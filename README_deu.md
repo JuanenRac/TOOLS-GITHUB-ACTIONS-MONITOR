@@ -68,11 +68,11 @@
 
 ## Einstellungen
 
-Alles liegt in `actions_monitor.json` (aus `actions_monitor.example.json` erzeugt). Der Tab **Einstellungen** bearbeitet sie sicher; Tokens und Geheimnisse werden nie angezeigt oder gespeichert. Ökosysteme, Build-Ziele und Stapelprofile sind eigene Dateien, auf die du verweist (`ecosystems_file`, `targets_file`, `profiles_file`); neutrale `*.example.json`-Vorlagen liegen bei. Vollständige Referenz: [`monitor/docs/SETTINGS.md`](monitor/docs/SETTINGS.md).
+Alles liegt in `actions_monitor.json` (aus `actions_monitor.example.json` erzeugt). Der Tab **Einstellungen** bearbeitet sie sicher; Tokens und Geheimnisse werden nie angezeigt oder gespeichert. Ökosysteme, Build-Ziele und Stapelprofile sind eigene Dateien, auf die du verweist (`ecosystems_file`, `targets_file`, `profiles_file`); neutrale `*.example.json`-Vorlagen liegen bei. Vollständige Referenz: [`monitor/docs/SETTINGS_deu.md`](monitor/docs/SETTINGS_deu.md).
 
 ## Ausgaben für Grafana und Dashboards
 
-Standardmäßig aus, nur lokal (`127.0.0.1`) und ohne zusätzliches Token. Nach dem Einschalten in den Einstellungen gibt es `/metrics` (Prometheus-Format), `/api/outputs/grafana.json` und `/api/outputs/dashboard.json` sowie ein importierbares Grafana-Dashboard in [`monitor/docs/grafana`](monitor/docs/grafana). Details: [`monitor/docs/OUTPUTS.md`](monitor/docs/OUTPUTS.md). Das Format von `ci_red.json`: [`monitor/docs/CI_RED_SCHEMA.md`](monitor/docs/CI_RED_SCHEMA.md).
+Standardmäßig aus, nur lokal (`127.0.0.1`) und ohne zusätzliches Token. Nach dem Einschalten in den Einstellungen gibt es `/metrics` (Prometheus-Format), `/api/outputs/grafana.json` und `/api/outputs/dashboard.json` sowie ein importierbares Grafana-Dashboard in [`monitor/docs/grafana`](monitor/docs/grafana). Details: [`monitor/docs/OUTPUTS_deu.md`](monitor/docs/OUTPUTS_deu.md). Das Format von `ci_red.json`: [`monitor/docs/CI_RED_SCHEMA_deu.md`](monitor/docs/CI_RED_SCHEMA_deu.md).
 
 ## Sicherheit
 
@@ -123,10 +123,10 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 
 ## Dokumentation
 
-- [`monitor/docs/SETTINGS.md`](monitor/docs/SETTINGS.md): alle Einstellungen
-- [`monitor/docs/OUTPUTS.md`](monitor/docs/OUTPUTS.md): Metriken, Grafana und Exporte
-- [`monitor/docs/CI_RED_SCHEMA.md`](monitor/docs/CI_RED_SCHEMA.md): das Format von ci_red.json
-- [`monitor/docs/CI_RED_BRIDGE.md`](monitor/docs/CI_RED_BRIDGE.md): ci_red.json in ein Dashboard bringen
+- [`monitor/docs/SETTINGS_deu.md`](monitor/docs/SETTINGS_deu.md): alle Einstellungen
+- [`monitor/docs/OUTPUTS_deu.md`](monitor/docs/OUTPUTS_deu.md): Metriken, Grafana und Exporte
+- [`monitor/docs/CI_RED_SCHEMA_deu.md`](monitor/docs/CI_RED_SCHEMA_deu.md): das Format von ci_red.json
+- [`monitor/docs/CI_RED_BRIDGE_deu.md`](monitor/docs/CI_RED_BRIDGE_deu.md): ci_red.json in ein Dashboard bringen
 - [`monitor/QUICKSTART_de.txt`](monitor/QUICKSTART_de.txt): erste Schritte, in acht Sprachen
 
 ## Mitwirken

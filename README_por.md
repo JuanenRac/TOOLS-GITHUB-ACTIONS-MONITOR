@@ -68,11 +68,11 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 
 ## Definições
 
-Tudo vive em `actions_monitor.json` (criado a partir de `actions_monitor.example.json`). O separador **Definições** edita-o em segurança; os tokens e segredos nunca são mostrados nem guardados. Os ecossistemas, os alvos de compilação e os perfis de lote são ficheiros à parte para os quais aponta (`ecosystems_file`, `targets_file`, `profiles_file`); vão incluídos modelos neutros `*.example.json`. Referência completa: [`monitor/docs/SETTINGS.md`](monitor/docs/SETTINGS.md).
+Tudo vive em `actions_monitor.json` (criado a partir de `actions_monitor.example.json`). O separador **Definições** edita-o em segurança; os tokens e segredos nunca são mostrados nem guardados. Os ecossistemas, os alvos de compilação e os perfis de lote são ficheiros à parte para os quais aponta (`ecosystems_file`, `targets_file`, `profiles_file`); vão incluídos modelos neutros `*.example.json`. Referência completa: [`monitor/docs/SETTINGS_por.md`](monitor/docs/SETTINGS_por.md).
 
 ## Saídas para o Grafana e painéis
 
-Tudo desligado por defeito, só local (`127.0.0.1`) e sem token adicional. Ao ativar nas definições obtém `/metrics` (formato Prometheus), `/api/outputs/grafana.json` e `/api/outputs/dashboard.json`, e um painel Grafana importável em [`monitor/docs/grafana`](monitor/docs/grafana). Detalhes: [`monitor/docs/OUTPUTS.md`](monitor/docs/OUTPUTS.md). O formato de `ci_red.json`: [`monitor/docs/CI_RED_SCHEMA.md`](monitor/docs/CI_RED_SCHEMA.md).
+Tudo desligado por defeito, só local (`127.0.0.1`) e sem token adicional. Ao ativar nas definições obtém `/metrics` (formato Prometheus), `/api/outputs/grafana.json` e `/api/outputs/dashboard.json`, e um painel Grafana importável em [`monitor/docs/grafana`](monitor/docs/grafana). Detalhes: [`monitor/docs/OUTPUTS_por.md`](monitor/docs/OUTPUTS_por.md). O formato de `ci_red.json`: [`monitor/docs/CI_RED_SCHEMA_por.md`](monitor/docs/CI_RED_SCHEMA_por.md).
 
 ## Segurança
 
@@ -123,10 +123,10 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 
 ## Documentação
 
-- [`monitor/docs/SETTINGS.md`](monitor/docs/SETTINGS.md): todas as definições
-- [`monitor/docs/OUTPUTS.md`](monitor/docs/OUTPUTS.md): métricas, Grafana e exportações
-- [`monitor/docs/CI_RED_SCHEMA.md`](monitor/docs/CI_RED_SCHEMA.md): o formato de ci_red.json
-- [`monitor/docs/CI_RED_BRIDGE.md`](monitor/docs/CI_RED_BRIDGE.md): levar o ci_red.json para um painel
+- [`monitor/docs/SETTINGS_por.md`](monitor/docs/SETTINGS_por.md): todas as definições
+- [`monitor/docs/OUTPUTS_por.md`](monitor/docs/OUTPUTS_por.md): métricas, Grafana e exportações
+- [`monitor/docs/CI_RED_SCHEMA_por.md`](monitor/docs/CI_RED_SCHEMA_por.md): o formato de ci_red.json
+- [`monitor/docs/CI_RED_BRIDGE_por.md`](monitor/docs/CI_RED_BRIDGE_por.md): levar o ci_red.json para um painel
 - [`monitor/QUICKSTART_pt.txt`](monitor/QUICKSTART_pt.txt): primeiros passos, em oito idiomas
 
 ## Contribuir

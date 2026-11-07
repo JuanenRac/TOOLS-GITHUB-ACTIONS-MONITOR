@@ -68,11 +68,11 @@
 
 ## 設定
 
-すべては `actions_monitor.json`（`actions_monitor.example.json` から作成）にあります。**設定** タブで安全に編集でき、トークンや秘密情報は表示も保存もされません。エコシステム、ビルド対象、バッチプロファイルは別ファイルで、`ecosystems_file`、`targets_file`、`profiles_file` で指定します。中立な `*.example.json` テンプレートが付属します。詳細は [`monitor/docs/SETTINGS.md`](monitor/docs/SETTINGS.md) を参照してください。
+すべては `actions_monitor.json`（`actions_monitor.example.json` から作成）にあります。**設定** タブで安全に編集でき、トークンや秘密情報は表示も保存もされません。エコシステム、ビルド対象、バッチプロファイルは別ファイルで、`ecosystems_file`、`targets_file`、`profiles_file` で指定します。中立な `*.example.json` テンプレートが付属します。詳細は [`monitor/docs/SETTINGS_jpn.md`](monitor/docs/SETTINGS_jpn.md) を参照してください。
 
 ## Grafana とダッシュボード向け出力
 
-すべて既定でオフ、ローカル（`127.0.0.1`）限定で、追加のトークンは不要です。設定で有効にすると `/metrics`（Prometheus 形式）、`/api/outputs/grafana.json`、`/api/outputs/dashboard.json` が使え、インポート可能な Grafana ダッシュボードが [`monitor/docs/grafana`](monitor/docs/grafana) にあります。詳細：[`monitor/docs/OUTPUTS.md`](monitor/docs/OUTPUTS.md)。`ci_red.json` の形式：[`monitor/docs/CI_RED_SCHEMA.md`](monitor/docs/CI_RED_SCHEMA.md)。
+すべて既定でオフ、ローカル（`127.0.0.1`）限定で、追加のトークンは不要です。設定で有効にすると `/metrics`（Prometheus 形式）、`/api/outputs/grafana.json`、`/api/outputs/dashboard.json` が使え、インポート可能な Grafana ダッシュボードが [`monitor/docs/grafana`](monitor/docs/grafana) にあります。詳細：[`monitor/docs/OUTPUTS_jpn.md`](monitor/docs/OUTPUTS_jpn.md)。`ci_red.json` の形式：[`monitor/docs/CI_RED_SCHEMA_jpn.md`](monitor/docs/CI_RED_SCHEMA_jpn.md)。
 
 ## セキュリティ
 
@@ -123,10 +123,10 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 
 ## ドキュメント
 
-- [`monitor/docs/SETTINGS.md`](monitor/docs/SETTINGS.md): すべての設定
-- [`monitor/docs/OUTPUTS.md`](monitor/docs/OUTPUTS.md): メトリクス、Grafana、エクスポート
-- [`monitor/docs/CI_RED_SCHEMA.md`](monitor/docs/CI_RED_SCHEMA.md): ci_red.json の形式
-- [`monitor/docs/CI_RED_BRIDGE.md`](monitor/docs/CI_RED_BRIDGE.md): ci_red.json をダッシュボードへ渡す
+- [`monitor/docs/SETTINGS_jpn.md`](monitor/docs/SETTINGS_jpn.md): すべての設定
+- [`monitor/docs/OUTPUTS_jpn.md`](monitor/docs/OUTPUTS_jpn.md): メトリクス、Grafana、エクスポート
+- [`monitor/docs/CI_RED_SCHEMA_jpn.md`](monitor/docs/CI_RED_SCHEMA_jpn.md): ci_red.json の形式
+- [`monitor/docs/CI_RED_BRIDGE_jpn.md`](monitor/docs/CI_RED_BRIDGE_jpn.md): ci_red.json をダッシュボードへ渡す
 - [`monitor/QUICKSTART_ja.txt`](monitor/QUICKSTART_ja.txt): 最初の手順（8言語）
 
 ## コントリビュート

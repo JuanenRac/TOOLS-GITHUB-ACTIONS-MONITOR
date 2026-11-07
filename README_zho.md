@@ -68,11 +68,11 @@
 
 ## 设置
 
-一切都在 `actions_monitor.json` 中（由 `actions_monitor.example.json` 创建）。**设置** 标签页可安全地编辑它；令牌和机密绝不会显示或保存。生态系统、构建目标和批处理配置是你指定的独立文件（`ecosystems_file`、`targets_file`、`profiles_file`）；附带中性的 `*.example.json` 模板。完整参考：[`monitor/docs/SETTINGS.md`](monitor/docs/SETTINGS.md)。
+一切都在 `actions_monitor.json` 中（由 `actions_monitor.example.json` 创建）。**设置** 标签页可安全地编辑它；令牌和机密绝不会显示或保存。生态系统、构建目标和批处理配置是你指定的独立文件（`ecosystems_file`、`targets_file`、`profiles_file`）；附带中性的 `*.example.json` 模板。完整参考：[`monitor/docs/SETTINGS_zho.md`](monitor/docs/SETTINGS_zho.md)。
 
 ## 面向 Grafana 和仪表板的输出
 
-默认全部关闭，仅限本地（`127.0.0.1`），无需额外令牌。在设置中启用后可使用 `/metrics`（Prometheus 格式）、`/api/outputs/grafana.json` 和 `/api/outputs/dashboard.json`，并在 [`monitor/docs/grafana`](monitor/docs/grafana) 提供可导入的 Grafana 仪表板。详情：[`monitor/docs/OUTPUTS.md`](monitor/docs/OUTPUTS.md)。`ci_red.json` 的格式：[`monitor/docs/CI_RED_SCHEMA.md`](monitor/docs/CI_RED_SCHEMA.md)。
+默认全部关闭，仅限本地（`127.0.0.1`），无需额外令牌。在设置中启用后可使用 `/metrics`（Prometheus 格式）、`/api/outputs/grafana.json` 和 `/api/outputs/dashboard.json`，并在 [`monitor/docs/grafana`](monitor/docs/grafana) 提供可导入的 Grafana 仪表板。详情：[`monitor/docs/OUTPUTS_zho.md`](monitor/docs/OUTPUTS_zho.md)。`ci_red.json` 的格式：[`monitor/docs/CI_RED_SCHEMA_zho.md`](monitor/docs/CI_RED_SCHEMA_zho.md)。
 
 ## 安全
 
@@ -123,10 +123,10 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 
 ## 文档
 
-- [`monitor/docs/SETTINGS.md`](monitor/docs/SETTINGS.md): 所有设置
-- [`monitor/docs/OUTPUTS.md`](monitor/docs/OUTPUTS.md): 指标、Grafana 和导出
-- [`monitor/docs/CI_RED_SCHEMA.md`](monitor/docs/CI_RED_SCHEMA.md): ci_red.json 的格式
-- [`monitor/docs/CI_RED_BRIDGE.md`](monitor/docs/CI_RED_BRIDGE.md): 把 ci_red.json 带到仪表板
+- [`monitor/docs/SETTINGS_zho.md`](monitor/docs/SETTINGS_zho.md): 所有设置
+- [`monitor/docs/OUTPUTS_zho.md`](monitor/docs/OUTPUTS_zho.md): 指标、Grafana 和导出
+- [`monitor/docs/CI_RED_SCHEMA_zho.md`](monitor/docs/CI_RED_SCHEMA_zho.md): ci_red.json 的格式
+- [`monitor/docs/CI_RED_BRIDGE_zho.md`](monitor/docs/CI_RED_BRIDGE_zho.md): 把 ci_red.json 带到仪表板
 - [`monitor/QUICKSTART_zh.txt`](monitor/QUICKSTART_zh.txt): 入门步骤（八种语言）
 
 ## 参与贡献
