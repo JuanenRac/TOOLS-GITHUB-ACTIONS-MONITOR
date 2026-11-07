@@ -3,6 +3,8 @@
   GPL-3.0-or-later - see LICENSE
 -->
 
+**🇺🇸 English** | [🇪🇸 Español](CI_RED_SCHEMA_spa.md) | [🇫🇷 Français](CI_RED_SCHEMA_fra.md) | [🇮🇹 Italiano](CI_RED_SCHEMA_ita.md) | [🇩🇪 Deutsch](CI_RED_SCHEMA_deu.md) | [🇨🇳 简体中文](CI_RED_SCHEMA_zho.md) | [🇯🇵 日本語](CI_RED_SCHEMA_jpn.md) | [🇵🇹 Português](CI_RED_SCHEMA_por.md)
+
 # ci_red.json - schema 2 (stable contract)
 
 `ci_red.json` is the snapshot the monitor writes (atomically, next to itself by default) so that any consumer can read the CI state without asking

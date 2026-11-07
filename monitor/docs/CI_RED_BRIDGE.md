@@ -3,6 +3,8 @@
   GPL-3.0-or-later - see LICENSE
 -->
 
+**🇺🇸 English** | [🇪🇸 Español](CI_RED_BRIDGE_spa.md) | [🇫🇷 Français](CI_RED_BRIDGE_fra.md) | [🇮🇹 Italiano](CI_RED_BRIDGE_ita.md) | [🇩🇪 Deutsch](CI_RED_BRIDGE_deu.md) | [🇨🇳 简体中文](CI_RED_BRIDGE_zho.md) | [🇯🇵 日本語](CI_RED_BRIDGE_jpn.md) | [🇵🇹 Português](CI_RED_BRIDGE_por.md)
+
 # From the monitor to the dashboard: `ci_red.json`
 
 What the monitor writes, how to export it and what a reader of the file needs. The monitor only reads GitHub and writes local files: it never pushes, never commits and never closes anything on its own.

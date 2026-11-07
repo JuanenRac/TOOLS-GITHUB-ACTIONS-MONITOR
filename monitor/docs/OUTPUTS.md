@@ -3,6 +3,8 @@
   GPL-3.0-or-later - see LICENSE
 -->
 
+**🇺🇸 English** | [🇪🇸 Español](OUTPUTS_spa.md) | [🇫🇷 Français](OUTPUTS_fra.md) | [🇮🇹 Italiano](OUTPUTS_ita.md) | [🇩🇪 Deutsch](OUTPUTS_deu.md) | [🇨🇳 简体中文](OUTPUTS_zho.md) | [🇯🇵 日本語](OUTPUTS_jpn.md) | [🇵🇹 Português](OUTPUTS_por.md)
+
 # Outputs for other tools
 
 Three optional outputs, **all off by default**, switched on in the Settings tab (group "Outputs for other tools") or in `actions_monitor.json`:

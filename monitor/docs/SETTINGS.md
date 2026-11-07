@@ -3,6 +3,8 @@
   GPL-3.0-or-later - see LICENSE
 -->
 
+**🇺🇸 English** | [🇪🇸 Español](SETTINGS_spa.md) | [🇫🇷 Français](SETTINGS_fra.md) | [🇮🇹 Italiano](SETTINGS_ita.md) | [🇩🇪 Deutsch](SETTINGS_deu.md) | [🇨🇳 简体中文](SETTINGS_zho.md) | [🇯🇵 日本語](SETTINGS_jpn.md) | [🇵🇹 Português](SETTINGS_por.md)
+
 # The Settings tab
 
 The Settings tab (the gear icon in the header or in the tab bar) changes the values of `actions_monitor.json` from the page, so nobody has to edit the file by hand.
