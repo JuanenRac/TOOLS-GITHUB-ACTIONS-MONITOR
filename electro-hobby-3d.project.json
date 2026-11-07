@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "ecosystem": "ELECTRO-HOBBY-3D",
+  "name": "TOOLS-GITHUB-ACTIONS-MONITOR",
+  "version": "1.5.0",
+  "role": "tool",
+  "stack": "python",
+  "technologies": [
+    "Python 3.11+",
+    "GitHub CLI (gh)",
+    "Prometheus",
+    "Grafana"
+  ],
+  "deployment_target": "user-pc",
+  "maturity": "functional",
+  "evidence": "host-test",
+  "hardware_bound": false,
+  "family": "Tools",
+  "parent": null,
+  "native_version": {
+    "file": "monitor/tool_version.py",
+    "pattern": "^TOOL_VERSION = \"(\\d+)\\.(\\d+)\\.(\\d+)\""
+  },
+  "build": "python -m unittest discover -s monitor/tests",
+  "notes": "A standalone tool: it belongs to no ecosystem and needs none of them. It watches the GitHub Actions workflows of the repositories of its owner and shows them on a local page. Part of the Tools group of the profile."
+}
