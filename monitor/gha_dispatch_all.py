@@ -628,7 +628,7 @@ def cmd_status(args):
         status, conclusion, url, bad = run_state(repo_of(name), info["run"])
         key = "running" if status != "completed" else ("ok" if conclusion == "success" else "failed")
         counts[key] += 1
-        print(f"  {te('gd.sl_' + key):8} {name:30} {status}/{conclusion} {(te("gd.failed_jobs") + ', '.join(bad)) if bad else ''} {url}")
+        print(f"  {te('gd.sl_' + key):8} {name:30} {status}/{conclusion} {(te('gd.failed_jobs') + ', '.join(bad)) if bad else ''} {url}")
     print(te("gd.summary"), counts)
 
 

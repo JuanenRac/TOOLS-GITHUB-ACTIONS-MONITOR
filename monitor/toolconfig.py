@@ -55,10 +55,10 @@ def raw_config():
 
 
 def forget():
-    """Drops the cached configuration and the owner lookup (used by the tests and after a configuration change)."""
+    """Drops the cached configuration and the owner lookup (used by the tests and after a configuration change). A pinned owner (set_owner) stays pinned."""
     with _lock:
         _raw_cache.update({"at": 0.0, "value": {}})
-        _owner.update({"pinned": None, "lookup": None})
+        _owner.update({"lookup": None})
         _ecosystems_override["value"] = None
 
 
