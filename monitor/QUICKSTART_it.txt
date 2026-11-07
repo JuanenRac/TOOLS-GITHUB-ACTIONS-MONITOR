@@ -1,0 +1,25 @@
+Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+GPL-3.0-or-later - see LICENSE
+
+AVVIO RAPIDO - Monitor di GitHub Actions + Sentinella
+=====================================================
+1. Installa Python 3.10 o successivo (python.org; su Linux/macOS di solito c'è già: python3 --version).
+2. Installa GitHub CLI (gh):
+     Windows:  winget install --id GitHub.cli
+     macOS:    brew install gh
+     Linux:    il tuo gestore di pacchetti (ad esempio: sudo apt install gh) o https://cli.github.com
+3. Accedi una volta:  gh auth login   (scegli GitHub.com e segui i passi nel browser). Il monitor non salva mai un token: lo chiede a gh.
+4. Avvia il monitor:
+     Windows:  doppio clic su MONITOR_GITHUB_ACTIONS.bat
+     macOS:    doppio clic su MONITOR_GITHUB_ACTIONS.command   (se non si apre: chmod +x *.sh *.command in un terminale)
+     Linux:    ./MONITOR_GITHUB_ACTIONS.sh
+   Si apre una pagina su http://127.0.0.1:8765 (solo sul tuo computer). Per fermarlo, Ctrl+C nella finestra.
+5. Primo utilizzo:
+   - La pagina mostra i TUOI repository (l'account GitHub con cui hai effettuato l'accesso). Per monitorare un altro account imposta "github_owner" in actions_monitor.json.
+   - Scegli la lingua nella scheda Impostazioni della pagina (icona dell'ingranaggio; parte in inglese e la scelta viene ricordata). Lì ci sono anche le altre impostazioni.
+   - Per raggruppare i repository per prefisso del nome o usare gli strumenti di batch, copia ecosystems.example.json / targets.example.json e fai puntare
+     actions_monitor.json a essi ("ecosystems_file", "targets_file"). I dettagli sono in README_it.txt.
+   - Nessun clone locale? Funziona comunque, in modalità ridotta (solo ciò che dà l'API di GitHub), e la pagina te lo dice.
+6. Cosa NON fa: non firma e non pubblica nulla da solo, da solo non scrive nulla su GitHub (solo `dispatch --go`, `dispatch --real` e `finalize --execute`, che esegui tu, lo fanno), ascolta solo su 127.0.0.1 e non conserva alcun token. Firmare e pubblicare sono
+   comandi che esegui tu; il monitor li mostra solo come testo.
+Problemi? Vedi «PROBLEMI» in README_it.txt.

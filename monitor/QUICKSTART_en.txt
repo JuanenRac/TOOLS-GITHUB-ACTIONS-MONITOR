@@ -1,0 +1,25 @@
+Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+GPL-3.0-or-later - see LICENSE
+
+QUICKSTART - GitHub Actions monitor + Sentinel
+==============================================
+1. Install Python 3.10 or newer (python.org; on Linux/macOS it is usually already there: python3 --version).
+2. Install the GitHub CLI (gh):
+     Windows:  winget install --id GitHub.cli
+     macOS:    brew install gh
+     Linux:    your package manager (for example: sudo apt install gh) or https://cli.github.com
+3. Log in once:  gh auth login   (choose GitHub.com and follow the steps in the browser). The monitor never stores a token: it asks gh.
+4. Start the monitor:
+     Windows:  double-click MONITOR_GITHUB_ACTIONS.bat
+     macOS:    double-click MONITOR_GITHUB_ACTIONS.command   (if it will not open: chmod +x *.sh *.command in a terminal)
+     Linux:    ./MONITOR_GITHUB_ACTIONS.sh
+   A page opens at http://127.0.0.1:8765 (only on your computer). Stop with Ctrl+C in the window.
+5. First use:
+   - The page shows YOUR repositories (the GitHub account you logged in with). To watch another account set "github_owner" in actions_monitor.json.
+   - Pick your language in the Settings tab of the page (gear icon; it starts in English and the choice is remembered). The other settings are there too.
+   - To group repositories by name prefix or to use the batch tools, copy ecosystems.example.json / targets.example.json and point actions_monitor.json at them
+     ("ecosystems_file", "targets_file"). The details are in README_en.txt.
+   - No local clones? It still works, in a reduced mode (only what the GitHub API gives), and the page tells you so.
+6. What it does NOT do: it does not sign and does not publish anything by itself, it writes nothing to GitHub on its own (only `dispatch --go`, `dispatch --real` and `finalize --execute`, which you run, do), it listens only on 127.0.0.1 and it keeps no
+   token. Signing and publishing are commands that you run yourself; the monitor only shows them as text.
+Problems? See "PROBLEMS" in README_en.txt.

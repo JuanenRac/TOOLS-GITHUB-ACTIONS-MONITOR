@@ -1,0 +1,9 @@
+{
+  "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+  "_license": "GPL-3.0-or-later - see LICENSE",
+  "_note": "Neutral template. Copy it to ecosystems.json (or name it in 'ecosystems_file' in actions_monitor.json) and edit. Each ecosystem groups the repositories whose name starts with one of its prefixes. 'tool' is the signing script of your own release tooling (optional: leave it out if you do not sign here). 'external': true = only reported, never dispatched or signed by this tool.",
+  "ecosystems": {
+    "main": {"label": "My projects", "prefixes": ["MYPROJECT-"]},
+    "other-team": {"label": "Another team", "prefixes": ["TEAM-"], "external": true}
+  }
+}

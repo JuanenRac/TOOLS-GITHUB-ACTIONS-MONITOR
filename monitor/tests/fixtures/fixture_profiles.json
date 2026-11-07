@@ -1,0 +1,42 @@
+{
+  "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+  "_license": "GPL-3.0-or-later - see LICENSE",
+  "min_rate_remaining": 1500,
+  "canary_wait_seconds": 1800,
+  "profiles": {
+    "release": {
+      "description": "Every target of the ecosystems that ride on your signing tools. The first one goes alone; the rest only if it is green.",
+      "workflows": [
+        "firmware-build.yml",
+        "package-build.yml",
+        "apk-build.yml",
+        "exe-build.yml",
+        "site-build.yml",
+        "binaries-build.yml",
+        "dist-build.yml",
+        "release-files-build.yml"
+      ],
+      "canary": true
+    },
+    "nightly": {
+      "description": "The builds that need no board and no keystore: packages, binaries, Windows executables, web kits and release files.",
+      "workflows": [
+        "package-build.yml",
+        "binaries-build.yml",
+        "exe-build.yml",
+        "dist-build.yml",
+        "site-build.yml",
+        "release-files-build.yml"
+      ],
+      "canary": true
+    },
+    "hil": {
+      "description": "The targets that talk to hardware in the loop (the HYDRA-UMC firmware and its HIL bridge). Edit the names to match the bench.",
+      "names": [
+        "HYDRA-UMC",
+        "HYDRA-UMC-HIL-BRIDGE"
+      ],
+      "canary": false
+    }
+  }
+}

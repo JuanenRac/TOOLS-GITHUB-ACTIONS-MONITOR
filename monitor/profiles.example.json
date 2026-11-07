@@ -1,0 +1,33 @@
+{
+  "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+  "_license": "GPL-3.0-or-later - see LICENSE",
+  "_note": "Neutral template that matches targets.example.json and ecosystems.example.json. Copy it to profiles.json and edit. A profile selects targets by workflow ('workflows') or by exact name ('names'), optionally limited to some ecosystems ('ecosystems'); build-only targets are never selected. canary true = the first target goes alone and the rest only follow if it is green. Keys that start with _ are ignored.",
+  "min_rate_remaining": 1500,
+  "canary_wait_seconds": 1800,
+  "profiles": {
+    "release": {
+      "description": "Every signed target of your main ecosystem. The first one goes alone; the rest only if it is green.",
+      "workflows": [
+        "firmware-build.yml"
+      ],
+      "ecosystems": [
+        "main"
+      ],
+      "canary": true
+    },
+    "firmware-only": {
+      "description": "One target chosen by name, no canary.",
+      "names": [
+        "MYPROJECT-FIRMWARE"
+      ],
+      "canary": false
+    },
+    "hil": {
+      "description": "The targets that talk to hardware in the loop (a firmware repository and its bench bridge). Replace the names with your own.",
+      "names": [
+        "MYPROJECT-FIRMWARE"
+      ],
+      "canary": false
+    }
+  }
+}

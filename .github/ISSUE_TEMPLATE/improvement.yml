@@ -1,0 +1,15 @@
+name: Improvement
+description: Suggest an improvement or a new panel, alert or export.
+title: "[Idea]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like the monitor to do?
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why is it useful?

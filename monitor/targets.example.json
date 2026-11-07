@@ -1,0 +1,15 @@
+{
+  "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+  "_license": "GPL-3.0-or-later - see LICENSE",
+  "_note": "Neutral template: one signed target and one build-only target. Edit the names, workflows and signing tools; keys that start with _ are ignored.",
+  "MYPROJECT-FIRMWARE": {
+    "workflow": "firmware-build.yml",
+    "tool": "my_fetch_and_sign.py",
+    "extra": []
+  },
+  "MYPROJECT-APP": {
+    "workflow": "package-build.yml",
+    "build_only": true,
+    "reason": "built on GitHub only; this example has no signing tool for it"
+  }
+}

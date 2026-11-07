@@ -1,0 +1,22 @@
+GitHub Actions Monitor - License and Copyright Notice
+
+GitHub Actions Monitor is (c) 2026 JuanenRac (Electro Hobby 3D).
+
+This notice must be included in any distribution of this project or of a derivative work.
+
+1. The source code (everything under `monitor/`, `tools/` and `.github/`) is available under the
+   **GNU General Public License v3.0 or later (GPL-3.0-or-later)**. Full text: the `LICENSE` file of this repository.
+
+2. The documentation (the README and its seven translations, `docs/`, the pictures under `images/`) is available under
+   **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)**. Full text: https://creativecommons.org/licenses/by-sa/4.0/
+
+This is an independent tool. It is not part of any other project of the author and it needs none of them: it talks to GitHub
+through the official `gh` command line client and keeps its files on your own machine.
+
+Contributions keep the same split: code stays GPL-3.0-or-later, documentation stays CC BY-SA 4.0, both with attribution
+to this project and its author.
+
+---
+
+Author: JuanenRac (Electro Hobby 3D)
+Contact: electrohobby3d@gmail.com

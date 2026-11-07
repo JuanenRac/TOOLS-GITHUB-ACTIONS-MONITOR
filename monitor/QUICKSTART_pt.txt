@@ -1,0 +1,25 @@
+Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+GPL-3.0-or-later - see LICENSE
+
+INÍCIO RÁPIDO - Monitor do GitHub Actions + Sentinela
+=====================================================
+1. Instale o Python 3.10 ou superior (python.org; em Linux/macOS costuma já estar instalado: python3 --version).
+2. Instale o GitHub CLI (gh):
+     Windows:  winget install --id GitHub.cli
+     macOS:    brew install gh
+     Linux:    o seu gestor de pacotes (por exemplo: sudo apt install gh) ou https://cli.github.com
+3. Inicie sessão uma vez:  gh auth login   (escolha GitHub.com e siga os passos no navegador). O monitor nunca guarda um token: pede-o ao gh.
+4. Arranque o monitor:
+     Windows:  duplo clique em MONITOR_GITHUB_ACTIONS.bat
+     macOS:    duplo clique em MONITOR_GITHUB_ACTIONS.command   (se não abrir: chmod +x *.sh *.command num terminal)
+     Linux:    ./MONITOR_GITHUB_ACTIONS.sh
+   Abre-se uma página em http://127.0.0.1:8765 (apenas no seu computador). Para parar, Ctrl+C na janela.
+5. Primeira utilização:
+   - A página mostra os SEUS repositórios (a conta do GitHub com que iniciou sessão). Para vigiar outra conta defina "github_owner" em actions_monitor.json.
+   - Escolha o idioma no separador Definições da página (ícone da roda dentada; arranca em inglês e a escolha fica guardada). As outras definições também estão lá.
+   - Para agrupar repositórios por prefixo do nome ou usar as ferramentas de lote, copie ecosystems.example.json / targets.example.json e aponte
+     actions_monitor.json para eles ("ecosystems_file", "targets_file"). Os detalhes estão em README_pt.txt.
+   - Sem clones locais? Funciona na mesma, em modo reduzido (só o que a API do GitHub fornece), e a página diz isso.
+6. O que NÃO faz: não assina e não publica nada por si só, por si só não escreve nada no GitHub (só `dispatch --go`, `dispatch --real` e `finalize --execute`, que executa você, o fazem), só escuta em 127.0.0.1 e não guarda nenhum token. Assinar e publicar são
+   comandos que executa você; o monitor limita-se a mostrá-los como texto.
+Problemas? Veja «PROBLEMAS» em README_pt.txt.

@@ -1,0 +1,220 @@
+{
+  "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+  "_license": "GPL-3.0-or-later - see LICENSE",
+  "_note": "Template: the monitor copies it to actions_monitor.json on the first start. github_owner empty = the account of `gh`; language empty = the language of your system (en es de fr it ja zh pt); the ecosystems and targets files are the neutral examples: copy and edit them.",
+  "github_owner": "",
+  "language": "",
+  "ecosystems_file": "ecosystems.example.json",
+  "targets_file": "targets.example.json",
+  "repos": "all",
+  "ecosystems": "all",
+  "exclude": [],
+  "mode": "full",
+  "refresh_seconds": 120,
+  "cold_refresh_seconds": 1200,
+  "issues_refresh_seconds": 180,
+  "discover_refresh_seconds": 3600,
+  "stuck_minutes": 120,
+  "runs_per_repo": 20,
+  "cold_runs_per_repo": 10,
+  "hot_hours": 3,
+  "max_workers": 8,
+  "min_rate_remaining": 1500,
+  "sentinel": {
+    "enabled": true,
+    "refresh_seconds": 900,
+    "alerts_hot_seconds": 900,
+    "alerts_cold_seconds": 3600,
+    "hygiene_seconds": 21600,
+    "max_calls_per_tick": 70,
+    "budget_per_hour": 600,
+    "workers": 8,
+    "hot_hours": 3,
+    "min_rate_remaining": 800,
+    "candidate_days": 2,
+    "candidate_min_entries": 1,
+    "skip_candidate_prefixes": [],
+    "stale_pr_days": 7,
+    "required_files": [
+      [
+        "README.md"
+      ],
+      [
+        "LICENSE",
+        "LICENSE.md"
+      ],
+      [
+        "CHANGELOG.md"
+      ],
+      [
+        "SECURITY.md"
+      ]
+    ],
+    "pending_sign_hours": 24,
+    "notify_command": [],
+    "minutes_budget": {},
+    "minutes_budget_period": "7d",
+    "ci_red_file": "",
+    "ci_red_audit_copy": false,
+    "require_verified_signature": true,
+    "signature_pubkeys": {},
+    "a2_full_sample_unknown": true,
+    "a2_resolve_max_calls_per_tick": 4,
+    "a2_resolve_ttl_seconds": 3600,
+    "surface": {
+      "enabled": true,
+      "refresh_seconds": 86400,
+      "local_seconds": 3600,
+      "max_repos_per_tick": 6,
+      "min_rate_factor": 2.0,
+      "budget_share": 0.5,
+      "checks": {
+        "workflows_disabled": {
+          "enabled": true
+        },
+        "dead_schedule": {
+          "enabled": true,
+          "days": 14
+        },
+        "unpinned_uses": {
+          "enabled": true
+        },
+        "broad_permissions": {
+          "enabled": true
+        },
+        "pr_target": {
+          "enabled": true
+        },
+        "stuck_concurrency": {
+          "enabled": true,
+          "minutes": 60
+        },
+        "matrix_os": {
+          "enabled": true,
+          "max_per_tick": 4
+        },
+        "artifacts": {
+          "enabled": true,
+          "max_mb": 500,
+          "retention_days": 30
+        },
+        "required_checks": {
+          "enabled": true
+        },
+        "release_assets": {
+          "enabled": true,
+          "recent_days": 30,
+          "required": {
+            "default": [
+              "sha256",
+              "sig"
+            ],
+            "apk-build.yml": [
+              "sha256"
+            ]
+          }
+        },
+        "tag_vs_version": {
+          "enabled": true
+        },
+        "packages": {
+          "enabled": true
+        },
+        "drafts": {
+          "enabled": true,
+          "days": 14
+        },
+        "security_aged": {
+          "enabled": true,
+          "days": 30
+        },
+        "coverage": {
+          "enabled": true
+        },
+        "secret_resolved": {
+          "enabled": true
+        },
+        "dependabot_priority": {
+          "enabled": true
+        },
+        "issue_close": {
+          "enabled": true
+        },
+        "milestones": {
+          "enabled": true
+        },
+        "pr_human": {
+          "enabled": true,
+          "days": 7
+        },
+        "pr_workflow_touch": {
+          "enabled": true
+        },
+        "merge_queue": {
+          "enabled": true
+        },
+        "maturity": {
+          "enabled": true
+        },
+        "parity": {
+          "enabled": true
+        },
+        "attestation": {
+          "enabled": true,
+          "max_per_tick": 3
+        }
+      }
+    },
+    "readiness": {
+      "enabled": true,
+      "min_coverage": 0.5,
+      "warn_below": 70,
+      "health": {
+        "weights": {
+          "red": 15,
+          "stuck": 10,
+          "secret": 25,
+          "high_alert": 8,
+          "alert": 2,
+          "stale_pr": 2,
+          "unsigned": 3,
+          "hygiene": 1
+        }
+      },
+      "pins": {
+        "refresh_seconds": 600,
+        "max_depth": 5,
+        "sources": []
+      }
+    },
+    "audit_files": {
+      "reconciliation": "RECONCILIATION_TOTAL_*.txt",
+      "rounds": "ROUNDS_MAP_2*.txt",
+      "rounds_extra": "ROUNDS_MAP_EXTRA_*.txt"
+    }
+  },
+  "ai": {
+    "provider": "none",
+    "model": "",
+    "daily_limit": 30
+  },
+  "webhook": {
+    "enabled": false,
+    "secret": ""
+  },
+  "report_history_days": 30,
+  "profiles_file": "profiles.example.json",
+  "tools_dir": "",
+  "outputs": {
+    "prometheus": {
+      "enabled": false,
+      "per_repo": true
+    },
+    "json": {
+      "enabled": false
+    },
+    "dashboard": {
+      "enabled": false
+    }
+  }
+}

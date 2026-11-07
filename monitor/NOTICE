@@ -1,0 +1,16 @@
+monitor_y_centinela - GitHub Actions monitor, Sentinel and build batch tools
+
+Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
+Software Foundation, either version 3 of the License, or (at your option) any later version (GPL-3.0-or-later). It is distributed in the hope that it
+will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. The full text is in
+the file LICENSE.
+
+Every source file of this package carries a notice with the copyright line and "GPL-3.0-or-later - see LICENSE". JSON data files carry the same
+information in the fields "_author" and "_license" (locales/*.json, ecosystems*.json, targets*.json, profiles.json, actions_monitor.example.json).
+Keys that start with an underscore are metadata: the tools ignore them.
+
+The package uses only the Python standard library and the GitHub CLI (gh), which is a separate program with its own licence. It talks to GitHub only
+through gh, with the account you log in with; it never stores a token. GitHub and the GitHub name are trademarks of their owners; this package is not
+affiliated with or endorsed by GitHub.

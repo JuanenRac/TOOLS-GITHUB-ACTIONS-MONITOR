@@ -1,0 +1,25 @@
+Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+GPL-3.0-or-later - see LICENSE
+
+DÉMARRAGE RAPIDE - Moniteur GitHub Actions + Sentinelle
+========================================================
+1. Installez Python 3.10 ou supérieur (python.org ; sous Linux/macOS il est souvent déjà là : python3 --version).
+2. Installez GitHub CLI (gh) :
+     Windows :  winget install --id GitHub.cli
+     macOS :    brew install gh
+     Linux :    votre gestionnaire de paquets (par exemple : sudo apt install gh) ou https://cli.github.com
+3. Connectez-vous une fois :  gh auth login   (choisissez GitHub.com et suivez les étapes dans le navigateur). Le moniteur ne stocke jamais de jeton : il le demande à gh.
+4. Lancez le moniteur :
+     Windows :  double-clic sur MONITOR_GITHUB_ACTIONS.bat
+     macOS :    double-clic sur MONITOR_GITHUB_ACTIONS.command   (s'il ne s'ouvre pas : chmod +x *.sh *.command dans un terminal)
+     Linux :    ./MONITOR_GITHUB_ACTIONS.sh
+   Une page s'ouvre sur http://127.0.0.1:8765 (uniquement sur votre ordinateur). Arrêt avec Ctrl+C dans la fenêtre.
+5. Première utilisation :
+   - La page affiche VOS dépôts (le compte GitHub avec lequel vous êtes connecté). Pour surveiller un autre compte, renseignez "github_owner" dans actions_monitor.json.
+   - Choisissez votre langue dans l'onglet Réglages de la page (icône d'engrenage ; démarrage en anglais, le choix est mémorisé). Les autres réglages y sont aussi.
+   - Pour regrouper les dépôts par préfixe de nom ou utiliser les outils de lot, copiez ecosystems.example.json / targets.example.json et faites-y pointer
+     actions_monitor.json ("ecosystems_file", "targets_file"). Le détail est dans README_fr.txt.
+   - Pas de clones locaux ? Cela fonctionne quand même, en mode réduit (seulement ce que donne l'API GitHub), et la page vous le dit.
+6. Ce qu'il ne fait PAS : il ne signe et ne publie rien tout seul, n'écrit rien sur GitHub de lui-même (seuls `dispatch --go`, `dispatch --real` et `finalize --execute`, que vous exécutez, le font), n'écoute que sur 127.0.0.1 et ne garde aucun jeton. Signer et publier sont
+   des commandes que vous lancez vous-même ; le moniteur ne fait que les afficher en texte.
+Des problèmes ? Voir « PROBLÈMES » dans README_fr.txt.

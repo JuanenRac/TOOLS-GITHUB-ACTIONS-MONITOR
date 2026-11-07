@@ -1,0 +1,11 @@
+{
+  "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+  "_license": "GPL-3.0-or-later - see LICENSE",
+  "_note": "The ecosystems this monitor groups repositories into, by name prefix. This is the maintainer's real file and doubles as a worked example; ecosystems.example.json is the neutral template. Point 'ecosystems_file' in actions_monitor.json at your own copy.",
+  "ecosystems": {
+    "armor": {"label": "A.R.M.O.R.", "prefixes": ["ARMOR-"], "tool": "armor_fetch_and_sign.py", "firmware_tool": "fetch_and_sign.py", "firmware_extra": ["-f", "idf_image=espressif/idf:v5.5.5"]},
+    "urtc": {"label": "URTC", "prefixes": ["URTC"], "tool": "urtc_fetch_and_sign.py"},
+    "hydra": {"label": "HYDRA-UMC", "prefixes": ["HYDRA-UMC"], "tool": "hydra_fetch_and_sign.py"},
+    "eh3d": {"label": "EH3D", "prefixes": ["EH3D-", "ELECTRO-HOBBY-3D"], "external": true}
+  }
+}

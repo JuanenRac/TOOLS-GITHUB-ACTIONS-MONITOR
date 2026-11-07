@@ -1,0 +1,71 @@
+Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+GPL-3.0-or-later - see LICENSE
+
+GitHub Actions モニター + センチネル（バージョン 1.5.0）
+========================================================
+必要なもの: Python 3.10 以上と、ログイン済みの GitHub CLI（`gh`）（gh auth login）。それ以外は不要で、Python の標準ライブラリだけを使います。
+初めて使うときの手順: QUICKSTART_ja.txt。
+
+起動       Windows: MONITOR_GITHUB_ACTIONS.bat | Linux: ./MONITOR_GITHUB_ACTIONS.sh | macOS: MONITOR_GITHUB_ACTIONS.command をダブルクリック
+           （http://127.0.0.1:<ポート> をブラウザーで開きます。ローカル専用）。どの OS でも次の実行も可能:  python3 actions_monitor.py  （Windows: py -3 actions_monitor.py）
+バッチ     BATCH_GITHUB_ACTIONS.bat / .sh / .command（gha_dispatch_all.py: plan, dispatch, status, finalize, hygiene）。ビルドを手元で署名する人向けのオプションです。
+絶対にしないこと   127.0.0.1 でのみ待ち受けます（ログインがないため 0.0.0.0 には絶対にバインドしないでください）。トークンは保存しません（`gh` に尋ねます）。単独では GitHub に何も書き込みません。GitHub に書き込むのはバッチコマンドの `dispatch --go`、`dispatch --real`、`finalize --execute` だけで（workflow の起動、未署名ドラフトの作成、公開）、あなたが実行したときに限ります。
+           自動で署名したり公開したりすることは「ありません」。署名と公開はあなた自身が実行するコマンドで、モニターはそれをテキストとして表示するだけです。
+           重要な判定に AI は使いません。オプションの AI による説明は、初期設定ではオフです。
+
+言語       8 言語: en, es, de, fr, it, ja, zh, pt（ポルトガル語はポルトガル式）。起動時は英語です。システムの言語では決まりません。別の言語は、ページの「設定」タブ（歯車アイコン。ブラウザーが記憶します）、
+           actions_monitor.json の "language"、環境変数 MONITOR_LANG、またはコマンドラインツールの --lang コード（最優先）で選びます。
+           スクリプトが読む行（SKIP、DISPATCHED、READY、FAILED、Summary:、BUILD ONLY...）は常に英語です。
+設定       actions_monitor.json（初回起動時に actions_monitor.example.json から作成されます）。主なキー: github_owner（空 = gh のアカウント）、
+           language, ecosystems_file, targets_file, refresh_seconds, cold_refresh_seconds, max_workers, min_rate_remaining, sentinel.*
+           ecosystems_file: 名前の接頭辞でリポジトリをまとめます（ecosystems.example.json を参照。"*" = すべてのリポジトリ）。targets_file: バッチツール用のビルド一覧
+           （targets.example.json を参照）。profiles_file (profiles.example.json): バッチのプロファイル。これらのファイルで "_" で始まるキーはメタデータです。
+ワークスペース  任意: リポジトリのローカルクローンを置いたフォルダー（MONITOR_ROOT、json の "workspace_root"、または .monitor-root ファイルのある親フォルダー）。
+           ない場合、モニターは「縮小モード」で起動し、その旨を表示します。GitHub API から得られる情報だけを表示します（ローカルの署名キュー、監査レポート、CHANGELOG の読み取りなし）。
+           ある場合は、リリース候補、署名キュー、バッチツールも使えます。署名記録は "signed_dir"、監査ファイルは "audit_dir" で指定します。
+テスト     py -3 -I -m unittest discover -s tests （Linux/macOS: python3 -I -m unittest discover -s tests）。ネットワークは不要です。
+困ったとき "API rate limit": gh の共有利用枠（1 時間 5000 回）を使い切りました。リセット（gh api rate_limit）を待ち、refresh_seconds を増やすか max_workers を減らしてください。
+           gh が応答しないと、モニターは起動時に停止します。壊れたキャッシュは無視されます。キャッシュをやり直すには sentinel_cache.json を削除してください。
+           パッケージを更新したらモニターを再起動してください（実行中のプロセスは古いコードのままです）。
+
+ツール     read_report.py [--lang コード] [--json] [--export-status フォルダー] [--export-sign-queue ファイル]  実行中のモニターの内容を表示（ローカル、GitHub の利用枠は消費しません）
+           gha_dispatch_all.py [--lang コード] plan|dispatch|status|finalize|hygiene    GitHub Actions のビルドをバッチ実行（この PC では何もコンパイルしません）
+           release_notes.py REPO [--since タグ] [--out ファイル]    コミットからリリースノートの下書きを作成（提案のみで、何も公開しません）
+           release_candidates.py    CHANGELOG の [Unreleased] に項目があり、最新リリースが古いプロジェクト（読み取り専用）
+イベント   センチネルは「変化」（新しい赤、CI の回復、停滞ビルド、新しいアラートなど）ごとに JSON を 1 行、events_monitor.jsonl に書き込みます。各行には、言語に依存しない
+           固定の `code`、`kind`, `level`, `repo`, `args`、そして設定した言語の `text` が含まれます。`tail -F` で追えます。
+赤の CI    基準は 1 つだけ: 既定ブランチでの各 workflow の「最後に完了した run」。赤 = failure, timed_out, startup_failure, action_required。
+           cancelled, skipped, neutral, stale は数えません。
+
+1.5.0 の新機能（履歴: CHANGELOG.md）
+  - 「設定」タブ: actions_monitor.json の値をページから変更できます（型と範囲つきの許可キー一覧、検証あり、保存前に config_backups/ へコピー、トークンや秘密は扱いません。docs/SETTINGS.md）。
+  - 光って沈むレリーフ付きボタン、名前とツールチップが 8 言語の SVG アイコン、状態ダッシュボードの見た目、動きのあるバーと数値（prefers-reduced-motion で停止）。
+  - 任意の出力（既定はオフ、127.0.0.1 のみ）: /metrics（Prometheus）、/api/outputs/grafana.json（Grafana JSON / Infinity）、/api/outputs/dashboard.json（docs/OUTPUTS.md、docs/grafana/ にサンプル）。
+  - 中立なパッケージ: エコシステム、ターゲット、プロファイルはパッケージの外に置きます（ecosystems_file、targets_file、profiles_file。ローカル署名ツールは tools_dir）。既定は英語、ファイルとフォルダー名も英語です。
+  1.4.x からの更新: 次の名前が変わりました（古い名前はファイルが存在し得る場所では引き続き読み取られ、書き込まれるのは新しい名前だけです）:
+  leer_parte.py -> read_report.py          eventos.py -> events.py          parte_history.py -> report_history.py
+  LOTE_GITHUB_ACTIONS.bat/.sh/.command -> BATCH_GITHUB_ACTIONS.bat/.sh/.command
+  eventos_monitor.jsonl -> events_monitor.jsonl          eventos_estado.json -> events_state.json
+  PARTE_CENTINELA_DIA_<day>.* -> SENTINEL_REPORT_DAY_<day>.*     PARTE_CENTINELA_<time>.txt -> SENTINEL_REPORT_<time>.txt     CANDIDATAS_RELEASE.txt -> RELEASE_CANDIDATES.txt
+  <signed_dir>/lotes/lote_<time>.json -> <signed_dir>/batches/batch_<time>.json     parte_history_days -> report_history_days     monitor_y_centinela.zip -> github_actions_monitor.zip
+  sentinel.audit_files: names of the A8 audit files (neutral defaults RECONCILIATION_TOTAL_*.txt, ROUNDS_MAP_2*.txt, ROUNDS_MAP_EXTRA_*.txt)
+  ci_red.json and --export-status: unchanged (a contract).
+
+1.4.2 の新機能(履歴: CHANGELOG.md)
+  A2 が隠れた workflow の最新の実行を問い合わせる際、実行中または取り消された run は「確認済み」とみなされなくなりました(以前の赤を隠す可能性があるため)。センチネルは
+  その workflow の完了済み run を取得し、実際の結論を持つ最初のものを使います(cancelled と skipped は無視)。デフォルトブランチに無ければ、その workflow だけが判定不能のままです。
+
+1.4.1 の新機能(履歴: CHANGELOG.md)
+  A2 は、実行サンプルが上限に達しただけでリポジトリ全体を判定不能とはしなくなりました。サンプルに現れないクローンの各 workflow について、その workflow だけの
+  デフォルトブランチ上の最新の実行を GitHub に問い合わせます(読み取り専用、A10 と同じクォータ制限、sentinel.a2_resolve_max_calls_per_tick で上限、回答は
+  sentinel.a2_resolve_ttl_seconds 秒保持)。赤は赤として数え、ブランチに実行がない workflow は判定不能のままで、パネルがその名前を示します。
+
+1.4.0 の新機能(履歴: CHANGELOG.md)
+  A11「準備状況」パネル: リポジトリごとのリリース準備状況(デフォルトブランチのCIとそのコミット、直近のリリースを上回るバージョン、ビルド、署名、次の手順)、
+  エコシステムの健全性(実際の件数だけから算出したスコア。データのあるリポジトリが少ない場合は表示しません)、提供元より古い固定バージョン
+  (ローカルクローンの固定ファイルから読み取り、sentinel.readiness.pins.sources で設定)。読み取り専用で、推測は一切行いません。
+
+1.3.0 の新機能（履歴: CHANGELOG.md）
+  ページ、コマンドライン、イベント、レポートが 8 言語に対応。言語セレクター。エコシステム、ターゲット、GitHub アカウントをデータ化（github_owner, ecosystems_file,
+  targets_file）。任意のワークスペースと、正直な縮小モード。すべてのファイルに著作権表示と GPL-3.0-or-later。LICENSE, NOTICE, AUTHORS。README と QUICKSTART を 8 言語で提供。
+ライセンス GPL-3.0-or-later（LICENSE と NOTICE を参照）。Copyright (C) 2026 JuanenRac (Electro Hobby 3D)。

@@ -1,0 +1,19 @@
+__pycache__/
+*.pyc
+build/
+dist/
+
+# Real per-machine settings and live data of the monitor are never committed
+monitor/actions_monitor.json
+monitor/ci_red.json
+monitor/sentinel_cache.json
+monitor/sentinel_history.json
+monitor/eventos_estado.json
+monitor/eventos_monitor.jsonl
+monitor/actions_monitor_log.txt
+monitor/targets.json.bak
+monitor/_no_workspace/
+.env
+.env.*
+!.env.example
+.monitor-root

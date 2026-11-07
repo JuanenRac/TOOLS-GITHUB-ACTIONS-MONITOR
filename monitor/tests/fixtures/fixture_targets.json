@@ -1,0 +1,229 @@
+{
+  "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+  "_license": "GPL-3.0-or-later - see LICENSE",
+  "_note": "The maintainer's real catalogue, kept as a worked example; targets.example.json is the neutral template (set targets_file in actions_monitor.json).",
+  "ARMOR-NODE-HMI": {
+    "workflow": "firmware-build.yml",
+    "tool": "fetch_and_sign.py",
+    "extra": [
+      "-f",
+      "idf_image=espressif/idf:v5.5.5"
+    ]
+  },
+  "ARMOR-NODE-ALARM": {
+    "workflow": "firmware-build.yml",
+    "tool": "fetch_and_sign.py",
+    "extra": [
+      "-f",
+      "idf_image=espressif/idf:v5.5.5"
+    ]
+  },
+  "ARMOR-NODE-ELECTRICAL": {
+    "workflow": "firmware-build.yml",
+    "tool": "fetch_and_sign.py",
+    "extra": [
+      "-f",
+      "idf_image=espressif/idf:v5.5.5"
+    ]
+  },
+  "ARMOR-NODE-RADAR": {
+    "workflow": "firmware-build.yml",
+    "tool": "fetch_and_sign.py",
+    "extra": [
+      "-f",
+      "idf_image=espressif/idf:v5.5.5"
+    ]
+  },
+  "ARMOR-NODE-SOLAR": {
+    "workflow": "firmware-build.yml",
+    "tool": "fetch_and_sign.py",
+    "extra": [
+      "-f",
+      "idf_image=espressif/idf:v5.5.5"
+    ]
+  },
+  "ARMOR-SERVER": {
+    "workflow": "package-build.yml",
+    "tool": "armor_fetch_and_sign.py",
+    "extra": []
+  },
+  "ARMOR-STUDIO": {
+    "workflow": "package-build.yml",
+    "tool": "armor_fetch_and_sign.py",
+    "extra": []
+  },
+  "ARMOR-NETWORK": {
+    "workflow": "package-build.yml",
+    "tool": "armor_fetch_and_sign.py",
+    "extra": []
+  },
+  "ARMOR-SERVER-AI": {
+    "workflow": "package-build.yml",
+    "tool": "armor_fetch_and_sign.py",
+    "extra": []
+  },
+  "ARMOR-VOICE-AI": {
+    "workflow": "package-build.yml",
+    "tool": "armor_fetch_and_sign.py",
+    "extra": []
+  },
+  "ARMOR-ANDROID-CONTROL": {
+    "workflow": "apk-build.yml",
+    "tool": "armor_fetch_and_sign.py",
+    "extra": []
+  },
+  "URTC": {
+    "workflow": "firmware-build.yml",
+    "tool": "urtc_fetch_and_sign.py",
+    "extra": [],
+    "finalize_flags": [
+      "--bench"
+    ]
+  },
+  "URTC-FLASHER": {
+    "workflow": "exe-build.yml",
+    "tool": "urtc_fetch_and_sign.py",
+    "extra": []
+  },
+  "URTC-TESTER": {
+    "workflow": "exe-build.yml",
+    "tool": "urtc_fetch_and_sign.py",
+    "extra": []
+  },
+  "URTC-SMART-RACK": {
+    "workflow": "firmware-build.yml",
+    "tool": "urtc_fetch_and_sign.py",
+    "extra": []
+  },
+  "URTC-VISION-TOOL": {
+    "workflow": "firmware-build.yml",
+    "tool": "urtc_fetch_and_sign.py",
+    "extra": []
+  },
+  "URTC-WEB-STUDIO": {
+    "workflow": "site-build.yml",
+    "tool": "urtc_fetch_and_sign.py",
+    "extra": []
+  },
+  "URTC-COMMON": {
+    "workflow": "release-files-build.yml",
+    "tool": "urtc_fetch_and_sign.py",
+    "extra": []
+  },
+  "HYDRA-UMC": {
+    "workflow": "firmware-build.yml",
+    "tool": "hydra_fetch_and_sign.py",
+    "extra": [],
+    "finalize_flags": [
+      "--bench"
+    ]
+  },
+  "HYDRA-UMC-TOOL-CLI": {
+    "workflow": "binaries-build.yml",
+    "tool": "hydra_fetch_and_sign.py",
+    "extra": []
+  },
+  "HYDRA-UMC-NODE-HEALING": {
+    "workflow": "binaries-build.yml",
+    "tool": "hydra_fetch_and_sign.py",
+    "extra": []
+  },
+  "HYDRA-UMC-JOB-DISPATCHER": {
+    "workflow": "binaries-build.yml",
+    "tool": "hydra_fetch_and_sign.py",
+    "extra": []
+  },
+  "HYDRA-UMC-ORCHESTRATOR": {
+    "workflow": "binaries-build.yml",
+    "tool": "hydra_fetch_and_sign.py",
+    "extra": []
+  },
+  "HYDRA-UMC-TWIN": {
+    "workflow": "binaries-build.yml",
+    "tool": "hydra_fetch_and_sign.py",
+    "extra": []
+  },
+  "HYDRA-UMC-ANDROID-CONTROL": {
+    "workflow": "binaries-build.yml",
+    "tool": "hydra_fetch_and_sign.py",
+    "extra": []
+  },
+  "HYDRA-UMC-WATCH": {
+    "workflow": "binaries-build.yml",
+    "tool": "hydra_fetch_and_sign.py",
+    "extra": []
+  },
+  "HYDRA-UMC-HIL-BRIDGE": {
+    "workflow": "binaries-build.yml",
+    "tool": "hydra_fetch_and_sign.py",
+    "extra": []
+  },
+  "HYDRA-UMC-PATH-PLANNER-3D": {
+    "workflow": "binaries-build.yml",
+    "tool": "hydra_fetch_and_sign.py",
+    "extra": []
+  },
+  "HYDRA-UMC-PHYSICS-REPLICA": {
+    "workflow": "binaries-build.yml",
+    "tool": "hydra_fetch_and_sign.py",
+    "extra": []
+  },
+  "HYDRA-UMC-SWARM-SYNC": {
+    "workflow": "binaries-build.yml",
+    "tool": "hydra_fetch_and_sign.py",
+    "extra": []
+  },
+  "HYDRA-UMC-UPDATER": {
+    "workflow": "package-build.yml",
+    "tool": "hydra_fetch_and_sign.py",
+    "extra": []
+  },
+  "HYDRA-UMC-OS-REBUILDER": {
+    "workflow": "package-build.yml",
+    "tool": "hydra_fetch_and_sign.py",
+    "extra": []
+  },
+  "HYDRA-UMC-SUITE": {
+    "workflow": "package-build.yml",
+    "tool": "hydra_fetch_and_sign.py",
+    "extra": []
+  },
+  "HYDRA-UMC-STUDIO": {
+    "workflow": "package-build.yml",
+    "tool": "hydra_fetch_and_sign.py",
+    "extra": []
+  },
+  "HYDRA-UMC-SERVER": {
+    "workflow": "package-build.yml",
+    "tool": "hydra_fetch_and_sign.py",
+    "extra": []
+  },
+  "HYDRA-UMC-SUITE:exe": {
+    "repo": "HYDRA-UMC-SUITE",
+    "workflow": "exe-build.yml",
+    "tool": "hydra_fetch_and_sign.py",
+    "extra": []
+  },
+  "HYDRA-UMC-STUDIO:dist": {
+    "repo": "HYDRA-UMC-STUDIO",
+    "workflow": "dist-build.yml",
+    "tool": "hydra_fetch_and_sign.py",
+    "extra": []
+  },
+  "HYDRA-UMC-SERVER:dist": {
+    "repo": "HYDRA-UMC-SERVER",
+    "workflow": "dist-build.yml",
+    "tool": "hydra_fetch_and_sign.py",
+    "extra": []
+  },
+  "HYDRA-UMC-OS": {
+    "workflow": "package-build.yml",
+    "build_only": true,
+    "reason": "its package-build.yml takes the inputs component/ref (not dry_run) and is signed with the hydra-pkg/1 scheme of tools/package_component.py, which no tool of the batch speaks yet; build and sign it by hand"
+  },
+  "HYDRA-UMC-STUDIO-KIT": {
+    "workflow": "dist-build.yml",
+    "tool": "hydra_fetch_and_sign.py",
+    "extra": []
+  }
+}

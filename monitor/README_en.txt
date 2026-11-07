@@ -1,0 +1,73 @@
+Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+GPL-3.0-or-later - see LICENSE
+
+GITHUB ACTIONS MONITOR + SENTINEL (version 1.5.0)
+=================================================
+Requirements: Python 3.10+ and the GitHub CLI (`gh`) logged in (gh auth login). Nothing else: only the Python standard library.
+Quick steps for a first use: QUICKSTART_en.txt.
+
+START      Windows: MONITOR_GITHUB_ACTIONS.bat | Linux: ./MONITOR_GITHUB_ACTIONS.sh | macOS: double-click MONITOR_GITHUB_ACTIONS.command
+           (opens http://127.0.0.1:<port>, local only). On any system you can also run:  python3 actions_monitor.py  (Windows: py -3 actions_monitor.py)
+BATCHES    BATCH_GITHUB_ACTIONS.bat / .sh / .command  (gha_dispatch_all.py: plan, dispatch, status, finalize, hygiene). Optional, for people who sign their builds locally.
+WHAT IT NEVER DOES   It listens only on 127.0.0.1 (never bind it to 0.0.0.0: it has no login). It stores no token (it asks `gh`). On its own it writes nothing to GitHub: only the batch commands `dispatch --go`, `dispatch --real` and `finalize --execute` write to GitHub (fire workflows, create the unsigned draft, publish), and only when you run them.
+           It does NOT sign and does NOT publish anything by itself: signing and publishing are commands that YOU run, and the monitor only shows them as text.
+           No AI is in the critical path; the optional AI explainer is off by default.
+
+LANGUAGE   8 languages: en, es, de, fr, it, ja, zh, pt (European Portuguese). It starts in ENGLISH: the language of your system does not decide. Choose another one in the SETTINGS tab of the page
+           (gear icon; the browser remembers it), or set "language" in actions_monitor.json, or the environment variable MONITOR_LANG, or --lang CODE in the command line tools (it beats the rest).
+           Lines that scripts read (SKIP, DISPATCHED, READY, FAILED, Summary:, BUILD ONLY...) are always English.
+CONFIG     actions_monitor.json (created from actions_monitor.example.json on the first start). Useful keys: github_owner (empty = the account of gh),
+           language, ecosystems_file, targets_file, refresh_seconds, cold_refresh_seconds, max_workers, min_rate_remaining, sentinel.*
+           ecosystems_file: groups repositories by name prefix (see ecosystems.example.json; "*" = every repository). targets_file: the catalogue of builds
+           for the batch tools (see targets.example.json). profiles_file (profiles.example.json): batch profiles. Keys that start with "_" in these files are metadata.
+WORKSPACE  OPTIONAL: a folder with local clones of your repositories (MONITOR_ROOT, "workspace_root" in the json, or a parent folder with a .monitor-root file).
+           Without it the monitor starts in REDUCED MODE and says so: only what the GitHub API gives (no local signing queue, no audit report, no CHANGELOG scan).
+           With it you also get release candidates, the signing queue and the batch tools. Signing records: "signed_dir"; audit files: "audit_dir".
+TESTS      py -3 -I -m unittest discover -s tests   (Linux/macOS: python3 -I -m unittest discover -s tests). They need no network.
+PROBLEMS   "API rate limit": the shared quota of gh (5000/hour) is used up; wait for the reset (gh api rate_limit) and raise refresh_seconds / lower max_workers.
+           The monitor stops at start if gh does not answer. A corrupt cache file is ignored; delete sentinel_cache.json to start the cache again.
+           Restart the monitor after updating the package (a running process keeps the old code).
+
+TOOLS      read_report.py [--lang CODE] [--json] [--export-status DIR] [--export-sign-queue FILE]  prints what the running monitor says (local, no GitHub quota)
+           gha_dispatch_all.py [--lang CODE] plan|dispatch|status|finalize|hygiene    batch of GitHub Actions builds (nothing is compiled on your PC)
+           release_notes.py REPO [--since TAG] [--out FILE]    draft of release notes from commits (a proposal; it publishes nothing)
+           release_candidates.py    projects with entries in CHANGELOG [Unreleased] and an old last release (read only)
+EVENTS     The Sentinel writes one JSON line per CHANGE (new red, recovered CI, stuck build, new alerts...) in events_monitor.jsonl. Each line has a stable
+           `code` (it never depends on the language), `kind`, `level`, `repo`, `args` and `text` (in the configured language). `tail -F` follows it.
+RED CI     One criterion: the LAST finished run of each workflow on the default branch. Red = failure, timed_out, startup_failure or action_required.
+           cancelled, skipped, neutral and stale do not count.
+
+WHAT IS NEW IN 1.5.0 (history: CHANGELOG.md)
+  - SETTINGS tab: change the values of actions_monitor.json from the page (a list of allowed keys with type and range, checked, a copy in config_backups/ before every save, never tokens or secrets; docs/SETTINGS.md).
+  - Buttons with relief that light up and sink, inline SVG icons with a name and tooltip in 8 languages, the look of the status dashboard, bars and figures with life (all of it stops with prefers-reduced-motion).
+  - Optional outputs, off by default, only on 127.0.0.1: /metrics (Prometheus), /api/outputs/grafana.json (Grafana JSON / Infinity), /api/outputs/dashboard.json (docs/OUTPUTS.md, example dashboard in docs/grafana/).
+  - A neutral package: your ecosystems, targets and profiles live outside it (ecosystems_file, targets_file, profiles_file; tools_dir for the local signing tools); English by default; names of files and folders in English.
+  UPDATING from 1.4.x: the names below changed (the old ones are still read where a file may exist; the new ones are the only ones written):
+  leer_parte.py -> read_report.py          eventos.py -> events.py          parte_history.py -> report_history.py
+  LOTE_GITHUB_ACTIONS.bat/.sh/.command -> BATCH_GITHUB_ACTIONS.bat/.sh/.command
+  eventos_monitor.jsonl -> events_monitor.jsonl          eventos_estado.json -> events_state.json
+  PARTE_CENTINELA_DIA_<day>.* -> SENTINEL_REPORT_DAY_<day>.*     PARTE_CENTINELA_<time>.txt -> SENTINEL_REPORT_<time>.txt     CANDIDATAS_RELEASE.txt -> RELEASE_CANDIDATES.txt
+  <signed_dir>/lotes/lote_<time>.json -> <signed_dir>/batches/batch_<time>.json     parte_history_days -> report_history_days     monitor_y_centinela.zip -> github_actions_monitor.zip
+  sentinel.audit_files: names of the A8 audit files (neutral defaults RECONCILIATION_TOTAL_*.txt, ROUNDS_MAP_2*.txt, ROUNDS_MAP_EXTRA_*.txt)
+  ci_red.json and --export-status: unchanged (a contract).
+
+WHAT IS NEW IN 1.4.2 (history: CHANGELOG.md)
+  When A2 asks for the last run of a hidden workflow, a run in progress or a cancelled one no longer counts as seen (it could hide an earlier red): the Sentinel asks for the
+  last completed runs of that workflow and uses the first with a real conclusion (cancelled and skipped are ignored). If there is none on the default branch, only that workflow stays inconclusive.
+
+WHAT IS NEW IN 1.4.1 (history: CHANGELOG.md)
+  A2 no longer reports a whole repository as inconclusive because its run sample is full: for each workflow of the clone that is missing from the
+  sample it asks GitHub for the last run of that one workflow on the default branch (read only, same quota gate as A10, limited by
+  sentinel.a2_resolve_max_calls_per_tick, answers kept sentinel.a2_resolve_ttl_seconds). Red counts as red; a workflow with no run on the branch stays
+  inconclusive and the panel names it.
+
+WHAT IS NEW IN 1.4.0 (history: CHANGELOG.md)
+  A11 "Readiness" panel: release readiness per repository (CI of the default branch and its commit, version above the last release, build, signing, next step),
+  ecosystem health (a score from real counts only, withheld when too few repositories have data) and dependency pins that are behind their provider
+  (read from pin files of the local clones, configured in sentinel.readiness.pins.sources). Read only; nothing is estimated.
+
+WHAT IS NEW IN 1.3.0 (history: CHANGELOG.md)
+  8 languages in the page, the command line, the events and the reports; language selector; ecosystems, targets and GitHub account as data (github_owner,
+  ecosystems_file, targets_file); optional workspace with an honest reduced mode; authorship and GPL-3.0-or-later in every file; LICENSE, NOTICE, AUTHORS;
+  README and QUICKSTART in 8 languages.
+LICENCE    GPL-3.0-or-later (see LICENSE and NOTICE). Copyright (C) 2026 JuanenRac (Electro Hobby 3D).

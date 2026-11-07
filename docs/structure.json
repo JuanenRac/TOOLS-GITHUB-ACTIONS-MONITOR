@@ -1,0 +1,351 @@
+{
+  "repo": "TOOLS-GITHUB-ACTIONS-MONITOR",
+  "ecosystem": "monitor",
+  "svg": "en",
+  "cards": [
+    {
+      "name": {
+        "en": "Repository root",
+        "es": "Raíz del repositorio",
+        "de": "Wurzel des Repositorys",
+        "fr": "Racine du dépôt",
+        "it": "Radice del repository",
+        "ja": "リポジトリのルート",
+        "zh": "仓库根目录",
+        "pt": "Raiz do repositório"
+      },
+      "kind": "group",
+      "span": 3,
+      "columns": 3,
+      "rows": [
+        {
+          "name": "monitor/",
+          "desc": {
+            "en": "the program",
+            "es": "el programa",
+            "de": "das Programm",
+            "fr": "le programme",
+            "it": "il programma",
+            "ja": "プログラム本体",
+            "zh": "程序本体",
+            "pt": "o programa"
+          }
+        },
+        {
+          "name": "docs/",
+          "desc": {
+            "en": "architecture, screenshots",
+            "es": "arquitectura, capturas",
+            "de": "Architektur, Screenshots",
+            "fr": "architecture, captures",
+            "it": "architettura, schermate",
+            "ja": "構成図、スクリーンショット",
+            "zh": "架构、截图",
+            "pt": "arquitetura, capturas"
+          }
+        },
+        {
+          "name": "tools/",
+          "desc": {
+            "en": "picture generators",
+            "es": "generadores de dibujos",
+            "de": "Bild-Generatoren",
+            "fr": "générateurs d'images",
+            "it": "generatori di immagini",
+            "ja": "図のジェネレーター",
+            "zh": "图片生成器",
+            "pt": "geradores de imagens"
+          }
+        },
+        {
+          "name": "images/",
+          "desc": {
+            "en": "banner and pictures",
+            "es": "banner y dibujos",
+            "de": "Banner und Bilder",
+            "fr": "bannière et images",
+            "it": "banner e immagini",
+            "ja": "バナーと図",
+            "zh": "横幅图和图片",
+            "pt": "banner e imagens"
+          }
+        },
+        {
+          "name": ".github/",
+          "desc": {
+            "en": "CI and issue forms",
+            "es": "CI y formularios",
+            "de": "CI und Formulare",
+            "fr": "CI et formulaires",
+            "it": "CI e moduli",
+            "ja": "CI と Issue フォーム",
+            "zh": "CI 和议题表单",
+            "pt": "CI e formulários"
+          }
+        },
+        {
+          "name": "CHANGELOG.md",
+          "desc": {
+            "en": "changes per version",
+            "es": "cambios por versión",
+            "de": "Änderungen je Version",
+            "fr": "changements par version",
+            "it": "modifiche per versione",
+            "ja": "バージョン別の変更",
+            "zh": "各版本变更",
+            "pt": "mudanças por versão"
+          }
+        },
+        {
+          "name": "LICENSE  NOTICE  AUTHORS",
+          "desc": {
+            "en": "licences and author",
+            "es": "licencias y autoría",
+            "de": "Lizenzen und Urheber",
+            "fr": "licences et auteur",
+            "it": "licenze e autore",
+            "ja": "ライセンスと作者",
+            "zh": "许可证和作者",
+            "pt": "licenças e autoria"
+          },
+          "tree_name": "LICENSE NOTICE AUTHORS"
+        },
+        {
+          "name": "CONTRIBUTING.md  SECURITY.md",
+          "desc": {
+            "en": "how to help, report",
+            "es": "cómo ayudar, informar",
+            "de": "mithelfen, melden",
+            "fr": "aider, signaler",
+            "it": "contribuire, segnalare",
+            "ja": "参加方法、報告",
+            "zh": "参与方式、报告",
+            "pt": "ajudar, comunicar"
+          },
+          "tree_name": "CONTRIBUTING.md SECURITY.md"
+        },
+        {
+          "name": "SUPPORT.md  CODE_OF_CONDUCT.md",
+          "desc": {
+            "en": "support and conduct",
+            "es": "soporte y conducta",
+            "de": "Support und Verhalten",
+            "fr": "aide et conduite",
+            "it": "supporto e condotta",
+            "ja": "サポートと行動規範",
+            "zh": "支持和行为准则",
+            "pt": "suporte e conduta"
+          },
+          "tree_name": "SUPPORT.md CODE_OF_CONDUCT.md"
+        }
+      ]
+    },
+    {
+      "name": "monitor/",
+      "sub": {
+        "en": "the program",
+        "es": "el programa",
+        "de": "das Programm",
+        "fr": "le programme",
+        "it": "il programma",
+        "ja": "プログラム",
+        "zh": "程序",
+        "pt": "o programa"
+      },
+      "span": 3,
+      "columns": 2,
+      "accent": "a",
+      "rows": [
+        {
+          "name": "actions_monitor.py",
+          "desc": {
+            "en": "local server",
+            "es": "servidor local",
+            "de": "lokaler Server",
+            "fr": "serveur local",
+            "it": "server locale",
+            "ja": "ローカルサーバー",
+            "zh": "本地服务器",
+            "pt": "servidor local"
+          }
+        },
+        {
+          "name": "actions_monitor.html",
+          "desc": {
+            "en": "the web page",
+            "es": "la página web",
+            "de": "die Webseite",
+            "fr": "la page web",
+            "it": "la pagina web",
+            "ja": "Web ページ",
+            "zh": "网页",
+            "pt": "a página web"
+          }
+        },
+        {
+          "name": "sentinel_local.py",
+          "desc": {
+            "en": "alerts and report",
+            "es": "alertas y parte",
+            "de": "Warnungen, Bericht",
+            "fr": "alertes, rapport",
+            "it": "avvisi e rapporto",
+            "ja": "アラートとレポート",
+            "zh": "警报与报告",
+            "pt": "alertas e relatório"
+          }
+        },
+        {
+          "name": "surface.py  readiness.py",
+          "desc": {
+            "en": "repo checks, readiness",
+            "es": "comprobaciones, preparación",
+            "de": "Prüfungen, Bereitschaft",
+            "fr": "contrôles, préparation",
+            "it": "controlli, preparazione",
+            "ja": "検査とリリース準備",
+            "zh": "检查与发布就绪",
+            "pt": "verificações, preparação"
+          },
+          "tree_name": "surface.py readiness.py"
+        },
+        {
+          "name": "settings_api.py  outputs.py",
+          "desc": {
+            "en": "settings, metrics, JSON",
+            "es": "ajustes, métricas, JSON",
+            "de": "Einstellungen, Metriken",
+            "fr": "réglages, métriques",
+            "it": "impostazioni, metriche",
+            "ja": "設定とメトリクス",
+            "zh": "设置与指标",
+            "pt": "definições, métricas"
+          },
+          "tree_name": "settings_api.py outputs.py"
+        },
+        {
+          "name": "signstate.py  sigverify.py",
+          "desc": {
+            "en": "signing state and check",
+            "es": "firma: estado y control",
+            "de": "Signatur: Stand, Prüfung",
+            "fr": "signature : état, contrôle",
+            "it": "firma: stato, verifica",
+            "ja": "署名の状態と検証",
+            "zh": "签名状态与验证",
+            "pt": "assinatura: estado e controlo"
+          },
+          "tree_name": "signstate.py sigverify.py"
+        },
+        {
+          "name": "read_report.py",
+          "desc": {
+            "en": "report from the terminal",
+            "es": "el parte en terminal",
+            "de": "Bericht im Terminal",
+            "fr": "rapport en terminal",
+            "it": "rapporto da terminale",
+            "ja": "ターミナルでレポート",
+            "zh": "终端报告",
+            "pt": "relatório no terminal"
+          }
+        },
+        {
+          "name": "gha_dispatch_all.py",
+          "desc": {
+            "en": "batch builds",
+            "es": "compilaciones por lotes",
+            "de": "Build-Stapel",
+            "fr": "builds par lots",
+            "it": "build a lotti",
+            "ja": "バッチビルド",
+            "zh": "批量构建",
+            "pt": "compilações por lotes"
+          }
+        },
+        {
+          "name": "events.py  report_history.py",
+          "desc": {
+            "en": "events and history",
+            "es": "eventos e historial",
+            "de": "Ereignisse, Verlauf",
+            "fr": "événements, historique",
+            "it": "eventi e storico",
+            "ja": "イベントと履歴",
+            "zh": "事件与历史",
+            "pt": "eventos e histórico"
+          },
+          "tree_name": "events.py report_history.py"
+        },
+        {
+          "name": "ci_red.py  export_status.py",
+          "desc": {
+            "en": "files others read",
+            "es": "ficheros para otros",
+            "de": "Dateien für andere",
+            "fr": "fichiers pour d'autres",
+            "it": "file per altri",
+            "ja": "他ツール向けファイル",
+            "zh": "供其他工具读取",
+            "pt": "ficheiros para outros"
+          },
+          "tree_name": "ci_red.py export_status.py"
+        },
+        {
+          "name": "i18n.py  locales/",
+          "desc": {
+            "en": "eight languages",
+            "es": "ocho idiomas",
+            "de": "acht Sprachen",
+            "fr": "huit langues",
+            "it": "otto lingue",
+            "ja": "8言語",
+            "zh": "八种语言",
+            "pt": "oito idiomas"
+          },
+          "tree_name": "i18n.py locales/"
+        },
+        {
+          "name": "toolconfig.py  workspace.py",
+          "desc": {
+            "en": "settings and clones",
+            "es": "ajustes y clones",
+            "de": "Einstellungen, Klone",
+            "fr": "réglages, clones",
+            "it": "impostazioni, cloni",
+            "ja": "設定とクローン",
+            "zh": "设置与克隆",
+            "pt": "definições e clones"
+          },
+          "tree_name": "toolconfig.py workspace.py"
+        },
+        {
+          "name": "tests/",
+          "desc": {
+            "en": "offline tests",
+            "es": "tests sin red",
+            "de": "Offline-Tests",
+            "fr": "tests hors ligne",
+            "it": "test offline",
+            "ja": "オフラインテスト",
+            "zh": "离线测试",
+            "pt": "testes sem rede"
+          }
+        },
+        {
+          "name": "docs/",
+          "desc": {
+            "en": "settings, outputs, Grafana",
+            "es": "ajustes, salidas, Grafana",
+            "de": "Einstellungen, Grafana",
+            "fr": "réglages, Grafana",
+            "it": "impostazioni, Grafana",
+            "ja": "設定と Grafana",
+            "zh": "设置与 Grafana",
+            "pt": "definições, Grafana"
+          }
+        }
+      ]
+    }
+  ]
+}

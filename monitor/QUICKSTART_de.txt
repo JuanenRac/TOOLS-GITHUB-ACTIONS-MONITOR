@@ -1,0 +1,25 @@
+Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+GPL-3.0-or-later - see LICENSE
+
+SCHNELLSTART - GitHub-Actions-Monitor + Wächter
+===============================================
+1. Installiere Python 3.10 oder neuer (python.org; unter Linux/macOS meist schon vorhanden: python3 --version).
+2. Installiere die GitHub CLI (gh):
+     Windows:  winget install --id GitHub.cli
+     macOS:    brew install gh
+     Linux:    deinen Paketmanager (zum Beispiel: sudo apt install gh) oder https://cli.github.com
+3. Einmal anmelden:  gh auth login   (GitHub.com wählen und den Schritten im Browser folgen). Der Monitor speichert nie ein Token: er fragt gh.
+4. Monitor starten:
+     Windows:  Doppelklick auf MONITOR_GITHUB_ACTIONS.bat
+     macOS:    Doppelklick auf MONITOR_GITHUB_ACTIONS.command   (öffnet es nicht: chmod +x *.sh *.command im Terminal)
+     Linux:    ./MONITOR_GITHUB_ACTIONS.sh
+   Eine Seite öffnet sich unter http://127.0.0.1:8765 (nur auf deinem Computer). Beenden mit Strg+C im Fenster.
+5. Erste Benutzung:
+   - Die Seite zeigt DEINE Repositories (das GitHub-Konto, mit dem du angemeldet bist). Für ein anderes Konto setze "github_owner" in actions_monitor.json.
+   - Wähle deine Sprache im Tab Einstellungen der Seite (Zahnrad-Symbol; Start auf Englisch, die Wahl wird gemerkt). Dort sind auch die übrigen Einstellungen.
+   - Um Repositories nach Namenspräfix zu gruppieren oder die Batch-Werkzeuge zu nutzen, kopiere ecosystems.example.json / targets.example.json und verweise in
+     actions_monitor.json darauf ("ecosystems_file", "targets_file"). Details stehen in README_de.txt.
+   - Keine lokalen Klone? Es funktioniert trotzdem, im reduzierten Modus (nur, was die GitHub-API liefert), und die Seite sagt es dir.
+6. Was er NICHT tut: Er signiert und veröffentlicht nichts von selbst, schreibt von sich aus nichts auf GitHub (nur `dispatch --go`, `dispatch --real` und `finalize --execute`, die du ausführst, tun es), lauscht nur auf 127.0.0.1 und speichert kein Token. Signieren und
+   Veröffentlichen sind Befehle, die du selbst ausführst; der Monitor zeigt sie nur als Text.
+Probleme? Siehe „PROBLEME“ in README_de.txt.

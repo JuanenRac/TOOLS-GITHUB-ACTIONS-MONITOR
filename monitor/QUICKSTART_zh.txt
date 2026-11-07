@@ -1,0 +1,25 @@
+Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+GPL-3.0-or-later - see LICENSE
+
+快速入门 - GitHub Actions 监视器 + 哨兵
+=======================================
+1. 安装 Python 3.10 或更高版本（python.org；Linux/macOS 通常已自带：python3 --version）。
+2. 安装 GitHub CLI（gh）：
+     Windows：  winget install --id GitHub.cli
+     macOS：    brew install gh
+     Linux：    你的包管理器（例如：sudo apt install gh）或 https://cli.github.com
+3. 登录一次：  gh auth login   （选择 GitHub.com，并按浏览器中的步骤操作）。监视器从不保存令牌：它向 gh 索取。
+4. 启动监视器：
+     Windows：  双击 MONITOR_GITHUB_ACTIONS.bat
+     macOS：    双击 MONITOR_GITHUB_ACTIONS.command   （打不开时，在终端运行 chmod +x *.sh *.command）
+     Linux：    ./MONITOR_GITHUB_ACTIONS.sh
+   会在 http://127.0.0.1:8765 打开页面（仅限你的电脑）。在窗口中按 Ctrl+C 停止。
+5. 首次使用：
+   - 页面显示“你的”仓库（你登录的 GitHub 账户）。要监视其他账户，请在 actions_monitor.json 中设置 "github_owner"。
+   - 在页面的“设置”选项卡(齿轮图标)中选择语言。默认以英语启动,选择会被记住。其他设置也在那里。
+   - 若要按名称前缀给仓库分组或使用批处理工具，请复制 ecosystems.example.json / targets.example.json，并在 actions_monitor.json 中
+     用 "ecosystems_file"、"targets_file" 指向它们。详情见 README_zh.txt。
+   - 没有本地克隆？同样可用，只是处于精简模式（只显示 GitHub API 提供的内容），页面会告诉你。
+6. 它不会做的事：不会自行签名或发布任何内容，自身不会向 GitHub 写入任何东西（只有你运行的 `dispatch --go`、`dispatch --real` 和 `finalize --execute` 会），只监听 127.0.0.1，也不保存任何令牌。签名和发布是你自己执行的命令；
+   监视器只把它们显示为文本。
+遇到问题？请参阅 README_zh.txt 中的“问题排查”。
