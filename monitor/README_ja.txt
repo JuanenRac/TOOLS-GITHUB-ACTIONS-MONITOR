@@ -1,9 +1,9 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GitHub Actions モニター + センチネル（バージョン 1.5.0）
+GitHub Actions モニター + センチネル（バージョン 1.5.1）
 ========================================================
-必要なもの: Python 3.10 以上と、ログイン済みの GitHub CLI（`gh`）（gh auth login）。それ以外は不要で、Python の標準ライブラリだけを使います。
+必要なもの: Python 3.11 以上と、ログイン済みの GitHub CLI（`gh`）（gh auth login）。それ以外は不要で、Python の標準ライブラリだけを使います。
 初めて使うときの手順: QUICKSTART_ja.txt。
 
 起動       Windows: MONITOR_GITHUB_ACTIONS.bat | Linux: ./MONITOR_GITHUB_ACTIONS.sh | macOS: MONITOR_GITHUB_ACTIONS.command をダブルクリック
@@ -36,6 +36,12 @@ GitHub Actions モニター + センチネル（バージョン 1.5.0）
            固定の `code`、`kind`, `level`, `repo`, `args`、そして設定した言語の `text` が含まれます。`tail -F` で追えます。
 赤の CI    基準は 1 つだけ: 既定ブランチでの各 workflow の「最後に完了した run」。赤 = failure, timed_out, startup_failure, action_required。
            cancelled, skipped, neutral, stale は数えません。
+
+1.5.1 の新機能（履歴: CHANGELOG.md）
+  - 設定タブ：新しいグループ「センチネル用の外部 AI」（ai.provider none / ollama / openai-compatible、モデル、Ollama のアドレス（このコンピューターのみ）、https エンドポイント、キーを保持する環境変数の名前、1日あたりの呼び出し回数）。キー自体は保存されません。既定ではオフで、外部サービスにはリポジトリのデータが送られます。
+  - migrate_state.py：1.5.0 より前に書かれたファイルを新しい名前に移します。`python migrate_state.py` はドライラン、`--apply` はコピー（古いファイルは残る）、`--move` は名前変更です。上書きはしません。docs/MIGRATING.md に8言語で1ページにまとめています。
+  - 独自のカタログファイルがない初回起動：サンプルを使用していることをコンソールに表示し、`--init-catalog` で ecosystems.json、targets.json、profiles.json の編集可能なコピーを作成します。
+  - Python 3.11 以上（Windows、Linux、macOS で 3.11 と 3.13 を検証）。
 
 1.5.0 の新機能（履歴: CHANGELOG.md）
   - 「設定」タブ: actions_monitor.json の値をページから変更できます（型と範囲つきの許可キー一覧、検証あり、保存前に config_backups/ へコピー、トークンや秘密は扱いません。docs/SETTINGS.md）。

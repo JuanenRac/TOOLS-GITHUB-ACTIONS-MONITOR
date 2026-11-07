@@ -1,9 +1,9 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITOR DO GITHUB ACTIONS + SENTINELA (versão 1.5.0)
+MONITOR DO GITHUB ACTIONS + SENTINELA (versão 1.5.1)
 ====================================================
-Requisitos: Python 3.10+ e o GitHub CLI (`gh`) com a sessão iniciada (gh auth login). Mais nada: só a biblioteca padrão do Python.
+Requisitos: Python 3.11+ e o GitHub CLI (`gh`) com a sessão iniciada (gh auth login). Mais nada: só a biblioteca padrão do Python.
 Passos rápidos para a primeira utilização: QUICKSTART_pt.txt.
 
 ARRANQUE   Windows: MONITOR_GITHUB_ACTIONS.bat | Linux: ./MONITOR_GITHUB_ACTIONS.sh | macOS: duplo clique em MONITOR_GITHUB_ACTIONS.command
@@ -36,6 +36,12 @@ EVENTOS    A Sentinela escreve uma linha JSON por cada ALTERAÇÃO (novo vermelh
            `code` estável (nunca depende do idioma), `kind`, `level`, `repo`, `args` e `text` (no idioma configurado). `tail -F` acompanha-o.
 CI VERMELHA Um único critério: o ÚLTIMO run terminado de cada workflow no ramo predefinido. Vermelho = failure, timed_out, startup_failure ou action_required.
            cancelled, skipped, neutral e stale não contam.
+
+NOVIDADES 1.5.1 (histórico: CHANGELOG.md)
+  - Separador DEFINIÇÕES: novo grupo «IA externa para a sentinela» (ai.provider none / ollama / openai-compatible, modelo, endereço do Ollama (só este computador), um endpoint https, o NOME da variável de ambiente que guarda a chave, chamadas por dia). A chave em si nunca é guardada. Desligada por defeito; um serviço externo recebe dados dos seus repositórios.
+  - migrate_state.py: leva os ficheiros escritos antes da 1.5.0 para os nomes novos. `python migrate_state.py` é uma simulação; `--apply` copia (os antigos ficam), `--move` renomeia. Nada é substituído. Uma página em docs/MIGRATING.md, em 8 idiomas.
+  - Primeiro arranque sem ficheiros de catálogo próprios: o monitor avisa que está a usar os de exemplo (consola), e `--init-catalog` cria cópias editáveis de ecosystems.json, targets.json e profiles.json.
+  - Python 3.11 ou superior (testado com 3.11 e 3.13, em Windows, Linux e macOS).
 
 NOVIDADES 1.5.0 (histórico: CHANGELOG.md)
   - Separador DEFINIÇÕES: altere na página os valores de actions_monitor.json (lista de chaves permitidas com tipo e intervalo, validadas, cópia em config_backups/ antes de cada gravação, nunca tokens nem segredos; docs/SETTINGS.md).

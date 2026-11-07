@@ -32,10 +32,14 @@ MAX_BODY = 16384
 
 NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}$")
 OWNER_RE = re.compile(r"^[A-Za-z0-9-]{0,39}$")
+MODEL_RE = re.compile(r"^[A-Za-z0-9._:/@-]{0,100}$")
+OLLAMA_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}/?$")   # the local service only: nothing leaves this computer
+HTTPS_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250})?$")
+ENV_NAME_RE = re.compile(r"^([A-Z_][A-Z0-9_]{0,63})?$")   # the NAME of an environment variable, never the key itself
 _FOREIGN = re.compile(r"^(?:[Dd]:|/mnt/[dD](?:/|$)|/[dD](?:/|$))")
 
 # group, path, type, bounds / enum, restart.   Types: int, float, bool, enum, text, path, names (list of repository names), eco (the string "all" or a list of ecosystem names)
-_G_GENERAL, _G_POLL, _G_SENT, _G_SURF, _G_READY, _G_PATHS, _G_OUT = "general", "polling", "sentinel", "surface", "readiness", "paths", "outputs"
+_G_GENERAL, _G_POLL, _G_SENT, _G_SURF, _G_READY, _G_PATHS, _G_OUT, _G_AI = "general", "polling", "sentinel", "surface", "readiness", "paths", "outputs", "ai"
 SCHEMA = [
     (_G_GENERAL, "language", "enum", ("",) + tuple(i18n.LANGS), False),
     (_G_GENERAL, "github_owner", "text", OWNER_RE, True),
@@ -91,9 +95,15 @@ SCHEMA = [
     (_G_OUT, "outputs.prometheus.per_repo", "bool", None, False),
     (_G_OUT, "outputs.json.enabled", "bool", None, False),
     (_G_OUT, "outputs.dashboard.enabled", "bool", None, False),
+    (_G_AI, "ai.provider", "enum", ("none", "ollama", "openai-compatible"), True),
+    (_G_AI, "ai.model", "text", MODEL_RE, True),
+    (_G_AI, "ai.ollama_url", "text", OLLAMA_RE, True),
+    (_G_AI, "ai.base_url", "text", HTTPS_RE, True),
+    (_G_AI, "ai.api_key_env", "text", ENV_NAME_RE, True),
+    (_G_AI, "ai.daily_limit", "int", (0, 500), True),
 ]
 FIELDS = {row[1]: row for row in SCHEMA}
-GROUPS = (_G_GENERAL, _G_POLL, _G_SENT, _G_SURF, _G_READY, _G_PATHS, _G_OUT)
+GROUPS = (_G_GENERAL, _G_POLL, _G_SENT, _G_SURF, _G_READY, _G_PATHS, _G_OUT, _G_AI)
 OUTPUT_DEFAULTS = {"prometheus": {"enabled": False, "per_repo": True}, "json": {"enabled": False}, "dashboard": {"enabled": False}}
 
 

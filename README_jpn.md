@@ -16,6 +16,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases/latest"><img src="https://img.shields.io/github/v/release/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR?label=version&color=2EE6A6" alt="Latest release"></a>
   <img src="https://img.shields.io/badge/License-GPL%203.0--or--later-blue.svg" alt="GPL-3.0-or-later">
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
@@ -30,6 +31,7 @@
 
 | | |
 |---|---|
+| **バージョン** | **1.5.1** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **必要なもの** | Python 3.11 以上と GitHub CLI（`gh auth login`）。それ以外は不要 |
 | **開く先** | `127.0.0.1` 上のページのみ、8言語対応 |
 | **GitHub への書き込み** | 自動では行いません。明示的な `--go` を付けて実行したバッチコマンドのみ |
@@ -65,6 +67,8 @@
 3. 起動：Windows は `MONITOR_GITHUB_ACTIONS.bat`、Linux は `./MONITOR_GITHUB_ACTIONS.sh`、macOS は `MONITOR_GITHUB_ACTIONS.command` をダブルクリック、どの環境でも `python actions_monitor.py` で起動できます。
 4. 表示されたアドレス（`http://127.0.0.1:<ポート>`）を開きます。初回起動時に、サンプルから `actions_monitor.json` を作成します。
 5. **設定** を開き、GitHub アカウント、エコシステム（名前の接頭辞によるリポジトリのグループ）などを設定します。
+
+> 1.5.0 より前のバージョンから更新しますか？ [`monitor/docs/MIGRATING_jpn.md`](monitor/docs/MIGRATING_jpn.md)
 
 ## 設定
 

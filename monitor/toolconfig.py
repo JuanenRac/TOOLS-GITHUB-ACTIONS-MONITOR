@@ -116,6 +116,28 @@ def _data_path(env_name, key, default, config=None):
     return path
 
 
+CATALOG_FILES = (("ecosystems_file", DEFAULT_ECOSYSTEMS_FILE), ("targets_file", DEFAULT_TARGETS_FILE), ("profiles_file", DEFAULT_PROFILES_FILE))
+
+
+def catalog_in_example(config=None):
+    """The default catalogue files that do not exist (and are not replaced by a file named in the configuration): those run on their neutral .example.json."""
+    cfg = config if config is not None else raw_config()
+    return [name for key, name in CATALOG_FILES if not cfg.get(key) and not (HERE / name).is_file() and (HERE / name.replace(".json", ".example.json")).is_file()]
+
+
+def init_catalog():
+    """Copies each neutral .example.json to the default name when that file is missing. Returns [(name, created)]."""
+    out = []
+    for _key, name in CATALOG_FILES:
+        target, example = HERE / name, HERE / name.replace(".json", ".example.json")
+        if target.is_file():
+            out.append((name, False))
+        elif example.is_file():
+            target.write_bytes(example.read_bytes())
+            out.append((name, True))
+    return out
+
+
 def targets_path(config=None):
     return _data_path("MONITOR_TARGETS_FILE", "targets_file", DEFAULT_TARGETS_FILE, config)
 

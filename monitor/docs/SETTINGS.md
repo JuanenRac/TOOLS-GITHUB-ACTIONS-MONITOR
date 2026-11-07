@@ -25,10 +25,11 @@ its configuration once) or **applies now**.
 | Readiness (A11) | `sentinel.readiness.enabled`, `min_coverage`, `warn_below` |
 | Folders and files | `workspace_root`, `signed_dir`, `audit_dir`, `ecosystems_file`, `targets_file`, `profiles_file`, `tools_dir`, `sentinel.ci_red_file`, `sentinel.ci_red_audit_copy` |
 | Outputs for other tools | `outputs.prometheus.enabled`, `outputs.prometheus.per_repo`, `outputs.json.enabled`, `outputs.dashboard.enabled` (see OUTPUTS.md) |
+| External AI for the sentinel | `ai.provider` (`none` / `ollama` / `openai-compatible`), `ai.model`, `ai.ollama_url` (this computer only), `ai.base_url` (https), `ai.api_key_env` (the NAME of the environment variable that holds the key) and `ai.daily_limit`. The key itself is never saved. Off by default; an outside service receives data of your repositories. |
 
 ## What can never be changed or seen from the page
 
-Tokens, secrets, signature keys, the webhook secret, the command the sentinel can run (`sentinel.notify_command`), the AI settings and any key of another tool: they are **not in the
+Tokens, secrets, signature keys, the webhook secret, the command the sentinel can run (`sentinel.notify_command`), the API key of the AI (only the name of its environment variable can be set) and any key of another tool: they are **not in the
 schema**, so the page neither shows nor writes them, and a request that names one is refused. Every other key of the file is kept exactly as it was.
 
 ## How a save works

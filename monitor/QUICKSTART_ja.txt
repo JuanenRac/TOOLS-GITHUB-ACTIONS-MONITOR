@@ -3,7 +3,7 @@ GPL-3.0-or-later - see LICENSE
 
 クイックスタート - GitHub Actions モニター + センチネル
 =====================================================
-1. Python 3.10 以上をインストールします（python.org。Linux/macOS では通常すでに入っています: python3 --version）。
+1. Python 3.11 以上をインストールします（python.org。Linux/macOS では通常すでに入っています: python3 --version）。
 2. GitHub CLI（gh）をインストールします:
      Windows:  winget install --id GitHub.cli
      macOS:    brew install gh

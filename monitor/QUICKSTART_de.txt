@@ -3,7 +3,7 @@ GPL-3.0-or-later - see LICENSE
 
 SCHNELLSTART - GitHub-Actions-Monitor + Wächter
 ===============================================
-1. Installiere Python 3.10 oder neuer (python.org; unter Linux/macOS meist schon vorhanden: python3 --version).
+1. Installiere Python 3.11 oder neuer (python.org; unter Linux/macOS meist schon vorhanden: python3 --version).
 2. Installiere die GitHub CLI (gh):
      Windows:  winget install --id GitHub.cli
      macOS:    brew install gh

@@ -2,6 +2,9 @@
   "repo": "TOOLS-GITHUB-ACTIONS-MONITOR",
   "ecosystem": "monitor",
   "svg": "en",
+  "exempt": [
+    "electro-hobby-3d.project.json"
+  ],
   "cards": [
     {
       "name": {

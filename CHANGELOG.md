@@ -9,6 +9,10 @@ Changes of the repository as a whole. The program has its own, more detailed his
 
 ## [Unreleased]
 
+## [1.5.1]
+
+- External AI settings for the sentinel in the Settings tab (only the name of the variable that holds the key), `migrate_state.py` with a one-page guide in eight languages, `--init-catalog`, and the version of the monitor shown in every README.
+
 ## [1.5.0]
 
 First public release of the monitor as its own repository.

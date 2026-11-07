@@ -3,7 +3,7 @@ GPL-3.0-or-later - see LICENSE
 
 QUICKSTART - GitHub Actions monitor + Sentinel
 ==============================================
-1. Install Python 3.10 or newer (python.org; on Linux/macOS it is usually already there: python3 --version).
+1. Install Python 3.11 or newer (python.org; on Linux/macOS it is usually already there: python3 --version).
 2. Install the GitHub CLI (gh):
      Windows:  winget install --id GitHub.cli
      macOS:    brew install gh

@@ -1,9 +1,9 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITEUR GITHUB ACTIONS + SENTINELLE (version 1.5.0)
+MONITEUR GITHUB ACTIONS + SENTINELLE (version 1.5.1)
 ====================================================
-Prérequis : Python 3.10+ et GitHub CLI (`gh`) connecté (gh auth login). Rien d'autre : uniquement la bibliothèque standard de Python.
+Prérequis : Python 3.11+ et GitHub CLI (`gh`) connecté (gh auth login). Rien d'autre : uniquement la bibliothèque standard de Python.
 Étapes rapides pour une première utilisation : QUICKSTART_fr.txt.
 
 DÉMARRAGE  Windows : MONITOR_GITHUB_ACTIONS.bat | Linux : ./MONITOR_GITHUB_ACTIONS.sh | macOS : double-clic sur MONITOR_GITHUB_ACTIONS.command
@@ -36,6 +36,12 @@ OUTILS     read_report.py [--lang CODE] [--json] [--export-status DOSSIER] [--ex
            `code` stable (jamais dépendant de la langue), `kind`, `level`, `repo`, `args` et `text` (dans la langue configurée). `tail -F` la suit.
 CI ROUGE   Un seul critère : le DERNIER run terminé de chaque workflow sur la branche par défaut. Rouge = failure, timed_out, startup_failure ou action_required.
            cancelled, skipped, neutral et stale ne comptent pas.
+
+NOUVEAUTÉS 1.5.1 (historique : CHANGELOG.md)
+  - Onglet RÉGLAGES : nouveau groupe « IA externe pour la sentinelle » (ai.provider none / ollama / openai-compatible, modèle, adresse d'Ollama (cet ordinateur seulement), un point d'accès https, le NOM de la variable d'environnement qui contient la clé, appels par jour). La clé elle-même n'est jamais enregistrée. Désactivée par défaut ; un service externe reçoit des données de vos dépôts.
+  - migrate_state.py : amène les fichiers écrits avant la 1.5.0 aux nouveaux noms. `python migrate_state.py` est une simulation ; `--apply` copie (les anciens restent), `--move` renomme. Rien n'est écrasé. Une page dans docs/MIGRATING.md, en 8 langues.
+  - Premier démarrage sans vos propres fichiers de catalogue : le moniteur indique qu'il utilise ceux d'exemple (console), et `--init-catalog` crée des copies modifiables de ecosystems.json, targets.json et profiles.json.
+  - Python 3.11 ou plus récent (testé avec 3.11 et 3.13, sous Windows, Linux et macOS).
 
 NOUVEAUTÉS 1.5.0 (historique : CHANGELOG.md)
   - Onglet RÉGLAGES : modifiez depuis la page les valeurs de actions_monitor.json (liste de clés autorisées avec type et plage, validées, copie dans config_backups/ avant chaque enregistrement, jamais de jetons ni de secrets ; docs/SETTINGS.md).

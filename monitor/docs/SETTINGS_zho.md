@@ -24,10 +24,11 @@
 | 就绪度（A11） | `sentinel.readiness.enabled`、`min_coverage`、`warn_below` |
 | 文件夹与文件 | `workspace_root`、`signed_dir`、`audit_dir`、`ecosystems_file`、`targets_file`、`profiles_file`、`tools_dir`、`sentinel.ci_red_file`、`sentinel.ci_red_audit_copy` |
 | 面向其他工具的输出 | `outputs.prometheus.enabled`、`outputs.prometheus.per_repo`、`outputs.json.enabled`、`outputs.dashboard.enabled`（参见 OUTPUTS_zho.md） |
+| 哨兵使用的外部 AI | `ai.provider`（`none` / `ollama` / `openai-compatible`）、`ai.model`、`ai.ollama_url`（仅限本机）、`ai.base_url`（https）、`ai.api_key_env`（保存密钥的环境变量名称）和 `ai.daily_limit`。密钥本身绝不会被保存。默认关闭；外部服务会收到你仓库的数据。 |
 
 ## 永远无法在页面上修改或查看的内容
 
-令牌、机密、签名密钥、Webhook 机密、哨兵可以运行的命令（`sentinel.notify_command`）、AI 设置以及其他工具的任何键：它们**不在模式中**，因此页面既不显示也不写入这些内容，提到其中任何一项的请求都会被拒绝。文件中的其他所有键都会原样保留。
+令牌、机密、签名密钥、Webhook 机密、哨兵可以运行的命令（`sentinel.notify_command`）、AI 的 API 密钥（只能设置其环境变量的名称）以及其他工具的任何键：它们**不在模式中**，因此页面既不显示也不写入这些内容，提到其中任何一项的请求都会被拒绝。文件中的其他所有键都会原样保留。
 
 ## 保存的工作方式
 

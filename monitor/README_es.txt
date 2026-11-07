@@ -1,9 +1,9 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITOR DE GITHUB ACTIONS + CENTINELA (versión 1.5.0)
+MONITOR DE GITHUB ACTIONS + CENTINELA (versión 1.5.1)
 =====================================================
-Requisitos: Python 3.10+ y GitHub CLI (`gh`) con la sesión iniciada (gh auth login). Nada más: solo la biblioteca estándar de Python.
+Requisitos: Python 3.11+ y GitHub CLI (`gh`) con la sesión iniciada (gh auth login). Nada más: solo la biblioteca estándar de Python.
 Pasos rápidos para el primer uso: QUICKSTART_es.txt.
 
 ARRANQUE   Windows: MONITOR_GITHUB_ACTIONS.bat | Linux: ./MONITOR_GITHUB_ACTIONS.sh | macOS: doble clic en MONITOR_GITHUB_ACTIONS.command
@@ -36,6 +36,12 @@ EVENTOS    El Centinela escribe una línea JSON por cada CAMBIO (rojo nuevo, CI 
            un `code` estable (nunca depende del idioma), `kind`, `level`, `repo`, `args` y `text` (en el idioma configurado). `tail -F` lo sigue.
 CI EN ROJO Un solo criterio: el ÚLTIMO run terminado de cada workflow en la rama por defecto. Rojo = failure, timed_out, startup_failure o action_required.
            cancelled, skipped, neutral y stale no cuentan.
+
+NOVEDADES 1.5.1 (historial: CHANGELOG.md)
+  - Pestaña AJUSTES: grupo nuevo «IA externa para el centinela» (ai.provider none / ollama / openai-compatible, modelo, dirección de Ollama (solo este equipo), un endpoint https, el NOMBRE de la variable de entorno que guarda la clave, llamadas al día). La clave en sí nunca se guarda. Apagada por defecto; un servicio externo recibe datos de tus repositorios.
+  - migrate_state.py: lleva los ficheros escritos antes de la 1.5.0 a los nombres nuevos. `python migrate_state.py` es una simulación; `--apply` copia (los antiguos se quedan), `--move` renombra. Nada se sobrescribe. Una página en docs/MIGRATING.md, en 8 idiomas.
+  - Primer arranque sin ficheros de catálogo propios: el monitor avisa de que usa los de ejemplo (consola), y `--init-catalog` crea copias editables de ecosystems.json, targets.json y profiles.json.
+  - Python 3.11 o superior (probado en 3.11 y 3.13, en Windows, Linux y macOS).
 
 NOVEDADES 1.5.0 (historial: CHANGELOG.md)
   - Pestaña CONFIGURACIÓN: cambia desde la página los valores de actions_monitor.json (lista de claves permitidas con tipo y rango, validadas, copia en config_backups/ antes de cada guardado, nunca tokens ni secretos; docs/SETTINGS.md).

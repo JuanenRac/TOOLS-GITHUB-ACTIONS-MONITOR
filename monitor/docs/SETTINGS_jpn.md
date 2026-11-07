@@ -24,10 +24,11 @@
 | 準備状況（A11） | `sentinel.readiness.enabled`、`min_coverage`、`warn_below` |
 | フォルダーとファイル | `workspace_root`、`signed_dir`、`audit_dir`、`ecosystems_file`、`targets_file`、`profiles_file`、`tools_dir`、`sentinel.ci_red_file`、`sentinel.ci_red_audit_copy` |
 | 他のツール向けの出力 | `outputs.prometheus.enabled`、`outputs.prometheus.per_repo`、`outputs.json.enabled`、`outputs.dashboard.enabled`（OUTPUTS_jpn.md を参照） |
+| センチネル用の外部 AI | `ai.provider`（`none` / `ollama` / `openai-compatible`）、`ai.model`、`ai.ollama_url`（このコンピューターのみ）、`ai.base_url`（https）、`ai.api_key_env`（キーを保持する環境変数の名前）、`ai.daily_limit`。キー自体は保存されません。既定ではオフで、外部サービスにはリポジトリのデータが送られます。 |
 
 ## ページから変更も閲覧もできないもの
 
-トークン、シークレット、署名キー、Webhook のシークレット、センチネルが実行できるコマンド（`sentinel.notify_command`）、AI の設定、ほかのツールのキーは、**スキーマに含まれていません**。そのためページはこれらを表示も書き込みもせず、いずれかを指定したリクエストは拒否されます。ファイルのそのほかのキーは、まったく元のまま保持されます。
+トークン、シークレット、署名キー、Webhook のシークレット、センチネルが実行できるコマンド（`sentinel.notify_command`）、AI の API キー（設定できるのは環境変数の名前だけです）、ほかのツールのキーは、**スキーマに含まれていません**。そのためページはこれらを表示も書き込みもせず、いずれかを指定したリクエストは拒否されます。ファイルのそのほかのキーは、まったく元のまま保持されます。
 
 ## 保存の仕組み
 

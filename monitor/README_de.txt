@@ -1,9 +1,9 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GITHUB-ACTIONS-MONITOR + WÄCHTER (Version 1.5.0)
+GITHUB-ACTIONS-MONITOR + WÄCHTER (Version 1.5.1)
 ================================================
-Voraussetzungen: Python 3.10+ und die GitHub CLI (`gh`), angemeldet (gh auth login). Sonst nichts: nur die Python-Standardbibliothek.
+Voraussetzungen: Python 3.11+ und die GitHub CLI (`gh`), angemeldet (gh auth login). Sonst nichts: nur die Python-Standardbibliothek.
 Kurzanleitung für die erste Benutzung: QUICKSTART_de.txt.
 
 START      Windows: MONITOR_GITHUB_ACTIONS.bat | Linux: ./MONITOR_GITHUB_ACTIONS.sh | macOS: Doppelklick auf MONITOR_GITHUB_ACTIONS.command
@@ -36,6 +36,12 @@ EREIGNISSE Der Wächter schreibt pro ÄNDERUNG (neues Rot, wiederhergestellte CI
            stabilen `code` (nie sprachabhängig), `kind`, `level`, `repo`, `args` und `text` (in der konfigurierten Sprache). `tail -F` folgt der Datei.
 ROTE CI    Ein einziges Kriterium: der LETZTE beendete Lauf jedes Workflows auf dem Standard-Branch. Rot = failure, timed_out, startup_failure oder action_required.
            cancelled, skipped, neutral und stale zählen nicht.
+
+NEU IN 1.5.1 (Verlauf: CHANGELOG.md)
+  - Tab EINSTELLUNGEN: neue Gruppe „Externe KI für den Wächter“ (ai.provider none / ollama / openai-compatible, Modell, Adresse von Ollama (nur dieser Rechner), ein https-Endpunkt, der NAME der Umgebungsvariable mit dem Schlüssel, Aufrufe pro Tag). Der Schlüssel selbst wird nie gespeichert. Standardmäßig aus; ein externer Dienst erhält Daten deiner Repositories.
+  - migrate_state.py: bringt die vor 1.5.0 geschriebenen Dateien auf die neuen Namen. `python migrate_state.py` ist ein Probelauf; `--apply` kopiert (die alten bleiben), `--move` benennt um. Nichts wird überschrieben. Eine Seite in docs/MIGRATING.md, in 8 Sprachen.
+  - Erster Start ohne eigene Katalogdateien: Der Monitor meldet, dass er die Beispiele verwendet (Konsole), und `--init-catalog` erstellt bearbeitbare Kopien von ecosystems.json, targets.json und profiles.json.
+  - Python 3.11 oder neuer (getestet mit 3.11 und 3.13 unter Windows, Linux und macOS).
 
 NEU IN 1.5.0 (Verlauf: CHANGELOG.md)
   - Tab EINSTELLUNGEN: Werte von actions_monitor.json auf der Seite ändern (Liste erlaubter Schlüssel mit Typ und Bereich, geprüft, Kopie in config_backups/ vor jedem Speichern, nie Tokens oder Geheimnisse; docs/SETTINGS.md).

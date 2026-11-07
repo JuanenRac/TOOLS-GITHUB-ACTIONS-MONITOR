@@ -25,10 +25,11 @@ a sua configuração uma única vez) ou **se aplica de imediato**.
 | Prontidão (A11) | `sentinel.readiness.enabled`, `min_coverage`, `warn_below` |
 | Pastas e ficheiros | `workspace_root`, `signed_dir`, `audit_dir`, `ecosystems_file`, `targets_file`, `profiles_file`, `tools_dir`, `sentinel.ci_red_file`, `sentinel.ci_red_audit_copy` |
 | Saídas para outras ferramentas | `outputs.prometheus.enabled`, `outputs.prometheus.per_repo`, `outputs.json.enabled`, `outputs.dashboard.enabled` (ver OUTPUTS_por.md) |
+| IA externa para a sentinela | `ai.provider` (`none` / `ollama` / `openai-compatible`), `ai.model`, `ai.ollama_url` (só este computador), `ai.base_url` (https), `ai.api_key_env` (o NOME da variável de ambiente que guarda a chave) e `ai.daily_limit`. A chave em si nunca é guardada. Desligada por defeito; um serviço externo recebe dados dos seus repositórios. |
 
 ## O que nunca se pode alterar nem ver a partir da página
 
-Tokens, segredos, chaves de assinatura, o segredo do webhook, o comando que a sentinela pode executar (`sentinel.notify_command`), as definições de IA e qualquer chave de outra ferramenta: **não estão no
+Tokens, segredos, chaves de assinatura, o segredo do webhook, o comando que a sentinela pode executar (`sentinel.notify_command`), a chave da API da IA (só se pode indicar o nome da sua variável de ambiente) e qualquer chave de outra ferramenta: **não estão no
 esquema**, pelo que a página nem as mostra nem as escreve, e um pedido que nomeie alguma é recusado. Todas as outras chaves do ficheiro mantêm-se exatamente como estavam.
 
 ## Como funciona uma gravação

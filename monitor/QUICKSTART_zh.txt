@@ -3,7 +3,7 @@ GPL-3.0-or-later - see LICENSE
 
 快速入门 - GitHub Actions 监视器 + 哨兵
 =======================================
-1. 安装 Python 3.10 或更高版本（python.org；Linux/macOS 通常已自带：python3 --version）。
+1. 安装 Python 3.11 或更高版本（python.org；Linux/macOS 通常已自带：python3 --version）。
 2. 安装 GitHub CLI（gh）：
      Windows：  winget install --id GitHub.cli
      macOS：    brew install gh

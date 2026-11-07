@@ -1,9 +1,9 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITOR DI GITHUB ACTIONS + SENTINELLA (versione 1.5.0)
+MONITOR DI GITHUB ACTIONS + SENTINELLA (versione 1.5.1)
 =======================================================
-Requisiti: Python 3.10+ e GitHub CLI (`gh`) con l'accesso effettuato (gh auth login). Nient'altro: solo la libreria standard di Python.
+Requisiti: Python 3.11+ e GitHub CLI (`gh`) con l'accesso effettuato (gh auth login). Nient'altro: solo la libreria standard di Python.
 Passi rapidi per il primo utilizzo: QUICKSTART_it.txt.
 
 AVVIO      Windows: MONITOR_GITHUB_ACTIONS.bat | Linux: ./MONITOR_GITHUB_ACTIONS.sh | macOS: doppio clic su MONITOR_GITHUB_ACTIONS.command
@@ -36,6 +36,12 @@ EVENTI     La sentinella scrive una riga JSON per ogni CAMBIAMENTO (nuovo rosso,
            `code` stabile (mai dipendente dalla lingua), `kind`, `level`, `repo`, `args` e `text` (nella lingua configurata). `tail -F` la segue.
 CI ROSSA   Un solo criterio: l'ULTIMO run terminato di ogni workflow sul branch predefinito. Rosso = failure, timed_out, startup_failure o action_required.
            cancelled, skipped, neutral e stale non contano.
+
+NOVITÀ 1.5.1 (cronologia: CHANGELOG.md)
+  - Scheda IMPOSTAZIONI: nuovo gruppo «IA esterna per la sentinella» (ai.provider none / ollama / openai-compatible, modello, indirizzo di Ollama (solo questo computer), un endpoint https, il NOME della variabile d'ambiente che contiene la chiave, chiamate al giorno). La chiave stessa non viene mai salvata. Spenta per impostazione predefinita; un servizio esterno riceve dati dei tuoi repository.
+  - migrate_state.py: porta i file scritti prima della 1.5.0 ai nuovi nomi. `python migrate_state.py` è una simulazione; `--apply` copia (i vecchi restano), `--move` rinomina. Nulla viene sovrascritto. Una pagina in docs/MIGRATING.md, in 8 lingue.
+  - Primo avvio senza file di catalogo propri: il monitor segnala che usa quelli di esempio (console), e `--init-catalog` crea copie modificabili di ecosystems.json, targets.json e profiles.json.
+  - Python 3.11 o successivo (provato con 3.11 e 3.13, su Windows, Linux e macOS).
 
 NOVITÀ 1.5.0 (cronologia: CHANGELOG.md)
   - Scheda IMPOSTAZIONI: modifica dalla pagina i valori di actions_monitor.json (elenco di chiavi consentite con tipo e intervallo, validate, copia in config_backups/ prima di ogni salvataggio, mai token né segreti; docs/SETTINGS.md).

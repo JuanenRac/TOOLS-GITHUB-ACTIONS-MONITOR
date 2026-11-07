@@ -25,10 +25,11 @@ ihre Konfiguration nur einmal) oder **sofort wirkt**.
 | Bereitschaft (A11) | `sentinel.readiness.enabled`, `min_coverage`, `warn_below` |
 | Ordner und Dateien | `workspace_root`, `signed_dir`, `audit_dir`, `ecosystems_file`, `targets_file`, `profiles_file`, `tools_dir`, `sentinel.ci_red_file`, `sentinel.ci_red_audit_copy` |
 | Ausgaben für andere Werkzeuge | `outputs.prometheus.enabled`, `outputs.prometheus.per_repo`, `outputs.json.enabled`, `outputs.dashboard.enabled` (siehe OUTPUTS_deu.md) |
+| Externe KI für den Wächter | `ai.provider` (`none` / `ollama` / `openai-compatible`), `ai.model`, `ai.ollama_url` (nur dieser Rechner), `ai.base_url` (https), `ai.api_key_env` (der NAME der Umgebungsvariable mit dem Schlüssel) und `ai.daily_limit`. Der Schlüssel selbst wird nie gespeichert. Standardmäßig aus; ein externer Dienst erhält Daten Ihrer Repositories. |
 
 ## Was sich von der Seite aus nie ändern oder einsehen lässt
 
-Tokens, Geheimnisse, Signaturschlüssel, das Webhook-Geheimnis, der Befehl, den der Wächter ausführen darf (`sentinel.notify_command`), die KI-Einstellungen und jeder Schlüssel eines anderen Werkzeugs: Sie sind **nicht im
+Tokens, Geheimnisse, Signaturschlüssel, das Webhook-Geheimnis, der Befehl, den der Wächter ausführen darf (`sentinel.notify_command`), der API-Schlüssel der KI (nur der Name seiner Umgebungsvariable kann gesetzt werden) und jeder Schlüssel eines anderen Werkzeugs: Sie sind **nicht im
 Schema** enthalten, daher zeigt die Seite sie weder an noch schreibt sie diese, und eine Anfrage, die einen davon nennt, wird abgelehnt. Alle übrigen Schlüssel der Datei bleiben genau so, wie sie waren.
 
 ## Wie ein Speichern abläuft

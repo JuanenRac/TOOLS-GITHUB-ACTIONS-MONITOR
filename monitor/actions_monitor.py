@@ -658,8 +658,13 @@ def main():
     parser.add_argument("--no-browser", action="store_true", help=i18n.t("mon.help_no_browser"))
     parser.add_argument("--discover", action="store_true", help=i18n.t("mon.help_discover"))
     parser.add_argument("--lang", metavar="CODE", help=i18n.t("cli.help_lang"))
+    parser.add_argument("--init-catalog", action="store_true", help=i18n.t("mon.help_init_catalog"))
     args = parser.parse_args()
     platform_compat.console_utf8()
+    if args.init_catalog:
+        for name, created in toolconfig.init_catalog():
+            print(i18n.t("mon.catalog_created" if created else "mon.catalog_kept", name=name))
+        return 0
     if not platform_compat.gh_available():
         print(platform_compat.gh_install_hint())
         return 1
@@ -682,6 +687,9 @@ def main():
         CONFIG_FILE.write_text(json.dumps(saved, indent=2), encoding="utf-8")
         print(i18n.t("mon.discovered", n=len(names), file=CONFIG_FILE.name))
         return 0
+    using_example = toolconfig.catalog_in_example(config)
+    if using_example:
+        print(i18n.t("mon.catalog_example", names=", ".join(using_example)))
     global AUTOSAVE
     LIVE_CONFIG.update(config)
     import report_history

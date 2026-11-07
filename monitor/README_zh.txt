@@ -1,9 +1,9 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GitHub Actions 监视器 + 哨兵（版本 1.5.0）
+GitHub Actions 监视器 + 哨兵（版本 1.5.1）
 ============================================
-运行要求：Python 3.10+，以及已登录的 GitHub CLI（`gh`）（gh auth login）。无需其他东西：只使用 Python 标准库。
+运行要求：Python 3.11+，以及已登录的 GitHub CLI（`gh`）（gh auth login）。无需其他东西：只使用 Python 标准库。
 首次使用的快速步骤：QUICKSTART_zh.txt。
 
 启动       Windows：MONITOR_GITHUB_ACTIONS.bat | Linux：./MONITOR_GITHUB_ACTIONS.sh | macOS：双击 MONITOR_GITHUB_ACTIONS.command
@@ -36,6 +36,12 @@ GitHub Actions 监视器 + 哨兵（版本 1.5.0）
            以及 `kind`、`level`、`repo`、`args` 和以配置语言写成的 `text`。可用 `tail -F` 跟踪。
 红色 CI    只有一个标准：默认分支上每个 workflow 的“最后一次已结束的运行”。红色 = failure、timed_out、startup_failure 或 action_required。
            cancelled、skipped、neutral 和 stale 不计入。
+
+1.5.1 的新功能(历史:CHANGELOG.md)
+  - 设置标签页：新增“哨兵使用的外部 AI”分组（ai.provider none / ollama / openai-compatible、模型、Ollama 地址（仅限本机）、https 端点、保存密钥的环境变量名称、每日调用次数）。密钥本身绝不会被保存。默认关闭；外部服务会收到你仓库的数据。
+  - migrate_state.py：把 1.5.0 之前写入的文件改为新名称。`python migrate_state.py` 为演练；`--apply` 复制（旧文件保留），`--move` 重命名。不会覆盖任何内容。docs/MIGRATING.md 用 8 种语言写成一页。
+  - 没有自己的目录文件时的首次启动：监视器会在控制台说明正在使用示例文件，`--init-catalog` 会创建 ecosystems.json、targets.json 和 profiles.json 的可编辑副本。
+  - Python 3.11 或更高版本（在 Windows、Linux 和 macOS 上用 3.11 和 3.13 测试）。
 
 1.5.0 的新功能(历史:CHANGELOG.md)
   - “设置”选项卡:在页面中修改 actions_monitor.json 的值(带类型和范围的允许键列表,经过校验,每次保存前在 config_backups/ 留副本,绝不处理令牌或密钥;docs/SETTINGS.md)。

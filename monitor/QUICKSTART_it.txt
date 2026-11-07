@@ -3,7 +3,7 @@ GPL-3.0-or-later - see LICENSE
 
 AVVIO RAPIDO - Monitor di GitHub Actions + Sentinella
 =====================================================
-1. Installa Python 3.10 o successivo (python.org; su Linux/macOS di solito c'è già: python3 --version).
+1. Installa Python 3.11 o successivo (python.org; su Linux/macOS di solito c'è già: python3 --version).
 2. Installa GitHub CLI (gh):
      Windows:  winget install --id GitHub.cli
      macOS:    brew install gh

@@ -3,7 +3,7 @@ GPL-3.0-or-later - see LICENSE
 
 DÉMARRAGE RAPIDE - Moniteur GitHub Actions + Sentinelle
 ========================================================
-1. Installez Python 3.10 ou supérieur (python.org ; sous Linux/macOS il est souvent déjà là : python3 --version).
+1. Installez Python 3.11 ou supérieur (python.org ; sous Linux/macOS il est souvent déjà là : python3 --version).
 2. Installez GitHub CLI (gh) :
      Windows :  winget install --id GitHub.cli
      macOS :    brew install gh

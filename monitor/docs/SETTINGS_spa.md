@@ -25,10 +25,11 @@ su configuración una sola vez) o se **aplica ahora**.
 | Preparación (A11) | `sentinel.readiness.enabled`, `min_coverage`, `warn_below` |
 | Carpetas y ficheros | `workspace_root`, `signed_dir`, `audit_dir`, `ecosystems_file`, `targets_file`, `profiles_file`, `tools_dir`, `sentinel.ci_red_file`, `sentinel.ci_red_audit_copy` |
 | Salidas para otras herramientas | `outputs.prometheus.enabled`, `outputs.prometheus.per_repo`, `outputs.json.enabled`, `outputs.dashboard.enabled` (véase OUTPUTS_spa.md) |
+| IA externa para el centinela | `ai.provider` (`none` / `ollama` / `openai-compatible`), `ai.model`, `ai.ollama_url` (solo este equipo), `ai.base_url` (https), `ai.api_key_env` (el NOMBRE de la variable de entorno que guarda la clave) y `ai.daily_limit`. La clave en sí nunca se guarda. Apagada por defecto; un servicio externo recibe datos de tus repositorios. |
 
 ## Lo que nunca se puede cambiar ni ver desde la página
 
-Tokens, secretos, claves de firma, el secreto del webhook, el comando que el centinela puede ejecutar (`sentinel.notify_command`), los ajustes de IA y cualquier clave de otra herramienta: **no están en el
+Tokens, secretos, claves de firma, el secreto del webhook, el comando que el centinela puede ejecutar (`sentinel.notify_command`), la clave de la API de la IA (solo se puede indicar el nombre de su variable de entorno) y cualquier clave de otra herramienta: **no están en el
 esquema**, así que la página ni los muestra ni los escribe, y una petición que nombre alguno se rechaza. Todas las demás claves del fichero se conservan exactamente como estaban.
 
 ## Cómo funciona un guardado

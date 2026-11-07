@@ -3,7 +3,7 @@ GPL-3.0-or-later - see LICENSE
 
 INÍCIO RÁPIDO - Monitor do GitHub Actions + Sentinela
 =====================================================
-1. Instale o Python 3.10 ou superior (python.org; em Linux/macOS costuma já estar instalado: python3 --version).
+1. Instale o Python 3.11 ou superior (python.org; em Linux/macOS costuma já estar instalado: python3 --version).
 2. Instale o GitHub CLI (gh):
      Windows:  winget install --id GitHub.cli
      macOS:    brew install gh

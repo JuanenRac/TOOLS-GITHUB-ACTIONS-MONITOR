@@ -25,10 +25,11 @@ sa configuration une seule fois) ou **s'applique immédiatement**.
 | Préparation (A11) | `sentinel.readiness.enabled`, `min_coverage`, `warn_below` |
 | Dossiers et fichiers | `workspace_root`, `signed_dir`, `audit_dir`, `ecosystems_file`, `targets_file`, `profiles_file`, `tools_dir`, `sentinel.ci_red_file`, `sentinel.ci_red_audit_copy` |
 | Sorties pour d'autres outils | `outputs.prometheus.enabled`, `outputs.prometheus.per_repo`, `outputs.json.enabled`, `outputs.dashboard.enabled` (voir OUTPUTS_fra.md) |
+| IA externe pour la sentinelle | `ai.provider` (`none` / `ollama` / `openai-compatible`), `ai.model`, `ai.ollama_url` (cet ordinateur seulement), `ai.base_url` (https), `ai.api_key_env` (le NOM de la variable d'environnement qui contient la clé) et `ai.daily_limit`. La clé elle-même n'est jamais enregistrée. Désactivée par défaut ; un service externe reçoit des données de vos dépôts. |
 
 ## Ce qui ne peut jamais être modifié ni consulté depuis la page
 
-Jetons, secrets, clés de signature, secret du webhook, commande que la sentinelle peut exécuter (`sentinel.notify_command`), paramètres d'IA et toute clé d'un autre outil : ils ne figurent **pas dans le
+Jetons, secrets, clés de signature, secret du webhook, commande que la sentinelle peut exécuter (`sentinel.notify_command`), clé d'API de l'IA (seul le nom de sa variable d'environnement peut être défini) et toute clé d'un autre outil : ils ne figurent **pas dans le
 schéma**, donc la page ne les affiche ni ne les écrit, et une requête qui en nomme un est refusée. Toutes les autres clés du fichier sont conservées exactement telles qu'elles étaient.
 
 ## Comment se déroule un enregistrement

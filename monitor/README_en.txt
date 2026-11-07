@@ -1,9 +1,9 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GITHUB ACTIONS MONITOR + SENTINEL (version 1.5.0)
+GITHUB ACTIONS MONITOR + SENTINEL (version 1.5.1)
 =================================================
-Requirements: Python 3.10+ and the GitHub CLI (`gh`) logged in (gh auth login). Nothing else: only the Python standard library.
+Requirements: Python 3.11+ and the GitHub CLI (`gh`) logged in (gh auth login). Nothing else: only the Python standard library.
 Quick steps for a first use: QUICKSTART_en.txt.
 
 START      Windows: MONITOR_GITHUB_ACTIONS.bat | Linux: ./MONITOR_GITHUB_ACTIONS.sh | macOS: double-click MONITOR_GITHUB_ACTIONS.command
@@ -36,6 +36,12 @@ EVENTS     The Sentinel writes one JSON line per CHANGE (new red, recovered CI, 
            `code` (it never depends on the language), `kind`, `level`, `repo`, `args` and `text` (in the configured language). `tail -F` follows it.
 RED CI     One criterion: the LAST finished run of each workflow on the default branch. Red = failure, timed_out, startup_failure or action_required.
            cancelled, skipped, neutral and stale do not count.
+
+WHAT IS NEW IN 1.5.1 (history: CHANGELOG.md)
+  - SETTINGS tab: new group "External AI for the sentinel" (ai.provider none / ollama / openai-compatible, model, the address of Ollama (this computer only), an https endpoint, the NAME of the environment variable that holds the key, calls per day). The key itself is never saved. Off by default; an outside service receives data of your repositories.
+  - migrate_state.py: brings the files written before 1.5.0 to the new names. `python migrate_state.py` is a dry run; `--apply` copies (the old files stay), `--move` renames. Nothing is overwritten. One page in docs/MIGRATING.md, in 8 languages.
+  - First start without your own catalogue files: the monitor says it is using the example ones (console), and `--init-catalog` creates editable copies of ecosystems.json, targets.json and profiles.json.
+  - Python 3.11 or newer (tested on 3.11 and 3.13, on Windows, Linux and macOS).
 
 WHAT IS NEW IN 1.5.0 (history: CHANGELOG.md)
   - SETTINGS tab: change the values of actions_monitor.json from the page (a list of allowed keys with type and range, checked, a copy in config_backups/ before every save, never tokens or secrets; docs/SETTINGS.md).
