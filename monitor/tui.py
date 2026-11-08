@@ -38,16 +38,19 @@ def default_port(lite=False):
     return 8766 if (lite or os.environ.get("MONITOR_MODE", "").strip().lower() == "lite") else 8765
 
 
-def fetch(port, timeout=6):
-    """(monitor data, sentinel snapshot) read from the local monitor; either may be None."""
+LITE_PORT = 8766
+
+
+def fetch(port, timeout=6, lite=False):
+    """(monitor data, sentinel snapshot) read from the local monitor; either may be None. The lite edition (--lite, or its port) has no sentinel: that endpoint is not asked for."""
     out = []
-    for path in ("/api/data", "/api/sentinel"):
+    for path in ("/api/data",) if (lite or port == LITE_PORT) else ("/api/data", "/api/sentinel"):
         try:
             with urllib.request.urlopen(f"http://127.0.0.1:{port}{path}?lang={i18n.language()}", timeout=timeout) as answer:
                 out.append((json.load(answer) or {}).get("data"))
         except (OSError, ValueError):
             out.append(None)
-    return out[0], out[1]
+    return out[0], (out[1] if len(out) > 1 else None)
 
 
 def hours(seconds):
@@ -132,7 +135,7 @@ def main(argv=None):
     from rich.console import Console
     from rich.live import Live
     console = Console()
-    data, snap = fetch(args.port)
+    data, snap = fetch(args.port, lite=args.lite)
     if data is None and snap is None:
         print(i18n.t("lp.not_running", port=args.port))
         return 2
@@ -143,7 +146,7 @@ def main(argv=None):
         with Live(build(data, snap, args.theme, args.lite or args.port == 8766), console=console, refresh_per_second=2, screen=False) as live:
             while True:
                 time.sleep(max(2, args.refresh))
-                data, snap = fetch(args.port)
+                data, snap = fetch(args.port, lite=args.lite)
                 live.update(build(data, snap, args.theme, args.lite or args.port == 8766))
     except KeyboardInterrupt:
         pass

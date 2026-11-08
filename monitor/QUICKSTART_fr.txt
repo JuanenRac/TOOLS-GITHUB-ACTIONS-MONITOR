@@ -8,7 +8,7 @@ DÉMARRAGE RAPIDE - Moniteur GitHub Actions + Sentinelle
      Windows :  winget install --id GitHub.cli
      macOS :    brew install gh
      Linux :    votre gestionnaire de paquets (par exemple : sudo apt install gh) ou https://cli.github.com
-3. Connectez-vous une fois :  gh auth login   (choisissez GitHub.com et suivez les étapes dans le navigateur). Le moniteur ne stocke jamais de jeton : il le demande à gh.
+3. Connectez-vous une fois :  gh auth login   (choisissez GitHub.com et suivez les étapes dans le navigateur). Le moniteur ne stocke jamais de jeton : il le demande à gh (sauf si vous activez le jeton optionnel du moniteur dans Réglages > Avancé).
 4. Lancez le moniteur :
      Windows :  double-clic sur MONITOR_GITHUB_ACTIONS.bat
      macOS :    double-clic sur MONITOR_GITHUB_ACTIONS.command   (s'il ne s'ouvre pas : chmod +x *.sh *.command dans un terminal)

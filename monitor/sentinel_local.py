@@ -1312,9 +1312,6 @@ class Sentinel:
 
 
 def local_request_ok(headers, port):
-    """DNS-rebinding / cross-site guard: Host must be this server and Origin (if any) too."""
-    allowed_hosts = {f"127.0.0.1:{port}", f"localhost:{port}"}
-    if (headers.get("Host") or "") not in allowed_hosts:
-        return False
-    origin = headers.get("Origin")
-    return origin is None or origin in {f"http://{h}" for h in allowed_hosts}
+    """DNS-rebinding / cross-site guard (kept here for the callers of the sentinel; the rule lives in localguard.py, which the lite edition loads without the sentinel)."""
+    import localguard
+    return localguard.local_request_ok(headers, port)

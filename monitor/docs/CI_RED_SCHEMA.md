@@ -72,3 +72,5 @@ pushes; what happens to the folder afterwards is up to you.
 
 `python3 read_report.py --export-sign-queue FILE` (`.json` or `.csv`) writes the global signing queue with the exact local commands. That file is
 for the PC that runs the monitor and says so inside.
+
+Optional field `ai_hint` (added in 1.6.4) in each red workflow: `{"class": "real|transient", "cause", "action"}` for an AI or a script. Consumers that read with `.get()` can ignore it.

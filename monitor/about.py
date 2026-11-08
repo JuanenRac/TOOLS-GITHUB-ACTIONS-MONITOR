@@ -11,7 +11,7 @@ import updatecheck
 from tool_version import AUTHOR, LICENSE_ID, TOOL_VERSION
 
 REPO_URL = "https://github.com/" + updatecheck.REPO
-LINKS = {"repository": REPO_URL, "releases": REPO_URL + "/releases", "changelog": REPO_URL + "/blob/main/CHANGELOG.md", "documentation": REPO_URL + "#readme",
+LINKS = {"repository": REPO_URL, "releases": REPO_URL + "/releases", "changelog": REPO_URL + "/blob/main/CHANGELOG.md", "documentation": REPO_URL + "#readme", "bridge": REPO_URL + "/blob/main/monitor/docs/CI_RED_BRIDGE.md",
          "issues": REPO_URL + "/issues", "license": REPO_URL + "/blob/main/LICENSE"}
 CREDITS = (("python", "Python", "PSF-2.0", None), ("gh", "GitHub CLI (gh)", "MIT", None), ("rich", "Rich", "MIT", "rich"), ("textual", "Textual", "MIT", "textual"))
 

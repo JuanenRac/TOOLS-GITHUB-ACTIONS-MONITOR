@@ -50,6 +50,9 @@ TOPIC_RE = re.compile(r"^[A-Za-z0-9/_.-]{1,100}$")
 PATTERN_RE = re.compile(r"^[A-Za-z0-9._*-]{1,100}:[A-Za-z0-9._*/-]{1,100}:[a-z_*]{1,30}$")      # repository:file:rule, with * for "any"
 FILE_PATTERN_RE = re.compile(r"^[A-Za-z0-9._*?-]{1,80}$")   # a file name pattern of the audit folder (no folders)
 FILE_NAME_RE = re.compile(r"^[A-Za-z0-9._-][A-Za-z0-9._/-]{0,79}$")
+LISTEN_HOST_RE = re.compile(r"^(127\.0\.0\.1|localhost|0\.0\.0\.0|10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|192\.168\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[01])\.[0-9]{1,3}\.[0-9]{1,3})$")   # this computer or a private address: never a public one
+OTLP_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250}|http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/%-]{0,100})?)?$")   # HTTPS anywhere, plain HTTP only on this computer
+ACT_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}:[A-Za-z0-9._-]{1,80}\.ya?ml:[a-z_]{1,30}$")      # repository:workflow-file:event, no wildcard
 IDENT_RE = re.compile(r"^[A-Za-z0-9_.-]{1,60}$")
 SOURCE_KEYS = {"ecosystem": NAME_RE, "kind": re.compile(r"^(pin_table|lock_files)$"), "provider": NAME_RE, "file": FILE_NAME_RE, "key": IDENT_RE,
                "lock_name": FILE_NAME_RE, "version_key": IDENT_RE}
@@ -240,9 +243,40 @@ for _rule in ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "
 # --- Terminal view
 _f("console", "tui", "tui.theme", "enum", ("dark", "light"), False)
 _f("console", "tui", "tui.refresh_seconds", "int", (2, 300), False)
+# --- Advanced: opt-in features, every one OFF by default (network, own token, actions on GitHub, act, mirror, runners, OTLP, organisations, FinOps)
+_f("advanced", "network", "listen.network", "bool", secure=True)
+_f("advanced", "network", "listen.host", "text", LISTEN_HOST_RE, secure=True)
+_f("advanced", "network", "listen.token_env", "text", ENV_NAME_RE, secure=True)
+_f("advanced", "network", "listen.allowed_hosts", "names", secure=True)
+_f("advanced", "token", "github_token.enabled", "bool", restart=False, secure=True)
+_f("advanced", "token", "github_token.store", "enum", ("auto", "system", "file"), restart=False, secure=True)
+_f("advanced", "ghactions", "github_actions.enabled", "bool", restart=False, secure=True)
+_f("advanced", "ghactions", "github_actions.allowed", "names", restart=False, secure=True)
+_f("advanced", "ghactions", "github_actions.merge_method", "enum", ("squash", "merge", "rebase"), restart=False, secure=True)
+_f("advanced", "act", "act.enabled", "bool", restart=False, secure=True)
+_f("advanced", "act", "act.allowed", "acts", restart=False, secure=True)
+_f("advanced", "act", "act.timeout_seconds", "int", (30, 7200), restart=False)
+_f("advanced", "mirror", "mirror.enabled", "bool", restart=False, secure=True)
+_f("advanced", "mirror", "mirror.folder", "path", restart=False)
+_f("advanced", "mirror", "mirror.max_mb", "int", (10, 100000), restart=False)
+_f("advanced", "mirror", "mirror.keep_days", "int", (1, 365), restart=False)
+_f("advanced", "mirror", "mirror.max_per_cycle", "int", (1, 20), restart=False, unit="")
+_f("advanced", "runners", "runners.enabled", "bool", restart=False)
+_f("advanced", "runners", "runners.scope", "enum", ("owner", "repos"), restart=False)
+_f("advanced", "otlp", "otlp.enabled", "bool", restart=False, secure=True)
+_f("advanced", "otlp", "otlp.endpoint", "text", OTLP_RE, restart=False, secure=True)
+_f("advanced", "otlp", "otlp.interval_seconds", "int", (15, 3600), restart=False)
+_f("advanced", "orgs", "organizations.discover", "bool", restart=False)
+_f("advanced", "finops", "finops.jobs_per_cycle", "int", (0, 50), restart=False, unit="calls")
+_f(_T_AI, "alerts", "ai_alerts.enabled", "bool", restart=False)
+_f(_T_AI, "alerts", "ai_alerts.folder", "path", restart=False)
+_f(_T_AI, "alerts", "ai_alerts.brief_max_bytes", "int", (512, 20000), restart=False, unit="")
+_f(_T_AI, "alerts", "ai_alerts.hook.enabled", "bool", restart=False, secure=True)
+_f(_T_AI, "alerts", "ai_alerts.hook.url", "text", LOOP_URL_RE, restart=False, secure=True)
+_f(_T_AI, "alerts", "ai_alerts.hook.max_per_hour", "int", (1, 60), restart=False, unit="")
 # @@MORE_SETTINGS@@
 
-TAB_ORDER = ("basic", "general", "polling", "cache", "sentinel", "surface", "readiness", "paths", "outputs", "ai", "webhook", "notify", "analytics", "lint", "console")
+TAB_ORDER = ("basic", "general", "polling", "cache", "sentinel", "surface", "readiness", "paths", "outputs", "ai", "webhook", "notify", "analytics", "lint", "advanced", "console")
 ROWS.sort(key=lambda row: TAB_ORDER.index(row[0]))     # stable: inside a tab the order of writing is kept
 SCHEMA = [(tab, key, kind, bounds, restart) for tab, _block, key, kind, bounds, restart in ROWS]
 FIELDS = {row[1]: row for row in SCHEMA}
@@ -341,6 +375,10 @@ def check_value(path, value):
         return True, list(value)
     if kind == "patterns":
         if not isinstance(value, list) or len(value) > 100 or not all(isinstance(v, str) and PATTERN_RE.match(v) for v in value):
+            return False, "names"
+        return True, list(value)
+    if kind == "acts":
+        if not isinstance(value, list) or len(value) > 50 or not all(isinstance(v, str) and ACT_RE.match(v) for v in value):
             return False, "names"
         return True, list(value)
     if kind == "repos":

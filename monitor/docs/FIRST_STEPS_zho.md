@@ -7,7 +7,7 @@
 
 # 你的前五分钟
 
-**1. 安装所需的两样东西。** Python 3.11 或更高版本，以及 GitHub CLI（`gh`）。然后登录一次：`gh auth login`。监视器从不保存令牌：它向 `gh` 索取。
+**1. 安装所需的两样东西。** Python 3.11 或更高版本，以及 GitHub CLI（`gh`）。然后登录一次：`gh auth login`。监视器从不保存令牌：它向 `gh` 索取（除非你在“设置 > 高级”中开启监视器的可选令牌）。
 
 **2. 用一条命令检查一切。** `python actions_monitor.py --doctor` 会为每个问题给出能修复它的确切命令。想先看看？`python actions_monitor.py --demo` 用虚构数据打开页面：无需 `gh`、登录或网络。
 

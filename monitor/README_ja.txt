@@ -1,15 +1,23 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GitHub Actions モニター + センチネル（バージョン 1.6.3）
+GitHub Actions モニター + センチネル（バージョン 1.6.4）
 ========================================================
+どれを起動する? (新しい利用者が2分で決められます)
+  完全版  MONITOR_GITHUB_ACTIONS.*       センチネル付きのページ(ポート 8765): アラート、署名キュー、分析。複数のリポジトリがあるならここから。
+  LITE版  MONITOR_LITE_GITHUB_ACTIONS.*  センチネルなしの同じページ(ポート 8766): 赤・停滞・実行中を表示。軽量で、完全版と同時に動かせます。
+  バッチ  BATCH_GITHUB_ACTIONS.*         自分のビルドを署名して公開する場合のみ。
+  ターミナル  python tui_textual.py (LITE版は --lite を付ける)   対話型ターミナルアプリ。tui.py --once は1画面だけ出力します。
+  診断    python actions_monitor.py --doctor (スクリプト用は --json)   不足しているものと、直すための正確なコマンドを表示します。
+  お試し  python actions_monitor.py --demo   架空のデータのページ: gh もログインも不要で、あなたのデータには触れません。
+
 必要なもの: Python 3.11 以上と、ログイン済みの GitHub CLI（`gh`）（gh auth login）。それ以外は不要です。中核はパッケージを必要とせず、ターミナル表示(tui.py)だけが任意のパッケージ rich を使います。
 初めて使うときの手順: QUICKSTART_ja.txt。
 
 起動       Windows: MONITOR_GITHUB_ACTIONS.bat | Linux: ./MONITOR_GITHUB_ACTIONS.sh | macOS: MONITOR_GITHUB_ACTIONS.command をダブルクリック
            （http://127.0.0.1:<ポート> をブラウザーで開きます。ローカル専用）。どの OS でも次の実行も可能:  python3 actions_monitor.py  （Windows: py -3 actions_monitor.py）
 バッチ     BATCH_GITHUB_ACTIONS.bat / .sh / .command（gha_dispatch_all.py: plan, dispatch, status, finalize, hygiene）。ビルドを手元で署名する人向けのオプションです。
-絶対にしないこと   127.0.0.1 でのみ待ち受けます（ログインがないため 0.0.0.0 には絶対にバインドしないでください）。トークンは保存しません（`gh` に尋ねます）。単独では GitHub に何も書き込みません。GitHub に書き込むのはバッチコマンドの `dispatch --go`、`dispatch --real`、`finalize --execute` だけで（workflow の起動、未署名ドラフトの作成、公開）、あなたが実行したときに限ります。
+絶対にしないこと   ネットワークモード(設定 > 詳細設定: プライベートアドレス、全リクエストのアクセストークン、ページ内の警告)をオンにしない限り、127.0.0.1 でのみ待ち受けます。システムの安全な保管庫に保存する任意のトークンをオンにしない限り、トークンは保存しません（`gh` に尋ねます）。単独では GitHub に何も書き込みません。GitHub に書き込むのはバッチコマンドの `dispatch --go`、`dispatch --real`、`finalize --execute` だけで（workflow の起動、未署名ドラフトの作成、公開）、あなたが実行したときに限ります。
            自動で署名したり公開したりすることは「ありません」。署名と公開はあなた自身が実行するコマンドで、モニターはそれをテキストとして表示するだけです。
            重要な判定に AI は使いません。オプションの AI による説明は、初期設定ではオフです。
 
@@ -76,6 +84,6 @@ GitHub Actions モニター + センチネル（バージョン 1.6.3）
   targets_file）。任意のワークスペースと、正直な縮小モード。すべてのファイルに著作権表示と GPL-3.0-or-later。LICENSE, NOTICE, AUTHORS。README と QUICKSTART を 8 言語で提供。
 ライセンス GPL-3.0-or-later（LICENSE と NOTICE を参照）。Copyright (C) 2026 JuanenRac (Electro Hobby 3D)。
 
-ヘルプ、バージョン情報、確認 (1.6.3)
+ヘルプ、バージョン情報、確認 (1.6.4)
 ------------------------------------
 ページにはヘルプボタン（丸い ?）とバージョン情報ボタン（i）があります。コンソールでは --help-topics、--help-search、--about、--doctor を使い、--demo は架空のデータでページを表示します。lite 版は独自のバナーとウィンドウタイトル（LITE、ポート 8766、センチネルなし）で起動し、フル版は COMPLETE、ポート 8765、センチネル有効と表示します。新バージョンのお知らせはオフにできます（設定 > 基本）。

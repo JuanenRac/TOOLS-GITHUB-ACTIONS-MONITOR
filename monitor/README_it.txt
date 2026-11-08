@@ -1,15 +1,23 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITOR DI GITHUB ACTIONS + SENTINELLA (versione 1.6.3)
+MONITOR DI GITHUB ACTIONS + SENTINELLA (versione 1.6.4)
 =======================================================
+QUALE AVVIARE? (un nuovo utente decide in due minuti)
+  COMPLETA  MONITOR_GITHUB_ACTIONS.*       la pagina con la sentinella (porta 8765): avvisi, coda di firma, analisi. Parti da qui se hai più repository.
+  LITE      MONITOR_LITE_GITHUB_ACTIONS.*  la stessa pagina senza sentinella (porta 8766): cosa è rosso, bloccato o in corso. Più leggera; convive con la completa.
+  BATCH     BATCH_GITHUB_ACTIONS.*         solo se firmi e pubblichi le tue build.
+  TERMINALE python tui_textual.py (aggiungi --lite per l'edizione lite)   l'applicazione interattiva da terminale; tui.py --once stampa una schermata.
+  CONTROLLO python actions_monitor.py --doctor (--json per gli script)   dice cosa manca e il comando esatto per sistemarlo.
+  PROVA     python actions_monitor.py --demo   la pagina con dati inventati: senza gh, senza login, nulla di tuo viene toccato.
+
 Requisiti: Python 3.11+ e GitHub CLI (`gh`) con l'accesso effettuato (gh auth login). Nient'altro: il nucleo non richiede pacchetti (la vista console, tui.py, usa il pacchetto facoltativo rich).
 Passi rapidi per il primo utilizzo: QUICKSTART_it.txt.
 
 AVVIO      Windows: MONITOR_GITHUB_ACTIONS.bat | Linux: ./MONITOR_GITHUB_ACTIONS.sh | macOS: doppio clic su MONITOR_GITHUB_ACTIONS.command
            (apre http://127.0.0.1:<porta>, solo in locale). Su qualsiasi sistema vale anche:  python3 actions_monitor.py  (Windows: py -3 actions_monitor.py)
 BATCH      BATCH_GITHUB_ACTIONS.bat / .sh / .command  (gha_dispatch_all.py: plan, dispatch, status, finalize, hygiene). Facoltativo, per chi firma le proprie build in locale.
-COSA NON FA MAI   Ascolta solo su 127.0.0.1 (non associarlo mai a 0.0.0.0: non ha login). Non salva alcun token (lo chiede a `gh`). Da solo non scrive nulla su GitHub: solo i comandi batch `dispatch --go`, `dispatch --real` e `finalize --execute` scrivono su GitHub (avviano workflow, creano la bozza non firmata, pubblicano), e solo quando li esegui tu.
+COSA NON FA MAI   Ascolta solo su 127.0.0.1 a meno che tu non attivi la modalità rete (Impostazioni > Avanzate: un indirizzo privato, un token di accesso per ogni richiesta, un avviso nella pagina). Non salva alcun token (lo chiede a `gh`) a meno che tu non attivi il token opzionale nell'archivio sicuro del sistema. Da solo non scrive nulla su GitHub: solo i comandi batch `dispatch --go`, `dispatch --real` e `finalize --execute` scrivono su GitHub (avviano workflow, creano la bozza non firmata, pubblicano), e solo quando li esegui tu.
            NON firma e NON pubblica nulla da solo: firmare e pubblicare sono comandi che esegui TU; il monitor li mostra solo come testo.
            Nessuna IA nel percorso critico; lo spiegatore facoltativo con IA è spento per impostazione predefinita.
 
@@ -78,6 +86,6 @@ NOVITÀ 1.3.0 (cronologia: CHANGELOG.md)
   README e QUICKSTART in 8 lingue.
 LICENZA    GPL-3.0-or-later (vedi LICENSE e NOTICE). Copyright (C) 2026 JuanenRac (Electro Hobby 3D).
 
-GUIDA, INFORMAZIONI E VERIFICHE (1.6.3)
+GUIDA, INFORMAZIONI E VERIFICHE (1.6.4)
 ---------------------------------------
 La pagina ha un pulsante Guida (? rotondo) e uno Informazioni (i); da console: --help-topics, --help-search, --about e --doctor; --demo mostra la pagina con dati inventati. L'edizione lite parte con un proprio banner e titolo di finestra (LITE, porta 8766, senza sentinella); la completa indica COMPLETE, porta 8765, sentinella attiva. L'avviso di nuova versione si può spegnere (Impostazioni > Di base).

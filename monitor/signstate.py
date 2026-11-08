@@ -21,6 +21,7 @@ signature_verified  True | False | "unknown": the signed folder checked against 
 """
 import json
 import re
+import redrule
 import sigverify
 from datetime import datetime, timezone
 from pathlib import Path
@@ -62,7 +63,7 @@ def signature_kind(names, manifest_kinds=()):
 def completed_runs(runs, branch="main", workflow=None):
     """THE definition of "the runs that count": completed, on the default branch, not cancelled/skipped/neutral/stale (and of one workflow file
     when `workflow` is given). Red (A2), green-without-release (A5) and the target states all start from this list."""
-    return [r for r in runs if r.get("status") == "completed" and r.get("branch") == branch and r.get("conclusion") not in IGNORED
+    return [r for r in runs if r.get("status") == "completed" and r.get("branch") == branch and r.get("conclusion") not in IGNORED and not redrule.is_dynamic(r)
             and (workflow is None or r.get("path") == workflow)]
 
 

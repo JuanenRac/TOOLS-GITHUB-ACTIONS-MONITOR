@@ -148,7 +148,7 @@ class DashboardContract(unittest.TestCase):
             for key in ("ecosystem", "red", "pending_sign_hours", "pending_sign"):
                 self.assertIn(key, repo)
             for red in repo["red"]:
-                self.assertEqual(set(red), {"workflow", "conclusion", "since", "streak", "url"})
+                self.assertEqual(set(red), {"workflow", "conclusion", "since", "streak", "url", "ai_hint"})
 
     def test_the_public_export_never_carries_the_signing_side(self):
         public = json.dumps(export_status.public_status(SNAP))

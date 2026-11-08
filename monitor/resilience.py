@@ -24,6 +24,24 @@ def is_network_error(text):
     return bool(NETWORK_RE.search(text))
 
 
+TRANSIENT_RE = re.compile(r"(50[0234]|bad gateway|service unavailable|gateway time-?out|tls|ssl|handshake|unexpected eof|connection (?:reset|closed)|stream error|http2)", re.I)
+TRANSIENT_CYCLES = 3      # a read that fails for a passing reason is only shown as an error after this many cycles in a row
+
+
+def is_transient(text):
+    """True for a failure that usually goes away by itself: a connection problem, a TLS hiccup or a 5xx of GitHub. Never for authentication, permission or "not found"."""
+    text = str(text or "")
+    if AUTH_RE.search(text) and not NETWORK_RE.search(text) and not TRANSIENT_RE.search(text):
+        return False
+    return bool(NETWORK_RE.search(text) or TRANSIENT_RE.search(text))
+
+
+def backoff(attempt, jitter=None):
+    """Seconds to wait before retry number `attempt` (0, 1, 2...): 1, 2, 4... up to 20 s, plus a little jitter so that parallel readers do not retry together."""
+    import random
+    return min(20.0, 1.0 * 2 ** attempt) + (random.random() * 0.5 if jitter is None else jitter)
+
+
 def stamp(now):
     return datetime.fromtimestamp(now, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 

@@ -72,3 +72,5 @@ push; che cosa accada alla cartella dopo dipende da te.
 
 `python3 read_report.py --export-sign-queue FILE` (`.json` o `.csv`) scrive la coda di firma globale con i comandi locali esatti. Quel file è
 per il PC che esegue il monitor e lo dichiara al proprio interno.
+
+Campo opzionale `ai_hint` (aggiunto nella 1.6.4) in ogni workflow rosso: `{"class": "real|transient", "cause", "action"}` per un'IA o uno script. I consumatori che leggono con `.get()` possono ignorarlo.

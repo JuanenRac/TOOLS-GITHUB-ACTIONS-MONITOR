@@ -12,7 +12,8 @@ import _testenv  # noqa: F401
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import actions_monitor  # noqa: E402
-import i18n  # noqa: E402
+import i18n
+from tool_version import TOOL_VERSION  # noqa: E402
 import readiness  # noqa: E402
 import sentinel_local as sl  # noqa: E402
 import toolconfig  # noqa: E402
@@ -213,8 +214,8 @@ class PageAndCatalogues(unittest.TestCase):
         page = actions_monitor.render_page()
         for needle in ('"ui.a11_title"', 'section("a11"', '["a11","ui.a11"'):
             self.assertIn(needle, page)
-        self.assertIn('"version": "1.6.3"', page)
-        self.assertEqual(i18n.t("mon.version", version="1.6.3"), "GitHub Actions v1.6.3")
+        self.assertIn('"version": "%s"' % TOOL_VERSION, page)
+        self.assertEqual(i18n.t("mon.version", version=TOOL_VERSION), "GitHub Actions v" + TOOL_VERSION)
         html = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
         self.assertIn('<h1>GitHub Actions <small class="mut" id="ver">', html)
 

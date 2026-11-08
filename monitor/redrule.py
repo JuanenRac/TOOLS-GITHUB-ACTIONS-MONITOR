@@ -14,15 +14,22 @@ def workflow_key(run):
     return run.get("path") or run.get("name") or ""
 
 
+def is_dynamic(run):
+    """A run that GitHub creates for dependency updates (event `dynamic`, a `dynamic/...` path): it is not a build of the repository and never decides."""
+    return run.get("event") == "dynamic" or str(run.get("path") or "").startswith("dynamic/")
+
+
 def completed_runs(runs, branch="main"):
-    """The runs that count: completed, on the branch, not cancelled / skipped / neutral / stale (the same definition as signstate.completed_runs)."""
-    return [r for r in runs if r.get("status") == "completed" and r.get("branch") == branch and r.get("conclusion") not in IGNORED]
+    """The runs that count: completed, on the branch, not dynamic, with a conclusion that is not cancelled / skipped / neutral / stale (the same definition as signstate.completed_runs)."""
+    return [r for r in runs if r.get("status") == "completed" and r.get("branch") == branch and r.get("conclusion") and r.get("conclusion") not in IGNORED and not is_dynamic(r)]
 
 
 def guess_default_branch(runs):
     """main, else master, else the branch that has most runs (None without runs)."""
     counts = {}
     for run in runs:
+        if is_dynamic(run):
+            continue
         counts[run.get("branch")] = counts.get(run.get("branch"), 0) + 1
     for name in ("main", "master"):
         if name in counts:

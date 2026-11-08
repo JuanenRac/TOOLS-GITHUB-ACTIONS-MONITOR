@@ -25,6 +25,8 @@ import tui  # noqa: E402
 
 INSTALL_HINT = "pip install textual"
 BASIC_SWITCHES = ("open_browser", "updates.check", "airgapped", "discovery.events", "discovery.suggest_groups", "discovery.auto_frequency")
+EDIT_GROUPS = ("basic", "general", "polling", "cache", "analytics", "lint", "console")     # the groups the terminal can edit; the options of security (secure) are changed in the page, with its confirmation
+EDIT_TYPES = ("bool", "int", "float", "enum", "text")
 
 
 def textual_available():
@@ -99,12 +101,51 @@ def summary_text(data, snapshot):
     return "\n".join(lines)
 
 
+def editable_fields(settings):
+    """[(group, field)] of the settings the terminal application may edit: simple types, in the common groups, never the ones marked secure."""
+    out = []
+    for group in (settings or {}).get("groups") or []:
+        if group.get("id") not in EDIT_GROUPS:
+            continue
+        for field in group.get("fields") or []:
+            if field.get("type") in EDIT_TYPES and not field.get("secure"):
+                out.append((group["id"], field))
+    return out
+
+
+def parse_value(field, text):
+    """The value typed for a field, or (None, reason) when it does not fit; the server checks it again."""
+    kind = field.get("type")
+    try:
+        if kind == "int":
+            return int(str(text).strip()), None
+        if kind == "float":
+            return float(str(text).strip()), None
+    except ValueError:
+        return None, "type"
+    return str(text).strip(), None
+
+
+def ai_text(info):
+    """The lines of the AI panel from the answer of /api/ai/actions: provider, model, calls today, availability; and what the page would say when the assistant is off."""
+    t = i18n.t
+    ai = (info or {}).get("ai")
+    if not ai:
+        return t("ui.tui_ai_off")
+    lines = [f"{ai.get('label', '')}", f"{ai.get('provider')} / {ai.get('model') or '-'}   {ai.get('used_today', 0)}/{ai.get('daily_limit', 0)}", str(ai.get("message") or "")]
+    state = (info or {}).get("state") or {}
+    lines.append(f"actions: {'on' if state.get('enabled') else 'off'}")
+    for entry in ((info or {}).get("log") or [])[-8:]:
+        lines.append(f"  {entry.get('at', '')} {entry.get('status', '')} {entry.get('action', '')}")
+    return "\n".join(lines)
+
+
 def make_app(port, lite=False, theme="dark"):
     """The Textual application (imports Textual here so the helpers above need nothing)."""
     from textual.app import App, ComposeResult
     from textual.containers import VerticalScroll
     from textual.screen import ModalScreen
-    from textual.widgets import DataTable, Footer, Header, Input, Static, Switch, TabbedContent, TabPane, Label
+    from textual.widgets import Button, DataTable, Footer, Header, Input, Label, Select, Static, Switch, TabbedContent, TabPane
 
     t = i18n.t
 
@@ -159,6 +200,8 @@ def make_app(port, lite=False, theme="dark"):
             self.data, self.snapshot, self.analytics = None, None, None
             self.levels = {"info", "warn", "bad"}
             self.query = ""
+            self.ai_info = None
+            self.fields = {}
             self.dark = theme == "dark"
             self.title = "GitHub Actions Monitor " + ("LITE" if lite else "COMPLETE")
 
@@ -177,6 +220,11 @@ def make_app(port, lite=False, theme="dark"):
                 if not lite:
                     with TabPane("Scripts", id="scripts"):
                         yield DataTable(id="lint-table")
+                if not lite:
+                    with TabPane(t("ui.tui_ai"), id="ai"):
+                        yield Static("", id="ai-text", markup=False)
+                        yield Button(t("ui.tui_ai_explain"), id="ai-explain")
+                        yield Static("", id="ai-answer", markup=False)
                 with TabPane(t("ui.tab_cfg"), id="settings"):
                     with VerticalScroll(id="settings-box"):
                         yield Label(t("ui.cfg_g_basic"))
@@ -200,6 +248,7 @@ def make_app(port, lite=False, theme="dark"):
             self.snapshot = ((get(self.port, "/api/sentinel") or {}).get("data")) if not self.lite else None
             self.analytics = get(self.port, "/api/analytics") if not self.lite else None
             settings = get(self.port, "/api/settings")
+            self.ai_info = get(self.port, "/api/ai/actions") if not self.lite else None
             self.call_from_thread(self.paint, settings)
 
         def paint(self, settings):
@@ -214,30 +263,63 @@ def make_app(port, lite=False, theme="dark"):
                 table.clear()
                 for row in lint_rows(self.snapshot, tuple(self.levels)):
                     table.add_row(*[str(c) for c in row])
+            if not self.lite:
+                self.query_one("#ai-text", Static).update(ai_text(self.ai_info))
             self.paint_settings(settings)
 
         def paint_settings(self, settings):
             box = self.query_one("#settings-box")
             if box.children and len(box.children) > 1:
                 return
-            for group in (settings or {}).get("groups") or []:
-                if group["id"] != "basic":
-                    continue
-                for field in group["fields"]:
-                    if field["key"] in BASIC_SWITCHES and field["type"] == "bool":
-                        box.mount(Label(t("cfg.f." + field["key"])))
-                        box.mount(Switch(value=bool(field["value"]), id="sw-" + field["key"].replace(".", "-")))
+            for group_id, field in editable_fields(settings):
+                widget_id = "f-" + field["key"].replace(".", "__")
+                self.fields[widget_id] = field
+                box.mount(Label(f"{t('ui.cfg_g_' + group_id)} - {t('cfg.f.' + field['key'])}" + (" *" if field.get("restart") else "")))
+                if field["type"] == "bool":
+                    box.mount(Switch(value=bool(field["value"]), id=widget_id))
+                elif field["type"] == "enum":
+                    box.mount(Select([(v if v else "-", v) for v in field.get("enum") or []], value=field["value"], allow_blank=False, id=widget_id))
+                else:
+                    box.mount(Input(value=str(field["value"] if field["value"] is not None else ""), id=widget_id))
+
+        def save(self, widget_id, value):
+            field = self.fields.get(widget_id)
+            if field is None or value == field.get("value"):
+                return
+            result = post(self.port, "/api/settings", {"changes": {field["key"]: value}})
+            if result.get("ok"):
+                field["value"] = value
+            self.notify(t("ui.cfg_saved", n=len(result.get("changed", []))) if result.get("ok") else t("ui.cfg_not_saved", why=str(result.get("errors", ""))), timeout=3)
 
         def on_switch_changed(self, event):
-            key = next((k for k in BASIC_SWITCHES if "sw-" + k.replace(".", "-") == event.switch.id), None)
-            if key:
-                result = post(self.port, "/api/settings", {"changes": {key: bool(event.value)}})
-                self.notify(t("ui.cfg_saved", n=len(result.get("changed", []))) if result.get("ok") else t("ui.cfg_not_saved", why=str(result.get("errors", ""))), timeout=3)
+            self.save(event.switch.id, bool(event.value))
+
+        def on_select_changed(self, event):
+            self.save(event.select.id, event.value)
+
+        def on_button_pressed(self, event):
+            if event.button.id == "ai-explain":
+                self.run_worker(self.explain, thread=True, exclusive=True)
+
+        def explain(self):
+            """Asks the assistant to explain the daily report of the sentinel (only if the assistant is on); the answer is labelled as written by an AI."""
+            answer = post(self.port, "/api/sentinel/ai", {"kind": "report"})
+            text = answer.get("text") if answer.get("ok") else (answer.get("error") or t("ai.is_off"))
+            self.call_from_thread(lambda: self.query_one("#ai-answer", Static).update(str(text)[:3000]))
 
         def on_input_changed(self, event):
             if event.input.id == "filter":
                 self.query = event.value
                 self.paint(None)
+
+        def on_input_submitted(self, event):
+            field = self.fields.get(event.input.id or "")
+            if field is not None:
+                value, why = parse_value(field, event.value)
+                if why:
+                    self.notify(t("ui.cfg_not_saved", why=why), timeout=3)
+                else:
+                    self.save(event.input.id, value)
 
         def action_focus_filter(self):
             self.query_one("#filter", Input).focus()

@@ -72,3 +72,5 @@ Push aus; was danach mit dem Ordner geschieht, liegt bei Ihnen.
 
 `python3 read_report.py --export-sign-queue FILE` (`.json` oder `.csv`) schreibt die globale Signaturwarteschlange mit den exakten lokalen Befehlen. Diese Datei ist
 für den PC bestimmt, auf dem der Monitor läuft, und sagt das auch in ihrem Inneren.
+
+Optionales Feld `ai_hint` (neu in 1.6.4) in jedem roten Workflow: `{"class": "real|transient", "cause", "action"}` für eine KI oder ein Skript. Verbraucher, die mit `.get()` lesen, können es ignorieren.

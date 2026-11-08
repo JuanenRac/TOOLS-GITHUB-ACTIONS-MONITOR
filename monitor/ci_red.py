@@ -14,7 +14,8 @@ FORMAT (schema 2, stable; read it with .get(): fields are only ever added)
    "pending_sign_repos": N,                         repositories with a green build waiting for the local signature / publication (over the threshold)
    "pending_sign_hours_threshold": H,
    "repos": {"<REPO>": {"ecosystem": "armor|urtc|hydra|eh3d|other",
-                        "red": [{"workflow", "conclusion", "since", "streak", "url"}],      A2: last completed run of the workflow on the default branch
+                        "red": [{"workflow", "conclusion", "since", "streak", "url", "ai_hint"}],      A2: last completed run of the workflow on the default branch;
+                                                                                                    ai_hint (optional, added in 1.6.4): {"class": "real|transient", "cause", "action"}, for an AI or a script
                         "pending_sign_hours": float|null,                                    the longest wait of the repository (kept from schema 1)
                         "pending_sign": [{"workflow", "hours", "state", "signature_kind": "none|dev|release",
                                           "signature_verified": true|false|"unknown", "last_build_at", "url"}]}}}
@@ -26,6 +27,7 @@ import os
 import re
 from pathlib import Path
 
+import ai_alerts
 from tool_version import TOOL_VERSION
 
 HERE = Path(__file__).resolve().parent
@@ -41,7 +43,8 @@ def build(snapshot):
     eco = snapshot.get("ecosystems") or {}
     for r in (snapshot.get("a2") or {}).get("red") or []:
         row = repos.setdefault(r["repo"], {"ecosystem": eco.get(r["repo"], "other"), "red": [], "pending_sign_hours": None})
-        row["red"].append({"workflow": r.get("workflow"), "conclusion": r.get("conclusion"), "since": r.get("since"), "streak": r.get("streak"), "url": r.get("url")})
+        row["red"].append({"workflow": r.get("workflow"), "conclusion": r.get("conclusion"), "since": r.get("since"), "streak": r.get("streak"), "url": r.get("url"),
+                           "ai_hint": ai_alerts.hint({"repo": r["repo"], "workflow": r.get("workflow"), "conclusion": r.get("conclusion"), "streak": r.get("streak"), "since": r.get("since"), "url": r.get("url")})})
     for g in (snapshot.get("a5") or {}).get("pending_sign") or []:
         row = repos.setdefault(g["repo"], {"ecosystem": eco.get(g["repo"], "other"), "red": [], "pending_sign_hours": None})
         row["pending_sign_hours"] = max(row["pending_sign_hours"] or 0, g.get("hours") or 0)

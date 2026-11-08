@@ -64,3 +64,5 @@ python3 read_report.py --export-status DIR
 这会在您指定的文件夹中写入 `ci_status_public.json` 和 `ci_status_public.md`，且**只**包含红色工作流的列表（仓库、生态系统、工作流、结论、起始时间、连续次数、运行链接）。不含签名状态、密钥名称、本地路径或命令。该工具绝不会提交或推送；之后如何处置该文件夹由您决定。
 
 `python3 read_report.py --export-sign-queue FILE`（`.json` 或 `.csv`）会写出全局签名队列以及确切的本地命令。该文件仅供运行监视器的那台 PC 使用，并在文件内部注明了这一点。
+
+每个红色工作流中的可选字段 `ai_hint`(1.6.4 新增):`{"class": "real|transient", "cause", "action"}`,供 AI 或脚本使用。用 `.get()` 读取的使用方可以忽略它。

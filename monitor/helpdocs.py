@@ -21,6 +21,10 @@ TAB_TOPICS = {"now": "readme", "sent": "analytics", "charts": "analytics", "repo
 _lock = threading.Lock()
 _cache = {"index": None}
 LINK_RE = re.compile(r"\[([^\]]{1,200})\]\(([^)\s]{1,300})(?:\s+\"[^\"]*\")?\)")
+MAX_HITS = 30                 # the most results a search ever returns (the page and the console)
+CONSOLE_HITS = 20             # the console shows this many and says how many more there are
+MAX_RENDER_CHARS = 150_000    # a section longer than this is cut (with a notice): a huge document can not hold the server thread
+MAX_RENDER_LINES = 4000
 URL_RE = re.compile(r"^https?://[^\s<>\"']{1,300}$")
 
 
@@ -50,7 +54,7 @@ def topics(lang):
     out = []
     for item in index()["topics"]:
         used = _lang_of(item, lang)
-        out.append({"id": item["id"], "group": item["group"], "title": item["title"].get(used) or item["id"], "translated": used == lang or lang == "en"})
+        out.append({"id": item["id"], "group": item["group"], "title": item["title"].get(used) or item["id"], "translated": (used == lang or lang == "en") and not (item.get("english_body") and lang != "en")})
     return out
 
 
@@ -88,7 +92,18 @@ def _inline(text, files):
 
 def render(markdown, files=None):
     files = files if files is not None else index().get("files", {})
-    out, lines, i = [], str(markdown).replace("\r\n", "\n").split("\n"), 0
+    text = str(markdown)
+    cut = len(text) > MAX_RENDER_CHARS
+    if cut:
+        text = text[:MAX_RENDER_CHARS]
+    lines = text.replace("\r\n", "\n").split("\n")
+    if len(lines) > MAX_RENDER_LINES:
+        lines, cut = lines[:MAX_RENDER_LINES], True
+    return _render_lines(lines, files) + ("<p class=\"cut\">...</p>" if cut else "")
+
+
+def _render_lines(lines, files):
+    out, i = [], 0
     paragraph, listing = [], None
 
     def flush():
@@ -165,7 +180,7 @@ def topic(topic_id, lang):
             body = re.sub(r"\A\s*#\s+[^\n]*\n", "", body, count=1)      # the heading of the document is already the title of the panel
         shown = f"<pre class=\"plain\">{html.escape(body, quote=True)}</pre>" if item.get("plain") else render(body, files)
         sections.append({"id": slug, "title": title, "html": shown})
-    return {"id": item["id"], "title": item["title"].get(used) or item["id"], "lang": used, "fallback": used != lang, "plain": bool(item.get("plain")), "sections": sections}
+    return {"id": item["id"], "title": item["title"].get(used) or item["id"], "lang": used, "fallback": used != lang or (bool(item.get("english_body")) and lang != "en"), "plain": bool(item.get("plain")), "sections": sections}
 
 
 def _snippet(text, words):
@@ -177,7 +192,8 @@ def _snippet(text, words):
     return ("…" if start else "") + flat[start:start + 170] + ("…" if start + 170 < len(flat) else "")
 
 
-def search(text, lang, limit=30):
+def search(text, lang, limit=MAX_HITS):
+    limit = max(1, min(int(limit) if isinstance(limit, int) else MAX_HITS, MAX_HITS))
     words = [w for w in re.split(r"\s+", str(text or "").lower().strip()) if w][:6]
     if not words or max(len(w) for w in words) < 2:
         return []
@@ -215,7 +231,8 @@ def console(args, lang, translate):
         hits = search(" ".join(args[1:]), lang)
         if not hits:
             return 1, translate("help.none") + "\n"
-        return 0, "\n".join(f"{h['topic']}#{h['section']}  {h['topic_title']} / {h['title']}\n    {h['snippet']}" for h in hits) + "\n"
+        shown = "\n".join(f"{h['topic']}#{h['section']}  {h['topic_title']} / {h['title']}\n    {h['snippet']}" for h in hits[:CONSOLE_HITS]) + "\n"
+        return 0, shown + (translate("help.more", n=len(hits) - CONSOLE_HITS) + "\n" if len(hits) > CONSOLE_HITS else "")
     if args:
         name = args[0].lower().replace("-", "_")
         text = plain_text(name, lang)
@@ -224,7 +241,8 @@ def console(args, lang, translate):
             if not hits:
                 return 1, translate("help.unknown", topic=args[0]) + "\n"
             return 0, "\n".join(f"{h['topic']}#{h['section']}  {h['topic_title']} / {h['title']}" for h in hits) + "\n"
-        used = _lang_of(_find(name), lang)
-        return 0, (translate("help.fallback") + "\n\n" if used != lang else "") + text
+        found = _find(name)
+        used = _lang_of(found, lang)
+        return 0, (translate("help.fallback") + "\n\n" if used != lang or (found.get("english_body") and lang != "en") else "") + text
     rows = [f"  {t['id']:<16} {t['title']}" for t in topics(lang)]
     return 0, translate("help.list_head") + "\n" + "\n".join(rows) + "\n\n" + translate("help.list_tail") + "\n"

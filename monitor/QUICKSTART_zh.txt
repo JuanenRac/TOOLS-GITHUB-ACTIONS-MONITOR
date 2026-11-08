@@ -8,7 +8,7 @@ GPL-3.0-or-later - see LICENSE
      Windows：  winget install --id GitHub.cli
      macOS：    brew install gh
      Linux：    你的包管理器（例如：sudo apt install gh）或 https://cli.github.com
-3. 登录一次：  gh auth login   （选择 GitHub.com，并按浏览器中的步骤操作）。监视器从不保存令牌：它向 gh 索取。
+3. 登录一次：  gh auth login   （选择 GitHub.com，并按浏览器中的步骤操作）。监视器从不保存令牌：它向 gh 索取（除非你在“设置 > 高级”中开启监视器的可选令牌）。
 4. 启动监视器：
      Windows：  双击 MONITOR_GITHUB_ACTIONS.bat
      macOS：    双击 MONITOR_GITHUB_ACTIONS.command   （打不开时，在终端运行 chmod +x *.sh *.command）

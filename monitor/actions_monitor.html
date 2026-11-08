@@ -214,6 +214,8 @@ background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 
 .modebox{display:inline-flex;gap:6px;align-items:center;padding:2px 8px;border:1px solid var(--line2);border-radius:9px;background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo)}.modebox select{padding:2px 6px}.modebox.on{border-color:var(--warn);color:var(--warn)}
 .upd{display:inline-flex;gap:6px;align-items:center;padding:2px 10px;border:1px solid var(--warn);color:var(--warn);border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
 .upd:hover{text-decoration:none;filter:brightness(1.15)}
+#netbar{background:var(--bad);color:#fff;padding:6px 18px;font-weight:700}#netbar[hidden]{display:none}
+.adv-live h3{margin:.4em 0}.adv-live .inl{margin:4px 0;display:flex;gap:6px;flex-wrap:wrap;align-items:center}.adv-live pre{max-height:240px;overflow:auto;background:var(--card);padding:6px;border-radius:6px}
 #restartbar{display:none;background:var(--warn);color:#fff;padding:6px 18px;font-weight:600}
 .help-cols{display:grid;grid-template-columns:260px minmax(0,1fr);flex:1;min-height:0}
 #help-list{border-right:1px solid var(--line);overflow:auto;padding:8px}
@@ -242,12 +244,13 @@ nav .navhelp{margin-left:auto;align-self:center}
 <div id="offline" role="status"></div>
 <div id="hidden" role="status"></div>
 <div id="restartbar" role="status"></div>
+<div id="netbar" role="alert" hidden></div>
 <header>
 <div class="h-row h-top"><h1>GitHub Actions <small class="mut" id="ver"></small></h1><div class="tiles" id="tiles1" role="group" data-i18n-aria="ui.tiles_aria1"><div class="tile skel " id="kt-active" role="button" tabindex="0" data-go="now" data-i18n-title="ui.k_active_title" data-i18n-aria="ui.k_active_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-run"/></svg><b id="k-active" data-v>–</b><small data-i18n="ui.k_active"></small></div><div class="tile skel " id="kt-queued" role="button" tabindex="0" data-go="now" data-i18n-title="ui.k_queued_title" data-i18n-aria="ui.k_queued_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-queue"/></svg><b id="k-queued" data-v>–</b><small data-i18n="ui.k_queued"></small></div><div class="tile skel kclick" id="kp-fail" role="button" tabindex="0" data-i18n-title="ui.k_fail_title" data-i18n-aria="ui.k_fail_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-fail"/></svg><b id="k-fail" data-v>–</b><small data-i18n="ui.k_fail"></small></div><div class="tile skel " id="kt-ok" role="button" tabindex="0" data-go="hist" data-i18n-title="ui.k_ok_title" data-i18n-aria="ui.k_ok_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-okc"/></svg><b id="k-ok" data-v>–</b><small data-i18n="ui.k_ok"></small></div><div class="tile skel " id="kt-issues" role="button" tabindex="0" data-go="sent" data-i18n-title="ui.k_issues_title" data-i18n-aria="ui.k_issues_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-alert"/></svg><b id="k-issues" data-v>–</b><small data-i18n="ui.k_issues"></small></div><div class="tile skel " id="kt-min" role="button" tabindex="0" data-go="charts" data-i18n-title="ui.k_min_title" data-i18n-aria="ui.k_min_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-timer"/></svg><b id="k-min" data-v>–</b><small data-i18n="ui.k_min"></small></div><div class="tile skel kclick" id="kp-red" role="button" tabindex="0" data-i18n-title="ui.k_red_title" data-i18n-aria="ui.k_red_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-flag"/></svg><b id="k-red" data-v>–</b><small data-i18n="ui.k_red"></small></div><div class="tile skel kclick" id="kp-sign" role="button" tabindex="0" data-i18n-title="ui.k_sign_title" data-i18n-aria="ui.k_sign_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-pen"/></svg><b id="k-sign" data-v>–</b><small data-i18n="ui.k_sign"></small></div></div>
 <button id="hotonly" class="ib" type="button" aria-pressed="false" data-i18n-aria="ui.ic_hotonly_off" data-i18n-title="ui.ic_hotonly_off"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-flame"/></svg></button>
 <button id="cfg-open" class="ib" type="button" data-i18n-title="ui.ic_settings" data-i18n-aria="ui.ic_settings"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gear"/></svg></button><label class="modebox" data-i18n-title="ui.mode_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gauge"/></svg><select id="mode-sel" data-i18n-aria="ui.mode_title"><option value="normal"></option><option value="fast"></option><option value="turbo"></option></select><span id="mode-left" class="mut" role="timer"></span></label><a id="upd-badge" class="upd" href="#" target="_blank" rel="noopener noreferrer" hidden></a><button id="help-open" class="ib" type="button" data-i18n-title="ui.ic_help" data-i18n-aria="ui.ic_help"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-help"/></svg></button><button id="about-open" class="ib" type="button" data-i18n-title="ui.ic_about" data-i18n-aria="ui.ic_about"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-info"/></svg></button></div>
 <div class="h-row"><div class="tiles" id="tiles2" role="group" data-i18n-aria="ui.tiles_aria2"><div class="tile skel " id="kt-repos" role="button" tabindex="0" data-go="repos" data-i18n-title="ui.t_repos_title" data-i18n-aria="ui.t_repos_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-repo"/></svg><b id="tv-repos" data-v>–</b><small data-i18n="ui.t_repos"></small></div><div class="tile skel " id="kt-hot" role="button" tabindex="0" data-go="repos" data-i18n-title="ui.t_hot_title" data-i18n-aria="ui.t_hot_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-flame"/></svg><b id="tv-hot" data-v>–</b><small data-i18n="ui.t_hot"></small></div><div class="tile skel " id="kt-mode" role="button" tabindex="0" data-go="cfg:general" data-i18n-title="ui.t_mode_title" data-i18n-aria="ui.t_mode_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-sliders"/></svg><b id="tv-mode" data-v>–</b><small data-i18n="ui.t_mode"></small></div><div class="tile skel " id="kt-etag" role="button" tabindex="0" data-go="cfg:cache" data-i18n-title="ui.t_etag_title" data-i18n-aria="ui.t_etag_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-save2"/></svg><b id="tv-etag" data-v>–</b><small data-i18n="ui.t_etag"></small></div><div class="tile skel wide" id="kt-quota" role="button" tabindex="0" data-go="cfg:polling" data-i18n-title="ui.t_quota_title" data-i18n-aria="ui.t_quota_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gauge"/></svg><b id="tv-quota" data-v>–</b><small><span data-i18n="ui.t_quota"></span> · <span id="tv-renews"></span></small><span class="qbar" aria-hidden="true"><i id="tq-fill"></i></span></div><div class="tile skel " id="kt-conn" role="group" data-i18n-title="ui.t_conn_title" data-i18n-aria="ui.t_conn_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-wifi"/></svg><b id="tv-conn" data-v>–</b><small data-i18n="ui.t_conn"></small><span class="vh" id="tv-conn-since"></span></div><div class="tile skel " id="kt-upd" role="group" data-i18n-title="ui.t_updated_title" data-i18n-aria="ui.t_updated_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg><b id="tv-upd" data-v>–</b><small data-i18n="ui.t_updated"></small></div><div class="tile wide run" id="kt-loading" role="group" hidden data-i18n-title="ui.t_loading_title" data-i18n-aria="ui.t_loading_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-spin"/></svg><b id="tv-load">–</b><small data-i18n="ui.t_loading"></small><span class="qbar" aria-hidden="true"><i id="tl-fill"></i></span></div></div>
-<span class="badge b-queued" id="k-budget" hidden role="status"></span><span class="rdy" id="k-ready" role="group" data-i18n-aria="ui.ready_title" hidden></span></div>
+<span class="badge b-queued" id="k-budget" hidden role="status"></span><span class="badge b-queued" id="k-a10" hidden role="status"></span><span class="rdy" id="k-ready" role="group" data-i18n-aria="ui.ready_title" hidden></span></div>
 <div class="vh" role="status"><span id="stamp" data-i18n="ui.loading_short"></span> <span id="mode"></span> <span id="rate"></span> <span class="badge b-queued" id="quota" hidden></span></div>
 </header>
 <nav role="tablist" data-i18n-aria="ui.nav_label">
@@ -314,7 +317,7 @@ nav .navhelp{margin-left:auto;align-self:center}
 <aside id="rp" role="complementary" data-i18n-aria="ui.rp_aria" hidden></aside>
 <script>
 "use strict";
-(function(){const raw=window.fetch.bind(window),need=/^\/api\/(settings|ai\/actions\/confirm|ai\/actions\/unlock|ai\/test|notify\/test|discovery\/group|mode)/;
+(function(){const raw=window.fetch.bind(window),need=/^\/api\/(settings|ai\/actions\/confirm|ai\/actions\/unlock|ai\/test|notify\/test|discovery\/group|mode|gh-action\/confirm|act\/confirm|act\/stop|github-token)/;
   window.fetch=async function(u,o){if(o&&o.method==="POST"&&need.test(String(u))){try{const r=await raw("/api/session-token",{cache:"no-store"}),j=await r.json();if(j.token)o=Object.assign({},o,{headers:Object.assign({},o.headers,{"X-Monitor-Token":j.token})})}catch(e){}}return raw(u,o)}})();
 const I18N=/*I18N_DATA*/null||{default:"en",langs:["en"],names:{en:"English"},html:{en:"en"},locale:{en:"en-GB"},catalogues:{en:{}},ecosystems:{},owner:"",version:""};
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
@@ -337,6 +340,8 @@ window.addEventListener("error",e=>{const b=document.getElementById("err");b.sty
 const $=id=>document.getElementById(id);
 /* life of the page: figures that count up, short and cheap (one requestAnimationFrame per figure), and nothing at all when the user asks for less motion */
 const REDUCED=window.matchMedia?matchMedia("(prefers-reduced-motion: reduce)"):{matches:false};
+/* the red tile counts WORKFLOWS (the same unit in both editions) and says in how many repositories they are */
+function redUnits(workflows,repos){const t=$("kp-red");if(!t)return;const sm=t.querySelector("small");if(sm)sm.textContent=workflows?T("ui.k_red_units",{repos:repos}):T("ui.k_red")}
 function kSet(id,v){
   const el=$(id);if(!el)return;
   if(typeof v!=="number"||!isFinite(v)||REDUCED.matches||!el.isConnected){el.textContent=v;el._v=typeof v==="number"?v:undefined;return}
@@ -426,10 +431,12 @@ function onKpiRed(){setList(T("ui.l_red"),redRepos());if(redRepos().length){OPEN
 function onKpiSign(){const same=FILTER.list&&FILTER.listLabel===T("ui.l_unsigned");setList(T("ui.l_unsigned"),signRepos());if(!same&&signRepos().length)focusSignQueue()}
 [["kp-red",onKpiRed],["kp-sign",onKpiSign]].forEach(([id,fn])=>{$(id).addEventListener("click",fn);$(id).addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fn()}})});
 function updateKpis(){
-  const s=SENT;if(!s||s.enabled===false||!s.a2){kSet("k-red","–");kSet("k-sign","–");if(typeof tileState==="function"){tileState("kp-red","");tileState("kp-sign","")}$("k-budget").hidden=true;$("k-ready").hidden=true;return}
+  const s=SENT;if(!s||s.enabled===false||!s.a2){kSet("k-red","–");kSet("k-sign","–");if(typeof tileState==="function"){tileState("kp-red","");tileState("kp-sign","")}$("k-budget").hidden=true;$("k-a10").hidden=true;$("k-ready").hidden=true;return}
   {const rd=$("k-ready"),hl=(s.a11&&s.a11.enabled!==false&&s.a11.health)||[];rd.hidden=!hl.length;rd.innerHTML=hl.map(h=>{const lim=(s.a11.warn_below||70),sc=h.score,cl=sc==null?"":(sc>=lim?"ok":(sc>=lim/2?"warn":"bad")),nm=I18N.ecosystems[h.ecosystem]||h.ecosystem;return `<span class="rdy-chip ${cl}" title="${esc(nm+": "+(sc==null?T("ui.ready_unknown"):sc+" / 100"))}"><i></i>${esc(nm)} ${sc==null?"?":sc}</span>`}).join("")}
-  kSet("k-red",s.a2.red.length);tileState("kp-red",s.a2.red.length?"bad":"");
+  kSet("k-red",s.a2.red.length);tileState("kp-red",s.a2.red.length?"bad":"");redUnits(s.a2.red.length,new Set(s.a2.red.map(x=>x.repo)).size);
   const n=signRepos().length;kSet("k-sign",n);tileState("kp-sign",(s.a5.pending_sign||[]).length?"warn":(n?"":""));{const w=Object.values(signWait());$("kp-sign").title=T("ui.k_sign_title")+(w.length?" - "+T("ui.k_sign_oldest",{h:Math.round(Math.max(...w))}):"")}
+  {const pz=(s.a10||{}).paused,ax=$("k-a10");ax.hidden=!pz;if(pz)ax.textContent=T("ui.k_a10_paused",{remaining:pz.remaining,needed:pz.needed})}
+  {const all=((s.a7||{}).budget||[]),sm=document.querySelector("#kt-min small");if(sm){const top=all.slice().sort((a,b)=>b.pct-a.pct)[0];sm.textContent=top?T("ui.k_min")+" · "+T("ui.k_min_budget",{pct:Math.round(top.pct)}):T("ui.k_min");$("kt-min").title=top?T("ui.k_min_title")+" - "+T("ui.k_min_budget_title",{eco:top.ecosystem,used:top.used,limit:top.limit,period:top.period}):T("ui.k_min_title")}}
   const bud=((s.a7||{}).budget||[]).filter(b=>b.level!=="ok"),bx=$("k-budget");
   bx.hidden=!bud.length;
   if(bud.length){const over=bud.some(b=>b.level==="over");bx.className="badge "+(over?"b-failure":"b-queued");bx.textContent=T(over?"ui.bud_over":"ui.bud_warn")+bud.map(b=>`${b.ecosystem} ${Math.round(b.pct)} %`).join(", ");bx.title=T("ui.bud_title",{period:bud[0].period})}
@@ -839,6 +846,7 @@ function cfgFilter(){
 $("cfg-search").addEventListener("input",cfgFilter);
 async function cfgExtras(){
   if(typeof basicExtras==="function")basicExtras();
+  if(typeof advancedExtras==="function")advancedExtras();
   const ai=document.getElementById("cfp-ai");
   if(ai&&!ai.querySelector(".ai-extra")){
     const box=document.createElement("div");box.className="cfg-group ai-extra";
@@ -902,7 +910,7 @@ function paintTiles(d){
   TILES_LIVE=true;
   const nz=(id,n,cls)=>tileState(id,n>0?cls:"");
   const last=runs=>runs;
-  if(LITE){const n=d.figures&&d.figures.red!=null?d.figures.red:d.failing.length;kSet("k-red",n);tileState("kp-red",n?"bad":"");$("kp-red").title=d.figures&&d.figures.red_approx?T("ui.k_red_approx"):"";$("kp-sign").hidden=true}
+  if(LITE){const n=d.figures&&d.figures.red!=null?d.figures.red:d.failing.length;kSet("k-red",n);redUnits(n,d.figures&&d.figures.red_repos!=null?d.figures.red_repos:new Set(d.failing.map(x=>x.repo)).size);tileState("kp-red",n?"bad":"");$("kp-red").title=d.figures&&d.figures.red_approx?T("ui.k_red_approx"):"";$("kp-sign").hidden=true}
   tileState("kt-active",d.active.filter(r=>r.status==="in_progress").length>0?"run":"");
   nz("kt-queued",d.active.filter(r=>r.status!=="in_progress").length,"warn");
   nz("kp-fail",$("k-fail")._v||0,"bad");
@@ -947,7 +955,7 @@ async function openAbout(){
   const a=await aboutLoad();if(!a){body.textContent=T("ui.err_monitor",{msg:"/api/about"});return}
   const h=a.health||{},L=a.links||{};
   let html=dl([[T("ui.about_version"),"v"+a.version],[T("ui.about_edition"),T("ui.edition_"+a.edition)],[T("ui.about_author"),a.author],[T("ui.about_license"),a.license],[T("ui.about_python"),a.python+" ("+a.implementation+")"],[T("ui.about_system"),a.system],[T("ui.about_update"),updLine(a.update),true]]);
-  html+=`<h3>${esc(T("ui.about_links"))}</h3>`+dl(["repository","releases","changelog","documentation","issues"].map(k=>[T("ui.about_"+k),aLink(L[k]),true]));
+  html+=`<h3>${esc(T("ui.about_links"))}</h3>`+dl(["repository","releases","changelog","documentation","bridge","issues"].map(k=>[T("ui.about_"+k),aLink(L[k]),true]));
   html+=`<h3>${esc(T("ui.about_paths"))}</h3>`+dl(Object.keys(a.paths||{}).map(k=>[T("ui.path_"+k),a.paths[k]]));
   html+=`<h3>${esc(T("ui.about_health"))}</h3>`+dl([[T("ui.health_ok"),yn(h.ok)],[T("ui.health_loaded"),yn(h.loaded)],[T("ui.health_offline"),yn(h.offline)],[T("ui.health_uptime"),fmt(h.uptime_seconds||0)]]);
   html+=`<h3>${esc(T("ui.about_credits"))}</h3>`+dl((a.credits||[]).map(c=>[c.name+" ("+c.license+")",T("ui.credit_"+c.id)+" · "+T(c.installed?"ui.about_installed":"ui.about_not_installed")]));
@@ -1000,10 +1008,12 @@ async function wizDraw(){
   if(n===3)html+=`<p><button id="wiz-basic" type="button">${esc(T("ui.wiz_open_basic"))}</button> <button id="wiz-help" type="button">${esc(T("ui.wiz_open_help"))}</button></p>`;
   b.innerHTML=html;
   if(n===3){$("wiz-basic").addEventListener("click",()=>{wizDone();CFG.tab="basic";store.set("am-cfg-tab","basic");showTab("cfg");if(CFG.groups.length)cfgShowTab("basic")});$("wiz-help").addEventListener("click",()=>{wizDone();openHelp(null,"first_steps")})}}
-function wizDone(){store.set("am-wizard-done","1");dlgs.wiz.hidden=true}
+function wizDone(){store.set("am-wizard-done","1");dlgs.wiz.hidden=true;try{fetch("/api/welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({done:true})})}catch(e){}}
 $("wiz-next").addEventListener("click",()=>{if(WIZ.n<3){WIZ.n++;wizDraw()}else wizDone()});
 $("wiz-back").addEventListener("click",()=>{if(WIZ.n>1){WIZ.n--;wizDraw()}});$("wiz-skip").addEventListener("click",wizDone);
-if(!store.get("am-wizard-done")&&QS.get("nowizard")!=="1"){dlgs.wiz.hidden=false;wizDraw()}
+if(!store.get("am-wizard-done")&&QS.get("nowizard")!=="1"){fetch("/api/welcome",{cache:"no-store"}).then(r=>r.json()).catch(()=>({})).then(j=>{if(j&&j.done){store.set("am-wizard-done","1");return}dlgs.wiz.hidden=false;wizDraw()})}
+/* network mode: a bar on every tab while the monitor answers other computers */
+if(I18N.network&&I18N.network.network){const nb=$("netbar");nb.hidden=false;nb.textContent=T("ui.adv_net_bar")}
 /* the update notice: one quiet read now and then (the server asks GitHub at most once a day) */
 aboutLoad();setInterval(aboutLoad,6*3600*1000);
 /* working modes: normal, fast, turbo (the estimate is shown BEFORE it is switched on; fast and turbo come back to normal by themselves) */
@@ -1044,6 +1054,45 @@ async function quotaBox(host){
     box.innerHTML=`<h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gauge"/></svg><span>${esc(T("ui.q_title"))}</span></h3><div class="cfg-grid" style="grid-template-columns:1fr">`+dl(rows)+`<div class="mut">${esc(T("ui.q_public"))} ${esc(T("ui.q_note"))}</div></div>`;
     if(lvl)box.style.borderColor=lvl==="ok"?"var(--ok)":(lvl==="warn"?"var(--warn)":"var(--bad)");
   }catch(e){}}
+/* Settings > Advanced: the live state of the opt-in features and the buttons that need a confirmation of their own */
+async function advPost(path,body){const r=await fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body||{})});try{return await r.json()}catch(e){return{ok:false,status:"error"}}}
+function advWhy(j){return T("ui.adv_why_"+(j.status||"error"))}
+async function advancedExtras(){
+  const host=document.getElementById("cfp-advanced");if(!host)return;
+  let box=host.querySelector(".adv-live");if(!box){box=document.createElement("div");box.className="cfg-group adv-live";host.appendChild(box)}
+  let st={};try{st=await (await fetch("/api/advanced",{cache:"no-store"})).json()}catch(e){return}
+  const pick=async p=>{try{return await (await fetch(p,{cache:"no-store"})).json()}catch(e){return null}};
+  const [rn,mi,ot,dc]=await Promise.all([pick("/api/runners"),pick("/api/mirror"),pick("/api/otlp"),pick("/api/discovery")]);
+  const tk=st.token||{},gh=st.github_actions||{},ac=st.act||{};let h=`<h3>${esc(T("ui.adv_title"))}</h3>`;
+  h+=`<h4>${esc(T("ui.adv_token_h"))}</h4><div class="inl"><span>${esc(tk.enabled?(tk.stored?T("ui.adv_token_where",{backend:tk.backend})+(tk.weak?" · "+T("ui.adv_token_weak"):""):T("ui.adv_token_empty")):T("ui.adv_token_none"))}</span>`;
+  if(tk.enabled)h+=`<input id="adv-token" type="password" autocomplete="off" spellcheck="false" placeholder="${esc(T("ui.adv_token_ph"))}"> <button type="button" id="adv-token-save">${esc(T("ui.adv_token_save"))}</button>`;
+  h+=`<button type="button" id="adv-token-del"${tk.stored?"":" disabled"}>${esc(T("ui.adv_token_delete"))}</button></div>`;
+  h+=`<h4>${esc(T("ui.adv_gh_h"))}</h4>`;
+  if(gh.enabled)h+=`<div class="inl"><select id="adv-gh-action">${(gh.allowed||[]).map(a=>`<option>${esc(a)}</option>`).join("")}</select><input id="adv-gh-repo" placeholder="${esc(T("ui.adv_gh_repo"))}" size="22"><input id="adv-gh-num" placeholder="${esc(T("ui.adv_gh_number"))}" size="14"><button type="button" id="adv-gh-go">${esc(T("ui.adv_prepare"))}</button></div>`;
+  else h+=`<div class="mut">${esc(T("ui.adv_off"))}</div>`;
+  h+=`<h4>${esc(T("ui.adv_act_h"))}</h4>`;
+  if(ac.enabled)h+=`<div class="inl"><select id="adv-act-sel">${(ac.allowed||[]).map(a=>`<option>${esc(a)}</option>`).join("")}</select><button type="button" id="adv-act-go">${esc(T("ui.adv_prepare"))}</button><button type="button" id="adv-act-stop">${esc(T("ui.adv_act_stop"))}</button></div><pre id="adv-act-out" aria-live="polite"></pre>`;
+  else h+=`<div class="mut">${esc(T("ui.adv_off"))}</div>`;
+  h+=`<h4>${esc(T("ui.adv_runners_h"))}</h4>`+(rn&&rn.enabled?`<div>${esc(T("ui.adv_runners_counts",rn.counts))}</div>`+(rn.runners||[]).map(x=>`<div class="mut">${esc(x.name)} · ${esc(x.state)}${x.load1!=null?" · load "+x.load1:""}${x.disk_free_percent!=null?" · disk free "+x.disk_free_percent+" %":""}</div>`).join(""):`<div class="mut">${esc(T("ui.adv_off"))}</div>`);
+  h+=`<h4>${esc(T("ui.adv_mirror_h"))}</h4><div class="mut">${esc(mi&&mi.enabled?T("ui.adv_mirror_text",{count:mi.count,mb:mi.mb}):T("ui.adv_off"))}</div>`;
+  h+=`<h4>${esc(T("ui.adv_otlp_h"))}</h4><div class="mut">${esc(ot&&ot.enabled?T("ui.adv_otlp_text",{host:ot.endpoint_host,spans:ot.spans_sent})+(ot.last_error?" · "+ot.last_error:""):T("ui.adv_off"))}</div>`;
+  h+=`<h4>${esc(T("ui.adv_orgs_h"))}</h4><div class="mut">${esc(dc&&dc.organizations&&dc.organizations.enabled?((dc.organizations.orgs||[]).join(", ")||"–")+" · "+T("ui.adv_orgs_hint"):T("ui.adv_off"))}</div>`;
+  box.innerHTML=h;
+  const on=(id,fn)=>{const e=box.querySelector("#"+id);if(e)e.addEventListener("click",fn)};
+  on("adv-token-save",async()=>{const i=box.querySelector("#adv-token"),j=await advPost("/api/github-token",{token:i.value});i.value="";cfgMsg(j.ok?"ok":"bad",j.ok?T("ui.adv_token_saved"):T("ui.adv_token_bad",{why:advWhy(j)}));advancedExtras()});
+  on("adv-token-del",async()=>{await advPost("/api/github-token",{action:"delete"});advancedExtras()});
+  on("adv-gh-go",async()=>{const p=await advPost("/api/gh-action/plan",{action:box.querySelector("#adv-gh-action").value,repo:box.querySelector("#adv-gh-repo").value.trim(),number:box.querySelector("#adv-gh-num").value.trim()});
+    if(!p.ok){cfgMsg("bad",T("ui.adv_refused",{why:advWhy(p)}));return}
+    if(!window.confirm(T("ui.adv_gh_confirm",{method:p.plan.method,endpoint:p.plan.endpoint})))return;
+    const j=await advPost("/api/gh-action/confirm",{plan:p.plan.id});cfgMsg(j.ok?"ok":"bad",j.ok?T("ui.adv_done"):T("ui.adv_refused",{why:advWhy(j)}))});
+  on("adv-act-go",async()=>{const [repo,workflow,event]=box.querySelector("#adv-act-sel").value.split(":");const p=await advPost("/api/act/plan",{repo:repo,workflow:workflow,event:event});
+    if(!p.ok){cfgMsg("bad",T("ui.adv_refused",{why:advWhy(p)}));return}
+    if(!window.confirm(T("ui.adv_act_confirm",{command:p.plan.command})))return;
+    const j=await advPost("/api/act/confirm",{plan:p.plan.id});if(!j.ok){cfgMsg("bad",T("ui.adv_refused",{why:advWhy(j)}));return}
+    const out=box.querySelector("#adv-act-out");let at=0;out.textContent="";
+    const poll=async()=>{const s=await (await fetch("/api/act/status?since="+at,{cache:"no-store"})).json();out.textContent+=s.lines.map(l=>l+"\n").join("");at+=s.lines.length;out.scrollTop=out.scrollHeight;if(s.running)setTimeout(poll,1000);else out.textContent+="\n"+T("ui.adv_act_exit",{code:s.exit})};poll()});
+  on("adv-act-stop",()=>advPost("/api/act/stop",{}));
+}
 async function basicExtras(){
   const host=document.getElementById("cfp-basic");if(!host)return;quotaBox(host);
   let box=host.querySelector(".disc-box");if(!box){box=document.createElement("div");box.className="cfg-group disc-box";host.appendChild(box)}

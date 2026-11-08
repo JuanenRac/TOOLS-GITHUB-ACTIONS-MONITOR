@@ -1,15 +1,23 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITEUR GITHUB ACTIONS + SENTINELLE (version 1.6.3)
+MONITEUR GITHUB ACTIONS + SENTINELLE (version 1.6.4)
 ====================================================
+LEQUEL LANCER ? (un nouvel utilisateur décide en deux minutes)
+  COMPLET   MONITOR_GITHUB_ACTIONS.*       la page avec la sentinelle (port 8765) : alertes, file de signature, analytique. Commencez ici si vous avez plusieurs dépôts.
+  LITE      MONITOR_LITE_GITHUB_ACTIONS.*  la même page sans sentinelle (port 8766) : ce qui est rouge, bloqué ou en cours. Plus légère ; cohabite avec la complète.
+  LOT       BATCH_GITHUB_ACTIONS.*         seulement si vous signez et publiez vos propres builds.
+  TERMINAL  python tui_textual.py (ajoutez --lite pour l'édition lite)   l'application interactive de terminal ; tui.py --once affiche un écran.
+  VÉRIFIER  python actions_monitor.py --doctor (--json pour les scripts)   dit ce qui manque et la commande exacte pour le corriger.
+  ESSAYER   python actions_monitor.py --demo   la page avec des données inventées : sans gh, sans connexion, rien de vous n'est touché.
+
 Prérequis : Python 3.11+ et GitHub CLI (`gh`) connecté (gh auth login). Rien d'autre : le cœur n'a besoin d'aucun paquet (la vue console, tui.py, utilise le paquet optionnel rich).
 Étapes rapides pour une première utilisation : QUICKSTART_fr.txt.
 
 DÉMARRAGE  Windows : MONITOR_GITHUB_ACTIONS.bat | Linux : ./MONITOR_GITHUB_ACTIONS.sh | macOS : double-clic sur MONITOR_GITHUB_ACTIONS.command
            (ouvre http://127.0.0.1:<port>, en local uniquement). Sur tout système, on peut aussi lancer :  python3 actions_monitor.py  (Windows : py -3 actions_monitor.py)
 LOTS       BATCH_GITHUB_ACTIONS.bat / .sh / .command  (gha_dispatch_all.py : plan, dispatch, status, finalize, hygiene). Facultatif, pour ceux qui signent leurs builds en local.
-CE QU'IL NE FAIT JAMAIS   Il n'écoute que sur 127.0.0.1 (ne le liez jamais à 0.0.0.0 : il n'a pas d'authentification). Il ne stocke aucun jeton (il le demande à `gh`). De lui-même il n'écrit rien sur GitHub : seules les commandes de lot `dispatch --go`, `dispatch --real` et `finalize --execute` écrivent sur GitHub (lancer des workflows, créer le brouillon non signé, publier), et seulement quand vous les exécutez.
+CE QU'IL NE FAIT JAMAIS   Il n'écoute que sur 127.0.0.1 sauf si vous activez le mode réseau (Réglages > Avancé : une adresse privée, un jeton d'accès pour chaque requête, un avertissement dans la page). Il ne stocke aucun jeton (il le demande à `gh`) sauf si vous activez le jeton optionnel gardé dans le coffre du système. De lui-même il n'écrit rien sur GitHub : seules les commandes de lot `dispatch --go`, `dispatch --real` et `finalize --execute` écrivent sur GitHub (lancer des workflows, créer le brouillon non signé, publier), et seulement quand vous les exécutez.
            Il ne signe RIEN et ne publie RIEN tout seul : signer et publier sont des commandes que VOUS lancez ; le moniteur ne fait que les afficher en texte.
            Pas d'IA dans le chemin critique ; l'explicateur facultatif par IA est désactivé par défaut.
 
@@ -78,6 +86,6 @@ NOUVEAUTÉS 1.3.0 (historique : CHANGELOG.md)
   README et QUICKSTART en 8 langues.
 LICENCE    GPL-3.0-or-later (voir LICENSE et NOTICE). Copyright (C) 2026 JuanenRac (Electro Hobby 3D).
 
-AIDE, À PROPOS ET VÉRIFICATIONS (1.6.3)
+AIDE, À PROPOS ET VÉRIFICATIONS (1.6.4)
 ---------------------------------------
 La page a un bouton Aide (? rond) et un bouton À propos (i) ; en console : --help-topics, --help-search, --about et --doctor ; --demo montre la page avec des données inventées. L'édition lite démarre avec sa propre bannière et son titre de fenêtre (LITE, port 8766, sans sentinelle) ; la complète indique COMPLETE, port 8765, sentinelle active. L'avis de nouvelle version peut être désactivé (Réglages > Essentiel).

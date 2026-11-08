@@ -1,15 +1,23 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GitHub Actions 监视器 + 哨兵（版本 1.6.3）
+GitHub Actions 监视器 + 哨兵（版本 1.6.4）
 ============================================
+该启动哪一个?(新用户两分钟就能决定)
+  完整版  MONITOR_GITHUB_ACTIONS.*       带哨兵的页面(端口 8765):警报、签名队列、分析。有多个仓库时从这里开始。
+  精简版  MONITOR_LITE_GITHUB_ACTIONS.*  不带哨兵的同一页面(端口 8766):显示红色、卡住和运行中的内容。更轻量,可与完整版同时运行。
+  批处理  BATCH_GITHUB_ACTIONS.*         仅当你自己签名并发布构建时使用。
+  终端    python tui_textual.py(精简版加 --lite)   交互式终端应用;tui.py --once 输出一屏。
+  检查    python actions_monitor.py --doctor(脚本用 --json)   说明缺少什么以及修复它的准确命令。
+  试用    python actions_monitor.py --demo   用虚构数据的页面:无需 gh、无需登录,不会碰你的任何数据。
+
 运行要求：Python 3.11+，以及已登录的 GitHub CLI（`gh`）（gh auth login）。无需其他东西:核心不需要任何包(终端视图 tui.py 使用可选的 rich 包)。
 首次使用的快速步骤：QUICKSTART_zh.txt。
 
 启动       Windows：MONITOR_GITHUB_ACTIONS.bat | Linux：./MONITOR_GITHUB_ACTIONS.sh | macOS：双击 MONITOR_GITHUB_ACTIONS.command
            （会打开 http://127.0.0.1:<端口>，仅限本机）。在任何系统上也可以运行：  python3 actions_monitor.py  （Windows：py -3 actions_monitor.py）
 批处理     BATCH_GITHUB_ACTIONS.bat / .sh / .command（gha_dispatch_all.py：plan、dispatch、status、finalize、hygiene）。可选，适用于在本机为构建签名的人。
-它绝不会做的事   只监听 127.0.0.1（切勿绑定到 0.0.0.0：它没有登录验证）。不保存任何令牌（向 `gh` 索取）。它自身不会向 GitHub 写入任何内容：只有批处理命令 `dispatch --go`、`dispatch --real` 和 `finalize --execute` 会写入 GitHub（触发 workflow、创建未签名草稿、发布），且仅在你亲自运行它们时才会。
+它绝不会做的事   除非开启网络模式(设置 > 高级:私有地址、每个请求都需访问令牌、页面中的警告),否则只监听 127.0.0.1。除非开启保存在系统安全存储中的可选令牌,否则不保存任何令牌（向 `gh` 索取）。它自身不会向 GitHub 写入任何内容：只有批处理命令 `dispatch --go`、`dispatch --real` 和 `finalize --execute` 会写入 GitHub（触发 workflow、创建未签名草稿、发布），且仅在你亲自运行它们时才会。
            它不会自行签名，也不会自行发布任何东西：签名和发布是由你自己执行的命令，监视器只把它们显示为文本。
            关键判断不使用 AI；可选的 AI 解释功能默认关闭。
 
@@ -76,6 +84,6 @@ GitHub Actions 监视器 + 哨兵（版本 1.6.3）
   可选的工作区与如实说明的精简模式；每个文件都带有作者声明和 GPL-3.0-or-later；LICENSE、NOTICE、AUTHORS；8 种语言的 README 和 QUICKSTART。
 许可证     GPL-3.0-or-later（见 LICENSE 和 NOTICE）。Copyright (C) 2026 JuanenRac (Electro Hobby 3D)。
 
-帮助、关于与检查 (1.6.3)
+帮助、关于与检查 (1.6.4)
 ------------------------
 页面有帮助按钮（圆形 ?）和关于按钮（i）；在控制台使用 --help-topics、--help-search、--about 和 --doctor；--demo 用虚构数据显示页面。精简版以自己的横幅和窗口标题启动（LITE、端口 8766、无哨兵）；完整版显示 COMPLETE、端口 8765、哨兵已启用。新版本提示可以关闭（设置 > 基本）。

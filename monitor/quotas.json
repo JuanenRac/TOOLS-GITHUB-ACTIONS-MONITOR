@@ -47,5 +47,26 @@
     "enterprise_cloud": 15000,
     "app_max": 12500,
     "concurrent_requests": 100
+  },
+  "larger_rates_usd_per_minute": {
+    "_note": "Larger runners and macOS sizes; these prices are NOT verified here: check the billing page of GitHub and edit this table",
+    "linux_2": 0.008,
+    "linux_4": 0.016,
+    "linux_8": 0.032,
+    "linux_16": 0.064,
+    "linux_32": 0.128,
+    "linux_64": 0.256,
+    "windows_2": 0.016,
+    "windows_4": 0.032,
+    "windows_8": 0.064,
+    "windows_16": 0.128,
+    "windows_32": 0.256,
+    "windows_64": 0.512,
+    "linux_arm_2": 0.005,
+    "linux_arm_4": 0.01,
+    "linux_arm_8": 0.02,
+    "linux_arm_16": 0.04,
+    "macos_large": 0.08,
+    "macos_xlarge": 0.16
   }
 }

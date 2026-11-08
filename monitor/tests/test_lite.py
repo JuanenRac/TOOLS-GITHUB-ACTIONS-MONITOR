@@ -168,7 +168,8 @@ class ActCommand(unittest.TestCase):
         self.assertIn("act -W .github/workflows/", self.page)
         self.assertIn('data-copy="${esc(c)}"', self.page)
         self.assertRegex(self.page, r"\[A-Za-z0-9\._-\]\+\\\.ya\?ml")          # only a plain workflow file name
-        self.assertNotIn("/api/act", self.page)
+        self.assertNotIn("/api/act/status?since=0", self.page)
+        self.assertIn("/api/act", __import__("actions_monitor").LITE_PATHS, "the lite edition has no /api/act endpoint (it answers 404)")
 
     def test_running_act_exists_only_as_a_confirmed_action_of_the_ai(self):
         import ai_actions

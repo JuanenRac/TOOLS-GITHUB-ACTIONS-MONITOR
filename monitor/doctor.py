@@ -2,7 +2,9 @@
 # GPL-3.0-or-later - see LICENSE
 """`--doctor`: checks what the monitor needs and says, for each failure, the exact command that fixes it (in the language of the interface). Read-only: it changes nothing and prints no secret.
 
-Checks: python, gh (installed), login (session), quota, network, folder (write permission), port (free), docker (optional), rich and textual (optional).
+Checks: python, gh (installed), login (session), quota (allowance left), network, folder (write permission), port (which ports are free and which are busy), docker (optional), rich and textual (optional),
+targets (your own targets.json or only the neutral example), token (the one-use token of the page) and exposure (only this computer, or the network mode).
+`--doctor --json` prints the same checks as one JSON document (no secret, no path of a person) for scripts.
 Every check is {"id", "status": ok | warn | fail, "detail", "fix"}; `run()` takes the way of running a command as an argument so the tests need no `gh`.
 """
 import json
@@ -14,10 +16,10 @@ import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-ORDER = ("python", "gh", "login", "quota", "network", "folder", "port", "docker", "rich", "textual")
+ORDER = ("python", "gh", "login", "quota", "network", "folder", "port", "docker", "rich", "textual", "targets", "token", "exposure")
 FIX = {"python": "https://www.python.org/downloads/", "gh": "winget install --id GitHub.cli   |   brew install gh   |   sudo apt install gh", "login": "gh auth login",
        "quota": "gh api rate_limit", "network": "gh api rate_limit", "folder": "", "port": "python actions_monitor.py --port 8800", "docker": "", "rich": "pip install rich",
-       "textual": "pip install textual"}
+       "textual": "pip install textual", "targets": "python actions_monitor.py --init-catalog", "token": "", "exposure": ""}
 
 
 def default_runner(args, timeout=20):
@@ -53,8 +55,9 @@ def _writable(folder):
         return False
 
 
-def run(runner=default_runner, folder=HERE, ports=(8765, 8766), python=None):
-    """The list of checks, in ORDER."""
+def run(runner=default_runner, folder=HERE, ports=(8765, 8766), python=None, config=None):
+    """The list of checks, in ORDER. `config` is the content of the configuration file ({} when there is none)."""
+    config = config if isinstance(config, dict) else {}
     version = python or sys.version_info[:3]
     out = {}
     out["python"] = ("ok" if tuple(version) >= (3, 11) else "fail", "%d.%d.%d" % tuple(version[:3]))
@@ -67,7 +70,7 @@ def run(runner=default_runner, folder=HERE, ports=(8765, 8766), python=None):
         if code == 0:
             try:
                 core = json.loads(stdout)["resources"]["core"]
-                out["quota"] = ("ok" if core["remaining"] > 200 else "warn", "%d/%d" % (core["remaining"], core["limit"]))
+                out["quota"] = ("ok" if core["remaining"] > 200 else "warn", "%d/%d" % (core["remaining"], core["limit"]))      # the allowance left, as the page shows it
             except (ValueError, KeyError, TypeError):
                 out["quota"] = ("warn", "")
             out["network"] = ("ok", "")
@@ -79,10 +82,18 @@ def run(runner=default_runner, folder=HERE, ports=(8765, 8766), python=None):
             out[name] = ("warn", "gh")
     out["folder"] = ("ok" if _writable(folder) else "fail", str(folder))
     free = [p for p in ports if _port_free(p)]
-    out["port"] = ("ok" if free else "warn", ", ".join(str(p) for p in free) or ", ".join(str(p) for p in ports))
+    busy = [p for p in ports if p not in free]
+    out["port"] = ("ok" if free else "warn", ("free " + ", ".join(str(p) for p in free) if free else "") + (" · " if free and busy else "") + ("busy " + ", ".join(str(p) for p in busy) if busy else ""))
     out["docker"] = ("ok" if shutil.which("docker") else "warn", "")
     out["rich"] = ("ok" if _module("rich") else "warn", "")
     out["textual"] = ("ok" if _module("textual") else "warn", "")
+    own = [n for n in ("targets.json", "ecosystems.json", "profiles.json") if (Path(folder) / n).is_file()]
+    out["targets"] = ("ok" if (Path(folder) / "targets.json").is_file() else "warn", ", ".join(own) if own else "example only")
+    guard = config.get("session_guard", True) is True
+    out["token"] = ("ok" if guard else "warn", "one-use, 10 min" if guard else "off")
+    listen = config.get("listen") if isinstance(config.get("listen"), dict) else {}
+    network = listen.get("network") is True
+    out["exposure"] = ("warn" if network else "ok", ("network " + str(listen.get("host", ""))) if network else "127.0.0.1")
     return [{"id": name, "status": out[name][0], "detail": out[name][1], "fix": FIX[name] if out[name][0] != "ok" else ""} for name in ORDER]
 
 
@@ -98,6 +109,14 @@ def text(checks, translate, banner_for=None):
     bad = sum(1 for c in checks if c["status"] == "fail")
     lines += ["", translate("doctor.all_ok") if not bad else translate("doctor.n_fail", n=bad)]
     return "\n".join(lines) + "\n"
+
+
+def as_json(checks, edition="full"):
+    """The checks as one JSON-ready dictionary: {"version", "edition", "ok", "checks": [{"id", "status", "detail", "fix"}]}. No secret and no path of a person."""
+    from tool_version import TOOL_VERSION
+    import about
+    return {"version": TOOL_VERSION, "edition": "lite" if edition == "lite" else "full", "ok": not any(c["status"] == "fail" for c in checks),
+            "checks": [{**c, "detail": about.home_free(c["detail"])} for c in checks]}
 
 
 def exit_code(checks):

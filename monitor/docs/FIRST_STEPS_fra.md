@@ -7,7 +7,7 @@
 
 # Vos cinq premières minutes
 
-**1. Installer le nécessaire.** Python 3.11 ou plus récent et le GitHub CLI (`gh`). Puis se connecter une fois : `gh auth login`. Le moniteur ne stocke jamais de jeton : il le demande à `gh`.
+**1. Installer le nécessaire.** Python 3.11 ou plus récent et le GitHub CLI (`gh`). Puis se connecter une fois : `gh auth login`. Le moniteur ne stocke jamais de jeton : il le demande à `gh` (sauf si vous activez le jeton optionnel du moniteur dans Réglages > Avancé).
 
 **2. Tout vérifier d'une commande.** `python actions_monitor.py --doctor` indique, pour chaque problème, la commande exacte qui le corrige. Envie de regarder d'abord ? `python actions_monitor.py --demo` ouvre la page avec des données inventées : sans `gh`, sans session, sans réseau.
 

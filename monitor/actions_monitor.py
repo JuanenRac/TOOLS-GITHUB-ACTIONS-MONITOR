@@ -38,6 +38,7 @@ import analytics
 import discovery
 import etagcache
 import i18n
+import localguard
 import modes
 import platform_compat
 import redrule
@@ -82,15 +83,25 @@ DEFAULTS = {
     "quota": {"billing_api": False, "warn_percent": 75, "alert_percent": 90, "default_runner": "linux"},
     "session_guard": True,         # the page asks for a one-use token before it changes a setting or confirms an action
     "discovery": {"events": True, "suggest_groups": True, "auto_frequency": False, "hide": []},
+    "listen": {"network": False, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": []},     # OFF: only this computer. On: a private address, with an access token for every request
+    "github_token": {"enabled": False, "store": "auto"},       # OFF: the monitor uses your own `gh login`. On: a token kept in the store of the system (secretstore.py)
+    "github_actions": {"enabled": False, "allowed": ["rerun_failed", "cancel"], "merge_method": "squash"},      # OFF: actions on GitHub, each one confirmed on its own (ghactions.py)
+    "act": {"enabled": False, "allowed": [], "timeout_seconds": 900},         # OFF: run a workflow here with `act`, each run confirmed on its own (actlocal.py)
+    "mirror": {"enabled": False, "folder": "", "max_mb": 500, "keep_days": 14, "max_per_cycle": 3},     # OFF: a local copy of the artifacts of the runs (mirror.py)
+    "runners": {"enabled": False, "scope": "owner"},                         # OFF: the self-hosted runners of the account (runners.py)
+    "otlp": {"enabled": False, "endpoint": "", "interval_seconds": 60},       # OFF: OpenTelemetry export to a collector you name (otlp.py)
+    "organizations": {"discover": False},                                    # OFF: list the organisations of the login (orgs.py)
+    "finops": {"jobs_per_cycle": 0},
+    "ai_alerts": {"enabled": True, "folder": "", "brief_max_bytes": 2048, "hook": {"enabled": False, "url": "", "max_per_hour": 6}},     # a local, read-only feed of alerts for AIs (ai_alerts.py); the hook is OFF                                          # 0: the system of each job is not read (quota.default_runner is assumed)
 }
 
 DEMO = {"on": False}      # --demo: invented data, no gh, no network
 LITE = {"on": False}      # the lite product: the same server without the sentinel, with its own configuration file, its own state files and a short settings page
 LITE_PORT = 8766
-LITE_PATHS = ("/api/sentinel", "/api/ai", "/api/notify", "/api/analytics", "/api/live-events", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics")   # they do not exist in lite
+LITE_PATHS = ("/api/gh-action", "/api/act", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/notify", "/api/analytics", "/api/live-events", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics")   # they do not exist in lite
 
 
-LITE_INHERIT = ("github_owner", "ecosystems", "ecosystems_file", "targets_file", "profiles_file", "exclude", "repos", "language", "runs_per_repo", "cold_runs_per_repo", "hot_hours", "stuck_minutes")   # what a first lite start copies from actions_monitor.json
+LITE_INHERIT = ("github_owner", "ecosystems", "ecosystems_file", "targets_file", "profiles_file", "exclude", "repos", "language", "runs_per_repo", "cold_runs_per_repo", "hot_hours", "stuck_minutes", "refresh_seconds", "cold_refresh_seconds")   # what a first lite start copies from actions_monitor.json
 HOT_FORCED = set()    # repositories a webhook event touched: they are read again in the next cycle
 HIDDEN = {"hidden": 0, "discovered": 0, "names": []}      # repositories of the account that the ecosystem filter leaves out, and how many the account has
 
@@ -205,7 +216,8 @@ def gh(*args, timeout=40, retries=2):
             raise AuthError(last)
         if "404" in last:
             break  # a repository without Actions: retrying does not help
-        time.sleep(secondary_wait(last, attempt))
+        if attempt < retries:
+            time.sleep(resilience.backoff(attempt) if resilience.is_transient(last) else secondary_wait(last, attempt))
     raise RuntimeError(last or "gh failed")
 
 
@@ -242,7 +254,8 @@ def gh_read(endpoint, retries=2):
                 raise AuthError(last) from None
             if "404" in last:
                 break
-            time.sleep(secondary_wait(last, attempt))
+            if attempt < retries:
+                time.sleep(resilience.backoff(attempt) if resilience.is_transient(last) else secondary_wait(last, attempt))
     raise RuntimeError(last or "gh failed")
 
 
@@ -398,14 +411,31 @@ def refresh_runs(repos, config, progress=None):
         with ThreadPoolExecutor(max_workers=config["max_workers"]) as pool:
             results = list(pool.map(lambda item: (item[0], *fetch_runs(*item)), chunk))
         for repo, runs, error in results:
-            if error and RUN_CACHE.get(repo):
-                RUN_CACHE[repo]["error"] = error  # keep the old runs, report the problem
-            else:
-                RUN_CACHE[repo] = {"runs": runs, "at": time.time(), "error": error}
+            note_read(repo, runs, error)
         done += len(chunk)
         if progress:
             progress(done, len(todo))
     return len(todo)
+
+
+def note_read(repo, runs, error):
+    """Stores the result of one read of a repository. A passing failure (a TLS hiccup, a 5xx, a cut) keeps the last runs, is read again in the next cycle and is shown as an error only
+    after resilience.TRANSIENT_CYCLES cycles in a row; any other error is shown at once (the old runs stay)."""
+    entry = RUN_CACHE.get(repo)
+    if not error:
+        RUN_CACHE[repo] = {"runs": runs, "at": time.time(), "error": None, "fails": 0}
+        return
+    fails = (entry or {}).get("fails", 0) + 1
+    if resilience.is_transient(error) and fails < resilience.TRANSIENT_CYCLES:
+        if entry:
+            entry.update({"fails": fails, "at": 0})      # the old picture stays and the read is repeated in the next cycle; nothing is shown yet
+        else:
+            RUN_CACHE[repo] = {"runs": [], "at": 0, "error": None, "fails": fails}
+        return
+    if entry:
+        entry.update({"error": error, "fails": fails})      # keep the old runs, report the problem
+    else:
+        RUN_CACHE[repo] = {"runs": runs, "at": time.time(), "error": error, "fails": fails}
 
 
 def run_jobs(repo, run_id):
@@ -486,7 +516,7 @@ def header_figures(runs, active, issues, now=None, red=None, approx=False):
                "fail24": sum(1 for r in done if r.get("conclusion") in ("failure", "timed_out", "startup_failure")), "ok24": sum(1 for r in done if r.get("conclusion") == "success"),
                "issues": len(issues), "min24": round(sum(r.get("seconds") or 0 for r in last) / 60)}
     if red is not None:
-        figures["red"], figures["red_approx"] = len(red), bool(approx)
+        figures["red"], figures["red_approx"], figures["red_repos"] = len(red), bool(approx), len({row["repo"] for row in red})
     return figures
 
 
@@ -621,9 +651,99 @@ def quota_watch(config):
         pass
 
 
+RUN_COSTS = {}      # run id -> exact cost from the labels of its jobs (quota.job_costs); filled up to finops.jobs_per_cycle runs per cycle
+
+
+def read_costs(config, data):
+    """FinOps: reads the jobs of a few finished private runs and keeps what each really cost (the system of every job, larger runners included). Costs one call per run, limited by
+    finops.jobs_per_cycle (0 = not read: the system of quota.default_runner is assumed)."""
+    import quota
+    limit = (config.get("finops") or {}).get("jobs_per_cycle", 0) if isinstance(config.get("finops"), dict) else 0
+    if not isinstance(limit, int) or limit <= 0:
+        return 0
+    table, runner, done = quota.load(), quota.settings(config)["default_runner"], 0
+    since = time.time() - 86400
+    for run in data.get("runs") or []:
+        if done >= limit:
+            break
+        when = parse_time(run.get("started"))
+        if run.get("status") != "completed" or run["repo"] not in PRIVATE or run["id"] in RUN_COSTS or not when or when.timestamp() <= since:
+            continue
+        try:
+            body = gh_read(f"repos/{toolconfig.github_owner(config)}/{run['repo']}/actions/runs/{run['id']}/jobs?per_page=100", retries=0)
+        except Exception:   # noqa: BLE001 - this run keeps the assumed system
+            RUN_COSTS[run["id"]] = None
+            continue
+        jobs = [{"seconds": seconds_between(parse_time(j.get("started_at")), parse_time(j.get("completed_at"))), "labels": j.get("labels")} for j in (body or {}).get("jobs") or []]
+        RUN_COSTS[run["id"]] = quota.job_costs(jobs, table, runner)
+        done += 1
+    while len(RUN_COSTS) > 3000:
+        RUN_COSTS.pop(next(iter(RUN_COSTS)))
+    return done
+
+
+def download_artifact(endpoint, destination):
+    """Binary download of one artifact through `gh api` (the answer is a zip, so it is not decoded as text)."""
+    done = subprocess.run(["gh", "api", endpoint], capture_output=True, timeout=300)
+    if done.returncode != 0 or not done.stdout:
+        raise RuntimeError("download failed")
+    Path(destination).write_bytes(done.stdout)
+
+
+def red_rows(data):
+    """The red workflows of this cycle: those of the sentinel when it runs, else the same small rule the lite edition uses."""
+    sentinel = SENTINEL["obj"]
+    if sentinel is not None:
+        try:
+            return list(((sentinel.snapshot() or {}).get("a2") or {}).get("red") or [])
+        except Exception:   # noqa: BLE001
+            pass
+    runs = data.get("runs") or []
+    return redrule.red_workflows({r: [x for x in runs if x["repo"] == r] for r in (data.get("repos") or [])}, None, True)[0]
+
+
+def feed_alerts(config, data):
+    """The local feed for AIs: complete edition only; a NEW real alert also reaches the notification channels you configured."""
+    if LITE["on"]:
+        return None
+    import ai_alerts
+    result = ai_alerts.update(config, red_rows(data))
+    for alert in result["opened"]:
+        if alert["class"] == "real":
+            try:
+                import notifiers
+                notifiers.notify(config, {"kind": "ai_alert", "code": "ai_alert", "level": "warn", "repo": alert["repo"], "owner": "main", "url": alert.get("url"), "args": {},
+                                          "text": i18n.t("evt.ai_alert", repo=alert["repo"], workflow=alert["workflow"])})
+            except Exception:   # noqa: BLE001
+                pass
+    return result
+
+
+def maintain_extras(config, data):
+    """The opt-in features that run after a cycle (each is OFF by default and costs nothing while off): exact costs, the local mirror of artifacts and the OpenTelemetry export."""
+    if data.get("loading") or data["offline"]["offline"]:
+        return
+    remaining = (data.get("rate") or {}).get("remaining")
+    spare = remaining is None or remaining > 2 * config.get("min_rate_remaining", 800)
+    for name, job in (("ai_alerts", lambda: feed_alerts(config, data)),
+                      ("finops", lambda: spare and read_costs(config, data)),
+                      ("mirror", lambda: spare and __import__("mirror").cycle(config, data.get("runs") or [], toolconfig.github_owner(config), lambda e: gh_read(e, retries=0), download_artifact)),
+                      ("otlp", lambda: __import__("otlp").export(config, data, TOOL_VERSION))):
+        try:
+            job()
+        except Exception as error:   # noqa: BLE001 - an extra never stops the monitor; a problem is said once
+            if name not in EXTRAS_WARNED:
+                EXTRAS_WARNED.append(name)
+                print(name + ":", repr(error)[:160], flush=True)
+
+
+EXTRAS_WARNED = []
+
+
 def maintain(config, data):
     """After each cycle: the conditional-read cache is saved, a few completed runs have their jobs sampled and the analytics are refreshed."""
     quota_watch(config)
+    maintain_extras(toolconfig.raw_config() if not LITE["on"] else config, data)
     try:
         if ETAG["cache"]:
             ETAG["cache"].save()
@@ -714,7 +834,7 @@ def render_page():
     """actions_monitor.html with the catalogues of the interface (keys "ui.*") for the 8 languages and the default language inlined."""
     page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
     data = {"default": i18n.language(), "langs": list(i18n.LANGS), "names": i18n.NATIVE_NAMES, "html": i18n.HTML_LANG, "locale": i18n.BROWSER_LOCALE, "catalogues": i18n.ui_catalogues(),
-            "ecosystems": {**{"other": i18n.t("ui.eco_other")}, **{key: item["label"] for key, item in toolconfig.ecosystems().items()}}, "owner": toolconfig.github_owner(), "host": github_host(), "lite": LITE["on"], "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
+            "ecosystems": {**{"other": i18n.t("ui.eco_other")}, **{key: item["label"] for key, item in toolconfig.ecosystems().items()}}, "owner": toolconfig.github_owner(), "host": github_host(), "lite": LITE["on"], "network": localguard.public_state(), "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
     blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     return page.replace("/*I18N_DATA*/null", blob, 1)
 
@@ -765,10 +885,36 @@ class Handler(BaseHTTPRequestHandler):
             pass   # the browser or a reader closed the tab mid-answer: nothing to report
 
     def guard(self):
-        import sentinel_local
-        if sentinel_local.local_request_ok(self.headers, self.server.server_address[1]):
+        if localguard.local_request_ok(self.headers, self.server.server_address[1]):
             return True
         self.json_reply({"error": "forbidden"}, 403)
+        return False
+
+    def access_gate(self):
+        """Network mode only: every request must prove the access token (cookie, header or `?access=` on the first visit, which sets the cookie and goes to the clean address)."""
+        if not localguard.STATE["network"] or self.path.split("?")[0] == "/api/webhook":      # the webhook has its own proof (the HMAC of GitHub)
+            return True
+        if not localguard.local_request_ok(self.headers, self.server.server_address[1]):
+            self.json_reply({"error": "forbidden"}, 403)
+            return False
+        from urllib.parse import parse_qs
+        query_token = (parse_qs(self.path.partition("?")[2]).get("access") or [""])[0]
+        if not localguard.access_ok(self.headers, query_token):
+            self.json_reply({"error": "access"}, 401)
+            return False
+        if query_token and self.command == "GET" and "text/html" in (self.headers.get("Accept") or "text/html"):
+            self.send_response(302)
+            self.send_header("Set-Cookie", f"{localguard.COOKIE}={query_token}; Path=/; HttpOnly; SameSite=Strict")
+            self.send_header("Location", self.path.split("?")[0])
+            self.end_headers()
+            return False
+        return True
+
+    def this_computer(self):
+        """Keys and actions that decide exposure or reach GitHub can only be changed from the same computer while the network mode is on (a 403 otherwise)."""
+        if not localguard.STATE["network"] or localguard.from_this_computer(self.client_address):
+            return True
+        self.json_reply({"ok": False, "errors": {"_": "local_only"}}, 403)
         return False
 
     def request_language(self):
@@ -785,6 +931,8 @@ class Handler(BaseHTTPRequestHandler):
         return False
 
     def do_POST(self):
+        if not self.access_gate():
+            return
         with i18n.use_language(self.request_language()):
             self.handle_post()
 
@@ -874,6 +1022,18 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as error:   # noqa: BLE001
                 self.json_reply({"ok": False, "error": str(error)[:200]}, 400)
             return
+        if path in ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack"):
+            if not self.guard() or not self.this_computer():
+                return
+            if path != "/api/welcome" and path != "/api/gh-action/plan" and path != "/api/act/plan" and not self.token_ok():
+                return
+            try:
+                size = int(self.headers.get("Content-Length") or 0)
+                request = json.loads(self.rfile.read(size) if 0 < size <= 2048 else b"{}")
+                self.json_reply(handle_advanced_post(path, request if isinstance(request, dict) else {}))
+            except Exception:   # noqa: BLE001 - the answer never repeats the request: it could hold a token
+                self.json_reply({"ok": False, "status": "request"}, 400)
+            return
         if path == "/api/settings":   # the settings menu: whitelisted keys only, checked, backed up and written atomically (settings_api.py); local request only
             if not self.guard() or not self.token_ok():
                 return
@@ -888,6 +1048,9 @@ class Handler(BaseHTTPRequestHandler):
                     return
                 request = json.loads(self.rfile.read(size))
                 changes = request.get("changes") if isinstance(request, dict) else None
+                if localguard.STATE["network"] and not localguard.from_this_computer(self.client_address) and isinstance(changes, dict) and any(str(k).startswith(localguard.LOCAL_ONLY_PREFIXES) for k in changes):
+                    self.json_reply({"ok": False, "errors": {"_": "local_only"}}, 403)
+                    return
                 result = settings_api.apply(changes, CONFIG_FILE, lite=LITE["on"])
                 if result.get("ok"):
                     RESTART_PENDING.update(result.get("restart") or [])
@@ -935,6 +1098,8 @@ class Handler(BaseHTTPRequestHandler):
             self.json_reply({"ok": False, "error": str(error)[:200]})
 
     def do_GET(self):
+        if not self.access_gate():
+            return
         with i18n.use_language(self.request_language()):
             self.handle_get()
 
@@ -1054,6 +1219,18 @@ class Handler(BaseHTTPRequestHandler):
                     self.json_reply({"error": "unknown topic"}, 404)
                 else:
                     self.json_reply(found)
+        elif path in ("/api/ai/brief", "/api/ai/alerts"):
+            if not self.guard():
+                return
+            answer = advanced_get(path, self.path.partition("?")[2])
+            if path == "/api/ai/brief" and "fmt=json" not in self.path:
+                self.reply(answer["brief"], "text/markdown; charset=utf-8")
+            else:
+                self.json_reply(answer)
+        elif path in ("/api/act/status", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/welcome", "/api/advanced"):
+            if not self.guard():
+                return
+            self.json_reply(advanced_get(path, self.path.partition("?")[2]))
         elif path == "/api/session-token":      # a one-use token for the next change of a setting (the page asks for it right before it writes)
             if not self.guard():
                 return
@@ -1142,7 +1319,7 @@ def quota_payload():
     done = [r for r in (data.get("runs") or []) if r.get("status") == "completed" and (parse_time(r.get("started")) or datetime.fromtimestamp(0, timezone.utc)).timestamp() > since]
     rate = data.get("rate") or {}
     reader = None if DEMO["on"] else (lambda endpoint: gh_read(endpoint, retries=0))
-    return quota.summary(config, done, data.get("active") or [], set(PRIVATE), reader, toolconfig.github_owner(config), rate.get("limit"))
+    return quota.summary(config, done, data.get("active") or [], set(PRIVATE), reader, toolconfig.github_owner(config), rate.get("limit"), costs={k: v for k, v in RUN_COSTS.items() if v})
 
 
 def about_payload():
@@ -1158,7 +1335,9 @@ def discovery_payload():
     with LOCK:
         data = STATE.get("data") or {}
     box = discovery.box(toolconfig.github_owner(config), len(data.get("repos") or []), HIDDEN["discovered"], HIDDEN["names"])
-    return {**box, "events": list(reversed(DISCOVERY["events"]))[:20], "suggestions": DISCOVERY["suggestions"], "settings": discovery.settings(config), "demo": DEMO["on"]}
+    import orgs
+    organisations = orgs.view(toolconfig.raw_config(), lambda endpoint: gh_read(endpoint, retries=0), HERE / ("orgs_state_lite.json" if LITE["on"] else "orgs_state.json"), offline=LINK.state()["offline"]) if not DEMO["on"] else {"enabled": False, "orgs": []}
+    return {**box, "events": list(reversed(DISCOVERY["events"]))[:20], "suggestions": DISCOVERY["suggestions"], "settings": discovery.settings(config), "demo": DEMO["on"], "organizations": organisations}
 
 
 class SessionTokens:
@@ -1220,6 +1399,106 @@ def handle_action_post(path, request):
     if name not in notifiers.CHANNELS:
         return {"ok": False, "reason": "bad_value"}
     return notifiers.send_channel(name, cfg["channels"][name], notifiers.test_event(i18n.t("evt.test")))
+
+
+def run_gh_checked(args, timeout=40):
+    return run_gh(args, timeout)
+
+
+def advanced_state(config):
+    """What the page may know about the opt-in features: switches and the places, never a token."""
+    import actlocal
+    import ghactions
+    import secretstore
+    token = secretstore.settings(config)
+    network = localguard.public_state()
+    return {"network": network, "token": {**token, **(secretstore.Store(token["store"]).status() if token["enabled"] else {"backend": "", "stored": False, "weak": False})},
+            "github_actions": ghactions.settings(config), "act": {k: v for k, v in actlocal.settings(config).items()}, "demo": DEMO["on"]}
+
+
+def welcome_file():
+    return HERE / ("welcome_state_lite.json" if LITE["on"] else "welcome_state.json")
+
+
+def advanced_get(path, query):
+    config = toolconfig.raw_config()
+    if path == "/api/advanced":
+        return advanced_state(config)
+    if path == "/api/github-token":
+        return advanced_state(config)["token"]
+    if path == "/api/act/status":
+        import actlocal
+        from urllib.parse import parse_qs
+        since = (parse_qs(query).get("since") or ["0"])[0]
+        return actlocal.status(int(since) if since.isdigit() else 0)
+    if path == "/api/ai/brief":
+        import ai_alerts
+        from urllib.parse import parse_qs
+        if "json" in (parse_qs(query).get("fmt") or [""]):
+            return {"brief": ai_alerts.read_brief(config), "alerts": ai_alerts.alerts(config, states=("open", "acknowledged"))}
+        return {"brief": ai_alerts.read_brief(config)}
+    if path == "/api/ai/alerts":
+        import ai_alerts
+        from urllib.parse import parse_qs
+        since = (parse_qs(query).get("since") or ["0"])[0]
+        return {"alerts": ai_alerts.alerts(config, int(since) if since.isdigit() else 0)}
+    if path == "/api/welcome":
+        try:
+            done = bool(json.loads(welcome_file().read_text(encoding="utf-8")).get("done"))
+        except (OSError, ValueError, AttributeError):
+            done = False
+        return {"done": done and not DEMO["on"]}
+    if path == "/api/runners":
+        import runners
+        return runners.payload(config, lambda endpoint: gh_read(endpoint, retries=0), toolconfig.github_owner(config), DEMO["on"], list((STATE.get("data") or {}).get("repos") or []))
+    if path == "/api/mirror":
+        import mirror
+        return mirror.status(config)
+    import otlp
+    return otlp.status(config)
+
+
+def handle_advanced_post(path, request):
+    """The plan / confirm pairs of the actions on GitHub and of `act`, the token of GitHub and the welcome flag. Answers never contain the request."""
+    config = toolconfig.raw_config()
+    if path == "/api/ai/ack":
+        import ai_alerts
+        return {"ok": ai_alerts.ack(config, request.get("id"))}
+    if path == "/api/welcome":
+        if not DEMO["on"]:
+            try:
+                welcome_file().write_text(json.dumps({"done": request.get("done") is True}) + chr(10), encoding="utf-8")
+            except OSError:
+                return {"ok": False}
+        return {"ok": True}
+    if path == "/api/github-token":
+        import secretstore
+        cfg = secretstore.settings(config)
+        store = secretstore.Store(cfg["store"])
+        if request.get("action") == "delete":
+            ok = store.delete()
+            secretstore.clear_environment()
+            return {"ok": ok, **advanced_state(config)["token"]}
+        if not cfg["enabled"]:
+            return {"ok": False, "status": "off"}
+        done, why = store.save(request.get("token"))
+        if done:
+            secretstore.apply_to_environment(config, store)
+        return {"ok": done, "status": "saved" if done else why, **advanced_state(config)["token"]}
+    if path.startswith("/api/gh-action"):
+        import ghactions
+        if path.endswith("plan"):
+            item, why = ghactions.plan(config, toolconfig.github_owner(config), request.get("action"), request.get("repo"), request.get("number"))
+            return {"ok": item is not None, "status": why, "plan": item}
+        return ghactions.execute(config, request.get("plan"), run_gh_checked)
+    import actlocal
+    if path.endswith("plan"):
+        import workspace
+        item, why = actlocal.plan(config, workspace.workspace_root_soft() if hasattr(workspace, "workspace_root_soft") else "", request.get("repo"), request.get("workflow"), request.get("event"), request.get("job") or None)
+        return {"ok": item is not None, "status": why, "plan": item}
+    if path.endswith("stop"):
+        return actlocal.stop()
+    return actlocal.start(config, request.get("plan"))
 
 
 def update_loop():
@@ -1304,6 +1583,8 @@ def main():
         config["webhook"] = {"enabled": False, "secret": ""}
     i18n.set_language(i18n.detect(config.get("language")))
     i18n.cli_language() if "--lang" in " ".join(sys.argv) else None
+    import secretstore
+    secretstore.apply_to_environment(config)       # the optional token kept by the monitor (off by default) goes to GH_TOKEN of this process; nothing is printed
     parser = argparse.ArgumentParser(description=i18n.t("mon.description"), formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--port", type=int, default=LITE_PORT if LITE["on"] else 8765, help=i18n.t("mon.help_port"))
     parser.add_argument("--lite", action="store_true", help=i18n.t("mon.help_lite"))
@@ -1315,6 +1596,7 @@ def main():
     parser.add_argument("--help-topics", nargs="*", metavar="TOPIC", help=i18n.t("mon.help_topics"))
     parser.add_argument("--help-search", nargs="+", metavar="WORD", help=i18n.t("mon.help_search"))
     parser.add_argument("--doctor", action="store_true", help=i18n.t("mon.help_doctor"))
+    parser.add_argument("--json", action="store_true", help=i18n.t("mon.help_json"))
     parser.add_argument("--demo", action="store_true", help=i18n.t("mon.help_demo"))
     parser.add_argument("--mode", choices=modes.NAMES, default=None, help=i18n.t("mon.help_mode"))
     parser.add_argument("--mode-minutes", type=int, default=None, help=i18n.t("mon.help_mode_minutes"))
@@ -1331,8 +1613,11 @@ def main():
         return code
     if args.doctor:
         import doctor
-        checks = doctor.run()
-        print(doctor.text(checks, i18n.t, "lite" if LITE["on"] else "full"), end="")
+        checks = doctor.run(config=config)
+        if args.json:
+            print(json.dumps(doctor.as_json(checks, "lite" if LITE["on"] else "full"), ensure_ascii=False, indent=1))
+        else:
+            print(doctor.text(checks, i18n.t, "lite" if LITE["on"] else "full"), end="")
         return doctor.exit_code(checks)
     if args.init_catalog:
         for name, created in toolconfig.init_catalog():
@@ -1382,9 +1667,17 @@ def main():
     if not LITE["on"]:
         start_sentinel(config)
     server = None
+    listen = {"network": False, "host": "127.0.0.1"} if LITE["on"] else localguard.settings_from(config)
+    access_token, access_generated = "", False
+    if listen["network"]:
+        access_token = os.environ.get(listen["token_env"], "").strip()
+        if len(access_token) < 16:
+            access_token, access_generated = localguard.make_token(), True      # a fresh token at each start, shown once in this console and nowhere else
+        localguard.configure(True, listen["host"], access_token, listen["allowed_hosts"])
+        LIVE_CONFIG["session_guard"] = True      # the one-use token of the page is not optional on the network
     for port in range(args.port, args.port + 10):
         try:
-            server = QuietServer(("127.0.0.1", port), Handler)
+            server = QuietServer((listen["host"] if listen["network"] else "127.0.0.1", port), Handler)
             if port != args.port:
                 print(i18n.t("mon.port_busy", port=args.port, used=port))
             break
@@ -1394,6 +1687,10 @@ def main():
         print(i18n.t("mon.no_port", port=args.port))
         return 1
     url = f"http://127.0.0.1:{server.server_address[1]}/"
+    if listen["network"]:
+        print(i18n.t("mon.network_on", host=listen["host"], port=server.server_address[1]), flush=True)
+        if access_generated:
+            print(i18n.t("mon.network_token", url=url + "?access=" + access_token), flush=True)      # the only place the token is shown
     if config.get("webhook", {}).get("enabled") is True:
         import webhook
         print(i18n.t("mon.webhook", status=webhook.status_text(config)))
@@ -1407,7 +1704,7 @@ def main():
     if news:
         print(news)
     if not args.no_browser and config.get("open_browser", True) is True:
-        webbrowser.open(url)
+        webbrowser.open(url + ("?access=" + access_token if access_generated else ""))
     try:
         server.serve_forever()
     except KeyboardInterrupt:

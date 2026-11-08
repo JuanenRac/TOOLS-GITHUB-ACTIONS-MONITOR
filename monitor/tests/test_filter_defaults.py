@@ -134,7 +134,7 @@ class LiteStart(unittest.TestCase):
         self.assertNotEqual(written.get("ai"), complete["ai"])
         self.assertNotEqual(written.get("outputs"), complete["outputs"])
         self.assertNotEqual(written.get("notify"), complete["notify"])
-        self.assertNotEqual(written["refresh_seconds"], 77)
+        self.assertEqual(written["refresh_seconds"], 77)                    # the pace of the complete monitor is inherited, so both editions read at the same rhythm
         self.assertNotIn("S" * 40, json.dumps(written))
         self.assertIn("github_owner", said)
         self.assertNotIn("S" * 40, said)

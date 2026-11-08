@@ -1,0 +1,50 @@
+<!--
+  Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+  GPL-3.0-or-later - see LICENSE
+-->
+
+# Funciones avanzadas (todas apagadas por defecto)
+
+Todo lo de esta página está **apagado hasta que lo actives** en *Ajustes > Avanzado* (o en `actions_monitor.json`), y las claves que deciden quién puede llegar al monitor o qué puede hacer en GitHub están marcadas como opciones de seguridad. Activa solo lo que necesites.
+
+## Escuchar en la red
+
+Por defecto la página responde solo en `127.0.0.1`. Con `listen.network` activado (requiere reinicio) también escucha en `listen.host`: una dirección privada de este equipo, o `0.0.0.0` para todas las interfaces. Una dirección pública se rechaza.
+
+- **Cada petición necesita el token de acceso** (cookie, cabecera `X-Monitor-Access` o `Authorization: Bearer`). El token es el valor de la variable de entorno indicada en `listen.token_env` (16 caracteres o más); sin ella se crea un token aleatorio en cada arranque y se muestra una vez en la consola. Abre una vez la dirección que se imprime allí: guarda la cookie y pasa a la dirección limpia.
+- El token de un solo uso de la página queda forzado, la página muestra una barra roja en todas las pestañas mientras el modo esté activo, y las claves de `listen.*`, `github_token.*`, `act.*` y `github_actions.*` solo se pueden cambiar desde el propio equipo.
+- `listen.allowed_hosts` lista los nombres con los que se puede abrir la página (protección contra DNS rebinding).
+- **Riesgos.** El tráfico es HTTP sin cifrar: quien pueda leer tu red puede leer el token y los datos. Úsalo solo en una red de confianza, o pon delante un proxy inverso con HTTPS (véase `DEPLOYMENT.md`). No lo expongas nunca a Internet. La edición lite nunca escucha más allá de este equipo.
+
+## Un token de GitHub guardado por el monitor
+
+Lo predeterminado sigue siendo tu propio inicio de sesión de `gh`. Con `github_token.enabled` activado puedes pegar un token en Ajustes > Avanzado: se guarda en el almacén seguro del sistema (DPAPI de Windows, Llavero de macOS, Secret Service de Linux) y, solo cuando falta, en un fichero con permisos 600 (la página lo dice). Nunca se escribe en `actions_monitor.json`, en un registro, en el panel Acerca de ni en el texto para soporte, y llega a `gh` solo por el entorno del proceso. El botón **Borrar el token** lo elimina de todos los sitios.
+
+## Acciones sobre GitHub
+
+Con `github_actions.enabled` activado, el monitor puede relanzar una ejecución fallida (`rerun_failed`, `rerun_run`, `rerun_job`), cancelar una ejecución (`cancel`), cerrar un issue o un pull request (`close_issue`, `close_pr`) y fusionar uno (`merge_pr`, con `github_actions.merge_method`). Solo se pueden usar los nombres de `github_actions.allowed` (por defecto `rerun_failed` y `cancel`). **Cada acción se confirma por separado**: la página muestra exactamente qué se enviará (método y endpoint) y no envía nada hasta que confirmes ese plan con el token de un solo uso. El token de GitHub necesita el permiso (`workflow` para ejecuciones, `repo` para issues y pull requests; si no, se muestra el rechazo del propio GitHub). Cada intento se escribe en `github_actions_log.jsonl`. El asistente de IA no tiene forma de iniciar ninguna.
+
+## Ejecutar un workflow aquí con act
+
+Con `act.enabled` activado y las entradas `repositorio:fichero.yml:evento` en `act.allowed` (las tres exactas), un botón ejecuta `act` sobre el clon local tras confirmar la línea de comandos exacta. No se entregan secretos reales (ficheros de secretos, variables, entorno y entradas vacíos, y un entorno mínimo sin ningún token), la salida se muestra según llega, una ejecución cada vez, con el límite de tiempo `act.timeout_seconds`, y puedes detenerla.
+
+## Copia local de artefactos
+
+Con `mirror.enabled` activado y una `mirror.folder` en este equipo, los artefactos de las ejecuciones terminadas se copian allí (`mirror.max_per_cycle` por ciclo, `mirror.max_mb` para la carpeta, `mirror.keep_days` de retención), una vez cada uno, con nombres limpios dentro de la carpeta.
+
+## Runners propios
+
+Con `runners.enabled` activado, Ajustes > Avanzado muestra cada runner como libre, ocupado o desconectado. El disco y la carga solo se muestran para los runners listados en `runners.metrics` ({nombre: dirección de un node exporter en este equipo o una dirección privada}).
+
+## OpenTelemetry
+
+Con `otlp.enabled` activado y un `otlp.endpoint` (HTTPS, o HTTP en este equipo), las ejecuciones terminadas salen como trazas y las cifras de la cabecera como métricas (OTLP/HTTP con JSON), cada ejecución una vez. Solo se envían repositorio, workflow, rama, evento, conclusión y duración.
+
+## Organizaciones y costes
+
+- `organizations.discover` lista las organizaciones del login en Ajustes > Básico. Para vigilar una, arranca un segundo monitor con `github_owner` puesto a ella.
+- `finops.jobs_per_cycle` mayor que 0 lee las etiquetas de los jobs de esas ejecuciones privadas terminadas por ciclo, para que los minutos usen el multiplicador correcto (Linux, Windows, macOS y los runners grandes de `quotas.json`) en lugar de un sistema supuesto. Con el informe de facturación activado (`quota.billing_api`) se muestran también los dólares de Codespaces y Packages, el almacenamiento en uso y el precio de los minutos por encima de los incluidos.
+
+## Comprobar contra los servicios reales
+
+`python tools/manual_check_live.py` (en el repositorio) lee los permisos de tu token, el informe de facturación, las organizaciones, los runners y las banderas de `gh copilot`, y pide a un monitor en marcha que envíe un mensaje de prueba por tus canales. Nunca pide un secreto.

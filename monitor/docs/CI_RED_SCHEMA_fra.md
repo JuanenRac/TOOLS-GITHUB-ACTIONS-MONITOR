@@ -72,3 +72,5 @@ push ; ce qu'il advient ensuite du dossier relève de vous.
 
 `python3 read_report.py --export-sign-queue FILE` (`.json` ou `.csv`) écrit la file de signature globale avec les commandes locales exactes. Ce fichier est
 destiné au PC qui exécute le moniteur et l'indique à l'intérieur.
+
+Champ optionnel `ai_hint` (ajouté en 1.6.4) dans chaque workflow rouge : `{"class": "real|transient", "cause", "action"}` pour une IA ou un script. Les consommateurs qui lisent avec `.get()` peuvent l'ignorer.

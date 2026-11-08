@@ -11,6 +11,7 @@ The figures are NOT in the code: they are read from `quotas.json` (next to the m
 """
 import json
 import math
+import re
 import time
 from pathlib import Path
 
@@ -30,7 +31,7 @@ def load(path=None):
         data = {}
     out = {k: (dict(v) if isinstance(v, dict) else v) for k, v in FALLBACK.items()}
     for key, value in (data.items() if isinstance(data, dict) else ()):
-        if key in ("plans", "rates_usd_per_minute", "limits", "api") and isinstance(value, dict):
+        if key in ("plans", "rates_usd_per_minute", "larger_rates_usd_per_minute", "limits", "api") and isinstance(value, dict):
             out[key] = {**out.get(key, {}), **value}
         elif key in ("schema", "source", "public_repositories_free"):
             out[key] = value
@@ -52,24 +53,57 @@ def settings(config):
 
 
 def multiplier(system, data):
+    """Rate of a system divided by the rate of Linux. `system` is linux | windows | macos or a finer key of the larger runners (linux_8, windows_16, macos_xlarge...): its price comes from
+    `larger_rates_usd_per_minute` in quotas.json; an unknown key is priced as its base system."""
     rates = data["rates_usd_per_minute"]
     base = rates.get("linux") or 0.006
-    return round((rates.get(system) or base) / base, 3)
+    price = (data.get("larger_rates_usd_per_minute") or {}).get(system) or rates.get(system) or rates.get(str(system).split("_")[0]) or base
+    return round(price / base, 3)
+
+
+CORES_RE = re.compile(r"-(\d{1,3})-cores?$")
 
 
 def runner_system(labels):
-    """'linux' | 'windows' | 'macos' | 'self' from the labels of a job; None when there are none. Self-hosted runners cost no minutes."""
+    """The system of a job from its labels: 'linux' | 'windows' | 'macos' | 'self', or a larger-runner key ('linux_8', 'windows_16', 'macos_large', 'macos_xlarge', 'linux_arm_4').
+    None when there are no labels. Self-hosted runners cost no minutes."""
     labels = [str(x).lower() for x in labels or []]
     if not labels:
         return None
     if "self-hosted" in labels:
         return "self"
     for label in labels:
-        if label.startswith("windows"):
-            return "windows"
-        if label.startswith("macos"):
-            return "macos"
+        kind = "windows" if label.startswith("windows") else ("macos" if label.startswith("macos") else ("linux" if label.startswith(("ubuntu", "linux")) else ""))
+        if not kind:
+            continue
+        cores = CORES_RE.search(label)
+        if kind == "macos":
+            return "macos_xlarge" if "xlarge" in label else ("macos_large" if "large" in label else "macos")
+        if cores:
+            return f"{kind}{'_arm' if 'arm' in label else ''}_{int(cores.group(1))}"
+        return kind
     return "linux"
+
+
+def base_system(key):
+    return "macos" if str(key).startswith("macos") else ("windows" if str(key).startswith("windows") else "linux")
+
+
+def job_costs(jobs, data, default_runner="linux"):
+    """The cost of ONE run from the jobs it ran: each job is rounded up to the minute (as GitHub bills) and multiplied by the rate of ITS runner. `jobs` carry `labels`, `started`/`completed`
+    as seconds (`seconds`). Returns {"clock", "billable", "by_system"} - the exact figure the estimate cannot give when it assumes one system for every run."""
+    clock = bill = 0
+    by = {}
+    for job in jobs or []:
+        seconds = job.get("seconds") or 0
+        minutes = math.ceil(seconds / 60) if seconds > 0 else 0
+        clock += minutes
+        system = runner_system(job.get("labels")) or default_runner
+        if system == "self":
+            continue
+        bill += minutes * multiplier(system, data)
+        by[system] = by.get(system, 0) + minutes
+    return {"clock": clock, "billable": round(bill, 2), "by_system": by}
 
 
 def included_minutes(plan, data):
@@ -80,22 +114,30 @@ def included_minutes(plan, data):
     return round(info["included_usd"] / data["rates_usd_per_minute"]["linux"])
 
 
-def billable(runs, private, data, default_runner="linux", systems=None):
-    """{"clock": minutes of every run, "billable": multiplied minutes of the private repositories, "by_system": {...}, "estimate": True} for the completed runs given."""
-    clock = bill = 0
+def billable(runs, private, data, default_runner="linux", systems=None, costs=None):
+    """{"clock": minutes of every run, "billable": multiplied minutes of the private repositories, "by_system": {...}, "estimate": bool} for the completed runs given.
+    A run whose jobs were read (`costs[run id]`, from job_costs) is counted exactly; the others with one assumed system (`systems[id]` or `default_runner`) and the result says how many were exact."""
+    clock = bill = exact = 0
     by = {s: 0 for s in SYSTEMS}
     for run in runs:
         seconds = run.get("seconds") or 0
         minutes = math.ceil(seconds / 60) if seconds > 0 else 0
-        clock += minutes
+        known = (costs or {}).get(run.get("id"))
+        clock += known["clock"] if known else minutes
         if run.get("repo") not in private:
+            continue
+        if known:
+            exact += 1
+            bill += known["billable"]
+            for key, value in known["by_system"].items():
+                by[key] = by.get(key, 0) + value
             continue
         system = (systems or {}).get(run.get("id")) or default_runner
         if system == "self":
             continue
         bill += minutes * multiplier(system, data)
-        by[system] += minutes
-    return {"clock": clock, "billable": round(bill), "by_system": by, "estimate": True}
+        by[system] = by.get(system, 0) + minutes
+    return {"clock": clock, "billable": round(bill), "by_system": by, "estimate": exact < len(runs) or not runs, "exact_runs": exact}
 
 
 def projection(billable_24h, days_in_month=30):
@@ -134,7 +176,8 @@ def long_jobs(active, data, share=0.8):
 
 
 def billing_usage(owner, reader):
-    """The real minutes of Actions this month from the billing report of GitHub (read only): {"minutes", "by_sku"} or None on any error (403, 404, offline). `reader(endpoint)` returns the JSON."""
+    """The real usage of this month from the billing report of GitHub (read only): {"minutes", "by_sku", "usd": {product: net dollars}, "storage_gb_hours"} or None on any error (403, 404, offline).
+    `reader(endpoint)` returns the JSON. Actions minutes are summed as before; Codespaces, Packages and every other product are summed in dollars (netAmount) so they can be shown too."""
     for endpoint in (f"users/{owner}/settings/billing/usage", f"organizations/{owner}/settings/billing/usage"):
         try:
             body = reader(endpoint)
@@ -142,12 +185,22 @@ def billing_usage(owner, reader):
             continue
         items = body.get("usageItems") if isinstance(body, dict) else None
         if isinstance(items, list):
-            by = {}
+            by, usd, storage = {}, {}, 0.0
             for item in items:
-                if isinstance(item, dict) and str(item.get("product", "")).lower() == "actions" and isinstance(item.get("quantity"), (int, float)) and "minute" in str(item.get("unitType", "minutes")).lower():
-                    sku = str(item.get("sku") or "actions")[:40]
-                    by[sku] = by.get(sku, 0) + item["quantity"]
-            return {"minutes": round(sum(by.values()), 1), "by_sku": {k: round(v, 1) for k, v in by.items()}}
+                if not isinstance(item, dict):
+                    continue
+                product = str(item.get("product", "")).lower()[:30]
+                amount = item.get("netAmount")
+                if isinstance(amount, (int, float)) and not isinstance(amount, bool):
+                    usd[product] = round(usd.get(product, 0) + amount, 4)
+                quantity, unit = item.get("quantity"), str(item.get("unitType", "minutes")).lower()
+                if product == "actions" and isinstance(quantity, (int, float)):
+                    if "minute" in unit:
+                        sku = str(item.get("sku") or "actions")[:40]
+                        by[sku] = by.get(sku, 0) + quantity
+                    elif "gigabyte" in unit or "gb" in unit:
+                        storage += quantity
+            return {"minutes": round(sum(by.values()), 1), "by_sku": {k: round(v, 1) for k, v in by.items()}, "usd": usd, "storage_gb_hours": round(storage, 2)}
     return None
 
 
@@ -167,16 +220,24 @@ class Alerts:
         return True
 
 
-def summary(config, runs, active, private, reader=None, owner="", rate_limit=None, systems=None, data=None):
+def extra_cost(used_minutes, included, data):
+    """What the minutes above the included ones cost, in dollars, at the rate of Linux (the billable minutes are already multiplied by the rate of each system). 0 under the ceiling; None
+    when the plan is unknown."""
+    if included is None:
+        return None
+    return round(max(0.0, used_minutes - included) * data["rates_usd_per_minute"]["linux"], 2)
+
+
+def summary(config, runs, active, private, reader=None, owner="", rate_limit=None, systems=None, data=None, costs=None):
     """Everything the panel shows, in one dictionary."""
     cfg = settings(config)
     data = data or load()
-    sums = billable(runs, private, data, cfg["default_runner"], systems)
+    sums = billable(runs, private, data, cfg["default_runner"], systems, costs)
     included = included_minutes(cfg["plan"], data)
     real = billing_usage(owner, reader) if (cfg["billing_api"] and reader and owner) else None
     month = projection(sums["billable"])
     used = real["minutes"] if real else month
     return {"plan": cfg["plan"], "included_minutes": included, "billable": sums, "month_estimate": month, "billing": real, "billing_requested": cfg["billing_api"], "level": level(used, included, cfg),
             "warn_percent": cfg["warn_percent"], "alert_percent": cfg["alert_percent"], "api_mode": api_mode(rate_limit), "concurrency": concurrency(active, cfg["plan"], data),
-            "long_jobs": long_jobs(active, data), "limits": data["limits"], "multipliers": {s: multiplier(s, data) for s in SYSTEMS}, "source": data.get("source", ""),
+            "long_jobs": long_jobs(active, data), "extra_cost_usd": extra_cost(used, included, data), "limits": data["limits"], "multipliers": {s: multiplier(s, data) for s in SYSTEMS}, "source": data.get("source", ""),
             "public_free": data.get("public_repositories_free", True)}

@@ -1,15 +1,23 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GITHUB-ACTIONS-MONITOR + WÄCHTER (Version 1.6.3)
+GITHUB-ACTIONS-MONITOR + WÄCHTER (Version 1.6.4)
 ================================================
+WELCHE STARTEN? (ein neuer Nutzer entscheidet in zwei Minuten)
+  KOMPLETT  MONITOR_GITHUB_ACTIONS.*       die Seite mit dem Wächter (Port 8765): Alarme, Signierwarteschlange, Analyse. Hier beginnen, wenn Sie mehrere Repositories haben.
+  LITE      MONITOR_LITE_GITHUB_ACTIONS.*  dieselbe Seite ohne Wächter (Port 8766): was rot ist, hängt oder läuft. Leichter; läuft neben der kompletten.
+  BATCH     BATCH_GITHUB_ACTIONS.*         nur wenn Sie Ihre eigenen Builds signieren und veröffentlichen.
+  TERMINAL  python tui_textual.py (mit --lite für die Lite-Edition)   die interaktive Terminal-Anwendung; tui.py --once gibt einen Bildschirm aus.
+  PRÜFEN    python actions_monitor.py --doctor (--json für Skripte)   sagt, was fehlt, und den genauen Befehl dagegen.
+  AUSPROBIEREN  python actions_monitor.py --demo   die Seite mit erfundenen Daten: kein gh, keine Anmeldung, nichts von Ihnen wird berührt.
+
 Voraussetzungen: Python 3.11+ und die GitHub CLI (`gh`), angemeldet (gh auth login). Sonst nichts: der Kern braucht keine Pakete (die Konsolenansicht tui.py nutzt das optionale Paket rich).
 Kurzanleitung für die erste Benutzung: QUICKSTART_de.txt.
 
 START      Windows: MONITOR_GITHUB_ACTIONS.bat | Linux: ./MONITOR_GITHUB_ACTIONS.sh | macOS: Doppelklick auf MONITOR_GITHUB_ACTIONS.command
            (öffnet http://127.0.0.1:<Port>, nur lokal). Auf jedem System geht auch:  python3 actions_monitor.py  (Windows: py -3 actions_monitor.py)
 BATCHES    BATCH_GITHUB_ACTIONS.bat / .sh / .command  (gha_dispatch_all.py: plan, dispatch, status, finalize, hygiene). Optional, für alle, die ihre Builds lokal signieren.
-WAS ER NIE TUT   Er lauscht nur auf 127.0.0.1 (niemals an 0.0.0.0 binden: er hat keine Anmeldung). Er speichert kein Token (er fragt `gh`). Von sich aus schreibt er nichts auf GitHub: nur die Batch-Befehle `dispatch --go`, `dispatch --real` und `finalize --execute` schreiben auf GitHub (Workflows starten, unsignierten Entwurf anlegen, veröffentlichen), und nur wenn du sie ausführst.
+WAS ER NIE TUT   Er lauscht nur auf 127.0.0.1, außer Sie schalten den Netzwerkmodus ein (Einstellungen > Erweitert: eine private Adresse, ein Zugriffstoken bei jeder Anfrage, eine Warnung in der Seite). Er speichert kein Token (er fragt `gh`), außer Sie schalten das optionale Token im sicheren Speicher des Systems ein. Von sich aus schreibt er nichts auf GitHub: nur die Batch-Befehle `dispatch --go`, `dispatch --real` und `finalize --execute` schreiben auf GitHub (Workflows starten, unsignierten Entwurf anlegen, veröffentlichen), und nur wenn du sie ausführst.
            Er signiert NICHTS und veröffentlicht NICHTS von selbst: Signieren und Veröffentlichen sind Befehle, die DU ausführst; der Monitor zeigt sie nur als Text.
            Keine KI im kritischen Pfad; der optionale KI-Erklärer ist standardmäßig aus.
 
@@ -78,6 +86,6 @@ NEU IN 1.3.0 (Verlauf: CHANGELOG.md)
   README und QUICKSTART in 8 Sprachen.
 LIZENZ     GPL-3.0-or-later (siehe LICENSE und NOTICE). Copyright (C) 2026 JuanenRac (Electro Hobby 3D).
 
-HILFE, ÜBER UND PRÜFUNGEN (1.6.3)
+HILFE, ÜBER UND PRÜFUNGEN (1.6.4)
 ---------------------------------
 Die Seite hat eine Hilfe-Taste (rundes ?) und eine Über-Taste (i); in der Konsole: --help-topics, --help-search, --about und --doctor; --demo zeigt die Seite mit erfundenen Daten. Die Lite-Ausgabe startet mit eigenem Banner und Fenstertitel (LITE, Port 8766, ohne Wächter); die vollständige meldet COMPLETE, Port 8765, Wächter aktiv. Der Hinweis auf neue Versionen lässt sich abschalten (Einstellungen > Grundlagen).

@@ -8,7 +8,7 @@ SCHNELLSTART - GitHub-Actions-Monitor + Wächter
      Windows:  winget install --id GitHub.cli
      macOS:    brew install gh
      Linux:    deinen Paketmanager (zum Beispiel: sudo apt install gh) oder https://cli.github.com
-3. Einmal anmelden:  gh auth login   (GitHub.com wählen und den Schritten im Browser folgen). Der Monitor speichert nie ein Token: er fragt gh.
+3. Einmal anmelden:  gh auth login   (GitHub.com wählen und den Schritten im Browser folgen). Der Monitor speichert nie ein Token: er fragt gh (außer Sie schalten das optionale Token des Monitors unter Einstellungen > Erweitert ein).
 4. Monitor starten:
      Windows:  Doppelklick auf MONITOR_GITHUB_ACTIONS.bat
      macOS:    Doppelklick auf MONITOR_GITHUB_ACTIONS.command   (öffnet es nicht: chmod +x *.sh *.command im Terminal)

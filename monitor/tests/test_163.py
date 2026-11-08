@@ -134,9 +134,14 @@ class HelpIndex(unittest.TestCase):
             self.assertFalse(helpdocs.topic("settings", lang)["fallback"], lang)
 
     def test_a_missing_translation_falls_back_to_english(self):
-        found = helpdocs.topic("roadmap", "es")
-        self.assertTrue(found["fallback"])
-        self.assertEqual(found["lang"], "en")
+        item = helpdocs._find("roadmap")
+        saved = item["sections"].pop("es")
+        try:
+            found = helpdocs.topic("roadmap", "es")
+            self.assertTrue(found["fallback"])
+            self.assertEqual(found["lang"], "en")
+        finally:
+            item["sections"]["es"] = saved
 
     def test_the_search_works_in_the_language_of_the_page(self):
         self.assertTrue(helpdocs.search("webhook", "es"))
@@ -173,7 +178,7 @@ class HelpIndex(unittest.TestCase):
         self.assertIn("settings_api", text)
         self.assertEqual(helpdocs.console(["zzzzqqqq"], "en", i18n.t)[0], 1)
         self.assertEqual(helpdocs.console(["--search", "webhook"], "en", i18n.t)[0], 0)
-        self.assertTrue(helpdocs.console(["roadmap"], "fr", i18n.t)[1].startswith("("))      # says it is shown in English
+        self.assertTrue(helpdocs.console(["changelog"], "fr", i18n.t)[1].startswith("("))      # says it is shown in English
 
 
 class AboutData(unittest.TestCase):

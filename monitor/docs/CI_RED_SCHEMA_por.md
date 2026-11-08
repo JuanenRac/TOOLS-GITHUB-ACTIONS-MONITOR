@@ -72,3 +72,5 @@ push; o que acontece à pasta depois fica ao seu critério.
 
 `python3 read_report.py --export-sign-queue FILE` (`.json` ou `.csv`) escreve a fila de assinatura global com os comandos locais exatos. Esse ficheiro é
 para o PC que executa o monitor e diz isso no seu interior.
+
+Campo opcional `ai_hint` (acrescentado na 1.6.4) em cada workflow vermelho: `{"class": "real|transient", "cause", "action"}` para uma IA ou um script. Os consumidores que leem com `.get()` podem ignorá-lo.

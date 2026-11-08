@@ -8,7 +8,7 @@ INICIO RÁPIDO - Monitor de GitHub Actions + Centinela
      Windows:  winget install --id GitHub.cli
      macOS:    brew install gh
      Linux:    tu gestor de paquetes (por ejemplo: sudo apt install gh) o https://cli.github.com
-3. Inicia sesión una vez:  gh auth login   (elige GitHub.com y sigue los pasos en el navegador). El monitor nunca guarda un token: se lo pide a gh.
+3. Inicia sesión una vez:  gh auth login   (elige GitHub.com y sigue los pasos en el navegador). El monitor nunca guarda un token: se lo pide a gh (salvo que actives el token opcional del monitor en Ajustes > Avanzado).
 4. Arranca el monitor:
      Windows:  doble clic en MONITOR_GITHUB_ACTIONS.bat
      macOS:    doble clic en MONITOR_GITHUB_ACTIONS.command   (si no se abre: chmod +x *.sh *.command en una terminal)

@@ -362,6 +362,61 @@
     "auto_frequency": false,
     "hide": []
   },
+  "listen": {
+    "network": false,
+    "host": "127.0.0.1",
+    "token_env": "MONITOR_ACCESS_TOKEN",
+    "allowed_hosts": []
+  },
+  "github_token": {
+    "enabled": false,
+    "store": "auto"
+  },
+  "github_actions": {
+    "enabled": false,
+    "allowed": [
+      "rerun_failed",
+      "cancel"
+    ],
+    "merge_method": "squash"
+  },
+  "act": {
+    "enabled": false,
+    "allowed": [],
+    "timeout_seconds": 900
+  },
+  "mirror": {
+    "enabled": false,
+    "folder": "",
+    "max_mb": 500,
+    "keep_days": 14,
+    "max_per_cycle": 3
+  },
+  "runners": {
+    "enabled": false,
+    "scope": "owner"
+  },
+  "otlp": {
+    "enabled": false,
+    "endpoint": "",
+    "interval_seconds": 60
+  },
+  "organizations": {
+    "discover": false
+  },
+  "finops": {
+    "jobs_per_cycle": 0
+  },
+  "ai_alerts": {
+    "enabled": true,
+    "folder": "",
+    "brief_max_bytes": 2048,
+    "hook": {
+      "enabled": false,
+      "url": "",
+      "max_per_hour": 6
+    }
+  },
   "tui": {
     "theme": "dark",
     "refresh_seconds": 5

@@ -22,7 +22,20 @@ TARGET = MON / "docs" / "help_index.json"
 LANGS = ("en", "es", "de", "fr", "it", "ja", "zh", "pt")
 SUFFIX = {"en": "", "es": "_spa", "de": "_deu", "fr": "_fra", "it": "_ita", "ja": "_jpn", "zh": "_zho", "pt": "_por"}      # README_spa.md, SETTINGS_spa.md
 SHORT = {lang: "_" + lang for lang in LANGS}                                                                            # QUICKSTART_es.txt, README_es.txt
-ORDER = ("readme", "first_steps", "quickstart", "lite", "sentinel", "quotas", "modes", "settings", "ai", "analytics", "notifications", "outputs", "webhook", "console_tools", "deployment", "ci_red_bridge", "ci_red_schema",
+#: topics whose BODY exists only in English (the fixed labels are translated): the Help says so with a translated notice instead of mixing languages without saying it
+ENGLISH_BODY = ("changelog",)
+#: every other topic must exist in all of LANGS: `--check` and the tests fail otherwise. A topic listed here is allowed to miss some languages (none today).
+MISSING_ALLOWED = {}
+CHANGELOG_LABELS = {
+    "title": {"en": "Changelog", "es": "Registro de cambios", "de": "Änderungsprotokoll", "fr": "Journal des modifications", "it": "Registro delle modifiche", "ja": "変更履歴", "zh": "更新日志", "pt": "Registo de alterações"},
+    "Added": {"en": "Added", "es": "Añadido", "de": "Hinzugefügt", "fr": "Ajouté", "it": "Aggiunto", "ja": "追加", "zh": "新增", "pt": "Adicionado"},
+    "Changed": {"en": "Changed", "es": "Cambiado", "de": "Geändert", "fr": "Modifié", "it": "Modificato", "ja": "変更", "zh": "变更", "pt": "Alterado"},
+    "Fixed": {"en": "Fixed", "es": "Corregido", "de": "Behoben", "fr": "Corrigé", "it": "Corretto", "ja": "修正", "zh": "修复", "pt": "Corrigido"},
+    "Security": {"en": "Security", "es": "Seguridad", "de": "Sicherheit", "fr": "Sécurité", "it": "Sicurezza", "ja": "セキュリティ", "zh": "安全", "pt": "Segurança"},
+    "Removed": {"en": "Removed", "es": "Eliminado", "de": "Entfernt", "fr": "Supprimé", "it": "Rimosso", "ja": "削除", "zh": "移除", "pt": "Removido"},
+    "Deprecated": {"en": "Deprecated", "es": "Obsoleto", "de": "Veraltet", "fr": "Obsolète", "it": "Deprecato", "ja": "非推奨", "zh": "已弃用", "pt": "Obsoleto"},
+}
+ORDER = ("readme", "first_steps", "quickstart", "lite", "sentinel", "quotas", "modes", "settings", "advanced", "ai", "ai_alerts", "analytics", "notifications", "outputs", "webhook", "console_tools", "deployment", "ci_red_bridge", "ci_red_schema",
          "migrating", "roadmap", "changelog", "contributing", "security", "support", "package")
 
 
@@ -95,10 +108,18 @@ def sources():
     names = sorted({p.stem for p in (MON / "docs").glob("*.md") if not re.search(r"_(spa|deu|fra|ita|jpn|zho|por)$", p.stem)})
     for name in names:
         out.append((name.lower(), "guides", {l: MON / "docs" / f"{name}{SUFFIX[l]}.md" for l in LANGS}, False))
-    out += [("roadmap", "project", {"en": ROOT / "docs" / "ROADMAP.md"}, False), ("changelog", "project", {"en": MON / "CHANGELOG.md"}, False),
-            ("contributing", "project", {"en": ROOT / "CONTRIBUTING.md"}, False), ("security", "project", {"en": ROOT / "SECURITY.md"}, False),
-            ("support", "project", {"en": ROOT / "SUPPORT.md"}, False)]
+    out += [("roadmap", "project", {l: ROOT / "docs" / f"ROADMAP{SUFFIX[l]}.md" for l in LANGS}, False), ("changelog", "project", {"en": MON / "CHANGELOG.md"}, False),
+            ("contributing", "project", {l: ROOT / f"CONTRIBUTING{SUFFIX[l]}.md" for l in LANGS}, False), ("security", "project", {l: ROOT / f"SECURITY{SUFFIX[l]}.md" for l in LANGS}, False),
+            ("support", "project", {l: ROOT / f"SUPPORT{SUFFIX[l]}.md" for l in LANGS}, False)]
     return out
+
+
+def label_changelog(text, lang):
+    """The CHANGELOG for a language: the fixed labels (`### Added`...) and the title translated, the entries themselves stay in English."""
+    for key, names in CHANGELOG_LABELS.items():
+        if key != "title":
+            text = re.sub(rf"^###\s+{key}\s*$", "### " + names[lang], text, flags=re.M)
+    return re.sub(r"^#\s+Changelog\s*$", "# " + CHANGELOG_LABELS["title"][lang], text, count=1, flags=re.M)
 
 
 def build():
@@ -112,10 +133,29 @@ def build():
             text = clean(path.read_text(encoding="utf-8"), plain)
             titles[lang] = first_title(text, topic_id)
             sections[lang] = split(text, plain)
+        if topic_id in ENGLISH_BODY and "en" in sections:
+            english = clean((paths["en"]).read_text(encoding="utf-8"), plain)
+            for lang in LANGS:
+                text = label_changelog(english, lang) if lang != "en" else english
+                titles[lang] = first_title(text, topic_id)
+                sections[lang] = split(text, plain)
         if "en" in sections:
-            topics.append({"id": topic_id, "group": group, "plain": plain, "title": titles, "sections": sections})
+            item = {"id": topic_id, "group": group, "plain": plain, "title": titles, "sections": sections}
+            if topic_id in ENGLISH_BODY:
+                item["english_body"] = True
+            topics.append(item)
     topics.sort(key=lambda t: (ORDER.index(t["id"]) if t["id"] in ORDER else len(ORDER), t["id"]))
     return {"_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>", "_license": "GPL-3.0-or-later - see LICENSE", "format": 1, "langs": list(LANGS), "files": dict(sorted(files.items())), "topics": topics}
+
+
+def missing(index):
+    """[(topic, lang)] of the topics that lack a language, without the explicit exceptions (MISSING_ALLOWED) and without the topics whose body is English on purpose."""
+    out = []
+    for item in index["topics"]:
+        for lang in LANGS:
+            if lang not in item["sections"] and lang not in MISSING_ALLOWED.get(item["id"], ()):
+                out.append((item["id"], lang))
+    return out
 
 
 def render():
@@ -123,11 +163,15 @@ def render():
 
 
 def main(argv):
+    gaps = missing(build())
     want = render()
     have = TARGET.read_text(encoding="utf-8") if TARGET.is_file() else ""
+    if gaps:
+        print("HELP_INDEX=FAIL these topics miss a language: " + ", ".join(f"{t}:{l}" for t, l in gaps))
+        return 1
     if "--check" in argv:
         ok = have == want
-        print("HELP_INDEX=" + ("PASS the index agrees with the documents" if ok else "FAIL monitor/docs/help_index.json is out of date (run tools/make_help_index.py)"))
+        print("HELP_INDEX=" + ("PASS the index agrees with the documents and every topic has all eight languages" if ok else "FAIL monitor/docs/help_index.json is out of date (run tools/make_help_index.py)"))
         return 0 if ok else 1
     TARGET.write_text(want, encoding="utf-8", newline="\n")
     print("HELP_INDEX=WRITTEN %s (%d KB)" % (TARGET, len(want.encode("utf-8")) // 1024))
