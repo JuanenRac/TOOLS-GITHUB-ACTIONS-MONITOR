@@ -24,4 +24,5 @@ INICIO RÁPIDO - Monitor de GitHub Actions + Centinela
    comandos que ejecutas tú; el monitor solo los muestra como texto.
 7. Extras opcionales (apagados o aparte): lint_workflows.py revisa tus archivos de workflow antes de subir; tui.py muestra una cuadrícula en vivo en la consola (pip install rich); las notificaciones, el webhook de entrada y el
    asistente de IA se activan en la pestaña Configuración; para ejecutarlo como servicio, tras un proxy o en un contenedor mira docs/DEPLOYMENT_spa.md.
+8. ¿Solo quieres vigilar tus runs? Arranca MONITOR_LITE_GITHUB_ACTIONS (la edición lite: sin centinela, una Configuración corta, puerto 8766). Mira docs/LITE_spa.md.
 ¿Problemas? Mira «PROBLEMAS» en README_es.txt.

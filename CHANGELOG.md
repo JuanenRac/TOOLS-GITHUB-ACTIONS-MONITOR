@@ -9,6 +9,10 @@ Changes of the repository as a whole. The program has its own, more detailed his
 
 ## [Unreleased]
 
+## [1.6.1]
+
+- The lite edition (its own launchers, configuration, state files and port, no sentinel), the `act` command in the repository panel, a container example built by the CI and an updated roadmap.
+
 ## [1.6.0]
 
 - Conditional reads, a mode for lost connections, analytics (durations, queue time, steps, flaky workflows), real-time webhook events, a workflow linter, optional notifications (chat, MQTT, local HTTP), new AI providers (`anthropic`, `copilot`) with a closed list of actions that run only after a confirmation, a terminal view, a health endpoint and Enterprise Server support.

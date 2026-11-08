@@ -16,6 +16,12 @@ Ideas that did not fit in the current version, in no promised order. They are di
 - **Run a workflow locally**: a button that runs the suggested `act -W FILE -j JOB` command after an explicit confirmation (today the command is only shown).
 - **More notification adapters**: ntfy, Microsoft Teams and e-mail through a local relay.
 - **Several accounts in one page**: today each account runs in its own monitor.
+- **FinOps of the minutes**: multipliers per operating system, a breakdown by repository, workflow, branch and author, an alert for an anomaly and for a monthly allowance.
+- **Self-hosted runner status** from the runners API (idle, busy, offline, queue and capacity), and hardware telemetry only through an optional node_exporter-like endpoint.
+
+## Why the terminal view uses Rich and not Textual
+
+`tui.py` is a read-only grid drawn again every few seconds: Rich is enough and is one small dependency. Textual would add an event loop, a second layout system and a second way to test the same screen without giving the monitor anything it needs; if an interactive terminal application is wanted one day it should be a separate tool.
 
 ## Ideas that need a decision first
 

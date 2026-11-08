@@ -36,6 +36,9 @@ WEB = [("now", "tab=now", (1400, 820)), ("sentinel", "tab=sent&open=a2", (1400, 
        ("charts", "tab=charts", (1400, 820)), ("repositories", "tab=repos", (1400, 820)), ("history", "tab=hist", (1400, 820))] + [(f"settings_{t}", f"tab=cfg&cfgtab={t}", (1400, 820)) for t in TABS]
 
 
+LITE_WEB = [("lite_now", "tab=now", (1400, 820)), ("lite_charts", "tab=charts", (1400, 820)), ("lite_history", "tab=hist", (1400, 820)), ("lite_settings", "tab=cfg&cfgtab=general", (1400, 700))]
+
+
 def edge():
     for path in EDGES:
         if Path(path).is_file():
@@ -151,6 +154,8 @@ def main():
     port = free_port()
     demo = subprocess.Popen([sys.executable, "-I", str(ROOT / "tools" / "demo_monitor.py"), str(port)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     work = tempfile.mkdtemp(prefix="ghamon_shots_")
+    lite_port = free_port()
+    lite = subprocess.Popen([sys.executable, "-I", str(ROOT / "tools" / "demo_monitor.py"), str(lite_port), "--lite"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:
         for _ in range(60):
             try:
@@ -164,6 +169,18 @@ def main():
                 for theme in ("light", "dark"):
                     if wanted(f"web_{name}"):
                         shot(f"http://127.0.0.1:{port}/?{query}&theme={theme}&lang=en", str(OUT / f"web_{name}_{theme}.png"), size)
+                        print("web", name, theme, flush=True)
+        if args.web or both:
+            for _ in range(60):
+                try:
+                    socket.create_connection(("127.0.0.1", lite_port), 0.5).close()
+                    break
+                except OSError:
+                    time.sleep(0.5)
+            for name, query, size in LITE_WEB:
+                for theme in ("light", "dark"):
+                    if wanted(f"web_{name}"):
+                        shot(f"http://127.0.0.1:{lite_port}/?{query}&theme={theme}&lang=en", str(OUT / f"web_{name}_{theme}.png"), size)
                         print("web", name, theme, flush=True)
         if args.console or both:
             texts = console_texts(port, work)
@@ -185,6 +202,7 @@ def main():
                 print("rich is not installed: the picture of tui.py was skipped (pip install rich)")
     finally:
         demo.terminate()
+        lite.terminate()
         shutil.rmtree(work, ignore_errors=True)
     return 0
 

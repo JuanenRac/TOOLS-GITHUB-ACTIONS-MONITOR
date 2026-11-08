@@ -38,6 +38,8 @@ background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 
 .tile.skel b{color:transparent;border-radius:5px;background:linear-gradient(100deg,var(--line) 30%,var(--line2) 50%,var(--line) 70%);background-size:200% 100%}
 .tile.skel small{opacity:.6}.tile.stale b{opacity:.55}
 .tile[hidden]{display:none}
+.lite #n-sent,.lite #t-sent,.lite #kp-sign,.lite #k-ready,.lite #k-budget,.lite #kt-etag{display:none!important}
+.lite-note{margin:0 0 10px;color:var(--mut)}
 @media (max-width:640px){header{padding:8px 10px}.tile{min-width:calc(50% - 4px);flex:1 1 calc(50% - 4px);padding:6px 9px}.tile.wide{min-width:100%}.tile b{font-size:18px}h1{width:100%}}
 @media (prefers-reduced-motion:no-preference){@keyframes tilepulse{0%,100%{box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo),0 0 0 0 rgba(96,165,250,.5)}50%{box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo),0 0 0 5px rgba(96,165,250,0)}}
 .tile.run:not(.skel){animation:tilepulse 2.4s ease-out infinite}@keyframes shimmer2{from{background-position:200% 0}to{background-position:-200% 0}}.tile.skel b{animation:shimmer2 1.4s linear infinite}}
@@ -279,8 +281,9 @@ var LANG=[QS.get("lang"),store.get("am-lang"),I18N.default,"en"].find(x=>x&&I18N
 function T(k,v){const c=I18N.catalogues[LANG]||{},e=I18N.catalogues.en||{};let s=c[k]!==undefined?c[k]:e[k];if(s===undefined)return k;if(v)s=s.replace(/\{(\w+)\}/g,(m,n)=>v[n]!==undefined?v[n]:m);return s}
 const LOC=()=>I18N.locale[LANG]||"en-GB";
 const OWNER=I18N.owner||"";
+const LITE=!!I18N.lite;if(LITE)document.body.classList.add("lite");
 function applyStatic(){
-  document.documentElement.lang=I18N.html[LANG]||LANG;document.title=T("ui.title")+(I18N.version?" v"+I18N.version:"");const aboutEl=document.getElementById("about");if(aboutEl&&I18N.author)aboutEl.textContent=T("ui.about",{author:I18N.author,license:I18N.license});const verEl=document.getElementById("ver");if(verEl)verEl.textContent=I18N.version?"v"+I18N.version:"";
+  document.documentElement.lang=I18N.html[LANG]||LANG;document.title=T("ui.title")+(I18N.version?" v"+I18N.version:"");const aboutEl=document.getElementById("about");if(aboutEl&&I18N.author)aboutEl.textContent=T("ui.about",{author:I18N.author,license:I18N.license});const verEl=document.getElementById("ver");if(verEl)verEl.textContent=(I18N.version?"v"+I18N.version:"")+(LITE?" · "+T("ui.lite_badge"):"");
   document.querySelectorAll("[data-i18n]").forEach(e=>{e.textContent=T(e.dataset.i18n)});
   document.querySelectorAll("[data-i18n-title]").forEach(e=>{e.title=T(e.dataset.i18nTitle)});
   document.querySelectorAll("[data-i18n-aria]").forEach(e=>{e.setAttribute("aria-label",T(e.dataset.i18nAria))});
@@ -348,7 +351,7 @@ function refreshLanguage(){
 }
 
 /* tabs */
-const TABS=["now","sent","charts","repos","hist","cfg"];
+const TABS=LITE?["now","charts","repos","hist","cfg"]:["now","sent","charts","repos","hist","cfg"];
 function showTab(t){if(!TABS.includes(t))t="now";TABS.forEach(x=>{$("t-"+x).classList.toggle("on",x===t);$("n-"+x).setAttribute("aria-selected",x===t)});store.set("am-tab",t);if(DATA&&t==="charts")setTimeout(()=>render(DATA),30);try{if(location.hash!=="#"+t)window.history.replaceState(null,"","#"+t)}catch(e){}}
 document.querySelector("nav").addEventListener("click",e=>{const b=e.target.closest("button[data-tab]");if(b)showTab(b.dataset.tab)});
 document.querySelector("nav").addEventListener("keydown",e=>{if(e.key!=="ArrowRight"&&e.key!=="ArrowLeft")return;const i=TABS.findIndex(x=>$("n-"+x).getAttribute("aria-selected")==="true"),n=TABS[(i+(e.key==="ArrowRight"?1:TABS.length-1))%TABS.length];showTab(n);$("n-"+n).focus()});
@@ -368,7 +371,7 @@ const failRepos=()=>DATA?[...new Set(DATA.failing.map(r=>r.repo))]:[];
 $("kp-fail").addEventListener("click",()=>setList(T("ui.l_fail"),failRepos()));
 $("kp-fail").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setList(T("ui.l_fail"),failRepos())}});
 /* KPIs "red" and "unsigned": filter the repos and, the second, focus the signing queue of the Sentinel */
-const redRepos=()=>SENT&&SENT.a2?[...new Set(SENT.a2.red.map(r=>r.repo))]:[];
+const redRepos=()=>LITE?(DATA?[...new Set(DATA.failing.map(r=>r.repo))]:[]):(SENT&&SENT.a2?[...new Set(SENT.a2.red.map(r=>r.repo))]:[]);
 /* the repositories that wait for a signature, the longest wait first (a repository only in the signing queue goes after them) */
 const signWait=()=>{const w={};((SENT&&SENT.a5&&SENT.a5.pending_sign)||[]).forEach(q=>{w[q.repo]=Math.max(w[q.repo]||0,q.hours||0)});return w};
 const signRepos=()=>{if(!SENT||!SENT.a5)return[];const w=signWait();return [...new Set([...(SENT.a5.sign_queue||[]).map(q=>q.repo),...(SENT.a5.pending_sign||[]).map(q=>q.repo)])].sort((a,b)=>(w[b]||0)-(w[a]||0)||(a<b?-1:1))};
@@ -664,6 +667,7 @@ $("t-sent").addEventListener("click",async e=>{
   renderSent();
 });
 async function sentTick(){
+  if(LITE)return;
   try{const r=await fetch("/api/analytics",{cache:"no-store"});if(r.ok)ANA=await r.json()}catch(e){}
   try{const r=await fetch("/api/sentinel?"+qlang(),{cache:"no-store"});const j=await r.json();SENT_ERR=j.error||null;if(j.data)SENT=j.data}
   catch(e){SENT_ERR=T("ui.err_sentinel_down",{msg:e})}
@@ -691,6 +695,8 @@ function renderPanel(){
   if(iss.length){const ic=s&&s.a10?(s.a10.sections||[]).find(x=>x.key==="issue_close"):null,ics=ic?ic.rows.filter(r=>r[0]===repo):[];
     h+=`<h3>${esc(T("ui.rp_issues"))}</h3>`+iss.map(i=>{const m=ics.find(r=>new RegExp("\b"+i.number+"\b").test(String(r[1])));
       return `<div>${link(i.url,"#"+i.number)} ${esc(i.title)}</div>`+(m?`<div style="margin:2px 0 6px"><span class="mut">${esc(T("ui.rp_close_suggest"))}</span><br><code>${esc(m[3])}</code> <button type="button" data-copy="${esc(m[3])}">${esc(T("ui.copy"))}</button></div>`:"")}).join("")}
+  {const wfs=[...new Set(rs.map(r=>r.path).filter(x=>/^[A-Za-z0-9._-]+\.ya?ml$/.test(x||"")))].slice(0,6),jn=jobs.length&&/^[A-Za-z0-9_-]+$/.test(jobs[0].name)?jobs[0].name:"<job>";
+    if(wfs.length)h+=`<h3>${esc(T("ui.act_h"))}</h3><div class="mut" style="font-size:12px">${esc(T("ui.act_hint"))}</div>`+wfs.map(f=>{const c="act -W .github/workflows/"+f+" -j "+jn;return `<div style="margin-top:4px"><code>${esc(c)}</code> <button type="button" data-copy="${esc(c)}">${esc(T("ui.copy"))}</button></div>`}).join("")}
   h+=`<h3>${esc(T("ui.rp_links"))}</h3><a href="${GH}${encodeURIComponent(OWNER)}/${encodeURIComponent(repo)}/actions" target="_blank" rel="noopener">${esc(T("ui.rp_open_actions"))}</a>`;
   if(!s)h+=`<div class="mut" style="margin-top:8px">${esc(T("ui.rp_sentinel_wait"))}</div>`;
   p.innerHTML=h;$("rp-x").addEventListener("click",closePanel);
@@ -706,7 +712,7 @@ function renderDiff(j){
   const part=(t,o)=>`<div style="margin:4px 0"><b>${esc(t)}</b> <span class="mut">${esc(T("ui.df_now",{n:o.now.length}))}</span><div class="dif">${o.appeared.map(a=>`<span class="chip new" title="${esc(T("ui.df_appears"))}">+ ${esc(a)}</span>`).join("")}${o.disappeared.map(a=>`<span class="chip gone" title="${esc(T("ui.df_disappears"))}">${esc(a)}</span>`).join("")}${o.appeared.length||o.disappeared.length?"":`<span class="mut">${esc(T("ui.df_nochange"))}</span>`}</div></div>`;
   el.innerHTML=`<div class="mut" style="font-size:12px">${esc(T("ui.df_base",{day:x.base_day,when:x.is_yesterday?T("ui.df_yesterday"):T("ui.df_lastday"),n:x.days_saved}))}</div>`+part(T("ui.df_red"),x.red)+part(T("ui.df_pending"),x.pending_sign)+(x.budget&&!x.budget.no_base?part(T("ui.df_budget"),x.budget):"")+(x.parte&&!x.parte.no_base?part(T("ui.df_lines"),x.parte):"");
 }
-async function diffTick(){try{const r=await fetch("/api/sentinel/historial?"+qlang(),{cache:"no-store"});renderDiff(await r.json())}catch(e){renderDiff({error:T("ui.err_monitor",{msg:e})})}}
+async function diffTick(){if(LITE)return;try{const r=await fetch("/api/sentinel/historial?"+qlang(),{cache:"no-store"});renderDiff(await r.json())}catch(e){renderDiff({error:T("ui.err_monitor",{msg:e})})}}
 var _rs=renderSent;renderSent=function(){_rs();updateKpis();if(PANEL)renderPanel();tipRows()};
 
 /* settings menu: sub-tabs built from what /api/settings says; only the values that changed are sent */
@@ -851,6 +857,7 @@ function paintTiles(d){
   TILES_LIVE=true;
   const nz=(id,n,cls)=>tileState(id,n>0?cls:"");
   const last=runs=>runs;
+  if(LITE){kSet("k-red",d.failing.length);tileState("kp-red",d.failing.length?"bad":"")}
   tileState("kt-active",d.active.filter(r=>r.status==="in_progress").length>0?"run":"");
   nz("kt-queued",d.active.filter(r=>r.status!=="in_progress").length,"warn");
   nz("kp-fail",$("k-fail")._v||0,"bad");

@@ -41,3 +41,15 @@ jobs:
           python tools/make_architecture.py --check
           python tools/make_structure.py --check
           python tools/make_settings_doc.py --check
+
+  container:
+    name: The example container builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the image of deploy/Dockerfile
+        run: docker build -f deploy/Dockerfile -t github-actions-monitor .
+      - name: The monitor and the GitHub CLI are in the image
+        run: |
+          docker run --rm github-actions-monitor python -c "import actions_monitor, tool_version; print(tool_version.TOOL_VERSION)"
+          docker run --rm github-actions-monitor gh --version

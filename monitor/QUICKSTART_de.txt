@@ -24,4 +24,5 @@ SCHNELLSTART - GitHub-Actions-Monitor + Wächter
    Veröffentlichen sind Befehle, die du selbst ausführst; der Monitor zeigt sie nur als Text.
 7. Optionale Extras (aus oder getrennt): lint_workflows.py prüft Ihre Workflow-Dateien vor dem Push; tui.py zeigt ein Live-Raster in der Konsole (pip install rich); Benachrichtigungen, der eingehende Webhook und der
    KI-Assistent werden im Reiter Einstellungen eingeschaltet; als Dienst, hinter einem Proxy oder in einem Container siehe docs/DEPLOYMENT_deu.md.
+8. Möchten Sie nur Ihre Runs beobachten? Starten Sie stattdessen MONITOR_LITE_GITHUB_ACTIONS (die Lite-Ausgabe: ohne Wächter, kurze Einstellungen, Port 8766). Siehe docs/LITE_deu.md.
 Probleme? Siehe „PROBLEME“ in README_de.txt.

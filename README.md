@@ -31,7 +31,7 @@
 
 | | |
 |---|---|
-| **Version** | **1.6.0** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **1.6.1** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Needs** | Python 3.11+ and the GitHub CLI (`gh auth login`); nothing else (the terminal view uses the optional package `rich`) |
 | **Opens** | a page on `127.0.0.1` only, in eight languages |
 | **Writes to GitHub** | never by itself: only batch commands you run with an explicit `--go` |
@@ -79,6 +79,15 @@
 
 </details>
 
+<details><summary><b>The lite edition</b></summary>
+
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_lite_now_light.png"><img src="docs/screenshots/web_lite_now_dark.png" alt="lite · Now" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_lite_charts_light.png"><img src="docs/screenshots/web_lite_charts_dark.png" alt="lite · Charts" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_lite_history_light.png"><img src="docs/screenshots/web_lite_history_dark.png" alt="lite · History" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_lite_settings_light.png"><img src="docs/screenshots/web_lite_settings_dark.png" alt="lite · Settings" width="92%"></picture></p>
+
+</details>
+
 Each picture follows the light or dark theme of your GitHub page.
 
 *Demo data: the repositories and names in the pictures are invented.*
@@ -106,6 +115,23 @@ Each picture follows the light or dark theme of your GitHub page.
 5. Open **Settings** to set your GitHub account, the ecosystems (groups of repositories by name prefix) and anything else.
 
 > Updating from a version before 1.5.0? [`monitor/docs/MIGRATING.md`](monitor/docs/MIGRATING.md)
+
+## The lite edition
+
+A second, simpler product in the same package: the page of what is running and what failed, without the sentinel. It is for people who only want to watch their runs.
+
+|  | Complete | Lite |
+|---|---|---|
+| Start | `MONITOR_GITHUB_ACTIONS` (`.bat` / `.sh` / `.command`) | `MONITOR_LITE_GITHUB_ACTIONS` (same three) |
+| Port | 8765 | 8766 |
+| Tabs | Now, Sentinel, Charts, Repositories, History, Settings | Now, Charts, Repositories, History, a short Settings |
+| Header | all the tiles, readiness, signing | running, queued, failures and successes of 24 h, compute minutes, issues, red on main, repositories, allowance, connection |
+| Sentinel (alerts, releases, signing queue, readiness, linter) | yes | no: it is not even imported |
+| Analytics, notifications, webhook, AI, Prometheus / Grafana outputs | yes, off until you switch them on | no: those paths answer 404 |
+| Configuration | `actions_monitor.json` | `actions_monitor_lite.json` (created on the first start; the sentinel is off in it) |
+| State files | `etag_cache.json`, `analytics_history.json`... | the same names with the suffix `_lite` |
+
+[`monitor/docs/LITE.md`](monitor/docs/LITE.md)
 
 ## Settings
 
@@ -144,6 +170,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 ├── monitor/                             the program
 ├── docs/                                architecture, screenshots, roadmap
 ├── tools/                               pictures, guides and demo
+├── deploy/                              container example
 ├── images/                              banner and pictures
 ├── .github/                             CI and issue forms
 ├── CHANGELOG.md                         changes per version
@@ -153,6 +180,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 └── monitor/
     ├── actions_monitor.py               local server
     ├── actions_monitor.html             the web page
+    ├── MONITOR_LITE_GITHUB_ACTIONS.*    the lite edition (no sentinel)
     ├── sentinel_local.py                alerts and report
     ├── surface.py readiness.py          repo checks, readiness
     ├── settings_api.py outputs.py       settings tabs, metrics
@@ -178,6 +206,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/CI_RED_SCHEMA.md`](monitor/docs/CI_RED_SCHEMA.md): the format of ci_red.json
 - [`monitor/docs/CI_RED_BRIDGE.md`](monitor/docs/CI_RED_BRIDGE.md): carrying ci_red.json to a dashboard
 - [`monitor/docs/WEBHOOK.md`](monitor/docs/WEBHOOK.md): the incoming webhook
+- [`monitor/docs/LITE.md`](monitor/docs/LITE.md): The lite edition
 - [`monitor/docs/NOTIFICATIONS.md`](monitor/docs/NOTIFICATIONS.md): notifications and the adapter contract
 - [`monitor/docs/AI.md`](monitor/docs/AI.md): the AI assistant: providers, safety and actions
 - [`monitor/docs/ANALYTICS.md`](monitor/docs/ANALYTICS.md): analytics, conditional reads and the lost connection

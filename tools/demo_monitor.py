@@ -6,7 +6,7 @@
 # =============================================================================
 """A demo monitor with invented data (the demo-* repositories of the demo-owner account) for the screenshots of the documentation.
 
-    python tools/demo_monitor.py [PORT]        # default 18765; runs until it is stopped
+    python tools/demo_monitor.py [PORT] [--lite]   # default 18765; runs until it is stopped
 
 It starts the real web server of the monitor on 127.0.0.1 with a temporary configuration and made-up runs, alerts, a signing queue, analytics and linter findings, so the page can be
 photographed without touching your own configuration or GitHub. Nothing is read from GitHub and nothing is written outside a temporary folder.
@@ -126,9 +126,12 @@ def demo_analytics(runs):
 
 
 def main():
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 18765
+    lite = "--lite" in sys.argv
+    numbers = [a for a in sys.argv[1:] if a.isdigit()]
+    port = int(numbers[0]) if numbers else 18765
     now = datetime.now(timezone.utc).replace(microsecond=0)
     setup(now)
+    am.LITE["on"] = lite       # the lite edition: no sentinel, no analytics, a short settings page
     data, runs, iso = build(now)
     snap = snapshot(now, data, runs, iso)
 
@@ -140,9 +143,10 @@ def main():
 
         def refresh_repos(self, names):
             return names
-    am.SENTINEL["obj"] = Demo()
-    am.ANALYTICS["store"] = analytics.Store(Path(tempfile.mkdtemp()) / "a.json")
-    am.ANALYTICS["summary"] = demo_analytics(runs)
+    if not lite:
+        am.SENTINEL["obj"] = Demo()
+        am.ANALYTICS["store"] = analytics.Store(Path(tempfile.mkdtemp()) / "a.json")
+        am.ANALYTICS["summary"] = demo_analytics(runs)
     am.ETAG["cache"] = etagcache.EtagCache(Path(tempfile.mkdtemp()) / "e.json")
     server = ThreadingHTTPServer(("127.0.0.1", port), am.Handler)
     print("demo on", port, flush=True)

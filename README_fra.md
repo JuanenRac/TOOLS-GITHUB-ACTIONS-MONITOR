@@ -31,7 +31,7 @@
 
 | | |
 |---|---|
-| **Version** | **1.6.0** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **1.6.1** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Prérequis** | Python 3.11+ et la CLI GitHub (`gh auth login`) ; rien d'autre (la vue console utilise le paquet optionnel `rich`) |
 | **S'ouvre** | sur une page `127.0.0.1` uniquement, en huit langues |
 | **Écrit sur GitHub** | jamais seul : seulement les commandes par lots que vous lancez avec un `--go` explicite |
@@ -79,6 +79,15 @@
 
 </details>
 
+<details><summary><b>L'édition lite</b></summary>
+
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_lite_now_light.png"><img src="docs/screenshots/web_lite_now_dark.png" alt="lite · Maintenant" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_lite_charts_light.png"><img src="docs/screenshots/web_lite_charts_dark.png" alt="lite · Graphiques" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_lite_history_light.png"><img src="docs/screenshots/web_lite_history_dark.png" alt="lite · Historique" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_lite_settings_light.png"><img src="docs/screenshots/web_lite_settings_dark.png" alt="lite · Réglages" width="92%"></picture></p>
+
+</details>
+
 Chaque image suit le thème clair ou sombre de votre page GitHub.
 
 *Données de démonstration : les dépôts et noms des images sont inventés.*
@@ -106,6 +115,23 @@ Chaque image suit le thème clair ou sombre de votre page GitHub.
 5. Ouvrez **Réglages** pour indiquer votre compte GitHub, les écosystèmes (groupes de dépôts par préfixe de nom) et le reste.
 
 > Vous mettez à jour depuis une version antérieure à la 1.5.0 ? [`monitor/docs/MIGRATING_fra.md`](monitor/docs/MIGRATING_fra.md)
+
+## L'édition lite
+
+Un second produit, plus simple, dans le même paquet : la page de ce qui tourne et de ce qui échoue, sans la sentinelle. Pour qui veut seulement surveiller ses runs.
+
+|  | Complète | Lite |
+|---|---|---|
+| Démarrage | `MONITOR_GITHUB_ACTIONS` (`.bat` / `.sh` / `.command`) | `MONITOR_LITE_GITHUB_ACTIONS` (les trois mêmes) |
+| Port | 8765 | 8766 |
+| Onglets | Maintenant, Sentinelle, Graphiques, Dépôts, Historique, Réglages | Maintenant, Graphiques, Dépôts, Historique, des Réglages courts |
+| En-tête | toutes les tuiles, préparation, signature | en cours, en file, échecs et succès de 24 h, minutes de calcul, issues, rouges sur main, dépôts, quota, connexion |
+| Sentinelle (alertes, releases, file de signature, préparation, linter) | oui | non : elle n'est même pas importée |
+| Analyses, notifications, webhook, IA, sorties Prometheus / Grafana | oui, désactivés tant que vous ne les activez pas | non : ces chemins répondent 404 |
+| Configuration | `actions_monitor.json` | `actions_monitor_lite.json` (créé au premier démarrage ; la sentinelle y est désactivée) |
+| Fichiers d'état | `etag_cache.json`, `analytics_history.json`... | les mêmes noms avec le suffixe `_lite` |
+
+[`monitor/docs/LITE_fra.md`](monitor/docs/LITE_fra.md)
 
 ## Réglages
 
@@ -144,6 +170,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 ├── monitor/                             le programme
 ├── docs/                                architecture, captures, feuille de route
 ├── tools/                               images, guides et démo
+├── deploy/                              exemple de conteneur
 ├── images/                              bannière et images
 ├── .github/                             CI et formulaires
 ├── CHANGELOG.md                         changements par version
@@ -153,6 +180,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 └── monitor/
     ├── actions_monitor.py               serveur local
     ├── actions_monitor.html             la page web
+    ├── MONITOR_LITE_GITHUB_ACTIONS.*    l'édition lite
     ├── sentinel_local.py                alertes, rapport
     ├── surface.py readiness.py          contrôles, préparation
     ├── settings_api.py outputs.py       réglages, métriques
@@ -178,6 +206,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/CI_RED_SCHEMA_fra.md`](monitor/docs/CI_RED_SCHEMA_fra.md): le format de ci_red.json
 - [`monitor/docs/CI_RED_BRIDGE_fra.md`](monitor/docs/CI_RED_BRIDGE_fra.md): amener ci_red.json vers un tableau de bord
 - [`monitor/docs/WEBHOOK_fra.md`](monitor/docs/WEBHOOK_fra.md): le webhook entrant
+- [`monitor/docs/LITE_fra.md`](monitor/docs/LITE_fra.md): L'édition lite
 - [`monitor/docs/NOTIFICATIONS_fra.md`](monitor/docs/NOTIFICATIONS_fra.md): notifications et contrat des adaptateurs
 - [`monitor/docs/AI_fra.md`](monitor/docs/AI_fra.md): l'assistant IA : fournisseurs, sécurité et actions
 - [`monitor/docs/ANALYTICS_fra.md`](monitor/docs/ANALYTICS_fra.md): analyses, lectures conditionnelles et connexion perdue

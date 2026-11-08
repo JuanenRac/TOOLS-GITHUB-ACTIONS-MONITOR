@@ -61,6 +61,19 @@
           }
         },
         {
+          "name": "deploy/",
+          "desc": {
+            "en": "container example",
+            "es": "ejemplo de contenedor",
+            "de": "Container-Beispiel",
+            "fr": "exemple de conteneur",
+            "it": "esempio di container",
+            "ja": "コンテナーの例",
+            "zh": "容器示例",
+            "pt": "exemplo de contentor"
+          }
+        },
+        {
           "name": "images/",
           "desc": {
             "en": "banner and pictures",
@@ -183,6 +196,20 @@
             "ja": "Web ページ",
             "zh": "网页",
             "pt": "a página web"
+          }
+        },
+        {
+          "name": "MONITOR_LITE_GITHUB_ACTIONS.*",
+          "tree_name": "MONITOR_LITE_GITHUB_ACTIONS.*",
+          "desc": {
+            "en": "the lite edition (no sentinel)",
+            "es": "la edición lite (sin centinela)",
+            "de": "die Lite-Ausgabe",
+            "fr": "l'édition lite",
+            "it": "l'edizione lite",
+            "ja": "lite 版(センチネルなし)",
+            "zh": "lite 版(无哨兵)",
+            "pt": "a edição lite"
           }
         },
         {

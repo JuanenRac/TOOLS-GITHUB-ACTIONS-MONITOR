@@ -47,6 +47,7 @@ WantedBy=multi-user.target
 Contenedor:
 
 ```dockerfile
+# the same file is deploy/Dockerfile of the repository (the CI builds it)
 FROM python:3.13-slim
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates gnupg \
  && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg -o /usr/share/keyrings/githubcli.gpg \

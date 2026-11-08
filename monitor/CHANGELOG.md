@@ -9,6 +9,13 @@ Version of the tool itself (monitor + sentinel + batch tools), semver of its own
 and is shown as `tool_version` in the sentinel snapshot and by `read_report.py --version`; `make_release.py` refuses to build
 when this file and `tool_version.py` disagree.
 
+## [1.6.1]
+
+- **The lite edition**, a second and simpler product in the same package: `MONITOR_LITE_GITHUB_ACTIONS.bat` / `.sh` / `.command` or `--lite` / `MONITOR_MODE=lite`. What is running and what failed, failures and successes of 24 hours, red on main, the history and the basic charts; no sentinel (it is not imported and its endpoints answer 404), a short Settings page (account, repositories and ecosystems, refresh, language, theme), its own file `actions_monitor_lite.json`, its own state files with the suffix `_lite` and port 8766, so both can run side by side. Guide in eight languages, a Lite-versus-Complete table in every README and new screenshots.
+- **`act` command in the repository panel**: for each workflow of the repository, `act -W .github/workflows/FILE -j JOB` ready to copy. The monitor never runs it (running it exists only as a confirmed action of the AI assistant).
+- A container example (`deploy/Dockerfile`) that the CI builds, and the notes of the terminal view (why it uses Rich and not Textual) in the roadmap.
+- The roadmap lists what did not fit: local mirror of artifacts, FinOps of the minutes, self-hosted runner status and an OTLP export.
+
 ## [1.6.0]
 
 - **Conditional reads (ETag)**: every read of the run lists sends `If-None-Match`; a `304 Not Modified` answer costs no quota. The header and `ghamon_etag_saved_total` count the reads saved; `cache.etag.*` in the Settings tab.

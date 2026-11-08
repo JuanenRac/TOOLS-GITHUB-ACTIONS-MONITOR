@@ -31,7 +31,7 @@
 
 | | |
 |---|---|
-| **バージョン** | **1.6.0** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **バージョン** | **1.6.1** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **必要なもの** | Python 3.11 以上と GitHub CLI（`gh auth login`）。それ以外は不要(ターミナル表示は任意のパッケージ `rich` を使います) |
 | **開く先** | `127.0.0.1` 上のページのみ、8言語対応 |
 | **GitHub への書き込み** | 自動では行いません。明示的な `--go` を付けて実行したバッチコマンドのみ |
@@ -79,6 +79,15 @@
 
 </details>
 
+<details><summary><b>lite 版</b></summary>
+
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_lite_now_light.png"><img src="docs/screenshots/web_lite_now_dark.png" alt="lite · 現在" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_lite_charts_light.png"><img src="docs/screenshots/web_lite_charts_dark.png" alt="lite · グラフ" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_lite_history_light.png"><img src="docs/screenshots/web_lite_history_dark.png" alt="lite · 履歴" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_lite_settings_light.png"><img src="docs/screenshots/web_lite_settings_dark.png" alt="lite · 設定" width="92%"></picture></p>
+
+</details>
+
 各画像は GitHub ページのライト/ダークテーマに従います。
 
 *デモデータです。画像内のリポジトリ名や名前は架空のものです。*
@@ -106,6 +115,23 @@
 5. **設定** を開き、GitHub アカウント、エコシステム（名前の接頭辞によるリポジトリのグループ）などを設定します。
 
 > 1.5.0 より前のバージョンから更新しますか？ [`monitor/docs/MIGRATING_jpn.md`](monitor/docs/MIGRATING_jpn.md)
+
+## lite 版
+
+同じパッケージに入った、もう 1 つのシンプルな製品です。実行中のものと失敗したものを見せるページで、センチネルはありません。自分の実行を眺めたいだけの人向けです。
+
+|  | 完全版 | lite 版 |
+|---|---|---|
+| 起動 | `MONITOR_GITHUB_ACTIONS`(`.bat` / `.sh` / `.command`) | `MONITOR_LITE_GITHUB_ACTIONS`(同じ 3 種類) |
+| ポート | 8765 | 8766 |
+| タブ | 今、センチネル、グラフ、リポジトリ、履歴、設定 | 今、グラフ、リポジトリ、履歴、短い設定 |
+| ヘッダー | すべてのタイル、準備状況、署名 | 実行中、待機、24 時間の失敗と成功、計算分数、issue、main の赤、リポジトリ、割り当て、接続 |
+| センチネル(アラート、リリース、署名キュー、準備状況、Lint) | あり | なし(インポートもされません) |
+| 分析、通知、Webhook、AI、Prometheus / Grafana 出力 | あり(オンにするまでオフ) | なし(これらのパスは 404 を返します) |
+| 設定 | `actions_monitor.json` | `actions_monitor_lite.json`(初回起動時に作成。センチネルはオフ) |
+| 状態ファイル | `etag_cache.json`、`analytics_history.json` など | 同じ名前に接尾辞 `_lite` |
+
+[`monitor/docs/LITE_jpn.md`](monitor/docs/LITE_jpn.md)
 
 ## 設定
 
@@ -144,6 +170,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 ├── monitor/                             プログラム本体
 ├── docs/                                構成図・画面・ロードマップ
 ├── tools/                               図・ガイド・デモ
+├── deploy/                              コンテナーの例
 ├── images/                              バナーと図
 ├── .github/                             CI と Issue フォーム
 ├── CHANGELOG.md                         バージョン別の変更
@@ -153,6 +180,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 └── monitor/
     ├── actions_monitor.py               ローカルサーバー
     ├── actions_monitor.html             Web ページ
+    ├── MONITOR_LITE_GITHUB_ACTIONS.*    lite 版(センチネルなし)
     ├── sentinel_local.py                アラートとレポート
     ├── surface.py readiness.py          検査とリリース準備
     ├── settings_api.py outputs.py       設定とメトリクス
@@ -178,6 +206,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/CI_RED_SCHEMA_jpn.md`](monitor/docs/CI_RED_SCHEMA_jpn.md): ci_red.json の形式
 - [`monitor/docs/CI_RED_BRIDGE_jpn.md`](monitor/docs/CI_RED_BRIDGE_jpn.md): ci_red.json をダッシュボードへ渡す
 - [`monitor/docs/WEBHOOK_jpn.md`](monitor/docs/WEBHOOK_jpn.md): 受信 Webhook
+- [`monitor/docs/LITE_jpn.md`](monitor/docs/LITE_jpn.md): lite 版
 - [`monitor/docs/NOTIFICATIONS_jpn.md`](monitor/docs/NOTIFICATIONS_jpn.md): 通知とアダプターの取り決め
 - [`monitor/docs/AI_jpn.md`](monitor/docs/AI_jpn.md): AI アシスタント:プロバイダー、安全性、アクション
 - [`monitor/docs/ANALYTICS_jpn.md`](monitor/docs/ANALYTICS_jpn.md): 分析、条件付き読み取り、接続の喪失

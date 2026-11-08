@@ -71,6 +71,28 @@ DEFAULTS = {
     "cache": {"etag": {"enabled": True, "ttl_hours": 24}},   # conditional reads: a 304 answer costs no quota (etagcache.py)
 }
 
+LITE = {"on": False}      # the lite product: the same server without the sentinel, with its own configuration file, its own state files and a short settings page
+LITE_PORT = 8766
+LITE_PATHS = ("/api/sentinel", "/api/ai", "/api/notify", "/api/analytics", "/api/live-events", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics")   # they do not exist in lite
+
+
+def lite_requested(argv=None):
+    """True with --lite or MONITOR_MODE=lite."""
+    return "--lite" in (sys.argv[1:] if argv is None else argv) or os.environ.get("MONITOR_MODE", "").strip().lower() == "lite"
+
+
+def enable_lite():
+    """Switches the module to the lite product BEFORE the configuration is read: its own file names (so that the complete monitor and the lite one can live in the same folder)."""
+    global CONFIG_FILE, LOG_FILE
+    import settings_api
+    LITE["on"] = True
+    CONFIG_FILE = HERE / "actions_monitor_lite.json"
+    LOG_FILE = HERE / "actions_monitor_log_lite.txt"
+    settings_api.CONFIG_FILE = toolconfig.CONFIG_FILE = CONFIG_FILE
+    settings_api.BACKUP_DIR = HERE / "config_backups_lite"
+    etagcache.CACHE_FILE = HERE / "etag_cache_lite.json"
+
+
 RESTART_PENDING = set()   # settings changed from the page since this process started that only apply after a restart
 STATE = {"data": None, "error": None, "hint": None}
 SENTINEL = {"obj": None, "error": None}  # the sentinel module (layer A); a failure of it never stops the monitor
@@ -114,7 +136,12 @@ def load_config():
     except FileNotFoundError:
         example = HERE / "actions_monitor.example.json"   # the template that travels with the package; the defaults are only the fallback
         try:
-            if example.is_file():
+            if example.is_file() and LITE["on"]:   # lite: the same template with the sentinel off and the light reading
+                template = json.loads(example.read_text(encoding="utf-8"))
+                template.update({"mode": "lite", "sentinel": {"enabled": False}, "webhook": {"enabled": False, "secret": ""}})
+                CONFIG_FILE.write_text(json.dumps(template, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                config.update(json.loads(CONFIG_FILE.read_text(encoding="utf-8")))
+            elif example.is_file():
                 CONFIG_FILE.write_text(example.read_text(encoding="utf-8"), encoding="utf-8")
                 config.update(json.loads(CONFIG_FILE.read_text(encoding="utf-8")))
             else:
@@ -532,7 +559,7 @@ def render_page():
     """actions_monitor.html with the catalogues of the interface (keys "ui.*") for the 8 languages and the default language inlined."""
     page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
     data = {"default": i18n.language(), "langs": list(i18n.LANGS), "names": i18n.NATIVE_NAMES, "html": i18n.HTML_LANG, "locale": i18n.BROWSER_LOCALE, "catalogues": i18n.ui_catalogues(),
-            "ecosystems": {key: item["label"] for key, item in toolconfig.ecosystems().items()}, "owner": toolconfig.github_owner(), "host": github_host(), "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
+            "ecosystems": {key: item["label"] for key, item in toolconfig.ecosystems().items()}, "owner": toolconfig.github_owner(), "host": github_host(), "lite": LITE["on"], "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
     blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     return page.replace("/*I18N_DATA*/null", blob, 1)
 
@@ -601,6 +628,10 @@ class Handler(BaseHTTPRequestHandler):
 
     def handle_post(self):
         path = self.path.split("?")[0]
+        if LITE["on"] and path.startswith(LITE_PATHS):
+            self.send_response(404)
+            self.end_headers()
+            return
         if path == "/api/hot-only":   # "only hot" switch: local request only, tiny body {"on": true|false}
             if not self.guard():
                 return
@@ -654,7 +685,7 @@ class Handler(BaseHTTPRequestHandler):
                     return
                 request = json.loads(self.rfile.read(size))
                 changes = request.get("changes") if isinstance(request, dict) else None
-                result = settings_api.apply(changes, CONFIG_FILE)
+                result = settings_api.apply(changes, CONFIG_FILE, lite=LITE["on"])
                 if result.get("ok"):
                     RESTART_PENDING.update(result.get("restart") or [])
                     result["restart_pending"] = sorted(RESTART_PENDING)
@@ -706,6 +737,10 @@ class Handler(BaseHTTPRequestHandler):
 
     def handle_get(self):
         path = self.path.split("?")[0]
+        if LITE["on"] and path.startswith(LITE_PATHS):      # the lite product does not have these endpoints
+            self.send_response(404)
+            self.end_headers()
+            return
         if path == "/api/sentinel/parte.txt":   # the same text as the daily report, to copy or download
             if not self.guard():
                 return
@@ -760,7 +795,7 @@ class Handler(BaseHTTPRequestHandler):
             if not self.guard():
                 return
             import settings_api
-            self.json_reply({"ok": True, **settings_api.describe(CONFIG_FILE), "restart_pending": sorted(RESTART_PENDING)})
+            self.json_reply({"ok": True, **settings_api.describe(CONFIG_FILE, lite=LITE["on"]), "restart_pending": sorted(RESTART_PENDING)})
         elif path == "/metrics" or path.startswith("/api/outputs/"):   # optional outputs, off unless switched on (outputs.py); local request only, no quota used
             if not self.guard():
                 return
@@ -792,7 +827,7 @@ class Handler(BaseHTTPRequestHandler):
                 return
             with LOCK:
                 loaded = bool(STATE.get("data"))
-            self.json_reply({"ok": True, "version": TOOL_VERSION, "uptime_seconds": int(time.time() - STARTED), "loaded": loaded, "offline": LINK.state()["offline"]})
+            self.json_reply({"ok": True, "lite": LITE["on"], "version": TOOL_VERSION, "uptime_seconds": int(time.time() - STARTED), "loaded": loaded, "offline": LINK.state()["offline"]})
         elif path == "/api/analytics":
             if not self.guard():
                 return
@@ -880,11 +915,17 @@ def start_sentinel(config):
 
 
 def main():
+    if lite_requested():
+        enable_lite()
     config = load_config()
+    if LITE["on"]:
+        config["sentinel"] = {"enabled": False}      # the lite product has no sentinel, whatever the file says
+        config["webhook"] = {"enabled": False, "secret": ""}
     i18n.set_language(i18n.detect(config.get("language")))
     i18n.cli_language() if "--lang" in " ".join(sys.argv) else None
     parser = argparse.ArgumentParser(description=i18n.t("mon.description"), formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--port", type=int, default=8765, help=i18n.t("mon.help_port"))
+    parser.add_argument("--port", type=int, default=LITE_PORT if LITE["on"] else 8765, help=i18n.t("mon.help_port"))
+    parser.add_argument("--lite", action="store_true", help=i18n.t("mon.help_lite"))
     parser.add_argument("--no-browser", action="store_true", help=i18n.t("mon.help_no_browser"))
     parser.add_argument("--discover", action="store_true", help=i18n.t("mon.help_discover"))
     parser.add_argument("--lang", metavar="CODE", help=i18n.t("cli.help_lang"))
@@ -925,11 +966,14 @@ def main():
     etag_cfg = ((config.get("cache") or {}).get("etag") or {}) if isinstance(config.get("cache"), dict) else {}
     ETAG["cache"] = etagcache.EtagCache(ttl_hours=etag_cfg.get("ttl_hours", 24) if isinstance(etag_cfg.get("ttl_hours"), int) else 24, enabled=etag_cfg.get("enabled", True) is True)
     acfg = analytics.settings(config)
-    ANALYTICS["store"] = analytics.Store(keep_days=acfg["keep_days"], max_samples=acfg["max_samples"])
-    import report_history
-    AUTOSAVE = report_history.AutoSaver()
+    if not LITE["on"]:
+        ANALYTICS["store"] = analytics.Store(keep_days=acfg["keep_days"], max_samples=acfg["max_samples"])
+    if not LITE["on"]:
+        import report_history
+        AUTOSAVE = report_history.AutoSaver()
     threading.Thread(target=loop, args=(config,), daemon=True).start()
-    start_sentinel(config)
+    if not LITE["on"]:
+        start_sentinel(config)
     server = None
     for port in range(args.port, args.port + 10):
         try:

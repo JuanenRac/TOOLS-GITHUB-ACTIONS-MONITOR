@@ -649,8 +649,8 @@ class ReleaseNotes(unittest.TestCase):
 class GateAndVersion(unittest.TestCase):
     def test_version_is_1_5_0_and_the_changelog_agrees(self):
         import tool_version
-        self.assertEqual(tool_version.TOOL_VERSION, "1.6.0")
-        self.assertEqual(mr.gate_static(), "1.6.0")
+        self.assertEqual(tool_version.TOOL_VERSION, "1.6.1")
+        self.assertEqual(mr.gate_static(), "1.6.1")
 
     def test_new_files_travel_and_state_files_do_not(self):
         names = {p.relative_to(mr.HERE).as_posix() for p in mr.members()}

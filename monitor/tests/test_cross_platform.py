@@ -49,7 +49,7 @@ class GhHint(unittest.TestCase):
 
 
 class Launchers(unittest.TestCase):
-    NAMES = ("MONITOR_GITHUB_ACTIONS.sh", "BATCH_GITHUB_ACTIONS.sh", "MONITOR_GITHUB_ACTIONS.command", "BATCH_GITHUB_ACTIONS.command")
+    NAMES = ("MONITOR_GITHUB_ACTIONS.sh", "BATCH_GITHUB_ACTIONS.sh", "MONITOR_GITHUB_ACTIONS.command", "BATCH_GITHUB_ACTIONS.command", "MONITOR_LITE_GITHUB_ACTIONS.sh", "MONITOR_LITE_GITHUB_ACTIONS.command")
 
     def test_shell_launchers_exist_with_unix_line_endings(self):
         for name in self.NAMES:

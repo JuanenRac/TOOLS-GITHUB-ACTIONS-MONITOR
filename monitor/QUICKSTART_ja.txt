@@ -24,4 +24,5 @@ GPL-3.0-or-later - see LICENSE
    コマンドで、モニターはそれをテキストとして表示するだけです。
 7. 任意の追加機能(オフまたは別扱い):lint_workflows.py は push の前にワークフローファイルを検査し、tui.py はコンソールにライブ表を表示します(pip install rich)。通知、受信 Webhook、AI アシスタントは設定タブでオンにします。
    サービス、プロキシの背後、コンテナーでの運用は docs/DEPLOYMENT_jpn.md を参照してください。
+8. 実行を眺めるだけなら、代わりに MONITOR_LITE_GITHUB_ACTIONS を起動してください(lite 版:センチネルなし、短い設定、ポート 8766)。docs/LITE_jpn.md を参照。
 困ったときは README_ja.txt の「困ったとき」を参照してください。

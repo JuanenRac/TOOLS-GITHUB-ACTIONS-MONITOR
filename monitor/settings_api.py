@@ -371,12 +371,18 @@ def check_value_list(value):
     return True, list(value)
 
 
-def validate(changes):
-    """({path: clean value}, {path: reason}) for a request {path: value}. A non-dict or an empty request is an error."""
+LITE_KEYS = ("github_owner", "language", "repos", "ecosystems", "exclude", "refresh_seconds")      # the short settings page of the lite product
+
+
+def validate(changes, lite=False):
+    """({path: clean value}, {path: reason}) for a request {path: value}. A non-dict or an empty request is an error. With lite only LITE_KEYS can be changed."""
     if not isinstance(changes, dict) or not changes or len(changes) > len(SCHEMA):
         return {}, {"_": "request"}
     clean, errors = {}, {}
     for path, value in changes.items():
+        if lite and path not in LITE_KEYS:
+            errors[str(path)[:80]] = "unknown"
+            continue
         ok, result = check_value(path, value) if isinstance(path, str) else (False, "unknown")
         if ok:
             clean[path] = result
@@ -401,7 +407,7 @@ def webhook_state(config):
     return "defined" if len(secret) >= 32 else "short"
 
 
-def describe(path=CONFIG_FILE):
+def describe(path=CONFIG_FILE, lite=False):
     """What the page shows: {"groups": [{"id", "blocks": [{"id", "title_key", "fields": [...]}], "fields": [...]}], "backups": N}. A field: {"key", "type", "value", "default", "min",
     "max", "enum", "restart", "unit", "secure", "label", "help", "block", "master"}. Values come from the file over the template; nothing outside SCHEMA is ever included."""
     template = {}
@@ -418,6 +424,7 @@ def describe(path=CONFIG_FILE):
         group_fields, group_blocks = [], []
         for block, keys in blocks:
             fields = []
+            keys = [k for k in keys if not lite or k in LITE_KEYS]
             for index, key in enumerate(keys):
                 _tab, _kind_key, _kind, bounds, restart = FIELDS[key][0], key, FIELDS[key][2], FIELDS[key][3], FIELDS[key][4]
                 kind = _kind
@@ -444,8 +451,10 @@ def describe(path=CONFIG_FILE):
                     item["choices"] = toolconfig.ecosystem_names()
                 fields.append(item)
             group_fields += fields
-            group_blocks.append({"id": block, "title_key": block_title_key(block), "fields": fields})
-        groups.append({"id": tab, "blocks": group_blocks, "fields": group_fields})
+            if fields:
+                group_blocks.append({"id": block, "title_key": block_title_key(block), "fields": fields})
+        if group_blocks:
+            groups.append({"id": tab, "blocks": group_blocks, "fields": group_fields})
     try:
         backups = len(list(BACKUP_DIR.glob("actions_monitor-*.json")))
     except OSError:
@@ -473,10 +482,10 @@ def _backup(path):
     return name
 
 
-def apply(changes, path=CONFIG_FILE):
+def apply(changes, path=CONFIG_FILE, lite=False):
     """Checks and writes. {"ok": True, "changed": [paths], "restart": [paths that need a restart], "backup": bool} or {"ok": False, "errors": {path: reason}}.
     Nothing is written when any value is invalid or when nothing changes."""
-    clean, errors = validate(changes)
+    clean, errors = validate(changes, lite)
     if errors:
         return {"ok": False, "errors": errors}
     path = Path(path)

@@ -24,4 +24,5 @@ GPL-3.0-or-later - see LICENSE
    监视器只把它们显示为文本。
 7. 可选的附加功能(默认关闭或独立):lint_workflows.py 在推送前检查你的工作流文件;tui.py 在控制台显示实时表格(pip install rich);通知、入站 Webhook 和 AI 助手在设置标签页中开启;
    作为服务、置于代理之后或在容器中运行,请见 docs/DEPLOYMENT_zho.md。
+8. 只想看自己的运行情况?请改为启动 MONITOR_LITE_GITHUB_ACTIONS(lite 版:无哨兵、简短设置、端口 8766)。见 docs/LITE_zho.md。
 遇到问题？请参阅 README_zh.txt 中的“问题排查”。

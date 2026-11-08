@@ -24,4 +24,5 @@ DÉMARRAGE RAPIDE - Moniteur GitHub Actions + Sentinelle
    des commandes que vous lancez vous-même ; le moniteur ne fait que les afficher en texte.
 7. Extras optionnels (désactivés ou à part) : lint_workflows.py contrôle vos fichiers de workflow avant le push ; tui.py affiche une grille en direct dans la console (pip install rich) ; les notifications, le webhook entrant
    et l'assistant IA s'activent dans l'onglet Réglages ; pour l'exécuter comme service, derrière un proxy ou dans un conteneur, voir docs/DEPLOYMENT_fra.md.
+8. Vous voulez seulement surveiller vos runs ? Lancez plutôt MONITOR_LITE_GITHUB_ACTIONS (l'édition lite : sans sentinelle, des Réglages courts, port 8766). Voir docs/LITE_fra.md.
 Des problèmes ? Voir « PROBLÈMES » dans README_fr.txt.
