@@ -20,7 +20,7 @@ Der Reiter ist in Unterreiter gegliedert, vom Gewöhnlichen zum Fortgeschrittene
 | Reiter | Blöcke und Einstellungen |
 |---|---|
 | Dieser Browser | Sprache der Seite, Design (auto / hell / dunkel), dichte Ansicht des Reiters Jetzt. Sie bleiben im Browser, nicht in der Datei. |
-| Allgemein | **Identität**: `github_owner`, `language`<br>**Umfang**: `mode`, `repos`, `ecosystems`, `exclude`<br>**Verlauf**: `report_history_days` |
+| Allgemein | **Identität**: `github_owner`, `language`<br>**Umfang**: `mode`, `repos`, `ecosystems`, `show_unclassified`, `exclude`<br>**Verlauf**: `report_history_days` |
 | Aktualisierung und Grenzen | **Heiße Repositorys**: `refresh_seconds`, `hot_hours`, `runs_per_repo`, `stuck_minutes`<br>**Kalte Repositorys**: `cold_refresh_seconds`, `cold_runs_per_repo`<br>**Hintergrundaufgaben**: `issues_refresh_seconds`, `discover_refresh_seconds`, `discover_limit`, `max_workers`<br>**API-Kontingent**: `min_rate_remaining` |
 | Lesen und Cache | **Bedingte Lesungen**: `cache.etag.enabled`, `cache.etag.ttl_hours` |
 | Wächter | **Haupteinstellungen**: `sentinel.enabled`, `sentinel.refresh_seconds`, `sentinel.hot_hours`<br>**Warnungen und Hygiene**: `sentinel.alerts_hot_seconds`, `sentinel.alerts_cold_seconds`, `sentinel.hygiene_seconds`<br>**API-Budget**: `sentinel.max_calls_per_tick`, `sentinel.budget_per_hour`, `sentinel.workers`, `sentinel.min_rate_remaining`<br>**Releases und Signaturen**: `sentinel.candidate_days`, `sentinel.candidate_min_entries`, `sentinel.skip_candidate_prefixes`, `sentinel.pending_sign_hours`, `sentinel.require_verified_signature`<br>**Rot-Abfragen (A2)**: `sentinel.a2_full_sample_unknown`, `sentinel.a2_resolve_max_calls_per_tick`, `sentinel.a2_resolve_ttl_seconds`<br>**Pull Requests**: `sentinel.stale_pr_days`<br>**Pflichtdateien**: `sentinel.required_files`<br>**Actions-Minuten**: `sentinel.minutes_budget_period`, `sentinel.minutes_budget`<br>**Audit-Dateien**: `sentinel.audit_files.reconciliation`, `sentinel.audit_files.rounds`, `sentinel.audit_files.rounds_extra` |
@@ -36,6 +36,8 @@ Der Reiter ist in Unterreiter gegliedert, vom Gewöhnlichen zum Fortgeschrittene
 | Konsolenansicht | **Konsole**: `tui.theme`, `tui.refresh_seconds` |
 
 Jede Einstellung steht nur an einer Stelle. Nur lesend: `webhook.signing_state` sagt nur, ob das gemeinsame Geheimnis definiert ist; das Geheimnis selbst wird nie angezeigt.
+
+Welche Repositorys beobachtet werden: Der Beispielkatalog der Ökosysteme endet mit einer Gruppe `rest` (Präfix `*`, „Everything else“), die jedes Repository aufnimmt, das keine andere Gruppe beansprucht; so bleibt standardmäßig nichts außen vor. Lässt Ihr eigener Katalog Repositorys aus, nennt ein Banner der Seite die Anzahl („Ihr Ökosystem-Filter blendet N von M Repositorys des Kontos aus“).
 
 Externe KI: `ai.provider` kann `ollama` (dieser Rechner), `openai-compatible` (jeder Endpunkt im OpenAI-Stil, der auch Gemini über dessen OpenAI-kompatiblen Endpunkt und OpenAI selbst bedient), `anthropic` (die Messages-API; das Modell wählen Sie) oder `copilot` (`gh copilot` mit Ihrem Login; verbraucht Premium-Anfragen) sein. Der Schlüssel wird nie gespeichert: nur der NAME der Umgebungsvariable. Siehe AI_deu.md.
 

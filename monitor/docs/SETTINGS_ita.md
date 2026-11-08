@@ -20,7 +20,7 @@ La scheda è divisa in sotto-schede, dal comune all'avanzato: Questo browser, Ge
 | Scheda | Blocchi e impostazioni |
 |---|---|
 | Questo browser | lingua della pagina, tema (auto / chiaro / scuro), vista densa della scheda Adesso. Restano nel browser, non nel file. |
-| Generale | **Identità**: `github_owner`, `language`<br>**Ambito**: `mode`, `repos`, `ecosystems`, `exclude`<br>**Cronologia**: `report_history_days` |
+| Generale | **Identità**: `github_owner`, `language`<br>**Ambito**: `mode`, `repos`, `ecosystems`, `show_unclassified`, `exclude`<br>**Cronologia**: `report_history_days` |
 | Aggiornamento e limiti | **Repository attivi**: `refresh_seconds`, `hot_hours`, `runs_per_repo`, `stuck_minutes`<br>**Repository inattivi**: `cold_refresh_seconds`, `cold_runs_per_repo`<br>**Attività in background**: `issues_refresh_seconds`, `discover_refresh_seconds`, `discover_limit`, `max_workers`<br>**Quota API**: `min_rate_remaining` |
 | Letture e cache | **Letture condizionali**: `cache.etag.enabled`, `cache.etag.ttl_hours` |
 | Sentinella | **Principale**: `sentinel.enabled`, `sentinel.refresh_seconds`, `sentinel.hot_hours`<br>**Avvisi e igiene**: `sentinel.alerts_hot_seconds`, `sentinel.alerts_cold_seconds`, `sentinel.hygiene_seconds`<br>**Budget API**: `sentinel.max_calls_per_tick`, `sentinel.budget_per_hour`, `sentinel.workers`, `sentinel.min_rate_remaining`<br>**Release e firme**: `sentinel.candidate_days`, `sentinel.candidate_min_entries`, `sentinel.skip_candidate_prefixes`, `sentinel.pending_sign_hours`, `sentinel.require_verified_signature`<br>**Ricerche dei rossi (A2)**: `sentinel.a2_full_sample_unknown`, `sentinel.a2_resolve_max_calls_per_tick`, `sentinel.a2_resolve_ttl_seconds`<br>**Pull request**: `sentinel.stale_pr_days`<br>**File obbligatori**: `sentinel.required_files`<br>**Minuti di Actions**: `sentinel.minutes_budget_period`, `sentinel.minutes_budget`<br>**File di audit**: `sentinel.audit_files.reconciliation`, `sentinel.audit_files.rounds`, `sentinel.audit_files.rounds_extra` |
@@ -36,6 +36,8 @@ La scheda è divisa in sotto-schede, dal comune all'avanzato: Questo browser, Ge
 | Vista da console | **Console**: `tui.theme`, `tui.refresh_seconds` |
 
 Un'impostazione compare in un solo posto. Sola lettura: `webhook.signing_state` dice solo se il segreto condiviso è definito; il segreto non viene mai mostrato.
+
+Quali repository si osservano: il catalogo di esempio degli ecosistemi termina con un gruppo `rest` (prefisso `*`, «Everything else») che prende ogni repository che nessun altro gruppo rivendica, quindi per impostazione predefinita nulla resta fuori. Se il tuo catalogo ne lascia fuori, un avviso della pagina dice quanti («il tuo filtro degli ecosistemi nasconde N dei M repository dell'account»).
 
 IA esterna: `ai.provider` può essere `ollama` (questo computer), `openai-compatible` (qualsiasi endpoint in stile OpenAI, che serve anche per Gemini tramite il suo endpoint compatibile OpenAI e per OpenAI), `anthropic` (l'API Messages; il modello lo scegli tu) o `copilot` (`gh copilot` con il tuo accesso; consuma richieste premium). La chiave non viene mai salvata: solo il NOME della variabile d'ambiente. Vedi AI_ita.md.
 

@@ -20,7 +20,7 @@ L'onglet est divisé en sous-onglets, du plus courant au plus avancé : Ce navig
 | Onglet | Blocs et réglages |
 |---|---|
 | Ce navigateur | langue de la page, thème (auto / clair / sombre), vue dense de l'onglet Maintenant. Ils restent dans le navigateur, pas dans le fichier. |
-| Général | **Identité**: `github_owner`, `language`<br>**Périmètre**: `mode`, `repos`, `ecosystems`, `exclude`<br>**Historique**: `report_history_days` |
+| Général | **Identité**: `github_owner`, `language`<br>**Périmètre**: `mode`, `repos`, `ecosystems`, `show_unclassified`, `exclude`<br>**Historique**: `report_history_days` |
 | Actualisation et limites | **Dépôts actifs**: `refresh_seconds`, `hot_hours`, `runs_per_repo`, `stuck_minutes`<br>**Dépôts inactifs**: `cold_refresh_seconds`, `cold_runs_per_repo`<br>**Tâches de fond**: `issues_refresh_seconds`, `discover_refresh_seconds`, `discover_limit`, `max_workers`<br>**Quota de l'API**: `min_rate_remaining` |
 | Lectures et cache | **Lectures conditionnelles**: `cache.etag.enabled`, `cache.etag.ttl_hours` |
 | Sentinelle | **Principal**: `sentinel.enabled`, `sentinel.refresh_seconds`, `sentinel.hot_hours`<br>**Alertes et hygiène**: `sentinel.alerts_hot_seconds`, `sentinel.alerts_cold_seconds`, `sentinel.hygiene_seconds`<br>**Budget de l'API**: `sentinel.max_calls_per_tick`, `sentinel.budget_per_hour`, `sentinel.workers`, `sentinel.min_rate_remaining`<br>**Releases et signatures**: `sentinel.candidate_days`, `sentinel.candidate_min_entries`, `sentinel.skip_candidate_prefixes`, `sentinel.pending_sign_hours`, `sentinel.require_verified_signature`<br>**Recherches des rouges (A2)**: `sentinel.a2_full_sample_unknown`, `sentinel.a2_resolve_max_calls_per_tick`, `sentinel.a2_resolve_ttl_seconds`<br>**Pull requests**: `sentinel.stale_pr_days`<br>**Fichiers requis**: `sentinel.required_files`<br>**Minutes d'Actions**: `sentinel.minutes_budget_period`, `sentinel.minutes_budget`<br>**Fichiers d'audit**: `sentinel.audit_files.reconciliation`, `sentinel.audit_files.rounds`, `sentinel.audit_files.rounds_extra` |
@@ -36,6 +36,8 @@ L'onglet est divisé en sous-onglets, du plus courant au plus avancé : Ce navig
 | Vue console | **Console**: `tui.theme`, `tui.refresh_seconds` |
 
 Un réglage n'apparaît qu'à un seul endroit. Lecture seule : `webhook.signing_state` indique seulement si le secret partagé est défini ; le secret lui-même n'est jamais affiché.
+
+Quels dépôts sont surveillés : le catalogue d'exemple des écosystèmes se termine par un groupe `rest` (préfixe `*`, « Everything else ») qui prend tout dépôt qu'aucun autre groupe ne réclame, donc rien n'est laissé de côté par défaut. Si votre propre catalogue en laisse, un bandeau de la page dit combien (« votre filtre d'écosystèmes masque N des M dépôts du compte »).
 
 IA externe : `ai.provider` peut valoir `ollama` (cet ordinateur), `openai-compatible` (tout point d'accès de style OpenAI, qui sert aussi pour Gemini via son point d'accès compatible OpenAI et pour OpenAI), `anthropic` (l'API Messages ; vous choisissez le modèle) ou `copilot` (`gh copilot` avec votre connexion ; consomme des requêtes premium). La clé n'est jamais enregistrée : seulement le NOM de la variable d'environnement. Voir AI_fra.md.
 

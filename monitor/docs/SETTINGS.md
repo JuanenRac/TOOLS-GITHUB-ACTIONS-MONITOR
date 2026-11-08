@@ -20,7 +20,7 @@ The tab is split into sub-tabs, ordered from the common to the advanced: This br
 | Tab | Blocks and settings |
 |---|---|
 | This browser | language of the page, theme (auto / light / dark), dense view of the Now tab. These are kept in the browser, not in the file. |
-| General | **Identity**: `github_owner`, `language`<br>**Scope**: `mode`, `repos`, `ecosystems`, `exclude`<br>**History**: `report_history_days` |
+| General | **Identity**: `github_owner`, `language`<br>**Scope**: `mode`, `repos`, `ecosystems`, `show_unclassified`, `exclude`<br>**History**: `report_history_days` |
 | Refresh and limits | **Hot repositories**: `refresh_seconds`, `hot_hours`, `runs_per_repo`, `stuck_minutes`<br>**Cold repositories**: `cold_refresh_seconds`, `cold_runs_per_repo`<br>**Background tasks**: `issues_refresh_seconds`, `discover_refresh_seconds`, `discover_limit`, `max_workers`<br>**API allowance**: `min_rate_remaining` |
 | Reads and cache | **Conditional reads**: `cache.etag.enabled`, `cache.etag.ttl_hours` |
 | Sentinel | **Main**: `sentinel.enabled`, `sentinel.refresh_seconds`, `sentinel.hot_hours`<br>**Alerts and hygiene**: `sentinel.alerts_hot_seconds`, `sentinel.alerts_cold_seconds`, `sentinel.hygiene_seconds`<br>**API budget**: `sentinel.max_calls_per_tick`, `sentinel.budget_per_hour`, `sentinel.workers`, `sentinel.min_rate_remaining`<br>**Releases and signatures**: `sentinel.candidate_days`, `sentinel.candidate_min_entries`, `sentinel.skip_candidate_prefixes`, `sentinel.pending_sign_hours`, `sentinel.require_verified_signature`<br>**Red lookups (A2)**: `sentinel.a2_full_sample_unknown`, `sentinel.a2_resolve_max_calls_per_tick`, `sentinel.a2_resolve_ttl_seconds`<br>**Pull requests**: `sentinel.stale_pr_days`<br>**Required files**: `sentinel.required_files`<br>**Actions minutes**: `sentinel.minutes_budget_period`, `sentinel.minutes_budget`<br>**Audit files**: `sentinel.audit_files.reconciliation`, `sentinel.audit_files.rounds`, `sentinel.audit_files.rounds_extra` |
@@ -36,6 +36,8 @@ The tab is split into sub-tabs, ordered from the common to the advanced: This br
 | Terminal view | **Terminal**: `tui.theme`, `tui.refresh_seconds` |
 
 A setting appears in one place only. Read-only: `webhook.signing_state` only says whether the shared secret is defined; the secret itself is never shown.
+
+Which repositories are watched: the example catalogue of ecosystems ends with a group `rest` (prefix `*`, "Everything else") that takes every repository no other group claims, so nothing is left out by default. If your own catalogue leaves repositories out, a banner of the page says how many ("your ecosystem filter hides N of the M repositories of the account").
 
 External AI: `ai.provider` can be `ollama` (this computer), `openai-compatible` (any OpenAI-style endpoint, which also serves Gemini through its OpenAI-compatible endpoint and OpenAI itself), `anthropic` (the Messages API; you choose the model) or `copilot` (`gh copilot` with your own login; it spends premium requests). The key is never saved: only the NAME of the environment variable. See AI.md.
 

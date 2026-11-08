@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GitHub Actions モニター + センチネル（バージョン 1.6.1）
+GitHub Actions モニター + センチネル（バージョン 1.6.2）
 ========================================================
 必要なもの: Python 3.11 以上と、ログイン済みの GitHub CLI（`gh`）（gh auth login）。それ以外は不要です。中核はパッケージを必要とせず、ターミナル表示(tui.py)だけが任意のパッケージ rich を使います。
 初めて使うときの手順: QUICKSTART_ja.txt。

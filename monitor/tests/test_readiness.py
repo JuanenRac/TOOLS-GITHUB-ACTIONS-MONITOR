@@ -213,8 +213,8 @@ class PageAndCatalogues(unittest.TestCase):
         page = actions_monitor.render_page()
         for needle in ('"ui.a11_title"', 'section("a11"', '["a11","ui.a11"'):
             self.assertIn(needle, page)
-        self.assertIn('"version": "1.6.1"', page)
-        self.assertEqual(i18n.t("mon.version", version="1.6.1"), "GitHub Actions v1.6.1")
+        self.assertIn('"version": "1.6.2"', page)
+        self.assertEqual(i18n.t("mon.version", version="1.6.2"), "GitHub Actions v1.6.2")
         html = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
         self.assertIn('<h1>GitHub Actions <small class="mut" id="ver">', html)
 

@@ -20,7 +20,7 @@ La pestaña se divide en subpestañas, ordenadas de lo común a lo avanzado: Est
 | Pestaña | Bloques y ajustes |
 |---|---|
 | Este navegador | idioma de la página, tema (auto / claro / oscuro), vista densa de la pestaña Ahora. Se guardan en el navegador, no en el archivo. |
-| General | **Identidad**: `github_owner`, `language`<br>**Alcance**: `mode`, `repos`, `ecosystems`, `exclude`<br>**Historial**: `report_history_days` |
+| General | **Identidad**: `github_owner`, `language`<br>**Alcance**: `mode`, `repos`, `ecosystems`, `show_unclassified`, `exclude`<br>**Historial**: `report_history_days` |
 | Actualización y límites | **Repositorios calientes**: `refresh_seconds`, `hot_hours`, `runs_per_repo`, `stuck_minutes`<br>**Repositorios fríos**: `cold_refresh_seconds`, `cold_runs_per_repo`<br>**Tareas de fondo**: `issues_refresh_seconds`, `discover_refresh_seconds`, `discover_limit`, `max_workers`<br>**Cuota de la API**: `min_rate_remaining` |
 | Lecturas y caché | **Lecturas condicionales**: `cache.etag.enabled`, `cache.etag.ttl_hours` |
 | Centinela | **Principal**: `sentinel.enabled`, `sentinel.refresh_seconds`, `sentinel.hot_hours`<br>**Alertas e higiene**: `sentinel.alerts_hot_seconds`, `sentinel.alerts_cold_seconds`, `sentinel.hygiene_seconds`<br>**Presupuesto de la API**: `sentinel.max_calls_per_tick`, `sentinel.budget_per_hour`, `sentinel.workers`, `sentinel.min_rate_remaining`<br>**Releases y firmas**: `sentinel.candidate_days`, `sentinel.candidate_min_entries`, `sentinel.skip_candidate_prefixes`, `sentinel.pending_sign_hours`, `sentinel.require_verified_signature`<br>**Consultas de rojos (A2)**: `sentinel.a2_full_sample_unknown`, `sentinel.a2_resolve_max_calls_per_tick`, `sentinel.a2_resolve_ttl_seconds`<br>**Pull requests**: `sentinel.stale_pr_days`<br>**Archivos obligatorios**: `sentinel.required_files`<br>**Minutos de Actions**: `sentinel.minutes_budget_period`, `sentinel.minutes_budget`<br>**Archivos de auditoría**: `sentinel.audit_files.reconciliation`, `sentinel.audit_files.rounds`, `sentinel.audit_files.rounds_extra` |
@@ -36,6 +36,8 @@ La pestaña se divide en subpestañas, ordenadas de lo común a lo avanzado: Est
 | Vista de consola | **Consola**: `tui.theme`, `tui.refresh_seconds` |
 
 Cada ajuste aparece en un solo sitio. Solo lectura: `webhook.signing_state` únicamente dice si el secreto compartido está definido; el secreto nunca se muestra.
+
+Qué repositorios se vigilan: el catálogo de ejemplo de ecosistemas termina con un grupo `rest` (prefijo `*`, «Everything else») que recoge todo repositorio que ningún otro grupo reclama, así que por defecto no queda nada fuera. Si tu propio catálogo deja repositorios fuera, un aviso de la página dice cuántos («tu filtro de ecosistemas oculta N de los M repositorios de la cuenta»).
 
 IA externa: `ai.provider` puede ser `ollama` (este equipo), `openai-compatible` (cualquier endpoint estilo OpenAI, que sirve también para Gemini mediante su endpoint compatible con OpenAI y para OpenAI), `anthropic` (la API Messages; el modelo lo eliges tú) o `copilot` (`gh copilot` con tu propio acceso; gasta solicitudes premium). La clave nunca se guarda: solo el NOMBRE de la variable de entorno. Ver AI_spa.md.
 

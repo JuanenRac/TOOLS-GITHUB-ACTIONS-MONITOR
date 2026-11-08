@@ -122,6 +122,7 @@ def _extra_metrics(out, extra, eco, per_repo):
     if etag:
         out.add("etag_saved_total", "Reads answered with 304 Not Modified (no quota used) since the cache was created.", _int(etag.get("saved")), kind="counter")
         out.add("etag_entries", "Endpoints held in the conditional-read cache.", _int(etag.get("entries")))
+        out.add("etag_invalid_total", "Cache entries thrown away because they were damaged (the read was made again in full).", _int(etag.get("invalid")), kind="counter")
     if "offline" in extra:
         out.add("offline", "1 while the monitor has no connection to GitHub and shows the last picture.", 1 if extra["offline"] else 0)
     if "live_events" in extra:

@@ -20,7 +20,7 @@
 | タブ | ブロックと設定 |
 |---|---|
 | このブラウザー | ページの言語、テーマ(自動/ライト/ダーク)、「今」タブの高密度表示。ファイルではなくブラウザーに保存されます。 |
-| 全般 | **アカウント**: `github_owner`, `language`<br>**対象範囲**: `mode`, `repos`, `ecosystems`, `exclude`<br>**履歴**: `report_history_days` |
+| 全般 | **アカウント**: `github_owner`, `language`<br>**対象範囲**: `mode`, `repos`, `ecosystems`, `show_unclassified`, `exclude`<br>**履歴**: `report_history_days` |
 | 更新と上限 | **アクティブなリポジトリ**: `refresh_seconds`, `hot_hours`, `runs_per_repo`, `stuck_minutes`<br>**非アクティブなリポジトリ**: `cold_refresh_seconds`, `cold_runs_per_repo`<br>**バックグラウンド処理**: `issues_refresh_seconds`, `discover_refresh_seconds`, `discover_limit`, `max_workers`<br>**API の割り当て**: `min_rate_remaining` |
 | 読み取りとキャッシュ | **条件付き読み取り**: `cache.etag.enabled`, `cache.etag.ttl_hours` |
 | センチネル | **基本**: `sentinel.enabled`, `sentinel.refresh_seconds`, `sentinel.hot_hours`<br>**アラートと衛生**: `sentinel.alerts_hot_seconds`, `sentinel.alerts_cold_seconds`, `sentinel.hygiene_seconds`<br>**API の予算**: `sentinel.max_calls_per_tick`, `sentinel.budget_per_hour`, `sentinel.workers`, `sentinel.min_rate_remaining`<br>**リリースと署名**: `sentinel.candidate_days`, `sentinel.candidate_min_entries`, `sentinel.skip_candidate_prefixes`, `sentinel.pending_sign_hours`, `sentinel.require_verified_signature`<br>**赤の照会(A2)**: `sentinel.a2_full_sample_unknown`, `sentinel.a2_resolve_max_calls_per_tick`, `sentinel.a2_resolve_ttl_seconds`<br>**プルリクエスト**: `sentinel.stale_pr_days`<br>**必須ファイル**: `sentinel.required_files`<br>**Actions の分数**: `sentinel.minutes_budget_period`, `sentinel.minutes_budget`<br>**監査ファイル**: `sentinel.audit_files.reconciliation`, `sentinel.audit_files.rounds`, `sentinel.audit_files.rounds_extra` |
@@ -36,6 +36,8 @@
 | ターミナル表示 | **ターミナル**: `tui.theme`, `tui.refresh_seconds` |
 
 各設定は 1 か所にだけ現れます。読み取り専用:`webhook.signing_state` は共有シークレットが設定済みかどうかだけを示し、シークレット自体は表示されません。
+
+どのリポジトリを監視するか:エコシステムのサンプルカタログは、他のどのグループにも属さないリポジトリをすべて受け取るグループ `rest`(接頭辞 `*`、「Everything else」)で終わるため、既定では何も漏れません。自分のカタログで漏れるリポジトリがある場合は、ページのバナーがその数を表示します(「エコシステムのフィルターがアカウントの M 件中 N 件を隠しています」)。
 
 外部 AI:`ai.provider` は `ollama`(このコンピューター)、`openai-compatible`(OpenAI 形式の任意のエンドポイント。Gemini の OpenAI 互換エンドポイントや OpenAI 自体にも使えます)、`anthropic`(Messages API。モデルは自分で選びます)、`copilot`(自分のログインで `gh copilot` を実行。プレミアムリクエストを消費)のいずれかです。キーは保存されず、環境変数の名前だけを設定します。AI_jpn.md を参照。
 

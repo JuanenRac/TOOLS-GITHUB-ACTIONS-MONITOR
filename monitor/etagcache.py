@@ -48,6 +48,7 @@ class EtagCache:
         self.entries = {}
         self.saved = 0
         self.calls = 0
+        self.invalid = 0       # entries thrown away because their body was not what the API sent (a damaged file)
         self.dirty = False
         self._load()
 
@@ -55,7 +56,7 @@ class EtagCache:
         try:
             data = json.loads(self.path.read_text(encoding="utf-8"))
             if isinstance(data, dict) and isinstance(data.get("entries"), dict):
-                self.entries = {k: v for k, v in data["entries"].items() if isinstance(v, dict) and ETAG_RE.match(str(v.get("etag", "")))}
+                self.entries = {k: v for k, v in data["entries"].items() if isinstance(v, dict) and ETAG_RE.match(str(v.get("etag", ""))) and isinstance(v.get("data"), (dict, list))}
                 self.saved = int(data.get("saved") or 0)
         except (OSError, ValueError, TypeError):
             self.entries = {}
@@ -96,6 +97,16 @@ class EtagCache:
         status, headers, body = split_response(out)
         with self.lock:
             self.calls += 1
+            damaged = status == 304 and etag and not isinstance(self.entries.get(endpoint, {}).get("data"), (dict, list))
+            if damaged:
+                self.entries.pop(endpoint, None)      # a damaged entry is a cache miss: read it again in full
+                self.invalid += 1
+                self.dirty = True
+                etag = None
+        if damaged:
+            code, out, err = run(["api", "-i", endpoint])
+            status, headers, body = split_response(out)
+        with self.lock:
             if status == 304 and etag:
                 entry = self.entries[endpoint]
                 entry["at"] = now or time.time()
@@ -104,7 +115,10 @@ class EtagCache:
                 return entry["data"], "304"
         if code != 0 or status not in (200, 0):
             raise RuntimeError((err or out or "gh failed").strip()[:300])
-        data = json.loads(body) if body.strip() else None
+        try:
+            data = json.loads(body) if body.strip() else None
+        except ValueError:
+            raise RuntimeError("the answer of the API is not valid JSON") from None
         new_tag = headers.get("etag", "")
         if self.enabled and status == 200 and ETAG_RE.match(new_tag):
             with self.lock:
@@ -114,4 +128,4 @@ class EtagCache:
         return data, "plain"
 
     def stats(self):
-        return {"enabled": self.enabled, "entries": len(self.entries), "saved": self.saved, "calls": self.calls}
+        return {"enabled": self.enabled, "entries": len(self.entries), "saved": self.saved, "calls": self.calls, "invalid": self.invalid}

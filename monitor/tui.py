@@ -12,6 +12,7 @@ If `rich` is not installed it says how to install it and exits with code 3; the 
 """
 import argparse
 import json
+import os
 import sys
 import time
 import urllib.request
@@ -30,6 +31,11 @@ def rich_available():
         return True
     except ImportError:
         return False
+
+
+def default_port(lite=False):
+    """8766 for the lite edition (--lite or MONITOR_MODE=lite), 8765 for the complete one."""
+    return 8766 if (lite or os.environ.get("MONITOR_MODE", "").strip().lower() == "lite") else 8765
 
 
 def fetch(port, timeout=6):
@@ -98,7 +104,8 @@ def main(argv=None):
     i18n.cli_language()
     platform_compat.console_utf8()
     ap = argparse.ArgumentParser(description=i18n.t("tui.description"))
-    ap.add_argument("--port", type=int, default=8765, help=i18n.t("lp.help_port"))
+    ap.add_argument("--lite", action="store_true", help=i18n.t("tui.help_lite"))
+    ap.add_argument("--port", type=int, default=None, help=i18n.t("lp.help_port"))
     ap.add_argument("--refresh", type=int, default=5, help=i18n.t("tui.help_refresh"))
     ap.add_argument("--once", action="store_true", help=i18n.t("tui.help_once"))
     ap.add_argument("--theme", choices=("dark", "light"), default="dark", help=i18n.t("tui.help_theme"))
@@ -106,6 +113,8 @@ def main(argv=None):
     args = ap.parse_args(argv)
     if args.lang:
         i18n.set_language(args.lang)
+    if args.port is None:
+        args.port = default_port(args.lite)
     if not rich_available():
         print(i18n.t("tui.need_rich", cmd=INSTALL_HINT))
         return 3

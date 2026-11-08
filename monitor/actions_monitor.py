@@ -58,6 +58,7 @@ DEFAULTS = {
     "issues_refresh_seconds": 180,
     "discover_refresh_seconds": 3600,
     "discover_limit": 1000,        # the most repositories listed for the account
+    "show_unclassified": True,     # repositories that no ecosystem claims are shown in an automatic group "Unclassified" instead of disappearing
     "stuck_minutes": 120,
     "runs_per_repo": 20,
     "cold_runs_per_repo": 5,
@@ -74,6 +75,20 @@ DEFAULTS = {
 LITE = {"on": False}      # the lite product: the same server without the sentinel, with its own configuration file, its own state files and a short settings page
 LITE_PORT = 8766
 LITE_PATHS = ("/api/sentinel", "/api/ai", "/api/notify", "/api/analytics", "/api/live-events", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics")   # they do not exist in lite
+
+
+LITE_INHERIT = ("github_owner", "ecosystems", "ecosystems_file", "targets_file", "profiles_file", "exclude", "repos", "language")   # what a first lite start copies from actions_monitor.json
+HOT_FORCED = set()    # repositories a webhook event touched: they are read again in the next cycle
+HIDDEN = {"hidden": 0, "discovered": 0, "names": []}      # repositories of the account that the ecosystem filter leaves out, and how many the account has
+
+
+def lite_inheritance(source):
+    """The settings of the complete monitor that the lite one starts with: the account, what to watch and the language; never the sentinel, the AI, the webhook or the outputs. {} when there is nothing."""
+    try:
+        data = json.loads(Path(source).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return {k: data[k] for k in LITE_INHERIT if isinstance(data, dict) and k in data}
 
 
 def lite_requested(argv=None):
@@ -138,7 +153,11 @@ def load_config():
         try:
             if example.is_file() and LITE["on"]:   # lite: the same template with the sentinel off and the light reading
                 template = json.loads(example.read_text(encoding="utf-8"))
-                template.update({"mode": "lite", "sentinel": {"enabled": False}, "webhook": {"enabled": False, "secret": ""}})
+                template.update({"mode": "lite", "ecosystems": "all", "sentinel": {"enabled": False}, "webhook": {"enabled": False, "secret": ""}})
+                inherited = lite_inheritance(HERE / "actions_monitor.json")
+                template.update(inherited)
+                if inherited:
+                    print(i18n.t("mon.lite_inherited", keys=", ".join(sorted(inherited))))
                 CONFIG_FILE.write_text(json.dumps(template, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
                 config.update(json.loads(CONFIG_FILE.read_text(encoding="utf-8")))
             elif example.is_file():
@@ -231,7 +250,11 @@ def watched_repos(config, force=False):
         known = toolconfig.ecosystem_names(config)
         wanted_eco = config["ecosystems"]
         allowed = set(known if wanted_eco in ("all", None) else wanted_eco)
-        names = [n for n in DISCOVERED["names"] if not known or ecosystem_of(n) in allowed or n == toolconfig.github_owner(config)]   # no ecosystems file: every repository
+        unclassified = config.get("show_unclassified", True) is True and wanted_eco in ("all", None)
+        names = [n for n in DISCOVERED["names"] if not known or ecosystem_of(n) in allowed or n == toolconfig.github_owner(config) or (unclassified and ecosystem_of(n) == "other")]   # no ecosystems file: every repository
+        kept = set(names)
+        left_out = [n for n in DISCOVERED["names"] if n not in kept]
+        HIDDEN["discovered"], HIDDEN["hidden"], HIDDEN["names"] = len(DISCOVERED["names"]), len(left_out), left_out[:50]
     skip = set(config["exclude"])
     valid = [n for n in names if NAME_RE.match(n) and n not in skip]
     for n in names:
@@ -265,6 +288,8 @@ def fetch_runs(repo, per_page):
 
 
 def is_hot(repo, config, now):
+    if repo in HOT_FORCED:
+        return True
     entry = RUN_CACHE.get(repo)
     if entry is None:
         return True
@@ -290,6 +315,7 @@ def refresh_runs(repos, config, progress=None):
     for repo in repos:
         entry = RUN_CACHE.get(repo)
         hot = is_hot(repo, config, now)
+        HOT_FORCED.discard(repo)
         if entry is None:
             todo.append((repo, config["cold_runs_per_repo"]))  # first look: a short list; the hot ones get the full list next cycle
         elif hot:
@@ -420,6 +446,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
         "min_rate": config["min_rate_remaining"], "paused_quota": bool(rate and rate["remaining"] < config["min_rate_remaining"]),
         "refresh_seconds": config["refresh_seconds"], "hot_only": hot_only_state(),
         "offline": LINK.state(), "etag": ETAG["cache"].stats() if ETAG["cache"] else None,
+        "hidden": HIDDEN["hidden"], "discovered": HIDDEN["discovered"], "hidden_names": HIDDEN["names"],
     }
 
 
@@ -433,6 +460,7 @@ def apply_live_event(record, config):
     del LIVE_EVENTS[:-keep]
     run = webhook.as_run(record)
     entry = RUN_CACHE.get(record["repo"])
+    HOT_FORCED.add(record["repo"])      # whatever the event said, the repository is read again in the next cycle (the event is the news, the read is the proof)
     if run and entry is not None:
         runs = [r for r in entry["runs"] if r.get("id") != run["id"]]
         entry["runs"] = sorted(runs + [run], key=lambda r: r.get("started") or "", reverse=True)[:max(config.get("runs_per_repo", 20), 5)]
@@ -559,7 +587,7 @@ def render_page():
     """actions_monitor.html with the catalogues of the interface (keys "ui.*") for the 8 languages and the default language inlined."""
     page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
     data = {"default": i18n.language(), "langs": list(i18n.LANGS), "names": i18n.NATIVE_NAMES, "html": i18n.HTML_LANG, "locale": i18n.BROWSER_LOCALE, "catalogues": i18n.ui_catalogues(),
-            "ecosystems": {key: item["label"] for key, item in toolconfig.ecosystems().items()}, "owner": toolconfig.github_owner(), "host": github_host(), "lite": LITE["on"], "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
+            "ecosystems": {**{"other": i18n.t("ui.eco_other")}, **{key: item["label"] for key, item in toolconfig.ecosystems().items()}}, "owner": toolconfig.github_owner(), "host": github_host(), "lite": LITE["on"], "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
     blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     return page.replace("/*I18N_DATA*/null", blob, 1)
 

@@ -92,6 +92,9 @@ AI_NOTE = {
 }
 
 
+ECO_NEW = {'en': 'Which repositories are watched: the example catalogue of ecosystems ends with a group `rest` (prefix `*`, "Everything else") that takes every repository no other group claims, so nothing is left out by default. If your own catalogue leaves repositories out, a banner of the page says how many ("your ecosystem filter hides N of the M repositories of the account").', 'es': 'Qué repositorios se vigilan: el catálogo de ejemplo de ecosistemas termina con un grupo `rest` (prefijo `*`, «Everything else») que recoge todo repositorio que ningún otro grupo reclama, así que por defecto no queda nada fuera. Si tu propio catálogo deja repositorios fuera, un aviso de la página dice cuántos («tu filtro de ecosistemas oculta N de los M repositorios de la cuenta»).', 'de': 'Welche Repositorys beobachtet werden: Der Beispielkatalog der Ökosysteme endet mit einer Gruppe `rest` (Präfix `*`, „Everything else“), die jedes Repository aufnimmt, das keine andere Gruppe beansprucht; so bleibt standardmäßig nichts außen vor. Lässt Ihr eigener Katalog Repositorys aus, nennt ein Banner der Seite die Anzahl („Ihr Ökosystem-Filter blendet N von M Repositorys des Kontos aus“).', 'fr': "Quels dépôts sont surveillés : le catalogue d'exemple des écosystèmes se termine par un groupe `rest` (préfixe `*`, « Everything else ») qui prend tout dépôt qu'aucun autre groupe ne réclame, donc rien n'est laissé de côté par défaut. Si votre propre catalogue en laisse, un bandeau de la page dit combien (« votre filtre d'écosystèmes masque N des M dépôts du compte »).", 'it': "Quali repository si osservano: il catalogo di esempio degli ecosistemi termina con un gruppo `rest` (prefisso `*`, «Everything else») che prende ogni repository che nessun altro gruppo rivendica, quindi per impostazione predefinita nulla resta fuori. Se il tuo catalogo ne lascia fuori, un avviso della pagina dice quanti («il tuo filtro degli ecosistemi nasconde N dei M repository dell'account»).", 'ja': 'どのリポジトリを監視するか:エコシステムのサンプルカタログは、他のどのグループにも属さないリポジトリをすべて受け取るグループ `rest`(接頭辞 `*`、「Everything else」)で終わるため、既定では何も漏れません。自分のカタログで漏れるリポジトリがある場合は、ページのバナーがその数を表示します(「エコシステムのフィルターがアカウントの M 件中 N 件を隠しています」)。', 'zh': '监视哪些仓库:生态系统示例目录以一个 `rest` 组(前缀 `*`,“Everything else”)结尾,它接收其他组都不认领的所有仓库,因此默认不会遗漏任何仓库。如果你自己的目录遗漏了仓库,页面横幅会告诉你数量(“你的生态系统筛选器隐藏了账户 M 个仓库中的 N 个”)。', 'pt': 'Que repositórios são vigiados: o catálogo de exemplo de ecossistemas termina com um grupo `rest` (prefixo `*`, «Everything else») que recolhe todo o repositório que nenhum outro grupo reclama, por isso por predefinição nada fica de fora. Se o seu próprio catálogo deixar repositórios de fora, um aviso da página diz quantos («o seu filtro de ecossistemas oculta N dos M repositórios da conta»).'}
+
+
 def locale(lang):
     return json.loads((MON / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
 
@@ -110,7 +113,7 @@ def render(lang):
             else:
                 cells.append(f"**{title}**: " + ", ".join(f"`{k}`" for k in keys))
         lines.append(f"| {cat['ui.cfg_g_' + tab]} | " + "<br>".join(cells) + " |")
-    lines += ["", tail, "", AI_NOTE[lang], "", f"### {PINS[lang][0]}", "", PINS[lang][1], "", PINS_EXAMPLE, END]
+    lines += ["", tail, "", ECO_NEW[lang], "", AI_NOTE[lang], "", f"### {PINS[lang][0]}", "", PINS[lang][1], "", PINS_EXAMPLE, END]
     return "\n".join(lines)
 
 

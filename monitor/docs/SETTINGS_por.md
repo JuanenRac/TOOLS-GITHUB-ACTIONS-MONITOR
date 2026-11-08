@@ -20,7 +20,7 @@ O separador divide-se em subseparadores, ordenados do comum ao avançado: Este n
 | Separador | Blocos e definições |
 |---|---|
 | Este navegador | idioma da página, tema (auto / claro / escuro), vista densa do separador Agora. Ficam no navegador, não no ficheiro. |
-| Geral | **Identidade**: `github_owner`, `language`<br>**Âmbito**: `mode`, `repos`, `ecosystems`, `exclude`<br>**Histórico**: `report_history_days` |
+| Geral | **Identidade**: `github_owner`, `language`<br>**Âmbito**: `mode`, `repos`, `ecosystems`, `show_unclassified`, `exclude`<br>**Histórico**: `report_history_days` |
 | Atualização e limites | **Repositórios quentes**: `refresh_seconds`, `hot_hours`, `runs_per_repo`, `stuck_minutes`<br>**Repositórios frios**: `cold_refresh_seconds`, `cold_runs_per_repo`<br>**Tarefas em segundo plano**: `issues_refresh_seconds`, `discover_refresh_seconds`, `discover_limit`, `max_workers`<br>**Quota da API**: `min_rate_remaining` |
 | Leituras e cache | **Leituras condicionais**: `cache.etag.enabled`, `cache.etag.ttl_hours` |
 | Sentinela | **Principal**: `sentinel.enabled`, `sentinel.refresh_seconds`, `sentinel.hot_hours`<br>**Alertas e higiene**: `sentinel.alerts_hot_seconds`, `sentinel.alerts_cold_seconds`, `sentinel.hygiene_seconds`<br>**Orçamento da API**: `sentinel.max_calls_per_tick`, `sentinel.budget_per_hour`, `sentinel.workers`, `sentinel.min_rate_remaining`<br>**Versões e assinaturas**: `sentinel.candidate_days`, `sentinel.candidate_min_entries`, `sentinel.skip_candidate_prefixes`, `sentinel.pending_sign_hours`, `sentinel.require_verified_signature`<br>**Consultas de vermelhos (A2)**: `sentinel.a2_full_sample_unknown`, `sentinel.a2_resolve_max_calls_per_tick`, `sentinel.a2_resolve_ttl_seconds`<br>**Pull requests**: `sentinel.stale_pr_days`<br>**Ficheiros obrigatórios**: `sentinel.required_files`<br>**Minutos de Actions**: `sentinel.minutes_budget_period`, `sentinel.minutes_budget`<br>**Ficheiros de auditoria**: `sentinel.audit_files.reconciliation`, `sentinel.audit_files.rounds`, `sentinel.audit_files.rounds_extra` |
@@ -36,6 +36,8 @@ O separador divide-se em subseparadores, ordenados do comum ao avançado: Este n
 | Vista de consola | **Consola**: `tui.theme`, `tui.refresh_seconds` |
 
 Cada definição aparece num só sítio. Só de leitura: `webhook.signing_state` apenas diz se o segredo partilhado está definido; o segredo nunca é mostrado.
+
+Que repositórios são vigiados: o catálogo de exemplo de ecossistemas termina com um grupo `rest` (prefixo `*`, «Everything else») que recolhe todo o repositório que nenhum outro grupo reclama, por isso por predefinição nada fica de fora. Se o seu próprio catálogo deixar repositórios de fora, um aviso da página diz quantos («o seu filtro de ecossistemas oculta N dos M repositórios da conta»).
 
 IA externa: `ai.provider` pode ser `ollama` (este computador), `openai-compatible` (qualquer endpoint ao estilo OpenAI, que serve também para o Gemini através do seu endpoint compatível com OpenAI e para a OpenAI), `anthropic` (a API Messages; o modelo é você que o escolhe) ou `copilot` (`gh copilot` com o seu acesso; gasta pedidos premium). A chave nunca é guardada: só o NOME da variável de ambiente. Ver AI_por.md.
 

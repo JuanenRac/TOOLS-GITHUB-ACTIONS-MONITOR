@@ -20,7 +20,7 @@
 | 标签页 | 块与设置 |
 |---|---|
 | 此浏览器 | 页面语言、主题(自动/浅色/深色)、“现在”标签页的紧凑视图。它们保存在浏览器中,而不是文件中。 |
-| 常规 | **身份**: `github_owner`, `language`<br>**范围**: `mode`, `repos`, `ecosystems`, `exclude`<br>**历史**: `report_history_days` |
+| 常规 | **身份**: `github_owner`, `language`<br>**范围**: `mode`, `repos`, `ecosystems`, `show_unclassified`, `exclude`<br>**历史**: `report_history_days` |
 | 刷新与限制 | **活跃仓库**: `refresh_seconds`, `hot_hours`, `runs_per_repo`, `stuck_minutes`<br>**非活跃仓库**: `cold_refresh_seconds`, `cold_runs_per_repo`<br>**后台任务**: `issues_refresh_seconds`, `discover_refresh_seconds`, `discover_limit`, `max_workers`<br>**API 配额**: `min_rate_remaining` |
 | 读取与缓存 | **条件读取**: `cache.etag.enabled`, `cache.etag.ttl_hours` |
 | 哨兵 | **主要**: `sentinel.enabled`, `sentinel.refresh_seconds`, `sentinel.hot_hours`<br>**警报与规范检查**: `sentinel.alerts_hot_seconds`, `sentinel.alerts_cold_seconds`, `sentinel.hygiene_seconds`<br>**API 预算**: `sentinel.max_calls_per_tick`, `sentinel.budget_per_hour`, `sentinel.workers`, `sentinel.min_rate_remaining`<br>**发布与签名**: `sentinel.candidate_days`, `sentinel.candidate_min_entries`, `sentinel.skip_candidate_prefixes`, `sentinel.pending_sign_hours`, `sentinel.require_verified_signature`<br>**红色查询(A2)**: `sentinel.a2_full_sample_unknown`, `sentinel.a2_resolve_max_calls_per_tick`, `sentinel.a2_resolve_ttl_seconds`<br>**拉取请求**: `sentinel.stale_pr_days`<br>**必需文件**: `sentinel.required_files`<br>**Actions 分钟数**: `sentinel.minutes_budget_period`, `sentinel.minutes_budget`<br>**审计文件**: `sentinel.audit_files.reconciliation`, `sentinel.audit_files.rounds`, `sentinel.audit_files.rounds_extra` |
@@ -36,6 +36,8 @@
 | 终端视图 | **终端**: `tui.theme`, `tui.refresh_seconds` |
 
 每项设置只出现在一个地方。只读:`webhook.signing_state` 仅说明共享密钥是否已定义;密钥本身永不显示。
+
+监视哪些仓库:生态系统示例目录以一个 `rest` 组(前缀 `*`,“Everything else”)结尾,它接收其他组都不认领的所有仓库,因此默认不会遗漏任何仓库。如果你自己的目录遗漏了仓库,页面横幅会告诉你数量(“你的生态系统筛选器隐藏了账户 M 个仓库中的 N 个”)。
 
 外部 AI:`ai.provider` 可以是 `ollama`(本机)、`openai-compatible`(任何 OpenAI 风格的端点,也适用于 Gemini 的 OpenAI 兼容端点和 OpenAI 本身)、`anthropic`(Messages API;模型由你选择)或 `copilot`(用你自己的登录运行 `gh copilot`;会消耗高级请求)。密钥从不保存:只设置环境变量的名称。见 AI_zho.md。
 

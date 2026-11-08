@@ -81,6 +81,7 @@ _f(_T_GENERAL, "identity", "language", "enum", ("",) + tuple(i18n.LANGS), False)
 _f(_T_GENERAL, "scope", "mode", "enum", ("full", "lite"))
 _f(_T_GENERAL, "scope", "repos", "repos")
 _f(_T_GENERAL, "scope", "ecosystems", "eco")
+_f(_T_GENERAL, "scope", "show_unclassified", "bool")
 _f(_T_GENERAL, "scope", "exclude", "names")
 _f(_T_GENERAL, "history", "report_history_days", "int", (1, 365))
 # --- Refresh and limits

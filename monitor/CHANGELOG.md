@@ -9,6 +9,17 @@ Version of the tool itself (monitor + sentinel + batch tools), semver of its own
 and is shown as `tool_version` in the sentinel snapshot and by `read_report.py --version`; `make_release.py` refuses to build
 when this file and `tool_version.py` disagree.
 
+## [1.6.2]
+
+- **A new installation no longer sees almost nothing.** The example catalogue of ecosystems ends with a group `rest` (prefix `*`, "Everything else") that takes every repository no other group claims, so the default filter leaves nothing out.
+- **The lite edition starts with what you already set up**: on its first start `actions_monitor_lite.json` copies from `actions_monitor.json` (when it exists) the account, the repositories and ecosystems to watch, the catalogue files, the exclusions and the language, and says so on the console; never the sentinel, the AI, the webhook, the outputs or the notifications. Without such a file its template watches all the ecosystems.
+- **A warning when the filter hides repositories**: a banner on the page (complete and lite) says "your ecosystem filter hides N of the M repositories of the account" when the filter leaves out most of them.
+- **No repository disappears silently**: the ones that no group claims are shown in an automatic group "Unclassified" (setting `show_unclassified`, on by default; an explicit choice of ecosystems is respected), and the banner names the repositories that a filter hides.
+- **A webhook event marks the repository as hot**, so the next cycle reads it again whatever the event said.
+- **A damaged cache entry is only a miss**: it is thrown away, the endpoint is read again in full and `ghamon_etag_invalid_total` counts it.
+- `tui.py --lite` (or `MONITOR_MODE=lite`) reads the lite edition on port 8766. A test makes sure that importing the monitor or the sentinel never loads Rich, and that the lite edition writes neither `ci_red.json` nor a signing queue.
+- Guides LITE and SETTINGS (eight languages) explain it.
+
 ## [1.6.1]
 
 - **The lite edition**, a second and simpler product in the same package: `MONITOR_LITE_GITHUB_ACTIONS.bat` / `.sh` / `.command` or `--lite` / `MONITOR_MODE=lite`. What is running and what failed, failures and successes of 24 hours, red on main, the history and the basic charts; no sentinel (it is not imported and its endpoints answer 404), a short Settings page (account, repositories and ecosystems, refresh, language, theme), its own file `actions_monitor_lite.json`, its own state files with the suffix `_lite` and port 8766, so both can run side by side. Guide in eight languages, a Lite-versus-Complete table in every README and new screenshots.
