@@ -87,9 +87,9 @@
 <text x="58" y="560" font-family="'Segoe UI','Noto Sans','Noto Sans CJK SC','Microsoft YaHei','Yu Gothic','Helvetica Neue',Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#C9D1D9" text-anchor="start">decides, tested</text>
 <rect x="180.56" y="548" width="14" height="14" rx="3" fill="none" stroke="#3D9BFF" stroke-width="2"/>
 <text x="202.56" y="560" font-family="'Segoe UI','Noto Sans','Noto Sans CJK SC','Microsoft YaHei','Yu Gothic','Helvetica Neue',Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#C9D1D9" text-anchor="start">a file or a format others read</text>
-<rect x="411.75999999999993" y="548" width="14" height="14" rx="3" fill="none" stroke="#FFB020" stroke-width="2" stroke-dasharray="3 2"/>
+<rect x="411.76" y="548" width="14" height="14" rx="3" fill="none" stroke="#FFB020" stroke-width="2" stroke-dasharray="3 2"/>
 <text x="433.76" y="560" font-family="'Segoe UI','Noto Sans','Noto Sans CJK SC','Microsoft YaHei','Yu Gothic','Helvetica Neue',Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#C9D1D9" text-anchor="start">off or optional until you set it up</text>
-<rect x="659.9999999999999" y="548" width="14" height="14" rx="3" fill="none" stroke="#30363D" stroke-width="2"/>
+<rect x="660.0" y="548" width="14" height="14" rx="3" fill="none" stroke="#30363D" stroke-width="2"/>
 <text x="682" y="560" font-family="'Segoe UI','Noto Sans','Noto Sans CJK SC','Microsoft YaHei','Yu Gothic','Helvetica Neue',Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#C9D1D9" text-anchor="start">not part of this repository</text>
 <text x="36" y="604" font-family="'Segoe UI','Noto Sans','Noto Sans CJK SC','Microsoft YaHei','Yu Gothic','Helvetica Neue',Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#6E7681" text-anchor="start">It only reads GitHub by default; every action that writes is off until you turn it on.</text>
 </svg>
