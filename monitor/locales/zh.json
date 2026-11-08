@@ -1090,6 +1090,7 @@
  "ui.k_sign": "未签名",
  "ui.k_sign_oldest": "最长等待:{h} 小时",
  "ui.k_sign_title": "筛选有未签名构建的仓库，并跳转到签名队列",
+ "ui.k_red_approx": "近似值:此版本不读取每个仓库的默认分支,而是假定为 main(或 master),比所读取运行更早的失败可能不会显示",
  "ui.l_fail": "仍存在失败",
  "ui.l_pending": "待签名",
  "ui.l_red": "红色 CI",

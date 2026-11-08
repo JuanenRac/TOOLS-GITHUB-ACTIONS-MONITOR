@@ -1090,6 +1090,7 @@
  "ui.k_sign": "non firmati",
  "ui.k_sign_oldest": "attesa più lunga: {h} h",
  "ui.k_sign_title": "Filtra i repository con build non firmati e vai alla coda di firma",
+ "ui.k_red_approx": "Approssimato: questa edizione non legge il branch predefinito di ogni repository, quindi assume main (o master) e può non vedere un errore più vecchio delle esecuzioni lette",
  "ui.l_fail": "con errore in corso",
  "ui.l_pending": "firma in sospeso",
  "ui.l_red": "CI rossa",

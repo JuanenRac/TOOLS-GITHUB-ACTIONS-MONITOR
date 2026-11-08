@@ -412,10 +412,10 @@ function runVisible(r,d){
 function render(d){
   DATA=d;const day=Date.now()-864e5;
   const runs=d.runs,last=runs.filter(r=>new Date(r.started)>day),done=last.filter(r=>r.status==="completed");
-  const ok=done.filter(r=>r.conclusion==="success").length,bad=done.filter(r=>BAD.includes(r.conclusion)).length;
-  kSet("k-active",d.active.filter(r=>r.status==="in_progress").length);
-  kSet("k-queued",d.active.filter(r=>r.status!=="in_progress").length);
-  kSet("k-min",Math.round(last.reduce((a,r)=>a+r.seconds,0)/60));kSet("k-fail",bad);kSet("k-ok",ok);kSet("k-issues",d.issues.length);
+  const F=d.figures||{},ok=F.ok24!=null?F.ok24:done.filter(r=>r.conclusion==="success").length,bad=F.fail24!=null?F.fail24:done.filter(r=>BAD.includes(r.conclusion)).length;      // the server counts them: both editions show the same figures
+  kSet("k-active",F.active!=null?F.active:d.active.filter(r=>r.status==="in_progress").length);
+  kSet("k-queued",F.queued!=null?F.queued:d.active.filter(r=>r.status!=="in_progress").length);
+  kSet("k-min",F.min24!=null?F.min24:Math.round(last.reduce((a,r)=>a+r.seconds,0)/60));kSet("k-fail",bad);kSet("k-ok",ok);kSet("k-issues",d.issues.length);
   $("stamp").textContent=d.loading?T("ui.loading_repos",{n:d.loading}):T("ui.updated",{time:clock(d.updated),secs:d.took});
   const eta=d.rate?Math.max(0,Math.round((new Date(d.rate.reset).getTime()-Date.now())/60000)):null;
   $("rate").textContent=d.rate?T("ui.quota",{remaining:d.rate.remaining,limit:d.rate.limit,time:clock(d.rate.reset,{hour:"2-digit",minute:"2-digit"}),eta:eta}):"";
@@ -860,7 +860,7 @@ function paintTiles(d){
   TILES_LIVE=true;
   const nz=(id,n,cls)=>tileState(id,n>0?cls:"");
   const last=runs=>runs;
-  if(LITE){kSet("k-red",d.failing.length);tileState("kp-red",d.failing.length?"bad":"")}
+  if(LITE){const n=d.figures&&d.figures.red!=null?d.figures.red:d.failing.length;kSet("k-red",n);tileState("kp-red",n?"bad":"");$("kp-red").title=d.figures&&d.figures.red_approx?T("ui.k_red_approx"):"";$("kp-sign").hidden=true}
   tileState("kt-active",d.active.filter(r=>r.status==="in_progress").length>0?"run":"");
   nz("kt-queued",d.active.filter(r=>r.status!=="in_progress").length,"warn");
   nz("kp-fail",$("k-fail")._v||0,"bad");
@@ -875,7 +875,7 @@ function paintTiles(d){
     tileText("tv-quota",d.rate.remaining+"/"+d.rate.limit);$("tq-fill").style.width=pct+"%";
     tileState("kt-quota",d.paused_quota||d.rate.remaining<low?"bad":(d.rate.remaining<low*2?"warn":"ok"));
     QUOTA_RESET=new Date(d.rate.reset);quotaCount();
-  }else tileState("kt-quota","");
+  }
   const o=d.offline||{};tileText("tv-conn",T(o.offline?"ui.t_offline":"ui.t_online"));tileState("kt-conn",o.offline?"bad":"ok");$("tv-conn-since").textContent=o.offline?T("ui.t_offline_since",{since:clock(o.since)}):"";
   tileText("tv-upd",clock(d.updated));tileState("kt-upd","");$("kt-upd").querySelector("small").textContent=T("ui.t_updated")+" · "+T("ui.t_took",{secs:d.took});
   const ld=$("kt-loading");ld.hidden=!d.loading;if(d.loading){const m=String(d.loading).match(/(\d+)\s*\/\s*(\d+)/);tileText("tv-load",d.loading);$("tl-fill").style.width=m&&+m[2]?Math.round(+m[1]/+m[2]*100)+"%":"0%"}

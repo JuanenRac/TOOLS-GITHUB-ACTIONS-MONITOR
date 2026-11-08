@@ -1090,6 +1090,7 @@
  "ui.k_sign": "sem assinar",
  "ui.k_sign_oldest": "espera mais longa: {h} h",
  "ui.k_sign_title": "Filtrar os repositórios com builds por assinar e ir para a fila de assinatura",
+ "ui.k_red_approx": "Aproximado: esta edição não lê o ramo predefinido de cada repositório, por isso assume main (ou master) e pode não ver uma falha mais antiga do que as execuções lidas",
  "ui.l_fail": "com falha em vigor",
  "ui.l_pending": "assinatura pendente",
  "ui.l_red": "CI vermelha",

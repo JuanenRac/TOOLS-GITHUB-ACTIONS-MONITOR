@@ -1090,6 +1090,7 @@
  "ui.k_sign": "non signés",
  "ui.k_sign_oldest": "attente la plus longue : {h} h",
  "ui.k_sign_title": "Filtrer les dépôts avec des builds non signés et aller à la file de signature",
+ "ui.k_red_approx": "Approximatif : cette édition ne lit pas la branche par défaut de chaque dépôt, elle suppose main (ou master) et peut manquer un échec plus ancien que les exécutions lues",
  "ui.l_fail": "avec un échec en cours",
  "ui.l_pending": "signature en attente",
  "ui.l_red": "CI rouge",

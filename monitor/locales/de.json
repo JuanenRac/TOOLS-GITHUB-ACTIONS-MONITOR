@@ -1090,6 +1090,7 @@
  "ui.k_sign": "unsigniert",
  "ui.k_sign_oldest": "längste Wartezeit: {h} Std.",
  "ui.k_sign_title": "Repositories mit unsignierten Builds filtern und zur Signatur-Warteschlange springen",
+ "ui.k_red_approx": "Näherungswert: Diese Ausgabe liest den Standardbranch jedes Repositories nicht und nimmt main (oder master) an; ein Fehler, der älter ist als die gelesenen Läufe, kann fehlen",
  "ui.l_fail": "mit bestehendem Fehler",
  "ui.l_pending": "Signatur ausstehend",
  "ui.l_red": "rote CI",

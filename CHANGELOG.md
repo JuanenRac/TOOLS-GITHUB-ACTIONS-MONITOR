@@ -11,7 +11,7 @@ Changes of the repository as a whole. The program has its own, more detailed his
 
 ## [1.6.2]
 
-- The example catalogue has a catch-all group so nothing is left out by default, the lite edition inherits the account and the filters of the complete one on its first start, the page warns when the ecosystem filter hides repositories, repositories that no group claims are shown as Unclassified, a webhook event makes the repository hot and a damaged cache entry is only a miss.
+- The example catalogue has a catch-all group so nothing is left out by default, the lite edition inherits the account and the filters of the complete one on its first start, the page warns when the ecosystem filter hides repositories, repositories that no group claims are shown as Unclassified, a webhook event makes the repository hot and a damaged cache entry is only a miss. Both editions now show the same header figures, with one rule for red workflows on the default branch.
 
 ## [1.6.1]
 

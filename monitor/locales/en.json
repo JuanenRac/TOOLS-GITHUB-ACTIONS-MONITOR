@@ -1090,6 +1090,7 @@
  "ui.k_sign": "unsigned",
  "ui.k_sign_oldest": "longest wait: {h} h",
  "ui.k_sign_title": "Filter the repositories with unsigned builds and jump to the signing queue",
+ "ui.k_red_approx": "Approximate: this edition does not read the default branch of each repository, so it assumes main (or master) and may miss a failure that is older than the runs it reads",
  "ui.l_fail": "with a standing failure",
  "ui.l_pending": "pending signature",
  "ui.l_red": "red CI",

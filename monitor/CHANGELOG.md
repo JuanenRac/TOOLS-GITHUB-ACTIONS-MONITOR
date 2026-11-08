@@ -18,6 +18,7 @@ when this file and `tool_version.py` disagree.
 - **A webhook event marks the repository as hot**, so the next cycle reads it again whatever the event said.
 - **A damaged cache entry is only a miss**: it is thrown away, the endpoint is read again in full and `ghamon_etag_invalid_total` counts it.
 - `tui.py --lite` (or `MONITOR_MODE=lite`) reads the lite edition on port 8766. A test makes sure that importing the monitor or the sentinel never loads Rich, and that the lite edition writes neither `ci_red.json` nor a signing queue.
+- **Both editions show the same header figures**: runs, failures, successes, compute minutes, running and queued are counted once, by the server, over the same 24 hours with each run counted once; the lite edition reads as deep as the complete one (it also inherits the depth settings). "Red on main" follows one small rule (`redrule.py`) used by the sentinel and by the lite edition, which marks the figure as approximate because it guesses the default branch. The lite edition hides the "unsigned" tile, and the allowance tile of both editions is painted from the first moment, while the repositories are still loading. A test compares both editions on the same data.
 - Guides LITE and SETTINGS (eight languages) explain it.
 
 ## [1.6.1]

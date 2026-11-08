@@ -38,6 +38,7 @@ import analytics
 import etagcache
 import i18n
 import platform_compat
+import redrule
 import resilience
 import toolconfig
 from tool_version import AUTHOR, LICENSE_ID, TOOL_VERSION
@@ -77,7 +78,7 @@ LITE_PORT = 8766
 LITE_PATHS = ("/api/sentinel", "/api/ai", "/api/notify", "/api/analytics", "/api/live-events", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics")   # they do not exist in lite
 
 
-LITE_INHERIT = ("github_owner", "ecosystems", "ecosystems_file", "targets_file", "profiles_file", "exclude", "repos", "language")   # what a first lite start copies from actions_monitor.json
+LITE_INHERIT = ("github_owner", "ecosystems", "ecosystems_file", "targets_file", "profiles_file", "exclude", "repos", "language", "runs_per_repo", "cold_runs_per_repo", "hot_hours", "stuck_minutes")   # what a first lite start copies from actions_monitor.json
 HOT_FORCED = set()    # repositories a webhook event touched: they are read again in the next cycle
 HIDDEN = {"hidden": 0, "discovered": 0, "names": []}      # repositories of the account that the ecosystem filter leaves out, and how many the account has
 
@@ -400,6 +401,26 @@ def collect(config, publish=None):
     return build(config, repos, started, refreshed, False, "")
 
 
+def header_figures(runs, active, issues, now=None, red=None, approx=False):
+    """The figures of the header, the same for both editions: runs of the last 24 hours (one per id), failures, successes, compute minutes, and what is running or queued."""
+    now = time.time() if now is None else now
+    since = now - 86400
+    seen, last = set(), []
+    for run in runs:
+        started = parse_time(run.get("started"))
+        if run.get("id") in seen or not started or started.timestamp() <= since:
+            continue
+        seen.add(run.get("id"))
+        last.append(run)
+    done = [r for r in last if r.get("status") == "completed"]
+    figures = {"active": sum(1 for r in active if r.get("status") == "in_progress"), "queued": sum(1 for r in active if r.get("status") != "in_progress"),
+               "fail24": sum(1 for r in done if r.get("conclusion") in ("failure", "timed_out", "startup_failure")), "ok24": sum(1 for r in done if r.get("conclusion") == "success"),
+               "issues": len(issues), "min24": round(sum(r.get("seconds") or 0 for r in last) / 60)}
+    if red is not None:
+        figures["red"], figures["red_approx"] = len(red), bool(approx)
+    return figures
+
+
 def build(config, repos, started, refreshed, loading, progress_text):
     runs, errors = [], {}
     for repo in repos:
@@ -430,13 +451,15 @@ def build(config, repos, started, refreshed, loading, progress_text):
 
         threading.Thread(target=refresh_issues, daemon=True).start()
     try:
-        if loading:
-            raise RuntimeError("skip")
-        limit = gh("api", "rate_limit", retries=0)["resources"]["core"]
+        limit = gh("api", "rate_limit", retries=0)["resources"]["core"]      # free of quota: it is also read while loading, so the allowance is on the page from the first moment
         rate = {"remaining": limit["remaining"], "limit": limit["limit"], "reset": datetime.fromtimestamp(limit["reset"], timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
     except Exception:
         rate = None
     hot = sum(1 for repo in repos if is_hot(repo, config, time.time()))
+    red, approx = None, False
+    if LITE["on"]:      # the lite edition has no sentinel: it counts the red workflows with the same small rule, guessing the default branch
+        red, approx = redrule.red_workflows({r: [x for x in runs if x["repo"] == r] for r in repos}, None, True, config.get("runs_per_repo"))
+    figures = header_figures(runs, active, ISSUE_CACHE["items"], red=red, approx=approx)
     return {
         "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "took": round(time.time() - started, 1),
         "repos": repos, "ecosystems": {repo: ecosystem_of(repo) for repo in repos},
@@ -447,6 +470,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
         "refresh_seconds": config["refresh_seconds"], "hot_only": hot_only_state(),
         "offline": LINK.state(), "etag": ETAG["cache"].stats() if ETAG["cache"] else None,
         "hidden": HIDDEN["hidden"], "discovered": HIDDEN["discovered"], "hidden_names": HIDDEN["names"],
+        "figures": figures,
     }
 
 
@@ -947,6 +971,7 @@ def main():
         enable_lite()
     config = load_config()
     if LITE["on"]:
+        config["mode"] = "full"                      # the lite edition reads as deep as the complete one: its figures must be the same
         config["sentinel"] = {"enabled": False}      # the lite product has no sentinel, whatever the file says
         config["webhook"] = {"enabled": False, "secret": ""}
     i18n.set_language(i18n.detect(config.get("language")))

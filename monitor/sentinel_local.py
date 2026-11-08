@@ -33,6 +33,7 @@ import events
 import i18n
 import lint_workflows
 import readiness
+import redrule
 import roadmap_a9
 import sentinel_ai
 import sys as _sys
@@ -121,26 +122,8 @@ def workflow_key(run):
 
 
 def red_workflows(runs_by_repo, default_branches=None):
-    """A2: the last completed run of each workflow on the default branch; red when it failed. Streak = consecutive reds."""
-    out = []
-    for repo, runs in runs_by_repo.items():
-        branch = (default_branches or {}).get(repo) or "main"
-        series = {}
-        for run in sorted(signstate.completed_runs(runs, branch), key=lambda r: r.get("started") or ""):
-            series.setdefault(workflow_key(run), []).append(run)
-        for key, items in series.items():
-            last = items[-1]
-            if last.get("conclusion") not in BAD:
-                continue
-            streak = 0
-            for run in reversed(items):
-                if run.get("conclusion") in BAD:
-                    streak += 1
-                else:
-                    break
-            out.append({"repo": repo, "workflow": last.get("name") or key, "conclusion": last["conclusion"], "since": last.get("started"),
-                        "url": last.get("url"), "streak": streak, "sha": last.get("sha", "")})
-    return sorted(out, key=lambda r: (r["repo"], r["workflow"]))
+    """A2: the last completed run of each workflow on the default branch; red when it failed. Streak = consecutive reds. The rule lives in redrule.py (the lite edition uses it too)."""
+    return redrule.red_workflows(runs_by_repo, default_branches)[0]
 
 
 def a2_unchecked(runs_by_repo):

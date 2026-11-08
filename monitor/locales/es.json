@@ -1090,6 +1090,7 @@
  "ui.k_sign": "sin firmar",
  "ui.k_sign_oldest": "espera más larga: {h} h",
  "ui.k_sign_title": "Filtrar los repos con builds sin firmar y enfocar la cola de firma",
+ "ui.k_red_approx": "Aproximado: esta edición no lee la rama por defecto de cada repo, así que supone main (o master) y puede no ver un fallo más antiguo que las ejecuciones que lee",
  "ui.l_fail": "con fallo vigente",
  "ui.l_pending": "pendientes de firma",
  "ui.l_red": "CI en rojo",
