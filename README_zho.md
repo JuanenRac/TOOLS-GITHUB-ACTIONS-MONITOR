@@ -31,7 +31,7 @@
 
 | | |
 |---|---|
-| **版本** | **1.6.2** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **版本** | **1.6.3** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **需要** | Python 3.11+ 和 GitHub CLI（`gh auth login`）；不需要其他东西(终端视图使用可选的 `rich` 包) |
 | **打开** | 仅在 `127.0.0.1` 上的页面，支持八种语言 |
 | **写入 GitHub** | 绝不自行写入：只有你用明确的 `--go` 运行的批处理命令才会 |
@@ -48,6 +48,10 @@
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_charts_light.png"><img src="docs/screenshots/web_charts_dark.png" alt="图表" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_repositories_light.png"><img src="docs/screenshots/web_repositories_dark.png" alt="仓库" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_history_light.png"><img src="docs/screenshots/web_history_dark.png" alt="历史" width="92%"></picture></p>
+
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_about_light.png"><img src="docs/screenshots/web_about_dark.png" alt="关于" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_help_light.png"><img src="docs/screenshots/web_help_dark.png" alt="帮助，可搜索且可离线使用" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_basic_light.png"><img src="docs/screenshots/web_settings_basic_dark.png" alt="设置 · 基本：套餐、配额与发现" width="92%"></picture></p>
 
 <details><summary><b>设置(逐个子标签页)</b></summary>
 
@@ -101,10 +105,22 @@
 - **八种语言**（en、es、de、fr、it、ja、zh、pt），以英语为基础；在设置中切换。
 - **面向仪表板的输出**：`ci_red.json`、Prometheus 端点和 Grafana 用 JSON 数据源，并附带可导入的 Grafana 仪表板。
 - **批处理工具**：一次计划并触发多个构建；没有 `--go` 就不会触发任何东西。
+- **页面内的“关于”和“帮助”**：**i** 按钮显示版本、版本类型、链接、文件、运行状况和复制支持信息的按钮；**?** 按钮（或 `?` 键）可离线打开全部文档，支持搜索并使用你的语言。控制台提供 `--about` 和 `--help-topics`，以及分标签页的交互式终端应用（可选 `textual`）。
+- **新版本提示**：发布较新版本时显示低调的徽章；它每天只读取一次公开发布页，从不安装任何内容，可以关闭（隔离网络安装中始终关闭）。
+- **适用于任何账户的配额**：套餐、计费分钟数（公开仓库不计费）、从 GitHub 响应头读取的 API 配额、并发数，以及接近 6 小时上限的作业；数字保存在可编辑的文件中。
 
 ## 架构
 
 <p align="center"><img src="images/architecture.svg" alt="架构" width="100%"></p>
+
+## 从这里开始：选哪个版本？
+
+| 如果你想... | 启动 | 端口 |
+|---|---|---|
+| 只看什么在运行、什么失败了（**从这里开始**） | `MONITOR_LITE_GITHUB_ACTIONS` | 8766 |
+| 让整个账户被替你监视：警报、发布、签名、就绪度、分析 | `MONITOR_GITHUB_ACTIONS`（含[哨兵](monitor/docs/SENTINEL_zho.md)） | 8765 |
+
+控制台窗口的标题和第一行会说明正在运行哪一个。还拿不准？`python actions_monitor.py --demo` 用虚构数据打开页面，`--doctor` 检查你的安装。[你的前五分钟](monitor/docs/FIRST_STEPS_zho.md)
 
 ## 快速开始
 
@@ -193,6 +209,12 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
     ├── analytics.py lint_workflows.py   时长、不稳定、检查器
     ├── notifiers.py ai_actions.py       通知与 AI 封闭列表
     ├── tui.py migrate_state.py          终端视图与迁移
+    ├── about.py  helpdocs.py            关于与帮助面板
+    ├── quota.py  quotas.json            套餐、分钟数与配额
+    ├── modes.py  updatecheck.py         工作模式、版本提示
+    ├── doctor.py  demo_mode.py          --doctor 与 --demo
+    ├── discovery.py  banner.py          发现、版本横幅
+    ├── tui_textual.py                   交互式终端
     ├── i18n.py locales/                 八种语言
     ├── toolconfig.py workspace.py       设置与克隆
     ├── tests/                           离线测试
@@ -213,6 +235,10 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/CONSOLE_TOOLS_zho.md`](monitor/docs/CONSOLE_TOOLS_zho.md): 工作流检查器与终端视图
 - [`monitor/docs/DEPLOYMENT_zho.md`](monitor/docs/DEPLOYMENT_zho.md): 作为服务运行、反向代理之后、权限
 - [`monitor/QUICKSTART_zh.txt`](monitor/QUICKSTART_zh.txt): 入门步骤（八种语言）
+- [`monitor/docs/FIRST_STEPS_zho.md`](monitor/docs/FIRST_STEPS_zho.md)：你的前五分钟
+- [`monitor/docs/SENTINEL_zho.md`](monitor/docs/SENTINEL_zho.md)：哨兵及其检查 A1-A13
+- [`monitor/docs/QUOTAS_zho.md`](monitor/docs/QUOTAS_zho.md)：GitHub 的配额与套餐
+- [`monitor/docs/MODES_zho.md`](monitor/docs/MODES_zho.md)：工作模式：普通、快速和极速
 
 ## 参与贡献
 

@@ -368,7 +368,7 @@ def build_svg(spec: dict) -> str:
     for lv in used:
         st = level_style(lv, pal_all)
         label = texts[lv]
-        need = 22 + K.text_width(label, 12) + 34
+        need = round(22 + K.text_width(label, 12) + 34, 2)
         if lx + need > W - 40:
             lx, ly = 36, ly + 20
         if lv == "untested":

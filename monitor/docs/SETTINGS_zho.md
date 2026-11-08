@@ -15,11 +15,12 @@
 
 只有 `settings_api.py` 列表(架构)中的键。每个键都有类型和范围,页面会说明更改是需要**重启**监视器(循环只读取一次配置)还是**立即生效**。
 
-该标签页按从常用到高级的顺序分为子标签页:此浏览器、常规、刷新与限制、哨兵、表面检查(A10)、就绪(A11)、文件夹与文件、输出,然后是集成。每个子标签页内的设置按带标题的块分组;块的第一个字段是它的总开关,关闭时该块其余部分变暗且不可编辑。每个字段都显示单位(秒、分钟、小时、天、MB、次)、范围、徽标(需要重启/立即生效)、以保守默认值启动的安全选项徽标,以及一行帮助。搜索框会筛选所有子标签页的设置;每个子标签页统计未保存的更改;保存和放弃按钮始终可见;浏览器会记住上次使用的子标签页。标签页遵循键盘操作模式(方向键、Home、End)。
+该标签页按从常用到高级的顺序分为子标签页:此浏览器、基本、常规、刷新与限制、哨兵、表面检查(A10)、就绪(A11)、文件夹与文件、输出,然后是集成。每个子标签页内的设置按带标题的块分组;块的第一个字段是它的总开关,关闭时该块其余部分变暗且不可编辑。每个字段都显示单位(秒、分钟、小时、天、MB、次)、范围、徽标(需要重启/立即生效)、以保守默认值启动的安全选项徽标,以及一行帮助。搜索框会筛选所有子标签页的设置;每个子标签页统计未保存的更改;保存和放弃按钮始终可见;浏览器会记住上次使用的子标签页。标签页遵循键盘操作模式(方向键、Home、End)。
 
 | 标签页 | 块与设置 |
 |---|---|
 | 此浏览器 | 页面语言、主题(自动/浅色/深色)、“现在”标签页的紧凑视图。它们保存在浏览器中,而不是文件中。 |
+| 基本 | **启动**: `open_browser`<br>**更新**: `updates.check`<br>**网络**: `airgapped`<br>**套餐与配额**: `account.plan`, `quota.default_runner`, `quota.warn_percent`, `quota.alert_percent`, `quota.billing_api`<br>**安全**: `session_guard`<br>**发现**: `discovery.events`, `discovery.suggest_groups`, `discovery.auto_frequency`<br>**生命周期**: `discovery.hide` |
 | 常规 | **身份**: `github_owner`, `language`<br>**范围**: `mode`, `repos`, `ecosystems`, `show_unclassified`, `exclude`<br>**历史**: `report_history_days` |
 | 刷新与限制 | **活跃仓库**: `refresh_seconds`, `hot_hours`, `runs_per_repo`, `stuck_minutes`<br>**非活跃仓库**: `cold_refresh_seconds`, `cold_runs_per_repo`<br>**后台任务**: `issues_refresh_seconds`, `discover_refresh_seconds`, `discover_limit`, `max_workers`<br>**API 配额**: `min_rate_remaining` |
 | 读取与缓存 | **条件读取**: `cache.etag.enabled`, `cache.etag.ttl_hours` |

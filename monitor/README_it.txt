@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITOR DI GITHUB ACTIONS + SENTINELLA (versione 1.6.2)
+MONITOR DI GITHUB ACTIONS + SENTINELLA (versione 1.6.3)
 =======================================================
 Requisiti: Python 3.11+ e GitHub CLI (`gh`) con l'accesso effettuato (gh auth login). Nient'altro: il nucleo non richiede pacchetti (la vista console, tui.py, usa il pacchetto facoltativo rich).
 Passi rapidi per il primo utilizzo: QUICKSTART_it.txt.
@@ -77,3 +77,7 @@ NOVITÀ 1.3.0 (cronologia: CHANGELOG.md)
   ecosystems_file, targets_file); workspace facoltativo con una modalità ridotta onesta; paternità e GPL-3.0-or-later in ogni file; LICENSE, NOTICE, AUTHORS;
   README e QUICKSTART in 8 lingue.
 LICENZA    GPL-3.0-or-later (vedi LICENSE e NOTICE). Copyright (C) 2026 JuanenRac (Electro Hobby 3D).
+
+GUIDA, INFORMAZIONI E VERIFICHE (1.6.3)
+---------------------------------------
+La pagina ha un pulsante Guida (? rotondo) e uno Informazioni (i); da console: --help-topics, --help-search, --about e --doctor; --demo mostra la pagina con dati inventati. L'edizione lite parte con un proprio banner e titolo di finestra (LITE, porta 8766, senza sentinella); la completa indica COMPLETE, porta 8765, sentinella attiva. L'avviso di nuova versione si può spegnere (Impostazioni > Di base).

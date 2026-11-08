@@ -31,7 +31,7 @@
 
 | | |
 |---|---|
-| **バージョン** | **1.6.2** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **バージョン** | **1.6.3** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **必要なもの** | Python 3.11 以上と GitHub CLI（`gh auth login`）。それ以外は不要(ターミナル表示は任意のパッケージ `rich` を使います) |
 | **開く先** | `127.0.0.1` 上のページのみ、8言語対応 |
 | **GitHub への書き込み** | 自動では行いません。明示的な `--go` を付けて実行したバッチコマンドのみ |
@@ -48,6 +48,10 @@
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_charts_light.png"><img src="docs/screenshots/web_charts_dark.png" alt="グラフ" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_repositories_light.png"><img src="docs/screenshots/web_repositories_dark.png" alt="リポジトリ" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_history_light.png"><img src="docs/screenshots/web_history_dark.png" alt="履歴" width="92%"></picture></p>
+
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_about_light.png"><img src="docs/screenshots/web_about_dark.png" alt="バージョン情報" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_help_light.png"><img src="docs/screenshots/web_help_dark.png" alt="ヘルプ（検索可能・オフライン）" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_basic_light.png"><img src="docs/screenshots/web_settings_basic_dark.png" alt="設定 · 基本: プラン、クォータ、検出" width="92%"></picture></p>
 
 <details><summary><b>設定(サブタブごと)</b></summary>
 
@@ -101,10 +105,22 @@
 - **8言語**（en、es、de、fr、it、ja、zh、pt）。英語が基本で、設定で切り替えます。
 - **ダッシュボード向け出力**：`ci_red.json`、Prometheus エンドポイント、Grafana 用 JSON ソースと、インポート可能な Grafana ダッシュボード。
 - **バッチツール**：多数のビルドをまとめて計画・実行します。`--go` なしでは何も実行されません。
+- **ページ内のバージョン情報とヘルプ**: **i** ボタンでバージョン、エディション、リンク、ファイル、動作状況、サポート用情報をコピーするボタンを表示し、**?** ボタン（またはキー `?`）でドキュメント全体を検索付き・お使いの言語でインターネットなしに開きます。コンソールには `--about` と `--help-topics`、タブ付きの対話型ターミナルアプリ（任意の `textual`）があります。
+- **新バージョンのお知らせ**: 新しいリリースが公開されると控えめなバッジを表示します。公開リリースページを1日1回読むだけで、何もインストールせず、オフにでき（隔離環境では常にオフ）ます。
+- **あらゆるアカウント向けのクォータ**: プラン、課金対象の分数（公開リポジトリは無料）、GitHub のヘッダーから読む API クォータ、並行実行、6時間の上限に近いジョブ。数値は編集可能なファイルにあります。
 
 ## アーキテクチャ
 
 <p align="center"><img src="images/architecture.svg" alt="アーキテクチャ" width="100%"></p>
+
+## まずここから: どの版？
+
+| 目的 | 起動 | ポート |
+|---|---|---|
+| 何が動き何が失敗したかだけを見たい（**まずはこちら**） | `MONITOR_LITE_GITHUB_ACTIONS` | 8766 |
+| アカウント全体を見張ってほしい: アラート、リリース、署名、準備状況、分析 | `MONITOR_GITHUB_ACTIONS`（[センチネル](monitor/docs/SENTINEL_jpn.md)付き） | 8765 |
+
+コンソールウィンドウのタイトルと1行目でどちらが動いているかわかります。迷うときは `python actions_monitor.py --demo` で架空のデータのページを開き、`--doctor` でインストールを確認できます。[最初の5分間](monitor/docs/FIRST_STEPS_jpn.md)
 
 ## クイックスタート
 
@@ -193,6 +209,12 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
     ├── analytics.py lint_workflows.py   所要時間・不安定・Lint
     ├── notifiers.py ai_actions.py       通知と AI の限定リスト
     ├── tui.py migrate_state.py          ターミナル表示と移行
+    ├── about.py  helpdocs.py            情報とヘルプのパネル
+    ├── quota.py  quotas.json            プラン・分数・クォータ
+    ├── modes.py  updatecheck.py         動作モード・更新通知
+    ├── doctor.py  demo_mode.py          --doctor と --demo
+    ├── discovery.py  banner.py          検出・版バナー
+    ├── tui_textual.py                   対話型ターミナル
     ├── i18n.py locales/                 8言語
     ├── toolconfig.py workspace.py       設定とクローン
     ├── tests/                           オフラインテスト
@@ -213,6 +235,10 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/CONSOLE_TOOLS_jpn.md`](monitor/docs/CONSOLE_TOOLS_jpn.md): ワークフロー Lint とターミナル表示
 - [`monitor/docs/DEPLOYMENT_jpn.md`](monitor/docs/DEPLOYMENT_jpn.md): サービスとして動かす、プロキシの背後、権限
 - [`monitor/QUICKSTART_ja.txt`](monitor/QUICKSTART_ja.txt): 最初の手順（8言語）
+- [`monitor/docs/FIRST_STEPS_jpn.md`](monitor/docs/FIRST_STEPS_jpn.md): 最初の5分間
+- [`monitor/docs/SENTINEL_jpn.md`](monitor/docs/SENTINEL_jpn.md): センチネルとチェック A1〜A13
+- [`monitor/docs/QUOTAS_jpn.md`](monitor/docs/QUOTAS_jpn.md): GitHub のクォータとプラン
+- [`monitor/docs/MODES_jpn.md`](monitor/docs/MODES_jpn.md): 動作モード: 通常・高速・ターボ
 
 ## コントリビュート
 

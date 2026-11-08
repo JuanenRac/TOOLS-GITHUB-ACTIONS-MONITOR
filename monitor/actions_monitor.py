@@ -35,12 +35,15 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 import analytics
+import discovery
 import etagcache
 import i18n
+import modes
 import platform_compat
 import redrule
 import resilience
 import toolconfig
+import updatecheck
 from tool_version import AUTHOR, LICENSE_ID, TOOL_VERSION
 
 HERE = Path(__file__).resolve().parent
@@ -71,8 +74,17 @@ DEFAULTS = {
     "ai": {"provider": "none"},
     "webhook": {"enabled": False, "secret": ""},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default)
     "cache": {"etag": {"enabled": True, "ttl_hours": 24}},   # conditional reads: a 304 answer costs no quota (etagcache.py)
+    "updates": {"check": True},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
+    "airgapped": False,            # True: nothing is requested from the network except GitHub's data you asked for; the update check is off
+    "open_browser": True,
+    "modes": {"start": "normal", "default_minutes": 60},     # normal | fast | turbo: see modes.py; the presets can be edited under modes.fast / modes.turbo
+    "account": {"plan": "unknown"},     # free | pro | team | enterprise: the quotas of the plan come from quotas.json (quota.py)
+    "quota": {"billing_api": False, "warn_percent": 75, "alert_percent": 90, "default_runner": "linux"},
+    "session_guard": True,         # the page asks for a one-use token before it changes a setting or confirms an action
+    "discovery": {"events": True, "suggest_groups": True, "auto_frequency": False, "hide": []},
 }
 
+DEMO = {"on": False}      # --demo: invented data, no gh, no network
 LITE = {"on": False}      # the lite product: the same server without the sentinel, with its own configuration file, its own state files and a short settings page
 LITE_PORT = 8766
 LITE_PATHS = ("/api/sentinel", "/api/ai", "/api/notify", "/api/analytics", "/api/live-events", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics")   # they do not exist in lite
@@ -115,7 +127,10 @@ SENTINEL = {"obj": None, "error": None}  # the sentinel module (layer A); a fail
 LOCK = threading.Lock()
 ISSUE_CACHE = {"at": 0.0, "items": [], "busy": False}
 RUN_CACHE = {}  # repo -> {"runs": [...], "at": float, "error": str|None}
-DISCOVERED = {"at": 0.0, "names": []}
+PRIVATE = set()                           # private repositories of the account (read with the listing): the only ones whose minutes cost anything
+QUOTA_ALERTS = None
+DISCOVERED = {"at": 0.0, "names": [], "snapshot": {}}
+DISCOVERY = {"events": [], "suggestions": []}   # what the last listing of the account brought (memory only)
 HOT_ONLY = {"on": False, "until": 0.0}   # "only hot" switch (memory only): cold repositories are not refreshed until `until` (one long cycle)
 LIVE_CONFIG = {}                          # the config the loop runs with, for the HTTP handler
 AUTOSAVE = None                           # report_history.AutoSaver, created in main()
@@ -190,8 +205,16 @@ def gh(*args, timeout=40, retries=2):
             raise AuthError(last)
         if "404" in last:
             break  # a repository without Actions: retrying does not help
-        time.sleep(2 * (attempt + 1))
+        time.sleep(secondary_wait(last, attempt))
     raise RuntimeError(last or "gh failed")
+
+
+def secondary_wait(message, attempt):
+    """Seconds to wait after a failed call: a secondary (abuse) limit asks for at least a minute and then backs off; anything else keeps the short wait."""
+    text = (message or "").lower()
+    if "secondary rate limit" in text or "retry-after" in text or "abuse" in text:
+        return min(300, 60 * 2 ** attempt)
+    return 2 * (attempt + 1)
 
 
 def run_gh(args, timeout=40):
@@ -219,7 +242,7 @@ def gh_read(endpoint, retries=2):
                 raise AuthError(last) from None
             if "404" in last:
                 break
-            time.sleep(2 * (attempt + 1))
+            time.sleep(secondary_wait(last, attempt))
     raise RuntimeError(last or "gh failed")
 
 
@@ -245,8 +268,23 @@ def watched_repos(config, force=False):
         names = list(wanted)
     else:
         if force or time.time() - DISCOVERED["at"] > config["discover_refresh_seconds"] or not DISCOVERED["names"]:
-            data = gh("repo", "list", toolconfig.github_owner(config), "--limit", str(config.get("discover_limit", 1000)), "--no-archived", "--json", "name") or []
-            DISCOVERED["names"] = sorted(item["name"] for item in data)
+            limit = str(config.get("discover_limit", 1000))
+            try:       # the richer listing (archived, fork, private, empty) lets the monitor notice news and apply the lifecycle rules
+                data = gh("repo", "list", toolconfig.github_owner(config), "--limit", limit, "--json", "name,isArchived,isFork,isPrivate,isEmpty", retries=0) or []
+            except AuthError:
+                raise
+            except Exception:   # an older gh without those fields: the plain listing, as before
+                data = gh("repo", "list", toolconfig.github_owner(config), "--limit", limit, "--no-archived", "--json", "name") or []
+            rules = discovery.settings(config)
+            PRIVATE.clear()
+            PRIVATE.update(item["name"] for item in data if item.get("isPrivate"))
+            snapshot = {item["name"]: {"archived": bool(item.get("isArchived"))} for item in data}
+            if rules["events"]:
+                found = discovery.diff(DISCOVERED.get("snapshot"), snapshot)
+                if found:
+                    announce_discovery(found, config)
+            DISCOVERED["snapshot"] = snapshot
+            DISCOVERED["names"] = sorted(discovery.lifecycle([dict(item, isArchived=bool(item.get("isArchived"))) for item in data if not item.get("isArchived")], rules))
             DISCOVERED["at"] = time.time()
         known = toolconfig.ecosystem_names(config)
         wanted_eco = config["ecosystems"]
@@ -256,6 +294,8 @@ def watched_repos(config, force=False):
         kept = set(names)
         left_out = [n for n in DISCOVERED["names"] if n not in kept]
         HIDDEN["discovered"], HIDDEN["hidden"], HIDDEN["names"] = len(DISCOVERED["names"]), len(left_out), left_out[:50]
+        if discovery.settings(config)["suggest_groups"]:
+            DISCOVERY["suggestions"] = discovery.suggest_groups([n for n in DISCOVERED["names"] if ecosystem_of(n) in ("other", "rest")], taken=set(known))
     skip = set(config["exclude"])
     valid = [n for n in names if NAME_RE.match(n) and n not in skip]
     for n in names:
@@ -288,6 +328,35 @@ def fetch_runs(repo, per_page):
     return runs, None
 
 
+TUNED = {"refresh_seconds": None, "cold_refresh_seconds": None}
+MODE = modes.State()      # the working mode: normal unless you ask (memory only, unless modes.remember is on)
+MODE_SAID = [""]
+
+
+def mode_remaining():
+    with LOCK:
+        rate = (STATE.get("data") or {}).get("rate") or {}
+    return rate.get("remaining"), rate.get("limit")
+
+
+def tuned(config, key, data=None):
+    """The interval in force: the configured one, or (discovery.auto_frequency on) the one the real activity of the last 24 hours asks for, inside the quota budget (discovery.auto_frequency())."""
+    if discovery.settings(config)["auto_frequency"] and data is not None and data.get("figures"):
+        hot, cold = discovery.auto_frequency(config, data["figures"].get("ok24", 0) + data["figures"].get("fail24", 0), max(1, len(data.get("repos") or [])), 3000)
+        TUNED["refresh_seconds"], TUNED["cold_refresh_seconds"] = hot, cold
+    value = TUNED[key] if (discovery.settings(config)["auto_frequency"] and TUNED.get(key)) else config[key]
+    remaining, _limit = mode_remaining()
+    name = MODE.current(config, remaining)
+    if MODE.notice and MODE.notice != MODE_SAID[0] and MODE.notice in ("expired", "quota"):
+        MODE_SAID[0] = MODE.notice
+        print(banner_mode_line(name, i18n.t("mode.back_" + MODE.notice)), flush=True)
+    return modes.effective({**config, key: value}, key, name)
+
+
+def banner_mode_line(name, extra=""):
+    return f"{'[LITE]' if LITE['on'] else '[COMPLETE]'} {i18n.t('mode.title')}: {i18n.t('mode.' + name)} {extra}".strip()
+
+
 def is_hot(repo, config, now):
     if repo in HOT_FORCED:
         return True
@@ -302,7 +371,7 @@ def is_hot(repo, config, now):
         if latest["conclusion"] in ("failure", "timed_out", "startup_failure"):
             return True
         started = parse_time(latest["started"])
-        if started and (datetime.now(timezone.utc) - started).total_seconds() < config["hot_hours"] * 3600:
+        if started and (datetime.now(timezone.utc) - started).total_seconds() < tuned(config, "hot_hours") * 3600:
             return True
     return False
 
@@ -320,8 +389,8 @@ def refresh_runs(repos, config, progress=None):
         if entry is None:
             todo.append((repo, config["cold_runs_per_repo"]))  # first look: a short list; the hot ones get the full list next cycle
         elif hot:
-            todo.append((repo, config["cold_runs_per_repo"] if lite else config["runs_per_repo"]))
-        elif not only_hot and now - entry["at"] > config["cold_refresh_seconds"]:
+            todo.append((repo, config["cold_runs_per_repo"] if lite else tuned(config, "runs_per_repo")))
+        elif not only_hot and now - entry["at"] > tuned(config, "cold_refresh_seconds"):
             todo.append((repo, config["cold_runs_per_repo"]))
     done = 0
     for start in range(0, len(todo), 40):  # chunks, so the page can show the first results while the rest loads
@@ -504,6 +573,21 @@ def apply_live_event(record, config):
                                   "text": i18n.t("evt.workflow_failed", repo=record["repo"], workflow=record.get("workflow") or "")})
 
 
+def announce_discovery(found, config):
+    """New, vanished, archived or unarchived repositories go to the console, to the list shown in Settings > Basic and (complete edition) to the notifications. Never raises."""
+    import notifiers
+    for item in found:
+        text = i18n.t("evt." + item["code"], repo=item["repo"])
+        DISCOVERY["events"].append({"code": item["code"], "repo": item["repo"], "text": text, "at": resilience.stamp(time.time())})
+        print(text, flush=True)
+        if not LITE["on"]:
+            try:
+                notifiers.notify(config, {"kind": item["code"], "code": item["code"], "level": "info", "repo": item["repo"], "owner": "main", "url": None, "args": {}, "text": text})
+            except Exception:   # noqa: BLE001 - a notification problem never stops the loop
+                pass
+    del DISCOVERY["events"][:-50]
+
+
 def announce_link(transition, config):
     """A change of the connection goes to the event feed and to the notifications, once."""
     import notifiers
@@ -520,8 +604,26 @@ def announce_link(transition, config):
         pass
 
 
+def quota_watch(config):
+    """The warning at 75 % and 90 % of the included minutes, once per level and month, through the notifications. Never raises."""
+    global QUOTA_ALERTS
+    try:
+        import notifiers
+        import quota
+        QUOTA_ALERTS = QUOTA_ALERTS or quota.Alerts()
+        info = quota_payload()
+        if info["included_minutes"] and QUOTA_ALERTS.due(info["level"]) and not LITE["on"]:
+            used = (info["billing"] or {}).get("minutes", info["month_estimate"])
+            text = i18n.t("evt.quota_" + info["level"], used=used, included=info["included_minutes"], estimate=i18n.t("quota.estimate") if not info["billing"] else "")
+            notifiers.notify(config, {"kind": "quota_" + info["level"], "code": "quota_" + info["level"], "level": "warn", "repo": "", "owner": "main", "url": None, "args": {}, "text": text})
+            print(text, flush=True)
+    except Exception:   # noqa: BLE001 - a quota calculation never stops the monitor
+        pass
+
+
 def maintain(config, data):
     """After each cycle: the conditional-read cache is saved, a few completed runs have their jobs sampled and the analytics are refreshed."""
+    quota_watch(config)
     try:
         if ETAG["cache"]:
             ETAG["cache"].save()
@@ -554,7 +656,8 @@ def loop(config):
             def publish(snapshot):
                 with LOCK:
                     STATE["data"], STATE["error"], STATE["hint"] = snapshot, None, None
-                print(i18n.t("mon.loaded", n=snapshot["loading"]), flush=True)
+                import banner
+                print(banner.tag(LITE["on"]), i18n.t("mon.loaded", n=snapshot["loading"]), flush=True)
 
             data = collect(config, publish)
             transition = LINK.end_cycle()
@@ -568,7 +671,7 @@ def loop(config):
                 STATE["complete"] = True
             with LOG_FILE.open("a", encoding="utf-8") as log:  # counts only, never titles
                 log.write(f"{data['updated']} repos={len(data['repos'])} hot={data['hot']} refreshed={data['refreshed']} active={len(data['active'])} issues={len(data['issues'])} rate={data['rate']}\n")
-            delay = config["refresh_seconds"]
+            delay = tuned(config, "refresh_seconds", data)
             try:   # the report of the day goes to the audit folder (never stops the loop)
                 if SENTINEL["obj"] is not None and AUTOSAVE is not None and not data.get("loading"):
                     import sentinel_local
@@ -674,6 +777,13 @@ class Handler(BaseHTTPRequestHandler):
         found = parse_qs(self.path.partition("?")[2]).get("lang")
         return found[0] if found else None
 
+    def token_ok(self):
+        """True when no token is needed or the request carries a valid one-use token (header X-Monitor-Token); else answers 403 and returns False."""
+        if not token_required() or SESSION.use(self.headers.get("X-Monitor-Token")):
+            return True
+        self.json_reply({"ok": False, "errors": {"_": "token"}}, 403)
+        return False
+
     def do_POST(self):
         with i18n.use_language(self.request_language()):
             self.handle_post()
@@ -712,8 +822,49 @@ class Handler(BaseHTTPRequestHandler):
             except Exception:
                 self.json_reply({"ok": False}, 400)
             return
+        if path == "/api/mode":      # change the working mode: a local setting, with the one-use token
+            if not self.guard() or not self.token_ok():
+                return
+            try:
+                size = int(self.headers.get("Content-Length") or 0)
+                request = json.loads(self.rfile.read(size) if 0 < size <= 512 else b"{}")
+                request = request if isinstance(request, dict) else {}
+                remaining, limit = mode_remaining()
+                config = LIVE_CONFIG or DEFAULTS
+                minutes = request.get("minutes", modes.settings(config)["default_minutes"])
+                ok, why = MODE.set(request.get("mode"), minutes, config, limit, remaining)
+                if ok:
+                    RUN_CACHE_RESET()
+                    print(banner_mode_line(MODE.name, f"({minutes} min)" if MODE.until else ""), flush=True)
+                self.json_reply({"ok": ok, "reason": why, **mode_payload()}, 200 if ok else 400)
+            except (ValueError, OSError):
+                self.json_reply({"ok": False, "reason": "request"}, 400)
+            return
+        if path == "/api/discovery/group":      # the user confirmed a suggested group: it is added to the ecosystems file (with a copy of it)
+            if not self.guard() or not self.token_ok():
+                return
+            try:
+                size = int(self.headers.get("Content-Length") or 0)
+                request = json.loads(self.rfile.read(size) if 0 < size <= 1024 else b"{}")
+                request = request if isinstance(request, dict) else {}
+                chosen = [g for g in DISCOVERY["suggestions"] if g["key"] == request.get("key") and g["prefix"] == request.get("prefix")]
+                if not chosen:
+                    self.json_reply({"ok": False, "error": "unknown"}, 400)
+                    return
+                target = toolconfig._data_path("MONITOR_ECOSYSTEMS_FILE", "ecosystems_file", toolconfig.DEFAULT_ECOSYSTEMS_FILE)
+                if target.stem.endswith(".example"):
+                    target = target.with_name(target.name.replace(".example", ""))
+                result = discovery.add_group(target, chosen[0]["key"], chosen[0]["prefix"], example=HERE / "ecosystems.example.json")
+                if result["ok"]:
+                    toolconfig.forget()
+                    DISCOVERED["at"] = 0.0
+                    DISCOVERY["suggestions"] = [g for g in DISCOVERY["suggestions"] if g["key"] != chosen[0]["key"]]
+                self.json_reply(result, 200 if result["ok"] else 400)
+            except (ValueError, OSError):
+                self.json_reply({"ok": False, "error": "request"}, 400)
+            return
         if path in ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test"):   # one request, one explicit person: local only, small JSON body
-            if not self.guard():
+            if not self.guard() or not self.token_ok():
                 return
             try:
                 size = int(self.headers.get("Content-Length") or 0)
@@ -724,7 +875,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.json_reply({"ok": False, "error": str(error)[:200]}, 400)
             return
         if path == "/api/settings":   # the settings menu: whitelisted keys only, checked, backed up and written atomically (settings_api.py); local request only
-            if not self.guard():
+            if not self.guard() or not self.token_ok():
                 return
             import settings_api
             try:
@@ -877,9 +1028,48 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/api/health":   # for a service manager or a container check: local only, no GitHub call
             if not self.guard():
                 return
-            with LOCK:
-                loaded = bool(STATE.get("data"))
-            self.json_reply({"ok": True, "lite": LITE["on"], "version": TOOL_VERSION, "uptime_seconds": int(time.time() - STARTED), "loaded": loaded, "offline": LINK.state()["offline"]})
+            self.json_reply(health_payload())
+        elif path == "/api/about":      # the About panel: versions, links, files, health, credits, the update notice; no secret and no repository name
+            if not self.guard():
+                return
+            self.json_reply(about_payload())
+        elif path == "/api/help/topics":
+            if not self.guard():
+                return
+            import helpdocs
+            from urllib.parse import parse_qs
+            tab = (parse_qs(self.path.partition("?")[2]).get("tab") or [""])[0]
+            self.json_reply({"topics": helpdocs.topics(i18n.language()), "tab_topic": helpdocs.tab_topic(tab) if tab else None, "lang": i18n.language()})
+        elif path in ("/api/help/topic", "/api/help/search"):
+            if not self.guard():
+                return
+            import helpdocs
+            from urllib.parse import parse_qs
+            query = parse_qs(self.path.partition("?")[2])
+            if path.endswith("search"):
+                self.json_reply({"hits": helpdocs.search((query.get("q") or [""])[0][:100], i18n.language())})
+            else:
+                found = helpdocs.topic(((query.get("id") or [""])[0])[:40], i18n.language())
+                if found is None:
+                    self.json_reply({"error": "unknown topic"}, 404)
+                else:
+                    self.json_reply(found)
+        elif path == "/api/session-token":      # a one-use token for the next change of a setting (the page asks for it right before it writes)
+            if not self.guard():
+                return
+            self.json_reply({"required": token_required(), "token": SESSION.issue() if token_required() else ""})
+        elif path == "/api/discovery":
+            if not self.guard():
+                return
+            self.json_reply(discovery_payload())
+        elif path == "/api/mode":      # the working mode, the estimate of each mode and the time left
+            if not self.guard():
+                return
+            self.json_reply(mode_payload())
+        elif path == "/api/quota":      # plan, billable minutes (an estimate unless the billing report is on), API allowance, concurrency, long jobs
+            if not self.guard():
+                return
+            self.json_reply(quota_payload())
         elif path == "/api/analytics":
             if not self.guard():
                 return
@@ -906,6 +1096,99 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self.send_response(404)
             self.end_headers()
+
+
+def health_payload():
+    with LOCK:
+        loaded = bool(STATE.get("data"))
+    return {"ok": True, "lite": LITE["on"], "version": TOOL_VERSION, "uptime_seconds": int(time.time() - STARTED), "loaded": loaded, "offline": LINK.state()["offline"]}
+
+
+def update_info():
+    """The state of the update notice: the cached answer, refreshed (at most every 24 hours) through the conditional GitHub client; silent when it cannot be read."""
+    config = LIVE_CONFIG or toolconfig.raw_config()
+    state_file = HERE / ("update_check_lite.json" if LITE["on"] else "update_check.json")
+    if DEMO["on"]:
+        return updatecheck.view({"updates": {"check": False}}, TOOL_VERSION, {})
+    return updatecheck.check(config, TOOL_VERSION, lambda endpoint: gh_read(endpoint, retries=0), state_file=state_file, offline=LINK.state()["offline"])
+
+
+def RUN_CACHE_RESET():
+    """After a change of mode every repository is read again in the next cycle."""
+    for entry in RUN_CACHE.values():
+        entry["at"] = 0
+
+
+def mode_payload():
+    config = LIVE_CONFIG or DEFAULTS
+    remaining, limit = mode_remaining()
+    name = MODE.current(config, remaining)
+    with LOCK:
+        data = STATE.get("data") or {}
+    etag = data.get("etag") or {}
+    calls = max(1, etag.get("calls") or 0)
+    saved = (etag.get("saved") or 0) / calls if etag.get("calls") else 0.0
+    return {"mode": name, "seconds_left": MODE.seconds_left(), "notice": MODE.notice, "names": list(modes.NAMES), "allowed": not (isinstance(limit, int) and limit <= 60),
+            "limit": limit, "remaining": remaining, "floor": int(config.get("min_rate_remaining", 800)), "default_minutes": modes.settings(config)["default_minutes"],
+            "estimate": modes.estimate(config, len(data.get("repos") or []), data.get("hot") or 0, remaining, saved), "presets": modes.presets(config), "saved_share": round(saved, 2)}
+
+
+def quota_payload():
+    import quota
+    config = LIVE_CONFIG or toolconfig.raw_config()
+    with LOCK:
+        data = STATE.get("data") or {}
+    since = time.time() - 86400
+    done = [r for r in (data.get("runs") or []) if r.get("status") == "completed" and (parse_time(r.get("started")) or datetime.fromtimestamp(0, timezone.utc)).timestamp() > since]
+    rate = data.get("rate") or {}
+    reader = None if DEMO["on"] else (lambda endpoint: gh_read(endpoint, retries=0))
+    return quota.summary(config, done, data.get("active") or [], set(PRIVATE), reader, toolconfig.github_owner(config), rate.get("limit"))
+
+
+def about_payload():
+    import about
+    paths = {"config": CONFIG_FILE, "log": LOG_FILE, "etag_cache": etagcache.CACHE_FILE, "package_folder": HERE}
+    data = about.info(LITE["on"], health_payload(), paths, update_info(), i18n.language())
+    data["support"] = about.support_text(data)
+    return data
+
+
+def discovery_payload():
+    config = LIVE_CONFIG or toolconfig.raw_config()
+    with LOCK:
+        data = STATE.get("data") or {}
+    box = discovery.box(toolconfig.github_owner(config), len(data.get("repos") or []), HIDDEN["discovered"], HIDDEN["names"])
+    return {**box, "events": list(reversed(DISCOVERY["events"]))[:20], "suggestions": DISCOVERY["suggestions"], "settings": discovery.settings(config), "demo": DEMO["on"]}
+
+
+class SessionTokens:
+    """One-use tokens for the POST requests that change something (settings, confirmations of the AI actions). A token lives ten minutes and works once; at most twenty are kept."""
+
+    def __init__(self, clock=time.time):
+        self.clock, self.items, self.lock = clock, {}, threading.Lock()
+
+    def issue(self):
+        import secrets
+        with self.lock:
+            now = self.clock()
+            self.items = {k: v for k, v in self.items.items() if v > now}
+            while len(self.items) >= 20:
+                self.items.pop(next(iter(self.items)))
+            token = secrets.token_hex(16)
+            self.items[token] = now + 600
+            return token
+
+    def use(self, token):
+        with self.lock:
+            expires = self.items.pop(str(token or ""), 0)
+            return expires > self.clock()
+
+
+SESSION = SessionTokens()
+
+
+def token_required():
+    return (LIVE_CONFIG or {}).get("session_guard") is True
 
 
 def metrics_extra():
@@ -939,6 +1222,22 @@ def handle_action_post(path, request):
     return notifiers.send_channel(name, cfg["channels"][name], notifiers.test_event(i18n.t("evt.test")))
 
 
+def update_loop():
+    """Looks for a newer published version now and then (at most one read every 24 hours; silent when it fails or when the check is off)."""
+    while True:
+        try:
+            info = update_info()
+            if info.get("newer") and not UPDATE_SAID:
+                UPDATE_SAID.append(info["latest"])
+                print(updatecheck.notice(info, i18n.t), flush=True)
+        except Exception:   # noqa: BLE001 - never stops anything
+            pass
+        time.sleep(6 * 3600)
+
+
+UPDATE_SAID = []
+
+
 def start_sentinel(config):
     """Layer A of the Centinela in its own thread and cache; if the module fails, the monitor goes on and the tab shows a red notice."""
     try:
@@ -966,7 +1265,36 @@ def start_sentinel(config):
         print(SENTINEL["error"])
 
 
+def demo_main():
+    """--demo: the page with invented data; nothing is read from GitHub and the configuration of the user is not touched."""
+    import demo_mode
+    i18n.set_language(i18n.detect(None))
+    i18n.cli_language() if "--lang" in " ".join(sys.argv) else None
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--demo", action="store_true")
+    parser.add_argument("--port", type=int, default=8765)
+    parser.add_argument("--no-browser", action="store_true")
+    parser.add_argument("--lang")
+    parser.add_argument("--lite", action="store_true")
+    args, _rest = parser.parse_known_args()
+    LITE["on"] = True       # the demo shows the page without the sentinel: its invented data are the runs, the figures and the history
+    platform_compat.console_utf8()
+    server, url = demo_mode.start(sys.modules[__name__], args.port)
+    import banner
+    banner.set_title("GitHub Actions Monitor DEMO")
+    print(i18n.t("mon.demo", url=url))
+    if not args.no_browser:
+        webbrowser.open(url)
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    return 0
+
+
 def main():
+    if "--demo" in sys.argv[1:]:
+        return demo_main()
     if lite_requested():
         enable_lite()
     config = load_config()
@@ -983,8 +1311,29 @@ def main():
     parser.add_argument("--discover", action="store_true", help=i18n.t("mon.help_discover"))
     parser.add_argument("--lang", metavar="CODE", help=i18n.t("cli.help_lang"))
     parser.add_argument("--init-catalog", action="store_true", help=i18n.t("mon.help_init_catalog"))
+    parser.add_argument("--about", action="store_true", help=i18n.t("mon.help_about"))
+    parser.add_argument("--help-topics", nargs="*", metavar="TOPIC", help=i18n.t("mon.help_topics"))
+    parser.add_argument("--help-search", nargs="+", metavar="WORD", help=i18n.t("mon.help_search"))
+    parser.add_argument("--doctor", action="store_true", help=i18n.t("mon.help_doctor"))
+    parser.add_argument("--demo", action="store_true", help=i18n.t("mon.help_demo"))
+    parser.add_argument("--mode", choices=modes.NAMES, default=None, help=i18n.t("mon.help_mode"))
+    parser.add_argument("--mode-minutes", type=int, default=None, help=i18n.t("mon.help_mode_minutes"))
     args = parser.parse_args()
     platform_compat.console_utf8()
+    if args.about:
+        import about
+        print(about.console_text(about.lone(i18n.t), i18n.t), end="")
+        return 0
+    if args.help_topics is not None or args.help_search:
+        import helpdocs
+        code, text = helpdocs.console((["--search"] + args.help_search) if args.help_search else args.help_topics, i18n.language(), i18n.t)
+        print(text, end="")
+        return code
+    if args.doctor:
+        import doctor
+        checks = doctor.run()
+        print(doctor.text(checks, i18n.t, "lite" if LITE["on"] else "full"), end="")
+        return doctor.exit_code(checks)
     if args.init_catalog:
         for name, created in toolconfig.init_catalog():
             print(i18n.t("mon.catalog_created" if created else "mon.catalog_kept", name=name))
@@ -1024,7 +1373,12 @@ def main():
     if not LITE["on"]:
         import report_history
         AUTOSAVE = report_history.AutoSaver()
+    wanted = args.mode or modes.settings(config)["start"]
+    if wanted in ("fast", "turbo"):
+        ok, why = MODE.set(wanted, args.mode_minutes if args.mode_minutes is not None else modes.settings(config)["default_minutes"], config)
+        print(banner_mode_line(MODE.name, "" if ok else why), flush=True)
     threading.Thread(target=loop, args=(config,), daemon=True).start()
+    threading.Thread(target=update_loop, daemon=True).start()
     if not LITE["on"]:
         start_sentinel(config)
     server = None
@@ -1043,10 +1397,16 @@ def main():
     if config.get("webhook", {}).get("enabled") is True:
         import webhook
         print(i18n.t("mon.webhook", status=webhook.status_text(config)))
+    import banner
+    banner.set_title(banner.window_title(LITE["on"], server.server_address[1], i18n.t))
+    print(banner.line(LITE["on"], server.server_address[1], CONFIG_FILE.name, i18n.t, url, sentinel=not LITE["on"] and config.get("sentinel", {}).get("enabled", True) is not False))
     print(i18n.t("mon.version", version=TOOL_VERSION))
     print(i18n.about_line())
     print(i18n.t("mon.started", url=url))
-    if not args.no_browser:
+    news = updatecheck.notice(update_info(), i18n.t) if updatecheck.settings(config)["check"] else ""
+    if news:
+        print(news)
+    if not args.no_browser and config.get("open_browser", True) is True:
         webbrowser.open(url)
     try:
         server.serve_forever()

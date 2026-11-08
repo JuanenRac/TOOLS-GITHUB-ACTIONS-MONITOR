@@ -3,7 +3,7 @@ rem Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 rem GPL-3.0-or-later - see LICENSE
 rem GitHub Actions monitor, LITE edition: what is running, the failures of the last 24 hours, the history and basic charts. No sentinel. Local only, port 8766.
 rem Stop: Ctrl+C in this window. The window does NOT close by itself.
-title GitHub Actions monitor (lite)
+title GitHub Actions Monitor LITE - port 8766 - no sentinel
 cd /d "%~dp0"
 where gh >nul 2>nul
 if errorlevel 1 (

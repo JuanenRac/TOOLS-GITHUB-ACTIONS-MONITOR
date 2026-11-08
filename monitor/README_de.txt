@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GITHUB-ACTIONS-MONITOR + WÄCHTER (Version 1.6.2)
+GITHUB-ACTIONS-MONITOR + WÄCHTER (Version 1.6.3)
 ================================================
 Voraussetzungen: Python 3.11+ und die GitHub CLI (`gh`), angemeldet (gh auth login). Sonst nichts: der Kern braucht keine Pakete (die Konsolenansicht tui.py nutzt das optionale Paket rich).
 Kurzanleitung für die erste Benutzung: QUICKSTART_de.txt.
@@ -77,3 +77,7 @@ NEU IN 1.3.0 (Verlauf: CHANGELOG.md)
   targets_file); optionaler Workspace mit ehrlichem reduziertem Modus; Urheberangabe und GPL-3.0-or-later in jeder Datei; LICENSE, NOTICE, AUTHORS;
   README und QUICKSTART in 8 Sprachen.
 LIZENZ     GPL-3.0-or-later (siehe LICENSE und NOTICE). Copyright (C) 2026 JuanenRac (Electro Hobby 3D).
+
+HILFE, ÜBER UND PRÜFUNGEN (1.6.3)
+---------------------------------
+Die Seite hat eine Hilfe-Taste (rundes ?) und eine Über-Taste (i); in der Konsole: --help-topics, --help-search, --about und --doctor; --demo zeigt die Seite mit erfundenen Daten. Die Lite-Ausgabe startet mit eigenem Banner und Fenstertitel (LITE, Port 8766, ohne Wächter); die vollständige meldet COMPLETE, Port 8765, Wächter aktiv. Der Hinweis auf neue Versionen lässt sich abschalten (Einstellungen > Grundlagen).

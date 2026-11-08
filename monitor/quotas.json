@@ -1,0 +1,51 @@
+{
+  "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+  "_license": "GPL-3.0-or-later - see LICENSE",
+  "schema": 1,
+  "source": "docs.github.com: the billing page of GitHub Actions, the limits page of GitHub Actions and the rate limits of the REST API. These figures change over time: edit this file to follow them without a new version of the monitor.",
+  "plans": {
+    "free": {
+      "included_usd": 12,
+      "storage_mb": 500,
+      "concurrent_jobs": 20,
+      "concurrent_macos": 5
+    },
+    "pro": {
+      "included_usd": 18,
+      "storage_mb": 1000,
+      "concurrent_jobs": 40,
+      "concurrent_macos": 5
+    },
+    "team": {
+      "included_usd": 18,
+      "storage_mb": 2000,
+      "concurrent_jobs": 60,
+      "concurrent_macos": 5
+    },
+    "enterprise": {
+      "included_usd": 300,
+      "storage_mb": 50000,
+      "concurrent_jobs": 500,
+      "concurrent_macos": 50
+    }
+  },
+  "rates_usd_per_minute": {
+    "linux": 0.006,
+    "windows": 0.01,
+    "macos": 0.062
+  },
+  "public_repositories_free": true,
+  "limits": {
+    "job_hours": 6,
+    "run_days": 35,
+    "matrix_jobs": 256
+  },
+  "api": {
+    "unauthenticated": 60,
+    "token": 5000,
+    "actions_token": 1000,
+    "enterprise_cloud": 15000,
+    "app_max": 12500,
+    "concurrent_requests": 100
+  }
+}

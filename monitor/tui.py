@@ -54,7 +54,7 @@ def hours(seconds):
     return f"{int(seconds // 60)}m" if seconds < 5400 else f"{seconds / 3600:.1f}h"
 
 
-def build(data, snap, theme="dark"):
+def build(data, snap, theme="dark", lite=False):
     """The Rich renderable of one picture. Needs rich; pure otherwise (it only reads its arguments)."""
     from rich import box
     from rich.console import Group
@@ -65,7 +65,7 @@ def build(data, snap, theme="dark"):
     good, bad, warn, dim = ("bright_green", "bright_red", "bright_yellow", "grey62") if theme == "dark" else ("dark_green", "dark_red", "dark_orange3", "grey37")
     data, snap = data or {}, snap or {}
     head = Text()
-    head.append("GitHub Actions ", style="bold")
+    head.append("GitHub Actions " + ("LITE " if lite else "COMPLETE "), style="bold")
     head.append(f"{len(data.get('repos') or [])} {t('tui.repos')}  ", style=dim)
     head.append(f"{len(data.get('active') or [])} {t('tui.running')}  ", style=good if data.get("active") else dim)
     head.append(f"{len((snap.get('a2') or {}).get('red') or [])} {t('tui.red')}  ", style=bad if (snap.get("a2") or {}).get("red") else dim)
@@ -110,9 +110,20 @@ def main(argv=None):
     ap.add_argument("--once", action="store_true", help=i18n.t("tui.help_once"))
     ap.add_argument("--theme", choices=("dark", "light"), default="dark", help=i18n.t("tui.help_theme"))
     ap.add_argument("--lang", metavar="CODE", help=i18n.t("cli.help_lang"))
+    ap.add_argument("--about", action="store_true", help=i18n.t("mon.help_about"))
+    ap.add_argument("--help-topics", nargs="*", metavar="TOPIC", help=i18n.t("mon.help_topics"))
     args = ap.parse_args(argv)
     if args.lang:
         i18n.set_language(args.lang)
+    if args.about:
+        import about
+        print(about.console_text(about.lone(lite=args.lite), i18n.t), end="")
+        return 0
+    if args.help_topics is not None:
+        import helpdocs
+        code, text = helpdocs.console(args.help_topics, i18n.language(), i18n.t)
+        print(text, end="")
+        return code
     if args.port is None:
         args.port = default_port(args.lite)
     if not rich_available():
@@ -126,14 +137,14 @@ def main(argv=None):
         print(i18n.t("lp.not_running", port=args.port))
         return 2
     if args.once:
-        console.print(build(data, snap, args.theme))
+        console.print(build(data, snap, args.theme, args.lite or args.port == 8766))
         return 0
     try:
-        with Live(build(data, snap, args.theme), console=console, refresh_per_second=2, screen=False) as live:
+        with Live(build(data, snap, args.theme, args.lite or args.port == 8766), console=console, refresh_per_second=2, screen=False) as live:
             while True:
                 time.sleep(max(2, args.refresh))
                 data, snap = fetch(args.port)
-                live.update(build(data, snap, args.theme))
+                live.update(build(data, snap, args.theme, args.lite or args.port == 8766))
     except KeyboardInterrupt:
         pass
     return 0

@@ -31,7 +31,7 @@
 
 | | |
 |---|---|
-| **Version** | **1.6.2** · [alle Releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **1.6.3** · [alle Releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Voraussetzung** | Python 3.11+ und die GitHub-CLI (`gh auth login`); sonst nichts (die Konsolenansicht nutzt das optionale Paket `rich`) |
 | **Öffnet** | eine Seite nur auf `127.0.0.1`, in acht Sprachen |
 | **Schreibt auf GitHub** | nie von selbst: nur Stapelbefehle, die du mit ausdrücklichem `--go` startest |
@@ -48,6 +48,10 @@
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_charts_light.png"><img src="docs/screenshots/web_charts_dark.png" alt="Diagramme" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_repositories_light.png"><img src="docs/screenshots/web_repositories_dark.png" alt="Repositories" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_history_light.png"><img src="docs/screenshots/web_history_dark.png" alt="Verlauf" width="92%"></picture></p>
+
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_about_light.png"><img src="docs/screenshots/web_about_dark.png" alt="Über" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_help_light.png"><img src="docs/screenshots/web_help_dark.png" alt="Hilfe, durchsuchbar und offline" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_basic_light.png"><img src="docs/screenshots/web_settings_basic_dark.png" alt="Einstellungen · Grundlagen: Tarif, Kontingente und Erkennung" width="92%"></picture></p>
 
 <details><summary><b>Einstellungen, Unterreiter für Unterreiter</b></summary>
 
@@ -101,10 +105,22 @@ Jedes Bild folgt dem hellen oder dunklen Design Ihrer GitHub-Seite.
 - **Acht Sprachen** (en, es, de, fr, it, ja, zh, pt) mit Englisch als Basis; Wechsel in den Einstellungen.
 - **Ausgaben für Dashboards**: `ci_red.json`, ein Prometheus-Endpunkt und eine JSON-Quelle für Grafana samt importierbarem Grafana-Dashboard.
 - **Stapelwerkzeuge**: viele Builds auf einmal planen und starten; ohne `--go` wird nichts ausgelöst.
+- **Über und Hilfe in der Seite**: die **i**-Taste zeigt Version, Ausgabe, Links, Dateien, Zustand und eine Taste, die die Informationen für den Support kopiert; die **?**-Taste (oder die Taste `?`) öffnet die gesamte Dokumentation, durchsuchbar und in Ihrer Sprache, ohne Internet. Die Konsole kennt `--about` und `--help-topics` und eine interaktive Terminalanwendung mit Reitern (optional `textual`).
+- **Hinweis auf eine neuere Version**: ein dezentes Abzeichen, wenn eine neuere Version erscheint; es liest nur einmal am Tag die öffentliche Release-Seite, installiert nie etwas und lässt sich abschalten (bei netzgetrennter Installation immer aus).
+- **Kontingente für jedes Konto**: Tarif, abrechenbare Minuten (öffentliche Repositorys kosten nichts), API-Kontingent aus den Headern von GitHub, Parallelität und Jobs nahe dem 6-Stunden-Limit; die Zahlen stehen in einer bearbeitbaren Datei.
 
 ## Architektur
 
 <p align="center"><img src="images/architecture.svg" alt="Architektur" width="100%"></p>
+
+## Hier beginnen: welche Ausgabe?
+
+| Wenn Sie ... wollen | Start | Port |
+|---|---|---|
+| nur sehen, was läuft und was fehlschlägt (**hier beginnen**) | `MONITOR_LITE_GITHUB_ACTIONS` | 8766 |
+| das ganze Konto für Sie überwacht: Alarme, Releases, Signatur, Bereitschaft, Analytik | `MONITOR_GITHUB_ACTIONS` (mit dem [Wächter](monitor/docs/SENTINEL_deu.md)) | 8765 |
+
+Das Konsolenfenster nennt die laufende Ausgabe in Titel und erster Zeile. Noch unsicher? `python actions_monitor.py --demo` öffnet die Seite mit erfundenen Daten, `--doctor` prüft Ihre Installation. [Ihre ersten fünf Minuten](monitor/docs/FIRST_STEPS_deu.md)
 
 ## Schnellstart
 
@@ -193,6 +209,12 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
     ├── analytics.py lint_workflows.py   Dauer, flaky, Workflow-Linter
     ├── notifiers.py ai_actions.py       Benachrichtigungen, KI-Liste
     ├── tui.py migrate_state.py          Konsolenansicht, Migration
+    ├── about.py  helpdocs.py            Über- und Hilfe-Panels
+    ├── quota.py  quotas.json            Tarif, Minuten, Kontingente
+    ├── modes.py  updatecheck.py         Arbeitsmodi, Versionshinweis
+    ├── doctor.py  demo_mode.py          --doctor und --demo
+    ├── discovery.py  banner.py          Erkennung, Ausgaben-Banner
+    ├── tui_textual.py                   interaktives Terminal
     ├── i18n.py locales/                 acht Sprachen
     ├── toolconfig.py workspace.py       Einstellungen, Klone
     ├── tests/                           Offline-Tests
@@ -213,6 +235,10 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/CONSOLE_TOOLS_deu.md`](monitor/docs/CONSOLE_TOOLS_deu.md): der Workflow-Linter und die Konsolenansicht
 - [`monitor/docs/DEPLOYMENT_deu.md`](monitor/docs/DEPLOYMENT_deu.md): als Dienst betreiben, hinter einem Proxy, Berechtigungen
 - [`monitor/QUICKSTART_de.txt`](monitor/QUICKSTART_de.txt): erste Schritte, in acht Sprachen
+- [`monitor/docs/FIRST_STEPS_deu.md`](monitor/docs/FIRST_STEPS_deu.md): Ihre ersten fünf Minuten
+- [`monitor/docs/SENTINEL_deu.md`](monitor/docs/SENTINEL_deu.md): der Wächter und seine Prüfungen A1-A13
+- [`monitor/docs/QUOTAS_deu.md`](monitor/docs/QUOTAS_deu.md): Kontingente und Tarife von GitHub
+- [`monitor/docs/MODES_deu.md`](monitor/docs/MODES_deu.md): Arbeitsmodi: normal, schnell und Turbo
 
 ## Mitwirken
 

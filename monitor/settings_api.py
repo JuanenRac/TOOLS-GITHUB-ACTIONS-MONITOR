@@ -75,6 +75,20 @@ def _f(tab, block, key, kind, bounds=None, restart=True, secure=False, unit=None
 _T_GENERAL, _T_POLL, _T_SENT, _T_SURF, _T_READY, _T_PATHS, _T_OUT, _T_AI, _T_HOOK = "general", "polling", "sentinel", "surface", "readiness", "paths", "outputs", "ai", "webhook"
 _G_GENERAL, _G_POLL, _G_SENT, _G_SURF, _G_READY, _G_PATHS, _G_OUT, _G_AI = _T_GENERAL, _T_POLL, _T_SENT, _T_SURF, _T_READY, _T_PATHS, _T_OUT, _T_AI
 
+# --- Basic: what a new user may want to change first
+_f("basic", "start", "open_browser", "bool")
+_f("basic", "updates", "updates.check", "bool", restart=False)
+_f("basic", "network", "airgapped", "bool", restart=False, secure=True)
+_f("basic", "plan", "account.plan", "enum", ("unknown", "free", "pro", "team", "enterprise"), restart=False)
+_f("basic", "plan", "quota.default_runner", "enum", ("linux", "windows", "macos"), restart=False)
+_f("basic", "plan", "quota.warn_percent", "int", (1, 100), unit="%", restart=False)
+_f("basic", "plan", "quota.alert_percent", "int", (1, 100), unit="%", restart=False)
+_f("basic", "plan", "quota.billing_api", "bool", restart=False, secure=True)
+_f("basic", "safety", "session_guard", "bool", restart=False, secure=True)
+_f("basic", "discovery", "discovery.events", "bool", restart=False)
+_f("basic", "discovery", "discovery.suggest_groups", "bool", restart=False)
+_f("basic", "discovery", "discovery.auto_frequency", "bool", restart=False)
+_f("basic", "lifecycle", "discovery.hide", "names")
 # --- General
 _f(_T_GENERAL, "identity", "github_owner", "text", OWNER_RE)
 _f(_T_GENERAL, "identity", "language", "enum", ("",) + tuple(i18n.LANGS), False)
@@ -228,7 +242,7 @@ _f("console", "tui", "tui.theme", "enum", ("dark", "light"), False)
 _f("console", "tui", "tui.refresh_seconds", "int", (2, 300), False)
 # @@MORE_SETTINGS@@
 
-TAB_ORDER = ("general", "polling", "cache", "sentinel", "surface", "readiness", "paths", "outputs", "ai", "webhook", "notify", "analytics", "lint", "console")
+TAB_ORDER = ("basic", "general", "polling", "cache", "sentinel", "surface", "readiness", "paths", "outputs", "ai", "webhook", "notify", "analytics", "lint", "console")
 ROWS.sort(key=lambda row: TAB_ORDER.index(row[0]))     # stable: inside a tab the order of writing is kept
 SCHEMA = [(tab, key, kind, bounds, restart) for tab, _block, key, kind, bounds, restart in ROWS]
 FIELDS = {row[1]: row for row in SCHEMA}
@@ -372,7 +386,7 @@ def check_value_list(value):
     return True, list(value)
 
 
-LITE_KEYS = ("github_owner", "language", "repos", "ecosystems", "exclude", "refresh_seconds")      # the short settings page of the lite product
+LITE_KEYS = ("github_owner", "language", "repos", "ecosystems", "exclude", "refresh_seconds", "open_browser", "updates.check", "airgapped")      # the short settings page of the lite product
 
 
 def validate(changes, lite=False):

@@ -23,8 +23,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - name: Rich, for the optional terminal view (the monitor itself needs no package)
-        run: python -m pip install rich
+      - name: Rich and Textual, for the optional terminal views (the monitor itself needs no package)
+        run: python -m pip install rich textual
       - name: Unit tests (offline)
         run: python -m unittest discover -s monitor/tests
 
@@ -42,6 +42,7 @@ jobs:
           python tools/make_structure.py --check
           python tools/make_settings_doc.py --check
           python tools/sync_changelog.py --check
+          python tools/make_help_index.py --check
 
   container:
     name: The example container builds

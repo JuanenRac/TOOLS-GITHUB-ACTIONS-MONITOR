@@ -26,3 +26,4 @@ DÉMARRAGE RAPIDE - Moniteur GitHub Actions + Sentinelle
    et l'assistant IA s'activent dans l'onglet Réglages ; pour l'exécuter comme service, derrière un proxy ou dans un conteneur, voir docs/DEPLOYMENT_fra.md.
 8. Vous voulez seulement surveiller vos runs ? Lancez plutôt MONITOR_LITE_GITHUB_ACTIONS (l'édition lite : sans sentinelle, des Réglages courts, port 8766). Voir docs/LITE_fra.md.
 Des problèmes ? Voir « PROBLÈMES » dans README_fr.txt.
+9. L'aide est incluse : le bouton rond ? de la page (ou la touche ?) ouvre toute la documentation hors ligne ; le bouton i affiche À propos et copie les informations pour le support (sans secret). En console : python actions_monitor.py --doctor (vérifie l'installation et indique comment corriger chaque problème), --demo (la page avec des données inventées, sans gh), --about, --help-topics, --help-search MOTS. Plus : docs/FIRST_STEPS_fra.md, docs/SENTINEL_fra.md, docs/QUOTAS_fra.md.

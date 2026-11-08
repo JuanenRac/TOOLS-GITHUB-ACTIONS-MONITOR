@@ -26,3 +26,4 @@ QUICKSTART - GitHub Actions monitor + Sentinel
    switched on in the Settings tab; to run it as a service, behind a proxy or in a container see docs/DEPLOYMENT.md.
 8. Only want to watch your runs? Start MONITOR_LITE_GITHUB_ACTIONS instead (the lite edition: no sentinel, a short Settings page, port 8766). See docs/LITE.md.
 Problems? See "PROBLEMS" in README_en.txt.
+9. Help is built in: the round ? button of the page (or the key ?) opens the whole documentation offline; the i button shows About and copies the information for support (it carries no secret). In the console: python actions_monitor.py --doctor (checks your installation and says how to fix each problem), --demo (the page with invented data, no gh needed), --about, --help-topics, --help-search WORDS. More: docs/FIRST_STEPS.md, docs/SENTINEL.md, docs/QUOTAS.md.

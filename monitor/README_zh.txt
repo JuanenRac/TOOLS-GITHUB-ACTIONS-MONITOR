@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GitHub Actions 监视器 + 哨兵（版本 1.6.2）
+GitHub Actions 监视器 + 哨兵（版本 1.6.3）
 ============================================
 运行要求：Python 3.11+，以及已登录的 GitHub CLI（`gh`）（gh auth login）。无需其他东西:核心不需要任何包(终端视图 tui.py 使用可选的 rich 包)。
 首次使用的快速步骤：QUICKSTART_zh.txt。
@@ -75,3 +75,7 @@ GitHub Actions 监视器 + 哨兵（版本 1.6.2）
   页面、命令行、事件和报告支持 8 种语言；语言选择器；生态系统、目标和 GitHub 账户改为数据（github_owner、ecosystems_file、targets_file）；
   可选的工作区与如实说明的精简模式；每个文件都带有作者声明和 GPL-3.0-or-later；LICENSE、NOTICE、AUTHORS；8 种语言的 README 和 QUICKSTART。
 许可证     GPL-3.0-or-later（见 LICENSE 和 NOTICE）。Copyright (C) 2026 JuanenRac (Electro Hobby 3D)。
+
+帮助、关于与检查 (1.6.3)
+------------------------
+页面有帮助按钮（圆形 ?）和关于按钮（i）；在控制台使用 --help-topics、--help-search、--about 和 --doctor；--demo 用虚构数据显示页面。精简版以自己的横幅和窗口标题启动（LITE、端口 8766、无哨兵）；完整版显示 COMPLETE、端口 8765、哨兵已启用。新版本提示可以关闭（设置 > 基本）。

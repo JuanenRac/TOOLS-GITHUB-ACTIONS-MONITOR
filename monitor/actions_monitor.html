@@ -199,18 +199,53 @@ background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 
 .bar i:not(.done):not(.fail){background-image:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.45) 50%,transparent 70%),linear-gradient(rgba(255,255,255,.3),rgba(255,255,255,0) 55%,rgba(0,0,0,.18));background-size:200% 100%,100% 100%;animation:shimmer 2s linear infinite}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* About, Help, the first-start guide and the restart bar */
+.dlg{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:14px}
+.dlg[hidden]{display:none}
+.dlg-box{background:var(--panel);border:1px solid var(--line2);border-radius:14px;box-shadow:var(--shadow);width:min(640px,100%);max-height:calc(100vh - 28px);display:flex;flex-direction:column;overflow:hidden}
+.dlg-box.wide{width:min(1100px,100%);height:calc(100vh - 28px)}
+.dlg-top{display:flex;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)}
+.dlg-top h2{margin:0;font-size:16px;flex:0 0 auto}.dlg-top .sp{flex:1}
+.dlg-body{padding:12px 16px;overflow:auto;flex:1;min-height:0}
+.dlg-bar{display:flex;gap:10px;align-items:center;padding:10px 14px;border-top:1px solid var(--line);flex-wrap:wrap}
+.dl{display:grid;grid-template-columns:minmax(120px,max-content) 1fr;gap:4px 14px;margin:0 0 12px}.dl dt{color:var(--mut)}.dl dd{margin:0;word-break:break-word}
+.dlg-body h3{font-size:12px;margin:14px 0 6px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+.modebox{display:inline-flex;gap:6px;align-items:center;padding:2px 8px;border:1px solid var(--line2);border-radius:9px;background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo)}.modebox select{padding:2px 6px}.modebox.on{border-color:var(--warn);color:var(--warn)}
+.upd{display:inline-flex;gap:6px;align-items:center;padding:2px 10px;border:1px solid var(--warn);color:var(--warn);border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.upd:hover{text-decoration:none;filter:brightness(1.15)}
+#restartbar{display:none;background:var(--warn);color:#fff;padding:6px 18px;font-weight:600}
+.help-cols{display:grid;grid-template-columns:260px minmax(0,1fr);flex:1;min-height:0}
+#help-list{border-right:1px solid var(--line);overflow:auto;padding:8px}
+#help-list h4{margin:10px 6px 4px;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+#help-list a{display:block;padding:4px 8px;border-radius:6px;color:var(--text);cursor:pointer}
+#help-list a[aria-current=true]{background:var(--panel2);font-weight:600;box-shadow:inset 0 1px 0 var(--bev-hi)}
+#help-list a:hover{text-decoration:none;background:var(--panel2)}
+#help-body{overflow:auto;padding:12px 18px;min-width:0}
+#help-body pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;overflow:auto;white-space:pre-wrap}
+#help-body pre.plain{white-space:pre-wrap;font:12.5px/1.5 ui-monospace,Consolas,monospace}
+#help-body code{background:var(--bg);border-radius:4px;padding:0 4px;font-size:12.5px}
+#help-body table{display:block;overflow:auto;margin:8px 0}#help-body td,#help-body th{white-space:normal}
+#help-body blockquote{margin:6px 0;padding:2px 10px;border-left:3px solid var(--line2);color:var(--mut)}
+#help-body h3{margin:16px 0 6px;font-size:15px;text-transform:none;letter-spacing:0;color:var(--text)}#help-body h4,#help-body h5{margin:12px 0 4px;font-size:13px;color:var(--text);text-transform:none;letter-spacing:0}
+.help-note{background:var(--bg);border:1px dashed var(--warn);border-radius:8px;padding:5px 10px;margin-bottom:10px;color:var(--warn)}
+.hit{padding:6px 8px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;cursor:pointer;background:var(--bg)}.hit:hover{border-color:var(--run)}.hit small{display:block;color:var(--mut)}
+nav .navhelp{margin-left:auto;align-self:center}
+.lvl{display:inline-flex;gap:6px;margin:0 0 8px}
+@media (max-width:760px){.help-cols{grid-template-columns:1fr;grid-template-rows:auto 1fr}#help-list{border-right:none;border-bottom:1px solid var(--line);max-height:30vh}.dl{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol><symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c1 3 4 4.5 4 8.5a4 4 0 0 1-8 0c0-1.4.6-2.4 1.4-3.2C9.9 9.2 11 7 12 3z"/><path d="M12 21a3 3 0 0 0 3-3c0-1.5-1.5-2-3-4-1.5 2-3 2.5-3 4a3 3 0 0 0 3 3z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 13.5A8.5 8.5 0 1 1 10.5 3a7 7 0 0 0 10.5 10.5z"/></symbol><symbol id="i-auto" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></symbol><symbol id="i-rows" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></symbol><symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/></symbol><symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol><symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol><symbol id="i-text" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></symbol><symbol id="i-md" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15V9l2.5 3L12 9v6M16 9v6m-2-2 2 2 2-2"/></symbol><symbol id="i-now" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><path d="M8 16v-5M12 16V8M16 16v-8"/></symbol><symbol id="i-repos" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></symbol><symbol id="i-run" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol><symbol id="i-queue" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol><symbol id="i-fail" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></symbol><symbol id="i-okc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></symbol><symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 3h6"/></symbol><symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol><symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></symbol><symbol id="i-repo" viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/></symbol><symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol><symbol id="i-save2" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></symbol><symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-6"/></symbol><symbol id="i-wifi" viewBox="0 0 24 24"><path d="M3 9a14 14 0 0 1 18 0M6 12.5a9 9 0 0 1 12 0M9 16a4.5 4.5 0 0 1 6 0"/><circle cx="12" cy="19" r="1"/></symbol><symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2 6"/><path d="M20 4v7h-7"/></symbol><symbol id="i-spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 9 9"/></symbol></defs></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol><symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c1 3 4 4.5 4 8.5a4 4 0 0 1-8 0c0-1.4.6-2.4 1.4-3.2C9.9 9.2 11 7 12 3z"/><path d="M12 21a3 3 0 0 0 3-3c0-1.5-1.5-2-3-4-1.5 2-3 2.5-3 4a3 3 0 0 0 3 3z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 13.5A8.5 8.5 0 1 1 10.5 3a7 7 0 0 0 10.5 10.5z"/></symbol><symbol id="i-auto" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></symbol><symbol id="i-rows" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></symbol><symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/></symbol><symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol><symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol><symbol id="i-text" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></symbol><symbol id="i-md" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15V9l2.5 3L12 9v6M16 9v6m-2-2 2 2 2-2"/></symbol><symbol id="i-now" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><path d="M8 16v-5M12 16V8M16 16v-8"/></symbol><symbol id="i-repos" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></symbol><symbol id="i-run" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol><symbol id="i-queue" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol><symbol id="i-fail" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></symbol><symbol id="i-okc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></symbol><symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 3h6"/></symbol><symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol><symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></symbol><symbol id="i-repo" viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/></symbol><symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol><symbol id="i-save2" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></symbol><symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-6"/></symbol><symbol id="i-wifi" viewBox="0 0 24 24"><path d="M3 9a14 14 0 0 1 18 0M6 12.5a9 9 0 0 1 12 0M9 16a4.5 4.5 0 0 1 6 0"/><circle cx="12" cy="19" r="1"/></symbol><symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2 6"/><path d="M20 4v7h-7"/></symbol><symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="7.6" r=".8"/></symbol><symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.6 2.6 0 1 1 3.9 2.2c-.9.5-1.4 1-1.4 2"/><circle cx="12" cy="16.8" r=".8"/></symbol><symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol><symbol id="i-spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 9 9"/></symbol></defs></svg>
 <div id="err" role="alert"></div>
 <div id="reduced" role="status"></div>
 <div id="offline" role="status"></div>
 <div id="hidden" role="status"></div>
+<div id="restartbar" role="status"></div>
 <header>
 <div class="h-row h-top"><h1>GitHub Actions <small class="mut" id="ver"></small></h1><div class="tiles" id="tiles1" role="group" data-i18n-aria="ui.tiles_aria1"><div class="tile skel " id="kt-active" role="button" tabindex="0" data-go="now" data-i18n-title="ui.k_active_title" data-i18n-aria="ui.k_active_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-run"/></svg><b id="k-active" data-v>–</b><small data-i18n="ui.k_active"></small></div><div class="tile skel " id="kt-queued" role="button" tabindex="0" data-go="now" data-i18n-title="ui.k_queued_title" data-i18n-aria="ui.k_queued_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-queue"/></svg><b id="k-queued" data-v>–</b><small data-i18n="ui.k_queued"></small></div><div class="tile skel kclick" id="kp-fail" role="button" tabindex="0" data-i18n-title="ui.k_fail_title" data-i18n-aria="ui.k_fail_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-fail"/></svg><b id="k-fail" data-v>–</b><small data-i18n="ui.k_fail"></small></div><div class="tile skel " id="kt-ok" role="button" tabindex="0" data-go="hist" data-i18n-title="ui.k_ok_title" data-i18n-aria="ui.k_ok_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-okc"/></svg><b id="k-ok" data-v>–</b><small data-i18n="ui.k_ok"></small></div><div class="tile skel " id="kt-issues" role="button" tabindex="0" data-go="sent" data-i18n-title="ui.k_issues_title" data-i18n-aria="ui.k_issues_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-alert"/></svg><b id="k-issues" data-v>–</b><small data-i18n="ui.k_issues"></small></div><div class="tile skel " id="kt-min" role="button" tabindex="0" data-go="charts" data-i18n-title="ui.k_min_title" data-i18n-aria="ui.k_min_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-timer"/></svg><b id="k-min" data-v>–</b><small data-i18n="ui.k_min"></small></div><div class="tile skel kclick" id="kp-red" role="button" tabindex="0" data-i18n-title="ui.k_red_title" data-i18n-aria="ui.k_red_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-flag"/></svg><b id="k-red" data-v>–</b><small data-i18n="ui.k_red"></small></div><div class="tile skel kclick" id="kp-sign" role="button" tabindex="0" data-i18n-title="ui.k_sign_title" data-i18n-aria="ui.k_sign_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-pen"/></svg><b id="k-sign" data-v>–</b><small data-i18n="ui.k_sign"></small></div></div>
 <button id="hotonly" class="ib" type="button" aria-pressed="false" data-i18n-aria="ui.ic_hotonly_off" data-i18n-title="ui.ic_hotonly_off"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-flame"/></svg></button>
-<button id="cfg-open" class="ib" type="button" data-i18n-title="ui.ic_settings" data-i18n-aria="ui.ic_settings"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gear"/></svg></button></div>
+<button id="cfg-open" class="ib" type="button" data-i18n-title="ui.ic_settings" data-i18n-aria="ui.ic_settings"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gear"/></svg></button><label class="modebox" data-i18n-title="ui.mode_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gauge"/></svg><select id="mode-sel" data-i18n-aria="ui.mode_title"><option value="normal"></option><option value="fast"></option><option value="turbo"></option></select><span id="mode-left" class="mut" role="timer"></span></label><a id="upd-badge" class="upd" href="#" target="_blank" rel="noopener noreferrer" hidden></a><button id="help-open" class="ib" type="button" data-i18n-title="ui.ic_help" data-i18n-aria="ui.ic_help"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-help"/></svg></button><button id="about-open" class="ib" type="button" data-i18n-title="ui.ic_about" data-i18n-aria="ui.ic_about"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-info"/></svg></button></div>
 <div class="h-row"><div class="tiles" id="tiles2" role="group" data-i18n-aria="ui.tiles_aria2"><div class="tile skel " id="kt-repos" role="button" tabindex="0" data-go="repos" data-i18n-title="ui.t_repos_title" data-i18n-aria="ui.t_repos_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-repo"/></svg><b id="tv-repos" data-v>–</b><small data-i18n="ui.t_repos"></small></div><div class="tile skel " id="kt-hot" role="button" tabindex="0" data-go="repos" data-i18n-title="ui.t_hot_title" data-i18n-aria="ui.t_hot_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-flame"/></svg><b id="tv-hot" data-v>–</b><small data-i18n="ui.t_hot"></small></div><div class="tile skel " id="kt-mode" role="button" tabindex="0" data-go="cfg:general" data-i18n-title="ui.t_mode_title" data-i18n-aria="ui.t_mode_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-sliders"/></svg><b id="tv-mode" data-v>–</b><small data-i18n="ui.t_mode"></small></div><div class="tile skel " id="kt-etag" role="button" tabindex="0" data-go="cfg:cache" data-i18n-title="ui.t_etag_title" data-i18n-aria="ui.t_etag_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-save2"/></svg><b id="tv-etag" data-v>–</b><small data-i18n="ui.t_etag"></small></div><div class="tile skel wide" id="kt-quota" role="button" tabindex="0" data-go="cfg:polling" data-i18n-title="ui.t_quota_title" data-i18n-aria="ui.t_quota_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gauge"/></svg><b id="tv-quota" data-v>–</b><small><span data-i18n="ui.t_quota"></span> · <span id="tv-renews"></span></small><span class="qbar" aria-hidden="true"><i id="tq-fill"></i></span></div><div class="tile skel " id="kt-conn" role="group" data-i18n-title="ui.t_conn_title" data-i18n-aria="ui.t_conn_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-wifi"/></svg><b id="tv-conn" data-v>–</b><small data-i18n="ui.t_conn"></small><span class="vh" id="tv-conn-since"></span></div><div class="tile skel " id="kt-upd" role="group" data-i18n-title="ui.t_updated_title" data-i18n-aria="ui.t_updated_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg><b id="tv-upd" data-v>–</b><small data-i18n="ui.t_updated"></small></div><div class="tile wide run" id="kt-loading" role="group" hidden data-i18n-title="ui.t_loading_title" data-i18n-aria="ui.t_loading_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-spin"/></svg><b id="tv-load">–</b><small data-i18n="ui.t_loading"></small><span class="qbar" aria-hidden="true"><i id="tl-fill"></i></span></div></div>
 <span class="badge b-queued" id="k-budget" hidden role="status"></span><span class="rdy" id="k-ready" role="group" data-i18n-aria="ui.ready_title" hidden></span></div>
 <div class="vh" role="status"><span id="stamp" data-i18n="ui.loading_short"></span> <span id="mode"></span> <span id="rate"></span> <span class="badge b-queued" id="quota" hidden></span></div>
@@ -222,7 +257,7 @@ background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 
 <button role="tab" id="n-repos" data-tab="repos" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-repos"/></svg><span data-i18n="ui.tab_repos"></span></button>
 <button role="tab" id="n-hist" data-tab="hist" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-history"/></svg><span data-i18n="ui.tab_hist"></span></button>
 <button role="tab" id="n-cfg" data-tab="cfg" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gear"/></svg><span data-i18n="ui.tab_cfg"></span></button>
-</nav>
+<button id="help-tab" class="ib navhelp" type="button" data-i18n-title="ui.help_tab" data-i18n-aria="ui.help_tab"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-help"/></svg></button></nav>
 <div class="filters" role="search" data-i18n-aria="ui.f_label">
 <label><span data-i18n="ui.f_eco"></span> <select id="g-eco"></select></label>
 <label><span data-i18n="ui.f_state"></span> <select id="g-state"><option value="" data-i18n="ui.f_all"></option><option value="active" data-i18n="ui.f_active"></option><option value="failed" data-i18n="ui.f_failed"></option><option value="stuck" data-i18n="ui.f_stuck"></option><option value="ok" data-i18n="ui.f_green"></option></select></label>
@@ -272,10 +307,15 @@ background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 
 </div></section>
 </div>
 </main>
+<div id="about-dlg" class="dlg" role="dialog" aria-modal="true" aria-labelledby="about-h" hidden><div class="dlg-box"><div class="dlg-top"><h2 id="about-h" data-i18n="ui.about_title"></h2><span class="sp"></span><button id="about-close" class="ib" type="button" data-i18n-title="ui.close" data-i18n-aria="ui.close"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-close"/></svg></button></div><div class="dlg-body" id="about-body"></div><div class="dlg-bar"><button id="about-copy" type="button"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-copy"/></svg><span data-i18n="ui.about_copy"></span></button><span id="about-msg" class="mut" role="status"></span></div></div></div>
+<div id="help-dlg" class="dlg" role="dialog" aria-modal="true" aria-labelledby="help-h" hidden><div class="dlg-box wide"><div class="dlg-top"><h2 id="help-h" data-i18n="ui.help_title"></h2><input id="help-q" type="search" autocomplete="off" data-i18n-ph="ui.help_search_ph" data-i18n-aria="ui.help_search_ph" style="flex:1;max-width:420px"><span class="sp"></span><button id="help-close" class="ib" type="button" data-i18n-title="ui.close" data-i18n-aria="ui.close"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-close"/></svg></button></div><div class="help-cols"><div id="help-list" role="navigation" data-i18n-aria="ui.help_index"></div><div id="help-body" tabindex="0"></div></div></div></div>
+<div id="wiz-dlg" class="dlg" role="dialog" aria-modal="true" aria-labelledby="wiz-h" hidden><div class="dlg-box"><div class="dlg-top"><h2 id="wiz-h" data-i18n="ui.wiz_title"></h2><span class="sp"></span><span class="mut" id="wiz-step"></span></div><div class="dlg-body" id="wiz-body"></div><div class="dlg-bar"><button id="wiz-back" type="button" data-i18n="ui.wiz_back"></button><button id="wiz-next" type="button" data-i18n="ui.wiz_next"></button><span class="sp" style="flex:1"></span><button id="wiz-skip" type="button" data-i18n="ui.wiz_skip"></button></div></div></div>
 <footer id="about" class="mut" style="padding:10px 14px;font-size:12px"></footer>
 <aside id="rp" role="complementary" data-i18n-aria="ui.rp_aria" hidden></aside>
 <script>
 "use strict";
+(function(){const raw=window.fetch.bind(window),need=/^\/api\/(settings|ai\/actions\/confirm|ai\/actions\/unlock|ai\/test|notify\/test|discovery\/group|mode)/;
+  window.fetch=async function(u,o){if(o&&o.method==="POST"&&need.test(String(u))){try{const r=await raw("/api/session-token",{cache:"no-store"}),j=await r.json();if(j.token)o=Object.assign({},o,{headers:Object.assign({},o.headers,{"X-Monitor-Token":j.token})})}catch(e){}}return raw(u,o)}})();
 const I18N=/*I18N_DATA*/null||{default:"en",langs:["en"],names:{en:"English"},html:{en:"en"},locale:{en:"en-GB"},catalogues:{en:{}},ecosystems:{},owner:"",version:""};
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 const QS=new URLSearchParams(location.search);   // deep link: ?tab=sent&repo=NAME&lang=de (the old #tab still works)
@@ -644,8 +684,9 @@ function analyticsBox(){
 }
 function lintBox(s){
   const L=s.lint;if(!L||!L.enabled)return mut_(T("ui.a13_off"));
-  const rows=(L.rows||[]).filter(r=>sVis(r.repo));
-  return rows.length?`<table>${thk(["ui.th_repo","ui.th_file","ui.th_line","ui.th_rule","ui.th_severity"])}<tbody>${rows.slice(0,80).map(r=>`<tr><td>${esc(r.repo)}</td><td>${esc(r.file)}</td><td>${r.line}</td><td>${esc(T("lint.rule."+r.rule))}${r.detail&&r.detail!=="missing"?" · "+esc(r.detail):""}</td><td><span class="chip ${r.severity==="bad"?"bad":(r.severity==="warn"?"warn":"")}">${esc(r.severity)}</span></td></tr>`).join("")}</tbody></table>`:ok_(T("ui.a13_none"));
+  const all=(L.rows||[]).filter(r=>sVis(r.repo)),rows=all.filter(r=>LINTLV.has(r.severity));
+  const chips=`<div class="lvl" role="group" aria-label="${esc(T("ui.lvl_filter"))}">`+["info","warn","bad"].map(k=>`<button type="button" class="ib" data-lvl="${k}" aria-pressed="${LINTLV.has(k)}">${esc(T("ui.lvl_"+k))} (${all.filter(r=>r.severity===k).length})</button>`).join("")+"</div>";
+  return all.length?chips+(rows.length?`<table>${thk(["ui.th_repo","ui.th_file","ui.th_line","ui.th_rule","ui.th_severity"])}<tbody>${rows.slice(0,80).map(r=>`<tr><td>${esc(r.repo)}</td><td>${esc(r.file)}</td><td>${r.line}</td><td>${esc(T("lint.rule."+r.rule))}${r.detail&&r.detail!=="missing"?" · "+esc(r.detail):""}</td><td><span class="chip ${r.severity==="bad"?"bad":(r.severity==="warn"?"warn":"")}">${esc(T("ui.lvl_"+r.severity))}</span></td></tr>`).join("")}</tbody></table>`:mut_(T("ui.help_none"))):ok_(T("ui.a13_none"));
 }
 async function copyText(btn){try{await navigator.clipboard.writeText(btn.dataset.copy);btn.textContent=T("ui.copied")}catch(err){btn.textContent=T("ui.copy_manual")}}
 $("t-sent").addEventListener("toggle",e=>{const d=e.target;if(d.tagName==="DETAILS"){d.open?OPEN.add(d.dataset.k):OPEN.delete(d.dataset.k);store.set("am-s-open",[...OPEN].join(","))}},true);
@@ -797,6 +838,7 @@ function cfgFilter(){
 }
 $("cfg-search").addEventListener("input",cfgFilter);
 async function cfgExtras(){
+  if(typeof basicExtras==="function")basicExtras();
   const ai=document.getElementById("cfp-ai");
   if(ai&&!ai.querySelector(".ai-extra")){
     const box=document.createElement("div");box.className="cfg-group ai-extra";
@@ -830,7 +872,7 @@ function cfgBuild(j){
     form.appendChild(panel);
   });
   cfgBuildTabs();cfgShowTab(CFG.tab);
-  const r=$("cfg-restart");const n=CFG.restart.length;r.style.display=n?"block":"none";r.textContent=n?T("ui.cfg_restart_banner",{n:n}):"";
+  const r=$("cfg-restart");const n=CFG.restart.length;r.style.display=n?"block":"none";r.textContent=n?T("ui.cfg_restart_banner",{n:n}):"";restartBar(n);
   $("cfg-backups").textContent=T("ui.cfg_backups",{n:j.backups||0});cfgRefreshButtons();cfgFilter();cfgExtras();
 }
 async function cfgLoad(){try{const r=await fetch("/api/settings?"+qlang(),{cache:"no-store"});const j=await r.json();if(j.ok)cfgBuild(j)}catch(e){$("cfg-msg").className="err";$("cfg-msg").textContent=T("ui.err_monitor",{msg:e})}}
@@ -887,6 +929,133 @@ tilesRestore();
 /* every button gives a short "pressed" feedback also for the keyboard (the mouse uses :active) */
 document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.tagName==="BUTTON"){e.target.classList.add("pressing")}});
 document.addEventListener("keyup",e=>{if(e.target.tagName==="BUTTON")e.target.classList.remove("pressing")});
+
+/* About, Help, the first-start guide, the update notice, the restart bar and the level filter of the linter */
+const dlgs={about:$("about-dlg"),help:$("help-dlg"),wiz:$("wiz-dlg")};
+let LASTFOCUS=null;
+function dlgOpen(k){LASTFOCUS=document.activeElement;dlgs[k].hidden=false}
+function dlgClose(k){dlgs[k].hidden=true;if(LASTFOCUS&&LASTFOCUS.focus)try{LASTFOCUS.focus()}catch(e){}}
+function dl(rows){return "<dl class=\"dl\">"+rows.map(r=>`<dt>${esc(r[0])}</dt><dd>${r[2]?r[1]:esc(r[1])}</dd>`).join("")+"</dl>"}
+function aLink(u,t){return `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(t||u)}</a>`}
+let ABOUT=null;
+function updLine(u){if(!u)return "";if(u.newer)return T("ui.update_available",{version:u.latest})+" · "+aLink(u.url,T("ui.update_open"))+" · "+aLink(u.changelog,T("ui.update_changelog"));
+  if(!u.enabled)return T("ui.update_off");return u.latest?T("ui.update_latest"):T("ui.update_unknown")}
+function paintBadge(u){const b=$("upd-badge");if(u&&u.newer){b.hidden=false;b.href=u.url||"#";b.textContent=T("ui.update_available",{version:u.latest});b.title=T("ui.update_open")}else b.hidden=true}
+async function aboutLoad(){try{const r=await fetch("/api/about?"+qlang(),{cache:"no-store"});ABOUT=await r.json();paintBadge(ABOUT.update)}catch(e){ABOUT=null}return ABOUT}
+async function openAbout(){
+  dlgOpen("about");$("about-msg").textContent="";const body=$("about-body");body.innerHTML=`<span class="mut">${esc(T("ui.loading"))}</span>`;
+  const a=await aboutLoad();if(!a){body.textContent=T("ui.err_monitor",{msg:"/api/about"});return}
+  const h=a.health||{},L=a.links||{};
+  let html=dl([[T("ui.about_version"),"v"+a.version],[T("ui.about_edition"),T("ui.edition_"+a.edition)],[T("ui.about_author"),a.author],[T("ui.about_license"),a.license],[T("ui.about_python"),a.python+" ("+a.implementation+")"],[T("ui.about_system"),a.system],[T("ui.about_update"),updLine(a.update),true]]);
+  html+=`<h3>${esc(T("ui.about_links"))}</h3>`+dl(["repository","releases","changelog","documentation","issues"].map(k=>[T("ui.about_"+k),aLink(L[k]),true]));
+  html+=`<h3>${esc(T("ui.about_paths"))}</h3>`+dl(Object.keys(a.paths||{}).map(k=>[T("ui.path_"+k),a.paths[k]]));
+  html+=`<h3>${esc(T("ui.about_health"))}</h3>`+dl([[T("ui.health_ok"),yn(h.ok)],[T("ui.health_loaded"),yn(h.loaded)],[T("ui.health_offline"),yn(h.offline)],[T("ui.health_uptime"),fmt(h.uptime_seconds||0)]]);
+  html+=`<h3>${esc(T("ui.about_credits"))}</h3>`+dl((a.credits||[]).map(c=>[c.name+" ("+c.license+")",T("ui.credit_"+c.id)+" · "+T(c.installed?"ui.about_installed":"ui.about_not_installed")]));
+  body.innerHTML=html;
+}
+$("about-open").addEventListener("click",openAbout);$("about-close").addEventListener("click",()=>dlgClose("about"));
+$("about-copy").addEventListener("click",async()=>{const t=ABOUT&&ABOUT.support?ABOUT.support:"";try{await navigator.clipboard.writeText(t);$("about-msg").textContent=T("ui.about_copied")}catch(e){$("about-msg").textContent=T("ui.copy_manual")}});
+/* Help */
+const HELP={topics:[],cur:"",tab:"now"};
+function helpGroups(){const g={};HELP.topics.forEach(t=>{(g[t.group]=g[t.group]||[]).push(t)});return g}
+function helpList(){const g=helpGroups(),box=$("help-list");box.innerHTML="";
+  ["start","guides","project"].forEach(k=>{if(!g[k])return;const h=document.createElement("h4");h.textContent=T("ui.help_group_"+k);box.appendChild(h);
+    g[k].forEach(t=>{const a=document.createElement("a");a.textContent=t.title;a.dataset.topic=t.id;a.tabIndex=0;a.setAttribute("role","link");if(t.id===HELP.cur)a.setAttribute("aria-current","true");
+      const go=()=>helpShow(t.id);a.addEventListener("click",go);a.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();go()}});box.appendChild(a)})})}
+async function helpShow(id,section){
+  HELP.cur=id;helpList();const body=$("help-body");body.innerHTML=`<span class="mut">${esc(T("ui.loading"))}</span>`;
+  try{const r=await fetch("/api/help/topic?id="+encodeURIComponent(id)+"&"+qlang(),{cache:"no-store"});const j=await r.json();if(!r.ok){body.textContent=T("ui.help_none");return}
+    let html=j.fallback?`<div class="help-note">${esc(T("ui.help_fallback"))}</div>`:"";
+    j.sections.forEach(sec=>{html+=`<section id="hs-${esc(sec.id)}" style="all:unset;display:block">`+(sec.title?`<h3>${esc(sec.title)}</h3>`:`<h2 style="font-size:18px;margin:0 0 8px">${esc(j.title)}</h2>`)+sec.html+"</section>"});
+    body.innerHTML=html;body.scrollTop=0;if(section){const el=document.getElementById("hs-"+section);if(el)el.scrollIntoView()}}
+  catch(e){body.textContent=T("ui.err_monitor",{msg:e})}}
+async function helpSearch(q){
+  const body=$("help-body");if(q.trim().length<2){if(HELP.cur)helpShow(HELP.cur);return}
+  try{const r=await fetch("/api/help/search?q="+encodeURIComponent(q)+"&"+qlang(),{cache:"no-store"});const j=await r.json();
+    body.innerHTML=j.hits.length?`<p class="mut">${esc(T("ui.help_hits",{n:j.hits.length}))}</p>`+j.hits.map(h=>`<div class="hit" tabindex="0" data-topic="${esc(h.topic)}" data-section="${esc(h.section)}"><strong>${esc(h.topic_title)}</strong> · ${esc(h.title)}<small>${esc(h.snippet)}</small></div>`).join(""):`<p class="mut">${esc(T("ui.help_none"))}</p>`}
+  catch(e){body.textContent=T("ui.err_monitor",{msg:e})}}
+async function openHelp(tab,topic){
+  dlgOpen("help");HELP.tab=tab||HELP.tab;$("help-q").value="";
+  try{const r=await fetch("/api/help/topics?tab="+encodeURIComponent(HELP.tab)+"&"+qlang(),{cache:"no-store"});const j=await r.json();HELP.topics=j.topics||[];
+    helpShow(topic||(tab?j.tab_topic:null)||HELP.cur||"readme")}catch(e){$("help-body").textContent=T("ui.err_monitor",{msg:e})}
+  $("help-q").focus()}
+$("help-open").addEventListener("click",()=>openHelp(null,null));
+$("help-tab").addEventListener("click",()=>openHelp(document.querySelector("nav [aria-selected=true]").dataset.tab,null));
+$("help-close").addEventListener("click",()=>dlgClose("help"));
+let HQ;$("help-q").addEventListener("input",e=>{clearTimeout(HQ);HQ=setTimeout(()=>helpSearch(e.target.value),200)});
+$("help-body").addEventListener("click",e=>{const a=e.target.closest("[data-topic]");if(!a)return;e.preventDefault();$("help-q").value="";helpShow(a.dataset.topic,a.dataset.section)});
+$("help-body").addEventListener("keydown",e=>{if(e.key==="Enter"){const a=e.target.closest(".hit");if(a)helpShow(a.dataset.topic,a.dataset.section)}});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){for(const k of Object.keys(dlgs))if(!dlgs[k].hidden){dlgClose(k);return}}
+  const t=e.target,typing=t&&(t.tagName==="INPUT"||t.tagName==="TEXTAREA"||t.tagName==="SELECT"||t.isContentEditable);
+  if(e.key==="?"&&!typing&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();dlgs.help.hidden?openHelp(document.querySelector("nav [aria-selected=true]").dataset.tab,null):dlgClose("help")}});
+/* the restart bar: shown on every tab while a saved setting waits for a restart */
+function restartBar(n){const b=$("restartbar");b.style.display=n?"block":"none";b.textContent=n?T("ui.cfg_restart_banner",{n:n}):""}
+/* first start: three short steps */
+const WIZ={n:1};
+async function wizDraw(){
+  const n=WIZ.n,b=$("wiz-body");$("wiz-step").textContent=T("ui.wiz_step",{n:n,total:3});$("wiz-back").disabled=n===1;$("wiz-next").textContent=T(n===3?"ui.wiz_finish":"ui.wiz_next");
+  let html=`<h3>${esc(T("ui.wiz_"+n+"_h"))}</h3><p>${esc(T("ui.wiz_"+n+"_t"))}</p>`;
+  if(n===2){try{const r=await fetch("/api/discovery",{cache:"no-store"}),j=await r.json();html+=`<p><strong>${esc(T("ui.wiz_found",{owner:j.owner||"–",discovered:j.discovered,watched:j.watched,hidden:j.hidden}))}</strong></p>`}catch(e){}}
+  if(n===3)html+=`<p><button id="wiz-basic" type="button">${esc(T("ui.wiz_open_basic"))}</button> <button id="wiz-help" type="button">${esc(T("ui.wiz_open_help"))}</button></p>`;
+  b.innerHTML=html;
+  if(n===3){$("wiz-basic").addEventListener("click",()=>{wizDone();CFG.tab="basic";store.set("am-cfg-tab","basic");showTab("cfg");if(CFG.groups.length)cfgShowTab("basic")});$("wiz-help").addEventListener("click",()=>{wizDone();openHelp(null,"first_steps")})}}
+function wizDone(){store.set("am-wizard-done","1");dlgs.wiz.hidden=true}
+$("wiz-next").addEventListener("click",()=>{if(WIZ.n<3){WIZ.n++;wizDraw()}else wizDone()});
+$("wiz-back").addEventListener("click",()=>{if(WIZ.n>1){WIZ.n--;wizDraw()}});$("wiz-skip").addEventListener("click",wizDone);
+if(!store.get("am-wizard-done")&&QS.get("nowizard")!=="1"){dlgs.wiz.hidden=false;wizDraw()}
+/* the update notice: one quiet read now and then (the server asks GitHub at most once a day) */
+aboutLoad();setInterval(aboutLoad,6*3600*1000);
+/* working modes: normal, fast, turbo (the estimate is shown BEFORE it is switched on; fast and turbo come back to normal by themselves) */
+let MODEDATA=null;
+function modeLabels(){["normal","fast","turbo"].forEach((m,i)=>{$("mode-sel").options[i].textContent=T("ui.mode_"+m)})}
+function modeText(d){return T("ui.mode_est",{mode:T("ui.mode_"+d.mode),calls:d.estimate[d.mode].calls_per_hour,cached:d.estimate[d.mode].with_cache_per_hour})}
+async function modeLoad(){
+  try{const r=await fetch("/api/mode?"+qlang(),{cache:"no-store"});MODEDATA=await r.json();modeLabels();$("mode-sel").value=MODEDATA.mode;
+    const left=MODEDATA.seconds_left;$("mode-left").textContent=MODEDATA.mode!=="normal"?(left!=null?fmt(left):"∞"):(MODEDATA.notice&&MODEDATA.notice!=="manual"?T("ui.mode_back_"+MODEDATA.notice):"");
+    $("mode-left").parentElement.classList.toggle("on",MODEDATA.mode!=="normal");[...$("mode-sel").options].forEach(o=>{o.disabled=o.value!=="normal"&&!MODEDATA.allowed});
+    $("mode-sel").title=MODEDATA.allowed?modeText(MODEDATA):T("ui.mode_no_token")}catch(e){}}
+$("mode-sel").addEventListener("change",async e=>{
+  const want=e.target.value;if(!MODEDATA)return;
+  if(want!=="normal"){const est=MODEDATA.estimate[want],mins=est.minutes_left;
+    if(!window.confirm(T("ui.mode_confirm",{mode:T("ui.mode_"+want),calls:est.calls_per_hour,cached:est.with_cache_per_hour,minutes:MODEDATA.default_minutes,left:mins==null?"–":fmt(mins*60),floor:MODEDATA.floor}))){e.target.value=MODEDATA.mode;return}}
+  try{const r=await fetch("/api/mode",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({mode:want,minutes:want==="normal"?0:MODEDATA.default_minutes})});const j=await r.json();
+    if(!j.ok){$("err").style.display="block";$("err").textContent=T("ui.mode_refused",{why:T("ui.mode_why_"+j.reason)})}}catch(x){}
+  modeLoad();tick()});
+modeLoad();setInterval(modeLoad,5000);
+{const d=QS.get("dlg");if(d==="about")openAbout();else if(d==="help")openHelp(QS.get("tab")||"cfg",QS.get("topic")||null)}
+
+/* the level filter of the linter (info / warning / error) */
+const LINTLV=new Set((store.get("am-lint-lv")||"info,warn,bad").split(","));
+document.addEventListener("click",e=>{const b=e.target.closest("button[data-lvl]");if(!b)return;const k=b.dataset.lvl;LINTLV.has(k)?LINTLV.delete(k):LINTLV.add(k);store.set("am-lint-lv",[...LINTLV].join(","));if(typeof renderSent==="function")renderSent()});
+/* Settings > Basic: what the monitor found in the account, news, and suggested groups (a group is added only after a click) */
+async function quotaBox(host){
+  let box=host.querySelector(".quota-box");if(!box){box=document.createElement("div");box.className="cfg-group quota-box";host.appendChild(box)}
+  try{const r=await fetch("/api/quota?"+qlang(),{cache:"no-store"}),q=await r.json();
+    const lvl={ok:"ok",warn:"warn",alert:"bad"}[q.level]||"";
+    const rows=[[T("ui.q_plan"),q.plan==="unknown"?T("ui.q_unknown"):q.plan]];
+    if(q.included_minutes){rows.push([T("ui.q_included"),String(q.included_minutes)]);
+      rows.push([T("ui.q_month"),q.month_estimate+" "+T("quota.estimate")+(q.level!=="ok"&&q.level!=="unknown"?" · "+Math.round(100*q.month_estimate/q.included_minutes)+" %":"")]);
+      if(q.billing_requested)rows.push([T("ui.q_real"),q.billing?String(q.billing.minutes):T("ui.q_real_none")])}
+    rows.push([T("ui.q_clock"),q.billable.clock+" / "+q.billable.billable+" "+T("quota.estimate")]);
+    rows.push([T("ui.q_api"),T("ui.q_api_"+q.api_mode)]);
+    if(q.concurrency&&q.concurrency.limit)rows.push([T("ui.q_conc"),q.concurrency.running+" / "+q.concurrency.queued+" / "+q.concurrency.limit]);
+    rows.push([T("ui.q_long"),q.long_jobs.length?q.long_jobs.map(j=>j.repo+" ("+j.hours+" h)").join(", "):T("ui.q_none")]);
+    box.innerHTML=`<h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gauge"/></svg><span>${esc(T("ui.q_title"))}</span></h3><div class="cfg-grid" style="grid-template-columns:1fr">`+dl(rows)+`<div class="mut">${esc(T("ui.q_public"))} ${esc(T("ui.q_note"))}</div></div>`;
+    if(lvl)box.style.borderColor=lvl==="ok"?"var(--ok)":(lvl==="warn"?"var(--warn)":"var(--bad)");
+  }catch(e){}}
+async function basicExtras(){
+  const host=document.getElementById("cfp-basic");if(!host)return;quotaBox(host);
+  let box=host.querySelector(".disc-box");if(!box){box=document.createElement("div");box.className="cfg-group disc-box";host.appendChild(box)}
+  try{const r=await fetch("/api/discovery",{cache:"no-store"}),j=await r.json();
+    let html=`<h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-repos"/></svg><span>${esc(T("ui.disc_title"))}</span></h3><div class="cfg-grid" style="grid-template-columns:1fr">`
+      +dl([[T("ui.disc_owner"),j.owner||"–"],[T("ui.disc_found"),String(j.discovered)],[T("ui.disc_watched"),String(j.watched)],[T("ui.disc_hidden"),String(j.hidden)+(j.hidden_names&&j.hidden_names.length?" · "+j.hidden_names.slice(0,12).join(", "):"")]]);
+    if(j.events&&j.events.length)html+=`<div><strong>${esc(T("ui.disc_events"))}</strong>`+j.events.map(x=>`<div class="mut">${esc(x.text)}</div>`).join("")+"</div>";
+    if(j.suggestions&&j.suggestions.length)html+=`<div><strong>${esc(T("ui.disc_suggest_h"))}</strong>`+j.suggestions.map(g=>`<div class="inl" style="margin:4px 0"><span>${esc(T("ui.disc_suggest_text",{n:g.repos.length,prefix:g.prefix,key:g.key}))}</span><button type="button" data-grp="${esc(g.key)}" data-pre="${esc(g.prefix)}">${esc(T("ui.disc_apply"))}</button></div>`).join("")+`<div class="mut">${esc(T("ui.disc_suggest_note"))}</div></div>`;
+    box.innerHTML=html+"</div>";
+    box.querySelectorAll("button[data-grp]").forEach(b=>b.addEventListener("click",async()=>{b.disabled=true;try{const r=await fetch("/api/discovery/group",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({key:b.dataset.grp,prefix:b.dataset.pre})});const k=await r.json();b.textContent=k.ok?T("ui.disc_applied"):T("ui.disc_failed")}catch(e){b.textContent=T("ui.disc_failed")}}));
+  }catch(e){}}
+
 applyStatic();applyTheme(theme);applyDense(DENSE);cfgLoad();
 diffTick();setInterval(diffTick,60000);
 sentTick();setInterval(sentTick,15000);

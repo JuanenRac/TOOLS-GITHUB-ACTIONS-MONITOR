@@ -81,7 +81,7 @@ def text_width(s: str, size: float, family: str = SANS, weight: str = "400", spa
     """A cautious estimate (slightly wide on purpose) of the width in pixels of `s`."""
     mono = family.startswith("'JetBrains") or "Consolas" in family[:60]
     bold = str(weight) in ("600", "700", "800", "bold")
-    return sum(_char_em(c, mono, bold) for c in s) * size + spacing * len(s)
+    return round(sum(_char_em(c, mono, bold) for c in s) * size + spacing * len(s), 3)     # rounded: Python 3.12 sums floats with compensation, so the last digits differ between versions
 
 
 def wrap(s: str, size: float, max_width: float, family: str = SANS, weight: str = "400", lines: int = 2) -> list[str]:

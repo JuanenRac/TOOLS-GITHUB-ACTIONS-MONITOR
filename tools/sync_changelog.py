@@ -47,6 +47,10 @@ def generated():
 
 
 def main(argv):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")      # the notes carry a few non-ASCII characters; a Windows console would write them in its own code page
+    except (AttributeError, ValueError):
+        pass
     if "--notes" in argv:
         found = section(SOURCE.read_text(encoding="utf-8").replace("\r\n", "\n"), argv[argv.index("--notes") + 1])
         if not found:

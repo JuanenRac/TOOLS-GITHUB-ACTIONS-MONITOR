@@ -31,7 +31,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 
 | | |
 |---|---|
-| **Versão** | **1.6.2** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versão** | **1.6.3** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Requisitos** | Python 3.11+ e a CLI do GitHub (`gh auth login`); mais nada (a vista de consola usa o pacote opcional `rich`) |
 | **Abre** | uma página só em `127.0.0.1`, em oito idiomas |
 | **Escreve no GitHub** | nunca sozinho: apenas os comandos por lotes que lançar com um `--go` explícito |
@@ -48,6 +48,10 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_charts_light.png"><img src="docs/screenshots/web_charts_dark.png" alt="Gráficos" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_repositories_light.png"><img src="docs/screenshots/web_repositories_dark.png" alt="Repositórios" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_history_light.png"><img src="docs/screenshots/web_history_dark.png" alt="Histórico" width="92%"></picture></p>
+
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_about_light.png"><img src="docs/screenshots/web_about_dark.png" alt="Acerca de" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_help_light.png"><img src="docs/screenshots/web_help_dark.png" alt="Ajuda, com pesquisa e sem ligação" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_basic_light.png"><img src="docs/screenshots/web_settings_basic_dark.png" alt="Definições · Básico: plano, quotas e descoberta" width="92%"></picture></p>
 
 <details><summary><b>Definições, subseparador a subseparador</b></summary>
 
@@ -101,10 +105,22 @@ Cada imagem segue o tema claro ou escuro da sua página do GitHub.
 - **Oito idiomas** (en, es, de, fr, it, ja, zh, pt) com o inglês como base; muda-se nas definições.
 - **Saídas para painéis**: `ci_red.json`, um ponto de acesso Prometheus e uma fonte JSON para o Grafana, com um painel Grafana importável.
 - **Ferramentas por lotes**: planeiam e lançam várias compilações de uma vez; nada é lançado sem `--go`.
+- **Acerca de e Ajuda na página**: o botão **i** mostra a versão, a edição, as ligações, os ficheiros, o estado de saúde e um botão que copia a informação para o suporte; o botão **?** (ou a tecla `?`) abre toda a documentação, com pesquisa e no seu idioma, sem Internet. A consola tem `--about` e `--help-topics`, e uma aplicação interativa de terminal por separadores (`textual` opcional).
+- **Aviso de versão nova**: um emblema discreto quando sai uma versão mais recente; só lê a página pública de versões uma vez por dia, nunca instala nada e pode ser desligado (sempre desligado numa instalação isolada).
+- **Quotas para qualquer conta**: plano, minutos faturáveis (os repositórios públicos não custam), quota da API lida dos cabeçalhos do GitHub, concorrência e jobs perto do limite de 6 horas; os valores estão num ficheiro editável.
 
 ## Arquitetura
 
 <p align="center"><img src="images/architecture.svg" alt="Arquitetura" width="100%"></p>
+
+## Comece aqui: que edição?
+
+| Se quer... | Arranque | Porta |
+|---|---|---|
+| ver o que corre e o que falha, nada mais (**comece aqui**) | `MONITOR_LITE_GITHUB_ACTIONS` | 8766 |
+| toda a conta vigiada por si: alertas, versões, assinatura, prontidão, análise | `MONITOR_GITHUB_ACTIONS` (com a [sentinela](monitor/docs/SENTINEL_por.md)) | 8765 |
+
+A janela da consola indica qual está a correr, no título e na primeira linha. Ainda tem dúvidas? `python actions_monitor.py --demo` abre a página com dados inventados e `--doctor` verifica a sua instalação. [Os seus primeiros cinco minutos](monitor/docs/FIRST_STEPS_por.md)
 
 ## Início rápido
 
@@ -193,6 +209,12 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
     ├── analytics.py lint_workflows.py   durações, flaky, linter
     ├── notifiers.py ai_actions.py       notificações, lista fechada IA
     ├── tui.py migrate_state.py          vista de consola, migração
+    ├── about.py  helpdocs.py            painéis Acerca de e Ajuda
+    ├── quota.py  quotas.json            plano, minutos e quotas
+    ├── modes.py  updatecheck.py         modos de trabalho, aviso de versão
+    ├── doctor.py  demo_mode.py          --doctor e --demo
+    ├── discovery.py  banner.py          descoberta, banner da edição
+    ├── tui_textual.py                   terminal interativo
     ├── i18n.py locales/                 oito idiomas
     ├── toolconfig.py workspace.py       definições e clones
     ├── tests/                           testes sem rede
@@ -213,6 +235,10 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/CONSOLE_TOOLS_por.md`](monitor/docs/CONSOLE_TOOLS_por.md): o linter de workflows e a vista de consola
 - [`monitor/docs/DEPLOYMENT_por.md`](monitor/docs/DEPLOYMENT_por.md): executá-lo como serviço, atrás de um proxy, permissões
 - [`monitor/QUICKSTART_pt.txt`](monitor/QUICKSTART_pt.txt): primeiros passos, em oito idiomas
+- [`monitor/docs/FIRST_STEPS_por.md`](monitor/docs/FIRST_STEPS_por.md): os seus primeiros cinco minutos
+- [`monitor/docs/SENTINEL_por.md`](monitor/docs/SENTINEL_por.md): a sentinela e as suas verificações A1-A13
+- [`monitor/docs/QUOTAS_por.md`](monitor/docs/QUOTAS_por.md): quotas e planos do GitHub
+- [`monitor/docs/MODES_por.md`](monitor/docs/MODES_por.md): modos de trabalho: normal, rápido e turbo
 
 ## Contribuir
 

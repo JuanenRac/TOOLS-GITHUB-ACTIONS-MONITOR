@@ -26,3 +26,4 @@ AVVIO RAPIDO - Monitor di GitHub Actions + Sentinella
    l'assistente IA si attivano nella scheda Impostazioni; per eseguirlo come servizio, dietro un proxy o in un container vedi docs/DEPLOYMENT_ita.md.
 8. Vuoi solo osservare i tuoi run? Avvia invece MONITOR_LITE_GITHUB_ACTIONS (l'edizione lite: senza sentinella, Impostazioni brevi, porta 8766). Vedi docs/LITE_ita.md.
 Problemi? Vedi «PROBLEMI» in README_it.txt.
+9. La guida è inclusa: il pulsante rotondo ? della pagina (o il tasto ?) apre tutta la documentazione offline; il pulsante i mostra Informazioni e copia le informazioni per l'assistenza (senza segreti). Da console: python actions_monitor.py --doctor (verifica l'installazione e dice come risolvere ogni problema), --demo (la pagina con dati inventati, senza gh), --about, --help-topics, --help-search PAROLE. Altro: docs/FIRST_STEPS_ita.md, docs/SENTINEL_ita.md, docs/QUOTAS_ita.md.

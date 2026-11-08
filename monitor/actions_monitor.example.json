@@ -325,6 +325,43 @@
       }
     }
   },
+  "updates": {
+    "check": true
+  },
+  "airgapped": false,
+  "open_browser": true,
+  "modes": {
+    "start": "normal",
+    "default_minutes": 60,
+    "fast": {
+      "refresh_seconds": 30,
+      "cold_refresh_seconds": 300,
+      "runs_per_repo": 30,
+      "hot_hours": 6
+    },
+    "turbo": {
+      "refresh_seconds": 15,
+      "cold_refresh_seconds": 90,
+      "runs_per_repo": 50,
+      "hot_hours": 12
+    }
+  },
+  "account": {
+    "plan": "unknown"
+  },
+  "quota": {
+    "billing_api": false,
+    "warn_percent": 75,
+    "alert_percent": 90,
+    "default_runner": "linux"
+  },
+  "session_guard": true,
+  "discovery": {
+    "events": true,
+    "suggest_groups": true,
+    "auto_frequency": false,
+    "hide": []
+  },
   "tui": {
     "theme": "dark",
     "refresh_seconds": 5

@@ -32,3 +32,13 @@ La versione 1.5.0 ha dato nomi inglesi a file, cartelle, script e a un'impostazi
 | `monitor_y_centinela` | `github_actions_monitor` |
 
 `ci_red.json`, il suo schema e i file di `--export-status` non sono cambiati. La lingua è l'inglese finché non ne scegli un'altra nelle impostazioni.
+
+# Da 1.5.x a 1.6.x
+
+Non c'è nulla da convertire: il monitor continua a leggere il tuo `actions_monitor.json` e aggiunge le nuove chiavi, con valori sicuri, la prima volta che salvi dalle Impostazioni.
+
+1. Ferma il monitor e decomprimi la nuova versione sulla vecchia cartella (conserva il tuo `actions_monitor.json` e i file di catalogo).
+2. Avvialo come prima. Accanto compaiono nuovi file (`etag_cache.json`, `analytics_history.json`, `update_check.json`, `sentinel_history.json`); si possono eliminare in qualsiasi momento.
+3. Facoltativo: `python actions_monitor.py --doctor` verifica l'installazione.
+
+Cosa cambia: esiste l'**edizione lite** (`MONITOR_LITE_GITHUB_ACTIONS`, porta 8766, il suo `actions_monitor_lite.json`, senza sentinella); il **rosso su main** è una sola regola (l'ultimo run terminato di ogni workflow sul branch predefinito; i run annullati, saltati, neutri e scaduti non dicono nulla), quindi una cifra può differire dalla 1.5.x; la pagina Impostazioni inizia con la scheda **Di base**; notifiche, analitica, linter, eventi del webhook e assistente IA esistono e sono **spenti** finché non li attivi; scrivere su GitHub richiede ancora la tua conferma esplicita. Rich e Textual restano opzionali; Python 3.11 o successivo.

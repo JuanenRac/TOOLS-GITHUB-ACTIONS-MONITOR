@@ -31,7 +31,7 @@
 
 | | |
 |---|---|
-| **Version** | **1.6.2** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **1.6.3** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Needs** | Python 3.11+ and the GitHub CLI (`gh auth login`); nothing else (the terminal view uses the optional package `rich`) |
 | **Opens** | a page on `127.0.0.1` only, in eight languages |
 | **Writes to GitHub** | never by itself: only batch commands you run with an explicit `--go` |
@@ -48,6 +48,10 @@
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_charts_light.png"><img src="docs/screenshots/web_charts_dark.png" alt="Charts" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_repositories_light.png"><img src="docs/screenshots/web_repositories_dark.png" alt="Repositories" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_history_light.png"><img src="docs/screenshots/web_history_dark.png" alt="History" width="92%"></picture></p>
+
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_about_light.png"><img src="docs/screenshots/web_about_dark.png" alt="About" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_help_light.png"><img src="docs/screenshots/web_help_dark.png" alt="Help, searchable and offline" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_basic_light.png"><img src="docs/screenshots/web_settings_basic_dark.png" alt="Settings · Basic: plan, quotas and discovery" width="92%"></picture></p>
 
 <details><summary><b>Settings, sub-tab by sub-tab</b></summary>
 
@@ -101,10 +105,22 @@ Each picture follows the light or dark theme of your GitHub page.
 - **Eight languages** (en, es, de, fr, it, ja, zh, pt) with English as the base; switch in Settings.
 - **Outputs for dashboards**: `ci_red.json`, a Prometheus endpoint and a JSON source for Grafana, with an importable Grafana dashboard.
 - **Batch tools**: plan and dispatch many builds at once; nothing is fired without `--go`.
+- **About and Help in the page**: the **i** button shows the version, the edition, the links, the files, the health and a button that copies the information for support; the **?** button (or the key `?`) opens the whole documentation, searchable and in your language, with no Internet. The console has `--about` and `--help-topics`, and a tab-by-tab interactive terminal application (optional `textual`).
+- **Notice of a newer version**: a discreet badge when a newer release is published; it only reads the public releases page once a day, never installs anything and can be switched off (always off when air-gapped).
+- **Quotas for every account**: plan, billable minutes (public repositories cost none), allowance of the API read from GitHub's headers, concurrency and jobs near the 6-hour limit; the figures are in an editable file.
 
 ## Architecture
 
 <p align="center"><img src="images/architecture.svg" alt="Architecture" width="100%"></p>
+
+## Start here: which edition?
+
+| If you want... | Start | Port |
+|---|---|---|
+| to watch what runs and what failed, nothing more (**start here**) | `MONITOR_LITE_GITHUB_ACTIONS` | 8766 |
+| the whole account watched for you: alerts, releases, signing, readiness, analytics | `MONITOR_GITHUB_ACTIONS` (with the [sentinel](monitor/docs/SENTINEL.md)) | 8765 |
+
+The console window says which one is running, in its title and in its first line. Not sure yet? `python actions_monitor.py --demo` opens the page with invented data, and `--doctor` checks your installation. [Your first five minutes](monitor/docs/FIRST_STEPS.md)
 
 ## Quick start
 
@@ -193,6 +209,12 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
     ├── analytics.py lint_workflows.py   durations, flaky, workflow linter
     ├── notifiers.py ai_actions.py       notifications, AI closed list
     ├── tui.py migrate_state.py          terminal view, state migration
+    ├── about.py  helpdocs.py            About and Help panels
+    ├── quota.py  quotas.json            plan, minutes and quotas
+    ├── modes.py  updatecheck.py         working modes, update notice
+    ├── doctor.py  demo_mode.py          --doctor and --demo
+    ├── discovery.py  banner.py          discovery, edition banner
+    ├── tui_textual.py                   interactive terminal
     ├── i18n.py locales/                 eight languages
     ├── toolconfig.py workspace.py       settings and clones
     ├── tests/                           offline tests
@@ -213,6 +235,10 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/CONSOLE_TOOLS.md`](monitor/docs/CONSOLE_TOOLS.md): the workflow linter and the terminal view
 - [`monitor/docs/DEPLOYMENT.md`](monitor/docs/DEPLOYMENT.md): running it as a service, behind a proxy, permissions
 - [`monitor/QUICKSTART_en.txt`](monitor/QUICKSTART_en.txt): first steps, in eight languages
+- [`monitor/docs/FIRST_STEPS.md`](monitor/docs/FIRST_STEPS.md): your first five minutes
+- [`monitor/docs/SENTINEL.md`](monitor/docs/SENTINEL.md): the sentinel and its checks A1-A13
+- [`monitor/docs/QUOTAS.md`](monitor/docs/QUOTAS.md): quotas and plans of GitHub
+- [`monitor/docs/MODES.md`](monitor/docs/MODES.md): working modes: normal, fast and turbo
 
 ## Contributing
 

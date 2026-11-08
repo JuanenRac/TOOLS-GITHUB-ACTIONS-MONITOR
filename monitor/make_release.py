@@ -49,7 +49,7 @@ LANGS = ("en", "es", "de", "fr", "it", "ja", "zh", "pt")
 BRAND = "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>"
 LICENSE_LINE = "GPL-3.0-or-later"
 LEGAL = ("LICENSE", "NOTICE", "AUTHORS")
-DATA_JSON = ("targets.example.json", "ecosystems.example.json", "profiles.example.json")   # only the neutral examples travel: your own files stay outside the package
+DATA_JSON = ("targets.example.json", "ecosystems.example.json", "profiles.example.json", "quotas.json")   # only the neutral examples travel: your own files stay outside the package
 REQUIRED_MEMBERS = ("i18n.py", "toolconfig.py", "launcher_msg.py", "LICENSE", "NOTICE", "AUTHORS", "README.txt", "targets.example.json", "ecosystems.example.json",
                     *[f"locales/{l}.json" for l in LANGS], *[f"README_{l}.txt" for l in LANGS], *[f"QUICKSTART_{l}.txt" for l in LANGS], "gha_dispatch_all.py", "sentinel_local.py", "actions_monitor.py", "actions_monitor.html", "CHANGELOG.md",
                     "tool_version.py", "read_report.py", "platform_compat.py", "surface.py", "readiness.py", "profiles.example.json", "export_status.py", "webhook.py", "monitor_link.py", "release_notes.py",

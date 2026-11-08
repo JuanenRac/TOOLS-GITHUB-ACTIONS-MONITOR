@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GitHub Actions モニター + センチネル（バージョン 1.6.2）
+GitHub Actions モニター + センチネル（バージョン 1.6.3）
 ========================================================
 必要なもの: Python 3.11 以上と、ログイン済みの GitHub CLI（`gh`）（gh auth login）。それ以外は不要です。中核はパッケージを必要とせず、ターミナル表示(tui.py)だけが任意のパッケージ rich を使います。
 初めて使うときの手順: QUICKSTART_ja.txt。
@@ -75,3 +75,7 @@ GitHub Actions モニター + センチネル（バージョン 1.6.2）
   ページ、コマンドライン、イベント、レポートが 8 言語に対応。言語セレクター。エコシステム、ターゲット、GitHub アカウントをデータ化（github_owner, ecosystems_file,
   targets_file）。任意のワークスペースと、正直な縮小モード。すべてのファイルに著作権表示と GPL-3.0-or-later。LICENSE, NOTICE, AUTHORS。README と QUICKSTART を 8 言語で提供。
 ライセンス GPL-3.0-or-later（LICENSE と NOTICE を参照）。Copyright (C) 2026 JuanenRac (Electro Hobby 3D)。
+
+ヘルプ、バージョン情報、確認 (1.6.3)
+------------------------------------
+ページにはヘルプボタン（丸い ?）とバージョン情報ボタン（i）があります。コンソールでは --help-topics、--help-search、--about、--doctor を使い、--demo は架空のデータでページを表示します。lite 版は独自のバナーとウィンドウタイトル（LITE、ポート 8766、センチネルなし）で起動し、フル版は COMPLETE、ポート 8765、センチネル有効と表示します。新バージョンのお知らせはオフにできます（設定 > 基本）。

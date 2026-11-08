@@ -148,6 +148,8 @@ def main():
         am.ANALYTICS["store"] = analytics.Store(Path(tempfile.mkdtemp()) / "a.json")
         am.ANALYTICS["summary"] = demo_analytics(runs)
     am.ETAG["cache"] = etagcache.EtagCache(Path(tempfile.mkdtemp()) / "e.json")
+    am.update_info = lambda: {"enabled": True, "newer": True, "latest": "9.9.9", "current": am.TOOL_VERSION, "url": "https://example.invalid/release", "changelog": "https://example.invalid/changelog", "airgapped": False}   # an invented newer version, for the picture of the badge
+    am.LIVE_CONFIG.update({"account": {"plan": "free"}, "session_guard": False})
     server = ThreadingHTTPServer(("127.0.0.1", port), am.Handler)
     print("demo on", port, flush=True)
     try:

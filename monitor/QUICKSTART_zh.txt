@@ -26,3 +26,4 @@ GPL-3.0-or-later - see LICENSE
    作为服务、置于代理之后或在容器中运行,请见 docs/DEPLOYMENT_zho.md。
 8. 只想看自己的运行情况?请改为启动 MONITOR_LITE_GITHUB_ACTIONS(lite 版:无哨兵、简短设置、端口 8766)。见 docs/LITE_zho.md。
 遇到问题？请参阅 README_zh.txt 中的“问题排查”。
+9. 帮助已内置：页面上圆形的 ? 按钮（或 ? 键）可离线打开全部文档；i 按钮显示“关于”并复制支持信息（不含任何密钥）。在控制台：python actions_monitor.py --doctor（检查安装并说明如何修复每个问题）、--demo（用虚构数据的页面，无需 gh）、--about、--help-topics、--help-search 关键词。更多：docs/FIRST_STEPS_zho.md、docs/SENTINEL_zho.md、docs/QUOTAS_zho.md。

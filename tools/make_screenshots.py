@@ -31,12 +31,12 @@ ROOT = Path(__file__).resolve().parent.parent
 MON = ROOT / "monitor"
 OUT = ROOT / "docs" / "screenshots"
 EDGES = (r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe", r"C:\Program Files\Microsoft\Edge\Application\msedge.exe", "/usr/bin/microsoft-edge", "/usr/bin/chromium", "/usr/bin/google-chrome")
-TABS = ("interface", "general", "polling", "cache", "sentinel", "surface", "readiness", "paths", "outputs", "ai", "webhook", "notify", "analytics", "lint", "console")
-WEB = [("now", "tab=now", (1400, 820)), ("sentinel", "tab=sent&open=a2", (1400, 1000)), ("sentinel_queue", "tab=sent&open=a5", (1400, 900)), ("sentinel_analytics", "tab=sent&open=a12,a13", (1400, 1200)),
+TABS = ("interface", "basic", "general", "polling", "cache", "sentinel", "surface", "readiness", "paths", "outputs", "ai", "webhook", "notify", "analytics", "lint", "console")
+WEB = [("about", "tab=now&dlg=about", (1400, 900)), ("help", "tab=cfg&dlg=help&topic=sentinel", (1400, 900)), ("now", "tab=now", (1400, 820)), ("sentinel", "tab=sent&open=a2", (1400, 1000)), ("sentinel_queue", "tab=sent&open=a5", (1400, 900)), ("sentinel_analytics", "tab=sent&open=a12,a13", (1400, 1200)),
        ("charts", "tab=charts", (1400, 820)), ("repositories", "tab=repos", (1400, 820)), ("history", "tab=hist", (1400, 820))] + [(f"settings_{t}", f"tab=cfg&cfgtab={t}", (1400, 820)) for t in TABS]
 
 
-LITE_WEB = [("lite_now", "tab=now", (1400, 820)), ("lite_charts", "tab=charts", (1400, 820)), ("lite_history", "tab=hist", (1400, 820)), ("lite_settings", "tab=cfg&cfgtab=general", (1400, 700))]
+LITE_WEB = [("lite_about", "tab=now&dlg=about", (1400, 900)), ("lite_basic", "tab=cfg&cfgtab=basic", (1400, 900)), ("lite_now", "tab=now", (1400, 820)), ("lite_charts", "tab=charts", (1400, 820)), ("lite_history", "tab=hist", (1400, 820)), ("lite_settings", "tab=cfg&cfgtab=general", (1400, 700))]
 
 
 def edge():
@@ -113,6 +113,9 @@ def console_texts(port, work):
     shutil.copytree(MON / "locales", legacy / "locales", dirs_exist_ok=True)
     for name in ("eventos_monitor.jsonl", "eventos_estado.json", "PARTE_CENTINELA_DIA_2000-01-01.txt"):
         (legacy / name).write_text("{}\n", encoding="utf-8")
+    out["about"] = ("tui.py --about", "py -3 tui.py --about --lang en", run(py + [str(MON / "tui.py"), "--about", "--lang", "en"]))
+    out["help_topics"] = ("tui.py --help-topics", "py -3 tui.py --help-topics --lang en", run(py + [str(MON / "tui.py"), "--help-topics", "--lang", "en"]))
+    out["doctor"] = ("--doctor", "py -3 actions_monitor.py --doctor --lang en", run(py + ["-c", "import sys; sys.path.insert(0, sys.argv[1]); import doctor, i18n; i18n.set_language('en'); print(doctor.text(doctor.run(), i18n.t, 'lite'))", str(MON)]))
     out["migrate_state"] = ("migrate_state.py", "py -3 migrate_state.py --lang en", run(py + [str(legacy / "migrate_state.py"), "--lang", "en"], cwd=legacy))
     catalog = Path(work) / "catalog"
     catalog.mkdir()
@@ -168,7 +171,7 @@ def main():
             for name, query, size in WEB:
                 for theme in ("light", "dark"):
                     if wanted(f"web_{name}"):
-                        shot(f"http://127.0.0.1:{port}/?{query}&theme={theme}&lang=en", str(OUT / f"web_{name}_{theme}.png"), size)
+                        shot(f"http://127.0.0.1:{port}/?{query}&theme={theme}&lang=en&nowizard=1", str(OUT / f"web_{name}_{theme}.png"), size)
                         print("web", name, theme, flush=True)
         if args.web or both:
             for _ in range(60):
@@ -180,7 +183,7 @@ def main():
             for name, query, size in LITE_WEB:
                 for theme in ("light", "dark"):
                     if wanted(f"web_{name}"):
-                        shot(f"http://127.0.0.1:{lite_port}/?{query}&theme={theme}&lang=en", str(OUT / f"web_{name}_{theme}.png"), size)
+                        shot(f"http://127.0.0.1:{lite_port}/?{query}&theme={theme}&lang=en&nowizard=1", str(OUT / f"web_{name}_{theme}.png"), size)
                         print("web", name, theme, flush=True)
         if args.console or both:
             texts = console_texts(port, work)

@@ -26,3 +26,4 @@ INICIO RÁPIDO - Monitor de GitHub Actions + Centinela
    asistente de IA se activan en la pestaña Configuración; para ejecutarlo como servicio, tras un proxy o en un contenedor mira docs/DEPLOYMENT_spa.md.
 8. ¿Solo quieres vigilar tus runs? Arranca MONITOR_LITE_GITHUB_ACTIONS (la edición lite: sin centinela, una Configuración corta, puerto 8766). Mira docs/LITE_spa.md.
 ¿Problemas? Mira «PROBLEMAS» en README_es.txt.
+9. La ayuda viene incluida: el botón redondo ? de la página (o la tecla ?) abre toda la documentación sin conexión; el botón i muestra Acerca de y copia la información para soporte (no lleva ningún secreto). En la consola: python actions_monitor.py --doctor (comprueba tu instalación y dice cómo arreglar cada problema), --demo (la página con datos inventados, sin gh), --about, --help-topics, --help-search PALABRAS. Más: docs/FIRST_STEPS_spa.md, docs/SENTINEL_spa.md, docs/QUOTAS_spa.md.

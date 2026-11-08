@@ -1,12 +1,12 @@
 {
   "repo": "TOOLS-GITHUB-ACTIONS-MONITOR",
   "ecosystem": "monitor",
-  "tagline": "Watches the workflows of every repository you own and tells you, in one page, what is red, what is stuck and what is waiting for you.",
-  "description": "GitHub Actions Monitor is a local program. It asks GitHub, through your own authenticated gh client, for the latest runs of every workflow of your repositories, decides what is really red, raises alerts about security, hygiene and releases, shows everything on a web page served only on your own machine in eight languages, and can export the result as files or metrics for a dashboard. Nothing is written to GitHub unless you ask for it.",
+  "tagline": "Two editions of one local monitor: the lite one shows what runs and what failed, the complete one adds the sentinel.",
+  "description": "GitHub Actions Monitor is a local program with two editions that share one core. The complete edition (port 8765) adds the sentinel with its checks A1 to A13, analytics, the workflow linter, notifications and an optional AI assistant. The lite edition (port 8766) has no sentinel and its own configuration and state files. Both read GitHub through your own gh login with conditional reads, apply one rule for red on main, know the quotas of your plan and answer the web panel, the console and the interactive terminal on 127.0.0.1 only. Outputs are ci_red.json, Prometheus metrics, JSON for Grafana, a health check, notifications and an optional dashboard notice. Nothing is written to GitHub unless you confirm it.",
   "columns": [
-    "WHO USES IT",
+    "INTERFACES",
     "THE MONITOR",
-    "WHAT IT TALKS TO"
+    "INPUTS AND OUTPUTS"
   ],
   "nodes": [
     {
@@ -15,165 +15,202 @@
       "level": "external",
       "title": "A person at the desk",
       "lines": [
-        "the web page on 127.0.0.1 with",
-        "its settings sub-tabs, or the",
-        "command line and terminal view"
+        "the browser, the console window",
+        "or the terminal; the title says",
+        "LITE or COMPLETE"
+      ],
+      "code": [
+        "monitor/MONITOR_GITHUB_ACTIONS.bat",
+        "monitor/MONITOR_LITE_GITHUB_ACTIONS.bat",
+        "monitor/banner.py"
+      ]
+    },
+    {
+      "id": "web",
+      "column": 0,
+      "level": "tested",
+      "title": "Web panel",
+      "lines": [
+        "tabs, Settings with a Basic tab,",
+        "About and Help from the real",
+        "documents, offline, 8 languages"
       ],
       "code": [
         "monitor/actions_monitor.html",
-        "monitor/settings_api.py",
-        "monitor/tui.py"
+        "monitor/about.py",
+        "monitor/helpdocs.py",
+        "monitor/settings_api.py"
       ]
     },
     {
-      "id": "board",
+      "id": "cli",
       "column": 0,
-      "level": "external",
-      "title": "A dashboard or Grafana",
+      "level": "tested",
+      "title": "Console and terminal",
       "lines": [
-        "reads the exported files, the",
-        "metrics or the messages sent",
-        "to a chat or a beacon"
+        "Rich view and --once, Textual app,",
+        "--doctor, --demo, --about,",
+        "--help-topics"
       ],
       "code": [
-        "monitor/outputs.py",
-        "monitor/export_status.py",
-        "monitor/notifiers.py"
+        "monitor/tui.py",
+        "monitor/tui_textual.py",
+        "monitor/doctor.py",
+        "monitor/demo_mode.py"
       ]
     },
     {
-      "id": "poll",
+      "id": "full",
       "column": 1,
       "level": "tested",
-      "title": "Run poller",
+      "title": "Complete edition, port 8765",
       "lines": [
-        "last completed run of every",
-        "workflow on the default branch;",
-        "conditional reads, offline mode"
-      ],
-      "code": [
-        "monitor/actions_monitor.py",
-        "monitor/etagcache.py",
-        "monitor/resilience.py"
-      ]
-    },
-    {
-      "id": "sent",
-      "column": 1,
-      "level": "tested",
-      "title": "Sentinel",
-      "lines": [
-        "alerts, hygiene, releases,",
-        "analytics, workflow linter,",
-        "a plain-language report"
+        "sentinel A1-A13, analytics, linter,",
+        "reports, signing queue; its own",
+        "actions_monitor.json"
       ],
       "code": [
         "monitor/sentinel_local.py",
         "monitor/surface.py",
+        "monitor/readiness.py",
         "monitor/analytics.py",
         "monitor/lint_workflows.py"
       ]
     },
     {
-      "id": "sign",
+      "id": "core",
       "column": 1,
-      "level": "contract",
-      "title": "Signing records",
+      "level": "tested",
+      "title": "Shared core",
       "lines": [
-        "what is built and not yet",
-        "signed, checked against the",
-        "signature you keep"
+        "gh client with ETag, offline mode,",
+        "one rule of red on main, quotas",
+        "of the plan, discovery, updates"
       ],
       "code": [
-        "monitor/signstate.py",
-        "monitor/sigverify.py"
+        "monitor/etagcache.py",
+        "monitor/resilience.py",
+        "monitor/redrule.py",
+        "monitor/quota.py",
+        "monitor/discovery.py",
+        "monitor/updatecheck.py"
       ]
     },
     {
-      "id": "batch",
+      "id": "lite",
       "column": 1,
-      "level": "config",
-      "title": "Batch tools",
+      "level": "contract",
+      "title": "Lite edition, port 8766",
       "lines": [
-        "plan and dispatch many builds",
-        "at once; nothing is fired",
-        "without an explicit --go"
+        "what runs and what failed; no",
+        "sentinel, its own config and",
+        "state files with the suffix _lite"
       ],
       "code": [
-        "monitor/gha_dispatch_all.py"
+        "monitor/MONITOR_LITE_GITHUB_ACTIONS.sh",
+        "monitor/actions_monitor.py::LITE"
       ]
     },
     {
       "id": "gh",
       "column": 2,
       "level": "external",
-      "title": "gh, the GitHub client",
-      "lines": [
-        "your own login; the monitor",
-        "never stores a token"
-      ]
-    },
-    {
-      "id": "api",
-      "column": 2,
-      "level": "external",
       "title": "GitHub",
       "lines": [
-        "runs, alerts, releases,",
-        "pull requests, repositories"
+        "REST and GraphQL through gh or a",
+        "token, headers say the real quota;",
+        "a signed webhook may push events"
+      ],
+      "code": [
+        "monitor/webhook.py",
+        "monitor/quotas.json"
       ]
     },
     {
       "id": "files",
       "column": 2,
-      "level": "config",
-      "title": "Your own files",
+      "level": "contract",
+      "title": "Files and metrics out",
       "lines": [
-        "optional local clones and",
-        "signing records; without them",
-        "it runs in a reduced mode"
+        "ci_red.json (schema 2), /metrics",
+        "ghamon_*, Grafana and dashboard",
+        "JSON, /api/health, reports"
       ],
       "code": [
-        "monitor/workspace.py",
-        "monitor/toolconfig.py"
+        "monitor/ci_red.py",
+        "monitor/outputs.py",
+        "monitor/export_status.py",
+        "monitor/report_history.py"
+      ]
+    },
+    {
+      "id": "notify",
+      "column": 2,
+      "level": "config",
+      "title": "Notices and AI assistant",
+      "lines": [
+        "chat, MQTT, a local HTTP address,",
+        "a dashboard notice; optional AI:",
+        "ollama, anthropic, copilot"
+      ],
+      "code": [
+        "monitor/notifiers.py",
+        ".github/workflows/dashboard-dispatch.yml",
+        "monitor/sentinel_ai.py",
+        "monitor/ai_actions.py"
       ]
     }
   ],
   "edges": [
     {
       "from": "person",
-      "to": "poll",
+      "to": "web",
       "label": "page",
       "level": "tested"
     },
     {
-      "from": "board",
-      "to": "sent",
-      "label": "export",
+      "from": "person",
+      "to": "cli",
+      "label": "keys",
+      "level": "tested"
+    },
+    {
+      "from": "web",
+      "to": "full",
+      "label": "local API",
+      "level": "tested"
+    },
+    {
+      "from": "cli",
+      "to": "lite",
+      "label": "local API",
+      "level": "tested"
+    },
+    {
+      "from": "full",
+      "to": "core",
+      "level": "tested"
+    },
+    {
+      "from": "lite",
+      "to": "core",
+      "level": "tested"
+    },
+    {
+      "from": "core",
+      "to": "gh",
+      "level": "external"
+    },
+    {
+      "from": "full",
+      "to": "files",
+      "label": "writes",
       "level": "contract"
     },
     {
-      "from": "poll",
-      "to": "gh",
-      "label": "run list",
-      "level": "tested"
-    },
-    {
-      "from": "sent",
-      "to": "gh",
-      "label": "alerts",
-      "level": "tested"
-    },
-    {
-      "from": "sign",
-      "to": "files",
-      "label": "records",
-      "level": "config"
-    },
-    {
-      "from": "batch",
-      "to": "api",
-      "label": "dispatch",
+      "from": "full",
+      "to": "notify",
+      "label": "events, text",
       "level": "config"
     }
   ],
@@ -183,5 +220,5 @@
     "config": "off or optional until you set it up",
     "external": "not part of this repository"
   },
-  "footer": "It only reads GitHub by default; every action that writes is off until you turn it on."
+  "footer": "It only reads GitHub by default; every action that writes is off until you turn it on and confirm it."
 }

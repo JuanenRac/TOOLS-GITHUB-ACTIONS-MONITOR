@@ -378,6 +378,84 @@
           }
         },
         {
+          "name": "about.py  helpdocs.py",
+          "desc": {
+            "en": "About and Help panels",
+            "es": "paneles Acerca de y Ayuda",
+            "de": "Über- und Hilfe-Panels",
+            "fr": "panneaux À propos et Aide",
+            "it": "pannelli Informazioni e Guida",
+            "ja": "情報とヘルプのパネル",
+            "zh": "关于与帮助面板",
+            "pt": "painéis Acerca de e Ajuda"
+          }
+        },
+        {
+          "name": "quota.py  quotas.json",
+          "desc": {
+            "en": "plan, minutes and quotas",
+            "es": "plan, minutos y cuotas",
+            "de": "Tarif, Minuten, Kontingente",
+            "fr": "offre, minutes et quotas",
+            "it": "piano, minuti e quote",
+            "ja": "プラン・分数・クォータ",
+            "zh": "套餐、分钟数与配额",
+            "pt": "plano, minutos e quotas"
+          }
+        },
+        {
+          "name": "modes.py  updatecheck.py",
+          "desc": {
+            "en": "working modes, update notice",
+            "es": "modos de trabajo, aviso de versión",
+            "de": "Arbeitsmodi, Versionshinweis",
+            "fr": "modes de travail, avis de version",
+            "it": "modalità di lavoro, avviso di versione",
+            "ja": "動作モード・更新通知",
+            "zh": "工作模式、版本提示",
+            "pt": "modos de trabalho, aviso de versão"
+          }
+        },
+        {
+          "name": "doctor.py  demo_mode.py",
+          "desc": {
+            "en": "--doctor and --demo",
+            "es": "--doctor y --demo",
+            "de": "--doctor und --demo",
+            "fr": "--doctor et --demo",
+            "it": "--doctor e --demo",
+            "ja": "--doctor と --demo",
+            "zh": "--doctor 与 --demo",
+            "pt": "--doctor e --demo"
+          }
+        },
+        {
+          "name": "discovery.py  banner.py",
+          "desc": {
+            "en": "discovery, edition banner",
+            "es": "descubrimiento, banner de edición",
+            "de": "Erkennung, Ausgaben-Banner",
+            "fr": "découverte, bannière d'édition",
+            "it": "rilevamento, banner di edizione",
+            "ja": "検出・版バナー",
+            "zh": "发现、版本横幅",
+            "pt": "descoberta, banner da edição"
+          }
+        },
+        {
+          "name": "tui_textual.py",
+          "desc": {
+            "en": "interactive terminal",
+            "es": "terminal interactivo",
+            "de": "interaktives Terminal",
+            "fr": "terminal interactif",
+            "it": "terminale interattivo",
+            "ja": "対話型ターミナル",
+            "zh": "交互式终端",
+            "pt": "terminal interativo"
+          }
+        },
+        {
           "name": "i18n.py  locales/",
           "desc": {
             "en": "eight languages",

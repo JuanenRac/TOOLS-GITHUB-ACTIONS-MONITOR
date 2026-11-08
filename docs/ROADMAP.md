@@ -7,18 +7,22 @@
 
 Ideas that did not fit in the current version, in no promised order. They are directions, not commitments; an issue or a pull request is the best way to move one forward.
 
-## Next: a version about the first five minutes
+## Done in 1.6.3
 
-Everything a new user should not have to think about. In this order:
+The first five minutes (Settings > Basic, the welcome, `--doctor`, `--demo`), automatic discovery, the one-use token, the lint levels, About and Help, the update notice, the interactive terminal application on Textual, quotas and plans and the guides of the sentinel were done; see the changelog.
 
-- **Zero configuration at the first start**: detect `gh` (installed, logged in, scopes, host) and the account, list the organisations it belongs to and watch what the user can see by default.
-- **First-start wizard** in the page, three steps at most, with a preview of what enters, and the lite edition as the default door ("start here"). Also a basic settings sub-tab placed before the advanced ones: port and opening the browser, theme, density, time format, start tab, sorting and archived / fork / empty / private repositories, the thresholds, the browser notification when something turns red, the tiles to show, restore defaults per tab and export / import of the settings (never secrets).
-- **Doctor** (`--doctor` and a Diagnostics tile): Python, `gh`, session, scopes, quota, network, write permission of the folders, free port, optional Docker and Rich, each failure with the exact command that fixes it, in eight languages; plus an exportable diagnostic file without secrets.
-- **Demo mode** (`--demo`) with invented data and no `gh` or network.
-- **Plain-language errors** (no traceback for the user), progressive disclosure with a "what is this?" help on every setting and tile and a short glossary, launchers that keep the error visible, and an optional (off by default) check for a new release that only reads the public releases page.
-- **Automatic discovery**: compare what `gh` lists with what is watched at every cycle and report a new, a vanished, an archived or an unarchived repository (a stable code, the report, `/metrics` and the optional notifications); suggest creating a group when three or more unclassified repositories share a prefix (never without a confirmation and a backup of the file); tune the hot / cold frequency by the real activity within the quota budget; lifecycle rules for archived, fork, empty and private repositories.
-- A "First five minutes" guide in eight languages with pictures of the wizard.
-- From the external review of 1.6.1: a short chooser in the README and the quick start ("start with Lite"), a one-use session token for the settings and the AI actions, a persistent restart banner that counts the pending settings, a migration block "from 1.5.x to 1.6.x", the lint levels info / warn / error with an allowlist in Settings, tiles for "API paused" and a minimal FinOps tile of the minutes against `minutes_budget`.
+## Next
+
+What 1.6.3 did not reach, and why:
+
+- **Zero configuration for organisations**: listing the organisations of the login and watching what it can see by default needs a real multi-organisation account to be tried against; it is only done for the account of the login.
+- **Reading the billing report against a live account**: the reading of `usageItems` follows the public description of the report and is covered by simulated answers; it has not been tried with a login allowed to see billing.
+- **Per-job systems for the minutes estimate**: the monitor estimates with one assumed system (`quota.default_runner`) because it does not read the labels of every job; reading them for each run costs calls and needs its own budget.
+- **Prices per extra minute, larger runners, storage in use, Codespaces and Packages** are not tracked.
+- **Textual**: the terminal application is covered by Textual's headless pilot in the tests; the editing of every setting (only the basic switches) and the panel of the AI assistant are left for a later version.
+- **Local mirror of artifacts, wider FinOps, self-hosted runners and an OTLP export**: each is a feature of its own (settings, tests, documentation in eight languages, pictures); they were not started so that the rest could be finished well. The multipliers per system are now in `quotas.json`.
+- **The flags of `gh copilot`**: they are checked with `gh copilot -- --help`, which needs the Copilot command line installed; it is not, so the current flags stay as they are and unverified.
+- **A check for a new release that downloads or installs**: never; the monitor only tells.
 
 ## Later
 
@@ -31,17 +35,6 @@ Everything a new user should not have to think about. In this order:
 - **Several accounts in one page**: today each account runs in its own monitor.
 - **FinOps of the minutes**: multipliers per operating system, a breakdown by repository, workflow, branch and author, an alert for an anomaly and for a monthly allowance.
 - **Self-hosted runner status** from the runners API (idle, busy, offline, queue and capacity), and hardware telemetry only through an optional node_exporter-like endpoint.
-
-## Next: an interactive terminal application
-
-The simple Rich view (`tui.py`, with `--once` for scripts) stays. The terminal is asked to reach the level of the web page, so an interactive application on **Textual** is planned as an optional extra (`pip install textual`; without it a clear message with that command). The core keeps needing no package. It reads the same local API of the complete or the lite edition (read only for data) and plans:
-
-- the header tiles with the same states and colours;
-- tabs with keyboard and mouse: Now, Sentinel (alerts, A10, readiness, signing queue with the trust filter), Charts (Unicode bars and sparklines, p50 / p95, queue, flaky), Repositories (sortable table, search, filters), History and Settings;
-- the detail of a repository or run (jobs, steps with times, the link, and the `gh run view` / `rerun` / `act` command to copy);
-- editable Settings with the same sub-tabs, validation and saving through the same API as the page, with the pending-restart notice;
-- language (eight), theme and density; an events centre; the AI panel with the same closed list and confirmation;
-- a help key, documented shortcuts, tests with Textual's pilot and exported SVG screenshots; `--lite` shows only the lite tabs.
 
 ## Ideas that need a decision first
 
