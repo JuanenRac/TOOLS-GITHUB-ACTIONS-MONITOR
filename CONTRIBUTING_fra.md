@@ -12,6 +12,7 @@
 4. **Sûr par défaut** : tout ce qui écrit sur GitHub, lance un programme, ouvre un port réseau ou envoie des données à l'extérieur est désactivé par défaut, a son propre interrupteur dans Réglages > Avancé, demande une confirmation propre et écoute sur `127.0.0.1` sauf si le mode réseau est activé. Une telle fonction vient avec des tests qui prouvent qu'elle refuse sans l'interrupteur, sans la confirmation et sans le jeton, et que rien ne fuit dans un journal.
 5. **Petits pas** : une modification par pull request, avec la ligne correspondante dans `CHANGELOG.md`.
 6. **Images** : modifiez `docs/architecture.json` ou `docs/structure.json` et lancez `python tools/make_architecture.py` / `python tools/make_structure.py` ; ne modifiez jamais le SVG à la main.
+7. **Journal des modifications en huit langues** : chaque nouvelle entrée de `monitor/CHANGELOG.md` reçoit sa traduction dans `monitor/docs/CHANGELOG_<spa|deu|fra|ita|jpn|zho|por>.md` (mêmes versions et sections ; une entrée pas encore traduite garde le texte anglais sous un avis traduit). `python tools/make_help_index.py --check` et la porte de version échouent si une version manque dans une traduction.
 
 ## Rafraîchir un tableau d'état après chaque version
 

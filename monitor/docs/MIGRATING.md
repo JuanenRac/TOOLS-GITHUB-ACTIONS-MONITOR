@@ -57,3 +57,13 @@ Nothing has to be converted. What now behaves differently, on purpose, because a
 - **Network mode**: only IPv4 addresses; the address shown is the one the server listens on; `GET /api/sentinel/parte.txt?save=1` no longer writes (the copy is a POST with the one-use token).
 - The stored GitHub token is no longer put in the environment of the process: only `gh` receives it.
 - The test that unpacks the zip in a clean folder is no longer part of the ordinary suite; `make_release.py` runs it as its own stage.
+
+# From 1.6.5 to 1.6.6
+
+Nothing has to be converted. What now behaves differently, on purpose:
+
+- **Network mode over HTTPS**: the changes made from the page now work; the `Origin` must have the scheme of the session and the port of the monitor. Behind a proxy keep the monitor's port in the address, or the check refuses it.
+- **Network mode**: every setting that the schema marks `secure` can only be changed from the computer itself (before: only `listen.`, `github_token.`, `act.`, `github_actions.`). A script on another computer that changed `webhook.*`, `notify.*` and similar now gets 403 `local_only`.
+- **act**: after Stop the run is free at once; a start right after no longer answers `busy`.
+- New files next to the monitor: `degraded.json` and `degraded_lite.json` (the counters of swallowed failures); they can be deleted at any time.
+- The history of changes (Help > Changelog) is translated: one file `docs/CHANGELOG_<lang>.md` per language.

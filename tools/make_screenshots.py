@@ -30,7 +30,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 MON = ROOT / "monitor"
 OUT = ROOT / "docs" / "screenshots"
-EDGES = (r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe", r"C:\Program Files\Microsoft\Edge\Application\msedge.exe", "/usr/bin/microsoft-edge", "/usr/bin/chromium", "/usr/bin/google-chrome")
+EDGES = (r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe", r"C:\Program Files\Microsoft\Edge\Application\msedge.exe", r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+         r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe", "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge", "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+         "/usr/bin/microsoft-edge", "/usr/bin/chromium", "/usr/bin/google-chrome")
 TABS = ("interface", "basic", "general", "polling", "cache", "sentinel", "surface", "readiness", "paths", "outputs", "ai", "webhook", "notify", "analytics", "lint", "advanced", "console")
 WEB = [("about", "tab=now&dlg=about", (1400, 900)), ("help", "tab=cfg&dlg=help&topic=sentinel", (1400, 900)), ("now", "tab=now", (1400, 820)), ("sentinel", "tab=sent&open=a2", (1400, 1000)), ("sentinel_queue", "tab=sent&open=a5", (1400, 900)), ("sentinel_analytics", "tab=sent&open=a12,a13", (1400, 1200)),
        ("charts", "tab=charts", (1400, 820)), ("repositories", "tab=repos", (1400, 820)), ("history", "tab=hist", (1400, 820))] + [(f"settings_{t}", f"tab=cfg&cfgtab={t}", (1400, 820)) for t in TABS]
@@ -39,14 +41,21 @@ WEB = [("about", "tab=now&dlg=about", (1400, 900)), ("help", "tab=cfg&dlg=help&t
 LITE_WEB = [("lite_about", "tab=now&dlg=about", (1400, 900)), ("lite_basic", "tab=cfg&cfgtab=basic", (1400, 900)), ("lite_now", "tab=now", (1400, 820)), ("lite_charts", "tab=charts", (1400, 820)), ("lite_history", "tab=hist", (1400, 820)), ("lite_settings", "tab=cfg&cfgtab=general", (1400, 700))]
 
 
+FAILED = []      # the pictures that were not made: the exit code says so
+
+
 def edge():
+    """The browser: --browser / MONITOR_BROWSER first, then Edge, Chrome or Chromium in their usual places and on the PATH."""
+    chosen = os.environ.get("MONITOR_BROWSER", "")
+    if chosen and Path(chosen).is_file():
+        return chosen
     for path in EDGES:
         if Path(path).is_file():
             return path
-    found = shutil.which("msedge") or shutil.which("chromium") or shutil.which("google-chrome")
+    found = shutil.which("msedge") or shutil.which("chromium") or shutil.which("google-chrome") or shutil.which("chrome")
     if found:
         return found
-    raise SystemExit("Microsoft Edge (or Chromium) was not found")
+    raise SystemExit("No browser was found: install Microsoft Edge, Chrome or Chromium, or set MONITOR_BROWSER to the full path of its program")
 
 
 def free_port():
@@ -61,8 +70,15 @@ def shot(url, target, size, tries=3):
         profile = tempfile.mkdtemp(prefix="ghamon_edge_")
         Path(target).unlink(missing_ok=True)
         try:
-            subprocess.run([edge(), "--headless=new", f"--user-data-dir={profile}", "--disable-gpu", "--hide-scrollbars", "--virtual-time-budget=9000", f"--window-size={size[0]},{size[1]}",
-                            f"--screenshot={target}", url], capture_output=True, timeout=120)
+            # Popen with its output sent to the null device and an explicit kill on timeout: with capture_output a browser that leaves a helper process alive keeps the pipe open and
+            # subprocess.run waited for ever (or raised after the time limit, which ended the whole script without a word).
+            child = subprocess.Popen([edge(), "--headless=new", f"--user-data-dir={profile}", "--disable-gpu", "--hide-scrollbars", "--virtual-time-budget=9000", f"--window-size={size[0]},{size[1]}",
+                                      f"--screenshot={target}", url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
+            try:
+                child.wait(timeout=60)
+            except subprocess.TimeoutExpired:
+                child.kill()
+                print("(the browser took more than 60 s: ended; the picture is looked for anyway)", flush=True)
         finally:
             shutil.rmtree(profile, ignore_errors=True)
         for _ in range(30):      # Edge may return before the file is complete: wait until it is there and stops growing
@@ -73,6 +89,7 @@ def shot(url, target, size, tries=3):
                 if Path(target).stat().st_size == size_now:
                     return True
     print("FAILED:", target, flush=True)
+    FAILED.append(str(target))
     return False
 
 
@@ -154,6 +171,8 @@ def main():
     args = ap.parse_args()
     both = not (args.web or args.console)
     OUT.mkdir(parents=True, exist_ok=True)
+    FAILED.clear()
+    print("browser:", edge(), "| output:", OUT, flush=True)
     port = free_port()
     demo = subprocess.Popen([sys.executable, "-I", str(ROOT / "tools" / "demo_monitor.py"), str(port)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     work = tempfile.mkdtemp(prefix="ghamon_shots_")
@@ -166,6 +185,9 @@ def main():
                 break
             except OSError:
                 time.sleep(0.5)
+        else:
+            print("The demo monitor did not start on port %d (run `python tools/demo_monitor.py %d` by hand to see why)." % (port, port), flush=True)
+            return 1
         wanted = lambda name: not args.only or name in args.only   # noqa: E731
         if args.web or both:
             for name, query, size in WEB:
@@ -207,6 +229,9 @@ def main():
         demo.terminate()
         lite.terminate()
         shutil.rmtree(work, ignore_errors=True)
+    if FAILED:
+        print("%d picture(s) were not made; take them by hand (see docs/CONTRIBUTING: start --demo, open the page, save one capture per tab)." % len(FAILED), flush=True)
+        return 1
     return 0
 
 

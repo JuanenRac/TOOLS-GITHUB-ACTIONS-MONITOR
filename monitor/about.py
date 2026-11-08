@@ -50,7 +50,7 @@ def support_text(data):
     update = data.get("update") or {}
     lines = [f"GitHub Actions Monitor {data['version']} ({data['edition']})", f"Python {data['python']} ({data['implementation']})", f"System: {data['system']}",
              f"Language: {data.get('language', '')}", f"License: {data['license']}",
-             "Health: " + ", ".join(f"{k}={health[k]}" for k in ("ok", "loaded", "offline", "uptime_seconds") if k in health),
+             "Health: " + ", ".join(f"{k}={health[k]}" for k in ("ok", "loaded", "offline", "uptime_seconds", "degraded") if k in health),
              "Update check: " + ("off" if not update.get("enabled") else f"on, latest {update.get('latest') or 'unknown'}"),
              "Files:"]
     lines += [f"  {name}: {home_free(path)}" for name, path in sorted((data.get("paths") or {}).items())]

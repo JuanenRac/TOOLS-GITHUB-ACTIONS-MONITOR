@@ -57,3 +57,13 @@ Non c'è nulla da convertire. Ciò che ora si comporta in modo diverso, di propo
 - **Modalità rete**: solo indirizzi IPv4; l'indirizzo mostrato è quello su cui il server ascolta; `GET /api/sentinel/parte.txt?save=1` non scrive più (la copia è un POST con il token monouso).
 - Il token GitHub conservato non viene più messo nell'ambiente del processo: lo riceve solo `gh`.
 - Il test che decomprime lo zip in una cartella pulita non fa più parte della batteria ordinaria; `make_release.py` lo esegue come fase a sé.
+
+# Dalla 1.6.5 alla 1.6.6
+
+Non c'è nulla da convertire. Cosa si comporta diversamente, di proposito:
+
+- **Modalità rete su HTTPS**: le modifiche fatte dalla pagina ora funzionano; l'`Origin` deve avere lo schema della sessione e la porta del monitor. Dietro un proxy mantieni la porta del monitor nell'indirizzo, altrimenti il controllo lo rifiuta.
+- **Modalità rete**: ogni impostazione che lo schema contrassegna `secure` si cambia solo dal computer stesso (prima: solo `listen.`, `github_token.`, `act.`, `github_actions.`). Uno script su un altro computer che cambiava `webhook.*`, `notify.*` e simili ora riceve 403 `local_only`.
+- **act**: dopo Stop l'esecuzione è libera subito; un avvio immediato non risponde più `busy`.
+- File nuovi accanto al monitor: `degraded.json` e `degraded_lite.json` (i contatori dei guasti ingoiati); si possono eliminare in qualsiasi momento.
+- Il registro delle modifiche (Aiuto > Registro delle modifiche) è tradotto: un file `docs/CHANGELOG_<lingua>.md` per lingua.

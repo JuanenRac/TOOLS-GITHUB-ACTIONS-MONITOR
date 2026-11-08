@@ -12,6 +12,7 @@
 4. **Safe by default**: anything that writes to GitHub, runs a program, opens a network port or sends data out is off by default, has its own switch in Settings > Advanced, asks for a confirmation of its own and listens on `127.0.0.1` unless the network mode is on. Such a feature comes with tests that prove it refuses without the switch, without the confirmation and without the token, and that nothing leaks to a log.
 5. **Small steps**: one change per pull request, with the matching line in `CHANGELOG.md`.
 6. **Pictures**: edit `docs/architecture.json` or `docs/structure.json` and run `python tools/make_architecture.py` / `python tools/make_structure.py`; never edit the SVG by hand.
+7. **Changelog in eight languages**: every new entry of `monitor/CHANGELOG.md` gets its translation in `monitor/docs/CHANGELOG_<spa|deu|fra|ita|jpn|zho|por>.md` (same versions and sections; an entry not yet translated keeps the English text under a translated notice). `python tools/make_help_index.py --check` and the release gate fail when a version is missing in a translation.
 
 ## Refreshing a status dashboard after each release
 

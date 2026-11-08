@@ -12,6 +12,7 @@
 4. **Seguro por defeito**: tudo o que escreve no GitHub, executa um programa, abre uma porta de rede ou envia dados para fora está desligado por defeito, tem o seu próprio interruptor em Definições > Avançado, pede uma confirmação própria e escuta em `127.0.0.1` salvo se o modo rede estiver ligado. Uma função assim traz testes que provam que recusa sem o interruptor, sem a confirmação e sem o token, e que nada vaza para um registo.
 5. **Passos pequenos**: uma alteração por pull request, com a linha correspondente em `CHANGELOG.md`.
 6. **Imagens**: edite `docs/architecture.json` ou `docs/structure.json` e execute `python tools/make_architecture.py` / `python tools/make_structure.py`; nunca edite o SVG à mão.
+7. **Registo de alterações em oito idiomas**: cada nova entrada de `monitor/CHANGELOG.md` recebe a sua tradução em `monitor/docs/CHANGELOG_<spa|deu|fra|ita|jpn|zho|por>.md` (mesmas versões e secções; uma entrada ainda por traduzir mantém o texto em inglês sob um aviso traduzido). `python tools/make_help_index.py --check` e a verificação de lançamento falham se faltar uma versão numa tradução.
 
 ## Atualizar um painel de estado após cada versão
 

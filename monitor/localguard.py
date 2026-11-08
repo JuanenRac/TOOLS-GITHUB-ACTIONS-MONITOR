@@ -160,12 +160,30 @@ def make_token():
 
 
 def local_request_ok(headers, port):
-    """DNS-rebinding / cross-site guard: Host must be this server and Origin (if any) too."""
+    """DNS-rebinding / cross-site guard: Host must be this server and Origin (if any) too. The Origin must carry the scheme of the session (https when the connection is HTTPS, direct TLS
+    or a proxy with `secure_cookie`; http otherwise) and exactly one of our own host:port pairs; the other scheme, another host or port and a malformed value are refused."""
     allowed_hosts = {f"127.0.0.1:{port}", f"localhost:{port}"} | {f"{h}:{port}" for h in STATE["allowed"]}
     if (headers.get("Host") or "").lower() not in {h.lower() for h in allowed_hosts}:
         return False
     origin = headers.get("Origin")
-    return origin is None or origin.lower() in {f"http://{h.lower()}" for h in allowed_hosts}
+    if origin is None:
+        return True
+    scheme = "https" if STATE["secure"] else "http"
+    return origin.lower() in {f"{scheme}://{h.lower()}" for h in allowed_hosts}
+
+
+def local_only_key(key):
+    """True when changing this setting is an exposure decision: the fixed prefixes and EVERY key that the settings schema marks as `secure`. In network mode these can only be changed
+    from the same computer. The list is read from the schema, so a new secure key is covered without anyone remembering it here."""
+    name = str(key)
+    if name.startswith(LOCAL_ONLY_PREFIXES):
+        return True
+    try:
+        import settings_api
+        meta = settings_api.META.get(name)
+    except ImportError:
+        meta = None
+    return bool(meta and meta.get("secure"))
 
 
 def presented(headers):

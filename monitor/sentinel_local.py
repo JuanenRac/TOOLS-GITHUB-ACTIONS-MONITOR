@@ -20,6 +20,7 @@ alerts_hot_seconds, the rest every alerts_cold_seconds; hygiene every hygiene_se
 hourly budget (budget_per_hour) of REST calls. The last picture is kept in sentinel_cache.json so the tab
 shows something at once after a restart; the daily trend lives in sentinel_history.json (60 days).
 """
+import degraded
 import importlib.util
 import json
 import re
@@ -873,7 +874,8 @@ class Sentinel:
         if time.time() - self.local_cache["at"] > 60:
             try:
                 self.local_cache = {"at": time.time(), "value": signstate.local_records(SIGNED_DIR, sigverify.pinned_keys(GITHUB_DIR, (self.cfg.get("signature_pubkeys") if isinstance(self.cfg.get("signature_pubkeys"), dict) else {})))}
-            except Exception:   # never stop the picture for a local file
+            except Exception as error:   # never stop the picture for a local file
+                degraded.note("sentinel.local", error)
                 self.local_cache = {"at": time.time(), "value": {"signed": {}, "batches": {}}}
         return self.local_cache["value"]
 
@@ -885,7 +887,8 @@ class Sentinel:
         if self.pins_cache["value"] is None or time.time() - self.pins_cache["at"] > cfg["refresh_seconds"]:
             try:
                 value = readiness.read_pins(GITHUB_DIR, repos, lambda r: eco.get(r) or toolconfig.ecosystem_of(r), cfg)
-            except Exception:   # a pin file must never stop the picture
+            except Exception as error:   # a pin file must never stop the picture
+                degraded.note("sentinel.pins", error)
                 value = read_none(cfg)
             self.pins_cache = {"at": time.time(), "value": value}
         return self.pins_cache["value"]
@@ -899,7 +902,8 @@ class Sentinel:
             try:
                 by_repo = lint_workflows.scan_clones(GITHUB_DIR, repos, cfg["rules"], cfg.get("ignore"))
                 value = {"by_repo": by_repo, "summary": lint_workflows.summarize(by_repo), "in_report": cfg["in_report"]}
-            except Exception:   # a workflow file must never stop the picture
+            except Exception as error:   # a workflow file must never stop the picture
+                degraded.note("sentinel.lint", error)
                 value = None
             self.lint_cache = {"at": time.time(), "value": value}
         return self.lint_cache["value"]
@@ -907,7 +911,8 @@ class Sentinel:
     def _export_ci_red(self, snap):
         try:
             ci_red.export(snap, self.cfg, AUDIT_DIR)
-        except Exception:   # an export problem never stops the sentinel
+        except Exception as error:   # an export problem never stops the sentinel
+            degraded.note("sentinel.export", error)
             pass
 
     def error(self, section, message):

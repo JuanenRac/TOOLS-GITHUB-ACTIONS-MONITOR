@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GitHub Actions 监视器 + 哨兵（版本 1.6.5）
+GitHub Actions 监视器 + 哨兵（版本 1.6.6）
 ============================================
 该启动哪一个?(新用户两分钟就能决定)
   完整版  MONITOR_GITHUB_ACTIONS.*       带哨兵的页面(端口 8765):警报、签名队列、分析。有多个仓库时从这里开始。
@@ -87,6 +87,10 @@ GitHub Actions 监视器 + 哨兵（版本 1.6.5）
 帮助、关于与检查 (1.6.4)
 ------------------------
 页面有帮助按钮（圆形 ?）和关于按钮（i）；在控制台使用 --help-topics、--help-search、--about 和 --doctor；--demo 用虚构数据显示页面。精简版以自己的横幅和窗口标题启动（LITE、端口 8766、无哨兵）；完整版显示 COMPLETE、端口 8765、哨兵已启用。新版本提示可以关闭（设置 > 基本）。
+
+1.6.6 新增内容（网络模式与 act 的修复；历史：CHANGELOG.md）
+  HTTPS 下的网络模式可从页面使用（来源遵循会话的协议）；所有标记为安全的设置只能在本机修改；POST /api/access 无需在地址中放令牌即可打开会话；监听所有接口时设置页显示红色横幅；
+  --doctor 与关于面板新增被忽略失败的计数器。act：Stop 会释放运行并关闭管道。更新历史已翻译为八种语言（帮助 > 更新日志）。
 
 1.6.5 新增内容（完整性与安全；历史：CHANGELOG.md）
   批次：绿色 CI 指必需的工作流已通过（dispatch.required_ci）；git fetch 失败会阻止触发；targets.json 不能指定工具文件夹之外的工具，也不能更改 dry_run/ref；finalize 只提供其批次

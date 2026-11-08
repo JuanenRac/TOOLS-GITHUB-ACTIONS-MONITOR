@@ -16,10 +16,10 @@ import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-ORDER = ("python", "gh", "login", "quota", "network", "folder", "port", "docker", "rich", "textual", "targets", "token", "exposure", "risks", "backend")
+ORDER = ("python", "gh", "login", "quota", "network", "folder", "port", "docker", "rich", "textual", "targets", "token", "exposure", "risks", "backend", "degraded")
 FIX = {"python": "https://www.python.org/downloads/", "gh": "winget install --id GitHub.cli   |   brew install gh   |   sudo apt install gh", "login": "gh auth login",
        "quota": "gh api rate_limit", "network": "gh api rate_limit", "folder": "", "port": "python actions_monitor.py --port 8800", "docker": "", "rich": "pip install rich",
-       "textual": "pip install textual", "targets": "python actions_monitor.py --init-catalog", "token": "", "exposure": "", "risks": "", "backend": ""}
+       "textual": "pip install textual", "targets": "python actions_monitor.py --init-catalog", "token": "", "exposure": "", "risks": "", "backend": "", "degraded": ""}
 
 
 def default_runner(args, timeout=20):
@@ -97,6 +97,9 @@ def run(runner=default_runner, folder=HERE, ports=(8765, 8766), python=None, con
     out["exposure"] = ("warn" if network else "ok", ("network " + str(listen.get("host", ""))) if network else "127.0.0.1")
     out["risks"] = risks(config)
     out["backend"] = token_backend(config)
+    import degraded
+    swallowed, origins = degraded.read(folder)
+    out["degraded"] = ("warn" if swallowed else "ok", (f"{swallowed}: " + ", ".join(f"{k} {v}" for k, v in sorted(origins.items(), key=lambda kv: -kv[1])[:5])) if swallowed else "0")
     return [{"id": name, "status": out[name][0], "detail": out[name][1], "fix": FIX[name] if out[name][0] != "ok" else ""} for name in ORDER]
 
 

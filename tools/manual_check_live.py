@@ -10,6 +10,7 @@ written: every step only READS (or sends the test message you ask for) and tells
     python tools/manual_check_live.py runners ORG the self-hosted runners of an organisation
     python tools/manual_check_live.py copilot     the flags of `gh copilot` (needs the Copilot command line installed)
     python tools/manual_check_live.py notify [PORT]   asks a running monitor to send a test message through every channel you enabled
+    python tools/manual_check_live.py tls         how to check direct HTTPS with a real browser and the POST that opens the session
     python tools/manual_check_live.py service     prints how to check the systemd / launchd examples of deploy/
 """
 import json
@@ -61,6 +62,11 @@ def main(argv):
             except Exception as error:   # noqa: BLE001
                 print(name, "failed:", str(error)[:100])
             token = json.load(urllib.request.urlopen(base + "/api/session-token", timeout=10)).get("token", "")
+    elif step == "tls":
+        print(chr(10).join(["Direct HTTPS with a real browser (the unit test already does a same-origin POST against a real TLS server with a certificate it makes; this checks the browser itself):",
+                         "  1. Put a certificate and a key (PEM) in listen.tls_cert_file / listen.tls_key_file, switch listen.network on, restart.",
+                         "  2. Open the https:// address printed in the console, accept the certificate warning once, change a setting and save it: it must answer 200, not 403.",
+                         "  3. From another computer: curl -k -X POST -H 'Content-Type: application/json' -d '{\"token\": \"<access token>\"}' https://HOST:PORT/api/access  must set the cookie."]))
     elif step == "service":
         print("Linux:  systemctl --user status github-actions-monitor   (see deploy/ for the unit)\nmacOS:  launchctl list | grep github-actions-monitor   (see deploy/ for the plist)")
     else:

@@ -396,16 +396,18 @@ class HelpLanguages(unittest.TestCase):
             for lang in ("es", "de", "fr", "it", "ja", "zh", "pt"):
                 self.assertNotEqual(json.dumps(item["sections"][lang]), english, (item["id"], lang))
 
-    def test_the_changelog_has_translated_labels_and_says_the_body_is_english(self):
+    def test_the_changelog_is_translated_and_lists_every_version(self):
         index = {t["id"]: t for t in json.loads((HERE / "docs" / "help_index.json").read_text(encoding="utf-8"))["topics"]}
-        self.assertTrue(index["changelog"]["english_body"])
+        self.assertFalse(index["changelog"].get("english_body"))
         self.assertEqual(index["changelog"]["title"]["es"], "Registro de cambios")
         body = json.dumps(index["changelog"]["sections"]["es"], ensure_ascii=False)
-        self.assertIn("### Añadido", body)
+        self.assertIn("Añadido", body)
         self.assertNotIn("### Added", body)
-        self.assertTrue(helpdocs.topic("changelog", "es")["fallback"])
+        self.assertFalse(helpdocs.topic("changelog", "es")["fallback"])
         self.assertFalse(helpdocs.topic("changelog", "en")["fallback"])
-        self.assertFalse([t for t in helpdocs.topics("de") if t["id"] == "changelog"][0]["translated"])
+        self.assertTrue([t for t in helpdocs.topics("de") if t["id"] == "changelog"][0]["translated"])
+        if make_help_index is not None:
+            self.assertEqual(make_help_index.changelog_problems(), [])
 
     def test_the_notice_is_translated_in_every_language(self):
         seen = set()
@@ -1258,7 +1260,7 @@ class SmallThings(unittest.TestCase):
             self.assertIn("tui_textual.py", head, lang)
 
     def test_the_version(self):
-        self.assertEqual(TOOL_VERSION, "1.6.5")
+        self.assertEqual(TOOL_VERSION, "1.6.6")
         if (ROOT / "electro-hobby-3d.project.json").is_file():          # not inside the zip
             self.assertEqual(json.loads((ROOT / "electro-hobby-3d.project.json").read_text(encoding="utf-8"))["version"], TOOL_VERSION)
         self.assertIn(f"## [{TOOL_VERSION}]", (HERE / "CHANGELOG.md").read_text(encoding="utf-8"))

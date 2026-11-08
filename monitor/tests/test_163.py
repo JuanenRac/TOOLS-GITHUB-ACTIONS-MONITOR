@@ -178,7 +178,7 @@ class HelpIndex(unittest.TestCase):
         self.assertIn("settings_api", text)
         self.assertEqual(helpdocs.console(["zzzzqqqq"], "en", i18n.t)[0], 1)
         self.assertEqual(helpdocs.console(["--search", "webhook"], "en", i18n.t)[0], 0)
-        self.assertTrue(helpdocs.console(["changelog"], "fr", i18n.t)[1].startswith("("))      # says it is shown in English
+        self.assertFalse(helpdocs.console(["changelog"], "fr", i18n.t)[1].startswith("("))      # the history is translated: no "shown in English" notice
 
 
 class AboutData(unittest.TestCase):

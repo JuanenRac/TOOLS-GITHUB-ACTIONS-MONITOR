@@ -7,6 +7,7 @@
   * An artifact is downloaded once; expired artifacts are skipped; names are cleaned to letters, digits and `._-`; the files are written inside the folder only.
   Read only on GitHub's side: the monitor lists the artifacts of a run and downloads them, nothing else.
 """
+import degraded
 import json
 import os
 import re
@@ -106,7 +107,8 @@ def cycle(config, runs, owner, lister, downloader, now=None):
             continue
         try:
             body = lister(f"repos/{owner}/{run['repo']}/actions/runs/{run['id']}/artifacts?per_page=30")
-        except Exception:   # noqa: BLE001 - the list can not be read: the run is tried again in a later cycle
+        except Exception as error:   # noqa: BLE001 - the list can not be read: the run is tried again in a later cycle
+            degraded.note("mirror.list", error)
             continue
         index.setdefault("_seen", {})[str(run["id"])] = int(now)
         for art in (body or {}).get("artifacts") or []:
@@ -125,7 +127,8 @@ def cycle(config, runs, owner, lister, downloader, now=None):
             destination.parent.mkdir(parents=True, exist_ok=True)
             try:
                 downloader(f"repos/{owner}/{run['repo']}/actions/artifacts/{art['id']}/zip", destination)
-            except Exception:   # noqa: BLE001
+            except Exception as error:   # noqa: BLE001
+                degraded.note("mirror.item", error)
                 result["skipped"] += 1
                 continue
             real = destination.stat().st_size if destination.is_file() else 0

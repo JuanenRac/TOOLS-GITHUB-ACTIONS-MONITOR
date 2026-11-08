@@ -23,7 +23,7 @@ LANGS = ("en", "es", "de", "fr", "it", "ja", "zh", "pt")
 SUFFIX = {"en": "", "es": "_spa", "de": "_deu", "fr": "_fra", "it": "_ita", "ja": "_jpn", "zh": "_zho", "pt": "_por"}      # README_spa.md, SETTINGS_spa.md
 SHORT = {lang: "_" + lang for lang in LANGS}                                                                            # QUICKSTART_es.txt, README_es.txt
 #: topics whose BODY exists only in English (the fixed labels are translated): the Help says so with a translated notice instead of mixing languages without saying it
-ENGLISH_BODY = ("changelog",)
+ENGLISH_BODY = ()
 #: every other topic must exist in all of LANGS: `--check` and the tests fail otherwise. A topic listed here is allowed to miss some languages (none today).
 MISSING_ALLOWED = {}
 CHANGELOG_LABELS = {
@@ -108,7 +108,7 @@ def sources():
     names = sorted({p.stem for p in (MON / "docs").glob("*.md") if not re.search(r"_(spa|deu|fra|ita|jpn|zho|por)$", p.stem)})
     for name in names:
         out.append((name.lower(), "guides", {l: MON / "docs" / f"{name}{SUFFIX[l]}.md" for l in LANGS}, False))
-    out += [("roadmap", "project", {l: ROOT / "docs" / f"ROADMAP{SUFFIX[l]}.md" for l in LANGS}, False), ("changelog", "project", {"en": MON / "CHANGELOG.md"}, False),
+    out += [("roadmap", "project", {l: ROOT / "docs" / f"ROADMAP{SUFFIX[l]}.md" for l in LANGS}, False), ("changelog", "project", {"en": MON / "CHANGELOG.md", **{l: MON / "docs" / f"CHANGELOG{SUFFIX[l]}.md" for l in LANGS if l != "en"}}, False),
             ("contributing", "project", {l: ROOT / f"CONTRIBUTING{SUFFIX[l]}.md" for l in LANGS}, False), ("security", "project", {l: ROOT / f"SECURITY{SUFFIX[l]}.md" for l in LANGS}, False),
             ("support", "project", {l: ROOT / f"SUPPORT{SUFFIX[l]}.md" for l in LANGS}, False)]
     return out
@@ -120,6 +120,25 @@ def label_changelog(text, lang):
         if key != "title":
             text = re.sub(rf"^###\s+{key}\s*$", "### " + names[lang], text, flags=re.M)
     return re.sub(r"^#\s+Changelog\s*$", "# " + CHANGELOG_LABELS["title"][lang], text, count=1, flags=re.M)
+
+
+VERSION_RE = re.compile(r"(?m)^## \[([^\]]+)\]")
+
+
+def changelog_problems():
+    """[(lang, version)] of the versions of monitor/CHANGELOG.md (the English source) that a translation lacks, and the versions a translation has that the source does not."""
+    source = (MON / "CHANGELOG.md").read_text(encoding="utf-8")
+    want = VERSION_RE.findall(source)
+    out = []
+    for lang in LANGS:
+        if lang == "en":
+            continue
+        path = MON / "docs" / f"CHANGELOG{SUFFIX[lang]}.md"
+        have = VERSION_RE.findall(path.read_text(encoding="utf-8")) if path.is_file() else []
+        out += [(lang, v) for v in want if v not in have] + [(lang, "+" + v) for v in have if v not in want]
+        if have and have != [v for v in want if v in have]:
+            out.append((lang, "order"))
+    return out
 
 
 def build():
@@ -164,6 +183,10 @@ def render():
 
 def main(argv):
     gaps = missing(build())
+    versions = changelog_problems()
+    if versions:
+        print("HELP_INDEX=FAIL the translated changelog does not list the same versions as monitor/CHANGELOG.md: " + ", ".join(f"{l}:{v}" for l, v in versions))
+        return 1
     want = render()
     have = TARGET.read_text(encoding="utf-8") if TARGET.is_file() else ""
     if gaps:

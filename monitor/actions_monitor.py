@@ -20,6 +20,7 @@ Repositories with something running, a recent push or a failing last run are ref
 cycle ("hot"); the others only every cold_refresh_seconds with fewer runs, so ~130 repositories
 do not use up the GitHub allowance shared with the agents.
 """
+import degraded
 import argparse
 import json
 import os
@@ -620,7 +621,8 @@ def announce_discovery(found, config):
         if not LITE["on"]:
             try:
                 notifiers.notify(config, {"kind": item["code"], "code": item["code"], "level": "info", "repo": item["repo"], "owner": "main", "url": None, "args": {}, "text": text})
-            except Exception:   # noqa: BLE001 - a notification problem never stops the loop
+            except Exception as error:   # noqa: BLE001 - a notification problem never stops the loop
+                degraded.note("notify", error)
                 pass
     del DISCOVERY["events"][:-50]
 
@@ -637,7 +639,8 @@ def announce_link(transition, config):
         if sentinel is not None:
             sentinel.feed._append([event])
         notifiers.notify(config, event)
-    except Exception:   # noqa: BLE001 - never stops the loop
+    except Exception as error:   # noqa: BLE001 - never stops the loop
+        degraded.note("loop.step", error)
         pass
 
 
@@ -654,7 +657,8 @@ def quota_watch(config):
             text = i18n.t("evt.quota_" + info["level"], used=used, included=info["included_minutes"], estimate=i18n.t("quota.estimate") if not info["billing"] else "")
             notifiers.notify(config, {"kind": "quota_" + info["level"], "code": "quota_" + info["level"], "level": "warn", "repo": "", "owner": "main", "url": None, "args": {}, "text": text})
             print(text, flush=True)
-    except Exception:   # noqa: BLE001 - a quota calculation never stops the monitor
+    except Exception as error:   # noqa: BLE001 - a quota calculation never stops the monitor
+        degraded.note("quota", error)
         pass
 
 
@@ -703,7 +707,8 @@ def red_rows(data):
     if sentinel is not None:
         try:
             return list(((sentinel.snapshot() or {}).get("a2") or {}).get("red") or [])
-        except Exception:   # noqa: BLE001
+        except Exception as error:   # noqa: BLE001
+            degraded.note("loop.extra", error)
             pass
     runs = data.get("runs") or []
     return redrule.red_workflows({r: [x for x in runs if x["repo"] == r] for r in (data.get("repos") or [])}, None, True)[0]
@@ -721,7 +726,8 @@ def feed_alerts(config, data):
                 import notifiers
                 notifiers.notify(config, {"kind": "ai_alert", "code": "ai_alert", "level": "warn", "repo": alert["repo"], "owner": "main", "url": alert.get("url"), "args": {},
                                           "text": i18n.t("evt.ai_alert", repo=alert["repo"], workflow=alert["workflow"])})
-            except Exception:   # noqa: BLE001
+            except Exception as error:   # noqa: BLE001
+                degraded.note("loop.extra2", error)
                 pass
     return result
 
@@ -769,6 +775,7 @@ def maintain(config, data):
         ANALYTICS["at"] = time.time()
         store.save()
     except Exception as error:   # noqa: BLE001 - analytics never stop the monitor, but a problem is said once
+        degraded.note("analytics", error)
         if not MAINTAIN_WARNED:
             MAINTAIN_WARNED.append(1)
             print("analytics:", repr(error)[:160], flush=True)
@@ -920,6 +927,8 @@ class Handler(BaseHTTPRequestHandler):
         """Network mode only: every request must prove the access token (cookie, header or `?access=` on the first visit, which sets the cookie and goes to the clean address)."""
         if not localguard.STATE["network"] or self.path.split("?")[0] == "/api/webhook":      # the webhook has its own proof (the HMAC of GitHub)
             return True
+        if self.command == "POST" and self.path.split("?")[0] == "/api/access":      # the one-use post that opens the session: it checks the token itself (handle_post)
+            return True
         if not localguard.local_request_ok(self.headers, self.server.server_address[1]):
             self.json_reply({"error": "forbidden"}, 403)
             return False
@@ -942,6 +951,44 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             return False
         return True
+
+    def open_session(self):
+        """POST /api/access {"token": "..."}: the access token travels in the body, so it never sits in an address bar, a history or a log. Same checks as every other request (Host, Origin,
+        lock-out of an address after too many wrong tokens, constant-time comparison); on success the cookie of the session is set. Without the network mode there is nothing to open."""
+        if not localguard.STATE["network"]:
+            self.json_reply({"ok": False, "error": "not_network"}, 404)
+            return
+        if not localguard.local_request_ok(self.headers, self.server.server_address[1]):
+            self.json_reply({"error": "forbidden"}, 403)
+            return
+        peer = str(self.client_address[0])
+        if localguard.is_locked(peer):
+            self.json_reply({"error": "locked"}, 429)
+            return
+        try:
+            size = int(self.headers.get("Content-Length") or 0)
+            if "application/json" not in (self.headers.get("Content-Type") or "").lower() or not 0 < size <= 512:
+                raise ValueError("shape")
+            body = json.loads(self.rfile.read(size))
+            candidate = body.get("token") if isinstance(body, dict) else None
+            if not isinstance(candidate, str) or not candidate or len(candidate) > 200:
+                raise ValueError("token")
+        except (ValueError, TypeError, OSError):
+            self.json_reply({"ok": False, "error": "request"}, 400)
+            return
+        if not localguard.access_ok({}, candidate):
+            localguard.note_failure(peer, localguard.max_failed(LIVE_CONFIG or DEFAULTS))
+            self.json_reply({"error": "access"}, 401)
+            return
+        body = json.dumps({"ok": True}).encode("utf-8")
+        self.send_response(200)
+        self.send_header("Set-Cookie", localguard.cookie_header(candidate))
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Referrer-Policy", "no-referrer")
+        self.end_headers()
+        self.wfile.write(body)
 
     def this_computer(self):
         """Keys and actions that decide exposure or reach GitHub can only be changed from the same computer while the network mode is on (a 403 otherwise)."""
@@ -974,6 +1021,9 @@ class Handler(BaseHTTPRequestHandler):
         if LITE["on"] and path.startswith(LITE_PATHS):
             self.send_response(404)
             self.end_headers()
+            return
+        if path == "/api/access":      # network mode: open the session with the access token in the BODY (never in the address); the cookie comes back and the token is not repeated
+            self.open_session()
             return
         if path == "/api/hot-only":   # "only hot" switch: local request only, tiny body {"on": true|false}
             if not self.guard():
@@ -1105,7 +1155,7 @@ class Handler(BaseHTTPRequestHandler):
                     return
                 request = json.loads(self.rfile.read(size))
                 changes = request.get("changes") if isinstance(request, dict) else None
-                if localguard.STATE["network"] and not localguard.from_this_computer(self.client_address) and isinstance(changes, dict) and any(str(k).startswith(localguard.LOCAL_ONLY_PREFIXES) for k in changes):
+                if localguard.STATE["network"] and not localguard.from_this_computer(self.client_address) and isinstance(changes, dict) and any(localguard.local_only_key(k) for k in changes):
                     self.json_reply({"ok": False, "errors": {"_": "local_only"}}, 403)
                     return
                 result = settings_api.apply(changes, CONFIG_FILE, lite=LITE["on"])
@@ -1328,7 +1378,7 @@ class Handler(BaseHTTPRequestHandler):
 def health_payload():
     with LOCK:
         loaded = bool(STATE.get("data"))
-    return {"ok": True, "lite": LITE["on"], "version": TOOL_VERSION, "uptime_seconds": int(time.time() - STARTED), "loaded": loaded, "offline": LINK.state()["offline"]}
+    return {"ok": True, "lite": LITE["on"], "version": TOOL_VERSION, "uptime_seconds": int(time.time() - STARTED), "loaded": loaded, "offline": LINK.state()["offline"], "degraded": degraded.snapshot()["total"]}
 
 
 def update_info():
@@ -1559,7 +1609,8 @@ def update_loop():
             if info.get("newer") and not UPDATE_SAID:
                 UPDATE_SAID.append(info["latest"])
                 print(updatecheck.notice(info, i18n.t), flush=True)
-        except Exception:   # noqa: BLE001 - never stops anything
+        except Exception as error:   # noqa: BLE001 - never stops anything
+            degraded.note("update.loop", error)
             pass
         time.sleep(6 * 3600)
 
@@ -1712,6 +1763,7 @@ def main():
     if wanted in ("fast", "turbo"):
         ok, why = MODE.set(wanted, args.mode_minutes if args.mode_minutes is not None else modes.settings(config)["default_minutes"], config)
         print(banner_mode_line(MODE.name, "" if ok else why), flush=True)
+    degraded.attach(HERE / ("degraded_lite.json" if LITE["on"] else "degraded.json"))
     threading.Thread(target=loop, args=(config,), daemon=True).start()
     threading.Thread(target=update_loop, daemon=True).start()
     if not LITE["on"]:

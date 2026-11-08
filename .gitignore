@@ -25,3 +25,7 @@ monitor/config_backups/
 monitor/events_monitor.jsonl
 monitor/events_state.json
 monitor/*.lock
+
+monitor/degraded.json
+monitor/degraded_lite.json
+monitor/update_check*.json

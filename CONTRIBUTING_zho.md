@@ -12,6 +12,7 @@
 4. **默认安全**:任何写入 GitHub、运行程序、开放网络端口或向外发送数据的功能,默认关闭,在设置 > 高级中有自己的开关,要求自己的确认,并且除非开启网络模式否则只监听 `127.0.0.1`。此类功能须附带测试,证明没有开关、没有确认、没有令牌时会拒绝,且不会向日志泄露任何内容。
 5. **小步前进**:每个 pull request 一项更改,并在 `CHANGELOG.md` 加上对应的一行。
 6. **图片**:编辑 `docs/architecture.json` 或 `docs/structure.json`,再运行 `python tools/make_architecture.py` / `python tools/make_structure.py`;不要手工编辑 SVG。
+7. **八种语言的更新日志**:`monitor/CHANGELOG.md` 的每条新条目都要在 `monitor/docs/CHANGELOG_<spa|deu|fra|ita|jpn|zho|por>.md` 中提供翻译(版本和章节相同;尚未翻译的条目在已翻译的提示下保留英文原文)。任何翻译缺少某个版本时,`python tools/make_help_index.py --check` 和发布检查都会失败。
 
 ## 每次发布后刷新状态看板
 

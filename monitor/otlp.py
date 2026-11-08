@@ -7,6 +7,7 @@
   * Each run is sent once (the ids sent are remembered); a failed send is tried again in the next interval and its text is kept for the page (cleaned of anything like a token).
   * One span per run (`gha.run`): trace and span ids come from a hash of the repository and the run id, so a run keeps the same identifier. Metrics: gauges of the figures of the header.
 """
+import degraded
 import hashlib
 import json
 import re
@@ -97,6 +98,7 @@ def export(config, data, version, now=None, post=None):
             _post(cfg["endpoint"] + "/v1/traces", traces(fresh, resource), post)
         _post(cfg["endpoint"] + "/v1/metrics", metrics(data.get("figures") or {}, resource, now), post)
     except Exception as error:   # noqa: BLE001 - a collector that is down is not the monitor's problem
+        degraded.note("otlp.send", error)
         STATE["last_error"] = secretstore.redact(str(error))[:160]
         return {"sent_spans": 0, "sent_metrics": 0, "error": STATE["last_error"]}
     STATE["sent"].update((r.get("repo"), r.get("id")) for r in fresh)

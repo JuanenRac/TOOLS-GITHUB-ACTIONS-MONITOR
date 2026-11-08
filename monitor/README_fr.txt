@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITEUR GITHUB ACTIONS + SENTINELLE (version 1.6.5)
+MONITEUR GITHUB ACTIONS + SENTINELLE (version 1.6.6)
 ====================================================
 LEQUEL LANCER ? (un nouvel utilisateur décide en deux minutes)
   COMPLET   MONITOR_GITHUB_ACTIONS.*       la page avec la sentinelle (port 8765) : alertes, file de signature, analytique. Commencez ici si vous avez plusieurs dépôts.
@@ -89,6 +89,11 @@ LICENCE    GPL-3.0-or-later (voir LICENSE et NOTICE). Copyright (C) 2026 JuanenR
 AIDE, À PROPOS ET VÉRIFICATIONS (1.6.4)
 ---------------------------------------
 La page a un bouton Aide (? rond) et un bouton À propos (i) ; en console : --help-topics, --help-search, --about et --doctor ; --demo montre la page avec des données inventées. L'édition lite démarre avec sa propre bannière et son titre de fenêtre (LITE, port 8766, sans sentinelle) ; la complète indique COMPLETE, port 8765, sentinelle active. L'avis de nouvelle version peut être désactivé (Réglages > Essentiel).
+
+NOUVEAUTÉS DE LA 1.6.6 (corrections du mode réseau et de act ; historique : CHANGELOG.md)
+  Le mode réseau en HTTPS fonctionne depuis la page (l'origine suit le schéma de la session) ; tout réglage marqué sûr ne se change que depuis l'ordinateur lui-même ; POST /api/access ouvre
+  la session sans le jeton dans l'adresse ; barre rouge dans les Réglages s'il écoute sur toutes les interfaces ; compteur d'échecs avalés dans --doctor et À propos. act : Stop libère
+  l'exécution et le tube est fermé. L'historique des modifications est traduit en huit langues (Aide > Journal des modifications).
 
 NOUVEAUTÉS DE LA 1.6.5 (intégrité et sécurité ; historique : CHANGELOG.md)
   Lots : une CI verte signifie que le workflow obligatoire a réussi (dispatch.required_ci), un git fetch en échec arrête le lancement, targets.json ne peut pas nommer un outil hors du dossier

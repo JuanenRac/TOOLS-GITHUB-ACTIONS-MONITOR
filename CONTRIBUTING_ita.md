@@ -12,6 +12,7 @@
 4. **Sicuro per impostazione predefinita**: tutto ciò che scrive su GitHub, esegue un programma, apre una porta di rete o invia dati all'esterno è spento di default, ha un interruttore proprio in Impostazioni > Avanzate, chiede una conferma propria e ascolta su `127.0.0.1` salvo modalità rete attiva. Una funzione così arriva con test che dimostrano che rifiuta senza interruttore, senza conferma e senza token, e che nulla finisce in un log.
 5. **Piccoli passi**: una modifica per pull request, con la riga corrispondente in `CHANGELOG.md`.
 6. **Immagini**: modifica `docs/architecture.json` o `docs/structure.json` ed esegui `python tools/make_architecture.py` / `python tools/make_structure.py`; non modificare mai l'SVG a mano.
+7. **Registro delle modifiche in otto lingue**: ogni nuova voce di `monitor/CHANGELOG.md` riceve la sua traduzione in `monitor/docs/CHANGELOG_<spa|deu|fra|ita|jpn|zho|por>.md` (stesse versioni e sezioni; una voce non ancora tradotta mantiene il testo inglese sotto un avviso tradotto). `python tools/make_help_index.py --check` e il controllo di rilascio falliscono se una versione manca in una traduzione.
 
 ## Aggiornare un pannello di stato dopo ogni versione
 

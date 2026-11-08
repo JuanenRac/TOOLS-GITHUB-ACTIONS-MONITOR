@@ -9,6 +9,33 @@ Version of the tool itself (monitor + sentinel + batch tools), semver of its own
 and is shown as `tool_version` in the sentinel snapshot and by `read_report.py --version`; `make_release.py` refuses to build
 when this file and `tool_version.py` disagree.
 
+## [1.6.6]
+
+Corrections to the network mode and to `act`, the pending items of 1.6.5, and the history of changes in eight languages.
+
+### Added
+
+- A persistent red bar at the top of Settings when the network mode listens on every interface (`listen.host` = `0.0.0.0`), in eight languages. Until now only `--doctor` said it.
+- `POST /api/access` with `{"token": "..."}`: opens the session of the network mode with the access token in the body, so it never sits in an address bar, a history or a log. Same checks as every request (host, origin, lock-out after wrong tokens, constant-time comparison); the cookie comes back `HttpOnly`, `SameSite=Strict` and, over HTTPS, `Secure`. The `?access=` address of 1.6.5 keeps working.
+- A counter of the failures the monitor swallows on purpose (`degraded.py`): a structured line on the console for each one, a count by origin kept in `degraded.json` next to the monitor, the new `--doctor` check `degraded` and a "Swallowed failures" line in the About panel. The behaviour does not change: they still never stop the monitor.
+- The history of changes (Help > Changelog) now has a translation file per language, `docs/CHANGELOG_<lang>.md`, with the same versions and sections as the English source; `tools/make_help_index.py --check` and a test fail when a version of the source is missing in a translation. Entries not yet translated say so, in the language of the reader.
+- Tests for every change of this release (the suite grew from 811 to 843).
+
+### Fixed
+
+- **Network mode over HTTPS was unusable from the page.** The same-origin guard accepted only an `http://` origin, so with direct TLS or an HTTPS proxy (`listen.secure_cookie`) the browser's own `Origin: https://...` was refused and every change (settings, confirmations) answered 403. The guard now builds the allowed origin from the scheme of the session (https or http, never both), compares host and port exactly and refuses a malformed origin. Tested with a real TLS server and a certificate the test makes.
+- `act`: Stop now frees the run, so the next start is no longer `busy` for ever when the process does not end; a worker that returns late never touches a newer run; the output pipe and the timer are closed in every case (normal end, time limit, Stop, unexpected error) and the suite no longer emits `ResourceWarning`.
+- `tools/make_screenshots.py` could end without a word: the browser runs without captured pipes and with a time limit, a missing browser or a demo that does not start is said, `MONITOR_BROWSER` names a browser by hand, and the exit code is 1 when a picture was not made.
+
+### Security
+
+- In network mode every setting that the schema marks `secure` can only be changed from the computer itself, not only the four families listed before (`listen.`, `github_token.`, `act.`, `github_actions.`): also the webhook, the AI actions, notifications, OpenTelemetry, the mirror, runners, outputs and the rest. The list is read from the schema, so a new secure setting is covered without anyone remembering it; a test walks all of them.
+
+### Changed
+
+- The pictures of About, Help, Now, Basic and Advanced in the README and the guides are taken again.
+- `docs/ADVANCED.md` (eight languages): HTTPS with your certificate or behind a proxy, the origin rule, the session opened by POST and the warning bar.
+
 ## [1.6.5]
 
 A release of integrity and security: no large new feature. What cannot be proven is no longer taken as safe.

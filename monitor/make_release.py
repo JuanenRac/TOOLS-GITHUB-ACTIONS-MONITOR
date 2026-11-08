@@ -13,7 +13,7 @@ The gate (nothing is written unless ALL of it passes):
   1. the unit tests pass (python -I -m unittest discover -s tests);
   2. no __pycache__, .pyc, log, cache, history, event or local-configuration file is inside the zip;
   3. actions_monitor.example.json shows EVERY option the sentinel reads (sentinel_local.DEFAULTS) and the targets catalogue is valid;
-  4. CHANGELOG.md (first version heading) and tool_version.py agree;
+  4. CHANGELOG.md (first version heading) and tool_version.py agree, and each translated history (docs/CHANGELOG_<lang>.md) lists the same versions;
   5. every text file has the authorship header (copyright + GPL-3.0-or-later) and every JSON file the _author/_license fields; LICENSE, NOTICE and AUTHORS exist;
   6. nothing private travels (no absolute path of a person, no key folder, no foreign e-mail, no token); the 8 locales have exactly the same keys;
   7. after writing, the zip is opened again, its members re-checked (launchers keep the executable bit) and SHA256SUMS written from the bytes on disk;
@@ -222,6 +222,23 @@ def changelog_version(text):
     return match.group(1) if match else None
 
 
+def changelog_translation_problems(here=HERE):
+    """The translated histories (docs/CHANGELOG_<spa|deu|fra|ita|jpn|zho|por>.md) must list the same versions, in the same order, as CHANGELOG.md."""
+    pattern = re.compile(r"^## \[([^\]]+)\]", re.M)
+    want = pattern.findall((here / "CHANGELOG.md").read_text(encoding="utf-8"))
+    out = []
+    for tail in ("spa", "deu", "fra", "ita", "jpn", "zho", "por"):
+        path = here / "docs" / f"CHANGELOG_{tail}.md"
+        if not path.is_file():
+            out.append(f"docs/CHANGELOG_{tail}.md is missing")
+            continue
+        have = pattern.findall(path.read_text(encoding="utf-8"))
+        if have != want:
+            lacking = [v for v in want if v not in have]
+            out.append(f"docs/CHANGELOG_{tail}.md does not list the versions of CHANGELOG.md" + (f" (missing: {', '.join(lacking[:5])})" if lacking else " (order or extra versions)"))
+    return out
+
+
 def template(here=HERE):
     data = json.loads((here / EXAMPLE).read_text(encoding="utf-8"))
     for key in STATE_KEYS:
@@ -273,6 +290,9 @@ def gate_static():
     top = changelog_version((HERE / "CHANGELOG.md").read_text(encoding="utf-8"))
     if top != tool_version.TOOL_VERSION:
         fail(f"CHANGELOG.md says {top} but tool_version.py says {tool_version.TOOL_VERSION}")
+    problems = changelog_translation_problems()
+    if problems:
+        fail("; ".join(problems))
     return tool_version.TOOL_VERSION
 
 

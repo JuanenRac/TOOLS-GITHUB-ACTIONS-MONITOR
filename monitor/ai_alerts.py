@@ -11,6 +11,7 @@
   * Optional, OFF by default: a hook (`ai_alerts.hook`) that POSTs a NEW real alert (closed list of fields) to an address on THIS computer, at most `max_per_hour` times an hour, so that a script of
     yours can wake an AI session. Nothing goes to an external provider from here, and nothing here runs a command or writes to GitHub.
 """
+import degraded
 import hashlib
 import json
 import os
@@ -199,7 +200,8 @@ def update(config, red_rows, now=None, texts=None, opener=None):
             if alert["class"] == "real" and HOOK.allowed(cfg["hook"]["max_per_hour"], now):
                 try:
                     HOOK.send(cfg["hook"]["url"], alert, now, opener)
-                except Exception:   # noqa: BLE001 - a hook that is down never stops the monitor
+                except Exception as error:   # noqa: BLE001 - a hook that is down never stops the monitor
+                    degraded.note("ai_alerts.hook", error)
                     pass
     return {"opened": opened, "resolved": resolved, "alerts": alerts}
 

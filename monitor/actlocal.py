@@ -19,6 +19,7 @@ import time
 from pathlib import Path
 
 import confirmation
+import degraded
 import secretstore
 
 ENTRY_RE = re.compile(r"^([A-Za-z0-9._-]{1,100}):([A-Za-z0-9._-]{1,80}\.ya?ml):([a-z_]{1,30})$")
@@ -27,7 +28,9 @@ EVENTS = ("push", "pull_request", "workflow_dispatch", "schedule", "release", "p
 MAX_LINES = 2000
 MAX_BYTES = 200_000
 PENDING = confirmation.Pending()
-RUN = {"lock": threading.Lock(), "proc": None, "lines": [], "bytes": 0, "running": False, "exit": None, "plan": None, "started": 0.0}
+#: seconds that Stop waits for the process to end before it frees the run anyway (the late worker is ignored, see `gen`)
+STOP_WAIT = 3.0
+RUN = {"lock": threading.Lock(), "gen": 0, "proc": None, "lines": [], "bytes": 0, "running": False, "exit": None, "plan": None, "started": 0.0}
 
 
 def settings(config):
@@ -180,12 +183,17 @@ def kill_tree(proc, grace=3.0, run=subprocess.run):
 def _worker(item, popen, clock):
     started = clock()
     before = None
+    proc = None
+    timer = None
+    code = 1
+    stopped = threading.Event()
+    gen = item.get("gen")
     try:
         before = docker_snapshot()
         proc = popen(item["argv"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, env=minimal_env(), text=True, encoding="utf-8", errors="replace", cwd=None, **spawn_options())
         with RUN["lock"]:
-            RUN["proc"] = proc
-        stopped = threading.Event()
+            if gen is None or RUN.get("gen") == gen:
+                RUN["proc"] = proc
 
         def expire():
             stopped.set()
@@ -196,14 +204,31 @@ def _worker(item, popen, clock):
         for line in proc.stdout:
             _push(line)
         code = proc.wait()
-        timer.cancel()
-        if stopped.is_set() or RUN.get("stopping"):
+        with RUN["lock"]:
+            asked = RUN.get("stopping") or RUN.get("stopped_gen") == (gen if gen is not None else RUN.get("gen"))
+        if stopped.is_set() or asked:
             clean_containers(before)
     except OSError as error:
         _push(f"({secretstore.redact(str(error))[:120]})")
         code = 127
-    with RUN["lock"]:
-        RUN.update({"running": False, "exit": code, "proc": None, "stopping": False, "finished": clock() - started})
+    except Exception as error:   # noqa: BLE001 - whatever happens, the run is closed below and the process does not stay behind
+        degraded.note("actlocal.worker", error)
+        _push(f"({secretstore.redact(str(error))[:120]})")
+        code = 1
+        if proc is not None:
+            _stop(proc)
+    finally:
+        if timer is not None:
+            timer.cancel()
+        stream = getattr(proc, "stdout", None)
+        if stream is not None and hasattr(stream, "close"):
+            try:
+                stream.close()
+            except (OSError, ValueError):
+                pass
+        with RUN["lock"]:
+            if gen is None or RUN.get("gen") == gen:      # a Stop may have freed this run already and a newer one may be running: it is not ours to close
+                RUN.update({"running": False, "exit": code, "proc": None, "stopping": False, "finished": clock() - started})
 
 
 docker_snapshot = docker_names   # replaced by the tests
@@ -223,6 +248,8 @@ def start(config, plan_id, popen=subprocess.Popen, clock=time.time, threaded=Tru
     with RUN["lock"]:
         if RUN["running"]:
             return {"ok": False, "status": "busy"}
+        RUN["gen"] = RUN.get("gen", 0) + 1
+        item = dict(item, gen=RUN["gen"])
         RUN.update({"running": True, "lines": [], "bytes": 0, "exit": None, "plan": {k: item[k] for k in ("repo", "workflow", "event", "job", "command")}, "started": clock()})
     if threaded:
         threading.Thread(target=_worker, args=(item, popen, clock), daemon=True).start()
@@ -232,14 +259,32 @@ def start(config, plan_id, popen=subprocess.Popen, clock=time.time, threaded=Tru
 
 
 def stop():
-    """Stops the run this module started (and only that one)."""
+    """Stops the run this module started (and only that one). After ending the tree it waits a moment (STOP_WAIT) for the process and then FREES the run (not running, no process, no
+    stopping flag, an exit code), so a worker that never returns cannot leave the next start answering `busy` for ever; that late worker no longer touches the state."""
     with RUN["lock"]:
         proc = RUN["proc"]
-    if proc is None:
-        return {"ok": False, "status": "idle"}
-    with RUN["lock"]:
+        gen = RUN.get("gen")
+        if proc is None:
+            return {"ok": False, "status": "idle"}
         RUN["stopping"] = True
+        RUN["stopped_gen"] = gen
     _stop(proc)
+    deadline = time.time() + STOP_WAIT
+    code = None
+    while True:
+        try:
+            code = proc.poll()
+        except (OSError, AttributeError):
+            code = None
+        if code is not None or time.time() >= deadline:
+            break
+        time.sleep(0.05)
+    with RUN["lock"]:
+        if RUN.get("gen") == gen and RUN["proc"] is proc:
+            if code is None:
+                if RUN["lines"] and RUN["lines"][-1] != "...":
+                    RUN["lines"].append("(stopped)")
+            RUN.update({"running": False, "proc": None, "stopping": False, "exit": code if isinstance(code, int) else 137})
     return {"ok": True, "status": "stopping"}
 
 

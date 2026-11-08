@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GITHUB ACTIONS MONITOR + SENTINEL - 1.6.5
+GITHUB ACTIONS MONITOR + SENTINEL - 1.6.6
 ==========================================
 Choose your language / Elige tu idioma / Sprache wählen / Choisissez votre langue / Scegli la lingua / 言語を選択 / 选择语言 / Escolha o idioma:
 

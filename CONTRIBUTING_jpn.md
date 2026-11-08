@@ -12,6 +12,7 @@
 4. **既定で安全**: GitHub への書き込み、プログラムの実行、ネットワークポートの公開、外部へのデータ送信は、既定でオフ、設定 > 詳細設定に専用スイッチ、独自の確認があり、ネットワークモードがオンでない限り `127.0.0.1` で待ち受けます。そのような機能には、スイッチ・確認・トークンが無いと拒否すること、ログに何も漏れないことを示すテストが付きます。
 5. **小さな一歩**: Pull Request 1件につき変更1つ、対応する行を `CHANGELOG.md` に。
 6. **図**: `docs/architecture.json` か `docs/structure.json` を編集して `python tools/make_architecture.py` / `python tools/make_structure.py` を実行します。SVG を手で編集しないでください。
+7. **8言語の変更履歴**: `monitor/CHANGELOG.md` の新しい項目には、それぞれ `monitor/docs/CHANGELOG_<spa|deu|fra|ita|jpn|zho|por>.md` に翻訳を付けます(同じバージョンと節。未翻訳の項目は翻訳された注記の下に英語の本文を残します)。翻訳にバージョンが欠けていると、`python tools/make_help_index.py --check` とリリースゲートが失敗します。
 
 ## リリースごとのステータスダッシュボード更新
 

@@ -214,7 +214,7 @@ background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 
 .modebox{display:inline-flex;gap:6px;align-items:center;padding:2px 8px;border:1px solid var(--line2);border-radius:9px;background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo)}.modebox select{padding:2px 6px}.modebox.on{border-color:var(--warn);color:var(--warn)}
 .upd{display:inline-flex;gap:6px;align-items:center;padding:2px 10px;border:1px solid var(--warn);color:var(--warn);border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
 .upd:hover{text-decoration:none;filter:brightness(1.15)}
-#netbar{background:var(--bad);color:#fff;padding:6px 18px;font-weight:700}#netbar[hidden]{display:none}
+#netbar{background:var(--bad);color:#fff;padding:6px 18px;font-weight:700}#netbar[hidden]{display:none}#cfg-netwarn{background:var(--bad);color:#fff;padding:8px 14px;margin:0 0 10px;font-weight:700;border-radius:4px}#cfg-netwarn[hidden]{display:none}
 .adv-live h3{margin:.4em 0}.adv-live .inl{margin:4px 0;display:flex;gap:6px;flex-wrap:wrap;align-items:center}.adv-live pre{max-height:240px;overflow:auto;background:var(--card);padding:6px;border-radius:6px}
 #restartbar{display:none;background:var(--warn);color:#fff;padding:6px 18px;font-weight:600}
 .help-cols{display:grid;grid-template-columns:260px minmax(0,1fr);flex:1;min-height:0}
@@ -302,6 +302,7 @@ nav .navhelp{margin-left:auto;align-self:center}
 <div class="tab" id="t-cfg" role="tabpanel" aria-labelledby="n-cfg">
 <section><h2><span data-i18n="ui.cfg_title"></span></h2><div class="body">
 <div id="cfg-restart" role="status"></div>
+<div id="cfg-netwarn" role="alert" hidden></div>
 <div class="cfg-top"><div id="cfg-tabs" role="tablist" aria-orientation="horizontal" data-i18n-aria="ui.cfg_tabs_aria"></div><input id="cfg-search" type="search" autocomplete="off" data-i18n-ph="ui.cfg_search" data-i18n-aria="ui.cfg_search"></div>
 <div id="cfg-panels"><p class="cfg-note" data-i18n="ui.cfg_hint"></p>
 <div id="cfp-interface" role="tabpanel" aria-labelledby="cft-interface" data-tab="interface"><div class="cfg-group"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gear"/></svg><span data-i18n="ui.cfg_g_interface"></span></h3><p class="cfg-note" style="padding:6px 12px 0" data-i18n="ui.cfg_interface_hint"></p><div class="ifrow"><label><span data-i18n="ui.lang_label"></span> <select id="lang" data-i18n-aria="ui.lang_label" data-i18n-title="ui.lang_label"></select></label><button id="theme" type="button" data-i18n-aria="ui.theme_aria"><svg class="ico" aria-hidden="true" focusable="false"><use id="theme-use" href="#i-auto"/></svg><span class="lbl" id="theme-lbl"></span></button><button id="dense" type="button" aria-pressed="false" data-i18n-title="ui.dense_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-rows"/></svg><span class="lbl" id="dense-lbl"></span></button></div></div></div>
@@ -957,7 +958,7 @@ async function openAbout(){
   let html=dl([[T("ui.about_version"),"v"+a.version],[T("ui.about_edition"),T("ui.edition_"+a.edition)],[T("ui.about_author"),a.author],[T("ui.about_license"),a.license],[T("ui.about_python"),a.python+" ("+a.implementation+")"],[T("ui.about_system"),a.system],[T("ui.about_update"),updLine(a.update),true]]);
   html+=`<h3>${esc(T("ui.about_links"))}</h3>`+dl(["repository","releases","changelog","documentation","bridge","issues"].map(k=>[T("ui.about_"+k),aLink(L[k]),true]));
   html+=`<h3>${esc(T("ui.about_paths"))}</h3>`+dl(Object.keys(a.paths||{}).map(k=>[T("ui.path_"+k),a.paths[k]]));
-  html+=`<h3>${esc(T("ui.about_health"))}</h3>`+dl([[T("ui.health_ok"),yn(h.ok)],[T("ui.health_loaded"),yn(h.loaded)],[T("ui.health_offline"),yn(h.offline)],[T("ui.health_uptime"),fmt(h.uptime_seconds||0)]]);
+  html+=`<h3>${esc(T("ui.about_health"))}</h3>`+dl([[T("ui.health_ok"),yn(h.ok)],[T("ui.health_loaded"),yn(h.loaded)],[T("ui.health_offline"),yn(h.offline)],[T("ui.health_uptime"),fmt(h.uptime_seconds||0)],[T("ui.health_degraded"),String(h.degraded||0)]]);
   html+=`<h3>${esc(T("ui.about_credits"))}</h3>`+dl((a.credits||[]).map(c=>[c.name+" ("+c.license+")",T("ui.credit_"+c.id)+" · "+T(c.installed?"ui.about_installed":"ui.about_not_installed")]));
   body.innerHTML=html;
 }
@@ -1013,7 +1014,7 @@ $("wiz-next").addEventListener("click",()=>{if(WIZ.n<3){WIZ.n++;wizDraw()}else w
 $("wiz-back").addEventListener("click",()=>{if(WIZ.n>1){WIZ.n--;wizDraw()}});$("wiz-skip").addEventListener("click",wizDone);
 if(!store.get("am-wizard-done")&&QS.get("nowizard")!=="1"){fetch("/api/welcome",{cache:"no-store"}).then(r=>r.json()).catch(()=>({})).then(j=>{if(j&&j.done){store.set("am-wizard-done","1");return}dlgs.wiz.hidden=false;wizDraw()})}
 /* network mode: a bar on every tab while the monitor answers other computers */
-if(I18N.network&&I18N.network.network){const nb=$("netbar");nb.hidden=false;nb.textContent=T("ui.adv_net_bar")}
+if(I18N.network&&I18N.network.network){const nb=$("netbar");nb.hidden=false;nb.textContent=T("ui.adv_net_bar");if(I18N.network.host==="0.0.0.0"){const nw=$("cfg-netwarn");nw.hidden=false;nw.textContent=T("ui.adv_net_all")}}
 /* the update notice: one quiet read now and then (the server asks GitHub at most once a day) */
 aboutLoad();setInterval(aboutLoad,6*3600*1000);
 /* working modes: normal, fast, turbo (the estimate is shown BEFORE it is switched on; fast and turbo come back to normal by themselves) */

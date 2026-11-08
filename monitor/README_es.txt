@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITOR DE GITHUB ACTIONS + CENTINELA (versión 1.6.5)
+MONITOR DE GITHUB ACTIONS + CENTINELA (versión 1.6.6)
 =====================================================
 ¿CUÁL ARRANCAR? (un usuario nuevo decide en dos minutos)
   COMPLETA  MONITOR_GITHUB_ACTIONS.*       la página con el centinela (puerto 8765): alertas, cola de firma, analítica. Empieza aquí si tienes varios repositorios.
@@ -89,6 +89,11 @@ LICENCIA   GPL-3.0-or-later (ver LICENSE y NOTICE). Copyright (C) 2026 JuanenRac
 AYUDA, ACERCA DE Y COMPROBACIONES (1.6.4)
 -----------------------------------------
 La página tiene un botón de Ayuda (? redondo) y uno de Acerca de (i); en la consola usa --help-topics, --help-search, --about y --doctor; --demo muestra la página con datos inventados. La edición lite arranca con su propio banner y título de ventana (LITE, puerto 8766, sin centinela); la completa dice COMPLETE, puerto 8765, centinela activo. El aviso de versión nueva se puede apagar (Ajustes > Básico).
+
+NOVEDADES DE LA 1.6.6 (correcciones del modo red y de act; historial: CHANGELOG.md)
+  El modo red con HTTPS funciona desde la página (el origen sigue el esquema de la sesión); todo ajuste marcado como seguro solo se cambia desde el propio equipo; POST /api/access abre la
+  sesión sin el token en la dirección; barra roja en Ajustes si escucha en todas las interfaces; contador de fallos tragados en --doctor y Acerca de. act: Stop libera la ejecución y se
+  cierra la tubería. El historial de cambios está traducido a ocho idiomas (Ayuda > Registro de cambios).
 
 NOVEDADES DE LA 1.6.5 (integridad y seguridad; historial: CHANGELOG.md)
   Lotes: CI en verde significa que pasó el workflow obligatorio (dispatch.required_ci), un git fetch fallido detiene el despacho, targets.json no puede nombrar una herramienta fuera de la

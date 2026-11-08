@@ -57,3 +57,13 @@ Rien n'est à convertir. Ce qui se comporte désormais autrement, volontairement
 - **Mode réseau** : adresses IPv4 uniquement ; l'adresse affichée est celle où le serveur écoute ; `GET /api/sentinel/parte.txt?save=1` n'écrit plus (la copie est un POST avec le jeton à usage unique).
 - Le jeton GitHub conservé n'est plus placé dans l'environnement du processus : seul `gh` le reçoit.
 - Le test qui décompresse le zip dans un dossier propre ne fait plus partie de la batterie ordinaire ; `make_release.py` l'exécute comme étape à part.
+
+# De la 1.6.5 à la 1.6.6
+
+Rien à convertir. Ce qui se comporte autrement, volontairement :
+
+- **Mode réseau en HTTPS** : les modifications faites depuis la page fonctionnent maintenant ; l'`Origin` doit porter le schéma de la session et le port du moniteur. Derrière un proxy, gardez le port du moniteur dans l'adresse, sinon le contrôle la refuse.
+- **Mode réseau** : tout réglage que le schéma marque `secure` ne se change que depuis l'ordinateur lui-même (avant : seulement `listen.`, `github_token.`, `act.`, `github_actions.`). Un script sur un autre ordinateur qui changeait `webhook.*`, `notify.*` et similaires reçoit maintenant 403 `local_only`.
+- **act** : après Stop l'exécution est libre aussitôt ; un démarrage immédiat ne répond plus `busy`.
+- Nouveaux fichiers à côté du moniteur : `degraded.json` et `degraded_lite.json` (les compteurs d'échecs avalés) ; on peut les supprimer à tout moment.
+- L'historique des modifications (Aide > Journal des modifications) est traduit : un fichier `docs/CHANGELOG_<langue>.md` par langue.

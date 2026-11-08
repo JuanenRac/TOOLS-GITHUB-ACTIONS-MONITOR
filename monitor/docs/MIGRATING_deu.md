@@ -57,3 +57,13 @@ Es muss nichts umgewandelt werden. Was sich jetzt bewusst anders verhält, weil 
 - **Netzwerkmodus**: nur IPv4-Adressen; die angezeigte Adresse ist die, auf der der Server lauscht; `GET /api/sentinel/parte.txt?save=1` schreibt nicht mehr (die Kopie ist ein POST mit dem Einmal-Token).
 - Das gespeicherte GitHub-Token wird nicht mehr in die Umgebung des Prozesses gelegt: Nur `gh` erhält es.
 - Der Test, der das Zip in einem sauberen Ordner entpackt, gehört nicht mehr zur normalen Testreihe; `make_release.py` führt ihn als eigene Stufe aus.
+
+# Von 1.6.5 auf 1.6.6
+
+Es muss nichts umgewandelt werden. Was sich absichtlich anders verhält:
+
+- **Netzwerkmodus über HTTPS**: Änderungen von der Seite aus funktionieren jetzt; der `Origin` muss das Schema der Sitzung und den Port des Monitors tragen. Hinter einem Proxy den Port des Monitors in der Adresse lassen, sonst lehnt die Prüfung ab.
+- **Netzwerkmodus**: Jede Einstellung, die das Schema als `secure` markiert, kann nur vom Rechner selbst geändert werden (vorher nur `listen.`, `github_token.`, `act.`, `github_actions.`). Ein Skript auf einem anderen Rechner, das `webhook.*`, `notify.*` und Ähnliches änderte, erhält jetzt 403 `local_only`.
+- **act**: Nach Stopp ist der Lauf sofort frei; ein Start direkt danach antwortet nicht mehr `busy`.
+- Neue Dateien neben dem Monitor: `degraded.json` und `degraded_lite.json` (die Zähler verschluckter Fehler); sie können jederzeit gelöscht werden.
+- Das Änderungsprotokoll (Hilfe > Änderungsprotokoll) ist übersetzt: eine Datei `docs/CHANGELOG_<Sprache>.md` je Sprache.

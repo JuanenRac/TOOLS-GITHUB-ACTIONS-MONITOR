@@ -137,7 +137,7 @@ class DocumentsDoNotSendToOldCommands(unittest.TestCase):
             if self.current_lines(path):
                 offenders.append(path.name)
         for path in (HERE / "docs").glob("*.md"):
-            if not path.name.startswith("MIGRATING") and self.current_lines(path):
+            if not path.name.startswith(("MIGRATING", "CHANGELOG")) and self.current_lines(path):   # a history names the old commands on purpose
                 offenders.append("docs/" + path.name)
         self.assertEqual(offenders, [])
 
