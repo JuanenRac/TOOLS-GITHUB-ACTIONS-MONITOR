@@ -13,24 +13,51 @@ import hmac
 import ipaddress
 import secrets
 import socket
+import ssl
+import threading
+import time
 
-LOOPBACK_HOSTS = ("127.0.0.1", "localhost", "[::1]")
-STATE = {"network": False, "host": "127.0.0.1", "token": "", "allowed": set()}
+LOOPBACK_HOSTS = ("127.0.0.1", "localhost")
+STATE = {"network": False, "host": "127.0.0.1", "token": "", "allowed": set(), "secure": False}
 COOKIE = "monitor_access"
 #: keys that can only be written from the same computer while the network mode is on
 LOCAL_ONLY_PREFIXES = ("listen.", "github_token.", "act.", "github_actions.")
 
 
 def host_ok(value):
-    """True for the loopback address, a private (RFC 1918 / unique-local / link-local) address or 0.0.0.0 ("every interface"). A public address is refused."""
+    """True for the loopback address, a private (RFC 1918) or link-local IPv4 address or 0.0.0.0 ("every interface"). A public address is refused, and so is every IPv6 literal: the
+    server is bound with IPv4 only, so an IPv6 address would be accepted by the settings and then never listen where the page says."""
     text = str(value or "").strip()
     if text in ("localhost", "0.0.0.0"):
         return True
     try:
-        address = ipaddress.ip_address(text)
+        address = ipaddress.IPv4Address(text)
     except ValueError:
         return False
     return address.is_loopback or address.is_private or address.is_link_local
+
+
+def display_host(bound):
+    """The address to write in the URL of the page for a server bound to `bound` (server.server_address[0]): the loopback address when it listens on every interface or on
+    this computer's own loopback, else the very address it is bound to (a private address is not reachable as 127.0.0.1)."""
+    text = str(bound or "")
+    return "127.0.0.1" if text in ("", "0.0.0.0", "localhost") else text
+
+
+def tls_settings(config):
+    """{"cert", "key", "secure_cookie"} of the `listen` section: the certificate and the private key (PEM files YOU provide) for HTTPS served directly, and whether the access cookie
+    is marked Secure because an HTTPS proxy sits in front. Empty strings = plain HTTP."""
+    cfg = config.get("listen") if isinstance(config, dict) and isinstance(config.get("listen"), dict) else {}
+    pick = lambda key: cfg.get(key).strip() if isinstance(cfg.get(key), str) and len(cfg.get(key)) <= 500 else ""
+    return {"cert": pick("tls_cert_file"), "key": pick("tls_key_file"), "secure_cookie": cfg.get("secure_cookie") is True}
+
+
+def tls_context(cert, key):
+    """A server-side TLS context (TLS 1.2 or newer) from your certificate and key files. Raises OSError / ssl.SSLError when they cannot be used: the caller then does NOT fall back to HTTP."""
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
+    context.load_cert_chain(certfile=cert, keyfile=key)
+    return context
 
 
 def own_addresses():
@@ -45,9 +72,10 @@ def own_addresses():
     return out
 
 
-def configure(network, host="127.0.0.1", token="", allowed=()):
-    """Sets the mode of the process. Returns the state (the token is never part of it)."""
+def configure(network, host="127.0.0.1", token="", allowed=(), secure=False):
+    """Sets the mode of the process. `secure` = the connection is HTTPS (direct TLS or a proxy in front): the cookie then carries Secure. Returns the state (the token is never part of it)."""
     STATE["network"] = bool(network)
+    STATE["secure"] = bool(network and secure)
     STATE["host"] = host if network else "127.0.0.1"
     STATE["token"] = token if network else ""
     STATE["allowed"] = {str(a).lower() for a in allowed} | (own_addresses() if network and host == "0.0.0.0" else set())
@@ -57,7 +85,74 @@ def configure(network, host="127.0.0.1", token="", allowed=()):
 
 
 def public_state():
-    return {"network": STATE["network"], "host": STATE["host"], "token_required": STATE["network"]}
+    return {"network": STATE["network"], "host": STATE["host"], "token_required": STATE["network"], "secure": STATE["secure"]}
+
+
+def cookie_header(token):
+    """The Set-Cookie value that remembers the access token: HttpOnly, SameSite=Strict and, when the connection is HTTPS, Secure."""
+    return f"{COOKIE}={token}; Path=/; HttpOnly; SameSite=Strict" + ("; Secure" if STATE["secure"] else "")
+
+
+_lock = threading.Lock()
+_failures = {}        # address -> times of its recent wrong tokens
+_locked = {}          # address -> time until which it is refused
+_hits = {}            # (bucket, address) -> times of the recent requests
+LOCKOUT_SECONDS = 300
+FAIL_WINDOW = 60
+
+
+def max_failed(config):
+    """Wrong access tokens from one address, within a minute, before that address is refused for five minutes (`listen.max_failed_attempts`, default 10)."""
+    cfg = config.get("listen") if isinstance(config, dict) and isinstance(config.get("listen"), dict) else {}
+    value = cfg.get("max_failed_attempts")
+    return value if isinstance(value, int) and not isinstance(value, bool) and 3 <= value <= 100 else 10
+
+
+def is_locked(address, now=None):
+    now = time.time() if now is None else now
+    with _lock:
+        until = _locked.get(address, 0)
+        if until and until <= now:
+            _locked.pop(address, None)
+            return False
+        return bool(until)
+
+
+def note_failure(address, limit, now=None):
+    """Counts a wrong token from `address`; returns True when that address is now locked out. The token itself is never stored or logged."""
+    now = time.time() if now is None else now
+    with _lock:
+        recent = [t for t in _failures.get(address, []) if t > now - FAIL_WINDOW] + [now]
+        _failures[address] = recent
+        if len(_failures) > 2000:
+            for key in [k for k, v in _failures.items() if not v or v[-1] < now - FAIL_WINDOW][:1000]:
+                _failures.pop(key, None)
+        if len(recent) >= limit:
+            _locked[address] = now + LOCKOUT_SECONDS
+            _failures.pop(address, None)
+            return True
+        return False
+
+
+def over_rate(bucket, address, per_minute, now=None):
+    """True when `address` already made `per_minute` requests of this kind in the last minute; otherwise counts this one."""
+    now = time.time() if now is None else now
+    key = (bucket, address)
+    with _lock:
+        recent = [t for t in _hits.get(key, []) if t > now - 60]
+        if len(recent) >= per_minute:
+            _hits[key] = recent
+            return True
+        _hits[key] = recent + [now]
+        if len(_hits) > 4000:
+            for k in [k for k, v in _hits.items() if not v or v[-1] < now - 60][:2000]:
+                _hits.pop(k, None)
+        return False
+
+
+def reset_limits():
+    with _lock:
+        _failures.clear(), _locked.clear(), _hits.clear()
 
 
 def make_token():

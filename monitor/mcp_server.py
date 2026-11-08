@@ -70,17 +70,46 @@ def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_g
     raise ValueError("unknown tool")
 
 
+MAX_LINE = 65536     # one JSON message per line; a longer line is refused, not buffered
+INVALID = {"code": -32600, "message": "invalid request"}
+
+
+def error_reply(ident, error):
+    return {"jsonrpc": "2.0", "id": ident if isinstance(ident, (str, int)) and not isinstance(ident, bool) else None, "error": dict(error)}
+
+
+def valid_shape(message):
+    """True when the message is a JSON-RPC request or notification of the shape this server reads: an object whose method is text, whose id (if any) is text or a whole number and whose
+    params (if any) is an object - and, for tools/call, whose name is text and whose arguments (if any) is an object."""
+    if not isinstance(message, dict) or not isinstance(message.get("method"), str):
+        return False
+    ident = message.get("id")
+    if "id" in message and ident is not None and (isinstance(ident, bool) or not isinstance(ident, (str, int))):
+        return False
+    params = message.get("params")
+    if params is not None and not isinstance(params, dict):
+        return False
+    if message["method"] == "tools/call":
+        arguments = (params or {}).get("arguments")
+        if not isinstance((params or {}).get("name"), str) or (arguments is not None and not isinstance(arguments, dict)):
+            return False
+    return True
+
+
 def handle(message, config, allow_ack=False, **kwargs):
-    """The answer to one JSON-RPC message, or None for a notification."""
+    """The answer to one JSON-RPC message, or None for a notification. A message that is not shaped as expected gets an "invalid request" error, never an exception."""
+    if not valid_shape(message):
+        return error_reply(message.get("id") if isinstance(message, dict) else None, INVALID)
     method, ident = message.get("method"), message.get("id")
     if method == "initialize":
-        result = {"protocolVersion": (message.get("params") or {}).get("protocolVersion", "2024-11-05"), "capabilities": {"tools": {}}, "serverInfo": {"name": "github-actions-monitor", "version": TOOL_VERSION}}
+        version = (message.get("params") or {}).get("protocolVersion", "2024-11-05")
+        result = {"protocolVersion": version if isinstance(version, str) and len(version) <= 20 else "2024-11-05", "capabilities": {"tools": {}}, "serverInfo": {"name": "github-actions-monitor", "version": TOOL_VERSION}}
     elif method == "tools/list":
         result = {"tools": [t for t in TOOLS if allow_ack or t["name"] != "ack_alert"]}
     elif method == "tools/call":
         params = message.get("params") or {}
         try:
-            text = call(str(params.get("name")), params.get("arguments") or {}, config, allow_ack, **kwargs)
+            text = call(params["name"], params.get("arguments") or {}, config, allow_ack, **kwargs)
             result = {"content": [{"type": "text", "text": text}]}
         except (ValueError, OSError, subprocess.SubprocessError) as error:
             result = {"content": [{"type": "text", "text": ai_alerts.redact(str(error))[:300]}], "isError": True}
@@ -93,18 +122,37 @@ def handle(message, config, allow_ack=False, **kwargs):
     return None if ident is None else {"jsonrpc": "2.0", "id": ident, "result": result}
 
 
-def main(argv=None):
+def serve_line(line, config, allow_ack=False, **kwargs):
+    """The reply (a dict) to one input line, or None. Whatever happens inside, the loop of the server goes on: a bad line is an error reply for that line only."""
+    try:
+        message = json.loads(line)
+    except ValueError:
+        return None      # text that is not JSON is noise on the line, not a request: it is skipped as it always was
+    try:
+        return handle(message, config, allow_ack, **kwargs)
+    except Exception:      # a defect in one tool never ends the server
+        return error_reply(message.get("id") if isinstance(message, dict) else None, {"code": -32603, "message": "internal error"})
+
+
+def main(argv=None, stdin=None, stdout=None):
     argv = sys.argv[1:] if argv is None else argv
+    stdin, stdout = stdin or sys.stdin, stdout or sys.stdout
     config = toolconfig.raw_config()
-    for line in sys.stdin:
-        try:
-            message = json.loads(line)
-        except ValueError:
+    while True:
+        line = stdin.readline(MAX_LINE + 1)
+        if not line:
+            break
+        if len(line) > MAX_LINE and not line.endswith("\n"):        # too long: skip the rest of the line without keeping it
+            while line and not line.endswith("\n"):
+                line = stdin.readline(MAX_LINE)
+            answer = error_reply(None, {"code": -32600, "message": "request too large"})
+        elif not line.strip():
             continue
-        answer = handle(message, config, "--allow-ack" in argv) if isinstance(message, dict) else None
+        else:
+            answer = serve_line(line, config, "--allow-ack" in argv)
         if answer is not None:
-            sys.stdout.write(json.dumps(answer) + "\n")
-            sys.stdout.flush()
+            stdout.write(json.dumps(answer) + "\n")
+            stdout.flush()
     return 0
 
 

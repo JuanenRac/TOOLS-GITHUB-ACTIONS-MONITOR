@@ -75,3 +75,7 @@ workflows de un repositorio a la vez hasta que terminan. De un panel de webhooks
 ## La cola de firma por confianza
 
 Cada fila de la cola tiene un `trust`: `verified` (la firma se comprobó con la clave pública), `unknown` (el formato no se puede comprobar aquí: nunca se adivina) o `failed` (se comprobó y no coincide). La pestaña Centinela tiene un filtro Firma con el número de cada tipo y marca las filas (borde verde, gris o rojo). Desde la consola: `py -3 read_report.py --export-sign-queue FILE --sign-trust failed`.
+
+## En el modo red
+
+`/metrics` y `dashboard.json` listan tus repositorios y su estado: no son páginas públicas. Con el modo red activo exigen el token de acceso como cualquier otro endpoint; apaga `outputs.prometheus.enabled` / `outputs.dashboard.enabled` si no quieres que ese inventario sea accesible en absoluto.

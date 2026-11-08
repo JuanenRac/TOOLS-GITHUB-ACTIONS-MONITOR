@@ -700,16 +700,18 @@ class OwnToken(unittest.TestCase):
         store = secretstore.Store("file")
         store.save(TOKEN)
         self.assertFalse(secretstore.apply_to_environment({}, store))
-        self.assertNotIn("GH_TOKEN", os.environ)
+        self.assertEqual(secretstore.gh_kwargs(), {})
         self.assertTrue(secretstore.apply_to_environment({"github_token": {"enabled": True, "store": "file"}}, store))
-        self.assertEqual(os.environ["GH_TOKEN"], TOKEN)
+        self.assertEqual(secretstore.gh_kwargs()["env"]["GH_TOKEN"], TOKEN, "the gh process gets it")
+        self.assertNotIn("GH_TOKEN", os.environ, "this process (and so every other child) does not")
         secretstore.clear_environment()
-        self.assertNotIn("GH_TOKEN", os.environ)
+        self.assertEqual(secretstore.gh_kwargs(), {})
 
     def test_a_token_of_the_user_is_never_removed(self):
         os.environ["GH_TOKEN"] = "mine"
         secretstore.clear_environment()
         self.assertEqual(os.environ["GH_TOKEN"], "mine")
+        self.assertEqual(secretstore.gh_kwargs(), {}, "a token of the user is his own: the monitor adds nothing")
         os.environ.pop("GH_TOKEN")
 
     def test_redact_removes_the_token_and_anything_that_looks_like_one(self):
@@ -722,7 +724,8 @@ class OwnToken(unittest.TestCase):
         with LiveServer(cfg) as server:
             status, answer = server.sensitive("/api/github-token", {"token": TOKEN})
             self.assertEqual((status, answer["ok"], answer["stored"], answer["weak"]), (200, True, True, True))
-            self.assertEqual(os.environ.get("GH_TOKEN"), TOKEN)
+            self.assertEqual(secretstore.gh_kwargs()["env"]["GH_TOKEN"], TOKEN)
+            self.assertNotIn("GH_TOKEN", os.environ)
             everything = ""
             for path in ("/api/github-token", "/api/advanced", "/api/about", "/api/settings", "/api/health", "/api/data", "/metrics"):
                 everything += json.dumps(server.call(path)[1])
@@ -733,7 +736,7 @@ class OwnToken(unittest.TestCase):
             self.assertNotIn(TOKEN[4:], everything)
             self.assertEqual(server.call("/api/github-token", {"action": "delete"})[0], 403, "deleting needs the one-use token too")
             status, answer = server.sensitive("/api/github-token", {"action": "delete"})
-            self.assertEqual((answer["stored"], os.environ.get("GH_TOKEN")), (False, None))
+            self.assertEqual((answer["stored"], secretstore.gh_kwargs()), (False, {}))
             self.assertEqual(secretstore.Store("file").load(), "")
 
     def test_it_is_refused_when_the_switch_is_off_or_the_token_is_malformed(self):
@@ -1255,7 +1258,7 @@ class SmallThings(unittest.TestCase):
             self.assertIn("tui_textual.py", head, lang)
 
     def test_the_version(self):
-        self.assertEqual(TOOL_VERSION, "1.6.4")
+        self.assertEqual(TOOL_VERSION, "1.6.5")
         if (ROOT / "electro-hobby-3d.project.json").is_file():          # not inside the zip
             self.assertEqual(json.loads((ROOT / "electro-hobby-3d.project.json").read_text(encoding="utf-8"))["version"], TOOL_VERSION)
         self.assertIn(f"## [{TOOL_VERSION}]", (HERE / "CHANGELOG.md").read_text(encoding="utf-8"))

@@ -23,7 +23,9 @@ do not use up the GitHub allowance shared with the agents.
 import argparse
 import json
 import os
+import random
 import re
+import ssl
 import subprocess
 import sys
 import threading
@@ -43,6 +45,7 @@ import modes
 import platform_compat
 import redrule
 import resilience
+import secretstore
 import toolconfig
 import updatecheck
 from tool_version import AUTHOR, LICENSE_ID, TOOL_VERSION
@@ -73,7 +76,7 @@ DEFAULTS = {
     "report_history_days": 30,   # (before 1.5.0: parte_history_days, still read)
     "sentinel": {"enabled": True},
     "ai": {"provider": "none"},
-    "webhook": {"enabled": False, "secret": ""},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default)
+    "webhook": {"enabled": False, "secret": "", "replay_seconds": 3600, "max_per_minute": 30},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default)
     "cache": {"etag": {"enabled": True, "ttl_hours": 24}},   # conditional reads: a 304 answer costs no quota (etagcache.py)
     "updates": {"check": True},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
     "airgapped": False,            # True: nothing is requested from the network except GitHub's data you asked for; the update check is off
@@ -83,10 +86,11 @@ DEFAULTS = {
     "quota": {"billing_api": False, "warn_percent": 75, "alert_percent": 90, "default_runner": "linux"},
     "session_guard": True,         # the page asks for a one-use token before it changes a setting or confirms an action
     "discovery": {"events": True, "suggest_groups": True, "auto_frequency": False, "hide": []},
-    "listen": {"network": False, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": []},     # OFF: only this computer. On: a private address, with an access token for every request
+    "listen": {"network": False, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "tls_cert_file": "", "tls_key_file": "", "secure_cookie": False, "max_failed_attempts": 10},     # OFF: only this computer. On: a private address, with an access token for every request
     "github_token": {"enabled": False, "store": "auto"},       # OFF: the monitor uses your own `gh login`. On: a token kept in the store of the system (secretstore.py)
     "github_actions": {"enabled": False, "allowed": ["rerun_failed", "cancel"], "merge_method": "squash"},      # OFF: actions on GitHub, each one confirmed on its own (ghactions.py)
-    "act": {"enabled": False, "allowed": [], "timeout_seconds": 900},         # OFF: run a workflow here with `act`, each run confirmed on its own (actlocal.py)
+    "act": {"enabled": False, "allowed": [], "timeout_seconds": 900, "allow_symlinks": False},
+    "dispatch": {"required_ci": ["ci.yml"]},                                 # the workflow files that must have passed on a commit before a batch is fired (gha_dispatch_all.py)         # OFF: run a workflow here with `act`, each run confirmed on its own (actlocal.py)
     "mirror": {"enabled": False, "folder": "", "max_mb": 500, "keep_days": 14, "max_per_cycle": 3},     # OFF: a local copy of the artifacts of the runs (mirror.py)
     "runners": {"enabled": False, "scope": "owner"},                         # OFF: the self-hosted runners of the account (runners.py)
     "otlp": {"enabled": False, "endpoint": "", "interval_seconds": 60},       # OFF: OpenTelemetry export to a collector you name (otlp.py)
@@ -204,10 +208,10 @@ def gh(*args, timeout=40, retries=2):
     last = ""
     for attempt in range(retries + 1):
         try:
-            result = subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8", timeout=timeout)
+            result = subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8", timeout=timeout, **secretstore.gh_kwargs())
         except subprocess.TimeoutExpired:
             last = "timeout"
-            time.sleep(2 * (attempt + 1))
+            time.sleep(resilience.backoff(attempt))
             continue
         if result.returncode == 0:
             return json.loads(result.stdout) if result.stdout.strip() else None
@@ -217,22 +221,25 @@ def gh(*args, timeout=40, retries=2):
         if "404" in last:
             break  # a repository without Actions: retrying does not help
         if attempt < retries:
-            time.sleep(resilience.backoff(attempt) if resilience.is_transient(last) else secondary_wait(last, attempt))
+            time.sleep(resilience.backoff(attempt) if resilience.is_transient(last) else secondary_wait(last, attempt, random.random()))
     raise RuntimeError(last or "gh failed")
 
 
-def secondary_wait(message, attempt):
-    """Seconds to wait after a failed call: a secondary (abuse) limit asks for at least a minute and then backs off; anything else keeps the short wait."""
+def secondary_wait(message, attempt, jitter=0.0):
+    """Seconds to wait after a failed call: a secondary (abuse) limit asks for at least a minute and then backs off exponentially; anything else keeps the short wait. `jitter` (0..1,
+    random.random() in the callers) adds up to 20 % so that parallel readers do not retry in the same second."""
     text = (message or "").lower()
     if "secondary rate limit" in text or "retry-after" in text or "abuse" in text:
-        return min(300, 60 * 2 ** attempt)
-    return 2 * (attempt + 1)
+        base = min(300, 60 * 2 ** attempt)
+    else:
+        base = 2 * (attempt + 1)
+    return base * (1 + 0.2 * max(0.0, min(1.0, jitter)))
 
 
 def run_gh(args, timeout=40):
     """(returncode, stdout, stderr) of one `gh` call with a fixed argument list (no shell)."""
     try:
-        done = subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout)
+        done = subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout, **secretstore.gh_kwargs())
         return done.returncode, done.stdout, done.stderr
     except subprocess.TimeoutExpired:
         return 1, "", "timeout"
@@ -255,7 +262,7 @@ def gh_read(endpoint, retries=2):
             if "404" in last:
                 break
             if attempt < retries:
-                time.sleep(resilience.backoff(attempt) if resilience.is_transient(last) else secondary_wait(last, attempt))
+                time.sleep(resilience.backoff(attempt) if resilience.is_transient(last) else secondary_wait(last, attempt, random.random()))
     raise RuntimeError(last or "gh failed")
 
 
@@ -684,7 +691,7 @@ def read_costs(config, data):
 
 def download_artifact(endpoint, destination):
     """Binary download of one artifact through `gh api` (the answer is a zip, so it is not decoded as text)."""
-    done = subprocess.run(["gh", "api", endpoint], capture_output=True, timeout=300)
+    done = subprocess.run(["gh", "api", endpoint], capture_output=True, timeout=300, **secretstore.gh_kwargs())
     if done.returncode != 0 or not done.stdout:
         raise RuntimeError("download failed")
     Path(destination).write_bytes(done.stdout)
@@ -817,11 +824,30 @@ HOST_RE = re.compile(r"^[A-Za-z0-9.-]{1,100}$")
 class QuietServer(ThreadingHTTPServer):
     """The server of the monitor: a client that disconnects is not an error worth a traceback; any other error is still shown."""
 
+    tls_context = None
+
+    def get_request(self):
+        sock, address = super().get_request()
+        if self.tls_context is not None:
+            sock = self.tls_context.wrap_socket(sock, server_side=True, do_handshake_on_connect=False)
+            sock.settimeout(20)
+        return sock, address
+
     def handle_error(self, request, client_address):
         if isinstance(sys.exc_info()[1], CLIENT_GONE):
             DISCONNECTS[0] += 1
             return
         super().handle_error(request, client_address)
+
+
+def webhook_settle(repo):
+    """After an accepted event: the conditional-read entries of the repository are dropped (the next read is a full one, never a stale 304) and the repository is read again in
+    the next cycle, which reconciles whatever the live event changed."""
+    cache = ETAG.get("cache")
+    if cache is not None:
+        cache.invalidate(repo)
+    if repo in RUN_CACHE:
+        RUN_CACHE[repo]["at"] = 0
 
 
 def github_host():
@@ -899,12 +925,19 @@ class Handler(BaseHTTPRequestHandler):
             return False
         from urllib.parse import parse_qs
         query_token = (parse_qs(self.path.partition("?")[2]).get("access") or [""])[0]
+        peer = str(self.client_address[0])
+        if localguard.is_locked(peer):      # too many wrong tokens from this address: refused for a while, whatever it sends now
+            self.json_reply({"error": "locked"}, 429)
+            return False
         if not localguard.access_ok(self.headers, query_token):
+            localguard.note_failure(peer, localguard.max_failed(LIVE_CONFIG or DEFAULTS))
             self.json_reply({"error": "access"}, 401)
             return False
         if query_token and self.command == "GET" and "text/html" in (self.headers.get("Accept") or "text/html"):
             self.send_response(302)
-            self.send_header("Set-Cookie", f"{localguard.COOKIE}={query_token}; Path=/; HttpOnly; SameSite=Strict")
+            self.send_header("Set-Cookie", localguard.cookie_header(query_token))
+            self.send_header("Referrer-Policy", "no-referrer")       # the clean address follows at once: the token must not travel on in a Referer header
+            self.send_header("Cache-Control", "no-store")
             self.send_header("Location", self.path.split("?")[0])
             self.end_headers()
             return False
@@ -957,6 +990,9 @@ class Handler(BaseHTTPRequestHandler):
             return
         if path == "/api/webhook":   # off unless configured; no Host check (a tunnel changes it), but every request must carry a valid HMAC
             import webhook
+            if localguard.STATE["network"] and localguard.over_rate("webhook", str(self.client_address[0]), 120):      # one address cannot flood the receiver
+                self.json_reply({"ok": False, "error": "rate"}, 429)
+                return
             try:
                 size = int(self.headers.get("Content-Length") or 0)
                 body = self.rfile.read(size) if 0 <= size <= webhook.MAX_BODY else b"x" * (webhook.MAX_BODY + 1)
@@ -964,8 +1000,8 @@ class Handler(BaseHTTPRequestHandler):
                 record = webhook.parse_event(self.headers.get("X-GitHub-Event"), body) if (code == 200 and repo) else None
                 if record and webhook.live_settings(LIVE_CONFIG or DEFAULTS)["record_events"]:
                     apply_live_event(record, LIVE_CONFIG or DEFAULTS)
-                elif repo and repo in RUN_CACHE:
-                    RUN_CACHE[repo]["at"] = 0   # refreshed in the next cycle
+                if repo:
+                    webhook_settle(repo)
                 self.json_reply(answer, code)
             except Exception:
                 self.json_reply({"ok": False}, 400)
@@ -987,6 +1023,27 @@ class Handler(BaseHTTPRequestHandler):
                 self.json_reply({"ok": ok, "reason": why, **mode_payload()}, 200 if ok else 400)
             except (ValueError, OSError):
                 self.json_reply({"ok": False, "reason": "request"}, 400)
+            return
+        if path == "/api/sentinel/parte/save":      # a copy of the daily report in the audit folder: a POST with the one-use token (a GET never writes)
+            if not self.guard() or not self.token_ok():
+                return
+            sentinel = SENTINEL["obj"]
+            if sentinel is None or LITE["on"]:
+                self.json_reply({"ok": False, "reason": "off"}, 404)
+                return
+            import report_history
+            import sentinel_local
+            try:
+                body = report_history.parte_text(sentinel.snapshot()).encode("utf-8")
+                folder = sentinel_local.AUDIT_DIR
+                if not folder.is_dir():
+                    self.json_reply({"ok": False, "reason": "no_folder"}, 400)
+                    return
+                name = "SENTINEL_REPORT_" + time.strftime("%Y-%m-%d_%H%M") + ".txt"
+                (folder / name).write_bytes(body)
+                self.json_reply({"ok": True, "file": name})
+            except Exception:
+                self.json_reply({"ok": False, "reason": "write"}, 500)
             return
         if path == "/api/discovery/group":      # the user confirmed a suggested group: it is added to the ecosystems file (with a copy of it)
             if not self.guard() or not self.token_ok():
@@ -1120,14 +1177,7 @@ class Handler(BaseHTTPRequestHandler):
                 body = (report_history.parte_markdown(snap) if markdown else report_history.parte_text(snap)).encode("utf-8")
             except Exception as error:
                 body = (i18n.t("mon.sentinel_failed", error=error) + chr(10)).encode("utf-8")
-            if "save=1" in self.path:   # optional copy in the audit folder; never fails the answer
-                try:
-                    import sentinel_local
-                    folder = sentinel_local.AUDIT_DIR
-                    if folder.is_dir():
-                        (folder / ("SENTINEL_REPORT_" + time.strftime("%Y-%m-%d_%H%M") + ".txt")).write_bytes(body)
-                except OSError:
-                    pass
+            # a GET only reads: the copy in the audit folder is a POST of its own (below), with the one-use token
             self.send_response(200)
             self.send_header("Content-Type", ("text/markdown" if markdown else "text/plain") + "; charset=utf-8")
             self.send_header("Content-Disposition", "inline; filename=parte_centinela." + ("md" if markdown else "txt"))
@@ -1669,11 +1719,20 @@ def main():
     server = None
     listen = {"network": False, "host": "127.0.0.1"} if LITE["on"] else localguard.settings_from(config)
     access_token, access_generated = "", False
+    tls_ctx = None
     if listen["network"]:
         access_token = os.environ.get(listen["token_env"], "").strip()
         if len(access_token) < 16:
             access_token, access_generated = localguard.make_token(), True      # a fresh token at each start, shown once in this console and nowhere else
-        localguard.configure(True, listen["host"], access_token, listen["allowed_hosts"])
+        tls = localguard.tls_settings(config)
+        tls_ctx = None
+        if tls["cert"] or tls["key"]:      # HTTPS served directly with YOUR certificate; if it cannot be used the monitor does not start on plain HTTP behind your back
+            try:
+                tls_ctx = localguard.tls_context(tls["cert"], tls["key"])
+            except (OSError, ValueError, ssl.SSLError) as error:
+                print(i18n.t("mon.tls_failed", error=str(error)[:200]))
+                return 1
+        localguard.configure(True, listen["host"], access_token, listen["allowed_hosts"], secure=tls_ctx is not None or tls["secure_cookie"])
         LIVE_CONFIG["session_guard"] = True      # the one-use token of the page is not optional on the network
     for port in range(args.port, args.port + 10):
         try:
@@ -1686,9 +1745,12 @@ def main():
     if server is None:
         print(i18n.t("mon.no_port", port=args.port))
         return 1
-    url = f"http://127.0.0.1:{server.server_address[1]}/"
+    server.tls_context = tls_ctx      # each connection is wrapped in its own thread (get_request), so a client that never finishes the handshake cannot stall the others
+    url = f"{'https' if tls_ctx is not None else 'http'}://{localguard.display_host(server.server_address[0])}:{server.server_address[1]}/"      # from the address the server really listens on
     if listen["network"]:
         print(i18n.t("mon.network_on", host=listen["host"], port=server.server_address[1]), flush=True)
+        if tls_ctx is None and not localguard.STATE["secure"]:
+            print(i18n.t("mon.network_plain"), flush=True)
         if access_generated:
             print(i18n.t("mon.network_token", url=url + "?access=" + access_token), flush=True)      # the only place the token is shown
     if config.get("webhook", {}).get("enabled") is True:

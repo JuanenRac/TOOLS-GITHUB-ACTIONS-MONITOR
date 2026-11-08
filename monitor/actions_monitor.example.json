@@ -224,7 +224,9 @@
     "enabled": false,
     "secret": "",
     "record_events": true,
-    "live_events_keep": 100
+    "live_events_keep": 100,
+    "replay_seconds": 3600,
+    "max_per_minute": 30
   },
   "report_history_days": 30,
   "profiles_file": "profiles.example.json",
@@ -366,7 +368,11 @@
     "network": false,
     "host": "127.0.0.1",
     "token_env": "MONITOR_ACCESS_TOKEN",
-    "allowed_hosts": []
+    "allowed_hosts": [],
+    "tls_cert_file": "",
+    "tls_key_file": "",
+    "secure_cookie": false,
+    "max_failed_attempts": 10
   },
   "github_token": {
     "enabled": false,
@@ -383,7 +389,13 @@
   "act": {
     "enabled": false,
     "allowed": [],
-    "timeout_seconds": 900
+    "timeout_seconds": 900,
+    "allow_symlinks": false
+  },
+  "dispatch": {
+    "required_ci": [
+      "ci.yml"
+    ]
   },
   "mirror": {
     "enabled": false,

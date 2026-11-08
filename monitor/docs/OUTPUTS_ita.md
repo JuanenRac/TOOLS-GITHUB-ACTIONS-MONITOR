@@ -75,3 +75,7 @@ workflow di un repository insieme fino alla loro conclusione. Da una dashboard d
 ## La coda di firma per affidabilità
 
 Ogni riga della coda ha un `trust`: `verified` (firma verificata con la chiave pubblica), `unknown` (il formato qui non si può verificare: mai indovinato) o `failed` (verificata e non corrisponde). La scheda Sentinella ha un filtro Firma con il numero di ciascun tipo e segna le righe (bordo verde, grigio o rosso). Da console: `py -3 read_report.py --export-sign-queue FILE --sign-trust failed`.
+
+## In modalità rete
+
+`/metrics` e `dashboard.json` elencano i tuoi repository e il loro stato: non sono pagine pubbliche. Con la modalità rete attiva richiedono il token di accesso come ogni altro endpoint; spegni `outputs.prometheus.enabled` / `outputs.dashboard.enabled` se non vuoi che quell'inventario sia raggiungibile affatto.

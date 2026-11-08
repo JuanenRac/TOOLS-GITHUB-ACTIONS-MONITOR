@@ -307,7 +307,8 @@ def copilot_chat(cfg, system, user, runner=None):
         raise RuntimeError("forbidden copilot option")
     run = runner or subprocess.run
     try:
-        done = run(args, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=cfg["timeout_seconds"], stdin=subprocess.DEVNULL, shell=False)
+        import secretstore
+        done = run(args, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=cfg["timeout_seconds"], stdin=subprocess.DEVNULL, shell=False, **secretstore.gh_kwargs())
     except subprocess.TimeoutExpired:
         raise RuntimeError(i18n.t("ai.copilot_timeout")) from None
     except OSError as error:

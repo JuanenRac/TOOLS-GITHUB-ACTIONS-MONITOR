@@ -32,7 +32,8 @@ BUILDS = {  # repositories whose release carries files built in Actions (see gha
 
 
 def gh_json(*args):
-    r = subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8", timeout=60)
+    import secretstore
+    r = subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8", timeout=60, **secretstore.gh_kwargs())
     return json.loads(r.stdout) if r.returncode == 0 and r.stdout.strip() else None
 
 

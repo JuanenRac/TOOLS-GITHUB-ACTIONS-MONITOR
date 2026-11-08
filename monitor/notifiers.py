@@ -41,7 +41,7 @@ DEFAULTS = {"enabled": False, "events": list(DEFAULT_EVENTS), "max_per_hour": 20
             }}
 _lock = threading.Lock()
 _sent = []          # timestamps of the messages that left (for max_per_hour)
-STATS = {"sent": 0, "failed": 0}
+STATS = {"sent": 0, "failed": 0, "limited": 0}
 
 
 def settings(config):
@@ -161,16 +161,21 @@ def send_channel(name, cfg, event, opener=None, connect=None):
         return {"channel": name, "ok": False, "reason": "failed"}
 
 
-def allowed_now(limit, now=None):
-    """True while fewer than `limit` messages left in the last hour (and registers one)."""
+def reserve(limit, count, now=None):
+    """Books up to `count` MESSAGES (one per channel) of the `limit` allowed in the last hour, atomically (one lock for the whole booking, so several threads can never go over).
+    Returns how many were granted, 0..count."""
     now = time.time() if now is None else now
     with _lock:
         while _sent and _sent[0] < now - 3600:
             _sent.pop(0)
-        if len(_sent) >= limit:
-            return False
-        _sent.append(now)
-        return True
+        granted = max(0, min(count, limit - len(_sent)))
+        _sent.extend([now] * granted)
+        return granted
+
+
+def allowed_now(limit, now=None):
+    """True while fewer than `limit` messages left in the last hour (and registers one)."""
+    return reserve(limit, 1, now) == 1
 
 
 def notify(config, event, opener=None, connect=None, now=None):
@@ -179,13 +184,17 @@ def notify(config, event, opener=None, connect=None, now=None):
     if not cfg["enabled"] or event.get("kind") not in cfg["events"] or event.get("owner", "main") != "main":
         return []
     live = [(n, c) for n, c in cfg["channels"].items() if c.get("enabled")]
-    if not live or not allowed_now(cfg["max_per_hour"], now):
+    if not live:
         return []
-    results = [send_channel(n, c, event, opener, connect) for n, c in live]
+    broken = [{"channel": n, "ok": False, "reason": check_channel(n, c)} for n, c in live if check_channel(n, c)]   # a channel that cannot send books nothing
+    ready = [(n, c) for n, c in live if not check_channel(n, c)]
+    granted = reserve(cfg["max_per_hour"], len(ready), now)      # max_per_hour counts MESSAGES: one unit for each channel that gets the event
+    results = [send_channel(n, c, event, opener, connect) for n, c in ready[:granted]]
     with _lock:
         STATS["sent"] += sum(1 for r in results if r["ok"])
-        STATS["failed"] += sum(1 for r in results if not r["ok"])
-    return results
+        STATS["failed"] += sum(1 for r in results if not r["ok"]) + len(broken)
+        STATS["limited"] += len(ready) - granted
+    return results + broken if (results or broken) else []
 
 
 def make_listener(config_fn):

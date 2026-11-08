@@ -27,3 +27,7 @@ Optional and **off by default**. The events of the feed (a new red, a stuck buil
 - To reach a service that is not in the list, run a small receiver on this computer and point `http_local` at it. It receives a POST with `Content-Type: application/json` and this body: `{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`.
 - `kind` is one of `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`. Fields are only ever added. Answer any 2xx; anything else is counted as a failure.
 - `mqtt` publishes the same JSON as the payload of a QoS 0 message on `notify.channels.mqtt.topic`.
+
+## The limit per hour counts messages
+
+`notify.max_per_hour` limits the MESSAGES that leave the computer, not the events: an event that goes to three channels uses three of the allowance, one for each channel. When the allowance is not enough for every channel, the first channels in the list get the message and the rest are dropped (the page counts them as "limited"). A channel that cannot send (no secret, a wrong address) books nothing. The count is made under one lock, so several threads can never go over the limit.

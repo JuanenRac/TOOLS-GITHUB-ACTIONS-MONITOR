@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITOR DO GITHUB ACTIONS + SENTINELA (versão 1.6.4)
+MONITOR DO GITHUB ACTIONS + SENTINELA (versão 1.6.5)
 ====================================================
 QUAL ARRANCAR? (um utilizador novo decide em dois minutos)
   COMPLETA  MONITOR_GITHUB_ACTIONS.*       a página com a sentinela (porta 8765): alertas, fila de assinatura, análise. Comece aqui se tem vários repositórios.
@@ -89,3 +89,9 @@ LICENÇA    GPL-3.0-or-later (ver LICENSE e NOTICE). Copyright (C) 2026 JuanenRa
 AJUDA, ACERCA DE E VERIFICAÇÕES (1.6.4)
 ---------------------------------------
 A página tem um botão de Ajuda (? redondo) e um de Acerca de (i); na consola use --help-topics, --help-search, --about e --doctor; --demo mostra a página com dados inventados. A edição lite arranca com o seu próprio banner e título de janela (LITE, porta 8766, sem sentinela); a completa diz COMPLETE, porta 8765, sentinela ativa. O aviso de versão nova pode ser desligado (Definições > Básico).
+
+NOVIDADES DA 1.6.5 (integridade e segurança; histórico: CHANGELOG.md)
+  Lotes: CI verde significa que o workflow obrigatório passou (dispatch.required_ci), um git fetch falhado pára o despacho, o targets.json não pode indicar uma ferramenta fora da pasta das
+  ferramentas nem alterar dry_run/ref, e o finalize só oferece execuções cujo lote registou a verificação do commit (finalize --accept-legacy para lotes antigos). O act fica dentro do espaço
+  de trabalho e o Stop termina toda a árvore. Modo de rede: HTTPS opcional, bloqueio após tokens errados, só IPv4. Webhook: sem repetições. Notificações: max_per_hour conta mensagens.
+  O --doctor avisa de combinações perigosas.

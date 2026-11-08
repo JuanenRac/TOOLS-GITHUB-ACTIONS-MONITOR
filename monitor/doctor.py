@@ -16,15 +16,16 @@ import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-ORDER = ("python", "gh", "login", "quota", "network", "folder", "port", "docker", "rich", "textual", "targets", "token", "exposure")
+ORDER = ("python", "gh", "login", "quota", "network", "folder", "port", "docker", "rich", "textual", "targets", "token", "exposure", "risks", "backend")
 FIX = {"python": "https://www.python.org/downloads/", "gh": "winget install --id GitHub.cli   |   brew install gh   |   sudo apt install gh", "login": "gh auth login",
        "quota": "gh api rate_limit", "network": "gh api rate_limit", "folder": "", "port": "python actions_monitor.py --port 8800", "docker": "", "rich": "pip install rich",
-       "textual": "pip install textual", "targets": "python actions_monitor.py --init-catalog", "token": "", "exposure": ""}
+       "textual": "pip install textual", "targets": "python actions_monitor.py --init-catalog", "token": "", "exposure": "", "risks": "", "backend": ""}
 
 
 def default_runner(args, timeout=20):
     try:
-        done = subprocess.run(args, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout)
+        import secretstore
+        done = subprocess.run(args, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout, **(secretstore.gh_kwargs() if args and args[0] == "gh" else {}))
         return done.returncode, done.stdout, done.stderr
     except (OSError, subprocess.TimeoutExpired) as error:
         return 127, "", str(error)
@@ -94,7 +95,42 @@ def run(runner=default_runner, folder=HERE, ports=(8765, 8766), python=None, con
     listen = config.get("listen") if isinstance(config.get("listen"), dict) else {}
     network = listen.get("network") is True
     out["exposure"] = ("warn" if network else "ok", ("network " + str(listen.get("host", ""))) if network else "127.0.0.1")
+    out["risks"] = risks(config)
+    out["backend"] = token_backend(config)
     return [{"id": name, "status": out[name][0], "detail": out[name][1], "fix": FIX[name] if out[name][0] != "ok" else ""} for name in ORDER]
+
+
+def risks(config):
+    """("ok" | "warn", codes): the dangerous combinations of options. network_all = listening on every interface (prefer one private address); execute_network = the AI may run
+    actions while the monitor is reachable from the network; token_file = the own GitHub token kept in a plain 600 file (the weakest store); act_network = local runs of act while
+    the monitor is reachable from the network."""
+    listen = config.get("listen") if isinstance(config.get("listen"), dict) else {}
+    network = listen.get("network") is True
+    found = []
+    if network and listen.get("host") == "0.0.0.0":
+        found.append("network_all")
+    ai_actions = (config.get("ai") or {}).get("actions") if isinstance(config.get("ai"), dict) else None
+    if network and isinstance(ai_actions, dict) and ai_actions.get("enabled") is True and ai_actions.get("execute") is True:
+        found.append("execute_network")
+    token = config.get("github_token") if isinstance(config.get("github_token"), dict) else {}
+    if token.get("enabled") is True and token.get("store") == "file":
+        found.append("token_file")
+    if network and isinstance(config.get("act"), dict) and config["act"].get("enabled") is True:
+        found.append("act_network")
+    return ("warn" if found else "ok", ", ".join(found))
+
+
+def token_backend(config, store_factory=None):
+    """The place the own token is kept (never the token). "ok" for the store of the system, "warn" for the plain file; "ok" and `off` when the feature is off."""
+    token = config.get("github_token") if isinstance(config.get("github_token"), dict) else {}
+    if token.get("enabled") is not True:
+        return "ok", "off"
+    try:
+        import secretstore
+        kind = (store_factory or secretstore.Store)(token.get("store") if token.get("store") in ("auto", "system", "file") else "auto").backend()
+    except Exception:
+        return "warn", "?"
+    return ("warn" if kind == "file" else "ok"), str(kind)
 
 
 def text(checks, translate, banner_for=None):

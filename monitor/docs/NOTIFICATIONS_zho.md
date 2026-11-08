@@ -27,3 +27,7 @@
 - 要连接列表之外的服务,请在本机运行一个小型接收程序,并让 `http_local` 指向它。它会收到 `Content-Type: application/json` 的 POST,正文如下:`{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`。
 - `kind` 为 `red_new`、`red_fixed`、`stuck_new`、`pending_sign`、`release_due`、`rate_low`、`offline`、`online`、`alerts_up`、`workflow_failed` 之一。字段只会增加。返回任意 2xx;其他一律算作失败。
 - `mqtt` 把同样的 JSON 作为 QoS 0 消息的负载发布到 `notify.channels.mqtt.topic`。
+
+## 每小时上限统计的是消息
+
+`notify.max_per_hour` 限制的是离开电脑的「消息」，而不是事件：发往三个渠道的一个事件会消耗三个额度，每个渠道一个。额度不足以覆盖所有渠道时，列表中靠前的渠道收到消息，其余的被丢弃（页面将其计为“受限”）。无法发送的渠道（没有密钥、地址错误）不消耗额度。计数在同一把锁下完成，因此多个线程永远不会超过上限。

@@ -59,8 +59,8 @@ def main():
                 print(export_status.TEXT["refused"])
             code = 0 if written else 4
         if args.export_sign_queue:
-            target = export_status.write_sign_queue(s, args.export_sign_queue, args.sign_trust)
-            print(export_status.TEXT["wrote"] + str(target) if target else export_status.TEXT["refused"])
+            target, reason = export_status.write_sign_queue(s, args.export_sign_queue, args.sign_trust)
+            print(export_status.TEXT["wrote"] + str(target) if target else export_status.TEXT["refused"] + " " + export_status.reason_text(reason))
             code = code or (0 if target else 4)
         return code
     if args.json:

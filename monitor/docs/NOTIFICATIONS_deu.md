@@ -27,3 +27,7 @@ Optional und **standardmäßig aus**. Die Ereignisse des Feeds (ein neues Rot, e
 - Für einen Dienst, der nicht in der Liste steht, starten Sie einen kleinen Empfänger auf diesem Rechner und richten `http_local` darauf. Er erhält einen POST mit `Content-Type: application/json` und diesem Rumpf: `{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`.
 - `kind` ist eines von `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`. Felder kommen nur hinzu. Antworten Sie mit einem beliebigen 2xx; alles andere zählt als Fehler.
 - `mqtt` veröffentlicht dasselbe JSON als Nutzlast einer QoS-0-Nachricht auf `notify.channels.mqtt.topic`.
+
+## Das Limit pro Stunde zählt Nachrichten
+
+`notify.max_per_hour` begrenzt die NACHRICHTEN, die den Computer verlassen, nicht die Ereignisse: Ein Ereignis, das an drei Kanäle geht, verbraucht drei Einheiten, eine je Kanal. Reicht das Kontingent nicht für alle Kanäle, erhalten die ersten Kanäle der Liste die Nachricht, der Rest wird verworfen (die Seite zählt sie als «begrenzt»). Ein Kanal, der nicht senden kann (kein Geheimnis, falsche Adresse), verbraucht nichts. Gezählt wird unter einer einzigen Sperre, mehrere Threads können das Limit also nie überschreiten.

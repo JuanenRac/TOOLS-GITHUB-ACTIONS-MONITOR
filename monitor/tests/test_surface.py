@@ -436,25 +436,29 @@ class Exports(unittest.TestCase):
         self.assertEqual(export_status.write_public_status(self.snap(), "D:/out"), [])
         self.assertEqual(export_status.write_public_status(self.snap(), "//server/share"), [])
         self.assertEqual(export_status.write_public_status({**self.snap(), "loading": "3/9"}, tempfile.gettempdir()), [])
-        self.assertIsNone(export_status.write_sign_queue(self.snap(), "D:/q.json"))
+        self.assertEqual(export_status.write_sign_queue(self.snap(), "D:/q.json"), (None, "path"))
 
     def test_sign_queue_json_and_csv(self):
         with tempfile.TemporaryDirectory() as tmp:
-            j = export_status.write_sign_queue(self.snap(), Path(tmp) / "q.json")
+            j, _why = export_status.write_sign_queue(self.snap(), Path(tmp) / "q.json")
             data = json.loads(j.read_text(encoding="utf-8"))
             self.assertTrue(data["local_only"] and data["queue"][0]["command"])
-            c = export_status.write_sign_queue(self.snap(), Path(tmp) / "q.csv")
+            c, _why = export_status.write_sign_queue(self.snap(), Path(tmp) / "q.csv")
             self.assertIn("command", c.read_text(encoding="utf-8").splitlines()[0])
-            self.assertIsNone(export_status.write_sign_queue(self.snap(), tmp))
+            self.assertEqual(export_status.write_sign_queue(self.snap(), tmp), (None, "is_dir"))
 
 
 class Webhook(unittest.TestCase):
     SECRET = "s" * 40
     CONFIG = {"webhook": {"enabled": True, "secret": SECRET}}
 
+    def setUp(self):
+        webhook.reset()
+
     def call(self, body, signature=True, event="workflow_run", config=None):
         raw = json.dumps(body).encode()
-        headers = {"X-GitHub-Event": event}
+        self.counter = getattr(self, "counter", 0) + 1
+        headers = {"X-GitHub-Event": event, "X-GitHub-Delivery": f"00000000-0000-0000-0000-{self.counter:012d}"}
         if signature:
             headers["X-Hub-Signature-256"] = webhook.sign(self.SECRET, raw)
         return webhook.handle(config or self.CONFIG, raw, headers, ["R"])
@@ -652,8 +656,8 @@ class ReleaseNotes(unittest.TestCase):
 class GateAndVersion(unittest.TestCase):
     def test_version_is_1_5_0_and_the_changelog_agrees(self):
         import tool_version
-        self.assertEqual(tool_version.TOOL_VERSION, "1.6.4")
-        self.assertEqual(mr.gate_static(), "1.6.4")
+        self.assertEqual(tool_version.TOOL_VERSION, "1.6.5")
+        self.assertEqual(mr.gate_static(), "1.6.5")
 
     def test_new_files_travel_and_state_files_do_not(self):
         names = {p.relative_to(mr.HERE).as_posix() for p in mr.members()}

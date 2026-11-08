@@ -41,10 +41,13 @@ class ShaCorrelation(unittest.TestCase):
         self.assertEqual(rows[names[0]]["state"], "ready")
         self.assertEqual(rows[names[1]]["state"], "not_ready")
 
-    def test_a_matched_run_and_an_old_batch_without_the_field_stay_ready(self):
-        for matched in (True, None):
-            name, batch = self.batch(matched)
-            self.assertEqual(gd.finalize_rows(batch, state_fn=state)[0]["state"], "ready")
+    def test_a_matched_run_is_ready_and_an_old_batch_without_the_field_needs_review(self):
+        name, batch = self.batch(True)
+        self.assertEqual(gd.finalize_rows(batch, state_fn=state)[0]["state"], "ready")
+        name, batch = self.batch(None)
+        row = gd.finalize_rows(batch, state_fn=state)[0]
+        self.assertEqual((row["state"], row["reason"]), ("not_ready", "needs_review"))
+        self.assertNotIn("command", row)
 
 
 class ApiDataGuard(unittest.TestCase):

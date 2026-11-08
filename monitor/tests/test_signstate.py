@@ -312,7 +312,7 @@ class DispatchTools(unittest.TestCase):
         self.assertEqual((got[1]["repo"], got[1]["ecosystem"], got[1]["workflow"]), ("HYDRA-UMC-SUITE", "hydra", "exe-build.yml"))
 
     def test_finalize_lists_exact_commands_and_marks_the_batch(self):
-        batch = {"dry_run": True, "targets": {"URTC": {"run": 11}, "HYDRA-UMC-SUITE:exe": {"run": 12}, "ARMOR-SERVER": {"run": 13}, "X": {"skipped": "r"},
+        batch = {"dry_run": True, "targets": {"URTC": {"run": 11, "sha_matched": True}, "HYDRA-UMC-SUITE:exe": {"run": 12, "sha_matched": True}, "ARMOR-SERVER": {"run": 13, "sha_matched": True}, "X": {"skipped": "r"},
                                               "URTC-TESTER": {"failed": "e"}}}
 
         def state(repo, run_id):

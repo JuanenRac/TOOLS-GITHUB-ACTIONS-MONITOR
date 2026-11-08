@@ -48,3 +48,12 @@ With `otlp.enabled` on and an `otlp.endpoint` (HTTPS, or HTTP on this computer),
 ## Checking against the real services
 
 `python tools/manual_check_live.py` (in the repository) reads the scopes of your token, the billing report, the organisations, the runners and the flags of `gh copilot`, and asks a running monitor to send a test message through your channels. It never asks for a secret.
+
+## Safety notes (read before switching anything on)
+
+- **Network mode**: use it only on a network you trust. The access token does not replace encryption; on plain HTTP the token and the data travel in the clear. Put an HTTPS proxy in front (and set `listen.secure_cookie`) or give the monitor your own certificate and key (`listen.tls_cert_file`, `listen.tls_key_file`): it then serves HTTPS itself (TLS 1.2 or newer) and refuses to start if the files cannot be used. Prefer ONE private address of this computer to every interface. Only IPv4 addresses are accepted. After the first visit the address bar is cleaned of the token and the cookie is HttpOnly, SameSite=Strict (and Secure over HTTPS). A address that sends `listen.max_failed_attempts` wrong tokens within a minute is refused for five minutes. `/metrics` and `dashboard.json` list your repositories: in the network mode they need the token too.
+- **Actions on GitHub**: **off by default, one confirmation per action, a closed list** (rerun a run or job, cancel, close an issue or pull request, merge a pull request when you list it). Deleting branches or repositories, secrets and settings are **not** there. The AI can propose a smaller list (`rerun_failed`, `rerun_run`, `close_issue`) and never merges.
+- **act**: off by default, each run confirmed, a closed list of `repository:file:event`, no real secrets. The clone must be a real folder inside the workspace: a folder that is a link to another place is refused unless `act.allow_symlinks` is on. The time limit and Stop end the whole tree of processes that the run started, and remove the `act-` containers it created.
+- **Your own token** is kept in the store of the system when there is one; the plain file (permissions 600) is the weakest store. It goes to `gh` only, never to `act` or to your commands. `--doctor` shows the store, never the token.
+- **Combinations to avoid** (`--doctor` names them): network mode on every interface; AI actions that execute while the network mode is on; `act` while the network mode is on; the token in a plain file.
+- The MCP server speaks over standard input and output only; never put it behind a network port.

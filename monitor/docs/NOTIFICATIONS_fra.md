@@ -27,3 +27,7 @@ Optionnelles et **désactivées par défaut**. Les événements du flux (un nouv
 - Pour joindre un service absent de la liste, lancez un petit récepteur sur cet ordinateur et pointez `http_local` vers lui. Il reçoit un POST avec `Content-Type: application/json` et ce corps : `{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`.
 - `kind` vaut `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up` ou `workflow_failed`. Les champs ne font que s'ajouter. Répondez par un 2xx ; tout le reste compte comme un échec.
 - `mqtt` publie le même JSON comme charge d'un message QoS 0 sur `notify.channels.mqtt.topic`.
+
+## La limite par heure compte les messages
+
+`notify.max_per_hour` limite les MESSAGES qui quittent l'ordinateur, pas les événements : un événement envoyé à trois canaux consomme trois unités, une par canal. Si le quota ne suffit pas pour tous les canaux, les premiers de la liste reçoivent le message et les autres sont écartés (la page les compte comme « limités »). Un canal qui ne peut pas envoyer (pas de secret, mauvaise adresse) ne consomme rien. Le décompte se fait sous un seul verrou : plusieurs threads ne peuvent donc jamais dépasser la limite.

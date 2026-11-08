@@ -68,3 +68,7 @@ scrape_configs:
 ## 按可信度划分的签名队列
 
 队列的每一行都有 `trust`:`verified`(已用公钥验证签名)、`unknown`(此处无法检查该格式:从不猜测)或 `failed`(已检查但不匹配)。哨兵标签页有签名筛选器,显示每类数量并标记各行(绿色、灰色或红色边)。在控制台:`py -3 read_report.py --export-sign-queue FILE --sign-trust failed`。
+
+## 在网络模式下
+
+`/metrics` 和 `dashboard.json` 会列出你的仓库及其状态：它们不是公开页面。开启网络模式后，它们与其他端点一样需要访问令牌；如果完全不希望该清单可被访问，请关闭 `outputs.prometheus.enabled` / `outputs.dashboard.enabled`。

@@ -77,7 +77,8 @@ def github_owner(config=None):
     if _owner["lookup"] is None:
         login = ""
         try:
-            done = subprocess.run(["gh", "api", "user", "--jq", ".login"], capture_output=True, text=True, encoding="utf-8", timeout=30)
+            import secretstore
+            done = subprocess.run(["gh", "api", "user", "--jq", ".login"], capture_output=True, text=True, encoding="utf-8", timeout=30, **secretstore.gh_kwargs())
             if done.returncode == 0:
                 login = done.stdout.strip()
         except (OSError, subprocess.SubprocessError):

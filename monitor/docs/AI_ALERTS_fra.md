@@ -23,3 +23,7 @@ Un workflow rouge ne sert à rien si personne de ceux qui travaillent sur le dé
 - Une NOUVELLE alerte réelle va aux canaux de notification que vous avez déjà configurés (Réglages > Notifications).
 - Optionnel, désactivé par défaut : `ai_alerts.hook` envoie en POST la nouvelle alerte réelle (liste fermée de champs nettoyés) à une adresse de cet ordinateur, au plus `max_per_hour` fois par heure, pour qu'un de vos scripts réveille une session IA.
 - Rien de cela n'envoie de données à un fournisseur d'IA, n'exécute de commande ni n'écrit sur GitHub.
+
+## Le serveur MCP est local
+
+`mcp_server.py` parle JSON sur l'entrée et la sortie standard avec l'outil d'IA qui le lance : il n'a pas de port réseau et ne doit jamais être placé derrière un port. Un message mal formé reçoit une erreur pour ce message seulement, une ligne de plus de 64 Ko est refusée, et `ack_alert` (seulement avec `--allow-ack`) ne change que l'état local du flux. Le flux peut contenir des noms de dépôts et de courts messages d'erreur de la CI ; tout est nettoyé des jetons, clés, adresses e-mail, adresses IP et du dossier d'une personne avant de sortir.

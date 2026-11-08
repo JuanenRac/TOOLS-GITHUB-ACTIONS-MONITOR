@@ -75,3 +75,7 @@ workflows d'un dépôt à la fois jusqu'à leur fin. D'un tableau de bord de web
 ## La file de signature par confiance
 
 Chaque ligne de la file a un `trust` : `verified` (signature vérifiée avec la clé publique), `unknown` (le format ne peut pas être vérifié ici : jamais deviné) ou `failed` (vérifiée et non conforme). L'onglet Sentinelle a un filtre Signature avec le nombre de chaque sorte et marque les lignes (bord vert, gris ou rouge). En console : `py -3 read_report.py --export-sign-queue FILE --sign-trust failed`.
+
+## En mode réseau
+
+`/metrics` et `dashboard.json` listent vos dépôts et leur état : ce ne sont pas des pages publiques. Avec le mode réseau actif, ils exigent le jeton d'accès comme tout autre point d'accès ; désactivez `outputs.prometheus.enabled` / `outputs.dashboard.enabled` si vous ne voulez pas que cet inventaire soit joignable du tout.

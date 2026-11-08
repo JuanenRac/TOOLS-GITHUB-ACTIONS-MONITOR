@@ -1224,7 +1224,8 @@ class Sentinel:
         import subprocess
         with self.lock:
             self.calls.append(time.time())
-        result = subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
+        import secretstore
+        result = subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60, **secretstore.gh_kwargs())
         if result.returncode != 0:
             raise RuntimeError((result.stderr or "gh failed").strip()[:200])
         return result.stdout[-limit:]

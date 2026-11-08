@@ -23,7 +23,10 @@ carries what differs from it (extra flags, finalize_flags, ...) and always wins.
 (green CI + a known *-build.yml + no entry in targets.json).
 
 Safety rules:
-  * `dispatch` refuses a repository whose main has no green CI run on its HEAD, or whose local clone is not at origin/main.
+  * `dispatch` refuses a repository whose main has no green CI on its HEAD (the REQUIRED workflow files of dispatch.required_ci succeeded, nothing failed or waits for approval, the list of
+    runs is complete), or whose local clone is not at origin/main after a `git fetch` that worked. A tool of the catalogue must be a plain file name inside the tools folder and `extra` may only
+    hold `-f key=value` workflow inputs (never dry_run or ref).
+  * `finalize` offers for signing only a run whose batch recorded that it was built on the commit that was checked; `finalize --accept-legacy` re-reads an older batch from GitHub first.
   * A workflow_dispatch that fails through the API is marked and retried ONCE at the end of the batch; the rest of the batch goes on.
   * Default is dry_run=true: the workflow builds, attests and uploads the artefact but creates NO draft release, so no approval in the
     `release` environment is needed. `--real` sets dry_run=false (creates the unsigned draft; the owner approves it on the run page).
@@ -70,12 +73,72 @@ BUILD_WORKFLOWS = ("firmware-build.yml", "package-build.yml", "apk-build.yml", "
 # the ecosystems marked "external" in the ecosystems file are reported apart, never added (toolconfig.is_internal)
 ECOSYSTEMS = tuple(toolconfig.ecosystem_names())
 NAME_RE = re.compile(r"^[A-Za-z0-9._:-]{1,100}$")
+TOOL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,98}\.py$")           # a plain file name: no folder, no drive, no "..", no leading dash
+INPUT_KEY_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]{0,63}$")             # the name of an input of a workflow
+RESERVED_INPUTS = ("dry_run", "ref")                                    # decided by this program, never by the catalogue
+FLAG_RE = re.compile(r"^--[a-z][a-z0-9-]{0,40}$")                       # a long flag of a signing tool (finalize_flags)
+SHA_RE = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
+GIT_TIMEOUT = 60
+CI_PAGES = 5                                                             # pages of 100 runs read before the sample counts as incomplete
+DEFAULT_REQUIRED_CI = ("ci.yml",)                                        # the workflow file of the CI of a repository when nothing else is configured
 TARGET_KEYS = {"workflow", "tool", "extra", "repo", "finalize_flags", "build_only", "reason"}
+BAD_CONCLUSIONS = ("failure", "timed_out", "startup_failure", "action_required")   # the same family as redrule.BAD: a run waiting for an approval blocks too
 PROFILES_FILE = toolconfig.profiles_path()   # "profiles_file" in actions_monitor.json, default profiles.json
 DEFAULT_MIN_RATE = 1500   # `dispatch --go` refuses to start when the GitHub allowance left is below this (profiles.json min_rate_remaining or --min-rate)
 CANARY_WAIT_SECONDS = 1800
 CANDIDATES_FILE = HERE / "targets.candidates.json"
 # convention: ecosystem prefix -> default signing tool, from the ecosystems file ("tool"; "firmware_tool" + "firmware_extra" for a firmware workflow that needs its own tool)
+
+
+def extra_inputs(extra):
+    """({input: value}, problems) from the `extra` list of a target. Only pairs `-f key=value` (inputs of the workflow) are accepted: no other option of `gh` (-R, --ref,
+    --repo, the workflow name...), no input that this program decides (dry_run, ref), no repeated input. The arguments of the command are then BUILT from the dict."""
+    inputs, problems = {}, []
+    items = list(extra)
+    if len(items) % 2:
+        problems.append("odd number of arguments (use \"-f\", \"key=value\" pairs)")
+    for i in range(0, len(items) - len(items) % 2, 2):
+        flag, pair = items[i], items[i + 1]
+        if flag != "-f":
+            problems.append(f"only -f key=value is allowed, not {flag!r}")
+            continue
+        key, sep, value = pair.partition("=")
+        if not sep or not INPUT_KEY_RE.match(key):
+            problems.append(f"{pair!r} is not key=value with a plain input name")
+        elif key in RESERVED_INPUTS:
+            problems.append(f"the input {key} is reserved for the program")
+        elif key in inputs:
+            problems.append(f"the input {key} is repeated")
+        elif len(value) > 300 or any(ord(c) < 32 for c in value):
+            problems.append(f"the value of {key} is not plain text of at most 300 characters")
+        else:
+            inputs[key] = value
+    return inputs, problems
+
+
+def dispatch_args(workflow, repo, real, extra):
+    """The argument list of `gh workflow run`, built from validated pieces (never from a free list). Raises ValueError for an `extra` that does not validate."""
+    inputs, problems = extra_inputs(extra)
+    if problems:
+        raise ValueError("; ".join(problems))
+    args = ["workflow", "run", workflow, "-R", f"{toolconfig.github_owner()}/{repo}", "--ref", "main", "-f", f"dry_run={'false' if real else 'true'}", "-f", "ref=main"]
+    for key, value in inputs.items():
+        args += ["-f", f"{key}={value}"]
+    return args
+
+
+def tool_path(tool, tools_dir=None):
+    """The path of a signing tool INSIDE the tools folder, or None: the name must be a plain file name and, once symbolic links are resolved, the file must still sit in that folder."""
+    if not (isinstance(tool, str) and TOOL_RE.match(tool) and ".." not in tool):
+        return None
+    base = Path(tools_dir or TOOLS_DIR)
+    path = base / tool
+    try:
+        if path.exists() and path.resolve().parent != base.resolve():
+            return None
+    except OSError:
+        return None
+    return path
 
 
 def validate_targets(data):
@@ -87,7 +150,7 @@ def validate_targets(data):
         return [t("val.catalogue_empty")]
     problems = []
     for name, target in data.items():
-        if not NAME_RE.match(str(name)):
+        if not NAME_RE.match(str(name)) or str(name).split(":")[0] in (".", "..") or str(name).startswith(("-", ":")):
             problems.append(t("val.bad_name", name=name))
         if not isinstance(target, dict):
             problems.append(t("val.not_object", name=name))
@@ -104,12 +167,17 @@ def validate_targets(data):
             continue
         if "reason" in target:
             problems.append(t("val.reason_only", name=name))
-        if not (isinstance(target.get("tool"), str) and target["tool"].endswith(".py")):
+        if not (isinstance(target.get("tool"), str) and TOOL_RE.match(target["tool"]) and ".." not in target["tool"]):
             problems.append(t("val.tool_py", name=name))
         for key in ("extra", "finalize_flags"):
             value = target.get(key, [])
             if not (isinstance(value, list) and all(isinstance(x, str) for x in value)):
                 problems.append(t("val.list_of_str", name=name, key=key))
+        if isinstance(target.get("extra"), list) and all(isinstance(x, str) for x in target["extra"]):
+            inputs, bad = extra_inputs(target["extra"])
+            problems += [t("val.extra_bad", name=name, why=why) for why in bad]
+        if isinstance(target.get("finalize_flags"), list):
+            problems += [t("val.flag_bad", name=name, flag=repr(f)) for f in target["finalize_flags"] if not (isinstance(f, str) and FLAG_RE.match(f))]
         if "extra" not in target:
             problems.append(t("val.extra_required", name=name))
         if ":" in name:
@@ -150,7 +218,10 @@ def ecosystem_of(repo):
 def finalize_command(name, run_id, targets=None):
     """The exact local command (argv list) that downloads, verifies, signs and publishes the build `run_id` of target `name`."""
     t = (targets or TARGETS)[name]
-    cmd = [*platform_compat.python_argv(), str(TOOLS_DIR / t["tool"]), name, "--run", str(run_id)]
+    path = tool_path(t["tool"])
+    if path is None:
+        raise ValueError(f"the tool of {name} is not a plain file name inside the tools folder")
+    cmd = [*platform_compat.python_argv(), str(path), name, "--run", str(run_id)]
     if t["tool"] == "fetch_and_sign.py":   # the firmware tool signs as part of --publish
         return cmd + ["--publish"]
     if t["tool"] == "armor_fetch_and_sign.py":
@@ -174,24 +245,88 @@ def ghj(*args):
     return json.loads(out) if out.strip() else None
 
 
+def git_run(path, *args, timeout=GIT_TIMEOUT):
+    """(returncode, stdout, stderr) of one git command in `path`, with a time limit. A command that cannot run or does not finish gives a non-zero code (fail closed)."""
+    try:
+        done = subprocess.run(["git", "-C", str(path), *args], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout)
+        return done.returncode, done.stdout.strip(), done.stderr.strip()
+    except subprocess.TimeoutExpired:
+        return 124, "", "timeout"
+    except OSError as error:
+        return 127, "", str(error)
+
+
 def local_head(repo):
+    """(origin/main sha, problem). The problem is "" only when the fetch WORKED and HEAD is origin/main; a failed fetch, a git that does not answer or a value that is not a
+    commit id gives (None, why): an old origin/main already on disk is never taken as proof of what GitHub has now."""
     path = ROOT / repo
     if not path.exists():
         return None, t("gd.no_clone")
-    run = lambda *a: subprocess.run(["git", "-C", str(path), *a], capture_output=True, text=True, encoding="utf-8").stdout.strip()
-    run("fetch", "-q", "origin")
-    head, remote = run("rev-parse", "HEAD"), run("rev-parse", "origin/main")
+    code, _out, err = git_run(path, "fetch", "-q", "origin")
+    if code != 0:
+        return None, t("gd.fetch_failed", why=(err or f"code {code}")[:120])
+    code_h, head, _e = git_run(path, "rev-parse", "HEAD")
+    code_r, remote, _e = git_run(path, "rev-parse", "origin/main")
+    if code_h != 0 or code_r != 0 or not SHA_RE.match(head) or not SHA_RE.match(remote):
+        return None, t("gd.sha_unreadable")
     return remote, ("" if head == remote else t("gd.head_mismatch", head=head[:7], remote=remote[:7]))
 
 
-def ci_green(repo, sha):
-    """True when a completed workflow run of the repository on that commit succeeded and none failed (CI baseline family)."""
-    runs = ghj("api", f"repos/{toolconfig.github_owner()}/{repo}/actions/runs?head_sha={sha}&event=push&per_page=30") or {}
-    done = [r for r in runs.get("workflow_runs", []) if r["status"] == "completed"]
-    pending = [r for r in runs.get("workflow_runs", []) if r["status"] != "completed"]
-    bad = [r["name"] for r in done if r["conclusion"] in ("failure", "timed_out", "startup_failure")]
-    ok = any(r["conclusion"] == "success" and "baseline" in r["name"].lower() for r in done) or any(r["conclusion"] == "success" for r in done)
-    return ok and not bad and not pending, bad, len(pending)
+def required_ci(repo, config=None, profile=None):
+    """The workflow FILES whose run on the commit must have succeeded for the repository: `dispatch.required_ci_repos[repo]`, else the profile's `dispatch.required_ci_profiles[profile]`,
+    else `dispatch.required_ci`, else the CI workflow (ci.yml). Never empty."""
+    cfg = (config if config is not None else toolconfig.raw_config()).get("dispatch")
+    cfg = cfg if isinstance(cfg, dict) else {}
+    for scope, key in ((cfg.get("required_ci_repos"), repo), (cfg.get("required_ci_profiles"), profile), (cfg, "required_ci")):
+        found = scope.get(key) if isinstance(scope, dict) and key else None
+        if isinstance(found, list):
+            names = [x for x in found if isinstance(x, str) and 0 < len(x) <= 100]
+            if names:
+                return names
+    return list(DEFAULT_REQUIRED_CI)
+
+
+ACTIVE = {"profile": None}   # the profile of the running dispatch (set by cmd_dispatch), for required_ci
+
+
+def _run_file(run):
+    return str(run.get("path") or "").split("@")[0].rsplit("/", 1)[-1].lower()
+
+
+def ci_green(repo, sha, required=None, config=None):
+    """(ok, bad, pending). FAIL CLOSED: green only when the REQUIRED workflows (required_ci) all have a completed successful run on that commit, none of the runs read is failed /
+    timed out / startup failure / action_required (waiting for an approval), nothing is still running and the list of runs is complete. A list GitHub says is longer than what
+    was read (more than CI_PAGES pages) is not green: `bad` then says so."""
+    owner = toolconfig.github_owner()
+    runs, total, truncated = [], None, False
+    for page in range(1, CI_PAGES + 1):
+        data = ghj("api", f"repos/{owner}/{repo}/actions/runs?head_sha={sha}&event=push&per_page=100&page={page}") or {}
+        chunk = data.get("workflow_runs") or []
+        runs += chunk
+        if isinstance(data.get("total_count"), int):
+            total = data["total_count"]
+        if len(chunk) < 100 and (total is None or len(runs) >= total):
+            break
+    else:
+        truncated = True
+    if total is not None and len(runs) < total:
+        truncated = True
+    latest = {}
+    for run in runs:   # one run per workflow file: the most recent one counts (a re-run keeps its id)
+        key = _run_file(run) or str(run.get("name") or "").lower()
+        if key not in latest or int(run.get("id") or 0) > int(latest[key].get("id") or 0):
+            latest[key] = run
+    done = [r for r in latest.values() if r.get("status") == "completed"]
+    pending = [r for r in latest.values() if r.get("status") != "completed"]
+    bad = [str(r.get("name") or _run_file(r)) for r in done if r.get("conclusion") in BAD_CONCLUSIONS]
+    wanted = [w.lower() for w in (required or required_ci(repo, config, ACTIVE["profile"]))]
+    missing = [w for w in wanted if not any(w in (key, str(r.get("name") or "").lower()) and r.get("status") == "completed" and r.get("conclusion") == "success"
+                                            for key, r in latest.items())]
+    still_running = [w for w in missing if any(w in (key, str(r.get("name") or "").lower()) and r.get("status") != "completed" for key, r in latest.items())]
+    absent = [w for w in missing if w not in still_running and not any(w in (key, str(r.get("name") or "").lower()) for key, r in latest.items())]
+    extra_bad = ([t("gd.ci_incomplete")] if truncated else []) + [t("gd.ci_required_missing", workflow=w) for w in absent]
+    ok = not bad and not pending and not missing and not truncated
+    return ok, bad + extra_bad, len(pending)
 
 
 def pick(only, ecosystem=None, profile=None):
@@ -312,7 +447,10 @@ def preflight(names, workflows=True):
     problems = []
     for name in names:
         target = TARGETS[name]
-        if not (TOOLS_DIR / target["tool"]).is_file():
+        path = tool_path(target["tool"])
+        if path is None:
+            problems.append(t("gd.tool_outside", name=name, tool=target["tool"], dir=TOOLS_DIR))
+        elif not path.is_file():
             problems.append(t("gd.tool_missing", name=name, tool=target['tool'], dir=TOOLS_DIR))
         if workflows:
             clone = ROOT / repo_of(name)
@@ -499,7 +637,11 @@ def fire(name, repo, sha, real):
     """Fires the workflow of one target and finds the run it created. Raises RuntimeError when the API refuses the dispatch."""
     target = TARGETS[name]
     before = time.time()
-    gh("workflow", "run", target["workflow"], "-R", f"{toolconfig.github_owner()}/{repo}", "--ref", "main", "-f", f"dry_run={'false' if real else 'true'}", "-f", "ref=main", *target["extra"])
+    try:
+        args = dispatch_args(target["workflow"], repo, real, target["extra"])
+    except ValueError as error:
+        raise RuntimeError(f"extra of {name} refused: {error}"[:200]) from None
+    gh(*args)
     run_id, matched = None, False
     for _ in range(10):  # the run appears a moment later
         time.sleep(3)
@@ -561,6 +703,7 @@ def run_batch(names, real, go, fire_fn=None, head_fn=None, green_fn=None, sleep_
 
 def cmd_dispatch(args):
     profile = profile_arg(args)
+    ACTIVE["profile"] = profile
     names = pick(args.only, getattr(args, "ecosystem", None), profile)
     problems = preflight(names)
     if problems and args.go:
@@ -632,24 +775,55 @@ def cmd_status(args):
     print(te("gd.summary"), counts)
 
 
-def finalize_rows(batch, state_fn=None):
-    """One dict per target of the batch with a run: state ready|not_ready, the run, the url and the exact command. `state_fn(repo, run)` -> (status, conclusion, url, bad)."""
+def run_sha(repo, run_id):
+    """The commit a run was built on, read from GitHub (used to re-check a batch recorded before the SHA was matched)."""
+    data = ghj("api", f"repos/{toolconfig.github_owner()}/{repo}/actions/runs/{run_id}") or {}
+    return str(data.get("head_sha") or "")
+
+
+def finalize_rows(batch, state_fn=None, legacy=False, sha_fn=None):
+    """One dict per target of the batch with a run: state ready|not_ready, the run, the url and the exact command. `state_fn(repo, run)` -> (status, conclusion, url, bad).
+
+    STRICT by default: a run is offered for signing only when the batch RECORDS that it was built on the commit that was checked (`sha_matched` is true). A batch without that
+    field (written before the check existed) is `not_ready` with reason `needs_review`. With `legacy=True` such a batch is accepted only after its run is read again from GitHub
+    (`sha_fn(repo, run)`) and its commit equals the one recorded in the batch; then the row says `legacy: true` so the caller can warn and ask again."""
     state_fn = state_fn or run_state
+    sha_fn = sha_fn or run_sha
     rows = []
     for name, info in sorted(batch["targets"].items(), key=lambda item: ":" in item[0]):   # parts after the packages they ride on
         if "skipped" in info or "failed" in info or info.get("retry") or not info.get("run") or name not in TARGETS:
             continue
         status, conclusion, url, bad = state_fn(repo_of(name), info["run"])
         row = {"name": name, "repo": repo_of(name), "run": info["run"], "url": url, "status": status, "conclusion": conclusion}
-        if info.get("sha_matched") is False:   # the run found was on another commit than the one checked: never offered for signing (fire() records it)
+        matched = info.get("sha_matched")
+        if matched is False:   # the run found was on another commit than the one checked: never offered for signing (fire() records it)
             row.update({"state": "not_ready", "failed_jobs": [], "reason": "sha_mismatch", "sha": str(info.get("sha", ""))[:7]})
+        elif matched is not True and not (legacy and _recheck(name, info, sha_fn)):
+            row.update({"state": "not_ready", "failed_jobs": [], "reason": "needs_review", "sha": str(info.get("sha", ""))[:7]})
         elif status == "completed" and conclusion == "success":
-            argv = finalize_command(name, info["run"])
-            row.update({"state": "ready", "argv": argv, "command": command_text(argv)})
+            try:
+                argv = finalize_command(name, info["run"])
+            except ValueError:
+                row.update({"state": "not_ready", "failed_jobs": [], "reason": "bad_tool"})
+            else:
+                row.update({"state": "ready", "argv": argv, "command": command_text(argv)})
+                if matched is not True:
+                    row["legacy"] = True
         else:
             row.update({"state": "not_ready", "failed_jobs": bad})
         rows.append(row)
     return rows
+
+
+def _recheck(name, info, sha_fn):
+    """True when the run of a batch without `sha_matched` was built on exactly the commit the batch recorded (read now from GitHub). Anything unreadable is False."""
+    expected = str(info.get("sha") or "")
+    if not SHA_RE.match(expected):
+        return False
+    try:
+        return sha_fn(repo_of(name), info["run"]) == expected
+    except (RuntimeError, OSError, subprocess.SubprocessError, ValueError):
+        return False
 
 
 def mark_batch(path, batch, name, **fields):
@@ -671,7 +845,8 @@ def cmd_finalize(args):
         for row in problems:
             print("  -", row)
         return 2
-    rows = finalize_rows(batch)
+    legacy = bool(getattr(args, "accept_legacy", False))
+    rows = finalize_rows(batch, legacy=legacy)
     if getattr(args, "json", False):
         print(json.dumps({"batch": path.name, "dry_run": batch.get("dry_run"), "targets": rows}, indent=2, ensure_ascii=False))
         return 0
@@ -723,6 +898,7 @@ def main():
     f = sub.add_parser("finalize")
     f.add_argument("--execute", action="store_true", help=t("gd.help_execute"))
     f.add_argument("--json", action="store_true", help=t("gd.help_finalize_json"))
+    f.add_argument("--accept-legacy", action="store_true", help=t("gd.help_accept_legacy"))
     args = parser.parse_args()
     return {"plan": cmd_plan, "dispatch": cmd_dispatch, "status": cmd_status, "finalize": cmd_finalize, "hygiene": cmd_hygiene}[args.cmd](args)
 

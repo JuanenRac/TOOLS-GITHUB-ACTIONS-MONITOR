@@ -23,3 +23,7 @@ Ein roter Workflow nützt nichts, wenn niemand, der am Repository arbeitet, davo
 - Eine NEUE echte Meldung geht an die Benachrichtigungskanäle, die du schon eingerichtet hast (Einstellungen > Benachrichtigungen).
 - Optional, standardmäßig aus: `ai_alerts.hook` schickt die neue echte Meldung (geschlossene Liste bereinigter Felder) per POST an eine Adresse auf diesem Rechner, höchstens `max_per_hour`-mal pro Stunde, damit ein eigenes Skript eine KI-Sitzung wecken kann.
 - Nichts davon sendet Daten an einen KI-Anbieter, führt einen Befehl aus oder schreibt auf GitHub.
+
+## Der MCP-Server ist lokal
+
+`mcp_server.py` spricht JSON über Standardeingabe und -ausgabe mit dem KI-Werkzeug, das ihn startet: Er hat keinen Netzwerkport und darf nie hinter einen gelegt werden. Eine fehlerhafte Nachricht erhält einen Fehler nur für diese Nachricht, eine Zeile über 64 KB wird abgelehnt, und `ack_alert` (nur mit `--allow-ack`) ändert nur den lokalen Zustand des Feeds. Der Feed kann Repository-Namen und kurze CI-Fehlermeldungen enthalten; alles wird vor der Ausgabe von Token, Schlüsseln, E-Mail-Adressen, IP-Adressen und dem Ordner einer Person bereinigt.

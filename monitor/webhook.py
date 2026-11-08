@@ -8,20 +8,27 @@ GitHub signature header `X-Hub-Signature-256: sha256=<hmac>` made with the share
 refused. What an accepted event does is small: it marks the repository named in the payload for a refresh on the next cycle (nothing is written
 anywhere, no payload text is stored or shown, and only repositories the monitor already watches are accepted).
 """
+import collections
 import hashlib
 import hmac
 import json
 import re
+import threading
+import time
 from datetime import datetime, timezone
 
 import i18n
+import toolconfig
 
 NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}$")
+DELIVERY_RE = re.compile(r"^[A-Za-z0-9-]{8,64}$")   # X-GitHub-Delivery: a GUID
+FULL_NAME_RE = re.compile(r"^([A-Za-z0-9-]{1,39})/([A-Za-z0-9._-]{1,100})$")
 MIN_SECRET = 32
 MAX_BODY = 262144
+MAX_DELIVERIES = 2000        # the replay memory is bounded: the oldest delivery ids fall out first
 EVENTS = ("workflow_run", "workflow_job", "push", "release", "check_suite", "ping")
 
-TEXT = {key: "wh." + key for key in ("off", "bad_secret", "too_big", "bad_signature", "bad_event", "bad_payload", "unknown_repo", "on")}   # keys of the messages (locales/*.json); use text(key)
+TEXT = {key: "wh." + key for key in ("off", "bad_secret", "too_big", "bad_signature", "bad_event", "bad_payload", "unknown_repo", "on", "bad_delivery")}   # keys of the messages (locales/*.json); use text(key)
 
 
 def text(key):
@@ -41,6 +48,59 @@ def live_settings(config):
     cfg = cfg if isinstance(cfg, dict) else {}
     keep = cfg.get("live_events_keep")
     return {"record_events": cfg.get("record_events", True) is True, "live_events_keep": keep if isinstance(keep, int) and not isinstance(keep, bool) and 10 <= keep <= 1000 else 100}
+
+
+def guard_settings(config):
+    """{"replay_seconds", "max_per_minute", "allowed_owners"}: how long a delivery id is remembered, how many accepted events one repository may cause per minute, and the owners
+    (besides github_owner) whose repositories may be named in a payload."""
+    cfg = (config or {}).get("webhook")
+    cfg = cfg if isinstance(cfg, dict) else {}
+
+    def number(key, default, low, high):
+        value = cfg.get(key)
+        return value if isinstance(value, int) and not isinstance(value, bool) and low <= value <= high else default
+    owners = [o for o in (cfg.get("allowed_owners") or []) if isinstance(o, str) and re.match(r"^[A-Za-z0-9-]{1,39}$", o)] if isinstance(cfg.get("allowed_owners"), list) else []
+    return {"replay_seconds": number("replay_seconds", 3600, 60, 86400), "max_per_minute": number("max_per_minute", 30, 1, 600), "allowed_owners": owners}
+
+
+_guard_lock = threading.Lock()
+_seen = collections.OrderedDict()     # delivery id -> time it was accepted (signature already verified)
+_per_repo = {}                        # repository -> times of the events accepted in the last minute
+
+
+def reset():
+    """Forgets every remembered delivery and every count (tests, and a changed secret)."""
+    with _guard_lock:
+        _seen.clear()
+        _per_repo.clear()
+
+
+def replay(delivery, window, now=None):
+    """True when this delivery id was already accepted within `window` seconds; otherwise remembers it (bounded memory) and returns False."""
+    now = time.time() if now is None else now
+    with _guard_lock:
+        while _seen and (len(_seen) > MAX_DELIVERIES or next(iter(_seen.values())) < now - window):
+            _seen.popitem(last=False)
+        if delivery in _seen and _seen[delivery] >= now - window:
+            return True
+        _seen[delivery] = now
+        _seen.move_to_end(delivery)
+        return False
+
+
+def throttled(repo, limit, now=None):
+    """True when `repo` already caused `limit` accepted events in the last minute; otherwise counts this one."""
+    now = time.time() if now is None else now
+    with _guard_lock:
+        recent = [x for x in _per_repo.get(repo, []) if x > now - 60]
+        if len(recent) >= limit:
+            _per_repo[repo] = recent
+            return True
+        _per_repo[repo] = recent + [now]
+        if len(_per_repo) > 5000:
+            for key in [k for k, v in _per_repo.items() if not v or v[-1] < now - 60]:
+                _per_repo.pop(key, None)
+        return False
 
 
 def active(config):
@@ -64,7 +124,10 @@ def verify(secret, body, header):
     """Constant-time comparison of the GitHub signature header with the one we compute."""
     if not secret or not isinstance(header, str) or not header.startswith("sha256="):
         return False
-    return hmac.compare_digest(sign(secret, body), header.strip())
+    try:
+        return hmac.compare_digest(sign(secret, body).encode("ascii"), header.strip().encode("ascii"))   # bytes: a header with other characters is a plain "no", not an exception
+    except UnicodeError:
+        return False
 
 
 def handle(config, body, headers, watched):
@@ -75,17 +138,33 @@ def handle(config, body, headers, watched):
         return 413, {"ok": False, "error": text("too_big")}, None
     if not verify(settings(config)["secret"], body, headers.get("X-Hub-Signature-256")):
         return 401, {"ok": False, "error": text("bad_signature")}, None
+    guard = guard_settings(config)
+    delivery = headers.get("X-GitHub-Delivery")
+    if not isinstance(delivery, str) or not DELIVERY_RE.match(delivery):
+        return 400, {"ok": False, "error": text("bad_delivery")}, None
+    if replay(delivery, guard["replay_seconds"]):     # a valid request captured and sent again: answered, never acted on
+        return 202, {"ok": True, "ignored": True, "duplicate": True}, None
     event = headers.get("X-GitHub-Event")
     if event not in EVENTS:
         return 202, {"ok": True, "ignored": True}, None
     if event == "ping":
         return 200, {"ok": True}, None
     try:
-        name = json.loads(body)["repository"]["name"]
-    except (ValueError, KeyError, TypeError):
+        payload = json.loads(body)
+        name = payload["repository"]["name"]
+        full = payload["repository"].get("full_name")
+    except (ValueError, KeyError, TypeError, AttributeError):
         return 400, {"ok": False, "error": text("bad_payload")}, None
     if not isinstance(name, str) or not NAME_RE.match(name) or name not in set(watched):
         return 202, {"ok": True, "ignored": True}, None
+    if full is not None:   # the owner named in the payload must be one this monitor watches
+        found = FULL_NAME_RE.match(full) if isinstance(full, str) else None
+        owners = {o.lower() for o in guard["allowed_owners"]} | {toolconfig.github_owner(config).lower()}
+        owners.discard("")
+        if not found or found.group(2) != name or (owners and found.group(1).lower() not in owners):
+            return 202, {"ok": True, "ignored": True}, None
+    if throttled(name, guard["max_per_minute"]):
+        return 202, {"ok": True, "ignored": True, "throttled": True}, None
     return 200, {"ok": True, "refresh": name}, name
 
 

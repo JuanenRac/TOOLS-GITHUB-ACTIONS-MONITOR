@@ -229,13 +229,22 @@ def template(here=HERE):
     return json.dumps(data, indent=2) + "\n"
 
 
-def run_tests():
-    env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
-    result = subprocess.run([sys.executable, "-I", "-m", "unittest", "discover", "-s", "tests"], cwd=str(HERE), capture_output=True, text=True,
-                            encoding="utf-8", errors="replace", env=env)
+TEST_TIMEOUT = 900            # seconds for the ordinary suite
+CLEAN_INSTALL_TIMEOUT = 1800  # seconds for the suite run from the extracted zip
+
+
+def run_tests(timeout=TEST_TIMEOUT):
+    """Stage 1 of the gate: the ordinary suite, ONCE, with a time limit. The nested "clean folder" test is switched off here (MONITOR_NO_NESTED): the clean install is its own stage
+    (clean_install_check), so the suite never runs twice inside one command."""
+    env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", MONITOR_NO_NESTED="1")
+    try:
+        result = subprocess.run([sys.executable, "-I", "-m", "unittest", "discover", "-s", "tests"], cwd=str(HERE), capture_output=True, text=True,
+                                encoding="utf-8", errors="replace", env=env, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        fail(f"the unit tests did not finish in {timeout} s")
     tail = (result.stderr or result.stdout).strip().splitlines()[-1:] or ["(no output)"]
     if result.returncode != 0:
-        fail("the unit tests do not pass:\n" + (result.stderr or result.stdout)[-1500:])
+        fail("the unit tests do not pass:\nstdout:\n" + result.stdout[-1000:] + "\nstderr:\n" + result.stderr[-1500:])
     return tail[0]
 
 
@@ -323,13 +332,17 @@ def clean_install_check(archive, entries, python=None):
                 fail(f"clean install: {path.relative_to(base).as_posix()} does not compile: {error}")
         env = {k: v for k, v in os.environ.items() if not k.startswith(("MONITOR_", "JUANENRAC_"))}
         env["PYTHONDONTWRITEBYTECODE"] = "1"
+        env["MONITOR_NO_NESTED"] = "1"      # the suite of the extracted copy must not start a third one
         smoke = subprocess.run([python, "-I", "read_report.py", "--version"], cwd=str(base), capture_output=True, text=True, encoding="utf-8", errors="replace", env=env, timeout=120)
         if smoke.returncode != 0 or not smoke.stdout.strip():
             fail("clean install: read_report.py --version does not run:\n" + (smoke.stderr or smoke.stdout)[-800:])
-        suite = subprocess.run([python, "-I", "-m", "unittest", "discover", "-s", "tests"], cwd=str(base), capture_output=True, text=True, encoding="utf-8", errors="replace",
-                               env=env, timeout=1800)
+        try:
+            suite = subprocess.run([python, "-I", "-m", "unittest", "discover", "-s", "tests"], cwd=str(base), capture_output=True, text=True, encoding="utf-8", errors="replace",
+                                   env=env, timeout=CLEAN_INSTALL_TIMEOUT)
+        except subprocess.TimeoutExpired:
+            fail(f"clean install: the suite from the extracted zip did not finish in {CLEAN_INSTALL_TIMEOUT} s")
         if suite.returncode != 0:
-            fail("clean install: the suite fails from the extracted zip:\n" + (suite.stderr or suite.stdout)[-1500:])
+            fail("clean install: the suite fails from the extracted zip:\nstdout:\n" + suite.stdout[-1000:] + "\nstderr:\n" + suite.stderr[-1500:])
         tail = (suite.stderr or suite.stdout).strip().splitlines()[-3:]
         return f"{len(found)} files, version {smoke.stdout.strip().splitlines()[0][:40]}, suite: {' '.join(tail)}"
 

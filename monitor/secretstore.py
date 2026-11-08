@@ -9,7 +9,7 @@ Where the token is kept, in this order (the setting `github_token.store` can for
   * Linux: the Secret Service (GNOME Keyring / KWallet), through `secret-tool`, which reads the secret from its standard input;
   * anywhere else, or when the tools above are missing: a file with permissions 600 (owner only) in a folder with permissions 700 - the weakest option, and the panel says so.
 The token is NEVER written to actions_monitor.json, a log, the About panel, the text for support, the metrics or any answer of the server: the page can only learn whether one is stored and where.
-It is handed to `gh` through the environment variable GH_TOKEN of this process only (children inherit it), and `redact()` removes it from any text before it is shown.
+It is handed to `gh` through the environment variable GH_TOKEN of the `gh` process ONLY (gh_kwargs(); never set in the environment of this process, so no other child inherits it), and `redact()` removes it from any text before it is shown.
 """
 import base64
 import ctypes
@@ -184,13 +184,20 @@ def apply_to_environment(config, store=None):
     token = (store or Store(cfg["store"])).load()
     if not valid(token):
         return False
-    os.environ["GH_TOKEN"] = token
-    APPLIED["token"] = token
+    APPLIED["token"] = token       # kept in this module only: it is NOT put in os.environ, so no child process inherits it by accident
     return True
 
 
+def gh_kwargs():
+    """Extra arguments for a subprocess call that runs `gh`: {"env": ...} with the stored token as GH_TOKEN when the monitor keeps one, else {} (gh then uses its own login). It is passed
+    to `gh` calls ONLY - never to `act`, to a notification command or to any program of the user."""
+    if not APPLIED["token"]:
+        return {}
+    env = dict(os.environ)
+    env["GH_TOKEN"] = APPLIED["token"]
+    return {"env": env}
+
+
 def clear_environment():
-    """After a delete or when the setting is turned off: the token this process put in GH_TOKEN leaves the environment."""
-    if APPLIED["token"] and os.environ.get("GH_TOKEN") == APPLIED["token"]:
-        os.environ.pop("GH_TOKEN", None)
+    """After a delete or when the setting is turned off: the monitor stops using the stored token. (A GH_TOKEN the user set in his own environment is never touched.)"""
     APPLIED["token"] = ""

@@ -68,3 +68,7 @@ GitHub Actions 向けの他のツールの仕組みを調べて、いくつか�
 ## 信頼度別の署名キュー
 
 キューの各行には `trust` があります。`verified`(公開鍵で署名を検証済み)、`unknown`(ここでは形式を検証できない:推測はしません)、`failed`(検証したが一致しない)。センチネルタブには署名フィルターがあり、種類ごとの件数を表示し、行に印(緑・灰・赤の縁)を付けます。コンソールからは `py -3 read_report.py --export-sign-queue FILE --sign-trust failed`。
+
+## ネットワークモードでは
+
+`/metrics` と `dashboard.json` はリポジトリとその状態を一覧にするため、公開ページではありません。ネットワークモードがオンのときは、他のエンドポイントと同じくアクセストークンが必要です。その一覧に到達できないようにしたい場合は `outputs.prometheus.enabled` / `outputs.dashboard.enabled` をオフにしてください。

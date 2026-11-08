@@ -23,3 +23,7 @@ A red workflow is useless if nobody who works on the repository hears about it. 
 - A NEW real alert goes to the notification channels you already configured (Settings > Notifications).
 - Optional, off by default: `ai_alerts.hook` POSTs the new real alert (a closed list of cleaned fields) to an address on this computer, at most `max_per_hour` times an hour, so a script of yours can wake an AI session.
 - Nothing here sends data to an AI provider, runs a command or writes to GitHub.
+
+## The MCP server is local
+
+`mcp_server.py` speaks JSON over standard input and output with the AI tool that starts it: it has no network port and must never be put behind one. A malformed message gets an error for that message only, a line longer than 64 KB is refused, and `ack_alert` (only with `--allow-ack`) changes nothing but the local state of the feed. The feed can hold repository names and short error messages of the CI; everything is cleaned of tokens, keys, e-mail addresses, IP addresses and the folder of a person before it leaves.

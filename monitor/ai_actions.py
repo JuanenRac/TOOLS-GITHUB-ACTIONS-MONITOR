@@ -133,7 +133,9 @@ class Actions:
             self.recent.append(self.clock())
             del self.pending[str(ident)]
         try:
-            done = (runner or subprocess.run)(proposal["argv"], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60, stdin=subprocess.DEVNULL, shell=False)
+            import secretstore
+            done = (runner or subprocess.run)(proposal["argv"], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60, stdin=subprocess.DEVNULL, shell=False,
+                                              **(secretstore.gh_kwargs() if proposal["argv"][0] == "gh" else {}))
             code, tail = done.returncode, ((done.stdout or "") + (done.stderr or "")).strip()[-300:]
         except (OSError, subprocess.SubprocessError) as error:
             code, tail = 1, str(error)[:200]

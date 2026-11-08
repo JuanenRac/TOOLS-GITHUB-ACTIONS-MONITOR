@@ -75,3 +75,7 @@ Workflows eines Repositorys auf einmal, bis sie beendet sind. Von einem Webhook-
 ## Die Signatur-Warteschlange nach Vertrauen
 
 Jede Zeile der Warteschlange hat ein `trust`: `verified` (Signatur gegen den öffentlichen Schlüssel geprüft), `unknown` (das Format lässt sich hier nicht prüfen: nie geraten) oder `failed` (geprüft und nicht passend). Der Reiter Wächter hat einen Filter Signatur mit der Anzahl je Art und markiert die Zeilen (grüner, grauer oder roter Rand). Auf der Konsole: `py -3 read_report.py --export-sign-queue FILE --sign-trust failed`.
+
+## Im Netzwerkmodus
+
+`/metrics` und `dashboard.json` listen deine Repositories und ihren Zustand auf: Es sind keine öffentlichen Seiten. Bei aktivem Netzwerkmodus brauchen sie das Zugriffstoken wie jeder andere Endpunkt; schalte `outputs.prometheus.enabled` / `outputs.dashboard.enabled` aus, wenn dieses Inventar gar nicht erreichbar sein soll.

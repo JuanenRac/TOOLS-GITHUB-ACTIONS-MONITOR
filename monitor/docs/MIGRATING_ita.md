@@ -42,3 +42,18 @@ Non c'è nulla da convertire: il monitor continua a leggere il tuo `actions_moni
 3. Facoltativo: `python actions_monitor.py --doctor` verifica l'installazione.
 
 Cosa cambia: esiste l'**edizione lite** (`MONITOR_LITE_GITHUB_ACTIONS`, porta 8766, il suo `actions_monitor_lite.json`, senza sentinella); il **rosso su main** è una sola regola (l'ultimo run terminato di ogni workflow sul branch predefinito; i run annullati, saltati, neutri e scaduti non dicono nulla), quindi una cifra può differire dalla 1.5.x; la pagina Impostazioni inizia con la scheda **Di base**; notifiche, analitica, linter, eventi del webhook e assistente IA esistono e sono **spenti** finché non li attivi; scrivere su GitHub richiede ancora la tua conferma esplicita. Rich e Textual restano opzionali; Python 3.11 o successivo.
+
+# Dalla 1.6.4 alla 1.6.5
+
+Non c'è nulla da convertire. Ciò che ora si comporta in modo diverso, di proposito, perché ciò che non è provato non è più considerato sicuro:
+
+- **Lotti**: `finalize` propone alla firma solo un'esecuzione il cui lotto REGISTRA di essere stata costruita sul commit verificato. Un lotto scritto da una versione precedente indica `needs_review`. Per usarlo comunque: `finalize --accept-legacy` rilegge l'esecuzione da GitHub, la accetta solo se il suo commit è quello registrato e chiede la parola LEGACY prima di ogni firma. Oppure rilancia la build.
+- **CI verde** significa che i file di workflow obbligatori sono passati su quel commit (predefinito `ci.yml`; `dispatch.required_ci`, `dispatch.required_ci_repos`, `dispatch.required_ci_profiles`), che nulla è fallito né attende approvazione e che l'elenco delle esecuzioni è completo. Un repository il cui file di CI ha un altro nome deve indicarlo in `dispatch.required_ci`.
+- **Un `git fetch` fallito** (niente rete, niente credenziali) ferma l'avvio di quel repository.
+- **targets.json**: `tool` deve essere un semplice nome di file (senza cartelle né `..`) nella cartella degli strumenti; `extra` ammette solo coppie `-f chiave=valore` (non `dry_run` né `ref`); `finalize_flags` solo opzioni lunghe come `--bench`. Un catalogo non conforme viene rifiutato con il motivo.
+- **Notifiche**: `max_per_hour` conta i messaggi (uno per canale), non gli eventi.
+- **Webhook**: ogni richiesta richiede `X-GitHub-Delivery` (GitHub lo invia sempre); un id ripetuto viene ignorato; il proprietario di `full_name` deve essere l'account osservato.
+- **act**: un clone che è un collegamento a un'altra cartella viene rifiutato (`act.allow_symlinks` lo consente).
+- **Modalità rete**: solo indirizzi IPv4; l'indirizzo mostrato è quello su cui il server ascolta; `GET /api/sentinel/parte.txt?save=1` non scrive più (la copia è un POST con il token monouso).
+- Il token GitHub conservato non viene più messo nell'ambiente del processo: lo riceve solo `gh`.
+- Il test che decomprime lo zip in una cartella pulita non fa più parte della batteria ordinaria; `make_release.py` lo esegue come fase a sé.

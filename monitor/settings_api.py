@@ -19,10 +19,12 @@ and help_key(key) say which ones.
 
 The web server only answers these requests to the page of the same machine (the same Host/Origin checks as every other endpoint).
 """
+import contextlib
 import json
 import os
 import re
 import shutil
+import threading
 import time
 from pathlib import Path
 
@@ -199,6 +201,8 @@ _f(_T_HOOK, "inbound", "webhook.enabled", "bool", secure=True)
 _f(_T_HOOK, "inbound", "webhook.signing_state", "status", restart=False)
 _f(_T_HOOK, "inbound", "webhook.record_events", "bool")
 _f(_T_HOOK, "inbound", "webhook.live_events_keep", "int", (10, 1000), unit="")
+_f(_T_HOOK, "inbound", "webhook.replay_seconds", "int", (60, 86400))
+_f(_T_HOOK, "inbound", "webhook.max_per_minute", "int", (1, 600), unit="")
 # --- Reads and cache (conditional reads)
 _f("cache", "etag", "cache.etag.enabled", "bool")
 _f("cache", "etag", "cache.etag.ttl_hours", "int", (1, 168))
@@ -248,6 +252,10 @@ _f("advanced", "network", "listen.network", "bool", secure=True)
 _f("advanced", "network", "listen.host", "text", LISTEN_HOST_RE, secure=True)
 _f("advanced", "network", "listen.token_env", "text", ENV_NAME_RE, secure=True)
 _f("advanced", "network", "listen.allowed_hosts", "names", secure=True)
+_f("advanced", "network", "listen.tls_cert_file", "path", secure=True)
+_f("advanced", "network", "listen.tls_key_file", "path", secure=True)
+_f("advanced", "network", "listen.secure_cookie", "bool", secure=True)
+_f("advanced", "network", "listen.max_failed_attempts", "int", (3, 100), unit="", secure=True)
 _f("advanced", "token", "github_token.enabled", "bool", restart=False, secure=True)
 _f("advanced", "token", "github_token.store", "enum", ("auto", "system", "file"), restart=False, secure=True)
 _f("advanced", "ghactions", "github_actions.enabled", "bool", restart=False, secure=True)
@@ -256,6 +264,8 @@ _f("advanced", "ghactions", "github_actions.merge_method", "enum", ("squash", "m
 _f("advanced", "act", "act.enabled", "bool", restart=False, secure=True)
 _f("advanced", "act", "act.allowed", "acts", restart=False, secure=True)
 _f("advanced", "act", "act.timeout_seconds", "int", (30, 7200), restart=False)
+_f("advanced", "act", "act.allow_symlinks", "bool", restart=False, secure=True)
+_f("advanced", "dispatch", "dispatch.required_ci", "names", restart=False)
 _f("advanced", "mirror", "mirror.enabled", "bool", restart=False, secure=True)
 _f("advanced", "mirror", "mirror.folder", "path", restart=False)
 _f("advanced", "mirror", "mirror.max_mb", "int", (10, 100000), restart=False)
@@ -535,6 +545,48 @@ def _backup(path):
     return name
 
 
+_WRITE_LOCK = threading.RLock()
+
+
+@contextlib.contextmanager
+def file_lock(path, timeout=10.0):
+    """Exclusive lock around read -> change -> write of the configuration: a lock of this process (two requests of the page at once) AND, best effort, a lock file next to it
+    (another process that saves at the same time). Without it the second save would start from the file as it was before the first and undo it."""
+    with _WRITE_LOCK:
+        handle = None
+        try:
+            handle = open(str(path) + ".lock", "a+b")
+            end = time.time() + timeout
+            while True:
+                try:
+                    if os.name == "nt":
+                        import msvcrt
+                        handle.seek(0)
+                        msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+                    else:
+                        import fcntl
+                        fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    break
+                except OSError:
+                    if time.time() > end:
+                        break          # the lock of another process is stuck: the lock of this process still protects the page
+                    time.sleep(0.05)
+        except OSError:
+            handle = None
+        try:
+            yield
+        finally:
+            if handle is not None:
+                try:
+                    if os.name == "nt":
+                        import msvcrt
+                        handle.seek(0)
+                        msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+                except OSError:
+                    pass
+                handle.close()
+
+
 def apply(changes, path=CONFIG_FILE, lite=False):
     """Checks and writes. {"ok": True, "changed": [paths], "restart": [paths that need a restart], "backup": bool} or {"ok": False, "errors": {path: reason}}.
     Nothing is written when any value is invalid or when nothing changes."""
@@ -542,6 +594,11 @@ def apply(changes, path=CONFIG_FILE, lite=False):
     if errors:
         return {"ok": False, "errors": errors}
     path = Path(path)
+    with file_lock(path):
+        return _apply_locked(clean, path)
+
+
+def _apply_locked(clean, path):
     try:
         current = _read_file(path) if path.is_file() else {}
     except (OSError, ValueError):

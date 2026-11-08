@@ -27,3 +27,7 @@ Opcionais e **desligadas por predefinição**. Os eventos do feed (um vermelho n
 - Para chegar a um serviço que não está na lista, execute um pequeno recetor neste computador e aponte `http_local` para ele. Recebe um POST com `Content-Type: application/json` e este corpo: `{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`.
 - `kind` é um de `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`. Os campos só se acrescentam. Responda com qualquer 2xx; o resto conta como falha.
 - `mqtt` publica o mesmo JSON como carga de uma mensagem QoS 0 em `notify.channels.mqtt.topic`.
+
+## O limite por hora conta mensagens
+
+`notify.max_per_hour` limita as MENSAGENS que saem do computador, não os eventos: um evento enviado para três canais gasta três unidades, uma por canal. Se a quota não chega para todos os canais, os primeiros da lista recebem a mensagem e os restantes são descartados (a página conta-os como «limitados»). Um canal que não consegue enviar (sem segredo, endereço errado) não gasta nada. A contagem é feita sob um único bloqueio, por isso vários fios nunca ultrapassam o limite.

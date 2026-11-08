@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GITHUB-ACTIONS-MONITOR + WÄCHTER (Version 1.6.4)
+GITHUB-ACTIONS-MONITOR + WÄCHTER (Version 1.6.5)
 ================================================
 WELCHE STARTEN? (ein neuer Nutzer entscheidet in zwei Minuten)
   KOMPLETT  MONITOR_GITHUB_ACTIONS.*       die Seite mit dem Wächter (Port 8765): Alarme, Signierwarteschlange, Analyse. Hier beginnen, wenn Sie mehrere Repositories haben.
@@ -89,3 +89,9 @@ LIZENZ     GPL-3.0-or-later (siehe LICENSE und NOTICE). Copyright (C) 2026 Juane
 HILFE, ÜBER UND PRÜFUNGEN (1.6.4)
 ---------------------------------
 Die Seite hat eine Hilfe-Taste (rundes ?) und eine Über-Taste (i); in der Konsole: --help-topics, --help-search, --about und --doctor; --demo zeigt die Seite mit erfundenen Daten. Die Lite-Ausgabe startet mit eigenem Banner und Fenstertitel (LITE, Port 8766, ohne Wächter); die vollständige meldet COMPLETE, Port 8765, Wächter aktiv. Der Hinweis auf neue Versionen lässt sich abschalten (Einstellungen > Grundlagen).
+
+NEU IN 1.6.5 (Integrität und Sicherheit; Verlauf: CHANGELOG.md)
+  Stapel: Grüne CI heißt, der erforderliche Workflow lief durch (dispatch.required_ci), ein fehlgeschlagenes git fetch stoppt den Start, targets.json kann kein Werkzeug außerhalb des
+  Werkzeugordners nennen und dry_run/ref nicht ändern, und finalize bietet nur Läufe an, deren Stapel die Commit-Prüfung aufgezeichnet hat (finalize --accept-legacy für alte Stapel). act bleibt
+  im Arbeitsbereich und Stopp beendet den ganzen Baum. Netzwerkmodus: optionales HTTPS, Sperre nach falschen Token, nur IPv4. Webhook: keine Wiederholungen. Benachrichtigungen:
+  max_per_hour zählt Nachrichten. --doctor warnt vor gefährlichen Kombinationen.

@@ -23,3 +23,7 @@ Un workflow en rojo no sirve de nada si nadie de los que trabajan en el reposito
 - Una alerta real NUEVA va a los canales de notificación que ya configuraste (Ajustes > Notificaciones).
 - Opcional, apagado por defecto: `ai_alerts.hook` envía por POST la alerta real nueva (una lista cerrada de campos limpiados) a una dirección de este equipo, como máximo `max_per_hour` veces por hora, para que un script tuyo despierte una sesión de IA.
 - Nada de esto envía datos a un proveedor de IA, ejecuta un comando ni escribe en GitHub.
+
+## El servidor MCP es local
+
+`mcp_server.py` habla JSON por entrada y salida estándar con la herramienta de IA que lo arranca: no tiene puerto de red y nunca debe ponerse detrás de uno. Un mensaje mal formado recibe un error solo para ese mensaje, una línea de más de 64 KB se rechaza, y `ack_alert` (solo con `--allow-ack`) no cambia más que el estado local del feed. El feed puede contener nombres de repositorios y mensajes de error breves de la CI; todo se limpia de tokens, claves, correos, direcciones IP y la carpeta de una persona antes de salir.

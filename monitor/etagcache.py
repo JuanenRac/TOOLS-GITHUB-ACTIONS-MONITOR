@@ -127,5 +127,16 @@ class EtagCache:
             return data, "200"
         return data, "plain"
 
+    def invalidate(self, repo):
+        """Drops the stored answers of one repository (the endpoints of `/repos/<owner>/<repo>/`). Returns how many were dropped."""
+        marker = f"/{repo}/"
+        with self.lock:
+            gone = [k for k in self.entries if marker in k or k.endswith(f"/{repo}")]
+            for key in gone:
+                del self.entries[key]
+            if gone:
+                self.dirty = True
+            return len(gone)
+
     def stats(self):
         return {"enabled": self.enabled, "entries": len(self.entries), "saved": self.saved, "calls": self.calls, "invalid": self.invalid}

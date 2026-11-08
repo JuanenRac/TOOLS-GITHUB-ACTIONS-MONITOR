@@ -75,3 +75,7 @@ workflows of a repository at once until they finish. From a webhook dashboard wi
 ## The signing queue by trust
 
 Each row of the queue has a `trust`: `verified` (the signature was checked against the public key), `unknown` (the format cannot be checked here: never a guess) or `failed` (it was checked and does not match). The Sentinel tab has a Signature filter with the count of each kind and marks the rows (green, grey or red edge). From the console: `py -3 read_report.py --export-sign-queue FILE --sign-trust failed`.
+
+## In the network mode
+
+`/metrics` and `dashboard.json` list your repositories and their state: they are not public pages. With the network mode on they need the access token like every other endpoint; switch off `outputs.prometheus.enabled` / `outputs.dashboard.enabled` if you do not want that inventory to be reachable at all.

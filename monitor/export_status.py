@@ -86,12 +86,15 @@ def sign_queue_rows(snapshot, trust="all"):
 
 
 def write_sign_queue(snapshot, path, trust="all"):
-    """JSON (default) or CSV (.csv). Returns the Path or None when refused / nothing to say."""
+    """JSON (default) or CSV (.csv). Returns (Path | None, reason): reason is "ok", "no_data" (nothing to say yet), "path" (a drive or network location that is refused), "is_dir" (the
+    destination is a folder) or "write: <what the system said>". The caller shows `reason_text(reason)`."""
     if not snapshot or snapshot.get("loading"):
-        return None
+        return None, "no_data"
     target = allowed_directory(path)
-    if target is None or target.is_dir():
-        return None
+    if target is None:
+        return None, "path"
+    if target.is_dir():
+        return None, "is_dir"
     rows = sign_queue_rows(snapshot, trust)
     try:
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -106,9 +109,16 @@ def write_sign_queue(snapshot, path, trust="all"):
         tmp = target.with_name(target.name + ".tmp")
         tmp.write_text(text, encoding="utf-8", newline="\n")
         os.replace(tmp, target)
-        return target
-    except OSError:
-        return None
+        return target, "ok"
+    except OSError as error:
+        return None, "write: " + (error.strerror or type(error).__name__)[:120]
+
+
+def reason_text(reason):
+    """The sentence (current language) for a reason returned by write_sign_queue."""
+    if reason.startswith("write:"):
+        return i18n.t("exp.reason_write", error=reason[6:].strip())
+    return i18n.t({"no_data": "exp.no_data", "path": "exp.reason_path", "is_dir": "exp.reason_dir"}.get(reason, "exp.refused"))
 
 
 def contains_sensitive(text):

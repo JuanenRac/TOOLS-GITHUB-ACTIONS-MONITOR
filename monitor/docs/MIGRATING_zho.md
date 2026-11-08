@@ -42,3 +42,18 @@
 3. 可选：`python actions_monitor.py --doctor` 检查安装。
 
 变化：出现了**精简版**（`MONITOR_LITE_GITHUB_ACTIONS`，端口 8766，独立的 `actions_monitor_lite.json`，无哨兵）；**main 上为红**统一为一条规则（每个工作流在默认分支上最后一次已完成的 run；已取消、已跳过、neutral 和 stale 的 run 不代表任何结论），因此某个数字可能与 1.5.x 不同；设置页以**基本**标签页开头；通知、分析、linter、webhook 事件和 AI 助手已存在，但在你开启之前都是**关闭**的；向 GitHub 写入仍需你明确确认。Rich 和 Textual 仍是可选的；需要 Python 3.11 或更高版本。
+
+# 从 1.6.4 到 1.6.5
+
+无需转换任何内容。以下行为是有意改变的，因为未经证明的事物不再被视为安全：
+
+- **批次**：`finalize` 只会把批次中「记录了」基于已校验提交构建的运行提供给签名。旧版本写下的批次显示 `needs_review`。如仍要使用：`finalize --accept-legacy` 会从 GitHub 重新读取该运行，仅当其提交与记录一致时才接受，并在每次签名前要求输入 LEGACY。或者重新触发构建。
+- **绿色 CI** 指必需的工作流文件在该提交上通过（默认 `ci.yml`；`dispatch.required_ci`、`dispatch.required_ci_repos`、`dispatch.required_ci_profiles`），没有失败或等待批准的项，且运行列表是完整的。CI 文件名不同的仓库需要把名称写入 `dispatch.required_ci`。
+- **`git fetch` 失败**（无网络、无凭据）会阻止该仓库的触发。
+- **targets.json**：`tool` 必须是工具文件夹内的普通文件名（无文件夹、无 `..`）；`extra` 只能包含 `-f 键=值` 对（不能是 `dry_run` 或 `ref`）；`finalize_flags` 只能是 `--bench` 这样的长选项。不符合的目录会连同原因被拒绝。
+- **通知**：`max_per_hour` 统计的是消息（每个渠道一条），而不是事件。
+- **Webhook**：每个请求都需要 `X-GitHub-Delivery`（GitHub 总会发送）；重复的 ID 会被忽略；`full_name` 的所有者必须是被监视的账户。
+- **act**：作为指向其他文件夹的链接的克隆会被拒绝（`act.allow_symlinks` 可允许）。
+- **网络模式**：仅 IPv4 地址；显示的地址就是服务器监听的地址；`GET /api/sentinel/parte.txt?save=1` 不再写入（副本改为带一次性令牌的 POST）。
+- 保存的 GitHub 令牌不再放入进程环境：只有 `gh` 会收到它。
+- 在干净文件夹中解压 zip 的测试不再属于常规测试集；`make_release.py` 将其作为独立阶段运行。

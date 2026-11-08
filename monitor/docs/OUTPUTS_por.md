@@ -75,3 +75,7 @@ workflows de um repositório de uma só vez até terminarem. De um painel de web
 ## A fila de assinatura por confiança
 
 Cada linha da fila tem um `trust`: `verified` (assinatura verificada com a chave pública), `unknown` (o formato não se pode verificar aqui: nunca se adivinha) ou `failed` (verificada e não corresponde). O separador Sentinela tem um filtro Assinatura com o número de cada tipo e marca as linhas (margem verde, cinzenta ou vermelha). Na consola: `py -3 read_report.py --export-sign-queue FILE --sign-trust failed`.
+
+## No modo de rede
+
+`/metrics` e `dashboard.json` listam os seus repositórios e o seu estado: não são páginas públicas. Com o modo de rede ligado exigem o token de acesso como qualquer outro endpoint; desligue `outputs.prometheus.enabled` / `outputs.dashboard.enabled` se não quiser que esse inventário seja acessível de todo.

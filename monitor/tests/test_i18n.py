@@ -410,8 +410,8 @@ class AuthorshipAndRelease(unittest.TestCase):
         self.assertNotIn("JuanenRac/", text)
 
     def test_a_zip_extracted_in_a_clean_folder_runs_the_tests_offline(self):
-        if os.environ.get("MONITOR_NO_NESTED"):
-            self.skipTest("nested run")
+        if os.environ.get("MONITOR_NO_NESTED") or not os.environ.get("MONITOR_RUN_CLEAN_INSTALL"):
+            self.skipTest("the clean install is its own stage of make_release.py (set MONITOR_RUN_CLEAN_INSTALL=1 to run it here)")
         with tempfile.TemporaryDirectory() as tmp:
             for p in mr.members():
                 dest = Path(tmp) / "pkg" / p.relative_to(HERE)

@@ -30,3 +30,7 @@
 - 只保留经过验证的简短字段(工作流、运行、状态、结论、分支、短提交、运行链接、时长);绝不保留提交信息或任何自由文本。最新的 `webhook.live_events_keep` 个事件可在 `GET /api/live-events` 读取(仅限本机)。
 - 当通知开启时,以红色结束的运行还会发送 `workflow_failed` 通知。关闭 `webhook.record_events` 后,Webhook 恢复为上述仅刷新模式。
 - GitHub 无法访问 `127.0.0.1`:请使用 `gh webhook forward`(见 GitHub CLI 文档)或你有意搭建的隧道,指向 `http://127.0.0.1:端口/api/webhook`。
+
+## 重放与洪泛
+
+被人截获后重新发送的有效签名请求会得到应答但不会被执行：每次投递都需要 `X-GitHub-Delivery` ID，已接受的 ID 会在 `webhook.replay_seconds` 内被记住（默认一小时，内存有上限），重复请求得到 `202 {"duplicate": true}`。（在 GitHub 页面手动重新投递会复用同一 ID，因此在此窗口内会被忽略。）一个仓库每分钟最多引发 `webhook.max_per_minute` 个被接受的事件，其余只应答并忽略。若载荷包含 `full_name`，其所有者必须是被监视的账户（或 `webhook.allowed_owners` 中的一个）。在网络模式下，一个地址每分钟可发送 120 个请求。接受事件后，该仓库已保存的条件读取会被丢弃，并在下个周期重新读取，因此实时事件总会与 GitHub 对账。

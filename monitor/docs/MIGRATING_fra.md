@@ -42,3 +42,18 @@ Rien n'est à convertir : le moniteur continue de lire votre `actions_monitor.js
 3. Facultatif : `python actions_monitor.py --doctor` vérifie l'installation.
 
 Ce qui change : l'**édition lite** existe (`MONITOR_LITE_GITHUB_ACTIONS`, port 8766, son propre `actions_monitor_lite.json`, sans sentinelle) ; le **rouge sur main** suit une seule règle (le dernier run terminé de chaque workflow sur la branche par défaut ; les runs annulés, ignorés, neutres et périmés ne disent rien), un chiffre peut donc différer de la 1.5.x ; la page Réglages commence par un onglet **Essentiel** ; les notifications, l'analytique, le linter, les événements du webhook et l'assistant IA existent et sont **désactivés** tant que vous ne les activez pas ; écrire sur GitHub exige toujours votre confirmation explicite. Rich et Textual restent facultatifs ; Python 3.11 ou plus récent.
+
+# De la 1.6.4 à la 1.6.5
+
+Rien n'est à convertir. Ce qui se comporte désormais autrement, volontairement, car ce qui n'est pas prouvé n'est plus tenu pour sûr :
+
+- **Lots** : `finalize` ne propose à la signature qu'une exécution dont le lot ENREGISTRE qu'elle a été construite sur le commit vérifié. Un lot écrit par une version plus ancienne indique `needs_review`. Pour l'utiliser quand même : `finalize --accept-legacy` relit l'exécution sur GitHub, ne l'accepte que si son commit est celui enregistré et demande le mot LEGACY avant chaque signature. Ou relancez la compilation.
+- **CI verte** signifie que les fichiers de workflow obligatoires ont réussi sur ce commit (par défaut `ci.yml` ; `dispatch.required_ci`, `dispatch.required_ci_repos`, `dispatch.required_ci_profiles`), que rien n'a échoué ni n'attend une approbation, et que la liste des exécutions est complète. Un dépôt dont le fichier de CI porte un autre nom doit l'indiquer dans `dispatch.required_ci`.
+- **Un `git fetch` en échec** (pas de réseau, pas d'identifiants) arrête le lancement de ce dépôt.
+- **targets.json** : `tool` doit être un simple nom de fichier (sans dossier ni `..`) situé dans le dossier des outils ; `extra` n'accepte que des paires `-f clé=valeur` (pas `dry_run` ni `ref`) ; `finalize_flags` seulement des options longues comme `--bench`. Un catalogue non conforme est refusé avec la raison.
+- **Notifications** : `max_per_hour` compte les messages (un par canal), pas les événements.
+- **Webhook** : chaque requête a besoin de `X-GitHub-Delivery` (GitHub l'envoie toujours) ; un identifiant répété est ignoré ; le propriétaire de `full_name` doit être le compte surveillé.
+- **act** : un clone qui est un lien vers un autre dossier est refusé (`act.allow_symlinks` l'autorise).
+- **Mode réseau** : adresses IPv4 uniquement ; l'adresse affichée est celle où le serveur écoute ; `GET /api/sentinel/parte.txt?save=1` n'écrit plus (la copie est un POST avec le jeton à usage unique).
+- Le jeton GitHub conservé n'est plus placé dans l'environnement du processus : seul `gh` le reçoit.
+- Le test qui décompresse le zip dans un dossier propre ne fait plus partie de la batterie ordinaire ; `make_release.py` l'exécute comme étape à part.

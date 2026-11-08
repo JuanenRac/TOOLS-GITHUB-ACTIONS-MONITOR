@@ -2,6 +2,10 @@
 
 Ideas que no cupieron en la versión actual, sin orden prometido. Son direcciones, no compromisos; un issue o un pull request es la mejor forma de adelantar una.
 
+## Hecho en la 1.6.5
+
+Una versión de integridad y seguridad, sin funciones grandes nuevas: un commit en verde exige el workflow obligatorio del repositorio, un fetch fallido detiene el despacho, el catálogo no puede nombrar una herramienta fuera de la carpeta de herramientas ni cambiar `dry_run`/`ref`, y un lote sin comprobación de commit registrada ya no se ofrece para firmar; `act` se queda dentro del espacio de trabajo y Stop termina todo el árbol de procesos y los contenedores de la ejecución; el modo red puede servir HTTPS, bloquea los tokens erróneos y solo acepta IPv4; el webhook rechaza reenvíos e inundaciones; el servidor MCP sobrevive a mensajes mal formados; `max_per_hour` cuenta mensajes; los ajustes se guardan bajo un bloqueo; el token guardado llega solo a `gh`; `--doctor` avisa de combinaciones peligrosas; la prueba de instalación limpia es una etapa propia del control de calidad de la publicación.
+
 ## Hecho en la 1.6.4
 
 Pruebas de aislamiento de la edición lite y de la demo, ninguna petición de red cuando la comprobación de versión está apagada o la instalación está aislada, un README que empieza por la elección del lanzador, `--doctor --json`, una barra persistente para el modo red, la Ayuda y sus documentos en ocho idiomas, y las funciones opcionales (modo red, un token guardado por el monitor, acciones sobre GitHub, `act`, copia local de artefactos, runners propios, OpenTelemetry, FinOps por etiquetas de job); véase el registro de cambios y `ADVANCED.md`.
@@ -10,6 +14,7 @@ Pruebas de aislamiento de la edición lite y de la demo, ninguna petición de re
 
 Lo que la 1.6.4 no alcanzó, y por qué:
 
+- **Decidido, no hecho en la 1.6.5** (la versión está cerrada a integridad y seguridad): el aviso activo a una IA externa (apagado por defecto, una primera confirmación por proveedor, solo los campos ya filtrados de la lista cerrada, un tope de llamadas y de coste por hora, la clave por el nombre de una variable de entorno, y la IA nunca ejecuta una acción) con su variante de comando saliente (lista cerrada, sin shell); capturas nuevas (`tools/make_screenshots.py --web` no produjo salida en la máquina de la publicación, así que se hacen a mano: arranca `--demo`, abre la página y guarda una captura por pestaña); y los repositorios de varios propietarios en una sola página.
 - **Varios propietarios en una página**: el monitor identifica un repositorio solo por su nombre (ejecuciones, centinela, caché, exportaciones), así que dos propietarios con un repositorio del mismo nombre se mezclarían. Las organizaciones se listan y cada una se vigila con su propio monitor (`github_owner`). Hacerlo en una página exige poner el propietario en cada identificador.
 - **El informe de facturación con un login que pueda leerlo**: la respuesta real de un login sin el permiso `user` es «no encontrado» y el monitor vuelve a la estimación (comprobado); las cifras en sí no se han comparado con una cuenta de facturación.
 - **Los precios de los runners grandes** de `quotas.json` salen de la memoria de la lista pública de precios y están marcados como no verificados; compáralos con la página de facturación de GitHub y edita el fichero.
