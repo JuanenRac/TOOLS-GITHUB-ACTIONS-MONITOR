@@ -44,6 +44,20 @@ class History(unittest.TestCase):
                 if re.fullmatch(r"v\d+\.\d+\.\d+", tag):
                     self.assertIn("## [%s]" % tag[1:], TEXT, tag)
 
+    def test_the_manifest_version_is_the_version_of_the_tool(self):
+        manifest = REPO / "electro-hobby-3d.project.json"
+        if not manifest.is_file():
+            self.skipTest("the manifest lives in the repository")
+        self.assertEqual(json.loads(manifest.read_text(encoding="utf-8"))["version"], tool_version.TOOL_VERSION)
+
+    def test_the_dashboard_notice_waits_for_a_green_ci_and_an_optional_secret(self):
+        flow = REPO / ".github" / "workflows" / "dashboard-dispatch.yml"
+        if not flow.is_file():
+            self.skipTest("the workflows live in the repository")
+        text = flow.read_text(encoding="utf-8")
+        for needle in ("      - CI", "permissions: {}", "conclusion == 'success'", "event == 'push'", "ECOSYSTEM_DASHBOARD_DISPATCH_TOKEN", "exit 0"):
+            self.assertIn(needle, text, needle)
+
     def test_recent_versions_are_grouped_and_every_section_has_content(self):
         for match in re.finditer(r"^## \[(\d+\.\d+\.\d+)\]\n(.*?)(?=^## \[|\Z)", TEXT, re.S | re.M):
             version, body = match.group(1), match.group(2)

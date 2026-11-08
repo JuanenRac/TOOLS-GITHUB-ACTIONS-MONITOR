@@ -12,3 +12,7 @@
 4. **Safe by default**: anything that writes to GitHub, opens a network port or sends data out is off by default and listens on `127.0.0.1` only.
 5. **Small steps**: one change per pull request, with the matching line in `CHANGELOG.md`.
 6. **Pictures**: edit `docs/architecture.json` or `docs/structure.json` and run `python tools/make_architecture.py` / `python tools/make_structure.py`; never edit the SVG by hand.
+
+## Refreshing a status dashboard after each release
+
+`.github/workflows/dashboard-dispatch.yml` runs after the `CI` workflow finishes green on `main` (push events only). If the maintainer defines the optional repository secret `ECOSYSTEM_DASHBOARD_DISPATCH_TOKEN`, it asks a dashboard repository to refresh its table of versions; without the secret it exits quietly, has no permissions and never changes or delays the CI. The version in `electro-hobby-3d.project.json` must equal `tool_version.py` at every release; a test checks it.
