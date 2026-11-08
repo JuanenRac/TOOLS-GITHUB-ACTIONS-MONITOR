@@ -22,4 +22,6 @@ GPL-3.0-or-later - see LICENSE
    - 没有本地克隆？同样可用，只是处于精简模式（只显示 GitHub API 提供的内容），页面会告诉你。
 6. 它不会做的事：不会自行签名或发布任何内容，自身不会向 GitHub 写入任何东西（只有你运行的 `dispatch --go`、`dispatch --real` 和 `finalize --execute` 会），只监听 127.0.0.1，也不保存任何令牌。签名和发布是你自己执行的命令；
    监视器只把它们显示为文本。
+7. 可选的附加功能(默认关闭或独立):lint_workflows.py 在推送前检查你的工作流文件;tui.py 在控制台显示实时表格(pip install rich);通知、入站 Webhook 和 AI 助手在设置标签页中开启;
+   作为服务、置于代理之后或在容器中运行,请见 docs/DEPLOYMENT_zho.md。
 遇到问题？请参阅 README_zh.txt 中的“问题排查”。

@@ -22,4 +22,6 @@ INÍCIO RÁPIDO - Monitor do GitHub Actions + Sentinela
    - Sem clones locais? Funciona na mesma, em modo reduzido (só o que a API do GitHub fornece), e a página diz isso.
 6. O que NÃO faz: não assina e não publica nada por si só, por si só não escreve nada no GitHub (só `dispatch --go`, `dispatch --real` e `finalize --execute`, que executa você, o fazem), só escuta em 127.0.0.1 e não guarda nenhum token. Assinar e publicar são
    comandos que executa você; o monitor limita-se a mostrá-los como texto.
+7. Extras opcionais (desligados ou à parte): lint_workflows.py verifica os seus ficheiros de workflow antes do push; tui.py mostra uma grelha em direto na consola (pip install rich); as notificações, o webhook de entrada e o
+   assistente de IA ligam-se no separador Definições; para o executar como serviço, atrás de um proxy ou num contentor veja docs/DEPLOYMENT_por.md.
 Problemas? Veja «PROBLEMAS» em README_pt.txt.

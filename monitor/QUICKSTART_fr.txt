@@ -22,4 +22,6 @@ DÉMARRAGE RAPIDE - Moniteur GitHub Actions + Sentinelle
    - Pas de clones locaux ? Cela fonctionne quand même, en mode réduit (seulement ce que donne l'API GitHub), et la page vous le dit.
 6. Ce qu'il ne fait PAS : il ne signe et ne publie rien tout seul, n'écrit rien sur GitHub de lui-même (seuls `dispatch --go`, `dispatch --real` et `finalize --execute`, que vous exécutez, le font), n'écoute que sur 127.0.0.1 et ne garde aucun jeton. Signer et publier sont
    des commandes que vous lancez vous-même ; le moniteur ne fait que les afficher en texte.
+7. Extras optionnels (désactivés ou à part) : lint_workflows.py contrôle vos fichiers de workflow avant le push ; tui.py affiche une grille en direct dans la console (pip install rich) ; les notifications, le webhook entrant
+   et l'assistant IA s'activent dans l'onglet Réglages ; pour l'exécuter comme service, derrière un proxy ou dans un conteneur, voir docs/DEPLOYMENT_fra.md.
 Des problèmes ? Voir « PROBLÈMES » dans README_fr.txt.

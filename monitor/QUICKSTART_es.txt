@@ -22,4 +22,6 @@ INICIO RÁPIDO - Monitor de GitHub Actions + Centinela
    - ¿Sin clones locales? Funciona igualmente, en modo reducido (solo lo que da la API de GitHub), y la página te lo dice.
 6. Lo que NO hace: no firma y no publica nada por sí solo, por sí solo no escribe nada en GitHub (solo `dispatch --go`, `dispatch --real` y `finalize --execute`, que ejecutas tú, lo hacen), solo escucha en 127.0.0.1 y no guarda ningún token. Firmar y publicar son
    comandos que ejecutas tú; el monitor solo los muestra como texto.
+7. Extras opcionales (apagados o aparte): lint_workflows.py revisa tus archivos de workflow antes de subir; tui.py muestra una cuadrícula en vivo en la consola (pip install rich); las notificaciones, el webhook de entrada y el
+   asistente de IA se activan en la pestaña Configuración; para ejecutarlo como servicio, tras un proxy o en un contenedor mira docs/DEPLOYMENT_spa.md.
 ¿Problemas? Mira «PROBLEMAS» en README_es.txt.

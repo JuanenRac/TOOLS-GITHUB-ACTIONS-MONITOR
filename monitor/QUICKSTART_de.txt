@@ -22,4 +22,6 @@ SCHNELLSTART - GitHub-Actions-Monitor + Wächter
    - Keine lokalen Klone? Es funktioniert trotzdem, im reduzierten Modus (nur, was die GitHub-API liefert), und die Seite sagt es dir.
 6. Was er NICHT tut: Er signiert und veröffentlicht nichts von selbst, schreibt von sich aus nichts auf GitHub (nur `dispatch --go`, `dispatch --real` und `finalize --execute`, die du ausführst, tun es), lauscht nur auf 127.0.0.1 und speichert kein Token. Signieren und
    Veröffentlichen sind Befehle, die du selbst ausführst; der Monitor zeigt sie nur als Text.
+7. Optionale Extras (aus oder getrennt): lint_workflows.py prüft Ihre Workflow-Dateien vor dem Push; tui.py zeigt ein Live-Raster in der Konsole (pip install rich); Benachrichtigungen, der eingehende Webhook und der
+   KI-Assistent werden im Reiter Einstellungen eingeschaltet; als Dienst, hinter einem Proxy oder in einem Container siehe docs/DEPLOYMENT_deu.md.
 Probleme? Siehe „PROBLEME“ in README_de.txt.
