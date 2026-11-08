@@ -14,6 +14,7 @@ Two optional command line tools. The monitor itself needs no package; the termin
 - `py -3 lint_workflows.py [PATH ...] [--json] [--fail-on info|warn|bad]` checks `.github/workflows/*.yml` before you push. With no path it looks at the current folder. It only opens files.
 - Rules (each can be switched off and given another severity in the Settings tab, sub-tab Workflow linter): `unpinned_uses` (an action not pinned to a full commit SHA), `permissions` (no `permissions:` block, or `write-all`), `secrets_in_clear` (what looks like a token or key written in the file), `injection` (text of an outsider pasted into a `run:` script) and `pr_target` (`pull_request_target` with a checkout of the pull request's code).
 - The exit code is 1 when a finding reaches `--fail-on` (default `bad`), so it can be a pre-push hook. When the monitor can see your clones it also adds one line to the daily report.
+- A value that looks like a secret is classified without ever being printed or stored: a known token format or a long high-entropy string is serious (`bad`), a readable filler such as `placeholder`, `dummy`, `changeme` or `ci` is only information, anything else is a warning, and `${{ secrets.X }}`, `${X}` or an empty value is no finding. To silence one finding write a comment on its line or on the line before: `# monitor-lint: ignore secrets_in_clear because it is a filler for docker compose config` (a rule name or `all`); or list `repository:file:rule` patterns, with `*`, in the setting `lint.ignore`.
 
 
 ## The terminal view: `tui.py`

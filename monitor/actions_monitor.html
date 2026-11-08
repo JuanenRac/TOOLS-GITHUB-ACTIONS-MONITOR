@@ -16,9 +16,31 @@
 :root[data-theme=dark]{--bg:#0a0b10;--panel:#14161f;--panel2:#202430;--line:#2e3444;--line2:#424a5e;--text:#f1f5f9;--mut:#94a3b8;--ok:#22c55e;--bad:#ef4444;--run:#60a5fa;--warn:#f59e0b;--grey:#64748b;--ink:#0b0e14;--bev-hi:rgba(255,255,255,.16);--bev-lo:rgba(0,0,0,.6);--shadow:0 4px 18px rgba(0,0,0,.4);--glow:rgba(96,165,250,.55);--tex:rgba(255,255,255,.02)}
 *{box-sizing:border-box}html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 "IBM Plex Sans",system-ui,"Segoe UI","Hiragino Sans","Yu Gothic","Microsoft YaHei","PingFang SC",sans-serif;display:flex;flex-direction:column;overflow:hidden;background-image:linear-gradient(45deg,var(--tex) 25%,transparent 25%,transparent 50%,var(--tex) 50%,var(--tex) 75%,transparent 75%,transparent),radial-gradient(circle at center,var(--panel) 0%,var(--bg) 100%);background-size:4px 4px,100% 100%}
-header{display:flex;flex-wrap:wrap;gap:6px 22px;align-items:center;padding:10px 18px;border-bottom:1px solid var(--line);background:var(--panel)}
+header{display:flex;flex-direction:column;gap:8px;padding:10px 18px;border-bottom:1px solid var(--line);background:var(--panel)}
+.h-row{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:stretch}.h-top{align-items:center}
 h1{font-size:17px;margin:0 6px 0 0}h2{font-size:14px;margin:0 0 8px}
-.kpi{display:flex;gap:6px;align-items:baseline}.kpi b{font-size:19px;font-family:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;font-variant-numeric:tabular-nums}.mut{color:var(--mut)}
+.mut{color:var(--mut)}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* the figures of the header: tiles with an icon, the figure big and the label small; the colour says the state */
+.tiles{display:flex;flex-wrap:wrap;gap:8px;flex:1 1 auto;min-width:0}
+.tile{position:relative;display:grid;grid-template-columns:auto 1fr;column-gap:9px;align-items:center;min-width:118px;padding:7px 12px;border:1px solid var(--line2);border-radius:12px;color:var(--text);
+background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo);transition:filter .14s,box-shadow .14s,transform .08s,border-color .14s}
+.tile .ico{grid-row:1/3;width:22px;height:22px;color:var(--mut)}
+.tile b{font-size:20px;line-height:1.1;font-family:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tile small{font-size:11.5px;line-height:1.2;color:var(--mut)}
+.tile.wide{min-width:230px}.tile .qbar{grid-column:1/3;height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:5px}.tile .qbar i{display:block;height:100%;width:0;background:var(--ok);transition:width .5s}
+.tile[tabindex]{cursor:pointer}.tile[tabindex]:hover,.tile[tabindex]:focus-visible{filter:brightness(1.14);border-color:var(--run);box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo),0 0 0 1px var(--run),0 0 14px var(--glow);outline:none}
+.tile[tabindex]:active{transform:translateY(2px);filter:brightness(.92)}
+.tile.ok{border-color:var(--ok)}.tile.ok .ico,.tile.ok b{color:var(--ok)}.tile.ok .qbar i{background:var(--ok)}
+.tile.warn{border-color:var(--warn)}.tile.warn .ico,.tile.warn b{color:var(--warn)}.tile.warn .qbar i{background:var(--warn)}
+.tile.bad{border-color:var(--bad)}.tile.bad .ico,.tile.bad b{color:var(--bad)}.tile.bad .qbar i{background:var(--bad)}
+.tile.run{border-color:var(--run)}.tile.run .ico,.tile.run b{color:var(--run)}
+.tile.skel b{color:transparent;border-radius:5px;background:linear-gradient(100deg,var(--line) 30%,var(--line2) 50%,var(--line) 70%);background-size:200% 100%}
+.tile.skel small{opacity:.6}.tile.stale b{opacity:.55}
+.tile[hidden]{display:none}
+@media (max-width:640px){header{padding:8px 10px}.tile{min-width:calc(50% - 4px);flex:1 1 calc(50% - 4px);padding:6px 9px}.tile.wide{min-width:100%}.tile b{font-size:18px}h1{width:100%}}
+@media (prefers-reduced-motion:no-preference){@keyframes tilepulse{0%,100%{box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo),0 0 0 0 rgba(96,165,250,.5)}50%{box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo),0 0 0 5px rgba(96,165,250,0)}}
+.tile.run:not(.skel){animation:tilepulse 2.4s ease-out infinite}@keyframes shimmer2{from{background-position:200% 0}to{background-position:-200% 0}}.tile.skel b{animation:shimmer2 1.4s linear infinite}}
 .sp{flex:1}
 select,input,textarea{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font:inherit;box-shadow:inset 0 1px 2px rgba(0,0,0,.25)}
 button{background:linear-gradient(var(--panel2),var(--panel));color:var(--text);border:1px solid var(--line2);border-radius:9px;padding:5px 12px;font:inherit;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo),0 3px 7px rgba(0,0,0,.22);transition:filter .14s,box-shadow .14s,transform .08s,border-color .14s}
@@ -177,29 +199,17 @@ background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol><symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c1 3 4 4.5 4 8.5a4 4 0 0 1-8 0c0-1.4.6-2.4 1.4-3.2C9.9 9.2 11 7 12 3z"/><path d="M12 21a3 3 0 0 0 3-3c0-1.5-1.5-2-3-4-1.5 2-3 2.5-3 4a3 3 0 0 0 3 3z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 13.5A8.5 8.5 0 1 1 10.5 3a7 7 0 0 0 10.5 10.5z"/></symbol><symbol id="i-auto" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></symbol><symbol id="i-rows" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></symbol><symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/></symbol><symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol><symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol><symbol id="i-text" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></symbol><symbol id="i-md" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15V9l2.5 3L12 9v6M16 9v6m-2-2 2 2 2-2"/></symbol><symbol id="i-now" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><path d="M8 16v-5M12 16V8M16 16v-8"/></symbol><symbol id="i-repos" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></symbol></defs></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol><symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c1 3 4 4.5 4 8.5a4 4 0 0 1-8 0c0-1.4.6-2.4 1.4-3.2C9.9 9.2 11 7 12 3z"/><path d="M12 21a3 3 0 0 0 3-3c0-1.5-1.5-2-3-4-1.5 2-3 2.5-3 4a3 3 0 0 0 3 3z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 13.5A8.5 8.5 0 1 1 10.5 3a7 7 0 0 0 10.5 10.5z"/></symbol><symbol id="i-auto" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></symbol><symbol id="i-rows" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></symbol><symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/></symbol><symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol><symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol><symbol id="i-text" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></symbol><symbol id="i-md" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15V9l2.5 3L12 9v6M16 9v6m-2-2 2 2 2-2"/></symbol><symbol id="i-now" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><path d="M8 16v-5M12 16V8M16 16v-8"/></symbol><symbol id="i-repos" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></symbol><symbol id="i-run" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol><symbol id="i-queue" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol><symbol id="i-fail" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></symbol><symbol id="i-okc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></symbol><symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 3h6"/></symbol><symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol><symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></symbol><symbol id="i-repo" viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/></symbol><symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol><symbol id="i-save2" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></symbol><symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-6"/></symbol><symbol id="i-wifi" viewBox="0 0 24 24"><path d="M3 9a14 14 0 0 1 18 0M6 12.5a9 9 0 0 1 12 0M9 16a4.5 4.5 0 0 1 6 0"/><circle cx="12" cy="19" r="1"/></symbol><symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2 6"/><path d="M20 4v7h-7"/></symbol><symbol id="i-spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 9 9"/></symbol></defs></svg>
 <div id="err" role="alert"></div>
 <div id="reduced" role="status"></div>
 <div id="offline" role="status"></div>
 <header>
-<h1>GitHub Actions <small class="mut" id="ver"></small></h1>
-<div class="kpi"><b id="k-active">–</b><span class="mut" data-i18n="ui.k_active"></span></div>
-<div class="kpi"><b id="k-queued">–</b><span class="mut" data-i18n="ui.k_queued"></span></div>
-<div class="kpi kclick" id="kp-fail" role="button" tabindex="0" data-i18n-title="ui.k_fail_title"><b id="k-fail">–</b><span class="mut" data-i18n="ui.k_fail"></span></div>
-<div class="kpi"><b id="k-ok">–</b><span class="mut" data-i18n="ui.k_ok"></span></div>
-<div class="kpi"><b id="k-issues">–</b><span class="mut" data-i18n="ui.k_issues"></span></div>
-<div class="kpi" data-i18n-title="ui.k_min_title"><b id="k-min">–</b><span class="mut" data-i18n="ui.k_min"></span></div>
-<div class="kpi kclick" id="kp-red" role="button" tabindex="0" data-i18n-title="ui.k_red_title"><b id="k-red">–</b><span class="mut" data-i18n="ui.k_red"></span></div>
-<div class="kpi kclick" id="kp-sign" role="button" tabindex="0" data-i18n-title="ui.k_sign_title"><b id="k-sign">–</b><span class="mut" data-i18n="ui.k_sign"></span></div>
-<span class="badge b-queued" id="k-budget" hidden role="status"></span>
-<span class="rdy" id="k-ready" role="group" data-i18n-aria="ui.ready_title" hidden></span>
-<span class="sp"></span>
-<span class="mut" id="stamp" data-i18n="ui.loading_short"></span>
-<span class="mut" id="mode"></span>
-<span class="mut" id="rate"></span>
-<span class="badge b-queued" id="quota" hidden></span>
+<div class="h-row h-top"><h1>GitHub Actions <small class="mut" id="ver"></small></h1><div class="tiles" id="tiles1" role="group" data-i18n-aria="ui.tiles_aria1"><div class="tile skel " id="kt-active" role="button" tabindex="0" data-go="now" data-i18n-title="ui.k_active_title" data-i18n-aria="ui.k_active_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-run"/></svg><b id="k-active" data-v>–</b><small data-i18n="ui.k_active"></small></div><div class="tile skel " id="kt-queued" role="button" tabindex="0" data-go="now" data-i18n-title="ui.k_queued_title" data-i18n-aria="ui.k_queued_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-queue"/></svg><b id="k-queued" data-v>–</b><small data-i18n="ui.k_queued"></small></div><div class="tile skel kclick" id="kp-fail" role="button" tabindex="0" data-i18n-title="ui.k_fail_title" data-i18n-aria="ui.k_fail_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-fail"/></svg><b id="k-fail" data-v>–</b><small data-i18n="ui.k_fail"></small></div><div class="tile skel " id="kt-ok" role="button" tabindex="0" data-go="hist" data-i18n-title="ui.k_ok_title" data-i18n-aria="ui.k_ok_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-okc"/></svg><b id="k-ok" data-v>–</b><small data-i18n="ui.k_ok"></small></div><div class="tile skel " id="kt-issues" role="button" tabindex="0" data-go="sent" data-i18n-title="ui.k_issues_title" data-i18n-aria="ui.k_issues_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-alert"/></svg><b id="k-issues" data-v>–</b><small data-i18n="ui.k_issues"></small></div><div class="tile skel " id="kt-min" role="button" tabindex="0" data-go="charts" data-i18n-title="ui.k_min_title" data-i18n-aria="ui.k_min_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-timer"/></svg><b id="k-min" data-v>–</b><small data-i18n="ui.k_min"></small></div><div class="tile skel kclick" id="kp-red" role="button" tabindex="0" data-i18n-title="ui.k_red_title" data-i18n-aria="ui.k_red_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-flag"/></svg><b id="k-red" data-v>–</b><small data-i18n="ui.k_red"></small></div><div class="tile skel kclick" id="kp-sign" role="button" tabindex="0" data-i18n-title="ui.k_sign_title" data-i18n-aria="ui.k_sign_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-pen"/></svg><b id="k-sign" data-v>–</b><small data-i18n="ui.k_sign"></small></div></div>
 <button id="hotonly" class="ib" type="button" aria-pressed="false" data-i18n-aria="ui.ic_hotonly_off" data-i18n-title="ui.ic_hotonly_off"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-flame"/></svg></button>
-<button id="cfg-open" class="ib" type="button" data-i18n-title="ui.ic_settings" data-i18n-aria="ui.ic_settings"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gear"/></svg></button>
+<button id="cfg-open" class="ib" type="button" data-i18n-title="ui.ic_settings" data-i18n-aria="ui.ic_settings"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gear"/></svg></button></div>
+<div class="h-row"><div class="tiles" id="tiles2" role="group" data-i18n-aria="ui.tiles_aria2"><div class="tile skel " id="kt-repos" role="button" tabindex="0" data-go="repos" data-i18n-title="ui.t_repos_title" data-i18n-aria="ui.t_repos_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-repo"/></svg><b id="tv-repos" data-v>–</b><small data-i18n="ui.t_repos"></small></div><div class="tile skel " id="kt-hot" role="button" tabindex="0" data-go="repos" data-i18n-title="ui.t_hot_title" data-i18n-aria="ui.t_hot_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-flame"/></svg><b id="tv-hot" data-v>–</b><small data-i18n="ui.t_hot"></small></div><div class="tile skel " id="kt-mode" role="button" tabindex="0" data-go="cfg:general" data-i18n-title="ui.t_mode_title" data-i18n-aria="ui.t_mode_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-sliders"/></svg><b id="tv-mode" data-v>–</b><small data-i18n="ui.t_mode"></small></div><div class="tile skel " id="kt-etag" role="button" tabindex="0" data-go="cfg:cache" data-i18n-title="ui.t_etag_title" data-i18n-aria="ui.t_etag_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-save2"/></svg><b id="tv-etag" data-v>–</b><small data-i18n="ui.t_etag"></small></div><div class="tile skel wide" id="kt-quota" role="button" tabindex="0" data-go="cfg:polling" data-i18n-title="ui.t_quota_title" data-i18n-aria="ui.t_quota_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gauge"/></svg><b id="tv-quota" data-v>–</b><small><span data-i18n="ui.t_quota"></span> · <span id="tv-renews"></span></small><span class="qbar" aria-hidden="true"><i id="tq-fill"></i></span></div><div class="tile skel " id="kt-conn" role="group" data-i18n-title="ui.t_conn_title" data-i18n-aria="ui.t_conn_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-wifi"/></svg><b id="tv-conn" data-v>–</b><small data-i18n="ui.t_conn"></small><span class="vh" id="tv-conn-since"></span></div><div class="tile skel " id="kt-upd" role="group" data-i18n-title="ui.t_updated_title" data-i18n-aria="ui.t_updated_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg><b id="tv-upd" data-v>–</b><small data-i18n="ui.t_updated"></small></div><div class="tile wide run" id="kt-loading" role="group" hidden data-i18n-title="ui.t_loading_title" data-i18n-aria="ui.t_loading_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-spin"/></svg><b id="tv-load">–</b><small data-i18n="ui.t_loading"></small><span class="qbar" aria-hidden="true"><i id="tl-fill"></i></span></div></div>
+<span class="badge b-queued" id="k-budget" hidden role="status"></span><span class="rdy" id="k-ready" role="group" data-i18n-aria="ui.ready_title" hidden></span></div>
+<div class="vh" role="status"><span id="stamp" data-i18n="ui.loading_short"></span> <span id="mode"></span> <span id="rate"></span> <span class="badge b-queued" id="quota" hidden></span></div>
 </header>
 <nav role="tablist" data-i18n-aria="ui.nav_label">
 <button role="tab" id="n-now" data-tab="now" aria-selected="true"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-now"/></svg><span data-i18n="ui.tab_now"></span> <span class="dot" id="d-now" hidden></span></button>
@@ -371,10 +381,10 @@ function onKpiRed(){setList(T("ui.l_red"),redRepos());if(redRepos().length){OPEN
 function onKpiSign(){const same=FILTER.list&&FILTER.listLabel===T("ui.l_unsigned");setList(T("ui.l_unsigned"),signRepos());if(!same&&signRepos().length)focusSignQueue()}
 [["kp-red",onKpiRed],["kp-sign",onKpiSign]].forEach(([id,fn])=>{$(id).addEventListener("click",fn);$(id).addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fn()}})});
 function updateKpis(){
-  const s=SENT;if(!s||s.enabled===false||!s.a2){kSet("k-red","–");kSet("k-sign","–");$("k-budget").hidden=true;$("k-ready").hidden=true;return}
+  const s=SENT;if(!s||s.enabled===false||!s.a2){kSet("k-red","–");kSet("k-sign","–");if(typeof tileState==="function"){tileState("kp-red","");tileState("kp-sign","")}$("k-budget").hidden=true;$("k-ready").hidden=true;return}
   {const rd=$("k-ready"),hl=(s.a11&&s.a11.enabled!==false&&s.a11.health)||[];rd.hidden=!hl.length;rd.innerHTML=hl.map(h=>{const lim=(s.a11.warn_below||70),sc=h.score,cl=sc==null?"":(sc>=lim?"ok":(sc>=lim/2?"warn":"bad")),nm=I18N.ecosystems[h.ecosystem]||h.ecosystem;return `<span class="rdy-chip ${cl}" title="${esc(nm+": "+(sc==null?T("ui.ready_unknown"):sc+" / 100"))}"><i></i>${esc(nm)} ${sc==null?"?":sc}</span>`}).join("")}
-  kSet("k-red",s.a2.red.length);$("k-red").style.color=s.a2.red.length?"var(--bad)":"";
-  const n=signRepos().length;kSet("k-sign",n);$("k-sign").style.color=(s.a5.pending_sign||[]).length?"var(--warn)":"";{const w=Object.values(signWait());$("kp-sign").title=T("ui.k_sign_title")+(w.length?" - "+T("ui.k_sign_oldest",{h:Math.round(Math.max(...w))}):"")}
+  kSet("k-red",s.a2.red.length);tileState("kp-red",s.a2.red.length?"bad":"");
+  const n=signRepos().length;kSet("k-sign",n);tileState("kp-sign",(s.a5.pending_sign||[]).length?"warn":(n?"":""));{const w=Object.values(signWait());$("kp-sign").title=T("ui.k_sign_title")+(w.length?" - "+T("ui.k_sign_oldest",{h:Math.round(Math.max(...w))}):"")}
   const bud=((s.a7||{}).budget||[]).filter(b=>b.level!=="ok"),bx=$("k-budget");
   bx.hidden=!bud.length;
   if(bud.length){const over=bud.some(b=>b.level==="over");bx.className="badge "+(over?"b-failure":"b-queued");bx.textContent=T(over?"ui.bud_over":"ui.bud_warn")+bud.map(b=>`${b.ecosystem} ${Math.round(b.pct)} %`).join(", ");bx.title=T("ui.bud_title",{period:bud[0].period})}
@@ -410,7 +420,7 @@ function render(d){
   {const of=$("offline"),o=d.offline||{};of.style.display=o.offline?"block":"none";of.textContent=o.offline?T("ui.offline_banner",{since:clock(o.since)}):""}
   $("g-count").textContent=T("ui.count",{n:d.repos.filter(r=>repoVisible(r,d)).length,m:d.repos.length});
   const nAlert=d.issues.length+d.active.filter(r=>r.stuck).length;$("d-now").hidden=!nAlert;$("d-now").textContent=nAlert;
-  alerts(d);now_(d);donut(ok,bad,done.length-ok-bad);rates(last);timeline(last);durations(runs);repos(d,last);filters(d);renderHistory();if(PANEL)renderPanel();tipRows();
+  paintTiles(d);alerts(d);now_(d);donut(ok,bad,done.length-ok-bad);rates(last);timeline(last);durations(runs);repos(d,last);filters(d);renderHistory();if(PANEL)renderPanel();tipRows();
 }
 const GH="https://"+(I18N.host||"github.com")+"/";
 function alerts(d){
@@ -729,7 +739,7 @@ function cfgField(f){
       sub.push(T("ui.cfg_range",{min:f.min,max:f.max}));input.addEventListener("input",()=>onchange(input.value===""?null:Number(input.value)));inl.appendChild(input)}
     else if(f.type==="enum"){input=document.createElement("select");input.id=id;f.enum.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v===""?"–":(I18N.names[v]||v);input.appendChild(o)});input.value=f.value==null?"":f.value;
       input.addEventListener("change",()=>onchange(input.value));inl.appendChild(input)}
-    else if(f.type==="names"||(f.type==="repos"&&Array.isArray(f.value))){input=document.createElement("textarea");input.id=id;input.value=(f.value||[]).join("\n");sub.push(T("ui.cfg_list_hint"));
+    else if(f.type==="names"||f.type==="patterns"||(f.type==="repos"&&Array.isArray(f.value))){input=document.createElement("textarea");input.id=id;input.value=(f.value||[]).join("\n");sub.push(T("ui.cfg_list_hint"));
       input.addEventListener("input",()=>onchange(input.value.split(/\s*\n\s*/).map(x=>x.trim()).filter(Boolean)));inl.appendChild(input)}
     else if(f.type==="repos"){input=document.createElement("input");input.type="text";input.id=id;input.value="all";input.addEventListener("input",()=>{const v=input.value.trim();onchange(v==="all"||v===""?"all":v.split(/[\s,]+/).filter(Boolean))});inl.appendChild(input)}
     else if(f.type==="filegroups"){input=document.createElement("textarea");input.id=id;input.value=(f.value||[]).map(g=>g.join(" ; ")).join("\n");sub.push(T("ui.cfg_files_hint"));
@@ -827,6 +837,43 @@ $("cfg-save").addEventListener("click",async()=>{
 });
 $("cfg-discard").addEventListener("click",()=>{cfgLoad();cfgMsg("","")});
 $("cfg-open").addEventListener("click",()=>showTab("cfg"));
+
+/* the tiles of the header: the last known values are shown at once (browser storage, guarded), the colour says the state, a click goes where the figure leads */
+const TILE_KEY="am-tiles";let TILE_CACHE={};try{TILE_CACHE=JSON.parse(store.get(TILE_KEY)||"{}")||{}}catch(e){TILE_CACHE={}}
+let TILES_LIVE=false,QUOTA_RESET=null;
+function tilesRestore(){document.querySelectorAll(".tile [data-v]").forEach(el=>{const t=el.closest(".tile"),v=TILE_CACHE[el.id];if(v!=null&&v!==""){el.textContent=v;t.classList.remove("skel");t.classList.add("stale")}})}
+function tileSave(){const out={};document.querySelectorAll(".tile [data-v]").forEach(el=>{const v=typeof el._v==="number"?el._v:el.textContent;if(v!=="–")out[el.id]=v});try{store.set(TILE_KEY,JSON.stringify(out))}catch(e){}}
+function tileState(id,cls){const el=$(id);if(!el)return;const t=el.closest(".tile");t.classList.remove("ok","warn","bad","run","skel","stale");if(cls)t.classList.add(cls)}
+function tileText(id,text){const el=$(id);if(el){el.textContent=text;el._v=undefined}}
+function quotaCount(){if(!QUOTA_RESET)return;const m=Math.max(0,Math.round((QUOTA_RESET-Date.now())/60000));$("tv-renews").textContent=T("ui.t_renews",{time:clock(QUOTA_RESET.toISOString(),{hour:"2-digit",minute:"2-digit"}),min:m})}
+setInterval(quotaCount,20000);
+function paintTiles(d){
+  TILES_LIVE=true;
+  const nz=(id,n,cls)=>tileState(id,n>0?cls:"");
+  const last=runs=>runs;
+  tileState("kt-active",d.active.filter(r=>r.status==="in_progress").length>0?"run":"");
+  nz("kt-queued",d.active.filter(r=>r.status!=="in_progress").length,"warn");
+  nz("kp-fail",$("k-fail")._v||0,"bad");
+  tileState("kt-ok",($("k-ok")._v||0)>0?"ok":"");
+  nz("kt-issues",d.issues.length,"warn");
+  tileState("kt-min","");
+  tileState("kt-repos","");tileState("kt-hot","");tileState("kt-mode","");
+  kSet("tv-repos",d.repos.length);kSet("tv-hot",d.hot);tileText("tv-mode",d.mode);
+  const saved=d.etag&&d.etag.saved!=null?d.etag.saved:null;kSet("tv-etag",saved==null?0:saved);tileState("kt-etag",saved>0?"ok":"");
+  if(d.rate){
+    const used=d.rate.limit-d.rate.remaining,pct=Math.max(0,Math.min(100,Math.round(d.rate.remaining/d.rate.limit*100))),low=d.min_rate||800;
+    tileText("tv-quota",d.rate.remaining+"/"+d.rate.limit);$("tq-fill").style.width=pct+"%";
+    tileState("kt-quota",d.paused_quota||d.rate.remaining<low?"bad":(d.rate.remaining<low*2?"warn":"ok"));
+    QUOTA_RESET=new Date(d.rate.reset);quotaCount();
+  }else tileState("kt-quota","");
+  const o=d.offline||{};tileText("tv-conn",T(o.offline?"ui.t_offline":"ui.t_online"));tileState("kt-conn",o.offline?"bad":"ok");$("tv-conn-since").textContent=o.offline?T("ui.t_offline_since",{since:clock(o.since)}):"";
+  tileText("tv-upd",clock(d.updated));tileState("kt-upd","");$("kt-upd").querySelector("small").textContent=T("ui.t_updated")+" · "+T("ui.t_took",{secs:d.took});
+  const ld=$("kt-loading");ld.hidden=!d.loading;if(d.loading){const m=String(d.loading).match(/(\d+)\s*\/\s*(\d+)/);tileText("tv-load",d.loading);$("tl-fill").style.width=m&&+m[2]?Math.round(+m[1]/+m[2]*100)+"%":"0%"}
+  tileSave();
+}
+document.querySelectorAll(".tile[data-go]").forEach(t=>{const go=()=>{const g=t.dataset.go;if(g.startsWith("cfg:")){CFG.tab=g.slice(4);store.set("am-cfg-tab",CFG.tab);showTab("cfg");if(CFG.groups.length)cfgShowTab(CFG.tab)}else showTab(g)};
+  t.addEventListener("click",go);t.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}})});
+tilesRestore();
 /* every button gives a short "pressed" feedback also for the keyboard (the mouse uses :active) */
 document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.tagName==="BUTTON"){e.target.classList.add("pressing")}});
 document.addEventListener("keyup",e=>{if(e.target.tagName==="BUTTON")e.target.classList.remove("pressing")});

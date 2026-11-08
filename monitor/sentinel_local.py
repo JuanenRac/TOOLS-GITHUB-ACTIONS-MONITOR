@@ -914,7 +914,7 @@ class Sentinel:
             return None
         if self.lint_cache["value"] is None or time.time() - self.lint_cache["at"] > cfg["refresh_seconds"]:
             try:
-                by_repo = lint_workflows.scan_clones(GITHUB_DIR, repos, cfg["rules"])
+                by_repo = lint_workflows.scan_clones(GITHUB_DIR, repos, cfg["rules"], cfg.get("ignore"))
                 value = {"by_repo": by_repo, "summary": lint_workflows.summarize(by_repo), "in_report": cfg["in_report"]}
             except Exception:   # a workflow file must never stop the picture
                 value = None

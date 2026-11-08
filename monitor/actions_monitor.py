@@ -512,6 +512,16 @@ def loop(config):
 HOST_RE = re.compile(r"^[A-Za-z0-9.-]{1,100}$")
 
 
+class QuietServer(ThreadingHTTPServer):
+    """The server of the monitor: a client that disconnects is not an error worth a traceback; any other error is still shown."""
+
+    def handle_error(self, request, client_address):
+        if isinstance(sys.exc_info()[1], CLIENT_GONE):
+            DISCONNECTS[0] += 1
+            return
+        super().handle_error(request, client_address)
+
+
 def github_host():
     """The GitHub host the links of the page point to: the GH_HOST of the environment (GitHub Enterprise Server) when it is a plain host name, else github.com. `gh` itself reads GH_HOST."""
     host = os.environ.get("GH_HOST", "")
@@ -527,18 +537,38 @@ def render_page():
     return page.replace("/*I18N_DATA*/null", blob, 1)
 
 
+DISCONNECTS = [0]     # requests whose browser went away before the answer was sent (counted in /metrics, never printed)
+CLIENT_GONE = (ConnectionAbortedError, ConnectionResetError, BrokenPipeError)
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *args):
         pass
 
+    def handle(self):
+        """A browser that closes or reloads its tab while the page is being sent is normal: it is counted, not printed. A real error still reaches the server's handle_error."""
+        try:
+            super().handle()
+        except CLIENT_GONE:
+            DISCONNECTS[0] += 1
+
+    def finish(self):
+        try:
+            super().finish()
+        except CLIENT_GONE:
+            DISCONNECTS[0] += 1
+
     def reply(self, body, kind):
         payload = body.encode("utf-8")
-        self.send_response(200)
-        self.send_header("Content-Type", kind)
-        self.send_header("Content-Length", str(len(payload)))
-        self.send_header("Cache-Control", "no-store")
-        self.end_headers()
-        self.wfile.write(payload)
+        try:
+            self.send_response(200)
+            self.send_header("Content-Type", kind)
+            self.send_header("Content-Length", str(len(payload)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(payload)
+        except CLIENT_GONE:
+            DISCONNECTS[0] += 1
 
     def json_reply(self, payload, code=200):
         body = json.dumps(payload).encode("utf-8")
@@ -795,7 +825,7 @@ def metrics_extra():
     """What /metrics and the Grafana source add to the sentinel's picture: conditional reads, the connection, the analytics, the live events and the notifications."""
     import notifiers
     return {"etag": ETAG["cache"].stats() if ETAG["cache"] else None, "offline": LINK.state()["offline"], "analytics": ANALYTICS["summary"], "live_events": len(LIVE_EVENTS),
-            "notify": dict(notifiers.STATS)}
+            "notify": dict(notifiers.STATS), "disconnects": DISCONNECTS[0]}
 
 
 def handle_action_post(path, request):
@@ -903,7 +933,7 @@ def main():
     server = None
     for port in range(args.port, args.port + 10):
         try:
-            server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
+            server = QuietServer(("127.0.0.1", port), Handler)
             if port != args.port:
                 print(i18n.t("mon.port_busy", port=args.port, used=port))
             break

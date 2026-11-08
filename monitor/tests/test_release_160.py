@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import time
 import unittest
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -707,6 +708,98 @@ class Endpoints160(unittest.TestCase):
             self.assertEqual(self.am.github_host(), "ghe.example.org")
         with mock.patch.dict("os.environ", {"GH_HOST": "evil.example/<script>"}):
             self.assertEqual(self.am.github_host(), "github.com")
+
+
+class ClientsThatLeave(unittest.TestCase):
+    """The browser closes or reloads its tab while the page is being sent: nothing is printed and nothing is raised (the same Handler serves the page, /metrics, the Grafana source and the webhook)."""
+
+    class Aborting:
+        def write(self, data):
+            raise ConnectionAbortedError(10053, "software caused connection abort")
+
+        def flush(self):
+            raise BrokenPipeError()
+
+    def handler(self):
+        import actions_monitor as am
+        h = am.Handler.__new__(am.Handler)
+        h.wfile = self.Aborting()
+        h.request_version = "HTTP/1.1"
+        h.requestline = "GET / HTTP/1.1"
+        h.command = "GET"
+        h.client_address = ("127.0.0.1", 1)
+        h._headers_buffer = []
+        h.send_response = lambda *a, **k: None
+        h.send_header = lambda *a, **k: None
+        h.end_headers = lambda: h.wfile.write(b"x")
+        return am, h
+
+    def test_a_reply_that_is_cut_in_the_middle_is_counted_and_silent(self):
+        import contextlib
+        import io
+        am, h = self.handler()
+        before = am.DISCONNECTS[0]
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            h.reply("<html>" * 1000, "text/html")
+            h.json_reply({"a": 1})
+        self.assertEqual(out.getvalue() + err.getvalue(), "")
+        self.assertEqual(am.DISCONNECTS[0], before + 1)       # reply counted; json_reply already ignored it
+
+    def test_the_whole_request_and_the_server_stay_quiet_but_real_errors_do_not(self):
+        import contextlib
+        import io
+        import http.server
+        am, h = self.handler()
+        before = am.DISCONNECTS[0]
+        for error in (ConnectionAbortedError(10053), ConnectionResetError(10054), BrokenPipeError()):
+            with mock.patch.object(http.server.BaseHTTPRequestHandler, "handle", side_effect=error):
+                h.handle()
+        self.assertEqual(am.DISCONNECTS[0], before + 3)
+        with mock.patch.object(http.server.BaseHTTPRequestHandler, "handle", side_effect=ValueError("a real bug")):
+            with self.assertRaises(ValueError):
+                h.handle()
+        server = am.QuietServer.__new__(am.QuietServer)
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            try:
+                raise ConnectionAbortedError(10053)
+            except ConnectionAbortedError:
+                server.handle_error(None, ("127.0.0.1", 1))
+        self.assertEqual(err.getvalue(), "")
+        with contextlib.redirect_stderr(err):
+            try:
+                raise ValueError("a real bug")
+            except ValueError:
+                server.handle_error(None, ("127.0.0.1", 1))
+        self.assertIn("a real bug", err.getvalue())
+
+    def test_a_real_client_that_hangs_up_does_not_print_anything(self):
+        import contextlib
+        import io
+        import actions_monitor as am
+        server = am.QuietServer(("127.0.0.1", 0), am.Handler)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        err = io.StringIO()
+        try:
+            with contextlib.redirect_stderr(err):
+                for path in ("/", "/metrics", "/api/data"):
+                    sock = socket.create_connection(("127.0.0.1", server.server_address[1]), 3)
+                    sock.sendall(f"GET {path} HTTP/1.1\r\nHost: 127.0.0.1:{server.server_address[1]}\r\n\r\n".encode())
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, __import__("struct").pack("ii", 1, 0))
+                    sock.close()                      # a reset, as a browser that is closed while the page loads
+                time.sleep(0.5)
+        finally:
+            server.shutdown()
+            server.server_close()
+        self.assertEqual(err.getvalue(), "")
+
+    def test_the_counter_is_in_the_metrics_and_the_webhook_uses_the_same_handler(self):
+        text = outputs.metrics_text(SNAP, DATA, now=NOW, extra={"disconnects": 3})
+        self.assertIn("ghamon_client_disconnects_total 3", text)
+        import actions_monitor as am
+        self.assertIn("disconnects", am.metrics_extra())
+        self.assertEqual(am.Handler.handle_post.__qualname__.split(".")[0], "Handler")      # /api/webhook is one more path of that class
 
 
 class TerminalView(unittest.TestCase):

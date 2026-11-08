@@ -482,7 +482,8 @@ class Webhook(unittest.TestCase):
     def test_the_server_never_binds_to_all_interfaces(self):
         source = (Path(__file__).resolve().parents[1] / "actions_monitor.py").read_text(encoding="utf-8")
         self.assertNotIn("0.0.0.0", source.replace("never bind it to 0.0.0.0", ""))
-        self.assertIn('ThreadingHTTPServer(("127.0.0.1", port)', source)
+        self.assertIn('QuietServer(("127.0.0.1", port)', source)
+        self.assertIn("class QuietServer(ThreadingHTTPServer)", source)
 
 
 class MonitorLink(unittest.TestCase):

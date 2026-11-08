@@ -126,6 +126,8 @@ def _extra_metrics(out, extra, eco, per_repo):
         out.add("offline", "1 while the monitor has no connection to GitHub and shows the last picture.", 1 if extra["offline"] else 0)
     if "live_events" in extra:
         out.add("live_events", "Events of the incoming webhook kept in memory.", _int(extra["live_events"]))
+    if "disconnects" in extra:
+        out.add("client_disconnects_total", "Requests whose browser or scraper closed the connection before the answer was sent.", _int(extra["disconnects"]), kind="counter")
     notify = extra.get("notify") if isinstance(extra.get("notify"), dict) else None
     if notify:
         out.add("notifications_sent_total", "Notifications that left the computer.", _int(notify.get("sent")), kind="counter")

@@ -12,6 +12,7 @@ Changes of the repository as a whole. The program has its own, more detailed his
 ## [1.6.0]
 
 - Conditional reads, a mode for lost connections, analytics (durations, queue time, steps, flaky workflows), real-time webhook events, a workflow linter, optional notifications (chat, MQTT, local HTTP), new AI providers (`anthropic`, `copilot`) with a closed list of actions that run only after a confirmation, a terminal view, a health endpoint and Enterprise Server support.
+- Header figures as tiles with live countdown and last known values; the workflow linter tells fillers from real secrets and can be silenced by a comment or by a list.
 - New guides in eight languages, published JSON schemas, a roadmap, and every screenshot redone in light and dark, console tools included.
 
 ## [1.5.2]

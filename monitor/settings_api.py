@@ -47,6 +47,7 @@ LOOP_URL_RE = re.compile(r"^(http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(
 CHAT_RE = re.compile(r"^(-?[0-9]{1,20})?$")
 ROOM_RE = re.compile(r"^(![A-Za-z0-9:._-]{3,120})?$")
 TOPIC_RE = re.compile(r"^[A-Za-z0-9/_.-]{1,100}$")
+PATTERN_RE = re.compile(r"^[A-Za-z0-9._*-]{1,100}:[A-Za-z0-9._*/-]{1,100}:[a-z_*]{1,30}$")      # repository:file:rule, with * for "any"
 FILE_PATTERN_RE = re.compile(r"^[A-Za-z0-9._*?-]{1,80}$")   # a file name pattern of the audit folder (no folders)
 FILE_NAME_RE = re.compile(r"^[A-Za-z0-9._-][A-Za-z0-9._/-]{0,79}$")
 IDENT_RE = re.compile(r"^[A-Za-z0-9_.-]{1,60}$")
@@ -217,6 +218,7 @@ _f("analytics", "signals", "analytics.flaky", "bool")
 _f("lint", "main", "lint.enabled", "bool")
 _f("lint", "main", "lint.refresh_seconds", "int", (60, 86400))
 _f("lint", "main", "lint.in_report", "bool")
+_f("lint", "main", "lint.ignore", "patterns")
 for _rule in ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target"):
     _f("lint", "rule_" + _rule, f"lint.rules.{_rule}.enabled", "bool", label=["cfg.p.rule_on"], help="cfg.h.rule_on")
     _f("lint", "rule_" + _rule, f"lint.rules.{_rule}.severity", "enum", ("info", "warn", "bad"), label=["cfg.p.severity"], help="cfg.h.p.severity")
@@ -320,6 +322,10 @@ def check_value(path, value):
         return True, text
     if kind == "names":
         if not isinstance(value, list) or len(value) > 200 or not all(isinstance(v, str) and NAME_RE.match(v) for v in value):
+            return False, "names"
+        return True, list(value)
+    if kind == "patterns":
+        if not isinstance(value, list) or len(value) > 100 or not all(isinstance(v, str) and PATTERN_RE.match(v) for v in value):
             return False, "names"
         return True, list(value)
     if kind == "repos":
