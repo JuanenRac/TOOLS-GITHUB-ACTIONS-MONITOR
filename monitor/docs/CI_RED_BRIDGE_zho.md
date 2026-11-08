@@ -43,3 +43,14 @@ py -3 read_report.py --export-sign-queue FILE     # 签名队列
 ## 监视器不做的事
 
 它不发布该文件，不推送到个人资料仓库，也不触碰任何工作流。把导出内容送到仪表板是所有者的一步操作（或由个人资料仓库中读取导出文件的某个工作流完成）。
+
+## 个人主页仪表板(使用方约定)
+
+个人主页仓库的状态仪表板可以通过两种方式读取同一份文档:从运行中的监视器(`GET /api/outputs/dashboard.json`,在开启 `outputs.dashboard.enabled` 之前关闭,仅限本机),或从 `py -3 read_report.py --export-status DIR` 写出的文件(只含红色工作流,绝不含签名部分)。仪表板可以依赖的内容(由本仓库的测试检查):
+
+1. `schema` 为 `2`,字段只会增加。
+2. 提供的文档与 `ci_red.json` 完全一致。
+3. `complete: false` 表示:保留你上一次完整的画面。
+4. 公开导出只有 `schema`、`generated`、`tool_version`、`complete`、`red_repos` 和 `red` 这些键,不含任何签名状态。
+
+监视器从不把该文件推送到个人主页仓库;把它放过去是所有者自己的一步。

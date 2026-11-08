@@ -3,87 +3,181 @@
   "ecosystem": "monitor",
   "tagline": "Watches the workflows of every repository you own and tells you, in one page, what is red, what is stuck and what is waiting for you.",
   "description": "GitHub Actions Monitor is a local program. It asks GitHub, through your own authenticated gh client, for the latest runs of every workflow of your repositories, decides what is really red, raises alerts about security, hygiene and releases, shows everything on a web page served only on your own machine in eight languages, and can export the result as files or metrics for a dashboard. Nothing is written to GitHub unless you ask for it.",
-  "columns": ["WHO USES IT", "THE MONITOR", "WHAT IT TALKS TO"],
+  "columns": [
+    "WHO USES IT",
+    "THE MONITOR",
+    "WHAT IT TALKS TO"
+  ],
   "nodes": [
     {
       "id": "person",
       "column": 0,
       "level": "external",
       "title": "A person at the desk",
-      "lines": ["the web page on 127.0.0.1", "in eight languages, or the", "command line reader"],
-      "code": ["monitor/actions_monitor.html", "monitor/read_report.py"]
+      "lines": [
+        "the web page on 127.0.0.1 with",
+        "its settings sub-tabs, in eight",
+        "languages, or the command line"
+      ],
+      "code": [
+        "monitor/actions_monitor.html",
+        "monitor/settings_api.py",
+        "monitor/read_report.py"
+      ]
     },
     {
       "id": "board",
       "column": 0,
       "level": "external",
       "title": "A dashboard or Grafana",
-      "lines": ["reads the exported files or", "the metrics, when you switch", "the export on"],
-      "code": ["monitor/export_status.py", "monitor/ci_red.py"]
+      "lines": [
+        "reads the exported files or",
+        "the metrics, when you switch",
+        "the export on"
+      ],
+      "code": [
+        "monitor/outputs.py",
+        "monitor/export_status.py",
+        "monitor/ci_red.py"
+      ]
     },
     {
       "id": "poll",
       "column": 1,
       "level": "tested",
       "title": "Run poller",
-      "lines": ["last completed run of every", "workflow on the default branch:", "red, stuck, or fine"],
-      "code": ["monitor/actions_monitor.py"]
+      "lines": [
+        "last completed run of every",
+        "workflow on the default branch:",
+        "red, stuck, or fine"
+      ],
+      "code": [
+        "monitor/actions_monitor.py"
+      ]
     },
     {
       "id": "sent",
       "column": 1,
       "level": "tested",
       "title": "Sentinel",
-      "lines": ["alerts, hygiene, releases", "ready to publish, quota,", "a plain-language report"],
-      "code": ["monitor/sentinel_local.py", "monitor/surface.py"]
+      "lines": [
+        "alerts, hygiene, releases",
+        "ready to publish, quota,",
+        "a plain-language report"
+      ],
+      "code": [
+        "monitor/sentinel_local.py",
+        "monitor/surface.py"
+      ]
     },
     {
       "id": "sign",
       "column": 1,
       "level": "contract",
       "title": "Signing records",
-      "lines": ["what is built and not yet", "signed, checked against the", "signature you keep"],
-      "code": ["monitor/signstate.py", "monitor/sigverify.py"]
+      "lines": [
+        "what is built and not yet",
+        "signed, checked against the",
+        "signature you keep"
+      ],
+      "code": [
+        "monitor/signstate.py",
+        "monitor/sigverify.py"
+      ]
     },
     {
       "id": "batch",
       "column": 1,
       "level": "config",
       "title": "Batch tools",
-      "lines": ["plan and dispatch many builds", "at once; nothing is fired", "without an explicit --go"],
-      "code": ["monitor/gha_dispatch_all.py"]
+      "lines": [
+        "plan and dispatch many builds",
+        "at once; nothing is fired",
+        "without an explicit --go"
+      ],
+      "code": [
+        "monitor/gha_dispatch_all.py"
+      ]
     },
     {
       "id": "gh",
       "column": 2,
       "level": "external",
       "title": "gh, the GitHub client",
-      "lines": ["your own login; the monitor", "never stores a token"]
+      "lines": [
+        "your own login; the monitor",
+        "never stores a token"
+      ]
     },
     {
       "id": "api",
       "column": 2,
       "level": "external",
       "title": "GitHub",
-      "lines": ["runs, alerts, releases,", "pull requests, repositories"]
+      "lines": [
+        "runs, alerts, releases,",
+        "pull requests, repositories"
+      ]
     },
     {
       "id": "files",
       "column": 2,
       "level": "config",
       "title": "Your own files",
-      "lines": ["optional local clones and", "signing records; without them", "it runs in a reduced mode"],
-      "code": ["monitor/workspace.py", "monitor/toolconfig.py"]
+      "lines": [
+        "optional local clones and",
+        "signing records; without them",
+        "it runs in a reduced mode"
+      ],
+      "code": [
+        "monitor/workspace.py",
+        "monitor/toolconfig.py"
+      ]
     }
   ],
   "edges": [
-    {"from": "person", "to": "poll", "label": "page", "level": "tested"},
-    {"from": "board", "to": "sent", "label": "export", "level": "contract"},
-    {"from": "poll", "to": "gh", "label": "run list", "level": "tested"},
-    {"from": "sent", "to": "gh", "label": "alerts", "level": "tested"},
-    {"from": "sign", "to": "files", "label": "records", "level": "config"},
-    {"from": "batch", "to": "api", "label": "dispatch", "level": "config"}
+    {
+      "from": "person",
+      "to": "poll",
+      "label": "page",
+      "level": "tested"
+    },
+    {
+      "from": "board",
+      "to": "sent",
+      "label": "export",
+      "level": "contract"
+    },
+    {
+      "from": "poll",
+      "to": "gh",
+      "label": "run list",
+      "level": "tested"
+    },
+    {
+      "from": "sent",
+      "to": "gh",
+      "label": "alerts",
+      "level": "tested"
+    },
+    {
+      "from": "sign",
+      "to": "files",
+      "label": "records",
+      "level": "config"
+    },
+    {
+      "from": "batch",
+      "to": "api",
+      "label": "dispatch",
+      "level": "config"
+    }
   ],
-  "legend": {"tested": "decides, tested", "contract": "a file or a format others read", "config": "off or optional until you set it up", "external": "not part of this repository"},
+  "legend": {
+    "tested": "decides, tested",
+    "contract": "a file or a format others read",
+    "config": "off or optional until you set it up",
+    "external": "not part of this repository"
+  },
   "footer": "It only reads GitHub by default; every action that writes is off until you turn it on."
 }

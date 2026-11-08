@@ -67,3 +67,11 @@ Leggere che cosa fanno altri strumenti per GitHub Actions ha dato alcune idee; n
 scelta di quali etichette esportare e una porta e un intervallo configurabili. Da una dashboard per TV alimentata da webhook: uno stato per repository con filtri, mostrato in grande. Da un osservatore da terminale: tutti i
 workflow di un repository insieme fino alla loro conclusione. Da una dashboard di webhook con regole di allerta: filtri per repository, ramo e workflow prima di avvisare. Qui le stesse idee compaiono come
 `per_repo` (scegliere le serie), l'origine JSON con una riga per workflow rosso, la scheda Adesso in tempo reale e il file degli eventi con filtri nella pagina.
+
+## Il pannello Grafana minimo
+
+`docs/grafana/red_by_ecosystem.json` è una board con un solo pannello: workflow rossi per ecosistema (query `ghamon_ecosystem_red_workflows`, legenda `{{ecosystem}}`). Importala e scegli la tua fonte Prometheus. Un test di questo repository verifica che la metrica e l'etichetta usate siano davvero servite da `/metrics`.
+
+## La coda di firma per affidabilità
+
+Ogni riga della coda ha un `trust`: `verified` (firma verificata con la chiave pubblica), `unknown` (il formato qui non si può verificare: mai indovinato) o `failed` (verificata e non corrisponde). La scheda Sentinella ha un filtro Firma con il numero di ciascun tipo e segna le righe (bordo verde, grigio o rosso). Da console: `py -3 read_report.py --export-sign-queue FILE --sign-trust failed`.

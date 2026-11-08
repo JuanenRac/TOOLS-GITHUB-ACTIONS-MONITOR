@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GITHUB ACTIONS MONITOR + SENTINEL (version 1.5.1)
+GITHUB ACTIONS MONITOR + SENTINEL (version 1.5.2)
 =================================================
 Requirements: Python 3.11+ and the GitHub CLI (`gh`) logged in (gh auth login). Nothing else: only the Python standard library.
 Quick steps for a first use: QUICKSTART_en.txt.

@@ -43,3 +43,14 @@ Les deux lisent le moniteur en cours d'exécution sur `127.0.0.1` (sans quota Gi
 ## Ce que le moniteur ne fait pas
 
 Il ne publie pas le fichier, ne pousse rien vers le dépôt du profil et ne touche à aucun workflow. Acheminer l'export vers le tableau de bord est une étape du propriétaire (ou d'un workflow du dépôt du profil qui lit le fichier exporté).
+
+## Le tableau d'état du profil (contrat du consommateur)
+
+Le tableau d'état d'un dépôt de profil peut lire le même document de deux façons : depuis le moniteur en marche (`GET /api/outputs/dashboard.json`, désactivé tant que `outputs.dashboard.enabled` ne l'est pas, cet ordinateur seulement) ou depuis le fichier écrit par `py -3 read_report.py --export-status DIR` (workflows rouges seulement, jamais le côté signature). Ce sur quoi le tableau peut compter, vérifié par un test de ce dépôt :
+
+1. `schema` vaut `2` et les champs ne font que s'ajouter.
+2. Le document servi est exactement celui de `ci_red.json`.
+3. `complete: false` signifie : gardez votre dernière image complète.
+4. L'export public a les clés `schema`, `generated`, `tool_version`, `complete`, `red_repos` et `red`, et rien de l'état de signature.
+
+Le moniteur ne pousse jamais le fichier vers le dépôt du profil ; l'y amener est une étape de son propriétaire.

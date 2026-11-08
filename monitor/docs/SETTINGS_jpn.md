@@ -10,21 +10,43 @@
 設定タブ（ヘッダーまたはタブバーの歯車アイコン）では、`actions_monitor.json` の値をページ上から変更できるため、ファイルを手作業で編集する必要はありません。
 このタブはページの 8 つの言語で書かれており、ほかの部分と同じ外観になっています。
 
+<!-- settings:begin -->
 ## 変更できるもの
 
-`settings_api.py` の一覧（スキーマ）にあるキーのみです。各キーには型と範囲があり、変更にモニターの**再起動**が必要か（ループは設定を一度しか読み込みません）、**すぐに反映される**かがページに表示されます。
+`settings_api.py` の一覧(スキーマ)にあるキーだけです。それぞれに型と範囲があり、変更にモニターの**再起動**が必要か(ループは設定を一度だけ読みます)、**すぐ反映**されるかをページが表示します。
 
-| グループ | キー |
+このタブは、一般的なものから高度なものの順にサブタブへ分かれています:このブラウザー、一般、更新と上限、センチネル、表面チェック(A10)、準備状況(A11)、フォルダーとファイル、出力、続いて連携。サブタブ内では設定が見出し付きのブロックにまとまり、ブロックの最初の項目がメインのスイッチです。オフの間、ブロックの残りは薄く表示され編集できません。各項目には単位(秒・分・時間・日・MB・回)、範囲、バッジ(再起動が必要/すぐ反映)、保守的な既定値で始まる安全オプションのバッジ、1 行のヘルプが表示されます。検索ボックスは全サブタブの設定を絞り込み、各サブタブは未保存の変更数を数え、保存と破棄のボタンは常に見え、最後に使ったサブタブはブラウザーが覚えます。タブはキーボード操作(矢印キー、Home、End)に対応します。
+
+| タブ | ブロックと設定 |
 |---|---|
-| このブラウザー | ページの言語、テーマ（自動 / ライト / ダーク）、「今」タブの高密度表示。これらはファイルではなくブラウザーに保存されます。 |
-| 全般 | `language`（ツールの既定言語）、`github_owner`、`mode`（`full` / `lite`）、`ecosystems`、`exclude`、`report_history_days` |
-| 更新と上限 | `refresh_seconds`、`cold_refresh_seconds`、`issues_refresh_seconds`、`discover_refresh_seconds`、`stuck_minutes`、`runs_per_repo`、`cold_runs_per_repo`、`hot_hours`、`max_workers`、`min_rate_remaining` |
-| センチネル | `sentinel.enabled`、各サイクル、API の予算、候補・古くなったプルリクエスト・保留中の署名のしきい値、`sentinel.require_verified_signature`、A2 の照会 |
-| サーフェスチェック（A10） | `sentinel.surface.enabled`、そのサイクル、1 サイクルあたりのリポジトリ数、許容係数、予算に占める割合 |
-| 準備状況（A11） | `sentinel.readiness.enabled`、`min_coverage`、`warn_below` |
-| フォルダーとファイル | `workspace_root`、`signed_dir`、`audit_dir`、`ecosystems_file`、`targets_file`、`profiles_file`、`tools_dir`、`sentinel.ci_red_file`、`sentinel.ci_red_audit_copy` |
-| 他のツール向けの出力 | `outputs.prometheus.enabled`、`outputs.prometheus.per_repo`、`outputs.json.enabled`、`outputs.dashboard.enabled`（OUTPUTS_jpn.md を参照） |
-| センチネル用の外部 AI | `ai.provider`（`none` / `ollama` / `openai-compatible`）、`ai.model`、`ai.ollama_url`（このコンピューターのみ）、`ai.base_url`（https）、`ai.api_key_env`（キーを保持する環境変数の名前）、`ai.daily_limit`。キー自体は保存されません。既定ではオフで、外部サービスにはリポジトリのデータが送られます。 |
+| このブラウザー | ページの言語、テーマ(自動/ライト/ダーク)、「今」タブの高密度表示。ファイルではなくブラウザーに保存されます。 |
+| 全般 | **アカウント**: `github_owner`, `language`<br>**対象範囲**: `mode`, `repos`, `ecosystems`, `exclude`<br>**履歴**: `report_history_days` |
+| 更新と上限 | **アクティブなリポジトリ**: `refresh_seconds`, `hot_hours`, `runs_per_repo`, `stuck_minutes`<br>**非アクティブなリポジトリ**: `cold_refresh_seconds`, `cold_runs_per_repo`<br>**バックグラウンド処理**: `issues_refresh_seconds`, `discover_refresh_seconds`, `max_workers`<br>**API の割り当て**: `min_rate_remaining` |
+| センチネル | **基本**: `sentinel.enabled`, `sentinel.refresh_seconds`, `sentinel.hot_hours`<br>**アラートと衛生**: `sentinel.alerts_hot_seconds`, `sentinel.alerts_cold_seconds`, `sentinel.hygiene_seconds`<br>**API の予算**: `sentinel.max_calls_per_tick`, `sentinel.budget_per_hour`, `sentinel.workers`, `sentinel.min_rate_remaining`<br>**リリースと署名**: `sentinel.candidate_days`, `sentinel.candidate_min_entries`, `sentinel.skip_candidate_prefixes`, `sentinel.pending_sign_hours`, `sentinel.require_verified_signature`<br>**赤の照会(A2)**: `sentinel.a2_full_sample_unknown`, `sentinel.a2_resolve_max_calls_per_tick`, `sentinel.a2_resolve_ttl_seconds`<br>**プルリクエスト**: `sentinel.stale_pr_days`<br>**必須ファイル**: `sentinel.required_files`<br>**Actions の分数**: `sentinel.minutes_budget_period`, `sentinel.minutes_budget`<br>**監査ファイル**: `sentinel.audit_files.reconciliation`, `sentinel.audit_files.rounds`, `sentinel.audit_files.rounds_extra` |
+| 表面チェック(A10) | **基本**: `sentinel.surface.enabled`, `sentinel.surface.refresh_seconds`, `sentinel.surface.local_seconds`, `sentinel.surface.max_repos_per_tick`, `sentinel.surface.min_rate_factor`, `sentinel.surface.budget_share`<br>**手動で無効化された workflow**: `sentinel.surface.checks.workflows_disabled.*` (`enabled`)<br>**実行されていないスケジュール**: `sentinel.surface.checks.dead_schedule.*` (`enabled`, `days`)<br>**SHA で固定されていない uses:**: `sentinel.surface.checks.unpinned_uses.*` (`enabled`)<br>**広すぎる権限（write-all）**: `sentinel.surface.checks.broad_permissions.*` (`enabled`)<br>**PR をチェックアウトする pull_request_target**: `sentinel.surface.checks.pr_target.*` (`enabled`)<br>**concurrency の詰まり（同じ workflow の待機中の実行）**: `sentinel.surface.checks.stuck_concurrency.*` (`enabled`, `minutes`)<br>**マトリクスの 1 つの OS だけで失敗**: `sentinel.surface.checks.matrix_os.*` (`enabled`, `max_per_tick`)<br>**アーティファクトのコスト**: `sentinel.surface.checks.artifacts.*` (`enabled`, `max_mb`, `retention_days`)<br>**赤または欠落している必須チェック**: `sentinel.surface.checks.required_checks.*` (`enabled`)<br>**不完全な公開済みリリース**: `sentinel.surface.checks.release_assets.*` (`enabled`, `recent_days`)<br>**リリースタグとマニフェスト/CHANGELOG のバージョンの比較**: `sentinel.surface.checks.tag_vs_version.*` (`enabled`)<br>**GitHub Packages**: `sentinel.surface.checks.packages.*` (`enabled`)<br>**放置された下書きとプレリリース**: `sentinel.surface.checks.drafts.*` (`enabled`, `days`)<br>**経過日数別の重大/高アラート（リポジトリ順位）**: `sentinel.surface.checks.security_aged.*` (`enabled`, `days`)<br>**セキュリティの適用範囲（CodeQL / Dependabot）**: `sentinel.surface.checks.coverage.*` (`enabled`)<br>**シークレットスキャン: 未対応と解決済み**: `sentinel.surface.checks.secret_resolved.*` (`enabled`)<br>**優先度別の Dependabot**: `sentinel.surface.checks.dependabot_priority.*` (`enabled`)<br>**クローズできそうな issue（提案のみ）**: `sentinel.surface.checks.issue_close.*` (`enabled`)<br>**エコシステムごとの期限切れマイルストーン**: `sentinel.surface.checks.milestones.*` (`enabled`)<br>**古くなった人間による PR**: `sentinel.surface.checks.pr_human.*` (`enabled`, `days`)<br>**workflow または CODEOWNERS を変更する PR（優先）**: `sentinel.surface.checks.pr_workflow_touch.*` (`enabled`)<br>**マージキュー: 承認済みで CI が成功**: `sentinel.surface.checks.merge_queue.*` (`enabled`)<br>**マニフェストの成熟度と根拠の比較**: `sentinel.surface.checks.maturity.*` (`enabled`)<br>**8 言語の README の整合性が崩れています**: `sentinel.surface.checks.parity.*` (`enabled`)<br>**ビルドの証明**: `sentinel.surface.checks.attestation.*` (`enabled`, `max_per_tick`) |
+| 準備状況(A11) | **基本**: `sentinel.readiness.enabled`, `sentinel.readiness.min_coverage`, `sentinel.readiness.warn_below`<br>**健全性の重み**: `sentinel.readiness.health.weights.red`, `sentinel.readiness.health.weights.stuck`, `sentinel.readiness.health.weights.secret`, `sentinel.readiness.health.weights.high_alert`, `sentinel.readiness.health.weights.alert`, `sentinel.readiness.health.weights.stale_pr`, `sentinel.readiness.health.weights.unsigned`, `sentinel.readiness.health.weights.hygiene`<br>**固定バージョン**: `sentinel.readiness.pins.refresh_seconds`, `sentinel.readiness.pins.max_depth`, `sentinel.readiness.pins.sources` |
+| フォルダーとファイル | **ローカルフォルダー**: `workspace_root`, `signed_dir`, `audit_dir`, `tools_dir`<br>**データファイル**: `ecosystems_file`, `targets_file`, `profiles_file`<br>**ci_red.json**: `sentinel.ci_red_file`, `sentinel.ci_red_audit_copy` |
+| 他のツール向けの出力 | **Prometheus**: `outputs.prometheus.enabled`, `outputs.prometheus.per_repo`<br>**Grafana JSON**: `outputs.json.enabled`<br>**ステータスダッシュボード**: `outputs.dashboard.enabled` |
+| センチネル用の外部 AI | **サービス**: `ai.provider`, `ai.model`, `ai.ollama_url`, `ai.base_url`, `ai.api_key_env`, `ai.daily_limit` |
+| 受信 Webhook | **受信 Webhook**: `webhook.enabled`, `webhook.signing_state` |
+
+各設定は 1 か所にだけ現れます。読み取り専用:`webhook.signing_state` は共有シークレットが設定済みかどうかだけを示し、シークレット自体は表示されません。
+
+### 固定バージョンの取得元の例
+
+固定バージョンは取得元を指定したときだけ読み取られます。リストが空なら何も読まず、ページがそう表示します。次はコメントアウトした例です:
+
+```jsonc
+// Example, commented out: where the pinned versions of an ecosystem live. Copy the part you need into
+// "sentinel" > "readiness" > "pins" > "sources" of actions_monitor.json (or paste it in the Settings tab) and remove the comments.
+// [
+//   {"ecosystem": "alpha", "kind": "pin_table", "provider": "ALPHA-COMMON", "file": "pins/consumers.json", "key": "consumers"},
+//   {"ecosystem": "beta",  "kind": "lock_files", "provider": "BETA-CORE", "lock_name": "beta.lock.json", "version_key": "core"}
+// ]
+// pin_table: a JSON file of the provider that maps each repository to the version it pins (under "key").
+// lock_files: every clone is searched (down to "max_depth" folder levels) for files called "lock_name"; the OLDEST version found in "version_key" counts.
+```
+<!-- settings:end -->
 
 ## ページから変更も閲覧もできないもの
 

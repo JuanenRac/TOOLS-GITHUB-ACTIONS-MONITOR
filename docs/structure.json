@@ -50,14 +50,14 @@
         {
           "name": "tools/",
           "desc": {
-            "en": "picture generators",
-            "es": "generadores de dibujos",
-            "de": "Bild-Generatoren",
-            "fr": "générateurs d'images",
-            "it": "generatori di immagini",
-            "ja": "図のジェネレーター",
-            "zh": "图片生成器",
-            "pt": "geradores de imagens"
+            "en": "picture and guide generators",
+            "es": "generadores de dibujos y guías",
+            "de": "Bild- und Anleitungsgeneratoren",
+            "fr": "générateurs d'images et de guides",
+            "it": "generatori di immagini e guide",
+            "ja": "図とガイドのジェネレーター",
+            "zh": "图片与指南生成器",
+            "pt": "geradores de imagens e guias"
           }
         },
         {
@@ -215,8 +215,8 @@
         {
           "name": "settings_api.py  outputs.py",
           "desc": {
-            "en": "settings, metrics, JSON",
-            "es": "ajustes, métricas, JSON",
+            "en": "settings tabs, metrics",
+            "es": "ajustes, métricas",
             "de": "Einstellungen, Metriken",
             "fr": "réglages, métriques",
             "it": "impostazioni, metriche",
@@ -338,14 +338,14 @@
         {
           "name": "docs/",
           "desc": {
-            "en": "settings, outputs, Grafana",
-            "es": "ajustes, salidas, Grafana",
-            "de": "Einstellungen, Grafana",
-            "fr": "réglages, Grafana",
-            "it": "impostazioni, Grafana",
-            "ja": "設定と Grafana",
-            "zh": "设置与 Grafana",
-            "pt": "definições, Grafana"
+            "en": "settings, outputs, webhook",
+            "es": "ajustes, salidas, webhook",
+            "de": "Einstellungen, Webhook",
+            "fr": "réglages, webhook",
+            "it": "impostazioni, webhook",
+            "ja": "設定と Webhook",
+            "zh": "设置与 Webhook",
+            "pt": "definições, webhook"
           }
         }
       ]

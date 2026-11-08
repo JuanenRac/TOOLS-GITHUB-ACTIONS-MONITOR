@@ -163,4 +163,4 @@ def about_line():
 
 def ui_catalogues():
     """{lang: {key: text}} of the keys that start with 'ui.' or 'cfg.' (what the web page needs: the texts and the labels of the settings), for the page to embed."""
-    return {lang: {k: v for k, v in _load(lang).items() if k.startswith(("ui.", "cfg."))} for lang in LANGS}
+    return {lang: {k: v for k, v in _load(lang).items() if k.startswith(("ui.", "cfg.", "surf.t."))} for lang in LANGS}

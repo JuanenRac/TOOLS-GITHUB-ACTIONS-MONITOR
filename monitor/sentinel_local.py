@@ -578,6 +578,12 @@ def build_parte(s):
     ahead = [r[0] for r in tag_rows if len(r) > 4 and t("surf.tag_after") in str(r[4])]
     if ahead:   # a release tag that is ahead of the version of the manifest: the release was cut from a commit whose manifest says an older version
         lines.append({"level": "warn", "code": "tag_vs_manifest", "text": t("parte.tag_vs_manifest", n=len(ahead), list=short_list(ahead))})
+    close_rows = next((sec.get("rows") or [] for sec in a10.get("sections") or [] if sec.get("key") == "issue_close"), [])
+    if close_rows:   # one line, grouped by repository: the monitor closes nothing, it only suggests (the commands are in the A10 section)
+        per_repo = {}
+        for row in close_rows:
+            per_repo[row[0]] = per_repo.get(row[0], 0) + 1
+        lines.append({"level": "info", "code": "issue_close", "text": t("parte.issue_close", n=len(close_rows), list=short_list(f"{r} ({n})" for r, n in sorted(per_repo.items())))})
     a11 = s.get("a11") or {}
     if a11.get("low_health"):
         lines.append({"level": "warn", "text": t("parte.a11_health", limit=a11.get("warn_below"), list=short_list(f"{toolconfig.label_of(h['ecosystem'])} ({h['score']})" for h in a11["low_health"]))})

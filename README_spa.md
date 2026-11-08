@@ -31,7 +31,7 @@
 
 | | |
 |---|---|
-| **Versión** | **1.5.1** · [todas las versiones](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versión** | **1.5.2** · [todas las versiones](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Necesita** | Python 3.11+ y la CLI de GitHub (`gh auth login`); nada más |
 | **Se abre** | en una página de `127.0.0.1` solamente, en ocho idiomas |
 | **Escribe en GitHub** | nunca por sí solo: solo las órdenes por lotes que lances con un `--go` explícito |
@@ -101,7 +101,7 @@ python -m unittest discover -s monitor/tests
 TOOLS-GITHUB-ACTIONS-MONITOR/
 ├── monitor/                          el programa
 ├── docs/                             arquitectura, capturas
-├── tools/                            generadores de dibujos
+├── tools/                            generadores de dibujos y guías
 ├── images/                           banner y dibujos
 ├── .github/                          CI y formularios
 ├── CHANGELOG.md                      cambios por versión
@@ -113,7 +113,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
     ├── actions_monitor.html          la página web
     ├── sentinel_local.py             alertas y parte
     ├── surface.py readiness.py       comprobaciones, preparación
-    ├── settings_api.py outputs.py    ajustes, métricas, JSON
+    ├── settings_api.py outputs.py    ajustes, métricas
     ├── signstate.py sigverify.py     firma: estado y control
     ├── read_report.py                el parte en terminal
     ├── gha_dispatch_all.py           compilaciones por lotes
@@ -122,7 +122,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
     ├── i18n.py locales/              ocho idiomas
     ├── toolconfig.py workspace.py    ajustes y clones
     ├── tests/                        tests sin red
-    └── docs/                         ajustes, salidas, Grafana
+    └── docs/                         ajustes, salidas, webhook
 ```
 
 ## Documentación
@@ -131,6 +131,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/OUTPUTS_spa.md`](monitor/docs/OUTPUTS_spa.md): métricas, Grafana y exportaciones
 - [`monitor/docs/CI_RED_SCHEMA_spa.md`](monitor/docs/CI_RED_SCHEMA_spa.md): el formato de ci_red.json
 - [`monitor/docs/CI_RED_BRIDGE_spa.md`](monitor/docs/CI_RED_BRIDGE_spa.md): llevar ci_red.json a un panel
+- [`monitor/docs/WEBHOOK_spa.md`](monitor/docs/WEBHOOK_spa.md): el webhook de entrada
 - [`monitor/QUICKSTART_es.txt`](monitor/QUICKSTART_es.txt): primeros pasos, en ocho idiomas
 
 ## Contribuir

@@ -219,7 +219,24 @@ def sign_queue(states, finalize_fn=None):
         queue.append({"name": s["name"], "repo": s["repo"], "ecosystem": s["ecosystem"], "hours": s["hours"] or 0.0, "step": step, "run_id": s["run_id"],
                       "last_build_at": s["last_build_at"], "signature_kind": s["signature_kind"], "signature_verified": s.get("signature_verified", sigverify.UNKNOWN), "url": s["url"], "argv": argv,
                       "command": subprocess_cmdline(argv)})
+        queue[-1]["trust"] = trust_of(queue[-1])
     return sorted(queue, key=lambda q: (-q["hours"], ECO_RANK.get(q["ecosystem"], 9), q["name"]))
+
+
+TRUST_VALUES = ("verified", "unknown", "failed")
+
+
+def trust_of(row):
+    """The signature of a queue row as one of verified | unknown | failed (a signature that was checked and did not match is "failed", never "unknown")."""
+    value = row.get("signature_verified", sigverify.UNKNOWN)
+    return "verified" if value is True else ("failed" if value is False else "unknown")
+
+
+def filter_queue(queue, trust="all"):
+    """The queue rows whose signature is `trust` (verified | unknown | failed); "all" or anything else keeps every row."""
+    if trust not in TRUST_VALUES:
+        return list(queue)
+    return [q for q in queue if trust_of(q) == trust]
 
 
 def subprocess_cmdline(argv):

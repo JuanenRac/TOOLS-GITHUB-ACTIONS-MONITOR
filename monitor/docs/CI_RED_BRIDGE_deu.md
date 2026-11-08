@@ -43,3 +43,14 @@ Beide lesen den laufenden Monitor auf `127.0.0.1` (ohne GitHub-Kontingent). Sie 
 ## Was der Monitor nicht tut
 
 Er veröffentlicht die Datei nicht, pusht nicht in das Profil-Repository und berührt keinen Workflow. Den Export zum Dashboard zu bringen, ist ein Schritt des Eigentümers (oder eines Workflows des Profil-Repositorys, der die exportierte Datei liest).
+
+## Das Dashboard des Profils (Vertrag des Verbrauchers)
+
+Das Status-Dashboard eines Profil-Repositorys kann dasselbe Dokument auf zwei Wegen lesen: vom laufenden Monitor (`GET /api/outputs/dashboard.json`, aus, bis `outputs.dashboard.enabled` an ist, nur dieser Rechner) oder aus der Datei, die `py -3 read_report.py --export-status DIR` schreibt (nur rote Workflows, nie die Signaturseite). Worauf sich das Dashboard verlassen darf, von einem Test dieses Repositorys geprüft:
+
+1. `schema` ist `2`, Felder werden nur hinzugefügt.
+2. Das ausgelieferte Dokument ist genau das von `ci_red.json`.
+3. `complete: false` heißt: das letzte vollständige Bild behalten.
+4. Der öffentliche Export hat die Schlüssel `schema`, `generated`, `tool_version`, `complete`, `red_repos` und `red` und nichts vom Signaturzustand.
+
+Der Monitor schiebt die Datei nie in das Profil-Repository; sie dorthin zu bringen ist ein Schritt ihres Besitzers.

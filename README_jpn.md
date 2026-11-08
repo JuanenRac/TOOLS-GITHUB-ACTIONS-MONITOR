@@ -31,7 +31,7 @@
 
 | | |
 |---|---|
-| **バージョン** | **1.5.1** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **バージョン** | **1.5.2** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **必要なもの** | Python 3.11 以上と GitHub CLI（`gh auth login`）。それ以外は不要 |
 | **開く先** | `127.0.0.1` 上のページのみ、8言語対応 |
 | **GitHub への書き込み** | 自動では行いません。明示的な `--go` を付けて実行したバッチコマンドのみ |
@@ -101,7 +101,7 @@ python -m unittest discover -s monitor/tests
 TOOLS-GITHUB-ACTIONS-MONITOR/
 ├── monitor/                          プログラム本体
 ├── docs/                             構成図、スクリーンショット
-├── tools/                            図のジェネレーター
+├── tools/                            図とガイドのジェネレーター
 ├── images/                           バナーと図
 ├── .github/                          CI と Issue フォーム
 ├── CHANGELOG.md                      バージョン別の変更
@@ -122,7 +122,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
     ├── i18n.py locales/              8言語
     ├── toolconfig.py workspace.py    設定とクローン
     ├── tests/                        オフラインテスト
-    └── docs/                         設定と Grafana
+    └── docs/                         設定と Webhook
 ```
 
 ## ドキュメント
@@ -131,6 +131,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/OUTPUTS_jpn.md`](monitor/docs/OUTPUTS_jpn.md): メトリクス、Grafana、エクスポート
 - [`monitor/docs/CI_RED_SCHEMA_jpn.md`](monitor/docs/CI_RED_SCHEMA_jpn.md): ci_red.json の形式
 - [`monitor/docs/CI_RED_BRIDGE_jpn.md`](monitor/docs/CI_RED_BRIDGE_jpn.md): ci_red.json をダッシュボードへ渡す
+- [`monitor/docs/WEBHOOK_jpn.md`](monitor/docs/WEBHOOK_jpn.md): 受信 Webhook
 - [`monitor/QUICKSTART_ja.txt`](monitor/QUICKSTART_ja.txt): 最初の手順（8言語）
 
 ## コントリビュート

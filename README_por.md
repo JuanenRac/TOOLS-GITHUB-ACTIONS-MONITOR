@@ -31,7 +31,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 
 | | |
 |---|---|
-| **Versão** | **1.5.1** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versão** | **1.5.2** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Requisitos** | Python 3.11+ e a CLI do GitHub (`gh auth login`); mais nada |
 | **Abre** | uma página só em `127.0.0.1`, em oito idiomas |
 | **Escreve no GitHub** | nunca sozinho: apenas os comandos por lotes que lançar com um `--go` explícito |
@@ -101,7 +101,7 @@ python -m unittest discover -s monitor/tests
 TOOLS-GITHUB-ACTIONS-MONITOR/
 ├── monitor/                          o programa
 ├── docs/                             arquitetura, capturas
-├── tools/                            geradores de imagens
+├── tools/                            geradores de imagens e guias
 ├── images/                           banner e imagens
 ├── .github/                          CI e formulários
 ├── CHANGELOG.md                      mudanças por versão
@@ -122,7 +122,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
     ├── i18n.py locales/              oito idiomas
     ├── toolconfig.py workspace.py    definições e clones
     ├── tests/                        testes sem rede
-    └── docs/                         definições, Grafana
+    └── docs/                         definições, webhook
 ```
 
 ## Documentação
@@ -131,6 +131,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/OUTPUTS_por.md`](monitor/docs/OUTPUTS_por.md): métricas, Grafana e exportações
 - [`monitor/docs/CI_RED_SCHEMA_por.md`](monitor/docs/CI_RED_SCHEMA_por.md): o formato de ci_red.json
 - [`monitor/docs/CI_RED_BRIDGE_por.md`](monitor/docs/CI_RED_BRIDGE_por.md): levar o ci_red.json para um painel
+- [`monitor/docs/WEBHOOK_por.md`](monitor/docs/WEBHOOK_por.md): o webhook de entrada
 - [`monitor/QUICKSTART_pt.txt`](monitor/QUICKSTART_pt.txt): primeiros passos, em oito idiomas
 
 ## Contribuir

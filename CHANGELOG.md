@@ -9,6 +9,12 @@ Changes of the repository as a whole. The program has its own, more detailed his
 
 ## [Unreleased]
 
+## [1.5.2]
+
+- The Settings tab now has sub-tabs, blocks with a main switch, units, ranges, help lines, a search box and every setting of the configuration file (the A10 checks, health weights, pin sources, minute ceilings and more).
+- Signing queue filter by trust (`verified` / `unknown` / `failed`), readiness chips in the header, grouped issue-closing suggestions in the report, a minimal Grafana board and a documented, tested contract for the profile dashboard.
+- New guide for the incoming webhook; the settings guides are generated from the schema.
+
 ## [1.5.1]
 
 - External AI settings for the sentinel in the Settings tab (only the name of the variable that holds the key), `migrate_state.py` with a one-page guide in eight languages, `--init-catalog`, and the version of the monitor shown in every README.

@@ -30,6 +30,7 @@ def main():
     ap.add_argument("--version", action="store_true", help=i18n.t("lp.help_version"))
     ap.add_argument("--export-status", metavar="DIR", help=i18n.t("lp.help_export_status"))
     ap.add_argument("--export-sign-queue", metavar="FILE", help=i18n.t("lp.help_export_queue"))
+    ap.add_argument("--sign-trust", choices=("all", "verified", "unknown", "failed"), default="all", help=i18n.t("lp.help_sign_trust"))
     args = ap.parse_args()
     if args.lang:
         i18n.set_language(args.lang)
@@ -58,7 +59,7 @@ def main():
                 print(export_status.TEXT["refused"])
             code = 0 if written else 4
         if args.export_sign_queue:
-            target = export_status.write_sign_queue(s, args.export_sign_queue)
+            target = export_status.write_sign_queue(s, args.export_sign_queue, args.sign_trust)
             print(export_status.TEXT["wrote"] + str(target) if target else export_status.TEXT["refused"])
             code = code or (0 if target else 4)
         return code
@@ -78,8 +79,10 @@ def main():
         print(i18n.t("lp.a2_red", repo=row.get("repo"), workflow=row.get("workflow"), streak=row.get("streak"), since=row.get("since"), url=row.get("url")))
     for row in (s.get("a5") or {}).get("pending_sign") or []:
         print(i18n.t("lp.a5_unsigned", repo=row.get("repo"), hours=row.get("hours"), url=row.get("url")))
-    for i, row in enumerate((s.get("a5") or {}).get("sign_queue") or [], 1):
-        print(i18n.t("lp.a5_queue", n=i, name=row.get("name"), hours=row.get("hours"), step=row.get("step"), command=row.get("command") or i18n.t("lp.no_command")))
+    import signstate
+    for i, row in enumerate(signstate.filter_queue((s.get("a5") or {}).get("sign_queue") or [], args.sign_trust), 1):
+        print(i18n.t("lp.a5_queue", n=i, name=row.get("name"), hours=row.get("hours"), step=row.get("step"), command=row.get("command") or i18n.t("lp.no_command"))
+              + f" [{i18n.t('ui.trust_' + signstate.trust_of(row))}]")
     for row in ((s.get("a7") or {}).get("budget") or []):
         print(i18n.t("lp.a7_budget", eco=row.get("ecosystem"), used=row.get("used"), limit=row.get("limit"), pct=row.get("pct"), period=row.get("period"), level=row.get("level")))
     if a2.get("unchecked"):

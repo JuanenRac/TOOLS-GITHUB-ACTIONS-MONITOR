@@ -60,3 +60,11 @@ scrape_configs:
 ## 借鉴自类似项目的想法
 
 阅读其他 GitHub Actions 工具的做法带来了一些想法；不使用它们的任何代码或文字。来自一个 Prometheus 指标导出器：把运行的状态表示为数字加标签、选择导出哪些标签，以及可配置的端口和间隔。来自一个由 Webhook 驱动的电视仪表板：每个仓库一个状态，带过滤器，以大字号显示。来自一个终端监视器：一次性显示某个仓库的所有工作流，直到它们结束。来自一个带告警规则的 Webhook 仪表板：在告警之前按仓库、分支和工作流进行过滤。在这里，同样的想法体现为 `per_repo`（选择序列）、每个红色工作流一行的 JSON 数据源、实时的“当前”选项卡，以及页面中带过滤器的事件文件。
+
+## 最小 Grafana 面板
+
+`docs/grafana/red_by_ecosystem.json` 是只含一个图表的面板:按生态系统统计的红色工作流(查询 `ghamon_ecosystem_red_workflows`,图例 `{{ecosystem}}`)。导入后选择你的 Prometheus 数据源。本仓库的测试会检查它使用的指标和标签确实由 `/metrics` 提供。
+
+## 按可信度划分的签名队列
+
+队列的每一行都有 `trust`:`verified`(已用公钥验证签名)、`unknown`(此处无法检查该格式:从不猜测)或 `failed`(已检查但不匹配)。哨兵标签页有签名筛选器,显示每类数量并标记各行(绿色、灰色或红色边)。在控制台:`py -3 read_report.py --export-sign-queue FILE --sign-trust failed`。

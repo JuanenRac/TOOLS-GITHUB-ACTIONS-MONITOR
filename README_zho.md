@@ -31,7 +31,7 @@
 
 | | |
 |---|---|
-| **版本** | **1.5.1** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **版本** | **1.5.2** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **需要** | Python 3.11+ 和 GitHub CLI（`gh auth login`）；不需要其他东西 |
 | **打开** | 仅在 `127.0.0.1` 上的页面，支持八种语言 |
 | **写入 GitHub** | 绝不自行写入：只有你用明确的 `--go` 运行的批处理命令才会 |
@@ -101,7 +101,7 @@ python -m unittest discover -s monitor/tests
 TOOLS-GITHUB-ACTIONS-MONITOR/
 ├── monitor/                          程序本体
 ├── docs/                             架构、截图
-├── tools/                            图片生成器
+├── tools/                            图片与指南生成器
 ├── images/                           横幅图和图片
 ├── .github/                          CI 和议题表单
 ├── CHANGELOG.md                      各版本变更
@@ -122,7 +122,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
     ├── i18n.py locales/              八种语言
     ├── toolconfig.py workspace.py    设置与克隆
     ├── tests/                        离线测试
-    └── docs/                         设置与 Grafana
+    └── docs/                         设置与 Webhook
 ```
 
 ## 文档
@@ -131,6 +131,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/OUTPUTS_zho.md`](monitor/docs/OUTPUTS_zho.md): 指标、Grafana 和导出
 - [`monitor/docs/CI_RED_SCHEMA_zho.md`](monitor/docs/CI_RED_SCHEMA_zho.md): ci_red.json 的格式
 - [`monitor/docs/CI_RED_BRIDGE_zho.md`](monitor/docs/CI_RED_BRIDGE_zho.md): 把 ci_red.json 带到仪表板
+- [`monitor/docs/WEBHOOK_zho.md`](monitor/docs/WEBHOOK_zho.md): 入站 Webhook
 - [`monitor/QUICKSTART_zh.txt`](monitor/QUICKSTART_zh.txt): 入门步骤（八种语言）
 
 ## 参与贡献

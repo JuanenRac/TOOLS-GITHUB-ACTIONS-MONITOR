@@ -67,3 +67,11 @@ Reading what other tools do for GitHub Actions gave some ideas; none of their co
 choice of which labels to export, and a configurable port and interval. From a TV dashboard fed by webhooks: one status per repository with filters, shown large. From a terminal watcher: all the
 workflows of a repository at once until they finish. From a webhook dashboard with alert rules: filters by repository, branch and workflow before alerting. Here the same ideas show up as
 `per_repo` (choose the series), the JSON source with one row per red workflow, the live Now tab and the events file with filters in the page.
+
+## The minimal Grafana board
+
+`docs/grafana/red_by_ecosystem.json` is a one-panel board: red workflows by ecosystem (query `ghamon_ecosystem_red_workflows`, legend `{{ecosystem}}`). Import it and pick your Prometheus data source. A test of this repository checks that the metric and the label it uses are really served by `/metrics`.
+
+## The signing queue by trust
+
+Each row of the queue has a `trust`: `verified` (the signature was checked against the public key), `unknown` (the format cannot be checked here: never a guess) or `failed` (it was checked and does not match). The Sentinel tab has a Signature filter with the count of each kind and marks the rows (green, grey or red edge). From the console: `py -3 read_report.py --export-sign-queue FILE --sign-trust failed`.

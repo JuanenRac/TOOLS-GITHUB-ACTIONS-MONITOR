@@ -67,3 +67,11 @@ Beim Lesen, was andere Werkzeuge für GitHub Actions leisten, ergaben sich einig
 Auswahl der zu exportierenden Labels sowie ein konfigurierbarer Port und Intervall. Von einem per Webhook gespeisten TV-Dashboard: ein Status je Repository mit Filtern, groß dargestellt. Von einem Terminal-Beobachter: alle
 Workflows eines Repositorys auf einmal, bis sie beendet sind. Von einem Webhook-Dashboard mit Alarmregeln: Filter nach Repository, Branch und Workflow vor dem Alarmieren. Hier erscheinen dieselben Ideen als
 `per_repo` (die Serien auswählen), die JSON-Quelle mit einer Zeile je rotem Workflow, der Live-Reiter Jetzt und die Ereignisdatei mit Filtern auf der Seite.
+
+## Das minimale Grafana-Board
+
+`docs/grafana/red_by_ecosystem.json` ist ein Board mit einem Panel: rote Workflows je Ökosystem (Abfrage `ghamon_ecosystem_red_workflows`, Legende `{{ecosystem}}`). Importieren und die Prometheus-Quelle wählen. Ein Test dieses Repositorys prüft, dass Metrik und Label wirklich von `/metrics` geliefert werden.
+
+## Die Signatur-Warteschlange nach Vertrauen
+
+Jede Zeile der Warteschlange hat ein `trust`: `verified` (Signatur gegen den öffentlichen Schlüssel geprüft), `unknown` (das Format lässt sich hier nicht prüfen: nie geraten) oder `failed` (geprüft und nicht passend). Der Reiter Wächter hat einen Filter Signatur mit der Anzahl je Art und markiert die Zeilen (grüner, grauer oder roter Rand). Auf der Konsole: `py -3 read_report.py --export-sign-queue FILE --sign-trust failed`.

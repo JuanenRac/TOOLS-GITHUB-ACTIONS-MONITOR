@@ -31,7 +31,7 @@
 
 | | |
 |---|---|
-| **Version** | **1.5.1** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **1.5.2** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Needs** | Python 3.11+ and the GitHub CLI (`gh auth login`); nothing else |
 | **Opens** | a page on `127.0.0.1` only, in eight languages |
 | **Writes to GitHub** | never by itself: only batch commands you run with an explicit `--go` |
@@ -101,7 +101,7 @@ python -m unittest discover -s monitor/tests
 TOOLS-GITHUB-ACTIONS-MONITOR/
 ├── monitor/                          the program
 ├── docs/                             architecture, screenshots
-├── tools/                            picture generators
+├── tools/                            picture and guide generators
 ├── images/                           banner and pictures
 ├── .github/                          CI and issue forms
 ├── CHANGELOG.md                      changes per version
@@ -113,7 +113,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
     ├── actions_monitor.html          the web page
     ├── sentinel_local.py             alerts and report
     ├── surface.py readiness.py       repo checks, readiness
-    ├── settings_api.py outputs.py    settings, metrics, JSON
+    ├── settings_api.py outputs.py    settings tabs, metrics
     ├── signstate.py sigverify.py     signing state and check
     ├── read_report.py                report from the terminal
     ├── gha_dispatch_all.py           batch builds
@@ -122,7 +122,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
     ├── i18n.py locales/              eight languages
     ├── toolconfig.py workspace.py    settings and clones
     ├── tests/                        offline tests
-    └── docs/                         settings, outputs, Grafana
+    └── docs/                         settings, outputs, webhook
 ```
 
 ## Documentation
@@ -131,6 +131,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/OUTPUTS.md`](monitor/docs/OUTPUTS.md): metrics, Grafana and exports
 - [`monitor/docs/CI_RED_SCHEMA.md`](monitor/docs/CI_RED_SCHEMA.md): the format of ci_red.json
 - [`monitor/docs/CI_RED_BRIDGE.md`](monitor/docs/CI_RED_BRIDGE.md): carrying ci_red.json to a dashboard
+- [`monitor/docs/WEBHOOK.md`](monitor/docs/WEBHOOK.md): the incoming webhook
 - [`monitor/QUICKSTART_en.txt`](monitor/QUICKSTART_en.txt): first steps, in eight languages
 
 ## Contributing

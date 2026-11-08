@@ -67,3 +67,11 @@ La lecture de ce que font d'autres outils pour GitHub Actions a fourni quelques 
 choix des étiquettes à exporter, ainsi qu'un port et un intervalle configurables. D'un tableau de bord pour écran de télévision alimenté par des webhooks : un état par dépôt avec des filtres, affiché en grand. D'un observateur en terminal : tous les
 workflows d'un dépôt à la fois jusqu'à leur fin. D'un tableau de bord de webhooks avec des règles d'alerte : des filtres par dépôt, branche et workflow avant d'alerter. Ici, les mêmes idées apparaissent sous la forme de
 `per_repo` (choisir les séries), la source JSON avec une ligne par workflow rouge, l'onglet Maintenant en direct et le fichier d'événements avec filtres dans la page.
+
+## Le tableau Grafana minimal
+
+`docs/grafana/red_by_ecosystem.json` est un tableau à un seul panneau : workflows rouges par écosystème (requête `ghamon_ecosystem_red_workflows`, légende `{{ecosystem}}`). Importez-le et choisissez votre source Prometheus. Un test de ce dépôt vérifie que la métrique et l'étiquette utilisées sont bien servies par `/metrics`.
+
+## La file de signature par confiance
+
+Chaque ligne de la file a un `trust` : `verified` (signature vérifiée avec la clé publique), `unknown` (le format ne peut pas être vérifié ici : jamais deviné) ou `failed` (vérifiée et non conforme). L'onglet Sentinelle a un filtre Signature avec le nombre de chaque sorte et marque les lignes (bord vert, gris ou rouge). En console : `py -3 read_report.py --export-sign-queue FILE --sign-trust failed`.

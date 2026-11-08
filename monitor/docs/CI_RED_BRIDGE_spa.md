@@ -43,3 +43,14 @@ Ambos leen el monitor en ejecución en `127.0.0.1` (sin cuota de GitHub). Se nie
 ## Qué no hace el monitor
 
 No publica el fichero, no hace push al repositorio del perfil y no toca ningún workflow. Llevar la exportación al panel es un paso del propietario (o de un workflow del repositorio del perfil que lea el fichero exportado).
+
+## El panel del perfil (contrato del consumidor)
+
+El panel de estado de un repositorio de perfil puede leer el mismo documento de dos maneras: del monitor en marcha (`GET /api/outputs/dashboard.json`, apagado hasta activar `outputs.dashboard.enabled`, solo este equipo) o del archivo que escribe `py -3 read_report.py --export-status DIR` (solo los workflows en rojo, nunca la parte de firma). Lo que el panel puede dar por seguro, comprobado por una prueba de este repositorio:
+
+1. `schema` es `2` y los campos solo se añaden.
+2. El documento servido es exactamente el de `ci_red.json`.
+3. `complete: false` significa: conserva tu última imagen completa.
+4. La exportación pública tiene las claves `schema`, `generated`, `tool_version`, `complete`, `red_repos` y `red`, y nada del estado de firma.
+
+El monitor nunca sube el archivo al repositorio del perfil; llevarlo allí es un paso de su dueño.

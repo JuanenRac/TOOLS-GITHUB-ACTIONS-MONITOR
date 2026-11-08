@@ -6,11 +6,16 @@ Safety rules (every one of them is tested):
 
   * Only the keys of SCHEMA can be read or written from the page. Anything else in the file (tokens, secrets, commands, keys of other tools) is neither shown
     nor touched: a write changes the listed keys and keeps every other key exactly as it was. The webhook secret, the signature keys, the command the
-    sentinel can run and the AI settings with credentials are NOT in the schema, so the page can neither show nor change them.
+    sentinel can run and the AI settings with credentials are NOT in the schema, so the page can neither show nor change them. The only thing the page learns
+    about the webhook secret is whether it is defined and long enough (a read-only "state").
   * Every value is checked against its type and range before anything is written; one invalid value refuses the whole request and nothing is written.
   * The file is written atomically (temporary file + replace) after a copy of the previous one goes to config_backups/ (the last BACKUPS copies are kept).
   * A path must be text without control characters, never a network (UNC) path and never on the D: drive.
   * Each setting says whether it needs a restart of the monitor (the loop reads the configuration once) or applies at once.
+
+Layout: every setting belongs to exactly ONE tab (GROUPS, the order of the page: from the common to the advanced) and to one block of that tab (a titled box; its first
+field is the main switch when it is a bool, and the rest of the block dims while it is off). Labels and help lines are texts of locales/*.json: label_keys(key)
+and help_key(key) say which ones.
 
 The web server only answers these requests to the page of the same machine (the same Host/Origin checks as every other endpoint).
 """
@@ -22,6 +27,7 @@ import time
 from pathlib import Path
 
 import i18n
+import surface
 import toolconfig
 
 HERE = Path(__file__).resolve().parent
@@ -36,75 +42,155 @@ MODEL_RE = re.compile(r"^[A-Za-z0-9._:/@-]{0,100}$")
 OLLAMA_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}/?$")   # the local service only: nothing leaves this computer
 HTTPS_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250})?$")
 ENV_NAME_RE = re.compile(r"^([A-Z_][A-Z0-9_]{0,63})?$")   # the NAME of an environment variable, never the key itself
+FILE_PATTERN_RE = re.compile(r"^[A-Za-z0-9._*?-]{1,80}$")   # a file name pattern of the audit folder (no folders)
+FILE_NAME_RE = re.compile(r"^[A-Za-z0-9._-][A-Za-z0-9._/-]{0,79}$")
+IDENT_RE = re.compile(r"^[A-Za-z0-9_.-]{1,60}$")
+SOURCE_KEYS = {"ecosystem": NAME_RE, "kind": re.compile(r"^(pin_table|lock_files)$"), "provider": NAME_RE, "file": FILE_NAME_RE, "key": IDENT_RE,
+               "lock_name": FILE_NAME_RE, "version_key": IDENT_RE}
 _FOREIGN = re.compile(r"^(?:[Dd]:|/mnt/[dD](?:/|$)|/[dD](?:/|$))")
 
-# group, path, type, bounds / enum, restart.   Types: int, float, bool, enum, text, path, names (list of repository names), eco (the string "all" or a list of ecosystem names)
-_G_GENERAL, _G_POLL, _G_SENT, _G_SURF, _G_READY, _G_PATHS, _G_OUT, _G_AI = "general", "polling", "sentinel", "surface", "readiness", "paths", "outputs", "ai"
-SCHEMA = [
-    (_G_GENERAL, "language", "enum", ("",) + tuple(i18n.LANGS), False),
-    (_G_GENERAL, "github_owner", "text", OWNER_RE, True),
-    (_G_GENERAL, "mode", "enum", ("full", "lite"), True),
-    (_G_GENERAL, "ecosystems", "eco", None, True),
-    (_G_GENERAL, "exclude", "names", None, True),
-    (_G_GENERAL, "report_history_days", "int", (1, 365), True),
-    (_G_POLL, "refresh_seconds", "int", (10, 3600), True),
-    (_G_POLL, "cold_refresh_seconds", "int", (60, 86400), True),
-    (_G_POLL, "issues_refresh_seconds", "int", (30, 86400), True),
-    (_G_POLL, "discover_refresh_seconds", "int", (300, 86400), True),
-    (_G_POLL, "stuck_minutes", "int", (10, 1440), True),
-    (_G_POLL, "runs_per_repo", "int", (5, 100), True),
-    (_G_POLL, "cold_runs_per_repo", "int", (1, 100), True),
-    (_G_POLL, "hot_hours", "int", (1, 48), True),
-    (_G_POLL, "max_workers", "int", (1, 32), True),
-    (_G_POLL, "min_rate_remaining", "int", (100, 5000), True),
-    (_G_SENT, "sentinel.enabled", "bool", None, True),
-    (_G_SENT, "sentinel.refresh_seconds", "int", (60, 86400), True),
-    (_G_SENT, "sentinel.alerts_hot_seconds", "int", (60, 86400), True),
-    (_G_SENT, "sentinel.alerts_cold_seconds", "int", (60, 86400), True),
-    (_G_SENT, "sentinel.hygiene_seconds", "int", (300, 604800), True),
-    (_G_SENT, "sentinel.max_calls_per_tick", "int", (10, 500), True),
-    (_G_SENT, "sentinel.budget_per_hour", "int", (50, 5000), True),
-    (_G_SENT, "sentinel.workers", "int", (1, 32), True),
-    (_G_SENT, "sentinel.min_rate_remaining", "int", (100, 5000), True),
-    (_G_SENT, "sentinel.candidate_days", "int", (0, 60), True),
-    (_G_SENT, "sentinel.candidate_min_entries", "int", (1, 100), True),
-    (_G_SENT, "sentinel.stale_pr_days", "int", (1, 90), True),
-    (_G_SENT, "sentinel.pending_sign_hours", "int", (1, 720), True),
-    (_G_SENT, "sentinel.require_verified_signature", "bool", None, True),
-    (_G_SENT, "sentinel.a2_resolve_max_calls_per_tick", "int", (0, 50), True),
-    (_G_SENT, "sentinel.a2_resolve_ttl_seconds", "int", (60, 86400), True),
-    (_G_SURF, "sentinel.surface.enabled", "bool", None, True),
-    (_G_SURF, "sentinel.surface.refresh_seconds", "int", (600, 604800), True),
-    (_G_SURF, "sentinel.surface.local_seconds", "int", (60, 86400), True),
-    (_G_SURF, "sentinel.surface.max_repos_per_tick", "int", (1, 50), True),
-    (_G_SURF, "sentinel.surface.min_rate_factor", "float", (1.0, 10.0), True),
-    (_G_SURF, "sentinel.surface.budget_share", "float", (0.1, 1.0), True),
-    (_G_READY, "sentinel.readiness.enabled", "bool", None, True),
-    (_G_READY, "sentinel.readiness.min_coverage", "float", (0.0, 1.0), True),
-    (_G_READY, "sentinel.readiness.warn_below", "int", (0, 100), True),
-    (_G_PATHS, "workspace_root", "path", None, True),
-    (_G_PATHS, "signed_dir", "path", None, True),
-    (_G_PATHS, "audit_dir", "path", None, True),
-    (_G_PATHS, "ecosystems_file", "path", None, True),
-    (_G_PATHS, "targets_file", "path", None, True),
-    (_G_PATHS, "profiles_file", "path", None, True),
-    (_G_PATHS, "tools_dir", "path", None, True),
-    (_G_PATHS, "sentinel.ci_red_file", "path", None, True),
-    (_G_PATHS, "sentinel.ci_red_audit_copy", "bool", None, True),
-    (_G_OUT, "outputs.prometheus.enabled", "bool", None, False),
-    (_G_OUT, "outputs.prometheus.per_repo", "bool", None, False),
-    (_G_OUT, "outputs.json.enabled", "bool", None, False),
-    (_G_OUT, "outputs.dashboard.enabled", "bool", None, False),
-    (_G_AI, "ai.provider", "enum", ("none", "ollama", "openai-compatible"), True),
-    (_G_AI, "ai.model", "text", MODEL_RE, True),
-    (_G_AI, "ai.ollama_url", "text", OLLAMA_RE, True),
-    (_G_AI, "ai.base_url", "text", HTTPS_RE, True),
-    (_G_AI, "ai.api_key_env", "text", ENV_NAME_RE, True),
-    (_G_AI, "ai.daily_limit", "int", (0, 500), True),
-]
+ROWS = []     # (tab, block, key, type, bounds / enum, restart)
+META = {}     # key -> {"tab", "block", "secure", "unit", "label", "help"}
+_UNIT_BY_SUFFIX = (("_seconds", "s"), ("_minutes", "min"), ("_hours", "h"), ("_days", "d"), ("max_mb", "MB"))
+
+
+def _unit(key):
+    for suffix, unit in _UNIT_BY_SUFFIX:
+        if key.endswith(suffix):
+            return unit
+    return ""
+
+
+def _f(tab, block, key, kind, bounds=None, restart=True, secure=False, unit=None, label=None, help=None):
+    ROWS.append((tab, block, key, kind, bounds, restart))
+    META[key] = {"tab": tab, "block": block, "secure": secure, "unit": _unit(key) if unit is None else unit, "label": label, "help": help}
+
+
+_T_GENERAL, _T_POLL, _T_SENT, _T_SURF, _T_READY, _T_PATHS, _T_OUT, _T_AI, _T_HOOK = "general", "polling", "sentinel", "surface", "readiness", "paths", "outputs", "ai", "webhook"
+_G_GENERAL, _G_POLL, _G_SENT, _G_SURF, _G_READY, _G_PATHS, _G_OUT, _G_AI = _T_GENERAL, _T_POLL, _T_SENT, _T_SURF, _T_READY, _T_PATHS, _T_OUT, _T_AI
+
+# --- General
+_f(_T_GENERAL, "identity", "github_owner", "text", OWNER_RE)
+_f(_T_GENERAL, "identity", "language", "enum", ("",) + tuple(i18n.LANGS), False)
+_f(_T_GENERAL, "scope", "mode", "enum", ("full", "lite"))
+_f(_T_GENERAL, "scope", "repos", "repos")
+_f(_T_GENERAL, "scope", "ecosystems", "eco")
+_f(_T_GENERAL, "scope", "exclude", "names")
+_f(_T_GENERAL, "history", "report_history_days", "int", (1, 365))
+# --- Refresh and limits
+_f(_T_POLL, "hot", "refresh_seconds", "int", (10, 3600))
+_f(_T_POLL, "hot", "hot_hours", "int", (1, 48))
+_f(_T_POLL, "hot", "runs_per_repo", "int", (5, 100))
+_f(_T_POLL, "hot", "stuck_minutes", "int", (10, 1440))
+_f(_T_POLL, "cold", "cold_refresh_seconds", "int", (60, 86400))
+_f(_T_POLL, "cold", "cold_runs_per_repo", "int", (1, 100))
+_f(_T_POLL, "background", "issues_refresh_seconds", "int", (30, 86400))
+_f(_T_POLL, "background", "discover_refresh_seconds", "int", (300, 86400))
+_f(_T_POLL, "background", "max_workers", "int", (1, 32))
+_f(_T_POLL, "quota", "min_rate_remaining", "int", (100, 5000), unit="calls")
+# --- Sentinel
+_f(_T_SENT, "main", "sentinel.enabled", "bool")
+_f(_T_SENT, "main", "sentinel.refresh_seconds", "int", (60, 86400))
+_f(_T_SENT, "main", "sentinel.hot_hours", "int", (1, 48))
+_f(_T_SENT, "alerts", "sentinel.alerts_hot_seconds", "int", (60, 86400))
+_f(_T_SENT, "alerts", "sentinel.alerts_cold_seconds", "int", (60, 86400))
+_f(_T_SENT, "alerts", "sentinel.hygiene_seconds", "int", (300, 604800))
+_f(_T_SENT, "budget", "sentinel.max_calls_per_tick", "int", (10, 500), unit="calls")
+_f(_T_SENT, "budget", "sentinel.budget_per_hour", "int", (50, 5000), unit="calls")
+_f(_T_SENT, "budget", "sentinel.workers", "int", (1, 32))
+_f(_T_SENT, "budget", "sentinel.min_rate_remaining", "int", (100, 5000), unit="calls")
+_f(_T_SENT, "releases", "sentinel.candidate_days", "int", (0, 60))
+_f(_T_SENT, "releases", "sentinel.candidate_min_entries", "int", (1, 100))
+_f(_T_SENT, "releases", "sentinel.skip_candidate_prefixes", "names")
+_f(_T_SENT, "releases", "sentinel.pending_sign_hours", "int", (1, 720))
+_f(_T_SENT, "releases", "sentinel.require_verified_signature", "bool", secure=True)
+_f(_T_SENT, "resolve", "sentinel.a2_full_sample_unknown", "bool")
+_f(_T_SENT, "resolve", "sentinel.a2_resolve_max_calls_per_tick", "int", (0, 50), unit="calls")
+_f(_T_SENT, "resolve", "sentinel.a2_resolve_ttl_seconds", "int", (60, 86400))
+_f(_T_SENT, "prs", "sentinel.stale_pr_days", "int", (1, 90))
+_f(_T_SENT, "hygiene_files", "sentinel.required_files", "filegroups")
+_f(_T_SENT, "minutes", "sentinel.minutes_budget_period", "enum", ("7d", "24h"))
+_f(_T_SENT, "minutes", "sentinel.minutes_budget", "intmap", (0, 1000000), unit="min")
+_f(_T_SENT, "audits", "sentinel.audit_files.reconciliation", "text", FILE_PATTERN_RE)
+_f(_T_SENT, "audits", "sentinel.audit_files.rounds", "text", FILE_PATTERN_RE)
+_f(_T_SENT, "audits", "sentinel.audit_files.rounds_extra", "text", FILE_PATTERN_RE)
+# --- Actions and releases surface (A10)
+_f(_T_SURF, "main", "sentinel.surface.enabled", "bool")
+_f(_T_SURF, "main", "sentinel.surface.refresh_seconds", "int", (600, 604800))
+_f(_T_SURF, "main", "sentinel.surface.local_seconds", "int", (60, 86400))
+_f(_T_SURF, "main", "sentinel.surface.max_repos_per_tick", "int", (1, 50))
+_f(_T_SURF, "main", "sentinel.surface.min_rate_factor", "float", (1.0, 10.0), unit="x")
+_f(_T_SURF, "main", "sentinel.surface.budget_share", "float", (0.1, 1.0), unit="x")
+CHECK_PARAMS = {"dead_schedule": (("days", (1, 365)),), "stuck_concurrency": (("minutes", (5, 1440)),), "matrix_os": (("max_per_tick", (1, 20)),),
+                "artifacts": (("max_mb", (1, 100000)), ("retention_days", (1, 400))), "release_assets": (("recent_days", (1, 365)),), "drafts": (("days", (1, 365)),),
+                "security_aged": (("days", (1, 365)),), "pr_human": (("days", (1, 365)),), "attestation": (("max_per_tick", (1, 20)),)}
+for _check in surface.DEFAULTS["checks"]:
+    _f(_T_SURF, "chk_" + _check, f"sentinel.surface.checks.{_check}.enabled", "bool", label=["cfg.p.check_on"], help="cfg.h.check_on")
+    for _param, _bounds in CHECK_PARAMS.get(_check, ()):
+        _f(_T_SURF, "chk_" + _check, f"sentinel.surface.checks.{_check}.{_param}", "int", _bounds, label=["cfg.p." + _param], help="cfg.h.p." + _param)
+# --- Release readiness (A11)
+_f(_T_READY, "main", "sentinel.readiness.enabled", "bool")
+_f(_T_READY, "main", "sentinel.readiness.min_coverage", "float", (0.0, 1.0), unit="x")
+_f(_T_READY, "main", "sentinel.readiness.warn_below", "int", (0, 100), unit="pts")
+for _w in ("red", "stuck", "secret", "high_alert", "alert", "stale_pr", "unsigned", "hygiene"):
+    _f(_T_READY, "weights", f"sentinel.readiness.health.weights.{_w}", "int", (0, 1000), unit="pts", label=["cfg.w." + _w], help="cfg.h.weight")
+_f(_T_READY, "pins", "sentinel.readiness.pins.refresh_seconds", "int", (60, 86400))
+_f(_T_READY, "pins", "sentinel.readiness.pins.max_depth", "int", (1, 12))
+_f(_T_READY, "pins", "sentinel.readiness.pins.sources", "sources")
+# --- Folders and files
+_f(_T_PATHS, "workspace", "workspace_root", "path")
+_f(_T_PATHS, "workspace", "signed_dir", "path")
+_f(_T_PATHS, "workspace", "audit_dir", "path")
+_f(_T_PATHS, "workspace", "tools_dir", "path")
+_f(_T_PATHS, "data", "ecosystems_file", "path")
+_f(_T_PATHS, "data", "targets_file", "path")
+_f(_T_PATHS, "data", "profiles_file", "path")
+_f(_T_PATHS, "ci_red", "sentinel.ci_red_file", "path")
+_f(_T_PATHS, "ci_red", "sentinel.ci_red_audit_copy", "bool")
+# --- Outputs and exports
+_f(_T_OUT, "prometheus", "outputs.prometheus.enabled", "bool", restart=False, secure=True)
+_f(_T_OUT, "prometheus", "outputs.prometheus.per_repo", "bool", restart=False)
+_f(_T_OUT, "json", "outputs.json.enabled", "bool", restart=False, secure=True)
+_f(_T_OUT, "dashboard", "outputs.dashboard.enabled", "bool", restart=False, secure=True)
+# --- Integrations: external AI, incoming webhook
+_f(_T_AI, "provider", "ai.provider", "enum", ("none", "ollama", "openai-compatible"), secure=True)
+_f(_T_AI, "provider", "ai.model", "text", MODEL_RE)
+_f(_T_AI, "provider", "ai.ollama_url", "text", OLLAMA_RE)
+_f(_T_AI, "provider", "ai.base_url", "text", HTTPS_RE, secure=True)
+_f(_T_AI, "provider", "ai.api_key_env", "text", ENV_NAME_RE)
+_f(_T_AI, "provider", "ai.daily_limit", "int", (0, 500), unit="calls")
+_f(_T_HOOK, "inbound", "webhook.enabled", "bool", secure=True)
+_f(_T_HOOK, "inbound", "webhook.signing_state", "status", restart=False)
+# @@MORE_SETTINGS@@
+
+SCHEMA = [(tab, key, kind, bounds, restart) for tab, _block, key, kind, bounds, restart in ROWS]
 FIELDS = {row[1]: row for row in SCHEMA}
-GROUPS = (_G_GENERAL, _G_POLL, _G_SENT, _G_SURF, _G_READY, _G_PATHS, _G_OUT, _G_AI)
+GROUPS = tuple(dict.fromkeys(row[0] for row in SCHEMA))
 OUTPUT_DEFAULTS = {"prometheus": {"enabled": False, "per_repo": True}, "json": {"enabled": False}, "dashboard": {"enabled": False}}
+STATUS_KEYS = {"webhook.signing_state"}      # computed, read-only: never written
+
+
+def label_keys(key):
+    """The locale keys whose texts, joined with a dash, make the label of a setting (one key for most)."""
+    custom = META[key]["label"]
+    return list(custom) if custom else ["cfg.f." + key]
+
+
+def help_key(key):
+    return META[key]["help"] or "cfg.h." + key
+
+
+def block_title_key(block):
+    """The locale key of the title of a block: the title of the check for the blocks of the A10 checks."""
+    return "surf.t." + block[4:] if block.startswith("chk_") else "ui.cfg_b_" + block
+
+
+def layout():
+    """[(tab, [(block, [keys])])] in page order."""
+    out = {}
+    for tab, block, key, *_ in ROWS:
+        out.setdefault(tab, {}).setdefault(block, []).append(key)
+    return [(tab, list(blocks.items())) for tab, blocks in out.items()]
 
 
 def _get(tree, dotted, default=None):
@@ -133,9 +219,9 @@ def _is_int(value):
 
 
 def check_value(path, value):
-    """(ok, clean value or the reason as a stable code). Reasons: unknown, type, range, enum, text, path, names, ecosystems."""
+    """(ok, clean value or the reason as a stable code). Reasons: unknown, type, range, enum, text, path, names, ecosystems, list, map."""
     row = FIELDS.get(path)
-    if row is None:
+    if row is None or row[2] == "status":
         return False, "unknown"
     kind, bounds = row[2], row[3]
     if kind == "bool":
@@ -167,6 +253,10 @@ def check_value(path, value):
         if not isinstance(value, list) or len(value) > 200 or not all(isinstance(v, str) and NAME_RE.match(v) for v in value):
             return False, "names"
         return True, list(value)
+    if kind == "repos":
+        if value == "all":
+            return True, "all"
+        return check_value_list(value)
     if kind == "eco":
         if value == "all":
             return True, "all"
@@ -174,7 +264,36 @@ def check_value(path, value):
         if isinstance(value, list) and len(value) <= 50 and all(isinstance(v, str) and (v in known or not known) and NAME_RE.match(v) for v in value):
             return True, list(value)
         return False, "ecosystems"
+    if kind == "intmap":
+        if not isinstance(value, dict) or len(value) > 50:
+            return False, "map"
+        for name, number in value.items():
+            if not isinstance(name, str) or not NAME_RE.match(name) or not _is_int(number) or not bounds[0] <= number <= bounds[1]:
+                return False, "map"
+        return True, dict(value)
+    if kind == "filegroups":
+        if not isinstance(value, list) or not value or len(value) > 40:
+            return False, "list"
+        for group in value:
+            if not isinstance(group, list) or not group or len(group) > 8 or not all(isinstance(n, str) and FILE_NAME_RE.match(n) and ".." not in n for n in group):
+                return False, "list"
+        return True, [list(g) for g in value]
+    if kind == "sources":
+        if not isinstance(value, list) or len(value) > 20:
+            return False, "list"
+        for item in value:
+            if not isinstance(item, dict) or set(item) - set(SOURCE_KEYS) or not {"ecosystem", "kind", "provider"} <= set(item):
+                return False, "list"
+            if not all(isinstance(v, str) and SOURCE_KEYS[k].match(v) and ".." not in v for k, v in item.items()):
+                return False, "list"
+        return True, [dict(i) for i in value]
     return False, "unknown"
+
+
+def check_value_list(value):
+    if not isinstance(value, list) or len(value) > 400 or not all(isinstance(v, str) and NAME_RE.match(v) for v in value):
+        return False, "names"
+    return True, list(value)
 
 
 def validate(changes):
@@ -199,9 +318,17 @@ def _read_file(path):
     return value
 
 
+def webhook_state(config):
+    """"defined" | "short" | "undefined": the only thing the page may know about the webhook secret (never the secret, nor its length)."""
+    secret = ((config or {}).get("webhook") or {}).get("secret") if isinstance((config or {}).get("webhook"), dict) else ""
+    if not isinstance(secret, str) or not secret:
+        return "undefined"
+    return "defined" if len(secret) >= 32 else "short"
+
+
 def describe(path=CONFIG_FILE):
-    """What the page shows: {"groups": [{"id", "fields": [{"key", "type", "value", "default", "min", "max", "enum", "restart"}]}], "backups": N}.
-    Values come from the file over the template; nothing outside SCHEMA is ever included."""
+    """What the page shows: {"groups": [{"id", "blocks": [{"id", "title_key", "fields": [...]}], "fields": [...]}], "backups": N}. A field: {"key", "type", "value", "default", "min",
+    "max", "enum", "restart", "unit", "secure", "label", "help", "block", "master"}. Values come from the file over the template; nothing outside SCHEMA is ever included."""
     template = {}
     try:
         template = _read_file(HERE / "actions_monitor.example.json")
@@ -211,25 +338,44 @@ def describe(path=CONFIG_FILE):
         current = _read_file(path)
     except (OSError, ValueError):
         current = {}
-    groups = {g: [] for g in GROUPS}
-    for group, key, kind, bounds, restart in SCHEMA:
-        default = _get(template, key)
-        if default is None and key.startswith("outputs."):
-            default = _get(OUTPUT_DEFAULTS, key[len("outputs."):], False)
-        value = _get(current, key, default)
-        item = {"key": key, "type": kind, "value": value if value is not None else ("" if kind in ("text", "path", "enum") else None), "default": default, "restart": restart}
-        if kind in ("int", "float"):
-            item["min"], item["max"] = bounds
-        if kind == "enum":
-            item["enum"] = list(bounds)
-        if kind == "eco":
-            item["choices"] = toolconfig.ecosystem_names()
-        groups[group].append(item)
+    groups = []
+    for tab, blocks in layout():
+        group_fields, group_blocks = [], []
+        for block, keys in blocks:
+            fields = []
+            for index, key in enumerate(keys):
+                _tab, _kind_key, _kind, bounds, restart = FIELDS[key][0], key, FIELDS[key][2], FIELDS[key][3], FIELDS[key][4]
+                kind = _kind
+                default = _get(template, key)
+                if default is None and key.startswith("outputs."):
+                    default = _get(OUTPUT_DEFAULTS, key[len("outputs."):], False)
+                if default is None and key == "repos":
+                    default = "all"
+                value = _get(current, key, default)
+                if key == "repos" and value is None:
+                    value = "all"
+                if kind == "status":
+                    value = webhook_state(current)
+                item = {"key": key, "type": kind, "value": value if value is not None else ("" if kind in ("text", "path", "enum") else None), "default": default, "restart": restart,
+                        "unit": META[key]["unit"], "secure": META[key]["secure"], "label": label_keys(key), "help": help_key(key), "block": block,
+                        "master": index == 0 and kind == "bool" and len(keys) > 1}
+                if kind in ("int", "float"):
+                    item["min"], item["max"] = bounds
+                if kind == "intmap":
+                    item["min"], item["max"] = bounds
+                if kind == "enum":
+                    item["enum"] = list(bounds)
+                if kind in ("eco", "intmap"):
+                    item["choices"] = toolconfig.ecosystem_names()
+                fields.append(item)
+            group_fields += fields
+            group_blocks.append({"id": block, "title_key": block_title_key(block), "fields": fields})
+        groups.append({"id": tab, "blocks": group_blocks, "fields": group_fields})
     try:
         backups = len(list(BACKUP_DIR.glob("actions_monitor-*.json")))
     except OSError:
         backups = 0
-    return {"groups": [{"id": g, "fields": groups[g]} for g in GROUPS], "backups": backups}
+    return {"groups": groups, "backups": backups}
 
 
 def _backup(path):

@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITOR DE GITHUB ACTIONS + CENTINELA (versión 1.5.1)
+MONITOR DE GITHUB ACTIONS + CENTINELA (versión 1.5.2)
 =====================================================
 Requisitos: Python 3.11+ y GitHub CLI (`gh`) con la sesión iniciada (gh auth login). Nada más: solo la biblioteca estándar de Python.
 Pasos rápidos para el primer uso: QUICKSTART_es.txt.

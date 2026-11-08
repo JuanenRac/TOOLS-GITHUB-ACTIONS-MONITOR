@@ -10,22 +10,43 @@
 The Settings tab (the gear icon in the header or in the tab bar) changes the values of `actions_monitor.json` from the page, so nobody has to edit the file by hand.
 It is written in the eight languages of the page and follows the look of the rest of it.
 
+<!-- settings:begin -->
 ## What can be changed
 
-Only the keys of the list in `settings_api.py` (the schema). Each one has a type and a range, and the page says whether a change needs a **restart** of the monitor (the loop reads
-its configuration once) or **applies now**.
+Only the keys of the list in `settings_api.py` (the schema). Each one has a type and a range, and the page says whether a change needs a **restart** of the monitor (the loop reads its configuration once) or **applies now**.
 
-| Group | Keys |
+The tab is split into sub-tabs, ordered from the common to the advanced: This browser, General, Refresh and limits, Sentinel, Surface checks (A10), Readiness (A11), Folders and files, Outputs, then the integrations. Inside a sub-tab the settings are grouped in titled blocks; the first field of a block is its main switch and, while it is off, the rest of the block is dimmed and cannot be edited. Every field shows its unit (s, min, h, days, MB, calls), its range, a badge (needs a restart / applies now), a badge for the safety options that start in their conservative state, and one line of help. The search box filters the settings of all the sub-tabs; each sub-tab counts its unsaved changes; the Save and Discard buttons stay visible; the sub-tab you used last is remembered by the browser. The tabs follow the keyboard pattern of tabs (arrow keys, Home, End).
+
+| Tab | Blocks and settings |
 |---|---|
 | This browser | language of the page, theme (auto / light / dark), dense view of the Now tab. These are kept in the browser, not in the file. |
-| General | `language` (default language of the tools), `github_owner`, `mode` (`full` / `lite`), `ecosystems`, `exclude`, `report_history_days` |
-| Refresh and limits | `refresh_seconds`, `cold_refresh_seconds`, `issues_refresh_seconds`, `discover_refresh_seconds`, `stuck_minutes`, `runs_per_repo`, `cold_runs_per_repo`, `hot_hours`, `max_workers`, `min_rate_remaining` |
-| Sentinel | `sentinel.enabled`, the cycles, the API budget, the thresholds of candidates, stale pull requests and pending signatures, `sentinel.require_verified_signature`, the A2 lookups |
-| Surface checks (A10) | `sentinel.surface.enabled`, its cycles, the repositories per cycle, the allowance factor and the share of the budget |
-| Readiness (A11) | `sentinel.readiness.enabled`, `min_coverage`, `warn_below` |
-| Folders and files | `workspace_root`, `signed_dir`, `audit_dir`, `ecosystems_file`, `targets_file`, `profiles_file`, `tools_dir`, `sentinel.ci_red_file`, `sentinel.ci_red_audit_copy` |
-| Outputs for other tools | `outputs.prometheus.enabled`, `outputs.prometheus.per_repo`, `outputs.json.enabled`, `outputs.dashboard.enabled` (see OUTPUTS.md) |
-| External AI for the sentinel | `ai.provider` (`none` / `ollama` / `openai-compatible`), `ai.model`, `ai.ollama_url` (this computer only), `ai.base_url` (https), `ai.api_key_env` (the NAME of the environment variable that holds the key) and `ai.daily_limit`. The key itself is never saved. Off by default; an outside service receives data of your repositories. |
+| General | **Identity**: `github_owner`, `language`<br>**Scope**: `mode`, `repos`, `ecosystems`, `exclude`<br>**History**: `report_history_days` |
+| Refresh and limits | **Hot repositories**: `refresh_seconds`, `hot_hours`, `runs_per_repo`, `stuck_minutes`<br>**Cold repositories**: `cold_refresh_seconds`, `cold_runs_per_repo`<br>**Background tasks**: `issues_refresh_seconds`, `discover_refresh_seconds`, `max_workers`<br>**API allowance**: `min_rate_remaining` |
+| Sentinel | **Main**: `sentinel.enabled`, `sentinel.refresh_seconds`, `sentinel.hot_hours`<br>**Alerts and hygiene**: `sentinel.alerts_hot_seconds`, `sentinel.alerts_cold_seconds`, `sentinel.hygiene_seconds`<br>**API budget**: `sentinel.max_calls_per_tick`, `sentinel.budget_per_hour`, `sentinel.workers`, `sentinel.min_rate_remaining`<br>**Releases and signatures**: `sentinel.candidate_days`, `sentinel.candidate_min_entries`, `sentinel.skip_candidate_prefixes`, `sentinel.pending_sign_hours`, `sentinel.require_verified_signature`<br>**Red lookups (A2)**: `sentinel.a2_full_sample_unknown`, `sentinel.a2_resolve_max_calls_per_tick`, `sentinel.a2_resolve_ttl_seconds`<br>**Pull requests**: `sentinel.stale_pr_days`<br>**Required files**: `sentinel.required_files`<br>**Actions minutes**: `sentinel.minutes_budget_period`, `sentinel.minutes_budget`<br>**Audit files**: `sentinel.audit_files.reconciliation`, `sentinel.audit_files.rounds`, `sentinel.audit_files.rounds_extra` |
+| Surface checks (A10) | **Main**: `sentinel.surface.enabled`, `sentinel.surface.refresh_seconds`, `sentinel.surface.local_seconds`, `sentinel.surface.max_repos_per_tick`, `sentinel.surface.min_rate_factor`, `sentinel.surface.budget_share`<br>**Workflows disabled by hand**: `sentinel.surface.checks.workflows_disabled.*` (`enabled`)<br>**Schedules with no runs**: `sentinel.surface.checks.dead_schedule.*` (`enabled`, `days`)<br>**uses: not pinned by SHA**: `sentinel.surface.checks.unpinned_uses.*` (`enabled`)<br>**Overly broad permissions (write-all)**: `sentinel.surface.checks.broad_permissions.*` (`enabled`)<br>**pull_request_target with a checkout of the PR**: `sentinel.surface.checks.pr_target.*` (`enabled`)<br>**Stuck concurrency (queued runs of the same workflow)**: `sentinel.surface.checks.stuck_concurrency.*` (`enabled`, `minutes`)<br>**Failures on only one system of the matrix**: `sentinel.surface.checks.matrix_os.*` (`enabled`, `max_per_tick`)<br>**Artifact cost**: `sentinel.surface.checks.artifacts.*` (`enabled`, `max_mb`, `retention_days`)<br>**Required checks that are red or missing**: `sentinel.surface.checks.required_checks.*` (`enabled`)<br>**Incomplete published releases**: `sentinel.surface.checks.release_assets.*` (`enabled`, `recent_days`)<br>**Release tag vs manifest/CHANGELOG version**: `sentinel.surface.checks.tag_vs_version.*` (`enabled`)<br>**GitHub Packages**: `sentinel.surface.checks.packages.*` (`enabled`)<br>**Forgotten drafts and pre-releases**: `sentinel.surface.checks.drafts.*` (`enabled`, `days`)<br>**Critical/high alerts by age (repository ranking)**: `sentinel.surface.checks.security_aged.*` (`enabled`, `days`)<br>**Security coverage (CodeQL / Dependabot)**: `sentinel.surface.checks.coverage.*` (`enabled`)<br>**Secret scanning: open vs resolved**: `sentinel.surface.checks.secret_resolved.*` (`enabled`)<br>**Dependabot by priority**: `sentinel.surface.checks.dependabot_priority.*` (`enabled`)<br>**Issues that could be closed (suggestion only)**: `sentinel.surface.checks.issue_close.*` (`enabled`)<br>**Overdue milestones per ecosystem**: `sentinel.surface.checks.milestones.*` (`enabled`)<br>**Aged human pull requests**: `sentinel.surface.checks.pr_human.*` (`enabled`, `days`)<br>**PRs that touch workflows or CODEOWNERS (priority)**: `sentinel.surface.checks.pr_workflow_touch.*` (`enabled`)<br>**Merge queue: approved with green CI**: `sentinel.surface.checks.merge_queue.*` (`enabled`)<br>**Manifest maturity vs evidence**: `sentinel.surface.checks.maturity.*` (`enabled`)<br>**Broken 8-language README parity**: `sentinel.surface.checks.parity.*` (`enabled`)<br>**Build attestations**: `sentinel.surface.checks.attestation.*` (`enabled`, `max_per_tick`) |
+| Readiness (A11) | **Main**: `sentinel.readiness.enabled`, `sentinel.readiness.min_coverage`, `sentinel.readiness.warn_below`<br>**Health weights**: `sentinel.readiness.health.weights.red`, `sentinel.readiness.health.weights.stuck`, `sentinel.readiness.health.weights.secret`, `sentinel.readiness.health.weights.high_alert`, `sentinel.readiness.health.weights.alert`, `sentinel.readiness.health.weights.stale_pr`, `sentinel.readiness.health.weights.unsigned`, `sentinel.readiness.health.weights.hygiene`<br>**Pins**: `sentinel.readiness.pins.refresh_seconds`, `sentinel.readiness.pins.max_depth`, `sentinel.readiness.pins.sources` |
+| Folders and files | **Local folders**: `workspace_root`, `signed_dir`, `audit_dir`, `tools_dir`<br>**Data files**: `ecosystems_file`, `targets_file`, `profiles_file`<br>**ci_red.json**: `sentinel.ci_red_file`, `sentinel.ci_red_audit_copy` |
+| Outputs for other tools | **Prometheus**: `outputs.prometheus.enabled`, `outputs.prometheus.per_repo`<br>**Grafana JSON**: `outputs.json.enabled`<br>**Status dashboard**: `outputs.dashboard.enabled` |
+| External AI for the sentinel | **Service**: `ai.provider`, `ai.model`, `ai.ollama_url`, `ai.base_url`, `ai.api_key_env`, `ai.daily_limit` |
+| Incoming webhook | **Incoming webhook**: `webhook.enabled`, `webhook.signing_state` |
+
+A setting appears in one place only. Read-only: `webhook.signing_state` only says whether the shared secret is defined; the secret itself is never shown.
+
+### Example of pin sources
+
+The pins are read only when a source is listed; with an empty list nothing is read and the page says so. The text below is an example, commented out:
+
+```jsonc
+// Example, commented out: where the pinned versions of an ecosystem live. Copy the part you need into
+// "sentinel" > "readiness" > "pins" > "sources" of actions_monitor.json (or paste it in the Settings tab) and remove the comments.
+// [
+//   {"ecosystem": "alpha", "kind": "pin_table", "provider": "ALPHA-COMMON", "file": "pins/consumers.json", "key": "consumers"},
+//   {"ecosystem": "beta",  "kind": "lock_files", "provider": "BETA-CORE", "lock_name": "beta.lock.json", "version_key": "core"}
+// ]
+// pin_table: a JSON file of the provider that maps each repository to the version it pins (under "key").
+// lock_files: every clone is searched (down to "max_depth" folder levels) for files called "lock_name"; the OLDEST version found in "version_key" counts.
+```
+<!-- settings:end -->
 
 ## What can never be changed or seen from the page
 

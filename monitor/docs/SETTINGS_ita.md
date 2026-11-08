@@ -10,22 +10,43 @@
 La scheda Impostazioni (l'icona a forma di ingranaggio nell'intestazione o nella barra delle schede) modifica dalla pagina i valori di `actions_monitor.json`, così nessuno deve modificare il file a mano.
 È scritta negli otto lingue della pagina e segue l'aspetto del resto.
 
-## Che cosa si può modificare
+<!-- settings:begin -->
+## Cosa si può modificare
 
-Solo le chiavi dell'elenco in `settings_api.py` (lo schema). Ognuna ha un tipo e un intervallo, e la pagina indica se una modifica richiede il **riavvio** del monitor (il ciclo legge
-la propria configurazione una sola volta) oppure **si applica subito**.
+Solo le chiavi dell'elenco di `settings_api.py` (lo schema). Ognuna ha un tipo e un intervallo, e la pagina dice se una modifica richiede il **riavvio** del monitor (il ciclo legge la configurazione una volta) o **si applica subito**.
 
-| Gruppo | Chiavi |
+La scheda è divisa in sotto-schede, dal comune all'avanzato: Questo browser, Generale, Aggiornamento e limiti, Sentinella, Controlli di superficie (A10), Prontezza (A11), Cartelle e file, Uscite, poi le integrazioni. In ogni sotto-scheda le impostazioni sono in blocchi con titolo; il primo campo di un blocco è il suo interruttore principale e, finché è spento, il resto del blocco è attenuato e non modificabile. Ogni campo mostra l'unità (s, min, h, giorni, MB, chiamate), l'intervallo, un badge (richiede riavvio / si applica subito), un badge per le opzioni di sicurezza che partono dal valore prudente e una riga di aiuto. La ricerca filtra le impostazioni di tutte le sotto-schede; ogni sotto-scheda conta le modifiche non salvate; i pulsanti Salva e Annulla restano visibili; il browser ricorda l'ultima sotto-scheda. Le schede seguono lo schema da tastiera (frecce, Home, Fine).
+
+| Scheda | Blocchi e impostazioni |
 |---|---|
-| Questo browser | lingua della pagina, tema (auto / chiaro / scuro), vista compatta della scheda Adesso. Sono conservati nel browser, non nel file. |
-| Generale | `language` (lingua predefinita degli strumenti), `github_owner`, `mode` (`full` / `lite`), `ecosystems`, `exclude`, `report_history_days` |
-| Aggiornamento e limiti | `refresh_seconds`, `cold_refresh_seconds`, `issues_refresh_seconds`, `discover_refresh_seconds`, `stuck_minutes`, `runs_per_repo`, `cold_runs_per_repo`, `hot_hours`, `max_workers`, `min_rate_remaining` |
-| Sentinella | `sentinel.enabled`, i cicli, il budget delle API, le soglie dei candidati, delle pull request obsolete e delle firme in sospeso, `sentinel.require_verified_signature`, le consultazioni di A2 |
-| Controlli di superficie (A10) | `sentinel.surface.enabled`, i relativi cicli, i repository per ciclo, il fattore di margine e la quota del budget |
-| Prontezza (A11) | `sentinel.readiness.enabled`, `min_coverage`, `warn_below` |
-| Cartelle e file | `workspace_root`, `signed_dir`, `audit_dir`, `ecosystems_file`, `targets_file`, `profiles_file`, `tools_dir`, `sentinel.ci_red_file`, `sentinel.ci_red_audit_copy` |
-| Uscite per altri strumenti | `outputs.prometheus.enabled`, `outputs.prometheus.per_repo`, `outputs.json.enabled`, `outputs.dashboard.enabled` (vedi OUTPUTS_ita.md) |
-| IA esterna per la sentinella | `ai.provider` (`none` / `openai-compatible` / `ollama`), `ai.model`, `ai.ollama_url` (solo questo computer), `ai.base_url` (https), `ai.api_key_env` (il NOME della variabile d'ambiente che contiene la chiave) e `ai.daily_limit`. La chiave stessa non viene mai salvata. Spenta per impostazione predefinita; un servizio esterno riceve dati dei tuoi repository. |
+| Questo browser | lingua della pagina, tema (auto / chiaro / scuro), vista densa della scheda Adesso. Restano nel browser, non nel file. |
+| Generale | **Identità**: `github_owner`, `language`<br>**Ambito**: `mode`, `repos`, `ecosystems`, `exclude`<br>**Cronologia**: `report_history_days` |
+| Aggiornamento e limiti | **Repository attivi**: `refresh_seconds`, `hot_hours`, `runs_per_repo`, `stuck_minutes`<br>**Repository inattivi**: `cold_refresh_seconds`, `cold_runs_per_repo`<br>**Attività in background**: `issues_refresh_seconds`, `discover_refresh_seconds`, `max_workers`<br>**Quota API**: `min_rate_remaining` |
+| Sentinella | **Principale**: `sentinel.enabled`, `sentinel.refresh_seconds`, `sentinel.hot_hours`<br>**Avvisi e igiene**: `sentinel.alerts_hot_seconds`, `sentinel.alerts_cold_seconds`, `sentinel.hygiene_seconds`<br>**Budget API**: `sentinel.max_calls_per_tick`, `sentinel.budget_per_hour`, `sentinel.workers`, `sentinel.min_rate_remaining`<br>**Release e firme**: `sentinel.candidate_days`, `sentinel.candidate_min_entries`, `sentinel.skip_candidate_prefixes`, `sentinel.pending_sign_hours`, `sentinel.require_verified_signature`<br>**Ricerche dei rossi (A2)**: `sentinel.a2_full_sample_unknown`, `sentinel.a2_resolve_max_calls_per_tick`, `sentinel.a2_resolve_ttl_seconds`<br>**Pull request**: `sentinel.stale_pr_days`<br>**File obbligatori**: `sentinel.required_files`<br>**Minuti di Actions**: `sentinel.minutes_budget_period`, `sentinel.minutes_budget`<br>**File di audit**: `sentinel.audit_files.reconciliation`, `sentinel.audit_files.rounds`, `sentinel.audit_files.rounds_extra` |
+| Controlli di superficie (A10) | **Principale**: `sentinel.surface.enabled`, `sentinel.surface.refresh_seconds`, `sentinel.surface.local_seconds`, `sentinel.surface.max_repos_per_tick`, `sentinel.surface.min_rate_factor`, `sentinel.surface.budget_share`<br>**Workflow disattivati a mano**: `sentinel.surface.checks.workflows_disabled.*` (`enabled`)<br>**Schedule senza esecuzioni**: `sentinel.surface.checks.dead_schedule.*` (`enabled`, `days`)<br>**uses: non fissato tramite SHA**: `sentinel.surface.checks.unpinned_uses.*` (`enabled`)<br>**Permessi troppo ampi (write-all)**: `sentinel.surface.checks.broad_permissions.*` (`enabled`)<br>**pull_request_target con checkout della PR**: `sentinel.surface.checks.pr_target.*` (`enabled`)<br>**Concurrency bloccata (run in coda dello stesso workflow)**: `sentinel.surface.checks.stuck_concurrency.*` (`enabled`, `minutes`)<br>**Errori solo su un sistema della matrice**: `sentinel.surface.checks.matrix_os.*` (`enabled`, `max_per_tick`)<br>**Costo degli artifact**: `sentinel.surface.checks.artifacts.*` (`enabled`, `max_mb`, `retention_days`)<br>**Check obbligatori rossi o assenti**: `sentinel.surface.checks.required_checks.*` (`enabled`)<br>**Release pubblicate incomplete**: `sentinel.surface.checks.release_assets.*` (`enabled`, `recent_days`)<br>**Tag di release vs versione del manifest/CHANGELOG**: `sentinel.surface.checks.tag_vs_version.*` (`enabled`)<br>**GitHub Packages**: `sentinel.surface.checks.packages.*` (`enabled`)<br>**Bozze e pre-release dimenticate**: `sentinel.surface.checks.drafts.*` (`enabled`, `days`)<br>**Avvisi critici/alti per età (classifica dei repository)**: `sentinel.surface.checks.security_aged.*` (`enabled`, `days`)<br>**Copertura di sicurezza (CodeQL / Dependabot)**: `sentinel.surface.checks.coverage.*` (`enabled`)<br>**Secret scanning: aperti vs risolti**: `sentinel.surface.checks.secret_resolved.*` (`enabled`)<br>**Dependabot per priorità**: `sentinel.surface.checks.dependabot_priority.*` (`enabled`)<br>**Issue che si potrebbero chiudere (solo suggerimento)**: `sentinel.surface.checks.issue_close.*` (`enabled`)<br>**Milestone scaduti per ecosistema**: `sentinel.surface.checks.milestones.*` (`enabled`)<br>**PR umane datate**: `sentinel.surface.checks.pr_human.*` (`enabled`, `days`)<br>**PR che modificano workflow o CODEOWNERS (priorità)**: `sentinel.surface.checks.pr_workflow_touch.*` (`enabled`)<br>**Coda di merge: approvate con CI verde**: `sentinel.surface.checks.merge_queue.*` (`enabled`)<br>**Maturità del manifest rispetto alle prove**: `sentinel.surface.checks.maturity.*` (`enabled`)<br>**Parità dei README in 8 lingue interrotta**: `sentinel.surface.checks.parity.*` (`enabled`)<br>**Attestazioni di build**: `sentinel.surface.checks.attestation.*` (`enabled`, `max_per_tick`) |
+| Preparazione (A11) | **Principale**: `sentinel.readiness.enabled`, `sentinel.readiness.min_coverage`, `sentinel.readiness.warn_below`<br>**Pesi della salute**: `sentinel.readiness.health.weights.red`, `sentinel.readiness.health.weights.stuck`, `sentinel.readiness.health.weights.secret`, `sentinel.readiness.health.weights.high_alert`, `sentinel.readiness.health.weights.alert`, `sentinel.readiness.health.weights.stale_pr`, `sentinel.readiness.health.weights.unsigned`, `sentinel.readiness.health.weights.hygiene`<br>**Versioni fissate**: `sentinel.readiness.pins.refresh_seconds`, `sentinel.readiness.pins.max_depth`, `sentinel.readiness.pins.sources` |
+| Cartelle e file | **Cartelle locali**: `workspace_root`, `signed_dir`, `audit_dir`, `tools_dir`<br>**File di dati**: `ecosystems_file`, `targets_file`, `profiles_file`<br>**ci_red.json**: `sentinel.ci_red_file`, `sentinel.ci_red_audit_copy` |
+| Uscite per altri strumenti | **Prometheus**: `outputs.prometheus.enabled`, `outputs.prometheus.per_repo`<br>**JSON di Grafana**: `outputs.json.enabled`<br>**Dashboard di stato**: `outputs.dashboard.enabled` |
+| IA esterna per la sentinella | **Servizio**: `ai.provider`, `ai.model`, `ai.ollama_url`, `ai.base_url`, `ai.api_key_env`, `ai.daily_limit` |
+| Webhook in ingresso | **Webhook in ingresso**: `webhook.enabled`, `webhook.signing_state` |
+
+Un'impostazione compare in un solo posto. Sola lettura: `webhook.signing_state` dice solo se il segreto condiviso è definito; il segreto non viene mai mostrato.
+
+### Esempio di fonti delle versioni fissate
+
+Le versioni fissate si leggono solo se è indicata una fonte; con l'elenco vuoto non si legge nulla e la pagina lo dice. Il testo seguente è un esempio, commentato:
+
+```jsonc
+// Example, commented out: where the pinned versions of an ecosystem live. Copy the part you need into
+// "sentinel" > "readiness" > "pins" > "sources" of actions_monitor.json (or paste it in the Settings tab) and remove the comments.
+// [
+//   {"ecosystem": "alpha", "kind": "pin_table", "provider": "ALPHA-COMMON", "file": "pins/consumers.json", "key": "consumers"},
+//   {"ecosystem": "beta",  "kind": "lock_files", "provider": "BETA-CORE", "lock_name": "beta.lock.json", "version_key": "core"}
+// ]
+// pin_table: a JSON file of the provider that maps each repository to the version it pins (under "key").
+// lock_files: every clone is searched (down to "max_depth" folder levels) for files called "lock_name"; the OLDEST version found in "version_key" counts.
+```
+<!-- settings:end -->
 
 ## Che cosa non si può mai modificare né vedere dalla pagina
 

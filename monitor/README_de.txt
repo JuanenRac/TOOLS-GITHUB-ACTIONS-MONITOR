@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GITHUB-ACTIONS-MONITOR + WÄCHTER (Version 1.5.1)
+GITHUB-ACTIONS-MONITOR + WÄCHTER (Version 1.5.2)
 ================================================
 Voraussetzungen: Python 3.11+ und die GitHub CLI (`gh`), angemeldet (gh auth login). Sonst nichts: nur die Python-Standardbibliothek.
 Kurzanleitung für die erste Benutzung: QUICKSTART_de.txt.

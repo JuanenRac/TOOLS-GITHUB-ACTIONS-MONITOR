@@ -43,3 +43,14 @@ Both read the running monitor on `127.0.0.1` (no GitHub quota). They refuse to w
 ## What the monitor does not do
 
 It does not publish the file, does not push to the profile repository and does not touch any workflow. Carrying the export to the dashboard is a step of the owner (or of a workflow of the profile repository that reads the exported file).
+
+## The profile dashboard (consumer contract)
+
+The status dashboard of a profile repository can read the same document in two ways: from the running monitor (`GET /api/outputs/dashboard.json`, off until `outputs.dashboard.enabled` is on, this computer only) or from the file written by `py -3 read_report.py --export-status DIR` (red workflows only, never the signing side). What the dashboard may rely on, checked by a test of this repository:
+
+1. `schema` is `2` and fields are only ever added.
+2. The served document is exactly the one of `ci_red.json`.
+3. `complete: false` means: keep your last complete picture.
+4. The public export has the keys `schema`, `generated`, `tool_version`, `complete`, `red_repos` and `red`, and nothing of the signing state.
+
+The monitor never pushes the file to the profile repository; carrying it there is a step of its owner.

@@ -31,7 +31,7 @@
 
 | | |
 |---|---|
-| **Version** | **1.5.1** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **1.5.2** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Prérequis** | Python 3.11+ et la CLI GitHub (`gh auth login`) ; rien d'autre |
 | **S'ouvre** | sur une page `127.0.0.1` uniquement, en huit langues |
 | **Écrit sur GitHub** | jamais seul : seulement les commandes par lots que vous lancez avec un `--go` explicite |
@@ -101,7 +101,7 @@ python -m unittest discover -s monitor/tests
 TOOLS-GITHUB-ACTIONS-MONITOR/
 ├── monitor/                          le programme
 ├── docs/                             architecture, captures
-├── tools/                            générateurs d'images
+├── tools/                            générateurs d'images et de guides
 ├── images/                           bannière et images
 ├── .github/                          CI et formulaires
 ├── CHANGELOG.md                      changements par version
@@ -122,7 +122,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
     ├── i18n.py locales/              huit langues
     ├── toolconfig.py workspace.py    réglages, clones
     ├── tests/                        tests hors ligne
-    └── docs/                         réglages, Grafana
+    └── docs/                         réglages, webhook
 ```
 
 ## Documentation
@@ -131,6 +131,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/OUTPUTS_fra.md`](monitor/docs/OUTPUTS_fra.md): métriques, Grafana et exports
 - [`monitor/docs/CI_RED_SCHEMA_fra.md`](monitor/docs/CI_RED_SCHEMA_fra.md): le format de ci_red.json
 - [`monitor/docs/CI_RED_BRIDGE_fra.md`](monitor/docs/CI_RED_BRIDGE_fra.md): amener ci_red.json vers un tableau de bord
+- [`monitor/docs/WEBHOOK_fra.md`](monitor/docs/WEBHOOK_fra.md): le webhook entrant
 - [`monitor/QUICKSTART_fr.txt`](monitor/QUICKSTART_fr.txt): premiers pas, en huit langues
 
 ## Contribuer

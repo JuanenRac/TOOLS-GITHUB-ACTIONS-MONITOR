@@ -10,22 +10,43 @@
 L'onglet Paramètres (l'icône en forme d'engrenage dans l'en-tête ou dans la barre d'onglets) modifie depuis la page les valeurs de `actions_monitor.json`, afin que personne n'ait à éditer le fichier à la main.
 Il est rédigé dans les huit langues de la page et suit l'apparence du reste.
 
+<!-- settings:begin -->
 ## Ce qui peut être modifié
 
-Uniquement les clés de la liste de `settings_api.py` (le schéma). Chacune a un type et une plage de valeurs, et la page indique si une modification nécessite un **redémarrage** du moniteur (la boucle lit
-sa configuration une seule fois) ou **s'applique immédiatement**.
+Seulement les clés de la liste de `settings_api.py` (le schéma). Chacune a un type et une plage, et la page indique si un changement demande un **redémarrage** du moniteur (la boucle lit sa configuration une fois) ou **s'applique tout de suite**.
 
-| Groupe | Clés |
+L'onglet est divisé en sous-onglets, du plus courant au plus avancé : Ce navigateur, Général, Actualisation et limites, Sentinelle, Contrôles de surface (A10), Préparation (A11), Dossiers et fichiers, Sorties, puis les intégrations. Dans un sous-onglet, les réglages sont regroupés en blocs titrés ; le premier champ d'un bloc est son interrupteur principal et, tant qu'il est éteint, le reste du bloc est atténué et non modifiable. Chaque champ affiche son unité (s, min, h, jours, Mo, appels), sa plage, un badge (demande un redémarrage / s'applique tout de suite), un badge pour les options de sécurité qui démarrent à leur valeur prudente et une ligne d'aide. La recherche filtre les réglages de tous les sous-onglets ; chaque sous-onglet compte ses modifications non enregistrées ; les boutons Enregistrer et Annuler restent visibles ; le navigateur retient le dernier sous-onglet. Les onglets suivent le schéma clavier des onglets (flèches, Début, Fin).
+
+| Onglet | Blocs et réglages |
 |---|---|
-| Ce navigateur | langue de la page, thème (auto / clair / sombre), affichage compact de l'onglet Maintenant. Ces valeurs sont conservées dans le navigateur, pas dans le fichier. |
-| Général | `language` (langue par défaut des outils), `github_owner`, `mode` (`full` / `lite`), `ecosystems`, `exclude`, `report_history_days` |
-| Actualisation et limites | `refresh_seconds`, `cold_refresh_seconds`, `issues_refresh_seconds`, `discover_refresh_seconds`, `stuck_minutes`, `runs_per_repo`, `cold_runs_per_repo`, `hot_hours`, `max_workers`, `min_rate_remaining` |
-| Sentinelle | `sentinel.enabled`, les cycles, le budget d'API, les seuils des candidats, des pull requests obsolètes et des signatures en attente, `sentinel.require_verified_signature`, les consultations de A2 |
-| Contrôles de surface (A10) | `sentinel.surface.enabled`, leurs cycles, les dépôts par cycle, le facteur de marge et la part du budget |
-| Préparation (A11) | `sentinel.readiness.enabled`, `min_coverage`, `warn_below` |
-| Dossiers et fichiers | `workspace_root`, `signed_dir`, `audit_dir`, `ecosystems_file`, `targets_file`, `profiles_file`, `tools_dir`, `sentinel.ci_red_file`, `sentinel.ci_red_audit_copy` |
-| Sorties pour d'autres outils | `outputs.prometheus.enabled`, `outputs.prometheus.per_repo`, `outputs.json.enabled`, `outputs.dashboard.enabled` (voir OUTPUTS_fra.md) |
-| IA externe pour la sentinelle | `ai.provider` (`none` / `ollama` / `openai-compatible`), `ai.model`, `ai.ollama_url` (cet ordinateur seulement), `ai.base_url` (https), `ai.api_key_env` (le NOM de la variable d'environnement qui contient la clé) et `ai.daily_limit`. La clé elle-même n'est jamais enregistrée. Désactivée par défaut ; un service externe reçoit des données de vos dépôts. |
+| Ce navigateur | langue de la page, thème (auto / clair / sombre), vue dense de l'onglet Maintenant. Ils restent dans le navigateur, pas dans le fichier. |
+| Général | **Identité**: `github_owner`, `language`<br>**Périmètre**: `mode`, `repos`, `ecosystems`, `exclude`<br>**Historique**: `report_history_days` |
+| Actualisation et limites | **Dépôts actifs**: `refresh_seconds`, `hot_hours`, `runs_per_repo`, `stuck_minutes`<br>**Dépôts inactifs**: `cold_refresh_seconds`, `cold_runs_per_repo`<br>**Tâches de fond**: `issues_refresh_seconds`, `discover_refresh_seconds`, `max_workers`<br>**Quota de l'API**: `min_rate_remaining` |
+| Sentinelle | **Principal**: `sentinel.enabled`, `sentinel.refresh_seconds`, `sentinel.hot_hours`<br>**Alertes et hygiène**: `sentinel.alerts_hot_seconds`, `sentinel.alerts_cold_seconds`, `sentinel.hygiene_seconds`<br>**Budget de l'API**: `sentinel.max_calls_per_tick`, `sentinel.budget_per_hour`, `sentinel.workers`, `sentinel.min_rate_remaining`<br>**Releases et signatures**: `sentinel.candidate_days`, `sentinel.candidate_min_entries`, `sentinel.skip_candidate_prefixes`, `sentinel.pending_sign_hours`, `sentinel.require_verified_signature`<br>**Recherches des rouges (A2)**: `sentinel.a2_full_sample_unknown`, `sentinel.a2_resolve_max_calls_per_tick`, `sentinel.a2_resolve_ttl_seconds`<br>**Pull requests**: `sentinel.stale_pr_days`<br>**Fichiers requis**: `sentinel.required_files`<br>**Minutes d'Actions**: `sentinel.minutes_budget_period`, `sentinel.minutes_budget`<br>**Fichiers d'audit**: `sentinel.audit_files.reconciliation`, `sentinel.audit_files.rounds`, `sentinel.audit_files.rounds_extra` |
+| Contrôles de surface (A10) | **Principal**: `sentinel.surface.enabled`, `sentinel.surface.refresh_seconds`, `sentinel.surface.local_seconds`, `sentinel.surface.max_repos_per_tick`, `sentinel.surface.min_rate_factor`, `sentinel.surface.budget_share`<br>**Workflows désactivés à la main**: `sentinel.surface.checks.workflows_disabled.*` (`enabled`)<br>**Planifications sans exécutions**: `sentinel.surface.checks.dead_schedule.*` (`enabled`, `days`)<br>**uses: non épinglé par SHA**: `sentinel.surface.checks.unpinned_uses.*` (`enabled`)<br>**Permissions trop larges (write-all)**: `sentinel.surface.checks.broad_permissions.*` (`enabled`)<br>**pull_request_target avec checkout de la PR**: `sentinel.surface.checks.pr_target.*` (`enabled`)<br>**Concurrence bloquée (runs en attente du même workflow)**: `sentinel.surface.checks.stuck_concurrency.*` (`enabled`, `minutes`)<br>**Échecs sur un seul système de la matrice**: `sentinel.surface.checks.matrix_os.*` (`enabled`, `max_per_tick`)<br>**Coût des artifacts**: `sentinel.surface.checks.artifacts.*` (`enabled`, `max_mb`, `retention_days`)<br>**Checks obligatoires rouges ou absents**: `sentinel.surface.checks.required_checks.*` (`enabled`)<br>**Releases publiées incomplètes**: `sentinel.surface.checks.release_assets.*` (`enabled`, `recent_days`)<br>**Étiquette de release vs version du manifeste/CHANGELOG**: `sentinel.surface.checks.tag_vs_version.*` (`enabled`)<br>**GitHub Packages**: `sentinel.surface.checks.packages.*` (`enabled`)<br>**Brouillons et pré-releases oubliés**: `sentinel.surface.checks.drafts.*` (`enabled`, `days`)<br>**Alertes critiques/élevées par ancienneté (classement des dépôts)**: `sentinel.surface.checks.security_aged.*` (`enabled`, `days`)<br>**Couverture de sécurité (CodeQL / Dependabot)**: `sentinel.surface.checks.coverage.*` (`enabled`)<br>**Secret scanning : ouvertes vs résolues**: `sentinel.surface.checks.secret_resolved.*` (`enabled`)<br>**Dependabot par priorité**: `sentinel.surface.checks.dependabot_priority.*` (`enabled`)<br>**Issues qui pourraient être fermées (simple suggestion)**: `sentinel.surface.checks.issue_close.*` (`enabled`)<br>**Jalons échus par écosystème**: `sentinel.surface.checks.milestones.*` (`enabled`)<br>**PR humaines anciennes**: `sentinel.surface.checks.pr_human.*` (`enabled`, `days`)<br>**PR qui modifient des workflows ou CODEOWNERS (priorité)**: `sentinel.surface.checks.pr_workflow_touch.*` (`enabled`)<br>**File de fusion : approuvées avec CI verte**: `sentinel.surface.checks.merge_queue.*` (`enabled`)<br>**Maturité du manifeste face aux preuves**: `sentinel.surface.checks.maturity.*` (`enabled`)<br>**Parité des README en 8 langues rompue**: `sentinel.surface.checks.parity.*` (`enabled`)<br>**Attestations de build**: `sentinel.surface.checks.attestation.*` (`enabled`, `max_per_tick`) |
+| Préparation (A11) | **Principal**: `sentinel.readiness.enabled`, `sentinel.readiness.min_coverage`, `sentinel.readiness.warn_below`<br>**Poids de la santé**: `sentinel.readiness.health.weights.red`, `sentinel.readiness.health.weights.stuck`, `sentinel.readiness.health.weights.secret`, `sentinel.readiness.health.weights.high_alert`, `sentinel.readiness.health.weights.alert`, `sentinel.readiness.health.weights.stale_pr`, `sentinel.readiness.health.weights.unsigned`, `sentinel.readiness.health.weights.hygiene`<br>**Versions épinglées**: `sentinel.readiness.pins.refresh_seconds`, `sentinel.readiness.pins.max_depth`, `sentinel.readiness.pins.sources` |
+| Dossiers et fichiers | **Dossiers locaux**: `workspace_root`, `signed_dir`, `audit_dir`, `tools_dir`<br>**Fichiers de données**: `ecosystems_file`, `targets_file`, `profiles_file`<br>**ci_red.json**: `sentinel.ci_red_file`, `sentinel.ci_red_audit_copy` |
+| Sorties pour d'autres outils | **Prometheus**: `outputs.prometheus.enabled`, `outputs.prometheus.per_repo`<br>**JSON Grafana**: `outputs.json.enabled`<br>**Tableau d'état**: `outputs.dashboard.enabled` |
+| IA externe pour la sentinelle | **Service**: `ai.provider`, `ai.model`, `ai.ollama_url`, `ai.base_url`, `ai.api_key_env`, `ai.daily_limit` |
+| Webhook entrant | **Webhook entrant**: `webhook.enabled`, `webhook.signing_state` |
+
+Un réglage n'apparaît qu'à un seul endroit. Lecture seule : `webhook.signing_state` indique seulement si le secret partagé est défini ; le secret lui-même n'est jamais affiché.
+
+### Exemple de sources d'épinglage
+
+Les versions épinglées ne sont lues que si une source est indiquée ; avec une liste vide rien n'est lu et la page le dit. Le texte suivant est un exemple, commenté :
+
+```jsonc
+// Example, commented out: where the pinned versions of an ecosystem live. Copy the part you need into
+// "sentinel" > "readiness" > "pins" > "sources" of actions_monitor.json (or paste it in the Settings tab) and remove the comments.
+// [
+//   {"ecosystem": "alpha", "kind": "pin_table", "provider": "ALPHA-COMMON", "file": "pins/consumers.json", "key": "consumers"},
+//   {"ecosystem": "beta",  "kind": "lock_files", "provider": "BETA-CORE", "lock_name": "beta.lock.json", "version_key": "core"}
+// ]
+// pin_table: a JSON file of the provider that maps each repository to the version it pins (under "key").
+// lock_files: every clone is searched (down to "max_depth" folder levels) for files called "lock_name"; the OLDEST version found in "version_key" counts.
+```
+<!-- settings:end -->
 
 ## Ce qui ne peut jamais être modifié ni consulté depuis la page
 

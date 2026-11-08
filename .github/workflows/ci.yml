@@ -38,3 +38,4 @@ jobs:
         run: |
           python tools/make_architecture.py --check
           python tools/make_structure.py --check
+          python tools/make_settings_doc.py --check

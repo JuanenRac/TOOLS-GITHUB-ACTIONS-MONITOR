@@ -31,7 +31,10 @@ class Validation(unittest.TestCase):
 
     def test_secrets_and_commands_are_not_in_the_schema(self):
         for key in sa.FIELDS:
+            if key.startswith("sentinel.readiness.health.weights."):
+                continue          # the weight given to "secret" findings is a number, not a secret
             self.assertFalse(re.search(r"secret|token|password|pubkey|command|key$", key.split(".")[-1]), key)
+        self.assertEqual(sa.check_value("webhook.signing_state", "defined"), (False, "unknown"))     # the state is read-only
 
     def test_types_and_ranges(self):
         self.assertEqual(sa.check_value("refresh_seconds", 9), (False, "range"))
@@ -66,7 +69,10 @@ class Validation(unittest.TestCase):
         for lang in i18n.LANGS:
             cat = i18n.catalogue(lang)
             for key in sa.FIELDS:
-                self.assertIn("cfg.f." + key, cat, f"{lang} {key}")
+                for label in sa.label_keys(key):
+                    self.assertIn(label, cat, f"{lang} {key}")
+                    self.assertTrue(cat[label].strip(), f"{lang} {label}")
+                self.assertIn(sa.help_key(key), cat, f"{lang} help of {key}")
             for group in sa.GROUPS:
                 self.assertIn("ui.cfg_g_" + group, cat, f"{lang} {group}")
             for reason in ("range", "type", "enum", "path", "text", "names", "ecosystems", "unknown", "request", "unreadable"):
@@ -338,7 +344,9 @@ class Icons(unittest.TestCase):
         for lang in i18n.LANGS:
             embedded = i18n.ui_catalogues()[lang]
             for key in sa.FIELDS:
-                self.assertIn("cfg.f." + key, embedded, f"{lang} {key}")
+                for label in sa.label_keys(key):
+                    self.assertIn(label, embedded, f"{lang} {key}")
+                self.assertIn(sa.help_key(key), embedded, f"{lang} help of {key}")
 
     def test_the_labels_of_the_icons_exist_in_the_eight_languages(self):
         keys = set(re.findall(r'data-i18n-(?:aria|title)="(ui\.ic_[a-z_]+)"', self.page)) | {"ui.ic_theme", "ui.ic_dense", "ui.ic_hotonly_on", "ui.ic_hotonly_off"}

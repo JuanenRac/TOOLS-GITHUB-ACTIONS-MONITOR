@@ -19,6 +19,7 @@ from pathlib import Path
 
 import ci_red
 import i18n
+import signstate
 from tool_version import TOOL_VERSION
 
 class _Text(dict):
@@ -29,7 +30,7 @@ class _Text(dict):
 
 
 TEXT = _Text.fromkeys(("refused", "no_data", "wrote", "md_title", "md_none"), "")
-FIELDS = ("name", "repo", "ecosystem", "hours", "step", "signature_kind", "signature_verified", "attestation", "last_build_at", "run_id", "url", "command")
+FIELDS = ("name", "repo", "ecosystem", "hours", "step", "signature_kind", "signature_verified", "trust", "attestation", "last_build_at", "run_id", "url", "command")
 
 
 def public_status(snapshot):
@@ -74,21 +75,24 @@ def write_public_status(snapshot, directory):
         return []
 
 
-def sign_queue_rows(snapshot):
+def sign_queue_rows(snapshot, trust="all"):
+    """The signing queue (optionally only the rows whose signature is verified | unknown | failed)."""
     rows = []
-    for q in (snapshot.get("a5") or {}).get("sign_queue") or []:
-        rows.append({k: q.get(k) for k in FIELDS})
+    for q in signstate.filter_queue((snapshot.get("a5") or {}).get("sign_queue") or [], trust):
+        row = {k: q.get(k) for k in FIELDS}
+        row["trust"] = signstate.trust_of(q)
+        rows.append(row)
     return rows
 
 
-def write_sign_queue(snapshot, path):
+def write_sign_queue(snapshot, path, trust="all"):
     """JSON (default) or CSV (.csv). Returns the Path or None when refused / nothing to say."""
     if not snapshot or snapshot.get("loading"):
         return None
     target = allowed_directory(path)
     if target is None or target.is_dir():
         return None
-    rows = sign_queue_rows(snapshot)
+    rows = sign_queue_rows(snapshot, trust)
     try:
         target.parent.mkdir(parents=True, exist_ok=True)
         if target.suffix.lower() == ".csv":

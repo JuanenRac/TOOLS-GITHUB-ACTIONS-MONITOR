@@ -9,6 +9,18 @@ Version of the tool itself (monitor + sentinel + batch tools), semver of its own
 and is shown as `tool_version` in the sentinel snapshot and by `read_report.py --version`; `make_release.py` refuses to build
 when this file and `tool_version.py` disagree.
 
+## [1.5.2]
+
+- **The Settings tab is organised in sub-tabs**, ordered from the common to the advanced (This browser, General, Refresh and limits, Sentinel, Surface checks A10, Readiness A11, Folders and files, Outputs, External AI, Incoming webhook). Inside a sub-tab the settings sit in titled blocks whose first field is the main switch (the rest of the block dims while it is off). Every field shows its unit and range, a badge (needs a restart / applies now), a badge for the safety options that start in their conservative state, and one line of help. A search box filters all the sub-tabs, each sub-tab counts its unsaved changes, Save and Discard stay visible, the arrow keys, Home and End move between the tabs and the last sub-tab used is remembered by the browser.
+- **Every setting of the configuration file is in the page now**: the A10 checks (a switch per check and its limits), the weights of the ecosystem health score, the sources of the pinned versions, the Actions-minutes ceilings, the required files, the audit file patterns, the hot period of the sentinel, the unknown-sample rule of A2, the candidate prefixes, the list of repositories and the switch of the incoming webhook. The shared secret of the webhook is never shown: the page only says whether it is defined.
+- **Signing queue by trust**: each row says `verified`, `unknown` or `failed`; the Sentinel tab has a Signature filter with the count of each kind and marks the rows; `read_report.py --sign-trust` filters the console list and the export, and the exported rows carry `trust`.
+- **Readiness chips in the header**: one coloured chip per ecosystem with its health score.
+- **The daily report groups the issue-closing suggestions** in one line per repository (the monitor still closes nothing).
+- **A minimal Grafana board** (`red_by_ecosystem.json`) and a test that checks every metric of both boards against what `/metrics` serves.
+- **The contract of the profile dashboard** is documented and checked by a test (`/api/outputs/dashboard.json` is exactly the document of `ci_red.json`; the public export never carries the signing side).
+- New guide `WEBHOOK` (refresh-only mode) and a commented example of the pin sources, in eight languages.
+- `tools/make_settings_doc.py` writes the settings table of the guides from the schema and the texts of the page, and the CI checks it.
+
 ## [1.5.1]
 
 - **The settings page can set the external AI of the sentinel** (new group "External AI for the sentinel"): `ai.provider` (`none` / `ollama` / `openai-compatible`), `ai.model`, `ai.ollama_url` (only this computer), `ai.base_url` (https only), `ai.api_key_env` and `ai.daily_limit`. Only the NAME of the environment variable that holds the key can be set: the key itself is never shown or saved. Off by default; an outside service receives data of your repositories.

@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GitHub Actions 监视器 + 哨兵（版本 1.5.1）
+GitHub Actions 监视器 + 哨兵（版本 1.5.2）
 ============================================
 运行要求：Python 3.11+，以及已登录的 GitHub CLI（`gh`）（gh auth login）。无需其他东西：只使用 Python 标准库。
 首次使用的快速步骤：QUICKSTART_zh.txt。
