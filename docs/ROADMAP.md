@@ -32,9 +32,16 @@ Everything a new user should not have to think about. In this order:
 - **FinOps of the minutes**: multipliers per operating system, a breakdown by repository, workflow, branch and author, an alert for an anomaly and for a monthly allowance.
 - **Self-hosted runner status** from the runners API (idle, busy, offline, queue and capacity), and hardware telemetry only through an optional node_exporter-like endpoint.
 
-## Why the terminal view uses Rich and not Textual
+## Next: an interactive terminal application
 
-`tui.py` is a read-only grid drawn again every few seconds: Rich is enough and is one small dependency. Textual would add an event loop, a second layout system and a second way to test the same screen without giving the monitor anything it needs; if an interactive terminal application is wanted one day it should be a separate tool.
+The simple Rich view (`tui.py`, with `--once` for scripts) stays. The terminal is asked to reach the level of the web page, so an interactive application on **Textual** is planned as an optional extra (`pip install textual`; without it a clear message with that command). The core keeps needing no package. It reads the same local API of the complete or the lite edition (read only for data) and plans:
+
+- the header tiles with the same states and colours;
+- tabs with keyboard and mouse: Now, Sentinel (alerts, A10, readiness, signing queue with the trust filter), Charts (Unicode bars and sparklines, p50 / p95, queue, flaky), Repositories (sortable table, search, filters), History and Settings;
+- the detail of a repository or run (jobs, steps with times, the link, and the `gh run view` / `rerun` / `act` command to copy);
+- editable Settings with the same sub-tabs, validation and saving through the same API as the page, with the pending-restart notice;
+- language (eight), theme and density; an events centre; the AI panel with the same closed list and confirmation;
+- a help key, documented shortcuts, tests with Textual's pilot and exported SVG screenshots; `--lite` shows only the lite tabs.
 
 ## Ideas that need a decision first
 

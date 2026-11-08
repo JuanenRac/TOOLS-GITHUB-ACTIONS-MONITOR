@@ -41,6 +41,7 @@ jobs:
           python tools/make_architecture.py --check
           python tools/make_structure.py --check
           python tools/make_settings_doc.py --check
+          python tools/sync_changelog.py --check
 
   container:
     name: The example container builds
