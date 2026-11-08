@@ -17,3 +17,10 @@ monitor/_no_workspace/
 .env.*
 !.env.example
 .monitor-root
+monitor/etag_cache.json
+monitor/analytics_history.json
+monitor/ai_actions_log.jsonl
+monitor/sentinel_ai_cache.json
+monitor/config_backups/
+monitor/events_monitor.jsonl
+monitor/events_state.json

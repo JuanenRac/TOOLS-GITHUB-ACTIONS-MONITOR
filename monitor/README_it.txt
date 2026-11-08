@@ -1,9 +1,9 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITOR DI GITHUB ACTIONS + SENTINELLA (versione 1.5.2)
+MONITOR DI GITHUB ACTIONS + SENTINELLA (versione 1.6.0)
 =======================================================
-Requisiti: Python 3.11+ e GitHub CLI (`gh`) con l'accesso effettuato (gh auth login). Nient'altro: solo la libreria standard di Python.
+Requisiti: Python 3.11+ e GitHub CLI (`gh`) con l'accesso effettuato (gh auth login). Nient'altro: il nucleo non richiede pacchetti (la vista console, tui.py, usa il pacchetto facoltativo rich).
 Passi rapidi per il primo utilizzo: QUICKSTART_it.txt.
 
 AVVIO      Windows: MONITOR_GITHUB_ACTIONS.bat | Linux: ./MONITOR_GITHUB_ACTIONS.sh | macOS: doppio clic su MONITOR_GITHUB_ACTIONS.command

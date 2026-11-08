@@ -23,3 +23,10 @@
 ## オンにするには
 
 `actions_monitor.json` に `"webhook": {"enabled": true, "secret": "<32 文字以上のランダムな文字列>"}` と書きます。スイッチは設定タブ(サブタブ「受信 Webhook」)にもありますが、シークレットはファイルにだけ置きます。モニターを再起動し、GitHub の Webhook 設定では、コンテンツタイプ `application/json`、同じシークレット、末尾が `/api/webhook` のトンネル URL を指定します。
+
+## リアルタイムイベント
+
+- `webhook.record_events` がオン(既定)のとき、署名付きの `workflow_run` イベントはそのリポジトリの実行リストを GitHub を読まずに即座に更新します。次の定期読み取りまで、そのリポジトリは割り当てを消費しません。`workflow_job` イベントは分析用に待ち時間と各ステップの時間ももたらします。
+- 保存されるのは検証済みの短いフィールド(ワークフロー、実行、状態、結論、ブランチ、短いコミット、実行へのリンク、所要時間)のみで、コミットメッセージや自由テキストは保存しません。最新の `webhook.live_events_keep` 件は `GET /api/live-events`(このコンピューターのみ)で読めます。
+- 赤で終わった実行は、通知が有効なら `workflow_failed` も送ります。`webhook.record_events` をオフにすると、上で説明した更新のみのモードに戻ります。
+- GitHub は `127.0.0.1` に届きません。`gh webhook forward`(GitHub CLI のドキュメント参照)か、意図して用意したトンネルで `http://127.0.0.1:PORT/api/webhook` へ転送してください。

@@ -23,3 +23,10 @@
 ## 如何开启
 
 在 `actions_monitor.json` 中写入 `"webhook": {"enabled": true, "secret": "<32 个或更多随机字符>"}`;开关也在设置标签页(子标签页“入站 Webhook”),密钥只放在文件里。重启监视器。在 GitHub 的 Webhook 设置中使用内容类型 `application/json`、相同的密钥,以及以 `/api/webhook` 结尾的隧道 URL。
+
+## 实时事件
+
+- 当 `webhook.record_events` 开启(默认)时,已签名的 `workflow_run` 事件会立即更新该仓库的运行列表,而无需读取 GitHub:直到下一次计划读取之前,该仓库不消耗配额。`workflow_job` 事件还会为分析带来排队时间和每个步骤的时间。
+- 只保留经过验证的简短字段(工作流、运行、状态、结论、分支、短提交、运行链接、时长);绝不保留提交信息或任何自由文本。最新的 `webhook.live_events_keep` 个事件可在 `GET /api/live-events` 读取(仅限本机)。
+- 当通知开启时,以红色结束的运行还会发送 `workflow_failed` 通知。关闭 `webhook.record_events` 后,Webhook 恢复为上述仅刷新模式。
+- GitHub 无法访问 `127.0.0.1`:请使用 `gh webhook forward`(见 GitHub CLI 文档)或你有意搭建的隧道,指向 `http://127.0.0.1:端口/api/webhook`。

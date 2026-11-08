@@ -1,0 +1,155 @@
+{
+  "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+  "_license": "GPL-3.0-or-later - see LICENSE",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ci_red.json (schema 2)",
+  "description": "What the monitor writes and serves at /api/outputs/dashboard.json. Fields are only ever added, never renamed or removed: read it with .get() and ignore what you do not know.",
+  "type": "object",
+  "required": [
+    "schema",
+    "generated",
+    "tool_version",
+    "complete",
+    "red_repos",
+    "pending_sign_repos",
+    "repos"
+  ],
+  "properties": {
+    "schema": {
+      "const": 2
+    },
+    "generated": {
+      "type": "string"
+    },
+    "tool_version": {
+      "type": "string"
+    },
+    "complete": {
+      "type": "boolean",
+      "description": "false while the sentinel is loading: keep the last complete picture."
+    },
+    "red_repos": {
+      "type": "integer"
+    },
+    "pending_sign_repos": {
+      "type": "integer"
+    },
+    "pending_sign_hours_threshold": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "repos": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "ecosystem",
+          "red",
+          "pending_sign"
+        ],
+        "properties": {
+          "ecosystem": {
+            "type": "string"
+          },
+          "red": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "workflow",
+                "conclusion",
+                "since",
+                "streak",
+                "url"
+              ],
+              "properties": {
+                "workflow": {
+                  "type": "string"
+                },
+                "conclusion": {
+                  "type": "string"
+                },
+                "since": {
+                  "type": "string"
+                },
+                "streak": {
+                  "type": "integer"
+                },
+                "url": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "pending_sign_hours": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "pending_sign": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "workflow",
+                "hours",
+                "state",
+                "signature_kind",
+                "signature_verified"
+              ],
+              "properties": {
+                "workflow": {
+                  "type": "string"
+                },
+                "hours": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "state": {
+                  "type": "string"
+                },
+                "signature_kind": {
+                  "enum": [
+                    "none",
+                    "dev",
+                    "release"
+                  ]
+                },
+                "signature_verified": {
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "const": "unknown"
+                    }
+                  ]
+                },
+                "last_build_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "url": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

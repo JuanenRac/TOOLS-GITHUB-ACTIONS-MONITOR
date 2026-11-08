@@ -1,0 +1,73 @@
+{
+  "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+  "_license": "GPL-3.0-or-later - see LICENSE",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ci_status_public.json (schema 1)",
+  "description": "The public export of read_report.py --export-status: the red workflows only, never the signing side.",
+  "type": "object",
+  "required": [
+    "schema",
+    "generated",
+    "tool_version",
+    "complete",
+    "red_repos",
+    "red"
+  ],
+  "properties": {
+    "schema": {
+      "const": 1
+    },
+    "generated": {
+      "type": "string"
+    },
+    "tool_version": {
+      "type": "string"
+    },
+    "complete": {
+      "type": "boolean"
+    },
+    "red_repos": {
+      "type": "integer"
+    },
+    "red": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "repo",
+          "workflow",
+          "conclusion",
+          "since",
+          "streak",
+          "url"
+        ],
+        "properties": {
+          "repo": {
+            "type": "string"
+          },
+          "ecosystem": {
+            "type": "string"
+          },
+          "workflow": {
+            "type": "string"
+          },
+          "conclusion": {
+            "type": "string"
+          },
+          "since": {
+            "type": "string"
+          },
+          "streak": {
+            "type": "integer"
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

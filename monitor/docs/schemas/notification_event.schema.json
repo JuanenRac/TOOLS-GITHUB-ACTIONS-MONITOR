@@ -1,0 +1,49 @@
+{
+  "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+  "_license": "GPL-3.0-or-later - see LICENSE",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Notification event",
+  "description": "The JSON body that the http_local channel POSTs and the mqtt channel publishes. Answer any 2xx. Fields are only ever added.",
+  "type": "object",
+  "required": [
+    "kind",
+    "repo",
+    "text",
+    "url"
+  ],
+  "properties": {
+    "kind": {
+      "enum": [
+        "red_new",
+        "red_fixed",
+        "stuck_new",
+        "pending_sign",
+        "release_due",
+        "rate_low",
+        "offline",
+        "online",
+        "alerts_up",
+        "workflow_failed"
+      ]
+    },
+    "repo": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "text": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "In the language of the monitor."
+    },
+    "url": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

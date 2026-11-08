@@ -23,3 +23,10 @@ Ein akzeptiertes Ereignis markiert nur das darin genannte Repository für eine A
 ## So schalten Sie ihn ein
 
 In `actions_monitor.json`: `"webhook": {"enabled": true, "secret": "<32 oder mehr Zufallszeichen>"}`; der Schalter steht auch im Reiter Einstellungen (Unterreiter Eingehender Webhook), das Geheimnis nur in der Datei. Starten Sie den Monitor neu. In den GitHub-Webhook-Einstellungen: Inhaltstyp `application/json`, dasselbe Geheimnis und die URL Ihres Tunnels mit Endung `/api/webhook`.
+
+## Echtzeit-Ereignisse
+
+- Ist `webhook.record_events` an (Standard), aktualisiert ein signiertes `workflow_run`-Ereignis die Run-Liste dieses Repositorys sofort, ohne GitHub zu lesen: Das Repository kostet bis zur nächsten geplanten Lesung kein Kontingent. Ein `workflow_job`-Ereignis liefert zudem Wartezeit und Zeit jedes Schritts für die Analytik.
+- Es werden nur kurze, geprüfte Felder behalten (Workflow, Run, Status, Ergebnis, Branch, kurzer Commit, Link zum Run, Dauern); nie die Commit-Nachricht oder freier Text. Die neuesten `webhook.live_events_keep` Ereignisse lassen sich unter `GET /api/live-events` lesen (nur dieser Rechner).
+- Ein rot endender Run löst bei aktiven Benachrichtigungen auch `workflow_failed` aus. Bei ausgeschaltetem `webhook.record_events` kehrt der Webhook zum oben beschriebenen reinen Aktualisierungsmodus zurück.
+- GitHub erreicht `127.0.0.1` nicht: Nutzen Sie `gh webhook forward` (siehe Dokumentation der GitHub-CLI) oder einen bewusst eingerichteten Tunnel auf `http://127.0.0.1:PORT/api/webhook`.

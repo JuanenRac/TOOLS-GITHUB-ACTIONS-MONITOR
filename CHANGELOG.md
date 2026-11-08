@@ -9,6 +9,11 @@ Changes of the repository as a whole. The program has its own, more detailed his
 
 ## [Unreleased]
 
+## [1.6.0]
+
+- Conditional reads, a mode for lost connections, analytics (durations, queue time, steps, flaky workflows), real-time webhook events, a workflow linter, optional notifications (chat, MQTT, local HTTP), new AI providers (`anthropic`, `copilot`) with a closed list of actions that run only after a confirmation, a terminal view, a health endpoint and Enterprise Server support.
+- New guides in eight languages, published JSON schemas, a roadmap, and every screenshot redone in light and dark, console tools included.
+
 ## [1.5.2]
 
 - The Settings tab now has sub-tabs, blocks with a main switch, units, ranges, help lines, a search box and every setting of the configuration file (the A10 checks, health weights, pin sources, minute ceilings and more).

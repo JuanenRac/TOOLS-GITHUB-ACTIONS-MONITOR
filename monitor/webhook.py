@@ -12,6 +12,7 @@ import hashlib
 import hmac
 import json
 import re
+from datetime import datetime, timezone
 
 import i18n
 
@@ -32,6 +33,14 @@ def settings(config):
     cfg = cfg if isinstance(cfg, dict) else {}
     secret = cfg.get("secret") if isinstance(cfg.get("secret"), str) else ""
     return {"enabled": cfg.get("enabled") is True, "secret": secret}
+
+
+def live_settings(config):
+    """What an accepted event is used for: {"record_events": bool, "live_events_keep": int}. Kept apart from settings() so the secret never travels with them."""
+    cfg = (config or {}).get("webhook")
+    cfg = cfg if isinstance(cfg, dict) else {}
+    keep = cfg.get("live_events_keep")
+    return {"record_events": cfg.get("record_events", True) is True, "live_events_keep": keep if isinstance(keep, int) and not isinstance(keep, bool) and 10 <= keep <= 1000 else 100}
 
 
 def active(config):
@@ -78,3 +87,65 @@ def handle(config, body, headers, watched):
     if not isinstance(name, str) or not NAME_RE.match(name) or name not in set(watched):
         return 202, {"ok": True, "ignored": True}, None
     return 200, {"ok": True, "refresh": name}, name
+
+
+GITHUB_URL = re.compile(r"^https://[A-Za-z0-9.-]+/[A-Za-z0-9._/-]{1,200}$")   # a link to the run on github.com or on a GitHub Enterprise Server host
+
+
+def _time(text):
+    try:
+        return datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp()
+    except (TypeError, ValueError):
+        return None
+
+
+def _name(value, size=100):
+    return value[:size] if isinstance(value, str) and value else ""
+
+
+def parse_event(event, body):
+    """A small, validated record of a `workflow_run` or `workflow_job` event, or None for any other event or a payload that does not look right.
+
+    {"event", "repo", "workflow", "run_id", "status", "conclusion", "branch", "sha", "attempt", "url", "seconds", "queue", "job", "steps": {name: seconds}}
+    Only these short fields are kept (never the commit message, the actor's e-mail or any free text of the payload)."""
+    if event not in ("workflow_run", "workflow_job"):
+        return None
+    try:
+        payload = json.loads(body)
+        repo = payload["repository"]["name"]
+        obj = payload["workflow_run" if event == "workflow_run" else "workflow_job"]
+    except (ValueError, KeyError, TypeError):
+        return None
+    if not isinstance(repo, str) or not NAME_RE.match(repo) or not isinstance(obj, dict) or not isinstance(obj.get("id"), int):
+        return None
+    url = obj.get("html_url") if isinstance(obj.get("html_url"), str) and GITHUB_URL.match(obj["html_url"]) else None
+    record = {"event": event, "repo": repo, "run_id": obj["run_id"] if event == "workflow_job" and isinstance(obj.get("run_id"), int) else obj["id"], "status": _name(obj.get("status"), 20),
+              "conclusion": _name(obj.get("conclusion"), 20) or None, "branch": _name(obj.get("head_branch")), "sha": _name(obj.get("head_sha"), 40)[:7], "url": url,
+              "attempt": obj.get("run_attempt") if isinstance(obj.get("run_attempt"), int) else None}
+    if event == "workflow_run":
+        record["workflow"] = _name(obj.get("name"))
+        record["path"] = _name(obj.get("path"), 200).split("@")[0].rsplit("/", 1)[-1]
+        record["started"] = _name(obj.get("run_started_at") or obj.get("created_at"), 25)
+        a, b = _time(obj.get("run_started_at") or obj.get("created_at")), _time(obj.get("updated_at"))
+        record["seconds"] = max(0, int(b - a)) if a is not None and b is not None and obj.get("status") == "completed" else None
+    else:
+        record["workflow"] = _name(obj.get("workflow_name"))
+        record["job"] = _name(obj.get("name"))
+        created, started, done = _time(obj.get("created_at")), _time(obj.get("started_at")), _time(obj.get("completed_at"))
+        record["queue"] = max(0, int(started - created)) if created is not None and started is not None else None
+        record["seconds"] = max(0, int(done - started)) if started is not None and done is not None else None
+        record["steps"] = {}
+        for step in obj.get("steps") or []:
+            if isinstance(step, dict) and step.get("name"):
+                a, b = _time(step.get("started_at")), _time(step.get("completed_at"))
+                if a is not None and b is not None:
+                    record["steps"][_name(step["name"], 80)] = max(0, int(b - a))
+    return record
+
+
+def as_run(record):
+    """The record of a `workflow_run` in the shape of the run list of the monitor (so a webhook can update a repository without reading it again)."""
+    if not record or record.get("event") != "workflow_run":
+        return None
+    return {"repo": record["repo"], "id": record["run_id"], "name": record["workflow"], "title": "", "event": "webhook", "branch": record["branch"], "path": record["path"], "sha": record["sha"],
+            "actor": "", "status": record["status"], "conclusion": record["conclusion"], "started": record["started"], "seconds": record["seconds"] or 0, "url": record["url"], "attempt": record.get("attempt")}

@@ -61,9 +61,10 @@ def _int(value):
     return value if isinstance(value, int) and not isinstance(value, bool) else None
 
 
-def metrics_text(snapshot, data, per_repo=True, now=None):
+def metrics_text(snapshot, data, per_repo=True, now=None, extra=None):
     """The Prometheus exposition of the current state. `snapshot` = sentinel snapshot (may be None), `data` = the monitor state (may be None)."""
     now = time.time() if now is None else now
+    extra = extra if isinstance(extra, dict) else {}
     snap = snapshot if isinstance(snapshot, dict) and snapshot.get("enabled", True) else {}
     data = data if isinstance(data, dict) else {}
     out = _Out()
@@ -111,10 +112,49 @@ def metrics_text(snapshot, data, per_repo=True, now=None):
         out.add("runs_failing", "Workflows whose latest run failed and was not fixed since.", len(data.get("failing") or []))
         out.add("issues_open", "Open issues opened by the CI bots.", len(data.get("issues") or []))
         out.add("quota_paused", "1 while the monitor is paused to protect the quota.", 1 if data.get("paused_quota") else 0)
+    _extra_metrics(out, extra, eco, per_repo)
     return "\n".join(out.lines) + "\n"
 
 
-def grafana_json(snapshot, data):
+def _extra_metrics(out, extra, eco, per_repo):
+    """The metrics of 1.6.0: conditional reads, connection, durations (p50 / p95), queue times, steps, flaky rate, live events and notifications."""
+    etag = extra.get("etag") if isinstance(extra.get("etag"), dict) else None
+    if etag:
+        out.add("etag_saved_total", "Reads answered with 304 Not Modified (no quota used) since the cache was created.", _int(etag.get("saved")), kind="counter")
+        out.add("etag_entries", "Endpoints held in the conditional-read cache.", _int(etag.get("entries")))
+    if "offline" in extra:
+        out.add("offline", "1 while the monitor has no connection to GitHub and shows the last picture.", 1 if extra["offline"] else 0)
+    if "live_events" in extra:
+        out.add("live_events", "Events of the incoming webhook kept in memory.", _int(extra["live_events"]))
+    notify = extra.get("notify") if isinstance(extra.get("notify"), dict) else None
+    if notify:
+        out.add("notifications_sent_total", "Notifications that left the computer.", _int(notify.get("sent")), kind="counter")
+        out.add("notifications_failed_total", "Notifications that could not be sent.", _int(notify.get("failed")), kind="counter")
+    summary = extra.get("analytics") if isinstance(extra.get("analytics"), dict) else None
+    if not summary or not summary.get("enabled", True):
+        return
+    out.add("workflows_slower", "Workflows whose p50 duration is well above their usual one.", len(summary.get("slower") or []))
+    out.add("workflows_flaky", "Workflows with a possibly transient failure (failed, then passed on the same commit).", len(summary.get("flaky") or []))
+    if not per_repo:
+        return
+    for row in (summary.get("duration") or [])[:200]:
+        for q, key in (("0.5", "p50"), ("0.95", "p95")):
+            out.add("workflow_duration_seconds", "Duration of the successful runs of a workflow (quantiles).", _int(row.get(key)),
+                    {"repo": row["repo"], "workflow": row["workflow"], "ecosystem": eco.get(row["repo"], "other"), "quantile": q})
+    for row in (summary.get("queue") or [])[:200]:
+        for q, key in (("0.5", "p50"), ("0.95", "p95")):
+            out.add("job_queue_seconds", "Time a job waited before it started (quantiles).", _int(row.get(key)),
+                    {"repo": row["repo"], "workflow": row["workflow"], "ecosystem": eco.get(row["repo"], "other"), "quantile": q})
+    for row in (summary.get("steps") or [])[:200]:
+        for q, key in (("0.5", "p50"), ("0.95", "p95")):
+            out.add("step_duration_seconds", "Duration of one step of a workflow (quantiles).", _int(row.get(key)),
+                    {"repo": row["repo"], "workflow": row["workflow"], "step": row["step"], "quantile": q})
+    for row in (summary.get("flaky") or [])[:200]:
+        out.add("workflow_flaky_rate", "Share of the runs of a workflow that failed and then passed on the same commit (a label, not a verdict).", row.get("rate"),
+                {"repo": row["repo"], "workflow": row["workflow"], "ecosystem": eco.get(row["repo"], "other")})
+
+
+def grafana_json(snapshot, data, extra=None):
     """The same figures as tables for the JSON/Infinity data source: {"summary": {...}, "red": [rows], "pending_sign": [rows], "ecosystems": [rows]}."""
     snap = snapshot if isinstance(snapshot, dict) and snapshot.get("enabled", True) else {}
     data = data if isinstance(data, dict) else {}
@@ -132,7 +172,9 @@ def grafana_json(snapshot, data):
                "runs_active": len(data.get("active") or []), "runs_failing": len(data.get("failing") or []), "repos_watched": len(data.get("repos") or [])}
     ecos = [{"ecosystem": key, "red_workflows": sum(1 for r in red if r["ecosystem"] == key), "pending_sign": sum(1 for g in pending if g["ecosystem"] == key)}
             for key in sorted(set(eco.values()))]
-    return {"schema": 1, "summary": summary, "red": red, "pending_sign": pending, "ecosystems": ecos}
+    analytics_part = (extra or {}).get("analytics") if isinstance((extra or {}).get("analytics"), dict) else {}
+    return {"schema": 1, "summary": summary, "red": red, "pending_sign": pending, "ecosystems": ecos, "durations": analytics_part.get("duration") or [],
+            "queue": analytics_part.get("queue") or [], "flaky": analytics_part.get("flaky") or [], "slower": analytics_part.get("slower") or []}
 
 
 def dashboard_json(snapshot):

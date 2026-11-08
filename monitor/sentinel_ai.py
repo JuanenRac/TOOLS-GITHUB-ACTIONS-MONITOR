@@ -41,13 +41,18 @@ CACHE_FILE = HERE / "sentinel_ai_cache.json"
 # the label shown with every answer is the text "ai.label" of the current language
 LABEL = "ai.label"
 VERDICTS = ("falso positivo", "real", "dudosa")
-DEFAULT_MODELS = {"ollama": "llama3.2", "openai-compatible": ""}
+DEFAULT_MODELS = {"ollama": "llama3.2", "openai-compatible": "", "anthropic": "", "copilot": ""}
+PROVIDERS = ("none", "ollama", "openai-compatible", "anthropic", "copilot")
+ANTHROPIC_URL = "https://api.anthropic.com"
+ANTHROPIC_VERSION = "2023-06-01"
 AI_DEFAULTS = {
     "provider": "none", "model": "", "daily_limit": 30, "max_input_chars": 5000, "max_output_chars": 1500,
     "timeout_seconds": 90, "ollama_url": "http://127.0.0.1:11434",
     "base_url": "", "api_key_env": "",
+    # what the model may look at and say (the settings page): the kinds of event it may analyse, the repositories it may see (empty = only the ones the monitor watches), the language of its answers
+    "events": ["build", "codeql", "report"], "allowed_repos": [], "answer_language": "",
 }
-KINDS = ("build", "codeql")
+KINDS = ("build", "codeql", "report", "release_notes", "ask")
 
 SECRET_PATTERNS = [
     re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----.*?(?:-----END [A-Z ]*PRIVATE KEY-----|$)", re.S),
@@ -65,11 +70,13 @@ def ai_config(config):
     value = (config or {}).get("ai")
     if isinstance(value, dict):
         merged.update({k: v for k, v in value.items() if k in AI_DEFAULTS})
-    if merged["provider"] not in ("none", "ollama", "openai-compatible"):
+    if merged["provider"] not in PROVIDERS:
         merged["provider"] = "none"
     try:
         merged["daily_limit"] = max(0, int(merged["daily_limit"]))
         merged["max_input_chars"] = max(500, min(20000, int(merged["max_input_chars"])))
+        merged["max_output_chars"] = max(200, min(8000, int(merged["max_output_chars"])))
+        merged["timeout_seconds"] = max(5, min(300, int(merged["timeout_seconds"])))
     except (TypeError, ValueError):
         merged["daily_limit"], merged["max_input_chars"] = AI_DEFAULTS["daily_limit"], AI_DEFAULTS["max_input_chars"]
     return merged
@@ -102,12 +109,18 @@ def parse_verdict(text):
     return match.group(1).lower() if match else "dudosa"
 
 
-def build_prompt(kind, data, nonce):
-    """System and user messages. The data goes between random delimiters and is declared untrusted. The answer is asked for in the current language."""
-    language = i18n.ENGLISH_NAMES.get(i18n.language(), "English")
+def build_prompt(kind, data, nonce, language=None):
+    """System and user messages. The data goes between random delimiters and is declared untrusted. The answer is asked for in `language` (default: the current one)."""
+    language = language or i18n.ENGLISH_NAMES.get(i18n.language(), "English")
     if kind == "build":
         task = (f"Summarise in at most 5 lines, in {language}, why this CI run failed: probable cause, file or step involved and what to look at first. "
                 "Do not invent anything that is not in the data.")
+    elif kind == "report":
+        task = f"Summarise this daily report of a CI monitor in at most 6 short lines in {language}: what is red, what is waiting, what to do first. Do not invent anything."
+    elif kind == "release_notes":
+        task = f"Draft short release notes in {language} from these changelog entries: a title line and at most 8 bullet points. Do not invent features."
+    elif kind == "ask":
+        task = f"Answer the question that opens the data, in at most 6 lines in {language}, using ONLY the data. If the data does not say, answer that it does not."
     else:
         task = ("Assess this CodeQL alert. The first line must be exactly 'VEREDICTO: falso positivo', 'VEREDICTO: real' or 'VEREDICTO: dudosa' "
                 f"(fixed protocol words: false positive / real / doubtful). Then, in at most 4 lines in {language}, the reason, quoting the line of code. Do not propose commands.")
@@ -239,7 +252,72 @@ def openai_compatible_chat(cfg, system, user):
     return (((body.get("choices") or [{}])[0]).get("message") or {}).get("content", "")
 
 
-TRANSPORTS = {"ollama": ollama_chat, "openai-compatible": openai_compatible_chat}
+def anthropic_problem(cfg):
+    """Why the anthropic provider cannot be used (None = ready). The model has no default: you choose it. Never returns the key."""
+    base = cfg.get("base_url") or ANTHROPIC_URL
+    url = urlparse(base)
+    if not url.hostname or (url.scheme != "https" and not (url.scheme == "http" and _loopback(base))):
+        return i18n.t("ai.need_https")
+    if not cfg.get("model"):
+        return i18n.t("ai.need_model")
+    if not ENV_NAME.match(cfg.get("api_key_env") or ""):
+        return i18n.t("ai.need_env_name")
+    if not os.environ.get(cfg["api_key_env"]):
+        return i18n.t("ai.env_not_set", name=cfg["api_key_env"])
+    return None
+
+
+def anthropic_chat(cfg, system, user):
+    """The Messages API of Anthropic: POST <base>/v1/messages with x-api-key and anthropic-version. The text of the reply only; no tools are offered to the model."""
+    problem = anthropic_problem(cfg)
+    if problem:
+        raise RuntimeError(problem)
+    key = os.environ[cfg["api_key_env"]]   # in memory for the call only; never logged
+    url = (cfg.get("base_url") or ANTHROPIC_URL).rstrip("/") + "/v1/messages"
+    try:
+        body = _post_json(url, {"model": cfg["model"], "max_tokens": 600, "temperature": 0.1, "system": system, "messages": [{"role": "user", "content": user}]},
+                          {"x-api-key": key, "anthropic-version": ANTHROPIC_VERSION}, cfg["timeout_seconds"])
+    except urllib.error.HTTPError as error:
+        raise RuntimeError(i18n.t("ai.provider_answered", code=error.code)) from None
+    return "".join(part.get("text", "") for part in (body.get("content") or []) if isinstance(part, dict) and part.get("type") == "text")
+
+
+# Arguments of the GitHub Copilot CLI run through `gh`: a fixed list, never built from the model's text or from the configuration. It is asked for ONE text answer (`-p`) and is given NO permission
+# to use tools: any option that would grant tools or switch the permission checks off is refused by FORBIDDEN_COPILOT even if somebody adds it here by mistake.
+COPILOT_ARGS = ("copilot", "--", "-p")
+FORBIDDEN_COPILOT = re.compile(r"(?i)allow|yolo|trust|approve|dangerous|bypass|no-ask|auto")
+
+
+def copilot_problem(cfg, which=None):
+    import shutil
+    if not (which or shutil.which)("gh"):
+        return i18n.t("ai.copilot_no_gh")
+    return None
+
+
+def copilot_chat(cfg, system, user, runner=None):
+    """`gh copilot -- -p <prompt>`: the Copilot CLI of the user's own GitHub login (no key in the monitor). A subprocess with a fixed argument list (no shell), no stdin (so it can never
+    ask for or start a download by itself), a time limit and a cut output. It spends premium requests of the account's Copilot plan."""
+    import subprocess
+    problem = copilot_problem(cfg)
+    if problem:
+        raise RuntimeError(problem)
+    args = ["gh", *COPILOT_ARGS, system + "\n\n" + user]
+    if any(FORBIDDEN_COPILOT.search(a) for a in COPILOT_ARGS):
+        raise RuntimeError("forbidden copilot option")
+    run = runner or subprocess.run
+    try:
+        done = run(args, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=cfg["timeout_seconds"], stdin=subprocess.DEVNULL, shell=False)
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(i18n.t("ai.copilot_timeout")) from None
+    except OSError as error:
+        raise RuntimeError(sanitize_text(str(error), 200, keep="head")) from None
+    if done.returncode != 0:
+        raise RuntimeError(i18n.t("ai.copilot_failed", code=done.returncode))
+    return (done.stdout or "")[:20000]
+
+
+TRANSPORTS = {"ollama": ollama_chat, "openai-compatible": openai_compatible_chat, "anthropic": anthropic_chat, "copilot": copilot_chat}
 
 
 def status(cfg, store):
@@ -250,6 +328,12 @@ def status(cfg, store):
     elif cfg["provider"] == "ollama":
         ok, why = ollama_available(cfg)
         out["available"], out["message"] = ok, why or i18n.t("ai.ollama_ok")
+    elif cfg["provider"] == "anthropic":
+        problem = anthropic_problem(cfg)
+        out["available"], out["message"] = problem is None, problem or i18n.t("ai.anthropic_ready")
+    elif cfg["provider"] == "copilot":
+        problem = copilot_problem(cfg)
+        out["available"], out["message"] = problem is None, problem or i18n.t("ai.copilot_ready")
     else:
         problem = compat_problem(cfg)
         out["available"] = problem is None
@@ -262,6 +346,8 @@ def explain(kind, data, cfg, store, transport=None):
     base = {"ok": False, "text": "", "verdict": "", "cached": False, "provider": cfg["provider"], "model": model_of(cfg), "label": i18n.t(LABEL), "error": ""}
     if kind not in KINDS:
         return {**base, "error": i18n.t("err.bad_kind")}
+    if kind not in (cfg.get("events") or []) and kind in ("build", "codeql", "report"):
+        return {**base, "error": i18n.t("ai.event_off", kind=kind)}
     if cfg["provider"] == "none":
         return {**base, "error": i18n.t("ai.is_off")}
     clean = sanitize_text(data, cfg["max_input_chars"], keep="tail" if kind == "build" else "head")
@@ -274,7 +360,7 @@ def explain(kind, data, cfg, store, transport=None):
             return {**base, "error": i18n.t("ai.daily_cap", n=cfg['daily_limit'])}
         store.add_call()  # counted before the call: a failing provider also spends the cap
         store.save()
-    system, user = build_prompt(kind, clean, _secrets.token_hex(6))
+    system, user = build_prompt(kind, clean, _secrets.token_hex(6), cfg.get("answer_language") or None)
     try:
         raw = (transport or TRANSPORTS[cfg["provider"]])(cfg, system, user)
     except Exception as error:
@@ -287,3 +373,21 @@ def explain(kind, data, cfg, store, transport=None):
         store.put(key, {"text": text, "verdict": verdict, "model": model_of(cfg), "at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")})
         store.save()
     return {**base, "ok": True, "text": text, "verdict": verdict}
+
+
+def test_connection(cfg, store, transport=None):
+    """The smallest call the provider can answer ("reply with ok"), to check the address, the model and the key. It counts against the daily cap like any call. Never raises."""
+    import time as _time
+    with store.lock:
+        if cfg["provider"] == "none":
+            return {"ok": False, "error": i18n.t("ai.is_off")}
+        if store.used_today() >= cfg["daily_limit"]:
+            return {"ok": False, "error": i18n.t("ai.daily_cap", n=cfg["daily_limit"])}
+        store.add_call()
+        store.save()
+    started = _time.time()
+    try:
+        answer = (transport or TRANSPORTS[cfg["provider"]])(cfg, "Reply with the single word: ok", "ping")
+    except Exception as error:   # noqa: BLE001
+        return {"ok": False, "error": sanitize_text(str(error), 300, keep="head"), "provider": cfg["provider"]}
+    return {"ok": bool(str(answer).strip()), "ms": int((_time.time() - started) * 1000), "provider": cfg["provider"], "model": model_of(cfg), "used_today": store.used_today(), "daily_limit": cfg["daily_limit"]}

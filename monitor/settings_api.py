@@ -42,6 +42,11 @@ MODEL_RE = re.compile(r"^[A-Za-z0-9._:/@-]{0,100}$")
 OLLAMA_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}/?$")   # the local service only: nothing leaves this computer
 HTTPS_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250})?$")
 ENV_NAME_RE = re.compile(r"^([A-Z_][A-Z0-9_]{0,63})?$")   # the NAME of an environment variable, never the key itself
+LOOP_HOST_RE = re.compile(r"^(127\.0\.0\.1|localhost|\[::1\])$")                      # a broker or a service ON THIS COMPUTER
+LOOP_URL_RE = re.compile(r"^(http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/%-]{0,100})?)?$")
+CHAT_RE = re.compile(r"^(-?[0-9]{1,20})?$")
+ROOM_RE = re.compile(r"^(![A-Za-z0-9:._-]{3,120})?$")
+TOPIC_RE = re.compile(r"^[A-Za-z0-9/_.-]{1,100}$")
 FILE_PATTERN_RE = re.compile(r"^[A-Za-z0-9._*?-]{1,80}$")   # a file name pattern of the audit folder (no folders)
 FILE_NAME_RE = re.compile(r"^[A-Za-z0-9._-][A-Za-z0-9._/-]{0,79}$")
 IDENT_RE = re.compile(r"^[A-Za-z0-9_.-]{1,60}$")
@@ -86,6 +91,7 @@ _f(_T_POLL, "cold", "cold_refresh_seconds", "int", (60, 86400))
 _f(_T_POLL, "cold", "cold_runs_per_repo", "int", (1, 100))
 _f(_T_POLL, "background", "issues_refresh_seconds", "int", (30, 86400))
 _f(_T_POLL, "background", "discover_refresh_seconds", "int", (300, 86400))
+_f(_T_POLL, "background", "discover_limit", "int", (10, 5000), unit="")
 _f(_T_POLL, "background", "max_workers", "int", (1, 32))
 _f(_T_POLL, "quota", "min_rate_remaining", "int", (100, 5000), unit="calls")
 # --- Sentinel
@@ -153,19 +159,78 @@ _f(_T_OUT, "prometheus", "outputs.prometheus.per_repo", "bool", restart=False)
 _f(_T_OUT, "json", "outputs.json.enabled", "bool", restart=False, secure=True)
 _f(_T_OUT, "dashboard", "outputs.dashboard.enabled", "bool", restart=False, secure=True)
 # --- Integrations: external AI, incoming webhook
-_f(_T_AI, "provider", "ai.provider", "enum", ("none", "ollama", "openai-compatible"), secure=True)
+_f(_T_AI, "provider", "ai.provider", "enum", ("none", "ollama", "openai-compatible", "anthropic", "copilot"), secure=True)
 _f(_T_AI, "provider", "ai.model", "text", MODEL_RE)
 _f(_T_AI, "provider", "ai.ollama_url", "text", OLLAMA_RE)
 _f(_T_AI, "provider", "ai.base_url", "text", HTTPS_RE, secure=True)
 _f(_T_AI, "provider", "ai.api_key_env", "text", ENV_NAME_RE)
 _f(_T_AI, "provider", "ai.daily_limit", "int", (0, 500), unit="calls")
+_f(_T_AI, "limits", "ai.max_input_chars", "int", (500, 20000), unit="chars")
+_f(_T_AI, "limits", "ai.max_output_chars", "int", (200, 8000), unit="chars")
+_f(_T_AI, "limits", "ai.timeout_seconds", "int", (5, 300))
+_f(_T_AI, "scope", "ai.events", "names")
+_f(_T_AI, "scope", "ai.allowed_repos", "names")
+_f(_T_AI, "scope", "ai.answer_language", "enum", ("",) + tuple(i18n.LANGS), False)
+_f(_T_AI, "actions", "ai.actions.enabled", "bool", secure=True)
+_f(_T_AI, "actions", "ai.actions.execute", "bool", secure=True)
+_f(_T_AI, "actions", "ai.actions.allowed", "names")
+_f(_T_AI, "actions", "ai.actions.max_per_hour", "int", (1, 60), unit="")
+_f(_T_AI, "actions", "ai.actions.ttl_seconds", "int", (30, 3600))
 _f(_T_HOOK, "inbound", "webhook.enabled", "bool", secure=True)
 _f(_T_HOOK, "inbound", "webhook.signing_state", "status", restart=False)
+_f(_T_HOOK, "inbound", "webhook.record_events", "bool")
+_f(_T_HOOK, "inbound", "webhook.live_events_keep", "int", (10, 1000), unit="")
+# --- Reads and cache (conditional reads)
+_f("cache", "etag", "cache.etag.enabled", "bool")
+_f("cache", "etag", "cache.etag.ttl_hours", "int", (1, 168))
+# --- Notifications
+_f("notify", "main", "notify.enabled", "bool", secure=True)
+_f("notify", "main", "notify.events", "names")
+_f("notify", "main", "notify.max_per_hour", "int", (1, 600), unit="")
+_f("notify", "ch_telegram", "notify.channels.telegram.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on")
+_f("notify", "ch_telegram", "notify.channels.telegram.token_env", "text", ENV_NAME_RE, label=["cfg.p.token_env"], help="cfg.h.p.token_env")
+_f("notify", "ch_telegram", "notify.channels.telegram.chat_id", "text", CHAT_RE, label=["cfg.p.chat_id"], help="cfg.h.p.chat_id")
+_f("notify", "ch_discord", "notify.channels.discord.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on")
+_f("notify", "ch_discord", "notify.channels.discord.url_env", "text", ENV_NAME_RE, label=["cfg.p.url_env"], help="cfg.h.p.url_env")
+_f("notify", "ch_slack", "notify.channels.slack.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on")
+_f("notify", "ch_slack", "notify.channels.slack.url_env", "text", ENV_NAME_RE, label=["cfg.p.url_env"], help="cfg.h.p.url_env")
+_f("notify", "ch_matrix", "notify.channels.matrix.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on")
+_f("notify", "ch_matrix", "notify.channels.matrix.homeserver", "text", HTTPS_RE, label=["cfg.p.homeserver"], help="cfg.h.p.homeserver")
+_f("notify", "ch_matrix", "notify.channels.matrix.room", "text", ROOM_RE, label=["cfg.p.room"], help="cfg.h.p.room")
+_f("notify", "ch_matrix", "notify.channels.matrix.token_env", "text", ENV_NAME_RE, label=["cfg.p.token_env"], help="cfg.h.p.token_env")
+_f("notify", "ch_mqtt", "notify.channels.mqtt.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on")
+_f("notify", "ch_mqtt", "notify.channels.mqtt.host", "text", LOOP_HOST_RE, label=["cfg.p.local_host"], help="cfg.h.p.local_host")
+_f("notify", "ch_mqtt", "notify.channels.mqtt.port", "int", (1, 65535), unit="", label=["cfg.p.port"], help="cfg.h.p.port")
+_f("notify", "ch_mqtt", "notify.channels.mqtt.topic", "text", TOPIC_RE, label=["cfg.p.topic"], help="cfg.h.p.topic")
+_f("notify", "ch_http_local", "notify.channels.http_local.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on")
+_f("notify", "ch_http_local", "notify.channels.http_local.url", "text", LOOP_URL_RE, label=["cfg.p.local_url"], help="cfg.h.p.local_url")
+# --- Analytics
+_f("analytics", "main", "analytics.enabled", "bool")
+_f("analytics", "main", "analytics.keep_days", "int", (1, 365))
+_f("analytics", "sampling", "analytics.min_samples", "int", (1, 100), unit="")
+_f("analytics", "sampling", "analytics.max_samples", "int", (20, 1000), unit="")
+_f("analytics", "sampling", "analytics.jobs_per_cycle", "int", (0, 20), unit="calls")
+_f("analytics", "sampling", "analytics.steps", "bool")
+_f("analytics", "signals", "analytics.slow_factor", "float", (1.1, 10.0), unit="x")
+_f("analytics", "signals", "analytics.flaky", "bool")
+# --- Workflow linter
+_f("lint", "main", "lint.enabled", "bool")
+_f("lint", "main", "lint.refresh_seconds", "int", (60, 86400))
+_f("lint", "main", "lint.in_report", "bool")
+for _rule in ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target"):
+    _f("lint", "rule_" + _rule, f"lint.rules.{_rule}.enabled", "bool", label=["cfg.p.rule_on"], help="cfg.h.rule_on")
+    _f("lint", "rule_" + _rule, f"lint.rules.{_rule}.severity", "enum", ("info", "warn", "bad"), label=["cfg.p.severity"], help="cfg.h.p.severity")
+# --- Terminal view
+_f("console", "tui", "tui.theme", "enum", ("dark", "light"), False)
+_f("console", "tui", "tui.refresh_seconds", "int", (2, 300), False)
 # @@MORE_SETTINGS@@
 
+TAB_ORDER = ("general", "polling", "cache", "sentinel", "surface", "readiness", "paths", "outputs", "ai", "webhook", "notify", "analytics", "lint", "console")
+ROWS.sort(key=lambda row: TAB_ORDER.index(row[0]))     # stable: inside a tab the order of writing is kept
 SCHEMA = [(tab, key, kind, bounds, restart) for tab, _block, key, kind, bounds, restart in ROWS]
 FIELDS = {row[1]: row for row in SCHEMA}
 GROUPS = tuple(dict.fromkeys(row[0] for row in SCHEMA))
+assert set(GROUPS) <= set(TAB_ORDER)
 OUTPUT_DEFAULTS = {"prometheus": {"enabled": False, "per_repo": True}, "json": {"enabled": False}, "dashboard": {"enabled": False}}
 STATUS_KEYS = {"webhook.signing_state"}      # computed, read-only: never written
 
@@ -182,7 +247,11 @@ def help_key(key):
 
 def block_title_key(block):
     """The locale key of the title of a block: the title of the check for the blocks of the A10 checks."""
-    return "surf.t." + block[4:] if block.startswith("chk_") else "ui.cfg_b_" + block
+    if block.startswith("chk_"):
+        return "surf.t." + block[4:]
+    if block.startswith("rule_"):
+        return "lint.rule." + block[5:]
+    return "ui.cfg_b_" + block
 
 
 def layout():

@@ -31,18 +31,55 @@
 
 | | |
 |---|---|
-| **Version** | **1.5.2** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
-| **Prérequis** | Python 3.11+ et la CLI GitHub (`gh auth login`) ; rien d'autre |
+| **Version** | **1.6.0** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Prérequis** | Python 3.11+ et la CLI GitHub (`gh auth login`) ; rien d'autre (la vue console utilise le paquet optionnel `rich`) |
 | **S'ouvre** | sur une page `127.0.0.1` uniquement, en huit langues |
 | **Écrit sur GitHub** | jamais seul : seulement les commandes par lots que vous lancez avec un `--go` explicite |
 | **Exporte** | `ci_red.json`, des métriques Prometheus et du JSON pour Grafana (tout désactivé tant que vous ne l'activez pas) |
 
 ## Captures d'écran
 
-<p align="center"><img src="docs/screenshots/monitor_now_dark.png" alt="Now" width="92%"></p>
-<p align="center"><img src="docs/screenshots/monitor_sentinel_dark.png" alt="Sentinel" width="92%"></p>
-<p align="center"><img src="docs/screenshots/monitor_charts_dark.png" alt="Charts" width="92%"></p>
-<p align="center"><img src="docs/screenshots/monitor_settings_light.png" alt="Settings" width="92%"></p>
+### La page
+
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="Maintenant" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_light.png"><img src="docs/screenshots/web_sentinel_dark.png" alt="Sentinelle" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_queue_light.png"><img src="docs/screenshots/web_sentinel_queue_dark.png" alt="File de signature (le plus urgent d'abord)" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_analytics_light.png"><img src="docs/screenshots/web_sentinel_analytics_dark.png" alt="A12 · Analyses : durées, temps en file, étapes et workflows instables" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_charts_light.png"><img src="docs/screenshots/web_charts_dark.png" alt="Graphiques" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_repositories_light.png"><img src="docs/screenshots/web_repositories_dark.png" alt="Dépôts" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_history_light.png"><img src="docs/screenshots/web_history_dark.png" alt="Historique" width="92%"></picture></p>
+
+<details><summary><b>Réglages, sous-onglet par sous-onglet</b></summary>
+
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_interface_light.png"><img src="docs/screenshots/web_settings_interface_dark.png" alt="Réglages · Ce navigateur" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_general_light.png"><img src="docs/screenshots/web_settings_general_dark.png" alt="Réglages · Général" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_polling_light.png"><img src="docs/screenshots/web_settings_polling_dark.png" alt="Réglages · Actualisation et limites" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_cache_light.png"><img src="docs/screenshots/web_settings_cache_dark.png" alt="Réglages · Lectures et cache" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_sentinel_light.png"><img src="docs/screenshots/web_settings_sentinel_dark.png" alt="Réglages · Sentinelle" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_surface_light.png"><img src="docs/screenshots/web_settings_surface_dark.png" alt="Réglages · Contrôles de surface (A10)" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_readiness_light.png"><img src="docs/screenshots/web_settings_readiness_dark.png" alt="Réglages · Préparation (A11)" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_paths_light.png"><img src="docs/screenshots/web_settings_paths_dark.png" alt="Réglages · Dossiers et fichiers" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_outputs_light.png"><img src="docs/screenshots/web_settings_outputs_dark.png" alt="Réglages · Sorties pour d'autres outils" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_ai_light.png"><img src="docs/screenshots/web_settings_ai_dark.png" alt="Réglages · IA externe pour la sentinelle" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_webhook_light.png"><img src="docs/screenshots/web_settings_webhook_dark.png" alt="Réglages · Webhook entrant" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_notify_light.png"><img src="docs/screenshots/web_settings_notify_dark.png" alt="Réglages · Notifications" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_analytics_light.png"><img src="docs/screenshots/web_settings_analytics_dark.png" alt="Réglages · Analyses" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_lint_light.png"><img src="docs/screenshots/web_settings_lint_dark.png" alt="Réglages · Linter de workflows" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_console_light.png"><img src="docs/screenshots/web_settings_console_dark.png" alt="Réglages · Vue console" width="92%"></picture></p>
+
+</details>
+
+<details><summary><b>Outils console</b></summary>
+
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/console_read_report_light.png"><img src="docs/screenshots/console_read_report_dark.png" alt="read_report.py" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/console_migrate_state_light.png"><img src="docs/screenshots/console_migrate_state_dark.png" alt="migrate_state.py" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/console_plan_light.png"><img src="docs/screenshots/console_plan_dark.png" alt="gha_dispatch_all.py plan" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/console_lint_light.png"><img src="docs/screenshots/console_lint_dark.png" alt="lint_workflows.py" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/console_tui_light.png"><img src="docs/screenshots/console_tui_dark.png" alt="tui.py" width="92%"></picture></p>
+
+</details>
+
+Chaque image suit le thème clair ou sombre de votre page GitHub.
 
 *Données de démonstration : les dépôts et noms des images sont inventés.*
 
@@ -83,6 +120,11 @@ Tout est désactivé par défaut, local uniquement (`127.0.0.1`) et sans jeton s
 - Il n'écoute que sur `127.0.0.1` et refuse les requêtes dont le `Host` ou l'`Origin` n'est pas local. Ne le liez jamais à `0.0.0.0` : il n'a pas de connexion.
 - Il ne stocke aucun jeton : il utilise votre propre `gh`.
 - Il n'écrit rien sur GitHub de lui-même. Seuls `dispatch --go`, `dispatch --real` et `finalize --execute` écrivent, et seulement quand vous les lancez.
+- **Analyses** : p50 / p95 de la durée, du temps en file et de chaque étape de chaque workflow, workflows instables (échoués puis réussis sur le même commit) et workflows devenus plus lents ; export vers Prometheus et Grafana.
+- **Économise le quota et survit à une coupure** : lectures conditionnelles (un 304 ne coûte rien) et un mode dernière image avec bandeau hors ligne qui reprend seul.
+- **Webhook entrant et notifications** : des événements signés mettent un dépôt à jour en temps réel ; messages optionnels vers Telegram, Discord, Slack, Matrix, MQTT ou une adresse locale (jamais une écriture sur GitHub).
+- **Linter de workflows et vue console** : `lint_workflows.py` contrôle `.github/workflows` avant le push ; `tui.py` (optionnel, avec `rich`) affiche une grille en direct dans la console.
+- **Assistant IA (désactivé par défaut)** : résumés, tri et explications avec Ollama, un service compatible OpenAI, Anthropic ou `gh copilot` ; commandes uniquement d'une liste fermée, exécutées seulement après confirmation de chacune.
 - La page de réglages écrit une liste fixe de clés validées, après avoir enregistré une copie de sauvegarde.
 
 ## Tests
@@ -99,30 +141,34 @@ python -m unittest discover -s monitor/tests
 
 ```
 TOOLS-GITHUB-ACTIONS-MONITOR/
-├── monitor/                          le programme
-├── docs/                             architecture, captures
-├── tools/                            générateurs d'images et de guides
-├── images/                           bannière et images
-├── .github/                          CI et formulaires
-├── CHANGELOG.md                      changements par version
-├── LICENSE NOTICE AUTHORS            licences et auteur
-├── CONTRIBUTING.md SECURITY.md       aider, signaler
-├── SUPPORT.md CODE_OF_CONDUCT.md     aide et conduite
+├── monitor/                             le programme
+├── docs/                                architecture, captures, feuille de route
+├── tools/                               images, guides et démo
+├── images/                              bannière et images
+├── .github/                             CI et formulaires
+├── CHANGELOG.md                         changements par version
+├── LICENSE NOTICE AUTHORS               licences et auteur
+├── CONTRIBUTING.md SECURITY.md          aider, signaler
+├── SUPPORT.md CODE_OF_CONDUCT.md        aide et conduite
 └── monitor/
-    ├── actions_monitor.py            serveur local
-    ├── actions_monitor.html          la page web
-    ├── sentinel_local.py             alertes, rapport
-    ├── surface.py readiness.py       contrôles, préparation
-    ├── settings_api.py outputs.py    réglages, métriques
-    ├── signstate.py sigverify.py     signature : état, contrôle
-    ├── read_report.py                rapport en terminal
-    ├── gha_dispatch_all.py           builds par lots
-    ├── events.py report_history.py   événements, historique
-    ├── ci_red.py export_status.py    fichiers pour d'autres
-    ├── i18n.py locales/              huit langues
-    ├── toolconfig.py workspace.py    réglages, clones
-    ├── tests/                        tests hors ligne
-    └── docs/                         réglages, webhook
+    ├── actions_monitor.py               serveur local
+    ├── actions_monitor.html             la page web
+    ├── sentinel_local.py                alertes, rapport
+    ├── surface.py readiness.py          contrôles, préparation
+    ├── settings_api.py outputs.py       réglages, métriques
+    ├── signstate.py sigverify.py        signature : état, contrôle
+    ├── read_report.py                   rapport en terminal
+    ├── gha_dispatch_all.py              builds par lots
+    ├── events.py report_history.py      événements, historique
+    ├── ci_red.py export_status.py       fichiers pour d'autres
+    ├── etagcache.py resilience.py       lectures conditionnelles
+    ├── analytics.py lint_workflows.py   durées, flaky, linter
+    ├── notifiers.py ai_actions.py       notifications, liste fermée IA
+    ├── tui.py migrate_state.py          vue console, migration
+    ├── i18n.py locales/                 huit langues
+    ├── toolconfig.py workspace.py       réglages, clones
+    ├── tests/                           tests hors ligne
+    └── docs/                            guides, schémas, Grafana
 ```
 
 ## Documentation
@@ -132,6 +178,11 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/CI_RED_SCHEMA_fra.md`](monitor/docs/CI_RED_SCHEMA_fra.md): le format de ci_red.json
 - [`monitor/docs/CI_RED_BRIDGE_fra.md`](monitor/docs/CI_RED_BRIDGE_fra.md): amener ci_red.json vers un tableau de bord
 - [`monitor/docs/WEBHOOK_fra.md`](monitor/docs/WEBHOOK_fra.md): le webhook entrant
+- [`monitor/docs/NOTIFICATIONS_fra.md`](monitor/docs/NOTIFICATIONS_fra.md): notifications et contrat des adaptateurs
+- [`monitor/docs/AI_fra.md`](monitor/docs/AI_fra.md): l'assistant IA : fournisseurs, sécurité et actions
+- [`monitor/docs/ANALYTICS_fra.md`](monitor/docs/ANALYTICS_fra.md): analyses, lectures conditionnelles et connexion perdue
+- [`monitor/docs/CONSOLE_TOOLS_fra.md`](monitor/docs/CONSOLE_TOOLS_fra.md): le linter de workflows et la vue console
+- [`monitor/docs/DEPLOYMENT_fra.md`](monitor/docs/DEPLOYMENT_fra.md): l'exécuter comme service, derrière un proxy, permissions
 - [`monitor/QUICKSTART_fr.txt`](monitor/QUICKSTART_fr.txt): premiers pas, en huit langues
 
 ## Contribuer

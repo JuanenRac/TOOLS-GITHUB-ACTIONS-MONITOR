@@ -38,7 +38,11 @@ class Layout(unittest.TestCase):
         layout = sa.layout()
         self.assertTrue(all(blocks and all(keys for _b, keys in blocks) for _t, blocks in layout))
         order = [tab for tab, _ in layout]
-        self.assertEqual(order[:4], ["general", "polling", "sentinel", "surface"])
+        self.assertEqual(order[:4], ["general", "polling", "cache", "sentinel"])
+        self.assertLess(order.index("ai"), order.index("webhook"))
+        self.assertLess(order.index("webhook"), order.index("notify"))
+        self.assertLess(order.index("notify"), order.index("analytics"))
+        self.assertEqual(order[-1], "console")
         self.assertLess(order.index("readiness"), order.index("paths"))
         self.assertLess(order.index("paths"), order.index("outputs"))
         self.assertLess(order.index("outputs"), order.index("ai"))

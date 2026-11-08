@@ -23,7 +23,9 @@ class AiSettings(unittest.TestCase):
     def test_the_ai_group_is_in_the_page_and_has_texts_in_every_language(self):
         self.assertIn("ai", sa.GROUPS)
         keys = [k for k in sa.FIELDS if k.startswith("ai.")]
-        self.assertEqual(sorted(keys), ["ai.api_key_env", "ai.base_url", "ai.daily_limit", "ai.model", "ai.ollama_url", "ai.provider"])
+        for needed in ("ai.api_key_env", "ai.base_url", "ai.daily_limit", "ai.model", "ai.ollama_url", "ai.provider"):
+            self.assertIn(needed, keys)
+        self.assertFalse([k for k in keys if k.endswith(("key", "secret", "token"))])      # only the NAME of a variable (api_key_env) can be set
         for lang in i18n.LANGS:
             with i18n.use_language(lang):
                 self.assertNotEqual(i18n.t("ui.cfg_g_ai"), "ui.cfg_g_ai", lang)

@@ -1,9 +1,9 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GITHUB-ACTIONS-MONITOR + WÄCHTER (Version 1.5.2)
+GITHUB-ACTIONS-MONITOR + WÄCHTER (Version 1.6.0)
 ================================================
-Voraussetzungen: Python 3.11+ und die GitHub CLI (`gh`), angemeldet (gh auth login). Sonst nichts: nur die Python-Standardbibliothek.
+Voraussetzungen: Python 3.11+ und die GitHub CLI (`gh`), angemeldet (gh auth login). Sonst nichts: der Kern braucht keine Pakete (die Konsolenansicht tui.py nutzt das optionale Paket rich).
 Kurzanleitung für die erste Benutzung: QUICKSTART_de.txt.
 
 START      Windows: MONITOR_GITHUB_ACTIONS.bat | Linux: ./MONITOR_GITHUB_ACTIONS.sh | macOS: Doppelklick auf MONITOR_GITHUB_ACTIONS.command

@@ -122,6 +122,7 @@ class Feed:
         except (OSError, ValueError):
             self.state = None
         self.was_loading = True
+        self.listeners = []   # functions called with the list of new events (the notifications hang here); a failing one never stops the feed
 
     def feed(self, snapshot):
         """Call with every snapshot. Returns the events written (possibly none)."""
@@ -138,6 +139,12 @@ class Feed:
         self._write_state()
         self._append(events)
         self._notify(events)
+        for listener in self.listeners:
+            try:
+                if events:
+                    listener(events)
+            except Exception:   # noqa: BLE001 - a notification problem must never stop the feed
+                pass
         return events
 
     def _notify(self, events):

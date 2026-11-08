@@ -1,0 +1,29 @@
+<!--
+  Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+  GPL-3.0-or-later - see LICENSE
+-->
+
+[🇺🇸 English](NOTIFICATIONS.md) | [🇪🇸 Español](NOTIFICATIONS_spa.md) | [🇫🇷 Français](NOTIFICATIONS_fra.md) | [🇮🇹 Italiano](NOTIFICATIONS_ita.md) | [🇩🇪 Deutsch](NOTIFICATIONS_deu.md) | **🇨🇳 简体中文** | [🇯🇵 日本語](NOTIFICATIONS_jpn.md) | [🇵🇹 Português](NOTIFICATIONS_por.md)
+
+# 通知
+
+可选功能,**默认关闭**。动态流中的事件(新的红色、卡住的构建、等待签名的构建、连接丢失、由 Webhook 报告的失败运行)可以发送到聊天或设备。通知只是带链接的消息:它从不在 GitHub 上重新运行、取消或写入任何内容。
+
+## 渠道
+
+- `telegram`(机器人)、`discord` 和 `slack`(频道 Webhook)、`matrix`(房间)、`mqtt`(本机上的代理,用于灯和信标)以及 `http_local`(向本机上的地址发送 POST)。
+- 每个渠道在设置标签页(子标签页“通知”)中都有自己的开关和发送测试的按钮。
+
+
+## 安全
+
+- 令牌和 Webhook URL 从不保存在配置中:你设置的是环境变量的名称,值仅在发送时读取,从不显示、从不记录。
+- `discord` 只接受 `discord.com`,`slack` 只接受 `hooks.slack.com`;`mqtt` 和 `http_local` 只接受 `127.0.0.1`、`localhost` 或 `[::1]`。
+- 每小时最多有 `notify.max_per_hour` 条消息离开本机;发送失败会被计数并忽略,绝不会让监视器停止。
+
+
+## 适配器约定
+
+- 要连接列表之外的服务,请在本机运行一个小型接收程序,并让 `http_local` 指向它。它会收到 `Content-Type: application/json` 的 POST,正文如下:`{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`。
+- `kind` 为 `red_new`、`red_fixed`、`stuck_new`、`pending_sign`、`release_due`、`rate_low`、`offline`、`online`、`alerts_up`、`workflow_failed` 之一。字段只会增加。返回任意 2xx;其他一律算作失败。
+- `mqtt` 把同样的 JSON 作为 QoS 0 消息的负载发布到 `notify.channels.mqtt.topic`。

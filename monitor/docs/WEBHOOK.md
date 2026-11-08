@@ -23,3 +23,10 @@ An accepted event only marks the repository named in it for a refresh in the nex
 ## How to switch it on
 
 In `actions_monitor.json`: `"webhook": {"enabled": true, "secret": "<32 or more random characters>"}`; the switch is also in the Settings tab (sub-tab Incoming webhook), the secret only in the file. Restart the monitor. In the GitHub webhook settings use content type `application/json`, the same secret and the URL of your tunnel ending in `/api/webhook`.
+
+## Real-time events
+
+- When `webhook.record_events` is on (the default), a signed `workflow_run` event updates the run list of that repository at once, without reading GitHub: the repository costs no quota until its next scheduled read. A `workflow_job` event also brings the queue time and the time of each step for the analytics.
+- Only short validated fields are kept (workflow, run, status, conclusion, branch, short commit, link to the run, durations); never the commit message or any free text. The newest `webhook.live_events_keep` events can be read at `GET /api/live-events` (this computer only).
+- A run that ends red also sends the notification `workflow_failed` when notifications are on. With `webhook.record_events` off the webhook goes back to the refresh-only mode above.
+- GitHub cannot reach `127.0.0.1`: use `gh webhook forward` (see the GitHub CLI documentation) or a tunnel you run on purpose, pointing at `http://127.0.0.1:PORT/api/webhook`.

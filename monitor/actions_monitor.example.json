@@ -14,6 +14,7 @@
   "cold_refresh_seconds": 1200,
   "issues_refresh_seconds": 180,
   "discover_refresh_seconds": 3600,
+  "discover_limit": 1000,
   "stuck_minutes": 120,
   "runs_per_repo": 20,
   "cold_runs_per_repo": 10,
@@ -196,11 +197,33 @@
   "ai": {
     "provider": "none",
     "model": "",
-    "daily_limit": 30
+    "daily_limit": 30,
+    "max_input_chars": 5000,
+    "max_output_chars": 1500,
+    "timeout_seconds": 90,
+    "events": [
+      "build",
+      "codeql",
+      "report"
+    ],
+    "allowed_repos": [],
+    "answer_language": "",
+    "actions": {
+      "enabled": false,
+      "execute": false,
+      "allowed": [
+        "rerun_failed",
+        "close_issue"
+      ],
+      "max_per_hour": 5,
+      "ttl_seconds": 600
+    }
   },
   "webhook": {
     "enabled": false,
-    "secret": ""
+    "secret": "",
+    "record_events": true,
+    "live_events_keep": 100
   },
   "report_history_days": 30,
   "profiles_file": "profiles.example.json",
@@ -216,5 +239,93 @@
     "dashboard": {
       "enabled": false
     }
+  },
+  "cache": {
+    "etag": {
+      "enabled": true,
+      "ttl_hours": 24
+    }
+  },
+  "analytics": {
+    "enabled": true,
+    "keep_days": 30,
+    "min_samples": 5,
+    "max_samples": 200,
+    "slow_factor": 1.5,
+    "jobs_per_cycle": 3,
+    "steps": true,
+    "flaky": true
+  },
+  "lint": {
+    "enabled": true,
+    "refresh_seconds": 3600,
+    "in_report": true,
+    "rules": {
+      "unpinned_uses": {
+        "enabled": true,
+        "severity": "warn"
+      },
+      "permissions": {
+        "enabled": true,
+        "severity": "warn"
+      },
+      "secrets_in_clear": {
+        "enabled": true,
+        "severity": "bad"
+      },
+      "injection": {
+        "enabled": true,
+        "severity": "warn"
+      },
+      "pr_target": {
+        "enabled": true,
+        "severity": "bad"
+      }
+    }
+  },
+  "notify": {
+    "enabled": false,
+    "events": [
+      "red_new",
+      "stuck_new",
+      "pending_sign",
+      "offline"
+    ],
+    "max_per_hour": 20,
+    "channels": {
+      "telegram": {
+        "enabled": false,
+        "token_env": "",
+        "chat_id": ""
+      },
+      "discord": {
+        "enabled": false,
+        "url_env": ""
+      },
+      "slack": {
+        "enabled": false,
+        "url_env": ""
+      },
+      "matrix": {
+        "enabled": false,
+        "homeserver": "",
+        "room": "",
+        "token_env": ""
+      },
+      "mqtt": {
+        "enabled": false,
+        "host": "127.0.0.1",
+        "port": 1883,
+        "topic": "ghamon/events"
+      },
+      "http_local": {
+        "enabled": false,
+        "url": ""
+      }
+    }
+  },
+  "tui": {
+    "theme": "dark",
+    "refresh_seconds": 5
   }
 }

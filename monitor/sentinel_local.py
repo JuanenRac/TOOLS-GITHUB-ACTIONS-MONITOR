@@ -31,6 +31,7 @@ from pathlib import Path
 
 import events
 import i18n
+import lint_workflows
 import readiness
 import roadmap_a9
 import sentinel_ai
@@ -584,6 +585,11 @@ def build_parte(s):
         for row in close_rows:
             per_repo[row[0]] = per_repo.get(row[0], 0) + 1
         lines.append({"level": "info", "code": "issue_close", "text": t("parte.issue_close", n=len(close_rows), list=short_list(f"{r} ({n})" for r, n in sorted(per_repo.items())))})
+    lint = s.get("lint") or {}
+    if lint.get("enabled") and lint.get("in_report") and (lint["summary"]["bad"] or lint["summary"]["warn"]):
+        summary = lint["summary"]
+        lines.append({"level": "bad" if summary["bad"] else "warn", "code": "workflow_lint",
+                      "text": t("parte.lint", n=summary["findings"], repos=summary["repos"], bad=summary["bad"], warn=summary["warn"], list=short_list(f"{r} ({n})" for r, n in summary["top"]))})
     a11 = s.get("a11") or {}
     if a11.get("low_health"):
         lines.append({"level": "warn", "text": t("parte.a11_health", limit=a11.get("warn_below"), list=short_list(f"{toolconfig.label_of(h['ecosystem'])} ({h['score']})" for h in a11["low_health"]))})
@@ -750,6 +756,9 @@ def compute_snapshot(inp):
     s["a10"]["paused"] = inp.get("surface_paused")
     s["a11"] = readiness.build(inp, s, cfg.get("readiness") or readiness.DEFAULTS)
     s["a11"]["level"] = s["a11"].get("level", "unknown")
+    lint = inp.get("lint")
+    s["lint"] = {"enabled": False} if not lint else {"enabled": True, "summary": lint["summary"], "in_report": lint.get("in_report", True),
+                                                    "rows": [dict(f, repo=r) for r, items in sorted(lint["by_repo"].items()) for f in items][:200]}
     for key in ("a3", "a4", "a5", "a6"):  # an "ok" with the data still loading would be a false green
         if s[key]["level"] == "ok" and (inp.get("loading") or not info or (key == "a3" and s["a3"]["alerts_checked"] < len(info))):
             s[key]["level"] = "unknown"
@@ -813,6 +822,7 @@ class Sentinel:
         self.repo_info, self.alerts, self.perms, self.unreleased = {}, {}, {}, {}
         self.local_versions = {}
         self.pins_cache = {"at": 0.0, "value": None}
+        self.lint_cache = {"at": 0.0, "value": None}
         self.errors = {}
         self.calls = []
         self.gql_at = 0.0
@@ -896,6 +906,20 @@ class Sentinel:
                 value = read_none(cfg)
             self.pins_cache = {"at": time.time(), "value": value}
         return self.pins_cache["value"]
+
+    def _lint(self, repos):
+        """The workflow linter over the local clones (plain file reads, cached `lint.refresh_seconds`); None when it is off or there is no workspace."""
+        cfg = lint_workflows.settings(self.config)
+        if not cfg["enabled"] or not workspace.has_workspace():
+            return None
+        if self.lint_cache["value"] is None or time.time() - self.lint_cache["at"] > cfg["refresh_seconds"]:
+            try:
+                by_repo = lint_workflows.scan_clones(GITHUB_DIR, repos, cfg["rules"])
+                value = {"by_repo": by_repo, "summary": lint_workflows.summarize(by_repo), "in_report": cfg["in_report"]}
+            except Exception:   # a workflow file must never stop the picture
+                value = None
+            self.lint_cache = {"at": time.time(), "value": value}
+        return self.lint_cache["value"]
 
     def _export_ci_red(self, snap):
         try:
@@ -1208,6 +1232,7 @@ class Sentinel:
                 "api": {"calls_last_hour": len([t for t in self.calls if t > time.time() - 3600]), "budget_per_hour": self.cfg["budget_per_hour"]},
                 "sample_caps": {"runs_per_repo": self.config.get("runs_per_repo"), "cold_runs_per_repo": self.config.get("cold_runs_per_repo")},
                 "surface_paused": self.surface_paused, "a2_resolved": dict(self.a2_resolved), "a2_pending_reason": self.a2_reason, "local_versions": dict(self.local_versions), "pins": pins,
+                "lint": self._lint(repos),
             }
         return compute_snapshot(inp)
 
@@ -1222,9 +1247,37 @@ class Sentinel:
         return result.stdout[-limit:]
 
     def ai_explain(self, request):
+        """The answer of the model for one request, with the proposals of actions (level 3) found in its text; nothing is run here."""
+        result = self._ai_explain(request)
+        try:
+            import ai_actions
+            repo = str(request.get("repo", ""))
+            if result.get("ok") and repo:
+                runs = lambda r: (self.ctx["runs_fn"]().get(r) or {}).get("runs", [])   # noqa: E731
+                issues = (self.ctx["data_fn"]() or {}).get("issues", [])
+                result["proposals"] = ai_actions.ACTIONS.propose(
+                    result.get("text", ""), repo, self.config, self.ctx["repos_fn"](), lambda r, n: any(x.get("id") == n for x in runs(r)),
+                    lambda r, n: any(i.get("repo") == r and i.get("number") == n for i in issues), toolconfig.github_owner())
+        except Exception:   # a proposal problem never hides the answer
+            result.setdefault("proposals", [])
+        return result
+
+    def _ai_explain(self, request):
         kind, repo = str(request.get("kind", "")), str(request.get("repo", ""))
+        if kind == "report":   # the daily report of the sentinel itself: nothing of any repository's files, only the lines the page already shows
+            if self.ai_cfg["provider"] == "none":
+                return sentinel_ai.explain(kind, "", self.ai_cfg, self.ai_store)
+            return sentinel_ai.explain("report", "\n".join(f"[{l.get('level')}] {l.get('text')}" for l in (self.snapshot().get("parte") or [])), self.ai_cfg, self.ai_store)
         if repo not in self.ctx["repos_fn"]():
             return {"ok": False, "error": i18n.t("err.unknown_repo")}
+        if self.ai_cfg.get("allowed_repos") and repo not in self.ai_cfg["allowed_repos"]:
+            return {"ok": False, "error": i18n.t("ai.repo_not_allowed", repo=repo)}
+        if kind == "ask":   # "ask the AI" about one repository: the question (short, sanitised) and the summary of its latest runs
+            question = sentinel_ai.sanitize_text(str(request.get("question", "")), 400, keep="head")
+            if not question or self.ai_cfg["provider"] == "none":
+                return sentinel_ai.explain("ask", "", self.ai_cfg, self.ai_store) if self.ai_cfg["provider"] == "none" else {"ok": False, "error": i18n.t("err.bad_kind")}
+            recent = [f"{r.get('name')}: {r.get('conclusion') or r.get('status')} ({r.get('branch')}, {r.get('sha')})" for r in (self.ctx["runs_fn"]().get(repo) or {}).get("runs", [])[:15]]
+            return sentinel_ai.explain("ask", f"QUESTION: {question}\nrepo: {repo}\nlatest runs:\n" + "\n".join(recent), self.ai_cfg, self.ai_store)
         if kind == "build":
             try:
                 run_id = int(request.get("run_id"))

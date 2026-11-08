@@ -23,3 +23,10 @@ Um evento aceite apenas marca o repositório nele indicado para ser atualizado n
 ## Como ativar
 
 Em `actions_monitor.json`: `"webhook": {"enabled": true, "secret": "<32 ou mais carateres aleatórios>"}`; o interruptor também está no separador Definições (subseparador Webhook de entrada), o segredo só no ficheiro. Reinicie o monitor. Nas definições do webhook do GitHub use o tipo `application/json`, o mesmo segredo e o URL do seu túnel terminado em `/api/webhook`.
+
+## Eventos em tempo real
+
+- Com `webhook.record_events` ligado (predefinição), um evento `workflow_run` assinado atualiza logo a lista de runs desse repositório, sem ler o GitHub: o repositório não gasta quota até à sua próxima leitura programada. Um evento `workflow_job` traz também o tempo em fila e o de cada passo para as análises.
+- Só se guardam campos curtos validados (workflow, run, estado, conclusão, ramo, commit curto, ligação ao run, durações); nunca a mensagem do commit nem texto livre. Os `webhook.live_events_keep` eventos mais recentes leem-se em `GET /api/live-events` (só este computador).
+- Um run que termina a vermelho envia também a notificação `workflow_failed` se as notificações estiverem ativas. Com `webhook.record_events` desligado o webhook volta ao modo de só atualizar descrito acima.
+- O GitHub não consegue chegar a `127.0.0.1`: use `gh webhook forward` (ver a documentação da CLI do GitHub) ou um túnel que monte de propósito, a apontar para `http://127.0.0.1:PORTA/api/webhook`.

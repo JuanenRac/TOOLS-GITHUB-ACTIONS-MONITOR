@@ -80,6 +80,18 @@ PINS = {
 }
 
 
+AI_NOTE = {
+    "en": "External AI: `ai.provider` can be `ollama` (this computer), `openai-compatible` (any OpenAI-style endpoint, which also serves Gemini through its OpenAI-compatible endpoint and OpenAI itself), `anthropic` (the Messages API; you choose the model) or `copilot` (`gh copilot` with your own login; it spends premium requests). The key is never saved: only the NAME of the environment variable. See AI.md.",
+    "es": "IA externa: `ai.provider` puede ser `ollama` (este equipo), `openai-compatible` (cualquier endpoint estilo OpenAI, que sirve también para Gemini mediante su endpoint compatible con OpenAI y para OpenAI), `anthropic` (la API Messages; el modelo lo eliges tú) o `copilot` (`gh copilot` con tu propio acceso; gasta solicitudes premium). La clave nunca se guarda: solo el NOMBRE de la variable de entorno. Ver AI_spa.md.",
+    "de": "Externe KI: `ai.provider` kann `ollama` (dieser Rechner), `openai-compatible` (jeder Endpunkt im OpenAI-Stil, der auch Gemini über dessen OpenAI-kompatiblen Endpunkt und OpenAI selbst bedient), `anthropic` (die Messages-API; das Modell wählen Sie) oder `copilot` (`gh copilot` mit Ihrem Login; verbraucht Premium-Anfragen) sein. Der Schlüssel wird nie gespeichert: nur der NAME der Umgebungsvariable. Siehe AI_deu.md.",
+    "fr": "IA externe : `ai.provider` peut valoir `ollama` (cet ordinateur), `openai-compatible` (tout point d'accès de style OpenAI, qui sert aussi pour Gemini via son point d'accès compatible OpenAI et pour OpenAI), `anthropic` (l'API Messages ; vous choisissez le modèle) ou `copilot` (`gh copilot` avec votre connexion ; consomme des requêtes premium). La clé n'est jamais enregistrée : seulement le NOM de la variable d'environnement. Voir AI_fra.md.",
+    "it": "IA esterna: `ai.provider` può essere `ollama` (questo computer), `openai-compatible` (qualsiasi endpoint in stile OpenAI, che serve anche per Gemini tramite il suo endpoint compatibile OpenAI e per OpenAI), `anthropic` (l'API Messages; il modello lo scegli tu) o `copilot` (`gh copilot` con il tuo accesso; consuma richieste premium). La chiave non viene mai salvata: solo il NOME della variabile d'ambiente. Vedi AI_ita.md.",
+    "ja": "外部 AI:`ai.provider` は `ollama`(このコンピューター)、`openai-compatible`(OpenAI 形式の任意のエンドポイント。Gemini の OpenAI 互換エンドポイントや OpenAI 自体にも使えます)、`anthropic`(Messages API。モデルは自分で選びます)、`copilot`(自分のログインで `gh copilot` を実行。プレミアムリクエストを消費)のいずれかです。キーは保存されず、環境変数の名前だけを設定します。AI_jpn.md を参照。",
+    "zh": "外部 AI:`ai.provider` 可以是 `ollama`(本机)、`openai-compatible`(任何 OpenAI 风格的端点,也适用于 Gemini 的 OpenAI 兼容端点和 OpenAI 本身)、`anthropic`(Messages API;模型由你选择)或 `copilot`(用你自己的登录运行 `gh copilot`;会消耗高级请求)。密钥从不保存:只设置环境变量的名称。见 AI_zho.md。",
+    "pt": "IA externa: `ai.provider` pode ser `ollama` (este computador), `openai-compatible` (qualquer endpoint ao estilo OpenAI, que serve também para o Gemini através do seu endpoint compatível com OpenAI e para a OpenAI), `anthropic` (a API Messages; o modelo é você que o escolhe) ou `copilot` (`gh copilot` com o seu acesso; gasta pedidos premium). A chave nunca é guardada: só o NOME da variável de ambiente. Ver AI_por.md.",
+}
+
+
 def locale(lang):
     return json.loads((MON / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
 
@@ -98,7 +110,7 @@ def render(lang):
             else:
                 cells.append(f"**{title}**: " + ", ".join(f"`{k}`" for k in keys))
         lines.append(f"| {cat['ui.cfg_g_' + tab]} | " + "<br>".join(cells) + " |")
-    lines += ["", tail, "", f"### {PINS[lang][0]}", "", PINS[lang][1], "", PINS_EXAMPLE, END]
+    lines += ["", tail, "", AI_NOTE[lang], "", f"### {PINS[lang][0]}", "", PINS[lang][1], "", PINS_EXAMPLE, END]
     return "\n".join(lines)
 
 

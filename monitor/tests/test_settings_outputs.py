@@ -31,8 +31,8 @@ class Validation(unittest.TestCase):
 
     def test_secrets_and_commands_are_not_in_the_schema(self):
         for key in sa.FIELDS:
-            if key.startswith("sentinel.readiness.health.weights."):
-                continue          # the weight given to "secret" findings is a number, not a secret
+            if key.startswith("sentinel.readiness.health.weights.") or key.endswith("_env"):
+                continue          # a weight is a number; a *_env setting holds only the NAME of an environment variable, never the secret
             self.assertFalse(re.search(r"secret|token|password|pubkey|command|key$", key.split(".")[-1]), key)
         self.assertEqual(sa.check_value("webhook.signing_state", "defined"), (False, "unknown"))     # the state is read-only
 

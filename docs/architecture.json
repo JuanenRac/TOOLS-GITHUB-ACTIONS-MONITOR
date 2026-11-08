@@ -16,13 +16,13 @@
       "title": "A person at the desk",
       "lines": [
         "the web page on 127.0.0.1 with",
-        "its settings sub-tabs, in eight",
-        "languages, or the command line"
+        "its settings sub-tabs, or the",
+        "command line and terminal view"
       ],
       "code": [
         "monitor/actions_monitor.html",
         "monitor/settings_api.py",
-        "monitor/read_report.py"
+        "monitor/tui.py"
       ]
     },
     {
@@ -31,14 +31,14 @@
       "level": "external",
       "title": "A dashboard or Grafana",
       "lines": [
-        "reads the exported files or",
-        "the metrics, when you switch",
-        "the export on"
+        "reads the exported files, the",
+        "metrics or the messages sent",
+        "to a chat or a beacon"
       ],
       "code": [
         "monitor/outputs.py",
         "monitor/export_status.py",
-        "monitor/ci_red.py"
+        "monitor/notifiers.py"
       ]
     },
     {
@@ -48,11 +48,13 @@
       "title": "Run poller",
       "lines": [
         "last completed run of every",
-        "workflow on the default branch:",
-        "red, stuck, or fine"
+        "workflow on the default branch;",
+        "conditional reads, offline mode"
       ],
       "code": [
-        "monitor/actions_monitor.py"
+        "monitor/actions_monitor.py",
+        "monitor/etagcache.py",
+        "monitor/resilience.py"
       ]
     },
     {
@@ -61,13 +63,15 @@
       "level": "tested",
       "title": "Sentinel",
       "lines": [
-        "alerts, hygiene, releases",
-        "ready to publish, quota,",
+        "alerts, hygiene, releases,",
+        "analytics, workflow linter,",
         "a plain-language report"
       ],
       "code": [
         "monitor/sentinel_local.py",
-        "monitor/surface.py"
+        "monitor/surface.py",
+        "monitor/analytics.py",
+        "monitor/lint_workflows.py"
       ]
     },
     {

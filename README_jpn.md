@@ -31,18 +31,55 @@
 
 | | |
 |---|---|
-| **バージョン** | **1.5.2** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
-| **必要なもの** | Python 3.11 以上と GitHub CLI（`gh auth login`）。それ以外は不要 |
+| **バージョン** | **1.6.0** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **必要なもの** | Python 3.11 以上と GitHub CLI（`gh auth login`）。それ以外は不要(ターミナル表示は任意のパッケージ `rich` を使います) |
 | **開く先** | `127.0.0.1` 上のページのみ、8言語対応 |
 | **GitHub への書き込み** | 自動では行いません。明示的な `--go` を付けて実行したバッチコマンドのみ |
 | **エクスポート** | `ci_red.json`、Prometheus メトリクス、Grafana 用 JSON（有効にするまですべてオフ） |
 
 ## スクリーンショット
 
-<p align="center"><img src="docs/screenshots/monitor_now_dark.png" alt="Now" width="92%"></p>
-<p align="center"><img src="docs/screenshots/monitor_sentinel_dark.png" alt="Sentinel" width="92%"></p>
-<p align="center"><img src="docs/screenshots/monitor_charts_dark.png" alt="Charts" width="92%"></p>
-<p align="center"><img src="docs/screenshots/monitor_settings_light.png" alt="Settings" width="92%"></p>
+### ページ
+
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="現在" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_light.png"><img src="docs/screenshots/web_sentinel_dark.png" alt="センチネル" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_queue_light.png"><img src="docs/screenshots/web_sentinel_queue_dark.png" alt="署名キュー（緊急度の高い順）" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_analytics_light.png"><img src="docs/screenshots/web_sentinel_analytics_dark.png" alt="A12 · 分析:所要時間・待ち時間・ステップ・不安定なワークフロー" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_charts_light.png"><img src="docs/screenshots/web_charts_dark.png" alt="グラフ" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_repositories_light.png"><img src="docs/screenshots/web_repositories_dark.png" alt="リポジトリ" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_history_light.png"><img src="docs/screenshots/web_history_dark.png" alt="履歴" width="92%"></picture></p>
+
+<details><summary><b>設定(サブタブごと)</b></summary>
+
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_interface_light.png"><img src="docs/screenshots/web_settings_interface_dark.png" alt="設定 · このブラウザー" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_general_light.png"><img src="docs/screenshots/web_settings_general_dark.png" alt="設定 · 全般" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_polling_light.png"><img src="docs/screenshots/web_settings_polling_dark.png" alt="設定 · 更新と上限" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_cache_light.png"><img src="docs/screenshots/web_settings_cache_dark.png" alt="設定 · 読み取りとキャッシュ" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_sentinel_light.png"><img src="docs/screenshots/web_settings_sentinel_dark.png" alt="設定 · センチネル" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_surface_light.png"><img src="docs/screenshots/web_settings_surface_dark.png" alt="設定 · 表面チェック(A10)" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_readiness_light.png"><img src="docs/screenshots/web_settings_readiness_dark.png" alt="設定 · 準備状況(A11)" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_paths_light.png"><img src="docs/screenshots/web_settings_paths_dark.png" alt="設定 · フォルダーとファイル" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_outputs_light.png"><img src="docs/screenshots/web_settings_outputs_dark.png" alt="設定 · 他のツール向けの出力" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_ai_light.png"><img src="docs/screenshots/web_settings_ai_dark.png" alt="設定 · センチネル用の外部 AI" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_webhook_light.png"><img src="docs/screenshots/web_settings_webhook_dark.png" alt="設定 · 受信 Webhook" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_notify_light.png"><img src="docs/screenshots/web_settings_notify_dark.png" alt="設定 · 通知" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_analytics_light.png"><img src="docs/screenshots/web_settings_analytics_dark.png" alt="設定 · 分析" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_lint_light.png"><img src="docs/screenshots/web_settings_lint_dark.png" alt="設定 · ワークフロー Lint" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_console_light.png"><img src="docs/screenshots/web_settings_console_dark.png" alt="設定 · ターミナル表示" width="92%"></picture></p>
+
+</details>
+
+<details><summary><b>コンソールツール</b></summary>
+
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/console_read_report_light.png"><img src="docs/screenshots/console_read_report_dark.png" alt="read_report.py" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/console_migrate_state_light.png"><img src="docs/screenshots/console_migrate_state_dark.png" alt="migrate_state.py" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/console_plan_light.png"><img src="docs/screenshots/console_plan_dark.png" alt="gha_dispatch_all.py plan" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/console_lint_light.png"><img src="docs/screenshots/console_lint_dark.png" alt="lint_workflows.py" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/console_tui_light.png"><img src="docs/screenshots/console_tui_dark.png" alt="tui.py" width="92%"></picture></p>
+
+</details>
+
+各画像は GitHub ページのライト/ダークテーマに従います。
 
 *デモデータです。画像内のリポジトリ名や名前は架空のものです。*
 
@@ -83,6 +120,11 @@
 - `127.0.0.1` でのみ待ち受け、`Host` または `Origin` がローカルでないリクエストは拒否します。ログインがないため、`0.0.0.0` には決して割り当てないでください。
 - トークンは保存せず、あなた自身の `gh` を使います。
 - 自動では GitHub に何も書き込みません。書き込むのは `dispatch --go`、`dispatch --real`、`finalize --execute` だけで、あなたが実行したときのみです。
+- **分析**:各ワークフローの所要時間・待ち時間・各ステップの p50 / p95、不安定なワークフロー(同じコミットで失敗後に成功)、遅くなったワークフロー。Prometheus と Grafana に出力。
+- **割り当てを節約し、断線に耐える**:条件付き読み取り(304 は無料)と、オフライン表示付きで自動再開する最終状態モード。
+- **受信 Webhook と通知**:署名付きイベントでリポジトリをリアルタイムに更新。Telegram・Discord・Slack・Matrix・MQTT・ローカルアドレスへの任意のメッセージ(GitHub への書き込みは一切なし)。
+- **ワークフロー Lint とターミナル表示**:`lint_workflows.py` は push 前に `.github/workflows` を検査し、`tui.py`(任意、`rich` 使用)はコンソールにライブ表を表示します。
+- **AI アシスタント(既定ではオフ)**:Ollama、OpenAI 互換サービス、Anthropic、`gh copilot` による要約・仕分け・説明。コマンドは限定リストのものだけで、1 件ずつ確認した後にのみ実行されます。
 - 設定ページは、バックアップを保存してから、検証済みの固定キーだけを書き込みます。
 
 ## テスト
@@ -99,30 +141,34 @@ python -m unittest discover -s monitor/tests
 
 ```
 TOOLS-GITHUB-ACTIONS-MONITOR/
-├── monitor/                          プログラム本体
-├── docs/                             構成図、スクリーンショット
-├── tools/                            図とガイドのジェネレーター
-├── images/                           バナーと図
-├── .github/                          CI と Issue フォーム
-├── CHANGELOG.md                      バージョン別の変更
-├── LICENSE NOTICE AUTHORS            ライセンスと作者
-├── CONTRIBUTING.md SECURITY.md       参加方法、報告
-├── SUPPORT.md CODE_OF_CONDUCT.md     サポートと行動規範
+├── monitor/                             プログラム本体
+├── docs/                                構成図・画面・ロードマップ
+├── tools/                               図・ガイド・デモ
+├── images/                              バナーと図
+├── .github/                             CI と Issue フォーム
+├── CHANGELOG.md                         バージョン別の変更
+├── LICENSE NOTICE AUTHORS               ライセンスと作者
+├── CONTRIBUTING.md SECURITY.md          参加方法、報告
+├── SUPPORT.md CODE_OF_CONDUCT.md        サポートと行動規範
 └── monitor/
-    ├── actions_monitor.py            ローカルサーバー
-    ├── actions_monitor.html          Web ページ
-    ├── sentinel_local.py             アラートとレポート
-    ├── surface.py readiness.py       検査とリリース準備
-    ├── settings_api.py outputs.py    設定とメトリクス
-    ├── signstate.py sigverify.py     署名の状態と検証
-    ├── read_report.py                ターミナルでレポート
-    ├── gha_dispatch_all.py           バッチビルド
-    ├── events.py report_history.py   イベントと履歴
-    ├── ci_red.py export_status.py    他ツール向けファイル
-    ├── i18n.py locales/              8言語
-    ├── toolconfig.py workspace.py    設定とクローン
-    ├── tests/                        オフラインテスト
-    └── docs/                         設定と Webhook
+    ├── actions_monitor.py               ローカルサーバー
+    ├── actions_monitor.html             Web ページ
+    ├── sentinel_local.py                アラートとレポート
+    ├── surface.py readiness.py          検査とリリース準備
+    ├── settings_api.py outputs.py       設定とメトリクス
+    ├── signstate.py sigverify.py        署名の状態と検証
+    ├── read_report.py                   ターミナルでレポート
+    ├── gha_dispatch_all.py              バッチビルド
+    ├── events.py report_history.py      イベントと履歴
+    ├── ci_red.py export_status.py       他ツール向けファイル
+    ├── etagcache.py resilience.py       条件付き読み取りと接続
+    ├── analytics.py lint_workflows.py   所要時間・不安定・Lint
+    ├── notifiers.py ai_actions.py       通知と AI の限定リスト
+    ├── tui.py migrate_state.py          ターミナル表示と移行
+    ├── i18n.py locales/                 8言語
+    ├── toolconfig.py workspace.py       設定とクローン
+    ├── tests/                           オフラインテスト
+    └── docs/                            ガイドとスキーマ
 ```
 
 ## ドキュメント
@@ -132,6 +178,11 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/CI_RED_SCHEMA_jpn.md`](monitor/docs/CI_RED_SCHEMA_jpn.md): ci_red.json の形式
 - [`monitor/docs/CI_RED_BRIDGE_jpn.md`](monitor/docs/CI_RED_BRIDGE_jpn.md): ci_red.json をダッシュボードへ渡す
 - [`monitor/docs/WEBHOOK_jpn.md`](monitor/docs/WEBHOOK_jpn.md): 受信 Webhook
+- [`monitor/docs/NOTIFICATIONS_jpn.md`](monitor/docs/NOTIFICATIONS_jpn.md): 通知とアダプターの取り決め
+- [`monitor/docs/AI_jpn.md`](monitor/docs/AI_jpn.md): AI アシスタント:プロバイダー、安全性、アクション
+- [`monitor/docs/ANALYTICS_jpn.md`](monitor/docs/ANALYTICS_jpn.md): 分析、条件付き読み取り、接続の喪失
+- [`monitor/docs/CONSOLE_TOOLS_jpn.md`](monitor/docs/CONSOLE_TOOLS_jpn.md): ワークフロー Lint とターミナル表示
+- [`monitor/docs/DEPLOYMENT_jpn.md`](monitor/docs/DEPLOYMENT_jpn.md): サービスとして動かす、プロキシの背後、権限
 - [`monitor/QUICKSTART_ja.txt`](monitor/QUICKSTART_ja.txt): 最初の手順（8言語）
 
 ## コントリビュート

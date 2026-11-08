@@ -22,6 +22,7 @@ do not use up the GitHub allowance shared with the agents.
 """
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -33,8 +34,11 @@ from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+import analytics
+import etagcache
 import i18n
 import platform_compat
+import resilience
 import toolconfig
 from tool_version import AUTHOR, LICENSE_ID, TOOL_VERSION
 
@@ -53,6 +57,7 @@ DEFAULTS = {
     "cold_refresh_seconds": 600,
     "issues_refresh_seconds": 180,
     "discover_refresh_seconds": 3600,
+    "discover_limit": 1000,        # the most repositories listed for the account
     "stuck_minutes": 120,
     "runs_per_repo": 20,
     "cold_runs_per_repo": 5,
@@ -63,6 +68,7 @@ DEFAULTS = {
     "sentinel": {"enabled": True},
     "ai": {"provider": "none"},
     "webhook": {"enabled": False, "secret": ""},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default)
+    "cache": {"etag": {"enabled": True, "ttl_hours": 24}},   # conditional reads: a 304 answer costs no quota (etagcache.py)
 }
 
 RESTART_PENDING = set()   # settings changed from the page since this process started that only apply after a restart
@@ -75,6 +81,11 @@ DISCOVERED = {"at": 0.0, "names": []}
 HOT_ONLY = {"on": False, "until": 0.0}   # "only hot" switch (memory only): cold repositories are not refreshed until `until` (one long cycle)
 LIVE_CONFIG = {}                          # the config the loop runs with, for the HTTP handler
 AUTOSAVE = None                           # report_history.AutoSaver, created in main()
+ETAG = {"cache": None}                    # etagcache.EtagCache (None = plain reads)
+LINK = resilience.Link()                  # the connection: offline since..., back online
+ANALYTICS = {"store": None, "summary": None, "at": 0.0}
+LIVE_EVENTS = []                          # the newest webhook events (workflow_run / workflow_job), newest last
+STARTED = time.time()
 
 
 def set_hot_only(on, config, now=None):
@@ -136,6 +147,35 @@ def gh(*args, timeout=40, retries=2):
     raise RuntimeError(last or "gh failed")
 
 
+def run_gh(args, timeout=40):
+    """(returncode, stdout, stderr) of one `gh` call with a fixed argument list (no shell)."""
+    try:
+        done = subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout)
+        return done.returncode, done.stdout, done.stderr
+    except subprocess.TimeoutExpired:
+        return 1, "", "timeout"
+
+
+def gh_read(endpoint, retries=2):
+    """A GET read of the API: conditional (ETag) when the cache is on, else a plain `gh api`. Raises like gh()."""
+    cache = ETAG["cache"]
+    if cache is None or not cache.enabled:
+        return gh("api", endpoint, retries=retries)
+    last = ""
+    for attempt in range(retries + 1):
+        try:
+            data, _status = cache.fetch(endpoint, run_gh)
+            return data
+        except RuntimeError as error:
+            last = str(error)
+            if "401" in last or "Bad credentials" in last or ("403" in last and "rate limit" not in last.lower()):
+                raise AuthError(last) from None
+            if "404" in last:
+                break
+            time.sleep(2 * (attempt + 1))
+    raise RuntimeError(last or "gh failed")
+
+
 def parse_time(text):
     return datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc) if text else None
 
@@ -158,7 +198,7 @@ def watched_repos(config, force=False):
         names = list(wanted)
     else:
         if force or time.time() - DISCOVERED["at"] > config["discover_refresh_seconds"] or not DISCOVERED["names"]:
-            data = gh("repo", "list", toolconfig.github_owner(config), "--limit", "400", "--no-archived", "--json", "name") or []
+            data = gh("repo", "list", toolconfig.github_owner(config), "--limit", str(config.get("discover_limit", 1000)), "--no-archived", "--json", "name") or []
             DISCOVERED["names"] = sorted(item["name"] for item in data)
             DISCOVERED["at"] = time.time()
         known = toolconfig.ecosystem_names(config)
@@ -175,11 +215,13 @@ def watched_repos(config, force=False):
 
 def fetch_runs(repo, per_page):
     try:
-        data = gh("api", f"repos/{toolconfig.github_owner()}/{repo}/actions/runs?per_page={per_page}")
+        data = gh_read(f"repos/{toolconfig.github_owner()}/{repo}/actions/runs?per_page={per_page}")
     except AuthError:
         raise
     except Exception as error:  # a repo without Actions or a network problem must not stop the page
+        LINK.record(str(error))
         return [], str(error)
+    LINK.record(None)
     runs = []
     for run in data.get("workflow_runs", []):
         started = parse_time(run.get("run_started_at") or run.get("created_at"))
@@ -190,7 +232,7 @@ def fetch_runs(repo, per_page):
             "event": run.get("event"), "branch": run.get("head_branch"), "path": (run.get("path") or "").split("@")[0].rsplit("/", 1)[-1], "sha": (run.get("head_sha") or "")[:7],
             "actor": (run.get("actor") or {}).get("login", ""), "status": run.get("status"),
             "conclusion": run.get("conclusion"), "started": run.get("run_started_at") or run.get("created_at"),
-            "seconds": seconds_between(started, updated if finished else None), "url": run.get("html_url"),
+            "seconds": seconds_between(started, updated if finished else None), "url": run.get("html_url"), "attempt": run.get("run_attempt"),
         })
     return runs, None
 
@@ -350,7 +392,81 @@ def build(config, repos, started, refreshed, loading, progress_text):
         "mode": config["mode"], "refreshed": refreshed, "hot": hot, "loading": progress_text if loading else "",
         "min_rate": config["min_rate_remaining"], "paused_quota": bool(rate and rate["remaining"] < config["min_rate_remaining"]),
         "refresh_seconds": config["refresh_seconds"], "hot_only": hot_only_state(),
+        "offline": LINK.state(), "etag": ETAG["cache"].stats() if ETAG["cache"] else None,
     }
+
+
+def apply_live_event(record, config):
+    """A signed workflow_run / workflow_job event: it goes to the live list, updates the run list of the repository without a read (so no quota is used), feeds the analytics and, when a run
+    ends red, the notifications. Nothing of the payload but the short validated fields is kept."""
+    import notifiers
+    import webhook
+    keep = webhook.live_settings(config)["live_events_keep"]
+    LIVE_EVENTS.append({k: v for k, v in record.items() if k != "steps"} | {"at": resilience.stamp(time.time())})
+    del LIVE_EVENTS[:-keep]
+    run = webhook.as_run(record)
+    entry = RUN_CACHE.get(record["repo"])
+    if run and entry is not None:
+        runs = [r for r in entry["runs"] if r.get("id") != run["id"]]
+        entry["runs"] = sorted(runs + [run], key=lambda r: r.get("started") or "", reverse=True)[:max(config.get("runs_per_repo", 20), 5)]
+        entry["at"] = time.time()
+    elif entry is not None:
+        entry["at"] = 0
+    store = ANALYTICS["store"]
+    if record["event"] == "workflow_job" and store is not None and record.get("status") == "completed" and analytics.settings(config)["enabled"] and record.get("queue") is not None:
+        key = f"{record['repo']}|{record['workflow']}"
+        store.data["queue"][key] = (store.data["queue"].get(key, []) + [record["queue"]])[-store.max_samples:]
+        for name, seconds in (record.get("steps") or {}).items():
+            slot = store.data["steps"].setdefault(key, {})
+            slot[name] = (slot.get(name, []) + [seconds])[-store.max_samples:]
+        store.dirty = True
+    if record["event"] == "workflow_run" and record.get("status") == "completed" and record.get("conclusion") in ("failure", "timed_out", "startup_failure"):
+        notifiers.notify(config, {"kind": "workflow_failed", "owner": "main", "repo": record["repo"], "url": record.get("url"),
+                                  "text": i18n.t("evt.workflow_failed", repo=record["repo"], workflow=record.get("workflow") or "")})
+
+
+def announce_link(transition, config):
+    """A change of the connection goes to the event feed and to the notifications, once."""
+    import notifiers
+    kind = transition["kind"]
+    event = {"kind": kind, "code": kind, "level": "warn" if kind == "offline" else "info", "repo": "", "owner": "main", "url": None, "args": {},
+             "text": i18n.t("evt." + kind, since=transition["at"], seconds=transition.get("seconds_offline", 0))}
+    print(event["text"], flush=True)
+    sentinel = SENTINEL["obj"]
+    try:
+        if sentinel is not None:
+            sentinel.feed._append([event])
+        notifiers.notify(config, event)
+    except Exception:   # noqa: BLE001 - never stops the loop
+        pass
+
+
+def maintain(config, data):
+    """After each cycle: the conditional-read cache is saved, a few completed runs have their jobs sampled and the analytics are refreshed."""
+    try:
+        if ETAG["cache"]:
+            ETAG["cache"].save()
+        cfg = analytics.settings(config)
+        store = ANALYTICS["store"]
+        if store is None or not cfg["enabled"] or data.get("loading") or data["offline"]["offline"]:
+            return
+        for run in analytics.pending_runs(data.get("runs") or [], store, cfg["jobs_per_cycle"]):
+            try:
+                body = gh_read(f"repos/{toolconfig.github_owner()}/{run['repo']}/actions/runs/{run['id']}/jobs?per_page=30", retries=0)
+            except Exception:   # noqa: BLE001 - a job list that cannot be read is skipped for good
+                store.add_jobs(run["repo"], run["name"], run["id"], [], cfg["steps"])
+                continue
+            store.add_jobs(run["repo"], run["name"], run["id"], (body or {}).get("jobs") or [], cfg["steps"])
+        ANALYTICS["summary"] = analytics.summary(data.get("runs") or [], store, cfg)
+        ANALYTICS["at"] = time.time()
+        store.save()
+    except Exception as error:   # noqa: BLE001 - analytics never stop the monitor, but a problem is said once
+        if not MAINTAIN_WARNED:
+            MAINTAIN_WARNED.append(1)
+            print("analytics:", repr(error)[:160], flush=True)
+
+
+MAINTAIN_WARNED = []
 
 
 def loop(config):
@@ -362,6 +478,12 @@ def loop(config):
                 print(i18n.t("mon.loaded", n=snapshot["loading"]), flush=True)
 
             data = collect(config, publish)
+            transition = LINK.end_cycle()
+            if transition:
+                announce_link(transition, config)
+            data["offline"] = LINK.state()
+            data["etag"] = ETAG["cache"].stats() if ETAG["cache"] else None
+            maintain(config, data)
             with LOCK:
                 STATE["data"], STATE["error"], STATE["hint"] = data, None, None
                 STATE["complete"] = True
@@ -387,11 +509,20 @@ def loop(config):
         time.sleep(delay)
 
 
+HOST_RE = re.compile(r"^[A-Za-z0-9.-]{1,100}$")
+
+
+def github_host():
+    """The GitHub host the links of the page point to: the GH_HOST of the environment (GitHub Enterprise Server) when it is a plain host name, else github.com. `gh` itself reads GH_HOST."""
+    host = os.environ.get("GH_HOST", "")
+    return host if HOST_RE.match(host) else "github.com"
+
+
 def render_page():
     """actions_monitor.html with the catalogues of the interface (keys "ui.*") for the 8 languages and the default language inlined."""
     page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
     data = {"default": i18n.language(), "langs": list(i18n.LANGS), "names": i18n.NATIVE_NAMES, "html": i18n.HTML_LANG, "locale": i18n.BROWSER_LOCALE, "catalogues": i18n.ui_catalogues(),
-            "ecosystems": {key: item["label"] for key, item in toolconfig.ecosystems().items()}, "owner": toolconfig.github_owner(), "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
+            "ecosystems": {key: item["label"] for key, item in toolconfig.ecosystems().items()}, "owner": toolconfig.github_owner(), "host": github_host(), "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
     blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     return page.replace("/*I18N_DATA*/null", blob, 1)
 
@@ -459,11 +590,25 @@ class Handler(BaseHTTPRequestHandler):
                 size = int(self.headers.get("Content-Length") or 0)
                 body = self.rfile.read(size) if 0 <= size <= webhook.MAX_BODY else b"x" * (webhook.MAX_BODY + 1)
                 code, answer, repo = webhook.handle(LIVE_CONFIG or DEFAULTS, body, self.headers, STATE["data"]["repos"] if STATE.get("data") else [])
-                if repo and repo in RUN_CACHE:
+                record = webhook.parse_event(self.headers.get("X-GitHub-Event"), body) if (code == 200 and repo) else None
+                if record and webhook.live_settings(LIVE_CONFIG or DEFAULTS)["record_events"]:
+                    apply_live_event(record, LIVE_CONFIG or DEFAULTS)
+                elif repo and repo in RUN_CACHE:
                     RUN_CACHE[repo]["at"] = 0   # refreshed in the next cycle
                 self.json_reply(answer, code)
             except Exception:
                 self.json_reply({"ok": False}, 400)
+            return
+        if path in ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test"):   # one request, one explicit person: local only, small JSON body
+            if not self.guard():
+                return
+            try:
+                size = int(self.headers.get("Content-Length") or 0)
+                request = json.loads(self.rfile.read(size) if 0 < size <= 4096 else b"{}")
+                request = request if isinstance(request, dict) else {}
+                self.json_reply(handle_action_post(path, request), 200)
+            except Exception as error:   # noqa: BLE001
+                self.json_reply({"ok": False, "error": str(error)[:200]}, 400)
             return
         if path == "/api/settings":   # the settings menu: whitelisted keys only, checked, backed up and written atomically (settings_api.py); local request only
             if not self.guard():
@@ -600,9 +745,9 @@ class Handler(BaseHTTPRequestHandler):
             with LOCK:
                 data = STATE["data"]
             if path == "/metrics" and settings_api.output_enabled(cfg, "prometheus"):
-                self.reply(outputs.metrics_text(snapshot, data, per_repo=settings_api.output_enabled(cfg, "prometheus", "per_repo")), outputs.CONTENT_TYPE)
+                self.reply(outputs.metrics_text(snapshot, data, per_repo=settings_api.output_enabled(cfg, "prometheus", "per_repo"), extra=metrics_extra()), outputs.CONTENT_TYPE)
             elif path == "/api/outputs/grafana.json" and settings_api.output_enabled(cfg, "json"):
-                self.json_reply(outputs.grafana_json(snapshot, data))
+                self.json_reply(outputs.grafana_json(snapshot, data, metrics_extra()))
             elif path == "/api/outputs/dashboard.json" and settings_api.output_enabled(cfg, "dashboard"):
                 document = outputs.dashboard_json(snapshot)
                 if document is None:
@@ -612,6 +757,28 @@ class Handler(BaseHTTPRequestHandler):
             else:
                 self.send_response(404)
                 self.end_headers()
+        elif path == "/api/health":   # for a service manager or a container check: local only, no GitHub call
+            if not self.guard():
+                return
+            with LOCK:
+                loaded = bool(STATE.get("data"))
+            self.json_reply({"ok": True, "version": TOOL_VERSION, "uptime_seconds": int(time.time() - STARTED), "loaded": loaded, "offline": LINK.state()["offline"]})
+        elif path == "/api/analytics":
+            if not self.guard():
+                return
+            self.json_reply(ANALYTICS["summary"] or {"enabled": ANALYTICS["store"] is not None, "duration": [], "queue": [], "steps": [], "flaky": [], "slower": []})
+        elif path == "/api/live-events":
+            if not self.guard():
+                return
+            self.json_reply({"events": list(reversed(LIVE_EVENTS))})
+        elif path == "/api/ai/actions":
+            if not self.guard():
+                return
+            import ai_actions
+            import sentinel_ai
+            sentinel = SENTINEL["obj"]
+            self.json_reply({"state": ai_actions.ACTIONS.state(toolconfig.raw_config()), "log": ai_actions.ACTIONS.log(),
+                             "ai": sentinel_ai.status(sentinel.ai_cfg, sentinel.ai_store) if sentinel is not None and sentinel.ai_cfg["provider"] != "none" else None})
         elif path.startswith("/api/data"):
             if not self.guard():
                 return
@@ -622,6 +789,37 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self.send_response(404)
             self.end_headers()
+
+
+def metrics_extra():
+    """What /metrics and the Grafana source add to the sentinel's picture: conditional reads, the connection, the analytics, the live events and the notifications."""
+    import notifiers
+    return {"etag": ETAG["cache"].stats() if ETAG["cache"] else None, "offline": LINK.state()["offline"], "analytics": ANALYTICS["summary"], "live_events": len(LIVE_EVENTS),
+            "notify": dict(notifiers.STATS)}
+
+
+def handle_action_post(path, request):
+    """The endpoints that DO something on request of the page: confirm an action of the AI, unlock the actions, test the AI connection, send a test notification."""
+    config = toolconfig.raw_config()
+    if path == "/api/ai/actions/confirm":
+        import ai_actions
+        return ai_actions.ACTIONS.run(request.get("id"), request.get("command"), config)
+    if path == "/api/ai/actions/unlock":
+        import ai_actions
+        ai_actions.ACTIONS.unlock()
+        return {"ok": True}
+    if path == "/api/ai/test":
+        import sentinel_ai
+        sentinel = SENTINEL["obj"]
+        if sentinel is None or sentinel.ai_cfg["provider"] == "none":
+            return {"ok": False, "error": i18n.t("ai.is_off")}
+        return sentinel_ai.test_connection(sentinel.ai_cfg, sentinel.ai_store)
+    import notifiers
+    cfg = notifiers.settings(config)
+    name = request.get("channel")
+    if name not in notifiers.CHANNELS:
+        return {"ok": False, "reason": "bad_value"}
+    return notifiers.send_channel(name, cfg["channels"][name], notifiers.test_event(i18n.t("evt.test")))
 
 
 def start_sentinel(config):
@@ -643,6 +841,8 @@ def start_sentinel(config):
         if not workspace.has_workspace():   # optional: without the local clones the sentinel runs in reduced mode (GitHub API data only)
             print(i18n.t("mon.reduced_mode"))
         SENTINEL["obj"] = sentinel_local.Sentinel(ctx, config)
+        import notifiers
+        SENTINEL["obj"].feed.listeners.append(notifiers.make_listener(toolconfig.raw_config))
         SENTINEL["obj"].start()
     except Exception as error:
         SENTINEL["error"] = i18n.t("mon.sentinel_start_failed", error=error)
@@ -692,6 +892,10 @@ def main():
         print(i18n.t("mon.catalog_example", names=", ".join(using_example)))
     global AUTOSAVE
     LIVE_CONFIG.update(config)
+    etag_cfg = ((config.get("cache") or {}).get("etag") or {}) if isinstance(config.get("cache"), dict) else {}
+    ETAG["cache"] = etagcache.EtagCache(ttl_hours=etag_cfg.get("ttl_hours", 24) if isinstance(etag_cfg.get("ttl_hours"), int) else 24, enabled=etag_cfg.get("enabled", True) is True)
+    acfg = analytics.settings(config)
+    ANALYTICS["store"] = analytics.Store(keep_days=acfg["keep_days"], max_samples=acfg["max_samples"])
     import report_history
     AUTOSAVE = report_history.AutoSaver()
     threading.Thread(target=loop, args=(config,), daemon=True).start()

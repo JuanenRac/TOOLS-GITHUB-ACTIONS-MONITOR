@@ -37,27 +37,27 @@
         {
           "name": "docs/",
           "desc": {
-            "en": "architecture, screenshots",
-            "es": "arquitectura, capturas",
-            "de": "Architektur, Screenshots",
-            "fr": "architecture, captures",
-            "it": "architettura, schermate",
-            "ja": "構成図、スクリーンショット",
-            "zh": "架构、截图",
-            "pt": "arquitetura, capturas"
+            "en": "architecture, screenshots, roadmap",
+            "es": "arquitectura, capturas, hoja de ruta",
+            "de": "Architektur, Bilder, Fahrplan",
+            "fr": "architecture, captures, feuille de route",
+            "it": "architettura, schermate, roadmap",
+            "ja": "構成図・画面・ロードマップ",
+            "zh": "架构、截图、路线图",
+            "pt": "arquitetura, capturas, roteiro"
           }
         },
         {
           "name": "tools/",
           "desc": {
-            "en": "picture and guide generators",
-            "es": "generadores de dibujos y guías",
-            "de": "Bild- und Anleitungsgeneratoren",
-            "fr": "générateurs d'images et de guides",
-            "it": "generatori di immagini e guide",
-            "ja": "図とガイドのジェネレーター",
-            "zh": "图片与指南生成器",
-            "pt": "geradores de imagens e guias"
+            "en": "pictures, guides and demo",
+            "es": "dibujos, guías y demo",
+            "de": "Bilder, Anleitungen, Demo",
+            "fr": "images, guides et démo",
+            "it": "immagini, guide e demo",
+            "ja": "図・ガイド・デモ",
+            "zh": "图片、指南与演示",
+            "pt": "imagens, guias e demo"
           }
         },
         {
@@ -295,6 +295,62 @@
           "tree_name": "ci_red.py export_status.py"
         },
         {
+          "name": "etagcache.py  resilience.py",
+          "tree_name": "etagcache.py resilience.py",
+          "desc": {
+            "en": "conditional reads, lost connection",
+            "es": "lecturas condicionales, conexión",
+            "de": "bedingte Lesungen, Verbindung",
+            "fr": "lectures conditionnelles",
+            "it": "letture condizionali",
+            "ja": "条件付き読み取りと接続",
+            "zh": "条件读取与连接",
+            "pt": "leituras condicionais"
+          }
+        },
+        {
+          "name": "analytics.py  lint_workflows.py",
+          "tree_name": "analytics.py lint_workflows.py",
+          "desc": {
+            "en": "durations, flaky, workflow linter",
+            "es": "duraciones, flaky, linter",
+            "de": "Dauer, flaky, Workflow-Linter",
+            "fr": "durées, flaky, linter",
+            "it": "durate, flaky, linter",
+            "ja": "所要時間・不安定・Lint",
+            "zh": "时长、不稳定、检查器",
+            "pt": "durações, flaky, linter"
+          }
+        },
+        {
+          "name": "notifiers.py  ai_actions.py",
+          "tree_name": "notifiers.py ai_actions.py",
+          "desc": {
+            "en": "notifications, AI closed list",
+            "es": "notificaciones, lista cerrada IA",
+            "de": "Benachrichtigungen, KI-Liste",
+            "fr": "notifications, liste fermée IA",
+            "it": "notifiche, elenco chiuso IA",
+            "ja": "通知と AI の限定リスト",
+            "zh": "通知与 AI 封闭列表",
+            "pt": "notificações, lista fechada IA"
+          }
+        },
+        {
+          "name": "tui.py  migrate_state.py",
+          "tree_name": "tui.py migrate_state.py",
+          "desc": {
+            "en": "terminal view, state migration",
+            "es": "vista de consola, migración",
+            "de": "Konsolenansicht, Migration",
+            "fr": "vue console, migration",
+            "it": "vista console, migrazione",
+            "ja": "ターミナル表示と移行",
+            "zh": "终端视图与迁移",
+            "pt": "vista de consola, migração"
+          }
+        },
+        {
           "name": "i18n.py  locales/",
           "desc": {
             "en": "eight languages",
@@ -338,14 +394,14 @@
         {
           "name": "docs/",
           "desc": {
-            "en": "settings, outputs, webhook",
-            "es": "ajustes, salidas, webhook",
-            "de": "Einstellungen, Webhook",
-            "fr": "réglages, webhook",
-            "it": "impostazioni, webhook",
-            "ja": "設定と Webhook",
-            "zh": "设置与 Webhook",
-            "pt": "definições, webhook"
+            "en": "guides, schemas, Grafana",
+            "es": "guías, esquemas, Grafana",
+            "de": "Anleitungen, Schemas",
+            "fr": "guides, schémas, Grafana",
+            "it": "guide, schemi, Grafana",
+            "ja": "ガイドとスキーマ",
+            "zh": "指南、模式、Grafana",
+            "pt": "guias, esquemas, Grafana"
           }
         }
       ]

@@ -35,6 +35,7 @@ nav .dot{display:inline-block;min-width:18px;padding:0 5px;margin-left:6px;borde
 .filters{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:8px 18px;border-bottom:1px solid var(--line);background:var(--bg)}
 #err{display:none;background:var(--bad);color:#fff;padding:6px 18px}
 #reduced{display:none;background:var(--warn);color:#fff;padding:6px 18px}
+#offline{display:none;background:var(--bad);color:#fff;padding:6px 18px;font-weight:600}
 main{flex:1;min-height:0;padding:12px 18px}
 .tab{display:none;height:100%;min-height:0}.tab.on{display:grid}
 section{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;min-width:0;min-height:0;display:flex;flex-direction:column}
@@ -179,6 +180,7 @@ background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol><symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c1 3 4 4.5 4 8.5a4 4 0 0 1-8 0c0-1.4.6-2.4 1.4-3.2C9.9 9.2 11 7 12 3z"/><path d="M12 21a3 3 0 0 0 3-3c0-1.5-1.5-2-3-4-1.5 2-3 2.5-3 4a3 3 0 0 0 3 3z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 13.5A8.5 8.5 0 1 1 10.5 3a7 7 0 0 0 10.5 10.5z"/></symbol><symbol id="i-auto" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></symbol><symbol id="i-rows" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></symbol><symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/></symbol><symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol><symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol><symbol id="i-text" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></symbol><symbol id="i-md" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15V9l2.5 3L12 9v6M16 9v6m-2-2 2 2 2-2"/></symbol><symbol id="i-now" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><path d="M8 16v-5M12 16V8M16 16v-8"/></symbol><symbol id="i-repos" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></symbol></defs></svg>
 <div id="err" role="alert"></div>
 <div id="reduced" role="status"></div>
+<div id="offline" role="status"></div>
 <header>
 <h1>GitHub Actions <small class="mut" id="ver"></small></h1>
 <div class="kpi"><b id="k-active">–</b><span class="mut" data-i18n="ui.k_active"></span></div>
@@ -404,12 +406,13 @@ function render(d){
   $("rate").textContent=d.rate?T("ui.quota",{remaining:d.rate.remaining,limit:d.rate.limit,time:clock(d.rate.reset,{hour:"2-digit",minute:"2-digit"}),eta:eta}):"";
   const q=$("quota");q.hidden=!d.paused_quota;if(d.paused_quota)q.textContent=T("ui.quota_paused",{remaining:d.rate.remaining,min:d.min_rate,eta:eta!=null?T("ui.quota_until",{eta:eta}):""});
   const ho=d.hot_only||{on:false};HOTONLY=!!ho.on;$("hotonly").setAttribute("aria-pressed",HOTONLY);const hotTxt=T("ui.hotonly",{state:HOTONLY?T("ui.hot_yes",{min:Math.ceil((ho.seconds_left||0)/60)}):T("ui.no")});$("hotonly").setAttribute("aria-label",hotTxt);$("hotonly").title=hotTxt+" - "+T("ui.hotonly_title");
-  $("mode").textContent=T("ui.mode",{repos:d.repos.length,hot:d.hot,mode:d.mode});
+  $("mode").textContent=T("ui.mode",{repos:d.repos.length,hot:d.hot,mode:d.mode})+((d.etag&&d.etag.saved)?" · "+T("ui.etag_saved",{n:d.etag.saved}):"");
+  {const of=$("offline"),o=d.offline||{};of.style.display=o.offline?"block":"none";of.textContent=o.offline?T("ui.offline_banner",{since:clock(o.since)}):""}
   $("g-count").textContent=T("ui.count",{n:d.repos.filter(r=>repoVisible(r,d)).length,m:d.repos.length});
   const nAlert=d.issues.length+d.active.filter(r=>r.stuck).length;$("d-now").hidden=!nAlert;$("d-now").textContent=nAlert;
   alerts(d);now_(d);donut(ok,bad,done.length-ok-bad);rates(last);timeline(last);durations(runs);repos(d,last);filters(d);renderHistory();if(PANEL)renderPanel();tipRows();
 }
-const GH="https://github.com/";
+const GH="https://"+(I18N.host||"github.com")+"/";
 function alerts(d){
   const a=[];
   d.issues.filter(i=>repoVisible(i.repo,d)).forEach(i=>a.push(`<div class="alert"><b>${esc(i.labels.join(", "))}</b> · ${esc(i.repo)} #${i.number}: ${esc(i.title)} — <a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(T("ui.a_open"))}</a> <span class="mut">(${hora(i.created)})</span></div>`));
@@ -499,8 +502,8 @@ async function tick(){
   catch(e){$("err").style.display="block";$("err").textContent=T("ui.err_monitor",{msg:e})}
 }
 /* ---------- Sentinel ---------- */
-var SENT=null,SENT_ERR=null;const AIRES={};
-const OPEN=new Set((store.get("am-s-open")||"a1,a2,a3").split(",").filter(Boolean));
+var SENT=null,SENT_ERR=null,ANA=null;const AIRES={};
+const OPEN=new Set((QS.get("open")||store.get("am-s-open")||"a1,a2,a3").split(",").filter(Boolean));
 const LVN=l=>T("ui.lv_"+l)===("ui.lv_"+l)?l:T("ui.lv_"+l);
 const safeUrl=u=>typeof u==="string"&&u.startsWith("https://github.com/")?u:"#";
 const link=(u,t)=>`<a href="${esc(safeUrl(u))}" target="_blank" rel="noopener">${esc(t)}</a>`;
@@ -514,8 +517,9 @@ function th(h){return "<thead><tr>"+h.map(x=>`<th>${esc(x)}</th>`).join("")+"</t
 const thk=keys=>th(keys.map(k=>T(k)));
 function aiBtn(kind,attrs){return SENT.ai&&SENT.ai.enabled?` <button type="button" data-ai="${kind}" ${attrs}>${esc(T("ui.ai_btn"))}</button>`:""}
 const VERDICT={"falso positivo":"ui.verdict_fp","real":"ui.verdict_real","dudosa":"ui.verdict_doubt"};
+const aiProposals=(r)=>!(r&&r.ok&&(r.proposals||[]).length)?"":`<div class="ai-prop"><small>${esc(T("ui.ai_prop_h"))}</small>${r.proposals.map(x=>`<div><code>${esc(x.command)}</code> ${x.runnable?`<button type="button" data-ai-run="${esc(x.id)}" data-cmd="${esc(x.command)}">${esc(T("ui.ai_prop_run"))}</button>`:`<button type="button" data-copy="${esc(x.command)}">${esc(T("ui.copy"))}</button> <span class="mut">${esc(T("ui.ai_prop_only"))}</span>`}</div>`).join("")}</div>`;
 function aiBox(key){const r=AIRES[key];if(!r)return"";if(r.busy)return `<div class="ai mut">${esc(T("ui.ai_busy"))}</div>`;
-  return `<div class="ai"><small>${esc(r.label||T("ui.ai_label"))}${r.cached?" "+esc(T("ui.ai_cached")):""}${r.model?" · "+esc(r.model):""}</small>${r.ok?(r.verdict?`<b>${esc(VERDICT[r.verdict]?T(VERDICT[r.verdict]):r.verdict)}</b>\n`:"")+esc(r.text):`<span style="color:var(--bad)">${esc(r.error||T("ui.ai_noanswer"))}</span>`}</div>`}
+  return `<div class="ai"><small>${esc(r.label||T("ui.ai_label"))}${r.cached?" "+esc(T("ui.ai_cached")):""}${r.model?" · "+esc(r.model):""}</small>${r.ok?(r.verdict?`<b>${esc(VERDICT[r.verdict]?T(VERDICT[r.verdict]):r.verdict)}</b>\n`:"")+esc(r.text):`<span style="color:var(--bad)">${esc(r.error||T("ui.ai_noanswer"))}</span>`}${aiProposals(r)}</div>`}
 function section(k,title,level,count,body){
   return `<details data-k="${k}" ${OPEN.has(k)?"open":""}><summary><span class="sem ${level}" style="cursor:inherit"><i></i>${esc(LVN(level))}</span> ${esc(title)} <span class="mut" style="font-weight:400">${esc(count)}</span></summary><div class="dbody">${body}</div></details>`;
 }
@@ -533,7 +537,7 @@ function renderSent0(){
   const s=SENT,t=s.totals,nbad=t.red+t.stuck+(t.secret||0);dot.hidden=!(errs.length||nbad);dot.textContent=errs.length?"!":nbad;
   const loadingText=s.loading==="starting"?T("ui.starting"):s.loading;
   $("s-stamp").textContent=(s.loading?T("ui.s_loading",{n:loadingText})+" ":"")+"· "+clock(s.generated)+(s.cache_age_seconds?" "+T("ui.s_cache",{dur:fmt(s.cache_age_seconds)}):"")+((s.a7&&s.a7.by_ecosystem)?T("ui.s_min24")+s.a7.by_ecosystem.filter(m=>m.min24).map(m=>m.ecosystem+" "+m.min24).join(", "):"");
-  const sems=[["a1","ui.a1",s.a1.level],["a2","ui.a2",s.a2.level],["a3","ui.a3",s.a3.level],["a4","ui.a4",s.a4.level],["a5","ui.a5",s.a5.level],["a6","ui.a6",s.a6.level],["a7","ui.a7",s.a7.level],["a8","ui.a8",s.a8.level],["a9","ui.a9",(s.a9||{}).level||"unknown"],["a10","ui.a10",(s.a10||{}).level||"unknown"],["a11","ui.a11",(s.a11||{}).level||"unknown"]];
+  const sems=[["a1","ui.a1",s.a1.level],["a2","ui.a2",s.a2.level],["a3","ui.a3",s.a3.level],["a4","ui.a4",s.a4.level],["a5","ui.a5",s.a5.level],["a6","ui.a6",s.a6.level],["a7","ui.a7",s.a7.level],["a8","ui.a8",s.a8.level],["a9","ui.a9",(s.a9||{}).level||"unknown"],["a10","ui.a10",(s.a10||{}).level||"unknown"],["a11","ui.a11",(s.a11||{}).level||"unknown"],["a12","ui.a12",ANA&&ANA.enabled!==false&&(ANA.slower||[]).length?"warn":(ANA&&(ANA.duration||[]).length?"ok":"unknown")],["a13","ui.a13",(s.lint&&s.lint.enabled)?(s.lint.summary.bad?"bad":(s.lint.summary.warn?"warn":"ok")):"unknown"]];
   $("s-sems").innerHTML=sems.map(([k,n,l])=>`<button type="button" class="sem ${l}" data-goto="${k}" title="${esc(LVN(l)+(k==="a2"?T("ui.sem_a2"):(k==="a5"?T("ui.sem_a5"):"")))}"><i></i>${esc(T(n))}</button>`).join("");
   const ecoLabel=k=>I18N.ecosystems[k]||k;
   $("s-parte").innerHTML=s.parte.map(p=>`<div class="pline ${p.level} ${p.head?"head":""}">${esc(p.text)}</div>`).join("")
@@ -608,7 +612,24 @@ function renderSent0(){
    +section("a8",T("ui.a8_title"),s.a8.level,Object.keys(au.audits||{}).join(" · "),a8)
    +section("a9",T("ui.a9_title"),rm.level||"unknown",T("ui.sc_a9",{n:(rm.boards||[]).filter(b=>(b.problems||[]).length).length,m:(rm.boards||[]).length}),a9)
    +section("a10",T("ui.a10_title"),a10o.level||"unknown",T("ui.sc_a10",{n:(a10o.sections||[]).filter(x=>x.count&&["bad","warn"].includes(x.level)).length,m:(a10o.sections||[]).length}),a10)
-   +section("a11",T("ui.a11_title"),a11o.level||"unknown",T("ui.sc_a11",{n:a11o.ready||0,m:a11o.behind||0}),a11);
+   +section("a11",T("ui.a11_title"),a11o.level||"unknown",T("ui.sc_a11",{n:a11o.ready||0,m:a11o.behind||0}),a11)
+   +section("a12",T("ui.a12_title"),ANA&&ANA.enabled!==false&&(ANA.slower||[]).length?"warn":(ANA&&(ANA.duration||[]).length?"ok":"unknown"),T("ui.sc_a12",{n:(ANA&&ANA.duration||[]).length,m:(ANA&&ANA.flaky||[]).length}),analyticsBox())
+   +section("a13",T("ui.a13_title"),(s.lint&&s.lint.enabled)?(s.lint.summary.bad?"bad":(s.lint.summary.warn?"warn":"ok")):"unknown",s.lint&&s.lint.enabled?T("ui.sc_a13",{n:s.lint.summary.findings,m:s.lint.summary.repos}):"",lintBox(s));
+}
+const fmtS=x=>x==null?"–":(x>=3600?(x/3600).toFixed(1)+" h":(x>=120?Math.round(x/60)+" min":Math.round(x)+" s"));
+function analyticsBox(){
+  const A=ANA;if(!A||A.enabled===false)return mut_(T("ui.a12_off"));
+  const tbl=(title,cols,rows)=>`<h3 style="font-size:13px;margin:10px 0 4px">${esc(title)}</h3>`+(rows.length?`<table>${thk(cols)}<tbody>${rows.slice(0,25).map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`:mut_(T("ui.a12_none")));
+  return tbl(T("ui.a12_h_duration"),["ui.th_repo","ui.th_workflow","ui.th_samples","ui.th_p50","ui.th_p95"],(A.duration||[]).map(r=>[r.repo,r.workflow,r.n,fmtS(r.p50),fmtS(r.p95)]))
+   +tbl(T("ui.a12_h_queue"),["ui.th_repo","ui.th_workflow","ui.th_samples","ui.th_p50","ui.th_p95"],(A.queue||[]).map(r=>[r.repo,r.workflow,r.n,fmtS(r.p50),fmtS(r.p95)]))
+   +tbl(T("ui.a12_h_steps"),["ui.th_repo","ui.th_workflow","ui.th_step","ui.th_p50","ui.th_p95"],(A.steps||[]).map(r=>[r.repo,r.workflow,r.step,fmtS(r.p50),fmtS(r.p95)]))
+   +tbl(T("ui.a12_h_flaky"),["ui.th_repo","ui.th_workflow","ui.th_flaky","ui.th_runs","ui.th_rate"],(A.flaky||[]).map(r=>[r.repo,r.workflow,r.flaky,r.total,Math.round(r.rate*100)+" %"]))
+   +tbl(T("ui.a12_h_slower"),["ui.th_repo","ui.th_workflow","ui.th_p50","ui.th_usual","ui.th_factor"],(A.slower||[]).map(r=>[r.repo,r.workflow,fmtS(r.p50),fmtS(r.usual),"×"+r.factor]));
+}
+function lintBox(s){
+  const L=s.lint;if(!L||!L.enabled)return mut_(T("ui.a13_off"));
+  const rows=(L.rows||[]).filter(r=>sVis(r.repo));
+  return rows.length?`<table>${thk(["ui.th_repo","ui.th_file","ui.th_line","ui.th_rule","ui.th_severity"])}<tbody>${rows.slice(0,80).map(r=>`<tr><td>${esc(r.repo)}</td><td>${esc(r.file)}</td><td>${r.line}</td><td>${esc(T("lint.rule."+r.rule))}${r.detail&&r.detail!=="missing"?" · "+esc(r.detail):""}</td><td><span class="chip ${r.severity==="bad"?"bad":(r.severity==="warn"?"warn":"")}">${esc(r.severity)}</span></td></tr>`).join("")}</tbody></table>`:ok_(T("ui.a13_none"));
 }
 async function copyText(btn){try{await navigator.clipboard.writeText(btn.dataset.copy);btn.textContent=T("ui.copied")}catch(err){btn.textContent=T("ui.copy_manual")}}
 $("t-sent").addEventListener("toggle",e=>{const d=e.target;if(d.tagName==="DETAILS"){d.open?OPEN.add(d.dataset.k):OPEN.delete(d.dataset.k);store.set("am-s-open",[...OPEN].join(","))}},true);
@@ -619,6 +640,12 @@ $("t-sent").addEventListener("click",async e=>{
     if(g.dataset.goto==="a2"&&SENT)setList(T("ui.l_red"),[...new Set(SENT.a2.red.map(r=>r.repo))]);
     else if(g.dataset.goto==="a5"&&SENT)setList(T("ui.l_pending"),[...new Set((SENT.a5.pending_sign||[]).map(r=>r.repo))]);
     const d=document.querySelector(`details[data-k="${g.dataset.goto}"]`);if(d){d.open=true;d.scrollIntoView({block:"nearest"})}return}
+  const run=e.target.closest("button[data-ai-run]");if(run){
+    if(!window.confirm(T("ui.ai_prop_confirm",{cmd:run.dataset.cmd})))return;
+    try{const r=await fetch("/api/ai/actions/confirm",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:run.dataset.aiRun,command:run.dataset.cmd})});const j=await r.json();
+      run.disabled=true;run.textContent=j.ok?T("ui.ai_run_ok"):(j.reason==="failed"?T("ui.ai_run_failed",{code:j.code}):T("ui.ai_run_"+j.reason))}
+    catch(err){run.textContent=T("ui.err_monitor",{msg:err})}
+    return}
   const b=e.target.closest("button[data-ai]");if(!b)return;
   const kind=b.dataset.ai,key=kind==="build"?"b"+b.dataset.repo+b.dataset.run:"c"+b.dataset.repo+b.dataset.number;
   AIRES[key]={busy:true};renderSent();
@@ -627,6 +654,7 @@ $("t-sent").addEventListener("click",async e=>{
   renderSent();
 });
 async function sentTick(){
+  try{const r=await fetch("/api/analytics",{cache:"no-store"});if(r.ok)ANA=await r.json()}catch(e){}
   try{const r=await fetch("/api/sentinel?"+qlang(),{cache:"no-store"});const j=await r.json();SENT_ERR=j.error||null;if(j.data)SENT=j.data}
   catch(e){SENT_ERR=T("ui.err_sentinel_down",{msg:e})}
   try{renderSent()}catch(e){SENT_ERR=T("ui.err_sentinel_draw",{msg:e.message});const b=$("s-err");b.style.display="block";b.textContent=T("ui.s_warn")+SENT_ERR}
@@ -749,6 +777,24 @@ function cfgFilter(){
   $("cfp-interface").hidden=true;$("cfg-none").style.display=hits?"none":"block";
 }
 $("cfg-search").addEventListener("input",cfgFilter);
+async function cfgExtras(){
+  const ai=document.getElementById("cfp-ai");
+  if(ai&&!ai.querySelector(".ai-extra")){
+    const box=document.createElement("div");box.className="cfg-group ai-extra";
+    box.innerHTML=`<h3></h3><div class="cfg-grid" style="grid-template-columns:1fr"><div class="help" id="ai-premium"></div><div class="inl"><button type="button" id="ai-test"></button><span id="ai-test-out" class="mut"></span><span id="ai-usage" class="mut"></span></div><div><b id="ai-log-h"></b> <button type="button" id="ai-unlock"></button><div id="ai-log" class="mut" style="font-size:12px"></div></div></div>`;
+    ai.appendChild(box);
+    box.querySelector("h3").textContent=T("ui.ai_log_h");$("ai-premium").textContent=T("ui.ai_premium");$("ai-test").textContent=T("ui.ai_test");$("ai-unlock").textContent=T("ui.ai_unlock");$("ai-log-h").textContent="";
+    $("ai-test").addEventListener("click",async()=>{try{const r=await fetch("/api/ai/test",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});const j=await r.json();$("ai-test-out").textContent=j.ok?T("ui.ai_test_ok",{ms:j.ms}):(j.error||"");if(j.daily_limit!=null)$("ai-usage").textContent=T("ui.ai_usage",{n:j.used_today,limit:j.daily_limit})}catch(e){$("ai-test-out").textContent=String(e)}});
+    $("ai-unlock").addEventListener("click",async()=>{await fetch("/api/ai/actions/unlock",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});cfgExtras()});
+  }
+  if($("ai-log")){try{const r=await fetch("/api/ai/actions",{cache:"no-store"});const j=await r.json();$("ai-log").innerHTML=(j.log||[]).length?j.log.map(x=>`<div>${esc(x.at)} · ${esc(x.command)} · ${x.code===0?esc(T("ui.ai_run_ok")):esc(T("ui.ai_run_failed",{code:x.code}))}</div>`).join(""):esc(T("ui.ai_log_none"));
+    if(j.ai)$("ai-usage").textContent=T("ui.ai_usage",{n:j.ai.used_today,limit:j.ai.daily_limit})}catch(e){}}
+  const nt=document.getElementById("cfp-notify");
+  if(nt&&!nt.querySelector(".nt-extra")){
+    const box=document.createElement("div");box.className="cfg-group nt-extra";box.innerHTML=`<div class="cfg-grid" style="grid-template-columns:1fr"><div class="inl">${["telegram","discord","slack","matrix","mqtt","http_local"].map(c=>`<button type="button" data-nt="${c}"></button>`).join("")}<span id="nt-out" class="mut"></span></div></div>`;
+    nt.appendChild(box);box.querySelectorAll("button[data-nt]").forEach(b=>{b.textContent=T("ui.notify_test")+" · "+T("ui.cfg_b_ch_"+b.dataset.nt);b.addEventListener("click",async()=>{try{const r=await fetch("/api/notify/test",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({channel:b.dataset.nt})});const j=await r.json();$("nt-out").textContent=j.ok?T("ui.notify_test_ok"):T("ui.notify_test_fail",{reason:j.reason||""})}catch(e){$("nt-out").textContent=String(e)}})})
+  }
+}
 function cfgBuild(j){
   CFG.groups=j.groups;CFG.orig={};CFG.cur={};CFG.meta={};CFG.restart=j.restart_pending||[];
   const form=$("cfg-form");form.innerHTML="";
@@ -766,7 +812,7 @@ function cfgBuild(j){
   });
   cfgBuildTabs();cfgShowTab(CFG.tab);
   const r=$("cfg-restart");const n=CFG.restart.length;r.style.display=n?"block":"none";r.textContent=n?T("ui.cfg_restart_banner",{n:n}):"";
-  $("cfg-backups").textContent=T("ui.cfg_backups",{n:j.backups||0});cfgRefreshButtons();cfgFilter();
+  $("cfg-backups").textContent=T("ui.cfg_backups",{n:j.backups||0});cfgRefreshButtons();cfgFilter();cfgExtras();
 }
 async function cfgLoad(){try{const r=await fetch("/api/settings?"+qlang(),{cache:"no-store"});const j=await r.json();if(j.ok)cfgBuild(j)}catch(e){$("cfg-msg").className="err";$("cfg-msg").textContent=T("ui.err_monitor",{msg:e})}}
 function cfgMsg(cls,t){const m=$("cfg-msg");m.className=cls;m.textContent=t}

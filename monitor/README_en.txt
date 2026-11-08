@@ -1,9 +1,9 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GITHUB ACTIONS MONITOR + SENTINEL (version 1.5.2)
+GITHUB ACTIONS MONITOR + SENTINEL (version 1.6.0)
 =================================================
-Requirements: Python 3.11+ and the GitHub CLI (`gh`) logged in (gh auth login). Nothing else: only the Python standard library.
+Requirements: Python 3.11+ and the GitHub CLI (`gh`) logged in (gh auth login). Nothing else: the core needs no package (the terminal view, tui.py, uses the optional package rich).
 Quick steps for a first use: QUICKSTART_en.txt.
 
 START      Windows: MONITOR_GITHUB_ACTIONS.bat | Linux: ./MONITOR_GITHUB_ACTIONS.sh | macOS: double-click MONITOR_GITHUB_ACTIONS.command

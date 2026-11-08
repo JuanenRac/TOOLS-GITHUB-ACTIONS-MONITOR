@@ -31,18 +31,55 @@
 
 | | |
 |---|---|
-| **版本** | **1.5.2** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
-| **需要** | Python 3.11+ 和 GitHub CLI（`gh auth login`）；不需要其他东西 |
+| **版本** | **1.6.0** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **需要** | Python 3.11+ 和 GitHub CLI（`gh auth login`）；不需要其他东西(终端视图使用可选的 `rich` 包) |
 | **打开** | 仅在 `127.0.0.1` 上的页面，支持八种语言 |
 | **写入 GitHub** | 绝不自行写入：只有你用明确的 `--go` 运行的批处理命令才会 |
 | **导出** | `ci_red.json`、Prometheus 指标和 Grafana 用 JSON（开启前全部关闭） |
 
 ## 截图
 
-<p align="center"><img src="docs/screenshots/monitor_now_dark.png" alt="Now" width="92%"></p>
-<p align="center"><img src="docs/screenshots/monitor_sentinel_dark.png" alt="Sentinel" width="92%"></p>
-<p align="center"><img src="docs/screenshots/monitor_charts_dark.png" alt="Charts" width="92%"></p>
-<p align="center"><img src="docs/screenshots/monitor_settings_light.png" alt="Settings" width="92%"></p>
+### 页面
+
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="当前" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_light.png"><img src="docs/screenshots/web_sentinel_dark.png" alt="哨兵" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_queue_light.png"><img src="docs/screenshots/web_sentinel_queue_dark.png" alt="签名队列（最紧急的在前）" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_analytics_light.png"><img src="docs/screenshots/web_sentinel_analytics_dark.png" alt="A12 · 分析:时长、排队时间、步骤与不稳定的工作流" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_charts_light.png"><img src="docs/screenshots/web_charts_dark.png" alt="图表" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_repositories_light.png"><img src="docs/screenshots/web_repositories_dark.png" alt="仓库" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_history_light.png"><img src="docs/screenshots/web_history_dark.png" alt="历史" width="92%"></picture></p>
+
+<details><summary><b>设置(逐个子标签页)</b></summary>
+
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_interface_light.png"><img src="docs/screenshots/web_settings_interface_dark.png" alt="设置 · 此浏览器" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_general_light.png"><img src="docs/screenshots/web_settings_general_dark.png" alt="设置 · 常规" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_polling_light.png"><img src="docs/screenshots/web_settings_polling_dark.png" alt="设置 · 刷新与限制" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_cache_light.png"><img src="docs/screenshots/web_settings_cache_dark.png" alt="设置 · 读取与缓存" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_sentinel_light.png"><img src="docs/screenshots/web_settings_sentinel_dark.png" alt="设置 · 哨兵" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_surface_light.png"><img src="docs/screenshots/web_settings_surface_dark.png" alt="设置 · 表面检查(A10)" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_readiness_light.png"><img src="docs/screenshots/web_settings_readiness_dark.png" alt="设置 · 就绪度(A11)" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_paths_light.png"><img src="docs/screenshots/web_settings_paths_dark.png" alt="设置 · 文件夹与文件" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_outputs_light.png"><img src="docs/screenshots/web_settings_outputs_dark.png" alt="设置 · 供其他工具使用的输出" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_ai_light.png"><img src="docs/screenshots/web_settings_ai_dark.png" alt="设置 · 哨兵使用的外部 AI" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_webhook_light.png"><img src="docs/screenshots/web_settings_webhook_dark.png" alt="设置 · 入站 Webhook" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_notify_light.png"><img src="docs/screenshots/web_settings_notify_dark.png" alt="设置 · 通知" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_analytics_light.png"><img src="docs/screenshots/web_settings_analytics_dark.png" alt="设置 · 分析" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_lint_light.png"><img src="docs/screenshots/web_settings_lint_dark.png" alt="设置 · 工作流检查器" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_console_light.png"><img src="docs/screenshots/web_settings_console_dark.png" alt="设置 · 终端视图" width="92%"></picture></p>
+
+</details>
+
+<details><summary><b>控制台工具</b></summary>
+
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/console_read_report_light.png"><img src="docs/screenshots/console_read_report_dark.png" alt="read_report.py" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/console_migrate_state_light.png"><img src="docs/screenshots/console_migrate_state_dark.png" alt="migrate_state.py" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/console_plan_light.png"><img src="docs/screenshots/console_plan_dark.png" alt="gha_dispatch_all.py plan" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/console_lint_light.png"><img src="docs/screenshots/console_lint_dark.png" alt="lint_workflows.py" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/console_tui_light.png"><img src="docs/screenshots/console_tui_dark.png" alt="tui.py" width="92%"></picture></p>
+
+</details>
+
+每张图片都会跟随你 GitHub 页面的浅色或深色主题。
 
 *演示数据：图片中的仓库和名称均为虚构。*
 
@@ -83,6 +120,11 @@
 - 它只监听 `127.0.0.1`，并拒绝 `Host` 或 `Origin` 不是本地的请求。切勿绑定到 `0.0.0.0`：它没有登录。
 - 它不保存任何令牌：使用你自己的 `gh`。
 - 它不会自行向 GitHub 写入任何内容。只有 `dispatch --go`、`dispatch --real` 和 `finalize --execute` 会写入，且仅在你运行它们时。
+- **分析**:每个工作流的时长、排队时间和每个步骤的 p50 / p95,不稳定的工作流(在同一提交上先失败后通过)以及变慢的工作流;导出到 Prometheus 和 Grafana。
+- **节省配额并能应对断网**:条件读取(304 不消耗任何配额)以及带离线横幅、可自动恢复的“最后画面”模式。
+- **入站 Webhook 与通知**:已签名的事件实时更新仓库;可选地向 Telegram、Discord、Slack、Matrix、MQTT 或本地地址发送消息(绝不写入 GitHub)。
+- **工作流检查器与终端视图**:`lint_workflows.py` 在推送前检查 `.github/workflows`;`tui.py`(可选,使用 `rich`)在控制台中显示实时表格。
+- **AI 助手(默认关闭)**:用 Ollama、OpenAI 兼容服务、Anthropic 或 `gh copilot` 做总结、分类和解释;命令只来自封闭列表,且每一条都要经你确认后才会执行。
 - 设置页面在保存备份副本之后，才会写入固定且经过验证的键。
 
 ## 测试
@@ -99,30 +141,34 @@ python -m unittest discover -s monitor/tests
 
 ```
 TOOLS-GITHUB-ACTIONS-MONITOR/
-├── monitor/                          程序本体
-├── docs/                             架构、截图
-├── tools/                            图片与指南生成器
-├── images/                           横幅图和图片
-├── .github/                          CI 和议题表单
-├── CHANGELOG.md                      各版本变更
-├── LICENSE NOTICE AUTHORS            许可证和作者
-├── CONTRIBUTING.md SECURITY.md       参与方式、报告
-├── SUPPORT.md CODE_OF_CONDUCT.md     支持和行为准则
+├── monitor/                             程序本体
+├── docs/                                架构、截图、路线图
+├── tools/                               图片、指南与演示
+├── images/                              横幅图和图片
+├── .github/                             CI 和议题表单
+├── CHANGELOG.md                         各版本变更
+├── LICENSE NOTICE AUTHORS               许可证和作者
+├── CONTRIBUTING.md SECURITY.md          参与方式、报告
+├── SUPPORT.md CODE_OF_CONDUCT.md        支持和行为准则
 └── monitor/
-    ├── actions_monitor.py            本地服务器
-    ├── actions_monitor.html          网页
-    ├── sentinel_local.py             警报与报告
-    ├── surface.py readiness.py       检查与发布就绪
-    ├── settings_api.py outputs.py    设置与指标
-    ├── signstate.py sigverify.py     签名状态与验证
-    ├── read_report.py                终端报告
-    ├── gha_dispatch_all.py           批量构建
-    ├── events.py report_history.py   事件与历史
-    ├── ci_red.py export_status.py    供其他工具读取
-    ├── i18n.py locales/              八种语言
-    ├── toolconfig.py workspace.py    设置与克隆
-    ├── tests/                        离线测试
-    └── docs/                         设置与 Webhook
+    ├── actions_monitor.py               本地服务器
+    ├── actions_monitor.html             网页
+    ├── sentinel_local.py                警报与报告
+    ├── surface.py readiness.py          检查与发布就绪
+    ├── settings_api.py outputs.py       设置与指标
+    ├── signstate.py sigverify.py        签名状态与验证
+    ├── read_report.py                   终端报告
+    ├── gha_dispatch_all.py              批量构建
+    ├── events.py report_history.py      事件与历史
+    ├── ci_red.py export_status.py       供其他工具读取
+    ├── etagcache.py resilience.py       条件读取与连接
+    ├── analytics.py lint_workflows.py   时长、不稳定、检查器
+    ├── notifiers.py ai_actions.py       通知与 AI 封闭列表
+    ├── tui.py migrate_state.py          终端视图与迁移
+    ├── i18n.py locales/                 八种语言
+    ├── toolconfig.py workspace.py       设置与克隆
+    ├── tests/                           离线测试
+    └── docs/                            指南、模式、Grafana
 ```
 
 ## 文档
@@ -132,6 +178,11 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/CI_RED_SCHEMA_zho.md`](monitor/docs/CI_RED_SCHEMA_zho.md): ci_red.json 的格式
 - [`monitor/docs/CI_RED_BRIDGE_zho.md`](monitor/docs/CI_RED_BRIDGE_zho.md): 把 ci_red.json 带到仪表板
 - [`monitor/docs/WEBHOOK_zho.md`](monitor/docs/WEBHOOK_zho.md): 入站 Webhook
+- [`monitor/docs/NOTIFICATIONS_zho.md`](monitor/docs/NOTIFICATIONS_zho.md): 通知与适配器约定
+- [`monitor/docs/AI_zho.md`](monitor/docs/AI_zho.md): AI 助手:提供方、安全与操作
+- [`monitor/docs/ANALYTICS_zho.md`](monitor/docs/ANALYTICS_zho.md): 分析、条件读取与连接丢失
+- [`monitor/docs/CONSOLE_TOOLS_zho.md`](monitor/docs/CONSOLE_TOOLS_zho.md): 工作流检查器与终端视图
+- [`monitor/docs/DEPLOYMENT_zho.md`](monitor/docs/DEPLOYMENT_zho.md): 作为服务运行、反向代理之后、权限
 - [`monitor/QUICKSTART_zh.txt`](monitor/QUICKSTART_zh.txt): 入门步骤（八种语言）
 
 ## 参与贡献

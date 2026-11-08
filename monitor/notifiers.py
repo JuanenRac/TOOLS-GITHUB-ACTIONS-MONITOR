@@ -1,0 +1,200 @@
+# Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+# GPL-3.0-or-later - see LICENSE
+"""Optional notifications (OFF by default): the events of the feed (a new red, a stuck build, a build waiting for its signature, a lost connection...) sent to a chat or to a device.
+
+  telegram    a bot message           token in the environment variable named by `token_env`, `chat_id` in the file
+  discord     a channel webhook       the full URL is in the environment variable named by `url_env` (discord.com only)
+  slack       an incoming webhook     the full URL is in the environment variable named by `url_env` (hooks.slack.com only)
+  matrix      a room message          `homeserver` (https), `room`, token in the variable named by `token_env`
+  mqtt        a message to a broker ON THIS COMPUTER (127.0.0.1 / localhost) for lights and beacons in a workshop
+  http_local  a POST of the same JSON to an address ON THIS COMPUTER (127.0.0.1 / localhost)
+
+Rules, all tested: a secret (token, webhook URL) is read from the environment at the moment of sending and is never written to the configuration, to a log or to the page (only the NAME of
+the variable is configured); a notification is only a message with a link: it never re-runs, cancels or writes anything on GitHub; every channel has its own switch; the whole thing is
+off until `notify.enabled` is true; a send that fails is ignored (and counted) so it can never stop the monitor; at most `max_per_hour` messages leave the computer.
+"""
+import json
+import os
+import re
+import socket
+import struct
+import threading
+import time
+import urllib.error
+import urllib.request
+from urllib.parse import quote, urlparse
+
+CHANNELS = ("telegram", "discord", "slack", "matrix", "mqtt", "http_local")
+KNOWN_EVENTS = ("red_new", "red_fixed", "stuck_new", "pending_sign", "release_due", "rate_low", "offline", "online", "alerts_up", "workflow_failed")
+DEFAULT_EVENTS = ["red_new", "stuck_new", "pending_sign", "offline"]
+LOOPBACK = ("127.0.0.1", "localhost", "::1", "[::1]")
+ENV_RE = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}$")
+TIMEOUT = 8
+DEFAULTS = {"enabled": False, "events": list(DEFAULT_EVENTS), "max_per_hour": 20,
+            "channels": {
+                "telegram": {"enabled": False, "token_env": "", "chat_id": ""},
+                "discord": {"enabled": False, "url_env": ""},
+                "slack": {"enabled": False, "url_env": ""},
+                "matrix": {"enabled": False, "homeserver": "", "room": "", "token_env": ""},
+                "mqtt": {"enabled": False, "host": "127.0.0.1", "port": 1883, "topic": "ghamon/events"},
+                "http_local": {"enabled": False, "url": ""},
+            }}
+_lock = threading.Lock()
+_sent = []          # timestamps of the messages that left (for max_per_hour)
+STATS = {"sent": 0, "failed": 0}
+
+
+def settings(config):
+    """`notify` of the configuration merged over DEFAULTS; a value of the wrong type keeps the default."""
+    out = json.loads(json.dumps(DEFAULTS))
+    user = (config or {}).get("notify")
+    if not isinstance(user, dict):
+        return out
+    if isinstance(user.get("enabled"), bool):
+        out["enabled"] = user["enabled"]
+    if isinstance(user.get("events"), list):
+        out["events"] = [e for e in user["events"] if isinstance(e, str) and e in KNOWN_EVENTS]
+    if isinstance(user.get("max_per_hour"), int) and not isinstance(user.get("max_per_hour"), bool) and 1 <= user["max_per_hour"] <= 600:
+        out["max_per_hour"] = user["max_per_hour"]
+    for name, base in DEFAULTS["channels"].items():
+        item = (user.get("channels") or {}).get(name) if isinstance(user.get("channels"), dict) else None
+        if isinstance(item, dict):
+            for key, default in base.items():
+                v = item.get(key)
+                if isinstance(v, type(default)) and (isinstance(v, bool) == isinstance(default, bool)):
+                    out["channels"][name][key] = v
+    return out
+
+
+def is_loopback(host):
+    return str(host).strip().lower() in LOOPBACK
+
+
+def secret(env_name):
+    """The value of the environment variable NAMED in the configuration, or "" (the name must look like a variable name)."""
+    return os.environ.get(env_name, "") if isinstance(env_name, str) and ENV_RE.match(env_name) else ""
+
+
+def check_channel(name, cfg):
+    """None when the channel can send, else a short stable reason: off, no_secret, bad_host, bad_value."""
+    if not cfg.get("enabled"):
+        return "off"
+    if name == "telegram":
+        return None if secret(cfg.get("token_env")) and re.match(r"^-?[0-9]{1,20}$", str(cfg.get("chat_id"))) else "no_secret"
+    if name in ("discord", "slack"):
+        url = secret(cfg.get("url_env"))
+        if not url:
+            return "no_secret"
+        host = urlparse(url)
+        allowed = ("discord.com", "discordapp.com") if name == "discord" else ("hooks.slack.com",)
+        return None if host.scheme == "https" and host.hostname in allowed else "bad_host"
+    if name == "matrix":
+        home = urlparse(str(cfg.get("homeserver")))
+        if not secret(cfg.get("token_env")):
+            return "no_secret"
+        return None if home.scheme == "https" and home.hostname and re.match(r"^![A-Za-z0-9:._-]{3,120}$", str(cfg.get("room"))) else "bad_value"
+    if name == "mqtt":
+        topic = str(cfg.get("topic"))
+        return None if is_loopback(cfg.get("host")) and 1 <= int(cfg.get("port", 0)) <= 65535 and re.match(r"^[A-Za-z0-9/_.-]{1,100}$", topic) else "bad_host"
+    if name == "http_local":
+        url = urlparse(str(cfg.get("url")))
+        return None if url.scheme == "http" and is_loopback(url.hostname or "") else "bad_host"
+    return "bad_value"
+
+
+def _post(url, payload, headers=None, opener=None):
+    request = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers={"Content-Type": "application/json", **(headers or {})}, method="POST")
+    with (opener or urllib.request.urlopen)(request, timeout=TIMEOUT) as answer:
+        return answer.status
+
+
+def mqtt_packet(topic, payload):
+    """A MQTT 3.1.1 CONNECT followed by a QoS 0 PUBLISH, as bytes (stdlib only; enough for a broker on this computer)."""
+    def text(value):
+        raw = value.encode("utf-8")
+        return struct.pack(">H", len(raw)) + raw
+
+    def length(n):
+        out = b""
+        while True:
+            digit, n = n % 128, n // 128
+            out += bytes([digit | (128 if n else 0)])
+            if not n:
+                return out
+    connect_body = text("MQTT") + b"\x04\x02" + struct.pack(">H", 30) + text("ghamon")
+    publish_body = text(topic) + payload.encode("utf-8")
+    return b"\x10" + length(len(connect_body)) + connect_body + b"\x30" + length(len(publish_body)) + publish_body + b"\xe0\x00"
+
+
+def send_channel(name, cfg, event, opener=None, connect=None):
+    """Sends one event through one channel. Returns {"channel", "ok", "reason"}; never raises, never puts a secret in the answer."""
+    problem = check_channel(name, cfg)
+    if problem:
+        return {"channel": name, "ok": False, "reason": problem}
+    text = f"{event.get('text', '')}" + (f"\n{event['url']}" if event.get("url") else "")
+    record = {"kind": event.get("kind"), "repo": event.get("repo"), "text": event.get("text"), "url": event.get("url")}
+    try:
+        if name == "telegram":
+            _post(f"https://api.telegram.org/bot{secret(cfg['token_env'])}/sendMessage", {"chat_id": cfg["chat_id"], "text": text, "disable_web_page_preview": True}, opener=opener)
+        elif name == "discord":
+            _post(secret(cfg["url_env"]), {"content": text[:1900]}, opener=opener)
+        elif name == "slack":
+            _post(secret(cfg["url_env"]), {"text": text[:3000]}, opener=opener)
+        elif name == "matrix":
+            home = str(cfg["homeserver"]).rstrip("/")
+            txn = f"ghamon{int(time.time() * 1000)}"
+            url = f"{home}/_matrix/client/v3/rooms/{quote(cfg['room'], safe='')}/send/m.room.message/{txn}"
+            request = urllib.request.Request(url, data=json.dumps({"msgtype": "m.text", "body": text}).encode("utf-8"), method="PUT",
+                                             headers={"Content-Type": "application/json", "Authorization": "Bearer " + secret(cfg["token_env"])})
+            with (opener or urllib.request.urlopen)(request, timeout=TIMEOUT):
+                pass
+        elif name == "mqtt":
+            sock = (connect or socket.create_connection)((cfg["host"], int(cfg["port"])), TIMEOUT)
+            try:
+                sock.sendall(mqtt_packet(cfg["topic"], json.dumps(record, ensure_ascii=False)))
+            finally:
+                sock.close()
+        elif name == "http_local":
+            _post(cfg["url"], record, opener=opener)
+        return {"channel": name, "ok": True, "reason": ""}
+    except (OSError, urllib.error.URLError, ValueError):
+        return {"channel": name, "ok": False, "reason": "failed"}
+
+
+def allowed_now(limit, now=None):
+    """True while fewer than `limit` messages left in the last hour (and registers one)."""
+    now = time.time() if now is None else now
+    with _lock:
+        while _sent and _sent[0] < now - 3600:
+            _sent.pop(0)
+        if len(_sent) >= limit:
+            return False
+        _sent.append(now)
+        return True
+
+
+def notify(config, event, opener=None, connect=None, now=None):
+    """Sends `event` through every enabled channel when notifications are on and the event kind is one the user asked for. Returns the list of results ([] when nothing was sent)."""
+    cfg = settings(config)
+    if not cfg["enabled"] or event.get("kind") not in cfg["events"] or event.get("owner", "main") != "main":
+        return []
+    live = [(n, c) for n, c in cfg["channels"].items() if c.get("enabled")]
+    if not live or not allowed_now(cfg["max_per_hour"], now):
+        return []
+    results = [send_channel(n, c, event, opener, connect) for n, c in live]
+    with _lock:
+        STATS["sent"] += sum(1 for r in results if r["ok"])
+        STATS["failed"] += sum(1 for r in results if not r["ok"])
+    return results
+
+
+def make_listener(config_fn):
+    """A function to hang on the event feed (`feed.listeners`): it notifies every event, in its own thread, so a slow chat never delays the monitor."""
+    def listener(events):
+        for event in events:
+            threading.Thread(target=notify, args=(config_fn(), event), daemon=True).start()
+    return listener
+
+
+def test_event(text="test"):
+    return {"kind": "red_new", "owner": "main", "repo": "demo-repo", "text": text, "url": None}
