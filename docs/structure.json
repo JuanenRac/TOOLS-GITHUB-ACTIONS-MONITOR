@@ -3,7 +3,10 @@
   "ecosystem": "monitor",
   "svg": "en",
   "exempt": [
-    "electro-hobby-3d.project.json"
+    "electro-hobby-3d.project.json",
+    "CONTRIBUTING_*.md",
+    "SECURITY_*.md",
+    "SUPPORT_*.md"
   ],
   "cards": [
     {
