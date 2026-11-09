@@ -7,6 +7,28 @@
 
 Versión de la propia herramienta (monitor + centinela + herramientas por lotes), con su propio semver. La fuente es el CHANGELOG.md en inglés; este fichero lleva las mismas versiones y secciones.
 
+## [1.7.1]
+
+Una página nueva y el mismo centinela detrás de un contrato. La página tiene un panel lateral a la izquierda con el logotipo, las secciones en grupos y dieciséis temas; el centinela de CI es ahora uno de los centinelas de un registro, y eso es lo que permite que lleguen los siguientes. Lo que el monitor muestra y decide no cambia.
+
+### Añadido
+
+- **Un panel lateral** (todas las ediciones): el logotipo de la herramienta (un SVG que se dibuja con los colores del tema y se queda quieto cuando el sistema pide menos movimiento), el selector de cuentas, las secciones en tres grupos que se pliegan (Vigilar, Datos, Sistema) y la ayuda. El panel se contrae a sus iconos y las dos elecciones se recuerdan en el navegador. La barra superior muestra el nombre de la sección y las herramientas. Las flechas, también arriba y abajo, mueven entre secciones. En una pantalla pequeña el panel pasa arriba. `?chrome=0` lo oculta, como ocultaba la barra de pestañas.
+- **Dieciséis temas** además de auto, claro y oscuro: los del Studio del sistema de alarma (Armor, Aqua, Midnight, Ember, Forest, Violet, Solar, Ice, Crimson, Mono, High contrast, Metallic, Professional, Videogame, Terminal y Blueprint), que se eligen en una lista en Ajustes > Este navegador o con `?theme=`. Cada uno define la página, el panel lateral, los paneles, las líneas, el texto, el acento, las esquinas y las letras. El verde, el rojo, el ámbar y el azul conservan su significado en todos, aclarados u oscurecidos donde un tema lo necesita para que cada cifra se lea a 4,5:1 o más, y el texto de una insignia sigue a su color.
+- **`BaseSentinel`, `Alert` y `SentinelRegistry`** (`sentinel_base.py`, `sentinel_registry.py`; solo la edición completa): el contrato de un centinela (`start`, `stop`, `tick`, `get_status`, `get_alerts`, `get_metrics`, `get_config_schema`, `refresh_seconds`), una alerta con un código estable que nunca depende del idioma (`ci.red`, `ci.stuck`, `ci.pending_sign`) y la cuenta a la que pertenece, y un registro que da a cada centinela un reloj propio. `sentinels.<nombre>.enabled` en `actions_monitor.json` enciende o apaga uno; sin él decide `sentinel.enabled`, como siempre, y donde los dos dicen algo gana el bloque nuevo.
+- **`SentinelCI`** (`sentinel_ci.py`): el centinela de siempre detrás de ese contrato. Contiene el `Sentinel` antiguo y no cambia cómo decide: la misma regla de rojo (la última ejecución terminada de cada workflow en la rama por defecto), los mismos ficheros, el mismo bucle, la misma instantánea.
+- Pruebas para cada cambio de esta versión: el contrato, el registro y sus interruptores, el centinela de CI y sus alertas en dos idiomas, que la edición lite no carga nada de esto, el panel lateral y los dieciséis temas (que cada uno define todas las variables y que el texto, el texto gris pequeño, el acento y los cuatro colores de estado se leen a 4,5:1 sobre su página y sus paneles).
+
+### Cambiado
+
+- El tema se elige en una lista en Ajustes > Este navegador (antes era un botón que recorría auto, claro y oscuro); un tema guardado por una versión anterior se sigue entendiendo.
+- El color de una insignia, una barra y un aviso que era blanco sobre rojo, ámbar o verde es ahora el que se lee sobre ese color en el tema en uso.
+- El centinela se arranca por el registro; `SENTINEL["obj"]` sigue siendo el centinela de CI, así que todo lo que le preguntaba algo sigue funcionando. Los eventos, los ficheros y los endpoints son los mismos.
+
+### Corregido
+
+- Una prueba de la 1.7.0 leía la salida de `tasklist` con la página de códigos equivocada y podía fallar en un Windows con otro idioma.
+
 ## [1.7.0]
 
 Varias cuentas en la edición completa, cada una un monitor propio, y una página que las conoce. La edición lite no cambia: una cuenta, y ni siquiera muestra las opciones nuevas.

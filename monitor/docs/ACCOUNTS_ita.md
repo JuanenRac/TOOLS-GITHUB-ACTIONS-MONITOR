@@ -42,7 +42,7 @@ Gli originali non vengono mai spostati né eliminati: li elimini tu dopo aver co
 
 ## La pagina
 
-La pagina è quella che conosci, con un selettore di account sotto l'intestazione e una voce **Tutti gli account** che mostra una scheda per account (stato, repository, in esecuzione, in errore) e ne apre una qualsiasi. Ogni finestra mantiene il proprio account e la propria vista: si leggono dall'indirizzo, mai da un'unica impostazione che un'altra finestra sovrascriverebbe.
+La pagina è quella che conosci, con un selettore di account in cima al pannello laterale e una voce **Tutti gli account** che mostra una scheda per account (stato, repository, in esecuzione, in errore) e ne apre una qualsiasi. Ogni finestra mantiene il proprio account e la propria vista: si leggono dall'indirizzo, mai da un'unica impostazione che un'altra finestra sovrascriverebbe.
 
 | Indirizzo | Cosa mostra |
 |---|---|

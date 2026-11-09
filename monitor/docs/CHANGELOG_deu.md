@@ -7,6 +7,28 @@
 
 Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem Semver. Die Quelle ist das englische CHANGELOG.md; diese Datei enthält dieselben Versionen und Abschnitte.
 
+## [1.7.1]
+
+Eine neue Seite und derselbe Wächter hinter einem Vertrag. Die Seite hat links eine Seitenleiste mit dem Logo, den Bereichen in Gruppen und sechzehn Designs; der CI-Wächter ist jetzt einer der Wächter einer Registry, und genau das lässt die nächsten kommen. Was der Monitor zeigt und entscheidet, ändert sich nicht.
+
+### Hinzugefügt
+
+- **Eine Seitenleiste** (alle Editionen): das Logo des Werkzeugs (ein SVG, das mit den Farben des Designs gezeichnet wird und stillsteht, wenn das System weniger Bewegung verlangt), die Kontoauswahl, die Bereiche in drei einklappbaren Gruppen (Beobachten, Daten, System) und die Hilfe. Die Leiste lässt sich auf ihre Symbole einklappen, beide Wahlen merkt sich der Browser. Die obere Leiste zeigt den Namen des Bereichs und die Werkzeuge. Die Pfeiltasten, auch nach oben und unten, wechseln zwischen den Bereichen. Auf einem kleinen Bildschirm steht die Leiste oben. `?chrome=0` blendet sie aus, wie es die Reiterleiste ausblendete.
+- **Sechzehn Designs** zusätzlich zu automatisch, hell und dunkel: die des Studios des Alarmsystems (Armor, Aqua, Midnight, Ember, Forest, Violet, Solar, Ice, Crimson, Mono, High contrast, Metallic, Professional, Videogame, Terminal und Blueprint), auswählbar in einer Liste unter Einstellungen > Dieser Browser oder mit `?theme=`. Jedes legt die Seite, die Seitenleiste, die Flächen, die Linien, den Text, den Akzent, die Ecken und die Schrift fest. Grün, Rot, Bernstein und Blau behalten in allen ihre Bedeutung, aufgehellt oder abgedunkelt, wo ein Design es braucht, damit jede Zahl mit 4,5:1 oder mehr lesbar ist; der Text einer Marke folgt ihrer Farbe.
+- **`BaseSentinel`, `Alert` und `SentinelRegistry`** (`sentinel_base.py`, `sentinel_registry.py`; nur die vollständige Edition): der Vertrag eines Wächters (`start`, `stop`, `tick`, `get_status`, `get_alerts`, `get_metrics`, `get_config_schema`, `refresh_seconds`), ein Alarm mit stabilem Code, der nie von der Sprache abhängt (`ci.red`, `ci.stuck`, `ci.pending_sign`) und dem Konto, zu dem er gehört, und eine Registry, die jedem Wächter eine eigene Uhr gibt. `sentinels.<name>.enabled` in `actions_monitor.json` schaltet einen ein oder aus; ohne sie entscheidet `sentinel.enabled` wie immer, und wo beide etwas sagen, gewinnt der neue Block.
+- **`SentinelCI`** (`sentinel_ci.py`): der Wächter von jeher hinter diesem Vertrag. Er hält den alten `Sentinel` und ändert nicht, wie dieser entscheidet: dieselbe Regel für Rot (der letzte abgeschlossene Lauf jedes Workflows auf dem Standardzweig), dieselben Dateien, dieselbe Schleife, derselbe Schnappschuss.
+- Tests für jede Änderung dieser Version: der Vertrag, die Registry und ihre Schalter, der CI-Wächter und seine Alarme in zwei Sprachen, dass die Lite-Edition nichts davon lädt, die Seitenleiste und die sechzehn Designs (dass jedes alle Variablen definiert und dass Text, kleiner grauer Text, Akzent und die vier Statusfarben mit 4,5:1 auf Seite und Flächen lesbar sind).
+
+### Geändert
+
+- Das Design wird in einer Liste unter Einstellungen > Dieser Browser gewählt (früher ein Knopf, der automatisch, hell und dunkel durchlief); ein von einer früheren Version gespeichertes Design wird weiter verstanden.
+- Die Farbe einer Marke, eines Balkens und einer Meldung, die weiß auf Rot, Bernstein oder Grün war, ist jetzt die, die auf dieser Farbe im verwendeten Design lesbar ist.
+- Der Wächter wird über die Registry gestartet; `SENTINEL["obj"]` ist weiterhin der CI-Wächter, alles, was ihn etwas fragte, funktioniert also weiter. Die Ereignisse, die Dateien und die Endpunkte sind dieselben.
+
+### Behoben
+
+- Ein Test der 1.7.0 las die Ausgabe von `tasklist` mit der falschen Codepage und konnte auf einem Windows mit anderer Sprache fehlschlagen.
+
 ## [1.7.0]
 
 Mehrere Konten in der kompletten Ausgabe, jedes ein eigener Monitor, und eine Seite, die sie kennt. Die Lite-Ausgabe bleibt unverändert: ein Konto, und sie zeigt die neuen Optionen nicht einmal.

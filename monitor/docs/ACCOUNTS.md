@@ -42,7 +42,7 @@ The originals are never moved or deleted: you delete them yourself once you have
 
 ## The page
 
-The page is the one you know, with a switcher of accounts under the header and an entry **All accounts** that shows one card per account (state, repositories, running, failing) and opens any of them. Every window keeps its own account and view: it is read from the address, never from one setting that another window would overwrite.
+The page is the one you know, with a switcher of accounts at the top of the side panel and an entry **All accounts** that shows one card per account (state, repositories, running, failing) and opens any of them. Every window keeps its own account and view: it is read from the address, never from one setting that another window would overwrite.
 
 | Address | What it shows |
 |---|---|

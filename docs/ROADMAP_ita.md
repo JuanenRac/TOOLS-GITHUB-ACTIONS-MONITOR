@@ -2,6 +2,10 @@
 
 Idee che non sono entrate nella versione attuale, senza ordine promesso. Sono direzioni, non impegni; una issue o una pull request è il modo migliore per farne avanzare una.
 
+## Fatto nella 1.7.1
+
+Una pagina con pannello laterale (il logo, il selettore degli account, le sezioni in gruppi comprimibili, la guida) e sedici temi oltre ad auto, chiaro e scuro, quelli dello Studio del sistema di allarme; e la sentinella CI dietro un contratto (`BaseSentinel`, `Alert`, `SentinelRegistry`, `SentinelCI`), per poter aggiungere le prossime sentinelle senza che il monitor sappia cosa fa ciascuna. Ciò che si mostra e si decide non cambia.
+
 ## Fatto nella 1.7.0
 
 Più account nell'edizione completa, ciascuno un monitor a sé sotto un supervisore (`accounts/<id>/`, `--accounts`, `--account`, `--migrate-accounts`), l'API degli account, un webhook per tutti, la pagina con un selettore e le schede di tutti gli account, le viste per indirizzo (`?view=` e `?chrome=0`) e la vista Live con lo stato del ricevitore webhook. L'edizione lite non cambia.

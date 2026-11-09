@@ -42,7 +42,7 @@ Los originales nunca se mueven ni se borran: los borras tú cuando lo hayas comp
 
 ## La página
 
-La página es la que conoces, con un selector de cuentas bajo la cabecera y una entrada **Todas las cuentas** que muestra una tarjeta por cuenta (estado, repositorios, en marcha, en rojo) y abre cualquiera de ellas. Cada ventana guarda su propia cuenta y vista: se leen de la dirección, nunca de un ajuste único que otra ventana pisaría.
+La página es la que conoces, con un selector de cuentas arriba en el panel lateral y una entrada **Todas las cuentas** que muestra una tarjeta por cuenta (estado, repositorios, en marcha, en rojo) y abre cualquiera de ellas. Cada ventana guarda su propia cuenta y vista: se leen de la dirección, nunca de un ajuste único que otra ventana pisaría.
 
 | Dirección | Qué muestra |
 |---|---|

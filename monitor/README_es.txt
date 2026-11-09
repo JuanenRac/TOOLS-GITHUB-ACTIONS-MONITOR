@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITOR DE GITHUB ACTIONS + CENTINELA (versión 1.7.0)
+MONITOR DE GITHUB ACTIONS + CENTINELA (versión 1.7.1)
 =====================================================
 ¿CUÁL ARRANCAR? (un usuario nuevo decide en dos minutos)
   COMPLETA  MONITOR_GITHUB_ACTIONS.*       la página con el centinela (puerto 8765): alertas, cola de firma, analítica. Empieza aquí si tienes varios repositorios.
@@ -89,6 +89,10 @@ LICENCIA   GPL-3.0-or-later (ver LICENSE y NOTICE). Copyright (C) 2026 JuanenRac
 AYUDA, ACERCA DE Y COMPROBACIONES (1.6.4)
 -----------------------------------------
 La página tiene un botón de Ayuda (? redondo) y uno de Acerca de (i); en la consola usa --help-topics, --help-search, --about y --doctor; --demo muestra la página con datos inventados. La edición lite arranca con su propio banner y título de ventana (LITE, puerto 8766, sin centinela); la completa dice COMPLETE, puerto 8765, centinela activo. El aviso de versión nueva se puede apagar (Ajustes > Básico).
+
+NOVEDADES DE LA 1.7.1 (panel lateral, dieciséis temas, un contrato para los centinelas; historial: CHANGELOG.md)
+  La página tiene un panel lateral a la izquierda con el logotipo, las secciones en grupos y la ayuda; se contrae a sus iconos. Dieciséis temas además de auto, claro y oscuro (Ajustes > Este navegador).
+  El centinela de CI está ahora detrás de un contrato (BaseSentinel, SentinelRegistry), así que se pueden añadir los siguientes; lo que muestra y decide no cambia. La edición lite no tiene nada de esto.
 
 NOVEDADES DE LA 1.7.0 (varias cuentas; historial: CHANGELOG.md)
   La edición completa puede vigilar varias cuentas de GitHub: una carpeta accounts/<id>/ por cuenta y un monitor por cuenta bajo un supervisor, así que el fallo de una nunca toca a otra.

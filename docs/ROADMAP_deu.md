@@ -2,6 +2,10 @@
 
 Ideen, die nicht in die aktuelle Version passten, ohne versprochene Reihenfolge. Es sind Richtungen, keine Zusagen; ein Issue oder ein Pull Request ist der beste Weg, eine voranzubringen.
 
+## Erledigt in 1.7.1
+
+Eine Seite mit Seitenleiste (das Logo, die Kontoauswahl, die Bereiche in einklappbaren Gruppen, die Hilfe) und sechzehn Designs zusätzlich zu automatisch, hell und dunkel, die des Studios des Alarmsystems; und der CI-Wächter hinter einem Vertrag (`BaseSentinel`, `Alert`, `SentinelRegistry`, `SentinelCI`), damit weitere Wächter hinzukommen können, ohne dass der Monitor wissen muss, was jeder tut. Was angezeigt und entschieden wird, ändert sich nicht.
+
 ## Erledigt in 1.7.0
 
 Mehrere Konten in der kompletten Ausgabe, jedes ein eigener Monitor unter einem Supervisor (`accounts/<id>/`, `--accounts`, `--account`, `--migrate-accounts`), die API der Konten, ein Webhook für alle, die Seite mit Auswahl und den Karten aller Konten, die Ansichten per Adresse (`?view=` und `?chrome=0`) und die Live-Ansicht mit dem Zustand des Webhook-Empfängers. Die Lite-Ausgabe bleibt unverändert.

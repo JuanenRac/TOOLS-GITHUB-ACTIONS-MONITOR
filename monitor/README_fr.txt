@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITEUR GITHUB ACTIONS + SENTINELLE (version 1.7.0)
+MONITEUR GITHUB ACTIONS + SENTINELLE (version 1.7.1)
 ====================================================
 LEQUEL LANCER ? (un nouvel utilisateur décide en deux minutes)
   COMPLET   MONITOR_GITHUB_ACTIONS.*       la page avec la sentinelle (port 8765) : alertes, file de signature, analytique. Commencez ici si vous avez plusieurs dépôts.
@@ -89,6 +89,10 @@ LICENCE    GPL-3.0-or-later (voir LICENSE et NOTICE). Copyright (C) 2026 JuanenR
 AIDE, À PROPOS ET VÉRIFICATIONS (1.6.4)
 ---------------------------------------
 La page a un bouton Aide (? rond) et un bouton À propos (i) ; en console : --help-topics, --help-search, --about et --doctor ; --demo montre la page avec des données inventées. L'édition lite démarre avec sa propre bannière et son titre de fenêtre (LITE, port 8766, sans sentinelle) ; la complète indique COMPLETE, port 8765, sentinelle active. L'avis de nouvelle version peut être désactivé (Réglages > Essentiel).
+
+NOUVEAUTÉS DE LA 1.7.1 (panneau latéral, seize thèmes, un contrat pour les sentinelles ; historique : CHANGELOG.md)
+  La page a un panneau latéral à gauche avec le logo, les sections en groupes et l'aide ; il se réduit à ses icônes. Seize thèmes en plus d'auto, clair et sombre (Réglages > Ce navigateur).
+  La sentinelle CI est désormais derrière un contrat (BaseSentinel, SentinelRegistry), ce qui permet d'ajouter les suivantes ; ce qu'elle montre et décide ne change pas. L'édition lite n'en a rien.
 
 NOUVEAUTÉS DE LA 1.7.0 (plusieurs comptes ; historique : CHANGELOG.md)
   L'édition complète peut surveiller plusieurs comptes GitHub : un dossier accounts/<id>/ par compte et un moniteur par compte sous un superviseur, si bien que la panne d'un compte ne touche jamais un autre.

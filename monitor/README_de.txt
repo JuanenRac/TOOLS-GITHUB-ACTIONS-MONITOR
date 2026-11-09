@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GITHUB-ACTIONS-MONITOR + WÄCHTER (Version 1.7.0)
+GITHUB-ACTIONS-MONITOR + WÄCHTER (Version 1.7.1)
 ================================================
 WELCHE STARTEN? (ein neuer Nutzer entscheidet in zwei Minuten)
   KOMPLETT  MONITOR_GITHUB_ACTIONS.*       die Seite mit dem Wächter (Port 8765): Alarme, Signierwarteschlange, Analyse. Hier beginnen, wenn Sie mehrere Repositories haben.
@@ -89,6 +89,10 @@ LIZENZ     GPL-3.0-or-later (siehe LICENSE und NOTICE). Copyright (C) 2026 Juane
 HILFE, ÜBER UND PRÜFUNGEN (1.6.4)
 ---------------------------------
 Die Seite hat eine Hilfe-Taste (rundes ?) und eine Über-Taste (i); in der Konsole: --help-topics, --help-search, --about und --doctor; --demo zeigt die Seite mit erfundenen Daten. Die Lite-Ausgabe startet mit eigenem Banner und Fenstertitel (LITE, Port 8766, ohne Wächter); die vollständige meldet COMPLETE, Port 8765, Wächter aktiv. Der Hinweis auf neue Versionen lässt sich abschalten (Einstellungen > Grundlagen).
+
+NEU IN 1.7.1 (Seitenleiste, sechzehn Designs, ein Vertrag für die Wächter; Verlauf: CHANGELOG.md)
+  Die Seite hat links eine Seitenleiste mit dem Logo, den Bereichen in Gruppen und der Hilfe; sie lässt sich auf ihre Symbole einklappen. Sechzehn Designs zusätzlich zu automatisch, hell und dunkel (Einstellungen > Dieser Browser).
+  Der CI-Wächter steht jetzt hinter einem Vertrag (BaseSentinel, SentinelRegistry), damit weitere hinzukommen können; was er zeigt und entscheidet, ändert sich nicht. Die Lite-Edition hat nichts davon.
 
 NEU IN 1.7.0 (mehrere Konten; Verlauf: CHANGELOG.md)
   Die komplette Ausgabe kann mehrere GitHub-Konten beobachten: ein Ordner accounts/<id>/ pro Konto und ein Monitor pro Konto unter einem Supervisor, sodass der Ausfall eines Kontos nie ein anderes berührt.

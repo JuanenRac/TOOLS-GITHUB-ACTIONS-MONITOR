@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GitHub Actions 监视器 + 哨兵（版本 1.7.0）
+GitHub Actions 监视器 + 哨兵（版本 1.7.1）
 ============================================
 该启动哪一个?(新用户两分钟就能决定)
   完整版  MONITOR_GITHUB_ACTIONS.*       带哨兵的页面(端口 8765):警报、签名队列、分析。有多个仓库时从这里开始。
@@ -87,6 +87,10 @@ GitHub Actions 监视器 + 哨兵（版本 1.7.0）
 帮助、关于与检查 (1.6.4)
 ------------------------
 页面有帮助按钮（圆形 ?）和关于按钮（i）；在控制台使用 --help-topics、--help-search、--about 和 --doctor；--demo 用虚构数据显示页面。精简版以自己的横幅和窗口标题启动（LITE、端口 8766、无哨兵）；完整版显示 COMPLETE、端口 8765、哨兵已启用。新版本提示可以关闭（设置 > 基本）。
+
+1.7.1 新增内容（侧边栏、十六个主题、哨兵的统一契约；历史：CHANGELOG.md）
+  页面左侧有侧边栏，包含徽标、分组的栏目和帮助，可收起为仅显示图标。除自动、浅色和深色外还有十六个主题（设置 > 此浏览器）。
+  CI 哨兵现在位于契约（BaseSentinel、SentinelRegistry）之后，因此可以加入后续的哨兵；它显示和判断的内容不变。lite 版没有这些内容。
 
 1.7.0 新增内容（多个账户；历史：CHANGELOG.md）
   完整版可以监视多个 GitHub 账户：每个账户一个 accounts/<id>/ 文件夹，并在监督程序下各有一个监视器，因此某个账户的故障绝不会影响其他账户。

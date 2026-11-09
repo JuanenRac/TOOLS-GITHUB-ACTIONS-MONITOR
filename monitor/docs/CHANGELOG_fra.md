@@ -7,6 +7,28 @@
 
 Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son propre semver. La source est le CHANGELOG.md en anglais ; ce fichier contient les mêmes versions et sections.
 
+## [1.7.1]
+
+Une nouvelle page et la même sentinelle derrière un contrat. La page a un panneau latéral à gauche avec le logo, les sections en groupes et seize thèmes ; la sentinelle CI est désormais l'une des sentinelles d'un registre, ce qui permet aux suivantes d'arriver. Ce que le moniteur montre et décide ne change pas.
+
+### Ajouté
+
+- **Un panneau latéral** (toutes les éditions) : le logo de l'outil (un SVG qui se dessine avec les couleurs du thème et s'immobilise quand le système demande moins de mouvement), le sélecteur de comptes, les sections en trois groupes repliables (Surveiller, Données, Système) et l'aide. Le panneau se réduit à ses icônes et les deux choix sont mémorisés dans le navigateur. La barre du haut montre le nom de la section et les outils. Les flèches, aussi haut et bas, passent d'une section à l'autre. Sur un petit écran le panneau passe en haut. `?chrome=0` le masque, comme il masquait la barre d'onglets.
+- **Seize thèmes** en plus d'auto, clair et sombre : ceux du Studio du système d'alarme (Armor, Aqua, Midnight, Ember, Forest, Violet, Solar, Ice, Crimson, Mono, High contrast, Metallic, Professional, Videogame, Terminal et Blueprint), choisis dans une liste sous Réglages > Ce navigateur ou avec `?theme=`. Chacun définit la page, le panneau latéral, les panneaux, les lignes, le texte, l'accent, les coins et les lettres. Le vert, le rouge, l'ambre et le bleu gardent leur sens dans tous, éclaircis ou assombris là où un thème l'exige pour que chaque chiffre se lise à 4,5:1 ou plus, et le texte d'un badge suit sa couleur.
+- **`BaseSentinel`, `Alert` et `SentinelRegistry`** (`sentinel_base.py`, `sentinel_registry.py` ; édition complète seulement) : le contrat d'une sentinelle (`start`, `stop`, `tick`, `get_status`, `get_alerts`, `get_metrics`, `get_config_schema`, `refresh_seconds`), une alerte avec un code stable qui ne dépend jamais de la langue (`ci.red`, `ci.stuck`, `ci.pending_sign`) et le compte auquel elle appartient, et un registre qui donne à chaque sentinelle sa propre horloge. `sentinels.<nom>.enabled` dans `actions_monitor.json` en active ou en désactive une ; sans lui `sentinel.enabled` décide, comme toujours, et là où les deux disent quelque chose le nouveau bloc l'emporte.
+- **`SentinelCI`** (`sentinel_ci.py`) : la sentinelle de toujours derrière ce contrat. Elle contient l'ancien `Sentinel` et ne change pas sa façon de décider : la même règle du rouge (le dernier run terminé de chaque workflow sur la branche par défaut), les mêmes fichiers, la même boucle, le même instantané.
+- Des tests pour chaque changement de cette version : le contrat, le registre et ses interrupteurs, la sentinelle CI et ses alertes en deux langues, que l'édition lite ne charge rien de tout cela, le panneau latéral et les seize thèmes (que chacun définit toutes les variables et que le texte, le petit texte gris, l'accent et les quatre couleurs d'état se lisent à 4,5:1 sur sa page et ses panneaux).
+
+### Modifié
+
+- Le thème se choisit dans une liste sous Réglages > Ce navigateur (c'était un bouton qui parcourait auto, clair et sombre) ; un thème enregistré par une version antérieure est toujours compris.
+- La couleur d'un badge, d'une barre et d'un avis qui était blanche sur rouge, ambre ou vert est maintenant celle qui se lit sur cette couleur dans le thème utilisé.
+- La sentinelle démarre par le registre ; `SENTINEL["obj"]` reste la sentinelle CI, donc tout ce qui l'interrogeait continue de fonctionner. Les événements, les fichiers et les points d'accès sont les mêmes.
+
+### Corrigé
+
+- Un test de la 1.7.0 lisait la sortie de `tasklist` avec la mauvaise page de codes et pouvait échouer sur un Windows d'une autre langue.
+
 ## [1.7.0]
 
 Plusieurs comptes dans l'édition complète, chacun un moniteur à part, et une page qui les connaît. L'édition lite ne change pas : un compte, et elle ne montre même pas les nouvelles options.

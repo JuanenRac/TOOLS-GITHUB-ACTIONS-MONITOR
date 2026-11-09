@@ -42,7 +42,7 @@ Die Originale werden nie verschoben oder gelöscht: Du löschst sie selbst, wenn
 
 ## Die Seite
 
-Die Seite ist die bekannte, mit einer Kontoauswahl unter der Kopfzeile und einem Eintrag **Alle Konten**, der eine Karte pro Konto zeigt (Zustand, Repositorys, laufend, fehlerhaft) und jedes davon öffnet. Jedes Fenster behält sein eigenes Konto und seine Ansicht: Sie werden aus der Adresse gelesen, nie aus einer einzigen Einstellung, die ein anderes Fenster überschreiben würde.
+Die Seite ist die bekannte, mit einer Kontoauswahl oben in der Seitenleiste und einem Eintrag **Alle Konten**, der eine Karte pro Konto zeigt (Zustand, Repositorys, laufend, fehlerhaft) und jedes davon öffnet. Jedes Fenster behält sein eigenes Konto und seine Ansicht: Sie werden aus der Adresse gelesen, nie aus einer einzigen Einstellung, die ein anderes Fenster überschreiben würde.
 
 | Adresse | Was sie zeigt |
 |---|---|

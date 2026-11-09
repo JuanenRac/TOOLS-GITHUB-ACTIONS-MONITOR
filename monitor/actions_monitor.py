@@ -145,7 +145,7 @@ def enable_lite():
 
 RESTART_PENDING = set()   # settings changed from the page since this process started that only apply after a restart
 STATE = {"data": None, "error": None, "hint": None}
-SENTINEL = {"obj": None, "error": None}  # the sentinel module (layer A); a failure of it never stops the monitor
+SENTINEL = {"obj": None, "error": None, "registry": None}  # the CI sentinel (layer A) and the registry of all of them; a failure of any never stops the monitor
 LOCK = threading.Lock()
 ISSUE_CACHE = {"at": 0.0, "items": [], "busy": False}
 RUN_CACHE = {}  # repo -> {"runs": [...], "at": float, "error": str|None}
@@ -1659,7 +1659,7 @@ UPDATE_SAID = []
 def start_sentinel(config):
     """Layer A of the Centinela in its own thread and cache; if the module fails, the monitor goes on and the tab shows a red notice."""
     try:
-        import sentinel_local
+        import sentinel_registry
 
         def repos_fn():
             data = STATE["data"]
@@ -1670,14 +1670,15 @@ def start_sentinel(config):
             except Exception:
                 return []
 
-        ctx = {"gh": gh, "repos_fn": repos_fn, "runs_fn": lambda: RUN_CACHE, "data_fn": lambda: STATE["data"], "eco_fn": ecosystem_of}
+        ctx = {"gh": gh, "repos_fn": repos_fn, "runs_fn": lambda: RUN_CACHE, "data_fn": lambda: STATE["data"], "eco_fn": ecosystem_of, "account_id": CHILD["account"]}
         import workspace
         if not workspace.has_workspace():   # optional: without the local clones the sentinel runs in reduced mode (GitHub API data only)
             print(i18n.t("mon.reduced_mode"))
-        SENTINEL["obj"] = sentinel_local.Sentinel(ctx, config)
+        SENTINEL["registry"] = sentinel_registry.SentinelRegistry.build(ctx, config)       # the sentinels by name (1.7.1); today only "ci"
+        SENTINEL["obj"] = SENTINEL["registry"].get("ci")                                   # the CI sentinel answers everything the monitor always asked of it
         import notifiers
         SENTINEL["obj"].feed.listeners.append(notifiers.make_listener(toolconfig.raw_config))
-        SENTINEL["obj"].start()
+        SENTINEL["registry"].start()
     except Exception as error:
         SENTINEL["error"] = i18n.t("mon.sentinel_start_failed", error=error)
         print(SENTINEL["error"])

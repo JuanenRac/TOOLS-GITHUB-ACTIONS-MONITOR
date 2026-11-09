@@ -42,7 +42,7 @@ Les originaux ne sont jamais déplacés ni supprimés : vous les supprimez vous-
 
 ## La page
 
-La page est celle que vous connaissez, avec un sélecteur de comptes sous l'en-tête et une entrée **Tous les comptes** qui montre une carte par compte (état, dépôts, en cours, en échec) et ouvre n'importe lequel. Chaque fenêtre garde son propre compte et sa propre vue : ils se lisent dans l'adresse, jamais dans un réglage unique qu'une autre fenêtre écraserait.
+La page est celle que vous connaissez, avec un sélecteur de comptes en haut du panneau latéral et une entrée **Tous les comptes** qui montre une carte par compte (état, dépôts, en cours, en échec) et ouvre n'importe lequel. Chaque fenêtre garde son propre compte et sa propre vue : ils se lisent dans l'adresse, jamais dans un réglage unique qu'une autre fenêtre écraserait.
 
 | Adresse | Ce qu'elle montre |
 |---|---|

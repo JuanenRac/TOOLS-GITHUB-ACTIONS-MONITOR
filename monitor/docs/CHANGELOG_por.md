@@ -7,6 +7,28 @@
 
 Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com o seu próprio semver. A fonte é o CHANGELOG.md em inglês; este ficheiro tem as mesmas versões e secções.
 
+## [1.7.1]
+
+Uma página nova e a mesma sentinela atrás de um contrato. A página tem um painel lateral à esquerda com o logótipo, as secções em grupos e dezasseis temas; a sentinela de CI é agora uma das sentinelas de um registo, e é isso que permite que cheguem as seguintes. O que o monitor mostra e decide não muda.
+
+### Adicionado
+
+- **Um painel lateral** (todas as edições): o logótipo da ferramenta (um SVG que se desenha com as cores do tema e fica parado quando o sistema pede menos movimento), o seletor de contas, as secções em três grupos que se recolhem (Vigiar, Dados, Sistema) e a ajuda. O painel contrai-se para os seus ícones e as duas escolhas ficam guardadas no navegador. A barra superior mostra o nome da secção e as ferramentas. As setas, também para cima e para baixo, passam de uma secção para outra. Num ecrã pequeno o painel passa para cima. `?chrome=0` esconde-o, como escondia a barra de separadores.
+- **Dezasseis temas** além de auto, claro e escuro: os do Studio do sistema de alarme (Armor, Aqua, Midnight, Ember, Forest, Violet, Solar, Ice, Crimson, Mono, High contrast, Metallic, Professional, Videogame, Terminal e Blueprint), escolhidos numa lista em Definições > Este navegador ou com `?theme=`. Cada um define a página, o painel lateral, os painéis, as linhas, o texto, o acento, os cantos e as letras. O verde, o vermelho, o âmbar e o azul mantêm o seu significado em todos, aclarados ou escurecidos onde um tema o precisa para que cada número se leia a 4,5:1 ou mais, e o texto de um distintivo segue a sua cor.
+- **`BaseSentinel`, `Alert` e `SentinelRegistry`** (`sentinel_base.py`, `sentinel_registry.py`; só a edição completa): o contrato de uma sentinela (`start`, `stop`, `tick`, `get_status`, `get_alerts`, `get_metrics`, `get_config_schema`, `refresh_seconds`), um alerta com um código estável que nunca depende da língua (`ci.red`, `ci.stuck`, `ci.pending_sign`) e a conta a que pertence, e um registo que dá a cada sentinela um relógio próprio. `sentinels.<nome>.enabled` em `actions_monitor.json` liga ou desliga uma; sem ele decide `sentinel.enabled`, como sempre, e onde os dois dizem algo ganha o bloco novo.
+- **`SentinelCI`** (`sentinel_ci.py`): a sentinela de sempre atrás desse contrato. Contém o `Sentinel` antigo e não muda a forma como decide: a mesma regra de vermelho (a última execução terminada de cada workflow no ramo por omissão), os mesmos ficheiros, o mesmo ciclo, a mesma instantânea.
+- Testes para cada alteração desta versão: o contrato, o registo e os seus interruptores, a sentinela de CI e os seus alertas em duas línguas, que a edição lite não carrega nada disto, o painel lateral e os dezasseis temas (que cada um define todas as variáveis e que o texto, o texto cinzento pequeno, o acento e as quatro cores de estado se leem a 4,5:1 na sua página e nos seus painéis).
+
+### Alterado
+
+- O tema escolhe-se numa lista em Definições > Este navegador (antes era um botão que percorria auto, claro e escuro); um tema guardado por uma versão anterior continua a ser entendido.
+- A cor de um distintivo, de uma barra e de um aviso que era branca sobre vermelho, âmbar ou verde é agora a que se lê sobre essa cor no tema em uso.
+- A sentinela arranca pelo registo; `SENTINEL["obj"]` continua a ser a sentinela de CI, por isso tudo o que lhe perguntava algo continua a funcionar. Os eventos, os ficheiros e os endpoints são os mesmos.
+
+### Corrigido
+
+- Um teste da 1.7.0 lia a saída de `tasklist` com a página de códigos errada e podia falhar num Windows com outra língua.
+
 ## [1.7.0]
 
 Várias contas na edição completa, cada uma um monitor próprio, e uma página que as conhece. A edição lite não muda: uma conta, e nem sequer mostra as opções novas.

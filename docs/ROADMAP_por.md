@@ -2,6 +2,10 @@
 
 Ideias que não couberam na versão atual, sem ordem prometida. São direções, não compromissos; uma issue ou um pull request é a melhor forma de fazer avançar uma.
 
+## Feito na 1.7.1
+
+Uma página com painel lateral (o logótipo, o seletor de contas, as secções em grupos que se recolhem, a ajuda) e dezasseis temas além de auto, claro e escuro, os do Studio do sistema de alarme; e a sentinela de CI atrás de um contrato (`BaseSentinel`, `Alert`, `SentinelRegistry`, `SentinelCI`), para poder juntar as sentinelas seguintes sem que o monitor saiba o que faz cada uma. O que se mostra e se decide não muda.
+
 ## Feito na 1.7.0
 
 Várias contas na edição completa, cada uma um monitor próprio sob um supervisor (`accounts/<id>/`, `--accounts`, `--account`, `--migrate-accounts`), a API das contas, um webhook para todas, a página com um seletor e os cartões de todas as contas, as vistas por endereço (`?view=` e `?chrome=0`) e a vista Ao vivo com o estado do recetor de webhook. A edição lite não muda.

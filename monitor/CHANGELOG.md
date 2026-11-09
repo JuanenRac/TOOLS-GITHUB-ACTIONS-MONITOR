@@ -9,6 +9,28 @@ Version of the tool itself (monitor + sentinel + batch tools), semver of its own
 and is shown as `tool_version` in the sentinel snapshot and by `read_report.py --version`; `make_release.py` refuses to build
 when this file and `tool_version.py` disagree.
 
+## [1.7.1]
+
+A new page and the same sentinel behind a contract. The page has a side panel on the left with the logo, the sections in groups and sixteen themes; the CI sentinel is now one of the sentinels of a registry, which is what lets the next ones arrive. What the monitor shows and decides does not change.
+
+### Added
+
+- **A side panel** (all editions): the logo of the tool (an SVG that draws itself with the colours of the theme and stands still when the system asks for less motion), the account switcher, the sections in three groups that fold (Watch, Data, System) and the help. The panel collapses to its icons and both choices are remembered in the browser. The top bar shows the name of the section and the tools. The arrow keys, up and down too, move between sections. On a small screen the panel goes on top. `?chrome=0` hides it, as it hid the tab bar.
+- **Sixteen themes** besides auto, light and dark: the ones of the alarm system Studio (Armor, Aqua, Midnight, Ember, Forest, Violet, Solar, Ice, Crimson, Mono, High contrast, Metallic, Professional, Videogame, Terminal and Blueprint), chosen from a list in Settings > This browser or with `?theme=`. Each one sets the page, the side panel, the panels, the lines, the text, the accent, the corners and the letters. Green, red, amber and blue keep their meaning in all of them, lightened or darkened where a theme needs it so that every figure reads at 4.5:1 or more, and the text of a badge follows its colour.
+- **`BaseSentinel`, `Alert` and `SentinelRegistry`** (`sentinel_base.py`, `sentinel_registry.py`; the complete edition only): the contract of a sentinel (`start`, `stop`, `tick`, `get_status`, `get_alerts`, `get_metrics`, `get_config_schema`, `refresh_seconds`), an alert with a stable code that never depends on the language (`ci.red`, `ci.stuck`, `ci.pending_sign`) and the account it belongs to, and a registry that gives every sentinel a clock of its own. `sentinels.<name>.enabled` in `actions_monitor.json` switches one on or off; without it `sentinel.enabled` decides, as always, and where both say something the new block wins.
+- **`SentinelCI`** (`sentinel_ci.py`): the sentinel of always behind that contract. It holds the old `Sentinel` and does not change how it decides: the same rule of red (the last completed run of each workflow on the default branch), the same files, the same loop, the same snapshot.
+- Tests for every change of this release: the contract, the registry and its switches, the CI sentinel and its alerts in two languages, that the lite edition loads none of it, the side panel, and the sixteen themes (that each one defines every variable and that the text, the small grey text, the accent and the four status colours read at 4.5:1 on its page and its panels).
+
+### Changed
+
+- The theme is chosen from a list in Settings > This browser (it was a button that went round auto, light and dark); a theme saved by an earlier version is still understood.
+- The colour of a badge, a bar and a notice that was white on red, amber or green is now the one that reads on that colour in the theme in use.
+- The sentinel is started through the registry; `SENTINEL["obj"]` is still the CI sentinel, so everything that asked it something keeps working. The events, the files and the endpoints are the same.
+
+### Fixed
+
+- A test of 1.7.0 read the output of `tasklist` in the wrong code page and could fail on a Windows with another language.
+
 ## [1.7.0]
 
 Several accounts in the complete edition, each one a monitor of its own, and a page that knows about them. The lite edition is unchanged: one account, and it does not even show the new options.

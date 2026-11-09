@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITOR DI GITHUB ACTIONS + SENTINELLA (versione 1.7.0)
+MONITOR DI GITHUB ACTIONS + SENTINELLA (versione 1.7.1)
 =======================================================
 QUALE AVVIARE? (un nuovo utente decide in due minuti)
   COMPLETA  MONITOR_GITHUB_ACTIONS.*       la pagina con la sentinella (porta 8765): avvisi, coda di firma, analisi. Parti da qui se hai più repository.
@@ -89,6 +89,10 @@ LICENZA    GPL-3.0-or-later (vedi LICENSE e NOTICE). Copyright (C) 2026 JuanenRa
 GUIDA, INFORMAZIONI E VERIFICHE (1.6.4)
 ---------------------------------------
 La pagina ha un pulsante Guida (? rotondo) e uno Informazioni (i); da console: --help-topics, --help-search, --about e --doctor; --demo mostra la pagina con dati inventati. L'edizione lite parte con un proprio banner e titolo di finestra (LITE, porta 8766, senza sentinella); la completa indica COMPLETE, porta 8765, sentinella attiva. L'avviso di nuova versione si può spegnere (Impostazioni > Di base).
+
+NOVITÀ DELLA 1.7.1 (pannello laterale, sedici temi, un contratto per le sentinelle; storico: CHANGELOG.md)
+  La pagina ha un pannello laterale a sinistra con il logo, le sezioni in gruppi e la guida; si riduce alle sue icone. Sedici temi oltre ad auto, chiaro e scuro (Impostazioni > Questo browser).
+  La sentinella CI sta ora dietro un contratto (BaseSentinel, SentinelRegistry), così si possono aggiungere le prossime; ciò che mostra e decide non cambia. L'edizione lite non ha nulla di tutto ciò.
 
 NOVITÀ DELLA 1.7.0 (più account; storico: CHANGELOG.md)
   L'edizione completa può osservare più account GitHub: una cartella accounts/<id>/ per account e un monitor per account sotto un supervisore, così il guasto di uno non tocca mai un altro.

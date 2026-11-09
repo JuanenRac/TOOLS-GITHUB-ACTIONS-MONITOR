@@ -42,7 +42,7 @@ Os originais nunca são movidos nem apagados: apaga-os você depois de verificar
 
 ## A página
 
-A página é a que conhece, com um seletor de contas por baixo do cabeçalho e uma entrada **Todas as contas** que mostra um cartão por conta (estado, repositórios, em curso, em falha) e abre qualquer uma. Cada janela guarda a sua própria conta e vista: lêem-se do endereço, nunca de uma definição única que outra janela pisaria.
+A página é a que conhece, com um seletor de contas no topo do painel lateral e uma entrada **Todas as contas** que mostra um cartão por conta (estado, repositórios, em curso, em falha) e abre qualquer uma. Cada janela guarda a sua própria conta e vista: lêem-se do endereço, nunca de uma definição única que outra janela pisaria.
 
 | Endereço | O que mostra |
 |---|---|

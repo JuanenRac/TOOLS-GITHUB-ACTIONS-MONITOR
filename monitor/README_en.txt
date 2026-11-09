@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GITHUB ACTIONS MONITOR + SENTINEL (version 1.7.0)
+GITHUB ACTIONS MONITOR + SENTINEL (version 1.7.1)
 =================================================
 WHICH ONE TO START? (a new user decides in two minutes)
   COMPLETE  MONITOR_GITHUB_ACTIONS.*       the page with the sentinel (port 8765): alerts, signing queue, analytics. Start here if you own several repositories.
@@ -89,6 +89,10 @@ LICENCE    GPL-3.0-or-later (see LICENSE and NOTICE). Copyright (C) 2026 JuanenR
 HELP, ABOUT AND CHECKS (1.6.4)
 -----------------------------
 The page has an Help button (round ?) and an About button (i); in the console use --help-topics, --help-search, --about and --doctor; --demo shows the page with invented data. The lite edition starts with its own banner and window title (LITE, port 8766, no sentinel); the complete edition says COMPLETE, port 8765, sentinel on. A notice of a newer version can be switched off (Settings > Basic).
+
+WHAT IS NEW IN 1.7.1 (a side panel, sixteen themes, one contract for the sentinels; history: CHANGELOG.md)
+  The page has a side panel on the left with the logo, the sections in groups and the help; it folds to its icons. Sixteen themes besides auto, light and dark (Settings > This browser).
+  The CI sentinel now sits behind a contract (BaseSentinel, SentinelRegistry), so the next ones can be added; what it shows and decides does not change. The lite edition has none of it.
 
 WHAT IS NEW IN 1.7.0 (several accounts; history: CHANGELOG.md)
   The complete edition can watch several GitHub accounts: one folder accounts/<id>/ per account and one monitor per account under a supervisor, so a failure of one never touches another.

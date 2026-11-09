@@ -2,6 +2,10 @@
 
 Des idées qui n'ont pas tenu dans la version actuelle, sans ordre promis. Ce sont des directions, pas des engagements ; une issue ou une pull request est la meilleure façon d'en faire avancer une.
 
+## Fait dans la 1.7.1
+
+Une page avec un panneau latéral (le logo, le sélecteur de comptes, les sections en groupes repliables, l'aide) et seize thèmes en plus d'auto, clair et sombre, ceux du Studio du système d'alarme ; et la sentinelle CI derrière un contrat (`BaseSentinel`, `Alert`, `SentinelRegistry`, `SentinelCI`), pour pouvoir ajouter les sentinelles suivantes sans que le moniteur sache ce que fait chacune. Ce qui est montré et décidé ne change pas.
+
 ## Fait dans la 1.7.0
 
 Plusieurs comptes dans l'édition complète, chacun un moniteur à part sous un superviseur (`accounts/<id>/`, `--accounts`, `--account`, `--migrate-accounts`), l'API des comptes, un webhook pour tous, la page avec un sélecteur et les cartes de tous les comptes, les vues par adresse (`?view=` et `?chrome=0`) et la vue En direct avec l'état du récepteur de webhook. L'édition lite ne change pas.

@@ -370,7 +370,7 @@ class Isolation(Running):
         self.assertEqual(get(f"{self.url}/api/health?account=beta")[0], 404)
         time.sleep(1.0)
         if sys.platform == "win32":
-            out = subprocess.run(["tasklist", "/FI", f"PID eq {beta_pid}", "/NH"], capture_output=True, text=True).stdout
+            out = subprocess.run(["tasklist", "/FI", f"PID eq {beta_pid}", "/NH"], capture_output=True, text=True, errors="replace").stdout or ""
             self.assertNotIn(str(beta_pid), out, "the process of the account that was switched off is gone")
         else:
             with self.assertRaises(ProcessLookupError):
@@ -386,7 +386,7 @@ class Isolation(Running):
         time.sleep(1.0)
         for pid in pids:
             if sys.platform == "win32":
-                out = subprocess.run(["tasklist", "/FI", f"PID eq {pid}", "/NH"], capture_output=True, text=True).stdout
+                out = subprocess.run(["tasklist", "/FI", f"PID eq {pid}", "/NH"], capture_output=True, text=True, errors="replace").stdout or ""
                 self.assertNotIn(str(pid), out)
             else:
                 with self.assertRaises(ProcessLookupError):
