@@ -28,6 +28,7 @@ Una pagina nuova e la stessa sentinella dietro un contratto. La pagina ha un pan
 ### Corretto
 
 - Un test della 1.7.0 leggeva l'output di `tasklist` con la tabella di caratteri sbagliata e poteva fallire su un Windows con un'altra lingua.
+- **Un rifiuto poteva perdersi per strada** (tutte le edizioni): un POST che il monitor rifiutava prima di leggerne il corpo (token mancante, corpo troppo grande) chiudeva la connessione con dati non letti, e Windows, a volte Linux, rispondeva con un reset: il client vedeva una connessione interrotta invece del 403 dovuto. Ora il monitor legge e scarta ciò che resta del corpo (fino a 1 MB, al massimo 2 secondi) dopo aver risposto, così la risposta arriva sempre. Il rifiuto, il suo codice e il suo testo sono gli stessi. Un test invia le intestazioni, attende e invia il corpo, e fallisce senza questo.
 
 ## [1.7.0]
 

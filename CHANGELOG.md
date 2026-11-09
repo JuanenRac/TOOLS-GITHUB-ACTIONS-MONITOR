@@ -29,6 +29,7 @@ A new page and the same sentinel behind a contract. The page has a side panel on
 ### Fixed
 
 - A test of 1.7.0 read the output of `tasklist` in the wrong code page and could fail on a Windows with another language.
+- **A refusal could be lost on the way** (all editions): a POST that the monitor refused before reading its body (a missing token, a body too big) closed the connection with data still unread, and Windows, sometimes Linux, answered with a reset: the client saw a broken connection instead of the 403 it was owed. The monitor now reads and drops what is left of a body (up to 1 MB, for at most 2 seconds) after it has answered, so the answer always arrives. The refusal itself, its code and its text are the same. A test sends the headers, waits and sends the body, and fails without this.
 
 ## [1.7.0]
 

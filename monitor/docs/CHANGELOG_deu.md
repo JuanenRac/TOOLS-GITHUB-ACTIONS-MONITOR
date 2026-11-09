@@ -28,6 +28,7 @@ Eine neue Seite und derselbe Wächter hinter einem Vertrag. Die Seite hat links 
 ### Behoben
 
 - Ein Test der 1.7.0 las die Ausgabe von `tasklist` mit der falschen Codepage und konnte auf einem Windows mit anderer Sprache fehlschlagen.
+- **Eine Ablehnung konnte unterwegs verloren gehen** (alle Editionen): ein POST, den der Monitor ablehnte, bevor er seinen Rumpf las (fehlendes Token, zu großer Rumpf), schloss die Verbindung mit ungelesenen Daten, und Windows, manchmal auch Linux, antwortete mit einem Reset: der Client sah eine abgebrochene Verbindung statt des geschuldeten 403. Der Monitor liest und verwirft jetzt nach der Antwort, was vom Rumpf übrig ist (bis 1 MB, höchstens 2 Sekunden), sodass die Antwort immer ankommt. Die Ablehnung selbst, ihr Code und ihr Text sind dieselben. Ein Test sendet die Kopfzeilen, wartet und sendet den Rumpf, und schlägt ohne dies fehl.
 
 ## [1.7.0]
 

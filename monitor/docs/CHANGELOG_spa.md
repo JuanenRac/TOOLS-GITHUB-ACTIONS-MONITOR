@@ -28,6 +28,7 @@ Una página nueva y el mismo centinela detrás de un contrato. La página tiene 
 ### Corregido
 
 - Una prueba de la 1.7.0 leía la salida de `tasklist` con la página de códigos equivocada y podía fallar en un Windows con otro idioma.
+- **Una negativa podía perderse por el camino** (todas las ediciones): un POST que el monitor rechazaba antes de leer su cuerpo (falta de token, cuerpo demasiado grande) cerraba la conexión con datos sin leer, y Windows, a veces Linux, respondía con un reinicio: el cliente veía una conexión rota en vez del 403 que se le debía. Ahora el monitor lee y descarta lo que queda del cuerpo (hasta 1 MB, durante 2 segundos como máximo) después de contestar, así que la respuesta siempre llega. La negativa, su código y su texto son los mismos. Una prueba envía las cabeceras, espera y envía el cuerpo, y falla sin esto.
 
 ## [1.7.0]
 

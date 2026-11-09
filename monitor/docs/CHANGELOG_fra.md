@@ -28,6 +28,7 @@ Une nouvelle page et la même sentinelle derrière un contrat. La page a un pann
 ### Corrigé
 
 - Un test de la 1.7.0 lisait la sortie de `tasklist` avec la mauvaise page de codes et pouvait échouer sur un Windows d'une autre langue.
+- **Un refus pouvait se perdre en chemin** (toutes les éditions) : un POST que le moniteur refusait avant de lire son corps (jeton absent, corps trop gros) fermait la connexion avec des données non lues, et Windows, parfois Linux, répondait par une réinitialisation : le client voyait une connexion rompue au lieu du 403 qui lui était dû. Le moniteur lit et jette désormais ce qui reste du corps (jusqu'à 1 Mo, 2 secondes au plus) après avoir répondu, de sorte que la réponse arrive toujours. Le refus lui-même, son code et son texte sont les mêmes. Un test envoie les en-têtes, attend et envoie le corps, et échoue sans cela.
 
 ## [1.7.0]
 

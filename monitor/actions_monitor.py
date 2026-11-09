@@ -904,6 +904,23 @@ def render_page():
 
 DISCONNECTS = [0]     # requests whose browser went away before the answer was sent (counted in /metrics, never printed)
 CLIENT_GONE = (ConnectionAbortedError, ConnectionResetError, BrokenPipeError)
+DRAIN_MAX = 1_048_576  # the most of an unread body that is read and dropped after an answer (see Handler.drain_body)
+DRAIN_WAIT = 2.0       # seconds to wait for the rest of it
+
+
+class CountedReader:
+    """The input of a request, counting what the handlers read, so that what is left can be dropped after the answer."""
+
+    def __init__(self, stream):
+        self.stream, self.count = stream, 0
+
+    def read(self, size=-1):
+        data = self.stream.read(size)
+        self.count += len(data)
+        return data
+
+    def __getattr__(self, name):
+        return getattr(self.stream, name)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -1040,11 +1057,35 @@ class Handler(BaseHTTPRequestHandler):
         self.json_reply({"ok": False, "errors": {"_": "token"}}, 403)
         return False
 
-    def do_POST(self):
-        if not self.access_gate():
+    def drain_body(self, counted):
+        """Reads and drops what the client sent and nobody read (a request refused with 403, 404 or 413 before its body was looked at). Closing a connection that still has unread data makes
+        Windows (and sometimes Linux) send a reset, and the client then loses the answer it was owed: it saw `ConnectionAbortedError` instead of the 403. A cap and a short wait keep it harmless."""
+        try:
+            left = min(int(self.headers.get("Content-Length") or 0), DRAIN_MAX) - counted.count
+        except ValueError:
             return
-        with i18n.use_language(self.request_language()):
-            self.handle_post()
+        if left <= 0:
+            return
+        try:
+            self.connection.settimeout(DRAIN_WAIT)
+            while left > 0:
+                chunk = counted.read(min(left, 65536))
+                if not chunk:
+                    break
+                left -= len(chunk)
+        except OSError:
+            pass
+
+    def do_POST(self):
+        counted = CountedReader(self.rfile)
+        self.rfile = counted
+        try:
+            if not self.access_gate():
+                return
+            with i18n.use_language(self.request_language()):
+                self.handle_post()
+        finally:
+            self.drain_body(counted)
 
     def handle_post(self):
         path = self.path.split("?")[0]

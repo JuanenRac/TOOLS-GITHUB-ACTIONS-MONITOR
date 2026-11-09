@@ -348,5 +348,91 @@ class Themes(unittest.TestCase):
         self.assertIn('document.documentElement.setAttribute("data-theme",t)', PAGE)
 
 
+
+class RefusedPostKeepsItsAnswer(unittest.TestCase):
+    """A POST refused before its body is read (403 for a missing token, 413 for a body too big) used to close the connection with data still unread: Windows turned that into a reset and the
+    client lost the answer it was owed (test_163 failed once in the CI with ConnectionAbortedError). The server now reads and drops what is left, with a cap."""
+
+    def setUp(self):
+        import json
+        import threading
+        from http.server import ThreadingHTTPServer
+        import actions_monitor as am
+        self.am, self.json = am, json
+        self.saved = dict(am.LIVE_CONFIG)
+        am.LIVE_CONFIG["session_guard"] = True
+        self.server = ThreadingHTTPServer(("127.0.0.1", 0), am.Handler)
+        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+        self.port = self.server.server_address[1]
+        self.addCleanup(self.stop)
+
+    def stop(self):
+        self.server.shutdown()
+        self.server.server_close()
+        self.am.LIVE_CONFIG.clear()
+        self.am.LIVE_CONFIG.update(self.saved)
+
+    def raw_post(self, path, body, declared=None, delay=0.3):
+        """The headers first, a pause (the server answers and would close), then the body: the order in which the loss happened."""
+        import socket
+        import time
+        head = (f"POST {path} HTTP/1.1\r\nHost: 127.0.0.1:{self.port}\r\nContent-Type: application/json\r\nContent-Length: {len(body) if declared is None else declared}\r\n"
+                f"X-Monitor-Token: {'0' * 32}\r\n\r\n").encode()
+        sock = socket.create_connection(("127.0.0.1", self.port), timeout=8)
+        try:
+            sock.sendall(head)
+            time.sleep(delay)
+            try:
+                sock.sendall(body)
+            except OSError:
+                pass
+            data = b""
+            while True:
+                chunk = sock.recv(4096)
+                if not chunk:
+                    break
+                data += chunk
+            return data
+        finally:
+            sock.close()
+
+    def test_a_refusal_before_the_body_still_reaches_the_client(self):
+        body = self.json.dumps({"changes": {"refresh_seconds": 70}}).encode()
+        for attempt in range(3):
+            answer = self.raw_post("/api/settings", body)
+            self.assertIn(b" 403 ", answer.split(b"\r\n", 1)[0], f"attempt {attempt}: {answer[:80]!r}")
+
+    def test_a_body_that_was_read_is_not_read_twice_and_the_answer_is_the_same(self):
+        import tempfile
+        import settings_api
+        with tempfile.TemporaryDirectory() as tmp:
+            saved = (self.am.CONFIG_FILE, settings_api.CONFIG_FILE, settings_api.BACKUP_DIR)
+            self.am.CONFIG_FILE = settings_api.CONFIG_FILE = Path(tmp) / "c.json"
+            settings_api.BACKUP_DIR = Path(tmp) / "b"
+            (Path(tmp) / "c.json").write_text("{}", encoding="utf-8")
+            self.am.LIVE_CONFIG["session_guard"] = False
+            try:
+                body = self.json.dumps({"changes": {"refresh_seconds": 70}}).encode()
+                answer = self.raw_post("/api/settings", body, delay=0.0)
+            finally:
+                self.am.CONFIG_FILE, settings_api.CONFIG_FILE, settings_api.BACKUP_DIR = saved
+        self.assertIn(b" 200 ", answer.split(b"\r\n", 1)[0], answer[:200])
+
+    def test_an_absurd_declared_size_is_not_waited_for_and_never_hangs_the_server(self):
+        import time
+        started = time.time()
+        answer = self.raw_post("/api/settings", b"{}", declared=10 ** 12, delay=0.0)
+        self.assertIn(b" 403 ", answer.split(b"\r\n", 1)[0])
+        self.assertLess(time.time() - started, self.am.DRAIN_WAIT + 6)
+
+    def test_the_counter_counts_what_the_handlers_read_and_passes_everything_else_through(self):
+        import io
+        reader = self.am.CountedReader(io.BytesIO(b"abcdef"))
+        self.assertEqual((reader.read(2), reader.read(10)), (b"ab", b"cdef"))
+        self.assertEqual(reader.count, 6)
+        self.assertEqual(reader.read(1), b"")
+        self.assertTrue(callable(reader.readline))
+
+
 if __name__ == "__main__":
     unittest.main()

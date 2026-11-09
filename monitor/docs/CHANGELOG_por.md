@@ -28,6 +28,7 @@ Uma página nova e a mesma sentinela atrás de um contrato. A página tem um pai
 ### Corrigido
 
 - Um teste da 1.7.0 lia a saída de `tasklist` com a página de códigos errada e podia falhar num Windows com outra língua.
+- **Uma recusa podia perder-se pelo caminho** (todas as edições): um POST que o monitor recusava antes de ler o seu corpo (token em falta, corpo demasiado grande) fechava a ligação com dados por ler, e o Windows, por vezes o Linux, respondia com um reinício: o cliente via uma ligação interrompida em vez do 403 que lhe era devido. Agora o monitor lê e descarta o que resta do corpo (até 1 MB, no máximo 2 segundos) depois de responder, por isso a resposta chega sempre. A recusa, o seu código e o seu texto são os mesmos. Um teste envia os cabeçalhos, espera e envia o corpo, e falha sem isto.
 
 ## [1.7.0]
 
