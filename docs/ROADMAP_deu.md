@@ -2,6 +2,10 @@
 
 Ideen, die nicht in die aktuelle Version passten, ohne versprochene Reihenfolge. Es sind Richtungen, keine Zusagen; ein Issue oder ein Pull Request ist der beste Weg, eine voranzubringen.
 
+## Erledigt in 1.6.8
+
+Der HTTPS-Proxy aus 1.6.7 wird gegen einen echten Proxy auf Port 443 geprüft (`tools/manual_check_live.py proxy` und Tests, die einen Client über TLS, einen Reverse-Proxy und den Monitor durchlaufen), die Bilder sind neu aufgenommen mit zwei neuen zum Netzwerkmodus, und die Änderungshistorie ist in den anderen sieben Sprachen bis 1.6.3 übersetzt.
+
 ## Erledigt in 1.6.7
 
 Ein HTTPS-Proxy auf dem Standardport 443 funktioniert jetzt mit dem Netzwerkmodus (`listen.proxy_public_host`, standardmäßig leer: der eine öffentliche Name des Proxys wird ohne Port akzeptiert, nur unter HTTPS, und er lässt sich nur vom Rechner selbst ändern), und die Änderungshistorie ist in den anderen sieben Sprachen für 1.6.7, 1.6.6 und 1.6.5 übersetzt.
@@ -23,7 +27,7 @@ Isolationstests der Lite-Edition und der Demo, keinerlei Netzwerkanfrage, wenn d
 Was 1.6.4 nicht erreicht hat, und warum:
 
 - **Entschieden, nicht erledigt in 1.6.6**: die aktive Benachrichtigung einer externen KI (standardmäßig aus, eine erste Bestätigung je Anbieter, nur die bereits gefilterten Felder der geschlossenen Liste, ein Limit für Aufrufe und Kosten pro Stunde, der Schlüssel über den Namen einer Umgebungsvariable, und die KI führt nie eine Aktion aus) mit ihrer Variante eines ausgehenden Befehls (geschlossene Liste, keine Shell); und die Repositories mehrerer Besitzer auf einer Seite (der Monitor erkennt ein Repository nur am Namen und braucht daher den Besitzer in jeder Kennung; Grundlage für mehrere Konten). Jedes ist eine eigene Funktion mit eigenem Entwurf und eigenen Tests, deshalb schloss 1.6.6 zuerst die Korrekturen ab.
-- **Die älteren Einträge des Änderungsprotokolls in den anderen sieben Sprachen**: Die Hilfe zeigt den Verlauf in jeder Sprache, und 1.6.7, 1.6.6 und 1.6.5 sind übersetzt; 1.6.4 und ältere behalten den englischen Text unter einem übersetzten Hinweis und werden Version für Version übersetzt, von der neuesten zur ältesten.
+- **Die älteren Einträge des Änderungsprotokolls in den anderen sieben Sprachen**: Die Hilfe zeigt den Verlauf in jeder Sprache, und 1.6.8 bis 1.6.3 sind übersetzt; 1.6.2 und ältere behalten den englischen Text unter einem übersetzten Hinweis und werden Version für Version übersetzt, von der neuesten zur ältesten.
 - **Mehrere Besitzer in einer Seite**: Der Monitor erkennt ein Repository allein an seinem Namen (Läufe, Wächter, Cache, Exporte); zwei Besitzer mit gleichnamigem Repository würden sich vermischen. Organisationen werden aufgelistet und jede von einem eigenen Monitor überwacht (`github_owner`). In einer Seite bräuchte jede Kennung den Besitzer.
 - **Der Abrechnungsbericht mit einem Login, der ihn lesen darf**: Die echte Antwort für einen Login ohne den Scope `user` ist „nicht gefunden“, und der Monitor fällt auf die Schätzung zurück (geprüft); die Zahlen selbst wurden nicht mit einem Abrechnungskonto verglichen.
 - **Die Preise größerer Runner** in `quotas.json` stammen aus dem Gedächtnis der öffentlichen Preisliste und sind als ungeprüft markiert; vergleiche sie mit der Abrechnungsseite von GitHub und bearbeite die Datei.

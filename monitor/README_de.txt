@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GITHUB-ACTIONS-MONITOR + WÄCHTER (Version 1.6.7)
+GITHUB-ACTIONS-MONITOR + WÄCHTER (Version 1.6.8)
 ================================================
 WELCHE STARTEN? (ein neuer Nutzer entscheidet in zwei Minuten)
   KOMPLETT  MONITOR_GITHUB_ACTIONS.*       die Seite mit dem Wächter (Port 8765): Alarme, Signierwarteschlange, Analyse. Hier beginnen, wenn Sie mehrere Repositories haben.
@@ -89,6 +89,10 @@ LIZENZ     GPL-3.0-or-later (siehe LICENSE und NOTICE). Copyright (C) 2026 Juane
 HILFE, ÜBER UND PRÜFUNGEN (1.6.4)
 ---------------------------------
 Die Seite hat eine Hilfe-Taste (rundes ?) und eine Über-Taste (i); in der Konsole: --help-topics, --help-search, --about und --doctor; --demo zeigt die Seite mit erfundenen Daten. Die Lite-Ausgabe startet mit eigenem Banner und Fenstertitel (LITE, Port 8766, ohne Wächter); die vollständige meldet COMPLETE, Port 8765, Wächter aktiv. Der Hinweis auf neue Versionen lässt sich abschalten (Einstellungen > Grundlagen).
+
+NEU IN 1.6.8 (Proxy wirklich geprüft; Verlauf: CHANGELOG.md)
+  Der HTTPS-Proxy aus 1.6.7 wird gegen einen echten Proxy auf Port 443 geprüft (tools/manual_check_live.py proxy im Repository) und mit Tests, die die ganze Kette durchlaufen. Das
+  Änderungsprotokoll ist bis 1.6.3 übersetzt (Hilfe > Änderungsprotokoll). Keine Einstellung ändert sich.
 
 NEU IN 1.6.7 (HTTPS-Proxy auf dem Standardport; Verlauf: CHANGELOG.md)
   Neue Einstellung listen.proxy_public_host (standardmäßig leer): Der öffentliche Name eines HTTPS-Proxys auf Port 443, der Host und Origin ohne Port weiterleitet, wird unverändert

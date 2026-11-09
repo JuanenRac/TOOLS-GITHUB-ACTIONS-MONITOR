@@ -41,6 +41,9 @@ WEB = [("about", "tab=now&dlg=about", (1400, 900)), ("help", "tab=cfg&dlg=help&t
 LITE_WEB = [("lite_about", "tab=now&dlg=about", (1400, 900)), ("lite_basic", "tab=cfg&cfgtab=basic", (1400, 900)), ("lite_now", "tab=now", (1400, 820)), ("lite_charts", "tab=charts", (1400, 820)), ("lite_history", "tab=hist", (1400, 820)), ("lite_settings", "tab=cfg&cfgtab=general", (1400, 700))]
 
 
+NETWORK_WEB = [("network_now", "tab=now", (1400, 820)), ("network_settings", "tab=cfg&cfgtab=advanced", (1400, 1180))]      # the page of the network mode: the red bar and the warning for every interface
+
+
 FAILED = []      # the pictures that were not made: the exit code says so
 
 
@@ -178,6 +181,8 @@ def main():
     work = tempfile.mkdtemp(prefix="ghamon_shots_")
     lite_port = free_port()
     lite = subprocess.Popen([sys.executable, "-I", str(ROOT / "tools" / "demo_monitor.py"), str(lite_port), "--lite"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    net_port = free_port()
+    net = subprocess.Popen([sys.executable, "-I", str(ROOT / "tools" / "demo_monitor.py"), str(net_port), "--network"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:
         for _ in range(60):
             try:
@@ -207,6 +212,18 @@ def main():
                     if wanted(f"web_{name}"):
                         shot(f"http://127.0.0.1:{lite_port}/?{query}&theme={theme}&lang=en&nowizard=1", str(OUT / f"web_{name}_{theme}.png"), size)
                         print("web", name, theme, flush=True)
+        if args.web or both:
+            for _ in range(60):
+                try:
+                    socket.create_connection(("127.0.0.1", net_port), 0.5).close()
+                    break
+                except OSError:
+                    time.sleep(0.5)
+            for name, query, size in NETWORK_WEB:
+                for theme in ("light", "dark"):
+                    if wanted(f"web_{name}"):
+                        shot(f"http://127.0.0.1:{net_port}/?{query}&theme={theme}&lang=en&nowizard=1", str(OUT / f"web_{name}_{theme}.png"), size)
+                        print("web", name, theme, flush=True)
         if args.console or both:
             texts = console_texts(port, work)
             for name, (title, command, text) in texts.items():
@@ -228,6 +245,7 @@ def main():
     finally:
         demo.terminate()
         lite.terminate()
+        net.terminate()
         shutil.rmtree(work, ignore_errors=True)
     if FAILED:
         print("%d picture(s) were not made; take them by hand (see docs/CONTRIBUTING: start --demo, open the page, save one capture per tab)." % len(FAILED), flush=True)

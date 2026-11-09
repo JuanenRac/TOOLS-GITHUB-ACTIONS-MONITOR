@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITOR DI GITHUB ACTIONS + SENTINELLA (versione 1.6.7)
+MONITOR DI GITHUB ACTIONS + SENTINELLA (versione 1.6.8)
 =======================================================
 QUALE AVVIARE? (un nuovo utente decide in due minuti)
   COMPLETA  MONITOR_GITHUB_ACTIONS.*       la pagina con la sentinella (porta 8765): avvisi, coda di firma, analisi. Parti da qui se hai più repository.
@@ -89,6 +89,10 @@ LICENZA    GPL-3.0-or-later (vedi LICENSE e NOTICE). Copyright (C) 2026 JuanenRa
 GUIDA, INFORMAZIONI E VERIFICHE (1.6.4)
 ---------------------------------------
 La pagina ha un pulsante Guida (? rotondo) e uno Informazioni (i); da console: --help-topics, --help-search, --about e --doctor; --demo mostra la pagina con dati inventati. L'edizione lite parte con un proprio banner e titolo di finestra (LITE, porta 8766, senza sentinella); la completa indica COMPLETE, porta 8765, sentinella attiva. L'avviso di nuova versione si può spegnere (Impostazioni > Di base).
+
+NOVITÀ DELLA 1.6.8 (proxy verificato davvero; storico: CHANGELOG.md)
+  Il proxy HTTPS della 1.6.7 è verificato contro un proxy reale sulla porta 443 (tools/manual_check_live.py proxy nel repository) e da test che percorrono l'intera catena. Il registro
+  delle modifiche è tradotto fino alla 1.6.3 (Aiuto > Registro delle modifiche). Nessuna impostazione cambia.
 
 NOVITÀ DELLA 1.6.7 (proxy HTTPS sulla porta predefinita; storico: CHANGELOG.md)
   Nuova impostazione listen.proxy_public_host (vuota per impostazione predefinita): il nome pubblico di un proxy HTTPS sulla porta 443 che inoltra Host e Origin senza porta è accettato

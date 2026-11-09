@@ -74,3 +74,10 @@ Nothing has to be converted. What now behaves differently, on purpose:
 
 - **Network mode behind an HTTPS proxy on port 443**: new setting `listen.proxy_public_host` (empty by default, nothing changes if you leave it). Put the public host name of the proxy there when it forwards `Host` and `Origin` without a port; that one name is then accepted as it is, only while the network mode is on and the session is HTTPS. It can only be changed from the computer itself. Behind a proxy that keeps the port nothing changes.
 - The history of changes (Help > Changelog) is now translated for 1.6.7 and 1.6.5 in the other seven languages; older entries still show the English text under a translated notice.
+
+# From 1.6.7 to 1.6.8
+
+Nothing has to be converted and no setting changes.
+
+- New in the repository (not in the package): `python tools/manual_check_live.py proxy HOST [PORT] [CONNECT]` checks your real HTTPS proxy on port 443 against `listen.proxy_public_host`; set `MONITOR_ACCESS_TOKEN` first, it is read and never printed.
+- The history of changes (Help > Changelog) is now translated in the other seven languages from 1.6.8 back to 1.6.3.

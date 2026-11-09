@@ -7,6 +7,26 @@
 
 ツール自体(モニター + センチネル + バッチツール)のバージョンで、独自のセマンティックバージョニングです。元は英語の CHANGELOG.md で、このファイルは同じバージョンと節を持ちます。
 
+## [1.6.8]
+
+1.6.7 の HTTPS プロキシを実際のプロキシで検証するようにし、画像を撮り直し、変更履歴を 1.6.3 まで翻訳しました。
+
+### 追加
+
+- `python tools/manual_check_live.py proxy ホスト [ポート] [接続先]`: 実際の HTTPS プロキシ(ポート 443)を通して、ページが受け入れられること(本文のアクセストークンでセッションが開き、クッキーが `Secure` と `HttpOnly` で返る)と、3 つのリクエストが拒否されたままであること(別のスキーム、別のホスト名、ポート付きの名前)を確認します。アクセストークンは `MONITOR_ACCESS_TOKEN` から読み取り、決して表示せず、引数なしで実行すると nginx や Caddy に何を設定するかを示します。
+- `tools/demo_monitor.py --network` は、ネットワークモードでのページの見え方(常時表示の赤いバー、設定では全インターフェースの警告と新しいプロキシ名)を撮影できるように表示します。デモは引き続き `127.0.0.1` だけで待ち受けます。`tools/make_screenshots.py` はこれで新しい画像を 2 枚(`web_network_now` と `web_network_settings`)撮影します。
+- 連鎖全体を通すテスト: 本物の TLS 上のクライアント、TLS を終端して `Host` と `Origin` をポートなしで転送するリバースプロキシ、その背後の本物のモニター。ページからの変更が設定に届くこと、`listen.proxy_public_host` がなければ同じリクエストが拒否されること、誤ったスキーム・名前・ポートが拒否されたままであること、セッションが開きクッキーが `Secure` であること、手動チェックがプロキシと一致しトークンを決して表示しないことを確認します(テストは 858 件から 866 件に増えました)。
+
+### 変更
+
+- 変更履歴(ヘルプ > 変更履歴)は、1.6.8 から 1.6.3 まで他の 7 言語に翻訳されました(1.6.7 と 1.6.5 は翻訳済み)。1.6.3 より前の項目は、翻訳済みの注記の下に英語のまま残ります。
+- README の画像を撮り直しました(計 76 枚)。8 言語の README に、設定の「詳細」サブタブとネットワークモードの画像 2 枚を載せました。
+- `docs/MIGRATING.md` に 1.6.7 から 1.6.8 へのブロックを追加し、8 言語のロードマップに残りの項目(古い変更履歴の項目と、あなた自身のサービスが必要な確認)を載せました。
+
+### 修正
+
+- 1.6.7 の変更履歴は、翻訳済みなのは 1.6.7 と 1.6.5 だけで、プロキシは検査ロジックでしか確認していないと述べていました。このバージョンは 1.6.3 までの残りを翻訳し、上記のとおりプロキシをエンドツーエンドで確認します。
+
 ## [1.6.7]
 
 既定の 443 番ポートで動く HTTPS プロキシがネットワークモードで使えるようになり、変更履歴の翻訳範囲がさらに広がりました。
@@ -90,62 +110,58 @@
 
 ## [1.6.4]
 
-> このバージョンの記載は現在英語のみです。翻訳は今後のバージョンで追加されます。
-
 ### 追加
 
-- **Alerts for AIs**: the monitor writes a local, read-only feed (`ai_alerts.jsonl`, one line per event, and `ALERTS_BRIEF.md`, rewritten at every cycle, 2 KB by default) with one alert per red workflow: stable id, severity, probable cause told apart as real or transient with editable rules, suggested action, and a state (open, acknowledged, resolved by itself when the workflow turns green). Everything goes through a cleaner of tokens, keys, e-mail addresses, IP addresses and home folders. `GET /api/ai/brief` and `GET /api/ai/alerts`, an optional read-only MCP server (`mcp_server.py`: `get_alerts`, `get_red_repos`, `get_run_failure`, `get_quota`, and `ack_alert` with `--allow-ack`), a notification when a new REAL alert appears, an optional hook to an address on this computer (off), and an optional `ai_hint` in `ci_red.json`. New guide `AI_ALERTS.md` in eight languages.
-- **Opt-in features, all off by default, each with its switch in Settings > Advanced** and tests that prove they refuse without the switch, the confirmation or the token: the network mode (a private address, an access token for every request, accepted host names, a persistent red bar, exposure keys changeable only from the computer itself); a GitHub token kept by the monitor in the secure store of the system (Windows DPAPI, macOS Keychain, Linux Secret Service, else a file with permissions 600) and never in a setting, a log or an answer, with a delete button; actions on GitHub (run again, cancel, close, merge), each confirmed on its own after showing exactly what will be sent; running a workflow here with `act` from a closed list, with no real secrets; a local mirror of artifacts; self-hosted runners (idle, busy, offline, optional disk and load); OpenTelemetry export (traces and metrics, OTLP/HTTP JSON); the organisations of the login; FinOps by job labels (Linux, Windows, macOS and larger runners), the price of the minutes above the included ones, Codespaces, Packages and storage from the billing report. New guide `ADVANCED.md` in eight languages, and `tools/manual_check_live.py` to try the real services by hand.
-- `--doctor --json`; the doctor also reports busy ports, the allowance left, whether you have your own targets file, the one-use token and the exposure. The README of the package starts with the choice of launcher (complete, lite, batch, terminal, doctor, demo).
-- The terminal application edits the simple settings (not the security ones) and has an AI tab; a persistent banner for settings that need a restart survives a reload; the header shows when the sentinel's A10 is paused for quota and how much of the minutes budget is used; the welcome is remembered by the server too.
-- `redrule.py` ignores the dynamic runs of dependency updates like the dashboard does, and the shared cases of the rule are now a test fixture.
+- **AI 向けアラート**: モニターはローカルの読み取り専用フィード(`ai_alerts.jsonl`(1 イベント 1 行)と、サイクルごとに書き直される `ALERTS_BRIEF.md`(既定 2 KB))を書き出し、赤のワークフローごとに 1 件のアラートを出します。安定した ID、重大度、編集可能なルールによって実際のものか一時的なものかを区別した推定原因、推奨アクション、状態(未対応、確認済み、ワークフローが緑に戻ったときに自動解決)を持ちます。すべてはトークン、キー、メールアドレス、IP アドレス、ホームフォルダーを除去するクリーナーを通ります。`GET /api/ai/brief` と `GET /api/ai/alerts`、任意の読み取り専用 MCP サーバー(`mcp_server.py`: `get_alerts`、`get_red_repos`、`get_run_failure`、`get_quota`、`--allow-ack` 付きの `ack_alert`)、新しい実際のアラートが現れたときの通知、このコンピューター上のアドレスへの任意のフック(オフ)、`ci_red.json` の任意の `ai_hint`。新しいガイド `AI_ALERTS.md` を 8 言語で用意しました。
+- **任意機能(すべて既定でオフ。それぞれ 設定 > 詳細 にスイッチあり)**。スイッチ、確認、トークンがなければ拒否することをテストで証明しています: ネットワークモード(プライベートアドレス、すべてのリクエストにアクセストークン、許可するホスト名、常時表示の赤いバー、そのコンピューター自身からだけ変更できる公開関連キー)、モニターがシステムの安全なストア(Windows DPAPI、macOS Keychain、Linux Secret Service、なければ権限 600 のファイル)に保管する GitHub トークン(設定、ログ、応答には決して入らず、削除ボタンあり)、GitHub 上のアクション(再実行、キャンセル、クローズ、マージ。送信内容を正確に表示してから個別に確認)、閉じたリストから `act` でここでワークフローを実行(本物のシークレットなし)、アーティファクトのローカルミラー、セルフホストランナー(アイドル、使用中、オフライン、任意でディスクと負荷)、OpenTelemetry エクスポート(トレースとメトリクス、OTLP/HTTP JSON)、ログインの組織、ジョブのラベルごとの FinOps(Linux、Windows、macOS、大型ランナー)、含まれる分を超えた分の料金、請求レポートの Codespaces、Packages、ストレージ。新しいガイド `ADVANCED.md` を 8 言語で用意し、実際のサービスを手で試す `tools/manual_check_live.py` を追加しました。
+- `--doctor --json`。doctor は使用中のポート、残りの枠、独自のターゲットファイルの有無、ワンタイムトークン、公開状態も報告します。パッケージの README は起動ランチャーの選択(フル、lite、バッチ、ターミナル、doctor、デモ)から始まります。
+- ターミナルアプリはシンプルな設定(セキュリティ設定は除く)を編集でき、AI タブがあります。再起動が必要な設定の持続バナーは再読み込みしても残ります。ヘッダーは、センチネルの A10 が枠のために一時停止している時と、分の予算をどれだけ使ったかを表示します。ウェルカムはサーバー側でも記憶されます。
+- `redrule.py` は、ダッシュボードと同様に依存関係更新の動的な実行を無視し、ルールの共有ケースはテストのフィクスチャになりました。
 
 ### 変更
 
-- **The Help is complete in eight languages**: the roadmap, contributing, security and support documents are translated, the fixed labels of the changelog are translated and its entries are marked as English only, with a translated notice; `tools/make_help_index.py --check` and a test fail when a topic lacks a language. A search shows at most 30 hits and a huge document no longer holds the server thread.
-- The red tile counts workflows in both editions and says in how many repositories. The lite edition inherits the refresh rhythm of the complete one at its first start.
-- A passing failure (a TLS hiccup, a 5xx) is retried with an exponential backoff and is shown as an error only after three cycles in a row; the last picture stays.
-- The terminal view of the lite edition no longer asks for the sentinel; the lite edition never loads the sentinel module (the local guard moved to `localguard.py`).
-- `--demo` redirects every file it could write (logs, caches, event feed, history, welcome) to its temporary folder.
+- **ヘルプが 8 言語で完全になりました**: ロードマップ、コントリビュート、セキュリティ、サポートの文書が翻訳され、変更履歴の固定ラベルも翻訳され、その項目は翻訳済みの注記付きで英語のみとして示されます。トピックに言語が欠けていると `tools/make_help_index.py --check` とテストが失敗します。検索は最大 30 件を表示し、巨大な文書がサーバースレッドを占有することもなくなりました。
+- 赤いタイルは両エディションでワークフローを数え、いくつのリポジトリにまたがるかを示します。lite エディションは初回起動時にフル版の更新間隔を引き継ぎます。
+- 一時的な失敗(TLS の不調、5xx)は指数バックオフで再試行され、3 サイクル連続した場合にだけエラーとして表示されます。直前の画面は残ります。
+- lite エディションのターミナルビューはセンチネルを要求しなくなりました。lite エディションはセンチネルモジュールを一切読み込みません(ローカルガードは `localguard.py` に移りました)。
+- `--demo` は、書き込む可能性のあるすべてのファイル(ログ、キャッシュ、イベントフィード、履歴、ウェルカム)を一時フォルダーにリダイレクトします。
 
 ### セキュリティ
 
-- With `updates.check` off or `airgapped` on, the monitor makes no network request at all for the update notice (tested).
-- Verified against the real GitHub API: the scopes of the token are read correctly, the organisations list and the billing report degrade silently (a login without the `user` scope gets "not found" and the monitor keeps the estimate).
+- `updates.check` がオフ、または `airgapped` がオンのとき、モニターは更新通知のためのネットワークリクエストを一切行いません(テスト済み)。
+- 実際の GitHub API で確認済み: トークンのスコープは正しく読み取られ、組織の一覧と請求レポートは静かに縮退します(`user` スコープのないログインは「見つかりません」を受け取り、モニターは推定値を保持します)。
 
 ## [1.6.3]
 
-> このバージョンの記載は現在英語のみです。翻訳は今後のバージョンで追加されます。
-
 ### 追加
 
-- **About panel** (the **i** button of the header, in both editions): version, edition, author, licence, Python and system, links (repository, releases, changelog, documentation, issues), the files it uses (read only), the health of the server, the credits of the libraries and a button that copies the information for support (no secret, no token, the home folder shown as `~`). `GET /api/about`, and `--about` in the console.
-- **Help panel** (the **?** button, the key `?`, and a "?" in the tab bar that opens the page of the tab you are on): the whole documentation (README, quick start, every guide, roadmap, changelog, contributing, security) as an index you can search, in the language of the page and in English where a document is not translated, served by the local server without Internet. It is built from the real documents by `tools/make_help_index.py` (`--check` in the CI), so no text is written twice; the markdown is rendered safely (everything escaped, no image loaded, only `http(s)` links and links to other documents). In the console: `--help-topics [TOPIC]` and `--help-search WORDS`.
-- **Notice of a newer version**: a discreet badge in the header, a line in About, in the console and in `--doctor` when a newer release is published. One read-only request a day to the public releases page, through the same client as everything else (conditional read), never downloads or installs anything, sends nothing about you, ignores pre-releases, compares versions as numbers (1.6.10 is newer than 1.6.9), is silent offline and is off with `updates.check` or in an air-gapped installation (`airgapped`).
-- **Settings > Basic**, the first tab: open the browser at start, the update notice, the air-gapped switch, the one-use token, the discovery options, the lifecycle rules, and the plan and quotas. Under it, what the monitor found in the account (owner, repositories found, watched, left out), the news and the suggested groups.
-- **`--doctor`**: Python, `gh`, the login, the allowance, the network, the write permission of the folder, a free port, and the optional Docker, Rich and Textual; each failure comes with the exact command that fixes it, in eight languages.
-- **`--demo`**: the page with invented data, with no `gh`, no login and no network; nothing of yours is read or written.
-- **A welcome of three steps** the first time the page is opened (what it does, what it found in your account, where to go next).
-- **Automatic discovery**: events for a new, vanished, archived or unarchived repository (console, Settings > Basic and, in the complete edition, the notifications); a suggested group when three or more unclassified repositories share a prefix, added only after your confirmation and with a copy of the file; lifecycle rules to leave out forks, empty and private repositories; an optional automatic refresh frequency that follows the real activity inside the call budget.
-- **A one-use token** (`session_guard`, on by default) that the page asks for right before it saves a setting or confirms an action, and a **restart bar** on every tab while a saved setting waits for a restart.
-- **Levels of the workflow linter** (information, warning, error) as filters in the page, and `Scripts` in the terminal application.
-- **Quotas and plans for every kind of account**: your plan in Settings > Basic; the figures (included minutes as money, rates per system, concurrency, limits of a job and of a run, allowances of the API) live in `quotas.json`, which you can edit without a new version; billable minutes apart from clock minutes (public repositories cost none, private ones use the multiplier of Windows or macOS), a monthly projection marked as an estimate, a warning once per month at 75 % and 90 % of the included minutes through the notifications, jobs running and queued against the limit of the plan, jobs near the 6-hour limit and the kind of token read from GitHub's own headers (with the advice to log in when only 60 calls an hour are left). The real usage comes only from the optional, read-only billing report (`quota.billing_api`, off by default, silent on a 403 or 404). `GET /api/quota`.
-- **Working modes: normal, fast and turbo** (`modes.py`, guide `MODES`): a selector with a gauge icon in the header and `--mode` / `--mode-minutes` in the console, in both editions. The presets live in the `modes` block of the configuration; before it starts the page shows the worst-case calls an hour, what the conditional reads usually save and how long the allowance left would last; it goes back to normal by itself when the time is up or when the allowance falls under `min_rate_remaining`, with a notice; without a login (60 calls an hour) fast and turbo are refused with the reason; it needs the one-use token, lives in memory and the console banner names it. `GET` and `POST /api/mode`.
-- **After a secondary rate limit** the monitor waits at least a minute and then doubles the wait up to five minutes instead of retrying quickly.
-- **The interactive terminal application** `tui_textual.py` (optional, `pip install textual`): tabs Summary, Repositories, Builds, Performance, Scripts and Settings (the basic switches), a filter, the levels of the linter, refresh, open in the browser, About and Help; `--lite` shows the lite tabs. The simple Rich view (`tui.py`, `--once`) stays and also has `--about` and `--help-topics`.
-- **The edition is clear at a glance**: a start-up banner (`GitHub Actions Monitor LITE 1.6.3 · port 8766 · actions_monitor_lite.json · no sentinel · http://127.0.0.1:8766/`, or COMPLETE · port 8765 · sentinel on), the title of the window of the console and of the terminal, the tag `[LITE]` / `[COMPLETE]` in the status lines, in `--doctor` and in the terminal views, and the same title in the launchers.
-- New guides in eight languages: **The sentinel and its checks A1-A13** (what it is, how it starts, the files it writes, how to read it, the exact rule, the setting and the action of each check and the twenty-five checks of A10; a test keeps the guide and the code in agreement), **Quotas and plans** and **Your first five minutes** (`FIRST_STEPS`); the migration guide has a block from 1.5.x to 1.6.x and the README has a chooser between the two editions.
-- Tests for all of it (the semantic versions, the notice offline, switched off and air-gapped, the safe markdown, the index, the one-use token, discovery, `--doctor`, the quotas for public and private repositories, Windows and macOS, no token, Enterprise and a 403 of the billing report, the banner and the launchers).
+- **バージョン情報パネル**(ヘッダーの **i** ボタン、両エディション): バージョン、エディション、作者、ライセンス、Python とシステム、リンク(リポジトリ、リリース、変更履歴、ドキュメント、Issue)、使用するファイル(読み取り専用)、サーバーの状態、ライブラリのクレジット、そしてサポート用に情報をコピーするボタン(シークレットやトークンは含まず、ホームフォルダーは `~` と表示)。`GET /api/about` と、コンソールの `--about`。
+- **ヘルプパネル**(**?** ボタン、`?` キー、開いているタブのページを開くタブバーの「?」): すべてのドキュメント(README、クイックスタート、各ガイド、ロードマップ、変更履歴、コントリビュート、セキュリティ)を検索できる索引として、ページの言語で、翻訳されていない文書は英語で、インターネットなしにローカルサーバーから提供します。実際の文書から `tools/make_help_index.py`(CI で `--check`)が作るため、同じ文章を二度書くことはありません。Markdown は安全に表示されます(すべてエスケープ、画像は読み込まず、`http(s)` リンクと他の文書へのリンクのみ)。コンソールでは `--help-topics [トピック]` と `--help-search 単語`。
+- **新しいバージョンのお知らせ**: 新しいリリースが公開されたとき、ヘッダーの控えめなバッジ、バージョン情報の 1 行、コンソール、`--doctor` に表示します。公開リリースページへの読み取り専用リクエストを 1 日 1 回、他のすべてと同じクライアントで(条件付き読み取り)行い、何もダウンロードやインストールをせず、あなたに関する情報を送らず、プレリリースは無視し、バージョンを数値として比較し(1.6.10 は 1.6.9 より新しい)、オフラインでは何も出さず、`updates.check` またはエアギャップ環境(`airgapped`)ではオフになります。
+- **設定 > 基本**(最初のタブ): 起動時にブラウザーを開く、更新のお知らせ、エアギャップのスイッチ、ワンタイムトークン、検出オプション、ライフサイクルルール、プランとクォータ。その下に、モニターがアカウントで見つけたもの(オーナー、見つかったリポジトリ、監視中、除外したもの)、新着、提案されたグループ。
+- **`--doctor`**: Python、`gh`、ログイン、残りの枠、ネットワーク、フォルダーの書き込み権限、空きポート、任意の Docker、Rich、Textual。失敗ごとに、直すための正確なコマンドを 8 言語で示します。
+- **`--demo`**: 架空のデータでページを表示します。`gh`、ログイン、ネットワークは不要で、あなたのものは何も読み書きされません。
+- **3 ステップのウェルカム**(ページを初めて開いたとき): 何をするか、アカウントで何を見つけたか、次にどこへ進むか。
+- **自動検出**: 新規、消失、アーカイブ、アーカイブ解除されたリポジトリのイベント(コンソール、設定 > 基本、フル版では通知にも)。未分類のリポジトリが 3 つ以上同じ接頭辞を共有するときの提案グループ(確認後にのみ、ファイルのコピーを取って追加)。フォーク、空、プライベートのリポジトリを除外するライフサイクルルール。呼び出し予算の範囲で実際の活動に追従する任意の自動更新頻度。
+- **ワンタイムトークン**(`session_guard`、既定でオン): 設定を保存する、またはアクションを確認する直前にページが要求します。また、保存した設定が再起動を待っている間、各タブに**再起動バー**を表示します。
+- **ワークフローリンターのレベル**(情報、警告、エラー)をページのフィルターとして、ターミナルアプリには `Scripts` を追加しました。
+- **あらゆる種類のアカウントに対応するクォータとプラン**: 設定 > 基本でのプラン。数値(含まれる分を金額で、システムごとの料金、同時実行数、ジョブと実行の上限、API の枠)は `quotas.json` にあり、新バージョンなしで編集できます。課金対象の分は実時間の分とは別に数えられ(パブリックリポジトリは無料、プライベートは Windows や macOS の倍率を使用)、月次の見込みは推定と明記され、含まれる分の 75 % と 90 % で月に 1 回通知による警告が出ます。プランの上限に対する実行中と待機中のジョブ、6 時間の上限に近いジョブ、GitHub 自身のヘッダーから読み取るトークンの種類(1 時間 60 回しか残っていないときはログインを勧めます)。実際の使用量は、任意で読み取り専用の請求レポート(`quota.billing_api`、既定でオフ、403 や 404 では何も出さない)からのみ得ます。`GET /api/quota`。
+- **作業モード: 通常、高速、ターボ**(`modes.py`、ガイド `MODES`): ヘッダーのゲージアイコン付きセレクターと、コンソールの `--mode` / `--mode-minutes`(両エディション)。プリセットは設定の `modes` ブロックにあります。開始前に、ページは最悪の場合の 1 時間あたりの呼び出し数、条件付き読み取りが通常節約する量、残りの枠がどれだけ持つかを表示します。時間が尽きたとき、または枠が `min_rate_remaining` を下回ったときは、お知らせとともに自動で通常に戻ります。ログインなし(1 時間 60 回)では高速とターボは理由付きで拒否されます。ワンタイムトークンが必要で、メモリ上にのみ存在し、コンソールのバナーに名前が表示されます。`GET` と `POST /api/mode`。
+- **セカンダリレート制限の後**、モニターはすぐに再試行する代わりに、最低 1 分待ち、その後は待ち時間を 5 分まで倍にします。
+- **対話型ターミナルアプリ** `tui_textual.py`(任意、`pip install textual`): 概要、リポジトリ、ビルド、パフォーマンス、スクリプト、設定(基本のスイッチ)のタブ、フィルター、リンターのレベル、更新、ブラウザーで開く、バージョン情報、ヘルプ。`--lite` は lite のタブを表示します。シンプルな Rich ビュー(`tui.py`、`--once`)は残り、`--about` と `--help-topics` も使えます。
+- **エディションが一目で分かります**: 起動バナー(`GitHub Actions Monitor LITE 1.6.3 · ポート 8766 · actions_monitor_lite.json · センチネルなし · http://127.0.0.1:8766/`、または COMPLETE · ポート 8765 · センチネル有効)、コンソールとターミナルのウィンドウタイトル、ステータス行、`--doctor`、ターミナルビューの `[LITE]` / `[COMPLETE]` タグ、ランチャーでの同じタイトル。
+- 8 言語の新しいガイド: **センチネルとその検査 A1-A13**(それが何か、どう起動するか、書き出すファイル、読み方、各検査の正確なルール、設定、アクション、A10 の 25 の検査。テストがガイドとコードの一致を保ちます)、**クォータとプラン**、**最初の 5 分**(`FIRST_STEPS`)。移行ガイドには 1.5.x から 1.6.x へのブロックがあり、README には 2 つのエディションの選択表があります。
+- これらすべてのテスト(セマンティックバージョン、オフライン・オフ・エアギャップでのお知らせ、安全な Markdown、索引、ワンタイムトークン、検出、`--doctor`、パブリックとプライベートのリポジトリ・Windows と macOS・トークンなし・Enterprise・請求レポートの 403 のクォータ、バナーとランチャー)。
 
 ### 変更
 
-- The Settings page starts with the **Basic** tab; the guide `SETTINGS` is generated with it.
-- The monitor lists the repositories of the account with their kind (archived, fork, private, empty); an older `gh` without those fields falls back to the plain list.
+- 設定ページは **基本** タブから始まります。ガイド `SETTINGS` はそれに合わせて生成されます。
+- モニターはアカウントのリポジトリを種類(アーカイブ、フォーク、プライベート、空)付きで一覧にします。それらのフィールドがない古い `gh` では単純な一覧に戻ります。
 
 ### セキュリティ
 
-- Nothing new writes to GitHub. The update notice, the billing report and the discovery are read only and switchable; none of them sends data about you. The Help and About panels are served from this computer and the support text carries no secret.
-- Writing a setting, confirming an action of the AI assistant and adding a suggested group need the one-use token of the page.
+- GitHub に新しく書き込むものはありません。更新のお知らせ、請求レポート、検出は読み取り専用で切り替え可能で、どれもあなたに関するデータを送りません。ヘルプとバージョン情報のパネルはこのコンピューターから提供され、サポート用テキストにシークレットは含まれません。
+- 設定の書き込み、AI アシスタントのアクションの確認、提案グループの追加には、ページのワンタイムトークンが必要です。
 
 ## [1.6.2]
 

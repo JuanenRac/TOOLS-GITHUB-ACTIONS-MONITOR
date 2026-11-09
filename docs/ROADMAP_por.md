@@ -2,6 +2,10 @@
 
 Ideias que não couberam na versão atual, sem ordem prometida. São direções, não compromissos; uma issue ou um pull request é a melhor forma de fazer avançar uma.
 
+## Feito na 1.6.8
+
+O proxy HTTPS da 1.6.7 é verificado contra um proxy real na porta 443 (`tools/manual_check_live.py proxy`, e testes que percorrem um cliente sobre TLS, um proxy inverso e o monitor), as imagens foram refeitas com duas novas do modo rede, e o histórico de alterações está traduzido nos outros sete idiomas até à 1.6.3.
+
 ## Feito na 1.6.7
 
 Um proxy HTTPS na porta 443 predefinida já funciona com o modo rede (`listen.proxy_public_host`, vazio por predefinição: o único nome público do proxy é aceite sem porta, só com HTTPS, e só se altera a partir do próprio computador), e o histórico de alterações está traduzido nos outros sete idiomas para a 1.6.7, a 1.6.6 e a 1.6.5.
@@ -23,7 +27,7 @@ Testes de isolamento da edição lite e da demonstração, nenhum pedido de rede
 O que a 1.6.4 não alcançou, e porquê:
 
 - **Decidido, não feito na 1.6.6**: o aviso ativo a uma IA externa (desligado por omissão, uma primeira confirmação por fornecedor, só os campos já filtrados da lista fechada, um limite de chamadas e de custo por hora, a chave pelo nome de uma variável de ambiente, e a IA nunca executa uma ação) com a sua variante de comando de saída (lista fechada, sem shell); e os repositórios de vários proprietários numa página (o monitor identifica um repositório só pelo nome, por isso precisa do proprietário em cada identificador; é a base de várias contas). Cada um é uma funcionalidade própria com o seu desenho e os seus testes, por isso a 1.6.6 fechou primeiro as correções.
-- **As entradas antigas do histórico de alterações nos outros sete idiomas**: a Ajuda mostra o histórico em cada idioma, e a 1.6.7, a 1.6.6 e a 1.6.5 estão traduzidas; a 1.6.4 e as anteriores mantêm o texto em inglês sob um aviso traduzido e serão traduzidas versão a versão, da mais recente para a mais antiga.
+- **As entradas antigas do histórico de alterações nos outros sete idiomas**: a Ajuda mostra o histórico em cada idioma, e da 1.6.8 à 1.6.3 estão traduzidas; a 1.6.2 e as anteriores mantêm o texto em inglês sob um aviso traduzido e serão traduzidas versão a versão, da mais recente para a mais antiga.
 - **Vários proprietários numa página**: o monitor identifica um repositório apenas pelo nome (execuções, sentinela, cache, exportações), pelo que dois proprietários com um repositório do mesmo nome se misturariam. As organizações são listadas e cada uma é vigiada pelo seu próprio monitor (`github_owner`). Fazê-lo numa página exige o proprietário em cada identificador.
 - **O relatório de faturação com um login que o possa ler**: a resposta real de um login sem o âmbito `user` é «não encontrado» e o monitor volta à estimativa (verificado); os valores em si não foram comparados com uma conta de faturação.
 - **Os preços dos runners grandes** em `quotas.json` vêm da memória da tabela pública de preços e estão marcados como não verificados; compare-os com a página de faturação do GitHub e edite o ficheiro.

@@ -7,6 +7,10 @@
 
 Ideas that did not fit in the current version, in no promised order. They are directions, not commitments; an issue or a pull request is the best way to move one forward.
 
+## Done in 1.6.8
+
+The HTTPS proxy of 1.6.7 is checked against a real proxy on port 443 (`tools/manual_check_live.py proxy`, and tests that run a client over TLS, a reverse proxy and the monitor), the pictures are taken again with two new ones of the network mode, and the history of changes is translated in the other seven languages back to 1.6.3.
+
 ## Done in 1.6.7
 
 An HTTPS proxy on the default port 443 now works with the network mode (`listen.proxy_public_host`, empty by default: the one public name of the proxy is accepted without a port, only under HTTPS, and it can only be changed from the computer itself), and the history of changes is translated in the other seven languages for 1.6.7, 1.6.6 and 1.6.5.
@@ -28,7 +32,7 @@ Isolation tests of the lite edition and of the demo, no network request at all w
 What 1.6.4 did not reach, and why:
 
 - **Decided, not done in 1.6.6**: the active notice to an external AI (off by default, a first confirmation per provider, only the redacted fields of the closed list, a cap of calls and of cost an hour, the key by the name of an environment variable, and the AI never runs an action) with its variant of an outgoing command (closed list, no shell); and the repositories of several owners in one page (the monitor identifies a repository by its name alone, so it needs the owner in every identifier; it is the base of several accounts). Each is a feature of its own that needs its design and its tests, so 1.6.6 closed the corrections first.
-- **The older entries of the changelog in the other seven languages**: the Help shows the history in each language, and 1.6.7, 1.6.6 and 1.6.5 are translated; 1.6.4 and older keep the English text under a translated notice and will be translated version by version, from the newest to the oldest.
+- **The older entries of the changelog in the other seven languages**: the Help shows the history in each language, and 1.6.8 back to 1.6.3 are translated; 1.6.2 and older keep the English text under a translated notice and will be translated version by version, from the newest to the oldest.
 - **Several owners in one page**: the monitor identifies a repository by its name alone (runs, sentinel, cache, exports), so two owners with a repository of the same name would mix. Organisations are listed, and each is watched by its own monitor (`github_owner`). Doing it in one page needs the owner in every identifier.
 - **The billing report against a login that may read it**: the real answer for a login without the `user` scope is "not found" and the monitor degrades to the estimate (checked); the figures themselves have not been compared with a billing account.
 - **The prices of larger runners** in `quotas.json` come from memory of the public price list and are marked as unverified; compare them with the billing page of GitHub and edit the file.

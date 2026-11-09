@@ -6,10 +6,13 @@
 # =============================================================================
 """A demo monitor with invented data (the demo-* repositories of the demo-owner account) for the screenshots of the documentation.
 
-    python tools/demo_monitor.py [PORT] [--lite]   # default 18765; runs until it is stopped
+    python tools/demo_monitor.py [PORT] [--lite] [--network]   # default 18765; runs until it is stopped
 
 It starts the real web server of the monitor on 127.0.0.1 with a temporary configuration and made-up runs, alerts, a signing queue, analytics and linter findings, so the page can be
 photographed without touching your own configuration or GitHub. Nothing is read from GitHub and nothing is written outside a temporary folder.
+
+`--network` shows the page as it looks in the network mode (the persistent red bar and, in Settings, the warning for every interface) so that it can be photographed: the page only
+shows them, the demo still listens on 127.0.0.1 only and no access token is needed. It exists for the pictures and is never the real network mode.
 """
 import json
 import sys
@@ -150,6 +153,9 @@ def main():
     am.ETAG["cache"] = etagcache.EtagCache(Path(tempfile.mkdtemp()) / "e.json")
     am.update_info = lambda: {"enabled": True, "newer": True, "latest": "9.9.9", "current": am.TOOL_VERSION, "url": "https://example.invalid/release", "changelog": "https://example.invalid/changelog", "airgapped": False}   # an invented newer version, for the picture of the badge
     am.LIVE_CONFIG.update({"account": {"plan": "free"}, "session_guard": False})
+    if "--network" in sys.argv:      # only what the page shows: the server below still listens on 127.0.0.1 and localguard stays off
+        real_state = am.localguard.public_state
+        am.localguard.public_state = lambda: {**real_state(), "network": True, "host": "0.0.0.0", "token_required": True, "secure": True}
     server = ThreadingHTTPServer(("127.0.0.1", port), am.Handler)
     print("demo on", port, flush=True)
     try:

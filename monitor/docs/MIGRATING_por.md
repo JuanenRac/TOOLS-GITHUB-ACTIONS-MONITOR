@@ -74,3 +74,10 @@ Não é preciso converter nada. O que se comporta de forma diferente, de propós
 
 - **Modo rede atrás de um proxy HTTPS na porta 443**: nova definição `listen.proxy_public_host` (vazia por predefinição; se a deixar assim, nada muda). Ponha aí o nome de anfitrião público do proxy quando ele reencaminha `Host` e `Origin` sem porta; esse único nome é então aceite tal como está, só enquanto o modo rede está ligado e a sessão é HTTPS. Só se altera a partir do próprio computador. Atrás de um proxy que mantém a porta nada muda.
 - O histórico de alterações (Ajuda > Registo de alterações) está agora traduzido para a 1.6.7 e a 1.6.5 nos outros sete idiomas; as entradas mais antigas continuam a mostrar o texto em inglês sob um aviso traduzido.
+
+# Da 1.6.7 para 1.6.8
+
+Não é preciso converter nada e nenhuma definição muda.
+
+- Novidade no repositório (não no pacote): `python tools/manual_check_live.py proxy ANFITRIÃO [PORTA] [LIGAR]` verifica o seu proxy HTTPS real na porta 443 face a `listen.proxy_public_host`; defina antes `MONITOR_ACCESS_TOKEN`, é lido e nunca impresso.
+- O histórico de alterações (Ajuda > Registo de alterações) está agora traduzido nos outros sete idiomas da 1.6.8 à 1.6.3.

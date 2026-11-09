@@ -9,6 +9,27 @@ Version of the tool itself (monitor + sentinel + batch tools), semver of its own
 and is shown as `tool_version` in the sentinel snapshot and by `read_report.py --version`; `make_release.py` refuses to build
 when this file and `tool_version.py` disagree.
 
+## [1.6.8]
+
+The HTTPS proxy of 1.6.7 is now checked against a real proxy, the pictures are taken again, and the history of changes is translated back to 1.6.3.
+
+### Added
+
+- `python tools/manual_check_live.py proxy HOST [PORT] [CONNECT]`: checks, through your real HTTPS proxy on port 443, that the page is let in (the session opens with the access token in the body and the cookie comes back `Secure` and `HttpOnly`) and that three requests stay refused (the other scheme, another host name, the name with a port). It reads the access token from `MONITOR_ACCESS_TOKEN`, never prints it, and says what to put in nginx or Caddy when it is run without arguments.
+- `tools/demo_monitor.py --network` shows the page as it looks in the network mode (the persistent red bar, and in Settings the warning for every interface and the new proxy name) so that it can be photographed; the demo still listens on `127.0.0.1` only. `tools/make_screenshots.py` takes two new pictures with it: `web_network_now` and `web_network_settings`.
+- Tests that run the whole chain: a client over real TLS, a reverse proxy that ends the TLS and forwards `Host` and `Origin` without a port, and the real monitor behind it. They check that a change made from the page reaches the settings, that the same request is refused without `listen.proxy_public_host`, that a wrong scheme, name or port stays refused, that the session opens and the cookie is `Secure`, and that the check by hand agrees with the proxy and never prints the token (the suite grew from 858 to 866).
+
+### Changed
+
+- The history of changes (Help > Changelog) is translated in the other seven languages for 1.6.8 to 1.6.3 (1.6.7 and 1.6.5 already were); the entries before 1.6.3 keep the English text under a translated notice.
+- The pictures of the README are taken again, 76 of them, and the README in eight languages shows the Advanced sub-tab of Settings and the two pictures of the network mode.
+- `docs/MIGRATING.md` has a block from 1.6.7 to 1.6.8, and the roadmap in eight languages lists what is left: the older entries of the changelog and the checks that need your own services.
+
+### Fixed
+
+- The changelog of 1.6.7 said that only 1.6.7 and 1.6.5 were translated and that the proxy was checked only with the guard; this version translates the rest back to 1.6.3 and checks the proxy end to end, as above.
+
+
 ## [1.6.7]
 
 An HTTPS proxy on the default port 443 now works with the network mode, and more of the history of changes is translated.

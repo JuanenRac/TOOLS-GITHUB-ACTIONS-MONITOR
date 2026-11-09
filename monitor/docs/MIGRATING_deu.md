@@ -74,3 +74,10 @@ Es muss nichts umgewandelt werden. Was sich absichtlich anders verhält:
 
 - **Netzwerkmodus hinter einem HTTPS-Proxy auf Port 443**: neue Einstellung `listen.proxy_public_host` (standardmäßig leer; wenn du sie leer lässt, ändert sich nichts). Trage dort den öffentlichen Hostnamen des Proxys ein, wenn er `Host` und `Origin` ohne Port weiterleitet; dieser eine Name wird dann unverändert akzeptiert, nur solange der Netzwerkmodus an ist und die Sitzung HTTPS nutzt. Sie lässt sich nur vom Rechner selbst ändern. Hinter einem Proxy, der den Port beibehält, ändert sich nichts.
 - Das Änderungsprotokoll (Hilfe > Änderungsprotokoll) ist jetzt für 1.6.7 und 1.6.5 in den anderen sieben Sprachen übersetzt; ältere Einträge zeigen weiterhin den englischen Text unter einem übersetzten Hinweis.
+
+# Von 1.6.7 auf 1.6.8
+
+Es muss nichts umgewandelt werden, und keine Einstellung ändert sich.
+
+- Neu im Repository (nicht im Paket): `python tools/manual_check_live.py proxy HOST [PORT] [VERBINDEN]` prüft deinen echten HTTPS-Proxy auf Port 443 gegen `listen.proxy_public_host`; setze vorher `MONITOR_ACCESS_TOKEN`, es wird gelesen und nie ausgegeben.
+- Das Änderungsprotokoll (Hilfe > Änderungsprotokoll) ist jetzt in den anderen sieben Sprachen von 1.6.8 bis 1.6.3 übersetzt.
