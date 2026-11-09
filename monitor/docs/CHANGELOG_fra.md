@@ -20,7 +20,7 @@ Plusieurs comptes dans l'édition complète, chacun un moniteur à part, et une 
 - **`--accounts`, `--account <id>` et `--migrate-accounts [--apply]`** : listent les comptes, n'exécutent qu'un compte comme moniteur ordinaire et déplacent l'ancienne organisation vers `accounts/default/`. La migration est un essai à blanc sauf avec `--apply`, ne déplace ni ne supprime jamais les originaux, refuse une seconde exécution et ne touche pas aux fichiers de l'édition lite.
 - **La page avec plusieurs comptes** : un sélecteur de comptes sous l'en-tête et une entrée **Tous les comptes** avec une carte par compte (état, dépôts, en cours, en échec). Chaque fenêtre garde son propre compte et sa propre vue, lus dans l'adresse.
 - **Vues par adresse** (`?view=now|alerts|charts|repos|settings|live` et `?chrome=0`, un écran sans boutons d'en-tête, onglets ni filtres pour un mur ou un second moniteur). La vue **En direct** montre les derniers événements envoyés par GitHub, l'état du récepteur de webhook (jamais le secret) et un sélecteur du mode de travail. `GET /api/live-status` en est la source.
-- `tools/demo_accounts.py` pour les images, le guide `ACCOUNTS.md` en huit langues et des tests pour chaque changement (la suite est passée de 866 à 913).
+- `tools/demo_accounts.py` pour les images, le guide `ACCOUNTS.md` en huit langues et des tests pour chaque changement (la suite est passée de 866 à 914).
 
 ### Modifié
 

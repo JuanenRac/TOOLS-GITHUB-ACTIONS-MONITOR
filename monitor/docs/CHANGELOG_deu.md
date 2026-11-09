@@ -20,7 +20,7 @@ Mehrere Konten in der kompletten Ausgabe, jedes ein eigener Monitor, und eine Se
 - **`--accounts`, `--account <id>` und `--migrate-accounts [--apply]`**: listen die Konten, führen nur eines als gewöhnlichen Monitor aus und verschieben das alte Layout nach `accounts/default/`. Die Migration ist ein Probelauf, außer mit `--apply`, verschiebt oder löscht die Originale nie, verweigert einen zweiten Lauf und berührt die Dateien der Lite-Ausgabe nicht.
 - **Die Seite mit mehreren Konten**: eine Kontoauswahl unter der Kopfzeile und ein Eintrag **Alle Konten** mit einer Karte pro Konto (Zustand, Repositorys, laufend, fehlerhaft). Jedes Fenster behält sein eigenes Konto und seine Ansicht, die aus der Adresse gelesen werden.
 - **Ansichten per Adresse** (`?view=now|alerts|charts|repos|settings|live` und `?chrome=0`, ein Bildschirm ohne Kopfzeilen-Tasten, Tabs und Filter für eine Wand oder einen zweiten Monitor). Die Ansicht **Live** zeigt die letzten von GitHub gesendeten Ereignisse, den Zustand des Webhook-Empfängers (nie das Geheimnis) und eine Auswahl des Arbeitsmodus. `GET /api/live-status` ist ihre Quelle.
-- `tools/demo_accounts.py` für die Bilder, die Anleitung `ACCOUNTS.md` in acht Sprachen und Tests für jede Änderung (die Suite wuchs von 866 auf 913).
+- `tools/demo_accounts.py` für die Bilder, die Anleitung `ACCOUNTS.md` in acht Sprachen und Tests für jede Änderung (die Suite wuchs von 866 auf 914).
 
 ### Geändert
 

@@ -368,7 +368,13 @@ class Isolation(Running):
         time.sleep(0.5)
         self.assertEqual(get(self.url + "/api/accounts")[1]["accounts"][0]["id"], "alpha")
         self.assertEqual(get(f"{self.url}/api/health?account=beta")[0], 404)
-        self.assertIsNotNone(subprocess.run(["tasklist", "/FI", f"PID eq {beta_pid}"], capture_output=True, text=True).stdout)
+        time.sleep(1.0)
+        if sys.platform == "win32":
+            out = subprocess.run(["tasklist", "/FI", f"PID eq {beta_pid}", "/NH"], capture_output=True, text=True).stdout
+            self.assertNotIn(str(beta_pid), out, "the process of the account that was switched off is gone")
+        else:
+            with self.assertRaises(ProcessLookupError):
+                os.kill(beta_pid, 0)
         path.write_text(json.dumps({"enabled_accounts": "all"}), encoding="utf-8")
         self.supervisor.sync()
         self.settle()
@@ -385,6 +391,16 @@ class Isolation(Running):
             else:
                 with self.assertRaises(ProcessLookupError):
                     os.kill(pid, 0)
+
+    def test_two_accounts_never_get_the_same_port_even_when_the_first_free_one_is_taken(self):
+        busy = {c.port for c in self.supervisor.children.values()}         # the two stub children of setUp already listen on the first ports: the next supervisor must move past them
+        other = sup.Supervisor(command_for=stub_command(self.base))
+        other.sync()                       # it only chooses ports: nothing is started, so nothing is bound yet, which is exactly when a repeated port used to happen
+        ports = [c.port for c in other.children.values()]
+        self.assertEqual(len(ports), 2)
+        self.assertEqual(len(set(ports)), 2, ports)
+        self.assertFalse(busy & set(ports), (busy, ports))
+        self.assertEqual(sup.free_port(sup.CHILD_PORT_START, taken={p for p in range(sup.CHILD_PORT_START, sup.CHILD_PORT_START + 50) if p != sup.CHILD_PORT_START + 49}), sup.CHILD_PORT_START + 49)
 
     def test_each_child_gets_its_own_free_port_on_the_loopback_address_only(self):
         ports = [c.port for c in self.supervisor.children.values()]

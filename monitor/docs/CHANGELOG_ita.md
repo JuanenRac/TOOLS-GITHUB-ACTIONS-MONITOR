@@ -20,7 +20,7 @@ Più account nell'edizione completa, ciascuno un monitor a sé, e una pagina che
 - **`--accounts`, `--account <id>` e `--migrate-accounts [--apply]`**: elencano gli account, eseguono solo uno come monitor ordinario e spostano il vecchio schema in `accounts/default/`. La migrazione è una prova salvo con `--apply`, non sposta né elimina mai gli originali, rifiuta una seconda esecuzione e non tocca i file dell'edizione lite.
 - **La pagina con più account**: un selettore di account sotto l'intestazione e una voce **Tutti gli account** con una scheda per account (stato, repository, in esecuzione, in errore). Ogni finestra mantiene il proprio account e la propria vista, letti dall'indirizzo.
 - **Viste per indirizzo** (`?view=now|alerts|charts|repos|settings|live` e `?chrome=0`, uno schermo senza pulsanti d'intestazione, schede né filtri per una parete o un secondo monitor). La vista **Live** mostra gli ultimi eventi inviati da GitHub, lo stato del ricevitore webhook (mai il segreto) e un selettore della modalità di lavoro. `GET /api/live-status` ne è la fonte.
-- `tools/demo_accounts.py` per le immagini, la guida `ACCOUNTS.md` in otto lingue e test per ogni modifica (la suite è passata da 866 a 913).
+- `tools/demo_accounts.py` per le immagini, la guida `ACCOUNTS.md` in otto lingue e test per ogni modifica (la suite è passata da 866 a 914).
 
 ### Modificato
 
