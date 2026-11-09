@@ -67,3 +67,10 @@ Es muss nichts umgewandelt werden. Was sich absichtlich anders verhält:
 - **act**: Nach Stopp ist der Lauf sofort frei; ein Start direkt danach antwortet nicht mehr `busy`.
 - Neue Dateien neben dem Monitor: `degraded.json` und `degraded_lite.json` (die Zähler verschluckter Fehler); sie können jederzeit gelöscht werden.
 - Das Änderungsprotokoll (Hilfe > Änderungsprotokoll) ist übersetzt: eine Datei `docs/CHANGELOG_<Sprache>.md` je Sprache.
+
+# Von 1.6.6 auf 1.6.7
+
+Es muss nichts umgewandelt werden. Was sich absichtlich anders verhält:
+
+- **Netzwerkmodus hinter einem HTTPS-Proxy auf Port 443**: neue Einstellung `listen.proxy_public_host` (standardmäßig leer; wenn du sie leer lässt, ändert sich nichts). Trage dort den öffentlichen Hostnamen des Proxys ein, wenn er `Host` und `Origin` ohne Port weiterleitet; dieser eine Name wird dann unverändert akzeptiert, nur solange der Netzwerkmodus an ist und die Sitzung HTTPS nutzt. Sie lässt sich nur vom Rechner selbst ändern. Hinter einem Proxy, der den Port beibehält, ändert sich nichts.
+- Das Änderungsprotokoll (Hilfe > Änderungsprotokoll) ist jetzt für 1.6.7 und 1.6.5 in den anderen sieben Sprachen übersetzt; ältere Einträge zeigen weiterhin den englischen Text unter einem übersetzten Hinweis.

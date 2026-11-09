@@ -67,3 +67,10 @@ Não é preciso converter nada. O que se comporta de forma diferente, de propós
 - **act**: depois do Stop a execução fica livre de imediato; um arranque logo a seguir já não responde `busy`.
 - Ficheiros novos junto do monitor: `degraded.json` e `degraded_lite.json` (os contadores de falhas engolidas); podem ser apagados a qualquer momento.
 - O histórico de alterações (Ajuda > Registo de alterações) está traduzido: um ficheiro `docs/CHANGELOG_<idioma>.md` por idioma.
+
+# Da 1.6.6 para 1.6.7
+
+Não é preciso converter nada. O que se comporta de forma diferente, de propósito:
+
+- **Modo rede atrás de um proxy HTTPS na porta 443**: nova definição `listen.proxy_public_host` (vazia por predefinição; se a deixar assim, nada muda). Ponha aí o nome de anfitrião público do proxy quando ele reencaminha `Host` e `Origin` sem porta; esse único nome é então aceite tal como está, só enquanto o modo rede está ligado e a sessão é HTTPS. Só se altera a partir do próprio computador. Atrás de um proxy que mantém a porta nada muda.
+- O histórico de alterações (Ajuda > Registo de alterações) está agora traduzido para a 1.6.7 e a 1.6.5 nos outros sete idiomas; as entradas mais antigas continuam a mostrar o texto em inglês sob um aviso traduzido.

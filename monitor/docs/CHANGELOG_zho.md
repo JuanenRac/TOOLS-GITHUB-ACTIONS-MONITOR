@@ -7,6 +7,24 @@
 
 工具本身(监视器 + 哨兵 + 批处理工具)的版本,采用自己的语义化版本号。源文件是英文的 CHANGELOG.md,本文件包含相同的版本和章节。
 
+## [1.6.7]
+
+默认 443 端口上的 HTTPS 代理现在可以配合网络模式使用,并且更新历史有更多内容被翻译。
+
+### 新增
+
+- `listen.proxy_public_host`(设置 > 高级 > 网络,默认为空):默认 443 端口上的 HTTPS 代理的公开主机名,该代理转发的 `Host` 和 `Origin` 不带端口。此前检查会把两者与监视器的端口比较,因此这样的代理会被拒绝;现在这一个名称会被原样接受。它只在网络模式开启且会话为 HTTPS(直接 TLS 或 `listen.secure_cookie`)时生效,必须是普通主机名(带端口、路径、用户名、空格或 IPv6 字面量都会使其变为空),与架构中标记为 `secure` 的所有设置一样只能在本机上更改,其标签和帮助提供八种语言。
+- 为本版本的每项更改添加了测试(测试从 843 项增加到 858 项,新文件检查检查逻辑、取值、架构和文本)。
+
+### 安全
+
+- 检查的例外被限制到最窄:只有这一个名称可以不带端口被接受,绝不接受其他不带端口的主机,绝不在普通 HTTP 下接受,并且 `Origin` 必须带有同一名称和 `https` 协议(其他协议、端口、路径、用户名或不同的主机仍会被拒绝)。代理名称绝不会出现在检查的公开状态中。
+
+### 变更
+
+- 更新历史(帮助 > 更新日志)已将 1.6.7 和 1.6.5 翻译为其他七种语言(1.6.6 早已翻译);更早的条目在已翻译的提示下保留英文原文,并将按从新到旧的顺序继续翻译。
+- `docs/ADVANCED.md`(八种语言)现在说明默认端口上的代理,而不再说它不受支持;`docs/MIGRATING.md` 新增了从 1.6.6 到 1.6.7 的部分;设置指南和帮助索引已重新生成。
+
 ## [1.6.6]
 
 修复网络模式和 `act` 的问题,完成 1.6.5 遗留事项,并把更新历史提供为八种语言。
@@ -36,41 +54,39 @@
 
 ## [1.6.5]
 
-> 此版本的说明目前仅有英文,翻译将在后续版本中补充。
-
-A release of integrity and security: no large new feature. What cannot be proven is no longer taken as safe.
+一个专注于完整性与安全的版本:没有大型新功能。无法证明的东西不再被视为安全。
 
 ### 新增
 
-- New settings, all with a conservative default: `dispatch.required_ci` (and, in the file, `dispatch.required_ci_repos` and `dispatch.required_ci_profiles`), `act.allow_symlinks`, `listen.tls_cert_file`, `listen.tls_key_file`, `listen.secure_cookie`, `listen.max_failed_attempts`, `webhook.replay_seconds`, `webhook.max_per_minute`; the guide of the settings is regenerated.
-- `finalize --accept-legacy` for batches written by an older version, and the `--doctor` checks `risks` and `backend` (eight languages).
-- Tests for every change of this release (the suite grew from 729 to more than 800).
+- 新设置,默认值均偏保守:`dispatch.required_ci`(文件中还有 `dispatch.required_ci_repos` 和 `dispatch.required_ci_profiles`)、`act.allow_symlinks`、`listen.tls_cert_file`、`listen.tls_key_file`、`listen.secure_cookie`、`listen.max_failed_attempts`、`webhook.replay_seconds`、`webhook.max_per_minute`;设置指南已重新生成。
+- 为旧版本写入的批次提供 `finalize --accept-legacy`,并新增 `--doctor` 的 `risks` 和 `backend` 检查(八种语言)。
+- 为本版本的每项更改添加了测试(测试从 729 项增加到 800 多项)。
 
 ### 安全
 
-- **A green commit needs the required CI.** `gha_dispatch_all.py` marks a commit green only when the required workflow files succeeded on it (`ci.yml` by default; `dispatch.required_ci`, `dispatch.required_ci_repos`, `dispatch.required_ci_profiles`), nothing failed, timed out or waits for an approval (`action_required` blocks like a failure), nothing is still running and the list of runs is complete (it reads up to five pages; a longer list is not green).
-- **A failed `git fetch` stops the dispatch** of that repository, git commands have a time limit and the commit ids are checked; an old `origin/main` is never taken as proof.
-- **The catalogue cannot leave its folder or change the dispatch.** `tool` must be a plain file name that sits in the tools folder (links that leave it are refused too); `extra` may only hold `-f key=value` workflow inputs (never `dry_run`, `ref`, `-R`, `--ref`); `finalize_flags` only long flags; the arguments of `gh workflow run` are built from the validated pieces and checked again when the batch fires.
-- **Old batches are not signed blindly.** `finalize` offers for signing only a run whose batch recorded that it was built on the commit that was checked. A batch written by an older version is `needs_review`; `finalize --accept-legacy` reads the run again from GitHub, accepts it only if its commit is the recorded one, warns, and asks for the word LEGACY before each signature.
-- **`act` stays inside the workspace.** The clone is resolved and must be a real folder of the workspace (a link, a `..` name or a `.github` that points elsewhere is refused; `act.allow_symlinks` allows a link to a clone). The time limit and Stop end the whole tree of processes the run started (a process group on Linux and macOS, `taskkill /T` on its own PID on Windows) and remove the `act-` containers that run created.
-- **Network mode**: HTTPS served directly with your own certificate and key (`listen.tls_cert_file`, `listen.tls_key_file`; TLS 1.2 or newer; the monitor does not start on plain HTTP if they cannot be used) or the `Secure` cookie behind an HTTPS proxy (`listen.secure_cookie`); the access token leaves the address bar at once (redirect, no `Referer`); an address that sends too many wrong tokens is refused for five minutes (`listen.max_failed_attempts`); the address of the page is the one the server listens on; only IPv4 addresses are accepted, in the settings and in the guard alike; the console says when the connection is plain HTTP.
-- **Webhook**: every delivery needs its `X-GitHub-Delivery` id and a repeated one is ignored for `webhook.replay_seconds`; a repository can cause at most `webhook.max_per_minute` accepted events a minute; the owner in `full_name` must be the watched account; one address is limited to 120 requests a minute in the network mode; an accepted event drops the stored conditional reads of that repository and marks it for the next cycle; a signature header with unusual characters is a plain refusal.
-- **MCP server**: a message of the wrong shape (parameters, arguments, id, method) gets an error for that message only, an unexpected defect in a tool is an internal error that does not end the server, and a line over 64 KB is refused.
-- **The stored GitHub token is given to `gh` only.** It is no longer put in the environment of the monitor, so `act`, your notification command and every other child cannot inherit it.
-- **A GET never writes.** The copy of the daily report in the audit folder is a POST with the one-use token (`/api/sentinel/parte/save`); `?save=1` on the GET is gone.
-- `--doctor` names dangerous combinations (network mode on every interface, AI actions that execute while the network mode is on, `act` while the network mode is on, the token in a plain file) and shows where the token is kept, never the token.
+- **绿色提交需要必需的 CI。** 只有当必需的工作流文件在该提交上成功(默认 `ci.yml`;`dispatch.required_ci`、`dispatch.required_ci_repos`、`dispatch.required_ci_profiles`)、没有失败、超时或等待审批的内容(`action_required` 与失败一样会阻止)、没有仍在运行的内容且运行列表完整时(最多读取五页;更长的列表不算绿色),`gha_dispatch_all.py` 才会把提交标记为绿色。
+- **`git fetch` 失败会停止该仓库的调度**,git 命令有时间限制,提交 ID 会被校验;过期的 `origin/main` 绝不会被当作证明。
+- **目录不能离开自己的文件夹,也不能更改调度。** `tool` 必须是位于工具文件夹中的普通文件名(指向外部的链接同样会被拒绝);`extra` 只能包含 `-f key=value` 形式的工作流输入(绝不能是 `dry_run`、`ref`、`-R`、`--ref`);`finalize_flags` 只能是长选项;`gh workflow run` 的参数由经过校验的部分构建,并在批次触发时再次检查。
+- **旧批次不会被盲目签名。** `finalize` 只会把批次记录了“基于已检查提交构建”的运行提供给签名。旧版本写入的批次为 `needs_review`;`finalize --accept-legacy` 会重新从 GitHub 读取该运行,只有当其提交与记录一致时才接受,给出警告,并在每次签名前要求输入 LEGACY 一词。
+- **`act` 保持在工作区之内。** 克隆会被解析,且必须是工作区内的真实文件夹(链接、带 `..` 的名称或指向别处的 `.github` 都会被拒绝;`act.allow_symlinks` 允许指向克隆的链接)。时间限制和 Stop 会结束该运行启动的整个进程树(Linux 和 macOS 上是进程组,Windows 上是对其自身 PID 执行 `taskkill /T`),并删除该运行创建的 `act-` 容器。
+- **网络模式**:直接使用你自己的证书和密钥提供 HTTPS(`listen.tls_cert_file`、`listen.tls_key_file`;TLS 1.2 或更高;若无法使用,监视器不会以普通 HTTP 启动),或在 HTTPS 代理之后使用 `Secure` Cookie(`listen.secure_cookie`);访问令牌会立即离开地址栏(重定向,无 `Referer`);发送过多错误令牌的地址会被拒绝五分钟(`listen.max_failed_attempts`);页面地址就是服务器监听的地址;只接受 IPv4 地址,设置和检查中都是如此;连接为普通 HTTP 时控制台会提示。
+- **Webhook**:每次投递都需要其 `X-GitHub-Delivery` ID,重复的投递在 `webhook.replay_seconds` 内会被忽略;一个仓库每分钟最多引发 `webhook.max_per_minute` 个被接受的事件;`full_name` 中的所有者必须是被监视的账户;网络模式下,一个地址每分钟最多 120 个请求;被接受的事件会丢弃该仓库已保存的条件读取,并将其标记为下一个周期处理;带有异常字符的签名头会被直接拒绝。
+- **MCP 服务器**:格式错误的消息(参数、实参、id、方法)只会为该消息返回错误,工具中意外的缺陷是不会终止服务器的内部错误,超过 64 KB 的行会被拒绝。
+- **保存的 GitHub 令牌只交给 `gh`。** 它不再放入监视器的环境中,因此 `act`、你的通知命令和其他子进程都无法继承它。
+- **GET 绝不写入。** 审计文件夹中日报的副本是带一次性令牌的 POST(`/api/sentinel/parte/save`);GET 上的 `?save=1` 已被移除。
+- `--doctor` 会指出危险的组合(网络模式监听所有接口、网络模式开启时 AI 执行动作、网络模式开启时使用 `act`、令牌存放在明文文件中),并显示令牌的保存位置,但绝不显示令牌本身。
 
 ### 修复
 
-- `max_per_hour` of the notifications now limits messages (one unit per channel, booked at once under one lock) and not events; a channel that cannot send books nothing.
-- Two saves of the settings at the same time no longer lose one of them (a lock in the process and a lock file).
-- The signing queue export says why it did not write (a refused drive or network path, a folder instead of a file, the error of the system) instead of a bare refusal.
-- The secondary-limit wait and the retry after a timeout carry a random jitter.
-- The test that unpacks the zip in a clean folder is no longer part of the ordinary suite: `make_release.py` runs the suite once with a time limit, then the clean install as its own stage, and shows stdout and stderr when either fails.
+- 通知的 `max_per_hour` 现在限制的是消息而不是事件(每个渠道一个单位,在同一个锁下一次性预订);无法发送的渠道不会预订任何额度。
+- 同时保存两次设置不再丢失其中一次(进程内的锁和锁文件)。
+- 签名队列的导出会说明为什么没有写入(被拒绝的驱动器或网络路径、文件夹而不是文件、系统错误),而不是只给出一个拒绝。
+- 次级限制的等待和超时后的重试带有随机抖动。
+- 在干净文件夹中解压 zip 的测试不再属于常规测试集:`make_release.py` 先带时间限制运行一次测试集,再把干净安装作为独立阶段运行,任一失败时都会显示 stdout 和 stderr。
 
 ### 变更
 
-- The guides of notifications, webhook, advanced features, outputs, AI alerts and migration say all of this in the eight languages; `docs/MIGRATING.md` has a block from 1.6.4 to 1.6.5.
+- 通知、Webhook、高级功能、输出、AI 警报和迁移的指南以八种语言说明了以上所有内容;`docs/MIGRATING.md` 新增了从 1.6.4 到 1.6.5 的部分。
 
 ## [1.6.4]
 

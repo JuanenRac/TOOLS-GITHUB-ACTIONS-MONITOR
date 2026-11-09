@@ -537,7 +537,7 @@ class NetworkMode(unittest.TestCase):
         localguard.configure(False)
 
     def test_off_by_default_and_a_public_address_is_never_accepted(self):
-        self.assertEqual(localguard.settings_from({}), {"network": False, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": []})
+        self.assertEqual(localguard.settings_from({}), {"network": False, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "proxy_public_host": ""})
         for host in ("8.8.8.8", "example.com", "", "0.0.0.0/0"):
             self.assertEqual(localguard.settings_from({"listen": {"network": True, "host": host}})["host"], "127.0.0.1", host)
         for host in ("192.168.1.20", "10.0.0.5", "172.16.4.4", "0.0.0.0"):
@@ -1260,7 +1260,7 @@ class SmallThings(unittest.TestCase):
             self.assertIn("tui_textual.py", head, lang)
 
     def test_the_version(self):
-        self.assertEqual(TOOL_VERSION, "1.6.6")
+        self.assertEqual(TOOL_VERSION, "1.6.7")
         if (ROOT / "electro-hobby-3d.project.json").is_file():          # not inside the zip
             self.assertEqual(json.loads((ROOT / "electro-hobby-3d.project.json").read_text(encoding="utf-8"))["version"], TOOL_VERSION)
         self.assertIn(f"## [{TOOL_VERSION}]", (HERE / "CHANGELOG.md").read_text(encoding="utf-8"))

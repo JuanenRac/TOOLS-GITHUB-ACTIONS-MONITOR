@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GitHub Actions 监视器 + 哨兵（版本 1.6.6）
+GitHub Actions 监视器 + 哨兵（版本 1.6.7）
 ============================================
 该启动哪一个?(新用户两分钟就能决定)
   完整版  MONITOR_GITHUB_ACTIONS.*       带哨兵的页面(端口 8765):警报、签名队列、分析。有多个仓库时从这里开始。
@@ -87,6 +87,10 @@ GitHub Actions 监视器 + 哨兵（版本 1.6.6）
 帮助、关于与检查 (1.6.4)
 ------------------------
 页面有帮助按钮（圆形 ?）和关于按钮（i）；在控制台使用 --help-topics、--help-search、--about 和 --doctor；--demo 用虚构数据显示页面。精简版以自己的横幅和窗口标题启动（LITE、端口 8766、无哨兵）；完整版显示 COMPLETE、端口 8765、哨兵已启用。新版本提示可以关闭（设置 > 基本）。
+
+1.6.7 新增内容（默认端口上的 HTTPS 代理；历史：CHANGELOG.md）
+  新设置 listen.proxy_public_host（默认为空）：443 端口上转发不带端口的 Host 和 Origin 的 HTTPS 代理，其公开名称会被原样接受，仅限 HTTPS，并且只能在本机上更改。
+  更新历史已翻译 1.6.7、1.6.6 和 1.6.5（帮助 > 更新日志）。
 
 1.6.6 新增内容（网络模式与 act 的修复；历史：CHANGELOG.md）
   HTTPS 下的网络模式可从页面使用（来源遵循会话的协议）；所有标记为安全的设置只能在本机修改；POST /api/access 无需在地址中放令牌即可打开会话；监听所有接口时设置页显示红色横幅；

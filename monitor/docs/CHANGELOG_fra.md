@@ -7,6 +7,24 @@
 
 Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son propre semver. La source est le CHANGELOG.md en anglais ; ce fichier contient les mêmes versions et sections.
 
+## [1.6.7]
+
+Un proxy HTTPS sur le port 443 par défaut fonctionne désormais avec le mode réseau, et une partie de plus de l'historique des modifications est traduite.
+
+### Ajouté
+
+- `listen.proxy_public_host` (Réglages > Avancé > Réseau, vide par défaut) : le nom d'hôte public d'un proxy HTTPS sur le port 443 par défaut qui transmet `Host` et `Origin` sans port. Jusqu'ici la garde comparait les deux avec le port du moniteur, donc un tel proxy était refusé ; ce seul nom est maintenant accepté tel quel. Il ne compte que lorsque le mode réseau est actif et que la session est en HTTPS (TLS direct ou `listen.secure_cookie`), il doit être un simple nom d'hôte (un port, un chemin, un utilisateur, une espace ou un littéral IPv6 le rendent vide), comme tout réglage que le schéma marque `secure` il ne se change que depuis l'ordinateur lui-même, et son libellé et son aide existent en huit langues.
+- Des tests pour chaque changement de cette version (la suite est passée de 843 à 858 et le nouveau fichier vérifie la garde, la valeur, le schéma et les textes).
+
+### Sécurité
+
+- L'exception de la garde est aussi étroite que possible : seul ce nom est accepté sans port, jamais un autre hôte sans port, jamais en HTTP simple, et l'`Origin` doit porter le même nom avec le schéma `https` (un autre schéma, un port, un chemin, un utilisateur ou un autre hôte restent refusés). Le nom du proxy n'apparaît jamais dans l'état public de la garde.
+
+### Modifié
+
+- L'historique des modifications (Aide > Journal des modifications) est traduit dans les sept autres langues pour la 1.6.7 et la 1.6.5 (la 1.6.6 l'était déjà) ; les entrées plus anciennes gardent le texte anglais sous un avis traduit et suivront, de la plus récente à la plus ancienne.
+- `docs/ADVANCED.md` (huit langues) explique le proxy sur le port par défaut au lieu de dire qu'il n'est pas pris en charge, `docs/MIGRATING.md` a un bloc de la 1.6.6 à la 1.6.7, et le guide des réglages et l'index de l'Aide sont régénérés.
+
 ## [1.6.6]
 
 Corrections du mode réseau et de `act`, les points en suspens de la 1.6.5 et l'historique des modifications en huit langues.
@@ -36,41 +54,39 @@ Corrections du mode réseau et de `act`, les points en suspens de la 1.6.5 et l'
 
 ## [1.6.5]
 
-> Cette version n'est disponible qu'en anglais pour l'instant ; la traduction viendra dans une version ultérieure.
-
-A release of integrity and security: no large new feature. What cannot be proven is no longer taken as safe.
+Une version d'intégrité et de sécurité : aucune grande fonction nouvelle. Ce qui ne peut pas être prouvé n'est plus tenu pour sûr.
 
 ### Ajouté
 
-- New settings, all with a conservative default: `dispatch.required_ci` (and, in the file, `dispatch.required_ci_repos` and `dispatch.required_ci_profiles`), `act.allow_symlinks`, `listen.tls_cert_file`, `listen.tls_key_file`, `listen.secure_cookie`, `listen.max_failed_attempts`, `webhook.replay_seconds`, `webhook.max_per_minute`; the guide of the settings is regenerated.
-- `finalize --accept-legacy` for batches written by an older version, and the `--doctor` checks `risks` and `backend` (eight languages).
-- Tests for every change of this release (the suite grew from 729 to more than 800).
+- Nouveaux réglages, tous avec une valeur par défaut prudente : `dispatch.required_ci` (et, dans le fichier, `dispatch.required_ci_repos` et `dispatch.required_ci_profiles`), `act.allow_symlinks`, `listen.tls_cert_file`, `listen.tls_key_file`, `listen.secure_cookie`, `listen.max_failed_attempts`, `webhook.replay_seconds`, `webhook.max_per_minute` ; le guide des réglages est régénéré.
+- `finalize --accept-legacy` pour les lots écrits par une version plus ancienne, et les contrôles `risks` et `backend` de `--doctor` (huit langues).
+- Des tests pour chaque changement de cette version (la suite est passée de 729 à plus de 800).
 
 ### Sécurité
 
-- **A green commit needs the required CI.** `gha_dispatch_all.py` marks a commit green only when the required workflow files succeeded on it (`ci.yml` by default; `dispatch.required_ci`, `dispatch.required_ci_repos`, `dispatch.required_ci_profiles`), nothing failed, timed out or waits for an approval (`action_required` blocks like a failure), nothing is still running and the list of runs is complete (it reads up to five pages; a longer list is not green).
-- **A failed `git fetch` stops the dispatch** of that repository, git commands have a time limit and the commit ids are checked; an old `origin/main` is never taken as proof.
-- **The catalogue cannot leave its folder or change the dispatch.** `tool` must be a plain file name that sits in the tools folder (links that leave it are refused too); `extra` may only hold `-f key=value` workflow inputs (never `dry_run`, `ref`, `-R`, `--ref`); `finalize_flags` only long flags; the arguments of `gh workflow run` are built from the validated pieces and checked again when the batch fires.
-- **Old batches are not signed blindly.** `finalize` offers for signing only a run whose batch recorded that it was built on the commit that was checked. A batch written by an older version is `needs_review`; `finalize --accept-legacy` reads the run again from GitHub, accepts it only if its commit is the recorded one, warns, and asks for the word LEGACY before each signature.
-- **`act` stays inside the workspace.** The clone is resolved and must be a real folder of the workspace (a link, a `..` name or a `.github` that points elsewhere is refused; `act.allow_symlinks` allows a link to a clone). The time limit and Stop end the whole tree of processes the run started (a process group on Linux and macOS, `taskkill /T` on its own PID on Windows) and remove the `act-` containers that run created.
-- **Network mode**: HTTPS served directly with your own certificate and key (`listen.tls_cert_file`, `listen.tls_key_file`; TLS 1.2 or newer; the monitor does not start on plain HTTP if they cannot be used) or the `Secure` cookie behind an HTTPS proxy (`listen.secure_cookie`); the access token leaves the address bar at once (redirect, no `Referer`); an address that sends too many wrong tokens is refused for five minutes (`listen.max_failed_attempts`); the address of the page is the one the server listens on; only IPv4 addresses are accepted, in the settings and in the guard alike; the console says when the connection is plain HTTP.
-- **Webhook**: every delivery needs its `X-GitHub-Delivery` id and a repeated one is ignored for `webhook.replay_seconds`; a repository can cause at most `webhook.max_per_minute` accepted events a minute; the owner in `full_name` must be the watched account; one address is limited to 120 requests a minute in the network mode; an accepted event drops the stored conditional reads of that repository and marks it for the next cycle; a signature header with unusual characters is a plain refusal.
-- **MCP server**: a message of the wrong shape (parameters, arguments, id, method) gets an error for that message only, an unexpected defect in a tool is an internal error that does not end the server, and a line over 64 KB is refused.
-- **The stored GitHub token is given to `gh` only.** It is no longer put in the environment of the monitor, so `act`, your notification command and every other child cannot inherit it.
-- **A GET never writes.** The copy of the daily report in the audit folder is a POST with the one-use token (`/api/sentinel/parte/save`); `?save=1` on the GET is gone.
-- `--doctor` names dangerous combinations (network mode on every interface, AI actions that execute while the network mode is on, `act` while the network mode is on, the token in a plain file) and shows where the token is kept, never the token.
+- **Un commit au vert exige la CI obligatoire.** `gha_dispatch_all.py` ne juge un commit vert que si les fichiers de workflow obligatoires ont réussi dessus (`ci.yml` par défaut ; `dispatch.required_ci`, `dispatch.required_ci_repos`, `dispatch.required_ci_profiles`), que rien n'a échoué, expiré ou n'attend une approbation (`action_required` bloque comme un échec), que rien n'est encore en cours et que la liste des exécutions est complète (il lit jusqu'à cinq pages ; une liste plus longue n'est pas verte).
+- **Un `git fetch` en échec arrête l'envoi** de ce dépôt, les commandes git ont une limite de temps et les identifiants de commit sont vérifiés ; un vieux `origin/main` n'est jamais pris pour une preuve.
+- **Le catalogue ne peut ni sortir de son dossier ni modifier l'envoi.** `tool` doit être un simple nom de fichier situé dans le dossier des outils (les liens qui en sortent sont aussi refusés) ; `extra` ne peut contenir que des entrées de workflow `-f clé=valeur` (jamais `dry_run`, `ref`, `-R`, `--ref`) ; `finalize_flags` seulement des options longues ; les arguments de `gh workflow run` sont construits à partir des éléments validés et revérifiés au déclenchement du lot.
+- **Les anciens lots ne sont pas signés à l'aveugle.** `finalize` ne propose à la signature qu'une exécution dont le lot a enregistré qu'il a été construit sur le commit vérifié. Un lot écrit par une version plus ancienne est `needs_review` ; `finalize --accept-legacy` relit l'exécution depuis GitHub, ne l'accepte que si son commit est celui enregistré, avertit et demande le mot LEGACY avant chaque signature.
+- **`act` reste dans l'espace de travail.** Le clone est résolu et doit être un vrai dossier de l'espace de travail (un lien, un nom avec `..` ou un `.github` qui pointe ailleurs est refusé ; `act.allow_symlinks` autorise un lien vers un clone). La limite de temps et Stop terminent tout l'arbre de processus lancé par l'exécution (un groupe de processus sous Linux et macOS, `taskkill /T` sur son propre PID sous Windows) et suppriment les conteneurs `act-` créés par cette exécution.
+- **Mode réseau** : HTTPS servi directement avec votre propre certificat et clé (`listen.tls_cert_file`, `listen.tls_key_file` ; TLS 1.2 ou plus récent ; le moniteur ne démarre pas en HTTP simple s'ils sont inutilisables) ou le cookie `Secure` derrière un proxy HTTPS (`listen.secure_cookie`) ; le jeton d'accès quitte aussitôt la barre d'adresse (redirection, pas de `Referer`) ; une adresse qui envoie trop de jetons erronés est refusée pendant cinq minutes (`listen.max_failed_attempts`) ; l'adresse de la page est celle sur laquelle le serveur écoute ; seules les adresses IPv4 sont acceptées, dans les réglages comme dans la garde ; la console signale quand la connexion est en HTTP simple.
+- **Webhook** : chaque livraison exige son identifiant `X-GitHub-Delivery` et une livraison répétée est ignorée pendant `webhook.replay_seconds` ; un dépôt peut provoquer au plus `webhook.max_per_minute` événements acceptés par minute ; le propriétaire dans `full_name` doit être le compte surveillé ; une adresse est limitée à 120 requêtes par minute en mode réseau ; un événement accepté écarte les lectures conditionnelles enregistrées de ce dépôt et le marque pour le cycle suivant ; un en-tête de signature aux caractères inhabituels est simplement refusé.
+- **Serveur MCP** : un message de forme incorrecte (paramètres, arguments, id, méthode) reçoit une erreur pour ce seul message, un défaut inattendu dans un outil est une erreur interne qui ne termine pas le serveur, et une ligne de plus de 64 Ko est refusée.
+- **Le jeton GitHub enregistré n'est remis qu'à `gh`.** Il n'est plus placé dans l'environnement du moniteur, si bien que `act`, votre commande de notification et tout autre processus enfant ne peuvent pas en hériter.
+- **Un GET n'écrit jamais.** La copie du rapport quotidien dans le dossier d'audit est un POST avec le jeton à usage unique (`/api/sentinel/parte/save`) ; `?save=1` sur le GET a disparu.
+- `--doctor` nomme les combinaisons dangereuses (mode réseau sur toutes les interfaces, actions de l'IA qui s'exécutent avec le mode réseau actif, `act` avec le mode réseau actif, le jeton dans un fichier en clair) et indique où le jeton est conservé, jamais le jeton.
 
 ### Corrigé
 
-- `max_per_hour` of the notifications now limits messages (one unit per channel, booked at once under one lock) and not events; a channel that cannot send books nothing.
-- Two saves of the settings at the same time no longer lose one of them (a lock in the process and a lock file).
-- The signing queue export says why it did not write (a refused drive or network path, a folder instead of a file, the error of the system) instead of a bare refusal.
-- The secondary-limit wait and the retry after a timeout carry a random jitter.
-- The test that unpacks the zip in a clean folder is no longer part of the ordinary suite: `make_release.py` runs the suite once with a time limit, then the clean install as its own stage, and shows stdout and stderr when either fails.
+- `max_per_hour` des notifications limite désormais les messages (une unité par canal, réservée d'un coup sous un seul verrou) et non les événements ; un canal qui ne peut pas envoyer ne réserve rien.
+- Deux enregistrements simultanés des réglages ne perdent plus l'un des deux (un verrou dans le processus et un fichier verrou).
+- L'export de la file de signature dit pourquoi il n'a pas écrit (un lecteur ou un chemin réseau refusé, un dossier au lieu d'un fichier, l'erreur du système) au lieu d'un simple refus.
+- L'attente de la limite secondaire et la nouvelle tentative après un délai dépassé portent une gigue aléatoire.
+- Le test qui décompresse le zip dans un dossier propre ne fait plus partie de la suite ordinaire : `make_release.py` exécute la suite une fois avec une limite de temps, puis l'installation propre comme étape à part, et affiche stdout et stderr quand l'une échoue.
 
 ### Modifié
 
-- The guides of notifications, webhook, advanced features, outputs, AI alerts and migration say all of this in the eight languages; `docs/MIGRATING.md` has a block from 1.6.4 to 1.6.5.
+- Les guides des notifications, du webhook, des fonctions avancées, des sorties, des alertes d'IA et de la migration disent tout cela en huit langues ; `docs/MIGRATING.md` a un bloc de la 1.6.4 à la 1.6.5.
 
 ## [1.6.4]
 

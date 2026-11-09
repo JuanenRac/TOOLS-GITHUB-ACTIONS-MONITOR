@@ -7,6 +7,10 @@
 
 Ideas that did not fit in the current version, in no promised order. They are directions, not commitments; an issue or a pull request is the best way to move one forward.
 
+## Done in 1.6.7
+
+An HTTPS proxy on the default port 443 now works with the network mode (`listen.proxy_public_host`, empty by default: the one public name of the proxy is accepted without a port, only under HTTPS, and it can only be changed from the computer itself), and the history of changes is translated in the other seven languages for 1.6.7, 1.6.6 and 1.6.5.
+
 ## Done in 1.6.6
 
 Corrections after 1.6.5: the network mode now works over HTTPS from the page (the origin guard follows the scheme of the session), every setting the schema marks secure can only be changed from the computer itself, `act` frees its run after Stop and closes its pipe, a red bar in Settings when the network mode listens on every interface, the session can be opened by POST instead of the address, a counter of swallowed failures in `--doctor` and About, `tools/make_screenshots.py` says what it does and the pictures are taken again, and the history of changes is translated into eight languages.
@@ -24,8 +28,7 @@ Isolation tests of the lite edition and of the demo, no network request at all w
 What 1.6.4 did not reach, and why:
 
 - **Decided, not done in 1.6.6**: the active notice to an external AI (off by default, a first confirmation per provider, only the redacted fields of the closed list, a cap of calls and of cost an hour, the key by the name of an environment variable, and the AI never runs an action) with its variant of an outgoing command (closed list, no shell); and the repositories of several owners in one page (the monitor identifies a repository by its name alone, so it needs the owner in every identifier; it is the base of several accounts). Each is a feature of its own that needs its design and its tests, so 1.6.6 closed the corrections first.
-- **The older entries of the changelog in the other seven languages**: from 1.6.6 the Help shows the history in each language, but only the newest entry is translated; the older ones keep the English text under a translated notice and will be translated version by version, newest first.
-- **HTTPS behind a proxy on the default port**: the guard compares the `Host` and `Origin` with the port of the monitor, so a proxy on port 443 that forwards a `Host` without port is not supported yet; the page works over a direct TLS port or a proxy that keeps the port.
+- **The older entries of the changelog in the other seven languages**: the Help shows the history in each language, and 1.6.7, 1.6.6 and 1.6.5 are translated; 1.6.4 and older keep the English text under a translated notice and will be translated version by version, from the newest to the oldest.
 - **Several owners in one page**: the monitor identifies a repository by its name alone (runs, sentinel, cache, exports), so two owners with a repository of the same name would mix. Organisations are listed, and each is watched by its own monitor (`github_owner`). Doing it in one page needs the owner in every identifier.
 - **The billing report against a login that may read it**: the real answer for a login without the `user` scope is "not found" and the monitor degrades to the estimate (checked); the figures themselves have not been compared with a billing account.
 - **The prices of larger runners** in `quotas.json` come from memory of the public price list and are marked as unverified; compare them with the billing page of GitHub and edit the file.

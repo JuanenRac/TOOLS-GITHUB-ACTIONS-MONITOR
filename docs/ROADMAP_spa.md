@@ -2,6 +2,10 @@
 
 Ideas que no cupieron en la versión actual, sin orden prometido. Son direcciones, no compromisos; un issue o un pull request es la mejor forma de adelantar una.
 
+## Hecho en la 1.6.7
+
+Un proxy HTTPS en el puerto 443 por defecto ya funciona con el modo red (`listen.proxy_public_host`, vacío por defecto: el único nombre público del proxy se acepta sin puerto, solo con HTTPS, y solo se cambia desde el propio equipo), y el historial de cambios está traducido a los otros siete idiomas para la 1.6.7, la 1.6.6 y la 1.6.5.
+
 ## Hecho en la 1.6.6
 
 Correcciones tras la 1.6.5: el modo red funciona ya con HTTPS desde la página (la guarda de origen sigue el esquema de la sesión), todo ajuste que el esquema marca como seguro solo se cambia desde el propio equipo, `act` libera su ejecución tras Stop y cierra su tubería, una barra roja en Ajustes cuando el modo red escucha en todas las interfaces, la sesión puede abrirse por POST en lugar de por la dirección, un contador de fallos tragados en `--doctor` y Acerca de, `tools/make_screenshots.py` dice lo que hace y las imágenes se han vuelto a tomar, y el historial de cambios está traducido a ocho idiomas.
@@ -19,8 +23,7 @@ Pruebas de aislamiento de la edición lite y de la demo, ninguna petición de re
 Lo que la 1.6.4 no alcanzó, y por qué:
 
 - **Decidido, no hecho en la 1.6.6**: el aviso activo a una IA externa (apagado por defecto, una primera confirmación por proveedor, solo los campos ya filtrados de la lista cerrada, un tope de llamadas y de coste por hora, la clave por el nombre de una variable de entorno, y la IA nunca ejecuta una acción) con su variante de comando saliente (lista cerrada, sin shell); y los repositorios de varios propietarios en una página (el monitor identifica un repositorio solo por su nombre, así que necesita el propietario en cada identificador; es la base de varias cuentas). Cada uno es una función con su diseño y sus pruebas, así que la 1.6.6 cerró primero las correcciones.
-- **Las entradas antiguas del historial de cambios en los otros siete idiomas**: desde la 1.6.6 la Ayuda muestra el historial en cada idioma, pero solo la entrada más nueva está traducida; las antiguas conservan el texto en inglés bajo un aviso traducido y se irán traduciendo versión a versión, de la más nueva a la más vieja.
-- **HTTPS detrás de un proxy en el puerto por defecto**: la guarda compara `Host` y `Origin` con el puerto del monitor, así que un proxy en el puerto 443 que reenvía un `Host` sin puerto aún no está soportado; la página funciona con un puerto TLS directo o con un proxy que conserva el puerto.
+- **Las entradas antiguas del historial de cambios en los otros siete idiomas**: la Ayuda muestra el historial en cada idioma y la 1.6.7, la 1.6.6 y la 1.6.5 están traducidas; la 1.6.4 y las anteriores conservan el texto en inglés bajo un aviso traducido y se irán traduciendo versión a versión, de la más nueva a la más vieja.
 - **Varios propietarios en una página**: el monitor identifica un repositorio solo por su nombre (ejecuciones, centinela, caché, exportaciones), así que dos propietarios con un repositorio del mismo nombre se mezclarían. Las organizaciones se listan y cada una se vigila con su propio monitor (`github_owner`). Hacerlo en una página exige poner el propietario en cada identificador.
 - **El informe de facturación con un login que pueda leerlo**: la respuesta real de un login sin el permiso `user` es «no encontrado» y el monitor vuelve a la estimación (comprobado); las cifras en sí no se han comparado con una cuenta de facturación.
 - **Los precios de los runners grandes** de `quotas.json` salen de la memoria de la lista pública de precios y están marcados como no verificados; compáralos con la página de facturación de GitHub y edita el fichero.

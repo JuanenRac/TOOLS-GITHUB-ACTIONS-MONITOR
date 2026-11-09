@@ -11,6 +11,7 @@
 """
 import hmac
 import ipaddress
+import re
 import secrets
 import socket
 import ssl
@@ -18,7 +19,9 @@ import threading
 import time
 
 LOOPBACK_HOSTS = ("127.0.0.1", "localhost")
-STATE = {"network": False, "host": "127.0.0.1", "token": "", "allowed": set(), "secure": False}
+STATE = {"network": False, "host": "127.0.0.1", "token": "", "allowed": set(), "secure": False, "proxy_host": ""}
+#: the public name of an HTTPS proxy that forwards `Host` without a port (the proxy on port 443): a plain host name, never an address with a port, a path or a user
+PROXY_HOST_RE = re.compile(r"^[a-z0-9]([a-z0-9.-]{0,98}[a-z0-9])?$")
 COOKIE = "monitor_access"
 #: keys that can only be written from the same computer while the network mode is on
 LOCAL_ONLY_PREFIXES = ("listen.", "github_token.", "act.", "github_actions.")
@@ -72,10 +75,18 @@ def own_addresses():
     return out
 
 
-def configure(network, host="127.0.0.1", token="", allowed=(), secure=False):
-    """Sets the mode of the process. `secure` = the connection is HTTPS (direct TLS or a proxy in front): the cookie then carries Secure. Returns the state (the token is never part of it)."""
+def proxy_host_clean(value):
+    """The public host name of the HTTPS proxy in lower case, or '' when it is empty or is not a plain host name (a port, a path, a user, a space or an IPv6 literal make it '')."""
+    text = value.strip().lower() if isinstance(value, str) else ""
+    return text if PROXY_HOST_RE.match(text) else ""
+
+
+def configure(network, host="127.0.0.1", token="", allowed=(), secure=False, proxy_host=""):
+    """Sets the mode of the process. `secure` = the connection is HTTPS (direct TLS or a proxy in front): the cookie then carries Secure. `proxy_host` = the public name of an HTTPS proxy that
+    forwards `Host` and `Origin` without a port (a proxy on port 443); it only counts when the session is HTTPS. Returns the state (the token is never part of it)."""
     STATE["network"] = bool(network)
     STATE["secure"] = bool(network and secure)
+    STATE["proxy_host"] = proxy_host_clean(proxy_host) if network and secure else ""
     STATE["host"] = host if network else "127.0.0.1"
     STATE["token"] = token if network else ""
     STATE["allowed"] = {str(a).lower() for a in allowed} | (own_addresses() if network and host == "0.0.0.0" else set())
@@ -161,8 +172,12 @@ def make_token():
 
 def local_request_ok(headers, port):
     """DNS-rebinding / cross-site guard: Host must be this server and Origin (if any) too. The Origin must carry the scheme of the session (https when the connection is HTTPS, direct TLS
-    or a proxy with `secure_cookie`; http otherwise) and exactly one of our own host:port pairs; the other scheme, another host or port and a malformed value are refused."""
+    or a proxy with `secure_cookie`; http otherwise) and exactly one of our own host:port pairs; the other scheme, another host or port and a malformed value are refused. The one
+    exception is `listen.proxy_public_host`: an HTTPS proxy on the default port forwards `Host` and `Origin` without a port, so that one name, and only under an HTTPS session, is also
+    accepted as it is (the host and the origin must both be exactly that name, never any other host without a port)."""
     allowed_hosts = {f"127.0.0.1:{port}", f"localhost:{port}"} | {f"{h}:{port}" for h in STATE["allowed"]}
+    if STATE["secure"] and STATE.get("proxy_host"):
+        allowed_hosts.add(STATE["proxy_host"])
     if (headers.get("Host") or "").lower() not in {h.lower() for h in allowed_hosts}:
         return False
     origin = headers.get("Origin")
@@ -219,10 +234,11 @@ def from_this_computer(client_address):
 
 
 def settings_from(config):
-    """{"network": bool, "host": str, "token_env": str, "allowed_hosts": [...]} from the configuration, with the conservative default."""
+    """{"network": bool, "host": str, "token_env": str, "allowed_hosts": [...], "proxy_public_host": str} from the configuration, with the conservative default."""
     cfg = config.get("listen") if isinstance(config, dict) and isinstance(config.get("listen"), dict) else {}
     host = cfg.get("host") if isinstance(cfg.get("host"), str) and host_ok(cfg.get("host")) else "127.0.0.1"
     network = cfg.get("network") is True
     env = cfg.get("token_env") if isinstance(cfg.get("token_env"), str) else "MONITOR_ACCESS_TOKEN"
     allowed = [h for h in (cfg.get("allowed_hosts") or []) if isinstance(h, str) and 0 < len(h) <= 100]
-    return {"network": network, "host": host if network else "127.0.0.1", "token_env": env or "MONITOR_ACCESS_TOKEN", "allowed_hosts": allowed}
+    return {"network": network, "host": host if network else "127.0.0.1", "token_env": env or "MONITOR_ACCESS_TOKEN", "allowed_hosts": allowed,
+            "proxy_public_host": proxy_host_clean(cfg.get("proxy_public_host"))}

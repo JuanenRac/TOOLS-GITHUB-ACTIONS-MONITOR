@@ -9,6 +9,25 @@ Version of the tool itself (monitor + sentinel + batch tools), semver of its own
 and is shown as `tool_version` in the sentinel snapshot and by `read_report.py --version`; `make_release.py` refuses to build
 when this file and `tool_version.py` disagree.
 
+## [1.6.7]
+
+An HTTPS proxy on the default port 443 now works with the network mode, and more of the history of changes is translated.
+
+### Added
+
+- `listen.proxy_public_host` (Settings > Advanced > Network, empty by default): the public host name of an HTTPS proxy on the default port 443 that forwards `Host` and `Origin` without a port. Until now the guard compared both with the port of the monitor, so such a proxy was refused; that one name is now accepted as it is. It only counts while the network mode is on and the session is HTTPS (direct TLS or `listen.secure_cookie`), it must be a plain host name (a port, a path, a user, a space or an IPv6 literal make it empty), like every setting the schema marks `secure` it can only be changed from the computer itself, and its label and help are in eight languages.
+- Tests for every change of this release (the suite grew from 843 to 858 and the new file checks the guard, the value, the schema and the texts).
+
+### Security
+
+- The exception of the guard is as narrow as it can be: only that one name is accepted without a port, never another host without a port, never under plain HTTP, and the `Origin` must carry the same name with the scheme `https` (another scheme, a port, a path, a user or a different host are still refused). The proxy name never appears in the public state of the guard.
+
+### Changed
+
+- The history of changes (Help > Changelog) is translated in the other seven languages for 1.6.7 and 1.6.5 (1.6.6 already was); the older entries keep the English text under a translated notice and will follow, newest first.
+- `docs/ADVANCED.md` (eight languages) explains the proxy on the default port instead of saying it is not supported, `docs/MIGRATING.md` has a block from 1.6.6 to 1.6.7, and the guide of the settings and the index of the Help are regenerated.
+
+
 ## [1.6.6]
 
 Corrections to the network mode and to `act`, the pending items of 1.6.5, and the history of changes in eight languages.

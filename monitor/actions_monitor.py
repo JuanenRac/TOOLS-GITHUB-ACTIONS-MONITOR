@@ -87,7 +87,7 @@ DEFAULTS = {
     "quota": {"billing_api": False, "warn_percent": 75, "alert_percent": 90, "default_runner": "linux"},
     "session_guard": True,         # the page asks for a one-use token before it changes a setting or confirms an action
     "discovery": {"events": True, "suggest_groups": True, "auto_frequency": False, "hide": []},
-    "listen": {"network": False, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "tls_cert_file": "", "tls_key_file": "", "secure_cookie": False, "max_failed_attempts": 10},     # OFF: only this computer. On: a private address, with an access token for every request
+    "listen": {"network": False, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "tls_cert_file": "", "tls_key_file": "", "secure_cookie": False, "proxy_public_host": "", "max_failed_attempts": 10},     # OFF: only this computer. On: a private address, with an access token for every request
     "github_token": {"enabled": False, "store": "auto"},       # OFF: the monitor uses your own `gh login`. On: a token kept in the store of the system (secretstore.py)
     "github_actions": {"enabled": False, "allowed": ["rerun_failed", "cancel"], "merge_method": "squash"},      # OFF: actions on GitHub, each one confirmed on its own (ghactions.py)
     "act": {"enabled": False, "allowed": [], "timeout_seconds": 900, "allow_symlinks": False},
@@ -1784,7 +1784,7 @@ def main():
             except (OSError, ValueError, ssl.SSLError) as error:
                 print(i18n.t("mon.tls_failed", error=str(error)[:200]))
                 return 1
-        localguard.configure(True, listen["host"], access_token, listen["allowed_hosts"], secure=tls_ctx is not None or tls["secure_cookie"])
+        localguard.configure(True, listen["host"], access_token, listen["allowed_hosts"], secure=tls_ctx is not None or tls["secure_cookie"], proxy_host=listen["proxy_public_host"])
         LIVE_CONFIG["session_guard"] = True      # the one-use token of the page is not optional on the network
     for port in range(args.port, args.port + 10):
         try:

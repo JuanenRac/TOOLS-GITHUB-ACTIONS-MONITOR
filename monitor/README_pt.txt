@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITOR DO GITHUB ACTIONS + SENTINELA (versão 1.6.6)
+MONITOR DO GITHUB ACTIONS + SENTINELA (versão 1.6.7)
 ====================================================
 QUAL ARRANCAR? (um utilizador novo decide em dois minutos)
   COMPLETA  MONITOR_GITHUB_ACTIONS.*       a página com a sentinela (porta 8765): alertas, fila de assinatura, análise. Comece aqui se tem vários repositórios.
@@ -89,6 +89,10 @@ LICENÇA    GPL-3.0-or-later (ver LICENSE e NOTICE). Copyright (C) 2026 JuanenRa
 AJUDA, ACERCA DE E VERIFICAÇÕES (1.6.4)
 ---------------------------------------
 A página tem um botão de Ajuda (? redondo) e um de Acerca de (i); na consola use --help-topics, --help-search, --about e --doctor; --demo mostra a página com dados inventados. A edição lite arranca com o seu próprio banner e título de janela (LITE, porta 8766, sem sentinela); a completa diz COMPLETE, porta 8765, sentinela ativa. O aviso de versão nova pode ser desligado (Definições > Básico).
+
+NOVIDADES DA 1.6.7 (proxy HTTPS na porta predefinida; histórico: CHANGELOG.md)
+  Nova definição listen.proxy_public_host (vazia por predefinição): o nome público de um proxy HTTPS na porta 443 que reencaminha Host e Origin sem porta é aceite tal como está, só com
+  HTTPS, e só se altera a partir do próprio computador. O histórico de alterações está traduzido para a 1.6.7, a 1.6.6 e a 1.6.5 (Ajuda > Registo de alterações).
 
 NOVIDADES DA 1.6.6 (correções do modo rede e do act; histórico: CHANGELOG.md)
   O modo rede com HTTPS funciona a partir da página (a origem segue o esquema da sessão); toda a definição marcada como segura só se altera a partir do próprio computador; POST /api/access abre

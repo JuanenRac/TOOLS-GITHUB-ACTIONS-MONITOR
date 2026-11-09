@@ -43,6 +43,7 @@ OWNER_RE = re.compile(r"^[A-Za-z0-9-]{0,39}$")
 MODEL_RE = re.compile(r"^[A-Za-z0-9._:/@-]{0,100}$")
 OLLAMA_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}/?$")   # the local service only: nothing leaves this computer
 HTTPS_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250})?$")
+PROXY_HOST_RE = re.compile(r"^([A-Za-z0-9]([A-Za-z0-9.-]{0,98}[A-Za-z0-9])?)?$")      # the public NAME of an HTTPS proxy: a host name only, no port, path, user or space (empty = none)
 ENV_NAME_RE = re.compile(r"^([A-Z_][A-Z0-9_]{0,63})?$")   # the NAME of an environment variable, never the key itself
 LOOP_HOST_RE = re.compile(r"^(127\.0\.0\.1|localhost|\[::1\])$")                      # a broker or a service ON THIS COMPUTER
 LOOP_URL_RE = re.compile(r"^(http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/%-]{0,100})?)?$")
@@ -255,6 +256,7 @@ _f("advanced", "network", "listen.allowed_hosts", "names", secure=True)
 _f("advanced", "network", "listen.tls_cert_file", "path", secure=True)
 _f("advanced", "network", "listen.tls_key_file", "path", secure=True)
 _f("advanced", "network", "listen.secure_cookie", "bool", secure=True)
+_f("advanced", "network", "listen.proxy_public_host", "text", PROXY_HOST_RE, secure=True)
 _f("advanced", "network", "listen.max_failed_attempts", "int", (3, 100), unit="", secure=True)
 _f("advanced", "token", "github_token.enabled", "bool", restart=False, secure=True)
 _f("advanced", "token", "github_token.store", "enum", ("auto", "system", "file"), restart=False, secure=True)

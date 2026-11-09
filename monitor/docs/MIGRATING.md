@@ -67,3 +67,10 @@ Nothing has to be converted. What now behaves differently, on purpose:
 - **act**: after Stop the run is free at once; a start right after no longer answers `busy`.
 - New files next to the monitor: `degraded.json` and `degraded_lite.json` (the counters of swallowed failures); they can be deleted at any time.
 - The history of changes (Help > Changelog) is translated: one file `docs/CHANGELOG_<lang>.md` per language.
+
+# From 1.6.6 to 1.6.7
+
+Nothing has to be converted. What now behaves differently, on purpose:
+
+- **Network mode behind an HTTPS proxy on port 443**: new setting `listen.proxy_public_host` (empty by default, nothing changes if you leave it). Put the public host name of the proxy there when it forwards `Host` and `Origin` without a port; that one name is then accepted as it is, only while the network mode is on and the session is HTTPS. It can only be changed from the computer itself. Behind a proxy that keeps the port nothing changes.
+- The history of changes (Help > Changelog) is now translated for 1.6.7 and 1.6.5 in the other seven languages; older entries still show the English text under a translated notice.

@@ -488,7 +488,7 @@ class Webhook(unittest.TestCase):
         self.assertNotIn("0.0.0.0", source.replace("never bind it to 0.0.0.0", ""))
         self.assertIn('(listen["host"] if listen["network"] else "127.0.0.1", port)', source)      # the address comes from the setting listen.* and is loopback unless it is turned on
         import localguard
-        self.assertEqual(localguard.settings_from({}), {"network": False, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": []})
+        self.assertEqual(localguard.settings_from({}), {"network": False, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "proxy_public_host": ""})
         self.assertEqual(localguard.settings_from({"listen": {"network": True, "host": "8.8.8.8"}})["host"], "127.0.0.1")        # a public address is never accepted
         self.assertIn("class QuietServer(ThreadingHTTPServer)", source)
 
@@ -656,8 +656,8 @@ class ReleaseNotes(unittest.TestCase):
 class GateAndVersion(unittest.TestCase):
     def test_version_is_1_5_0_and_the_changelog_agrees(self):
         import tool_version
-        self.assertEqual(tool_version.TOOL_VERSION, "1.6.6")
-        self.assertEqual(mr.gate_static(), "1.6.6")
+        self.assertEqual(tool_version.TOOL_VERSION, "1.6.7")
+        self.assertEqual(mr.gate_static(), "1.6.7")
 
     def test_new_files_travel_and_state_files_do_not(self):
         names = {p.relative_to(mr.HERE).as_posix() for p in mr.members()}

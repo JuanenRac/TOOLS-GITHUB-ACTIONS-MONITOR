@@ -15,7 +15,7 @@
 - 页面的一次性令牌被强制启用,模式开启期间每个标签页都会显示红色提示条,`listen.*`、`github_token.*`、`act.*` 和 `github_actions.*` 的键只能从本机修改。
 - `listen.allowed_hosts` 列出可用来打开页面的名称(防御 DNS 重绑定)。
 - **风险。** 流量是明文 HTTP:能监听你网络的人可以读取令牌和数据。只在可信网络中使用,或在前面放置带 HTTPS 的反向代理(见 `DEPLOYMENT.md`)。切勿暴露到互联网。精简版绝不会监听本机以外。
-- **HTTPS。** 使用自己的证书和密钥(`listen.tls_cert_file`、`listen.tls_key_file`),监视器会自己提供 HTTPS;在替你处理 HTTPS 的代理之后,请设置 `listen.secure_cookie`。两种情况下,浏览器每次更改都会发送 `Origin: https://主机:端口`,检查只接受会话的协议(另一种协议、其他主机、其他端口或格式错误的来源都会被拒绝)。浏览器使用的地址必须带有监视器的端口(默认 443 端口上转发不带端口的 `Host` 的代理暂不支持)。
+- **HTTPS。** 使用自己的证书和密钥(`listen.tls_cert_file`、`listen.tls_key_file`),监视器会自己提供 HTTPS;在替你处理 HTTPS 的代理之后,请设置 `listen.secure_cookie`。两种情况下,浏览器每次更改都会发送 `Origin: https://主机:端口`,检查只接受会话的协议(另一种协议、其他主机、其他端口或格式错误的来源都会被拒绝)。浏览器使用的地址必须带有监视器的端口,但如果位于默认 443 端口上、转发不带端口的 `Host` 和 `Origin` 的 HTTPS 代理之后,请把它的公开名称填入 `listen.proxy_public_host`(仅限主机名,默认为空)。它只在 HTTPS 下生效,只有这一个名称可以不带端口被接受,并且只能在本机上更改。
 - **用 POST 打开会话。** 除了带 `?access=` 的地址,也可以向 `POST /api/access` 发送 JSON `{"token": "..."}`:令牌不会出现在地址栏、历史记录和日志中,Cookie 在响应中返回。带 `?access=` 的地址仍然可用。当 `listen.host` 为 `0.0.0.0` 时,设置页顶部会显示红色横幅提醒。架构中标记为安全的所有设置(不仅是 `listen.*`、`github_token.*`、`act.*` 和 `github_actions.*`,还有 Webhook、AI 操作、通知、OpenTelemetry、镜像、runner 和输出)只能在本机修改。
 
 ## 监视器保存的 GitHub 令牌

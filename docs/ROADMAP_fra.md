@@ -2,6 +2,10 @@
 
 Des idées qui n'ont pas tenu dans la version actuelle, sans ordre promis. Ce sont des directions, pas des engagements ; une issue ou une pull request est la meilleure façon d'en faire avancer une.
 
+## Fait dans la 1.6.7
+
+Un proxy HTTPS sur le port 443 par défaut fonctionne désormais avec le mode réseau (`listen.proxy_public_host`, vide par défaut : le seul nom public du proxy est accepté sans port, uniquement en HTTPS, et il ne se change que depuis l'ordinateur lui-même), et l'historique des modifications est traduit dans les sept autres langues pour la 1.6.7, la 1.6.6 et la 1.6.5.
+
 ## Fait dans la 1.6.6
 
 Corrections après la 1.6.5 : le mode réseau fonctionne maintenant en HTTPS depuis la page (la garde d'origine suit le schéma de la session), tout réglage que le schéma marque sûr ne se change que depuis l'ordinateur lui-même, `act` libère son exécution après Stop et ferme son tube, une barre rouge dans les Réglages quand le mode réseau écoute sur toutes les interfaces, la session peut s'ouvrir par POST au lieu de l'adresse, un compteur d'échecs avalés dans `--doctor` et À propos, `tools/make_screenshots.py` dit ce qu'il fait et les images sont refaites, et l'historique des modifications est traduit en huit langues.
@@ -19,8 +23,7 @@ Tests d'isolation de l'édition lite et de la démo, aucune requête réseau qua
 Ce que la 1.6.4 n'a pas atteint, et pourquoi :
 
 - **Décidé, pas fait dans la 1.6.6** : l'avis actif à une IA externe (désactivé par défaut, une première confirmation par fournisseur, seulement les champs déjà filtrés de la liste fermée, un plafond d'appels et de coût par heure, la clé par le nom d'une variable d'environnement, et l'IA n'exécute jamais d'action) avec sa variante de commande sortante (liste fermée, sans shell) ; et les dépôts de plusieurs propriétaires dans une page (le moniteur identifie un dépôt par son seul nom, il lui faut donc le propriétaire dans chaque identifiant ; c'est la base de plusieurs comptes). Chacun est une fonction à part avec sa conception et ses tests, donc la 1.6.6 a d'abord clos les corrections.
-- **Les anciennes entrées du journal des modifications dans les sept autres langues** : depuis la 1.6.6 l'Aide montre l'historique dans chaque langue, mais seule l'entrée la plus récente est traduite ; les anciennes gardent le texte anglais sous un avis traduit et seront traduites version par version, la plus récente d'abord.
-- **HTTPS derrière un proxy sur le port par défaut** : la garde compare `Host` et `Origin` avec le port du moniteur, donc un proxy sur le port 443 qui transmet un `Host` sans port n'est pas encore pris en charge ; la page fonctionne avec un port TLS direct ou un proxy qui garde le port.
+- **Les anciennes entrées du journal des modifications dans les sept autres langues** : l'Aide montre l'historique dans chaque langue, et la 1.6.7, la 1.6.6 et la 1.6.5 sont traduites ; la 1.6.4 et les précédentes gardent le texte anglais sous un avis traduit et seront traduites version par version, de la plus récente à la plus ancienne.
 - **Plusieurs propriétaires dans une page** : le moniteur identifie un dépôt par son seul nom (exécutions, sentinelle, cache, exports) ; deux propriétaires ayant un dépôt du même nom se mélangeraient. Les organisations sont listées et chacune est surveillée par son propre moniteur (`github_owner`). Le faire dans une page demande le propriétaire dans chaque identifiant.
 - **Le rapport de facturation avec un compte qui peut le lire** : la vraie réponse pour un compte sans la portée `user` est « introuvable » et le moniteur retombe sur l'estimation (vérifié) ; les chiffres eux-mêmes n'ont pas été comparés à un compte de facturation.
 - **Les prix des gros runners** de `quotas.json` viennent de la mémoire de la grille tarifaire publique et sont marqués non vérifiés ; comparez-les à la page de facturation de GitHub et modifiez le fichier.

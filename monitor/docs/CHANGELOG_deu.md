@@ -7,6 +7,24 @@
 
 Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem Semver. Die Quelle ist das englische CHANGELOG.md; diese Datei enthält dieselben Versionen und Abschnitte.
 
+## [1.6.7]
+
+Ein HTTPS-Proxy auf dem Standardport 443 funktioniert jetzt mit dem Netzwerkmodus, und ein weiterer Teil der Änderungshistorie ist übersetzt.
+
+### Hinzugefügt
+
+- `listen.proxy_public_host` (Einstellungen > Erweitert > Netzwerk, standardmäßig leer): der öffentliche Hostname eines HTTPS-Proxys auf dem Standardport 443, der `Host` und `Origin` ohne Port weiterleitet. Bisher verglich die Prüfung beide mit dem Port des Monitors, sodass ein solcher Proxy abgelehnt wurde; dieser eine Name wird jetzt unverändert akzeptiert. Er zählt nur, solange der Netzwerkmodus an ist und die Sitzung HTTPS nutzt (direktes TLS oder `listen.secure_cookie`), muss ein einfacher Hostname sein (ein Port, ein Pfad, ein Benutzer, ein Leerzeichen oder ein IPv6-Literal machen ihn leer), kann wie jede vom Schema als `secure` markierte Einstellung nur vom Rechner selbst geändert werden, und sein Label und seine Hilfe gibt es in acht Sprachen.
+- Tests für jede Änderung dieser Version (die Suite wuchs von 843 auf 858, und die neue Datei prüft die Prüfung, den Wert, das Schema und die Texte).
+
+### Sicherheit
+
+- Die Ausnahme der Prüfung ist so eng wie möglich: Nur dieser Name wird ohne Port akzeptiert, nie ein anderer Host ohne Port, nie über einfaches HTTP, und der `Origin` muss denselben Namen mit dem Schema `https` tragen (ein anderes Schema, ein Port, ein Pfad, ein Benutzer oder ein anderer Host werden weiterhin abgelehnt). Der Name des Proxys erscheint nie im öffentlichen Zustand der Prüfung.
+
+### Geändert
+
+- Die Änderungshistorie (Hilfe > Änderungsprotokoll) ist in den anderen sieben Sprachen für 1.6.7 und 1.6.5 übersetzt (1.6.6 war es schon); die älteren Einträge behalten den englischen Text unter einem übersetzten Hinweis und folgen, die neuesten zuerst.
+- `docs/ADVANCED.md` (acht Sprachen) erklärt den Proxy auf dem Standardport, statt zu sagen, er werde nicht unterstützt, `docs/MIGRATING.md` hat einen Block von 1.6.6 auf 1.6.7, und die Einstellungsanleitung und der Index der Hilfe sind neu erzeugt.
+
 ## [1.6.6]
 
 Korrekturen am Netzwerkmodus und an `act`, die offenen Punkte aus 1.6.5 und die Änderungshistorie in acht Sprachen.
@@ -36,41 +54,39 @@ Korrekturen am Netzwerkmodus und an `act`, die offenen Punkte aus 1.6.5 und die 
 
 ## [1.6.5]
 
-> Diese Version liegt vorerst nur auf Englisch vor; die Übersetzung folgt in einer späteren Version.
-
-A release of integrity and security: no large new feature. What cannot be proven is no longer taken as safe.
+Eine Version für Integrität und Sicherheit: keine große neue Funktion. Was sich nicht beweisen lässt, gilt nicht mehr als sicher.
 
 ### Hinzugefügt
 
-- New settings, all with a conservative default: `dispatch.required_ci` (and, in the file, `dispatch.required_ci_repos` and `dispatch.required_ci_profiles`), `act.allow_symlinks`, `listen.tls_cert_file`, `listen.tls_key_file`, `listen.secure_cookie`, `listen.max_failed_attempts`, `webhook.replay_seconds`, `webhook.max_per_minute`; the guide of the settings is regenerated.
-- `finalize --accept-legacy` for batches written by an older version, and the `--doctor` checks `risks` and `backend` (eight languages).
-- Tests for every change of this release (the suite grew from 729 to more than 800).
+- Neue Einstellungen, alle mit konservativem Standardwert: `dispatch.required_ci` (und in der Datei `dispatch.required_ci_repos` und `dispatch.required_ci_profiles`), `act.allow_symlinks`, `listen.tls_cert_file`, `listen.tls_key_file`, `listen.secure_cookie`, `listen.max_failed_attempts`, `webhook.replay_seconds`, `webhook.max_per_minute`; die Einstellungsanleitung wird neu erzeugt.
+- `finalize --accept-legacy` für Stapel, die eine ältere Version geschrieben hat, sowie die `--doctor`-Prüfungen `risks` und `backend` (acht Sprachen).
+- Tests für jede Änderung dieser Version (die Suite wuchs von 729 auf mehr als 800).
 
 ### Sicherheit
 
-- **A green commit needs the required CI.** `gha_dispatch_all.py` marks a commit green only when the required workflow files succeeded on it (`ci.yml` by default; `dispatch.required_ci`, `dispatch.required_ci_repos`, `dispatch.required_ci_profiles`), nothing failed, timed out or waits for an approval (`action_required` blocks like a failure), nothing is still running and the list of runs is complete (it reads up to five pages; a longer list is not green).
-- **A failed `git fetch` stops the dispatch** of that repository, git commands have a time limit and the commit ids are checked; an old `origin/main` is never taken as proof.
-- **The catalogue cannot leave its folder or change the dispatch.** `tool` must be a plain file name that sits in the tools folder (links that leave it are refused too); `extra` may only hold `-f key=value` workflow inputs (never `dry_run`, `ref`, `-R`, `--ref`); `finalize_flags` only long flags; the arguments of `gh workflow run` are built from the validated pieces and checked again when the batch fires.
-- **Old batches are not signed blindly.** `finalize` offers for signing only a run whose batch recorded that it was built on the commit that was checked. A batch written by an older version is `needs_review`; `finalize --accept-legacy` reads the run again from GitHub, accepts it only if its commit is the recorded one, warns, and asks for the word LEGACY before each signature.
-- **`act` stays inside the workspace.** The clone is resolved and must be a real folder of the workspace (a link, a `..` name or a `.github` that points elsewhere is refused; `act.allow_symlinks` allows a link to a clone). The time limit and Stop end the whole tree of processes the run started (a process group on Linux and macOS, `taskkill /T` on its own PID on Windows) and remove the `act-` containers that run created.
-- **Network mode**: HTTPS served directly with your own certificate and key (`listen.tls_cert_file`, `listen.tls_key_file`; TLS 1.2 or newer; the monitor does not start on plain HTTP if they cannot be used) or the `Secure` cookie behind an HTTPS proxy (`listen.secure_cookie`); the access token leaves the address bar at once (redirect, no `Referer`); an address that sends too many wrong tokens is refused for five minutes (`listen.max_failed_attempts`); the address of the page is the one the server listens on; only IPv4 addresses are accepted, in the settings and in the guard alike; the console says when the connection is plain HTTP.
-- **Webhook**: every delivery needs its `X-GitHub-Delivery` id and a repeated one is ignored for `webhook.replay_seconds`; a repository can cause at most `webhook.max_per_minute` accepted events a minute; the owner in `full_name` must be the watched account; one address is limited to 120 requests a minute in the network mode; an accepted event drops the stored conditional reads of that repository and marks it for the next cycle; a signature header with unusual characters is a plain refusal.
-- **MCP server**: a message of the wrong shape (parameters, arguments, id, method) gets an error for that message only, an unexpected defect in a tool is an internal error that does not end the server, and a line over 64 KB is refused.
-- **The stored GitHub token is given to `gh` only.** It is no longer put in the environment of the monitor, so `act`, your notification command and every other child cannot inherit it.
-- **A GET never writes.** The copy of the daily report in the audit folder is a POST with the one-use token (`/api/sentinel/parte/save`); `?save=1` on the GET is gone.
-- `--doctor` names dangerous combinations (network mode on every interface, AI actions that execute while the network mode is on, `act` while the network mode is on, the token in a plain file) and shows where the token is kept, never the token.
+- **Ein grüner Commit braucht die verpflichtende CI.** `gha_dispatch_all.py` hält einen Commit nur für grün, wenn die verpflichtenden Workflow-Dateien darauf erfolgreich waren (standardmäßig `ci.yml`; `dispatch.required_ci`, `dispatch.required_ci_repos`, `dispatch.required_ci_profiles`), nichts fehlschlug, ablief oder auf eine Freigabe wartet (`action_required` blockiert wie ein Fehler), nichts mehr läuft und die Liste der Läufe vollständig ist (es liest bis zu fünf Seiten; eine längere Liste ist nicht grün).
+- **Ein fehlgeschlagenes `git fetch` stoppt den Versand** dieses Repositorys, git-Befehle haben ein Zeitlimit und die Commit-IDs werden geprüft; ein alter `origin/main` gilt nie als Beweis.
+- **Der Katalog kann seinen Ordner nicht verlassen und den Versand nicht ändern.** `tool` muss ein einfacher Dateiname im Werkzeugordner sein (Links, die ihn verlassen, werden ebenfalls abgelehnt); `extra` darf nur Workflow-Eingaben der Form `-f key=value` enthalten (nie `dry_run`, `ref`, `-R`, `--ref`); `finalize_flags` nur lange Flags; die Argumente von `gh workflow run` werden aus den geprüften Teilen gebaut und beim Auslösen des Stapels erneut geprüft.
+- **Alte Stapel werden nicht blind signiert.** `finalize` bietet nur einen Lauf zum Signieren an, dessen Stapel festgehalten hat, auf dem geprüften Commit gebaut worden zu sein. Ein von einer älteren Version geschriebener Stapel ist `needs_review`; `finalize --accept-legacy` liest den Lauf erneut von GitHub, akzeptiert ihn nur, wenn sein Commit der festgehaltene ist, warnt und verlangt vor jeder Signatur das Wort LEGACY.
+- **`act` bleibt im Arbeitsbereich.** Der Klon wird aufgelöst und muss ein echter Ordner des Arbeitsbereichs sein (ein Link, ein Name mit `..` oder ein `.github`, das woanders hinzeigt, wird abgelehnt; `act.allow_symlinks` erlaubt einen Link auf einen Klon). Zeitlimit und Stop beenden den gesamten Prozessbaum, den der Lauf gestartet hat (eine Prozessgruppe unter Linux und macOS, `taskkill /T` auf die eigene PID unter Windows), und entfernen die `act-`-Container, die dieser Lauf erzeugt hat.
+- **Netzwerkmodus**: HTTPS direkt mit deinem eigenen Zertifikat und Schlüssel (`listen.tls_cert_file`, `listen.tls_key_file`; TLS 1.2 oder neuer; der Monitor startet nicht über einfaches HTTP, wenn sie nicht nutzbar sind) oder das `Secure`-Cookie hinter einem HTTPS-Proxy (`listen.secure_cookie`); das Zugriffstoken verlässt sofort die Adressleiste (Weiterleitung, kein `Referer`); eine Adresse, die zu viele falsche Tokens sendet, wird fünf Minuten lang abgelehnt (`listen.max_failed_attempts`); die Adresse der Seite ist die, auf der der Server lauscht; es werden nur IPv4-Adressen akzeptiert, in den Einstellungen wie in der Prüfung; die Konsole sagt, wenn die Verbindung einfaches HTTP ist.
+- **Webhook**: Jede Zustellung braucht ihre `X-GitHub-Delivery`-ID, und eine wiederholte wird `webhook.replay_seconds` lang ignoriert; ein Repository kann höchstens `webhook.max_per_minute` akzeptierte Ereignisse pro Minute auslösen; der Eigentümer in `full_name` muss das beobachtete Konto sein; eine Adresse ist im Netzwerkmodus auf 120 Anfragen pro Minute begrenzt; ein akzeptiertes Ereignis verwirft die gespeicherten bedingten Abfragen dieses Repositorys und markiert es für den nächsten Zyklus; ein Signatur-Header mit ungewöhnlichen Zeichen wird schlicht abgelehnt.
+- **MCP-Server**: Eine Nachricht mit falscher Form (Parameter, Argumente, ID, Methode) erhält einen Fehler nur für diese Nachricht, ein unerwarteter Defekt in einem Werkzeug ist ein interner Fehler, der den Server nicht beendet, und eine Zeile über 64 KB wird abgelehnt.
+- **Das gespeicherte GitHub-Token geht nur an `gh`.** Es wird nicht mehr in die Umgebung des Monitors gelegt, sodass `act`, dein Benachrichtigungsbefehl und jeder andere Kindprozess es nicht erben können.
+- **Ein GET schreibt nie.** Die Kopie des Tagesberichts im Audit-Ordner ist ein POST mit dem Einmal-Token (`/api/sentinel/parte/save`); `?save=1` beim GET ist entfallen.
+- `--doctor` nennt gefährliche Kombinationen (Netzwerkmodus auf allen Schnittstellen, KI-Aktionen, die bei aktivem Netzwerkmodus ausführen, `act` bei aktivem Netzwerkmodus, das Token in einer einfachen Datei) und zeigt, wo das Token liegt, nie das Token.
 
 ### Behoben
 
-- `max_per_hour` of the notifications now limits messages (one unit per channel, booked at once under one lock) and not events; a channel that cannot send books nothing.
-- Two saves of the settings at the same time no longer lose one of them (a lock in the process and a lock file).
-- The signing queue export says why it did not write (a refused drive or network path, a folder instead of a file, the error of the system) instead of a bare refusal.
-- The secondary-limit wait and the retry after a timeout carry a random jitter.
-- The test that unpacks the zip in a clean folder is no longer part of the ordinary suite: `make_release.py` runs the suite once with a time limit, then the clean install as its own stage, and shows stdout and stderr when either fails.
+- `max_per_hour` der Benachrichtigungen begrenzt jetzt Nachrichten (eine Einheit pro Kanal, sofort unter einer Sperre gebucht) und nicht Ereignisse; ein Kanal, der nicht senden kann, bucht nichts.
+- Zwei gleichzeitige Speichervorgänge der Einstellungen verlieren nicht mehr einen von beiden (eine Sperre im Prozess und eine Sperrdatei).
+- Der Export der Signaturwarteschlange sagt, warum er nicht geschrieben hat (ein abgelehntes Laufwerk oder Netzwerkpfad, ein Ordner statt einer Datei, der Systemfehler), statt nur abzulehnen.
+- Die Wartezeit beim sekundären Limit und die Wiederholung nach einer Zeitüberschreitung tragen einen zufälligen Jitter.
+- Der Test, der das Zip in einem sauberen Ordner entpackt, gehört nicht mehr zur gewöhnlichen Suite: `make_release.py` führt die Suite einmal mit Zeitlimit aus, dann die saubere Installation als eigene Stufe, und zeigt stdout und stderr, wenn eine fehlschlägt.
 
 ### Geändert
 
-- The guides of notifications, webhook, advanced features, outputs, AI alerts and migration say all of this in the eight languages; `docs/MIGRATING.md` has a block from 1.6.4 to 1.6.5.
+- Die Anleitungen zu Benachrichtigungen, Webhook, erweiterten Funktionen, Ausgaben, KI-Warnungen und Migration sagen all das in acht Sprachen; `docs/MIGRATING.md` hat einen Block von 1.6.4 auf 1.6.5.
 
 ## [1.6.4]
 
