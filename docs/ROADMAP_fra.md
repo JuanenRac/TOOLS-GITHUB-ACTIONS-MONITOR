@@ -2,6 +2,10 @@
 
 Des idées qui n'ont pas tenu dans la version actuelle, sans ordre promis. Ce sont des directions, pas des engagements ; une issue ou une pull request est la meilleure façon d'en faire avancer une.
 
+## Fait dans la 1.7.0
+
+Plusieurs comptes dans l'édition complète, chacun un moniteur à part sous un superviseur (`accounts/<id>/`, `--accounts`, `--account`, `--migrate-accounts`), l'API des comptes, un webhook pour tous, la page avec un sélecteur et les cartes de tous les comptes, les vues par adresse (`?view=` et `?chrome=0`) et la vue En direct avec l'état du récepteur de webhook. L'édition lite ne change pas.
+
 ## Fait dans la 1.6.8
 
 Le proxy HTTPS de la 1.6.7 est vérifié face à un vrai proxy sur le port 443 (`tools/manual_check_live.py proxy`, et des tests qui parcourent un client sur TLS, un reverse proxy et le moniteur), les images sont reprises avec deux nouvelles du mode réseau, et l'historique des modifications est traduit dans les sept autres langues jusqu'à la 1.6.3.
@@ -28,7 +32,7 @@ Ce que la 1.6.4 n'a pas atteint, et pourquoi :
 
 - **Décidé, pas fait dans la 1.6.6** : l'avis actif à une IA externe (désactivé par défaut, une première confirmation par fournisseur, seulement les champs déjà filtrés de la liste fermée, un plafond d'appels et de coût par heure, la clé par le nom d'une variable d'environnement, et l'IA n'exécute jamais d'action) avec sa variante de commande sortante (liste fermée, sans shell) ; et les dépôts de plusieurs propriétaires dans une page (le moniteur identifie un dépôt par son seul nom, il lui faut donc le propriétaire dans chaque identifiant ; c'est la base de plusieurs comptes). Chacun est une fonction à part avec sa conception et ses tests, donc la 1.6.6 a d'abord clos les corrections.
 - **Les anciennes entrées du journal des modifications dans les sept autres langues** : l'Aide montre l'historique dans chaque langue, et de la 1.6.8 à la 1.6.3 sont traduites ; la 1.6.2 et les précédentes gardent le texte anglais sous un avis traduit et seront traduites version par version, de la plus récente à la plus ancienne.
-- **Plusieurs propriétaires dans une page** : le moniteur identifie un dépôt par son seul nom (exécutions, sentinelle, cache, exports) ; deux propriétaires ayant un dépôt du même nom se mélangeraient. Les organisations sont listées et chacune est surveillée par son propre moniteur (`github_owner`). Le faire dans une page demande le propriétaire dans chaque identifiant.
+- **Plusieurs propriétaires dans un processus et une page** : depuis la 1.7.0 chaque compte est un moniteur à part et la page les montre côte à côte, mais dans un moniteur un dépôt s'identifie encore par son seul nom, donc deux propriétaires dans le même moniteur se mélangeraient. Les comptes de la 1.7.0 sont le moyen de les garder séparés ; les ramener dans un seul processus, avec le propriétaire dans chaque identifiant, est ce qui reste.
 - **Le rapport de facturation avec un compte qui peut le lire** : la vraie réponse pour un compte sans la portée `user` est « introuvable » et le moniteur retombe sur l'estimation (vérifié) ; les chiffres eux-mêmes n'ont pas été comparés à un compte de facturation.
 - **Les prix des gros runners** de `quotas.json` viennent de la mémoire de la grille tarifaire publique et sont marqués non vérifiés ; comparez-les à la page de facturation de GitHub et modifiez le fichier.
 - **`gh copilot`** : ses options se vérifient avec `gh copilot -- --help`, qui exige la ligne de commande Copilot ; elle n'est pas installée ici, donc elles restent non vérifiées.
@@ -39,7 +43,7 @@ Ce que la 1.6.4 n'a pas atteint, et pourquoi :
 ## Plus tard
 
 - **Plus d'adaptateurs de notification** : ntfy, Microsoft Teams et e-mail via un relais local.
-- **Plusieurs comptes dans une page** : aujourd'hui chaque compte tourne dans son propre moniteur.
+- **Plusieurs comptes dans une page** : fait dans la 1.7.0, chaque compte dans son propre moniteur sous un superviseur.
 - **Télémétrie matérielle des runners** via un agent : aujourd'hui seul un point d'accès optionnel de node exporter est lu.
 
 ## Idées qui demandent d'abord une décision

@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GITHUB-ACTIONS-MONITOR + WÄCHTER (Version 1.6.8)
+GITHUB-ACTIONS-MONITOR + WÄCHTER (Version 1.7.0)
 ================================================
 WELCHE STARTEN? (ein neuer Nutzer entscheidet in zwei Minuten)
   KOMPLETT  MONITOR_GITHUB_ACTIONS.*       die Seite mit dem Wächter (Port 8765): Alarme, Signierwarteschlange, Analyse. Hier beginnen, wenn Sie mehrere Repositories haben.
@@ -89,6 +89,11 @@ LIZENZ     GPL-3.0-or-later (siehe LICENSE und NOTICE). Copyright (C) 2026 Juane
 HILFE, ÜBER UND PRÜFUNGEN (1.6.4)
 ---------------------------------
 Die Seite hat eine Hilfe-Taste (rundes ?) und eine Über-Taste (i); in der Konsole: --help-topics, --help-search, --about und --doctor; --demo zeigt die Seite mit erfundenen Daten. Die Lite-Ausgabe startet mit eigenem Banner und Fenstertitel (LITE, Port 8766, ohne Wächter); die vollständige meldet COMPLETE, Port 8765, Wächter aktiv. Der Hinweis auf neue Versionen lässt sich abschalten (Einstellungen > Grundlagen).
+
+NEU IN 1.7.0 (mehrere Konten; Verlauf: CHANGELOG.md)
+  Die komplette Ausgabe kann mehrere GitHub-Konten beobachten: ein Ordner accounts/<id>/ pro Konto und ein Monitor pro Konto unter einem Supervisor, sodass der Ausfall eines Kontos nie ein anderes berührt.
+  --accounts, --account <id>, --migrate-accounts [--apply]; eine Auswahl und die Seite Alle Konten; ?view= und ?chrome=0; die Live-Ansicht mit dem Zustand des Webhooks; ein /api/webhook für alle.
+  Anleitung: docs/ACCOUNTS.md. Ohne einen Ordner accounts/ ändert sich nichts. Die Lite-Ausgabe hat ein Konto und nichts davon.
 
 NEU IN 1.6.8 (Proxy wirklich geprüft; Verlauf: CHANGELOG.md)
   Der HTTPS-Proxy aus 1.6.7 wird gegen einen echten Proxy auf Port 443 geprüft (tools/manual_check_live.py proxy im Repository) und mit Tests, die die ganze Kette durchlaufen. Das

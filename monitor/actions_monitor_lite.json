@@ -1,0 +1,262 @@
+{
+  "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+  "_license": "GPL-3.0-or-later - see LICENSE",
+  "_note": "Template: the monitor copies it to actions_monitor.json on the first start. github_owner empty = the account of `gh`; language empty = the language of your system (en es de fr it ja zh pt); the ecosystems and targets files are the neutral examples: copy and edit them.",
+  "github_owner": "",
+  "language": "",
+  "ecosystems_file": "ecosystems.example.json",
+  "targets_file": "targets.example.json",
+  "repos": "all",
+  "ecosystems": "all",
+  "exclude": [],
+  "mode": "lite",
+  "refresh_seconds": 120,
+  "cold_refresh_seconds": 1200,
+  "issues_refresh_seconds": 180,
+  "discover_refresh_seconds": 3600,
+  "discover_limit": 1000,
+  "show_unclassified": true,
+  "stuck_minutes": 120,
+  "runs_per_repo": 20,
+  "cold_runs_per_repo": 10,
+  "hot_hours": 3,
+  "max_workers": 8,
+  "min_rate_remaining": 1500,
+  "sentinel": {
+    "enabled": false
+  },
+  "ai": {
+    "provider": "none",
+    "model": "",
+    "daily_limit": 30,
+    "max_input_chars": 5000,
+    "max_output_chars": 1500,
+    "timeout_seconds": 90,
+    "events": [
+      "build",
+      "codeql",
+      "report"
+    ],
+    "allowed_repos": [],
+    "answer_language": "",
+    "actions": {
+      "enabled": false,
+      "execute": false,
+      "allowed": [
+        "rerun_failed",
+        "close_issue"
+      ],
+      "max_per_hour": 5,
+      "ttl_seconds": 600
+    }
+  },
+  "webhook": {
+    "enabled": false,
+    "secret": ""
+  },
+  "report_history_days": 30,
+  "profiles_file": "profiles.example.json",
+  "tools_dir": "",
+  "outputs": {
+    "prometheus": {
+      "enabled": false,
+      "per_repo": true
+    },
+    "json": {
+      "enabled": false
+    },
+    "dashboard": {
+      "enabled": false
+    }
+  },
+  "cache": {
+    "etag": {
+      "enabled": true,
+      "ttl_hours": 24
+    }
+  },
+  "analytics": {
+    "enabled": true,
+    "keep_days": 30,
+    "min_samples": 5,
+    "max_samples": 200,
+    "slow_factor": 1.5,
+    "jobs_per_cycle": 3,
+    "steps": true,
+    "flaky": true
+  },
+  "lint": {
+    "enabled": true,
+    "refresh_seconds": 3600,
+    "in_report": true,
+    "rules": {
+      "unpinned_uses": {
+        "enabled": true,
+        "severity": "warn"
+      },
+      "permissions": {
+        "enabled": true,
+        "severity": "warn"
+      },
+      "secrets_in_clear": {
+        "enabled": true,
+        "severity": "bad"
+      },
+      "injection": {
+        "enabled": true,
+        "severity": "warn"
+      },
+      "pr_target": {
+        "enabled": true,
+        "severity": "bad"
+      }
+    }
+  },
+  "notify": {
+    "enabled": false,
+    "events": [
+      "red_new",
+      "stuck_new",
+      "pending_sign",
+      "offline"
+    ],
+    "max_per_hour": 20,
+    "channels": {
+      "telegram": {
+        "enabled": false,
+        "token_env": "",
+        "chat_id": ""
+      },
+      "discord": {
+        "enabled": false,
+        "url_env": ""
+      },
+      "slack": {
+        "enabled": false,
+        "url_env": ""
+      },
+      "matrix": {
+        "enabled": false,
+        "homeserver": "",
+        "room": "",
+        "token_env": ""
+      },
+      "mqtt": {
+        "enabled": false,
+        "host": "127.0.0.1",
+        "port": 1883,
+        "topic": "ghamon/events"
+      },
+      "http_local": {
+        "enabled": false,
+        "url": ""
+      }
+    }
+  },
+  "updates": {
+    "check": true
+  },
+  "airgapped": false,
+  "open_browser": true,
+  "modes": {
+    "start": "normal",
+    "default_minutes": 60,
+    "fast": {
+      "refresh_seconds": 30,
+      "cold_refresh_seconds": 300,
+      "runs_per_repo": 30,
+      "hot_hours": 6
+    },
+    "turbo": {
+      "refresh_seconds": 15,
+      "cold_refresh_seconds": 90,
+      "runs_per_repo": 50,
+      "hot_hours": 12
+    }
+  },
+  "account": {
+    "plan": "unknown"
+  },
+  "quota": {
+    "billing_api": false,
+    "warn_percent": 75,
+    "alert_percent": 90,
+    "default_runner": "linux"
+  },
+  "session_guard": true,
+  "discovery": {
+    "events": true,
+    "suggest_groups": true,
+    "auto_frequency": false,
+    "hide": []
+  },
+  "listen": {
+    "network": false,
+    "host": "127.0.0.1",
+    "token_env": "MONITOR_ACCESS_TOKEN",
+    "allowed_hosts": [],
+    "tls_cert_file": "",
+    "tls_key_file": "",
+    "secure_cookie": false,
+    "max_failed_attempts": 10
+  },
+  "github_token": {
+    "enabled": false,
+    "store": "auto"
+  },
+  "github_actions": {
+    "enabled": false,
+    "allowed": [
+      "rerun_failed",
+      "cancel"
+    ],
+    "merge_method": "squash"
+  },
+  "act": {
+    "enabled": false,
+    "allowed": [],
+    "timeout_seconds": 900,
+    "allow_symlinks": false
+  },
+  "dispatch": {
+    "required_ci": [
+      "ci.yml"
+    ]
+  },
+  "mirror": {
+    "enabled": false,
+    "folder": "",
+    "max_mb": 500,
+    "keep_days": 14,
+    "max_per_cycle": 3
+  },
+  "runners": {
+    "enabled": false,
+    "scope": "owner"
+  },
+  "otlp": {
+    "enabled": false,
+    "endpoint": "",
+    "interval_seconds": 60
+  },
+  "organizations": {
+    "discover": false
+  },
+  "finops": {
+    "jobs_per_cycle": 0
+  },
+  "ai_alerts": {
+    "enabled": true,
+    "folder": "",
+    "brief_max_bytes": 2048,
+    "hook": {
+      "enabled": false,
+      "url": "",
+      "max_per_hour": 6
+    }
+  },
+  "tui": {
+    "theme": "dark",
+    "refresh_seconds": 5
+  }
+}

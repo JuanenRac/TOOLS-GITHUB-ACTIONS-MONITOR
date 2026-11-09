@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITOR DO GITHUB ACTIONS + SENTINELA (versão 1.6.8)
+MONITOR DO GITHUB ACTIONS + SENTINELA (versão 1.7.0)
 ====================================================
 QUAL ARRANCAR? (um utilizador novo decide em dois minutos)
   COMPLETA  MONITOR_GITHUB_ACTIONS.*       a página com a sentinela (porta 8765): alertas, fila de assinatura, análise. Comece aqui se tem vários repositórios.
@@ -89,6 +89,11 @@ LICENÇA    GPL-3.0-or-later (ver LICENSE e NOTICE). Copyright (C) 2026 JuanenRa
 AJUDA, ACERCA DE E VERIFICAÇÕES (1.6.4)
 ---------------------------------------
 A página tem um botão de Ajuda (? redondo) e um de Acerca de (i); na consola use --help-topics, --help-search, --about e --doctor; --demo mostra a página com dados inventados. A edição lite arranca com o seu próprio banner e título de janela (LITE, porta 8766, sem sentinela); a completa diz COMPLETE, porta 8765, sentinela ativa. O aviso de versão nova pode ser desligado (Definições > Básico).
+
+NOVIDADES DA 1.7.0 (várias contas; histórico: CHANGELOG.md)
+  A edição completa pode vigiar várias contas do GitHub: uma pasta accounts/<id>/ por conta e um monitor por conta sob um supervisor, pelo que a falha de uma nunca toca noutra.
+  --accounts, --account <id>, --migrate-accounts [--apply]; um seletor e a página Todas as contas; ?view= e ?chrome=0; a vista Ao vivo com o estado do webhook; um /api/webhook para todas.
+  Guia: docs/ACCOUNTS.md. Sem uma pasta accounts/ nada muda. A edição lite tem uma conta e nada disto.
 
 NOVIDADES DA 1.6.8 (proxy verificado a sério; histórico: CHANGELOG.md)
   O proxy HTTPS da 1.6.7 é verificado contra um proxy real na porta 443 (tools/manual_check_live.py proxy no repositório) e por testes que percorrem toda a cadeia. O histórico de

@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GITHUB ACTIONS MONITOR + SENTINEL (version 1.6.8)
+GITHUB ACTIONS MONITOR + SENTINEL (version 1.7.0)
 =================================================
 WHICH ONE TO START? (a new user decides in two minutes)
   COMPLETE  MONITOR_GITHUB_ACTIONS.*       the page with the sentinel (port 8765): alerts, signing queue, analytics. Start here if you own several repositories.
@@ -89,6 +89,11 @@ LICENCE    GPL-3.0-or-later (see LICENSE and NOTICE). Copyright (C) 2026 JuanenR
 HELP, ABOUT AND CHECKS (1.6.4)
 -----------------------------
 The page has an Help button (round ?) and an About button (i); in the console use --help-topics, --help-search, --about and --doctor; --demo shows the page with invented data. The lite edition starts with its own banner and window title (LITE, port 8766, no sentinel); the complete edition says COMPLETE, port 8765, sentinel on. A notice of a newer version can be switched off (Settings > Basic).
+
+WHAT IS NEW IN 1.7.0 (several accounts; history: CHANGELOG.md)
+  The complete edition can watch several GitHub accounts: one folder accounts/<id>/ per account and one monitor per account under a supervisor, so a failure of one never touches another.
+  --accounts, --account <id>, --migrate-accounts [--apply]; a switcher and the page All accounts; ?view= and ?chrome=0; the Live view with the state of the webhook; one /api/webhook for all.
+  Guide: docs/ACCOUNTS.md. Without an accounts/ folder nothing changes. The lite edition has one account and none of this.
 
 WHAT IS NEW IN 1.6.8 (proxy checked for real; history: CHANGELOG.md)
   The HTTPS proxy of 1.6.7 is checked against a real proxy on port 443 (tools/manual_check_live.py proxy in the repository) and by tests that run the whole chain. The changelog is

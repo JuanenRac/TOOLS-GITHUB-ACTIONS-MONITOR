@@ -39,6 +39,25 @@ background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 
 .tile.skel small{opacity:.6}.tile.stale b{opacity:.55}
 .tile[hidden]{display:none}
 .lite #n-sent,.lite #t-sent,.lite #kp-sign,.lite #k-ready,.lite #k-budget,.lite #kt-etag{display:none!important}
+/* the complete edition with several accounts: the switcher of the top bar, the page "all accounts" and the views of a screen of its own (?view=&chrome=0) */
+#accbar{display:none;align-items:center;gap:10px;padding:6px 18px;border-bottom:1px solid var(--line);background:var(--panel2)}
+.acc #accbar{display:flex}#accbar label{display:flex;align-items:center;gap:8px;font-weight:600}
+#accbar .sp{flex:1}#accbar .mut{font-size:12px}
+.accgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;padding:14px 18px}
+.acard{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:linear-gradient(var(--panel2),var(--panel));display:flex;flex-direction:column;gap:6px}
+.acard.ok{border-color:var(--ok)}.acard.down{border-color:var(--bad)}.acard.offline,.acard.starting{border-color:var(--warn)}
+.acard h3{margin:0;font-size:15px;display:flex;align-items:center;gap:8px}.acard .state{font-size:11.5px;color:var(--mut);font-weight:400}
+.acard dl{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:0;font-size:13px}.acard dd{margin:0;text-align:right;font-family:"IBM Plex Mono",ui-monospace,Consolas,monospace}
+.acard .bad{color:var(--bad);font-weight:700}.acard button{align-self:flex-start;margin-top:4px}
+#t-all{display:none}.allmode #t-all{display:block}.allmode main>.tab:not(#t-all),.allmode nav,.allmode .filters,.allmode header .tiles,.allmode #g-list,.allmode .modebox,.allmode #k-ready,.allmode #k-budget,.allmode #k-a10{display:none!important}   /* the figures of the header belong to ONE account: in the page of all of them they would read as the figures of the whole */
+#t-live{display:none}.v-live #t-live{display:block}.v-live main>.tab:not(#t-live){display:none!important}
+.livelist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}.livelist li{display:flex;gap:10px;align-items:baseline;border:1px solid var(--line);border-radius:8px;padding:5px 10px;background:var(--panel)}
+.livelist time{color:var(--mut);font-size:12px;min-width:74px}.livelist .repo{font-weight:600}
+.livebar{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;margin:0 0 8px}.livebox{border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--panel);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.livebox.ok{border-color:var(--ok)}.livebox.warn{border-color:var(--warn)}.livebox.off{border-color:var(--line2);color:var(--mut)}.livebox b{font-weight:700}
+/* chrome=0: a screen of its own for a wall or a second monitor: no header, no tabs, no filters; the figures stay */
+.kiosk header .h-top .sp~button,.kiosk header .h-top .modebox,.kiosk nav,.kiosk .filters,.kiosk #accbar,.kiosk footer{display:none!important}
+.kiosk header{padding:6px 14px}.kiosk main{padding-top:8px}
 .lite-note{margin:0 0 10px;color:var(--mut)}
 #hidden{display:none;background:var(--warn);color:#fff;padding:6px 18px;font-weight:600}
 @media (max-width:640px){header{padding:8px 10px}.tile{min-width:calc(50% - 4px);flex:1 1 calc(50% - 4px);padding:6px 9px}.tile.wide{min-width:100%}.tile b{font-size:18px}h1{width:100%}}
@@ -253,6 +272,7 @@ nav .navhelp{margin-left:auto;align-self:center}
 <span class="badge b-queued" id="k-budget" hidden role="status"></span><span class="badge b-queued" id="k-a10" hidden role="status"></span><span class="rdy" id="k-ready" role="group" data-i18n-aria="ui.ready_title" hidden></span></div>
 <div class="vh" role="status"><span id="stamp" data-i18n="ui.loading_short"></span> <span id="mode"></span> <span id="rate"></span> <span class="badge b-queued" id="quota" hidden></span></div>
 </header>
+<div id="accbar" role="group" data-i18n-aria="ui.acc_title"><label><span data-i18n="ui.acc_label"></span> <select id="acc-sel" data-i18n-title="ui.acc_title"></select></label><span class="mut" id="acc-state"></span><span class="sp"></span><span class="mut" id="acc-view"></span></div>
 <nav role="tablist" data-i18n-aria="ui.nav_label">
 <button role="tab" id="n-now" data-tab="now" aria-selected="true"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-now"/></svg><span data-i18n="ui.tab_now"></span> <span class="dot" id="d-now" hidden></span></button>
 <button role="tab" id="n-sent" data-tab="sent" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-shield"/></svg><span data-i18n="ui.tab_sent"></span> <span class="dot" id="d-sent" hidden></span></button>
@@ -269,6 +289,8 @@ nav .navhelp{margin-left:auto;align-self:center}
 <span class="mut" id="g-count"></span>
 </div>
 <main>
+<div class="tab" id="t-all" role="region" data-i18n-aria="ui.acc_all"><div class="accgrid" id="acc-grid"><span class="mut" data-i18n="ui.acc_none"></span></div></div>
+<div class="tab" id="t-live" role="region" data-i18n-aria="ui.live_title"><section><h2 data-i18n="ui.live_title"></h2><div class="body"><div class="livebar"><div class="livebox" id="live-wh" role="status"></div><label class="livebox"><span data-i18n="ui.live_mode"></span> <select id="live-mode"><option value="normal"></option><option value="fast"></option><option value="turbo"></option></select></label></div><p class="mut" data-i18n="ui.live_hint"></p><ul class="livelist" id="live-list"><li class="mut" data-i18n="ui.live_empty"></li></ul></div></section></div>
 <div class="tab on" id="t-now" role="tabpanel" aria-labelledby="n-now">
 <section><h2 data-i18n="ui.alerts"></h2><div class="body" id="alerts"><span class="mut">–</span></div></section>
 <section><h2 data-i18n="ui.happening"></h2><div class="body" id="now"><span class="mut">–</span></div></section>
@@ -319,8 +341,10 @@ nav .navhelp{margin-left:auto;align-self:center}
 <script>
 "use strict";
 (function(){const raw=window.fetch.bind(window),need=/^\/api\/(settings|ai\/actions\/confirm|ai\/actions\/unlock|ai\/test|notify\/test|discovery\/group|mode|gh-action\/confirm|act\/confirm|act\/stop|github-token)/;
-  window.fetch=async function(u,o){if(o&&o.method==="POST"&&need.test(String(u))){try{const r=await raw("/api/session-token",{cache:"no-store"}),j=await r.json();if(j.token)o=Object.assign({},o,{headers:Object.assign({},o.headers,{"X-Monitor-Token":j.token})})}catch(e){}}return raw(u,o)}})();
+  window.fetch=async function(u,o){if(o&&o.method==="POST"&&need.test(String(u))){try{const m=/[?&]account=([A-Za-z0-9_-]+)/.exec(String(u));const r=await raw("/api/session-token"+(m?"?account="+m[1]:""),{cache:"no-store"}),j=await r.json();if(j.token)o=Object.assign({},o,{headers:Object.assign({},o.headers,{"X-Monitor-Token":j.token})})}catch(e){}}return raw(u,o)}})();
 const I18N=/*I18N_DATA*/null||{default:"en",langs:["en"],names:{en:"English"},html:{en:"en"},locale:{en:"en-GB"},catalogues:{en:{}},ecosystems:{},owner:"",version:""};
+/* several accounts (complete edition only): the supervisor embeds the list; one account or the lite edition leaves it null and nothing below changes */
+const ACC=/*ACCOUNTS_DATA*/null;
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 const QS=new URLSearchParams(location.search);   // deep link: ?tab=sent&repo=NAME&lang=de (the old #tab still works)
 var LANG=[QS.get("lang"),store.get("am-lang"),I18N.default,"en"].find(x=>x&&I18N.langs.includes(x));
@@ -404,6 +428,60 @@ function showTab(t){if(!TABS.includes(t))t="now";TABS.forEach(x=>{$("t-"+x).clas
 document.querySelector("nav").addEventListener("click",e=>{const b=e.target.closest("button[data-tab]");if(b)showTab(b.dataset.tab)});
 document.querySelector("nav").addEventListener("keydown",e=>{if(e.key!=="ArrowRight"&&e.key!=="ArrowLeft")return;const i=TABS.findIndex(x=>$("n-"+x).getAttribute("aria-selected")==="true"),n=TABS[(i+(e.key==="ArrowRight"?1:TABS.length-1))%TABS.length];showTab(n);$("n-"+n).focus()});
 showTab(QS.get("tab")||location.hash.slice(1)||store.get("am-tab")||"now");
+/* ---------- shell of the complete edition: accounts, views and a screen of its own ---------- */
+/* ?view=now|alerts|charts|repos|settings|live  ?chrome=0 (a kiosk: no header buttons, tabs or filters)  ?account=<id>|all  (several accounts only; the lite edition ignores account=)
+   Every window keeps its own view: the choice is read from the address, never from one global setting that another window would overwrite. */
+const VIEWS={now:"now",alerts:"sent",charts:"charts",repos:"repos",settings:"cfg",live:"live"};
+const VIEW=QS.get("view")&&VIEWS[QS.get("view")]?QS.get("view"):"";
+if(QS.get("chrome")==="0")document.body.classList.add("kiosk");
+function accUrl(id){const u=new URL(location.href);if(id)u.searchParams.set("account",id);else u.searchParams.delete("account");return u.pathname+u.search}
+function accApi(path){if(!ACC||!ACC.current)return path;return path+(path.includes("?")?"&":"?")+"account="+encodeURIComponent(ACC.current)}
+if(ACC&&!LITE){
+  document.body.classList.add("acc");
+  const sel=$("acc-sel");
+  [["all",T("ui.acc_all")],...ACC.accounts.map(a=>[a,a])].forEach(([v,n])=>{const o=document.createElement("option");o.value=v;o.textContent=n;sel.appendChild(o)});
+  const wantAll=QS.get("account")==="all";
+  sel.value=wantAll?"all":ACC.current;
+  sel.addEventListener("change",()=>{const v=sel.value;try{store.set("am-account",v)}catch(e){}location.href=accUrl(v)});
+  /* every request of the page goes to the account being looked at: the supervisor forwards by ?account= (the header would do too) */
+  const rawFetch=window.fetch.bind(window);
+  window.fetch=function(u,o){const s=String(u);if(s.startsWith("/api/")&&!s.startsWith("/api/accounts")&&!/[?&]account=/.test(s))return rawFetch(accApi(s),o);return rawFetch(u,o)};
+  if(wantAll){document.body.classList.add("allmode");accTick();setInterval(accTick,5000)}
+}
+async function accTick(){
+  try{const r=await fetch("/api/accounts",{cache:"no-store"}),j=await r.json(),g=$("acc-grid");
+    if(!j.accounts||!j.accounts.length){g.innerHTML=`<span class="mut">${esc(T("ui.acc_none"))}</span>`;return}
+    g.innerHTML=j.accounts.map(a=>{const st=a.state||"starting",n=a.failing||0;
+      return `<div class="acard ${esc(st)}"><h3>${esc(a.id)} <span class="state">${esc(T("ui.acc_state_"+st))}</span></h3>`+
+      `<dl><dt>${esc(T("ui.acc_repos"))}</dt><dd>${esc(a.repos==null?"–":a.repos)}</dd><dt>${esc(T("ui.acc_running"))}</dt><dd>${esc(a.running==null?"–":a.running)}</dd>`+
+      `<dt>${esc(T("ui.acc_failing"))}</dt><dd class="${n?"bad":""}">${esc(a.failing==null?"–":n)}</dd></dl>`+
+      `<button type="button" data-open="${esc(a.id)}">${esc(T("ui.acc_open"))}</button></div>`}).join("");
+    g.querySelectorAll("button[data-open]").forEach(b=>b.addEventListener("click",()=>{location.href=accUrl(b.dataset.open)}))
+  }catch(e){const g=$("acc-grid");if(g)g.innerHTML=`<span class="mut">${esc(T("ui.err_monitor",{msg:e}))}</span>`}
+}
+/* the views: a deep link opens one panel; the tab bar still works unless chrome=0 hides it */
+function liveRow(ev){const t=ev.at?new Date(ev.at).toLocaleTimeString(LOC()):"";return `<li><time>${esc(t)}</time><span class="repo">${esc(ev.repo||"")}</span><span>${esc(ev.name||ev.workflow||ev.event||"")}</span><span class="mut">${esc(ev.status||"")} ${esc(ev.conclusion||"")}</span></li>`}
+function liveWebhook(s){
+  const box=$("live-wh");if(!box)return;
+  if(!s||!s.enabled){box.className="livebox off";box.innerHTML=`<b>${esc(T("ui.live_wh_title"))}</b> ${esc(T("ui.live_off"))}`;return}
+  const st=s.stats||{},last=s.last&&s.last.repo?T("ui.live_wh_last",{repo:s.last.repo,when:s.last.at?new Date(s.last.at).toLocaleTimeString(LOC()):"–"}):T("ui.live_wh_none");
+  box.className="livebox "+(s.active?"ok":"warn");
+  box.innerHTML=`<b>${esc(T("ui.live_wh_title"))}</b> ${esc(s.text||"")}`+(s.secret_ok?"":` <span>${esc(T("ui.live_wh_short"))}</span>`)+` <span class="mut">${esc(T("ui.live_wh_stats",{accepted:st.accepted||0,bad:st.bad_signature||0,ignored:st.ignored||0,dup:st.duplicates||0,refused:st.refused||0}))}</span> <span class="mut">${esc(last)}</span>`;
+}
+async function liveTick(){
+  try{const r=await fetch("/api/live-events",{cache:"no-store"});if(!r.ok)throw new Error(r.status);const j=await r.json(),l=$("live-list");
+    l.innerHTML=(j.events&&j.events.length)?j.events.slice(0,60).map(liveRow).join(""):`<li class="mut">${esc(T("ui.live_empty"))}</li>`}
+  catch(e){const l=$("live-list");if(l)l.innerHTML=`<li class="mut">${esc(T("ui.live_off"))}</li>`}
+  try{const r=await fetch("/api/live-status",{cache:"no-store"});if(r.ok)liveWebhook(await r.json())}catch(e){}
+  try{const sel=$("live-mode");if(sel&&MODEDATA){[...sel.options].forEach((o,i)=>{o.textContent=T("ui.mode_"+o.value);o.disabled=o.value!=="normal"&&!MODEDATA.allowed});sel.value=MODEDATA.mode}}catch(e){}
+}
+{const sel=$("live-mode");if(sel)sel.addEventListener("change",()=>{const main=$("mode-sel");if(main){main.value=sel.value;main.dispatchEvent(new Event("change"))}})}
+if(VIEW){
+  document.body.classList.add("v-"+VIEW);
+  if(VIEW==="live"&&!LITE){liveTick();setInterval(liveTick,3000)}
+  else if(VIEWS[VIEW]!=="live")showTab(VIEWS[VIEW]);
+  document.title=T("ui.title")+" · "+T("ui.view_"+(VIEW==="settings"?"now":VIEW))+(ACC&&ACC.current?" · "+ACC.current:"");
+}
 
 DATA=null;
 const FILTER={eco:store.get("am-f-eco")||"",state:store.get("am-f-state")||"",q:store.get("am-f-q")||""};

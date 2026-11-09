@@ -35,7 +35,7 @@ CHANGELOG_LABELS = {
     "Removed": {"en": "Removed", "es": "Eliminado", "de": "Entfernt", "fr": "Supprimé", "it": "Rimosso", "ja": "削除", "zh": "移除", "pt": "Removido"},
     "Deprecated": {"en": "Deprecated", "es": "Obsoleto", "de": "Veraltet", "fr": "Obsolète", "it": "Deprecato", "ja": "非推奨", "zh": "已弃用", "pt": "Obsoleto"},
 }
-ORDER = ("readme", "first_steps", "quickstart", "lite", "sentinel", "quotas", "modes", "settings", "advanced", "ai", "ai_alerts", "analytics", "notifications", "outputs", "webhook", "console_tools", "deployment", "ci_red_bridge", "ci_red_schema",
+ORDER = ("readme", "first_steps", "quickstart", "lite", "accounts", "sentinel", "quotas", "modes", "settings", "advanced", "ai", "ai_alerts", "analytics", "notifications", "outputs", "webhook", "console_tools", "deployment", "ci_red_bridge", "ci_red_schema",
          "migrating", "roadmap", "changelog", "contributing", "security", "support", "package")
 
 

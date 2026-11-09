@@ -2,6 +2,10 @@
 
 Ideas que no cupieron en la versión actual, sin orden prometido. Son direcciones, no compromisos; un issue o un pull request es la mejor forma de adelantar una.
 
+## Hecho en la 1.7.0
+
+Varias cuentas en la edición completa, cada una un monitor propio bajo un supervisor (`accounts/<id>/`, `--accounts`, `--account`, `--migrate-accounts`), la API de las cuentas, un webhook para todas, la página con un selector y las tarjetas de todas las cuentas, las vistas por dirección (`?view=` y `?chrome=0`) y la vista En vivo con el estado del receptor de webhook. La edición lite no cambia.
+
 ## Hecho en la 1.6.8
 
 El proxy HTTPS de la 1.6.7 se comprueba contra un proxy real en el puerto 443 (`tools/manual_check_live.py proxy`, y pruebas que recorren un cliente sobre TLS, un proxy inverso y el monitor), las imágenes se han vuelto a tomar con dos nuevas del modo red, y el historial de cambios está traducido a los otros siete idiomas hasta la 1.6.3.
@@ -28,7 +32,7 @@ Lo que la 1.6.4 no alcanzó, y por qué:
 
 - **Decidido, no hecho en la 1.6.6**: el aviso activo a una IA externa (apagado por defecto, una primera confirmación por proveedor, solo los campos ya filtrados de la lista cerrada, un tope de llamadas y de coste por hora, la clave por el nombre de una variable de entorno, y la IA nunca ejecuta una acción) con su variante de comando saliente (lista cerrada, sin shell); y los repositorios de varios propietarios en una página (el monitor identifica un repositorio solo por su nombre, así que necesita el propietario en cada identificador; es la base de varias cuentas). Cada uno es una función con su diseño y sus pruebas, así que la 1.6.6 cerró primero las correcciones.
 - **Las entradas antiguas del historial de cambios en los otros siete idiomas**: la Ayuda muestra el historial en cada idioma y de la 1.6.8 a la 1.6.3 están traducidas; la 1.6.2 y las anteriores conservan el texto en inglés bajo un aviso traducido y se irán traduciendo versión a versión, de la más nueva a la más vieja.
-- **Varios propietarios en una página**: el monitor identifica un repositorio solo por su nombre (ejecuciones, centinela, caché, exportaciones), así que dos propietarios con un repositorio del mismo nombre se mezclarían. Las organizaciones se listan y cada una se vigila con su propio monitor (`github_owner`). Hacerlo en una página exige poner el propietario en cada identificador.
+- **Varios propietarios en un proceso y en una página**: desde la 1.7.0 cada cuenta es un monitor propio y la página las muestra una al lado de otra, pero dentro de un monitor un repositorio se identifica solo por su nombre, así que dos propietarios en el mismo monitor se mezclarían. Las cuentas de la 1.7.0 son la manera de mantenerlos aparte; llevarlas a un solo proceso, con el propietario en cada identificador, es lo que queda.
 - **El informe de facturación con un login que pueda leerlo**: la respuesta real de un login sin el permiso `user` es «no encontrado» y el monitor vuelve a la estimación (comprobado); las cifras en sí no se han comparado con una cuenta de facturación.
 - **Los precios de los runners grandes** de `quotas.json` salen de la memoria de la lista pública de precios y están marcados como no verificados; compáralos con la página de facturación de GitHub y edita el fichero.
 - **`gh copilot`**: sus banderas se comprueban con `gh copilot -- --help`, que necesita la línea de comandos de Copilot; aquí no está instalada, así que siguen sin verificar.
@@ -39,7 +43,7 @@ Lo que la 1.6.4 no alcanzó, y por qué:
 ## Más adelante
 
 - **Más adaptadores de notificación**: ntfy, Microsoft Teams y correo mediante un relé local.
-- **Varias cuentas en una página**: hoy cada cuenta funciona con su propio monitor.
+- **Varias cuentas en una página**: hecho en la 1.7.0, cada cuenta en su propio monitor bajo un supervisor.
 - **Telemetría de hardware de los runners** mediante un agente: hoy solo se lee un endpoint opcional de node exporter.
 
 ## Ideas que necesitan una decisión antes

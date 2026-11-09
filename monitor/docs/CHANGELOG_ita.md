@@ -7,6 +7,34 @@
 
 Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il proprio semver. La fonte è il CHANGELOG.md in inglese; questo file ha le stesse versioni e sezioni.
 
+## [1.7.0]
+
+Più account nell'edizione completa, ciascuno un monitor a sé, e una pagina che li conosce. L'edizione lite non cambia: un account, e non mostra nemmeno le nuove opzioni.
+
+### Aggiunto
+
+- **Più account** (solo l'edizione completa). Una cartella `accounts/<id>/` per account (una persona o un'organizzazione) con il proprio `actions_monitor.json`, la propria cache, i propri eventi, analisi, stato della sentinella e registri; `accounts/global.json` è facoltativo (`default_account`, `enabled_accounts`) e `MONITOR_ACCOUNTS_DIR` sposta la cartella. L'id è formato da lettere minuscole, cifre, `_` e `-` (fino a 40), quindi è sempre un nome di cartella sicuro. Senza una cartella `accounts/` nulla cambia: un account, i suoi file accanto al codice.
+- **Un supervisore** (`accounts_supervisor.py`): con una cartella `accounts/`, `python actions_monitor.py` avvia un piccolo processo sulla porta di sempre che esegue un monitor per account (`account_child.py`), ciascuno sulla propria porta di `127.0.0.1`. Un guasto, una risposta lenta o un limite di frequenza di un account non tocca mai un altro; un account caduto viene riavviato con un'attesa crescente (2, 5, 15, 30, 60, poi 120 secondi) e il riepilogo lo dichiara fermo nel frattempo. Non legge nulla da GitHub e non scrive nulla; fermarlo termina tutti i processi che ha avviato, anche su Windows.
+- **L'API degli account**: `GET /api/accounts` (il riepilogo), `GET /api/accounts/<id>/status`, e ogni altra richiesta `/api/` va all'account indicato con `?account=<id>` o l'intestazione `X-Account-Id` (l'account predefinito senza nulla; un account sconosciuto dà 404). Le regole di accesso sono quelle di un monitor singolo, e il token monouso di una modifica si chiede allo stesso account a cui va la modifica.
+- **Un webhook per tutti**: `POST /api/webhook` è un unico indirizzo per l'installazione; il supervisore legge solo il proprietario in `repository.full_name` e passa l'evento intatto all'account il cui `github_owner` è quel proprietario, che verifica la firma con il proprio segreto. Un proprietario che nessuno osserva riceve risposta e viene ignorato.
+- **`--accounts`, `--account <id>` e `--migrate-accounts [--apply]`**: elencano gli account, eseguono solo uno come monitor ordinario e spostano il vecchio schema in `accounts/default/`. La migrazione è una prova salvo con `--apply`, non sposta né elimina mai gli originali, rifiuta una seconda esecuzione e non tocca i file dell'edizione lite.
+- **La pagina con più account**: un selettore di account sotto l'intestazione e una voce **Tutti gli account** con una scheda per account (stato, repository, in esecuzione, in errore). Ogni finestra mantiene il proprio account e la propria vista, letti dall'indirizzo.
+- **Viste per indirizzo** (`?view=now|alerts|charts|repos|settings|live` e `?chrome=0`, uno schermo senza pulsanti d'intestazione, schede né filtri per una parete o un secondo monitor). La vista **Live** mostra gli ultimi eventi inviati da GitHub, lo stato del ricevitore webhook (mai il segreto) e un selettore della modalità di lavoro. `GET /api/live-status` ne è la fonte.
+- `tools/demo_accounts.py` per le immagini, la guida `ACCOUNTS.md` in otto lingue e test per ogni modifica (la suite è passata da 866 a 913).
+
+### Modificato
+
+- I file di stato di un monitor che è un account fra più stanno nella sua cartella tramite `state_dir()`; un monitor singolo li tiene accanto al codice, come sempre.
+- Le immagini del README sono state rifatte e il README in otto lingue mostra gli account.
+
+### Sicurezza
+
+- Il supervisore e gli account ascoltano solo su `127.0.0.1` a meno che la modalità rete sia attiva. Il webhook non ha controllo dell'host né token di accesso (un tunnel cambia l'host) e la sua prova resta l'HMAC di GitHub; un cookie della sessione non viene mai passato a un account.
+
+### Corretto
+
+- La vista Live della 1.6.8 non aveva lo stato del ricevitore: con il webhook spento o con un segreto di meno di 32 caratteri non diceva nulla, e ora dice quale dei due.
+
 ## [1.6.8]
 
 Il proxy HTTPS della 1.6.7 viene ora verificato contro un proxy reale, le immagini sono state rifatte e la cronologia delle modifiche è tradotta fino alla 1.6.3.

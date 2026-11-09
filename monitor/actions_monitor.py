@@ -103,7 +103,13 @@ DEFAULTS = {
 DEMO = {"on": False}      # --demo: invented data, no gh, no network
 LITE = {"on": False}      # the lite product: the same server without the sentinel, with its own configuration file, its own state files and a short settings page
 LITE_PORT = 8766
-LITE_PATHS = ("/api/gh-action", "/api/act", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/notify", "/api/analytics", "/api/live-events", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics")   # they do not exist in lite
+CHILD = {"account": "", "folder": ""}      # set by account_child.py: this process is the monitor of ONE account of an installation with several (empty = the single account, as always)
+
+
+def state_dir():
+    """Where the small state files of this process live: the folder of the account when this is the monitor of one account, else next to the code, as always."""
+    return Path(CHILD["folder"]) if CHILD["folder"] else HERE
+LITE_PATHS = ("/api/gh-action", "/api/act", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/notify", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics")   # they do not exist in lite
 
 
 LITE_INHERIT = ("github_owner", "ecosystems", "ecosystems_file", "targets_file", "profiles_file", "exclude", "repos", "language", "runs_per_repo", "cold_runs_per_repo", "hot_hours", "stuck_minutes", "refresh_seconds", "cold_refresh_seconds")   # what a first lite start copies from actions_monitor.json
@@ -581,6 +587,30 @@ def build(config, repos, started, refreshed, loading, progress_text):
     }
 
 
+WEBHOOK_STATS = {"accepted": 0, "bad_signature": 0, "ignored": 0, "duplicates": 0, "refused": 0, "last_at": None}      # deliveries seen since this process started (memory only; no payload, no secret)
+
+
+def webhook_count(code, duplicate=False):
+    """Counts one delivery by what the receiver answered: 200 accepted, 401 a signature that did not verify, 202 ignored (a repository that is not watched, an event that is not used, a replay), anything else refused. A 404 is the
+    receiver being off: nothing arrived, so nothing is counted."""
+    if code == 404:
+        return
+    key = "accepted" if code == 200 else "bad_signature" if code == 401 else ("duplicates" if duplicate else "ignored") if code == 202 else "refused"
+    WEBHOOK_STATS[key] += 1
+    if code == 200:
+        WEBHOOK_STATS["last_at"] = resilience.stamp(time.time())
+
+
+def webhook_status(config):
+    """What the Live view says about the receiver: whether it is on, whether the secret is long enough (never the secret itself), the counters and the newest event. Read only."""
+    import webhook
+    cfg = webhook.settings(config)
+    newest = LIVE_EVENTS[-1] if LIVE_EVENTS else None
+    return {"enabled": cfg["enabled"], "active": webhook.active(config), "secret_ok": len(cfg["secret"]) >= webhook.MIN_SECRET, "text": webhook.status_text(config), "stats": dict(WEBHOOK_STATS),
+            "keep": webhook.live_settings(config)["live_events_keep"], "held": len(LIVE_EVENTS),
+            "last": ({k: newest.get(k) for k in ("repo", "name", "event", "status", "conclusion", "at")} if newest else None)}
+
+
 def apply_live_event(record, config):
     """A signed workflow_run / workflow_job event: it goes to the live list, updates the run list of the repository without a read (so no quota is used), feeds the analytics and, when a run
     ends red, the notifications. Nothing of the payload but the short validated fields is kept."""
@@ -1047,6 +1077,7 @@ class Handler(BaseHTTPRequestHandler):
                 size = int(self.headers.get("Content-Length") or 0)
                 body = self.rfile.read(size) if 0 <= size <= webhook.MAX_BODY else b"x" * (webhook.MAX_BODY + 1)
                 code, answer, repo = webhook.handle(LIVE_CONFIG or DEFAULTS, body, self.headers, STATE["data"]["repos"] if STATE.get("data") else [])
+                webhook_count(code, bool(answer.get("duplicate")) if isinstance(answer, dict) else False)
                 record = webhook.parse_event(self.headers.get("X-GitHub-Event"), body) if (code == 200 and repo) else None
                 if record and webhook.live_settings(LIVE_CONFIG or DEFAULTS)["record_events"]:
                     apply_live_event(record, LIVE_CONFIG or DEFAULTS)
@@ -1355,6 +1386,10 @@ class Handler(BaseHTTPRequestHandler):
             if not self.guard():
                 return
             self.json_reply({"events": list(reversed(LIVE_EVENTS))})
+        elif path == "/api/live-status":      # the receiver of webhooks as the Live view shows it: on or off, never the secret
+            if not self.guard():
+                return
+            self.json_reply(webhook_status(LIVE_CONFIG or DEFAULTS))
         elif path == "/api/ai/actions":
             if not self.guard():
                 return
@@ -1378,13 +1413,16 @@ class Handler(BaseHTTPRequestHandler):
 def health_payload():
     with LOCK:
         loaded = bool(STATE.get("data"))
-    return {"ok": True, "lite": LITE["on"], "version": TOOL_VERSION, "uptime_seconds": int(time.time() - STARTED), "loaded": loaded, "offline": LINK.state()["offline"], "degraded": degraded.snapshot()["total"]}
+    out = {"ok": True, "lite": LITE["on"], "version": TOOL_VERSION, "uptime_seconds": int(time.time() - STARTED), "loaded": loaded, "offline": LINK.state()["offline"], "degraded": degraded.snapshot()["total"]}
+    if CHILD["account"]:
+        out["account"] = CHILD["account"]
+    return out
 
 
 def update_info():
     """The state of the update notice: the cached answer, refreshed (at most every 24 hours) through the conditional GitHub client; silent when it cannot be read."""
     config = LIVE_CONFIG or toolconfig.raw_config()
-    state_file = HERE / ("update_check_lite.json" if LITE["on"] else "update_check.json")
+    state_file = state_dir() / ("update_check_lite.json" if LITE["on"] else "update_check.json")
     if DEMO["on"]:
         return updatecheck.view({"updates": {"check": False}}, TOOL_VERSION, {})
     return updatecheck.check(config, TOOL_VERSION, lambda endpoint: gh_read(endpoint, retries=0), state_file=state_file, offline=LINK.state()["offline"])
@@ -1436,7 +1474,7 @@ def discovery_payload():
         data = STATE.get("data") or {}
     box = discovery.box(toolconfig.github_owner(config), len(data.get("repos") or []), HIDDEN["discovered"], HIDDEN["names"])
     import orgs
-    organisations = orgs.view(toolconfig.raw_config(), lambda endpoint: gh_read(endpoint, retries=0), HERE / ("orgs_state_lite.json" if LITE["on"] else "orgs_state.json"), offline=LINK.state()["offline"]) if not DEMO["on"] else {"enabled": False, "orgs": []}
+    organisations = orgs.view(toolconfig.raw_config(), lambda endpoint: gh_read(endpoint, retries=0), state_dir() / ("orgs_state_lite.json" if LITE["on"] else "orgs_state.json"), offline=LINK.state()["offline"]) if not DEMO["on"] else {"enabled": False, "orgs": []}
     return {**box, "events": list(reversed(DISCOVERY["events"]))[:20], "suggestions": DISCOVERY["suggestions"], "settings": discovery.settings(config), "demo": DEMO["on"], "organizations": organisations}
 
 
@@ -1517,7 +1555,7 @@ def advanced_state(config):
 
 
 def welcome_file():
-    return HERE / ("welcome_state_lite.json" if LITE["on"] else "welcome_state.json")
+    return state_dir() / ("welcome_state_lite.json" if LITE["on"] else "welcome_state.json")
 
 
 def advanced_get(path, query):
@@ -1672,9 +1710,74 @@ def demo_main():
     return 0
 
 
+def accounts_cli(argv):
+    """The commands of the accounts that do not start a monitor: --accounts (list), --migrate-accounts [--apply]. Returns an exit code, or None when the arguments are not for them.
+    The lite edition never gets here: it has no accounts."""
+    if "--accounts" not in argv and "--migrate-accounts" not in argv:
+        return None
+    import accounts
+    i18n.set_language(i18n.detect(None))
+    i18n.cli_language() if "--lang" in " ".join(argv) else None
+    platform_compat.console_utf8()
+    if "--migrate-accounts" in argv:
+        done = accounts.migrate(apply="--apply" in argv)
+        for source, target, kind in done["items"]:
+            print(i18n.t("mon.migrate_done" if done["applied"] else "mon.migrate_would", kind=i18n.t("mon.kind_" + kind), name=Path(source).name, target=target))
+        for problem in done["problems"]:
+            print(i18n.t("mon.migrate_problem", text=problem))
+        if not done["items"]:
+            print(i18n.t("mon.migrate_nothing"))
+        elif not done["applied"]:
+            print(i18n.t("mon.migrate_dry"))
+        return 1 if done["problems"] else 0
+    on = set(accounts.enabled_accounts())
+    for account_id in accounts.list_accounts():
+        try:
+            owner = json.loads(accounts.config_path(account_id).read_text(encoding="utf-8")).get("github_owner") or "-"
+        except (OSError, ValueError):
+            owner = "?"
+        print(i18n.t("mon.account_line", id=account_id, owner=owner, state=i18n.t("mon.account_on" if account_id in on else "mon.account_off"),
+                     default=i18n.t("mon.account_default") if account_id == accounts.default_account() else ""))
+    return 0
+
+
+def supervisor_main(argv):
+    """Several accounts: this process is the supervisor (accounts_supervisor.py) and starts one monitor per account. Returns an exit code."""
+    import accounts
+    import accounts_supervisor
+    port = next((int(argv[i + 1]) for i, a in enumerate(argv) if a == "--port" and i + 1 < len(argv) and argv[i + 1].isdigit()), 8765)
+    i18n.set_language(i18n.detect(None))
+    platform_compat.console_utf8()
+    server, sup = accounts_supervisor.serve(port)
+    url = f"http://127.0.0.1:{server.server_address[1]}/"
+    print(i18n.t("mon.accounts_started", n=len(accounts.enabled_accounts()), url=url), flush=True)
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        sup.stop()
+    return 0
+
+
 def main():
     if "--demo" in sys.argv[1:]:
         return demo_main()
+    code = accounts_cli(sys.argv[1:]) if not lite_requested() else None
+    if code is not None:
+        return code
+    if not lite_requested() and not CHILD["account"]:
+        import accounts
+        asked = next((sys.argv[i + 1] for i, a in enumerate(sys.argv) if a == "--account" and i + 1 < len(sys.argv)), "")
+        if asked:       # --account ID: only that account, as an ordinary monitor in this very process (no supervisor)
+            if not accounts.valid_id(asked) or not accounts.config_path(asked).is_file():
+                print(i18n.t("mon.account_unknown", id=asked[:40], known=", ".join(accounts.list_accounts()) or "-"))
+                return 2
+            import account_child
+            CHILD["account"], CHILD["folder"] = asked, str(account_child.redirect(asked))
+            sys.argv = [a for i, a in enumerate(sys.argv) if not (a == "--account" or (i > 0 and sys.argv[i - 1] == "--account"))]
+        elif accounts.layout() == "accounts":
+            return supervisor_main(sys.argv[1:])
     if lite_requested():
         enable_lite()
     config = load_config()
@@ -1701,6 +1804,11 @@ def main():
     parser.add_argument("--demo", action="store_true", help=i18n.t("mon.help_demo"))
     parser.add_argument("--mode", choices=modes.NAMES, default=None, help=i18n.t("mon.help_mode"))
     parser.add_argument("--mode-minutes", type=int, default=None, help=i18n.t("mon.help_mode_minutes"))
+    if not LITE["on"]:       # the lite edition has no accounts: it does not even show these options
+        parser.add_argument("--account", metavar="ID", help=i18n.t("mon.help_account"))
+        parser.add_argument("--accounts", action="store_true", help=i18n.t("mon.help_accounts"))
+        parser.add_argument("--migrate-accounts", action="store_true", help=i18n.t("mon.help_migrate_accounts"))
+        parser.add_argument("--apply", action="store_true", help=i18n.t("mon.help_apply"))
     args = parser.parse_args()
     platform_compat.console_utf8()
     if args.about:
@@ -1763,7 +1871,7 @@ def main():
     if wanted in ("fast", "turbo"):
         ok, why = MODE.set(wanted, args.mode_minutes if args.mode_minutes is not None else modes.settings(config)["default_minutes"], config)
         print(banner_mode_line(MODE.name, "" if ok else why), flush=True)
-    degraded.attach(HERE / ("degraded_lite.json" if LITE["on"] else "degraded.json"))
+    degraded.attach(state_dir() / ("degraded_lite.json" if LITE["on"] else "degraded.json"))
     threading.Thread(target=loop, args=(config,), daemon=True).start()
     threading.Thread(target=update_loop, daemon=True).start()
     if not LITE["on"]:

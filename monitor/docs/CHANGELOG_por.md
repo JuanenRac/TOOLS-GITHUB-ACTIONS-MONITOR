@@ -7,6 +7,34 @@
 
 Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com o seu próprio semver. A fonte é o CHANGELOG.md em inglês; este ficheiro tem as mesmas versões e secções.
 
+## [1.7.0]
+
+Várias contas na edição completa, cada uma um monitor próprio, e uma página que as conhece. A edição lite não muda: uma conta, e nem sequer mostra as opções novas.
+
+### Adicionado
+
+- **Várias contas** (só a edição completa). Uma pasta `accounts/<id>/` por conta (uma pessoa ou uma organização) com o seu próprio `actions_monitor.json`, a sua própria cache, eventos, análise, estado da sentinela e registos; `accounts/global.json` é opcional (`default_account`, `enabled_accounts`) e `MONITOR_ACCOUNTS_DIR` muda a pasta de sítio. O id são letras minúsculas, dígitos, `_` e `-` (até 40), pelo que é sempre um nome de pasta seguro. Sem uma pasta `accounts/` nada muda: uma conta, com os seus ficheiros junto do código.
+- **Um supervisor** (`accounts_supervisor.py`): com uma pasta `accounts/`, `python actions_monitor.py` arranca um processo pequeno na porta de sempre que executa um monitor por conta (`account_child.py`), cada um na sua própria porta de `127.0.0.1`. Uma falha, uma resposta lenta ou um limite de taxa de uma conta nunca toca noutra; uma conta em baixo é arrancada de novo com uma espera crescente (2, 5, 15, 30, 60 e depois 120 segundos) e o resumo diz que está em baixo entretanto. Não lê nada do GitHub e não escreve nada; ao pará-lo termina todos os processos que arrancou, também no Windows.
+- **A API das contas**: `GET /api/accounts` (o resumo), `GET /api/accounts/<id>/status`, e qualquer outro pedido `/api/` vai para a conta indicada com `?account=<id>` ou o cabeçalho `X-Account-Id` (a conta predefinida sem nenhuma; uma conta desconhecida dá 404). As regras de acesso são as de um monitor isolado, e o token de uso único de uma alteração é pedido à mesma conta a que a alteração vai.
+- **Um webhook para todas**: `POST /api/webhook` é um único endereço para a instalação; o supervisor lê apenas o proprietário em `repository.full_name` e passa o evento intacto à conta cujo `github_owner` é esse proprietário, que verifica a assinatura com o seu próprio segredo. Um proprietário que ninguém vigia recebe resposta e é ignorado.
+- **`--accounts`, `--account <id>` e `--migrate-accounts [--apply]`**: listam as contas, executam só uma como um monitor normal e movem o esquema antigo para `accounts/default/`. A migração é um ensaio, salvo com `--apply`, nunca move nem apaga os originais, recusa uma segunda execução e não toca nos ficheiros da edição lite.
+- **A página com várias contas**: um seletor de contas por baixo do cabeçalho e uma entrada **Todas as contas** com um cartão por conta (estado, repositórios, em curso, em falha). Cada janela guarda a sua própria conta e vista, lidas do endereço.
+- **Vistas por endereço** (`?view=now|alerts|charts|repos|settings|live` e `?chrome=0`, um ecrã sem botões de cabeçalho, separadores nem filtros para uma parede ou um segundo monitor). A vista **Ao vivo** mostra os últimos eventos que o GitHub enviou, o estado do recetor de webhook (nunca o segredo) e um seletor do modo de trabalho. `GET /api/live-status` é a sua fonte.
+- `tools/demo_accounts.py` para as imagens, o guia `ACCOUNTS.md` em oito idiomas e testes para cada alteração (a bateria passou de 866 para 913).
+
+### Alterado
+
+- Os ficheiros de estado de um monitor que é uma conta entre várias vivem na sua pasta através de `state_dir()`; um monitor isolado mantém-nos junto do código, como sempre.
+- As imagens do README foram refeitas e o README em oito idiomas mostra as contas.
+
+### Segurança
+
+- O supervisor e as contas escutam só em `127.0.0.1`, salvo se o modo rede estiver ligado. O webhook não tem verificação de anfitrião nem token de acesso (um túnel muda o anfitrião) e a sua prova continua a ser o HMAC do GitHub; um cookie da sessão nunca é passado a uma conta.
+
+### Corrigido
+
+- A vista Ao vivo da 1.6.8 não tinha estado do recetor: com o webhook desligado ou com um segredo de menos de 32 carateres não dizia nada, e agora diz qual dos dois.
+
 ## [1.6.8]
 
 O proxy HTTPS da 1.6.7 é agora verificado contra um proxy real, as imagens foram refeitas e o histórico de alterações está traduzido até à 1.6.3.

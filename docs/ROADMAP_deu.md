@@ -2,6 +2,10 @@
 
 Ideen, die nicht in die aktuelle Version passten, ohne versprochene Reihenfolge. Es sind Richtungen, keine Zusagen; ein Issue oder ein Pull Request ist der beste Weg, eine voranzubringen.
 
+## Erledigt in 1.7.0
+
+Mehrere Konten in der kompletten Ausgabe, jedes ein eigener Monitor unter einem Supervisor (`accounts/<id>/`, `--accounts`, `--account`, `--migrate-accounts`), die API der Konten, ein Webhook für alle, die Seite mit Auswahl und den Karten aller Konten, die Ansichten per Adresse (`?view=` und `?chrome=0`) und die Live-Ansicht mit dem Zustand des Webhook-Empfängers. Die Lite-Ausgabe bleibt unverändert.
+
 ## Erledigt in 1.6.8
 
 Der HTTPS-Proxy aus 1.6.7 wird gegen einen echten Proxy auf Port 443 geprüft (`tools/manual_check_live.py proxy` und Tests, die einen Client über TLS, einen Reverse-Proxy und den Monitor durchlaufen), die Bilder sind neu aufgenommen mit zwei neuen zum Netzwerkmodus, und die Änderungshistorie ist in den anderen sieben Sprachen bis 1.6.3 übersetzt.
@@ -28,7 +32,7 @@ Was 1.6.4 nicht erreicht hat, und warum:
 
 - **Entschieden, nicht erledigt in 1.6.6**: die aktive Benachrichtigung einer externen KI (standardmäßig aus, eine erste Bestätigung je Anbieter, nur die bereits gefilterten Felder der geschlossenen Liste, ein Limit für Aufrufe und Kosten pro Stunde, der Schlüssel über den Namen einer Umgebungsvariable, und die KI führt nie eine Aktion aus) mit ihrer Variante eines ausgehenden Befehls (geschlossene Liste, keine Shell); und die Repositories mehrerer Besitzer auf einer Seite (der Monitor erkennt ein Repository nur am Namen und braucht daher den Besitzer in jeder Kennung; Grundlage für mehrere Konten). Jedes ist eine eigene Funktion mit eigenem Entwurf und eigenen Tests, deshalb schloss 1.6.6 zuerst die Korrekturen ab.
 - **Die älteren Einträge des Änderungsprotokolls in den anderen sieben Sprachen**: Die Hilfe zeigt den Verlauf in jeder Sprache, und 1.6.8 bis 1.6.3 sind übersetzt; 1.6.2 und ältere behalten den englischen Text unter einem übersetzten Hinweis und werden Version für Version übersetzt, von der neuesten zur ältesten.
-- **Mehrere Besitzer in einer Seite**: Der Monitor erkennt ein Repository allein an seinem Namen (Läufe, Wächter, Cache, Exporte); zwei Besitzer mit gleichnamigem Repository würden sich vermischen. Organisationen werden aufgelistet und jede von einem eigenen Monitor überwacht (`github_owner`). In einer Seite bräuchte jede Kennung den Besitzer.
+- **Mehrere Eigentümer in einem Prozess und einer Seite**: Seit 1.7.0 ist jedes Konto ein eigener Monitor und die Seite zeigt sie nebeneinander, aber innerhalb eines Monitors wird ein Repository weiter nur über seinen Namen erkannt, sodass sich zwei Eigentümer im selben Monitor mischen würden. Die Konten von 1.7.0 sind der Weg, sie getrennt zu halten; sie in einen Prozess zu holen, mit dem Eigentümer in jedem Bezeichner, ist das, was bleibt.
 - **Der Abrechnungsbericht mit einem Login, der ihn lesen darf**: Die echte Antwort für einen Login ohne den Scope `user` ist „nicht gefunden“, und der Monitor fällt auf die Schätzung zurück (geprüft); die Zahlen selbst wurden nicht mit einem Abrechnungskonto verglichen.
 - **Die Preise größerer Runner** in `quotas.json` stammen aus dem Gedächtnis der öffentlichen Preisliste und sind als ungeprüft markiert; vergleiche sie mit der Abrechnungsseite von GitHub und bearbeite die Datei.
 - **`gh copilot`**: Seine Optionen werden mit `gh copilot -- --help` geprüft, was die Copilot-Kommandozeile braucht; sie ist hier nicht installiert, die Optionen bleiben ungeprüft.
@@ -39,7 +43,7 @@ Was 1.6.4 nicht erreicht hat, und warum:
 ## Später
 
 - **Weitere Benachrichtigungsadapter**: ntfy, Microsoft Teams und E-Mail über ein lokales Relay.
-- **Mehrere Konten in einer Seite**: Heute läuft jedes Konto in einem eigenen Monitor.
+- **Mehrere Konten in einer Seite**: in 1.7.0 erledigt, jedes Konto in einem eigenen Monitor unter einem Supervisor.
 - **Hardware-Telemetrie der Runner** über einen Agenten: Heute wird nur ein optionaler Node-Exporter-Endpunkt gelesen.
 
 ## Ideen, die zuerst eine Entscheidung brauchen

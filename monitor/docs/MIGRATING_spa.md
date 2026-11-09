@@ -81,3 +81,11 @@ No hay que convertir nada y ningún ajuste cambia.
 
 - Novedad en el repositorio (no en el paquete): `python tools/manual_check_live.py proxy HOST [PUERTO] [CONECTAR]` comprueba tu proxy HTTPS real en el puerto 443 frente a `listen.proxy_public_host`; define antes `MONITOR_ACCESS_TOKEN`, se lee y nunca se imprime.
 - El historial de cambios (Ayuda > Registro de cambios) está ahora traducido a los otros siete idiomas de la 1.6.8 a la 1.6.3.
+
+# De la 1.6.8 a la 1.7.0
+
+No hay que convertir nada: sin una carpeta `accounts/` el monitor funciona exactamente como antes.
+
+- Las **varias cuentas** son opcionales. Para usarlas ejecuta `python actions_monitor.py --migrate-accounts` (un ensayo) y luego añade `--apply` para copiar tus ficheros a `accounts/default/`; los originales se quedan hasta que los borres. Añade más cuentas como `accounts/<id>/actions_monitor.json`. Véase `ACCOUNTS.md`.
+- Con una carpeta `accounts/`, `python actions_monitor.py` arranca un supervisor que ejecuta un monitor por cuenta; `--account <id>` ejecuta solo una. La edición lite no tiene nada de esto.
+- Novedades: `?view=` y `?chrome=0` en la dirección de la página, `GET /api/accounts`, `GET /api/live-status` y un solo `POST /api/webhook` para todas las cuentas.

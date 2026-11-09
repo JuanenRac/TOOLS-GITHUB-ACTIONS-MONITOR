@@ -7,6 +7,34 @@
 
 Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem Semver. Die Quelle ist das englische CHANGELOG.md; diese Datei enthält dieselben Versionen und Abschnitte.
 
+## [1.7.0]
+
+Mehrere Konten in der kompletten Ausgabe, jedes ein eigener Monitor, und eine Seite, die sie kennt. Die Lite-Ausgabe bleibt unverändert: ein Konto, und sie zeigt die neuen Optionen nicht einmal.
+
+### Hinzugefügt
+
+- **Mehrere Konten** (nur die komplette Ausgabe). Ein Ordner `accounts/<id>/` pro Konto (eine Person oder eine Organisation) mit eigener `actions_monitor.json`, eigenem Cache, eigenen Ereignissen, eigener Analytik, eigenem Wächterzustand und eigenen Protokollen; `accounts/global.json` ist optional (`default_account`, `enabled_accounts`) und `MONITOR_ACCOUNTS_DIR` verschiebt den Ordner. Die ID besteht aus Kleinbuchstaben, Ziffern, `_` und `-` (bis zu 40), ist also immer ein sicherer Ordnername. Ohne einen Ordner `accounts/` ändert sich nichts: ein Konto, seine Dateien neben dem Code.
+- **Ein Supervisor** (`accounts_supervisor.py`): Mit einem Ordner `accounts/` startet `python actions_monitor.py` einen kleinen Prozess auf dem üblichen Port, der pro Konto einen Monitor ausführt (`account_child.py`), jeden auf einem eigenen Port von `127.0.0.1`. Ein Absturz, eine langsame Antwort oder ein Ratenlimit eines Kontos berührt nie ein anderes; ein ausgefallenes Konto wird mit wachsender Wartezeit neu gestartet (2, 5, 15, 30, 60, dann 120 Sekunden), und die Übersicht meldet es in der Zwischenzeit als ausgefallen. Er liest nichts von GitHub und schreibt nichts; beim Beenden werden alle von ihm gestarteten Prozesse beendet, auch unter Windows.
+- **Die API der Konten**: `GET /api/accounts` (die Übersicht), `GET /api/accounts/<id>/status`, und jede andere `/api/`-Anfrage geht an das mit `?account=<id>` oder dem Header `X-Account-Id` genannte Konto (ohne Angabe das Standardkonto; ein unbekanntes Konto ergibt 404). Die Zugriffsregeln sind die eines einzelnen Monitors, und das Einmal-Token einer Änderung wird bei demselben Konto angefordert, an das die Änderung geht.
+- **Ein Webhook für alle**: `POST /api/webhook` ist eine einzige Adresse für die Installation; der Supervisor liest nur den Eigentümer in `repository.full_name` und reicht das Ereignis unverändert an das Konto weiter, dessen `github_owner` dieser Eigentümer ist und das die Signatur mit seinem eigenen Geheimnis prüft. Ein Eigentümer, den niemand beobachtet, wird beantwortet und ignoriert.
+- **`--accounts`, `--account <id>` und `--migrate-accounts [--apply]`**: listen die Konten, führen nur eines als gewöhnlichen Monitor aus und verschieben das alte Layout nach `accounts/default/`. Die Migration ist ein Probelauf, außer mit `--apply`, verschiebt oder löscht die Originale nie, verweigert einen zweiten Lauf und berührt die Dateien der Lite-Ausgabe nicht.
+- **Die Seite mit mehreren Konten**: eine Kontoauswahl unter der Kopfzeile und ein Eintrag **Alle Konten** mit einer Karte pro Konto (Zustand, Repositorys, laufend, fehlerhaft). Jedes Fenster behält sein eigenes Konto und seine Ansicht, die aus der Adresse gelesen werden.
+- **Ansichten per Adresse** (`?view=now|alerts|charts|repos|settings|live` und `?chrome=0`, ein Bildschirm ohne Kopfzeilen-Tasten, Tabs und Filter für eine Wand oder einen zweiten Monitor). Die Ansicht **Live** zeigt die letzten von GitHub gesendeten Ereignisse, den Zustand des Webhook-Empfängers (nie das Geheimnis) und eine Auswahl des Arbeitsmodus. `GET /api/live-status` ist ihre Quelle.
+- `tools/demo_accounts.py` für die Bilder, die Anleitung `ACCOUNTS.md` in acht Sprachen und Tests für jede Änderung (die Suite wuchs von 866 auf 913).
+
+### Geändert
+
+- Die Zustandsdateien eines Monitors, der ein Konto von mehreren ist, liegen über `state_dir()` in seinem Ordner; ein einzelner Monitor hält sie wie immer neben dem Code.
+- Die Bilder des README sind neu aufgenommen, und das README zeigt in acht Sprachen die Konten.
+
+### Sicherheit
+
+- Der Supervisor und die Konten lauschen nur auf `127.0.0.1`, außer der Netzwerkmodus ist an. Der Webhook hat keine Host-Prüfung und kein Zugriffstoken (ein Tunnel ändert den Host), und sein Beweis ist weiterhin der HMAC von GitHub; ein Cookie der Sitzung wird nie an ein Konto weitergegeben.
+
+### Behoben
+
+- Die Live-Ansicht von 1.6.8 hatte keinen Zustand des Empfängers: Bei ausgeschaltetem Webhook oder einem Geheimnis unter 32 Zeichen sagte sie nichts, jetzt sagt sie, was von beidem zutrifft.
+
 ## [1.6.8]
 
 Der HTTPS-Proxy aus 1.6.7 wird jetzt gegen einen echten Proxy geprüft, die Bilder sind neu aufgenommen, und die Änderungshistorie ist bis 1.6.3 übersetzt.

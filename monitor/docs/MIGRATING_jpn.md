@@ -81,3 +81,11 @@
 
 - リポジトリの新機能(パッケージには含まれません): `python tools/manual_check_live.py proxy ホスト [ポート] [接続先]` は、ポート 443 の実際の HTTPS プロキシを `listen.proxy_public_host` に照らして確認します。先に `MONITOR_ACCESS_TOKEN` を設定してください。読み取られるだけで、表示されることはありません。
 - 変更履歴(ヘルプ > 変更履歴)は、1.6.8 から 1.6.3 まで他の 7 言語に翻訳されました。
+
+# 1.6.8 から 1.7.0 へ
+
+変換が必要なものはありません。`accounts/` フォルダーがなければ、モニターはこれまでとまったく同じように動作します。
+
+- **複数のアカウント** は任意です。使うには `python actions_monitor.py --migrate-accounts`（試験実行）を実行し、続けて `--apply` を付けてファイルを `accounts/default/` にコピーします。元のファイルは、あなたが削除するまで残ります。アカウントを追加するには `accounts/<id>/actions_monitor.json` を作ります。`ACCOUNTS.md` を参照してください。
+- `accounts/` フォルダーがあると、`python actions_monitor.py` はアカウントごとに 1 つのモニターを実行するスーパーバイザーを起動します。`--account <id>` は 1 つだけを実行します。lite 版にはこれらは一切ありません。
+- 新機能: ページのアドレスでの `?view=` と `?chrome=0`、`GET /api/accounts`、`GET /api/live-status`、そしてすべてのアカウント向けの 1 つの `POST /api/webhook`。

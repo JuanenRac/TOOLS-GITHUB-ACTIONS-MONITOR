@@ -81,3 +81,11 @@
 
 - 仓库中的新功能(不在软件包内):`python tools/manual_check_live.py proxy 主机 [端口] [连接地址]` 会用 443 端口上你真实的 HTTPS 代理对照 `listen.proxy_public_host` 进行检查;请先设置 `MONITOR_ACCESS_TOKEN`,它只会被读取,绝不会被打印。
 - 更新历史(帮助 > 更新日志)现在已将 1.6.8 至 1.6.3 翻译为其他七种语言。
+
+# 从 1.6.8 到 1.7.0
+
+无需转换任何内容：没有 `accounts/` 文件夹时，监视器的工作方式与以前完全一样。
+
+- **多个账户** 是可选的。要使用它们，请运行 `python actions_monitor.py --migrate-accounts`（试运行），然后加上 `--apply` 把你的文件复制到 `accounts/default/`；原文件会一直保留，直到你自己删除。其他账户以 `accounts/<id>/actions_monitor.json` 的形式添加。参见 `ACCOUNTS.md`。
+- 存在 `accounts/` 文件夹时，`python actions_monitor.py` 会启动一个监督程序，为每个账户运行一个监视器；`--account <id>` 只运行其中一个。精简版没有这些内容。
+- 新增：页面地址中的 `?view=` 和 `?chrome=0`、`GET /api/accounts`、`GET /api/live-status`，以及供所有账户使用的一个 `POST /api/webhook`。

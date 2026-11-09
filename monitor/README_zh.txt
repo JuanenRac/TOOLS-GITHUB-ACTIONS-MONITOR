@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GitHub Actions 监视器 + 哨兵（版本 1.6.8）
+GitHub Actions 监视器 + 哨兵（版本 1.7.0）
 ============================================
 该启动哪一个?(新用户两分钟就能决定)
   完整版  MONITOR_GITHUB_ACTIONS.*       带哨兵的页面(端口 8765):警报、签名队列、分析。有多个仓库时从这里开始。
@@ -87,6 +87,11 @@ GitHub Actions 监视器 + 哨兵（版本 1.6.8）
 帮助、关于与检查 (1.6.4)
 ------------------------
 页面有帮助按钮（圆形 ?）和关于按钮（i）；在控制台使用 --help-topics、--help-search、--about 和 --doctor；--demo 用虚构数据显示页面。精简版以自己的横幅和窗口标题启动（LITE、端口 8766、无哨兵）；完整版显示 COMPLETE、端口 8765、哨兵已启用。新版本提示可以关闭（设置 > 基本）。
+
+1.7.0 新增内容（多个账户；历史：CHANGELOG.md）
+  完整版可以监视多个 GitHub 账户：每个账户一个 accounts/<id>/ 文件夹，并在监督程序下各有一个监视器，因此某个账户的故障绝不会影响其他账户。
+  --accounts、--account <id>、--migrate-accounts [--apply]；切换器和“所有账户”页面；?view= 和 ?chrome=0；显示 webhook 状态的实时视图；供所有账户使用的一个 /api/webhook。
+  指南：docs/ACCOUNTS.md。没有 accounts/ 文件夹时一切照旧。精简版只有一个账户，没有这些内容。
 
 1.6.8 新增内容（代理的真实验证；历史：CHANGELOG.md）
   1.6.7 的 HTTPS 代理已用 443 端口上的真实代理（仓库中的 tools/manual_check_live.py proxy）和贯穿整条链路的测试验证。更新历史已翻译到 1.6.3（帮助 > 更新日志）。没有任何设置变化。

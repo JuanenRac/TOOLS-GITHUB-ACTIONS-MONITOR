@@ -8,6 +8,37 @@
 
 The history of GitHub Actions Monitor, from the first version to the latest. Each version groups its changes under Added, Changed, Fixed and Security.
 
+## [1.7.0]
+
+Several accounts in the complete edition, each one a monitor of its own, and a page that knows about them. The lite edition is unchanged: one account, and it does not even show the new options.
+
+### Added
+
+- **Several accounts** (complete edition only). A folder `accounts/<id>/` per account (a person or an organisation) with its own `actions_monitor.json`, its own cache, events, analytics, sentinel state and logs; `accounts/global.json` is optional (`default_account`, `enabled_accounts`) and `MONITOR_ACCOUNTS_DIR` moves the folder. The id is lower case letters, digits, `_` and `-` (up to 40), so it is always a safe folder name. Without an `accounts/` folder nothing changes: one account, its files next to the code.
+- **A supervisor** (`accounts_supervisor.py`): with an `accounts/` folder, `python actions_monitor.py` starts one small process on the usual port that runs one monitor per account (`account_child.py`), each one on its own port of `127.0.0.1`. A crash, a slow answer or a rate limit of one account never touches another; a dead account is started again with a growing wait (2, 5, 15, 30, 60, then 120 seconds) and the summary says it is down meanwhile. It reads nothing from GitHub and writes nothing; stopping it ends every process it started, also on Windows, where the interpreter of a virtual environment is a launcher with a child of its own.
+- **The API of the accounts**: `GET /api/accounts` (the summary), `GET /api/accounts/<id>/status`, and every other `/api/` request goes to the account named with `?account=<id>` or the header `X-Account-Id` (the default account without one; an unknown account is a 404). The access rules are the ones of a single monitor: the same host and origin check and the same access token in the network mode, and the one-use token of a change is asked from the same account the change goes to.
+- **One webhook for all of them**: `POST /api/webhook` is a single address for the installation; the supervisor reads only the owner in `repository.full_name` and passes the event untouched to the account whose `github_owner` is that owner, which verifies the signature with its own secret. An owner nobody watches is answered and ignored; `?account=<id>` chooses the account yourself.
+- **`--accounts`, `--account <id>` and `--migrate-accounts [--apply]`**: list the accounts, run only one as an ordinary monitor, and move the old layout into `accounts/default/`. The migration is a dry run unless `--apply`, never moves or deletes the originals, leaves a marker, refuses a second run so two states never mix, and does not touch the files of the lite edition.
+- **The page with several accounts**: a switcher of accounts under the header, an entry **All accounts** with one card per account (state, repositories, running, failing) that opens any of them, and the same page for each account. Every window keeps its own account and view, read from the address and not from one setting that another window would overwrite.
+- **Views by address** (`?view=now|alerts|charts|repos|settings|live` and `?chrome=0`, a screen without header buttons, tabs or filters for a wall or a second monitor): one monitor serves every window, so the allowance is not spent twice. The **Live** view shows the last events GitHub sent, the state of the webhook receiver (on or off, how many deliveries were accepted, ignored, repeated or refused, whether the secret is long enough, never the secret) and a selector of the working mode. `GET /api/live-status` is its source.
+- `tools/demo_accounts.py`: the supervisor with three invented accounts for the pictures, and the guide `ACCOUNTS.md` in eight languages.
+- Tests for every change of this release (the suite grew from 866 to 913): the ids, the folders, the migration, the supervisor and its API with a stand-in for the monitor of an account (a dead account, the growing wait, switching an account off and on, stopping everything, one free port each), the routing of the webhook, the token of the right account, what the lite edition never loads, and that every state file of an account lands in its own folder.
+
+### Changed
+
+- The state files of a monitor that is one account of several (the update check, the welcome, the organisations, the counter of swallowed failures) live in its folder through `state_dir()`; a single monitor keeps them next to the code, as always.
+- The pictures of the README are taken again and the README in eight languages shows the accounts.
+
+### Security
+
+- The supervisor and the accounts listen on `127.0.0.1` only unless the network mode is on, exactly like a single monitor. The webhook has no Host check and no access token (a tunnel changes the host) and its proof is still the HMAC of GitHub; a cookie of the session is never passed on to an account.
+- The page of the supervisor embeds the list of account ids and nothing else; no secret reaches it and none reaches the summary.
+
+### Fixed
+
+- The Live view of 1.6.8 had no state of the receiver: with the webhook off or with a secret shorter than 32 characters it said nothing, and now it says which.
+
+
 ## [1.6.8]
 
 The HTTPS proxy of 1.6.7 is now checked against a real proxy, the pictures are taken again, and the history of changes is translated back to 1.6.3.

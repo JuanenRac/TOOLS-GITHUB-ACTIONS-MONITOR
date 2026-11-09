@@ -44,6 +44,9 @@ LITE_WEB = [("lite_about", "tab=now&dlg=about", (1400, 900)), ("lite_basic", "ta
 NETWORK_WEB = [("network_now", "tab=now", (1400, 820)), ("network_settings", "tab=cfg&cfgtab=advanced", (1400, 1180))]      # the page of the network mode: the red bar and the warning for every interface
 
 
+ACCOUNTS_WEB = [("accounts_all", "account=all", (1400, 420)), ("accounts_one", "account=org-acme", (1400, 820)), ("accounts_live", "view=live&chrome=0", (1100, 700))]      # the complete edition with several accounts (tools/demo_accounts.py)
+
+
 FAILED = []      # the pictures that were not made: the exit code says so
 
 
@@ -183,6 +186,8 @@ def main():
     lite = subprocess.Popen([sys.executable, "-I", str(ROOT / "tools" / "demo_monitor.py"), str(lite_port), "--lite"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     net_port = free_port()
     net = subprocess.Popen([sys.executable, "-I", str(ROOT / "tools" / "demo_monitor.py"), str(net_port), "--network"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    acc_port = free_port()
+    acc = subprocess.Popen([sys.executable, "-I", str(ROOT / "tools" / "demo_accounts.py"), str(acc_port)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:
         for _ in range(60):
             try:
@@ -224,6 +229,19 @@ def main():
                     if wanted(f"web_{name}"):
                         shot(f"http://127.0.0.1:{net_port}/?{query}&theme={theme}&lang=en&nowizard=1", str(OUT / f"web_{name}_{theme}.png"), size)
                         print("web", name, theme, flush=True)
+        if args.web or both:
+            for _ in range(120):
+                try:
+                    socket.create_connection(("127.0.0.1", acc_port), 0.5).close()
+                    break
+                except OSError:
+                    time.sleep(0.5)
+            time.sleep(6)       # the supervisor starts its three monitors before the page can be served
+            for name, query, size in ACCOUNTS_WEB:
+                for theme in ("light", "dark"):
+                    if wanted(f"web_{name}"):
+                        shot(f"http://127.0.0.1:{acc_port}/?{query}&theme={theme}&lang=en&nowizard=1", str(OUT / f"web_{name}_{theme}.png"), size)
+                        print("web", name, theme, flush=True)
         if args.console or both:
             texts = console_texts(port, work)
             for name, (title, command, text) in texts.items():
@@ -246,6 +264,10 @@ def main():
         demo.terminate()
         lite.terminate()
         net.terminate()
+        if sys.platform == "win32":      # the supervisor started three monitors of its own: its whole tree ends, and only that tree
+            subprocess.run(["taskkill", "/PID", str(acc.pid), "/T", "/F"], capture_output=True)
+        else:
+            acc.terminate()
         shutil.rmtree(work, ignore_errors=True)
     if FAILED:
         print("%d picture(s) were not made; take them by hand (see docs/CONTRIBUTING: start --demo, open the page, save one capture per tab)." % len(FAILED), flush=True)
