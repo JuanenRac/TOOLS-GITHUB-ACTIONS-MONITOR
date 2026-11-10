@@ -2,6 +2,10 @@
 
 Idee che non sono entrate nella versione attuale, senza ordine promesso. Sono direzioni, non impegni; una issue o una pull request è il modo migliore per farne avanzare una.
 
+## Fatto nella 1.7.2
+
+L'intestazione con le sue cifre in un ordine che si legge e in una griglia che segue la larghezza; i controlli rapidi (solo i caldi, velocità, salute degli ecosistemi) fissi in alto a destra; Impostazioni, Guida e Informazioni solo nel pannello laterale; l'avviso di nuova versione fuori dall'intestazione; e i test che non lasciano più file accanto al codice.
+
 ## Fatto nella 1.7.1
 
 Una pagina con pannello laterale (il logo, il selettore degli account, le sezioni in gruppi comprimibili, la guida) e sedici temi oltre ad auto, chiaro e scuro, quelli dello Studio del sistema di allarme; e la sentinella CI dietro un contratto (`BaseSentinel`, `Alert`, `SentinelRegistry`, `SentinelCI`), per poter aggiungere le prossime sentinelle senza che il monitor sappia cosa fa ciascuna. Ciò che si mostra e si decide non cambia.

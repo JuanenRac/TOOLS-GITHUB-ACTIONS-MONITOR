@@ -68,6 +68,7 @@ class LiveServer:
         self.config, self.network = config or {}, network
 
     def __enter__(self):
+        self.leftovers = _testenv.guard(unittest.TestCase())
         self.tmp = tempfile.TemporaryDirectory()
         self.file = Path(self.tmp.name) / "actions_monitor.json"
         self.file.write_text(json.dumps(self.config), encoding="utf-8")
@@ -98,6 +99,7 @@ class LiveServer:
         am.RESTART_PENDING.update(self.saved[6])
         toolconfig.forget()
         self.tmp.cleanup()
+        self.leftovers()
 
     def call(self, path, body=None, headers=None, method=None):
         data = None if body is None else json.dumps(body).encode()
@@ -119,6 +121,9 @@ class LiveServer:
 
 # --- the isolation of the lite edition, the demo and the airgapped switch ---------------------------------------------------------------------------------------------------------------------
 class LiteIsolation(unittest.TestCase):
+    def setUp(self):
+        _testenv.guard(self)
+
     def run_lite(self, code):
         script = "import sys; sys.path.insert(0, %r); sys.argv = ['x', '--lite']; import actions_monitor as am; am.enable_lite(); %s" % (str(HERE), code)
         done = subprocess.run([sys.executable, "-I", "-c", script], capture_output=True, text=True, timeout=90)
@@ -637,6 +642,7 @@ class NetworkMode(unittest.TestCase):
 # --- the token kept by the monitor ----------------------------------------------------------------------------------------------------------------------------------------------------
 class OwnToken(unittest.TestCase):
     def setUp(self):
+        _testenv.guard(self)
         self.tmp = tempfile.TemporaryDirectory()
         self.env = mock.patch.dict(os.environ, {"MONITOR_SECRET_DIR": self.tmp.name})
         self.env.start()
@@ -758,6 +764,7 @@ class GitHubActions(unittest.TestCase):
     CONFIG = {"github_actions": {"enabled": True, "allowed": ["rerun_failed", "cancel", "close_pr", "merge_pr"], "merge_method": "rebase"}}
 
     def setUp(self):
+        _testenv.guard(self)
         self.sent = []
         self.scopes = "X-OAuth-Scopes: repo, workflow\n"
         self.log = Path(tempfile.mkdtemp()) / "log.jsonl"
@@ -1260,7 +1267,7 @@ class SmallThings(unittest.TestCase):
             self.assertIn("tui_textual.py", head, lang)
 
     def test_the_version(self):
-        self.assertEqual(TOOL_VERSION, "1.7.1")
+        self.assertEqual(TOOL_VERSION, "1.7.2")
         if (ROOT / "electro-hobby-3d.project.json").is_file():          # not inside the zip
             self.assertEqual(json.loads((ROOT / "electro-hobby-3d.project.json").read_text(encoding="utf-8"))["version"], TOOL_VERSION)
         self.assertIn(f"## [{TOOL_VERSION}]", (HERE / "CHANGELOG.md").read_text(encoding="utf-8"))

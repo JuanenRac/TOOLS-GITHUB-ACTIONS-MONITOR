@@ -1315,6 +1315,7 @@
  "ui.copied": "コピーしました",
  "ui.copy": "コピー",
  "ui.copy_manual": "手動で選択してコピーしてください",
+ "ui.corner_aria": "クイック操作",
  "ui.count": "{m} 件中 {n} 件のリポジトリ",
  "ui.credit_gh": "GitHub への唯一の入口。保存されたトークンではなく、あなた自身のログインを使います",
  "ui.credit_python": "言語と標準ライブラリ。本体にはこれ以外は不要です",

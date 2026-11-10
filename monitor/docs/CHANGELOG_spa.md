@@ -7,6 +7,24 @@
 
 Versión de la propia herramienta (monitor + centinela + herramientas por lotes), con su propio semver. La fuente es el CHANGELOG.md en inglés; este fichero lleva las mismas versiones y secciones.
 
+## [1.7.2]
+
+Una cabecera que se lee en orden y se ajusta a la ventana, los controles rápidos fijos en la esquina superior derecha, Acerca de en el panel lateral y el fin del aviso de versión nueva. Las pruebas dejan de dejar ficheros junto al código, que es lo que había sustituido los ajustes de una persona por la plantilla neutra.
+
+### Cambiado
+
+- **Las cifras de la cabecera, en orden y en rejilla** (todas las ediciones): la primera fila va ahora de lo que está pasando a lo que pide atención (en marcha, en cola, fallos, éxitos, minutos de cómputo, incidencias abiertas, workflows en rojo en main, sin firmar) y la segunda guarda la maquinaria (repositorios, calientes, modo, lecturas ahorradas, cupo, conexión, actualizado). Cada fila es una rejilla de ocho columnas, cuatro o dos según el ancho de su propio bloque, así que las dos filas llenan siempre sus líneas con cualquier ancho de ventana, desde una pantalla de 1080p hacia arriba (un mosaico nunca impone un ancho propio). El mosaico largo del cupo ocupa dos columnas.
+- **Los controles rápidos quedan en la esquina superior derecha**: el botón de solo calientes, la lista de velocidad (normal, rápido, turbo) y las etiquetas de salud de los ecosistemas (y los avisos de presupuesto y de pausa) están fijos ahí, en una columna propia, y se ajustan dentro de ella sin mover las cifras. Por debajo de 1100 puntos de ancho la esquina pasa encima de las cifras. La página de todas las cuentas la oculta, como oculta las cifras.
+- **Ajustes, Ayuda y Acerca de están solo en el panel lateral**: los botones del engranaje, la interrogación y la información salen de la cabecera. Ajustes ya era una sección del panel; Ayuda de esta pestaña sigue al pie y se añade **Acerca de** a su lado. La guía de los Ajustes lo dice en los ocho idiomas.
+
+### Eliminado
+
+- **El aviso de versión nueva en la cabecera** (la insignia naranja) con su código y su estilo. El panel Acerca de sigue diciendo si hay una versión más nueva, y la consola también; el ajuste `updates.check` y la caché de 24 horas son los mismos.
+
+### Corregido
+
+- **La plantilla neutra podía sustituir los ajustes de una persona.** Tres grupos de pruebas (el aislamiento de lite, el token de un solo uso y la parte lite de las cuentas) arrancaban un monitor cuyo primer arranque escribe `actions_monitor.json` o `update_check.json` junto al código, y nada los quitaba; al copiar la carpeta `monitor/` sobre una instalación, los ajustes de la persona (su catálogo propio de ecosistemas) quedaban sustituidos por la plantilla, y todos los repositorios caían en el grupo «Everything else» (una esquina que decía «Everything else 54»). Cada una de esas pruebas quita ahora lo que creó, y una prueba lo demuestra. El paquete nunca llevó los ajustes ni el catálogo de nadie, y sigue sin llevarlos.
+
 ## [1.7.1]
 
 Una página nueva y el mismo centinela detrás de un contrato. La página tiene un panel lateral a la izquierda con el logotipo, las secciones en grupos y dieciséis temas; el centinela de CI es ahora uno de los centinelas de un registro, y eso es lo que permite que lleguen los siguientes. Lo que el monitor muestra y decide no cambia.

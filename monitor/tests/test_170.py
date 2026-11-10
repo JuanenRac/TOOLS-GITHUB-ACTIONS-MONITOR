@@ -542,6 +542,9 @@ class LiveStatus(unittest.TestCase):
 class LiteKnowsNothing(unittest.TestCase):
     """The lite edition is one account, simple. It never imports the accounts, never sees the options, and its page does not carry the switcher."""
 
+    def setUp(self):
+        _testenv.guard(self)
+
     def run_lite(self, code):
         script = "import sys; sys.path.insert(0, %r); sys.argv = ['x', '--lite']; import actions_monitor as am; am.enable_lite(); %s" % (str(HERE), code)
         done = subprocess.run([sys.executable, "-I", "-c", script], capture_output=True, text=True, timeout=60)

@@ -82,7 +82,7 @@ class History(unittest.TestCase):
         self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
         notes = subprocess.run([sys.executable, str(REPO / "tools" / "sync_changelog.py"), "--notes", tool_version.TOOL_VERSION], capture_output=True, text=True, encoding="utf-8")
         self.assertEqual(notes.returncode, 0)
-        self.assertIn("### Added", notes.stdout)
+        self.assertRegex(notes.stdout, r"(?m)^### \S", "the notes of a release carry its sections (a release may have no Added: it can be only Changed or Fixed)")
         self.assertNotIn("## [", notes.stdout)
 
 

@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GITHUB ACTIONS MONITOR + SENTINEL (version 1.7.1)
+GITHUB ACTIONS MONITOR + SENTINEL (version 1.7.2)
 =================================================
 WHICH ONE TO START? (a new user decides in two minutes)
   COMPLETE  MONITOR_GITHUB_ACTIONS.*       the page with the sentinel (port 8765): alerts, signing queue, analytics. Start here if you own several repositories.
@@ -89,6 +89,10 @@ LICENCE    GPL-3.0-or-later (see LICENSE and NOTICE). Copyright (C) 2026 JuanenR
 HELP, ABOUT AND CHECKS (1.6.4)
 -----------------------------
 The page has an Help button (round ?) and an About button (i); in the console use --help-topics, --help-search, --about and --doctor; --demo shows the page with invented data. The lite edition starts with its own banner and window title (LITE, port 8766, no sentinel); the complete edition says COMPLETE, port 8765, sentinel on. A notice of a newer version can be switched off (Settings > Basic).
+
+WHAT IS NEW IN 1.7.2 (an ordered header, quick controls in the corner, About in the side panel; history: CHANGELOG.md)
+  The figures of the header are in an order that reads and in a grid that follows the width; the hot-only button, the speed list and the health of the ecosystems stay at the top right.
+  Settings, Help and About are only in the side panel. The notice of a new version is no longer in the header (About and the console still say it). The tests leave nothing next to the code.
 
 WHAT IS NEW IN 1.7.1 (a side panel, sixteen themes, one contract for the sentinels; history: CHANGELOG.md)
   The page has a side panel on the left with the logo, the sections in groups and the help; it folds to its icons. Sixteen themes besides auto, light and dark (Settings > This browser).

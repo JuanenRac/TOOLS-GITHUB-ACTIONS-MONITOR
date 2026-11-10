@@ -1315,6 +1315,7 @@
  "ui.copied": "Copiado",
  "ui.copy": "Copiar",
  "ui.copy_manual": "Selecione e copie à mão",
+ "ui.corner_aria": "Controlos rápidos",
  "ui.count": "{n} de {m} repositórios",
  "ui.credit_gh": "a única porta para o GitHub: a sua própria sessão, nunca um token guardado",
  "ui.credit_python": "a linguagem e a sua biblioteca padrão; o núcleo não precisa de mais nada",

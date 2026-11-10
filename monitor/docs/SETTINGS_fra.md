@@ -7,7 +7,7 @@
 
 # L'onglet Paramètres
 
-L'onglet Paramètres (l'icône en forme d'engrenage dans l'en-tête ou dans la barre d'onglets) modifie depuis la page les valeurs de `actions_monitor.json`, afin que personne n'ait à éditer le fichier à la main.
+L'onglet Paramètres (l'entrée Paramètres du panneau latéral) modifie depuis la page les valeurs de `actions_monitor.json`, afin que personne n'ait à éditer le fichier à la main.
 Il est rédigé dans les huit langues de la page et suit l'apparence du reste.
 
 <!-- settings:begin -->

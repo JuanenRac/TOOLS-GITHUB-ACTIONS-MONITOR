@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITOR DI GITHUB ACTIONS + SENTINELLA (versione 1.7.1)
+MONITOR DI GITHUB ACTIONS + SENTINELLA (versione 1.7.2)
 =======================================================
 QUALE AVVIARE? (un nuovo utente decide in due minuti)
   COMPLETA  MONITOR_GITHUB_ACTIONS.*       la pagina con la sentinella (porta 8765): avvisi, coda di firma, analisi. Parti da qui se hai più repository.
@@ -89,6 +89,10 @@ LICENZA    GPL-3.0-or-later (vedi LICENSE e NOTICE). Copyright (C) 2026 JuanenRa
 GUIDA, INFORMAZIONI E VERIFICHE (1.6.4)
 ---------------------------------------
 La pagina ha un pulsante Guida (? rotondo) e uno Informazioni (i); da console: --help-topics, --help-search, --about e --doctor; --demo mostra la pagina con dati inventati. L'edizione lite parte con un proprio banner e titolo di finestra (LITE, porta 8766, senza sentinella); la completa indica COMPLETE, porta 8765, sentinella attiva. L'avviso di nuova versione si può spegnere (Impostazioni > Di base).
+
+NOVITÀ DELLA 1.7.2 (intestazione ordinata, controlli rapidi nell'angolo, Informazioni nel pannello laterale; storico: CHANGELOG.md)
+  Le cifre dell'intestazione sono in un ordine che si legge e in una griglia che segue la larghezza; il pulsante «solo i caldi», l'elenco della velocità e la salute degli ecosistemi restano in alto a destra.
+  Impostazioni, Guida e Informazioni sono solo nel pannello laterale. L'avviso di nuova versione non è più nell'intestazione (Informazioni e la console lo dicono ancora). I test non lasciano nulla accanto al codice.
 
 NOVITÀ DELLA 1.7.1 (pannello laterale, sedici temi, un contratto per le sentinelle; storico: CHANGELOG.md)
   La pagina ha un pannello laterale a sinistra con il logo, le sezioni in gruppi e la guida; si riduce alle sue icone. Sedici temi oltre ad auto, chiaro e scuro (Impostazioni > Questo browser).

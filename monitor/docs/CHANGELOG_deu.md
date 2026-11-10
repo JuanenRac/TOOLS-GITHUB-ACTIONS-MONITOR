@@ -7,6 +7,24 @@
 
 Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem Semver. Die Quelle ist das englische CHANGELOG.md; diese Datei enthält dieselben Versionen und Abschnitte.
 
+## [1.7.2]
+
+Eine Kopfzeile, die sich in Reihenfolge lesen lässt und zum Fenster passt, die Schnellsteuerung fest in der oberen rechten Ecke, Info in der Seitenleiste und das Ende des Hinweises auf eine neue Version. Die Tests hinterlassen keine Dateien mehr neben dem Code; genau das hatte die Einstellungen einer Person durch die neutrale Vorlage ersetzt.
+
+### Geändert
+
+- **Die Zahlen der Kopfzeile, geordnet und in einem Raster** (alle Editionen): die erste Zeile geht jetzt von dem, was gerade läuft, zu dem, was Aufmerksamkeit braucht (laufend, wartend, Fehler, Erfolge, Rechenminuten, offene Issues, rote Workflows auf main, unsigniert), die zweite behält die Technik (Repositorys, heiß, Modus, gesparte Lesungen, Kontingent, Verbindung, aktualisiert). Jede Zeile ist ein Raster aus acht Spalten, vier oder zwei je nach Breite ihres eigenen Blocks, sodass beide Zeilen ihre Zeilen bei jeder Fensterbreite füllen, ab einem 1080p-Bildschirm aufwärts (eine Kachel erzwingt nie eine eigene Breite). Die lange Kontingent-Kachel belegt zwei Spalten.
+- **Die Schnellsteuerung bleibt in der oberen rechten Ecke**: der Knopf für nur heiße, die Geschwindigkeitsliste (normal, schnell, Turbo) und die Gesundheitsmarken der Ökosysteme (und die Hinweise zu Budget und Pause) sind dort fest, in einer eigenen Spalte, und brechen darin um, ohne die Zahlen zu verschieben. Unter 1100 Punkten Breite rückt die Ecke über die Zahlen. Die Seite aller Konten blendet sie aus, wie sie die Zahlen ausblendet.
+- **Einstellungen, Hilfe und Info sind nur noch in der Seitenleiste**: die Knöpfe für Zahnrad, Fragezeichen und Information verlassen die Kopfzeile. Einstellungen war schon ein Bereich der Leiste; Hilfe zu diesem Reiter bleibt am Fuß und **Info** kommt daneben. Die Anleitung der Einstellungen sagt das in den acht Sprachen.
+
+### Entfernt
+
+- **Der Hinweis auf eine neue Version in der Kopfzeile** (das orange Abzeichen) samt Code und Stil. Das Info-Fenster sagt weiterhin, ob es eine neuere Version gibt, die Konsole auch; die Einstellung `updates.check` und der Zwischenspeicher von 24 Stunden sind dieselben.
+
+### Behoben
+
+- **Die neutrale Vorlage konnte die Einstellungen einer Person ersetzen.** Drei Testgruppen (die Isolation von Lite, das Einmal-Token und der Lite-Teil der Konten) starteten einen Monitor, dessen erster Start `actions_monitor.json` oder `update_check.json` neben den Code schreibt, und nichts entfernte sie; kopierte man den Ordner `monitor/` über eine Installation, wurden die Einstellungen der Person (ihr eigener Ökosystem-Katalog) durch die Vorlage ersetzt, und alle Repositorys landeten in der Gruppe „Everything else“ (eine Ecke, die „Everything else 54“ zeigte). Jeder dieser Tests entfernt nun, was er erzeugt hat, und ein Test belegt es. Das Paket enthielt nie die Einstellungen oder den Katalog von jemandem und tut es weiterhin nicht.
+
 ## [1.7.1]
 
 Eine neue Seite und derselbe Wächter hinter einem Vertrag. Die Seite hat links eine Seitenleiste mit dem Logo, den Bereichen in Gruppen und sechzehn Designs; der CI-Wächter ist jetzt einer der Wächter einer Registry, und genau das lässt die nächsten kommen. Was der Monitor zeigt und entscheidet, ändert sich nicht.

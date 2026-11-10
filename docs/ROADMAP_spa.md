@@ -2,6 +2,10 @@
 
 Ideas que no cupieron en la versión actual, sin orden prometido. Son direcciones, no compromisos; un issue o un pull request es la mejor forma de adelantar una.
 
+## Hecho en la 1.7.2
+
+La cabecera con sus cifras en un orden que se lee y en una rejilla que sigue el ancho; los controles rápidos (solo calientes, velocidad, salud de los ecosistemas) fijos arriba a la derecha; Ajustes, Ayuda y Acerca de solo en el panel lateral; el aviso de versión nueva fuera de la cabecera; y las pruebas que ya no dejan ficheros junto al código.
+
 ## Hecho en la 1.7.1
 
 Una página con panel lateral (el logotipo, el selector de cuentas, las secciones en grupos que se pliegan, la ayuda) y dieciséis temas además de auto, claro y oscuro, los del Studio del sistema de alarma; y el centinela de CI detrás de un contrato (`BaseSentinel`, `Alert`, `SentinelRegistry`, `SentinelCI`), para poder añadir los siguientes centinelas sin que el monitor sepa qué hace cada uno. Lo que se muestra y se decide no cambia.

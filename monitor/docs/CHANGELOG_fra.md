@@ -7,6 +7,24 @@
 
 Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son propre semver. La source est le CHANGELOG.md en anglais ; ce fichier contient les mêmes versions et sections.
 
+## [1.7.2]
+
+Un en-tête qui se lit dans l'ordre et s'adapte à la fenêtre, les commandes rapides fixes dans le coin supérieur droit, À propos dans le panneau latéral et la fin de l'avis de nouvelle version. Les tests cessent de laisser des fichiers à côté du code, ce qui avait remplacé les réglages d'une personne par le modèle neutre.
+
+### Modifié
+
+- **Les chiffres de l'en-tête, dans l'ordre et en grille** (toutes les éditions) : la première ligne va maintenant de ce qui se passe à ce qui demande de l'attention (en cours, en file, échecs, réussites, minutes de calcul, tickets ouverts, workflows rouges sur main, non signés) et la seconde garde la mécanique (dépôts, chauds, mode, lectures économisées, quota, connexion, mis à jour). Chaque ligne est une grille de huit colonnes, quatre ou deux selon la largeur de son propre bloc, de sorte que les deux lignes remplissent toujours leurs rangées à toute largeur de fenêtre, à partir d'un écran 1080p (une tuile n'impose jamais de largeur propre). La longue tuile du quota occupe deux colonnes.
+- **Les commandes rapides restent dans le coin supérieur droit** : le bouton « seulement les chauds », la liste de vitesse (normal, rapide, turbo) et les pastilles de santé des écosystèmes (et les avis de budget et de pause) y sont fixés, dans une colonne à part, et se replient à l'intérieur sans déplacer les chiffres. Sous 1100 points de large le coin passe au-dessus des chiffres. La page de tous les comptes le masque, comme elle masque les chiffres.
+- **Réglages, Aide et À propos sont seulement dans le panneau latéral** : les boutons de l'engrenage, du point d'interrogation et de l'information quittent l'en-tête. Réglages était déjà une section du panneau ; Aide de cet onglet reste en bas et **À propos** s'ajoute à côté. Le guide des Réglages le dit dans les huit langues.
+
+### Supprimé
+
+- **L'avis de nouvelle version dans l'en-tête** (le badge orange) avec son code et son style. Le panneau À propos dit toujours s'il existe une version plus récente, et la console aussi ; le réglage `updates.check` et le cache de 24 heures sont les mêmes.
+
+### Corrigé
+
+- **Le modèle neutre pouvait remplacer les réglages d'une personne.** Trois groupes de tests (l'isolation de lite, le jeton à usage unique et la partie lite des comptes) démarraient un moniteur dont le premier démarrage écrit `actions_monitor.json` ou `update_check.json` à côté du code, et rien ne les supprimait ; en copiant le dossier `monitor/` sur une installation, les réglages de la personne (son propre catalogue d'écosystèmes) étaient remplacés par le modèle, et tous les dépôts tombaient dans le groupe « Everything else » (un coin qui affichait « Everything else 54 »). Chacun de ces tests supprime maintenant ce qu'il a créé, et un test le prouve. Le paquet n'a jamais contenu les réglages ni le catalogue de personne, et n'en contient toujours pas.
+
 ## [1.7.1]
 
 Une nouvelle page et la même sentinelle derrière un contrat. La page a un panneau latéral à gauche avec le logo, les sections en groupes et seize thèmes ; la sentinelle CI est désormais l'une des sentinelles d'un registre, ce qui permet aux suivantes d'arriver. Ce que le moniteur montre et décide ne change pas.

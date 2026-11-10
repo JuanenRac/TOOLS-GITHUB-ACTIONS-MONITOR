@@ -283,7 +283,7 @@ class PageWiring(unittest.TestCase):
     page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
 
     def test_buttons_panels_and_shortcut_exist(self):
-        for needle in ('id="about-open"', 'id="help-open"', 'id="help-tab"', 'id="about-dlg"', 'id="help-dlg"', 'id="upd-badge"', 'id="restartbar"', 'e.key==="?"', "/api/help/search", "X-Monitor-Token", 'href="#i-info"', 'href="#i-help"'):
+        for needle in ('id="about-open"', 'id="help-tab"', 'id="about-dlg"', 'id="help-dlg"', 'id="restartbar"', 'e.key==="?"', "/api/help/search", "X-Monitor-Token", 'href="#i-info"', 'href="#i-help"'):
             self.assertIn(needle, self.page, needle)
 
     def test_the_new_texts_exist_in_the_eight_languages(self):

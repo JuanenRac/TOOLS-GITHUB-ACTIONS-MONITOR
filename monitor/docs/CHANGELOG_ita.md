@@ -7,6 +7,24 @@
 
 Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il proprio semver. La fonte è il CHANGELOG.md in inglese; questo file ha le stesse versioni e sezioni.
 
+## [1.7.2]
+
+Un'intestazione che si legge in ordine e si adatta alla finestra, i controlli rapidi fissi nell'angolo in alto a destra, Informazioni nel pannello laterale e la fine dell'avviso di nuova versione. I test smettono di lasciare file accanto al codice, ed era proprio questo ad aver sostituito le impostazioni di una persona con il modello neutro.
+
+### Modificato
+
+- **Le cifre dell'intestazione, in ordine e in una griglia** (tutte le edizioni): la prima riga va ora da ciò che sta succedendo a ciò che richiede attenzione (in corso, in coda, errori, successi, minuti di calcolo, issue aperte, workflow rossi su main, non firmati) e la seconda tiene la parte meccanica (repository, caldi, modalità, letture risparmiate, quota, connessione, aggiornato). Ogni riga è una griglia di otto colonne, quattro o due secondo la larghezza del suo blocco, così le due righe riempiono sempre le loro file a qualsiasi larghezza di finestra, da uno schermo 1080p in su (una tessera non impone mai una larghezza propria). La lunga tessera della quota occupa due colonne.
+- **I controlli rapidi restano nell'angolo in alto a destra**: il pulsante «solo i caldi», l'elenco della velocità (normale, veloce, turbo) e le etichette di salute degli ecosistemi (e gli avvisi di budget e di pausa) sono fissati lì, in una colonna propria, e vanno a capo al suo interno senza spostare le cifre. Sotto i 1100 punti di larghezza l'angolo passa sopra le cifre. La pagina di tutti gli account lo nasconde, come nasconde le cifre.
+- **Impostazioni, Guida e Informazioni sono solo nel pannello laterale**: i pulsanti dell'ingranaggio, del punto interrogativo e dell'informazione lasciano l'intestazione. Impostazioni era già una sezione del pannello; Guida di questa scheda resta in fondo e accanto si aggiunge **Informazioni**. La guida delle Impostazioni lo dice nelle otto lingue.
+
+### Rimosso
+
+- **L'avviso di nuova versione nell'intestazione** (il badge arancione) con il suo codice e il suo stile. Il pannello Informazioni dice ancora se c'è una versione più recente, e così la console; l'impostazione `updates.check` e la cache di 24 ore sono le stesse.
+
+### Corretto
+
+- **Il modello neutro poteva sostituire le impostazioni di una persona.** Tre gruppi di test (l'isolamento di lite, il token monouso e la parte lite degli account) avviavano un monitor il cui primo avvio scrive `actions_monitor.json` o `update_check.json` accanto al codice, e nulla li rimuoveva; copiando la cartella `monitor/` su un'installazione, le impostazioni della persona (il suo catalogo di ecosistemi) venivano sostituite dal modello, e tutti i repository finivano nel gruppo «Everything else» (un angolo che diceva «Everything else 54»). Ognuno di quei test rimuove ora ciò che ha creato, e un test lo dimostra. Il pacchetto non ha mai contenuto le impostazioni né il catalogo di nessuno, e continua a non contenerli.
+
 ## [1.7.1]
 
 Una pagina nuova e la stessa sentinella dietro un contratto. La pagina ha un pannello laterale a sinistra con il logo, le sezioni in gruppi e sedici temi; la sentinella CI è ora una delle sentinelle di un registro, ed è ciò che permette l'arrivo delle prossime. Ciò che il monitor mostra e decide non cambia.

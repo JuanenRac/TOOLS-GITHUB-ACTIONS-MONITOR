@@ -17,6 +17,27 @@ i18n.set_language("en")
 toolconfig.set_owner("JuanenRac")
 
 
+WATCHED = ("actions_monitor.json", "actions_monitor_lite.json", "update_check.json", "update_check_lite.json", "actions_monitor_log.txt", "actions_monitor_log_lite.txt",
+           "github_actions_log.jsonl", "ai_actions_log.jsonl")
+
+
+def guard(case):
+    """Registers a cleanup on a TestCase: the files of the monitor that this test creates next to the code (the template of a first start, the update notice) are removed afterwards. Only
+    what did not exist before is removed."""
+    folder = Path(__file__).resolve().parent.parent
+    before = {name for name in WATCHED if (folder / name).exists()}
+
+    def remove_new():
+        for name in WATCHED:
+            if name not in before:
+                try:
+                    (folder / name).unlink()
+                except OSError:
+                    pass
+    case.addCleanup(remove_new)
+    return remove_new
+
+
 import unittest  # noqa: E402
 
 

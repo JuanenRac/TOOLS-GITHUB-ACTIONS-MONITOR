@@ -7,6 +7,24 @@
 
 Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com o seu próprio semver. A fonte é o CHANGELOG.md em inglês; este ficheiro tem as mesmas versões e secções.
 
+## [1.7.2]
+
+Um cabeçalho que se lê por ordem e se ajusta à janela, os controlos rápidos fixos no canto superior direito, Acerca de no painel lateral e o fim do aviso de versão nova. Os testes deixam de deixar ficheiros junto do código, que é o que tinha substituído as definições de uma pessoa pelo modelo neutro.
+
+### Alterado
+
+- **Os números do cabeçalho, por ordem e numa grelha** (todas as edições): a primeira linha vai agora do que está a acontecer ao que pede atenção (em curso, em fila, falhas, sucessos, minutos de cálculo, incidências abertas, workflows a vermelho em main, por assinar) e a segunda guarda a maquinaria (repositórios, quentes, modo, leituras poupadas, quota, ligação, atualizado). Cada linha é uma grelha de oito colunas, quatro ou duas conforme a largura do seu próprio bloco, de modo que as duas linhas enchem sempre as suas filas com qualquer largura de janela, a partir de um ecrã de 1080p (um mosaico nunca impõe uma largura própria). O mosaico comprido da quota ocupa duas colunas.
+- **Os controlos rápidos ficam no canto superior direito**: o botão de só quentes, a lista de velocidade (normal, rápido, turbo) e as etiquetas de saúde dos ecossistemas (e os avisos de orçamento e de pausa) estão fixos aí, numa coluna própria, e quebram dentro dela sem mexer nos números. Abaixo de 1100 pontos de largura o canto passa para cima dos números. A página de todas as contas esconde-o, como esconde os números.
+- **Definições, Ajuda e Acerca de estão só no painel lateral**: os botões da roda dentada, do ponto de interrogação e da informação saem do cabeçalho. Definições já era uma secção do painel; Ajuda deste separador fica ao fundo e **Acerca de** junta-se ao lado. O guia das Definições di-lo nos oito idiomas.
+
+### Removido
+
+- **O aviso de versão nova no cabeçalho** (o distintivo laranja) com o seu código e o seu estilo. O painel Acerca de continua a dizer se há uma versão mais recente, e a consola também; a definição `updates.check` e a cache de 24 horas são as mesmas.
+
+### Corrigido
+
+- **O modelo neutro podia substituir as definições de uma pessoa.** Três grupos de testes (o isolamento do lite, o token de uma só utilização e a parte lite das contas) arrancavam um monitor cujo primeiro arranque escreve `actions_monitor.json` ou `update_check.json` junto do código, e nada os removia; ao copiar a pasta `monitor/` sobre uma instalação, as definições da pessoa (o seu catálogo próprio de ecossistemas) ficavam substituídas pelo modelo, e todos os repositórios caíam no grupo «Everything else» (um canto que dizia «Everything else 54»). Cada um desses testes remove agora o que criou, e um teste demonstra-o. O pacote nunca levou as definições nem o catálogo de ninguém, e continua sem os levar.
+
 ## [1.7.1]
 
 Uma página nova e a mesma sentinela atrás de um contrato. A página tem um painel lateral à esquerda com o logótipo, as secções em grupos e dezasseis temas; a sentinela de CI é agora uma das sentinelas de um registo, e é isso que permite que cheguem as seguintes. O que o monitor mostra e decide não muda.

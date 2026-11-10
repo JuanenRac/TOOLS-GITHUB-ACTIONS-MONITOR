@@ -1315,6 +1315,7 @@
  "ui.copied": "已复制",
  "ui.copy": "复制",
  "ui.copy_manual": "请手动选中并复制",
+ "ui.corner_aria": "快捷控制",
  "ui.count": "{m} 个仓库中的 {n} 个",
  "ui.credit_gh": "通往 GitHub 的唯一入口：使用你自己的登录，从不保存令牌",
  "ui.credit_python": "语言及其标准库；核心不需要其他任何东西",

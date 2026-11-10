@@ -7,7 +7,7 @@
 
 # La scheda Impostazioni
 
-La scheda Impostazioni (l'icona a forma di ingranaggio nell'intestazione o nella barra delle schede) modifica dalla pagina i valori di `actions_monitor.json`, così nessuno deve modificare il file a mano.
+La scheda Impostazioni (la voce Impostazioni del pannello laterale) modifica dalla pagina i valori di `actions_monitor.json`, così nessuno deve modificare il file a mano.
 È scritta negli otto lingue della pagina e segue l'aspetto del resto.
 
 <!-- settings:begin -->

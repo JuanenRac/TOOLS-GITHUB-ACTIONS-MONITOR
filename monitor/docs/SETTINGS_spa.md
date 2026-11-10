@@ -7,7 +7,7 @@
 
 # La pestaña Ajustes
 
-La pestaña Ajustes (el icono del engranaje en la cabecera o en la barra de pestañas) cambia desde la página los valores de `actions_monitor.json`, de modo que nadie tenga que editar el fichero a mano.
+La pestaña Ajustes (la entrada Ajustes del panel lateral) cambia desde la página los valores de `actions_monitor.json`, de modo que nadie tenga que editar el fichero a mano.
 Está escrita en los ocho idiomas de la página y sigue el aspecto del resto.
 
 <!-- settings:begin -->

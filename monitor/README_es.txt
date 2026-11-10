@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITOR DE GITHUB ACTIONS + CENTINELA (versión 1.7.1)
+MONITOR DE GITHUB ACTIONS + CENTINELA (versión 1.7.2)
 =====================================================
 ¿CUÁL ARRANCAR? (un usuario nuevo decide en dos minutos)
   COMPLETA  MONITOR_GITHUB_ACTIONS.*       la página con el centinela (puerto 8765): alertas, cola de firma, analítica. Empieza aquí si tienes varios repositorios.
@@ -89,6 +89,10 @@ LICENCIA   GPL-3.0-or-later (ver LICENSE y NOTICE). Copyright (C) 2026 JuanenRac
 AYUDA, ACERCA DE Y COMPROBACIONES (1.6.4)
 -----------------------------------------
 La página tiene un botón de Ayuda (? redondo) y uno de Acerca de (i); en la consola usa --help-topics, --help-search, --about y --doctor; --demo muestra la página con datos inventados. La edición lite arranca con su propio banner y título de ventana (LITE, puerto 8766, sin centinela); la completa dice COMPLETE, puerto 8765, centinela activo. El aviso de versión nueva se puede apagar (Ajustes > Básico).
+
+NOVEDADES DE LA 1.7.2 (cabecera ordenada, controles rápidos en la esquina, Acerca de en el panel lateral; historial: CHANGELOG.md)
+  Las cifras de la cabecera van en un orden que se lee y en una rejilla que sigue el ancho; el botón de solo calientes, la lista de velocidad y la salud de los ecosistemas quedan arriba a la derecha.
+  Ajustes, Ayuda y Acerca de están solo en el panel lateral. El aviso de versión nueva ya no está en la cabecera (Acerca de y la consola lo siguen diciendo). Las pruebas no dejan nada junto al código.
 
 NOVEDADES DE LA 1.7.1 (panel lateral, dieciséis temas, un contrato para los centinelas; historial: CHANGELOG.md)
   La página tiene un panel lateral a la izquierda con el logotipo, las secciones en grupos y la ayuda; se contrae a sus iconos. Dieciséis temas además de auto, claro y oscuro (Ajustes > Este navegador).

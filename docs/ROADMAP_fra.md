@@ -2,6 +2,10 @@
 
 Des idées qui n'ont pas tenu dans la version actuelle, sans ordre promis. Ce sont des directions, pas des engagements ; une issue ou une pull request est la meilleure façon d'en faire avancer une.
 
+## Fait dans la 1.7.2
+
+L'en-tête avec ses chiffres dans un ordre qui se lit et dans une grille qui suit la largeur ; les commandes rapides (seulement les chauds, vitesse, santé des écosystèmes) fixes en haut à droite ; Réglages, Aide et À propos seulement dans le panneau latéral ; l'avis de nouvelle version hors de l'en-tête ; et les tests qui ne laissent plus de fichiers à côté du code.
+
 ## Fait dans la 1.7.1
 
 Une page avec un panneau latéral (le logo, le sélecteur de comptes, les sections en groupes repliables, l'aide) et seize thèmes en plus d'auto, clair et sombre, ceux du Studio du système d'alarme ; et la sentinelle CI derrière un contrat (`BaseSentinel`, `Alert`, `SentinelRegistry`, `SentinelCI`), pour pouvoir ajouter les sentinelles suivantes sans que le moniteur sache ce que fait chacune. Ce qui est montré et décidé ne change pas.

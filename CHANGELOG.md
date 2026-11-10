@@ -8,6 +8,24 @@
 
 The history of GitHub Actions Monitor, from the first version to the latest. Each version groups its changes under Added, Changed, Fixed and Security.
 
+## [1.7.2]
+
+A header that reads in order and fits the window, the quick controls fixed in the top right corner, About in the side panel, and the end of the notice of a new version. The tests stop leaving files next to the code, which is what had replaced the settings of a person by the neutral template.
+
+### Changed
+
+- **The figures of the header, in order and in a grid** (all editions): the first row now goes from what is going on to what needs attention (running, queued, failures, successes, compute minutes, open issues, workflows red on main, unsigned) and the second keeps the machinery (repositories, hot, mode, reads saved, allowance, connection, updated). Each row is a grid of eight columns, four or two according to the width of its own block, so the two rows always fill their lines at any window width, from a 1080p screen up (a tile never forces a width of its own). The long allowance tile takes two columns.
+- **The quick controls stay at the top right corner**: the hot-only button, the speed list (normal, fast, turbo) and the health chips of the ecosystems (and the budget and paused badges) are fixed there, in a column of their own, and wrap inside it without moving the figures. Below 1100 points wide the corner goes above the figures. The page of all the accounts hides it, as it hides the figures.
+- **Settings, Help and About are only in the side panel**: the gear, the question mark and the information buttons leave the header. Settings was already a section of the panel; Help for this tab stays at its foot and **About** is added beside it. The guide of the Settings says so in the eight languages.
+
+### Removed
+
+- **The notice of a new version in the header** (the orange badge) with its code and its style. The About panel still says whether there is a newer version, and so does the console; the setting `updates.check` and the cache of 24 hours are the same.
+
+### Fixed
+
+- **The neutral template could replace the settings of a person.** Three groups of tests (the lite isolation, the one-use token and the lite part of the accounts) started a monitor whose first start writes `actions_monitor.json` or `update_check.json` next to the code, and nothing removed them; copying the `monitor/` folder over an installation then replaced the settings of the person (their own catalogue of ecosystems) by the template, and every repository fell into the group "Everything else" (a corner that read "Everything else 54"). Each of those tests now removes what it created, and a test proves it. The package never carried the settings or the catalogue of anyone, and still does not.
+
 ## [1.7.1]
 
 A new page and the same sentinel behind a contract. The page has a side panel on the left with the logo, the sections in groups and sixteen themes; the CI sentinel is now one of the sentinels of a registry, which is what lets the next ones arrive. What the monitor shows and decides does not change.

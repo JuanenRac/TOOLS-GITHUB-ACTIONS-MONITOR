@@ -2,6 +2,10 @@
 
 Ideen, die nicht in die aktuelle Version passten, ohne versprochene Reihenfolge. Es sind Richtungen, keine Zusagen; ein Issue oder ein Pull Request ist der beste Weg, eine voranzubringen.
 
+## Erledigt in 1.7.2
+
+Die Kopfzeile mit ihren Zahlen in einer lesbaren Reihenfolge und in einem Raster, das der Breite folgt; die Schnellsteuerung (nur heiße, Geschwindigkeit, Gesundheit der Ökosysteme) fest oben rechts; Einstellungen, Hilfe und Info nur in der Seitenleiste; der Hinweis auf eine neue Version nicht mehr in der Kopfzeile; und die Tests, die keine Dateien mehr neben dem Code hinterlassen.
+
 ## Erledigt in 1.7.1
 
 Eine Seite mit Seitenleiste (das Logo, die Kontoauswahl, die Bereiche in einklappbaren Gruppen, die Hilfe) und sechzehn Designs zusätzlich zu automatisch, hell und dunkel, die des Studios des Alarmsystems; und der CI-Wächter hinter einem Vertrag (`BaseSentinel`, `Alert`, `SentinelRegistry`, `SentinelCI`), damit weitere Wächter hinzukommen können, ohne dass der Monitor wissen muss, was jeder tut. Was angezeigt und entschieden wird, ändert sich nicht.

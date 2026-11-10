@@ -7,7 +7,7 @@
 
 # O separador Definições
 
-O separador Definições (o ícone da roda dentada no cabeçalho ou na barra de separadores) altera, a partir da página, os valores de `actions_monitor.json`, para que ninguém tenha de editar o ficheiro à mão.
+O separador Definições (a entrada Definições do painel lateral) altera, a partir da página, os valores de `actions_monitor.json`, para que ninguém tenha de editar o ficheiro à mão.
 Está escrito nas oito línguas da página e segue o aspeto do resto.
 
 <!-- settings:begin -->

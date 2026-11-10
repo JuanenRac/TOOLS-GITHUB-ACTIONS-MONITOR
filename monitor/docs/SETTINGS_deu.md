@@ -7,7 +7,7 @@
 
 # Der Reiter Einstellungen
 
-Der Reiter Einstellungen (das Zahnradsymbol in der Kopfzeile oder in der Reiterleiste) ändert die Werte von `actions_monitor.json` direkt auf der Seite, sodass niemand die Datei von Hand bearbeiten muss.
+Der Reiter Einstellungen (der Eintrag Einstellungen der Seitenleiste) ändert die Werte von `actions_monitor.json` direkt auf der Seite, sodass niemand die Datei von Hand bearbeiten muss.
 Er ist in den acht Sprachen der Seite verfasst und folgt dem Erscheinungsbild des Rests.
 
 <!-- settings:begin -->

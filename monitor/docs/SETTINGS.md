@@ -7,7 +7,7 @@
 
 # The Settings tab
 
-The Settings tab (the gear icon in the header or in the tab bar) changes the values of `actions_monitor.json` from the page, so nobody has to edit the file by hand.
+The Settings tab (the Settings entry of the side panel) changes the values of `actions_monitor.json` from the page, so nobody has to edit the file by hand.
 It is written in the eight languages of the page and follows the look of the rest of it.
 
 <!-- settings:begin -->
