@@ -111,6 +111,34 @@ def opener_for(allow_private=False, resolver=None, use_proxy=False):
     return lambda request, timeout=8: open_url(request, timeout, allow_private, resolver, use_proxy)
 
 
+def _is_loopback_host(url):
+    host = (urllib.parse.urlsplit(url).hostname or "").lower()
+    if host == "localhost":
+        return True
+    try:
+        return ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        return False
+
+
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    """A redirect is an answer, not something to follow: a header with a secret must not be sent on to another address."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+def local_open(request, timeout=8, follow_redirects=True):
+    """urlopen for the calls to this computer (the monitor, the receiver of a hook): a request to 127.0.0.1 / localhost never goes through a proxy of the environment (a proxy would
+    receive the access token and the data of the monitor, or could not reach the address at all). Any other address is opened as urlopen does. With `follow_redirects=False` a redirect
+    is not followed (it ends as an HTTPError with its code)."""
+    url = request if isinstance(request, str) else request.full_url
+    handlers = ([urllib.request.ProxyHandler({})] if _is_loopback_host(url) else []) + ([] if follow_redirects else [NoRedirect()])
+    if not handlers:
+        return urllib.request.urlopen(request, timeout=timeout)
+    return urllib.request.build_opener(*handlers).open(request, timeout=timeout)
+
+
 def reason_of(error):
     """Short stable reason for a failed send: private_target when the rule refused it, else failed."""
     cause = error.reason if isinstance(error, urllib.error.URLError) else error

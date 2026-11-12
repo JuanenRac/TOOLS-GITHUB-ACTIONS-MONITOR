@@ -8,6 +8,7 @@ alert goes away at once). Nothing leaves this PC; if the monitor is not running 
 """
 import json
 import urllib.request
+import netguard
 
 PORTS = range(8765, 8775)   # the monitor uses the first free port from 8765
 PATH = "/api/refresh-repos"
@@ -22,7 +23,7 @@ def notify_refresh(repos, ports=PORTS, timeout=2.0, opener=None):
     for port in ports:
         request = urllib.request.Request(f"http://127.0.0.1:{port}{PATH}", data=body, method="POST", headers={"Content-Type": "application/json"})
         try:
-            with (opener or urllib.request.urlopen)(request, timeout=timeout) as answer:
+            with (opener or netguard.local_open)(request, timeout=timeout) as answer:
                 if json.load(answer).get("ok") is True:
                     return port
         except Exception:   # not this port / monitor not running / older monitor without the endpoint

@@ -124,7 +124,7 @@ def _private_literal(host):
 
 def _post(url, payload, headers=None, opener=None):
     request = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers={"Content-Type": "application/json", **(headers or {})}, method="POST")
-    with (opener or urllib.request.urlopen)(request, timeout=TIMEOUT) as answer:
+    with (opener or netguard.local_open)(request, timeout=TIMEOUT) as answer:
         return answer.status
 
 
@@ -168,7 +168,7 @@ def send_channel(name, cfg, event, opener=None, connect=None, allow_private=Fals
             url = f"{home}/_matrix/client/v3/rooms/{quote(cfg['room'], safe='')}/send/m.room.message/{txn}"
             request = urllib.request.Request(url, data=json.dumps({"msgtype": "m.text", "body": text}).encode("utf-8"), method="PUT",
                                              headers={"Content-Type": "application/json", "Authorization": "Bearer " + secret(cfg["token_env"])})
-            with (opener or urllib.request.urlopen)(request, timeout=TIMEOUT):
+            with (opener or netguard.local_open)(request, timeout=TIMEOUT):
                 pass
         elif name == "mqtt":
             sock = (connect or socket.create_connection)((cfg["host"], int(cfg["port"])), TIMEOUT)

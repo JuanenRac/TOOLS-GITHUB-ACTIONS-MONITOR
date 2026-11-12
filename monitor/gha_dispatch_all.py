@@ -117,12 +117,16 @@ def extra_inputs(extra):
     return inputs, problems
 
 
-def dispatch_args(workflow, repo, real, extra):
-    """The argument list of `gh workflow run`, built from validated pieces (never from a free list). Raises ValueError for an `extra` that does not validate."""
+SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+
+
+def dispatch_args(workflow, repo, real, extra, sha=None):
+    """The argument list of `gh workflow run`, built from validated pieces (never from a free list). Raises ValueError for an `extra` that does not validate. With the commit that was
+    checked (`sha`, 40 hex) the input `ref` is that commit, so a workflow that checks out `inputs.ref` builds exactly it and not whatever `main` is by then."""
     inputs, problems = extra_inputs(extra)
     if problems:
         raise ValueError("; ".join(problems))
-    args = ["workflow", "run", workflow, "-R", f"{toolconfig.github_owner()}/{repo}", "--ref", "main", "-f", f"dry_run={'false' if real else 'true'}", "-f", "ref=main"]
+    args = ["workflow", "run", workflow, "-R", f"{toolconfig.github_owner()}/{repo}", "--ref", "main", "-f", f"dry_run={'false' if real else 'true'}", "-f", f"ref={sha if isinstance(sha, str) and SHA_RE.match(sha) else 'main'}"]
     for key, value in inputs.items():
         args += ["-f", f"{key}={value}"]
     return args
@@ -321,10 +325,10 @@ def ci_green(repo, sha, required=None, config=None):
     pending = [r for r in latest.values() if r.get("status") != "completed"]
     bad = [str(r.get("name") or _run_file(r)) for r in done if r.get("conclusion") in BAD_CONCLUSIONS]
     wanted = [w.lower() for w in (required or required_ci(repo, config, ACTIVE["profile"]))]
-    missing = [w for w in wanted if not any(w in (key, str(r.get("name") or "").lower()) and r.get("status") == "completed" and r.get("conclusion") == "success"
-                                            for key, r in latest.items())]
-    still_running = [w for w in missing if any(w in (key, str(r.get("name") or "").lower()) and r.get("status") != "completed" for key, r in latest.items())]
-    absent = [w for w in missing if w not in still_running and not any(w in (key, str(r.get("name") or "").lower()) for key, r in latest.items())]
+    # a required workflow is a FILE: it is matched with the file of the run, never with the visible `name:` of another workflow
+    missing = [w for w in wanted if not any(w == key and r.get("status") == "completed" and r.get("conclusion") == "success" for key, r in latest.items())]
+    still_running = [w for w in missing if any(w == key and r.get("status") != "completed" for key, r in latest.items())]
+    absent = [w for w in missing if w not in still_running and not any(w == key for key, r in latest.items())]
     extra_bad = ([t("gd.ci_incomplete")] if truncated else []) + [t("gd.ci_required_missing", workflow=w) for w in absent]
     ok = not bad and not pending and not missing and not truncated
     return ok, bad + extra_bad, len(pending)
@@ -639,20 +643,22 @@ def fire(name, repo, sha, real):
     target = TARGETS[name]
     before = time.time()
     try:
-        args = dispatch_args(target["workflow"], repo, real, target["extra"])
+        args = dispatch_args(target["workflow"], repo, real, target["extra"], sha)
     except ValueError as error:
         raise RuntimeError(f"extra of {name} refused: {error}"[:200]) from None
+    listing = ("run", "list", "-R", f"{toolconfig.github_owner()}/{repo}", "--workflow", target["workflow"], "--event", "workflow_dispatch", "-L", "20", "--json", "databaseId,createdAt,headSha,event")
+    # the runs that already exist are noted BEFORE the dispatch and only a run that did not exist then can be ours (no clocks: a run of another batch, person or dry_run is never taken)
+    known = {r.get("databaseId") for r in (ghj(*listing) or []) if isinstance(r, dict)}
     gh(*args)
     run_id, matched = None, False
     for _ in range(10):  # the run appears a moment later
         time.sleep(3)
-        runs = ghj("run", "list", "-R", f"{toolconfig.github_owner()}/{repo}", "--workflow", target["workflow"], "--event", "workflow_dispatch", "-L", "5", "--json", "databaseId,createdAt,headSha,event")
-        fresh = [r for r in runs or [] if r.get("event") == "workflow_dispatch"
-                 and datetime.strptime(r["createdAt"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp() >= before - 5]
-        exact = [r for r in fresh if r.get("headSha") == sha]   # the run must be on the commit we checked, not another concurrent one
-        if exact or fresh:
+        fresh = [r for r in (ghj(*listing) or []) if isinstance(r, dict) and r.get("event") == "workflow_dispatch" and r.get("databaseId") not in known]
+        if fresh:
+            exact = [r for r in fresh if r.get("headSha") == sha]      # the run must be on the commit we checked, not another concurrent one
             chosen = (exact or fresh)[0]
-            run_id, matched = chosen["databaseId"], bool(exact)
+            # more than one new candidate (a second dispatch at the same time): which one is ours cannot be told, so it is not offered for signing (needs review)
+            run_id, matched = chosen["databaseId"], bool(exact) and len(fresh) == 1
             break
     if run_id and not matched:
         print(te("gd.warn_other_sha", name=name, sha=sha[:7]))
@@ -726,7 +732,7 @@ def cmd_dispatch(args):
         batch["canary_note"] = note
     if args.go:
         BATCH_DIR.mkdir(parents=True, exist_ok=True)
-        path = BATCH_DIR / f"batch_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        path = BATCH_DIR / f"batch_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.json"      # UTC: the name sorts in order across a change of the clock
         private_io.write_private(path, json.dumps(batch, indent=2))
         print(t("gd.batch_recorded", path=path))
         failed = [n for n, i in batch["targets"].items() if "failed" in i]

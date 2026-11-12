@@ -2,7 +2,7 @@
 # GPL-3.0-or-later - see LICENSE
 """The gate script of an AI tool: it tells the AI session what the monitor sees, without a skill or a plugin. Installed by `monitor_cli.py ai-hook install` (see docs/AI_ALERTS.md).
 
-    python ai_hook.py EVENT [--format claude|cursor|generic] [--config FILE]
+    python ai_hook.py EVENT [--format assistant|cursor|generic] [--config FILE]
 
 The tool runs it at some moments and writes a JSON document to its standard input (`hook_event_name` among other things):
   * SessionStart / UserPromptSubmit: when real red alerts are open it writes the summary of ALERTS_BRIEF.md as extra context for the AI;
@@ -165,11 +165,11 @@ def run(argv, stdin_text, now=None, env=None):
     """The text to write to standard output (empty = nothing). Raises nothing the caller must handle: main() wraps it."""
     now = time.time() if now is None else now
     args = list(argv)
-    fmt = "claude"
+    fmt = "assistant"
     config_path = None
     if "--format" in args:
         index = args.index("--format")
-        fmt = args[index + 1] if index + 1 < len(args) and args[index + 1] in ("claude", "cursor", "generic") else "claude"
+        fmt = args[index + 1] if index + 1 < len(args) and args[index + 1] in ("assistant", "cursor", "generic") else "assistant"
         del args[index:index + 2]
     if "--config" in args:
         index = args.index("--config")

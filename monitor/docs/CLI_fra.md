@@ -52,7 +52,7 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python monitor_cli
 
 ## `ai-hook` : dire à un outil d'IA ce que voit le moniteur
 
-`python monitor_cli.py ai-hook install|status|uninstall [--cursor|--generic] [--scope project|user] [--project-dir DIR] [--dry-run] [--json]` n'a pas besoin d'un moniteur en marche. Il ajoute, montre ou retire le script de liaison `ai_hook.py` dans les réglages de crochets d'un outil d'IA (voir le guide des alertes pour IA) : le fichier de réglages est fusionné, une copie est gardée et la réponse de `--json` est de l'ASCII pur. `status` est l'action par défaut.
+`python monitor_cli.py ai-hook install|status|uninstall [--assistant|--cursor|--generic] [--scope project|user] [--project-dir DIR] [--dry-run] [--json]` n'a pas besoin d'un moniteur en marche. Il ajoute, montre ou retire le script de liaison `ai_hook.py` dans les réglages de crochets d'un outil d'IA (voir le guide des alertes pour IA) : le fichier de réglages est fusionné, une copie est gardée et la réponse de `--json` est de l'ASCII pur. `status` est l'action par défaut.
 
 ## Le jeton d'accès en ligne de commande
 

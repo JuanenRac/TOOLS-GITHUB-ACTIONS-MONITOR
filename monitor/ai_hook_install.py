@@ -6,7 +6,7 @@ The settings file of the tool is MERGED, never replaced: the hooks of other prog
 is kept next to it before every change (the last three), a file that is not valid JSON is refused untouched, and what is written is plain ASCII JSON (no accented letter is garbled by an old
 Windows console or editor). Nothing here talks to GitHub or to the network.
 
-  --claude   Claude Code      project: <folder>/.claude/settings.local.json   user: ~/.claude/settings.json      events SessionStart, UserPromptSubmit, Stop
+  --assistant  the default tool  project: <folder>/.claude/settings.local.json   user: ~/.claude/settings.json      events SessionStart, UserPromptSubmit, Stop
   --cursor   Cursor           project: <folder>/.cursor/hooks.json            user: ~/.cursor/hooks.json          events sessionStart, stop (best effort, see docs/AI_ALERTS.md)
   --generic  any other tool   nothing is written: the commands to put in its settings are printed
 """
@@ -22,9 +22,9 @@ import private_io
 HERE = Path(__file__).resolve().parent
 SCRIPT = HERE / "ai_hook.py"
 MARKER = "ai_hook.py"
-TARGETS = ("claude", "cursor", "generic")
+TARGETS = ("assistant", "cursor", "generic")
 SCOPES = ("project", "user")
-EVENTS = {"claude": ("SessionStart", "UserPromptSubmit", "Stop"), "cursor": ("sessionStart", "stop"), "generic": ("SessionStart", "UserPromptSubmit", "Stop")}
+EVENTS = {"assistant": ("SessionStart", "UserPromptSubmit", "Stop"), "cursor": ("sessionStart", "stop"), "generic": ("SessionStart", "UserPromptSubmit", "Stop")}
 KEEP_BACKUPS = 3
 
 
@@ -43,7 +43,7 @@ def command_for(event, target, python=None, script=None):
 def settings_path(target, scope, project_dir=None, home=None):
     """The file of the tool for this scope, or None for `generic`."""
     base = Path(project_dir or os.getcwd()) if scope == "project" else Path(home or Path.home())
-    if target == "claude":
+    if target == "assistant":
         return base / ".claude" / ("settings.local.json" if scope == "project" else "settings.json")
     if target == "cursor":
         return base / ".cursor" / "hooks.json"
@@ -73,7 +73,7 @@ def ours(command):
     return isinstance(command, str) and MARKER in command
 
 
-def _strip_claude(hooks):
+def _strip_nested(hooks):
     """Removes our entries from the {"Event": [{"hooks": [...]}]} map; groups that were only ours disappear. Returns the events that had one."""
     found = []
     for event in list(hooks):
@@ -119,7 +119,7 @@ def merged(data, target, python=None, script=None, remove_only=False):
     hooks = data.get("hooks", {})
     if not isinstance(hooks, dict):
         raise InstallError("the key \"hooks\" of the settings is not an object: nothing was changed")
-    found = (_strip_cursor if target == "cursor" else _strip_claude)(hooks)
+    found = (_strip_cursor if target == "cursor" else _strip_nested)(hooks)
     if not remove_only:
         for event in EVENTS[target]:
             command = command_for(event, target, python, script)
@@ -168,7 +168,7 @@ def _write(path, text):
         raise InstallError(f"cannot write {posix(path)}: {error.__class__.__name__}") from None
 
 
-def install(target="claude", scope="project", project_dir=None, home=None, python=None, script=None, now=None, dry_run=False):
+def install(target="assistant", scope="project", project_dir=None, home=None, python=None, script=None, now=None, dry_run=False):
     """Adds the three (two for Cursor) entries. Returns a report; `action` is installed, updated (already there, changed), unchanged or printed (generic)."""
     commands = {event: command_for(event, target, python, script) for event in EVENTS[target]}
     if target == "generic":
@@ -187,7 +187,7 @@ def install(target="claude", scope="project", project_dir=None, home=None, pytho
             "backup": posix(copy) if copy else None}
 
 
-def uninstall(target="claude", scope="project", project_dir=None, home=None, now=None, dry_run=False):
+def uninstall(target="assistant", scope="project", project_dir=None, home=None, now=None, dry_run=False):
     """Removes only the entries that run ai_hook.py. Returns a report; `action` is removed or absent."""
     if target == "generic":
         return {"target": target, "scope": None, "file": None, "action": "absent", "events": [], "commands": {}, "backup": None}
@@ -209,7 +209,7 @@ def status(project_dir=None, home=None, config=None):
     """Where the gate script is installed: one row per tool and scope (the file, whether it exists, the events that run ai_hook.py, whether the script they call exists), plus the settings
     that rule it (`ai_alerts.client_hook`) and the last time it read the brief."""
     rows = []
-    for target in ("claude", "cursor"):
+    for target in ("assistant", "cursor"):
         for scope in SCOPES:
             path = settings_path(target, scope, project_dir, home)
             row = {"target": target, "scope": scope, "file": posix(path), "exists": path.is_file(), "events": [], "script_ok": None, "error": None}

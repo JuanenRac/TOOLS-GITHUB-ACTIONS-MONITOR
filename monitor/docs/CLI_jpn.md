@@ -52,7 +52,7 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python monitor_cli
 
 ## `ai-hook`: モニターが見ているものを AI ツールに伝える
 
-`python monitor_cli.py ai-hook install|status|uninstall [--cursor|--generic] [--scope project|user] [--project-dir DIR] [--dry-run] [--json]` は、モニターが動いていなくても使えます。AI ツールのフック設定に連携スクリプト `ai_hook.py` を追加・表示・削除します (AI 向けアラートのガイドを参照)。設定ファイルはマージされ、コピーが保存され、`--json` の出力は純粋な ASCII です。既定の動作は `status` です。
+`python monitor_cli.py ai-hook install|status|uninstall [--assistant|--cursor|--generic] [--scope project|user] [--project-dir DIR] [--dry-run] [--json]` は、モニターが動いていなくても使えます。AI ツールのフック設定に連携スクリプト `ai_hook.py` を追加・表示・削除します (AI 向けアラートのガイドを参照)。設定ファイルはマージされ、コピーが保存され、`--json` の出力は純粋な ASCII です。既定の動作は `status` です。
 
 ## コマンドラインでのアクセストークン
 

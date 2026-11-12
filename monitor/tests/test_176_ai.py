@@ -446,11 +446,11 @@ class Installer(Folder):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(data), encoding="utf-8")
 
-    def test_claude_project_install_merges_backs_up_and_is_idempotent(self):
+    def test_assistant_project_install_merges_backs_up_and_is_idempotent(self):
         target = self.folder / ".claude" / "settings.local.json"
         foreign = {"permissions": {"allow": ["Bash(ls)"]}, "hooks": {"Stop": [{"hooks": [{"type": "command", "command": "other-tool stop"}]}], "PreToolUse": [{"matcher": "Bash", "hooks": []}]}}
         self.put(target, foreign)
-        report = ai_hook_install.install("claude", "project", str(self.folder), python=self.PY, script=self.SCRIPT, now=NOW)
+        report = ai_hook_install.install("assistant", "project", str(self.folder), python=self.PY, script=self.SCRIPT, now=NOW)
         self.assertEqual(report["action"], "installed")
         self.assertTrue(report["backup"] and Path(report["backup"]).is_file())
         saved = json.loads(target.read_text(encoding="utf-8"))
@@ -458,45 +458,45 @@ class Installer(Folder):
         self.assertEqual(saved["hooks"]["PreToolUse"], foreign["hooks"]["PreToolUse"])
         stop = [h["command"] for g in saved["hooks"]["Stop"] for h in g["hooks"]]
         self.assertEqual(stop[0], "other-tool stop")
-        self.assertIn('"C:/monitor/ai_hook.py" Stop --format claude', stop[1])
+        self.assertIn('"C:/monitor/ai_hook.py" Stop --format assistant', stop[1])
         self.assertEqual(set(saved["hooks"]), {"SessionStart", "UserPromptSubmit", "Stop", "PreToolUse"})
         self.assertTrue(all(ord(c) < 128 for c in target.read_text(encoding="utf-8")), "plain ASCII JSON")
-        again = ai_hook_install.install("claude", "project", str(self.folder), python=self.PY, script=self.SCRIPT, now=NOW + 1)
+        again = ai_hook_install.install("assistant", "project", str(self.folder), python=self.PY, script=self.SCRIPT, now=NOW + 1)
         self.assertEqual((again["action"], again["backup"]), ("unchanged", None))
         self.assertEqual(json.loads(target.read_text(encoding="utf-8")), saved)
 
     def test_a_new_file_is_created_a_broken_one_is_refused_untouched(self):
-        report = ai_hook_install.install("claude", "project", str(self.folder), python=self.PY, script=self.SCRIPT)
+        report = ai_hook_install.install("assistant", "project", str(self.folder), python=self.PY, script=self.SCRIPT)
         self.assertEqual((report["action"], report["backup"]), ("installed", None))
         broken = self.folder / "other" / ".claude" / "settings.local.json"
         broken.parent.mkdir(parents=True)
         broken.write_text("{not json", encoding="utf-8")
         with self.assertRaises(ai_hook_install.InstallError):
-            ai_hook_install.install("claude", "project", str(broken.parent.parent), python=self.PY, script=self.SCRIPT)
+            ai_hook_install.install("assistant", "project", str(broken.parent.parent), python=self.PY, script=self.SCRIPT)
         self.assertEqual(broken.read_text(encoding="utf-8"), "{not json")
         self.put(broken, ["a list"])
         with self.assertRaises(ai_hook_install.InstallError):
-            ai_hook_install.install("claude", "project", str(broken.parent.parent), python=self.PY, script=self.SCRIPT)
+            ai_hook_install.install("assistant", "project", str(broken.parent.parent), python=self.PY, script=self.SCRIPT)
         self.put(broken, {"hooks": "nope"})
         with self.assertRaises(ai_hook_install.InstallError):
-            ai_hook_install.install("claude", "project", str(broken.parent.parent), python=self.PY, script=self.SCRIPT)
+            ai_hook_install.install("assistant", "project", str(broken.parent.parent), python=self.PY, script=self.SCRIPT)
 
     def test_user_scope_uses_the_home_folder_and_uninstall_removes_only_ours(self):
         home = self.folder / "home"
         self.put(home / ".claude" / "settings.json", {"hooks": {"Stop": [{"hooks": [{"type": "command", "command": "other-tool stop"}]}]}})
-        ai_hook_install.install("claude", "user", home=str(home), python=self.PY, script=self.SCRIPT, now=NOW)
-        removed = ai_hook_install.uninstall("claude", "user", home=str(home), now=NOW + 5)
+        ai_hook_install.install("assistant", "user", home=str(home), python=self.PY, script=self.SCRIPT, now=NOW)
+        removed = ai_hook_install.uninstall("assistant", "user", home=str(home), now=NOW + 5)
         self.assertEqual((removed["action"], sorted(removed["events"])), ("removed", ["SessionStart", "Stop", "UserPromptSubmit"]))
         left = json.loads((home / ".claude" / "settings.json").read_text(encoding="utf-8"))
         self.assertEqual(left, {"hooks": {"Stop": [{"hooks": [{"type": "command", "command": "other-tool stop"}]}]}})
-        self.assertEqual(ai_hook_install.uninstall("claude", "user", home=str(home))["action"], "absent")
-        self.assertEqual(ai_hook_install.uninstall("claude", "project", str(self.folder / "nowhere"))["action"], "absent")
+        self.assertEqual(ai_hook_install.uninstall("assistant", "user", home=str(home))["action"], "absent")
+        self.assertEqual(ai_hook_install.uninstall("assistant", "project", str(self.folder / "nowhere"))["action"], "absent")
 
     def test_only_the_last_three_backups_stay(self):
         target = self.folder / ".claude" / "settings.local.json"
         self.put(target, {"a": 1})
         for i in range(6):
-            ai_hook_install.install("claude", "project", str(self.folder), python=self.PY, script=f"C:/m{i}/ai_hook.py", now=NOW + i * 10)
+            ai_hook_install.install("assistant", "project", str(self.folder), python=self.PY, script=f"C:/m{i}/ai_hook.py", now=NOW + i * 10)
         self.assertEqual(len(list(target.parent.glob("settings.local.json.monitor-backup-*"))), 3)
 
     def test_cursor_generic_and_dry_run(self):
@@ -507,22 +507,22 @@ class Installer(Folder):
         generic = ai_hook_install.install("generic", python=self.PY, script=self.SCRIPT)
         self.assertEqual((generic["action"], generic["file"]), ("printed", None))
         self.assertEqual(len(generic["commands"]), 3)
-        dry = ai_hook_install.install("claude", "project", str(self.folder / "dry"), python=self.PY, script=self.SCRIPT, dry_run=True)
+        dry = ai_hook_install.install("assistant", "project", str(self.folder / "dry"), python=self.PY, script=self.SCRIPT, dry_run=True)
         self.assertEqual(dry["action"], "would_installed")
         self.assertFalse((self.folder / "dry").exists())
 
     def test_status_finds_what_is_installed_and_what_rules_it(self):
         self.assertFalse(ai_hook_install.status(str(self.folder), str(self.folder / "h"), {})["installed"])
-        ai_hook_install.install("claude", "project", str(self.folder), python=sys.executable, script=str(HERE / "ai_hook.py"))
+        ai_hook_install.install("assistant", "project", str(self.folder), python=sys.executable, script=str(HERE / "ai_hook.py"))
         report = ai_hook_install.status(str(self.folder), str(self.folder / "h"), {})
         self.assertTrue(report["installed"])
-        row_ = [r for r in report["targets"] if r["target"] == "claude" and r["scope"] == "project"][0]
+        row_ = [r for r in report["targets"] if r["target"] == "assistant" and r["scope"] == "project"][0]
         self.assertEqual((row_["events"], row_["script_ok"]), (["SessionStart", "Stop", "UserPromptSubmit"], True))
         self.assertFalse(report["settings"]["block_on_stop"], "conservative default")
         self.assertTrue(report["script_present"])
 
     def test_the_command_line_installs_reports_json_in_ascii_and_fails_cleanly(self):
-        argv = ["ai-hook", "install", "--claude", "--scope", "project", "--project-dir", str(self.folder), "--json"]
+        argv = ["ai-hook", "install", "--assistant", "--scope", "project", "--project-dir", str(self.folder), "--json"]
         with redirect_stdout(io.StringIO()) as out:
             code = monitor_cli.main(argv)
         self.assertEqual(code, 0)
@@ -598,9 +598,9 @@ class PrivateFiles(unittest.TestCase):
             ai_alerts.ack(config, ai_alerts.alert_id("repo-a", "CI"), now=NOW)
             with mock.patch.object(alert_center, "STATE_FILE", base / "alert_mutes.json"):
                 alert_center.mute("alert", "a1", 1, now=NOW)
-            ai_hook_install.install("claude", "project", str(base / "proj"), python="p", script="s")
+            ai_hook_install.install("assistant", "project", str(base / "proj"), python="p", script="s")
             (base / "proj" / ".claude" / "settings.local.json").chmod(0o666)
-            ai_hook_install.install("claude", "project", str(base / "proj"), python="p", script="s2")
+            ai_hook_install.install("assistant", "project", str(base / "proj"), python="p", script="s2")
             ai_hook.private_write(base / "feed" / "ai_hook_state.json", "{}")
             private_io.private_dir(base / "d1" / "d2")
             files = [p for p in base.rglob("*") if p.is_file()]

@@ -36,10 +36,16 @@ def _load():
     try:
         data = json.loads(Path(STATE_FILE).read_text(encoding="utf-8"))
         if isinstance(data, dict) and isinstance(data.get("active"), list) and isinstance(data.get("history"), list):
-            return data
+            return {"active": [e for e in data["active"] if _valid_entry(e)], "history": [e for e in data["history"] if isinstance(e, dict) and isinstance(e.get("value"), str)]}
     except (OSError, ValueError):
         pass
     return {"active": [], "history": []}
+
+
+def _valid_entry(entry):
+    """A silence read from the file: the right types, a known scope and an end. Anything else is dropped (a file edited by hand never breaks the Alerts tab)."""
+    return (isinstance(entry, dict) and entry.get("scope") in SCOPES and isinstance(entry.get("value"), str) and bool(entry["value"])
+            and isinstance(entry.get("until_ts"), int) and not isinstance(entry.get("until_ts"), bool) and isinstance(entry.get("until"), str))
 
 
 def _save(data):

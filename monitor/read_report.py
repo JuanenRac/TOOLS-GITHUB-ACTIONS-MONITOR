@@ -18,6 +18,7 @@ import export_status
 import i18n
 import platform_compat
 from tool_version import TOOL_VERSION  # noqa: E402
+import netguard
 
 
 def main():
@@ -39,7 +40,7 @@ def main():
         print(i18n.about_line())
         return 0
     try:
-        with urllib.request.urlopen(f"http://127.0.0.1:{args.port}/api/sentinel?lang={i18n.language()}", timeout=8) as r:
+        with netguard.local_open(f"http://127.0.0.1:{args.port}/api/sentinel?lang={i18n.language()}", timeout=8) as r:
             payload = json.load(r)
     except Exception as exc:  # noqa: BLE001
         print(f"MONITOR_NO_RESPONDE: {exc}")   # fixed machine-readable prefix, then the reason

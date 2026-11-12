@@ -26,6 +26,7 @@ import tzdisplay
 import urllib.request
 from pathlib import Path
 import private_io
+import netguard
 
 HERE = Path(__file__).resolve().parent
 FEED = "ai_alerts.jsonl"
@@ -44,16 +45,24 @@ TRANSIENT_DEFAULT = [r"\b50[234]\b", r"bad gateway", r"service unavailable", r"g
 LOOP_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/%-]{0,100})?$")
 
 _SECRETS = [
+    (re.compile(r"(?s)-----BEGIN [A-Z ]*PRIVATE KEY-----.*?(?:-----END [A-Z ]*PRIVATE KEY-----|$)"), "[pem]"),
+    (re.compile(r"(?i)\b([a-z][a-z0-9+.-]*://)[^/\s:@]+:[^/\s@]+@"), r"\1[credentials]@"),      # user:password@host in an address
+    (re.compile(r"(?i)\bhooks\.slack\.com/services/[A-Za-z0-9/_-]+"), "hooks.slack.com/services/[webhook]"),
+    (re.compile(r"(?i)\bdiscord(?:app)?\.com/api/webhooks/\d+/[A-Za-z0-9._-]+"), "discord.com/api/webhooks/[webhook]"),
+    (re.compile(r"\bbot\d{6,}:[A-Za-z0-9_-]{20,}"), "bot[token]"),
+    (re.compile(r"(?i)(x-monitor-access|monitor_access)(\s*[:=]\s*)\S+"), r"\1\2[secret]"),
+    (re.compile(r"(?<![A-Za-z0-9])(?:glpat-[A-Za-z0-9_-]{10,}|npm_[A-Za-z0-9]{16,}|pypi-[A-Za-z0-9_-]{16,})"), "[token]"),
     (re.compile(r"\b(?:gh[pousr]_[A-Za-z0-9]{8,}|github_pat_[A-Za-z0-9_]{8,})"), "[token]"),
     (re.compile(r"\b(?:sk-[A-Za-z0-9_-]{16,}|AKIA[0-9A-Z]{12,}|xox[abprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{20,})"), "[key]"),
     (re.compile(r"\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}"), "[jwt]"),
     (re.compile(r"(?i)\b(bearer|basic)\s+[A-Za-z0-9._~+/=-]{12,}"), r"\1 [secret]"),
-    (re.compile(r"(?i)\b(password|passwd|secret|token|api[_-]?key|authorization)\b(\s*[:=]\s*)\S+"), r"\1\2[secret]"),
+    (re.compile(r"(?i)([A-Za-z0-9_.-]*(?:password|passwd|pwd|secret|token|api[_-]?key|access[_-]?key|authorization)[A-Za-z0-9_.-]*)(\s*[:=]\s*)\S+"), r"\1\2[secret]"),      # DB_PASSWORD=, AWS_SECRET_ACCESS_KEY=, MYSQL_PWD=
     (re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"), "[email]"),
     (re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b"), "[ip]"),
     (re.compile(r"\b(?:[0-9A-Fa-f]{1,4}:){4,7}[0-9A-Fa-f]{1,4}\b"), "[ip]"),
     (re.compile(r"(?i)[A-Z]:\\Users\\[^\\\s]+"), "~"),
     (re.compile(r"/(?:home|Users)/[^/\s]+"), "~"),
+    (re.compile(r"(?<![0-9A-Fa-f])[0-9A-Fa-f]{32,}(?![0-9A-Fa-f])"), "[hex]"),
     (re.compile(r"\b[A-Za-z0-9+/_-]{40,}={0,2}"), "[blob]"),
 ]
 
@@ -305,7 +314,7 @@ class Hook:
     def send(self, url, alert, now, opener=None):
         body = json.dumps({k: alert.get(k) for k in FIELDS}).encode("utf-8")
         request = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"}, method="POST")
-        (opener or (lambda r: urllib.request.urlopen(r, timeout=5).read()))(request)
+        (opener or (lambda r: netguard.local_open(r, timeout=5).read()))(request)
         self.sent.append(now)
 
 

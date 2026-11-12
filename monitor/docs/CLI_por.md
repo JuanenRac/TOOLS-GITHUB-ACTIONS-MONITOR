@@ -52,7 +52,7 @@ O `health` distingue três coisas: o monitor não responde (2), o acesso ao GitH
 
 ## `ai-hook`: dizer a uma ferramenta de IA o que o monitor vê
 
-`python monitor_cli.py ai-hook install|status|uninstall [--cursor|--generic] [--scope project|user] [--project-dir DIR] [--dry-run] [--json]` não precisa de um monitor em execução. Acrescenta, mostra ou remove o script de ligação `ai_hook.py` nas definições de ganchos de uma ferramenta de IA (ver o guia dos alertas para IA): o ficheiro de definições é fundido, guarda-se uma cópia e a resposta de `--json` é ASCII puro. `status` é a ação predefinida.
+`python monitor_cli.py ai-hook install|status|uninstall [--assistant|--cursor|--generic] [--scope project|user] [--project-dir DIR] [--dry-run] [--json]` não precisa de um monitor em execução. Acrescenta, mostra ou remove o script de ligação `ai_hook.py` nas definições de ganchos de uma ferramenta de IA (ver o guia dos alertas para IA): o ficheiro de definições é fundido, guarda-se uma cópia e a resposta de `--json` é ASCII puro. `status` é a ação predefinida.
 
 ## O token de acesso na linha de comandos
 

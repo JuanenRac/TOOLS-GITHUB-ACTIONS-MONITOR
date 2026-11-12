@@ -1393,7 +1393,7 @@ class AlertsForAIs(unittest.TestCase):
             if args[0] == "api":
                 return 0, json.dumps({"jobs": [{"name": "build", "steps": [{"name": "Test", "conclusion": "failure"}]}]}), ""
             return 0, f"line\nerror with {TOKEN} from 10.0.0.9\n", ""
-        text = mcp_server.call("get_run_failure", {"repo": "r1", "run": 7}, self.config, runner=runner)
+        text = mcp_server.call("get_run_failure", {"repo": "r1", "run": 7}, dict(self.config, repos=["r1"]), runner=runner)
         self.assertIn("build: Test", text)
         self.assertNotIn(TOKEN, text)
         self.assertNotIn("10.0.0.9", text)
@@ -1439,7 +1439,7 @@ class TerminalApplication(unittest.TestCase):
         def fake(url, timeout=0):
             asked.append(url)
             return Answer(b'{"data": {}}')
-        with mock.patch.object(tui.urllib.request, "urlopen", fake):
+        with mock.patch.object(tui.netguard, "local_open", fake):
             tui.fetch(8766)
             tui.fetch(8765, lite=True)
             self.assertEqual(len(asked), 2)

@@ -516,7 +516,7 @@
  "cli.health_no_data": "GitHub：モニターにはまだデータがありません（読み込み中）。",
  "cli.help_account": "問い合わせるアカウント（複数アカウント時のみ）",
  "cli.help_ai_action": "ai-hook 用: install、status、uninstall (既定: status)",
- "cli.help_claude": "ai-hook: Claude Code (既定)",
+ "cli.help_assistant": "ai-hook: 既定のアシスタントツール (既定)",
  "cli.help_command": "status, accounts, alerts, live, doctor, health (または check)、ai-hook",
  "cli.help_cursor": "ai-hook: Cursor (ベストエフォート)",
  "cli.help_dry_run": "ai-hook: 書き込まずに変更内容を表示します",

@@ -25,6 +25,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))        # works also under `py -3 -I`
 
 import accounts  # noqa: E402
+import netguard
 CHILD_PORT_START = 18800          # the children listen on 127.0.0.1 from here; the supervisor asks the system for a free one when it is taken
 HEALTH_EVERY = 5.0
 BACKOFF = (2, 5, 15, 30, 60, 120)  # seconds to wait before starting a dead account again, growing; the last value repeats
@@ -99,7 +100,7 @@ def fetch(url, timeout=6, data=None, headers=None, method=None):
     """(status, body bytes, headers dict) of one local request; (0, b'', {}) when the child does not answer. Never raises."""
     request = urllib.request.Request(url, data=data, headers=headers or {}, method=method or ("POST" if data is not None else "GET"))
     try:
-        with urllib.request.urlopen(request, timeout=timeout) as answer:
+        with netguard.local_open(request, timeout=timeout) as answer:
             return answer.status, answer.read(MAX_BODY * 8), dict(answer.headers)
     except urllib.error.HTTPError as error:
         try:

@@ -18,7 +18,7 @@
 - **`ai_alerts.cascade`**: 因另一个仓库变红而变红的告警 (在日志或规则 `ai_alerts.cascade.map` 中点名) 会在摘要中列在它之下, 并带有 `origin`。
 - **`GET /api/ai/stream`** (`ai_alerts.stream`, 默认关闭): 服务器推送事件, 只读, 网络模式下需要访问令牌, 限制监听者数量和时长, 可用 `Last-Event-ID` 续传; lite 版没有它。
 - **MCP 工具 `alerts_open`、`alert_diagnose` 和 `alert_ack`** (最后一个仅在 `--allow-ack` 时提供), 以及 AI 连接时的提示: 在 `instructions` 中并通过一条通知说明有多少真实告警未处理。
-- **`monitor_cli.py ai-hook install|status|uninstall [--cursor|--generic] [--scope project|user] [--dry-run]`** 和联动脚本 `ai_hook.py` (仅用标准库): 把摘要加入 AI 会话, 并且仅在 `ai_alerts.client_hook.block_on_stop` (默认关闭) 开启时, 在回合结束前提示 AI 查看未处理的真实告警。工具的设置是合并而非替换, 会保留文件备份, 不是有效 JSON 的文件会被拒绝且不改动, 写入的内容全部是纯 ASCII。相关数值在 `ai_alerts.client_hook` 中 (设置页, 八种语言)。
+- **`monitor_cli.py ai-hook install|status|uninstall [--assistant|--cursor|--generic] [--scope project|user] [--dry-run]`** 和联动脚本 `ai_hook.py` (仅用标准库): 把摘要加入 AI 会话, 并且仅在 `ai_alerts.client_hook.block_on_stop` (默认关闭) 开启时, 在回合结束前提示 AI 查看未处理的真实告警。工具的设置是合并而非替换, 会保留文件备份, 不是有效 JSON 的文件会被拒绝且不改动, 写入的内容全部是纯 ASCII。相关数值在 `ai_alerts.client_hook` 中 (设置页, 八种语言)。
 - **AI 心跳** (`ai_alerts.heartbeat`): 事件流、MCP 服务器、联动脚本和端点把最近一次读取记录在一个本地小文件中, 底部栏显示是否有 AI 已连接以及多久前读取过。
 - **`monitor_cli.py --token-file FILE`**, 以及在使用 `--token` (它会出现在进程列表中) 或令牌文件可被其他用户读取时在 stderr 发出警告。
 - 每项更改都有测试, 在临时文件夹中离线运行, 包括宽松 `umask` 下每个状态文件的模式。
@@ -40,6 +40,14 @@
 - **被拒绝地址的列表有上限** (`localguard`): 下一次锁定会清除所有已结束的锁, 而不只是发起请求的地址, 并且最多保留 2000 项。
 - **未能保存的静默不会被报告为已保存**: 文件无法写入时, `POST /api/alerts/mute` 和 `unmute` 返回 `ok: false`。
 - **面对形状错误的响应, 命令行绝不显示回溯**: 用列表、`null` 或数字代替对象, 或字段类型错误, 都以退出码 4 和一条消息结束。
+- **网络客户端只能写入一个很短的允许列表中的设置** (语言、时区和页面的刷新节奏): 每个通知渠道、每个路径、每个环境变量名以及签名和分发流程所信任的文件, 都必须在监控器所在的电脑上更改。之后新增的设置在被有意列入之前仅限本机。
+- **在同一台机器上的反向代理之后**, 带有转发头 (`Forwarded`、`X-Forwarded-*`、`X-Real-IP`) 或代理公开名称的请求绝不会被当作“这台电脑”, 并且访问令牌先于按地址的封锁被判断, 因此大量错误令牌不会把所有者锁在门外。
+- **对本机的调用绝不经过环境中的代理** (`netguard.local_open`, 供命令行、MCP 服务器、终端视图和钩子使用), 命令行也不跟随重定向, 因此访问令牌不会被转发到别的地址。
+- **每个响应都禁止被嵌入框架** (`X-Frame-Options: DENY`、`frame-ancestors 'none'`、`nosniff`), 页面像 API 一样检查 `Host`, 通过已弃用的 `?access=` 地址认证的响应都带有 `Deprecation` 头。
+- **分发与签名**: 分发之前已存在的运行会被记录, 只有新的运行才可能被认作自己的 (不依赖时钟); 出现两个新候选需要复核; 输入 `ref` 是已检查的提交; 必需的工作流按其文件而不是显示名称匹配; 批次名称使用 UTC。
+- **面向 AI 的信息流清理器覆盖更多格式**: 以 `PASSWORD`、`PWD`、`SECRET` 或 `TOKEN` 结尾的名称、地址中的凭据、Slack 和 Discord 的 Webhook、Telegram 机器人令牌、`glpat-`、`npm_` 和 `pypi-` 令牌、私钥、长十六进制字符串以及本监控器的访问令牌。MCP 服务器的 `get_run_failure` 只读取监控器所监视的仓库 (或 `ai.allowed_repos`)。
+- **手工编辑的文件** (静默记录、更新状态) 只会丢失其中无效的条目, 无效的更新状态不再阻止启动。
+- **时区**: 内置表中的开罗自 2023 年起遵循夏令时, 系统不认识的时区名称会在设置页被拒绝。完整版像 lite 版一样在页头报告红色工作流数量, 没有数据时 `monitor_cli.py status` 像 `health` 一样以退出码 4 结束。
 
 ## [1.7.5]
 

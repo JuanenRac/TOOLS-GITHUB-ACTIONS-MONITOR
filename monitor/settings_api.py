@@ -411,6 +411,9 @@ def check_value(path, value):
     if kind == "text":
         if not isinstance(value, str):
             return False, "type"
+        if path == "display.timezone":      # a name the system and the built-in table do not know would silently show the local time: it is refused
+            import tzdisplay
+            return (True, value.strip()) if bounds.match(value.strip()) and tzdisplay.valid_setting(value.strip()) else (False, "text")
         return (True, value.strip()) if bounds.match(value.strip()) else (False, "text")
     if kind == "path":
         if not isinstance(value, str):

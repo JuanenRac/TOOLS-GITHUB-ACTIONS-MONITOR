@@ -22,6 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import i18n  # noqa: E402
 import platform_compat  # noqa: E402
 import tui  # noqa: E402
+import netguard
 
 INSTALL_HINT = "pip install textual"
 BASIC_SWITCHES = ("open_browser", "updates.check", "airgapped", "discovery.events", "discovery.suggest_groups", "discovery.auto_frequency")
@@ -39,7 +40,7 @@ def textual_available():
 
 def get(port, path, timeout=6):
     try:
-        with urllib.request.urlopen(f"http://127.0.0.1:{port}{path}{'&' if '?' in path else '?'}lang={i18n.language()}", timeout=timeout) as answer:
+        with netguard.local_open(f"http://127.0.0.1:{port}{path}{'&' if '?' in path else '?'}lang={i18n.language()}", timeout=timeout) as answer:
             return json.load(answer)
     except (OSError, ValueError):
         return None
@@ -50,7 +51,7 @@ def post(port, path, body):
     token = (get(port, "/api/session-token") or {}).get("token", "")
     request = urllib.request.Request(f"http://127.0.0.1:{port}{path}", data=json.dumps(body).encode("utf-8"), method="POST", headers={"Content-Type": "application/json", "X-Monitor-Token": token})
     try:
-        with urllib.request.urlopen(request, timeout=8) as answer:
+        with netguard.local_open(request, timeout=8) as answer:
             return json.load(answer)
     except urllib.error.HTTPError as error:
         try:

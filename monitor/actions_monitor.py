@@ -603,6 +603,11 @@ def build(config, repos, started, refreshed, loading, progress_text):
     red, approx = None, False
     if LITE["on"]:      # the lite edition has no sentinel: it counts the red workflows with the same small rule, guessing the default branch
         red, approx = redrule.red_workflows({r: [x for x in runs if x["repo"] == r] for r in repos}, None, True, config.get("runs_per_repo"))
+    else:      # the complete edition knows the real figure (the sentinel); without it the same small rule: both editions report the same keys
+        try:
+            red = red_rows({"runs": runs, "repos": repos})
+        except Exception as error:   # noqa: BLE001 - a figure of the header never stops a cycle
+            degraded.note("loop.extra", error)
     figures = header_figures(runs, active, ISSUE_CACHE["items"], red=red, approx=approx)
     return {
         "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "updated_local": tzdisplay.stamp(time.time()), "took": round(time.time() - started, 1),
@@ -995,6 +1000,15 @@ class Handler(BaseHTTPRequestHandler):
         except CLIENT_GONE:
             DISCONNECTS[0] += 1
 
+    def end_headers(self):
+        """Every answer: the page cannot be put in a frame of another site (clickjacking) and the browser does not guess a type."""
+        self.send_header("X-Frame-Options", "DENY")
+        self.send_header("Content-Security-Policy", "frame-ancestors 'none'")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        if getattr(self, "deprecated_access", False):
+            self.send_header("Deprecation", "true")      # the ?access= address is deprecated: POST /api/access keeps the token out of the address bar
+        super().end_headers()
+
     def reply(self, body, kind):
         payload = body.encode("utf-8")
         try:
@@ -1059,6 +1073,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def access_gate(self):
         """Network mode only: every request must prove the access token (cookie, header or `?access=` on the first visit, which sets the cookie and goes to the clean address)."""
+        self.deprecated_access = False
         if not localguard.STATE["network"] or self.path.split("?")[0] == "/api/webhook":      # the webhook has its own proof (the HMAC of GitHub)
             return True
         if self.command == "POST" and self.path.split("?")[0] == "/api/access":      # the one-use post that opens the session: it checks the token itself (handle_post)
@@ -1071,17 +1086,17 @@ class Handler(BaseHTTPRequestHandler):
         if query_token and not localguard.query_token_counts(self.command, self.path, LIVE_CONFIG or DEFAULTS):      # deprecated: only the first visit of a page, and only while listen.query_access is on
             query_token = ""
         peer = str(self.client_address[0])
-        if localguard.is_locked(peer):      # too many wrong tokens from this address: refused for a while, whatever it sends now
-            self.json_reply({"error": "locked"}, 429)
-            return False
-        if not localguard.access_ok(self.headers, query_token):
+        if not localguard.access_ok(self.headers, query_token):      # the token is judged FIRST: behind a proxy on this machine everybody shares one address, and the owner with the right token must get in
+            if localguard.is_locked(peer):      # too many wrong tokens from this address: refused for a while
+                self.json_reply({"error": "locked"}, 429)
+                return False
             localguard.note_failure(peer, localguard.max_failed(LIVE_CONFIG or DEFAULTS))
             self.json_reply({"error": "access"}, 401)
             return False
+        self.deprecated_access = bool(query_token) and not localguard.presented(self.headers)      # the token came in the address: every answer says that way is deprecated
         if query_token and self.command == "GET" and "text/html" in (self.headers.get("Accept") or "text/html"):
             self.send_response(302)
             self.send_header("Set-Cookie", localguard.cookie_header(query_token))
-            self.send_header("Deprecation", "true")      # the ?access= address is deprecated: POST /api/access keeps the token out of the address bar
             self.send_header("Referrer-Policy", "no-referrer")       # the clean address follows at once: the token must not travel on in a Referer header
             self.send_header("Cache-Control", "no-store")
             self.send_header("Location", self.path.split("?")[0])
@@ -1129,7 +1144,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def this_computer(self):
         """Keys and actions that decide exposure or reach GitHub can only be changed from the same computer while the network mode is on (a 403 otherwise)."""
-        if not localguard.STATE["network"] or localguard.from_this_computer(self.client_address):
+        if not localguard.STATE["network"] or localguard.is_this_computer(self.client_address, self.headers):
             return True
         self.json_reply({"ok": False, "errors": {"_": "local_only"}}, 403)
         return False
@@ -1317,7 +1332,7 @@ class Handler(BaseHTTPRequestHandler):
                     return
                 request = json.loads(self.rfile.read(size))
                 changes = request.get("changes") if isinstance(request, dict) else None
-                if localguard.STATE["network"] and not localguard.from_this_computer(self.client_address) and isinstance(changes, dict) and any(localguard.local_only_key(k) for k in changes):
+                if localguard.STATE["network"] and not localguard.is_this_computer(self.client_address, self.headers) and isinstance(changes, dict) and any(localguard.local_only_key(k) for k in changes):
                     self.json_reply({"ok": False, "errors": {"_": "local_only"}}, 403)
                     return
                 result = settings_api.apply(changes, CONFIG_FILE, lite=LITE["on"])
@@ -1532,7 +1547,7 @@ class Handler(BaseHTTPRequestHandler):
             if not self.guard():
                 return
             refresh_feed()      # the bar polls every 30 seconds: the feed follows the sentinel without waiting for a cycle
-            self.json_reply(statusbar_payload(self.server.server_address[1], not localguard.STATE["network"] or localguard.from_this_computer(self.client_address)))
+            self.json_reply(statusbar_payload(self.server.server_address[1], not localguard.STATE["network"] or localguard.is_this_computer(self.client_address, self.headers)))
         elif path in ("/api/alerts", "/api/events"):      # one list of the alerts of every sentinel, and the events of the feed (1.7.3; read only; the account comes from ?account= or the process)
             if not self.guard():
                 return
@@ -1567,6 +1582,8 @@ class Handler(BaseHTTPRequestHandler):
             with LOCK:
                 self.reply(json.dumps({"data": STATE["data"], "error": STATE["error"], "hint": STATE["hint"]}), "application/json; charset=utf-8")
         elif path in ("/", "/index.html"):
+            if not self.guard():      # the page checks the Host like the API does (a rebinding page gets a 403, not the monitor)
+                return
             self.reply(render_page(), "text/html; charset=utf-8")
         else:
             self.send_response(404)
@@ -2162,7 +2179,11 @@ def main():
     print(i18n.t("mon.version", version=TOOL_VERSION))
     print(i18n.about_line())
     print(i18n.t("mon.started", url=url))
-    news = updatecheck.notice(update_info(), i18n.t) if updatecheck.settings(config)["check"] else ""
+    try:      # the notice of a new version never stops the start (a damaged state file, no network)
+        news = updatecheck.notice(update_info(), i18n.t) if updatecheck.settings(config)["check"] else ""
+    except Exception as error:   # noqa: BLE001
+        degraded.note("loop.extra", error)
+        news = ""
     if news:
         print(news)
     if not args.no_browser and config.get("open_browser", True) is True:

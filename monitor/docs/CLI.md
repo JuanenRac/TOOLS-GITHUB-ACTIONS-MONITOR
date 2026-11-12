@@ -52,7 +52,7 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python monitor_cli
 
 ## `ai-hook`: tell an AI tool what the monitor sees
 
-`python monitor_cli.py ai-hook install|status|uninstall [--cursor|--generic] [--scope project|user] [--project-dir DIR] [--dry-run] [--json]` needs no running monitor. It adds, shows or removes the gate script `ai_hook.py` in the hook settings of an AI tool (see the guide on alerts for AIs): the settings file is merged, a copy is kept, and the answer of `--json` is plain ASCII. `status` is the default action.
+`python monitor_cli.py ai-hook install|status|uninstall [--assistant|--cursor|--generic] [--scope project|user] [--project-dir DIR] [--dry-run] [--json]` needs no running monitor. It adds, shows or removes the gate script `ai_hook.py` in the hook settings of an AI tool (see the guide on alerts for AIs): the settings file is merged, a copy is kept, and the answer of `--json` is plain ASCII. `status` is the default action.
 
 ## The access token in the command line
 

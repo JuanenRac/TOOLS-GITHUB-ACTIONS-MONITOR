@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 # GPL-3.0-or-later - see LICENSE
-"""A local MCP server (Model Context Protocol over standard input and output) so that an AI tool - Claude Code, Gemini CLI, Codex, GitHub Copilot in VS Code - can ask the monitor what is red.
+"""A local MCP server (Model Context Protocol over standard input and output) so that an AI tool - an assistant in a terminal or an editor - can ask the monitor what is red.
 
     python mcp_server.py [--allow-ack]
 
@@ -23,6 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import ai_alerts  # noqa: E402
 import toolconfig  # noqa: E402
 from tool_version import TOOL_VERSION  # noqa: E402
+import netguard
 
 NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}$")
 TOOLS = [
@@ -37,6 +38,18 @@ TOOLS = [
 ]
 
 
+def watched(config, repo):
+    """True when the AI may ask for the log of a run of `repo`: a repository the monitor watches (the configuration, or an open alert of the feed). When `ai.allowed_repos` lists
+    repositories, only those. The log of any other repository of the account (a private one the monitor does not look at) is not for an AI tool to read through this server."""
+    allowed = ((config or {}).get("ai") or {}).get("allowed_repos") if isinstance((config or {}).get("ai"), dict) else None
+    if isinstance(allowed, list) and allowed:
+        return repo in [x for x in allowed if isinstance(x, str)]
+    listed = (config or {}).get("repos")
+    if isinstance(listed, list) and repo in [x for x in listed if isinstance(x, str)]:
+        return True
+    return repo in {a["repo"] for a in ai_alerts.alerts(config, states=("open", "acknowledged"))}
+
+
 def open_summary(config):
     """One short text: how many real alerts are open (and how old the brief is), or '' when none is."""
     rows = [a for a in ai_alerts.alerts(config, states=("open",)) if a["class"] == "real"]
@@ -48,7 +61,7 @@ def open_summary(config):
 
 
 def local_get(path, port=8765):
-    with urllib.request.urlopen(f"http://127.0.0.1:{port}{path}", timeout=10) as answer:
+    with netguard.local_open(f"http://127.0.0.1:{port}{path}", timeout=10) as answer:
         return json.load(answer)
 
 
@@ -87,6 +100,8 @@ def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_g
         repo, run = str(arguments.get("repo", "")), arguments.get("run")
         if not NAME_RE.match(repo) or not isinstance(run, int) or isinstance(run, bool) or run <= 0:
             raise ValueError("repo and run are required")
+        if not watched(config, repo):
+            raise ValueError("that repository is not watched (it is not in the configuration, in ai.allowed_repos or in an open alert)")
         owner = toolconfig.github_owner(config)
         code, out, err = runner(["api", f"repos/{owner}/{repo}/actions/runs/{run}/jobs?per_page=30"])
         if code != 0:

@@ -50,9 +50,17 @@ def settings(config):
 def _load(path):
     try:
         value = json.loads(Path(path).read_text(encoding="utf-8"))
-        return value if isinstance(value, dict) else {}
     except (OSError, ValueError):
         return {}
+    if not isinstance(value, dict):
+        return {}
+    clean = {}      # a file edited by hand (or damaged) never reaches the page with a field of the wrong type
+    if isinstance(value.get("checked_at"), (int, float)) and not isinstance(value.get("checked_at"), bool):
+        clean["checked_at"] = value["checked_at"]
+    release = value.get("release")
+    if isinstance(release, dict) and isinstance(release.get("tag"), str) and isinstance(release.get("url", ""), str):
+        clean["release"] = {"tag": release["tag"][:40], "url": release.get("url", "")[:300], "published": release.get("published", "") if isinstance(release.get("published"), str) else ""}
+    return clean
 
 
 def _save(path, state):

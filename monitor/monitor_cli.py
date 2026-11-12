@@ -8,7 +8,7 @@
   alerts    the alerts of every sentinel in one list (--sentinel ci|collab, --level, --muted)
   live      the last events that arrived through the webhook and the state of the receiver
   doctor    the checks of --doctor for this installation (no monitor needed)
-  ai-hook   install | status | uninstall the gate script that tells an AI tool what the monitor sees (--claude, --cursor or --generic; --scope project|user); it needs no
+  ai-hook   install | status | uninstall the gate script that tells an AI tool what the monitor sees (--assistant, --cursor or --generic; --scope project|user); it needs no
             running monitor and writes only the settings file of that tool (merged, with a backup), never anything on GitHub
   health    a quick check before reading anything heavy: is the monitor reachable, does it accept this client, does the GitHub credential of the account answer (a limit of the
             allowance is told apart from a credential that failed). Alias: check
@@ -35,6 +35,7 @@ import i18n
 import platform_compat
 import tzdisplay
 from tool_version import TOOL_VERSION
+import netguard
 
 EXIT_OK, EXIT_USAGE, EXIT_DOWN, EXIT_AUTH, EXIT_DEGRADED, EXIT_ALERTS = 0, 1, 2, 3, 4, 5
 COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "ai-hook")
@@ -114,7 +115,7 @@ def fetch(base, path, query=None, timeout=8, token=""):
     url = base + path + (("?" + urlencode({k: v for k, v in (query or {}).items() if v not in (None, "")})) if query else "")
     request = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": f"monitor_cli/{TOOL_VERSION}", **({"X-Monitor-Access": token} if token else {})})
     try:
-        with urllib.request.urlopen(request, timeout=timeout) as answer:     # noqa: S310 - http/https only, checked in base_url
+        with netguard.local_open(request, timeout=timeout, follow_redirects=False) as answer:     # noqa: S310 - http/https only, checked in base_url
             body = answer.read(4_000_000)
     except urllib.error.HTTPError as error:
         if error.code in (401, 403):
@@ -145,6 +146,9 @@ def cmd_status(ctx):
     data = answer.get("data") or {}
     figures = data.get("figures") or {}
     rate = data.get("rate") or {}
+    for value, kind in ((data, dict), (figures, dict), (rate, dict), (data.get("repos") or [], list), (data.get("updated") or "", str), (data.get("offline") or {}, dict)):
+        if not isinstance(value, kind):      # a field of the wrong type: the answer cannot be read (exit 4), never a half-printed status
+            raise ValueError("shape")
     payload = {"version": health.get("version"), "edition": "lite" if health.get("lite") else "complete", "account": health.get("account"), "uptime_seconds": health.get("uptime_seconds"),
                "repos": len(data.get("repos") or []), "active": figures.get("active"), "queued": figures.get("queued"), "failures_24h": figures.get("fail24"), "successes_24h": figures.get("ok24"),
                "red_workflows": figures.get("red"), "updated": data.get("updated"), "updated_local": tzdisplay.stamp(data["updated"]) if data.get("updated") else None, "offline": bool((data.get("offline") or {}).get("offline")),
@@ -154,6 +158,9 @@ def cmd_status(ctx):
              i18n.t("cli.status_allowance", remaining=rate.get("remaining", "-"), limit=rate.get("limit", "-")),
              i18n.t("cli.status_updated", when=payload["updated_local"] or "-")]
     code = EXIT_OK
+    if not data and not answer.get("error"):      # the monitor has not read GitHub yet: nothing to report is not "all right" (same as `health`)
+        lines.append(i18n.t("cli.health_no_data"))
+        code = EXIT_DEGRADED
     if payload["offline"]:
         lines.append(i18n.t("cli.status_offline"))
         code = EXIT_DEGRADED
@@ -261,7 +268,7 @@ def cmd_ai_hook(ctx):
             seen = report["presence"]
             lines.append(i18n.t("cli.aih_last_read", via=seen["via"], ago=ago_text(seen["age_seconds"])) if seen.get("last_at") else i18n.t("cli.aih_never"))
             return report, lines, EXIT_OK
-        target = ctx.get("target") or "claude"
+        target = ctx.get("target") or "assistant"
         scope = ctx.get("scope") or "project"
         if action == "install":
             report = hook.install(target, scope, ctx.get("project_dir") or None, dry_run=ctx.get("dry_run", False))
@@ -288,7 +295,7 @@ def build_parser():
     ap.add_argument("command", choices=COMMANDS, help=i18n.t("cli.help_command"))
     ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS, default=None, help=i18n.t("cli.help_ai_action"))
     ap.add_argument("--json", action="store_true", help=i18n.t("cli.help_json"))
-    for name in ("claude", "cursor", "generic"):
+    for name in ("assistant", "cursor", "generic"):
         ap.add_argument("--" + name, dest="target", action="store_const", const=name, default="", help=i18n.t("cli.help_" + name))
     ap.add_argument("--scope", choices=("project", "user"), default="project", help=i18n.t("cli.help_scope"))
     ap.add_argument("--project-dir", metavar="DIR", default="", dest="project_dir", help=i18n.t("cli.help_project_dir"))

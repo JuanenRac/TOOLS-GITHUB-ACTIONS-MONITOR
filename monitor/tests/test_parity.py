@@ -93,7 +93,8 @@ class SameFigures(unittest.TestCase):
         self.assertEqual(complete["min24"], 10)         # the 30 hours old run is out of the 24 h window: 8 runs of 60 s and one of 120 s
         self.assertEqual(lite["red"], 2)
         self.assertTrue(lite["red_approx"])
-        self.assertNotIn("red", complete)               # the complete edition takes it from the sentinel
+        self.assertEqual(complete["red"], lite["red"])     # both editions report the same keys: the complete one takes the figure from the sentinel when it runs, else from the same small rule
+        self.assertFalse(complete["red_approx"])
 
     def test_a_run_listed_twice_is_counted_once(self):
         am.RUN_CACHE["a"]["runs"].append(dict(BY_REPO["a"][0]))

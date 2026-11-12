@@ -516,7 +516,7 @@
  "cli.health_no_data": "GitHub: o monitor ainda não tem dados (continua a carregar).",
  "cli.help_account": "a conta a consultar (só com várias contas)",
  "cli.help_ai_action": "para ai-hook: install, status ou uninstall (predefinição: status)",
- "cli.help_claude": "ai-hook: Claude Code (predefinição)",
+ "cli.help_assistant": "ai-hook: a ferramenta de assistente predefinida (predefinição)",
  "cli.help_command": "status, accounts, alerts, live, doctor, health (ou check), ai-hook",
  "cli.help_cursor": "ai-hook: Cursor (melhor esforço)",
  "cli.help_dry_run": "ai-hook: mostra o que mudaria sem escrever",

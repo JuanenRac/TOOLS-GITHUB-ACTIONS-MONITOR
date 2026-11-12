@@ -236,7 +236,8 @@ class NetworkMode(unittest.TestCase):
             codes = [server.call("/api/health", headers={"X-Monitor-Access": "wrong" * 5})[0] for _ in range(12)]
             self.assertEqual(codes[:9], [401] * 9)
             self.assertEqual(codes[-1], 429)
-            self.assertEqual(server.call("/api/health", headers={"X-Monitor-Access": access})[0], 429, "even the right token waits while the lock lasts")
+            self.assertEqual(server.call("/api/health", headers={"X-Monitor-Access": "wrong" * 5})[0], 429, "a wrong token waits while the lock lasts")
+            self.assertEqual(server.call("/api/health", headers={"X-Monitor-Access": access})[0], 200, "the right token always gets in (behind a proxy on this machine everybody shares one address)")
 
     def test_the_limiter_counts_per_address_and_expires(self):
         for _ in range(4):
@@ -486,9 +487,14 @@ class TokenOnlyForGh(unittest.TestCase):
     TOKEN = "ghp_" + "a1B2c3D4" * 4
 
     def setUp(self):
+        self.env = mock.patch.dict(os.environ)      # the test asserts about the environment of THIS process: a GH_TOKEN exported by whoever runs it must not decide the result
+        self.env.start()
+        for name in ("GH_TOKEN", "GITHUB_TOKEN"):
+            os.environ.pop(name, None)
         secretstore.APPLIED["token"] = self.TOKEN
 
     def tearDown(self):
+        self.env.stop()
         secretstore.clear_environment()
 
     def test_gh_gets_it_and_nothing_else_does(self):

@@ -516,7 +516,7 @@
  "cli.health_no_data": "GitHub：监视器尚无数据（仍在加载）。",
  "cli.help_account": "要查询的账户（仅多账户时）",
  "cli.help_ai_action": "用于 ai-hook: install、status 或 uninstall (默认: status)",
- "cli.help_claude": "ai-hook: Claude Code (默认)",
+ "cli.help_assistant": "ai-hook: 默认的助手工具 (默认)",
  "cli.help_command": "status, accounts, alerts, live, doctor, health (或 check), ai-hook",
  "cli.help_cursor": "ai-hook: Cursor (尽力而为)",
  "cli.help_dry_run": "ai-hook: 只显示将要更改的内容, 不写入",

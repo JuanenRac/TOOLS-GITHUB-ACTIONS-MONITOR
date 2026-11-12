@@ -21,6 +21,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))   # works also under `py -3 -I`
 import i18n  # noqa: E402
 import platform_compat  # noqa: E402
+import netguard
 
 INSTALL_HINT = "pip install rich"
 
@@ -46,7 +47,7 @@ def fetch(port, timeout=6, lite=False):
     out = []
     for path in ("/api/data",) if (lite or port == LITE_PORT) else ("/api/data", "/api/sentinel"):
         try:
-            with urllib.request.urlopen(f"http://127.0.0.1:{port}{path}?lang={i18n.language()}", timeout=timeout) as answer:
+            with netguard.local_open(f"http://127.0.0.1:{port}{path}?lang={i18n.language()}", timeout=timeout) as answer:
                 out.append((json.load(answer) or {}).get("data"))
         except (OSError, ValueError):
             out.append(None)

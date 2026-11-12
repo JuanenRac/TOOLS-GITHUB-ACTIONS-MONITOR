@@ -516,7 +516,7 @@
  "cli.health_no_data": "GitHub: the monitor has no data yet (it is still loading).",
  "cli.help_account": "the account to ask (several accounts only)",
  "cli.help_ai_action": "for ai-hook: install, status or uninstall (default: status)",
- "cli.help_claude": "ai-hook: Claude Code (default)",
+ "cli.help_assistant": "ai-hook: the default assistant tool (default)",
  "cli.help_command": "status, accounts, alerts, live, doctor, health (or check), ai-hook",
  "cli.help_cursor": "ai-hook: Cursor (best effort)",
  "cli.help_dry_run": "ai-hook: show what would change without writing",

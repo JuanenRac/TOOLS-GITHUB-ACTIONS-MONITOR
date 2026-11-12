@@ -39,7 +39,7 @@ _TABLE = {
     "Asia/Tokyo": (540, "JST", "JST", ""), "Asia/Seoul": (540, "KST", "KST", ""), "Asia/Shanghai": (480, "CST", "CST", ""),
     "Asia/Hong_Kong": (480, "HKT", "HKT", ""), "Asia/Singapore": (480, "+08", "+08", ""), "Asia/Kolkata": (330, "IST", "IST", ""),
     "Asia/Dubai": (240, "+04", "+04", ""), "Australia/Sydney": (600, "AEST", "AEDT", "au"), "Pacific/Auckland": (720, "NZST", "NZDT", "nz"),
-    "Africa/Johannesburg": (120, "SAST", "SAST", ""), "Africa/Cairo": (120, "EET", "EET", ""), "UTC": (0, "UTC", "UTC", ""), "Etc/UTC": (0, "UTC", "UTC", ""),
+    "Africa/Johannesburg": (120, "SAST", "SAST", ""), "Africa/Cairo": (120, "EET", "EEST", "eg"), "UTC": (0, "UTC", "UTC", ""), "Etc/UTC": (0, "UTC", "UTC", ""),
     "GMT": (0, "GMT", "GMT", ""),
 }
 _NAME_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_+./-]{0,63}$")
@@ -60,6 +60,12 @@ def _in_dst(utc_dt, std_minutes, rule):
     if rule == "eu":      # last Sunday of March -> last Sunday of October, both at 01:00 UTC
         start = datetime(y, 3, _nth_weekday(y, 3, 6, -1), 1)
         end = datetime(y, 10, _nth_weekday(y, 10, 6, -1), 1)
+        return start <= utc_dt < end
+    if rule == "eg":      # since 2023: last Friday of April 00:00 local -> last Thursday of October 24:00 local daylight (22:00 and 21:00 UTC the day before)
+        if y < 2023:
+            return False
+        start = datetime(y, 4, _nth_weekday(y, 4, 4, -1)) - timedelta(hours=2)
+        end = datetime(y, 10, _nth_weekday(y, 10, 3, -1), 21)
         return start <= utc_dt < end
     if rule == "us":      # second Sunday of March 02:00 local standard -> first Sunday of November 02:00 local daylight
         start = datetime(y, 3, _nth_weekday(y, 3, 6, 2), 2) - timedelta(minutes=std_minutes)

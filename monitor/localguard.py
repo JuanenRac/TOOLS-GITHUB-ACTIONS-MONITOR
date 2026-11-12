@@ -192,9 +192,16 @@ def local_request_ok(headers, port):
     return origin.lower() in {f"{scheme}://{h.lower()}" for h in allowed_hosts}
 
 
+#: the ONLY settings a client of the network can change (the look and the pace of the page). Everything else - every channel of notifications, every path, every name of an environment
+#: variable, the files the signing and dispatch flow trusts, the rules of the sentinel - is decided from the computer of the monitor. A setting that is added later is local-only until it
+#: is listed here on purpose.
+REMOTE_WRITABLE = frozenset({"language", "display.timezone", "refresh_seconds", "hot_hours", "cold_refresh_seconds", "runs_per_repo", "cold_runs_per_repo", "stuck_minutes",
+                             "show_unclassified", "report_history_days", "quota.warn_percent", "quota.alert_percent", "alerts.mute_hours"})
+
+
 def local_only_key(key):
-    """True when changing this setting is an exposure decision: the fixed prefixes and EVERY key that the settings schema marks as `secure`. In network mode these can only be changed
-    from the same computer. The list is read from the schema, so a new secure key is covered without anyone remembering it here."""
+    """True when this setting cannot be changed by a client of the network: in network mode only REMOTE_WRITABLE (a short allow list) may be written from another computer; the keys
+    of the fixed prefixes and every key the schema marks as `secure` are local-only in any case."""
     name = str(key)
     if name.startswith(LOCAL_ONLY_PREFIXES):
         return True
@@ -203,7 +210,9 @@ def local_only_key(key):
         meta = settings_api.META.get(name)
     except ImportError:
         meta = None
-    return bool(meta and meta.get("secure"))
+    if meta and meta.get("secure"):
+        return True
+    return name not in REMOTE_WRITABLE
 
 
 def presented(headers):
@@ -236,6 +245,22 @@ def from_this_computer(client_address):
         return ipaddress.ip_address(str(client_address[0]).split("%")[0]).is_loopback
     except (ValueError, IndexError, TypeError):
         return False
+
+
+FORWARD_HEADERS = ("Forwarded", "X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Proto", "X-Forwarded-Port", "X-Real-IP", "Via")
+
+
+def is_this_computer(client_address, headers=None):
+    """True when the request really comes from a person on this computer: the TCP peer is loopback AND the request does not come through a reverse proxy on the same machine (a proxy
+    makes every client look like 127.0.0.1). A request that carries a forwarding header, or whose Host is the public name of the proxy (`listen.proxy_public_host`), is never "this computer"."""
+    if not from_this_computer(client_address):
+        return False
+    if headers is None:
+        return True
+    if any(headers.get(name) for name in FORWARD_HEADERS):
+        return False
+    proxy = STATE.get("proxy_host")
+    return not (proxy and (headers.get("Host") or "").lower() == str(proxy).lower())
 
 
 def query_access_allowed(config):
