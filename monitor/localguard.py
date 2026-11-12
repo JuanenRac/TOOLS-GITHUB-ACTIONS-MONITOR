@@ -195,7 +195,7 @@ def local_request_ok(headers, port):
 #: the ONLY settings a client of the network can change (the look and the pace of the page). Everything else - every channel of notifications, every path, every name of an environment
 #: variable, the files the signing and dispatch flow trusts, the rules of the sentinel - is decided from the computer of the monitor. A setting that is added later is local-only until it
 #: is listed here on purpose.
-REMOTE_WRITABLE = frozenset({"language", "display.timezone", "refresh_seconds", "hot_hours", "cold_refresh_seconds", "runs_per_repo", "cold_runs_per_repo", "stuck_minutes",
+REMOTE_WRITABLE = frozenset({"language", "display.timezone", "display.blink_red_tiles", "refresh_seconds", "hot_hours", "cold_refresh_seconds", "runs_per_repo", "cold_runs_per_repo", "stuck_minutes",
                              "show_unclassified", "report_history_days", "quota.warn_percent", "quota.alert_percent", "alerts.mute_hours"})
 
 

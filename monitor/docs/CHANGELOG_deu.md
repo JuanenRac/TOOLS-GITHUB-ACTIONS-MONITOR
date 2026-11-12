@@ -7,6 +7,26 @@
 
 Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem Semver. Die Quelle ist das englische CHANGELOG.md; diese Datei enthält dieselben Versionen und Abschnitte.
 
+## [Unreleased]
+
+### Hinzugefügt
+
+- **Eine Prüfung, dass kein Text sein Feld verlässt** (`tools/check_overflow.py` und ein Test, der ohne Browser sauber übersprungen wird): Die Seite wird in einem Browser ohne Fenster in den acht Sprachen, breit und schmal, geöffnet, geht jeden Tab und jedes Fenster durch und schlägt fehl, wenn ein Text breiter ist als ein Feld mit Rand oder Hintergrund oder das Fenster verlässt.
+- **`display.blink_red_tiles`** (standardmäßig an, im Tab Einstellungen, in den acht Sprachen): Die Kacheln oben und die Elemente der unteren Leiste, die rot werden, blinken sanft, bis die Ursache behoben ist; bei reduzierter Bewegung im System zeigen sie stattdessen einen festen, dickeren roten Rand.
+- **Eine Doctor-Prüfung für die Zeitzone**: Eine Zone, die weder das System noch die eingebaute Tabelle kennt, wird gemeldet, und die Zeiten erscheinen dann in UTC (früher fielen sie ohne Hinweis auf die Zone des Computers zurück).
+- **Der Tab Verlauf zeigt "n von N"**, wenn die Liste kürzer ist als das, was die Kopfzeile gezählt hat (der Monitor behält die 600 neuesten Läufe; die Daten enthalten `runs_total`).
+
+### Geändert
+
+- **Die untere Leiste wurde neu gestaltet**: Jedes Element ist ein Chip mit eigenem Rand, Verbindung und Kontingent übernehmen die Farbe ihres Zustands, die Uhr ist ein Rahmen mit großen, fetten, tabellarischen Ziffern, darüber das Datum und die Zone in kleiner Schrift, und die Leiste behält ihre Reihenfolge in schmalen Fenstern.
+- **Jedes Feld lässt seinen Text umbrechen, statt ihn überstehen zu lassen** (Kacheln, Chips, Badges, Zellen, Überschriften, Fensterschaltflächen): Die Zeit der letzten Abfrage trägt ihre Zone getrennt in kleiner Schrift, die Warnungszeilen werden in schmalen Fenstern zweispaltig und die Kachelraster können unter ihren Inhalt schrumpfen.
+
+### Behoben
+
+- **Eine Zahl für die offenen Fehler**: Die Kachel "rot auf main", die Liste der Warnungen, die untere Leiste und die Zusammenfassung zählen dasselbe, einen Workflow, dessen letzter Lauf auf dem Standard-Branch fehlschlug (ein Fehler auf einem Arbeits-Branch erscheint nicht mehr als offene Warnung), und die Leiste sagt nie "keine Hinweise", solange Warnungen offen sind.
+- **Der Start des Monitors nennt die Version nur einmal**: Die Zeile "GitHub Actions v...", die die Kopfzeile wiederholte, entfällt; Autor und Lizenz bleiben in einer Zeile.
+- **Beschädigte Statusdateien** (Collab-Status, Sentinel-Cache und -Verlauf mit falscher Form) werden Eintrag für Eintrag ignoriert, statt den lesenden Code zu erreichen.
+
 ## [1.7.6]
 
 Die Verbindung zwischen Monitor und KI-Werkzeug: Der Feed stimmt immer mit der Seite überein, jede Warnung sagt, warum sie rot ist, ein Stream und drei MCP-Werkzeuge schieben die Neuigkeiten nach, ein Befehl installiert das Gate-Skript, die Leiste zeigt, ob eine KI verbunden ist, und jede Zustandsdatei gehört nur ihrem Besitzer.

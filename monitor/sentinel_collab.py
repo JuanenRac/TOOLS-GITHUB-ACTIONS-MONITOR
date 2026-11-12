@@ -102,8 +102,11 @@ def load_state(path):
     try:
         data = json.loads(Path(path).read_text(encoding="utf-8"))
         if isinstance(data, dict) and isinstance(data.get("alerts"), dict) and isinstance(data.get("per_repo"), dict):
+            # a hand-edited or half-written file keeps only the entries the rest of the code can read (an alert is a dict with a repo, a repository record is a dict)
+            data["alerts"] = {str(k): v for k, v in data["alerts"].items() if isinstance(v, dict) and isinstance(v.get("repo"), str)}
+            data["per_repo"] = {str(k): v for k, v in data["per_repo"].items() if isinstance(v, dict)}
             return data
-    except (OSError, ValueError):
+    except (OSError, ValueError, AttributeError):
         pass
     return {"alerts": {}, "per_repo": {}, "last_full_scan": None}
 

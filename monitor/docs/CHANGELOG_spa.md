@@ -7,6 +7,26 @@
 
 Versión de la propia herramienta (monitor + centinela + herramientas por lotes), con su propio semver. La fuente es el CHANGELOG.md en inglés; este fichero lleva las mismas versiones y secciones.
 
+## [Unreleased]
+
+### Añadido
+
+- **Una comprobación de que ningún texto se sale de su recuadro** (`tools/check_overflow.py` y un test que se omite sin navegador): la página se abre en un navegador sin ventana en los ocho idiomas, ancha y estrecha, recorre cada pestaña y ventana, y falla si algún texto es más ancho que un recuadro con borde o fondo o sale de la ventana.
+- **`display.blink_red_tiles`** (activado por defecto, en la pestaña Ajustes, en los ocho idiomas): los recuadros de arriba y los elementos de la barra inferior que se ponen en rojo parpadean suavemente hasta que se resuelve la causa; con movimiento reducido en el sistema muestran en su lugar un borde rojo fijo y más grueso.
+- **Una comprobación del doctor para la zona horaria**: se avisa de una zona que ni el sistema ni la tabla interna conocen, y entonces las horas se muestran en UTC (antes caían en la zona del equipo sin avisar).
+- **La pestaña Historial dice "Mostrando n de N"** cuando la lista es más corta que lo que contó la cabecera (el monitor guarda las 600 ejecuciones más recientes; los datos llevan `runs_total`).
+
+### Cambiado
+
+- **La barra inferior se ha rediseñado**: cada elemento es una pastilla con su borde, la conexión y la cuota toman el color de su estado, el reloj es un recuadro con dígitos grandes, en negrita y tabulares, la fecha encima y la zona en letra pequeña, y la barra conserva su orden en ventanas estrechas.
+- **Todo recuadro deja que su texto se parta en vez de salirse** (recuadros, pastillas, etiquetas, celdas, títulos, botones de las ventanas): la hora de la última lectura lleva su zona aparte en letra pequeña, las filas de alertas pasan a dos columnas en ventanas estrechas y las rejillas de recuadros pueden encogerse por debajo de su contenido.
+
+### Corregido
+
+- **Una sola cifra para los fallos abiertos**: el recuadro "rojos en main", la lista de alertas, la barra inferior y el resumen cuentan lo mismo, un workflow cuya última ejecución en la rama principal falló (un fallo en una rama de trabajo ya no aparece como alerta abierta), y la barra nunca dice "sin avisos" mientras haya alertas abiertas.
+- **El arranque del monitor nombra la versión una sola vez**: desaparece la línea "GitHub Actions v..." que repetía la cabecera; el autor y la licencia quedan en una línea.
+- **Ficheros de estado dañados** (estado de colaboración, caché e historial del centinela con otra forma) se ignoran entrada por entrada en vez de llegar al código que los lee.
+
 ## [1.7.6]
 
 La conexión entre el monitor y una herramienta de IA: el flujo coincide siempre con la página, cada alerta dice por qué está roja, un flujo en directo y tres herramientas MCP empujan las novedades, un comando instala el script de enlace, la barra muestra si hay una IA conectada y todos los ficheros de estado son privados de su dueño.

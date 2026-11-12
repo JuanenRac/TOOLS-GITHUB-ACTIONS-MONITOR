@@ -81,7 +81,7 @@ DEFAULTS = {
     "ai": {"provider": "none"},
     "webhook": {"enabled": False, "secret": "", "replay_seconds": 3600, "max_per_minute": 30},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default)
     "cache": {"etag": {"enabled": True, "ttl_hours": 24}},   # conditional reads: a 304 answer costs no quota (etagcache.py)
-    "display": {"timezone": "local"},   # zone of the times written for people (log, reports, command line, notifications): local | utc | an IANA name such as Europe/Madrid
+    "display": {"timezone": "local", "blink_red_tiles": True},   # blink_red_tiles: the red tiles and red items of the bar blink softly until the cause is solved; zone of the times written for people (log, reports, command line, notifications): local | utc | an IANA name such as Europe/Madrid
     "updates": {"check": True},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
     "airgapped": False,            # True: nothing is requested from the network except GitHub's data you asked for; the update check is off
     "open_browser": True,
@@ -503,13 +503,20 @@ def open_issues(repos, workers):
         return [item for part in pool.map(repo_issues, repos) for item in part]
 
 
-def unresolved_failures(runs):
-    """A failed run counts as unresolved while no later run of the same workflow in the same repository has succeeded."""
-    latest = {}
-    for run in sorted(runs, key=lambda r: r["started"] or ""):
-        if run["status"] == "completed":
-            latest[(run["repo"], run["name"])] = run
-    return [r for r in latest.values() if r["conclusion"] in ("failure", "timed_out", "startup_failure")]
+def unresolved_failures(runs, default_branches=None):
+    """The failures that are still open: the last completed run of a workflow on the DEFAULT branch of its repository failed (the rule of "red on main", redrule.py: cancelled, skipped and dynamic runs
+    say nothing). A failure on a work branch is not an open alert: the tile "red on main", the list of alerts, the bar at the foot and the brief all count the same thing."""
+    by_repo = {}
+    for run in runs:
+        by_repo.setdefault(run["repo"], []).append(run)
+    out = []
+    for repo, items in by_repo.items():
+        branch = (default_branches or {}).get(repo) or redrule.guess_default_branch(items) or "main"
+        last = {}
+        for run in sorted(redrule.completed_runs(items, branch), key=lambda r: r.get("started") or ""):
+            last[redrule.workflow_key(run)] = run
+        out.extend(run for run in last.values() if run.get("conclusion") in redrule.BAD)
+    return out
 
 
 def collect(config, publish=None):
@@ -612,7 +619,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
     return {
         "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "updated_local": tzdisplay.stamp(time.time()), "took": round(time.time() - started, 1),
         "repos": repos, "ecosystems": {repo: ecosystem_of(repo) for repo in repos},
-        "runs": runs[:600], "active": active, "issues": ISSUE_CACHE["items"], "failing": unresolved_failures(runs),
+        "runs": runs[:600], "runs_total": len(runs), "active": active, "issues": ISSUE_CACHE["items"], "failing": unresolved_failures(runs, {r: m.get("branch") for r, m in repo_meta(repos).items() if m.get("branch")}),
         "errors": errors, "rate": rate, "stuck_minutes": config["stuck_minutes"],
         "mode": config["mode"], "refreshed": refreshed, "hot": hot, "loading": progress_text if loading else "",
         "min_rate": config["min_rate_remaining"], "paused_quota": bool(rate and rate["remaining"] < config["min_rate_remaining"]),
@@ -957,7 +964,7 @@ def render_page():
     """actions_monitor.html with the catalogues of the interface (keys "ui.*") for the 8 languages and the default language inlined."""
     page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
     data = {"default": i18n.language(), "langs": list(i18n.LANGS), "names": i18n.NATIVE_NAMES, "html": i18n.HTML_LANG, "locale": i18n.BROWSER_LOCALE, "catalogues": i18n.ui_catalogues(),
-            "ecosystems": {**{"other": i18n.t("ui.eco_other")}, **{key: item["label"] for key, item in toolconfig.ecosystems().items()}}, "owner": toolconfig.github_owner(), "tz": tzdisplay.setting(), "host": github_host(), "lite": LITE["on"], "network": localguard.public_state(), "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
+            "ecosystems": {**{"other": i18n.t("ui.eco_other")}, **{key: item["label"] for key, item in toolconfig.ecosystems().items()}}, "owner": toolconfig.github_owner(), "tz": tzdisplay.setting(), "blink": (toolconfig.raw_config().get("display") or {}).get("blink_red_tiles", True) is not False, "host": github_host(), "lite": LITE["on"], "network": localguard.public_state(), "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
     blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     return page.replace("/*I18N_DATA*/null", blob, 1)
 
@@ -2176,8 +2183,7 @@ def main():
     import banner
     banner.set_title(banner.window_title(LITE["on"], server.server_address[1], i18n.t))
     print(banner.line(LITE["on"], server.server_address[1], CONFIG_FILE.name, i18n.t, url, sentinel=not LITE["on"] and config.get("sentinel", {}).get("enabled", True) is not False))
-    print(i18n.t("mon.version", version=TOOL_VERSION))
-    print(i18n.about_line())
+    print(i18n.about_line())      # author and licence only: the version is in the banner line above, once
     print(i18n.t("mon.started", url=url))
     try:      # the notice of a new version never stops the start (a damaged state file, no network)
         news = updatecheck.notice(update_info(), i18n.t) if updatecheck.settings(config)["check"] else ""

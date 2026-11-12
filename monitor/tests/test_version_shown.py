@@ -20,9 +20,18 @@ class VersionShown(unittest.TestCase):
         self.assertIn(f'"version": "{TOOL_VERSION}"', page)
         self.assertIn('id="ver"', page)
 
-    def test_the_start_up_line_prints_the_version(self):
+    def test_the_start_up_output_names_the_version_once(self):
+        """One banner line carries the name and the version; the line of authorship and the licence repeats neither (every language, both editions)."""
+        import banner
+        import i18n
         text = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
-        self.assertIn('i18n.t("mon.version", version=TOOL_VERSION)', text)
+        self.assertNotIn('i18n.t("mon.version"', text)
+        for lang in i18n.LANGS:
+            i18n.set_language(lang)
+            for lite in (False, True):
+                shown = chr(10).join([banner.line(lite, 8765, "actions_monitor.json", i18n.t, "http://127.0.0.1:8765/"), i18n.about_line(), i18n.t("mon.started", url="http://127.0.0.1:8765/")])
+                self.assertEqual(shown.count(TOOL_VERSION), 1, (lang, lite, shown))
+        i18n.set_language("en")
 
 
 if __name__ == "__main__":

@@ -7,6 +7,26 @@
 
 Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son propre semver. La source est le CHANGELOG.md en anglais ; ce fichier contient les mêmes versions et sections.
 
+## [Unreleased]
+
+### Ajouté
+
+- **Une vérification qu'aucun texte ne sort de sa case** (`tools/check_overflow.py` et un test qui s'ignore proprement sans navigateur) : la page est ouverte dans un navigateur sans fenêtre dans les huit langues, large et étroite, parcourt chaque onglet et chaque fenêtre, et échoue si un texte est plus large qu'une case avec bordure ou fond ou sort de la fenêtre.
+- **`display.blink_red_tiles`** (activé par défaut, dans l'onglet Réglages, dans les huit langues) : les tuiles du haut et les éléments de la barre du bas qui passent au rouge clignotent doucement jusqu'à la résolution de la cause ; avec le mouvement réduit du système, elles affichent à la place un bord rouge fixe et plus épais.
+- **Une vérification du doctor pour le fuseau horaire** : un fuseau que ni le système ni la table interne ne connaissent est signalé, et les heures sont alors affichées en UTC (elles retombaient auparavant sur le fuseau de l'ordinateur sans le dire).
+- **L'onglet Historique indique « n sur N »** quand la liste est plus courte que ce que l'en-tête a compté (le moniteur garde les 600 exécutions les plus récentes ; les données portent `runs_total`).
+
+### Modifié
+
+- **La barre du bas est redessinée** : chaque élément est une pastille avec sa bordure, la connexion et le quota prennent la couleur de leur état, l'horloge est un cadre avec de grands chiffres gras tabulaires, la date au-dessus et le fuseau en petits caractères, et la barre garde son ordre dans les fenêtres étroites.
+- **Chaque case laisse son texte se couper au lieu de déborder** (tuiles, pastilles, badges, cellules, titres, boutons des fenêtres) : l'heure de la dernière lecture porte son fuseau à part en petits caractères, les lignes d'alertes passent sur deux colonnes dans les fenêtres étroites et les grilles de tuiles peuvent rétrécir sous leur contenu.
+
+### Corrigé
+
+- **Un seul chiffre pour les échecs ouverts** : la tuile « rouges sur main », la liste des alertes, la barre du bas et le résumé comptent la même chose, un workflow dont la dernière exécution sur la branche par défaut a échoué (un échec sur une branche de travail n'apparaît plus comme alerte ouverte), et la barre ne dit jamais « aucun avis » tant que des alertes sont ouvertes.
+- **Le démarrage du moniteur nomme la version une seule fois** : la ligne « GitHub Actions v... » qui répétait l'en-tête disparaît ; l'auteur et la licence restent sur une ligne.
+- **Fichiers d'état endommagés** (état de collaboration, cache et historique du sentinelle de mauvaise forme) : ils sont ignorés entrée par entrée au lieu d'atteindre le code qui les lit.
+
 ## [1.7.6]
 
 La liaison entre le moniteur et un outil d'IA : le flux concorde toujours avec la page, chaque alerte dit pourquoi elle est rouge, un flux en direct et trois outils MCP poussent les nouvelles, une commande installe le script de liaison, la barre montre si une IA est connectée et tout fichier d'état est privé à son propriétaire.

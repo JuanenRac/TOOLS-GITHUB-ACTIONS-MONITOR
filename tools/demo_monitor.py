@@ -72,7 +72,7 @@ def build(now):
         rid += 1
         run = make_run(repo, name, None, iso(now - timedelta(seconds=secs)), rid=rid, status=status)
         run.update({"url": f"https://github.com/{OWNER}/{repo}/actions/runs/{rid}", "title": "demo run", "event": "push", "actor": "demo-user", "seconds": secs, "stuck": False,
-                    "jobs": [{"name": "build", "status": "in_progress", "conclusion": None, "steps_total": 8, "steps_done": 5, "step": "Compile", "runner": "demo-runner-1", "seconds": secs, "url": "#"},
+                    "jobs": [{"name": "Build and test the firmware image for every supported board (release candidate with the long job name of a real project)", "status": "in_progress", "conclusion": None, "steps_total": 8, "steps_done": 5, "step": "Compile", "runner": "demo-runner-1", "seconds": secs, "url": "#"},
                              {"name": "test", "status": "completed", "conclusion": "success", "steps_total": 6, "steps_done": 6, "step": "", "runner": "demo-runner-2", "seconds": 90, "url": "#"}]
                     if status == "in_progress" else []})
         active.append(run)

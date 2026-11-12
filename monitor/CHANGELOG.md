@@ -9,6 +9,26 @@ Version of the tool itself (monitor + sentinel + batch tools), semver of its own
 and is shown as `tool_version` in the sentinel snapshot and by `read_report.py --version`; `make_release.py` refuses to build
 when this file and `tool_version.py` disagree.
 
+## [Unreleased]
+
+### Added
+
+- **A check that no text leaves its box** (`tools/check_overflow.py` and a test that skips cleanly without a browser): the page is opened in a headless browser in the eight languages, wide and narrow, goes through every tab and window, and fails when any text is wider than a box that has a border or a background or leaves the window.
+- **`display.blink_red_tiles`** (on by default, in the Settings tab, in the eight languages): the tiles at the top and the items of the bar at the foot that turn red blink softly until the cause is solved; with reduced motion in the system they show a fixed, thicker red edge instead.
+- **A doctor check for the time zone**: a zone that neither the system nor the built-in table knows is reported, and the times are then shown in UTC (they used to fall back to the zone of the computer without saying so).
+- **The History tab says "Showing n of N"** when the list is shorter than what the header counted (the monitor keeps the 600 most recent runs; the data carry `runs_total`).
+
+### Changed
+
+- **The bar at the foot is redesigned**: every item is a chip with its own border, the connection and the quota take the colour of their state, the clock is a framed box with large bold tabular digits, the date above and the zone in small letters, and the bar keeps its order in narrow windows.
+- **Every box lets its text break instead of leaving it** (tiles, chips, badges, cells, headings, buttons of the windows): the time of the last reading keeps its zone apart in small letters, the alert rows are laid out in two columns in narrow windows and the grids of the tiles can shrink below their content.
+
+### Fixed
+
+- **One number for the open failures**: the tile "red on main", the list of alerts, the bar at the foot and the brief count the same thing, a workflow whose last run on the default branch failed (a failure on a work branch no longer shows as an open alert), and the bar never says "no notices" while alerts are open.
+- **The start-up of the monitor names the version once**: the line "GitHub Actions v..." that repeated the banner is gone; the author and the licence stay in one line.
+- **Damaged state files** (collab state, sentinel cache and history of the wrong shape) are ignored entry by entry instead of reaching the code that reads them.
+
 ## [1.7.6]
 
 The connection between the monitor and an AI tool: the feed always agrees with the page, each alert says why it is red, a stream and three MCP tools push the news, a command installs the gate script, the bar shows whether an AI is connected, and every state file is private to its owner.

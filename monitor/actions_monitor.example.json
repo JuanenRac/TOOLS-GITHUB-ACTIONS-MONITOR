@@ -354,7 +354,8 @@
     }
   },
   "display": {
-    "timezone": "local"
+    "timezone": "local",
+    "blink_red_tiles": true
   },
   "updates": {
     "check": true

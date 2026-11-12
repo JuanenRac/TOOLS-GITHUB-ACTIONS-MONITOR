@@ -41,10 +41,11 @@ h1{font-size:17px;margin:0 6px 0 0}h2{font-size:14px;margin:0 0 8px}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* the figures of the header: tiles with an icon, the figure big and the label small; the colour says the state */
 .tiles{display:flex;flex-wrap:wrap;gap:8px;flex:1 1 auto;min-width:0}
-.tile{position:relative;display:grid;grid-template-columns:auto 1fr;column-gap:9px;align-items:center;min-width:118px;padding:7px 12px;border:1px solid var(--line2);border-radius:12px;color:var(--text);
+.tile{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:9px;align-items:center;min-width:118px;padding:7px 12px;border:1px solid var(--line2);border-radius:12px;color:var(--text);
 background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo);transition:filter .14s,box-shadow .14s,transform .08s,border-color .14s}
 .tile .ico{grid-row:1/3;width:22px;height:22px;color:var(--mut)}
-.tile b{font-size:20px;line-height:1.1;font-family:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tile b{font-size:20px;line-height:1.1;font-family:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;font-variant-numeric:tabular-nums;min-width:0;overflow-wrap:anywhere}
+.tile b .tz{font-size:.62em;font-weight:600;color:var(--mut);white-space:nowrap}
 .tile small{font-size:11.5px;line-height:1.2;color:var(--mut)}
 .tile.wide{min-width:230px}.tile .qbar{grid-column:1/3;height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:5px}.tile .qbar i{display:block;height:100%;width:0;background:var(--ok);transition:width .5s}
 .tile[tabindex]{cursor:pointer}.tile[tabindex]:hover,.tile[tabindex]:focus-visible{filter:brightness(1.14);border-color:var(--run);box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo),0 0 0 1px var(--run),0 0 14px var(--glow);outline:none}
@@ -121,7 +122,7 @@ svg{display:block;max-width:none}svg text{fill:var(--mut);font-size:12px}
 /* Sentinel */
 #t-al{grid-template-columns:minmax(0,1fr);overflow:auto}#al-filters{align-items:center;gap:10px;margin:0 0 10px}#al-chips button{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:999px;padding:3px 12px;margin:0 4px 0 0;cursor:pointer}#al-chips button[aria-pressed=true]{background:var(--acc);color:var(--on-acc,#fff);border-color:var(--acc)}
 .alrow{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:6px 10px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line)}.alrow.muted{opacity:.6}.alrow .tt{min-width:0;overflow-wrap:anywhere}.alrow .acts{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}.alrow .acts button{font-size:12px;padding:2px 8px}.origin{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:1px 8px;border-radius:6px;border:1px solid var(--line)}.origin.ci{border-color:var(--acc);color:var(--acc)}.origin.collab{border-color:var(--ok);color:var(--ok)}
-@media (max-width:700px){.alrow{grid-template-columns:auto minmax(0,1fr)}.alrow .acts{grid-column:1/-1;justify-content:flex-start}}
+@media (max-width:700px){.alrow{grid-template-columns:auto minmax(0,1fr)}.alrow .tt{grid-column:1/-1}.alrow .acts{grid-column:1/-1;justify-content:flex-start}.alrow>.chip,.alrow>.origin{justify-self:start}}
 #t-sent{grid-template-columns:minmax(0,1fr) minmax(0,2.1fr);gap:12px}
 #t-sent .lcol{display:flex;flex-direction:column;gap:12px;min-height:0;min-width:0}
 #t-sent .lcol section:first-child{flex:1.3 1 0}#t-sent .lcol section:last-child{flex:1 1 0}
@@ -272,15 +273,23 @@ background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 
 th.sortable{cursor:pointer;user-select:none;white-space:nowrap}th.sortable:hover,th.sortable:focus-visible{color:var(--acc)}th .si{color:var(--acc);font-size:11px}th .si sub{font-size:9px}
 .tbl-tools{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:0 0 8px;font-size:12px}.colsel{position:relative}.colsel summary{cursor:pointer;border:1px solid var(--line2);border-radius:8px;padding:3px 10px;list-style:none}.colsel summary::-webkit-details-marker{display:none}
 .colsel .colbox{position:absolute;z-index:12;top:30px;left:0;min-width:220px;max-height:60vh;overflow:auto;background:var(--panel);border:1px solid var(--line2);border-radius:10px;box-shadow:var(--shadow);padding:8px 10px;display:flex;flex-direction:column;gap:3px}.colsel .colbox label{display:flex;gap:6px;align-items:center;white-space:nowrap}
-#statusbar{flex:none;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 16px;padding:5px 14px;border-top:1px solid var(--line2);background:var(--panel);font-size:12px;min-height:34px;position:relative;z-index:15}
-#statusbar .sb-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1 1 260px}#statusbar .sb-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
-#statusbar .sb-right{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:2px 14px;margin-left:auto}#statusbar .sb-item{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;color:var(--mut)}
-#statusbar .sb-clock{color:var(--text);font-variant-numeric:tabular-nums;order:99}
+#statusbar{flex:none;display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:6px 14px;padding:6px 14px;border-top:2px solid var(--acc);background:linear-gradient(var(--panel2),var(--panel));font-size:12px;min-height:40px;position:relative;z-index:15;min-width:0}
+#statusbar .sb-left{display:flex;align-items:center;gap:8px;min-width:0;flex:0 1 200px}#statusbar .sb-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;color:var(--text)}
+#statusbar .sb-right{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:5px 6px;margin-left:auto;min-width:0;flex:1 1 0}
+#statusbar .sb-item{display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:100%;padding:2px 10px;border:1px solid var(--line2);border-radius:999px;background:var(--bg);color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.5}
+#statusbar .sb-item:empty{display:none}
+#statusbar .sb-item.sb-opt{color:var(--mut);background:transparent;border-style:dashed}
+#statusbar #sb-conn{font-weight:700;border-color:var(--ok)}#statusbar #sb-conn.warn{border-color:var(--warn)}#statusbar #sb-conn.bad{border-color:var(--bad)}
+#statusbar #sb-quota,#statusbar #sb-runs{font-weight:600}#statusbar #sb-quota.warn{border-color:var(--warn)}#statusbar #sb-quota.bad{border-color:var(--bad)}
+#statusbar .sb-clock{order:99;display:inline-flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:0 8px;padding:3px 14px;margin-left:6px;border:2px solid var(--acc);border-radius:12px;background:var(--bg);box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo);overflow:visible;line-height:1.15}
+#statusbar .ck-t{font-size:22px;font-weight:800;letter-spacing:.02em;font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;color:var(--text)}
+#statusbar .ck-d{font-size:11px;font-weight:600;color:var(--mut);white-space:nowrap;order:-1}#statusbar .ck-z{font-size:11px;font-weight:700;color:var(--acc);white-space:nowrap;text-transform:uppercase}
 .sb-lamp{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--grey,#888);box-shadow:0 0 0 2px rgba(127,127,127,.18);flex:none}.sb-lamp.ok{background:var(--ok);box-shadow:0 0 6px var(--ok)}.sb-lamp.warn{background:var(--warn);box-shadow:0 0 6px var(--warn)}.sb-lamp.bad{background:var(--bad);box-shadow:0 0 6px var(--bad)}
 .sb-more{border:1px solid var(--line2);background:transparent;color:var(--text);border-radius:999px;padding:0 9px;font-size:12px;cursor:pointer;flex:none}
 #sb-open{width:26px;height:26px;flex:none}#notes-body{padding:6px 14px 14px;overflow:auto}#notes-body ul{list-style:none;margin:0;padding:0}#notes-body li{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:4px 10px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--line)}#notes-body time{color:var(--mut);font-variant-numeric:tabular-nums;font-size:12px}
 @media (max-width:900px){#statusbar .sb-opt{display:none}#statusbar{padding:5px 10px}}
-@media (max-width:560px){#statusbar .sb-left{flex-basis:100%}#statusbar .sb-right{width:100%;justify-content:space-between;margin-left:0}}
+@media (max-width:560px){#statusbar .sb-clock{width:100%;margin-left:0}#statusbar .ck-t{font-size:20px}}
+@media (max-width:560px){#statusbar{flex-wrap:wrap}#statusbar .sb-left{flex-basis:100%}#statusbar .sb-right{width:100%;justify-content:flex-start;margin-left:0}}
 .shell{flex:1;min-height:0;display:flex}
 .stage{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
 .sidebar{flex:0 0 auto;width:var(--side-w,236px);display:flex;flex-direction:column;gap:14px;min-height:0;overflow:hidden;padding:14px 10px;background:var(--side);border-right:1px solid var(--line);color:var(--side-text);transition:width .18s}
@@ -350,6 +359,17 @@ header .tile.wide{min-width:0;grid-column:span 2}
 .rdy-chip{max-width:100%;white-space:nowrap}
 @media (max-width:1100px){.hgrid{grid-template-columns:minmax(0,1fr)}.hcorner{position:static;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;order:-1}.hcorner .hbadges{justify-content:flex-start}}
 @media (min-width:1900px){:root{--corner-w:268px}header .tile b{font-size:19px}}
+/* text never leaves its box: every box may shrink below its content and long words break */
+:where(.chip,.badge,.tile small,.card,.acard,.hit,summary,label,h1,h2,h3,h4,li,dt,dd,p,.origin,.rdy-chip,.pline,.tt,.dlg-box,.dlg-body,.dlg-top,.dlg-bar,td,th,.body,section>h2){min-width:0;overflow-wrap:anywhere}
+:where(td,th){overflow-wrap:break-word}
+:where(.chip,.badge,.origin,.rdy-chip){max-width:100%}
+:where(.tbl-tools,.dlg-top,.dlg-bar,.hbadges,.lvl,.acts,.dif){flex-wrap:wrap}
+:where(select,input:not([type=checkbox]):not([type=radio]),textarea){max-width:100%;min-width:0;text-overflow:ellipsis}
+
+/* red tiles blink softly while the cause is open (display.blink_red_tiles, on by default); with reduced motion they keep a fixed thicker red edge instead */
+@keyframes redblink{0%,100%{box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo),0 0 0 0 transparent;filter:none}50%{box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo),0 0 0 2px var(--bad),0 0 16px var(--bad);filter:brightness(1.18)}}
+@media (prefers-reduced-motion:no-preference){:root[data-blink="1"] .tile.bad:not(.skel),:root[data-blink="1"] #statusbar .sb-item.bad,:root[data-blink="1"] #statusbar .sb-lamp.bad{animation:redblink 1.2s ease-in-out infinite}}
+@media (prefers-reduced-motion:reduce){:root[data-blink="1"] .tile.bad:not(.skel),:root[data-blink="1"] #statusbar .sb-item.bad{box-shadow:inset 0 0 0 3px var(--bad)}}
 </style>
 </head>
 <body>
@@ -470,7 +490,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <span class="sb-item sb-opt" id="sb-acc"></span>
 <span class="sb-item sb-opt" id="sb-ver"></span>
 <span class="sb-item sb-opt" id="sb-addr"></span>
-<span class="sb-item sb-clock" id="sb-clock"></span>
+<span class="sb-item sb-clock" id="sb-clock" role="timer" aria-live="off"><span class="ck-d" id="ck-d"></span><span class="ck-t" id="ck-t"></span><span class="ck-z" id="ck-z"></span></span>
 </div>
 </footer>
 <div id="notes-dlg" class="dlg" role="dialog" aria-modal="true" aria-labelledby="notes-h" hidden><div class="dlg-box"><div class="dlg-top"><h2 id="notes-h" data-i18n="ui.sb_all_title"></h2><label class="inl"><span data-i18n="ui.sb_filter"></span> <select id="notes-level"><option value="" data-i18n="ui.f_all"></option><option value="bad" data-i18n="ui.sb_lv_bad"></option><option value="warn" data-i18n="ui.sb_lv_warn"></option></select></label><span class="sp"></span><button id="notes-close" class="ib" type="button" data-i18n-title="ui.close" data-i18n-aria="ui.close"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-close"/></svg></button></div><div class="dlg-body" id="notes-body"></div></div></div>
@@ -519,7 +539,7 @@ function kSet(id,v){
 function tipRows(){document.querySelectorAll(".rrow,.spk,.job").forEach(r=>{if(!r.title){const t=r.textContent.replace(/\s+/g," ").trim();if(t)r.title=t}})}
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=s=>{s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60,u=[T("ui.u_h"),T("ui.u_min"),T("ui.u_s")];return h?`${h} ${u[0]} ${m} ${u[1]}`:m?`${m} ${u[1]} ${x} ${u[2]}`:`${x} ${u[2]}`};
-const TZ=(()=>{const z=String(I18N.tz||"local");if(z.toLowerCase()==="utc")return "UTC";if(z==="local")return undefined;try{new Intl.DateTimeFormat("en",{timeZone:z});return z}catch(e){return undefined}})();   // display.timezone: "local" = the browser's zone
+const TZ=(()=>{const z=String(I18N.tz||"local");if(z.toLowerCase()==="utc")return "UTC";if(z==="local")return undefined;try{new Intl.DateTimeFormat("en",{timeZone:z});return z}catch(e){return "UTC"}})();   // display.timezone: "local" = the browser's zone
 const hora=t=>t?new Date(t).toLocaleString(LOC(),{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit",timeZone:TZ}):"";
 const clock=(t,o)=>new Date(t).toLocaleTimeString(LOC(),{timeZone:TZ,timeZoneName:"short",...(o||{})});
 const dtime=t=>new Date(t).toLocaleString(LOC(),{year:"2-digit",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",timeZoneName:"short",timeZone:TZ});
@@ -573,6 +593,8 @@ function refreshLanguage(){
 }
 
 /* tabs */
+var OPENALERTS=0;
+document.documentElement.dataset.blink=I18N.blink===false?"0":"1";
 const TABS=LITE?["now","charts","repos","hist","cfg"]:["now","al","sent","charts","repos","hist","cfg"];
 function showTab(t){if(!TABS.includes(t))t="now";TABS.forEach(x=>{$("t-"+x).classList.toggle("on",x===t);$("n-"+x).setAttribute("aria-selected",x===t)});store.set("am-tab",t);CURTAB=t;applyGroups();setViewTitle();if(DATA&&t==="charts")setTimeout(()=>render(DATA),30);try{if(location.hash!=="#"+t)window.history.replaceState(null,"","#"+t)}catch(e){}}
 document.querySelector("nav").addEventListener("click",e=>{const b=e.target.closest("button[data-tab]");if(b)showTab(b.dataset.tab)});
@@ -722,6 +744,7 @@ function alerts(d){
   const withIssue=new Set(d.issues.map(i=>i.repo));
   d.failing.filter(r=>repoVisible(r.repo,d)&&!withIssue.has(r.repo)).slice(0,30).forEach(r=>a.push(`<div class="alert warn"><b>${esc(T("ui.a_unresolved"))}</b> · ${esc(T("ui.a_unresolved_line",{repo:r.repo,name:r.name,conclusion:r.conclusion,since:hora(r.started)}))} — <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(T("ui.link_run"))}</a> <span class="mut">${esc(T("ui.a_no_issue"))}</span></div>`));
   Object.entries(d.errors).forEach(([k,v])=>a.push(`<div class="alert warn"><b>${esc(T("ui.a_nodata",{key:k}))}</b>: ${esc(v)}</div>`));
+  OPENALERTS=a.length;try{renderBar()}catch(e){}      // the bar at the foot says the same as this list: it is never "no notices" while alerts are open
   $("alerts").innerHTML=a.length?a.join(""):`<span style="color:var(--ok)">${esc(T("ui.a_none"))}</span>`;
 }
 function now_(d){
@@ -867,8 +890,10 @@ const HIST_TABLE=Table("hist",[
 ],()=>renderHistory());
 function renderHistory(){
   if(!DATA)return;const repo=$("f-repo").value,res=$("f-res").value,q=$("f-q").value.toLowerCase();
-  const rows=HIST_TABLE.sorted(DATA.runs.filter(r=>repoVisible(r.repo,DATA)&&(!repo||r.repo===repo)&&(!res||r.conclusion===res)&&(!q||(r.name+" "+r.title).toLowerCase().includes(q)))).slice(0,200);
+  const all=DATA.runs.filter(r=>repoVisible(r.repo,DATA)&&(!repo||r.repo===repo)&&(!res||r.conclusion===res)&&(!q||(r.name+" "+r.title).toLowerCase().includes(q))),rows=HIST_TABLE.sorted(all).slice(0,200);
   HIST_TABLE.draw($("hist-head"),$("hist-tools"));
+  {const total=!repo&&!res&&!q&&DATA.runs_total>DATA.runs.length?DATA.runs_total:all.length;      // the server keeps the 600 most recent runs: say so when the list is shorter than what the header counted
+   if(rows.length<total){const n=document.createElement("span");n.className="mut";n.id="hist-count";n.setAttribute("role","status");n.textContent=T("ui.n_showing",{n:rows.length,total:total});$("hist-tools").appendChild(n)}}
   $("hist").innerHTML=rows.map(r=>`<tr>${HIST_TABLE.cells(r)}</tr>`).join("")||`<tr><td colspan="${HIST_TABLE.visible().length}" class="mut">${esc(T("ui.h_none"))}</td></tr>`;
 }
 ["f-repo","f-res"].forEach(id=>$(id).addEventListener("change",renderHistory));$("f-q").addEventListener("input",renderHistory);
@@ -1250,6 +1275,7 @@ let TILES_LIVE=false,QUOTA_RESET=null;
 function tilesRestore(){document.querySelectorAll(".tile [data-v]").forEach(el=>{const t=el.closest(".tile"),v=TILE_CACHE[el.id];if(v!=null&&v!==""){el.textContent=v;t.classList.remove("skel");t.classList.add("stale")}})}
 function tileSave(){const out={};document.querySelectorAll(".tile [data-v]").forEach(el=>{const v=typeof el._v==="number"?el._v:el.textContent;if(v!=="–")out[el.id]=v});try{store.set(TILE_KEY,JSON.stringify(out))}catch(e){}}
 function tileState(id,cls){const el=$(id);if(!el)return;const t=el.closest(".tile");t.classList.remove("ok","warn","bad","run","skel","stale");if(cls)t.classList.add(cls)}
+function tileClock(id,t){const el=$(id);if(!el)return;const o=t?new Date(t):null;if(!o||isNaN(o)){el.textContent="–";el._v=undefined;return}const f=(x)=>{try{return o.toLocaleTimeString(LOC(),{timeZone:TZ,...x})}catch(e){return o.toLocaleTimeString(LOC(),x)}};const z=(new Intl.DateTimeFormat(LOC(),{timeZone:TZ,timeZoneName:"short"}).formatToParts(o).find(x=>x.type==="timeZoneName")||{}).value||"";el.textContent=f({hour:"2-digit",minute:"2-digit",second:"2-digit"})+" ";const sp=document.createElement("span");sp.className="tz";sp.textContent=z;el.appendChild(sp);el._v=undefined}
 function tileText(id,text){const el=$(id);if(el){el.textContent=text;el._v=undefined}}
 function quotaCount(){if(!QUOTA_RESET)return;const m=Math.max(0,Math.round((QUOTA_RESET-Date.now())/60000));$("tv-renews").textContent=T("ui.t_renews",{time:clock(QUOTA_RESET.toISOString(),{hour:"2-digit",minute:"2-digit"}),min:m})}
 setInterval(quotaCount,20000);
@@ -1274,7 +1300,7 @@ function paintTiles(d){
     QUOTA_RESET=new Date(d.rate.reset);quotaCount();
   }
   const o=d.offline||{};tileText("tv-conn",T(o.offline?"ui.t_offline":"ui.t_online"));tileState("kt-conn",o.offline?"bad":"ok");$("tv-conn-since").textContent=o.offline?T("ui.t_offline_since",{since:clock(o.since)}):"";
-  tileText("tv-upd",clock(d.updated));tileState("kt-upd","");$("kt-upd").querySelector("small").textContent=T("ui.t_updated")+" · "+T("ui.t_took",{secs:d.took});
+  tileClock("tv-upd",d.updated);tileState("kt-upd","");$("kt-upd").querySelector("small").textContent=T("ui.t_updated")+" · "+T("ui.t_took",{secs:d.took});
   const ld=$("kt-loading");ld.hidden=!d.loading;if(d.loading){const m=String(d.loading).match(/(\d+)\s*\/\s*(\d+)/);tileText("tv-load",d.loading);$("tl-fill").style.width=m&&+m[2]?Math.round(+m[1]/+m[2]*100)+"%":"0%"}
   tileSave();
 }
@@ -1464,6 +1490,7 @@ function readNotices(){
   const now=Date.now(),out=[];
   NOTE_SRC.forEach(([id,lv,rank])=>{const el=$(id);let on=false;if(el)on=(id==="netbar"||id==="quota"?!el.hidden:el.style.display==="block")&&!!el.textContent.trim();
     if(on){NSEEN[id]=NSEEN[id]||now;out.push({id:id,level:lv,rank:rank,text:el.textContent.trim(),at:NSEEN[id]})}else delete NSEEN[id]});
+  if(OPENALERTS>0){NSEEN.alerts=NSEEN.alerts||now;out.push({id:"alerts",level:"warn",rank:60,text:T("ui.sb_open_alerts",{n:OPENALERTS}),at:NSEEN.alerts})}else delete NSEEN.alerts;
   return out.sort((a,b)=>(b.level==="bad")-(a.level==="bad")||b.rank-a.rank);
 }
 function renderBar(){
@@ -1487,9 +1514,11 @@ function renderBarFacts(){
   else if(d.offline&&d.offline.offline){conn.className="sb-lamp bad";ct.textContent=T("ui.sb_offline");$("sb-conn").title=T("ui.sb_offline_t")}
   else if(d.paused_quota){conn.className="sb-lamp warn";ct.textContent=T("ui.sb_quota_low");$("sb-conn").title=T("ui.sb_quota_low_t")}
   else{conn.className="sb-lamp ok";ct.textContent=T("ui.sb_online");$("sb-conn").title=T("ui.sb_online_t")}
+  $("sb-conn").className="sb-item "+(conn.className.replace("sb-lamp","").trim());
   if(d){
     const eta=d.rate?Math.max(0,Math.round((new Date(d.rate.reset).getTime()-Date.now())/60000)):null;
     set("sb-quota",d.rate?T("ui.sb_quota",{remaining:d.rate.remaining,limit:d.rate.limit,time:clock(d.rate.reset,{hour:"2-digit",minute:"2-digit"})}):"",d.rate?T("ui.quota",{remaining:d.rate.remaining,limit:d.rate.limit,time:clock(d.rate.reset,{hour:"2-digit",minute:"2-digit"}),eta:eta}):"");
+    {const q=$("sb-quota"),fr=d.rate&&d.rate.limit?d.rate.remaining/d.rate.limit:1;q.className="sb-item "+(fr<0.05?"bad":fr<0.2?"warn":"")}
     {const F=d.figures||{};set("sb-runs",F.active!=null||F.queued!=null?T("ui.sb_runs",{active:F.active||0,queued:F.queued||0}):"",T("ui.sb_runs_t"))}
     set("sb-refresh",T("ui.sb_updated",{time:clock(d.updated),secs:d.took}),T("ui.sb_updated_t",{n:d.refresh_seconds}));
     set("sb-repos",T("ui.sb_repos",{n:d.repos.length,hot:d.hot}),T("ui.sb_repos_t"));
@@ -1503,7 +1532,10 @@ function renderBarFacts(){
   if(SBINFO)set("sb-addr",(SBINFO.bind==="0.0.0.0"&&SBINFO.lan_address?SBINFO.lan_address:"127.0.0.1")+":"+SBINFO.port,T("ui.sb_addr_t",{local:"127.0.0.1:"+SBINFO.port,lan:(SBINFO.lan_address||"-")+":"+SBINFO.port}));
 }
 function agoText(s){s=Math.max(0,Math.round(s||0));return s>=3600?Math.floor(s/3600)+" h":s>=60?Math.floor(s/60)+" min":s+" s"}
-function renderClock(){const e=$("sb-clock");if(e)e.textContent=new Date().toLocaleString(LOC(),{dateStyle:"medium",timeStyle:"long",timeZone:TZ})}
+function renderClock(){const e=$("sb-clock");if(!e)return;const now=new Date(),part=(o)=>{try{return now.toLocaleString(LOC(),{timeZone:TZ,...o})}catch(x){return now.toLocaleString(LOC(),o)}};
+  $("ck-d").textContent=part({dateStyle:"medium"});$("ck-t").textContent=part({hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  const z=(new Intl.DateTimeFormat(LOC(),{timeZone:TZ,timeZoneName:"short"}).formatToParts(now).find(x=>x.type==="timeZoneName")||{}).value||"";$("ck-z").textContent=z;
+  e.title=part({dateStyle:"full",timeStyle:"long"})}
 async function sbTick(){try{const r=await fetch("/api/statusbar",{cache:"no-store"});if(r.ok)SBINFO=await r.json()}catch(e){}renderBarFacts()}
 {const watch=new MutationObserver(()=>{if(!watch.q){watch.q=requestAnimationFrame(()=>{watch.q=0;renderBar()})}});
   NOTE_SRC.forEach(([id])=>{const el=$(id);if(el)watch.observe(el,{attributes:true,childList:true,characterData:true,subtree:true})});

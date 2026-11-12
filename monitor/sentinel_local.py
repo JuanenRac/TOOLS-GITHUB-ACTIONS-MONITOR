@@ -815,6 +815,8 @@ class Sentinel:
         self.loading = "starting"
         self.saved_at = None
         self.history = self._load(HISTORY_FILE, {"days": {}})
+        if not isinstance(self.history.get("days"), dict):
+            self.history = {"days": {}}
         dispatch = self._load_dispatch()
         self.targets = dict(dispatch.TARGETS) if dispatch else {}
         self.finalize_fn = (lambda name, run_id, _m=dispatch: _m.finalize_command(name, run_id)) if dispatch else None   # the command `gha_dispatch_all.py finalize` prints
@@ -830,9 +832,11 @@ class Sentinel:
         self.roadmaps = roadmap_a9.Watcher(ctx["gh"], GITHUB_DIR / toolconfig.github_owner())   # A9: refreshed in its own thread, nothing is written
         cached = self._load(CACHE_FILE, {})
         if cached:
-            self.repo_info, self.alerts, self.perms = cached.get("repo_info", {}), cached.get("alerts", {}), cached.get("perms", {})
-            self.unreleased, self.saved_at = cached.get("unreleased", {}), cached.get("saved")
-            self.local_versions = cached.get("local_versions", {})
+            def mapping(key):      # a cache written by hand or cut in half must not take the sentinel down: only dictionaries are taken
+                return cached.get(key) if isinstance(cached.get(key), dict) else {}
+            self.repo_info, self.alerts, self.perms = mapping("repo_info"), mapping("alerts"), mapping("perms")
+            self.unreleased, self.saved_at = mapping("unreleased"), cached.get("saved")
+            self.local_versions = mapping("local_versions")
             self.surface.load(cached.get("surface"))
             if isinstance(cached.get("a2_resolved"), dict):
                 self.a2_resolved = cached["a2_resolved"]
@@ -841,9 +845,10 @@ class Sentinel:
     @staticmethod
     def _load(path, default):
         try:
-            return json.loads(Path(path).read_text(encoding="utf-8"))
+            value = json.loads(Path(path).read_text(encoding="utf-8"))
         except (OSError, ValueError):
             return default
+        return value if isinstance(value, type(default)) else default      # a file of the wrong shape (a list, a number) is as good as no file
 
     @staticmethod
     def _save(path, value):

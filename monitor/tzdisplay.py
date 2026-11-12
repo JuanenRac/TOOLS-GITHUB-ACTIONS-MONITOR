@@ -157,6 +157,7 @@ def at(value, zone=None):
             dst = _in_dst(naive, std, rule)
             offset = timedelta(minutes=std + (60 if dst else 0))
             return utc_dt.astimezone(timezone(offset, dst_name if dst else std_name))
+        return utc_dt      # a name nothing knows: UTC, never the zone of this computer by surprise (the doctor and the settings page say so)
     local = _local(ts)
     return local.replace(tzinfo=timezone(local.utcoffset(), _short_name(local.tzname(), local.utcoffset())))
 

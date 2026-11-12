@@ -7,6 +7,26 @@
 
 Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il proprio semver. La fonte è il CHANGELOG.md in inglese; questo file ha le stesse versioni e sezioni.
 
+## [Unreleased]
+
+### Aggiunto
+
+- **Una verifica che nessun testo esca dal suo riquadro** (`tools/check_overflow.py` e un test che si salta senza browser): la pagina viene aperta in un browser senza finestra nelle otto lingue, larga e stretta, percorre ogni scheda e finestra e fallisce se un testo è più largo di un riquadro con bordo o sfondo o esce dalla finestra.
+- **`display.blink_red_tiles`** (attivo per impostazione predefinita, nella scheda Impostazioni, nelle otto lingue): i riquadri in alto e gli elementi della barra in basso che diventano rossi lampeggiano dolcemente finché la causa non è risolta; con il movimento ridotto del sistema mostrano invece un bordo rosso fisso e più spesso.
+- **Un controllo del doctor per il fuso orario**: un fuso che né il sistema né la tabella interna conoscono viene segnalato e gli orari sono mostrati in UTC (prima ricadevano sul fuso del computer senza dirlo).
+- **La scheda Cronologia dice "n di N"** quando l'elenco è più corto di ciò che l'intestazione ha contato (il monitor conserva le 600 esecuzioni più recenti; i dati portano `runs_total`).
+
+### Modificato
+
+- **La barra in basso è ridisegnata**: ogni elemento è una pastiglia con il suo bordo, la connessione e la quota prendono il colore del loro stato, l'orologio è un riquadro con grandi cifre in grassetto tabulari, la data sopra e il fuso in piccolo, e la barra mantiene il suo ordine nelle finestre strette.
+- **Ogni riquadro lascia spezzare il testo invece di farlo uscire** (riquadri, pastiglie, etichette, celle, titoli, pulsanti delle finestre): l'ora dell'ultima lettura porta il fuso a parte in piccolo, le righe degli avvisi passano su due colonne nelle finestre strette e le griglie dei riquadri possono restringersi sotto il loro contenuto.
+
+### Corretto
+
+- **Un solo numero per i guasti aperti**: il riquadro "rossi su main", l'elenco degli avvisi, la barra in basso e il riepilogo contano la stessa cosa, un workflow la cui ultima esecuzione sul ramo predefinito è fallita (un guasto su un ramo di lavoro non appare più come avviso aperto), e la barra non dice mai "nessun avviso" finché ci sono avvisi aperti.
+- **L'avvio del monitor nomina la versione una sola volta**: la riga "GitHub Actions v..." che ripeteva l'intestazione sparisce; autore e licenza restano in una riga.
+- **File di stato danneggiati** (stato di collaborazione, cache e cronologia del sentinella di forma errata) vengono ignorati voce per voce invece di raggiungere il codice che li legge.
+
 ## [1.7.6]
 
 Il collegamento tra il monitor e uno strumento di IA: il feed coincide sempre con la pagina, ogni avviso dice perché è rosso, un flusso e tre strumenti MCP spingono le novità, un comando installa lo script di collegamento, la barra mostra se una IA è collegata e ogni file di stato è privato del suo proprietario.

@@ -7,6 +7,26 @@
 
 Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com o seu próprio semver. A fonte é o CHANGELOG.md em inglês; este ficheiro tem as mesmas versões e secções.
 
+## [Unreleased]
+
+### Adicionado
+
+- **Uma verificação de que nenhum texto sai da sua caixa** (`tools/check_overflow.py` e um teste que é ignorado sem navegador): a página é aberta num navegador sem janela nos oito idiomas, larga e estreita, percorre cada separador e janela, e falha se algum texto for mais largo do que uma caixa com borda ou fundo ou sair da janela.
+- **`display.blink_red_tiles`** (ativado por defeito, no separador Definições, nos oito idiomas): os quadros de cima e os elementos da barra inferior que ficam vermelhos piscam suavemente até a causa ser resolvida; com movimento reduzido no sistema, mostram em vez disso uma borda vermelha fixa e mais grossa.
+- **Uma verificação do doctor para o fuso horário**: um fuso que nem o sistema nem a tabela interna conhecem é assinalado, e as horas passam a ser mostradas em UTC (antes caíam no fuso do computador sem avisar).
+- **O separador Histórico diz "n de N"** quando a lista é mais curta do que o que o cabeçalho contou (o monitor guarda as 600 execuções mais recentes; os dados trazem `runs_total`).
+
+### Alterado
+
+- **A barra inferior foi redesenhada**: cada elemento é uma pastilha com a sua borda, a ligação e a quota tomam a cor do seu estado, o relógio é uma caixa com dígitos grandes, a negrito e tabulares, a data por cima e o fuso em letra pequena, e a barra mantém a sua ordem em janelas estreitas.
+- **Cada caixa deixa o texto quebrar em vez de sair** (quadros, pastilhas, etiquetas, células, títulos, botões das janelas): a hora da última leitura traz o fuso à parte em letra pequena, as linhas de alertas passam a duas colunas em janelas estreitas e as grelhas de quadros podem encolher abaixo do seu conteúdo.
+
+### Corrigido
+
+- **Um só número para as falhas abertas**: o quadro "vermelhos em main", a lista de alertas, a barra inferior e o resumo contam o mesmo, um workflow cuja última execução no ramo principal falhou (uma falha num ramo de trabalho já não aparece como alerta aberto), e a barra nunca diz "sem avisos" enquanto houver alertas abertos.
+- **O arranque do monitor nomeia a versão uma só vez**: desaparece a linha "GitHub Actions v..." que repetia o cabeçalho; o autor e a licença ficam numa linha.
+- **Ficheiros de estado danificados** (estado de colaboração, cache e histórico do sentinela com outra forma) são ignorados entrada a entrada em vez de chegarem ao código que os lê.
+
 ## [1.7.6]
 
 A ligação entre o monitor e uma ferramenta de IA: o feed coincide sempre com a página, cada alerta diz porque está vermelho, um fluxo e três ferramentas MCP empurram as novidades, um comando instala o script de ligação, a barra mostra se há uma IA ligada e todos os ficheiros de estado são privados do seu dono.

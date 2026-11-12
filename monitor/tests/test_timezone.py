@@ -88,7 +88,8 @@ class Zones(unittest.TestCase):
         out = tzdisplay.localize(text, MADRID)
         self.assertEqual(out, "2026-11-12 11:43:07 CET (10:43:07 UTC) repos=3 rate={'reset': '2026-11-12 11:54:09 CET (10:54:09 UTC)'} 2026-11-12 plain")
 
-    def test_an_unknown_name_falls_back_to_the_computer_and_is_refused_by_the_check(self):
+    def test_an_unknown_name_shows_utc_and_is_refused_by_the_check(self):
+        self.assertEqual(tzdisplay.clock("2026-11-12T10:43:07Z", "Nowhere/Atlantis"), "10:43 UTC")
         self.assertTrue(tzdisplay.valid_setting("local") and tzdisplay.valid_setting("utc") and tzdisplay.valid_setting(MADRID))
         self.assertFalse(tzdisplay.valid_setting("Nowhere/Atlantis"))
 
@@ -155,7 +156,7 @@ class Setting(unittest.TestCase):
 
     def test_the_default_and_the_template_say_local(self):
         import actions_monitor as am
-        self.assertEqual(am.DEFAULTS["display"], {"timezone": "local"})
+        self.assertEqual(am.DEFAULTS["display"], {"timezone": "local", "blink_red_tiles": True})
         template = json.loads((HERE / "actions_monitor.example.json").read_text(encoding="utf-8"))
         self.assertEqual(template["display"]["timezone"], "local")
 
