@@ -17,10 +17,10 @@ import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-ORDER = ("python", "gh", "login", "quota", "network", "folder", "port", "docker", "rich", "textual", "targets", "token", "exposure", "risks", "backend", "degraded", "credential", "timezone")
+ORDER = ("python", "gh", "login", "quota", "network", "folder", "port", "docker", "rich", "textual", "targets", "token", "exposure", "risks", "backend", "degraded", "credential", "timezone", "github_app")
 FIX = {"python": "https://www.python.org/downloads/", "gh": "winget install --id GitHub.cli   |   brew install gh   |   sudo apt install gh", "login": "gh auth login",
        "quota": "gh api rate_limit", "network": "gh api rate_limit", "folder": "", "port": "python actions_monitor.py --port 8800", "docker": "", "rich": "pip install rich",
-       "textual": "pip install textual", "targets": "python actions_monitor.py --init-catalog", "token": "", "exposure": "", "risks": "", "backend": "", "degraded": "", "credential": "", "timezone": ""}
+       "textual": "pip install textual", "targets": "python actions_monitor.py --init-catalog", "token": "", "exposure": "", "risks": "", "backend": "", "degraded": "", "credential": "", "timezone": "", "github_app": ""}
 
 
 def default_runner(args, timeout=20):
@@ -103,6 +103,7 @@ def run(runner=default_runner, folder=HERE, ports=(8765, 8766), python=None, con
     out["degraded"] = ("warn" if swallowed else "ok", (f"{swallowed}: " + ", ".join(f"{k} {v}" for k, v in sorted(origins.items(), key=lambda kv: -kv[1])[:5])) if swallowed else "0")
     out["credential"] = shared_credential(folder)
     out["timezone"] = time_zone(config)
+    out["github_app"] = github_app_check(config)
     return [{"id": name, "status": out[name][0], "detail": out[name][1], "fix": FIX[name] if out[name][0] != "ok" else ""} for name in ORDER]
 
 
@@ -113,6 +114,26 @@ def time_zone(config):
     display = config.get("display") if isinstance(config.get("display"), dict) else {}
     setting = os.environ.get("MONITOR_TIMEZONE", "").strip() or (display.get("timezone") if isinstance(display.get("timezone"), str) else "") or "local"
     return ("ok" if tzdisplay.valid_setting(setting) else "warn"), setting[:64]
+
+
+def github_app_check(config):
+    """("ok" | "warn", detail): off = ok; on = the program openssl, the key file and its permissions. Never the key, never a token."""
+    import github_app
+    cfg = github_app.settings(config)
+    if not cfg["enabled"]:
+        return "ok", "off"
+    problems = []
+    if not shutil.which("openssl"):
+        problems.append("openssl missing")
+    if not cfg["app_id"]:
+        problems.append("app_id missing")
+    if not cfg["key_path"]:
+        problems.append("key_path missing")
+    else:
+        warning = github_app.key_warning(cfg["key_path"])
+        if warning:
+            problems.append(warning)
+    return ("warn", "; ".join(problems)) if problems else ("ok", "on")
 
 
 def fingerprint(secret):

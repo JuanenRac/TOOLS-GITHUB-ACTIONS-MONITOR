@@ -82,6 +82,7 @@ DEFAULTS = {
     "webhook": {"enabled": False, "secret": "", "replay_seconds": 3600, "max_per_minute": 30},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default)
     "cache": {"etag": {"enabled": True, "ttl_hours": 24}},   # conditional reads: a 304 answer costs no quota (etagcache.py)
     "display": {"timezone": "local", "blink_red_tiles": True},   # blink_red_tiles: the red tiles and red items of the bar blink softly until the cause is solved; zone of the times written for people (log, reports, command line, notifications): local | utc | an IANA name such as Europe/Madrid
+    "github_app": {"enabled": False, "app_id": "", "key_path": "", "installation_id": ""},      # an optional GitHub App for the READS (its own allowance); only the PATH of the key is kept here (github_app.py)
     "central": {"source": "off", "max_age_minutes": 120, "git_dir": ""},      # the central panel of the profile repository as a base line that spends no allowance (central_source.py): off | git | http
     "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
     "updates": {"check": True},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
@@ -222,12 +223,30 @@ def load_config():
     return config
 
 
-def gh(*args, timeout=40, retries=2):
-    """Runs `gh` with a fixed argument list (no shell). Retries slow or flaky answers, not auth errors."""
+def app_kwargs(args):
+    """{"env": ...} with the installation token of the GitHub App as GH_TOKEN for a call that only READS (github_app.py), else {}: writes and actions keep the token of the user."""
+    try:
+        import github_app
+        if not github_app.is_read(args):
+            return {}
+        got = github_app.token(LIVE_CONFIG or toolconfig.raw_config())
+        if not got:
+            return {}
+        env = dict(os.environ)
+        env["GH_TOKEN"] = got
+        return {"env": env}
+    except Exception as error:   # noqa: BLE001 - the App never stops a read: the user's token answers
+        degraded.note("loop.extra", error)
+        return {}
+
+
+def gh(*args, timeout=40, retries=2, as_user=False):
+    """Runs `gh` with a fixed argument list (no shell). Retries slow or flaky answers, not auth errors. With the GitHub App on (github_app.*) the reads use its token and fall back to the user's."""
     last = ""
+    via_app = {} if as_user else app_kwargs(args)
     for attempt in range(retries + 1):
         try:
-            result = subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8", timeout=timeout, **secretstore.gh_kwargs())
+            result = subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8", timeout=timeout, **(via_app or secretstore.gh_kwargs()))
         except subprocess.TimeoutExpired:
             last = "timeout"
             time.sleep(resilience.backoff(attempt))
@@ -235,6 +254,12 @@ def gh(*args, timeout=40, retries=2):
         if result.returncode == 0:
             return json.loads(result.stdout) if result.stdout.strip() else None
         last = (result.stderr or result.stdout).strip()[:300]
+        if via_app:
+            import github_app
+            if github_app.should_retry_with_user(last):      # the App lacks a permission or its token was refused: the same read with the user's token
+                github_app._STATE.update({"token": "", "failed_at": time.time(), "error": github_app.clean(last)[:120]})
+                via_app = {}
+                continue
         if "401" in last or "Bad credentials" in last or ("403" in last and "rate limit" not in last.lower()):
             raise AuthError(last)
         if "404" in last:
@@ -685,6 +710,13 @@ def build(config, repos, started, refreshed, loading, progress_text):
         rate = {"remaining": limit["remaining"], "limit": limit["limit"], "reset": datetime.fromtimestamp(limit["reset"], timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
     except Exception:
         rate = None
+    rate_user = None
+    if (config.get("github_app") or {}).get("enabled") is True and rate is not None:
+        try:      # with the App on, `rate` is the allowance of the App; the one of the user is shown next to it (a free call)
+            core = gh("api", "rate_limit", retries=0, as_user=True)["resources"]["core"]
+            rate_user = {"remaining": core["remaining"], "limit": core["limit"], "reset": datetime.fromtimestamp(core["reset"], timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
+        except Exception:   # noqa: BLE001
+            rate_user = None
     hot = sum(1 for repo in repos if is_hot(repo, config, time.time()))
     red, approx = None, False
     if LITE["on"]:      # the lite edition has no sentinel: it counts the red workflows with the same small rule, guessing the default branch
@@ -699,7 +731,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
         "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "updated_local": tzdisplay.stamp(time.time()), "took": round(time.time() - started, 1),
         "repos": repos, "ecosystems": {repo: ecosystem_of(repo) for repo in repos},
         "runs": runs[:600], "runs_total": len(runs), "active": active, "issues": ISSUE_CACHE["items"], "failing": unresolved_failures(runs, {r: m.get("branch") for r, m in repo_meta(repos).items() if m.get("branch")}),
-        "errors": errors, "rate": rate, "stuck_minutes": config["stuck_minutes"],
+        "errors": errors, "rate": rate, "rate_user": rate_user, "stuck_minutes": config["stuck_minutes"],
         "mode": config["mode"], "refreshed": refreshed, "hot": hot, "loading": progress_text if loading else "",
         "quota_block": rate_block_state(rate), "min_rate": config["min_rate_remaining"], "paused_quota": bool(rate and rate["remaining"] < config["min_rate_remaining"]),
         "refresh_seconds": config["refresh_seconds"], "hot_only": hot_only_state(),
@@ -1697,6 +1729,11 @@ class Handler(BaseHTTPRequestHandler):
                     self.json_reply({"error": "unknown topic"}, 404)
                 else:
                     self.json_reply(found)
+        elif path == "/api/github-app/status":      # this computer only: asks the App for a token and says its name, installation, permissions and allowance (never the key or the token)
+            if not self.guard() or not self.this_computer():
+                return
+            import github_app
+            self.json_reply(github_app.status(LIVE_CONFIG or toolconfig.raw_config()))
         elif path == "/api/ai/state":      # read only, versioned: everything the monitor says, as signals (signals.py); the same in the lite and the complete edition
             if not self.guard():
                 return
