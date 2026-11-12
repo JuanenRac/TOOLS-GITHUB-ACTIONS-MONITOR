@@ -3,6 +3,7 @@
 """No text leaves its box: the page is opened in a headless browser in the eight languages, wide and narrow, and every box is measured (tools/check_overflow.py).
 
 Skipped when there is no Edge, Chrome or Chromium on this computer."""
+import os
 import sys
 import unittest
 from pathlib import Path
@@ -14,6 +15,7 @@ import check_overflow  # noqa: E402
 
 @unittest.skipUnless(check_overflow.edge(), "no Edge, Chrome or Chromium on this computer")
 class NoTextLeavesItsBox(unittest.TestCase):
+    @unittest.skipIf(os.environ.get("CI") and not os.environ.get("MONITOR_BROWSER_TESTS"), "fonts and browsers differ on the runners of the CI: the measurement runs on your computer (or with MONITOR_BROWSER_TESTS=1)")
     def test_every_language_wide_and_narrow(self):
         results = check_overflow.run(quiet=True)
         self.assertIsNotNone(results)
