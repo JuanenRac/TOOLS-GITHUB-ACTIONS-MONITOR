@@ -131,7 +131,9 @@ class LiteIsolation(unittest.TestCase):
         return done.stdout.strip()
 
     def test_lite_never_imports_the_sentinel_and_its_endpoints_are_404(self):
-        code = ("import threading, urllib.request, urllib.error\n"
+        # no call to GitHub in this test: the runners of the CI have a `gh` without a login that answers in tens of seconds, and what is looked at here is the answer of the endpoints
+        code = ("am.gh_read = am.gh = lambda *a, **k: (_ for _ in ()).throw(RuntimeError('no network in this test'))\n"
+                "import threading, urllib.request, urllib.error\n"
                 "from http.server import ThreadingHTTPServer\n"
                 "s = ThreadingHTTPServer(('127.0.0.1', 0), am.Handler); threading.Thread(target=s.serve_forever, daemon=True).start()\n"
                 "base = 'http://127.0.0.1:%d' % s.server_address[1]\n"

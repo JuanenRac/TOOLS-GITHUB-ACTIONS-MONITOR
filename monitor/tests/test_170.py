@@ -534,7 +534,7 @@ class LiveStatus(unittest.TestCase):
                   "s = ThreadingHTTPServer(('127.0.0.1', 0), am.Handler); threading.Thread(target=s.serve_forever, daemon=True).start()\n"
                   "try:\n    urllib.request.urlopen('http://127.0.0.1:%d/api/live-status' % s.server_address[1], timeout=5); print('200')\n"
                   "except urllib.error.HTTPError as e:\n    print(e.code)\n")
-        done = subprocess.run([sys.executable, "-I", "-c", "import sys; sys.path.insert(0, %r); sys.argv = ['x', '--lite']; import actions_monitor as am; am.enable_lite(); %s" % (str(HERE), script)],
+        done = subprocess.run([sys.executable, "-I", "-c", "import sys; sys.path.insert(0, %r); sys.argv = ['x', '--lite']; import actions_monitor as am; am.enable_lite(); am.gh_read = am.gh = (lambda *a, **k: (_ for _ in ()).throw(RuntimeError('no network in this test'))); %s" % (str(HERE), script)],
                               capture_output=True, text=True, timeout=60)
         self.assertEqual(done.stdout.strip(), "404", done.stdout + done.stderr)
 
@@ -546,7 +546,7 @@ class LiteKnowsNothing(unittest.TestCase):
         _testenv.guard(self)
 
     def run_lite(self, code):
-        script = "import sys; sys.path.insert(0, %r); sys.argv = ['x', '--lite']; import actions_monitor as am; am.enable_lite(); %s" % (str(HERE), code)
+        script = "import sys; sys.path.insert(0, %r); sys.argv = ['x', '--lite']; import actions_monitor as am; am.enable_lite(); am.gh_read = am.gh = (lambda *a, **k: (_ for _ in ()).throw(RuntimeError('no network in this test'))); %s" % (str(HERE), code)
         done = subprocess.run([sys.executable, "-I", "-c", script], capture_output=True, text=True, timeout=60)
         self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
         return done.stdout.strip()
