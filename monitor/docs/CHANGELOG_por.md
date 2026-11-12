@@ -36,7 +36,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 - **O arranque do monitor nomeia a versão uma só vez**: desaparece a linha "GitHub Actions v..." que repetia o cabeçalho; o autor e a licença ficam numa linha.
 - **Ficheiros de estado danificados** (estado de colaboração, cache e histórico do sentinela com outra forma) são ignorados entrada a entrada em vez de chegarem ao código que os lê.
 - **Uma quota do GitHub esgotada é UM aviso, não um erro por repositório**: as leituras dos repositórios param até à renovação (e retomam sozinhas), a lista de Alertas diz "Quota do GitHub esgotada até às HH:MM ... (N repositórios por atualizar)", a barra inferior também, nada fica vermelho e nada chega ao feed, ao som nem ao resumo como falha; os textos de erro do `gh` são cortados numa linha (sem parágrafo legal nem id do pedido) e muitos repositórios com o mesmo tipo de erro são agrupados numa linha.
-- **O Acerca de (e qualquer página) já não espera pela rede**: a verificação de uma nova versão do monitor era lida dentro do pedido de `/api/about` quando a sua resposta tinha mais de um dia, pelo que um `gh` sem sessão ou uma rede lenta faziam a janela Acerca de demorar de 10 a 25 segundos; agora a resposta da cache é devolvida de imediato e a leitura é feita por um fio em segundo plano, um de cada vez.
+- **O Acerca de (e qualquer página) já não espera pela rede**: a verificação de uma nova versão do monitor era lida dentro do pedido de /api/about quando a sua resposta tinha mais de um dia, pelo que um `gh` sem sessão ou uma rede lenta faziam a janela Acerca de demorar de 10 a 25 segundos; agora a resposta da cache é devolvida de imediato e a leitura é feita por um fio em segundo plano, um de cada vez.
 
 ## [1.7.6]
 
