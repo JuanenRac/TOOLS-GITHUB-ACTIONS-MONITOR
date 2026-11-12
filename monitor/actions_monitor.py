@@ -1899,7 +1899,7 @@ def update_info():
     state_file = state_dir() / ("update_check_lite.json" if LITE["on"] else "update_check.json")
     if DEMO["on"]:
         return updatecheck.view({"updates": {"check": False}}, TOOL_VERSION, {})
-    return updatecheck.check(config, TOOL_VERSION, lambda endpoint: gh_read(endpoint, retries=0), state_file=state_file, offline=LINK.state()["offline"])
+    return updatecheck.check(config, TOOL_VERSION, lambda endpoint: gh_read(endpoint, retries=0), state_file=state_file, offline=LINK.state()["offline"], background=True)      # never a network wait in the path of a page
 
 
 def RUN_CACHE_RESET():

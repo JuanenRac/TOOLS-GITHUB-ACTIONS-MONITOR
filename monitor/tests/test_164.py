@@ -131,8 +131,8 @@ class LiteIsolation(unittest.TestCase):
         return done.stdout.strip()
 
     def test_lite_never_imports_the_sentinel_and_its_endpoints_are_404(self):
-        # no call to GitHub in this test: the runners of the CI have a `gh` without a login that answers in tens of seconds, and what is looked at here is the answer of the endpoints
-        code = ("am.gh_read = am.gh = lambda *a, **k: (_ for _ in ()).throw(RuntimeError('no network in this test'))\n"
+        # a `gh` that hangs for 20 seconds (a runner without a login does): no page and no endpoint may wait for it, so every answer must come inside the budget of 5 seconds
+        code = ("import time\nam.gh_read = am.gh = lambda *a, **k: (time.sleep(20), 1 / 0)\n"
                 "import threading, urllib.request, urllib.error\n"
                 "from http.server import ThreadingHTTPServer\n"
                 "s = ThreadingHTTPServer(('127.0.0.1', 0), am.Handler); threading.Thread(target=s.serve_forever, daemon=True).start()\n"
@@ -140,7 +140,7 @@ class LiteIsolation(unittest.TestCase):
                 "codes = []\n"
                 "for path in ('/api/sentinel', '/api/sentinel/parte.txt', '/api/ai/actions', '/api/analytics', '/metrics', '/api/gh-action/plan', '/api/act/status', '/api/runners', '/api/mirror', '/api/otlp', '/api/github-token'):\n"
                 "    try:\n        urllib.request.urlopen(base + path, timeout=5); codes.append(200)\n    except urllib.error.HTTPError as e:\n        codes.append(e.code)\n"
-                "import time\nfor path in ('/api/health', '/api/about', '/api/quota', '/api/help/topics'):\n    t0 = time.time()\n    try:\n        status = urllib.request.urlopen(base + path, timeout=30).status\n        codes.append(status if time.time() - t0 < 25 else '%s answered %s after %.1f s' % (path, status, time.time() - t0))\n    except Exception as e:\n        codes.append(path + ' ' + type(e).__name__ + ' after %.1f s' % (time.time() - t0))\n"
+                "import time\nfor path in ('/api/health', '/api/about', '/api/quota', '/api/help/topics'):\n    t0 = time.time()\n    try:\n        status = urllib.request.urlopen(base + path, timeout=30).status\n        codes.append(status if time.time() - t0 < 5 else '%s answered %s after %.1f s' % (path, status, time.time() - t0))\n    except Exception as e:\n        codes.append(path + ' ' + type(e).__name__ + ' after %.1f s' % (time.time() - t0))\n"
                 "print(codes, 'sentinel_local' in sys.modules)")
         out = self.run_lite(code)
         self.assertTrue(out.endswith("False"), out)

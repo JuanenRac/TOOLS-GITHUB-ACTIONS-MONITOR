@@ -36,6 +36,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 - **El arranque del monitor nombra la versión una sola vez**: desaparece la línea "GitHub Actions v..." que repetía la cabecera; el autor y la licencia quedan en una línea.
 - **Ficheros de estado dañados** (estado de colaboración, caché e historial del centinela con otra forma) se ignoran entrada por entrada en vez de llegar al código que los lee.
 - **Una cuota de GitHub agotada es UN aviso, no un error por repositorio**: las lecturas de los repositorios se paran hasta la renovación (y se reanudan solas), la lista de Alertas dice "Cuota de GitHub agotada hasta las HH:MM ... (N repositorios sin refrescar)", la barra inferior también, nada se pone en rojo y nada llega al flujo, al sonido ni al resumen como fallo; los textos de error de `gh` se recortan a una línea (sin el párrafo legal ni el id de petición) y muchos repositorios con el mismo tipo de error se agrupan en una línea.
+- **Acerca de (y cualquier página) ya no espera a la red**: la comprobación de una versión nueva del monitor se leía dentro de la petición de `/api/about` cuando su respuesta tenía más de un día, así que un `gh` sin sesión o una red lenta hacían que la ventana Acerca de tardara de 10 a 25 segundos; ahora se devuelve al instante la respuesta de la caché y la lectura la hace un hilo en segundo plano, de una en una.
 
 ## [1.7.6]
 

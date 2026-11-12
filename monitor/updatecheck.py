@@ -11,6 +11,7 @@
 import json
 import os
 import re
+import threading
 import time
 from pathlib import Path
 import private_io
@@ -97,21 +98,47 @@ def view(config, current, state, offline=False):
             "checked_at": state.get("checked_at") or 0, "offline": bool(offline)}
 
 
-def check(config, current, reader, now=None, state_file=None, offline=False, force=False):
+_BUSY = set()
+_BUSY_LOCK = threading.Lock()
+
+
+def _refresh(reader, path, now, state):
+    try:
+        release = clean_release(reader(ENDPOINT))
+        _save(path, {"checked_at": int(now), "release": release})
+    except Exception:   # noqa: BLE001 - offline, air-gapped networks, rate limits: the check is silent, it tries again later
+        _save(path, dict(state, checked_at=int(now) - INTERVAL + 3600))      # tried again in an hour, not at every request
+
+
+def check(config, current, reader, now=None, state_file=None, offline=False, force=False, background=False):
     """The update state; reads the releases page through `reader(endpoint) -> dict` only when the check is on, the connection is up and the last answer is older than 24 hours.
-    Any error leaves the last answer in place and is never raised."""
+    Any error leaves the last answer in place and is never raised. With `background` the answer of the cache is returned AT ONCE and the read is made by a thread (never more than one at a time per file):
+    a page or an endpoint must not wait for the network (a `gh` without a login can take half a minute)."""
     now = time.time() if now is None else now
     path = state_file or STATE_FILE
     state = _load(path)
     cfg = settings(config)
     if cfg["check"] and not offline and (force or not state.get("checked_at") or now - float(state["checked_at"]) >= INTERVAL):
-        try:
-            release = clean_release(reader(ENDPOINT))
-            state = {"checked_at": int(now), "release": release}
-            _save(path, state)
-        except Exception:   # noqa: BLE001 - offline, air-gapped networks, rate limits: the check is silent, it tries again later
-            state = dict(state, checked_at=int(now) - INTERVAL + 3600)      # tried again in an hour, not at every request
-            _save(path, state)
+        if background:
+            with _BUSY_LOCK:
+                start = str(path) not in _BUSY
+                _BUSY.add(str(path))
+            if start:
+                def work():
+                    try:
+                        _refresh(reader, path, now, state)
+                    finally:
+                        with _BUSY_LOCK:
+                            _BUSY.discard(str(path))
+                threading.Thread(target=work, daemon=True).start()
+        else:
+            try:
+                release = clean_release(reader(ENDPOINT))
+                state = {"checked_at": int(now), "release": release}
+                _save(path, state)
+            except Exception:   # noqa: BLE001
+                state = dict(state, checked_at=int(now) - INTERVAL + 3600)
+                _save(path, state)
     return view(config, current, state, offline)
 
 

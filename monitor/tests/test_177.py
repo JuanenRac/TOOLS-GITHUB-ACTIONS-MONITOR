@@ -131,5 +131,35 @@ class QuotaPace(unittest.TestCase):
             self.assertNotEqual(i18n.tl(lang, "ui.sb_quota_out_t"), "ui.sb_quota_out_t", lang)
 
 
+class UpdateCheckNeverBlocks(unittest.TestCase):
+    def test_a_slow_read_is_made_in_the_background_and_the_answer_of_the_cache_is_immediate(self):
+        import threading
+        import time as _time
+        import updatecheck
+        gate = threading.Event()
+        calls = []
+
+        def slow_reader(endpoint):
+            calls.append(endpoint)
+            gate.wait(10)
+            return {"tag_name": "v9.9.9", "html_url": "https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases/tag/v9.9.9"}
+        with tempfile.TemporaryDirectory() as tmp:
+            state_file = Path(tmp) / "u.json"
+            started = _time.time()
+            first = updatecheck.check({}, "1.0.0", slow_reader, state_file=state_file, background=True)
+            second = updatecheck.check({}, "1.0.0", slow_reader, state_file=state_file, background=True)
+            self.assertLess(_time.time() - started, 2, "the page does not wait for the network")
+            self.assertFalse(first["newer"])
+            self.assertFalse(second["newer"])
+            gate.set()
+            for _ in range(100):
+                if state_file.is_file():
+                    break
+                _time.sleep(0.05)
+            self.assertEqual(len(calls), 1, "one read at a time")
+            self.assertTrue(updatecheck.check({}, "1.0.0", slow_reader, state_file=state_file, background=True)["newer"], "the next answer has what the thread read")
+            self.assertIn("background=True", (HERE / "actions_monitor.py").read_text(encoding="utf-8"))
+
+
 if __name__ == "__main__":
     unittest.main()
