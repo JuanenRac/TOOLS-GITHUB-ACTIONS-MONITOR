@@ -29,6 +29,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 - **One number for the open failures**: the tile "red on main", the list of alerts, the bar at the foot and the brief count the same thing, a workflow whose last run on the default branch failed (a failure on a work branch no longer shows as an open alert), and the bar never says "no notices" while alerts are open.
 - **The start-up of the monitor names the version once**: the line "GitHub Actions v..." that repeated the banner is gone; the author and the licence stay in one line.
 - **Damaged state files** (collab state, sentinel cache and history of the wrong shape) are ignored entry by entry instead of reaching the code that reads them.
+- **A used-up GitHub allowance is ONE notice, not one error per repository**: the reads of the repositories stop until the renewal (and resume by themselves), the Alerts list says "GitHub allowance used up until HH:MM ... (N repositories not refreshed)", the bar at the foot says it too, nothing turns red and nothing reaches the feed, the sound or the brief as a failure; the error texts of `gh` are cut to one line (no legal paragraph, no request id) and many repositories with the same kind of error are grouped in one line.
 
 ## [1.7.6]
 

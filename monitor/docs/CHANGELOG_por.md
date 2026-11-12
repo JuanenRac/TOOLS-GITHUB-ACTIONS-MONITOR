@@ -28,6 +28,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 - **Um só número para as falhas abertas**: o quadro "vermelhos em main", a lista de alertas, a barra inferior e o resumo contam o mesmo, um workflow cuja última execução no ramo principal falhou (uma falha num ramo de trabalho já não aparece como alerta aberto), e a barra nunca diz "sem avisos" enquanto houver alertas abertos.
 - **O arranque do monitor nomeia a versão uma só vez**: desaparece a linha "GitHub Actions v..." que repetia o cabeçalho; o autor e a licença ficam numa linha.
 - **Ficheiros de estado danificados** (estado de colaboração, cache e histórico do sentinela com outra forma) são ignorados entrada a entrada em vez de chegarem ao código que os lê.
+- **Uma quota do GitHub esgotada é UM aviso, não um erro por repositório**: as leituras dos repositórios param até à renovação (e retomam sozinhas), a lista de Alertas diz "Quota do GitHub esgotada até às HH:MM ... (N repositórios por atualizar)", a barra inferior também, nada fica vermelho e nada chega ao feed, ao som nem ao resumo como falha; os textos de erro do `gh` são cortados numa linha (sem parágrafo legal nem id do pedido) e muitos repositórios com o mesmo tipo de erro são agrupados numa linha.
 
 ## [1.7.6]
 

@@ -414,6 +414,47 @@ def is_hot(repo, config, now):
     return False
 
 
+RATE_BLOCK = {"until": 0.0, "unread": 0}      # while the allowance of GitHub is used up the reads of the repositories wait for the renewal: one notice, not one error per repository
+RATE_RE = re.compile(r"rate limit|api rate|secondary rate", re.I)
+
+
+def is_rate_limit(error):
+    return bool(RATE_RE.search(str(error or "")))
+
+
+def short_error(error, limit=160):
+    """The first line of an error of `gh`, without the legal paragraph and the request id GitHub adds to a rate limit message."""
+    text = str(error or "").strip().splitlines()[0] if str(error or "").strip() else ""
+    for cut in (" If you reach out", " (https://", " (http", " Request ID", " - Request"):
+        if cut in text:
+            text = text.split(cut)[0]
+    return text.strip(" .,:;")[:limit]
+
+
+def rate_block_start(now=None):
+    """The allowance ran out in the middle of a cycle: the reads stop until its renewal (the free call `rate_limit` says when; ten minutes if it cannot be read)."""
+    now = time.time() if now is None else now
+    until = now + 600
+    try:
+        reset = gh("api", "rate_limit", retries=0)["resources"]["core"]["reset"]
+        if reset > now:
+            until = float(reset) + 5
+    except Exception:   # noqa: BLE001 - the answer of rate_limit may itself be refused
+        pass
+    RATE_BLOCK["until"] = until
+    return until
+
+
+def rate_block_state(rate=None, now=None):
+    """{"blocked", "until", "unread"} for the page, the bar and the alerts: `until` is the renewal in ISO UTC."""
+    now = time.time() if now is None else now
+    blocked = now < RATE_BLOCK["until"] or bool(rate and rate.get("remaining") is not None and rate["remaining"] <= 0)
+    until = RATE_BLOCK["until"] if now < RATE_BLOCK["until"] else None
+    if rate and rate.get("reset") and blocked:
+        return {"blocked": True, "until": rate["reset"], "unread": RATE_BLOCK["unread"]}
+    return {"blocked": blocked, "until": datetime.fromtimestamp(until, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ") if until else None, "unread": RATE_BLOCK["unread"]}
+
+
 def refresh_runs(repos, config, progress=None):
     """Hot repositories every cycle with the full run list, cold ones only now and then with a short list."""
     now = time.time()
@@ -431,13 +472,25 @@ def refresh_runs(repos, config, progress=None):
         elif not only_hot and now - entry["at"] > tuned(config, "cold_refresh_seconds"):
             todo.append((repo, config["cold_runs_per_repo"]))
     done = 0
+    RATE_BLOCK["unread"] = 0
+    if time.time() < RATE_BLOCK["until"]:      # the allowance is still used up: nothing is asked until it renews (the old picture stays)
+        RATE_BLOCK["unread"] = len(todo)
+        return 0
     for start in range(0, len(todo), 40):  # chunks, so the page can show the first results while the rest loads
         chunk = todo[start:start + 40]
         with ThreadPoolExecutor(max_workers=config["max_workers"]) as pool:
             results = list(pool.map(lambda item: (item[0], *fetch_runs(*item)), chunk))
+        limited = False
         for repo, runs, error in results:
+            if error and is_rate_limit(error):
+                limited = True
+                continue      # not an error of the repository: the read is repeated after the renewal
             note_read(repo, runs, error)
         done += len(chunk)
+        if limited:
+            rate_block_start()
+            RATE_BLOCK["unread"] = len(todo) - done + sum(1 for _r, _x, e in results if e and is_rate_limit(e))
+            break
         if progress:
             progress(done, len(todo))
     return len(todo)
@@ -457,6 +510,7 @@ def note_read(repo, runs, error):
         else:
             RUN_CACHE[repo] = {"runs": [], "at": 0, "error": None, "fails": fails}
         return
+    error = short_error(error) or "gh failed"      # one line: no legal paragraph, no request id
     if entry:
         entry.update({"error": error, "fails": fails})      # keep the old runs, report the problem
     else:
@@ -623,7 +677,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
         "runs": runs[:600], "runs_total": len(runs), "active": active, "issues": ISSUE_CACHE["items"], "failing": unresolved_failures(runs, {r: m.get("branch") for r, m in repo_meta(repos).items() if m.get("branch")}),
         "errors": errors, "rate": rate, "stuck_minutes": config["stuck_minutes"],
         "mode": config["mode"], "refreshed": refreshed, "hot": hot, "loading": progress_text if loading else "",
-        "min_rate": config["min_rate_remaining"], "paused_quota": bool(rate and rate["remaining"] < config["min_rate_remaining"]),
+        "quota_block": rate_block_state(rate), "min_rate": config["min_rate_remaining"], "paused_quota": bool(rate and rate["remaining"] < config["min_rate_remaining"]),
         "refresh_seconds": config["refresh_seconds"], "hot_only": hot_only_state(),
         "offline": LINK.state(), "etag": ETAG["cache"].stats() if ETAG["cache"] else None,
         "hidden": HIDDEN["hidden"], "discovered": HIDDEN["discovered"], "hidden_names": HIDDEN["names"],
@@ -716,6 +770,22 @@ def announce_link(transition, config):
     except Exception as error:   # noqa: BLE001 - never stops the loop
         degraded.note("loop.step", error)
         pass
+
+
+def quota_delay(rate, floor, delay, now=None):
+    """The pause before the next cycle given the allowance of GitHub (it is shared by every tool of the account): below the floor the loop slows to 180 s so the agents and the owner keep what is left;
+    when nothing is left it waits for the renewal (at most an hour and five minutes), because every call would fail and spend the next allowance as soon as it arrives."""
+    if not rate or rate.get("remaining") is None:
+        return delay
+    if rate["remaining"] <= 0:
+        try:
+            reset = datetime.strptime(rate["reset"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp()
+            return max(delay, min(3900, int(reset - (time.time() if now is None else now)) + 5))
+        except (KeyError, TypeError, ValueError):
+            return max(delay, 600)
+    if rate["remaining"] < floor:
+        return max(delay, 180)
+    return delay
 
 
 def quota_watch(config):
@@ -949,8 +1019,9 @@ def loop(config):
                     AUTOSAVE.maybe(sentinel_local.AUDIT_DIR, SENTINEL["obj"].snapshot(), config.get("report_history_days", config.get("parte_history_days", 30)))
             except Exception:
                 pass
-            if data["rate"] and data["rate"]["remaining"] < config["min_rate_remaining"]:
-                delay = max(delay, 180)  # leave the GitHub allowance to the agents and the owner
+            delay = quota_delay(data.get("rate"), config["min_rate_remaining"], delay)
+            if time.time() < RATE_BLOCK["until"]:
+                delay = max(delay, min(3900, int(RATE_BLOCK["until"] - time.time()) + 1))
         except AuthError as error:
             with LOCK:
                 STATE["error"], STATE["hint"] = str(error), "auth"   # the page writes the hint in its own language

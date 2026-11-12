@@ -768,7 +768,8 @@ function alerts(d){
   d.active.filter(r=>r.stuck&&repoVisible(r.repo,d)).forEach(r=>a.push(`<div class="alert"><b>${esc(T("ui.a_stuck"))}</b> · ${esc(T("ui.a_stuck_line",{repo:r.repo,name:r.name,dur:fmt(r.seconds),limit:d.stuck_minutes}))} — <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(T("ui.link_run"))}</a></div>`));
   const withIssue=new Set(d.issues.map(i=>i.repo));
   d.failing.filter(r=>repoVisible(r.repo,d)&&!withIssue.has(r.repo)).slice(0,30).forEach(r=>a.push(`<div class="alert warn"><b>${esc(T("ui.a_unresolved"))}</b> · ${esc(T("ui.a_unresolved_line",{repo:r.repo,name:r.name,conclusion:r.conclusion,since:hora(r.started)}))} — <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(T("ui.link_run"))}</a> <span class="mut">${esc(T("ui.a_no_issue"))}</span></div>`));
-  Object.entries(d.errors).forEach(([k,v])=>a.push(`<div class="alert warn"><b>${esc(T("ui.a_nodata",{key:k}))}</b>: ${esc(v)}</div>`));
+  {const qb=d.quota_block;if(qb&&qb.blocked)a.push(`<div class="alert warn" id="quota-alert"><b>${esc(T("ui.a_quota_out",{time:qb.until?clock(qb.until,{hour:"2-digit",minute:"2-digit"}):"?",n:qb.unread||0}))}</b></div>`)}
+  {const errs=Object.entries(d.errors||{});if(errs.length>3)a.push(`<div class="alert warn"><b>${esc(T("ui.a_nodata_many",{n:errs.length}))}</b>: ${esc(errs[0][1])}</div>`);else errs.forEach(([k,v])=>a.push(`<div class="alert warn"><b>${esc(T("ui.a_nodata",{key:k}))}</b>: ${esc(v)}</div>`))}
   OPENALERTS=a.length;try{renderBar()}catch(e){}      // the bar at the foot says the same as this list: it is never "no notices" while alerts are open
   $("alerts").innerHTML=a.length?a.join(""):`<span style="color:var(--ok)">${esc(T("ui.a_none"))}</span>`;
 }
@@ -1537,6 +1538,7 @@ function renderBarFacts(){
   const conn=$("sb-conn-lamp"),ct=$("sb-conn-t");
   if(!d){conn.className="sb-lamp";ct.textContent=T("ui.sb_waiting")}
   else if(d.offline&&d.offline.offline){conn.className="sb-lamp bad";ct.textContent=T("ui.sb_offline");$("sb-conn").title=T("ui.sb_offline_t")}
+  else if(d.rate&&d.rate.remaining<=0){conn.className="sb-lamp bad";ct.textContent=T("ui.sb_quota_out",{time:clock(d.rate.reset,{hour:"2-digit",minute:"2-digit"})});$("sb-conn").title=T("ui.sb_quota_out_t")}
   else if(d.paused_quota){conn.className="sb-lamp warn";ct.textContent=T("ui.sb_quota_low");$("sb-conn").title=T("ui.sb_quota_low_t")}
   else{conn.className="sb-lamp ok";ct.textContent=T("ui.sb_online");$("sb-conn").title=T("ui.sb_online_t")}
   $("sb-conn").className="sb-item "+(conn.className.replace("sb-lamp","").trim());

@@ -113,5 +113,23 @@ class RedTilesBlink(unittest.TestCase):
                 self.assertNotEqual(i18n.tl(lang, key), key, lang)
 
 
+class QuotaPace(unittest.TestCase):
+    def test_the_loop_slows_down_below_the_floor_and_waits_for_the_renewal_when_nothing_is_left(self):
+        now = 1_000_000
+        stamp = lambda epoch: __import__("time").strftime("%Y-%m-%dT%H:%M:%SZ", __import__("time").gmtime(epoch))      # noqa: E731
+        self.assertEqual(am.quota_delay({"remaining": 4000, "reset": stamp(now + 100)}, 800, 120, now), 120)
+        self.assertEqual(am.quota_delay({"remaining": 500, "reset": stamp(now + 100)}, 800, 120, now), 180)
+        self.assertEqual(am.quota_delay({"remaining": 0, "reset": stamp(now + 1200)}, 800, 120, now), 1205)
+        self.assertEqual(am.quota_delay({"remaining": 0, "reset": stamp(now + 99999)}, 800, 120, now), 3900)
+        self.assertEqual(am.quota_delay({"remaining": 0, "reset": "garbage"}, 800, 120, now), 600)
+        self.assertEqual(am.quota_delay(None, 800, 120, now), 120)
+
+    def test_the_bar_says_until_when_the_allowance_is_used_up(self):
+        self.assertIn('T("ui.sb_quota_out"', PAGE)
+        for lang in i18n.LANGS:
+            self.assertIn("{time}", i18n.tl(lang, "ui.sb_quota_out"), lang)
+            self.assertNotEqual(i18n.tl(lang, "ui.sb_quota_out_t"), "ui.sb_quota_out_t", lang)
+
+
 if __name__ == "__main__":
     unittest.main()

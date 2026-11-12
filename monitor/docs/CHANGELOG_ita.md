@@ -28,6 +28,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 - **Un solo numero per i guasti aperti**: il riquadro "rossi su main", l'elenco degli avvisi, la barra in basso e il riepilogo contano la stessa cosa, un workflow la cui ultima esecuzione sul ramo predefinito è fallita (un guasto su un ramo di lavoro non appare più come avviso aperto), e la barra non dice mai "nessun avviso" finché ci sono avvisi aperti.
 - **L'avvio del monitor nomina la versione una sola volta**: la riga "GitHub Actions v..." che ripeteva l'intestazione sparisce; autore e licenza restano in una riga.
 - **File di stato danneggiati** (stato di collaborazione, cache e cronologia del sentinella di forma errata) vengono ignorati voce per voce invece di raggiungere il codice che li legge.
+- **Una quota GitHub esaurita è UN avviso, non un errore per repository**: le letture dei repository si fermano fino al rinnovo (e riprendono da sole), l'elenco degli avvisi dice "Quota di GitHub esaurita fino alle HH:MM ... (N repository non aggiornati)", la barra in basso anche, nulla diventa rosso e nulla arriva al feed, al suono o al riepilogo come guasto; i testi di errore di `gh` sono tagliati a una riga (senza paragrafo legale né id della richiesta) e molti repository con lo stesso tipo di errore sono raggruppati in una riga.
 
 ## [1.7.6]
 

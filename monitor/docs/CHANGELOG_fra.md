@@ -28,6 +28,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 - **Un seul chiffre pour les échecs ouverts** : la tuile « rouges sur main », la liste des alertes, la barre du bas et le résumé comptent la même chose, un workflow dont la dernière exécution sur la branche par défaut a échoué (un échec sur une branche de travail n'apparaît plus comme alerte ouverte), et la barre ne dit jamais « aucun avis » tant que des alertes sont ouvertes.
 - **Le démarrage du moniteur nomme la version une seule fois** : la ligne « GitHub Actions v... » qui répétait l'en-tête disparaît ; l'auteur et la licence restent sur une ligne.
 - **Fichiers d'état endommagés** (état de collaboration, cache et historique du sentinelle de mauvaise forme) : ils sont ignorés entrée par entrée au lieu d'atteindre le code qui les lit.
+- **Un quota GitHub épuisé est UN avis, pas une erreur par dépôt** : les lectures des dépôts s'arrêtent jusqu'au renouvellement (et reprennent seules), la liste des alertes dit « Quota de GitHub épuisé jusqu'à HH:MM ... (N dépôts non rafraîchis) », la barre du bas aussi, rien ne passe au rouge et rien n'arrive au flux, au son ni au résumé comme un échec ; les textes d'erreur de `gh` sont coupés à une ligne (sans paragraphe juridique ni identifiant de requête) et beaucoup de dépôts avec le même type d'erreur sont groupés sur une ligne.
 
 ## [1.7.6]
 

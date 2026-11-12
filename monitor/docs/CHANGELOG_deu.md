@@ -28,6 +28,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 - **Eine Zahl für die offenen Fehler**: Die Kachel "rot auf main", die Liste der Warnungen, die untere Leiste und die Zusammenfassung zählen dasselbe, einen Workflow, dessen letzter Lauf auf dem Standard-Branch fehlschlug (ein Fehler auf einem Arbeits-Branch erscheint nicht mehr als offene Warnung), und die Leiste sagt nie "keine Hinweise", solange Warnungen offen sind.
 - **Der Start des Monitors nennt die Version nur einmal**: Die Zeile "GitHub Actions v...", die die Kopfzeile wiederholte, entfällt; Autor und Lizenz bleiben in einer Zeile.
 - **Beschädigte Statusdateien** (Collab-Status, Sentinel-Cache und -Verlauf mit falscher Form) werden Eintrag für Eintrag ignoriert, statt den lesenden Code zu erreichen.
+- **Ein erschöpftes GitHub-Kontingent ist EIN Hinweis, nicht ein Fehler pro Repository**: Das Lesen der Repositories pausiert bis zur Erneuerung (und setzt von selbst fort), die Liste der Warnungen sagt "GitHub-Kontingent erschöpft bis HH:MM ... (N Repositories nicht aktualisiert)", die untere Leiste ebenfalls, nichts wird rot und nichts erreicht Feed, Ton oder Zusammenfassung als Fehler; die Fehlertexte von `gh` werden auf eine Zeile gekürzt (ohne Rechtstext und Anfrage-ID), und viele Repositories mit derselben Fehlerart werden in einer Zeile zusammengefasst.
 
 ## [1.7.6]
 

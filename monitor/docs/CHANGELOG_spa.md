@@ -28,6 +28,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 - **Una sola cifra para los fallos abiertos**: el recuadro "rojos en main", la lista de alertas, la barra inferior y el resumen cuentan lo mismo, un workflow cuya última ejecución en la rama principal falló (un fallo en una rama de trabajo ya no aparece como alerta abierta), y la barra nunca dice "sin avisos" mientras haya alertas abiertas.
 - **El arranque del monitor nombra la versión una sola vez**: desaparece la línea "GitHub Actions v..." que repetía la cabecera; el autor y la licencia quedan en una línea.
 - **Ficheros de estado dañados** (estado de colaboración, caché e historial del centinela con otra forma) se ignoran entrada por entrada en vez de llegar al código que los lee.
+- **Una cuota de GitHub agotada es UN aviso, no un error por repositorio**: las lecturas de los repositorios se paran hasta la renovación (y se reanudan solas), la lista de Alertas dice "Cuota de GitHub agotada hasta las HH:MM ... (N repositorios sin refrescar)", la barra inferior también, nada se pone en rojo y nada llega al flujo, al sonido ni al resumen como fallo; los textos de error de `gh` se recortan a una línea (sin el párrafo legal ni el id de petición) y muchos repositorios con el mismo tipo de error se agrupan en una línea.
 
 ## [1.7.6]
 
