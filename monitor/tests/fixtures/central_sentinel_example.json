@@ -3,7 +3,7 @@
  "_license": "GPL-3.0-or-later - see LICENSE",
  "asof": "2026-01-01T10:00:00Z",
  "schema": 1,
- "ci": {"checked": 12, "red": [{"repo": "demo-beta-fw", "workflow": "ci.yml", "since": "2026-01-01T08:00:00Z"}, {"repo": "demo-gamma-api", "workflow": "ci.yml", "since": "2026-01-01T09:00:00Z"}], "red_total": 2},
+ "ci": {"checked": 12, "red": [{"repo": "demo-beta-fw", "wf": "ci.yml"}, {"repo": "demo-gamma-api", "wf": "ci.yml"}], "red_total": 2},
  "ecosystems": {"alpha": {"cand": 1, "read": 6, "red": 0, "repos": 6, "unpub": 0}, "beta": {"cand": 0, "read": 6, "red": 2, "repos": 6, "unpub": 0}},
  "releases": {"candidates": [{"repo": "demo-alpha-app", "entries": 6, "published": "2025-12-01T00:00:00Z", "tag": "v1.0.0"}], "days": 30, "min_entries": 5, "total": 1},
  "signatures": {"invalid": 0, "verified": 3, "unverified": 1, "none": 0, "norelease": 2, "unverifiable": 0, "invalid_repos": []},

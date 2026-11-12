@@ -95,7 +95,7 @@ def inventory(data, panels=None, health=None, now=None):
         import central_source
         rows = []
         if central.get("ok") and not central.get("stale"):
-            rows = [_row(r.get("repo"), f"{r.get('workflow')}: red on the default branch (central panel)", "", _age(r.get("since"), now), "open the log of the run (or wait for your own reading to confirm)") for r in central["data"]["ci"]["red"]]
+            rows = [_row(r.get("repo"), f"{r.get('wf') or r.get('workflow')}: red on the default branch (central panel)", "", _age(r.get("since"), now), "open the log of the run (or wait for your own reading to confirm)") for r in central["data"]["ci"]["red"]]
         out.append(_signal("health.central", "health", "watch" if (not central.get("ok") or central.get("stale")) else "info", central_source.summary(central), rows, transient=not central.get("ok") or bool(central.get("stale"))))
     out.append(_signal("health.doctor", "health", "watch" if health.get("warnings") else "info", "; ".join(health.get("warnings") or []) or "no warning",
                        [_row("", w, "", None, "run the doctor: python actions_monitor.py --doctor") for w in health.get("warnings") or []]))

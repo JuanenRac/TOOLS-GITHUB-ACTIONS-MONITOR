@@ -4,6 +4,7 @@
 import json
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -85,9 +86,17 @@ class CentralSource(unittest.TestCase):
         rows = redrule.red_workflows(runs, None)[0]
         data = json.loads(EXAMPLE)
         self.assertEqual({r["repo"] for r in rows}, {r["repo"] for r in data["ci"]["red"]} & {"demo-beta-fw"})
-        self.assertTrue(set(rows[0]) >= {"repo", "workflow", "since"})
-        self.assertTrue({"repo", "workflow", "since"} <= set(data["ci"]["red"][0]))
+        self.assertTrue({"repo", "wf"} <= set(data["ci"]["red"][0]))      # the real rows: {"repo", "wf"}
 
+    def test_the_real_file_of_the_profile_repository_is_read_when_it_is_there(self):
+        real = Path("C:/Users/juane/Documents/GitHub/JuanenRac/data/sentinel.json")
+        if not real.is_file():
+            self.skipTest("no copy of the real file on this computer")
+        result = central_source.read({"central": {"source": "http"}}, "o", opener=lambda url: real.read_text(encoding="utf-8"), now=time.time())
+        self.assertTrue(result["ok"], result)
+        self.assertIsInstance(result["data"]["ci"]["red"], list)
+        for row in result["data"]["ci"]["red"]:
+            self.assertTrue(row["repo"] and "wf" in row)
 
 class Integration(unittest.TestCase):
     def setUp(self):

@@ -38,7 +38,8 @@ def validate(data):
     ci = data.get("ci")
     if not isinstance(ci, dict) or not isinstance(ci.get("red"), list):
         return None
-    ci["red"] = [r for r in ci["red"] if isinstance(r, dict) and isinstance(r.get("repo"), str)]
+    # the real rows are {"repo", "wf"} (the file name of the workflow); "workflow" is accepted too and both are kept under "wf"
+    ci["red"] = [{**r, "wf": str(r.get("wf") or r.get("workflow") or "")} for r in ci["red"] if isinstance(r, dict) and isinstance(r.get("repo"), str)]
     rel = data.get("releases") if isinstance(data.get("releases"), dict) else {}
     rel["candidates"] = [c for c in (rel.get("candidates") or []) if isinstance(c, dict) and isinstance(c.get("repo"), str)]
     data["releases"] = rel
