@@ -14,6 +14,25 @@ os.environ["MONITOR_TIMEZONE"] = "utc"      # texts for people in UTC unless a t
 import i18n  # noqa: E402
 import toolconfig  # noqa: E402
 
+# HERMETIC: no test may depend on a `gh` that is installed and logged in (the runners of the CI have none, or one without a login that takes tens of seconds to answer). Every `gh` this process starts
+# is replaced by a program that fails at once with a controlled message; a test that needs another answer mocks `subprocess.run` or the reader itself, which wins over this. The token variables are emptied.
+import subprocess  # noqa: E402
+
+os.environ.pop("GH_TOKEN", None)
+os.environ.pop("GITHUB_TOKEN", None)
+_RealPopen = subprocess.Popen
+
+
+class _NoGhPopen(_RealPopen):
+    def __init__(self, args, *more, **kwargs):
+        first = args[0] if isinstance(args, (list, tuple)) and args else None
+        if first == "gh" or (isinstance(first, str) and os.path.basename(first).lower() in ("gh", "gh.exe")):
+            args = [sys.executable, "-c", "import sys; sys.stderr.write('gh: not logged in (hermetic test)'); sys.exit(4)"]
+        super().__init__(args, *more, **kwargs)
+
+
+subprocess.Popen = _NoGhPopen
+
 i18n.set_language("en")
 toolconfig.set_owner("JuanenRac")
 

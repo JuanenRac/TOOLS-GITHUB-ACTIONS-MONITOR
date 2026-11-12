@@ -131,21 +131,33 @@ class LiteIsolation(unittest.TestCase):
         return done.stdout.strip()
 
     def test_lite_never_imports_the_sentinel_and_its_endpoints_are_404(self):
-        # a `gh` that hangs for 20 seconds (a runner without a login does): no page and no endpoint may wait for it, so every answer must come inside the budget of 5 seconds
-        code = ("import time\nam.gh_read = am.gh = lambda *a, **k: (time.sleep(20), 1 / 0)\n"
-                "import threading, urllib.request, urllib.error\n"
+        # No timing here (the runners of the CI are 3 to 10 times slower than a desktop): what is checked is that no page and no endpoint calls `gh` or the network in the thread that answers the request
+        # (a call there is a wait for the network that a runner without a login turns into half a minute). A `gh` that records who calls it and fails at once stands in for the real one.
+        code = ("import threading\n"
+                "calls_in_request = []\n"
+                "def _gh(*a, **k):\n"
+                "    name = threading.current_thread().name\n"
+                "    if 'process_request' in name:\n"
+                "        calls_in_request.append((name, a[:3]))\n"
+                "    raise RuntimeError('no network in this test')\n"
+                "am.gh_read = am.gh = _gh\n"
+                "import tempfile, pathlib\n"
+                "_state = pathlib.Path(tempfile.mkdtemp())\n"
+                "am.state_dir = lambda: _state\n"      # a clean state folder: the update notice is due, as on a new installation or a runner
+                "import urllib.request, urllib.error\n"
                 "from http.server import ThreadingHTTPServer\n"
                 "s = ThreadingHTTPServer(('127.0.0.1', 0), am.Handler); threading.Thread(target=s.serve_forever, daemon=True).start()\n"
                 "base = 'http://127.0.0.1:%d' % s.server_address[1]\n"
                 "codes = []\n"
                 "for path in ('/api/sentinel', '/api/sentinel/parte.txt', '/api/ai/actions', '/api/analytics', '/metrics', '/api/gh-action/plan', '/api/act/status', '/api/runners', '/api/mirror', '/api/otlp', '/api/github-token'):\n"
-                "    try:\n        urllib.request.urlopen(base + path, timeout=5); codes.append(200)\n    except urllib.error.HTTPError as e:\n        codes.append(e.code)\n"
-                "import time\nfor path in ('/api/health', '/api/about', '/api/quota', '/api/help/topics'):\n    t0 = time.time()\n    try:\n        status = urllib.request.urlopen(base + path, timeout=30).status\n        codes.append(status if time.time() - t0 < 5 else '%s answered %s after %.1f s' % (path, status, time.time() - t0))\n    except Exception as e:\n        codes.append(path + ' ' + type(e).__name__ + ' after %.1f s' % (time.time() - t0))\n"
-                "print(codes, 'sentinel_local' in sys.modules)")
+                "    try:\n        urllib.request.urlopen(base + path, timeout=60); codes.append(200)\n    except urllib.error.HTTPError as e:\n        codes.append(e.code)\n"
+                "for path in ('/api/health', '/api/about', '/api/quota', '/api/help/topics', '/api/ai/state', '/api/mode', '/api/discovery'):\n"
+                "    try:\n        codes.append(urllib.request.urlopen(base + path, timeout=120).status)\n    except Exception as e:\n        codes.append(path + ' ' + type(e).__name__)\n"
+                "print(codes, calls_in_request, 'sentinel_local' in sys.modules)")
         out = self.run_lite(code)
         self.assertTrue(out.endswith("False"), out)
         self.assertEqual(out.count("404"), 11, out)
-        self.assertIn("200, 200, 200, 200]", out)
+        self.assertIn("200, 200, 200, 200, 200, 200, 200] []", out, "every page answers 200 and none of them called GitHub in the request: " + out)
 
     def test_lite_has_its_own_files_and_port(self):
         out = self.run_lite("print(am.CONFIG_FILE.name, am.LOG_FILE.name, am.LITE_PORT, am.etagcache.CACHE_FILE.name, am.DEFAULTS['sentinel'])")
