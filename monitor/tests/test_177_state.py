@@ -104,6 +104,8 @@ class Editions(unittest.TestCase):
             self.assertIn(key, settings_api.LITE_KEYS, key)
 
     def test_a_running_monitor_answers_in_both_editions(self):
+        if not (HERE.parent / "tools" / "demo_monitor.py").is_file():
+            self.skipTest("the demo monitor lives in the repository, not in the release zip")
         for flavor in ("--lite", None):
             with socket.socket() as probe:
                 probe.bind(("127.0.0.1", 0))
@@ -111,12 +113,15 @@ class Editions(unittest.TestCase):
             args = [sys.executable, "-I", str(HERE.parent / "tools" / "demo_monitor.py"), str(port)] + ([flavor] if flavor else [])
             proc = subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             try:
+                ready = False
                 for _ in range(80):
                     try:
                         socket.create_connection(("127.0.0.1", port), 0.5).close()
+                        ready = True
                         break
                     except OSError:
                         time.sleep(0.5)
+                self.assertTrue(ready, "the demo monitor did not start listening")
                 with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/ai/state", timeout=20) as answer:
                     doc = json.load(answer)
                 self.assertEqual(doc["edition"], "lite" if flavor else "complete")
