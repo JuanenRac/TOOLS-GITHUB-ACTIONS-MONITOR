@@ -41,7 +41,7 @@ Eine Runde liest höchstens `max_repos_per_tick` Repositories, je zwei bedingte 
 ## Weniger Lärm: ignorieren und stummschalten
 
 - **Ignorier-Label**: Setze ein Label aus `ignore_labels` (standardmäßig `monitor:ignore`) **auf GitHub** an das Issue oder den Pull Request, und Collab löst dafür keinen Alarm aus. Der Monitor schreibt selbst nie Labels.
-- **Stummschaltung im Monitor**: Im Reiter Alarme hat jeder Alarm Knöpfe, um diesen Alarm, seine Regel oder den ganzen Wächter für `alerts.mute_hours` Stunden stummzuschalten (standardmäßig 24, von 1 bis 720). Sie läuft von selbst ab, lässt sich jederzeit aufheben, und der Reiter führt einen kurzen Verlauf, was bis wann stummgeschaltet war. Es ist eine Notiz dieses Monitors; auf GitHub ändert sich nichts.
+- **Stummschaltung im Monitor**: Im Reiter Alarme hat jeder Alarm Knöpfe, um diesen Alarm, seine Regel oder den ganzen Wächter für `alerts.mute_hours` Stunden stummzuschalten (standardmäßig 24, von 1 bis 720). Sie läuft von selbst ab, lässt sich jederzeit aufheben, und der Reiter führt einen kurzen Verlauf, was bis wann stummgeschaltet war. Es ist eine Notiz dieses Monitors; auf GitHub ändert sich nichts. Im Netzwerkmodus kann eine Stummschaltung nur von dem Rechner aus gesetzt (und aufgehoben) werden, auf dem der Monitor läuft (`this_computer`); ein Client im Netzwerk sieht sie und kann sie nicht ändern. Das bleibt so, bis eine spätere Ausgabe eigene Benutzer hat. Die Stummschaltung eines Alarms kann auch „bis sich das Element ändert" dauern (`until_change` in der Anfrage von `POST /api/alerts/mute`): Sie endet sofort, wenn sich das `updated_at` des Issues oder Pull Requests ändert, oder nach Ablauf der Stunden, was zuerst eintritt.
 
 ## Wo du es siehst
 

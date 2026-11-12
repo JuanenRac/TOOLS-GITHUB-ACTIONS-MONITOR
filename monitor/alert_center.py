@@ -6,7 +6,8 @@
 when. `GET /api/alerts` serves it (`?sentinel=ci|collab`, `?level=`, `?muted=show|hide|only`) and the Alerts tab draws it; the command line reads the same endpoint.
 
 Silencing is local, a note of this monitor and never a change on GitHub. It has a scope (this alert, a rule code, or a whole sentinel), an end (a number of hours, `alerts.mute_hours` by
-default, at most `MAX_HOURS`) and it lapses by itself. What was silenced stays in a short history, so it is visible who muted what and until when. Nothing here reads GitHub.
+default, at most `MAX_HOURS`) and it lapses by itself. A silence of one alert can also be "until the item changes" (`until_change`): it keeps the `updated_at` that the alert carried and ends
+at once when that value changes (a new comment, a push), or at the usual end of the hours, whichever comes first. What was silenced stays in a short history, so it is visible who muted what and until when. Nothing here reads GitHub.
 """
 import json
 import os
@@ -58,14 +59,17 @@ def _clean_value(value):
     return str(value or "").strip()[:200]
 
 
-def mute(scope, value, hours=None, config=None, now=None, who=""):
-    """Silences one alert id, one rule code or one sentinel for `hours` (default from the settings). Returns the entry, or None when the scope or the value is not valid."""
+def mute(scope, value, hours=None, config=None, now=None, who="", until_change=None):
+    """Silences one alert id, one rule code or one sentinel for `hours` (default from the settings). Returns the entry, or None when the scope or the value is not valid.
+    `until_change` is the `updated_at` the alert carries now (a string): only for the scope `alert`, the silence ends as soon as the alert carries another one."""
     value = _clean_value(value)
     if scope not in SCOPES or not value:
         return None
     now = time.time() if now is None else now
     length = hours if isinstance(hours, int) and not isinstance(hours, bool) and 1 <= hours <= MAX_HOURS else hours_setting(config)
     entry = {"scope": scope, "value": value, "from": _iso(now), "until": _iso(now + length * 3600), "until_ts": int(now + length * 3600), "hours": length, "who": str(who or "")[:60]}
+    if scope == "alert" and isinstance(until_change, str) and until_change.strip():
+        entry["until_change"] = until_change.strip()[:40]
     with LOCK:
         data = _load()
         data["active"] = [e for e in data["active"] if not (e.get("scope") == scope and e.get("value") == value)] + [entry]
@@ -110,9 +114,18 @@ def history(limit=30):
 
 def muted_until(alert, live):
     """The end of the silence that covers this alert (the longest one that does), or None."""
-    ends = [e["until"] for e in live if (e["scope"] == "alert" and e["value"] == alert.get("id")) or (e["scope"] == "code" and e["value"] == alert.get("code"))
+    ends = [e["until"] for e in live if (e["scope"] == "alert" and e["value"] == alert.get("id") and not changed(e, alert)) or (e["scope"] == "code" and e["value"] == alert.get("code"))
             or (e["scope"] == "sentinel" and e["value"] == alert.get("sentinel"))]
     return max(ends) if ends else None
+
+
+def changed(entry, alert):
+    """True when a silence "until the item changes" no longer applies: the `updated_at` the alert carries now is not the one it carried when the silence began."""
+    kept = entry.get("until_change")
+    if not kept:
+        return False
+    now = (alert.get("details") or {}).get("updated") if isinstance(alert.get("details"), dict) else None
+    return bool(now) and str(now) != kept
 
 
 def collect(registry, now=None):

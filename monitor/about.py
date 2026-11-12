@@ -38,7 +38,7 @@ def home_free(text):
 
 def info(lite, health, paths, update, language):
     """The dictionary of the panel. `paths` is {"config": Path, "log": Path, ...} (names to files; only the paths are shown, never their content)."""
-    return {"version": TOOL_VERSION, "edition": "lite" if lite else "full", "author": AUTHOR, "license": LICENSE_ID, "links": dict(LINKS),
+    return {"version": TOOL_VERSION, "edition": "lite" if lite else "complete", "author": AUTHOR, "license": LICENSE_ID, "links": dict(LINKS),
             "python": platform.python_version(), "implementation": platform.python_implementation(), "system": f"{platform.system()} {platform.release()} ({platform.machine()})",
             "paths": {name: home_free(path) for name, path in paths.items()}, "health": health, "update": update, "language": language,
             "credits": [{"id": i, "name": n, "license": lic, "installed": library_state(mod)} for i, n, lic, mod in CREDITS]}

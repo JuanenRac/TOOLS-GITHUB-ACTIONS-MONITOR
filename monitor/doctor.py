@@ -8,6 +8,7 @@ targets (your own targets.json or only the neutral example), token (the one-use 
 Every check is {"id", "status": ok | warn | fail, "detail", "fix"}; `run()` takes the way of running a command as an argument so the tests need no `gh`.
 """
 import json
+import os
 import shutil
 import socket
 import subprocess
@@ -16,10 +17,10 @@ import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-ORDER = ("python", "gh", "login", "quota", "network", "folder", "port", "docker", "rich", "textual", "targets", "token", "exposure", "risks", "backend", "degraded")
+ORDER = ("python", "gh", "login", "quota", "network", "folder", "port", "docker", "rich", "textual", "targets", "token", "exposure", "risks", "backend", "degraded", "credential")
 FIX = {"python": "https://www.python.org/downloads/", "gh": "winget install --id GitHub.cli   |   brew install gh   |   sudo apt install gh", "login": "gh auth login",
        "quota": "gh api rate_limit", "network": "gh api rate_limit", "folder": "", "port": "python actions_monitor.py --port 8800", "docker": "", "rich": "pip install rich",
-       "textual": "pip install textual", "targets": "python actions_monitor.py --init-catalog", "token": "", "exposure": "", "risks": "", "backend": "", "degraded": ""}
+       "textual": "pip install textual", "targets": "python actions_monitor.py --init-catalog", "token": "", "exposure": "", "risks": "", "backend": "", "degraded": "", "credential": ""}
 
 
 def default_runner(args, timeout=20):
@@ -100,7 +101,53 @@ def run(runner=default_runner, folder=HERE, ports=(8765, 8766), python=None, con
     import degraded
     swallowed, origins = degraded.read(folder)
     out["degraded"] = ("warn" if swallowed else "ok", (f"{swallowed}: " + ", ".join(f"{k} {v}" for k, v in sorted(origins.items(), key=lambda kv: -kv[1])[:5])) if swallowed else "0")
+    out["credential"] = shared_credential(folder)
     return [{"id": name, "status": out[name][0], "detail": out[name][1], "fix": FIX[name] if out[name][0] != "ok" else ""} for name in ORDER]
+
+
+def fingerprint(secret):
+    """A short digest that tells two equal credentials apart from two different ones without showing either: the first 8 hexadecimal digits of the SHA-256. Never the credential itself."""
+    import hashlib
+    return hashlib.sha256(str(secret).encode("utf-8")).hexdigest()[:8]
+
+
+def shared_credential(folder=HERE, env=None, loader=None):
+    """("ok" | "warn", detail): whether two or more accounts of the supervisor would read GitHub with the SAME personal access token. The credential of an account is the token kept by the
+    monitor when the configuration of that account turns `github_token.enabled` on (the store is one per user, so every such account gets the same one), else the token of the environment
+    (GH_TOKEN, GITHUB_TOKEN) that every account process inherits, else nothing (the login of `gh`, which is not compared). Only a fingerprint is compared and shown, never a token."""
+    import accounts
+    env = os.environ if env is None else env
+    try:
+        ids = accounts.enabled_accounts(folder)
+    except Exception:       # noqa: BLE001 - the doctor must always answer
+        ids = []
+    if len(ids) < 2:
+        return "ok", "single account" if not ids else "1"
+    inherited = next((env.get(name) for name in ("GH_TOKEN", "GITHUB_TOKEN") if (env.get(name) or "").strip()), "")
+    kept = None
+    groups = {}
+    for account_id in ids:
+        try:
+            cfg = json.loads(accounts.config_path(account_id, folder).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            cfg = {}
+        settings = cfg.get("github_token") if isinstance(cfg, dict) and isinstance(cfg.get("github_token"), dict) else {}
+        secret = ""
+        if settings.get("enabled") is True:
+            if kept is None:
+                try:
+                    import secretstore
+                    kept = (loader or secretstore.Store(settings.get("store") if settings.get("store") in ("auto", "system", "file") else "auto").load)() or ""
+                except Exception:       # noqa: BLE001
+                    kept = ""
+            secret = kept
+        secret = secret or inherited
+        if secret:
+            groups.setdefault(fingerprint(secret), []).append(account_id)
+    shared = {fp: names for fp, names in groups.items() if len(names) > 1}
+    if not shared:
+        return "ok", "%d accounts" % len(ids)
+    return "warn", "; ".join("%s: %s" % (fp, ", ".join(names[:6])) for fp, names in sorted(shared.items()))
 
 
 def risks(config):
@@ -150,11 +197,11 @@ def text(checks, translate, banner_for=None):
     return "\n".join(lines) + "\n"
 
 
-def as_json(checks, edition="full"):
+def as_json(checks, edition="complete"):
     """The checks as one JSON-ready dictionary: {"version", "edition", "ok", "checks": [{"id", "status", "detail", "fix"}]}. No secret and no path of a person."""
     from tool_version import TOOL_VERSION
     import about
-    return {"version": TOOL_VERSION, "edition": "lite" if edition == "lite" else "full", "ok": not any(c["status"] == "fail" for c in checks),
+    return {"version": TOOL_VERSION, "edition": "lite" if edition == "lite" else "complete", "ok": not any(c["status"] == "fail" for c in checks),
             "checks": [{**c, "detail": about.home_free(c["detail"])} for c in checks]}
 
 

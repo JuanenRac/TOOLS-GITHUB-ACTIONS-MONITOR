@@ -398,7 +398,8 @@
     "tls_cert_file": "",
     "tls_key_file": "",
     "secure_cookie": false,
-    "max_failed_attempts": 10
+    "max_failed_attempts": 10,
+    "query_access": true
   },
   "github_token": {
     "enabled": false,

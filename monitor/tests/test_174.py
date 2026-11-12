@@ -172,7 +172,7 @@ class Usage(unittest.TestCase):
 
     def test_every_text_of_the_cli_exists_in_the_eight_languages_and_the_help_runs_in_each(self):
         used = set(re.findall(r'i18n\.t\("(cli\.[a-z_]+)"', (HERE / "monitor_cli.py").read_text(encoding="utf-8")))
-        used = {k for k in used if not k.endswith("_")} | {"cli.edition_full", "cli.edition_lite", "cli.live_on", "cli.live_off"}
+        used = {k for k in used if not k.endswith("_")} | {"cli.edition_complete", "cli.edition_lite", "cli.live_on", "cli.live_off"}
         for lang in ("en", "es", "de", "fr", "it", "ja", "zh", "pt"):
             catalogue = json.loads((HERE / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
             for key in used:

@@ -20,7 +20,7 @@
 | `alerts` | gli avvisi di tutte le sentinelle in un elenco: `--sentinel ci\|collab`, `--level info\|warning\|error`, `--muted show\|hide\|only` | no |
 | `live` | lo stato del ricevitore del webhook e gli ultimi eventi | no |
 
-Opzioni di tutti i comandi: `--json` (la risposta come un documento JSON: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (porta 8766), `--timeout SECONDI` (da 1 a 60), `--lang CODICE`. In modalità di rete metti il token di accesso nella variabile d'ambiente `MONITOR_TOKEN` (viaggia nell'intestazione `X-Monitor-Access`, mai nell'indirizzo e mai a schermo).
+Opzioni di tutti i comandi: `--json` (la risposta come un documento JSON: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (porta 8766), `--timeout SECONDI` (da 1 a 60), `--lang CODICE`. In modalità di rete metti il token di accesso nella variabile d'ambiente `MONITOR_ACCESS_TOKEN`, quella che legge il monitor stesso (`MONITOR_TOKEN` è accettata come alias; `--token TOKEN` è l'ultima risorsa, perché un'opzione compare nell'elenco dei processi). L'ordine: `MONITOR_ACCESS_TOKEN`, poi `MONITOR_TOKEN`, poi `--token`. Viaggia nell'intestazione `X-Monitor-Access`, mai nell'indirizzo e mai a schermo. Un `--url` in `http` non cifrato verso un altro computer stampa un avviso su stderr (il token e le risposte viaggerebbero in chiaro): usa `https` fuori da una rete che controlli.
 
 ## Codici di uscita (stabili)
 
@@ -39,7 +39,7 @@ Opzioni di tutti i comandi: `--json` (la risposta come un documento JSON: `{"ok"
 python monitor_cli.py health && python monitor_cli.py alerts --fail-on error
 python monitor_cli.py alerts --sentinel collab --level warning --json
 python monitor_cli.py status --account org-acme
-MONITOR_URL=http://192.168.0.20:8765 MONITOR_TOKEN=... python monitor_cli.py health --json
+MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python monitor_cli.py health --json
 ```
 
 `health` distingue tre cose: il monitor non risponde (2), l'accesso a GitHub fallisce (3) e la quota è esaurita o GitHub non è raggiungibile (4); un monitor che non ha finito la prima lettura lo dice (4) invece di mostrare cifre vuote.

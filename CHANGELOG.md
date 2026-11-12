@@ -8,6 +8,30 @@
 
 The history of GitHub Actions Monitor, from the first version to the latest. Each version groups its changes under Added, Changed, Fixed and Security.
 
+## [Unreleased]
+
+Work in progress after 1.7.4.
+
+### Added
+
+- **`monitor_cli.py --token TOKEN`**, and the access token of the command line now has the name the monitor itself reads: `MONITOR_ACCESS_TOKEN`, then its alias `MONITOR_TOKEN`, then `--token` (a flag shows in the list of processes, so it is the last resort). The message of a refused client names the variable. Tested against a fake monitor that demands the header.
+- **A warning on stderr** when `monitor_cli.py` is pointed at plain `http` on another computer (the token and the answers would travel unencrypted); the answer and `--json` are not touched.
+- **`listen.query_access`** (on by default, in the Settings tab, in the eight languages): turn it off and the deprecated `?access=` address is refused, so the session opens only with `POST /api/access` (the token in the body) or the header. The address that works answers with a `Deprecation` header and the console says it is deprecated.
+- **A silence "until the item changes"**: `POST /api/alerts/mute` takes `until_change` for one alert; the silence keeps the `updated_at` the issue or pull request had and ends at once when it changes (a new comment, a push), or at the end of the hours, whichever comes first. The alerts of Collab now carry `details.updated`.
+- **A doctor check for one token shared by several accounts** (`credential`): it compares only a short fingerprint of the tokens the accounts would read GitHub with (the token kept by the monitor, or `GH_TOKEN` / `GITHUB_TOKEN` of the environment) and lists the accounts that share one; the token itself is never shown.
+- Tests for each change, including a webhook hygiene test: a payload with a secret, an e-mail, a commit message and a token reaches neither the live list, nor the feed, nor a notification, and the live list is now filtered by a list of allowed fields.
+
+### Changed
+
+- **The API calls the edition `complete`** (it said `full`) in `/api/about`, `/api/statusbar`, `--doctor --json` and the command line; `full` stays reserved for what the sentinel may execute. The page and the command line still understand both words.
+- **Silences are made only from the computer of the monitor** (also in the network mode, until the editions with users): the guide of Collab says so in the eight languages, and a test keeps the route behind that rule.
+- **The workflows of this repository use actions pinned to a full commit**, with the version in a comment, and a test keeps them so.
+
+### Security
+
+- **`/api/statusbar` no longer hands the address of the computer on the local network (`lan_address`) to a client of the network** in the network mode; the bar draws without it.
+- The deprecated `?access=` address is honoured only on a `GET`.
+
 ## [1.7.4]
 
 A bar at the foot of the page for the notices and the facts of the monitor, a full screen button, tables that sort by one or several columns with the columns of your choice, and the command line as a client of the running monitor.

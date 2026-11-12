@@ -230,7 +230,7 @@ class Server(unittest.TestCase):
             am.LITE["on"] = lite
             code, about_data = self.call("/api/about?lang=es")
             self.assertEqual(code, 200)
-            self.assertEqual((about_data["version"], about_data["edition"]), (TOOL_VERSION, "lite" if lite else "full"))
+            self.assertEqual((about_data["version"], about_data["edition"]), (TOOL_VERSION, "lite" if lite else "complete"))
             self.assertTrue(about_data["update"]["newer"])
             self.assertIn("Python", about_data["support"])
             self.assertEqual(set(about_data["links"]) >= {"repository", "releases", "changelog", "documentation", "issues"}, True)
@@ -288,7 +288,7 @@ class PageWiring(unittest.TestCase):
 
     def test_the_new_texts_exist_in_the_eight_languages(self):
         keys = set(re.findall(r'T\("(ui\.(?:about|help|wiz|disc|lvl|update|path|health|credit|edition)[a-z_0-9]*)"', self.page)) | {"ui.ic_about", "ui.ic_help", "upd.available", "doctor.title", "help.none"}
-        keys = {k for k in keys if not k.endswith("_")} | {f"ui.wiz_{n}_{p}" for n in (1, 2, 3) for p in "ht"} | {f"ui.credit_{c}" for c in ("python", "gh", "rich", "textual")} | {"ui.edition_full", "ui.edition_lite"}
+        keys = {k for k in keys if not k.endswith("_")} | {f"ui.wiz_{n}_{p}" for n in (1, 2, 3) for p in "ht"} | {f"ui.credit_{c}" for c in ("python", "gh", "rich", "textual")} | {"ui.edition_complete", "ui.edition_lite"}
         for lang in i18n.LANGS:
             cat = i18n.catalogue(lang)
             for key in keys:

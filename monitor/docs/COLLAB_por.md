@@ -41,7 +41,7 @@ Uma ronda lê no máximo `max_repos_per_tick` repositórios, com dois pedidos co
 ## Menos ruído: ignorar e silenciar
 
 - **Etiqueta de ignorar**: ponha no GitHub uma etiqueta de `ignore_labels` (`monitor:ignore` por omissão) na issue ou no pull request e a Collab não gera alerta para ele. O monitor nunca escreve etiquetas.
-- **Silêncio no monitor**: no separador Alertas, cada alerta tem botões para silenciar esse alerta, a sua regra ou toda a sentinela durante `alerts.mute_hours` horas (24 por omissão, de 1 a 720). Caduca sozinho, pode repor-se quando quiser e o separador guarda um histórico curto do que foi silenciado e até quando. É uma nota deste monitor; no GitHub nada muda.
+- **Silêncio no monitor**: no separador Alertas, cada alerta tem botões para silenciar esse alerta, a sua regra ou toda a sentinela durante `alerts.mute_hours` horas (24 por omissão, de 1 a 720). Caduca sozinho, pode repor-se quando quiser e o separador guarda um histórico curto do que foi silenciado e até quando. É uma nota deste monitor; nada muda no GitHub. No modo de rede um silêncio só pode ser feito (e levantado) a partir do computador onde o monitor corre (`this_computer`); um cliente da rede vê os silêncios e não os pode alterar. Continuará assim até uma edição posterior ter utilizadores próprios. O silêncio de um alerta também pode durar «até o item mudar» (`until_change` no pedido de `POST /api/alerts/mute`): termina logo que o `updated_at` da issue ou do pull request muda, ou no fim das horas, o que acontecer primeiro.
 
 ## Onde se vê
 

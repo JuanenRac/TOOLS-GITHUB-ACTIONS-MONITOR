@@ -20,7 +20,7 @@
 | `alerts` | les alertes de toutes les sentinelles dans une liste : `--sentinel ci\|collab`, `--level info\|warning\|error`, `--muted show\|hide\|only` | non |
 | `live` | l'état du récepteur de webhook et les derniers évènements | non |
 
-Options de toutes les commandes : `--json` (la réponse comme un document JSON : `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (port 8766), `--timeout SECONDES` (1 à 60), `--lang CODE`. En mode réseau, mettez le jeton d'accès dans la variable d'environnement `MONITOR_TOKEN` (il voyage dans l'en-tête `X-Monitor-Access`, jamais dans l'adresse ni à l'écran).
+Options de toutes les commandes : `--json` (la réponse comme un document JSON : `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (port 8766), `--timeout SECONDES` (1 à 60), `--lang CODE`. En mode réseau, mettez le jeton d'accès dans la variable d'environnement `MONITOR_ACCESS_TOKEN`, celle que lit le moniteur lui-même (`MONITOR_TOKEN` est accepté comme alias ; `--token JETON` est le dernier recours, car une option apparaît dans la liste des processus). L'ordre : `MONITOR_ACCESS_TOKEN`, puis `MONITOR_TOKEN`, puis `--token`. Il voyage dans l'en-tête `X-Monitor-Access`, jamais dans l'adresse ni à l'écran. Un `--url` en `http` non chiffré vers un autre ordinateur affiche un avertissement sur stderr (le jeton et les réponses circuleraient en clair) : utilisez `https` hors d'un réseau que vous contrôlez.
 
 ## Codes de sortie (stables)
 
@@ -39,7 +39,7 @@ Options de toutes les commandes : `--json` (la réponse comme un document JSON :
 python monitor_cli.py health && python monitor_cli.py alerts --fail-on error
 python monitor_cli.py alerts --sentinel collab --level warning --json
 python monitor_cli.py status --account org-acme
-MONITOR_URL=http://192.168.0.20:8765 MONITOR_TOKEN=... python monitor_cli.py health --json
+MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python monitor_cli.py health --json
 ```
 
 `health` distingue trois choses : le moniteur ne répond pas (2), la connexion GitHub échoue (3), et le quota est épuisé ou GitHub est injoignable (4) ; un moniteur qui n'a pas fini sa première lecture le dit (4) au lieu de montrer des chiffres vides.

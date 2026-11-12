@@ -11,13 +11,15 @@
   health    a quick check before reading anything heavy: is the monitor reachable, does it accept this client, does the GitHub credential of the account answer (a limit of the
             allowance is told apart from a credential that failed). Alias: check
 
-Every command takes --json (the answer as one JSON document), --account ID, --url URL, --timeout SECONDS and --lang CODE. Nothing here writes to GitHub or changes a setting.
+Every command takes --json (the answer as one JSON document), --account ID, --url URL, --timeout SECONDS and --lang CODE. In the network mode the access token is read from MONITOR_ACCESS_TOKEN,
+then from its alias MONITOR_TOKEN, then from --token (the last resort: a flag shows in the list of processes); plain http to another computer prints a warning on stderr. Nothing here writes to GitHub or changes a setting.
 The lite edition answers `status`, `doctor` and `health` (use --lite for its port 8766); the rest need the complete edition.
 
 Exit codes (stable): 0 all right; 1 wrong use of the command; 2 the monitor cannot be reached; 3 the monitor or GitHub refuses the credential (access token of the network mode, or the login
 of GitHub); 4 the monitor answers but is degraded (offline, allowance exhausted, no data yet) or an answer that cannot be read; 5 `alerts --fail-on LEVEL` found alerts of that level or worse.
 """
 import argparse
+import ipaddress
 import json
 import os
 import sys
@@ -35,7 +37,8 @@ EXIT_OK, EXIT_USAGE, EXIT_DOWN, EXIT_AUTH, EXIT_DEGRADED, EXIT_ALERTS = 0, 1, 2,
 COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check")
 LITE_COMMANDS = ("status", "doctor", "health", "check")
 LEVELS = ("info", "warning", "error")
-PORTS = {"full": 8765, "lite": 8766}
+PORTS = {"complete": 8765, "lite": 8766}
+TOKEN_VARIABLES = ("MONITOR_ACCESS_TOKEN", "MONITOR_TOKEN")      # the first is the one the monitor itself reads; the second is an alias
 
 
 class CliError(Exception):
@@ -44,12 +47,34 @@ class CliError(Exception):
         self.code, self.text = code, text
 
 
+def resolve_token(env=None, flag=""):
+    """The access token of the network mode: MONITOR_ACCESS_TOKEN, else its alias MONITOR_TOKEN, else the `--token` flag (the last resort: a flag shows in the list of processes)."""
+    env = os.environ if env is None else env
+    for name in TOKEN_VARIABLES:
+        value = (env.get(name) or "").strip()
+        if value:
+            return value
+    return (flag or "").strip()
+
+
+def plain_http_to_network(url):
+    """The host when `url` is plain http to an address that is not this computer (the token and the answers would travel in the clear), else ''."""
+    parts = urlparse(url if "://" in url else "http://" + url)
+    host = (parts.hostname or "").lower()
+    if parts.scheme != "http" or not host or host == "localhost":
+        return ""
+    try:
+        return "" if ipaddress.ip_address(host).is_loopback else host
+    except ValueError:
+        return host
+
+
 def base_url(url=None, lite=False, env=None):
     """The address of the monitor: --url, else MONITOR_URL, else 127.0.0.1 on the port of the edition. Only http and https are accepted; a path or a query is dropped."""
     env = os.environ if env is None else env
     chosen = (url or env.get("MONITOR_URL") or "").strip()
     if not chosen:
-        return f"http://127.0.0.1:{PORTS['lite' if lite else 'full']}"
+        return f"http://127.0.0.1:{PORTS['lite' if lite else 'complete']}"
     parts = urlparse(chosen if "://" in chosen else "http://" + chosen)
     try:
         port_ok = parts.port is None or 0 < parts.port < 65536
@@ -94,11 +119,11 @@ def cmd_status(ctx):
     data = answer.get("data") or {}
     figures = data.get("figures") or {}
     rate = data.get("rate") or {}
-    payload = {"version": health.get("version"), "edition": "lite" if health.get("lite") else "full", "account": health.get("account"), "uptime_seconds": health.get("uptime_seconds"),
+    payload = {"version": health.get("version"), "edition": "lite" if health.get("lite") else "complete", "account": health.get("account"), "uptime_seconds": health.get("uptime_seconds"),
                "repos": len(data.get("repos") or []), "active": figures.get("active"), "queued": figures.get("queued"), "failures_24h": figures.get("fail24"), "successes_24h": figures.get("ok24"),
                "red_workflows": figures.get("red"), "updated": data.get("updated"), "offline": bool((data.get("offline") or {}).get("offline")),
                "allowance": {"remaining": rate.get("remaining"), "limit": rate.get("limit"), "reset": rate.get("reset")}, "error": answer.get("error") or None}
-    lines = [i18n.t("cli.status_head", version=payload["version"], edition=i18n.t("cli.edition_" + payload["edition"]), account=payload["account"] or "-"),
+    lines = [i18n.t("cli.status_head", version=payload["version"], edition=i18n.t("cli.edition_" + ("lite" if payload["edition"] == "lite" else "complete")), account=payload["account"] or "-"),
              i18n.t("cli.status_repos", n=payload["repos"], active=payload["active"], queued=payload["queued"], fail=payload["failures_24h"], ok=payload["successes_24h"]),
              i18n.t("cli.status_allowance", remaining=rate.get("remaining", "-"), limit=rate.get("limit", "-")),
              i18n.t("cli.status_updated", when=payload["updated"] or "-")]
@@ -149,7 +174,7 @@ def cmd_doctor(ctx):
     import doctor
     import toolconfig
     checks = doctor.run(config=toolconfig.raw_config())
-    edition = "lite" if ctx.get("lite") else "full"
+    edition = "lite" if ctx.get("lite") else "complete"
     return doctor.as_json(checks, edition), doctor.text(checks, i18n.t, edition).rstrip("\n").split("\n"), doctor.exit_code(checks)
 
 
@@ -201,6 +226,7 @@ def build_parser():
     ap.add_argument("--account", metavar="ID", default="", help=i18n.t("cli.help_account"))
     ap.add_argument("--url", metavar="URL", default="", help=i18n.t("cli.help_url"))
     ap.add_argument("--lite", action="store_true", help=i18n.t("cli.help_lite"))
+    ap.add_argument("--token", metavar="TOKEN", default="", help=i18n.t("cli.help_token"))
     ap.add_argument("--timeout", type=float, default=8.0, metavar="SECONDS", help=i18n.t("cli.help_timeout"))
     ap.add_argument("--sentinel", choices=("ci", "collab"), default="", help=i18n.t("cli.help_sentinel"))
     ap.add_argument("--level", choices=LEVELS, default="", help=i18n.t("cli.help_level"))
@@ -229,8 +255,11 @@ def main(argv=None):
         print(i18n.t("cli.lite_only"), file=sys.stderr)
         return EXIT_USAGE
     try:
-        ctx = {"base": base_url(args.url, args.lite), "account": args.account, "timeout": max(1.0, min(60.0, args.timeout)), "token": os.environ.get("MONITOR_TOKEN", ""),
+        ctx = {"base": base_url(args.url, args.lite), "account": args.account, "timeout": max(1.0, min(60.0, args.timeout)), "token": resolve_token(flag=args.token),
                "sentinel": args.sentinel, "level": args.level, "muted": args.muted, "fail_on": args.fail_on, "lite": args.lite}
+        insecure = plain_http_to_network(ctx["base"])
+        if insecure:
+            print(i18n.t("cli.plain_http", host=insecure), file=sys.stderr)
         payload, lines, code = HANDLERS[args.command](ctx)
     except CliError as error:
         if args.json:

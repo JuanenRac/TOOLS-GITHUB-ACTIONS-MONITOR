@@ -233,6 +233,19 @@ def from_this_computer(client_address):
         return False
 
 
+def query_access_allowed(config):
+    """True while the deprecated `?access=` address may open the session (`listen.query_access`, default on so that nothing already set up breaks). The token in an address ends up in the
+    history, the logs and the Referer: turn it off and the session is opened by `POST /api/access` (the token in the body) or by the header."""
+    cfg = config.get("listen") if isinstance(config, dict) and isinstance(config.get("listen"), dict) else {}
+    return cfg.get("query_access") is not False
+
+
+def query_token_counts(command, path, config):
+    """The `?access=` token is honoured only on a GET (never on another verb, where it would sit in the address of a request that changes something) and only while
+    `listen.query_access` is on. It opens the session once: the answer sets the cookie and goes to the clean address."""
+    return command == "GET" and query_access_allowed(config)
+
+
 def settings_from(config):
     """{"network": bool, "host": str, "token_env": str, "allowed_hosts": [...], "proxy_public_host": str} from the configuration, with the conservative default."""
     cfg = config.get("listen") if isinstance(config, dict) and isinstance(config.get("listen"), dict) else {}

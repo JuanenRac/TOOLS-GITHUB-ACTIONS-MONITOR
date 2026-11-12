@@ -20,7 +20,7 @@
 | `alerts` | os alertas de todas as sentinelas numa lista: `--sentinel ci\|collab`, `--level info\|warning\|error`, `--muted show\|hide\|only` | não |
 | `live` | o estado do recetor do webhook e os últimos eventos | não |
 
-Opções de todos os comandos: `--json` (a resposta como um documento JSON: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (porta 8766), `--timeout SEGUNDOS` (de 1 a 60), `--lang CÓDIGO`. No modo de rede ponha o token de acesso na variável de ambiente `MONITOR_TOKEN` (viaja no cabeçalho `X-Monitor-Access`, nunca no endereço nem no ecrã).
+Opções de todos os comandos: `--json` (a resposta como um documento JSON: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (porta 8766), `--timeout SEGUNDOS` (de 1 a 60), `--lang CÓDIGO`. No modo de rede ponha o token de acesso na variável de ambiente `MONITOR_ACCESS_TOKEN`, a que o próprio monitor lê (`MONITOR_TOKEN` é aceite como alias; `--token TOKEN` é o último recurso, porque uma opção aparece na lista de processos). A ordem: `MONITOR_ACCESS_TOKEN`, depois `MONITOR_TOKEN`, depois `--token`. Viaja no cabeçalho `X-Monitor-Access`, nunca no endereço nem no ecrã. Um `--url` com `http` sem cifra para outro computador imprime um aviso no stderr (o token e as respostas viajariam em claro): use `https` fora de uma rede que controle.
 
 ## Códigos de saída (estáveis)
 
@@ -39,7 +39,7 @@ Opções de todos os comandos: `--json` (a resposta como um documento JSON: `{"o
 python monitor_cli.py health && python monitor_cli.py alerts --fail-on error
 python monitor_cli.py alerts --sentinel collab --level warning --json
 python monitor_cli.py status --account org-acme
-MONITOR_URL=http://192.168.0.20:8765 MONITOR_TOKEN=... python monitor_cli.py health --json
+MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python monitor_cli.py health --json
 ```
 
 O `health` distingue três coisas: o monitor não responde (2), o acesso ao GitHub falha (3), e a quota esgotou-se ou não se chega ao GitHub (4); um monitor que ainda não terminou a primeira leitura di-lo (4) em vez de mostrar números vazios.

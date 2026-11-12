@@ -7,6 +7,30 @@
 
 Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son propre semver. La source est le CHANGELOG.md en anglais ; ce fichier contient les mêmes versions et sections.
 
+## [Unreleased]
+
+Travail en cours après la 1.7.4.
+
+### Ajouté
+
+- **`monitor_cli.py --token JETON`**, et le jeton d'accès de la ligne de commande porte désormais le nom que lit le moniteur lui-même : `MONITOR_ACCESS_TOKEN`, puis son alias `MONITOR_TOKEN`, puis `--token` (une option apparaît dans la liste des processus : c'est le dernier recours). Le message d'un client refusé nomme la variable. Testé contre un faux moniteur qui exige l'en-tête.
+- **Un avertissement sur stderr** quand `monitor_cli.py` vise du `http` non chiffré sur un autre ordinateur (le jeton et les réponses circuleraient en clair) ; la réponse et `--json` ne sont pas touchés.
+- **`listen.query_access`** (activé par défaut, dans l'onglet Réglages, en huit langues) : désactivé, l'adresse obsolète `?access=` est refusée et la session ne s'ouvre qu'avec `POST /api/access` (le jeton dans le corps) ou l'en-tête. L'adresse qui fonctionne répond avec un en-tête `Deprecation` et la console dit qu'elle est obsolète.
+- **Un silence « jusqu'à ce que l'élément change »** : `POST /api/alerts/mute` accepte `until_change` pour une alerte ; le silence garde l'`updated_at` qu'avait l'issue ou la pull request et prend fin dès qu'il change (un nouveau commentaire, un push), ou à la fin des heures, selon ce qui arrive en premier. Les alertes de Collab portent maintenant `details.updated`.
+- **Un contrôle du doctor pour un jeton partagé par plusieurs comptes** (`credential`) : il ne compare qu'une courte empreinte des jetons avec lesquels les comptes liraient GitHub (le jeton gardé par le moniteur, ou `GH_TOKEN` / `GITHUB_TOKEN` de l'environnement) et liste les comptes qui en partagent un ; le jeton n'est jamais affiché.
+- Des tests pour chaque changement, dont un test d'hygiène du webhook : une charge avec un secret, un e-mail, un message de commit et un jeton n'arrive ni à la liste en direct, ni au flux, ni à une notification, et la liste en direct est désormais filtrée par une liste de champs autorisés.
+
+### Modifié
+
+- **L'API appelle l'édition `complete`** (elle disait `full`) dans `/api/about`, `/api/statusbar`, `--doctor --json` et la ligne de commande ; `full` reste réservé à ce que la sentinelle peut exécuter. La page et la ligne de commande comprennent toujours les deux mots.
+- **Les silences ne se font que depuis l'ordinateur du moniteur** (aussi en mode réseau, jusqu'aux éditions avec utilisateurs) : le guide de Collab le dit en huit langues et un test garde la route derrière cette règle.
+- **Les workflows de ce dépôt utilisent des actions épinglées sur un commit complet**, avec la version en commentaire, et un test le maintient.
+
+### Sécurité
+
+- **`/api/statusbar` ne donne plus l'adresse de l'ordinateur sur le réseau local (`lan_address`) à un client du réseau** en mode réseau ; la barre se dessine sans elle.
+- L'adresse obsolète `?access=` n'est prise en compte que sur un `GET`.
+
 ## [1.7.4]
 
 Une barre au pied de la page pour les avis et les données du moniteur, un bouton plein écran, des tableaux qui se trient selon une ou plusieurs colonnes avec les colonnes de votre choix, et la ligne de commande comme client du moniteur en marche.

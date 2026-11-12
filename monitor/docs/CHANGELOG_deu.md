@@ -7,6 +7,30 @@
 
 Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem Semver. Die Quelle ist das englische CHANGELOG.md; diese Datei enthält dieselben Versionen und Abschnitte.
 
+## [Unreleased]
+
+Laufende Arbeit nach 1.7.4.
+
+### Hinzugefügt
+
+- **`monitor_cli.py --token TOKEN`**, und das Zugriffstoken der Befehlszeile hat jetzt den Namen, den der Monitor selbst liest: `MONITOR_ACCESS_TOKEN`, dann sein Alias `MONITOR_TOKEN`, dann `--token` (eine Option erscheint in der Prozessliste, also der letzte Ausweg). Die Meldung eines abgelehnten Clients nennt die Variable. Getestet gegen einen falschen Monitor, der den Header verlangt.
+- **Eine Warnung auf stderr**, wenn `monitor_cli.py` auf unverschlüsseltes `http` eines anderen Rechners zeigt (Token und Antworten würden unverschlüsselt reisen); die Antwort und `--json` bleiben unberührt.
+- **`listen.query_access`** (standardmäßig an, im Tab Einstellungen, in den acht Sprachen): Ausgeschaltet wird die veraltete Adresse `?access=` abgelehnt, die Sitzung öffnet sich dann nur mit `POST /api/access` (Token im Body) oder dem Header. Die funktionierende Adresse antwortet mit einem `Deprecation`-Header, und die Konsole sagt, dass sie veraltet ist.
+- **Eine Stummschaltung „bis sich das Element ändert"**: `POST /api/alerts/mute` nimmt `until_change` für einen Alarm; sie merkt sich das `updated_at` des Issues oder Pull Requests und endet sofort, wenn es sich ändert (neuer Kommentar, Push), oder nach Ablauf der Stunden, was zuerst eintritt. Die Alarme von Collab tragen jetzt `details.updated`.
+- **Eine Doctor-Prüfung für ein Token, das mehrere Konten teilen** (`credential`): Sie vergleicht nur einen kurzen Fingerabdruck der Token, mit denen die Konten GitHub lesen würden (das vom Monitor gespeicherte Token oder `GH_TOKEN` / `GITHUB_TOKEN` der Umgebung), und listet die Konten, die eines teilen; das Token selbst wird nie gezeigt.
+- Tests für jede Änderung, darunter ein Hygienetest des Webhooks: Eine Nutzlast mit Geheimnis, E-Mail, Commit-Nachricht und Token erreicht weder die Live-Liste noch den Feed noch eine Benachrichtigung, und die Live-Liste wird jetzt mit einer Liste erlaubter Felder gefiltert.
+
+### Geändert
+
+- **Die API nennt die Ausgabe `complete`** (vorher `full`) in `/api/about`, `/api/statusbar`, `--doctor --json` und der Befehlszeile; `full` bleibt für das reserviert, was der Wächter ausführen darf. Die Seite und die Befehlszeile verstehen weiterhin beide Wörter.
+- **Stummschaltungen gibt es nur vom Rechner des Monitors aus** (auch im Netzwerkmodus, bis es Ausgaben mit Benutzern gibt): Die Anleitung von Collab sagt es in den acht Sprachen, und ein Test hält die Route hinter dieser Regel.
+- **Die Workflows dieses Repositorys nutzen auf einen vollständigen Commit festgelegte Actions**, mit der Version im Kommentar, und ein Test hält das so.
+
+### Sicherheit
+
+- **`/api/statusbar` gibt die Adresse des Rechners im lokalen Netz (`lan_address`) im Netzwerkmodus nicht mehr an einen Client des Netzes weiter**; die Leiste wird ohne sie gezeichnet.
+- Die veraltete Adresse `?access=` wird nur bei einem `GET` beachtet.
+
 ## [1.7.4]
 
 Eine Leiste am Fuß der Seite für die Hinweise und die Fakten des Monitors, ein Vollbild-Knopf, Tabellen, die nach einer oder mehreren Spalten sortieren, mit den Spalten deiner Wahl, und die Befehlszeile als Client des laufenden Monitors.

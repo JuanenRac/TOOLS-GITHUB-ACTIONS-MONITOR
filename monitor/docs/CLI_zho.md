@@ -20,7 +20,7 @@
 | `alerts` | 所有哨兵的警报合成一个列表：`--sentinel ci\|collab`、`--level info\|warning\|error`、`--muted show\|hide\|only` | 不支持 |
 | `live` | Webhook 接收器的状态和最近的事件 | 不支持 |
 
-所有命令的选项：`--json`（以单个 JSON 文档输出：`{"ok", "exit", "data"}`）、`--account ID`、`--url URL`、`--lite`（端口 8766）、`--timeout 秒数`（1 到 60）、`--lang 代码`。在网络模式下，把访问令牌放入环境变量 `MONITOR_TOKEN`（通过请求头 `X-Monitor-Access` 发送，绝不出现在地址或屏幕上）。
+所有命令的选项：`--json`（以单个 JSON 文档输出：`{"ok", "exit", "data"}`）、`--account ID`、`--url URL`、`--lite`（端口 8766）、`--timeout 秒数`（1 到 60）、`--lang 代码`。在网络模式下,请把访问令牌放在监视器自己读取的环境变量 `MONITOR_ACCESS_TOKEN` 中(`MONITOR_TOKEN` 作为别名也可用;`--token TOKEN` 是最后手段,因为命令行选项会出现在进程列表中)。优先顺序:`MONITOR_ACCESS_TOKEN`、`MONITOR_TOKEN`、`--token`。令牌通过请求头 `X-Monitor-Access` 传送,绝不出现在地址或屏幕上。对其他计算机使用未加密 `http` 的 `--url` 时,会在 stderr 打印警告(令牌和响应将以明文传输):在不受你控制的网络中请使用 `https`。
 
 ## 退出码（稳定）
 
@@ -39,7 +39,7 @@
 python monitor_cli.py health && python monitor_cli.py alerts --fail-on error
 python monitor_cli.py alerts --sentinel collab --level warning --json
 python monitor_cli.py status --account org-acme
-MONITOR_URL=http://192.168.0.20:8765 MONITOR_TOKEN=... python monitor_cli.py health --json
+MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python monitor_cli.py health --json
 ```
 
 `health` 区分三种情况：监视器没有响应（2）、GitHub 登录失败（3）、配额耗尽或无法连接 GitHub（4）；尚未完成首次读取的监视器会如实说明（4），而不是显示空数字。

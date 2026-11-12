@@ -1285,7 +1285,7 @@ async function openAbout(){
   dlgOpen("about");$("about-msg").textContent="";const body=$("about-body");body.innerHTML=`<span class="mut">${esc(T("ui.loading"))}</span>`;
   const a=await aboutLoad();if(!a){body.textContent=T("ui.err_monitor",{msg:"/api/about"});return}
   const h=a.health||{},L=a.links||{};
-  let html=dl([[T("ui.about_version"),"v"+a.version],[T("ui.about_edition"),T("ui.edition_"+a.edition)],[T("ui.about_author"),a.author],[T("ui.about_license"),a.license],[T("ui.about_python"),a.python+" ("+a.implementation+")"],[T("ui.about_system"),a.system],[T("ui.about_update"),updLine(a.update),true]]);
+  let html=dl([[T("ui.about_version"),"v"+a.version],[T("ui.about_edition"),T("ui.edition_"+(a.edition==="lite"?"lite":"complete"))],[T("ui.about_author"),a.author],[T("ui.about_license"),a.license],[T("ui.about_python"),a.python+" ("+a.implementation+")"],[T("ui.about_system"),a.system],[T("ui.about_update"),updLine(a.update),true]]);
   html+=`<h3>${esc(T("ui.about_links"))}</h3>`+dl(["repository","releases","changelog","documentation","bridge","issues"].map(k=>[T("ui.about_"+k),aLink(L[k]),true]));
   html+=`<h3>${esc(T("ui.about_paths"))}</h3>`+dl(Object.keys(a.paths||{}).map(k=>[T("ui.path_"+k),a.paths[k]]));
   html+=`<h3>${esc(T("ui.about_health"))}</h3>`+dl([[T("ui.health_ok"),yn(h.ok)],[T("ui.health_loaded"),yn(h.loaded)],[T("ui.health_offline"),yn(h.offline)],[T("ui.health_uptime"),fmt(h.uptime_seconds||0)],[T("ui.health_degraded"),String(h.degraded||0)]]);
@@ -1483,7 +1483,7 @@ function renderBarFacts(){
   set("sb-sent",LITE?"":T("ui.sb_sentinels",{n:sents.filter(s=>s.enabled).length,m:sents.length}),sents.map(s=>(T("ui.al_o_"+s.name)===("ui.al_o_"+s.name)?s.name:T("ui.al_o_"+s.name))+": "+T(s.enabled?"ui.sb_on":"ui.sb_off")).join(" · "));
   set("sb-acc",T("ui.sb_account",{name:(ACC&&ACC.current)||OWNER||"-"}),T("ui.sb_account_t"));
   set("sb-ver","v"+(I18N.version||"")+" · "+T(LITE?"ui.sb_lite":"ui.sb_complete"),T("ui.sb_version_t"));
-  if(SBINFO)set("sb-addr",(SBINFO.bind==="0.0.0.0"?SBINFO.lan_address:"127.0.0.1")+":"+SBINFO.port,T("ui.sb_addr_t",{local:"127.0.0.1:"+SBINFO.port,lan:(SBINFO.lan_address||"-")+":"+SBINFO.port}));
+  if(SBINFO)set("sb-addr",(SBINFO.bind==="0.0.0.0"&&SBINFO.lan_address?SBINFO.lan_address:"127.0.0.1")+":"+SBINFO.port,T("ui.sb_addr_t",{local:"127.0.0.1:"+SBINFO.port,lan:(SBINFO.lan_address||"-")+":"+SBINFO.port}));
 }
 function renderClock(){const e=$("sb-clock");if(e)e.textContent=new Date().toLocaleString(LOC(),{dateStyle:"medium",timeStyle:"medium"})}
 async function sbTick(){try{const r=await fetch("/api/statusbar",{cache:"no-store"});if(r.ok)SBINFO=await r.json()}catch(e){}renderBarFacts()}

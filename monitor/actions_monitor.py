@@ -87,7 +87,7 @@ DEFAULTS = {
     "quota": {"billing_api": False, "warn_percent": 75, "alert_percent": 90, "default_runner": "linux"},
     "session_guard": True,         # the page asks for a one-use token before it changes a setting or confirms an action
     "discovery": {"events": True, "suggest_groups": True, "auto_frequency": False, "hide": []},
-    "listen": {"network": False, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "tls_cert_file": "", "tls_key_file": "", "secure_cookie": False, "proxy_public_host": "", "max_failed_attempts": 10},     # OFF: only this computer. On: a private address, with an access token for every request
+    "listen": {"network": False, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "tls_cert_file": "", "tls_key_file": "", "secure_cookie": False, "proxy_public_host": "", "max_failed_attempts": 10, "query_access": True},     # OFF: only this computer. On: a private address, with an access token for every request
     "github_token": {"enabled": False, "store": "auto"},       # OFF: the monitor uses your own `gh login`. On: a token kept in the store of the system (secretstore.py)
     "github_actions": {"enabled": False, "allowed": ["rerun_failed", "cancel"], "merge_method": "squash"},      # OFF: actions on GitHub, each one confirmed on its own (ghactions.py)
     "act": {"enabled": False, "allowed": [], "timeout_seconds": 900, "allow_symlinks": False},
@@ -635,7 +635,7 @@ def apply_live_event(record, config):
     import notifiers
     import webhook
     keep = webhook.live_settings(config)["live_events_keep"]
-    LIVE_EVENTS.append({k: v for k, v in record.items() if k != "steps"} | {"at": resilience.stamp(time.time())})
+    LIVE_EVENTS.append({k: v for k, v in record.items() if k in webhook.LIVE_FIELDS} | {"at": resilience.stamp(time.time())})
     del LIVE_EVENTS[:-keep]
     run = webhook.as_run(record)
     entry = RUN_CACHE.get(record["repo"])
@@ -999,6 +999,8 @@ class Handler(BaseHTTPRequestHandler):
             return False
         from urllib.parse import parse_qs
         query_token = (parse_qs(self.path.partition("?")[2]).get("access") or [""])[0]
+        if query_token and not localguard.query_token_counts(self.command, self.path, LIVE_CONFIG or DEFAULTS):      # deprecated: only the first visit of a page, and only while listen.query_access is on
+            query_token = ""
         peer = str(self.client_address[0])
         if localguard.is_locked(peer):      # too many wrong tokens from this address: refused for a while, whatever it sends now
             self.json_reply({"error": "locked"}, 429)
@@ -1010,6 +1012,7 @@ class Handler(BaseHTTPRequestHandler):
         if query_token and self.command == "GET" and "text/html" in (self.headers.get("Accept") or "text/html"):
             self.send_response(302)
             self.send_header("Set-Cookie", localguard.cookie_header(query_token))
+            self.send_header("Deprecation", "true")      # the ?access= address is deprecated: POST /api/access keeps the token out of the address bar
             self.send_header("Referrer-Policy", "no-referrer")       # the clean address follows at once: the token must not travel on in a Referer header
             self.send_header("Cache-Control", "no-store")
             self.send_header("Location", self.path.split("?")[0])
@@ -1453,7 +1456,7 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/api/statusbar":      # what the bar at the foot of the page shows about this monitor: edition, address, account, sentinels (no secret, no GitHub call)
             if not self.guard():
                 return
-            self.json_reply(statusbar_payload(self.server.server_address[1]))
+            self.json_reply(statusbar_payload(self.server.server_address[1], not localguard.STATE["network"] or localguard.from_this_computer(self.client_address)))
         elif path in ("/api/alerts", "/api/events"):      # one list of the alerts of every sentinel, and the events of the feed (1.7.3; read only; the account comes from ?account= or the process)
             if not self.guard():
                 return
@@ -1507,8 +1510,9 @@ def lan_address():
         probe.close()
 
 
-def statusbar_payload(port):
-    """GET /api/statusbar: the facts of the bar at the foot of the page that the data of GitHub does not carry."""
+def statusbar_payload(port, client_local=True):
+    """GET /api/statusbar: the facts of the bar at the foot of the page that the data of GitHub does not carry. In the network mode the address of this computer on the local network
+    (`lan_address`) is only given to a client on this same computer: a client of the network already knows the address it used and the map of the network is not handed out."""
     registry = SENTINEL["registry"]
     sentinels = []
     if registry is not None:
@@ -1520,9 +1524,12 @@ def statusbar_payload(port):
                 status = {}
             sentinels.append({"name": name, "enabled": bool(status.get("enabled", True)), "level": status.get("level", "unknown"), "refresh_seconds": status.get("refresh_seconds")})
     state = localguard.public_state()
-    return {"schema": 1, "version": TOOL_VERSION, "edition": "lite" if LITE["on"] else "full", "port": port, "bind": state.get("host") or "127.0.0.1", "network": bool(state.get("network")),
-            "lan_address": lan_address(), "account": CHILD["account"] or None, "uptime_seconds": int(time.time() - STARTED), "demo": bool(DEMO["on"]),
-            "sentinels": sentinels, "workers": ((LIVE_CONFIG or {}).get("sentinel") or {}).get("workers") if not LITE["on"] else None}
+    answer = {"schema": 1, "version": TOOL_VERSION, "edition": "lite" if LITE["on"] else "complete", "port": port, "bind": state.get("host") or "127.0.0.1", "network": bool(state.get("network")),
+              "lan_address": lan_address(), "account": CHILD["account"] or None, "uptime_seconds": int(time.time() - STARTED), "demo": bool(DEMO["on"]),
+              "sentinels": sentinels, "workers": ((LIVE_CONFIG or {}).get("sentinel") or {}).get("workers") if not LITE["on"] else None}
+    if answer["network"] and not client_local:
+        del answer["lan_address"]
+    return answer
 
 
 def alerts_payload(ask):
@@ -1729,7 +1736,13 @@ def handle_advanced_post(path, request):
         scope, value = str(request.get("scope") or ""), str(request.get("value") or "")
         if path.endswith("unmute"):
             return {"ok": alert_center.unmute(scope, value)}
-        entry = alert_center.mute(scope, value, request.get("hours"), config)
+        until_change = None
+        if request.get("until_change") is True and scope == "alert":      # "until the item changes": remember the updated_at the alert carries now
+            for alert in alert_center.collect(SENTINEL["registry"]):
+                if alert.get("id") == value:
+                    until_change = (alert.get("details") or {}).get("updated") if isinstance(alert.get("details"), dict) else None
+                    break
+        entry = alert_center.mute(scope, value, request.get("hours"), config, until_change=until_change)
         return {"ok": entry is not None, "mute": entry}
     if path == "/api/ai/ack":
         import ai_alerts
@@ -2047,8 +2060,11 @@ def main():
         print(i18n.t("mon.network_on", host=listen["host"], port=server.server_address[1]), flush=True)
         if tls_ctx is None and not localguard.STATE["secure"]:
             print(i18n.t("mon.network_plain"), flush=True)
-        if access_generated:
+        if access_generated and localguard.query_access_allowed(config):
             print(i18n.t("mon.network_token", url=url + "?access=" + access_token), flush=True)      # the only place the token is shown
+            print(i18n.t("mon.network_token_deprecated"), flush=True)
+        elif access_generated:
+            print(i18n.t("mon.network_token_post", url=url, token=access_token), flush=True)
     if config.get("webhook", {}).get("enabled") is True:
         import webhook
         print(i18n.t("mon.webhook", status=webhook.status_text(config)))
@@ -2062,7 +2078,7 @@ def main():
     if news:
         print(news)
     if not args.no_browser and config.get("open_browser", True) is True:
-        webbrowser.open(url + ("?access=" + access_token if access_generated else ""))
+        webbrowser.open(url + ("?access=" + access_token if access_generated and localguard.query_access_allowed(config) else ""))
     try:
         server.serve_forever()
     except KeyboardInterrupt:

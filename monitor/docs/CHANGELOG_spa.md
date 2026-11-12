@@ -7,6 +7,30 @@
 
 Versión de la propia herramienta (monitor + centinela + herramientas por lotes), con su propio semver. La fuente es el CHANGELOG.md en inglés; este fichero lleva las mismas versiones y secciones.
 
+## [Unreleased]
+
+Trabajo en curso después de la 1.7.4.
+
+### Añadido
+
+- **`monitor_cli.py --token TOKEN`**, y el token de acceso de la línea de comandos tiene ahora el nombre que lee el propio monitor: `MONITOR_ACCESS_TOKEN`, luego su alias `MONITOR_TOKEN`, luego `--token` (una opción se ve en la lista de procesos, así que es el último recurso). El mensaje de un cliente rechazado nombra la variable. Probado contra un monitor falso que exige la cabecera.
+- **Un aviso por stderr** cuando `monitor_cli.py` apunta a `http` sin cifrar en otro ordenador (el token y las respuestas viajarían sin cifrar); la respuesta y `--json` no se tocan.
+- **`listen.query_access`** (activo por defecto, en la pestaña Ajustes, en los ocho idiomas): desactívalo y la dirección obsoleta `?access=` se rechaza, de modo que la sesión se abre solo con `POST /api/access` (el token en el cuerpo) o la cabecera. La dirección que funciona responde con una cabecera `Deprecation` y la consola avisa de que es obsoleta.
+- **Un silencio «hasta que cambie el elemento»**: `POST /api/alerts/mute` acepta `until_change` para una alerta; el silencio guarda el `updated_at` que tenía el issue o la pull request y termina enseguida cuando cambia (un comentario nuevo, un push), o al acabar las horas, lo que ocurra primero. Las alertas de Collab llevan ahora `details.updated`.
+- **Una comprobación del doctor para un token compartido por varias cuentas** (`credential`): compara solo una huella corta de los tokens con los que las cuentas leerían GitHub (el token guardado por el monitor, o `GH_TOKEN` / `GITHUB_TOKEN` del entorno) y lista las cuentas que comparten uno; el token nunca se muestra.
+- Pruebas para cada cambio, incluida una de higiene del webhook: un payload con un secreto, un correo, un mensaje de commit y un token no llega ni a la lista en vivo, ni al feed, ni a una notificación, y la lista en vivo se filtra ahora con una lista de campos permitidos.
+
+### Cambiado
+
+- **La API llama a la edición `complete`** (decía `full`) en `/api/about`, `/api/statusbar`, `--doctor --json` y la línea de comandos; `full` queda reservado para lo que el centinela puede ejecutar. La página y la línea de comandos siguen entendiendo ambas palabras.
+- **Los silencios se hacen solo desde el ordenador del monitor** (también en el modo red, hasta las ediciones con usuarios): la guía de Collab lo dice en los ocho idiomas y una prueba mantiene la ruta tras esa regla.
+- **Los workflows de este repositorio usan acciones fijadas a un commit completo**, con la versión en un comentario, y una prueba lo mantiene.
+
+### Seguridad
+
+- **`/api/statusbar` ya no entrega la dirección del ordenador en la red local (`lan_address`) a un cliente de la red** en el modo red; la barra se dibuja sin ella.
+- La dirección obsoleta `?access=` solo se atiende en un `GET`.
+
 ## [1.7.4]
 
 Una barra al pie de la página para los avisos y los datos del monitor, un botón de pantalla completa, tablas que se ordenan por una o varias columnas con las columnas que elijas, y la línea de comandos como cliente del monitor en marcha.

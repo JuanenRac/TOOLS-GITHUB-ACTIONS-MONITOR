@@ -168,6 +168,10 @@ def handle(config, body, headers, watched):
     return 200, {"ok": True, "refresh": name}, name
 
 
+#: the only fields of a parsed event that may reach the live list, the feed or a notification (everything else of a payload is dropped by `parse_event`, and this list guards the way out)
+LIVE_FIELDS = ("event", "repo", "run_id", "status", "conclusion", "branch", "sha", "url", "attempt", "workflow", "path", "started", "seconds", "job", "queue")
+
+
 GITHUB_URL = re.compile(r"^https://[A-Za-z0-9.-]+/[A-Za-z0-9._/-]{1,200}$")   # a link to the run on github.com or on a GitHub Enterprise Server host
 
 

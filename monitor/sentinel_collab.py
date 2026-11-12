@@ -134,7 +134,7 @@ def evaluate(repo, issues, prs, rules, now, known=None):
 
     def add(code, item, ref, labels=None):
         key = f"{code}:{repo}:{item['number']}"
-        found[key] = {"id": key, "code": code, "level": LEVELS[code], "repo": repo, "number": item["number"], "title": item["title"], "url": item["url"], "ref": ref, "labels": labels or [],
+        found[key] = {"id": key, "code": code, "level": LEVELS[code], "repo": repo, "number": item["number"], "title": item["title"], "url": item["url"], "ref": ref, "labels": labels or [], "updated": item.get("updated"),
                       "created_at": (known.get(key) or {}).get("created_at") or stamp(now)}
 
     for issue in issues:
@@ -326,7 +326,7 @@ class SentinelCollab(sentinel_base.BaseSentinel):
         with self.lock:
             items = list(self.state["alerts"].values())
         return [{"id": a["id"], "code": a["code"], "level": a["level"], "sentinel": self.name, "account_id": self.account_id, "repo": a["repo"], "title": self._title(a),
-                 "details": {"number": a["number"], "title": a["title"], "url": a["url"], "labels": a.get("labels") or []}, "created_at": a["created_at"]} for a in sorted(items, key=lambda x: x["id"])]
+                 "details": {"number": a["number"], "title": a["title"], "url": a["url"], "labels": a.get("labels") or [], "updated": a.get("updated")}, "created_at": a["created_at"]} for a in sorted(items, key=lambda x: x["id"])]
 
     def get_status(self):
         if not self.enabled:
