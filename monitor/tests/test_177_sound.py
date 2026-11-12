@@ -96,7 +96,10 @@ class PageSide(unittest.TestCase):
     def test_the_page_logic_in_a_browser_new_red_only_and_cooldown(self):
         """The real functions run in a headless browser: no sound on the first look, none for an alert that was already there, one for a new one, none inside the cooldown, none when muted."""
         sys.path.insert(0, str(HERE.parent / "tools"))
-        import check_overflow
+        try:
+            import check_overflow
+        except ImportError:      # the tools folder does not travel in the zip of a release
+            self.skipTest("no tools folder")
         browser = check_overflow.edge()
         if os.environ.get("CI") and not os.environ.get("MONITOR_BROWSER_TESTS"):
             self.skipTest("the browser tests run on your computer (or with MONITOR_BROWSER_TESTS=1)")

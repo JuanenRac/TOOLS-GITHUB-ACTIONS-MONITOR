@@ -10,10 +10,13 @@ from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent.parent.parent / "tools"
 sys.path.insert(0, str(TOOLS))
-import check_overflow  # noqa: E402
+try:
+    import check_overflow  # noqa: E402
+except ImportError:      # the tools folder does not travel in the zip of a release
+    check_overflow = None
 
 
-@unittest.skipUnless(check_overflow.edge(), "no Edge, Chrome or Chromium on this computer")
+@unittest.skipUnless(check_overflow is not None and check_overflow.edge(), "no tools folder, or no Edge, Chrome or Chromium on this computer")
 class NoTextLeavesItsBox(unittest.TestCase):
     @unittest.skipIf(os.environ.get("CI") and not os.environ.get("MONITOR_BROWSER_TESTS"), "fonts and browsers differ on the runners of the CI: the measurement runs on your computer (or with MONITOR_BROWSER_TESTS=1)")
     def test_every_language_wide_and_narrow(self):
