@@ -82,6 +82,7 @@ DEFAULTS = {
     "webhook": {"enabled": False, "secret": "", "replay_seconds": 3600, "max_per_minute": 30},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default)
     "cache": {"etag": {"enabled": True, "ttl_hours": 24}},   # conditional reads: a 304 answer costs no quota (etagcache.py)
     "display": {"timezone": "local", "blink_red_tiles": True},   # blink_red_tiles: the red tiles and red items of the bar blink softly until the cause is solved; zone of the times written for people (log, reports, command line, notifications): local | utc | an IANA name such as Europe/Madrid
+    "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
     "updates": {"check": True},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
     "airgapped": False,            # True: nothing is requested from the network except GitHub's data you asked for; the update check is off
     "open_browser": True,
@@ -845,6 +846,11 @@ def feed_alerts(config, data, diagnose=True):
     for alert in result["opened"]:
         if alert["class"] == "real":
             try:
+                import soundalert
+                soundalert.beep(config, "new_red")      # only with sound.server_beep (off by default), for when the page is not open
+            except Exception as error:   # noqa: BLE001
+                degraded.note("loop.extra2", error)
+            try:
                 import notifiers
                 notifiers.notify(config, {"kind": "ai_alert", "code": "ai_alert", "level": "warn", "repo": alert["repo"], "owner": "main", "url": alert.get("url"), "args": {},
                                           "text": i18n.t("evt.ai_alert", repo=alert["repo"], workflow=alert["workflow"])})
@@ -873,11 +879,20 @@ def maintain_extras(config, data):
 
 
 EXTRAS_WARNED = []
+CONNECTION_WAS = {"lost": False}
 
 
 def maintain(config, data):
     """After each cycle: the conditional-read cache is saved, a few completed runs have their jobs sampled and the analytics are refreshed."""
     quota_watch(config)
+    try:      # the connection that goes down is announced once, by the same switch as a new red
+        import soundalert
+        lost = bool((data.get("offline") or {}).get("offline"))
+        if lost and not CONNECTION_WAS["lost"]:
+            soundalert.beep(toolconfig.raw_config(), "connection_lost")
+        CONNECTION_WAS["lost"] = lost
+    except Exception as error:   # noqa: BLE001 - a sound never stops a cycle
+        degraded.note("loop.extra2", error)
     maintain_extras(toolconfig.raw_config() if not LITE["on"] else config, data)
     try:
         if ETAG["cache"]:
@@ -989,7 +1004,7 @@ def render_page():
     """actions_monitor.html with the catalogues of the interface (keys "ui.*") for the 8 languages and the default language inlined."""
     page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
     data = {"default": i18n.language(), "langs": list(i18n.LANGS), "names": i18n.NATIVE_NAMES, "html": i18n.HTML_LANG, "locale": i18n.BROWSER_LOCALE, "catalogues": i18n.ui_catalogues(),
-            "ecosystems": {**{"other": i18n.t("ui.eco_other")}, **{key: item["label"] for key, item in toolconfig.ecosystems().items()}}, "owner": toolconfig.github_owner(), "tz": tzdisplay.setting(), "blink": (toolconfig.raw_config().get("display") or {}).get("blink_red_tiles", True) is not False, "host": github_host(), "lite": LITE["on"], "network": localguard.public_state(), "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
+            "ecosystems": {**{"other": i18n.t("ui.eco_other")}, **{key: item["label"] for key, item in toolconfig.ecosystems().items()}}, "owner": toolconfig.github_owner(), "tz": tzdisplay.setting(), "blink": (toolconfig.raw_config().get("display") or {}).get("blink_red_tiles", True) is not False, "sound": {k: v for k, v in __import__("soundalert").settings(toolconfig.raw_config()).items() if k != "server_beep"}, "host": github_host(), "lite": LITE["on"], "network": localguard.public_state(), "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
     blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     return page.replace("/*I18N_DATA*/null", blob, 1)
 

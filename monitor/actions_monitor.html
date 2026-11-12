@@ -278,6 +278,7 @@ th.sortable{cursor:pointer;user-select:none;white-space:nowrap}th.sortable:hover
 #statusbar .sb-right{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:5px 6px;margin-left:auto;min-width:0;flex:1 1 0}
 #statusbar .sb-item{display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:100%;padding:2px 10px;border:1px solid var(--line2);border-radius:999px;background:var(--bg);color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.5}
 #statusbar .sb-item:empty{display:none}
+#statusbar .sb-sound{cursor:pointer;font:inherit;font-weight:600}#statusbar .sb-sound.off{color:var(--mut);border-style:dashed}
 #statusbar .sb-item.sb-opt{color:var(--mut);background:transparent;border-style:dashed}
 #statusbar #sb-conn{font-weight:700;border-color:var(--ok)}#statusbar #sb-conn.warn{border-color:var(--warn)}#statusbar #sb-conn.bad{border-color:var(--bad)}
 #statusbar #sb-quota,#statusbar #sb-runs{font-weight:600}#statusbar #sb-quota.warn{border-color:var(--warn)}#statusbar #sb-quota.bad{border-color:var(--bad)}
@@ -465,7 +466,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <div id="cfg-netwarn" role="alert" hidden></div>
 <div class="cfg-top"><div id="cfg-tabs" role="tablist" aria-orientation="horizontal" data-i18n-aria="ui.cfg_tabs_aria"></div><input id="cfg-search" type="search" autocomplete="off" data-i18n-ph="ui.cfg_search" data-i18n-aria="ui.cfg_search"></div>
 <div id="cfg-panels"><p class="cfg-note" data-i18n="ui.cfg_hint"></p>
-<div id="cfp-interface" role="tabpanel" aria-labelledby="cft-interface" data-tab="interface"><div class="cfg-group"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gear"/></svg><span data-i18n="ui.cfg_g_interface"></span></h3><p class="cfg-note" style="padding:6px 12px 0" data-i18n="ui.cfg_interface_hint"></p><div class="ifrow"><label><span data-i18n="ui.lang_label"></span> <select id="lang" data-i18n-aria="ui.lang_label" data-i18n-title="ui.lang_label"></select></label><label><span data-i18n="ui.theme_label"></span> <select id="theme" data-i18n-aria="ui.theme_aria"></select></label><button id="dense" type="button" aria-pressed="false" data-i18n-title="ui.dense_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-rows"/></svg><span class="lbl" id="dense-lbl"></span></button></div></div></div>
+<div id="cfp-interface" role="tabpanel" aria-labelledby="cft-interface" data-tab="interface"><div class="cfg-group"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gear"/></svg><span data-i18n="ui.cfg_g_interface"></span></h3><p class="cfg-note" style="padding:6px 12px 0" data-i18n="ui.cfg_interface_hint"></p><div class="ifrow"><label><span data-i18n="ui.lang_label"></span> <select id="lang" data-i18n-aria="ui.lang_label" data-i18n-title="ui.lang_label"></select></label><label><span data-i18n="ui.theme_label"></span> <select id="theme" data-i18n-aria="ui.theme_aria"></select></label><button id="snd-test" type="button" data-i18n="ui.snd_test"></button><button id="dense" type="button" aria-pressed="false" data-i18n-title="ui.dense_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-rows"/></svg><span class="lbl" id="dense-lbl"></span></button></div></div></div>
 <form id="cfg-form" autocomplete="off" novalidate></form><div id="cfg-none" role="status" data-i18n="ui.cfg_search_none"></div></div>
 <div class="cfg-bar"><button id="cfg-save" type="button" disabled><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-save"/></svg><span data-i18n="ui.cfg_save"></span></button><button id="cfg-discard" type="button" disabled><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-undo"/></svg><span data-i18n="ui.cfg_discard"></span></button><span id="cfg-msg" role="status" aria-live="polite"></span><span class="mut" id="cfg-backups"></span></div>
 </div></section>
@@ -490,6 +491,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <span class="sb-item sb-opt" id="sb-acc"></span>
 <span class="sb-item sb-opt" id="sb-ver"></span>
 <span class="sb-item sb-opt" id="sb-addr"></span>
+<button type="button" class="sb-item sb-sound" id="sb-sound" aria-pressed="true"></button>
 <span class="sb-item sb-clock" id="sb-clock" role="timer" aria-live="off"><span class="ck-d" id="ck-d"></span><span class="ck-t" id="ck-t"></span><span class="ck-z" id="ck-z"></span></span>
 </div>
 </footer>
@@ -594,6 +596,28 @@ function refreshLanguage(){
 
 /* tabs */
 var OPENALERTS=0;
+const nowMs=()=>Date.now();
+let AUDIO=null;
+function audioCtx(){try{if(!AUDIO){const C=window.AudioContext||window.webkitAudioContext;if(C)AUDIO=new C()}if(AUDIO&&AUDIO.state==="suspended")AUDIO.resume();return AUDIO}catch(e){return null}}
+function playTones(vol){const c=audioCtx();if(!c||c.state==="suspended")return false;const t0=c.currentTime+0.02,v=Math.max(0.01,Math.min(1,vol||0.4))*0.5;
+  [[880,0],[1175,0.22]].forEach(([f,d])=>{const o=c.createOscillator(),g=c.createGain();o.type="sine";o.frequency.value=f;o.connect(g);g.connect(c.destination);
+    g.gain.setValueAtTime(0.0001,t0+d);g.gain.exponentialRampToValueAtTime(v,t0+d+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t0+d+0.15);o.start(t0+d);o.stop(t0+d+0.17)});return true}
+/*SOUND-BEGIN*/
+const SOUND={muted:false,first:true,known:new Set(),lastAt:0,conn:null};
+try{SOUND.muted=store.get("am-sound")==="off"}catch(e){}
+function soundCfg(){const c=I18N.sound||{};return {enabled:c.enabled!==false,newRed:c.on_new_red!==false,conn:c.on_connection_lost!==false,cool:(c.cooldown_seconds==null?30:c.cooldown_seconds)*1000,vol:(c.volume==null?40:c.volume)/100}}
+/* a bing bing only for something NEW: the alerts that are there at the first look are remembered, not announced; a cooldown keeps one sound from the next; muted means silent */
+function soundWatch(d){
+  if(!d)return;const cfg=soundCfg(),keys=new Set((d.failing||[]).map(r=>r.repo+"|"+r.name)),off=!!(d.offline&&d.offline.offline);
+  if(SOUND.first){SOUND.first=false;SOUND.known=keys;SOUND.conn=off;return}
+  let fire=false;
+  if(cfg.newRed)for(const k of keys)if(!SOUND.known.has(k))fire=true;
+  if(cfg.conn&&off&&SOUND.conn===false)fire=true;
+  SOUND.known=keys;SOUND.conn=off;
+  if(fire&&cfg.enabled&&!SOUND.muted&&nowMs()-SOUND.lastAt>=cfg.cool){SOUND.lastAt=nowMs();playTones(cfg.vol)}
+}
+/*SOUND-END*/
+function soundChip(){const b=$("sb-sound");if(!b)return;const on=!SOUND.muted&&soundCfg().enabled;b.textContent=T(on?"ui.snd_on":"ui.snd_off");b.title=T("ui.snd_chip_t");b.setAttribute("aria-pressed",on?"true":"false");b.className="sb-item sb-sound"+(on?"":" off")}
 document.documentElement.dataset.blink=I18N.blink===false?"0":"1";
 const TABS=LITE?["now","charts","repos","hist","cfg"]:["now","al","sent","charts","repos","hist","cfg"];
 function showTab(t){if(!TABS.includes(t))t="now";TABS.forEach(x=>{$("t-"+x).classList.toggle("on",x===t);$("n-"+x).setAttribute("aria-selected",x===t)});store.set("am-tab",t);CURTAB=t;applyGroups();setViewTitle();if(DATA&&t==="charts")setTimeout(()=>render(DATA),30);try{if(location.hash!=="#"+t)window.history.replaceState(null,"","#"+t)}catch(e){}}
@@ -719,6 +743,7 @@ const runFig=(shown,total)=>shown!==total?T("ui.k_of",{n:shown,total:total}):tot
 function runTitle(id,titleKey,shown,total){const el=$(id),t=el&&el.closest(".tile");if(t)t.title=T(titleKey)+(shown!==total?" - "+T("ui.k_filtered_title",{n:shown,total:total}):"")}
 function showingLine(c){return c.filters||c.differs?'<div class="mut" id="now-count" role="status">'+esc(T(c.filters?"ui.n_showing_filters":"ui.n_showing",{n:c.shown,total:c.total}))+"</div>":""}
 function render(d){
+  try{soundWatch(d)}catch(e){}
   DATA=d;const day=Date.now()-864e5;
   const runs=d.runs,last=runs.filter(r=>new Date(r.started)>day),done=last.filter(r=>r.status==="completed");
   const F=d.figures||{},ok=F.ok24!=null?F.ok24:done.filter(r=>r.conclusion==="success").length,bad=F.fail24!=null?F.fail24:done.filter(r=>BAD.includes(r.conclusion)).length;      // the server counts them: both editions show the same figures
@@ -1540,7 +1565,9 @@ async function sbTick(){try{const r=await fetch("/api/statusbar",{cache:"no-stor
 {const watch=new MutationObserver(()=>{if(!watch.q){watch.q=requestAnimationFrame(()=>{watch.q=0;renderBar()})}});
   NOTE_SRC.forEach(([id])=>{const el=$(id);if(el)watch.observe(el,{attributes:true,childList:true,characterData:true,subtree:true})});
   $("sb-more").addEventListener("click",openNotes);$("sb-open").addEventListener("click",openNotes);$("notes-close").addEventListener("click",()=>dlgClose("notes"));$("notes-level").addEventListener("change",renderNotes);
-  renderBar();renderClock();setInterval(renderClock,1000);sbTick();setInterval(sbTick,30000);setInterval(renderBarFacts,15000)}
+  $("sb-sound").addEventListener("click",()=>{SOUND.muted=!SOUND.muted;try{store.set("am-sound",SOUND.muted?"off":"on")}catch(e){}audioCtx();soundChip();if(!SOUND.muted)playTones(soundCfg().vol)});
+  {const t=$("snd-test");if(t)t.addEventListener("click",()=>{audioCtx();playTones(soundCfg().vol)})}
+  soundChip();renderBar();renderClock();setInterval(renderClock,1000);sbTick();setInterval(sbTick,30000);setInterval(renderBarFacts,15000)}
 /* the full screen: one button in the corner, a second press leaves it; the page keeps working in either state */
 function fsSync(){const b=$("fs");if(!b)return;const on=!!document.fullscreenElement,k=on?"ui.fs_exit":"ui.fs_enter";b.setAttribute("aria-pressed",on);b.title=T(k);b.setAttribute("aria-label",T(k));const u=$("fs-ico");if(u)u.setAttribute("href",on?"#i-fullx":"#i-full")}
 {const b=$("fs");if(b){if(!document.fullscreenEnabled)b.hidden=true;else{b.addEventListener("click",()=>{const r=document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();if(r&&r.catch)r.catch(()=>{})});document.addEventListener("fullscreenchange",fsSync);fsSync()}}}

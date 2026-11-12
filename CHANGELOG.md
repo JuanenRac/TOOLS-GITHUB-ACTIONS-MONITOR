@@ -17,6 +17,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 - **A doctor check for the time zone**: a zone that neither the system nor the built-in table knows is reported, and the times are then shown in UTC (they used to fall back to the zone of the computer without saying so).
 - **The History tab says "Showing n of N"** when the list is shorter than what the header counted (the monitor keeps the 600 most recent runs; the data carry `runs_total`).
 - **The panels of the Sentinel tab as data**: `GET /api/sentinel/panels` (read only), the MCP tool `sentinel_panels` and a section "Sentinel panels" in the brief give, for A1..A13 and the second sentinel, the level, a line and the rows to act on with repository and link; the rows of a panel at "act" or "keep an eye on it" also become alerts of the feed (classes `real` and `watch`), so the stream, the hook, `alerts_open` and the counter of real alerts include them.
+- **A "bing bing" for something new that fails** (the `sound` settings, in the eight languages): the page plays two short tones (Web Audio) only for a NEW red or a lost connection, never at a refresh or for what was already there, with a cooldown, a volume and a chip "Sound" in the bar at the foot that unlocks the audio of the browser, mutes it and is remembered; a button "Test sound" in This browser; and `sound.server_beep` (off by default, local only) for when the page is closed (Windows beep, macOS `afplay`, Linux `canberra-gtk-play` or the terminal bell, without a shell and without the network).
 
 ### Changed
 

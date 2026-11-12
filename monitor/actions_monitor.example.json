@@ -357,6 +357,14 @@
     "timezone": "local",
     "blink_red_tiles": true
   },
+  "sound": {
+    "enabled": true,
+    "on_new_red": true,
+    "on_connection_lost": true,
+    "cooldown_seconds": 30,
+    "volume": 40,
+    "server_beep": false
+  },
   "updates": {
     "check": true
   },

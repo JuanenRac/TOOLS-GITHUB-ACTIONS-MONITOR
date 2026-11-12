@@ -16,6 +16,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 - **Uma verificação do doctor para o fuso horário**: um fuso que nem o sistema nem a tabela interna conhecem é assinalado, e as horas passam a ser mostradas em UTC (antes caíam no fuso do computador sem avisar).
 - **O separador Histórico diz "n de N"** quando a lista é mais curta do que o que o cabeçalho contou (o monitor guarda as 600 execuções mais recentes; os dados trazem `runs_total`).
 - **Os painéis do separador Sentinela como dados**: `GET /api/sentinel/panels` (só de leitura), a ferramenta MCP `sentinel_panels` e uma secção "Sentinel panels" no resumo dão, para A1..A13 e o segundo sentinela, o nível, uma linha e as linhas em que agir com repositório e ligação; as linhas de um painel em "agir" ou "vigiar" tornam-se também alertas do feed (classes `real` e `watch`), pelo que o fluxo em direto, o hook, `alerts_open` e o contador de alertas reais as incluem.
+- **Um "bing bing" quando algo novo falha** (as definições `sound`, nos oito idiomas): a página reproduz dois toques curtos (Web Audio) só por um NOVO vermelho ou uma ligação perdida, nunca numa atualização nem pelo que já existia, com pausa mínima, volume e um chip "Som" na barra inferior que desbloqueia o áudio do navegador, o silencia e fica memorizado; um botão "Testar som" em Este navegador; e `sound.server_beep` (desativado por defeito, só local) para quando a página está fechada (sinal do Windows, `afplay` do macOS, `canberra-gtk-play` do Linux ou o sino do terminal, sem shell e sem rede).
 
 ### Alterado
 
