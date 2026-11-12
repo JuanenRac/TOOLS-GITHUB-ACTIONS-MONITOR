@@ -1,6 +1,7 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 # GPL-3.0-or-later - see LICENSE
 """The "bing bing": the server side (off by default, cooldown, never fails) and the page side (only a NEW red or a lost connection, the mute chip, the cooldown)."""
+import os
 import sys
 import unittest
 from pathlib import Path
@@ -97,6 +98,8 @@ class PageSide(unittest.TestCase):
         sys.path.insert(0, str(HERE.parent / "tools"))
         import check_overflow
         browser = check_overflow.edge()
+        if os.environ.get("CI") and not os.environ.get("MONITOR_BROWSER_TESTS"):
+            self.skipTest("the browser tests run on your computer (or with MONITOR_BROWSER_TESTS=1)")
         if not browser:
             self.skipTest("no Edge, Chrome or Chromium on this computer")
         import json

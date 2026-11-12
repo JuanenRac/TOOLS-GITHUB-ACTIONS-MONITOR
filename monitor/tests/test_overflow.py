@@ -23,6 +23,7 @@ class NoTextLeavesItsBox(unittest.TestCase):
         lines = [f"[{lang}/{size}] {item['section']}: {item['kind']} {item['at']} ({item['detail']}) {item['text']!r}" for (lang, size), items in results.items() for item in items]
         self.assertEqual(lines, [], "text outside its box:\n" + "\n".join(lines[:40]))
 
+    @unittest.skipIf(os.environ.get("CI") and not os.environ.get("MONITOR_BROWSER_TESTS"), "the browser tests run on your computer (or with MONITOR_BROWSER_TESTS=1)")
     def test_the_probe_catches_a_real_overflow(self):
         """The measuring script itself: a page with a box too small for its word must be reported (so a silent probe cannot pass)."""
         import tempfile
