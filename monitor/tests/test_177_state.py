@@ -89,6 +89,11 @@ class Editions(unittest.TestCase):
         body = source.split("def feed_alerts(")[1].split("def maintain_extras")[0]
         self.assertNotIn('if LITE["on"]', body)      # the feed is written by the lite edition too
 
+    def test_the_settings_of_the_connection_the_sound_and_the_look_are_in_the_lite_page_too(self):
+        import settings_api
+        for key in ("ai_alerts.enabled", "ai_alerts.stream.enabled", "ai_alerts.client_hook.enabled", "sound.enabled", "sound.server_beep", "display.blink_red_tiles", "display.timezone"):
+            self.assertIn(key, settings_api.LITE_KEYS, key)
+
     def test_a_running_monitor_answers_in_both_editions(self):
         for flavor in ("--lite", None):
             with socket.socket() as probe:

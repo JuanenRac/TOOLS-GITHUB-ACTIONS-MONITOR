@@ -485,7 +485,8 @@ def check_value_list(value):
     return True, list(value)
 
 
-LITE_KEYS = ("github_owner", "language", "repos", "ecosystems", "exclude", "refresh_seconds", "open_browser", "updates.check", "airgapped")      # the short settings page of the lite product
+LITE_KEYS = ("github_owner", "language", "repos", "ecosystems", "exclude", "refresh_seconds", "open_browser", "updates.check", "airgapped") + tuple(
+    k for k in FIELDS if k.startswith(("ai_alerts.", "sound.", "display.")))      # the short settings page of the lite product; the connection with an AI tool, the sound and the look are the same in both editions
 
 
 def validate(changes, lite=False):

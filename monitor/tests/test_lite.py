@@ -75,7 +75,7 @@ class LiteSettings(unittest.TestCase):
         groups = sa.describe(HERE / "nonexistent.json", lite=True)["groups"]
         keys = {f["key"] for g in groups for f in g["fields"]}
         self.assertEqual(keys, set(sa.LITE_KEYS))
-        self.assertLessEqual(len(groups), 3)        # Basic, General and Refresh
+        self.assertLessEqual(len(groups), 4)        # Basic, General, Refresh and the connection with an AI tool (the same in both editions)
         self.assertNotIn("sentinel.enabled", keys)
         self.assertTrue(len(sa.describe(HERE / "nonexistent.json")["groups"]) > 5)
 
