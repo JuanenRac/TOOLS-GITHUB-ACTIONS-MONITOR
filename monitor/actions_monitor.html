@@ -90,6 +90,7 @@ button:disabled{opacity:.5;cursor:default;filter:none;transform:none}
 button.ib{padding:5px 8px;min-width:34px}
 button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--run);outline-offset:2px}
 .filters{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:8px 18px;border-bottom:1px solid var(--line);background:var(--bg)}
+#err,#reduced,#offline,#hidden,#restartbar,#netbar{display:none!important}
 #err{display:none;background:var(--bad);color:var(--on-bad);padding:6px 18px}
 #reduced{display:none;background:var(--warn);color:var(--on-warn);padding:6px 18px}
 #offline{display:none;background:var(--bad);color:var(--on-bad);padding:6px 18px;font-weight:600}
@@ -268,6 +269,18 @@ background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 
 .lvl{display:inline-flex;gap:6px;margin:0 0 8px}
 @media (max-width:760px){.help-cols{grid-template-columns:1fr;grid-template-rows:auto 1fr}#help-list{border-right:none;border-bottom:1px solid var(--line);max-height:30vh}.dl{grid-template-columns:1fr}}
 /* the shell: a side panel on the left (the logo, the account switcher, the sections in groups, the help) and the stage on the right (the top bar, the figures, the section) */
+th.sortable{cursor:pointer;user-select:none;white-space:nowrap}th.sortable:hover,th.sortable:focus-visible{color:var(--acc)}th .si{color:var(--acc);font-size:11px}th .si sub{font-size:9px}
+.tbl-tools{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:0 0 8px;font-size:12px}.colsel{position:relative}.colsel summary{cursor:pointer;border:1px solid var(--line2);border-radius:8px;padding:3px 10px;list-style:none}.colsel summary::-webkit-details-marker{display:none}
+.colsel .colbox{position:absolute;z-index:12;top:30px;left:0;min-width:220px;max-height:60vh;overflow:auto;background:var(--panel);border:1px solid var(--line2);border-radius:10px;box-shadow:var(--shadow);padding:8px 10px;display:flex;flex-direction:column;gap:3px}.colsel .colbox label{display:flex;gap:6px;align-items:center;white-space:nowrap}
+#statusbar{flex:none;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 16px;padding:5px 14px;border-top:1px solid var(--line2);background:var(--panel);font-size:12px;min-height:34px;position:relative;z-index:15}
+#statusbar .sb-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1 1 260px}#statusbar .sb-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+#statusbar .sb-right{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:2px 14px;margin-left:auto}#statusbar .sb-item{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;color:var(--mut)}
+#statusbar .sb-clock{color:var(--text);font-variant-numeric:tabular-nums;order:99}
+.sb-lamp{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--grey,#888);box-shadow:0 0 0 2px rgba(127,127,127,.18);flex:none}.sb-lamp.ok{background:var(--ok);box-shadow:0 0 6px var(--ok)}.sb-lamp.warn{background:var(--warn);box-shadow:0 0 6px var(--warn)}.sb-lamp.bad{background:var(--bad);box-shadow:0 0 6px var(--bad)}
+.sb-more{border:1px solid var(--line2);background:transparent;color:var(--text);border-radius:999px;padding:0 9px;font-size:12px;cursor:pointer;flex:none}
+#sb-open{width:26px;height:26px;flex:none}#notes-body{padding:6px 14px 14px;overflow:auto}#notes-body ul{list-style:none;margin:0;padding:0}#notes-body li{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:4px 10px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--line)}#notes-body time{color:var(--mut);font-variant-numeric:tabular-nums;font-size:12px}
+@media (max-width:900px){#statusbar .sb-opt{display:none}#statusbar{padding:5px 10px}}
+@media (max-width:560px){#statusbar .sb-left{flex-basis:100%}#statusbar .sb-right{width:100%;justify-content:space-between;margin-left:0}}
 .shell{flex:1;min-height:0;display:flex}
 .stage{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
 .sidebar{flex:0 0 auto;width:var(--side-w,236px);display:flex;flex-direction:column;gap:14px;min-height:0;overflow:hidden;padding:14px 10px;background:var(--side);border-right:1px solid var(--line);color:var(--side-text);transition:width .18s}
@@ -376,7 +389,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <div class="tiles" id="tiles1" role="group" data-i18n-aria="ui.tiles_aria1"><div class="tile skel " id="kt-active" role="button" tabindex="0" data-go="now" data-i18n-title="ui.k_active_title" data-i18n-aria="ui.k_active_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-run"/></svg><b id="k-active" data-v>–</b><small data-i18n="ui.k_active"></small></div><div class="tile skel " id="kt-queued" role="button" tabindex="0" data-go="now" data-i18n-title="ui.k_queued_title" data-i18n-aria="ui.k_queued_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-queue"/></svg><b id="k-queued" data-v>–</b><small data-i18n="ui.k_queued"></small></div><div class="tile skel kclick" id="kp-fail" role="button" tabindex="0" data-i18n-title="ui.k_fail_title" data-i18n-aria="ui.k_fail_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-fail"/></svg><b id="k-fail" data-v>–</b><small data-i18n="ui.k_fail"></small></div><div class="tile skel " id="kt-ok" role="button" tabindex="0" data-go="hist" data-i18n-title="ui.k_ok_title" data-i18n-aria="ui.k_ok_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-okc"/></svg><b id="k-ok" data-v>–</b><small data-i18n="ui.k_ok"></small></div><div class="tile skel " id="kt-min" role="button" tabindex="0" data-go="charts" data-i18n-title="ui.k_min_title" data-i18n-aria="ui.k_min_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-timer"/></svg><b id="k-min" data-v>–</b><small data-i18n="ui.k_min"></small></div><div class="tile skel " id="kt-issues" role="button" tabindex="0" data-go="sent" data-i18n-title="ui.k_issues_title" data-i18n-aria="ui.k_issues_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-alert"/></svg><b id="k-issues" data-v>–</b><small data-i18n="ui.k_issues"></small></div><div class="tile skel kclick" id="kp-red" role="button" tabindex="0" data-i18n-title="ui.k_red_title" data-i18n-aria="ui.k_red_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-flag"/></svg><b id="k-red" data-v>–</b><small data-i18n="ui.k_red"></small></div><div class="tile skel kclick" id="kp-sign" role="button" tabindex="0" data-i18n-title="ui.k_sign_title" data-i18n-aria="ui.k_sign_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-pen"/></svg><b id="k-sign" data-v>–</b><small data-i18n="ui.k_sign"></small></div></div>
 <div class="tiles" id="tiles2" role="group" data-i18n-aria="ui.tiles_aria2"><div class="tile skel " id="kt-repos" role="button" tabindex="0" data-go="repos" data-i18n-title="ui.t_repos_title" data-i18n-aria="ui.t_repos_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-repo"/></svg><b id="tv-repos" data-v>–</b><small data-i18n="ui.t_repos"></small></div><div class="tile skel " id="kt-hot" role="button" tabindex="0" data-go="repos" data-i18n-title="ui.t_hot_title" data-i18n-aria="ui.t_hot_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-flame"/></svg><b id="tv-hot" data-v>–</b><small data-i18n="ui.t_hot"></small></div><div class="tile skel " id="kt-mode" role="button" tabindex="0" data-go="cfg:general" data-i18n-title="ui.t_mode_title" data-i18n-aria="ui.t_mode_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-sliders"/></svg><b id="tv-mode" data-v>–</b><small data-i18n="ui.t_mode"></small></div><div class="tile skel " id="kt-etag" role="button" tabindex="0" data-go="cfg:cache" data-i18n-title="ui.t_etag_title" data-i18n-aria="ui.t_etag_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-save2"/></svg><b id="tv-etag" data-v>–</b><small data-i18n="ui.t_etag"></small></div><div class="tile skel wide" id="kt-quota" role="button" tabindex="0" data-go="cfg:polling" data-i18n-title="ui.t_quota_title" data-i18n-aria="ui.t_quota_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gauge"/></svg><b id="tv-quota" data-v>–</b><small><span data-i18n="ui.t_quota"></span> · <span id="tv-renews"></span></small><span class="qbar" aria-hidden="true"><i id="tq-fill"></i></span></div><div class="tile skel " id="kt-conn" role="group" data-i18n-title="ui.t_conn_title" data-i18n-aria="ui.t_conn_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-wifi"/></svg><b id="tv-conn" data-v>–</b><small data-i18n="ui.t_conn"></small><span class="vh" id="tv-conn-since"></span></div><div class="tile skel " id="kt-upd" role="group" data-i18n-title="ui.t_updated_title" data-i18n-aria="ui.t_updated_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg><b id="tv-upd" data-v>–</b><small data-i18n="ui.t_updated"></small></div><div class="tile wide run" id="kt-loading" role="group" hidden data-i18n-title="ui.t_loading_title" data-i18n-aria="ui.t_loading_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-spin"/></svg><b id="tv-load">–</b><small data-i18n="ui.t_loading"></small><span class="qbar" aria-hidden="true"><i id="tl-fill"></i></span></div></div>
 </div>
-<div class="hcorner" role="group" data-i18n-aria="ui.corner_aria"><div class="tools"><button id="hotonly" class="ib" type="button" aria-pressed="false" data-i18n-aria="ui.ic_hotonly_off" data-i18n-title="ui.ic_hotonly_off"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-flame"/></svg></button><label class="modebox" data-i18n-title="ui.mode_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gauge"/></svg><select id="mode-sel" data-i18n-aria="ui.mode_title"><option value="normal"></option><option value="fast"></option><option value="turbo"></option></select><span id="mode-left" class="mut" role="timer"></span></label></div><div class="hbadges"><span class="badge b-queued" id="k-budget" hidden role="status"></span><span class="badge b-queued" id="k-a10" hidden role="status"></span><span class="rdy" id="k-ready" role="group" data-i18n-aria="ui.ready_title" hidden></span></div></div>
+<div class="hcorner" role="group" data-i18n-aria="ui.corner_aria"><div class="tools"><button id="fs" class="ib" type="button" aria-pressed="false" data-i18n-aria="ui.fs_enter" data-i18n-title="ui.fs_enter"><svg class="ico" aria-hidden="true" focusable="false"><use id="fs-ico" href="#i-full"/></svg></button><button id="hotonly" class="ib" type="button" aria-pressed="false" data-i18n-aria="ui.ic_hotonly_off" data-i18n-title="ui.ic_hotonly_off"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-flame"/></svg></button><label class="modebox" data-i18n-title="ui.mode_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gauge"/></svg><select id="mode-sel" data-i18n-aria="ui.mode_title"><option value="normal"></option><option value="fast"></option><option value="turbo"></option></select><span id="mode-left" class="mut" role="timer"></span></label></div><div class="hbadges"><span class="badge b-queued" id="k-budget" hidden role="status"></span><span class="badge b-queued" id="k-a10" hidden role="status"></span><span class="rdy" id="k-ready" role="group" data-i18n-aria="ui.ready_title" hidden></span></div></div>
 </div>
 <div class="vh" role="status"><span id="stamp" data-i18n="ui.loading_short"></span> <span id="mode"></span> <span id="rate"></span> <span class="badge b-queued" id="quota" hidden></span></div>
 </header>
@@ -414,7 +427,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <section class="wide"><h2 data-i18n="ui.c_timeline"></h2><div class="body" id="timeline"></div></section>
 </div>
 <div class="tab" id="t-repos" role="tabpanel" aria-labelledby="n-repos">
-<section><h2 data-i18n="ui.r_title"></h2><div class="body"><table><thead><tr><th data-i18n="ui.th_repo"></th><th data-i18n="ui.th_lastrun"></th><th data-i18n="ui.th_result"></th><th data-i18n="ui.th_ago"></th><th data-i18n="ui.th_lastok"></th><th data-i18n="ui.th_ok24"></th><th data-i18n="ui.th_min24"></th><th data-i18n="ui.th_now"></th><th data-i18n="ui.th_issues"></th></tr></thead><tbody id="repo-rows"></tbody></table></div></section>
+<section><h2 data-i18n="ui.r_title"></h2><div class="body"><div class="tbl-tools" id="repos-tools"></div><table><thead><tr id="repos-head"></tr></thead><tbody id="repo-rows"></tbody></table></div></section>
 </div>
 <div class="tab" id="t-hist" role="tabpanel" aria-labelledby="n-hist">
 <section><h2 data-i18n="ui.h_title"></h2>
@@ -423,7 +436,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <label><span data-i18n="ui.th_result"></span> <select id="f-res"><option value="" data-i18n="ui.f_all"></option><option>success</option><option>failure</option><option>cancelled</option><option>timed_out</option></select></label>
 <label><span data-i18n="ui.f_search"></span> <input id="f-q" data-i18n-ph="ui.h_search_ph"></label>
 </div>
-<div class="body"><table><thead><tr><th data-i18n="ui.th_start"></th><th data-i18n="ui.th_repo"></th><th data-i18n="ui.th_workflow"></th><th data-i18n="ui.th_event"></th><th data-i18n="ui.th_branch"></th><th data-i18n="ui.th_result"></th><th data-i18n="ui.th_duration"></th><th data-i18n="ui.th_title"></th></tr></thead><tbody id="hist"></tbody></table></div>
+<div class="body"><div class="tbl-tools" id="hist-tools"></div><table><thead><tr id="hist-head"></tr></thead><tbody id="hist"></tbody></table></div>
 </section>
 </div>
 <div class="tab" id="t-cfg" role="tabpanel" aria-labelledby="n-cfg">
@@ -443,7 +456,22 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <div id="about-dlg" class="dlg" role="dialog" aria-modal="true" aria-labelledby="about-h" hidden><div class="dlg-box"><div class="dlg-top"><h2 id="about-h" data-i18n="ui.about_title"></h2><span class="sp"></span><button id="about-close" class="ib" type="button" data-i18n-title="ui.close" data-i18n-aria="ui.close"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-close"/></svg></button></div><div class="dlg-body" id="about-body"></div><div class="dlg-bar"><button id="about-copy" type="button"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-copy"/></svg><span data-i18n="ui.about_copy"></span></button><span id="about-msg" class="mut" role="status"></span></div></div></div>
 <div id="help-dlg" class="dlg" role="dialog" aria-modal="true" aria-labelledby="help-h" hidden><div class="dlg-box wide"><div class="dlg-top"><h2 id="help-h" data-i18n="ui.help_title"></h2><input id="help-q" type="search" autocomplete="off" data-i18n-ph="ui.help_search_ph" data-i18n-aria="ui.help_search_ph" style="flex:1;max-width:420px"><span class="sp"></span><button id="help-close" class="ib" type="button" data-i18n-title="ui.close" data-i18n-aria="ui.close"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-close"/></svg></button></div><div class="help-cols"><div id="help-list" role="navigation" data-i18n-aria="ui.help_index"></div><div id="help-body" tabindex="0"></div></div></div></div>
 <div id="wiz-dlg" class="dlg" role="dialog" aria-modal="true" aria-labelledby="wiz-h" hidden><div class="dlg-box"><div class="dlg-top"><h2 id="wiz-h" data-i18n="ui.wiz_title"></h2><span class="sp"></span><span class="mut" id="wiz-step"></span></div><div class="dlg-body" id="wiz-body"></div><div class="dlg-bar"><button id="wiz-back" type="button" data-i18n="ui.wiz_back"></button><button id="wiz-next" type="button" data-i18n="ui.wiz_next"></button><span class="sp" style="flex:1"></span><button id="wiz-skip" type="button" data-i18n="ui.wiz_skip"></button></div></div></div>
-<footer id="about" class="mut" style="padding:10px 14px;font-size:12px"></footer>
+<footer id="statusbar" role="contentinfo" data-i18n-aria="ui.sb_label">
+<div class="sb-left"><span class="sb-lamp ok" id="sb-lamp" aria-hidden="true"></span><span class="sb-text" id="sb-text" role="status" aria-live="polite"></span><button id="sb-more" class="sb-more" type="button" hidden></button><button id="sb-open" class="ib" type="button" hidden data-i18n-title="ui.sb_open_all" data-i18n-aria="ui.sb_open_all"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-list"/></svg></button></div>
+<div class="sb-right" id="sb-items">
+<span class="sb-item" id="sb-conn"><span class="sb-lamp" id="sb-conn-lamp" aria-hidden="true"></span><span id="sb-conn-t"></span></span>
+<span class="sb-item" id="sb-quota"></span>
+<span class="sb-item sb-opt" id="sb-refresh"></span>
+<span class="sb-item sb-opt" id="sb-mode"></span>
+<span class="sb-item sb-opt" id="sb-sent"></span>
+<span class="sb-item sb-opt" id="sb-repos"></span>
+<span class="sb-item sb-opt" id="sb-acc"></span>
+<span class="sb-item sb-opt" id="sb-ver"></span>
+<span class="sb-item sb-opt" id="sb-addr"></span>
+<span class="sb-item sb-clock" id="sb-clock"></span>
+</div>
+</footer>
+<div id="notes-dlg" class="dlg" role="dialog" aria-modal="true" aria-labelledby="notes-h" hidden><div class="dlg-box"><div class="dlg-top"><h2 id="notes-h" data-i18n="ui.sb_all_title"></h2><label class="inl"><span data-i18n="ui.sb_filter"></span> <select id="notes-level"><option value="" data-i18n="ui.f_all"></option><option value="bad" data-i18n="ui.sb_lv_bad"></option><option value="warn" data-i18n="ui.sb_lv_warn"></option></select></label><span class="sp"></span><button id="notes-close" class="ib" type="button" data-i18n-title="ui.close" data-i18n-aria="ui.close"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-close"/></svg></button></div><div class="dlg-body" id="notes-body"></div></div></div>
 <aside id="rp" role="complementary" data-i18n-aria="ui.rp_aria" hidden></aside>
 <script>
 "use strict";
@@ -460,12 +488,13 @@ const LOC=()=>I18N.locale[LANG]||"en-GB";
 const OWNER=I18N.owner||"";
 const LITE=!!I18N.lite;if(LITE)document.body.classList.add("lite");
 function applyStatic(){
-  document.documentElement.lang=I18N.html[LANG]||LANG;document.title=T("ui.title")+(I18N.version?" v"+I18N.version:"");const aboutEl=document.getElementById("about");if(aboutEl&&I18N.author)aboutEl.textContent=T("ui.about",{author:I18N.author,license:I18N.license});const verEl=document.getElementById("ver");if(verEl)verEl.textContent=(I18N.version?"v"+I18N.version:"")+(LITE?" · "+T("ui.lite_badge"):"");
+  document.documentElement.lang=I18N.html[LANG]||LANG;document.title=T("ui.title")+(I18N.version?" v"+I18N.version:"");const verEl=document.getElementById("ver");if(verEl)verEl.textContent=(I18N.version?"v"+I18N.version:"")+(LITE?" · "+T("ui.lite_badge"):"");
   document.querySelectorAll("[data-i18n]").forEach(e=>{e.textContent=T(e.dataset.i18n)});
   document.querySelectorAll("[data-i18n-title]").forEach(e=>{e.title=T(e.dataset.i18nTitle)});
   document.querySelectorAll("[data-i18n-aria]").forEach(e=>{e.setAttribute("aria-label",T(e.dataset.i18nAria))});
   document.querySelectorAll("[data-i18n-ph]").forEach(e=>{e.placeholder=T(e.dataset.i18nPh)});
   const lq="?lang="+LANG;$("lnk-txt").href="/api/sentinel/parte.txt"+lq;$("lnk-md").href="/api/sentinel/parte.txt?fmt=md&lang="+LANG;
+  try{fsSync();renderBar()}catch(e){}      // the texts of the bar and of the full screen button follow the language
 }
 var DATA=null;
 window.addEventListener("error",e=>{const b=document.getElementById("err");b.style.display="block";b.textContent=T("ui.err_page",{msg:e.message,line:e.lineno})});
@@ -740,19 +769,94 @@ function durations(runs){
   svg+=`<text x="${L}" y="${H+22}" style="font-size:12px">${esc(T("ui.oldest"))}</text><text x="${w-6}" y="${H+22}" text-anchor="end" style="font-size:12px">${esc(T("ui.newest"))}</text>`;
   el.innerHTML=svg+"</svg>";
 }
+/* ---------- the two big tables: a click on a header sorts, Shift+click adds a second key, a third click goes back to no order; the order and the columns are remembered ---------- */
+function jget(k,def){try{const v=JSON.parse(store.get(k));return v==null?def:v}catch(e){return def}}
+const age_=t=>t?Date.now()-new Date(t).getTime():null;
+function Table(id,cols,again){
+  const tb={id:id,cols:cols,open:false,sort:jget("am-sort-"+id,[]),show:jget("am-cols-"+id,null),made:""};
+  if(!Array.isArray(tb.sort))tb.sort=[];
+  tb.sort=tb.sort.filter(s=>s&&cols.some(c=>c.id===s.c)&&(s.d===1||s.d===-1)).slice(0,4);
+  if(!Array.isArray(tb.show))tb.show=cols.filter(c=>c.def).map(c=>c.id);
+  tb.show=cols.filter(c=>c.fixed||tb.show.includes(c.id)).map(c=>c.id);
+  tb.visible=()=>cols.filter(c=>tb.show.includes(c.id));
+  tb.save=()=>{store.set("am-sort-"+id,JSON.stringify(tb.sort));store.set("am-cols-"+id,JSON.stringify(tb.show))};
+  tb.click=(c,multi)=>{const i=tb.sort.findIndex(s=>s.c===c);
+    if(!multi){if(i>=0&&tb.sort.length===1){if(tb.sort[0].d===1)tb.sort[0].d=-1;else tb.sort=[]}else tb.sort=[{c:c,d:1}]}
+    else{if(i<0)tb.sort.push({c:c,d:1});else if(tb.sort[i].d===1)tb.sort[i].d=-1;else tb.sort.splice(i,1)}
+    tb.save();again()};
+  tb.cmp=(x,y)=>{for(const s of tb.sort){const col=cols.find(c=>c.id===s.c),p=col.sort(x),q=col.sort(y),np=p==null||p==="",nq=q==null||q==="";
+      if(np&&nq)continue;if(np)return 1;if(nq)return -1;                       /* an empty value goes last, whatever the direction */
+      const r=typeof p==="number"&&typeof q==="number"?p-q:String(p).localeCompare(String(q),LOC(),{numeric:true,sensitivity:"base"});
+      if(r)return r*s.d}return 0};
+  tb.sorted=rows=>tb.sort.length?rows.map((r,i)=>[r,i]).sort((p,q)=>tb.cmp(p[0],q[0])||p[1]-q[1]).map(p=>p[0]):rows;
+  tb.draw=(head,tools)=>{
+    head.innerHTML=tb.visible().map(c=>{const i=tb.sort.findIndex(s=>s.c===c.id),s=i>=0?tb.sort[i]:null;
+      return `<th class="sortable" data-c="${c.id}" tabindex="0" aria-sort="${s?(s.d===1?"ascending":"descending"):"none"}" title="${esc(T("ui.tbl_sort_hint"))}">${esc(T(c.label))}${s?` <span class="si" aria-hidden="true">${s.d===1?"▲":"▼"}${tb.sort.length>1?`<sub>${i+1}</sub>`:""}</span>`:""}</th>`}).join("");
+    head.querySelectorAll("th").forEach(th=>{const go=e=>tb.click(th.dataset.c,e.shiftKey);th.addEventListener("click",go);th.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go(e)}})});
+    const key=JSON.stringify([tb.sort,tb.show,LANG]);if(key===tb.made)return;tb.made=key;     /* the tools are drawn again only when they change, so an open list of columns stays put */
+    const order=tb.sort.map(s=>T(cols.find(c=>c.id===s.c).label)+(s.d===1?" ▲":" ▼")).join(" › ");
+    tools.innerHTML=`<details class="colsel"${tb.open?" open":""}><summary>${esc(T("ui.tbl_columns"))}</summary><div class="colbox">${cols.map(c=>`<label><input type="checkbox" data-c="${c.id}"${tb.show.includes(c.id)?" checked":""}${c.fixed?" disabled":""}> ${esc(T(c.label))}</label>`).join("")}<button type="button" data-reset="cols">${esc(T("ui.tbl_reset_cols"))}</button></div></details><span class="mut">${esc(order?T("ui.tbl_order",{list:order}):T("ui.tbl_sort_hint"))}</span>${tb.sort.length?`<button type="button" data-reset="sort">${esc(T("ui.tbl_reset"))}</button>`:""}`;
+    const det=tools.querySelector("details");det.addEventListener("toggle",()=>{tb.open=det.open});
+    tools.querySelectorAll("input[data-c]").forEach(i=>i.addEventListener("change",()=>{const on=[...tools.querySelectorAll("input[data-c]:checked")].map(x=>x.dataset.c);tb.show=cols.filter(c=>c.fixed||on.includes(c.id)).map(c=>c.id);tb.save();again()}));
+    tools.querySelectorAll("button[data-reset]").forEach(b=>b.addEventListener("click",()=>{if(b.dataset.reset==="sort")tb.sort=[];else tb.show=cols.filter(c=>c.def||c.fixed).map(c=>c.id);tb.save();again()}));
+  };
+  tb.cells=row=>tb.visible().map(c=>`<td>${c.cell(row)}</td>`).join("");
+  return tb}
+const dash_="–",statusKey_=r=>r?(r.status!=="completed"?r.status:(r.conclusion||"skipped")):"";
+const REPO_TABLE=Table("repos",[
+  {id:"repo",label:"ui.th_repo",def:1,fixed:1,sort:r=>r.repo,cell:r=>`<b class="rl" data-repo-open="${esc(r.repo)}" tabindex="0" title="${esc(T("ui.detail_title"))}">${esc(r.repo)}</b>`},
+  {id:"lastrun",label:"ui.th_lastrun",def:1,sort:r=>r.l&&r.l.name,cell:r=>r.l?`<a href="${esc(r.l.url)}" target="_blank" rel="noopener">${esc(r.l.name)}</a>`:dash_},
+  {id:"result",label:"ui.th_result",def:1,sort:r=>statusKey_(r.l),cell:r=>r.l?badge(r.l):""},
+  {id:"ago",label:"ui.th_ago",def:1,sort:r=>r.l&&age_(r.l.started),cell:r=>r.l?ago(r.l.started):""},
+  {id:"lastok",label:"ui.th_lastok",def:1,sort:r=>r.lastOk&&age_(r.lastOk.started),cell:r=>r.lastOk?ago(r.lastOk.started):dash_},
+  {id:"ok24",label:"ui.th_ok24",def:1,sort:r=>r.done24?r.ok24/r.done24:null,cell:r=>r.done24?Math.round(100*r.ok24/r.done24)+"% ("+r.ok24+"/"+r.done24+")":dash_},
+  {id:"min24",label:"ui.th_min24",def:1,sort:r=>r.min24,cell:r=>r.min24},
+  {id:"now",label:"ui.th_now",def:1,sort:r=>r.act,cell:r=>r.act?`<span class="badge b-run">${esc(T("ui.running_n",{n:r.act}))}</span>`:""},
+  {id:"issues",label:"ui.th_issues",def:1,sort:r=>r.issues,cell:r=>r.issues?`<span class="badge b-failure">${r.issues}</span>`:""},
+  {id:"eco",label:"ui.th_eco",sort:r=>r.eco,cell:r=>esc(r.eco)},
+  {id:"runno",label:"ui.th_runno",sort:r=>r.l&&r.l.number,cell:r=>r.l&&r.l.number!=null?"#"+r.l.number:dash_},
+  {id:"actor",label:"ui.th_actor",sort:r=>r.l&&r.l.actor,cell:r=>r.l?esc(r.l.actor):dash_},
+  {id:"commit",label:"ui.th_commit",sort:r=>r.l&&r.l.sha,cell:r=>r.l?`<code>${esc(r.l.sha)}</code>`:dash_},
+  {id:"attempt",label:"ui.th_attempt",sort:r=>r.l&&r.l.attempt,cell:r=>r.l&&r.l.attempt?r.l.attempt:dash_},
+  {id:"queued",label:"ui.th_queued",sort:r=>r.l&&r.l.queued,cell:r=>r.l&&r.l.queued!=null?fmt(r.l.queued):dash_},
+  {id:"runs24",label:"ui.th_runs24",sort:r=>r.done24,cell:r=>r.done24},
+  {id:"branch",label:"ui.th_defbranch",sort:r=>r.meta.branch,cell:r=>r.meta.branch?esc(r.meta.branch):dash_},
+  {id:"visibility",label:"ui.th_visibility",sort:r=>r.meta.private?1:0,cell:r=>esc(T(r.meta.private?"ui.vis_private":"ui.vis_public"))},
+  {id:"pushed",label:"ui.th_pushed",sort:r=>age_(r.meta.pushed),cell:r=>r.meta.pushed?ago(r.meta.pushed):dash_},
+  {id:"prs",label:"ui.th_prs",sort:r=>r.meta.prs,cell:r=>r.meta.prs!=null?r.meta.prs:dash_}
+],()=>{if(DATA)render(DATA)});
 function repos(d,last){
-  const issues={};d.issues.forEach(i=>issues[i.repo]=(issues[i.repo]||0)+1);
-  $("repo-rows").innerHTML=d.repos.filter(repo=>repoVisible(repo,d)).map(repo=>{
-    const rs=d.runs.filter(r=>r.repo===repo),l=rs[0],done24=last.filter(r=>r.repo===repo&&r.status==="completed"),ok24=done24.filter(r=>r.conclusion==="success").length;
-    const lastOk=rs.find(r=>r.conclusion==="success"),act=d.active.filter(r=>r.repo===repo).length;
-    const pct=done24.length?Math.round(100*ok24/done24.length)+"% ("+ok24+"/"+done24.length+")":"–";
-    return `<tr><td><b class="rl" data-repo-open="${esc(repo)}" tabindex="0" title="${esc(T("ui.detail_title"))}">${esc(repo)}</b></td><td>${l?`<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.name)}</a>`:"–"}</td><td>${l?badge(l):""}</td><td>${l?ago(l.started):""}</td><td>${lastOk?ago(lastOk.started):"–"}</td><td>${pct}</td><td>${Math.round(last.filter(r=>r.repo===repo).reduce((a,r)=>a+r.seconds,0)/60)}</td><td>${act?`<span class="badge b-run">${esc(T("ui.running_n",{n:act}))}</span>`:""}</td><td>${issues[repo]?`<span class="badge b-failure">${issues[repo]}</span>`:""}</td></tr>`}).join("");
+  const issues={};d.issues.forEach(i=>issues[i.repo]=(issues[i.repo]||0)+1);const meta=d.repo_meta||{};
+  const rows=d.repos.filter(repo=>repoVisible(repo,d)).map(repo=>{
+    const rs=d.runs.filter(r=>r.repo===repo),mine=last.filter(r=>r.repo===repo),done=mine.filter(r=>r.status==="completed");
+    return {repo:repo,l:rs[0],lastOk:rs.find(r=>r.conclusion==="success"),act:d.active.filter(r=>r.repo===repo).length,done24:done.length,ok24:done.filter(r=>r.conclusion==="success").length,
+      min24:Math.round(mine.reduce((a,r)=>a+r.seconds,0)/60),issues:issues[repo]||0,eco:d.ecosystems[repo]||"other",meta:meta[repo]||{}}});
+  REPO_TABLE.draw($("repos-head"),$("repos-tools"));
+  $("repo-rows").innerHTML=REPO_TABLE.sorted(rows).map(r=>`<tr>${REPO_TABLE.cells(r)}</tr>`).join("");
 }
 function filters(d){const sel=$("f-repo"),cur=sel.value;if(sel.options.length<=1){d.repos.forEach(r=>{const o=document.createElement("option");o.textContent=r;sel.appendChild(o)});sel.value=cur}}
+const HIST_TABLE=Table("hist",[
+  {id:"start",label:"ui.th_start",def:1,fixed:1,sort:r=>new Date(r.started).getTime(),cell:r=>hora(r.started)},
+  {id:"repo",label:"ui.th_repo",def:1,sort:r=>r.repo,cell:r=>`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.repo)}</a>`},
+  {id:"workflow",label:"ui.th_workflow",def:1,sort:r=>r.name,cell:r=>esc(r.name)},
+  {id:"event",label:"ui.th_event",def:1,sort:r=>r.event,cell:r=>esc(r.event)},
+  {id:"branch",label:"ui.th_branch",def:1,sort:r=>r.branch,cell:r=>esc(r.branch)},
+  {id:"result",label:"ui.th_result",def:1,sort:r=>statusKey_(r),cell:r=>badge(r)},
+  {id:"duration",label:"ui.th_duration",def:1,sort:r=>r.seconds,cell:r=>fmt(r.seconds)},
+  {id:"title",label:"ui.th_title",def:1,sort:r=>r.title,cell:r=>esc(r.title)},
+  {id:"runno",label:"ui.th_runno",sort:r=>r.number,cell:r=>r.number!=null?"#"+r.number:dash_},
+  {id:"actor",label:"ui.th_actor",sort:r=>r.actor,cell:r=>esc(r.actor)},
+  {id:"commit",label:"ui.th_commit",sort:r=>r.sha,cell:r=>`<code>${esc(r.sha)}</code>`},
+  {id:"attempt",label:"ui.th_attempt",sort:r=>r.attempt,cell:r=>r.attempt||dash_},
+  {id:"queued",label:"ui.th_queued",sort:r=>r.queued,cell:r=>r.queued!=null?fmt(r.queued):dash_},
+  {id:"file",label:"ui.th_file",sort:r=>r.path,cell:r=>esc(r.path)},
+  {id:"eco",label:"ui.th_eco",sort:r=>(DATA&&DATA.ecosystems[r.repo])||"other",cell:r=>esc((DATA&&DATA.ecosystems[r.repo])||"other")}
+],()=>renderHistory());
 function renderHistory(){
   if(!DATA)return;const repo=$("f-repo").value,res=$("f-res").value,q=$("f-q").value.toLowerCase();
-  const rows=DATA.runs.filter(r=>repoVisible(r.repo,DATA)&&(!repo||r.repo===repo)&&(!res||r.conclusion===res)&&(!q||(r.name+" "+r.title).toLowerCase().includes(q))).slice(0,200);
-  $("hist").innerHTML=rows.map(r=>`<tr><td>${hora(r.started)}</td><td><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.repo)}</a></td><td>${esc(r.name)}</td><td>${esc(r.event)}</td><td>${esc(r.branch)}</td><td>${badge(r)}</td><td>${fmt(r.seconds)}</td><td>${esc(r.title)}</td></tr>`).join("")||`<tr><td colspan="8" class="mut">${esc(T("ui.h_none"))}</td></tr>`;
+  const rows=HIST_TABLE.sorted(DATA.runs.filter(r=>repoVisible(r.repo,DATA)&&(!repo||r.repo===repo)&&(!res||r.conclusion===res)&&(!q||(r.name+" "+r.title).toLowerCase().includes(q)))).slice(0,200);
+  HIST_TABLE.draw($("hist-head"),$("hist-tools"));
+  $("hist").innerHTML=rows.map(r=>`<tr>${HIST_TABLE.cells(r)}</tr>`).join("")||`<tr><td colspan="${HIST_TABLE.visible().length}" class="mut">${esc(T("ui.h_none"))}</td></tr>`;
 }
 ["f-repo","f-res"].forEach(id=>$(id).addEventListener("change",renderHistory));$("f-q").addEventListener("input",renderHistory);
 async function tick(){
@@ -1167,7 +1271,7 @@ document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.tar
 document.addEventListener("keyup",e=>{if(e.target.tagName==="BUTTON")e.target.classList.remove("pressing")});
 
 /* About, Help, the first-start guide, the update notice, the restart bar and the level filter of the linter */
-const dlgs={about:$("about-dlg"),help:$("help-dlg"),wiz:$("wiz-dlg")};
+const dlgs={about:$("about-dlg"),help:$("help-dlg"),wiz:$("wiz-dlg"),notes:$("notes-dlg")};
 let LASTFOCUS=null;
 function dlgOpen(k){LASTFOCUS=document.activeElement;dlgs[k].hidden=false}
 function dlgClose(k){dlgs[k].hidden=true;if(LASTFOCUS&&LASTFOCUS.focus)try{LASTFOCUS.focus()}catch(e){}}
@@ -1336,6 +1440,61 @@ diffTick();setInterval(diffTick,60000);
 sentTick();setInterval(sentTick,15000);
 let rz;window.addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{if(DATA)render(DATA)},200)});
 tick();setInterval(tick,10000);
+/* ---------- the bar at the foot: the most important notice (all of them in a window), the connection, the allowance and the facts of this monitor ---------- */
+/* the notices of the page (the red and yellow ones that used to sit on top) are still written into their six elements by the code that knows about them; the bar reads those elements
+   and keeps the time each one was first seen, so the list of the window is in order of time and nothing else has to change */
+const NOTE_SRC=[["err","bad",90],["netbar","bad",80],["offline","bad",70],["quota","warn",50],["hidden","warn",40],["restartbar","warn",30],["reduced","warn",20]];
+const NSEEN={};var NOTES=[],SBINFO=null;
+function readNotices(){
+  const now=Date.now(),out=[];
+  NOTE_SRC.forEach(([id,lv,rank])=>{const el=$(id);let on=false;if(el)on=(id==="netbar"||id==="quota"?!el.hidden:el.style.display==="block")&&!!el.textContent.trim();
+    if(on){NSEEN[id]=NSEEN[id]||now;out.push({id:id,level:lv,rank:rank,text:el.textContent.trim(),at:NSEEN[id]})}else delete NSEEN[id]});
+  return out.sort((a,b)=>(b.level==="bad")-(a.level==="bad")||b.rank-a.rank);
+}
+function renderBar(){
+  const list=readNotices();NOTES=list;
+  const lamp=$("sb-lamp"),txt=$("sb-text"),more=$("sb-more"),open=$("sb-open");
+  if(!list.length){lamp.className="sb-lamp ok";txt.textContent=T("ui.sb_none");txt.title="";more.hidden=true;open.hidden=true}
+  else{const top=list[0];lamp.className="sb-lamp "+top.level;txt.textContent=top.text;txt.title=top.text;more.hidden=list.length<2;open.hidden=list.length<2;
+    if(list.length>1){more.textContent=T("ui.sb_more",{n:list.length-1});more.title=T("ui.sb_open_all")}}
+  if(!dlgs.notes.hidden)renderNotes();
+  renderBarFacts();
+}
+function renderNotes(){
+  const lv=$("notes-level").value,rows=NOTES.filter(n=>!lv||n.level===lv).slice().sort((a,b)=>b.at-a.at);
+  $("notes-body").innerHTML=rows.length?`<ul>${rows.map(n=>`<li><time>${esc(dtime(n.at))}</time><span class="chip ${n.level}">${esc(T("ui.sb_lv_"+n.level))}</span><span>${esc(n.text)}</span></li>`).join("")}</ul>`:`<p class="mut">${esc(T("ui.sb_none"))}</p>`;
+}
+function openNotes(){renderNotes();dlgOpen("notes")}
+function renderBarFacts(){
+  const d=DATA,set=(id,txt,title)=>{const e=$(id);if(!e)return;e.textContent=txt;e.title=title||""};
+  const conn=$("sb-conn-lamp"),ct=$("sb-conn-t");
+  if(!d){conn.className="sb-lamp";ct.textContent=T("ui.sb_waiting")}
+  else if(d.offline&&d.offline.offline){conn.className="sb-lamp bad";ct.textContent=T("ui.sb_offline");$("sb-conn").title=T("ui.sb_offline_t")}
+  else if(d.paused_quota){conn.className="sb-lamp warn";ct.textContent=T("ui.sb_quota_low");$("sb-conn").title=T("ui.sb_quota_low_t")}
+  else{conn.className="sb-lamp ok";ct.textContent=T("ui.sb_online");$("sb-conn").title=T("ui.sb_online_t")}
+  if(d){
+    const eta=d.rate?Math.max(0,Math.round((new Date(d.rate.reset).getTime()-Date.now())/60000)):null;
+    set("sb-quota",d.rate?T("ui.sb_quota",{remaining:d.rate.remaining,limit:d.rate.limit,time:clock(d.rate.reset,{hour:"2-digit",minute:"2-digit"})}):"",d.rate?T("ui.quota",{remaining:d.rate.remaining,limit:d.rate.limit,time:clock(d.rate.reset,{hour:"2-digit",minute:"2-digit"}),eta:eta}):"");
+    set("sb-refresh",T("ui.sb_updated",{time:clock(d.updated),secs:d.took}),T("ui.sb_updated_t",{n:d.refresh_seconds}));
+    set("sb-repos",T("ui.sb_repos",{n:d.repos.length,hot:d.hot}),T("ui.sb_repos_t"));
+  }
+  const mode=typeof MODEDATA!=="undefined"&&MODEDATA?MODEDATA.mode:"normal";set("sb-mode",T("ui.sb_mode",{mode:T("ui.mode_"+mode)}),T("ui.mode_title"));
+  const sents=SBINFO&&!LITE?SBINFO.sentinels||[]:[];
+  set("sb-sent",LITE?"":T("ui.sb_sentinels",{n:sents.filter(s=>s.enabled).length,m:sents.length}),sents.map(s=>(T("ui.al_o_"+s.name)===("ui.al_o_"+s.name)?s.name:T("ui.al_o_"+s.name))+": "+T(s.enabled?"ui.sb_on":"ui.sb_off")).join(" · "));
+  set("sb-acc",T("ui.sb_account",{name:(ACC&&ACC.current)||OWNER||"-"}),T("ui.sb_account_t"));
+  set("sb-ver","v"+(I18N.version||"")+" · "+T(LITE?"ui.sb_lite":"ui.sb_complete"),T("ui.sb_version_t"));
+  if(SBINFO)set("sb-addr",(SBINFO.bind==="0.0.0.0"?SBINFO.lan_address:"127.0.0.1")+":"+SBINFO.port,T("ui.sb_addr_t",{local:"127.0.0.1:"+SBINFO.port,lan:(SBINFO.lan_address||"-")+":"+SBINFO.port}));
+}
+function renderClock(){const e=$("sb-clock");if(e)e.textContent=new Date().toLocaleString(LOC(),{dateStyle:"medium",timeStyle:"medium"})}
+async function sbTick(){try{const r=await fetch("/api/statusbar",{cache:"no-store"});if(r.ok)SBINFO=await r.json()}catch(e){}renderBarFacts()}
+{const watch=new MutationObserver(()=>{if(!watch.q){watch.q=requestAnimationFrame(()=>{watch.q=0;renderBar()})}});
+  NOTE_SRC.forEach(([id])=>{const el=$(id);if(el)watch.observe(el,{attributes:true,childList:true,characterData:true,subtree:true})});
+  $("sb-more").addEventListener("click",openNotes);$("sb-open").addEventListener("click",openNotes);$("notes-close").addEventListener("click",()=>dlgClose("notes"));$("notes-level").addEventListener("change",renderNotes);
+  renderBar();renderClock();setInterval(renderClock,1000);sbTick();setInterval(sbTick,30000);setInterval(renderBarFacts,15000)}
+/* the full screen: one button in the corner, a second press leaves it; the page keeps working in either state */
+function fsSync(){const b=$("fs");if(!b)return;const on=!!document.fullscreenElement,k=on?"ui.fs_exit":"ui.fs_enter";b.setAttribute("aria-pressed",on);b.title=T(k);b.setAttribute("aria-label",T(k));const u=$("fs-ico");if(u)u.setAttribute("href",on?"#i-fullx":"#i-full")}
+{const b=$("fs");if(b){if(!document.fullscreenEnabled)b.hidden=true;else{b.addEventListener("click",()=>{const r=document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();if(r&&r.catch)r.catch(()=>{})});document.addEventListener("fullscreenchange",fsSync);fsSync()}}}
+{if(QS.get("dlg")==="notes")setTimeout(openNotes,800)}      /* deep link: ?dlg=notes opens the window of the notices (the pictures use it) */
 </script>
 </body>
 </html>

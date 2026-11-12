@@ -23,3 +23,7 @@
 起動方法:Windows は `MONITOR_LITE_GITHUB_ACTIONS.bat`、Linux は `./MONITOR_LITE_GITHUB_ACTIONS.sh`、macOS は `MONITOR_LITE_GITHUB_ACTIONS.command` をダブルクリック、または `python actions_monitor.py --lite`(`MONITOR_MODE=lite` でも可)。`127.0.0.1:8766` で待ち受けるので、完全版と同時に動かせます。
 
 短い設定には、アカウント(`github_owner`)、監視するリポジトリとエコシステム(`repos`、`ecosystems`、`exclude`)、更新間隔(`refresh_seconds`)、言語、テーマがあります。「main の赤」は、直近に完了した実行が失敗したワークフローの数です。後からセンチネルなどが必要になったら完全版を起動するだけで、移行は不要です。 初回起動時、`actions_monitor_lite.json` は `actions_monitor.json`(存在する場合)からアカウント、監視するリポジトリとエコシステム、カタログファイル、言語をコピーし、コンソールにそう表示します。センチネル、AI、Webhook、出力、通知は決してコピーしません。そのファイルが無ければすべてのエコシステムを監視します(`"ecosystems": "all"`)。テーマはブラウザーがポートごとに別々に記憶します。 lite 版は `ci_red.json` も署名キューも書き込まず、専用の状態ファイルを使います。両方の版に `sentinel.ci_red_file` を設定する場合は、同じファイルを指さないでください。
+
+## コマンドライン
+
+`python monitor_cli.py status --lite`、`doctor --lite`、`health --lite` はポート 8766 の lite モニターに問い合わせます（[CLI_jpn.md](CLI_jpn.md) を参照）。アカウントや番人が必要なコマンドは拒否されます。ページにも下部のステータスバーと並べ替えできる表があります。

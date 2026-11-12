@@ -81,7 +81,8 @@ def build(now):
     data = {"updated": iso(now), "took": 4.2, "repos": REPOS, "ecosystems": {r: am.ecosystem_of(r) for r in REPOS}, "runs": runs, "active": active, "issues": issues, "failing": am.unresolved_failures(runs),
             "errors": {}, "rate": {"remaining": 4630, "limit": 5000, "reset": iso(now + timedelta(minutes=40))}, "stuck_minutes": 120, "mode": "full", "refreshed": 3, "hot": 4, "loading": "", "min_rate": 1500,
             "paused_quota": False, "refresh_seconds": 120, "hot_only": {"on": False, "seconds_left": 0}, "offline": {"offline": False, "since": None, "last_ok": iso(now)},
-            "etag": {"enabled": True, "entries": 64, "saved": 482, "calls": 1290}}
+            "etag": {"enabled": True, "entries": 64, "saved": 482, "calls": 1290},
+            "repo_meta": {r: {"private": r.endswith(("fw", "api")), "branch": "main", "pushed": iso(now - timedelta(hours=3 + i)), "prs": i % 3} for i, r in enumerate(REPOS)}}
     for run in runs:
         am.RUN_CACHE.setdefault(run["repo"], {"runs": [], "at": time.time(), "error": None})["runs"].append(run)
     am.STATE.update({"data": data, "error": None, "hint": None, "complete": True})

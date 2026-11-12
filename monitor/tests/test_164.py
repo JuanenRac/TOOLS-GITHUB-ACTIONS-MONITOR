@@ -1267,7 +1267,7 @@ class SmallThings(unittest.TestCase):
             self.assertIn("tui_textual.py", head, lang)
 
     def test_the_version(self):
-        self.assertEqual(TOOL_VERSION, "1.7.3")
+        self.assertEqual(TOOL_VERSION, "1.7.4")
         if (ROOT / "electro-hobby-3d.project.json").is_file():          # not inside the zip
             self.assertEqual(json.loads((ROOT / "electro-hobby-3d.project.json").read_text(encoding="utf-8"))["version"], TOOL_VERSION)
         self.assertIn(f"## [{TOOL_VERSION}]", (HERE / "CHANGELOG.md").read_text(encoding="utf-8"))

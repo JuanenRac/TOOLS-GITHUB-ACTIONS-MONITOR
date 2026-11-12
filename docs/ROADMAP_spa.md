@@ -2,6 +2,10 @@
 
 Ideas que no cupieron en la versión actual, sin orden prometido. Son direcciones, no compromisos; un issue o un pull request es la mejor forma de adelantar una.
 
+## Hecho en la 1.7.4
+
+Una barra al pie de la página con el aviso más importante (y una ventana con todos), la conexión, la cuota, la última lectura, el modo, la dirección y el reloj; un botón de pantalla completa; tablas de Repositorios e Historial que se ordenan por una o varias columnas con las columnas que elijas; `monitor_cli.py`, la línea de comandos como cliente del monitor en marcha (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) con `--json` y códigos de salida estables, y su guía en ocho idiomas; los registros de cambios comprobados en orden, el README del paquete sin historial dentro y los dibujos hechos de nuevo.
+
 ## Hecho en la 1.7.3
 
 Un segundo centinela para incidencias y pull requests (Collab, apagado por defecto, solo lectura, con reloj propio), una pestaña Alertas con las alertas de todos los centinelas y filtro por origen y nivel, silencios locales que acaban solos (una alerta, una regla o un centinela; `alerts.mute_hours`), la etiqueta que hace ignorar un elemento, `GET /api/alerts` y `GET /api/events`, una lista de comprobación de la vista En vivo, una guía del centinela Collab en ocho idiomas y los dibujos hechos de nuevo.

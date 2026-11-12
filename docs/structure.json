@@ -284,6 +284,19 @@
           "tree_name": "signstate.py sigverify.py"
         },
         {
+          "name": "monitor_cli.py",
+          "desc": {
+            "en": "command line as a client",
+            "es": "línea de comandos cliente",
+            "de": "Befehlszeile als Client",
+            "fr": "ligne de commande cliente",
+            "it": "riga di comando client",
+            "ja": "クライアント用コマンド",
+            "zh": "客户端命令行",
+            "pt": "linha de comandos cliente"
+          }
+        },
+        {
           "name": "read_report.py",
           "desc": {
             "en": "report from the terminal",

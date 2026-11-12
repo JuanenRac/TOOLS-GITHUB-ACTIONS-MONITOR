@@ -9,6 +9,28 @@ Version of the tool itself (monitor + sentinel + batch tools), semver of its own
 and is shown as `tool_version` in the sentinel snapshot and by `read_report.py --version`; `make_release.py` refuses to build
 when this file and `tool_version.py` disagree.
 
+## [1.7.4]
+
+A bar at the foot of the page for the notices and the facts of the monitor, a full screen button, tables that sort by one or several columns with the columns of your choice, and the command line as a client of the running monitor.
+
+### Added
+
+- **A status bar at the foot of the page** (all editions) in place of the line of authorship. On the left, the most important notice (red before yellow) with the number of the others and a button that opens a window with all of them, newest first, with a filter by level; with no notice it says so. On the right, the connection (a lamp: GitHub online, offline, or allowance low), the allowance and when it renews, the last read, the working mode, how many sentinels are on, the repositories watched, the account, the version and edition, the address of the monitor and the local date and time. It follows the width of the window: the secondary facts fold away on narrow screens. `GET /api/statusbar` gives it the facts that GitHub data does not carry (no GitHub call, no secret).
+- **A full screen button** in the top right corner (the Fullscreen API; a second press leaves it), with its icon and text in the eight languages.
+- **Sortable tables**: Repositories and History sort by a click on a header (up, down, none), by several columns at once with Shift+click (each key shows its number and direction), the empty values always last, and the order is remembered. A column chooser adds more columns: run number, actor, short commit, attempt, queue wait, file and ecosystem in History; ecosystem, run number, actor, commit, attempt, queue wait, runs in 24 h, default branch, visibility, last push and open pull requests in Repositories. The monitor now sends the run number and the queue wait of every run and a small block of facts per repository (taken from what it already read; nothing new from GitHub).
+- **`monitor_cli.py`**, the command line as a client of the running monitor (`status`, `health` or `check`, `doctor`, `accounts`, `alerts`, `live`): it reads `GET /api/...` on this computer or at `--url` / `MONITOR_URL`, prints plain text or one JSON document with `--json`, takes `--account`, `--sentinel`, `--level`, `--muted`, `--timeout` and `--lang`, and uses stable exit codes (0 all right, 1 wrong use, 2 monitor not reachable, 3 credential refused, 4 degraded, 5 alerts found with `--fail-on`). `health` tells a monitor that does not answer from a GitHub login that failed and from an allowance that ran out. The lite edition answers `status`, `doctor` and `health`. It never writes to GitHub; the access token of the network mode goes in `MONITOR_TOKEN`. The older tools keep working. Guide in eight languages (`CLI.md`).
+- Tests for each change, including the sorting logic run for real with Node where it is installed, the commands against a fake monitor, every exit code and a test that every changelog, in every language, lists its versions from the newest to the oldest, with the same versions as the source.
+
+### Changed
+
+- **The red and yellow notices no longer sit on top of the page**: the same notices are shown in the bar at the foot (the most important one) and in its window (all of them).
+- **The README of the package** (`README_<lang>.txt`) no longer carries a history of versions: it points to the changelog.
+- The pictures of the README, the architecture and the structure are drawn again for this version, with a picture of the new tables and bar.
+
+### Removed
+
+- **The line of authorship at the foot of the page**: the author and the licence are in About.
+
 ## [1.7.3]
 
 A second sentinel for issues and pull requests, one tab with the alerts of every sentinel, and silences that end by themselves. Collab only reads; nothing here writes to GitHub.

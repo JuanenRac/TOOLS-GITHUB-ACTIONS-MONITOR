@@ -348,7 +348,8 @@ def fetch_runs(repo, per_page):
         runs.append({
             "repo": repo, "id": run["id"], "name": run.get("name") or "", "title": (run.get("display_title") or "")[:90],
             "event": run.get("event"), "branch": run.get("head_branch"), "path": (run.get("path") or "").split("@")[0].rsplit("/", 1)[-1], "sha": (run.get("head_sha") or "")[:7],
-            "actor": (run.get("actor") or {}).get("login", ""), "status": run.get("status"),
+            "actor": (run.get("actor") or {}).get("login", ""), "status": run.get("status"), "number": run.get("run_number"),
+            "queued": seconds_between(parse_time(run.get("created_at")), started) if run.get("created_at") and run.get("run_started_at") else None,
             "conclusion": run.get("conclusion"), "started": run.get("run_started_at") or run.get("created_at"),
             "seconds": seconds_between(started, updated if finished else None), "url": run.get("html_url"), "attempt": run.get("run_attempt"),
         })
@@ -514,6 +515,23 @@ def collect(config, publish=None):
     return build(config, repos, started, refreshed, False, "")
 
 
+def repo_meta(repos):
+    """{repo: {"private": bool, "branch": str or None, "pushed": ISO or None, "prs": int or None}} for the columns of the Repositories table. The visibility comes from the listing the monitor already
+    reads; the rest from the CI sentinel when it has looked (the lite edition has none: those fields are None). Nothing new is read from GitHub."""
+    info = {}
+    sentinel = SENTINEL.get("obj")
+    try:
+        info = dict(getattr(sentinel, "repo_info", None) or {}) if sentinel is not None and not LITE["on"] else {}
+    except Exception:       # noqa: BLE001 - extra columns never stop the page
+        info = {}
+    out = {}
+    for repo in repos:
+        item = info.get(repo) if isinstance(info.get(repo), dict) else {}
+        prs = item.get("prs")
+        out[repo] = {"private": repo in PRIVATE, "branch": item.get("branch") or None, "pushed": item.get("pushed") or None, "prs": len(prs) if isinstance(prs, list) else None}
+    return out
+
+
 def header_figures(runs, active, issues, now=None, red=None, approx=False):
     """The figures of the header, the same for both editions: runs of the last 24 hours (one per id), failures, successes, compute minutes, and what is running or queued."""
     now = time.time() if now is None else now
@@ -583,7 +601,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
         "refresh_seconds": config["refresh_seconds"], "hot_only": hot_only_state(),
         "offline": LINK.state(), "etag": ETAG["cache"].stats() if ETAG["cache"] else None,
         "hidden": HIDDEN["hidden"], "discovered": HIDDEN["discovered"], "hidden_names": HIDDEN["names"],
-        "figures": figures,
+        "figures": figures, "repo_meta": repo_meta(repos),
     }
 
 
@@ -1432,6 +1450,10 @@ class Handler(BaseHTTPRequestHandler):
             if not self.guard():
                 return
             self.json_reply(ANALYTICS["summary"] or {"enabled": ANALYTICS["store"] is not None, "duration": [], "queue": [], "steps": [], "flaky": [], "slower": []})
+        elif path == "/api/statusbar":      # what the bar at the foot of the page shows about this monitor: edition, address, account, sentinels (no secret, no GitHub call)
+            if not self.guard():
+                return
+            self.json_reply(statusbar_payload(self.server.server_address[1]))
         elif path in ("/api/alerts", "/api/events"):      # one list of the alerts of every sentinel, and the events of the feed (1.7.3; read only; the account comes from ?account= or the process)
             if not self.guard():
                 return
@@ -1470,6 +1492,37 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self.send_response(404)
             self.end_headers()
+
+
+def lan_address():
+    """The address of this computer on the local network, found without sending a packet (a UDP socket only chooses a route); 127.0.0.1 when there is none."""
+    import socket
+    probe = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        probe.connect(("192.0.2.1", 9))
+        return probe.getsockname()[0]
+    except OSError:
+        return "127.0.0.1"
+    finally:
+        probe.close()
+
+
+def statusbar_payload(port):
+    """GET /api/statusbar: the facts of the bar at the foot of the page that the data of GitHub does not carry."""
+    registry = SENTINEL["registry"]
+    sentinels = []
+    if registry is not None:
+        for name in registry.names():
+            try:
+                item = registry.get(name)
+                status = item.get_status() if item is not None else {}
+            except Exception:       # noqa: BLE001 - the bar must always answer
+                status = {}
+            sentinels.append({"name": name, "enabled": bool(status.get("enabled", True)), "level": status.get("level", "unknown"), "refresh_seconds": status.get("refresh_seconds")})
+    state = localguard.public_state()
+    return {"schema": 1, "version": TOOL_VERSION, "edition": "lite" if LITE["on"] else "full", "port": port, "bind": state.get("host") or "127.0.0.1", "network": bool(state.get("network")),
+            "lan_address": lan_address(), "account": CHILD["account"] or None, "uptime_seconds": int(time.time() - STARTED), "demo": bool(DEMO["on"]),
+            "sentinels": sentinels, "workers": ((LIVE_CONFIG or {}).get("sentinel") or {}).get("workers") if not LITE["on"] else None}
 
 
 def alerts_payload(ask):

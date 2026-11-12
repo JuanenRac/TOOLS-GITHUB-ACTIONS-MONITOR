@@ -41,7 +41,7 @@ WEB = [("about", "tab=now&dlg=about", (1400, 900)), ("help", "tab=cfg&dlg=help&t
 LITE_WEB = [("lite_about", "tab=now&dlg=about", (1400, 900)), ("lite_basic", "tab=cfg&cfgtab=basic", (1400, 900)), ("lite_now", "tab=now", (1400, 820)), ("lite_charts", "tab=charts", (1400, 820)), ("lite_history", "tab=hist", (1400, 820)), ("lite_settings", "tab=cfg&cfgtab=general", (1400, 700))]
 
 
-NETWORK_WEB = [("network_now", "tab=now", (1400, 820)), ("network_settings", "tab=cfg&cfgtab=advanced", (1400, 1180))]      # the page of the network mode: the red bar and the warning for every interface
+NETWORK_WEB = [("network_now", "tab=now", (1400, 820)), ("network_notices", "tab=now&dlg=notes", (1400, 820)), ("network_settings", "tab=cfg&cfgtab=advanced", (1400, 1180))]      # the page of the network mode: the red bar and the warning for every interface
 
 
 ACCOUNTS_WEB = [("accounts_all", "account=all", (1400, 420)), ("accounts_one", "account=org-acme", (1400, 820)), ("accounts_live", "view=live&chrome=0", (1100, 700))]      # the complete edition with several accounts (tools/demo_accounts.py)

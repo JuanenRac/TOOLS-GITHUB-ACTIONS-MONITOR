@@ -31,9 +31,9 @@
       "level": "tested",
       "title": "Web panel",
       "lines": [
-        "tabs, Settings with a Basic tab,",
-        "About and Help from the real",
-        "documents, offline, 8 languages"
+        "tabs, status bar at the foot,",
+        "sortable tables, Settings, About",
+        "and Help offline, 8 languages"
       ],
       "code": [
         "monitor/actions_monitor.html",
@@ -48,11 +48,12 @@
       "level": "tested",
       "title": "Console and terminal",
       "lines": [
-        "Rich view and --once, Textual app,",
-        "--doctor, --demo, --about,",
-        "--help-topics"
+        "monitor_cli.py reads the monitor,",
+        "Rich view, Textual app,",
+        "--doctor, --demo, --about"
       ],
       "code": [
+        "monitor/monitor_cli.py",
         "monitor/tui.py",
         "monitor/tui_textual.py",
         "monitor/doctor.py",

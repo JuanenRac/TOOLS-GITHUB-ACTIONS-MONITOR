@@ -2,6 +2,10 @@
 
 Des idées qui n'ont pas tenu dans la version actuelle, sans ordre promis. Ce sont des directions, pas des engagements ; une issue ou une pull request est la meilleure façon d'en faire avancer une.
 
+## Fait dans la 1.7.4
+
+Une barre au pied de la page avec l'avis le plus important (et une fenêtre avec tous), la connexion, le quota, la dernière lecture, le mode, l'adresse et l'horloge ; un bouton plein écran ; des tableaux Dépôts et Historique qui se trient selon une ou plusieurs colonnes, avec les colonnes de votre choix ; `monitor_cli.py`, la ligne de commande comme client du moniteur en marche (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) avec `--json` et des codes de sortie stables, et son guide en huit langues ; les journaux des modifications vérifiés dans l'ordre, le README du paquet sans historique à l'intérieur et les images redessinées.
+
 ## Fait dans la 1.7.3
 
 Une seconde sentinelle pour les issues et pull requests (Collab, désactivée par défaut, lecture seule, horloge propre), un onglet Alertes avec les alertes de toutes les sentinelles et un filtre par origine et niveau, des mises en sourdine locales qui se terminent seules (une alerte, une règle ou une sentinelle ; `alerts.mute_hours`), l'étiquette qui fait ignorer un élément, `GET /api/alerts` et `GET /api/events`, une liste de contrôle de la vue en direct, un guide de la sentinelle Collab en huit langues et les images redessinées.

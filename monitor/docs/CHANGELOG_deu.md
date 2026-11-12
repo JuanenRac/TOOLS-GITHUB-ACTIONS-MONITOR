@@ -7,6 +7,28 @@
 
 Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem Semver. Die Quelle ist das englische CHANGELOG.md; diese Datei enthält dieselben Versionen und Abschnitte.
 
+## [1.7.4]
+
+Eine Leiste am Fuß der Seite für die Hinweise und die Fakten des Monitors, ein Vollbild-Knopf, Tabellen, die nach einer oder mehreren Spalten sortieren, mit den Spalten deiner Wahl, und die Befehlszeile als Client des laufenden Monitors.
+
+### Hinzugefügt
+
+- **Eine Statusleiste am Fuß der Seite** (alle Ausgaben) anstelle der Urheberzeile. Links der wichtigste Hinweis (rot vor gelb) mit der Zahl der übrigen und einem Knopf, der ein Fenster mit allen öffnet, neueste zuerst, mit Filter nach Stufe; ohne Hinweise sagt sie das. Rechts die Verbindung (eine Lampe: GitHub online, offline oder Kontingent knapp), das Kontingent und wann es sich erneuert, die letzte Lesung, der Arbeitsmodus, wie viele Wächter an sind, die überwachten Repositories, das Konto, Version und Ausgabe, die Adresse des Monitors und Datum und Uhrzeit. Sie folgt der Fensterbreite: Die zweitrangigen Angaben klappen auf schmalen Bildschirmen weg. `GET /api/statusbar` liefert ihr die Fakten, die GitHub-Daten nicht tragen (kein GitHub-Aufruf, kein Geheimnis).
+- **Ein Vollbild-Knopf** in der oberen rechten Ecke (die Fullscreen-API; ein zweiter Druck beendet es), mit Symbol und Text in den acht Sprachen.
+- **Sortierbare Tabellen**: Repositories und Verlauf sortieren per Klick auf eine Spaltenüberschrift (auf, ab, keine), nach mehreren Spalten zugleich mit Umschalt+Klick (jeder Schlüssel zeigt Nummer und Richtung), leere Werte immer zuletzt, und die Reihenfolge wird gemerkt. Eine Spaltenauswahl fügt weitere Spalten hinzu: Lauf-Nummer, Auslöser, kurzer Commit, Versuch, Wartezeit, Datei und Ökosystem im Verlauf; Ökosystem, Lauf-Nummer, Auslöser, Commit, Versuch, Wartezeit, Läufe in 24 h, Standard-Branch, Sichtbarkeit, letzter Push und offene Pull Requests bei den Repositories. Der Monitor sendet jetzt die Lauf-Nummer und die Wartezeit jedes Laufs und einen kleinen Faktenblock je Repository (aus dem, was er schon gelesen hat; nichts Neues von GitHub).
+- **`monitor_cli.py`**, die Befehlszeile als Client des laufenden Monitors (`status`, `health` oder `check`, `doctor`, `accounts`, `alerts`, `live`): Sie liest `GET /api/...` auf diesem Rechner oder unter `--url` / `MONITOR_URL`, gibt Text oder mit `--json` ein JSON-Dokument aus, kennt `--account`, `--sentinel`, `--level`, `--muted`, `--timeout` und `--lang` und nutzt stabile Exit-Codes (0 gut, 1 falsche Verwendung, 2 Monitor nicht erreichbar, 3 Zugangsdaten abgelehnt, 4 eingeschränkt, 5 Alarme gefunden mit `--fail-on`). `health` unterscheidet einen Monitor, der nicht antwortet, von einer fehlgeschlagenen GitHub-Anmeldung und von einem erschöpften Kontingent. Die Lite-Ausgabe beantwortet `status`, `doctor` und `health`. Sie schreibt nie nach GitHub; das Zugriffstoken des Netzwerkmodus steht in `MONITOR_TOKEN`. Die älteren Werkzeuge funktionieren weiter. Anleitung in acht Sprachen (`CLI.md`).
+- Tests zu jeder Änderung, darunter die Sortierlogik, die mit Node wirklich ausgeführt wird, wo es installiert ist, die Befehle gegen einen falschen Monitor, jeder Exit-Code und ein Test, dass jedes Änderungsprotokoll in jeder Sprache seine Versionen von der neuesten zur ältesten auflistet, mit denselben Versionen wie die Quelle.
+
+### Geändert
+
+- **Die roten und gelben Hinweise stehen nicht mehr oben auf der Seite**: Dieselben Hinweise erscheinen in der Leiste am Fuß (der wichtigste) und in ihrem Fenster (alle).
+- **Die README des Pakets** (`README_<Sprache>.txt`) trägt keinen Versionsverlauf mehr: Sie verweist auf das Änderungsprotokoll.
+- Die Bilder der README, der Architektur und der Struktur sind für diese Version neu gezeichnet, mit einem Bild der neuen Tabellen und der Leiste.
+
+### Entfernt
+
+- **Die Urheberzeile am Fuß der Seite**: Autor und Lizenz stehen unter Info.
+
 ## [1.7.3]
 
 Ein zweiter Wächter für Issues und Pull Requests, ein Reiter mit den Alarmen aller Wächter und Stummschaltungen, die von selbst enden. Collab liest nur; nichts davon schreibt nach GitHub.
@@ -255,351 +277,269 @@ Eine Version für Integrität und Sicherheit: keine große neue Funktion. Was si
 
 ## [1.6.2]
 
-> Diese Version liegt vorerst nur auf Englisch vor; die Übersetzung folgt in einer späteren Version.
-
 ### Hinzugefügt
 
-- **A catch-all group** `rest` ("Everything else", prefix `*`) at the end of the example catalogue of ecosystems, so a new installation leaves no repository out.
-- **An automatic group "Unclassified"** for the repositories that no group claims (setting `show_unclassified`, on by default; an explicit choice of ecosystems is respected).
-- **A warning when the filter hides repositories**: a banner (complete and lite) says "your ecosystem filter hides N of the M repositories of the account" and names them.
-- **The lite edition starts with what you already set up**: on its first start `actions_monitor_lite.json` copies from `actions_monitor.json` (when it exists) the account, the repositories and ecosystems to watch, the catalogue files, the exclusions, the language and the reading depth, and says so on the console. Without such a file its template watches all the ecosystems.
-- **`tui.py --lite`** (or `MONITOR_MODE=lite`) reads the lite edition on port 8766.
-- **`redrule.py`**, the single small rule of "red on main", used by the sentinel and by the lite edition (which marks the figure as approximate because it guesses the default branch).
-- **`ghamon_etag_invalid_total`**, the count of damaged cache entries, in `/metrics`.
-- Tests: header-data parity between the complete and the lite edition, the catch-all group, the hidden-repository count, the lite start, the webhook hot mark, the damaged cache entry, and that importing the monitor or the sentinel never loads Rich.
-- Guides `LITE` and `SETTINGS` (eight languages) updated.
+- **Eine Sammelgruppe** `rest` („Alles andere“, Präfix `*`) am Ende des Beispielkatalogs der Ökosysteme, damit eine neue Installation kein Repository auslässt.
+- **Eine automatische Gruppe „Nicht zugeordnet“** für die Repositories, die keine Gruppe beansprucht (Einstellung `show_unclassified`, standardmäßig an; eine ausdrückliche Auswahl von Ökosystemen wird respektiert).
+- **Eine Warnung, wenn der Filter Repositories verbirgt**: Ein Banner (vollständig und Lite) sagt „dein Ökosystem-Filter verbirgt N der M Repositories des Kontos“ und nennt sie.
+- **Die Lite-Ausgabe startet mit dem, was du schon eingerichtet hast**: Beim ersten Start kopiert `actions_monitor_lite.json` aus `actions_monitor.json` (falls vorhanden) das Konto, die zu überwachenden Repositories und Ökosysteme, die Katalogdateien, die Ausschlüsse, die Sprache und die Lesetiefe und sagt das in der Konsole. Ohne eine solche Datei überwacht ihre Vorlage alle Ökosysteme.
+- **`tui.py --lite`** (oder `MONITOR_MODE=lite`) liest die Lite-Ausgabe auf Port 8766.
+- **`redrule.py`**, die eine kleine Regel für „rot auf main“, genutzt vom Wächter und von der Lite-Ausgabe (die die Zahl als ungefähr kennzeichnet, weil sie den Standard-Branch rät).
+- **`ghamon_etag_invalid_total`**, die Zahl beschädigter Cache-Einträge, in `/metrics`.
+- Tests: Gleichheit der Kopfzeilendaten zwischen vollständiger und Lite-Ausgabe, die Sammelgruppe, die Zahl verborgener Repositories, der Lite-Start, die Heiß-Markierung durch den Webhook, der beschädigte Cache-Eintrag und dass das Importieren des Monitors oder des Wächters nie Rich lädt.
+- Anleitungen `LITE` und `SETTINGS` (acht Sprachen) aktualisiert.
 
 ### Geändert
 
-- **Both editions show the same header figures**: runs, failures, successes, compute minutes, running and queued are counted once, by the server, over the same 24 hours with each run counted once; the lite edition reads as deep as the complete one. The lite edition hides the "unsigned" tile.
-- **A webhook event marks the repository as hot**, so the next cycle reads it again whatever the event said.
-- The GitHub allowance tile is painted from the first moment, while the repositories are still loading.
+- **Beide Ausgaben zeigen dieselben Kopfzeilenzahlen**: Läufe, Fehler, Erfolge, Rechenminuten, laufende und wartende werden einmal vom Server gezählt, über dieselben 24 Stunden und mit jedem Lauf nur einmal; die Lite-Ausgabe liest so tief wie die vollständige. Die Lite-Ausgabe blendet die Kachel „unsigniert“ aus.
+- **Ein Webhook-Ereignis markiert das Repository als heiß**, sodass der nächste Zyklus es erneut liest, was auch immer das Ereignis sagte.
+- Die Kachel für das GitHub-Kontingent wird vom ersten Moment an gezeichnet, während die Repositories noch laden.
 
 ### Behoben
 
-- A new installation with the example catalogue saw almost no repository; the lite edition detected one repository out of 129 because its template filtered by ecosystem.
-- **A damaged cache entry is only a miss**: it is thrown away and the endpoint is read again in full.
-- "Red on main" and the compute minutes differed between the two editions.
+- Eine neue Installation mit dem Beispielkatalog sah fast kein Repository; die Lite-Ausgabe erkannte ein Repository von 129, weil ihre Vorlage nach Ökosystem filterte.
+- **Ein beschädigter Cache-Eintrag ist nur ein Fehlgriff**: Er wird verworfen und der Endpunkt vollständig neu gelesen.
+- „Rot auf main“ und die Rechenminuten wichen zwischen den beiden Ausgaben ab.
 
 ### Sicherheit
 
-- The lite edition never inherits the sentinel, the AI, the webhook, the outputs or the notifications, nor any secret, from the complete one; it writes neither `ci_red.json` nor a signing queue.
+- Die Lite-Ausgabe erbt von der vollständigen nie den Wächter, die KI, den Webhook, die Ausgaben oder die Benachrichtigungen und kein Geheimnis; sie schreibt weder `ci_red.json` noch eine Signierwarteschlange.
 
 ## [1.6.1]
 
-> Diese Version liegt vorerst nur auf Englisch vor; die Übersetzung folgt in einer späteren Version.
-
 ### Hinzugefügt
 
-- **The lite edition**, a second and simpler product in the same package: `MONITOR_LITE_GITHUB_ACTIONS.bat` / `.sh` / `.command` or `--lite` / `MONITOR_MODE=lite`. What is running and what failed, failures and successes of 24 hours, red on main, the history and the basic charts; a short Settings page (account, repositories and ecosystems, refresh, language, theme); its own file `actions_monitor_lite.json`, its own state files with the suffix `_lite` and port 8766, so both can run side by side.
-- **`act` command in the repository panel**: for each workflow of the repository, `act -W .github/workflows/FILE -j JOB` ready to copy. The monitor never runs it (running it exists only as a confirmed action of the AI assistant).
-- **A container example** (`deploy/Dockerfile`) that the CI builds.
-- Guide `LITE` in eight languages, a Lite-versus-Complete table in every README and new screenshots of both editions in light and dark.
-- The roadmap lists what did not fit: local mirror of artifacts, FinOps of the minutes, self-hosted runner status and an OTLP export, and the notes of the terminal view (why it uses Rich).
+- **Die Lite-Ausgabe**, ein zweites, einfacheres Produkt im selben Paket: `MONITOR_LITE_GITHUB_ACTIONS.bat` / `.sh` / `.command` oder `--lite` / `MONITOR_MODE=lite`. Was läuft und was fehlschlug, Fehler und Erfolge der 24 Stunden, rot auf main, der Verlauf und die einfachen Diagramme; eine kurze Einstellungsseite (Konto, Repositories und Ökosysteme, Aktualisierung, Sprache, Design); eine eigene Datei `actions_monitor_lite.json`, eigene Zustandsdateien mit dem Suffix `_lite` und Port 8766, sodass beide nebeneinander laufen können.
+- **Befehl `act` im Repository-Panel**: Für jeden Workflow des Repositorys steht `act -W .github/workflows/DATEI -j JOB` zum Kopieren bereit. Der Monitor führt ihn nie aus (das Ausführen gibt es nur als bestätigte Aktion des KI-Assistenten).
+- **Ein Container-Beispiel** (`deploy/Dockerfile`), das die CI baut.
+- Anleitung `LITE` in acht Sprachen, eine Tabelle Lite gegen Vollständig in jeder README und neue Bilder beider Ausgaben in hell und dunkel.
+- Der Fahrplan nennt, was nicht mehr hineinpasste: lokaler Spiegel der Artefakte, FinOps der Minuten, Status eigener Runner und ein OTLP-Export, sowie die Anmerkungen zur Terminal-Ansicht (warum sie Rich nutzt).
 
 ### Sicherheit
 
-- The lite edition has no sentinel: it is not imported and its endpoints answer 404.
+- Die Lite-Ausgabe hat keinen Wächter: Er wird nicht importiert und seine Endpunkte antworten mit 404.
 
 ## [1.6.0]
 
-> Diese Version liegt vorerst nur auf Englisch vor; die Übersetzung folgt in einer späteren Version.
-
 ### Hinzugefügt
 
-- **Conditional reads (ETag)**: every read of the run lists sends `If-None-Match`; a `304 Not Modified` answer costs no quota. The header and `ghamon_etag_saved_total` count the reads saved; `cache.etag.*` in the Settings tab.
-- **Resilience to network cuts**: when every read of a cycle fails with a connection problem the page keeps the last picture with an offline banner and resumes by itself; `offline` and `online` events (they can be notified) and `ghamon_offline`.
-- **Analytics** (section A12 of the Sentinel tab, `/api/analytics`, `/metrics`, the Grafana JSON source): p50 / p95 of the duration of each workflow, of the queue time of its jobs and of each step; workflows that got slower than usual; **flaky** workflows (failed, then passed on the same commit, or needed another attempt), only a label that never changes what counts as red.
-- **Incoming webhook in real time**: a signed `workflow_run` event updates the run list of its repository without reading GitHub, `workflow_job` events bring queue and step times; only short validated fields are kept (`/api/live-events`).
-- **Workflow linter**: `lint_workflows.py` (actions not pinned by SHA, missing or broad permissions, secrets in clear text, injection, `pull_request_target` with the PR's code), rules switchable with their own severity, a line in the daily report and the section A13. A comment `# monitor-lint: ignore RULE reason` or the setting `lint.ignore` silences a finding.
-- **Notifications** (off by default): Telegram, Discord, Slack, Matrix, MQTT and a local HTTP address, a limit per hour, a test button and a documented adapter contract (`monitor/docs/schemas/notification_event.schema.json`).
-- **AI assistant**: new providers `anthropic` (Messages API, the model is yours to choose) and `copilot` (`gh copilot` with your own login, text only, no tools); new tasks (daily report, release notes, a question about a repository); settings for the kinds of event, the repositories, the language and the limits, a test button and the use of the day. A closed list of actions (`gh run rerun`, `gh issue close`, `act`), only PROPOSED by default.
-- **The figures of the header are tiles** with an icon, a big figure and a small label, coloured by state, with a tooltip, a click that leads to the tab, counting figures and a skeleton that shows the last known values at once; the second line (repositories, hot, mode, reads saved, GitHub allowance with a bar and a live countdown, connection, last update and the loading progress) is made of tiles too.
-- **Terminal view**: `tui.py` draws a live grid in the console (read-only, optional, needs the package `rich`; the monitor and its tests need no package).
-- **For servers and bigger accounts**: `GET /api/health`, `GH_HOST` for GitHub Enterprise Server (every link of the page follows it), `discover_limit`, minimum permissions per feature, and a guide to run it as a service (systemd, launchd, a scheduled task, a container) and behind a reverse proxy.
-- Published JSON schemas of `ci_red.json`, of the public export and of the notification event (`monitor/docs/schemas`), and a public roadmap (`docs/ROADMAP.md`).
-- New guides in eight languages: notifications, the AI assistant, analytics, console tools and deployment; the webhook guide covers the real-time events. All screenshots were redone (light and dark, console tools included) with `tools/make_screenshots.py` and invented data.
+- **Bedingte Lesezugriffe (ETag)**: Jedes Lesen der Laufübersichten sendet `If-None-Match`; eine Antwort `304 Not Modified` kostet kein Kontingent. Die Kopfzeile und `ghamon_etag_saved_total` zählen die gesparten Lesezugriffe; `cache.etag.*` im Reiter Einstellungen.
+- **Robustheit bei Netzunterbrechungen**: Wenn alle Lesezugriffe eines Zyklus an einem Verbindungsproblem scheitern, behält die Seite das letzte Bild mit einem Offline-Banner und macht von selbst weiter; Ereignisse `offline` und `online` (sie lassen sich melden) und `ghamon_offline`.
+- **Analyse** (Abschnitt A12 des Reiters Wächter, `/api/analytics`, `/metrics`, die JSON-Quelle für Grafana): p50 / p95 der Dauer jedes Workflows, der Wartezeit seiner Jobs und jedes Schritts; Workflows, die langsamer als gewöhnlich wurden; **wackelige** Workflows (fehlgeschlagen, dann mit demselben Commit bestanden oder einen weiteren Versuch gebraucht), nur ein Etikett, das nie ändert, was als rot zählt.
+- **Eingehender Webhook in Echtzeit**: Ein signiertes `workflow_run`-Ereignis aktualisiert die Laufliste seines Repositorys, ohne GitHub zu lesen; `workflow_job`-Ereignisse bringen Warte- und Schrittzeiten; es werden nur kurze, geprüfte Felder behalten (`/api/live-events`).
+- **Workflow-Linter**: `lint_workflows.py` (nicht per SHA festgelegte Actions, fehlende oder weite Berechtigungen, Geheimnisse im Klartext, Injection, `pull_request_target` mit dem Code der PR), Regeln einzeln schaltbar mit eigener Schwere, eine Zeile im Tagesbericht und der Abschnitt A13. Ein Kommentar `# monitor-lint: ignore REGEL Grund` oder die Einstellung `lint.ignore` unterdrückt einen Fund.
+- **Benachrichtigungen** (standardmäßig aus): Telegram, Discord, Slack, Matrix, MQTT und eine lokale HTTP-Adresse, ein Limit pro Stunde, ein Testknopf und ein dokumentierter Adapter-Vertrag (`monitor/docs/schemas/notification_event.schema.json`).
+- **KI-Assistent**: neue Anbieter `anthropic` (Messages-API, das Modell wählst du) und `copilot` (`gh copilot` mit deiner eigenen Anmeldung, nur Text, keine Werkzeuge); neue Aufgaben (Tagesbericht, Versionshinweise, eine Frage zu einem Repository); Einstellungen für die Ereignisarten, die Repositories, die Sprache und die Grenzen, ein Testknopf und die Nutzung des Tages. Eine geschlossene Liste von Aktionen (`gh run rerun`, `gh issue close`, `act`), standardmäßig nur VORGESCHLAGEN.
+- **Die Zahlen der Kopfzeile sind Kacheln** mit Symbol, großer Zahl und kleinem Etikett, nach Zustand gefärbt, mit Tooltip, einem Klick, der zum Reiter führt, zählenden Zahlen und einem Skelett, das sofort die zuletzt bekannten Werte zeigt; auch die zweite Zeile (Repositories, heiß, Modus, gesparte Lesezugriffe, GitHub-Kontingent mit Balken und Live-Countdown, Verbindung, letzte Aktualisierung und Ladefortschritt) besteht aus Kacheln.
+- **Terminal-Ansicht**: `tui.py` zeichnet ein Live-Raster in der Konsole (nur lesend, optional, braucht das Paket `rich`; der Monitor und seine Tests brauchen kein Paket).
+- **Für Server und größere Konten**: `GET /api/health`, `GH_HOST` für GitHub Enterprise Server (jeder Link der Seite folgt ihm), `discover_limit`, Mindestberechtigungen je Funktion und eine Anleitung, ihn als Dienst (systemd, launchd, eine geplante Aufgabe, ein Container) und hinter einem Reverse-Proxy zu betreiben.
+- Veröffentlichte JSON-Schemas von `ci_red.json`, des öffentlichen Exports und des Benachrichtigungsereignisses (`monitor/docs/schemas`) sowie ein öffentlicher Fahrplan (`docs/ROADMAP.md`).
+- Neue Anleitungen in acht Sprachen: Benachrichtigungen, der KI-Assistent, Analyse, Konsolenwerkzeuge und Betrieb; die Webhook-Anleitung deckt die Echtzeit-Ereignisse ab. Alle Bilder wurden neu erstellt (hell und dunkel, Konsolenwerkzeuge eingeschlossen) mit `tools/make_screenshots.py` und erfundenen Daten.
 
 ### Geändert
 
-- **Settings**: new sub-tabs for reads and cache, notifications, analytics, the linter and the terminal view; the AI and webhook sub-tabs have all their options.
+- **Einstellungen**: neue Unterreiter für Lesezugriffe und Cache, Benachrichtigungen, Analyse, den Linter und die Terminal-Ansicht; die Unterreiter für KI und Webhook haben alle ihre Optionen.
 
 ### Behoben
 
-- **The linter no longer cries wolf on placeholders**: a value that looks like a secret is classified (a known token format or a long high-entropy string is serious, a readable filler such as `placeholder` or `changeme` is only information, anything else a warning; references and empty values are no finding) and its value is never printed or stored.
-- **A browser that closes or reloads its tab while the page is loading no longer prints a traceback** (`ConnectionAbortedError`, `ConnectionResetError`, `BrokenPipeError`): they are counted in `ghamon_client_disconnects_total`; a real error is still shown.
+- **Der Linter schlägt bei Platzhaltern keinen Fehlalarm mehr**: Ein Wert, der wie ein Geheimnis aussieht, wird eingestuft (ein bekanntes Token-Format oder eine lange Zeichenfolge mit hoher Entropie ist ernst, ein lesbarer Platzhalter wie `placeholder` oder `changeme` nur eine Information, alles andere eine Warnung; Verweise und leere Werte sind kein Fund), und sein Wert wird nie ausgegeben oder gespeichert.
+- **Ein Browser, der seinen Tab beim Laden der Seite schließt oder neu lädt, erzeugt keinen Traceback mehr** (`ConnectionAbortedError`, `ConnectionResetError`, `BrokenPipeError`): Sie werden in `ghamon_client_disconnects_total` gezählt; ein echter Fehler wird weiterhin gezeigt.
 
 ### Sicherheit
 
-- The incoming webhook stays off by default, on `127.0.0.1`, with a mandatory HMAC.
-- Notification secrets live only in environment variables; hosts are fixed; notifications never write to GitHub.
-- AI actions: running one needs its own switch and a confirmation of the full command each time, only on targets the monitor already watches, with a limit per hour, a local log and a lock after two failures in a row.
+- Der eingehende Webhook bleibt standardmäßig aus, auf `127.0.0.1`, mit verpflichtendem HMAC.
+- Geheimnisse der Benachrichtigungen liegen nur in Umgebungsvariablen; Hosts sind fest; Benachrichtigungen schreiben nie nach GitHub.
+- KI-Aktionen: Eine auszuführen braucht einen eigenen Schalter und jedes Mal eine Bestätigung des vollständigen Befehls, nur auf Zielen, die der Monitor ohnehin überwacht, mit einem Limit pro Stunde, einem lokalen Protokoll und einer Sperre nach zwei Fehlschlägen in Folge.
 
 ## [1.5.2]
 
-> Diese Version liegt vorerst nur auf Englisch vor; die Übersetzung folgt in einer späteren Version.
-
 ### Hinzugefügt
 
-- **The Settings tab is organised in sub-tabs**, ordered from the common to the advanced (This browser, General, Refresh and limits, Sentinel, Surface checks A10, Readiness A11, Folders and files, Outputs, External AI, Incoming webhook). Inside a sub-tab the settings sit in titled blocks whose first field is the main switch (the rest of the block dims while it is off). Every field shows its unit and range, a badge (needs a restart / applies now), a badge for the safety options that start in their conservative state, and one line of help. A search box filters all the sub-tabs, each sub-tab counts its unsaved changes, Save and Discard stay visible, the arrow keys, Home and End move between the tabs and the last sub-tab used is remembered by the browser.
-- **Every setting of the configuration file is in the page now**: the A10 checks (a switch per check and its limits), the weights of the ecosystem health score, the sources of the pinned versions, the Actions-minutes ceilings, the required files, the audit file patterns, the hot period of the sentinel, the unknown-sample rule of A2, the candidate prefixes, the list of repositories and the switch of the incoming webhook.
-- **Signing queue by trust**: each row says `verified`, `unknown` or `failed`; the Sentinel tab has a Signature filter with the count of each kind; `read_report.py --sign-trust` filters the console list and the export, and the exported rows carry `trust`.
-- **Readiness chips in the header**: one coloured chip per ecosystem with its health score.
-- **A minimal Grafana board** (`red_by_ecosystem.json`) and a test that checks every metric of both boards against what `/metrics` serves.
-- New guide `WEBHOOK` (refresh-only mode) and a commented example of the pin sources, in eight languages.
-- `tools/make_settings_doc.py` writes the settings table of the guides from the schema and the texts of the page, and the CI checks it.
+- **Der Reiter Einstellungen ist in Unterreiter gegliedert**, vom Gewöhnlichen zum Fortgeschrittenen geordnet (Dieser Browser, Allgemein, Aktualisierung und Grenzen, Wächter, Oberflächenprüfungen A10, Bereitschaft A11, Ordner und Dateien, Ausgaben, Externe KI, Eingehender Webhook). In einem Unterreiter stehen die Einstellungen in Blöcken mit Titel, deren erstes Feld der Hauptschalter ist (der Rest des Blocks wird gedimmt, solange er aus ist). Jedes Feld zeigt Einheit und Bereich, ein Abzeichen (braucht Neustart / gilt sofort), ein Abzeichen für die Sicherheitsoptionen, die im konservativen Zustand starten, und eine Hilfezeile. Ein Suchfeld filtert alle Unterreiter, jeder Unterreiter zählt seine ungespeicherten Änderungen, Speichern und Verwerfen bleiben sichtbar, die Pfeiltasten, Pos1 und Ende bewegen zwischen den Reitern, und der Browser merkt sich den zuletzt benutzten Unterreiter.
+- **Jede Einstellung der Konfigurationsdatei steht jetzt auf der Seite**: die A10-Prüfungen (ein Schalter je Prüfung und ihre Grenzen), die Gewichte der Ökosystem-Gesundheitsbewertung, die Quellen der festgelegten Versionen, die Obergrenzen der Actions-Minuten, die erforderlichen Dateien, die Muster der Prüfdateien, die Heißzeit des Wächters, die Regel für unbekannte Stichproben von A2, die Kandidatenpräfixe, die Liste der Repositories und der Schalter des eingehenden Webhooks.
+- **Signierwarteschlange nach Vertrauen**: Jede Zeile sagt `verified`, `unknown` oder `failed`; der Reiter Wächter hat einen Signaturfilter mit der Zahl jeder Art; `read_report.py --sign-trust` filtert die Konsolenliste und den Export, und die exportierten Zeilen tragen `trust`.
+- **Bereitschaftschips in der Kopfzeile**: ein farbiger Chip je Ökosystem mit seiner Gesundheitsbewertung.
+- **Ein minimales Grafana-Board** (`red_by_ecosystem.json`) und ein Test, der jede Metrik beider Boards gegen das prüft, was `/metrics` liefert.
+- Neue Anleitung `WEBHOOK` (Modus nur aktualisieren) und ein kommentiertes Beispiel der Pin-Quellen, in acht Sprachen.
+- `tools/make_settings_doc.py` schreibt die Einstellungstabelle der Anleitungen aus dem Schema und den Texten der Seite, und die CI prüft sie.
 
 ### Geändert
 
-- **The daily report groups the issue-closing suggestions** in one line per repository (the monitor still closes nothing).
-- **The contract of the profile dashboard** is documented and checked by a test (`/api/outputs/dashboard.json` is exactly the document of `ci_red.json`; the public export never carries the signing side).
+- **Der Tagesbericht fasst die Vorschläge zum Schließen von Issues zusammen** in einer Zeile je Repository (der Monitor schließt weiterhin nichts).
+- **Der Vertrag des Profil-Dashboards** ist dokumentiert und durch einen Test geprüft (`/api/outputs/dashboard.json` ist genau das Dokument von `ci_red.json`; der öffentliche Export trägt nie die Signierseite).
 
 ### Sicherheit
 
-- The shared secret of the webhook is never shown in the page: it only says whether it is defined.
+- Das gemeinsame Geheimnis des Webhooks wird nie auf der Seite gezeigt: Sie sagt nur, ob es definiert ist.
 
 ## [1.5.1]
 
-> Diese Version liegt vorerst nur auf Englisch vor; die Übersetzung folgt in einer späteren Version.
-
 ### Hinzugefügt
 
-- **The settings page can set the external AI of the sentinel** (group "External AI for the sentinel"): `ai.provider` (`none` / `ollama` / `openai-compatible`), `ai.model`, `ai.ollama_url` (only this computer), `ai.base_url` (https only), `ai.api_key_env` and `ai.daily_limit`. Off by default; an outside service receives data of your repositories.
-- **`migrate_state.py`**: brings the files written before 1.5.0 to the new names (events, report history, release candidates, batch records, the `report_history_days` setting). A dry run by default; `--apply` copies and keeps the old files, `--move` renames them; nothing that exists is overwritten. One-page guide in `docs/MIGRATING.md`, in eight languages.
-- **`--init-catalog`** creates editable `ecosystems.json`, `targets.json` and `profiles.json` from the examples.
-- A test makes sure no document sends the reader to a command that was renamed in 1.5.0 (only the tables of old and new names and the migration guides may name them).
-- The version in every README.
+- **Die Einstellungsseite kann die externe KI des Wächters festlegen** (Gruppe „Externe KI für den Wächter“): `ai.provider` (`none` / `ollama` / `openai-compatible`), `ai.model`, `ai.ollama_url` (nur dieser Rechner), `ai.base_url` (nur https), `ai.api_key_env` und `ai.daily_limit`. Standardmäßig aus; ein externer Dienst erhält Daten deiner Repositories.
+- **`migrate_state.py`**: bringt die vor 1.5.0 geschriebenen Dateien auf die neuen Namen (Ereignisse, Berichtsverlauf, Release-Kandidaten, Stapelprotokolle, die Einstellung `report_history_days`). Standardmäßig ein Probelauf; `--apply` kopiert und behält die alten Dateien, `--move` benennt sie um; nichts Vorhandenes wird überschrieben. Einseitige Anleitung in `docs/MIGRATING.md`, in acht Sprachen.
+- **`--init-catalog`** erstellt bearbeitbare `ecosystems.json`, `targets.json` und `profiles.json` aus den Beispielen.
+- Ein Test stellt sicher, dass kein Dokument den Leser zu einem Befehl schickt, der in 1.5.0 umbenannt wurde (nur die Tabellen alter und neuer Namen und die Migrationsanleitungen dürfen sie nennen).
+- Die Version in jeder README.
 
 ### Geändert
 
-- **First start without catalogue files of your own**: the console says the example files are in use.
-- Python 3.11 or newer is the documented minimum (tested on 3.11 and 3.13 on Windows, Linux and macOS).
+- **Erster Start ohne eigene Katalogdateien**: Die Konsole sagt, dass die Beispieldateien verwendet werden.
+- Python 3.11 oder neuer ist das dokumentierte Minimum (getestet mit 3.11 und 3.13 unter Windows, Linux und macOS).
 
 ### Sicherheit
 
-- Only the NAME of the environment variable that holds the AI key can be set: the key itself is never shown or saved.
+- Es lässt sich nur der NAME der Umgebungsvariablen festlegen, die den KI-Schlüssel enthält: Der Schlüssel selbst wird nie angezeigt oder gespeichert.
 
 ## [1.5.0]
 
-> Diese Version liegt vorerst nur auf Englisch vor; die Übersetzung folgt in einer späteren Version.
+**Hinweis zur Aktualisierung (zuerst lesen).** Mehrere Dateien und Einstellungen haben jetzt englische Namen. Nichts geht verloren: Die alten Namen werden weiterhin GELESEN, wo eine von einer früheren Version geschriebene Datei existieren kann, und die neuen Namen sind die einzigen, die geschrieben werden.
 
-**Update notice (read this first).** Several files and settings have English names now. Nothing is lost: the old names are still READ where a file written by an earlier version may exist, and the new names are the only ones written.
-
-| Before 1.5.0 | From 1.5.0 |
+| Vor 1.5.0 | Ab 1.5.0 |
 |---|---|
 | `leer_parte.py` | `read_report.py` |
 | `eventos.py` | `events.py` |
 | `parte_history.py` | `report_history.py` |
 | `LOTE_GITHUB_ACTIONS.bat` / `.sh` / `.command` | `BATCH_GITHUB_ACTIONS.bat` / `.sh` / `.command` |
-| `eventos_monitor.jsonl`, `eventos_estado.json` | `events_monitor.jsonl`, `events_state.json` (copy or rename them to keep the history of events) |
-| `PARTE_CENTINELA_DIA_<day>.txt/.json` (report history) | `SENTINEL_REPORT_DAY_<day>.txt/.json` (the old ones are still read) |
-| `PARTE_CENTINELA_<time>.txt` (saved report) | `SENTINEL_REPORT_<time>.txt` |
+| `eventos_monitor.jsonl`, `eventos_estado.json` | `events_monitor.jsonl`, `events_state.json` (kopiere oder benenne sie um, um den Ereignisverlauf zu behalten) |
+| `PARTE_CENTINELA_DIA_<day>.txt/.json` (Berichtsverlauf) | `SENTINEL_REPORT_DAY_<day>.txt/.json` (die alten werden weiterhin gelesen) |
+| `PARTE_CENTINELA_<time>.txt` (gespeicherter Bericht) | `SENTINEL_REPORT_<time>.txt` |
 | `CANDIDATAS_RELEASE.txt` | `RELEASE_CANDIDATES.txt` |
-| `<signed_dir>/lotes/lote_<time>.json` | `<signed_dir>/batches/batch_<time>.json` (the old records are still read) |
-| `parte_history_days` (setting) | `report_history_days` (the old name is still read) |
-| `monitor_y_centinela.zip` and folder | `github_actions_monitor.zip` and folder; `LEEME_CORREO.txt` is `README_MAIL.txt` |
-| A8 looked for `RECONCILIACION_TOTAL_AUDITORIAS_*.txt`, `MAPA_DE_RONDAS_*` | the names are `sentinel.audit_files` (neutral defaults `RECONCILIATION_TOTAL_*.txt`, `ROUNDS_MAP_2*.txt`, `ROUNDS_MAP_EXTRA_*.txt`); set your own there |
-| `ci_red.json`, its schema and the `--export-status` files | unchanged (they are a contract) |
+| `<signed_dir>/lotes/lote_<time>.json` | `<signed_dir>/batches/batch_<time>.json` (die alten Protokolle werden weiterhin gelesen) |
+| `parte_history_days` (Einstellung) | `report_history_days` (der alte Name wird weiterhin gelesen) |
+| `monitor_y_centinela.zip` und Ordner | `github_actions_monitor.zip` und Ordner; `LEEME_CORREO.txt` heißt `README_MAIL.txt` |
+| A8 suchte `RECONCILIACION_TOTAL_AUDITORIAS_*.txt`, `MAPA_DE_RONDAS_*` | die Namen stehen in `sentinel.audit_files` (neutrale Standardwerte `RECONCILIATION_TOTAL_*.txt`, `ROUNDS_MAP_2*.txt`, `ROUNDS_MAP_EXTRA_*.txt`); trage dort deine eigenen ein |
+| `ci_red.json`, sein Schema und die Dateien von `--export-status` | unverändert (sie sind ein Vertrag) |
 
-- **English by default.** The language of the system no longer decides: the tools start in English until you choose another one in the Settings tab, with `language` in `actions_monitor.json`, `MONITOR_LANG` or `--lang`.
-- **A clean, neutral package.** `ecosystems.json`, `targets.json` and `profiles.json` are no longer part of the package: only the `*.example.json` files travel, and a missing default file falls back to its example. Your own files live anywhere and are named by `ecosystems_file`, `targets_file` and the new `profiles_file`; the folder of your local signing tools is the new `tools_dir`. The tests use their own fixtures (`tests/fixtures`).
-- **Settings tab.** A new tab changes the values of `actions_monitor.json` from the page: a whitelist of keys with their type and range, one request refused as a whole when a value is invalid, a copy of the previous file in `config_backups/` before every save (the last ten are kept), an atomic write, only on 127.0.0.1 with the same Host and Origin checks as every other endpoint, JSON only. Tokens, secrets, signature keys and the command of the sentinel are not in the list: they are never shown and never written, and every other key of the file is kept as it was. Each setting says whether it needs a restart. The language selector, the theme and the dense view moved there.
-- **Buttons and icons.** Buttons have relief, light up on hover and sink when pressed; the icon buttons are inline SVG with an accessible name and a tooltip in the 8 languages. Colours, type, cards, bars and the ring follow the status dashboard of the profile repository.
-- **Life in the charts.** Bars grow in, what is red or running has a discreet pulse, the figures of the header count up, hovering a bar highlights it and gives its text as a tooltip, widths change smoothly; all of it stops with `prefers-reduced-motion`.
-- **Outputs for other tools (off by default, 127.0.0.1 only, no new token).** `/metrics` in the Prometheus format (red workflows per ecosystem and repository, red streaks and hours, builds waiting for a signature, A10 paused, allowance left, incomplete snapshot...), `/api/outputs/grafana.json` for the Grafana JSON / Infinity source and `/api/outputs/dashboard.json` (the `ci_red.json` document) for the status dashboard. An importable Grafana dashboard is in `docs/grafana/` and the details in `docs/OUTPUTS.md`.
-- **Report:** a line (code `tag_vs_manifest`) when a release tag is ahead of the version of the manifest; the unsigned figure is ordered by the longest wait and says how long it is; the repository panel suggests the `gh issue close` command (never run) for a failure issue whose workflow is green again; the `hil` batch profile is documented in `profiles.example.json`; tests for `finalize` and for `monitor_link`.
-- **Docs:** `docs/SETTINGS.md`, `docs/OUTPUTS.md`, README and QUICKSTART in the 8 languages updated, screenshots made with invented repositories.
+- **Standardmäßig Englisch.** Die Systemsprache entscheidet nicht mehr: Die Werkzeuge starten auf Englisch, bis du im Reiter Einstellungen, mit `language` in `actions_monitor.json`, `MONITOR_LANG` oder `--lang` eine andere wählst.
+- **Ein sauberes, neutrales Paket.** `ecosystems.json`, `targets.json` und `profiles.json` gehören nicht mehr zum Paket: Nur die Dateien `*.example.json` reisen mit, und eine fehlende Standarddatei fällt auf ihr Beispiel zurück. Deine eigenen Dateien liegen, wo du willst, und werden mit `ecosystems_file`, `targets_file` und dem neuen `profiles_file` benannt; der Ordner deiner lokalen Signierwerkzeuge ist das neue `tools_dir`. Die Tests nutzen eigene Testdaten (`tests/fixtures`).
+- **Reiter Einstellungen.** Ein neuer Reiter ändert die Werte von `actions_monitor.json` von der Seite aus: eine Whitelist von Schlüsseln mit Typ und Bereich, eine als Ganzes abgelehnte Anfrage, wenn ein Wert ungültig ist, eine Kopie der vorherigen Datei in `config_backups/` vor jedem Speichern (die letzten zehn bleiben), ein atomares Schreiben, nur auf 127.0.0.1 mit denselben Host- und Origin-Prüfungen wie jeder andere Endpunkt, nur JSON. Tokens, Geheimnisse, Signierschlüssel und der Befehl des Wächters stehen nicht in der Liste: Sie werden nie gezeigt und nie geschrieben, und jeder andere Schlüssel der Datei bleibt, wie er war. Jede Einstellung sagt, ob sie einen Neustart braucht. Die Sprachauswahl, das Design und die dichte Ansicht sind dorthin umgezogen.
+- **Knöpfe und Symbole.** Knöpfe haben Relief, leuchten beim Überfahren auf und sinken beim Drücken ein; die Symbolknöpfe sind Inline-SVG mit zugänglichem Namen und Tooltip in den 8 Sprachen. Farben, Schrift, Karten, Balken und der Ring folgen dem Status-Dashboard des Profil-Repositorys.
+- **Leben in den Diagrammen.** Balken wachsen ein, was rot ist oder läuft, pulsiert dezent, die Zahlen der Kopfzeile zählen hoch, das Überfahren eines Balkens hebt ihn hervor und gibt seinen Text als Tooltip, Breiten ändern sich sanft; all das stoppt bei `prefers-reduced-motion`.
+- **Ausgaben für andere Werkzeuge (standardmäßig aus, nur 127.0.0.1, kein neues Token).** `/metrics` im Prometheus-Format (rote Workflows je Ökosystem und Repository, rote Serien und Stunden, auf Signatur wartende Builds, A10 pausiert, verbleibendes Kontingent, unvollständiger Schnappschuss ...), `/api/outputs/grafana.json` für die Grafana-JSON-/Infinity-Quelle und `/api/outputs/dashboard.json` (das Dokument `ci_red.json`) für das Status-Dashboard. Ein importierbares Grafana-Dashboard liegt in `docs/grafana/`, die Einzelheiten in `docs/OUTPUTS.md`.
+- **Bericht:** eine Zeile (Code `tag_vs_manifest`), wenn ein Release-Tag der Version des Manifests voraus ist; die Zahl der unsignierten ist nach der längsten Wartezeit geordnet und nennt sie; das Repository-Panel schlägt den Befehl `gh issue close` vor (nie ausgeführt) für ein Fehler-Issue, dessen Workflow wieder grün ist; das Stapelprofil `hil` ist in `profiles.example.json` dokumentiert; Tests für `finalize` und für `monitor_link`.
+- **Doku:** `docs/SETTINGS.md`, `docs/OUTPUTS.md`, README und QUICKSTART in den 8 Sprachen aktualisiert, Bilder mit erfundenen Repositories erstellt.
 
 ## [1.4.5]
 
-> Diese Version liegt vorerst nur auf Englisch vor; die Übersetzung folgt in einer späteren Version.
-
-- **The report says when the snapshot is incomplete:** a line with the stable code `incomplete` (still loading, no local workspace, errors while reading) right after the headline, so nobody acts on a half-read list of red repositories or signing queue.
-- **Signing summary:** one line with how many releases wait to be signed (verified / not checked / failed the check) and how many builds are build-only on purpose, so "not signed on purpose" is not confused with "signature missing" (code `sign_summary`).
-- **A10 paused for the quota is said in the report** (code `a10_paused`) with the allowance left and needed, and the three knobs that control it.
-- Texts in the 8 languages; tests for the three lines.
+- **Der Bericht sagt, wann der Schnappschuss unvollständig ist:** eine Zeile mit dem stabilen Code `incomplete` (lädt noch, kein lokaler Arbeitsbereich, Fehler beim Lesen) direkt nach der Schlagzeile, damit niemand auf eine halb gelesene Liste roter Repositories oder der Signierwarteschlange reagiert.
+- **Signierübersicht:** eine Zeile, wie viele Releases auf ihre Signatur warten (verifiziert / nicht geprüft / Prüfung fehlgeschlagen) und wie viele Builds absichtlich nur gebaut werden, damit „absichtlich nicht signiert“ nicht mit „Signatur fehlt“ verwechselt wird (Code `sign_summary`).
+- **A10 wegen des Kontingents pausiert, steht im Bericht** (Code `a10_paused`) mit dem verbleibenden und dem benötigten Kontingent und den drei Reglern, die es steuern.
+- Texte in den 8 Sprachen; Tests für die drei Zeilen.
 
 ## [1.4.4]
 
-> Diese Version liegt vorerst nur auf Englisch vor; die Übersetzung folgt in einer späteren Version.
-
-- **Author and licence are always visible:** the web panel has a footer with the author and the licence, `read_report.py --version` and the new `gha_dispatch_all.py --version` print them under the version, and the monitor prints the same line when it starts. The text is in the 8 languages (`ui.about`); the author and the licence come from `tool_version.py`.
-- **Bridge to the dashboard written down:** `docs/CI_RED_BRIDGE.md` says what `ci_red.json` contains (schema 2, `complete`), how to export it and what a reader must check; the monitor still never pushes or commits.
-- Tests for the author line in the 8 languages, the footer, both `--version` flags and the start-up line.
+- **Autor und Lizenz sind immer sichtbar:** Das Web-Panel hat eine Fußzeile mit Autor und Lizenz, `read_report.py --version` und das neue `gha_dispatch_all.py --version` geben sie unter der Version aus, und der Monitor gibt beim Start dieselbe Zeile aus. Der Text liegt in den 8 Sprachen vor (`ui.about`); Autor und Lizenz stammen aus `tool_version.py`.
+- **Die Brücke zum Dashboard ist aufgeschrieben:** `docs/CI_RED_BRIDGE.md` sagt, was `ci_red.json` enthält (Schema 2, `complete`), wie man sie exportiert und was ein Leser prüfen muss; der Monitor pusht oder committet weiterhin nie.
+- Tests für die Autorenzeile in den 8 Sprachen, die Fußzeile, beide `--version`-Schalter und die Startzeile.
 
 ## [1.4.3]
 
-> Diese Version liegt vorerst nur auf Englisch vor; die Übersetzung folgt in einer späteren Version.
-
-- **A workflow that only runs on pull requests no longer makes A2 inconclusive:** `pull_request` and `pull_request_target` join the events whose runs never sit on the default branch (like `workflow_dispatch`, `release` and `workflow_call`), so a workflow such as a contract integration check that only runs on pull requests is not asked for a last run on main. A workflow that also has `push` or `schedule` still counts. Tests for both cases.
+- **Ein Workflow, der nur bei Pull Requests läuft, macht A2 nicht mehr unschlüssig:** `pull_request` und `pull_request_target` gehören jetzt zu den Ereignissen, deren Läufe nie auf dem Standard-Branch liegen (wie `workflow_dispatch`, `release` und `workflow_call`); von einem Workflow wie einer Vertrags-Integrationsprüfung, die nur bei Pull Requests läuft, wird also kein letzter Lauf auf main verlangt. Ein Workflow, der auch `push` oder `schedule` hat, zählt weiterhin. Tests für beide Fälle.
 
 ## [1.4.2]
 
-> Diese Version liegt vorerst nur auf Englisch vor; die Übersetzung folgt in einer späteren Version.
-
-- **A2 no longer counts a run in progress or a cancelled one as seen:** when it resolves a hidden workflow, the Sentinel now asks for the last completed runs of that workflow on the default branch (`gh run list -w <file> --branch <default> --status completed -L 10`, read only) and uses the first one with a real conclusion. A cancelled or skipped run (and anything without a conclusion) is ignored, so it can no longer hide an earlier red; a workflow with no completed run with a conclusion on the branch stays inconclusive on its own. Same quota gate, call limit and cache as before.
+- **A2 zählt einen laufenden oder abgebrochenen Lauf nicht mehr als gesehen:** Beim Auflösen eines verborgenen Workflows fragt der Wächter jetzt nach den letzten abgeschlossenen Läufen dieses Workflows auf dem Standard-Branch (`gh run list -w <Datei> --branch <Standard> --status completed -L 10`, nur lesend) und nimmt den ersten mit einem echten Ergebnis. Ein abgebrochener oder übersprungener Lauf (und alles ohne Ergebnis) wird ignoriert und kann so kein früheres Rot mehr verdecken; ein Workflow ohne abgeschlossenen Lauf mit Ergebnis auf dem Branch bleibt für sich unschlüssig. Dieselbe Kontingent-Schranke, dieselbe Aufruf-Grenze und derselbe Cache wie zuvor.
 
 ## [1.4.1]
 
-> Diese Version liegt vorerst nur auf Englisch vor; die Übersetzung folgt in einer späteren Version.
-
-- **A2 resolves a hidden workflow instead of giving up on the whole repository:** when a repository has a full run sample and a workflow of its clone (one that can run on the default branch) is missing from it, the Sentinel asks GitHub for the last run of THAT workflow on the default branch (`gh run list -w <file> --branch <default> -L 1`, read only). A red answer counts as red in A2; a green one removes the workflow from the inconclusive list; a workflow with no run on the branch stays inconclusive on its own and the panel names it (`repo/file.yml (no run on the default branch)`) instead of only the repository. Without quota (same gate as A10: `min_rate_remaining` x `surface.min_rate_factor`, plus the hourly budget) the workflow stays inconclusive and the panel says why. New options `sentinel.a2_resolve_max_calls_per_tick` (4; 0 = never ask) and `sentinel.a2_resolve_ttl_seconds` (3600, how long an answer is kept; it is also saved in the cache file). The snapshot carries `a2.inconclusive_workflows` (labels) and `a2.inconclusive_details`; `a2.inconclusive` is still the list of repositories. 5 new texts in the 8 languages and a reworded `ui.a2_inconclusive`.
+- **A2 löst einen verborgenen Workflow auf, statt für das ganze Repository aufzugeben:** Hat ein Repository eine vollständige Laufstichprobe und fehlt darin ein Workflow seines Klons (einer, der auf dem Standard-Branch laufen kann), fragt der Wächter GitHub nach dem letzten Lauf GENAU dieses Workflows auf dem Standard-Branch (`gh run list -w <Datei> --branch <Standard> -L 1`, nur lesend). Eine rote Antwort zählt in A2 als rot; eine grüne nimmt den Workflow aus der Liste der Unschlüssigen; ein Workflow ohne Lauf auf dem Branch bleibt für sich unschlüssig, und das Panel nennt ihn (`repo/datei.yml (kein Lauf auf dem Standard-Branch)`) statt nur das Repository. Ohne Kontingent (dieselbe Schranke wie A10: `min_rate_remaining` x `surface.min_rate_factor`, plus das Stundenbudget) bleibt der Workflow unschlüssig, und das Panel sagt warum. Neue Optionen `sentinel.a2_resolve_max_calls_per_tick` (4; 0 = nie fragen) und `sentinel.a2_resolve_ttl_seconds` (3600, wie lange eine Antwort behalten wird; sie wird auch in der Cache-Datei gespeichert). Der Schnappschuss trägt `a2.inconclusive_workflows` (Etiketten) und `a2.inconclusive_details`; `a2.inconclusive` bleibt die Liste der Repositories. 5 neue Texte in den 8 Sprachen und ein umformuliertes `ui.a2_inconclusive`.
 
 ## [1.4.0]
 
-> Diese Version liegt vorerst nur auf Englisch vor; die Übersetzung folgt in einer späteren Version.
-
-- **New layer A11 "Readiness" (read only, real data only):** a panel of the Sentinel tab, a traffic light in its header and two lines of the report. It is switched with `sentinel.readiness.enabled` and described in `readiness.py`.
-  - **Release readiness:** one row per repository with at least `candidate_min_entries` entries in `[Unreleased]` (external ecosystems excluded): CI of the default branch (the single rule of A2) with the commit it ran on, whether the version the clone declares (`*.project.json`, else `pyproject.toml`, else the first CHANGELOG heading) is already above the last release, whether a build exists after that release, whether it is signed (the states of A5), and the next step (`fix the red CI`, `wait for run data`, `bump the version`, `build in Actions`, `sign`, `publish`, `cut and publish`). A green CI over a full run sample that may hide an older workflow says so.
-  - **Ecosystem health:** per ecosystem, 100 minus weighted counts of red CI, stuck builds, secrets, serious alerts, other alerts, Dependabot PRs older than `stale_pr_days`, builds waiting for signing and repositories with hygiene problems (`sentinel.readiness.health.weights`); the parts that lower the score are listed. No score is shown (`?`) when fewer than `min_coverage` (0.5) of the repositories of the ecosystem have run data and alerts. The report warns when a score is under `warn_below` (70).
-  - **Dependency pins:** repositories that pin an older version than the one of the repository that provides the contract or library. Where the pins live is data (`sentinel.readiness.pins.sources`): a JSON table of pins in the provider (`pin_table`) or lock files in the consumers (`lock_files`, the oldest one found counts). Plain file reads of the local clones, cached `pins.refresh_seconds`; an ecosystem without a configured source is listed as having none, and nothing is guessed. The shipped example has no source.
-  - 60 new texts in the 8 languages; `tests/test_readiness.py` (rules, weights, coverage, pins on a temporary tree, the page and the 8 catalogues).
-- **`docs/CI_RED_SCHEMA.md`:** says explicitly that the PC publishes neither `ci_red.json` nor `pending_sign` to any repository or dashboard (the signing side is local by decision); a public consumer recomputes the rule from the public runs or uses `read_report.py --export-status`.
-- **Quota tuning from the log (`actions_monitor_log.txt`, 3 days, 889 samples):** the shared allowance was under the floor (`min_rate_remaining` 1500) in 11% of the samples since 5 November and under 3000 in 45%; the hourly burn was 3000-5000 calls in most hours and reached the limit in some. In the maintainer's `actions_monitor.json`: `refresh_seconds` 120 -> 180 (the real cycle was a median of 139 s) and `sentinel.surface.min_rate_factor` 2.0 -> 1.5 (the cold calls of A10 are about 260 a day, so they can run above 2250; with 3000 they waited almost half of the time). `max_repos_per_tick` (6) and the daily cold cycle stay: they cost less than 1% of the allowance. The shipped example keeps its neutral defaults.
+- **Neue Ebene A11 „Bereitschaft“ (nur lesend, nur echte Daten):** ein Panel des Reiters Wächter, eine Ampel in dessen Kopf und zwei Zeilen des Berichts. Sie wird mit `sentinel.readiness.enabled` geschaltet und in `readiness.py` beschrieben.
+  - **Release-Bereitschaft:** eine Zeile je Repository mit mindestens `candidate_min_entries` Einträgen in `[Unreleased]` (externe Ökosysteme ausgenommen): die CI des Standard-Branches (die einzige Regel von A2) mit dem Commit, auf dem sie lief, ob die vom Klon deklarierte Version (`*.project.json`, sonst `pyproject.toml`, sonst die erste CHANGELOG-Überschrift) schon über dem letzten Release liegt, ob es einen Build nach diesem Release gibt, ob er signiert ist (die Zustände von A5) und der nächste Schritt (`rote CI beheben`, `auf Laufdaten warten`, `Version erhöhen`, `in Actions bauen`, `signieren`, `veröffentlichen`, `schneiden und veröffentlichen`). Eine grüne CI über einer vollen Laufstichprobe, die einen älteren Workflow verbergen kann, sagt das.
+  - **Gesundheit des Ökosystems:** je Ökosystem 100 minus gewichtete Zahlen von roter CI, hängenden Builds, Geheimnissen, schweren Warnungen, anderen Warnungen, Dependabot-PRs älter als `stale_pr_days`, auf Signatur wartenden Builds und Repositories mit Hygieneproblemen (`sentinel.readiness.health.weights`); die Teile, die die Bewertung senken, werden aufgelistet. Keine Bewertung (`?`), wenn weniger als `min_coverage` (0,5) der Repositories des Ökosystems Laufdaten und Warnungen haben. Der Bericht warnt, wenn eine Bewertung unter `warn_below` (70) liegt.
+  - **Abhängigkeits-Pins:** Repositories, die eine ältere Version festlegen als das Repository, das den Vertrag oder die Bibliothek liefert. Wo die Pins liegen, ist Datenfrage (`sentinel.readiness.pins.sources`): eine JSON-Tabelle der Pins im Anbieter (`pin_table`) oder Lock-Dateien in den Verbrauchern (`lock_files`, die älteste gefundene zählt). Einfaches Lesen von Dateien der lokalen Klone, zwischengespeichert `pins.refresh_seconds`; ein Ökosystem ohne konfigurierte Quelle wird als ohne aufgeführt, und nichts wird geraten. Das mitgelieferte Beispiel hat keine Quelle.
+  - 60 neue Texte in den 8 Sprachen; `tests/test_readiness.py` (Regeln, Gewichte, Abdeckung, Pins auf einem temporären Baum, die Seite und die 8 Kataloge).
+- **`docs/CI_RED_SCHEMA.md`:** sagt ausdrücklich, dass der PC weder `ci_red.json` noch `pending_sign` in ein Repository oder Dashboard veröffentlicht (die Signierseite ist per Entscheidung lokal); ein öffentlicher Verbraucher berechnet die Regel aus den öffentlichen Läufen neu oder nutzt `read_report.py --export-status`.
+- **Kontingent-Abstimmung anhand des Protokolls (`actions_monitor_log.txt`, 3 Tage, 889 Messwerte):** Das gemeinsame Kontingent lag seit dem 5. November in 11 % der Messwerte unter der Untergrenze (`min_rate_remaining` 1500) und in 45 % unter 3000; der Stundenverbrauch lag in den meisten Stunden bei 3000-5000 Aufrufen und erreichte in manchen das Limit. In der `actions_monitor.json` des Maintainers: `refresh_seconds` 120 -> 180 (der echte Zyklus hatte einen Median von 139 s) und `sentinel.surface.min_rate_factor` 2,0 -> 1,5 (die kalten Aufrufe von A10 sind etwa 260 am Tag, können also über 2250 laufen; mit 3000 warteten sie fast die Hälfte der Zeit). `max_repos_per_tick` (6) und der tägliche kalte Zyklus bleiben: Sie kosten weniger als 1 % des Kontingents. Das mitgelieferte Beispiel behält seine neutralen Standardwerte.
 
 ## [1.3.3]
 
-> Diese Version liegt vorerst nur auf Englisch vor; die Übersetzung folgt in einer späteren Version.
-
-- **A2 ignores workflows that never run on the default branch:** when deciding whether a full run sample hides a workflow, the files of the clone whose `on:` has no `push`, `pull_request` or `schedule` for the branch (only `workflow_dispatch`, `release`, tag-only `push` without `branches`, or `workflow_call`) are no longer expected in the sample. `on:` is read with the standard library only (string, list, map, and the YAML `true` key); if it cannot be parsed the workflow counts as before. The workflow scan carries the new field `main_triggered` (`true`/`false`/`null`).
+- **A2 ignoriert Workflows, die nie auf dem Standard-Branch laufen:** Beim Entscheiden, ob eine volle Laufstichprobe einen Workflow verbirgt, werden Dateien des Klons, deren `on:` weder `push`, `pull_request` noch `schedule` für den Branch hat (nur `workflow_dispatch`, `release`, ein reines Tag-`push` ohne `branches` oder `workflow_call`), nicht mehr in der Stichprobe erwartet. `on:` wird nur mit der Standardbibliothek gelesen (Zeichenfolge, Liste, Map und der YAML-Schlüssel `true`); lässt es sich nicht lesen, zählt der Workflow wie zuvor. Der Workflow-Scan trägt das neue Feld `main_triggered` (`true`/`false`/`null`).
 
 ## [1.3.2]
 
-> Diese Version liegt vorerst nur auf Englisch vor; die Übersetzung folgt in einer späteren Version.
-
-- **A2 shows `unknown` instead of green when its sample is full and inconclusive:** a repository whose list of runs is as long as the sample asked for (`runs_per_repo` / `cold_runs_per_repo` of the monitor, which the check did not see before) and whose clone has a workflow file with no run in that sample (or that has no clone) is listed as inconclusive, and A2 is `unknown` unless something is red. New option `sentinel.a2_full_sample_unknown` (default `true`; `false` = only informative as before). The page lists the repositories.
-- **`profiles.example.json`:** a neutral batch-profiles template that matches `targets.example.json` and `ecosystems.example.json`. A test (and the release gate) validates it against those catalogues, not the maintainer's, and checks that every profile selects at least one target.
-- **Clean-install check in `make_release`:** before anything is left in the output folder the zip is extracted into a new, empty temporary directory and, from there with `python -I`, every member must be present, every module must compile, `read_report.py --version` must run and the whole suite must pass; any gap fails the release.
-- **Wording:** README and QUICKSTART in the 8 languages now say that the package writes nothing to GitHub on its own and that only `dispatch --go`, `dispatch --real` and `finalize --execute` (which you run) do.
-- **A10 quota:** the share of the sentinel's per-tick call budget that A10 may use is now `sentinel.surface.budget_share` (default `0.5`, as before but configurable); the page shows "A10 paused for quota" with the allowance left and the one needed (`min_rate_remaining` x `min_rate_factor`) while the cold calls wait.
+- **A2 zeigt `unknown` statt grün, wenn seine Stichprobe voll und unschlüssig ist:** Ein Repository, dessen Laufliste so lang ist wie die angeforderte Stichprobe (`runs_per_repo` / `cold_runs_per_repo` des Monitors, die die Prüfung bisher nicht sah) und dessen Klon eine Workflow-Datei ohne Lauf in dieser Stichprobe hat (oder keinen Klon hat), wird als unschlüssig aufgeführt, und A2 ist `unknown`, außer etwas ist rot. Neue Option `sentinel.a2_full_sample_unknown` (Standard `true`; `false` = nur informativ wie zuvor). Die Seite listet die Repositories.
+- **`profiles.example.json`:** eine neutrale Vorlage für Stapelprofile, passend zu `targets.example.json` und `ecosystems.example.json`. Ein Test (und die Release-Schranke) prüft sie gegen diese Kataloge, nicht gegen die des Maintainers, und stellt sicher, dass jedes Profil mindestens ein Ziel auswählt.
+- **Prüfung der sauberen Installation in `make_release`:** Bevor etwas im Ausgabeordner liegen bleibt, wird das Zip in ein neues, leeres temporäres Verzeichnis entpackt, und von dort mit `python -I` muss jedes Mitglied vorhanden sein, jedes Modul kompilieren, `read_report.py --version` laufen und die ganze Suite bestehen; jede Lücke lässt das Release scheitern.
+- **Formulierung:** README und QUICKSTART in den 8 Sprachen sagen jetzt, dass das Paket von sich aus nichts nach GitHub schreibt und dass nur `dispatch --go`, `dispatch --real` und `finalize --execute` (die du ausführst) es tun.
+- **A10-Kontingent:** Der Anteil des Aufrufbudgets des Wächters pro Zyklus, den A10 nutzen darf, ist jetzt `sentinel.surface.budget_share` (Standard `0.5`, wie zuvor, aber konfigurierbar); die Seite zeigt „A10 wegen Kontingent pausiert“ mit dem verbleibenden und dem benötigten Kontingent (`min_rate_remaining` x `min_rate_factor`), solange die kalten Aufrufe warten.
 
 ## [1.3.1]
 
-> Diese Version liegt vorerst nur auf Englisch vor; die Übersetzung folgt in einer späteren Version.
-
-- **A run built on another commit is never offered for signing:** when `dispatch` could only find a recent run of another commit (`sha_matched` false), `finalize` now lists it as not ready with the reason and gives no signing command; an old batch without the field behaves as before. Tests with two concurrent runs of different commits.
-- **`/api/data` goes through the same Host/Origin guard as the other routes** of the local server (DNS rebinding).
+- **Ein auf einem anderen Commit gebauter Lauf wird nie zum Signieren angeboten:** Konnte `dispatch` nur einen jüngeren Lauf eines anderen Commits finden (`sha_matched` falsch), listet `finalize` ihn jetzt als nicht bereit mit dem Grund und gibt keinen Signierbefehl aus; ein alter Stapel ohne das Feld verhält sich wie zuvor. Tests mit zwei gleichzeitigen Läufen verschiedener Commits.
+- **`/api/data` läuft durch dieselbe Host-/Origin-Wache wie die anderen Routen** des lokalen Servers (DNS-Rebinding).
 
 ## [1.3.0]
 
-> Diese Version liegt vorerst nur auf Englisch vor; die Übersetzung folgt in einer späteren Version.
+Zum Teilen gemacht: acht Sprachen, Urheberschaft und Lizenz in jeder Datei, keine privaten Daten und nichts an ein GitHub-Konto gebunden.
 
-Made to be shared: eight languages, authorship and licence in every file, no private data, and nothing tied to one GitHub account.
-
-- **8 languages** (en, es, de, fr, it, ja, zh, pt = European Portuguese) for the page, the command line tools, the launchers, the events, the reports and the error
-  messages. `i18n.py` + `locales/<lang>.json` (one flat catalogue per language, standard library only, `t("key", name=value)` with a fallback to English). The language
-  is `language` in `actions_monitor.json` (default: the system language, English if unsupported), a selector in the header of the page (remembered by the browser),
-  `MONITOR_LANG` / `JUANENRAC_LANG`, or `--lang CODE` in every tool (it wins over the rest). Technical names, commands, paths and the markers that scripts read
-  (`SKIP`, `DISPATCHED`, `READY`, `FAILED`, `Summary:`, `BUILD ONLY`, `WOULD DISPATCH`...) are never translated. Events in `events_monitor.jsonl` now carry a stable
-  `code` (and `args`) next to the text, so nobody has to parse a language.
-- A test checks that the 8 catalogues have exactly the same keys, none empty, the same `{placeholders}`, that every key used by the code and the page exists, and that no
-  visible string in the code bypasses `t()`.
-- README and QUICKSTART in the 8 languages (`README_<lang>.txt`, `QUICKSTART_<lang>.txt`); `README.txt` is now a short language chooser with the quick start.
-- **Authorship and licence**: every source file carries "Copyright (C) 2026 JuanenRac (Electro Hobby 3D)" and "GPL-3.0-or-later - see LICENSE"; JSON data files carry
-  `_author` / `_license`; `LICENSE` (GPL-3.0 text), `NOTICE` and `AUTHORS` travel in the zip. `make_release.py` refuses to build when a file lacks them, when private data
-  would travel, when the locales differ, or when a launcher loses its executable bit.
-- **Shareable**: `github_owner` in the configuration (default: the account of `gh`) replaces the constant that was spread over three modules; the ecosystem prefixes and the
-  signing tools are data (`ecosystems.json`, neutral `ecosystems.example.json`; `"*"` = every repository; `"external": true` = only reported) and so are the targets (`targets.json`
-  is the maintainer's real catalogue, `targets.example.json` the neutral one; `targets_file` / `ecosystems_file` choose them; keys that start with `_` are metadata).
-  The example configuration is neutral. Nothing of this adds a call to the hot cycle.
-- **The workspace is optional**: without local clones the monitor starts in a reduced mode (only what the GitHub API gives: no local signing queue, no audit report, no
-  CHANGELOG scan) and says so on the page, in the report and at start, instead of stopping. `MONITOR_ROOT` / `MONITOR_AUDIT_DIR` / `MONITOR_SIGNED_DIR` and `signed_dir`
-  were added next to the old names. The roadmap layer (A9) is optional too.
-- Launchers: menus and messages come from `launcher_msg.py` (your language); comments in English; header on every file.
-- Fix: `workspace_root()` no longer ends the monitor when the sentinel starts without a workspace.
+- **8 Sprachen** (en, es, de, fr, it, ja, zh, pt = europäisches Portugiesisch) für die Seite, die Befehlszeilenwerkzeuge, die Starter, die Ereignisse, die Berichte und die Fehlermeldungen. `i18n.py` + `locales/<Sprache>.json` (ein flacher Katalog je Sprache, nur Standardbibliothek, `t("Schlüssel", name=wert)` mit Rückfall auf Englisch). Die Sprache ist `language` in `actions_monitor.json` (Standard: die Systemsprache, Englisch, wenn nicht unterstützt), eine Auswahl in der Kopfzeile der Seite (der Browser merkt sie sich), `MONITOR_LANG` / `JUANENRAC_LANG` oder `--lang CODE` in jedem Werkzeug (sie schlägt alles andere). Technische Namen, Befehle, Pfade und die Marker, die Skripte lesen (`SKIP`, `DISPATCHED`, `READY`, `FAILED`, `Summary:`, `BUILD ONLY`, `WOULD DISPATCH` ...), werden nie übersetzt. Ereignisse in `events_monitor.jsonl` tragen jetzt neben dem Text einen stabilen `code` (und `args`), sodass niemand eine Sprache auswerten muss.
+- Ein Test prüft, dass die 8 Kataloge genau dieselben Schlüssel haben, keiner leer ist, dieselben `{Platzhalter}` enthalten, dass jeder von Code und Seite verwendete Schlüssel existiert und dass kein sichtbarer Text im Code `t()` umgeht.
+- README und QUICKSTART in den 8 Sprachen (`README_<Sprache>.txt`, `QUICKSTART_<Sprache>.txt`); `README.txt` ist jetzt eine kurze Sprachauswahl mit dem Schnellstart.
+- **Urheberschaft und Lizenz**: Jede Quelldatei trägt „Copyright (C) 2026 JuanenRac (Electro Hobby 3D)“ und „GPL-3.0-or-later - see LICENSE“; JSON-Datendateien tragen `_author` / `_license`; `LICENSE` (GPL-3.0-Text), `NOTICE` und `AUTHORS` reisen im Zip mit. `make_release.py` weigert sich zu bauen, wenn einer Datei sie fehlen, wenn private Daten mitreisen würden, wenn die Locales abweichen oder wenn ein Starter sein Ausführungsbit verliert.
+- **Teilbar**: `github_owner` in der Konfiguration (Standard: das Konto von `gh`) ersetzt die Konstante, die über drei Module verstreut war; die Ökosystem-Präfixe und die Signierwerkzeuge sind Daten (`ecosystems.json`, neutral `ecosystems.example.json`; `"*"` = jedes Repository; `"external": true` = nur gemeldet) und ebenso die Ziele (`targets.json` ist der echte Katalog des Maintainers, `targets.example.json` der neutrale; `targets_file` / `ecosystems_file` wählen sie; Schlüssel, die mit `_` beginnen, sind Metadaten). Die Beispielkonfiguration ist neutral. Nichts davon fügt dem heißen Zyklus einen Aufruf hinzu.
+- **Der Arbeitsbereich ist optional**: Ohne lokale Klone startet der Monitor in einem reduzierten Modus (nur was die GitHub-API liefert: keine lokale Signierwarteschlange, kein Prüfbericht, kein CHANGELOG-Scan) und sagt das auf der Seite, im Bericht und beim Start, statt anzuhalten. `MONITOR_ROOT` / `MONITOR_AUDIT_DIR` / `MONITOR_SIGNED_DIR` und `signed_dir` kamen neben die alten Namen. Die Fahrplan-Ebene (A9) ist ebenfalls optional.
+- Starter: Menüs und Meldungen kommen aus `launcher_msg.py` (deine Sprache); Kommentare auf Englisch; Kopfzeile in jeder Datei.
+- Korrektur: `workspace_root()` beendet den Monitor nicht mehr, wenn der Wächter ohne Arbeitsbereich startet.
 
 ## [1.2.0]
 
-> Diese Version liegt vorerst nur auf Englisch vor; die Übersetzung folgt in einer späteren Version.
+Was fehlte und was sich sonst auf GitHub tun lässt, alles nur lesend und lokal.
 
-What was missing and what else can be done on GitHub, all of it read only and local.
+**Teil A - was fehlte**
+- Das Schema 2 von `ci_red.json` ist jetzt ein dokumentierter Vertrag: `docs/CI_RED_SCHEMA.md` (Form, die eine Regel für „rot“, was nur für den Besitzer ist). Vom PC wird nichts veröffentlicht. Optionale, ausdrückliche Exporte (nie ein Commit oder Push): `read_report.py --export-status DIR` schreibt NUR die Rot-Liste (`ci_status_public.json/.md`); `read_report.py --export-sign-queue FILE` (.json/.csv) schreibt die globale Signierwarteschlange mit den lokalen Befehlen.
+- Attestierung: Die Signierwarteschlange zeigt, ob der Build eine Attestierung hat (Vorhandensein anhand des Digests der signierten Dateien, eine Abfrage je Eintrag, keine Signaturprüfung; Schalter `sentinel.surface.checks.attestation`). Eine fehlende ist eine Zeile im Bericht.
+- Mehr geprüfte Formate: HYDRA `hydra-sign` (`DATEI.sig` = Base64-Ed25519 über die Bytes der Datei, der festgelegte Release-Schlüssel, blockweise gelesen) wird endgültig geprüft; URTC `.imgsig` hat sein strenges Format geprüft (152 Hexziffern + LF; fehlerhaft = ungültig) und bleibt „unknown“, wenn es wohlgeformt ist (die signierte Nachricht braucht auch den Build-Header, den der Signierordner nicht trägt); ARMOR-APKs werden im APK von apksigner signiert und bleiben „unknown“.
+- `HYDRA-UMC-OS` ist in `targets.json` absichtlich gekennzeichnet (`"build_only": true` + `reason`): `plan` führt es unter BUILD ONLY auf, und es ist keine Waise mehr. Die Signierwerkzeuge wurden nicht angefasst (sein Workflow nimmt andere Eingaben und ein anderes Signaturschema).
+- Korrektur: `ci_red.target_path` wies jeden Windows-Pfad mit Backslashes (`C:\...`) zurück; nur Schrägstriche wurden akzeptiert.
 
-**Part A - what was missing**
-- `ci_red.json` schema 2 is now a documented contract: `docs/CI_RED_SCHEMA.md` (shape, the one rule of "red", what is for the owner only). Nothing is
-  published from the PC. Optional, explicit exports (never a commit or a push): `read_report.py --export-status DIR` writes ONLY the red list
-  (`ci_status_public.json/.md`); `read_report.py --export-sign-queue FILE` (.json/.csv) writes the global signing queue with the local commands.
-- Attestation: the signing queue shows whether the build has an attestation (existence by digest of the signed files, one lookup per entry, no signature
-  check; switch `sentinel.surface.checks.attestation`). A missing one is a line in the report.
-- More verified formats: HYDRA `hydra-sign` (`FILE.sig` = base64 Ed25519 over the bytes of the file, the pinned release key, read in blocks) is checked
-  definitively; URTC `.imgsig` has its strict format checked (152 hex digits + LF; malformed = not valid) and stays "unknown" when well formed (the signed
-  message also needs the build header, which the signed folder does not carry); ARMOR APKs are signed inside the APK by apksigner and stay "unknown".
-- `HYDRA-UMC-OS` is labelled on purpose in `targets.json` (`"build_only": true` + `reason`): `plan` lists it under BUILD ONLY and it is no longer an orphan.
-  The signing tools were not touched (its workflow takes other inputs and a different signature scheme).
-- Fix: `ci_red.target_path` refused every Windows path written with backslashes (`C:\...`); only forward slashes were accepted.
-
-**Part B - the A10 layer "Actions & releases surface"** (`surface.py`, new section of the tab, a switch and a threshold per check under `sentinel.surface`)
-- Actions: workflows disabled by hand, schedules with no run in N days (only when the sample of runs covers the window), `uses:` not pinned by SHA
-  (reusable workflows flagged apart), `permissions: write-all`, `pull_request_target` with a checkout of the PR, stuck concurrency queues, failures on only one
-  OS of a matrix, artifact cost and retention, required status checks that are red or missing (GraphQL), `dispatch --profile release|nightly|hil` with a canary
-  (the first target alone, the rest only if it is green) and a quota gate (`--min-rate`, fails closed). Profiles live in `profiles.json`.
-- Releases: expected assets per kind of target (alert when a release was published incomplete), tag vs manifest vs CHANGELOG, GitHub Packages, forgotten drafts
-  and pre-releases, `release_notes.py` (a DRAFT of notes from the commits since the last tag; it publishes nothing).
-- Security: critical/high alerts by age with a ranking of repositories, coverage (a stack without CodeQL/Dependabot), secret scanning open vs resolved,
-  Dependabot by priority (runtime major first, CI-only last).
-- Issues and PRs: suggestion of `gh issue close` for build issues whose CI is green again (an event with the text; nothing is ever closed), overdue milestones,
-  old human PRs, PRs that touch workflows or CODEOWNERS, the merge queue (approved with green checks). Stale board cards: PENDING (needs per-item reads and a threshold).
-- Manifest vs evidence (maturity), 8-language README parity failures, Actions minutes per ecosystem in the header, the report and A7.
-- `finalize --execute` now tells the running monitor (127.0.0.1) to refresh just the signed repositories and rewrite `ci_red.json` at once (`monitor_link.py`).
-- Optional signed webhook receiver (`webhook.enabled`, off by default, 127.0.0.1 only, HMAC with a shared secret from the config, never a GitHub token).
-- Cost: nothing in the hot cycle. Cold, spread over ticks and inside the hourly budget: 2 REST calls per repository per day, one GraphQL query per 15
-  repositories per day, 3 for Packages, plus the jobs of red runs and the attestation lookups of the signing queue, and only while the allowance is above
-  twice `min_rate_remaining`. The hot GraphQL pass asks for 3 more fields per node (alert dates, review decision, checks state): no extra call.
-- The gate also compares `sentinel.surface` of the example file with the defaults and validates `profiles.json`.
+**Teil B - die A10-Ebene „Oberfläche von Actions und Releases“** (`surface.py`, neuer Abschnitt des Reiters, ein Schalter und eine Schwelle je Prüfung unter `sentinel.surface`)
+- Actions: von Hand deaktivierte Workflows, Zeitpläne ohne Lauf in N Tagen (nur wenn die Laufstichprobe das Fenster abdeckt), nicht per SHA festgelegte `uses:` (wiederverwendbare Workflows gesondert gekennzeichnet), `permissions: write-all`, `pull_request_target` mit Checkout der PR, hängende Concurrency-Warteschlangen, Fehler nur auf einem OS einer Matrix, Kosten und Aufbewahrung von Artefakten, erforderliche Statusprüfungen, die rot sind oder fehlen (GraphQL), `dispatch --profile release|nightly|hil` mit einem Kanarienvogel (nur das erste Ziel, der Rest nur bei Grün) und einer Kontingent-Schranke (`--min-rate`, schließt im Zweifel). Profile liegen in `profiles.json`.
+- Releases: erwartete Assets je Zieltyp (Warnung bei unvollständig veröffentlichtem Release), Tag gegen Manifest gegen CHANGELOG, GitHub Packages, vergessene Entwürfe und Vorabversionen, `release_notes.py` (ein ENTWURF von Hinweisen aus den Commits seit dem letzten Tag; er veröffentlicht nichts).
+- Sicherheit: kritische/hohe Warnungen nach Alter mit einer Rangliste der Repositories, Abdeckung (ein Stack ohne CodeQL/Dependabot), offene gegenüber gelösten Secret-Scanning-Funden, Dependabot nach Priorität (Runtime-Major zuerst, nur CI zuletzt).
+- Issues und PRs: Vorschlag `gh issue close` für Build-Issues, deren CI wieder grün ist (ein Ereignis mit dem Text; nie wird etwas geschlossen), überfällige Meilensteine, alte menschliche PRs, PRs, die Workflows oder CODEOWNERS berühren, die Merge-Queue (genehmigt mit grünen Prüfungen). Veraltete Board-Karten: AUSSTEHEND (braucht Lesezugriffe je Element und eine Schwelle).
+- Manifest gegen Beleg (Reife), Paritätsfehler der README in 8 Sprachen, Actions-Minuten je Ökosystem in der Kopfzeile, im Bericht und in A7.
+- `finalize --execute` sagt jetzt dem laufenden Monitor (127.0.0.1), nur die signierten Repositories zu aktualisieren und `ci_red.json` sofort neu zu schreiben (`monitor_link.py`).
+- Optionaler Empfänger für signierte Webhooks (`webhook.enabled`, standardmäßig aus, nur 127.0.0.1, HMAC mit einem gemeinsamen Geheimnis aus der Konfiguration, nie ein GitHub-Token).
+- Kosten: nichts im heißen Zyklus. Kalt, über Ticks verteilt und innerhalb des Stundenbudgets: 2 REST-Aufrufe je Repository und Tag, eine GraphQL-Abfrage je 15 Repositories und Tag, 3 für Packages, dazu die Jobs roter Läufe und die Attestierungsabfragen der Signierwarteschlange, und nur solange das Kontingent über dem Doppelten von `min_rate_remaining` liegt. Der heiße GraphQL-Durchlauf fragt 3 weitere Felder je Knoten ab (Datum der Warnungen, Review-Entscheidung, Prüfstatus): kein zusätzlicher Aufruf.
+- Die Schranke vergleicht außerdem `sentinel.surface` der Beispieldatei mit den Standardwerten und validiert `profiles.json`.
 
 ## [1.1.1]
 
-> Diese Version liegt vorerst nur auf Englisch vor; die Übersetzung folgt in einer späteren Version.
-
-- **Cross-platform:** the monitor and the batch tools work on Windows, macOS and Linux. Launchers `MONITOR_GITHUB_ACTIONS.sh`/`.command` and `BATCH_GITHUB_ACTIONS.sh`/`.command` (the zip keeps the executable permission and make_release rejects Windows line endings in them).
-- New `platform_compat.py`: the command that starts a child tool (`py -3` on Windows, the current interpreter elsewhere), the text of the commands that `finalize` shows (cmd/PowerShell or POSIX quoting), UTF-8 console and a notice with the way to install `gh` on each system.
-- New tests of the cross-platform part (Windows and POSIX simulated from any system).
+- **Plattformübergreifend:** Der Monitor und die Stapelwerkzeuge laufen unter Windows, macOS und Linux. Starter `MONITOR_GITHUB_ACTIONS.sh`/`.command` und `BATCH_GITHUB_ACTIONS.sh`/`.command` (das Zip behält die Ausführungsberechtigung, und make_release weist Windows-Zeilenenden darin zurück).
+- Neues `platform_compat.py`: der Befehl, der ein Kindwerkzeug startet (`py -3` unter Windows, der aktuelle Interpreter sonst), der Text der Befehle, die `finalize` zeigt (cmd/PowerShell- oder POSIX-Quoting), UTF-8-Konsole und ein Hinweis, wie man `gh` auf jedem System installiert.
+- Neue Tests des plattformübergreifenden Teils (Windows und POSIX von jedem System aus simuliert).
 
 ## [1.1.0]
 
-> Diese Version liegt vorerst nur auf Englisch vor; die Übersetzung folgt in einer späteren Version.
+Signaturvertrauen, eine stabile Brücke zum Dashboard, Waisen und Konventionen in den Stapelwerkzeugen und eine nützlichere Seite.
 
-Signature trust, a stable bridge to the dashboard, orphans and conventions in the batch tools, and a more useful page.
+- Signaturvertrauen: `sigverify.py` (Standardbibliothek, nur lesend, kein Netz) prüft den Signierordner `_firmados/<REPO>/release-<Version>/` gegen den ÖFFENTLICHEN Schlüssel, den jedes Ökosystem festlegt (URTC `release_sign.py`, der ARMOR-Helfer `PACKAGE_PUBLIC_KEY`, der HYDRA-Updater `RELEASES_PUBLIC_KEY` oder `sentinel.signature_pubkeys`). Jeder Zustand trägt jetzt `signature_kind` (none | dev | release) und `signature_verified` (true | false | "unknown"); nur eine Release-Signatur, die sich verifizieren lässt (`trusted`), senkt den Alarm „Signatur ausstehend“, außer „veröffentlicht“. Eine Signatur, die sich nicht verifizieren lässt, behält den Alarm und sagt das im Bericht. `sentinel.require_verified_signature` (Standard true; false = die Regel von 1.0.0). Formate, die dieses Modul nicht prüfen kann (.sig2, .hdr2, .imgsig, APK, hydra-sign), sind „unknown“, nie „false“. Die Build-Attestierung braucht weiterhin das Netz und bleibt bei den Signierwerkzeugen.
+- Schema 2 von `ci_red.json`: je Repository eine Liste `pending_sign` (Workflow, Stunden, Zustand, signature_kind, signature_verified, last_build_at, url) neben den roten Workflows, dazu `schema`, `pending_sign_repos` und die Schwelle; das Format ist in `ci_red.py` dokumentiert und wird nur erweitert.
+- Eine Definition von „letzter Lauf auf main“ (`signstate.completed_runs`), geteilt von der Rot-Prüfung, der Prüfung „grün ohne Release“ und den Zielzuständen.
+- `ci_red.target_path` weist D:-Pfade, WSL-/Git-Bash-Formen von D: und Laufwerks-/UNC-Pfade zurück, die das laufende System nicht nutzen kann; die Tests simulieren beide Systeme, und die ganze Suite besteht jetzt unter Linux.
+- `gha_dispatch_all.py plan` endet immer mit dem Abschnitt „Signatur-Waisen“ (grüne CI + bekannte `*-build.yml` + kein Ziel); die Abdeckung gilt je Repository UND Workflow.
+- Konvention für Ziele (Ökosystem-Präfix -> Standard-Signierwerkzeug, Workflow in der bekannten Liste); `targets.json` enthält nur die Ausnahmen und gewinnt immer. `hygiene --write-candidates` schreibt die vorgeschlagenen Einträge in `targets.candidates.json` (nie von selbst angewendet, nie verpackt).
+- Seite: anklickbare Kopfzähler „rot auf main“ und „unsigniert“ (filtern die Repositories; der zweite fokussiert auch die Signierwarteschlange), die Signierwarteschlange mit ihren Befehlen und einem Kopieren-Knopf, Repository-Panel mit gebaut / signiert / veröffentlicht, Signaturart und Verifizierung sowie dem vorgeschlagenen Befehl; ein Abzeichen in der Kopfzeile, wenn ein Minutenbudget 80 % erreicht (rot bei Überschreitung); „gestern gegen heute“ vergleicht auch Budgetwarnungen und die Zeilen des Berichts.
 
-- Signature trust: `sigverify.py` (standard library, read only, no network) checks the signed folder `_firmados/<REPO>/release-<version>/` against the PUBLIC
-  key each ecosystem pins (URTC `release_sign.py`, ARMOR helper `PACKAGE_PUBLIC_KEY`, HYDRA updater `RELEASES_PUBLIC_KEY`, or `sentinel.signature_pubkeys`).
-  Every state now carries `signature_kind` (none | dev | release) and `signature_verified` (true | false | "unknown"); only a release signature that verifies
-  (`trusted`) lowers the pending-signature alert, besides "published". A signature that does not verify keeps the alert and says so in the report.
-  `sentinel.require_verified_signature` (default true; false = the 1.0.0 rule). Formats this module cannot check (.sig2, .hdr2, .imgsig, APK, hydra-sign) are
-  "unknown", never "false". The build attestation still needs the network and stays with the signing tools.
-- `ci_red.json` schema 2: per repository a `pending_sign` list (workflow, hours, state, signature_kind, signature_verified, last_build_at, url) next to the red
-  workflows, plus `schema`, `pending_sign_repos` and the threshold; the format is documented in `ci_red.py` and is only ever extended.
-- One definition of "last run on main" (`signstate.completed_runs`) shared by the red check, the green-without-release check and the target states.
-- `ci_red.target_path` refuses D: paths, WSL/Git Bash forms of D: and drive/UNC paths that the running system cannot use; the tests simulate both systems
-  and the whole suite now passes on Linux.
-- `gha_dispatch_all.py plan` always ends with the section "Signature orphans" (green CI + known `*-build.yml` + no target); coverage is by repository AND workflow.
-- Convention for targets (ecosystem prefix -> default signing tool, workflow in the known list); `targets.json` only holds the overrides and always wins.
-  `hygiene --write-candidates` writes the proposed entries to `targets.candidates.json` (never applied by itself, never packaged).
-- Page: clickable header counters "red on main" and "unsigned" (filter the repositories; the second one also focuses the signing queue), the signing queue
-  with its commands and a copy button, repository panel with build / signed / published, signature kind and verification, and the suggested command;
-  a header badge when a minutes budget reaches 80 % (red when exceeded); "yesterday vs today" also compares budget warnings and the lines of the report.
-
-Not done: reading the build attestation / SBOM (network); `HYDRA-UMC-OS` has a build workflow but its signing tool does not support it yet (listed as an orphan).
+Nicht umgesetzt: das Lesen der Build-Attestierung / SBOM (Netz); `HYDRA-UMC-OS` hat einen Build-Workflow, aber sein Signierwerkzeug unterstützt ihn noch nicht (als Waise aufgeführt).
 
 ## [1.0.0]
 
-> Diese Version liegt vorerst nur auf Englisch vor; die Übersetzung folgt in einer späteren Version.
+Erste nummerierte Version. Was das Paket tut:
 
-First numbered version. What the package does:
+- Monitor für GitHub Actions der vier Ökosysteme (lokale Webseite, Lauf-Cache, hängende Builds, build-failed-/build-stuck-Issues).
+- Wächter-Ebene A (nur lesend, keine KI nötig): A1 hängende Builds, A2 rote CI (ein einziges Kriterium: der letzte abgeschlossene Lauf jedes Workflows auf dem Standard-Branch), A3 CodeQL-/Dependabot-/Geheimnis-Warnungen, A4 Dependabot-Pull-Requests, A5 Releases (Kandidaten, grüne Builds ohne Release, ausstehende Signatur), A6 Hygiene, A7 Verbrauch (Minuten und API-Kontingent), A8 Audits und Runden, A9 Fahrplan-Boards.
+- Expliziter Zustand jedes Build-Ziels: built_on_gha -> signed_local (none | dev | release) -> published, mit `last_build_at`, `last_signed_at`, `signature_kind` und den echten Wartestunden; lokale Stapel- und Signierordner-Protokolle senken den Alarm „Signatur ausstehend“, ohne auf GitHub zu warten.
+- Signierwarteschlange des Tages (`a5.sign_queue`): das Dringendste zuerst, mit dem genauen finalize-Befehl jedes Ziels.
+- Budget der Actions-Minuten je Ökosystem (`sentinel.minutes_budget`, standardmäßig leer): Warnung bei 80 % im Bericht und als Ereignis.
+- Ereignisstrom (`events_monitor.jsonl`) und `ci_red.json` (Repository -> rote Workflows + Stunden bis zur Signatur), atomar geschrieben.
+- Stapelwerkzeuge: `gha_dispatch_all.py plan|dispatch|status|finalize|hygiene` mit `--only` oder `--ecosystem`, `plan --json`, `finalize --json`, ein Wiederholungsversuch eines fehlgeschlagenen Dispatch am Ende des Stapels, Ziele als Daten in `targets.json`.
+- `read_report.py`: der Bericht als Klartext vom laufenden Monitor, ohne API-Kontingent zu verbrauchen.
+- `make_release.py`: Qualitätsschranke (Unit-Tests, sauberes Zip, vollständige Beispielkonfiguration, Übereinstimmung von Version und Changelog) und SHA256SUMS.
 
-- Monitor of GitHub Actions for the four ecosystems (local web page, run cache, stuck builds, build-failed/build-stuck issues).
-- Sentinel layer A (read only, no AI needed): A1 stuck builds, A2 red CI (one criterion: last completed run of each workflow on the default
-  branch), A3 CodeQL/Dependabot/secret alerts, A4 Dependabot pull requests, A5 releases (candidates, green builds without a release,
-  pending signature), A6 hygiene, A7 consumption (minutes and API allowance), A8 audits and rounds, A9 roadmap boards.
-- Explicit state of each build target: built_on_gha -> signed_local (none | dev | release) -> published, with `last_build_at`,
-  `last_signed_at`, `signature_kind` and the real hours waiting; local batch and signed-folder records lower the pending-signature
-  alert without waiting for GitHub.
-- Signing queue of the day (`a5.sign_queue`): most urgent first, with the exact finalize command of each target.
-- Budget of Actions minutes per ecosystem (`sentinel.minutes_budget`, empty by default): warning at 80 % in the report and as an event.
-- Event feed (`events_monitor.jsonl`) and `ci_red.json` (repository -> red workflows + hours pending signature), written atomically.
-- Batch tools: `gha_dispatch_all.py plan|dispatch|status|finalize|hygiene` with `--only` or `--ecosystem`, `plan --json`,
-  `finalize --json`, one retry of a failed dispatch at the end of the batch, targets as data in `targets.json`.
-- `read_report.py`: the report as plain text from the running monitor, without spending API quota.
-- `make_release.py`: quality gate (unit tests, clean zip, complete example configuration, version/changelog agreement) and SHA256SUMS.
+In dieser Version nicht umgesetzt: das Prüfen der Release-Signaturen gegen den öffentlichen Schlüssel und der Build-Attestierung durch den Wächter (je Ökosystem andere Signaturformate; die Attestierung braucht das Netz; die Signierwerkzeuge prüfen beides vor dem Veröffentlichen).
 
-Not done in this version: verifying release signatures against the public key and the build attestation from the sentinel
-(different signature formats per ecosystem; the attestation needs the network; the signing tools verify both before publishing).

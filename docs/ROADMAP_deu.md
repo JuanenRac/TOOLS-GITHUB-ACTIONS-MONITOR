@@ -2,6 +2,10 @@
 
 Ideen, die nicht in die aktuelle Version passten, ohne versprochene Reihenfolge. Es sind Richtungen, keine Zusagen; ein Issue oder ein Pull Request ist der beste Weg, eine voranzubringen.
 
+## Erledigt in 1.7.4
+
+Eine Leiste am Fuß der Seite mit dem wichtigsten Hinweis (und einem Fenster mit allen), der Verbindung, dem Kontingent, der letzten Lesung, dem Modus, der Adresse und der Uhr; ein Vollbild-Knopf; Tabellen für Repositories und Verlauf, die nach einer oder mehreren Spalten sortieren, mit den Spalten deiner Wahl; `monitor_cli.py`, die Befehlszeile als Client des laufenden Monitors (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) mit `--json` und stabilen Exit-Codes samt Anleitung in acht Sprachen; die auf Reihenfolge geprüften Änderungsprotokolle, die README des Pakets ohne Verlauf darin und neu gezeichnete Bilder.
+
 ## Erledigt in 1.7.3
 
 Ein zweiter Wächter für Issues und Pull Requests (Collab, standardmäßig aus, nur lesend, mit eigener Uhr), ein Reiter Alarme mit den Alarmen aller Wächter und Filter nach Herkunft und Stufe, lokale Stummschaltungen, die von selbst enden (ein Alarm, eine Regel oder ein Wächter; `alerts.mute_hours`), das Label, das ein Element ignorieren lässt, `GET /api/alerts` und `GET /api/events`, eine Checkliste für die Live-Ansicht, eine Anleitung zum Collab-Wächter in acht Sprachen und neu gezeichnete Bilder.

@@ -26,9 +26,10 @@ class Authorship(unittest.TestCase):
             self.assertIn(LICENSE_ID, line, lang)
             self.assertNotIn("{", line, lang)
 
-    def test_the_page_has_the_footer_and_carries_author_and_licence(self):
+    def test_the_page_carries_author_and_licence_in_the_about_panel_and_has_no_authorship_footer(self):
         page = actions_monitor.render_page()
-        self.assertIn('id="about"', page)
+        self.assertIn('id="about-dlg"', page)           # since 1.7.4 the line of authorship at the foot is gone: the bar there is the status bar and About has it
+        self.assertNotIn('<footer id="about"', page)
         self.assertIn(f'"author": "{AUTHOR}"', page)
         self.assertIn(f'"license": "{LICENSE_ID}"', page)
         self.assertIn('"ui.about"', page)
