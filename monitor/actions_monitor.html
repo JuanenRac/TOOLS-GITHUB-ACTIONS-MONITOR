@@ -461,6 +461,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <div class="sb-right" id="sb-items">
 <span class="sb-item" id="sb-conn"><span class="sb-lamp" id="sb-conn-lamp" aria-hidden="true"></span><span id="sb-conn-t"></span></span>
 <span class="sb-item" id="sb-quota"></span>
+<span class="sb-item" id="sb-runs"></span>
 <span class="sb-item sb-opt" id="sb-refresh"></span>
 <span class="sb-item sb-opt" id="sb-mode"></span>
 <span class="sb-item sb-opt" id="sb-sent"></span>
@@ -682,12 +683,22 @@ function runVisible(r,d){
   if(FILTER.q&&!(r.repo+" "+r.name).toLowerCase().includes(FILTER.q.toLowerCase()))return false;
   return true;
 }
+/* ONE count for the header, the list "Right now", the status bar and the command line: the totals are the figures of the server (every run in progress or waiting), what the list shows is those runs
+   after the filters of the page; when they differ the page says so (tile "3 of 13", line "Showing 3 of 13 (filters active)") instead of showing two numbers that look like one */
+function filtersOn(){return !!(FILTER.eco||FILTER.state||FILTER.q||FILTER.list)}
+function runCounts(d){
+  const F=d.figures||{},run=r=>r.status==="in_progress",vis=d.active.filter(r=>runVisible(r,d));
+  const tr=F.active!=null?F.active:d.active.filter(run).length,tq=F.queued!=null?F.queued:d.active.filter(r=>!run(r)).length,sr=vis.filter(run).length,sq=vis.length-sr;
+  return {tr:tr,tq:tq,sr:sr,sq:sq,shown:vis.length,total:tr+tq,filters:filtersOn(),differs:sr!==tr||sq!==tq};
+}
+const runFig=(shown,total)=>shown!==total?T("ui.k_of",{n:shown,total:total}):total;
+function runTitle(id,titleKey,shown,total){const el=$(id),t=el&&el.closest(".tile");if(t)t.title=T(titleKey)+(shown!==total?" - "+T("ui.k_filtered_title",{n:shown,total:total}):"")}
+function showingLine(c){return c.filters||c.differs?'<div class="mut" id="now-count" role="status">'+esc(T(c.filters?"ui.n_showing_filters":"ui.n_showing",{n:c.shown,total:c.total}))+"</div>":""}
 function render(d){
   DATA=d;const day=Date.now()-864e5;
   const runs=d.runs,last=runs.filter(r=>new Date(r.started)>day),done=last.filter(r=>r.status==="completed");
   const F=d.figures||{},ok=F.ok24!=null?F.ok24:done.filter(r=>r.conclusion==="success").length,bad=F.fail24!=null?F.fail24:done.filter(r=>BAD.includes(r.conclusion)).length;      // the server counts them: both editions show the same figures
-  kSet("k-active",F.active!=null?F.active:d.active.filter(r=>r.status==="in_progress").length);
-  kSet("k-queued",F.queued!=null?F.queued:d.active.filter(r=>r.status!=="in_progress").length);
+  {const c=runCounts(d);kSet("k-active",runFig(c.sr,c.tr));kSet("k-queued",runFig(c.sq,c.tq));runTitle("k-active","ui.k_active_title",c.sr,c.tr);runTitle("k-queued","ui.k_queued_title",c.sq,c.tq)}
   kSet("k-min",F.min24!=null?F.min24:Math.round(last.reduce((a,r)=>a+r.seconds,0)/60));kSet("k-fail",bad);kSet("k-ok",ok);kSet("k-issues",d.issues.length);
   $("stamp").textContent=d.loading?T("ui.loading_repos",{n:d.loading}):T("ui.updated",{time:clock(d.updated),secs:d.took});
   const eta=d.rate?Math.max(0,Math.round((new Date(d.rate.reset).getTime()-Date.now())/60000)):null;
@@ -712,11 +723,11 @@ function alerts(d){
   $("alerts").innerHTML=a.length?a.join(""):`<span style="color:var(--ok)">${esc(T("ui.a_none"))}</span>`;
 }
 function now_(d){
-  const act=d.active.filter(r=>runVisible(r,d));
-  if(!act.length){$("now").innerHTML='<span class="mut">'+esc(T("ui.n_nothing")+(FILTER.eco||FILTER.state||FILTER.q?T("ui.n_with_filters"):"")+".")+'</span>';return}
+  const act=d.active.filter(r=>runVisible(r,d)),cnt=showingLine(runCounts(d));
+  if(!act.length){$("now").innerHTML=cnt+'<span class="mut">'+esc(T("ui.n_nothing")+(filtersOn()?T("ui.n_with_filters"):"")+".")+'</span>';return}
   act.sort((a,b)=>(d.ecosystems[a.repo]||"").localeCompare(d.ecosystems[b.repo]||""));
   let lastEco="";
-  $("now").innerHTML=act.map(r=>{
+  $("now").innerHTML=cnt+act.map(r=>{
     const eco=d.ecosystems[r.repo]||"other",head=eco!==lastEco?`<h3 style="margin:10px 0 6px;font-size:13px;color:var(--mut);text-transform:uppercase">${esc(eco)}</h3>`:"";lastEco=eco;
     const jobs=(r.jobs||[]).map(j=>{const pct=j.steps_total?Math.round(100*j.steps_done/j.steps_total):(j.status==="completed"?100:0);
       const cls=j.conclusion==="failure"?"fail":(j.status==="completed"?"done":"");
@@ -1475,6 +1486,7 @@ function renderBarFacts(){
   if(d){
     const eta=d.rate?Math.max(0,Math.round((new Date(d.rate.reset).getTime()-Date.now())/60000)):null;
     set("sb-quota",d.rate?T("ui.sb_quota",{remaining:d.rate.remaining,limit:d.rate.limit,time:clock(d.rate.reset,{hour:"2-digit",minute:"2-digit"})}):"",d.rate?T("ui.quota",{remaining:d.rate.remaining,limit:d.rate.limit,time:clock(d.rate.reset,{hour:"2-digit",minute:"2-digit"}),eta:eta}):"");
+    {const F=d.figures||{};set("sb-runs",F.active!=null||F.queued!=null?T("ui.sb_runs",{active:F.active||0,queued:F.queued||0}):"",T("ui.sb_runs_t"))}
     set("sb-refresh",T("ui.sb_updated",{time:clock(d.updated),secs:d.took}),T("ui.sb_updated_t",{n:d.refresh_seconds}));
     set("sb-repos",T("ui.sb_repos",{n:d.repos.length,hot:d.hot}),T("ui.sb_repos_t"));
   }

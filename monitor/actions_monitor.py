@@ -564,7 +564,11 @@ def build(config, repos, started, refreshed, loading, progress_text):
     runs.sort(key=lambda run: run["started"] or "", reverse=True)
     # Runs with event "dynamic" are the internal jobs of Dependabot ("Configured Graph Update"): GitHub leaves them "queued" for ever although the work is done
     # (the owner cannot cancel them and they finish by themselves), so they are not builds that can be stuck.
-    active = [run for run in runs if run["status"] in ("in_progress", "queued", "waiting", "requested", "pending") and run.get("event") != "dynamic"]
+    active, seen_active = [], set()
+    for run in runs:        # one entry per run (a repository read twice must not count its runs twice): the header figures and the list "Right now" are made from this same list
+        if run["status"] in ("in_progress", "queued", "waiting", "requested", "pending") and run.get("event") != "dynamic" and (run["repo"], run.get("id")) not in seen_active:
+            seen_active.add((run["repo"], run.get("id")))
+            active.append(run)
     for run in active:
         run["jobs"] = run_jobs(run["repo"], run["id"]) if (run["status"] == "in_progress" and not loading) else []
         run["stuck"] = run["seconds"] > config["stuck_minutes"] * 60
@@ -1514,6 +1518,7 @@ def statusbar_payload(port, client_local=True):
     """GET /api/statusbar: the facts of the bar at the foot of the page that the data of GitHub does not carry. In the network mode the address of this computer on the local network
     (`lan_address`) is only given to a client on this same computer: a client of the network already knows the address it used and the map of the network is not handed out."""
     registry = SENTINEL["registry"]
+    figures = (STATE.get("data") or {}).get("figures") or {}
     sentinels = []
     if registry is not None:
         for name in registry.names():
@@ -1526,6 +1531,7 @@ def statusbar_payload(port, client_local=True):
     state = localguard.public_state()
     answer = {"schema": 1, "version": TOOL_VERSION, "edition": "lite" if LITE["on"] else "complete", "port": port, "bind": state.get("host") or "127.0.0.1", "network": bool(state.get("network")),
               "lan_address": lan_address(), "account": CHILD["account"] or None, "uptime_seconds": int(time.time() - STARTED), "demo": bool(DEMO["on"]),
+              "runs": {"active": figures.get("active"), "queued": figures.get("queued")},      # the same two figures as the header tiles and `monitor_cli status` (null until the first read)
               "sentinels": sentinels, "workers": ((LIVE_CONFIG or {}).get("sentinel") or {}).get("workers") if not LITE["on"] else None}
     if answer["network"] and not client_local:
         del answer["lan_address"]
