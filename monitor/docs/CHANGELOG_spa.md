@@ -27,11 +27,14 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 - **Una pestaña Cuota en Ajustes** (en los ocho idiomas, también en la edición lite): los modos y los valores de Bajo (`modes.*`), el ahorro (`network.etag`, un alias que funciona junto con `cache.etag.enabled`), el panel central, la GitHub App y una segunda cuenta para las lecturas en un solo sitio, con botones que muestran la cuota de cada fuente con su hora de renovación, prueban la App y la segunda cuenta, listan los permisos que le faltan a la App y aplican los valores recomendados o los defectos.
 - **Una segunda cuenta de solo lectura para las lecturas** (`extra_reader.enabled`, `extra_reader.file`): el ajuste guarda solo la RUTA de un fichero con un token de acceso fino, que el monitor lee en el momento de usarlo, guarda en memoria y nunca almacena, imprime ni registra; las lecturas se reparten entre tu sesión, la App y la segunda cuenta según las llamadas que le quedan a cada una, una fuente rechazada se deja fuera cinco minutos y la lectura se repite con la siguiente, y las escrituras y acciones nunca la usan.
 - **Contabilidad de las lecturas**: el estado, el resumen y los datos dicen cuántas llamadas condicionales se hicieron y cuántas respondieron 304 (sin gastar cuota) y la cuota de cada fuente.
+- **Quién gasta la cuota**: el monitor compara, dentro de cada ventana horaria, lo que gastó toda la cuenta con sus propias llamadas y dice en la pestaña Cuota, el estado y el resumen cuánto gastan otras herramientas, con un aviso cuando gastan la mayor parte (GitHub no dice cuál).
+- **El flujo en directo lleva también las demás señales**: la cuota agotada, la conexión que se cae, los datos que se quedan viejos, un panel central atrasado y los avisos de salud pasan a ser eventos del feed (y del flujo y del hook) cuando aparecen, cambian o se resuelven, no solo los workflows rojos y los paneles de la pestaña Centinela.
 
 ### Cambiado
 
 - **La barra inferior se ha rediseñado**: cada elemento es una pastilla con su borde, la conexión y la cuota toman el color de su estado, el reloj es un recuadro con dígitos grandes, en negrita y tabulares, la fecha encima y la zona en letra pequeña, y la barra conserva su orden en ventanas estrechas.
 - **Todo recuadro deja que su texto se parta en vez de salirse** (recuadros, pastillas, etiquetas, celdas, títulos, botones de las ventanas): la hora de la última lectura lleva su zona aparte en letra pequeña, las filas de alertas pasan a dos columnas en ventanas estrechas y las rejillas de recuadros pueden encogerse por debajo de su contenido.
+- **Los recuadros de una fila tienen la misma altura**, sea lo que sea lo que necesite su texto pequeño.
 
 ### Corregido
 

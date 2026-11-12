@@ -82,6 +82,11 @@ def inventory(data, panels=None, health=None, now=None):
                            [_row("", "below the floor: the loop slows down", "", None, "keep other tools from spending the allowance")] if low else [], transient=bool(low)))
     etag = data.get("etag") or {}
     sources = data.get("rate_sources") or {}
+    trend = data.get("quota_trend") or {}
+    if trend:
+        out.append(_signal("quota.trend", "now", "watch" if trend.get("others_warn") else "info",
+                           f"over {trend.get('minutes')} min the account spent {trend.get('all_per_hour')} calls an hour, this monitor {trend.get('own_per_hour')} and other tools about {trend.get('others_per_hour')}" +
+                           ("; other tools are spending most of the allowance" if trend.get("others_warn") else ""), transient=bool(trend.get("others_warn"))))
     if etag.get("calls") is not None or len(sources) > 1:
         rows = [_row(name, f"{info.get('remaining')}/{info.get('limit')} calls left, renews {info.get('reset')}", "", None, "") for name, info in sources.items()]
         out.append(_signal("quota.accounting", "now", "info", f"reads: {etag.get('calls', 0)} conditional calls, {etag.get('saved', 0)} answered 304 (no allowance spent)" + (f"; {len(sources)} sources read the repositories" if len(sources) > 1 else ""), rows))
@@ -116,6 +121,20 @@ def state(data, panels, edition, health=None, now=None, version=""):
             "act": sum(max(1, len(s["rows"])) for s in signals if s["level"] == "act" and not s["transient"]),
             "watch": sum(1 for s in signals if s["level"] == "watch"), "panels_not_in_this_edition": missing,
             "note": "the lite edition has no sentinel: the panels listed are not missing data, they do not exist here" if missing else ""}
+
+
+EVENT_SIGNALS = ("quota", "quota.trend", "connection", "repos.errors", "health.refresh", "health.central", "health.doctor", "health.mode")
+
+
+def extra_alert_rows(doc):
+    """The signals that are not a red workflow or a sentinel panel (those already travel as alerts) and that say "watch" or "act", as rows for the feed: the stream, the hook and the brief then carry an event
+    when the allowance is used up, the connection drops, the data go stale or the central panel is behind, and another when it is solved."""
+    out = []
+    for sig in doc["signals"]:
+        if sig["id"] in EVENT_SIGNALS and sig["level"] in ("act", "watch"):
+            out.append({"repo": "monitor", "workflow": sig["id"], "conclusion": "panel", "streak": 1, "since": None, "url": "", "panel": sig["panel"], "level": "bad" if sig["level"] == "act" else "warn",
+                        "detail": sig["summary"], "title": sig["id"]})
+    return out
 
 
 def brief_sections(doc):

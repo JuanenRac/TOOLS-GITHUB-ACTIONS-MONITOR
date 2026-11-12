@@ -27,11 +27,14 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 - **Um separador Quota nas Definições** (nos oito idiomas, também na edição lite): os modos e os valores da poupança (`modes.*`), a poupança (`network.etag`, um alias que funciona em conjunto com `cache.etag.enabled`), o painel central, a GitHub App e uma segunda conta para as leituras num só sítio, com botões que mostram a quota de cada fonte com a hora de renovação, testam a App e a segunda conta, listam as permissões que faltam à App e aplicam os valores recomendados ou os predefinidos.
 - **Uma segunda conta só de leitura para as leituras** (`extra_reader.enabled`, `extra_reader.file`): a definição guarda só o CAMINHO de um ficheiro com um token de acesso fino, que o monitor lê no momento de usar, guarda em memória e nunca armazena, imprime nem regista; as leituras repartem-se entre a sua sessão, a App e a segunda conta conforme as chamadas que restam a cada uma, uma fonte recusada fica de fora cinco minutos e a leitura repete-se com a seguinte, e as escritas e ações nunca a usam.
 - **Contabilidade das leituras**: o estado, o resumo e os dados dizem quantas chamadas condicionais foram feitas e quantas responderam 304 (sem gastar quota) e a quota de cada fonte.
+- **Quem gasta a quota**: o monitor compara, dentro de cada janela horária, o que gastou toda a conta com as suas próprias chamadas e diz no separador Quota, no estado e no resumo quanto gastam outras ferramentas, com um aviso quando gastam a maior parte (o GitHub não diz qual).
+- **O fluxo em direto leva também os outros sinais**: a quota esgotada, a ligação que cai, os dados que ficam velhos, um painel central atrasado e os avisos de saúde passam a ser eventos do feed (e do fluxo e do hook) quando aparecem, mudam ou se resolvem, não só os workflows vermelhos e os painéis do separador Sentinela.
 
 ### Alterado
 
 - **A barra inferior foi redesenhada**: cada elemento é uma pastilha com a sua borda, a ligação e a quota tomam a cor do seu estado, o relógio é uma caixa com dígitos grandes, a negrito e tabulares, a data por cima e o fuso em letra pequena, e a barra mantém a sua ordem em janelas estreitas.
 - **Cada caixa deixa o texto quebrar em vez de sair** (quadros, pastilhas, etiquetas, células, títulos, botões das janelas): a hora da última leitura traz o fuso à parte em letra pequena, as linhas de alertas passam a duas colunas em janelas estreitas e as grelhas de quadros podem encolher abaixo do seu conteúdo.
+- **Os quadros de uma linha têm a mesma altura**, seja o que for que o seu texto pequeno precise.
 
 ### Corrigido
 

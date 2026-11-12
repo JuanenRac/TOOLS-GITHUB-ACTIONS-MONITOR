@@ -27,11 +27,14 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 - **Un onglet Quota dans les Réglages** (dans les huit langues, aussi dans l'édition lite) : les modes et les valeurs du mode économe (`modes.*`), l'économie (`network.etag`, un alias qui fonctionne avec `cache.etag.enabled`), le panneau central, la GitHub App et un second compte pour les lectures au même endroit, avec des boutons qui montrent le quota de chaque source et son heure de renouvellement, testent l'App et le second compte, listent les permissions qui manquent à l'App et appliquent les valeurs recommandées ou celles par défaut.
 - **Un second compte en lecture seule pour les lectures** (`extra_reader.enabled`, `extra_reader.file`) : le réglage ne contient que le CHEMIN d'un fichier avec un jeton à granularité fine, que le moniteur lit au moment de l'utiliser, garde en mémoire et ne stocke, imprime ni journalise jamais ; les lectures sont réparties entre votre connexion, l'App et le second compte selon les appels restants de chacun, une source refusée est laissée de côté cinq minutes et la lecture est refaite avec la suivante, et les écritures et actions ne l'utilisent jamais.
 - **Comptabilité des lectures** : l'état, le résumé et les données disent combien d'appels conditionnels ont été faits et combien ont répondu 304 (sans dépenser de quota) et le quota de chaque source.
+- **Qui dépense le quota** : le moniteur compare, dans chaque fenêtre horaire, ce que tout le compte a dépensé avec ses propres appels et dit dans l'onglet Quota, l'état et le résumé combien dépensent les autres outils, avec un avertissement quand ils en dépensent l'essentiel (GitHub ne dit pas lequel).
+- **Le flux en direct porte aussi les autres signaux** : le quota épuisé, la connexion qui tombe, les données qui vieillissent, un panneau central en retard et les avertissements de santé deviennent des événements du flux (et du hook) quand ils apparaissent, changent ou se résolvent, pas seulement les workflows rouges et les panneaux de l'onglet Sentinelle.
 
 ### Modifié
 
 - **La barre du bas est redessinée** : chaque élément est une pastille avec sa bordure, la connexion et le quota prennent la couleur de leur état, l'horloge est un cadre avec de grands chiffres gras tabulaires, la date au-dessus et le fuseau en petits caractères, et la barre garde son ordre dans les fenêtres étroites.
 - **Chaque case laisse son texte se couper au lieu de déborder** (tuiles, pastilles, badges, cellules, titres, boutons des fenêtres) : l'heure de la dernière lecture porte son fuseau à part en petits caractères, les lignes d'alertes passent sur deux colonnes dans les fenêtres étroites et les grilles de tuiles peuvent rétrécir sous leur contenu.
+- **Les tuiles d'une ligne ont la même hauteur**, quoi que demande leur petit texte.
 
 ### Corrigé
 

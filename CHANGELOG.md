@@ -28,11 +28,14 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 - **A Quota tab in Settings** (in the eight languages, also in the lite edition): the modes and the values of Low (`modes.*`), the saving (`network.etag`, an alias that works together with `cache.etag.enabled`), the central panel, the GitHub App and a second account for the reads in one place, with buttons that show the allowance of every source with its renewal time, test the App and the second account, list the permissions the App lacks, and apply the recommended values or the defaults.
 - **A second read-only account for the reads** (`extra_reader.enabled`, `extra_reader.file`): the setting holds only the PATH of a file with a fine-grained token, which the monitor reads at the moment of use, keeps in memory and never stores, prints or logs; the reads are spread over your login, the App and the second account by the calls each has left, a refused source is left out for five minutes and the read is made again with the next one, and writes and actions never use it.
 - **Accounting of the reads**: the state, the brief and the data say how many conditional calls were made and how many answered 304 (no allowance spent) and the allowance of each source.
+- **Who spends the allowance**: the monitor compares, inside each hourly window, what the whole account spent with its own calls and says in the Quota tab, the state and the brief how much other tools spend, with a warning when they spend most of it (GitHub does not say which tool).
+- **The stream carries the other signals too**: the allowance used up, the connection that drops, data that go stale, a central panel that is behind and the health warnings become events of the feed (and of the stream and the hook) when they appear, change or are solved, not only the red workflows and the panels of the Sentinel tab.
 
 ### Changed
 
 - **The bar at the foot is redesigned**: every item is a chip with its own border, the connection and the quota take the colour of their state, the clock is a framed box with large bold tabular digits, the date above and the zone in small letters, and the bar keeps its order in narrow windows.
 - **Every box lets its text break instead of leaving it** (tiles, chips, badges, cells, headings, buttons of the windows): the time of the last reading keeps its zone apart in small letters, the alert rows are laid out in two columns in narrow windows and the grids of the tiles can shrink below their content.
+- **The tiles of a row have the same height**, whatever their small text needs.
 
 ### Fixed
 

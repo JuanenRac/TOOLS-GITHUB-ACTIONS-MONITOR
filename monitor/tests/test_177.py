@@ -41,6 +41,16 @@ class OneRuleForOpenFailures(unittest.TestCase):
         self.assertEqual(len(failing), len(red))      # "red on main" and the open failures are the same number
         self.assertEqual(sorted((r["repo"], r["workflow"]) for r in red), sorted((r["repo"], r["name"]) for r in failing))
 
+    def test_the_two_failures_of_the_real_screenshot_are_classified_by_the_default_branch(self):
+        """HYDRA-UMC-SDK "Sync check" and ARMOR-STUDIO "A.R.M.O.R. CI baseline" showed as open alerts while the tile said 0 red on main: they count when their last run is on the default branch and not otherwise."""
+        on_work_branch = [run(1, "HYDRA-UMC-SDK", "Sync check", "failure", branch="work-branch"), run(2, "ARMOR-STUDIO", "A.R.M.O.R. CI baseline", "failure", branch="work-branch")]
+        self.assertEqual(am.unresolved_failures(on_work_branch, {"HYDRA-UMC-SDK": "main", "ARMOR-STUDIO": "main"}), [])
+        on_main = [run(3, "HYDRA-UMC-SDK", "Sync check", "failure"), run(4, "ARMOR-STUDIO", "A.R.M.O.R. CI baseline", "failure")]
+        failing = am.unresolved_failures(on_main, {"HYDRA-UMC-SDK": "main", "ARMOR-STUDIO": "main"})
+        self.assertEqual(sorted(r["repo"] for r in failing), ["ARMOR-STUDIO", "HYDRA-UMC-SDK"])
+        red = redrule.red_workflows({r: [x for x in on_main if x["repo"] == r] for r in ("HYDRA-UMC-SDK", "ARMOR-STUDIO")}, {"HYDRA-UMC-SDK": "main", "ARMOR-STUDIO": "main"})[0]
+        self.assertEqual(len(red), len(failing), "the tile of red on main and the list of alerts are one number")
+
     def test_a_default_branch_that_is_not_main_is_respected(self):
         runs = [run(1, "a", "ci", "failure", branch="trunk")]
         self.assertEqual(len(am.unresolved_failures(runs, {"a": "trunk"})), 1)

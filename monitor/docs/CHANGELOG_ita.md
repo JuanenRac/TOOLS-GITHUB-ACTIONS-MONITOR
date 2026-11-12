@@ -27,11 +27,14 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 - **Una scheda Quota nelle Impostazioni** (nelle otto lingue, anche nell'edizione lite): le modalità e i valori della modalità risparmio (`modes.*`), il risparmio (`network.etag`, un alias che funziona insieme a `cache.etag.enabled`), il pannello centrale, la GitHub App e un secondo account per le letture in un solo posto, con pulsanti che mostrano la quota di ogni fonte con l'ora di rinnovo, provano la App e il secondo account, elencano i permessi che mancano alla App e applicano i valori consigliati o i predefiniti.
 - **Un secondo account di sola lettura per le letture** (`extra_reader.enabled`, `extra_reader.file`): l'impostazione contiene solo il PERCORSO di un file con un token a grana fine, che il monitor legge al momento dell'uso, tiene in memoria e non memorizza, stampa né registra mai; le letture sono ripartite tra il tuo accesso, la App e il secondo account in base alle chiamate rimaste a ciascuno, una fonte rifiutata viene lasciata fuori cinque minuti e la lettura viene ripetuta con la successiva, e le scritture e le azioni non lo usano mai.
 - **Contabilità delle letture**: lo stato, il riepilogo e i dati dicono quante chiamate condizionali sono state fatte e quante hanno risposto 304 (senza spendere quota) e la quota di ogni fonte.
+- **Chi spende la quota**: il monitor confronta, in ogni finestra oraria, ciò che ha speso tutto l'account con le proprie chiamate e dice nella scheda Quota, nello stato e nel riepilogo quanto spendono altri strumenti, con un avviso quando ne spendono la maggior parte (GitHub non dice quale).
+- **Il flusso porta anche gli altri segnali**: la quota esaurita, la connessione che cade, i dati che invecchiano, un pannello centrale in ritardo e gli avvisi di salute diventano eventi del feed (e del flusso e dell'hook) quando compaiono, cambiano o si risolvono, non solo i workflow rossi e i pannelli della scheda Sentinella.
 
 ### Modificato
 
 - **La barra in basso è ridisegnata**: ogni elemento è una pastiglia con il suo bordo, la connessione e la quota prendono il colore del loro stato, l'orologio è un riquadro con grandi cifre in grassetto tabulari, la data sopra e il fuso in piccolo, e la barra mantiene il suo ordine nelle finestre strette.
 - **Ogni riquadro lascia spezzare il testo invece di farlo uscire** (riquadri, pastiglie, etichette, celle, titoli, pulsanti delle finestre): l'ora dell'ultima lettura porta il fuso a parte in piccolo, le righe degli avvisi passano su due colonne nelle finestre strette e le griglie dei riquadri possono restringersi sotto il loro contenuto.
+- **I riquadri di una riga hanno la stessa altezza**, qualunque cosa richieda il loro testo piccolo.
 
 ### Corretto
 

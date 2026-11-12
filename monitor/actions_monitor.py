@@ -230,7 +230,7 @@ def pool_status():
     import github_app
     import readpool
     config = LIVE_CONFIG or toolconfig.raw_config()
-    out = {"sources": [], "recommended": {"modes.auto_low": True, "network.etag": True}}
+    out = {"sources": [], "recommended": {"modes.auto_low": True, "network.etag": True}, "trend": __import__("quotawatch").trend()}
     try:
         core = gh("api", "rate_limit", retries=0, as_user=True)["resources"]["core"]
         out["sources"].append({"name": "user", "ok": True, "remaining": core["remaining"], "limit": core["limit"], "reset": core["reset"]})
@@ -274,6 +274,9 @@ def rate_probes(config):
     return out
 
 
+CALLS = {"n": 0}
+
+
 def read_source(args, source=None):
     """(name, {"env": ...}) of the source that does a read (readpool.py): the user, the GitHub App or the second read-only account, the one with the most calls left; `source` forces one. Writes and actions
     always get the user."""
@@ -297,6 +300,7 @@ def gh(*args, timeout=40, retries=2, as_user=False, source=None):
     while attempt + 1 < attempts:
         attempt += 1
         try:
+            CALLS["n"] += 1      # the calls of this monitor: the trend of the consumption tells them from the ones other tools make (quotawatch.py)
             result = subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8", timeout=timeout, **(via or secretstore.gh_kwargs()))
         except subprocess.TimeoutExpired:
             last = "timeout"
@@ -766,6 +770,12 @@ def build(config, repos, started, refreshed, loading, progress_text):
     except Exception:
         rate, rate_sources = None, {}
     rate_user = (rate_sources.get("user") if rate is not None else None)
+    try:
+        import quotawatch
+        if rate_user:      # the allowance of the user, the one the other tools spend too
+            quotawatch.note(rate_user["remaining"], rate_user["limit"], rate_user["reset"], CALLS["n"], time.time())
+    except Exception as error:   # noqa: BLE001
+        degraded.note("loop.extra", error)
     hot = sum(1 for repo in repos if is_hot(repo, config, time.time()))
     red, approx = None, False
     if LITE["on"]:      # the lite edition has no sentinel: it counts the red workflows with the same small rule, guessing the default branch
@@ -780,7 +790,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
         "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "updated_local": tzdisplay.stamp(time.time()), "took": round(time.time() - started, 1),
         "repos": repos, "ecosystems": {repo: ecosystem_of(repo) for repo in repos},
         "runs": runs[:600], "runs_total": len(runs), "active": active, "issues": ISSUE_CACHE["items"], "failing": unresolved_failures(runs, {r: m.get("branch") for r, m in repo_meta(repos).items() if m.get("branch")}),
-        "errors": errors, "rate": rate, "rate_user": rate_user, "rate_sources": rate_sources, "stuck_minutes": config["stuck_minutes"],
+        "errors": errors, "rate": rate, "rate_user": rate_user, "rate_sources": rate_sources, "quota_trend": __import__("quotawatch").trend(), "stuck_minutes": config["stuck_minutes"],
         "mode": config["mode"], "refreshed": refreshed, "hot": hot, "loading": progress_text if loading else "",
         "quota_block": rate_block_state(rate), "min_rate": config["min_rate_remaining"], "paused_quota": bool(rate and rate["remaining"] < config["min_rate_remaining"]),
         "refresh_seconds": config["refresh_seconds"], "hot_only": hot_only_state(),
@@ -1067,7 +1077,14 @@ def feed_alerts(config, data, diagnose=True):
         except Exception as error:   # noqa: BLE001 - the panels never stop the feed of the red workflows
             degraded.note("ai_alerts.panels", error)
             panels = None
-        result = ai_alerts.update(config, red_rows(data), runner=ai_alerts.gh_runner if diagnose else None, owner=toolconfig.github_owner(config), panels=panels, sections=ai_sections(data, panels))
+        extra, sections = None, ""
+        try:
+            import signals
+            doc = ai_state(data=data, panels=panels)
+            extra, sections = signals.extra_alert_rows(doc), signals.brief_sections(doc)
+        except Exception as error:   # noqa: BLE001 - the signals never stop the feed of the red workflows
+            degraded.note("ai_alerts.panels", error)
+        result = ai_alerts.update(config, red_rows(data), runner=ai_alerts.gh_runner if diagnose else None, owner=toolconfig.github_owner(config), panels=panels, sections=sections, extra_rows=extra)
     for alert in result["opened"]:
         if alert["class"] == "real":
             try:

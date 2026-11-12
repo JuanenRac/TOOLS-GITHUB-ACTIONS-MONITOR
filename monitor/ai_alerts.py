@@ -342,7 +342,7 @@ class Hook:
 HOOK = Hook()
 
 
-def update(config, red_rows, now=None, texts=None, opener=None, runner=None, owner="", panels=None, sections=""):
+def update(config, red_rows, now=None, texts=None, opener=None, runner=None, owner="", panels=None, sections="", extra_rows=None):
     """Brings the feed up to date with the red workflows of this cycle. Returns {"opened": [...], "resolved": [...], "alerts": [...]}. Nothing is written when the feed is off.
     With a `runner` (read only calls to `gh`) and `ai_alerts.diagnose.enabled`, a new or changed red run also gets its diagnosis; without a runner the diagnosis already kept is reused."""
     cfg = settings(config)
@@ -354,6 +354,8 @@ def update(config, red_rows, now=None, texts=None, opener=None, runner=None, own
     state = _read(folder / STATE, {})
     seen, opened, resolved = set(), [], []
     budget = cfg["diagnose"]["max_per_cycle"] if runner is not None and cfg["diagnose"]["enabled"] else 0
+    if extra_rows:      # the signals of the monitor that are not a red workflow or a panel (the allowance, the connection, the health): an event when they appear, change or are solved
+        red_rows = list(red_rows) + list(extra_rows)
     if panels:
         import sentinel_panels
         red_rows = list(red_rows) + sentinel_panels.alert_rows(panels)      # what the panels of the Sentinel tab ask for travels the same way as a red workflow

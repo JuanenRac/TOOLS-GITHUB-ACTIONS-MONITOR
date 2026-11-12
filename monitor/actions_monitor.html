@@ -345,12 +345,12 @@ header{padding:10px 18px 8px}
 .hgrid{display:grid;grid-template-columns:minmax(0,1fr) var(--corner-w,236px);gap:8px 14px;align-items:start}
 .hmain{display:flex;flex-direction:column;gap:8px;min-width:0;container-type:inline-size}
 .hmain .h-top{padding:0 2px}
-header .tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;flex:none;grid-auto-flow:row dense}
+header .tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;flex:none;grid-auto-flow:row dense;grid-auto-rows:1fr}      /* every tile of a row has the same height, whatever its small text needs */
 @container (min-width:500px){header .tiles{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @container (min-width:1080px){header .tiles{grid-template-columns:repeat(8,minmax(0,1fr))}}
 header .tile{min-width:0;padding:7px 11px}
 header .tile b{font-size:18px}
-header .tile small{text-wrap:balance}
+header .tile small{text-wrap:balance;line-height:1.2;overflow-wrap:anywhere}header .tile{align-items:center;align-content:center}
 header .tile.wide{min-width:0;grid-column:span 2}
 .hcorner{position:sticky;top:0;display:flex;flex-direction:column;align-items:flex-end;gap:8px;min-width:0}
 .hcorner .tools{display:flex;flex-wrap:nowrap;gap:8px;align-items:center;justify-content:flex-end}
@@ -1290,7 +1290,8 @@ function quotaBox(){
   const bar=document.createElement("div");bar.className="ifrow";const out=document.createElement("div");out.id="qt-out";out.className="mut";out.setAttribute("role","status");out.style.padding="6px 12px";
   const run=async(what)=>{out.textContent="…";try{const r=await fetch("/api/quota-pool/status",{cache:"no-store"});const d=await r.json();
     const rows=(d.sources||[]).filter(s=>what==="all"||(what==="app"&&s.name==="app")||(what==="extra"&&s.name==="extra")||(what==="perms"&&s.name==="app"));
-    out.innerHTML=rows.map(s=>`<div><b>${esc(s.name)}</b> · ${esc(T(s.ok?"ui.qt_ok":"ui.qt_fail"))}${s.app?" · "+esc(s.app):""}${s.remaining!=null?" · "+esc(s.remaining+"/"+s.limit+" "+T("ui.qt_left")):""}${s.reset?" · "+esc(clock(new Date(s.reset*1000).toISOString(),{hour:"2-digit",minute:"2-digit"})):""}${(s.missing&&s.missing.length&&(what==="perms"||what==="app"||what==="all"))?" · "+esc(T("ui.qt_missing"))+": "+esc(s.missing.join(", ")):""}${s.error?" · "+esc(s.error):""}${s.warning?" · "+esc(s.warning):""}</div>`).join("")||esc(T("ui.qt_fail"))}catch(e){out.textContent=String(e)}};
+    const tr=d.trend||{},trl=(what==="all"&&tr.minutes)?`<div>${esc(T("ui.qt_trend",{m:tr.minutes,a:tr.all_per_hour,o:tr.own_per_hour,x:tr.others_per_hour}))}${tr.others_warn?" · <b>"+esc(T("ui.qt_others"))+"</b>":""}</div>`:"";
+    out.innerHTML=trl+rows.map(s=>`<div><b>${esc(s.name)}</b> · ${esc(T(s.ok?"ui.qt_ok":"ui.qt_fail"))}${s.app?" · "+esc(s.app):""}${s.remaining!=null?" · "+esc(s.remaining+"/"+s.limit+" "+T("ui.qt_left")):""}${s.reset?" · "+esc(clock(new Date(s.reset*1000).toISOString(),{hour:"2-digit",minute:"2-digit"})):""}${(s.missing&&s.missing.length&&(what==="perms"||what==="app"||what==="all"))?" · "+esc(T("ui.qt_missing"))+": "+esc(s.missing.join(", ")):""}${s.error?" · "+esc(s.error):""}${s.warning?" · "+esc(s.warning):""}</div>`).join("")||esc(T("ui.qt_fail"))}catch(e){out.textContent=String(e)}};
   [["ui.qt_state","all"],["ui.qt_test_app","app"],["ui.qt_test_extra","extra"],["ui.qt_perms","perms"]].forEach(([k,w])=>{const b=document.createElement("button");b.type="button";b.textContent=T(k);b.addEventListener("click",()=>run(w));bar.appendChild(b)});
   const apply=async(values)=>{try{const r=await fetch("/api/settings?"+qlang(),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({changes:values})});const j=await r.json();cfgMsg(j.ok?"":"err",j.ok?T("ui.cfg_saved",{n:Object.keys(values).length}):JSON.stringify(j.errors||{}));cfgLoad()}catch(e){cfgMsg("err",String(e))}};
   [["ui.qt_recommended",{"modes.auto_low":true,"network.etag":true}],["ui.qt_defaults",Object.assign({"central.source":"off","extra_reader.enabled":false,"github_app.enabled":false},QT_DEFAULTS)]].forEach(([k,v])=>{const b=document.createElement("button");b.type="button";b.textContent=T(k);b.addEventListener("click",()=>apply(v));bar.appendChild(b)});

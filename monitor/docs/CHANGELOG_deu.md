@@ -27,11 +27,14 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 - **Ein Tab Kontingent in den Einstellungen** (in den acht Sprachen, auch in der Lite-Edition): die Modi und die Werte des Sparmodus (`modes.*`), das Sparen (`network.etag`, ein Alias, der zusammen mit `cache.etag.enabled` wirkt), das zentrale Panel, die GitHub-App und ein zweites Konto für das Lesen an einem Ort, mit Schaltflächen, die das Kontingent jeder Quelle mit ihrer Erneuerungszeit zeigen, die App und das zweite Konto testen, fehlende Berechtigungen der App auflisten und die empfohlenen Werte oder die Standardwerte anwenden.
 - **Ein zweites Nur-Lese-Konto für das Lesen** (`extra_reader.enabled`, `extra_reader.file`): Die Einstellung enthält nur den PFAD einer Datei mit einem feingranularen Token, das der Monitor im Moment der Nutzung liest, im Speicher hält und nie speichert, druckt oder protokolliert; die Lesezugriffe verteilen sich nach den verbleibenden Aufrufen auf Ihre Anmeldung, die App und das zweite Konto, eine abgelehnte Quelle wird fünf Minuten ausgelassen und der Lesezugriff mit der nächsten wiederholt, und Schreibzugriffe und Aktionen nutzen es nie.
 - **Buchführung der Lesezugriffe**: Zustand, Zusammenfassung und Daten nennen, wie viele bedingte Aufrufe gemacht wurden und wie viele mit 304 antworteten (kein Kontingent verbraucht), sowie das Kontingent jeder Quelle.
+- **Wer das Kontingent verbraucht**: Der Monitor vergleicht in jedem Stundenfenster, was das ganze Konto verbraucht hat, mit seinen eigenen Aufrufen und nennt im Tab Kontingent, im Zustand und in der Zusammenfassung, wie viel andere Werkzeuge verbrauchen, mit einer Warnung, wenn sie den Großteil verbrauchen (GitHub sagt nicht, welches).
+- **Der Stream trägt auch die übrigen Signale**: Das erschöpfte Kontingent, die abbrechende Verbindung, veraltete Daten, ein zurückliegendes zentrales Panel und die Gesundheitswarnungen werden zu Ereignissen des Feeds (und des Streams und des Hooks), wenn sie auftreten, sich ändern oder gelöst werden, nicht nur die roten Workflows und die Panels des Tabs Sentinel.
 
 ### Geändert
 
 - **Die untere Leiste wurde neu gestaltet**: Jedes Element ist ein Chip mit eigenem Rand, Verbindung und Kontingent übernehmen die Farbe ihres Zustands, die Uhr ist ein Rahmen mit großen, fetten, tabellarischen Ziffern, darüber das Datum und die Zone in kleiner Schrift, und die Leiste behält ihre Reihenfolge in schmalen Fenstern.
 - **Jedes Feld lässt seinen Text umbrechen, statt ihn überstehen zu lassen** (Kacheln, Chips, Badges, Zellen, Überschriften, Fensterschaltflächen): Die Zeit der letzten Abfrage trägt ihre Zone getrennt in kleiner Schrift, die Warnungszeilen werden in schmalen Fenstern zweispaltig und die Kachelraster können unter ihren Inhalt schrumpfen.
+- **Die Kacheln einer Zeile sind gleich hoch**, was auch immer ihr kleiner Text braucht.
 
 ### Behoben
 
