@@ -916,6 +916,7 @@
  "rd.c.version": "バージョン",
  "rd.c.where": "検出場所",
  "rd.n.build": "Actionsでビルドする",
+ "rd.n.build_sign": "Actions でビルドして署名する",
  "rd.n.bump": "バージョンを上げる",
  "rd.n.cut": "リリースを切って公開する",
  "rd.n.fix_ci": "失敗しているCIを直す",

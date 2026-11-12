@@ -61,7 +61,8 @@ class Rules(unittest.TestCase):
         self.assertEqual((row["bumped"], row["build"], row["next"]), (True, "no_build", "cut"))
         state = lambda st, **kw: [{"repo": "ARMOR-A", "state": st, **kw}]  # noqa: E731
         up = {**base, "local_versions": {"ARMOR-A": "0.1.1"}}
-        self.assertEqual(readiness.release_rows({**up, "states": state("published")})[0]["next"], "build")
+        self.assertEqual(readiness.release_rows({**up, "states": state("published")})[0]["next"], "build_sign")        # a build that is published with a signature
+        self.assertEqual(readiness.release_rows({**up, "states": state("published", workflow="apk-build.yml")})[0]["next"], "build")      # one that carries only a checksum
         self.assertEqual(readiness.release_rows({**up, "states": state("built_on_gha")})[0]["next"], "sign")
         row = readiness.release_rows({**up, "states": state("signed_local", trusted=True)})[0]
         self.assertEqual((row["signing"], row["next"]), ("signed", "publish"))
@@ -194,7 +195,7 @@ class PageAndCatalogues(unittest.TestCase):
             + [f"rd.t.{x}" for x in ("readiness", "health", "pins")]
             + [f"rd.c.{c}" for cols in readiness.COLUMNS.values() for c in cols]
             + [f"rd.v.{x}" for x in ("green", "green_partial", "red", "unknown", "bumped", "no_release", "not_bumped", "no_build", "built", "build_needed", "sign_na", "sign_signed", "sign_unsigned")]
-            + [f"rd.n.{x}" for x in ("fix_ci", "wait_data", "bump", "build", "sign", "publish", "cut")]
+            + [f"rd.n.{x}" for x in ("fix_ci", "wait_data", "bump", "build", "build_sign", "sign", "publish", "cut")]
             + [f"rd.p.{x}" for x in ("red", "stuck", "secret", "high_alert", "alert", "stale_pr", "unsigned", "hygiene", "none")])
 
     def test_every_text_exists_in_the_eight_languages(self):

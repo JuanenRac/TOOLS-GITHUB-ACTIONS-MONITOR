@@ -375,5 +375,113 @@ class PinnedWorkflows(unittest.TestCase):
                     self.assertRegex(match.group(1), r"@[0-9a-f]{40}$", f"{path.name}: {line.strip()}")
 
 
+def _run(repo, name, conclusion, started, path="ci.yml", rid=1):
+    return {"repo": repo, "id": rid, "name": name, "path": ".github/workflows/" + path, "branch": "main", "status": "completed", "conclusion": conclusion, "started": started,
+            "url": f"https://github.com/JuanenRac/{repo}/actions/runs/{rid}"}
+
+
+class IssueNeedsItsOwnWorkflow(unittest.TestCase):
+    ISSUE = [{"repo": "R", "number": 9, "title": "Firmware build failed", "url": "u", "created": "2030-01-01T10:00:00Z"}]
+
+    def suggest(self, runs):
+        import surface
+        return surface.issue_close_suggestions(self.ISSUE, {"R": runs}, set(), {}, 1_900_000_000)
+
+    def test_a_green_run_of_another_workflow_never_proposes_closing(self):
+        runs = [_run("R", "Notify central ecosystem dashboard", "success", "2030-01-02T10:00:00Z", "notify.yml", 2),
+                _run("R", "Firmware", "failure", "2030-01-01T09:00:00Z", "firmware-build.yml", 1)]
+        self.assertEqual(self.suggest(runs), [])
+
+    def test_the_same_workflow_green_after_the_issue_does(self):
+        runs = [_run("R", "Notify central ecosystem dashboard", "success", "2030-01-03T10:00:00Z", "notify.yml", 3),
+                _run("R", "Firmware", "success", "2030-01-02T10:00:00Z", "firmware-build.yml", 2)]
+        rows = self.suggest(runs)
+        self.assertEqual([r["number"] for r in rows], [9])
+        self.assertIn("2", rows[0]["reason"])            # the run it points to is the one of the firmware, not the dashboard
+
+    def test_the_same_workflow_still_red_or_green_before_the_issue_does_not(self):
+        self.assertEqual(self.suggest([_run("R", "Firmware", "failure", "2030-01-02T10:00:00Z", "firmware-build.yml", 2)]), [])
+        self.assertEqual(self.suggest([_run("R", "Firmware", "success", "2029-12-30T10:00:00Z", "firmware-build.yml", 2)]), [])
+
+    def test_an_issue_that_names_no_workflow_proposes_nothing(self):
+        import surface
+        issue = [dict(self.ISSUE[0], title="Something broke")]
+        runs = {"R": [_run("R", "Build", "success", "2030-01-02T10:00:00Z", "build.yml", 2)]}
+        self.assertEqual(surface.issue_close_suggestions(issue, runs, set(), {}, 1_900_000_000), [])
+        self.assertTrue(surface.workflow_in_title({"name": "Build", "path": ""}, "Build failed: Build"))
+        self.assertFalse(surface.workflow_in_title({"name": "CI", "path": ".github/workflows/ci.yml"}, "Decision made"))          # whole words only
+
+
+class TagAgainstManifest(unittest.TestCase):
+    def rows(self, tag, local="0.2.1", remote=None, repo_tag=None):
+        import surface
+        from test_surface import SurfaceInTheSnapshot
+        data = SurfaceInTheSnapshot().inp()
+        data["repo_info"]["R"]["release"]["tagName"] = tag
+        data["scans"]["R"]["manifest"]["version"] = local
+        data["scans"]["R"]["changelog_top"] = local
+        if remote:
+            data["repo_info"]["R"]["remote_manifest"] = {"tag": repo_tag or tag, "version": remote}
+        return {s["key"]: s["rows"] for s in surface.build(data)["sections"]}["tag_vs_version"]
+
+    def test_a_tag_ahead_of_an_old_reading_warns_and_the_manifest_of_the_branch_clears_it(self):
+        self.assertTrue(self.rows("v0.2.2"))                                                      # the clone says 0.2.1
+        self.assertEqual(self.rows("v0.2.2", remote="0.2.2"), [])                                # main already had 0.2.2
+        self.assertTrue(self.rows("v0.2.3", remote="0.2.2"))                                      # still ahead: a real warning
+        self.assertTrue(self.rows("v0.2.2", remote="0.2.2", repo_tag="v0.2.1"))                 # a reading made for an older release is not used
+
+    def test_a_tag_that_is_not_a_version_says_nothing(self):
+        import surface
+        self.assertEqual(self.rows("meshes-1", local="0.2.1"), [])
+        for good in ("v1.2", "0.8.0.1", "v2.0.0-rc1"):
+            self.assertTrue(surface.is_version_tag(good), good)
+        for bad in ("meshes-1", "nightly", "", None, "v1"):
+            self.assertFalse(surface.is_version_tag(bad), bad)
+
+    def test_the_branch_manifest_is_read_once_per_release_and_only_when_the_tag_is_ahead(self):
+        import base64
+        import surface
+        calls = []
+
+        def gh(*args, **kw):
+            calls.append(args)
+            return {"content": base64.b64encode(json.dumps({"version": "0.2.2"}).encode()).decode()}
+
+        collector = surface.Collector(gh, tempfile.gettempdir(), surface.settings({}))
+        collector.scans = {"R": {"manifest": {"file": "r.project.json", "version": "0.2.1"}}, "Q": {"manifest": {"file": "q.project.json", "version": "1.0.0"}}}
+        collector.raw = {"R": {"release": {"tagName": "v0.2.2"}}, "Q": {"release": {"tagName": "v1.0.0"}}}
+        self.assertEqual(collector.confirm_manifests(["R", "Q"], {}, 10), 1)
+        self.assertEqual(collector.raw["R"]["remote_manifest"], {"tag": "v0.2.2", "version": "0.2.2"})
+        self.assertIn("r.project.json", " ".join(calls[0]))
+        self.assertEqual(collector.confirm_manifests(["R", "Q"], {}, 10), 0)                       # already read for this tag
+        self.assertEqual(len(calls), 1)
+
+
+class NextStepOfACandidate(unittest.TestCase):
+    BASE = {"unreleased": {"ARMOR-NODE-X": 6}, "min_entries": 5, "releases": {"ARMOR-NODE-X": {"tagName": "v0.1.0"}}, "local_versions": {"ARMOR-NODE-X": "0.1.1"},
+            "runs": {"ARMOR-NODE-X": [{"repo": "ARMOR-NODE-X", "id": 1, "name": "CI", "path": "ci.yml", "branch": "main", "status": "completed", "conclusion": "success",
+                                       "started": "2030-01-01T10:00:00Z", "sha": "abc1234"}]}}
+
+    def rows(self, eco_of=lambda repo: "armor", **extra):
+        import readiness
+        return readiness.release_rows({**self.BASE, "eco_of": eco_of, **extra})
+
+    def test_bump_build_and_sign_sign_and_publish_are_told_apart(self):
+        import readiness
+        state = lambda st, **kw: [{"repo": "ARMOR-NODE-X", "workflow": "firmware-build.yml", "state": st, **kw}]  # noqa: E731
+        self.assertEqual(self.rows(local_versions={"ARMOR-NODE-X": "0.1.0"})[0]["next"], "bump")
+        self.assertEqual(self.rows(states=state("published"))[0]["next"], "build_sign")
+        self.assertEqual(self.rows(states=state("built_on_gha"))[0]["next"], "sign")
+        self.assertEqual(self.rows(states=state("signed_local", trusted=True))[0]["next"], "publish")
+        self.assertTrue(readiness.needs_signature("firmware-build.yml"))
+        self.assertFalse(readiness.needs_signature("apk-build.yml"))
+        for lang in LANGS:
+            self.assertNotEqual(i18n.tl(lang, "rd.n.build_sign"), "rd.n.build_sign", lang)
+
+    def test_a_repository_handled_elsewhere_is_not_a_candidate(self):
+        self.assertEqual(self.rows(eco_of=lambda repo: "eh3d"), [])
+        self.assertEqual(len(self.rows()), 1)
+
+
 if __name__ == "__main__":
     unittest.main()

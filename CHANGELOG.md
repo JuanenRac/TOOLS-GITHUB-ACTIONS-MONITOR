@@ -27,6 +27,12 @@ Work in progress after 1.7.4.
 - **Silences are made only from the computer of the monitor** (also in the network mode, until the editions with users): the guide of Collab says so in the eight languages, and a test keeps the route behind that rule.
 - **The workflows of this repository use actions pinned to a full commit**, with the version in a comment, and a test keeps them so.
 
+### Fixed
+
+- **Issues that could be closed** (surface check): a green run of another workflow no longer proposes closing an issue; the issue must name the workflow (by its name or by its file, "Firmware build failed" for `firmware-build.yml`) and that same workflow must have a later green run on the default branch. An issue that names no workflow proposes nothing.
+- **Tag against manifest** (surface check): when the tag of the latest release is ahead of the manifest read from the clone, the manifest of the default branch on GitHub is read once for that release (the clone may be behind after a release) and the warning disappears if it already had that version; tags that are not versions (`meshes-1`) are ignored.
+- **Next step of a release candidate**: a repository whose release needs a signed build now says "build in Actions and sign", apart from "bump the version", "sign" and "publish"; the repositories of ecosystems handled elsewhere stay out of the candidates (tested).
+
 ### Security
 
 - **`/api/statusbar` no longer hands the address of the computer on the local network (`lan_address`) to a client of the network** in the network mode; the bar draws without it.

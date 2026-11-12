@@ -26,6 +26,12 @@ Laufende Arbeit nach 1.7.4.
 - **Stummschaltungen gibt es nur vom Rechner des Monitors aus** (auch im Netzwerkmodus, bis es Ausgaben mit Benutzern gibt): Die Anleitung von Collab sagt es in den acht Sprachen, und ein Test hält die Route hinter dieser Regel.
 - **Die Workflows dieses Repositorys nutzen auf einen vollständigen Commit festgelegte Actions**, mit der Version im Kommentar, und ein Test hält das so.
 
+### Behoben
+
+- **Issues, die geschlossen werden könnten** (Oberflächenprüfung): Ein grüner Lauf eines anderen Workflows schlägt nicht mehr vor, ein Issue zu schließen; das Issue muss den Workflow nennen (mit seinem Namen oder seiner Datei, „Firmware build failed" für `firmware-build.yml`), und genau dieser Workflow braucht einen späteren grünen Lauf auf dem Standard-Branch. Ein Issue ohne Workflow-Namen schlägt nichts vor.
+- **Tag gegenüber Manifest** (Oberflächenprüfung): Liegt der Tag des letzten Releases vor dem aus dem Klon gelesenen Manifest, wird das Manifest des Standard-Branches auf GitHub einmal für dieses Release gelesen (der Klon kann nach einem Release hinterherhinken), und die Warnung verschwindet, wenn es diese Version schon hatte; Tags, die keine Versionen sind (`meshes-1`), werden ignoriert.
+- **Nächster Schritt eines Release-Kandidaten**: Ein Repository, dessen Release einen signierten Build braucht, sagt jetzt „in Actions bauen und signieren", getrennt von „Version erhöhen", „signieren" und „veröffentlichen"; Repositories von anderswo betreuten Ökosystemen bleiben aus den Kandidaten heraus (getestet).
+
 ### Sicherheit
 
 - **`/api/statusbar` gibt die Adresse des Rechners im lokalen Netz (`lan_address`) im Netzwerkmodus nicht mehr an einen Client des Netzes weiter**; die Leiste wird ohne sie gezeichnet.

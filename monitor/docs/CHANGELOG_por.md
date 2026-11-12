@@ -26,6 +26,12 @@ Trabalho em curso depois da 1.7.4.
 - **Os silêncios só se fazem a partir do computador do monitor** (também no modo de rede, até às edições com utilizadores): o guia do Collab di-lo nos oito idiomas e um teste mantém a rota atrás dessa regra.
 - **Os workflows deste repositório usam ações fixadas a um commit completo**, com a versão num comentário, e um teste mantém isso.
 
+### Corrigido
+
+- **Issues que se poderiam fechar** (verificação de superfície): uma execução verde de outro workflow deixa de propor o fecho de uma issue; a issue tem de nomear o workflow (pelo nome ou pelo ficheiro, «Firmware build failed» para `firmware-build.yml`) e esse mesmo workflow tem de ter uma execução verde posterior no ramo por defeito. Uma issue que não nomeia nenhum workflow não propõe nada.
+- **Tag face ao manifesto** (verificação de superfície): quando o tag da última release vai à frente do manifesto lido do clone, o manifesto do ramo por defeito no GitHub é lido uma vez para essa release (o clone pode estar atrasado depois de uma release) e o aviso desaparece se já tinha essa versão; os tags que não são versões (`meshes-1`) são ignorados.
+- **Passo seguinte de um candidato a release**: um repositório cuja release precisa de uma compilação assinada diz agora «compilar no Actions e assinar», à parte de «subir a versão», «assinar» e «publicar»; os repositórios de ecossistemas tratados noutro sítio ficam fora dos candidatos (testado).
+
 ### Segurança
 
 - **`/api/statusbar` já não entrega o endereço do computador na rede local (`lan_address`) a um cliente da rede** no modo de rede; a barra desenha-se sem ele.

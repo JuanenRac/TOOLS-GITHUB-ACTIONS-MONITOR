@@ -215,6 +215,12 @@ def ci_state(repo, runs, branch, red_by_repo, unchecked, inconclusive):
     return "green", (last.get("sha") or ""), repo in inconclusive
 
 
+def needs_signature(workflow):
+    """True when the release of this build workflow is published with a signature (every workflow but the ones the release-assets check lists without `sig`)."""
+    import surface
+    return "sig" in surface.asset_template(workflow or "", surface.settings({}))
+
+
 def release_rows(inp):
     """Rows for the repositories with at least `min_entries` entries in [Unreleased]. Keys of `inp`: unreleased (repo -> n), min_entries, releases
     (repo -> {tagName, publishedAt}), runs, branches, red (A2 rows), unchecked, inconclusive, states (A5 target states), local_versions (repo -> version),
@@ -247,7 +253,7 @@ def release_rows(inp):
         elif bumped is not True:
             nxt = "bump"
         elif build == "build_needed":
-            nxt = "build"
+            nxt = "build_sign" if any(needs_signature(s.get("workflow")) for s in states) else "build"
         elif build == "built":
             nxt = "publish" if signing == "signed" else "sign"
         else:

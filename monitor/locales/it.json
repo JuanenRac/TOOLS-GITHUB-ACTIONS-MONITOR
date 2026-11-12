@@ -916,6 +916,7 @@
  "rd.c.version": "Versione",
  "rd.c.where": "Trovata in",
  "rd.n.build": "compilare in Actions",
+ "rd.n.build_sign": "compilare in Actions e firmare",
  "rd.n.bump": "aumentare la versione",
  "rd.n.cut": "chiudere e pubblicare la release",
  "rd.n.fix_ci": "correggere la CI rossa",

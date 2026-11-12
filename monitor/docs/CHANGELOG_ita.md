@@ -26,6 +26,12 @@ Lavoro in corso dopo la 1.7.4.
 - **I silenziamenti si fanno solo dal computer del monitor** (anche in modalità di rete, fino alle edizioni con utenti): la guida di Collab lo dice in otto lingue e un test mantiene la route dietro questa regola.
 - **I workflow di questo repository usano azioni fissate a un commit completo**, con la versione in un commento, e un test lo mantiene.
 
+### Corretto
+
+- **Issue che si potrebbero chiudere** (controllo di superficie): un'esecuzione verde di un altro workflow non propone più di chiudere una issue; la issue deve nominare il workflow (con il suo nome o con il suo file, «Firmware build failed» per `firmware-build.yml`) e quello stesso workflow deve avere un'esecuzione verde successiva sul ramo predefinito. Una issue che non nomina alcun workflow non propone nulla.
+- **Tag rispetto al manifesto** (controllo di superficie): quando il tag dell'ultima release precede il manifesto letto dal clone, il manifesto del ramo predefinito su GitHub viene letto una volta per quella release (il clone può essere indietro dopo una release) e l'avviso sparisce se aveva già quella versione; i tag che non sono versioni (`meshes-1`) vengono ignorati.
+- **Passo successivo di un candidato alla release**: un repository la cui release richiede una build firmata dice ora «compilare in Actions e firmare», distinto da «alzare la versione», «firmare» e «pubblicare»; i repository di ecosistemi gestiti altrove restano fuori dai candidati (testato).
+
 ### Sicurezza
 
 - **`/api/statusbar` non consegna più l'indirizzo del computer nella rete locale (`lan_address`) a un client della rete** in modalità di rete; la barra si disegna senza.

@@ -26,6 +26,12 @@ Travail en cours après la 1.7.4.
 - **Les silences ne se font que depuis l'ordinateur du moniteur** (aussi en mode réseau, jusqu'aux éditions avec utilisateurs) : le guide de Collab le dit en huit langues et un test garde la route derrière cette règle.
 - **Les workflows de ce dépôt utilisent des actions épinglées sur un commit complet**, avec la version en commentaire, et un test le maintient.
 
+### Corrigé
+
+- **Issues qu'on pourrait fermer** (contrôle de surface) : une exécution verte d'un autre workflow ne propose plus de fermer une issue ; l'issue doit nommer le workflow (par son nom ou par son fichier, « Firmware build failed » pour `firmware-build.yml`) et ce même workflow doit avoir une exécution verte plus récente sur la branche par défaut. Une issue qui ne nomme aucun workflow ne propose rien.
+- **Tag face au manifeste** (contrôle de surface) : quand le tag de la dernière release devance le manifeste lu dans le clone, le manifeste de la branche par défaut sur GitHub est lu une fois pour cette release (le clone peut être en retard après une release) et l'avertissement disparaît s'il avait déjà cette version ; les tags qui ne sont pas des versions (`meshes-1`) sont ignorés.
+- **Étape suivante d'un candidat à la release** : un dépôt dont la release exige une compilation signée dit maintenant « compiler dans Actions et signer », à part « monter la version », « signer » et « publier » ; les dépôts d'écosystèmes gérés ailleurs restent hors des candidats (testé).
+
 ### Sécurité
 
 - **`/api/statusbar` ne donne plus l'adresse de l'ordinateur sur le réseau local (`lan_address`) à un client du réseau** en mode réseau ; la barre se dessine sans elle.

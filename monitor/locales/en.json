@@ -916,6 +916,7 @@
  "rd.c.version": "Version",
  "rd.c.where": "Found in",
  "rd.n.build": "build in Actions",
+ "rd.n.build_sign": "build in Actions and sign",
  "rd.n.bump": "bump the version",
  "rd.n.cut": "cut and publish the release",
  "rd.n.fix_ci": "fix the red CI",

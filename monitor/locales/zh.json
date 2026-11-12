@@ -916,6 +916,7 @@
  "rd.c.version": "版本",
  "rd.c.where": "位置",
  "rd.n.build": "在 Actions 中构建",
+ "rd.n.build_sign": "在 Actions 中构建并签名",
  "rd.n.bump": "提升版本号",
  "rd.n.cut": "切出并发布版本",
  "rd.n.fix_ci": "修复失败的 CI",

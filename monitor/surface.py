@@ -298,7 +298,7 @@ def scan_clone(path):
         try:
             import json
             data = json.loads(text) if text else {}
-            manifest = {"version": str(data.get("version") or ""), "maturity": str(data.get("maturity") or ""), "evidence": str(data.get("evidence") or ""),
+            manifest = {"file": found[0].name, "version": str(data.get("version") or ""), "maturity": str(data.get("maturity") or ""), "evidence": str(data.get("evidence") or ""),
                         "role": str(data.get("role") or "")}
         except ValueError:
             manifest = None
@@ -312,6 +312,23 @@ def scan_clone(path):
 
 
 # ---------- pure rules (tested without network) ----------
+VERSION_TAG = re.compile(r"^v?\d+\.\d+(?:\.\d+){0,2}(?:[-+][0-9A-Za-z.-]+)?$")
+
+
+def is_version_tag(tag):
+    """True for a tag that is a version (`v1.2`, `0.8.0.1`, `v2.0.0-rc1`); `meshes-1` or `nightly` are labels of another kind and say nothing about the manifest."""
+    return bool(VERSION_TAG.match(str(tag or "").strip()))
+
+
+def remote_manifest_version(gh, owner_name, repo, file, branch):
+    """The `version` of the manifest as it is on the default branch of GitHub (one call), or None. The clone on this computer may be behind after a release."""
+    import base64
+    import json
+    try:
+        data = gh("api", f"repos/{owner_name}/{repo}/contents/{file}?ref={branch}", retries=1) or {}
+        return str(json.loads(base64.b64decode(data.get("content") or "").decode("utf-8")).get("version") or "") or None
+    except Exception:       # noqa: BLE001 - a missing file or a bad answer leaves the local reading
+        return None
 def version_tuple(text):
     nums = re.findall(r"\d+", str(text or ""))
     return tuple(int(n) for n in nums[:4]) if nums else None
@@ -427,11 +444,27 @@ def dependabot_priority(prs):
 ISSUE_RUN = re.compile(r"actions/runs/(\d+)|\brun\s*#?(\d{6,})", re.I)
 
 
+def _words(text):
+    return " ".join(re.sub(r"[^a-z0-9]+", " ", str(text or "").lower()).split())
+
+
+def workflow_in_title(run, title):
+    """True when the title of an issue names the workflow of this run: by its name ("Build failed: Build") or by the name of its file without the extension
+    ("Firmware build failed" for firmware-build.yml). Whole words only."""
+    haystack = " " + _words(title) + " "
+    stem = str(run.get("path") or "").rsplit("/", 1)[-1].rsplit(".", 1)[0]
+    for candidate in (run.get("name"), stem):
+        words = _words(candidate)
+        if words and " " + words + " " in haystack:
+            return True
+    return False
+
+
 def issue_close_suggestions(issues, runs_by_repo, red_keys, branches, now):
     """Open build-failed/build-stuck issues whose workflow is green again. NEVER closes anything: each row carries the text of `gh issue close`.
-    `red_keys` = {(repo, workflow name)} of A2. The issue is tied to a run by a run id/URL in its title, else to a workflow by its name in the title;
-    when nothing ties it, the whole repository must have no red workflow. In every case the latest completed run on the default branch must be a
-    success and newer than the issue."""
+    The issue is tied to a run by a run id/URL in its title, else to a workflow by its name (or the name of its file, `firmware-build.yml` for "Firmware build failed")
+    in the title. When nothing ties the issue to a workflow there is no suggestion: a green run of ANOTHER workflow says nothing about the one that failed. The latest
+    completed run of that same workflow on the default branch must be a success and newer than the issue. (`red_keys` is kept for the callers.)"""
     rows = []
     for issue in issues:
         repo, number = issue["repo"], issue["number"]
@@ -446,12 +479,9 @@ def issue_close_suggestions(issues, runs_by_repo, red_keys, branches, now):
         if linked:
             scope = [r for r in runs if r.get("path") == linked.get("path") or r.get("name") == linked.get("name")] or runs
         else:
-            scope = [r for r in runs if r.get("name") and r["name"].lower() in title.lower()]
-        whole_repo = not scope
-        if whole_repo:
-            if any(k[0] == repo for k in red_keys):
-                continue
-            scope = runs
+            scope = [r for r in runs if workflow_in_title(r, title)]
+        if not scope:
+            continue
         last = max(scope, key=lambda r: r.get("started") or "")
         created = issue.get("created")
         if last.get("conclusion") != "success" or (created and (last.get("started") or "") <= created):
@@ -616,12 +646,18 @@ def build(inp):
         man, top = (scan.get("manifest") or {}).get("version"), scan.get("changelog_top")
         rel = (info.get(repo) or {}).get("release")
         tag = rel.get("tagName") if rel else None
+        remote = (info.get(repo) or {}).get("remote_manifest") or {}
+        from_branch = bool(remote.get("version") and remote.get("tag") == tag)
+        if from_branch:      # the manifest of the branch on GitHub, read after this release appeared: the clone may be behind (its CHANGELOG too)
+            man = remote["version"]
         notes = []
+        if tag and not is_version_tag(tag):
+            tag = None
         if tag and man and compare_versions(tag, man) == 1:
             notes.append(t("surf.tag_after"))
         elif tag and man and compare_versions(man, tag) == 1:
             notes.append(t("surf.tag_before"))
-        if man and top and compare_versions(man, top) not in (0, None):
+        if man and top and not from_branch and compare_versions(man, top) not in (0, None):
             notes.append(t("surf.tag_changelog"))
         if notes:
             rows.append([repo, tag or "–", man or "–", top or "–", "; ".join(notes)])
@@ -848,6 +884,25 @@ class Collector:
                 out["check_error"] = str(error)[:80]
         return out, calls
 
+    def confirm_manifests(self, repos, branches, budget):
+        """When the tag of the latest release is ahead of the manifest read from the clone, reads the manifest from the default branch on GitHub once for that tag (the clone may be
+        behind after a release; the old reading must not raise a warning). One call per repository and per release; returns the calls made."""
+        used = 0
+        for repo in sorted(repos):
+            if used >= budget:
+                break
+            manifest = (self.scans.get(repo) or {}).get("manifest") or {}
+            tag = ((self.raw.get(repo) or {}).get("release") or {}).get("tagName")
+            if not (tag and is_version_tag(tag) and manifest.get("version") and manifest.get("file")) or compare_versions(tag, manifest["version"]) != 1:
+                continue
+            if ((self.raw.get(repo) or {}).get("remote_manifest") or {}).get("tag") == tag:
+                continue
+            used += 1
+            version = remote_manifest_version(self.gh, owner(), repo, manifest["file"], branches.get(repo) or "main")
+            with self.lock:
+                self.raw.setdefault(repo, {"at": 0})["remote_manifest"] = {"tag": tag, "version": version or ""}
+        return used
+
     def refresh_graphql(self, repos):
         """The one batched query (15 repositories per call) for required checks, drafts and milestones. Returns the number of calls."""
         if self.clock() - self.graphql_at < self.cfg["refresh_seconds"] or not any(on(self.cfg, k) for k in ("required_checks", "drafts", "milestones")):
@@ -964,6 +1019,8 @@ class Collector:
             used += calls
             with self.lock:
                 self.raw[repo] = entry
+        if used < budget:
+            used += self.confirm_manifests(repos, branches, budget - used)
         if used < budget:
             used += self.fetch_jobs(red_rows, min(self.cfg["checks"]["matrix_os"]["max_per_tick"], budget - used))
         if used < budget:
