@@ -82,6 +82,7 @@ DEFAULTS = {
     "webhook": {"enabled": False, "secret": "", "replay_seconds": 3600, "max_per_minute": 30},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default)
     "cache": {"etag": {"enabled": True, "ttl_hours": 24}},   # conditional reads: a 304 answer costs no quota (etagcache.py)
     "display": {"timezone": "local", "blink_red_tiles": True},   # blink_red_tiles: the red tiles and red items of the bar blink softly until the cause is solved; zone of the times written for people (log, reports, command line, notifications): local | utc | an IANA name such as Europe/Madrid
+    "central": {"source": "off", "max_age_minutes": 120, "git_dir": ""},      # the central panel of the profile repository as a base line that spends no allowance (central_source.py): off | git | http
     "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
     "updates": {"check": True},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
     "airgapped": False,            # True: nothing is requested from the network except GitHub's data you asked for; the update check is off
@@ -396,9 +397,31 @@ def banner_mode_line(name, extra=""):
     return f"{'[LITE]' if LITE['on'] else '[COMPLETE]'} {i18n.t('mode.title')}: {i18n.t('mode.' + name)} {extra}".strip()
 
 
+def central_result(config=None):
+    """The base line of the central panel (cached; {"ok": False} while it is off)."""
+    import central_source
+    config = config or toolconfig.raw_config()
+    return central_source.read(config, toolconfig.github_owner(config), workspace_root_text())
+
+
+def workspace_root_text():
+    try:
+        import workspace
+        return str(workspace.workspace_root_soft() or "")
+    except Exception:   # noqa: BLE001
+        return ""
+
+
 def is_hot(repo, config, now):
     if repo in HOT_FORCED:
         return True
+    if MODE.name == "low":
+        try:      # in Low the central panel says which repositories are red without asking GitHub: those are read live, the others wait for the long interval
+            import central_source
+            if repo in central_source.red_repos(central_result(config)):
+                return True
+        except Exception as error:   # noqa: BLE001
+            degraded.note("loop.extra", error)
     entry = RUN_CACHE.get(repo)
     if entry is None:
         return True
@@ -929,7 +952,18 @@ def ai_state(lang=None, data=None, panels=None):
     if swallowed:
         warnings.append(f"degraded: {swallowed} failure(s) swallowed on purpose")
     stale = age is not None and age > 3 * int(data.get("refresh_seconds") or 120) + 60
-    return signals.state(data, panels, "lite" if LITE["on"] else "complete", {"age_seconds": age, "stale": stale, "warnings": warnings, "working_mode": MODE.name, "auto_mode": bool(MODE.auto)}, version=TOOL_VERSION)
+    central = None
+    try:
+        import central_source
+        central = central_source.read(config, toolconfig.github_owner(config), workspace_root_text())
+        if central.get("source") == "off":
+            central = None
+        elif central.get("ok") and central.get("stale"):
+            warnings.append("central panel behind: not trusted")
+    except Exception as error:   # noqa: BLE001
+        degraded.note("loop.extra", error)
+    return signals.state(data, panels, "lite" if LITE["on"] else "complete", {"age_seconds": age, "stale": stale, "warnings": warnings, "working_mode": MODE.name, "auto_mode": bool(MODE.auto),
+                                                                                "central": central}, version=TOOL_VERSION)
 
 
 def ai_sections(data, panels):

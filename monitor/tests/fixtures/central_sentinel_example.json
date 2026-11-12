@@ -1,0 +1,15 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "asof": "2026-01-01T10:00:00Z",
+ "schema": 1,
+ "ci": {"checked": 12, "red": [{"repo": "demo-beta-fw", "workflow": "ci.yml", "since": "2026-01-01T08:00:00Z"}, {"repo": "demo-gamma-api", "workflow": "ci.yml", "since": "2026-01-01T09:00:00Z"}], "red_total": 2},
+ "ecosystems": {"alpha": {"cand": 1, "read": 6, "red": 0, "repos": 6, "unpub": 0}, "beta": {"cand": 0, "read": 6, "red": 2, "repos": 6, "unpub": 0}},
+ "releases": {"candidates": [{"repo": "demo-alpha-app", "entries": 6, "published": "2025-12-01T00:00:00Z", "tag": "v1.0.0"}], "days": 30, "min_entries": 5, "total": 1},
+ "signatures": {"invalid": 0, "verified": 3, "unverified": 1, "none": 0, "norelease": 2, "unverifiable": 0, "invalid_repos": []},
+ "hygiene": {"gaps": 0, "sha_missing": 0, "allowed_missing": 0, "ruleset_checked": 12, "ruleset_missing": 0, "settings_checked": 12},
+ "unpublished": {"rows": [], "total": 0},
+ "compute": {"total24": 120, "total7": 400, "warn": false, "top": [{"repo": "demo-alpha-app", "min24": 60, "min7": 200}]},
+ "trend": {"dates": ["2025-12-31", "2026-01-01"], "red": [1, 2], "cand": [1, 1], "min": [100, 120], "gaps": [0, 0]},
+ "events": [], "parte": [], "read": 12, "repos": 12, "tags": {"demo-alpha-app": "v1.0.0"}
+}
