@@ -153,8 +153,8 @@ class OneList(unittest.TestCase):
         page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
         self.assertIn("alerts\\/(mute|unmute)", page)
         lite = text.split("LITE_PATHS = (", 1)[1].split(")", 1)[0]
-        self.assertNotIn("/api/alerts", lite)
-        self.assertNotIn("/api/events", lite)
+        self.assertIn("/api/alerts", lite)         # the lite product has no sentinel and answers none of them
+        self.assertIn("/api/events", lite)
 
     def test_the_events_are_read_newest_first_filtered_and_a_bad_line_is_skipped(self):
         path = Path(self.tmp.name) / "events.jsonl"
@@ -200,9 +200,10 @@ class Wiring(unittest.TestCase):
         self.assertIn("alert_mutes.json", [name for name, _ in accounts.LEGACY])
         self.assertIn(("alert_center", "STATE_FILE", "alert_mutes_demo.json"), demo_mode.STATE_FILES)
         self.assertIn("alert_mutes.json", make_release.FORBIDDEN_NAMES)
-        ignored = (HERE.parent / ".gitignore").read_text(encoding="utf-8").splitlines()
-        for name in ("monitor/alert_mutes.json", "monitor/ai_alerts_state.json", "monitor/ALERTS_BRIEF.md"):
-            self.assertIn(name, ignored)
+        if (HERE.parent / ".gitignore").is_file():         # the zip of the package carries no .gitignore
+            ignored = (HERE.parent / ".gitignore").read_text(encoding="utf-8").splitlines()
+            for name in ("monitor/alert_mutes.json", "monitor/ai_alerts_state.json", "monitor/ALERTS_BRIEF.md"):
+                self.assertIn(name, ignored)
 
     def test_the_page_has_the_alerts_tab_the_filters_and_the_live_checklist(self):
         page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")

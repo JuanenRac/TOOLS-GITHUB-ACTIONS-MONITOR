@@ -374,7 +374,8 @@ class Wiring(unittest.TestCase):
     def test_the_file_of_state_is_never_published_nor_committed(self):
         import make_release
         self.assertIn("collab_state.json", make_release.FORBIDDEN_NAMES)
-        self.assertIn("monitor/collab_state.json", (HERE.parent / ".gitignore").read_text(encoding="utf-8").splitlines())
+        if (HERE.parent / ".gitignore").is_file():         # the zip of the package carries no .gitignore
+            self.assertIn("monitor/collab_state.json", (HERE.parent / ".gitignore").read_text(encoding="utf-8").splitlines())
 
     def test_the_endpoint_is_absent_from_lite_and_the_page_has_the_layer(self):
         text = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
