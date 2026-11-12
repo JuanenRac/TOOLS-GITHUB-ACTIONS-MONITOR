@@ -682,9 +682,10 @@ class SettingsAndTexts(unittest.TestCase):
             self.assertIn("listen.query_access", cat["cfg.h.listen.network"], lang)
 
     def test_state_files_of_the_feed_are_never_committed_or_packaged(self):
-        ignored = (HERE.parent / ".gitignore").read_text(encoding="utf-8")
-        for name in ("monitor/ai_alerts.jsonl", "monitor/ai_heartbeat.json", "monitor/ai_hook_state.json"):
-            self.assertIn(name, ignored)
+        if (HERE.parent / ".gitignore").is_file():                  # not inside the zip
+            ignored = (HERE.parent / ".gitignore").read_text(encoding="utf-8")
+            for name in ("monitor/ai_alerts.jsonl", "monitor/ai_heartbeat.json", "monitor/ai_hook_state.json"):
+                self.assertIn(name, ignored)
         packaging = (HERE / "make_release.py").read_text(encoding="utf-8")
         for name in ("ai_alerts.jsonl", "ai_heartbeat.json", "ai_hook_state.json"):
             self.assertIn(f'"{name}"', packaging)

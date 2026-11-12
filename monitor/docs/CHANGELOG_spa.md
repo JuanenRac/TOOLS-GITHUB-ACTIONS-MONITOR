@@ -7,7 +7,7 @@
 
 Versión de la propia herramienta (monitor + centinela + herramientas por lotes), con su propio semver. La fuente es el CHANGELOG.md en inglés; este fichero lleva las mismas versiones y secciones.
 
-## [Unreleased]
+## [1.7.6]
 
 La conexión entre el monitor y una herramienta de IA: el flujo coincide siempre con la página, cada alerta dice por qué está roja, un flujo en directo y tres herramientas MCP empujan las novedades, un comando instala el script de enlace, la barra muestra si hay una IA conectada y todos los ficheros de estado son privados de su dueño.
 

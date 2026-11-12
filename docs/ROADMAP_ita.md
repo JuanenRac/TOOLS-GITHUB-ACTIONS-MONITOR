@@ -2,6 +2,10 @@
 
 Idee che non sono entrate nella versione attuale, senza ordine promesso. Sono direzioni, non impegni; una issue o una pull request è il modo migliore per farne avanzare una.
 
+## Fatto nella 1.7.6
+
+Il collegamento tra il monitor e uno strumento di IA: il feed coincide sempre con la pagina, ogni avviso dice perché è rosso, un flusso e tre strumenti MCP spingono le novità, un comando installa lo script di collegamento, la barra mostra se una IA è collegata e ogni file di stato è privato del suo proprietario.
+
 ## Fatto nella 1.7.5
 
 La riga di comando prende il token di accesso con il suo nome, la modalità di rete è più sicura per impostazione predefinita (l'indirizzo del computer è nascosto alla rete, il vecchio indirizzo ?access= si può disattivare, le destinazioni di notifica della rete locale sono rifiutate, avviso sul semplice HTTP), gli orari per le persone usano il tuo fuso orario, un avviso si può silenziare finché l'elemento non cambia, e sono corretti i conteggi e i controlli che davano risposte sbagliate.

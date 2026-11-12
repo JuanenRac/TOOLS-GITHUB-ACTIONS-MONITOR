@@ -2,6 +2,10 @@
 
 Des idées qui n'ont pas tenu dans la version actuelle, sans ordre promis. Ce sont des directions, pas des engagements ; une issue ou une pull request est la meilleure façon d'en faire avancer une.
 
+## Fait dans la 1.7.6
+
+La liaison entre le moniteur et un outil d'IA : le flux concorde toujours avec la page, chaque alerte dit pourquoi elle est rouge, un flux en direct et trois outils MCP poussent les nouvelles, une commande installe le script de liaison, la barre montre si une IA est connectée et tout fichier d'état est privé à son propriétaire.
+
 ## Fait dans la 1.7.5
 
 La ligne de commande prend le jeton d'accès sous son propre nom, le mode réseau est plus sûr par défaut (l'adresse de l'ordinateur est cachée au réseau, l'ancienne adresse ?access= peut être désactivée, les destinations de notification du réseau local sont refusées, avertissement sur le HTTP simple), les heures pour les personnes utilisent votre fuseau horaire, une alerte peut être mise en sourdine jusqu'à ce que l'élément change, et les comptes et vérifications qui donnaient des réponses fausses sont corrigés.

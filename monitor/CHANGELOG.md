@@ -9,7 +9,7 @@ Version of the tool itself (monitor + sentinel + batch tools), semver of its own
 and is shown as `tool_version` in the sentinel snapshot and by `read_report.py --version`; `make_release.py` refuses to build
 when this file and `tool_version.py` disagree.
 
-## [Unreleased]
+## [1.7.6]
 
 The connection between the monitor and an AI tool: the feed always agrees with the page, each alert says why it is red, a stream and three MCP tools push the news, a command installs the gate script, the bar shows whether an AI is connected, and every state file is private to its owner.
 

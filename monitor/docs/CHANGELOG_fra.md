@@ -7,7 +7,7 @@
 
 Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son propre semver. La source est le CHANGELOG.md en anglais ; ce fichier contient les mêmes versions et sections.
 
-## [Unreleased]
+## [1.7.6]
 
 La liaison entre le moniteur et un outil d'IA : le flux concorde toujours avec la page, chaque alerte dit pourquoi elle est rouge, un flux en direct et trois outils MCP poussent les nouvelles, une commande installe le script de liaison, la barre montre si une IA est connectée et tout fichier d'état est privé à son propriétaire.
 

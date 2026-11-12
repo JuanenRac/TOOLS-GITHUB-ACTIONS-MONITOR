@@ -2,6 +2,10 @@
 
 Ideen, die nicht in die aktuelle Version passten, ohne versprochene Reihenfolge. Es sind Richtungen, keine Zusagen; ein Issue oder ein Pull Request ist der beste Weg, eine voranzubringen.
 
+## Erledigt in 1.7.6
+
+Die Verbindung zwischen Monitor und KI-Werkzeug: Der Feed stimmt immer mit der Seite überein, jede Warnung sagt, warum sie rot ist, ein Stream und drei MCP-Werkzeuge schieben die Neuigkeiten nach, ein Befehl installiert das Gate-Skript, die Leiste zeigt, ob eine KI verbunden ist, und jede Zustandsdatei gehört nur ihrem Besitzer.
+
 ## Erledigt in 1.7.5
 
 Die Befehlszeile nimmt das Zugriffstoken unter seinem eigenen Namen, der Netzwerkmodus ist standardmäßig sicherer (die Adresse des Rechners wird vor dem Netz verborgen, die alte Adresse ?access= lässt sich abschalten, Benachrichtigungsziele im lokalen Netz werden abgelehnt, Warnung vor einfachem HTTP), Zeiten für Menschen nutzen deine eigene Zeitzone, ein Alarm lässt sich bis zur Änderung des Elements stummschalten, und falsche Zählungen und Prüfungen sind korrigiert.

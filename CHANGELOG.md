@@ -8,7 +8,7 @@
 
 The history of GitHub Actions Monitor, from the first version to the latest. Each version groups its changes under Added, Changed, Fixed and Security.
 
-## [Unreleased]
+## [1.7.6]
 
 The connection between the monitor and an AI tool: the feed always agrees with the page, each alert says why it is red, a stream and three MCP tools push the news, a command installs the gate script, the bar shows whether an AI is connected, and every state file is private to its owner.
 

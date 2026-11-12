@@ -7,7 +7,7 @@
 
 Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem Semver. Die Quelle ist das englische CHANGELOG.md; diese Datei enthält dieselben Versionen und Abschnitte.
 
-## [Unreleased]
+## [1.7.6]
 
 Die Verbindung zwischen Monitor und KI-Werkzeug: Der Feed stimmt immer mit der Seite überein, jede Warnung sagt, warum sie rot ist, ein Stream und drei MCP-Werkzeuge schieben die Neuigkeiten nach, ein Befehl installiert das Gate-Skript, die Leiste zeigt, ob eine KI verbunden ist, und jede Zustandsdatei gehört nur ihrem Besitzer.
 

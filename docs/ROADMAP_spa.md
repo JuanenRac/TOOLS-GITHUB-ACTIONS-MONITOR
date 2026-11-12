@@ -2,6 +2,10 @@
 
 Ideas que no cupieron en la versión actual, sin orden prometido. Son direcciones, no compromisos; un issue o un pull request es la mejor forma de adelantar una.
 
+## Hecho en la 1.7.6
+
+La conexión entre el monitor y una herramienta de IA: el flujo coincide siempre con la página, cada alerta dice por qué está roja, un flujo en directo y tres herramientas MCP empujan las novedades, un comando instala el script de enlace, la barra muestra si hay una IA conectada y todos los ficheros de estado son privados de su dueño.
+
 ## Hecho en la 1.7.5
 
 La línea de comandos toma el token de acceso con su propio nombre, el modo red es más seguro por defecto (la dirección del ordenador se oculta a la red, la dirección antigua ?access= se puede desactivar, se rechazan los destinos de notificación de la red local, aviso sobre HTTP plano), las horas para las personas usan tu zona horaria, una alerta se puede silenciar hasta que cambie el elemento, y se corrigen los recuentos y comprobaciones que daban respuestas erróneas.

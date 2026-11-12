@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GitHub Actions 监视器 + 哨兵（版本 1.7.5）
+GitHub Actions 监视器 + 哨兵（版本 1.7.6）
 ============================================
 该启动哪一个?(新用户两分钟就能决定)
   完整版  MONITOR_GITHUB_ACTIONS.*       带哨兵的页面(端口 8765):警报、签名队列、分析。有多个仓库时从这里开始。
