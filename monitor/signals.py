@@ -87,7 +87,9 @@ def inventory(data, panels=None, health=None, now=None):
         out.append(_signal("sentinel." + panel["id"], panel["id"], _level(panel.get("level")), panel.get("summary") or panel.get("title"), rows))
     health = health or {}
     out.append(_signal("health.refresh", "health", "watch" if health.get("stale") else "info", f"data read {health.get('age_seconds', '?')} s ago", transient=bool(health.get("stale"))))
-    out.append(_signal("health.mode", "health", "info", f"mode {data.get('mode')}"))
+    low = health.get("working_mode") == "low"
+    out.append(_signal("health.mode", "health", "watch" if low else "info", f"working mode {health.get('working_mode', 'normal')}" + (" (automatic)" if health.get("auto_mode") else "") +
+                       (f": the allowance is low, the monitor reads less and its figures can be old (the last reading was {health.get('age_seconds', '?')} s ago)" if low else ""), transient=low))
     out.append(_signal("health.doctor", "health", "watch" if health.get("warnings") else "info", "; ".join(health.get("warnings") or []) or "no warning",
                        [_row("", w, "", None, "run the doctor: python actions_monitor.py --doctor") for w in health.get("warnings") or []]))
     return out

@@ -386,7 +386,7 @@ def tuned(config, key, data=None):
     value = TUNED[key] if (discovery.settings(config)["auto_frequency"] and TUNED.get(key)) else config[key]
     remaining, _limit = mode_remaining()
     name = MODE.current(config, remaining)
-    if MODE.notice and MODE.notice != MODE_SAID[0] and MODE.notice in ("expired", "quota"):
+    if MODE.notice and MODE.notice != MODE_SAID[0] and MODE.notice in ("expired", "quota", "auto_low", "auto_low_end"):
         MODE_SAID[0] = MODE.notice
         print(banner_mode_line(name, i18n.t("mode.back_" + MODE.notice)), flush=True)
     return modes.effective({**config, key: value}, key, name)
@@ -929,7 +929,7 @@ def ai_state(lang=None, data=None, panels=None):
     if swallowed:
         warnings.append(f"degraded: {swallowed} failure(s) swallowed on purpose")
     stale = age is not None and age > 3 * int(data.get("refresh_seconds") or 120) + 60
-    return signals.state(data, panels, "lite" if LITE["on"] else "complete", {"age_seconds": age, "stale": stale, "warnings": warnings}, version=TOOL_VERSION)
+    return signals.state(data, panels, "lite" if LITE["on"] else "complete", {"age_seconds": age, "stale": stale, "warnings": warnings, "working_mode": MODE.name, "auto_mode": bool(MODE.auto)}, version=TOOL_VERSION)
 
 
 def ai_sections(data, panels):
@@ -1846,7 +1846,7 @@ def mode_payload():
     etag = data.get("etag") or {}
     calls = max(1, etag.get("calls") or 0)
     saved = (etag.get("saved") or 0) / calls if etag.get("calls") else 0.0
-    return {"mode": name, "seconds_left": MODE.seconds_left(), "notice": MODE.notice, "names": list(modes.NAMES), "allowed": not (isinstance(limit, int) and limit <= 60),
+    return {"mode": name, "auto": bool(MODE.auto), "seconds_left": MODE.seconds_left(), "notice": MODE.notice, "names": list(modes.NAMES), "allowed": not (isinstance(limit, int) and limit <= 60),
             "limit": limit, "remaining": remaining, "floor": int(config.get("min_rate_remaining", 800)), "default_minutes": modes.settings(config)["default_minutes"],
             "estimate": modes.estimate(config, len(data.get("repos") or []), data.get("hot") or 0, remaining, saved), "presets": modes.presets(config), "saved_share": round(saved, 2)}
 

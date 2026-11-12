@@ -10,12 +10,17 @@
 """
 import time
 
-NAMES = ("normal", "fast", "turbo")
+NAMES = ("normal", "fast", "turbo", "low")
 DEFAULTS = {
     "start": "normal",
     "default_minutes": 60,
     "fast": {"refresh_seconds": 30, "cold_refresh_seconds": 300, "runs_per_repo": 30, "hot_hours": 6},
     "turbo": {"refresh_seconds": 15, "cold_refresh_seconds": 90, "runs_per_repo": 50, "hot_hours": 12},
+    # low: the opposite of fast, for when many tools spend the same allowance: only the hot repositories (a run in progress or a red one) every few minutes, the rest every half hour, short run lists
+    "low": {"refresh_seconds": 240, "cold_refresh_seconds": 1800, "runs_per_repo": 10, "hot_hours": 2},
+    "auto_low": True,             # go to low by itself when the allowance left falls under auto_low_enter and come back when it passes auto_low_exit (or renews)
+    "auto_low_enter": 1000,
+    "auto_low_exit": 2500,
 }
 MIN_REFRESH = 10            # never faster than the minimum of the Settings page: it keeps clear of the secondary limits of GitHub
 KEYS = ("refresh_seconds", "cold_refresh_seconds", "runs_per_repo", "hot_hours")
@@ -25,7 +30,7 @@ BOUNDS = {"refresh_seconds": (MIN_REFRESH, 3600), "cold_refresh_seconds": (30, 8
 def presets(config):
     block = (config or {}).get("modes") if isinstance((config or {}).get("modes"), dict) else {}
     out = {"normal": {}}
-    for name in ("fast", "turbo"):
+    for name in ("fast", "turbo", "low"):
         merged = dict(DEFAULTS[name])
         given = block.get(name) if isinstance(block.get(name), dict) else {}
         for key in KEYS:
@@ -39,33 +44,46 @@ def presets(config):
 def settings(config):
     block = (config or {}).get("modes") if isinstance((config or {}).get("modes"), dict) else {}
     minutes = block.get("default_minutes")
-    return {"start": block.get("start") if block.get("start") in NAMES else "normal", "default_minutes": minutes if isinstance(minutes, int) and not isinstance(minutes, bool) and 1 <= minutes <= 1440 else 60}
+    def number(key, low, high):
+        value = block.get(key)
+        return value if isinstance(value, int) and not isinstance(value, bool) and low <= value <= high else DEFAULTS[key]
+    enter, leave = number("auto_low_enter", 50, 4000), number("auto_low_exit", 100, 5000)
+    if leave <= enter:      # a gap between going in and coming out (hysteresis), or it would flap
+        enter, leave = DEFAULTS["auto_low_enter"], DEFAULTS["auto_low_exit"]
+    return {"start": block.get("start") if block.get("start") in NAMES else "normal", "default_minutes": minutes if isinstance(minutes, int) and not isinstance(minutes, bool) and 1 <= minutes <= 1440 else 60,
+            "auto_low": block.get("auto_low") is not False, "auto_low_enter": enter, "auto_low_exit": leave}
 
 
 class State:
     def __init__(self, clock=time.time):
         self.clock = clock
-        self.name, self.until, self.notice, self.started = "normal", None, "", None
+        self.name, self.until, self.notice, self.started, self.auto = "normal", None, "", None, False
 
     def current(self, config, remaining=None):
-        """The mode in force now: ends a mode whose time is up or whose allowance fell under the floor (and keeps the reason as a notice)."""
+        """The mode in force now: ends a mode whose time is up or whose allowance fell under the floor (and keeps the reason as a notice). With `auto_low` (on by default) normal becomes low when
+        the allowance left falls under `auto_low_enter` and low comes back to normal above `auto_low_exit`: two different numbers, so it does not flap."""
         now = self.clock()
+        cfg = settings(config)
         if self.name != "normal":
             if self.until is not None and now >= self.until:
                 self._back("expired")
-            elif remaining is not None and remaining < int((config or {}).get("min_rate_remaining", 800)):
+            elif self.name in ("fast", "turbo") and remaining is not None and remaining < int((config or {}).get("min_rate_remaining", 800)):
                 self._back("quota")
+            elif self.name == "low" and self.auto and remaining is not None and remaining > cfg["auto_low_exit"]:
+                self._back("auto_low_end")
+        elif cfg["auto_low"] and remaining is not None and remaining < cfg["auto_low_enter"]:
+            self.name, self.until, self.started, self.auto, self.notice = "low", None, now, True, "auto_low"
         return self.name
 
     def _back(self, why):
-        self.name, self.until, self.started = "normal", None, None
+        self.name, self.until, self.started, self.auto = "normal", None, None, False
         self.notice = why
 
     def set(self, name, minutes, config, rate_limit=None, remaining=None):
         """(ok, reason). `minutes` 0 or None = until you change it (or until the allowance falls under the floor)."""
         if name not in NAMES:
             return False, "unknown"
-        if name != "normal":
+        if name not in ("normal", "low"):      # low is always allowed: it spends less
             if rate_limit is not None and isinstance(rate_limit, int) and rate_limit <= 60:
                 return False, "no_token"
             if remaining is not None and remaining < int((config or {}).get("min_rate_remaining", 800)):
@@ -76,7 +94,7 @@ class State:
             return True, "ok"
         if minutes is not None and (not isinstance(minutes, int) or isinstance(minutes, bool) or minutes < 0 or minutes > 1440):
             return False, "minutes"
-        self.name, self.notice, self.started = name, "", self.clock()
+        self.name, self.notice, self.started, self.auto = name, "", self.clock(), False
         self.until = self.clock() + minutes * 60 if minutes else None
         return True, "ok"
 
@@ -92,6 +110,8 @@ def effective(config, key, state_name):
     preset = presets(config)[state_name].get(key)
     if preset is None:
         return base
+    if state_name == "low":      # the opposite direction: never faster (or bigger) than what you set yourself
+        return max(base, preset) if key in ("refresh_seconds", "cold_refresh_seconds") else min(base, preset)
     return max(base, preset) if key in ("runs_per_repo", "hot_hours") else min(base, preset)
 
 
