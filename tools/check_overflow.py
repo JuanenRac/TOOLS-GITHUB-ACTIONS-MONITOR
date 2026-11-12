@@ -141,7 +141,18 @@ def relay(target_port):
     return server
 
 
-def measure(browser, url, size):
+def measure(browser, url, size, tries=3):
+    """Opens the page and returns the overflows; a browser that answers nothing (a busy computer) is asked again."""
+    for attempt in range(tries):
+        try:
+            return measure_once(browser, url, size)
+        except RuntimeError:
+            if attempt == tries - 1:
+                raise
+            time.sleep(2)
+
+
+def measure_once(browser, url, size):
     """Opens the page once and returns the list of overflows the script found (or raises when the browser gave no answer)."""
     profile = tempfile.mkdtemp(prefix="ghamon_ovf_")
     try:
