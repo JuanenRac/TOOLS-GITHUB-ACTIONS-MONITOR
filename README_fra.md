@@ -37,6 +37,36 @@
 | **Écrit sur GitHub** | jamais seul : seulement les commandes par lots que vous lancez avec un `--go` explicite |
 | **Exporte** | `ci_red.json`, des métriques Prometheus et du JSON pour Grafana (tout désactivé tant que vous ne l'activez pas) |
 
+<!-- glance:begin -->
+
+**Mesuré aujourd'hui** (v1.7.6)
+
+| | |
+|---|---|
+| **Maturité** | functional |
+| **Tests** | 1232 méthodes de test (`python -m unittest discover -s monitor/tests`) |
+| **Réglages** | 277 réglages, tous avec aide |
+| **Langues** | 8 (anglais, espagnol, allemand, français, italien, japonais, chinois et portugais) |
+| **Testé dans le CI sur** | ubuntu, windows, macos, Python 3.11, 3.13 |
+
+## État du projet
+
+Chaque ligne est une partie de ce dépôt et le voyant dit où elle en est aujourd'hui : ce que les tests et le CI peuvent montrer et ce qui a tourné pour de vrai, pas ce qui est prévu.
+
+🟢 Fait et vérifié · 🟡 Fonctionne, avec des limites connues · 🟠 En partie fait ou pas encore vérifié · 🔴 Pas fait ou ne fonctionne pas
+
+| Domaine | État | Ce que cela veut dire ici |
+|---|---|---|
+| Moniteur et page | 🟢 | Tourne chaque jour sur un vrai compte ; les tests tournent dans le CI sur trois systèmes. |
+| Sentinelle (A1..A13) | 🟢 | Tourne chaque jour sur un vrai compte ; ses niveaux et lignes sont testés avec des fixtures. |
+| Notifications | 🟡 | Testées contre des serveurs simulés ; tous les canaux n'ont pas été essayés avec le vrai service. |
+| Connexion à un outil d'IA et MCP | 🟡 | Le flux, l'état, le flux en direct, le hook et les outils MCP sont testés avec un vrai serveur et un client simulé ; aucun utilisateur indépendant ne les a encore utilisés. |
+| Édition lite | 🟡 | Testée dans le CI et partage les canaux et réglages de la complète ; peu d'usage réel jusqu'ici. |
+| GitHub App, panneau central et mode économe | 🟠 | Nouveau : testé avec des serveurs et fichiers simulés ; pas encore tourné longtemps avec le vrai service. |
+| Linux et macOS | 🟠 | Testés seulement dans le CI ; l'usage quotidien est sous Windows. |
+
+<!-- glance:end -->
+
 ## Captures d'écran
 
 ### La page

@@ -37,6 +37,36 @@
 | **Escribe en GitHub** | nunca por sí solo: solo las órdenes por lotes que lances con un `--go` explícito |
 | **Exporta** | `ci_red.json`, métricas Prometheus y JSON para Grafana (todo apagado hasta que lo actives) |
 
+<!-- glance:begin -->
+
+**Medido hoy** (v1.7.6)
+
+| | |
+|---|---|
+| **Madurez** | functional |
+| **Tests** | 1232 métodos de test (`python -m unittest discover -s monitor/tests`) |
+| **Ajustes** | 277 ajustes, todos con ayuda |
+| **Idiomas** | 8 (inglés, español, alemán, francés, italiano, japonés, chino y portugués) |
+| **Probado en el CI en** | ubuntu, windows, macos, Python 3.11, 3.13 |
+
+## Estado del proyecto
+
+Cada línea es una parte de este repositorio y la luz dice hasta dónde llega hoy: lo que pueden mostrar los tests y el CI y lo que se ha ejecutado de verdad, no lo planeado.
+
+🟢 Hecho y verificado · 🟡 Funciona, con límites conocidos · 🟠 Hecho en parte o sin verificar todavía · 🔴 Sin hacer o sin funcionar
+
+| Área | Estado | Qué significa aquí |
+|---|---|---|
+| Monitor y página | 🟢 | Funciona cada día con una cuenta real; los tests corren en el CI en tres sistemas. |
+| Centinela (A1..A13) | 🟢 | Funciona cada día con una cuenta real; sus niveles y filas se prueban con fixtures. |
+| Notificaciones | 🟡 | Probadas contra servidores simulados; no todos los canales se han probado con el servicio real. |
+| Conexión con una IA y MCP | 🟡 | El flujo, el estado, el flujo en directo, el hook y las herramientas MCP se prueban con un servidor real y un cliente simulado; ningún usuario independiente los ha usado todavía. |
+| Edición lite | 🟡 | Probada en el CI y comparte los canales y ajustes de la completa; poco uso real hasta ahora. |
+| GitHub App, panel central y modo Bajo | 🟠 | Nuevo: probado con servidores y ficheros simulados; todavía no ha funcionado mucho tiempo con el servicio real. |
+| Linux y macOS | 🟠 | Probados solo en el CI; el uso diario es en Windows. |
+
+<!-- glance:end -->
+
 ## Capturas
 
 ### La página

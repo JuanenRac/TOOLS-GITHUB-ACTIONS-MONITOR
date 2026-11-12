@@ -37,6 +37,36 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 | **Escreve no GitHub** | nunca sozinho: apenas os comandos por lotes que lançar com um `--go` explícito |
 | **Exporta** | `ci_red.json`, métricas Prometheus e JSON para o Grafana (tudo desligado até o ativar) |
 
+<!-- glance:begin -->
+
+**Medido hoje** (v1.7.6)
+
+| | |
+|---|---|
+| **Maturidade** | functional |
+| **Testes** | 1232 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Definições** | 277 definições, todas com ajuda |
+| **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
+| **Testado no CI em** | ubuntu, windows, macos, Python 3.11, 3.13 |
+
+## Estado do projeto
+
+Cada linha é uma parte deste repositório e a luz diz até onde chega hoje: o que os testes e o CI podem mostrar e o que correu de verdade, não o que está planeado.
+
+🟢 Feito e verificado · 🟡 Funciona, com limites conhecidos · 🟠 Feito em parte ou ainda não verificado · 🔴 Por fazer ou a não funcionar
+
+| Área | Estado | O que significa aqui |
+|---|---|---|
+| Monitor e página | 🟢 | Corre todos os dias numa conta real; os testes correm no CI em três sistemas. |
+| Sentinela (A1..A13) | 🟢 | Corre todos os dias numa conta real; os níveis e linhas são testados com fixtures. |
+| Notificações | 🟡 | Testadas contra servidores simulados; nem todos os canais foram experimentados com o serviço real. |
+| Ligação a uma ferramenta de IA e MCP | 🟡 | O feed, o estado, o fluxo, o hook e as ferramentas MCP são testados com um servidor real e um cliente simulado; nenhum utilizador independente os usou ainda. |
+| Edição lite | 🟡 | Testada no CI e partilha os canais e definições da completa; pouco uso real até agora. |
+| GitHub App, painel central e modo poupança | 🟠 | Novo: testado com servidores e ficheiros simulados; ainda não correu muito tempo com o serviço real. |
+| Linux e macOS | 🟠 | Testados só no CI; o uso diário é no Windows. |
+
+<!-- glance:end -->
+
 ## Capturas de ecrã
 
 ### A página

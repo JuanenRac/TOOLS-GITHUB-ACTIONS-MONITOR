@@ -37,6 +37,36 @@
 | **Writes to GitHub** | never by itself: only batch commands you run with an explicit `--go` |
 | **Exports** | `ci_red.json`, Prometheus metrics and JSON for Grafana (all off until you switch them on) |
 
+<!-- glance:begin -->
+
+**Measured today** (v1.7.6)
+
+| | |
+|---|---|
+| **Maturity** | functional |
+| **Tests** | 1232 test methods (`python -m unittest discover -s monitor/tests`) |
+| **Settings** | 277 settings, all with help |
+| **Languages** | 8 (English, Spanish, German, French, Italian, Japanese, Chinese, Portuguese) |
+| **Tested in the CI on** | ubuntu, windows, macos, Python 3.11, 3.13 |
+
+## Project status
+
+Each line is one part of this repository and the light says how far it is today: what the tests and the CI can show and what has run for real, not what is planned.
+
+🟢 Done and verified · 🟡 Works, with known limits · 🟠 Partly done or not verified yet · 🔴 Not done or not working
+
+| Area | State | What it means here |
+|---|---|---|
+| Monitor and page | 🟢 | Runs every day on a real account; the tests run in the CI on three systems. |
+| Sentinel (A1..A13) | 🟢 | Runs every day on a real account; its levels and rows are tested with fixtures. |
+| Notifications | 🟡 | Tested against simulated servers; not every channel has been tried against the real service. |
+| Connection with an AI tool and MCP | 🟡 | The feed, the state, the stream, the hook and the MCP tools are tested with a real server and a simulated client; no independent user has run them yet. |
+| Lite edition | 🟡 | Tested in the CI and shares the channels and settings of the complete one; little real use so far. |
+| GitHub App, central panel and Low mode | 🟠 | New: tested with simulated servers and files; not yet run for a long time against the real service. |
+| Linux and macOS | 🟠 | Tested in the CI only; the daily use is on Windows. |
+
+<!-- glance:end -->
+
 ## Screenshots
 
 ### The page

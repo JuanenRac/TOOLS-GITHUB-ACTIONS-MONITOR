@@ -37,6 +37,36 @@
 | **Schreibt auf GitHub** | nie von selbst: nur Stapelbefehle, die du mit ausdrücklichem `--go` startest |
 | **Exportiert** | `ci_red.json`, Prometheus-Metriken und JSON für Grafana (alles aus, bis du es einschaltest) |
 
+<!-- glance:begin -->
+
+**Heute gemessen** (v1.7.6)
+
+| | |
+|---|---|
+| **Reifegrad** | functional |
+| **Tests** | 1232 Testmethoden (`python -m unittest discover -s monitor/tests`) |
+| **Einstellungen** | 277 Einstellungen, alle mit Hilfe |
+| **Sprachen** | 8 (Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch) |
+| **Im CI getestet auf** | ubuntu, windows, macos, Python 3.11, 3.13 |
+
+## Projektstatus
+
+Jede Zeile ist ein Teil dieses Repositories, und die Ampel sagt, wie weit er heute ist: was die Tests und das CI zeigen können und was wirklich gelaufen ist, nicht was geplant ist.
+
+🟢 Fertig und geprüft · 🟡 Funktioniert, mit bekannten Grenzen · 🟠 Teilweise fertig oder noch nicht geprüft · 🔴 Nicht fertig oder funktioniert nicht
+
+| Bereich | Stand | Was das hier bedeutet |
+|---|---|---|
+| Monitor und Seite | 🟢 | Läuft täglich mit einem echten Konto; die Tests laufen im CI auf drei Systemen. |
+| Sentinel (A1..A13) | 🟢 | Läuft täglich mit einem echten Konto; Stufen und Zeilen werden mit Fixtures getestet. |
+| Benachrichtigungen | 🟡 | Gegen simulierte Server getestet; nicht jeder Kanal wurde am echten Dienst probiert. |
+| Verbindung zu einem KI-Werkzeug und MCP | 🟡 | Feed, Zustand, Stream, Hook und MCP-Werkzeuge sind mit einem echten Server und einem simulierten Client getestet; noch kein unabhängiger Nutzer hat sie benutzt. |
+| Lite-Edition | 🟡 | Im CI getestet und teilt Kanäle und Einstellungen mit der vollständigen; bisher wenig echter Einsatz. |
+| GitHub-App, zentrales Panel und Sparmodus | 🟠 | Neu: mit simulierten Servern und Dateien getestet; noch nicht lange gegen den echten Dienst gelaufen. |
+| Linux und macOS | 🟠 | Nur im CI getestet; der tägliche Einsatz ist unter Windows. |
+
+<!-- glance:end -->
+
 ## Screenshots
 
 ### Die Seite

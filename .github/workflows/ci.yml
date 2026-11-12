@@ -43,6 +43,7 @@ jobs:
           python tools/make_settings_doc.py --check
           python tools/sync_changelog.py --check
           python tools/make_help_index.py --check
+          python tools/make_glance.py --check
 
   container:
     name: The example container builds
