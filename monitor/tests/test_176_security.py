@@ -373,6 +373,14 @@ class DispatchAndSigning(unittest.TestCase):
         self.assertEqual((result["run"], result["sha_matched"]), (7, True))
         self.assertIn("ref=" + self.SHA, calls[0], "the dispatch builds exactly the commit that was checked")
 
+    def test_the_attempt_of_the_run_is_kept_and_the_field_is_asked_for(self):
+        result, calls = self.fire([[], [{**self.made(9, self.SHA), "attempt": 1}]])
+        self.assertEqual((result["run"], result["run_attempt"]), (9, 1))
+        listing = [c for c in calls if "--json" in c][0] if any("--json" in c for c in calls) else []
+        self.assertTrue(not listing or "attempt" in listing[listing.index("--json") + 1])
+        again, _ = self.fire([[], [self.made(10, self.SHA)]])
+        self.assertIsNone(again["run_attempt"], "a gh that does not give the field leaves it empty, it is not invented")
+
     def test_a_new_run_on_another_commit_is_not_matched(self):
         result, _ = self.fire([[], [self.made(8, self.OTHER)]])
         self.assertEqual((result["run"], result["sha_matched"]), (8, False))

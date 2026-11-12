@@ -29,6 +29,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 - **Buchführung der Lesezugriffe**: Zustand, Zusammenfassung und Daten nennen, wie viele bedingte Aufrufe gemacht wurden und wie viele mit 304 antworteten (kein Kontingent verbraucht), sowie das Kontingent jeder Quelle.
 - **Wer das Kontingent verbraucht**: Der Monitor vergleicht in jedem Stundenfenster, was das ganze Konto verbraucht hat, mit seinen eigenen Aufrufen und nennt im Tab Kontingent, im Zustand und in der Zusammenfassung, wie viel andere Werkzeuge verbrauchen, mit einer Warnung, wenn sie den Großteil verbrauchen (GitHub sagt nicht, welches).
 - **Der Stream trägt auch die übrigen Signale**: Das erschöpfte Kontingent, die abbrechende Verbindung, veraltete Daten, ein zurückliegendes zentrales Panel und die Gesundheitswarnungen werden zu Ereignissen des Feeds (und des Streams und des Hooks), wenn sie auftreten, sich ändern oder gelöst werden, nicht nur die roten Workflows und die Panels des Tabs Sentinel.
+- **Der Batch-Versand speichert den Versuch des gefundenen Laufs** (`run_attempt` im Batch-Eintrag, aus dem Feld `attempt` von `gh run list`; leer, wenn `gh` es nicht liefert), und die Leitfäden zur KI-Verbindung und zum Kontingent beschreiben das zweite Nur-Lese-Konto.
 
 ### Geändert
 

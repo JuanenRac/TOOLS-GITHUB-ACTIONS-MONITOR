@@ -30,6 +30,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 - **Accounting of the reads**: the state, the brief and the data say how many conditional calls were made and how many answered 304 (no allowance spent) and the allowance of each source.
 - **Who spends the allowance**: the monitor compares, inside each hourly window, what the whole account spent with its own calls and says in the Quota tab, the state and the brief how much other tools spend, with a warning when they spend most of it (GitHub does not say which tool).
 - **The stream carries the other signals too**: the allowance used up, the connection that drops, data that go stale, a central panel that is behind and the health warnings become events of the feed (and of the stream and the hook) when they appear, change or are solved, not only the red workflows and the panels of the Sentinel tab.
+- **The batch dispatch keeps the attempt of the run it found** (`run_attempt` in the batch record, from the field `attempt` of `gh run list`; empty when `gh` does not give it), and the guides of the connection with an AI tool and of the quota describe the second read-only account.
 
 ### Changed
 

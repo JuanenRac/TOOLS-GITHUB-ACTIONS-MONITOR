@@ -29,6 +29,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 - **Comptabilité des lectures** : l'état, le résumé et les données disent combien d'appels conditionnels ont été faits et combien ont répondu 304 (sans dépenser de quota) et le quota de chaque source.
 - **Qui dépense le quota** : le moniteur compare, dans chaque fenêtre horaire, ce que tout le compte a dépensé avec ses propres appels et dit dans l'onglet Quota, l'état et le résumé combien dépensent les autres outils, avec un avertissement quand ils en dépensent l'essentiel (GitHub ne dit pas lequel).
 - **Le flux en direct porte aussi les autres signaux** : le quota épuisé, la connexion qui tombe, les données qui vieillissent, un panneau central en retard et les avertissements de santé deviennent des événements du flux (et du hook) quand ils apparaissent, changent ou se résolvent, pas seulement les workflows rouges et les panneaux de l'onglet Sentinelle.
+- **L'envoi par lots garde la tentative de l'exécution trouvée** (`run_attempt` dans l'enregistrement du lot, depuis le champ `attempt` de `gh run list` ; vide si `gh` ne le donne pas), et les guides de la connexion à un outil d'IA et du quota décrivent le second compte en lecture seule.
 
 ### Modifié
 

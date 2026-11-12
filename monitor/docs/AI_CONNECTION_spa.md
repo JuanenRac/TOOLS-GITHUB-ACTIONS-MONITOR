@@ -42,3 +42,5 @@ Todo está apagado por defecto. El texto de los logs se limpia de secretos y rut
 
 ## Ajustes
 `ai_alerts.enabled`, `ai_alerts.folder`, `ai_alerts.brief_max_bytes`, `ai_alerts.diagnose.*`, `ai_alerts.cascade.enabled`, `ai_alerts.stream.*`, `ai_alerts.heartbeat.*`, `ai_alerts.client_hook.*`; relacionados: `sound.enabled`, `display.blink_red_tiles`. Véase [SETTINGS_spa.md](SETTINGS_spa.md) y [AI_ALERTS_spa.md](AI_ALERTS_spa.md).
+
+La cuota de GitHub la comparten el monitor, las herramientas de IA y cualquier otra herramienta de la cuenta. Para que el monitor no se quede sin ella: la pestaña Cuota de los Ajustes, una GitHub App (`github_app.enabled`), una segunda cuenta de solo lectura para las lecturas (`extra_reader.enabled`, `extra_reader.file`: solo la ruta del fichero del token), el panel central (`central.source`) y el modo Bajo (`modes.auto_low`). El estado y el resumen dicen cuándo se agota la cuota y cuánto gastan otras herramientas. Véase [QUOTA_spa.md](QUOTA_spa.md).

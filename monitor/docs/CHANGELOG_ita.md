@@ -29,6 +29,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 - **Contabilità delle letture**: lo stato, il riepilogo e i dati dicono quante chiamate condizionali sono state fatte e quante hanno risposto 304 (senza spendere quota) e la quota di ogni fonte.
 - **Chi spende la quota**: il monitor confronta, in ogni finestra oraria, ciò che ha speso tutto l'account con le proprie chiamate e dice nella scheda Quota, nello stato e nel riepilogo quanto spendono altri strumenti, con un avviso quando ne spendono la maggior parte (GitHub non dice quale).
 - **Il flusso porta anche gli altri segnali**: la quota esaurita, la connessione che cade, i dati che invecchiano, un pannello centrale in ritardo e gli avvisi di salute diventano eventi del feed (e del flusso e dell'hook) quando compaiono, cambiano o si risolvono, non solo i workflow rossi e i pannelli della scheda Sentinella.
+- **L'invio a lotti conserva il tentativo dell'esecuzione trovata** (`run_attempt` nel record del lotto, dal campo `attempt` di `gh run list`; vuoto se `gh` non lo dà), e le guide della connessione a uno strumento di IA e della quota descrivono il secondo account di sola lettura.
 
 ### Modificato
 

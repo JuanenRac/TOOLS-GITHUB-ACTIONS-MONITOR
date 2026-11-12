@@ -42,3 +42,5 @@ Tudo está desativado por defeito. O texto dos registos é limpo de segredos e c
 
 ## Definições
 `ai_alerts.enabled`, `ai_alerts.folder`, `ai_alerts.brief_max_bytes`, `ai_alerts.diagnose.*`, `ai_alerts.cascade.enabled`, `ai_alerts.stream.*`, `ai_alerts.heartbeat.*`, `ai_alerts.client_hook.*`; relacionadas: `sound.enabled`, `display.blink_red_tiles`. Ver [SETTINGS_por.md](SETTINGS_por.md) e [AI_ALERTS_por.md](AI_ALERTS_por.md).
+
+A quota do GitHub é partilhada pelo monitor, pelas ferramentas de IA e por qualquer outra ferramenta da conta. Para que o monitor não fique sem ela: o separador Quota das Definições, uma GitHub App (`github_app.enabled`), uma segunda conta só de leitura para as leituras (`extra_reader.enabled`, `extra_reader.file`: só o caminho do ficheiro do token), o painel central (`central.source`) e o modo poupança (`modes.auto_low`). O estado e o resumo dizem quando a quota se esgota e quanto gastam outras ferramentas. Ver [QUOTA_por.md](QUOTA_por.md).

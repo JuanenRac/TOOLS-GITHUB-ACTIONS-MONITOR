@@ -29,6 +29,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 - **Contabilidad de las lecturas**: el estado, el resumen y los datos dicen cuántas llamadas condicionales se hicieron y cuántas respondieron 304 (sin gastar cuota) y la cuota de cada fuente.
 - **Quién gasta la cuota**: el monitor compara, dentro de cada ventana horaria, lo que gastó toda la cuenta con sus propias llamadas y dice en la pestaña Cuota, el estado y el resumen cuánto gastan otras herramientas, con un aviso cuando gastan la mayor parte (GitHub no dice cuál).
 - **El flujo en directo lleva también las demás señales**: la cuota agotada, la conexión que se cae, los datos que se quedan viejos, un panel central atrasado y los avisos de salud pasan a ser eventos del feed (y del flujo y del hook) cuando aparecen, cambian o se resuelven, no solo los workflows rojos y los paneles de la pestaña Centinela.
+- **El despacho por lotes guarda el intento de la ejecución que encontró** (`run_attempt` en el registro del lote, del campo `attempt` de `gh run list`; vacío si `gh` no lo da), y las guías de la conexión con una IA y de la cuota describen la segunda cuenta de solo lectura.
 
 ### Cambiado
 

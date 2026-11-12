@@ -42,3 +42,5 @@ Everything is off by default. The text of logs is cleaned of secrets and persona
 
 ## Settings
 `ai_alerts.enabled`, `ai_alerts.folder`, `ai_alerts.brief_max_bytes`, `ai_alerts.diagnose.*`, `ai_alerts.cascade.enabled`, `ai_alerts.stream.*`, `ai_alerts.heartbeat.*`, `ai_alerts.client_hook.*`; related: `sound.enabled`, `display.blink_red_tiles`. See [SETTINGS.md](SETTINGS.md) and [AI_ALERTS.md](AI_ALERTS.md).
+
+The allowance of GitHub is shared by the monitor, the AI tools and every other tool of the account. To keep the monitor from running dry: the Quota tab of the Settings, a GitHub App (`github_app.enabled`), a second read-only account for the reads (`extra_reader.enabled`, `extra_reader.file`: only the path of the token file), the central panel (`central.source`) and Low mode (`modes.auto_low`). The state and the brief say when the allowance is used up and how much other tools spend. See [QUOTA.md](QUOTA.md).

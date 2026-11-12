@@ -42,3 +42,5 @@
 
 ## 设置
 `ai_alerts.enabled`、`ai_alerts.folder`、`ai_alerts.brief_max_bytes`、`ai_alerts.diagnose.*`、`ai_alerts.cascade.enabled`、`ai_alerts.stream.*`、`ai_alerts.heartbeat.*`、`ai_alerts.client_hook.*`;相关:`sound.enabled`、`display.blink_red_tiles`。参见 [SETTINGS_zho.md](SETTINGS_zho.md) 和 [AI_ALERTS_zho.md](AI_ALERTS_zho.md)。
+
+GitHub 配额由监视器、AI 工具和账户下的所有其他工具共享。为避免监视器耗尽配额:设置中的“配额”标签页、GitHub App(`github_app.enabled`)、用于读取的第二个只读账户(`extra_reader.enabled`、`extra_reader.file`:只填令牌文件的路径)、中央面板(`central.source`)和节省模式(`modes.auto_low`)。状态和简报会说明配额何时用尽以及其他工具消耗了多少。参见 [QUOTA_zho.md](QUOTA_zho.md)。

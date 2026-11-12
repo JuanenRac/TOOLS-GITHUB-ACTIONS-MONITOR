@@ -646,11 +646,11 @@ def fire(name, repo, sha, real):
         args = dispatch_args(target["workflow"], repo, real, target["extra"], sha)
     except ValueError as error:
         raise RuntimeError(f"extra of {name} refused: {error}"[:200]) from None
-    listing = ("run", "list", "-R", f"{toolconfig.github_owner()}/{repo}", "--workflow", target["workflow"], "--event", "workflow_dispatch", "-L", "20", "--json", "databaseId,createdAt,headSha,event")
+    listing = ("run", "list", "-R", f"{toolconfig.github_owner()}/{repo}", "--workflow", target["workflow"], "--event", "workflow_dispatch", "-L", "20", "--json", "databaseId,createdAt,headSha,event,attempt")
     # the runs that already exist are noted BEFORE the dispatch and only a run that did not exist then can be ours (no clocks: a run of another batch, person or dry_run is never taken)
     known = {r.get("databaseId") for r in (ghj(*listing) or []) if isinstance(r, dict)}
     gh(*args)
-    run_id, matched = None, False
+    run_id, matched, attempt = None, False, None
     for _ in range(10):  # the run appears a moment later
         time.sleep(3)
         fresh = [r for r in (ghj(*listing) or []) if isinstance(r, dict) and r.get("event") == "workflow_dispatch" and r.get("databaseId") not in known]
@@ -659,11 +659,12 @@ def fire(name, repo, sha, real):
             chosen = (exact or fresh)[0]
             # more than one new candidate (a second dispatch at the same time): which one is ours cannot be told, so it is not offered for signing (needs review)
             run_id, matched = chosen["databaseId"], bool(exact) and len(fresh) == 1
+            attempt = chosen.get("attempt") if isinstance(chosen.get("attempt"), int) and not isinstance(chosen.get("attempt"), bool) else None      # a re-run of the same run is a different attempt
             break
     if run_id and not matched:
         print(te("gd.warn_other_sha", name=name, sha=sha[:7]))
     print(te("gd.dispatched", name=name, run=run_id))
-    return {"workflow": target["workflow"], "run": run_id, "sha": sha, "event": "workflow_dispatch", "sha_matched": matched,
+    return {"workflow": target["workflow"], "run": run_id, "sha": sha, "event": "workflow_dispatch", "sha_matched": matched, "run_attempt": attempt,
             "dispatched_at": datetime.fromtimestamp(before, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
 
 

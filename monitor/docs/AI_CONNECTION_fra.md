@@ -42,3 +42,5 @@ Tout est désactivé par défaut. Le texte des journaux est nettoyé des secrets
 
 ## Réglages
 `ai_alerts.enabled`, `ai_alerts.folder`, `ai_alerts.brief_max_bytes`, `ai_alerts.diagnose.*`, `ai_alerts.cascade.enabled`, `ai_alerts.stream.*`, `ai_alerts.heartbeat.*`, `ai_alerts.client_hook.*` ; liés : `sound.enabled`, `display.blink_red_tiles`. Voir [SETTINGS_fra.md](SETTINGS_fra.md) et [AI_ALERTS_fra.md](AI_ALERTS_fra.md).
+
+Le quota de GitHub est partagé par le moniteur, les outils d'IA et tout autre outil du compte. Pour que le moniteur n'en manque pas : l'onglet Quota des Réglages, une GitHub App (`github_app.enabled`), un second compte en lecture seule pour les lectures (`extra_reader.enabled`, `extra_reader.file` : seulement le chemin du fichier du jeton), le panneau central (`central.source`) et le mode économe (`modes.auto_low`). L'état et le résumé disent quand le quota est épuisé et combien dépensent les autres outils. Voir [QUOTA_fra.md](QUOTA_fra.md).

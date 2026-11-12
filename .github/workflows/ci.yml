@@ -45,6 +45,20 @@ jobs:
           python tools/make_help_index.py --check
           python tools/make_glance.py --check
 
+  browser:
+    name: The page in a browser (eight languages, every tab)
+    runs-on: ubuntu-latest
+    continue-on-error: true      # the fonts of a runner differ from the ones of a desktop: this job reports, it does not turn the CI red
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: No text leaves its box, the Quota tab included, and the sound logic of the page
+        env:
+          MONITOR_BROWSER_TESTS: "1"
+        run: python -m unittest discover -s monitor/tests -p "test_overflow.py" && python -m unittest discover -s monitor/tests -p "test_177_sound.py"
+
   container:
     name: The example container builds
     runs-on: ubuntu-latest

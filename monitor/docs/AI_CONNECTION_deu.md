@@ -42,3 +42,5 @@ Alles ist standardmäßig aus. Der Text der Logs wird vor dem Schreiben von Gehe
 
 ## Einstellungen
 `ai_alerts.enabled`, `ai_alerts.folder`, `ai_alerts.brief_max_bytes`, `ai_alerts.diagnose.*`, `ai_alerts.cascade.enabled`, `ai_alerts.stream.*`, `ai_alerts.heartbeat.*`, `ai_alerts.client_hook.*`; verwandt: `sound.enabled`, `display.blink_red_tiles`. Siehe [SETTINGS_deu.md](SETTINGS_deu.md) und [AI_ALERTS_deu.md](AI_ALERTS_deu.md).
+
+Das GitHub-Kontingent teilen sich der Monitor, die KI-Werkzeuge und jedes andere Werkzeug des Kontos. Damit dem Monitor nichts ausgeht: der Tab Kontingent der Einstellungen, eine GitHub-App (`github_app.enabled`), ein zweites Nur-Lese-Konto für das Lesen (`extra_reader.enabled`, `extra_reader.file`: nur der Pfad der Token-Datei), das zentrale Panel (`central.source`) und der Sparmodus (`modes.auto_low`). Zustand und Zusammenfassung sagen, wann das Kontingent erschöpft ist und wie viel andere Werkzeuge verbrauchen. Siehe [QUOTA_deu.md](QUOTA_deu.md).

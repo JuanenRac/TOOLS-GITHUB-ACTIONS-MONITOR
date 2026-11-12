@@ -29,6 +29,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 - **Contabilidade das leituras**: o estado, o resumo e os dados dizem quantas chamadas condicionais foram feitas e quantas responderam 304 (sem gastar quota) e a quota de cada fonte.
 - **Quem gasta a quota**: o monitor compara, dentro de cada janela horária, o que gastou toda a conta com as suas próprias chamadas e diz no separador Quota, no estado e no resumo quanto gastam outras ferramentas, com um aviso quando gastam a maior parte (o GitHub não diz qual).
 - **O fluxo em direto leva também os outros sinais**: a quota esgotada, a ligação que cai, os dados que ficam velhos, um painel central atrasado e os avisos de saúde passam a ser eventos do feed (e do fluxo e do hook) quando aparecem, mudam ou se resolvem, não só os workflows vermelhos e os painéis do separador Sentinela.
+- **O despacho por lotes guarda a tentativa da execução que encontrou** (`run_attempt` no registo do lote, do campo `attempt` de `gh run list`; vazio se o `gh` não o der), e os guias da ligação a uma ferramenta de IA e da quota descrevem a segunda conta só de leitura.
 
 ### Alterado
 
