@@ -24,6 +24,7 @@ Where it goes is set in `actions_monitor.json`:
 {
   "schema": 2,
   "generated": "2026-01-01T12:00:00Z",
+  "generated_local": "2026-01-01 13:00:00 CET (12:00:00 UTC)",
   "tool_version": "1.2.0",
   "complete": true,
   "red_repos": 1,
@@ -45,6 +46,7 @@ Where it goes is set in `actions_monitor.json`:
 * `complete` is `false` while the sentinel is still loading: do not treat a missing repository as green in that case.
 * `signature_verified` is `true`, `false` or the string `"unknown"` (never a guess: formats this tool cannot check are `"unknown"`).
 * `pending_sign*` fields describe the **local signing side** and are for your own local tools. A public consumer should ignore them.
+* The time is also written for people: `generated_local` has the same moment as local date, time, zone and UTC (for example `2026-01-01 13:00:00 CET (12:00:00 UTC)`), in the zone of `display.timezone` (`local` by default). `generated` is always UTC and is the field for programs.
 
 ## The rule of "red" (one definition, everywhere)
 

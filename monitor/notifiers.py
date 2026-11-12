@@ -25,6 +25,7 @@ import urllib.request
 from urllib.parse import quote, urlparse
 
 import netguard
+import tzdisplay
 
 CHANNELS = ("telegram", "discord", "slack", "matrix", "mqtt", "http_local")
 KNOWN_EVENTS = ("red_new", "red_fixed", "stuck_new", "pending_sign", "release_due", "rate_low", "offline", "online", "alerts_up", "workflow_failed", "collab_new", "collab_fixed")
@@ -149,7 +150,7 @@ def send_channel(name, cfg, event, opener=None, connect=None, allow_private=Fals
         return {"channel": name, "ok": False, "reason": problem}
     if opener is None and name != "http_local":      # http_local is loopback by definition; every other channel goes through the rule of netguard (resolved address, redirects)
         opener = netguard.opener_for(allow_private)
-    text = f"{event.get('text', '')}" + (f"\n{event['url']}" if event.get("url") else "")
+    text = tzdisplay.localize(f"{event.get('text', '')}") + (f"\n{event['url']}" if event.get("url") else "")
     record = {"kind": event.get("kind"), "repo": event.get("repo"), "text": event.get("text"), "url": event.get("url")}
     try:
         if name == "telegram":

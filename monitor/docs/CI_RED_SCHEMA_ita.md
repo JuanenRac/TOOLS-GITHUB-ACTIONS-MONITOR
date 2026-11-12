@@ -24,6 +24,7 @@ Dove viene scritto si imposta in `actions_monitor.json`:
 {
   "schema": 2,
   "generated": "2026-01-01T12:00:00Z",
+  "generated_local": "2026-01-01 13:00:00 CET (12:00:00 UTC)",
   "tool_version": "1.2.0",
   "complete": true,
   "red_repos": 1,
@@ -45,6 +46,7 @@ Dove viene scritto si imposta in `actions_monitor.json`:
 * `complete` è `false` finché la sentinella sta ancora caricando: in tal caso non considerare verde un repository mancante.
 * `signature_verified` è `true`, `false` o la stringa `"unknown"` (mai una supposizione: i formati che questo strumento non può verificare sono `"unknown"`).
 * I campi `pending_sign*` descrivono il **lato della firma locale** e sono per i tuoi strumenti locali. Un consumatore pubblico deve ignorarli.
+* L'ora è scritta anche per le persone: `generated_local` contiene lo stesso istante come data, ora e fuso locali più l'ora UTC (per esempio `2026-01-01 13:00:00 CET (12:00:00 UTC)`), nel fuso di `display.timezone` (`local` di default). `generated` è sempre UTC ed è il campo per i programmi.
 
 ## La regola del «rosso» (una sola definizione, ovunque)
 

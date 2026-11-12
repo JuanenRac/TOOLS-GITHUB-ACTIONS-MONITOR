@@ -23,6 +23,7 @@
 {
   "schema": 2,
   "generated": "2026-01-01T12:00:00Z",
+  "generated_local": "2026-01-01 13:00:00 CET (12:00:00 UTC)",
   "tool_version": "1.2.0",
   "complete": true,
   "red_repos": 1,
@@ -44,6 +45,7 @@
 * 哨兵仍在加载时，`complete` 为 `false`：此时请勿把缺失的仓库当作绿色。
 * `signature_verified` 为 `true`、`false` 或字符串 `"unknown"`（绝不猜测：本工具无法检查的格式一律为 `"unknown"`）。
 * `pending_sign*` 字段描述**本地签名一侧**，仅供您自己的本地工具使用。公开的使用方应忽略它们。
+* 时间也为人而写：`generated_local` 以本地日期、时间、时区加 UTC 表示同一时刻（例如 `2026-01-01 13:00:00 CET (12:00:00 UTC)`），时区取自 `display.timezone`（默认 `local`）。`generated` 始终是 UTC，供程序使用。
 
 ## “红色”的规则（处处只有一个定义）
 

@@ -22,6 +22,8 @@
 
 全コマンド共通のオプション：`--json`（応答を 1 つの JSON 文書で：`{"ok", "exit", "data"}`）、`--account ID`、`--url URL`、`--lite`（ポート 8766）、`--timeout 秒`（1〜60）、`--lang コード`。ネットワークモードではアクセストークンを、モニター自身が読む環境変数 `MONITOR_ACCESS_TOKEN` に設定します(`MONITOR_TOKEN` は別名として受け付けます。`--token TOKEN` は最後の手段で、オプションはプロセス一覧に表示されるためです)。優先順位は `MONITOR_ACCESS_TOKEN`、`MONITOR_TOKEN`、`--token` の順です。ヘッダー `X-Monitor-Access` で送られ、アドレスや画面には出ません。別のコンピューターへの暗号化されていない `http` の `--url` では stderr に警告を出します(トークンと応答が平文で送られるため)。管理下にないネットワークでは `https` を使ってください。
 
+人向けに書かれる時刻（`Last read` 行、ミュート、ログ、レポート、通知）は、このコンピューターのゾーンを使い、その名前と UTC 時刻を併記します（`11:43:07 CET (10:43:07 UTC)`）。別のゾーンは `display.timezone`（`local`、`utc`、または `Europe/Madrid` のような名前）で選びます。環境変数 `MONITOR_TIMEZONE` はファイルより優先されます。`--json` は UTC のままで `updated_local` を追加します。
+
 ## 終了コード（固定）
 
 | コード | 意味 |

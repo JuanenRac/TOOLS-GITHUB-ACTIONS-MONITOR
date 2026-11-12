@@ -24,6 +24,7 @@ L'emplacement d'écriture se définit dans `actions_monitor.json` :
 {
   "schema": 2,
   "generated": "2026-01-01T12:00:00Z",
+  "generated_local": "2026-01-01 13:00:00 CET (12:00:00 UTC)",
   "tool_version": "1.2.0",
   "complete": true,
   "red_repos": 1,
@@ -45,6 +46,7 @@ L'emplacement d'écriture se définit dans `actions_monitor.json` :
 * `complete` vaut `false` tant que la sentinelle est encore en cours de chargement : dans ce cas, ne considérez pas un dépôt manquant comme vert.
 * `signature_verified` vaut `true`, `false` ou la chaîne `"unknown"` (jamais une supposition : les formats que cet outil ne peut pas vérifier sont `"unknown"`).
 * Les champs `pending_sign*` décrivent le **côté signature locale** et sont destinés à vos propres outils locaux. Un consommateur public doit les ignorer.
+* L'heure est aussi écrite pour les personnes : `generated_local` contient le même instant en date, heure et fuseau locaux plus l'heure UTC (par exemple `2026-01-01 13:00:00 CET (12:00:00 UTC)`), dans le fuseau de `display.timezone` (`local` par défaut). `generated` est toujours en UTC et reste le champ pour les programmes.
 
 ## La règle du « rouge » (une seule définition, partout)
 

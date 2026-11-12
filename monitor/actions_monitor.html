@@ -518,9 +518,10 @@ function kSet(id,v){
 function tipRows(){document.querySelectorAll(".rrow,.spk,.job").forEach(r=>{if(!r.title){const t=r.textContent.replace(/\s+/g," ").trim();if(t)r.title=t}})}
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=s=>{s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60,u=[T("ui.u_h"),T("ui.u_min"),T("ui.u_s")];return h?`${h} ${u[0]} ${m} ${u[1]}`:m?`${m} ${u[1]} ${x} ${u[2]}`:`${x} ${u[2]}`};
-const hora=t=>t?new Date(t).toLocaleString(LOC(),{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"";
-const clock=(t,o)=>new Date(t).toLocaleTimeString(LOC(),o);
-const dtime=t=>new Date(t).toLocaleString(LOC(),{dateStyle:"short",timeStyle:"short"});
+const TZ=(()=>{const z=String(I18N.tz||"local");if(z.toLowerCase()==="utc")return "UTC";if(z==="local")return undefined;try{new Intl.DateTimeFormat("en",{timeZone:z});return z}catch(e){return undefined}})();   // display.timezone: "local" = the browser's zone
+const hora=t=>t?new Date(t).toLocaleString(LOC(),{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit",timeZone:TZ}):"";
+const clock=(t,o)=>new Date(t).toLocaleTimeString(LOC(),{timeZone:TZ,timeZoneName:"short",...(o||{})});
+const dtime=t=>new Date(t).toLocaleString(LOC(),{year:"2-digit",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",timeZoneName:"short",timeZone:TZ});
 const ago=t=>t?fmt((Date.now()-new Date(t).getTime())/1000):"";
 const COLORS={success:"var(--ok)",failure:"var(--bad)",timed_out:"var(--bad)",startup_failure:"var(--bad)",cancelled:"var(--grey)",skipped:"var(--grey)"};
 const BAD=["failure","timed_out","startup_failure"];
@@ -608,11 +609,11 @@ async function accTick(){
   }catch(e){const g=$("acc-grid");if(g)g.innerHTML=`<span class="mut">${esc(T("ui.err_monitor",{msg:e}))}</span>`}
 }
 /* the views: a deep link opens one panel; the tab bar still works unless chrome=0 hides it */
-function liveRow(ev){const t=ev.at?new Date(ev.at).toLocaleTimeString(LOC()):"";return `<li><time>${esc(t)}</time><span class="repo">${esc(ev.repo||"")}</span><span>${esc(ev.name||ev.workflow||ev.event||"")}</span><span class="mut">${esc(ev.status||"")} ${esc(ev.conclusion||"")}</span></li>`}
+function liveRow(ev){const t=ev.at?new Date(ev.at).toLocaleTimeString(LOC(),{timeZone:TZ,timeZoneName:"short"}):"";return `<li><time>${esc(t)}</time><span class="repo">${esc(ev.repo||"")}</span><span>${esc(ev.name||ev.workflow||ev.event||"")}</span><span class="mut">${esc(ev.status||"")} ${esc(ev.conclusion||"")}</span></li>`}
 function liveWebhook(s){
   const box=$("live-wh");if(!box)return;
   if(!s||!s.enabled){box.className="livebox off";box.innerHTML=`<b>${esc(T("ui.live_wh_title"))}</b> ${esc(T("ui.live_off"))}`;return}
-  const st=s.stats||{},last=s.last&&s.last.repo?T("ui.live_wh_last",{repo:s.last.repo,when:s.last.at?new Date(s.last.at).toLocaleTimeString(LOC()):"–"}):T("ui.live_wh_none");
+  const st=s.stats||{},last=s.last&&s.last.repo?T("ui.live_wh_last",{repo:s.last.repo,when:s.last.at?new Date(s.last.at).toLocaleTimeString(LOC(),{timeZone:TZ,timeZoneName:"short"}):"–"}):T("ui.live_wh_none");
   box.className="livebox "+(s.active?"ok":"warn");
   box.innerHTML=`<b>${esc(T("ui.live_wh_title"))}</b> ${esc(s.text||"")}`+(s.secret_ok?"":` <span>${esc(T("ui.live_wh_short"))}</span>`)+` <span class="mut">${esc(T("ui.live_wh_stats",{accepted:st.accepted||0,bad:st.bad_signature||0,ignored:st.ignored||0,dup:st.duplicates||0,refused:st.refused||0}))}</span> <span class="mut">${esc(last)}</span>`;
 }
@@ -1039,7 +1040,8 @@ $("t-sent").addEventListener("click",async e=>{
 /* the Alerts tab: the alerts of every sentinel in one list, a filter by origin and level, and local silences with an end (the monitor never writes to GitHub) */
 var ALERTS=null;const ALF={s:QS.get("sentinel")||store.get("am-al-s")||"",l:"",m:store.get("am-al-m")==="1"};
 async function alertsTick(){if(LITE)return;try{const r=await fetch("/api/alerts",{cache:"no-store"});if(r.ok)ALERTS=await r.json()}catch(e){}try{renderAlerts()}catch(e){}}
-async function alertMute(scope,value,on){try{await fetch(on?"/api/alerts/mute":"/api/alerts/unmute",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scope:scope,value:value})})}catch(e){}alertsTick()}
+async function alertMute(scope,value,on,untilChange){try{const body={scope:scope,value:value};if(untilChange)body.until_change=true;await fetch(on?"/api/alerts/mute":"/api/alerts/unmute",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})}catch(e){}alertsTick()}
+function onChange(a){return ((ALERTS&&ALERTS.mutes)||[]).some(m=>m.scope==="alert"&&m.value===a.id&&m.until_change)}   // the silence of this alert ends when the item changes
 function renderAlerts(){
   const A=ALERTS,box=$("al-list");if(!A||!box)return;
   const sm=A.summary||{by_sentinel:{},by_level:{}},names=A.sentinels||[];
@@ -1051,8 +1053,9 @@ function renderAlerts(){
   $("al-count").textContent=T("ui.al_count",{n:open,m:sm.muted||0});
   const dot=$("d-al");if(dot){const bad=(A.alerts||[]).filter(a=>!a.muted_until&&a.level==="error").length;dot.hidden=!bad;dot.textContent=bad}
   const url=a=>safeUrl((a.details||{}).url);
-  box.innerHTML=rows.length?rows.map(a=>`<div class="alrow ${a.muted_until?"muted":""}"><span class="origin ${esc(a.sentinel)}">${esc(T("ui.al_o_"+a.sentinel)===("ui.al_o_"+a.sentinel)?a.sentinel:T("ui.al_o_"+a.sentinel))}</span><span class="chip ${a.level==="error"?"bad":a.level==="info"?"":"warn"}" title="${esc(a.code)}">${esc(LVN(a.level==="error"?"bad":a.level==="warning"?"warn":"info"))}</span><span class="tt"><b class="rl" data-repo-open="${esc(a.repo||"")}">${esc(a.repo||"")}</b> ${esc(a.title)} <span class="mut">${esc(a.created_at?ago(a.created_at):"")}</span>${url(a)!=="#"?` <a href="${esc(url(a))}" target="_blank" rel="noopener">${esc(T("ui.a_open"))}</a>`:""}${a.muted_until?` <span class="chip">${esc(T("ui.al_muted_until",{time:dtime(a.muted_until)}))}</span>`:""}</span><span class="acts">${a.muted_until?`<button type="button" data-un="alert" data-v="${esc(a.id)}">${esc(T("ui.al_unmute"))}</button>`:`<button type="button" data-m="alert" data-v="${esc(a.id)}" title="${esc(T("ui.al_mute_alert_t",{h:A.mute_hours}))}">${esc(T("ui.al_mute_alert",{h:A.mute_hours}))}</button><button type="button" data-m="code" data-v="${esc(a.code)}" title="${esc(T("ui.al_mute_code_t",{h:A.mute_hours}))}">${esc(T("ui.al_mute_code"))}</button><button type="button" data-m="sentinel" data-v="${esc(a.sentinel)}" title="${esc(T("ui.al_mute_sent_t",{h:A.mute_hours}))}">${esc(T("ui.al_mute_sent"))}</button>`}</span></div>`).join(""):`<span style="color:var(--ok)">${esc(T("ui.al_none"))}</span>`;
+  box.innerHTML=rows.length?rows.map(a=>`<div class="alrow ${a.muted_until?"muted":""}"><span class="origin ${esc(a.sentinel)}">${esc(T("ui.al_o_"+a.sentinel)===("ui.al_o_"+a.sentinel)?a.sentinel:T("ui.al_o_"+a.sentinel))}</span><span class="chip ${a.level==="error"?"bad":a.level==="info"?"":"warn"}" title="${esc(a.code)}">${esc(LVN(a.level==="error"?"bad":a.level==="warning"?"warn":"info"))}</span><span class="tt"><b class="rl" data-repo-open="${esc(a.repo||"")}">${esc(a.repo||"")}</b> ${esc(a.title)} <span class="mut">${esc(a.created_at?ago(a.created_at):"")}</span>${url(a)!=="#"?` <a href="${esc(url(a))}" target="_blank" rel="noopener">${esc(T("ui.a_open"))}</a>`:""}${a.muted_until?` <span class="chip">${esc(T(onChange(a)?"ui.al_muted_change":"ui.al_muted_until",{time:dtime(a.muted_until)}))}</span>`:""}</span><span class="acts">${a.muted_until?`<button type="button" data-un="alert" data-v="${esc(a.id)}">${esc(T("ui.al_unmute"))}</button>`:`<button type="button" data-m="alert" data-v="${esc(a.id)}" title="${esc(T("ui.al_mute_alert_t",{h:A.mute_hours}))}">${esc(T("ui.al_mute_alert",{h:A.mute_hours}))}</button>${(a.details||{}).updated?`<button type="button" data-mc="alert" data-v="${esc(a.id)}" title="${esc(T("ui.al_mute_change_t",{h:A.mute_hours}))}">${esc(T("ui.al_mute_change"))}</button>`:""}<button type="button" data-m="code" data-v="${esc(a.code)}" title="${esc(T("ui.al_mute_code_t",{h:A.mute_hours}))}">${esc(T("ui.al_mute_code"))}</button><button type="button" data-m="sentinel" data-v="${esc(a.sentinel)}" title="${esc(T("ui.al_mute_sent_t",{h:A.mute_hours}))}">${esc(T("ui.al_mute_sent"))}</button>`}</span></div>`).join(""):`<span style="color:var(--ok)">${esc(T("ui.al_none"))}</span>`;
   box.querySelectorAll("button[data-m]").forEach(b=>b.addEventListener("click",()=>alertMute(b.dataset.m,b.dataset.v,true)));
+  box.querySelectorAll("button[data-mc]").forEach(b=>b.addEventListener("click",()=>alertMute(b.dataset.mc,b.dataset.v,true,true)));
   box.querySelectorAll("button[data-un]").forEach(b=>b.addEventListener("click",()=>alertMute(b.dataset.un,b.dataset.v,false)));
   const act=(A.mutes||[]),hist=(A.history||[]);
   $("al-hist").innerHTML=hist.length?`<table><thead><tr><th>${esc(T("ui.al_h_what"))}</th><th>${esc(T("ui.al_h_scope"))}</th><th>${esc(T("ui.al_h_from"))}</th><th>${esc(T("ui.al_h_until"))}</th><th></th></tr></thead><tbody>${hist.map(h=>{const live=act.some(m=>m.scope===h.scope&&m.value===h.value&&m.until===h.until);return `<tr><td class="wrap">${esc(h.value)}</td><td>${esc(T("ui.al_s_"+h.scope))}</td><td>${esc(dtime(h.from))}</td><td>${esc(h.ended?T("ui.al_ended",{time:dtime(h.ended)}):dtime(h.until))}</td><td>${live?`<button type="button" data-un="${esc(h.scope)}" data-v="${esc(h.value)}">${esc(T("ui.al_unmute"))}</button>`:""}</td></tr>`}).join("")}</tbody></table>`:esc(T("ui.al_hist_none"));
@@ -1497,7 +1500,7 @@ function renderBarFacts(){
   set("sb-ver","v"+(I18N.version||"")+" · "+T(LITE?"ui.sb_lite":"ui.sb_complete"),T("ui.sb_version_t"));
   if(SBINFO)set("sb-addr",(SBINFO.bind==="0.0.0.0"&&SBINFO.lan_address?SBINFO.lan_address:"127.0.0.1")+":"+SBINFO.port,T("ui.sb_addr_t",{local:"127.0.0.1:"+SBINFO.port,lan:(SBINFO.lan_address||"-")+":"+SBINFO.port}));
 }
-function renderClock(){const e=$("sb-clock");if(e)e.textContent=new Date().toLocaleString(LOC(),{dateStyle:"medium",timeStyle:"medium"})}
+function renderClock(){const e=$("sb-clock");if(e)e.textContent=new Date().toLocaleString(LOC(),{dateStyle:"medium",timeStyle:"long",timeZone:TZ})}
 async function sbTick(){try{const r=await fetch("/api/statusbar",{cache:"no-store"});if(r.ok)SBINFO=await r.json()}catch(e){}renderBarFacts()}
 {const watch=new MutationObserver(()=>{if(!watch.q){watch.q=requestAnimationFrame(()=>{watch.q=0;renderBar()})}});
   NOTE_SRC.forEach(([id])=>{const el=$(id);if(el)watch.observe(el,{attributes:true,childList:true,characterData:true,subtree:true})});

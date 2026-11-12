@@ -24,6 +24,7 @@ Wohin es geschrieben wird, legt `actions_monitor.json` fest:
 {
   "schema": 2,
   "generated": "2026-01-01T12:00:00Z",
+  "generated_local": "2026-01-01 13:00:00 CET (12:00:00 UTC)",
   "tool_version": "1.2.0",
   "complete": true,
   "red_repos": 1,
@@ -45,6 +46,7 @@ Wohin es geschrieben wird, legt `actions_monitor.json` fest:
 * `complete` ist `false`, solange der Wächter noch lädt: Werten Sie in diesem Fall ein fehlendes Repository nicht als grün.
 * `signature_verified` ist `true`, `false` oder die Zeichenkette `"unknown"` (nie eine Vermutung: Formate, die dieses Werkzeug nicht prüfen kann, sind `"unknown"`).
 * Die Felder `pending_sign*` beschreiben die **lokale Signaturseite** und sind für Ihre eigenen lokalen Werkzeuge gedacht. Ein öffentlicher Konsument sollte sie ignorieren.
+* Die Zeit steht auch für Menschen da: `generated_local` enthält denselben Zeitpunkt als lokales Datum, Uhrzeit, Zone und UTC (zum Beispiel `2026-01-01 13:00:00 CET (12:00:00 UTC)`), in der Zone von `display.timezone` (standardmäßig `local`). `generated` ist immer UTC und das Feld für Programme.
 
 ## Die Regel für „rot“ (eine Definition, überall)
 

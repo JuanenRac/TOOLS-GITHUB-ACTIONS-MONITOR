@@ -41,6 +41,7 @@ MAX_BODY = 16384
 NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}$")
 LABEL_RE = re.compile(r"^[\w .:/+-]{1,50}$")      # a label of GitHub may hold a colon, a space or a slash ("monitor:ignore", "good first issue")
 LABEL_KEYS = ("sentinels.collab.rules.issue_critical_labels", "sentinels.collab.rules.ignore_labels")
+TZ_RE = re.compile(r"^(?:local|utc|UTC|[A-Za-z][A-Za-z0-9_+./-]{1,63})$")      # display.timezone: local, utc or an IANA name
 OWNER_RE = re.compile(r"^[A-Za-z0-9-]{0,39}$")
 MODEL_RE = re.compile(r"^[A-Za-z0-9._:/@-]{0,100}$")
 OLLAMA_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}/?$")   # the local service only: nothing leaves this computer
@@ -100,6 +101,7 @@ _f("basic", "lifecycle", "discovery.hide", "names")
 # --- General
 _f(_T_GENERAL, "identity", "github_owner", "text", OWNER_RE)
 _f(_T_GENERAL, "identity", "language", "enum", ("",) + tuple(i18n.LANGS), False)
+_f(_T_GENERAL, "identity", "display.timezone", "text", TZ_RE, False)
 _f(_T_GENERAL, "scope", "mode", "enum", ("full", "lite"))
 _f(_T_GENERAL, "scope", "repos", "repos")
 _f(_T_GENERAL, "scope", "ecosystems", "eco")

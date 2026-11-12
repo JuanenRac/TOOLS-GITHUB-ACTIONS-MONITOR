@@ -48,6 +48,7 @@ import redrule
 import resilience
 import secretstore
 import toolconfig
+import tzdisplay
 import updatecheck
 from tool_version import AUTHOR, LICENSE_ID, TOOL_VERSION
 
@@ -79,6 +80,7 @@ DEFAULTS = {
     "ai": {"provider": "none"},
     "webhook": {"enabled": False, "secret": "", "replay_seconds": 3600, "max_per_minute": 30},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default)
     "cache": {"etag": {"enabled": True, "ttl_hours": 24}},   # conditional reads: a 304 answer costs no quota (etagcache.py)
+    "display": {"timezone": "local"},   # zone of the times written for people (log, reports, command line, notifications): local | utc | an IANA name such as Europe/Madrid
     "updates": {"check": True},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
     "airgapped": False,            # True: nothing is requested from the network except GitHub's data you asked for; the update check is off
     "open_browser": True,
@@ -596,7 +598,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
         red, approx = redrule.red_workflows({r: [x for x in runs if x["repo"] == r] for r in repos}, None, True, config.get("runs_per_repo"))
     figures = header_figures(runs, active, ISSUE_CACHE["items"], red=red, approx=approx)
     return {
-        "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "took": round(time.time() - started, 1),
+        "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "updated_local": tzdisplay.stamp(time.time()), "took": round(time.time() - started, 1),
         "repos": repos, "ecosystems": {repo: ecosystem_of(repo) for repo in repos},
         "runs": runs[:600], "active": active, "issues": ISSUE_CACHE["items"], "failing": unresolved_failures(runs),
         "errors": errors, "rate": rate, "stuck_minutes": config["stuck_minutes"],
@@ -856,7 +858,7 @@ def loop(config):
                 STATE["data"], STATE["error"], STATE["hint"] = data, None, None
                 STATE["complete"] = True
             with LOG_FILE.open("a", encoding="utf-8") as log:  # counts only, never titles
-                log.write(f"{data['updated']} repos={len(data['repos'])} hot={data['hot']} refreshed={data['refreshed']} active={len(data['active'])} issues={len(data['issues'])} rate={data['rate']}\n")
+                log.write(tzdisplay.localize(f"{data['updated']} repos={len(data['repos'])} hot={data['hot']} refreshed={data['refreshed']} active={len(data['active'])} issues={len(data['issues'])} rate={data['rate']}\n"))
             delay = tuned(config, "refresh_seconds", data)
             try:   # the report of the day goes to the audit folder (never stops the loop)
                 if SENTINEL["obj"] is not None and AUTOSAVE is not None and not data.get("loading"):
@@ -919,7 +921,7 @@ def render_page():
     """actions_monitor.html with the catalogues of the interface (keys "ui.*") for the 8 languages and the default language inlined."""
     page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
     data = {"default": i18n.language(), "langs": list(i18n.LANGS), "names": i18n.NATIVE_NAMES, "html": i18n.HTML_LANG, "locale": i18n.BROWSER_LOCALE, "catalogues": i18n.ui_catalogues(),
-            "ecosystems": {**{"other": i18n.t("ui.eco_other")}, **{key: item["label"] for key, item in toolconfig.ecosystems().items()}}, "owner": toolconfig.github_owner(), "host": github_host(), "lite": LITE["on"], "network": localguard.public_state(), "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
+            "ecosystems": {**{"other": i18n.t("ui.eco_other")}, **{key: item["label"] for key, item in toolconfig.ecosystems().items()}}, "owner": toolconfig.github_owner(), "tz": tzdisplay.setting(), "host": github_host(), "lite": LITE["on"], "network": localguard.public_state(), "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
     blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     return page.replace("/*I18N_DATA*/null", blob, 1)
 

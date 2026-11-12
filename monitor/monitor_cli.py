@@ -31,6 +31,7 @@ from urllib.parse import urlencode, urlparse
 sys.path.insert(0, str(Path(__file__).resolve().parent))      # also under `python -I`
 import i18n
 import platform_compat
+import tzdisplay
 from tool_version import TOOL_VERSION
 
 EXIT_OK, EXIT_USAGE, EXIT_DOWN, EXIT_AUTH, EXIT_DEGRADED, EXIT_ALERTS = 0, 1, 2, 3, 4, 5
@@ -121,12 +122,12 @@ def cmd_status(ctx):
     rate = data.get("rate") or {}
     payload = {"version": health.get("version"), "edition": "lite" if health.get("lite") else "complete", "account": health.get("account"), "uptime_seconds": health.get("uptime_seconds"),
                "repos": len(data.get("repos") or []), "active": figures.get("active"), "queued": figures.get("queued"), "failures_24h": figures.get("fail24"), "successes_24h": figures.get("ok24"),
-               "red_workflows": figures.get("red"), "updated": data.get("updated"), "offline": bool((data.get("offline") or {}).get("offline")),
+               "red_workflows": figures.get("red"), "updated": data.get("updated"), "updated_local": tzdisplay.stamp(data["updated"]) if data.get("updated") else None, "offline": bool((data.get("offline") or {}).get("offline")),
                "allowance": {"remaining": rate.get("remaining"), "limit": rate.get("limit"), "reset": rate.get("reset")}, "error": answer.get("error") or None}
     lines = [i18n.t("cli.status_head", version=payload["version"], edition=i18n.t("cli.edition_" + ("lite" if payload["edition"] == "lite" else "complete")), account=payload["account"] or "-"),
              i18n.t("cli.status_repos", n=payload["repos"], active=payload["active"], queued=payload["queued"], fail=payload["failures_24h"], ok=payload["successes_24h"]),
              i18n.t("cli.status_allowance", remaining=rate.get("remaining", "-"), limit=rate.get("limit", "-")),
-             i18n.t("cli.status_updated", when=payload["updated"] or "-")]
+             i18n.t("cli.status_updated", when=payload["updated_local"] or "-")]
     code = EXIT_OK
     if payload["offline"]:
         lines.append(i18n.t("cli.status_offline"))

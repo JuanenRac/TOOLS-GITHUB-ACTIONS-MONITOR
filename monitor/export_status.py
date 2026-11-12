@@ -20,6 +20,7 @@ from pathlib import Path
 import ci_red
 import i18n
 import signstate
+import tzdisplay
 from tool_version import TOOL_VERSION
 
 class _Text(dict):
@@ -105,7 +106,7 @@ def write_sign_queue(snapshot, path, trust="all"):
             writer.writerows(rows)
             text = buffer.getvalue()
         else:
-            text = json.dumps({"schema": 1, "generated": snapshot.get("generated"), "local_only": True, "queue": rows}, ensure_ascii=False, indent=1) + "\n"
+            text = json.dumps({"schema": 1, "generated": snapshot.get("generated"), "generated_local": tzdisplay.stamp(snapshot.get("generated")) if snapshot.get("generated") else None, "local_only": True, "queue": rows}, ensure_ascii=False, indent=1) + "\n"
         tmp = target.with_name(target.name + ".tmp")
         tmp.write_text(text, encoding="utf-8", newline="\n")
         os.replace(tmp, target)

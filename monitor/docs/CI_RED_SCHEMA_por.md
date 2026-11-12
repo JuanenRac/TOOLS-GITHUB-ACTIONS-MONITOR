@@ -24,6 +24,7 @@ O local onde é escrito define-se em `actions_monitor.json`:
 {
   "schema": 2,
   "generated": "2026-01-01T12:00:00Z",
+  "generated_local": "2026-01-01 13:00:00 CET (12:00:00 UTC)",
   "tool_version": "1.2.0",
   "complete": true,
   "red_repos": 1,
@@ -45,6 +46,7 @@ O local onde é escrito define-se em `actions_monitor.json`:
 * `complete` é `false` enquanto a sentinela ainda está a carregar: nesse caso, não trate como verde um repositório em falta.
 * `signature_verified` é `true`, `false` ou a cadeia `"unknown"` (nunca um palpite: os formatos que esta ferramenta não consegue verificar são `"unknown"`).
 * Os campos `pending_sign*` descrevem o **lado da assinatura local** e destinam-se às suas próprias ferramentas locais. Um consumidor público deve ignorá-los.
+* A hora também é escrita para as pessoas: `generated_local` traz o mesmo instante como data, hora e fuso locais mais a hora UTC (por exemplo `2026-01-01 13:00:00 CET (12:00:00 UTC)`), no fuso de `display.timezone` (`local` por omissão). `generated` é sempre UTC e é o campo para os programas.
 
 ## A regra do «vermelho» (uma só definição, em todo o lado)
 

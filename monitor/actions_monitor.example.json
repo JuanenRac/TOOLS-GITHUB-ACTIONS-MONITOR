@@ -353,6 +353,9 @@
       }
     }
   },
+  "display": {
+    "timezone": "local"
+  },
   "updates": {
     "check": true
   },

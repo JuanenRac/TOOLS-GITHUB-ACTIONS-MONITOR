@@ -66,7 +66,7 @@ def main():
     if args.json:
         print(json.dumps(s, ensure_ascii=False, indent=1))
         return 0
-    print(i18n.t("lp.header", tool=s.get("tool_version") or i18n.t("lp.old_version"), copy=TOOL_VERSION, level=s.get("level"), generated=s.get("generated"), rate=s.get("rate"), loading=s.get("loading")))
+    print(i18n.t("lp.header", tool=s.get("tool_version") or i18n.t("lp.old_version"), copy=TOOL_VERSION, level=s.get("level"), generated=s.get("generated"), rate=str(s.get("rate")), loading=s.get("loading")))
     for line in s.get("parte") or []:
         print(f"[{line.get('level')}] {line.get('text')}")
     for key, row in (s.get("by_ecosystem") or {}).items():

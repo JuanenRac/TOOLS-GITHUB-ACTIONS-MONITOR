@@ -145,10 +145,17 @@ def tl(lang, key, /, **values):
         text = _load(DEFAULT).get(key)
     if text is None:
         return key
+    if values:
+        values = {k: (_tz().localize(v) if isinstance(v, str) and "Z" in v else v) for k, v in values.items()}   # an ISO UTC time in a text for people is shown in the zone of display.timezone
     try:
         return text.format(**values) if values else text
     except (KeyError, IndexError, ValueError):
         return text
+
+
+def _tz():
+    import tzdisplay
+    return tzdisplay
 
 
 def t(key, /, **values):

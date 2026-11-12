@@ -22,6 +22,8 @@
 
 Options de toutes les commandes : `--json` (la réponse comme un document JSON : `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (port 8766), `--timeout SECONDES` (1 à 60), `--lang CODE`. En mode réseau, mettez le jeton d'accès dans la variable d'environnement `MONITOR_ACCESS_TOKEN`, celle que lit le moniteur lui-même (`MONITOR_TOKEN` est accepté comme alias ; `--token JETON` est le dernier recours, car une option apparaît dans la liste des processus). L'ordre : `MONITOR_ACCESS_TOKEN`, puis `MONITOR_TOKEN`, puis `--token`. Il voyage dans l'en-tête `X-Monitor-Access`, jamais dans l'adresse ni à l'écran. Un `--url` en `http` non chiffré vers un autre ordinateur affiche un avertissement sur stderr (le jeton et les réponses circuleraient en clair) : utilisez `https` hors d'un réseau que vous contrôlez.
 
+Les heures écrites pour les personnes (la ligne `Last read`, les sourdines, le journal, les rapports, les notifications) utilisent le fuseau de cet ordinateur et le nomment, avec l'heure UTC à côté (`11:43:07 CET (10:43:07 UTC)`). Choisissez un autre fuseau avec `display.timezone` (`local`, `utc` ou un nom comme `Europe/Madrid` ; la variable d'environnement `MONITOR_TIMEZONE` l'emporte sur le fichier). `--json` garde l'UTC et ajoute `updated_local`.
+
 ## Codes de sortie (stables)
 
 | Code | Signification |

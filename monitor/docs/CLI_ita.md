@@ -22,6 +22,8 @@
 
 Opzioni di tutti i comandi: `--json` (la risposta come un documento JSON: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (porta 8766), `--timeout SECONDI` (da 1 a 60), `--lang CODICE`. In modalità di rete metti il token di accesso nella variabile d'ambiente `MONITOR_ACCESS_TOKEN`, quella che legge il monitor stesso (`MONITOR_TOKEN` è accettata come alias; `--token TOKEN` è l'ultima risorsa, perché un'opzione compare nell'elenco dei processi). L'ordine: `MONITOR_ACCESS_TOKEN`, poi `MONITOR_TOKEN`, poi `--token`. Viaggia nell'intestazione `X-Monitor-Access`, mai nell'indirizzo e mai a schermo. Un `--url` in `http` non cifrato verso un altro computer stampa un avviso su stderr (il token e le risposte viaggerebbero in chiaro): usa `https` fuori da una rete che controlli.
 
+Gli orari scritti per le persone (la riga `Last read`, i silenziamenti, il registro, i rapporti, le notifiche) usano il fuso di questo computer e lo nominano, con l'ora UTC accanto (`11:43:07 CET (10:43:07 UTC)`). Un altro fuso si sceglie con `display.timezone` (`local`, `utc` o un nome come `Europe/Madrid`; la variabile d'ambiente `MONITOR_TIMEZONE` prevale sul file). `--json` mantiene UTC e aggiunge `updated_local`.
+
 ## Codici di uscita (stabili)
 
 | Codice | Significato |

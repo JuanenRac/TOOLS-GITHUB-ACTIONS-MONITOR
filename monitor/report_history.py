@@ -14,6 +14,7 @@ import time
 from datetime import datetime, timedelta, timezone
 
 import i18n
+import tzdisplay
 
 PREFIX = "SENTINEL_REPORT_DAY_"
 LEGACY_PREFIX = "PARTE_CENTINELA_DIA_"   # the name used by versions before 1.5.0: still read (and kept in the retention), never written
@@ -26,14 +27,19 @@ def parte_lines(snap):
     return [(l.get("level"), l.get("text")) for l in (snap or {}).get("parte") or []]
 
 
+def _when(snap):
+    generated = (snap or {}).get("generated")
+    return tzdisplay.stamp(generated) if generated else generated
+
+
 def parte_text(snap):
-    lines = [f"{i18n.t('ph.title_text')} - {(snap or {}).get('generated')}"] + [f"[{lv}] {tx}" for lv, tx in parte_lines(snap)]
+    lines = [f"{i18n.t('ph.title_text')} - {_when(snap)}"] + [f"[{lv}] {tx}" for lv, tx in parte_lines(snap)]
     return "\n".join(lines) + "\n"
 
 
 def parte_markdown(snap):
     """The report as Markdown, ready to paste into an issue."""
-    out = [f"## {i18n.t('ph.title_md')} - {(snap or {}).get('generated')}", ""]
+    out = [f"## {i18n.t('ph.title_md')} - {_when(snap)}", ""]
     for lv, tx in parte_lines(snap):
         out.append(f"- **{lv}**: {tx}")
     totals = (snap or {}).get("totals") or {}

@@ -17,6 +17,7 @@ import json
 import os
 import re
 import time
+import tzdisplay
 import urllib.request
 from pathlib import Path
 
@@ -125,12 +126,12 @@ def _event(folder, kind, alert, now):
         handle.write(json.dumps(line, ensure_ascii=False) + "\n")
 
 
-def brief(alerts, limit):
+def brief(alerts, limit, now=None):
     """The Markdown an AI reads when it starts: open alerts, the real ones first, within `limit` bytes."""
     live = [a for a in alerts if a["state"] != "resolved"]
     live.sort(key=lambda a: (a["state"] == "acknowledged", a["class"] != "real", a["repo"], a["workflow"]))
     real = sum(1 for a in live if a["class"] == "real" and a["state"] == "open")
-    lines = ["# CI alerts", "", f"{real} real alert(s) open, {len(live)} in total. Transient ones usually clear by themselves; re-run once before you dig.", ""]
+    lines = ["# CI alerts", "", f"{real} real alert(s) open, {len(live)} in total. Transient ones usually clear by themselves; re-run once before you dig.", f"Updated: {tzdisplay.stamp(time.time() if now is None else now)}", ""]
     for a in live:
         mark = {"open": "", "acknowledged": " (acknowledged)"}[a["state"]]
         lines.append(f"- [{a['severity']}/{a['class']}] {a['repo']} / {a['workflow']}: {a['conclusion']} x{a['streak']}{mark} - {a['cause']}. Next: {a['action']}. {a.get('url') or ''}".rstrip())
@@ -194,7 +195,7 @@ def update(config, red_rows, now=None, texts=None, opener=None):
     state = {k: v for k, v in state.items() if v.get("state") != "resolved" or v.get("resolved_at", 0) > cutoff}
     _write(folder / STATE, json.dumps(state, ensure_ascii=False, indent=1) + "\n")
     alerts = sorted(state.values(), key=lambda a: (a["repo"], a["workflow"]))
-    _write(folder / BRIEF, brief(alerts, cfg["brief_max_bytes"]))
+    _write(folder / BRIEF, brief(alerts, cfg["brief_max_bytes"], now))
     if cfg["hook"]["enabled"]:
         for alert in opened:
             if alert["class"] == "real" and HOOK.allowed(cfg["hook"]["max_per_hour"], now):

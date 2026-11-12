@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 os.environ["MONITOR_TARGETS_FILE"] = str(Path(__file__).resolve().parent / "fixtures" / "fixture_targets.json")          # the maintainer's catalogue, whatever the configuration says
 os.environ["MONITOR_ECOSYSTEMS_FILE"] = str(Path(__file__).resolve().parent / "fixtures" / "fixture_ecosystems.json")
 os.environ["MONITOR_PROFILES_FILE"] = str(Path(__file__).resolve().parent / "fixtures" / "fixture_profiles.json")
+os.environ["MONITOR_TIMEZONE"] = "utc"      # texts for people in UTC unless a test asks for another zone (tests/test_timezone.py)
 import i18n  # noqa: E402
 import toolconfig  # noqa: E402
 

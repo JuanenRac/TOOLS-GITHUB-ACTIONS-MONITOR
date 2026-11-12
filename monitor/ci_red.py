@@ -9,7 +9,7 @@ sentinel.ci_red_file in actions_monitor.json:  ""  = ci_red.json next to the mon
 sentinel.ci_red_audit_copy: true also copies it into the audits folder when that folder exists.
 
 FORMAT (schema 2, stable; read it with .get(): fields are only ever added)
-  {"schema": 2, "generated": "<UTC time>", "tool_version": "...", "complete": bool,   complete = false while the sentinel is still loading
+  {"schema": 2, "generated": "<UTC time>", "generated_local": "<same moment for people: local date, time, zone and UTC>", "tool_version": "...", "complete": bool,   complete = false while the sentinel is still loading
    "red_repos": N,                                  repositories with at least one workflow in red
    "pending_sign_repos": N,                         repositories with a green build waiting for the local signature / publication (over the threshold)
    "pending_sign_hours_threshold": H,
@@ -28,6 +28,7 @@ import re
 from pathlib import Path
 
 import ai_alerts
+import tzdisplay
 from tool_version import TOOL_VERSION
 
 HERE = Path(__file__).resolve().parent
@@ -53,7 +54,7 @@ def build(snapshot):
                                                    "last_build_at": g.get("last_build_at"), "url": g.get("url")})
     for row in repos.values():
         row.setdefault("pending_sign", [])
-    return {"schema": SCHEMA, "generated": snapshot.get("generated"), "tool_version": TOOL_VERSION, "complete": not snapshot.get("loading"),
+    return {"schema": SCHEMA, "generated": snapshot.get("generated"), "generated_local": tzdisplay.stamp(snapshot.get("generated")) if snapshot.get("generated") else None, "tool_version": TOOL_VERSION, "complete": not snapshot.get("loading"),
             "red_repos": sum(1 for v in repos.values() if v["red"]), "pending_sign_repos": sum(1 for v in repos.values() if v["pending_sign"]),
             "pending_sign_hours_threshold": (snapshot.get("a5") or {}).get("pending_sign_hours"), "repos": dict(sorted(repos.items()))}
 
