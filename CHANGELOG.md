@@ -8,6 +8,27 @@
 
 The history of GitHub Actions Monitor, from the first version to the latest. Each version groups its changes under Added, Changed, Fixed and Security.
 
+## [Unreleased]
+
+The connection between the monitor and an AI tool: the feed always agrees with the page, each alert says why it is red, a stream and three MCP tools push the news, a command installs the gate script, the bar shows whether an AI is connected, and every state file is private to its owner.
+
+### Added
+
+- **The brief and the feed follow every refresh of the Alerts tab** (and every read of the feed and every cycle): they used to follow it by one cycle, so an AI could read 10 alerts while the page showed 6. `ALERTS_BRIEF.md` now carries `Updated:` in your time zone and a machine line `updated_epoch:`, and `GET /api/ai/brief?fmt=json` adds `updated`, `updated_local` and `age_seconds`. A cycle that has not loaded its data yet never resolves alerts.
+- **`ai_alerts.diagnose`** (off by default, in the Settings tab, in the eight languages): each alert of a new red run carries `diagnosis`, the first failing step and about ten relevant lines of the log, read with read-only calls, cleaned of secrets and bounded in size and in runs per cycle; an infrastructure error in the log makes the alert transient.
+- **`ai_alerts.cascade`**: alerts that are red because another repository is red (named in the log or in the rule `ai_alerts.cascade.map`) are listed under it in the brief and carry `origin`.
+- **`GET /api/ai/stream`** (`ai_alerts.stream`, off by default): server-sent events, read only, with the access token in the network mode, limited in listeners and in time, resumable with `Last-Event-ID`; the lite edition does not have it.
+- **MCP tools `alerts_open`, `alert_diagnose` and `alert_ack`** (the last one only with `--allow-ack`), and a notice to the AI when it connects, in the `instructions` and with one notification, saying how many real alerts are open.
+- **`monitor_cli.py ai-hook install|status|uninstall [--cursor|--generic] [--scope project|user] [--dry-run]`** and the gate script `ai_hook.py` (standard library only): it adds the brief to the AI session and, only with `ai_alerts.client_hook.block_on_stop` (off by default), asks the AI to look at open real alerts before it ends a turn. The settings of the tool are merged, never replaced, a copy of the file is kept, a file that is not valid JSON is refused untouched, and everything written is plain ASCII. The figures live in `ai_alerts.client_hook` (Settings tab, eight languages).
+- **An AI heartbeat** (`ai_alerts.heartbeat`): the stream, the MCP server, the gate script and the endpoints note their last read in a small local file, and the bar at the foot of the page shows whether an AI is connected and how long ago it read.
+- **`monitor_cli.py --token-file FILE`** and a warning on stderr when `--token` is used (it shows in the list of processes) or when the token file can be read by other users.
+- Tests for every change, in a temporary folder and offline, including the mode of every state file under a lax `umask`.
+
+### Changed
+
+- **Every state file of the monitor is created with mode 0600** (and the folders it creates with 0700) through one helper, `private_io.py`: silences, events, the feed, the brief, caches, the settings and the files written by the gate script installer. On Windows the modes cannot be enforced by the program (the folders inherit the permissions of their parent).
+- **Starting the network mode** while `listen.query_access` is still on now prints the first steps (turn it off; use HTTPS or a VPN), and the help of `listen.network` and the advanced guide say the same in the eight languages.
+
 ## [1.7.5]
 
 The command line takes the access token under its own name, the network mode is safer by default (the address of the computer is hidden from the network, the old ?access= address can be turned off, notification destinations on the local network are refused, a warning about plain HTTP), times for people use your own time zone, an alert can be silenced until the item changes, and the counts and checks that gave wrong answers are corrected.

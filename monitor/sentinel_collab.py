@@ -32,6 +32,7 @@ import events
 import i18n
 import sentinel_base
 import toolconfig
+import private_io
 
 HERE = Path(__file__).resolve().parent
 STATE_FILE = HERE / "collab_state.json"
@@ -314,7 +315,7 @@ class SentinelCollab(sentinel_base.BaseSentinel):
             payload = json.dumps(self.state, ensure_ascii=False)
         try:
             tmp = Path(str(STATE_FILE) + ".tmp")
-            tmp.write_text(payload, encoding="utf-8")
+            private_io.write_tmp(tmp, payload)
             os.replace(tmp, STATE_FILE)
         except OSError:
             pass

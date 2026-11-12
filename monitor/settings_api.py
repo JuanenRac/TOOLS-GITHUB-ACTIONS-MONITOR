@@ -31,6 +31,7 @@ from pathlib import Path
 import i18n
 import surface
 import toolconfig
+import private_io
 
 HERE = Path(__file__).resolve().parent
 CONFIG_FILE = HERE / "actions_monitor.json"
@@ -306,6 +307,22 @@ _f(_T_AI, "alerts", "ai_alerts.brief_max_bytes", "int", (512, 20000), restart=Fa
 _f(_T_AI, "alerts", "ai_alerts.hook.enabled", "bool", restart=False, secure=True)
 _f(_T_AI, "alerts", "ai_alerts.hook.url", "text", LOOP_URL_RE, restart=False, secure=True)
 _f(_T_AI, "alerts", "ai_alerts.hook.max_per_hour", "int", (1, 60), restart=False, unit="")
+_f(_T_AI, "alerts", "ai_alerts.diagnose.enabled", "bool", restart=False, secure=True)
+_f(_T_AI, "alerts", "ai_alerts.diagnose.max_per_cycle", "int", (1, 10), restart=False, unit="")
+_f(_T_AI, "alerts", "ai_alerts.diagnose.log_lines", "int", (3, 40), restart=False, unit="")
+_f(_T_AI, "alerts", "ai_alerts.diagnose.max_bytes", "int", (200, 4000), restart=False, unit="")
+_f(_T_AI, "alerts", "ai_alerts.cascade.enabled", "bool", restart=False)
+_f(_T_AI, "alerts", "ai_alerts.stream.enabled", "bool", restart=False, secure=True)
+_f(_T_AI, "alerts", "ai_alerts.stream.max_seconds", "int", (60, 86400), restart=False)
+_f(_T_AI, "alerts", "ai_alerts.stream.max_clients", "int", (1, 10), restart=False, unit="")
+_f(_T_AI, "alerts", "ai_alerts.heartbeat.enabled", "bool", restart=False)
+_f(_T_AI, "alerts", "ai_alerts.heartbeat.window_minutes", "int", (1, 1440), restart=False)
+_f(_T_AI, "alerts", "ai_alerts.client_hook.enabled", "bool", restart=False)
+_f(_T_AI, "alerts", "ai_alerts.client_hook.block_on_stop", "bool", restart=False, secure=True)
+_f(_T_AI, "alerts", "ai_alerts.client_hook.cooldown_minutes", "int", (1, 1440), restart=False)
+_f(_T_AI, "alerts", "ai_alerts.client_hook.stale_hours", "int", (1, 168), restart=False)
+_f(_T_AI, "alerts", "ai_alerts.client_hook.max_lines", "int", (1, 40), restart=False, unit="")
+_f(_T_AI, "alerts", "ai_alerts.client_hook.max_chars", "int", (400, 8000), restart=False, unit="")
 # @@MORE_SETTINGS@@
 
 TAB_ORDER = ("basic", "general", "polling", "cache", "sentinel", "surface", "readiness", "paths", "outputs", "ai", "webhook", "notify", "analytics", "lint", "advanced", "console")
@@ -633,7 +650,7 @@ def _apply_locked(clean, path):
         _set(current, key, clean[key])
     backup = _backup(path)
     tmp = path.with_name(path.name + ".tmp")
-    tmp.write_text(json.dumps(current, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+    private_io.write_tmp(tmp, json.dumps(current, ensure_ascii=False, indent=2) + "\n")
     os.replace(tmp, path)
     toolconfig.forget()
     if "language" in changed:

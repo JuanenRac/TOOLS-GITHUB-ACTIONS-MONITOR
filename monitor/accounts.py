@@ -20,6 +20,7 @@ import os
 import re
 import shutil
 from pathlib import Path
+import private_io
 
 HERE = Path(__file__).resolve().parent
 ACCOUNT_ID_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{0,39}$")
@@ -139,7 +140,7 @@ def create_account(account_id, owner="", base=None, example=None):
         data = {}
     data["github_owner"] = str(owner or "")
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    private_io.write_private(path, json.dumps(data, ensure_ascii=False, indent=2) + "\n")
     return path
 
 
@@ -173,5 +174,5 @@ def migrate(base=None, source=None, account_id=DEFAULT_ID, apply=False):
             out["copied"] += 1
         except OSError as error:
             out["problems"].append(f"{src.name}: {str(error)[:80]}")
-    (target / MARKER).write_text(json.dumps({"from": str(Path(source or base or HERE)), "copied": out["copied"]}), encoding="utf-8")
+    private_io.write_private(target / MARKER, json.dumps({"from": str(Path(source or base or HERE)), "copied": out["copied"]}))
     return out

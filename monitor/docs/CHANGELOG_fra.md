@@ -7,6 +7,27 @@
 
 Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son propre semver. La source est le CHANGELOG.md en anglais ; ce fichier contient les mêmes versions et sections.
 
+## [Unreleased]
+
+La liaison entre le moniteur et un outil d'IA : le flux concorde toujours avec la page, chaque alerte dit pourquoi elle est rouge, un flux en direct et trois outils MCP poussent les nouvelles, une commande installe le script de liaison, la barre montre si une IA est connectée et tout fichier d'état est privé à son propriétaire.
+
+### Ajouté
+
+- **Le résumé et le flux suivent chaque actualisation de l'onglet Alertes** (et chaque lecture du flux et chaque cycle) : ils avaient un cycle de retard, si bien qu'une IA pouvait lire 10 alertes alors que la page en montrait 6. `ALERTS_BRIEF.md` porte désormais `Updated:` dans ton fuseau horaire et une ligne pour machines `updated_epoch:`, et `GET /api/ai/brief?fmt=json` ajoute `updated`, `updated_local` et `age_seconds`. Un cycle dont les données ne sont pas encore chargées ne résout jamais d'alertes.
+- **`ai_alerts.diagnose`** (désactivé par défaut, dans l'onglet Réglages, en huit langues) : chaque alerte d'une nouvelle exécution rouge porte `diagnosis`, la première étape en échec et une dizaine de lignes utiles du journal, lues par des appels en lecture seule, nettoyées des secrets et bornées en taille et en exécutions par cycle ; une erreur d'infrastructure dans le journal rend l'alerte passagère.
+- **`ai_alerts.cascade`** : les alertes rouges parce qu'un autre dépôt est rouge (nommé dans le journal ou dans la règle `ai_alerts.cascade.map`) sont listées sous lui dans le résumé et portent `origin`.
+- **`GET /api/ai/stream`** (`ai_alerts.stream`, désactivé par défaut) : événements serveur, lecture seule, avec le jeton d'accès en mode réseau, limités en auditeurs et en durée, reprenables avec `Last-Event-ID` ; l'édition lite ne l'a pas.
+- **Outils MCP `alerts_open`, `alert_diagnose` et `alert_ack`** (le dernier seulement avec `--allow-ack`), et un avis à l'IA à la connexion, dans les `instructions` et par une notification, disant combien d'alertes réelles sont ouvertes.
+- **`monitor_cli.py ai-hook install|status|uninstall [--cursor|--generic] [--scope project|user] [--dry-run]`** et le script de liaison `ai_hook.py` (bibliothèque standard seulement) : il ajoute le résumé à la session d'IA et, seulement avec `ai_alerts.client_hook.block_on_stop` (désactivé par défaut), demande à l'IA d'examiner les alertes réelles ouvertes avant de finir un tour. Les réglages de l'outil sont fusionnés, jamais remplacés, une copie du fichier est gardée, un fichier qui n'est pas du JSON valide est refusé sans être touché, et tout ce qui est écrit est de l'ASCII pur. Les valeurs sont dans `ai_alerts.client_hook` (onglet Réglages, huit langues).
+- **Un battement d'IA** (`ai_alerts.heartbeat`) : le flux, le serveur MCP, le script de liaison et les points d'accès notent leur dernière lecture dans un petit fichier local, et la barre du bas montre si une IA est connectée et depuis quand elle a lu.
+- **`monitor_cli.py --token-file FICHIER`** et un avertissement sur stderr quand `--token` est utilisé (il apparaît dans la liste des processus) ou quand le fichier du jeton est lisible par d'autres utilisateurs.
+- Des tests pour chaque changement, dans un dossier temporaire et hors ligne, y compris le mode de chaque fichier d'état avec un `umask` permissif.
+
+### Modifié
+
+- **Tout fichier d'état du moniteur est créé en mode 0600** (les dossiers créés en 0700) par un seul assistant, `private_io.py` : silences, événements, flux, résumé, caches, réglages et fichiers écrits par l'installeur du script de liaison. Sous Windows le programme ne peut pas imposer les modes (les dossiers héritent des droits de leur parent).
+- **Au démarrage du mode réseau** avec `listen.query_access` encore activé, les premiers pas sont maintenant affichés (le désactiver ; utiliser HTTPS ou un VPN), et l'aide de `listen.network` et le guide avancé disent la même chose en huit langues.
+
 ## [1.7.5]
 
 La ligne de commande prend le jeton d'accès sous son propre nom, le mode réseau est plus sûr par défaut (l'adresse de l'ordinateur est cachée au réseau, l'ancienne adresse ?access= peut être désactivée, les destinations de notification du réseau local sont refusées, avertissement sur le HTTP simple), les heures pour les personnes utilisent votre fuseau horaire, une alerte peut être mise en sourdine jusqu'à ce que l'élément change, et les comptes et vérifications qui donnaient des réponses fausses sont corrigés.

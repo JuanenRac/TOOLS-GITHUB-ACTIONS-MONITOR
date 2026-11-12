@@ -11,6 +11,7 @@ Settings (all in the `discovery` block of the configuration): events (on), sugge
 archived repositories are always left out).
 """
 import re
+import private_io
 
 DEFAULTS = {"events": True, "suggest_groups": True, "auto_frequency": False, "hide": []}
 EVENT_CODES = ("repo_new", "repo_gone", "repo_archived", "repo_unarchived")
@@ -133,7 +134,7 @@ def add_group(path, key, prefix, label=None, example=None, keep=5):
             ordered["rest"] = groups["rest"]
         data["ecosystems"] = ordered
         tmp = path.with_name(path.name + ".tmp")
-        tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+        private_io.write_tmp(tmp, json.dumps(data, ensure_ascii=False, indent=2) + "\n")
         os.replace(tmp, path)
         return {"ok": True, "file": path.name}
     except OSError:

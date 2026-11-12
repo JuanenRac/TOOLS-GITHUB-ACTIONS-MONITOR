@@ -7,6 +7,27 @@
 
 Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il proprio semver. La fonte è il CHANGELOG.md in inglese; questo file ha le stesse versioni e sezioni.
 
+## [Unreleased]
+
+Il collegamento tra il monitor e uno strumento di IA: il feed coincide sempre con la pagina, ogni avviso dice perché è rosso, un flusso e tre strumenti MCP spingono le novità, un comando installa lo script di collegamento, la barra mostra se una IA è collegata e ogni file di stato è privato del suo proprietario.
+
+### Aggiunto
+
+- **Il riepilogo e il feed seguono ogni aggiornamento della scheda Avvisi** (e ogni lettura del feed e ogni ciclo): prima avevano un ciclo di ritardo, così una IA poteva leggere 10 avvisi mentre la pagina ne mostrava 6. `ALERTS_BRIEF.md` ora contiene `Updated:` nel tuo fuso orario e una riga per macchine `updated_epoch:`, e `GET /api/ai/brief?fmt=json` aggiunge `updated`, `updated_local` e `age_seconds`. Un ciclo che non ha ancora caricato i dati non risolve mai avvisi.
+- **`ai_alerts.diagnose`** (disattivato per impostazione predefinita, nella scheda Impostazioni, in otto lingue): ogni avviso di una nuova esecuzione rossa porta `diagnosis`, il primo passo che fallisce e una decina di righe utili del log, lette con chiamate di sola lettura, ripulite dai segreti e limitate in dimensione e in esecuzioni per ciclo; un errore di infrastruttura nel log rende l'avviso transitorio.
+- **`ai_alerts.cascade`**: gli avvisi rossi perché un altro repository è rosso (nominato nel log o nella regola `ai_alerts.cascade.map`) vengono elencati sotto di esso nel riepilogo e portano `origin`.
+- **`GET /api/ai/stream`** (`ai_alerts.stream`, disattivato per impostazione predefinita): eventi del server, sola lettura, con il token di accesso in modalità di rete, limitato in ascoltatori e tempo, riprendibile con `Last-Event-ID`; l'edizione lite non lo ha.
+- **Strumenti MCP `alerts_open`, `alert_diagnose` e `alert_ack`** (l'ultimo solo con `--allow-ack`) e un avviso alla IA quando si collega, nelle `instructions` e con una notifica, che dice quanti avvisi reali sono aperti.
+- **`monitor_cli.py ai-hook install|status|uninstall [--cursor|--generic] [--scope project|user] [--dry-run]`** e lo script di collegamento `ai_hook.py` (solo libreria standard): aggiunge il riepilogo alla sessione di IA e, solo con `ai_alerts.client_hook.block_on_stop` (disattivato per impostazione predefinita), chiede alla IA di esaminare gli avvisi reali aperti prima di chiudere un turno. Le impostazioni dello strumento vengono unite, mai sostituite, si conserva una copia del file, un file che non è JSON valido viene rifiutato senza toccarlo e tutto ciò che si scrive è ASCII puro. I valori stanno in `ai_alerts.client_hook` (scheda Impostazioni, otto lingue).
+- **Un battito della IA** (`ai_alerts.heartbeat`): il flusso, il server MCP, lo script di collegamento e gli endpoint annotano l'ultima lettura in un piccolo file locale, e la barra in basso mostra se una IA è collegata e da quanto ha letto.
+- **`monitor_cli.py --token-file FILE`** e un avviso su stderr quando si usa `--token` (compare nell'elenco dei processi) o quando il file del token è leggibile da altri utenti.
+- Test per ogni modifica, in una cartella temporanea e offline, compreso il modo di ogni file di stato con un `umask` permissivo.
+
+### Modificato
+
+- **Ogni file di stato del monitor viene creato con modo 0600** (le cartelle create con 0700) tramite un solo helper, `private_io.py`: silenziamenti, eventi, feed, riepilogo, cache, impostazioni e i file scritti dall'installatore dello script di collegamento. Su Windows il programma non può imporre i modi (le cartelle ereditano i permessi della cartella superiore).
+- **All'avvio della modalità di rete** con `listen.query_access` ancora attivo ora si stampano i primi passi (disattivarlo; usare HTTPS o una VPN), e l'aiuto di `listen.network` e la guida avanzata dicono lo stesso in otto lingue.
+
 ## [1.7.5]
 
 La riga di comando prende il token di accesso con il suo nome, la modalità di rete è più sicura per impostazione predefinita (l'indirizzo del computer è nascosto alla rete, il vecchio indirizzo ?access= si può disattivare, le destinazioni di notifica della rete locale sono rifiutate, avviso sul semplice HTTP), gli orari per le persone usano il tuo fuso orario, un avviso si può silenziare finché l'elemento non cambia, e sono corretti i conteggi e i controlli che davano risposte sbagliate.

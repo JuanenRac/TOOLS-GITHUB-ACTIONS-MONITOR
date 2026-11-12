@@ -20,6 +20,7 @@ import threading
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+import private_io
 
 HERE = Path(__file__).resolve().parent
 HISTORY_FILE = HERE / "analytics_history.json"
@@ -181,7 +182,7 @@ class Store:
             self.dirty = False
         try:
             tmp = self.path.with_name(self.path.name + ".tmp")
-            tmp.write_text(payload, encoding="utf-8")
+            private_io.write_tmp(tmp, payload)
             os.replace(tmp, self.path)
             return True
         except OSError:

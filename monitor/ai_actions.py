@@ -20,6 +20,7 @@ import subprocess
 import threading
 import time
 from pathlib import Path
+import private_io
 
 HERE = Path(__file__).resolve().parent
 LOG_FILE = HERE / "ai_actions_log.jsonl"
@@ -153,11 +154,11 @@ class Actions:
     def _log(self, record):
         record = {"at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(self.clock())), **record}
         try:
-            with open(self.log_file, "a", encoding="utf-8", newline="\n") as handle:
+            with private_io.open_append(self.log_file) as handle:
                 handle.write(json.dumps(record, ensure_ascii=False) + "\n")
             if self.log_file.stat().st_size > 256 * 1024:
                 lines = self.log_file.read_text(encoding="utf-8").splitlines()
-                self.log_file.write_text("\n".join(lines[len(lines) // 2:]) + "\n", encoding="utf-8", newline="\n")
+                private_io.write_private(self.log_file, "\n".join(lines[len(lines) // 2:]) + "\n")
         except OSError:
             pass
 

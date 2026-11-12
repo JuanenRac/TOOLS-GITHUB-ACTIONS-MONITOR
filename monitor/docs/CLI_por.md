@@ -49,3 +49,11 @@ O `health` distingue três coisas: o monitor não responde (2), o acesso ao GitH
 ## A edição lite
 
 `python monitor_cli.py status --lite`, `doctor --lite` e `health --lite` falam com a porta 8766. Os comandos que precisam de contas, sentinelas ou do recetor do webhook são recusados com o código de saída 1. A edição lite não tem contas nem API de alertas.
+
+## `ai-hook`: dizer a uma ferramenta de IA o que o monitor vê
+
+`python monitor_cli.py ai-hook install|status|uninstall [--cursor|--generic] [--scope project|user] [--project-dir DIR] [--dry-run] [--json]` não precisa de um monitor em execução. Acrescenta, mostra ou remove o script de ligação `ai_hook.py` nas definições de ganchos de uma ferramenta de IA (ver o guia dos alertas para IA): o ficheiro de definições é fundido, guarda-se uma cópia e a resposta de `--json` é ASCII puro. `status` é a ação predefinida.
+
+## O token de acesso na linha de comandos
+
+No modo de rede o token é lido de `MONITOR_ACCESS_TOKEN`, depois de `MONITOR_TOKEN`, depois da primeira linha de `--token-file FICHEIRO` (mantenha esse ficheiro legível só por si: num sistema com modos de ficheiro o comando avisa se outros o puderem ler) e por fim de `--token`, que aparece na lista de processos e por isso imprime um aviso no stderr.

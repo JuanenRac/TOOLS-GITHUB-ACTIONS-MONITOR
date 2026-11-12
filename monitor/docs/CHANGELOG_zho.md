@@ -7,6 +7,27 @@
 
 工具本身(监视器 + 哨兵 + 批处理工具)的版本,采用自己的语义化版本号。源文件是英文的 CHANGELOG.md,本文件包含相同的版本和章节。
 
+## [Unreleased]
+
+监控器与 AI 工具的联动: 信息流始终与页面一致, 每条告警都说明为何变红, 事件流和三个 MCP 工具推送新消息, 一条命令即可安装联动脚本, 底部栏显示是否有 AI 已连接, 所有状态文件仅其所有者可读。
+
+### 新增
+
+- **摘要和信息流跟随告警页的每次刷新** (以及信息流的每次读取和每个周期): 以前它们落后一个周期, 因此页面显示 6 条时 AI 可能读到 10 条。`ALERTS_BRIEF.md` 现在带有你所在时区的 `Updated:` 和供机器读取的 `updated_epoch:` 行, `GET /api/ai/brief?fmt=json` 另外提供 `updated`、`updated_local` 和 `age_seconds`。数据尚未加载的周期绝不会解决告警。
+- **`ai_alerts.diagnose`** (默认关闭, 设置页, 八种语言): 新红色运行的每条告警带有 `diagnosis`, 即第一个失败的步骤和日志中约十行相关内容, 用只读调用读取, 已清除机密, 并限制大小和每周期读取的运行数; 日志中的基础设施错误会使该告警视为临时性。
+- **`ai_alerts.cascade`**: 因另一个仓库变红而变红的告警 (在日志或规则 `ai_alerts.cascade.map` 中点名) 会在摘要中列在它之下, 并带有 `origin`。
+- **`GET /api/ai/stream`** (`ai_alerts.stream`, 默认关闭): 服务器推送事件, 只读, 网络模式下需要访问令牌, 限制监听者数量和时长, 可用 `Last-Event-ID` 续传; lite 版没有它。
+- **MCP 工具 `alerts_open`、`alert_diagnose` 和 `alert_ack`** (最后一个仅在 `--allow-ack` 时提供), 以及 AI 连接时的提示: 在 `instructions` 中并通过一条通知说明有多少真实告警未处理。
+- **`monitor_cli.py ai-hook install|status|uninstall [--cursor|--generic] [--scope project|user] [--dry-run]`** 和联动脚本 `ai_hook.py` (仅用标准库): 把摘要加入 AI 会话, 并且仅在 `ai_alerts.client_hook.block_on_stop` (默认关闭) 开启时, 在回合结束前提示 AI 查看未处理的真实告警。工具的设置是合并而非替换, 会保留文件备份, 不是有效 JSON 的文件会被拒绝且不改动, 写入的内容全部是纯 ASCII。相关数值在 `ai_alerts.client_hook` 中 (设置页, 八种语言)。
+- **AI 心跳** (`ai_alerts.heartbeat`): 事件流、MCP 服务器、联动脚本和端点把最近一次读取记录在一个本地小文件中, 底部栏显示是否有 AI 已连接以及多久前读取过。
+- **`monitor_cli.py --token-file FILE`**, 以及在使用 `--token` (它会出现在进程列表中) 或令牌文件可被其他用户读取时在 stderr 发出警告。
+- 每项更改都有测试, 在临时文件夹中离线运行, 包括宽松 `umask` 下每个状态文件的模式。
+
+### 变更
+
+- **监控器的所有状态文件都以 0600 模式创建** (创建的文件夹为 0700), 通过唯一的辅助模块 `private_io.py`: 静默记录、事件、信息流、摘要、缓存、设置以及联动脚本安装程序写入的文件。在 Windows 上程序无法强制设置模式 (文件夹继承其父文件夹的权限)。
+- **启动网络模式** 时若 `listen.query_access` 仍开启, 现在会打印第一步 (关闭它; 使用 HTTPS 或 VPN), `listen.network` 的帮助和高级指南也用八种语言说明了同样的事。
+
 ## [1.7.5]
 
 命令行以专用名称读取访问令牌，网络模式默认更安全（对网络隐藏本机地址、可关闭旧的 ?access= 地址、拒绝本地网络上的通知目标、对明文 HTTP 发出警告），面向人的时间使用你自己的时区，警报可以静音到该项目发生变化为止，并修正了给出错误结果的计数和检查。

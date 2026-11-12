@@ -49,3 +49,11 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python monitor_cli
 ## 精简版
 
 `python monitor_cli.py status --lite`、`doctor --lite` 和 `health --lite` 与端口 8766 通信。需要账户、哨兵或 Webhook 接收器的命令会以退出码 1 被拒绝。精简版没有账户，也没有警报 API。
+
+## `ai-hook`: 告诉 AI 工具监控器看到了什么
+
+`python monitor_cli.py ai-hook install|status|uninstall [--cursor|--generic] [--scope project|user] [--project-dir DIR] [--dry-run] [--json]` 不需要监控器正在运行。它在 AI 工具的钩子设置中添加、显示或移除联动脚本 `ai_hook.py` (见 AI 告警指南): 设置文件会被合并, 保留一份备份, `--json` 的输出是纯 ASCII。默认动作是 `status`。
+
+## 命令行中的访问令牌
+
+在网络模式下, 令牌依次从 `MONITOR_ACCESS_TOKEN`、`MONITOR_TOKEN`、`--token-file FILE` 的第一行读取 (请让该文件只有你能读取: 在有文件模式的系统上, 其他用户可读时命令会发出警告), 最后才是 `--token`, 它会出现在进程列表中, 因此会在 stderr 打印警告。

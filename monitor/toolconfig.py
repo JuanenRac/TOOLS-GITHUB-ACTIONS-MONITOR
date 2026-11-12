@@ -22,6 +22,7 @@ import subprocess
 import threading
 import time
 from pathlib import Path
+import private_io
 
 HERE = Path(__file__).resolve().parent
 CONFIG_FILE = HERE / "actions_monitor.json"
@@ -134,7 +135,7 @@ def init_catalog():
         if target.is_file():
             out.append((name, False))
         elif example.is_file():
-            target.write_bytes(example.read_bytes())
+            private_io.write_private(target, example.read_bytes())
             out.append((name, True))
     return out
 

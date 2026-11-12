@@ -4,6 +4,7 @@
 used to disappear. Now each one is counted by its origin and the last few are kept (the kind of error and a cleaned, short text, never a token), so `--doctor` and the page can show
 that the monitor is working in a degraded way. Noting a failure never raises and never changes what the caller does."""
 import json
+import private_io
 import logging
 import os
 import re
@@ -73,8 +74,7 @@ def save(force=False):
     FILE["saved"] = time.time()
     try:
         tmp = f"{path}.tmp"
-        with open(tmp, "w", encoding="utf-8", newline=chr(10)) as handle:
-            json.dump({"total": sum(COUNTS.values()), "origins": dict(COUNTS), "at": int(time.time())}, handle)
+        private_io.write_tmp(tmp, json.dumps({"total": sum(COUNTS.values()), "origins": dict(COUNTS), "at": int(time.time())}))
         os.replace(tmp, path)
     except (OSError, ValueError):
         pass      # the counter is a courtesy: a folder that cannot be written is not one more failure to report

@@ -23,6 +23,7 @@ from pathlib import Path
 
 import i18n
 import toolconfig
+import private_io
 
 HERE = Path(__file__).resolve().parent
 EVENTS_FILE = HERE / "events_monitor.jsonl"
@@ -175,7 +176,7 @@ class Feed:
     def _write_state(self):
         try:
             tmp = self.state_file.with_name(self.state_file.name + ".tmp")
-            tmp.write_text(json.dumps(self.state, ensure_ascii=False), encoding="utf-8")
+            private_io.write_tmp(tmp, json.dumps(self.state, ensure_ascii=False))
             os.replace(tmp, self.state_file)
         except OSError:
             pass
@@ -185,12 +186,12 @@ class Feed:
             return
         at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         try:
-            with open(self.events_file, "a", encoding="utf-8", newline="\n") as handle:
+            with private_io.open_append(self.events_file) as handle:
                 for event in events:
                     handle.write(json.dumps({"at": at, **event}, ensure_ascii=False) + "\n")
             if self.events_file.stat().st_size > MAX_BYTES:
                 lines = self.events_file.read_text(encoding="utf-8").splitlines()
-                self.events_file.write_text("\n".join(lines[len(lines) // 2:]) + "\n", encoding="utf-8", newline="\n")
+                private_io.write_private(self.events_file, "\n".join(lines[len(lines) // 2:]) + "\n")
         except OSError:
             pass
 

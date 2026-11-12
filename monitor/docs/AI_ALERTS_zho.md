@@ -27,3 +27,14 @@
 ## MCP 服务器仅限本地
 
 `mcp_server.py` 通过标准输入输出与启动它的 AI 工具交换 JSON：它没有网络端口，也绝不能放在网络端口之后。格式错误的消息只会针对该消息返回错误，超过 64 KB 的行会被拒绝，`ack_alert`（仅在 `--allow-ack` 时）只会改变订阅源的本地状态。订阅源可能包含仓库名称和简短的 CI 错误信息；输出前会清除令牌、密钥、电子邮件、IP 地址和个人文件夹。
+
+## 与 AI 工具的联动 (只读)
+
+- **始终最新。** 信息流和摘要会在告警页每次刷新、信息流每次被读取以及每个周期都重新写入, 因此与页面一致 (以前会落后一个周期)。`ALERTS_BRIEF.md` 含有 `Updated:` (你的时区及 UTC) 和供机器读取的 `updated_epoch:` 行; `GET /api/ai/brief?fmt=json` 另外提供 `updated`、`updated_local` 和 `age_seconds`。
+- **为什么是红色。** 开启 `ai_alerts.diagnose.enabled` (默认关闭: 会从 GitHub 读取新红色运行的作业列表和日志末尾, 使用只读调用, 计入你的配额) 后, 每条告警带有 `diagnosis`: 第一个失败的步骤和约十行相关内容 (`ai_alerts.diagnose.log_lines`), 已清除机密, 且不超过 `ai_alerts.diagnose.max_bytes`。每个周期最多读取 `max_per_cycle` 个运行, 每个运行只读一次。日志显示基础设施错误时, 该告警视为临时性。
+- **连锁告警。** 开启 `ai_alerts.cascade.enabled` (默认开启: 只改变告警的列法) 后, 因另一个仓库变红而变红的告警 (其日志点名了它, 或 `ai_alerts.cascade.map` 的规则 `{"base-repo": ["client-repo"]}` 这样规定) 会在摘要中列在那个仓库之下 (“Also red because of it (fix this one first)”), 并在信息流中带有 `origin`。
+- **事件流。** 开启 `ai_alerts.stream.enabled` (默认关闭) 后, `GET /api/ai/stream[?only=real]` 发送服务器推送事件: 一个 `hello` 帧 (有多少真实告警未处理、最前面的几条、摘要的时长) 和信息流中每个事件对应的 `alert` 帧; `Last-Event-ID` (或 `?since=`) 可续传。它是只读的, 遵循与页面其余部分相同的访问规则 (网络模式下, 以请求头或 Cookie 提供访问令牌), 并受 `stream.max_clients` 和 `stream.max_seconds` 限制。
+- **MCP 工具。** `alerts_open` (未处理告警, 含时长、诊断和来源)、`alert_diagnose(id)` (已保存的诊断, 或用只读 `gh` 调用读取日志), 以及仅在 `--allow-ack` 时提供的 `alert_ack(id)`。AI 工具连接时, 服务器会在 `instructions` 中并通过一条通知告知有多少真实告警未处理。
+- **联动脚本。** `python monitor_cli.py ai-hook install [--cursor|--generic] [--scope project|user]` (还有 `status` 和 `uninstall`; `--dry-run` 显示将要做的更改) 把 `ai_hook.py` 加入工具的钩子设置: SessionStart 和 UserPromptSubmit 在有真实告警未处理时把摘要加入会话; Stop 会在回合结束前提示 AI 先查看, 但仅在 `ai_alerts.client_hook.block_on_stop` (默认关闭) 开启时, 且每个 `cooldown_minutes` 最多一次。设置文件会被合并 (其他钩子保留), 保留一份备份 (最近三份), 不是有效 JSON 的文件会被拒绝且不改动, 写入的内容全部是纯 ASCII。默认目标写入工具自己的隐藏文件夹中的 `settings.local.json` (project) 或 `settings.json` (user); `--cursor` 写入 `.cursor/hooks.json` (尽力而为: 其钩子格式可能变化); `--generic` 不写入任何内容, 只显示命令。脚本只需要 Python, 数值取自 `ai_alerts.client_hook`。
+- **是否有 AI 已连接?** 开启 `ai_alerts.heartbeat.enabled` 后, 本地小文件 `ai_heartbeat.json` 会记录事件流、MCP 服务器、联动脚本或端点最近一次的读取, 底部栏在 `window_minutes` 内显示“AI: mcp, 3 分钟前” (或“无连接”)。不会向外发送任何内容。
+- **私有文件。** 信息流、摘要、心跳以及监控器的其他所有状态文件都以 0600 模式创建 (监控器创建的文件夹为 0700)。在 Windows 上程序无法强制设置模式: 文件夹继承其父文件夹的权限, 所以请把监控器文件夹放在你自己的用户目录内。

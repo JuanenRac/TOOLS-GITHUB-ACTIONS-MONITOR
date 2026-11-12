@@ -17,6 +17,7 @@ import re
 import threading
 import time
 from pathlib import Path
+import private_io
 
 HERE = Path(__file__).resolve().parent
 CACHE_FILE = HERE / "etag_cache.json"
@@ -73,7 +74,7 @@ class EtagCache:
             self.dirty = False
         try:
             tmp = self.path.with_name(self.path.name + ".tmp")
-            tmp.write_text(json.dumps(payload), encoding="utf-8")
+            private_io.write_tmp(tmp, json.dumps(payload))
             os.replace(tmp, self.path)
             return True
         except OSError:

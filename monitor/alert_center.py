@@ -15,6 +15,7 @@ import threading
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+import private_io
 
 HERE = Path(__file__).resolve().parent
 STATE_FILE = HERE / "alert_mutes.json"      # an account moves it into its own folder (accounts.STATE_FILES)
@@ -44,7 +45,7 @@ def _load():
 def _save(data):
     try:
         tmp = Path(str(STATE_FILE) + ".tmp")
-        tmp.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+        private_io.write_tmp(tmp, json.dumps(data, ensure_ascii=False))
         os.replace(tmp, STATE_FILE)
         return True
     except OSError:

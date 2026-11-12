@@ -17,6 +17,7 @@
 - **风险。** 流量是明文 HTTP:能监听你网络的人可以读取令牌和数据。只在可信网络中使用,或在前面放置带 HTTPS 的反向代理(见 `DEPLOYMENT.md`)。切勿暴露到互联网。精简版绝不会监听本机以外。
 - **HTTPS。** 使用自己的证书和密钥(`listen.tls_cert_file`、`listen.tls_key_file`),监视器会自己提供 HTTPS;在替你处理 HTTPS 的代理之后,请设置 `listen.secure_cookie`。两种情况下,浏览器每次更改都会发送 `Origin: https://主机:端口`,检查只接受会话的协议(另一种协议、其他主机、其他端口或格式错误的来源都会被拒绝)。浏览器使用的地址必须带有监视器的端口,但如果位于默认 443 端口上、转发不带端口的 `Host` 和 `Origin` 的 HTTPS 代理之后,请把它的公开名称填入 `listen.proxy_public_host`(仅限主机名,默认为空)。它只在 HTTPS 下生效,只有这一个名称可以不带端口被接受,并且只能在本机上更改。
 - **用 POST 打开会话。** 除了带 `?access=` 的地址已弃用:默认仍可使用(已有的设置不会失效),且只对 `GET` 有效,但令牌会留在历史记录、日志和 `Referer` 中,监视器会用 `Deprecation` 响应头回应。关闭 `listen.query_access` 即可拒绝它,只用 `POST /api/access` 或请求头 `X-Monitor-Access` 打开会话。带 `?access=` 的地址仍然可用。当 `listen.host` 为 `0.0.0.0` 时,设置页顶部会显示红色横幅提醒。架构中标记为安全的所有设置(不仅是 `listen.*`、`github_token.*`、`act.*` 和 `github_actions.*`,还有 Webhook、AI 操作、通知、OpenTelemetry、镜像、runner 和输出)只能在本机修改。
+- **在网络上监听时的第一步。** 先关闭 `listen.query_access` (这样令牌就不会出现在地址、历史记录或日志中; 用 `POST /api/access` 或请求头打开会话), 并在前面加上 HTTPS (`listen.tls_cert_file` 中的证书或 HTTPS 代理) 或 VPN。网络模式启动时若仍接受旧地址, 控制台会重复这条提示。
 
 ## 监视器保存的 GitHub 令牌
 

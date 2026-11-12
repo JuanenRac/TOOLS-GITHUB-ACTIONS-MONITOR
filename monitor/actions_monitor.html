@@ -465,6 +465,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <span class="sb-item sb-opt" id="sb-refresh"></span>
 <span class="sb-item sb-opt" id="sb-mode"></span>
 <span class="sb-item sb-opt" id="sb-sent"></span>
+<span class="sb-item sb-opt" id="sb-ai"></span>
 <span class="sb-item sb-opt" id="sb-repos"></span>
 <span class="sb-item sb-opt" id="sb-acc"></span>
 <span class="sb-item sb-opt" id="sb-ver"></span>
@@ -1496,10 +1497,12 @@ function renderBarFacts(){
   const mode=typeof MODEDATA!=="undefined"&&MODEDATA?MODEDATA.mode:"normal";set("sb-mode",T("ui.sb_mode",{mode:T("ui.mode_"+mode)}),T("ui.mode_title"));
   const sents=SBINFO&&!LITE?SBINFO.sentinels||[]:[];
   set("sb-sent",LITE?"":T("ui.sb_sentinels",{n:sents.filter(s=>s.enabled).length,m:sents.length}),sents.map(s=>(T("ui.al_o_"+s.name)===("ui.al_o_"+s.name)?s.name:T("ui.al_o_"+s.name))+": "+T(s.enabled?"ui.sb_on":"ui.sb_off")).join(" · "));
+  {const ai=SBINFO&&!LITE?SBINFO.ai:null;set("sb-ai",!ai||!ai.enabled?"":(ai.streams>0?T("ui.sb_ai_stream"):ai.connected?T("ui.sb_ai_on",{via:ai.via||"-",ago:agoText(ai.age_seconds)}):T("ui.sb_ai_off")),T("ui.sb_ai_t"))}
   set("sb-acc",T("ui.sb_account",{name:(ACC&&ACC.current)||OWNER||"-"}),T("ui.sb_account_t"));
   set("sb-ver","v"+(I18N.version||"")+" · "+T(LITE?"ui.sb_lite":"ui.sb_complete"),T("ui.sb_version_t"));
   if(SBINFO)set("sb-addr",(SBINFO.bind==="0.0.0.0"&&SBINFO.lan_address?SBINFO.lan_address:"127.0.0.1")+":"+SBINFO.port,T("ui.sb_addr_t",{local:"127.0.0.1:"+SBINFO.port,lan:(SBINFO.lan_address||"-")+":"+SBINFO.port}));
 }
+function agoText(s){s=Math.max(0,Math.round(s||0));return s>=3600?Math.floor(s/3600)+" h":s>=60?Math.floor(s/60)+" min":s+" s"}
 function renderClock(){const e=$("sb-clock");if(e)e.textContent=new Date().toLocaleString(LOC(),{dateStyle:"medium",timeStyle:"long",timeZone:TZ})}
 async function sbTick(){try{const r=await fetch("/api/statusbar",{cache:"no-store"});if(r.ok)SBINFO=await r.json()}catch(e){}renderBarFacts()}
 {const watch=new MutationObserver(()=>{if(!watch.q){watch.q=requestAnimationFrame(()=>{watch.q=0;renderBar()})}});

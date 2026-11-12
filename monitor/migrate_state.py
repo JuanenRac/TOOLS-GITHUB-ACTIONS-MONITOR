@@ -28,6 +28,7 @@ sys.path.insert(0, str(HERE))
 import i18n  # noqa: E402
 import platform_compat  # noqa: E402
 import workspace  # noqa: E402
+import private_io
 
 
 def plan(root=None, audit=None, signed=None):
@@ -88,7 +89,7 @@ def run(apply=False, move=False, root=None, audit=None, signed=None, config_path
                 shutil.copy2(str(config_path), str(backup))
                 data = json.loads(config_path.read_text(encoding="utf-8"))
                 data["report_history_days"] = data.pop("parte_history_days")
-                config_path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+                private_io.write_private(config_path, json.dumps(data, indent=2, ensure_ascii=False) + "\n")
                 out(t("mig.done_key", backup=backup.name))
             except (OSError, ValueError) as error:
                 out(t("mig.failed", old=config_path.name, error=error))

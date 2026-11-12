@@ -7,6 +7,27 @@
 
 Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem Semver. Die Quelle ist das englische CHANGELOG.md; diese Datei enthält dieselben Versionen und Abschnitte.
 
+## [Unreleased]
+
+Die Verbindung zwischen Monitor und KI-Werkzeug: Der Feed stimmt immer mit der Seite überein, jede Warnung sagt, warum sie rot ist, ein Stream und drei MCP-Werkzeuge schieben die Neuigkeiten nach, ein Befehl installiert das Gate-Skript, die Leiste zeigt, ob eine KI verbunden ist, und jede Zustandsdatei gehört nur ihrem Besitzer.
+
+### Hinzugefügt
+
+- **Zusammenfassung und Feed folgen jeder Aktualisierung des Reiters Warnungen** (und jedem Lesen des Feeds und jedem Zyklus): früher hinkten sie einen Zyklus hinterher, sodass eine KI 10 Warnungen las, während die Seite 6 zeigte. `ALERTS_BRIEF.md` enthält jetzt `Updated:` in deiner Zeitzone und eine Maschinenzeile `updated_epoch:`, und `GET /api/ai/brief?fmt=json` ergänzt `updated`, `updated_local` und `age_seconds`. Ein Zyklus, dessen Daten noch nicht geladen sind, löst nie Warnungen auf.
+- **`ai_alerts.diagnose`** (standardmäßig aus, im Reiter Einstellungen, in acht Sprachen): Jede Warnung eines neuen roten Laufs trägt `diagnosis`, den ersten fehlgeschlagenen Schritt und etwa zehn relevante Logzeilen, gelesen mit lesenden Aufrufen, von Geheimnissen bereinigt und in Größe und Läufen pro Zyklus begrenzt; ein Infrastrukturfehler im Log macht die Warnung vorübergehend.
+- **`ai_alerts.cascade`**: Warnungen, die rot sind, weil ein anderes Repository rot ist (im Log oder in der Regel `ai_alerts.cascade.map` genannt), stehen in der Zusammenfassung darunter und tragen `origin`.
+- **`GET /api/ai/stream`** (`ai_alerts.stream`, standardmäßig aus): Server-Sent Events, nur lesend, im Netzwerkmodus mit dem Zugriffstoken, in Zuhörern und Zeit begrenzt, mit `Last-Event-ID` fortsetzbar; die Lite-Edition hat ihn nicht.
+- **MCP-Werkzeuge `alerts_open`, `alert_diagnose` und `alert_ack`** (das letzte nur mit `--allow-ack`) und ein Hinweis an die KI beim Verbinden, in den `instructions` und mit einer Benachrichtigung, wie viele echte Warnungen offen sind.
+- **`monitor_cli.py ai-hook install|status|uninstall [--cursor|--generic] [--scope project|user] [--dry-run]`** und das Gate-Skript `ai_hook.py` (nur Standardbibliothek): Es fügt der KI-Sitzung die Zusammenfassung hinzu und bittet die KI, nur mit `ai_alerts.client_hook.block_on_stop` (standardmäßig aus), vor dem Ende eines Zuges offene echte Warnungen anzusehen. Die Einstellungen des Werkzeugs werden zusammengeführt, nie ersetzt, eine Kopie der Datei bleibt erhalten, eine Datei ohne gültiges JSON wird unberührt abgelehnt, und alles Geschriebene ist reines ASCII. Die Werte liegen in `ai_alerts.client_hook` (Reiter Einstellungen, acht Sprachen).
+- **Ein KI-Heartbeat** (`ai_alerts.heartbeat`): Stream, MCP-Server, Gate-Skript und Endpunkte vermerken ihren letzten Lesezugriff in einer kleinen lokalen Datei, und die untere Leiste zeigt, ob eine KI verbunden ist und wie lange ihr Lesen her ist.
+- **`monitor_cli.py --token-file DATEI`** und eine Warnung auf stderr, wenn `--token` benutzt wird (es erscheint in der Prozessliste) oder die Token-Datei für andere Benutzer lesbar ist.
+- Tests für jede Änderung, in einem temporären Ordner und offline, einschließlich des Modus jeder Zustandsdatei bei lockerem `umask`.
+
+### Geändert
+
+- **Jede Zustandsdatei des Monitors wird mit Modus 0600 angelegt** (die erzeugten Ordner mit 0700), über einen einzigen Helfer, `private_io.py`: Stummschaltungen, Ereignisse, Feed, Zusammenfassung, Caches, die Einstellungen und die Dateien des Installers für das Gate-Skript. Unter Windows kann das Programm die Modi nicht erzwingen (Ordner erben die Rechte ihres übergeordneten Ordners).
+- **Beim Start des Netzwerkmodus** mit noch eingeschaltetem `listen.query_access` werden jetzt die ersten Schritte ausgegeben (ausschalten; HTTPS oder VPN nutzen), und die Hilfe von `listen.network` sowie die erweiterte Anleitung sagen dasselbe in acht Sprachen.
+
 ## [1.7.5]
 
 Die Befehlszeile nimmt das Zugriffstoken unter seinem eigenen Namen, der Netzwerkmodus ist standardmäßig sicherer (die Adresse des Rechners wird vor dem Netz verborgen, die alte Adresse ?access= lässt sich abschalten, Benachrichtigungsziele im lokalen Netz werden abgelehnt, Warnung vor einfachem HTTP), Zeiten für Menschen nutzen deine eigene Zeitzone, ein Alarm lässt sich bis zur Änderung des Elements stummschalten, und falsche Zählungen und Prüfungen sind korrigiert.

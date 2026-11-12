@@ -25,6 +25,9 @@ monitor/collab_state.json
 monitor/alert_mutes.json
 monitor/ai_alerts_state.json
 monitor/ALERTS_BRIEF.md
+monitor/ai_alerts.jsonl
+monitor/ai_heartbeat.json
+monitor/ai_hook_state.json
 monitor/config_backups/
 monitor/events_monitor.jsonl
 monitor/events_state.json

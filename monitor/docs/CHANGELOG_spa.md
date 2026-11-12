@@ -7,6 +7,27 @@
 
 Versión de la propia herramienta (monitor + centinela + herramientas por lotes), con su propio semver. La fuente es el CHANGELOG.md en inglés; este fichero lleva las mismas versiones y secciones.
 
+## [Unreleased]
+
+La conexión entre el monitor y una herramienta de IA: el flujo coincide siempre con la página, cada alerta dice por qué está roja, un flujo en directo y tres herramientas MCP empujan las novedades, un comando instala el script de enlace, la barra muestra si hay una IA conectada y todos los ficheros de estado son privados de su dueño.
+
+### Añadido
+
+- **El resumen y el flujo siguen cada refresco de la pestaña Alertas** (y cada lectura del flujo y cada ciclo): antes iban un ciclo por detrás, así que una IA podía leer 10 alertas mientras la página mostraba 6. `ALERTS_BRIEF.md` lleva ahora `Updated:` en tu zona horaria y una línea para máquinas `updated_epoch:`, y `GET /api/ai/brief?fmt=json` añade `updated`, `updated_local` y `age_seconds`. Un ciclo que aún no ha cargado sus datos nunca resuelve alertas.
+- **`ai_alerts.diagnose`** (desactivado por defecto, en la pestaña Ajustes, en los ocho idiomas): cada alerta de una ejecución roja nueva lleva `diagnosis`, el primer paso que falla y unas diez líneas relevantes del log, leídas con llamadas de solo lectura, limpias de secretos y acotadas en tamaño y en ejecuciones por ciclo; un error de infraestructura en el log hace la alerta transitoria.
+- **`ai_alerts.cascade`**: las alertas que están rojas porque otro repositorio está rojo (nombrado en el log o en la regla `ai_alerts.cascade.map`) se listan bajo él en el resumen y llevan `origin`.
+- **`GET /api/ai/stream`** (`ai_alerts.stream`, desactivado por defecto): eventos del servidor, solo lectura, con el token de acceso en modo red, limitado en oyentes y en tiempo, reanudable con `Last-Event-ID`; la edición lite no lo tiene.
+- **Herramientas MCP `alerts_open`, `alert_diagnose` y `alert_ack`** (esta última solo con `--allow-ack`), y un aviso a la IA cuando se conecta, en las `instructions` y con una notificación, que dice cuántas alertas reales hay abiertas.
+- **`monitor_cli.py ai-hook install|status|uninstall [--cursor|--generic] [--scope project|user] [--dry-run]`** y el script de enlace `ai_hook.py` (solo biblioteca estándar): añade el resumen a la sesión de IA y, solo con `ai_alerts.client_hook.block_on_stop` (desactivado por defecto), pide a la IA que mire las alertas reales abiertas antes de cerrar un turno. Los ajustes de la herramienta se fusionan, nunca se reemplazan, se guarda una copia del fichero, un fichero que no es JSON válido se rechaza sin tocarlo y todo lo escrito es ASCII puro. Las cifras viven en `ai_alerts.client_hook` (pestaña Ajustes, ocho idiomas).
+- **Un latido de IA** (`ai_alerts.heartbeat`): el flujo, el servidor MCP, el script de enlace y los endpoints anotan su última lectura en un pequeño fichero local, y la barra inferior muestra si hay una IA conectada y hace cuánto leyó.
+- **`monitor_cli.py --token-file FICHERO`** y un aviso por stderr cuando se usa `--token` (se ve en la lista de procesos) o cuando otros usuarios pueden leer el fichero del token.
+- Pruebas para cada cambio, en una carpeta temporal y sin red, incluido el modo de cada fichero de estado con un `umask` laxo.
+
+### Cambiado
+
+- **Todos los ficheros de estado del monitor se crean con modo 0600** (y las carpetas que crea con 0700) mediante un solo ayudante, `private_io.py`: silencios, eventos, el flujo, el resumen, cachés, los ajustes y los ficheros que escribe el instalador del script de enlace. En Windows el programa no puede imponer los modos (las carpetas heredan los permisos de su carpeta madre).
+- **Al arrancar el modo red** con `listen.query_access` aún activo se imprimen ahora los primeros pasos (desactivarlo; usar HTTPS o una VPN), y la ayuda de `listen.network` y la guía avanzada dicen lo mismo en los ocho idiomas.
+
 ## [1.7.5]
 
 La línea de comandos toma el token de acceso con su propio nombre, el modo red es más seguro por defecto (la dirección del ordenador se oculta a la red, la dirección antigua ?access= se puede desactivar, se rechazan los destinos de notificación de la red local, aviso sobre HTTP plano), las horas para las personas usan tu zona horaria, una alerta se puede silenciar hasta que cambie el elemento, y se corrigen los recuentos y comprobaciones que daban respuestas erróneas.

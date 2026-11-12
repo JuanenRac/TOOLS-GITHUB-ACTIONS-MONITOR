@@ -15,6 +15,7 @@ from datetime import datetime, timedelta, timezone
 
 import i18n
 import tzdisplay
+import private_io
 
 PREFIX = "SENTINEL_REPORT_DAY_"
 LEGACY_PREFIX = "PARTE_CENTINELA_DIA_"   # the name used by versions before 1.5.0: still read (and kept in the retention), never written
@@ -86,8 +87,8 @@ def save_day(folder, snap, keep_days=DEFAULT_DAYS, today=None):
     try:
         if not folder.is_dir():
             return None
-        _path(folder, today, "txt").write_text(parte_text(snap), encoding="utf-8")
-        _path(folder, today, "json").write_text(json.dumps({"day": today, "generated": snap.get("generated"), **day_state(snap)}), encoding="utf-8")
+        private_io.write_private(_path(folder, today, "txt"), parte_text(snap))
+        private_io.write_private(_path(folder, today, "json"), json.dumps({"day": today, "generated": snap.get("generated"), **day_state(snap)}))
         prune(folder, keep_days, today)
     except OSError:
         return None

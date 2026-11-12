@@ -30,6 +30,7 @@ from pathlib import Path
 import ai_alerts
 import tzdisplay
 from tool_version import TOOL_VERSION
+import private_io
 
 HERE = Path(__file__).resolve().parent
 DEFAULT_NAME = "ci_red.json"
@@ -80,7 +81,7 @@ def _own_drive_path(text, windows):
 def _write_atomic(path, payload):
     path = Path(path)
     tmp = path.with_name(path.name + ".tmp")
-    tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=1), encoding="utf-8", newline="\n")
+    private_io.write_tmp(tmp, json.dumps(payload, ensure_ascii=False, indent=1))
     os.replace(tmp, path)
 
 

@@ -49,3 +49,11 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python monitor_cli
 ## Lite 版
 
 `python monitor_cli.py status --lite`、`doctor --lite`、`health --lite` はポート 8766 と通信します。アカウント、番人、Webhook 受信が必要なコマンドは終了コード 1 で拒否されます。Lite 版にはアカウントもアラート API もありません。
+
+## `ai-hook`: モニターが見ているものを AI ツールに伝える
+
+`python monitor_cli.py ai-hook install|status|uninstall [--cursor|--generic] [--scope project|user] [--project-dir DIR] [--dry-run] [--json]` は、モニターが動いていなくても使えます。AI ツールのフック設定に連携スクリプト `ai_hook.py` を追加・表示・削除します (AI 向けアラートのガイドを参照)。設定ファイルはマージされ、コピーが保存され、`--json` の出力は純粋な ASCII です。既定の動作は `status` です。
+
+## コマンドラインでのアクセストークン
+
+ネットワークモードでは、トークンは `MONITOR_ACCESS_TOKEN`、次に `MONITOR_TOKEN`、次に `--token-file FILE` の 1 行目から読み取り (このファイルは自分だけが読めるようにしてください。ファイルモードのあるシステムでは、他のユーザーが読めると警告します)、最後に `--token` から読み取ります。`--token` はプロセス一覧に表示されるため、stderr に警告を出します。

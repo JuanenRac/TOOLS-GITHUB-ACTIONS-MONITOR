@@ -13,6 +13,7 @@ import os
 import re
 import time
 from pathlib import Path
+import private_io
 
 HERE = Path(__file__).resolve().parent
 STATE_FILE = HERE / "update_check.json"
@@ -57,7 +58,7 @@ def _load(path):
 def _save(path, state):
     try:
         tmp = Path(str(path) + ".tmp")
-        tmp.write_text(json.dumps(state, indent=1) + "\n", encoding="utf-8", newline="\n")
+        private_io.write_tmp(tmp, json.dumps(state, indent=1) + "\n")
         os.replace(tmp, path)
     except OSError:
         pass

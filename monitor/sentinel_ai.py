@@ -35,6 +35,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import i18n
+import private_io
 
 HERE = Path(__file__).resolve().parent
 CACHE_FILE = HERE / "sentinel_ai_cache.json"
@@ -175,7 +176,7 @@ class Store:
         try:
             with self.lock:
                 tmp = self.path.with_name(self.path.name + ".tmp")
-                tmp.write_text(json.dumps(self.data, indent=1, ensure_ascii=False), encoding="utf-8")
+                private_io.write_tmp(tmp, json.dumps(self.data, indent=1, ensure_ascii=False))
                 os.replace(tmp, self.path)   # atomic: a crash never leaves half a file
         except OSError:
             pass

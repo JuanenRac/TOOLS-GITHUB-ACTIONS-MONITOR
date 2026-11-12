@@ -51,6 +51,7 @@ import toolconfig
 import tzdisplay
 import updatecheck
 from tool_version import AUTHOR, LICENSE_ID, TOOL_VERSION
+import private_io
 
 HERE = Path(__file__).resolve().parent
 CONFIG_FILE = HERE / "actions_monitor.json"
@@ -99,7 +100,12 @@ DEFAULTS = {
     "otlp": {"enabled": False, "endpoint": "", "interval_seconds": 60},       # OFF: OpenTelemetry export to a collector you name (otlp.py)
     "organizations": {"discover": False},                                    # OFF: list the organisations of the login (orgs.py)
     "finops": {"jobs_per_cycle": 0},
-    "ai_alerts": {"enabled": True, "folder": "", "brief_max_bytes": 2048, "hook": {"enabled": False, "url": "", "max_per_hour": 6}},     # a local, read-only feed of alerts for AIs (ai_alerts.py); the hook is OFF                                          # 0: the system of each job is not read (quota.default_runner is assumed)
+    "ai_alerts": {"enabled": True, "folder": "", "brief_max_bytes": 2048, "hook": {"enabled": False, "url": "", "max_per_hour": 6},
+                  "diagnose": {"enabled": False, "max_per_cycle": 3, "log_lines": 10, "max_bytes": 1500},      # OFF: reads logs of GitHub (the allowance)
+                  "cascade": {"enabled": True, "map": {}},
+                  "stream": {"enabled": False, "max_seconds": 3600, "max_clients": 3},      # OFF: GET /api/ai/stream
+                  "heartbeat": {"enabled": True, "window_minutes": 15},
+                  "client_hook": {"enabled": True, "block_on_stop": False, "cooldown_minutes": 20, "stale_hours": 3, "max_lines": 12, "max_chars": 2400}},     # a local, read-only feed of alerts for AIs (ai_alerts.py); the hook is OFF                                          # 0: the system of each job is not read (quota.default_runner is assumed)
 }
 
 DEMO = {"on": False}      # --demo: invented data, no gh, no network
@@ -198,13 +204,13 @@ def load_config():
                 template.update(inherited)
                 if inherited:
                     print(i18n.t("mon.lite_inherited", keys=", ".join(sorted(inherited))))
-                CONFIG_FILE.write_text(json.dumps(template, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                private_io.write_private(CONFIG_FILE, json.dumps(template, ensure_ascii=False, indent=2) + "\n")
                 config.update(json.loads(CONFIG_FILE.read_text(encoding="utf-8")))
             elif example.is_file():
-                CONFIG_FILE.write_text(example.read_text(encoding="utf-8"), encoding="utf-8")
+                private_io.write_private(CONFIG_FILE, example.read_text(encoding="utf-8"))
                 config.update(json.loads(CONFIG_FILE.read_text(encoding="utf-8")))
             else:
-                CONFIG_FILE.write_text(json.dumps(DEFAULTS, indent=2), encoding="utf-8")
+                private_io.write_private(CONFIG_FILE, json.dumps(DEFAULTS, indent=2))
         except (OSError, ValueError):
             pass
     except (OSError, ValueError) as error:
@@ -768,12 +774,36 @@ def red_rows(data):
     return redrule.red_workflows({r: [x for x in runs if x["repo"] == r] for r in (data.get("repos") or [])}, None, True)[0]
 
 
-def feed_alerts(config, data):
-    """The local feed for AIs: complete edition only; a NEW real alert also reaches the notification channels you configured."""
+FEED_SYNC = {"at": 0.0}
+FEED_LOCK = threading.RLock()
+
+
+def refresh_feed(config=None, min_gap=2.0):
+    """Rewrites the feed and the brief from the red workflows as they are NOW, so that they agree with what the Alerts tab shows (they used to follow one cycle behind). Called at every
+    refresh of the alert centre and at every read of the feed; it does not call GitHub (a diagnosis is only fetched in the cycle) and does nothing while the data has not loaded."""
+    data = STATE.get("data") or {}
+    if LITE["on"] or not data or data.get("loading") or (data.get("offline") or {}).get("offline") or not (data.get("repos") or data.get("runs")):
+        return None
+    if time.time() - FEED_SYNC["at"] < min_gap or not FEED_LOCK.acquire(False):
+        return None
+    try:
+        FEED_SYNC["at"] = time.time()
+        return feed_alerts(config or toolconfig.raw_config(), data, diagnose=False)
+    except Exception as error:   # noqa: BLE001 - reading the alerts never fails because the feed could not be written
+        degraded.note("ai_alerts.refresh", error)
+        return None
+    finally:
+        FEED_LOCK.release()
+
+
+def feed_alerts(config, data, diagnose=True):
+    """The local feed for AIs: complete edition only; a NEW real alert also reaches the notification channels you configured. With `diagnose` (the cycle) and ai_alerts.diagnose.enabled,
+    the failing step and the last relevant lines of the log of a new red run are read (read only calls to `gh`)."""
     if LITE["on"]:
         return None
     import ai_alerts
-    result = ai_alerts.update(config, red_rows(data))
+    with FEED_LOCK:      # the cycle and a refresh of the alert centre never write the feed at the same time
+        result = ai_alerts.update(config, red_rows(data), runner=ai_alerts.gh_runner if diagnose else None, owner=toolconfig.github_owner(config))
     for alert in result["opened"]:
         if alert["class"] == "real":
             try:
@@ -857,7 +887,7 @@ def loop(config):
             with LOCK:
                 STATE["data"], STATE["error"], STATE["hint"] = data, None, None
                 STATE["complete"] = True
-            with LOG_FILE.open("a", encoding="utf-8") as log:  # counts only, never titles
+            with private_io.open_append(LOG_FILE) as log:  # counts only, never titles
                 log.write(tzdisplay.localize(f"{data['updated']} repos={len(data['repos'])} hot={data['hot']} refreshed={data['refreshed']} active={len(data['active'])} issues={len(data['issues'])} rate={data['rate']}\n"))
             delay = tuned(config, "refresh_seconds", data)
             try:   # the report of the day goes to the audit folder (never stops the loop)
@@ -987,6 +1017,38 @@ class Handler(BaseHTTPRequestHandler):
             self.wfile.write(body)
         except (ConnectionError, OSError):
             pass   # the browser or a reader closed the tab mid-answer: nothing to report
+
+    def ai_stream(self):
+        """GET /api/ai/stream[?only=real]: `text/event-stream` with a `hello` frame (how many real alerts are open), then one `alert` frame per event of the feed and a keep-alive comment. It resumes
+        from the `Last-Event-ID` header or `?since=`. Read only; the network mode asks for the access token as for every other request; a limited number of listeners, each for a limited time."""
+        import ai_alerts
+        from urllib.parse import parse_qs
+        config = toolconfig.raw_config()
+        cfg = ai_alerts.settings(config)
+        if not cfg["enabled"] or not cfg["stream"]["enabled"]:
+            self.json_reply({"error": "stream off"}, 404)
+            return
+        if not ai_alerts.stream_acquire(config):
+            self.json_reply({"error": "too many listeners"}, 429)
+            return
+        ask = parse_qs(self.path.partition("?")[2])
+        resume = self.headers.get("Last-Event-ID") or (ask.get("since") or [""])[0]
+        try:
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Accel-Buffering", "no")
+            self.send_header("Connection", "close")
+            self.end_headers()
+            self.close_connection = True
+            for frame in ai_alerts.stream_frames(config, offset=int(resume) if str(resume).isdigit() else None,
+                                                 only_real=(ask.get("only") or [""])[0] == "real"):
+                self.wfile.write(frame.encode("utf-8"))
+                self.wfile.flush()
+        except (ConnectionError, OSError):
+            DISCONNECTS[0] += 1      # the listener went away: nothing to report
+        finally:
+            ai_alerts.stream_release()
 
     def guard(self):
         if localguard.local_request_ok(self.headers, self.server.server_address[1]):
@@ -1427,10 +1489,16 @@ class Handler(BaseHTTPRequestHandler):
                     self.json_reply({"error": "unknown topic"}, 404)
                 else:
                     self.json_reply(found)
+        elif path == "/api/ai/stream":      # server-sent events, read only: the alerts as they open and resolve (ai_alerts.stream, off by default)
+            if not self.guard():
+                return
+            self.ai_stream()
         elif path in ("/api/ai/brief", "/api/ai/alerts"):
             if not self.guard():
                 return
+            refresh_feed()
             answer = advanced_get(path, self.path.partition("?")[2])
+            __import__("ai_alerts").touch(toolconfig.raw_config(), "endpoint", self.headers.get("User-Agent") or "")
             if path == "/api/ai/brief" and "fmt=json" not in self.path:
                 self.reply(answer["brief"], "text/markdown; charset=utf-8")
             else:
@@ -1462,6 +1530,7 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/api/statusbar":      # what the bar at the foot of the page shows about this monitor: edition, address, account, sentinels (no secret, no GitHub call)
             if not self.guard():
                 return
+            refresh_feed()      # the bar polls every 30 seconds: the feed follows the sentinel without waiting for a cycle
             self.json_reply(statusbar_payload(self.server.server_address[1], not localguard.STATE["network"] or localguard.from_this_computer(self.client_address)))
         elif path in ("/api/alerts", "/api/events"):      # one list of the alerts of every sentinel, and the events of the feed (1.7.3; read only; the account comes from ?account= or the process)
             if not self.guard():
@@ -1534,7 +1603,8 @@ def statusbar_payload(port, client_local=True):
     answer = {"schema": 1, "version": TOOL_VERSION, "edition": "lite" if LITE["on"] else "complete", "port": port, "bind": state.get("host") or "127.0.0.1", "network": bool(state.get("network")),
               "lan_address": lan_address(), "account": CHILD["account"] or None, "uptime_seconds": int(time.time() - STARTED), "demo": bool(DEMO["on"]),
               "runs": {"active": figures.get("active"), "queued": figures.get("queued")},      # the same two figures as the header tiles and `monitor_cli status` (null until the first read)
-              "sentinels": sentinels, "workers": ((LIVE_CONFIG or {}).get("sentinel") or {}).get("workers") if not LITE["on"] else None}
+              "sentinels": sentinels, "workers": ((LIVE_CONFIG or {}).get("sentinel") or {}).get("workers") if not LITE["on"] else None,
+              "ai": None if LITE["on"] else __import__("ai_alerts").presence(LIVE_CONFIG or toolconfig.raw_config())}      # was the feed read lately, and by what way (ai_alerts.heartbeat)
     if answer["network"] and not client_local:
         del answer["lan_address"]
     return answer
@@ -1543,6 +1613,7 @@ def statusbar_payload(port, client_local=True):
 def alerts_payload(ask):
     """GET /api/alerts: the alerts of every sentinel in one list, each with `muted_until`; `?sentinel=`, `?level=`, `?muted=show|hide|only`. Lite has no sentinels: an empty list."""
     import alert_center
+    refresh_feed()
     registry = SENTINEL["registry"]
     everything = alert_center.collect(registry)
     chosen = alert_center.select(everything, ask.get("sentinel", ""), ask.get("level", ""), ask.get("muted", "show") if ask.get("muted") in ("show", "hide", "only") else "show")
@@ -1713,7 +1784,7 @@ def advanced_get(path, query):
         import ai_alerts
         from urllib.parse import parse_qs
         if "json" in (parse_qs(query).get("fmt") or [""]):
-            return {"brief": ai_alerts.read_brief(config), "alerts": ai_alerts.alerts(config, states=("open", "acknowledged"))}
+            return {**ai_alerts.brief_info(config), "alerts": ai_alerts.alerts(config, states=("open", "acknowledged"))}
         return {"brief": ai_alerts.read_brief(config)}
     if path == "/api/ai/alerts":
         import ai_alerts
@@ -1758,7 +1829,7 @@ def handle_advanced_post(path, request):
     if path == "/api/welcome":
         if not DEMO["on"]:
             try:
-                welcome_file().write_text(json.dumps({"done": request.get("done") is True}) + chr(10), encoding="utf-8")
+                private_io.write_private(welcome_file(), json.dumps({"done": request.get("done") is True}) + chr(10))
             except OSError:
                 return {"ok": False}
         return {"ok": True}
@@ -2008,7 +2079,7 @@ def main():
         names = watched_repos(config, force=True)
         saved = dict(config)
         saved["repos"] = names
-        CONFIG_FILE.write_text(json.dumps(saved, indent=2), encoding="utf-8")
+        private_io.write_private(CONFIG_FILE, json.dumps(saved, indent=2))
         print(i18n.t("mon.discovered", n=len(names), file=CONFIG_FILE.name))
         return 0
     using_example = toolconfig.catalog_in_example(config)
@@ -2068,6 +2139,8 @@ def main():
         print(i18n.t("mon.network_on", host=listen["host"], port=server.server_address[1]), flush=True)
         if tls_ctx is None and not localguard.STATE["secure"]:
             print(i18n.t("mon.network_plain"), flush=True)
+        if localguard.query_access_allowed(config):
+            print(i18n.t("mon.network_first_steps"), flush=True)      # first step of the network mode: the token must not travel in an address
         if access_generated and localguard.query_access_allowed(config):
             print(i18n.t("mon.network_token", url=url + "?access=" + access_token), flush=True)      # the only place the token is shown
             print(i18n.t("mon.network_token_deprecated"), flush=True)

@@ -6,7 +6,10 @@
     python mcp_server.py [--allow-ack]
 
 Read only by default. Tools: get_alerts (the open alerts of the feed), get_red_repos, get_run_failure(repo, run) (the failed steps of a run and a short, cleaned fragment of its log),
-get_quota (the allowance and the minutes, from a running monitor) and - only with --allow-ack - ack_alert(id), which changes the local state of the feed and nothing else. Nothing here writes to
+get_quota (the allowance and the minutes, from a running monitor), alerts_open (the open alerts with their age, diagnosis and the origin they fall together under), alert_diagnose(id) (the failing
+step and the last relevant lines of the log of that alert; read only calls to `gh` when the feed has none yet) and - only with --allow-ack - ack_alert(id) / alert_ack(id), which change the local state
+of the feed and nothing else. When it starts it tells the AI, in its `instructions` and with one notification, how many real alerts are open, and it notes in the heartbeat file that an AI is
+connected (the status bar of the monitor shows it). Nothing here writes to
 GitHub, runs a workflow or sends anything out: every answer goes through ai_alerts.redact() (no token, key, e-mail, IP or home folder). It speaks JSON, one message per line.
 """
 import json
@@ -27,8 +30,21 @@ TOOLS = [
     {"name": "get_red_repos", "description": "Repositories with a workflow that is red on its default branch.", "inputSchema": {"type": "object", "properties": {}}},
     {"name": "get_run_failure", "description": "The failed steps of one run and a short cleaned fragment of its log.", "inputSchema": {"type": "object", "properties": {"repo": {"type": "string"}, "run": {"type": "integer"}}, "required": ["repo", "run"]}},
     {"name": "get_quota", "description": "GitHub allowance and Actions minutes, from the running monitor.", "inputSchema": {"type": "object", "properties": {}}},
+    {"name": "alerts_open", "description": "Open CI alerts of the monitor, real ones first: age of the feed, failing step, last log lines and the red repository they fall together under.", "inputSchema": {"type": "object", "properties": {"only_real": {"type": "boolean"}}}},
+    {"name": "alert_diagnose", "description": "The failing step and the last relevant lines of the log of one alert (by id); reads the log from GitHub only when the feed has no diagnosis yet.", "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"]}},
+    {"name": "alert_ack", "description": "Acknowledge an alert (local state only; needs --allow-ack).", "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"]}},
     {"name": "ack_alert", "description": "Acknowledge an alert (local state only; needs --allow-ack).", "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"]}},
 ]
+
+
+def open_summary(config):
+    """One short text: how many real alerts are open (and how old the brief is), or '' when none is."""
+    rows = [a for a in ai_alerts.alerts(config, states=("open",)) if a["class"] == "real"]
+    if not rows:
+        return ""
+    info = ai_alerts.brief_info(config)
+    first = "; ".join(f"{a['repo']} / {a['workflow']}" for a in rows[:5])
+    return ai_alerts.redact(f"{len(rows)} real CI alert(s) open (brief updated {info['updated_local']}): {first}. Use alerts_open and alert_diagnose.", 600)
 
 
 def local_get(path, port=8765):
@@ -46,6 +62,24 @@ def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_g
     if name == "get_alerts":
         states = None if arguments.get("include_resolved") else ("open", "acknowledged")
         return ai_alerts.redact(json.dumps(ai_alerts.alerts(config, states=states), ensure_ascii=False, indent=1))
+    if name == "alerts_open":
+        rows = [a for a in ai_alerts.alerts(config, states=("open", "acknowledged")) if not arguments.get("only_real") or a["class"] == "real"]
+        rows.sort(key=lambda a: (a["state"] == "acknowledged", a["class"] != "real", a["repo"], a["workflow"]))
+        info = ai_alerts.brief_info(config)
+        return ai_alerts.redact(json.dumps({"updated": info["updated"], "updated_local": info["updated_local"], "age_seconds": info["age_seconds"], "alerts": rows}, ensure_ascii=False, indent=1))
+    if name == "alert_diagnose":
+        wanted = str(arguments.get("id", ""))
+        found = [a for a in ai_alerts.alerts(config, states=("open", "acknowledged")) if a["id"] == wanted]
+        if not found:
+            raise ValueError("no such open alert")
+        item = found[0]
+        diagnosis = item.get("diagnosis")
+        if not diagnosis or diagnosis.get("unavailable"):
+            cfg = ai_alerts.settings(config)["diagnose"]
+            diagnosis = ai_alerts.diagnose(toolconfig.github_owner(config), item["repo"], item.get("url"), runner, cfg["log_lines"], cfg["max_bytes"])
+            if not diagnosis:
+                raise ValueError("this alert has no run to read")
+        return ai_alerts.redact(json.dumps({"id": wanted, "repo": item["repo"], "workflow": item["workflow"], "diagnosis": diagnosis, "origin": item.get("origin")}, ensure_ascii=False, indent=1))
     if name == "get_red_repos":
         rows = ai_alerts.alerts(config, states=("open", "acknowledged"))
         return ai_alerts.redact(json.dumps(sorted({a["repo"] for a in rows})))
@@ -63,7 +97,7 @@ def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_g
         return ai_alerts.redact("Failed steps:\n" + ("\n".join(steps) or "(none listed)") + "\n\nEnd of the failed log:\n" + fragment, 4000)
     if name == "get_quota":
         return ai_alerts.redact(json.dumps(getter("/api/quota"), ensure_ascii=False)[:3000])
-    if name == "ack_alert":
+    if name in ("ack_alert", "alert_ack"):
         if not allow_ack:
             raise ValueError("acknowledging is off: start the server with --allow-ack")
         return "acknowledged" if ai_alerts.ack(config, arguments.get("id")) else "no such open alert"
@@ -103,11 +137,17 @@ def handle(message, config, allow_ack=False, **kwargs):
     method, ident = message.get("method"), message.get("id")
     if method == "initialize":
         version = (message.get("params") or {}).get("protocolVersion", "2024-11-05")
-        result = {"protocolVersion": version if isinstance(version, str) and len(version) <= 20 else "2024-11-05", "capabilities": {"tools": {}}, "serverInfo": {"name": "github-actions-monitor", "version": TOOL_VERSION}}
+        result = {"protocolVersion": version if isinstance(version, str) and len(version) <= 20 else "2024-11-05", "capabilities": {"tools": {}, "logging": {}},
+                  "serverInfo": {"name": "github-actions-monitor", "version": TOOL_VERSION}}
+        note = open_summary(config)
+        if note:
+            result["instructions"] = note
+        ai_alerts.touch(config, "mcp", str(((message.get("params") or {}).get("clientInfo") or {}).get("name") or "mcp") if isinstance((message.get("params") or {}).get("clientInfo"), dict) else "mcp")
     elif method == "tools/list":
-        result = {"tools": [t for t in TOOLS if allow_ack or t["name"] != "ack_alert"]}
+        result = {"tools": [t for t in TOOLS if allow_ack or t["name"] not in ("ack_alert", "alert_ack")]}
     elif method == "tools/call":
         params = message.get("params") or {}
+        ai_alerts.touch(config, "mcp", "mcp")
         try:
             text = call(params["name"], params.get("arguments") or {}, config, allow_ack, **kwargs)
             result = {"content": [{"type": "text", "text": text}]}
@@ -115,6 +155,9 @@ def handle(message, config, allow_ack=False, **kwargs):
             result = {"content": [{"type": "text", "text": ai_alerts.redact(str(error))[:300]}], "isError": True}
     elif method == "ping":
         result = {}
+    elif method == "notifications/initialized":      # the tool is ready: one notification says what is red (nothing when nothing is)
+        note = open_summary(config)
+        return {"jsonrpc": "2.0", "method": "notifications/message", "params": {"level": "warning", "logger": "github-actions-monitor", "data": note}} if note else None
     elif ident is None:
         return None
     else:

@@ -8,11 +8,13 @@
   alerts    the alerts of every sentinel in one list (--sentinel ci|collab, --level, --muted)
   live      the last events that arrived through the webhook and the state of the receiver
   doctor    the checks of --doctor for this installation (no monitor needed)
+  ai-hook   install | status | uninstall the gate script that tells an AI tool what the monitor sees (--claude, --cursor or --generic; --scope project|user); it needs no
+            running monitor and writes only the settings file of that tool (merged, with a backup), never anything on GitHub
   health    a quick check before reading anything heavy: is the monitor reachable, does it accept this client, does the GitHub credential of the account answer (a limit of the
             allowance is told apart from a credential that failed). Alias: check
 
 Every command takes --json (the answer as one JSON document), --account ID, --url URL, --timeout SECONDS and --lang CODE. In the network mode the access token is read from MONITOR_ACCESS_TOKEN,
-then from its alias MONITOR_TOKEN, then from --token (the last resort: a flag shows in the list of processes); plain http to another computer prints a warning on stderr. Nothing here writes to GitHub or changes a setting.
+then from its alias MONITOR_TOKEN, then from --token-file (a file only you can read) and last from --token (it shows in the list of processes, so it prints a warning on stderr); plain http to another computer prints a warning on stderr. Nothing here writes to GitHub or changes a setting.
 The lite edition answers `status`, `doctor` and `health` (use --lite for its port 8766); the rest need the complete edition.
 
 Exit codes (stable): 0 all right; 1 wrong use of the command; 2 the monitor cannot be reached; 3 the monitor or GitHub refuses the credential (access token of the network mode, or the login
@@ -35,7 +37,8 @@ import tzdisplay
 from tool_version import TOOL_VERSION
 
 EXIT_OK, EXIT_USAGE, EXIT_DOWN, EXIT_AUTH, EXIT_DEGRADED, EXIT_ALERTS = 0, 1, 2, 3, 4, 5
-COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check")
+COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "ai-hook")
+AI_HOOK_ACTIONS = ("install", "status", "uninstall")
 LITE_COMMANDS = ("status", "doctor", "health", "check")
 LEVELS = ("info", "warning", "error")
 PORTS = {"complete": 8765, "lite": 8766}
@@ -48,13 +51,33 @@ class CliError(Exception):
         self.code, self.text = code, text
 
 
-def resolve_token(env=None, flag=""):
-    """The access token of the network mode: MONITOR_ACCESS_TOKEN, else its alias MONITOR_TOKEN, else the `--token` flag (the last resort: a flag shows in the list of processes)."""
+def read_token_file(path):
+    """The first line of a file that holds the access token. Raises CliError(1) when it cannot be read or is empty. On a system with file modes a file that others can read is told about on stderr."""
+    try:
+        with open(path, "r", encoding="utf-8-sig") as handle:
+            value = handle.readline().strip()
+        mode = os.stat(path).st_mode
+    except (OSError, UnicodeError):
+        raise CliError(EXIT_USAGE, i18n.t("cli.token_file_bad", file=path)) from None
+    if not value:
+        raise CliError(EXIT_USAGE, i18n.t("cli.token_file_bad", file=path))
+    if os.name != "nt" and mode & 0o077:
+        print(i18n.t("cli.token_file_open", file=path), file=sys.stderr)
+    return value
+
+
+def resolve_token(env=None, flag="", token_file=""):
+    """The access token of the network mode: MONITOR_ACCESS_TOKEN, else its alias MONITOR_TOKEN, else the first line of `--token-file`, else the `--token` flag (the last resort: a flag shows
+    in the list of processes, so it warns on stderr)."""
     env = os.environ if env is None else env
     for name in TOKEN_VARIABLES:
         value = (env.get(name) or "").strip()
         if value:
             return value
+    if token_file:
+        return read_token_file(token_file)
+    if (flag or "").strip():
+        print(i18n.t("cli.token_flag_warn"), file=sys.stderr)
     return (flag or "").strip()
 
 
@@ -217,16 +240,61 @@ def cmd_health(ctx):
     return out, lines + [i18n.t("cli.health_github_ok", remaining=remaining if remaining is not None else "-")], EXIT_OK
 
 
-HANDLERS = {"status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "live": cmd_live, "doctor": cmd_doctor, "health": cmd_health, "check": cmd_health}
+def cmd_ai_hook(ctx):
+    """`ai-hook install|status|uninstall`: local, no monitor needed. The --json answer is plain ASCII (see main)."""
+    import ai_hook_install as hook
+    action = ctx.get("action") or "status"
+    try:
+        if action == "status":
+            import ai_alerts
+            import toolconfig
+            report = hook.status(ctx.get("project_dir") or None)
+            report["presence"] = ai_alerts.presence(toolconfig.raw_config())
+            lines = [i18n.t("cli.aih_state_on" if report["installed"] else "cli.aih_state_off")]
+            for row in report["targets"]:
+                if row["events"] or row["error"]:
+                    lines.append(i18n.t("cli.aih_row", target=row["target"], scope=row["scope"], events=", ".join(row["events"]) or "-", file=row["file"]) + (f" [{row['error']}]" if row["error"] else ""))
+            cfg = report["settings"]
+            lines.append(i18n.t("cli.aih_settings", enabled=i18n.t("ui.yes" if cfg["enabled"] else "ui.no"), block=i18n.t("ui.yes" if cfg["block_on_stop"] else "ui.no"), minutes=cfg["cooldown_minutes"]))
+            seen = report["presence"]
+            lines.append(i18n.t("cli.aih_last_read", via=seen["via"], ago=ago_text(seen["age_seconds"])) if seen.get("last_at") else i18n.t("cli.aih_never"))
+            return report, lines, EXIT_OK
+        target = ctx.get("target") or "claude"
+        scope = ctx.get("scope") or "project"
+        if action == "install":
+            report = hook.install(target, scope, ctx.get("project_dir") or None, dry_run=ctx.get("dry_run", False))
+        else:
+            report = hook.uninstall(target, scope, ctx.get("project_dir") or None, dry_run=ctx.get("dry_run", False))
+    except hook.InstallError as error:
+        raise CliError(EXIT_USAGE, i18n.t("cli.aih_error", reason=str(error))) from None
+    lines = [i18n.t("cli.aih_" + report["action"], target=report["target"], scope=report["scope"] or "-", file=report["file"] or "-")]
+    if report["action"] == "printed":
+        lines.append(i18n.t("cli.aih_generic"))
+        lines.extend(f"  {event}: {command}" for event, command in report["commands"].items())
+    if report.get("backup"):
+        lines.append(i18n.t("cli.aih_backup", file=report["backup"]))
+    if action == "install" and report["action"] != "printed":
+        lines.append(i18n.t("cli.aih_next"))
+    return report, lines, EXIT_OK
+
+
+HANDLERS = {"ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "live": cmd_live, "doctor": cmd_doctor, "health": cmd_health, "check": cmd_health}
 
 
 def build_parser():
     ap = argparse.ArgumentParser(prog="monitor_cli.py", description=i18n.t("cli.description"), epilog=i18n.t("cli.epilog"), formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("command", choices=COMMANDS, help=i18n.t("cli.help_command"))
+    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS, default=None, help=i18n.t("cli.help_ai_action"))
     ap.add_argument("--json", action="store_true", help=i18n.t("cli.help_json"))
+    for name in ("claude", "cursor", "generic"):
+        ap.add_argument("--" + name, dest="target", action="store_const", const=name, default="", help=i18n.t("cli.help_" + name))
+    ap.add_argument("--scope", choices=("project", "user"), default="project", help=i18n.t("cli.help_scope"))
+    ap.add_argument("--project-dir", metavar="DIR", default="", dest="project_dir", help=i18n.t("cli.help_project_dir"))
+    ap.add_argument("--dry-run", action="store_true", dest="dry_run", help=i18n.t("cli.help_dry_run"))
     ap.add_argument("--account", metavar="ID", default="", help=i18n.t("cli.help_account"))
     ap.add_argument("--url", metavar="URL", default="", help=i18n.t("cli.help_url"))
     ap.add_argument("--lite", action="store_true", help=i18n.t("cli.help_lite"))
+    ap.add_argument("--token-file", metavar="FILE", default="", dest="token_file", help=i18n.t("cli.help_token_file"))
     ap.add_argument("--token", metavar="TOKEN", default="", help=i18n.t("cli.help_token"))
     ap.add_argument("--timeout", type=float, default=8.0, metavar="SECONDS", help=i18n.t("cli.help_timeout"))
     ap.add_argument("--sentinel", choices=("ci", "collab"), default="", help=i18n.t("cli.help_sentinel"))
@@ -256,8 +324,9 @@ def main(argv=None):
         print(i18n.t("cli.lite_only"), file=sys.stderr)
         return EXIT_USAGE
     try:
-        ctx = {"base": base_url(args.url, args.lite), "account": args.account, "timeout": max(1.0, min(60.0, args.timeout)), "token": resolve_token(flag=args.token),
-               "sentinel": args.sentinel, "level": args.level, "muted": args.muted, "fail_on": args.fail_on, "lite": args.lite}
+        ctx = {"base": base_url(args.url, args.lite), "account": args.account, "timeout": max(1.0, min(60.0, args.timeout)), "token": resolve_token(flag=args.token, token_file=args.token_file),
+               "sentinel": args.sentinel, "level": args.level, "muted": args.muted, "fail_on": args.fail_on, "lite": args.lite,
+               "action": args.action or "", "target": args.target, "scope": args.scope, "project_dir": args.project_dir, "dry_run": args.dry_run}
         insecure = plain_http_to_network(ctx["base"])
         if insecure:
             print(i18n.t("cli.plain_http", host=insecure), file=sys.stderr)
@@ -269,7 +338,7 @@ def main(argv=None):
             print(error.text, file=sys.stderr)
         return error.code
     if args.json:
-        print(json.dumps({"ok": code == EXIT_OK, "exit": code, "data": payload}, ensure_ascii=False, indent=1))
+        print(json.dumps({"ok": code == EXIT_OK, "exit": code, "data": payload}, ensure_ascii=args.command == "ai-hook", indent=1))      # ai-hook: plain ASCII, whatever the console
     else:
         print("\n".join(lines))
     return code

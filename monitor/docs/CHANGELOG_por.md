@@ -7,6 +7,27 @@
 
 Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com o seu próprio semver. A fonte é o CHANGELOG.md em inglês; este ficheiro tem as mesmas versões e secções.
 
+## [Unreleased]
+
+A ligação entre o monitor e uma ferramenta de IA: o feed coincide sempre com a página, cada alerta diz porque está vermelho, um fluxo e três ferramentas MCP empurram as novidades, um comando instala o script de ligação, a barra mostra se há uma IA ligada e todos os ficheiros de estado são privados do seu dono.
+
+### Adicionado
+
+- **O resumo e o feed seguem cada atualização do separador Alertas** (e cada leitura do feed e cada ciclo): antes iam um ciclo atrás, de modo que uma IA podia ler 10 alertas enquanto a página mostrava 6. O `ALERTS_BRIEF.md` leva agora `Updated:` no seu fuso horário e uma linha para máquinas `updated_epoch:`, e `GET /api/ai/brief?fmt=json` acrescenta `updated`, `updated_local` e `age_seconds`. Um ciclo que ainda não carregou os dados nunca resolve alertas.
+- **`ai_alerts.diagnose`** (desligado por predefinição, no separador Definições, em oito idiomas): cada alerta de uma execução vermelha nova leva `diagnosis`, o primeiro passo que falha e cerca de dez linhas relevantes do registo, lidas com chamadas só de leitura, limpas de segredos e limitadas em tamanho e em execuções por ciclo; um erro de infraestrutura no registo torna o alerta transitório.
+- **`ai_alerts.cascade`**: os alertas vermelhos porque outro repositório está vermelho (nomeado no registo ou na regra `ai_alerts.cascade.map`) são listados sob ele no resumo e levam `origin`.
+- **`GET /api/ai/stream`** (`ai_alerts.stream`, desligado por predefinição): eventos do servidor, só leitura, com o token de acesso no modo de rede, limitado em ouvintes e em tempo, retomável com `Last-Event-ID`; a edição lite não o tem.
+- **Ferramentas MCP `alerts_open`, `alert_diagnose` e `alert_ack`** (a última só com `--allow-ack`) e um aviso à IA quando se liga, nas `instructions` e com uma notificação, que diz quantos alertas reais estão abertos.
+- **`monitor_cli.py ai-hook install|status|uninstall [--cursor|--generic] [--scope project|user] [--dry-run]`** e o script de ligação `ai_hook.py` (só biblioteca padrão): junta o resumo à sessão de IA e, só com `ai_alerts.client_hook.block_on_stop` (desligado por predefinição), pede à IA que veja os alertas reais abertos antes de terminar um turno. As definições da ferramenta são fundidas, nunca substituídas, guarda-se uma cópia do ficheiro, um ficheiro que não seja JSON válido é recusado sem lhe tocar e tudo o que se escreve é ASCII puro. Os valores estão em `ai_alerts.client_hook` (separador Definições, oito idiomas).
+- **Um batimento da IA** (`ai_alerts.heartbeat`): o fluxo, o servidor MCP, o script de ligação e os endpoints anotam a sua última leitura num pequeno ficheiro local, e a barra inferior mostra se há uma IA ligada e há quanto tempo leu.
+- **`monitor_cli.py --token-file FICHEIRO`** e um aviso no stderr quando se usa `--token` (aparece na lista de processos) ou quando o ficheiro do token pode ser lido por outros utilizadores.
+- Testes para cada alteração, numa pasta temporária e sem rede, incluindo o modo de cada ficheiro de estado com um `umask` permissivo.
+
+### Alterado
+
+- **Todos os ficheiros de estado do monitor são criados com o modo 0600** (as pastas criadas, com 0700) através de um único auxiliar, `private_io.py`: silenciamentos, eventos, o feed, o resumo, caches, as definições e os ficheiros escritos pelo instalador do script de ligação. No Windows o programa não consegue impor os modos (as pastas herdam as permissões da pasta-mãe).
+- **Ao arrancar o modo de rede** com `listen.query_access` ainda ligado, passam a imprimir-se os primeiros passos (desligá-lo; usar HTTPS ou uma VPN), e a ajuda de `listen.network` e o guia avançado dizem o mesmo em oito idiomas.
+
 ## [1.7.5]
 
 A linha de comandos lê o token de acesso com o seu próprio nome, o modo de rede é mais seguro por predefinição (o endereço do computador fica escondido da rede, o endereço antigo ?access= pode ser desativado, os destinos de notificação da rede local são recusados, aviso sobre HTTP simples), as horas para as pessoas usam o seu fuso horário, um alerta pode ser silenciado até o elemento mudar, e foram corrigidas as contagens e verificações que davam respostas erradas.

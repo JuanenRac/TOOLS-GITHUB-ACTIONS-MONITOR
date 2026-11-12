@@ -49,3 +49,11 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python monitor_cli
 ## The lite edition
 
 `python monitor_cli.py status --lite`, `doctor --lite` and `health --lite` talk to port 8766. The commands that need accounts, sentinels or the webhook receiver are refused with exit code 1. The lite edition has no accounts and no alerts API.
+
+## `ai-hook`: tell an AI tool what the monitor sees
+
+`python monitor_cli.py ai-hook install|status|uninstall [--cursor|--generic] [--scope project|user] [--project-dir DIR] [--dry-run] [--json]` needs no running monitor. It adds, shows or removes the gate script `ai_hook.py` in the hook settings of an AI tool (see the guide on alerts for AIs): the settings file is merged, a copy is kept, and the answer of `--json` is plain ASCII. `status` is the default action.
+
+## The access token in the command line
+
+In the network mode the token is read from `MONITOR_ACCESS_TOKEN`, then `MONITOR_TOKEN`, then the first line of `--token-file FILE` (keep that file readable by you only: on a system with file modes the command warns when others can read it), and last from `--token`, which shows in the list of processes and therefore prints a warning on stderr.

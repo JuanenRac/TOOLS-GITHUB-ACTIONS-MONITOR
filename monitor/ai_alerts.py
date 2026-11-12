@@ -10,22 +10,35 @@
   * Everything written goes through `redact()` first: tokens, keys, e-mail addresses, IP addresses and the home folder of the user never reach the feed, the brief, an endpoint or a hook.
   * Optional, OFF by default: a hook (`ai_alerts.hook`) that POSTs a NEW real alert (closed list of fields) to an address on THIS computer, at most `max_per_hour` times an hour, so that a script of
     yours can wake an AI session. Nothing goes to an external provider from here, and nothing here runs a command or writes to GitHub.
+  * 1.7.6 - the connection between the monitor and an AI: the feed and the brief are rewritten at EVERY refresh of the alert centre (not one cycle later), each alert can carry the failing step and
+    the last relevant lines of its log (`ai_alerts.diagnose`, off by default: it reads logs of GitHub), alerts that fall together because of one red repository are grouped under it
+    (`ai_alerts.cascade`), a read-only stream of events (`ai_alerts.stream`, off by default), and a heartbeat file that tells the status bar whether an AI is reading the feed (`ai_alerts.heartbeat`).
 """
 import degraded
 import hashlib
 import json
 import os
 import re
+import subprocess
+import threading
 import time
 import tzdisplay
 import urllib.request
 from pathlib import Path
+import private_io
 
 HERE = Path(__file__).resolve().parent
 FEED = "ai_alerts.jsonl"
 BRIEF = "ALERTS_BRIEF.md"
 STATE = "ai_alerts_state.json"
+HEARTBEAT = "ai_heartbeat.json"
 FIELDS = ("id", "severity", "class", "repo", "workflow", "conclusion", "since", "streak", "url", "cause", "action", "state")      # the closed list a hook or an endpoint may carry
+EXTRA = ("diagnosis", "origin")      # what the feed, the stream and the endpoints add to FIELDS (never the hook: its list is the closed one above)
+RUN_RE = re.compile(r"/actions/runs/(\d+)")
+ANSI_RE = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
+STAMP_RE = re.compile(r"^\d{4}-\d\d-\d\dT[\d:.]+Z\s*")
+RELEVANT_RE = re.compile(r"(?i)\b(error|errors|fail|failed|failure|fatal|exception|traceback|not found|denied|cannot|can't|unable|exit code|assert\w*|no such)\b")
+VIA = ("stream", "mcp", "hook", "endpoint")
 TRANSIENT_DEFAULT = [r"\b50[234]\b", r"bad gateway", r"service unavailable", r"gateway time-?out", r"timed? ?out", r"rate limit", r"secondary rate", r"tls", r"connection (?:reset|refused|closed)",
                      r"unexpected eof", r"codeql.*download", r"download.*codeql", r"could not resolve host", r"no space left", r"the runner has received a shutdown signal"]
 LOOP_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/%-]{0,100})?$")
@@ -57,17 +70,40 @@ def redact(text, limit=None):
     return out[:limit] if limit else out
 
 
+def _num(block, key, low, high, default):
+    value = block.get(key)
+    return value if isinstance(value, int) and not isinstance(value, bool) and low <= value <= high else default
+
+
+def _block(cfg, name):
+    return cfg.get(name) if isinstance(cfg.get(name), dict) else {}
+
+
 def settings(config):
     cfg = config.get("ai_alerts") if isinstance(config, dict) and isinstance(config.get("ai_alerts"), dict) else {}
-    hook = cfg.get("hook") if isinstance(cfg.get("hook"), dict) else {}
+    hook = _block(cfg, "hook")
+    diagnose, cascade, stream, beat, client = (_block(cfg, n) for n in ("diagnose", "cascade", "stream", "heartbeat", "client_hook"))
     size = cfg.get("brief_max_bytes")
     per_hour = hook.get("max_per_hour")
     patterns = cfg.get("transient_patterns") if isinstance(cfg.get("transient_patterns"), list) else TRANSIENT_DEFAULT
+    links = cascade.get("map") if isinstance(cascade.get("map"), dict) else {}
     return {"enabled": cfg.get("enabled", True) is True, "folder": cfg.get("folder") if isinstance(cfg.get("folder"), str) else "",
             "brief_max_bytes": size if isinstance(size, int) and not isinstance(size, bool) and 512 <= size <= 20000 else 2048,
             "transient_patterns": [p for p in patterns if isinstance(p, str) and 0 < len(p) <= 120][:40],
             "hook": {"enabled": hook.get("enabled") is True and bool(LOOP_RE.match(str(hook.get("url") or ""))), "url": str(hook.get("url") or ""),
-                     "max_per_hour": per_hour if isinstance(per_hour, int) and not isinstance(per_hour, bool) and 1 <= per_hour <= 60 else 6}}
+                     "max_per_hour": per_hour if isinstance(per_hour, int) and not isinstance(per_hour, bool) and 1 <= per_hour <= 60 else 6},
+            # reads logs of GitHub (the allowance): OFF until you turn it on
+            "diagnose": {"enabled": diagnose.get("enabled") is True, "max_per_cycle": _num(diagnose, "max_per_cycle", 1, 10, 3), "log_lines": _num(diagnose, "log_lines", 3, 40, 10),
+                         "max_bytes": _num(diagnose, "max_bytes", 200, 4000, 1500)},
+            # only a way of showing the alerts: on. `map` = {"base-repo": ["client-repo", ...]} for the cascades that a log does not name
+            "cascade": {"enabled": cascade.get("enabled", True) is True,
+                        "map": {str(k)[:100]: [str(v)[:100] for v in vs if isinstance(v, str)][:50] for k, vs in list(links.items())[:50] if isinstance(vs, list)}},
+            # a read-only stream of events for an AI session: OFF until you turn it on
+            "stream": {"enabled": stream.get("enabled") is True, "max_seconds": _num(stream, "max_seconds", 60, 86400, 3600), "max_clients": _num(stream, "max_clients", 1, 10, 3)},
+            "heartbeat": {"enabled": beat.get("enabled", True) is True, "window_minutes": _num(beat, "window_minutes", 1, 1440, 15)},
+            # the gate script `ai_hook.py` (installed with `monitor_cli.py ai-hook install`): it injects the brief; blocking the end of a turn is OFF until you turn it on
+            "client_hook": {"enabled": client.get("enabled", True) is True, "block_on_stop": client.get("block_on_stop") is True, "cooldown_minutes": _num(client, "cooldown_minutes", 1, 1440, 20),
+                            "stale_hours": _num(client, "stale_hours", 1, 168, 3), "max_lines": _num(client, "max_lines", 1, 40, 12), "max_chars": _num(client, "max_chars", 400, 8000, 2400)}}
 
 
 def folder_of(cfg):
@@ -116,25 +152,127 @@ def _read(path, default):
 
 def _write(path, text):
     tmp = Path(str(path) + ".tmp")
-    tmp.write_text(text, encoding="utf-8", newline="\n")
+    private_io.write_tmp(tmp, text)
     os.replace(tmp, path)
 
 
 def _event(folder, kind, alert, now):
-    line = {"at": int(now), "event": kind, **{k: alert.get(k) for k in FIELDS}}
-    with open(Path(folder) / FEED, "a", encoding="utf-8", newline="\n") as handle:
+    line = {"at": int(now), "event": kind, **{k: alert.get(k) for k in FIELDS + EXTRA}}
+    with private_io.open_append(Path(folder) / FEED) as handle:
         handle.write(json.dumps(line, ensure_ascii=False) + "\n")
 
 
+def run_id_of(url):
+    match = RUN_RE.search(str(url or ""))
+    return int(match.group(1)) if match else 0
+
+
+def gh_runner(args, timeout=60):
+    """Runs `gh` (read only calls) with the token the monitor keeps, if any. Returns (code, text out, text err)."""
+    kwargs = {}
+    try:
+        import secretstore
+        kwargs = secretstore.gh_kwargs()
+    except Exception:   # noqa: BLE001 - without the store gh uses its own login
+        pass
+    done = subprocess.run(["gh", *args], capture_output=True, timeout=timeout, **kwargs)
+    return done.returncode, done.stdout.decode("utf-8", "replace"), done.stderr.decode("utf-8", "replace")
+
+
+def relevant_lines(log, count=10):
+    """The last `count` lines of a failed log that say what went wrong (error, failed, not found...), else the last lines; time stamps, colours and group marks removed."""
+    cleaned = []
+    for raw in str(log or "").splitlines():
+        parts = raw.split("\t", 2)
+        text = STAMP_RE.sub("", ANSI_RE.sub("", parts[2] if len(parts) == 3 else raw)).strip()
+        if text and not text.startswith(("##[group]", "##[endgroup]")):
+            cleaned.append(text)
+    hits = [line for line in cleaned if RELEVANT_RE.search(line)]
+    return [line[:200] for line in (hits[-count:] if hits else cleaned[-count:])]
+
+
+def diagnose(owner, repo, url, runner, count=10, max_bytes=1500):
+    """The probable cause of a red run, read from its log: {"run", "step" (the first failing step), "lines" (about ten relevant ones)}. Everything goes through redact() and the answer never
+    exceeds `max_bytes` once written. None when the address carries no run; {"run", "unavailable": True} when GitHub did not answer (so it is not asked again for the same run)."""
+    run = run_id_of(url)
+    if not run:
+        return None
+    try:
+        code, out, _err = runner(["api", f"repos/{owner}/{repo}/actions/runs/{run}/jobs?per_page=30"], 60)
+        if code != 0:
+            return {"run": run, "unavailable": True}
+        step = ""
+        for job in json.loads(out).get("jobs") or []:
+            failed = [x for x in job.get("steps") or [] if x.get("conclusion") == "failure"]
+            if failed:
+                step = f"{job.get('name')}: {failed[0].get('name')}"
+                break
+        code, log, _err = runner(["run", "view", str(run), "--repo", f"{owner}/{repo}", "--log-failed"], 90)
+    except (ValueError, OSError, subprocess.SubprocessError, AttributeError):
+        return {"run": run, "unavailable": True}
+    lines = [redact(line) for line in relevant_lines(log if code == 0 else "", count)]
+    result = {"run": run, "step": redact(step, 160), "lines": lines}
+    while lines and len(json.dumps(result, ensure_ascii=False).encode("utf-8")) > max_bytes:
+        lines.pop(0)
+    return result
+
+
+def _words(text):
+    return {w.lower() for w in re.findall(r"[A-Za-z0-9._-]{4,100}", str(text or ""))}
+
+
+def group_cascades(alerts, links=None):
+    """Marks as `origin` (id, repo, workflow) the alerts that are red because of another red repository: the base repository is named by a rule of `ai_alerts.cascade.map` or by the log of the
+    alert itself. The root of a chain wins; two repositories that name each other have no origin. Alerts without one lose a stale mark."""
+    live = [a for a in alerts if a.get("state") != "resolved"]
+    by_repo = {}
+    for a in sorted(live, key=lambda x: (x["repo"], x["workflow"])):
+        by_repo.setdefault(a["repo"], a)
+    parent = {}
+    for a in live:
+        text = " ".join([str(a.get("cause") or "")] + list((a.get("diagnosis") or {}).get("lines") or []) + [str((a.get("diagnosis") or {}).get("step") or "")])
+        words = _words(text)
+        for repo, base in by_repo.items():
+            if repo == a["repo"]:
+                continue
+            if a["repo"] in (links or {}).get(repo, []) or repo.lower() in words:
+                parent[a["id"]] = base["id"]
+                break
+    index = {a["id"]: a for a in live}
+    for a in live:
+        a["origin"] = None
+        seen, node = {a["id"]}, a["id"]
+        while node in parent and parent[node] not in seen:
+            node = parent[node]
+            seen.add(node)
+        if node != a["id"] and parent.get(node) not in seen:      # a chain that ends in a root
+            root = index[node]
+            a["origin"] = {"id": root["id"], "repo": root["repo"], "workflow": root["workflow"]}
+    return alerts
+
+
 def brief(alerts, limit, now=None):
-    """The Markdown an AI reads when it starts: open alerts, the real ones first, within `limit` bytes."""
+    """The Markdown an AI reads when it starts: open alerts, the real ones first, within `limit` bytes. An alert that is red because of another one is listed under that one."""
     live = [a for a in alerts if a["state"] != "resolved"]
     live.sort(key=lambda a: (a["state"] == "acknowledged", a["class"] != "real", a["repo"], a["workflow"]))
     real = sum(1 for a in live if a["class"] == "real" and a["state"] == "open")
-    lines = ["# CI alerts", "", f"{real} real alert(s) open, {len(live)} in total. Transient ones usually clear by themselves; re-run once before you dig.", f"Updated: {tzdisplay.stamp(time.time() if now is None else now)}", ""]
+    followers = {}
     for a in live:
+        if a.get("origin"):
+            followers.setdefault(a["origin"]["id"], []).append(a)
+    roots = [a for a in live if not a.get("origin")]
+    stamp = time.time() if now is None else now
+    head = f"{real} real alert(s) open, {len(live)} in total" + (f", in {sum(1 for a in roots if a['class'] == 'real' and a['state'] == 'open')} independent group(s)" if followers else "")
+    lines = ["# CI alerts", "", head + ". Transient ones usually clear by themselves; re-run once before you dig.", f"Updated: {tzdisplay.stamp(stamp)}", f"updated_epoch: {int(stamp)}", ""]
+    for a in roots:
         mark = {"open": "", "acknowledged": " (acknowledged)"}[a["state"]]
-        lines.append(f"- [{a['severity']}/{a['class']}] {a['repo']} / {a['workflow']}: {a['conclusion']} x{a['streak']}{mark} - {a['cause']}. Next: {a['action']}. {a.get('url') or ''}".rstrip())
+        item = f"- [{a['severity']}/{a['class']}] {a['repo']} / {a['workflow']}: {a['conclusion']} x{a['streak']}{mark} - {a['cause']}. Next: {a['action']}. {a.get('url') or ''}".rstrip()
+        diagnosis = a.get("diagnosis") or {}
+        if diagnosis.get("step"):
+            item += "\n  Failing step: " + str(diagnosis["step"]) + (" | " + str(diagnosis["lines"][-1]) if diagnosis.get("lines") else "")
+        if followers.get(a["id"]):
+            item += "\n  Also red because of it (fix this one first): " + ", ".join(f"{f['repo']} / {f['workflow']}" for f in followers[a["id"]])
+        lines.append(item)
     text = "\n".join(lines) + "\n"
     if len(text.encode("utf-8")) > limit:
         kept = []
@@ -165,32 +303,53 @@ class Hook:
 HOOK = Hook()
 
 
-def update(config, red_rows, now=None, texts=None, opener=None):
-    """Brings the feed up to date with the red workflows of this cycle. Returns {"opened": [...], "resolved": [...], "alerts": [...]}. Nothing is written when the feed is off."""
+def update(config, red_rows, now=None, texts=None, opener=None, runner=None, owner=""):
+    """Brings the feed up to date with the red workflows of this cycle. Returns {"opened": [...], "resolved": [...], "alerts": [...]}. Nothing is written when the feed is off.
+    With a `runner` (read only calls to `gh`) and `ai_alerts.diagnose.enabled`, a new or changed red run also gets its diagnosis; without a runner the diagnosis already kept is reused."""
     cfg = settings(config)
     now = time.time() if now is None else now
     if not cfg["enabled"]:
         return {"opened": [], "resolved": [], "alerts": []}
     folder = folder_of(cfg)
-    folder.mkdir(parents=True, exist_ok=True)
+    private_io.private_dir(folder)
     state = _read(folder / STATE, {})
     seen, opened, resolved = set(), [], []
+    budget = cfg["diagnose"]["max_per_cycle"] if runner is not None and cfg["diagnose"]["enabled"] else 0
     for row in red_rows:
-        alert = build_alert(row, cfg["transient_patterns"], (texts or {}).get(alert_id(row["repo"], row["workflow"]), ""))
+        ident = alert_id(row["repo"], row["workflow"])
+        old = state.get(ident)
+        diagnosis = old.get("diagnosis") if old and old.get("state") != "resolved" else None
+        run = run_id_of(row.get("url"))
+        if budget and run and (not diagnosis or diagnosis.get("run") != run):
+            budget -= 1
+            try:
+                diagnosis = diagnose(owner, row["repo"], row.get("url"), runner, cfg["diagnose"]["log_lines"], cfg["diagnose"]["max_bytes"]) or diagnosis
+            except Exception as error:   # noqa: BLE001 - a diagnosis that fails never stops the feed
+                degraded.note("ai_alerts.diagnose", error)
+        text = ((texts or {}).get(ident, "") + "\n" + "\n".join((diagnosis or {}).get("lines") or [])).strip()
+        alert = build_alert(row, cfg["transient_patterns"], text)
+        alert["diagnosis"] = diagnosis
+        alert["origin"] = None
         seen.add(alert["id"])
-        old = state.get(alert["id"])
         if old and old.get("state") != "resolved":
             alert["state"], alert["first_seen"] = old["state"], old.get("first_seen", int(now))
         else:
             alert["state"], alert["first_seen"] = "open", int(now)
             opened.append(alert)
-            _event(folder, "opened", alert, now)
         state[alert["id"]] = alert
     for key, old in list(state.items()):
         if key not in seen and old.get("state") != "resolved":
             old["state"], old["resolved_at"] = "resolved", int(now)
             resolved.append(old)
-            _event(folder, "resolved", old, now)
+    for item in state.values():
+        if not cfg["cascade"]["enabled"]:
+            item["origin"] = None
+    if cfg["cascade"]["enabled"]:
+        group_cascades(list(state.values()), cfg["cascade"]["map"])
+    for alert in opened:      # the events carry the final form of the alert (diagnosis, origin)
+        _event(folder, "opened", alert, now)
+    for old in resolved:
+        _event(folder, "resolved", old, now)
     cutoff = now - 14 * 86400
     state = {k: v for k, v in state.items() if v.get("state") != "resolved" or v.get("resolved_at", 0) > cutoff}
     _write(folder / STATE, json.dumps(state, ensure_ascii=False, indent=1) + "\n")
@@ -225,7 +384,7 @@ def alerts(config, since=0, states=None):
     """The alerts as a list of dicts with the closed list of fields (plus `first_seen`), those changed after `since` (epoch seconds)."""
     cfg = settings(config)
     state = _read(folder_of(cfg) / STATE, {})
-    return [{**{k: a.get(k) for k in FIELDS}, "first_seen": a.get("first_seen")} for a in sorted(state.values(), key=lambda a: (a["repo"], a["workflow"]))
+    return [{**{k: a.get(k) for k in FIELDS + EXTRA}, "first_seen": a.get("first_seen")} for a in sorted(state.values(), key=lambda a: (a["repo"], a["workflow"]))
             if (states is None or a.get("state") in states) and max(a.get("first_seen", 0), a.get("resolved_at", 0)) >= since]
 
 
@@ -235,6 +394,144 @@ def read_brief(config):
         return path.read_text(encoding="utf-8")
     except OSError:
         return "# CI alerts\n\nNo cycle has finished yet.\n"
+
+
+def brief_info(config, now=None):
+    """The brief with how old it is: {"brief", "updated" (epoch), "updated_local", "age_seconds"}. `updated` is None before the first cycle."""
+    path = folder_of(settings(config)) / BRIEF
+    now = time.time() if now is None else now
+    try:
+        text = path.read_text(encoding="utf-8")
+        match = re.search(r"^updated_epoch: (\d+)$", text, re.M)
+        stamp = int(match.group(1)) if match else int(path.stat().st_mtime)
+    except OSError:
+        return {"brief": read_brief(config), "updated": None, "updated_local": None, "age_seconds": None}
+    return {"brief": text, "updated": stamp, "updated_local": tzdisplay.stamp(stamp), "age_seconds": max(0, int(now - stamp))}
+
+
+# -- the heartbeat: who read the feed last, and how
+_BEAT = {}
+
+
+def touch(config, via, client="", now=None):
+    """Notes that something read the feed (`via`: stream, mcp, hook, endpoint). A file in the feed folder, so that another process (the MCP server, the gate script) can say it too.
+    Not more than once every 5 seconds per way. Returns True when written."""
+    cfg = settings(config)
+    if not cfg["enabled"] or not cfg["heartbeat"]["enabled"] or via not in VIA:
+        return False
+    now = time.time() if now is None else now
+    if now - _BEAT.get(via, 0) < 5:
+        return False
+    _BEAT[via] = now
+    folder = folder_of(cfg)
+    try:
+        private_io.private_dir(folder)
+        data = _read(folder / HEARTBEAT, {})
+        reads = data.get("reads") if isinstance(data.get("reads"), dict) else {}
+        reads[via] = {"at": int(now), "client": redact(client, 40)}
+        _write(folder / HEARTBEAT, json.dumps({"reads": reads}, ensure_ascii=True) + "\n")
+        return True
+    except OSError:
+        return False
+
+
+def presence(config, now=None):
+    """Is an AI connected? {"enabled", "connected" (a read within `window_minutes`, or a stream open), "last_at", "age_seconds", "via", "client", "streams"}."""
+    cfg = settings(config)
+    now = time.time() if now is None else now
+    out = {"enabled": cfg["enabled"] and cfg["heartbeat"]["enabled"], "connected": False, "last_at": None, "age_seconds": None, "via": None, "client": "", "streams": STREAMS[0]}
+    if not out["enabled"]:
+        return out
+    reads = _read(folder_of(cfg) / HEARTBEAT, {}).get("reads")
+    best = None
+    for via, item in (reads.items() if isinstance(reads, dict) else []):
+        if via in VIA and isinstance(item, dict) and isinstance(item.get("at"), int) and (best is None or item["at"] > best[1]["at"]):
+            best = (via, item)
+    if best:
+        age = max(0, int(now - best[1]["at"]))
+        out.update({"last_at": best[1]["at"], "age_seconds": age, "via": best[0], "client": str(best[1].get("client") or "")[:40]})
+        out["connected"] = age <= cfg["heartbeat"]["window_minutes"] * 60
+    out["connected"] = out["connected"] or STREAMS[0] > 0
+    return out
+
+
+# -- the stream: server-sent events, read only
+STREAMS = [0]
+STREAM_LOCK = threading.Lock()
+
+
+def stream_acquire(config):
+    """True when one more stream may start (`ai_alerts.stream.max_clients`); call stream_release() when it ends."""
+    cfg = settings(config)
+    with STREAM_LOCK:
+        if STREAMS[0] >= cfg["stream"]["max_clients"]:
+            return False
+        STREAMS[0] += 1
+        return True
+
+
+def stream_release():
+    with STREAM_LOCK:
+        STREAMS[0] = max(0, STREAMS[0] - 1)
+
+
+def public_event(event):
+    """One line of the feed as the stream sends it: the closed list of fields, cleaned once more."""
+    keep = {k: event.get(k) for k in ("at", "event") + FIELDS + EXTRA if k in event}
+    return json.loads(redact(json.dumps(keep, ensure_ascii=False)))
+
+
+def _frame(name, data, ident=None):
+    return (f"id: {ident}\n" if ident is not None else "") + f"event: {name}\ndata: {json.dumps(data, ensure_ascii=True)}\n\n"
+
+
+def hello(config, now=None):
+    """What a new listener is told when it connects: how many real alerts are open, the first of them and the age of the brief."""
+    open_alerts = [a for a in alerts(config, states=("open",)) if a["class"] == "real"]
+    info = brief_info(config, now)
+    return {"open_real": len(open_alerts), "updated": info["updated"], "age_seconds": info["age_seconds"], "alerts": [public_event(a) for a in open_alerts[:10]]}
+
+
+def stream_frames(config, stop=lambda: False, sleep=time.sleep, clock=time.time, offset=None, only_real=False, keepalive=15, poll=1.0):
+    """The frames of the stream: `hello` at once, then one `alert` frame per new line of ai_alerts.jsonl (its `id` is the byte offset, to resume with Last-Event-ID), a comment every `keepalive`
+    seconds, and `bye` when `ai_alerts.stream.max_seconds` is over or `stop()` says so. Nothing is written anywhere except the heartbeat."""
+    cfg = settings(config)
+    path = folder_of(cfg) / FEED
+    started = clock()
+    touch(config, "stream", now=started)
+    try:      # where to start is fixed BEFORE the first frame leaves, so nothing written meanwhile is lost
+        size = path.stat().st_size
+        position = size if offset is None else max(0, min(int(offset), size))
+    except (OSError, ValueError):
+        position = 0
+    yield _frame("hello", hello(config, started))
+    last_beat = started
+    while not stop() and clock() - started < cfg["stream"]["max_seconds"]:
+        try:
+            size = path.stat().st_size
+            if size < position:
+                position = 0
+            if size > position:
+                with open(path, "rb") as handle:
+                    handle.seek(position)
+                    chunk = handle.read(size - position)
+                for raw in chunk[:chunk.rfind(b"\n") + 1].split(b"\n")[:-1]:
+                    position += len(raw) + 1
+                    try:
+                        event = json.loads(raw.decode("utf-8", "replace"))
+                    except ValueError:
+                        continue
+                    if isinstance(event, dict) and (not only_real or event.get("class") in ("real", None)):
+                        yield _frame("alert", public_event(event), position)
+                last_beat = clock()
+        except OSError:
+            pass
+        if clock() - last_beat >= keepalive:
+            last_beat = clock()
+            touch(config, "stream", now=last_beat)
+            yield ": keepalive\n\n"
+        sleep(poll)
+    yield _frame("bye", {"reason": "stopped" if stop() else "time"})
 
 
 def hint(row, patterns=None):

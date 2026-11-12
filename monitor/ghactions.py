@@ -17,6 +17,7 @@ from pathlib import Path
 
 import confirmation
 import secretstore
+import private_io
 
 HERE = Path(__file__).resolve().parent
 LOG_FILE = HERE / "github_actions_log.jsonl"
@@ -87,7 +88,7 @@ def permission(scope, have):
 def log(entry, path=None):
     line = {"at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), **{k: entry[k] for k in ("action", "repo", "number", "ok", "status") if k in entry}}
     try:
-        with open(path or LOG_FILE, "a", encoding="utf-8", newline="\n") as handle:
+        with private_io.open_append(path or LOG_FILE) as handle:
             handle.write(json.dumps(line, ensure_ascii=False) + "\n")
     except OSError:
         pass

@@ -27,3 +27,14 @@
 ## MCP サーバーはローカル専用です
 
 `mcp_server.py` は、起動した AI ツールと標準入出力で JSON をやり取りします。ネットワークポートを持たず、ポートの背後に置いてはいけません。形式の誤ったメッセージにはそのメッセージ分のエラーだけを返し、64 KB を超える行は拒否します。`ack_alert`（`--allow-ack` のときのみ）が変えるのはフィードのローカル状態だけです。フィードにはリポジトリ名や CI の短いエラーメッセージが含まれ得ますが、外に出す前にトークン、キー、メールアドレス、IP アドレス、個人のフォルダーが除去されます。
+
+## AI ツールとの連携 (読み取り専用)
+
+- **常に最新。** フィードと概要は、アラートタブの更新ごと、フィードの読み取りごと、各サイクルごとに書き直されるため、ページと一致します (以前は 1 サイクル遅れていました)。`ALERTS_BRIEF.md` には `Updated:` (お使いのタイムゾーンと UTC) と機械向けの行 `updated_epoch:` があり、`GET /api/ai/brief?fmt=json` は `updated`、`updated_local`、`age_seconds` を追加します。
+- **なぜ赤いのか。** `ai_alerts.diagnose.enabled` (既定はオフ。新しい赤い実行のジョブ一覧とログの末尾を GitHub から読み取ります。読み取り専用の呼び出しですが割り当てに計上されます) をオンにすると、各アラートは `diagnosis` を持ちます。最初に失敗したステップと関連する約 10 行 (`ai_alerts.diagnose.log_lines`) で、シークレットは除去され `ai_alerts.diagnose.max_bytes` 以下に収まります。1 サイクルに読む実行は最大 `max_per_cycle` 件で、各実行は 1 回だけです。インフラのエラーを示すログのアラートは一時的として扱われます。
+- **連鎖。** `ai_alerts.cascade.enabled` (既定はオン。表示のしかたを変えるだけです) では、別のリポジトリが赤いために赤くなったアラート (ログがそれを名指しする、または `ai_alerts.cascade.map` の規則 `{"base-repo": ["client-repo"]}` による) は、概要でそのリポジトリの下に並び (「Also red because of it (fix this one first)」)、フィードでは `origin` を持ちます。
+- **ストリーム。** `ai_alerts.stream.enabled` (既定はオフ) をオンにすると、`GET /api/ai/stream[?only=real]` がサーバー送信イベントを送ります。`hello` フレーム (開いている実際のアラート数、先頭の数件、概要の経過時間) と、フィードのイベントごとの `alert` フレームです。`Last-Event-ID` (または `?since=`) で再開できます。読み取り専用で、ページの他の部分と同じアクセス規則に従い (ネットワークモードではヘッダーまたは Cookie のアクセストークン)、`stream.max_clients` と `stream.max_seconds` で制限されます。
+- **MCP ツール。** `alerts_open` (経過時間・診断・発生元つきの未解決アラート)、`alert_diagnose(id)` (保存済みの診断、または読み取り専用の `gh` 呼び出しによるログの読み取り)、`--allow-ack` のときだけ `alert_ack(id)`。AI ツールが接続すると、サーバーは `instructions` と通知で実際のアラートの件数を伝えます。
+- **連携スクリプト。** `python monitor_cli.py ai-hook install [--cursor|--generic] [--scope project|user]` (`status`、`uninstall` もあり、`--dry-run` は変更内容を表示) は、ツールのフック設定に `ai_hook.py` を追加します。SessionStart と UserPromptSubmit は、実際のアラートが開いているときに概要をセッションに加えます。Stop はターンの終了前に AI へ確認を促しますが、`ai_alerts.client_hook.block_on_stop` (既定はオフ) のときだけで、`cooldown_minutes` ごとに最大 1 回です。設定ファイルはマージされ (他のフックは残ります)、コピーが保存され (直近 3 つ)、有効な JSON でないファイルは触らずに拒否され、書き込まれる内容はすべて純粋な ASCII です。既定の対象は、ツール固有の隠しフォルダー内の `settings.local.json` (project) または `settings.json` (user) に、`--cursor` は `.cursor/hooks.json` に書きます (ベストエフォート。フック形式は変わる可能性があります)。`--generic` は何も書かずにコマンドを表示します。スクリプトに必要なのは Python だけで、値は `ai_alerts.client_hook` から読みます。
+- **AI は接続中か。** `ai_alerts.heartbeat.enabled` をオンにすると、小さなローカルファイル `ai_heartbeat.json` にストリーム・MCP サーバー・連携スクリプト・エンドポイントによる最後の読み取りが記録され、下部のバーに `window_minutes` の間「AI: mcp、3 分前」(または「接続なし」) と表示されます。何も外部に送りません。
+- **非公開ファイル。** フィード、概要、ハートビート、その他のモニターの状態ファイルはモード 0600 で作成されます (モニターが作るフォルダーは 0700)。Windows ではプログラムがモードを強制できません。フォルダーは親フォルダーの権限を継承するため、モニターのフォルダーは自分のプロファイル内に置いてください。

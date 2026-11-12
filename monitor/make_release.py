@@ -43,7 +43,7 @@ EXAMPLE = "actions_monitor.example.json"
 # session state and local configuration: they must never travel
 FORBIDDEN_NAMES = {"actions_monitor.json", "sentinel_cache.json", "sentinel_history.json", "events_monitor.jsonl", "events_state.json",
                    "ci_red.json", "actions_monitor_log.txt", "ai_cache.json", "targets.candidates.json", "targets.json", "ecosystems.json", "profiles.json",
-                   "eventos_monitor.jsonl", "eventos_estado.json", "events_monitor.jsonl", "events_state.json", "etag_cache.json", "analytics_history.json", "ai_actions_log.jsonl", "sentinel_ai_cache.json", "collab_state.json", "alert_mutes.json", "ai_alerts_state.json", "ALERTS_BRIEF.md"}
+                   "eventos_monitor.jsonl", "eventos_estado.json", "events_monitor.jsonl", "events_state.json", "etag_cache.json", "analytics_history.json", "ai_actions_log.jsonl", "sentinel_ai_cache.json", "collab_state.json", "alert_mutes.json", "ai_alerts_state.json", "ALERTS_BRIEF.md", "ai_alerts.jsonl", "ai_heartbeat.json", "ai_hook_state.json"}
 FORBIDDEN_SUFFIXES = (".pyc", ".pyo", ".log", ".tmp", ".jsonl")
 LANGS = ("en", "es", "de", "fr", "it", "ja", "zh", "pt")
 BRAND = "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>"

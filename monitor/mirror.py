@@ -13,6 +13,7 @@ import os
 import re
 import time
 from pathlib import Path
+import private_io
 
 NAME_RE = re.compile(r"[^A-Za-z0-9._-]+")
 INDEX = ".mirror_index.json"
@@ -51,7 +52,7 @@ def _load(folder):
 def _save(folder, index):
     Path(folder).mkdir(parents=True, exist_ok=True)
     tmp = Path(folder) / (INDEX + ".tmp")
-    tmp.write_text(json.dumps(index, indent=1) + "\n", encoding="utf-8", newline="\n")
+    private_io.write_tmp(tmp, json.dumps(index, indent=1) + "\n")
     os.replace(tmp, Path(folder) / INDEX)
 
 

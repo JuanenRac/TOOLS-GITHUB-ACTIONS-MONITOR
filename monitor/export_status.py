@@ -22,6 +22,7 @@ import i18n
 import signstate
 import tzdisplay
 from tool_version import TOOL_VERSION
+import private_io
 
 class _Text(dict):
     """TEXT[key] -> the message in the current language (keys are the texts "exp.<key>" of locales/*.json)."""
@@ -68,7 +69,7 @@ def write_public_status(snapshot, directory):
         out = []
         for name, text in (("ci_status_public.json", json.dumps(status, ensure_ascii=False, indent=1) + "\n"), ("ci_status_public.md", public_markdown(status))):
             tmp = folder / (name + ".tmp")
-            tmp.write_text(text, encoding="utf-8", newline="\n")
+            private_io.write_tmp(tmp, text)
             os.replace(tmp, folder / name)
             out.append(folder / name)
         return out
@@ -108,7 +109,7 @@ def write_sign_queue(snapshot, path, trust="all"):
         else:
             text = json.dumps({"schema": 1, "generated": snapshot.get("generated"), "generated_local": tzdisplay.stamp(snapshot.get("generated")) if snapshot.get("generated") else None, "local_only": True, "queue": rows}, ensure_ascii=False, indent=1) + "\n"
         tmp = target.with_name(target.name + ".tmp")
-        tmp.write_text(text, encoding="utf-8", newline="\n")
+        private_io.write_tmp(tmp, text)
         os.replace(tmp, target)
         return target, "ok"
     except OSError as error:

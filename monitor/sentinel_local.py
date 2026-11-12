@@ -47,6 +47,7 @@ import sigverify
 import surface
 import toolconfig
 from tool_version import TOOL_VERSION
+import private_io
 
 HERE = Path(__file__).resolve().parent
 GITHUB_DIR = workspace.workspace_root_soft()
@@ -848,7 +849,7 @@ class Sentinel:
     def _save(path, value):
         try:
             tmp = Path(str(path) + ".tmp")
-            tmp.write_text(json.dumps(value, ensure_ascii=False), encoding="utf-8")
+            private_io.write_tmp(tmp, json.dumps(value, ensure_ascii=False))
             tmp.replace(path)
         except OSError:
             pass

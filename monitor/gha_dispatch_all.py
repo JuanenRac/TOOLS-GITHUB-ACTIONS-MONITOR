@@ -54,6 +54,7 @@ import platform_compat
 import toolconfig
 import workspace
 from tool_version import TOOL_VERSION
+import private_io
 
 t = i18n.t
 
@@ -544,7 +545,7 @@ def write_candidates(path=CANDIDATES_FILE):
     """Writes the PROPOSED entries (never targets.json). Returns the proposals; an empty one writes nothing."""
     proposals = candidate_proposals()
     if proposals:
-        Path(path).write_text(json.dumps(proposals, indent=2) + "\n", encoding="utf-8", newline="\n")
+        private_io.write_private(Path(path), json.dumps(proposals, indent=2) + "\n")
     return proposals
 
 
@@ -726,7 +727,7 @@ def cmd_dispatch(args):
     if args.go:
         BATCH_DIR.mkdir(parents=True, exist_ok=True)
         path = BATCH_DIR / f"batch_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        path.write_text(json.dumps(batch, indent=2), encoding="utf-8")
+        private_io.write_private(path, json.dumps(batch, indent=2))
         print(t("gd.batch_recorded", path=path))
         failed = [n for n, i in batch["targets"].items() if "failed" in i]
         if failed:
@@ -831,7 +832,7 @@ def mark_batch(path, batch, name, **fields):
     try:
         batch["targets"][name].update(fields)
         tmp = Path(str(path) + ".tmp")
-        tmp.write_text(json.dumps(batch, indent=2), encoding="utf-8")
+        private_io.write_tmp(tmp, json.dumps(batch, indent=2))
         os.replace(tmp, path)
     except OSError as error:
         print(t("gd.warn_record", name=name, file=Path(path).name, error=error))

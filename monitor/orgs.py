@@ -11,6 +11,7 @@ import os
 import re
 import time
 from pathlib import Path
+import private_io
 
 LOGIN_RE = re.compile(r"^[A-Za-z0-9-]{1,39}$")
 INTERVAL = 24 * 3600
@@ -42,7 +43,7 @@ def view(config, reader, state_file, now=None, offline=False):
             state = dict(state, checked_at=int(now) - INTERVAL + 3600)
         try:
             tmp = Path(str(state_file) + ".tmp")
-            tmp.write_text(json.dumps(state) + "\n", encoding="utf-8", newline="\n")
+            private_io.write_tmp(tmp, json.dumps(state) + "\n")
             os.replace(tmp, state_file)
         except OSError:
             pass
