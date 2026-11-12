@@ -17,3 +17,5 @@
 ## Rafraîchir un tableau d'état après chaque version
 
 `.github/workflows/dashboard-dispatch.yml` s'exécute quand le workflow `CI` se termine au vert sur `main` (événements push seulement). Si le mainteneur définit le secret optionnel du dépôt `ECOSYSTEM_DASHBOARD_DISPATCH_TOKEN`, il demande à un dépôt de tableau de bord de rafraîchir sa table de versions ; sans le secret il se termine en silence, n'a aucune permission et ne modifie ni ne retarde jamais la CI. La version de `electro-hobby-3d.project.json` doit être égale à `tool_version.py` à chaque version ; un test le vérifie.
+
+- Liste de contrôle de l'aide : l'aide des Réglages (`cfg.h.<clé>`) de chaque nouveau réglage, l'aide de l'onglet modifié, les guides de `monitor/docs/`, les huit langues, l'index d'aide (`python tools/make_help_index.py`) et le journal des modifications.

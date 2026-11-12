@@ -17,3 +17,5 @@
 ## Actualizar un panel de estado tras cada versión
 
 `.github/workflows/dashboard-dispatch.yml` se ejecuta cuando el workflow `CI` termina en verde en `main` (solo eventos push). Si el responsable define el secreto opcional del repositorio `ECOSYSTEM_DASHBOARD_DISPATCH_TOKEN`, pide a un repositorio de panel que actualice su tabla de versiones; sin el secreto termina en silencio, no tiene permisos y nunca cambia ni retrasa el CI. La versión de `electro-hobby-3d.project.json` debe ser igual a `tool_version.py` en cada versión; una prueba lo comprueba.
+
+- Lista de comprobación de la ayuda: la ayuda de Ajustes (`cfg.h.<clave>`) de cada ajuste nuevo, la ayuda de la pestaña que cambió, las guías de `monitor/docs/`, los ocho idiomas, el índice de ayuda (`python tools/make_help_index.py`) y el registro de cambios.

@@ -11,6 +11,7 @@ Describe the observable change.
 
 - [ ] `python -m unittest discover -s monitor/tests` passes.
 - [ ] New texts exist in the eight languages.
+- [ ] Help checklist: `cfg.h.<key>` for every new setting, the help of the tab that changed, the guides, the help index (`python tools/make_help_index.py`).
 - [ ] `CHANGELOG.md` has a line for this change.
 - [ ] The README and its translations are updated if behaviour changed.
 - [ ] No token, private path or personal data is included.

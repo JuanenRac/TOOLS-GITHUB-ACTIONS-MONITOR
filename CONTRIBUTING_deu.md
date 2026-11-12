@@ -17,3 +17,5 @@
 ## Eine Statusseite nach jeder Version aktualisieren
 
 `.github/workflows/dashboard-dispatch.yml` läuft, nachdem der Workflow `CI` auf `main` grün endet (nur Push-Ereignisse). Definiert die Betreuerin oder der Betreuer das optionale Repository-Secret `ECOSYSTEM_DASHBOARD_DISPATCH_TOKEN`, bittet er ein Dashboard-Repository, seine Versionstabelle zu aktualisieren; ohne das Secret endet er still, hat keine Berechtigungen und ändert oder verzögert die CI nie. Die Version in `electro-hobby-3d.project.json` muss bei jeder Version gleich `tool_version.py` sein; ein Test prüft das.
+
+- Hilfe-Checkliste: die Einstellungshilfe (`cfg.h.<Schlüssel>`) jeder neuen Einstellung, die Hilfe des geänderten Tabs, die Leitfäden in `monitor/docs/`, die acht Sprachen, der Hilfeindex (`python tools/make_help_index.py`) und das Änderungsprotokoll.

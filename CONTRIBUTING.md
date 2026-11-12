@@ -17,3 +17,5 @@
 ## Refreshing a status dashboard after each release
 
 `.github/workflows/dashboard-dispatch.yml` runs after the `CI` workflow finishes green on `main` (push events only). If the maintainer defines the optional repository secret `ECOSYSTEM_DASHBOARD_DISPATCH_TOKEN`, it asks a dashboard repository to refresh its table of versions; without the secret it exits quietly, has no permissions and never changes or delays the CI. The version in `electro-hobby-3d.project.json` must equal `tool_version.py` at every release; a test checks it.
+
+- Help checklist: the Settings help (`cfg.h.<key>`) of every new setting, the help of the tab that changed, the guides in `monitor/docs/`, the eight languages, the help index (`python tools/make_help_index.py`) and the changelog.

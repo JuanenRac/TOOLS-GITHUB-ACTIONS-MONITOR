@@ -17,3 +17,5 @@
 ## 每次发布后刷新状态看板
 
 `.github/workflows/dashboard-dispatch.yml` 在 `CI` 工作流于 `main` 上变绿后运行(仅 push 事件)。如果维护者定义了可选的仓库密钥 `ECOSYSTEM_DASHBOARD_DISPATCH_TOKEN`,它会请求一个看板仓库刷新其版本表;没有该密钥时静默退出,没有任何权限,也从不更改或拖慢 CI。每次发布时 `electro-hobby-3d.project.json` 中的版本必须等于 `tool_version.py`;有测试检查。
+
+- 帮助检查清单:每个新设置的设置帮助(`cfg.h.<键>`)、所改标签页的帮助、`monitor/docs/` 中的指南、八种语言、帮助索引(`python tools/make_help_index.py`)和更新日志。

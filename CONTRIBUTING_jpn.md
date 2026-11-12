@@ -17,3 +17,5 @@
 ## リリースごとのステータスダッシュボード更新
 
 `.github/workflows/dashboard-dispatch.yml` は、`CI` ワークフローが `main` で成功した後(push イベントのみ)に実行されます。管理者が任意のリポジトリシークレット `ECOSYSTEM_DASHBOARD_DISPATCH_TOKEN` を定義すると、ダッシュボードリポジトリにバージョン表の更新を依頼します。シークレットが無ければ何もせず終了し、権限もなく、CIを変更・遅延させません。`electro-hobby-3d.project.json` のバージョンは各リリースで `tool_version.py` と等しくなければならず、テストが確認します。
+
+- ヘルプのチェックリスト:新しい設定ごとの設定ヘルプ(`cfg.h.<キー>`)、変更したタブのヘルプ、`monitor/docs/` のガイド、8 言語、ヘルプのインデックス(`python tools/make_help_index.py`)、変更履歴。
