@@ -19,6 +19,7 @@ Optional and **off by default**. The events of the feed (a new red, a stuck buil
 
 - Tokens and webhook URLs are never saved in the configuration: you set the NAME of an environment variable and the value is read only at the moment of sending, never shown, never logged.
 - `discord` only accepts `discord.com` and `slack` only `hooks.slack.com`; `mqtt` and `http_local` only accept `127.0.0.1`, `localhost` or `[::1]`.
+- A destination that is, or resolves to, a loopback, private (10.x, 172.16-31.x, 192.168.x, fc00::/7), link-local (169.254.x with the cloud metadata address, fe80::/10), shared (100.64.0.0/10) or reserved address is refused unless `notify.allow_private_targets` is on (off by default). The name is resolved once, the connection goes to the address that was checked, and every redirect goes through the same rule. This is what keeps a wrong Matrix homeserver from reaching your router or the metadata service of a cloud machine.
 - At most `notify.max_per_hour` messages leave the computer; a send that fails is counted and ignored, it never stops the monitor.
 
 

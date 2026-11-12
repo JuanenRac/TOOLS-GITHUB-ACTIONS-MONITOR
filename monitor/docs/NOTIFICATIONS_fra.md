@@ -19,6 +19,7 @@ Optionnelles et **désactivées par défaut**. Les événements du flux (un nouv
 
 - Les jetons et URL de webhook ne sont jamais enregistrés dans la configuration : vous indiquez le NOM d'une variable d'environnement, la valeur n'est lue qu'au moment de l'envoi, jamais affichée ni journalisée.
 - `discord` n'accepte que `discord.com` et `slack` que `hooks.slack.com` ; `mqtt` et `http_local` n'acceptent que `127.0.0.1`, `localhost` ou `[::1]`.
+- Une destination qui est, ou se résout vers, une adresse de boucle locale, privée (10.x, 172.16-31.x, 192.168.x, fc00::/7), de lien local (169.254.x avec l'adresse de métadonnées du cloud, fe80::/10), partagée (100.64.0.0/10) ou réservée est refusée tant que `notify.allow_private_targets` est désactivé (par défaut). Le nom est résolu une fois, la connexion va vers l'adresse vérifiée et chaque redirection suit la même règle. Ainsi un serveur Matrix mal saisi n'atteint ni votre routeur ni le service de métadonnées d'une machine cloud.
 - Au plus `notify.max_per_hour` messages quittent l'ordinateur ; un envoi qui échoue est compté et ignoré, il n'arrête jamais le moniteur.
 
 

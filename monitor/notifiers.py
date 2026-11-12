@@ -24,13 +24,15 @@ import urllib.error
 import urllib.request
 from urllib.parse import quote, urlparse
 
+import netguard
+
 CHANNELS = ("telegram", "discord", "slack", "matrix", "mqtt", "http_local")
 KNOWN_EVENTS = ("red_new", "red_fixed", "stuck_new", "pending_sign", "release_due", "rate_low", "offline", "online", "alerts_up", "workflow_failed", "collab_new", "collab_fixed")
 DEFAULT_EVENTS = ["red_new", "stuck_new", "pending_sign", "offline"]
 LOOPBACK = ("127.0.0.1", "localhost", "::1", "[::1]")
 ENV_RE = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}$")
 TIMEOUT = 8
-DEFAULTS = {"enabled": False, "events": list(DEFAULT_EVENTS), "max_per_hour": 20,
+DEFAULTS = {"enabled": False, "allow_private_targets": False, "events": list(DEFAULT_EVENTS), "max_per_hour": 20,
             "channels": {
                 "telegram": {"enabled": False, "token_env": "", "chat_id": ""},
                 "discord": {"enabled": False, "url_env": ""},
@@ -52,6 +54,8 @@ def settings(config):
         return out
     if isinstance(user.get("enabled"), bool):
         out["enabled"] = user["enabled"]
+    if isinstance(user.get("allow_private_targets"), bool):
+        out["allow_private_targets"] = user["allow_private_targets"]
     if isinstance(user.get("events"), list):
         out["events"] = [e for e in user["events"] if isinstance(e, str) and e in KNOWN_EVENTS]
     if isinstance(user.get("max_per_hour"), int) and not isinstance(user.get("max_per_hour"), bool) and 1 <= user["max_per_hour"] <= 600:
@@ -75,8 +79,8 @@ def secret(env_name):
     return os.environ.get(env_name, "") if isinstance(env_name, str) and ENV_RE.match(env_name) else ""
 
 
-def check_channel(name, cfg):
-    """None when the channel can send, else a short stable reason: off, no_secret, bad_host, bad_value."""
+def check_channel(name, cfg, allow_private=False):
+    """None when the channel can send, else a short stable reason: off, no_secret, bad_host, bad_value, private_target (an address of the local network while `notify.allow_private_targets` is off)."""
     if not cfg.get("enabled"):
         return "off"
     if name == "telegram":
@@ -92,7 +96,9 @@ def check_channel(name, cfg):
         home = urlparse(str(cfg.get("homeserver")))
         if not secret(cfg.get("token_env")):
             return "no_secret"
-        return None if home.scheme == "https" and home.hostname and re.match(r"^![A-Za-z0-9:._-]{3,120}$", str(cfg.get("room"))) else "bad_value"
+        if not (home.scheme == "https" and home.hostname and re.match(r"^![A-Za-z0-9:._-]{3,120}$", str(cfg.get("room")))):
+            return "bad_value"
+        return "private_target" if not allow_private and _private_literal(home.hostname) else None
     if name == "mqtt":
         topic = str(cfg.get("topic"))
         return None if is_loopback(cfg.get("host")) and 1 <= int(cfg.get("port", 0)) <= 65535 and re.match(r"^[A-Za-z0-9/_.-]{1,100}$", topic) else "bad_host"
@@ -100,6 +106,16 @@ def check_channel(name, cfg):
         url = urlparse(str(cfg.get("url")))
         return None if url.scheme == "http" and is_loopback(url.hostname or "") else "bad_host"
     return "bad_value"
+
+
+def _private_literal(host):
+    """True for `localhost` or an address written as a number that points into this computer or the local network; names are judged when the connection opens."""
+    host = str(host).strip("[]").lower()
+    if host == "localhost" or host.endswith(".localhost"):
+        return True
+    if host.replace(".", "").isdigit() or ":" in host:
+        return netguard.blocked_ip(host)
+    return False
 
 
 def _post(url, payload, headers=None, opener=None):
@@ -126,11 +142,13 @@ def mqtt_packet(topic, payload):
     return b"\x10" + length(len(connect_body)) + connect_body + b"\x30" + length(len(publish_body)) + publish_body + b"\xe0\x00"
 
 
-def send_channel(name, cfg, event, opener=None, connect=None):
+def send_channel(name, cfg, event, opener=None, connect=None, allow_private=False):
     """Sends one event through one channel. Returns {"channel", "ok", "reason"}; never raises, never puts a secret in the answer."""
-    problem = check_channel(name, cfg)
+    problem = check_channel(name, cfg, allow_private)
     if problem:
         return {"channel": name, "ok": False, "reason": problem}
+    if opener is None and name != "http_local":      # http_local is loopback by definition; every other channel goes through the rule of netguard (resolved address, redirects)
+        opener = netguard.opener_for(allow_private)
     text = f"{event.get('text', '')}" + (f"\n{event['url']}" if event.get("url") else "")
     record = {"kind": event.get("kind"), "repo": event.get("repo"), "text": event.get("text"), "url": event.get("url")}
     try:
@@ -157,8 +175,8 @@ def send_channel(name, cfg, event, opener=None, connect=None):
         elif name == "http_local":
             _post(cfg["url"], record, opener=opener)
         return {"channel": name, "ok": True, "reason": ""}
-    except (OSError, urllib.error.URLError, ValueError):
-        return {"channel": name, "ok": False, "reason": "failed"}
+    except (OSError, urllib.error.URLError, ValueError) as error:
+        return {"channel": name, "ok": False, "reason": netguard.reason_of(error)}
 
 
 def reserve(limit, count, now=None):
@@ -186,10 +204,11 @@ def notify(config, event, opener=None, connect=None, now=None):
     live = [(n, c) for n, c in cfg["channels"].items() if c.get("enabled")]
     if not live:
         return []
-    broken = [{"channel": n, "ok": False, "reason": check_channel(n, c)} for n, c in live if check_channel(n, c)]   # a channel that cannot send books nothing
-    ready = [(n, c) for n, c in live if not check_channel(n, c)]
+    allow = cfg["allow_private_targets"]
+    broken = [{"channel": n, "ok": False, "reason": check_channel(n, c, allow)} for n, c in live if check_channel(n, c, allow)]   # a channel that cannot send books nothing
+    ready = [(n, c) for n, c in live if not check_channel(n, c, allow)]
     granted = reserve(cfg["max_per_hour"], len(ready), now)      # max_per_hour counts MESSAGES: one unit for each channel that gets the event
-    results = [send_channel(n, c, event, opener, connect) for n, c in ready[:granted]]
+    results = [send_channel(n, c, event, opener, connect, allow) for n, c in ready[:granted]]
     with _lock:
         STATS["sent"] += sum(1 for r in results if r["ok"])
         STATS["failed"] += sum(1 for r in results if not r["ok"]) + len(broken)

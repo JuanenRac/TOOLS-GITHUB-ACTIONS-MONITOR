@@ -20,6 +20,9 @@ Trabalho em curso depois da 1.7.4.
 - **Uma verificação do doctor para um token partilhado por várias contas** (`credential`): compara só uma impressão digital curta dos tokens com que as contas leriam o GitHub (o token guardado pelo monitor, ou `GH_TOKEN` / `GITHUB_TOKEN` do ambiente) e lista as contas que partilham um; o token nunca é mostrado.
 - Testes para cada alteração, incluindo um teste de higiene do webhook: uma carga com um segredo, um e-mail, uma mensagem de commit e um token não chega nem à lista em direto, nem ao feed, nem a uma notificação, e a lista em direto passa a ser filtrada por uma lista de campos permitidos.
 
+- **`notify.allow_private_targets`** (desligado por predefinição, no separador Definições, nas oito línguas): é recusado um destino de notificação que seja, ou resolva para, um endereço de loopback, privado (10.x, 172.16-31.x, 192.168.x, fc00::/7), de ligação local (169.254.x, com o endereço de metadados da nuvem, fe80::/10), partilhado (100.64.0.0/10) ou reservado. O nome é resolvido uma vez e o socket abre-se para o endereço verificado (um nome que mude a resposta não passa), e cada redirecionamento segue a mesma regra. Os canais `mqtt` e `http_local` continuam apenas locais por definição. Testado com um servidor e um resolvedor falsos.
+- **Um aviso sobre HTTP simples no modo de rede**: a ajuda do interruptor `listen.network` diz agora, nas oito línguas, que sem HTTPS o token e os dados circulam sem cifra; a consola já avisa ao arrancar em rede sem certificado.
+
 ### Alterado
 
 - **A API chama à edição `complete`** (dizia `full`) em `/api/about`, `/api/statusbar`, `--doctor --json` e na linha de comandos; `full` fica reservado ao que a sentinela pode executar. A página e a linha de comandos continuam a entender as duas palavras.

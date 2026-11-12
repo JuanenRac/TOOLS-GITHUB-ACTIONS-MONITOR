@@ -20,6 +20,9 @@ Laufende Arbeit nach 1.7.4.
 - **Eine Doctor-Prüfung für ein Token, das mehrere Konten teilen** (`credential`): Sie vergleicht nur einen kurzen Fingerabdruck der Token, mit denen die Konten GitHub lesen würden (das vom Monitor gespeicherte Token oder `GH_TOKEN` / `GITHUB_TOKEN` der Umgebung), und listet die Konten, die eines teilen; das Token selbst wird nie gezeigt.
 - Tests für jede Änderung, darunter ein Hygienetest des Webhooks: Eine Nutzlast mit Geheimnis, E-Mail, Commit-Nachricht und Token erreicht weder die Live-Liste noch den Feed noch eine Benachrichtigung, und die Live-Liste wird jetzt mit einer Liste erlaubter Felder gefiltert.
 
+- **`notify.allow_private_targets`** (standardmäßig aus, im Tab Einstellungen, in den acht Sprachen): Ein Benachrichtigungsziel, das eine Loopback-, private (10.x, 172.16-31.x, 192.168.x, fc00::/7), Link-Local- (169.254.x, mit der Cloud-Metadatenadresse, fe80::/10), gemeinsame (100.64.0.0/10) oder reservierte Adresse ist oder dorthin aufgelöst wird, wird abgelehnt. Der Name wird einmal aufgelöst und der Socket zur geprüften Adresse geöffnet (ein Name, der seine Antwort ändert, kommt nicht durch), und jede Weiterleitung durchläuft dieselbe Regel. Die Kanäle `mqtt` und `http_local` bleiben per Definition nur lokal. Mit einem falschen Server und einem falschen Resolver getestet.
+- **Eine Warnung zu einfachem HTTP im Netzwerkmodus**: Die Hilfe des Schalters `listen.network` sagt jetzt in den acht Sprachen, dass Token und Daten ohne HTTPS unverschlüsselt übertragen werden; die Konsole warnt beim Start im Netz ohne Zertifikat bereits.
+
 ### Geändert
 
 - **Die API nennt die Ausgabe `complete`** (vorher `full`) in `/api/about`, `/api/statusbar`, `--doctor --json` und der Befehlszeile; `full` bleibt für das reserviert, was der Wächter ausführen darf. Die Seite und die Befehlszeile verstehen weiterhin beide Wörter.

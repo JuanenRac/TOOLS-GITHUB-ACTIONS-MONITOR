@@ -22,6 +22,9 @@ Work in progress after 1.7.4.
 - **A doctor check for one token shared by several accounts** (`credential`): it compares only a short fingerprint of the tokens the accounts would read GitHub with (the token kept by the monitor, or `GH_TOKEN` / `GITHUB_TOKEN` of the environment) and lists the accounts that share one; the token itself is never shown.
 - Tests for each change, including a webhook hygiene test: a payload with a secret, an e-mail, a commit message and a token reaches neither the live list, nor the feed, nor a notification, and the live list is now filtered by a list of allowed fields.
 
+- **`notify.allow_private_targets`** (off by default, in the Settings tab, in the eight languages): a notification destination that is, or resolves to, a loopback, private (10.x, 172.16-31.x, 192.168.x, fc00::/7), link-local (169.254.x, with the cloud metadata address, fe80::/10), shared (100.64.0.0/10) or reserved address is refused. The name is resolved once and the socket is opened to the address that was checked (so a name that changes its answer cannot get past it), and every redirect goes through the same rule. The channels `mqtt` and `http_local` stay loopback only by definition. Tested with a fake server and a fake resolver.
+- **A warning about plain HTTP in the network mode**: the help of the switch `listen.network` now says, in the eight languages, that without HTTPS the token and the data travel unencrypted; the console already warns when the monitor starts on the network without a certificate.
+
 ### Changed
 
 - **The API calls the edition `complete`** (it said `full`) in `/api/about`, `/api/statusbar`, `--doctor --json` and the command line; `full` stays reserved for what the sentinel may execute. The page and the command line still understand both words.

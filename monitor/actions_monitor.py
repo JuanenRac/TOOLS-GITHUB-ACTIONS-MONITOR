@@ -1674,7 +1674,7 @@ def handle_action_post(path, request):
     name = request.get("channel")
     if name not in notifiers.CHANNELS:
         return {"ok": False, "reason": "bad_value"}
-    return notifiers.send_channel(name, cfg["channels"][name], notifiers.test_event(i18n.t("evt.test")))
+    return notifiers.send_channel(name, cfg["channels"][name], notifiers.test_event(i18n.t("evt.test")), allow_private=cfg["allow_private_targets"])
 
 
 def run_gh_checked(args, timeout=40):

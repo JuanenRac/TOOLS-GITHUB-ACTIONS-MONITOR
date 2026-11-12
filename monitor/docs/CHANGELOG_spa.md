@@ -20,6 +20,9 @@ Trabajo en curso después de la 1.7.4.
 - **Una comprobación del doctor para un token compartido por varias cuentas** (`credential`): compara solo una huella corta de los tokens con los que las cuentas leerían GitHub (el token guardado por el monitor, o `GH_TOKEN` / `GITHUB_TOKEN` del entorno) y lista las cuentas que comparten uno; el token nunca se muestra.
 - Pruebas para cada cambio, incluida una de higiene del webhook: un payload con un secreto, un correo, un mensaje de commit y un token no llega ni a la lista en vivo, ni al feed, ni a una notificación, y la lista en vivo se filtra ahora con una lista de campos permitidos.
 
+- **`notify.allow_private_targets`** (apagado por defecto, en la pestaña de Ajustes, en los ocho idiomas): se rechaza un destino de notificación que sea, o resuelva a, una dirección de bucle local, privada (10.x, 172.16-31.x, 192.168.x, fc00::/7), de enlace local (169.254.x, con la dirección de metadatos de la nube, fe80::/10), compartida (100.64.0.0/10) o reservada. El nombre se resuelve una vez y el socket se abre a la dirección comprobada (un nombre que cambie su respuesta no puede colarse), y cada redirección pasa por la misma regla. Los canales `mqtt` y `http_local` siguen siendo solo locales por definición. Probado con un servidor y un resolutor falsos.
+- **Un aviso sobre HTTP plano en el modo red**: la ayuda del interruptor `listen.network` dice ahora, en los ocho idiomas, que sin HTTPS el token y los datos viajan sin cifrar; la consola ya avisa al arrancar en red sin certificado.
+
 ### Cambiado
 
 - **La API llama a la edición `complete`** (decía `full`) en `/api/about`, `/api/statusbar`, `--doctor --json` y la línea de comandos; `full` queda reservado para lo que el centinela puede ejecutar. La página y la línea de comandos siguen entendiendo ambas palabras.

@@ -19,6 +19,7 @@ Opcionales y **apagadas por defecto**. Los eventos del feed (un rojo nuevo, un b
 
 - Los tokens y las URL de webhook nunca se guardan en la configuración: se pone el NOMBRE de una variable de entorno y el valor solo se lee al enviar, sin mostrarse ni registrarse.
 - `discord` solo acepta `discord.com` y `slack` solo `hooks.slack.com`; `mqtt` y `http_local` solo aceptan `127.0.0.1`, `localhost` o `[::1]`.
+- Se rechaza un destino que sea, o resuelva a, una dirección de bucle local, privada (10.x, 172.16-31.x, 192.168.x, fc00::/7), de enlace local (169.254.x con la dirección de metadatos de la nube, fe80::/10), compartida (100.64.0.0/10) o reservada, salvo que `notify.allow_private_targets` esté encendido (apagado por defecto). El nombre se resuelve una vez, la conexión va a la dirección comprobada y cada redirección pasa por la misma regla. Así un servidor Matrix mal puesto no alcanza tu router ni el servicio de metadatos de una máquina en la nube.
 - Como máximo salen `notify.max_per_hour` mensajes del equipo; un envío que falla se cuenta y se ignora, nunca detiene el monitor.
 
 

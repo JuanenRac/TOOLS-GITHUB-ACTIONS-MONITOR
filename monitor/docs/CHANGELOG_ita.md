@@ -20,6 +20,9 @@ Lavoro in corso dopo la 1.7.4.
 - **Un controllo del doctor per un token condiviso da più account** (`credential`): confronta solo una breve impronta dei token con cui gli account leggerebbero GitHub (il token conservato dal monitor, o `GH_TOKEN` / `GITHUB_TOKEN` dell'ambiente) ed elenca gli account che ne condividono uno; il token non viene mai mostrato.
 - Test per ogni modifica, compreso un test di igiene del webhook: un payload con un segreto, un'e-mail, un messaggio di commit e un token non arriva né all'elenco dal vivo, né al feed, né a una notifica, e l'elenco dal vivo è ora filtrato da una lista di campi consentiti.
 
+- **`notify.allow_private_targets`** (spento per impostazione predefinita, nella scheda Impostazioni, nelle otto lingue): una destinazione di notifica che è, o si risolve in, un indirizzo di loopback, privato (10.x, 172.16-31.x, 192.168.x, fc00::/7), link-local (169.254.x, con l'indirizzo dei metadati cloud, fe80::/10), condiviso (100.64.0.0/10) o riservato viene rifiutata. Il nome viene risolto una volta e il socket si apre verso l'indirizzo verificato (un nome che cambia risposta non passa), e ogni reindirizzamento segue la stessa regola. I canali `mqtt` e `http_local` restano solo locali per definizione. Provato con un server e un resolver finti.
+- **Un avviso sull'HTTP semplice in modalità rete**: l'aiuto dell'interruttore `listen.network` ora dice, nelle otto lingue, che senza HTTPS token e dati viaggiano non cifrati; la console avvisa già all'avvio in rete senza certificato.
+
 ### Modificato
 
 - **L'API chiama l'edizione `complete`** (diceva `full`) in `/api/about`, `/api/statusbar`, `--doctor --json` e nella riga di comando; `full` resta riservato a ciò che la sentinella può eseguire. La pagina e la riga di comando capiscono ancora entrambe le parole.

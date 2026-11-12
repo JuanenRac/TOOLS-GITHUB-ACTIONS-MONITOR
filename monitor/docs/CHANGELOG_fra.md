@@ -20,6 +20,9 @@ Travail en cours après la 1.7.4.
 - **Un contrôle du doctor pour un jeton partagé par plusieurs comptes** (`credential`) : il ne compare qu'une courte empreinte des jetons avec lesquels les comptes liraient GitHub (le jeton gardé par le moniteur, ou `GH_TOKEN` / `GITHUB_TOKEN` de l'environnement) et liste les comptes qui en partagent un ; le jeton n'est jamais affiché.
 - Des tests pour chaque changement, dont un test d'hygiène du webhook : une charge avec un secret, un e-mail, un message de commit et un jeton n'arrive ni à la liste en direct, ni au flux, ni à une notification, et la liste en direct est désormais filtrée par une liste de champs autorisés.
 
+- **`notify.allow_private_targets`** (désactivé par défaut, dans l'onglet Réglages, dans les huit langues) : une destination de notification qui est, ou se résout vers, une adresse de boucle locale, privée (10.x, 172.16-31.x, 192.168.x, fc00::/7), de lien local (169.254.x, avec l'adresse de métadonnées du cloud, fe80::/10), partagée (100.64.0.0/10) ou réservée est refusée. Le nom est résolu une fois et le socket s'ouvre vers l'adresse vérifiée (un nom qui change de réponse ne passe pas), et chaque redirection suit la même règle. Les canaux `mqtt` et `http_local` restent locaux par définition. Testé avec un faux serveur et un faux résolveur.
+- **Un avertissement sur le HTTP simple en mode réseau** : l'aide de l'interrupteur `listen.network` dit désormais, dans les huit langues, que sans HTTPS le jeton et les données circulent en clair ; la console avertit déjà au démarrage en réseau sans certificat.
+
 ### Modifié
 
 - **L'API appelle l'édition `complete`** (elle disait `full`) dans `/api/about`, `/api/statusbar`, `--doctor --json` et la ligne de commande ; `full` reste réservé à ce que la sentinelle peut exécuter. La page et la ligne de commande comprennent toujours les deux mots.

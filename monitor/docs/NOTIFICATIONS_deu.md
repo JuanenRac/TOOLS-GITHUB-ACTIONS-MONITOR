@@ -19,6 +19,7 @@ Optional und **standardmäßig aus**. Die Ereignisse des Feeds (ein neues Rot, e
 
 - Tokens und Webhook-URLs werden nie in der Konfiguration gespeichert: Sie tragen den NAMEN einer Umgebungsvariable ein, der Wert wird erst beim Senden gelesen, nie angezeigt, nie protokolliert.
 - `discord` akzeptiert nur `discord.com`, `slack` nur `hooks.slack.com`; `mqtt` und `http_local` nur `127.0.0.1`, `localhost` oder `[::1]`.
+- Ein Ziel, das eine Loopback-, private (10.x, 172.16-31.x, 192.168.x, fc00::/7), Link-Local- (169.254.x mit der Cloud-Metadatenadresse, fe80::/10), gemeinsame (100.64.0.0/10) oder reservierte Adresse ist oder dorthin aufgelöst wird, wird abgelehnt, solange `notify.allow_private_targets` aus ist (Standard). Der Name wird einmal aufgelöst, die Verbindung geht zur geprüften Adresse, und jede Weiterleitung durchläuft dieselbe Regel. So erreicht ein falsch eingetragener Matrix-Server weder Ihren Router noch den Metadatendienst einer Cloud-Maschine.
 - Höchstens `notify.max_per_hour` Nachrichten verlassen den Rechner; ein fehlgeschlagenes Senden wird gezählt und ignoriert, es stoppt den Monitor nie.
 
 
