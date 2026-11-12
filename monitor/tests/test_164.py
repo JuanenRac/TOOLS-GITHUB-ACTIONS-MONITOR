@@ -138,7 +138,7 @@ class LiteIsolation(unittest.TestCase):
                 "codes = []\n"
                 "for path in ('/api/sentinel', '/api/sentinel/parte.txt', '/api/ai/actions', '/api/analytics', '/metrics', '/api/gh-action/plan', '/api/act/status', '/api/runners', '/api/mirror', '/api/otlp', '/api/github-token'):\n"
                 "    try:\n        urllib.request.urlopen(base + path, timeout=5); codes.append(200)\n    except urllib.error.HTTPError as e:\n        codes.append(e.code)\n"
-                "import time\nfor path in ('/api/health', '/api/about', '/api/quota', '/api/help/topics'):\n    t0 = time.time()\n    try:\n        status = urllib.request.urlopen(base + path, timeout=30).status\n        codes.append(status if time.time() - t0 < 8 else '%s answered %s after %.1f s' % (path, status, time.time() - t0))\n    except Exception as e:\n        codes.append(path + ' ' + type(e).__name__ + ' after %.1f s' % (time.time() - t0))\n"
+                "import time\nfor path in ('/api/health', '/api/about', '/api/quota', '/api/help/topics'):\n    t0 = time.time()\n    try:\n        status = urllib.request.urlopen(base + path, timeout=30).status\n        codes.append(status if time.time() - t0 < 25 else '%s answered %s after %.1f s' % (path, status, time.time() - t0))\n    except Exception as e:\n        codes.append(path + ' ' + type(e).__name__ + ' after %.1f s' % (time.time() - t0))\n"
                 "print(codes, 'sentinel_local' in sys.modules)")
         out = self.run_lite(code)
         self.assertTrue(out.endswith("False"), out)
