@@ -255,6 +255,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ACCOUNTS_spa.md`](monitor/docs/ACCOUNTS_spa.md): varias cuentas, un proceso para cada una
 - [`monitor/docs/QUOTAS_spa.md`](monitor/docs/QUOTAS_spa.md): cuotas y planes de GitHub
 - [`monitor/docs/MODES_spa.md`](monitor/docs/MODES_spa.md): modos de trabajo: normal, rápido y turbo
+- [`monitor/docs/AI_CONNECTION_spa.md`](monitor/docs/AI_CONNECTION_spa.md): Conectar una herramienta de IA: todo lo que dice el monitor, como señales, en el resumen, el endpoint, las herramientas MCP y el hook
+- [`monitor/docs/QUOTA_spa.md`](monitor/docs/QUOTA_spa.md): Más cuota, menos gasto: modo Bajo, el panel central, una GitHub App y cómo compartir la cuota
 
 ## Contribuir
 

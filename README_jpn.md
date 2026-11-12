@@ -255,6 +255,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ACCOUNTS_jpn.md`](monitor/docs/ACCOUNTS_jpn.md): 複数アカウント（1 つにつき 1 プロセス）
 - [`monitor/docs/QUOTAS_jpn.md`](monitor/docs/QUOTAS_jpn.md): GitHub のクォータとプラン
 - [`monitor/docs/MODES_jpn.md`](monitor/docs/MODES_jpn.md): 動作モード: 通常・高速・ターボ
+- [`monitor/docs/AI_CONNECTION_jpn.md`](monitor/docs/AI_CONNECTION_jpn.md): AI ツールを接続する:モニターが伝えるすべてをシグナルとして、ブリーフ、エンドポイント、MCP ツール、フックで提供
+- [`monitor/docs/QUOTA_jpn.md`](monitor/docs/QUOTA_jpn.md): クォータを増やし、消費を減らす:節約モード、中央パネル、GitHub App、クォータの共有方法
 
 ## コントリビュート
 

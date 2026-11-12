@@ -255,6 +255,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ACCOUNTS_ita.md`](monitor/docs/ACCOUNTS_ita.md): più account, un processo ciascuno
 - [`monitor/docs/QUOTAS_ita.md`](monitor/docs/QUOTAS_ita.md): quote e piani di GitHub
 - [`monitor/docs/MODES_ita.md`](monitor/docs/MODES_ita.md): modalità di lavoro: normale, veloce e turbo
+- [`monitor/docs/AI_CONNECTION_ita.md`](monitor/docs/AI_CONNECTION_ita.md): Collegare uno strumento di IA: tutto ciò che dice il monitor, come segnali, nel riepilogo, nell'endpoint, negli strumenti MCP e nell'hook
+- [`monitor/docs/QUOTA_ita.md`](monitor/docs/QUOTA_ita.md): Più quota, meno spesa: modalità risparmio, il pannello centrale, una GitHub App e come condividere la quota
 
 ## Contribuire
 

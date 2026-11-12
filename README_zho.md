@@ -255,6 +255,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ACCOUNTS_zho.md`](monitor/docs/ACCOUNTS_zho.md)：多个账户，每个账户一个进程
 - [`monitor/docs/QUOTAS_zho.md`](monitor/docs/QUOTAS_zho.md)：GitHub 的配额与套餐
 - [`monitor/docs/MODES_zho.md`](monitor/docs/MODES_zho.md)：工作模式：普通、快速和极速
+- [`monitor/docs/AI_CONNECTION_zho.md`](monitor/docs/AI_CONNECTION_zho.md): 连接 AI 工具:监视器说的一切,以信号形式出现在简报、端点、MCP 工具和钩子中
+- [`monitor/docs/QUOTA_zho.md`](monitor/docs/QUOTA_zho.md): 更多配额,更少消耗:节省模式、中央面板、GitHub App 以及如何共享配额
 
 ## 参与贡献
 

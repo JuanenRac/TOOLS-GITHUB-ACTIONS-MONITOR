@@ -255,6 +255,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ACCOUNTS_deu.md`](monitor/docs/ACCOUNTS_deu.md): mehrere Konten, je ein Prozess
 - [`monitor/docs/QUOTAS_deu.md`](monitor/docs/QUOTAS_deu.md): Kontingente und Tarife von GitHub
 - [`monitor/docs/MODES_deu.md`](monitor/docs/MODES_deu.md): Arbeitsmodi: normal, schnell und Turbo
+- [`monitor/docs/AI_CONNECTION_deu.md`](monitor/docs/AI_CONNECTION_deu.md): Ein KI-Werkzeug verbinden: alles, was der Monitor sagt, als Signale, in der Zusammenfassung, im Endpunkt, in den MCP-Werkzeugen und im Hook
+- [`monitor/docs/QUOTA_deu.md`](monitor/docs/QUOTA_deu.md): Mehr Kontingent, weniger Verbrauch: Sparmodus, das zentrale Panel, eine GitHub-App und wie man das Kontingent teilt
 
 ## Mitwirken
 

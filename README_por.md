@@ -255,6 +255,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ACCOUNTS_por.md`](monitor/docs/ACCOUNTS_por.md): várias contas, um processo cada
 - [`monitor/docs/QUOTAS_por.md`](monitor/docs/QUOTAS_por.md): quotas e planos do GitHub
 - [`monitor/docs/MODES_por.md`](monitor/docs/MODES_por.md): modos de trabalho: normal, rápido e turbo
+- [`monitor/docs/AI_CONNECTION_por.md`](monitor/docs/AI_CONNECTION_por.md): Ligar uma ferramenta de IA: tudo o que o monitor diz, como sinais, no resumo, no endpoint, nas ferramentas MCP e no hook
+- [`monitor/docs/QUOTA_por.md`](monitor/docs/QUOTA_por.md): Mais quota, menos gasto: modo poupança, o painel central, uma GitHub App e como partilhar a quota
 
 ## Contribuir
 
