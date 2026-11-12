@@ -279,7 +279,7 @@ def group_cascades(alerts, links=None):
     return alerts
 
 
-def brief(alerts, limit, now=None, panels=None):
+def brief(alerts, limit, now=None, panels=None, sections=""):
     """The Markdown an AI reads when it starts: open alerts, the real ones first, within `limit` bytes. An alert that is red because of another one is listed under that one."""
     live = [a for a in alerts if a["state"] != "resolved"]
     live.sort(key=lambda a: (a["state"] == "acknowledged", a["class"] != "real", a["repo"], a["workflow"]))
@@ -316,6 +316,11 @@ def brief(alerts, limit, now=None, panels=None):
         while len(section.encode("utf-8")) > limit and section.count("\n") > 3:
             section = section.rsplit("\n", 2)[0] + "\n- ... more in ai_alerts.jsonl\n"
         text += "\n" + section
+    if sections:      # what to do now, what is pending, the health of the monitor (signals.py), with the same size limit
+        block = sections
+        while len(block.encode("utf-8")) > limit and block.count("\n") > 6:
+            block = block.rsplit("\n", 3)[0] + "\n"
+        text += "\n" + block
     return redact(text)
 
 
@@ -337,7 +342,7 @@ class Hook:
 HOOK = Hook()
 
 
-def update(config, red_rows, now=None, texts=None, opener=None, runner=None, owner="", panels=None):
+def update(config, red_rows, now=None, texts=None, opener=None, runner=None, owner="", panels=None, sections=""):
     """Brings the feed up to date with the red workflows of this cycle. Returns {"opened": [...], "resolved": [...], "alerts": [...]}. Nothing is written when the feed is off.
     With a `runner` (read only calls to `gh`) and `ai_alerts.diagnose.enabled`, a new or changed red run also gets its diagnosis; without a runner the diagnosis already kept is reused."""
     cfg = settings(config)
@@ -391,7 +396,7 @@ def update(config, red_rows, now=None, texts=None, opener=None, runner=None, own
     state = {k: v for k, v in state.items() if v.get("state") != "resolved" or v.get("resolved_at", 0) > cutoff}
     _write(folder / STATE, json.dumps(state, ensure_ascii=False, indent=1) + "\n")
     alerts = sorted(state.values(), key=lambda a: (a["repo"], a["workflow"]))
-    _write(folder / BRIEF, brief(alerts, cfg["brief_max_bytes"], now, panels))
+    _write(folder / BRIEF, brief(alerts, cfg["brief_max_bytes"], now, panels, sections))
     if cfg["hook"]["enabled"]:
         for alert in opened:
             if alert["class"] == "real" and HOOK.allowed(cfg["hook"]["max_per_hour"], now):

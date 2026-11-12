@@ -119,6 +119,7 @@ CHILD = {"account": "", "folder": ""}      # set by account_child.py: this proce
 def state_dir():
     """Where the small state files of this process live: the folder of the account when this is the monitor of one account, else next to the code, as always."""
     return Path(CHILD["folder"]) if CHILD["folder"] else HERE
+LITE_SHARED = ("/api/ai/state", "/api/ai/stream", "/api/ai/brief", "/api/ai/alerts", "/api/ai/ack")      # the channels for an AI tool are the same in both editions
 LITE_PATHS = ("/api/gh-action", "/api/act", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/notify", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events")   # they do not exist in lite
 
 
@@ -866,7 +867,7 @@ def refresh_feed(config=None, min_gap=2.0):
     """Rewrites the feed and the brief from the red workflows as they are NOW, so that they agree with what the Alerts tab shows (they used to follow one cycle behind). Called at every
     refresh of the alert centre and at every read of the feed; it does not call GitHub (a diagnosis is only fetched in the cycle) and does nothing while the data has not loaded."""
     data = STATE.get("data") or {}
-    if LITE["on"] or not data or data.get("loading") or (data.get("offline") or {}).get("offline") or not (data.get("repos") or data.get("runs")):
+    if not data or data.get("loading") or (data.get("offline") or {}).get("offline") or not (data.get("repos") or data.get("runs")):
         return None
     if time.time() - FEED_SYNC["at"] < min_gap or not FEED_LOCK.acquire(False):
         return None
@@ -900,11 +901,50 @@ def panel_list(lang=None):
     return sentinel_panels.panels(snapshot, lambda key, **values: i18n.tl(code, key, **values), analytics=ANALYTICS.get("summary"), collab=collab_alerts, owner=toolconfig.github_owner())
 
 
+def ai_state(lang=None, data=None, panels=None):
+    """The document of `GET /api/ai/state`: every signal of the monitor (signals.py), the same in both editions; the lite one says which panels do not exist there."""
+    import signals
+    data = data if data is not None else (STATE.get("data") or {})
+    if panels is None:
+        try:
+            panels = panel_list(lang)
+        except Exception as error:   # noqa: BLE001
+            degraded.note("ai_alerts.panels", error)
+            panels = []
+    age = None
+    try:
+        age = int(time.time() - parse_time(data.get("updated")).timestamp()) if data.get("updated") else None
+    except Exception:   # noqa: BLE001
+        age = None
+    config = toolconfig.raw_config()
+    warnings = []
+    try:
+        import doctor
+        for name, check in (("timezone", doctor.time_zone(config)), ("risks", doctor.risks(config))):
+            if check[0] != "ok":
+                warnings.append(f"{name}: {check[1]}")
+    except Exception as error:   # noqa: BLE001
+        degraded.note("loop.extra", error)
+    swallowed = degraded.read(state_dir())[0] if hasattr(degraded, "read") else 0
+    if swallowed:
+        warnings.append(f"degraded: {swallowed} failure(s) swallowed on purpose")
+    stale = age is not None and age > 3 * int(data.get("refresh_seconds") or 120) + 60
+    return signals.state(data, panels, "lite" if LITE["on"] else "complete", {"age_seconds": age, "stale": stale, "warnings": warnings}, version=TOOL_VERSION)
+
+
+def ai_sections(data, panels):
+    """The Markdown of "What to do now / Pending / Monitor health" for the brief."""
+    try:
+        import signals
+        return signals.brief_sections(ai_state(data=data, panels=panels))
+    except Exception as error:   # noqa: BLE001 - the brief never fails because of this block
+        degraded.note("ai_alerts.panels", error)
+        return ""
+
+
 def feed_alerts(config, data, diagnose=True):
     """The local feed for AIs: complete edition only; a NEW real alert also reaches the notification channels you configured. With `diagnose` (the cycle) and ai_alerts.diagnose.enabled,
-    the failing step and the last relevant lines of the log of a new red run are read (read only calls to `gh`)."""
-    if LITE["on"]:
-        return None
+    the failing step and the last relevant lines of the log of a new red run are read (read only calls to `gh`). The same in both editions: the lite one has no panels, only its signals."""
     import ai_alerts
     with FEED_LOCK:      # the cycle and a refresh of the alert centre never write the feed at the same time
         try:
@@ -912,7 +952,7 @@ def feed_alerts(config, data, diagnose=True):
         except Exception as error:   # noqa: BLE001 - the panels never stop the feed of the red workflows
             degraded.note("ai_alerts.panels", error)
             panels = None
-        result = ai_alerts.update(config, red_rows(data), runner=ai_alerts.gh_runner if diagnose else None, owner=toolconfig.github_owner(config), panels=panels)
+        result = ai_alerts.update(config, red_rows(data), runner=ai_alerts.gh_runner if diagnose else None, owner=toolconfig.github_owner(config), panels=panels, sections=ai_sections(data, panels))
     for alert in result["opened"]:
         if alert["class"] == "real":
             try:
@@ -1312,7 +1352,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def handle_post(self):
         path = self.path.split("?")[0]
-        if LITE["on"] and path.startswith(LITE_PATHS):
+        if LITE["on"] and path.startswith(LITE_PATHS) and path not in LITE_SHARED:
             self.send_response(404)
             self.end_headers()
             return
@@ -1507,7 +1547,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def handle_get(self):
         path = self.path.split("?")[0]
-        if LITE["on"] and path.startswith(LITE_PATHS):      # the lite product does not have these endpoints
+        if LITE["on"] and path.startswith(LITE_PATHS) and path not in LITE_SHARED:      # the lite product does not have these endpoints
             self.send_response(404)
             self.end_headers()
             return
@@ -1623,6 +1663,12 @@ class Handler(BaseHTTPRequestHandler):
                     self.json_reply({"error": "unknown topic"}, 404)
                 else:
                     self.json_reply(found)
+        elif path == "/api/ai/state":      # read only, versioned: everything the monitor says, as signals (signals.py); the same in the lite and the complete edition
+            if not self.guard():
+                return
+            query = self.path.partition("?")[2].split("&")
+            lang = next((q[5:] for q in query if q.startswith("lang=") and q[5:] in i18n.LANGS), "en")
+            self.json_reply(ai_state(lang))
         elif path == "/api/ai/stream":      # server-sent events, read only: the alerts as they open and resolve (ai_alerts.stream, off by default)
             if not self.guard():
                 return

@@ -31,6 +31,10 @@ TOOLS = [
     {"name": "get_red_repos", "description": "Repositories with a workflow that is red on its default branch.", "inputSchema": {"type": "object", "properties": {}}},
     {"name": "get_run_failure", "description": "The failed steps of one run and a short cleaned fragment of its log.", "inputSchema": {"type": "object", "properties": {"repo": {"type": "string"}, "run": {"type": "integer"}}, "required": ["repo", "run"]}},
     {"name": "sentinel_panels", "description": "The panels A1..A13 and the second sentinel of the Sentinel tab as data: level (bad = act, warn = keep an eye on it), one line and the rows to act on, with repository and link. Read only.", "inputSchema": {"type": "object", "properties": {}}},
+    {"name": "monitor_state", "description": "Everything the monitor says, as signals (level act / watch / info, rows with repository, link, age and next step), plus the edition (lite or complete) and the panels that do not exist in it. Read only.", "inputSchema": {"type": "object", "properties": {}}},
+    {"name": "signals", "description": "The signals of one panel (now, alerts, repos, health, a1..a13, collab) or of all of them, optionally only the ones that need action.", "inputSchema": {"type": "object", "properties": {"panel": {"type": "string"}, "only_act": {"type": "boolean"}}}},
+    {"name": "diagnose", "description": "The failing step and the last lines of the log of one alert (by id); same as alert_diagnose.", "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"]}},
+    {"name": "act", "description": "Acknowledge an alert (local state only; needs --allow-ack); same as alert_ack.", "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"]}},
     {"name": "get_quota", "description": "GitHub allowance and Actions minutes, from the running monitor.", "inputSchema": {"type": "object", "properties": {}}},
     {"name": "alerts_open", "description": "Open CI alerts of the monitor, real ones first: age of the feed, failing step, last log lines and the red repository they fall together under.", "inputSchema": {"type": "object", "properties": {"only_real": {"type": "boolean"}}}},
     {"name": "alert_diagnose", "description": "The failing step and the last relevant lines of the log of one alert (by id); reads the log from GitHub only when the feed has no diagnosis yet.", "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"]}},
@@ -81,7 +85,7 @@ def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_g
         rows.sort(key=lambda a: (a["state"] == "acknowledged", a["class"] != "real", a["repo"], a["workflow"]))
         info = ai_alerts.brief_info(config)
         return ai_alerts.redact(json.dumps({"updated": info["updated"], "updated_local": info["updated_local"], "age_seconds": info["age_seconds"], "alerts": rows}, ensure_ascii=False, indent=1))
-    if name == "alert_diagnose":
+    if name in ("alert_diagnose", "diagnose"):
         wanted = str(arguments.get("id", ""))
         found = [a for a in ai_alerts.alerts(config, states=("open", "acknowledged")) if a["id"] == wanted]
         if not found:
@@ -97,6 +101,12 @@ def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_g
     if name == "get_red_repos":
         rows = [a for a in ai_alerts.alerts(config, states=("open", "acknowledged")) if a.get("conclusion") != "panel"]
         return ai_alerts.redact(json.dumps(sorted({a["repo"] for a in rows})))
+    if name == "monitor_state":
+        return ai_alerts.redact(json.dumps(getter("/api/ai/state"), ensure_ascii=False)[:20000])
+    if name == "signals":
+        doc = getter("/api/ai/state")
+        rows = [s for s in doc.get("signals", []) if (not arguments.get("panel") or s.get("panel") == arguments["panel"] or s["id"].split(".")[0] == arguments["panel"]) and (not arguments.get("only_act") or s.get("level") == "act")]
+        return ai_alerts.redact(json.dumps({"edition": doc.get("edition"), "signals": rows}, ensure_ascii=False)[:16000])
     if name == "sentinel_panels":
         return ai_alerts.redact(json.dumps(getter("/api/sentinel/panels"), ensure_ascii=False)[:12000])
     if name == "get_run_failure":
@@ -115,7 +125,7 @@ def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_g
         return ai_alerts.redact("Failed steps:\n" + ("\n".join(steps) or "(none listed)") + "\n\nEnd of the failed log:\n" + fragment, 4000)
     if name == "get_quota":
         return ai_alerts.redact(json.dumps(getter("/api/quota"), ensure_ascii=False)[:3000])
-    if name in ("ack_alert", "alert_ack"):
+    if name in ("ack_alert", "alert_ack", "act"):
         if not allow_ack:
             raise ValueError("acknowledging is off: start the server with --allow-ack")
         return "acknowledged" if ai_alerts.ack(config, arguments.get("id")) else "no such open alert"
