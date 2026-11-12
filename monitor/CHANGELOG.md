@@ -9,6 +9,27 @@ Version of the tool itself (monitor + sentinel + batch tools), semver of its own
 and is shown as `tool_version` in the sentinel snapshot and by `read_report.py --version`; `make_release.py` refuses to build
 when this file and `tool_version.py` disagree.
 
+## [1.7.3]
+
+A second sentinel for issues and pull requests, one tab with the alerts of every sentinel, and silences that end by themselves. Collab only reads; nothing here writes to GitHub.
+
+### Added
+
+- **The Collab sentinel** (`sentinel_collab.py`, complete edition only, off by default): the open issues and pull requests of your repositories, on a clock of its own (`sentinels.collab.refresh_seconds`) that never alters the CI sentinel. Six rules with stable codes: `collab.issue.stale`, `collab.issue.critical`, `collab.issue.external`, `collab.pr.review_pending`, `collab.pr.draft_old` and `collab.pr.conflict`. It reads with conditional requests (an unchanged repository costs no allowance), at most `max_repos_per_tick` repositories per round, pauses under `min_rate_remaining`, keeps its state in `collab_state.json` (inside the folder of each account) and announces only changes. Bots are left out. Its layer *Issues and pull requests* is in the Sentinel tab and `GET /api/sentinel/collab` serves it.
+- **Two new events**, `collab_new` and `collab_fixed`, for the feed and for every notification channel (they are in the list of events of the channels and in the event schema).
+- **The Alerts tab** (complete edition): one list with the alerts of every sentinel, each with its origin (CI or Collab) and level, a filter by origin and by level, a link to GitHub and a red dot on the tab with the errors that are open. `?view=alerts&sentinel=collab` opens it filtered.
+- **Silences with an end** (`alert_center.py`): from the Alerts tab an alert, a rule (its code) or a whole sentinel can be silenced for `alerts.mute_hours` hours (24 by default, 1 to 720). A silence lapses by itself, can be restored at once, and a short history says what was silenced, since when and until when. It is a note of the monitor, kept per account in `alert_mutes.json`; nothing changes on GitHub.
+- **`ignore_labels`** in the rules of Collab (`monitor:ignore` by default): an issue or pull request that a person labelled so on GitHub raises no alert. The monitor never writes labels.
+- **`GET /api/alerts`** (`?sentinel=`, `?level=`, `?muted=show|hide|only`) and **`GET /api/events`** (`?sentinel=`, `?since=`), both read only and per account; `POST /api/alerts/mute` and `/api/alerts/unmute` (this computer only, one-use token, like every other change).
+- **A checklist in the Live view** (secret of 32 characters or more, forward or tunnel to `/api/webhook`, the test event of GitHub, watch the allowance) and the same steps in the webhook guide.
+- **A guide of the Collab sentinel** in the eight languages (`COLLAB.md`), found by the Help.
+- Tests for each change: the rules and their stable codes, the cost (conditional reads, the cap per round, the pause), that it only reads, the silences (scopes, end, bounds, history, a damaged file), the ignore label, the endpoints, that lite has none of it, the files of state of each account and of the demo, and the texts in the eight languages.
+
+### Changed
+
+- The settings page has twelve settings for Collab in one block of the Sentinel tab, and `alerts.mute_hours` beside them.
+- The files `alert_mutes.json`, `collab_state.json`, `ai_alerts_state.json` and `ALERTS_BRIEF.md` are never committed and never travel in a package.
+
 ## [1.7.2]
 
 A header that reads in order and fits the window, the quick controls fixed in the top right corner, About in the side panel, and the end of the notice of a new version. The tests stop leaving files next to the code, which is what had replaced the settings of a person by the neutral template.

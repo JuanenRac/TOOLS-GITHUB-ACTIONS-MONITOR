@@ -47,6 +47,8 @@ def setup(now):
     toolconfig.set_owner(OWNER)
     toolconfig.set_ecosystems({"alpha": {"label": "Alpha", "prefixes": ["demo-alpha-"]}, "beta": {"label": "Beta", "prefixes": ["demo-beta-"]}, "gamma": {"label": "Gamma", "prefixes": ["demo-gamma-"]}})
     am.LIVE_CONFIG.update(cfg)
+    import alert_center
+    alert_center.STATE_FILE = tmp / "alert_mutes.json"       # a silence made while taking the pictures never reaches the files next to the code
     return cfg, tmp
 
 
@@ -113,6 +115,21 @@ def snapshot(now, data, runs, iso):
     return snap
 
 
+def demo_alerts(now, iso):
+    """The alerts of the two sentinels with invented repositories and numbers, for the picture of the Alerts tab."""
+    def one(sentinel, code, level, repo, title, hours, url="#", number=None):
+        details = {"url": url}
+        if number:
+            details.update({"number": number, "url": f"https://github.com/{OWNER}/{repo}/issues/{number}"})
+        return {"id": f"{code}:{repo}:{number or title[:12]}", "code": code, "level": level, "sentinel": sentinel, "account_id": "", "repo": repo, "title": title, "details": details, "created_at": iso(now - timedelta(hours=hours))}
+    return [one("ci", "ci.red", "error", "demo-alpha-app", "demo-alpha-app: Release build is red on main", 30),
+            one("ci", "ci.pending_sign", "warning", "demo-beta-fw", "demo-beta-fw: a build waits for its signature (31 h)", 31),
+            one("collab", "collab.issue.critical", "error", "demo-gamma-api", "Critical issue (security): demo-gamma-api #31 Token printed in a log", 52, number=31),
+            one("collab", "collab.pr.review_pending", "warning", "demo-alpha-core", "Review waiting for 4 days: demo-alpha-core #8 Faster cache", 96, number=8),
+            one("collab", "collab.pr.conflict", "warning", "demo-beta-docs", "Pull request with conflicts for 9 days: demo-beta-docs #5 New guide", 220, number=5),
+            one("collab", "collab.pr.draft_old", "info", "demo-gamma-ui", "Draft pull request open for 41 days: demo-gamma-ui #14 Dark theme", 980, number=14)]
+
+
 def demo_analytics(runs):
     store = analytics.Store(Path(tempfile.mkdtemp()) / "a.json")
     job = {"created_at": "2026-01-01T00:00:00Z", "started_at": "2026-01-01T00:00:12Z", "steps": [{"name": "Set up job", "started_at": "2026-01-01T00:00:12Z", "completed_at": "2026-01-01T00:00:14Z"},
@@ -146,7 +163,22 @@ def main():
 
         def refresh_repos(self, names):
             return names
+    class DemoCollab:
+        def snapshot(self):
+            alerts = [a for a in demo_alerts(now, iso) if a["sentinel"] == "collab"]
+            return {"enabled": True, "level": "bad", "status": {"enabled": True, "level": "bad", "repos_in_scope": 6, "repos_checked": 6, "refresh_seconds": 600, "errors": []}, "alerts": alerts}
+
+    class DemoRegistry:
+        def alerts(self):
+            return demo_alerts(now, iso)
+
+        def names(self):
+            return ["ci", "collab"]
+
+        def get(self, name):
+            return DemoCollab() if name == "collab" else None
     if not lite:
+        am.SENTINEL["registry"] = DemoRegistry()
         am.SENTINEL["obj"] = Demo()
         am.ANALYTICS["store"] = analytics.Store(Path(tempfile.mkdtemp()) / "a.json")
         am.ANALYTICS["summary"] = demo_analytics(runs)

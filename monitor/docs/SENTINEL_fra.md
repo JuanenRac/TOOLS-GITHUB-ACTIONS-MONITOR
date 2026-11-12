@@ -82,3 +82,7 @@ Ce sont toutes des suggestions en lecture seule pour une personne ; le moniteur 
 ## Où tout se configure
 
 Chaque seuil ci-dessus est un réglage des onglets **Sentinelle**, **Contrôles de surface (A10)**, **Préparation (A11)**, **Dossiers et fichiers**, **Analytique** et **Linter de workflows** de la page Réglages, et une clé de `actions_monitor.json`. La liste complète avec ses plages est dans `SETTINGS_fra.md`. Le panneau d'Aide et `--help-topics sentinel` affichent cette page hors ligne.
+
+## La seconde sentinelle et la liste des alertes
+
+En plus de cette sentinelle (CI), l'édition complète a la **sentinelle Collab**, qui surveille les issues et pull requests ouvertes sur une horloge propre et n'écrit jamais sur GitHub : [COLLAB_fra.md](COLLAB_fra.md). L'onglet **Alertes** réunit les alertes des deux dans une liste, avec un filtre par origine et niveau et des mises en sourdine locales qui se terminent seules (`alerts.mute_hours`) ; `GET /api/alerts` sert la même liste.

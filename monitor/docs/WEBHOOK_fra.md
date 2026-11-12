@@ -34,3 +34,10 @@ Dans `actions_monitor.json` : `"webhook": {"enabled": true, "secret": "<32 carac
 ## Rejeux et inondations
 
 Une requête signée valide qu'on a capturée puis renvoyée reçoit une réponse mais n'est pas exécutée : chaque livraison a besoin de son identifiant `X-GitHub-Delivery`, les identifiants déjà acceptés sont mémorisés pendant `webhook.replay_seconds` (une heure par défaut, mémoire bornée) et une répétition reçoit `202 {"duplicate": true}`. (Une nouvelle livraison manuelle depuis la page GitHub réutilise l'identifiant : elle est donc ignorée dans cette fenêtre.) Un dépôt peut provoquer au plus `webhook.max_per_minute` événements acceptés par minute ; les autres reçoivent une réponse et sont ignorés. Si la charge indique `full_name`, son propriétaire doit être le compte surveillé (ou l'un de `webhook.allowed_owners`). En mode réseau, une adresse peut envoyer 120 requêtes par minute. Après un événement accepté, les lectures conditionnelles mémorisées de ce dépôt sont supprimées et il est relu au cycle suivant : un événement en direct est toujours réconcilié avec GitHub.
+
+## Liste de contrôle de la vue en direct
+
+1. Définissez `webhook.secret` avec au moins 32 caractères et activez le webhook.
+2. Redirigez le port (`gh webhook forward`) ou ouvrez un tunnel et utilisez son adresse terminée par `/api/webhook` dans GitHub.
+3. Envoyez l'évènement de test de GitHub (Recent deliveries > Redeliver) et cherchez-le dans `?view=live`.
+4. Surveillez le quota dans l'en-tête : avec les webhooks, un cycle plus lent suffit.

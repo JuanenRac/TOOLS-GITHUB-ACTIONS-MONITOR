@@ -1,8 +1,8 @@
 {
   "repo": "TOOLS-GITHUB-ACTIONS-MONITOR",
   "ecosystem": "monitor",
-  "tagline": "Two editions of one local monitor: the lite one shows what runs and what failed, the complete one adds the sentinel.",
-  "description": "GitHub Actions Monitor is a local program with two editions that share one core. The complete edition (port 8765) adds the sentinel with its checks A1 to A13, analytics, the workflow linter, notifications and an optional AI assistant. The lite edition (port 8766) has no sentinel and its own configuration and state files. Both read GitHub through your own gh login with conditional reads, apply one rule for red on main, know the quotas of your plan and answer the web panel, the console and the interactive terminal on 127.0.0.1 only. Outputs are ci_red.json, Prometheus metrics, JSON for Grafana, a health check, notifications and an optional dashboard notice. Nothing is written to GitHub unless you confirm it.",
+  "tagline": "Two editions of one local monitor: the lite one shows what runs and what failed, the complete one adds sentinels, alerts and accounts.",
+  "description": "GitHub Actions Monitor is a local program with two editions that share one core. The complete edition (port 8765) adds the sentinels (CI with its checks A1 to A13, and Collab for issues and pull requests), one list of alerts with local silences, several accounts, analytics, the workflow linter, notifications and an optional AI assistant. The lite edition (port 8766) has no sentinel and its own configuration and state files. Both read GitHub through your own gh login with conditional reads, apply one rule for red on main, know the quotas of your plan and answer the web panel, the console and the interactive terminal on 127.0.0.1 only. Outputs are ci_red.json, Prometheus metrics, JSON for Grafana, a health check, notifications and an optional dashboard notice. Nothing is written to GitHub unless you confirm it.",
   "columns": [
     "INTERFACES",
     "THE MONITOR",
@@ -60,21 +60,37 @@
       ]
     },
     {
+      "id": "accounts",
+      "column": 1,
+      "level": "tested",
+      "title": "Several accounts",
+      "lines": [
+        "a supervisor and one isolated",
+        "monitor per account, each",
+        "with its own folder and port"
+      ],
+      "code": [
+        "monitor/accounts.py",
+        "monitor/accounts_supervisor.py",
+        "monitor/account_child.py"
+      ]
+    },
+    {
       "id": "full",
       "column": 1,
       "level": "tested",
-      "title": "Complete edition, port 8765",
+      "title": "Complete, port 8765",
       "lines": [
-        "sentinel A1-A13, analytics, linter,",
-        "reports, signing queue; its own",
-        "actions_monitor.json"
+        "analytics, linter, reports,",
+        "signing queue and the tab",
+        "of alerts; its own config"
       ],
       "code": [
-        "monitor/sentinel_local.py",
         "monitor/surface.py",
         "monitor/readiness.py",
         "monitor/analytics.py",
-        "monitor/lint_workflows.py"
+        "monitor/lint_workflows.py",
+        "monitor/alert_center.py"
       ]
     },
     {
@@ -97,10 +113,28 @@
       ]
     },
     {
+      "id": "sentinels",
+      "column": 1,
+      "level": "tested",
+      "title": "Sentinels CI and Collab",
+      "lines": [
+        "CI checks A1-A13 and Collab",
+        "(issues, pull requests); one",
+        "contract, a clock each"
+      ],
+      "code": [
+        "monitor/sentinel_base.py",
+        "monitor/sentinel_registry.py",
+        "monitor/sentinel_ci.py",
+        "monitor/sentinel_collab.py",
+        "monitor/sentinel_local.py"
+      ]
+    },
+    {
       "id": "lite",
       "column": 1,
       "level": "contract",
-      "title": "Lite edition, port 8766",
+      "title": "Lite, port 8766",
       "lines": [
         "what runs and what failed; no",
         "sentinel, its own config and",
@@ -187,11 +221,6 @@
       "level": "tested"
     },
     {
-      "from": "full",
-      "to": "core",
-      "level": "tested"
-    },
-    {
       "from": "lite",
       "to": "core",
       "level": "tested"
@@ -212,6 +241,21 @@
       "to": "notify",
       "label": "events, text",
       "level": "config"
+    },
+    {
+      "from": "full",
+      "to": "sentinels",
+      "level": "tested"
+    },
+    {
+      "from": "sentinels",
+      "to": "core",
+      "level": "tested"
+    },
+    {
+      "from": "accounts",
+      "to": "full",
+      "level": "tested"
     }
   ],
   "legend": {

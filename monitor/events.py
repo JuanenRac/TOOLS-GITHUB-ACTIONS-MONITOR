@@ -147,6 +147,18 @@ class Feed:
                 pass
         return events
 
+    def emit(self, events):
+        """Writes events that another sentinel made (their own kind, code, text and url) to the same file and gives them to the same listeners (1.7.3). Returns them."""
+        events = [e for e in events if isinstance(e, dict) and e.get("kind")]
+        self._append(events)
+        for listener in self.listeners:
+            try:
+                if events:
+                    listener(events)
+            except Exception:   # noqa: BLE001 - a notification problem must never stop the feed
+                pass
+        return events
+
     def _notify(self, events):
         """Optional hook (sentinel.notify_command in actions_monitor.json: a list, run WITHOUT a shell with the text as last argument)
         for what asks for a decision: a new red, a stuck build, a build waiting for its signature. Failures are ignored."""

@@ -104,7 +104,7 @@ class Registry(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             with mock.patch.object(sentinel_local, "CACHE_FILE", Path(tmp) / "c.json"), mock.patch.object(sentinel_local, "HISTORY_FILE", Path(tmp) / "h.json"):
                 registry = reg.SentinelRegistry.build(ctx_stub(), {})
-        self.assertEqual(registry.names(), ["ci"])
+        self.assertEqual(registry.names(), ["ci", "collab"])      # 1.7.3: the Collab sentinel is the second one (off by default)
         ci = registry.get("ci")
         for attribute in ("snapshot", "feed", "refresh_repos", "ai_explain", "gh_text", "loading", "cfg", "repo_info"):
             self.assertTrue(hasattr(ci, attribute), attribute)

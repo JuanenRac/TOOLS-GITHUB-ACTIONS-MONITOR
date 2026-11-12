@@ -2,6 +2,10 @@
 
 Idee che non sono entrate nella versione attuale, senza ordine promesso. Sono direzioni, non impegni; una issue o una pull request è il modo migliore per farne avanzare una.
 
+## Fatto nella 1.7.3
+
+Una seconda sentinella per issue e pull request (Collab, disattivata di default, sola lettura, orologio proprio), una scheda Avvisi con gli avvisi di tutte le sentinelle e filtro per origine e livello, silenziamenti locali che finiscono da soli (un avviso, una regola o una sentinella; `alerts.mute_hours`), l'etichetta che fa ignorare un elemento, `GET /api/alerts` e `GET /api/events`, una lista di controllo della vista dal vivo, una guida della sentinella Collab in otto lingue e le immagini ridisegnate.
+
 ## Fatto nella 1.7.2
 
 L'intestazione con le sue cifre in un ordine che si legge e in una griglia che segue la larghezza; i controlli rapidi (solo i caldi, velocità, salute degli ecosistemi) fissi in alto a destra; Impostazioni, Guida e Informazioni solo nel pannello laterale; l'avviso di nuova versione fuori dall'intestazione; e i test che non lasciano più file accanto al codice.

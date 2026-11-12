@@ -31,7 +31,7 @@
 
 | | |
 |---|---|
-| **Versión** | **1.7.2** · [todas las versiones](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versión** | **1.7.3** · [todas las versiones](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Necesita** | Python 3.11+ y la CLI de GitHub (`gh auth login`); nada más (la vista de consola usa el paquete opcional `rich`) |
 | **Se abre** | en una página de `127.0.0.1` solamente, en ocho idiomas |
 | **Escribe en GitHub** | nunca por sí solo: solo las órdenes por lotes que lances con un `--go` explícito |
@@ -42,6 +42,7 @@
 ### La página
 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="Ahora" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_alerts_light.png"><img src="docs/screenshots/web_alerts_dark.png" alt="Alertas: todos los centinelas en una lista, con silencios locales" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_light.png"><img src="docs/screenshots/web_sentinel_dark.png" alt="Centinela" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_queue_light.png"><img src="docs/screenshots/web_sentinel_queue_dark.png" alt="Cola de firma (lo más urgente primero)" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_analytics_light.png"><img src="docs/screenshots/web_sentinel_analytics_dark.png" alt="A12 · Analítica: duraciones, tiempo en cola, pasos y workflows inestables" width="92%"></picture></p>
@@ -106,6 +107,7 @@ Cada imagen sigue el tema claro u oscuro de tu página de GitHub.
 
 - **Rojo o no, con una sola regla**: la última ejecución terminada de cada workflow en la rama por defecto. Las ejecuciones canceladas u omitidas nunca tapan un fallo anterior.
 - **Centinela**: alertas de seguridad, higiene de repositorios, pull requests antiguas, versiones listas para publicar, compilaciones pendientes de firma y un parte en lenguaje llano.
+- **Centinela Collab y una lista de alertas**: incidencias y pull requests abiertos que necesitan a una persona (olvidados, críticos, revisiones en espera, borradores viejos, conflictos), solo lectura y con un reloj propio, y una pestaña Alertas con todos los centinelas en una lista, filtro por origen y silencios locales que acaban solos.
 - **Página de ajustes**: cambia rutas, intervalos, cuotas e interruptores desde el navegador; solo una lista fija de claves, validadas, con copia de seguridad antes de cada guardado.
 - **Gráficas e historial**: minutos de cómputo, fallos y éxitos con barras animadas y un historial diario (respeta el movimiento reducido).
 - **Ocho idiomas** (en, es, de, fr, it, ja, zh, pt) con el inglés como base; se cambia en Ajustes.
@@ -189,42 +191,43 @@ python -m unittest discover -s monitor/tests
 
 ```
 TOOLS-GITHUB-ACTIONS-MONITOR/
-├── monitor/                             el programa
-├── docs/                                arquitectura, capturas, hoja de ruta
-├── tools/                               dibujos, guías y demo
-├── deploy/                              ejemplo de contenedor
-├── images/                              banner y dibujos
-├── .github/                             CI y formularios
-├── CHANGELOG.md                         cambios por versión
-├── LICENSE NOTICE AUTHORS               licencias y autoría
-├── CONTRIBUTING.md SECURITY.md          cómo ayudar, informar
-├── SUPPORT.md CODE_OF_CONDUCT.md        soporte y conducta
+├── monitor/                                  el programa
+├── docs/                                     arquitectura, capturas, hoja de ruta
+├── tools/                                    dibujos, guías y demo
+├── deploy/                                   ejemplo de contenedor
+├── images/                                   banner y dibujos
+├── .github/                                  CI y formularios
+├── CHANGELOG.md                              cambios por versión
+├── LICENSE NOTICE AUTHORS                    licencias y autoría
+├── CONTRIBUTING.md SECURITY.md               cómo ayudar, informar
+├── SUPPORT.md CODE_OF_CONDUCT.md             soporte y conducta
 └── monitor/
-    ├── actions_monitor.py               servidor local
-    ├── actions_monitor.html             la página web
-    ├── MONITOR_LITE_GITHUB_ACTIONS.*    la edición lite (sin centinela)
-    ├── sentinel_local.py                alertas y parte
-    ├── surface.py readiness.py          comprobaciones, preparación
-    ├── settings_api.py outputs.py       ajustes, métricas
-    ├── signstate.py sigverify.py        firma: estado y control
-    ├── read_report.py                   el parte en terminal
-    ├── gha_dispatch_all.py              compilaciones por lotes
-    ├── events.py report_history.py      eventos e historial
-    ├── ci_red.py export_status.py       ficheros para otros
-    ├── etagcache.py resilience.py       lecturas condicionales, conexión
-    ├── analytics.py lint_workflows.py   duraciones, flaky, linter
-    ├── notifiers.py ai_actions.py       notificaciones, lista cerrada IA
-    ├── tui.py migrate_state.py          vista de consola, migración
-    ├── about.py  helpdocs.py            paneles Acerca de y Ayuda
-    ├── quota.py  quotas.json            plan, minutos y cuotas
-    ├── modes.py  updatecheck.py         modos de trabajo, aviso de versión
-    ├── doctor.py  demo_mode.py          --doctor y --demo
-    ├── discovery.py  banner.py          descubrimiento, banner de edición
-    ├── tui_textual.py                   terminal interactivo
-    ├── i18n.py locales/                 ocho idiomas
-    ├── toolconfig.py workspace.py       ajustes y clones
-    ├── tests/                           tests sin red
-    └── docs/                            guías, esquemas, Grafana
+    ├── actions_monitor.py                    servidor local
+    ├── actions_monitor.html                  la página web
+    ├── MONITOR_LITE_GITHUB_ACTIONS.*         la edición lite (sin centinela)
+    ├── sentinel_local.py                     alertas y parte
+    ├── sentinel_collab.py  alert_center.py   centinela de incidencias, alertas
+    ├── surface.py readiness.py               comprobaciones, preparación
+    ├── settings_api.py outputs.py            ajustes, métricas
+    ├── signstate.py sigverify.py             firma: estado y control
+    ├── read_report.py                        el parte en terminal
+    ├── gha_dispatch_all.py                   compilaciones por lotes
+    ├── events.py report_history.py           eventos e historial
+    ├── ci_red.py export_status.py            ficheros para otros
+    ├── etagcache.py resilience.py            lecturas condicionales, conexión
+    ├── analytics.py lint_workflows.py        duraciones, flaky, linter
+    ├── notifiers.py ai_actions.py            notificaciones, lista cerrada IA
+    ├── tui.py migrate_state.py               vista de consola, migración
+    ├── about.py  helpdocs.py                 paneles Acerca de y Ayuda
+    ├── quota.py  quotas.json                 plan, minutos y cuotas
+    ├── modes.py  updatecheck.py              modos de trabajo, aviso de versión
+    ├── doctor.py  demo_mode.py               --doctor y --demo
+    ├── discovery.py  banner.py               descubrimiento, banner de edición
+    ├── tui_textual.py                        terminal interactivo
+    ├── i18n.py locales/                      ocho idiomas
+    ├── toolconfig.py workspace.py            ajustes y clones
+    ├── tests/                                tests sin red
+    └── docs/                                 guías, esquemas, Grafana
 ```
 
 ## Documentación
@@ -243,6 +246,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/QUICKSTART_es.txt`](monitor/QUICKSTART_es.txt): primeros pasos, en ocho idiomas
 - [`monitor/docs/FIRST_STEPS_spa.md`](monitor/docs/FIRST_STEPS_spa.md): tus primeros cinco minutos
 - [`monitor/docs/SENTINEL_spa.md`](monitor/docs/SENTINEL_spa.md): el centinela y sus comprobaciones A1-A13
+- [`monitor/docs/COLLAB_spa.md`](monitor/docs/COLLAB_spa.md): el centinela Collab, la pestaña Alertas y los silencios
+- [`monitor/docs/ACCOUNTS_spa.md`](monitor/docs/ACCOUNTS_spa.md): varias cuentas, un proceso para cada una
 - [`monitor/docs/QUOTAS_spa.md`](monitor/docs/QUOTAS_spa.md): cuotas y planes de GitHub
 - [`monitor/docs/MODES_spa.md`](monitor/docs/MODES_spa.md): modos de trabajo: normal, rápido y turbo
 

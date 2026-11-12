@@ -23,7 +23,9 @@
         "offline",
         "online",
         "alerts_up",
-        "workflow_failed"
+        "workflow_failed",
+        "collab_new",
+        "collab_fixed"
       ]
     },
     "repo": {

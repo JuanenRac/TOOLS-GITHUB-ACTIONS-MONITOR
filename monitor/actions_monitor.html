@@ -56,7 +56,7 @@ background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 
 .tile.skel b{color:transparent;border-radius:5px;background:linear-gradient(100deg,var(--line) 30%,var(--line2) 50%,var(--line) 70%);background-size:200% 100%}
 .tile.skel small{opacity:.6}.tile.stale b{opacity:.55}
 .tile[hidden]{display:none}
-.lite #n-sent,.lite #t-sent,.lite #kp-sign,.lite #k-ready,.lite #k-budget,.lite #kt-etag{display:none!important}
+.lite #n-sent,.lite #t-sent,.lite #n-al,.lite #t-al,.lite #kp-sign,.lite #k-ready,.lite #k-budget,.lite #kt-etag{display:none!important}
 /* the complete edition with several accounts: the switcher of the top bar, the page "all accounts" and the views of a screen of its own (?view=&chrome=0) */
 #accbar{display:none;flex-direction:column;align-items:stretch;gap:6px;padding:8px;border:1px solid var(--line);border-radius:var(--radius);background:var(--side-active);color:var(--side-text)}
 .acc #accbar{display:flex}#accbar label{display:flex;flex-direction:column;align-items:stretch;gap:4px;font-weight:600;color:var(--side-hi)}#accbar select{width:100%}
@@ -72,7 +72,7 @@ background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 
 .livelist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}.livelist li{display:flex;gap:10px;align-items:baseline;border:1px solid var(--line);border-radius:8px;padding:5px 10px;background:var(--panel)}
 .livelist time{color:var(--mut);font-size:12px;min-width:74px}.livelist .repo{font-weight:600}
 .livebar{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;margin:0 0 8px}.livebox{border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--panel);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.livebox.ok{border-color:var(--ok)}.livebox.warn{border-color:var(--warn)}.livebox.off{border-color:var(--line2);color:var(--mut)}.livebox b{font-weight:700}
+#live-check{flex-direction:column;align-items:flex-start;margin:0 0 8px}#live-check ol{margin:4px 0 0;padding-left:20px}#live-check li{margin:2px 0}.livebox.ok{border-color:var(--ok)}.livebox.warn{border-color:var(--warn)}.livebox.off{border-color:var(--line2);color:var(--mut)}.livebox b{font-weight:700}
 /* chrome=0: a screen of its own for a wall or a second monitor: no header, no tabs, no filters; the figures stay */
 .kiosk .sidebar,.kiosk .tools,.kiosk .filters,.kiosk footer{display:none!important}.kiosk .hcorner{position:static}
 .kiosk header{padding:6px 14px}.kiosk main{padding-top:8px}
@@ -118,6 +118,9 @@ svg{display:block;max-width:none}svg text{fill:var(--mut);font-size:12px}
 #t-charts .wide{grid-column:1/-1}
 #t-hist,#t-repos{grid-template-rows:minmax(0,1fr)}
 /* Sentinel */
+#t-al{grid-template-columns:minmax(0,1fr);overflow:auto}#al-filters{align-items:center;gap:10px;margin:0 0 10px}#al-chips button{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:999px;padding:3px 12px;margin:0 4px 0 0;cursor:pointer}#al-chips button[aria-pressed=true]{background:var(--acc);color:var(--on-acc,#fff);border-color:var(--acc)}
+.alrow{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:6px 10px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line)}.alrow.muted{opacity:.6}.alrow .tt{min-width:0;overflow-wrap:anywhere}.alrow .acts{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}.alrow .acts button{font-size:12px;padding:2px 8px}.origin{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:1px 8px;border-radius:6px;border:1px solid var(--line)}.origin.ci{border-color:var(--acc);color:var(--acc)}.origin.collab{border-color:var(--ok);color:var(--ok)}
+@media (max-width:700px){.alrow{grid-template-columns:auto minmax(0,1fr)}.alrow .acts{grid-column:1/-1;justify-content:flex-start}}
 #t-sent{grid-template-columns:minmax(0,1fr) minmax(0,2.1fr);gap:12px}
 #t-sent .lcol{display:flex;flex-direction:column;gap:12px;min-height:0;min-width:0}
 #t-sent .lcol section:first-child{flex:1.3 1 0}#t-sent .lcol section:last-child{flex:1 1 0}
@@ -337,7 +340,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="i-chev" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol><symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol><symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c1 3 4 4.5 4 8.5a4 4 0 0 1-8 0c0-1.4.6-2.4 1.4-3.2C9.9 9.2 11 7 12 3z"/><path d="M12 21a3 3 0 0 0 3-3c0-1.5-1.5-2-3-4-1.5 2-3 2.5-3 4a3 3 0 0 0 3 3z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 13.5A8.5 8.5 0 1 1 10.5 3a7 7 0 0 0 10.5 10.5z"/></symbol><symbol id="i-auto" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></symbol><symbol id="i-rows" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></symbol><symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/></symbol><symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol><symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol><symbol id="i-text" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></symbol><symbol id="i-md" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15V9l2.5 3L12 9v6M16 9v6m-2-2 2 2 2-2"/></symbol><symbol id="i-now" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><path d="M8 16v-5M12 16V8M16 16v-8"/></symbol><symbol id="i-repos" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></symbol><symbol id="i-run" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol><symbol id="i-queue" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol><symbol id="i-fail" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></symbol><symbol id="i-okc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></symbol><symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 3h6"/></symbol><symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol><symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></symbol><symbol id="i-repo" viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/></symbol><symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol><symbol id="i-save2" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></symbol><symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-6"/></symbol><symbol id="i-wifi" viewBox="0 0 24 24"><path d="M3 9a14 14 0 0 1 18 0M6 12.5a9 9 0 0 1 12 0M9 16a4.5 4.5 0 0 1 6 0"/><circle cx="12" cy="19" r="1"/></symbol><symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2 6"/><path d="M20 4v7h-7"/></symbol><symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="7.6" r=".8"/></symbol><symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.6 2.6 0 1 1 3.9 2.2c-.9.5-1.4 1-1.4 2"/><circle cx="12" cy="16.8" r=".8"/></symbol><symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol><symbol id="i-spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 9 9"/></symbol></defs></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="i-full" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol><symbol id="i-fullx" viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></symbol><symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol><symbol id="i-chev" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol><symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol><symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c1 3 4 4.5 4 8.5a4 4 0 0 1-8 0c0-1.4.6-2.4 1.4-3.2C9.9 9.2 11 7 12 3z"/><path d="M12 21a3 3 0 0 0 3-3c0-1.5-1.5-2-3-4-1.5 2-3 2.5-3 4a3 3 0 0 0 3 3z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 13.5A8.5 8.5 0 1 1 10.5 3a7 7 0 0 0 10.5 10.5z"/></symbol><symbol id="i-auto" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></symbol><symbol id="i-rows" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></symbol><symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/></symbol><symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol><symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol><symbol id="i-text" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></symbol><symbol id="i-md" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15V9l2.5 3L12 9v6M16 9v6m-2-2 2 2 2-2"/></symbol><symbol id="i-now" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><path d="M8 16v-5M12 16V8M16 16v-8"/></symbol><symbol id="i-repos" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></symbol><symbol id="i-run" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol><symbol id="i-queue" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol><symbol id="i-fail" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></symbol><symbol id="i-okc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></symbol><symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 3h6"/></symbol><symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol><symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></symbol><symbol id="i-repo" viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/></symbol><symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol><symbol id="i-save2" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></symbol><symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-6"/></symbol><symbol id="i-wifi" viewBox="0 0 24 24"><path d="M3 9a14 14 0 0 1 18 0M6 12.5a9 9 0 0 1 12 0M9 16a4.5 4.5 0 0 1 6 0"/><circle cx="12" cy="19" r="1"/></symbol><symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2 6"/><path d="M20 4v7h-7"/></symbol><symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="7.6" r=".8"/></symbol><symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.6 2.6 0 1 1 3.9 2.2c-.9.5-1.4 1-1.4 2"/><circle cx="12" cy="16.8" r=".8"/></symbol><symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol><symbol id="i-spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 9 9"/></symbol></defs></svg>
 <div id="err" role="alert"></div>
 <div id="reduced" role="status"></div>
 <div id="offline" role="status"></div>
@@ -351,6 +354,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <nav role="tablist" aria-orientation="vertical" data-i18n-aria="ui.nav_label">
 <div class="nav-group" data-group="watch"><button type="button" class="nav-group-title" aria-expanded="true"><i aria-hidden="true">&#9662;</i><strong data-i18n="ui.nav_g_watch"></strong></button><div class="nav-items">
 <button role="tab" id="n-now" data-tab="now" aria-selected="true"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-now"/></svg><span class="nl" data-i18n="ui.tab_now"></span> <span class="dot" id="d-now" hidden></span></button>
+<button role="tab" id="n-al" data-tab="al" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-alert"/></svg><span class="nl" data-i18n="ui.tab_al"></span> <span class="dot" id="d-al" hidden></span></button>
 <button role="tab" id="n-sent" data-tab="sent" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-shield"/></svg><span class="nl" data-i18n="ui.tab_sent"></span> <span class="dot" id="d-sent" hidden></span></button>
 <button role="tab" id="n-charts" data-tab="charts" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-chart"/></svg><span class="nl" data-i18n="ui.tab_charts"></span></button>
 </div></div>
@@ -385,11 +389,17 @@ header .tile.wide{min-width:0;grid-column:span 2}
 </div>
 <main>
 <div class="tab" id="t-all" role="region" data-i18n-aria="ui.acc_all"><div class="accgrid" id="acc-grid"><span class="mut" data-i18n="ui.acc_none"></span></div></div>
-<div class="tab" id="t-live" role="region" data-i18n-aria="ui.live_title"><section><h2 data-i18n="ui.live_title"></h2><div class="body"><div class="livebar"><div class="livebox" id="live-wh" role="status"></div><label class="livebox"><span data-i18n="ui.live_mode"></span> <select id="live-mode"><option value="normal"></option><option value="fast"></option><option value="turbo"></option></select></label></div><p class="mut" data-i18n="ui.live_hint"></p><ul class="livelist" id="live-list"><li class="mut" data-i18n="ui.live_empty"></li></ul></div></section></div>
+<div class="tab" id="t-live" role="region" data-i18n-aria="ui.live_title"><section><h2 data-i18n="ui.live_title"></h2><div class="body"><div class="livebar"><div class="livebox" id="live-wh" role="status"></div><label class="livebox"><span data-i18n="ui.live_mode"></span> <select id="live-mode"><option value="normal"></option><option value="fast"></option><option value="turbo"></option></select></label></div><p class="mut" data-i18n="ui.live_hint"></p><div class="livebox" id="live-check" role="note"><b data-i18n="ui.live_ck_title"></b><ol><li data-i18n="ui.live_ck_1"></li><li data-i18n="ui.live_ck_2"></li><li data-i18n="ui.live_ck_3"></li><li data-i18n="ui.live_ck_4"></li></ol></div><ul class="livelist" id="live-list"><li class="mut" data-i18n="ui.live_empty"></li></ul></div></section></div>
 <div class="tab on" id="t-now" role="tabpanel" aria-labelledby="n-now">
 <section><h2 data-i18n="ui.alerts"></h2><div class="body" id="alerts"><span class="mut">–</span></div></section>
 <section><h2 data-i18n="ui.happening"></h2><div class="body" id="now"><span class="mut">–</span></div></section>
 </div>
+<div class="tab" id="t-al" role="tabpanel" aria-labelledby="n-al">
+<section><h2><span data-i18n="ui.al_title"></span> <span class="mut" id="al-count" style="font-weight:400"></span></h2><div class="body">
+<div class="row" id="al-filters" role="group" data-i18n-aria="ui.al_filters"><span id="al-chips"></span><label><span data-i18n="ui.al_level"></span> <select id="al-level"><option value="" data-i18n="ui.f_all"></option><option value="error" data-i18n="ui.lv_bad"></option><option value="warning" data-i18n="ui.lv_warn"></option><option value="info" data-i18n="ui.lv_info"></option></select></label><label class="inl"><input type="checkbox" id="al-muted"> <span data-i18n="ui.al_show_muted"></span></label></div>
+<div id="al-list"><span class="mut">–</span></div>
+<h3 style="font-size:13px;margin:14px 0 4px" data-i18n="ui.al_hist_title"></h3><div id="al-hist" class="mut">–</div>
+</div></section></div>
 <div class="tab" id="t-sent" role="tabpanel" aria-labelledby="n-sent">
 <div class="lcol">
 <section><h2><span data-i18n="ui.s_report"></span> <span class="mut" id="s-stamp" style="font-weight:400"></span> <a id="lnk-txt" href="/api/sentinel/parte.txt" target="_blank" rel="noopener" class="ia" data-i18n-title="ui.ic_text" data-i18n-aria="ui.ic_text"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-text"/></svg></a></h2><div class="body"><div id="s-err" role="alert"></div><div class="sems" id="s-sems"></div><div id="s-parte"><span class="mut" data-i18n="ui.loading"></span></div></div></section>
@@ -437,7 +447,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <aside id="rp" role="complementary" data-i18n-aria="ui.rp_aria" hidden></aside>
 <script>
 "use strict";
-(function(){const raw=window.fetch.bind(window),need=/^\/api\/(settings|ai\/actions\/confirm|ai\/actions\/unlock|ai\/test|notify\/test|discovery\/group|mode|gh-action\/confirm|act\/confirm|act\/stop|github-token)/;
+(function(){const raw=window.fetch.bind(window),need=/^\/api\/(alerts\/(mute|unmute)|settings|ai\/actions\/confirm|ai\/actions\/unlock|ai\/test|notify\/test|discovery\/group|mode|gh-action\/confirm|act\/confirm|act\/stop|github-token)/;
   window.fetch=async function(u,o){if(o&&o.method==="POST"&&need.test(String(u))){try{const m=/[?&]account=([A-Za-z0-9_-]+)/.exec(String(u));const r=await raw("/api/session-token"+(m?"?account="+m[1]:""),{cache:"no-store"}),j=await r.json();if(j.token)o=Object.assign({},o,{headers:Object.assign({},o.headers,{"X-Monitor-Token":j.token})})}catch(e){}}return raw(u,o)}})();
 const I18N=/*I18N_DATA*/null||{default:"en",langs:["en"],names:{en:"English"},html:{en:"en"},locale:{en:"en-GB"},catalogues:{en:{}},ecosystems:{},owner:"",version:""};
 /* several accounts (complete edition only): the supervisor embeds the list; one account or the lite edition leaves it null and nothing below changes */
@@ -480,6 +490,7 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;"
 const fmt=s=>{s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60,u=[T("ui.u_h"),T("ui.u_min"),T("ui.u_s")];return h?`${h} ${u[0]} ${m} ${u[1]}`:m?`${m} ${u[1]} ${x} ${u[2]}`:`${x} ${u[2]}`};
 const hora=t=>t?new Date(t).toLocaleString(LOC(),{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"";
 const clock=(t,o)=>new Date(t).toLocaleTimeString(LOC(),o);
+const dtime=t=>new Date(t).toLocaleString(LOC(),{dateStyle:"short",timeStyle:"short"});
 const ago=t=>t?fmt((Date.now()-new Date(t).getTime())/1000):"";
 const COLORS={success:"var(--ok)",failure:"var(--bad)",timed_out:"var(--bad)",startup_failure:"var(--bad)",cancelled:"var(--grey)",skipped:"var(--grey)"};
 const BAD=["failure","timed_out","startup_failure"];
@@ -530,7 +541,7 @@ function refreshLanguage(){
 }
 
 /* tabs */
-const TABS=LITE?["now","charts","repos","hist","cfg"]:["now","sent","charts","repos","hist","cfg"];
+const TABS=LITE?["now","charts","repos","hist","cfg"]:["now","al","sent","charts","repos","hist","cfg"];
 function showTab(t){if(!TABS.includes(t))t="now";TABS.forEach(x=>{$("t-"+x).classList.toggle("on",x===t);$("n-"+x).setAttribute("aria-selected",x===t)});store.set("am-tab",t);CURTAB=t;applyGroups();setViewTitle();if(DATA&&t==="charts")setTimeout(()=>render(DATA),30);try{if(location.hash!=="#"+t)window.history.replaceState(null,"","#"+t)}catch(e){}}
 document.querySelector("nav").addEventListener("click",e=>{const b=e.target.closest("button[data-tab]");if(b)showTab(b.dataset.tab)});
 document.querySelector("nav").addEventListener("keydown",e=>{if(!["ArrowRight","ArrowLeft","ArrowDown","ArrowUp"].includes(e.key))return;e.preventDefault();const i=TABS.findIndex(x=>$("n-"+x).getAttribute("aria-selected")==="true"),n=TABS[(i+(e.key==="ArrowRight"||e.key==="ArrowDown"?1:TABS.length-1))%TABS.length];showTab(n);$("n-"+n).focus()});
@@ -538,7 +549,7 @@ showTab(QS.get("tab")||location.hash.slice(1)||store.get("am-tab")||"now");
 /* ---------- shell of the complete edition: accounts, views and a screen of its own ---------- */
 /* ?view=now|alerts|charts|repos|settings|live  ?chrome=0 (a kiosk: no header buttons, tabs or filters)  ?account=<id>|all  (several accounts only; the lite edition ignores account=)
    Every window keeps its own view: the choice is read from the address, never from one global setting that another window would overwrite. */
-const VIEWS={now:"now",alerts:"sent",charts:"charts",repos:"repos",settings:"cfg",live:"live"};
+const VIEWS={now:"now",alerts:"al",charts:"charts",repos:"repos",settings:"cfg",live:"live"};
 const VIEW=QS.get("view")&&VIEWS[QS.get("view")]?QS.get("view"):"";
 if(QS.get("chrome")==="0")document.body.classList.add("kiosk");
 function accUrl(id){const u=new URL(location.href);if(id)u.searchParams.set("account",id);else u.searchParams.delete("account");return u.pathname+u.search}
@@ -751,7 +762,7 @@ async function tick(){
   catch(e){$("err").style.display="block";$("err").textContent=T("ui.err_monitor",{msg:e})}
 }
 /* ---------- Sentinel ---------- */
-var SENT=null,SENT_ERR=null,ANA=null;const AIRES={};
+var SENT=null,SENT_ERR=null,ANA=null,COLLAB=null;const AIRES={};
 const OPEN=new Set((QS.get("open")||store.get("am-s-open")||"a1,a2,a3").split(",").filter(Boolean));
 const LVN=l=>T("ui.lv_"+l)===("ui.lv_"+l)?l:T("ui.lv_"+l);
 const safeUrl=u=>typeof u==="string"&&u.startsWith("https://github.com/")?u:"#";
@@ -863,8 +874,15 @@ function renderSent0(){
    +section("a10",T("ui.a10_title"),a10o.level||"unknown",T("ui.sc_a10",{n:(a10o.sections||[]).filter(x=>x.count&&["bad","warn"].includes(x.level)).length,m:(a10o.sections||[]).length}),a10)
    +section("a11",T("ui.a11_title"),a11o.level||"unknown",T("ui.sc_a11",{n:a11o.ready||0,m:a11o.behind||0}),a11)
    +section("a12",T("ui.a12_title"),ANA&&ANA.enabled!==false&&(ANA.slower||[]).length?"warn":(ANA&&(ANA.duration||[]).length?"ok":"unknown"),T("ui.sc_a12",{n:(ANA&&ANA.duration||[]).length,m:(ANA&&ANA.flaky||[]).length}),analyticsBox())
-   +section("a13",T("ui.a13_title"),(s.lint&&s.lint.enabled)?(s.lint.summary.bad?"bad":(s.lint.summary.warn?"warn":"ok")):"unknown",s.lint&&s.lint.enabled?T("ui.sc_a13",{n:s.lint.summary.findings,m:s.lint.summary.repos}):"",lintBox(s));
+   +section("a13",T("ui.a13_title"),(s.lint&&s.lint.enabled)?(s.lint.summary.bad?"bad":(s.lint.summary.warn?"warn":"ok")):"unknown",s.lint&&s.lint.enabled?T("ui.sc_a13",{n:s.lint.summary.findings,m:s.lint.summary.repos}):"",lintBox(s))
+   +section("collab",T("ui.collab_title"),collabLevel(),COLLAB&&COLLAB.enabled!==false?T("ui.collab_count",{n:(COLLAB.alerts||[]).length,m:(COLLAB.status||{}).repos_checked||0}):"",collabBox());
 }
+function collabBox(){
+  const c=COLLAB;if(!c||c.enabled===false)return mut_(T("ui.collab_off"));
+  const rows=(c.alerts||[]).filter(a=>sVis(a.repo)),st=c.status||{};
+  const tbl=rows.length?`<table>${thk(["ui.th_repo","ui.th_alert","ui.th_age","ui.th_link"])}<tbody>${rows.map(a=>`<tr><td><b class="rl" data-repo-open="${esc(a.repo)}">${esc(a.repo)}</b></td><td class="wrap"><span class="chip ${a.level==="error"?"bad":a.level==="info"?"":"warn"}" title="${esc(a.code)}">collab</span> ${esc(a.title)}</td><td>${esc(ago(a.created_at))}</td><td>${link(a.details.url,"#"+a.details.number)}</td></tr>`).join("")}</tbody></table>`:ok_(T("ui.collab_none"));
+  return tbl+`<div class="mut" style="margin-top:8px">${esc(T("ui.collab_foot",{c:st.repos_checked||0,r:st.repos_in_scope||0,s:st.refresh_seconds||0}))}${(st.errors||[]).length?" · "+esc(st.errors.map(e=>e.section).slice(0,4).join(", ")):""}</div>`}
+function collabLevel(){const c=COLLAB;return !c||c.enabled===false?"unknown":(c.level||"unknown")}
 const fmtS=x=>x==null?"–":(x>=3600?(x/3600).toFixed(1)+" h":(x>=120?Math.round(x/60)+" min":Math.round(x)+" s"));
 function analyticsBox(){
   const A=ANA;if(!A||A.enabled===false)return mut_(T("ui.a12_off"));
@@ -903,11 +921,36 @@ $("t-sent").addEventListener("click",async e=>{
   catch(err){AIRES[key]={ok:false,error:T("ui.err_monitor",{msg:err})}}
   renderSent();
 });
-async function sentTick(){
+/* the Alerts tab: the alerts of every sentinel in one list, a filter by origin and level, and local silences with an end (the monitor never writes to GitHub) */
+var ALERTS=null;const ALF={s:QS.get("sentinel")||store.get("am-al-s")||"",l:"",m:store.get("am-al-m")==="1"};
+async function alertsTick(){if(LITE)return;try{const r=await fetch("/api/alerts",{cache:"no-store"});if(r.ok)ALERTS=await r.json()}catch(e){}try{renderAlerts()}catch(e){}}
+async function alertMute(scope,value,on){try{await fetch(on?"/api/alerts/mute":"/api/alerts/unmute",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({scope:scope,value:value})})}catch(e){}alertsTick()}
+function renderAlerts(){
+  const A=ALERTS,box=$("al-list");if(!A||!box)return;
+  const sm=A.summary||{by_sentinel:{},by_level:{}},names=A.sentinels||[];
+  $("al-chips").innerHTML=[["",T("ui.f_all"),sm.total||0],...names.map(n=>[n,T("ui.al_o_"+n)===("ui.al_o_"+n)?n:T("ui.al_o_"+n),(sm.by_sentinel||{})[n]||0])].map(c=>`<button type="button" data-s="${esc(c[0])}" aria-pressed="${ALF.s===c[0]}">${esc(c[1])} (${c[2]})</button>`).join("");
+  $("al-chips").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{ALF.s=b.dataset.s;store.set("am-al-s",ALF.s);renderAlerts()}));
+  $("al-level").value=ALF.l;$("al-muted").checked=ALF.m;
+  const rows=(A.alerts||[]).filter(a=>(!ALF.s||a.sentinel===ALF.s)&&(!ALF.l||a.level===ALF.l)&&(ALF.m||!a.muted_until)&&(!SENT||!a.repo||sVis(a.repo)));
+  const open=(A.alerts||[]).filter(a=>!a.muted_until).length;
+  $("al-count").textContent=T("ui.al_count",{n:open,m:sm.muted||0});
+  const dot=$("d-al");if(dot){const bad=(A.alerts||[]).filter(a=>!a.muted_until&&a.level==="error").length;dot.hidden=!bad;dot.textContent=bad}
+  const url=a=>safeUrl((a.details||{}).url);
+  box.innerHTML=rows.length?rows.map(a=>`<div class="alrow ${a.muted_until?"muted":""}"><span class="origin ${esc(a.sentinel)}">${esc(T("ui.al_o_"+a.sentinel)===("ui.al_o_"+a.sentinel)?a.sentinel:T("ui.al_o_"+a.sentinel))}</span><span class="chip ${a.level==="error"?"bad":a.level==="info"?"":"warn"}" title="${esc(a.code)}">${esc(LVN(a.level==="error"?"bad":a.level==="warning"?"warn":"info"))}</span><span class="tt"><b class="rl" data-repo-open="${esc(a.repo||"")}">${esc(a.repo||"")}</b> ${esc(a.title)} <span class="mut">${esc(a.created_at?ago(a.created_at):"")}</span>${url(a)!=="#"?` <a href="${esc(url(a))}" target="_blank" rel="noopener">${esc(T("ui.a_open"))}</a>`:""}${a.muted_until?` <span class="chip">${esc(T("ui.al_muted_until",{time:dtime(a.muted_until)}))}</span>`:""}</span><span class="acts">${a.muted_until?`<button type="button" data-un="alert" data-v="${esc(a.id)}">${esc(T("ui.al_unmute"))}</button>`:`<button type="button" data-m="alert" data-v="${esc(a.id)}" title="${esc(T("ui.al_mute_alert_t",{h:A.mute_hours}))}">${esc(T("ui.al_mute_alert",{h:A.mute_hours}))}</button><button type="button" data-m="code" data-v="${esc(a.code)}" title="${esc(T("ui.al_mute_code_t",{h:A.mute_hours}))}">${esc(T("ui.al_mute_code"))}</button><button type="button" data-m="sentinel" data-v="${esc(a.sentinel)}" title="${esc(T("ui.al_mute_sent_t",{h:A.mute_hours}))}">${esc(T("ui.al_mute_sent"))}</button>`}</span></div>`).join(""):`<span style="color:var(--ok)">${esc(T("ui.al_none"))}</span>`;
+  box.querySelectorAll("button[data-m]").forEach(b=>b.addEventListener("click",()=>alertMute(b.dataset.m,b.dataset.v,true)));
+  box.querySelectorAll("button[data-un]").forEach(b=>b.addEventListener("click",()=>alertMute(b.dataset.un,b.dataset.v,false)));
+  const act=(A.mutes||[]),hist=(A.history||[]);
+  $("al-hist").innerHTML=hist.length?`<table><thead><tr><th>${esc(T("ui.al_h_what"))}</th><th>${esc(T("ui.al_h_scope"))}</th><th>${esc(T("ui.al_h_from"))}</th><th>${esc(T("ui.al_h_until"))}</th><th></th></tr></thead><tbody>${hist.map(h=>{const live=act.some(m=>m.scope===h.scope&&m.value===h.value&&m.until===h.until);return `<tr><td class="wrap">${esc(h.value)}</td><td>${esc(T("ui.al_s_"+h.scope))}</td><td>${esc(dtime(h.from))}</td><td>${esc(h.ended?T("ui.al_ended",{time:dtime(h.ended)}):dtime(h.until))}</td><td>${live?`<button type="button" data-un="${esc(h.scope)}" data-v="${esc(h.value)}">${esc(T("ui.al_unmute"))}</button>`:""}</td></tr>`}).join("")}</tbody></table>`:esc(T("ui.al_hist_none"));
+  $("al-hist").querySelectorAll("button[data-un]").forEach(b=>b.addEventListener("click",()=>alertMute(b.dataset.un,b.dataset.v,false)));
+}
+$("al-level").addEventListener("change",()=>{ALF.l=$("al-level").value;renderAlerts()});
+$("al-muted").addEventListener("change",()=>{ALF.m=$("al-muted").checked;store.set("am-al-m",ALF.m?"1":"0");renderAlerts()});
+async function sentTick(){alertsTick();
   if(LITE)return;
   try{const r=await fetch("/api/analytics",{cache:"no-store"});if(r.ok)ANA=await r.json()}catch(e){}
   try{const r=await fetch("/api/sentinel?"+qlang(),{cache:"no-store"});const j=await r.json();SENT_ERR=j.error||null;if(j.data)SENT=j.data}
   catch(e){SENT_ERR=T("ui.err_sentinel_down",{msg:e})}
+  try{const r=await fetch("/api/sentinel/collab?"+qlang(),{cache:"no-store"});if(r.ok){const j=await r.json();COLLAB=j.data||null}}catch(e){COLLAB=null}
   try{renderSent()}catch(e){SENT_ERR=T("ui.err_sentinel_draw",{msg:e.message});const b=$("s-err");b.style.display="block";b.textContent=T("ui.s_warn")+SENT_ERR}
 }
 /* side panel of a repo: only data the page already has (monitor and Sentinel snapshots), no new GitHub calls */

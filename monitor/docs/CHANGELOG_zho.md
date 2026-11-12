@@ -7,6 +7,27 @@
 
 工具本身(监视器 + 哨兵 + 批处理工具)的版本,采用自己的语义化版本号。源文件是英文的 CHANGELOG.md,本文件包含相同的版本和章节。
 
+## [1.7.3]
+
+第二个哨兵，用于 Issue 和拉取请求；一个汇总所有哨兵警报的标签页；以及会自行结束的静音。Collab 只读取，这里没有任何内容会向 GitHub 写入。
+
+### 新增
+
+- **Collab 哨兵**（`sentinel_collab.py`，仅完整版，默认关闭）：按自己的周期（`sentinels.collab.refresh_seconds`）查看你仓库中未关闭的 Issue 和拉取请求，绝不影响 CI 哨兵。六条带稳定代码的规则：`collab.issue.stale`、`collab.issue.critical`、`collab.issue.external`、`collab.pr.review_pending`、`collab.pr.draft_old` 和 `collab.pr.conflict`。它使用条件请求读取（没有变化的仓库不消耗配额），每轮最多 `max_repos_per_tick` 个仓库，配额低于 `min_rate_remaining` 时暂停，状态保存在 `collab_state.json`（位于各账户的文件夹内），只通知变化。机器人不计入。其*Issue 与拉取请求*层位于哨兵标签页，由 `GET /api/sentinel/collab` 提供。
+- **两个新事件**，`collab_new` 和 `collab_fixed`，用于事件流和所有通知渠道（已列入渠道的事件列表和事件模式）。
+- **“警报”标签页**（完整版）：一个列表汇总所有哨兵的警报，每条标明来源（CI 或 Collab）和级别，可按来源和级别筛选，带 GitHub 链接，并在标签上用红点提示未处理的错误。`?view=alerts&sentinel=collab` 会直接打开已筛选的视图。
+- **会结束的静音**（`alert_center.py`）：在“警报”标签页中，可将某个警报、某条规则（其代码）或整个哨兵静音 `alerts.mute_hours` 小时（默认 24，范围 1 到 720）。静音会自行到期，可立即恢复，简短的历史记录显示静音了什么、从何时到何时。这只是监视器的备注，按账户保存在 `alert_mutes.json`，GitHub 上不会有任何变化。
+- Collab 规则中的 **`ignore_labels`**（默认 `monitor:ignore`）：由人在 GitHub 上打了该标签的 Issue 或拉取请求不会产生警报。监视器从不写标签。
+- **`GET /api/alerts`**（`?sentinel=`、`?level=`、`?muted=show|hide|only`）和 **`GET /api/events`**（`?sentinel=`、`?since=`），均为只读且按账户区分；`POST /api/alerts/mute` 与 `/api/alerts/unmute` 仅限本机，需要一次性令牌，与其他所有变更相同。
+- **实时视图中的检查清单**（至少 32 个字符的密钥、转发或隧道到 `/api/webhook`、GitHub 的测试事件、留意配额），Webhook 指南中也有同样的步骤。
+- **八种语言的 Collab 哨兵指南**（`COLLAB.md`），可通过帮助找到。
+- 每项改动都有测试：规则及其稳定代码、开销（条件读取、每轮上限、暂停）、只读、静音（范围、结束、上下限、历史、损坏的文件）、忽略标签、各端点、精简版没有这些功能、各账户和演示的状态文件，以及八种语言的文本。
+
+### 变更
+
+- 设置页在哨兵标签页的一个区块中有十二项 Collab 设置，旁边是 `alerts.mute_hours`。
+- 文件 `alert_mutes.json`、`collab_state.json`、`ai_alerts_state.json` 和 `ALERTS_BRIEF.md` 从不提交，也从不随软件包发布。
+
 ## [1.7.2]
 
 按顺序阅读且适应窗口的标题栏、固定在右上角的快捷控制、侧边栏中的“关于”，以及取消新版本通知。测试不再在代码旁留下文件，而正是这一点曾把个人的设置换成了中性模板。

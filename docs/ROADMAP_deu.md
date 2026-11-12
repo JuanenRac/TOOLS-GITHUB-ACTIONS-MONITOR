@@ -2,6 +2,10 @@
 
 Ideen, die nicht in die aktuelle Version passten, ohne versprochene Reihenfolge. Es sind Richtungen, keine Zusagen; ein Issue oder ein Pull Request ist der beste Weg, eine voranzubringen.
 
+## Erledigt in 1.7.3
+
+Ein zweiter Wächter für Issues und Pull Requests (Collab, standardmäßig aus, nur lesend, mit eigener Uhr), ein Reiter Alarme mit den Alarmen aller Wächter und Filter nach Herkunft und Stufe, lokale Stummschaltungen, die von selbst enden (ein Alarm, eine Regel oder ein Wächter; `alerts.mute_hours`), das Label, das ein Element ignorieren lässt, `GET /api/alerts` und `GET /api/events`, eine Checkliste für die Live-Ansicht, eine Anleitung zum Collab-Wächter in acht Sprachen und neu gezeichnete Bilder.
+
 ## Erledigt in 1.7.2
 
 Die Kopfzeile mit ihren Zahlen in einer lesbaren Reihenfolge und in einem Raster, das der Breite folgt; die Schnellsteuerung (nur heiße, Geschwindigkeit, Gesundheit der Ökosysteme) fest oben rechts; Einstellungen, Hilfe und Info nur in der Seitenleiste; der Hinweis auf eine neue Version nicht mehr in der Kopfzeile; und die Tests, die keine Dateien mehr neben dem Code hinterlassen.

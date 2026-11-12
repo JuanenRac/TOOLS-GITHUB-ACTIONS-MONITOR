@@ -33,6 +33,8 @@ def redirect(account_id, base=None):
         sys.modules.setdefault(module.__name__, module)
     folder = accounts.account_dir(account_id, base)
     import sentinel_local            # the sentinel is part of the complete edition: its files are per account too
+    import sentinel_collab           # and so are the files of the second one
+    import alert_center              # and the silences of the alerts
     for module, attribute, relative in accounts.STATE_FILES:
         loaded = sys.modules.get(module)
         if loaded is not None and hasattr(loaded, attribute):

@@ -31,7 +31,7 @@
 
 | | |
 |---|---|
-| **Version** | **1.7.2** · [alle Releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **1.7.3** · [alle Releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Voraussetzung** | Python 3.11+ und die GitHub-CLI (`gh auth login`); sonst nichts (die Konsolenansicht nutzt das optionale Paket `rich`) |
 | **Öffnet** | eine Seite nur auf `127.0.0.1`, in acht Sprachen |
 | **Schreibt auf GitHub** | nie von selbst: nur Stapelbefehle, die du mit ausdrücklichem `--go` startest |
@@ -42,6 +42,7 @@
 ### Die Seite
 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="Jetzt" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_alerts_light.png"><img src="docs/screenshots/web_alerts_dark.png" alt="Alarme: alle Wächter in einer Liste, mit lokalen Stummschaltungen" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_light.png"><img src="docs/screenshots/web_sentinel_dark.png" alt="Wächter" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_queue_light.png"><img src="docs/screenshots/web_sentinel_queue_dark.png" alt="Signatur-Warteschlange (Dringendstes zuerst)" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_analytics_light.png"><img src="docs/screenshots/web_sentinel_analytics_dark.png" alt="A12 · Analytik: Dauer, Wartezeit, Schritte und instabile Workflows" width="92%"></picture></p>
@@ -106,6 +107,7 @@ Jedes Bild folgt dem hellen oder dunklen Design Ihrer GitHub-Seite.
 
 - **Rot oder nicht, nach einer einzigen Regel**: der letzte beendete Lauf jedes Workflows auf dem Standard-Branch. Abgebrochene und übersprungene Läufe verdecken nie einen früheren Fehler.
 - **Wächter**: Sicherheitswarnungen, Repository-Hygiene, alte Pull Requests, veröffentlichungsbereite Versionen, noch nicht signierte Builds und ein Bericht in einfacher Sprache.
+- **Collab-Wächter und eine Alarmliste**: offene Issues und Pull Requests, die einen Menschen brauchen (vergessen, kritisch, wartende Reviews, alte Entwürfe, Konflikte), nur lesend und mit eigener Uhr, dazu ein Reiter Alarme mit allen Wächtern in einer Liste, Filter nach Herkunft und lokale Stummschaltungen, die von selbst enden.
 - **Einstellungsseite**: Pfade, Intervalle, Kontingente und Schalter im Browser ändern; nur eine feste Liste geprüfter Schlüssel, mit Sicherung vor jedem Speichern.
 - **Diagramme und Verlauf**: Rechenminuten, Fehler und Erfolge mit animierten Balken und Tagesverlauf (berücksichtigt reduzierte Bewegung).
 - **Acht Sprachen** (en, es, de, fr, it, ja, zh, pt) mit Englisch als Basis; Wechsel in den Einstellungen.
@@ -189,42 +191,43 @@ python -m unittest discover -s monitor/tests
 
 ```
 TOOLS-GITHUB-ACTIONS-MONITOR/
-├── monitor/                             das Programm
-├── docs/                                Architektur, Bilder, Fahrplan
-├── tools/                               Bilder, Anleitungen, Demo
-├── deploy/                              Container-Beispiel
-├── images/                              Banner und Bilder
-├── .github/                             CI und Formulare
-├── CHANGELOG.md                         Änderungen je Version
-├── LICENSE NOTICE AUTHORS               Lizenzen und Urheber
-├── CONTRIBUTING.md SECURITY.md          mithelfen, melden
-├── SUPPORT.md CODE_OF_CONDUCT.md        Support und Verhalten
+├── monitor/                                  das Programm
+├── docs/                                     Architektur, Bilder, Fahrplan
+├── tools/                                    Bilder, Anleitungen, Demo
+├── deploy/                                   Container-Beispiel
+├── images/                                   Banner und Bilder
+├── .github/                                  CI und Formulare
+├── CHANGELOG.md                              Änderungen je Version
+├── LICENSE NOTICE AUTHORS                    Lizenzen und Urheber
+├── CONTRIBUTING.md SECURITY.md               mithelfen, melden
+├── SUPPORT.md CODE_OF_CONDUCT.md             Support und Verhalten
 └── monitor/
-    ├── actions_monitor.py               lokaler Server
-    ├── actions_monitor.html             die Webseite
-    ├── MONITOR_LITE_GITHUB_ACTIONS.*    die Lite-Ausgabe
-    ├── sentinel_local.py                Warnungen, Bericht
-    ├── surface.py readiness.py          Prüfungen, Bereitschaft
-    ├── settings_api.py outputs.py       Einstellungen, Metriken
-    ├── signstate.py sigverify.py        Signatur: Stand, Prüfung
-    ├── read_report.py                   Bericht im Terminal
-    ├── gha_dispatch_all.py              Build-Stapel
-    ├── events.py report_history.py      Ereignisse, Verlauf
-    ├── ci_red.py export_status.py       Dateien für andere
-    ├── etagcache.py resilience.py       bedingte Lesungen, Verbindung
-    ├── analytics.py lint_workflows.py   Dauer, flaky, Workflow-Linter
-    ├── notifiers.py ai_actions.py       Benachrichtigungen, KI-Liste
-    ├── tui.py migrate_state.py          Konsolenansicht, Migration
-    ├── about.py  helpdocs.py            Über- und Hilfe-Panels
-    ├── quota.py  quotas.json            Tarif, Minuten, Kontingente
-    ├── modes.py  updatecheck.py         Arbeitsmodi, Versionshinweis
-    ├── doctor.py  demo_mode.py          --doctor und --demo
-    ├── discovery.py  banner.py          Erkennung, Ausgaben-Banner
-    ├── tui_textual.py                   interaktives Terminal
-    ├── i18n.py locales/                 acht Sprachen
-    ├── toolconfig.py workspace.py       Einstellungen, Klone
-    ├── tests/                           Offline-Tests
-    └── docs/                            Anleitungen, Schemas
+    ├── actions_monitor.py                    lokaler Server
+    ├── actions_monitor.html                  die Webseite
+    ├── MONITOR_LITE_GITHUB_ACTIONS.*         die Lite-Ausgabe
+    ├── sentinel_local.py                     Warnungen, Bericht
+    ├── sentinel_collab.py  alert_center.py   Issue-Wächter, Alarme
+    ├── surface.py readiness.py               Prüfungen, Bereitschaft
+    ├── settings_api.py outputs.py            Einstellungen, Metriken
+    ├── signstate.py sigverify.py             Signatur: Stand, Prüfung
+    ├── read_report.py                        Bericht im Terminal
+    ├── gha_dispatch_all.py                   Build-Stapel
+    ├── events.py report_history.py           Ereignisse, Verlauf
+    ├── ci_red.py export_status.py            Dateien für andere
+    ├── etagcache.py resilience.py            bedingte Lesungen, Verbindung
+    ├── analytics.py lint_workflows.py        Dauer, flaky, Workflow-Linter
+    ├── notifiers.py ai_actions.py            Benachrichtigungen, KI-Liste
+    ├── tui.py migrate_state.py               Konsolenansicht, Migration
+    ├── about.py  helpdocs.py                 Über- und Hilfe-Panels
+    ├── quota.py  quotas.json                 Tarif, Minuten, Kontingente
+    ├── modes.py  updatecheck.py              Arbeitsmodi, Versionshinweis
+    ├── doctor.py  demo_mode.py               --doctor und --demo
+    ├── discovery.py  banner.py               Erkennung, Ausgaben-Banner
+    ├── tui_textual.py                        interaktives Terminal
+    ├── i18n.py locales/                      acht Sprachen
+    ├── toolconfig.py workspace.py            Einstellungen, Klone
+    ├── tests/                                Offline-Tests
+    └── docs/                                 Anleitungen, Schemas
 ```
 
 ## Dokumentation
@@ -243,6 +246,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/QUICKSTART_de.txt`](monitor/QUICKSTART_de.txt): erste Schritte, in acht Sprachen
 - [`monitor/docs/FIRST_STEPS_deu.md`](monitor/docs/FIRST_STEPS_deu.md): Ihre ersten fünf Minuten
 - [`monitor/docs/SENTINEL_deu.md`](monitor/docs/SENTINEL_deu.md): der Wächter und seine Prüfungen A1-A13
+- [`monitor/docs/COLLAB_deu.md`](monitor/docs/COLLAB_deu.md): der Collab-Wächter, der Reiter Alarme und die Stummschaltungen
+- [`monitor/docs/ACCOUNTS_deu.md`](monitor/docs/ACCOUNTS_deu.md): mehrere Konten, je ein Prozess
 - [`monitor/docs/QUOTAS_deu.md`](monitor/docs/QUOTAS_deu.md): Kontingente und Tarife von GitHub
 - [`monitor/docs/MODES_deu.md`](monitor/docs/MODES_deu.md): Arbeitsmodi: normal, schnell und Turbo
 

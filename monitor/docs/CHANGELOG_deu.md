@@ -7,6 +7,27 @@
 
 Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem Semver. Die Quelle ist das englische CHANGELOG.md; diese Datei enthält dieselben Versionen und Abschnitte.
 
+## [1.7.3]
+
+Ein zweiter Wächter für Issues und Pull Requests, ein Reiter mit den Alarmen aller Wächter und Stummschaltungen, die von selbst enden. Collab liest nur; nichts davon schreibt nach GitHub.
+
+### Hinzugefügt
+
+- **Der Collab-Wächter** (`sentinel_collab.py`, nur vollständige Ausgabe, standardmäßig aus): die offenen Issues und Pull Requests deiner Repositories, mit einer eigenen Uhr (`sentinels.collab.refresh_seconds`), die den CI-Wächter nie beeinflusst. Sechs Regeln mit stabilen Codes: `collab.issue.stale`, `collab.issue.critical`, `collab.issue.external`, `collab.pr.review_pending`, `collab.pr.draft_old` und `collab.pr.conflict`. Er liest mit bedingten Anfragen (ein unverändertes Repository kostet kein Kontingent), höchstens `max_repos_per_tick` Repositories pro Runde, pausiert unter `min_rate_remaining`, hält seinen Zustand in `collab_state.json` (im Ordner jedes Kontos) und meldet nur Änderungen. Bots werden ausgelassen. Seine Ebene *Issues und Pull Requests* liegt im Reiter Wächter, und `GET /api/sentinel/collab` liefert sie.
+- **Zwei neue Ereignisse**, `collab_new` und `collab_fixed`, für den Verlauf und alle Benachrichtigungskanäle (sie stehen in der Ereignisliste der Kanäle und im Ereignisschema).
+- **Der Reiter Alarme** (vollständige Ausgabe): eine Liste mit den Alarmen aller Wächter, jeder mit Herkunft (CI oder Collab) und Stufe, ein Filter nach Herkunft und Stufe, ein Link nach GitHub und ein roter Punkt am Reiter mit den offenen Fehlern. `?view=alerts&sentinel=collab` öffnet ihn gefiltert.
+- **Stummschaltungen mit Ende** (`alert_center.py`): Im Reiter Alarme lässt sich ein Alarm, eine Regel (ihr Code) oder ein ganzer Wächter für `alerts.mute_hours` Stunden stummschalten (standardmäßig 24, von 1 bis 720). Eine Stummschaltung läuft von selbst ab, lässt sich sofort aufheben, und ein kurzer Verlauf sagt, was seit wann bis wann stumm war. Es ist eine Notiz des Monitors, pro Konto in `alert_mutes.json`; auf GitHub ändert sich nichts.
+- **`ignore_labels`** in den Regeln von Collab (standardmäßig `monitor:ignore`): Ein Issue oder Pull Request, das eine Person auf GitHub so beschriftet hat, löst keinen Alarm aus. Der Monitor schreibt nie Labels.
+- **`GET /api/alerts`** (`?sentinel=`, `?level=`, `?muted=show|hide|only`) und **`GET /api/events`** (`?sentinel=`, `?since=`), beide nur lesend und pro Konto; `POST /api/alerts/mute` und `/api/alerts/unmute` (nur von diesem Rechner, Einmal-Token, wie jede andere Änderung).
+- **Eine Checkliste in der Live-Ansicht** (Geheimnis mit 32 Zeichen oder mehr, Weiterleitung oder Tunnel zu `/api/webhook`, das Testereignis von GitHub, das Kontingent beobachten) und dieselben Schritte in der Webhook-Anleitung.
+- **Eine Anleitung zum Collab-Wächter** in den acht Sprachen (`COLLAB.md`), von der Hilfe gefunden.
+- Tests zu jeder Änderung: die Regeln und ihre stabilen Codes, die Kosten (bedingte Lesezugriffe, die Obergrenze pro Runde, die Pause), dass er nur liest, die Stummschaltungen (Bereiche, Ende, Grenzen, Verlauf, eine beschädigte Datei), das Ignorier-Label, die Endpunkte, dass Lite nichts davon hat, die Zustandsdateien jedes Kontos und der Demo und die Texte in den acht Sprachen.
+
+### Geändert
+
+- Die Einstellungsseite hat zwölf Collab-Einstellungen in einem Block des Reiters Wächter und daneben `alerts.mute_hours`.
+- Die Dateien `alert_mutes.json`, `collab_state.json`, `ai_alerts_state.json` und `ALERTS_BRIEF.md` werden nie eingecheckt und reisen nie in einem Paket mit.
+
 ## [1.7.2]
 
 Eine Kopfzeile, die sich in Reihenfolge lesen lässt und zum Fenster passt, die Schnellsteuerung fest in der oberen rechten Ecke, Info in der Seitenleiste und das Ende des Hinweises auf eine neue Version. Die Tests hinterlassen keine Dateien mehr neben dem Code; genau das hatte die Einstellungen einer Person durch die neutrale Vorlage ersetzt.

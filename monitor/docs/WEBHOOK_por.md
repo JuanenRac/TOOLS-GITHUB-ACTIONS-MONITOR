@@ -34,3 +34,10 @@ Em `actions_monitor.json`: `"webhook": {"enabled": true, "secret": "<32 ou mais 
 ## Repetições e inundações
 
 Um pedido assinado válido que alguém capturou e volta a enviar é respondido mas não executado: cada entrega precisa do seu id `X-GitHub-Delivery`, os ids já aceites são memorizados durante `webhook.replay_seconds` (uma hora por omissão, memória limitada) e uma repetição recebe `202 {"duplicate": true}`. (Uma reentrega manual na página do GitHub reutiliza o id, por isso é ignorada nessa janela.) Um repositório pode causar no máximo `webhook.max_per_minute` eventos aceites por minuto; os restantes são respondidos e ignorados. Se a carga indicar `full_name`, o seu proprietário tem de ser a conta vigiada (ou um de `webhook.allowed_owners`). No modo de rede, um endereço pode enviar 120 pedidos por minuto. Depois de um evento aceite, as leituras condicionais guardadas desse repositório são descartadas e é lido de novo no ciclo seguinte, pelo que um evento em direto é sempre reconciliado com o GitHub.
+
+## Lista de verificação da vista em direto
+
+1. Defina `webhook.secret` com pelo menos 32 carateres e ative o webhook.
+2. Reencaminhe a porta (`gh webhook forward`) ou abra um túnel e use o seu endereço terminado em `/api/webhook` no GitHub.
+3. Envie o evento de teste do GitHub (Recent deliveries > Redeliver) e procure-o em `?view=live`.
+4. Vigie a quota no cabeçalho: com webhooks basta um ciclo mais lento.

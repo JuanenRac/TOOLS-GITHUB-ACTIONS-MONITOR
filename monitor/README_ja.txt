@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GitHub Actions モニター + センチネル（バージョン 1.7.2）
+GitHub Actions モニター + センチネル（バージョン 1.7.3）
 ========================================================
 どれを起動する? (新しい利用者が2分で決められます)
   完全版  MONITOR_GITHUB_ACTIONS.*       センチネル付きのページ(ポート 8765): アラート、署名キュー、分析。複数のリポジトリがあるならここから。
@@ -45,76 +45,9 @@ GitHub Actions モニター + センチネル（バージョン 1.7.2）
 赤の CI    基準は 1 つだけ: 既定ブランチでの各 workflow の「最後に完了した run」。赤 = failure, timed_out, startup_failure, action_required。
            cancelled, skipped, neutral, stale は数えません。
 
-1.5.1 の新機能（履歴: CHANGELOG.md）
-  - 設定タブ：新しいグループ「センチネル用の外部 AI」（ai.provider none / ollama / openai-compatible、モデル、Ollama のアドレス（このコンピューターのみ）、https エンドポイント、キーを保持する環境変数の名前、1日あたりの呼び出し回数）。キー自体は保存されません。既定ではオフで、外部サービスにはリポジトリのデータが送られます。
-  - migrate_state.py：1.5.0 より前に書かれたファイルを新しい名前に移します。`python migrate_state.py` はドライラン、`--apply` はコピー（古いファイルは残る）、`--move` は名前変更です。上書きはしません。docs/MIGRATING.md に8言語で1ページにまとめています。
-  - 独自のカタログファイルがない初回起動：サンプルを使用していることをコンソールに表示し、`--init-catalog` で ecosystems.json、targets.json、profiles.json の編集可能なコピーを作成します。
-  - Python 3.11 以上（Windows、Linux、macOS で 3.11 と 3.13 を検証）。
-
-1.5.0 の新機能（履歴: CHANGELOG.md）
-  - 「設定」タブ: actions_monitor.json の値をページから変更できます（型と範囲つきの許可キー一覧、検証あり、保存前に config_backups/ へコピー、トークンや秘密は扱いません。docs/SETTINGS.md）。
-  - 光って沈むレリーフ付きボタン、名前とツールチップが 8 言語の SVG アイコン、状態ダッシュボードの見た目、動きのあるバーと数値（prefers-reduced-motion で停止）。
-  - 任意の出力（既定はオフ、127.0.0.1 のみ）: /metrics（Prometheus）、/api/outputs/grafana.json（Grafana JSON / Infinity）、/api/outputs/dashboard.json（docs/OUTPUTS.md、docs/grafana/ にサンプル）。
-  - 中立なパッケージ: エコシステム、ターゲット、プロファイルはパッケージの外に置きます（ecosystems_file、targets_file、profiles_file。ローカル署名ツールは tools_dir）。既定は英語、ファイルとフォルダー名も英語です。
-  1.4.x からの更新: 次の名前が変わりました（古い名前はファイルが存在し得る場所では引き続き読み取られ、書き込まれるのは新しい名前だけです）:
-  leer_parte.py -> read_report.py          eventos.py -> events.py          parte_history.py -> report_history.py
-  LOTE_GITHUB_ACTIONS.bat/.sh/.command -> BATCH_GITHUB_ACTIONS.bat/.sh/.command
-  eventos_monitor.jsonl -> events_monitor.jsonl          eventos_estado.json -> events_state.json
-  PARTE_CENTINELA_DIA_<day>.* -> SENTINEL_REPORT_DAY_<day>.*     PARTE_CENTINELA_<time>.txt -> SENTINEL_REPORT_<time>.txt     CANDIDATAS_RELEASE.txt -> RELEASE_CANDIDATES.txt
-  <signed_dir>/lotes/lote_<time>.json -> <signed_dir>/batches/batch_<time>.json     parte_history_days -> report_history_days     monitor_y_centinela.zip -> github_actions_monitor.zip
-  sentinel.audit_files: names of the A8 audit files (neutral defaults RECONCILIATION_TOTAL_*.txt, ROUNDS_MAP_2*.txt, ROUNDS_MAP_EXTRA_*.txt)
-  ci_red.json and --export-status: unchanged (a contract).
-
-1.4.2 の新機能(履歴: CHANGELOG.md)
-  A2 が隠れた workflow の最新の実行を問い合わせる際、実行中または取り消された run は「確認済み」とみなされなくなりました(以前の赤を隠す可能性があるため)。センチネルは
-  その workflow の完了済み run を取得し、実際の結論を持つ最初のものを使います(cancelled と skipped は無視)。デフォルトブランチに無ければ、その workflow だけが判定不能のままです。
-
-1.4.1 の新機能(履歴: CHANGELOG.md)
-  A2 は、実行サンプルが上限に達しただけでリポジトリ全体を判定不能とはしなくなりました。サンプルに現れないクローンの各 workflow について、その workflow だけの
-  デフォルトブランチ上の最新の実行を GitHub に問い合わせます(読み取り専用、A10 と同じクォータ制限、sentinel.a2_resolve_max_calls_per_tick で上限、回答は
-  sentinel.a2_resolve_ttl_seconds 秒保持)。赤は赤として数え、ブランチに実行がない workflow は判定不能のままで、パネルがその名前を示します。
-
-1.4.0 の新機能(履歴: CHANGELOG.md)
-  A11「準備状況」パネル: リポジトリごとのリリース準備状況(デフォルトブランチのCIとそのコミット、直近のリリースを上回るバージョン、ビルド、署名、次の手順)、
-  エコシステムの健全性(実際の件数だけから算出したスコア。データのあるリポジトリが少ない場合は表示しません)、提供元より古い固定バージョン
-  (ローカルクローンの固定ファイルから読み取り、sentinel.readiness.pins.sources で設定)。読み取り専用で、推測は一切行いません。
-
-1.3.0 の新機能（履歴: CHANGELOG.md）
-  ページ、コマンドライン、イベント、レポートが 8 言語に対応。言語セレクター。エコシステム、ターゲット、GitHub アカウントをデータ化（github_owner, ecosystems_file,
-  targets_file）。任意のワークスペースと、正直な縮小モード。すべてのファイルに著作権表示と GPL-3.0-or-later。LICENSE, NOTICE, AUTHORS。README と QUICKSTART を 8 言語で提供。
-ライセンス GPL-3.0-or-later（LICENSE と NOTICE を参照）。Copyright (C) 2026 JuanenRac (Electro Hobby 3D)。
+変更履歴
+  すべてのバージョンが新しい順に CHANGELOG.md にあります（8 言語版は docs/CHANGELOG_*.md、ページでは ヘルプ > 変更履歴）。
 
 ヘルプ、バージョン情報、確認 (1.6.4)
 ------------------------------------
 ページにはヘルプボタン（丸い ?）とバージョン情報ボタン（i）があります。コンソールでは --help-topics、--help-search、--about、--doctor を使い、--demo は架空のデータでページを表示します。lite 版は独自のバナーとウィンドウタイトル（LITE、ポート 8766、センチネルなし）で起動し、フル版は COMPLETE、ポート 8765、センチネル有効と表示します。新バージョンのお知らせはオフにできます（設定 > 基本）。
-
-1.7.2 の新機能（順序の整ったヘッダー、角のクイック操作、サイドパネルのバージョン情報。履歴: CHANGELOG.md）
-  ヘッダーの数値は読みやすい順序で、幅に合わせたグリッドに並びます。「ホットのみ」ボタン、速度のリスト、エコシステムの健全性は右上に残ります。
-  設定、ヘルプ、バージョン情報はサイドパネルだけにあります。新バージョンの通知はヘッダーから消えました（バージョン情報とコンソールでは引き続き表示されます）。テストはコードの隣に何も残しません。
-
-1.7.1 の新機能（サイドパネル、16 のテーマ、センチネルの契約。履歴: CHANGELOG.md）
-  ページの左にロゴ、グループ分けしたセクション、ヘルプを備えたサイドパネルが付きました。アイコンだけに縮められます。自動、ライト、ダークに加えて 16 のテーマがあります（設定 > このブラウザ）。
-  CI センチネルは契約（BaseSentinel、SentinelRegistry）の裏に置かれ、次のセンチネルを追加できます。表示と判断の内容は変わりません。lite 版にはどれもありません。
-
-1.7.0 の新機能（複数アカウント。履歴: CHANGELOG.md）
-  フル版は複数の GitHub アカウントを監視できます。アカウントごとに accounts/<id>/ フォルダーと、スーパーバイザーの下の 1 つのモニターがあり、1 つの障害が他に及ぶことはありません。
-  --accounts、--account <id>、--migrate-accounts [--apply]。切り替えとすべてのアカウントのページ、?view= と ?chrome=0、Webhook の状態を表示するライブビュー、すべてに共通の 1 つの /api/webhook。
-  ガイド: docs/ACCOUNTS.md。accounts/ フォルダーがなければ何も変わりません。lite 版はアカウントが 1 つで、これらはありません。
-
-1.6.8 の新機能（プロキシの実機検証。履歴: CHANGELOG.md）
-  1.6.7 の HTTPS プロキシを、ポート 443 の実際のプロキシ（リポジトリの tools/manual_check_live.py proxy）と、連鎖全体を通すテストで検証しました。変更履歴は 1.6.3 まで翻訳済みです
-  （ヘルプ > 変更履歴）。変わる設定はありません。
-
-1.6.7 の新機能（既定ポートの HTTPS プロキシ。履歴: CHANGELOG.md）
-  新しい設定 listen.proxy_public_host（既定は空）: ポート 443 の HTTPS プロキシが Host と Origin をポートなしで転送する場合、その公開名はそのまま受け付けられます。HTTPS のときに限り、
-  変更はそのコンピューター自身からのみ可能です。変更履歴は 1.6.7、1.6.6、1.6.5 について翻訳済みです（ヘルプ > 変更履歴）。
-
-1.6.6 の新機能（ネットワークモードと act の修正。履歴: CHANGELOG.md）
-  HTTPS のネットワークモードがページから動作（オリジンはセッションのスキームに従う）。secure とされた設定はそのコンピューター自身からのみ変更可能。POST /api/access でアドレスにトークンを
-  含めずにセッションを開始。全インターフェースで待ち受けると設定に赤いバーを表示。握りつぶした失敗のカウンターを --doctor とバージョン情報に追加。act: Stop が実行を解放し、パイプを閉じる。
-  変更履歴を8言語に翻訳（ヘルプ > 変更履歴）。
-
-1.6.5 の新機能（整合性とセキュリティ。履歴: CHANGELOG.md）
-  バッチ: CI が緑とは必須ワークフローが成功したこと（dispatch.required_ci）。git fetch の失敗は起動を止め、targets.json はツールフォルダー外のツールや dry_run/ref の変更を指定できず、
-  finalize はコミット確認を記録したバッチの実行だけを提示します（古いバッチは finalize --accept-legacy）。act はワークスペース内に留まり、Stop はツリー全体を終了します。
-  ネットワークモード: 任意の HTTPS、誤ったトークン後のロック、IPv4 のみ。Webhook: リプレイなし。通知: max_per_hour はメッセージ数。--doctor が危険な組み合わせを警告します。

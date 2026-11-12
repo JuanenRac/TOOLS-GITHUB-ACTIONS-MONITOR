@@ -2,6 +2,10 @@
 
 Ideias que não couberam na versão atual, sem ordem prometida. São direções, não compromissos; uma issue ou um pull request é a melhor forma de fazer avançar uma.
 
+## Feito na 1.7.3
+
+Uma segunda sentinela para issues e pull requests (Collab, desligada por omissão, só de leitura, com relógio próprio), um separador Alertas com os alertas de todas as sentinelas e filtro por origem e nível, silêncios locais que acabam sozinhos (um alerta, uma regra ou uma sentinela; `alerts.mute_hours`), a etiqueta que faz ignorar um elemento, `GET /api/alerts` e `GET /api/events`, uma lista de verificação da vista em direto, um guia da sentinela Collab em oito idiomas e as imagens redesenhadas.
+
 ## Feito na 1.7.2
 
 O cabeçalho com os seus números numa ordem que se lê e numa grelha que segue a largura; os controlos rápidos (só quentes, velocidade, saúde dos ecossistemas) fixos em cima à direita; Definições, Ajuda e Acerca de só no painel lateral; o aviso de versão nova fora do cabeçalho; e os testes que já não deixam ficheiros junto do código.

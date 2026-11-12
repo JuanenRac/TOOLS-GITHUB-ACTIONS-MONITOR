@@ -7,6 +7,27 @@
 
 Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com o seu próprio semver. A fonte é o CHANGELOG.md em inglês; este ficheiro tem as mesmas versões e secções.
 
+## [1.7.3]
+
+Uma segunda sentinela para issues e pull requests, um separador com os alertas de todas as sentinelas e silêncios que acabam sozinhos. A Collab só lê; nada disto escreve no GitHub.
+
+### Adicionado
+
+- **A sentinela Collab** (`sentinel_collab.py`, só edição completa, desligada por omissão): as issues e pull requests abertas dos seus repositórios, com um relógio próprio (`sentinels.collab.refresh_seconds`) que nunca altera a sentinela de CI. Seis regras com códigos estáveis: `collab.issue.stale`, `collab.issue.critical`, `collab.issue.external`, `collab.pr.review_pending`, `collab.pr.draft_old` e `collab.pr.conflict`. Lê com pedidos condicionais (um repositório sem alterações não gasta quota), no máximo `max_repos_per_tick` repositórios por ronda, pára abaixo de `min_rate_remaining`, guarda o estado em `collab_state.json` (dentro da pasta de cada conta) e só anuncia as mudanças. Os bots ficam de fora. A sua camada *Issues e pull requests* está no separador Sentinela e `GET /api/sentinel/collab` serve-a.
+- **Dois eventos novos**, `collab_new` e `collab_fixed`, para o registo e para todos os canais de notificação (estão na lista de eventos dos canais e no esquema de eventos).
+- **O separador Alertas** (edição completa): uma lista com os alertas de todas as sentinelas, cada um com a sua origem (CI ou Collab) e nível, filtro por origem e por nível, ligação ao GitHub e um ponto vermelho no separador com os erros abertos. `?view=alerts&sentinel=collab` abre-o já filtrado.
+- **Silêncios com fim** (`alert_center.py`): a partir do separador Alertas pode silenciar-se um alerta, uma regra (o seu código) ou uma sentinela inteira durante `alerts.mute_hours` horas (24 por omissão, de 1 a 720). Um silêncio caduca sozinho, pode repor-se de imediato e um histórico curto diz o que foi silenciado, desde quando e até quando. É uma nota do monitor, guardada por conta em `alert_mutes.json`; no GitHub nada muda.
+- **`ignore_labels`** nas regras da Collab (`monitor:ignore` por omissão): uma issue ou pull request que uma pessoa etiquetou assim no GitHub não gera alerta. O monitor nunca escreve etiquetas.
+- **`GET /api/alerts`** (`?sentinel=`, `?level=`, `?muted=show|hide|only`) e **`GET /api/events`** (`?sentinel=`, `?since=`), ambos só de leitura e por conta; `POST /api/alerts/mute` e `/api/alerts/unmute` (só deste computador, token de uso único, como qualquer outra alteração).
+- **Uma lista de verificação na vista em direto** (segredo de 32 carateres ou mais, reencaminhamento ou túnel para `/api/webhook`, o evento de teste do GitHub, vigiar a quota) e os mesmos passos no guia do webhook.
+- **Um guia da sentinela Collab** nos oito idiomas (`COLLAB.md`), encontrado pela Ajuda.
+- Testes de cada alteração: as regras e os seus códigos estáveis, o custo (leituras condicionais, o limite por ronda, a pausa), que só lê, os silêncios (âmbitos, fim, limites, histórico, um ficheiro danificado), a etiqueta de ignorar, os endpoints, que a lite não tem nada disto, os ficheiros de estado de cada conta e da demonstração e os textos nos oito idiomas.
+
+### Alterado
+
+- A página de definições tem doze definições da Collab num bloco do separador Sentinela, e `alerts.mute_hours` ao lado.
+- Os ficheiros `alert_mutes.json`, `collab_state.json`, `ai_alerts_state.json` e `ALERTS_BRIEF.md` nunca são enviados para o git nem viajam num pacote.
+
 ## [1.7.2]
 
 Um cabeçalho que se lê por ordem e se ajusta à janela, os controlos rápidos fixos no canto superior direito, Acerca de no painel lateral e o fim do aviso de versão nova. Os testes deixam de deixar ficheiros junto do código, que é o que tinha substituído as definições de uma pessoa pelo modelo neutro.

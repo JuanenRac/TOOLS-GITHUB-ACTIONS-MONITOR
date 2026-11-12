@@ -31,7 +31,7 @@
 
 | | |
 |---|---|
-| **Version** | **1.7.2** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **1.7.3** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Needs** | Python 3.11+ and the GitHub CLI (`gh auth login`); nothing else (the terminal view uses the optional package `rich`) |
 | **Opens** | a page on `127.0.0.1` only, in eight languages |
 | **Writes to GitHub** | never by itself: only batch commands you run with an explicit `--go` |
@@ -42,6 +42,7 @@
 ### The page
 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="Now" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_alerts_light.png"><img src="docs/screenshots/web_alerts_dark.png" alt="Alerts: every sentinel in one list, with local silences" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_light.png"><img src="docs/screenshots/web_sentinel_dark.png" alt="Sentinel" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_queue_light.png"><img src="docs/screenshots/web_sentinel_queue_dark.png" alt="Signing queue (most urgent first)" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_analytics_light.png"><img src="docs/screenshots/web_sentinel_analytics_dark.png" alt="A12 · Analytics: durations, queue time, steps and flaky workflows" width="92%"></picture></p>
@@ -106,6 +107,7 @@ Each picture follows the light or dark theme of your GitHub page.
 
 - **Red or not, by one rule**: the last finished run of each workflow on the default branch. Cancelled and skipped runs never hide an earlier failure.
 - **Sentinel**: security alerts, repository hygiene, stale pull requests, releases that are ready to cut, builds waiting to be signed, and a plain-language report.
+- **Collab sentinel and one list of alerts**: open issues and pull requests that need a person (forgotten, critical, reviews waiting, old drafts, conflicts), read only and on a clock of its own, and an Alerts tab with every sentinel in one list, a filter by origin and local silences that end by themselves.
 - **Settings page**: change paths, intervals, quotas and switches from the browser; only a fixed list of keys, validated, with a backup before every save.
 - **Charts and history**: compute minutes, failures and successes with animated bars and a daily history (it respects reduced motion).
 - **Eight languages** (en, es, de, fr, it, ja, zh, pt) with English as the base; switch in Settings.
@@ -189,42 +191,43 @@ python -m unittest discover -s monitor/tests
 
 ```
 TOOLS-GITHUB-ACTIONS-MONITOR/
-├── monitor/                             the program
-├── docs/                                architecture, screenshots, roadmap
-├── tools/                               pictures, guides and demo
-├── deploy/                              container example
-├── images/                              banner and pictures
-├── .github/                             CI and issue forms
-├── CHANGELOG.md                         changes per version
-├── LICENSE NOTICE AUTHORS               licences and author
-├── CONTRIBUTING.md SECURITY.md          how to help, report
-├── SUPPORT.md CODE_OF_CONDUCT.md        support and conduct
+├── monitor/                                  the program
+├── docs/                                     architecture, screenshots, roadmap
+├── tools/                                    pictures, guides and demo
+├── deploy/                                   container example
+├── images/                                   banner and pictures
+├── .github/                                  CI and issue forms
+├── CHANGELOG.md                              changes per version
+├── LICENSE NOTICE AUTHORS                    licences and author
+├── CONTRIBUTING.md SECURITY.md               how to help, report
+├── SUPPORT.md CODE_OF_CONDUCT.md             support and conduct
 └── monitor/
-    ├── actions_monitor.py               local server
-    ├── actions_monitor.html             the web page
-    ├── MONITOR_LITE_GITHUB_ACTIONS.*    the lite edition (no sentinel)
-    ├── sentinel_local.py                alerts and report
-    ├── surface.py readiness.py          repo checks, readiness
-    ├── settings_api.py outputs.py       settings tabs, metrics
-    ├── signstate.py sigverify.py        signing state and check
-    ├── read_report.py                   report from the terminal
-    ├── gha_dispatch_all.py              batch builds
-    ├── events.py report_history.py      events and history
-    ├── ci_red.py export_status.py       files others read
-    ├── etagcache.py resilience.py       conditional reads, lost connection
-    ├── analytics.py lint_workflows.py   durations, flaky, workflow linter
-    ├── notifiers.py ai_actions.py       notifications, AI closed list
-    ├── tui.py migrate_state.py          terminal view, state migration
-    ├── about.py  helpdocs.py            About and Help panels
-    ├── quota.py  quotas.json            plan, minutes and quotas
-    ├── modes.py  updatecheck.py         working modes, update notice
-    ├── doctor.py  demo_mode.py          --doctor and --demo
-    ├── discovery.py  banner.py          discovery, edition banner
-    ├── tui_textual.py                   interactive terminal
-    ├── i18n.py locales/                 eight languages
-    ├── toolconfig.py workspace.py       settings and clones
-    ├── tests/                           offline tests
-    └── docs/                            guides, schemas, Grafana
+    ├── actions_monitor.py                    local server
+    ├── actions_monitor.html                  the web page
+    ├── MONITOR_LITE_GITHUB_ACTIONS.*         the lite edition (no sentinel)
+    ├── sentinel_local.py                     alerts and report
+    ├── sentinel_collab.py  alert_center.py   issues sentinel, alerts
+    ├── surface.py readiness.py               repo checks, readiness
+    ├── settings_api.py outputs.py            settings tabs, metrics
+    ├── signstate.py sigverify.py             signing state and check
+    ├── read_report.py                        report from the terminal
+    ├── gha_dispatch_all.py                   batch builds
+    ├── events.py report_history.py           events and history
+    ├── ci_red.py export_status.py            files others read
+    ├── etagcache.py resilience.py            conditional reads, lost connection
+    ├── analytics.py lint_workflows.py        durations, flaky, workflow linter
+    ├── notifiers.py ai_actions.py            notifications, AI closed list
+    ├── tui.py migrate_state.py               terminal view, state migration
+    ├── about.py  helpdocs.py                 About and Help panels
+    ├── quota.py  quotas.json                 plan, minutes and quotas
+    ├── modes.py  updatecheck.py              working modes, update notice
+    ├── doctor.py  demo_mode.py               --doctor and --demo
+    ├── discovery.py  banner.py               discovery, edition banner
+    ├── tui_textual.py                        interactive terminal
+    ├── i18n.py locales/                      eight languages
+    ├── toolconfig.py workspace.py            settings and clones
+    ├── tests/                                offline tests
+    └── docs/                                 guides, schemas, Grafana
 ```
 
 ## Documentation
@@ -243,6 +246,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/QUICKSTART_en.txt`](monitor/QUICKSTART_en.txt): first steps, in eight languages
 - [`monitor/docs/FIRST_STEPS.md`](monitor/docs/FIRST_STEPS.md): your first five minutes
 - [`monitor/docs/SENTINEL.md`](monitor/docs/SENTINEL.md): the sentinel and its checks A1-A13
+- [`monitor/docs/COLLAB.md`](monitor/docs/COLLAB.md): the Collab sentinel, the Alerts tab and the silences
+- [`monitor/docs/ACCOUNTS.md`](monitor/docs/ACCOUNTS.md): several accounts, one process each
 - [`monitor/docs/QUOTAS.md`](monitor/docs/QUOTAS.md): quotas and plans of GitHub
 - [`monitor/docs/MODES.md`](monitor/docs/MODES.md): working modes: normal, fast and turbo
 

@@ -7,6 +7,27 @@
 
 Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son propre semver. La source est le CHANGELOG.md en anglais ; ce fichier contient les mêmes versions et sections.
 
+## [1.7.3]
+
+Une seconde sentinelle pour les issues et pull requests, un onglet avec les alertes de toutes les sentinelles et des mises en sourdine qui se terminent toutes seules. Collab ne fait que lire ; rien ici n'écrit sur GitHub.
+
+### Ajouté
+
+- **La sentinelle Collab** (`sentinel_collab.py`, édition complète seulement, désactivée par défaut) : les issues et pull requests ouvertes de vos dépôts, sur une horloge propre (`sentinels.collab.refresh_seconds`) qui ne modifie jamais la sentinelle CI. Six règles aux codes stables : `collab.issue.stale`, `collab.issue.critical`, `collab.issue.external`, `collab.pr.review_pending`, `collab.pr.draft_old` et `collab.pr.conflict`. Elle lit avec des requêtes conditionnelles (un dépôt inchangé ne coûte pas de quota), au plus `max_repos_per_tick` dépôts par tour, se met en pause sous `min_rate_remaining`, garde son état dans `collab_state.json` (dans le dossier de chaque compte) et n'annonce que les changements. Les robots sont exclus. Sa couche *Issues et pull requests* est dans l'onglet Sentinelle et `GET /api/sentinel/collab` la sert.
+- **Deux nouveaux évènements**, `collab_new` et `collab_fixed`, pour le journal et pour tous les canaux de notification (ils figurent dans la liste des évènements des canaux et dans le schéma des évènements).
+- **L'onglet Alertes** (édition complète) : une liste avec les alertes de toutes les sentinelles, chacune avec son origine (CI ou Collab) et son niveau, un filtre par origine et par niveau, un lien vers GitHub et un point rouge sur l'onglet avec les erreurs ouvertes. `?view=alerts&sentinel=collab` l'ouvre déjà filtré.
+- **Mises en sourdine avec une fin** (`alert_center.py`) : depuis l'onglet Alertes, une alerte, une règle (son code) ou toute une sentinelle peut être mise en sourdine pendant `alerts.mute_hours` heures (24 par défaut, de 1 à 720). Une sourdine expire toute seule, se rétablit aussitôt, et un court historique dit ce qui a été coupé, depuis quand et jusqu'à quand. C'est une note du moniteur, gardée par compte dans `alert_mutes.json` ; rien ne change sur GitHub.
+- **`ignore_labels`** dans les règles de Collab (`monitor:ignore` par défaut) : une issue ou pull request qu'une personne a ainsi étiquetée sur GitHub ne lève pas d'alerte. Le moniteur n'écrit jamais d'étiquette.
+- **`GET /api/alerts`** (`?sentinel=`, `?level=`, `?muted=show|hide|only`) et **`GET /api/events`** (`?sentinel=`, `?since=`), tous deux en lecture seule et par compte ; `POST /api/alerts/mute` et `/api/alerts/unmute` (depuis cet ordinateur seulement, jeton à usage unique, comme tout autre changement).
+- **Une liste de contrôle dans la vue en direct** (secret de 32 caractères ou plus, redirection ou tunnel vers `/api/webhook`, l'évènement de test de GitHub, surveiller le quota) et les mêmes étapes dans le guide du webhook.
+- **Un guide de la sentinelle Collab** dans les huit langues (`COLLAB.md`), trouvé par l'aide.
+- Des tests pour chaque changement : les règles et leurs codes stables, le coût (lectures conditionnelles, le plafond par tour, la pause), qu'elle ne fait que lire, les sourdines (portées, fin, bornes, historique, un fichier abîmé), l'étiquette d'exclusion, les points d'accès, que lite n'en a rien, les fichiers d'état de chaque compte et de la démo, et les textes dans les huit langues.
+
+### Modifié
+
+- La page des réglages compte douze réglages de Collab dans un bloc de l'onglet Sentinelle, et `alerts.mute_hours` à côté.
+- Les fichiers `alert_mutes.json`, `collab_state.json`, `ai_alerts_state.json` et `ALERTS_BRIEF.md` ne sont jamais versionnés ni inclus dans un paquet.
+
 ## [1.7.2]
 
 Un en-tête qui se lit dans l'ordre et s'adapte à la fenêtre, les commandes rapides fixes dans le coin supérieur droit, À propos dans le panneau latéral et la fin de l'avis de nouvelle version. Les tests cessent de laisser des fichiers à côté du code, ce qui avait remplacé les réglages d'une personne par le modèle neutre.

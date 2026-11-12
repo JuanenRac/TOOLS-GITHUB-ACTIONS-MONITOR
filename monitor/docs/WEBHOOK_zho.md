@@ -34,3 +34,10 @@
 ## 重放与洪泛
 
 被人截获后重新发送的有效签名请求会得到应答但不会被执行：每次投递都需要 `X-GitHub-Delivery` ID，已接受的 ID 会在 `webhook.replay_seconds` 内被记住（默认一小时，内存有上限），重复请求得到 `202 {"duplicate": true}`。（在 GitHub 页面手动重新投递会复用同一 ID，因此在此窗口内会被忽略。）一个仓库每分钟最多引发 `webhook.max_per_minute` 个被接受的事件，其余只应答并忽略。若载荷包含 `full_name`，其所有者必须是被监视的账户（或 `webhook.allowed_owners` 中的一个）。在网络模式下，一个地址每分钟可发送 120 个请求。接受事件后，该仓库已保存的条件读取会被丢弃，并在下个周期重新读取，因此实时事件总会与 GitHub 对账。
+
+## 实时视图检查清单
+
+1. 把 `webhook.secret` 设为至少 32 个字符，并开启 Webhook。
+2. 转发端口（`gh webhook forward`）或打开隧道，并在 GitHub 中使用以 `/api/webhook` 结尾的地址。
+3. 发送 GitHub 的测试事件（Recent deliveries > Redeliver），并在 `?view=live` 中查看。
+4. 留意页头的配额：使用 Webhook 后，较慢的周期就够了。

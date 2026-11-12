@@ -31,7 +31,7 @@
 
 | | |
 |---|---|
-| **バージョン** | **1.7.2** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **バージョン** | **1.7.3** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **必要なもの** | Python 3.11 以上と GitHub CLI（`gh auth login`）。それ以外は不要(ターミナル表示は任意のパッケージ `rich` を使います) |
 | **開く先** | `127.0.0.1` 上のページのみ、8言語対応 |
 | **GitHub への書き込み** | 自動では行いません。明示的な `--go` を付けて実行したバッチコマンドのみ |
@@ -42,6 +42,7 @@
 ### ページ
 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="現在" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_alerts_light.png"><img src="docs/screenshots/web_alerts_dark.png" alt="アラート：すべての番人を 1 つの一覧に、ローカルのミュート付き" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_light.png"><img src="docs/screenshots/web_sentinel_dark.png" alt="センチネル" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_queue_light.png"><img src="docs/screenshots/web_sentinel_queue_dark.png" alt="署名キュー（緊急度の高い順）" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_analytics_light.png"><img src="docs/screenshots/web_sentinel_analytics_dark.png" alt="A12 · 分析:所要時間・待ち時間・ステップ・不安定なワークフロー" width="92%"></picture></p>
@@ -106,6 +107,7 @@
 
 - **赤かどうかは1つのルールで判定**：既定ブランチ上の各ワークフローの最後に完了した実行。キャンセルやスキップされた実行が、以前の失敗を隠すことはありません。
 - **センチネル**：セキュリティアラート、リポジトリの衛生、古いプルリクエスト、公開準備の整ったバージョン、署名待ちのビルド、平易な言葉のレポート。
+- **Collab 番人と 1 つのアラート一覧**：人の手が必要な未解決の Issue とプルリクエスト（放置、重大、レビュー待ち、古い下書き、コンフリクト）を、読み取り専用・独自の周期で確認。アラートタブにはすべての番人を 1 つの一覧にまとめ、由来での絞り込みと、自動で終わるローカルのミュートを備えます。
 - **設定ページ**：パス、間隔、クォータ、スイッチをブラウザーから変更できます。検証済みの固定キーのみで、保存前に必ずバックアップを取ります。
 - **グラフと履歴**：計算時間、失敗、成功をアニメーションするバーと日次履歴で表示します（動きの軽減設定を尊重します）。
 - **8言語**（en、es、de、fr、it、ja、zh、pt）。英語が基本で、設定で切り替えます。
@@ -189,42 +191,43 @@ python -m unittest discover -s monitor/tests
 
 ```
 TOOLS-GITHUB-ACTIONS-MONITOR/
-├── monitor/                             プログラム本体
-├── docs/                                構成図・画面・ロードマップ
-├── tools/                               図・ガイド・デモ
-├── deploy/                              コンテナーの例
-├── images/                              バナーと図
-├── .github/                             CI と Issue フォーム
-├── CHANGELOG.md                         バージョン別の変更
-├── LICENSE NOTICE AUTHORS               ライセンスと作者
-├── CONTRIBUTING.md SECURITY.md          参加方法、報告
-├── SUPPORT.md CODE_OF_CONDUCT.md        サポートと行動規範
+├── monitor/                                  プログラム本体
+├── docs/                                     構成図・画面・ロードマップ
+├── tools/                                    図・ガイド・デモ
+├── deploy/                                   コンテナーの例
+├── images/                                   バナーと図
+├── .github/                                  CI と Issue フォーム
+├── CHANGELOG.md                              バージョン別の変更
+├── LICENSE NOTICE AUTHORS                    ライセンスと作者
+├── CONTRIBUTING.md SECURITY.md               参加方法、報告
+├── SUPPORT.md CODE_OF_CONDUCT.md             サポートと行動規範
 └── monitor/
-    ├── actions_monitor.py               ローカルサーバー
-    ├── actions_monitor.html             Web ページ
-    ├── MONITOR_LITE_GITHUB_ACTIONS.*    lite 版(センチネルなし)
-    ├── sentinel_local.py                アラートとレポート
-    ├── surface.py readiness.py          検査とリリース準備
-    ├── settings_api.py outputs.py       設定とメトリクス
-    ├── signstate.py sigverify.py        署名の状態と検証
-    ├── read_report.py                   ターミナルでレポート
-    ├── gha_dispatch_all.py              バッチビルド
-    ├── events.py report_history.py      イベントと履歴
-    ├── ci_red.py export_status.py       他ツール向けファイル
-    ├── etagcache.py resilience.py       条件付き読み取りと接続
-    ├── analytics.py lint_workflows.py   所要時間・不安定・Lint
-    ├── notifiers.py ai_actions.py       通知と AI の限定リスト
-    ├── tui.py migrate_state.py          ターミナル表示と移行
-    ├── about.py  helpdocs.py            情報とヘルプのパネル
-    ├── quota.py  quotas.json            プラン・分数・クォータ
-    ├── modes.py  updatecheck.py         動作モード・更新通知
-    ├── doctor.py  demo_mode.py          --doctor と --demo
-    ├── discovery.py  banner.py          検出・版バナー
-    ├── tui_textual.py                   対話型ターミナル
-    ├── i18n.py locales/                 8言語
-    ├── toolconfig.py workspace.py       設定とクローン
-    ├── tests/                           オフラインテスト
-    └── docs/                            ガイドとスキーマ
+    ├── actions_monitor.py                    ローカルサーバー
+    ├── actions_monitor.html                  Web ページ
+    ├── MONITOR_LITE_GITHUB_ACTIONS.*         lite 版(センチネルなし)
+    ├── sentinel_local.py                     アラートとレポート
+    ├── sentinel_collab.py  alert_center.py   Issue 番人とアラート
+    ├── surface.py readiness.py               検査とリリース準備
+    ├── settings_api.py outputs.py            設定とメトリクス
+    ├── signstate.py sigverify.py             署名の状態と検証
+    ├── read_report.py                        ターミナルでレポート
+    ├── gha_dispatch_all.py                   バッチビルド
+    ├── events.py report_history.py           イベントと履歴
+    ├── ci_red.py export_status.py            他ツール向けファイル
+    ├── etagcache.py resilience.py            条件付き読み取りと接続
+    ├── analytics.py lint_workflows.py        所要時間・不安定・Lint
+    ├── notifiers.py ai_actions.py            通知と AI の限定リスト
+    ├── tui.py migrate_state.py               ターミナル表示と移行
+    ├── about.py  helpdocs.py                 情報とヘルプのパネル
+    ├── quota.py  quotas.json                 プラン・分数・クォータ
+    ├── modes.py  updatecheck.py              動作モード・更新通知
+    ├── doctor.py  demo_mode.py               --doctor と --demo
+    ├── discovery.py  banner.py               検出・版バナー
+    ├── tui_textual.py                        対話型ターミナル
+    ├── i18n.py locales/                      8言語
+    ├── toolconfig.py workspace.py            設定とクローン
+    ├── tests/                                オフラインテスト
+    └── docs/                                 ガイドとスキーマ
 ```
 
 ## ドキュメント
@@ -243,6 +246,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/QUICKSTART_ja.txt`](monitor/QUICKSTART_ja.txt): 最初の手順（8言語）
 - [`monitor/docs/FIRST_STEPS_jpn.md`](monitor/docs/FIRST_STEPS_jpn.md): 最初の5分間
 - [`monitor/docs/SENTINEL_jpn.md`](monitor/docs/SENTINEL_jpn.md): センチネルとチェック A1〜A13
+- [`monitor/docs/COLLAB_jpn.md`](monitor/docs/COLLAB_jpn.md): Collab 番人、アラートタブ、ミュート
+- [`monitor/docs/ACCOUNTS_jpn.md`](monitor/docs/ACCOUNTS_jpn.md): 複数アカウント（1 つにつき 1 プロセス）
 - [`monitor/docs/QUOTAS_jpn.md`](monitor/docs/QUOTAS_jpn.md): GitHub のクォータとプラン
 - [`monitor/docs/MODES_jpn.md`](monitor/docs/MODES_jpn.md): 動作モード: 通常・高速・ターボ
 

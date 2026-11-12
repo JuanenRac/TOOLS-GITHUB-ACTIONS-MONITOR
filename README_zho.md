@@ -31,7 +31,7 @@
 
 | | |
 |---|---|
-| **版本** | **1.7.2** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **版本** | **1.7.3** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **需要** | Python 3.11+ 和 GitHub CLI（`gh auth login`）；不需要其他东西(终端视图使用可选的 `rich` 包) |
 | **打开** | 仅在 `127.0.0.1` 上的页面，支持八种语言 |
 | **写入 GitHub** | 绝不自行写入：只有你用明确的 `--go` 运行的批处理命令才会 |
@@ -42,6 +42,7 @@
 ### 页面
 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="当前" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_alerts_light.png"><img src="docs/screenshots/web_alerts_dark.png" alt="警报：所有哨兵合在一个列表，带本地静音" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_light.png"><img src="docs/screenshots/web_sentinel_dark.png" alt="哨兵" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_queue_light.png"><img src="docs/screenshots/web_sentinel_queue_dark.png" alt="签名队列（最紧急的在前）" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_analytics_light.png"><img src="docs/screenshots/web_sentinel_analytics_dark.png" alt="A12 · 分析:时长、排队时间、步骤与不稳定的工作流" width="92%"></picture></p>
@@ -106,6 +107,7 @@
 
 - **是否为红，只用一条规则**：默认分支上每个工作流最后一次已结束的运行。已取消或已跳过的运行不会掩盖之前的失败。
 - **哨兵**：安全警报、仓库卫生、陈旧的拉取请求、可发布的版本、等待签名的构建，以及通俗易懂的报告。
+- **Collab 哨兵与统一警报列表**：需要人来处理的未关闭 Issue 和拉取请求（被遗忘的、严重的、等待评审的、陈旧草稿、冲突），只读且按自己的周期运行；“警报”标签页把所有哨兵汇总成一个列表，可按来源筛选，并提供会自行结束的本地静音。
 - **设置页面**：在浏览器中修改路径、间隔、配额和开关；只有固定且经过验证的键，每次保存前都会备份。
 - **图表与历史**：计算分钟数、失败和成功，配有动画条形图和每日历史（尊重“减少动态效果”设置）。
 - **八种语言**（en、es、de、fr、it、ja、zh、pt），以英语为基础；在设置中切换。
@@ -189,42 +191,43 @@ python -m unittest discover -s monitor/tests
 
 ```
 TOOLS-GITHUB-ACTIONS-MONITOR/
-├── monitor/                             程序本体
-├── docs/                                架构、截图、路线图
-├── tools/                               图片、指南与演示
-├── deploy/                              容器示例
-├── images/                              横幅图和图片
-├── .github/                             CI 和议题表单
-├── CHANGELOG.md                         各版本变更
-├── LICENSE NOTICE AUTHORS               许可证和作者
-├── CONTRIBUTING.md SECURITY.md          参与方式、报告
-├── SUPPORT.md CODE_OF_CONDUCT.md        支持和行为准则
+├── monitor/                                  程序本体
+├── docs/                                     架构、截图、路线图
+├── tools/                                    图片、指南与演示
+├── deploy/                                   容器示例
+├── images/                                   横幅图和图片
+├── .github/                                  CI 和议题表单
+├── CHANGELOG.md                              各版本变更
+├── LICENSE NOTICE AUTHORS                    许可证和作者
+├── CONTRIBUTING.md SECURITY.md               参与方式、报告
+├── SUPPORT.md CODE_OF_CONDUCT.md             支持和行为准则
 └── monitor/
-    ├── actions_monitor.py               本地服务器
-    ├── actions_monitor.html             网页
-    ├── MONITOR_LITE_GITHUB_ACTIONS.*    lite 版(无哨兵)
-    ├── sentinel_local.py                警报与报告
-    ├── surface.py readiness.py          检查与发布就绪
-    ├── settings_api.py outputs.py       设置与指标
-    ├── signstate.py sigverify.py        签名状态与验证
-    ├── read_report.py                   终端报告
-    ├── gha_dispatch_all.py              批量构建
-    ├── events.py report_history.py      事件与历史
-    ├── ci_red.py export_status.py       供其他工具读取
-    ├── etagcache.py resilience.py       条件读取与连接
-    ├── analytics.py lint_workflows.py   时长、不稳定、检查器
-    ├── notifiers.py ai_actions.py       通知与 AI 封闭列表
-    ├── tui.py migrate_state.py          终端视图与迁移
-    ├── about.py  helpdocs.py            关于与帮助面板
-    ├── quota.py  quotas.json            套餐、分钟数与配额
-    ├── modes.py  updatecheck.py         工作模式、版本提示
-    ├── doctor.py  demo_mode.py          --doctor 与 --demo
-    ├── discovery.py  banner.py          发现、版本横幅
-    ├── tui_textual.py                   交互式终端
-    ├── i18n.py locales/                 八种语言
-    ├── toolconfig.py workspace.py       设置与克隆
-    ├── tests/                           离线测试
-    └── docs/                            指南、模式、Grafana
+    ├── actions_monitor.py                    本地服务器
+    ├── actions_monitor.html                  网页
+    ├── MONITOR_LITE_GITHUB_ACTIONS.*         lite 版(无哨兵)
+    ├── sentinel_local.py                     警报与报告
+    ├── sentinel_collab.py  alert_center.py   Issue 哨兵与警报
+    ├── surface.py readiness.py               检查与发布就绪
+    ├── settings_api.py outputs.py            设置与指标
+    ├── signstate.py sigverify.py             签名状态与验证
+    ├── read_report.py                        终端报告
+    ├── gha_dispatch_all.py                   批量构建
+    ├── events.py report_history.py           事件与历史
+    ├── ci_red.py export_status.py            供其他工具读取
+    ├── etagcache.py resilience.py            条件读取与连接
+    ├── analytics.py lint_workflows.py        时长、不稳定、检查器
+    ├── notifiers.py ai_actions.py            通知与 AI 封闭列表
+    ├── tui.py migrate_state.py               终端视图与迁移
+    ├── about.py  helpdocs.py                 关于与帮助面板
+    ├── quota.py  quotas.json                 套餐、分钟数与配额
+    ├── modes.py  updatecheck.py              工作模式、版本提示
+    ├── doctor.py  demo_mode.py               --doctor 与 --demo
+    ├── discovery.py  banner.py               发现、版本横幅
+    ├── tui_textual.py                        交互式终端
+    ├── i18n.py locales/                      八种语言
+    ├── toolconfig.py workspace.py            设置与克隆
+    ├── tests/                                离线测试
+    └── docs/                                 指南、模式、Grafana
 ```
 
 ## 文档
@@ -243,6 +246,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/QUICKSTART_zh.txt`](monitor/QUICKSTART_zh.txt): 入门步骤（八种语言）
 - [`monitor/docs/FIRST_STEPS_zho.md`](monitor/docs/FIRST_STEPS_zho.md)：你的前五分钟
 - [`monitor/docs/SENTINEL_zho.md`](monitor/docs/SENTINEL_zho.md)：哨兵及其检查 A1-A13
+- [`monitor/docs/COLLAB_zho.md`](monitor/docs/COLLAB_zho.md)：Collab 哨兵、警报标签页与静音
+- [`monitor/docs/ACCOUNTS_zho.md`](monitor/docs/ACCOUNTS_zho.md)：多个账户，每个账户一个进程
 - [`monitor/docs/QUOTAS_zho.md`](monitor/docs/QUOTAS_zho.md)：GitHub 的配额与套餐
 - [`monitor/docs/MODES_zho.md`](monitor/docs/MODES_zho.md)：工作模式：普通、快速和极速
 

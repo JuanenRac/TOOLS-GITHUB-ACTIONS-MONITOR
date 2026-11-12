@@ -34,3 +34,10 @@ In `actions_monitor.json`: `"webhook": {"enabled": true, "secret": "<32 oder meh
 ## Wiederholungen und Flut
 
 Eine gültige signierte Anfrage, die jemand abgefangen hat und erneut sendet, wird beantwortet, aber nicht ausgeführt: Jede Lieferung braucht ihre `X-GitHub-Delivery`-Kennung, bereits akzeptierte Kennungen werden `webhook.replay_seconds` lang gemerkt (standardmäßig eine Stunde, begrenzter Speicher), und eine Wiederholung erhält `202 {"duplicate": true}`. (Eine manuelle erneute Zustellung von der GitHub-Seite verwendet dieselbe Kennung und wird in diesem Fenster ignoriert.) Ein Repository kann höchstens `webhook.max_per_minute` akzeptierte Ereignisse pro Minute auslösen; der Rest wird beantwortet und ignoriert. Nennt die Nutzlast `full_name`, muss dessen Eigentümer das beobachtete Konto sein (oder einer aus `webhook.allowed_owners`). Im Netzwerkmodus darf eine Adresse 120 Anfragen pro Minute senden. Nach einem akzeptierten Ereignis werden die gespeicherten bedingten Lesevorgänge dieses Repositorys verworfen und im nächsten Zyklus neu gelesen, so wird ein Live-Ereignis immer mit GitHub abgeglichen.
+
+## Checkliste für die Live-Ansicht
+
+1. Lege `webhook.secret` mit mindestens 32 Zeichen fest und schalte den Webhook ein.
+2. Leite den Port weiter (`gh webhook forward`) oder öffne einen Tunnel und trage dessen Adresse mit der Endung `/api/webhook` bei GitHub ein.
+3. Sende das Testereignis von GitHub (Recent deliveries > Redeliver) und suche es in `?view=live`.
+4. Beobachte das Kontingent in der Kopfzeile: Mit Webhooks genügt ein langsamerer Zyklus.

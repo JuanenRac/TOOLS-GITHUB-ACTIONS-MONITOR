@@ -82,3 +82,7 @@ All of them are read-only suggestions for a person; the monitor never closes an 
 ## Where everything is configured
 
 Every threshold above is a setting of the **Sentinel**, **Surface checks (A10)**, **Readiness (A11)**, **Folders and files**, **Analytics** and **Workflow linter** tabs of the Settings page, and a key of `actions_monitor.json`. The full list with its ranges is in `SETTINGS.md`. The Help panel and `--help-topics sentinel` show this page offline.
+
+## The second sentinel and the list of alerts
+
+Besides this sentinel (CI), the complete edition has the **Collab sentinel**, which watches open issues and pull requests on a clock of its own and never writes to GitHub: [COLLAB.md](COLLAB.md). The **Alerts** tab puts the alerts of both in one list, with a filter by origin and level and local silences that end by themselves (`alerts.mute_hours`); `GET /api/alerts` serves the same list.

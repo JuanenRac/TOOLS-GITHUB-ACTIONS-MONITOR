@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITOR DE GITHUB ACTIONS + CENTINELA (versión 1.7.2)
+MONITOR DE GITHUB ACTIONS + CENTINELA (versión 1.7.3)
 =====================================================
 ¿CUÁL ARRANCAR? (un usuario nuevo decide en dos minutos)
   COMPLETA  MONITOR_GITHUB_ACTIONS.*       la página con el centinela (puerto 8765): alertas, cola de firma, analítica. Empieza aquí si tienes varios repositorios.
@@ -45,79 +45,9 @@ EVENTOS    El Centinela escribe una línea JSON por cada CAMBIO (rojo nuevo, CI 
 CI EN ROJO Un solo criterio: el ÚLTIMO run terminado de cada workflow en la rama por defecto. Rojo = failure, timed_out, startup_failure o action_required.
            cancelled, skipped, neutral y stale no cuentan.
 
-NOVEDADES 1.5.1 (historial: CHANGELOG.md)
-  - Pestaña AJUSTES: grupo nuevo «IA externa para el centinela» (ai.provider none / ollama / openai-compatible, modelo, dirección de Ollama (solo este equipo), un endpoint https, el NOMBRE de la variable de entorno que guarda la clave, llamadas al día). La clave en sí nunca se guarda. Apagada por defecto; un servicio externo recibe datos de tus repositorios.
-  - migrate_state.py: lleva los ficheros escritos antes de la 1.5.0 a los nombres nuevos. `python migrate_state.py` es una simulación; `--apply` copia (los antiguos se quedan), `--move` renombra. Nada se sobrescribe. Una página en docs/MIGRATING.md, en 8 idiomas.
-  - Primer arranque sin ficheros de catálogo propios: el monitor avisa de que usa los de ejemplo (consola), y `--init-catalog` crea copias editables de ecosystems.json, targets.json y profiles.json.
-  - Python 3.11 o superior (probado en 3.11 y 3.13, en Windows, Linux y macOS).
-
-NOVEDADES 1.5.0 (historial: CHANGELOG.md)
-  - Pestaña CONFIGURACIÓN: cambia desde la página los valores de actions_monitor.json (lista de claves permitidas con tipo y rango, validadas, copia en config_backups/ antes de cada guardado, nunca tokens ni secretos; docs/SETTINGS.md).
-  - Botones con relieve que se iluminan y se hunden, iconos SVG con nombre y tooltip en 8 idiomas, el aspecto del panel de estado, barras y cifras con vida (todo se detiene con prefers-reduced-motion).
-  - Salidas opcionales, apagadas por defecto, solo en 127.0.0.1: /metrics (Prometheus), /api/outputs/grafana.json (Grafana JSON / Infinity), /api/outputs/dashboard.json (docs/OUTPUTS.md, panel de ejemplo en docs/grafana/).
-  - Paquete neutro: tus ecosistemas, objetivos y perfiles viven fuera (ecosystems_file, targets_file, profiles_file; tools_dir para las herramientas de firma locales); inglés por defecto; nombres de ficheros y carpetas en inglés.
-  AL ACTUALIZAR desde 1.4.x: cambiaron estos nombres (los antiguos se siguen leyendo donde pueda haber un fichero; solo se escriben los nuevos):
-  leer_parte.py -> read_report.py          eventos.py -> events.py          parte_history.py -> report_history.py
-  LOTE_GITHUB_ACTIONS.bat/.sh/.command -> BATCH_GITHUB_ACTIONS.bat/.sh/.command
-  eventos_monitor.jsonl -> events_monitor.jsonl          eventos_estado.json -> events_state.json
-  PARTE_CENTINELA_DIA_<day>.* -> SENTINEL_REPORT_DAY_<day>.*     PARTE_CENTINELA_<time>.txt -> SENTINEL_REPORT_<time>.txt     CANDIDATAS_RELEASE.txt -> RELEASE_CANDIDATES.txt
-  <signed_dir>/lotes/lote_<time>.json -> <signed_dir>/batches/batch_<time>.json     parte_history_days -> report_history_days     monitor_y_centinela.zip -> github_actions_monitor.zip
-  sentinel.audit_files: names of the A8 audit files (neutral defaults RECONCILIATION_TOTAL_*.txt, ROUNDS_MAP_2*.txt, ROUNDS_MAP_EXTRA_*.txt)
-  ci_red.json and --export-status: unchanged (a contract).
-
-NOVEDADES 1.4.2 (historial: CHANGELOG.md)
-  Cuando A2 pregunta por el último run de un workflow oculto, un run en curso o cancelado ya no cuenta como visto (podría ocultar un rojo anterior): el Centinela pide los
-  últimos runs completados de ese workflow y usa el primero con conclusión real (cancelled y skipped se ignoran). Si no hay ninguno en la rama por defecto, solo ese workflow sigue sin concluir.
-
-NOVEDADES 1.4.1 (historial: CHANGELOG.md)
-  A2 ya no da un repositorio entero por no concluyente solo porque su muestra de ejecuciones esté llena: por cada workflow del clon que falta en la muestra
-  pregunta a GitHub por el último run de ese workflow en la rama por defecto (solo lectura, misma puerta de cuota que A10, limitado por
-  sentinel.a2_resolve_max_calls_per_tick, respuestas guardadas sentinel.a2_resolve_ttl_seconds). El rojo cuenta como rojo; un workflow sin ejecuciones en la rama
-  sigue sin concluir y el panel lo nombra.
-
-NOVEDADES 1.4.0 (historial: CHANGELOG.md)
-  Panel A11 "Preparación": preparación de releases por repositorio (CI de la rama por defecto y su commit, versión por encima de la última release, compilación, firma,
-  siguiente paso), salud de los ecosistemas (puntuación solo con recuentos reales, que se retiene si pocos repositorios tienen datos) y versiones fijadas que van por detrás
-  de su proveedor (leídas de los ficheros de versiones de los clones locales, configurados en sentinel.readiness.pins.sources). Solo lectura; nada se estima.
-
-NOVEDADES 1.3.0 (historial: CHANGELOG.md)
-  8 idiomas en la página, la línea de comandos, los eventos y los partes; selector de idioma; ecosistemas, objetivos y cuenta de GitHub como datos (github_owner,
-  ecosystems_file, targets_file); workspace opcional con un modo reducido honesto; autoría y GPL-3.0-or-later en cada fichero; LICENSE, NOTICE, AUTHORS;
-  README y QUICKSTART en 8 idiomas.
-LICENCIA   GPL-3.0-or-later (ver LICENSE y NOTICE). Copyright (C) 2026 JuanenRac (Electro Hobby 3D).
+HISTORIAL DE CAMBIOS
+  Todas las versiones, de la más nueva a la más antigua, están en CHANGELOG.md (en ocho idiomas en docs/CHANGELOG_*.md, y en la página: Ayuda > Registro de cambios).
 
 AYUDA, ACERCA DE Y COMPROBACIONES (1.6.4)
 -----------------------------------------
 La página tiene un botón de Ayuda (? redondo) y uno de Acerca de (i); en la consola usa --help-topics, --help-search, --about y --doctor; --demo muestra la página con datos inventados. La edición lite arranca con su propio banner y título de ventana (LITE, puerto 8766, sin centinela); la completa dice COMPLETE, puerto 8765, centinela activo. El aviso de versión nueva se puede apagar (Ajustes > Básico).
-
-NOVEDADES DE LA 1.7.2 (cabecera ordenada, controles rápidos en la esquina, Acerca de en el panel lateral; historial: CHANGELOG.md)
-  Las cifras de la cabecera van en un orden que se lee y en una rejilla que sigue el ancho; el botón de solo calientes, la lista de velocidad y la salud de los ecosistemas quedan arriba a la derecha.
-  Ajustes, Ayuda y Acerca de están solo en el panel lateral. El aviso de versión nueva ya no está en la cabecera (Acerca de y la consola lo siguen diciendo). Las pruebas no dejan nada junto al código.
-
-NOVEDADES DE LA 1.7.1 (panel lateral, dieciséis temas, un contrato para los centinelas; historial: CHANGELOG.md)
-  La página tiene un panel lateral a la izquierda con el logotipo, las secciones en grupos y la ayuda; se contrae a sus iconos. Dieciséis temas además de auto, claro y oscuro (Ajustes > Este navegador).
-  El centinela de CI está ahora detrás de un contrato (BaseSentinel, SentinelRegistry), así que se pueden añadir los siguientes; lo que muestra y decide no cambia. La edición lite no tiene nada de esto.
-
-NOVEDADES DE LA 1.7.0 (varias cuentas; historial: CHANGELOG.md)
-  La edición completa puede vigilar varias cuentas de GitHub: una carpeta accounts/<id>/ por cuenta y un monitor por cuenta bajo un supervisor, así que el fallo de una nunca toca a otra.
-  --accounts, --account <id>, --migrate-accounts [--apply]; un selector y la página Todas las cuentas; ?view= y ?chrome=0; la vista En vivo con el estado del webhook; un /api/webhook para todas.
-  Guía: docs/ACCOUNTS.md. Sin una carpeta accounts/ nada cambia. La edición lite tiene una cuenta y nada de esto.
-
-NOVEDADES DE LA 1.6.8 (proxy comprobado de verdad; historial: CHANGELOG.md)
-  El proxy HTTPS de la 1.6.7 se comprueba contra un proxy real en el puerto 443 (tools/manual_check_live.py proxy en el repositorio) y con pruebas que recorren toda la cadena. El historial
-  de cambios está traducido hasta la 1.6.3 (Ayuda > Registro de cambios). Ningún ajuste cambia.
-
-NOVEDADES DE LA 1.6.7 (proxy HTTPS en el puerto por defecto; historial: CHANGELOG.md)
-  Ajuste nuevo listen.proxy_public_host (vacío por defecto): el nombre público de un proxy HTTPS en el puerto 443 que reenvía Host y Origin sin puerto se acepta tal cual, solo con
-  HTTPS, y solo se cambia desde el propio equipo. El historial de cambios está traducido para la 1.6.7, la 1.6.6 y la 1.6.5 (Ayuda > Registro de cambios).
-
-NOVEDADES DE LA 1.6.6 (correcciones del modo red y de act; historial: CHANGELOG.md)
-  El modo red con HTTPS funciona desde la página (el origen sigue el esquema de la sesión); todo ajuste marcado como seguro solo se cambia desde el propio equipo; POST /api/access abre la
-  sesión sin el token en la dirección; barra roja en Ajustes si escucha en todas las interfaces; contador de fallos tragados en --doctor y Acerca de. act: Stop libera la ejecución y se
-  cierra la tubería. El historial de cambios está traducido a ocho idiomas (Ayuda > Registro de cambios).
-
-NOVEDADES DE LA 1.6.5 (integridad y seguridad; historial: CHANGELOG.md)
-  Lotes: CI en verde significa que pasó el workflow obligatorio (dispatch.required_ci), un git fetch fallido detiene el despacho, targets.json no puede nombrar una herramienta fuera de la
-  carpeta de herramientas ni cambiar dry_run/ref, y finalize solo ofrece runs cuyo lote registró la comprobación del commit (finalize --accept-legacy para lotes antiguos). act se queda
-  dentro del espacio de trabajo y Stop termina todo el árbol. Modo red: HTTPS opcional, bloqueo tras tokens erróneos, solo IPv4. Webhook: sin reenvíos. Notificaciones: max_per_hour cuenta
-  mensajes. --doctor avisa de combinaciones peligrosas.

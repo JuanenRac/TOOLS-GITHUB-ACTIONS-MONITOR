@@ -39,6 +39,8 @@ BACKUPS = 10
 MAX_BODY = 16384
 
 NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}$")
+LABEL_RE = re.compile(r"^[\w .:/+-]{1,50}$")      # a label of GitHub may hold a colon, a space or a slash ("monitor:ignore", "good first issue")
+LABEL_KEYS = ("sentinels.collab.rules.issue_critical_labels", "sentinels.collab.rules.ignore_labels")
 OWNER_RE = re.compile(r"^[A-Za-z0-9-]{0,39}$")
 MODEL_RE = re.compile(r"^[A-Za-z0-9._:/@-]{0,100}$")
 OLLAMA_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}/?$")   # the local service only: nothing leaves this computer
@@ -142,6 +144,20 @@ _f(_T_SENT, "minutes", "sentinel.minutes_budget", "intmap", (0, 1000000), unit="
 _f(_T_SENT, "audits", "sentinel.audit_files.reconciliation", "text", FILE_PATTERN_RE)
 _f(_T_SENT, "audits", "sentinel.audit_files.rounds", "text", FILE_PATTERN_RE)
 _f(_T_SENT, "audits", "sentinel.audit_files.rounds_extra", "text", FILE_PATTERN_RE)
+# the Collab sentinel (1.7.3): issues and pull requests that need a person; off by default, read only
+_f(_T_SENT, "collab", "sentinels.collab.enabled", "bool")
+_f(_T_SENT, "collab", "sentinels.collab.refresh_seconds", "int", (60, 86400))
+_f(_T_SENT, "collab", "sentinels.collab.max_repos_per_tick", "int", (1, 100), unit="calls")
+_f(_T_SENT, "collab", "sentinels.collab.min_rate_remaining", "int", (100, 5000), unit="calls")
+_f(_T_SENT, "collab", "sentinels.collab.repos", "repos")
+_f(_T_SENT, "collab", "sentinels.collab.rules.issue_stale_days", "int", (1, 365))
+_f(_T_SENT, "collab", "sentinels.collab.rules.issue_critical_labels", "names")
+_f(_T_SENT, "collab", "sentinels.collab.rules.pr_review_pending_days", "int", (1, 90))
+_f(_T_SENT, "collab", "sentinels.collab.rules.pr_draft_max_days", "int", (1, 365))
+_f(_T_SENT, "collab", "sentinels.collab.rules.pr_conflict_days", "int", (1, 90))
+_f(_T_SENT, "collab", "sentinels.collab.rules.watch_external_comments", "bool")
+_f(_T_SENT, "collab", "sentinels.collab.rules.ignore_labels", "names")
+_f(_T_SENT, "collab", "alerts.mute_hours", "int", (1, 720), restart=False, unit="h")
 # --- Actions and releases surface (A10)
 _f(_T_SURF, "main", "sentinel.surface.enabled", "bool")
 _f(_T_SURF, "main", "sentinel.surface.refresh_seconds", "int", (600, 604800))
@@ -382,7 +398,8 @@ def check_value(path, value):
             return False, "path"
         return True, text
     if kind == "names":
-        if not isinstance(value, list) or len(value) > 200 or not all(isinstance(v, str) and NAME_RE.match(v) for v in value):
+        pattern = LABEL_RE if path in LABEL_KEYS else NAME_RE
+        if not isinstance(value, list) or len(value) > 200 or not all(isinstance(v, str) and pattern.match(v) for v in value):
             return False, "names"
         return True, list(value)
     if kind == "patterns":

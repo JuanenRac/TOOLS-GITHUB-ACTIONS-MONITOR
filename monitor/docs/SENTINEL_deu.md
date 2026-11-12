@@ -82,3 +82,7 @@ Alle sind reine Lese-Vorschläge für einen Menschen; der Monitor schließt nie 
 ## Wo alles eingestellt wird
 
 Jeder Schwellwert oben ist eine Einstellung der Reiter **Wächter**, **Oberflächenprüfungen (A10)**, **Bereitschaft (A11)**, **Ordner und Dateien**, **Analytik** und **Workflow-Linter** der Einstellungsseite und ein Schlüssel von `actions_monitor.json`. Die vollständige Liste mit Bereichen steht in `SETTINGS_deu.md`. Das Hilfe-Panel und `--help-topics sentinel` zeigen diese Seite offline.
+
+## Der zweite Wächter und die Alarmliste
+
+Neben diesem Wächter (CI) hat die vollständige Ausgabe den **Collab-Wächter**, der offene Issues und Pull Requests mit eigener Uhr beobachtet und nie nach GitHub schreibt: [COLLAB_deu.md](COLLAB_deu.md). Der Reiter **Alarme** führt die Alarme beider in einer Liste zusammen, mit Filter nach Herkunft und Stufe und lokalen Stummschaltungen, die von selbst enden (`alerts.mute_hours`); `GET /api/alerts` liefert dieselbe Liste.

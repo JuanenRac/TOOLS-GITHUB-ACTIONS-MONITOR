@@ -18,7 +18,7 @@ toolconfig.set_owner("JuanenRac")
 
 
 WATCHED = ("actions_monitor.json", "actions_monitor_lite.json", "update_check.json", "update_check_lite.json", "actions_monitor_log.txt", "actions_monitor_log_lite.txt",
-           "github_actions_log.jsonl", "ai_actions_log.jsonl")
+           "github_actions_log.jsonl", "ai_actions_log.jsonl", "collab_state.json", "alert_mutes.json")
 
 
 def guard(case):

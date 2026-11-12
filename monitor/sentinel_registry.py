@@ -1,6 +1,6 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 # GPL-3.0-or-later - see LICENSE
-"""The sentinels of the complete edition, by name (1.7.1). Today there is one, `ci`; the next ones are added to REGISTRY and nothing else of the monitor changes.
+"""The sentinels of the complete edition, by name (1.7.1): `ci` and, since 1.7.3, `collab` (off until `sentinels.collab.enabled` is true). The next ones are added to `_registry()` and nothing else of the monitor changes.
 
 `config["sentinels"][name]["enabled"]` switches one on or off. Without it the old setting decides: the CI sentinel follows `sentinel.enabled` exactly as before. The options of
 `config["sentinels"]["ci"]` are the same ones as `sentinel.*` (the old block keeps working; where both say something, the new block wins).
@@ -14,7 +14,8 @@ import sentinel_base
 
 def _registry():
     import sentinel_ci
-    return {sentinel_ci.SentinelCI.name: sentinel_ci.SentinelCI}
+    import sentinel_collab
+    return {sentinel_ci.SentinelCI.name: sentinel_ci.SentinelCI, sentinel_collab.SentinelCollab.name: sentinel_collab.SentinelCollab}
 
 
 def section(config, name):

@@ -82,3 +82,7 @@ Sono tutti suggerimenti di sola lettura per una persona; il monitor non chiude m
 ## Dove si configura tutto
 
 Ogni soglia qui sopra è un'impostazione delle schede **Sentinella**, **Controlli di superficie (A10)**, **Prontezza (A11)**, **Cartelle e file**, **Analitica** e **Linter dei workflow** della pagina Impostazioni, e una chiave di `actions_monitor.json`. L'elenco completo con gli intervalli è in `SETTINGS_ita.md`. Il pannello Guida e `--help-topics sentinel` mostrano questa pagina offline.
+
+## La seconda sentinella e l'elenco degli avvisi
+
+Oltre a questa sentinella (CI), l'edizione completa ha la **sentinella Collab**, che osserva issue e pull request aperte con un orologio proprio e non scrive mai su GitHub: [COLLAB_ita.md](COLLAB_ita.md). La scheda **Avvisi** riunisce gli avvisi di entrambe in un elenco, con filtro per origine e livello e silenziamenti locali che finiscono da soli (`alerts.mute_hours`); `GET /api/alerts` serve lo stesso elenco.

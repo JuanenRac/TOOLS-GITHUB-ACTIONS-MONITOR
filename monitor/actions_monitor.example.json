@@ -195,6 +195,32 @@
       "rounds_extra": "ROUNDS_MAP_EXTRA_*.txt"
     }
   },
+  "sentinels": {
+    "collab": {
+      "enabled": false,
+      "refresh_seconds": 600,
+      "max_repos_per_tick": 10,
+      "min_rate_remaining": 1000,
+      "repos": "all",
+      "rules": {
+        "issue_stale_days": 14,
+        "issue_critical_labels": [
+          "security",
+          "critical"
+        ],
+        "pr_review_pending_days": 3,
+        "pr_draft_max_days": 30,
+        "pr_conflict_days": 7,
+        "watch_external_comments": false,
+        "ignore_labels": [
+          "monitor:ignore"
+        ]
+      }
+    }
+  },
+  "alerts": {
+    "mute_hours": 24
+  },
   "ai": {
     "provider": "none",
     "model": "",

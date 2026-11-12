@@ -82,3 +82,7 @@ Todas são sugestões só de leitura para uma pessoa; o monitor nunca fecha um p
 ## Onde se configura tudo
 
 Cada limiar acima é uma definição dos separadores **Sentinela**, **Verificações de superfície (A10)**, **Prontidão (A11)**, **Pastas e ficheiros**, **Análise** e **Linter de workflows** da página de Definições, e uma chave de `actions_monitor.json`. A lista completa com os intervalos está em `SETTINGS_por.md`. O painel de Ajuda e `--help-topics sentinel` mostram esta página sem ligação.
+
+## A segunda sentinela e a lista de alertas
+
+Além desta sentinela (CI), a edição completa tem a **sentinela Collab**, que vigia issues e pull requests abertas com um relógio próprio e nunca escreve no GitHub: [COLLAB_por.md](COLLAB_por.md). O separador **Alertas** reúne os alertas de ambas numa lista, com filtro por origem e nível e silêncios locais que acabam sozinhos (`alerts.mute_hours`); `GET /api/alerts` serve a mesma lista.

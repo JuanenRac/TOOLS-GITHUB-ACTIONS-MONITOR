@@ -25,7 +25,7 @@
 ## 适配器约定
 
 - 要连接列表之外的服务,请在本机运行一个小型接收程序,并让 `http_local` 指向它。它会收到 `Content-Type: application/json` 的 POST,正文如下:`{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`。
-- `kind` 为 `red_new`、`red_fixed`、`stuck_new`、`pending_sign`、`release_due`、`rate_low`、`offline`、`online`、`alerts_up`、`workflow_failed` 之一。字段只会增加。返回任意 2xx;其他一律算作失败。
+- `kind` 为 `red_new`、`red_fixed`、`stuck_new`、`pending_sign`、`release_due`、`rate_low`、`offline`、`online`、`alerts_up`、`workflow_failed`、`collab_new`、`collab_fixed` 之一。字段只会增加。返回任意 2xx;其他一律算作失败。
 - `mqtt` 把同样的 JSON 作为 QoS 0 消息的负载发布到 `notify.channels.mqtt.topic`。
 
 ## 每小时上限统计的是消息

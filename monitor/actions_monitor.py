@@ -1201,7 +1201,7 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as error:   # noqa: BLE001
                 self.json_reply({"ok": False, "error": str(error)[:200]}, 400)
             return
-        if path in ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack"):
+        if path in ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/alerts/mute", "/api/alerts/unmute"):
             if not self.guard() or not self.this_computer():
                 return
             if path != "/api/welcome" and path != "/api/gh-action/plan" and path != "/api/act/plan" and not self.token_ok():
@@ -1322,6 +1322,15 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as error:
                 self.json_reply({"data": None, "error": i18n.t("mon.history_failed", error=error)})
             return
+        if path == "/api/sentinel/collab":      # the issues and pull requests that need a person (the Collab sentinel; off by default; read only)
+            if not self.guard():
+                return
+            collab = (SENTINEL["registry"].get("collab") if SENTINEL["registry"] else None)
+            try:
+                self.json_reply({"data": collab.snapshot() if collab else None, "error": SENTINEL["error"] or (None if collab else i18n.t("mon.sentinel_not_loaded"))})
+            except Exception as error:      # shown as a notice in the tab
+                self.json_reply({"data": None, "error": i18n.t("mon.sentinel_failed", error=error)})
+            return
         if path == "/api/sentinel":
             if not self.guard():
                 return
@@ -1423,6 +1432,18 @@ class Handler(BaseHTTPRequestHandler):
             if not self.guard():
                 return
             self.json_reply(ANALYTICS["summary"] or {"enabled": ANALYTICS["store"] is not None, "duration": [], "queue": [], "steps": [], "flaky": [], "slower": []})
+        elif path in ("/api/alerts", "/api/events"):      # one list of the alerts of every sentinel, and the events of the feed (1.7.3; read only; the account comes from ?account= or the process)
+            if not self.guard():
+                return
+            from urllib.parse import parse_qs
+            ask = {k: v[0] for k, v in parse_qs(self.path.partition("?")[2]).items() if v}
+            if path == "/api/events":
+                import alert_center
+                import events as events_mod
+                rows = alert_center.read_events(events_mod.EVENTS_FILE, ask.get("sentinel", ""), ask.get("since", ""), min(500, int(ask["limit"])) if str(ask.get("limit", "")).isdigit() else 200)
+                self.json_reply({"schema": 1, "account": CHILD["account"] or None, "events": rows})
+            else:
+                self.json_reply(alerts_payload(ask))
         elif path == "/api/live-events":
             if not self.guard():
                 return
@@ -1449,6 +1470,16 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self.send_response(404)
             self.end_headers()
+
+
+def alerts_payload(ask):
+    """GET /api/alerts: the alerts of every sentinel in one list, each with `muted_until`; `?sentinel=`, `?level=`, `?muted=show|hide|only`. Lite has no sentinels: an empty list."""
+    import alert_center
+    registry = SENTINEL["registry"]
+    everything = alert_center.collect(registry)
+    chosen = alert_center.select(everything, ask.get("sentinel", ""), ask.get("level", ""), ask.get("muted", "show") if ask.get("muted") in ("show", "hide", "only") else "show")
+    return {"schema": 1, "account": CHILD["account"] or None, "alerts": chosen, "summary": alert_center.summary(everything), "mutes": alert_center.active(), "history": alert_center.history(20),
+            "mute_hours": alert_center.hours_setting(LIVE_CONFIG or toolconfig.raw_config()), "sentinels": registry.names() if registry else []}
 
 
 def health_payload():
@@ -1640,6 +1671,13 @@ def advanced_get(path, query):
 def handle_advanced_post(path, request):
     """The plan / confirm pairs of the actions on GitHub and of `act`, the token of GitHub and the welcome flag. Answers never contain the request."""
     config = toolconfig.raw_config()
+    if path in ("/api/alerts/mute", "/api/alerts/unmute"):      # a local silence (never a change on GitHub): scope alert|code|sentinel, hours optional
+        import alert_center
+        scope, value = str(request.get("scope") or ""), str(request.get("value") or "")
+        if path.endswith("unmute"):
+            return {"ok": alert_center.unmute(scope, value)}
+        entry = alert_center.mute(scope, value, request.get("hours"), config)
+        return {"ok": entry is not None, "mute": entry}
     if path == "/api/ai/ack":
         import ai_alerts
         return {"ok": ai_alerts.ack(config, request.get("id"))}
@@ -1711,7 +1749,7 @@ def start_sentinel(config):
             except Exception:
                 return []
 
-        ctx = {"gh": gh, "repos_fn": repos_fn, "runs_fn": lambda: RUN_CACHE, "data_fn": lambda: STATE["data"], "eco_fn": ecosystem_of, "account_id": CHILD["account"]}
+        ctx = {"gh": gh, "run_gh": run_gh, "repos_fn": repos_fn, "runs_fn": lambda: RUN_CACHE, "data_fn": lambda: STATE["data"], "eco_fn": ecosystem_of, "account_id": CHILD["account"]}
         import workspace
         if not workspace.has_workspace():   # optional: without the local clones the sentinel runs in reduced mode (GitHub API data only)
             print(i18n.t("mon.reduced_mode"))
@@ -1719,6 +1757,9 @@ def start_sentinel(config):
         SENTINEL["obj"] = SENTINEL["registry"].get("ci")                                   # the CI sentinel answers everything the monitor always asked of it
         import notifiers
         SENTINEL["obj"].feed.listeners.append(notifiers.make_listener(toolconfig.raw_config))
+        collab = SENTINEL["registry"].get("collab")
+        if collab is not None:
+            collab.feed.listeners.append(notifiers.make_listener(toolconfig.raw_config))
         SENTINEL["registry"].start()
     except Exception as error:
         SENTINEL["error"] = i18n.t("mon.sentinel_start_failed", error=error)

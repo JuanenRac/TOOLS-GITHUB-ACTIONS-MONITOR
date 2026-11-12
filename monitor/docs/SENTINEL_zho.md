@@ -82,3 +82,7 @@
 ## 所有配置在哪里
 
 上面的每个阈值都是设置页中**哨兵**、**表面检查（A10）**、**就绪度（A11）**、**文件夹与文件**、**分析**和**工作流 linter** 标签页的设置项，也是 `actions_monitor.json` 的键。带范围的完整列表见 `SETTINGS_zho.md`。帮助面板和 `--help-topics sentinel` 可离线显示本页。
+
+## 第二个哨兵与警报列表
+
+除了这个哨兵（CI），完整版还有 **Collab 哨兵**，它按自己的周期关注未关闭的 Issue 和拉取请求，从不向 GitHub 写入：[COLLAB_zho.md](COLLAB_zho.md)。**警报**标签页把两者的警报汇总成一个列表，可按来源和级别筛选，并提供会自行结束的本地静音（`alerts.mute_hours`）；`GET /api/alerts` 提供同一个列表。

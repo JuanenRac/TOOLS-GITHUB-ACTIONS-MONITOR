@@ -2,6 +2,10 @@
 
 Des idées qui n'ont pas tenu dans la version actuelle, sans ordre promis. Ce sont des directions, pas des engagements ; une issue ou une pull request est la meilleure façon d'en faire avancer une.
 
+## Fait dans la 1.7.3
+
+Une seconde sentinelle pour les issues et pull requests (Collab, désactivée par défaut, lecture seule, horloge propre), un onglet Alertes avec les alertes de toutes les sentinelles et un filtre par origine et niveau, des mises en sourdine locales qui se terminent seules (une alerte, une règle ou une sentinelle ; `alerts.mute_hours`), l'étiquette qui fait ignorer un élément, `GET /api/alerts` et `GET /api/events`, une liste de contrôle de la vue en direct, un guide de la sentinelle Collab en huit langues et les images redessinées.
+
 ## Fait dans la 1.7.2
 
 L'en-tête avec ses chiffres dans un ordre qui se lit et dans une grille qui suit la largeur ; les commandes rapides (seulement les chauds, vitesse, santé des écosystèmes) fixes en haut à droite ; Réglages, Aide et À propos seulement dans le panneau latéral ; l'avis de nouvelle version hors de l'en-tête ; et les tests qui ne laissent plus de fichiers à côté du code.

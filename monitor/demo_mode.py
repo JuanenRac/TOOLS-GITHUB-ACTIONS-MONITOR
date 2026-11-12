@@ -51,7 +51,7 @@ def data(now):
 STATE_FILES = (("actions_monitor", "LOG_FILE", "actions_monitor_log_demo.txt"), ("etagcache", "CACHE_FILE", "etag_cache_demo.json"), ("events", "EVENTS_FILE", "events_monitor_demo.jsonl"),
                ("events", "STATE_FILE", "events_state_demo.json"), ("analytics", "HISTORY_FILE", "analytics_history_demo.json"), ("ai_actions", "LOG_FILE", "ai_actions_log_demo.jsonl"),
                ("updatecheck", "STATE_FILE", "update_check_demo.json"), ("ghactions", "LOG_FILE", "github_actions_log_demo.jsonl"), ("sentinel_local", "CACHE_FILE", "sentinel_cache_demo.json"),
-               ("sentinel_local", "HISTORY_FILE", "sentinel_history_demo.json"), ("sentinel_ai", "CACHE_FILE", "sentinel_ai_cache_demo.json"))
+               ("sentinel_local", "HISTORY_FILE", "sentinel_history_demo.json"), ("sentinel_ai", "CACHE_FILE", "sentinel_ai_cache_demo.json"), ("sentinel_collab", "STATE_FILE", "collab_state_demo.json"), ("alert_center", "STATE_FILE", "alert_mutes_demo.json"))
 
 
 def redirect_state(tmp):

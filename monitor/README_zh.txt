@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GitHub Actions 监视器 + 哨兵（版本 1.7.2）
+GitHub Actions 监视器 + 哨兵（版本 1.7.3）
 ============================================
 该启动哪一个?(新用户两分钟就能决定)
   完整版  MONITOR_GITHUB_ACTIONS.*       带哨兵的页面(端口 8765):警报、签名队列、分析。有多个仓库时从这里开始。
@@ -45,74 +45,9 @@ GitHub Actions 监视器 + 哨兵（版本 1.7.2）
 红色 CI    只有一个标准：默认分支上每个 workflow 的“最后一次已结束的运行”。红色 = failure、timed_out、startup_failure 或 action_required。
            cancelled、skipped、neutral 和 stale 不计入。
 
-1.5.1 的新功能(历史:CHANGELOG.md)
-  - 设置标签页：新增“哨兵使用的外部 AI”分组（ai.provider none / ollama / openai-compatible、模型、Ollama 地址（仅限本机）、https 端点、保存密钥的环境变量名称、每日调用次数）。密钥本身绝不会被保存。默认关闭；外部服务会收到你仓库的数据。
-  - migrate_state.py：把 1.5.0 之前写入的文件改为新名称。`python migrate_state.py` 为演练；`--apply` 复制（旧文件保留），`--move` 重命名。不会覆盖任何内容。docs/MIGRATING.md 用 8 种语言写成一页。
-  - 没有自己的目录文件时的首次启动：监视器会在控制台说明正在使用示例文件，`--init-catalog` 会创建 ecosystems.json、targets.json 和 profiles.json 的可编辑副本。
-  - Python 3.11 或更高版本（在 Windows、Linux 和 macOS 上用 3.11 和 3.13 测试）。
-
-1.5.0 的新功能(历史:CHANGELOG.md)
-  - “设置”选项卡:在页面中修改 actions_monitor.json 的值(带类型和范围的允许键列表,经过校验,每次保存前在 config_backups/ 留副本,绝不处理令牌或密钥;docs/SETTINGS.md)。
-  - 有浮雕感、悬停发光、按下凹陷的按钮,带名称和提示的 8 语言 SVG 图标,与状态仪表板一致的外观,有动感的条形和数字(prefers-reduced-motion 时全部停止)。
-  - 可选输出,默认关闭,仅在 127.0.0.1 上:/metrics(Prometheus)、/api/outputs/grafana.json(Grafana JSON / Infinity)、/api/outputs/dashboard.json(docs/OUTPUTS.md,示例仪表板在 docs/grafana/)。
-  - 中立的软件包:你的生态系统、目标和配置文件放在包外(ecosystems_file、targets_file、profiles_file;本地签名工具用 tools_dir);默认英语;文件和文件夹名称为英语。
-  从 1.4.x 更新:以下名称已更改(旧名称在可能存在文件的地方仍会被读取;只写入新名称):
-  leer_parte.py -> read_report.py          eventos.py -> events.py          parte_history.py -> report_history.py
-  LOTE_GITHUB_ACTIONS.bat/.sh/.command -> BATCH_GITHUB_ACTIONS.bat/.sh/.command
-  eventos_monitor.jsonl -> events_monitor.jsonl          eventos_estado.json -> events_state.json
-  PARTE_CENTINELA_DIA_<day>.* -> SENTINEL_REPORT_DAY_<day>.*     PARTE_CENTINELA_<time>.txt -> SENTINEL_REPORT_<time>.txt     CANDIDATAS_RELEASE.txt -> RELEASE_CANDIDATES.txt
-  <signed_dir>/lotes/lote_<time>.json -> <signed_dir>/batches/batch_<time>.json     parte_history_days -> report_history_days     monitor_y_centinela.zip -> github_actions_monitor.zip
-  sentinel.audit_files: names of the A8 audit files (neutral defaults RECONCILIATION_TOTAL_*.txt, ROUNDS_MAP_2*.txt, ROUNDS_MAP_EXTRA_*.txt)
-  ci_red.json and --export-status: unchanged (a contract).
-
-1.4.2 的新内容(历史:CHANGELOG.md)
-  A2 查询被隐藏 workflow 的最近一次运行时,进行中或已取消的运行不再算作“已看到”(它可能掩盖更早的红色):哨兵会取该 workflow 最近已完成的运行,
-  使用第一个有真实结论的(cancelled 和 skipped 被忽略)。若默认分支上没有,则只有该 workflow 仍为不确定。
-
-1.4.1 的新内容(历史:CHANGELOG.md)
-  A2 不再仅因运行样本已满就把整个仓库判为无法判定:对克隆中未出现在样本里的每个 workflow,单独向 GitHub 查询该 workflow 在默认分支上的最近一次运行
-  (只读,与 A10 相同的配额闸门,受 sentinel.a2_resolve_max_calls_per_tick 限制,答案保存 sentinel.a2_resolve_ttl_seconds 秒)。红色按红色计算;
-  默认分支上没有运行的 workflow 仍然无法判定,面板会点名该 workflow。
-
-1.4.0 的新内容(历史:CHANGELOG.md)
-  A11“就绪”面板:按仓库显示发布就绪情况(默认分支的 CI 及其提交、版本是否高于最近一次发布、构建、签名、下一步),
-  生态系统健康度(仅用真实计数计算得分,有数据的仓库太少时不显示),以及落后于其提供方的固定版本
-  (从本地克隆中的固定文件读取,在 sentinel.readiness.pins.sources 中配置)。只读;不做任何估计。
-
-1.3.0 的新内容（历史：CHANGELOG.md）
-  页面、命令行、事件和报告支持 8 种语言；语言选择器；生态系统、目标和 GitHub 账户改为数据（github_owner、ecosystems_file、targets_file）；
-  可选的工作区与如实说明的精简模式；每个文件都带有作者声明和 GPL-3.0-or-later；LICENSE、NOTICE、AUTHORS；8 种语言的 README 和 QUICKSTART。
-许可证     GPL-3.0-or-later（见 LICENSE 和 NOTICE）。Copyright (C) 2026 JuanenRac (Electro Hobby 3D)。
+更新历史
+  所有版本按从新到旧排列在 CHANGELOG.md 中（八种语言见 docs/CHANGELOG_*.md，页面中见 帮助 > 更新日志）。
 
 帮助、关于与检查 (1.6.4)
 ------------------------
 页面有帮助按钮（圆形 ?）和关于按钮（i）；在控制台使用 --help-topics、--help-search、--about 和 --doctor；--demo 用虚构数据显示页面。精简版以自己的横幅和窗口标题启动（LITE、端口 8766、无哨兵）；完整版显示 COMPLETE、端口 8765、哨兵已启用。新版本提示可以关闭（设置 > 基本）。
-
-1.7.2 新增内容（有序的标题栏、角落的快捷控制、侧边栏中的关于；历史：CHANGELOG.md）
-  标题栏的数字按便于阅读的顺序排列，并使用随宽度变化的网格；“仅热点”按钮、速度列表和生态系统的健康状态保留在右上角。
-  设置、帮助和关于只在侧边栏中。新版本通知不再出现在标题栏（“关于”和控制台仍会提示）。测试不会在代码旁留下任何东西。
-
-1.7.1 新增内容（侧边栏、十六个主题、哨兵的统一契约；历史：CHANGELOG.md）
-  页面左侧有侧边栏，包含徽标、分组的栏目和帮助，可收起为仅显示图标。除自动、浅色和深色外还有十六个主题（设置 > 此浏览器）。
-  CI 哨兵现在位于契约（BaseSentinel、SentinelRegistry）之后，因此可以加入后续的哨兵；它显示和判断的内容不变。lite 版没有这些内容。
-
-1.7.0 新增内容（多个账户；历史：CHANGELOG.md）
-  完整版可以监视多个 GitHub 账户：每个账户一个 accounts/<id>/ 文件夹，并在监督程序下各有一个监视器，因此某个账户的故障绝不会影响其他账户。
-  --accounts、--account <id>、--migrate-accounts [--apply]；切换器和“所有账户”页面；?view= 和 ?chrome=0；显示 webhook 状态的实时视图；供所有账户使用的一个 /api/webhook。
-  指南：docs/ACCOUNTS.md。没有 accounts/ 文件夹时一切照旧。精简版只有一个账户，没有这些内容。
-
-1.6.8 新增内容（代理的真实验证；历史：CHANGELOG.md）
-  1.6.7 的 HTTPS 代理已用 443 端口上的真实代理（仓库中的 tools/manual_check_live.py proxy）和贯穿整条链路的测试验证。更新历史已翻译到 1.6.3（帮助 > 更新日志）。没有任何设置变化。
-
-1.6.7 新增内容（默认端口上的 HTTPS 代理；历史：CHANGELOG.md）
-  新设置 listen.proxy_public_host（默认为空）：443 端口上转发不带端口的 Host 和 Origin 的 HTTPS 代理，其公开名称会被原样接受，仅限 HTTPS，并且只能在本机上更改。
-  更新历史已翻译 1.6.7、1.6.6 和 1.6.5（帮助 > 更新日志）。
-
-1.6.6 新增内容（网络模式与 act 的修复；历史：CHANGELOG.md）
-  HTTPS 下的网络模式可从页面使用（来源遵循会话的协议）；所有标记为安全的设置只能在本机修改；POST /api/access 无需在地址中放令牌即可打开会话；监听所有接口时设置页显示红色横幅；
-  --doctor 与关于面板新增被忽略失败的计数器。act：Stop 会释放运行并关闭管道。更新历史已翻译为八种语言（帮助 > 更新日志）。
-
-1.6.5 新增内容（完整性与安全；历史：CHANGELOG.md）
-  批次：绿色 CI 指必需的工作流已通过（dispatch.required_ci）；git fetch 失败会阻止触发；targets.json 不能指定工具文件夹之外的工具，也不能更改 dry_run/ref；finalize 只提供其批次
-  记录了提交校验的运行（旧批次用 finalize --accept-legacy）。act 留在工作区内，Stop 结束整个进程树。网络模式：可选 HTTPS、错误令牌后锁定、仅 IPv4。Webhook：不接受重放。
-  通知：max_per_hour 统计消息。--doctor 会警告危险的选项组合。

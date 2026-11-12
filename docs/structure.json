@@ -229,6 +229,19 @@
           }
         },
         {
+          "name": "sentinel_collab.py  alert_center.py",
+          "desc": {
+            "en": "issues sentinel, alerts",
+            "es": "centinela de incidencias, alertas",
+            "de": "Issue-Wächter, Alarme",
+            "fr": "sentinelle d'issues, alertes",
+            "it": "sentinella issue, avvisi",
+            "ja": "Issue 番人とアラート",
+            "zh": "Issue 哨兵与警报",
+            "pt": "sentinela de issues, alertas"
+          }
+        },
+        {
           "name": "surface.py  readiness.py",
           "desc": {
             "en": "repo checks, readiness",

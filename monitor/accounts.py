@@ -39,6 +39,8 @@ STATE_FILES = (
     ("sentinel_local", "CACHE_FILE", "sentinel_state/sentinel_cache.json"),
     ("sentinel_local", "HISTORY_FILE", "sentinel_state/sentinel_history.json"),
     ("sentinel_ai", "CACHE_FILE", "sentinel_state/sentinel_ai_cache.json"),
+    ("sentinel_collab", "STATE_FILE", "sentinel_state/collab_state.json"),
+    ("alert_center", "STATE_FILE", "alert_mutes.json"),
     ("updatecheck", "STATE_FILE", "update_check.json"),
 )
 #: files of the old layout (name next to the code) and where each one goes in the folder of an account; the lite edition's own files are not part of this
@@ -46,7 +48,7 @@ LEGACY = (
     ("actions_monitor.json", CONFIG_NAME), ("actions_monitor_log.txt", "actions_monitor_log.txt"), ("etag_cache.json", "cache/etag_cache.json"),
     ("events_monitor.jsonl", "events/events_monitor.jsonl"), ("events_state.json", "events/events_state.json"), ("analytics_history.json", "analytics/analytics_history.json"),
     ("ai_actions_log.jsonl", "ai_actions_log.jsonl"), ("github_actions_log.jsonl", "github_actions_log.jsonl"), ("sentinel_cache.json", "sentinel_state/sentinel_cache.json"),
-    ("sentinel_history.json", "sentinel_state/sentinel_history.json"), ("sentinel_ai_cache.json", "sentinel_state/sentinel_ai_cache.json"), ("update_check.json", "update_check.json"),
+    ("sentinel_history.json", "sentinel_state/sentinel_history.json"), ("sentinel_ai_cache.json", "sentinel_state/sentinel_ai_cache.json"), ("collab_state.json", "sentinel_state/collab_state.json"), ("alert_mutes.json", "alert_mutes.json"), ("update_check.json", "update_check.json"),
     ("degraded.json", "degraded.json"), ("welcome_state.json", "welcome_state.json"), ("orgs_state.json", "orgs_state.json"), ("config_backups", "config_backups"),
 )
 

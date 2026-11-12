@@ -34,3 +34,10 @@ In `actions_monitor.json`: `"webhook": {"enabled": true, "secret": "<32 or more 
 ## Replays and floods
 
 A valid signed request that someone captured and sends again is answered but not acted on: every delivery needs its `X-GitHub-Delivery` id, the ids already accepted are remembered for `webhook.replay_seconds` (one hour by default, bounded memory), and a repeat gets `202 {"duplicate": true}`. (A manual re-delivery from the GitHub page reuses the id, so it is ignored inside that window.) One repository can cause at most `webhook.max_per_minute` accepted events a minute; the rest are answered and ignored. If the payload names `full_name`, its owner must be the watched account (or one listed in `webhook.allowed_owners`). In the network mode one address may send 120 requests a minute. After an accepted event the stored conditional reads of that repository are dropped and the repository is read again in the next cycle, so a live event is always reconciled with GitHub.
+
+## Checklist for the Live view
+
+1. Define `webhook.secret` with at least 32 characters and switch the webhook on.
+2. Forward the port (`gh webhook forward`) or open a tunnel, and use its address ending in `/api/webhook` in GitHub.
+3. Send the test event of GitHub (Recent deliveries > Redeliver) and look for it in `?view=live`.
+4. Watch the allowance in the header: with webhooks a slower cycle is enough.

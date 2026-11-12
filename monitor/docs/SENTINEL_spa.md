@@ -82,3 +82,7 @@ Todas son sugerencias de solo lectura para una persona; el monitor nunca cierra 
 ## Dónde se configura todo
 
 Cada umbral de arriba es un ajuste de las pestañas **Centinela**, **Comprobaciones de superficie (A10)**, **Preparación (A11)**, **Carpetas y archivos**, **Analítica** y **Linter de workflows** de la página de Ajustes, y una clave de `actions_monitor.json`. La lista completa con sus rangos está en `SETTINGS_spa.md`. El panel de Ayuda y `--help-topics sentinel` muestran esta página sin conexión.
+
+## El segundo centinela y la lista de alertas
+
+Además de este centinela (CI), la edición completa tiene el **centinela Collab**, que vigila incidencias y pull requests abiertos con un reloj propio y nunca escribe en GitHub: [COLLAB_spa.md](COLLAB_spa.md). La pestaña **Alertas** reúne las alertas de ambos en una lista, con filtro por origen y nivel y silencios locales que acaban solos (`alerts.mute_hours`); `GET /api/alerts` sirve la misma lista.

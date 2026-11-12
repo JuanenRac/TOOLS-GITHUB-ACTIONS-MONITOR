@@ -34,7 +34,7 @@ EDGES = (r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe", r"C:\P
          r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe", "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge", "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
          "/usr/bin/microsoft-edge", "/usr/bin/chromium", "/usr/bin/google-chrome")
 TABS = ("interface", "basic", "general", "polling", "cache", "sentinel", "surface", "readiness", "paths", "outputs", "ai", "webhook", "notify", "analytics", "lint", "advanced", "console")
-WEB = [("about", "tab=now&dlg=about", (1400, 900)), ("help", "tab=cfg&dlg=help&topic=sentinel", (1400, 900)), ("now", "tab=now", (1400, 820)), ("sentinel", "tab=sent&open=a2", (1400, 1000)), ("sentinel_queue", "tab=sent&open=a5", (1400, 900)), ("sentinel_analytics", "tab=sent&open=a12,a13", (1400, 1200)),
+WEB = [("about", "tab=now&dlg=about", (1400, 900)), ("help", "tab=cfg&dlg=help&topic=sentinel", (1400, 900)), ("now", "tab=now", (1400, 820)), ("alerts", "tab=al", (1400, 820)), ("sentinel", "tab=sent&open=a2", (1400, 1000)), ("sentinel_queue", "tab=sent&open=a5", (1400, 900)), ("sentinel_analytics", "tab=sent&open=a12,a13", (1400, 1200)),
        ("charts", "tab=charts", (1400, 820)), ("repositories", "tab=repos", (1400, 820)), ("history", "tab=hist", (1400, 820))] + [(f"settings_{t}", f"tab=cfg&cfgtab={t}", (1400, 820)) for t in TABS]
 
 
