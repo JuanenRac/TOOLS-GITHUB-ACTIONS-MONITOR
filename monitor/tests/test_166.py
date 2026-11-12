@@ -2,6 +2,7 @@
 # GPL-3.0-or-later - see LICENSE
 """Version 1.6.6: the same-origin guard under HTTPS (direct TLS and a proxy), the exposure keys of the network mode taken from the schema, the local run of `act` that frees
 itself after a Stop and closes its pipe, the visible warning for the network mode on every interface, the one-use session post and the counter of silent failures."""
+import hashlib
 import http.client
 import json
 import os
@@ -220,6 +221,15 @@ class StuckProcess:
         pass
 
 
+def confirmed(item):
+    """The item of a plan as `actlocal.plan` makes it: bound to the path and the content of its workflow (checked again by `start`)."""
+    folder = Path(tempfile.mkdtemp())
+    flow = folder / "ci.yml"
+    flow.write_text("on: push\n", encoding="utf-8")
+    item["workflow_path"], item["workflow_sha256"] = str(flow.resolve()), hashlib.sha256(flow.read_bytes()).hexdigest()
+    return item
+
+
 class ActStopFreesTheRun(unittest.TestCase):
     def setUp(self):
         reset_run()
@@ -233,7 +243,7 @@ class ActStopFreesTheRun(unittest.TestCase):
 
     def start_item(self, popen):
         item = {"repo": "r", "workflow": "ci.yml", "event": "push", "job": "", "command": "act", "argv": ["act"], "timeout_seconds": 60}
-        plan_id = actlocal.PENDING.add("act", item)
+        plan_id = actlocal.PENDING.add("act", confirmed(item))
         return actlocal.start(self.config, plan_id, popen=popen)
 
     def test_stop_then_start_is_not_busy_when_the_worker_does_not_end(self):
@@ -271,7 +281,7 @@ class ActStopFreesTheRun(unittest.TestCase):
     def test_a_real_process_that_ignores_terminate_is_ended_and_freed(self):
         code = "import signal, time, sys\nsignal.signal(signal.SIGTERM, signal.SIG_IGN) if hasattr(signal, 'SIGTERM') else None\nprint('up', flush=True)\ntime.sleep(120)\n"
         item = {"repo": "r", "workflow": "ci.yml", "event": "push", "job": "", "command": "x", "argv": [sys.executable, "-c", code], "timeout_seconds": 300}
-        plan_id = actlocal.PENDING.add("act", item)
+        plan_id = actlocal.PENDING.add("act", confirmed(item))
         self.assertEqual(actlocal.start(self.config, plan_id)["status"], "started")
         end = time.time() + 20
         while time.time() < end and "up" not in actlocal.status()["lines"]:

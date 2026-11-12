@@ -75,7 +75,8 @@ def mute(scope, value, hours=None, config=None, now=None, who="", until_change=N
         data = _load()
         data["active"] = [e for e in data["active"] if not (e.get("scope") == scope and e.get("value") == value)] + [entry]
         data["history"] = (data["history"] + [dict(entry, ended=None)])[-HISTORY:]
-        _save(data)
+        if not _save(data):
+            return None      # the file could not be written: the caller must not say "saved"
     return entry
 
 
@@ -92,7 +93,8 @@ def unmute(scope, value, now=None):
                     item["ended"] = _iso(now)
                     break
             data["active"] = keep
-            _save(data)
+            if not _save(data):
+                return False
     return found
 
 

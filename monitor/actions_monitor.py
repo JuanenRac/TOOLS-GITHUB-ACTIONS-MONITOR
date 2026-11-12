@@ -100,7 +100,8 @@ DEFAULTS = {
     "otlp": {"enabled": False, "endpoint": "", "interval_seconds": 60},       # OFF: OpenTelemetry export to a collector you name (otlp.py)
     "organizations": {"discover": False},                                    # OFF: list the organisations of the login (orgs.py)
     "finops": {"jobs_per_cycle": 0},
-    "ai_alerts": {"enabled": True, "folder": "", "brief_max_bytes": 2048, "hook": {"enabled": False, "url": "", "max_per_hour": 6},
+    "network": {"use_proxy": False},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
+    "ai_alerts": {"enabled": False, "folder": "", "brief_max_bytes": 2048, "hook": {"enabled": False, "url": "", "max_per_hour": 6},
                   "diagnose": {"enabled": False, "max_per_cycle": 3, "log_lines": 10, "max_bytes": 1500},      # OFF: reads logs of GitHub (the allowance)
                   "cascade": {"enabled": True, "map": {}},
                   "stream": {"enabled": False, "max_seconds": 3600, "max_clients": 3},      # OFF: GET /api/ai/stream
@@ -1280,7 +1281,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.json_reply({"ok": False, "error": "request"}, 400)
             return
         if path in ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test"):   # one request, one explicit person: local only, small JSON body
-            if not self.guard() or not self.token_ok():
+            if not self.guard() or not self.this_computer() or not self.token_ok():
                 return
             try:
                 size = int(self.headers.get("Content-Length") or 0)
@@ -1747,7 +1748,7 @@ def handle_action_post(path, request):
     name = request.get("channel")
     if name not in notifiers.CHANNELS:
         return {"ok": False, "reason": "bad_value"}
-    return notifiers.send_channel(name, cfg["channels"][name], notifiers.test_event(i18n.t("evt.test")), allow_private=cfg["allow_private_targets"])
+    return notifiers.send_channel(name, cfg["channels"][name], notifiers.test_event(i18n.t("evt.test")), allow_private=cfg["allow_private_targets"], use_proxy=cfg["use_proxy"])
 
 
 def run_gh_checked(args, timeout=40):
@@ -2135,6 +2136,12 @@ def main():
         return 1
     server.tls_context = tls_ctx      # each connection is wrapped in its own thread (get_request), so a client that never finishes the handshake cannot stall the others
     url = f"{'https' if tls_ctx is not None else 'http'}://{localguard.display_host(server.server_address[0])}:{server.server_address[1]}/"      # from the address the server really listens on
+    try:      # the feed for AIs is off by default since 1.7.6: an installation that was already using it keeps it, and is told
+        import ai_alerts
+        if ai_alerts.settings(config)["legacy"]:
+            print(i18n.t("mon.ai_feed_legacy"), flush=True)
+    except Exception as error:   # noqa: BLE001 - a notice never stops the start
+        degraded.note("loop.extra", error)
     if listen["network"]:
         print(i18n.t("mon.network_on", host=listen["host"], port=server.server_address[1]), flush=True)
         if tls_ctx is None and not localguard.STATE["secure"]:

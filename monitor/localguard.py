@@ -110,6 +110,7 @@ _locked = {}          # address -> time until which it is refused
 _hits = {}            # (bucket, address) -> times of the recent requests
 LOCKOUT_SECONDS = 300
 FAIL_WINDOW = 60
+MAX_LOCKED = 2000      # the list of refused addresses never grows without a limit, whatever the number of addresses that fail once
 
 
 def max_failed(config):
@@ -139,6 +140,10 @@ def note_failure(address, limit, now=None):
             for key in [k for k, v in _failures.items() if not v or v[-1] < now - FAIL_WINDOW][:1000]:
                 _failures.pop(key, None)
         if len(recent) >= limit:
+            for key in [k for k, until in _locked.items() if until <= now]:      # every lock that ended goes, not only the one of the address that asks
+                _locked.pop(key, None)
+            while len(_locked) >= MAX_LOCKED:      # still full: the lock that would end first goes
+                _locked.pop(min(_locked, key=_locked.get), None)
             _locked[address] = now + LOCKOUT_SECONDS
             _failures.pop(address, None)
             return True

@@ -9,6 +9,7 @@
     is told not to read `.secrets` or `.env`. The output is shown in the page as it comes (limited in size, cleaned of anything that looks like a token). One run at a time; a time limit
     (`act.timeout_seconds`); the person can stop it.
 """
+import hashlib
 import os
 import re
 import shutil
@@ -85,6 +86,26 @@ def clone_dir(workspace_root, repo, workflow, allow_symlinks=False):
     return real, "ok"
 
 
+def workflow_fingerprint(repo_dir, workflow):
+    """(resolved path, SHA-256 of the content) of the workflow file; ('', '') when it cannot be read."""
+    try:
+        path = (Path(repo_dir) / ".github" / "workflows" / workflow).resolve()
+        return str(path), hashlib.sha256(path.read_bytes()).hexdigest()
+    except OSError:
+        return "", ""
+
+
+def workflow_unchanged(item):
+    """True when the file the plan was made for is still the same file with the same content (re-checked right before `act` is started)."""
+    if not item.get("workflow_path") or not item.get("workflow_sha256"):
+        return False
+    try:
+        path = Path(item["workflow_path"])
+        return str(path.resolve()) == item["workflow_path"] and hashlib.sha256(path.read_bytes()).hexdigest() == item["workflow_sha256"]
+    except OSError:
+        return False
+
+
 def plan(config, workspace_root, repo, workflow, event, job=None, which=shutil.which):
     """(plan | None, reason). Reasons: off, not_allowed, job, no_act, no_clone, symlink, outside."""
     cfg = settings(config)
@@ -102,6 +123,7 @@ def plan(config, workspace_root, repo, workflow, event, job=None, which=shutil.w
         return None, why
     item = {"repo": repo, "workflow": workflow, "event": event, "job": job or "", "argv": command(binary, repo_dir, workflow, event, job), "timeout_seconds": cfg["timeout_seconds"]}
     item["command"] = " ".join(item["argv"])
+    item["workflow_path"], item["workflow_sha256"] = workflow_fingerprint(repo_dir, workflow)      # what the person confirmed is this file, with this content
     item["id"] = PENDING.add("act", item)
     return dict(item), "ok"
 
@@ -245,6 +267,8 @@ def start(config, plan_id, popen=subprocess.Popen, clock=time.time, threaded=Tru
     item = PENDING.take(plan_id, "act")
     if item is None:
         return {"ok": False, "status": "unknown_plan"}
+    if not workflow_unchanged(item):      # the workflow was edited (or replaced by a link) after the person confirmed the plan: nothing starts
+        return {"ok": False, "status": "workflow_changed"}
     with RUN["lock"]:
         if RUN["running"]:
             return {"ok": False, "status": "busy"}

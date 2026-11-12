@@ -229,6 +229,7 @@ _f("cache", "etag", "cache.etag.ttl_hours", "int", (1, 168))
 # --- Notifications
 _f("notify", "main", "notify.enabled", "bool", secure=True)
 _f("notify", "main", "notify.allow_private_targets", "bool", secure=True)
+_f("notify", "main", "network.use_proxy", "bool", restart=False, secure=True)
 _f("notify", "main", "notify.events", "names")
 _f("notify", "main", "notify.max_per_hour", "int", (1, 600), unit="")
 _f("notify", "ch_telegram", "notify.channels.telegram.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on")

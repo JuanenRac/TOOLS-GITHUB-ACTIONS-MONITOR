@@ -6,12 +6,17 @@ An outgoing notification goes to an address that comes from the configuration. U
 a loopback, private (RFC 1918, fc00::/7), link-local (169.254.0.0/16 with the cloud metadata address 169.254.169.254, fe80::/10), shared (100.64.0.0/10), multicast, unspecified or
 reserved address. The check is made on the address the connection really uses (the name is resolved once and the socket is opened to that address), so a name that changes its answer
 between the check and the connection (DNS rebinding) and every redirect (each hop is a new connection) go through the same rule.
+
+Proxies: the proxy variables of the environment (http_proxy, https_proxy...) are NOT used (an explicit empty ProxyHandler), because a proxy would make the check judge the address of the
+proxy and not the one of the destination, and a proxy that answers with a redirect could send the request to the local network. Only with the setting `network.use_proxy` (off by
+default) the proxies of the environment are used, and then the destination (and the target of every redirect) is checked BEFORE anything is sent to the proxy.
 """
 import http.client
 import ipaddress
 import socket
 import ssl
 import urllib.error
+import urllib.parse
 import urllib.request
 
 SHARED = ipaddress.ip_network("100.64.0.0/10")
@@ -63,7 +68,7 @@ def _connect(connection, allow_private, resolver):
     return socket.create_connection((ip, connection.port), connection.timeout, connection.source_address)
 
 
-def _handlers(allow_private, resolver):
+def _handlers(allow_private, resolver, use_proxy=False):
     class Plain(http.client.HTTPConnection):
         def connect(self):
             self.sock = _connect(self, allow_private, resolver)
@@ -80,17 +85,30 @@ def _handlers(allow_private, resolver):
     class HttpsHandler(urllib.request.HTTPSHandler):
         def https_open(self, req):
             return self.do_open(Secure, req)
-    return [HttpHandler(), HttpsHandler()]
+    if not use_proxy:
+        return [urllib.request.ProxyHandler({}), HttpHandler(), HttpsHandler()]      # no proxy at all, whatever the environment says
+
+    class CheckedProxy(urllib.request.ProxyHandler):
+        """The proxies of the environment, but the destination is judged before the proxy gets the request (and so is every redirect, which comes back through here)."""
+
+        def proxy_open(self, req, proxy, type):      # noqa: A002 - the name of urllib's own method
+            parts = urllib.parse.urlsplit(req.full_url)
+            if not parts.hostname:
+                raise Refused("private_target")
+            check_host(parts.hostname, parts.port or (443 if parts.scheme == "https" else 80), allow_private, resolver)
+            return super().proxy_open(req, proxy, type)
+    # the socket to the proxy itself is not judged (a company proxy is usually on the private network); the destination was judged above
+    return [CheckedProxy(), _handlers(True, resolver)[1], _handlers(True, resolver)[2]]
 
 
-def open_url(request, timeout=8, allow_private=False, resolver=None):
+def open_url(request, timeout=8, allow_private=False, resolver=None, use_proxy=False):
     """urllib's urlopen with the rule above on every connection (the first one and every redirect). A refused destination raises Refused (an OSError)."""
-    return urllib.request.build_opener(*_handlers(allow_private, resolver)).open(request, timeout=timeout)
+    return urllib.request.build_opener(*_handlers(allow_private, resolver, use_proxy)).open(request, timeout=timeout)
 
 
-def opener_for(allow_private=False, resolver=None):
+def opener_for(allow_private=False, resolver=None, use_proxy=False):
     """A function with the shape of urlopen(request, timeout=...) that applies the rule."""
-    return lambda request, timeout=8: open_url(request, timeout, allow_private, resolver)
+    return lambda request, timeout=8: open_url(request, timeout, allow_private, resolver, use_proxy)
 
 
 def reason_of(error):

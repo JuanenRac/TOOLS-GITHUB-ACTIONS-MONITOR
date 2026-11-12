@@ -110,6 +110,6 @@ def execute(config, plan_id, run_gh, log_file=None):
         if code == 0:
             result = {"ok": True, "status": "done"}
         else:
-            result = {"ok": False, "status": "refused" if re.search(r"\b(403|404|405|409|422)\b", err or "") else "error", "detail": secretstore.redact((err or "").strip()[:200])}
+            result = {"ok": False, "status": "refused" if re.search(r"\b(403|404|405|409|422)\b", err or "") else "error", "detail": secretstore.redact((err or "").strip()[:200], secretstore.APPLIED["token"])}
     log({**item, **result}, log_file)
     return result

@@ -27,6 +27,19 @@ Die Verbindung zwischen Monitor und KI-Werkzeug: Der Feed stimmt immer mit der S
 
 - **Jede Zustandsdatei des Monitors wird mit Modus 0600 angelegt** (die erzeugten Ordner mit 0700), über einen einzigen Helfer, `private_io.py`: Stummschaltungen, Ereignisse, Feed, Zusammenfassung, Caches, die Einstellungen und die Dateien des Installers für das Gate-Skript. Unter Windows kann das Programm die Modi nicht erzwingen (Ordner erben die Rechte ihres übergeordneten Ordners).
 - **Beim Start des Netzwerkmodus** mit noch eingeschaltetem `listen.query_access` werden jetzt die ersten Schritte ausgegeben (ausschalten; HTTPS oder VPN nutzen), und die Hilfe von `listen.network` sowie die erweiterte Anleitung sagen dasselbe in acht Sprachen.
+- **Der Warnungs-Feed für KI ist standardmäßig aus** (`ai_alerts.enabled`, war an): Eine neue Installation schreibt keinen Feed, bis du ihn einschaltest. Eine Installation, die schon einen Feed in ihrem Ordner hat, behält ihn an, und die Konsole sagt das beim Start einmal, sodass niemand, der ihn absichtlich nutzte, abgeschaltet wird.
+
+
+### Sicherheit
+
+- **Ausgehende Benachrichtigungen ignorieren die Proxy-Variablen der Umgebung** (`http_proxy`, `https_proxy`): Ein Proxy ließ die Prüfung die Adresse des Proxys statt der des Ziels beurteilen, und ein Proxy, der mit einer Weiterleitung antwortete, konnte die Anfrage ins lokale Netz schicken (auch an die Metadatenadresse einer Cloud). Die neue Einstellung `network.use_proxy` (standardmäßig aus, im Reiter Einstellungen, in acht Sprachen) verwendet sie wieder, und dann werden Ziel und Ziel jeder Weiterleitung geprüft, bevor der Proxy etwas erhält. Getestet mit einem Proxy, der auf die Metadatenadresse weiterleitet.
+- **`/api/ai/actions/confirm`, `/api/ai/actions/unlock`, `/api/ai/test` und `/api/notify/test` gelten nur für diesen Rechner** im Netzwerkmodus (403 `local_only`), wie die anderen handelnden Endpunkte.
+- **Ein `act`-Plan ist an seinen Workflow gebunden**: Der Plan merkt sich den aufgelösten Pfad und den SHA-256 der Datei, beides wird unmittelbar vor dem Start von `act` erneut geprüft; ein nach der Bestätigung geänderter, ersetzter oder entfernter Workflow läuft nicht (`workflow_changed`, mit Text in acht Sprachen).
+- **Der macOS-Schlüsselbund bekommt das Token nicht mehr in einer Befehlszeile**: `security -i` liest den Befehl von der Standardeingabe, das Token steht also nicht in der Prozessliste.
+- **Alles, was `gh` ausgibt, wird vor dem Speichern bereinigt**: das Protokoll der Aktionen für KI und das Detail einer abgelehnten Aktion laufen durch den Bereiniger, der jetzt auch die alten 40-Hex-Token und das vom Monitor gespeicherte Token abdeckt.
+- **Die Liste abgelehnter Adressen ist begrenzt** (`localguard`): Die nächste Sperre entfernt alle abgelaufenen Sperren, nicht nur die der anfragenden Adresse, und hält nie mehr als 2000 Einträge.
+- **Eine Stummschaltung, die nicht gespeichert werden konnte, gilt nicht als gespeichert**: `POST /api/alerts/mute` und `unmute` antworten `ok: false`, wenn die Datei nicht geschrieben werden konnte.
+- **Die Befehlszeile zeigt bei einer Antwort der falschen Form nie einen Traceback**: eine Liste, `null` oder eine Zahl statt eines Objekts oder ein Feld des falschen Typs endet mit Exit-Code 4 und einer Meldung.
 
 ## [1.7.5]
 

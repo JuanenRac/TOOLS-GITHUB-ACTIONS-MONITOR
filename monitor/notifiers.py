@@ -33,7 +33,7 @@ DEFAULT_EVENTS = ["red_new", "stuck_new", "pending_sign", "offline"]
 LOOPBACK = ("127.0.0.1", "localhost", "::1", "[::1]")
 ENV_RE = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}$")
 TIMEOUT = 8
-DEFAULTS = {"enabled": False, "allow_private_targets": False, "events": list(DEFAULT_EVENTS), "max_per_hour": 20,
+DEFAULTS = {"enabled": False, "allow_private_targets": False, "use_proxy": False, "events": list(DEFAULT_EVENTS), "max_per_hour": 20,
             "channels": {
                 "telegram": {"enabled": False, "token_env": "", "chat_id": ""},
                 "discord": {"enabled": False, "url_env": ""},
@@ -50,6 +50,9 @@ STATS = {"sent": 0, "failed": 0, "limited": 0}
 def settings(config):
     """`notify` of the configuration merged over DEFAULTS; a value of the wrong type keeps the default."""
     out = json.loads(json.dumps(DEFAULTS))
+    network = (config or {}).get("network")
+    if isinstance(network, dict) and isinstance(network.get("use_proxy"), bool):
+        out["use_proxy"] = network["use_proxy"]      # network.use_proxy: the proxies of the environment, with the destination judged first (netguard)
     user = (config or {}).get("notify")
     if not isinstance(user, dict):
         return out
@@ -143,13 +146,13 @@ def mqtt_packet(topic, payload):
     return b"\x10" + length(len(connect_body)) + connect_body + b"\x30" + length(len(publish_body)) + publish_body + b"\xe0\x00"
 
 
-def send_channel(name, cfg, event, opener=None, connect=None, allow_private=False):
+def send_channel(name, cfg, event, opener=None, connect=None, allow_private=False, use_proxy=False):
     """Sends one event through one channel. Returns {"channel", "ok", "reason"}; never raises, never puts a secret in the answer."""
     problem = check_channel(name, cfg, allow_private)
     if problem:
         return {"channel": name, "ok": False, "reason": problem}
     if opener is None and name != "http_local":      # http_local is loopback by definition; every other channel goes through the rule of netguard (resolved address, redirects)
-        opener = netguard.opener_for(allow_private)
+        opener = netguard.opener_for(allow_private, use_proxy=use_proxy)
     text = tzdisplay.localize(f"{event.get('text', '')}") + (f"\n{event['url']}" if event.get("url") else "")
     record = {"kind": event.get("kind"), "repo": event.get("repo"), "text": event.get("text"), "url": event.get("url")}
     try:
@@ -209,7 +212,7 @@ def notify(config, event, opener=None, connect=None, now=None):
     broken = [{"channel": n, "ok": False, "reason": check_channel(n, c, allow)} for n, c in live if check_channel(n, c, allow)]   # a channel that cannot send books nothing
     ready = [(n, c) for n, c in live if not check_channel(n, c, allow)]
     granted = reserve(cfg["max_per_hour"], len(ready), now)      # max_per_hour counts MESSAGES: one unit for each channel that gets the event
-    results = [send_channel(n, c, event, opener, connect, allow) for n, c in ready[:granted]]
+    results = [send_channel(n, c, event, opener, connect, allow, cfg["use_proxy"]) for n, c in ready[:granted]]
     with _lock:
         STATS["sent"] += sum(1 for r in results if r["ok"])
         STATS["failed"] += sum(1 for r in results if not r["ok"]) + len(broken)

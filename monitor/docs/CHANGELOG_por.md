@@ -27,6 +27,19 @@ A ligação entre o monitor e uma ferramenta de IA: o feed coincide sempre com a
 
 - **Todos os ficheiros de estado do monitor são criados com o modo 0600** (as pastas criadas, com 0700) através de um único auxiliar, `private_io.py`: silenciamentos, eventos, o feed, o resumo, caches, as definições e os ficheiros escritos pelo instalador do script de ligação. No Windows o programa não consegue impor os modos (as pastas herdam as permissões da pasta-mãe).
 - **Ao arrancar o modo de rede** com `listen.query_access` ainda ligado, passam a imprimir-se os primeiros passos (desligá-lo; usar HTTPS ou uma VPN), e a ajuda de `listen.network` e o guia avançado dizem o mesmo em oito idiomas.
+- **O feed de alertas para IA está desligado por predefinição** (`ai_alerts.enabled`, estava ligado): uma instalação nova não escreve nenhum feed até o ligar. Uma instalação que já tem um feed na sua pasta mantém-no ligado, e a consola di-lo uma vez ao arrancar, pelo que ninguém que o usasse de propósito fica desligado.
+
+
+### Segurança
+
+- **As notificações enviadas ignoram as variáveis de proxy do ambiente** (`http_proxy`, `https_proxy`): um proxy fazia a verificação julgar o endereço do proxy e não o do destino, e um proxy que respondesse com um redirecionamento podia enviar o pedido para a rede local (incluindo o endereço de metadados de uma cloud). A nova definição `network.use_proxy` (desligada por predefinição, no separador Definições, em oito idiomas) volta a usá-las e, então, o destino e o alvo de cada redirecionamento são verificados antes de o proxy receber o que quer que seja. Testado com um proxy que redireciona para o endereço de metadados.
+- **`/api/ai/actions/confirm`, `/api/ai/actions/unlock`, `/api/ai/test` e `/api/notify/test` são só para este computador** no modo de rede (403 `local_only`), como os outros endpoints que atuam.
+- **Um plano do `act` fica preso ao seu workflow**: o plano guarda o caminho resolvido e o SHA-256 do ficheiro, e ambos são verificados de novo mesmo antes de o `act` arrancar; um workflow editado, substituído ou removido depois da confirmação não corre (`workflow_changed`, com texto em oito idiomas).
+- **O porta-chaves do macOS já não recebe o token numa linha de comandos**: o `security -i` lê o comando da entrada padrão, pelo que o token não aparece na lista de processos.
+- **Tudo o que o `gh` imprime é limpo antes de ser guardado**: o registo das ações para IA e o detalhe de uma ação recusada passam pelo limpador, que agora cobre também os tokens antigos de 40 hexadecimais e o token guardado pelo monitor.
+- **A lista de endereços recusados é limitada** (`localguard`): o bloqueio seguinte elimina todos os bloqueios terminados, não só o do endereço que pergunta, e nunca guarda mais de 2000 entradas.
+- **Um silenciamento que não se conseguiu guardar não é dado como guardado**: `POST /api/alerts/mute` e `unmute` respondem `ok: false` quando o ficheiro não pôde ser escrito.
+- **A linha de comandos nunca mostra um traceback perante uma resposta de forma errada**: uma lista, `null` ou um número em vez de um objeto, ou um campo do tipo errado, termina com o código de saída 4 e uma mensagem.
 
 ## [1.7.5]
 

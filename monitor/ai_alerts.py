@@ -87,7 +87,10 @@ def settings(config):
     per_hour = hook.get("max_per_hour")
     patterns = cfg.get("transient_patterns") if isinstance(cfg.get("transient_patterns"), list) else TRANSIENT_DEFAULT
     links = cascade.get("map") if isinstance(cascade.get("map"), dict) else {}
-    return {"enabled": cfg.get("enabled", True) is True, "folder": cfg.get("folder") if isinstance(cfg.get("folder"), str) else "",
+    folder_text = cfg.get("folder") if isinstance(cfg.get("folder"), str) else ""
+    # OFF by default (1.7.6). A configuration that never said anything and whose feed already exists - it was on by default before - keeps working, and `legacy` tells the console to say so once.
+    legacy = not isinstance(cfg.get("enabled"), bool) and in_use(folder_text)
+    return {"enabled": cfg["enabled"] if isinstance(cfg.get("enabled"), bool) else legacy, "legacy": legacy, "folder": folder_text,
             "brief_max_bytes": size if isinstance(size, int) and not isinstance(size, bool) and 512 <= size <= 20000 else 2048,
             "transient_patterns": [p for p in patterns if isinstance(p, str) and 0 < len(p) <= 120][:40],
             "hook": {"enabled": hook.get("enabled") is True and bool(LOOP_RE.match(str(hook.get("url") or ""))), "url": str(hook.get("url") or ""),
@@ -104,6 +107,12 @@ def settings(config):
             # the gate script `ai_hook.py` (installed with `monitor_cli.py ai-hook install`): it injects the brief; blocking the end of a turn is OFF until you turn it on
             "client_hook": {"enabled": client.get("enabled", True) is True, "block_on_stop": client.get("block_on_stop") is True, "cooldown_minutes": _num(client, "cooldown_minutes", 1, 1440, 20),
                             "stale_hours": _num(client, "stale_hours", 1, 168, 3), "max_lines": _num(client, "max_lines", 1, 40, 12), "max_chars": _num(client, "max_chars", 400, 8000, 2400)}}
+
+
+def in_use(folder_text):
+    """True when a feed of this monitor already exists in the folder (so that an installation that had it on by default is not switched off by the new default)."""
+    folder = folder_of({"folder": folder_text})
+    return (folder / STATE).is_file() or (folder / BRIEF).is_file()
 
 
 def folder_of(cfg):

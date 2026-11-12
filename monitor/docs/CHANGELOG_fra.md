@@ -27,6 +27,19 @@ La liaison entre le moniteur et un outil d'IA : le flux concorde toujours avec l
 
 - **Tout fichier d'état du moniteur est créé en mode 0600** (les dossiers créés en 0700) par un seul assistant, `private_io.py` : silences, événements, flux, résumé, caches, réglages et fichiers écrits par l'installeur du script de liaison. Sous Windows le programme ne peut pas imposer les modes (les dossiers héritent des droits de leur parent).
 - **Au démarrage du mode réseau** avec `listen.query_access` encore activé, les premiers pas sont maintenant affichés (le désactiver ; utiliser HTTPS ou un VPN), et l'aide de `listen.network` et le guide avancé disent la même chose en huit langues.
+- **Le flux d'alertes pour IA est désactivé par défaut** (`ai_alerts.enabled`, il était activé) : une nouvelle installation n'écrit aucun flux tant que tu ne l'actives pas. Une installation qui a déjà un flux dans son dossier le garde activé, et la console le dit une fois au démarrage ; personne qui l'utilisait volontairement n'est donc coupé.
+
+
+### Sécurité
+
+- **Les notifications sortantes ignorent les variables de proxy de l'environnement** (`http_proxy`, `https_proxy`) : un proxy faisait juger par la vérification l'adresse du proxy et non celle de la destination, et un proxy répondant par une redirection pouvait envoyer la requête vers le réseau local (y compris l'adresse de métadonnées d'un cloud). Le nouveau réglage `network.use_proxy` (désactivé par défaut, dans l'onglet Réglages, en huit langues) les réutilise, et alors la destination et la cible de chaque redirection sont vérifiées avant que le proxy ne reçoive quoi que ce soit. Testé avec un proxy qui redirige vers l'adresse de métadonnées.
+- **`/api/ai/actions/confirm`, `/api/ai/actions/unlock`, `/api/ai/test` et `/api/notify/test` ne valent que pour cet ordinateur** en mode réseau (403 `local_only`), comme les autres points d'accès qui agissent.
+- **Un plan `act` est lié à son workflow** : le plan garde le chemin résolu et le SHA-256 du fichier, et les deux sont revérifiés juste avant de lancer `act` ; un workflow modifié, remplacé ou supprimé après la confirmation ne s'exécute pas (`workflow_changed`, avec un texte en huit langues).
+- **Le trousseau macOS ne reçoit plus le jeton sur une ligne de commande** : `security -i` lit la commande sur l'entrée standard, le jeton n'apparaît donc pas dans la liste des processus.
+- **Tout ce qu'imprime `gh` est nettoyé avant d'être conservé** : le journal des actions pour IA et le détail d'une action refusée passent par le nettoyeur, qui couvre maintenant aussi les anciens jetons de 40 caractères hexadécimaux et le jeton gardé par le moniteur.
+- **La liste des adresses refusées est bornée** (`localguard`) : le verrou suivant purge tous les verrous terminés, pas seulement celui de l'adresse qui demande, et ne garde jamais plus de 2000 entrées.
+- **Un silence qui n'a pas pu être enregistré n'est pas annoncé comme enregistré** : `POST /api/alerts/mute` et `unmute` répondent `ok: false` quand le fichier n'a pas pu être écrit.
+- **La ligne de commande n'affiche jamais de trace d'appels pour une réponse de mauvaise forme** : une liste, `null` ou un nombre au lieu d'un objet, ou un champ du mauvais type, se termine par le code de sortie 4 et un message.
 
 ## [1.7.5]
 

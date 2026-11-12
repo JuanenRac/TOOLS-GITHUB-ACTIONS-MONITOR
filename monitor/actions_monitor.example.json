@@ -450,7 +450,7 @@
     "jobs_per_cycle": 0
   },
   "ai_alerts": {
-    "enabled": true,
+    "enabled": false,
     "folder": "",
     "brief_max_bytes": 2048,
     "hook": {

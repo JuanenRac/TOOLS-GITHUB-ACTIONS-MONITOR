@@ -29,6 +29,19 @@ The connection between the monitor and an AI tool: the feed always agrees with t
 
 - **Every state file of the monitor is created with mode 0600** (and the folders it creates with 0700) through one helper, `private_io.py`: silences, events, the feed, the brief, caches, the settings and the files written by the gate script installer. On Windows the modes cannot be enforced by the program (the folders inherit the permissions of their parent).
 - **Starting the network mode** while `listen.query_access` is still on now prints the first steps (turn it off; use HTTPS or a VPN), and the help of `listen.network` and the advanced guide say the same in the eight languages.
+- **The feed of alerts for AIs is off by default** (`ai_alerts.enabled`, it was on): a new installation writes no feed until you turn it on. An installation that already has a feed in its folder keeps it on, and the console says so once at start, so nobody who was using it on purpose is switched off.
+
+
+### Security
+
+- **Outgoing notifications ignore the proxy variables of the environment** (`http_proxy`, `https_proxy`): a proxy made the check judge the address of the proxy and not the one of the destination, and a proxy that answered with a redirect could send the request to the local network (the metadata address of a cloud included). The new setting `network.use_proxy` (off by default, in the Settings tab, in the eight languages) uses them again, and then the destination and the target of every redirect are checked before the proxy gets anything. Tested with a proxy that redirects to the metadata address.
+- **`/api/ai/actions/confirm`, `/api/ai/actions/unlock`, `/api/ai/test` and `/api/notify/test` are for this computer only** in the network mode (403 `local_only`), like the other endpoints that act.
+- **A plan of `act` is bound to its workflow**: the plan keeps the resolved path and the SHA-256 of the file, and both are checked again right before `act` starts; a workflow edited, replaced or removed after the confirmation does not run (`workflow_changed`, with a text in the eight languages).
+- **The macOS Keychain no longer gets the token on a command line**: `security -i` reads the command from standard input, so the token is not in the list of processes.
+- **Everything `gh` prints is cleaned before it is kept**: the log of the actions for AIs and the detail of a refused action go through the redactor, which now also covers the old 40-hex tokens and the token the monitor keeps.
+- **The list of refused addresses is bounded** (`localguard`): the next lock purges every lock that ended, not only the one of the address that asks, and it never holds more than 2000 entries.
+- **A silence that could not be saved is not reported as saved**: `POST /api/alerts/mute` and `unmute` answer `ok: false` when the file could not be written.
+- **The command line never shows a traceback for an answer of the wrong shape**: a list, `null` or a number instead of an object, or a field of the wrong type, ends with exit code 4 and a message.
 
 ## [1.7.5]
 

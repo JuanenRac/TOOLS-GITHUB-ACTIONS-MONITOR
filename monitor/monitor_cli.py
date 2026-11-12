@@ -128,6 +128,8 @@ def fetch(base, path, query=None, timeout=8, token=""):
         data = json.loads(body.decode("utf-8"))
     except ValueError:
         raise CliError(EXIT_DEGRADED, i18n.t("cli.not_json", path=path)) from None
+    if not isinstance(data, dict):      # every answer of the monitor is an object: a list, null or a number is not the monitor (or a broken one)
+        raise CliError(EXIT_DEGRADED, i18n.t("cli.not_json", path=path))
     return data
 
 
@@ -330,7 +332,10 @@ def main(argv=None):
         insecure = plain_http_to_network(ctx["base"])
         if insecure:
             print(i18n.t("cli.plain_http", host=insecure), file=sys.stderr)
-        payload, lines, code = HANDLERS[args.command](ctx)
+        try:
+            payload, lines, code = HANDLERS[args.command](ctx)
+        except (AttributeError, TypeError, KeyError, ValueError, IndexError):      # a field of the wrong type in an answer that is an object: degraded, never a traceback
+            raise CliError(EXIT_DEGRADED, i18n.t("cli.bad_shape")) from None
     except CliError as error:
         if args.json:
             print(json.dumps({"ok": False, "exit": error.code, "error": error.text}, ensure_ascii=False))

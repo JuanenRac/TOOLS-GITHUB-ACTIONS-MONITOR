@@ -27,6 +27,19 @@ Il collegamento tra il monitor e uno strumento di IA: il feed coincide sempre co
 
 - **Ogni file di stato del monitor viene creato con modo 0600** (le cartelle create con 0700) tramite un solo helper, `private_io.py`: silenziamenti, eventi, feed, riepilogo, cache, impostazioni e i file scritti dall'installatore dello script di collegamento. Su Windows il programma non può imporre i modi (le cartelle ereditano i permessi della cartella superiore).
 - **All'avvio della modalità di rete** con `listen.query_access` ancora attivo ora si stampano i primi passi (disattivarlo; usare HTTPS o una VPN), e l'aiuto di `listen.network` e la guida avanzata dicono lo stesso in otto lingue.
+- **Il feed degli avvisi per IA è disattivato per impostazione predefinita** (`ai_alerts.enabled`, era attivo): una nuova installazione non scrive alcun feed finché non lo attivi. Un'installazione che ha già un feed nella sua cartella lo mantiene attivo, e la console lo dice una volta all'avvio, così chi lo usava di proposito non viene spento.
+
+
+### Sicurezza
+
+- **Le notifiche in uscita ignorano le variabili di proxy dell'ambiente** (`http_proxy`, `https_proxy`): un proxy faceva giudicare al controllo l'indirizzo del proxy e non quello della destinazione, e un proxy che rispondeva con un reindirizzamento poteva mandare la richiesta alla rete locale (compreso l'indirizzo dei metadati di un cloud). La nuova impostazione `network.use_proxy` (disattivata per impostazione predefinita, nella scheda Impostazioni, in otto lingue) li usa di nuovo, e allora la destinazione e il bersaglio di ogni reindirizzamento vengono controllati prima che il proxy riceva qualcosa. Provato con un proxy che reindirizza all'indirizzo dei metadati.
+- **`/api/ai/actions/confirm`, `/api/ai/actions/unlock`, `/api/ai/test` e `/api/notify/test` valgono solo per questo computer** in modalità di rete (403 `local_only`), come gli altri endpoint che agiscono.
+- **Un piano di `act` è legato al suo workflow**: il piano conserva il percorso risolto e lo SHA-256 del file, e li ricontrolla subito prima di avviare `act`; un workflow modificato, sostituito o rimosso dopo la conferma non viene eseguito (`workflow_changed`, con testo in otto lingue).
+- **Il portachiavi di macOS non riceve più il token su una riga di comando**: `security -i` legge il comando dall'input standard, quindi il token non compare nell'elenco dei processi.
+- **Tutto ciò che stampa `gh` viene ripulito prima di essere conservato**: il registro delle azioni per IA e il dettaglio di un'azione rifiutata passano dal pulitore, che ora copre anche i vecchi token di 40 caratteri esadecimali e il token conservato dal monitor.
+- **L'elenco degli indirizzi rifiutati è limitato** (`localguard`): il blocco successivo elimina tutti i blocchi scaduti, non solo quello dell'indirizzo che chiede, e non conserva mai più di 2000 voci.
+- **Un silenziamento che non si è potuto salvare non viene dato per salvato**: `POST /api/alerts/mute` e `unmute` rispondono `ok: false` quando il file non si è potuto scrivere.
+- **La riga di comando non mostra mai un traceback per una risposta di forma sbagliata**: una lista, `null` o un numero al posto di un oggetto, o un campo del tipo sbagliato, termina con il codice di uscita 4 e un messaggio.
 
 ## [1.7.5]
 

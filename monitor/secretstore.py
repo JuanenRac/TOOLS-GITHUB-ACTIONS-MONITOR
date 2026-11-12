@@ -48,7 +48,8 @@ def redact(text, token=None):
     out = str(text)
     if token:
         out = out.replace(token, "***")
-    return re.sub(r"(gh[pousr]_[A-Za-z0-9]{8,}|github_pat_[A-Za-z0-9_]{8,})", "***", out)
+    out = re.sub(r"(gh[pousr]_[A-Za-z0-9]{8,}|github_pat_[A-Za-z0-9_]{8,})", "***", out)
+    return re.sub(r"(?<![0-9A-Fa-f])[0-9a-f]{40}(?![0-9A-Fa-f])", "***", out)      # the old 40-hex tokens (TOKEN_RE accepts them)
 
 
 def _run(args, data=None, runner=None):
@@ -125,7 +126,8 @@ class Store:
             if kind == "dpapi":
                 _private_file(self._file("token.dpapi"), base64.b64encode(_dpapi(token.encode(), True)))
             elif kind == "keychain":
-                code, _out = _run(["security", "add-generic-password", "-U", "-s", SERVICE, "-a", ACCOUNT, "-w", token], runner=self.runner)
+                # `security -i` reads its commands from standard input: the token never sits in the argument list (visible to every user with `ps`). A token has only letters, digits and underscores.
+                code, _out = _run(["security", "-i"], f'add-generic-password -U -s "{SERVICE}" -a "{ACCOUNT}" -w "{token}"\n', self.runner)
                 if code:
                     return False, "keychain"
             elif kind == "secret-service":

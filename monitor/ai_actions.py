@@ -137,9 +137,10 @@ class Actions:
             import secretstore
             done = (runner or subprocess.run)(proposal["argv"], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60, stdin=subprocess.DEVNULL, shell=False,
                                               **(secretstore.gh_kwargs() if proposal["argv"][0] == "gh" else {}))
-            code, tail = done.returncode, ((done.stdout or "") + (done.stderr or "")).strip()[-300:]
+            code, tail = done.returncode, secretstore.redact(((done.stdout or "") + (done.stderr or "")).strip()[-300:], secretstore.APPLIED["token"])
         except (OSError, subprocess.SubprocessError) as error:
-            code, tail = 1, str(error)[:200]
+            import secretstore
+            code, tail = 1, secretstore.redact(str(error)[:200], secretstore.APPLIED["token"])
         with self.lock:
             self.failures = 0 if code == 0 else self.failures + 1
             if self.failures >= LOCK_AFTER:

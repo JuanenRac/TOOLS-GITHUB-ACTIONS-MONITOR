@@ -56,13 +56,13 @@ class Folder(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.folder = Path(self.tmp.name)
-        self.config = {"ai_alerts": {"folder": str(self.folder)}}
+        self.config = {"ai_alerts": {"enabled": True, "folder": str(self.folder)}}
         ai_alerts._BEAT.clear()
         ai_alerts.STREAMS[0] = 0
         self.addCleanup(lambda: ai_alerts.STREAMS.__setitem__(0, 0))
 
     def cfg(self, **blocks):
-        return {"ai_alerts": {"folder": str(self.folder), **blocks}}
+        return {"ai_alerts": {"enabled": True, "folder": str(self.folder), **blocks}}
 
 
 class BriefFollowsTheCentre(Folder):
@@ -592,7 +592,7 @@ class PrivateFiles(unittest.TestCase):
         self.addCleanup(os.umask, old)
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)
-            config = {"ai_alerts": {"folder": str(base / "feed")}}
+            config = {"ai_alerts": {"enabled": True, "folder": str(base / "feed")}}
             ai_alerts.update(config, [row()], now=NOW)
             ai_alerts.touch(config, "hook", now=NOW)
             ai_alerts.ack(config, ai_alerts.alert_id("repo-a", "CI"), now=NOW)
@@ -616,6 +616,37 @@ class PrivateFiles(unittest.TestCase):
             text = path.read_text(encoding="utf-8")
             found = len(re.findall(r"\.write_text\(|\.write_bytes\(|open\([^)]*, \"[aw]\"", text))
             self.assertLessEqual(found, allowed.get(path.name, 0), f"{path.name} writes a file without private_io")
+
+
+class TheFeedIsOffByDefault(Folder):
+    def test_a_new_installation_has_it_off_and_writes_nothing(self):
+        config = {"ai_alerts": {"folder": str(self.folder)}}
+        cfg = ai_alerts.settings(config)
+        self.assertEqual((cfg["enabled"], cfg["legacy"]), (False, False))
+        self.assertEqual(ai_alerts.update(config, [row()], now=NOW)["alerts"], [])
+        self.assertEqual(list(self.folder.iterdir()), [])
+        self.assertFalse(actions_monitor.DEFAULTS["ai_alerts"]["enabled"])
+
+    def test_an_installation_that_already_had_the_feed_keeps_it_and_is_told(self):
+        ai_alerts.update(self.config, [row()], now=NOW)       # the feed exists in the folder (it was on by default before)
+        silent = {"ai_alerts": {"folder": str(self.folder)}}
+        cfg = ai_alerts.settings(silent)
+        self.assertEqual((cfg["enabled"], cfg["legacy"]), (True, True))
+        self.assertTrue(ai_alerts.update(silent, [row()], now=NOW + 5)["alerts"])
+
+    def test_what_the_person_wrote_always_wins(self):
+        ai_alerts.update(self.config, [row()], now=NOW)
+        off = {"ai_alerts": {"enabled": False, "folder": str(self.folder)}}
+        self.assertEqual((ai_alerts.settings(off)["enabled"], ai_alerts.settings(off)["legacy"]), (False, False))
+        on = {"ai_alerts": {"enabled": True, "folder": str(self.folder / "fresh")}}
+        self.assertEqual((ai_alerts.settings(on)["enabled"], ai_alerts.settings(on)["legacy"]), (True, False))
+
+    def test_the_notice_exists_in_each_language_and_the_template_agrees(self):
+        for lang in LANGS:
+            cat = json.loads((HERE / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
+            self.assertIn("ai_alerts.enabled", cat["mon.ai_feed_legacy"], lang)
+        example = json.loads((HERE / "actions_monitor.example.json").read_text(encoding="utf-8"))
+        self.assertIs(example["ai_alerts"].get("enabled"), False)
 
 
 class SettingsAndTexts(unittest.TestCase):

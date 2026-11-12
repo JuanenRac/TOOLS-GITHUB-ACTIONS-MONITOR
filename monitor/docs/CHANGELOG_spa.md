@@ -27,6 +27,19 @@ La conexión entre el monitor y una herramienta de IA: el flujo coincide siempre
 
 - **Todos los ficheros de estado del monitor se crean con modo 0600** (y las carpetas que crea con 0700) mediante un solo ayudante, `private_io.py`: silencios, eventos, el flujo, el resumen, cachés, los ajustes y los ficheros que escribe el instalador del script de enlace. En Windows el programa no puede imponer los modos (las carpetas heredan los permisos de su carpeta madre).
 - **Al arrancar el modo red** con `listen.query_access` aún activo se imprimen ahora los primeros pasos (desactivarlo; usar HTTPS o una VPN), y la ayuda de `listen.network` y la guía avanzada dicen lo mismo en los ocho idiomas.
+- **El flujo de alertas para IA está desactivado por defecto** (`ai_alerts.enabled`, antes activado): una instalación nueva no escribe ningún flujo hasta que lo actives. Una instalación que ya tiene un flujo en su carpeta lo mantiene activado, y la consola lo dice una vez al arrancar, así que nadie que lo usara a propósito se queda sin él.
+
+
+### Seguridad
+
+- **Las notificaciones salientes ignoran las variables de proxy del entorno** (`http_proxy`, `https_proxy`): un proxy hacía que la comprobación juzgara la dirección del proxy y no la del destino, y un proxy que respondiera con una redirección podía enviar la petición a la red local (incluida la dirección de metadatos de una nube). El nuevo ajuste `network.use_proxy` (desactivado por defecto, en la pestaña Ajustes, en los ocho idiomas) vuelve a usarlas y entonces el destino y el objetivo de cada redirección se comprueban antes de que el proxy reciba nada. Probado con un proxy que redirige a la dirección de metadatos.
+- **`/api/ai/actions/confirm`, `/api/ai/actions/unlock`, `/api/ai/test` y `/api/notify/test` son solo para este ordenador** en modo red (403 `local_only`), como los demás endpoints que actúan.
+- **Un plan de `act` queda atado a su workflow**: el plan guarda la ruta resuelta y el SHA-256 del fichero, y ambos se comprueban de nuevo justo antes de arrancar `act`; un workflow editado, sustituido o borrado tras la confirmación no se ejecuta (`workflow_changed`, con texto en los ocho idiomas).
+- **El llavero de macOS ya no recibe el token en una línea de comandos**: `security -i` lee el comando por la entrada estándar, así que el token no aparece en la lista de procesos.
+- **Todo lo que imprime `gh` se limpia antes de guardarlo**: el registro de las acciones para IA y el detalle de una acción rechazada pasan por el limpiador, que ahora cubre también los tokens antiguos de 40 hexadecimales y el token que guarda el monitor.
+- **La lista de direcciones rechazadas está acotada** (`localguard`): el siguiente bloqueo purga todos los bloqueos que terminaron, no solo el de la dirección que consulta, y nunca guarda más de 2000 entradas.
+- **Un silencio que no se pudo guardar no se da por guardado**: `POST /api/alerts/mute` y `unmute` responden `ok: false` cuando no se pudo escribir el fichero.
+- **La línea de comandos nunca muestra un traceback ante una respuesta de forma incorrecta**: una lista, `null` o un número en lugar de un objeto, o un campo de tipo erróneo, termina con el código de salida 4 y un mensaje.
 
 ## [1.7.5]
 
