@@ -80,6 +80,11 @@ def inventory(data, panels=None, health=None, now=None):
         low = rate.get("remaining") is not None and data.get("paused_quota")
         out.append(_signal("quota", "now", "watch" if low else "info", f"allowance {rate.get('remaining')}/{rate.get('limit')}, renews {rate.get('reset')}" if rate else "allowance unknown",
                            [_row("", "below the floor: the loop slows down", "", None, "keep other tools from spending the allowance")] if low else [], transient=bool(low)))
+    etag = data.get("etag") or {}
+    sources = data.get("rate_sources") or {}
+    if etag.get("calls") is not None or len(sources) > 1:
+        rows = [_row(name, f"{info.get('remaining')}/{info.get('limit')} calls left, renews {info.get('reset')}", "", None, "") for name, info in sources.items()]
+        out.append(_signal("quota.accounting", "now", "info", f"reads: {etag.get('calls', 0)} conditional calls, {etag.get('saved', 0)} answered 304 (no allowance spent)" + (f"; {len(sources)} sources read the repositories" if len(sources) > 1 else ""), rows))
     offline = (data.get("offline") or {}).get("offline")
     out.append(_signal("connection", "now", "watch" if offline else "info", "offline since " + str((data.get("offline") or {}).get("since")) if offline else "online", transient=bool(offline)))
     for panel in panels or []:

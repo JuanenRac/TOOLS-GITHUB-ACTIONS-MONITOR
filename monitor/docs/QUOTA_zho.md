@@ -51,3 +51,8 @@ GraphQL 不用于工作流的运行:它不提供这些数据。
 - *数字较旧*:节省模式已启用(选择或自动);状态栏会说明。
 - *App 不工作*:查看 `/api/github-app/status` 和 doctor:openssl、密钥路径、权限。
 - *`git fetch` 消耗配额吗?* 不消耗。另见 [QUOTAS_zho.md](QUOTAS_zho.md)(套餐与分钟)和 [MODES_zho.md](MODES_zho.md)。
+
+## “配额”标签页与第二个账户
+与配额有关的一切都在一处:*设置*中的*配额*标签页。它汇集了模式(`modes.auto_low`、`modes.auto_low_enter`、`modes.auto_low_exit` 以及 `modes.low.*` 中的节省模式数值)、节省(`network.etag`,与 `cache.etag.enabled` 一起生效)、中央面板(`central.source`、`central.max_age_minutes`)、GitHub App(`github_app.*`)和**用于读取的第二个账户**。标签页中的按钮会显示每个来源(你的登录、App、第二个账户)的配额和恢复时间,测试 App 和第二个账户,列出 App 缺少的权限,并应用推荐值或默认值。
+
+第二个账户(`extra_reader.enabled`、`extra_reader.file`)是只读账户,其细粒度令牌保存在任何仓库之外的文本文件中,只有你能读取;设置中**只保存**该文件的路径。监视器在使用时读取令牌,保存在内存中,绝不存储、打印或记录。读取会按各来源的剩余调用数(免费 `rate_limit` 调用的数值减去此后已做的读取)在你的登录、App 和第二个账户之间分配;被拒绝的来源会被排除五分钟,并用下一个来源重新读取。写入和操作从不使用它。它用于你自己的账户(例如对这些仓库有读取权限的自己的第二个账户),而不是用他人账户绕过限制的办法。

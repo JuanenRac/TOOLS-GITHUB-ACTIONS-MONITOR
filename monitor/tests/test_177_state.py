@@ -71,6 +71,15 @@ class Coverage(unittest.TestCase):
         self.assertGreaterEqual(doc["act"], 3)
 
 
+class Accounting(unittest.TestCase):
+    def test_the_state_counts_the_conditional_reads_and_every_source(self):
+        doc = signals.state({"figures": {}, "etag": {"calls": 100, "saved": 80}, "rate_sources": {"user": {"remaining": 4000, "limit": 5000, "reset": "r"}, "app": {"remaining": 9000, "limit": 10550, "reset": "r"}}}, [], "complete")
+        sig = [s for s in doc["signals"] if s["id"] == "quota.accounting"][0]
+        self.assertIn("80 answered 304", sig["summary"])
+        self.assertIn("2 sources", sig["summary"])
+        self.assertEqual({r["repo"] for r in sig["rows"]}, {"user", "app"})
+
+
 class Editions(unittest.TestCase):
     def test_the_state_says_the_edition_and_what_does_not_exist_in_lite(self):
         lite = signals.state(data(), [], "lite")

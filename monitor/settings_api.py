@@ -105,12 +105,22 @@ _f(_T_GENERAL, "identity", "language", "enum", ("",) + tuple(i18n.LANGS), False)
 _f(_T_GENERAL, "identity", "display.timezone", "text", TZ_RE, False)
 _f(_T_GENERAL, "identity", "display.blink_red_tiles", "bool", restart=False)
 _f(_T_GENERAL, "sound", "sound.enabled", "bool", restart=False)
-_f(_T_GENERAL, "github_app", "github_app.enabled", "bool", restart=False, secure=True)
-_f(_T_GENERAL, "github_app", "github_app.app_id", "text", re.compile(r"^[0-9]{1,12}$"), restart=False, secure=True)
-_f(_T_GENERAL, "github_app", "github_app.key_path", "path", restart=False, secure=True)
-_f(_T_GENERAL, "github_app", "github_app.installation_id", "text", re.compile(r"^[0-9]{0,12}$"), restart=False, secure=True)
-_f(_T_GENERAL, "central", "central.source", "enum", ("off", "git", "http"), restart=False, secure=True)
-_f(_T_GENERAL, "central", "central.max_age_minutes", "int", (5, 10080), unit="min", restart=False)
+_f("quota", "modes", "modes.auto_low", "bool", restart=False)
+_f("quota", "modes", "modes.auto_low_enter", "int", (50, 4000), restart=False, unit="calls")
+_f("quota", "modes", "modes.auto_low_exit", "int", (100, 5000), restart=False, unit="calls")
+_f("quota", "modes", "modes.low.refresh_seconds", "int", (10, 3600), restart=False, unit="s")
+_f("quota", "modes", "modes.low.cold_refresh_seconds", "int", (30, 86400), restart=False, unit="s")
+_f("quota", "modes", "modes.low.runs_per_repo", "int", (5, 100), restart=False)
+_f("quota", "modes", "modes.low.hot_hours", "int", (1, 48), restart=False, unit="h")
+_f("quota", "saving", "network.etag", "bool", restart=True)
+_f("quota", "extra_reader", "extra_reader.enabled", "bool", restart=False, secure=True)
+_f("quota", "extra_reader", "extra_reader.file", "path", restart=False, secure=True)
+_f("quota", "github_app", "github_app.enabled", "bool", restart=False, secure=True)
+_f("quota", "github_app", "github_app.app_id", "text", re.compile(r"^[0-9]{1,12}$"), restart=False, secure=True)
+_f("quota", "github_app", "github_app.key_path", "path", restart=False, secure=True)
+_f("quota", "github_app", "github_app.installation_id", "text", re.compile(r"^[0-9]{0,12}$"), restart=False, secure=True)
+_f("quota", "central", "central.source", "enum", ("off", "git", "http"), restart=False, secure=True)
+_f("quota", "central", "central.max_age_minutes", "int", (5, 10080), unit="min", restart=False)
 _f(_T_GENERAL, "sound", "sound.on_new_red", "bool", restart=False)
 _f(_T_GENERAL, "sound", "sound.on_connection_lost", "bool", restart=False)
 _f(_T_GENERAL, "sound", "sound.cooldown_seconds", "int", (0, 3600), unit="s", restart=False)
@@ -339,7 +349,7 @@ _f(_T_AI, "alerts", "ai_alerts.client_hook.max_lines", "int", (1, 40), restart=F
 _f(_T_AI, "alerts", "ai_alerts.client_hook.max_chars", "int", (400, 8000), restart=False, unit="")
 # @@MORE_SETTINGS@@
 
-TAB_ORDER = ("basic", "general", "polling", "cache", "sentinel", "surface", "readiness", "paths", "outputs", "ai", "webhook", "notify", "analytics", "lint", "advanced", "console")
+TAB_ORDER = ("basic", "general", "polling", "cache", "quota", "sentinel", "surface", "readiness", "paths", "outputs", "ai", "webhook", "notify", "analytics", "lint", "advanced", "console")
 ROWS.sort(key=lambda row: TAB_ORDER.index(row[0]))     # stable: inside a tab the order of writing is kept
 SCHEMA = [(tab, key, kind, bounds, restart) for tab, _block, key, kind, bounds, restart in ROWS]
 FIELDS = {row[1]: row for row in SCHEMA}
@@ -492,7 +502,7 @@ def check_value_list(value):
 
 
 LITE_KEYS = ("github_owner", "language", "repos", "ecosystems", "exclude", "refresh_seconds", "open_browser", "updates.check", "airgapped") + tuple(
-    k for k in FIELDS if k.startswith(("ai_alerts.", "sound.", "display.")))      # the short settings page of the lite product; the connection with an AI tool, the sound and the look are the same in both editions
+    k for k in FIELDS if k.startswith(("ai_alerts.", "sound.", "display.", "modes.", "central.", "extra_reader.", "github_app.", "network.etag")))      # the short settings page of the lite product; the connection with an AI tool, the sound and the look are the same in both editions
 
 
 def validate(changes, lite=False):

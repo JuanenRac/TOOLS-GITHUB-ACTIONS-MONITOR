@@ -161,12 +161,17 @@ class SettingsAndDoctor(unittest.TestCase):
 
     def test_the_monitor_hands_the_app_token_only_to_reads(self):
         import actions_monitor as am
-        with mock.patch.object(github_app, "token", return_value=SECRET_TOKEN):
-            self.assertEqual(am.app_kwargs(["api", "repos/o/r"])["env"]["GH_TOKEN"], SECRET_TOKEN)
-            self.assertEqual(am.app_kwargs(["api", "-X", "POST", "repos/o/r/x"]), {})
-            self.assertEqual(am.app_kwargs(["workflow", "run", "ci.yml"]), {})
-        with mock.patch.object(github_app, "token", return_value=""):
-            self.assertEqual(am.app_kwargs(["api", "repos/o/r"]), {})
+        old = am.LIVE_CONFIG
+        am.LIVE_CONFIG = CONFIG
+        try:
+            with mock.patch.object(github_app, "token", return_value=SECRET_TOKEN):
+                self.assertEqual(am.read_source(["api", "repos/o/r"], "app")[1]["env"]["GH_TOKEN"], SECRET_TOKEN)
+                self.assertEqual(am.read_source(["api", "-X", "POST", "repos/o/r/x"])[1], {})      # a write: the user, whatever the pool says
+                self.assertEqual(am.read_source(["workflow", "run", "ci.yml"])[1], {})
+            with mock.patch.object(github_app, "token", return_value=""):
+                self.assertEqual(am.read_source(["api", "repos/o/r"], "app")[1], {})
+        finally:
+            am.LIVE_CONFIG = old
 
 
 if __name__ == "__main__":

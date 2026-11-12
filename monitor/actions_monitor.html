@@ -1276,11 +1276,25 @@ function cfgBuild(j){
       blk.fields.forEach(f=>{CFG.meta[f.key]=f;if(f.type!=="status"){CFG.orig[f.key]=f.value==null?(f.type==="int"||f.type==="float"?null:f.value):f.value;if(f.type==="names")CFG.orig[f.key]=f.value||[];CFG.cur[f.key]=JSON.parse(JSON.stringify(CFG.orig[f.key]===undefined?null:CFG.orig[f.key]))}grid.appendChild(cfgField(f))});
       box.appendChild(grid);panel.appendChild(box);
     });
+    if(g.id==="quota")panel.appendChild(quotaBox());
     form.appendChild(panel);
   });
   cfgBuildTabs();cfgShowTab(CFG.tab);
   const r=$("cfg-restart");const n=CFG.restart.length;r.style.display=n?"block":"none";r.textContent=n?T("ui.cfg_restart_banner",{n:n}):"";restartBar(n);
   $("cfg-backups").textContent=T("ui.cfg_backups",{n:j.backups||0});cfgRefreshButtons();cfgFilter();cfgExtras();
+}
+/* the Quota tab: the allowance of every source of the reads, the tests of the App and of the second account, what the App lacks, and the recommended values */
+const QT_DEFAULTS={"modes.auto_low":true,"modes.auto_low_enter":1000,"modes.auto_low_exit":2500,"modes.low.refresh_seconds":240,"modes.low.cold_refresh_seconds":1800,"modes.low.runs_per_repo":10,"modes.low.hot_hours":2,"network.etag":true,"central.max_age_minutes":120};
+function quotaBox(){
+  const box=document.createElement("div");box.className="cfg-group";box.id="qt-box";const h=document.createElement("h3");h.textContent=T("ui.qt_state");box.appendChild(h);
+  const bar=document.createElement("div");bar.className="ifrow";const out=document.createElement("div");out.id="qt-out";out.className="mut";out.setAttribute("role","status");out.style.padding="6px 12px";
+  const run=async(what)=>{out.textContent="…";try{const r=await fetch("/api/quota-pool/status",{cache:"no-store"});const d=await r.json();
+    const rows=(d.sources||[]).filter(s=>what==="all"||(what==="app"&&s.name==="app")||(what==="extra"&&s.name==="extra")||(what==="perms"&&s.name==="app"));
+    out.innerHTML=rows.map(s=>`<div><b>${esc(s.name)}</b> · ${esc(T(s.ok?"ui.qt_ok":"ui.qt_fail"))}${s.app?" · "+esc(s.app):""}${s.remaining!=null?" · "+esc(s.remaining+"/"+s.limit+" "+T("ui.qt_left")):""}${s.reset?" · "+esc(clock(new Date(s.reset*1000).toISOString(),{hour:"2-digit",minute:"2-digit"})):""}${(s.missing&&s.missing.length&&(what==="perms"||what==="app"||what==="all"))?" · "+esc(T("ui.qt_missing"))+": "+esc(s.missing.join(", ")):""}${s.error?" · "+esc(s.error):""}${s.warning?" · "+esc(s.warning):""}</div>`).join("")||esc(T("ui.qt_fail"))}catch(e){out.textContent=String(e)}};
+  [["ui.qt_state","all"],["ui.qt_test_app","app"],["ui.qt_test_extra","extra"],["ui.qt_perms","perms"]].forEach(([k,w])=>{const b=document.createElement("button");b.type="button";b.textContent=T(k);b.addEventListener("click",()=>run(w));bar.appendChild(b)});
+  const apply=async(values)=>{try{const r=await fetch("/api/settings?"+qlang(),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({changes:values})});const j=await r.json();cfgMsg(j.ok?"":"err",j.ok?T("ui.cfg_saved",{n:Object.keys(values).length}):JSON.stringify(j.errors||{}));cfgLoad()}catch(e){cfgMsg("err",String(e))}};
+  [["ui.qt_recommended",{"modes.auto_low":true,"network.etag":true}],["ui.qt_defaults",Object.assign({"central.source":"off","extra_reader.enabled":false,"github_app.enabled":false},QT_DEFAULTS)]].forEach(([k,v])=>{const b=document.createElement("button");b.type="button";b.textContent=T(k);b.addEventListener("click",()=>apply(v));bar.appendChild(b)});
+  box.appendChild(bar);box.appendChild(out);return box;
 }
 async function cfgLoad(){try{const r=await fetch("/api/settings?"+qlang(),{cache:"no-store"});const j=await r.json();if(j.ok)cfgBuild(j)}catch(e){$("cfg-msg").className="err";$("cfg-msg").textContent=T("ui.err_monitor",{msg:e})}}
 function cfgMsg(cls,t){const m=$("cfg-msg");m.className=cls;m.textContent=t}

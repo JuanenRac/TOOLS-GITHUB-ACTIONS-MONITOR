@@ -82,6 +82,8 @@ DEFAULTS = {
     "webhook": {"enabled": False, "secret": "", "replay_seconds": 3600, "max_per_minute": 30},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default)
     "cache": {"etag": {"enabled": True, "ttl_hours": 24}},   # conditional reads: a 304 answer costs no quota (etagcache.py)
     "display": {"timezone": "local", "blink_red_tiles": True},   # blink_red_tiles: the red tiles and red items of the bar blink softly until the cause is solved; zone of the times written for people (log, reports, command line, notifications): local | utc | an IANA name such as Europe/Madrid
+    "modes": {"auto_low": True, "auto_low_enter": 1000, "auto_low_exit": 2500, "low": {"refresh_seconds": 240, "cold_refresh_seconds": 1800, "runs_per_repo": 10, "hot_hours": 2}},      # see modes.py: only what is shown in the Quota tab
+    "extra_reader": {"enabled": False, "file": ""},      # a second read-only account: only the PATH of the file with its token (readpool.py)
     "github_app": {"enabled": False, "app_id": "", "key_path": "", "installation_id": ""},      # an optional GitHub App for the READS (its own allowance); only the PATH of the key is kept here (github_app.py)
     "central": {"source": "off", "max_age_minutes": 120, "git_dir": ""},      # the central panel of the profile repository as a base line that spends no allowance (central_source.py): off | git | http
     "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
@@ -103,7 +105,7 @@ DEFAULTS = {
     "otlp": {"enabled": False, "endpoint": "", "interval_seconds": 60},       # OFF: OpenTelemetry export to a collector you name (otlp.py)
     "organizations": {"discover": False},                                    # OFF: list the organisations of the login (orgs.py)
     "finops": {"jobs_per_cycle": 0},
-    "network": {"use_proxy": False},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
+    "network": {"use_proxy": False, "etag": True},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
     "ai_alerts": {"enabled": False, "folder": "", "brief_max_bytes": 2048, "hook": {"enabled": False, "url": "", "max_per_hour": 6},
                   "diagnose": {"enabled": False, "max_per_cycle": 3, "log_lines": 10, "max_bytes": 1500},      # OFF: reads logs of GitHub (the allowance)
                   "cascade": {"enabled": True, "map": {}},
@@ -223,30 +225,79 @@ def load_config():
     return config
 
 
-def app_kwargs(args):
-    """{"env": ...} with the installation token of the GitHub App as GH_TOKEN for a call that only READS (github_app.py), else {}: writes and actions keep the token of the user."""
+def pool_status():
+    """What the Quota tab shows (never a token, never a path): every source with its allowance, the permissions the App was granted and the warning about a key or token file that others can read."""
+    import github_app
+    import readpool
+    config = LIVE_CONFIG or toolconfig.raw_config()
+    out = {"sources": [], "recommended": {"modes.auto_low": True, "network.etag": True}}
     try:
-        import github_app
-        if not github_app.is_read(args):
-            return {}
-        got = github_app.token(LIVE_CONFIG or toolconfig.raw_config())
-        if not got:
-            return {}
-        env = dict(os.environ)
-        env["GH_TOKEN"] = got
-        return {"env": env}
-    except Exception as error:   # noqa: BLE001 - the App never stops a read: the user's token answers
-        degraded.note("loop.extra", error)
-        return {}
+        core = gh("api", "rate_limit", retries=0, as_user=True)["resources"]["core"]
+        out["sources"].append({"name": "user", "ok": True, "remaining": core["remaining"], "limit": core["limit"], "reset": core["reset"]})
+    except Exception as error:   # noqa: BLE001
+        out["sources"].append({"name": "user", "ok": False, "error": github_app.clean(str(error))[:120]})
+    app = github_app.status(config)
+    if app.get("enabled"):
+        rate = app.get("rate") or {}
+        out["sources"].append({"name": "app", "ok": bool(app.get("ok")), "app": app.get("app", ""), "remaining": rate.get("remaining"), "limit": rate.get("limit"), "reset": rate.get("reset"),
+                               "missing": [p for p, v in (app.get("permissions") or {}).items() if v == "missing"], "error": app.get("error", ""), "warning": app.get("warning", ""), "openssl": app.get("openssl")})
+    extra = readpool.settings(config)
+    if extra["enabled"]:
+        item = {"name": "extra", "ok": False, "warning": readpool.file_warning(extra["file"])}
+        if not readpool.token_from_file(extra["file"]):
+            item["error"] = "no token in the file"
+        else:
+            try:
+                core = gh("api", "rate_limit", retries=0, source="extra")["resources"]["core"]
+                item.update({"ok": True, "remaining": core["remaining"], "limit": core["limit"], "reset": core["reset"]})
+                readpool.note_probe("extra", core["remaining"])
+            except Exception as error:   # noqa: BLE001
+                item["error"] = github_app.clean(str(error))[:120]
+        out["sources"].append(item)
+    return out
 
 
-def gh(*args, timeout=40, retries=2, as_user=False):
-    """Runs `gh` with a fixed argument list (no shell). Retries slow or flaky answers, not auth errors. With the GitHub App on (github_app.*) the reads use its token and fall back to the user's."""
-    last = ""
-    via_app = {} if as_user else app_kwargs(args)
-    for attempt in range(retries + 1):
+def rate_probes(config):
+    """{"user": {...}, "app": {...}, "extra": {...}}: the allowance of each source that is on, from the free call `rate_limit` (each answers for its own token). A source that cannot answer is left out."""
+    import readpool
+    out = {}
+    for name in readpool.available(config) if len(readpool.available(config)) > 1 else ["user"]:
         try:
-            result = subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8", timeout=timeout, **(via_app or secretstore.gh_kwargs()))
+            core = gh("api", "rate_limit", retries=0, source=name)["resources"]["core"] if name != "user" else gh("api", "rate_limit", retries=0, as_user=True)["resources"]["core"]
+        except Exception:   # noqa: BLE001
+            if name == "user":
+                raise
+            readpool.note_failure(name)
+            continue
+        out[name] = {"remaining": core["remaining"], "limit": core["limit"], "reset": datetime.fromtimestamp(core["reset"], timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
+        readpool.note_probe(name, core["remaining"])
+    return out
+
+
+def read_source(args, source=None):
+    """(name, {"env": ...}) of the source that does a read (readpool.py): the user, the GitHub App or the second read-only account, the one with the most calls left; `source` forces one. Writes and actions
+    always get the user."""
+    try:
+        import readpool
+        config = LIVE_CONFIG or toolconfig.raw_config()
+        if source:
+            return source, readpool.env_for(config, source)
+        return readpool.pick(config, args)
+    except Exception as error:   # noqa: BLE001 - the pool never stops a read: the user's token answers
+        degraded.note("loop.extra", error)
+        return "user", {}
+
+
+def gh(*args, timeout=40, retries=2, as_user=False, source=None):
+    """Runs `gh` with a fixed argument list (no shell). Retries slow or flaky answers, not auth errors. The READS are spread over the sources of the pool (user, GitHub App, second read-only account); a source
+    that is refused is left out for a while and the same read is made with the next one, the user last."""
+    last = ""
+    name, via = ("user", {}) if as_user else read_source(args, source)
+    attempt, attempts = -1, retries + 1
+    while attempt + 1 < attempts:
+        attempt += 1
+        try:
+            result = subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8", timeout=timeout, **(via or secretstore.gh_kwargs()))
         except subprocess.TimeoutExpired:
             last = "timeout"
             time.sleep(resilience.backoff(attempt))
@@ -254,11 +305,15 @@ def gh(*args, timeout=40, retries=2, as_user=False):
         if result.returncode == 0:
             return json.loads(result.stdout) if result.stdout.strip() else None
         last = (result.stderr or result.stdout).strip()[:300]
-        if via_app:
+        if via:
             import github_app
-            if github_app.should_retry_with_user(last):      # the App lacks a permission or its token was refused: the same read with the user's token
-                github_app._STATE.update({"token": "", "failed_at": time.time(), "error": github_app.clean(last)[:120]})
-                via_app = {}
+            import readpool
+            if github_app.should_retry_with_user(last):      # this source lacks a permission or its token was refused: the same read with the next one
+                readpool.note_failure(name)
+                if name == "app":
+                    github_app._STATE.update({"token": "", "failed_at": time.time(), "error": github_app.clean(last)[:120]})
+                name, via = read_source(args) if not source else ("user", {})
+                attempts += 1      # the read with the next source is one more try, not one less
                 continue
         if "401" in last or "Bad credentials" in last or ("403" in last and "rate limit" not in last.lower()):
             raise AuthError(last)
@@ -706,17 +761,11 @@ def build(config, repos, started, refreshed, loading, progress_text):
 
         threading.Thread(target=refresh_issues, daemon=True).start()
     try:
-        limit = gh("api", "rate_limit", retries=0)["resources"]["core"]      # free of quota: it is also read while loading, so the allowance is on the page from the first moment
-        rate = {"remaining": limit["remaining"], "limit": limit["limit"], "reset": datetime.fromtimestamp(limit["reset"], timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
+        rate_sources = rate_probes(config)      # free of quota: it is also read while loading, so the allowance is on the page from the first moment
+        rate = max(rate_sources.values(), key=lambda r: r["remaining"])
     except Exception:
-        rate = None
-    rate_user = None
-    if (config.get("github_app") or {}).get("enabled") is True and rate is not None:
-        try:      # with the App on, `rate` is the allowance of the App; the one of the user is shown next to it (a free call)
-            core = gh("api", "rate_limit", retries=0, as_user=True)["resources"]["core"]
-            rate_user = {"remaining": core["remaining"], "limit": core["limit"], "reset": datetime.fromtimestamp(core["reset"], timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
-        except Exception:   # noqa: BLE001
-            rate_user = None
+        rate, rate_sources = None, {}
+    rate_user = (rate_sources.get("user") if rate is not None else None)
     hot = sum(1 for repo in repos if is_hot(repo, config, time.time()))
     red, approx = None, False
     if LITE["on"]:      # the lite edition has no sentinel: it counts the red workflows with the same small rule, guessing the default branch
@@ -731,7 +780,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
         "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "updated_local": tzdisplay.stamp(time.time()), "took": round(time.time() - started, 1),
         "repos": repos, "ecosystems": {repo: ecosystem_of(repo) for repo in repos},
         "runs": runs[:600], "runs_total": len(runs), "active": active, "issues": ISSUE_CACHE["items"], "failing": unresolved_failures(runs, {r: m.get("branch") for r, m in repo_meta(repos).items() if m.get("branch")}),
-        "errors": errors, "rate": rate, "rate_user": rate_user, "stuck_minutes": config["stuck_minutes"],
+        "errors": errors, "rate": rate, "rate_user": rate_user, "rate_sources": rate_sources, "stuck_minutes": config["stuck_minutes"],
         "mode": config["mode"], "refreshed": refreshed, "hot": hot, "loading": progress_text if loading else "",
         "quota_block": rate_block_state(rate), "min_rate": config["min_rate_remaining"], "paused_quota": bool(rate and rate["remaining"] < config["min_rate_remaining"]),
         "refresh_seconds": config["refresh_seconds"], "hot_only": hot_only_state(),
@@ -1729,6 +1778,10 @@ class Handler(BaseHTTPRequestHandler):
                     self.json_reply({"error": "unknown topic"}, 404)
                 else:
                     self.json_reply(found)
+        elif path == "/api/quota-pool/status":      # this computer only: the allowance of every source of the reads and what the App lacks (never a key or a token)
+            if not self.guard() or not self.this_computer():
+                return
+            self.json_reply(pool_status())
         elif path == "/api/github-app/status":      # this computer only: asks the App for a token and says its name, installation, permissions and allowance (never the key or the token)
             if not self.guard() or not self.this_computer():
                 return
@@ -2351,7 +2404,7 @@ def main():
     global AUTOSAVE
     LIVE_CONFIG.update(config)
     etag_cfg = ((config.get("cache") or {}).get("etag") or {}) if isinstance(config.get("cache"), dict) else {}
-    ETAG["cache"] = etagcache.EtagCache(ttl_hours=etag_cfg.get("ttl_hours", 24) if isinstance(etag_cfg.get("ttl_hours"), int) else 24, enabled=etag_cfg.get("enabled", True) is True)
+    ETAG["cache"] = etagcache.EtagCache(ttl_hours=etag_cfg.get("ttl_hours", 24) if isinstance(etag_cfg.get("ttl_hours"), int) else 24, enabled=etag_cfg.get("enabled", True) is True and (config.get("network") or {}).get("etag", True) is not False)      # network.etag is the switch of the Quota tab; cache.etag.enabled stays as it was
     acfg = analytics.settings(config)
     if not LITE["on"]:
         ANALYTICS["store"] = analytics.Store(keep_days=acfg["keep_days"], max_samples=acfg["max_samples"])
