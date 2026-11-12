@@ -2,6 +2,10 @@
 
 Ideen, die nicht in die aktuelle Version passten, ohne versprochene Reihenfolge. Es sind Richtungen, keine Zusagen; ein Issue oder ein Pull Request ist der beste Weg, eine voranzubringen.
 
+## Erledigt in 1.7.5
+
+Die Befehlszeile nimmt das Zugriffstoken unter seinem eigenen Namen, der Netzwerkmodus ist standardmäßig sicherer (die Adresse des Rechners wird vor dem Netz verborgen, die alte Adresse ?access= lässt sich abschalten, Benachrichtigungsziele im lokalen Netz werden abgelehnt, Warnung vor einfachem HTTP), Zeiten für Menschen nutzen deine eigene Zeitzone, ein Alarm lässt sich bis zur Änderung des Elements stummschalten, und falsche Zählungen und Prüfungen sind korrigiert.
+
 ## Erledigt in 1.7.4
 
 Eine Leiste am Fuß der Seite mit dem wichtigsten Hinweis (und einem Fenster mit allen), der Verbindung, dem Kontingent, der letzten Lesung, dem Modus, der Adresse und der Uhr; ein Vollbild-Knopf; Tabellen für Repositories und Verlauf, die nach einer oder mehreren Spalten sortieren, mit den Spalten deiner Wahl; `monitor_cli.py`, die Befehlszeile als Client des laufenden Monitors (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) mit `--json` und stabilen Exit-Codes samt Anleitung in acht Sprachen; die auf Reihenfolge geprüften Änderungsprotokolle, die README des Pakets ohne Verlauf darin und neu gezeichnete Bilder.
