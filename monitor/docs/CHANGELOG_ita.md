@@ -15,6 +15,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 - **`display.blink_red_tiles`** (attivo per impostazione predefinita, nella scheda Impostazioni, nelle otto lingue): i riquadri in alto e gli elementi della barra in basso che diventano rossi lampeggiano dolcemente finché la causa non è risolta; con il movimento ridotto del sistema mostrano invece un bordo rosso fisso e più spesso.
 - **Un controllo del doctor per il fuso orario**: un fuso che né il sistema né la tabella interna conoscono viene segnalato e gli orari sono mostrati in UTC (prima ricadevano sul fuso del computer senza dirlo).
 - **La scheda Cronologia dice "n di N"** quando l'elenco è più corto di ciò che l'intestazione ha contato (il monitor conserva le 600 esecuzioni più recenti; i dati portano `runs_total`).
+- **I pannelli della scheda Sentinella come dati**: `GET /api/sentinel/panels` (sola lettura), lo strumento MCP `sentinel_panels` e una sezione "Sentinel panels" nel riepilogo danno, per A1..A13 e il secondo sentinella, il livello, una riga e le righe su cui agire con repository e link; le righe di un pannello su "agire" o "tenere d'occhio" diventano anche avvisi del feed (classi `real` e `watch`), quindi flusso, hook, `alerts_open` e il contatore degli avvisi reali le includono.
 
 ### Modificato
 

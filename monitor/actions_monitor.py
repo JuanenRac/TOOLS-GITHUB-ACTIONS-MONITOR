@@ -809,6 +809,26 @@ def refresh_feed(config=None, min_gap=2.0):
         FEED_LOCK.release()
 
 
+def panel_list(lang=None):
+    """The panels of the Sentinel tab (A1..A13 and the second sentinel) as data: same levels as the page, with the rows somebody has to act on (sentinel_panels.py). [] while the sentinel is off or still loading."""
+    sentinel = SENTINEL.get("obj")
+    if LITE["on"] or sentinel is None:
+        return []
+    import sentinel_panels
+    snapshot = sentinel.snapshot()
+    if not snapshot or snapshot.get("enabled") is False or snapshot.get("loading") == "starting":
+        return []
+    registry = SENTINEL.get("registry")
+    collab = registry.get("collab") if registry else None
+    try:
+        collab_alerts = collab.get_alerts() if collab is not None and getattr(collab, "enabled", False) else None
+    except Exception as error:   # noqa: BLE001
+        degraded.note("loop.extra", error)
+        collab_alerts = None
+    code = lang or "en"
+    return sentinel_panels.panels(snapshot, lambda key, **values: i18n.tl(code, key, **values), analytics=ANALYTICS.get("summary"), collab=collab_alerts, owner=toolconfig.github_owner())
+
+
 def feed_alerts(config, data, diagnose=True):
     """The local feed for AIs: complete edition only; a NEW real alert also reaches the notification channels you configured. With `diagnose` (the cycle) and ai_alerts.diagnose.enabled,
     the failing step and the last relevant lines of the log of a new red run are read (read only calls to `gh`)."""
@@ -816,7 +836,12 @@ def feed_alerts(config, data, diagnose=True):
         return None
     import ai_alerts
     with FEED_LOCK:      # the cycle and a refresh of the alert centre never write the feed at the same time
-        result = ai_alerts.update(config, red_rows(data), runner=ai_alerts.gh_runner if diagnose else None, owner=toolconfig.github_owner(config))
+        try:
+            panels = panel_list()
+        except Exception as error:   # noqa: BLE001 - the panels never stop the feed of the red workflows
+            degraded.note("ai_alerts.panels", error)
+            panels = None
+        result = ai_alerts.update(config, red_rows(data), runner=ai_alerts.gh_runner if diagnose else None, owner=toolconfig.github_owner(config), panels=panels)
     for alert in result["opened"]:
         if alert["class"] == "real":
             try:
@@ -1546,6 +1571,16 @@ class Handler(BaseHTTPRequestHandler):
             if not self.guard():
                 return
             self.json_reply(quota_payload())
+        elif path == "/api/sentinel/panels":      # read only: the panels A1..A13 and the second sentinel as data (level, one line, rows to act on), for tools that do not look at the page
+            if not self.guard():
+                return
+            query = self.path.partition("?")[2].split("&")
+            lang = next((q[5:] for q in query if q.startswith("lang=") and q[5:] in i18n.LANGS), "en")
+            try:
+                panels = panel_list(lang)
+                self.json_reply({"data": {"panels": panels, "act": sum(1 for p in panels if p["level"] == "bad"), "watch": sum(1 for p in panels if p["level"] == "warn")}, "error": None})
+            except Exception as error:   # noqa: BLE001
+                self.json_reply({"data": {"panels": [], "act": 0, "watch": 0}, "error": str(error)[:200]})
         elif path == "/api/analytics":
             if not self.guard():
                 return

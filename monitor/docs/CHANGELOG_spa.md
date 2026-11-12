@@ -15,6 +15,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 - **`display.blink_red_tiles`** (activado por defecto, en la pestaña Ajustes, en los ocho idiomas): los recuadros de arriba y los elementos de la barra inferior que se ponen en rojo parpadean suavemente hasta que se resuelve la causa; con movimiento reducido en el sistema muestran en su lugar un borde rojo fijo y más grueso.
 - **Una comprobación del doctor para la zona horaria**: se avisa de una zona que ni el sistema ni la tabla interna conocen, y entonces las horas se muestran en UTC (antes caían en la zona del equipo sin avisar).
 - **La pestaña Historial dice "Mostrando n de N"** cuando la lista es más corta que lo que contó la cabecera (el monitor guarda las 600 ejecuciones más recientes; los datos llevan `runs_total`).
+- **Los paneles de la pestaña Centinela como datos**: `GET /api/sentinel/panels` (solo lectura), la herramienta MCP `sentinel_panels` y una sección "Sentinel panels" en el resumen dan, para A1..A13 y el segundo centinela, el nivel, una línea y las filas sobre las que actuar con repositorio y enlace; las filas de un panel en "actuar" o "vigilar" pasan además a ser alertas del flujo (clases `real` y `watch`), así que el flujo en directo, el hook, `alerts_open` y el contador de alertas reales las incluyen.
 
 ### Cambiado
 

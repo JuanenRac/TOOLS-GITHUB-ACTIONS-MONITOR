@@ -30,6 +30,7 @@ TOOLS = [
     {"name": "get_alerts", "description": "Open CI alerts of the monitor (real ones first), with probable cause and suggested action.", "inputSchema": {"type": "object", "properties": {"include_resolved": {"type": "boolean"}}}},
     {"name": "get_red_repos", "description": "Repositories with a workflow that is red on its default branch.", "inputSchema": {"type": "object", "properties": {}}},
     {"name": "get_run_failure", "description": "The failed steps of one run and a short cleaned fragment of its log.", "inputSchema": {"type": "object", "properties": {"repo": {"type": "string"}, "run": {"type": "integer"}}, "required": ["repo", "run"]}},
+    {"name": "sentinel_panels", "description": "The panels A1..A13 and the second sentinel of the Sentinel tab as data: level (bad = act, warn = keep an eye on it), one line and the rows to act on, with repository and link. Read only.", "inputSchema": {"type": "object", "properties": {}}},
     {"name": "get_quota", "description": "GitHub allowance and Actions minutes, from the running monitor.", "inputSchema": {"type": "object", "properties": {}}},
     {"name": "alerts_open", "description": "Open CI alerts of the monitor, real ones first: age of the feed, failing step, last log lines and the red repository they fall together under.", "inputSchema": {"type": "object", "properties": {"only_real": {"type": "boolean"}}}},
     {"name": "alert_diagnose", "description": "The failing step and the last relevant lines of the log of one alert (by id); reads the log from GitHub only when the feed has no diagnosis yet.", "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"]}},
@@ -94,8 +95,10 @@ def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_g
                 raise ValueError("this alert has no run to read")
         return ai_alerts.redact(json.dumps({"id": wanted, "repo": item["repo"], "workflow": item["workflow"], "diagnosis": diagnosis, "origin": item.get("origin")}, ensure_ascii=False, indent=1))
     if name == "get_red_repos":
-        rows = ai_alerts.alerts(config, states=("open", "acknowledged"))
+        rows = [a for a in ai_alerts.alerts(config, states=("open", "acknowledged")) if a.get("conclusion") != "panel"]
         return ai_alerts.redact(json.dumps(sorted({a["repo"] for a in rows})))
+    if name == "sentinel_panels":
+        return ai_alerts.redact(json.dumps(getter("/api/sentinel/panels"), ensure_ascii=False)[:12000])
     if name == "get_run_failure":
         repo, run = str(arguments.get("repo", "")), arguments.get("run")
         if not NAME_RE.match(repo) or not isinstance(run, int) or isinstance(run, bool) or run <= 0:

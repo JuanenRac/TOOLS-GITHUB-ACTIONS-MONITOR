@@ -15,6 +15,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 - **`display.blink_red_tiles`** (activé par défaut, dans l'onglet Réglages, dans les huit langues) : les tuiles du haut et les éléments de la barre du bas qui passent au rouge clignotent doucement jusqu'à la résolution de la cause ; avec le mouvement réduit du système, elles affichent à la place un bord rouge fixe et plus épais.
 - **Une vérification du doctor pour le fuseau horaire** : un fuseau que ni le système ni la table interne ne connaissent est signalé, et les heures sont alors affichées en UTC (elles retombaient auparavant sur le fuseau de l'ordinateur sans le dire).
 - **L'onglet Historique indique « n sur N »** quand la liste est plus courte que ce que l'en-tête a compté (le moniteur garde les 600 exécutions les plus récentes ; les données portent `runs_total`).
+- **Les panneaux de l'onglet Sentinelle comme données** : `GET /api/sentinel/panels` (lecture seule), l'outil MCP `sentinel_panels` et une section « Sentinel panels » du résumé donnent, pour A1..A13 et le second sentinelle, le niveau, une ligne et les lignes sur lesquelles agir avec dépôt et lien ; les lignes d'un panneau à « agir » ou « surveiller » deviennent aussi des alertes du flux (classes `real` et `watch`), si bien que le flux en direct, le hook, `alerts_open` et le compteur d'alertes réelles les incluent.
 
 ### Modifié
 

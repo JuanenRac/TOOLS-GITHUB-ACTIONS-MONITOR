@@ -34,7 +34,7 @@ BRIEF = "ALERTS_BRIEF.md"
 STATE = "ai_alerts_state.json"
 HEARTBEAT = "ai_heartbeat.json"
 FIELDS = ("id", "severity", "class", "repo", "workflow", "conclusion", "since", "streak", "url", "cause", "action", "state")      # the closed list a hook or an endpoint may carry
-EXTRA = ("diagnosis", "origin")      # what the feed, the stream and the endpoints add to FIELDS (never the hook: its list is the closed one above)
+EXTRA = ("diagnosis", "origin", "panel")      # what the feed, the stream and the endpoints add to FIELDS (never the hook: its list is the closed one above)
 RUN_RE = re.compile(r"/actions/runs/(\d+)")
 ANSI_RE = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
 STAMP_RE = re.compile(r"^\d{4}-\d\d-\d\dT[\d:.]+Z\s*")
@@ -151,7 +151,17 @@ def alert_id(repo, workflow):
     return hashlib.sha1(f"{repo}|{workflow}".encode()).hexdigest()[:12]
 
 
+def build_panel_alert(row):
+    """An alert that comes from a panel of the Sentinel tab (A1..A13, the second sentinel): "real" when the panel says act ("bad"), "watch" when it says keep an eye on it ("warn")."""
+    real = row.get("level") == "bad"
+    return {"id": alert_id(row["repo"], row["workflow"]), "severity": "high" if real else "warn", "class": "real" if real else "watch", "repo": row["repo"], "workflow": row["workflow"], "conclusion": "panel",
+            "since": None, "streak": 1, "url": row.get("url"), "cause": redact(str(row.get("detail") or ""), 240), "panel": row.get("panel"),
+            "action": f"open the panel {str(row.get('panel')).upper()} of the Sentinel tab and deal with it"}
+
+
 def build_alert(row, patterns, text=""):
+    if row.get("conclusion") == "panel":
+        return build_panel_alert(row)
     kind, cause = classify(row.get("conclusion"), text, patterns)
     streak = int(row.get("streak") or 1)
     severity = "info" if kind == "transient" and streak < 3 else ("high" if streak >= 3 or kind == "real" and row.get("conclusion") == "failure" else "warn")
@@ -269,7 +279,7 @@ def group_cascades(alerts, links=None):
     return alerts
 
 
-def brief(alerts, limit, now=None):
+def brief(alerts, limit, now=None, panels=None):
     """The Markdown an AI reads when it starts: open alerts, the real ones first, within `limit` bytes. An alert that is red because of another one is listed under that one."""
     live = [a for a in alerts if a["state"] != "resolved"]
     live.sort(key=lambda a: (a["state"] == "acknowledged", a["class"] != "real", a["repo"], a["workflow"]))
@@ -300,6 +310,12 @@ def brief(alerts, limit, now=None):
                 break
             kept.append(line)
         text = "\n".join(kept + [f"- ... and {max(0, len(lines) - len(kept))} more in ai_alerts.jsonl"]) + "\n"
+    if panels:      # the panels of the Sentinel tab have a section of their own, with the same size limit as the list above (it never pushes the CI alerts out)
+        import sentinel_panels
+        section = sentinel_panels.brief_section(panels)
+        while len(section.encode("utf-8")) > limit and section.count("\n") > 3:
+            section = section.rsplit("\n", 2)[0] + "\n- ... more in ai_alerts.jsonl\n"
+        text += "\n" + section
     return redact(text)
 
 
@@ -321,7 +337,7 @@ class Hook:
 HOOK = Hook()
 
 
-def update(config, red_rows, now=None, texts=None, opener=None, runner=None, owner=""):
+def update(config, red_rows, now=None, texts=None, opener=None, runner=None, owner="", panels=None):
     """Brings the feed up to date with the red workflows of this cycle. Returns {"opened": [...], "resolved": [...], "alerts": [...]}. Nothing is written when the feed is off.
     With a `runner` (read only calls to `gh`) and `ai_alerts.diagnose.enabled`, a new or changed red run also gets its diagnosis; without a runner the diagnosis already kept is reused."""
     cfg = settings(config)
@@ -333,6 +349,9 @@ def update(config, red_rows, now=None, texts=None, opener=None, runner=None, own
     state = _read(folder / STATE, {})
     seen, opened, resolved = set(), [], []
     budget = cfg["diagnose"]["max_per_cycle"] if runner is not None and cfg["diagnose"]["enabled"] else 0
+    if panels:
+        import sentinel_panels
+        red_rows = list(red_rows) + sentinel_panels.alert_rows(panels)      # what the panels of the Sentinel tab ask for travels the same way as a red workflow
     for row in red_rows:
         ident = alert_id(row["repo"], row["workflow"])
         old = state.get(ident)
@@ -372,7 +391,7 @@ def update(config, red_rows, now=None, texts=None, opener=None, runner=None, own
     state = {k: v for k, v in state.items() if v.get("state") != "resolved" or v.get("resolved_at", 0) > cutoff}
     _write(folder / STATE, json.dumps(state, ensure_ascii=False, indent=1) + "\n")
     alerts = sorted(state.values(), key=lambda a: (a["repo"], a["workflow"]))
-    _write(folder / BRIEF, brief(alerts, cfg["brief_max_bytes"], now))
+    _write(folder / BRIEF, brief(alerts, cfg["brief_max_bytes"], now, panels))
     if cfg["hook"]["enabled"]:
         for alert in opened:
             if alert["class"] == "real" and HOOK.allowed(cfg["hook"]["max_per_hour"], now):

@@ -15,6 +15,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 - **`display.blink_red_tiles`** (ativado por defeito, no separador Definições, nos oito idiomas): os quadros de cima e os elementos da barra inferior que ficam vermelhos piscam suavemente até a causa ser resolvida; com movimento reduzido no sistema, mostram em vez disso uma borda vermelha fixa e mais grossa.
 - **Uma verificação do doctor para o fuso horário**: um fuso que nem o sistema nem a tabela interna conhecem é assinalado, e as horas passam a ser mostradas em UTC (antes caíam no fuso do computador sem avisar).
 - **O separador Histórico diz "n de N"** quando a lista é mais curta do que o que o cabeçalho contou (o monitor guarda as 600 execuções mais recentes; os dados trazem `runs_total`).
+- **Os painéis do separador Sentinela como dados**: `GET /api/sentinel/panels` (só de leitura), a ferramenta MCP `sentinel_panels` e uma secção "Sentinel panels" no resumo dão, para A1..A13 e o segundo sentinela, o nível, uma linha e as linhas em que agir com repositório e ligação; as linhas de um painel em "agir" ou "vigiar" tornam-se também alertas do feed (classes `real` e `watch`), pelo que o fluxo em direto, o hook, `alerts_open` e o contador de alertas reais as incluem.
 
 ### Alterado
 

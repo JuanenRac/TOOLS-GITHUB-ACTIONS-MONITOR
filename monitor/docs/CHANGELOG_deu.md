@@ -15,6 +15,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 - **`display.blink_red_tiles`** (standardmäßig an, im Tab Einstellungen, in den acht Sprachen): Die Kacheln oben und die Elemente der unteren Leiste, die rot werden, blinken sanft, bis die Ursache behoben ist; bei reduzierter Bewegung im System zeigen sie stattdessen einen festen, dickeren roten Rand.
 - **Eine Doctor-Prüfung für die Zeitzone**: Eine Zone, die weder das System noch die eingebaute Tabelle kennt, wird gemeldet, und die Zeiten erscheinen dann in UTC (früher fielen sie ohne Hinweis auf die Zone des Computers zurück).
 - **Der Tab Verlauf zeigt "n von N"**, wenn die Liste kürzer ist als das, was die Kopfzeile gezählt hat (der Monitor behält die 600 neuesten Läufe; die Daten enthalten `runs_total`).
+- **Die Panels des Tabs Sentinel als Daten**: `GET /api/sentinel/panels` (nur lesend), das MCP-Werkzeug `sentinel_panels` und ein Abschnitt "Sentinel panels" in der Zusammenfassung liefern für A1..A13 und den zweiten Sentinel die Stufe, eine Zeile und die Zeilen, auf die zu reagieren ist, mit Repository und Link; die Zeilen eines Panels auf "handeln" oder "beobachten" werden zusätzlich zu Warnungen des Feeds (Klassen `real` und `watch`), sodass Stream, Hook, `alerts_open` und der Zähler echter Warnungen sie enthalten.
 
 ### Geändert
 

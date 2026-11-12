@@ -16,6 +16,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 - **`display.blink_red_tiles`** (on by default, in the Settings tab, in the eight languages): the tiles at the top and the items of the bar at the foot that turn red blink softly until the cause is solved; with reduced motion in the system they show a fixed, thicker red edge instead.
 - **A doctor check for the time zone**: a zone that neither the system nor the built-in table knows is reported, and the times are then shown in UTC (they used to fall back to the zone of the computer without saying so).
 - **The History tab says "Showing n of N"** when the list is shorter than what the header counted (the monitor keeps the 600 most recent runs; the data carry `runs_total`).
+- **The panels of the Sentinel tab as data**: `GET /api/sentinel/panels` (read only), the MCP tool `sentinel_panels` and a section "Sentinel panels" in the brief give, for A1..A13 and the second sentinel, the level, a line and the rows to act on with repository and link; the rows of a panel at "act" or "keep an eye on it" also become alerts of the feed (classes `real` and `watch`), so the stream, the hook, `alerts_open` and the counter of real alerts include them.
 
 ### Changed
 
