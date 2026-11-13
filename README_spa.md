@@ -31,7 +31,7 @@
 
 | | |
 |---|---|
-| **Versión** | **1.7.6** · [todas las versiones](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versión** | **1.7.7** · [todas las versiones](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Necesita** | Python 3.11+ y la CLI de GitHub (`gh auth login`); nada más (la vista de consola usa el paquete opcional `rich`) |
 | **Se abre** | en una página de `127.0.0.1` solamente, en ocho idiomas |
 | **Escribe en GitHub** | nunca por sí solo: solo las órdenes por lotes que lances con un `--go` explícito |
@@ -39,7 +39,7 @@
 
 <!-- glance:begin -->
 
-**Medido hoy** (v1.7.6)
+**Medido hoy** (v1.7.7)
 
 | | |
 |---|---|

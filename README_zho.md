@@ -31,7 +31,7 @@
 
 | | |
 |---|---|
-| **版本** | **1.7.6** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **版本** | **1.7.7** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **需要** | Python 3.11+ 和 GitHub CLI（`gh auth login`）；不需要其他东西(终端视图使用可选的 `rich` 包) |
 | **打开** | 仅在 `127.0.0.1` 上的页面，支持八种语言 |
 | **写入 GitHub** | 绝不自行写入：只有你用明确的 `--go` 运行的批处理命令才会 |
@@ -39,7 +39,7 @@
 
 <!-- glance:begin -->
 
-**今日实测** (v1.7.6)
+**今日实测** (v1.7.7)
 
 | | |
 |---|---|
