@@ -18,6 +18,7 @@ import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
+from github_actions_monitor.security import private_io
 from github_actions_monitor.storage import base
 
 FORMAT = 1
@@ -37,8 +38,8 @@ def make_backup(storage, dest):
     digest, size, accounts, events = hashlib.sha256(), 0, 0, 0
     tmp = dest.with_name(dest.name + f".{os.getpid()}.tmp")
     try:
-        with zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as bundle:
-            with bundle.open(DUMP, "w", force_zip64=True) as member:
+        with zipfile.ZipFile(tmp, mode="w", compression=zipfile.ZIP_DEFLATED) as bundle:
+            with bundle.open(DUMP, mode="w", force_zip64=True) as member:
                 for line in _dump_lines(storage):
                     data = (line + "\n").encode("utf-8")
                     member.write(data)
@@ -54,6 +55,7 @@ def make_backup(storage, dest):
         problems = verify_backup(tmp)
         if problems:
             raise base.StorageError("the backup did not verify: " + "; ".join(problems[:3]))
+        private_io._fix_mode(tmp, private_io.FILE_MODE)      # a backup holds everything: only its owner reads it
         os.replace(tmp, dest)
     finally:
         try:
