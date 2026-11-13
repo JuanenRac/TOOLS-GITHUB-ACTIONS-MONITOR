@@ -626,7 +626,7 @@ function soundWatch(d){
 /*SOUND-END*/
 /*FRESH-BEGIN*/
 /* is the page in step with the monitor? the time of the last good answer, a retry that shows, a watchdog for an answer that never comes and the data that stopped changing */
-const FRESH={okAt:0,t0:nowMs(),fails:0,start:0,busy:false,upd:"",updAt:0,retryAt:0,refresh:0};
+const FRESH={okAt:0,t0:nowMs(),fails:0,start:0,busy:false,upd:"",updAt:0,retryAt:0,refresh:0,loop:null};
 const FRESH_LATE=60000,FRESH_HANG=20000;
 function freshInfo(now,refresh){
   const age=now-(FRESH.okAt||FRESH.t0),lim=Math.max(120000,3000*(refresh||0)),late=age>FRESH_LATE,old=!late&&FRESH.updAt>0&&now-FRESH.updAt>lim;
@@ -638,6 +638,11 @@ function freshOk(now,d){
   FRESH.okAt=now;FRESH.fails=0;FRESH.retryAt=0;
   if(d){if(d.updated!==FRESH.upd||d.loading||d.paused_quota){FRESH.upd=d.updated;FRESH.updAt=now}}
   return was;
+}
+/* what the server says about its own refresh loop (j.loop): a cycle that runs far too long is a stuck monitor, even if /api/data still answers at once */
+function loopBad(L,refresh){
+  if(!L)return false;const lim=Math.max(600,3*(refresh||0));
+  return !!L.stuck||(L.running_seconds||0)>lim;
 }
 function freshFail(now){FRESH.fails++;FRESH.retryAt=now+Math.min(3,FRESH.fails)*3000;return FRESH.retryAt-now}
 /* what the watchdog does now: "abort" an answer that hangs, "tick" when out of step and nothing is on the way, "" otherwise */
@@ -964,6 +969,7 @@ async function tick(force){
   FRESH.ctl=ctl;FRESH.busy=true;FRESH.start=nowMs();
   try{const r=await fetch("/api/data",{cache:"no-store",signal:ctl?ctl.signal:undefined});const j=await r.json();
     if(FRESH.ctl!==ctl)return;
+    FRESH.loop=j.loop||null;
     const was=freshOk(nowMs(),j.data);
     if(j.error){$("err").style.display="block";$("err").textContent=j.hint==="auth"?T("ui.auth_hint"):(j.hint?j.hint+" ":T("ui.err_github")+j.error)}else $("err").style.display="none";
     if(j.data){FRESH.refresh=j.data.refresh_seconds;render(j.data)}else $("stamp").textContent=T("ui.waiting");
@@ -978,7 +984,10 @@ function freshBack(){soundResync();["sentTick","diffTick","modeLoad","sbTick"].f
 function freshPaint(){
   const i=freshInfo(nowMs(),FRESH.refresh),r=$("sb-refresh"),lamp=$("sb-conn-lamp"),ct=$("sb-conn-t"),c=$("sb-conn");
   if(r){const base=DATA?T("ui.sb_updated",{time:clock(DATA.updated),secs:DATA.took}):"";r.textContent=(base?base+" · ":"")+T("ui.fresh",{age:agoText(i.age)})+(i.late&&i.retry?" · "+T("ui.fresh_retry",{n:i.retry}):"");r.title=T(i.late?"ui.fresh_late_t":"ui.fresh_t");r.classList.toggle("bad",i.late)}
-  if(i.late&&lamp&&ct&&c){lamp.className="sb-lamp bad";ct.textContent=T("ui.fresh_late",{age:agoText(i.age)});c.title=T("ui.fresh_late_t");c.className="sb-item bad"}
+  const L=FRESH.loop,stuck=loopBad(L,FRESH.refresh),ph=L?T("ui.loop_phase_"+L.phase):"";
+  if(stuck&&lamp&&ct&&c){lamp.className="sb-lamp bad";ct.textContent=T("ui.loop_stuck",{phase:ph,age:agoText(L.running_seconds)});c.title=T("ui.loop_stuck_t",{phase:ph});c.className="sb-item bad";if(r)r.classList.add("bad")}
+  else if(i.late&&lamp&&ct&&c){lamp.className="sb-lamp bad";ct.textContent=T("ui.fresh_late",{age:agoText(i.age)});c.title=T("ui.fresh_late_t");c.className="sb-item bad"}
+  else if(L&&L.log_error&&lamp&&ct&&c){lamp.className="sb-lamp warn";ct.textContent=T("ui.loop_logfail",{msg:L.log_error});c.title=T("ui.loop_logfail",{msg:L.log_error});c.className="sb-item warn"}
 }
 function freshDog(){if(freshWatch(nowMs()))tick(true)}
 setInterval(freshDog,5000);setInterval(freshPaint,1000);

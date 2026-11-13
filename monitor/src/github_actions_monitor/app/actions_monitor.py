@@ -21,6 +21,7 @@ cycle ("hot"); the others only every cold_refresh_seconds with fewer runs, so ~1
 do not use up the GitHub allowance shared with the agents.
 """
 from github_actions_monitor.app import degraded
+from github_actions_monitor.app import cycle_watch
 import argparse
 import json
 import os
@@ -72,6 +73,7 @@ DEFAULTS = {
     "discover_limit": 1000,        # the most repositories listed for the account
     "show_unclassified": True,     # repositories that no ecosystem claims are shown in an automatic group "Unclassified" instead of disappearing
     "stuck_minutes": 120,
+    "watchdog_minutes": 10,      # a refresh cycle that runs longer than this is dumped to the log and restarted in a new thread (0 = off)
     "runs_per_repo": 20,
     "cold_runs_per_repo": 5,
     "hot_hours": 3,
@@ -161,6 +163,7 @@ def enable_lite():
 
 RESTART_PENDING = set()   # settings changed from the page since this process started that only apply after a restart
 STATE = {"data": None, "error": None, "hint": None}
+WATCH = cycle_watch.CycleWatch()      # the heartbeat of the refresh loop (phase, last good cycle, last error, log problem)
 SENTINEL = {"obj": None, "error": None, "registry": None}  # the CI sentinel (layer A) and the registry of all of them; a failure of any never stops the monitor
 LOCK = threading.Lock()
 ISSUE_CACHE = {"at": 0.0, "items": [], "busy": False}
@@ -302,7 +305,8 @@ def gh(*args, timeout=40, retries=2, as_user=False, source=None):
         attempt += 1
         try:
             CALLS["n"] += 1      # the calls of this monitor: the trend of the consumption tells them from the ones other tools make (quotawatch.py)
-            result = subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8", timeout=timeout, **(via or secretstore.gh_kwargs()))
+            extra = via or secretstore.gh_kwargs()
+            result = cycle_watch.bounded(lambda: subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8", timeout=timeout, **extra), timeout + 15)      # a child that keeps its pipes open cannot hold the loop
         except subprocess.TimeoutExpired:
             last = "timeout"
             time.sleep(resilience.backoff(attempt))
@@ -343,7 +347,8 @@ def secondary_wait(message, attempt, jitter=0.0):
 def run_gh(args, timeout=40):
     """(returncode, stdout, stderr) of one `gh` call with a fixed argument list (no shell)."""
     try:
-        done = subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout, **secretstore.gh_kwargs())
+        extra = secretstore.gh_kwargs()
+        done = cycle_watch.bounded(lambda: subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout, **extra), timeout + 15)
         return done.returncode, done.stdout, done.stderr
     except subprocess.TimeoutExpired:
         return 1, "", "timeout"
@@ -1115,7 +1120,11 @@ def maintain_extras(config, data):
                       ("otlp", lambda: __import__("github_actions_monitor.integrations.otlp", fromlist=["_"]).export(config, data, TOOL_VERSION))):
         try:
             job()
+            if name == "ai_alerts":
+                WATCH.log_ok("brief")
         except Exception as error:   # noqa: BLE001 - an extra never stops the monitor; a problem is said once
+            if name == "ai_alerts":      # the brief for the AI that cannot be written is shown, not silent
+                WATCH.log_failed(error, "brief")
             if name not in EXTRAS_WARNED:
                 EXTRAS_WARNED.append(name)
                 print(name + ":", repr(error)[:160], flush=True)
@@ -1164,46 +1173,143 @@ def maintain(config, data):
 MAINTAIN_WARNED = []
 
 
-def loop(config):
-    while True:
-        try:
-            def publish(snapshot):
-                with LOCK:
-                    STATE["data"], STATE["error"], STATE["hint"] = snapshot, None, None
-                from github_actions_monitor.util import banner
-                print(banner.tag(LITE["on"]), i18n.t("mon.loaded", n=snapshot["loading"]), flush=True)
+def sleep_for(seconds, generation=None):
+    """Sleeps in slices of one second and gives up early when this loop was replaced by a newer one (the watchdog restarted it)."""
+    end = time.time() + seconds
+    while time.time() < end:
+        if not WATCH.current(generation):
+            return
+        time.sleep(min(1.0, max(0.0, end - time.time())))
 
-            data = collect(config, publish)
-            transition = LINK.end_cycle()
-            if transition:
-                announce_link(transition, config)
-            data["offline"] = LINK.state()
-            data["etag"] = ETAG["cache"].stats() if ETAG["cache"] else None
-            maintain(config, data)
-            with LOCK:
-                STATE["data"], STATE["error"], STATE["hint"] = data, None, None
-                STATE["complete"] = True
-            with private_io.open_append(LOG_FILE) as log:  # counts only, never titles
-                log.write(tzdisplay.localize(f"{data['updated']} repos={len(data['repos'])} hot={data['hot']} refreshed={data['refreshed']} active={len(data['active'])} issues={len(data['issues'])} rate={data['rate']}\n"))
-            delay = tuned(config, "refresh_seconds", data)
-            try:   # the report of the day goes to the audit folder (never stops the loop)
-                if SENTINEL["obj"] is not None and AUTOSAVE is not None and not data.get("loading"):
-                    from github_actions_monitor.sentinels import sentinel_local
-                    AUTOSAVE.maybe(sentinel_local.AUDIT_DIR, SENTINEL["obj"].snapshot(), config.get("report_history_days", config.get("parte_history_days", 30)))
-            except Exception:
-                pass
-            delay = quota_delay(data.get("rate"), config["min_rate_remaining"], delay)
-            if time.time() < RATE_BLOCK["until"]:
-                delay = max(delay, min(3900, int(RATE_BLOCK["until"] - time.time()) + 1))
+
+def write_cycle_log(data):
+    """One line of counts per cycle (never titles). A failure is not swallowed: the heartbeat keeps it and the page and the doctor show it."""
+    try:
+        with private_io.open_append(LOG_FILE) as log:
+            log.write(tzdisplay.localize(f"{data['updated']} repos={len(data['repos'])} hot={data['hot']} refreshed={data['refreshed']} active={len(data['active'])} issues={len(data['issues'])} rate={data['rate']}\n"))
+        WATCH.log_ok()
+    except Exception as error:   # noqa: BLE001 - a log that cannot be written never stops the monitor, but it is said
+        WATCH.log_failed(error)
+        degraded.note("loop.log", error)
+
+
+def run_cycle(config, generation):
+    """One refresh cycle; returns the pause before the next one, or None when this loop was replaced meanwhile (nothing is published then)."""
+    def publish(snapshot):
+        if not WATCH.current(generation):
+            return
+        with LOCK:
+            STATE["data"], STATE["error"], STATE["hint"] = snapshot, None, None
+        from github_actions_monitor.util import banner
+        print(banner.tag(LITE["on"]), i18n.t("mon.loaded", n=snapshot["loading"]), flush=True)
+
+    WATCH.begin()
+    data = collect(config, publish)
+    WATCH.phase("maintain")
+    transition = LINK.end_cycle()
+    if transition:
+        announce_link(transition, config)
+    data["offline"] = LINK.state()
+    data["etag"] = ETAG["cache"].stats() if ETAG["cache"] else None
+    maintain(config, data)
+    if not WATCH.current(generation):
+        return None
+    WATCH.phase("publish")
+    with LOCK:
+        STATE["data"], STATE["error"], STATE["hint"] = data, None, None
+        STATE["complete"] = True
+    WATCH.phase("log")
+    write_cycle_log(data)
+    WATCH.phase("extras")
+    delay = tuned(config, "refresh_seconds", data)
+    try:   # the report of the day goes to the audit folder (never stops the loop)
+        if SENTINEL["obj"] is not None and AUTOSAVE is not None and not data.get("loading"):
+            from github_actions_monitor.sentinels import sentinel_local
+            AUTOSAVE.maybe(sentinel_local.AUDIT_DIR, SENTINEL["obj"].snapshot(), config.get("report_history_days", config.get("parte_history_days", 30)))
+    except Exception as error:   # noqa: BLE001
+        degraded.note("loop.autosave", error)
+    delay = quota_delay(data.get("rate"), config["min_rate_remaining"], delay)
+    if time.time() < RATE_BLOCK["until"]:
+        delay = max(delay, min(3900, int(RATE_BLOCK["until"] - time.time()) + 1))
+    WATCH.ok()
+    return delay
+
+
+def loop(config, generation=None):
+    generation = WATCH.generation if generation is None else generation
+    while WATCH.current(generation):
+        try:
+            delay = run_cycle(config, generation)
+            if delay is None:
+                return
         except AuthError as error:
+            if not WATCH.current(generation):
+                return
+            WATCH.fail(error)
             with LOCK:
                 STATE["error"], STATE["hint"] = str(error), "auth"   # the page writes the hint in its own language
             delay = 60
         except Exception as error:
+            if not WATCH.current(generation):
+                return
+            WATCH.fail(error)
+            degraded.note("loop.cycle", error)
             with LOCK:
                 STATE["error"] = str(error)
             delay = 60
-        time.sleep(delay)
+        sleep_for(delay, generation)
+
+
+def start_loop(config):
+    """Starts a refresh loop in its own thread (a new generation: an older one that wakes up later leaves without publishing). Returns the thread."""
+    generation = WATCH.new_generation()
+    thread = threading.Thread(target=loop, args=(config, generation), daemon=True, name=f"refresh-loop-{generation}")
+    LOOP["thread"] = thread
+    thread.start()
+    return thread
+
+
+LOOP = {"thread": None}
+
+
+def watchdog_restart(config, reason):
+    """The traceback of every thread goes to the log (where the cycle hangs) and the loop starts again in a new thread. Returns the new thread."""
+    try:
+        with private_io.open_append(LOG_FILE) as log:
+            log.write(tzdisplay.localize(f"{datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')} WATCHDOG {reason} phase={WATCH.phase_name} running={WATCH.running_seconds()}s: threads follow\n"))
+            log.flush()
+            cycle_watch.dump_stacks(log)
+    except Exception as error:   # noqa: BLE001
+        WATCH.log_failed(error)
+    print(f"WATCHDOG: the refresh loop was {reason} in phase {WATCH.phase_name}; it is started again", flush=True)
+    WATCH.restarts += 1
+    WATCH.fail(f"{reason} in phase {WATCH.phase_name}")
+    return start_loop(config)
+
+
+def watchdog_limit(config):
+    try:
+        return max(0, int((LIVE_CONFIG or config).get("watchdog_minutes", 10))) * 60
+    except (TypeError, ValueError):
+        return 600
+
+
+def watchdog_once(config):
+    """One look of the watchdog: restarts the loop when a cycle runs longer than `watchdog_minutes` or its thread is gone. Returns "", "stuck" or "dead"."""
+    thread = LOOP["thread"]
+    verdict = cycle_watch.check(WATCH, watchdog_limit(config), thread is not None and thread.is_alive())
+    if verdict:
+        watchdog_restart(config, verdict)
+    return verdict
+
+
+def watchdog_loop(config, every=30):
+    while True:
+        time.sleep(every)
+        try:
+            watchdog_once(config)
+        except Exception as error:   # noqa: BLE001 - the watchdog never stops
+            degraded.note("loop.watchdog", error)
 
 
 HOST_RE = re.compile(r"^[A-Za-z0-9.-]{1,100}$")
@@ -1896,7 +2002,7 @@ class Handler(BaseHTTPRequestHandler):
             if not self.guard():
                 return
             with LOCK:
-                self.reply(json.dumps({"data": STATE["data"], "error": STATE["error"], "hint": STATE["hint"]}), "application/json; charset=utf-8")
+                self.reply(json.dumps({"data": STATE["data"], "error": STATE["error"], "hint": STATE["hint"], "loop": WATCH.snapshot(limit_seconds=watchdog_limit(LIVE_CONFIG or DEFAULTS))}), "application/json; charset=utf-8")
         elif path in ("/", "/index.html"):
             if not self.guard():      # the page checks the Host like the API does (a rebinding page gets a 403, not the monitor)
                 return
@@ -2434,7 +2540,8 @@ def main():
         ok, why = MODE.set(wanted, args.mode_minutes if args.mode_minutes is not None else modes.settings(config)["default_minutes"], config)
         print(banner_mode_line(MODE.name, "" if ok else why), flush=True)
     degraded.attach(state_dir() / ("degraded_lite.json" if LITE["on"] else "degraded.json"))
-    threading.Thread(target=loop, args=(config,), daemon=True).start()
+    start_loop(config)
+    threading.Thread(target=watchdog_loop, args=(config,), daemon=True, name="refresh-watchdog").start()
     threading.Thread(target=update_loop, daemon=True).start()
     if not LITE["on"]:
         start_sentinel(config)

@@ -44,8 +44,8 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 | | |
 |---|---|
 | **Maturidade** | functional |
-| **Testes** | 1311 métodos de teste (`python -m unittest discover -s monitor/tests`) |
-| **Definições** | 288 definições, todas com ajuda |
+| **Testes** | 1324 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Definições** | 289 definições, todas com ajuda |
 | **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
 | **Testado no CI em** | ubuntu, windows, macos, Python 3.11, 3.13 |
 

@@ -28,8 +28,12 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **The sound can be unlocked and no longer misses a red that came while the page was closed**: a visible notice "Sound blocked by the browser: click here to turn it on" appears while the browser keeps the audio locked (any click on the page unlocks it; the notice button also plays a test tone); the page remembers the reds it had seen (per account, up to six hours), so a red that appeared while the page was closed or reloading sounds; and when the page returns from a gap the cooldown no longer hides a new red. The help of `sound.server_beep` (off by default, this computer only) now says what the page cannot do and what that switch adds, in the eight languages.
 
+- **The refresh loop has a heartbeat and a watchdog**: `/api/data` now carries `loop` (the phase of the cycle, how long it has been running, the last good cycle, the last error and the phase it happened in, the restarts and any problem writing the log or the brief for the AI). The page says "The monitor does not refresh: its cycle has been in <phase> for <time>" in the bottom bar when a cycle runs far too long, and a log or brief that cannot be written is shown there too instead of failing in silence. A watchdog thread checks every 30 seconds: a cycle that runs longer than the new setting `watchdog_minutes` (default 10, 0 = off) or a loop whose thread is gone is restarted in a new thread, after writing the traceback of every thread to the log file (where it hangs). The old loop, if it ever wakes up, sees it was replaced and leaves without publishing.
+
 ### Fixed
 
+- The dashboard could stay on one old picture while the monitor was running: a call to `gh` that never returned (a child process holding its pipes after the timeout) held the refresh loop for good while the page still answered at once. Every `gh` call is now bounded by a hard deadline in a helper thread, and a loop that still hangs is found and restarted by the watchdog above.
+- A failure to write the log was swallowed and could end a cycle; it is now kept and shown, and the cycle goes on.
 - The page showed old data without any warning when the monitor stopped or answered slowly (a request that never returned left the page looking alive), and the "bing bing" stayed silent after a reload or a long gap.
 
 ## [1.7.9]

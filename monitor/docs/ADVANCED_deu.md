@@ -62,3 +62,7 @@ Mit `otlp.enabled` an und einem `otlp.endpoint` (HTTPS oder HTTP auf diesem Rech
 - Der MCP-Server spricht nur über Standardeingabe und -ausgabe; niemals hinter einen Netzwerkport legen.
 
 `listen.trusted_proxy` (standardmäßig aus): nur wenn ein EIGENER Reverse-Proxy auf demselben Computer der einzige Zugang ist. Fehlversuche werden dann gegen die letzte Adresse von `X-Forwarded-For` (die Ihr Proxy anhängt) und nicht gegen den Proxy gezählt; eine Anfrage über einen Proxy gilt weiterhin nie als dieser Computer. Wenn jemand anderes den Monitor direkt erreichen kann, aus lassen.
+
+## Die Aktualisierungsschleife: Herzschlag und Wächter
+
+`/api/data` liefert zusätzlich `loop`: die Phase des Aktualisierungszyklus (`collect`, `maintain`, `publish`, `log`, `extras`, `idle`), wie lange der Zyklus läuft, den letzten guten Zyklus, den letzten Fehler samt Phase, die Neustarts und jedes Problem beim Schreiben des Protokolls oder der Übersicht für die KI. Die untere Leiste der Seite zeigt es rot, wenn ein Zyklus viel zu lange läuft, und als Warnung, wenn eine Datei nicht geschrieben werden kann. Ein Wächter startet einen Zyklus, der länger als `watchdog_minutes` läuft (Standard 10, 0 schaltet ihn aus), in einem neuen Thread neu, nachdem er die Traceback aller Threads in `actions_monitor_log.txt` geschrieben hat.
