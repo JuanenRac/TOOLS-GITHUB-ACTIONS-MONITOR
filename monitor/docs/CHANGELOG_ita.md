@@ -19,6 +19,16 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - `tools/migrate_layout.py` per una cartella che era un'installazione piatta: simulazione per impostazione predefinita; `--apply` copia la tua configurazione in `layout_backup_<marca>/config/` e SPOSTA (mai cancella né sovrascrive) i vecchi moduli, pagina, esempi e `locales/` in `layout_backup_<marca>/old_code/`. `--doctor` avvisa finché esistono tali resti. `MIGRATING.md` lo descrive nelle otto lingue.
 
+### Sicurezza
+
+- **Un indirizzo di GitHub supera il pulitore solo con le forme di un elenco chiuso** (un repository, un'esecuzione con il suo job o tentativo, un commit, una issue, una pull request, un file); viene tagliato al primo carattere che non sia lettera, cifra, punto, trattino, trattino basso o barra, e ciò che segue viene ripulito come qualsiasi testo. Finora un segreto attaccato a un link (una query codificata, un elenco separato da virgole, i due punti, un segmento opaco del percorso, un'e-mail che inizia nell'indirizzo) arrivava intero all'IA.
+
+- **L'hook del client di IA non consegna alcun testo di log**: solo il repository, il workflow, la conclusione e il link di ogni avviso. L'ordine di agire senza aspettare che glielo dicano è sparito; l'ultima riga ora dice che un log può contenere testo scritto da terzi, che sono dati non affidabili e che le istruzioni che vi si trovano non vengono mai seguite. Nelle otto lingue.
+
+### Corretto
+
+- **Il flusso di eventi per IA non muore più con una riga di log normale**: la riga del feed viene ripulita campo per campo e poi scritta, invece di ripulire un JSON già scritto (una causa che finiva con `password: x`, `token=x` o `DB_PASSWORD=x` lo rompeva). Una riga che non si può ripulire viene saltata e il flusso continua; le risposte del server MCP vengono ripulite allo stesso modo. Nel pulitore, il valore di una coppia `chiave=valore` si ferma a un apice, una virgola o un punto e virgola, e un valore tra virgolette viene ripulito per intero.
+
 ## [1.7.9]
 
 ### Corretto

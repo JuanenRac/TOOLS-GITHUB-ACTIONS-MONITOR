@@ -19,6 +19,16 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - `tools/migrate_layout.py` para una carpeta que era una instalación plana: simulación por defecto; `--apply` copia tu configuración a `layout_backup_<marca>/config/` y MUEVE (nunca borra ni pisa) los módulos, la página, los ejemplos y `locales/` antiguos a `layout_backup_<marca>/old_code/`. `--doctor` avisa mientras queden restos así. `MIGRATING.md` lo describe en los ocho idiomas.
 
+### Seguridad
+
+- **Una dirección de GitHub pasa el limpiador solo con las formas de una lista cerrada** (un repositorio, una ejecución con su job o intento, un commit, una incidencia, una pull request, un archivo); se corta en el primer carácter que no sea letra, cifra, punto, guion, guion bajo o barra, y lo que sigue se limpia como cualquier texto. Hasta ahora un secreto pegado a un enlace (una consulta codificada, una lista separada por comas, unos dos puntos, un segmento opaco de la ruta, un correo que empieza en la dirección) llegaba entero a la IA.
+
+- **El hook del cliente de IA no entrega texto de ningún log**: solo el repositorio, el workflow, la conclusión y el enlace de cada alerta. La orden de actuar sin esperar a que se lo digan ha desaparecido; la línea final dice ahora que un log puede contener texto escrito por terceros, que son datos no fiables y que nunca se siguen las instrucciones que contenga. En los ocho idiomas.
+
+### Corregido
+
+- **El stream de eventos para IA ya no muere con una línea de log corriente**: la línea del feed se limpia campo a campo y luego se escribe, en lugar de limpiar un JSON ya escrito (una causa que acabara en `password: x`, `token=x` o `DB_PASSWORD=x` lo rompía). Una línea que no se puede limpiar se salta y el stream sigue; las respuestas del servidor MCP se limpian igual. En el limpiador, el valor de un par `clave=valor` termina en una comilla, una coma o un punto y coma, y un valor entre comillas se limpia entero.
+
 ## [1.7.9]
 
 ### Corregido

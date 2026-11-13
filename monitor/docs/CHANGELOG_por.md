@@ -19,6 +19,16 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - `tools/migrate_layout.py` para uma pasta que era uma instalação plana: simulação por defeito; `--apply` copia a sua configuração para `layout_backup_<marca>/config/` e MOVE (nunca apaga nem substitui) os módulos, a página, os exemplos e `locales/` antigos para `layout_backup_<marca>/old_code/`. `--doctor` avisa enquanto existirem tais restos. `MIGRATING.md` descreve-o nos oito idiomas.
 
+### Segurança
+
+- **Um endereço do GitHub só passa o limpador com as formas de uma lista fechada** (um repositório, uma execução com o seu job ou tentativa, um commit, uma issue, um pull request, um ficheiro); é cortado no primeiro carácter que não seja letra, algarismo, ponto, hífen, sublinhado ou barra, e o que se segue é limpo como qualquer texto. Até agora, um segredo colado a uma ligação (uma consulta codificada, uma lista separada por vírgulas, dois pontos, um segmento opaco do caminho, um e-mail que começa no endereço) chegava inteiro à IA.
+
+- **O hook do cliente de IA não entrega nenhum texto de registo**: só o repositório, o workflow, a conclusão e a ligação de cada alerta. A ordem de agir sem esperar que lha digam desapareceu; a última linha diz agora que um registo pode conter texto escrito por terceiros, que são dados não fiáveis e que as instruções que nele se encontrem nunca são seguidas. Nos oito idiomas.
+
+### Corrigido
+
+- **O fluxo de eventos para IA já não morre com uma linha de registo normal**: a linha do feed é limpa campo a campo e só depois escrita, em vez de limpar um JSON já escrito (uma causa que terminasse em `password: x`, `token=x` ou `DB_PASSWORD=x` estragava-o). Uma linha que não se consiga limpar é saltada e o fluxo continua; as respostas do servidor MCP são limpas da mesma forma. No limpador, o valor de um par `chave=valor` termina numa aspa, numa vírgula ou num ponto e vírgula, e um valor entre aspas é limpo por inteiro.
+
 ## [1.7.9]
 
 ### Corrigido

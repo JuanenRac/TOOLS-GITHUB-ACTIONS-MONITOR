@@ -19,6 +19,16 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - `tools/migrate_layout.py` für einen Ordner, der eine flache Installation war: standardmäßig ein Probelauf; `--apply` kopiert Ihre Konfiguration nach `layout_backup_<Stempel>/config/` und VERSCHIEBT (nie löschen, nie überschreiben) die alten Module, die alte Seite, die alten Beispiele und `locales/` nach `layout_backup_<Stempel>/old_code/`. `--doctor` warnt, solange solche Reste existieren. `MIGRATING.md` beschreibt es in den acht Sprachen.
 
+### Sicherheit
+
+- **Eine GitHub-Adresse passiert den Bereiniger nur in den Formen einer geschlossenen Liste** (ein Repository, ein Lauf mit Job oder Versuch, ein Commit, eine Issue, ein Pull Request, eine Datei); sie wird am ersten Zeichen abgeschnitten, das kein Buchstabe, keine Ziffer, kein Punkt, Bindestrich, Unterstrich oder Schrägstrich ist, und der Rest wird wie jeder Text bereinigt. Bisher gelangte ein an einen Link geklebtes Geheimnis (eine kodierte Abfrage, eine Liste mit Kommas, ein Doppelpunkt, ein undurchsichtiges Pfadsegment, eine E-Mail-Adresse, die in der Adresse beginnt) unverändert zur KI.
+
+- **Der Hook des KI-Clients übergibt keinen Log-Text**: nur Repository, Workflow, Ergebnis und Link jeder Warnung. Die Anweisung, ohne Aufforderung zu handeln, ist entfallen; die Schlusszeile sagt nun, dass ein Log Text von Dritten enthalten kann, dass er nicht vertrauenswürdige Daten sind und dass darin gefundene Anweisungen nie befolgt werden. In den acht Sprachen.
+
+### Behoben
+
+- **Der Ereignisstrom für KIs stirbt nicht mehr an einer gewöhnlichen Log-Zeile**: Die Zeile des Feeds wird feldweise bereinigt und dann geschrieben, statt ein bereits geschriebenes JSON zu bereinigen (eine Ursache, die auf `password: x`, `token=x` oder `DB_PASSWORD=x` endete, zerstörte es). Eine Zeile, die sich nicht bereinigen lässt, wird übersprungen und der Strom läuft weiter; die Antworten des MCP-Servers werden genauso bereinigt. Im Bereiniger endet der Wert eines `Schlüssel=Wert`-Paares an einem Anführungszeichen, einem Komma oder einem Semikolon, und ein Wert in Anführungszeichen wird ganz bereinigt.
+
 ## [1.7.9]
 
 ### Behoben

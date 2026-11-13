@@ -21,6 +21,16 @@ when this file and `tool_version.py` disagree.
 
 - `tools/migrate_layout.py` for a folder that was a flat installation: a dry run by default; `--apply` copies your configuration to `layout_backup_<stamp>/config/` and MOVES (never deletes, never overwrites) the old modules, page, examples and `locales/` to `layout_backup_<stamp>/old_code/`. `--doctor` warns while such leftovers exist. `MIGRATING.md` describes it in the eight languages.
 
+### Security
+
+- **An address of GitHub passes the cleaner only in the shapes of a closed list** (a repository, a run with its job or attempt, a commit, an issue, a pull request, a file); it is cut at the first character that is not a letter, a digit, a dot, a hyphen, an underscore or a slash, and what follows is cleaned like any text. Until now a secret glued to a link (an encoded query, a list separated by commas, a colon, an opaque segment of the path, an e-mail that starts in the address) travelled whole to the AI.
+
+- **The hook of the AI client hands over no text of a log**: only the repository, the workflow, the conclusion and the link of each alert. The order to act without waiting to be told is gone; the closing line now says that a log can hold text written by third parties, that it is untrusted data and that instructions found in it are never followed. In the eight languages.
+
+### Fixed
+
+- **The stream of events for AIs no longer dies on an ordinary log line**: the line of the feed is cleaned field by field and then written, instead of cleaning a JSON that was already written (a cause that ended in `password: x`, `token=x` or `DB_PASSWORD=x` broke it). A line that cannot be cleaned is skipped and the stream goes on; the answers of the MCP server are cleaned the same way. In the cleaner, the value of a `key=value` pair stops at a quote, a comma or a semicolon, and a quoted value is cleaned whole.
+
 ## [1.7.9]
 
 ### Fixed

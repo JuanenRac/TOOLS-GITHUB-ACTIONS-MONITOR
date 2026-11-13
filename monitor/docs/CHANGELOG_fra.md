@@ -19,6 +19,16 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - `tools/migrate_layout.py` pour un dossier qui était une installation plate : simulation par défaut ; `--apply` copie votre configuration vers `layout_backup_<horodatage>/config/` et DÉPLACE (jamais supprimer ni écraser) les anciens modules, page, exemples et `locales/` vers `layout_backup_<horodatage>/old_code/`. `--doctor` avertit tant que de tels restes existent. `MIGRATING.md` le décrit dans les huit langues.
 
+### Sécurité
+
+- **Une adresse de GitHub ne passe le nettoyeur que sous les formes d'une liste fermée** (un dépôt, une exécution avec son job ou sa tentative, un commit, une issue, une pull request, un fichier) ; elle est coupée au premier caractère qui n'est ni une lettre, ni un chiffre, ni un point, un tiret, un tiret bas ou une barre oblique, et ce qui suit est nettoyé comme n'importe quel texte. Jusqu'ici un secret collé à un lien (une requête encodée, une liste séparée par des virgules, deux-points, un segment opaque du chemin, un e-mail qui commence dans l'adresse) arrivait entier à l'IA.
+
+- **Le hook du client d'IA ne remet aucun texte de journal** : seulement le dépôt, le workflow, la conclusion et le lien de chaque alerte. L'ordre d'agir sans attendre qu'on le dise a disparu ; la dernière ligne dit désormais qu'un journal peut contenir du texte écrit par des tiers, que ce sont des données non fiables et que les instructions qu'il contient ne sont jamais suivies. Dans les huit langues.
+
+### Corrigé
+
+- **Le flux d'événements pour IA ne meurt plus sur une ligne de journal ordinaire** : la ligne du flux est nettoyée champ par champ puis écrite, au lieu de nettoyer un JSON déjà écrit (une cause qui finissait par `password: x`, `token=x` ou `DB_PASSWORD=x` le cassait). Une ligne impossible à nettoyer est ignorée et le flux continue ; les réponses du serveur MCP sont nettoyées de la même façon. Dans le nettoyeur, la valeur d'une paire `clé=valeur` s'arrête à un guillemet, une virgule ou un point-virgule, et une valeur entre guillemets est nettoyée en entier.
+
 ## [1.7.9]
 
 ### Corrigé
