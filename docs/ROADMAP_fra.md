@@ -2,6 +2,10 @@
 
 Des idées qui n'ont pas tenu dans la version actuelle, sans ordre promis. Ce sont des directions, pas des engagements ; une issue ou une pull request est la meilleure façon d'en faire avancer une.
 
+## Fait dans la 1.7.9
+
+### Corrigé
+
 ## Fait dans la 1.7.8
 
 ### Ajouté

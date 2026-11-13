@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITOR DO GITHUB ACTIONS + SENTINELA (versão 1.7.8)
+MONITOR DO GITHUB ACTIONS + SENTINELA (versão 1.7.9)
 ====================================================
 QUAL ARRANCAR? (um utilizador novo decide em dois minutos)
   COMPLETA  MONITOR_GITHUB_ACTIONS.*       a página com a sentinela (porta 8765): alertas, fila de assinatura, análise. Comece aqui se tem vários repositórios.

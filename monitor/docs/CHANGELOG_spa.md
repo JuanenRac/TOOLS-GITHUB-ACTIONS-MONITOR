@@ -7,7 +7,7 @@
 
 Versión de la propia herramienta (monitor + centinela + herramientas por lotes), con su propio semver. La fuente es el CHANGELOG.md en inglés; este fichero lleva las mismas versiones y secciones.
 
-## [Unreleased]
+## [1.7.9]
 
 ### Corregido
 

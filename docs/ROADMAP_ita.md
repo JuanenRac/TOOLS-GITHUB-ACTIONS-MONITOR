@@ -2,6 +2,10 @@
 
 Idee che non sono entrate nella versione attuale, senza ordine promesso. Sono direzioni, non impegni; una issue o una pull request è il modo migliore per farne avanzare una.
 
+## Fatto nella 1.7.9
+
+### Corretto
+
 ## Fatto nella 1.7.8
 
 ### Aggiunto
