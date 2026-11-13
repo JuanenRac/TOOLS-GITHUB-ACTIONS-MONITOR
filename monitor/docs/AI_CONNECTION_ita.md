@@ -44,3 +44,17 @@ Tutto è disattivato per impostazione predefinita. Il testo dei log viene ripuli
 `ai_alerts.enabled`, `ai_alerts.folder`, `ai_alerts.brief_max_bytes`, `ai_alerts.diagnose.*`, `ai_alerts.cascade.enabled`, `ai_alerts.stream.*`, `ai_alerts.heartbeat.*`, `ai_alerts.client_hook.*`; correlate: `sound.enabled`, `display.blink_red_tiles`. Vedi [SETTINGS_ita.md](SETTINGS_ita.md) e [AI_ALERTS_ita.md](AI_ALERTS_ita.md).
 
 La quota di GitHub è condivisa dal monitor, dagli strumenti di IA e da ogni altro strumento dell'account. Perché il monitor non resti senza: la scheda Quota delle Impostazioni, una GitHub App (`github_app.enabled`), un secondo account di sola lettura per le letture (`extra_reader.enabled`, `extra_reader.file`: solo il percorso del file del token), il pannello centrale (`central.source`) e la modalità risparmio (`modes.auto_low`). Lo stato e il riepilogo dicono quando la quota è esaurita e quanto spendono altri strumenti. Vedi [QUOTA_ita.md](QUOTA_ita.md).
+
+## L'avviso attivo a una IA esterna (opzionale, disattivato per impostazione predefinita)
+
+Oltre al flusso che una IA legge (`ALERTS_BRIEF.md`, lo stream, il server MCP), il monitor può **avvisare** una IA esterna quando si apre un NUOVO avviso reale. È il blocco `ai_notify` delle Impostazioni, scheda *IA*, e ogni suo interruttore si cambia solo da questo computer:
+
+- `ai_notify.enabled` (disattivato). Non viene inviato nulla finché è disattivato.
+- **Una prima conferma per fornitore**: il fornitore è quello del blocco IA (`ai.provider`); non esce nulla finché non scrivi il suo nome in `ai_notify.confirmed_provider`. Se cambi fornitore confermi di nuovo. Per il comando in uscita (sotto) scrivi `command`.
+- **Solo i campi oscurati di un elenco chiuso**: gravità, classe, repository, workflow, conclusione, serie, causa, passo successivo e collegamento, ciascuno ripulito come il flusso (token, chiavi, indirizzi e-mail, indirizzi IP e cartelle personali rimossi). Log, diagnosi e tutto il resto dell'avviso restano a casa.
+- **Limiti**: `ai_notify.max_calls_per_hour` (4) e `ai_notify.max_cost_per_hour_cents` con `ai_notify.cost_per_call_cents` (il costo che dichiari, perché il monitor non può conoscere il prezzo del tuo piano). Una chiamata viene contata prima di essere fatta, quindi anche un fornitore che fallisce consuma il limite.
+- **La chiave tramite il nome di una variabile**: il monitor legge la variabile indicata in `ai.api_key_env`; la chiave non viene mai salvata, registrata né inviata altrove che al fornitore.
+- **La IA non esegue mai un'azione**: la sua risposta viene tagliata, i suoi collegamenti disinnescati e viene solo scritta in `ai_notify.jsonl` accanto al flusso; nulla viene letto come comando e nulla delle azioni dell'assistente (`ai.actions.*`) è raggiungibile da qui.
+- **La variante di un comando in uscita**: `ai_notify.command` (solo nel file di configurazione, mai nella pagina delle Impostazioni) indica UN file con percorso assoluto; viene avviato senza shell e senza argomenti e riceve lo stesso JSON oscurato sul suo standard input.
+
+L'avviso parte da un thread a parte, così un fornitore lento non trattiene mai il ciclo.

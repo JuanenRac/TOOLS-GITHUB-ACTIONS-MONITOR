@@ -19,6 +19,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - `tools/migrate_layout.py` pour un dossier qui était une installation plate : simulation par défaut ; `--apply` copie votre configuration vers `layout_backup_<horodatage>/config/` et DÉPLACE (jamais supprimer ni écraser) les anciens modules, page, exemples et `locales/` vers `layout_backup_<horodatage>/old_code/`. `--doctor` avertit tant que de tels restes existent. `MIGRATING.md` le décrit dans les huit langues.
 
+- **L'avis actif à une IA externe** (`ai_notify.*`, dans l'onglet IA, depuis cet ordinateur seulement, désactivé par défaut, en huit langues) : quand une NOUVELLE alerte réelle s'ouvre, un court résumé part chez le fournisseur du bloc IA et sa réponse est gardée comme conseil dans `ai_notify.jsonl`. Une première confirmation par fournisseur (`ai_notify.confirmed_provider` ; changer de fournisseur en demande une nouvelle), seulement les champs expurgés d'une liste fermée (gravité, classe, dépôt, workflow, conclusion, série, cause, étape suivante, lien), un plafond d'appels par heure et un plafond de coût déclaré par heure (un appel est compté avant d'être fait), la clé par le nom d'une variable d'environnement, et l'IA n'exécute jamais d'action (sa réponse est coupée, ses liens sont désamorcés et rien n'en est lu comme une commande). La variante d'une commande sortante (`ai_notify.command` (seulement dans le fichier de configuration, jamais dans la page des Réglages)) nomme UN fichier par son chemin absolu, lancé sans shell et sans arguments, qui reçoit le même JSON sur son entrée standard. L'avis part d'un fil d'exécution à part, si bien qu'un fournisseur lent ne retient jamais un cycle.
+
 ## [1.7.9]
 
 ### Corrigé

@@ -44,3 +44,17 @@ Todo está apagado por defecto. El texto de los logs se limpia de secretos y rut
 `ai_alerts.enabled`, `ai_alerts.folder`, `ai_alerts.brief_max_bytes`, `ai_alerts.diagnose.*`, `ai_alerts.cascade.enabled`, `ai_alerts.stream.*`, `ai_alerts.heartbeat.*`, `ai_alerts.client_hook.*`; relacionados: `sound.enabled`, `display.blink_red_tiles`. Véase [SETTINGS_spa.md](SETTINGS_spa.md) y [AI_ALERTS_spa.md](AI_ALERTS_spa.md).
 
 La cuota de GitHub la comparten el monitor, las herramientas de IA y cualquier otra herramienta de la cuenta. Para que el monitor no se quede sin ella: la pestaña Cuota de los Ajustes, una GitHub App (`github_app.enabled`), una segunda cuenta de solo lectura para las lecturas (`extra_reader.enabled`, `extra_reader.file`: solo la ruta del fichero del token), el panel central (`central.source`) y el modo Bajo (`modes.auto_low`). El estado y el resumen dicen cuándo se agota la cuota y cuánto gastan otras herramientas. Véase [QUOTA_spa.md](QUOTA_spa.md).
+
+## El aviso activo a una IA externa (opcional, desactivado por defecto)
+
+Además del feed que lee una IA (`ALERTS_BRIEF.md`, el stream, el servidor MCP), el monitor puede **avisar** a una IA externa cuando se abre una alerta real NUEVA. Es el bloque `ai_notify` de Ajustes, pestaña *IA*, y cada interruptor suyo solo se cambia desde este equipo:
+
+- `ai_notify.enabled` (desactivado). No se envía nada mientras esté desactivado.
+- **Una primera confirmación por proveedor**: el proveedor es el del bloque IA (`ai.provider`); no sale nada hasta que escribas su nombre en `ai_notify.confirmed_provider`. Si cambias de proveedor, confirmas otra vez. Para el comando de salida (abajo) escribes `command`.
+- **Solo los campos redactados de una lista cerrada**: gravedad, clase, repositorio, workflow, conclusión, racha, causa, siguiente paso y enlace, cada uno limpiado como el feed (se quitan tokens, claves, correos, direcciones IP y carpetas personales). Los registros, los diagnósticos y todo lo demás de la alerta se quedan en casa.
+- **Topes**: `ai_notify.max_calls_per_hour` (4) y `ai_notify.max_cost_per_hour_cents` con `ai_notify.cost_per_call_cents` (el coste que declaras, porque el monitor no puede saber el precio de tu plan). Una llamada se cuenta antes de hacerla, así que un proveedor que falla también gasta el tope.
+- **La clave por el nombre de una variable**: el monitor lee la variable que nombra `ai.api_key_env`; la clave nunca se guarda, se registra ni se envía a ningún sitio salvo al proveedor.
+- **La IA nunca ejecuta una acción**: su respuesta se corta, sus enlaces se desactivan y solo se escribe en `ai_notify.jsonl` junto al feed; nada de ella se lee como comando y nada de las acciones del asistente (`ai.actions.*`) es alcanzable desde aquí.
+- **La variante de un comando de salida**: `ai_notify.command` (solo en el fichero de configuración, nunca en la página de Ajustes) nombra UN fichero por su ruta absoluta; se inicia sin shell y sin argumentos y recibe el mismo JSON redactado por su entrada estándar.
+
+El aviso se envía desde un hilo propio, de modo que un proveedor lento nunca retiene el ciclo.

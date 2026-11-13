@@ -19,6 +19,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - `tools/migrate_layout.py` para uma pasta que era uma instalação plana: simulação por defeito; `--apply` copia a sua configuração para `layout_backup_<marca>/config/` e MOVE (nunca apaga nem substitui) os módulos, a página, os exemplos e `locales/` antigos para `layout_backup_<marca>/old_code/`. `--doctor` avisa enquanto existirem tais restos. `MIGRATING.md` descreve-o nos oito idiomas.
 
+- **O aviso ativo a uma IA externa** (`ai_notify.*`, no separador IA, só a partir deste computador, desativado por predefinição, em oito línguas): quando se abre um NOVO alerta real, um resumo curto vai para o fornecedor do bloco IA e a sua resposta fica guardada como conselho em `ai_notify.jsonl`. Uma primeira confirmação por fornecedor (`ai_notify.confirmed_provider`; mudar de fornecedor pede outra), só os campos redigidos de uma lista fechada (gravidade, classe, repositório, workflow, conclusão, sequência, causa, passo seguinte, ligação), um limite de chamadas por hora e um limite de custo declarado por hora (uma chamada é contada antes de ser feita), a chave pelo nome de uma variável de ambiente, e a IA nunca executa uma ação (a sua resposta é cortada, as suas ligações são neutralizadas e nada dela é lido como comando). A variante de um comando de saída (`ai_notify.command` (só no ficheiro de configuração, nunca na página de Definições)) indica UM ficheiro pelo caminho absoluto, iniciado sem shell e sem argumentos, que recebe o mesmo JSON na sua entrada padrão. O aviso sai de um fio de execução próprio, pelo que um fornecedor lento nunca retém um ciclo.
+
 ## [1.7.9]
 
 ### Corrigido

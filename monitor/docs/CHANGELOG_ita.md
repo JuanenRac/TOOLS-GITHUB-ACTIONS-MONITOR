@@ -19,6 +19,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - `tools/migrate_layout.py` per una cartella che era un'installazione piatta: simulazione per impostazione predefinita; `--apply` copia la tua configurazione in `layout_backup_<marca>/config/` e SPOSTA (mai cancella né sovrascrive) i vecchi moduli, pagina, esempi e `locales/` in `layout_backup_<marca>/old_code/`. `--doctor` avvisa finché esistono tali resti. `MIGRATING.md` lo descrive nelle otto lingue.
 
+- **L'avviso attivo a una IA esterna** (`ai_notify.*`, nella scheda IA, solo da questo computer, disattivato per impostazione predefinita, in otto lingue): quando si apre un NUOVO avviso reale, un breve riepilogo va al fornitore del blocco IA e la sua risposta viene conservata come consiglio in `ai_notify.jsonl`. Una prima conferma per fornitore (`ai_notify.confirmed_provider`; cambiare fornitore ne richiede una nuova), solo i campi oscurati di un elenco chiuso (gravità, classe, repository, workflow, conclusione, serie, causa, passo successivo, collegamento), un limite di chiamate all'ora e un limite di costo dichiarato all'ora (una chiamata viene contata prima di essere fatta), la chiave tramite il nome di una variabile d'ambiente, e la IA non esegue mai un'azione (la sua risposta viene tagliata, i suoi collegamenti disinnescati e nulla viene letto come comando). La variante di un comando in uscita (`ai_notify.command` (solo nel file di configurazione, mai nella pagina delle Impostazioni)) indica UN file con percorso assoluto, avviato senza shell e senza argomenti, che riceve lo stesso JSON sul suo standard input. L'avviso parte da un thread a parte, così un fornitore lento non trattiene mai un ciclo.
+
 ## [1.7.9]
 
 ### Corretto

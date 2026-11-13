@@ -44,3 +44,17 @@ Alles ist standardmäßig aus. Der Text der Logs wird vor dem Schreiben von Gehe
 `ai_alerts.enabled`, `ai_alerts.folder`, `ai_alerts.brief_max_bytes`, `ai_alerts.diagnose.*`, `ai_alerts.cascade.enabled`, `ai_alerts.stream.*`, `ai_alerts.heartbeat.*`, `ai_alerts.client_hook.*`; verwandt: `sound.enabled`, `display.blink_red_tiles`. Siehe [SETTINGS_deu.md](SETTINGS_deu.md) und [AI_ALERTS_deu.md](AI_ALERTS_deu.md).
 
 Das GitHub-Kontingent teilen sich der Monitor, die KI-Werkzeuge und jedes andere Werkzeug des Kontos. Damit dem Monitor nichts ausgeht: der Tab Kontingent der Einstellungen, eine GitHub-App (`github_app.enabled`), ein zweites Nur-Lese-Konto für das Lesen (`extra_reader.enabled`, `extra_reader.file`: nur der Pfad der Token-Datei), das zentrale Panel (`central.source`) und der Sparmodus (`modes.auto_low`). Zustand und Zusammenfassung sagen, wann das Kontingent erschöpft ist und wie viel andere Werkzeuge verbrauchen. Siehe [QUOTA_deu.md](QUOTA_deu.md).
+
+## Der aktive Hinweis an eine externe KI (optional, standardmäßig aus)
+
+Neben dem Feed, den eine KI liest (`ALERTS_BRIEF.md`, der Stream, der MCP-Server), kann der Monitor eine externe KI **benachrichtigen**, wenn ein NEUER echter Alarm entsteht. Das ist der Block `ai_notify` der Einstellungen, Reiter *KI*; jeder Schalter darin lässt sich nur von diesem Computer aus ändern:
+
+- `ai_notify.enabled` (aus). Solange er aus ist, wird nichts gesendet.
+- **Eine erste Bestätigung pro Anbieter**: Der Anbieter ist der des KI-Blocks (`ai.provider`); es geht nichts hinaus, bis Sie seinen Namen in `ai_notify.confirmed_provider` eintippen. Wechseln Sie den Anbieter, bestätigen Sie erneut. Für den ausgehenden Befehl (unten) tippen Sie `command`.
+- **Nur die geschwärzten Felder einer geschlossenen Liste**: Schweregrad, Klasse, Repository, Workflow, Ergebnis, Serie, Ursache, nächster Schritt und der Link, jeweils wie der Feed bereinigt (Tokens, Schlüssel, E-Mail-Adressen, IP-Adressen und persönliche Ordner entfernt). Logs, Diagnosen und alles andere des Alarms bleiben zu Hause.
+- **Obergrenzen**: `ai_notify.max_calls_per_hour` (4) und `ai_notify.max_cost_per_hour_cents` mit `ai_notify.cost_per_call_cents` (die Kosten, die Sie angeben, weil der Monitor den Preis Ihres Tarifs nicht kennt). Ein Aufruf wird gezählt, bevor er erfolgt; auch ein fehlschlagender Anbieter verbraucht also die Grenze.
+- **Der Schlüssel über den Namen einer Variablen**: Der Monitor liest die in `ai.api_key_env` genannte Variable; der Schlüssel wird nie gespeichert, protokolliert oder irgendwohin außer zum Anbieter gesendet.
+- **Die KI führt nie eine Aktion aus**: Ihre Antwort wird gekürzt, ihre Links werden entschärft, und sie wird nur in `ai_notify.jsonl` neben dem Feed geschrieben; nichts davon wird als Befehl gelesen, und die Aktionen des Assistenten (`ai.actions.*`) sind von hier aus nicht erreichbar.
+- **Die Variante eines ausgehenden Befehls**: `ai_notify.command` (nur in der Konfigurationsdatei, nie auf der Einstellungsseite) nennt EINE Datei mit absolutem Pfad; sie wird ohne Shell und ohne Argumente gestartet und erhält dasselbe geschwärzte JSON auf der Standardeingabe.
+
+Der Hinweis wird aus einem eigenen Thread gesendet, sodass ein langsamer Anbieter den Zyklus nie aufhält.

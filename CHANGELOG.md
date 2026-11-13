@@ -20,6 +20,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - `tools/migrate_layout.py` for a folder that was a flat installation: a dry run by default; `--apply` copies your configuration to `layout_backup_<stamp>/config/` and MOVES (never deletes, never overwrites) the old modules, page, examples and `locales/` to `layout_backup_<stamp>/old_code/`. `--doctor` warns while such leftovers exist. `MIGRATING.md` describes it in the eight languages.
 
+- **The active notice to an external AI** (`ai_notify.*`, in the AI tab, local-only, off by default, in the eight languages): when a NEW real alert opens, a short summary goes to the provider of the AI block and its answer is kept as advice in `ai_notify.jsonl`. A first confirmation per provider (`ai_notify.confirmed_provider`, changing the provider needs a new one), only the redacted fields of a closed list (severity, class, repository, workflow, conclusion, streak, cause, next step, link), a cap of calls an hour and a cap of declared cost an hour (a call is counted before it is made), the key by the name of an environment variable, and the AI never runs an action (its answer is cut, its links are defused and nothing of it is read as a command). The variant of an outgoing command (`ai_notify.command` (only in the configuration file, never in the Settings page)) names ONE file by its absolute path, started without a shell and without arguments, that receives the same JSON on its standard input. The notice leaves from a thread of its own, so a slow provider never holds a cycle.
+
 ## [1.7.9]
 
 ### Fixed
