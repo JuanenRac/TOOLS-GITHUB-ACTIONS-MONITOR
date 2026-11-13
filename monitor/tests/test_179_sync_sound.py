@@ -141,6 +141,24 @@ const r=[];soundWatch(red('a'));NOW+=1000;soundWatch(red('a','b'));r.push(TONES)
 console.log(JSON.stringify(r));""")
         self.assertEqual(out, [1])
 
+    def test_losing_the_monitor_sounds_once_per_loss_and_respects_mute_cooldown_and_the_switch(self):
+        out = run_js("""
+const r=[];
+soundLost();r.push(TONES);                         // lost: sounds
+NOW+=5000;soundLost();r.push(TONES);               // still lost: silent
+soundFound();NOW+=1000;soundLost();r.push(TONES);  // found and lost again inside the cooldown: silent
+soundFound();NOW+=40000;soundLost();r.push(TONES); // another loss after the cooldown: sounds
+soundFound();NOW+=40000;SOUND.muted=true;soundLost();r.push(TONES);      // muted: silent
+soundFound();SOUND.muted=false;NOW+=40000;I18N.sound.on_connection_lost=false;soundLost();r.push(TONES);      // switch off: silent
+console.log(JSON.stringify(r));""")
+        self.assertEqual(out, [1, 1, 1, 2, 2, 2])
+
+    def test_the_page_calls_the_loss_from_the_freshness_paint_and_the_help_says_so(self):
+        self.assertIn("soundLost()", PAGE)
+        self.assertIn("soundFound()", PAGE)
+        for lang in i18n.LANGS:
+            self.assertGreater(len(i18n.tl(lang, "cfg.h.sound.on_connection_lost")), 60, lang)
+
 
 if __name__ == "__main__":
     unittest.main()

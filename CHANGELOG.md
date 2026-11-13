@@ -30,6 +30,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **The refresh loop has a heartbeat and a watchdog**: `/api/data` now carries `loop` (the phase of the cycle, how long it has been running, the last good cycle, the last error and the phase it happened in, the restarts and any problem writing the log or the brief for the AI). The page says "The monitor does not refresh: its cycle has been in <phase> for <time>" in the bottom bar when a cycle runs far too long, and a log or brief that cannot be written is shown there too instead of failing in silence. A watchdog thread checks every 30 seconds: a cycle that runs longer than the new setting `watchdog_minutes` (default 10, 0 = off) or a loop whose thread is gone is restarted in a new thread, after writing the traceback of every thread to the log file (where it hangs). The old loop, if it ever wakes up, sees it was replaced and leaves without publishing.
 
+- **The "bing bing" also sounds when the page loses the monitor itself**: once per loss (no answer for over a minute, or a cycle stuck), together with the red bar. The mute chip, the `sound.on_connection_lost` switch, the cooldown and the browser's sound lock apply as for any other sound; the help of that setting says so in the eight languages.
+
 ### Fixed
 
 - The dashboard could stay on one old picture while the monitor was running: a call to `gh` that never returned (a child process holding its pipes after the timeout) held the refresh loop for good while the page still answered at once. Every `gh` call is now bounded by a hard deadline in a helper thread, and a loop that still hangs is found and restarted by the watchdog above.

@@ -479,7 +479,7 @@
  "cfg.h.signed_dir": "Dossier des enregistrements locaux de signature et de lots.",
  "cfg.h.sound.cooldown_seconds": "Durée minimale entre deux sons, pour qu'une rafale d'échecs ne sonne qu'une fois. 0 = pas de pause.",
  "cfg.h.sound.enabled": "Interrupteur principal du « bing bing » (deux courts signaux) de la page. La pastille « Son » de la barre du bas le coupe dans ce navigateur.",
- "cfg.h.sound.on_connection_lost": "Retentit une fois quand la connexion à GitHub passe de en ligne à hors ligne.",
+ "cfg.h.sound.on_connection_lost": "Retentit une fois quand la connexion à GitHub passe de en ligne à hors ligne. Il retentit aussi une fois quand cette page perd la connexion avec le moniteur lui-même (sans réponse depuis plus d'une minute) et que la barre devient rouge ; il respecte la pastille de silence, la pause minimale et le blocage du son par le navigateur.",
  "cfg.h.sound.on_new_red": "Retentit quand un échec absent auparavant apparaît (pas pour ceux déjà ouverts ni à chaque rafraîchissement).",
  "cfg.h.sound.server_beep": "Désactivé par défaut. Le « bing bing » de la page ne retentit que lorsqu'une page est ouverte dans un navigateur qui a reçu un clic (l'avis « Son bloqué » l'indique). Avec cet interrupteur, le moniteur émet lui-même deux tonalités sur cet ordinateur (bip Windows, son Glass de macOS, canberra sous Linux ou la cloche du terminal) pour un nouveau rouge ou une connexion perdue, même sans page ouverte ou si le navigateur bloque le son. Il n'utilise jamais le réseau et un programme manquant n'est pas une erreur.",
  "cfg.h.sound.volume": "Volume des signaux de la page, de 1 à 100 (modéré par défaut). Utilisez le bouton « Tester le son » dans Ce navigateur pour l'entendre.",

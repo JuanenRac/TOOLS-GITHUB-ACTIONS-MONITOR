@@ -479,7 +479,7 @@
  "cfg.h.signed_dir": "Folder with the local records of signing and batches.",
  "cfg.h.sound.cooldown_seconds": "Minimum time between two sounds, so a burst of failures sounds once. 0 = no pause.",
  "cfg.h.sound.enabled": "Main switch of the \"bing bing\" (two short tones) of the page. The chip \"Sound\" of the bar at the foot mutes it in this browser.",
- "cfg.h.sound.on_connection_lost": "Sounds once when the connection to GitHub goes from online to offline.",
+ "cfg.h.sound.on_connection_lost": "Sounds once when the connection to GitHub goes from online to offline. It also sounds once when this page loses the connection with the monitor itself (no answer for over a minute) and the bar turns red; it respects the mute chip, the cooldown and the browser's sound block.",
  "cfg.h.sound.on_new_red": "Sounds when a failure that was not there before appears (not for the ones already open and not at every refresh).",
  "cfg.h.sound.server_beep": "Off by default. The \"bing bing\" of the page only sounds while a page is open in a browser that has had one click (the notice \"Sound blocked\" says so). With this switch the monitor itself sounds two tones on this computer (Windows beep, macOS Glass sound, Linux canberra or the terminal bell) for a new red or a lost connection even when no page is open or the browser blocks sound. It never uses the network and a missing program is not an error.",
  "cfg.h.sound.volume": "Volume of the tones of the page, from 1 to 100 (moderate by default). Use the button \"Test sound\" in This browser to hear it.",

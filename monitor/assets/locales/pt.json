@@ -479,7 +479,7 @@
  "cfg.h.signed_dir": "Pasta com os registos locais de assinatura e lotes.",
  "cfg.h.sound.cooldown_seconds": "Tempo mínimo entre dois sons, para que uma rajada de falhas soe uma só vez. 0 = sem pausa.",
  "cfg.h.sound.enabled": "Interruptor principal do \"bing bing\" (dois toques curtos) da página. O chip \"Som\" da barra inferior silencia-o neste navegador.",
- "cfg.h.sound.on_connection_lost": "Soa uma vez quando a ligação ao GitHub passa de online para offline.",
+ "cfg.h.sound.on_connection_lost": "Soa uma vez quando a ligação ao GitHub passa de online para offline. Toca também uma vez quando esta página perde a ligação ao próprio monitor (sem resposta há mais de um minuto) e a barra fica vermelha; respeita o botão de silêncio, a pausa mínima e o bloqueio de som do navegador.",
  "cfg.h.sound.on_new_red": "Soa quando aparece uma falha que antes não existia (não pelas já abertas nem a cada atualização).",
  "cfg.h.sound.server_beep": "Desativado por defeito. O «bing bing» da página só toca enquanto há uma página aberta num navegador que recebeu um clique (o aviso «Som bloqueado» indica-o). Com este interruptor, o próprio monitor emite dois toques neste computador (sinal do Windows, som Glass do macOS, canberra no Linux ou o sino do terminal) para um novo vermelho ou uma ligação perdida, mesmo sem nenhuma página aberta ou se o navegador bloquear o som. Nunca usa a rede e um programa em falta não é um erro.",
  "cfg.h.sound.volume": "Volume dos toques da página, de 1 a 100 (moderado por defeito). Use o botão \"Testar som\" em Este navegador para o ouvir.",

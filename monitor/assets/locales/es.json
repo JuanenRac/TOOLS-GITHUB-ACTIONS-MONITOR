@@ -479,7 +479,7 @@
  "cfg.h.signed_dir": "Carpeta con los registros locales de firma y lotes.",
  "cfg.h.sound.cooldown_seconds": "Tiempo mínimo entre dos sonidos, para que una ráfaga de fallos suene una sola vez. 0 = sin pausa.",
  "cfg.h.sound.enabled": "Interruptor principal del \"bing bing\" (dos pitidos cortos) de la página. El chip \"Sonido\" de la barra inferior lo silencia en este navegador.",
- "cfg.h.sound.on_connection_lost": "Suena una vez cuando la conexión con GitHub pasa de en línea a sin conexión.",
+ "cfg.h.sound.on_connection_lost": "Suena una vez cuando la conexión con GitHub pasa de en línea a sin conexión. También suena una vez cuando esta página pierde la conexión con el propio monitor (sin respuesta durante más de un minuto) y la barra se pone en rojo; respeta el botón de silencio, la pausa mínima y el bloqueo de sonido del navegador.",
  "cfg.h.sound.on_new_red": "Suena cuando aparece un fallo que antes no estaba (no por los ya abiertos ni en cada refresco).",
  "cfg.h.sound.server_beep": "Apagado por defecto. El «bing bing» de la página solo suena mientras hay una página abierta en un navegador que ha recibido un clic (el aviso «Sonido bloqueado» lo indica). Con este interruptor el propio monitor emite dos tonos en este equipo (pitido de Windows, sonido Glass de macOS, canberra de Linux o la campana del terminal) por un rojo nuevo o una conexión perdida aunque no haya ninguna página abierta o el navegador bloquee el sonido. Nunca usa la red y que falte el programa no es un error.",
  "cfg.h.sound.volume": "Volumen de los pitidos de la página, de 1 a 100 (moderado por defecto). Usa el botón \"Probar sonido\" en Este navegador para oírlo.",

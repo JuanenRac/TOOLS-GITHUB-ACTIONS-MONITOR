@@ -479,7 +479,7 @@
  "cfg.h.signed_dir": "Ordner mit den lokalen Signatur- und Batch-Protokollen.",
  "cfg.h.sound.cooldown_seconds": "Mindestzeit zwischen zwei Tönen, damit eine Fehlerserie nur einmal ertönt. 0 = keine Pause.",
  "cfg.h.sound.enabled": "Hauptschalter des \"Bing Bing\" (zwei kurze Töne) der Seite. Der Chip \"Ton\" in der unteren Leiste schaltet ihn in diesem Browser stumm.",
- "cfg.h.sound.on_connection_lost": "Ertönt einmal, wenn die Verbindung zu GitHub von online auf offline wechselt.",
+ "cfg.h.sound.on_connection_lost": "Ertönt einmal, wenn die Verbindung zu GitHub von online auf offline wechselt. Er ertönt außerdem einmal, wenn diese Seite die Verbindung zum Monitor selbst verliert (über eine Minute ohne Antwort) und die Leiste rot wird; Stummschaltung, Pause und die Tonsperre des Browsers werden beachtet.",
  "cfg.h.sound.on_new_red": "Ertönt, wenn ein Fehler auftaucht, der vorher nicht da war (nicht für bereits offene und nicht bei jeder Aktualisierung).",
  "cfg.h.sound.server_beep": "Standardmäßig aus. Das \"Bing Bing\" der Seite ertönt nur, solange eine Seite in einem Browser offen ist, der einen Klick erhalten hat (der Hinweis \"Ton blockiert\" zeigt es an). Mit diesem Schalter gibt der Monitor selbst zwei Töne auf diesem Computer aus (Windows-Beep, macOS-Glass-Ton, Linux canberra oder die Terminalglocke) bei einem neuen Rot oder einer verlorenen Verbindung, auch wenn keine Seite offen ist oder der Browser den Ton blockiert. Er nutzt nie das Netzwerk, und ein fehlendes Programm ist kein Fehler.",
  "cfg.h.sound.volume": "Lautstärke der Töne der Seite, von 1 bis 100 (standardmäßig moderat). Mit der Schaltfläche \"Ton testen\" unter Dieser Browser anhören.",

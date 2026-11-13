@@ -606,13 +606,16 @@ function playTones(vol){const c=audioCtx();if(!c||c.state==="suspended")return f
   [[880,0],[1175,0.22]].forEach(([f,d])=>{const o=c.createOscillator(),g=c.createGain();o.type="sine";o.frequency.value=f;o.connect(g);g.connect(c.destination);
     g.gain.setValueAtTime(0.0001,t0+d);g.gain.exponentialRampToValueAtTime(v,t0+d+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t0+d+0.15);o.start(t0+d);o.stop(t0+d+0.17)});return true}
 /*SOUND-BEGIN*/
-const SOUND={muted:false,first:true,known:new Set(),lastAt:0,conn:null};
+const SOUND={muted:false,first:true,known:new Set(),lastAt:0,conn:null,lost:false};
 try{SOUND.muted=store.get("am-sound")==="off"}catch(e){}
 function soundCfg(){const c=I18N.sound||{};return {enabled:c.enabled!==false,newRed:c.on_new_red!==false,conn:c.on_connection_lost!==false,cool:(c.cooldown_seconds==null?30:c.cooldown_seconds)*1000,vol:(c.volume==null?40:c.volume)/100}}
 /* a bing bing only for something NEW: the alerts that are there at the first look are remembered, not announced; a cooldown keeps one sound from the next; muted means silent */
 function soundKey(){return "am-sound-known-"+(typeof ACC!=="undefined"&&ACC&&ACC.current?ACC.current:"")}
 function soundLoad(){try{const o=JSON.parse(store.get(soundKey())||"null");if(o&&Array.isArray(o.k)&&nowMs()-o.t<6*36e5)return new Set(o.k)}catch(e){}return null}
 function soundSave(keys){try{store.set(soundKey(),JSON.stringify({t:nowMs(),k:[...keys]}))}catch(e){}}
+/* the connection with the monitor itself is lost: one bing bing per loss (the mute chip, the switch, the cooldown and the audio lock all apply); found again, it can sound at the next loss */
+function soundLost(){if(SOUND.lost)return;SOUND.lost=true;const cfg=soundCfg();if(cfg.conn&&cfg.enabled&&!SOUND.muted&&nowMs()-SOUND.lastAt>=cfg.cool){SOUND.lastAt=nowMs();playTones(cfg.vol)}}
+function soundFound(){SOUND.lost=false}
 function soundResync(){SOUND.lastAt=0}      // the page was out of step and is back: the cooldown of before does not hide a new red
 function soundWatch(d){
   if(!d)return;const cfg=soundCfg(),keys=new Set((d.failing||[]).map(r=>r.repo+"|"+r.name)),off=!!(d.offline&&d.offline.offline);
@@ -985,6 +988,7 @@ function freshPaint(){
   const i=freshInfo(nowMs(),FRESH.refresh),r=$("sb-refresh"),lamp=$("sb-conn-lamp"),ct=$("sb-conn-t"),c=$("sb-conn");
   if(r){const base=DATA?T("ui.sb_updated",{time:clock(DATA.updated),secs:DATA.took}):"";r.textContent=(base?base+" · ":"")+T("ui.fresh",{age:agoText(i.age)})+(i.late&&i.retry?" · "+T("ui.fresh_retry",{n:i.retry}):"");r.title=T(i.late?"ui.fresh_late_t":"ui.fresh_t");r.classList.toggle("bad",i.late)}
   const L=FRESH.loop,stuck=loopBad(L,FRESH.refresh),ph=L?T("ui.loop_phase_"+L.phase):"";
+  if((i.late&&!i.old)||stuck)soundLost();else soundFound();
   if(stuck&&lamp&&ct&&c){lamp.className="sb-lamp bad";ct.textContent=T("ui.loop_stuck",{phase:ph,age:agoText(L.running_seconds)});c.title=T("ui.loop_stuck_t",{phase:ph});c.className="sb-item bad";if(r)r.classList.add("bad")}
   else if(i.late&&lamp&&ct&&c){lamp.className="sb-lamp bad";ct.textContent=T("ui.fresh_late",{age:agoText(i.age)});c.title=T("ui.fresh_late_t");c.className="sb-item bad"}
   else if(L&&L.log_error&&lamp&&ct&&c){lamp.className="sb-lamp warn";ct.textContent=T("ui.loop_logfail",{msg:L.log_error});c.title=T("ui.loop_logfail",{msg:L.log_error});c.className="sb-item warn"}
