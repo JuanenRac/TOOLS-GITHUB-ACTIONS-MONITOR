@@ -2,6 +2,10 @@
 
 Des idées qui n'ont pas tenu dans la version actuelle, sans ordre promis. Ce sont des directions, pas des engagements ; une issue ou une pull request est la meilleure façon d'en faire avancer une.
 
+## Fait dans la 1.8.0
+
+Une nouvelle organisation des dossiers (le paquet dans `src/`, la page, les exemples et les langues dans `assets/`) ; la barre du bas tient sur une seule ligne et ne dit que ce que les cadres du haut ne disent pas ; le résumé pour les outils d'IA et le journal sont cohérents avec un moniteur en marche ; une lecture facultative des dépôts calmes via GraphQL (désactivée par défaut) avec sa comptabilité ; l'avis actif à une IA externe (désactivé par défaut, une première confirmation par fournisseur, seulement les champs expurgés d'une liste fermée, un plafond d'appels et de coût par heure, la clé par le nom d'une variable, et l'IA n'exécute jamais d'action) ; l'application de terminal modifie les listes et les tables ; et l'historique des changements est traduit dans les huit langues jusqu'à la 1.0.0.
+
 ## Fait dans la 1.7.9
 
 ### Corrigé
@@ -66,14 +70,13 @@ Tests d'isolation de l'édition lite et de la démo, aucune requête réseau qua
 
 Ce que la 1.6.4 n'a pas atteint, et pourquoi :
 
-- **Décidé, pas fait dans la 1.6.6** : l'avis actif à une IA externe (désactivé par défaut, une première confirmation par fournisseur, seulement les champs déjà filtrés de la liste fermée, un plafond d'appels et de coût par heure, la clé par le nom d'une variable d'environnement, et l'IA n'exécute jamais d'action) avec sa variante de commande sortante (liste fermée, sans shell) ; et les dépôts de plusieurs propriétaires dans une page (le moniteur identifie un dépôt par son seul nom, il lui faut donc le propriétaire dans chaque identifiant ; c'est la base de plusieurs comptes). Chacun est une fonction à part avec sa conception et ses tests, donc la 1.6.6 a d'abord clos les corrections.
-- **Les anciennes entrées du journal des modifications dans les sept autres langues** : l'Aide montre l'historique dans chaque langue, et de la 1.6.8 à la 1.6.3 sont traduites ; la 1.6.2 et les précédentes gardent le texte anglais sous un avis traduit et seront traduites version par version, de la plus récente à la plus ancienne.
-- **Plusieurs propriétaires dans un processus et une page** : depuis la 1.7.0 chaque compte est un moniteur à part et la page les montre côte à côte, mais dans un moniteur un dépôt s'identifie encore par son seul nom, donc deux propriétaires dans le même moniteur se mélangeraient. Les comptes de la 1.7.0 sont le moyen de les garder séparés ; les ramener dans un seul processus, avec le propriétaire dans chaque identifiant, est ce qui reste.
+- **Plusieurs propriétaires dans un processus et une page** : depuis la 1.7.0 chaque compte est un moniteur à part et la page les montre côte à côte, mais dans un moniteur un dépôt reste identifié par son seul nom, si bien que deux propriétaires dans le même moniteur se mélangeraient. Les réunir dans un seul processus exige le propriétaire dans chaque identifiant (les lectures, les identifiants d'alerte, les listes des réglages, les sentinelles et la page) ; cela n'a pas pu être démontré sans les dépôts de deux vrais propriétaires, donc les comptes de la 1.7.0 restent le moyen de les séparer.
 - **Le rapport de facturation avec un compte qui peut le lire** : la vraie réponse pour un compte sans la portée `user` est « introuvable » et le moniteur retombe sur l'estimation (vérifié) ; les chiffres eux-mêmes n'ont pas été comparés à un compte de facturation.
 - **Les prix des gros runners** de `quotas.json` viennent de la mémoire de la grille tarifaire publique et sont marqués non vérifiés ; comparez-les à la page de facturation de GitHub et modifiez le fichier.
 - **`gh copilot`** : ses options se vérifient avec `gh copilot -- --help`, qui exige la ligne de commande Copilot ; elle n'est pas installée ici, donc elles restent non vérifiées.
 - **Notifications, webhook, Enterprise Server et exemples de service** face à des services réels : `tools/manual_check_live.py` les vérifie à la main ; ils demandent vos canaux et hôtes, ils n'ont donc pas été lancés ici.
-- **L'application de terminal** modifie les réglages simples et montre l'état de l'IA ; l'explication d'un workflow rouge précis et l'édition des listes et tables restent dans la page.
+- **L'application de terminal** modifie les réglages simples, les listes et les tables de nombres et montre l'état de l'IA ; l'explication d'un workflow rouge précis reste dans la page.
+- **Seul le propriétaire peut les démontrer sur une vraie installation** : plusieurs comptes avec la sentinelle Collab sur de vrais dépôts, une GitHub App et un second compte en lecture seule avec de vraies clés, et le proxy HTTPS avec un vrai certificat. Ils se vérifient à la main (`tools/manual_check_live.py`) et ne sont pas donnés pour faits.
 - **Une vérification de nouvelle version qui télécharge ou installe** : jamais ; le moniteur ne fait que le dire.
 
 ## Plus tard
