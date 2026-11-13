@@ -352,7 +352,7 @@ def login_page():
     texts = {k: t("auth." + k) for k in ("title", "user", "password", "sign_in", "bootstrap_note", "create_admin", "wrong", "locked", "failed", "rate")}
     from html import escape
     e = {k: escape(v, quote=True) for k, v in texts.items()}
-    texts_json = json.dumps(texts).replace("</", "<\/")
+    texts_json = json.dumps(texts).replace("</", "<\\/")
     return f"""<!doctype html>
 <html lang="{escape(i18n.language())}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{e['title']}</title>
