@@ -18,6 +18,7 @@ from github_actions_monitor.storage.file_storage import FileStorage
 BACKENDS = ("file", "sqlite")
 DB_NAME = "storage.sqlite3"
 DEFAULT_BACKEND = "file"
+DEFAULT_BUSY_MS = 30000      # `storage.busy_timeout_ms`: how long SQLite waits for another writer (1000-600000)
 
 
 def settings(block):
@@ -25,7 +26,9 @@ def settings(block):
     block = block if isinstance(block, dict) else {}
     backend = block.get("backend") if block.get("backend") in BACKENDS else DEFAULT_BACKEND
     path = block.get("path") if isinstance(block.get("path"), str) else ""
-    return {"backend": backend, "path": path.strip()}
+    wait = block.get("busy_timeout_ms")
+    wait = wait if isinstance(wait, int) and not isinstance(wait, bool) and 1000 <= wait <= 600000 else DEFAULT_BUSY_MS
+    return {"backend": backend, "path": path.strip(), "busy_timeout_ms": wait}
 
 
 def create_storage(block=None, account_id=None, lite=False, base_dir=None):
@@ -35,11 +38,11 @@ def create_storage(block=None, account_id=None, lite=False, base_dir=None):
     if cfg["backend"] == "sqlite":
         from github_actions_monitor.storage.sqlite_storage import SqliteStorage
         if cfg["path"]:
-            return SqliteStorage(cfg["path"])
+            return SqliteStorage(cfg["path"], cfg["busy_timeout_ms"])
         if accounts.layout(base_dir) == "accounts" or account_id not in (None, accounts.DEFAULT_ID):
-            return SqliteStorage(accounts.account_dir(account_id or accounts.DEFAULT_ID, base_dir) / DB_NAME)
+            return SqliteStorage(accounts.account_dir(account_id or accounts.DEFAULT_ID, base_dir) / DB_NAME, cfg["busy_timeout_ms"])
         from github_actions_monitor.util.paths import ROOT
-        return SqliteStorage((Path(base_dir) if base_dir else ROOT) / DB_NAME)
+        return SqliteStorage((Path(base_dir) if base_dir else ROOT) / DB_NAME, cfg["busy_timeout_ms"])
     if cfg["backend"] != "file":
         raise base.StorageError("backend")
     if cfg["path"]:
@@ -56,5 +59,5 @@ def create_global_storage(block=None, lite=False, base_dir=None):
     cfg = settings(None if lite else block)
     if cfg["backend"] == "sqlite":
         from github_actions_monitor.storage.sqlite_storage import SqliteStorage
-        return SqliteStorage(cfg["path"] or accounts.root_dir(base_dir) / "_global" / DB_NAME)
+        return SqliteStorage(cfg["path"] or accounts.root_dir(base_dir) / "_global" / DB_NAME, cfg["busy_timeout_ms"])
     return FileStorage(Path(cfg["path"]) if cfg["path"] else accounts.root_dir(base_dir), "accounts")
