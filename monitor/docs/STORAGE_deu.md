@@ -56,8 +56,10 @@ Ein monatelang laufender Monitor würde ohne Obergrenze wachsen, daher entfernt 
 | `retention.enabled` | an | der Schalter |
 | `retention.events_days` | 90 | ältere Ereignisse werden entfernt |
 | `retention.analytics_days` | 180 | ältere Tage des Analyseverlaufs werden entfernt |
-| `retention.mode` | `delete` | `archive` schreibt die alten Ereignisse zuerst in eine `.gz` in `events/archive/` |
+| `retention.mode` | `archive` | `archive` schreibt die alten Ereignisse zuerst in eine `.gz` in `events/archive/` |
 | `retention.events_max_kb` | 512 | Größenobergrenze der Feed-Datei beim Dateispeicher (wie immer) |
 | `retention.warn_events_mb` | 20 | `--doctor` warnt oberhalb dieser Größe |
 
 Die Bereinigung berührt nur Ereignisse und Analysetage, die älter als ihre Grenze sind; sie berührt nie die Konfiguration, den Zustand der Wächter, die Stummschaltungen oder ein Ereignis ohne Zeit. Jeder Durchlauf hinterlässt eine Zeile im Auditdokument (wann, wie viele Ereignisse entfernt und behalten, die Archivdatei, wie viele Analysetage, ein Fehler). `--doctor` warnt vor der Größe der Ereignisse und, bei einem Monitor, der als Dienst läuft (Netzwerkmodus, ohne Browser, ein Container oder `MONITOR_SERVICE=1`), wenn seine Konfiguration keinen `retention`-Block hat. Sichern Sie, bevor Sie die Grenzen verkürzen.
+
+Der Standard `archive` bewahrt das Entfernte in komprimierten, wieder lesbaren Dateien auf; `delete` entfernt es endgültig.

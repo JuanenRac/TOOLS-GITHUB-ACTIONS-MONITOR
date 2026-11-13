@@ -439,7 +439,7 @@
  "cfg.h.retention.events_days": "Gli eventi più vecchi di questi giorni vengono rimossi (o archiviati, secondo la modalità). Predefinito 90.",
  "cfg.h.retention.events_max_kb": "Con l'archiviazione su file, il file del feed viene ridotto alla metà più recente quando supera questa dimensione, qualunque sia la sua età. Predefinito 512. Richiede riavvio.",
  "cfg.h.retention.interval_hours": "Ogni quanto viene eseguita la pulizia: un breve passaggio al termine di un aggiornamento, una volta trascorso questo tempo. Predefinito 24.",
- "cfg.h.retention.mode": "delete = rimuoverli. archive = prima scriverli in un file compresso in events/archive/ (fuori dal percorso attivo), poi toglierli dal feed. Predefinito delete.",
+ "cfg.h.retention.mode": "delete = rimuoverli. archive = prima scriverli in un file compresso in events/archive/ (fuori dal percorso attivo), poi toglierli dal feed. Predefinito archive.",
  "cfg.h.retention.warn_events_mb": "--doctor avvisa quando gli eventi di un account superano questa dimensione. Predefinito 20.",
  "cfg.h.rule_on": "Accende o spegne questa regola.",
  "cfg.h.runners.enabled": "Spento = non letti. Acceso = libero, occupato o offline per ogni runner dell'account (una lettura in più per ciclo).",

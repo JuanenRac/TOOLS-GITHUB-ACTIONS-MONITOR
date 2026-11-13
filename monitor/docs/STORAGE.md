@@ -56,8 +56,10 @@ A monitor left running for months would grow without a ceiling, so a short pass 
 | `retention.enabled` | on | the switch |
 | `retention.events_days` | 90 | events older than this are removed |
 | `retention.analytics_days` | 180 | days of the analytics history older than this are removed |
-| `retention.mode` | `delete` | `archive` writes the old events to a `.gz` in `events/archive/` first |
+| `retention.mode` | `archive` | `archive` writes the old events to a `.gz` in `events/archive/` first |
 | `retention.events_max_kb` | 512 | ceiling in size of the feed file with the file backend (as always) |
 | `retention.warn_events_mb` | 20 | `--doctor` warns above this size |
 
 The purge only touches events and analytics days that are older than their limit; it never touches the configuration, the state of the sentinels, the silences or an event with no time. Each pass leaves a line in the audit document (when, how many events removed and kept, the archive file, how many analytics days, any error). `--doctor` warns about the size of the events and, for a monitor that runs as a service (network mode, no browser, a container or `MONITOR_SERVICE=1`), when its configuration has no `retention` block. Make a backup before you shorten the limits.
+
+The default `archive` keeps what it removes in compressed files you can read back; `delete` removes it for good.

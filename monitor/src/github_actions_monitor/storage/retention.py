@@ -7,7 +7,7 @@ Settings (the `retention` block of the configuration; every one is read through 
     retention.enabled         true   the purge runs; false = nothing is ever removed by age
     retention.events_days     90     events older than this are removed (or archived)
     retention.analytics_days  180    days of the analytics history older than this are removed
-    retention.mode            delete | archive   archive = the old events are first written to a .gz outside the hot path (events/archive/ of the account), then removed
+    retention.mode            archive | delete   (default archive)  archive = the old events are first written to a .gz outside the hot path (events/archive/ of the account), then removed
     retention.events_max_kb   512    the ceiling in bytes of the feed FILE (the file backend): the feed is cut to its newest half beyond it, as it always was
     retention.interval_hours  24     how often the purge runs (a tick of maintenance checks the clock; the purge itself is one short pass)
     retention.warn_events_mb  20     `--doctor` warns when the events of an account are bigger than this
@@ -21,7 +21,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-DEFAULTS = {"enabled": True, "events_days": 90, "analytics_days": 180, "mode": "delete", "events_max_kb": 512, "interval_hours": 24, "warn_events_mb": 20}
+DEFAULTS = {"enabled": True, "events_days": 90, "analytics_days": 180, "mode": "archive", "events_max_kb": 512, "interval_hours": 24, "warn_events_mb": 20}
 BOUNDS = {"events_days": (1, 3650), "analytics_days": (1, 3650), "events_max_kb": (64, 1048576), "interval_hours": (1, 168), "warn_events_mb": (1, 100000)}
 MODES = ("delete", "archive")
 AUDIT_KEEP = 50

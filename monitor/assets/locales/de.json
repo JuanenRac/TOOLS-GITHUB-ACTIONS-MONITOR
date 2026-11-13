@@ -439,7 +439,7 @@
  "cfg.h.retention.events_days": "Ereignisse, die älter als diese Tage sind, werden entfernt (oder archiviert, siehe Modus). Standard 90.",
  "cfg.h.retention.events_max_kb": "Beim Dateispeicher wird die Feed-Datei auf ihre neuere Hälfte gekürzt, wenn sie diese Größe überschreitet, unabhängig vom Alter. Standard 512. Neustart nötig.",
  "cfg.h.retention.interval_hours": "Wie oft die Bereinigung läuft: ein kurzer Durchlauf am Ende einer Aktualisierung, sobald diese Zeit vergangen ist. Standard 24.",
- "cfg.h.retention.mode": "delete = entfernen. archive = zuerst in eine komprimierte Datei in events/archive/ schreiben (außerhalb des aktiven Pfads), dann aus dem Feed entfernen. Standard delete.",
+ "cfg.h.retention.mode": "delete = entfernen. archive = zuerst in eine komprimierte Datei in events/archive/ schreiben (außerhalb des aktiven Pfads), dann aus dem Feed entfernen. Standard archive.",
  "cfg.h.retention.warn_events_mb": "--doctor warnt, wenn die Ereignisse eines Kontos mehr als diesen Wert belegen. Standard 20.",
  "cfg.h.rule_on": "Schaltet diese Regel ein oder aus.",
  "cfg.h.runners.enabled": "Aus = nicht gelesen. An = frei, belegt oder offline je Runner des Kontos (ein zusätzlicher Lesezugriff pro Zyklus).",

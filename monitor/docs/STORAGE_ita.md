@@ -56,8 +56,10 @@ Un monitor lasciato attivo per mesi crescerebbe senza limite, quindi un breve pa
 | `retention.enabled` | attivo | l'interruttore |
 | `retention.events_days` | 90 | gli eventi più vecchi vengono rimossi |
 | `retention.analytics_days` | 180 | i giorni dello storico delle analisi più vecchi vengono rimossi |
-| `retention.mode` | `delete` | `archive` scrive prima gli eventi vecchi in un `.gz` in `events/archive/` |
+| `retention.mode` | `archive` | `archive` scrive prima gli eventi vecchi in un `.gz` in `events/archive/` |
 | `retention.events_max_kb` | 512 | limite di dimensione del file del feed con l'archiviazione su file (come sempre) |
 | `retention.warn_events_mb` | 20 | `--doctor` avvisa oltre questa dimensione |
 
 La pulizia tocca solo eventi e giorni di analisi più vecchi del loro limite; non tocca mai la configurazione, lo stato delle sentinelle, i silenziamenti né un evento senza ora. Ogni passaggio lascia una riga nel documento di audit (quando, quanti eventi rimossi e conservati, il file di archivio, quanti giorni di analisi, l'eventuale errore). `--doctor` avvisa della dimensione degli eventi e, per un monitor che funziona come servizio (modalità rete, senza browser, un container o `MONITOR_SERVICE=1`), quando la sua configurazione non ha un blocco `retention`. Fai una copia prima di accorciare i limiti.
+
+Il predefinito `archive` conserva ciò che viene rimosso in file compressi che puoi rileggere; `delete` lo elimina definitivamente.

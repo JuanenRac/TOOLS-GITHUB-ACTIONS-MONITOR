@@ -439,7 +439,7 @@
  "cfg.h.retention.events_days": "この日数より古いイベントは削除されます(モードによってはアーカイブ)。既定は90日です。",
  "cfg.h.retention.events_max_kb": "ファイル保存では、フィードファイルがこのサイズを超えると、古さに関係なく新しい半分に切り詰められます。既定は512。再起動が必要です。",
  "cfg.h.retention.interval_hours": "整理を実行する間隔です。この時間が経過したあと、更新の終わりに短く1回実行します。既定は24。",
- "cfg.h.retention.mode": "delete = 削除する。archive = まず events/archive/ に圧縮ファイルとして書き出し(頻繁に使う場所の外)、そのあとフィードから取り除く。既定は delete です。",
+ "cfg.h.retention.mode": "delete = 削除する。archive = まず events/archive/ に圧縮ファイルとして書き出し(頻繁に使う場所の外)、そのあとフィードから取り除く。既定は archive です。",
  "cfg.h.retention.warn_events_mb": "アカウントのイベントがこのサイズを超えると --doctor が警告します。既定は20。",
  "cfg.h.rule_on": "このルールのオン/オフ。",
  "cfg.h.runners.enabled": "オフ = 読み取らない。オン = アカウントの各ランナーの待機・使用中・オフラインを表示(1サイクルあたり読み取り1回追加)。",

@@ -29,7 +29,7 @@
 
 - `tools/migrate_storage.py` 在文件与 SQLite 之间双向迁移状态:默认试运行;`--apply` 一步复制每个账户,然后比较每一项和每条事件;你的文件绝不会被修改或删除;被中断的运行让每个账户要么完整、要么保持原样,再次运行同一命令即可继续。`tools/backup_storage.py` 为两种后端创建、检查和恢复备份。
 
-- **保留与轮转**(完整版):`retention.events_days`(90)和 `retention.analytics_days`(180)决定事件和分析历史日期的保留时长;`retention.mode` 为 `delete`(默认)或 `archive`(旧事件先写入账户 `events/archive/` 中的 `.gz`,再从事件流中移除);`retention.enabled` 是开关,`retention.interval_hours`(24)决定在刷新结束时多久快速执行一遍。每次清理都会留下一行审计记录(时间、删除和保留的事件数、归档文件、分析天数、错误)。清理绝不会改动配置、哨兵状态、静音设置或没有时间的事件。`retention.events_max_kb`(512,与以往相同)是事件流文件的大小上限。这些设置在“文件夹与文件”标签页;精简版没有。
+- **保留与轮转**(完整版):`retention.events_days`(90)和 `retention.analytics_days`(180)决定事件和分析历史日期的保留时长;`retention.mode` 为 `archive`(默认;旧事件先写入账户 `events/archive/` 中的 `.gz`,再从事件流中移除)或 `delete`;`retention.enabled` 是开关,`retention.interval_hours`(24)决定在刷新结束时多久快速执行一遍。每次清理都会留下一行审计记录(时间、删除和保留的事件数、归档文件、分析天数、错误)。清理绝不会改动配置、哨兵状态、静音设置或没有时间的事件。`retention.events_max_kb`(512,与以往相同)是事件流文件的大小上限。这些设置在“文件夹与文件”标签页;精简版没有。
 
 - `--doctor` 新增两项检查:存储(SQLite 数据库存在、通过完整性检查、架构为当前版本所能理解;只读)和保留(每个账户事件的大小与 `retention.warn_events_mb` 比较,并对没有保留区块却作为服务运行的监视器发出警告)。
 

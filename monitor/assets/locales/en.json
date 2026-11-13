@@ -439,7 +439,7 @@
  "cfg.h.retention.events_days": "Events older than this many days are removed (or archived, see the mode). Default 90.",
  "cfg.h.retention.events_max_kb": "With the file backend the feed file is cut to its newest half when it grows beyond this size, whatever its age. Default 512. Needs a restart.",
  "cfg.h.retention.interval_hours": "How often the purge runs: a short pass at the end of a refresh once this time has passed. Default 24.",
- "cfg.h.retention.mode": "delete = remove them. archive = first write them to a compressed file in events/archive/ (outside the hot path), then remove them from the feed. Default delete.",
+ "cfg.h.retention.mode": "delete = remove them. archive = first write them to a compressed file in events/archive/ (outside the hot path), then remove them from the feed. Default archive.",
  "cfg.h.retention.warn_events_mb": "--doctor warns when the events of an account take more than this. Default 20.",
  "cfg.h.rule_on": "Switches this rule on or off.",
  "cfg.h.runners.enabled": "Off = not read. On = idle, busy or offline for each runner of the account (one extra read per cycle).",

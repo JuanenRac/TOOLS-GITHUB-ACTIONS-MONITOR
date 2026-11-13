@@ -473,7 +473,7 @@
     "enabled": true,
     "events_days": 90,
     "analytics_days": 180,
-    "mode": "delete",
+    "mode": "archive",
     "events_max_kb": 512,
     "interval_hours": 24,
     "warn_events_mb": 20

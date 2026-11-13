@@ -38,7 +38,7 @@ def day(days_ago):
 
 class Settings(unittest.TestCase):
     def test_the_defaults_are_the_conservative_ones(self):
-        self.assertEqual(retention.settings({}), {"enabled": True, "events_days": 90, "analytics_days": 180, "mode": "delete", "events_max_kb": 512, "interval_hours": 24, "warn_events_mb": 20})
+        self.assertEqual(retention.settings({}), {"enabled": True, "events_days": 90, "analytics_days": 180, "mode": "archive", "events_max_kb": 512, "interval_hours": 24, "warn_events_mb": 20})
         self.assertFalse(retention.configured({}))
         self.assertTrue(retention.configured({"retention": {"events_days": 30}}))
 
@@ -80,7 +80,7 @@ class Backends:
         return [e["kind"] for e in self.storage.load_events("alpha", None, None)]
 
     def test_a_pass_removes_only_old_events_and_old_analytics_days(self):
-        line = retention.run(self.storage, "alpha", retention.settings({}), NOW)
+        line = retention.run(self.storage, "alpha", retention.settings({"retention": {"mode": "delete"}}), NOW)
         self.assertEqual((line["events_removed"], line["events_kept"], line["analytics_removed"], line["error"], line["mode"]), (2, 2, 2, "", "delete"))
         self.assertEqual(self.kinds(), ["recent", "now"])
         self.assertEqual(set(self.storage.load_analytics("alpha")["daily"]), {day(100), day(1)})
@@ -89,6 +89,34 @@ class Backends:
         self.assertEqual(list(self.storage.load_sentinel_state("alpha", "sentinel_history")["days"]), [day(400)])
         self.assertEqual(self.storage.load_doc("alpha", "alert_mutes"), {"active": [{"x": 1}], "history": []})
         self.assertEqual(self.storage.load_doc("alpha", "events_state"), {"reds": {}})
+
+    def test_the_default_archives_and_what_it_removed_can_be_read_back_and_restored(self):
+        line = retention.run(self.storage, "alpha", retention.settings({}), NOW)
+        self.assertEqual((line["mode"], line["events_removed"], line["error"]), ("archive", 2, ""))
+        (archive,) = list(Path(self.storage.archive_dir("alpha")).glob("events-*.jsonl.gz"))
+        rows = [json.loads(x) for x in gzip.open(archive, "rt", encoding="utf-8").read().splitlines()]
+        self.assertEqual([r["kind"] for r in rows], ["ancient", "old"])
+        self.assertEqual(self.kinds(), ["recent", "now"])
+        self.storage.append_events("alpha", rows)      # put back, with their own times
+        self.assertEqual(self.kinds(), ["ancient", "old", "recent", "now"])
+
+    def test_delete_is_an_explicit_choice_and_leaves_no_archive(self):
+        line = retention.run(self.storage, "alpha", retention.settings({"retention": {"mode": "delete"}}), NOW)
+        self.assertEqual((line["mode"], line["events_removed"], line["archived"]), ("delete", 2, ""))
+        self.assertFalse(Path(self.storage.archive_dir("alpha")).exists() and list(Path(self.storage.archive_dir("alpha")).glob("*.gz")))
+
+    def test_an_archive_that_cannot_be_written_removes_nothing(self):
+        with mock.patch("github_actions_monitor.storage.archive.write_archive", side_effect=OSError("disk full")):
+            line = retention.run(self.storage, "alpha", retention.settings({}), NOW)
+        self.assertIn("OSError", line["error"])
+        self.assertEqual(self.kinds(), ["ancient", "old", "recent", "now"])      # the events are still there: nothing was lost for want of an archive
+
+    def test_the_limits_are_kept_inside_their_bounds(self):
+        for key, low, high in (("events_days", 1, 3650), ("analytics_days", 1, 3650), ("interval_hours", 1, 168)):
+            self.assertEqual(retention.settings({"retention": {key: low}})[key], low)
+            self.assertEqual(retention.settings({"retention": {key: high}})[key], high)
+            self.assertEqual(retention.settings({"retention": {key: low - 1}})[key], retention.DEFAULTS[key])
+            self.assertEqual(retention.settings({"retention": {key: high + 1}})[key], retention.DEFAULTS[key])
 
     def test_the_limits_come_from_the_settings(self):
         retention.run(self.storage, "alpha", retention.settings({"retention": {"events_days": 5}}), NOW)
@@ -174,7 +202,7 @@ class TheFeedWhileItIsPurged(unittest.TestCase):
             def purging():
                 try:
                     while not stop.is_set():
-                        retention.run(storage, "alpha", retention.settings({}), time.time())
+                        retention.run(storage, "alpha", retention.settings({"retention": {"mode": "delete"}}), time.time())
                 except Exception as error:  # noqa: BLE001
                     errors.append(error)
 

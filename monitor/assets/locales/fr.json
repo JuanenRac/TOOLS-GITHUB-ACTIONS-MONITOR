@@ -439,7 +439,7 @@
  "cfg.h.retention.events_days": "Les événements plus anciens que ce nombre de jours sont supprimés (ou archivés, selon le mode). Par défaut 90.",
  "cfg.h.retention.events_max_kb": "Avec le stockage en fichiers, le fichier du flux est réduit à sa moitié la plus récente quand il dépasse cette taille, quel que soit son âge. Par défaut 512. Redémarrage nécessaire.",
  "cfg.h.retention.interval_hours": "À quelle fréquence la purge s'exécute : un court passage à la fin d'une actualisation une fois ce délai écoulé. Par défaut 24.",
- "cfg.h.retention.mode": "delete = les supprimer. archive = les écrire d'abord dans un fichier compressé dans events/archive/ (hors du chemin chaud), puis les retirer du flux. Par défaut delete.",
+ "cfg.h.retention.mode": "delete = les supprimer. archive = les écrire d'abord dans un fichier compressé dans events/archive/ (hors du chemin chaud), puis les retirer du flux. Par défaut archive.",
  "cfg.h.retention.warn_events_mb": "--doctor avertit quand les événements d'un compte dépassent cette taille. Par défaut 20.",
  "cfg.h.rule_on": "Active ou coupe cette règle.",
  "cfg.h.runners.enabled": "Désactivé = non lus. Activé = libre, occupé ou hors ligne pour chaque runner du compte (une lecture de plus par cycle).",

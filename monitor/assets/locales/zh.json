@@ -439,7 +439,7 @@
  "cfg.h.retention.events_days": "超过这个天数的事件会被删除(或按模式归档)。默认 90 天。",
  "cfg.h.retention.events_max_kb": "使用文件存储时,事件流文件一旦超过这个大小,无论新旧都会被截成较新的一半。默认 512。需要重启。",
  "cfg.h.retention.interval_hours": "清理的运行频率:这段时间过后,在一次刷新结束时快速执行一遍。默认 24。",
- "cfg.h.retention.mode": "delete = 直接删除。archive = 先写入 events/archive/ 中的压缩文件(不在常用路径上),再从事件流中移除。默认 delete。",
+ "cfg.h.retention.mode": "delete = 直接删除。archive = 先写入 events/archive/ 中的压缩文件(不在常用路径上),再从事件流中移除。默认 archive。",
  "cfg.h.retention.warn_events_mb": "当某个账户的事件超过这个大小时,--doctor 会发出警告。默认 20。",
  "cfg.h.rule_on": "开关此规则。",
  "cfg.h.runners.enabled": "关闭 = 不读取。开启 = 显示账户中每个运行器的空闲、忙碌或离线状态(每个周期多一次读取)。",

@@ -56,8 +56,10 @@ python tools/backup_storage.py restore backup.zip --backend file     # 空の保
 | `retention.enabled` | オン | スイッチ |
 | `retention.events_days` | 90 | これより古いイベントを削除 |
 | `retention.analytics_days` | 180 | これより古い分析履歴の日を削除 |
-| `retention.mode` | `delete` | `archive` は古いイベントを先に `events/archive/` の `.gz` に書き出す |
+| `retention.mode` | `archive` | `archive` は古いイベントを先に `events/archive/` の `.gz` に書き出す |
 | `retention.events_max_kb` | 512 | ファイル保存でのフィードファイルのサイズ上限(従来どおり) |
 | `retention.warn_events_mb` | 20 | このサイズを超えると `--doctor` が警告 |
 
 整理は、期限より古いイベントと分析の日だけを対象にします。設定、センチネルの状態、ミュート、時刻のないイベントには決して触れません。処理のたびに監査ドキュメントに1行(いつ、削除・保持したイベント数、アーカイブファイル、分析の日数、エラー)が残ります。`--doctor` はイベントのサイズを警告し、サービスとして動くモニター(ネットワークモード、ブラウザなし、コンテナ、または `MONITOR_SERVICE=1`)で設定に `retention` ブロックがない場合にも警告します。期限を短くする前にバックアップを取ってください。
+
+既定の `archive` は取り除いた内容を読み戻せる圧縮ファイルに残し、`delete` は完全に削除します。

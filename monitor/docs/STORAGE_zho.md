@@ -56,8 +56,10 @@ python tools/backup_storage.py restore backup.zip --backend file     # 恢复到
 | `retention.enabled` | 开 | 开关 |
 | `retention.events_days` | 90 | 超过此天数的事件会被删除 |
 | `retention.analytics_days` | 180 | 超过此天数的分析历史会被删除 |
-| `retention.mode` | `delete` | `archive` 会先把旧事件写入 `events/archive/` 中的 `.gz` |
+| `retention.mode` | `archive` | `archive` 会先把旧事件写入 `events/archive/` 中的 `.gz` |
 | `retention.events_max_kb` | 512 | 文件存储时事件流文件的大小上限(与以往相同) |
 | `retention.warn_events_mb` | 20 | 超过此大小时 `--doctor` 发出警告 |
 
 清理只处理超过期限的事件和分析日期;它绝不会改动配置、哨兵状态、静音设置,也不会删除没有时间的事件。每次清理都会在审计文档中留下一行(时间、删除和保留的事件数、归档文件、分析天数、错误)。`--doctor` 会警告事件的大小;对作为服务运行的监视器(网络模式、没有浏览器、容器或 `MONITOR_SERVICE=1`),如果配置里没有 `retention` 区块,也会警告。缩短期限之前请先备份。
+
+默认的 `archive` 会把移除的内容保存在可再次读取的压缩文件中;`delete` 则永久删除。

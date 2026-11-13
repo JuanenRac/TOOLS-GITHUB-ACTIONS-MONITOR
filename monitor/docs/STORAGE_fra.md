@@ -56,8 +56,10 @@ Un moniteur laissé en marche pendant des mois grossirait sans plafond ; un cour
 | `retention.enabled` | activé | l'interrupteur |
 | `retention.events_days` | 90 | les événements plus anciens sont supprimés |
 | `retention.analytics_days` | 180 | les jours de l'historique d'analyses plus anciens sont supprimés |
-| `retention.mode` | `delete` | `archive` écrit d'abord les anciens événements dans un `.gz` de `events/archive/` |
+| `retention.mode` | `archive` | `archive` écrit d'abord les anciens événements dans un `.gz` de `events/archive/` |
 | `retention.events_max_kb` | 512 | plafond de taille du fichier du flux avec le stockage en fichiers (comme toujours) |
 | `retention.warn_events_mb` | 20 | `--doctor` avertit au-delà de cette taille |
 
 La purge ne touche que les événements et les jours d'analyses plus anciens que leur limite ; elle ne touche jamais la configuration, l'état des sentinelles, les mises en sourdine ni un événement sans heure. Chaque passage laisse une ligne dans le document d'audit (quand, combien d'événements supprimés et conservés, le fichier d'archive, combien de jours d'analyses, l'erreur éventuelle). `--doctor` avertit de la taille des événements et, pour un moniteur qui tourne comme service (mode réseau, sans navigateur, un conteneur ou `MONITOR_SERVICE=1`), quand sa configuration n'a pas de bloc `retention`. Faites une sauvegarde avant de raccourcir les limites.
+
+Par défaut (`archive`), ce qui est retiré reste dans des fichiers compressés relisibles ; `delete` le supprime définitivement.

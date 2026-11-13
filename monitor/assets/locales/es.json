@@ -439,7 +439,7 @@
  "cfg.h.retention.events_days": "Los eventos más antiguos que estos días se eliminan (o se archivan, según el modo). Por defecto 90.",
  "cfg.h.retention.events_max_kb": "Con el almacenamiento en archivos, el archivo del feed se recorta a su mitad más reciente cuando supera este tamaño, sea cual sea su antigüedad. Por defecto 512. Requiere reiniciar.",
  "cfg.h.retention.interval_hours": "Cada cuánto se ejecuta la purga: una pasada corta al final de una actualización cuando ha pasado este tiempo. Por defecto 24.",
- "cfg.h.retention.mode": "delete = eliminarlos. archive = primero escribirlos en un archivo comprimido en events/archive/ (fuera del camino caliente) y luego quitarlos del feed. Por defecto delete.",
+ "cfg.h.retention.mode": "delete = eliminarlos. archive = primero escribirlos en un archivo comprimido en events/archive/ (fuera del camino caliente) y luego quitarlos del feed. Por defecto archive.",
  "cfg.h.retention.warn_events_mb": "--doctor avisa cuando los eventos de una cuenta ocupan más que esto. Por defecto 20.",
  "cfg.h.rule_on": "Enciende o apaga esta regla.",
  "cfg.h.runners.enabled": "Apagado = no se leen. Encendido = inactivo, ocupado o desconectado de cada runner de la cuenta (una lectura extra por ciclo).",
