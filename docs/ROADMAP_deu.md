@@ -2,6 +2,10 @@
 
 Ideen, die nicht in die aktuelle Version passten, ohne versprochene Reihenfolge. Es sind Richtungen, keine Zusagen; ein Issue oder ein Pull Request ist der beste Weg, eine voranzubringen.
 
+## Erledigt in 1.8.0
+
+Eine neue Ordnerstruktur (das Paket in `src/`, die Seite, die Beispiele und die Sprachen in `assets/`); die Leiste am Fuß ist eine einzige Zeile und sagt nur, was die Felder oben nicht sagen; die Zusammenfassung für die KI-Werkzeuge und das Protokoll stimmen mit einem laufenden Monitor überein; ein optionales Lesen ruhiger Repositories über GraphQL (standardmäßig aus) mit seiner Abrechnung; der aktive Hinweis an eine externe KI (standardmäßig aus, eine erste Bestätigung je Anbieter, nur die geschwärzten Felder einer geschlossenen Liste, eine Obergrenze der Aufrufe und der Kosten pro Stunde, der Schlüssel über den Namen einer Variablen, und die KI führt nie eine Aktion aus); die Terminalanwendung bearbeitet Listen und Maps; und das Änderungsprotokoll ist in den acht Sprachen bis 1.0.0 übersetzt.
+
 ## Erledigt in 1.7.9
 
 ### Behoben
@@ -66,14 +70,13 @@ Isolationstests der Lite-Edition und der Demo, keinerlei Netzwerkanfrage, wenn d
 
 Was 1.6.4 nicht erreicht hat, und warum:
 
-- **Entschieden, nicht erledigt in 1.6.6**: die aktive Benachrichtigung einer externen KI (standardmäßig aus, eine erste Bestätigung je Anbieter, nur die bereits gefilterten Felder der geschlossenen Liste, ein Limit für Aufrufe und Kosten pro Stunde, der Schlüssel über den Namen einer Umgebungsvariable, und die KI führt nie eine Aktion aus) mit ihrer Variante eines ausgehenden Befehls (geschlossene Liste, keine Shell); und die Repositories mehrerer Besitzer auf einer Seite (der Monitor erkennt ein Repository nur am Namen und braucht daher den Besitzer in jeder Kennung; Grundlage für mehrere Konten). Jedes ist eine eigene Funktion mit eigenem Entwurf und eigenen Tests, deshalb schloss 1.6.6 zuerst die Korrekturen ab.
-- **Die älteren Einträge des Änderungsprotokolls in den anderen sieben Sprachen**: Die Hilfe zeigt den Verlauf in jeder Sprache, und 1.6.8 bis 1.6.3 sind übersetzt; 1.6.2 und ältere behalten den englischen Text unter einem übersetzten Hinweis und werden Version für Version übersetzt, von der neuesten zur ältesten.
-- **Mehrere Eigentümer in einem Prozess und einer Seite**: Seit 1.7.0 ist jedes Konto ein eigener Monitor und die Seite zeigt sie nebeneinander, aber innerhalb eines Monitors wird ein Repository weiter nur über seinen Namen erkannt, sodass sich zwei Eigentümer im selben Monitor mischen würden. Die Konten von 1.7.0 sind der Weg, sie getrennt zu halten; sie in einen Prozess zu holen, mit dem Eigentümer in jedem Bezeichner, ist das, was bleibt.
+- **Mehrere Eigentümer in einem Prozess und einer Seite**: Seit 1.7.0 ist jedes Konto ein eigener Monitor und die Seite zeigt sie nebeneinander, aber innerhalb eines Monitors wird ein Repository weiterhin nur über seinen Namen identifiziert, sodass zwei Eigentümer im selben Monitor sich vermischen würden. Sie in einen Prozess zu bringen, verlangt den Eigentümer in jedem Bezeichner (die Abfragen, die Alarm-Kennungen, die Listen der Einstellungen, die Wächter und die Seite); ohne Repositories zweier echter Eigentümer ließ es sich nicht belegen, daher bleiben die Konten von 1.7.0 der Weg, sie getrennt zu halten.
 - **Der Abrechnungsbericht mit einem Login, der ihn lesen darf**: Die echte Antwort für einen Login ohne den Scope `user` ist „nicht gefunden“, und der Monitor fällt auf die Schätzung zurück (geprüft); die Zahlen selbst wurden nicht mit einem Abrechnungskonto verglichen.
 - **Die Preise größerer Runner** in `quotas.json` stammen aus dem Gedächtnis der öffentlichen Preisliste und sind als ungeprüft markiert; vergleiche sie mit der Abrechnungsseite von GitHub und bearbeite die Datei.
 - **`gh copilot`**: Seine Optionen werden mit `gh copilot -- --help` geprüft, was die Copilot-Kommandozeile braucht; sie ist hier nicht installiert, die Optionen bleiben ungeprüft.
 - **Benachrichtigungen, Webhook, Enterprise Server und die Dienstbeispiele** gegen echte Dienste: `tools/manual_check_live.py` prüft sie von Hand; sie brauchen deine Kanäle und Hosts und wurden hier nicht ausgeführt.
-- **Die Terminal-Anwendung** bearbeitet die einfachen Einstellungen und zeigt den KI-Status; die Erklärung eines einzelnen roten Workflows und das Bearbeiten von Listen und Maps bleiben in der Seite.
+- **Die Terminal-Anwendung** bearbeitet die einfachen Einstellungen, Listen und Zahlen-Maps und zeigt den KI-Status; die Erklärung eines einzelnen roten Workflows bleibt auf der Seite.
+- **Nur der Eigentümer kann sie an einer echten Installation belegen**: mehrere Konten mit dem Collab-Wächter auf echten Repositories, eine GitHub App und ein zweites Nur-Lese-Konto mit echten Schlüsseln sowie der HTTPS-Proxy mit einem echten Zertifikat. Sie werden von Hand geprüft (`tools/manual_check_live.py`) und nicht als erledigt ausgegeben.
 - **Eine Prüfung auf neue Versionen, die herunterlädt oder installiert**: niemals; der Monitor sagt es nur.
 
 ## Später

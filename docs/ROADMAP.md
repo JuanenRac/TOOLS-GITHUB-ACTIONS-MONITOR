@@ -7,6 +7,10 @@
 
 Ideas that did not fit in the current version, in no promised order. They are directions, not commitments; an issue or a pull request is the best way to move one forward.
 
+## Done in 1.8.0
+
+A new folder layout (the package in `src/`, the page, the examples and the languages in `assets/`); the bottom bar is one line and says only what the boxes at the top do not; the brief for the AI tools and the log agree with a monitor that is running; an optional read of quiet repositories through GraphQL (off by default) with its accounting; the active notice to an external AI (off by default, a first confirmation per provider, only the redacted fields of a closed list, a cap of calls and of cost an hour, the key by the name of a variable, and the AI never runs an action); the terminal application edits lists and maps; and the history of changes is translated in the eight languages back to 1.0.0.
+
 ## Done in 1.7.9
 
 ### Fixed
@@ -71,14 +75,13 @@ Isolation tests of the lite edition and of the demo, no network request at all w
 
 What 1.6.4 did not reach, and why:
 
-- **Decided, not done in 1.6.6**: the active notice to an external AI (off by default, a first confirmation per provider, only the redacted fields of the closed list, a cap of calls and of cost an hour, the key by the name of an environment variable, and the AI never runs an action) with its variant of an outgoing command (closed list, no shell); and the repositories of several owners in one page (the monitor identifies a repository by its name alone, so it needs the owner in every identifier; it is the base of several accounts). Each is a feature of its own that needs its design and its tests, so 1.6.6 closed the corrections first.
-- **The older entries of the changelog in the other seven languages**: the Help shows the history in each language, and 1.6.8 back to 1.6.3 are translated; 1.6.2 and older keep the English text under a translated notice and will be translated version by version, from the newest to the oldest.
-- **Several owners in one process and one page**: since 1.7.0 every account is a monitor of its own and the page shows them side by side, but a repository is still identified by its name alone inside one monitor, so two owners in the same monitor would mix. The accounts of 1.7.0 are the way to keep them apart; bringing them into one process, with the owner in every identifier, is what is left.
+- **Several owners in one process and one page**: since 1.7.0 every account is a monitor of its own and the page shows them side by side, but inside one monitor a repository is still identified by its name alone, so two owners in the same monitor would mix. Bringing them into one process means the owner in every identifier (the reads, the alert ids, the lists of the settings, the sentinels and the page); it could not be proved without repositories of two real owners, so the accounts of 1.7.0 remain the way to keep them apart.
 - **The billing report against a login that may read it**: the real answer for a login without the `user` scope is "not found" and the monitor degrades to the estimate (checked); the figures themselves have not been compared with a billing account.
 - **The prices of larger runners** in `quotas.json` come from memory of the public price list and are marked as unverified; compare them with the billing page of GitHub and edit the file.
 - **`gh copilot`**: its flags are checked with `gh copilot -- --help`, which needs the Copilot command line; it is not installed here, so they stay unverified.
 - **Notifications, webhook, Enterprise Server and the service examples** against live services: `tools/manual_check_live.py` checks them by hand; they need your channels and hosts, so they were not run here.
-- **The terminal application** edits the simple settings and shows the AI status; the explanation of a single red workflow and the editing of lists and maps stay in the page.
+- **The terminal application** edits the simple settings, lists and maps of numbers and shows the AI status; the explanation of a single red workflow stays in the page.
+- **Only the owner can prove them on a real installation**: several accounts with the Collab sentinel on real repositories, a GitHub App and a second read-only account with real keys, and the HTTPS proxy with a real certificate. They are run by hand (`tools/manual_check_live.py`) and are not claimed as done.
 - **A check for a new release that downloads or installs**: never; the monitor only tells.
 
 ## Later
