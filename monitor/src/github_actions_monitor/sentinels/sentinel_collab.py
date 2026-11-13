@@ -33,6 +33,7 @@ from github_actions_monitor import i18n
 from github_actions_monitor.sentinels import sentinel_base
 from github_actions_monitor.app import toolconfig
 from github_actions_monitor.security import private_io
+from github_actions_monitor.storage import state_io
 
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
 STATE_FILE = HERE / "collab_state.json"
@@ -100,7 +101,7 @@ def stamp(now):
 
 def load_state(path):
     try:
-        data = json.loads(Path(path).read_text(encoding="utf-8"))
+        data = state_io.load_json(path)
         if isinstance(data, dict) and isinstance(data.get("alerts"), dict) and isinstance(data.get("per_repo"), dict):
             # a hand-edited or half-written file keeps only the entries the rest of the code can read (an alert is a dict with a repo, a repository record is a dict)
             data["alerts"] = {str(k): v for k, v in data["alerts"].items() if isinstance(v, dict) and isinstance(v.get("repo"), str)}
@@ -317,9 +318,7 @@ class SentinelCollab(sentinel_base.BaseSentinel):
         with self.lock:
             payload = json.dumps(self.state, ensure_ascii=False)
         try:
-            tmp = Path(str(STATE_FILE) + ".tmp")
-            private_io.write_tmp(tmp, payload)
-            os.replace(tmp, STATE_FILE)
+            state_io.save_text(STATE_FILE, payload)
         except OSError:
             pass
 

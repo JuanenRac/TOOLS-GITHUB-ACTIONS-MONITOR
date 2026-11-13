@@ -2421,6 +2421,9 @@ def main():
         print(i18n.t("mon.catalog_example", names=", ".join(using_example)))
     global AUTOSAVE
     LIVE_CONFIG.update(config)
+    if not LITE["on"] and not CHILD["account"]:      # an account process bound its storage when it was redirected; the lite edition has no database
+        from github_actions_monitor.storage import runtime as storage_runtime
+        storage_runtime.bind(config)
     etag_cfg = ((config.get("cache") or {}).get("etag") or {}) if isinstance(config.get("cache"), dict) else {}
     ETAG["cache"] = etagcache.EtagCache(ttl_hours=etag_cfg.get("ttl_hours", 24) if isinstance(etag_cfg.get("ttl_hours"), int) else 24, enabled=etag_cfg.get("enabled", True) is True and (config.get("network") or {}).get("etag", True) is not False)      # network.etag is the switch of the Quota tab; cache.etag.enabled stays as it was
     acfg = analytics.settings(config)

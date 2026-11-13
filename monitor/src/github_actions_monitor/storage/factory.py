@@ -2,10 +2,12 @@
 # GPL-3.0-or-later - see LICENSE
 """create_storage: the one place that decides which backend a process uses.
 
-    storage = create_storage(config.get("storage"), account_id="personal")      # {"backend": "file", "path": "..."}
+    storage = create_storage(config.get("storage"), account_id="personal")      # {"backend": "file" | "sqlite", "path": "..."}
 
   backend  "file" (the default, and the only one the lite edition has) keeps the layout of accounts/<id>/ as it has always been; `path` is the folder of the accounts.
-  lite     True = the lite edition: the backend is "file" whatever the configuration says, and nothing but the files is read, shown or created.
+           "sqlite" keeps the same data in a database: by default ONE FILE PER ACCOUNT (accounts/<id>/storage.sqlite3, model A: the process of an account is the only one that writes it);
+           a `path` names ONE shared file for the whole installation (model B, kept ready: WAL and a busy timeout make several processes safe, see docs/STORAGE.md).
+  lite     True = the lite edition: the backend is "file" whatever the configuration says, and nothing about SQLite is read, shown or created.
 """
 from pathlib import Path
 
@@ -13,7 +15,8 @@ from github_actions_monitor.accounts import accounts
 from github_actions_monitor.storage import base
 from github_actions_monitor.storage.file_storage import FileStorage
 
-BACKENDS = ("file",)
+BACKENDS = ("file", "sqlite")
+DB_NAME = "storage.sqlite3"
 DEFAULT_BACKEND = "file"
 
 
@@ -29,6 +32,14 @@ def create_storage(block=None, account_id=None, lite=False, base_dir=None):
     """The storage for a process. `block` is `config["storage"]` (None = the default). Without an accounts/ folder (and for the account "default") it is the flat installation, the files next
     to the launchers; with accounts/ the layout of accounts/<id>/. `base_dir` is the product folder (tests pass a temporary one)."""
     cfg = settings(None if lite else block)
+    if cfg["backend"] == "sqlite":
+        from github_actions_monitor.storage.sqlite_storage import SqliteStorage
+        if cfg["path"]:
+            return SqliteStorage(cfg["path"])
+        if accounts.layout(base_dir) == "accounts" or account_id not in (None, accounts.DEFAULT_ID):
+            return SqliteStorage(accounts.account_dir(account_id or accounts.DEFAULT_ID, base_dir) / DB_NAME)
+        from github_actions_monitor.util.paths import ROOT
+        return SqliteStorage((Path(base_dir) if base_dir else ROOT) / DB_NAME)
     if cfg["backend"] != "file":
         raise base.StorageError("backend")
     if cfg["path"]:
@@ -37,3 +48,13 @@ def create_storage(block=None, account_id=None, lite=False, base_dir=None):
         return FileStorage(accounts.root_dir(base_dir), "accounts")
     from github_actions_monitor.util.paths import ROOT
     return FileStorage(Path(base_dir) if base_dir else ROOT, "flat")
+
+
+def create_global_storage(block=None, lite=False, base_dir=None):
+    """The storage of the GLOBAL records (users, the accounts they may see, sessions): the supervisor of the accounts owns it, not an account process. With the file backend it is
+    <accounts>/_global/*.json; with SQLite one database, accounts/_global/storage.sqlite3, or the shared file when `storage.path` names one."""
+    cfg = settings(None if lite else block)
+    if cfg["backend"] == "sqlite":
+        from github_actions_monitor.storage.sqlite_storage import SqliteStorage
+        return SqliteStorage(cfg["path"] or accounts.root_dir(base_dir) / "_global" / DB_NAME)
+    return FileStorage(Path(cfg["path"]) if cfg["path"] else accounts.root_dir(base_dir), "accounts")

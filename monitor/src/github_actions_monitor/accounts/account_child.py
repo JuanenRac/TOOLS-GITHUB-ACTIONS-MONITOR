@@ -8,12 +8,14 @@ changes, so every rule of the monitor (read only, the one-use token, the network
 
 The child listens on 127.0.0.1 only and never opens a browser: the supervisor is the one the person talks to. The lite edition never runs this.
 """
+import json
 import sys
 from pathlib import Path
 
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
 
 from github_actions_monitor.accounts import accounts  # noqa: E402
+from github_actions_monitor.storage import runtime  # noqa: E402
 
 
 def redirect(account_id, base=None):
@@ -54,6 +56,11 @@ def redirect(account_id, base=None):
             defaults[0] = getattr(sys.modules[owner.__module__], attribute)
         function.__defaults__ = tuple(defaults)
     ai_actions.ACTIONS.log_file = Path(ai_actions.LOG_FILE)     # this one was built when the module loaded, with the old path already in it
+    try:      # the state this account keeps in a database, when its configuration asks for one (the file backend binds nothing)
+        own = json.loads(config.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        own = {}
+    runtime.bind(own if isinstance(own, dict) else {}, account_id, base)
     return folder
 
 
