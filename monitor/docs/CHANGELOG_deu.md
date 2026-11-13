@@ -15,6 +15,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - Die Befehle der Anleitungen (`python read_report.py`, `python actions_monitor.py --doctor`, `python monitor_cli.py status` ...) funktionieren weiter: Eine kleine Einstiegsdatei mit demselben Namen bleibt im Produktordner, sodass auch die per Pfad registrierten Hooks und MCP-Server weiterlaufen. Das Release-Zip behält seinen Ordnernamen und enthält jetzt `src/`, `assets/` und `tools/`.
 
+- **Die Roadmap sagt, was 1.8.0 enthält und was jede nächste Version bringt**: was schon im Hauptzweig ist, was fertig ist und auf das Zusammenführen wartet, was noch abgeschlossen wird, und den Plan von 1.8.2 bis 2.0.0 in der Reihenfolge, in der er umgesetzt wird, in den acht Sprachen.
+
 ### Hinzugefügt
 
 - `tools/migrate_layout.py` für einen Ordner, der eine flache Installation war: standardmäßig ein Probelauf; `--apply` kopiert Ihre Konfiguration nach `layout_backup_<Stempel>/config/` und VERSCHIEBT (nie löschen, nie überschreiben) die alten Module, die alte Seite, die alten Beispiele und `locales/` nach `layout_backup_<Stempel>/old_code/`. `--doctor` warnt, solange solche Reste existieren. `MIGRATING.md` beschreibt es in den acht Sprachen.

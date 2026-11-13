@@ -15,6 +15,8 @@
 
 - 指南中的命令(`python read_report.py`、`python actions_monitor.py --doctor`、`python monitor_cli.py status` 等)继续有效:产品文件夹里保留了同名的小型入口文件,因此已按路径注册的钩子和 MCP 服务器也继续工作。发布 zip 保持原文件夹名,现在包含 `src/`、`assets/` 和 `tools/`。
 
+- **路线图说明 1.8.0 包含什么以及之后每个版本将带来什么**:已在主分支的内容、已完成等待合并的内容、仍在收尾的内容,以及按实施顺序排列的从 1.8.2 到 2.0.0 的计划,共八种语言。
+
 ### 新增
 
 - `tools/migrate_layout.py`,用于原本是平铺安装的文件夹:默认试运行;`--apply` 会把你的配置复制到 `layout_backup_<时间戳>/config/`,并把旧模块、旧网页、旧示例和 `locales/` 移动(绝不删除、绝不覆盖)到 `layout_backup_<时间戳>/old_code/`。只要还有此类遗留,`--doctor` 就会提醒。`MIGRATING.md` 以八种语言说明。
