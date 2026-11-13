@@ -230,7 +230,7 @@ def presented(headers):
         if name == COOKIE:
             return value
     bearer = headers.get("Authorization") or ""
-    if bearer.lower().startswith("bearer "):
+    if bearer.lower().startswith("bearer ") and not bearer[7:].strip().startswith("msn_"):      # "msn_..." is the session of a user (security/auth.py), not the access token
         return bearer[7:].strip()
     return (headers.get("X-Monitor-Access") or "").strip()
 

@@ -19,6 +19,10 @@
 
 - 平らなインストールだったフォルダ向けの `tools/migrate_layout.py`:既定はドライラン。`--apply` で設定を `layout_backup_<日時>/config/` にコピーし、古いモジュール・ページ・サンプル・`locales/` を `layout_backup_<日時>/old_code/` に移動します(削除も上書きもしません)。そうした残りがある間は `--doctor` が知らせます。`MIGRATING.md` に 8 言語で説明があります。
 
+- **チームモード：ユーザー、ロール、セッション**（`src/github_actions_monitor/security/auth.py`、`auth_http.py`、`auth_cli.py`。`auth.enabled` で既定はオフなので、1人で使う場合は何も変わりません）：最初の管理者（`/login` またはコンソールで、モニターを実行しているコンピューターからのみ、1回だけ作成）が存在すると、すべてのリクエストにセッションが必要になります。ロールは `viewer`（閲覧）、`maintainer`（ミュート、確認応答、動作モードの変更も可能）、`admin`（設定、ユーザー、GitHub に到達しうるすべても可能）。誰も列挙していないルートは admin 以外すべて閉じられます。各ユーザーには閲覧できるアカウントがあり、`?account=`、`X-Account-Id`、エクスポートで他のアカウントを要求すると 403 を返します。パスワードはソルト付き scrypt ハッシュとして保存され、セッションは HttpOnly・SameSite=Strict（HTTPS では Secure）の Cookie で、すべての POST に CSRF トークンが付くか、スクリプトやアプリ用の Bearer トークン（`auth.allow_bearer`）です。誤ったパスワードが `auth.max_failed_logins` 回でユーザーはロックされ、アドレスごとにレート制限があり、パスワード・ロール・状態の変更でユーザーのセッションは終了し、有効な管理者は常に1人残ります。エンドポイント `/api/auth/login|logout|me|bootstrap|password`、`/api/auth/users`、`/api/auth/audit` はエラーを `{"error", "code"}` で返し、`auth_audit.jsonl` は秘密情報なしでログイン、ロック、拒否されたリクエスト、ユーザーの変更を記録します。lite 版にログインはなく、ページの使い切りトークンは引き続き適用され、`python -m github_actions_monitor.security.auth_cli` で失われた管理者パスワードを復旧できます。8言語のヘルプ付きの設定7件（`auth.*`）と8言語の `docs/ADVANCED.md` の節。`tests/test_auth.py` は実サーバー上で、ルール、各種ルートのロール、アカウント間の範囲、Cookie、CSRF、Bearer、ロック、監査を検証します。
+
+- アカウントのスーパーバイザーがユーザーごとに絞り込みます。`GET /api/accounts`、`/api/accounts/<id>/status`、アカウントのページ、`?account=` や `X-Account-Id` を付けたすべてのリクエストは、ユーザーに割り当てられたアカウントだけを表示・対象とし（admin はすべて）、アカウントのモニターは操作者を知ります。アラートタブのミュートは誰が行ったかを保持するようになりました：`GET /api/alerts` の `muted_by` とミュート履歴。
+
 ### セキュリティ
 
 - **誤ったトークンのロックアウトが再び歯止めになります(ネットワークモード)**:このコンピューター以外のロックされたアドレスは、トークンを判定する前に拒否されます(ヘッダー、クッキー、`?access=`、`POST /api/access` のいずれの方法でも)。これまではロックされたアドレスが推測を続けられ、正しいトークンはそれでも通りました。このコンピューターを操作している人は、自分のモニターから締め出されることはありません。

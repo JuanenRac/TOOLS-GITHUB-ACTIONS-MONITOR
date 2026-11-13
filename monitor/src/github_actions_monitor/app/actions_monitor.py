@@ -43,6 +43,7 @@ from github_actions_monitor.data_pipeline import discovery
 from github_actions_monitor.data_pipeline import etagcache
 from github_actions_monitor.data_pipeline import graphql_checks
 from github_actions_monitor import i18n
+from github_actions_monitor.security import auth_http
 from github_actions_monitor.security import localguard
 from github_actions_monitor.app import modes
 from github_actions_monitor.util import platform_compat
@@ -99,6 +100,7 @@ DEFAULTS = {
     "quota": {"billing_api": False, "warn_percent": 75, "alert_percent": 90, "default_runner": "linux"},
     "session_guard": True,         # the page asks for a one-use token before it changes a setting or confirms an action
     "discovery": {"events": True, "suggest_groups": True, "auto_frequency": False, "hide": []},
+    "auth": {"enabled": False, "session_hours": 12, "max_failed_logins": 5, "lockout_minutes": 15, "min_length": 10, "allow_bearer": True, "audit": True},     # OFF: one person, no login. On: users with roles once the first administrator exists (security/auth.py)
     "listen": {"network": False, "trusted_proxy": False, "local_port": 0, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "tls_cert_file": "", "tls_key_file": "", "secure_cookie": False, "proxy_public_host": "", "max_failed_attempts": 10, "query_access": True},     # OFF: only this computer. On: a private address, with an access token for every request
     "github_token": {"enabled": False, "store": "auto"},       # OFF: the monitor uses your own `gh login`. On: a token kept in the store of the system (secretstore.py)
     "github_actions": {"enabled": False, "allowed": ["rerun_failed", "cancel"], "merge_method": "squash"},      # OFF: actions on GitHub, each one confirmed on its own (ghactions.py)
@@ -1654,7 +1656,7 @@ class Handler(BaseHTTPRequestHandler):
         counted = CountedReader(self.rfile)
         self.rfile = counted
         try:
-            if not self.access_gate():
+            if not self.access_gate() or not auth_http.gate(self, LIVE_CONFIG or DEFAULTS, LITE["on"]):
                 return
             with i18n.use_language(self.request_language()):
                 self.handle_post()
@@ -1783,7 +1785,7 @@ class Handler(BaseHTTPRequestHandler):
             try:
                 size = int(self.headers.get("Content-Length") or 0)
                 request = json.loads(self.rfile.read(size) if 0 < size <= 2048 else b"{}")
-                self.json_reply(handle_advanced_post(path, request if isinstance(request, dict) else {}))
+                self.json_reply(handle_advanced_post(path, request if isinstance(request, dict) else {}, auth_http.acting_user(self)))
             except Exception:   # noqa: BLE001 - the answer never repeats the request: it could hold a token
                 self.json_reply({"ok": False, "status": "request"}, 400)
             return
@@ -1851,7 +1853,7 @@ class Handler(BaseHTTPRequestHandler):
             self.json_reply({"ok": False, "error": str(error)[:200]})
 
     def do_GET(self):
-        if not self.access_gate():
+        if not self.access_gate() or not auth_http.gate(self, LIVE_CONFIG or DEFAULTS, LITE["on"]):
             return
         with i18n.use_language(self.request_language()):
             self.handle_get()
@@ -2326,7 +2328,7 @@ def advanced_get(path, query):
     return otlp.status(config)
 
 
-def handle_advanced_post(path, request):
+def handle_advanced_post(path, request, who=""):
     """The plan / confirm pairs of the actions on GitHub and of `act`, the token of GitHub and the welcome flag. Answers never contain the request."""
     config = toolconfig.raw_config()
     if path in ("/api/alerts/mute", "/api/alerts/unmute"):      # a local silence (never a change on GitHub): scope alert|code|sentinel, hours optional
@@ -2340,7 +2342,7 @@ def handle_advanced_post(path, request):
                 if alert.get("id") == value:
                     until_change = (alert.get("details") or {}).get("updated") if isinstance(alert.get("details"), dict) else None
                     break
-        entry = alert_center.mute(scope, value, request.get("hours"), config, until_change=until_change)
+        entry = alert_center.mute(scope, value, request.get("hours"), config, who=who, until_change=until_change)
         return {"ok": entry is not None, "mute": entry}
     if path == "/api/ai/ack":
         from github_actions_monitor.integrations import ai_alerts

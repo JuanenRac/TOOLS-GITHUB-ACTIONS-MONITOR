@@ -19,6 +19,10 @@
 
 - `tools/migrate_layout.py`,用于原本是平铺安装的文件夹:默认试运行;`--apply` 会把你的配置复制到 `layout_backup_<时间戳>/config/`,并把旧模块、旧网页、旧示例和 `locales/` 移动(绝不删除、绝不覆盖)到 `layout_backup_<时间戳>/old_code/`。只要还有此类遗留,`--doctor` 就会提醒。`MIGRATING.md` 以八种语言说明。
 
+- **团队模式：用户、角色与会话**（`src/github_actions_monitor/security/auth.py`、`auth_http.py`、`auth_cli.py`；通过 `auth.enabled` 默认关闭，因此一个人使用时毫无察觉）：第一位管理员（在 `/login` 或控制台创建，只能在运行监视器的电脑上、只能一次）存在后，每个请求都需要会话。角色 `viewer`（只读）、`maintainer`（还可静音、确认、更改工作模式）和 `admin`（还可更改设置、用户以及一切可触及 GitHub 的内容）；无人列出的路由对除 admin 外的所有人关闭。每个用户有可查看的账户：用 `?account=`、`X-Account-Id` 或导出请求其他账户会返回 403。密码以加盐的 scrypt 哈希保存；会话是 HttpOnly、SameSite=Strict（HTTPS 时加 Secure）的 Cookie，每个 POST 都带 CSRF 令牌，或是供脚本和应用使用的 Bearer 令牌（`auth.allow_bearer`）；错误密码达到 `auth.max_failed_logins` 次后用户被锁定，每个地址有请求频率限制，新的密码、角色或状态会结束该用户的会话，并且始终保留一位有效管理员。端点 `/api/auth/login|logout|me|bootstrap|password`、`/api/auth/users` 和 `/api/auth/audit` 以 `{"error", "code"}` 返回错误；`auth_audit.jsonl` 记录登录、锁定、被拒绝的请求和用户变更，不含任何机密。lite 版从不登录，页面的一次性令牌仍然适用，`python -m github_actions_monitor.security.auth_cli` 可找回丢失的管理员密码。七项设置（`auth.*`）及其八种语言的帮助，以及八种语言的 `docs/ADVANCED.md` 一节；`tests/test_auth.py` 在真实服务器上覆盖规则、各类路由的角色、账户之间的范围、Cookie、CSRF、Bearer、锁定和审计。
+
+- 账户监督器按用户过滤：`GET /api/accounts`、`/api/accounts/<id>/status`、账户页面以及所有带 `?account=` 或 `X-Account-Id` 的请求只显示并访问分配给该用户的账户（admin 可看全部），账户的监视器会知道是谁在操作。“警报”标签页的静音现在会记录是谁做的：`GET /api/alerts` 中的 `muted_by` 和静音历史。
+
 ### 安全
 
 - **错误令牌的锁定重新起到限制作用(网络模式)**:不是本机且已被锁定的地址,会在判断其令牌之前就被拒绝,无论令牌以何种方式出示(请求头、Cookie、`?access=` 和 `POST /api/access`);此前被锁定的地址仍可继续猜测,正确的令牌依然能进入。本机上的使用者永远不会被锁在自己的监控之外。
