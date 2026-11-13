@@ -13,6 +13,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - **`listen.trusted_proxy`** (disattivato per impostazione predefinita, solo locale, nelle otto lingue): dietro un reverse proxy proprio sullo stesso computer, un tentativo fallito viene contato sull'ultimo indirizzo di `X-Forwarded-For` invece che sul proxy, così i token errati di una persona non bloccano tutti. Cambia solo questo conteggio: una richiesta che passa da un proxy non è comunque mai trattata come questo computer.
 
+### Corretto
+
+- La pagina Impostazioni mostrava "Il monitor locale non risponde" e nessuna scheda: il riquadro della scheda Quota aveva lo stesso nome di una funzione più vecchia della scheda Base e ne veniva sostituito. Il riquadro Quota è rinominato e un test ora fallisce se una funzione della pagina è definita due volte.
+
 ## [1.7.7]
 
 ### Aggiunto

@@ -13,6 +13,10 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - **`listen.trusted_proxy`** (desativado por defeito, só local, nos oito idiomas): atrás de um proxy inverso próprio no mesmo computador, uma tentativa falhada é contada contra o último endereço de `X-Forwarded-For` em vez de contra o proxy, para que os tokens errados de uma pessoa não bloqueiem todos. Só muda essa contagem: um pedido que chega por um proxy continua a nunca ser tratado como este computador.
 
+### Corrigido
+
+- A página de Definições mostrava "O monitor local não responde" e nenhum separador: a caixa do separador Quota tinha o mesmo nome de uma função mais antiga do separador Básico e era substituída por ela. A caixa da Quota foi renomeada e um teste passa a falhar se uma função da página for definida duas vezes.
+
 ## [1.7.7]
 
 ### Adicionado
