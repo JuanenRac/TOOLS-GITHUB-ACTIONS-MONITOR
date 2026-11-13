@@ -16,6 +16,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - The commands of the guides (`python read_report.py`, `python actions_monitor.py --doctor`, `python monitor_cli.py status` ...) keep working: a small entry-point file with the same name stays in the product folder, so the hooks and MCP servers already registered by path keep working too. The release zip keeps its folder name and now carries `src/`, `assets/` and `tools/`.
 
+- **The roadmap tells what 1.8.0 holds and what each next version brings**: what is already in the main branch, what is finished and waiting to be merged, what is still being finished, and the plan from 1.8.2 to 2.0.0 in the order it will be done, in the eight languages.
+
 ### Added
 
 - **Storage layer** (`src/github_actions_monitor/storage/`): a `Storage` interface (configuration, sentinel state, the event feed, analytics, small named documents and the global records of users, their accounts and sessions) that keeps the rule "a write is atomic, a damaged item reads as empty" for every backend. `FileStorage` is the first backend and keeps the layout of `accounts/<id>/` exactly as before (and the flat installation next to the launchers): the same files with the same names, written through a temporary file that is flushed and renamed. `create_storage` is the one place that picks the backend; the lite edition always gets the file backend.
