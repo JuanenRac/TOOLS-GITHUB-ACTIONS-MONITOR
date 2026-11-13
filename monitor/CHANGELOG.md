@@ -42,6 +42,8 @@ when this file and `tool_version.py` disagree.
 
 - **The "bing bing" also sounds when the page loses the monitor itself**: once per loss (no answer for over a minute, or a cycle stuck), together with the red bar. The mute chip, the `sound.on_connection_lost` switch, the cooldown and the browser's sound lock apply as for any other sound; the help of that setting says so in the eight languages.
 
+- **GraphQL for quiet repositories** (`network.graphql_checks`, off by default; `network.graphql_batch`, 1 to 30, 20 by default; in the Quota tab, in the eight languages): the repositories that are not hot are read in batches through GraphQL, which has an allowance of its own, instead of one REST call each; the hot ones and any repository the query does not answer are still read through REST in the same cycle, and a failed batch falls back to REST. It sees only the last commit of the default branch and gives no durations, attempts or other branches (the guide of the allowance says so). The accounting (batches, repositories, points, repositories sent to REST) is part of the allowance line of the brief and of the state for the AI tools, next to the reads answered `304`.
+
 ### Fixed
 
 - The dashboard could stay on one old picture while the monitor was running: a call to `gh` that never returned (a child process holding its pipes after the timeout) held the refresh loop for good while the page still answered at once. Every `gh` call is now bounded by a hard deadline in a helper thread, and a loop that still hangs is found and restarted by the watchdog above.

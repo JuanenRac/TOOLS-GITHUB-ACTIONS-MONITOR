@@ -19,7 +19,7 @@ GitHub gives every account a limited **allowance of API calls**, shared by every
 3. **Central panel as a base line**: `central.source` (`off`, `git`, `http`) reads `data/sentinel.json` of your profile repository, refreshed by a workflow with its own token; it spends none of your allowance. `central.max_age_minutes` (120): older than that it is "behind" and not trusted.
 4. **One notice when the allowance runs out**: the reads stop until the renewal, the page says "allowance used up until HH:MM" once (not one error per repository), and they resume by themselves.
 5. **A GitHub App for the reads** (`github_app.*`), below.
-GraphQL is not used for the runs of the workflows: it does not offer them.
+6. **GraphQL for quiet repositories (optional, off by default)**: `network.graphql_checks` reads the repositories that are not hot in batches (`network.graphql_batch`, 20 by default) through GraphQL, which has an allowance of its own; one call replaces many REST calls. It sees only the last commit of the default branch (a workflow that did not run on it is not listed) and gives no durations, attempts or other branches, so the hot repositories and any repository that GraphQL does not answer are still read through REST in the same cycle. The accounting (batches, repositories, points, repositories that went to REST) is in the brief and in the state for the AI tools.
 
 ## A GitHub App, step by step
 1. In GitHub, *Settings*, *Developer settings*, *GitHub Apps*, *New GitHub App*. No webhook. **Read-only** permissions: Actions, Checks, Code scanning alerts, Commit statuses, Contents, Dependabot alerts, Issues, Pull requests, Secret scanning alerts and Metadata.

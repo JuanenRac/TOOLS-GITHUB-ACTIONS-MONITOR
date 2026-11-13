@@ -66,10 +66,10 @@ class Guides(unittest.TestCase):
                     ok = probe in keys or any(k.startswith(probe + ".") for k in keys)
                     self.assertTrue(ok, f"{base}{suffix}: `{token}` is not a setting of the monitor")
 
-    def test_the_quota_guide_does_not_claim_what_is_not_there(self):
+    def test_the_quota_guide_claims_only_what_is_there(self):
         for suffix in SUFFIXES:
             text = (DOCS / f"QUOTA{suffix}.md").read_text(encoding="utf-8")
-            self.assertNotIn("network.graphql_batch", text)
+            self.assertIn("network.graphql_batch", text)      # the batches exist since the optional GraphQL read (and the settings page has both keys)
             self.assertNotRegex(text, r"[A-Za-z]:\\Users|\\keys\\\\")      # no personal path
 
 
