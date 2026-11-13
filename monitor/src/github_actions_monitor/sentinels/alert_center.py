@@ -16,6 +16,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 from github_actions_monitor.security import private_io
+from github_actions_monitor.storage import state_io
 
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
 STATE_FILE = HERE / "alert_mutes.json"      # an account moves it into its own folder (accounts.STATE_FILES)
@@ -34,7 +35,7 @@ def hours_setting(config):
 
 def _load():
     try:
-        data = json.loads(Path(STATE_FILE).read_text(encoding="utf-8"))
+        data = state_io.load_json(STATE_FILE)
         if isinstance(data, dict) and isinstance(data.get("active"), list) and isinstance(data.get("history"), list):
             return {"active": [e for e in data["active"] if _valid_entry(e)], "history": [e for e in data["history"] if isinstance(e, dict) and isinstance(e.get("value"), str)]}
     except (OSError, ValueError):
@@ -50,9 +51,7 @@ def _valid_entry(entry):
 
 def _save(data):
     try:
-        tmp = Path(str(STATE_FILE) + ".tmp")
-        private_io.write_tmp(tmp, json.dumps(data, ensure_ascii=False))
-        os.replace(tmp, STATE_FILE)
+        state_io.save_text(STATE_FILE, json.dumps(data, ensure_ascii=False))
         return True
     except OSError:
         return False

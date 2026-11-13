@@ -36,6 +36,7 @@ from urllib.parse import urlparse
 
 from github_actions_monitor import i18n
 from github_actions_monitor.security import private_io
+from github_actions_monitor.storage import state_io
 
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
 CACHE_FILE = HERE / "sentinel_ai_cache.json"
@@ -138,7 +139,7 @@ class Store:
         self.path = Path(path)
         self.lock = threading.RLock()
         try:
-            self.data = json.loads(self.path.read_text(encoding="utf-8"))
+            self.data = state_io.load_json(self.path)
         except (OSError, ValueError):
             self.data = {}   # missing or corrupt file: start empty
         if not isinstance(self.data, dict):
@@ -175,9 +176,7 @@ class Store:
     def save(self):
         try:
             with self.lock:
-                tmp = self.path.with_name(self.path.name + ".tmp")
-                private_io.write_tmp(tmp, json.dumps(self.data, indent=1, ensure_ascii=False))
-                os.replace(tmp, self.path)   # atomic: a crash never leaves half a file
+                state_io.save_text(self.path, json.dumps(self.data, indent=1, ensure_ascii=False))   # atomic: a crash never leaves half a file
         except OSError:
             pass
 
