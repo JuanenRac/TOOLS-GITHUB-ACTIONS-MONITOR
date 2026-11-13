@@ -19,6 +19,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - `tools/migrate_layout.py` per una cartella che era un'installazione piatta: simulazione per impostazione predefinita; `--apply` copia la tua configurazione in `layout_backup_<marca>/config/` e SPOSTA (mai cancella né sovrascrive) i vecchi moduli, pagina, esempi e `locales/` in `layout_backup_<marca>/old_code/`. `--doctor` avvisa finché esistono tali resti. `MIGRATING.md` lo descrive nelle otto lingue.
 
+- **GraphQL per i repository tranquilli** (`network.graphql_checks`, disattivato per impostazione predefinita; `network.graphql_batch`, da 1 a 30, 20 per impostazione predefinita; nella scheda Quota, in otto lingue): i repository che non sono caldi vengono letti a lotti con GraphQL, che ha una quota propria, invece di una chiamata REST ciascuno; quelli caldi e ogni repository a cui la query non risponde vengono letti con REST nello stesso ciclo, e un lotto fallito ricade su REST. Vede solo l'ultimo commit del ramo predefinito e non dà durate, tentativi né altri rami (la guida della quota lo dice). La contabilità (lotti, repository, punti, repository inviati a REST) fa parte della riga della quota del riepilogo e dello stato per gli strumenti di IA, accanto alle letture risposte `304`.
+
 ## [1.7.9]
 
 ### Corretto

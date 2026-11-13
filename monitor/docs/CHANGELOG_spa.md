@@ -19,6 +19,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - `tools/migrate_layout.py` para una carpeta que era una instalación plana: simulación por defecto; `--apply` copia tu configuración a `layout_backup_<marca>/config/` y MUEVE (nunca borra ni pisa) los módulos, la página, los ejemplos y `locales/` antiguos a `layout_backup_<marca>/old_code/`. `--doctor` avisa mientras queden restos así. `MIGRATING.md` lo describe en los ocho idiomas.
 
+- **GraphQL para los repositorios tranquilos** (`network.graphql_checks`, desactivado por defecto; `network.graphql_batch`, de 1 a 30, 20 por defecto; en la pestaña Cuota, en los ocho idiomas): los repositorios que no están calientes se leen por lotes con GraphQL, que tiene una cuota propia, en lugar de una llamada REST cada uno; los calientes y cualquier repositorio que la consulta no responda se siguen leyendo por REST en el mismo ciclo, y un lote fallido cae a REST. Solo ve el último commit de la rama por defecto y no da duraciones, intentos ni otras ramas (la guía de la cuota lo dice). La contabilidad (lotes, repositorios, puntos, repositorios enviados a REST) forma parte de la línea de cuota del resumen y del estado para las herramientas de IA, junto a las lecturas respondidas `304`.
+
 ## [1.7.9]
 
 ### Corregido

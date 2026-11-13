@@ -114,6 +114,8 @@ _f("quota", "modes", "modes.low.cold_refresh_seconds", "int", (30, 86400), resta
 _f("quota", "modes", "modes.low.runs_per_repo", "int", (5, 100), restart=False)
 _f("quota", "modes", "modes.low.hot_hours", "int", (1, 48), restart=False, unit="h")
 _f("quota", "saving", "network.etag", "bool", restart=True)
+_f("quota", "saving", "network.graphql_checks", "bool", restart=False)
+_f("quota", "saving", "network.graphql_batch", "int", (1, 30), restart=False)
 _f("quota", "extra_reader", "extra_reader.enabled", "bool", restart=False, secure=True)
 _f("quota", "extra_reader", "extra_reader.file", "path", restart=False, secure=True)
 _f("quota", "github_app", "github_app.enabled", "bool", restart=False, secure=True)
@@ -504,7 +506,7 @@ def check_value_list(value):
 
 
 LITE_KEYS = ("github_owner", "language", "repos", "ecosystems", "exclude", "refresh_seconds", "open_browser", "updates.check", "airgapped") + tuple(
-    k for k in FIELDS if k.startswith(("ai_alerts.", "sound.", "display.", "modes.", "central.", "extra_reader.", "github_app.", "network.etag")))      # the short settings page of the lite product; the connection with an AI tool, the sound and the look are the same in both editions
+    k for k in FIELDS if k.startswith(("ai_alerts.", "sound.", "display.", "modes.", "central.", "extra_reader.", "github_app.", "network.etag", "network.graphql")))      # the short settings page of the lite product; the connection with an AI tool, the sound and the look are the same in both editions
 
 
 def validate(changes, lite=False):

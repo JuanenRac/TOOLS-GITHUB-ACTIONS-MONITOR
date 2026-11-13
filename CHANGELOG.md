@@ -20,6 +20,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - `tools/migrate_layout.py` for a folder that was a flat installation: a dry run by default; `--apply` copies your configuration to `layout_backup_<stamp>/config/` and MOVES (never deletes, never overwrites) the old modules, page, examples and `locales/` to `layout_backup_<stamp>/old_code/`. `--doctor` warns while such leftovers exist. `MIGRATING.md` describes it in the eight languages.
 
+- **GraphQL for quiet repositories** (`network.graphql_checks`, off by default; `network.graphql_batch`, 1 to 30, 20 by default; in the Quota tab, in the eight languages): the repositories that are not hot are read in batches through GraphQL, which has an allowance of its own, instead of one REST call each; the hot ones and any repository the query does not answer are still read through REST in the same cycle, and a failed batch falls back to REST. It sees only the last commit of the default branch and gives no durations, attempts or other branches (the guide of the allowance says so). The accounting (batches, repositories, points, repositories sent to REST) is part of the allowance line of the brief and of the state for the AI tools, next to the reads answered `304`.
+
 ## [1.7.9]
 
 ### Fixed

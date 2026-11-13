@@ -19,7 +19,7 @@ GitHub gibt jedem Konto ein begrenztes **Kontingent an API-Aufrufen**, das alle 
 3. **Zentrales Panel als Basis**: `central.source` (`off`, `git`, `http`) liest `data/sentinel.json` Ihres Profil-Repositories, das ein Workflow mit eigenem Token aktualisiert; es verbraucht nichts von Ihrem Kontingent. `central.max_age_minutes` (120): älter gilt es als "veraltet" und wird nicht beachtet.
 4. **Ein Hinweis, wenn das Kontingent aufgebraucht ist**: Das Lesen pausiert bis zur Erneuerung, die Seite sagt einmal "Kontingent erschöpft bis HH:MM" (nicht einen Fehler pro Repository) und setzt von selbst fort.
 5. **Eine GitHub-App für das Lesen** (`github_app.*`), unten.
-GraphQL wird für die Läufe der Workflows nicht genutzt: Es bietet sie nicht an.
+6. **GraphQL für ruhige Repositories (optional, standardmäßig aus)**: `network.graphql_checks` liest die Repositories, die nicht heiß sind, in Stapeln (`network.graphql_batch`, standardmäßig 20) über GraphQL, das ein eigenes Kontingent hat; ein Aufruf ersetzt viele REST-Aufrufe. Es sieht nur den letzten Commit des Standardzweigs (ein Workflow, der darauf nicht lief, fehlt) und liefert keine Laufzeiten, Versuche oder anderen Zweige; deshalb werden die heißen Repositories und jedes Repository, das GraphQL nicht beantwortet, im selben Zyklus weiter über REST gelesen. Die Abrechnung (Stapel, Repositories, Punkte, an REST übergebene Repositories) steht in der Zusammenfassung und im Zustand für die KI-Werkzeuge.
 
 ## Eine GitHub-App, Schritt für Schritt
 1. In GitHub *Settings*, *Developer settings*, *GitHub Apps*, *New GitHub App*. Kein Webhook. **Nur-Lese**-Berechtigungen: Actions, Checks, Code scanning alerts, Commit statuses, Contents, Dependabot alerts, Issues, Pull requests, Secret scanning alerts und Metadata.

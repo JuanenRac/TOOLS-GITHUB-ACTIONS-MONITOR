@@ -19,6 +19,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - `tools/migrate_layout.py` para uma pasta que era uma instalação plana: simulação por defeito; `--apply` copia a sua configuração para `layout_backup_<marca>/config/` e MOVE (nunca apaga nem substitui) os módulos, a página, os exemplos e `locales/` antigos para `layout_backup_<marca>/old_code/`. `--doctor` avisa enquanto existirem tais restos. `MIGRATING.md` descreve-o nos oito idiomas.
 
+- **GraphQL para os repositórios sossegados** (`network.graphql_checks`, desativado por predefinição; `network.graphql_batch`, de 1 a 30, 20 por predefinição; no separador Quota, em oito línguas): os repositórios que não estão quentes são lidos em lotes com GraphQL, que tem uma quota própria, em vez de uma chamada REST cada; os quentes e qualquer repositório a que a consulta não responda continuam a ser lidos por REST no mesmo ciclo, e um lote falhado recai em REST. Só vê o último commit do ramo predefinido e não dá durações, tentativas nem outros ramos (o guia da quota di-lo). A contabilidade (lotes, repositórios, pontos, repositórios enviados para REST) faz parte da linha da quota do resumo e do estado para as ferramentas de IA, junto das leituras respondidas `304`.
+
 ## [1.7.9]
 
 ### Corrigido

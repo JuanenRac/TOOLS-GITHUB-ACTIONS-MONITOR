@@ -40,6 +40,7 @@ from pathlib import Path
 from github_actions_monitor.data_pipeline import analytics
 from github_actions_monitor.data_pipeline import discovery
 from github_actions_monitor.data_pipeline import etagcache
+from github_actions_monitor.data_pipeline import graphql_checks
 from github_actions_monitor import i18n
 from github_actions_monitor.security import localguard
 from github_actions_monitor.app import modes
@@ -106,7 +107,7 @@ DEFAULTS = {
     "otlp": {"enabled": False, "endpoint": "", "interval_seconds": 60},       # OFF: OpenTelemetry export to a collector you name (otlp.py)
     "organizations": {"discover": False},                                    # OFF: list the organisations of the login (orgs.py)
     "finops": {"jobs_per_cycle": 0},
-    "network": {"use_proxy": False, "etag": True},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
+    "network": {"use_proxy": False, "etag": True, "graphql_checks": False, "graphql_batch": 20},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
     "ai_alerts": {"enabled": False, "folder": "", "brief_max_bytes": 2048, "hook": {"enabled": False, "url": "", "max_per_hour": 6},
                   "diagnose": {"enabled": False, "max_per_cycle": 3, "log_lines": 10, "max_bytes": 1500},      # OFF: reads logs of GitHub (the allowance)
                   "cascade": {"enabled": True, "map": {}},
@@ -570,6 +571,7 @@ def refresh_runs(repos, config, progress=None):
     lite = config["mode"] == "lite"
     only_hot = hot_only_state(now)["on"]
     todo = []
+    cold_due = set()      # the repositories that only wait for their slow turn: the ones network.graphql_checks may read in batches
     for repo in repos:
         entry = RUN_CACHE.get(repo)
         hot = is_hot(repo, config, now)
@@ -580,11 +582,18 @@ def refresh_runs(repos, config, progress=None):
             todo.append((repo, config["cold_runs_per_repo"] if lite else tuned(config, "runs_per_repo")))
         elif not only_hot and now - entry["at"] > tuned(config, "cold_refresh_seconds"):
             todo.append((repo, config["cold_runs_per_repo"]))
+            cold_due.add(repo)
     done = 0
     RATE_BLOCK["unread"] = 0
     if time.time() < RATE_BLOCK["until"]:      # the allowance is still used up: nothing is asked until it renews (the old picture stays)
         RATE_BLOCK["unread"] = len(todo)
         return 0
+    total = len(todo)
+    batched = graphql_cold(config, [r for r, _n in todo if r in cold_due])
+    if batched:
+        for repo, runs in batched.items():
+            note_read(repo, runs, None)
+        todo = [item for item in todo if item[0] not in batched]
     for start in range(0, len(todo), 40):  # chunks, so the page can show the first results while the rest loads
         chunk = todo[start:start + 40]
         with ThreadPoolExecutor(max_workers=config["max_workers"]) as pool:
@@ -602,7 +611,24 @@ def refresh_runs(repos, config, progress=None):
             break
         if progress:
             progress(done, len(todo))
-    return len(todo)
+    return total
+
+
+def graphql_cold(config, repos):
+    """network.graphql_checks (off by default): the cold repositories that are due are read with batches of GraphQL (its own allowance) instead of one REST call each. {repo: runs} for the ones
+    the batches answered; the others (and everything when the switch is off, a batch fails or the answer is not understood) are read through REST in the same cycle."""
+    cfg = graphql_checks.settings(config)
+    if not cfg["enabled"] or not repos:
+        return {}
+
+    def call(text):
+        return gh("api", "graphql", "-f", "query=" + text, retries=0, as_user=True)
+    try:
+        found, _rest = graphql_checks.read_batches(toolconfig.github_owner(), repos, cfg["batch"], call)
+    except Exception as error:   # noqa: BLE001 - a feature that saves allowance never stops the cycle
+        degraded.note("loop.extra", error)
+        return {}
+    return found
 
 
 def note_read(repo, runs, error):
@@ -795,7 +821,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
         "mode": config["mode"], "refreshed": refreshed, "hot": hot, "loading": progress_text if loading else "",
         "quota_block": rate_block_state(rate), "min_rate": config["min_rate_remaining"], "paused_quota": bool(rate and rate["remaining"] < config["min_rate_remaining"]),
         "refresh_seconds": config["refresh_seconds"], "hot_only": hot_only_state(),
-        "offline": LINK.state(), "etag": ETAG["cache"].stats() if ETAG["cache"] else None,
+        "offline": LINK.state(), "etag": ETAG["cache"].stats() if ETAG["cache"] else None, "graphql": graphql_checks.stats(config),
         "hidden": HIDDEN["hidden"], "discovered": HIDDEN["discovered"], "hidden_names": HIDDEN["names"],
         "figures": figures, "repo_meta": repo_meta(repos),
     }

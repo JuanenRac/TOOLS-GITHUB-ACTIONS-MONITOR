@@ -19,6 +19,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - `tools/migrate_layout.py` für einen Ordner, der eine flache Installation war: standardmäßig ein Probelauf; `--apply` kopiert Ihre Konfiguration nach `layout_backup_<Stempel>/config/` und VERSCHIEBT (nie löschen, nie überschreiben) die alten Module, die alte Seite, die alten Beispiele und `locales/` nach `layout_backup_<Stempel>/old_code/`. `--doctor` warnt, solange solche Reste existieren. `MIGRATING.md` beschreibt es in den acht Sprachen.
 
+- **GraphQL für ruhige Repositories** (`network.graphql_checks`, standardmäßig aus; `network.graphql_batch`, 1 bis 30, standardmäßig 20; im Reiter Kontingent, in den acht Sprachen): Repositories, die nicht heiß sind, werden in Stapeln über GraphQL gelesen, das ein eigenes Kontingent hat, statt mit je einem REST-Aufruf; die heißen und jedes Repository, das die Abfrage nicht beantwortet, werden im selben Zyklus weiter über REST gelesen, und ein fehlgeschlagener Stapel fällt auf REST zurück. Es sieht nur den letzten Commit des Standardzweigs und liefert keine Laufzeiten, Versuche oder anderen Zweige (die Anleitung zum Kontingent sagt das). Die Abrechnung (Stapel, Repositories, Punkte, an REST übergebene Repositories) ist Teil der Kontingentzeile der Zusammenfassung und des Zustands für die KI-Werkzeuge, neben den mit `304` beantworteten Abfragen.
+
 ## [1.7.9]
 
 ### Behoben

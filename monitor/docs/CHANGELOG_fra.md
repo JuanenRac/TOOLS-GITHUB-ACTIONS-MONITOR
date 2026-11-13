@@ -19,6 +19,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - `tools/migrate_layout.py` pour un dossier qui était une installation plate : simulation par défaut ; `--apply` copie votre configuration vers `layout_backup_<horodatage>/config/` et DÉPLACE (jamais supprimer ni écraser) les anciens modules, page, exemples et `locales/` vers `layout_backup_<horodatage>/old_code/`. `--doctor` avertit tant que de tels restes existent. `MIGRATING.md` le décrit dans les huit langues.
 
+- **GraphQL pour les dépôts calmes** (`network.graphql_checks`, désactivé par défaut ; `network.graphql_batch`, de 1 à 30, 20 par défaut ; dans l'onglet Quota, en huit langues) : les dépôts qui ne sont pas chauds sont lus par lots via GraphQL, qui a un quota propre, au lieu d'un appel REST chacun ; les chauds et tout dépôt auquel la requête ne répond pas sont lus via REST dans le même cycle, et un lot en échec retombe sur REST. Il ne voit que le dernier commit de la branche par défaut et ne donne ni durées, ni tentatives, ni autres branches (le guide du quota le dit). La comptabilité (lots, dépôts, points, dépôts envoyés à REST) fait partie de la ligne de quota du résumé et de l'état pour les outils d'IA, à côté des lectures répondues `304`.
+
 ## [1.7.9]
 
 ### Corrigé
