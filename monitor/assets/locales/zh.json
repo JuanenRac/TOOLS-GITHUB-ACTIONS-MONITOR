@@ -1843,6 +1843,7 @@
  "ui.l_pending": "待签名",
  "ui.l_red": "红色 CI",
  "ui.l_unsigned": "未签名",
+ "ui.lamp_was": "之前:{level}",
  "ui.lang_label": "语言",
  "ui.link_run": "查看运行",
  "ui.link_run_short": "运行",

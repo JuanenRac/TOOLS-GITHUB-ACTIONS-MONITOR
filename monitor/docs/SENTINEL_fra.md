@@ -29,6 +29,8 @@ Elle démarre avec le moniteur complet et tourne dans le même processus, dans s
 
 Chaque contrôle a l'un de cinq niveaux : **ok** (rien à faire), **info** (bon à savoir), **warn** (à regarder bientôt), **bad** (agir maintenant) et **unknown** (pas encore vérifiable : **unknown n'est jamais affiché en vert**). Le rapport en haut de l'onglet le résume en quelques lignes ; le détail s'ouvre par contrôle. Un dépôt filtré dans le moniteur n'est pas contrôlé.
 
+Chaque voyant a une forme en plus d'une couleur (une coche pour ok, un point d'exclamation pour warn, une croix pour bad, un *i* pour info et un point d'interrogation pour unknown) : le niveau ne dépend donc jamais de la couleur seule. Survolez un voyant, ou atteignez-le au clavier, pour lire son niveau en toutes lettres et ce qu'il était avant de changer. Les voyants respirent à un rythme qui suit leur niveau, un voyant qui change joue une brève transition et, si votre système demande un mouvement réduit, plus rien ne bouge.
+
 ## Les contrôles
 
 | Contrôle | Ce qu'il vérifie et la règle exacte | Où configurer | Niveau et que faire |

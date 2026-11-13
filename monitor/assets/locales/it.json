@@ -1843,6 +1843,7 @@
  "ui.l_pending": "firma in sospeso",
  "ui.l_red": "CI rossa",
  "ui.l_unsigned": "non firmati",
+ "ui.lamp_was": "prima: {level}",
  "ui.lang_label": "Lingua",
  "ui.link_run": "vedi run",
  "ui.link_run_short": "run",

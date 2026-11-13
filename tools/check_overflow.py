@@ -147,22 +147,22 @@ def relay(target_port, probe=None, head=None, change=None):
     return server
 
 
-def measure(browser, url, size, tries=3, report="overflow-report"):
+def measure(browser, url, size, tries=3, report="overflow-report", flags=()):
     """Opens the page and returns the overflows; a browser that answers nothing (a busy computer) is asked again."""
     for attempt in range(tries):
         try:
-            return measure_once(browser, url, size, report)
+            return measure_once(browser, url, size, report, flags)
         except RuntimeError:
             if attempt == tries - 1:
                 raise
             time.sleep(2)
 
 
-def measure_once(browser, url, size, report="overflow-report"):
+def measure_once(browser, url, size, report="overflow-report", flags=()):
     """Opens the page once and returns the list of overflows the script found (or raises when the browser gave no answer). With another `report` it returns the whole document the script wrote."""
     profile = tempfile.mkdtemp(prefix="ghamon_ovf_")
     try:
-        child = subprocess.Popen([browser, "--headless=new", f"--user-data-dir={profile}", "--disable-gpu", *(["--no-sandbox", "--disable-dev-shm-usage"] if sys.platform.startswith("linux") else []), "--hide-scrollbars", "--virtual-time-budget=20000", f"--window-size={size[0]},{size[1]}",
+        child = subprocess.Popen([browser, "--headless=new", f"--user-data-dir={profile}", "--disable-gpu", *(["--no-sandbox", "--disable-dev-shm-usage"] if sys.platform.startswith("linux") else []), "--hide-scrollbars", *flags, "--virtual-time-budget=20000", f"--window-size={size[0]},{size[1]}",
                                   "--dump-dom", url], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
         try:
             dom = child.communicate(timeout=120)[0].decode("utf-8", "replace")

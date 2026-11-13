@@ -12,6 +12,7 @@ Alles hier Aufgeführte ist geschrieben und getestet; es ist entweder schon im H
 - Eine Speicherschicht hinter einer einzigen Schnittstelle, mit dem Datei-Backend, das den Aufbau von `accounts/<id>/` beibehält, atomaren Schreibvorgängen und Sicherungen, die jedes Backend wiederherstellen kann.
 - Ein optionales SQLite-Backend (standardmäßig aus), eine Datenbank je Konto, versionierte Migrationen, eine einstellbare Wartezeit und Werkzeuge, um den Zustand zwischen Datei-Backend und SQLite in beide Richtungen zu verschieben, zuerst mit einem Probelauf.
 - Die Änderungshistorie ist bis 1.0.0 in den acht Sprachen übersetzt, und ein Test hält sie vollständig.
+- Aufbewahrung und Rotation der Historie (Ereignisse und Analysen für eine Anzahl von Tagen, löschen oder archivieren, eine Prüfzeile je Durchlauf, eine Größenwarnung im Doctor; Zustand der Wächter und Konfiguration werden nie angefasst).
 
 ### Fertig und wartet auf das Zusammenführen
 
@@ -24,11 +25,10 @@ Alles hier Aufgeführte ist geschrieben und getestet; es ist entweder schon im H
 - Die aktive Benachrichtigung einer externen KI (standardmäßig aus, eine erste Bestätigung je Anbieter, nur die geschwärzten Felder einer geschlossenen Liste, eine Obergrenze für Aufrufe und Kosten pro Stunde, der Schlüssel über den Namen einer Variablen, und die KI führt nie eine Aktion aus).
 - Die Terminal-Anwendung bearbeitet Listen und Zuordnungen.
 - Teammodus (standardmäßig aus): Benutzer, Rollen (admin, maintainer, viewer) und Sitzungen im Speicher, eine Anmeldeseite, ein Bearer-Token für Clients, die kein Browser sind, stabile JSON-Fehler und eine Wiederherstellung eines Administrators über die Konsole dieses Rechners. Der Einzelmodus funktioniert weiter ohne Anmeldung, und die Lite-Ausgabe hat nie eine.
+- Eine lebendigere Seite: animierte Symbole, Statuslämpchen, deren Bewegung ihrem Zustand folgt, Reaktionen auf Überfahren, Fokus und Klick; alles aus bei reduzierter Bewegung und schlank in der Lite-Ausgabe.
 
 ### Noch in Arbeit
 
-- Aufbewahrung und Rotation der Historie (Ereignisse und Analysen für eine Anzahl von Tagen, löschen oder archivieren, eine Prüfzeile je Durchlauf, eine Größenwarnung im Doctor; Zustand der Wächter und Konfiguration werden nie angefasst).
-- Eine lebendigere Seite: animierte Symbole, Statuslämpchen, deren Bewegung ihrem Zustand folgt, Reaktionen auf Überfahren, Fokus und Klick; alles aus bei reduzierter Bewegung und schlank in der Lite-Ausgabe.
 - Stummschaltungen, die sich merken, wer sie gesetzt hat (braucht den Teammodus).
 
 ## Geplant, in dieser Reihenfolge

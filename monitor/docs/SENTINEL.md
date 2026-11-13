@@ -29,6 +29,8 @@ It starts with the complete monitor and runs in the same process, in its own thr
 
 Each check has one of five levels: **ok** (nothing to do), **info** (worth knowing), **warn** (look at it soon), **bad** (act now) and **unknown** (it could not be checked yet: **unknown is never shown as green**). The report on top of the tab sums them up in a few lines; the details open per check. A repository you filtered out of the monitor is not checked.
 
+Every lamp has a shape as well as a colour (a tick for ok, an exclamation mark for warn, a cross for bad, an *i* for info and a question mark for unknown), so the level never depends on the colour alone. Hover a lamp, or reach it with the keyboard, to read its level in words and what it was before it changed. The lamps breathe at a pace that follows their level, a lamp that changes plays one short transition, and when your system asks for reduced motion nothing moves at all.
+
 ## The checks
 
 | Check | What it checks and the exact rule | Where to configure | Level and what to do |

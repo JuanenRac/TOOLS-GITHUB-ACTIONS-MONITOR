@@ -29,6 +29,8 @@ Parte con il monitor completo e gira nello stesso processo, in un thread proprio
 
 Ogni controllo ha uno di cinque livelli: **ok** (niente da fare), **info** (utile saperlo), **warn** (da guardare presto), **bad** (agisci ora) e **unknown** (non ancora verificabile: **unknown non è mai mostrato in verde**). Il rapporto in cima alla scheda li riassume in poche righe; il dettaglio si apre per controllo. Un repository filtrato nel monitor non viene controllato.
 
+Ogni spia ha una forma oltre al colore (una spunta per ok, un punto esclamativo per warn, una croce per bad, una *i* per info e un punto interrogativo per unknown), così il livello non dipende mai dal solo colore. Passa il mouse su una spia, o raggiungila con la tastiera, per leggere il suo livello a parole e com'era prima di cambiare. Le spie respirano con un ritmo che segue il loro livello, una spia che cambia esegue una breve transizione e, se il sistema chiede un movimento ridotto, non si muove nulla.
+
 ## I controlli
 
 | Controllo | Cosa controlla e la regola esatta | Dove si configura | Livello e cosa fare |

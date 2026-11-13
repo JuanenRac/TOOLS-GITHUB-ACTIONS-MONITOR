@@ -1843,6 +1843,7 @@
  "ui.l_pending": "Signatur ausstehend",
  "ui.l_red": "rote CI",
  "ui.l_unsigned": "unsigniert",
+ "ui.lamp_was": "vorher: {level}",
  "ui.lang_label": "Sprache",
  "ui.link_run": "Lauf ansehen",
  "ui.link_run_short": "Lauf",
