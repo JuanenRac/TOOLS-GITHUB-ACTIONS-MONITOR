@@ -1257,8 +1257,7 @@ def run_cycle(config, generation):
     WATCH.begin()
     try:      # the log says that a cycle began, so a long one is not mistaken for a monitor that stopped
         with private_io.open_append(LOG_FILE) as log:
-            log.write(tzdisplay.localize(f"{datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')} cycle=started
-"))
+            log.write(tzdisplay.localize(f"{datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')} cycle=started\n"))
     except Exception as error:   # noqa: BLE001
         WATCH.log_failed(error)
     brief_status(toolconfig.raw_config() if not LITE["on"] else config, "running, a cycle has started, the alerts below are from the last complete cycle")

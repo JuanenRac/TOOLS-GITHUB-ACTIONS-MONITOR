@@ -94,7 +94,6 @@ button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{ou
 #err,#reduced,#offline,#hidden,#restartbar,#netbar{display:none!important}
 #err{display:none;background:var(--bad);color:var(--on-bad);padding:6px 18px}
 #snd-lock{background:var(--panel2);border-bottom:2px solid var(--warn);padding:4px 18px}#snd-lock[hidden]{display:none}#snd-lock button{font:inherit;font-weight:600;color:var(--text);background:transparent;border:1px dashed var(--warn);border-radius:6px;padding:3px 10px;cursor:pointer}
-#sb-refresh.bad{color:var(--bad);font-weight:700}
 #reduced{display:none;background:var(--warn);color:var(--on-warn);padding:6px 18px}
 #offline{display:none;background:var(--bad);color:var(--on-bad);padding:6px 18px;font-weight:600}
 main{flex:1;min-height:0;padding:12px 18px}
@@ -976,15 +975,17 @@ async function tick(force){
 }
 /* back in step: the rest of the page asks again and the sound may speak (a red that came in the meantime is new) */
 function freshBack(){soundResync();["sentTick","diffTick","modeLoad","sbTick"].forEach(f=>{try{if(typeof window[f]==="function")window[f]()}catch(e){}})}
-/* what the bar says: the age of the last good answer, red after a minute; the lamp of the connection follows */
+/* what the bar says when the page is out of step with the monitor: a notice (red) with the age of the last good answer, or the cycle that is stuck; the sound follows */
+var FRESHNOTE=null;
 function freshPaint(){
-  const i=freshInfo(nowMs(),FRESH.refresh),r=$("sb-refresh"),lamp=$("sb-conn-lamp"),ct=$("sb-conn-t"),c=$("sb-conn");
-  if(r){const base=DATA?T("ui.sb_updated",{time:clock(DATA.updated),secs:DATA.took}):"";r.textContent=(base?base+" · ":"")+T("ui.fresh",{age:agoText(i.age)})+(i.late&&i.retry?" · "+T("ui.fresh_retry",{n:i.retry}):"");r.title=T(i.late?"ui.fresh_late_t":"ui.fresh_t");r.classList.toggle("bad",i.late)}
-  const L=FRESH.loop,stuck=loopBad(L,FRESH.refresh),ph=L?T("ui.loop_phase_"+L.phase):"";
+  const i=freshInfo(nowMs(),FRESH.refresh),L=FRESH.loop,stuck=loopBad(L,FRESH.refresh),ph=L?T("ui.loop_phase_"+L.phase):"";
   if((i.late&&!i.old)||stuck)soundLost();else soundFound();
-  if(stuck&&lamp&&ct&&c){lamp.className="sb-lamp bad";ct.textContent=T("ui.loop_stuck",{phase:ph,age:agoText(L.running_seconds)});c.title=T("ui.loop_stuck_t",{phase:ph});c.className="sb-item bad";if(r)r.classList.add("bad")}
-  else if(i.late&&lamp&&ct&&c){lamp.className="sb-lamp bad";ct.textContent=T("ui.fresh_late",{age:agoText(i.age)});c.title=T("ui.fresh_late_t");c.className="sb-item bad"}
-  else if(L&&L.log_error&&lamp&&ct&&c){lamp.className="sb-lamp warn";ct.textContent=T("ui.loop_logfail",{msg:L.log_error});c.title=T("ui.loop_logfail",{msg:L.log_error});c.className="sb-item warn"}
+  let note=null;
+  if(stuck)note={level:"bad",text:T("ui.loop_stuck",{phase:ph,age:agoText(L.running_seconds)})};
+  else if(i.late)note={level:"bad",text:T("ui.fresh_late",{age:agoText(i.age)})+(i.retry?" · "+T("ui.fresh_retry",{n:i.retry}):""),hint:T("ui.fresh",{age:agoText(i.age)})+" · "+T("ui.fresh_late_t")+" "+T("ui.fresh_t")};
+  else if(L&&L.log_error)note={level:"warn",text:T("ui.loop_logfail",{msg:L.log_error})};
+  const key=note?note.level+"|"+note.text:"";
+  if(key!==(FRESHNOTE?FRESHNOTE.level+"|"+FRESHNOTE.text:"")){FRESHNOTE=note;try{renderBar()}catch(e){}}
 }
 function freshDog(){if(freshWatch(nowMs()))tick(true)}
 setInterval(freshDog,5000);setInterval(freshPaint,1000);
@@ -1591,6 +1592,7 @@ function readNotices(){
   const now=Date.now(),out=[];
   NOTE_SRC.forEach(([id,lv,rank])=>{const el=$(id);let on=false;if(el)on=(id==="netbar"||id==="quota"?!el.hidden:el.style.display==="block")&&!!el.textContent.trim();
     if(on){NSEEN[id]=NSEEN[id]||now;out.push({id:id,level:lv,rank:rank,text:el.textContent.trim(),at:NSEEN[id]})}else delete NSEEN[id]});
+  if(typeof FRESHNOTE!=="undefined"&&FRESHNOTE){NSEEN.fresh=NSEEN.fresh||now;out.push({id:"fresh",level:FRESHNOTE.level,rank:95,text:FRESHNOTE.text,hint:FRESHNOTE.hint,at:NSEEN.fresh})}else delete NSEEN.fresh;
   if(OPENALERTS>0){NSEEN.alerts=NSEEN.alerts||now;out.push({id:"alerts",level:"warn",rank:60,text:T("ui.sb_open_alerts",{n:OPENALERTS}),at:NSEEN.alerts})}else delete NSEEN.alerts;
   return out.sort((a,b)=>(b.level==="bad")-(a.level==="bad")||b.rank-a.rank);
 }
@@ -1598,7 +1600,7 @@ function renderBar(){
   const list=readNotices();NOTES=list;
   const lamp=$("sb-lamp"),txt=$("sb-text"),more=$("sb-more"),open=$("sb-open");
   if(!list.length){lamp.className="sb-lamp ok";txt.textContent=T("ui.sb_none");txt.title="";more.hidden=true;open.hidden=true}
-  else{const top=list[0];lamp.className="sb-lamp "+top.level;txt.textContent=top.text;txt.title=top.text;more.hidden=list.length<2;open.hidden=list.length<2;
+  else{const top=list[0];lamp.className="sb-lamp "+top.level;txt.textContent=top.text;txt.title=top.hint||top.text;more.hidden=list.length<2;open.hidden=list.length<2;
     if(list.length>1){more.textContent=T("ui.sb_more",{n:list.length-1});more.title=T("ui.sb_open_all")}}
   if(!dlgs.notes.hidden)renderNotes();
   renderBarFacts();
@@ -1618,7 +1620,6 @@ function renderBarFacts(){
   {const ai=SBINFO&&!LITE?SBINFO.ai:null;set("sb-ai",!ai||!ai.enabled?"":(ai.streams>0?T("ui.sb_ai_stream"):ai.connected?T("ui.sb_ai_on",{via:ai.via||"-",ago:agoText(ai.age_seconds)}):T("ui.sb_ai_off")),T("ui.sb_ai_t"))}
   set("sb-acc",T("ui.sb_account",{name:(ACC&&ACC.current)||OWNER||"-"}),T("ui.sb_account_t"));
   set("sb-ver","v"+(I18N.version||"")+" · "+T(LITE?"ui.sb_lite":"ui.sb_complete"),T("ui.sb_version_t"));
-  freshPaint();
   if(SBINFO)set("sb-addr",(SBINFO.bind==="0.0.0.0"&&SBINFO.lan_address?SBINFO.lan_address:"127.0.0.1")+":"+SBINFO.port,T("ui.sb_addr_t",{local:"127.0.0.1:"+SBINFO.port,lan:(SBINFO.lan_address||"-")+":"+SBINFO.port}));
 }
 function agoText(s){s=Math.max(0,Math.round(s||0));return s>=3600?Math.floor(s/3600)+" h":s>=60?Math.floor(s/60)+" min":s+" s"}
