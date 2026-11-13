@@ -14,6 +14,7 @@ import threading
 import time
 import unittest
 from pathlib import Path
+from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(HERE / "src"))
@@ -53,7 +54,7 @@ class Schema(unittest.TestCase):
         self.assertEqual(s.schema_version(), sqlite_storage.SCHEMA_VERSION)
         self.assertTrue({"accounts", "configs", "sentinel_states", "events", "analytics_snapshots", "users", "user_accounts", "sessions", "meta"} <= self.tables())
         info = s.describe()
-        self.assertEqual((info["journal_mode"], info["busy_timeout_ms"]), ("wal", 5000))
+        self.assertEqual((info["journal_mode"], info["busy_timeout_ms"]), ("wal", 30000))
         con = sqlite3.connect(str(self.db))
         try:
             indexes = {r[1]: [c[2] for c in con.execute(f"PRAGMA index_info({r[1]})")] for r in con.execute("PRAGMA index_list(events)")}
@@ -173,6 +174,44 @@ class Schema(unittest.TestCase):
         self.assertEqual(s.export_account("alpha"), files.export_account("alpha"))
 
 
+class Retry(unittest.TestCase):
+    def test_a_busy_step_is_tried_again_with_a_bounded_number_of_attempts(self):
+        calls = []
+
+        def flaky():
+            calls.append(1)
+            if len(calls) < 3:
+                raise sqlite3.OperationalError("database is locked")
+            return "ok"
+
+        with mock.patch.object(sqlite_storage.time, "sleep") as pause:
+            self.assertEqual(sqlite_storage.retrying(flaky), "ok")
+        self.assertEqual((len(calls), pause.call_count), (3, 2))
+        calls.clear()
+        with mock.patch.object(sqlite_storage.time, "sleep"):
+            with self.assertRaises(sqlite3.OperationalError):
+                sqlite_storage.retrying(lambda: (calls.append(1), (_ for _ in ()).throw(sqlite3.OperationalError("database is busy")))[1], attempts=4)
+        self.assertEqual(len(calls), 4)
+
+    def test_another_error_is_not_retried(self):
+        calls = []
+        with mock.patch.object(sqlite_storage.time, "sleep") as pause:
+            with self.assertRaises(sqlite3.OperationalError):
+                sqlite_storage.retrying(lambda: (calls.append(1), (_ for _ in ()).throw(sqlite3.OperationalError("no such table")))[1])
+        self.assertEqual((len(calls), pause.call_count), (1, 0))
+
+    def test_the_wait_is_configurable_and_clamped(self):
+        self.assertEqual(factory.settings({"busy_timeout_ms": 60000})["busy_timeout_ms"], 60000)
+        for bad in (5, 10 ** 9, "x", True, None):
+            self.assertEqual(factory.settings({"busy_timeout_ms": bad})["busy_timeout_ms"], 30000)
+        with tempfile.TemporaryDirectory() as tmp:
+            s = factory.create_storage({"backend": "sqlite", "busy_timeout_ms": 45000}, None, base_dir=Path(tmp))
+            try:
+                self.assertEqual(s.describe()["busy_timeout_ms"], 45000)
+            finally:
+                s.close()
+
+
 class Factory(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -272,7 +311,11 @@ TICKER = textwrap.dedent("""
     import sys
     sys.path.insert(0, sys.argv[1])
     from github_actions_monitor.storage import sqlite_storage
-    path, account, count = sys.argv[2], sys.argv[3], int(sys.argv[4])
+    path, account, count, gate = sys.argv[2], sys.argv[3], int(sys.argv[4]), sys.argv[5]
+    import os, time
+    deadline = time.time() + 60
+    while not os.path.exists(gate) and time.time() < deadline:      # every process opens the database at the same moment: the start is a file, not a guess
+        time.sleep(0.001)
     s = sqlite_storage.SqliteStorage(path)
     for i in range(count):
         s.append_events(account, [{"kind": "tick", "n": i, "who": account}])
@@ -282,11 +325,19 @@ TICKER = textwrap.dedent("""
 """)
 
 
+def spawn_tickers(shared_or_paths, count, gate):
+    """Starts one ticking process per (account, database path), all waiting at the gate file."""
+    return [subprocess.Popen([sys.executable, "-I", "-c", TICKER, str(HERE / "src"), str(path), name, str(count), str(gate)]) for name, path in shared_or_paths.items()]
+
+
 class TwoAccounts(unittest.TestCase):
     """Model A: each account has its own database and its own process; model B: one shared database. In both, two accounts ticking at once corrupt nothing."""
 
     def tick_together(self, paths):
-        procs = [subprocess.Popen([sys.executable, "-I", "-c", TICKER, str(HERE / "src"), str(p), name, "150"]) for name, p in paths.items()]
+        gate = Path(next(iter(paths.values()))).parent / "gate"
+        gate.parent.mkdir(parents=True, exist_ok=True)
+        procs = spawn_tickers(paths, 150, gate)
+        gate.write_text("go", encoding="utf-8")
         for proc in procs:
             self.assertEqual(proc.wait(timeout=180), 0)
 
@@ -323,7 +374,9 @@ class TwoAccounts(unittest.TestCase):
             shared = Path(tmp) / "shared.sqlite3"
             s = sqlite_storage.SqliteStorage(shared)
             self.assertEqual(s.describe()["journal_mode"], "wal")
-            procs = [subprocess.Popen([sys.executable, "-I", "-c", TICKER, str(HERE / "src"), str(shared), name, "300"]) for name in ("alpha", "beta")]
+            gate = Path(tmp) / "gate"
+            procs = spawn_tickers({"alpha": shared, "beta": shared}, 300, gate)
+            gate.write_text("go", encoding="utf-8")
             slowest, reads, last = 0.0, 0, 0
             try:
                 while any(p.poll() is None for p in procs):
@@ -364,7 +417,9 @@ class TwoAccounts(unittest.TestCase):
             server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Page)
             thread = threading.Thread(target=server.serve_forever, daemon=True)
             thread.start()
-            procs = [subprocess.Popen([sys.executable, "-I", "-c", TICKER, str(HERE / "src"), str(shared), name, "300"]) for name in ("alpha", "beta")]
+            gate = Path(tmp) / "gate"
+            procs = spawn_tickers({"alpha": shared, "beta": shared}, 300, gate)
+            gate.write_text("go", encoding="utf-8")
             slowest, answers = 0.0, 0
             try:
                 while any(p.poll() is None for p in procs):
