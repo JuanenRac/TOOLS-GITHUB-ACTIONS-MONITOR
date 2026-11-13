@@ -86,7 +86,7 @@ DEFAULTS = {
     "cache": {"etag": {"enabled": True, "ttl_hours": 24}},   # conditional reads: a 304 answer costs no quota (etagcache.py)
     "display": {"timezone": "local", "blink_red_tiles": True},   # blink_red_tiles: the red tiles and red items of the bar blink softly until the cause is solved; zone of the times written for people (log, reports, command line, notifications): local | utc | an IANA name such as Europe/Madrid
     "modes": {"auto_low": True, "auto_low_enter": 1000, "auto_low_exit": 2500, "low": {"refresh_seconds": 240, "cold_refresh_seconds": 1800, "runs_per_repo": 10, "hot_hours": 2}},      # see modes.py: only what is shown in the Quota tab
-    "extra_reader": {"enabled": False, "file": ""},      # a second read-only account: only the PATH of the file with its token (readpool.py)
+    "extra_reader": {"enabled": False, "file": "", "any_folder": False},      # a second read-only account: only the PATH of the file with its token (readpool.py)
     "github_app": {"enabled": False, "app_id": "", "key_path": "", "installation_id": ""},      # an optional GitHub App for the READS (its own allowance); only the PATH of the key is kept here (github_app.py)
     "central": {"source": "off", "max_age_minutes": 120, "git_dir": ""},      # the central panel of the profile repository as a base line that spends no allowance (central_source.py): off | git | http
     "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
@@ -98,7 +98,7 @@ DEFAULTS = {
     "quota": {"billing_api": False, "warn_percent": 75, "alert_percent": 90, "default_runner": "linux"},
     "session_guard": True,         # the page asks for a one-use token before it changes a setting or confirms an action
     "discovery": {"events": True, "suggest_groups": True, "auto_frequency": False, "hide": []},
-    "listen": {"network": False, "trusted_proxy": False, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "tls_cert_file": "", "tls_key_file": "", "secure_cookie": False, "proxy_public_host": "", "max_failed_attempts": 10, "query_access": True},     # OFF: only this computer. On: a private address, with an access token for every request
+    "listen": {"network": False, "trusted_proxy": False, "local_port": 0, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "tls_cert_file": "", "tls_key_file": "", "secure_cookie": False, "proxy_public_host": "", "max_failed_attempts": 10, "query_access": True},     # OFF: only this computer. On: a private address, with an access token for every request
     "github_token": {"enabled": False, "store": "auto"},       # OFF: the monitor uses your own `gh login`. On: a token kept in the store of the system (secretstore.py)
     "github_actions": {"enabled": False, "allowed": ["rerun_failed", "cancel"], "merge_method": "squash"},      # OFF: actions on GitHub, each one confirmed on its own (ghactions.py)
     "act": {"enabled": False, "allowed": [], "timeout_seconds": 900, "allow_symlinks": False},
@@ -1459,11 +1459,22 @@ class Handler(BaseHTTPRequestHandler):
                 self.wfile.flush()
         except (ConnectionError, OSError):
             DISCONNECTS[0] += 1      # the listener went away: nothing to report
+        except (ValueError, TypeError) as error:      # a frame that cannot be written ends this listener, never the server
+            degraded.note("ai.stream", error)
         finally:
             ai_alerts.stream_release()
 
+    local_door = False      # True only on the second, loopback-only port (listen.local_port): the way in of the person at this computer when a reverse proxy is declared
+
+    def request_ok(self):
+        return localguard.local_request_ok(self.headers, self.server.server_address[1], door=self.local_door)
+
+    def is_local(self):
+        """True when this request really comes from a person at this computer (see localguard.is_this_computer)."""
+        return localguard.is_this_computer(self.client_address, self.headers, door=self.local_door)
+
     def guard(self):
-        if localguard.local_request_ok(self.headers, self.server.server_address[1]):
+        if self.request_ok():
             return True
         self.json_reply({"error": "forbidden"}, 403)
         return False
@@ -1475,7 +1486,7 @@ class Handler(BaseHTTPRequestHandler):
             return True
         if self.command == "POST" and self.path.split("?")[0] == "/api/access":      # the one-use post that opens the session: it checks the token itself (handle_post)
             return True
-        if not localguard.local_request_ok(self.headers, self.server.server_address[1]):
+        if not self.request_ok():
             self.json_reply({"error": "forbidden"}, 403)
             return False
         from urllib.parse import parse_qs
@@ -1483,17 +1494,18 @@ class Handler(BaseHTTPRequestHandler):
         if query_token and not localguard.query_token_counts(self.command, self.path, LIVE_CONFIG or DEFAULTS):      # deprecated: only the first visit of a page, and only while listen.query_access is on
             query_token = ""
         peer = localguard.client_key(self.client_address, self.headers)
-        if not localguard.access_ok(self.headers, query_token):      # the token is judged FIRST: behind a proxy on this machine everybody shares one address, and the owner with the right token must get in
-            if localguard.is_locked(peer):      # too many wrong tokens from this address: refused for a while
-                self.json_reply({"error": "locked"}, 429)
-                return False
+        if not self.is_local() and localguard.is_locked_out(self.client_address, self.headers):      # the lock is looked at FIRST for every address that is not this computer: a locked address cannot keep guessing, not even with the right token
+            self.json_reply({"error": "locked"}, 429)
+            return False
+        if not localguard.access_ok(self.headers, query_token):      # the person at this computer is never locked out of their own monitor; a shared proxy address is told apart with listen.trusted_proxy
             localguard.note_failure(peer, localguard.max_failed(LIVE_CONFIG or DEFAULTS))
+            localguard.note_proxy_failure(self.client_address, self.headers, localguard.max_failed(LIVE_CONFIG or DEFAULTS))
             self.json_reply({"error": "access"}, 401)
             return False
         self.deprecated_access = bool(query_token) and not localguard.presented(self.headers)      # the token came in the address: every answer says that way is deprecated
         if query_token and self.command == "GET" and "text/html" in (self.headers.get("Accept") or "text/html"):
             self.send_response(302)
-            self.send_header("Set-Cookie", localguard.cookie_header(query_token))
+            self.send_header("Set-Cookie", localguard.cookie_header(query_token, secure=False if self.local_door else None))
             self.send_header("Referrer-Policy", "no-referrer")       # the clean address follows at once: the token must not travel on in a Referer header
             self.send_header("Cache-Control", "no-store")
             self.send_header("Location", self.path.split("?")[0])
@@ -1507,11 +1519,11 @@ class Handler(BaseHTTPRequestHandler):
         if not localguard.STATE["network"]:
             self.json_reply({"ok": False, "error": "not_network"}, 404)
             return
-        if not localguard.local_request_ok(self.headers, self.server.server_address[1]):
+        if not self.request_ok():
             self.json_reply({"error": "forbidden"}, 403)
             return
         peer = localguard.client_key(self.client_address, self.headers)
-        if localguard.is_locked(peer):
+        if not self.is_local() and localguard.is_locked_out(self.client_address, self.headers):      # the same rule as every other request (access_gate)
             self.json_reply({"error": "locked"}, 429)
             return
         try:
@@ -1527,11 +1539,12 @@ class Handler(BaseHTTPRequestHandler):
             return
         if not localguard.access_ok({}, candidate):
             localguard.note_failure(peer, localguard.max_failed(LIVE_CONFIG or DEFAULTS))
+            localguard.note_proxy_failure(self.client_address, self.headers, localguard.max_failed(LIVE_CONFIG or DEFAULTS))
             self.json_reply({"error": "access"}, 401)
             return
         body = json.dumps({"ok": True}).encode("utf-8")
         self.send_response(200)
-        self.send_header("Set-Cookie", localguard.cookie_header(candidate))
+        self.send_header("Set-Cookie", localguard.cookie_header(candidate, secure=False if self.local_door else None))
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
@@ -1541,7 +1554,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def this_computer(self):
         """Keys and actions that decide exposure or reach GitHub can only be changed from the same computer while the network mode is on (a 403 otherwise)."""
-        if not localguard.STATE["network"] or localguard.is_this_computer(self.client_address, self.headers):
+        if not localguard.STATE["network"] or self.is_local():
             return True
         self.json_reply({"ok": False, "errors": {"_": "local_only"}}, 403)
         return False
@@ -1729,7 +1742,7 @@ class Handler(BaseHTTPRequestHandler):
                     return
                 request = json.loads(self.rfile.read(size))
                 changes = request.get("changes") if isinstance(request, dict) else None
-                if localguard.STATE["network"] and not localguard.is_this_computer(self.client_address, self.headers) and isinstance(changes, dict) and any(localguard.local_only_key(k) for k in changes):
+                if localguard.STATE["network"] and not self.is_local() and isinstance(changes, dict) and any(localguard.local_only_key(k) for k in changes):
                     self.json_reply({"ok": False, "errors": {"_": "local_only"}}, 403)
                     return
                 result = settings_api.apply(changes, CONFIG_FILE, lite=LITE["on"])
@@ -1846,7 +1859,7 @@ class Handler(BaseHTTPRequestHandler):
             if not self.guard():
                 return
             from github_actions_monitor.app import settings_api
-            self.json_reply({"ok": True, **settings_api.describe(CONFIG_FILE, lite=LITE["on"]), "restart_pending": sorted(RESTART_PENDING)})
+            self.json_reply({"ok": True, **settings_api.describe(CONFIG_FILE, lite=LITE["on"], remote=localguard.STATE["network"] and not self.is_local()), "restart_pending": sorted(RESTART_PENDING)})
         elif path == "/metrics" or path.startswith("/api/outputs/"):   # optional outputs, off unless switched on (outputs.py); local request only, no quota used
             if not self.guard():
                 return
@@ -1969,7 +1982,7 @@ class Handler(BaseHTTPRequestHandler):
             if not self.guard():
                 return
             refresh_feed()      # the bar polls every 30 seconds: the feed follows the sentinel without waiting for a cycle
-            self.json_reply(statusbar_payload(self.server.server_address[1], not localguard.STATE["network"] or localguard.is_this_computer(self.client_address, self.headers)))
+            self.json_reply(statusbar_payload(self.server.server_address[1], not localguard.STATE["network"] or self.is_local()))
         elif path in ("/api/alerts", "/api/events"):      # one list of the alerts of every sentinel, and the events of the feed (1.7.3; read only; the account comes from ?account= or the process)
             if not self.guard():
                 return
@@ -2010,6 +2023,13 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self.send_response(404)
             self.end_headers()
+
+
+class LocalDoorHandler(Handler):
+    """The same page on the second port (`listen.local_port`), bound to loopback only: the way in of the person at this computer when a reverse proxy is declared, because behind a proxy
+    nothing that arrives on the main port counts as "this computer"."""
+
+    local_door = True
 
 
 def lan_address():
@@ -2504,7 +2524,7 @@ def main():
         print(platform_compat.gh_install_hint())
         return 1
     try:
-        me = gh("api", "user", retries=0)
+        me = gh("api", "user", retries=0, as_user=True)
         toolconfig.prime_owner((me or {}).get("login"))   # the owner to watch when "github_owner" is empty, from the call that checks the login: no extra call
     except AuthError:
         print(i18n.t("mon.auth_rejected"))
@@ -2548,6 +2568,13 @@ def main():
     threading.Thread(target=update_loop, daemon=True).start()
     if not LITE["on"]:
         start_sentinel(config)
+    try:      # the token file of the second account is only accepted inside the accounts folder: a configuration that points elsewhere is told once, with the way out
+        from github_actions_monitor.data_pipeline import readpool
+        block = config.get("extra_reader") if isinstance(config.get("extra_reader"), dict) else {}
+        if block.get("enabled") is True and block.get("file") and not readpool.settings(config)["file"]:
+            print(i18n.t("mon.extra_file_outside"), flush=True)
+    except Exception as error:   # noqa: BLE001 - a notice never stops the start
+        degraded.note("loop.extra", error)
     server = None
     listen = {"network": False, "host": "127.0.0.1"} if LITE["on"] else localguard.settings_from(config)
     access_token, access_generated = "", False
@@ -2564,7 +2591,8 @@ def main():
             except (OSError, ValueError, ssl.SSLError) as error:
                 print(i18n.t("mon.tls_failed", error=str(error)[:200]))
                 return 1
-        localguard.configure(True, listen["host"], access_token, listen["allowed_hosts"], secure=tls_ctx is not None or tls["secure_cookie"], proxy_host=listen["proxy_public_host"], trusted_proxy=listen["trusted_proxy"])
+        localguard.configure(True, listen["host"], access_token, listen["allowed_hosts"], secure=tls_ctx is not None or tls["secure_cookie"], proxy_host=listen["proxy_public_host"], trusted_proxy=listen["trusted_proxy"],
+                           behind_proxy=tls["secure_cookie"])
         LIVE_CONFIG["session_guard"] = True      # the one-use token of the page is not optional on the network
     for port in range(args.port, args.port + 10):
         try:
@@ -2577,6 +2605,14 @@ def main():
     if server is None:
         print(i18n.t("mon.no_port", port=args.port))
         return 1
+    door = None
+    if listen["network"] and listen["local_port"] and listen["local_port"] != server.server_address[1]:      # the way in of the person at this computer when a reverse proxy is declared (listen.local_port)
+        try:
+            door = QuietServer(("127.0.0.1", listen["local_port"]), LocalDoorHandler)
+            threading.Thread(target=door.serve_forever, daemon=True).start()
+            print(i18n.t("mon.local_door", port=listen["local_port"]), flush=True)
+        except OSError:
+            print(i18n.t("mon.local_door_failed", port=listen["local_port"]), flush=True)
     server.tls_context = tls_ctx      # each connection is wrapped in its own thread (get_request), so a client that never finishes the handshake cannot stall the others
     url = f"{'https' if tls_ctx is not None else 'http'}://{localguard.display_host(server.server_address[0])}:{server.server_address[1]}/"      # from the address the server really listens on
     try:      # the feed for AIs is off by default since 1.7.6: an installation that was already using it keeps it, and is told

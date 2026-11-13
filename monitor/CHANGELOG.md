@@ -46,6 +46,36 @@ when this file and `tool_version.py` disagree.
 - The page showed old data without any warning when the monitor stopped or answered slowly (a request that never returned left the page looking alive), and the "bing bing" stayed silent after a reload or a long gap.
 - The SQLite storage no longer fails with "database is locked" when several processes open or write the same database at once: the wait for another writer is 30 seconds by default and can be set with `busy_timeout_ms` in the `storage` block, and the steps that SQLite does not make wait (the first switch to WAL, taking the writer lock) are tried again a few times with growing pauses.
 
+- **The stream of events for AIs no longer dies on an ordinary log line**: the line of the feed is cleaned field by field and then written, instead of cleaning a JSON that was already written (a cause that ended in `password: x`, `token=x` or `DB_PASSWORD=x` broke it). A line that cannot be cleaned is skipped and the stream goes on; the answers of the MCP server are cleaned the same way. In the cleaner, the value of a `key=value` pair stops at a quote, a comma or a semicolon, and a quoted value is cleaned whole.
+
+- **The test of the ports of the accounts no longer fails when suites run at once**: the supervisor can be told where to start looking for free ports (the default stays 18800) and the tests ask the system for an unused stretch instead of a fixed one.
+
+### Security
+
+- **The lock-out of wrong tokens brakes again (network mode)**: an address that is not this computer and is locked is refused BEFORE its token is judged, in every way of presenting it (header, cookie, `?access=` and `POST /api/access`); until now a locked address could keep guessing and the right token still got in. The person at this computer is never locked out of their own monitor.
+
+- **A declared reverse proxy makes loopback stop meaning "this computer"** (`listen.proxy_public_host`, `listen.secure_cookie` or `listen.trusted_proxy`): a proxy that forgets its forwarding headers can no longer turn every client of the internet into the owner. The person at the computer of the monitor uses the new second port that only listens on `127.0.0.1` (`listen.local_port`, 0 = off, restart needed, same access token). With `listen.trusted_proxy`, the wrong tokens of all the clients of the proxy are also counted together (three times the limit of one address), so rotating `X-Forwarded-For` does not defeat the lock-out.
+
+- **The guide of the reverse proxy** (`DEPLOYMENT.md`, eight languages) gives the whole recipe: public `Host`, `X-Forwarded-For $proxy_add_x_forwarded_for`, `X-Forwarded-Proto`, the network mode and the declaration of the proxy; it no longer says that the monitor "has no login", and it says that `listen.trusted_proxy` assumes a proxy on the same computer.
+
+- **`GET /api/settings` for a client of the network** returns the value only of the settings it may change; for every other setting (paths of keys and tokens, folders, names of variables) it says only whether it is defined.
+
+- **Test of every "this computer only" route**: a table of the routes is walked against a real server with a client that is not on loopback (and the source is scanned so that a new route cannot be forgotten).
+
+- **An address of GitHub passes the cleaner only in the shapes of a closed list** (a repository, a run with its job or attempt, a commit, an issue, a pull request, a file); it is cut at the first character that is not a letter, a digit, a dot, a hyphen, an underscore or a slash, and what follows is cleaned like any text. Until now a secret glued to a link (an encoded query, a list separated by commas, a colon, an opaque segment of the path, an e-mail that starts in the address) travelled whole to the AI.
+
+- **The hook of the AI client hands over no text of a log**: only the repository, the workflow, the conclusion and the link of each alert. The order to act without waiting to be told is gone; the closing line now says that a log can hold text written by third parties, that it is untrusted data and that instructions found in it are never followed. In the eight languages.
+
+- **What depends on who asks is always answered by your own login**: `gh api user`, `user/orgs`, notifications, a search for `@me`, `gh auth` and `gh repo list` without an owner never go to the GitHub App or to the second account, however many calls those have left (with the second account on, the monitor could take the owner of that account as its owner and list its organisations).
+
+- **A `gh` call is a read only when it is on a white list**: `gh api ENDPOINT` with at most the options `--jq`, `--paginate`, `-H` (of the kind a read sends), `-i` and `--cache`. The attached spellings of a write (`-XPOST`, `--method=DELETE`, `-fa=b`, `--field=a=b`, `--input=-`) and any other option go to your login instead of being spread over the sources.
+
+- **The token file of the second account** (`extra_reader.file`) must be inside the accounts folder of the monitor (`accounts/`, or `MONITOR_ACCOUNTS_DIR`) and is opened without following a link and only if it is a small regular file; outside that folder the setting is empty. The new switch `extra_reader.any_folder` (off by default, local only) lifts the folder rule for a file that must stay elsewhere.
+
+- **A central panel dated in the future is not trusted**: its age was clamped to zero, so it counted as fresh for ever; now it is behind, the summary says the date is not trusted and a clock that runs ahead by up to five minutes is tolerated.
+
+- **A page that breaks turns the CI red**: a new job (`page`, without `continue-on-error`) opens the page of the demo monitor in a real browser (`tools/check_page.py`), goes through every tab and every sub-tab of Settings, requires a minimum of fields in each one and fails on any error of the page, unhandled promise or console.error. A page broken on purpose (a second definition, an assignment to the name of a function, a call to a function that does not exist) must make it fail. The test that looks for functions defined twice now also sees a declaration with an indent, one with `async` and an assignment to the name of a function.
+
 ## [1.7.9]
 
 ### Fixed

@@ -78,12 +78,12 @@ def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_g
     """The text a tool answers (already cleaned). Raises ValueError for a bad request."""
     if name == "get_alerts":
         states = None if arguments.get("include_resolved") else ("open", "acknowledged")
-        return ai_alerts.redact(json.dumps(ai_alerts.alerts(config, states=states), ensure_ascii=False, indent=1))
+        return ai_alerts.redact_json(ai_alerts.alerts(config, states=states), indent=1)
     if name == "alerts_open":
         rows = [a for a in ai_alerts.alerts(config, states=("open", "acknowledged")) if not arguments.get("only_real") or a["class"] == "real"]
         rows.sort(key=lambda a: (a["state"] == "acknowledged", a["class"] != "real", a["repo"], a["workflow"]))
         info = ai_alerts.brief_info(config)
-        return ai_alerts.redact(json.dumps({"updated": info["updated"], "updated_local": info["updated_local"], "age_seconds": info["age_seconds"], "alerts": rows}, ensure_ascii=False, indent=1))
+        return ai_alerts.redact_json({"updated": info["updated"], "updated_local": info["updated_local"], "age_seconds": info["age_seconds"], "alerts": rows}, indent=1)
     if name in ("alert_diagnose", "diagnose"):
         wanted = str(arguments.get("id", ""))
         found = [a for a in ai_alerts.alerts(config, states=("open", "acknowledged")) if a["id"] == wanted]
@@ -96,18 +96,18 @@ def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_g
             diagnosis = ai_alerts.diagnose(toolconfig.github_owner(config), item["repo"], item.get("url"), runner, cfg["log_lines"], cfg["max_bytes"])
             if not diagnosis:
                 raise ValueError("this alert has no run to read")
-        return ai_alerts.redact(json.dumps({"id": wanted, "repo": item["repo"], "workflow": item["workflow"], "diagnosis": diagnosis, "origin": item.get("origin")}, ensure_ascii=False, indent=1))
+        return ai_alerts.redact_json({"id": wanted, "repo": item["repo"], "workflow": item["workflow"], "diagnosis": diagnosis, "origin": item.get("origin")}, indent=1)
     if name == "get_red_repos":
         rows = [a for a in ai_alerts.alerts(config, states=("open", "acknowledged")) if a.get("conclusion") != "panel"]
-        return ai_alerts.redact(json.dumps(sorted({a["repo"] for a in rows})))
+        return ai_alerts.redact_json(sorted({a["repo"] for a in rows}))
     if name == "monitor_state":
-        return ai_alerts.redact(json.dumps(getter("/api/ai/state"), ensure_ascii=False)[:20000])
+        return ai_alerts.redact_json(getter("/api/ai/state"), 20000)
     if name == "signals":
         doc = getter("/api/ai/state")
         rows = [s for s in doc.get("signals", []) if (not arguments.get("panel") or s.get("panel") == arguments["panel"] or s["id"].split(".")[0] == arguments["panel"]) and (not arguments.get("only_act") or s.get("level") == "act")]
-        return ai_alerts.redact(json.dumps({"edition": doc.get("edition"), "signals": rows}, ensure_ascii=False)[:16000])
+        return ai_alerts.redact_json({"edition": doc.get("edition"), "signals": rows}, 16000)
     if name == "sentinel_panels":
-        return ai_alerts.redact(json.dumps(getter("/api/sentinel/panels"), ensure_ascii=False)[:12000])
+        return ai_alerts.redact_json(getter("/api/sentinel/panels"), 12000)
     if name == "get_run_failure":
         repo, run = str(arguments.get("repo", "")), arguments.get("run")
         if not NAME_RE.match(repo) or not isinstance(run, int) or isinstance(run, bool) or run <= 0:
@@ -123,7 +123,7 @@ def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_g
         fragment = "\n".join((log or "").splitlines()[-40:]) if code == 0 else ""
         return ai_alerts.redact("Failed steps:\n" + ("\n".join(steps) or "(none listed)") + "\n\nEnd of the failed log:\n" + fragment, 4000)
     if name == "get_quota":
-        return ai_alerts.redact(json.dumps(getter("/api/quota"), ensure_ascii=False)[:3000])
+        return ai_alerts.redact_json(getter("/api/quota"), 3000)
     if name in ("ack_alert", "alert_ack", "act"):
         if not allow_ack:
             raise ValueError("acknowledging is off: start the server with --allow-ack")
