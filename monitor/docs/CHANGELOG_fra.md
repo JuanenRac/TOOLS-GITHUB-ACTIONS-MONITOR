@@ -7,6 +7,12 @@
 
 Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son propre semver. La source est le CHANGELOG.md en anglais ; ce fichier contient les mêmes versions et sections.
 
+## [Unreleased]
+
+### Ajouté
+
+- **`listen.trusted_proxy`** (désactivé par défaut, local uniquement, dans les huit langues) : derrière un proxy inverse à vous sur le même ordinateur, un échec est compté sur la dernière adresse de `X-Forwarded-For` et non sur le proxy, pour que les jetons erronés d'une personne ne bloquent pas tout le monde. Cela ne change que ce comptage : une requête qui passe par un proxy n'est toujours jamais traitée comme cet ordinateur.
+
 ## [1.7.7]
 
 ### Ajouté

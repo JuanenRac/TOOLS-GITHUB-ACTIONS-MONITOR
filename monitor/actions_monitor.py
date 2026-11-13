@@ -95,7 +95,7 @@ DEFAULTS = {
     "quota": {"billing_api": False, "warn_percent": 75, "alert_percent": 90, "default_runner": "linux"},
     "session_guard": True,         # the page asks for a one-use token before it changes a setting or confirms an action
     "discovery": {"events": True, "suggest_groups": True, "auto_frequency": False, "hide": []},
-    "listen": {"network": False, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "tls_cert_file": "", "tls_key_file": "", "secure_cookie": False, "proxy_public_host": "", "max_failed_attempts": 10, "query_access": True},     # OFF: only this computer. On: a private address, with an access token for every request
+    "listen": {"network": False, "trusted_proxy": False, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "tls_cert_file": "", "tls_key_file": "", "secure_cookie": False, "proxy_public_host": "", "max_failed_attempts": 10, "query_access": True},     # OFF: only this computer. On: a private address, with an access token for every request
     "github_token": {"enabled": False, "store": "auto"},       # OFF: the monitor uses your own `gh login`. On: a token kept in the store of the system (secretstore.py)
     "github_actions": {"enabled": False, "allowed": ["rerun_failed", "cancel"], "merge_method": "squash"},      # OFF: actions on GitHub, each one confirmed on its own (ghactions.py)
     "act": {"enabled": False, "allowed": [], "timeout_seconds": 900, "allow_symlinks": False},
@@ -1375,7 +1375,7 @@ class Handler(BaseHTTPRequestHandler):
         query_token = (parse_qs(self.path.partition("?")[2]).get("access") or [""])[0]
         if query_token and not localguard.query_token_counts(self.command, self.path, LIVE_CONFIG or DEFAULTS):      # deprecated: only the first visit of a page, and only while listen.query_access is on
             query_token = ""
-        peer = str(self.client_address[0])
+        peer = localguard.client_key(self.client_address, self.headers)
         if not localguard.access_ok(self.headers, query_token):      # the token is judged FIRST: behind a proxy on this machine everybody shares one address, and the owner with the right token must get in
             if localguard.is_locked(peer):      # too many wrong tokens from this address: refused for a while
                 self.json_reply({"error": "locked"}, 429)
@@ -1403,7 +1403,7 @@ class Handler(BaseHTTPRequestHandler):
         if not localguard.local_request_ok(self.headers, self.server.server_address[1]):
             self.json_reply({"error": "forbidden"}, 403)
             return
-        peer = str(self.client_address[0])
+        peer = localguard.client_key(self.client_address, self.headers)
         if localguard.is_locked(peer):
             self.json_reply({"error": "locked"}, 429)
             return
@@ -2453,7 +2453,7 @@ def main():
             except (OSError, ValueError, ssl.SSLError) as error:
                 print(i18n.t("mon.tls_failed", error=str(error)[:200]))
                 return 1
-        localguard.configure(True, listen["host"], access_token, listen["allowed_hosts"], secure=tls_ctx is not None or tls["secure_cookie"], proxy_host=listen["proxy_public_host"])
+        localguard.configure(True, listen["host"], access_token, listen["allowed_hosts"], secure=tls_ctx is not None or tls["secure_cookie"], proxy_host=listen["proxy_public_host"], trusted_proxy=listen["trusted_proxy"])
         LIVE_CONFIG["session_guard"] = True      # the one-use token of the page is not optional on the network
     for port in range(args.port, args.port + 10):
         try:

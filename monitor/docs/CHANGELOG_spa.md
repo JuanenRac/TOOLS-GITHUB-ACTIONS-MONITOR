@@ -7,6 +7,12 @@
 
 Versión de la propia herramienta (monitor + centinela + herramientas por lotes), con su propio semver. La fuente es el CHANGELOG.md en inglés; este fichero lleva las mismas versiones y secciones.
 
+## [Unreleased]
+
+### Añadido
+
+- **`listen.trusted_proxy`** (apagado por defecto, solo local, en los ocho idiomas): detrás de un proxy inverso propio en el mismo equipo, un intento fallido se cuenta contra la última dirección de `X-Forwarded-For` en vez de contra el proxy, para que los tokens erróneos de una persona no bloqueen a todos. Solo cambia ese recuento: una petición que llega por un proxy sigue sin tratarse nunca como este equipo.
+
 ## [1.7.7]
 
 ### Añadido

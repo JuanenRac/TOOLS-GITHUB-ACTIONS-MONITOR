@@ -60,3 +60,5 @@ Con `otlp.enabled` attivo e un `otlp.endpoint` (HTTPS, o HTTP su questo computer
 - **Il tuo token** è conservato nell'archivio del sistema se esiste; il file semplice (permessi 600) è l'archivio più debole. Va solo a `gh`, mai ad `act` né ai tuoi comandi. `--doctor` mostra l'archivio, mai il token.
 - **Combinazioni da evitare** (`--doctor` le nomina): modalità rete su tutte le interfacce; azioni dell'IA che eseguono con la modalità rete attiva; `act` con la modalità rete attiva; il token in un file semplice.
 - Il server MCP parla solo su ingresso e uscita standard; non metterlo mai dietro una porta di rete.
+
+`listen.trusted_proxy` (disattivato per impostazione predefinita): solo se un reverse proxy TUO sullo stesso computer è l'unico ingresso. I tentativi falliti vengono allora contati sull'ultimo indirizzo di `X-Forwarded-For` (quello che aggiunge il tuo proxy) e non sul proxy; una richiesta che passa da un proxy non è comunque mai trattata come questo computer. Se qualcun altro può raggiungere direttamente il monitor, lascialo spento.

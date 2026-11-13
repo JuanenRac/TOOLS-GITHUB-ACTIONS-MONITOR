@@ -7,6 +7,12 @@
 
 Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem Semver. Die Quelle ist das englische CHANGELOG.md; diese Datei enthält dieselben Versionen und Abschnitte.
 
+## [Unreleased]
+
+### Hinzugefügt
+
+- **`listen.trusted_proxy`** (standardmäßig aus, nur lokal, in den acht Sprachen): Hinter einem eigenen Reverse-Proxy auf demselben Computer wird ein Fehlversuch gegen die letzte Adresse von `X-Forwarded-For` statt gegen den Proxy gezählt, damit falsche Tokens einer Person nicht alle aussperren. Es ändert nur diese Zählung: Eine Anfrage über einen Proxy gilt weiterhin nie als dieser Computer.
+
 ## [1.7.7]
 
 ### Hinzugefügt

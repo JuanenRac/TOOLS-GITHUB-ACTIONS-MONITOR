@@ -60,3 +60,5 @@ Avec `otlp.enabled` activé et un `otlp.endpoint` (HTTPS, ou HTTP sur cet ordina
 - **Votre propre jeton** est gardé dans le magasin du système s'il existe ; le simple fichier (droits 600) est le magasin le plus faible. Il va à `gh` seulement, jamais à `act` ni à vos commandes. `--doctor` montre le magasin, jamais le jeton.
 - **Combinaisons à éviter** (`--doctor` les nomme) : mode réseau sur toutes les interfaces ; actions de l'IA qui s'exécutent avec le mode réseau actif ; `act` avec le mode réseau actif ; le jeton dans un simple fichier.
 - Le serveur MCP parle uniquement sur l'entrée et la sortie standard ; ne le placez jamais derrière un port réseau.
+
+`listen.trusted_proxy` (désactivé par défaut) : seulement si un proxy inverse À VOUS sur le même ordinateur est la seule entrée. Les échecs sont alors comptés sur la dernière adresse de `X-Forwarded-For` (celle qu'ajoute votre proxy) et non sur le proxy ; une requête qui passe par un proxy n'est toujours jamais traitée comme cet ordinateur. Si quelqu'un d'autre peut joindre directement le moniteur, laissez-le désactivé.
