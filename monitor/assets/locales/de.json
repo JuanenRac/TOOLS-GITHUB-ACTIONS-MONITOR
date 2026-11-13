@@ -968,6 +968,7 @@
  "mon.started": "GitHub-Actions-Monitor: {url} (Strg+C beendet ihn; er lauscht nur auf diesem PC; binde ihn niemals an 0.0.0.0: er hat keine Anmeldung)",
  "mon.tls_failed": "Zertifikat oder Schlüssel für TLS konnten nicht verwendet werden ({error}); der Monitor startet nicht stattdessen mit unverschlüsseltem HTTP.",
  "mon.version": "GitHub Actions v{version}",
+ "mon.watchdog_restart": "WÄCHTER: die Aktualisierungsschleife war {reason} in Phase {phase}; sie wird neu gestartet",
  "mon.webhook": "Webhook: {status}",
  "parte.a10": "Actions- und Release-Oberfläche · {title}: {n}.",
  "parte.a10_paused": "Der kalte A10-Scan pausiert wegen der API-Quote ({remaining} übrig, {needed} nötig). Parameter: max_repos_per_tick, refresh_seconds, min_rate_remaining und min_rate_factor.",

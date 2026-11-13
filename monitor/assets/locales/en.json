@@ -968,6 +968,7 @@
  "mon.started": "GitHub Actions monitor: {url} (Ctrl+C stops it; it only listens on this PC; never bind it to 0.0.0.0: it has no login)",
  "mon.tls_failed": "The TLS certificate or key could not be used ({error}); the monitor does not start on plain HTTP instead.",
  "mon.version": "GitHub Actions v{version}",
+ "mon.watchdog_restart": "WATCHDOG: the refresh loop was {reason} in phase {phase}; it is started again",
  "mon.webhook": "Webhook: {status}",
  "parte.a10": "Actions and releases surface · {title}: {n}.",
  "parte.a10_paused": "A10 cold scan paused for the API quota ({remaining} left, {needed} needed). Knobs: max_repos_per_tick, refresh_seconds, min_rate_remaining and min_rate_factor.",

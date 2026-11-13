@@ -968,6 +968,7 @@
  "mon.started": "Monitor de GitHub Actions: {url} (Ctrl+C lo detiene; solo escucha en este PC; nunca lo enlaces a 0.0.0.0: no tiene inicio de sesión)",
  "mon.tls_failed": "No se pudo usar el certificado o la clave TLS ({error}); el monitor no arranca en HTTP sin cifrar en su lugar.",
  "mon.version": "GitHub Actions v{version}",
+ "mon.watchdog_restart": "VIGILANTE: el bucle de refresco estaba {reason} en la fase {phase}; se vuelve a iniciar",
  "mon.webhook": "Webhook: {status}",
  "parte.a10": "Superficie de Actions y releases · {title}: {n}.",
  "parte.a10_paused": "El escaneo frío A10 está en pausa por la cuota de la API (quedan {remaining}, hacen falta {needed}). Parámetros: max_repos_per_tick, refresh_seconds, min_rate_remaining y min_rate_factor.",

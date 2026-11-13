@@ -968,6 +968,7 @@
  "mon.started": "GitHub Actions モニター: {url}（Ctrl+C で停止。この PC でのみ待ち受けます。ログインがないため 0.0.0.0 には絶対にバインドしないでください）",
  "mon.tls_failed": "TLS の証明書または鍵を使用できませんでした（{error}）。代わりに暗号化なしの HTTP で起動することはありません。",
  "mon.version": "GitHub Actions v{version}",
+ "mon.watchdog_restart": "ウォッチドッグ:更新ループは「{phase}」の段階で {reason} でした。再起動します",
  "mon.webhook": "Webhook: {status}",
  "parte.a10": "Actions とリリースの対象範囲 · {title}: {n} 件。",
  "parte.a10_paused": "API の割り当てのため A10 のコールドスキャンを一時停止中です（残り {remaining}、必要 {needed}）。設定: max_repos_per_tick、refresh_seconds、min_rate_remaining、min_rate_factor。",

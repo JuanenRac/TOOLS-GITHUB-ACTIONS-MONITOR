@@ -1281,7 +1281,7 @@ def watchdog_restart(config, reason):
             cycle_watch.dump_stacks(log)
     except Exception as error:   # noqa: BLE001
         WATCH.log_failed(error)
-    print(f"WATCHDOG: the refresh loop was {reason} in phase {WATCH.phase_name}; it is started again", flush=True)
+    print(i18n.t("mon.watchdog_restart", reason=reason, phase=WATCH.phase_name), flush=True)
     WATCH.restarts += 1
     WATCH.fail(f"{reason} in phase {WATCH.phase_name}")
     return start_loop(config)

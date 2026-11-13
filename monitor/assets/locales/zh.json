@@ -968,6 +968,7 @@
  "mon.started": "GitHub Actions 监视器：{url}（Ctrl+C 停止；仅监听本机；切勿绑定到 0.0.0.0：它没有登录验证）",
  "mon.tls_failed": "无法使用 TLS 证书或密钥（{error}）；监视器不会改用未加密的 HTTP 启动。",
  "mon.version": "GitHub Actions v{version}",
+ "mon.watchdog_restart": "看门狗:刷新循环在“{phase}”阶段处于 {reason} 状态,正在重新启动",
  "mon.webhook": "Webhook：{status}",
  "parte.a10": "Actions 与发布面 · {title}：{n}。",
  "parte.a10_paused": "A10 冷扫描因 API 配额而暂停（剩余 {remaining}，需要 {needed}）。参数：max_repos_per_tick、refresh_seconds、min_rate_remaining 和 min_rate_factor。",

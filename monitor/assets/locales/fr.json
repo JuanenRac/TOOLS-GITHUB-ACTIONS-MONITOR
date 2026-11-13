@@ -968,6 +968,7 @@
  "mon.started": "Moniteur GitHub Actions : {url} (Ctrl+C l'arrête ; il n'écoute que sur ce PC ; ne le liez jamais à 0.0.0.0 : il n'a pas d'authentification)",
  "mon.tls_failed": "Le certificat ou la clé TLS n'ont pas pu être utilisés ({error}) ; le moniteur ne démarre pas en HTTP non chiffré à la place.",
  "mon.version": "GitHub Actions v{version}",
+ "mon.watchdog_restart": "CHIEN DE GARDE : la boucle de rafraîchissement était {reason} en phase {phase} ; elle est relancée",
  "mon.webhook": "Webhook : {status}",
  "parte.a10": "Surface Actions et releases · {title} : {n}.",
  "parte.a10_paused": "Le scan froid A10 est en pause à cause du quota de l'API ({remaining} restants, {needed} nécessaires). Paramètres : max_repos_per_tick, refresh_seconds, min_rate_remaining et min_rate_factor.",
