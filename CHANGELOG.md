@@ -18,6 +18,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Added
 
+- **Storage layer** (`src/github_actions_monitor/storage/`): a `Storage` interface (configuration, sentinel state, the event feed, analytics, small named documents and the global records of users, their accounts and sessions) that keeps the rule "a write is atomic, a damaged item reads as empty" for every backend. `FileStorage` is the first backend and keeps the layout of `accounts/<id>/` exactly as before (and the flat installation next to the launchers): the same files with the same names, written through a temporary file that is flushed and renamed. `create_storage` is the one place that picks the backend; the lite edition always gets the file backend.
+
+- Backups of a storage that any backend can restore: one `.zip` with a dump and a manifest of counts, size and SHA-256; the restore verifies the copy first and refuses to write over a storage that already holds accounts unless it is forced.
+
 - `tools/migrate_layout.py` for a folder that was a flat installation: a dry run by default; `--apply` copies your configuration to `layout_backup_<stamp>/config/` and MOVES (never deletes, never overwrites) the old modules, page, examples and `locales/` to `layout_backup_<stamp>/old_code/`. `--doctor` warns while such leftovers exist. `MIGRATING.md` describes it in the eight languages.
 
 - **The page says when it is out of step with the monitor**: the bottom bar shows "data from Ns ago" (the time since the last good answer) and turns red, with the connection lamp, after 60 seconds; a failed request shows "retrying in N s" and retries by itself; a request that hangs is cut after 15 seconds; a watchdog asks again when the page is late and nothing is on the way, and coming back to the tab asks at once. Data that stop changing for two minutes (longer in low mode) count as old. When the page comes back from a gap it asks again for the sentinels, the history and the mode.
