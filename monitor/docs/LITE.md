@@ -27,3 +27,7 @@ The short Settings page has the account (`github_owner`), the repositories and e
 ## The command line
 
 `python monitor_cli.py status --lite`, `doctor --lite` and `health --lite` ask the lite monitor on port 8766 (see [CLI.md](CLI.md)); the commands that need accounts or sentinels are refused. The page has the status bar at its foot and the sortable tables too.
+
+## Storage
+
+The lite edition keeps plain files only: no database, no retention job, and none of the options of [STORAGE.md](STORAGE.md).

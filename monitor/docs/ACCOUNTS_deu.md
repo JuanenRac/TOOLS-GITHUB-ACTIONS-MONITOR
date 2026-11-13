@@ -66,3 +66,7 @@ Für mehrere Bildschirme öffne ein Fenster pro Ansicht, zum Beispiel `?view=now
 - Mehrere Konten sind mehrere Prozesse: Jeder liest GitHub für sich, sodass das Kontingent vom verwendeten Login geteilt wird. Beobachte es in den Karten und senke bei Bedarf `refresh_seconds` oder `max_workers` pro Konto.
 - Die Prüfungen, die einen echten Browser, echte GitHub-Konten und einen echten Webhook-Tunnel brauchen, führst du selbst aus; die Tests nutzen Platzhalter für den Monitor eines Kontos und rufen GitHub nie auf.
 - Eine spätere Version holt die Konten in einen Prozess; Ordneraufbau und API von oben bleiben.
+
+## Wo ein Konto seinen Zustand speichert
+
+Standardmäßig in Dateien unter `accounts/<id>/`. Ein Konto kann ihn stattdessen in einer Datenbank halten: `"storage": {"backend": "sqlite"}` in seiner eigenen Konfiguration gibt ihm `accounts/<id>/storage.sqlite3`, und nur der Prozess dieses Kontos schreibt sie. Die Konfiguration des Kontos bleibt eine JSON-Datei. Siehe [STORAGE_deu.md](STORAGE_deu.md).

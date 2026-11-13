@@ -27,3 +27,7 @@ Les Réglages courts contiennent le compte (`github_owner`), les dépôts et éc
 ## La ligne de commande
 
 `python monitor_cli.py status --lite`, `doctor --lite` et `health --lite` interrogent le moniteur lite sur le port 8766 (voir [CLI_fra.md](CLI_fra.md)) ; les commandes qui demandent des comptes ou des sentinelles sont refusées. La page a aussi la barre d'état au pied et les tableaux triables.
+
+## Stockage
+
+L'édition lite ne garde que de simples fichiers : pas de base de données, pas de tâche de conservation et aucune des options de [STORAGE_fra.md](STORAGE_fra.md).

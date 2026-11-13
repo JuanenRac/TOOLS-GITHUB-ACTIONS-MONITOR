@@ -17,10 +17,10 @@ import tempfile
 from pathlib import Path
 
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
-ORDER = ("python", "gh", "login", "quota", "network", "folder", "port", "docker", "rich", "textual", "targets", "token", "exposure", "risks", "backend", "degraded", "credential", "timezone", "github_app", "layout")
+ORDER = ("python", "gh", "login", "quota", "network", "folder", "port", "docker", "rich", "textual", "targets", "token", "exposure", "risks", "backend", "degraded", "credential", "timezone", "github_app", "layout", "storage", "retention")
 FIX = {"python": "https://www.python.org/downloads/", "gh": "winget install --id GitHub.cli   |   brew install gh   |   sudo apt install gh", "login": "gh auth login",
        "quota": "gh api rate_limit", "network": "gh api rate_limit", "folder": "", "port": "python actions_monitor.py --port 8800", "docker": "", "rich": "pip install rich",
-       "textual": "pip install textual", "targets": "python actions_monitor.py --init-catalog", "token": "", "exposure": "", "risks": "", "backend": "", "degraded": "", "credential": "", "timezone": "", "github_app": "", "layout": "python tools/migrate_layout.py"}
+       "textual": "pip install textual", "targets": "python actions_monitor.py --init-catalog", "token": "", "exposure": "", "risks": "", "backend": "", "degraded": "", "credential": "", "timezone": "", "github_app": "", "layout": "python tools/migrate_layout.py", "storage": "python tools/migrate_storage.py --from file --to sqlite", "retention": ""}
 
 
 def default_runner(args, timeout=20):
@@ -105,6 +105,8 @@ def run(runner=default_runner, folder=HERE, ports=(8765, 8766), python=None, con
     out["timezone"] = time_zone(config)
     out["github_app"] = github_app_check(config)
     out["layout"] = layout_check(folder)
+    out["storage"] = storage_check(config, folder)
+    out["retention"] = retention_check(config, folder)
     return [{"id": name, "status": out[name][0], "detail": out[name][1], "fix": FIX[name] if out[name][0] != "ok" else ""} for name in ORDER]
 
 
@@ -124,6 +126,83 @@ def layout_check(folder=HERE):
     if not left:
         return "ok", "src/ + assets/"
     return "warn", f"{len(left)}: " + ", ".join(p.as_posix() for p in left[:5])
+
+
+def _account_configs(config, folder):
+    """[(account id or '', its configuration)] the storage and the retention checks look at: every enabled account of an accounts/ layout, else the one configuration."""
+    from github_actions_monitor.accounts import accounts
+    try:
+        ids = accounts.enabled_accounts(folder) if accounts.layout(folder) == "accounts" else []
+    except Exception:       # noqa: BLE001 - the doctor must always answer
+        ids = []
+    out = []
+    for account_id in ids:
+        try:
+            cfg = json.loads(accounts.config_path(account_id, folder).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            cfg = {}
+        out.append((account_id, cfg if isinstance(cfg, dict) else {}))
+    return out or [("", config)]
+
+
+def storage_check(config, folder=HERE):
+    """("ok" | "warn", detail): the backend of the state. Files = ok. SQLite = the database exists, passes SQLite's integrity check and has a schema this version understands (read only: nothing is
+    created or migrated here)."""
+    from github_actions_monitor.accounts import accounts
+    from github_actions_monitor.storage import factory
+    problems, backends = [], set()
+    for account_id, cfg in _account_configs(config, folder):
+        settings = factory.settings(cfg.get("storage"))
+        backends.add(settings["backend"])
+        if settings["backend"] != "sqlite":
+            continue
+        from github_actions_monitor.storage import sqlite_storage
+        path = Path(settings["path"]) if settings["path"] else (accounts.account_dir(account_id, folder) / factory.DB_NAME if account_id else Path(folder) / factory.DB_NAME)
+        info = sqlite_storage.inspect(path)
+        label = account_id or "default"
+        if not info["exists"]:
+            problems.append(f"{label}: no database yet")
+        problems += [f"{label}: {p}" for p in info["problems"]]
+    detail = "+".join(sorted(backends)) or "file"
+    return ("warn", detail + " - " + "; ".join(problems[:3])) if problems else ("ok", detail)
+
+
+def _folder_bytes(path):
+    total = 0
+    try:
+        for item in Path(path).rglob("*"):
+            if item.is_file():
+                total += item.stat().st_size
+    except OSError:
+        pass
+    return total
+
+
+def retention_check(config, folder=HERE, env=None):
+    """("ok" | "warn", detail): the size of the events of every account against `retention.warn_events_mb`, and, for a monitor that runs as a service, whether a `retention` block exists at all
+    (without one the defaults apply, which is fine, but a service that is left alone for months should say what it keeps). Read only."""
+    from github_actions_monitor.accounts import accounts
+    from github_actions_monitor.storage import factory, retention
+    service = retention.service_mode(config, env)
+    notes, biggest = [], 0
+    for account_id, cfg in _account_configs(config, folder):
+        cfg_r = retention.settings(cfg)
+        sqlite = factory.settings(cfg.get("storage"))["backend"] == "sqlite"
+        base = accounts.account_dir(account_id, folder) if account_id else Path(folder)
+        if sqlite:
+            size = (base / "storage.sqlite3").stat().st_size if (base / "storage.sqlite3").is_file() else 0
+        else:
+            size = (_folder_bytes(base / "events") if account_id else sum(p.stat().st_size for p in Path(folder).glob("events_monitor.jsonl") if p.is_file()))
+        biggest = max(biggest, size)
+        label = account_id or "default"
+        if size > cfg_r["warn_events_mb"] * 1024 * 1024:
+            notes.append(f"{label}: {size // (1024 * 1024)} MB > {cfg_r['warn_events_mb']} MB")
+        if cfg_r["enabled"] is False and service:
+            notes.append(f"{label}: off")
+        elif service and not retention.configured(cfg):
+            notes.append(f"{label}: not configured")
+    detail = f"{biggest // 1024} KB" if biggest < 1024 * 1024 else f"{biggest // (1024 * 1024)} MB"
+    return ("warn", detail + " - " + "; ".join(notes[:3])) if notes else ("ok", detail)
 
 
 def github_app_check(config):

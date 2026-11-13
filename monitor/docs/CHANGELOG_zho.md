@@ -15,9 +15,25 @@
 
 - 指南中的命令(`python read_report.py`、`python actions_monitor.py --doctor`、`python monitor_cli.py status` 等)继续有效:产品文件夹里保留了同名的小型入口文件,因此已按路径注册的钩子和 MCP 服务器也继续工作。发布 zip 保持原文件夹名,现在包含 `src/`、`assets/` 和 `tools/`。
 
+- **路线图说明 1.8.0 包含什么以及之后每个版本将带来什么**:已在主分支的内容、已完成等待合并的内容、仍在收尾的内容,以及按实施顺序排列的从 1.8.2 到 2.0.0 的计划,共八种语言。
+
 ### 新增
 
 - `tools/migrate_layout.py`,用于原本是平铺安装的文件夹:默认试运行;`--apply` 会把你的配置复制到 `layout_backup_<时间戳>/config/`,并把旧模块、旧网页、旧示例和 `locales/` 移动(绝不删除、绝不覆盖)到 `layout_backup_<时间戳>/old_code/`。只要还有此类遗留,`--doctor` 就会提醒。`MIGRATING.md` 以八种语言说明。
+
+- **存储层**(`src/github_actions_monitor/storage/`):一个 `Storage` 接口(配置、哨兵状态、事件流、分析、小型文档,以及用户、其账户和会话的全局记录),对每种后端都遵守“写入是原子的,损坏的项目按空处理”的规则。第一个后端 `FileStorage` 完全保持原来的 `accounts/<id>/` 布局(以及启动器旁边的扁平安装):同样的文件、同样的名称,通过先刷到磁盘再改名的临时文件写入。`create_storage` 是唯一选择后端的地方;精简版始终使用文件。
+
+- 任何后端都能恢复的存储备份:一个 `.zip`,包含转储和清单(账户数、大小、SHA-256);恢复前先校验副本,并且除非强制,否则拒绝写入已有账户的存储。
+
+- **SQLite 后端**(可选,默认关闭):同样的数据放进数据库,每个账户一个文件(`accounts/<id>/storage.sqlite3`),只有该账户的进程会写它。WAL 日志和等待时间,每次写入都是短事务,带版本的架构迁移与版本号更新在同一个事务中执行(被中断的迁移让数据库保持原样;更新版本的数据库会被拒绝),按时间为账户事件建立索引,中途被终止的进程在下次启动时恢复。迁入数据库的有:事件流、事件流已通报的内容、分析、哨兵状态、静音设置和更新提示;配置仍是 JSON 文件,缓存和日志仍是文件。精简版没有此选项。
+
+- 整个安装共用一个数据库(多个账户和进程使用同一个文件)已经备好并经过测试:WAL、等待时间、两个进程同时运行周期,以及页面通过 HTTP 应答而不必等待写入方。
+
+- `tools/migrate_storage.py` 在文件与 SQLite 之间双向迁移状态:默认试运行;`--apply` 一步复制每个账户,然后比较每一项和每条事件;你的文件绝不会被修改或删除;被中断的运行让每个账户要么完整、要么保持原样,再次运行同一命令即可继续。`tools/backup_storage.py` 为两种后端创建、检查和恢复备份。
+
+- **保留与轮转**(完整版):`retention.events_days`(90)和 `retention.analytics_days`(180)决定事件和分析历史日期的保留时长;`retention.mode` 为 `archive`(默认;旧事件先写入账户 `events/archive/` 中的 `.gz`,再从事件流中移除)或 `delete`;`retention.enabled` 是开关,`retention.interval_hours`(24)决定在刷新结束时多久快速执行一遍。每次清理都会留下一行审计记录(时间、删除和保留的事件数、归档文件、分析天数、错误)。清理绝不会改动配置、哨兵状态、静音设置或没有时间的事件。`retention.events_max_kb`(512,与以往相同)是事件流文件的大小上限。这些设置在“文件夹与文件”标签页;精简版没有。
+
+- `--doctor` 新增两项检查:存储(SQLite 数据库存在、通过完整性检查、架构为当前版本所能理解;只读)和保留(每个账户事件的大小与 `retention.warn_events_mb` 比较,并对没有保留区块却作为服务运行的监视器发出警告)。
 
 - **团队模式：用户、角色与会话**（`src/github_actions_monitor/security/auth.py`、`auth_http.py`、`auth_cli.py`；通过 `auth.enabled` 默认关闭，因此一个人使用时毫无察觉）：第一位管理员（在 `/login` 或控制台创建，只能在运行监视器的电脑上、只能一次）存在后，每个请求都需要会话。角色 `viewer`（只读）、`maintainer`（还可静音、确认、更改工作模式）和 `admin`（还可更改设置、用户以及一切可触及 GitHub 的内容）；无人列出的路由对除 admin 外的所有人关闭。每个用户有可查看的账户：用 `?account=`、`X-Account-Id` 或导出请求其他账户会返回 403。密码以加盐的 scrypt 哈希保存；会话是 HttpOnly、SameSite=Strict（HTTPS 时加 Secure）的 Cookie，每个 POST 都带 CSRF 令牌，或是供脚本和应用使用的 Bearer 令牌（`auth.allow_bearer`）；错误密码达到 `auth.max_failed_logins` 次后用户被锁定，每个地址有请求频率限制，新的密码、角色或状态会结束该用户的会话，并且始终保留一位有效管理员。端点 `/api/auth/login|logout|me|bootstrap|password`、`/api/auth/users` 和 `/api/auth/audit` 以 `{"error", "code"}` 返回错误；`auth_audit.jsonl` 记录登录、锁定、被拒绝的请求和用户变更，不含任何机密。lite 版从不登录，页面的一次性令牌仍然适用，`python -m github_actions_monitor.security.auth_cli` 可找回丢失的管理员密码。七项设置（`auth.*`）及其八种语言的帮助，以及八种语言的 `docs/ADVANCED.md` 一节；`tests/test_auth.py` 在真实服务器上覆盖规则、各类路由的角色、账户之间的范围、Cookie、CSRF、Bearer、锁定和审计。
 

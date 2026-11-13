@@ -57,3 +57,7 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python monitor_cli
 ## Il token di accesso nella riga di comando
 
 In modalità di rete il token si legge da `MONITOR_ACCESS_TOKEN`, poi `MONITOR_TOKEN`, poi dalla prima riga di `--token-file FILE` (tieni quel file leggibile solo da te: su un sistema con modi di file il comando avvisa se altri possono leggerlo) e infine da `--token`, che compare nell'elenco dei processi e per questo stampa un avviso su stderr.
+
+## Gli strumenti di archiviazione
+
+`python tools/migrate_storage.py` sposta lo stato tra file e SQLite, e `python tools/backup_storage.py` crea, verifica e ripristina copie dell'uno o dell'altro (entrambi sono descritti in [STORAGE_ita.md](STORAGE_ita.md)). `--doctor` ha due controlli per essi: l'archiviazione e la conservazione.

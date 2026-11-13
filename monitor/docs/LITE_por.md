@@ -27,3 +27,7 @@ As Definições curtas têm a conta (`github_owner`), os repositórios e ecossis
 ## A linha de comandos
 
 `python monitor_cli.py status --lite`, `doctor --lite` e `health --lite` interrogam o monitor lite na porta 8766 (ver [CLI_por.md](CLI_por.md)); os comandos que precisam de contas ou sentinelas são recusados. A página também tem a barra de estado ao pé e as tabelas ordenáveis.
+
+## Armazenamento
+
+A edição lite guarda apenas ficheiros simples: sem base de dados, sem tarefa de retenção e sem nenhuma das opções de [STORAGE_por.md](STORAGE_por.md).

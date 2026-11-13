@@ -403,3 +403,30 @@ class SqliteStorage(base.Storage):
             copy.close()
         os.replace(tmp, dest)
         return dest.stat().st_size
+
+
+def inspect(path):
+    """Looks at a database WITHOUT changing it (opened read only, no migration, nothing created): {"exists", "schema_version", "target", "problems": [...], "bytes"}. For the doctor."""
+    path = Path(path)
+    info = {"exists": path.is_file(), "schema_version": 0, "target": SCHEMA_VERSION, "problems": [], "bytes": 0}
+    if not info["exists"]:
+        return info
+    info["bytes"] = path.stat().st_size
+    try:
+        conn = sqlite3.connect(f"{path.resolve().as_uri()}?mode=ro", uri=True, timeout=2.0)
+    except sqlite3.Error as error:
+        info["problems"].append(str(error)[:100])
+        return info
+    try:
+        row = conn.execute("SELECT value FROM meta WHERE key = 'schema_version'").fetchone()
+        info["schema_version"] = int(row[0]) if row else 0
+        result = [r[0] for r in conn.execute("PRAGMA integrity_check").fetchall()]
+        if result != ["ok"]:
+            info["problems"].append("integrity check: " + "; ".join(result[:2]))
+        if info["schema_version"] > SCHEMA_VERSION:
+            info["problems"].append(f"schema {info['schema_version']} is newer than this version understands ({SCHEMA_VERSION})")
+    except sqlite3.Error as error:
+        info["problems"].append(str(error)[:100])
+    finally:
+        conn.close()
+    return info

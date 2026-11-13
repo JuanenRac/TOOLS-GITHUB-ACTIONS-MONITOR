@@ -57,3 +57,7 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python monitor_cli
 ## Das Zugriffstoken in der Befehlszeile
 
 Im Netzwerkmodus wird das Token aus `MONITOR_ACCESS_TOKEN`, dann `MONITOR_TOKEN`, dann der ersten Zeile von `--token-file DATEI` gelesen (halte diese Datei nur für dich lesbar: auf einem System mit Dateimodi warnt der Befehl, wenn andere sie lesen können) und zuletzt aus `--token`, das in der Prozessliste erscheint und deshalb eine Warnung auf stderr ausgibt.
+
+## Die Speicher-Werkzeuge
+
+`python tools/migrate_storage.py` verschiebt den Zustand zwischen Dateien und SQLite, und `python tools/backup_storage.py` erstellt, prüft und stellt Sicherungen von beiden wieder her (beide sind in [STORAGE_deu.md](STORAGE_deu.md) beschrieben). `--doctor` hat dafür zwei Prüfungen: Speicher und Aufbewahrung.

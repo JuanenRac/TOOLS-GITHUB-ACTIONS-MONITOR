@@ -57,3 +57,7 @@ O `health` distingue três coisas: o monitor não responde (2), o acesso ao GitH
 ## O token de acesso na linha de comandos
 
 No modo de rede o token é lido de `MONITOR_ACCESS_TOKEN`, depois de `MONITOR_TOKEN`, depois da primeira linha de `--token-file FICHEIRO` (mantenha esse ficheiro legível só por si: num sistema com modos de ficheiro o comando avisa se outros o puderem ler) e por fim de `--token`, que aparece na lista de processos e por isso imprime um aviso no stderr.
+
+## As ferramentas de armazenamento
+
+`python tools/migrate_storage.py` move o estado entre ficheiros e SQLite, e `python tools/backup_storage.py` faz, verifica e restaura cópias de qualquer um deles (ambas estão descritas em [STORAGE_por.md](STORAGE_por.md)). O `--doctor` tem duas verificações para elas: o armazenamento e a retenção.

@@ -30,3 +30,7 @@ Ein Workflow, der auf demselben Commit FEHLSCHLUG und dann BESTAND (oder dessen 
 ## Wenn die Verbindung verloren geht
 
 Scheitern alle Lesungen eines Zyklus an einem Verbindungsproblem (nicht an Login oder Kontingent), behält die Seite das letzte Bild und zeigt ein rotes Banner `keine Verbindung seit HH:MM`. Nichts löst eine Ausnahme aus; der Monitor macht von selbst weiter und schreibt je einmal ein `offline`- und ein `online`-Ereignis (benachrichtigbar). `ghamon_offline` ist währenddessen 1.
+
+## Wie lange der Verlauf aufbewahrt wird
+
+Neben `keep_days` des Analyseblocks entfernt der Aufbewahrungsdurchlauf die Tage des Verlaufs, die älter als `retention.analytics_days` sind (standardmäßig 180); die Messwerte selbst begrenzt `max_samples`. Siehe [STORAGE_deu.md](STORAGE_deu.md).

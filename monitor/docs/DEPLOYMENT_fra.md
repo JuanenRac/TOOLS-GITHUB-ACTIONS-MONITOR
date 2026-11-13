@@ -102,3 +102,7 @@ Dès qu'un proxy est déclaré, rien de ce qui arrive sur le port principal ne c
 ## Beaucoup de dépôts
 
 Les lectures conditionnelles (`cache.etag`) font qu'un dépôt inchangé ne coûte aucun quota ; `mode: lite`, `ecosystems`, `exclude` et `max_workers` limitent le travail ; le webhook entrant supprime l'interrogation des dépôts qui envoient des événements. `discover_limit` est le nombre maximal de dépôts listés pour un compte (1000 par défaut).
+
+## Tourner pendant des mois : stockage et conservation
+
+Gardez `accounts/` (ou la base) sur un volume qui survit au conteneur et faites une sauvegarde avec `python tools/backup_storage.py backup FICHIER.zip --backend file` (ou `sqlite`) avant une mise à jour. Par défaut, un court passage supprime les événements de plus de 90 jours et les analyses de plus de 180 jours ; réglez `retention` dans la configuration pour changer cela, et `MONITOR_SERVICE=1` fait traiter le moniteur comme un service par `--doctor` (qui avertit alors s'il n'y a pas de bloc `retention` ou si les événements deviennent gros). Avec SQLite, une base par compte est le défaut ; un fichier partagé est possible et décrit dans [STORAGE_fra.md](STORAGE_fra.md).

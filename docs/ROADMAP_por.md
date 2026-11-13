@@ -2,9 +2,76 @@
 
 Ideias que não couberam na versão atual, sem ordem prometida. São direções, não compromissos; uma issue ou um pull request é a melhor forma de fazer avançar uma.
 
-## Feito na 1.8.0
+## Na 1.8.0 (a próxima versão)
 
-Uma nova organização das pastas (o pacote em `src/`, a página, os exemplos e as línguas em `assets/`); a barra inferior é uma só linha e diz apenas o que as caixas de cima não dizem; o resumo para as ferramentas de IA e o registo estão de acordo com um monitor em execução; uma leitura opcional dos repositórios sossegados por GraphQL (desativada por predefinição) com a sua contabilidade; o aviso ativo a uma IA externa (desativado por predefinição, uma primeira confirmação por fornecedor, só os campos redigidos de uma lista fechada, um limite de chamadas e de custo por hora, a chave pelo nome de uma variável, e a IA nunca executa uma ação); a aplicação de terminal edita listas e mapas; e o histórico de alterações está traduzido nas oito línguas até à 1.0.0.
+Tudo o que se segue está escrito e testado; ou já está no ramo principal, ou aguarda num pull request. Nada se dá como demonstrado em serviços reais (ver «A seguir»).
+
+### Já no ramo principal
+
+- Uma nova organização das pastas (o pacote em `src/`, a página, os exemplos e as línguas em `assets/`), com uma ferramenta de migração que move uma instalação plana antiga sem apagar nada.
+- Uma camada de armazenamento atrás de uma única interface, com o suporte de ficheiros que mantém a disposição de `accounts/<id>/`, escritas atómicas e cópias de segurança que qualquer suporte pode restaurar.
+- Um suporte SQLite opcional (desativado por predefinição), uma base de dados por conta, migrações com versão, um tempo de espera configurável e ferramentas para mover o estado entre o suporte de ficheiros e o SQLite nos dois sentidos, primeiro com uma simulação.
+- O histórico de alterações está traduzido nas oito línguas até à 1.0.0 e um teste mantém-no completo.
+
+### Concluído e à espera de integração
+
+- Modo de rede: o travão de bloqueio volta a atuar antes de olhar para o token, um proxy inverso declarado nunca é tomado por este computador, as leituras remotas das definições limitam-se ao que um cliente remoto pode alterar e o guia de implementação traz a receita completa.
+- O canal para a IA é limpo campo a campo, só passam endereços do GitHub de formas fechadas e o gancho não entrega texto de registos, apenas o repositório, o workflow, o resultado e a ligação.
+- As leituras de identidade são sempre do utilizador, uma leitura é julgada por uma lista branca e o ficheiro de token da segunda conta fica dentro da pasta das contas.
+- Um teste de fumo da página num navegador real põe a CI a vermelho quando um separador se estraga ou uma função é definida duas vezes.
+- Uma barra inferior de uma só linha que diz apenas o que as caixas de cima não dizem, um resumo para as ferramentas de IA e um registo de acordo com o monitor em execução, uma página que avisa quando está dessincronizada do monitor e um som que se desbloqueia com um clique e sobrevive a um recarregamento.
+- Uma leitura opcional dos repositórios sossegados por GraphQL (desativada por predefinição) com a sua contabilidade.
+- O aviso ativo a uma IA externa (desativado por predefinição, uma primeira confirmação por fornecedor, só os campos redigidos de uma lista fechada, um limite de chamadas e de custo por hora, a chave pelo nome de uma variável, e a IA nunca executa uma ação).
+- A aplicação de terminal edita listas e mapas.
+- Modo de equipa (desativado por predefinição): utilizadores, funções (admin, maintainer, viewer) e sessões guardados no armazenamento, uma página de início de sessão, um token Bearer para clientes que não são um navegador, erros JSON estáveis e a recuperação de um administrador a partir da consola deste computador. O modo individual continua sem início de sessão e a edição lite nunca o tem.
+
+### Ainda a ser concluído
+
+- Retenção e rotação do histórico (eventos e análises durante um número de dias, apagar ou arquivar, uma linha de auditoria por passagem, um aviso de tamanho no doctor; o estado das sentinelas e a configuração nunca são tocados).
+- Uma página mais viva: ícones animados, luzes de estado cujo movimento segue o estado, respostas a passar o rato, foco e clique; tudo se desliga com movimento reduzido e é leve na edição lite.
+- Silêncios que recordam quem os definiu (exige o modo de equipa).
+
+## Previsto, por esta ordem
+
+Cada versão leva tudo o que é do seu troço do plano: nada fica pendurado de uma versão anterior e nada se adia para a seguinte. Depois da 1.8.3 e depois da 1.9.3 o produto passa por uma revisão independente e as suas conclusões fecham-se na versão de estabilização seguinte. Não há 1.8.1: utilizadores, funções e sessões chegam com a 1.8.0.
+
+### 1.8.2 - Imagem Docker oficial e modo de serviço
+
+Uma imagem em várias fases com utilizador sem privilégios, volumes para dados e configuração, variáveis de ambiente documentadas, um exemplo de compose com proxy inverso e TLS opcionais, uma unidade systemd para quem prefira a instalação clássica e uma verificação de saúde profunda que falha se o supervisor ou o ciclo de uma conta estiver bloqueado. Uma credencial que o GitHub revoga ou deixa caducar marca só essa conta como cega, lança um alerta de sistema crítico e pode ser substituída sem reiniciar o supervisor. Cópia de segurança, atualização e primeiro arranque como serviço ficam documentados; a página diz se escuta neste computador, na rede ou atrás de um proxy; a linha de comandos funciona contra um monitor remoto. A edição lite continua local. Além disso: um relatório do tempo que os jobs esperam na fila por cada runner.
+
+### 1.8.3 - Notificações por utilizador
+
+Preferências por utilizador (canal, sentinela, nível mínimo), um distribuidor que decide quem avisar segundo as preferências e as funções, canais como plug-ins simples e resumos dos alertas ainda não lidos. Além disso: um job ignorado pelos caminhos que vigia é mostrado à parte de um job vermelho.
+
+### 1.8.4 - Estabilização
+
+Sem grandes funcionalidades. Isolamento entre contas, a página, o armazenamento, início de sessão e funções, notificações, um GitHub que falha por vezes, o arranque após uma migração interrompida, a recuperação após um corte, um doctor mais amplo, os sítios que escrevem no GitHub, registos sem tokens, uma lista de verificação de segurança do modo de equipa e documentos que coincidem com o comportamento. A série só continua até à 1.8.9 se for preciso.
+
+### 1.9.0 - Uma pontuação
+
+Recolhedores de métricas por conta e por sentinela (taxa de sucesso, duração, tempo de recuperação, débito), um motor de pontuação com limiares que pode alterar, uma tendência face ao período anterior, instantâneos guardados no armazenamento, um widget de pontuação com minigráfico, alertas quando a pontuação desce e um verbo da linha de comandos que a imprime.
+
+### 1.9.1 - Sentinela de segurança
+
+A terceira sentinela: Dependabot, análise de código, análise de segredos, proteção de ramos, permissões dos workflows e proprietários do código, com regras por tipo de sinal, o mesmo filtro no separador Alertas e uma penalização na pontuação por alertas críticos abertos. Opcional, na mesma versão: higiene de workflows (ações não fixadas a um commit, jobs sem limite de tempo, workflows sem permissões ou sem concorrência, uso perigoso de pull_request_target), sobre o verificador de workflows que o projeto já tem.
+
+### 1.9.2 - Saúde do repositório e da equipa
+
+Uma vista de saúde de cada repositório (CI, issues e pull requests, segurança, preparação para uma versão, atividade) e uma da equipa com classificação, totais e filtros; páginas para ambas com ligações diretas para ecrãs de parede. Opcional, na mesma versão: um painel de benchmarks noturnos face a um orçamento (mediana face a uma referência por classe de máquina) e um painel de listas de materiais de software e atestações de cada versão.
+
+### 1.9.3 - Relatórios programados e registo de auditoria
+
+Modelos de relatório em HTML e Markdown (PDF opcional) com a pontuação, os alertas principais e as alterações, um agendador e um registo de auditoria só de acrescentar com quem fez o quê e quando, sem qualquer segredo lá dentro. Opcional, na mesma versão: uma vista «versão pronta / bloqueada» com o último commit verde de cada repositório.
+
+### 1.9.4 - Estabilização da terceira fase
+
+O mesmo tipo de fecho da 1.8.4 para a pontuação, a sentinela de segurança, as vistas de saúde, os relatórios e o registo de auditoria; o custo em chamadas à API com três sentinelas ativas; uma pontuação que se mantém coerente quando uma sentinela está desligada.
+
+### 2.0.0 - Maturidade
+
+Uma versão principal que limpa a dívida técnica e congela as interfaces públicas: sentinelas, armazenamento, alertas, o esquema de eventos e a API de leitura, com uma suite de testes de contrato que os clientes podem executar contra qualquer versão. Um guia para cada forma de usar o produto (lite, individual, serviço, equipa) e uma referência de definições, eventos, métricas e API. A partir da 2.0.1 há uma margem para o que só aparece com uso real prolongado.
+
+Os workflows do próprio monitor cumprem o que a sentinela de higiene pedirá aos outros: ações fixadas a um commit, as permissões mínimas e um limite de tempo em cada job.
 
 ## Feito na 1.7.9
 
@@ -87,5 +154,4 @@ O que a 1.6.4 não alcançou, e porquê:
 
 ## Ideias que precisam primeiro de uma decisão
 
-- Um ecrã de início de sessão para a página, para que o modo rede não exija escrever uma vez o token de acesso. Hoje a resposta é o token de acesso e, para a Internet, um proxy inverso com autenticação (veja `monitor/docs/DEPLOYMENT.md`).
 - Ler na página os registos de um passo falhado, com a mesma limpeza que o assistente de IA aplica.

@@ -102,3 +102,7 @@ location / {
 ## 大量仓库
 
 条件读取(`cache.etag`)让未变化的仓库不消耗配额;`mode: lite`、`ecosystems`、`exclude` 和 `max_workers` 限制工作量;入站 Webhook 让发送事件的仓库不再需要轮询。`discover_limit` 是每个账户列出的仓库上限(默认 1000)。
+
+## 连续运行数月:存储与保留
+
+把 `accounts/`(或数据库)放在容器重建后仍能保留的卷上,更新前用 `python tools/backup_storage.py backup FILE.zip --backend file`(或 `sqlite`)备份。默认情况下,一次快速清理会删除超过 90 天的事件和超过 180 天的分析;要更改请在配置中设置 `retention`,而 `MONITOR_SERVICE=1` 会让 `--doctor` 把监视器当作服务(此时若没有 `retention` 区块或事件变得很大就会警告)。使用 SQLite 时默认每个账户一个数据库;也可以使用一个共享文件,详见 [STORAGE_zho.md](STORAGE_zho.md)。

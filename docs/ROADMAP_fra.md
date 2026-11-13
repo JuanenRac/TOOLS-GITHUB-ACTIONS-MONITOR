@@ -2,9 +2,76 @@
 
 Des idées qui n'ont pas tenu dans la version actuelle, sans ordre promis. Ce sont des directions, pas des engagements ; une issue ou une pull request est la meilleure façon d'en faire avancer une.
 
-## Fait dans la 1.8.0
+## Dans la 1.8.0 (la prochaine version)
 
-Une nouvelle organisation des dossiers (le paquet dans `src/`, la page, les exemples et les langues dans `assets/`) ; la barre du bas tient sur une seule ligne et ne dit que ce que les cadres du haut ne disent pas ; le résumé pour les outils d'IA et le journal sont cohérents avec un moniteur en marche ; une lecture facultative des dépôts calmes via GraphQL (désactivée par défaut) avec sa comptabilité ; l'avis actif à une IA externe (désactivé par défaut, une première confirmation par fournisseur, seulement les champs expurgés d'une liste fermée, un plafond d'appels et de coût par heure, la clé par le nom d'une variable, et l'IA n'exécute jamais d'action) ; l'application de terminal modifie les listes et les tables ; et l'historique des changements est traduit dans les huit langues jusqu'à la 1.0.0.
+Tout ce qui suit est écrit et testé ; c'est soit déjà dans la branche principale, soit en attente dans une pull request. Rien n'est présenté comme prouvé sur de vrais services (voir « Ensuite »).
+
+### Déjà dans la branche principale
+
+- Une nouvelle organisation des dossiers (le paquet dans `src/`, la page, les exemples et les langues dans `assets/`), avec un outil de migration qui déplace une ancienne installation à plat sans rien supprimer.
+- Une couche de stockage derrière une seule interface, avec le support fichiers qui garde la disposition de `accounts/<id>/`, des écritures atomiques et des sauvegardes que n'importe quel support peut restaurer.
+- Un support SQLite facultatif (désactivé par défaut), une base par compte, des migrations versionnées, un délai d'attente réglable et des outils pour déplacer l'état entre le support fichiers et SQLite dans les deux sens, avec une simulation d'abord.
+- L'historique des changements est traduit dans les huit langues jusqu'à la 1.0.0, et un test le garde complet.
+
+### Terminé et en attente de fusion
+
+- Mode réseau : le frein de verrouillage agit de nouveau avant d'examiner le jeton, un proxy inverse déclaré n'est jamais pris pour cet ordinateur, les lectures distantes des réglages se limitent à ce qu'un client distant peut changer et le guide de déploiement donne la recette complète.
+- Le flux pour l'IA est nettoyé champ par champ, seules passent les adresses GitHub de formes fermées et le crochet ne livre aucun texte de journal, seulement le dépôt, le workflow, le résultat et le lien.
+- Les lectures d'identité sont toujours celles de l'utilisateur, une lecture est jugée sur une liste blanche et le fichier de jeton du second compte reste dans le dossier des comptes.
+- Un test de fumée de la page dans un vrai navigateur met la CI en rouge quand un onglet se casse ou qu'une fonction est définie deux fois.
+- Une barre inférieure d'une seule ligne qui ne dit que ce que les cadres du haut ne disent pas, un résumé pour les outils d'IA et un journal en accord avec le moniteur en marche, une page qui signale quand elle est en décalage avec le moniteur et un son qui se débloque d'un clic et survit à un rechargement.
+- Une lecture facultative des dépôts calmes par GraphQL (désactivée par défaut) avec sa comptabilité.
+- L'avis actif à une IA externe (désactivé par défaut, une première confirmation par fournisseur, seulement les champs expurgés d'une liste fermée, un plafond d'appels et de coût par heure, la clé par le nom d'une variable, et l'IA n'exécute jamais d'action).
+- L'application de terminal édite les listes et les tables.
+- Mode équipe (désactivé par défaut) : utilisateurs, rôles (admin, maintainer, viewer) et sessions gardés dans le stockage, une page de connexion, un jeton Bearer pour les clients qui ne sont pas un navigateur, des erreurs JSON stables et une récupération d'un administrateur depuis la console de cet ordinateur. Le mode individuel continue sans connexion et l'édition lite n'en a jamais.
+
+### Encore en finition
+
+- Rétention et rotation de l'historique (événements et analyses pendant un nombre de jours, supprimer ou archiver, une ligne d'audit par passage, un avertissement de taille dans le doctor ; l'état des sentinelles et la configuration ne sont jamais touchés).
+- Une page plus vivante : icônes animées, voyants d'état dont le mouvement suit l'état, réponses au survol, au focus et au clic ; tout s'éteint avec le mouvement réduit et reste léger dans l'édition lite.
+- Des silences qui retiennent qui les a posés (demande le mode équipe).
+
+## Prévu, dans cet ordre
+
+Chaque version porte tout ce qui est de son tronçon du plan : rien ne reste suspendu à une version antérieure et rien n'est repoussé à la suivante. Après la 1.8.3 et après la 1.9.3, le produit passe une revue indépendante dont les constats sont clos dans la version de stabilisation suivante. Il n'y a pas de 1.8.1 : utilisateurs, rôles et sessions arrivent avec la 1.8.0.
+
+### 1.8.2 - Image Docker officielle et mode service
+
+Une image multi-étapes avec un utilisateur sans privilèges, des volumes pour les données et la configuration, des variables d'environnement documentées, un exemple de compose avec proxy inverse et TLS facultatifs, une unité systemd pour qui préfère l'installation classique et un contrôle de santé profond qui échoue si le superviseur ou le cycle d'un compte est bloqué. Un identifiant que GitHub révoque ou laisse expirer marque seulement ce compte comme aveugle, déclenche une alerte système critique et peut être remplacé sans redémarrer le superviseur. Sauvegarde, mise à jour et premier démarrage en service sont documentés ; la page dit si elle écoute sur cet ordinateur, sur le réseau ou derrière un proxy ; la ligne de commande fonctionne contre un moniteur distant. L'édition lite reste locale. Aussi : un rapport du temps que les jobs attendent en file pour chaque runner.
+
+### 1.8.3 - Notifications par utilisateur
+
+Préférences par utilisateur (canal, sentinelle, niveau minimal), un répartiteur qui décide qui prévenir d'après les préférences et les rôles, des canaux comme simples modules et des synthèses des alertes pas encore lues. Aussi : un job sauté à cause des chemins surveillés est montré à part d'un job rouge.
+
+### 1.8.4 - Stabilisation
+
+Pas de grandes fonctions. Isolation entre comptes, la page, le stockage, connexion et rôles, notifications, un GitHub qui flanche par moments, le démarrage après une migration interrompue, la reprise après une coupure, un doctor élargi, les endroits qui écrivent sur GitHub, des journaux sans jetons, une liste de contrôle de sécurité du mode équipe et des documents conformes au comportement. La série ne va jusqu'à la 1.8.9 que si nécessaire.
+
+### 1.9.0 - Un score
+
+Des collecteurs de métriques par compte et par sentinelle (taux de réussite, durée, temps de rétablissement, débit), un moteur de score aux seuils modifiables, une tendance par rapport à la période précédente, des instantanés gardés dans le stockage, un widget de score avec sa courbe, des alertes quand le score baisse et un verbe de ligne de commande qui l'affiche.
+
+### 1.9.1 - Sentinelle de sécurité
+
+La troisième sentinelle : Dependabot, analyse de code, analyse des secrets, protection des branches, permissions des workflows et propriétaires du code, avec des règles par type de signal, le même filtre dans l'onglet Alertes et une pénalité dans le score pour les alertes critiques ouvertes. Facultatif, dans la même version : hygiène des workflows (actions non fixées à un commit, jobs sans limite de temps, workflows sans permissions ou sans concurrence, usage dangereux de pull_request_target), sur le vérificateur de workflows que le projet a déjà.
+
+### 1.9.2 - Santé du dépôt et de l'équipe
+
+Une vue de santé de chaque dépôt (CI, tickets et pull requests, sécurité, préparation à une version, activité) et une de l'équipe avec classement, totaux et filtres ; des pages pour les deux avec des liens directs pour écrans muraux. Facultatif, dans la même version : un panneau de benchmarks de nuit face à un budget (médiane face à une référence par classe de machine) et un panneau de nomenclatures logicielles et d'attestations de chaque version.
+
+### 1.9.3 - Rapports programmés et journal d'audit
+
+Des modèles de rapport en HTML et Markdown (PDF facultatif) avec le score, les principales alertes et les changements, un planificateur et un journal d'audit en ajout seul de qui a fait quoi et quand, sans aucun secret dedans. Facultatif, dans la même version : une vue « version prête / bloquée » avec le dernier commit vert de chaque dépôt.
+
+### 1.9.4 - Stabilisation de la troisième phase
+
+La même sorte de clôture que la 1.8.4 pour le score, la sentinelle de sécurité, les vues de santé, les rapports et le journal d'audit ; le coût en appels d'API avec trois sentinelles actives ; un score qui reste cohérent quand une sentinelle est éteinte.
+
+### 2.0.0 - Maturité
+
+Une version majeure qui nettoie la dette technique et fige les interfaces publiques : sentinelles, stockage, alertes, le schéma d'événements et l'API de lecture, avec une suite de tests de contrat que les clients peuvent lancer contre n'importe quelle version. Un guide pour chaque façon d'utiliser le produit (lite, individuel, service, équipe) et une référence des réglages, événements, métriques et API. À partir de la 2.0.1, un coussin pour ce qui n'apparaît qu'à l'usage réel prolongé.
+
+Les workflows du moniteur lui-même respectent ce que la sentinelle d'hygiène demandera aux autres : actions fixées à un commit, permissions minimales et une limite de temps sur chaque job.
 
 ## Fait dans la 1.7.9
 
@@ -87,5 +154,4 @@ Ce que la 1.6.4 n'a pas atteint, et pourquoi :
 
 ## Idées qui demandent d'abord une décision
 
-- Un écran de connexion pour la page, afin que le mode réseau n'exige plus de saisir une fois le jeton d'accès. Aujourd'hui la réponse est le jeton d'accès et, pour Internet, un reverse proxy avec authentification (voir `monitor/docs/DEPLOYMENT.md`).
 - Lire dans la page les journaux d'une étape en échec, avec le même nettoyage que l'assistant IA.

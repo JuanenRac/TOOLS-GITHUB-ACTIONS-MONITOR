@@ -115,6 +115,10 @@
 | `ui` | 关于、帮助文档、终端视图 |
 | `i18n`、`util` | 八种语言;共享的小工具 |
 
+## 在文件与 SQLite 之间迁移状态(1.8.0)
+
+升级时无需迁移任何内容:默认仍然是文件。如果想把状态放进 SQLite,`python tools/migrate_storage.py --from file --to sqlite` 会显示将要复制的内容(试运行);加上 `--apply` 才会复制并校验。你的文件绝不会被修改或删除。详见 [STORAGE_zho.md](STORAGE_zho.md)。
+
 # 从 1.7.9 到 1.8.0
 
 无需转换。有一项设置可能需要调整:

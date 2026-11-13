@@ -66,3 +66,7 @@ Per più schermi apri una finestra per vista, ad esempio `?view=now&chrome=0`, `
 - Più account sono più processi: ognuno legge GitHub per conto suo, quindi la quota è condivisa dal login che usi. Tienila d'occhio nelle schede e abbassa `refresh_seconds` o `max_workers` per account se serve.
 - I controlli che richiedono un vero browser, veri account GitHub e un vero tunnel webhook spettano a te; i test usano sostituti del monitor di un account e non chiamano mai GitHub.
 - Una versione successiva porterà gli account in un solo processo; la struttura delle cartelle e l'API qui sopra restano.
+
+## Dove un account conserva il suo stato
+
+Per impostazione predefinita in file dentro `accounts/<id>/`. Un account può conservarlo in un database: `"storage": {"backend": "sqlite"}` nella sua configurazione gli assegna `accounts/<id>/storage.sqlite3`, e solo il processo di quell'account lo scrive. La configurazione dell'account resta un file JSON. Vedi [STORAGE_ita.md](STORAGE_ita.md).
