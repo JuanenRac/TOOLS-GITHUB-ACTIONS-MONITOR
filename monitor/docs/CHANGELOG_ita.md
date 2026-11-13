@@ -15,9 +15,16 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - I comandi delle guide (`python read_report.py`, `python actions_monitor.py --doctor`, `python monitor_cli.py status` ...) continuano a funzionare: un piccolo file di ingresso con lo stesso nome resta nella cartella del prodotto, quindi anche gli hook e i server MCP già registrati per percorso continuano a funzionare. Lo zip della versione mantiene il nome della cartella e ora contiene `src/`, `assets/` e `tools/`.
 
+- **La barra a piè di pagina è una sola riga e dice solo ciò che i riquadri in alto non dicono**: connessione, quota, esecuzioni, ultima lettura e repository erano detti due volte (come riquadri in alto e come elementi della barra); la barra conserva sentinelle, l'avviso della modalità Low (l'unica che dice), IA, account, versione, indirizzo, il chip del suono e l'orologio, e non va più a capo a nessuna larghezza (su uno schermo stretto spariscono prima la data e il fuso). Un test nel browser la misura in più lingue, larga e stretta.
+- **Il riquadro «caricamento dei repository»** è verificato in un browser: si vede mentre i repository si caricano e sparisce con l'ultimo.
+
 ### Aggiunto
 
 - `tools/migrate_layout.py` per una cartella che era un'installazione piatta: simulazione per impostazione predefinita; `--apply` copia la tua configurazione in `layout_backup_<marca>/config/` e SPOSTA (mai cancella né sovrascrive) i vecchi moduli, pagina, esempi e `locales/` in `layout_backup_<marca>/old_code/`. `--doctor` avvisa finché esistono tali resti. `MIGRATING.md` lo descrive nelle otto lingue.
+
+### Corretto
+
+- Il riepilogo per gli strumenti di IA (`ALERTS_BRIEF.md`) e il registro (`actions_monitor_log.txt`) ora concordano con un monitor in esecuzione: il riepilogo ha una riga `Monitor:` (ciclo completo, ciclo in corso, connessione persa, ultimo ciclo fallito) e l'ora di quella nota, così un ciclo che sta ancora leggendo i repository non lascia più l'ora del ciclo precedente come ultima parola (gli avvisi elencati sono quelli conservati dall'ultimo ciclo completo e un ciclo parziale non ne apre né ne chiude mai uno); il registro scrive una riga `cycle=started` quando inizia un ciclo.
 
 ## [1.7.9]
 

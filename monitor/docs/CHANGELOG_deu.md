@@ -15,9 +15,16 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - Die Befehle der Anleitungen (`python read_report.py`, `python actions_monitor.py --doctor`, `python monitor_cli.py status` ...) funktionieren weiter: Eine kleine Einstiegsdatei mit demselben Namen bleibt im Produktordner, sodass auch die per Pfad registrierten Hooks und MCP-Server weiterlaufen. Das Release-Zip behält seinen Ordnernamen und enthält jetzt `src/`, `assets/` und `tools/`.
 
+- **Die Leiste am Fuß der Seite ist eine einzige Zeile und sagt nur, was die Felder oben nicht sagen**: Verbindung, Kontingent, Läufe, letzte Abfrage und Repositories wurden doppelt angezeigt (als Felder oben und als Elemente der Leiste); die Leiste behält die Wächter, den Hinweis auf den Low-Modus (den einzigen Modus, den sie nennt), die KI, das Konto, die Version, die Adresse, den Ton-Chip und die Uhr und bricht bei keiner Breite mehr um (auf einem schmalen Bildschirm verschwinden zuerst Datum und Zone). Ein Browsertest misst sie in mehreren Sprachen, breit und schmal.
+- **Das Feld „Repositories werden geladen“** wird im Browser geprüft: Es ist sichtbar, solange Repositories laden, und verschwindet mit dem letzten.
+
 ### Hinzugefügt
 
 - `tools/migrate_layout.py` für einen Ordner, der eine flache Installation war: standardmäßig ein Probelauf; `--apply` kopiert Ihre Konfiguration nach `layout_backup_<Stempel>/config/` und VERSCHIEBT (nie löschen, nie überschreiben) die alten Module, die alte Seite, die alten Beispiele und `locales/` nach `layout_backup_<Stempel>/old_code/`. `--doctor` warnt, solange solche Reste existieren. `MIGRATING.md` beschreibt es in den acht Sprachen.
+
+### Behoben
+
+- Die Zusammenfassung für die KI-Werkzeuge (`ALERTS_BRIEF.md`) und das Protokoll (`actions_monitor_log.txt`) stimmen jetzt mit einem laufenden Monitor überein: Die Zusammenfassung hat eine Zeile `Monitor:` (Zyklus abgeschlossen, Zyklus läuft, Verbindung verloren, letzter Zyklus fehlgeschlagen) und die Zeit dieses Hinweises, sodass ein Zyklus, der noch Repositories liest, nicht mehr die Zeit des vorigen Zyklus als letztes Wort stehen lässt (die aufgeführten Alarme stammen aus dem letzten vollständigen Zyklus, und ein Teilzyklus öffnet oder schließt nie einen); das Protokoll schreibt zu Beginn eines Zyklus eine Zeile `cycle=started`.
 
 ## [1.7.9]
 
