@@ -93,6 +93,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{ou
 .filters{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:8px 18px;border-bottom:1px solid var(--line);background:var(--bg)}
 #err,#reduced,#offline,#hidden,#restartbar,#netbar{display:none!important}
 #err{display:none;background:var(--bad);color:var(--on-bad);padding:6px 18px}
+#snd-lock{background:var(--panel2);border-bottom:2px solid var(--warn);padding:4px 18px}#snd-lock[hidden]{display:none}#snd-lock button{font:inherit;font-weight:600;color:var(--text);background:transparent;border:1px dashed var(--warn);border-radius:6px;padding:3px 10px;cursor:pointer}
+#sb-refresh.bad{color:var(--bad);font-weight:700}
 #reduced{display:none;background:var(--warn);color:var(--on-warn);padding:6px 18px}
 #offline{display:none;background:var(--bad);color:var(--on-bad);padding:6px 18px;font-weight:600}
 main{flex:1;min-height:0;padding:12px 18px}
@@ -375,6 +377,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="i-full" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol><symbol id="i-fullx" viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></symbol><symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol><symbol id="i-chev" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol><symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol><symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c1 3 4 4.5 4 8.5a4 4 0 0 1-8 0c0-1.4.6-2.4 1.4-3.2C9.9 9.2 11 7 12 3z"/><path d="M12 21a3 3 0 0 0 3-3c0-1.5-1.5-2-3-4-1.5 2-3 2.5-3 4a3 3 0 0 0 3 3z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 13.5A8.5 8.5 0 1 1 10.5 3a7 7 0 0 0 10.5 10.5z"/></symbol><symbol id="i-auto" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></symbol><symbol id="i-rows" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></symbol><symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/></symbol><symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol><symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol><symbol id="i-text" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></symbol><symbol id="i-md" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15V9l2.5 3L12 9v6M16 9v6m-2-2 2 2 2-2"/></symbol><symbol id="i-now" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><path d="M8 16v-5M12 16V8M16 16v-8"/></symbol><symbol id="i-repos" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></symbol><symbol id="i-run" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol><symbol id="i-queue" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol><symbol id="i-fail" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></symbol><symbol id="i-okc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></symbol><symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 3h6"/></symbol><symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol><symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></symbol><symbol id="i-repo" viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/></symbol><symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol><symbol id="i-save2" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></symbol><symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-6"/></symbol><symbol id="i-wifi" viewBox="0 0 24 24"><path d="M3 9a14 14 0 0 1 18 0M6 12.5a9 9 0 0 1 12 0M9 16a4.5 4.5 0 0 1 6 0"/><circle cx="12" cy="19" r="1"/></symbol><symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2 6"/><path d="M20 4v7h-7"/></symbol><symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="7.6" r=".8"/></symbol><symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.6 2.6 0 1 1 3.9 2.2c-.9.5-1.4 1-1.4 2"/><circle cx="12" cy="16.8" r=".8"/></symbol><symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol><symbol id="i-spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 9 9"/></symbol></defs></svg>
+<div id="snd-lock" role="status" hidden><button type="button" id="snd-lock-b"></button></div>
 <div id="err" role="alert"></div>
 <div id="reduced" role="status"></div>
 <div id="offline" role="status"></div>
@@ -556,7 +559,7 @@ const qlang=()=>"lang="+encodeURIComponent(LANG);
 var HOTONLY=false;
 $("hotonly").addEventListener("click",async()=>{
   try{const r=await fetch("/api/hot-only",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({on:!HOTONLY})});const j=await r.json();
-    if(!j.ok)throw new Error(j.error||r.status);tick()}
+    if(!j.ok)throw new Error(j.error||r.status);tick(true)}
   catch(e){$("err").style.display="block";$("err").textContent=T("ui.err_hotonly",{msg:e.message})}
 });
 /* dense view of the Now tab */
@@ -603,20 +606,59 @@ function playTones(vol){const c=audioCtx();if(!c||c.state==="suspended")return f
   [[880,0],[1175,0.22]].forEach(([f,d])=>{const o=c.createOscillator(),g=c.createGain();o.type="sine";o.frequency.value=f;o.connect(g);g.connect(c.destination);
     g.gain.setValueAtTime(0.0001,t0+d);g.gain.exponentialRampToValueAtTime(v,t0+d+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t0+d+0.15);o.start(t0+d);o.stop(t0+d+0.17)});return true}
 /*SOUND-BEGIN*/
-const SOUND={muted:false,first:true,known:new Set(),lastAt:0,conn:null};
+const SOUND={muted:false,first:true,known:new Set(),lastAt:0,conn:null,lost:false};
 try{SOUND.muted=store.get("am-sound")==="off"}catch(e){}
 function soundCfg(){const c=I18N.sound||{};return {enabled:c.enabled!==false,newRed:c.on_new_red!==false,conn:c.on_connection_lost!==false,cool:(c.cooldown_seconds==null?30:c.cooldown_seconds)*1000,vol:(c.volume==null?40:c.volume)/100}}
 /* a bing bing only for something NEW: the alerts that are there at the first look are remembered, not announced; a cooldown keeps one sound from the next; muted means silent */
+function soundKey(){return "am-sound-known-"+(typeof ACC!=="undefined"&&ACC&&ACC.current?ACC.current:"")}
+function soundLoad(){try{const o=JSON.parse(store.get(soundKey())||"null");if(o&&Array.isArray(o.k)&&nowMs()-o.t<6*36e5)return new Set(o.k)}catch(e){}return null}
+function soundSave(keys){try{store.set(soundKey(),JSON.stringify({t:nowMs(),k:[...keys]}))}catch(e){}}
+/* the connection with the monitor itself is lost: one bing bing per loss (the mute chip, the switch, the cooldown and the audio lock all apply); found again, it can sound at the next loss */
+function soundLost(){if(SOUND.lost)return;SOUND.lost=true;const cfg=soundCfg();if(cfg.conn&&cfg.enabled&&!SOUND.muted&&nowMs()-SOUND.lastAt>=cfg.cool){SOUND.lastAt=nowMs();playTones(cfg.vol)}}
+function soundFound(){SOUND.lost=false}
+function soundResync(){SOUND.lastAt=0}      // the page was out of step and is back: the cooldown of before does not hide a new red
 function soundWatch(d){
   if(!d)return;const cfg=soundCfg(),keys=new Set((d.failing||[]).map(r=>r.repo+"|"+r.name)),off=!!(d.offline&&d.offline.offline);
-  if(SOUND.first){SOUND.first=false;SOUND.known=keys;SOUND.conn=off;return}
+  if(SOUND.first){SOUND.first=false;SOUND.conn=off;const prev=soundLoad();if(!prev){SOUND.known=keys;soundSave(keys);return}SOUND.known=prev}      // a reload keeps the baseline of the last look (a few hours at most): a red that came while the page was closed is NEW
   let fire=false;
   if(cfg.newRed)for(const k of keys)if(!SOUND.known.has(k))fire=true;
   if(cfg.conn&&off&&SOUND.conn===false)fire=true;
-  SOUND.known=keys;SOUND.conn=off;
+  SOUND.known=keys;SOUND.conn=off;soundSave(keys);
   if(fire&&cfg.enabled&&!SOUND.muted&&nowMs()-SOUND.lastAt>=cfg.cool){SOUND.lastAt=nowMs();playTones(cfg.vol)}
 }
 /*SOUND-END*/
+/*FRESH-BEGIN*/
+/* is the page in step with the monitor? the time of the last good answer, a retry that shows, a watchdog for an answer that never comes and the data that stopped changing */
+const FRESH={okAt:0,t0:nowMs(),fails:0,start:0,busy:false,upd:"",updAt:0,retryAt:0,refresh:0,loop:null};
+const FRESH_LATE=60000,FRESH_HANG=20000;
+function freshInfo(now,refresh){
+  const age=now-(FRESH.okAt||FRESH.t0),lim=Math.max(120000,3000*(refresh||0)),late=age>FRESH_LATE,old=!late&&FRESH.updAt>0&&now-FRESH.updAt>lim;
+  return {age:Math.round(age/1000),late:late||old,old:old,fails:FRESH.fails,retry:Math.max(0,Math.ceil((FRESH.retryAt-now)/1000))};
+}
+/* an answer came: true when the page had been out of step (the caller forces a reload of the rest and lets the sound speak again) */
+function freshOk(now,d){
+  const was=freshInfo(now,d&&d.refresh_seconds).late;
+  FRESH.okAt=now;FRESH.fails=0;FRESH.retryAt=0;
+  if(d){if(d.updated!==FRESH.upd||d.loading||d.paused_quota){FRESH.upd=d.updated;FRESH.updAt=now}}
+  return was;
+}
+/* what the server says about its own refresh loop (j.loop): a cycle that runs far too long is a stuck monitor, even if /api/data still answers at once */
+function loopBad(L,refresh){
+  if(!L)return false;const lim=Math.max(600,3*(refresh||0));
+  return !!L.stuck||(L.running_seconds||0)>lim;
+}
+function freshFail(now){FRESH.fails++;FRESH.retryAt=now+Math.min(3,FRESH.fails)*3000;return FRESH.retryAt-now}
+/* what the watchdog does now: "abort" an answer that hangs, "tick" when out of step and nothing is on the way, "" otherwise */
+function freshWatch(now){
+  if(FRESH.busy&&now-FRESH.start>FRESH_HANG)return "abort";
+  if(!FRESH.busy&&freshInfo(now,FRESH.refresh).late&&now-FRESH.start>5000)return "tick";
+  return "";
+}
+/*FRESH-END*/
+/* the browser lets a page sound only after a click: say it, and one click unlocks it with a test tone */
+function soundLocked(){if(SOUND.muted||!soundCfg().enabled)return false;const c=audioCtx();return !c||c.state!=="running"}
+function soundLockPaint(){const b=$("snd-lock");if(!b)return;const on=soundLocked();b.hidden=!on;const x=$("snd-lock-b");if(on&&x&&!x.textContent){x.textContent=T("ui.snd_locked");x.title=T("ui.snd_locked_t")}}
+function soundUnlock(test){const c=audioCtx();if(!c)return;const done=()=>{soundLockPaint();soundChip();if(test)playTones(soundCfg().vol)};try{const p=c.resume();if(p&&p.then)p.then(done,done);else done()}catch(e){done()}}
 function soundChip(){const b=$("sb-sound");if(!b)return;const on=!SOUND.muted&&soundCfg().enabled;b.textContent=T(on?"ui.snd_on":"ui.snd_off");b.title=T("ui.snd_chip_t");b.setAttribute("aria-pressed",on?"true":"false");b.className="sb-item sb-sound"+(on?"":" off")}
 document.documentElement.dataset.blink=I18N.blink===false?"0":"1";
 const TABS=LITE?["now","charts","repos","hist","cfg"]:["now","al","sent","charts","repos","hist","cfg"];
@@ -923,12 +965,37 @@ function renderHistory(){
   $("hist").innerHTML=rows.map(r=>`<tr>${HIST_TABLE.cells(r)}</tr>`).join("")||`<tr><td colspan="${HIST_TABLE.visible().length}" class="mut">${esc(T("ui.h_none"))}</td></tr>`;
 }
 ["f-repo","f-res"].forEach(id=>$(id).addEventListener("change",renderHistory));$("f-q").addEventListener("input",renderHistory);
-async function tick(){
-  try{const r=await fetch("/api/data",{cache:"no-store"});const j=await r.json();
+async function tick(force){
+  if(FRESH.busy&&!force)return;
+  if(FRESH.ctl){try{FRESH.ctl.abort()}catch(e){}}
+  const ctl=typeof AbortController==="function"?new AbortController():null,to=ctl?setTimeout(()=>ctl.abort(),15000):0;
+  FRESH.ctl=ctl;FRESH.busy=true;FRESH.start=nowMs();
+  try{const r=await fetch("/api/data",{cache:"no-store",signal:ctl?ctl.signal:undefined});const j=await r.json();
+    if(FRESH.ctl!==ctl)return;
+    FRESH.loop=j.loop||null;
+    const was=freshOk(nowMs(),j.data);
     if(j.error){$("err").style.display="block";$("err").textContent=j.hint==="auth"?T("ui.auth_hint"):(j.hint?j.hint+" ":T("ui.err_github")+j.error)}else $("err").style.display="none";
-    if(j.data)render(j.data);else $("stamp").textContent=T("ui.waiting")}
-  catch(e){$("err").style.display="block";$("err").textContent=T("ui.err_monitor",{msg:e})}
+    if(j.data){FRESH.refresh=j.data.refresh_seconds;render(j.data)}else $("stamp").textContent=T("ui.waiting");
+    if(was)freshBack();
+    freshPaint()}
+  catch(e){if(FRESH.ctl!==ctl)return;const ms=freshFail(nowMs());$("err").style.display="block";$("err").textContent=T("ui.err_monitor",{msg:e})+" "+T("ui.fresh_retry",{n:Math.round(ms/1000)});freshPaint();setTimeout(()=>tick(),ms)}
+  finally{clearTimeout(to);if(FRESH.ctl===ctl){FRESH.ctl=null;FRESH.busy=false}}
 }
+/* back in step: the rest of the page asks again and the sound may speak (a red that came in the meantime is new) */
+function freshBack(){soundResync();["sentTick","diffTick","modeLoad","sbTick"].forEach(f=>{try{if(typeof window[f]==="function")window[f]()}catch(e){}})}
+/* what the bar says: the age of the last good answer, red after a minute; the lamp of the connection follows */
+function freshPaint(){
+  const i=freshInfo(nowMs(),FRESH.refresh),r=$("sb-refresh"),lamp=$("sb-conn-lamp"),ct=$("sb-conn-t"),c=$("sb-conn");
+  if(r){const base=DATA?T("ui.sb_updated",{time:clock(DATA.updated),secs:DATA.took}):"";r.textContent=(base?base+" · ":"")+T("ui.fresh",{age:agoText(i.age)})+(i.late&&i.retry?" · "+T("ui.fresh_retry",{n:i.retry}):"");r.title=T(i.late?"ui.fresh_late_t":"ui.fresh_t");r.classList.toggle("bad",i.late)}
+  const L=FRESH.loop,stuck=loopBad(L,FRESH.refresh),ph=L?T("ui.loop_phase_"+L.phase):"";
+  if((i.late&&!i.old)||stuck)soundLost();else soundFound();
+  if(stuck&&lamp&&ct&&c){lamp.className="sb-lamp bad";ct.textContent=T("ui.loop_stuck",{phase:ph,age:agoText(L.running_seconds)});c.title=T("ui.loop_stuck_t",{phase:ph});c.className="sb-item bad";if(r)r.classList.add("bad")}
+  else if(i.late&&lamp&&ct&&c){lamp.className="sb-lamp bad";ct.textContent=T("ui.fresh_late",{age:agoText(i.age)});c.title=T("ui.fresh_late_t");c.className="sb-item bad"}
+  else if(L&&L.log_error&&lamp&&ct&&c){lamp.className="sb-lamp warn";ct.textContent=T("ui.loop_logfail",{msg:L.log_error});c.title=T("ui.loop_logfail",{msg:L.log_error});c.className="sb-item warn"}
+}
+function freshDog(){if(freshWatch(nowMs()))tick(true)}
+setInterval(freshDog,5000);setInterval(freshPaint,1000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)tick(true)});
 /* ---------- Sentinel ---------- */
 var SENT=null,SENT_ERR=null,ANA=null,COLLAB=null;const AIRES={};
 const OPEN=new Set((QS.get("open")||store.get("am-s-open")||"a1,a2,a3").split(",").filter(Boolean));
@@ -1443,7 +1510,7 @@ $("mode-sel").addEventListener("change",async e=>{
     if(!window.confirm(T("ui.mode_confirm",{mode:T("ui.mode_"+want),calls:est.calls_per_hour,cached:est.with_cache_per_hour,minutes:MODEDATA.default_minutes,left:mins==null?"–":fmt(mins*60),floor:MODEDATA.floor}))){e.target.value=MODEDATA.mode;return}}
   try{const r=await fetch("/api/mode",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({mode:want,minutes:want==="normal"?0:MODEDATA.default_minutes})});const j=await r.json();
     if(!j.ok){$("err").style.display="block";$("err").textContent=T("ui.mode_refused",{why:T("ui.mode_why_"+j.reason)})}}catch(x){}
-  modeLoad();tick()});
+  modeLoad();tick(true)});
 modeLoad();setInterval(modeLoad,5000);
 {const d=QS.get("dlg");if(d==="about")openAbout();else if(d==="help")openHelp(QS.get("tab")||"cfg",QS.get("topic")||null)}
 
@@ -1571,6 +1638,7 @@ function renderBarFacts(){
   {const ai=SBINFO&&!LITE?SBINFO.ai:null;set("sb-ai",!ai||!ai.enabled?"":(ai.streams>0?T("ui.sb_ai_stream"):ai.connected?T("ui.sb_ai_on",{via:ai.via||"-",ago:agoText(ai.age_seconds)}):T("ui.sb_ai_off")),T("ui.sb_ai_t"))}
   set("sb-acc",T("ui.sb_account",{name:(ACC&&ACC.current)||OWNER||"-"}),T("ui.sb_account_t"));
   set("sb-ver","v"+(I18N.version||"")+" · "+T(LITE?"ui.sb_lite":"ui.sb_complete"),T("ui.sb_version_t"));
+  freshPaint();
   if(SBINFO)set("sb-addr",(SBINFO.bind==="0.0.0.0"&&SBINFO.lan_address?SBINFO.lan_address:"127.0.0.1")+":"+SBINFO.port,T("ui.sb_addr_t",{local:"127.0.0.1:"+SBINFO.port,lan:(SBINFO.lan_address||"-")+":"+SBINFO.port}));
 }
 function agoText(s){s=Math.max(0,Math.round(s||0));return s>=3600?Math.floor(s/3600)+" h":s>=60?Math.floor(s/60)+" min":s+" s"}
@@ -1582,8 +1650,10 @@ async function sbTick(){try{const r=await fetch("/api/statusbar",{cache:"no-stor
 {const watch=new MutationObserver(()=>{if(!watch.q){watch.q=requestAnimationFrame(()=>{watch.q=0;renderBar()})}});
   NOTE_SRC.forEach(([id])=>{const el=$(id);if(el)watch.observe(el,{attributes:true,childList:true,characterData:true,subtree:true})});
   $("sb-more").addEventListener("click",openNotes);$("sb-open").addEventListener("click",openNotes);$("notes-close").addEventListener("click",()=>dlgClose("notes"));$("notes-level").addEventListener("change",renderNotes);
-  $("sb-sound").addEventListener("click",()=>{SOUND.muted=!SOUND.muted;try{store.set("am-sound",SOUND.muted?"off":"on")}catch(e){}audioCtx();soundChip();if(!SOUND.muted)playTones(soundCfg().vol)});
-  {const t=$("snd-test");if(t)t.addEventListener("click",()=>{audioCtx();playTones(soundCfg().vol)})}
+  $("sb-sound").addEventListener("click",()=>{SOUND.muted=!SOUND.muted;try{store.set("am-sound",SOUND.muted?"off":"on")}catch(e){}soundUnlock(!SOUND.muted);soundLockPaint()});
+  {const t=$("snd-test");if(t)t.addEventListener("click",()=>soundUnlock(true))}
+  {const b=$("snd-lock-b");if(b)b.addEventListener("click",()=>soundUnlock(true));["pointerdown","keydown"].forEach(ev=>document.addEventListener(ev,()=>soundUnlock(false),{capture:true}))}
+  soundLockPaint();setInterval(soundLockPaint,2000);
   soundChip();renderBar();renderClock();setInterval(renderClock,1000);sbTick();setInterval(sbTick,30000);setInterval(renderBarFacts,15000)}
 /* the full screen: one button in the corner, a second press leaves it; the page keeps working in either state */
 function fsSync(){const b=$("fs");if(!b)return;const on=!!document.fullscreenElement,k=on?"ui.fs_exit":"ui.fs_enter";b.setAttribute("aria-pressed",on);b.title=T(k);b.setAttribute("aria-label",T(k));const u=$("fs-ico");if(u)u.setAttribute("href",on?"#i-fullx":"#i-full")}

@@ -17,6 +17,7 @@
   "discover_limit": 1000,
   "show_unclassified": true,
   "stuck_minutes": 120,
+  "watchdog_minutes": 10,
   "runs_per_repo": 20,
   "cold_runs_per_repo": 10,
   "hot_hours": 3,
