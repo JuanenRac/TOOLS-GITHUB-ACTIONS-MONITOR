@@ -406,7 +406,7 @@ class OpenSessionByPost(unittest.TestCase):
 
     def test_wrong_tokens_lock_the_address_out(self):
         access = "T" * 24
-        with LiveServer({"listen": {"max_failed_attempts": 3}}, network=access) as server:
+        with LiveServer({"listen": {"max_failed_attempts": 3}}, network=access) as server, mock.patch.object(localguard, "from_this_computer", return_value=False):      # a client of the network
             for _ in range(3):
                 self.post(server, {"token": "bad" * 8})
             self.assertEqual(self.post(server, {"token": access})[0], 429)

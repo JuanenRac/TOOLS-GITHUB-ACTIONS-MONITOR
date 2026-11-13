@@ -19,6 +19,18 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - `tools/migrate_layout.py` pour un dossier qui était une installation plate : simulation par défaut ; `--apply` copie votre configuration vers `layout_backup_<horodatage>/config/` et DÉPLACE (jamais supprimer ni écraser) les anciens modules, page, exemples et `locales/` vers `layout_backup_<horodatage>/old_code/`. `--doctor` avertit tant que de tels restes existent. `MIGRATING.md` le décrit dans les huit langues.
 
+### Sécurité
+
+- **Le verrouillage des mauvais jetons freine de nouveau (mode réseau)** : une adresse qui n'est pas cet ordinateur et qui est verrouillée est refusée AVANT que son jeton soit jugé, quelle que soit la façon de le présenter (en-tête, cookie, `?access=` et `POST /api/access`) ; jusqu'ici une adresse verrouillée pouvait continuer à deviner et le bon jeton entrait quand même. La personne devant cet ordinateur n'est jamais verrouillée hors de son propre moniteur.
+
+- **Un reverse proxy déclaré fait que la boucle locale ne veut plus dire « cet ordinateur »** (`listen.proxy_public_host`, `listen.secure_cookie` ou `listen.trusted_proxy`) : un proxy qui oublie ses en-têtes de transfert ne peut plus transformer n'importe quel client d'internet en propriétaire. La personne devant l'ordinateur du moniteur utilise le nouveau second port qui n'écoute que sur `127.0.0.1` (`listen.local_port`, 0 = désactivé, redémarrage nécessaire, même jeton d'accès). Avec `listen.trusted_proxy`, les mauvais jetons de tous les clients du proxy sont aussi comptés ensemble (trois fois la limite d'une adresse) : changer `X-Forwarded-For` n'annule donc pas le verrouillage.
+
+- **Le guide du reverse proxy** (`DEPLOYMENT.md`, huit langues) donne la recette complète : `Host` public, `X-Forwarded-For $proxy_add_x_forwarded_for`, `X-Forwarded-Proto`, le mode réseau et la déclaration du proxy ; il ne dit plus que le moniteur « n'a pas de connexion », et précise que `listen.trusted_proxy` suppose un proxy sur le même ordinateur.
+
+- **`GET /api/settings` pour un client du réseau** ne renvoie la valeur que des réglages qu'il peut modifier ; pour tout autre réglage (chemins de clés et de jetons, dossiers, noms de variables) il indique seulement s'il est défini.
+
+- **Test de chaque route « cet ordinateur seulement »** : un tableau des routes est parcouru contre un vrai serveur avec un client hors de la boucle locale (et le code source est examiné pour qu'une nouvelle route ne soit pas oubliée).
+
 ## [1.7.9]
 
 ### Corrigé

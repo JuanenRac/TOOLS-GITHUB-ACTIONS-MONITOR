@@ -45,6 +45,18 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 - The page showed old data without any warning when the monitor stopped or answered slowly (a request that never returned left the page looking alive), and the "bing bing" stayed silent after a reload or a long gap.
 - The SQLite storage no longer fails with "database is locked" when several processes open or write the same database at once: the wait for another writer is 30 seconds by default and can be set with `busy_timeout_ms` in the `storage` block, and the steps that SQLite does not make wait (the first switch to WAL, taking the writer lock) are tried again a few times with growing pauses.
 
+### Security
+
+- **The lock-out of wrong tokens brakes again (network mode)**: an address that is not this computer and is locked is refused BEFORE its token is judged, in every way of presenting it (header, cookie, `?access=` and `POST /api/access`); until now a locked address could keep guessing and the right token still got in. The person at this computer is never locked out of their own monitor.
+
+- **A declared reverse proxy makes loopback stop meaning "this computer"** (`listen.proxy_public_host`, `listen.secure_cookie` or `listen.trusted_proxy`): a proxy that forgets its forwarding headers can no longer turn every client of the internet into the owner. The person at the computer of the monitor uses the new second port that only listens on `127.0.0.1` (`listen.local_port`, 0 = off, restart needed, same access token). With `listen.trusted_proxy`, the wrong tokens of all the clients of the proxy are also counted together (three times the limit of one address), so rotating `X-Forwarded-For` does not defeat the lock-out.
+
+- **The guide of the reverse proxy** (`DEPLOYMENT.md`, eight languages) gives the whole recipe: public `Host`, `X-Forwarded-For $proxy_add_x_forwarded_for`, `X-Forwarded-Proto`, the network mode and the declaration of the proxy; it no longer says that the monitor "has no login", and it says that `listen.trusted_proxy` assumes a proxy on the same computer.
+
+- **`GET /api/settings` for a client of the network** returns the value only of the settings it may change; for every other setting (paths of keys and tokens, folders, names of variables) it says only whether it is defined.
+
+- **Test of every "this computer only" route**: a table of the routes is walked against a real server with a client that is not on loopback (and the source is scanned so that a new route cannot be forgotten).
+
 ## [1.7.9]
 
 ### Fixed

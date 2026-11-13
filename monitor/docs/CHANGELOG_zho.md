@@ -19,6 +19,18 @@
 
 - `tools/migrate_layout.py`,用于原本是平铺安装的文件夹:默认试运行;`--apply` 会把你的配置复制到 `layout_backup_<时间戳>/config/`,并把旧模块、旧网页、旧示例和 `locales/` 移动(绝不删除、绝不覆盖)到 `layout_backup_<时间戳>/old_code/`。只要还有此类遗留,`--doctor` 就会提醒。`MIGRATING.md` 以八种语言说明。
 
+### 安全
+
+- **错误令牌的锁定重新起到限制作用(网络模式)**:不是本机且已被锁定的地址,会在判断其令牌之前就被拒绝,无论令牌以何种方式出示(请求头、Cookie、`?access=` 和 `POST /api/access`);此前被锁定的地址仍可继续猜测,正确的令牌依然能进入。本机上的使用者永远不会被锁在自己的监控之外。
+
+- **声明了反向代理后,回环地址不再等同于“本机”**(`listen.proxy_public_host`、`listen.secure_cookie` 或 `listen.trusted_proxy`):忘记转发请求头的代理不能再把互联网上的任何客户端变成所有者。在监控所在电脑前的人使用新增的、只监听 `127.0.0.1` 的第二个端口(`listen.local_port`,0 = 关闭,需要重启,使用同一个访问令牌)。启用 `listen.trusted_proxy` 时,代理所有客户端的错误令牌还会合计计数(为单个地址上限的三倍),因此轮换 `X-Forwarded-For` 无法绕过锁定。
+
+- **反向代理指南**(`DEPLOYMENT.md`,八种语言)给出完整配方:公开的 `Host`、`X-Forwarded-For $proxy_add_x_forwarded_for`、`X-Forwarded-Proto`、网络模式以及对代理的声明;不再说监控“没有登录”,并说明 `listen.trusted_proxy` 假定代理位于同一台电脑上。
+
+- **面向网络客户端的 `GET /api/settings`** 只返回它可以修改的设置的值;对其他设置(密钥和令牌的路径、文件夹、变量名)只说明是否已定义。
+
+- **对每个“仅限本机”路由的测试**:用一个不在回环地址上的客户端对真实服务器遍历路由表(并检查源代码,避免遗漏新路由)。
+
 ## [1.7.9]
 
 ### 修复
