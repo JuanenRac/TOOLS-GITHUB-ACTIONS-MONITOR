@@ -27,3 +27,7 @@ Le Impostazioni brevi hanno l'account (`github_owner`), i repository e gli ecosi
 ## La riga di comando
 
 `python monitor_cli.py status --lite`, `doctor --lite` e `health --lite` interrogano il monitor lite sulla porta 8766 (vedi [CLI_ita.md](CLI_ita.md)); i comandi che richiedono account o sentinelle vengono rifiutati. Anche la pagina ha la barra di stato a piè di pagina e le tabelle ordinabili.
+
+## Archiviazione
+
+L'edizione lite conserva solo file semplici: nessun database, nessuna attività di conservazione e nessuna delle opzioni di [STORAGE_ita.md](STORAGE_ita.md).

@@ -30,3 +30,7 @@ A workflow that FAILED and then PASSED on the very same commit (or whose run nee
 ## When the connection is lost
 
 If every read of a cycle fails with a connection problem (not a login or a quota problem), the page keeps the last picture and shows a red banner `no connection since HH:MM`. Nothing raises; the monitor resumes by itself and writes an `offline` and an `online` event once each (they can be notified). `ghamon_offline` is 1 meanwhile.
+
+## How long the history is kept
+
+Besides `keep_days` of the analytics block, the days of the history older than `retention.analytics_days` (180 by default) are removed by the retention pass; the samples themselves are capped by `max_samples`. See [STORAGE.md](STORAGE.md).

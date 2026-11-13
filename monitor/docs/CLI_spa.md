@@ -57,3 +57,7 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python monitor_cli
 ## El token de acceso en la línea de comandos
 
 En modo red el token se lee de `MONITOR_ACCESS_TOKEN`, luego de `MONITOR_TOKEN`, luego de la primera línea de `--token-file FICHERO` (deja ese fichero legible solo para ti: en un sistema con modos de fichero el comando avisa si otros pueden leerlo) y por último de `--token`, que se ve en la lista de procesos y por eso imprime un aviso por stderr.
+
+## Las herramientas de almacenamiento
+
+`python tools/migrate_storage.py` mueve el estado entre archivos y SQLite, y `python tools/backup_storage.py` hace, comprueba y restaura copias de cualquiera de los dos (ambas se describen en [STORAGE_spa.md](STORAGE_spa.md)). `--doctor` tiene dos comprobaciones para ellas: el almacenamiento y la retención.

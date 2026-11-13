@@ -99,3 +99,7 @@ location / {
 ## 多数のリポジトリ
 
 条件付き読み取り(`cache.etag`)により、変更のないリポジトリは割り当てを消費しません。`mode: lite`、`ecosystems`、`exclude`、`max_workers` で作業量を制限でき、受信 Webhook はイベントを送るリポジトリの定期取得を不要にします。`discover_limit` はアカウントごとに一覧するリポジトリの最大数です(既定 1000)。
+
+## 何か月も動かす場合:保存と保持
+
+`accounts/`(またはデータベース)はコンテナがなくなっても残るボリュームに置き、更新の前に `python tools/backup_storage.py backup FILE.zip --backend file`(または `sqlite`)でバックアップを取ってください。初期状態では、短い処理が90日より古いイベントと180日より古い分析を削除します。変更するには設定の `retention` を使い、`MONITOR_SERVICE=1` を付けると `--doctor` がモニターをサービスとして扱います(その場合、`retention` ブロックがない、またはイベントが大きくなっていると警告します)。SQLiteでは1アカウント1データベースが既定で、共有ファイル1つも可能です([STORAGE_jpn.md](STORAGE_jpn.md) を参照)。

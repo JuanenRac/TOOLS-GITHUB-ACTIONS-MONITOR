@@ -27,3 +27,7 @@
 ## コマンドライン
 
 `python monitor_cli.py status --lite`、`doctor --lite`、`health --lite` はポート 8766 の lite モニターに問い合わせます（[CLI_jpn.md](CLI_jpn.md) を参照）。アカウントや番人が必要なコマンドは拒否されます。ページにも下部のステータスバーと並べ替えできる表があります。
+
+## 保存
+
+ライト版は通常のファイルだけを使います。データベースも保持ジョブもなく、[STORAGE_jpn.md](STORAGE_jpn.md) のオプションは一切ありません。

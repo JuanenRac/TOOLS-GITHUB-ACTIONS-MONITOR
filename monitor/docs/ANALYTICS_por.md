@@ -30,3 +30,7 @@ Um workflow que FALHOU e depois PASSOU no mesmo commit (ou cujo run precisou de 
 ## Quando a ligação se perde
 
 Se todas as leituras de um ciclo falham por um problema de ligação (não de login nem de quota), a página mantém a última imagem e mostra um aviso vermelho `sem ligação desde HH:MM`. Nada lança exceções; o monitor retoma sozinho e escreve um evento `offline` e outro `online`, uma vez cada (podem ser notificados). Entretanto `ghamon_offline` vale 1.
+
+## Durante quanto tempo se guarda o histórico
+
+Além de `keep_days` do bloco de análises, a passagem de retenção remove os dias do histórico mais antigos do que `retention.analytics_days` (180 por omissão); as próprias amostras são limitadas por `max_samples`. Veja [STORAGE_por.md](STORAGE_por.md).

@@ -99,3 +99,7 @@ location / {
 ## Molti repository
 
 Le letture condizionali (`cache.etag`) fanno sì che un repository invariato non costi quota; `mode: lite`, `ecosystems`, `exclude` e `max_workers` limitano il lavoro; il webhook in ingresso elimina l'interrogazione dei repository che inviano eventi. `discover_limit` è il massimo di repository elencati per un account (1000 predefinito).
+
+## Attivo per mesi: archiviazione e conservazione
+
+Tieni `accounts/` (o il database) su un volume che sopravvive al container e fai una copia con `python tools/backup_storage.py backup FILE.zip --backend file` (o `sqlite`) prima di un aggiornamento. Di serie un breve passaggio rimuove gli eventi più vecchi di 90 giorni e le analisi più vecchie di 180; imposta `retention` nella configurazione per cambiarlo, e `MONITOR_SERVICE=1` fa trattare il monitor come un servizio a `--doctor` (che poi avvisa se manca il blocco `retention` o se gli eventi diventano grandi). Con SQLite il predefinito è un database per account; un file condiviso è possibile ed è descritto in [STORAGE_ita.md](STORAGE_ita.md).

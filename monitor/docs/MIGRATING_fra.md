@@ -114,3 +114,7 @@ Vos données ne bougent pas : `actions_monitor.json`, les caches, les journaux, 
 | `cli` | les outils en ligne de commande |
 | `ui` | À propos, documents d'aide, vues terminal |
 | `i18n`, `util` | les huit langues ; petits utilitaires partagés |
+
+## Déplacer l'état entre fichiers et SQLite (1.8.0)
+
+Rien n'est à migrer pour mettre à jour : les fichiers restent le défaut. Si vous voulez l'état dans SQLite, `python tools/migrate_storage.py --from file --to sqlite` montre ce qui serait copié (simulation) ; ajoutez `--apply` pour copier et vérifier. Vos fichiers ne sont jamais modifiés ni supprimés. Voir [STORAGE_fra.md](STORAGE_fra.md).

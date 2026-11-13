@@ -66,3 +66,7 @@ Pour plusieurs écrans, ouvrez une fenêtre par vue, par exemple `?view=now&chro
 - Plusieurs comptes sont plusieurs processus : chacun lit GitHub de son côté, donc le quota est partagé par le compte connecté que vous utilisez. Surveillez-le dans les cartes et baissez `refresh_seconds` ou `max_workers` par compte si besoin.
 - Les vérifications qui demandent un vrai navigateur, de vrais comptes GitHub et un vrai tunnel de webhook sont à votre charge ; les tests utilisent des remplaçants du moniteur d'un compte et n'appellent jamais GitHub.
 - Une version ultérieure ramènera les comptes dans un seul processus ; l'organisation des dossiers et l'API ci-dessus restent.
+
+## Où un compte garde son état
+
+Par défaut dans des fichiers sous `accounts/<id>/`. Un compte peut le garder dans une base de données : `"storage": {"backend": "sqlite"}` dans sa propre configuration lui donne `accounts/<id>/storage.sqlite3`, et seul le processus de ce compte l'écrit. La configuration du compte reste un fichier JSON. Voir [STORAGE_fra.md](STORAGE_fra.md).

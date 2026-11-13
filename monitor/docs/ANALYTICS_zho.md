@@ -30,3 +30,7 @@
 ## 连接丢失时
 
 如果某个周期的所有读取都因连接问题(而非登录或配额问题)失败,页面会保留最后的画面并显示红色横幅“自 HH:MM 起无连接”。不会抛出异常;监视器会自动恢复,并各写入一次 `offline` 和 `online` 事件(可被通知)。期间 `ghamon_offline` 为 1。
+
+## 历史保留多久
+
+除了分析区块里的 `keep_days`,保留任务还会删除早于 `retention.analytics_days`(默认 180)的历史日期;样本数量本身由 `max_samples` 限制。详见 [STORAGE_zho.md](STORAGE_zho.md)。

@@ -30,3 +30,7 @@ Un workflow che è FALLITO e poi PASSATO sullo stesso commit (o il cui run ha ri
 ## Quando la connessione si perde
 
 Se tutte le letture di un ciclo falliscono per un problema di connessione (non di login né di quota), la pagina conserva l'ultima immagine e mostra un avviso rosso `nessuna connessione dalle HH:MM`. Nulla solleva eccezioni; il monitor riprende da solo e scrive un evento `offline` e uno `online`, una volta ciascuno (si possono notificare). Nel frattempo `ghamon_offline` vale 1.
+
+## Per quanto tempo si conserva lo storico
+
+Oltre a `keep_days` del blocco delle analisi, il passaggio di conservazione rimuove i giorni dello storico più vecchi di `retention.analytics_days` (180 per impostazione predefinita); i campioni stessi sono limitati da `max_samples`. Vedi [STORAGE_ita.md](STORAGE_ita.md).

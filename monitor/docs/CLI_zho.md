@@ -57,3 +57,7 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python monitor_cli
 ## 命令行中的访问令牌
 
 在网络模式下, 令牌依次从 `MONITOR_ACCESS_TOKEN`、`MONITOR_TOKEN`、`--token-file FILE` 的第一行读取 (请让该文件只有你能读取: 在有文件模式的系统上, 其他用户可读时命令会发出警告), 最后才是 `--token`, 它会出现在进程列表中, 因此会在 stderr 打印警告。
+
+## 存储工具
+
+`python tools/migrate_storage.py` 在文件与 SQLite 之间迁移状态,`python tools/backup_storage.py` 为两者创建、检查和恢复备份(详见 [STORAGE_zho.md](STORAGE_zho.md))。`--doctor` 为此有两项检查:存储和保留。

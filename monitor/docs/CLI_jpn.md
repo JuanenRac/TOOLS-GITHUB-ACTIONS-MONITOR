@@ -57,3 +57,7 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python monitor_cli
 ## コマンドラインでのアクセストークン
 
 ネットワークモードでは、トークンは `MONITOR_ACCESS_TOKEN`、次に `MONITOR_TOKEN`、次に `--token-file FILE` の 1 行目から読み取り (このファイルは自分だけが読めるようにしてください。ファイルモードのあるシステムでは、他のユーザーが読めると警告します)、最後に `--token` から読み取ります。`--token` はプロセス一覧に表示されるため、stderr に警告を出します。
+
+## 保存用のツール
+
+`python tools/migrate_storage.py` は状態をファイルとSQLiteの間で移し、`python tools/backup_storage.py` はどちらのバックアップも作成・検証・復元します(どちらも [STORAGE_jpn.md](STORAGE_jpn.md) で説明しています)。`--doctor` にはそのための2つの検査(保存と保持)があります。

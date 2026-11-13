@@ -57,3 +57,7 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python monitor_cli
 ## Le jeton d'accès en ligne de commande
 
 En mode réseau le jeton est lu dans `MONITOR_ACCESS_TOKEN`, puis `MONITOR_TOKEN`, puis la première ligne de `--token-file FICHIER` (garde ce fichier lisible par toi seul : sur un système avec des modes de fichier la commande avertit si d'autres peuvent le lire) et enfin `--token`, qui apparaît dans la liste des processus et affiche donc un avertissement sur stderr.
+
+## Les outils de stockage
+
+`python tools/migrate_storage.py` déplace l'état entre fichiers et SQLite, et `python tools/backup_storage.py` fait, vérifie et restaure des sauvegardes de l'un ou l'autre (les deux sont décrits dans [STORAGE_fra.md](STORAGE_fra.md)). `--doctor` a deux vérifications pour eux : le stockage et la conservation.

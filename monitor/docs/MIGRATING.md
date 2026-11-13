@@ -114,3 +114,7 @@ Your data does not move: `actions_monitor.json`, the caches, the logs, `config_b
 | `cli` | the command-line tools |
 | `ui` | About, help documents, terminal views |
 | `i18n`, `util` | the eight languages; small shared helpers |
+
+## Moving the state between files and SQLite (1.8.0)
+
+Nothing has to be migrated to update: files stay the default. If you want the state in SQLite, `python tools/migrate_storage.py --from file --to sqlite` shows what it would copy (a dry run); add `--apply` to copy and verify it. Your files are never changed or deleted. See [STORAGE.md](STORAGE.md).

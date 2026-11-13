@@ -99,3 +99,7 @@ location / {
 ## Viele Repositorys
 
 Bedingte Lesungen (`cache.etag`) lassen ein unverändertes Repository kein Kontingent kosten; `mode: lite`, `ecosystems`, `exclude` und `max_workers` begrenzen die Arbeit; der eingehende Webhook ersetzt das Abfragen der Repositorys, die Ereignisse senden. `discover_limit` ist die Höchstzahl aufgelisteter Repositorys je Konto (Standard 1000).
+
+## Monatelanger Betrieb: Speicherung und Aufbewahrung
+
+Legen Sie `accounts/` (oder die Datenbank) auf ein Volume, das den Container überlebt, und sichern Sie vor einem Update mit `python tools/backup_storage.py backup DATEI.zip --backend file` (oder `sqlite`). Werkseitig entfernt ein kurzer Durchlauf Ereignisse älter als 90 Tage und Analysen älter als 180 Tage; ändern Sie das mit `retention` in der Konfiguration, und `MONITOR_SERVICE=1` lässt `--doctor` den Monitor als Dienst behandeln (dann warnt es, wenn der `retention`-Block fehlt oder die Ereignisse groß werden). Bei SQLite ist eine Datenbank pro Konto der Standard; eine gemeinsame Datei ist möglich und in [STORAGE_deu.md](STORAGE_deu.md) beschrieben.
