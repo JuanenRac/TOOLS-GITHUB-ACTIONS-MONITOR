@@ -15,9 +15,16 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - Os comandos dos guias (`python read_report.py`, `python actions_monitor.py --doctor`, `python monitor_cli.py status` ...) continuam a funcionar: um pequeno ficheiro de entrada com o mesmo nome fica na pasta do produto, pelo que os hooks e os servidores MCP já registados por caminho também continuam a funcionar. O zip da versão mantém o nome da pasta e passa a incluir `src/`, `assets/` e `tools/`.
 
+- **A barra ao fundo da página é uma só linha e diz apenas o que as caixas de cima não dizem**: a ligação, a quota, as execuções, a última leitura e os repositórios eram ditos duas vezes (caixas em cima e elementos da barra); a barra mantém as sentinelas, o aviso do modo Low (o único modo que diz), a IA, a conta, a versão, o endereço, a ficha do som e o relógio, e já não quebra em nenhuma largura (num ecrã estreito saem primeiro a data e o fuso). Um teste de navegador mede-a em várias línguas, larga e estreita.
+- **A caixa «a carregar repositórios»** é verificada num navegador: aparece enquanto os repositórios carregam e desaparece com o último.
+
 ### Adicionado
 
 - `tools/migrate_layout.py` para uma pasta que era uma instalação plana: simulação por defeito; `--apply` copia a sua configuração para `layout_backup_<marca>/config/` e MOVE (nunca apaga nem substitui) os módulos, a página, os exemplos e `locales/` antigos para `layout_backup_<marca>/old_code/`. `--doctor` avisa enquanto existirem tais restos. `MIGRATING.md` descreve-o nos oito idiomas.
+
+### Corrigido
+
+- O resumo para as ferramentas de IA (`ALERTS_BRIEF.md`) e o registo (`actions_monitor_log.txt`) passam a estar de acordo com um monitor em execução: o resumo tem uma linha `Monitor:` (ciclo completo, ciclo em curso, ligação perdida, último ciclo falhado) e a hora dessa nota, pelo que um ciclo que ainda lê repositórios já não deixa a hora do ciclo anterior como última palavra (os alertas listados são os guardados do último ciclo completo, e um ciclo parcial nunca abre nem fecha um); o registo escreve uma linha `cycle=started` quando começa um ciclo.
 
 ## [1.7.9]
 

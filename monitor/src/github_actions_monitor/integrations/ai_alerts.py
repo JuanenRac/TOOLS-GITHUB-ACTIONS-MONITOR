@@ -295,7 +295,7 @@ def group_cascades(alerts, links=None):
     return alerts
 
 
-def brief(alerts, limit, now=None, panels=None, sections=""):
+def brief(alerts, limit, now=None, panels=None, sections="", status=""):
     """The Markdown an AI reads when it starts: open alerts, the real ones first, within `limit` bytes. An alert that is red because of another one is listed under that one."""
     live = [a for a in alerts if a["state"] != "resolved"]
     live.sort(key=lambda a: (a["state"] == "acknowledged", a["class"] != "real", a["repo"], a["workflow"]))
@@ -307,7 +307,7 @@ def brief(alerts, limit, now=None, panels=None, sections=""):
     roots = [a for a in live if not a.get("origin")]
     stamp = time.time() if now is None else now
     head = f"{real} real alert(s) open, {len(live)} in total" + (f", in {sum(1 for a in roots if a['class'] == 'real' and a['state'] == 'open')} independent group(s)" if followers else "")
-    lines = ["# CI alerts", "", head + ". Transient ones usually clear by themselves; re-run once before you dig.", f"Updated: {tzdisplay.stamp(stamp)}", f"updated_epoch: {int(stamp)}", ""]
+    lines = ["# CI alerts", "", head + ". Transient ones usually clear by themselves; re-run once before you dig.", f"Updated: {tzdisplay.stamp(stamp)}", f"updated_epoch: {int(stamp)}"] + ([f"Monitor: {status}"] if status else []) + [""]
     for a in roots:
         mark = {"open": "", "acknowledged": " (acknowledged)"}[a["state"]]
         item = f"- [{a['severity']}/{a['class']}] {a['repo']} / {a['workflow']}: {a['conclusion']} x{a['streak']}{mark} - {a['cause']}. Next: {a['action']}. {a.get('url') or ''}".rstrip()
@@ -358,7 +358,7 @@ class Hook:
 HOOK = Hook()
 
 
-def update(config, red_rows, now=None, texts=None, opener=None, runner=None, owner="", panels=None, sections="", extra_rows=None):
+def update(config, red_rows, now=None, texts=None, opener=None, runner=None, owner="", panels=None, sections="", extra_rows=None, status=""):
     """Brings the feed up to date with the red workflows of this cycle. Returns {"opened": [...], "resolved": [...], "alerts": [...]}. Nothing is written when the feed is off.
     With a `runner` (read only calls to `gh`) and `ai_alerts.diagnose.enabled`, a new or changed red run also gets its diagnosis; without a runner the diagnosis already kept is reused."""
     cfg = settings(config)
@@ -414,7 +414,7 @@ def update(config, red_rows, now=None, texts=None, opener=None, runner=None, own
     state = {k: v for k, v in state.items() if v.get("state") != "resolved" or v.get("resolved_at", 0) > cutoff}
     _write(folder / STATE, json.dumps(state, ensure_ascii=False, indent=1) + "\n")
     alerts = sorted(state.values(), key=lambda a: (a["repo"], a["workflow"]))
-    _write(folder / BRIEF, brief(alerts, cfg["brief_max_bytes"], now, panels, sections))
+    _write(folder / BRIEF, brief(alerts, cfg["brief_max_bytes"], now, panels, sections, status))
     if cfg["hook"]["enabled"]:
         for alert in opened:
             if alert["class"] == "real" and HOOK.allowed(cfg["hook"]["max_per_hour"], now):
@@ -424,6 +424,24 @@ def update(config, red_rows, now=None, texts=None, opener=None, runner=None, own
                     degraded.note("ai_alerts.hook", error)
                     pass
     return {"opened": opened, "resolved": resolved, "alerts": alerts}
+
+
+def monitor_status(config, status, now=None):
+    """The brief says what the monitor is doing while a cycle runs, the connection is down or a cycle failed: the alerts it lists are the ones kept from the last complete cycle (none is opened
+    or resolved here, because a partial cycle must not close an alert) and its `Updated` line is the time of this note. False when the feed is off or nothing could be written."""
+    cfg = settings(config)
+    if not cfg["enabled"]:
+        return False
+    now = time.time() if now is None else now
+    folder = folder_of(cfg)
+    try:
+        state = _read(folder / STATE, {})
+        alerts = sorted(state.values(), key=lambda a: (a["repo"], a["workflow"]))
+        private_io.private_dir(folder)
+        _write(folder / BRIEF, brief(alerts, cfg["brief_max_bytes"], now, None, "", status))
+    except OSError:
+        return False
+    return True
 
 
 def ack(config, alert_id_, now=None):

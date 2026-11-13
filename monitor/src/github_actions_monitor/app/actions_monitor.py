@@ -1085,7 +1085,8 @@ def feed_alerts(config, data, diagnose=True):
             extra, sections = signals.extra_alert_rows(doc), signals.brief_sections(doc)
         except Exception as error:   # noqa: BLE001 - the signals never stop the feed of the red workflows
             degraded.note("ai_alerts.panels", error)
-        result = ai_alerts.update(config, red_rows(data), runner=ai_alerts.gh_runner if diagnose else None, owner=toolconfig.github_owner(config), panels=panels, sections=sections, extra_rows=extra)
+        result = ai_alerts.update(config, red_rows(data), runner=ai_alerts.gh_runner if diagnose else None, owner=toolconfig.github_owner(config), panels=panels, sections=sections, extra_rows=extra,
+                                  status=f"running, cycle complete ({len(data.get('repos') or [])} repositories read)")
     for alert in result["opened"]:
         if alert["class"] == "real":
             try:
@@ -1106,6 +1107,7 @@ def feed_alerts(config, data, diagnose=True):
 def maintain_extras(config, data):
     """The opt-in features that run after a cycle (each is OFF by default and costs nothing while off): exact costs, the local mirror of artifacts and the OpenTelemetry export."""
     if data.get("loading") or data["offline"]["offline"]:
+        brief_status(config, "connection lost, the alerts below are from the last complete cycle" if data["offline"]["offline"] else f"running, reading repositories ({data.get('loading')}), the alerts below are from the last complete cycle")
         return
     remaining = (data.get("rate") or {}).get("remaining")
     spare = remaining is None or remaining > 2 * config.get("min_rate_remaining", 800)
@@ -1119,6 +1121,16 @@ def maintain_extras(config, data):
             if name not in EXTRAS_WARNED:
                 EXTRAS_WARNED.append(name)
                 print(name + ":", repr(error)[:160], flush=True)
+
+
+def brief_status(config, status):
+    """The brief of the AI feed says what the monitor is doing (a cycle in progress, the connection lost, a cycle that failed) so that it never shows the hour of an old cycle as if it were
+    the last word. Best effort: it never stops the loop."""
+    try:
+        from github_actions_monitor.integrations import ai_alerts
+        ai_alerts.monitor_status(config, status)
+    except Exception as error:   # noqa: BLE001
+        degraded.note("ai_alerts.refresh", error)
 
 
 EXTRAS_WARNED = []
@@ -1173,6 +1185,9 @@ def loop(config):
                 from github_actions_monitor.util import banner
                 print(banner.tag(LITE["on"]), i18n.t("mon.loaded", n=snapshot["loading"]), flush=True)
 
+            with private_io.open_append(LOG_FILE) as log:      # the log says that a cycle began, so a long one is not mistaken for a monitor that stopped
+                log.write(tzdisplay.localize(f"{datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')} cycle=started\n"))
+            brief_status(toolconfig.raw_config() if not LITE["on"] else config, "running, a cycle has started, the alerts below are from the last complete cycle")
             data = collect(config, publish)
             transition = LINK.end_cycle()
             if transition:
@@ -1198,10 +1213,12 @@ def loop(config):
         except AuthError as error:
             with LOCK:
                 STATE["error"], STATE["hint"] = str(error), "auth"   # the page writes the hint in its own language
+            brief_status(toolconfig.raw_config() if not LITE["on"] else config, "running, but the last cycle failed to sign in to GitHub; the alerts below are from the last complete cycle")
             delay = 60
         except Exception as error:
             with LOCK:
                 STATE["error"] = str(error)
+            brief_status(toolconfig.raw_config() if not LITE["on"] else config, f"running, but the last cycle failed ({type(error).__name__}); the alerts below are from the last complete cycle")
             delay = 60
         time.sleep(delay)
 

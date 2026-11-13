@@ -16,9 +16,16 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - The commands of the guides (`python read_report.py`, `python actions_monitor.py --doctor`, `python monitor_cli.py status` ...) keep working: a small entry-point file with the same name stays in the product folder, so the hooks and MCP servers already registered by path keep working too. The release zip keeps its folder name and now carries `src/`, `assets/` and `tools/`.
 
+- **The bar at the foot of the page is one line and says only what the boxes at the top do not**: the connection, the allowance, the runs, the last read and the repositories were said twice (as boxes at the top and as items of the bar); the bar keeps the sentinels, the Low-mode warning (the only mode it says), the AI, the account, the version, the address, the sound chip and the clock, and it no longer wraps at any width (on a narrow screen the date and the zone leave first). A browser test measures it in several languages, wide and narrow.
+- **The "loading repositories" box** is checked in a browser: it is shown while repositories load and it is gone with the last one.
+
 ### Added
 
 - `tools/migrate_layout.py` for a folder that was a flat installation: a dry run by default; `--apply` copies your configuration to `layout_backup_<stamp>/config/` and MOVES (never deletes, never overwrites) the old modules, page, examples and `locales/` to `layout_backup_<stamp>/old_code/`. `--doctor` warns while such leftovers exist. `MIGRATING.md` describes it in the eight languages.
+
+### Fixed
+
+- The brief for the AI tools (`ALERTS_BRIEF.md`) and the log (`actions_monitor_log.txt`) now agree with a monitor that is running: the brief has a `Monitor:` line (cycle complete, cycle in progress, connection lost, last cycle failed) and the hour of that note, so a cycle that is still reading repositories no longer leaves the hour of the previous cycle as the last word (the alerts it lists are the ones kept from the last complete cycle, and a partial cycle never opens or closes one); the log writes a `cycle=started` line when a cycle begins.
 
 ## [1.7.9]
 

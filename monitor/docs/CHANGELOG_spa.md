@@ -15,9 +15,16 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - Los comandos de las guías (`python read_report.py`, `python actions_monitor.py --doctor`, `python monitor_cli.py status` ...) siguen funcionando: un pequeño archivo de entrada con el mismo nombre queda en la carpeta del producto, así que los hooks y servidores MCP ya registrados por ruta también siguen funcionando. El zip de la versión conserva su nombre de carpeta y ahora incluye `src/`, `assets/` y `tools/`.
 
+- **La barra al pie de la página es una sola línea y dice solo lo que los marcos de arriba no dicen**: la conexión, la cuota, las ejecuciones, la última lectura y los repositorios se decían dos veces (como marcos arriba y como elementos de la barra); la barra conserva el aviso del modo Low (el único modo que dice), los centinelas, la IA, la cuenta, la versión, la dirección, la ficha del sonido y el reloj, y ya no se parte en ningún ancho (en una pantalla estrecha se van primero la fecha y la zona). Una prueba de navegador la mide en varios idiomas, ancha y estrecha.
+- **El marco de «carga de repositorios»** se comprueba en un navegador: se ve mientras cargan los repositorios y desaparece con el último.
+
 ### Añadido
 
 - `tools/migrate_layout.py` para una carpeta que era una instalación plana: simulación por defecto; `--apply` copia tu configuración a `layout_backup_<marca>/config/` y MUEVE (nunca borra ni pisa) los módulos, la página, los ejemplos y `locales/` antiguos a `layout_backup_<marca>/old_code/`. `--doctor` avisa mientras queden restos así. `MIGRATING.md` lo describe en los ocho idiomas.
+
+### Corregido
+
+- El resumen para las herramientas de IA (`ALERTS_BRIEF.md`) y el registro (`actions_monitor_log.txt`) ahora coinciden con un monitor en marcha: el resumen lleva una línea `Monitor:` (ciclo completo, ciclo en curso, conexión perdida, último ciclo fallido) y la hora de esa nota, de modo que un ciclo que aún lee repositorios ya no deja la hora del ciclo anterior como última palabra (las alertas que lista son las guardadas del último ciclo completo, y un ciclo parcial nunca abre ni cierra una); el registro escribe una línea `cycle=started` cuando empieza un ciclo.
 
 ## [1.7.9]
 

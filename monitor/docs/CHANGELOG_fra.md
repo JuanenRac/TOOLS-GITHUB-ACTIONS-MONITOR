@@ -15,9 +15,16 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - Les commandes des guides (`python read_report.py`, `python actions_monitor.py --doctor`, `python monitor_cli.py status` ...) continuent de fonctionner : un petit fichier d'entrée du même nom reste dans le dossier du produit, donc les hooks et serveurs MCP déjà enregistrés par chemin fonctionnent aussi. Le zip de la version garde le nom de son dossier et contient maintenant `src/`, `assets/` et `tools/`.
 
+- **La barre au bas de la page tient sur une seule ligne et ne dit que ce que les cadres du haut ne disent pas** : la connexion, le quota, les exécutions, la dernière lecture et les dépôts étaient dits deux fois (cadres en haut et éléments de la barre) ; la barre garde les sentinelles, l'avertissement du mode Low (le seul mode qu'elle dit), l'IA, le compte, la version, l'adresse, la pastille du son et l'horloge, et ne passe plus à la ligne à aucune largeur (sur un écran étroit, la date et le fuseau partent d'abord). Un test de navigateur la mesure en plusieurs langues, large et étroite.
+- **Le cadre « chargement des dépôts »** est vérifié dans un navigateur : il apparaît pendant le chargement des dépôts et disparaît avec le dernier.
+
 ### Ajouté
 
 - `tools/migrate_layout.py` pour un dossier qui était une installation plate : simulation par défaut ; `--apply` copie votre configuration vers `layout_backup_<horodatage>/config/` et DÉPLACE (jamais supprimer ni écraser) les anciens modules, page, exemples et `locales/` vers `layout_backup_<horodatage>/old_code/`. `--doctor` avertit tant que de tels restes existent. `MIGRATING.md` le décrit dans les huit langues.
+
+### Corrigé
+
+- Le résumé pour les outils d'IA (`ALERTS_BRIEF.md`) et le journal (`actions_monitor_log.txt`) sont maintenant cohérents avec un moniteur en marche : le résumé porte une ligne `Monitor:` (cycle terminé, cycle en cours, connexion perdue, dernier cycle en échec) et l'heure de cette note, si bien qu'un cycle qui lit encore des dépôts ne laisse plus l'heure du cycle précédent comme dernier mot (les alertes listées sont celles gardées du dernier cycle complet, et un cycle partiel n'en ouvre ni n'en ferme jamais) ; le journal écrit une ligne `cycle=started` quand un cycle commence.
 
 ## [1.7.9]
 

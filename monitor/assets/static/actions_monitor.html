@@ -275,22 +275,20 @@ th.sortable{cursor:pointer;user-select:none;white-space:nowrap}th.sortable:hover
 .colsel .colbox{position:absolute;z-index:12;top:30px;left:0;min-width:220px;max-height:60vh;overflow:auto;background:var(--panel);border:1px solid var(--line2);border-radius:10px;box-shadow:var(--shadow);padding:8px 10px;display:flex;flex-direction:column;gap:3px}.colsel .colbox label{display:flex;gap:6px;align-items:center;white-space:nowrap}
 #statusbar{flex:none;display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:6px 14px;padding:6px 14px;border-top:2px solid var(--acc);background:linear-gradient(var(--panel2),var(--panel));font-size:12px;min-height:40px;position:relative;z-index:15;min-width:0}
 #statusbar .sb-left{display:flex;align-items:center;gap:8px;min-width:0;flex:0 1 200px}#statusbar .sb-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;color:var(--text)}
-#statusbar .sb-right{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:5px 6px;margin-left:auto;min-width:0;flex:1 1 0}
+#statusbar .sb-right{display:flex;flex-wrap:nowrap;align-items:center;justify-content:flex-end;gap:5px 6px;margin-left:auto;min-width:0;flex:1 1 0}
 #statusbar .sb-item{display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:100%;padding:2px 10px;border:1px solid var(--line2);border-radius:999px;background:var(--bg);color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.5}
 #statusbar .sb-item:empty{display:none}
 #statusbar .sb-sound{cursor:pointer;font:inherit;font-weight:600}#statusbar .sb-sound.off{color:var(--mut);border-style:dashed}
 #statusbar .sb-item.sb-opt{color:var(--mut);background:transparent;border-style:dashed}
-#statusbar #sb-conn{font-weight:700;border-color:var(--ok)}#statusbar #sb-conn.warn{border-color:var(--warn)}#statusbar #sb-conn.bad{border-color:var(--bad)}
-#statusbar #sb-quota,#statusbar #sb-runs{font-weight:600}#statusbar #sb-quota.warn{border-color:var(--warn)}#statusbar #sb-quota.bad{border-color:var(--bad)}
-#statusbar .sb-clock{order:99;display:inline-flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:0 8px;padding:3px 14px;margin-left:6px;border:2px solid var(--acc);border-radius:12px;background:var(--bg);box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo);overflow:visible;line-height:1.15}
+#statusbar .sb-clock{order:99;flex:none;display:inline-flex;flex-wrap:nowrap;align-items:baseline;justify-content:center;gap:0 8px;padding:3px 14px;margin-left:6px;border:2px solid var(--acc);border-radius:12px;background:var(--bg);box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo);overflow:visible;line-height:1.15}
 #statusbar .ck-t{font-size:22px;font-weight:800;letter-spacing:.02em;font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;color:var(--text)}
 #statusbar .ck-d{font-size:11px;font-weight:600;color:var(--mut);white-space:nowrap;order:-1}#statusbar .ck-z{font-size:11px;font-weight:700;color:var(--acc);white-space:nowrap;text-transform:uppercase}
 .sb-lamp{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--grey,#888);box-shadow:0 0 0 2px rgba(127,127,127,.18);flex:none}.sb-lamp.ok{background:var(--ok);box-shadow:0 0 6px var(--ok)}.sb-lamp.warn{background:var(--warn);box-shadow:0 0 6px var(--warn)}.sb-lamp.bad{background:var(--bad);box-shadow:0 0 6px var(--bad)}
 .sb-more{border:1px solid var(--line2);background:transparent;color:var(--text);border-radius:999px;padding:0 9px;font-size:12px;cursor:pointer;flex:none}
 #sb-open{width:26px;height:26px;flex:none}#notes-body{padding:6px 14px 14px;overflow:auto}#notes-body ul{list-style:none;margin:0;padding:0}#notes-body li{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:4px 10px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--line)}#notes-body time{color:var(--mut);font-variant-numeric:tabular-nums;font-size:12px}
 @media (max-width:900px){#statusbar .sb-opt{display:none}#statusbar{padding:5px 10px}}
-@media (max-width:560px){#statusbar .sb-clock{width:100%;margin-left:0}#statusbar .ck-t{font-size:20px}}
-@media (max-width:560px){#statusbar{flex-wrap:wrap}#statusbar .sb-left{flex-basis:100%}#statusbar .sb-right{width:100%;justify-content:flex-start;margin-left:0}}
+/* ONE line at every width: the bar never wraps; on a narrow screen the date goes first and the notice shrinks (its title carries the whole text) */
+@media (max-width:560px){#statusbar .sb-clock{margin-left:0;padding:2px 10px}#statusbar .ck-t{font-size:18px}#statusbar .ck-d,#statusbar .ck-z{display:none}#statusbar .sb-left{flex:1 1 0}#statusbar .sb-right{flex:none}}
 .shell{flex:1;min-height:0;display:flex}
 .stage{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
 .sidebar{flex:0 0 auto;width:var(--side-w,236px);display:flex;flex-direction:column;gap:14px;min-height:0;overflow:hidden;padding:14px 10px;background:var(--side);border-right:1px solid var(--line);color:var(--side-text);transition:width .18s}
@@ -480,14 +478,9 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <footer id="statusbar" role="contentinfo" data-i18n-aria="ui.sb_label">
 <div class="sb-left"><span class="sb-lamp ok" id="sb-lamp" aria-hidden="true"></span><span class="sb-text" id="sb-text" role="status" aria-live="polite"></span><button id="sb-more" class="sb-more" type="button" hidden></button><button id="sb-open" class="ib" type="button" hidden data-i18n-title="ui.sb_open_all" data-i18n-aria="ui.sb_open_all"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-list"/></svg></button></div>
 <div class="sb-right" id="sb-items">
-<span class="sb-item" id="sb-conn"><span class="sb-lamp" id="sb-conn-lamp" aria-hidden="true"></span><span id="sb-conn-t"></span></span>
-<span class="sb-item" id="sb-quota"></span>
-<span class="sb-item" id="sb-runs"></span>
-<span class="sb-item sb-opt" id="sb-refresh"></span>
-<span class="sb-item sb-opt" id="sb-mode"></span>
+<span class="sb-item" id="sb-mode"></span>
 <span class="sb-item sb-opt" id="sb-sent"></span>
 <span class="sb-item sb-opt" id="sb-ai"></span>
-<span class="sb-item sb-opt" id="sb-repos"></span>
 <span class="sb-item sb-opt" id="sb-acc"></span>
 <span class="sb-item sb-opt" id="sb-ver"></span>
 <span class="sb-item sb-opt" id="sb-addr"></span>
@@ -1548,24 +1541,11 @@ function renderNotes(){
   $("notes-body").innerHTML=rows.length?`<ul>${rows.map(n=>`<li><time>${esc(dtime(n.at))}</time><span class="chip ${n.level}">${esc(T("ui.sb_lv_"+n.level))}</span><span>${esc(n.text)}</span></li>`).join("")}</ul>`:`<p class="mut">${esc(T("ui.sb_none"))}</p>`;
 }
 function openNotes(){renderNotes();dlgOpen("notes")}
+/* the bottom bar says only what the boxes at the top do NOT say (connection, allowance, runs, last read and repositories are boxes at the top; the mode only when it is Low): the sentinels, the AI, the account, the version, the address, the sound and the clock; all in ONE line */
 function renderBarFacts(){
-  const d=DATA,set=(id,txt,title)=>{const e=$(id);if(!e)return;e.textContent=txt;e.title=title||""};
-  const conn=$("sb-conn-lamp"),ct=$("sb-conn-t");
-  if(!d){conn.className="sb-lamp";ct.textContent=T("ui.sb_waiting")}
-  else if(d.offline&&d.offline.offline){conn.className="sb-lamp bad";ct.textContent=T("ui.sb_offline");$("sb-conn").title=T("ui.sb_offline_t")}
-  else if(d.rate&&d.rate.remaining<=0){conn.className="sb-lamp bad";ct.textContent=T("ui.sb_quota_out",{time:clock(d.rate.reset,{hour:"2-digit",minute:"2-digit"})});$("sb-conn").title=T("ui.sb_quota_out_t")}
-  else if(d.paused_quota){conn.className="sb-lamp warn";ct.textContent=T("ui.sb_quota_low");$("sb-conn").title=T("ui.sb_quota_low_t")}
-  else{conn.className="sb-lamp ok";ct.textContent=T("ui.sb_online");$("sb-conn").title=T("ui.sb_online_t")}
-  $("sb-conn").className="sb-item "+(conn.className.replace("sb-lamp","").trim());
-  if(d){
-    const eta=d.rate?Math.max(0,Math.round((new Date(d.rate.reset).getTime()-Date.now())/60000)):null;
-    set("sb-quota",d.rate?T("ui.sb_quota",{remaining:d.rate.remaining,limit:d.rate.limit,time:clock(d.rate.reset,{hour:"2-digit",minute:"2-digit"})}):"",d.rate?T("ui.quota",{remaining:d.rate.remaining,limit:d.rate.limit,time:clock(d.rate.reset,{hour:"2-digit",minute:"2-digit"}),eta:eta}):"");
-    {const q=$("sb-quota"),fr=d.rate&&d.rate.limit?d.rate.remaining/d.rate.limit:1;q.className="sb-item "+(fr<0.05?"bad":fr<0.2?"warn":"")}
-    {const F=d.figures||{};set("sb-runs",F.active!=null||F.queued!=null?T("ui.sb_runs",{active:F.active||0,queued:F.queued||0}):"",T("ui.sb_runs_t"))}
-    set("sb-refresh",T("ui.sb_updated",{time:clock(d.updated),secs:d.took}),T("ui.sb_updated_t",{n:d.refresh_seconds}));
-    set("sb-repos",T("ui.sb_repos",{n:d.repos.length,hot:d.hot}),T("ui.sb_repos_t"));
-  }
-  const mode=typeof MODEDATA!=="undefined"&&MODEDATA?MODEDATA.mode:"normal";set("sb-mode",T("ui.sb_mode",{mode:T("ui.mode_"+mode)})+(MODEDATA&&MODEDATA.auto?T("ui.mode_auto"):""),mode==="low"?T("ui.mode_low_t"):T("ui.mode_title"));
+  const set=(id,txt,title)=>{const e=$(id);if(!e)return;e.textContent=txt;e.title=title||""};
+  {const low=typeof MODEDATA!=="undefined"&&MODEDATA&&MODEDATA.mode==="low";      /* Low is a warning (the figures can be old), not a figure of the boxes at the top: it is the only mode the bar says */
+    set("sb-mode",low?T("ui.sb_mode",{mode:T("ui.mode_low")})+(MODEDATA.auto?T("ui.mode_auto"):""):"",low?T("ui.mode_low_t"):"")}
   const sents=SBINFO&&!LITE?SBINFO.sentinels||[]:[];
   set("sb-sent",LITE?"":T("ui.sb_sentinels",{n:sents.filter(s=>s.enabled).length,m:sents.length}),sents.map(s=>(T("ui.al_o_"+s.name)===("ui.al_o_"+s.name)?s.name:T("ui.al_o_"+s.name))+": "+T(s.enabled?"ui.sb_on":"ui.sb_off")).join(" · "));
   {const ai=SBINFO&&!LITE?SBINFO.ai:null;set("sb-ai",!ai||!ai.enabled?"":(ai.streams>0?T("ui.sb_ai_stream"):ai.connected?T("ui.sb_ai_on",{via:ai.via||"-",ago:agoText(ai.age_seconds)}):T("ui.sb_ai_off")),T("ui.sb_ai_t"))}
