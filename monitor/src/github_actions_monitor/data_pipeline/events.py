@@ -24,6 +24,7 @@ from pathlib import Path
 from github_actions_monitor import i18n
 from github_actions_monitor.app import toolconfig
 from github_actions_monitor.security import private_io
+from github_actions_monitor.storage import locks, state_io
 
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
 EVENTS_FILE = HERE / "events_monitor.jsonl"
@@ -119,7 +120,7 @@ class Feed:
         self.events_file, self.state_file = Path(events_file), Path(state_file)
         self.notify_command = [str(x) for x in notify_command] if isinstance(notify_command, list) and notify_command else None
         try:
-            self.state = json.loads(self.state_file.read_text(encoding="utf-8"))
+            self.state = state_io.load_json(self.state_file)
         except (OSError, ValueError):
             self.state = None
         self.was_loading = True
@@ -175,9 +176,7 @@ class Feed:
 
     def _write_state(self):
         try:
-            tmp = self.state_file.with_name(self.state_file.name + ".tmp")
-            private_io.write_tmp(tmp, json.dumps(self.state, ensure_ascii=False))
-            os.replace(tmp, self.state_file)
+            state_io.save_text(self.state_file, json.dumps(self.state, ensure_ascii=False))
         except OSError:
             pass
 
@@ -186,12 +185,15 @@ class Feed:
             return
         at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         try:
-            with private_io.open_append(self.events_file) as handle:
-                for event in events:
-                    handle.write(json.dumps({"at": at, **event}, ensure_ascii=False) + "\n")
-            if self.events_file.stat().st_size > MAX_BYTES:
-                lines = self.events_file.read_text(encoding="utf-8").splitlines()
-                private_io.write_private(self.events_file, "\n".join(lines[len(lines) // 2:]) + "\n")
+            if state_io.append_events(self.events_file, [{"at": at, **event} for event in events]):      # a storage that is not made of files keeps the feed itself
+                return
+            with locks.path_lock(self.events_file):      # the purge of the retention rewrites this file under the same lock: no line is lost between the two
+                with private_io.open_append(self.events_file) as handle:
+                    for event in events:
+                        handle.write(json.dumps({"at": at, **event}, ensure_ascii=False) + "\n")
+                if self.events_file.stat().st_size > MAX_BYTES:
+                    lines = self.events_file.read_text(encoding="utf-8").splitlines()
+                    private_io.write_private(self.events_file, "\n".join(lines[len(lines) // 2:]) + "\n")
         except OSError:
             pass
 

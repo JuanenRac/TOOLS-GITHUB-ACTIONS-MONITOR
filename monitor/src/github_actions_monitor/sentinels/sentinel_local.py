@@ -47,6 +47,7 @@ from github_actions_monitor.app import surface
 from github_actions_monitor.app import toolconfig
 from github_actions_monitor.tool_version import TOOL_VERSION
 from github_actions_monitor.security import private_io
+from github_actions_monitor.storage import state_io
 
 from github_actions_monitor.util import paths
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
@@ -845,7 +846,7 @@ class Sentinel:
     @staticmethod
     def _load(path, default):
         try:
-            value = json.loads(Path(path).read_text(encoding="utf-8"))
+            value = state_io.load_json(path)
         except (OSError, ValueError):
             return default
         return value if isinstance(value, type(default)) else default      # a file of the wrong shape (a list, a number) is as good as no file
@@ -853,9 +854,7 @@ class Sentinel:
     @staticmethod
     def _save(path, value):
         try:
-            tmp = Path(str(path) + ".tmp")
-            private_io.write_tmp(tmp, json.dumps(value, ensure_ascii=False))
-            tmp.replace(path)
+            state_io.save_text(path, json.dumps(value, ensure_ascii=False))
         except OSError:
             pass
 
