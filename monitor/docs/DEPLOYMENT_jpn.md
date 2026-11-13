@@ -78,17 +78,20 @@ services:
 
 ## リバースプロキシの背後で
 
-モニターは `127.0.0.1` のままにし、`0.0.0.0` には決して割り当てないでください。ログインがありません。別のマシンから届かせる必要がある場合は、認証と TLS を備えたリバースプロキシを前に置きます。モニターは `Host` が自分のアドレスでないリクエストを拒否するため、プロキシは次のように送る必要があります:
+既定では、モニターは `127.0.0.1` だけで待ち受けます。別のマシンから接続する必要がある場合は、TLS 付きのリバースプロキシを前段に置き、ネットワークモードをオンにし(`listen.network`:すべてのリクエストがアクセストークンを持つ必要があります)、プロキシを宣言してください(公開名を指定した `listen.proxy_public_host`、`listen.secure_cookie`、または `listen.trusted_proxy`)。モニターは `Host` が自身のアドレスでもその公開名でもないリクエストを拒否します。そのためプロキシは `Host` を送り、さらにクライアントの実際のアドレスを追加する必要があります。
 
 ```nginx
 location / {
-    auth_basic           "monitor";
-    auth_basic_user_file /etc/nginx/monitor.htpasswd;
     proxy_pass           http://127.0.0.1:8765;
-    proxy_set_header     Host 127.0.0.1:8765;   # the monitor refuses any other Host
+    proxy_set_header     Host $host;                                  # the public name: set it in listen.proxy_public_host
+    proxy_set_header     X-Forwarded-For $proxy_add_x_forwarded_for;  # APPENDS the real address of the client; never copy the one the client sent
+    proxy_set_header     X-Forwarded-Proto $scheme;
 }
 ```
 
+プロキシを宣言すると、メインポートに届くものはヘッダーの内容にかかわらず「このコンピューター」とは見なされません(ヘッダーを付け忘れるプロキシがあると、インターネット上のすべてのクライアントがローカルに見えてしまうためです)。そのため、公開範囲を決めるキー、GitHub 上の操作、チャンネルのテストはそこからは使えません。使うには、`listen.local_port`(1024〜65535 の数値)で `127.0.0.1` だけで待ち受ける第2のポートを開き、モニターのあるコンピューターからそれを使ってください。同じアクセストークンが必要です。
+
+`listen.trusted_proxy` は、プロキシがモニターと「同じ」コンピューター上で動いていることを前提とします(モニターはループバックで届くあらゆる接続の `X-Forwarded-For` を信じます)。別のマシン上のプロキシでは使わないでください。プロキシのすべてのクライアントの誤ったトークンは合計でも数えられます(1つのアドレスの上限の3倍)。試行のたびにヘッダーを変えてもロックアウトは無効になりません。
 
 ## ログインに必要な最小限の権限(`gh` または細粒度トークン)
 

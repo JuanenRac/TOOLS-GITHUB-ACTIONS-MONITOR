@@ -78,17 +78,20 @@ services:
 
 ## Derrière un reverse proxy
 
-Gardez le moniteur sur `127.0.0.1` et ne le liez jamais à `0.0.0.0` : il n'a pas de connexion. Si vous devez l'atteindre depuis une autre machine, placez devant un reverse proxy avec authentification et TLS. Le moniteur refuse toute requête dont le `Host` n'est pas sa propre adresse ; le proxy doit donc l'envoyer :
+Par défaut, le moniteur n'écoute que sur `127.0.0.1`. Si vous devez l'atteindre depuis une autre machine, placez devant un reverse proxy avec TLS, activez le mode réseau (`listen.network` : chaque requête doit alors porter le jeton d'accès) et DÉCLAREZ le proxy (`listen.proxy_public_host` avec son nom public, `listen.secure_cookie` ou `listen.trusted_proxy`). Le moniteur refuse toute requête dont le `Host` n'est ni sa propre adresse ni ce nom public ; le proxy doit donc l'envoyer, et il doit ajouter l'adresse réelle du client :
 
 ```nginx
 location / {
-    auth_basic           "monitor";
-    auth_basic_user_file /etc/nginx/monitor.htpasswd;
     proxy_pass           http://127.0.0.1:8765;
-    proxy_set_header     Host 127.0.0.1:8765;   # the monitor refuses any other Host
+    proxy_set_header     Host $host;                                  # the public name: set it in listen.proxy_public_host
+    proxy_set_header     X-Forwarded-For $proxy_add_x_forwarded_for;  # APPENDS the real address of the client; never copy the one the client sent
+    proxy_set_header     X-Forwarded-Proto $scheme;
 }
 ```
 
+Dès qu'un proxy est déclaré, rien de ce qui arrive sur le port principal ne compte comme « cet ordinateur », quoi que disent les en-têtes (un proxy qui oublie un en-tête ferait sinon passer pour locaux tous les clients d'internet). Les clés qui décident de l'exposition, les actions sur GitHub et les tests des canaux ne peuvent donc pas être utilisés depuis ce port. Pour les utiliser, ouvrez avec `listen.local_port` (un nombre de 1024 à 65535) un second port qui n'écoute que sur `127.0.0.1` et servez-vous-en depuis l'ordinateur du moniteur : il demande le même jeton d'accès.
+
+`listen.trusted_proxy` suppose que le proxy tourne sur le MÊME ordinateur que le moniteur (le moniteur croit `X-Forwarded-For` sur toute connexion arrivant par la boucle locale) : ne l'utilisez pas avec un proxy sur une autre machine. Les mauvais jetons de tous les clients du proxy sont aussi comptés ensemble (trois fois la limite d'une adresse), pour que changer l'en-tête à chaque essai n'annule pas le verrouillage.
 
 ## Permissions minimales de la connexion (`gh` ou un jeton à granularité fine)
 

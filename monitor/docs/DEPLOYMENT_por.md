@@ -78,17 +78,20 @@ services:
 
 ## Atrás de um proxy inverso
 
-Mantenha o monitor em `127.0.0.1` e nunca o ligue a `0.0.0.0`: não tem login. Se precisar de lhe chegar a partir de outra máquina, ponha à frente um proxy inverso com autenticação e TLS. O monitor recusa qualquer pedido cujo `Host` não seja o seu próprio endereço, por isso o proxy tem de o enviar:
+Por defeito, o monitor só escuta em `127.0.0.1`. Se precisar de lhe chegar a partir de outra máquina, ponha à frente um proxy inverso com TLS, ative o modo de rede (`listen.network`: então todos os pedidos têm de levar o token de acesso) e DECLARE o proxy (`listen.proxy_public_host` com o seu nome público, `listen.secure_cookie` ou `listen.trusted_proxy`). O monitor recusa qualquer pedido cujo `Host` não seja o seu próprio endereço nem esse nome público; por isso o proxy tem de o enviar e tem de acrescentar o endereço real do cliente:
 
 ```nginx
 location / {
-    auth_basic           "monitor";
-    auth_basic_user_file /etc/nginx/monitor.htpasswd;
     proxy_pass           http://127.0.0.1:8765;
-    proxy_set_header     Host 127.0.0.1:8765;   # the monitor refuses any other Host
+    proxy_set_header     Host $host;                                  # the public name: set it in listen.proxy_public_host
+    proxy_set_header     X-Forwarded-For $proxy_add_x_forwarded_for;  # APPENDS the real address of the client; never copy the one the client sent
+    proxy_set_header     X-Forwarded-Proto $scheme;
 }
 ```
 
+Com um proxy declarado, nada do que chega pela porta principal conta como «este computador», diga o que disser nos cabeçalhos (um proxy que se esqueça de um cabeçalho faria parecer locais todos os clientes da internet). Por isso as chaves que decidem a exposição, as ações no GitHub e os testes dos canais não podem ser usados a partir daí. Para os usar, abra com `listen.local_port` (um número de 1024 a 65535) uma segunda porta que só escuta em `127.0.0.1` e use-a a partir do computador do monitor: pede o mesmo token de acesso.
+
+`listen.trusted_proxy` pressupõe que o proxy corre no MESMO computador que o monitor (o monitor acredita em `X-Forwarded-For` em qualquer ligação que chegue por loopback): não o use com um proxy noutra máquina. Os tokens errados de todos os clientes do proxy são também contados em conjunto (o triplo do limite de um endereço), para que mudar o cabeçalho a cada tentativa não anule o bloqueio.
 
 ## Permissões mínimas do acesso (`gh` ou um token de granularidade fina)
 

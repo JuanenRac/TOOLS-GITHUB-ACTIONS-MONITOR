@@ -118,3 +118,9 @@ Vos données ne bougent pas : `actions_monitor.json`, les caches, les journaux, 
 ## Déplacer l'état entre fichiers et SQLite (1.8.0)
 
 Rien n'est à migrer pour mettre à jour : les fichiers restent le défaut. Si vous voulez l'état dans SQLite, `python tools/migrate_storage.py --from file --to sqlite` montre ce qui serait copié (simulation) ; ajoutez `--apply` pour copier et vérifier. Vos fichiers ne sont jamais modifiés ni supprimés. Voir [STORAGE_fra.md](STORAGE_fra.md).
+
+# De 1.7.9 à 1.8.0
+
+Rien n'est à convertir. Un réglage peut demander un changement :
+
+- extra_reader.file pointe hors du dossier des comptes, donc le second compte n'est PAS utilisé. Déplacez le fichier du jeton dans le dossier des comptes (accounts/, ou le dossier indiqué par MONITOR_ACCOUNTS_DIR) et gardez son chemin dans extra_reader.file, ou activez extra_reader.any_folder dans Réglages > Quota.

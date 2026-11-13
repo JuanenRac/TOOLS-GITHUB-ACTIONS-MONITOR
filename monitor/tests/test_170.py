@@ -196,12 +196,21 @@ def get(url, headers=None, data=None, method=None):
             error.close()
 
 
+def unused_stretch():
+    """The first port of a stretch that nobody uses, asked of the system (an ephemeral port): two suites that run at once, or a program of the computer, no longer fight for the same fixed ports."""
+    import socket
+    with socket.socket() as probe:
+        probe.bind(("127.0.0.1", 0))
+        return max(1024, min(probe.getsockname()[1], 65000) - 100)
+
+
 class Running(unittest.TestCase):
     """A supervisor with two stub accounts and a real HTTP server in front of it."""
     names = ("alpha", "beta")
     mode = "ok"
 
     def setUp(self):
+        self.port_start = unused_stretch()
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.base = Path(self.tmp.name)
@@ -210,7 +219,7 @@ class Running(unittest.TestCase):
         self.addCleanup(patcher.stop)
         for name in self.names:
             accounts.create_account(name, name + "-owner")
-        self.supervisor = sup.Supervisor(command_for=stub_command(self.base, self.mode))
+        self.supervisor = sup.Supervisor(command_for=stub_command(self.base, self.mode), port_start=self.port_start)
         self.addCleanup(self.supervisor.stop)
         self.supervisor.sync()
         self.settle()
@@ -342,7 +351,7 @@ class Isolation(Running):
 
     def test_an_account_that_dies_at_once_is_retried_with_a_wait_and_never_stops_the_supervisor(self):
         self.supervisor.stop()
-        self.supervisor = sup.Supervisor(command_for=stub_command(self.base, "crash"))
+        self.supervisor = sup.Supervisor(command_for=stub_command(self.base, "crash"), port_start=self.port_start)
         self.addCleanup(self.supervisor.stop)
         self.supervisor.sync()
         for _ in range(3):
@@ -394,13 +403,15 @@ class Isolation(Running):
 
     def test_two_accounts_never_get_the_same_port_even_when_the_first_free_one_is_taken(self):
         busy = {c.port for c in self.supervisor.children.values()}         # the two stub children of setUp already listen on the first ports: the next supervisor must move past them
-        other = sup.Supervisor(command_for=stub_command(self.base))
+        other = sup.Supervisor(command_for=stub_command(self.base), port_start=self.port_start)
         other.sync()                       # it only chooses ports: nothing is started, so nothing is bound yet, which is exactly when a repeated port used to happen
         ports = [c.port for c in other.children.values()]
         self.assertEqual(len(ports), 2)
         self.assertEqual(len(set(ports)), 2, ports)
         self.assertFalse(busy & set(ports), (busy, ports))
-        self.assertEqual(sup.free_port(sup.CHILD_PORT_START, taken={p for p in range(sup.CHILD_PORT_START, sup.CHILD_PORT_START + 50) if p != sup.CHILD_PORT_START + 49}), sup.CHILD_PORT_START + 49)
+        start = unused_stretch()
+        self.assertEqual(sup.free_port(start, taken={p for p in range(start, start + 50) if p != start + 49}), start + 49)
+        self.assertEqual(sup.Supervisor().port_start, sup.CHILD_PORT_START, "the default is still the documented stretch")
 
     def test_each_child_gets_its_own_free_port_on_the_loopback_address_only(self):
         ports = [c.port for c in self.supervisor.children.values()]

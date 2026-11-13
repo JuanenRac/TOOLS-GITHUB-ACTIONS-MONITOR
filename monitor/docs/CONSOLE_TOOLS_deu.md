@@ -21,3 +21,4 @@ Zwei optionale Kommandozeilenwerkzeuge. Der Monitor selbst braucht kein Paket; d
 
 - `pip install rich`, dann `py -3 tui.py [--port 8765] [--refresh 5] [--once] [--theme dark|light]`. Sie zeichnet ein Live-Raster mit dem, was läuft, den roten Workflows, der Signatur-Warteschlange und dem Bericht, gelesen vom laufenden Monitor auf `127.0.0.1` (kein GitHub-Kontingent).
 - Sie ist nur lesend: Keine Taste startet neu, schließt oder schreibt etwas. Ohne Rich nennt sie die Installation und endet mit Code 3; der Monitor und seine Tests brauchen Rich nie.
+- Die interaktive Terminalanwendung `tui_textual.py` (`pip install textual`; mit `--lite` für die Lite-Ausgabe) bearbeitet im Reiter Einstellungen die einfachen Einstellungen der aufgeführten Gruppen, **Listen** (Einträge durch Kommas getrennt: `a, b, c`) und **Zahlen-Maps** (`name=3, other=5`); der Server prüft jeden Wert erneut, und die Sicherheitsoptionen lassen sich nur auf der Seite ändern.

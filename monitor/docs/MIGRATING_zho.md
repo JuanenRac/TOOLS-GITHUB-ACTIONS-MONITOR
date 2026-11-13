@@ -118,3 +118,9 @@
 ## 在文件与 SQLite 之间迁移状态(1.8.0)
 
 升级时无需迁移任何内容:默认仍然是文件。如果想把状态放进 SQLite,`python tools/migrate_storage.py --from file --to sqlite` 会显示将要复制的内容(试运行);加上 `--apply` 才会复制并校验。你的文件绝不会被修改或删除。详见 [STORAGE_zho.md](STORAGE_zho.md)。
+
+# 从 1.7.9 到 1.8.0
+
+无需转换。有一项设置可能需要调整:
+
+- extra_reader.file 指向账户文件夹之外,因此不会使用第二个账户。请把令牌文件移到账户文件夹(accounts/,或 MONITOR_ACCOUNTS_DIR 指定的文件夹)并在 extra_reader.file 中保留其路径,或在 设置 > 配额 中开启 extra_reader.any_folder。

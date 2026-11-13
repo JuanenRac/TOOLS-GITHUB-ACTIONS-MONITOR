@@ -78,17 +78,20 @@ services:
 
 ## 置于反向代理之后
 
-让监视器保持在 `127.0.0.1`,绝不要绑定到 `0.0.0.0`:它没有登录。如果必须从另一台机器访问,请在前面放置带认证和 TLS 的反向代理。监视器会拒绝 `Host` 不是其自身地址的任何请求,所以代理必须发送它:
+默认情况下,监控只监听 `127.0.0.1`。如果必须从另一台机器访问,请在前面放一个带 TLS 的反向代理,开启网络模式(`listen.network`:此时每个请求都必须带访问令牌),并声明该代理(带公开名称的 `listen.proxy_public_host`、`listen.secure_cookie` 或 `listen.trusted_proxy`)。监控会拒绝 `Host` 既不是自己的地址也不是该公开名称的任何请求,因此代理必须发送它,并且必须追加客户端的真实地址:
 
 ```nginx
 location / {
-    auth_basic           "monitor";
-    auth_basic_user_file /etc/nginx/monitor.htpasswd;
     proxy_pass           http://127.0.0.1:8765;
-    proxy_set_header     Host 127.0.0.1:8765;   # the monitor refuses any other Host
+    proxy_set_header     Host $host;                                  # the public name: set it in listen.proxy_public_host
+    proxy_set_header     X-Forwarded-For $proxy_add_x_forwarded_for;  # APPENDS the real address of the client; never copy the one the client sent
+    proxy_set_header     X-Forwarded-Proto $scheme;
 }
 ```
 
+一旦声明了代理,无论请求头怎么写,从主端口到达的任何请求都不算作“本机”(否则忘记加请求头的代理会让互联网上的所有客户端看起来都是本地的)。因此决定暴露范围的键、对 GitHub 的操作和通道测试无法从那里使用。要使用它们,请用 `listen.local_port`(1024 到 65535 之间的数字)再打开一个只监听 `127.0.0.1` 的端口,并在运行监控的这台电脑上使用它:它要求同一个访问令牌。
+
+`listen.trusted_proxy` 假定代理与监控运行在同一台电脑上(监控会相信任何经回环地址到达的连接上的 `X-Forwarded-For`):不要用于位于另一台机器上的代理。代理所有客户端的错误令牌还会合计计数(为单个地址上限的三倍),这样每次尝试都更换请求头也无法绕过锁定。
 
 ## 登录所需的最小权限(`gh` 或细粒度令牌)
 

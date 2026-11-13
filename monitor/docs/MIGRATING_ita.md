@@ -118,3 +118,9 @@ I tuoi dati non si spostano: `actions_monitor.json`, le cache, i log, `config_ba
 ## Spostare lo stato tra file e SQLite (1.8.0)
 
 Per aggiornare non serve migrare nulla: i file restano il predefinito. Se vuoi lo stato in SQLite, `python tools/migrate_storage.py --from file --to sqlite` mostra cosa copierebbe (simulazione); aggiungi `--apply` per copiare e verificare. I tuoi file non vengono mai modificati né eliminati. Vedi [STORAGE_ita.md](STORAGE_ita.md).
+
+# Da 1.7.9 a 1.8.0
+
+Non c'è nulla da convertire. Un'impostazione può richiedere uno spostamento:
+
+- extra_reader.file punta fuori dalla cartella degli account, quindi il secondo account NON viene usato. Sposta il file del token nella cartella degli account (accounts/, o la cartella indicata da MONITOR_ACCOUNTS_DIR) e lascia il suo percorso in extra_reader.file, oppure attiva extra_reader.any_folder in Impostazioni > Quota.

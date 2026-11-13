@@ -118,3 +118,9 @@ Os seus dados não se movem: `actions_monitor.json`, as caches, os registos, `co
 ## Mover o estado entre ficheiros e SQLite (1.8.0)
 
 Não é preciso migrar nada para atualizar: os ficheiros continuam a ser o predefinido. Se quiser o estado em SQLite, `python tools/migrate_storage.py --from file --to sqlite` mostra o que copiaria (simulação); acrescente `--apply` para copiar e verificar. Os seus ficheiros nunca são alterados nem apagados. Veja [STORAGE_por.md](STORAGE_por.md).
+
+# De 1.7.9 para 1.8.0
+
+Não é preciso converter nada. Uma definição pode precisar de uma alteração:
+
+- extra_reader.file aponta para fora da pasta de contas, pelo que a segunda conta NÃO é usada. Mova o ficheiro do token para a pasta de contas (accounts/, ou a pasta indicada por MONITOR_ACCOUNTS_DIR) e mantenha o seu caminho em extra_reader.file, ou ative extra_reader.any_folder em Definições > Quota.

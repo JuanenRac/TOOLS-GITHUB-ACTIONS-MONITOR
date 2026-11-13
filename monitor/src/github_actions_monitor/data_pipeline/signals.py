@@ -87,9 +87,11 @@ def inventory(data, panels=None, health=None, now=None):
         out.append(_signal("quota.trend", "now", "watch" if trend.get("others_warn") else "info",
                            f"over {trend.get('minutes')} min the account spent {trend.get('all_per_hour')} calls an hour, this monitor {trend.get('own_per_hour')} and other tools about {trend.get('others_per_hour')}" +
                            ("; other tools are spending most of the allowance" if trend.get("others_warn") else ""), transient=bool(trend.get("others_warn"))))
-    if etag.get("calls") is not None or len(sources) > 1:
+    gql = data.get("graphql") or {}
+    if etag.get("calls") is not None or len(sources) > 1 or gql.get("calls"):
         rows = [_row(name, f"{info.get('remaining')}/{info.get('limit')} calls left, renews {info.get('reset')}", "", None, "") for name, info in sources.items()]
-        out.append(_signal("quota.accounting", "now", "info", f"reads: {etag.get('calls', 0)} conditional calls, {etag.get('saved', 0)} answered 304 (no allowance spent)" + (f"; {len(sources)} sources read the repositories" if len(sources) > 1 else ""), rows))
+        out.append(_signal("quota.accounting", "now", "info", f"reads: {etag.get('calls', 0)} conditional calls, {etag.get('saved', 0)} answered 304 (no allowance spent)" + (f"; {len(sources)} sources read the repositories" if len(sources) > 1 else "") +
+                           (f"; GraphQL: {gql.get('calls')} batch(es) read {gql.get('repos', 0)} repositories for {gql.get('cost', 0)} point(s), {gql.get('fallbacks', 0)} went to REST" if gql.get("calls") else ""), rows))
     offline = (data.get("offline") or {}).get("offline")
     out.append(_signal("connection", "now", "watch" if offline else "info", "offline since " + str((data.get("offline") or {}).get("since")) if offline else "online", transient=bool(offline)))
     for panel in panels or []:

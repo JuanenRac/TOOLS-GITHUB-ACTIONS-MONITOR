@@ -118,3 +118,9 @@ Tus datos no se mueven: `actions_monitor.json`, las cachés, los registros, `con
 ## Mover el estado entre archivos y SQLite (1.8.0)
 
 No hay que migrar nada para actualizar: los archivos siguen siendo lo predeterminado. Si quieres el estado en SQLite, `python tools/migrate_storage.py --from file --to sqlite` muestra lo que copiaría (simulación); añade `--apply` para copiar y verificar. Tus archivos nunca se modifican ni se borran. Véase [STORAGE_spa.md](STORAGE_spa.md).
+
+# De 1.7.9 a 1.8.0
+
+No hay que convertir nada. Un ajuste puede necesitar un cambio:
+
+- extra_reader.file apunta fuera de la carpeta de cuentas, así que la segunda cuenta NO se usa. Mueve el archivo del token a la carpeta de cuentas (accounts/, o la carpeta que indique MONITOR_ACCOUNTS_DIR) y deja su ruta en extra_reader.file, o activa extra_reader.any_folder en Ajustes > Cuota.

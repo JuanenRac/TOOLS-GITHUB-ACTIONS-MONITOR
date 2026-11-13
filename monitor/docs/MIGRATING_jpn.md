@@ -118,3 +118,9 @@
 ## 状態をファイルとSQLiteの間で移す(1.8.0)
 
 更新のために移行する必要はありません。既定は引き続きファイルです。状態をSQLiteに置きたい場合は、`python tools/migrate_storage.py --from file --to sqlite` でコピーされる内容を確認でき(ドライラン)、`--apply` を付けるとコピーして検証します。元のファイルは変更も削除もされません。詳しくは [STORAGE_jpn.md](STORAGE_jpn.md) をご覧ください。
+
+# 1.7.9 から 1.8.0 へ
+
+変換は不要です。1つの設定は対応が必要な場合があります。
+
+- extra_reader.file がアカウントフォルダーの外を指しているため、2つ目のアカウントは使われません。トークンファイルをアカウントフォルダー(accounts/、または MONITOR_ACCOUNTS_DIR が指すフォルダー)に移してパスを extra_reader.file に残すか、設定 > クォータで extra_reader.any_folder をオンにしてください。

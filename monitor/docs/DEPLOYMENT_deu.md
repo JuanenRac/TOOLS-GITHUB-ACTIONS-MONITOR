@@ -78,17 +78,20 @@ services:
 
 ## Hinter einem Reverse-Proxy
 
-Lassen Sie den Monitor auf `127.0.0.1` und binden Sie ihn nie an `0.0.0.0`: Er hat keinen Login. Wenn Sie ihn von einem anderen Rechner erreichen müssen, setzen Sie einen Reverse-Proxy mit Authentifizierung und TLS davor. Der Monitor lehnt jede Anfrage ab, deren `Host` nicht seine eigene Adresse ist; der Proxy muss ihn also senden:
+Standardmäßig lauscht der Monitor nur auf `127.0.0.1`. Wenn du ihn von einem anderen Rechner aus erreichen musst, setze einen Reverse-Proxy mit TLS davor, schalte den Netzwerkmodus ein (`listen.network`: dann muss jede Anfrage das Zugriffstoken tragen) und DEKLARIERE den Proxy (`listen.proxy_public_host` mit seinem öffentlichen Namen, `listen.secure_cookie` oder `listen.trusted_proxy`). Der Monitor weist jede Anfrage ab, deren `Host` nicht seine eigene Adresse oder dieser öffentliche Name ist; der Proxy muss ihn also senden und die echte Adresse des Clients anfügen:
 
 ```nginx
 location / {
-    auth_basic           "monitor";
-    auth_basic_user_file /etc/nginx/monitor.htpasswd;
     proxy_pass           http://127.0.0.1:8765;
-    proxy_set_header     Host 127.0.0.1:8765;   # the monitor refuses any other Host
+    proxy_set_header     Host $host;                                  # the public name: set it in listen.proxy_public_host
+    proxy_set_header     X-Forwarded-For $proxy_add_x_forwarded_for;  # APPENDS the real address of the client; never copy the one the client sent
+    proxy_set_header     X-Forwarded-Proto $scheme;
 }
 ```
 
+Sobald ein Proxy deklariert ist, gilt nichts, was am Hauptport ankommt, als „dieser Computer“, was auch immer die Header sagen (ein Proxy, der einen Header vergisst, ließe sonst jeden Client des Internets lokal aussehen). Die Schlüssel, die die Erreichbarkeit bestimmen, die Aktionen auf GitHub und die Tests der Kanäle lassen sich von dort daher nicht verwenden. Um sie zu nutzen, öffne mit `listen.local_port` (eine Zahl von 1024 bis 65535) einen zweiten Port, der nur auf `127.0.0.1` lauscht, und benutze ihn am Rechner des Monitors: Er verlangt dasselbe Zugriffstoken.
+
+`listen.trusted_proxy` setzt voraus, dass der Proxy auf DEMSELBEN Rechner wie der Monitor läuft (der Monitor glaubt `X-Forwarded-For` bei jeder Verbindung über Loopback): Verwende es nicht mit einem Proxy auf einem anderen Rechner. Die falschen Tokens aller Clients des Proxys werden außerdem zusammen gezählt (das Dreifache des Limits einer Adresse), damit das Ändern des Headers bei jedem Versuch die Sperre nicht aushebelt.
 
 ## Mindestberechtigungen des Logins (`gh` oder ein feingranulares Token)
 

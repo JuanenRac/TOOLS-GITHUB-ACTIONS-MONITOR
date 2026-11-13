@@ -403,6 +403,15 @@
     "auto_frequency": false,
     "hide": []
   },
+  "auth": {
+    "enabled": false,
+    "session_hours": 12,
+    "max_failed_logins": 5,
+    "lockout_minutes": 15,
+    "min_length": 10,
+    "allow_bearer": true,
+    "audit": true
+  },
   "listen": {
     "network": false,
     "host": "127.0.0.1",
@@ -412,7 +421,8 @@
     "tls_key_file": "",
     "secure_cookie": false,
     "max_failed_attempts": 10,
-    "query_access": true
+    "query_access": true,
+    "local_port": 0
   },
   "github_token": {
     "enabled": false,
