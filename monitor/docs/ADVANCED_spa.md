@@ -75,3 +75,7 @@ Con `otlp.enabled` activado y un `otlp.endpoint` (HTTPS, o HTTP en este equipo),
 - El servidor MCP habla solo por entrada y salida estándar; nunca lo pongas detrás de un puerto de red.
 
 `listen.trusted_proxy` (apagado por defecto): solo si un proxy inverso TUYO en el mismo equipo es la única entrada. Los intentos fallidos se cuentan entonces contra la última dirección de `X-Forwarded-For` (la que añade tu proxy) y no contra el proxy; una petición que llega por un proxy sigue sin tratarse nunca como este equipo. Si alguien más puede llegar al monitor directamente, déjalo apagado.
+
+## El bucle de refresco: latido y vigilante
+
+`/api/data` devuelve también `loop`: la fase del ciclo de refresco (`collect`, `maintain`, `publish`, `log`, `extras`, `idle`), cuánto lleva el ciclo en marcha, el último ciclo bueno, el último error y la fase en que ocurrió, los reinicios y cualquier problema al escribir el registro o el resumen para la IA. La barra inferior de la página lo muestra en rojo cuando un ciclo dura demasiado y como aviso cuando no se puede escribir un fichero. Un vigilante reinicia en un hilo nuevo el ciclo que dure más de `watchdog_minutes` (por defecto 10, 0 lo apaga), tras escribir en `actions_monitor_log.txt` la traza de todos los hilos.

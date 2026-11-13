@@ -75,3 +75,7 @@ With `otlp.enabled` on and an `otlp.endpoint` (HTTPS, or HTTP on this computer),
 - The MCP server speaks over standard input and output only; never put it behind a network port.
 
 `listen.trusted_proxy` (off by default): only if a reverse proxy of YOURS on the same computer is the only way in. Failed attempts are then counted against the last address of `X-Forwarded-For` (the one your proxy adds) and not against the proxy; a request that comes through a proxy is still never treated as this computer. If anybody else can reach the monitor directly, leave it off.
+
+## The refresh loop: heartbeat and watchdog
+
+`/api/data` also returns `loop`: the phase of the refresh cycle (`collect`, `maintain`, `publish`, `log`, `extras`, `idle`), how long the cycle has been running, the last good cycle, the last error and the phase it happened in, the restarts and any problem writing the log or the brief for the AI. The bottom bar of the page shows it in red when a cycle runs far too long, and as a warning when a file cannot be written. A watchdog restarts a cycle that runs longer than `watchdog_minutes` (default 10, 0 switches it off) in a new thread, after writing the traceback of every thread to `actions_monitor_log.txt`.
