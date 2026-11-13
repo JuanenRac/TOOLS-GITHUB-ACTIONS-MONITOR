@@ -15,6 +15,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - Os comandos dos guias (`python read_report.py`, `python actions_monitor.py --doctor`, `python monitor_cli.py status` ...) continuam a funcionar: um pequeno ficheiro de entrada com o mesmo nome fica na pasta do produto, pelo que os hooks e os servidores MCP já registados por caminho também continuam a funcionar. O zip da versão mantém o nome da pasta e passa a incluir `src/`, `assets/` e `tools/`.
 
+- **O roteiro diz o que a 1.8.0 leva e o que cada versão seguinte trará**: o que já está no ramo principal, o que está concluído à espera de integração, o que ainda se conclui e o plano da 1.8.2 à 2.0.0 pela ordem em que será feito, nas oito línguas.
+
 ### Adicionado
 
 - `tools/migrate_layout.py` para uma pasta que era uma instalação plana: simulação por defeito; `--apply` copia a sua configuração para `layout_backup_<marca>/config/` e MOVE (nunca apaga nem substitui) os módulos, a página, os exemplos e `locales/` antigos para `layout_backup_<marca>/old_code/`. `--doctor` avisa enquanto existirem tais restos. `MIGRATING.md` descreve-o nos oito idiomas.

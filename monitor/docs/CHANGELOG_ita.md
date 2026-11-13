@@ -15,6 +15,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - I comandi delle guide (`python read_report.py`, `python actions_monitor.py --doctor`, `python monitor_cli.py status` ...) continuano a funzionare: un piccolo file di ingresso con lo stesso nome resta nella cartella del prodotto, quindi anche gli hook e i server MCP già registrati per percorso continuano a funzionare. Lo zip della versione mantiene il nome della cartella e ora contiene `src/`, `assets/` e `tools/`.
 
+- **La roadmap dice cosa contiene la 1.8.0 e cosa porterà ogni versione successiva**: ciò che è già nel ramo principale, ciò che è finito e attende l'unione, ciò che si sta ancora chiudendo e il piano dalla 1.8.2 alla 2.0.0 nell'ordine in cui sarà eseguito, nelle otto lingue.
+
 ### Aggiunto
 
 - `tools/migrate_layout.py` per una cartella che era un'installazione piatta: simulazione per impostazione predefinita; `--apply` copia la tua configurazione in `layout_backup_<marca>/config/` e SPOSTA (mai cancella né sovrascrive) i vecchi moduli, pagina, esempi e `locales/` in `layout_backup_<marca>/old_code/`. `--doctor` avvisa finché esistono tali resti. `MIGRATING.md` lo descrive nelle otto lingue.

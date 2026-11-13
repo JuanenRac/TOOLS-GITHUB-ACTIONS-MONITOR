@@ -17,6 +17,8 @@ when this file and `tool_version.py` disagree.
 
 - The commands of the guides (`python read_report.py`, `python actions_monitor.py --doctor`, `python monitor_cli.py status` ...) keep working: a small entry-point file with the same name stays in the product folder, so the hooks and MCP servers already registered by path keep working too. The release zip keeps its folder name and now carries `src/`, `assets/` and `tools/`.
 
+- **The roadmap tells what 1.8.0 holds and what each next version brings**: what is already in the main branch, what is finished and waiting to be merged, what is still being finished, and the plan from 1.8.2 to 2.0.0 in the order it will be done, in the eight languages.
+
 - **The bar at the foot of the page is one line and says only what the boxes at the top do not**: the connection, the allowance, the runs, the last read and the repositories were said twice (as boxes at the top and as items of the bar); the bar keeps the sentinels, the Low-mode warning (the only mode it says), the AI, the account, the version, the address, the sound chip and the clock, and it no longer wraps at any width (on a narrow screen the date and the zone leave first). A browser test measures it in several languages, wide and narrow.
 - **The "loading repositories" box** is checked in a browser: it is shown while repositories load and it is gone with the last one.
 
