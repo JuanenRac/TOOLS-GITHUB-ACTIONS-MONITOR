@@ -19,6 +19,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - `tools/migrate_layout.py` per una cartella che era un'installazione piatta: simulazione per impostazione predefinita; `--apply` copia la tua configurazione in `layout_backup_<marca>/config/` e SPOSTA (mai cancella né sovrascrive) i vecchi moduli, pagina, esempi e `locales/` in `layout_backup_<marca>/old_code/`. `--doctor` avvisa finché esistono tali resti. `MIGRATING.md` lo descrive nelle otto lingue.
 
+- **L'applicazione da terminale modifica liste e mappe**: nella scheda Impostazioni di `tui_textual.py` si possono scrivere e salvare una lista (elementi separati da virgole) e una mappa di numeri (`name=3, other=5`) come un'impostazione semplice; il server ricontrolla ogni valore, le opzioni di sicurezza si cambiano ancora solo nella pagina, e la guida degli strumenti da console lo dice.
+
 ## [1.7.9]
 
 ### Corretto

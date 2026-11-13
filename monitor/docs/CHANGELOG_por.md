@@ -19,6 +19,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - `tools/migrate_layout.py` para uma pasta que era uma instalação plana: simulação por defeito; `--apply` copia a sua configuração para `layout_backup_<marca>/config/` e MOVE (nunca apaga nem substitui) os módulos, a página, os exemplos e `locales/` antigos para `layout_backup_<marca>/old_code/`. `--doctor` avisa enquanto existirem tais restos. `MIGRATING.md` descreve-o nos oito idiomas.
 
+- **A aplicação de terminal edita listas e mapas**: no separador Definições de `tui_textual.py` pode escrever-se e guardar uma lista (itens separados por vírgulas) e um mapa de números (`name=3, other=5`) como uma definição simples; o servidor volta a verificar cada valor, as opções de segurança continuam a alterar-se só na página, e o guia das ferramentas de consola di-lo.
+
 ## [1.7.9]
 
 ### Corrigido

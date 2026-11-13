@@ -19,6 +19,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - `tools/migrate_layout.py` für einen Ordner, der eine flache Installation war: standardmäßig ein Probelauf; `--apply` kopiert Ihre Konfiguration nach `layout_backup_<Stempel>/config/` und VERSCHIEBT (nie löschen, nie überschreiben) die alten Module, die alte Seite, die alten Beispiele und `locales/` nach `layout_backup_<Stempel>/old_code/`. `--doctor` warnt, solange solche Reste existieren. `MIGRATING.md` beschreibt es in den acht Sprachen.
 
+- **Die Terminalanwendung bearbeitet Listen und Maps**: Im Reiter Einstellungen von `tui_textual.py` lassen sich eine Liste (Einträge durch Kommas getrennt) und eine Zahlen-Map (`name=3, other=5`) wie eine einfache Einstellung eintippen und speichern; der Server prüft jeden Wert erneut, die Sicherheitsoptionen ändern sich weiterhin nur auf der Seite, und die Anleitung der Konsolenwerkzeuge sagt es.
+
 ## [1.7.9]
 
 ### Behoben

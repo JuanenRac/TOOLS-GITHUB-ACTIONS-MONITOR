@@ -26,7 +26,7 @@ from github_actions_monitor.security import netguard
 INSTALL_HINT = "pip install textual"
 BASIC_SWITCHES = ("open_browser", "updates.check", "airgapped", "discovery.events", "discovery.suggest_groups", "discovery.auto_frequency")
 EDIT_GROUPS = ("basic", "general", "polling", "cache", "analytics", "lint", "console")     # the groups the terminal can edit; the options of security (secure) are changed in the page, with its confirmation
-EDIT_TYPES = ("bool", "int", "float", "enum", "text")
+EDIT_TYPES = ("bool", "int", "float", "enum", "text", "names", "patterns", "acts", "intmap")      # lists (names, patterns, acts: separated by commas) and maps (intmap: name=number, name=number) too
 
 
 def textual_available():
@@ -113,9 +113,36 @@ def editable_fields(settings):
     return out
 
 
+LIST_TYPES = ("names", "patterns", "acts")
+
+
+def format_value(field):
+    """The text shown in the box of a field: a list as `a, b, c`, a map as `name=1, other=2`, anything else as it is."""
+    value = field.get("value")
+    if field.get("type") in LIST_TYPES and isinstance(value, list):
+        return ", ".join(str(v) for v in value)
+    if field.get("type") == "intmap" and isinstance(value, dict):
+        return ", ".join(f"{k}={v}" for k, v in value.items())
+    return str(value if value is not None else "")
+
+
 def parse_value(field, text):
     """The value typed for a field, or (None, reason) when it does not fit; the server checks it again."""
     kind = field.get("type")
+    if kind in LIST_TYPES:
+        items = [part.strip() for part in str(text).split(",") if part.strip()]
+        return (items, None) if len(set(items)) == len(items) else (None, "names")
+    if kind == "intmap":
+        out = {}
+        for part in (p.strip() for p in str(text).split(",") if p.strip()):
+            name, sep, number = part.partition("=")
+            try:
+                if not sep or not name.strip() or name.strip() in out:
+                    return None, "map"
+                out[name.strip()] = int(number.strip())
+            except ValueError:
+                return None, "map"
+        return out, None
     try:
         if kind == "int":
             return int(str(text).strip()), None
@@ -280,7 +307,7 @@ def make_app(port, lite=False, theme="dark"):
                 elif field["type"] == "enum":
                     box.mount(Select([(v if v else "-", v) for v in field.get("enum") or []], value=field["value"], allow_blank=False, id=widget_id))
                 else:
-                    box.mount(Input(value=str(field["value"] if field["value"] is not None else ""), id=widget_id))
+                    box.mount(Input(value=format_value(field), id=widget_id))
 
         def save(self, widget_id, value):
             field = self.fields.get(widget_id)

@@ -19,6 +19,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - `tools/migrate_layout.py` pour un dossier qui était une installation plate : simulation par défaut ; `--apply` copie votre configuration vers `layout_backup_<horodatage>/config/` et DÉPLACE (jamais supprimer ni écraser) les anciens modules, page, exemples et `locales/` vers `layout_backup_<horodatage>/old_code/`. `--doctor` avertit tant que de tels restes existent. `MIGRATING.md` le décrit dans les huit langues.
 
+- **L'application de terminal modifie les listes et les tables** : dans l'onglet Réglages de `tui_textual.py`, une liste (éléments séparés par des virgules) et une table de nombres (`name=3, other=5`) se saisissent et s'enregistrent comme un réglage simple ; le serveur revérifie chaque valeur, les options de sécurité ne se changent toujours que dans la page, et le guide des outils de console le dit.
+
 ## [1.7.9]
 
 ### Corrigé

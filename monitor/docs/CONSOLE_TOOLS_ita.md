@@ -21,3 +21,4 @@ Due strumenti a riga di comando, facoltativi. Il monitor in sé non richiede alc
 
 - `pip install rich`, poi `py -3 tui.py [--port 8765] [--refresh 5] [--once] [--theme dark|light]`. Disegna una griglia in tempo reale con ciò che è in corso, i workflow rossi, la coda di firma e il rapporto, letti dal monitor in esecuzione su `127.0.0.1` (nessuna quota GitHub).
 - È di sola lettura: nessun tasto rilancia, chiude o scrive nulla. Senza Rich dice come installarlo ed esce con codice 3; il monitor e i suoi test non richiedono mai Rich.
+- L'applicazione interattiva da terminale `tui_textual.py` (`pip install textual`; aggiungi `--lite` per l'edizione lite) modifica nella scheda Impostazioni le impostazioni semplici dei gruppi che elenca, le **liste** (elementi separati da virgole: `a, b, c`) e le **mappe di numeri** (`name=3, other=5`); il server ricontrolla ogni valore, e le opzioni di sicurezza si cambiano solo nella pagina.

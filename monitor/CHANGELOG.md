@@ -21,6 +21,8 @@ when this file and `tool_version.py` disagree.
 
 - `tools/migrate_layout.py` for a folder that was a flat installation: a dry run by default; `--apply` copies your configuration to `layout_backup_<stamp>/config/` and MOVES (never deletes, never overwrites) the old modules, page, examples and `locales/` to `layout_backup_<stamp>/old_code/`. `--doctor` warns while such leftovers exist. `MIGRATING.md` describes it in the eight languages.
 
+- **The terminal application edits lists and maps**: in the Settings tab of `tui_textual.py`, a list (the items separated by commas) and a map of numbers (`name=3, other=5`) can be typed and saved like a simple setting; the server checks every value again, the options of security still change only in the page, and the guide of the console tools says so.
+
 ## [1.7.9]
 
 ### Fixed
