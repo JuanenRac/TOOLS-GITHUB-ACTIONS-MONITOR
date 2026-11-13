@@ -165,6 +165,18 @@ class TheTokenFileOfTheSecondAccount(unittest.TestCase):
         self.assertFalse(am.DEFAULTS["extra_reader"]["any_folder"])
 
 
+class TheNoticeOfAFileOutsideTheAccountsFolder(unittest.TestCase):
+    def test_the_start_notice_and_the_migration_guide_say_the_way_out_in_the_eight_languages(self):
+        from github_actions_monitor import i18n
+        guides = {"en": "", "es": "_spa", "de": "_deu", "fr": "_fra", "it": "_ita", "ja": "_jpn", "zh": "_zho", "pt": "_por"}
+        for lang, suffix in guides.items():
+            text = i18n.tl(lang, "mon.extra_file_outside")
+            for needle in ("extra_reader.file", "extra_reader.any_folder", "MONITOR_ACCOUNTS_DIR"):
+                self.assertIn(needle, text, lang)
+            guide = (Path(__file__).resolve().parent.parent / "docs" / f"MIGRATING{suffix}.md").read_text(encoding="utf-8")
+            self.assertIn(text, guide, lang)
+
+
 class ACentralPanelDatedInTheFutureIsNotTrusted(unittest.TestCase):
     def setUp(self):
         central_source.reset()

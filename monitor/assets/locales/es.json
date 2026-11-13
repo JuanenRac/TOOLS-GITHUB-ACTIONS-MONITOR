@@ -923,6 +923,7 @@
  "mon.demo": "DEMO: datos inventados, no se lee nada de GitHub. {url}",
  "mon.description": "Monitor en vivo de GitHub Actions: una página web local (solo 127.0.0.1) con lo que se está ejecutando, historial, gráficas, CI en rojo y el parte del Centinela. Nunca escribe en GitHub.",
  "mon.discovered": "{n} repositorios guardados en {file}. Vuelve a poner \"repos\": \"all\" para descubrirlos en cada arranque.",
+ "mon.extra_file_outside": "extra_reader.file apunta fuera de la carpeta de cuentas, así que la segunda cuenta NO se usa. Mueve el archivo del token a la carpeta de cuentas (accounts/, o la carpeta que indique MONITOR_ACCOUNTS_DIR) y deja su ruta en extra_reader.file, o activa extra_reader.any_folder en Ajustes > Cuota.",
  "mon.gh_not_ready": "El comando gh no está listo (instálalo y ejecuta: gh auth login): {error}",
  "mon.help_about": "Muestra la versión, la edición, los enlaces y los créditos, y termina.",
  "mon.help_account": "Ejecuta solo la cuenta con este id (una carpeta de accounts/). Sin él, una instalación con varias cuentas las arranca todas.",

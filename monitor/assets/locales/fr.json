@@ -923,6 +923,7 @@
  "mon.demo": "DÉMO : données inventées, rien n'est lu sur GitHub. {url}",
  "mon.description": "Moniteur en direct de GitHub Actions : une page web locale (127.0.0.1 uniquement) avec ce qui tourne maintenant, l'historique, les graphiques, la CI rouge et le rapport de la sentinelle. N'écrit jamais sur GitHub.",
  "mon.discovered": "{n} dépôts enregistrés dans {file}. Remettez \"repos\": \"all\" pour les découvrir à chaque démarrage.",
+ "mon.extra_file_outside": "extra_reader.file pointe hors du dossier des comptes, donc le second compte n'est PAS utilisé. Déplacez le fichier du jeton dans le dossier des comptes (accounts/, ou le dossier indiqué par MONITOR_ACCOUNTS_DIR) et gardez son chemin dans extra_reader.file, ou activez extra_reader.any_folder dans Réglages > Quota.",
  "mon.gh_not_ready": "La commande gh n'est pas prête (installez-la et lancez : gh auth login) : {error}",
  "mon.help_about": "Affiche la version, l'édition, les liens et les crédits, puis quitte.",
  "mon.help_account": "N'exécute que le compte portant cet id (un dossier de accounts/). Sans lui, une installation à plusieurs comptes les démarre tous.",

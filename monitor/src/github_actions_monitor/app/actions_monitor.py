@@ -2438,6 +2438,13 @@ def main():
     threading.Thread(target=update_loop, daemon=True).start()
     if not LITE["on"]:
         start_sentinel(config)
+    try:      # the token file of the second account is only accepted inside the accounts folder: a configuration that points elsewhere is told once, with the way out
+        from github_actions_monitor.data_pipeline import readpool
+        block = config.get("extra_reader") if isinstance(config.get("extra_reader"), dict) else {}
+        if block.get("enabled") is True and block.get("file") and not readpool.settings(config)["file"]:
+            print(i18n.t("mon.extra_file_outside"), flush=True)
+    except Exception as error:   # noqa: BLE001 - a notice never stops the start
+        degraded.note("loop.extra", error)
     server = None
     listen = {"network": False, "host": "127.0.0.1"} if LITE["on"] else localguard.settings_from(config)
     access_token, access_generated = "", False

@@ -923,6 +923,7 @@
  "mon.demo": "デモ: 架空のデータです。GitHub からは何も読み込みません。{url}",
  "mon.description": "GitHub Actions のライブモニター: 実行中の内容、履歴、グラフ、赤の CI、センチネルのレポートを表示するローカル Web ページ（127.0.0.1 のみ）。GitHub には一切書き込みません。",
  "mon.discovered": "{n} 件のリポジトリを {file} に保存しました。起動のたびに検出するには \"repos\": \"all\" に戻してください。",
+ "mon.extra_file_outside": "extra_reader.file がアカウントフォルダーの外を指しているため、2つ目のアカウントは使われません。トークンファイルをアカウントフォルダー(accounts/、または MONITOR_ACCOUNTS_DIR が指すフォルダー)に移してパスを extra_reader.file に残すか、設定 > クォータで extra_reader.any_folder をオンにしてください。",
  "mon.gh_not_ready": "gh コマンドの準備ができていません（インストールして gh auth login を実行してください）: {error}",
  "mon.help_about": "バージョン、エディション、リンク、クレジットを表示して終了します。",
  "mon.help_account": "この ID のアカウント（accounts/ のフォルダー）だけを実行します。指定しない場合、複数アカウントのインストールはすべてを起動します。",

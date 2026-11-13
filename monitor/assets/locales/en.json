@@ -923,6 +923,7 @@
  "mon.demo": "DEMO: invented data, nothing is read from GitHub. {url}",
  "mon.description": "Live monitor of GitHub Actions: a local web page (127.0.0.1 only) with what is running now, history, charts, red CI and the Sentinel report. It never writes to GitHub.",
  "mon.discovered": "{n} repositories saved in {file}. Put \"repos\": \"all\" back to discover them on every start.",
+ "mon.extra_file_outside": "extra_reader.file points outside the accounts folder, so the second account is NOT used. Move the token file into the accounts folder (accounts/, or the folder named by MONITOR_ACCOUNTS_DIR) and keep its path in extra_reader.file, or turn on extra_reader.any_folder in Settings > Quota.",
  "mon.gh_not_ready": "The gh command is not ready (install it and run: gh auth login): {error}",
  "mon.help_about": "Show the version, the edition, the links and the credits, and exit.",
  "mon.help_account": "Run only the account with this id (a folder of accounts/). Without it, an installation with several accounts starts them all.",

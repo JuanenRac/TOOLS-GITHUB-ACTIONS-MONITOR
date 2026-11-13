@@ -923,6 +923,7 @@
  "mon.demo": "演示：使用虚构数据，不从 GitHub 读取任何内容。{url}",
  "mon.description": "GitHub Actions 实时监视器：一个仅限本机（127.0.0.1）的网页，显示正在运行的任务、历史、图表、红色 CI 和哨兵报告。绝不会写入 GitHub。",
  "mon.discovered": "已将 {n} 个仓库保存到 {file}。若要每次启动时自动发现，请把 \"repos\" 改回 \"all\"。",
+ "mon.extra_file_outside": "extra_reader.file 指向账户文件夹之外,因此不会使用第二个账户。请把令牌文件移到账户文件夹(accounts/,或 MONITOR_ACCOUNTS_DIR 指定的文件夹)并在 extra_reader.file 中保留其路径,或在 设置 > 配额 中开启 extra_reader.any_folder。",
  "mon.gh_not_ready": "gh 命令尚未就绪（请安装并运行：gh auth login）：{error}",
  "mon.help_about": "显示版本、版本类型、链接和致谢后退出。",
  "mon.help_account": "只运行此 ID 的账户（accounts/ 中的一个文件夹）。不指定时，多账户安装会启动全部账户。",
