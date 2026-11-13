@@ -16,6 +16,9 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - The commands of the guides (`python read_report.py`, `python actions_monitor.py --doctor`, `python monitor_cli.py status` ...) keep working: a small entry-point file with the same name stays in the product folder, so the hooks and MCP servers already registered by path keep working too. The release zip keeps its folder name and now carries `src/`, `assets/` and `tools/`.
 
+- **The bar at the foot of the page is one line and says only what the boxes at the top do not**: the connection, the allowance, the runs, the last read and the repositories were said twice (as boxes at the top and as items of the bar); the bar keeps the sentinels, the Low-mode warning (the only mode it says), the AI, the account, the version, the address, the sound chip and the clock, and it no longer wraps at any width (on a narrow screen the date and the zone leave first). A browser test measures it in several languages, wide and narrow.
+- **The "loading repositories" box** is checked in a browser: it is shown while repositories load and it is gone with the last one.
+
 ### Added
 
 - **Storage layer** (`src/github_actions_monitor/storage/`): a `Storage` interface (configuration, sentinel state, the event feed, analytics, small named documents and the global records of users, their accounts and sessions) that keeps the rule "a write is atomic, a damaged item reads as empty" for every backend. `FileStorage` is the first backend and keeps the layout of `accounts/<id>/` exactly as before (and the flat installation next to the launchers): the same files with the same names, written through a temporary file that is flushed and renamed. `create_storage` is the one place that picks the backend; the lite edition always gets the file backend.
@@ -42,12 +45,49 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **The "bing bing" also sounds when the page loses the monitor itself**: once per loss (no answer for over a minute, or a cycle stuck), together with the red bar. The mute chip, the `sound.on_connection_lost` switch, the cooldown and the browser's sound lock apply as for any other sound; the help of that setting says so in the eight languages.
 
+- **GraphQL for quiet repositories** (`network.graphql_checks`, off by default; `network.graphql_batch`, 1 to 30, 20 by default; in the Quota tab, in the eight languages): the repositories that are not hot are read in batches through GraphQL, which has an allowance of its own, instead of one REST call each; the hot ones and any repository the query does not answer are still read through REST in the same cycle, and a failed batch falls back to REST. It sees only the last commit of the default branch and gives no durations, attempts or other branches (the guide of the allowance says so). The accounting (batches, repositories, points, repositories sent to REST) is part of the allowance line of the brief and of the state for the AI tools, next to the reads answered `304`.
+
+- **The active notice to an external AI** (`ai_notify.*`, in the AI tab, local-only, off by default, in the eight languages): when a NEW real alert opens, a short summary goes to the provider of the AI block and its answer is kept as advice in `ai_notify.jsonl`. A first confirmation per provider (`ai_notify.confirmed_provider`, changing the provider needs a new one), only the redacted fields of a closed list (severity, class, repository, workflow, conclusion, streak, cause, next step, link), a cap of calls an hour and a cap of declared cost an hour (a call is counted before it is made), the key by the name of an environment variable, and the AI never runs an action (its answer is cut, its links are defused and nothing of it is read as a command). The variant of an outgoing command (`ai_notify.command` (only in the configuration file, never in the Settings page)) names ONE file by its absolute path, started without a shell and without arguments, that receives the same JSON on its standard input. The notice leaves from a thread of its own, so a slow provider never holds a cycle.
+
+- **The terminal application edits lists and maps**: in the Settings tab of `tui_textual.py`, a list (the items separated by commas) and a map of numbers (`name=3, other=5`) can be typed and saved like a simple setting; the server checks every value again, the options of security still change only in the page, and the guide of the console tools says so.
+
 ### Fixed
 
 - The dashboard could stay on one old picture while the monitor was running: a call to `gh` that never returned (a child process holding its pipes after the timeout) held the refresh loop for good while the page still answered at once. Every `gh` call is now bounded by a hard deadline in a helper thread, and a loop that still hangs is found and restarted by the watchdog above.
 - A failure to write the log was swallowed and could end a cycle; it is now kept and shown, and the cycle goes on.
 - The page showed old data without any warning when the monitor stopped or answered slowly (a request that never returned left the page looking alive), and the "bing bing" stayed silent after a reload or a long gap.
 - The SQLite storage no longer fails with "database is locked" when several processes open or write the same database at once: the wait for another writer is 30 seconds by default and can be set with `busy_timeout_ms` in the `storage` block, and the steps that SQLite does not make wait (the first switch to WAL, taking the writer lock) are tried again a few times with growing pauses.
+- The brief for the AI tools (`ALERTS_BRIEF.md`) and the log (`actions_monitor_log.txt`) now agree with a monitor that is running: the brief has a `Monitor:` line (cycle complete, cycle in progress, connection lost, last cycle failed) and the hour of that note, so a cycle that is still reading repositories no longer leaves the hour of the previous cycle as the last word (the alerts it lists are the ones kept from the last complete cycle, and a partial cycle never opens or closes one); the log writes a `cycle=started` line when a cycle begins.
+
+- **The stream of events for AIs no longer dies on an ordinary log line**: the line of the feed is cleaned field by field and then written, instead of cleaning a JSON that was already written (a cause that ended in `password: x`, `token=x` or `DB_PASSWORD=x` broke it). A line that cannot be cleaned is skipped and the stream goes on; the answers of the MCP server are cleaned the same way. In the cleaner, the value of a `key=value` pair stops at a quote, a comma or a semicolon, and a quoted value is cleaned whole.
+
+- **The test of the ports of the accounts no longer fails when suites run at once**: the supervisor can be told where to start looking for free ports (the default stays 18800) and the tests ask the system for an unused stretch instead of a fixed one.
+
+### Security
+
+- **The lock-out of wrong tokens brakes again (network mode)**: an address that is not this computer and is locked is refused BEFORE its token is judged, in every way of presenting it (header, cookie, `?access=` and `POST /api/access`); until now a locked address could keep guessing and the right token still got in. The person at this computer is never locked out of their own monitor.
+
+- **A declared reverse proxy makes loopback stop meaning "this computer"** (`listen.proxy_public_host`, `listen.secure_cookie` or `listen.trusted_proxy`): a proxy that forgets its forwarding headers can no longer turn every client of the internet into the owner. The person at the computer of the monitor uses the new second port that only listens on `127.0.0.1` (`listen.local_port`, 0 = off, restart needed, same access token). With `listen.trusted_proxy`, the wrong tokens of all the clients of the proxy are also counted together (three times the limit of one address), so rotating `X-Forwarded-For` does not defeat the lock-out.
+
+- **The guide of the reverse proxy** (`DEPLOYMENT.md`, eight languages) gives the whole recipe: public `Host`, `X-Forwarded-For $proxy_add_x_forwarded_for`, `X-Forwarded-Proto`, the network mode and the declaration of the proxy; it no longer says that the monitor "has no login", and it says that `listen.trusted_proxy` assumes a proxy on the same computer.
+
+- **`GET /api/settings` for a client of the network** returns the value only of the settings it may change; for every other setting (paths of keys and tokens, folders, names of variables) it says only whether it is defined.
+
+- **Test of every "this computer only" route**: a table of the routes is walked against a real server with a client that is not on loopback (and the source is scanned so that a new route cannot be forgotten).
+
+- **An address of GitHub passes the cleaner only in the shapes of a closed list** (a repository, a run with its job or attempt, a commit, an issue, a pull request, a file); it is cut at the first character that is not a letter, a digit, a dot, a hyphen, an underscore or a slash, and what follows is cleaned like any text. Until now a secret glued to a link (an encoded query, a list separated by commas, a colon, an opaque segment of the path, an e-mail that starts in the address) travelled whole to the AI.
+
+- **The hook of the AI client hands over no text of a log**: only the repository, the workflow, the conclusion and the link of each alert. The order to act without waiting to be told is gone; the closing line now says that a log can hold text written by third parties, that it is untrusted data and that instructions found in it are never followed. In the eight languages.
+
+- **What depends on who asks is always answered by your own login**: `gh api user`, `user/orgs`, notifications, a search for `@me`, `gh auth` and `gh repo list` without an owner never go to the GitHub App or to the second account, however many calls those have left (with the second account on, the monitor could take the owner of that account as its owner and list its organisations).
+
+- **A `gh` call is a read only when it is on a white list**: `gh api ENDPOINT` with at most the options `--jq`, `--paginate`, `-H` (of the kind a read sends), `-i` and `--cache`. The attached spellings of a write (`-XPOST`, `--method=DELETE`, `-fa=b`, `--field=a=b`, `--input=-`) and any other option go to your login instead of being spread over the sources.
+
+- **The token file of the second account** (`extra_reader.file`) must be inside the accounts folder of the monitor (`accounts/`, or `MONITOR_ACCOUNTS_DIR`) and is opened without following a link and only if it is a small regular file; outside that folder the setting is empty. The new switch `extra_reader.any_folder` (off by default, local only) lifts the folder rule for a file that must stay elsewhere.
+
+- **A central panel dated in the future is not trusted**: its age was clamped to zero, so it counted as fresh for ever; now it is behind, the summary says the date is not trusted and a clock that runs ahead by up to five minutes is tolerated.
+
+- **A page that breaks turns the CI red**: a new job (`page`, without `continue-on-error`) opens the page of the demo monitor in a real browser (`tools/check_page.py`), goes through every tab and every sub-tab of Settings, requires a minimum of fields in each one and fails on any error of the page, unhandled promise or console.error. A page broken on purpose (a second definition, an assignment to the name of a function, a call to a function that does not exist) must make it fail. The test that looks for functions defined twice now also sees a declaration with an indent, one with `async` and an assignment to the name of a function.
 
 ## [1.7.9]
 

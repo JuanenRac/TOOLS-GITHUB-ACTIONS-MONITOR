@@ -23,6 +23,38 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - El supervisor de cuentas filtra por usuario: `GET /api/accounts`, `/api/accounts/<id>/status`, la página de una cuenta y toda petición con `?account=` o `X-Account-Id` muestran y alcanzan solo las cuentas asignadas al usuario (un admin ve todas), y el monitor de una cuenta sabe quién actúa. Un silencio de la pestaña Alertas guarda ahora quién lo hizo: `muted_by` en `GET /api/alerts` y en el historial de silencios.
 
+### Seguridad
+
+- **El bloqueo por tokens erróneos vuelve a frenar (modo red)**: una dirección que no es este equipo y está bloqueada se rechaza ANTES de juzgar su token, se presente como se presente (cabecera, cookie, `?access=` y `POST /api/access`); hasta ahora una dirección bloqueada podía seguir adivinando y el token correcto aún entraba. Quien está en este equipo nunca queda bloqueado en su propio monitor.
+
+- **Un proxy inverso declarado hace que loopback deje de significar «este equipo»** (`listen.proxy_public_host`, `listen.secure_cookie` o `listen.trusted_proxy`): un proxy que olvide sus cabeceras de reenvío ya no puede convertir a cualquier cliente de internet en el dueño. Quien está en el equipo del monitor usa el nuevo segundo puerto que solo escucha en `127.0.0.1` (`listen.local_port`, 0 = apagado, requiere reinicio, mismo token de acceso). Con `listen.trusted_proxy`, los tokens erróneos de todos los clientes del proxy se cuentan además juntos (tres veces el límite de una dirección), así que rotar `X-Forwarded-For` no anula el bloqueo.
+
+- **La guía del proxy inverso** (`DEPLOYMENT.md`, ocho idiomas) da la receta completa: `Host` público, `X-Forwarded-For $proxy_add_x_forwarded_for`, `X-Forwarded-Proto`, el modo red y la declaración del proxy; ya no dice que el monitor «no tiene login», y avisa de que `listen.trusted_proxy` supone un proxy en el mismo equipo.
+
+- **`GET /api/settings` para un cliente de la red** devuelve el valor solo de los ajustes que puede cambiar; de cualquier otro ajuste (rutas de claves y tokens, carpetas, nombres de variables) dice únicamente si está definido.
+
+- **Prueba de cada ruta «solo este equipo»**: una tabla de rutas se recorre contra un servidor real con un cliente que no está en loopback (y se examina el código para que una ruta nueva no se olvide).
+
+- **Una dirección de GitHub pasa el limpiador solo con las formas de una lista cerrada** (un repositorio, una ejecución con su job o intento, un commit, una incidencia, una pull request, un archivo); se corta en el primer carácter que no sea letra, cifra, punto, guion, guion bajo o barra, y lo que sigue se limpia como cualquier texto. Hasta ahora un secreto pegado a un enlace (una consulta codificada, una lista separada por comas, unos dos puntos, un segmento opaco de la ruta, un correo que empieza en la dirección) llegaba entero a la IA.
+
+- **El hook del cliente de IA no entrega texto de ningún log**: solo el repositorio, el workflow, la conclusión y el enlace de cada alerta. La orden de actuar sin esperar a que se lo digan ha desaparecido; la línea final dice ahora que un log puede contener texto escrito por terceros, que son datos no fiables y que nunca se siguen las instrucciones que contenga. En los ocho idiomas.
+
+### Corregido
+
+- **El stream de eventos para IA ya no muere con una línea de log corriente**: la línea del feed se limpia campo a campo y luego se escribe, en lugar de limpiar un JSON ya escrito (una causa que acabara en `password: x`, `token=x` o `DB_PASSWORD=x` lo rompía). Una línea que no se puede limpiar se salta y el stream sigue; las respuestas del servidor MCP se limpian igual. En el limpiador, el valor de un par `clave=valor` termina en una comilla, una coma o un punto y coma, y un valor entre comillas se limpia entero.
+
+- **Lo que depende de quién pregunta lo contesta siempre tu propio login**: `gh api user`, `user/orgs`, las notificaciones, una búsqueda de `@me`, `gh auth` y `gh repo list` sin propietario no van nunca a la GitHub App ni a la segunda cuenta, por muchas llamadas que les queden (con la segunda cuenta activa, el monitor podía tomar como propietario al dueño de esa cuenta y listar sus organizaciones).
+
+- **Una llamada a `gh` es una lectura solo si está en una lista blanca**: `gh api ENDPOINT` con, como mucho, las opciones `--jq`, `--paginate`, `-H` (de las que envía una lectura), `-i` y `--cache`. Las formas pegadas de una escritura (`-XPOST`, `--method=DELETE`, `-fa=b`, `--field=a=b`, `--input=-`) y cualquier otra opción van a tu login en vez de repartirse entre las fuentes.
+
+- **El archivo del token de la segunda cuenta** (`extra_reader.file`) debe estar dentro de la carpeta de cuentas del monitor (`accounts/`, o `MONITOR_ACCOUNTS_DIR`) y se abre sin seguir un enlace y solo si es un archivo normal y pequeño; fuera de esa carpeta el ajuste queda vacío. El nuevo interruptor `extra_reader.any_folder` (apagado por defecto, solo local) levanta la regla de la carpeta para un archivo que deba quedarse en otro sitio.
+
+- **Un panel central con fecha futura ya no es de fiar**: su edad se recortaba a cero y contaba como fresco para siempre; ahora está atrasado, el resumen dice que la fecha no es de fiar y se tolera un reloj adelantado hasta cinco minutos.
+
+- **La prueba de los puertos de las cuentas ya no falla cuando varias suites corren a la vez**: el supervisor admite que se le indique desde dónde buscar puertos libres (el valor por defecto sigue siendo 18800) y las pruebas piden al sistema un tramo sin uso en vez de uno fijo.
+
+- **Una página rota pone el CI en rojo**: un nuevo job (`page`, sin `continue-on-error`) abre la página del monitor de demostración en un navegador real (`tools/check_page.py`), recorre cada pestaña y cada subpestaña de Ajustes, exige un mínimo de campos en cada una y falla ante cualquier error de la página, promesa no gestionada o console.error. Una página rota a propósito (una segunda definición, una asignación al nombre de una función, una llamada a una función que no existe) debe hacerlo fallar. La prueba que busca funciones definidas dos veces ve ahora también una declaración con sangría, una con `async` y una asignación al nombre de una función.
+
 ## [1.7.9]
 
 ### Corregido

@@ -19,7 +19,7 @@ GitHub 为每个账户提供有限的 **API 调用配额**,由使用它的所有
 3. **中央面板作为基线**:`central.source`(`off`、`git`、`http`)读取你的个人资料仓库中由工作流用自己的令牌刷新的 `data/sentinel.json`,不消耗你的配额。`central.max_age_minutes`(120):比这更旧则为“滞后”,不被信任。
 4. **配额用尽时只给一条通知**:读取暂停到配额恢复,页面只说一次“配额已用尽,HH:MM 恢复”(而不是每个仓库一个错误),并自动继续。
 5. **用于读取的 GitHub App**(`github_app.*`),见下。
-GraphQL 不用于工作流的运行:它不提供这些数据。
+6. **面向安静仓库的 GraphQL(可选,默认关闭)**:`network.graphql_checks` 通过有独立配额的 GraphQL 分批(`network.graphql_batch`,默认 20)读取不活跃的仓库;一次调用可替代许多次 REST 调用。它只能看到默认分支的最后一次提交(未在其上运行的工作流不会列出),也没有时长、重试次数或其他分支,因此活跃的仓库以及 GraphQL 没有应答的仓库会在同一周期内继续通过 REST 读取。统计(批次、仓库、点数、转交 REST 的仓库)显示在摘要和面向 AI 工具的状态中。
 
 ## GitHub App 逐步设置
 1. 在 GitHub 中依次进入 *Settings*、*Developer settings*、*GitHub Apps*、*New GitHub App*。无需 webhook。**只读**权限:Actions、Checks、Code scanning alerts、Commit statuses、Contents、Dependabot alerts、Issues、Pull requests、Secret scanning alerts 和 Metadata。
@@ -55,4 +55,4 @@ GraphQL 不用于工作流的运行:它不提供这些数据。
 ## “配额”标签页与第二个账户
 与配额有关的一切都在一处:*设置*中的*配额*标签页。它汇集了模式(`modes.auto_low`、`modes.auto_low_enter`、`modes.auto_low_exit` 以及 `modes.low.*` 中的节省模式数值)、节省(`network.etag`,与 `cache.etag.enabled` 一起生效)、中央面板(`central.source`、`central.max_age_minutes`)、GitHub App(`github_app.*`)和**用于读取的第二个账户**。标签页中的按钮会显示每个来源(你的登录、App、第二个账户)的配额和恢复时间,测试 App 和第二个账户,列出 App 缺少的权限,并应用推荐值或默认值。
 
-第二个账户(`extra_reader.enabled`、`extra_reader.file`)是只读账户,其细粒度令牌保存在任何仓库之外的文本文件中,只有你能读取;设置中**只保存**该文件的路径。监视器在使用时读取令牌,保存在内存中,绝不存储、打印或记录。读取会按各来源的剩余调用数(免费 `rate_limit` 调用的数值减去此后已做的读取)在你的登录、App 和第二个账户之间分配;被拒绝的来源会被排除五分钟,并用下一个来源重新读取。写入和操作从不使用它。它用于你自己的账户(例如对这些仓库有读取权限的自己的第二个账户),而不是用他人账户绕过限制的办法。
+第二个账户(`extra_reader.enabled`、`extra_reader.file`)是只读账户,其细粒度令牌保存在任何仓库之外的文本文件中,只有你能读取;设置中**只保存**该文件的路径。监视器在使用时读取令牌,保存在内存中,绝不存储、打印或记录。读取会按各来源的剩余调用数(免费 `rate_limit` 调用的数值减去此后已做的读取)在你的登录、App 和第二个账户之间分配;被拒绝的来源会被排除五分钟,并用下一个来源重新读取。写入和操作从不使用它。它用于你自己的账户(例如对这些仓库有读取权限的自己的第二个账户),而不是用他人账户绕过限制的办法。该文件必须位于监控的账户文件夹内(`accounts/`,或 `MONITOR_ACCOUNTS_DIR` 指定的文件夹),并且绝不会通过链接读取;`extra_reader.any_folder`(默认关闭)可取消文件夹限制。取决于“谁在询问”的内容(你的账户、其组织、通知、对 `@me` 的搜索、`gh auth`、没有所有者的 `gh repo list`)始终由你自己的登录回答,只有简单的 `gh api ENDPOINT` 读取(最多带有 `--jq`、`--paginate`、`-H`、`-i` 和 `--cache` 选项)才会在各来源之间分配:任何其他调用都交给你的登录。

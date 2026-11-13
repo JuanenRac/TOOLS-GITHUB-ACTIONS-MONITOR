@@ -134,11 +134,12 @@ class QuotaPace(unittest.TestCase):
         self.assertEqual(am.quota_delay({"remaining": 0, "reset": "garbage"}, 800, 120, now), 600)
         self.assertEqual(am.quota_delay(None, 800, 120, now), 120)
 
-    def test_the_bar_says_until_when_the_allowance_is_used_up(self):
-        self.assertIn('T("ui.sb_quota_out"', PAGE)
-        for lang in i18n.LANGS:
-            self.assertIn("{time}", i18n.tl(lang, "ui.sb_quota_out"), lang)
-            self.assertNotEqual(i18n.tl(lang, "ui.sb_quota_out_t"), "ui.sb_quota_out_t", lang)
+    def test_the_bar_does_not_repeat_the_boxes_at_the_top(self):
+        """The connection, the allowance, the runs, the last read, the repositories and the mode are boxes at the top: the bar at the foot does not say them twice."""
+        for gone in ("sb-conn", "sb-quota", "sb-runs", "sb-refresh", "sb-repos"):
+            self.assertNotIn(f'id="{gone}"', PAGE)
+        for kept in ("sb-mode", "sb-sent", "sb-ai", "sb-acc", "sb-ver", "sb-addr", "sb-sound", "sb-clock"):
+            self.assertIn(f'id="{kept}"', PAGE)
 
 
 class UpdateCheckNeverBlocks(unittest.TestCase):

@@ -23,6 +23,38 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - Le superviseur de comptes filtre par utilisateur : `GET /api/accounts`, `/api/accounts/<id>/status`, la page d'un compte et toute requête avec `?account=` ou `X-Account-Id` ne montrent et n'atteignent que les comptes attribués à l'utilisateur (un admin les voit tous), et le moniteur d'un compte sait qui agit. Une mise en sourdine de l'onglet Alertes conserve désormais qui l'a faite : `muted_by` dans `GET /api/alerts` et dans l'historique des sourdines.
 
+### Sécurité
+
+- **Le verrouillage des mauvais jetons freine de nouveau (mode réseau)** : une adresse qui n'est pas cet ordinateur et qui est verrouillée est refusée AVANT que son jeton soit jugé, quelle que soit la façon de le présenter (en-tête, cookie, `?access=` et `POST /api/access`) ; jusqu'ici une adresse verrouillée pouvait continuer à deviner et le bon jeton entrait quand même. La personne devant cet ordinateur n'est jamais verrouillée hors de son propre moniteur.
+
+- **Un reverse proxy déclaré fait que la boucle locale ne veut plus dire « cet ordinateur »** (`listen.proxy_public_host`, `listen.secure_cookie` ou `listen.trusted_proxy`) : un proxy qui oublie ses en-têtes de transfert ne peut plus transformer n'importe quel client d'internet en propriétaire. La personne devant l'ordinateur du moniteur utilise le nouveau second port qui n'écoute que sur `127.0.0.1` (`listen.local_port`, 0 = désactivé, redémarrage nécessaire, même jeton d'accès). Avec `listen.trusted_proxy`, les mauvais jetons de tous les clients du proxy sont aussi comptés ensemble (trois fois la limite d'une adresse) : changer `X-Forwarded-For` n'annule donc pas le verrouillage.
+
+- **Le guide du reverse proxy** (`DEPLOYMENT.md`, huit langues) donne la recette complète : `Host` public, `X-Forwarded-For $proxy_add_x_forwarded_for`, `X-Forwarded-Proto`, le mode réseau et la déclaration du proxy ; il ne dit plus que le moniteur « n'a pas de connexion », et précise que `listen.trusted_proxy` suppose un proxy sur le même ordinateur.
+
+- **`GET /api/settings` pour un client du réseau** ne renvoie la valeur que des réglages qu'il peut modifier ; pour tout autre réglage (chemins de clés et de jetons, dossiers, noms de variables) il indique seulement s'il est défini.
+
+- **Test de chaque route « cet ordinateur seulement »** : un tableau des routes est parcouru contre un vrai serveur avec un client hors de la boucle locale (et le code source est examiné pour qu'une nouvelle route ne soit pas oubliée).
+
+- **Une adresse de GitHub ne passe le nettoyeur que sous les formes d'une liste fermée** (un dépôt, une exécution avec son job ou sa tentative, un commit, une issue, une pull request, un fichier) ; elle est coupée au premier caractère qui n'est ni une lettre, ni un chiffre, ni un point, un tiret, un tiret bas ou une barre oblique, et ce qui suit est nettoyé comme n'importe quel texte. Jusqu'ici un secret collé à un lien (une requête encodée, une liste séparée par des virgules, deux-points, un segment opaque du chemin, un e-mail qui commence dans l'adresse) arrivait entier à l'IA.
+
+- **Le hook du client d'IA ne remet aucun texte de journal** : seulement le dépôt, le workflow, la conclusion et le lien de chaque alerte. L'ordre d'agir sans attendre qu'on le dise a disparu ; la dernière ligne dit désormais qu'un journal peut contenir du texte écrit par des tiers, que ce sont des données non fiables et que les instructions qu'il contient ne sont jamais suivies. Dans les huit langues.
+
+### Corrigé
+
+- **Le flux d'événements pour IA ne meurt plus sur une ligne de journal ordinaire** : la ligne du flux est nettoyée champ par champ puis écrite, au lieu de nettoyer un JSON déjà écrit (une cause qui finissait par `password: x`, `token=x` ou `DB_PASSWORD=x` le cassait). Une ligne impossible à nettoyer est ignorée et le flux continue ; les réponses du serveur MCP sont nettoyées de la même façon. Dans le nettoyeur, la valeur d'une paire `clé=valeur` s'arrête à un guillemet, une virgule ou un point-virgule, et une valeur entre guillemets est nettoyée en entier.
+
+- **Ce qui dépend de celui qui demande est toujours servi par votre propre login** : `gh api user`, `user/orgs`, les notifications, une recherche de `@me`, `gh auth` et `gh repo list` sans propriétaire ne vont jamais à la GitHub App ni au second compte, quel que soit le nombre d'appels qui leur restent (avec le second compte actif, le moniteur pouvait prendre le titulaire de ce compte comme propriétaire et lister ses organisations).
+
+- **Un appel `gh` n'est une lecture que s'il figure sur une liste blanche** : `gh api ENDPOINT` avec au plus les options `--jq`, `--paginate`, `-H` (de celles qu'envoie une lecture), `-i` et `--cache`. Les formes collées d'une écriture (`-XPOST`, `--method=DELETE`, `-fa=b`, `--field=a=b`, `--input=-`) et toute autre option vont à votre login au lieu d'être réparties entre les sources.
+
+- **Le fichier du jeton du second compte** (`extra_reader.file`) doit se trouver dans le dossier des comptes du moniteur (`accounts/`, ou `MONITOR_ACCOUNTS_DIR`) et s'ouvre sans suivre de lien et seulement s'il s'agit d'un petit fichier ordinaire ; hors de ce dossier le réglage est vide. Le nouvel interrupteur `extra_reader.any_folder` (désactivé par défaut, local seulement) lève la règle du dossier pour un fichier qui doit rester ailleurs.
+
+- **Un panneau central daté du futur n'est plus cru** : son âge était ramené à zéro et il comptait comme frais pour toujours ; il est maintenant en retard, le résumé dit que la date n'est pas fiable et une horloge en avance de cinq minutes au plus est tolérée.
+
+- **Le test des ports des comptes n'échoue plus quand plusieurs suites tournent en même temps** : le superviseur peut recevoir le point de départ de la recherche de ports libres (la valeur par défaut reste 18800) et les tests demandent au système une plage inutilisée au lieu d'une plage fixe.
+
+- **Une page cassée met la CI au rouge** : un nouveau job (`page`, sans `continue-on-error`) ouvre la page du moniteur de démonstration dans un vrai navigateur (`tools/check_page.py`), parcourt chaque onglet et chaque sous-onglet des Réglages, exige un minimum de champs dans chacun et échoue à la moindre erreur de la page, promesse non gérée ou console.error. Une page cassée exprès (une seconde définition, une affectation au nom d'une fonction, un appel à une fonction qui n'existe pas) doit le faire échouer. Le test qui cherche les fonctions définies deux fois voit désormais aussi une déclaration indentée, une déclaration avec `async` et une affectation au nom d'une fonction.
+
 ## [1.7.9]
 
 ### Corrigé

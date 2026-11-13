@@ -74,7 +74,7 @@ With `otlp.enabled` on and an `otlp.endpoint` (HTTPS, or HTTP on this computer),
 - **Combinations to avoid** (`--doctor` names them): network mode on every interface; AI actions that execute while the network mode is on; `act` while the network mode is on; the token in a plain file.
 - The MCP server speaks over standard input and output only; never put it behind a network port.
 
-`listen.trusted_proxy` (off by default): only if a reverse proxy of YOURS on the same computer is the only way in. Failed attempts are then counted against the last address of `X-Forwarded-For` (the one your proxy adds) and not against the proxy; a request that comes through a proxy is still never treated as this computer. If anybody else can reach the monitor directly, leave it off.
+`listen.trusted_proxy` (off by default): only if a reverse proxy of YOURS on the SAME computer is the only way in. Failed attempts are then counted against the last address of `X-Forwarded-For` (the one your proxy adds: in nginx, `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`) and not against the proxy, and also against all the clients of the proxy together with a limit three times higher. The monitor believes that header on any connection that arrives over loopback, so never use it with a proxy on another machine, and if anybody else can reach the monitor directly, leave it off. With a proxy declared (`listen.proxy_public_host`, `listen.secure_cookie` or `listen.trusted_proxy`) nothing that arrives on the main port is treated as this computer; `listen.local_port` (0 = off, otherwise 1024 to 65535) opens a second port that only listens on `127.0.0.1` for the person at the computer of the monitor (see the deployment guide).
 
 ## The refresh loop: heartbeat and watchdog
 

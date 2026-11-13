@@ -114,3 +114,9 @@ Ihre Daten wandern nicht: `actions_monitor.json`, die Caches, die Protokolle, `c
 | `cli` | die Befehlszeilenwerkzeuge |
 | `ui` | Info, Hilfedokumente, Terminalansichten |
 | `i18n`, `util` | die acht Sprachen; kleine gemeinsame Helfer |
+
+# Von 1.7.9 auf 1.8.0
+
+Nichts muss umgewandelt werden. Eine Einstellung kann eine Änderung brauchen:
+
+- extra_reader.file zeigt außerhalb des Kontenordners, daher wird das zweite Konto NICHT verwendet. Verschiebe die Token-Datei in den Kontenordner (accounts/ oder den Ordner, den MONITOR_ACCOUNTS_DIR nennt) und lass ihren Pfad in extra_reader.file, oder schalte extra_reader.any_folder in Einstellungen > Kontingent ein.

@@ -114,3 +114,9 @@ Your data does not move: `actions_monitor.json`, the caches, the logs, `config_b
 | `cli` | the command-line tools |
 | `ui` | About, help documents, terminal views |
 | `i18n`, `util` | the eight languages; small shared helpers |
+
+# From 1.7.9 to 1.8.0
+
+Nothing has to be converted. One setting can need a move:
+
+- extra_reader.file points outside the accounts folder, so the second account is NOT used. Move the token file into the accounts folder (accounts/, or the folder named by MONITOR_ACCOUNTS_DIR) and keep its path in extra_reader.file, or turn on extra_reader.any_folder in Settings > Quota.

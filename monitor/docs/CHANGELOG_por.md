@@ -23,6 +23,38 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - O supervisor de contas filtra por utilizador: `GET /api/accounts`, `/api/accounts/<id>/status`, a página de uma conta e todo o pedido com `?account=` ou `X-Account-Id` mostram e alcançam apenas as contas atribuídas ao utilizador (um admin vê todas), e o monitor de uma conta sabe quem age. Um silêncio do separador Alertas guarda agora quem o fez: `muted_by` em `GET /api/alerts` e no histórico de silêncios.
 
+### Segurança
+
+- **O bloqueio por tokens errados volta a travar (modo de rede)**: um endereço que não é este computador e está bloqueado é recusado ANTES de o seu token ser avaliado, seja qual for a forma de o apresentar (cabeçalho, cookie, `?access=` e `POST /api/access`); até agora um endereço bloqueado podia continuar a adivinhar e o token certo entrava na mesma. Quem está neste computador nunca fica bloqueado fora do seu próprio monitor.
+
+- **Um proxy inverso declarado faz com que o loopback deixe de significar «este computador»** (`listen.proxy_public_host`, `listen.secure_cookie` ou `listen.trusted_proxy`): um proxy que se esqueça dos cabeçalhos de reencaminhamento já não pode transformar qualquer cliente da internet no dono. Quem está no computador do monitor usa a nova segunda porta que só escuta em `127.0.0.1` (`listen.local_port`, 0 = desligado, requer reinício, o mesmo token de acesso). Com `listen.trusted_proxy`, os tokens errados de todos os clientes do proxy contam também em conjunto (o triplo do limite de um endereço), pelo que rodar `X-Forwarded-For` não anula o bloqueio.
+
+- **O guia do proxy inverso** (`DEPLOYMENT.md`, oito idiomas) dá a receita completa: `Host` público, `X-Forwarded-For $proxy_add_x_forwarded_for`, `X-Forwarded-Proto`, o modo de rede e a declaração do proxy; já não diz que o monitor «não tem início de sessão» e avisa que `listen.trusted_proxy` pressupõe um proxy no mesmo computador.
+
+- **`GET /api/settings` para um cliente da rede** devolve o valor apenas das definições que pode alterar; de qualquer outra definição (caminhos de chaves e tokens, pastas, nomes de variáveis) diz só se está definida.
+
+- **Teste de cada rota «só este computador»**: uma tabela de rotas é percorrida contra um servidor real com um cliente fora do loopback (e o código-fonte é examinado para que uma rota nova não seja esquecida).
+
+- **Um endereço do GitHub só passa o limpador com as formas de uma lista fechada** (um repositório, uma execução com o seu job ou tentativa, um commit, uma issue, um pull request, um ficheiro); é cortado no primeiro carácter que não seja letra, algarismo, ponto, hífen, sublinhado ou barra, e o que se segue é limpo como qualquer texto. Até agora, um segredo colado a uma ligação (uma consulta codificada, uma lista separada por vírgulas, dois pontos, um segmento opaco do caminho, um e-mail que começa no endereço) chegava inteiro à IA.
+
+- **O hook do cliente de IA não entrega nenhum texto de registo**: só o repositório, o workflow, a conclusão e a ligação de cada alerta. A ordem de agir sem esperar que lha digam desapareceu; a última linha diz agora que um registo pode conter texto escrito por terceiros, que são dados não fiáveis e que as instruções que nele se encontrem nunca são seguidas. Nos oito idiomas.
+
+### Corrigido
+
+- **O fluxo de eventos para IA já não morre com uma linha de registo normal**: a linha do feed é limpa campo a campo e só depois escrita, em vez de limpar um JSON já escrito (uma causa que terminasse em `password: x`, `token=x` ou `DB_PASSWORD=x` estragava-o). Uma linha que não se consiga limpar é saltada e o fluxo continua; as respostas do servidor MCP são limpas da mesma forma. No limpador, o valor de um par `chave=valor` termina numa aspa, numa vírgula ou num ponto e vírgula, e um valor entre aspas é limpo por inteiro.
+
+- **O que depende de quem pergunta é sempre respondido pelo seu próprio login**: `gh api user`, `user/orgs`, as notificações, uma pesquisa de `@me`, `gh auth` e `gh repo list` sem proprietário nunca vão para a GitHub App nem para a segunda conta, por muitas chamadas que lhes restem (com a segunda conta ativa, o monitor podia tomar como proprietário o titular dessa conta e listar as suas organizações).
+
+- **Uma chamada a `gh` só é uma leitura se estiver numa lista branca**: `gh api ENDPOINT` com, no máximo, as opções `--jq`, `--paginate`, `-H` (das que uma leitura envia), `-i` e `--cache`. As formas coladas de uma escrita (`-XPOST`, `--method=DELETE`, `-fa=b`, `--field=a=b`, `--input=-`) e qualquer outra opção vão para o seu login em vez de serem repartidas pelas fontes.
+
+- **O ficheiro do token da segunda conta** (`extra_reader.file`) tem de estar dentro da pasta de contas do monitor (`accounts/`, ou `MONITOR_ACCOUNTS_DIR`) e é aberto sem seguir uma ligação e só se for um ficheiro normal e pequeno; fora dessa pasta a definição fica vazia. O novo interruptor `extra_reader.any_folder` (desligado por defeito, só local) levanta a regra da pasta para um ficheiro que tenha de ficar noutro sítio.
+
+- **Um painel central com data no futuro já não merece confiança**: a sua idade era reduzida a zero e contava como fresco para sempre; agora está atrasado, o resumo diz que a data não é fiável e tolera-se um relógio adiantado até cinco minutos.
+
+- **O teste das portas das contas já não falha quando várias suites correm ao mesmo tempo**: o supervisor aceita que lhe indiquem por onde começar a procurar portas livres (o valor por defeito continua a ser 18800) e os testes pedem ao sistema um troço sem uso em vez de um fixo.
+
+- **Uma página estragada põe o CI a vermelho**: um novo job (`page`, sem `continue-on-error`) abre a página do monitor de demonstração num navegador real (`tools/check_page.py`), percorre cada separador e cada subseparador das Definições, exige um mínimo de campos em cada um e falha perante qualquer erro da página, promessa não tratada ou console.error. Uma página estragada de propósito (uma segunda definição, uma atribuição ao nome de uma função, uma chamada a uma função que não existe) tem de o fazer falhar. O teste que procura funções definidas duas vezes passa a ver também uma declaração com recuo, uma com `async` e uma atribuição ao nome de uma função.
+
 ## [1.7.9]
 
 ### Corrigido

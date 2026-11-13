@@ -114,8 +114,11 @@ _f("quota", "modes", "modes.low.cold_refresh_seconds", "int", (30, 86400), resta
 _f("quota", "modes", "modes.low.runs_per_repo", "int", (5, 100), restart=False)
 _f("quota", "modes", "modes.low.hot_hours", "int", (1, 48), restart=False, unit="h")
 _f("quota", "saving", "network.etag", "bool", restart=True)
+_f("quota", "saving", "network.graphql_checks", "bool", restart=False)
+_f("quota", "saving", "network.graphql_batch", "int", (1, 30), restart=False)
 _f("quota", "extra_reader", "extra_reader.enabled", "bool", restart=False, secure=True)
 _f("quota", "extra_reader", "extra_reader.file", "path", restart=False, secure=True)
+_f("quota", "extra_reader", "extra_reader.any_folder", "bool", restart=False, secure=True)
 _f("quota", "github_app", "github_app.enabled", "bool", restart=False, secure=True)
 _f("quota", "github_app", "github_app.app_id", "text", re.compile(r"^[0-9]{1,12}$"), restart=False, secure=True)
 _f("quota", "github_app", "github_app.key_path", "path", restart=False, secure=True)
@@ -314,6 +317,8 @@ _f("advanced", "auth", "auth.lockout_minutes", "int", (1, 1440), restart=False, 
 _f("advanced", "auth", "auth.min_length", "int", (8, 64), restart=False, secure=True, unit="")
 _f("advanced", "auth", "auth.allow_bearer", "bool", restart=False, secure=True)
 _f("advanced", "auth", "auth.audit", "bool", restart=False, secure=True)
+
+_f("advanced", "network", "listen.local_port", "int", (0, 65535), unit="", secure=True)
 _f("advanced", "token", "github_token.enabled", "bool", restart=False, secure=True)
 _f("advanced", "token", "github_token.store", "enum", ("auto", "system", "file"), restart=False, secure=True)
 _f("advanced", "ghactions", "github_actions.enabled", "bool", restart=False, secure=True)
@@ -341,6 +346,12 @@ _f(_T_AI, "alerts", "ai_alerts.folder", "path", restart=False)
 _f(_T_AI, "alerts", "ai_alerts.brief_max_bytes", "int", (512, 20000), restart=False, unit="")
 _f(_T_AI, "alerts", "ai_alerts.hook.enabled", "bool", restart=False, secure=True)
 _f(_T_AI, "alerts", "ai_alerts.hook.url", "text", LOOP_URL_RE, restart=False, secure=True)
+_f(_T_AI, "notice", "ai_notify.enabled", "bool", restart=False, secure=True)
+_f(_T_AI, "notice", "ai_notify.confirmed_provider", "text", re.compile(r"^[a-z0-9-]{0,40}$"), restart=False, secure=True)
+_f(_T_AI, "notice", "ai_notify.max_calls_per_hour", "int", (1, 60), restart=False, secure=True, unit="calls")
+_f(_T_AI, "notice", "ai_notify.cost_per_call_cents", "int", (0, 10000), restart=False, secure=True, unit="")
+_f(_T_AI, "notice", "ai_notify.max_cost_per_hour_cents", "int", (0, 100000), restart=False, secure=True, unit="")
+_f(_T_AI, "notice", "ai_notify.timeout_seconds", "int", (5, 120), restart=False, secure=True, unit="s")
 _f(_T_AI, "alerts", "ai_alerts.hook.max_per_hour", "int", (1, 60), restart=False, unit="")
 _f(_T_AI, "alerts", "ai_alerts.diagnose.enabled", "bool", restart=False, secure=True)
 _f(_T_AI, "alerts", "ai_alerts.diagnose.max_per_cycle", "int", (1, 10), restart=False, unit="")
@@ -513,7 +524,7 @@ def check_value_list(value):
 
 
 LITE_KEYS = ("github_owner", "language", "repos", "ecosystems", "exclude", "refresh_seconds", "open_browser", "updates.check", "airgapped") + tuple(
-    k for k in FIELDS if k.startswith(("ai_alerts.", "sound.", "display.", "modes.", "central.", "extra_reader.", "github_app.", "network.etag")))      # the short settings page of the lite product; the connection with an AI tool, the sound and the look are the same in both editions
+    k for k in FIELDS if k.startswith(("ai_alerts.", "sound.", "display.", "modes.", "central.", "extra_reader.", "github_app.", "network.etag", "network.graphql")))      # the short settings page of the lite product; the connection with an AI tool, the sound and the look are the same in both editions
 
 
 def validate(changes, lite=False):
@@ -549,8 +560,14 @@ def webhook_state(config):
     return "defined" if len(secret) >= 32 else "short"
 
 
-def describe(path=CONFIG_FILE, lite=False):
-    """What the page shows: {"groups": [{"id", "blocks": [{"id", "title_key", "fields": [...]}], "fields": [...]}], "backups": N}. A field: {"key", "type", "value", "default", "min",
+def _remote_visible():
+    from github_actions_monitor.security import localguard
+    return localguard.REMOTE_WRITABLE
+
+
+def describe(path=CONFIG_FILE, lite=False, remote=False):
+    """`remote` = the asker is a client of the network, not this computer: the value of every setting that a client of the network may not change (see localguard.REMOTE_WRITABLE) is
+    left out and the field only says whether it is defined (paths of keys, names of variables and channels are for the computer of the monitor). What the page shows: {"groups": [{"id", "blocks": [{"id", "title_key", "fields": [...]}], "fields": [...]}], "backups": N}. A field: {"key", "type", "value", "default", "min",
     "max", "enum", "restart", "unit", "secure", "label", "help", "block", "master"}. Values come from the file over the template; nothing outside SCHEMA is ever included."""
     template = {}
     try:
@@ -580,9 +597,13 @@ def describe(path=CONFIG_FILE, lite=False):
                     value = "all"
                 if kind == "status":
                     value = webhook_state(current)
+                hidden = remote and key not in _remote_visible()
+                if hidden:
+                    kind, default = "status", None
+                    value = "defined" if value not in (None, "", [], {}, False) else "undefined"
                 item = {"key": key, "type": kind, "value": value if value is not None else ("" if kind in ("text", "path", "enum") else None), "default": default, "restart": restart,
                         "unit": META[key]["unit"], "secure": META[key]["secure"], "label": label_keys(key), "help": help_key(key), "block": block,
-                        "master": index == 0 and kind == "bool" and len(keys) > 1}
+                        "master": index == 0 and kind == "bool" and len(keys) > 1, **({"redacted": True} if hidden else {})}
                 if kind in ("int", "float"):
                     item["min"], item["max"] = bounds
                 if kind == "intmap":

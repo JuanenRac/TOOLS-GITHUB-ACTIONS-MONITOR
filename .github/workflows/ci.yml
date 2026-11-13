@@ -54,10 +54,24 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
-      - name: No text leaves its box, the Quota tab included, and the sound logic of the page
+      - name: No text leaves its box, the Quota tab included, the sound logic, the bottom bar in one line and the loading box
         env:
           MONITOR_BROWSER_TESTS: "1"
-        run: python -m unittest discover -s monitor/tests -p "test_overflow.py" && python -m unittest discover -s monitor/tests -p "test_177_sound.py"
+        run: python -m unittest discover -s monitor/tests -p "test_overflow.py" && python -m unittest discover -s monitor/tests -p "test_177_sound.py" && python -m unittest discover -s monitor/tests -p "test_ui_bar_and_loading.py"
+
+  page:
+    name: The page works in a browser (every tab, every sub-tab of Settings, no error)
+    runs-on: ubuntu-latest      # a failure here turns the CI red
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Open the page, go through every tab and raise nothing (and a page broken on purpose must fail)
+        env:
+          MONITOR_BROWSER_TESTS: "1"
+          MONITOR_REQUIRE_BROWSER: "1"
+        run: python -m unittest discover -s monitor/tests -p "test_180_page_smoke.py" -v
 
   container:
     name: The example container builds
