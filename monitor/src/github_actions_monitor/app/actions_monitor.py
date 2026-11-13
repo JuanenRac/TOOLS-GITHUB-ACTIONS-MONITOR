@@ -110,6 +110,7 @@ DEFAULTS = {
     "organizations": {"discover": False},                                    # OFF: list the organisations of the login (orgs.py)
     "finops": {"jobs_per_cycle": 0},
     "network": {"use_proxy": False, "etag": True, "graphql_checks": False, "graphql_batch": 20},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
+    "ai_notify": {"enabled": False, "confirmed_provider": "", "max_calls_per_hour": 4, "cost_per_call_cents": 5, "max_cost_per_hour_cents": 50, "command": "", "timeout_seconds": 30},      # OFF: tell an external AI of a NEW real alert (ai_notify.py)
     "ai_alerts": {"enabled": False, "folder": "", "brief_max_bytes": 2048, "hook": {"enabled": False, "url": "", "max_per_hour": 6},
                   "diagnose": {"enabled": False, "max_per_cycle": 3, "log_lines": 10, "max_bytes": 1500},      # OFF: reads logs of GitHub (the allowance)
                   "cascade": {"enabled": True, "map": {}},
@@ -1132,7 +1133,19 @@ def feed_alerts(config, data, diagnose=True):
             except Exception as error:   # noqa: BLE001
                 degraded.note("loop.extra2", error)
                 pass
+            notice_ai(config, alert)
     return result
+
+
+def notice_ai(config, alert):
+    """The active notice to an external AI (ai_notify.py, OFF by default, confirmed per provider, capped by hour): sent from a thread of its own so that a slow provider never holds the cycle."""
+    try:
+        from github_actions_monitor.integrations import ai_notify
+        if not ai_notify.settings(config)["enabled"]:
+            return
+        threading.Thread(target=ai_notify.notify, args=(config, dict(alert)), name="ai-notify", daemon=True).start()
+    except Exception as error:   # noqa: BLE001 - a notice never stops the cycle
+        degraded.note("ai_alerts.hook", error)
 
 
 def maintain_extras(config, data):
