@@ -15,6 +15,7 @@ import threading
 import time
 from pathlib import Path
 from github_actions_monitor.security import private_io
+from github_actions_monitor.storage import state_io
 
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
 STATE_FILE = HERE / "update_check.json"
@@ -50,7 +51,7 @@ def settings(config):
 
 def _load(path):
     try:
-        value = json.loads(Path(path).read_text(encoding="utf-8"))
+        value = state_io.load_json(path)
     except (OSError, ValueError):
         return {}
     if not isinstance(value, dict):
@@ -66,9 +67,7 @@ def _load(path):
 
 def _save(path, state):
     try:
-        tmp = Path(str(path) + ".tmp")
-        private_io.write_tmp(tmp, json.dumps(state, indent=1) + "\n")
-        os.replace(tmp, path)
+        state_io.save_text(path, json.dumps(state, indent=1) + "\n")
     except OSError:
         pass
 

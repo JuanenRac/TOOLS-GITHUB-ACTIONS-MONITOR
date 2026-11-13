@@ -21,6 +21,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 from github_actions_monitor.security import private_io
+from github_actions_monitor.storage import state_io
 
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
 HISTORY_FILE = HERE / "analytics_history.json"
@@ -103,7 +104,7 @@ class Store:
         self.data = {"seen": [], "queue": {}, "steps": {}, "daily": {}}
         self.dirty = False
         try:
-            loaded = json.loads(self.path.read_text(encoding="utf-8"))
+            loaded = state_io.load_json(self.path)
             if isinstance(loaded, dict):
                 for key in self.data:
                     if isinstance(loaded.get(key), type(self.data[key])):
@@ -181,9 +182,7 @@ class Store:
             payload = json.dumps(self.data)
             self.dirty = False
         try:
-            tmp = self.path.with_name(self.path.name + ".tmp")
-            private_io.write_tmp(tmp, payload)
-            os.replace(tmp, self.path)
+            state_io.save_text(self.path, payload)
             return True
         except OSError:
             return False

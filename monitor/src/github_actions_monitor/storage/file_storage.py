@@ -337,6 +337,7 @@ class FileStorage(base.Storage):
 
     def export_account(self, account_id):
         events, _bad = self._read_events(account_id)
+        events.sort(key=base.event_ts)      # in time order, like the other backend; stable, so the order of writing is kept inside one second
         return {"config": self.load_config(account_id),
                 "sentinels": {n: self.load_sentinel_state(account_id, n) for n in self._sentinel_names(account_id)},
                 "docs": {n: self.load_doc(account_id, n, {}) for n in self._doc_names(account_id)},
