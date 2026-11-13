@@ -19,6 +19,20 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - `tools/migrate_layout.py` für einen Ordner, der eine flache Installation war: standardmäßig ein Probelauf; `--apply` kopiert Ihre Konfiguration nach `layout_backup_<Stempel>/config/` und VERSCHIEBT (nie löschen, nie überschreiben) die alten Module, die alte Seite, die alten Beispiele und `locales/` nach `layout_backup_<Stempel>/old_code/`. `--doctor` warnt, solange solche Reste existieren. `MIGRATING.md` beschreibt es in den acht Sprachen.
 
+### Sicherheit
+
+- **Was davon abhängt, wer fragt, beantwortet immer dein eigener Login**: `gh api user`, `user/orgs`, Benachrichtigungen, eine Suche nach `@me`, `gh auth` und `gh repo list` ohne Eigentümer gehen nie an die GitHub-App oder das zweite Konto, wie viele Aufrufe diese auch übrig haben (bei aktivem zweiten Konto konnte der Monitor dessen Inhaber als seinen Eigentümer nehmen und seine Organisationen auflisten).
+
+- **Ein `gh`-Aufruf ist nur dann ein Lesen, wenn er auf einer Positivliste steht**: `gh api ENDPOINT` mit höchstens den Optionen `--jq`, `--paginate`, `-H` (von der Art, die ein Lesen sendet), `-i` und `--cache`. Die angehängten Schreibweisen eines Schreibens (`-XPOST`, `--method=DELETE`, `-fa=b`, `--field=a=b`, `--input=-`) und jede andere Option gehen an deinen Login, statt auf die Quellen verteilt zu werden.
+
+- **Die Token-Datei des zweiten Kontos** (`extra_reader.file`) muss im Kontenordner des Monitors liegen (`accounts/` oder `MONITOR_ACCOUNTS_DIR`) und wird ohne Link-Folgen geöffnet, und nur wenn sie eine kleine normale Datei ist; außerhalb dieses Ordners ist die Einstellung leer. Der neue Schalter `extra_reader.any_folder` (standardmäßig aus, nur lokal) hebt die Ordnerregel für eine Datei auf, die woanders bleiben muss.
+
+- **Einem Zentralpanel mit Datum in der Zukunft wird nicht mehr vertraut**: Sein Alter wurde auf null begrenzt und galt für immer als frisch; jetzt ist es veraltet, die Zusammenfassung sagt, dass dem Datum nicht zu trauen ist, und eine bis zu fünf Minuten vorgehende Uhr wird toleriert.
+
+### Behoben
+
+- **Der Test der Ports der Konten schlägt nicht mehr fehl, wenn Suiten gleichzeitig laufen**: Dem Supervisor kann gesagt werden, wo er mit der Suche nach freien Ports beginnen soll (Standard bleibt 18800), und die Tests fragen das System nach einem unbenutzten Bereich statt nach einem festen.
+
 ## [1.7.9]
 
 ### Behoben

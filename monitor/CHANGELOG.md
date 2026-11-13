@@ -21,6 +21,20 @@ when this file and `tool_version.py` disagree.
 
 - `tools/migrate_layout.py` for a folder that was a flat installation: a dry run by default; `--apply` copies your configuration to `layout_backup_<stamp>/config/` and MOVES (never deletes, never overwrites) the old modules, page, examples and `locales/` to `layout_backup_<stamp>/old_code/`. `--doctor` warns while such leftovers exist. `MIGRATING.md` describes it in the eight languages.
 
+### Security
+
+- **What depends on who asks is always answered by your own login**: `gh api user`, `user/orgs`, notifications, a search for `@me`, `gh auth` and `gh repo list` without an owner never go to the GitHub App or to the second account, however many calls those have left (with the second account on, the monitor could take the owner of that account as its owner and list its organisations).
+
+- **A `gh` call is a read only when it is on a white list**: `gh api ENDPOINT` with at most the options `--jq`, `--paginate`, `-H` (of the kind a read sends), `-i` and `--cache`. The attached spellings of a write (`-XPOST`, `--method=DELETE`, `-fa=b`, `--field=a=b`, `--input=-`) and any other option go to your login instead of being spread over the sources.
+
+- **The token file of the second account** (`extra_reader.file`) must be inside the accounts folder of the monitor (`accounts/`, or `MONITOR_ACCOUNTS_DIR`) and is opened without following a link and only if it is a small regular file; outside that folder the setting is empty. The new switch `extra_reader.any_folder` (off by default, local only) lifts the folder rule for a file that must stay elsewhere.
+
+- **A central panel dated in the future is not trusted**: its age was clamped to zero, so it counted as fresh for ever; now it is behind, the summary says the date is not trusted and a clock that runs ahead by up to five minutes is tolerated.
+
+### Fixed
+
+- **The test of the ports of the accounts no longer fails when suites run at once**: the supervisor can be told where to start looking for free ports (the default stays 18800) and the tests ask the system for an unused stretch instead of a fixed one.
+
 ## [1.7.9]
 
 ### Fixed

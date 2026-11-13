@@ -19,6 +19,20 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - `tools/migrate_layout.py` pour un dossier qui était une installation plate : simulation par défaut ; `--apply` copie votre configuration vers `layout_backup_<horodatage>/config/` et DÉPLACE (jamais supprimer ni écraser) les anciens modules, page, exemples et `locales/` vers `layout_backup_<horodatage>/old_code/`. `--doctor` avertit tant que de tels restes existent. `MIGRATING.md` le décrit dans les huit langues.
 
+### Sécurité
+
+- **Ce qui dépend de celui qui demande est toujours servi par votre propre login** : `gh api user`, `user/orgs`, les notifications, une recherche de `@me`, `gh auth` et `gh repo list` sans propriétaire ne vont jamais à la GitHub App ni au second compte, quel que soit le nombre d'appels qui leur restent (avec le second compte actif, le moniteur pouvait prendre le titulaire de ce compte comme propriétaire et lister ses organisations).
+
+- **Un appel `gh` n'est une lecture que s'il figure sur une liste blanche** : `gh api ENDPOINT` avec au plus les options `--jq`, `--paginate`, `-H` (de celles qu'envoie une lecture), `-i` et `--cache`. Les formes collées d'une écriture (`-XPOST`, `--method=DELETE`, `-fa=b`, `--field=a=b`, `--input=-`) et toute autre option vont à votre login au lieu d'être réparties entre les sources.
+
+- **Le fichier du jeton du second compte** (`extra_reader.file`) doit se trouver dans le dossier des comptes du moniteur (`accounts/`, ou `MONITOR_ACCOUNTS_DIR`) et s'ouvre sans suivre de lien et seulement s'il s'agit d'un petit fichier ordinaire ; hors de ce dossier le réglage est vide. Le nouvel interrupteur `extra_reader.any_folder` (désactivé par défaut, local seulement) lève la règle du dossier pour un fichier qui doit rester ailleurs.
+
+- **Un panneau central daté du futur n'est plus cru** : son âge était ramené à zéro et il comptait comme frais pour toujours ; il est maintenant en retard, le résumé dit que la date n'est pas fiable et une horloge en avance de cinq minutes au plus est tolérée.
+
+### Corrigé
+
+- **Le test des ports des comptes n'échoue plus quand plusieurs suites tournent en même temps** : le superviseur peut recevoir le point de départ de la recherche de ports libres (la valeur par défaut reste 18800) et les tests demandent au système une plage inutilisée au lieu d'une plage fixe.
+
 ## [1.7.9]
 
 ### Corrigé

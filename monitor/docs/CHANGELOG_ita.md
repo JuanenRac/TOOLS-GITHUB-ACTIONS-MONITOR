@@ -19,6 +19,20 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - `tools/migrate_layout.py` per una cartella che era un'installazione piatta: simulazione per impostazione predefinita; `--apply` copia la tua configurazione in `layout_backup_<marca>/config/` e SPOSTA (mai cancella né sovrascrive) i vecchi moduli, pagina, esempi e `locales/` in `layout_backup_<marca>/old_code/`. `--doctor` avvisa finché esistono tali resti. `MIGRATING.md` lo descrive nelle otto lingue.
 
+### Sicurezza
+
+- **Ciò che dipende da chi chiede è sempre servito dal tuo login**: `gh api user`, `user/orgs`, le notifiche, una ricerca di `@me`, `gh auth` e `gh repo list` senza proprietario non vanno mai alla GitHub App né al secondo account, per quante chiamate abbiano ancora (con il secondo account attivo, il monitor poteva prendere come proprietario il titolare di quell'account ed elencarne le organizzazioni).
+
+- **Una chiamata `gh` è una lettura solo se è in una lista bianca**: `gh api ENDPOINT` con al massimo le opzioni `--jq`, `--paginate`, `-H` (di quelle che invia una lettura), `-i` e `--cache`. Le forme attaccate di una scrittura (`-XPOST`, `--method=DELETE`, `-fa=b`, `--field=a=b`, `--input=-`) e ogni altra opzione vanno al tuo login invece di essere distribuite tra le fonti.
+
+- **Il file del token del secondo account** (`extra_reader.file`) deve stare nella cartella degli account del monitor (`accounts/`, o `MONITOR_ACCOUNTS_DIR`) e viene aperto senza seguire un collegamento e solo se è un piccolo file normale; fuori da quella cartella l'impostazione è vuota. Il nuovo interruttore `extra_reader.any_folder` (spento per impostazione predefinita, solo locale) toglie la regola della cartella per un file che deve restare altrove.
+
+- **Un pannello centrale con data futura non è più creduto**: la sua età veniva ridotta a zero e contava come fresco per sempre; ora è in ritardo, il riepilogo dice che la data non è affidabile e un orologio avanti fino a cinque minuti è tollerato.
+
+### Corretto
+
+- **Il test delle porte degli account non fallisce più quando più suite girano insieme**: al supervisore si può indicare da dove cercare porte libere (il valore predefinito resta 18800) e i test chiedono al sistema un tratto inutilizzato invece di uno fisso.
+
 ## [1.7.9]
 
 ### Corretto

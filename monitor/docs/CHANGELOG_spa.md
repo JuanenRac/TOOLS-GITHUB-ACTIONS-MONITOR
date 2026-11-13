@@ -19,6 +19,20 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - `tools/migrate_layout.py` para una carpeta que era una instalación plana: simulación por defecto; `--apply` copia tu configuración a `layout_backup_<marca>/config/` y MUEVE (nunca borra ni pisa) los módulos, la página, los ejemplos y `locales/` antiguos a `layout_backup_<marca>/old_code/`. `--doctor` avisa mientras queden restos así. `MIGRATING.md` lo describe en los ocho idiomas.
 
+### Seguridad
+
+- **Lo que depende de quién pregunta lo contesta siempre tu propio login**: `gh api user`, `user/orgs`, las notificaciones, una búsqueda de `@me`, `gh auth` y `gh repo list` sin propietario no van nunca a la GitHub App ni a la segunda cuenta, por muchas llamadas que les queden (con la segunda cuenta activa, el monitor podía tomar como propietario al dueño de esa cuenta y listar sus organizaciones).
+
+- **Una llamada a `gh` es una lectura solo si está en una lista blanca**: `gh api ENDPOINT` con, como mucho, las opciones `--jq`, `--paginate`, `-H` (de las que envía una lectura), `-i` y `--cache`. Las formas pegadas de una escritura (`-XPOST`, `--method=DELETE`, `-fa=b`, `--field=a=b`, `--input=-`) y cualquier otra opción van a tu login en vez de repartirse entre las fuentes.
+
+- **El archivo del token de la segunda cuenta** (`extra_reader.file`) debe estar dentro de la carpeta de cuentas del monitor (`accounts/`, o `MONITOR_ACCOUNTS_DIR`) y se abre sin seguir un enlace y solo si es un archivo normal y pequeño; fuera de esa carpeta el ajuste queda vacío. El nuevo interruptor `extra_reader.any_folder` (apagado por defecto, solo local) levanta la regla de la carpeta para un archivo que deba quedarse en otro sitio.
+
+- **Un panel central con fecha futura ya no es de fiar**: su edad se recortaba a cero y contaba como fresco para siempre; ahora está atrasado, el resumen dice que la fecha no es de fiar y se tolera un reloj adelantado hasta cinco minutos.
+
+### Corregido
+
+- **La prueba de los puertos de las cuentas ya no falla cuando varias suites corren a la vez**: el supervisor admite que se le indique desde dónde buscar puertos libres (el valor por defecto sigue siendo 18800) y las pruebas piden al sistema un tramo sin uso en vez de uno fijo.
+
 ## [1.7.9]
 
 ### Corregido

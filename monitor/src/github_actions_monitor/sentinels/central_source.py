@@ -46,12 +46,16 @@ def validate(data):
     return data
 
 
+FUTURE_SLACK = 300      # seconds a clock may run ahead of ours before the date of the file is not believed
+
+
 def age_seconds(data, now=None):
     try:
         asof = datetime.strptime(data["asof"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp()
     except (KeyError, TypeError, ValueError):
         return None
-    return max(0, int((time.time() if now is None else now) - asof))
+    age = int((time.time() if now is None else now) - asof)
+    return None if age < -FUTURE_SLACK else max(0, age)      # a date in the future (a clock that runs ahead, a mistake, a file written by hand) is not a fresh file: no age, and so behind
 
 
 def _git(args, cwd, runner):
@@ -116,6 +120,8 @@ def summary(result):
         return ""
     if not result.get("ok"):
         return f"central panel not readable ({result.get('error')})"
+    if result.get("age_seconds") is None:
+        return "source: central panel, the date of the file is missing or in the future: not trusted"
     minutes = (result.get("age_seconds") or 0) // 60
     base = f"source: central panel, {minutes} min ago: {len(result['data']['ci']['red'])} red, {len(result['data']['releases']['candidates'])} release candidate(s)"
     return base + (" - the central panel is behind: not trusted" if result.get("stale") else "")
