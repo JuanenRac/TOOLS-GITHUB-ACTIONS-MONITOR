@@ -7,7 +7,7 @@
 
 Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son propre semver. La source est le CHANGELOG.md en anglais ; ce fichier contient les mêmes versions et sections.
 
-## [Unreleased]
+## [1.7.8]
 
 ### Ajouté
 
