@@ -7,6 +7,18 @@
 
 Versión de la propia herramienta (monitor + centinela + herramientas por lotes), con su propio semver. La fuente es el CHANGELOG.md en inglés; este fichero lleva las mismas versiones y secciones.
 
+## [Unreleased]
+
+### Cambiado
+
+- **Nueva estructura de carpetas, mismo comportamiento**: el código es ahora un paquete importable en `src/github_actions_monitor/` (`app`, `accounts`, `sentinels`, `security`, `data_pipeline`, `integrations`, `cli`, `ui`, `i18n`, `util`); la página, los ejemplos neutros con `quotas.json` y los ocho catálogos de idioma están en `assets/` (`static`, `examples`, `locales`); `make_release.py` está en `tools/`. Los lanzadores siguen en la carpeta del producto y ejecutan `python -m github_actions_monitor` (completo) o `python -m github_actions_monitor.lite` (lite): misma dirección, mismo puerto. Los datos de quien lo usa (`actions_monitor.json`, cachés, registros, `accounts/`, catálogos) siguen junto a los lanzadores, nunca dentro de `src/`.
+
+- Los comandos de las guías (`python read_report.py`, `python actions_monitor.py --doctor`, `python monitor_cli.py status` ...) siguen funcionando: un pequeño archivo de entrada con el mismo nombre queda en la carpeta del producto, así que los hooks y servidores MCP ya registrados por ruta también siguen funcionando. El zip de la versión conserva su nombre de carpeta y ahora incluye `src/`, `assets/` y `tools/`.
+
+### Añadido
+
+- `tools/migrate_layout.py` para una carpeta que era una instalación plana: simulación por defecto; `--apply` copia tu configuración a `layout_backup_<marca>/config/` y MUEVE (nunca borra ni pisa) los módulos, la página, los ejemplos y `locales/` antiguos a `layout_backup_<marca>/old_code/`. `--doctor` avisa mientras queden restos así. `MIGRATING.md` lo describe en los ocho idiomas.
+
 ## [1.7.9]
 
 ### Corregido

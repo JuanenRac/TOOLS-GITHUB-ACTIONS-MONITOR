@@ -9,7 +9,7 @@
     python tools/make_glance.py            write the block in README.md and its seven translations
     python tools/make_glance.py --check    fail when a README differs from what the repository gives (the CI runs it)
 
-The block lives between `<!-- glance:begin -->` and `<!-- glance:end -->`. What is measured, never typed: the version (monitor/tool_version.py), the number of tests (the test methods of
+The block lives between `<!-- glance:begin -->` and `<!-- glance:end -->`. What is measured, never typed: the version (monitor/src/github_actions_monitor/tool_version.py), the number of tests (the test methods of
 monitor/tests, counted from the source), the number of settings (the schema of the Settings page), the languages, the systems and Python versions of the CI (.github/workflows/ci.yml) and
 the maturity (the project manifest). The lights follow the rule of the ecosystem: only the light in the State column; nothing is green that has not run in the real environment.
 """
@@ -21,20 +21,20 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 MON = ROOT / "monitor"
-sys.path.insert(0, str(MON))
+sys.path.insert(0, str(MON / "src"))
 SUFFIX = {"en": "", "es": "_spa", "fr": "_fra", "it": "_ita", "de": "_deu", "zh": "_zho", "ja": "_jpn", "pt": "_por"}
 BEGIN, END = "<!-- glance:begin -->", "<!-- glance:end -->"
 
 
 def facts():
-    version = re.search(r'TOOL_VERSION\s*=\s*"([^"]+)"', (MON / "tool_version.py").read_text(encoding="utf-8")).group(1)
+    version = re.search(r'TOOL_VERSION\s*=\s*"([^"]+)"', (MON / "src" / "github_actions_monitor" / "tool_version.py").read_text(encoding="utf-8")).group(1)
     tests = 0
     for path in sorted((MON / "tests").glob("test_*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8-sig"))
         for node in ast.walk(tree):
             if isinstance(node, ast.ClassDef) and any((isinstance(b, ast.Attribute) and b.attr == "TestCase") or (isinstance(b, ast.Name) and b.id.endswith("TestCase")) for b in node.bases):
                 tests += sum(1 for f in node.body if isinstance(f, ast.FunctionDef) and f.name.startswith("test"))
-    import settings_api
+    from github_actions_monitor.app import settings_api
     ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
     systems = re.search(r"os:\s*\[([^\]]+)\]", ci).group(1)
     pythons = re.search(r"python:\s*\[([^\]]+)\]", ci).group(1)

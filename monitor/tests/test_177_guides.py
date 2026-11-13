@@ -8,13 +8,13 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import actions_monitor as am  # noqa: E402
-import modes  # noqa: E402
-import settings_api  # noqa: E402
+from github_actions_monitor.app import actions_monitor as am  # noqa: E402
+from github_actions_monitor.app import modes  # noqa: E402
+from github_actions_monitor.app import settings_api  # noqa: E402
 
 DOCS = HERE / "docs"
 SUFFIXES = ("", "_spa", "_deu", "_fra", "_ita", "_jpn", "_zho", "_por")

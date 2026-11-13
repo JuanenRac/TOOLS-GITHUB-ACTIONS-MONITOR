@@ -20,7 +20,7 @@ import sys
 import urllib.request
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "monitor"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "monitor" / "src"))
 
 
 def gh(*args):
@@ -84,13 +84,13 @@ def proxy_check(args):
 def main(argv):
     step = argv[0] if argv else "help"
     if step == "scopes":
-        import actions_monitor as am
-        import ghactions
+        from github_actions_monitor.app import actions_monitor as am
+        from github_actions_monitor.integrations import ghactions
         have = ghactions.scopes(am.run_gh)
         print("scopes:", "not listed (fine-grained or app token: GitHub decides)" if have is None else ", ".join(sorted(have)))
     elif step == "billing":
-        import actions_monitor as am
-        import quota
+        from github_actions_monitor.app import actions_monitor as am
+        from github_actions_monitor.data_pipeline import quota
         owner = json.loads(gh("api", "user")[1] or "{}").get("login", "")
         result = quota.billing_usage(owner, lambda endpoint: am.gh("api", endpoint, retries=0))
         print("billing report:", "not available for this login (expected without the `user` scope)" if result is None else json.dumps(result, indent=1))
@@ -105,8 +105,8 @@ def main(argv):
         print(out if code == 0 else "the Copilot command line is not installed (" + (err or out).strip()[:100] + "); the flags stay unverified")
     elif step == "notify":
         port = argv[1] if len(argv) > 1 else "8765"
-        sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "monitor"))
-        import notifiers
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "monitor" / "src"))
+        from github_actions_monitor.integrations import notifiers
         base = f"http://127.0.0.1:{port}"
         token = json.load(urllib.request.urlopen(base + "/api/session-token", timeout=10)).get("token", "")
         for name in notifiers.CHANNELS:

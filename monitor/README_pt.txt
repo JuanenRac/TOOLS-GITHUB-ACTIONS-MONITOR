@@ -24,10 +24,10 @@ O QUE NUNCA FAZ   Só escuta em 127.0.0.1, a menos que ligue o modo rede (Defini
 IDIOMA     8 idiomas: en, es, de, fr, it, ja, zh, pt (português de Portugal). Arranca em INGLÊS: o idioma do sistema não decide. Escolha outro no separador DEFINIÇÕES da página
            (ícone da roda dentada; o navegador lembra-se), ou com "language" em actions_monitor.json, ou com a variável de ambiente MONITOR_LANG, ou com --lang CÓDIGO nas ferramentas de linha de comandos (prevalece sobre tudo).
            As linhas que os scripts leem (SKIP, DISPATCHED, READY, FAILED, Summary:, BUILD ONLY...) estão sempre em inglês.
-CONFIG     actions_monitor.json (criado a partir de actions_monitor.example.json no primeiro arranque). Chaves úteis: github_owner (vazio = a conta do gh),
+CONFIG     actions_monitor.json (criado a partir de assets/examples/actions_monitor.example.json no primeiro arranque). Chaves úteis: github_owner (vazio = a conta do gh),
            language, ecosystems_file, targets_file, refresh_seconds, cold_refresh_seconds, max_workers, min_rate_remaining, sentinel.*
-           ecosystems_file: agrupa repositórios por prefixo do nome (ver ecosystems.example.json; "*" = todos os repositórios). targets_file: catálogo de builds para as
-           ferramentas de lote (ver targets.example.json). profiles_file (profiles.example.json): perfis de lote. As chaves que começam por "_" nestes ficheiros são metadados.
+           ecosystems_file: agrupa repositórios por prefixo do nome (ver assets/examples/ecosystems.example.json; "*" = todos os repositórios). targets_file: catálogo de builds para as
+           ferramentas de lote (ver assets/examples/targets.example.json). profiles_file (assets/examples/profiles.example.json): perfis de lote. As chaves que começam por "_" nestes ficheiros são metadados.
 ESPAÇO DE TRABALHO  OPCIONAL: uma pasta com clones locais dos seus repositórios (MONITOR_ROOT, "workspace_root" no json, ou uma pasta superior com um ficheiro .monitor-root).
            Sem ele, o monitor arranca em MODO REDUZIDO e diz isso: só o que a API do GitHub fornece (sem fila de assinatura local, sem relatório de auditoria, sem leitura do CHANGELOG).
            Com ele, há também releases candidatas, fila de assinatura e as ferramentas de lote. Registos de assinatura: "signed_dir"; ficheiros de auditoria: "audit_dir".

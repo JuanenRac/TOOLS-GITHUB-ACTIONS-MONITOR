@@ -44,7 +44,7 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **テスト** | テストメソッド 1264 件(`python -m unittest discover -s monitor/tests`) |
+| **テスト** | テストメソッド 1286 件(`python -m unittest discover -s monitor/tests`) |
 | **設定** | 設定 288 件、すべてヘルプ付き |
 | **言語** | 8(英語、スペイン語、ドイツ語、フランス語、イタリア語、日本語、中国語、ポルトガル語) |
 | **CI で検証したシステム** | ubuntu, windows, macos、Python 3.11, 3.13 |
@@ -192,7 +192,7 @@
 
 ## 設定
 
-すべては `actions_monitor.json`（`actions_monitor.example.json` から作成）にあります。**設定** タブで安全に編集でき、トークンや秘密情報は表示も保存もされません。エコシステム、ビルド対象、バッチプロファイルは別ファイルで、`ecosystems_file`、`targets_file`、`profiles_file` で指定します。中立な `*.example.json` テンプレートが付属します。詳細は [`monitor/docs/SETTINGS_jpn.md`](monitor/docs/SETTINGS_jpn.md) を参照してください。
+すべては `actions_monitor.json`（`monitor/assets/examples/actions_monitor.example.json` から作成）にあります。**設定** タブで安全に編集でき、トークンや秘密情報は表示も保存もされません。エコシステム、ビルド対象、バッチプロファイルは別ファイルで、`ecosystems_file`、`targets_file`、`profiles_file` で指定します。中立な `*.example.json` テンプレートが付属します。詳細は [`monitor/docs/SETTINGS_jpn.md`](monitor/docs/SETTINGS_jpn.md) を参照してください。
 
 ## Grafana とダッシュボード向け出力
 
@@ -224,44 +224,26 @@ python -m unittest discover -s monitor/tests
 
 ```
 TOOLS-GITHUB-ACTIONS-MONITOR/
-├── monitor/                                  プログラム本体
-├── docs/                                     構成図・画面・ロードマップ
-├── tools/                                    図・ガイド・デモ
-├── deploy/                                   コンテナーの例
-├── images/                                   バナーと図
-├── .github/                                  CI と Issue フォーム
-├── CHANGELOG.md                              バージョン別の変更
-├── LICENSE NOTICE AUTHORS                    ライセンスと作者
-├── CONTRIBUTING.md SECURITY.md               参加方法、報告
-├── SUPPORT.md CODE_OF_CONDUCT.md             サポートと行動規範
+├── monitor/                                プログラム本体
+├── docs/                                   構成図・画面・ロードマップ
+├── tools/                                  図・ガイド・デモ
+├── deploy/                                 コンテナーの例
+├── images/                                 バナーと図
+├── .github/                                CI と Issue フォーム
+├── CHANGELOG.md                            バージョン別の変更
+├── LICENSE NOTICE AUTHORS                  ライセンスと作者
+├── CONTRIBUTING.md SECURITY.md             参加方法、報告
+├── SUPPORT.md CODE_OF_CONDUCT.md           サポートと行動規範
 └── monitor/
-    ├── actions_monitor.py                    ローカルサーバー
-    ├── actions_monitor.html                  Web ページ
-    ├── MONITOR_LITE_GITHUB_ACTIONS.*         lite 版(センチネルなし)
-    ├── sentinel_local.py                     アラートとレポート
-    ├── sentinel_collab.py  alert_center.py   Issue 番人とアラート
-    ├── surface.py readiness.py               検査とリリース準備
-    ├── settings_api.py outputs.py            設定とメトリクス
-    ├── signstate.py sigverify.py             署名の状態と検証
-    ├── monitor_cli.py                        クライアント用コマンド
-    ├── read_report.py                        ターミナルでレポート
-    ├── gha_dispatch_all.py                   バッチビルド
-    ├── events.py report_history.py           イベントと履歴
-    ├── ci_red.py export_status.py            他ツール向けファイル
-    ├── etagcache.py resilience.py            条件付き読み取りと接続
-    ├── analytics.py lint_workflows.py        所要時間・不安定・Lint
-    ├── notifiers.py ai_actions.py            通知と AI の限定リスト
-    ├── tui.py migrate_state.py               ターミナル表示と移行
-    ├── about.py  helpdocs.py                 情報とヘルプのパネル
-    ├── quota.py  quotas.json                 プラン・分数・クォータ
-    ├── modes.py  updatecheck.py              動作モード・更新通知
-    ├── doctor.py  demo_mode.py               --doctor と --demo
-    ├── discovery.py  banner.py               検出・版バナー
-    ├── tui_textual.py                        対話型ターミナル
-    ├── i18n.py locales/                      8言語
-    ├── toolconfig.py workspace.py            設定とクローン
-    ├── tests/                                オフラインテスト
-    └── docs/                                 ガイドとスキーマ
+    ├── MONITOR_GITHUB_ACTIONS.*            起動スクリプト(ダブルクリック)
+    ├── MONITOR_LITE_GITHUB_ACTIONS.*       lite 版(センチネルなし)
+    ├── BATCH_GITHUB_ACTIONS.*              バッチビルドのメニュー
+    ├── src/                                インポート可能なパッケージ
+    ├── assets/                             例・ページ・言語
+    ├── actions_monitor.py read_report.py   ツールの入口
+    ├── tests/                              オフラインテスト
+    ├── docs/                               ガイドとスキーマ
+    └── tools/                              リリースと移行のスクリプト
 ```
 
 ## ドキュメント

@@ -18,19 +18,19 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import actions_monitor  # noqa: E402
-import ai_alerts  # noqa: E402
-import ai_hook  # noqa: E402
-import ai_hook_install  # noqa: E402
-import alert_center  # noqa: E402
-import mcp_server  # noqa: E402
-import monitor_cli  # noqa: E402
-import private_io  # noqa: E402
-import settings_api  # noqa: E402
+from github_actions_monitor.app import actions_monitor  # noqa: E402
+from github_actions_monitor.integrations import ai_alerts  # noqa: E402
+from github_actions_monitor.integrations import ai_hook  # noqa: E402
+from github_actions_monitor.integrations import ai_hook_install  # noqa: E402
+from github_actions_monitor.sentinels import alert_center  # noqa: E402
+from github_actions_monitor.integrations import mcp_server  # noqa: E402
+from github_actions_monitor.cli import monitor_cli  # noqa: E402
+from github_actions_monitor.security import private_io  # noqa: E402
+from github_actions_monitor.app import settings_api  # noqa: E402
 
 LANGS = ("en", "es", "de", "fr", "it", "ja", "zh", "pt")
 NOW = 1_800_000_000
@@ -94,7 +94,7 @@ class BriefFollowsTheCentre(Folder):
         with mock.patch.object(actions_monitor, "refresh_feed") as refresh, mock.patch.object(actions_monitor, "SENTINEL", {"registry": None, "obj": None, "error": None}):
             actions_monitor.alerts_payload({})
         refresh.assert_called()
-        page = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        page = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         for needle in ('refresh_feed()      # the bar polls every 30 seconds', "refresh_feed()\n            answer = advanced_get(path"):
             self.assertIn(needle, page.replace("\r\n", "\n"))
 
@@ -224,7 +224,7 @@ class Heartbeat(Folder):
             self.assertIsNone(actions_monitor.statusbar_payload(8766)["ai"], "the lite edition has no feed")
 
     def test_the_page_shows_it_in_the_bar(self):
-        page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         for needle in ('id="sb-ai"', "ui.sb_ai_on", "ui.sb_ai_off", "ui.sb_ai_stream", "SBINFO.ai"):
             self.assertIn(needle, page, needle)
 
@@ -434,7 +434,7 @@ class GateScript(Folder):
             self.assertEqual(ai_hook.run(["Stop"], bad, now=NOW, env={}), "", "a payload that is not an object is no reason to fail")
 
     def test_the_script_needs_nothing_but_the_standard_library(self):
-        tree = (HERE / "ai_hook.py").read_text(encoding="utf-8")
+        tree = (HERE / "src" / "github_actions_monitor" / "integrations" / "ai_hook.py").read_text(encoding="utf-8")
         imports = set(re.findall(r"^(?:import|from) (\w+)", tree, re.M))
         self.assertTrue(imports <= {"json", "os", "re", "sys", "time", "pathlib"}, imports)
 
@@ -612,7 +612,7 @@ class PrivateFiles(unittest.TestCase):
 
     def test_no_module_writes_a_state_file_with_a_plain_write(self):
         allowed = {"actions_monitor.py": 2, "release_candidates.py": 1, "release_notes.py": 1, "tui.py": 99, "demo_mode.py": 99, "make_release.py": 99, "private_io.py": 99}
-        for path in sorted(HERE.glob("*.py")):
+        for path in _testenv.source_files():
             text = path.read_text(encoding="utf-8")
             found = len(re.findall(r"\.write_text\(|\.write_bytes\(|open\([^)]*, \"[aw]\"", text))
             self.assertLessEqual(found, allowed.get(path.name, 0), f"{path.name} writes a file without private_io")
@@ -643,9 +643,9 @@ class TheFeedIsOffByDefault(Folder):
 
     def test_the_notice_exists_in_each_language_and_the_template_agrees(self):
         for lang in LANGS:
-            cat = json.loads((HERE / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
+            cat = json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
             self.assertIn("ai_alerts.enabled", cat["mon.ai_feed_legacy"], lang)
-        example = json.loads((HERE / "actions_monitor.example.json").read_text(encoding="utf-8"))
+        example = json.loads((HERE / "assets" / "examples" / "actions_monitor.example.json").read_text(encoding="utf-8"))
         self.assertIs(example["ai_alerts"].get("enabled"), False)
 
 
@@ -660,7 +660,7 @@ class SettingsAndTexts(unittest.TestCase):
         for key in self.KEYS:
             self.assertIn(key, settings_api.META, key)
             for lang in LANGS:
-                cat = json.loads((HERE / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
+                cat = json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
                 self.assertTrue(cat.get("cfg.f." + key) and cat.get("cfg.h." + key), (lang, key))
         for key in ("diagnose.enabled", "stream.enabled", "client_hook.block_on_stop"):
             self.assertTrue(settings_api.META["ai_alerts." + key]["secure"], key)
@@ -674,7 +674,7 @@ class SettingsAndTexts(unittest.TestCase):
 
     def test_the_new_command_line_texts_exist_in_the_eight_languages(self):
         for lang in LANGS:
-            cat = json.loads((HERE / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
+            cat = json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
             for action in ("installed", "updated", "unchanged", "printed", "removed", "absent", "would_installed", "would_updated", "would_remove"):
                 self.assertTrue(cat.get("cli.aih_" + action), (lang, action))
             for key in ("cli.token_flag_warn", "cli.help_token_file", "mon.network_first_steps", "ui.sb_ai_on", "ui.sb_ai_off", "ui.sb_ai_stream", "ui.sb_ai_t"):
@@ -686,7 +686,7 @@ class SettingsAndTexts(unittest.TestCase):
             ignored = (HERE.parent / ".gitignore").read_text(encoding="utf-8")
             for name in ("monitor/ai_alerts.jsonl", "monitor/ai_heartbeat.json", "monitor/ai_hook_state.json"):
                 self.assertIn(name, ignored)
-        packaging = (HERE / "make_release.py").read_text(encoding="utf-8")
+        packaging = (HERE / "tools" / "make_release.py").read_text(encoding="utf-8")
         for name in ("ai_alerts.jsonl", "ai_heartbeat.json", "ai_hook_state.json"):
             self.assertIn(f'"{name}"', packaging)
 

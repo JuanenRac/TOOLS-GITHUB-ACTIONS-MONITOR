@@ -34,7 +34,7 @@ python actions_monitor.py --migrate-accounts --apply  # copia-o para accounts/de
 python actions_monitor.py --accounts                  # lista as contas
 ```
 
-Os originais nunca são movidos nem apagados: apaga-os você depois de verificar. Uma segunda execução recusa-se, para que dois estados nunca se misturem. Para acrescentar uma conta, crie `accounts/<id>/actions_monitor.json` com o seu `github_owner` (copie o modelo `actions_monitor.example.json`).
+Os originais nunca são movidos nem apagados: apaga-os você depois de verificar. Uma segunda execução recusa-se, para que dois estados nunca se misturem. Para acrescentar uma conta, crie `accounts/<id>/actions_monitor.json` com o seu `github_owner` (copie o modelo `assets/examples/actions_monitor.example.json`).
 
 ## Executar
 

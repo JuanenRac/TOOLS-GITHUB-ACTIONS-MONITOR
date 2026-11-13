@@ -17,7 +17,7 @@ SCHNELLSTART - GitHub-Actions-Monitor + Wächter
 5. Erste Benutzung:
    - Die Seite zeigt DEINE Repositories (das GitHub-Konto, mit dem du angemeldet bist). Für ein anderes Konto setze "github_owner" in actions_monitor.json.
    - Wähle deine Sprache im Tab Einstellungen der Seite (Zahnrad-Symbol; Start auf Englisch, die Wahl wird gemerkt). Dort sind auch die übrigen Einstellungen.
-   - Um Repositories nach Namenspräfix zu gruppieren oder die Batch-Werkzeuge zu nutzen, kopiere ecosystems.example.json / targets.example.json und verweise in
+   - Um Repositories nach Namenspräfix zu gruppieren oder die Batch-Werkzeuge zu nutzen, kopiere assets/examples/ecosystems.example.json / assets/examples/targets.example.json und verweise in
      actions_monitor.json darauf ("ecosystems_file", "targets_file"). Details stehen in README_de.txt.
    - Keine lokalen Klone? Es funktioniert trotzdem, im reduzierten Modus (nur, was die GitHub-API liefert), und die Seite sagt es dir.
 6. Was er NICHT tut: Er signiert und veröffentlicht nichts von selbst, schreibt von sich aus nichts auf GitHub (nur `dispatch --go`, `dispatch --real` und `finalize --execute`, die du ausführst, tun es), lauscht nur auf 127.0.0.1 und speichert kein Token. Signieren und

@@ -89,3 +89,28 @@ Não é preciso converter nada: sem uma pasta `accounts/` o monitor funciona exa
 - As **várias contas** são opcionais. Para as usar execute `python actions_monitor.py --migrate-accounts` (um ensaio) e depois acrescente `--apply` para copiar os seus ficheiros para `accounts/default/`; os originais ficam até os apagar. Acrescente mais contas como `accounts/<id>/actions_monitor.json`. Veja `ACCOUNTS.md`.
 - Com uma pasta `accounts/`, `python actions_monitor.py` arranca um supervisor que executa um monitor por conta; `--account <id>` executa só uma. A edição lite não tem nada disto.
 - Novidades: `?view=` e `?chrome=0` no endereço da página, `GET /api/accounts`, `GET /api/live-status` e um só `POST /api/webhook` para todas as contas.
+
+# Da 1.7.x para a nova estrutura de pastas
+
+O código vive agora em `src/github_actions_monitor/`, a página, os ficheiros de exemplo e os idiomas em `assets/`, e os scripts de versão e de migração em `tools/`. Nada do que utiliza muda: os lançadores (`MONITOR_GITHUB_ACTIONS`, `MONITOR_LITE_GITHUB_ACTIONS`, `BATCH_GITHUB_ACTIONS`) ficam onde estavam e abrem o mesmo endereço e a mesma porta, e os comandos deste guia (`python read_report.py`, `python actions_monitor.py --doctor`, `python monitor_cli.py status` ...) continuam a funcionar, porque na pasta do produto fica um pequeno ficheiro de entrada com o mesmo nome. Os lançadores executam `python -m github_actions_monitor` (completo) e `python -m github_actions_monitor.lite` (lite) com `src/` no caminho.
+
+Os seus dados não se movem: `actions_monitor.json`, as caches, os registos, `config_backups/`, `accounts/` e os seus próprios ficheiros de catálogo ficam na pasta do produto junto dos lançadores, nunca dentro de `src/`. Os exemplos neutros e o `quotas.json` que acompanham o programa estão agora em `assets/examples/`; um `quotas.json` seu junto dos lançadores continua a ter prioridade.
+
+## Passos
+
+1. Pare o monitor e descomprima a nova versão por cima da pasta antiga (mantenha o seu `actions_monitor.json`).
+2. Arranque-o como sempre. Funciona mesmo que não faça mais nada.
+3. Para retirar os restos da antiga estrutura plana: `python tools/migrate_layout.py` (simulação) e depois `python tools/migrate_layout.py --apply`. Copia os seus ficheiros de configuração para `layout_backup_<marca>/config/` e move os módulos antigos, a página antiga, os exemplos antigos e a pasta `locales/` antiga para `layout_backup_<marca>/old_code/`. Nada é apagado, nada do que existe é substituído e os seus dados não são tocados. `python actions_monitor.py --doctor` avisa enquanto sobrarem ficheiros antigos.
+4. Um script seu que importava um módulo pelo nome plano antigo (`import read_report`) passa a importar `github_actions_monitor.<pacote>.<módulo>` com `src/` no caminho.
+
+| Pacote | O que contém |
+|---|---|
+| `app` | o servidor, as definições, os modos de trabalho, a configuração partilhada |
+| `accounts` | várias contas: registo, supervisor, processo filho |
+| `sentinels` | as sentinelas, o centro de alertas, os painéis |
+| `security` | guarda local, segredos, webhook, confirmação, guarda de rede, assinaturas, ficheiros privados |
+| `data_pipeline` | eventos, análise, leituras condicionais, descoberta, quotas, a regra do vermelho em main |
+| `integrations` | GitHub, notificações, OpenTelemetry, espelho, runners, MCP, o feed e o hook da IA |
+| `cli` | as ferramentas de linha de comandos |
+| `ui` | Acerca de, documentos de ajuda, vistas de terminal |
+| `i18n`, `util` | os oito idiomas; pequenos utilitários partilhados |

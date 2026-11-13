@@ -3,13 +3,14 @@
 import json
 import tempfile
 import unittest
+from unittest import mock
 import _testenv  # noqa: F401
 from pathlib import Path
 
 import sys
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-import sentinel_ai
-import sentinel_local
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+from github_actions_monitor.sentinels import sentinel_ai
+from github_actions_monitor.sentinels import sentinel_local
 
 
 class LabelAndStore(unittest.TestCase):
@@ -75,14 +76,15 @@ class ReleaseRules(unittest.TestCase):
         self.assertEqual([r["repo"] for r in rows], ["A", "D"])   # B too few, C too recent, EH3D skipped; D never released
 
     def test_config_template_is_copied_when_the_json_is_missing(self):
-        import actions_monitor
+        from github_actions_monitor.app import actions_monitor
         with tempfile.TemporaryDirectory() as tmp:
             tmp = Path(tmp)
             (tmp / "actions_monitor.example.json").write_text(json.dumps({"refresh_seconds": 77}), encoding="utf-8")
             old_file, old_here = actions_monitor.CONFIG_FILE, actions_monitor.HERE
             actions_monitor.CONFIG_FILE, actions_monitor.HERE = tmp / "actions_monitor.json", tmp
             try:
-                config = actions_monitor.load_config()
+                with mock.patch.object(actions_monitor.paths, "EXAMPLES", tmp):
+                    config = actions_monitor.load_config()
             finally:
                 actions_monitor.CONFIG_FILE, actions_monitor.HERE = old_file, old_here
             self.assertEqual(config["refresh_seconds"], 77)
@@ -92,7 +94,7 @@ class ReleaseRules(unittest.TestCase):
 class RedCriterion(unittest.TestCase):
     def test_same_red_set_as_the_public_dashboard(self):
         import re
-        import workspace
+        from github_actions_monitor.app import workspace
         if not workspace.available():
             self.skipTest("integration test: needs the workspace of the repositories")
         scripts = workspace.workspace_root() / "JuanenRac" / "scripts"

@@ -24,10 +24,10 @@ GitHub Actions モニター + センチネル（バージョン 1.7.9）
 言語       8 言語: en, es, de, fr, it, ja, zh, pt（ポルトガル語はポルトガル式）。起動時は英語です。システムの言語では決まりません。別の言語は、ページの「設定」タブ（歯車アイコン。ブラウザーが記憶します）、
            actions_monitor.json の "language"、環境変数 MONITOR_LANG、またはコマンドラインツールの --lang コード（最優先）で選びます。
            スクリプトが読む行（SKIP、DISPATCHED、READY、FAILED、Summary:、BUILD ONLY...）は常に英語です。
-設定       actions_monitor.json（初回起動時に actions_monitor.example.json から作成されます）。主なキー: github_owner（空 = gh のアカウント）、
+設定       actions_monitor.json（初回起動時に assets/examples/actions_monitor.example.json から作成されます）。主なキー: github_owner（空 = gh のアカウント）、
            language, ecosystems_file, targets_file, refresh_seconds, cold_refresh_seconds, max_workers, min_rate_remaining, sentinel.*
-           ecosystems_file: 名前の接頭辞でリポジトリをまとめます（ecosystems.example.json を参照。"*" = すべてのリポジトリ）。targets_file: バッチツール用のビルド一覧
-           （targets.example.json を参照）。profiles_file (profiles.example.json): バッチのプロファイル。これらのファイルで "_" で始まるキーはメタデータです。
+           ecosystems_file: 名前の接頭辞でリポジトリをまとめます（assets/examples/ecosystems.example.json を参照。"*" = すべてのリポジトリ）。targets_file: バッチツール用のビルド一覧
+           （assets/examples/targets.example.json を参照）。profiles_file (assets/examples/profiles.example.json): バッチのプロファイル。これらのファイルで "_" で始まるキーはメタデータです。
 ワークスペース  任意: リポジトリのローカルクローンを置いたフォルダー（MONITOR_ROOT、json の "workspace_root"、または .monitor-root ファイルのある親フォルダー）。
            ない場合、モニターは「縮小モード」で起動し、その旨を表示します。GitHub API から得られる情報だけを表示します（ローカルの署名キュー、監査レポート、CHANGELOG の読み取りなし）。
            ある場合は、リリース候補、署名キュー、バッチツールも使えます。署名記録は "signed_dir"、監査ファイルは "audit_dir" で指定します。

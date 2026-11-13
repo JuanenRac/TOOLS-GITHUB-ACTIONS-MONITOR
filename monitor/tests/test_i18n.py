@@ -18,14 +18,14 @@ from unittest import mock
 
 import _testenv  # noqa: F401
 
-import events as event_feed
-import gha_dispatch_all as gd
-import i18n
+from github_actions_monitor.data_pipeline import events as event_feed
+from github_actions_monitor.cli import gha_dispatch_all as gd
+from github_actions_monitor import i18n
 import make_release as mr
-import sentinel_local as sl
-import surface
-import toolconfig
-import workspace
+from github_actions_monitor.sentinels import sentinel_local as sl
+from github_actions_monitor.app import surface
+from github_actions_monitor.app import toolconfig
+from github_actions_monitor.app import workspace
 
 HERE = Path(__file__).resolve().parents[1]
 LANGS = ("en", "es", "de", "fr", "it", "ja", "zh", "pt")
@@ -33,7 +33,7 @@ PH = re.compile(r"\{(\w+)(?:![rsa])?(?::[^}]*)?\}")
 
 
 def catalogue(lang):
-    data = json.loads((HERE / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
+    data = json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
     return {k: v for k, v in data.items() if not k.startswith("_")}
 
 
@@ -53,7 +53,7 @@ class Catalogues(unittest.TestCase):
 
     def test_every_locale_declares_its_authorship(self):
         for lang in LANGS:
-            data = json.loads((HERE / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
+            data = json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
             self.assertIn("JuanenRac (Electro Hobby 3D)", data["_author"])
             self.assertIn("GPL-3.0-or-later", data["_license"])
 
@@ -71,13 +71,13 @@ class Catalogues(unittest.TestCase):
 
     def test_json_files_are_utf8_without_bom(self):
         for lang in LANGS:
-            self.assertFalse((HERE / "locales" / f"{lang}.json").read_bytes().startswith(b"\xef\xbb\xbf"))
+            self.assertFalse((HERE / "assets" / "locales" / f"{lang}.json").read_bytes().startswith(b"\xef\xbb\xbf"))
 
 
 def used_keys():
     """Every literal key passed to t() / te() / tl() / i18n.t() in the code, and every ui.* key of the page."""
     keys = {}
-    for path in sorted(HERE.glob("*.py")):
+    for path in _testenv.source_files():
         tree = ast.parse(path.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
             if isinstance(node, ast.Call):
@@ -87,7 +87,7 @@ def used_keys():
                     arg = node.args[1] if name == "tl" and len(node.args) > 1 else node.args[0]
                     if isinstance(arg, ast.Constant) and isinstance(arg.value, str) and "." in arg.value:
                         keys.setdefault(arg.value, path.name)
-    html = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+    html = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
     for key in re.findall(r'"(ui\.[a-z0-9_]+)"', html):
         keys.setdefault(key, "actions_monitor.html")
     return keys
@@ -147,7 +147,7 @@ class NoVisibleStringBypassesT(unittest.TestCase):
     def test_prints_exits_and_help_use_the_catalogues(self):
         offenders = []
         for name in self.MODULES:
-            path = HERE / name
+            path = _testenv.module_file(name)
             tree = ast.parse(path.read_text(encoding="utf-8"))
             for node in ast.walk(tree):
                 targets = []
@@ -166,7 +166,7 @@ class NoVisibleStringBypassesT(unittest.TestCase):
         self.assertEqual(offenders, [])
 
     def test_the_page_has_no_visible_text_of_its_own(self):
-        html = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        html = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         body = html.split("<body>", 1)[1].split("<script>", 1)[0]
         text = re.sub(r"<[^>]+>", " ", body)
         words = [w for w in re.findall(r"[A-Za-zÀ-ÿ]{3,}", text) if w not in ("GitHub", "Actions", "success", "failure", "cancelled", "timed", "out")]
@@ -241,7 +241,7 @@ class Behaviour(unittest.TestCase):
                 self.assertNotEqual(events[0]["text"], i18n.tl("en", "evt.red_new", repo="R", workflow="CI"))
 
     def test_the_page_embeds_the_catalogues_and_the_default_language(self):
-        import actions_monitor
+        from github_actions_monitor.app import actions_monitor
         with i18n.use_language("de"):
             page = actions_monitor.render_page()
         self.assertNotIn("/*I18N_DATA*/null", page)
@@ -255,7 +255,7 @@ class Behaviour(unittest.TestCase):
         for lang in LANGS:
             out = io.StringIO()
             with redirect_stdout(out):
-                import launcher_msg
+                from github_actions_monitor.cli import launcher_msg
                 self.assertEqual(launcher_msg.main(["menu", "--lang", lang]), 0)
             self.assertIn("1)", out.getvalue())
             self.assertIn(i18n.tl(lang, "launch.m6"), out.getvalue())
@@ -301,16 +301,16 @@ class SharedSettings(unittest.TestCase):
             toolconfig.set_ecosystems(None)
 
     def test_the_neutral_examples_are_valid(self):
-        self.assertEqual(gd.validate_targets(json.loads((HERE / "targets.example.json").read_text(encoding="utf-8"))), [])
+        self.assertEqual(gd.validate_targets(json.loads((HERE / "assets" / "examples" / "targets.example.json").read_text(encoding="utf-8"))), [])
         self.assertEqual(gd.validate_targets(json.loads((HERE / "tests" / "fixtures" / "fixture_targets.json").read_text(encoding="utf-8"))), [])
-        eco = json.loads((HERE / "ecosystems.example.json").read_text(encoding="utf-8"))["ecosystems"]
+        eco = json.loads((HERE / "assets" / "examples" / "ecosystems.example.json").read_text(encoding="utf-8"))["ecosystems"]
         toolconfig.set_ecosystems(eco)
         try:
             self.assertEqual(toolconfig.ecosystem_of("MYPROJECT-X"), "main")
             self.assertTrue(toolconfig.is_external("other-team"))
         finally:
             toolconfig.set_ecosystems(None)
-        example = json.loads((HERE / "actions_monitor.example.json").read_text(encoding="utf-8"))
+        example = json.loads((HERE / "assets" / "examples" / "actions_monitor.example.json").read_text(encoding="utf-8"))
         self.assertEqual((example["github_owner"], example["language"]), ("", ""))
         self.assertEqual((example["ecosystems_file"], example["targets_file"]), ("ecosystems.example.json", "targets.example.json"))
 
@@ -391,8 +391,8 @@ class AuthorshipAndRelease(unittest.TestCase):
     def test_locale_gate_and_member_list(self):
         self.assertEqual(mr.locale_problems(self.entries()), [])
         names = {p.relative_to(HERE).as_posix() for p in mr.members()}
-        for needed in ("LICENSE", "NOTICE", "AUTHORS", "README.txt", "i18n.py", "toolconfig.py", "targets.example.json", "ecosystems.example.json",
-                       *[f"locales/{l}.json" for l in LANGS], *[f"README_{l}.txt" for l in LANGS], *[f"QUICKSTART_{l}.txt" for l in LANGS]):
+        for needed in ("LICENSE", "NOTICE", "AUTHORS", "README.txt", "src/github_actions_monitor/i18n/__init__.py", "src/github_actions_monitor/app/toolconfig.py", "assets/examples/targets.example.json", "assets/examples/ecosystems.example.json",
+                       *[f"assets/locales/{l}.json" for l in LANGS], *[f"README_{l}.txt" for l in LANGS], *[f"QUICKSTART_{l}.txt" for l in LANGS]):
             self.assertIn(needed, names)
 
     def test_every_readme_and_quickstart_says_it_signs_nothing_by_itself(self):
@@ -417,7 +417,7 @@ class AuthorshipAndRelease(unittest.TestCase):
                 dest = Path(tmp) / "pkg" / p.relative_to(HERE)
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 dest.write_bytes(p.read_bytes())
-            (Path(tmp) / "pkg" / "actions_monitor.example.json").write_text(mr.template(), encoding="utf-8")
+            (Path(tmp) / "pkg" / "assets" / "examples" / "actions_monitor.example.json").write_text(mr.template(), encoding="utf-8")
             env = dict(os.environ, MONITOR_NO_NESTED="1", PYTHONDONTWRITEBYTECODE="1", MONITOR_ROOT="", JUANENRAC_ROOT="")
             env.pop("MONITOR_ROOT"), env.pop("JUANENRAC_ROOT")
             done = subprocess.run([sys.executable, "-I", "-m", "unittest", "discover", "-s", "tests"], cwd=str(Path(tmp) / "pkg"), capture_output=True, text=True, env=env, timeout=300)

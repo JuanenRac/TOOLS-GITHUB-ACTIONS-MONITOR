@@ -6,15 +6,15 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import i18n  # noqa: E402
-import modes  # noqa: E402
-import signals  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.app import modes  # noqa: E402
+from github_actions_monitor.data_pipeline import signals  # noqa: E402
 
-PAGE = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+PAGE = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
 CONFIG = {"refresh_seconds": 45, "cold_refresh_seconds": 600, "runs_per_repo": 20, "hot_hours": 6, "min_rate_remaining": 800}
 
 
@@ -93,7 +93,7 @@ class LowMode(unittest.TestCase):
 
     def test_red_alerts_survive_low(self):
         """Low slows the reading but the alerts of what was already read stay: the failing list comes from the runs in memory and the rule does not look at the mode."""
-        import actions_monitor as am
+        from github_actions_monitor.app import actions_monitor as am
         runs = [{"id": 1, "repo": "r", "name": "ci", "path": "ci.yml", "status": "completed", "conclusion": "failure", "event": "push", "branch": "main", "sha": "a", "url": "u", "started": "2026-01-01T10:00:00Z", "seconds": 5}]
         self.assertEqual(len(am.unresolved_failures(runs)), 1)
         import inspect

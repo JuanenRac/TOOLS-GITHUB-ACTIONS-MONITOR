@@ -16,24 +16,24 @@ from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
 ROOT = HERE.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 sys.path.insert(0, str(ROOT / "tools"))
 
 import _testenv  # noqa: F401,E402
-import about  # noqa: E402
-import actions_monitor as am  # noqa: E402
-import demo_mode  # noqa: E402
-import discovery  # noqa: E402
-import doctor  # noqa: E402
-import helpdocs  # noqa: E402
-import i18n  # noqa: E402
+from github_actions_monitor.ui import about  # noqa: E402
+from github_actions_monitor.app import actions_monitor as am  # noqa: E402
+from github_actions_monitor.app import demo_mode  # noqa: E402
+from github_actions_monitor.data_pipeline import discovery  # noqa: E402
+from github_actions_monitor.cli import doctor  # noqa: E402
+from github_actions_monitor.ui import helpdocs  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
 try:
     import make_help_index  # noqa: E402     (the tools live in the repository, not in the zip)
 except ImportError:
     make_help_index = None
-import updatecheck as uc  # noqa: E402
-from tool_version import TOOL_VERSION  # noqa: E402
+from github_actions_monitor.app import updatecheck as uc  # noqa: E402
+from github_actions_monitor.tool_version import TOOL_VERSION  # noqa: E402
 
 
 class Semver(unittest.TestCase):
@@ -112,7 +112,7 @@ class UpdateNotice(unittest.TestCase):
         self.assertEqual(uc.notice({"newer": False}, i18n.t), "")
 
     def test_the_switch_is_a_setting_in_the_basic_tab(self):
-        import settings_api as sa
+        from github_actions_monitor.app import settings_api as sa
         self.assertEqual(sa.FIELDS["updates.check"][0], "basic")
         self.assertEqual(sa.FIELDS["airgapped"][0], "basic")
 
@@ -248,7 +248,7 @@ class Server(unittest.TestCase):
         self.assertEqual(caught.exception.code, 403)
 
     def test_the_one_use_token_guards_the_writes(self):
-        import settings_api
+        from github_actions_monitor.app import settings_api
         with tempfile.TemporaryDirectory() as tmp:
             saved = (am.CONFIG_FILE, settings_api.CONFIG_FILE, settings_api.BACKUP_DIR)
             am.CONFIG_FILE = settings_api.CONFIG_FILE = Path(tmp) / "c.json"
@@ -280,7 +280,7 @@ class Server(unittest.TestCase):
 
 
 class PageWiring(unittest.TestCase):
-    page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+    page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
 
     def test_buttons_panels_and_shortcut_exist(self):
         for needle in ('id="about-open"', 'id="help-tab"', 'id="about-dlg"', 'id="help-dlg"', 'id="restartbar"', 'e.key==="?"', "/api/help/search", "X-Monitor-Token", 'href="#i-info"', 'href="#i-help"'):
@@ -332,7 +332,7 @@ class DiscoveryRules(unittest.TestCase):
             self.assertEqual(discovery.add_group(path, "acme", "acme-")["error"], "exists")
             self.assertEqual(discovery.add_group(path, "Bad Key", "x")["error"], "invalid")
             fresh = Path(tmp) / "new.json"
-            self.assertTrue(discovery.add_group(fresh, "acme", "acme-", example=HERE / "ecosystems.example.json")["ok"])
+            self.assertTrue(discovery.add_group(fresh, "acme", "acme-", example=HERE / "assets" / "examples" / "ecosystems.example.json")["ok"])
             self.assertIn("acme", json.loads(fresh.read_text(encoding="utf-8"))["ecosystems"])
 
     def test_the_automatic_frequency_stays_inside_the_budget(self):
@@ -385,7 +385,7 @@ class DoctorAndDemo(unittest.TestCase):
 
 class SentinelDocumentation(unittest.TestCase):
     def test_every_check_of_the_code_is_in_the_guide_and_the_other_way_round(self):
-        code = (HERE / "sentinel_local.py").read_text(encoding="utf-8")
+        code = (HERE / "src" / "github_actions_monitor" / "sentinels" / "sentinel_local.py").read_text(encoding="utf-8")
         in_code = {m for m in re.findall(r'^\s+"a(\d+)": ', code, re.M)} | {m for m in re.findall(r's\["a(\d+)"\] = ', code)}
         in_locale = {m for m in (re.match(r"ui\.a(\d+)_title$", k) for k in i18n.catalogue("en")) if m}
         checks = in_code | {m.group(1) for m in in_locale}
@@ -399,7 +399,7 @@ class SentinelDocumentation(unittest.TestCase):
 @unittest.skipUnless(__import__("importlib").util.find_spec("textual"), "needs the optional package textual")
 class InteractiveTerminal(unittest.TestCase):
     def test_helpers_and_a_headless_run(self):
-        import tui_textual as tt
+        from github_actions_monitor.ui import tui_textual as tt
         from datetime import datetime, timezone
         data = demo_mode.data(datetime.now(timezone.utc))
         self.assertTrue(tt.repo_rows(data, "alpha"))
@@ -426,7 +426,7 @@ class InteractiveTerminal(unittest.TestCase):
 
 class Quotas(unittest.TestCase):
     def setUp(self):
-        import quota
+        from github_actions_monitor.data_pipeline import quota
         self.q = quota
         self.data = quota.load()
 
@@ -443,7 +443,7 @@ class Quotas(unittest.TestCase):
             self.assertEqual(self.q.included_minutes("free", data), 1000)
             self.assertEqual(self.q.multiplier("macos", data), 20.0)
             self.assertEqual(self.q.load(Path(tmp) / "missing.json")["limits"]["job_hours"], 6)       # a missing or broken file leaves the defaults
-        source = (HERE / "quota.py").read_text(encoding="utf-8")
+        source = (HERE / "src" / "github_actions_monitor" / "data_pipeline" / "quota.py").read_text(encoding="utf-8")
         self.assertNotIn("2000", source)
         self.assertNotIn("50000", source)
 
@@ -511,10 +511,10 @@ class Quotas(unittest.TestCase):
         self.assertEqual(real["api_mode"], "enterprise")
 
     def test_the_endpoint_and_the_settings(self):
-        import settings_api as sa
+        from github_actions_monitor.app import settings_api as sa
         for key in ("account.plan", "quota.billing_api", "quota.warn_percent", "quota.alert_percent", "quota.default_runner"):
             self.assertEqual(sa.FIELDS[key][0], "basic", key)
-        self.assertFalse(json.loads((HERE / "actions_monitor.example.json").read_text(encoding="utf-8"))["quota"]["billing_api"])
+        self.assertFalse(json.loads((HERE / "assets" / "examples" / "actions_monitor.example.json").read_text(encoding="utf-8"))["quota"]["billing_api"])
         am.PRIVATE.clear()
         am.PRIVATE.add("priv")
         server = ThreadingHTTPServer(("127.0.0.1", 0), am.Handler)
@@ -533,7 +533,7 @@ class Quotas(unittest.TestCase):
 
 class WorkingModes(unittest.TestCase):
     def setUp(self):
-        import modes
+        from github_actions_monitor.app import modes
         self.m = modes
         self.now = [1000.0]
         self.config = {"min_rate_remaining": 800, "refresh_seconds": 45, "cold_refresh_seconds": 600, "runs_per_repo": 20, "hot_hours": 3}
@@ -631,21 +631,21 @@ class WorkingModes(unittest.TestCase):
                 am.STATE["data"] = None
 
     def test_the_page_has_the_selector_and_every_text_in_eight_languages(self):
-        page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         for needle in ('id="mode-sel"', 'id="mode-left"', "/api/mode", "ui.mode_confirm"):
             self.assertIn(needle, page, needle)
         for lang in i18n.LANGS:
             cat = i18n.catalogue(lang)
             for key in ("ui.mode_title", "ui.mode_normal", "ui.mode_fast", "ui.mode_turbo", "ui.mode_est", "ui.mode_confirm", "ui.mode_no_token", "ui.mode_back_expired", "ui.mode_back_quota", "mode.back_quota", "mon.help_mode"):
                 self.assertIn(key, cat, f"{lang} {key}")
-        source = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        source = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         self.assertIn("modes.State()", source)
         self.assertIn("--mode", source)
 
 
 class EditionBanner(unittest.TestCase):
     def test_the_banner_says_which_edition_runs_in_every_language(self):
-        import banner
+        from github_actions_monitor.util import banner
         for lang in i18n.LANGS:
             tr = lambda k, lang=lang, **v: i18n.tl(lang, k, **v)   # noqa: E731
             lite = banner.line(True, 8766, "actions_monitor_lite.json", tr, "http://127.0.0.1:8766/")
@@ -661,7 +661,7 @@ class EditionBanner(unittest.TestCase):
 
     def test_the_title_is_set_only_on_a_terminal(self):
         import io
-        import banner
+        from github_actions_monitor.util import banner
 
         class Tty(io.StringIO):
             def isatty(self):
@@ -679,7 +679,7 @@ class EditionBanner(unittest.TestCase):
                 text = (HERE / (name + ext)).read_text(encoding="utf-8")
                 self.assertIn(chr(92) + "033]0;%s" + chr(92) + "007", text)
                 self.assertIn("Monitor " + mark, text)
-        source = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        source = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         for needle in ("banner.line(", "banner.set_title(", "banner.tag("):
             self.assertIn(needle, source)
         data = about.lone(lite=True)
@@ -697,7 +697,7 @@ class Packaging(unittest.TestCase):
 
     def test_importing_the_monitor_never_loads_textual_or_rich(self):
         import subprocess
-        code = "import sys; sys.path.insert(0, %r); import actions_monitor, about, helpdocs, updatecheck, discovery, doctor; print('textual' in sys.modules or 'rich' in sys.modules)" % str(HERE)
+        code = "import sys; sys.path.insert(0, %r); from github_actions_monitor.app import actions_monitor; from github_actions_monitor.ui import about; from github_actions_monitor.ui import helpdocs; from github_actions_monitor.app import updatecheck; from github_actions_monitor.data_pipeline import discovery; from github_actions_monitor.cli import doctor; print('textual' in sys.modules or 'rich' in sys.modules)" % str(HERE / "src")
         done = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, timeout=60)
         self.assertEqual(done.stdout.strip(), "False", done.stderr)
 

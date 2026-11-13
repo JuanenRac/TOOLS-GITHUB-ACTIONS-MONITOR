@@ -23,14 +23,14 @@ from http.server import ThreadingHTTPServer
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent / "monitor"
-sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "tests"))
-import actions_monitor as am  # noqa: E402
-import analytics  # noqa: E402
-import etagcache  # noqa: E402
-import sentinel_local as sl  # noqa: E402
-import settings_api  # noqa: E402
-import toolconfig  # noqa: E402
+from github_actions_monitor.app import actions_monitor as am  # noqa: E402
+from github_actions_monitor.data_pipeline import analytics  # noqa: E402
+from github_actions_monitor.data_pipeline import etagcache  # noqa: E402
+from github_actions_monitor.sentinels import sentinel_local as sl  # noqa: E402
+from github_actions_monitor.app import settings_api  # noqa: E402
+from github_actions_monitor.app import toolconfig  # noqa: E402
 from test_sentinel import run as make_run  # noqa: E402
 
 OWNER = "demo-owner"
@@ -39,7 +39,7 @@ REPOS = ["demo-alpha-core", "demo-alpha-app", "demo-beta-fw", "demo-beta-docs", 
 
 def setup(now):
     tmp = Path(tempfile.mkdtemp(prefix="ghamon_demo_"))
-    cfg = json.loads((ROOT / "actions_monitor.example.json").read_text(encoding="utf-8"))
+    cfg = json.loads((ROOT / "assets" / "examples" / "actions_monitor.example.json").read_text(encoding="utf-8"))
     cfg.update({"github_owner": OWNER, "workspace_root": "", "signed_dir": "", "audit_dir": ""})
     (tmp / "actions_monitor.json").write_text(json.dumps(cfg), encoding="utf-8")
     am.CONFIG_FILE = settings_api.CONFIG_FILE = toolconfig.CONFIG_FILE = tmp / "actions_monitor.json"
@@ -47,7 +47,7 @@ def setup(now):
     toolconfig.set_owner(OWNER)
     toolconfig.set_ecosystems({"alpha": {"label": "Alpha", "prefixes": ["demo-alpha-"]}, "beta": {"label": "Beta", "prefixes": ["demo-beta-"]}, "gamma": {"label": "Gamma", "prefixes": ["demo-gamma-"]}})
     am.LIVE_CONFIG.update(cfg)
-    import alert_center
+    from github_actions_monitor.sentinels import alert_center
     alert_center.STATE_FILE = tmp / "alert_mutes.json"       # a silence made while taking the pictures never reaches the files next to the code
     return cfg, tmp
 

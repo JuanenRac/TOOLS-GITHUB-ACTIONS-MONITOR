@@ -7,8 +7,8 @@ import _testenv  # noqa: F401
 from pathlib import Path
 
 import sys
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-import events
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+from github_actions_monitor.data_pipeline import events
 
 
 def snap(reds=(), alerts=None, prs=(), rate=4000, loading=""):

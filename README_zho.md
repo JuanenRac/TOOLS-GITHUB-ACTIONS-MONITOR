@@ -44,7 +44,7 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 1264 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **测试** | 1286 个测试方法(`python -m unittest discover -s monitor/tests`) |
 | **设置** | 288 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows, macos,Python 3.11, 3.13 |
@@ -192,7 +192,7 @@
 
 ## 设置
 
-一切都在 `actions_monitor.json` 中（由 `actions_monitor.example.json` 创建）。**设置** 标签页可安全地编辑它；令牌和机密绝不会显示或保存。生态系统、构建目标和批处理配置是你指定的独立文件（`ecosystems_file`、`targets_file`、`profiles_file`）；附带中性的 `*.example.json` 模板。完整参考：[`monitor/docs/SETTINGS_zho.md`](monitor/docs/SETTINGS_zho.md)。
+一切都在 `actions_monitor.json` 中（由 `monitor/assets/examples/actions_monitor.example.json` 创建）。**设置** 标签页可安全地编辑它；令牌和机密绝不会显示或保存。生态系统、构建目标和批处理配置是你指定的独立文件（`ecosystems_file`、`targets_file`、`profiles_file`）；附带中性的 `*.example.json` 模板。完整参考：[`monitor/docs/SETTINGS_zho.md`](monitor/docs/SETTINGS_zho.md)。
 
 ## 面向 Grafana 和仪表板的输出
 
@@ -224,44 +224,26 @@ python -m unittest discover -s monitor/tests
 
 ```
 TOOLS-GITHUB-ACTIONS-MONITOR/
-├── monitor/                                  程序本体
-├── docs/                                     架构、截图、路线图
-├── tools/                                    图片、指南与演示
-├── deploy/                                   容器示例
-├── images/                                   横幅图和图片
-├── .github/                                  CI 和议题表单
-├── CHANGELOG.md                              各版本变更
-├── LICENSE NOTICE AUTHORS                    许可证和作者
-├── CONTRIBUTING.md SECURITY.md               参与方式、报告
-├── SUPPORT.md CODE_OF_CONDUCT.md             支持和行为准则
+├── monitor/                                程序本体
+├── docs/                                   架构、截图、路线图
+├── tools/                                  图片、指南与演示
+├── deploy/                                 容器示例
+├── images/                                 横幅图和图片
+├── .github/                                CI 和议题表单
+├── CHANGELOG.md                            各版本变更
+├── LICENSE NOTICE AUTHORS                  许可证和作者
+├── CONTRIBUTING.md SECURITY.md             参与方式、报告
+├── SUPPORT.md CODE_OF_CONDUCT.md           支持和行为准则
 └── monitor/
-    ├── actions_monitor.py                    本地服务器
-    ├── actions_monitor.html                  网页
-    ├── MONITOR_LITE_GITHUB_ACTIONS.*         lite 版(无哨兵)
-    ├── sentinel_local.py                     警报与报告
-    ├── sentinel_collab.py  alert_center.py   Issue 哨兵与警报
-    ├── surface.py readiness.py               检查与发布就绪
-    ├── settings_api.py outputs.py            设置与指标
-    ├── signstate.py sigverify.py             签名状态与验证
-    ├── monitor_cli.py                        客户端命令行
-    ├── read_report.py                        终端报告
-    ├── gha_dispatch_all.py                   批量构建
-    ├── events.py report_history.py           事件与历史
-    ├── ci_red.py export_status.py            供其他工具读取
-    ├── etagcache.py resilience.py            条件读取与连接
-    ├── analytics.py lint_workflows.py        时长、不稳定、检查器
-    ├── notifiers.py ai_actions.py            通知与 AI 封闭列表
-    ├── tui.py migrate_state.py               终端视图与迁移
-    ├── about.py  helpdocs.py                 关于与帮助面板
-    ├── quota.py  quotas.json                 套餐、分钟数与配额
-    ├── modes.py  updatecheck.py              工作模式、版本提示
-    ├── doctor.py  demo_mode.py               --doctor 与 --demo
-    ├── discovery.py  banner.py               发现、版本横幅
-    ├── tui_textual.py                        交互式终端
-    ├── i18n.py locales/                      八种语言
-    ├── toolconfig.py workspace.py            设置与克隆
-    ├── tests/                                离线测试
-    └── docs/                                 指南、模式、Grafana
+    ├── MONITOR_GITHUB_ACTIONS.*            启动脚本(双击)
+    ├── MONITOR_LITE_GITHUB_ACTIONS.*       lite 版(无哨兵)
+    ├── BATCH_GITHUB_ACTIONS.*              批量构建菜单
+    ├── src/                                可导入的包
+    ├── assets/                             示例、网页、语言
+    ├── actions_monitor.py read_report.py   工具入口
+    ├── tests/                              离线测试
+    ├── docs/                               指南、模式、Grafana
+    └── tools/                              发布与迁移脚本
 ```
 
 ## 文档

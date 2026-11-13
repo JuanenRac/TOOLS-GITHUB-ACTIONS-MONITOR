@@ -7,12 +7,12 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import i18n  # noqa: E402
-import settings_api  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.app import settings_api  # noqa: E402
 
 DOCS = HERE / "docs"
 # groups that were written before this rule and share the help of their block: a NEW setting is not in this list and must carry its own cfg.h.<key> in the eight languages
@@ -31,7 +31,7 @@ class HelpSync(unittest.TestCase):
         self.assertEqual(missing, [], "a setting without its help: add cfg.f.<key> and cfg.h.<key> to the eight locales")
 
     def test_every_tab_of_the_page_has_a_help_topic_in_the_eight_languages(self):
-        import helpdocs
+        from github_actions_monitor.ui import helpdocs
         index = __import__("json").loads((DOCS / "help_index.json").read_text(encoding="utf-8"))
         topics = {t.get("id") or t.get("key") or t.get("topic") for t in index["topics"] if isinstance(t, dict)}
         for tab, topic in helpdocs.TAB_TOPICS.items():

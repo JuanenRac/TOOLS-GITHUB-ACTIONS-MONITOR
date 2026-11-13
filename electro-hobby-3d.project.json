@@ -18,7 +18,7 @@
   "family": "Tools",
   "parent": null,
   "native_version": {
-    "file": "monitor/tool_version.py",
+    "file": "monitor/src/github_actions_monitor/tool_version.py",
     "pattern": "^TOOL_VERSION = \"(\\d+)\\.(\\d+)\\.(\\d+)\""
   },
   "build": "python -m unittest discover -s monitor/tests",

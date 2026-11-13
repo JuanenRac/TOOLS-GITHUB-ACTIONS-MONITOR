@@ -6,9 +6,9 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
-import ai_alerts  # noqa: E402
+from github_actions_monitor.integrations import ai_alerts  # noqa: E402
 
 RUN = "https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/actions/runs/123456789012/job/98765432101"
 

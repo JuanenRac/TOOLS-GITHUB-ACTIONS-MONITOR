@@ -21,15 +21,15 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import actions_monitor as am  # noqa: E402
-import actlocal  # noqa: E402
-import localguard  # noqa: E402
-import settings_api  # noqa: E402
-import toolconfig  # noqa: E402
+from github_actions_monitor.app import actions_monitor as am  # noqa: E402
+from github_actions_monitor.integrations import actlocal  # noqa: E402
+from github_actions_monitor.security import localguard  # noqa: E402
+from github_actions_monitor.app import settings_api  # noqa: E402
+from github_actions_monitor.app import toolconfig  # noqa: E402
 from test_164 import LiveServer  # noqa: E402
 
 
@@ -178,7 +178,7 @@ class ExposureKeysFromTheSchema(unittest.TestCase):
         self.assertTrue(localguard.local_only_key("webhook.enabled"))
         self.assertTrue(localguard.local_only_key("listen.host"))
         self.assertFalse(localguard.local_only_key("refresh_seconds"))
-        source = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        source = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         self.assertIn("localguard.local_only_key", source)
         self.assertNotIn("startswith(localguard.LOCAL_ONLY_PREFIXES", source)
 
@@ -438,11 +438,11 @@ class NetworkAllInterfacesWarning(unittest.TestCase):
         self.assertNotEqual(localguard.public_state()["host"], "0.0.0.0")
 
     def test_the_page_has_the_bar_in_settings_and_the_text_in_eight_languages(self):
-        html = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        html = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         self.assertIn('id="cfg-netwarn"', html)
         self.assertIn('I18N.network.host==="0.0.0.0"', html)
         for lang in ("en", "es", "de", "fr", "it", "ja", "zh", "pt"):
-            catalog = json.loads((HERE / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
+            catalog = json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
             self.assertIn("0.0.0.0", catalog["ui.adv_net_all"], lang)
             self.assertTrue(catalog["ui.health_degraded"] and catalog["doctor.t.degraded"] and catalog["doctor.f.degraded"], lang)
 
@@ -450,7 +450,7 @@ class NetworkAllInterfacesWarning(unittest.TestCase):
 # --- swallowed failures are counted -----------------------------------------------------------------------------------------------------------------------------------------------------------
 class DegradedCounter(unittest.TestCase):
     def setUp(self):
-        import degraded
+        from github_actions_monitor.app import degraded
         self.degraded = degraded
         degraded.reset()
         self.tmp = tempfile.TemporaryDirectory()
@@ -477,7 +477,7 @@ class DegradedCounter(unittest.TestCase):
         self.degraded.note(Evil(), Evil())      # must not raise
 
     def test_doctor_reads_what_the_running_monitor_saved(self):
-        import doctor
+        from github_actions_monitor.cli import doctor
         path = Path(self.tmp.name) / "degraded.json"
         self.degraded.attach(path)
         self.degraded.note("mirror.item", OSError("disk"))

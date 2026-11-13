@@ -6,11 +6,11 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import gha_dispatch_all as gd  # noqa: E402
+from github_actions_monitor.cli import gha_dispatch_all as gd  # noqa: E402
 
 
 def state(repo, run):
@@ -52,7 +52,7 @@ class ShaCorrelation(unittest.TestCase):
 
 class ApiDataGuard(unittest.TestCase):
     def test_api_data_calls_the_guard(self):
-        text = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        text = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         start = text.index('elif path.startswith("/api/data")')
         self.assertIn("self.guard()", text[start:start + 200])
 

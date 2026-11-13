@@ -34,7 +34,7 @@ python actions_monitor.py --migrate-accounts --apply  # accounts/default/ にコ
 python actions_monitor.py --accounts                  # アカウントを一覧表示します
 ```
 
-元のファイルは決して移動も削除もされません。確認したあとで自分で削除してください。2 回目の実行は拒否されるため、2 つの状態が混ざることはありません。アカウントを追加するには、`github_owner` を指定した `accounts/<id>/actions_monitor.json` を作成します（テンプレート `actions_monitor.example.json` をコピーしてください）。
+元のファイルは決して移動も削除もされません。確認したあとで自分で削除してください。2 回目の実行は拒否されるため、2 つの状態が混ざることはありません。アカウントを追加するには、`github_owner` を指定した `accounts/<id>/actions_monitor.json` を作成します（テンプレート `assets/examples/actions_monitor.example.json` をコピーしてください）。
 
 ## 実行
 

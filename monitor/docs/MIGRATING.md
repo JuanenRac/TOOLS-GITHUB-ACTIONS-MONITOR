@@ -89,3 +89,28 @@ Nothing has to be converted: without an `accounts/` folder the monitor works exa
 - **Several accounts** are optional. To use them run `python actions_monitor.py --migrate-accounts` (a dry run), then add `--apply` to copy your files into `accounts/default/`; the originals stay until you delete them. Add more accounts as `accounts/<id>/actions_monitor.json`. See `ACCOUNTS.md`.
 - With an `accounts/` folder, `python actions_monitor.py` starts a supervisor that runs one monitor per account; `--account <id>` runs only one. The lite edition does not have any of this.
 - New: `?view=` and `?chrome=0` in the address of the page, `GET /api/accounts`, `GET /api/live-status`, and one `POST /api/webhook` for all the accounts.
+
+# From 1.7.x to the new folder layout
+
+The code now lives in `src/github_actions_monitor/`, the page, the example files and the languages in `assets/`, and the release and migration scripts in `tools/`. Nothing you use changes: the launchers (`MONITOR_GITHUB_ACTIONS`, `MONITOR_LITE_GITHUB_ACTIONS`, `BATCH_GITHUB_ACTIONS`) stay where they were and open the same address and port, and the commands of this guide (`python read_report.py`, `python actions_monitor.py --doctor`, `python monitor_cli.py status` ...) still work, because a small entry-point file with the same name stays in the product folder. The launchers run `python -m github_actions_monitor` (complete) and `python -m github_actions_monitor.lite` (lite) with `src/` on the path.
+
+Your data does not move: `actions_monitor.json`, the caches, the logs, `config_backups/`, `accounts/` and your own catalogue files stay in the product folder next to the launchers, never inside `src/`. The neutral examples and the `quotas.json` that travel with the program are now in `assets/examples/`; a `quotas.json` of your own next to the launchers still wins.
+
+## Steps
+
+1. Stop the monitor and unzip the new version over the old folder (keep your `actions_monitor.json`).
+2. Start it as always. It works even if you do nothing else.
+3. To remove the leftovers of the old flat layout: `python tools/migrate_layout.py` (a dry run) and then `python tools/migrate_layout.py --apply`. It copies your configuration files to `layout_backup_<stamp>/config/` and moves the old modules, the old page, the old examples and the old `locales/` folder to `layout_backup_<stamp>/old_code/`. Nothing is deleted and nothing that exists is overwritten; your data is not touched. `python actions_monitor.py --doctor` warns while old files are left.
+4. A script of yours that imported a module by its old flat name (`import read_report`) now imports `github_actions_monitor.<package>.<module>` with `src/` on the path.
+
+| Package | What it holds |
+|---|---|
+| `app` | the server, the settings, the working modes, the shared configuration |
+| `accounts` | several accounts: registry, supervisor, child process |
+| `sentinels` | the sentinels, the alert centre, the panels |
+| `security` | local guard, secrets, webhook, confirmation, network guard, signatures, private files |
+| `data_pipeline` | events, analytics, conditional reads, discovery, quotas, the red-on-main rule |
+| `integrations` | GitHub, notifications, OpenTelemetry, mirror, runners, MCP, the AI feed and hook |
+| `cli` | the command-line tools |
+| `ui` | About, help documents, terminal views |
+| `i18n`, `util` | the eight languages; small shared helpers |

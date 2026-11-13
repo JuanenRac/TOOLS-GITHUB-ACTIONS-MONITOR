@@ -133,12 +133,12 @@ def console_texts(port, work):
     out["read_report"] = ("read_report.py", "py -3 read_report.py --lang en", run(py + [str(MON / "read_report.py"), "--port", str(port), "--lang", "en"]))
     legacy = Path(work) / "legacy"
     shutil.copytree(MON, legacy, ignore=shutil.ignore_patterns("tests", "__pycache__", "docs", "*.json", "actions_monitor_log.txt"))
-    shutil.copytree(MON / "locales", legacy / "locales", dirs_exist_ok=True)
+    shutil.copytree(MON / "assets" / "locales", legacy / "assets" / "locales", dirs_exist_ok=True)
     for name in ("eventos_monitor.jsonl", "eventos_estado.json", "PARTE_CENTINELA_DIA_2000-01-01.txt"):
         (legacy / name).write_text("{}\n", encoding="utf-8")
     out["about"] = ("tui.py --about", "py -3 tui.py --about --lang en", run(py + [str(MON / "tui.py"), "--about", "--lang", "en"]))
     out["help_topics"] = ("tui.py --help-topics", "py -3 tui.py --help-topics --lang en", run(py + [str(MON / "tui.py"), "--help-topics", "--lang", "en"]))
-    out["doctor"] = ("--doctor", "py -3 actions_monitor.py --doctor --lang en", run(py + ["-c", "import sys; sys.path.insert(0, sys.argv[1]); import doctor, i18n; i18n.set_language('en'); print(doctor.text(doctor.run(), i18n.t, 'lite'))", str(MON)]))
+    out["doctor"] = ("--doctor", "py -3 actions_monitor.py --doctor --lang en", run(py + ["-c", "import sys; sys.path.insert(0, sys.argv[1]); from github_actions_monitor.cli import doctor; from github_actions_monitor import i18n; i18n.set_language('en'); print(doctor.text(doctor.run(), i18n.t, 'lite'))", str(MON / "src")]))
     out["migrate_state"] = ("migrate_state.py", "py -3 migrate_state.py --lang en", run(py + [str(legacy / "migrate_state.py"), "--lang", "en"], cwd=legacy))
     catalog = Path(work) / "catalog"
     catalog.mkdir()
@@ -158,9 +158,9 @@ def console_texts(port, work):
 
 def tui_html(port, theme):
     """The terminal view drawn by Rich itself and exported as HTML (needs rich in the interpreter that runs this script)."""
-    sys.path.insert(0, str(MON))
+    sys.path.insert(0, str(MON / "src"))
     import io
-    import tui
+    from github_actions_monitor.ui import tui
     from rich.console import Console
     data, snap = tui.fetch(port)
     console = Console(record=True, width=100, file=io.StringIO(), force_terminal=True, color_system="truecolor")

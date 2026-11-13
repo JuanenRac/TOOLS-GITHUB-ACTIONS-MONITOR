@@ -21,36 +21,36 @@ from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
 ROOT = HERE.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 sys.path.insert(0, str(ROOT / "tools"))
 
 import _testenv  # noqa: F401,E402
-import about  # noqa: E402
-import actions_monitor as am  # noqa: E402
-import actlocal  # noqa: E402
-import ai_alerts  # noqa: E402
-import mcp_server  # noqa: E402
-import confirmation  # noqa: E402
-import demo_mode  # noqa: E402
-import doctor  # noqa: E402
-import ghactions  # noqa: E402
-import helpdocs  # noqa: E402
-import i18n  # noqa: E402
-import localguard  # noqa: E402
-import mirror  # noqa: E402
-import orgs  # noqa: E402
-import otlp  # noqa: E402
-import quota  # noqa: E402
-import redrule  # noqa: E402
-import resilience  # noqa: E402
-import runners  # noqa: E402
-import secretstore  # noqa: E402
-import settings_api  # noqa: E402
-import toolconfig  # noqa: E402
-import tui  # noqa: E402
-import updatecheck  # noqa: E402
-from tool_version import TOOL_VERSION  # noqa: E402
+from github_actions_monitor.ui import about  # noqa: E402
+from github_actions_monitor.app import actions_monitor as am  # noqa: E402
+from github_actions_monitor.integrations import actlocal  # noqa: E402
+from github_actions_monitor.integrations import ai_alerts  # noqa: E402
+from github_actions_monitor.integrations import mcp_server  # noqa: E402
+from github_actions_monitor.security import confirmation  # noqa: E402
+from github_actions_monitor.app import demo_mode  # noqa: E402
+from github_actions_monitor.cli import doctor  # noqa: E402
+from github_actions_monitor.integrations import ghactions  # noqa: E402
+from github_actions_monitor.ui import helpdocs  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.security import localguard  # noqa: E402
+from github_actions_monitor.integrations import mirror  # noqa: E402
+from github_actions_monitor.data_pipeline import orgs  # noqa: E402
+from github_actions_monitor.integrations import otlp  # noqa: E402
+from github_actions_monitor.data_pipeline import quota  # noqa: E402
+from github_actions_monitor.data_pipeline import redrule  # noqa: E402
+from github_actions_monitor.util import resilience  # noqa: E402
+from github_actions_monitor.integrations import runners  # noqa: E402
+from github_actions_monitor.security import secretstore  # noqa: E402
+from github_actions_monitor.app import settings_api  # noqa: E402
+from github_actions_monitor.app import toolconfig  # noqa: E402
+from github_actions_monitor.ui import tui  # noqa: E402
+from github_actions_monitor.app import updatecheck  # noqa: E402
+from github_actions_monitor.tool_version import TOOL_VERSION  # noqa: E402
 
 try:
     import make_help_index  # noqa: E402     (the tools live in the repository, not in the zip)
@@ -125,7 +125,7 @@ class LiteIsolation(unittest.TestCase):
         _testenv.guard(self)
 
     def run_lite(self, code):
-        script = "import sys; sys.path.insert(0, %r); sys.argv = ['x', '--lite']; import actions_monitor as am; am.enable_lite(); %s" % (str(HERE), code)
+        script = "import sys; sys.path.insert(0, %r); sys.argv = ['x', '--lite']; from github_actions_monitor.app import actions_monitor as am; am.enable_lite(); %s" % (str(HERE / "src"), code)
         done = subprocess.run([sys.executable, "-I", "-c", script], capture_output=True, text=True, timeout=90)
         self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
         return done.stdout.strip()
@@ -153,7 +153,7 @@ class LiteIsolation(unittest.TestCase):
                 "    try:\n        urllib.request.urlopen(base + path, timeout=60); codes.append(200)\n    except urllib.error.HTTPError as e:\n        codes.append(e.code)\n"
                 "for path in ('/api/health', '/api/about', '/api/quota', '/api/help/topics', '/api/ai/state', '/api/mode', '/api/discovery'):\n"
                 "    try:\n        codes.append(urllib.request.urlopen(base + path, timeout=120).status)\n    except Exception as e:\n        codes.append(path + ' ' + type(e).__name__)\n"
-                "print(codes, calls_in_request, 'sentinel_local' in sys.modules)")
+                "print(codes, calls_in_request, 'github_actions_monitor.sentinels.sentinel_local' in sys.modules)")
         out = self.run_lite(code)
         self.assertTrue(out.endswith("False"), out)
         self.assertEqual(out.count("404"), 11, out)
@@ -179,7 +179,7 @@ class LiteIsolation(unittest.TestCase):
                 os.chdir(cwd)
 
     def test_the_settings_of_lite_have_no_sentinel_options(self):
-        described = settings_api.describe(HERE / "actions_monitor.example.json", lite=True)
+        described = settings_api.describe(HERE / "assets" / "examples" / "actions_monitor.example.json", lite=True)
         keys = {f["key"] for g in described["groups"] for f in g["fields"]}
         self.assertTrue(keys and keys <= set(settings_api.LITE_KEYS), keys - set(settings_api.LITE_KEYS))
         self.assertFalse([k for k in keys if k.startswith(("sentinel.", "ai.", "webhook.", "listen.", "github_token.", "act.", "github_actions."))])
@@ -203,7 +203,7 @@ class LiteIsolation(unittest.TestCase):
         self.assertEqual(len(red), 4)
         figures = am.header_figures([], [], [], red=red)
         self.assertEqual((figures["red"], figures["red_repos"]), (4, 2))
-        page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         self.assertIn("redUnits(", page)
         self.assertIn("ui.k_red_units", page)
 
@@ -222,7 +222,7 @@ class DemoIsolation(unittest.TestCase):
             return {n: ((HERE / n).stat().st_mtime_ns, (HERE / n).read_bytes()) if (HERE / n).exists() else None for n in watched}
         before = snapshot()
         saved = (am.CONFIG_FILE, settings_api.CONFIG_FILE, toolconfig.CONFIG_FILE, dict(am.LIVE_CONFIG), settings_api.BACKUP_DIR, am.LITE["on"], am.DEMO["on"], am.LOG_FILE,
-                 updatecheck.STATE_FILE, __import__("etagcache").CACHE_FILE, __import__("events").EVENTS_FILE, set(am.RESTART_PENDING))
+                 updatecheck.STATE_FILE, __import__("github_actions_monitor.data_pipeline.etagcache", fromlist=["_"]).CACHE_FILE, __import__("github_actions_monitor.data_pipeline.events", fromlist=["_"]).EVENTS_FILE, set(am.RESTART_PENDING))
         with tempfile.TemporaryDirectory() as tmp:
             try:
                 server, url = demo_mode.start(am, 0, tmp=tmp)
@@ -248,8 +248,8 @@ class DemoIsolation(unittest.TestCase):
                 am.LIVE_CONFIG.update(saved[3])
                 settings_api.BACKUP_DIR, am.LITE["on"], am.DEMO["on"], am.LOG_FILE = saved[4:8]
                 updatecheck.STATE_FILE = saved[8]
-                __import__("etagcache").CACHE_FILE = saved[9]
-                __import__("events").EVENTS_FILE = saved[10]
+                __import__("github_actions_monitor.data_pipeline.etagcache", fromlist=["_"]).CACHE_FILE = saved[9]
+                __import__("github_actions_monitor.data_pipeline.events", fromlist=["_"]).EVENTS_FILE = saved[10]
                 am.RESTART_PENDING.clear()
                 am.RESTART_PENDING.update(saved[11])
                 toolconfig.forget()
@@ -502,7 +502,7 @@ class SharedRedCases(unittest.TestCase):
         good = {"status": "completed", "branch": "main", "conclusion": "success", "event": "push", "path": "ci.yml", "started": "2026-01-01T00:00:00Z", "name": "ci", "id": 1}
         self.assertEqual(redrule.red_workflows({"r": [good, dynamic]}, {"r": "main"})[0], [])
         self.assertEqual(redrule.guess_default_branch([dynamic]), None)
-        import signstate
+        from github_actions_monitor.sentinels import signstate
         self.assertEqual(signstate.completed_runs([good, dynamic]), [good])
 
 
@@ -566,7 +566,7 @@ class NetworkMode(unittest.TestCase):
         self.assertFalse(settings_api.LISTEN_HOST_RE.match("1.1.1.1"))
 
     def test_the_example_configuration_has_every_switch_off(self):
-        example = json.loads((HERE / "actions_monitor.example.json").read_text(encoding="utf-8"))
+        example = json.loads((HERE / "assets" / "examples" / "actions_monitor.example.json").read_text(encoding="utf-8"))
         self.assertIs(example["listen"]["network"], False)
         self.assertEqual(example["listen"]["host"], "127.0.0.1")
         for key in ("github_token", "github_actions", "act", "mirror", "runners", "otlp"):
@@ -643,7 +643,7 @@ class NetworkMode(unittest.TestCase):
         self.assertTrue(localguard.from_this_computer(("127.0.0.1", 5000)))
 
     def test_there_is_a_persistent_warning_in_the_page(self):
-        page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         self.assertIn('id="netbar"', page)
         self.assertIn("I18N.network.network", page)
         for lang in ("en", "es", "de", "fr", "it", "ja", "zh", "pt"):
@@ -850,10 +850,10 @@ class GitHubActions(unittest.TestCase):
 
     def test_the_ai_assistant_has_no_way_to_reach_it(self):
         for name in ("ai_actions.py", "sentinel_ai.py"):
-            source = (HERE / name).read_text(encoding="utf-8")
+            source = _testenv.module_file(name).read_text(encoding="utf-8")
             self.assertNotIn("ghactions", source, name)
             self.assertNotIn("actlocal", source, name)
-        self.assertNotIn("ghactions", (HERE / "notifiers.py").read_text(encoding="utf-8"))
+        self.assertNotIn("ghactions", (HERE / "src" / "github_actions_monitor" / "integrations" / "notifiers.py").read_text(encoding="utf-8"))
 
     def test_through_the_server_the_plan_needs_no_token_but_the_confirmation_does(self):
         cfg = {"session_guard": True, **self.CONFIG}
@@ -1221,7 +1221,7 @@ class FinOps(unittest.TestCase):
 # --- the other small things of the version -----------------------------------------------------------------------------------------------------------------------------------------
 class SmallThings(unittest.TestCase):
     def test_the_export_for_the_dashboard_is_complete_and_schema_two(self):
-        import ci_red
+        from github_actions_monitor.data_pipeline import ci_red
         document = ci_red.build({"generated": "x", "loading": False, "a2": {"red": []}, "a5": {}})
         self.assertGreaterEqual(document["schema"], 2)
         self.assertIs(document["complete"], True)
@@ -1230,7 +1230,7 @@ class SmallThings(unittest.TestCase):
     def test_about_links_the_documentation_of_the_bridge(self):
         data = about.info(False, {}, {}, {}, "en")
         self.assertTrue(data["links"]["bridge"].endswith("CI_RED_BRIDGE.md"))
-        self.assertIn('"bridge"', (HERE / "actions_monitor.html").read_text(encoding="utf-8"))
+        self.assertIn('"bridge"', (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8"))
         self.assertTrue(helpdocs.topic("ci_red_bridge", "es"))
 
     def test_a_setting_that_needs_a_restart_is_announced_and_stays_announced(self):
@@ -1238,22 +1238,22 @@ class SmallThings(unittest.TestCase):
             status, answer = server.call("/api/settings", {"changes": {"max_workers": 7}})
             self.assertEqual((status, answer["restart_pending"]), (200, ["max_workers"]))
             self.assertEqual(server.call("/api/settings")[1]["restart_pending"], ["max_workers"], "it survives a reload of the page")
-            self.assertIn("restartBar(", (HERE / "actions_monitor.html").read_text(encoding="utf-8"))
+            self.assertIn("restartBar(", (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8"))
 
     def test_the_signing_queue_can_be_filtered_by_trust(self):
-        page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         match = re.search(r'id="sq-trust">\$\{\[("[a-z", ]+)\]', page)
         self.assertTrue(match)
         self.assertEqual(re.findall(r'"([a-z]+)"', match.group(1)), ["all", "verified", "unknown", "failed"])
 
     def test_the_quota_pause_and_the_minutes_budget_are_visible_in_the_header(self):
-        page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         self.assertIn('id="k-a10"', page)
         self.assertIn("ui.k_a10_paused", page)
         self.assertIn("ui.k_min_budget", page)
 
     def test_the_lint_ignore_list_removes_findings_and_severities_are_settings(self):
-        import lint_workflows
+        from github_actions_monitor.cli import lint_workflows
         finding = {"file": ".github/workflows/ci.yml", "rule": "unpinned_uses"}
         self.assertTrue(lint_workflows.ignored("repo", finding, ["repo:ci.yml:unpinned_uses"]))
         self.assertTrue(lint_workflows.ignored("repo", finding, ["*:*:unpinned_uses"]))
@@ -1271,7 +1271,7 @@ class SmallThings(unittest.TestCase):
                 self.assertEqual(server.call("/api/welcome")[1], {"done": True})
             finally:
                 am.welcome_file = saved
-        self.assertIn("/api/welcome", (HERE / "actions_monitor.html").read_text(encoding="utf-8"))
+        self.assertIn("/api/welcome", (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8"))
 
     def test_the_readme_of_the_package_starts_with_the_choice_of_launcher(self):
         for lang in ("en", "es", "de", "fr", "it", "ja", "zh", "pt"):
@@ -1380,7 +1380,7 @@ class AlertsForAIs(unittest.TestCase):
             self.assertTrue(server.sensitive("/api/ai/ack", {"id": ai_alerts.alert_id("r1", "ci.yml")})[1]["ok"])
 
     def test_the_ci_red_file_carries_an_optional_ai_hint(self):
-        import ci_red
+        from github_actions_monitor.data_pipeline import ci_red
         document = ci_red.build({"generated": "x", "loading": False, "a2": {"red": [self.ROW, dict(self.ROW, repo="r2", conclusion="startup_failure")]}, "a5": {}})
         self.assertEqual({r: v["red"][0]["ai_hint"]["class"] for r, v in document["repos"].items()}, {"r1": "real", "r2": "transient"})
         self.assertGreaterEqual(document["schema"], 2)
@@ -1416,7 +1416,7 @@ class AlertsForAIs(unittest.TestCase):
                 mcp_server.call("get_run_failure", bad, self.config, runner=runner)
 
     def test_the_mcp_server_speaks_json_lines_on_standard_io(self):
-        script = "import sys; sys.path.insert(0, %r); import mcp_server; sys.exit(mcp_server.main([]))" % str(HERE)
+        script = "import sys; sys.path.insert(0, %r); from github_actions_monitor.integrations import mcp_server; sys.exit(mcp_server.main([]))" % str(HERE / "src")
         done = subprocess.run([sys.executable, "-I", "-c", script], input='{"jsonrpc":"2.0","id":1,"method":"ping"}\nnot json\n', capture_output=True, text=True, timeout=30)
         self.assertEqual(json.loads(done.stdout.strip()), {"jsonrpc": "2.0", "id": 1, "result": {}})
 
@@ -1429,7 +1429,7 @@ class AlertsForAIs(unittest.TestCase):
 
 class TerminalApplication(unittest.TestCase):
     def test_the_helpers_need_no_textual(self):
-        import tui_textual as tt
+        from github_actions_monitor.ui import tui_textual as tt
         settings = {"groups": [{"id": "basic", "fields": [{"key": "open_browser", "type": "bool", "secure": False}, {"key": "airgapped", "type": "bool", "secure": True}]},
                                {"id": "sentinel", "fields": [{"key": "sentinel.workers", "type": "int"}]}, {"id": "polling", "fields": [{"key": "names", "type": "names"}, {"key": "refresh_seconds", "type": "int"}]}]}
         self.assertEqual([f["key"] for _g, f in tt.editable_fields(settings)], ["open_browser", "refresh_seconds"], "no security option, no complex type, only the common groups")

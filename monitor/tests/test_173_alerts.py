@@ -10,13 +10,13 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import alert_center as ac  # noqa: E402
-import sentinel_collab as sc  # noqa: E402
-import settings_api  # noqa: E402
+from github_actions_monitor.sentinels import alert_center as ac  # noqa: E402
+from github_actions_monitor.sentinels import sentinel_collab as sc  # noqa: E402
+from github_actions_monitor.app import settings_api  # noqa: E402
 
 NOW = 1_800_000_000
 
@@ -136,7 +136,7 @@ class OneList(unittest.TestCase):
         self.assertEqual(ac.collect(None), [])
 
     def test_the_endpoint_answers_with_the_list_the_counts_and_the_silences(self):
-        import actions_monitor as am
+        from github_actions_monitor.app import actions_monitor as am
         ac.mute("alert", "ci.red:1", 3, now=NOW)
         with mock.patch.dict(am.SENTINEL, {"registry": FakeRegistry(self.sample())}):
             body = am.alerts_payload({"sentinel": "ci"})
@@ -146,11 +146,11 @@ class OneList(unittest.TestCase):
             self.assertEqual(am.alerts_payload({"muted": "nonsense"})["alerts"].__len__(), 4)   # an unknown value is the default
 
     def test_the_posts_need_this_computer_and_a_token_and_the_page_goes_through_the_one_use_token(self):
-        text = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        text = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         group = text.split('"/api/gh-action/plan", "/api/gh-action/confirm"', 1)[1].split("):", 1)[0]
         self.assertIn("/api/alerts/mute", group)
         self.assertIn("/api/alerts/unmute", group)
-        page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         self.assertIn("alerts\\/(mute|unmute)", page)
         lite = text.split("LITE_PATHS = (", 1)[1].split(")", 1)[0]
         self.assertIn("/api/alerts", lite)         # the lite product has no sentinel and answers none of them
@@ -193,12 +193,12 @@ class IgnoreLabel(unittest.TestCase):
 
 class Wiring(unittest.TestCase):
     def test_the_silences_follow_the_account_and_are_never_published(self):
-        import accounts
-        import demo_mode
+        from github_actions_monitor.accounts import accounts
+        from github_actions_monitor.app import demo_mode
         import make_release
-        self.assertIn(("alert_center", "STATE_FILE", "alert_mutes.json"), accounts.STATE_FILES)
+        self.assertIn(("github_actions_monitor.sentinels.alert_center", "STATE_FILE", "alert_mutes.json"), accounts.STATE_FILES)
         self.assertIn("alert_mutes.json", [name for name, _ in accounts.LEGACY])
-        self.assertIn(("alert_center", "STATE_FILE", "alert_mutes_demo.json"), demo_mode.STATE_FILES)
+        self.assertIn(("github_actions_monitor.sentinels.alert_center", "STATE_FILE", "alert_mutes_demo.json"), demo_mode.STATE_FILES)
         self.assertIn("alert_mutes.json", make_release.FORBIDDEN_NAMES)
         if (HERE.parent / ".gitignore").is_file():         # the zip of the package carries no .gitignore
             ignored = (HERE.parent / ".gitignore").read_text(encoding="utf-8").splitlines()
@@ -206,7 +206,7 @@ class Wiring(unittest.TestCase):
                 self.assertIn(name, ignored)
 
     def test_the_page_has_the_alerts_tab_the_filters_and_the_live_checklist(self):
-        page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         for needle in ('id="t-al"', 'id="n-al"', "function renderAlerts", "/api/alerts", "alertMute", 'id="live-check"', 'const TABS=LITE?["now","charts","repos","hist","cfg"]:["now","al","sent"', ".lite #n-al"):
             self.assertIn(needle, page, needle)
 
@@ -216,7 +216,7 @@ class Wiring(unittest.TestCase):
             self.assertIn(key, settings_api.META, key)
         texts = {}
         for lang in ("en", "es", "de", "fr", "it", "ja", "zh", "pt"):
-            texts[lang] = json.loads((HERE / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
+            texts[lang] = json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
             for key in keys:
                 self.assertTrue(texts[lang].get("cfg.f." + key) and texts[lang].get("cfg.h." + key), (lang, key))
             for key in [k for k in texts["en"] if k.startswith(("ui.al_", "ui.live_ck_", "ui.tab_al"))]:

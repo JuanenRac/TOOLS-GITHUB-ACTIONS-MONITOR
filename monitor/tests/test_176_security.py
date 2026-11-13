@@ -19,20 +19,20 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import actions_monitor  # noqa: E402
-import actlocal  # noqa: E402
-import ai_actions  # noqa: E402
-import alert_center  # noqa: E402
-import ghactions  # noqa: E402
-import localguard  # noqa: E402
-import monitor_cli  # noqa: E402
-import netguard  # noqa: E402
-import notifiers  # noqa: E402
-import secretstore  # noqa: E402
+from github_actions_monitor.app import actions_monitor  # noqa: E402
+from github_actions_monitor.integrations import actlocal  # noqa: E402
+from github_actions_monitor.integrations import ai_actions  # noqa: E402
+from github_actions_monitor.sentinels import alert_center  # noqa: E402
+from github_actions_monitor.integrations import ghactions  # noqa: E402
+from github_actions_monitor.security import localguard  # noqa: E402
+from github_actions_monitor.cli import monitor_cli  # noqa: E402
+from github_actions_monitor.security import netguard  # noqa: E402
+from github_actions_monitor.integrations import notifiers  # noqa: E402
+from github_actions_monitor.security import secretstore  # noqa: E402
 
 LANGS = ("en", "es", "de", "fr", "it", "ja", "zh", "pt")
 PROXY_HITS = []
@@ -97,7 +97,7 @@ class ProxyOfTheEnvironment(unittest.TestCase):
         self.assertTrue(notifiers.settings({"network": {"use_proxy": True}})["use_proxy"])
         self.assertFalse(notifiers.settings({"network": {"use_proxy": "yes"}})["use_proxy"])
         self.assertFalse(actions_monitor.DEFAULTS["network"]["use_proxy"])
-        import settings_api
+        from github_actions_monitor.app import settings_api
         self.assertIn("network.use_proxy", settings_api.META)
 
 
@@ -131,7 +131,7 @@ class LocalOnlyEndpoints(unittest.TestCase):
 
 class NetworkClientsWriteOnlyAShortList(LocalOnlyEndpoints):
     def test_only_the_allow_list_can_be_written_from_another_computer(self):
-        import settings_api
+        from github_actions_monitor.app import settings_api
         for key in settings_api.META:
             if key in localguard.REMOTE_WRITABLE:
                 self.assertFalse(localguard.local_only_key(key), key)
@@ -144,7 +144,7 @@ class NetworkClientsWriteOnlyAShortList(LocalOnlyEndpoints):
         self.assertFalse(localguard.REMOTE_WRITABLE - set(settings_api.META), "every listed key exists")
 
     def test_a_remote_client_cannot_point_a_channel_at_a_secret_or_rewrite_the_trusted_files(self):
-        import settings_api
+        from github_actions_monitor.app import settings_api
         server = ThreadingHTTPServer(("127.0.0.1", 0), actions_monitor.Handler)
         threading.Thread(target=server.serve_forever, daemon=True).start()
         self.addCleanup(server.server_close)
@@ -210,7 +210,7 @@ class ActPlanIsBoundToItsWorkflow(unittest.TestCase):
 
     def test_the_page_has_a_text_for_it_in_each_language(self):
         for lang in LANGS:
-            cat = json.loads((HERE / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
+            cat = json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
             self.assertTrue(cat.get("ui.adv_why_workflow_changed"), lang)
 
 
@@ -353,7 +353,7 @@ class DispatchAndSigning(unittest.TestCase):
 
     def fire(self, listings):
         """`listings` = what each call to `gh run list` answers, in order (the first one is the list BEFORE the dispatch)."""
-        import gha_dispatch_all as gd
+        from github_actions_monitor.cli import gha_dispatch_all as gd
         name = next(n for n in gd.TARGETS if ":" not in n)
         calls = []
         answers = iter(listings)
@@ -396,7 +396,7 @@ class DispatchAndSigning(unittest.TestCase):
         self.assertFalse(result["sha_matched"], "which of the two is ours cannot be known: it is not offered for signing")
 
     def test_a_required_workflow_is_a_file_not_a_visible_name(self):
-        import gha_dispatch_all as gd
+        from github_actions_monitor.cli import gha_dispatch_all as gd
         ok = {"status": "completed", "conclusion": "success"}
         runs = [{"id": 1, "path": ".github/workflows/zzz.yml", "name": "ci.yml", **ok}]
         with mock.patch.object(gd, "ghj", return_value={"total_count": 1, "workflow_runs": runs}):
@@ -407,7 +407,7 @@ class DispatchAndSigning(unittest.TestCase):
             self.assertTrue(gd.ci_green("REPO", "a" * 40, required=["ci.yml"])[0])
 
     def test_the_name_of_a_batch_is_in_utc(self):
-        source = (HERE / "gha_dispatch_all.py").read_text(encoding="utf-8")
+        source = (HERE / "src" / "github_actions_monitor" / "cli" / "gha_dispatch_all.py").read_text(encoding="utf-8")
         self.assertIn("datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')", source)
         self.assertNotIn("datetime.now().strftime", source)
 
@@ -428,20 +428,20 @@ class RedactorCoversTheFormats(unittest.TestCase):
     }
 
     def test_no_sample_leaks(self):
-        import ai_alerts
+        from github_actions_monitor.integrations import ai_alerts
         for name, (text, secret) in self.SAMPLES.items():
             cleaned = ai_alerts.redact(text)
             self.assertNotIn(secret, cleaned, name)
             self.assertNotEqual(cleaned, text, name)
 
     def test_ordinary_text_is_left_alone(self):
-        import ai_alerts
+        from github_actions_monitor.integrations import ai_alerts
         self.assertEqual(ai_alerts.redact("Error: step Run tests failed with exit code 1"), "Error: step Run tests failed with exit code 1")
 
 
 class McpOnlyForWatchedRepositories(unittest.TestCase):
     def test_a_repository_that_is_not_watched_is_refused_and_gh_is_not_called(self):
-        import mcp_server
+        from github_actions_monitor.integrations import mcp_server
         calls = []
 
         def runner(args, timeout=60):
@@ -513,7 +513,7 @@ class LoopbackNeverUsesAProxy(unittest.TestCase):
 
     def test_no_module_opens_a_loopback_address_with_plain_urlopen(self):
         for name in ("monitor_cli", "accounts_supervisor", "mcp_server", "monitor_link", "read_report", "tui", "tui_textual", "ai_alerts", "notifiers"):
-            self.assertNotIn("urllib.request.urlopen", (HERE / f"{name}.py").read_text(encoding="utf-8"), name)
+            self.assertNotIn("urllib.request.urlopen", _testenv.module_file(name).read_text(encoding="utf-8"), name)
 
 
 class HeadersAndHost(unittest.TestCase):
@@ -561,7 +561,7 @@ class FilesWithTheWrongShape(unittest.TestCase):
                 self.assertEqual([h["value"] for h in alert_center.history()], ["h"])
 
     def test_an_update_state_with_fields_of_the_wrong_type_is_ignored(self):
-        import updatecheck
+        from github_actions_monitor.app import updatecheck
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "u.json"
             for body in ('[]', '{"release": "x", "checked_at": "now"}', '{"release": {"tag": 5, "url": []}, "checked_at": true}'):
@@ -574,7 +574,7 @@ class FilesWithTheWrongShape(unittest.TestCase):
 
 class TimeZones(unittest.TestCase):
     def test_cairo_follows_the_daylight_saving_time_it_has_since_2023(self):
-        import tzdisplay
+        from github_actions_monitor.util import tzdisplay
         from datetime import datetime, timezone
 
         def hours(text):
@@ -583,8 +583,8 @@ class TimeZones(unittest.TestCase):
             self.assertEqual([hours("2024-04-25T12:00:00Z"), hours("2024-04-26T12:00:00Z"), hours("2024-10-30T12:00:00Z"), hours("2024-10-31T22:30:00Z"), hours("2022-07-01T12:00:00Z")], [2, 3, 3, 2, 2])
 
     def test_a_zone_the_system_does_not_know_is_refused_in_the_settings(self):
-        import settings_api
-        import tzdisplay
+        from github_actions_monitor.app import settings_api
+        from github_actions_monitor.util import tzdisplay
         with mock.patch.object(tzdisplay, "_zoneinfo", lambda name: None):
             self.assertFalse(settings_api.check_value("display.timezone", "Europe/Madird")[0])
             self.assertTrue(settings_api.check_value("display.timezone", "Europe/Madrid")[0])
@@ -639,7 +639,7 @@ class CommandLineStatusAndRedirects(unittest.TestCase):
 
 class HeaderFigureOfTheCompleteEdition(unittest.TestCase):
     def test_the_complete_edition_reports_the_red_workflows_too(self):
-        source = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        source = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         self.assertIn('red = red_rows({"runs": runs, "repos": repos})', source)
 
 
@@ -688,7 +688,7 @@ class CommandLineAnswersOfTheWrongShape(unittest.TestCase):
 
     def test_the_message_exists_in_each_language(self):
         for lang in LANGS:
-            cat = json.loads((HERE / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
+            cat = json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
             self.assertTrue(cat.get("cli.bad_shape"), lang)
 
 

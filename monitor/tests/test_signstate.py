@@ -11,15 +11,15 @@ import _testenv  # noqa: F401
 from datetime import datetime, timezone
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-import ci_red  # noqa: E402
-import events as event_feed  # noqa: E402
-import platform_compat
-import gha_dispatch_all as gd  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+from github_actions_monitor.data_pipeline import ci_red  # noqa: E402
+from github_actions_monitor.data_pipeline import events as event_feed  # noqa: E402
+from github_actions_monitor.util import platform_compat
+from github_actions_monitor.cli import gha_dispatch_all as gd  # noqa: E402
 import make_release as mr  # noqa: E402
-import sentinel_local as sl  # noqa: E402
-import signstate  # noqa: E402
-import tool_version  # noqa: E402
+from github_actions_monitor.sentinels import sentinel_local as sl  # noqa: E402
+from github_actions_monitor.sentinels import signstate  # noqa: E402
+from github_actions_monitor import tool_version  # noqa: E402
 
 NOW = datetime(2026, 11, 4, 12, 0, 0, tzinfo=timezone.utc)
 BUILD_AT = "2026-11-03T10:00:00Z"   # 26 h before NOW

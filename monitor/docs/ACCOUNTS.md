@@ -34,7 +34,7 @@ python actions_monitor.py --migrate-accounts --apply  # copies it into accounts/
 python actions_monitor.py --accounts                  # lists the accounts
 ```
 
-The originals are never moved or deleted: you delete them yourself once you have checked. A second run refuses, so two states never mix. To add an account, create `accounts/<id>/actions_monitor.json` with its `github_owner` (copy the template `actions_monitor.example.json`).
+The originals are never moved or deleted: you delete them yourself once you have checked. A second run refuses, so two states never mix. To add an account, create `accounts/<id>/actions_monitor.json` with its `github_owner` (copy the template `assets/examples/actions_monitor.example.json`).
 
 ## Running
 

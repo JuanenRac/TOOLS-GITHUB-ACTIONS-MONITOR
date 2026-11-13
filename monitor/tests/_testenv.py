@@ -6,13 +6,14 @@ import os
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))      # the importable package
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))     # make_release.py and migrate_layout.py are scripts of the product folder, not part of the package
 os.environ["MONITOR_TARGETS_FILE"] = str(Path(__file__).resolve().parent / "fixtures" / "fixture_targets.json")          # the maintainer's catalogue, whatever the configuration says
 os.environ["MONITOR_ECOSYSTEMS_FILE"] = str(Path(__file__).resolve().parent / "fixtures" / "fixture_ecosystems.json")
 os.environ["MONITOR_PROFILES_FILE"] = str(Path(__file__).resolve().parent / "fixtures" / "fixture_profiles.json")
 os.environ["MONITOR_TIMEZONE"] = "utc"      # texts for people in UTC unless a test asks for another zone (tests/test_timezone.py)
-import i18n  # noqa: E402
-import toolconfig  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.app import toolconfig  # noqa: E402
 
 # HERMETIC: no test may depend on a `gh` that is installed and logged in (the runners of the CI have none, or one without a login that takes tens of seconds to answer). Every `gh` this process starts
 # is replaced by a program that fails at once with a controlled message; a test that needs another answer mocks `subprocess.run` or the reader itself, which wins over this. The token variables are emptied.
@@ -71,3 +72,21 @@ class Spanish:
     def tearDown(self):
         i18n.set_language("en")
         super().tearDown()
+
+
+PRODUCT = Path(__file__).resolve().parent.parent          # the product folder (launchers, src/, assets/, docs/, tests/, tools/)
+PACKAGE = PRODUCT / "src" / "github_actions_monitor"
+
+
+def source_files():
+    """Every .py of the package (src/github_actions_monitor/**) plus tools/make_release.py: what the static checks of the tests read."""
+    return sorted(p for p in PACKAGE.rglob("*.py") if "__pycache__" not in p.parts) + [PRODUCT / "tools" / "make_release.py"]
+
+
+def module_file(name):
+    """The file of a module by its old flat name ("sentinel_local" or "sentinel_local.py")."""
+    stem = name[:-3] if name.endswith(".py") else name
+    found = [p for p in source_files() if p.stem == stem or (stem == "i18n" and p.parent.name == "i18n" and p.name == "__init__.py")]
+    if not found:
+        raise FileNotFoundError(name)
+    return found[0]

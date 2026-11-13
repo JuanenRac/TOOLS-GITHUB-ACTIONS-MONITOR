@@ -7,13 +7,13 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import i18n  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
 
-PAGE = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+PAGE = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
 HEADER = PAGE[PAGE.index("<header>"):PAGE.index("</header>")]
 FIRST_LINE = ("k-active", "k-queued", "k-fail", "k-ok", "k-issues", "k-min", "k-red", "k-sign")
 SECOND_LINE = ("tv-repos", "tv-hot", "tv-mode", "tv-etag", "tv-quota", "tv-conn", "tv-upd", "tv-load")

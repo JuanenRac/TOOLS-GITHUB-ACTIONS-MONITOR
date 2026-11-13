@@ -11,10 +11,10 @@ from pathlib import Path
 from unittest import mock
 
 import _testenv  # noqa: F401
-import i18n  # noqa: E402,F401
+from github_actions_monitor import i18n  # noqa: E402,F401
 import make_release as mr  # noqa: E402
-import sentinel_local as sl  # noqa: E402
-import surface  # noqa: E402
+from github_actions_monitor.sentinels import sentinel_local as sl  # noqa: E402
+from github_actions_monitor.app import surface  # noqa: E402
 
 CAPS = {"runs_per_repo": 6, "cold_runs_per_repo": 3}
 HERE = Path(mr.HERE)
@@ -223,19 +223,19 @@ class OnlyConcluded(unittest.TestCase):
 
 class Settings(unittest.TestCase):
     def test_the_options_are_in_the_defaults_and_in_the_neutral_example(self):
-        example = json.loads((HERE / "actions_monitor.example.json").read_text(encoding="utf-8"))["sentinel"]
+        example = json.loads((HERE / "assets" / "examples" / "actions_monitor.example.json").read_text(encoding="utf-8"))["sentinel"]
         for key in ("a2_resolve_max_calls_per_tick", "a2_resolve_ttl_seconds"):
             self.assertIn(key, sl.DEFAULTS)
             self.assertEqual(example[key], sl.DEFAULTS[key])
 
     def test_new_texts_exist_in_the_eight_catalogues(self):
         for lang in mr.LANGS:
-            cat = json.loads((HERE / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
+            cat = json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
             for key in ("ui.a2_reason_no_runs", "ui.a2_reason_quota", "ui.a2_reason_pending", "ui.a2_reason_no_clone", "ui.a2_inconclusive"):
                 self.assertTrue(cat.get(key, "").strip(), f"{lang}: {key}")
 
     def test_the_panel_uses_the_workflow_labels(self):
-        self.assertIn("inconclusive_workflows", (HERE / "actions_monitor.html").read_text(encoding="utf-8"))
+        self.assertIn("inconclusive_workflows", (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

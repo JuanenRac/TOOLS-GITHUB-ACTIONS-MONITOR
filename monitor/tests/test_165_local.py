@@ -19,26 +19,26 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import actions_monitor as am  # noqa: E402
-import actlocal  # noqa: E402
-import ai_alerts  # noqa: E402
-import demo_mode  # noqa: E402
-import doctor  # noqa: E402
-import etagcache  # noqa: E402
-import export_status  # noqa: E402
-import helpdocs  # noqa: E402
-import localguard  # noqa: E402
+from github_actions_monitor.app import actions_monitor as am  # noqa: E402
+from github_actions_monitor.integrations import actlocal  # noqa: E402
+from github_actions_monitor.integrations import ai_alerts  # noqa: E402
+from github_actions_monitor.app import demo_mode  # noqa: E402
+from github_actions_monitor.cli import doctor  # noqa: E402
+from github_actions_monitor.data_pipeline import etagcache  # noqa: E402
+from github_actions_monitor.cli import export_status  # noqa: E402
+from github_actions_monitor.ui import helpdocs  # noqa: E402
+from github_actions_monitor.security import localguard  # noqa: E402
 import make_release as mr  # noqa: E402
-import mcp_server  # noqa: E402
-import notifiers  # noqa: E402
-import secretstore  # noqa: E402
-import settings_api  # noqa: E402
-import updatecheck  # noqa: E402
-import webhook  # noqa: E402
+from github_actions_monitor.integrations import mcp_server  # noqa: E402
+from github_actions_monitor.integrations import notifiers  # noqa: E402
+from github_actions_monitor.security import secretstore  # noqa: E402
+from github_actions_monitor.app import settings_api  # noqa: E402
+from github_actions_monitor.app import updatecheck  # noqa: E402
+from github_actions_monitor.security import webhook  # noqa: E402
 from test_164 import LiveServer  # noqa: E402
 
 
@@ -200,7 +200,7 @@ class NetworkMode(unittest.TestCase):
         self.assertEqual(localguard.display_host("192.168.1.20"), "192.168.1.20")
         self.assertEqual(localguard.display_host("0.0.0.0"), "127.0.0.1")
         self.assertEqual(localguard.display_host("127.0.0.1"), "127.0.0.1")
-        source = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        source = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         self.assertIn("localguard.display_host(server.server_address[0])", source)
 
     def test_the_cookie_is_secure_only_when_the_connection_is_https(self):
@@ -276,7 +276,7 @@ class NetworkMode(unittest.TestCase):
 
     def test_a_get_never_writes_and_the_copy_of_the_report_is_a_post_with_the_token(self):
         with tempfile.TemporaryDirectory() as folder, LiveServer({"session_guard": True}) as server:
-            import sentinel_local
+            from github_actions_monitor.sentinels import sentinel_local
             with mock.patch.object(sentinel_local, "AUDIT_DIR", Path(folder)):
                 server.call("/api/sentinel/parte.txt?save=1")
                 self.assertEqual(list(Path(folder).iterdir()), [], "a GET must not write")
@@ -512,8 +512,8 @@ class TokenOnlyForGh(unittest.TestCase):
 
     def test_the_notification_command_and_the_hooks_do_not_inherit_it(self):
         with mock.patch.object(subprocess, "Popen") as popen:
-            import events
-            source = (HERE / "events.py").read_text(encoding="utf-8")
+            from github_actions_monitor.data_pipeline import events
+            source = (HERE / "src" / "github_actions_monitor" / "data_pipeline" / "events.py").read_text(encoding="utf-8")
             self.assertNotIn("gh_kwargs", source)
         self.assertNotIn("GH_TOKEN", os.environ)
 
@@ -526,7 +526,7 @@ class RetryWaits(unittest.TestCase):
         self.assertGreater(am.secondary_wait("secondary rate limit", 1, 0.5), am.secondary_wait("secondary rate limit", 0, 0.5))
         self.assertLessEqual(am.secondary_wait("secondary rate limit", 9, 1.0), 360)
         self.assertEqual(am.secondary_wait("timeout", 1), 4)
-        import resilience
+        from github_actions_monitor.util import resilience
         waits = {resilience.backoff(2) for _ in range(20)}
         self.assertGreater(len(waits), 1, "the transient wait is randomised")
 
@@ -559,7 +559,7 @@ class DoctorRisks(unittest.TestCase):
         checks = doctor.run(runner=lambda args, timeout=20: (0, "{}", ""), config={"listen": {"network": True, "host": "0.0.0.0"}})
         by = {c["id"]: c for c in checks}
         self.assertEqual(by["risks"]["status"], "warn")
-        import i18n
+        from github_actions_monitor import i18n
         for lang in i18n.LANGS:
             self.assertTrue(i18n.tl(lang, "doctor.t.risks") and i18n.tl(lang, "doctor.f.backend"))
 
@@ -609,7 +609,7 @@ class GateStages(unittest.TestCase):
     def test_the_nested_test_is_a_separate_opt_in_stage(self):
         text = (HERE / "tests" / "test_i18n.py").read_text(encoding="utf-8")
         self.assertIn("MONITOR_RUN_CLEAN_INSTALL", text)
-        self.assertIn("clean_install_check", (HERE / "make_release.py").read_text(encoding="utf-8"))
+        self.assertIn("clean_install_check", (HERE / "tools" / "make_release.py").read_text(encoding="utf-8"))
 
 
 # --- small regressions of the third review -------------------------------------------------------------------------------------------------------------------------------------------
@@ -643,7 +643,7 @@ class SmallRegressions(unittest.TestCase):
     def test_the_demo_data_never_looks_like_a_real_token(self):
         for name in ("demo_mode.py", "tests/test_164.py"):
             pass
-        text = (HERE / "demo_mode.py").read_text(encoding="utf-8")
+        text = (HERE / "src" / "github_actions_monitor" / "app" / "demo_mode.py").read_text(encoding="utf-8")
         for prefix in ("ghp_", "gho_", "ghu_", "ghs_", "github_pat_"):
             self.assertNotIn(prefix, text)
         for path in (HERE.parent / "docs" / "screenshots").glob("*"):
@@ -653,8 +653,8 @@ class SmallRegressions(unittest.TestCase):
                     self.assertNotIn(prefix, body, path.name)
 
     def test_the_documents_describe_exactly_the_actions_the_code_has(self):
-        import ghactions
-        import ai_actions
+        from github_actions_monitor.integrations import ghactions
+        from github_actions_monitor.integrations import ai_actions
         actions = set(ghactions.ACTIONS) if hasattr(ghactions, "ACTIONS") else set()
         self.assertIn("merge_pr", actions)
         runnable = set(ai_actions.RUNNABLE)

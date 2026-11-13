@@ -7,7 +7,7 @@
 
 # Quote e piani
 
-Il monitor è usato da ogni tipo di account, quindi non ne presume nessuno. Le cifre qui sotto stanno in `monitor/quotas.json` (modificalo per seguire i cambiamenti di GitHub senza una nuova versione del monitor) e sono state confrontate con la documentazione pubblica di GitHub; cambiano nel tempo, quindi usale come punto di partenza e guarda le pagine citate nel file. Scegli il tuo piano in **Impostazioni > Di base** (`account.plan`); finché è *sconosciuto* non viene mostrata alcuna cifra di quota.
+Il monitor è usato da ogni tipo di account, quindi non ne presume nessuno. Le cifre qui sotto stanno in `monitor/assets/examples/quotas.json` (una copia chiamata `quotas.json` accanto ai lanciatori ha la precedenza) (modificalo per seguire i cambiamenti di GitHub senza una nuova versione del monitor) e sono state confrontate con la documentazione pubblica di GitHub; cambiano nel tempo, quindi usale come punto di partenza e guarda le pagine citate nel file. Scegli il tuo piano in **Impostazioni > Di base** (`account.plan`); finché è *sconosciuto* non viene mostrata alcuna cifra di quota.
 
 ## La quota dell'API
 

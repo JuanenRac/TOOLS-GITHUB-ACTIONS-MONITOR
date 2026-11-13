@@ -17,7 +17,7 @@ DÉMARRAGE RAPIDE - Moniteur GitHub Actions + Sentinelle
 5. Première utilisation :
    - La page affiche VOS dépôts (le compte GitHub avec lequel vous êtes connecté). Pour surveiller un autre compte, renseignez "github_owner" dans actions_monitor.json.
    - Choisissez votre langue dans l'onglet Réglages de la page (icône d'engrenage ; démarrage en anglais, le choix est mémorisé). Les autres réglages y sont aussi.
-   - Pour regrouper les dépôts par préfixe de nom ou utiliser les outils de lot, copiez ecosystems.example.json / targets.example.json et faites-y pointer
+   - Pour regrouper les dépôts par préfixe de nom ou utiliser les outils de lot, copiez assets/examples/ecosystems.example.json / assets/examples/targets.example.json et faites-y pointer
      actions_monitor.json ("ecosystems_file", "targets_file"). Le détail est dans README_fr.txt.
    - Pas de clones locaux ? Cela fonctionne quand même, en mode réduit (seulement ce que donne l'API GitHub), et la page vous le dit.
 6. Ce qu'il ne fait PAS : il ne signe et ne publie rien tout seul, n'écrit rien sur GitHub de lui-même (seuls `dispatch --go`, `dispatch --real` et `finalize --execute`, que vous exécutez, le font), n'écoute que sur 127.0.0.1 et ne garde aucun jeton. Signer et publier sont

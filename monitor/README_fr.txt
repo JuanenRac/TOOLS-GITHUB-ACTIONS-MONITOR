@@ -24,10 +24,10 @@ CE QU'IL NE FAIT JAMAIS   Il n'écoute que sur 127.0.0.1 sauf si vous activez le
 LANGUE     8 langues : en, es, de, fr, it, ja, zh, pt (portugais du Portugal). Démarrage en ANGLAIS : la langue du système ne décide pas. Choisissez-en une autre dans l'onglet RÉGLAGES de la page
            (icône d'engrenage ; le navigateur s'en souvient), ou avec "language" dans actions_monitor.json, ou la variable d'environnement MONITOR_LANG, ou --lang CODE dans les outils en ligne de commande (prioritaire).
            Les lignes lues par les scripts (SKIP, DISPATCHED, READY, FAILED, Summary:, BUILD ONLY...) sont toujours en anglais.
-CONFIG     actions_monitor.json (créé à partir de actions_monitor.example.json au premier démarrage). Clés utiles : github_owner (vide = le compte de gh),
+CONFIG     actions_monitor.json (créé à partir de assets/examples/actions_monitor.example.json au premier démarrage). Clés utiles : github_owner (vide = le compte de gh),
            language, ecosystems_file, targets_file, refresh_seconds, cold_refresh_seconds, max_workers, min_rate_remaining, sentinel.*
-           ecosystems_file : regroupe les dépôts par préfixe de nom (voir ecosystems.example.json ; "*" = tous les dépôts). targets_file : catalogue des builds pour les
-           outils de lot (voir targets.example.json). profiles_file (profiles.example.json) : profils de lot. Les clés commençant par "_" dans ces fichiers sont des métadonnées.
+           ecosystems_file : regroupe les dépôts par préfixe de nom (voir assets/examples/ecosystems.example.json ; "*" = tous les dépôts). targets_file : catalogue des builds pour les
+           outils de lot (voir assets/examples/targets.example.json). profiles_file (assets/examples/profiles.example.json) : profils de lot. Les clés commençant par "_" dans ces fichiers sont des métadonnées.
 ESPACE DE TRAVAIL  FACULTATIF : un dossier avec des clones locaux de vos dépôts (MONITOR_ROOT, "workspace_root" dans le json, ou un dossier parent contenant un fichier .monitor-root).
            Sans lui, le moniteur démarre en MODE RÉDUIT et le dit : seulement ce que donne l'API GitHub (pas de file de signature locale, pas de rapport d'audit, pas de lecture du CHANGELOG).
            Avec lui, vous avez aussi les releases candidates, la file de signature et les outils de lot. Journaux de signature : "signed_dir" ; fichiers d'audit : "audit_dir".

@@ -44,7 +44,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 | | |
 |---|---|
 | **Maturidade** | functional |
-| **Testes** | 1264 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Testes** | 1286 métodos de teste (`python -m unittest discover -s monitor/tests`) |
 | **Definições** | 288 definições, todas com ajuda |
 | **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
 | **Testado no CI em** | ubuntu, windows, macos, Python 3.11, 3.13 |
@@ -192,7 +192,7 @@ Um segundo produto, mais simples, no mesmo pacote: a página do que está a corr
 
 ## Definições
 
-Tudo vive em `actions_monitor.json` (criado a partir de `actions_monitor.example.json`). O separador **Definições** edita-o em segurança; os tokens e segredos nunca são mostrados nem guardados. Os ecossistemas, os alvos de compilação e os perfis de lote são ficheiros à parte para os quais aponta (`ecosystems_file`, `targets_file`, `profiles_file`); vão incluídos modelos neutros `*.example.json`. Referência completa: [`monitor/docs/SETTINGS_por.md`](monitor/docs/SETTINGS_por.md).
+Tudo vive em `actions_monitor.json` (criado a partir de `monitor/assets/examples/actions_monitor.example.json`). O separador **Definições** edita-o em segurança; os tokens e segredos nunca são mostrados nem guardados. Os ecossistemas, os alvos de compilação e os perfis de lote são ficheiros à parte para os quais aponta (`ecosystems_file`, `targets_file`, `profiles_file`); vão incluídos modelos neutros `*.example.json`. Referência completa: [`monitor/docs/SETTINGS_por.md`](monitor/docs/SETTINGS_por.md).
 
 ## Saídas para o Grafana e painéis
 
@@ -224,44 +224,26 @@ python -m unittest discover -s monitor/tests
 
 ```
 TOOLS-GITHUB-ACTIONS-MONITOR/
-├── monitor/                                  o programa
-├── docs/                                     arquitetura, capturas, roteiro
-├── tools/                                    imagens, guias e demo
-├── deploy/                                   exemplo de contentor
-├── images/                                   banner e imagens
-├── .github/                                  CI e formulários
-├── CHANGELOG.md                              mudanças por versão
-├── LICENSE NOTICE AUTHORS                    licenças e autoria
-├── CONTRIBUTING.md SECURITY.md               ajudar, comunicar
-├── SUPPORT.md CODE_OF_CONDUCT.md             suporte e conduta
+├── monitor/                                o programa
+├── docs/                                   arquitetura, capturas, roteiro
+├── tools/                                  imagens, guias e demo
+├── deploy/                                 exemplo de contentor
+├── images/                                 banner e imagens
+├── .github/                                CI e formulários
+├── CHANGELOG.md                            mudanças por versão
+├── LICENSE NOTICE AUTHORS                  licenças e autoria
+├── CONTRIBUTING.md SECURITY.md             ajudar, comunicar
+├── SUPPORT.md CODE_OF_CONDUCT.md           suporte e conduta
 └── monitor/
-    ├── actions_monitor.py                    servidor local
-    ├── actions_monitor.html                  a página web
-    ├── MONITOR_LITE_GITHUB_ACTIONS.*         a edição lite
-    ├── sentinel_local.py                     alertas e relatório
-    ├── sentinel_collab.py  alert_center.py   sentinela de issues, alertas
-    ├── surface.py readiness.py               verificações, preparação
-    ├── settings_api.py outputs.py            definições, métricas
-    ├── signstate.py sigverify.py             assinatura: estado e controlo
-    ├── monitor_cli.py                        linha de comandos cliente
-    ├── read_report.py                        relatório no terminal
-    ├── gha_dispatch_all.py                   compilações por lotes
-    ├── events.py report_history.py           eventos e histórico
-    ├── ci_red.py export_status.py            ficheiros para outros
-    ├── etagcache.py resilience.py            leituras condicionais
-    ├── analytics.py lint_workflows.py        durações, flaky, linter
-    ├── notifiers.py ai_actions.py            notificações, lista fechada IA
-    ├── tui.py migrate_state.py               vista de consola, migração
-    ├── about.py  helpdocs.py                 painéis Acerca de e Ajuda
-    ├── quota.py  quotas.json                 plano, minutos e quotas
-    ├── modes.py  updatecheck.py              modos de trabalho, aviso de versão
-    ├── doctor.py  demo_mode.py               --doctor e --demo
-    ├── discovery.py  banner.py               descoberta, banner da edição
-    ├── tui_textual.py                        terminal interativo
-    ├── i18n.py locales/                      oito idiomas
-    ├── toolconfig.py workspace.py            definições e clones
-    ├── tests/                                testes sem rede
-    └── docs/                                 guias, esquemas, Grafana
+    ├── MONITOR_GITHUB_ACTIONS.*            os lançadores (duplo clique)
+    ├── MONITOR_LITE_GITHUB_ACTIONS.*       a edição lite
+    ├── BATCH_GITHUB_ACTIONS.*              o menu das compilações por lotes
+    ├── src/                                o pacote importável
+    ├── assets/                             exemplos, a página, idiomas
+    ├── actions_monitor.py read_report.py   pontos de entrada das ferramentas
+    ├── tests/                              testes sem rede
+    ├── docs/                               guias, esquemas, Grafana
+    └── tools/                              scripts de versão e migração
 ```
 
 ## Documentação

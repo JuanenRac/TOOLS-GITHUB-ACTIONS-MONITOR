@@ -11,17 +11,17 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import ai_alerts  # noqa: E402
-import alert_center  # noqa: E402
-import ci_red  # noqa: E402
-import i18n  # noqa: E402
-import report_history  # noqa: E402
-import settings_api  # noqa: E402
-import tzdisplay  # noqa: E402
+from github_actions_monitor.integrations import ai_alerts  # noqa: E402
+from github_actions_monitor.sentinels import alert_center  # noqa: E402
+from github_actions_monitor.data_pipeline import ci_red  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.data_pipeline import report_history  # noqa: E402
+from github_actions_monitor.app import settings_api  # noqa: E402
+from github_actions_monitor.util import tzdisplay  # noqa: E402
 
 LANGS = ("en", "es", "de", "fr", "it", "ja", "zh", "pt")
 MADRID, TOKYO = "Europe/Madrid", "Asia/Tokyo"
@@ -73,9 +73,9 @@ class Zones(unittest.TestCase):
         with mock.patch.dict(os.environ, {"MONITOR_TIMEZONE": MADRID}):
             self.assertEqual(tzdisplay.setting(), MADRID)
             self.assertEqual(tzdisplay.stamp("2026-11-12T10:43:07Z"), "2026-11-12 11:43:07 CET (10:43:07 UTC)")
-        with mock.patch.dict(os.environ, {"MONITOR_TIMEZONE": ""}), mock.patch("toolconfig.raw_config", return_value={"display": {"timezone": TOKYO}}):
+        with mock.patch.dict(os.environ, {"MONITOR_TIMEZONE": ""}), mock.patch("github_actions_monitor.app.toolconfig.raw_config", return_value={"display": {"timezone": TOKYO}}):
             self.assertEqual(tzdisplay.setting(), TOKYO)
-        with mock.patch.dict(os.environ, {"MONITOR_TIMEZONE": ""}), mock.patch("toolconfig.raw_config", return_value={}):
+        with mock.patch.dict(os.environ, {"MONITOR_TIMEZONE": ""}), mock.patch("github_actions_monitor.app.toolconfig.raw_config", return_value={}):
             self.assertEqual(tzdisplay.setting(), "local")
 
     def test_what_cannot_be_read_comes_back_unchanged(self):
@@ -125,7 +125,7 @@ class Texts(unittest.TestCase):
         self.assertIn("11:54:09 CET", out)
 
     def test_the_command_line_status_says_the_zone(self):
-        import monitor_cli as cli
+        from github_actions_monitor.cli import monitor_cli as cli
         replies = {"/api/health": {"version": "1", "account": "a"}, "/api/data": {"data": {"updated": "2026-11-12T10:43:07Z", "repos": [], "figures": {}, "rate": {}}}}
         with mock.patch.object(cli, "fetch", lambda base, path, *a, **k: replies[path]):
             payload, lines, _ = cli.cmd_status({"base": "x", "account": None, "timeout": 1, "token": ""})
@@ -134,7 +134,7 @@ class Texts(unittest.TestCase):
         self.assertIn("11:43:07 CET", "\n".join(lines))
 
     def test_a_notification_carries_the_local_time(self):
-        import notifiers
+        from github_actions_monitor.integrations import notifiers
         sent = []
         event = {"kind": "red_new", "text": "red since 2026-11-12T10:43:07Z", "url": "https://x"}
         with mock.patch.dict(os.environ, {"TOK": "1"}):
@@ -155,17 +155,17 @@ class Setting(unittest.TestCase):
             self.assertTrue(cat.get("cfg.f.display.timezone") and cat.get("cfg.h.display.timezone"), lang)
 
     def test_the_default_and_the_template_say_local(self):
-        import actions_monitor as am
+        from github_actions_monitor.app import actions_monitor as am
         self.assertEqual(am.DEFAULTS["display"], {"timezone": "local", "blink_red_tiles": True})
-        template = json.loads((HERE / "actions_monitor.example.json").read_text(encoding="utf-8"))
+        template = json.loads((HERE / "assets" / "examples" / "actions_monitor.example.json").read_text(encoding="utf-8"))
         self.assertEqual(template["display"]["timezone"], "local")
 
     def test_the_page_shows_the_zone_in_the_clocks_and_receives_the_setting(self):
-        page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         self.assertIn("timeZoneName", page)
         self.assertIn("I18N.tz", page)
         self.assertIn("timeStyle:\"long\"", page)       # the clock of the bar at the foot
-        import actions_monitor as am
+        from github_actions_monitor.app import actions_monitor as am
         with mock.patch.dict(os.environ, {"MONITOR_TIMEZONE": TOKYO}):
             self.assertIn('"tz": "Asia/Tokyo"', am.render_page())
 
@@ -174,7 +174,7 @@ class UntilItChanges(unittest.TestCase):
     """The button of the alerts tab that silences an alert until the item changes."""
 
     def test_the_page_offers_the_button_only_when_the_alert_has_a_version_to_compare(self):
-        page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         self.assertRegex(page, r'\(a\.details\|\|\{\}\)\.updated\?`<button type="button" data-mc="alert"')
         self.assertIn("until_change", page)
         self.assertIn('T(onChange(a)?"ui.al_muted_change":"ui.al_muted_until"', page)

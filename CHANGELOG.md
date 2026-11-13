@@ -8,6 +8,18 @@
 
 The history of GitHub Actions Monitor, from the first version to the latest. Each version groups its changes under Added, Changed, Fixed and Security.
 
+## [Unreleased]
+
+### Changed
+
+- **New folder layout, same behaviour**: the code is now an importable package in `src/github_actions_monitor/` (`app`, `accounts`, `sentinels`, `security`, `data_pipeline`, `integrations`, `cli`, `ui`, `i18n`, `util`); the page, the neutral examples with `quotas.json` and the eight language catalogues are in `assets/` (`static`, `examples`, `locales`); `make_release.py` is in `tools/`. The launchers stay in the product folder and start `python -m github_actions_monitor` (complete) or `python -m github_actions_monitor.lite` (lite): same address, same port. The data of the person who runs it (`actions_monitor.json`, caches, logs, `accounts/`, catalogues) still lives next to the launchers, never inside `src/`.
+
+- The commands of the guides (`python read_report.py`, `python actions_monitor.py --doctor`, `python monitor_cli.py status` ...) keep working: a small entry-point file with the same name stays in the product folder, so the hooks and MCP servers already registered by path keep working too. The release zip keeps its folder name and now carries `src/`, `assets/` and `tools/`.
+
+### Added
+
+- `tools/migrate_layout.py` for a folder that was a flat installation: a dry run by default; `--apply` copies your configuration to `layout_backup_<stamp>/config/` and MOVES (never deletes, never overwrites) the old modules, page, examples and `locales/` to `layout_backup_<stamp>/old_code/`. `--doctor` warns while such leftovers exist. `MIGRATING.md` describes it in the eight languages.
+
 ## [1.7.9]
 
 ### Fixed

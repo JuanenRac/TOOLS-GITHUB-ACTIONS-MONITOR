@@ -10,13 +10,13 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import actions_monitor as am  # noqa: E402
-import redrule  # noqa: E402
-import sentinel_local  # noqa: E402
+from github_actions_monitor.app import actions_monitor as am  # noqa: E402
+from github_actions_monitor.data_pipeline import redrule  # noqa: E402
+from github_actions_monitor.sentinels import sentinel_local  # noqa: E402
 
 NOW = datetime.now(timezone.utc)
 
@@ -60,7 +60,7 @@ class OneRuleForRed(unittest.TestCase):
         self.assertIsNone(redrule.guess_default_branch([]))
 
     def test_the_lite_edition_does_not_load_the_sentinel_for_it(self):
-        code = "import sys; sys.path.insert(0, %r); import actions_monitor, redrule; sys.exit(1 if 'sentinel_local' in sys.modules else 0)" % str(HERE)
+        code = "import sys; sys.path.insert(0, %r); from github_actions_monitor.app import actions_monitor; from github_actions_monitor.data_pipeline import redrule; sys.exit(1 if 'github_actions_monitor.sentinels.sentinel_local' in sys.modules else 0)" % str(HERE / "src")
         done = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
         self.assertEqual(done.returncode, 0, done.stderr)
 
@@ -108,11 +108,11 @@ class SameFigures(unittest.TestCase):
 
     def test_the_lite_edition_reads_as_deep_as_the_complete_one_and_hides_the_signing_tile(self):
         saved = (am.LITE["on"], am.CONFIG_FILE)
-        text = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        text = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         self.assertIn('config["mode"] = "full"', text)
         for key in ("runs_per_repo", "cold_runs_per_repo", "hot_hours", "stuck_minutes"):
             self.assertIn('"%s"' % key, text.split("LITE_INHERIT = ")[1].split("\n")[0])
-        page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         self.assertIn('$("kp-sign").hidden=true', page)
         self.assertIn("d.figures", page)
         self.assertEqual(saved, (am.LITE["on"], am.CONFIG_FILE))

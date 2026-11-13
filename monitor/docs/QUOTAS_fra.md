@@ -7,7 +7,7 @@
 
 # Quotas et offres
 
-Le moniteur est utilisé par tous les types de comptes, il n'en suppose donc aucun. Les chiffres ci-dessous sont dans `monitor/quotas.json` (modifiez-le pour suivre les changements de GitHub sans nouvelle version du moniteur) et ont été confrontés à la documentation publique de GitHub ; ils évoluent, prenez-les comme point de départ et consultez les pages citées dans le fichier. Choisissez votre offre dans **Réglages > Essentiel** (`account.plan`) ; tant qu'elle est *inconnue*, aucun chiffre de quota n'est affiché.
+Le moniteur est utilisé par tous les types de comptes, il n'en suppose donc aucun. Les chiffres ci-dessous sont dans `monitor/assets/examples/quotas.json` (une copie nommée `quotas.json` à côté des lanceurs a la priorité) (modifiez-le pour suivre les changements de GitHub sans nouvelle version du moniteur) et ont été confrontés à la documentation publique de GitHub ; ils évoluent, prenez-les comme point de départ et consultez les pages citées dans le fichier. Choisissez votre offre dans **Réglages > Essentiel** (`account.plan`) ; tant qu'elle est *inconnue*, aucun chiffre de quota n'est affiché.
 
 ## Le quota de l'API
 

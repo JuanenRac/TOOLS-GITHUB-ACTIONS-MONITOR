@@ -18,11 +18,11 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
 ROOT = HERE.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import monitor_cli as cli  # noqa: E402
+from github_actions_monitor.cli import monitor_cli as cli  # noqa: E402
 
 ANSWERS = {}
 
@@ -171,10 +171,10 @@ class Usage(unittest.TestCase):
                 cli.base_url(bad)
 
     def test_every_text_of_the_cli_exists_in_the_eight_languages_and_the_help_runs_in_each(self):
-        used = set(re.findall(r'i18n\.t\("(cli\.[a-z_]+)"', (HERE / "monitor_cli.py").read_text(encoding="utf-8")))
+        used = set(re.findall(r'i18n\.t\("(cli\.[a-z_]+)"', (HERE / "src" / "github_actions_monitor" / "cli" / "monitor_cli.py").read_text(encoding="utf-8")))
         used = {k for k in used if not k.endswith("_")} | {"cli.edition_complete", "cli.edition_lite", "cli.live_on", "cli.live_off"}
         for lang in ("en", "es", "de", "fr", "it", "ja", "zh", "pt"):
-            catalogue = json.loads((HERE / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
+            catalogue = json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
             for key in used:
                 self.assertTrue(catalogue.get(key), (lang, key))
             done = subprocess.run([sys.executable, "-I", str(HERE / "monitor_cli.py"), "--help", "--lang", lang], capture_output=True, text=True, encoding="utf-8", timeout=30)
@@ -182,14 +182,14 @@ class Usage(unittest.TestCase):
             self.assertIn("health", done.stdout)
 
     def test_it_never_writes_to_github_or_runs_a_program(self):
-        text = (HERE / "monitor_cli.py").read_text(encoding="utf-8")
+        text = (HERE / "src" / "github_actions_monitor" / "cli" / "monitor_cli.py").read_text(encoding="utf-8")
         for forbidden in ("subprocess", "os.system", '"POST"', "method=", "shell=True"):
             self.assertNotIn(forbidden, text, forbidden)
 
 
 class Page(unittest.TestCase):
     def setUp(self):
-        self.page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        self.page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
 
     def test_the_bar_at_the_foot_replaces_the_authorship_line_and_takes_the_six_banners(self):
         for needle in ('<footer id="statusbar"', 'id="sb-lamp"', 'id="sb-open"', 'id="notes-dlg"', "function readNotices", "NOTE_SRC", 'id="sb-clock"', 'id="sb-addr"', 'id="sb-conn-lamp"', "/api/statusbar"):
@@ -223,12 +223,12 @@ class Page(unittest.TestCase):
         self.assertIn("aria-sort", self.page)
 
     def test_the_server_sends_what_the_new_columns_need(self):
-        import actions_monitor as am
+        from github_actions_monitor.app import actions_monitor as am
         self.assertTrue(callable(am.repo_meta))
         meta = am.repo_meta(["x", "y"])
         self.assertEqual(set(meta), {"x", "y"})
         self.assertEqual(set(meta["x"]), {"private", "branch", "pushed", "prs"})
-        text = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        text = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         self.assertIn('"number": run.get("run_number")', text)
         self.assertIn('"queued":', text)
         status = am.statusbar_payload(8765)
@@ -241,7 +241,7 @@ class Page(unittest.TestCase):
 @unittest.skipUnless(shutil.which("node"), "Node is not installed: the sorting logic is checked only where it is")
 class SortingRunsForReal(unittest.TestCase):
     def evaluate(self, body):
-        page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         start = page.index("function jget(k,def)")
         end = page.index("const dash_=")
         script = ("const mem={};const store={get:k=>mem[k]??null,set:(k,v)=>{mem[k]=v}};const LOC=()=>'en-GB';const LANG='en';const T=k=>k;const esc=s=>String(s);\n"

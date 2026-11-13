@@ -18,17 +18,17 @@ from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
 ROOT = HERE.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import actions_monitor as am  # noqa: E402
-import alert_center  # noqa: E402
-import doctor  # noqa: E402
-import i18n  # noqa: E402
-import localguard  # noqa: E402
-import monitor_cli as cli  # noqa: E402
-import webhook  # noqa: E402
+from github_actions_monitor.app import actions_monitor as am  # noqa: E402
+from github_actions_monitor.sentinels import alert_center  # noqa: E402
+from github_actions_monitor.cli import doctor  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.security import localguard  # noqa: E402
+from github_actions_monitor.cli import monitor_cli as cli  # noqa: E402
+from github_actions_monitor.security import webhook  # noqa: E402
 from test_164 import LiveServer  # noqa: E402
 
 LANGS = ("en", "es", "de", "fr", "it", "ja", "zh", "pt")
@@ -137,7 +137,7 @@ class PlainHttpWarning(unittest.TestCase):
 
 class EditionName(unittest.TestCase):
     def test_the_api_says_complete_and_never_full(self):
-        import about
+        from github_actions_monitor.ui import about
         self.assertEqual(about.info(False, {}, {}, {}, "en")["edition"], "complete")
         self.assertEqual(about.info(True, {}, {}, {}, "en")["edition"], "lite")
         self.assertEqual(doctor.as_json([], "complete")["edition"], "complete")
@@ -146,7 +146,7 @@ class EditionName(unittest.TestCase):
         self.assertEqual(cli.PORTS, {"complete": 8765, "lite": 8766})
 
     def test_the_clients_understand_both_names(self):
-        html = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        html = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         self.assertIn('T("ui.edition_"+(a.edition==="lite"?"lite":"complete"))', html)
         for lang in LANGS:
             self.assertNotEqual(i18n.tl(lang, "ui.edition_complete"), "ui.edition_complete", lang)
@@ -160,7 +160,7 @@ class EditionName(unittest.TestCase):
 
 class SilencesAreLocal(unittest.TestCase):
     def test_silencing_needs_the_computer_of_the_monitor(self):
-        text = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        text = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         route = text.split('if path in ("/api/gh-action/plan"', 1)[1].split(")", 1)[0]
         self.assertIn('"/api/alerts/mute"', route)
         self.assertIn('"/api/alerts/unmute"', route)
@@ -191,7 +191,7 @@ class StatusBarAddress(unittest.TestCase):
         self.assertIn("lan_address", am.statusbar_payload(8765, False))            # without the network mode nobody but this computer can ask
 
     def test_the_bar_still_draws_without_the_address(self):
-        html = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        html = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         self.assertIn('SBINFO.bind==="0.0.0.0"&&SBINFO.lan_address?SBINFO.lan_address:"127.0.0.1"', html)
 
 
@@ -217,14 +217,14 @@ class QueryAccess(unittest.TestCase):
             self.assertEqual(status, 200)
 
     def test_the_redirect_marks_the_address_as_deprecated(self):
-        text = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        text = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         self.assertIn('self.send_header("Deprecation", "true")', text)
         self.assertTrue(am.DEFAULTS["listen"]["query_access"])
 
     def test_the_setting_is_in_the_schema_the_example_and_the_eight_languages(self):
-        import settings_api
+        from github_actions_monitor.app import settings_api
         self.assertIn("listen.query_access", settings_api.META)
-        self.assertIs(json.loads((HERE / "actions_monitor.example.json").read_text(encoding="utf-8"))["listen"]["query_access"], True)
+        self.assertIs(json.loads((HERE / "assets" / "examples" / "actions_monitor.example.json").read_text(encoding="utf-8"))["listen"]["query_access"], True)
         for lang in LANGS:
             for key in ("cfg.f.listen.query_access", "cfg.h.listen.query_access", "mon.network_token_deprecated", "mon.network_token_post"):
                 self.assertNotEqual(i18n.tl(lang, key), key, (lang, key))
@@ -262,12 +262,12 @@ class SnoozeUntilChange(unittest.TestCase):
         self.assertNotIn("until_change", alert_center.mute("alert", "x", 2, now=1_900_000_000))
 
     def test_the_collab_alerts_carry_the_updated_at(self):
-        import sentinel_collab
+        from github_actions_monitor.sentinels import sentinel_collab
         issue = {"number": 7, "title": "t", "url": "u", "created": "2020-01-01T00:00:00Z", "updated": "2020-01-02T00:00:00Z", "labels": [], "bot": False, "assoc": "NONE", "comments": 0}
         found = sentinel_collab.evaluate("r", [issue], [], sentinel_collab.DEFAULTS["rules"], 1_900_000_000)
         self.assertEqual([a["code"] for a in found.values()], ["collab.issue.stale"])
         self.assertEqual([a["updated"] for a in found.values()], ["2020-01-02T00:00:00Z"])
-        self.assertIn('"updated": a.get("updated")', (HERE / "sentinel_collab.py").read_text(encoding="utf-8"))
+        self.assertIn('"updated": a.get("updated")', (HERE / "src" / "github_actions_monitor" / "sentinels" / "sentinel_collab.py").read_text(encoding="utf-8"))
 
 
 class SharedCredential(unittest.TestCase):
@@ -341,7 +341,7 @@ class WebhookHygiene(unittest.TestCase):
         saved = list(am.LIVE_EVENTS)
         self.addCleanup(lambda: am.LIVE_EVENTS.__setitem__(slice(None), saved))
         am.LIVE_EVENTS.clear()
-        with mock.patch("notifiers.notify", side_effect=lambda cfg, event: told.append(event)):
+        with mock.patch("github_actions_monitor.integrations.notifiers.notify", side_effect=lambda cfg, event: told.append(event)):
             am.apply_live_event(record, {})
         self.assertEqual(len(am.LIVE_EVENTS), 1)
         self.assertTrue(set(am.LIVE_EVENTS[0]) <= set(webhook.LIVE_FIELDS) | {"at"})
@@ -354,7 +354,7 @@ class WebhookHygiene(unittest.TestCase):
         saved = list(am.LIVE_EVENTS)
         self.addCleanup(lambda: am.LIVE_EVENTS.__setitem__(slice(None), saved))
         am.LIVE_EVENTS.clear()
-        with mock.patch("notifiers.notify"):
+        with mock.patch("github_actions_monitor.integrations.notifiers.notify"):
             am.apply_live_event(webhook.parse_event("workflow_run", self.payload()), {})
         with LiveServer({}) as server:
             status, answer = server.call("/api/live-events")
@@ -384,7 +384,7 @@ class IssueNeedsItsOwnWorkflow(unittest.TestCase):
     ISSUE = [{"repo": "R", "number": 9, "title": "Firmware build failed", "url": "u", "created": "2030-01-01T10:00:00Z"}]
 
     def suggest(self, runs):
-        import surface
+        from github_actions_monitor.app import surface
         return surface.issue_close_suggestions(self.ISSUE, {"R": runs}, set(), {}, 1_900_000_000)
 
     def test_a_green_run_of_another_workflow_never_proposes_closing(self):
@@ -404,7 +404,7 @@ class IssueNeedsItsOwnWorkflow(unittest.TestCase):
         self.assertEqual(self.suggest([_run("R", "Firmware", "success", "2029-12-30T10:00:00Z", "firmware-build.yml", 2)]), [])
 
     def test_an_issue_that_names_no_workflow_proposes_nothing(self):
-        import surface
+        from github_actions_monitor.app import surface
         issue = [dict(self.ISSUE[0], title="Something broke")]
         runs = {"R": [_run("R", "Build", "success", "2030-01-02T10:00:00Z", "build.yml", 2)]}
         self.assertEqual(surface.issue_close_suggestions(issue, runs, set(), {}, 1_900_000_000), [])
@@ -414,7 +414,7 @@ class IssueNeedsItsOwnWorkflow(unittest.TestCase):
 
 class TagAgainstManifest(unittest.TestCase):
     def rows(self, tag, local="0.2.1", remote=None, repo_tag=None):
-        import surface
+        from github_actions_monitor.app import surface
         from test_surface import SurfaceInTheSnapshot
         data = SurfaceInTheSnapshot().inp()
         data["repo_info"]["R"]["release"]["tagName"] = tag
@@ -431,7 +431,7 @@ class TagAgainstManifest(unittest.TestCase):
         self.assertTrue(self.rows("v0.2.2", remote="0.2.2", repo_tag="v0.2.1"))                 # a reading made for an older release is not used
 
     def test_a_tag_that_is_not_a_version_says_nothing(self):
-        import surface
+        from github_actions_monitor.app import surface
         self.assertEqual(self.rows("meshes-1", local="0.2.1"), [])
         for good in ("v1.2", "0.8.0.1", "v2.0.0-rc1"):
             self.assertTrue(surface.is_version_tag(good), good)
@@ -440,7 +440,7 @@ class TagAgainstManifest(unittest.TestCase):
 
     def test_the_branch_manifest_is_read_once_per_release_and_only_when_the_tag_is_ahead(self):
         import base64
-        import surface
+        from github_actions_monitor.app import surface
         calls = []
 
         def gh(*args, **kw):
@@ -463,11 +463,11 @@ class NextStepOfACandidate(unittest.TestCase):
                                        "started": "2030-01-01T10:00:00Z", "sha": "abc1234"}]}}
 
     def rows(self, eco_of=lambda repo: "armor", **extra):
-        import readiness
+        from github_actions_monitor.sentinels import readiness
         return readiness.release_rows({**self.BASE, "eco_of": eco_of, **extra})
 
     def test_bump_build_and_sign_sign_and_publish_are_told_apart(self):
-        import readiness
+        from github_actions_monitor.sentinels import readiness
         state = lambda st, **kw: [{"repo": "ARMOR-NODE-X", "workflow": "firmware-build.yml", "state": st, **kw}]  # noqa: E731
         self.assertEqual(self.rows(local_versions={"ARMOR-NODE-X": "0.1.0"})[0]["next"], "bump")
         self.assertEqual(self.rows(states=state("published"))[0]["next"], "build_sign")

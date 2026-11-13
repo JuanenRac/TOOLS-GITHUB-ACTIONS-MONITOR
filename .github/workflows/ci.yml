@@ -68,5 +68,5 @@ jobs:
         run: docker build -f deploy/Dockerfile -t github-actions-monitor .
       - name: The monitor and the GitHub CLI are in the image
         run: |
-          docker run --rm github-actions-monitor python -c "import actions_monitor, tool_version; print(tool_version.TOOL_VERSION)"
+          docker run --rm github-actions-monitor python -c "from github_actions_monitor.app import actions_monitor; from github_actions_monitor import tool_version; print(tool_version.TOOL_VERSION)"
           docker run --rm github-actions-monitor gh --version

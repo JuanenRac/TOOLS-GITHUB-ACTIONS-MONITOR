@@ -14,12 +14,12 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import netguard  # noqa: E402
-import notifiers  # noqa: E402
+from github_actions_monitor.security import netguard  # noqa: E402
+from github_actions_monitor.integrations import notifiers  # noqa: E402
 
 HITS = []
 

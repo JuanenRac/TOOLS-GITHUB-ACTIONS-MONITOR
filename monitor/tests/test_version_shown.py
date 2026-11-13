@@ -6,12 +6,12 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import actions_monitor  # noqa: E402
-from tool_version import TOOL_VERSION  # noqa: E402
+from github_actions_monitor.app import actions_monitor  # noqa: E402
+from github_actions_monitor.tool_version import TOOL_VERSION  # noqa: E402
 
 
 class VersionShown(unittest.TestCase):
@@ -22,9 +22,9 @@ class VersionShown(unittest.TestCase):
 
     def test_the_start_up_output_names_the_version_once(self):
         """One banner line carries the name and the version; the line of authorship and the licence repeats neither (every language, both editions)."""
-        import banner
-        import i18n
-        text = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        from github_actions_monitor.util import banner
+        from github_actions_monitor import i18n
+        text = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         self.assertNotIn('i18n.t("mon.version"', text)
         for lang in i18n.LANGS:
             i18n.set_language(lang)

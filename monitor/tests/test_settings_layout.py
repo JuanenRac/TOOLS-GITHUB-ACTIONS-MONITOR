@@ -10,10 +10,10 @@ from pathlib import Path
 import _testenv  # noqa: F401
 
 HERE = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(HERE))
-import i18n  # noqa: E402
-import settings_api as sa  # noqa: E402
-import surface  # noqa: E402
+sys.path.insert(0, str(HERE / "src"))
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.app import settings_api as sa  # noqa: E402
+from github_actions_monitor.app import surface  # noqa: E402
 
 FORGOTTEN = (
     "sentinel.hot_hours", "sentinel.minutes_budget", "sentinel.minutes_budget_period", "sentinel.a2_full_sample_unknown", "sentinel.skip_candidate_prefixes",
@@ -85,7 +85,7 @@ class Layout(unittest.TestCase):
                 self.assertLessEqual(bounds[0], bounds[1], key)
 
     def test_the_template_value_of_every_setting_is_accepted(self):
-        template = json.loads((HERE / "actions_monitor.example.json").read_text(encoding="utf-8"))
+        template = json.loads((HERE / "assets" / "examples" / "actions_monitor.example.json").read_text(encoding="utf-8"))
         for key, row in sa.FIELDS.items():
             value = sa._get(template, key, "\0missing")
             if value == "\0missing" or row[2] == "status":
@@ -141,7 +141,7 @@ class Guide(unittest.TestCase):
 
 
 class Page(unittest.TestCase):
-    page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+    page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
 
     def test_the_subtabs_are_accessible(self):
         for needle in ('id="cfg-tabs" role="tablist"', 'id="cfg-search"', "role=tabpanel", "aria-controls", "aria-selected", "ArrowRight", "ArrowLeft", '"Home"', '"End"',

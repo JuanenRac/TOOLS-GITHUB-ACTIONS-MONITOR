@@ -2,12 +2,12 @@
 
 ## 技术栈
 - **语言**:Python 3.11 或更高;核心不需要任何包(终端视图 `tui.py` 使用可选的 Rich,缺少时测试会跳过依赖它的部分)。
-- **界面**:在 `127.0.0.1` 提供的本地网页(`monitor/actions_monitor.html`),外加命令行工具。
+- **界面**:在 `127.0.0.1` 提供的本地网页(`monitor/assets/static/actions_monitor.html`),外加命令行工具。
 - **数据源**:官方 GitHub 命令行客户端 `gh`(默认只读调用)。
 
 ## 准则
 1. **先写测试**:提交 pull request 前 `python -m unittest discover -s monitor/tests` 必须通过。离线运行:测试从不调用 GitHub。要手动试用真实服务,请使用 `python tools/manual_check_live.py`。
-2. **八种语言**:用户能读到的每段文字都在 `monitor/locales/<lang>.json` 中(en、es、de、fr、it、ja、zh、pt=欧洲葡萄牙语)。新键要加入全部八个文件,测试会检查它们键相同。
+2. **八种语言**:用户能读到的每段文字都在 `monitor/assets/locales/<lang>.json` 中(en、es、de、fr、it、ja、zh、pt=欧洲葡萄牙语)。新键要加入全部八个文件,测试会检查它们键相同。
 3. **不留秘密**:默认监视器不保存令牌(向 `gh` 索取);唯一的可选令牌只存放在系统安全存储(`secretstore.py`)中。不要添加在其他地方读取、打印、记录或写入凭据的代码,也不要提交真实的 `actions_monitor.json`。
 4. **默认安全**:任何写入 GitHub、运行程序、开放网络端口或向外发送数据的功能,默认关闭,在设置 > 高级中有自己的开关,要求自己的确认,并且除非开启网络模式否则只监听 `127.0.0.1`。此类功能须附带测试,证明没有开关、没有确认、没有令牌时会拒绝,且不会向日志泄露任何内容。
 5. **小步前进**:每个 pull request 一项更改,并在 `CHANGELOG.md` 加上对应的一行。

@@ -11,9 +11,9 @@ import urllib.request
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-import actions_monitor as am  # noqa: E402
-import report_history as ph  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+from github_actions_monitor.app import actions_monitor as am  # noqa: E402
+from github_actions_monitor.data_pipeline import report_history as ph  # noqa: E402
 
 
 def snap(red=(), pend=(), generated="2026-11-05T10:00:00Z", **extra):

@@ -10,13 +10,13 @@ from pathlib import Path
 
 import _testenv  # noqa: F401
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-import actions_monitor  # noqa: E402
-import i18n
-from tool_version import TOOL_VERSION  # noqa: E402
-import readiness  # noqa: E402
-import sentinel_local as sl  # noqa: E402
-import toolconfig  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+from github_actions_monitor.app import actions_monitor  # noqa: E402
+from github_actions_monitor import i18n
+from github_actions_monitor.tool_version import TOOL_VERSION  # noqa: E402
+from github_actions_monitor.sentinels import readiness  # noqa: E402
+from github_actions_monitor.sentinels import sentinel_local as sl  # noqa: E402
+from github_actions_monitor.app import toolconfig  # noqa: E402
 
 HERE = Path(__file__).resolve().parents[1]
 NOW = datetime(2026, 11, 4, 12, 0, 0, tzinfo=timezone.utc)
@@ -200,12 +200,12 @@ class PageAndCatalogues(unittest.TestCase):
 
     def test_every_text_exists_in_the_eight_languages(self):
         for lang in ("en", "es", "de", "fr", "it", "ja", "zh", "pt"):
-            data = json.loads((HERE / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
+            data = json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
             for key in self.KEYS:
                 self.assertTrue(data.get(key), f"{lang}:{key}")
 
     def test_every_dynamic_key_the_code_builds_is_in_the_catalogue(self):
-        en = json.loads((HERE / "locales" / "en.json").read_text(encoding="utf-8"))
+        en = json.loads((HERE / "assets" / "locales" / "en.json").read_text(encoding="utf-8"))
         for ci in ("green", "red", "unknown", "green_partial"):
             self.assertIn("rd.v." + ci, en)
         for nxt in set(readiness.NEXT_FOR_CI.values()) | {"bump", "build", "sign", "publish", "cut"}:
@@ -217,7 +217,7 @@ class PageAndCatalogues(unittest.TestCase):
             self.assertIn(needle, page)
         self.assertIn('"version": "%s"' % TOOL_VERSION, page)
         self.assertEqual(i18n.t("mon.version", version=TOOL_VERSION), "GitHub Actions v" + TOOL_VERSION)
-        html = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        html = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         self.assertIn('<h1>GitHub Actions <small class="mut" id="ver">', html)
 
     def test_the_section_titles_are_translated(self):

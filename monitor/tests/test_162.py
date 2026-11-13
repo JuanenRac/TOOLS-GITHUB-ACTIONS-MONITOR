@@ -10,13 +10,13 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import actions_monitor as am  # noqa: E402
-import etagcache  # noqa: E402
-import webhook  # noqa: E402
+from github_actions_monitor.app import actions_monitor as am  # noqa: E402
+from github_actions_monitor.data_pipeline import etagcache  # noqa: E402
+from github_actions_monitor.security import webhook  # noqa: E402
 from test_release_160 import WebhookEvents  # noqa: E402
 
 
@@ -61,15 +61,15 @@ class DamagedCache(unittest.TestCase):
         self.assertEqual(cache.entries["e"]["etag"], '"b"')
 
     def test_the_counter_is_in_the_metrics(self):
-        import outputs
+        from github_actions_monitor.integrations import outputs
         text = outputs.metrics_text({}, {}, extra={"etag": {"saved": 1, "entries": 1, "invalid": 2}})
         self.assertIn("ghamon_etag_invalid_total 2", text)
 
 
 class CoreWithoutRich(unittest.TestCase):
     def test_importing_the_monitor_and_the_sentinel_never_loads_rich_or_the_terminal_view(self):
-        code = ("import sys; sys.path.insert(0, %r); import actions_monitor, sentinel_local, outputs, settings_api, notifiers, analytics, lint_workflows; "
-                "bad = [m for m in ('rich', 'textual', 'tui') if m in sys.modules]; print(bad); sys.exit(1 if bad else 0)" % str(HERE))
+        code = ("import sys; sys.path.insert(0, %r); from github_actions_monitor.app import actions_monitor; from github_actions_monitor.sentinels import sentinel_local; from github_actions_monitor.integrations import outputs; from github_actions_monitor.app import settings_api; from github_actions_monitor.integrations import notifiers; from github_actions_monitor.data_pipeline import analytics; from github_actions_monitor.cli import lint_workflows; "
+                "bad = [m for m in ('rich', 'textual', 'tui') if m in sys.modules]; print(bad); sys.exit(1 if bad else 0)" % str(HERE / "src"))
         done = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, encoding="utf-8", errors="replace")
         self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
 
@@ -79,7 +79,7 @@ class CoreWithoutRich(unittest.TestCase):
 
     def test_the_terminal_view_follows_the_lite_port(self):
         import os
-        import tui
+        from github_actions_monitor.ui import tui
         with mock.patch.dict(os.environ, {"MONITOR_MODE": ""}):
             self.assertEqual((tui.default_port(True), tui.default_port(False)), (8766, 8765))
         with mock.patch.dict(os.environ, {"MONITOR_MODE": "lite"}):
@@ -88,10 +88,10 @@ class CoreWithoutRich(unittest.TestCase):
 
 class LiteStaysOut(unittest.TestCase):
     def test_lite_writes_neither_ci_red_nor_the_signing_queue_and_uses_other_files(self):
-        text = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        text = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         self.assertRegex(text, r"if not LITE\[\"on\"\]:\n\s+start_sentinel\(config\)")          # ci_red.json and the queue are written by the sentinel only
         saved = (am.LITE["on"], am.CONFIG_FILE, am.LOG_FILE)
-        import etagcache as ec
+        from github_actions_monitor.data_pipeline import etagcache as ec
         saved_cache = ec.CACHE_FILE
         try:
             am.enable_lite()

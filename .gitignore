@@ -36,3 +36,6 @@ monitor/*.lock
 monitor/degraded.json
 monitor/degraded_lite.json
 monitor/update_check*.json
+
+# Backups made by tools/migrate_layout.py
+monitor/layout_backup_*/

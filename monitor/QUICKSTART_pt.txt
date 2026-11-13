@@ -17,7 +17,7 @@ INÍCIO RÁPIDO - Monitor do GitHub Actions + Sentinela
 5. Primeira utilização:
    - A página mostra os SEUS repositórios (a conta do GitHub com que iniciou sessão). Para vigiar outra conta defina "github_owner" em actions_monitor.json.
    - Escolha o idioma no separador Definições da página (ícone da roda dentada; arranca em inglês e a escolha fica guardada). As outras definições também estão lá.
-   - Para agrupar repositórios por prefixo do nome ou usar as ferramentas de lote, copie ecosystems.example.json / targets.example.json e aponte
+   - Para agrupar repositórios por prefixo do nome ou usar as ferramentas de lote, copie assets/examples/ecosystems.example.json / assets/examples/targets.example.json e aponte
      actions_monitor.json para eles ("ecosystems_file", "targets_file"). Os detalhes estão em README_pt.txt.
    - Sem clones locais? Funciona na mesma, em modo reduzido (só o que a API do GitHub fornece), e a página diz isso.
 6. O que NÃO faz: não assina e não publica nada por si só, por si só não escreve nada no GitHub (só `dispatch --go`, `dispatch --real` e `finalize --execute`, que executa você, o fazem), só escuta em 127.0.0.1 e não guarda nenhum token. Assinar e publicar são

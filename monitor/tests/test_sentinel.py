@@ -8,9 +8,9 @@ import _testenv  # noqa: F401
 from datetime import datetime, timezone
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-import sentinel_ai as ai  # noqa: E402
-import sentinel_local as sl  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+from github_actions_monitor.sentinels import sentinel_ai as ai  # noqa: E402
+from github_actions_monitor.sentinels import sentinel_local as sl  # noqa: E402
 
 NOW = datetime(2026, 11, 4, 12, 0, 0, tzinfo=timezone.utc)
 

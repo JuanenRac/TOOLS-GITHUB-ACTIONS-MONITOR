@@ -15,12 +15,12 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import gha_dispatch_all as gd  # noqa: E402
-import toolconfig  # noqa: E402
+from github_actions_monitor.cli import gha_dispatch_all as gd  # noqa: E402
+from github_actions_monitor.app import toolconfig  # noqa: E402
 
 SHA = "a" * 40
 

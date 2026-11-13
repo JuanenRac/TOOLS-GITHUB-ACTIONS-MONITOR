@@ -8,13 +8,13 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import ai_alerts  # noqa: E402
-import i18n  # noqa: E402
-import sentinel_panels  # noqa: E402
+from github_actions_monitor.integrations import ai_alerts  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.sentinels import sentinel_panels  # noqa: E402
 
 OWNER = "demo-owner"
 
@@ -108,7 +108,7 @@ class PanelsAsData(unittest.TestCase):
         self.assertIn("demo-owner: CodeQL 0 · Dependabot 1", text)
 
     def test_the_mcp_tool_and_the_endpoint_say_what_the_page_says(self):
-        import mcp_server
+        from github_actions_monitor.integrations import mcp_server
         self.assertIn("sentinel_panels", [t["name"] for t in mcp_server.TOOLS])
         answer = {"data": {"panels": self.panels, "act": 2, "watch": 3}, "error": None}
         seen = []
@@ -117,7 +117,7 @@ class PanelsAsData(unittest.TestCase):
         data = json.loads(text)["data"]
         self.assertEqual([p["id"] for p in data["panels"]], list(sentinel_panels.ORDER))
         self.assertTrue([r for p in data["panels"] if p["id"] == "a3" for r in p["rows"] if r["repo"] == "demo-owner"])
-        source = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        source = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         self.assertIn('path == "/api/sentinel/panels"', source)
         self.assertIn("panels=panels", source)      # the feed takes the same panels
 

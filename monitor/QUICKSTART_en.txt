@@ -17,7 +17,7 @@ QUICKSTART - GitHub Actions monitor + Sentinel
 5. First use:
    - The page shows YOUR repositories (the GitHub account you logged in with). To watch another account set "github_owner" in actions_monitor.json.
    - Pick your language in the Settings tab of the page (gear icon; it starts in English and the choice is remembered). The other settings are there too.
-   - To group repositories by name prefix or to use the batch tools, copy ecosystems.example.json / targets.example.json and point actions_monitor.json at them
+   - To group repositories by name prefix or to use the batch tools, copy assets/examples/ecosystems.example.json / assets/examples/targets.example.json and point actions_monitor.json at them
      ("ecosystems_file", "targets_file"). The details are in README_en.txt.
    - No local clones? It still works, in a reduced mode (only what the GitHub API gives), and the page tells you so.
 6. What it does NOT do: it does not sign and does not publish anything by itself, it writes nothing to GitHub on its own (only `dispatch --go`, `dispatch --real` and `finalize --execute`, which you run, do), it listens only on 127.0.0.1 and it keeps no

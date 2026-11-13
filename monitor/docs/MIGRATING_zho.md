@@ -89,3 +89,28 @@
 - **多个账户** 是可选的。要使用它们，请运行 `python actions_monitor.py --migrate-accounts`（试运行），然后加上 `--apply` 把你的文件复制到 `accounts/default/`；原文件会一直保留，直到你自己删除。其他账户以 `accounts/<id>/actions_monitor.json` 的形式添加。参见 `ACCOUNTS.md`。
 - 存在 `accounts/` 文件夹时，`python actions_monitor.py` 会启动一个监督程序，为每个账户运行一个监视器；`--account <id>` 只运行其中一个。精简版没有这些内容。
 - 新增：页面地址中的 `?view=` 和 `?chrome=0`、`GET /api/accounts`、`GET /api/live-status`，以及供所有账户使用的一个 `POST /api/webhook`。
+
+# 从 1.7.x 到新的文件夹布局
+
+代码现在位于 `src/github_actions_monitor/`,网页、示例文件和语言文件位于 `assets/`,发布与迁移脚本位于 `tools/`。你日常使用的东西都没有变:启动脚本(`MONITOR_GITHUB_ACTIONS`、`MONITOR_LITE_GITHUB_ACTIONS`、`BATCH_GITHUB_ACTIONS`)仍在原处,打开相同的地址和端口;本指南中的命令(`python read_report.py`、`python actions_monitor.py --doctor`、`python monitor_cli.py status` 等)仍然有效,因为产品文件夹里保留了同名的小型入口文件。启动脚本在把 `src/` 加入路径后运行 `python -m github_actions_monitor`(完整版)和 `python -m github_actions_monitor.lite`(lite 版)。
+
+你的数据不会移动:`actions_monitor.json`、缓存、日志、`config_backups/`、`accounts/` 以及你自己的目录文件都留在启动脚本旁边的产品文件夹里,绝不会进入 `src/`。随程序发布的中性示例和 `quotas.json` 现在位于 `assets/examples/`;你放在启动脚本旁边的自己的 `quotas.json` 仍然优先。
+
+## 步骤
+
+1. 停止监视器,把新版本解压到旧文件夹之上(保留你的 `actions_monitor.json`)。
+2. 照常启动。即使不做别的也能正常工作。
+3. 要清理旧的平铺布局留下的文件:先运行 `python tools/migrate_layout.py`(试运行),再运行 `python tools/migrate_layout.py --apply`。它会把你的配置文件复制到 `layout_backup_<时间戳>/config/`,并把旧模块、旧网页、旧示例和旧的 `locales/` 文件夹移到 `layout_backup_<时间戳>/old_code/`。不会删除任何内容,也不会覆盖已有文件,你的数据不受影响。只要还有旧文件,`python actions_monitor.py --doctor` 就会提醒。
+4. 你自己的脚本如果按旧的平铺名称导入模块(`import read_report`),现在应在把 `src/` 加入路径后导入 `github_actions_monitor.<包>.<模块>`。
+
+| 包 | 内容 |
+|---|---|
+| `app` | 服务器、设置、工作模式、共享配置 |
+| `accounts` | 多账户:注册表、监督器、子进程 |
+| `sentinels` | 哨兵、警报中心、面板 |
+| `security` | 本地守卫、密钥、webhook、确认、网络守卫、签名、私有文件 |
+| `data_pipeline` | 事件、分析、条件读取、发现、配额、main 上变红的规则 |
+| `integrations` | GitHub、通知、OpenTelemetry、镜像、runner、MCP、AI 订阅源与钩子 |
+| `cli` | 命令行工具 |
+| `ui` | 关于、帮助文档、终端视图 |
+| `i18n`、`util` | 八种语言;共享的小工具 |
