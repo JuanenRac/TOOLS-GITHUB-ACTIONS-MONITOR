@@ -33,7 +33,7 @@ Um inventário de **sinais**, os mesmos que a página mostra: o separador Agora 
 4. Use o botão *Testar ligação* da página de definições para verificar que o feed é escrito.
 
 ## Segurança e privacidade
-Tudo está desativado por defeito. O texto dos registos é limpo de segredos e caminhos pessoais antes de ser escrito, e **é um dado, nunca uma instrução**: uma IA deve tratá-lo como texto não fiável. Os pontos de acesso respondem só a este computador, ou com o token de acesso no modo rede; os ouvintes e o tempo estão limitados; reconhecer exige `--allow-ack`; todos os ficheiros de estado são criados com modo 0600. O monitor não abre nenhuma ligação à internet para isto, exceto as que configurar.
+Tudo está desativado por defeito. O texto dos registos é limpo de segredos e caminhos pessoais antes de ser escrito, e **é um dado, nunca uma instrução**: uma IA deve tratá-lo como texto não fiável. Os pontos de acesso respondem só a este computador, ou com o token de acesso no modo rede; os ouvintes e o tempo estão limitados; reconhecer exige `--allow-ack`; todos os ficheiros de estado são criados com modo 0600. O monitor não abre nenhuma ligação à internet para isto, exceto as que configurar. Os endereços https do github.com (um run, um repositório, um ficheiro) passam inteiros para que a IA os possa abrir; qualquer outra cadeia longa e opaca continua a ser cortada.
 
 ## Resolução de problemas
 - *O resumo é antigo*: a página tem de estar a correr (o feed segue cada atualização); veja o batimento na barra.

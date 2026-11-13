@@ -7,6 +7,12 @@
 
 Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il proprio semver. La fonte è il CHANGELOG.md in inglese; questo file ha le stesse versioni e sezioni.
 
+## [Unreleased]
+
+### Corretto
+
+- I link dei run ricevuti dagli strumenti di IA (flusso, riepilogo, stato, hook) venivano tagliati in "https://github.[blob]": il redattore scambiava l'indirizzo per una stringa opaca. Gli indirizzi https completi di github.com ora passano intatti; token, chiavi, e-mail, IP e percorsi personali restano ripuliti, anche dentro un link.
+
 ## [1.7.8]
 
 ### Aggiunto

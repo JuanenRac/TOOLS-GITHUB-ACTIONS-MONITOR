@@ -7,6 +7,12 @@
 
 Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com o seu próprio semver. A fonte é o CHANGELOG.md em inglês; este ficheiro tem as mesmas versões e secções.
 
+## [Unreleased]
+
+### Corrigido
+
+- Os links dos runs recebidos pelas ferramentas de IA (fluxo, resumo, estado, hook) eram cortados para "https://github.[blob]": o redator tomava o endereço por uma cadeia opaca. Os endereços https completos do github.com passam agora intactos; tokens, chaves, e-mails, IP e caminhos pessoais continuam limpos, também dentro de um link.
+
 ## [1.7.8]
 
 ### Adicionado

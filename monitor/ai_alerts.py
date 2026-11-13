@@ -67,15 +67,31 @@ _SECRETS = [
 ]
 
 
+# The address of a page of GitHub (a repository, a run, a file): public, it carries no secret and the AI needs it whole. Without a query or a fragment, which is where a token could hide.
+_GITHUB_URL = re.compile(r"https://(?:api\.)?github\.com/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._~%@:+=,/-]*)?")
+
+
 def redact(text, limit=None):
-    """The text without tokens, keys, e-mail addresses, IP addresses, the home folder of a person and long opaque strings."""
+    """The text without tokens, keys, e-mail addresses, IP addresses, the home folder of a person and long opaque strings. Whole https addresses of github.com pass untouched (a run link is
+    longer than the 40 characters of an opaque string and used to be cut to [blob])."""
     out = str(text or "")
     home = str(Path.home())
     for variant in {home, home.replace("\\", "/")}:
         if len(variant) > 3:
             out = out.replace(variant, "~")
+    kept = []
+
+    def keep(match):
+        url = match.group(0)
+        if any(pattern.search(url) for pattern, replacement in _SECRETS if replacement not in ("[hex]", "[blob]")):      # a link that itself holds a token, a key, a home folder...: it is cleaned like any text
+            return url
+        kept.append(url)
+        return f"{len(kept) - 1}"
+    out = _GITHUB_URL.sub(keep, out)
     for pattern, replacement in _SECRETS:
         out = pattern.sub(replacement, out)
+    for index, url in enumerate(kept):
+        out = out.replace(f"{index}", url)
     return out[:limit] if limit else out
 
 

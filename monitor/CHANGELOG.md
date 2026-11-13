@@ -9,6 +9,12 @@ Version of the tool itself (monitor + sentinel + batch tools), semver of its own
 and is shown as `tool_version` in the sentinel snapshot and by `read_report.py --version`; `make_release.py` refuses to build
 when this file and `tool_version.py` disagree.
 
+## [Unreleased]
+
+### Fixed
+
+- The links of the runs that the AI tools receive (feed, brief, state, hook) were cut to "https://github.[blob]": the redactor took the address for an opaque string. Whole https addresses of github.com now pass untouched; tokens, keys, e-mails, IP addresses and personal paths are still cleaned, also inside a link.
+
 ## [1.7.8]
 
 ### Added
