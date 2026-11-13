@@ -11,7 +11,7 @@ configuration several accounts and processes share one file (model B). The schem
 
 How it stays sound:
 
-  * WAL journal, synchronous=NORMAL, busy_timeout (5 s by default): readers never block the writer and the writer never blocks readers; a process killed at any point leaves a database
+  * WAL journal, synchronous=NORMAL, busy_timeout (30 s by default, `storage.busy_timeout_ms`) and a bounded retry with growing pauses for the steps SQLite does not make wait: readers never block the writer and the writer never blocks readers; a process killed at any point leaves a database
     that the next open recovers by itself (every commit is atomic).
   * Every write is ONE short transaction (BEGIN IMMEDIATE ... COMMIT): the batch of events, the replacement of a document, the purge. A failed one is rolled back whole.
   * Schema migrations are versioned (`schema_version` in `meta`) and each runs inside the same transaction as the bump of the version: a migration that is interrupted leaves the
@@ -20,6 +20,7 @@ How it stays sound:
 """
 import json
 import os
+import random
 import sqlite3
 import threading
 import time
@@ -29,7 +30,8 @@ from pathlib import Path
 from github_actions_monitor.storage import archive, base
 
 SCHEMA_VERSION = 1
-BUSY_MS = 5000
+BUSY_MS = 30000      # how long a statement waits for another writer before it gives up (SQLite's own busy handler)
+RETRIES = 8          # and how many times the steps that SQLite does not make wait (switching to WAL, taking the writer lock) are tried again, with a growing pause
 #: version -> the statements that bring a database from version-1 to version
 MIGRATIONS = {
     1: [
@@ -46,6 +48,23 @@ MIGRATIONS = {
         "CREATE INDEX sessions_expires ON sessions (expires)",
     ],
 }
+
+
+def _busy(error):
+    text = str(error).lower()
+    return "locked" in text or "busy" in text
+
+
+def retrying(step, attempts=RETRIES):
+    """Runs `step()`; when SQLite answers "database is locked / busy" (which its busy handler does not cover for some steps, such as the first switch to WAL on a database that another process
+    is creating) it waits a growing, slightly random time and tries again, up to `attempts` times. Any other error, and the last busy one, is raised."""
+    for attempt in range(attempts):
+        try:
+            return step()
+        except sqlite3.OperationalError as error:
+            if not _busy(error) or attempt == attempts - 1:
+                raise
+            time.sleep(min(2.0, 0.05 * (2 ** attempt)) * (0.5 + random.random()))
 
 
 def _dumps(value):
@@ -89,7 +108,7 @@ class SqliteStorage(base.Storage):
             return conn
         conn = sqlite3.connect(str(self.path), timeout=self.busy_ms / 1000.0, isolation_level=None, check_same_thread=False)
         conn.execute(f"PRAGMA busy_timeout = {self.busy_ms}")
-        mode = conn.execute("PRAGMA journal_mode = WAL").fetchone()
+        mode = retrying(lambda: conn.execute("PRAGMA journal_mode = WAL").fetchone())
         self.journal_mode = str(mode[0]).lower() if mode else ""
         conn.execute("PRAGMA synchronous = NORMAL")
         conn.execute("PRAGMA foreign_keys = ON")
@@ -112,7 +131,7 @@ class SqliteStorage(base.Storage):
     def _write(self):
         """One short write transaction (the lock of the writer is taken at once, so a busy database is waited for here, not half way)."""
         conn = self._conn()
-        conn.execute("BEGIN IMMEDIATE")
+        retrying(lambda: conn.execute("BEGIN IMMEDIATE"))
         try:
             yield conn
         except BaseException:
@@ -140,7 +159,7 @@ class SqliteStorage(base.Storage):
         return int(row[0]) if row else 0
 
     def _migrate(self, conn):
-        conn.execute("BEGIN IMMEDIATE")
+        retrying(lambda: conn.execute("BEGIN IMMEDIATE"))
         try:
             conn.execute("CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
             row = conn.execute("SELECT value FROM meta WHERE key = 'schema_version'").fetchone()

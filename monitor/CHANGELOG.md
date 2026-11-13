@@ -31,6 +31,10 @@ when this file and `tool_version.py` disagree.
 
 - `tools/migrate_layout.py` for a folder that was a flat installation: a dry run by default; `--apply` copies your configuration to `layout_backup_<stamp>/config/` and MOVES (never deletes, never overwrites) the old modules, page, examples and `locales/` to `layout_backup_<stamp>/old_code/`. `--doctor` warns while such leftovers exist. `MIGRATING.md` describes it in the eight languages.
 
+### Fixed
+
+- The SQLite storage no longer fails with "database is locked" when several processes open or write the same database at once: the wait for another writer is 30 seconds by default and can be set with `busy_timeout_ms` in the `storage` block, and the steps that SQLite does not make wait (the first switch to WAL, taking the writer lock) are tried again a few times with growing pauses.
+
 ## [1.7.9]
 
 ### Fixed
