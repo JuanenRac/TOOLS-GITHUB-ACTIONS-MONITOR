@@ -19,6 +19,10 @@ when this file and `tool_version.py` disagree.
 
 ### Added
 
+- **Storage layer** (`src/github_actions_monitor/storage/`): a `Storage` interface (configuration, sentinel state, the event feed, analytics, small named documents and the global records of users, their accounts and sessions) that keeps the rule "a write is atomic, a damaged item reads as empty" for every backend. `FileStorage` is the first backend and keeps the layout of `accounts/<id>/` exactly as before (and the flat installation next to the launchers): the same files with the same names, written through a temporary file that is flushed and renamed. `create_storage` is the one place that picks the backend; the lite edition always gets the file backend.
+
+- Backups of a storage that any backend can restore: one `.zip` with a dump and a manifest of counts, size and SHA-256; the restore verifies the copy first and refuses to write over a storage that already holds accounts unless it is forced.
+
 - `tools/migrate_layout.py` for a folder that was a flat installation: a dry run by default; `--apply` copies your configuration to `layout_backup_<stamp>/config/` and MOVES (never deletes, never overwrites) the old modules, page, examples and `locales/` to `layout_backup_<stamp>/old_code/`. `--doctor` warns while such leftovers exist. `MIGRATING.md` describes it in the eight languages.
 
 ### Security
