@@ -44,3 +44,17 @@ Everything is off by default. The text of logs is cleaned of secrets and persona
 `ai_alerts.enabled`, `ai_alerts.folder`, `ai_alerts.brief_max_bytes`, `ai_alerts.diagnose.*`, `ai_alerts.cascade.enabled`, `ai_alerts.stream.*`, `ai_alerts.heartbeat.*`, `ai_alerts.client_hook.*`; related: `sound.enabled`, `display.blink_red_tiles`. See [SETTINGS.md](SETTINGS.md) and [AI_ALERTS.md](AI_ALERTS.md).
 
 The allowance of GitHub is shared by the monitor, the AI tools and every other tool of the account. To keep the monitor from running dry: the Quota tab of the Settings, a GitHub App (`github_app.enabled`), a second read-only account for the reads (`extra_reader.enabled`, `extra_reader.file`: only the path of the token file), the central panel (`central.source`) and Low mode (`modes.auto_low`). The state and the brief say when the allowance is used up and how much other tools spend. See [QUOTA.md](QUOTA.md).
+
+## The active notice to an external AI (optional, off by default)
+
+Besides the feed that an AI reads (`ALERTS_BRIEF.md`, the stream, the MCP server), the monitor can **tell** an external AI when a NEW real alert opens. It is the block `ai_notify` of Settings, tab *AI*, and every switch of it can only be changed from this computer:
+
+- `ai_notify.enabled` (off). Nothing is sent while it is off.
+- **A first confirmation per provider**: the provider is the one of the AI block (`ai.provider`); nothing goes out until you type its name in `ai_notify.confirmed_provider`. If you change the provider you confirm again. For the outgoing command (below) you type `command`.
+- **Only the redacted fields of a closed list**: severity, class, repository, workflow, conclusion, streak, cause, next step and the link, each one cleaned like the feed (tokens, keys, e-mail addresses, IP addresses and personal folders removed). Logs, diagnoses and everything else of the alert stay at home.
+- **Caps**: `ai_notify.max_calls_per_hour` (4) and `ai_notify.max_cost_per_hour_cents` with `ai_notify.cost_per_call_cents` (the cost that you declare, because the monitor cannot know the price of your plan). A call is counted before it is made, so a provider that fails also spends the cap.
+- **The key by the name of a variable**: the monitor reads the variable named in `ai.api_key_env`; the key is never saved, logged or sent anywhere but to the provider.
+- **The AI never runs an action**: its answer is cut, its links are defused and it is only written to `ai_notify.jsonl` next to the feed; nothing of it is read as a command and nothing of the actions of the assistant (`ai.actions.*`) is reachable from here.
+- **The variant of an outgoing command**: `ai_notify.command` (only in the configuration file, never in the Settings page) names ONE file by its absolute path; it is started without a shell and without arguments and receives the same redacted JSON on its standard input.
+
+The notice is sent from a thread of its own, so a slow provider never holds the cycle.

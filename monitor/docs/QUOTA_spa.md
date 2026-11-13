@@ -19,7 +19,7 @@ GitHub da a cada cuenta una **cuota limitada de llamadas a la API**, compartida 
 3. **Panel central como línea base**: `central.source` (`off`, `git`, `http`) lee `data/sentinel.json` de tu repositorio de perfil, que refresca un workflow con su propio token; no gasta nada de tu cuota. `central.max_age_minutes` (120): más viejo que eso está "atrasado" y no se fía.
 4. **Un solo aviso cuando se agota la cuota**: las lecturas se paran hasta la renovación, la página dice una vez "cuota agotada hasta las HH:MM" (no un error por repositorio) y se reanudan solas.
 5. **Una GitHub App para las lecturas** (`github_app.*`), más abajo.
-GraphQL no se usa para las ejecuciones de los workflows: no las ofrece.
+6. **GraphQL para los repositorios tranquilos (opcional, desactivado por defecto)**: `network.graphql_checks` lee por lotes (`network.graphql_batch`, 20 por defecto) los repositorios que no están calientes mediante GraphQL, que tiene una cuota propia; una llamada sustituye a muchas llamadas REST. Solo ve el último commit de la rama por defecto (un workflow que no corrió en él no aparece) y no da duraciones, intentos ni otras ramas, así que los repositorios calientes y cualquiera que GraphQL no responda se siguen leyendo por REST en el mismo ciclo. La contabilidad (lotes, repositorios, puntos, repositorios que pasaron a REST) está en el resumen y en el estado para las herramientas de IA.
 
 ## Una GitHub App, paso a paso
 1. En GitHub, *Settings*, *Developer settings*, *GitHub Apps*, *New GitHub App*. Sin webhook. Permisos **de solo lectura**: Actions, Checks, Code scanning alerts, Commit statuses, Contents, Dependabot alerts, Issues, Pull requests, Secret scanning alerts y Metadata.

@@ -114,6 +114,8 @@ _f("quota", "modes", "modes.low.cold_refresh_seconds", "int", (30, 86400), resta
 _f("quota", "modes", "modes.low.runs_per_repo", "int", (5, 100), restart=False)
 _f("quota", "modes", "modes.low.hot_hours", "int", (1, 48), restart=False, unit="h")
 _f("quota", "saving", "network.etag", "bool", restart=True)
+_f("quota", "saving", "network.graphql_checks", "bool", restart=False)
+_f("quota", "saving", "network.graphql_batch", "int", (1, 30), restart=False)
 _f("quota", "extra_reader", "extra_reader.enabled", "bool", restart=False, secure=True)
 _f("quota", "extra_reader", "extra_reader.file", "path", restart=False, secure=True)
 _f("quota", "extra_reader", "extra_reader.any_folder", "bool", restart=False, secure=True)
@@ -335,6 +337,12 @@ _f(_T_AI, "alerts", "ai_alerts.folder", "path", restart=False)
 _f(_T_AI, "alerts", "ai_alerts.brief_max_bytes", "int", (512, 20000), restart=False, unit="")
 _f(_T_AI, "alerts", "ai_alerts.hook.enabled", "bool", restart=False, secure=True)
 _f(_T_AI, "alerts", "ai_alerts.hook.url", "text", LOOP_URL_RE, restart=False, secure=True)
+_f(_T_AI, "notice", "ai_notify.enabled", "bool", restart=False, secure=True)
+_f(_T_AI, "notice", "ai_notify.confirmed_provider", "text", re.compile(r"^[a-z0-9-]{0,40}$"), restart=False, secure=True)
+_f(_T_AI, "notice", "ai_notify.max_calls_per_hour", "int", (1, 60), restart=False, secure=True, unit="calls")
+_f(_T_AI, "notice", "ai_notify.cost_per_call_cents", "int", (0, 10000), restart=False, secure=True, unit="")
+_f(_T_AI, "notice", "ai_notify.max_cost_per_hour_cents", "int", (0, 100000), restart=False, secure=True, unit="")
+_f(_T_AI, "notice", "ai_notify.timeout_seconds", "int", (5, 120), restart=False, secure=True, unit="s")
 _f(_T_AI, "alerts", "ai_alerts.hook.max_per_hour", "int", (1, 60), restart=False, unit="")
 _f(_T_AI, "alerts", "ai_alerts.diagnose.enabled", "bool", restart=False, secure=True)
 _f(_T_AI, "alerts", "ai_alerts.diagnose.max_per_cycle", "int", (1, 10), restart=False, unit="")
@@ -507,7 +515,7 @@ def check_value_list(value):
 
 
 LITE_KEYS = ("github_owner", "language", "repos", "ecosystems", "exclude", "refresh_seconds", "open_browser", "updates.check", "airgapped") + tuple(
-    k for k in FIELDS if k.startswith(("ai_alerts.", "sound.", "display.", "modes.", "central.", "extra_reader.", "github_app.", "network.etag")))      # the short settings page of the lite product; the connection with an AI tool, the sound and the look are the same in both editions
+    k for k in FIELDS if k.startswith(("ai_alerts.", "sound.", "display.", "modes.", "central.", "extra_reader.", "github_app.", "network.etag", "network.graphql")))      # the short settings page of the lite product; the connection with an AI tool, the sound and the look are the same in both editions
 
 
 def validate(changes, lite=False):

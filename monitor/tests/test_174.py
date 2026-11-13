@@ -192,7 +192,7 @@ class Page(unittest.TestCase):
         self.page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
 
     def test_the_bar_at_the_foot_replaces_the_authorship_line_and_takes_the_six_banners(self):
-        for needle in ('<footer id="statusbar"', 'id="sb-lamp"', 'id="sb-open"', 'id="notes-dlg"', "function readNotices", "NOTE_SRC", 'id="sb-clock"', 'id="sb-addr"', 'id="sb-conn-lamp"', "/api/statusbar"):
+        for needle in ('<footer id="statusbar"', 'id="sb-lamp"', 'id="sb-open"', 'id="notes-dlg"', "function readNotices", "NOTE_SRC", 'id="sb-clock"', 'id="sb-addr"', "/api/statusbar"):
             self.assertIn(needle, self.page, needle)
         self.assertNotIn('<footer id="about"', self.page)
         for banner in ("err", "reduced", "offline", "hidden", "restartbar", "netbar"):

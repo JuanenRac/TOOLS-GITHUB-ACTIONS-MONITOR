@@ -44,3 +44,17 @@
 `ai_alerts.enabled`、`ai_alerts.folder`、`ai_alerts.brief_max_bytes`、`ai_alerts.diagnose.*`、`ai_alerts.cascade.enabled`、`ai_alerts.stream.*`、`ai_alerts.heartbeat.*`、`ai_alerts.client_hook.*`。関連:`sound.enabled`、`display.blink_red_tiles`。[SETTINGS_jpn.md](SETTINGS_jpn.md) と [AI_ALERTS_jpn.md](AI_ALERTS_jpn.md) を参照してください。
 
 GitHub のクォータは、モニター、AI ツール、アカウントのその他すべてのツールで共有されます。モニターが枯渇しないように:設定の「クォータ」タブ、GitHub App(`github_app.enabled`)、読み取り用の 2 つ目の読み取り専用アカウント(`extra_reader.enabled`、`extra_reader.file`:トークンファイルのパスのみ)、中央パネル(`central.source`)、節約モード(`modes.auto_low`)。状態とブリーフは、クォータが尽きたときと他のツールの消費量を伝えます。[QUOTA_jpn.md](QUOTA_jpn.md) を参照してください。
+
+## 外部 AI へのアクティブな通知(任意、既定ではオフ)
+
+AI が読むフィード(`ALERTS_BRIEF.md`、ストリーム、MCP サーバー)とは別に、新しい本物のアラートが開いたとき、モニターから外部 AI に**知らせる**ことができます。設定の「AI」タブにある `ai_notify` ブロックで、すべてのスイッチはこのコンピューターからのみ変更できます。
+
+- `ai_notify.enabled`(オフ)。オフの間は何も送られません。
+- **プロバイダーごとの初回確認**:プロバイダーは AI ブロック(`ai.provider`)のものです。その名前を `ai_notify.confirmed_provider` に入力するまで何も送信されません。プロバイダーを変えたら再度確認します。送信コマンド(下記)の場合は `command` と入力します。
+- **固定リストの伏せ字済みの項目のみ**:重大度、クラス、リポジトリ、ワークフロー、結論、連続回数、原因、次の手順、リンク。いずれもフィードと同様に整えられます(トークン、キー、メールアドレス、IP アドレス、個人フォルダーを除去)。ログ、診断、アラートのその他の内容は外に出ません。
+- **上限**:`ai_notify.max_calls_per_hour`(4)と、`ai_notify.max_cost_per_hour_cents` および `ai_notify.cost_per_call_cents`(契約プランの価格はモニターには分からないため、申告するコスト)。呼び出しは実行前に数えられるので、失敗するプロバイダーも上限を消費します。
+- **環境変数の名前によるキー**:モニターは `ai.api_key_env` で指定した変数を読みます。キーは保存・記録されず、プロバイダー以外には送られません。
+- **AI は決してアクションを実行しません**:回答は切り詰められ、リンクは無効化され、フィードの隣の `ai_notify.jsonl` に書かれるだけです。コマンドとして読まれることはなく、アシスタントのアクション(`ai.actions.*`)にもここからは到達できません。
+- **送信コマンドという変形**:`ai_notify.command` (設定ファイルのみ。設定ページからは変更できません) は絶対パスで 1 つのファイルを指定します。シェルも引数もなしで起動され、同じ伏せ字の JSON を標準入力で受け取ります。
+
+通知は専用のスレッドから送られるため、遅いプロバイダーがサイクルを止めることはありません。

@@ -19,7 +19,7 @@ GitHub はアカウントごとに**API 呼び出しの限られたクォータ*
 3. **ベースラインとしての中央パネル**:`central.source`(`off`、`git`、`http`)は、ワークフローが独自のトークンで更新するプロフィールリポジトリの `data/sentinel.json` を読みます。あなたのクォータは消費しません。`central.max_age_minutes`(120)より古いと「遅延」とされ、信頼されません。
 4. **クォータ切れは 1 つの通知に**:更新まで読み取りを止め、ページは「クォータは HH:MM まで使い切り」と 1 回だけ表示し(リポジトリごとのエラーではなく)、自動で再開します。
 5. **読み取り用の GitHub App**(`github_app.*`)、下記。
-GraphQL はワークフローの run には使いません。提供されていないためです。
+6. **静かなリポジトリ向けの GraphQL(任意、既定ではオフ)**:`network.graphql_checks` は、ホットでないリポジトリを専用の枠を持つ GraphQL でまとめて(`network.graphql_batch`、既定 20)読みます。1 回の呼び出しで多数の REST 呼び出しの代わりになります。見えるのは既定ブランチの最後のコミットだけ(そこで動かなかったワークフローは表示されません)で、実行時間・試行回数・他のブランチは得られないため、ホットなリポジトリと GraphQL が応答しないリポジトリは同じサイクルで REST で読みます。集計(バッチ数、リポジトリ数、ポイント、REST に回ったリポジトリ)は概要と AI ツール向けの状態にあります。
 
 ## GitHub App の手順
 1. GitHub で *Settings*、*Developer settings*、*GitHub Apps*、*New GitHub App*。Webhook は不要。**読み取り専用**の権限:Actions、Checks、Code scanning alerts、Commit statuses、Contents、Dependabot alerts、Issues、Pull requests、Secret scanning alerts、Metadata。

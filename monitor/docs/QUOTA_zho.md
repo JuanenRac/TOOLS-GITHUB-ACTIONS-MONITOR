@@ -19,7 +19,7 @@ GitHub 为每个账户提供有限的 **API 调用配额**,由使用它的所有
 3. **中央面板作为基线**:`central.source`(`off`、`git`、`http`)读取你的个人资料仓库中由工作流用自己的令牌刷新的 `data/sentinel.json`,不消耗你的配额。`central.max_age_minutes`(120):比这更旧则为“滞后”,不被信任。
 4. **配额用尽时只给一条通知**:读取暂停到配额恢复,页面只说一次“配额已用尽,HH:MM 恢复”(而不是每个仓库一个错误),并自动继续。
 5. **用于读取的 GitHub App**(`github_app.*`),见下。
-GraphQL 不用于工作流的运行:它不提供这些数据。
+6. **面向安静仓库的 GraphQL(可选,默认关闭)**:`network.graphql_checks` 通过有独立配额的 GraphQL 分批(`network.graphql_batch`,默认 20)读取不活跃的仓库;一次调用可替代许多次 REST 调用。它只能看到默认分支的最后一次提交(未在其上运行的工作流不会列出),也没有时长、重试次数或其他分支,因此活跃的仓库以及 GraphQL 没有应答的仓库会在同一周期内继续通过 REST 读取。统计(批次、仓库、点数、转交 REST 的仓库)显示在摘要和面向 AI 工具的状态中。
 
 ## GitHub App 逐步设置
 1. 在 GitHub 中依次进入 *Settings*、*Developer settings*、*GitHub Apps*、*New GitHub App*。无需 webhook。**只读**权限:Actions、Checks、Code scanning alerts、Commit statuses、Contents、Dependabot alerts、Issues、Pull requests、Secret scanning alerts 和 Metadata。

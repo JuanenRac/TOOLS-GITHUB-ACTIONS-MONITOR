@@ -44,3 +44,17 @@ Tout est désactivé par défaut. Le texte des journaux est nettoyé des secrets
 `ai_alerts.enabled`, `ai_alerts.folder`, `ai_alerts.brief_max_bytes`, `ai_alerts.diagnose.*`, `ai_alerts.cascade.enabled`, `ai_alerts.stream.*`, `ai_alerts.heartbeat.*`, `ai_alerts.client_hook.*` ; liés : `sound.enabled`, `display.blink_red_tiles`. Voir [SETTINGS_fra.md](SETTINGS_fra.md) et [AI_ALERTS_fra.md](AI_ALERTS_fra.md).
 
 Le quota de GitHub est partagé par le moniteur, les outils d'IA et tout autre outil du compte. Pour que le moniteur n'en manque pas : l'onglet Quota des Réglages, une GitHub App (`github_app.enabled`), un second compte en lecture seule pour les lectures (`extra_reader.enabled`, `extra_reader.file` : seulement le chemin du fichier du jeton), le panneau central (`central.source`) et le mode économe (`modes.auto_low`). L'état et le résumé disent quand le quota est épuisé et combien dépensent les autres outils. Voir [QUOTA_fra.md](QUOTA_fra.md).
+
+## L'avis actif à une IA externe (optionnel, désactivé par défaut)
+
+En plus du flux qu'une IA lit (`ALERTS_BRIEF.md`, le flux continu, le serveur MCP), le moniteur peut **prévenir** une IA externe quand une NOUVELLE alerte réelle s'ouvre. C'est le bloc `ai_notify` des Réglages, onglet *IA*, et chacun de ses interrupteurs ne se change que depuis cet ordinateur :
+
+- `ai_notify.enabled` (désactivé). Rien n'est envoyé tant qu'il est désactivé.
+- **Une première confirmation par fournisseur** : le fournisseur est celui du bloc IA (`ai.provider`) ; rien ne part tant que vous n'avez pas tapé son nom dans `ai_notify.confirmed_provider`. Si vous changez de fournisseur, vous confirmez à nouveau. Pour la commande sortante (ci-dessous), tapez `command`.
+- **Seulement les champs expurgés d'une liste fermée** : gravité, classe, dépôt, workflow, conclusion, série, cause, étape suivante et lien, chacun nettoyé comme le flux (jetons, clés, adresses e-mail, adresses IP et dossiers personnels retirés). Les journaux, les diagnostics et tout le reste de l'alerte restent chez vous.
+- **Plafonds** : `ai_notify.max_calls_per_hour` (4) et `ai_notify.max_cost_per_hour_cents` avec `ai_notify.cost_per_call_cents` (le coût que vous déclarez, car le moniteur ne peut pas connaître le prix de votre offre). Un appel est compté avant d'être fait, donc un fournisseur en échec dépense aussi le plafond.
+- **La clé par le nom d'une variable** : le moniteur lit la variable nommée dans `ai.api_key_env` ; la clé n'est jamais enregistrée, journalisée ni envoyée ailleurs qu'au fournisseur.
+- **L'IA n'exécute jamais d'action** : sa réponse est coupée, ses liens sont désamorcés et elle est seulement écrite dans `ai_notify.jsonl` à côté du flux ; rien n'en est lu comme une commande et rien des actions de l'assistant (`ai.actions.*`) n'est accessible d'ici.
+- **La variante d'une commande sortante** : `ai_notify.command` (seulement dans le fichier de configuration, jamais dans la page des Réglages) nomme UN fichier par son chemin absolu ; il est lancé sans shell et sans arguments et reçoit le même JSON expurgé sur son entrée standard.
+
+L'avis part d'un fil d'exécution à part, si bien qu'un fournisseur lent ne retient jamais le cycle.

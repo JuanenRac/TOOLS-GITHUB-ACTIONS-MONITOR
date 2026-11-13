@@ -41,6 +41,7 @@ from pathlib import Path
 from github_actions_monitor.data_pipeline import analytics
 from github_actions_monitor.data_pipeline import discovery
 from github_actions_monitor.data_pipeline import etagcache
+from github_actions_monitor.data_pipeline import graphql_checks
 from github_actions_monitor import i18n
 from github_actions_monitor.security import localguard
 from github_actions_monitor.app import modes
@@ -108,7 +109,8 @@ DEFAULTS = {
     "otlp": {"enabled": False, "endpoint": "", "interval_seconds": 60},       # OFF: OpenTelemetry export to a collector you name (otlp.py)
     "organizations": {"discover": False},                                    # OFF: list the organisations of the login (orgs.py)
     "finops": {"jobs_per_cycle": 0},
-    "network": {"use_proxy": False, "etag": True},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
+    "network": {"use_proxy": False, "etag": True, "graphql_checks": False, "graphql_batch": 20},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
+    "ai_notify": {"enabled": False, "confirmed_provider": "", "max_calls_per_hour": 4, "cost_per_call_cents": 5, "max_cost_per_hour_cents": 50, "command": "", "timeout_seconds": 30},      # OFF: tell an external AI of a NEW real alert (ai_notify.py)
     "ai_alerts": {"enabled": False, "folder": "", "brief_max_bytes": 2048, "hook": {"enabled": False, "url": "", "max_per_hour": 6},
                   "diagnose": {"enabled": False, "max_per_cycle": 3, "log_lines": 10, "max_bytes": 1500},      # OFF: reads logs of GitHub (the allowance)
                   "cascade": {"enabled": True, "map": {}},
@@ -575,6 +577,7 @@ def refresh_runs(repos, config, progress=None):
     lite = config["mode"] == "lite"
     only_hot = hot_only_state(now)["on"]
     todo = []
+    cold_due = set()      # the repositories that only wait for their slow turn: the ones network.graphql_checks may read in batches
     for repo in repos:
         entry = RUN_CACHE.get(repo)
         hot = is_hot(repo, config, now)
@@ -585,11 +588,18 @@ def refresh_runs(repos, config, progress=None):
             todo.append((repo, config["cold_runs_per_repo"] if lite else tuned(config, "runs_per_repo")))
         elif not only_hot and now - entry["at"] > tuned(config, "cold_refresh_seconds"):
             todo.append((repo, config["cold_runs_per_repo"]))
+            cold_due.add(repo)
     done = 0
     RATE_BLOCK["unread"] = 0
     if time.time() < RATE_BLOCK["until"]:      # the allowance is still used up: nothing is asked until it renews (the old picture stays)
         RATE_BLOCK["unread"] = len(todo)
         return 0
+    total = len(todo)
+    batched = graphql_cold(config, [r for r, _n in todo if r in cold_due])
+    if batched:
+        for repo, runs in batched.items():
+            note_read(repo, runs, None)
+        todo = [item for item in todo if item[0] not in batched]
     for start in range(0, len(todo), 40):  # chunks, so the page can show the first results while the rest loads
         chunk = todo[start:start + 40]
         with ThreadPoolExecutor(max_workers=config["max_workers"]) as pool:
@@ -607,7 +617,24 @@ def refresh_runs(repos, config, progress=None):
             break
         if progress:
             progress(done, len(todo))
-    return len(todo)
+    return total
+
+
+def graphql_cold(config, repos):
+    """network.graphql_checks (off by default): the cold repositories that are due are read with batches of GraphQL (its own allowance) instead of one REST call each. {repo: runs} for the ones
+    the batches answered; the others (and everything when the switch is off, a batch fails or the answer is not understood) are read through REST in the same cycle."""
+    cfg = graphql_checks.settings(config)
+    if not cfg["enabled"] or not repos:
+        return {}
+
+    def call(text):
+        return gh("api", "graphql", "-f", "query=" + text, retries=0, as_user=True)
+    try:
+        found, _rest = graphql_checks.read_batches(toolconfig.github_owner(), repos, cfg["batch"], call)
+    except Exception as error:   # noqa: BLE001 - a feature that saves allowance never stops the cycle
+        degraded.note("loop.extra", error)
+        return {}
+    return found
 
 
 def note_read(repo, runs, error):
@@ -800,7 +827,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
         "mode": config["mode"], "refreshed": refreshed, "hot": hot, "loading": progress_text if loading else "",
         "quota_block": rate_block_state(rate), "min_rate": config["min_rate_remaining"], "paused_quota": bool(rate and rate["remaining"] < config["min_rate_remaining"]),
         "refresh_seconds": config["refresh_seconds"], "hot_only": hot_only_state(),
-        "offline": LINK.state(), "etag": ETAG["cache"].stats() if ETAG["cache"] else None,
+        "offline": LINK.state(), "etag": ETAG["cache"].stats() if ETAG["cache"] else None, "graphql": graphql_checks.stats(config),
         "hidden": HIDDEN["hidden"], "discovered": HIDDEN["discovered"], "hidden_names": HIDDEN["names"],
         "figures": figures, "repo_meta": repo_meta(repos),
     }
@@ -1090,7 +1117,8 @@ def feed_alerts(config, data, diagnose=True):
             extra, sections = signals.extra_alert_rows(doc), signals.brief_sections(doc)
         except Exception as error:   # noqa: BLE001 - the signals never stop the feed of the red workflows
             degraded.note("ai_alerts.panels", error)
-        result = ai_alerts.update(config, red_rows(data), runner=ai_alerts.gh_runner if diagnose else None, owner=toolconfig.github_owner(config), panels=panels, sections=sections, extra_rows=extra)
+        result = ai_alerts.update(config, red_rows(data), runner=ai_alerts.gh_runner if diagnose else None, owner=toolconfig.github_owner(config), panels=panels, sections=sections, extra_rows=extra,
+                                  status=f"running, cycle complete ({len(data.get('repos') or [])} repositories read)")
     for alert in result["opened"]:
         if alert["class"] == "real":
             try:
@@ -1105,12 +1133,25 @@ def feed_alerts(config, data, diagnose=True):
             except Exception as error:   # noqa: BLE001
                 degraded.note("loop.extra2", error)
                 pass
+            notice_ai(config, alert)
     return result
+
+
+def notice_ai(config, alert):
+    """The active notice to an external AI (ai_notify.py, OFF by default, confirmed per provider, capped by hour): sent from a thread of its own so that a slow provider never holds the cycle."""
+    try:
+        from github_actions_monitor.integrations import ai_notify
+        if not ai_notify.settings(config)["enabled"]:
+            return
+        threading.Thread(target=ai_notify.notify, args=(config, dict(alert)), name="ai-notify", daemon=True).start()
+    except Exception as error:   # noqa: BLE001 - a notice never stops the cycle
+        degraded.note("ai_alerts.hook", error)
 
 
 def maintain_extras(config, data):
     """The opt-in features that run after a cycle (each is OFF by default and costs nothing while off): exact costs, the local mirror of artifacts and the OpenTelemetry export."""
     if data.get("loading") or data["offline"]["offline"]:
+        brief_status(config, "connection lost, the alerts below are from the last complete cycle" if data["offline"]["offline"] else f"running, reading repositories ({data.get('loading')}), the alerts below are from the last complete cycle")
         return
     remaining = (data.get("rate") or {}).get("remaining")
     spare = remaining is None or remaining > 2 * config.get("min_rate_remaining", 800)
@@ -1128,6 +1169,16 @@ def maintain_extras(config, data):
             if name not in EXTRAS_WARNED:
                 EXTRAS_WARNED.append(name)
                 print(name + ":", repr(error)[:160], flush=True)
+
+
+def brief_status(config, status):
+    """The brief of the AI feed says what the monitor is doing (a cycle in progress, the connection lost, a cycle that failed) so that it never shows the hour of an old cycle as if it were
+    the last word. Best effort: it never stops the loop."""
+    try:
+        from github_actions_monitor.integrations import ai_alerts
+        ai_alerts.monitor_status(config, status)
+    except Exception as error:   # noqa: BLE001
+        degraded.note("ai_alerts.refresh", error)
 
 
 EXTRAS_WARNED = []
@@ -1204,6 +1255,12 @@ def run_cycle(config, generation):
         print(banner.tag(LITE["on"]), i18n.t("mon.loaded", n=snapshot["loading"]), flush=True)
 
     WATCH.begin()
+    try:      # the log says that a cycle began, so a long one is not mistaken for a monitor that stopped
+        with private_io.open_append(LOG_FILE) as log:
+            log.write(tzdisplay.localize(f"{datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')} cycle=started\n"))
+    except Exception as error:   # noqa: BLE001
+        WATCH.log_failed(error)
+    brief_status(toolconfig.raw_config() if not LITE["on"] else config, "running, a cycle has started, the alerts below are from the last complete cycle")
     data = collect(config, publish)
     WATCH.phase("maintain")
     transition = LINK.end_cycle()
@@ -1248,6 +1305,7 @@ def loop(config, generation=None):
             WATCH.fail(error)
             with LOCK:
                 STATE["error"], STATE["hint"] = str(error), "auth"   # the page writes the hint in its own language
+            brief_status(toolconfig.raw_config() if not LITE["on"] else config, "running, but the last cycle failed to sign in to GitHub; the alerts below are from the last complete cycle")
             delay = 60
         except Exception as error:
             if not WATCH.current(generation):
@@ -1256,6 +1314,7 @@ def loop(config, generation=None):
             degraded.note("loop.cycle", error)
             with LOCK:
                 STATE["error"] = str(error)
+            brief_status(toolconfig.raw_config() if not LITE["on"] else config, f"running, but the last cycle failed ({type(error).__name__}); the alerts below are from the last complete cycle")
             delay = 60
         sleep_for(delay, generation)
 

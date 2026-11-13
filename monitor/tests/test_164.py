@@ -1432,7 +1432,7 @@ class TerminalApplication(unittest.TestCase):
         from github_actions_monitor.ui import tui_textual as tt
         settings = {"groups": [{"id": "basic", "fields": [{"key": "open_browser", "type": "bool", "secure": False}, {"key": "airgapped", "type": "bool", "secure": True}]},
                                {"id": "sentinel", "fields": [{"key": "sentinel.workers", "type": "int"}]}, {"id": "polling", "fields": [{"key": "names", "type": "names"}, {"key": "refresh_seconds", "type": "int"}]}]}
-        self.assertEqual([f["key"] for _g, f in tt.editable_fields(settings)], ["open_browser", "refresh_seconds"], "no security option, no complex type, only the common groups")
+        self.assertEqual([f["key"] for _g, f in tt.editable_fields(settings)], ["open_browser", "names", "refresh_seconds"], "no security option, lists and maps allowed, only the common groups")
         self.assertEqual(tt.parse_value({"type": "int"}, " 42 "), (42, None))
         self.assertEqual(tt.parse_value({"type": "float"}, "x"), (None, "type"))
         self.assertEqual(tt.parse_value({"type": "text"}, " a "), ("a", None))

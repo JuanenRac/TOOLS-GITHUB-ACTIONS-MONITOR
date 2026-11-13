@@ -44,3 +44,17 @@
 `ai_alerts.enabled`、`ai_alerts.folder`、`ai_alerts.brief_max_bytes`、`ai_alerts.diagnose.*`、`ai_alerts.cascade.enabled`、`ai_alerts.stream.*`、`ai_alerts.heartbeat.*`、`ai_alerts.client_hook.*`;相关:`sound.enabled`、`display.blink_red_tiles`。参见 [SETTINGS_zho.md](SETTINGS_zho.md) 和 [AI_ALERTS_zho.md](AI_ALERTS_zho.md)。
 
 GitHub 配额由监视器、AI 工具和账户下的所有其他工具共享。为避免监视器耗尽配额:设置中的“配额”标签页、GitHub App(`github_app.enabled`)、用于读取的第二个只读账户(`extra_reader.enabled`、`extra_reader.file`:只填令牌文件的路径)、中央面板(`central.source`)和节省模式(`modes.auto_low`)。状态和简报会说明配额何时用尽以及其他工具消耗了多少。参见 [QUOTA_zho.md](QUOTA_zho.md)。
+
+## 向外部 AI 的主动通知(可选,默认关闭)
+
+除了 AI 读取的信息流(`ALERTS_BRIEF.md`、事件流、MCP 服务器)之外,当出现新的真实告警时,监视器还可以**主动通知**外部 AI。这是“设置”中“AI”标签页里的 `ai_notify` 块,其中每个开关都只能在本机修改:
+
+- `ai_notify.enabled`(关闭)。关闭时不会发送任何内容。
+- **每个提供方首次确认**:提供方就是 AI 块(`ai.provider`)中的那个;在 `ai_notify.confirmed_provider` 中输入其名称之前不会发出任何内容。更换提供方需要重新确认。对于外发命令(见下),输入 `command`。
+- **只发送固定清单中已脱敏的字段**:严重程度、类别、仓库、工作流、结论、连续次数、原因、下一步和链接,每个字段都像信息流一样清理(去除令牌、密钥、电子邮件地址、IP 地址和个人文件夹)。日志、诊断以及告警的其他内容都留在本地。
+- **上限**:`ai_notify.max_calls_per_hour`(4),以及 `ai_notify.max_cost_per_hour_cents` 与 `ai_notify.cost_per_call_cents`(由你声明的成本,因为监视器无法得知你套餐的价格)。调用在发出之前就被计数,因此失败的提供方也会消耗上限。
+- **通过变量名使用密钥**:监视器读取 `ai.api_key_env` 中指定的变量;密钥从不被保存、记录,也不会发送到提供方以外的任何地方。
+- **AI 绝不执行任何操作**:它的回答会被截断,链接会被失效处理,仅写入信息流旁边的 `ai_notify.jsonl`;其中的任何内容都不会被当作命令读取,助手的操作(`ai.actions.*`)也无法从这里访问。
+- **外发命令的变体**:`ai_notify.command` (仅在配置文件中,绝不在“设置”页面中) 以绝对路径指定一个文件;它不经 shell、不带参数启动,并在标准输入上收到同样的脱敏 JSON。
+
+通知由单独的线程发送,因此较慢的提供方不会拖住周期。
