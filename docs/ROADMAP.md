@@ -7,6 +7,10 @@
 
 Ideas that did not fit in the current version, in no promised order. They are directions, not commitments; an issue or a pull request is the best way to move one forward.
 
+## Done in 1.7.9
+
+### Fixed
+
 ## Done in 1.7.8
 
 ### Added

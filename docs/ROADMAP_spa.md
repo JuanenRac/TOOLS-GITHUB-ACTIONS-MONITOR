@@ -2,6 +2,10 @@
 
 Ideas que no cupieron en la versión actual, sin orden prometido. Son direcciones, no compromisos; un issue o un pull request es la mejor forma de adelantar una.
 
+## Hecho en la 1.7.9
+
+### Corregido
+
 ## Hecho en la 1.7.8
 
 ### Añadido
