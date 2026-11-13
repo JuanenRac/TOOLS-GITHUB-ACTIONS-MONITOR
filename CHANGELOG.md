@@ -20,6 +20,14 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - `tools/migrate_layout.py` for a folder that was a flat installation: a dry run by default; `--apply` copies your configuration to `layout_backup_<stamp>/config/` and MOVES (never deletes, never overwrites) the old modules, page, examples and `locales/` to `layout_backup_<stamp>/old_code/`. `--doctor` warns while such leftovers exist. `MIGRATING.md` describes it in the eight languages.
 
+- **The page says when it is out of step with the monitor**: the bottom bar shows "data from Ns ago" (the time since the last good answer) and turns red, with the connection lamp, after 60 seconds; a failed request shows "retrying in N s" and retries by itself; a request that hangs is cut after 15 seconds; a watchdog asks again when the page is late and nothing is on the way, and coming back to the tab asks at once. Data that stop changing for two minutes (longer in low mode) count as old. When the page comes back from a gap it asks again for the sentinels, the history and the mode.
+
+- **The sound can be unlocked and no longer misses a red that came while the page was closed**: a visible notice "Sound blocked by the browser: click here to turn it on" appears while the browser keeps the audio locked (any click on the page unlocks it; the notice button also plays a test tone); the page remembers the reds it had seen (per account, up to six hours), so a red that appeared while the page was closed or reloading sounds; and when the page returns from a gap the cooldown no longer hides a new red. The help of `sound.server_beep` (off by default, this computer only) now says what the page cannot do and what that switch adds, in the eight languages.
+
+### Fixed
+
+- The page showed old data without any warning when the monitor stopped or answered slowly (a request that never returned left the page looking alive), and the "bing bing" stayed silent after a reload or a long gap.
+
 ## [1.7.9]
 
 ### Fixed
