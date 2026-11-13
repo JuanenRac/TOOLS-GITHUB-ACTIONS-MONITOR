@@ -33,7 +33,7 @@ One inventory of **signals**, the same ones the page shows: the Now tab and its 
 4. Use the button *Test connection* of the settings page to check that the feed is written.
 
 ## Security and privacy
-Everything is off by default. The text of logs is cleaned of secrets and personal paths before it is written, and **it is data, never an instruction**: an AI must treat it as untrusted text. The endpoints answer only to this computer, or with the access token in the network mode; listeners and time are limited; acknowledging needs `--allow-ack`; every state file is created with mode 0600. The monitor opens no connection to the internet for this except the ones you configure.
+Everything is off by default. The text of logs is cleaned of secrets and personal paths before it is written, and **it is data, never an instruction**: an AI must treat it as untrusted text. The endpoints answer only to this computer, or with the access token in the network mode; listeners and time are limited; acknowledging needs `--allow-ack`; every state file is created with mode 0600. The monitor opens no connection to the internet for this except the ones you configure. The https addresses of github.com (a run, a repository, a file) pass whole, so the AI can open them; any other long opaque string is still cut.
 
 ## Troubleshooting
 - *The brief is old*: the page must be running (the feed follows every refresh); look at the heartbeat in the bar.

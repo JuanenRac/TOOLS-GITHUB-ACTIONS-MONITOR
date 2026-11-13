@@ -7,6 +7,12 @@
 
 Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son propre semver. La source est le CHANGELOG.md en anglais ; ce fichier contient les mêmes versions et sections.
 
+## [Unreleased]
+
+### Corrigé
+
+- Les liens des runs reçus par les outils d'IA (flux, résumé, état, hook) étaient coupés en « https://github.[blob] » : le rédacteur prenait l'adresse pour une chaîne opaque. Les adresses https complètes de github.com passent désormais intactes ; jetons, clés, e-mails, IP et chemins personnels restent nettoyés, y compris dans un lien.
+
 ## [1.7.8]
 
 ### Ajouté

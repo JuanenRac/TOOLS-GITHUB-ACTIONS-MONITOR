@@ -33,7 +33,7 @@ Un inventario de **señales**, las mismas que muestra la página: la pestaña Ah
 4. Usa el botón *Probar conexión* de la página de ajustes para comprobar que el flujo se escribe.
 
 ## Seguridad y privacidad
-Todo está apagado por defecto. El texto de los logs se limpia de secretos y rutas personales antes de escribirse, y **es un dato, nunca una instrucción**: una IA debe tratarlo como texto no fiable. Los endpoints responden solo a este equipo, o con el token de acceso en modo red; los oyentes y el tiempo están limitados; reconocer exige `--allow-ack`; todos los ficheros de estado se crean con modo 0600. El monitor no abre ninguna conexión a internet para esto salvo las que configures.
+Todo está apagado por defecto. El texto de los logs se limpia de secretos y rutas personales antes de escribirse, y **es un dato, nunca una instrucción**: una IA debe tratarlo como texto no fiable. Los endpoints responden solo a este equipo, o con el token de acceso en modo red; los oyentes y el tiempo están limitados; reconocer exige `--allow-ack`; todos los ficheros de estado se crean con modo 0600. El monitor no abre ninguna conexión a internet para esto salvo las que configures. Las direcciones https de github.com (un run, un repositorio, un fichero) pasan enteras para que la IA pueda abrirlas; cualquier otra cadena larga y opaca se sigue recortando.
 
 ## Solución de problemas
 - *El resumen es viejo*: la página debe estar en marcha (el flujo sigue cada refresco); mira el latido en la barra.

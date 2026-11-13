@@ -7,6 +7,12 @@
 
 Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem Semver. Die Quelle ist das englische CHANGELOG.md; diese Datei enthält dieselben Versionen und Abschnitte.
 
+## [Unreleased]
+
+### Behoben
+
+- Die Links der Runs, die die KI-Werkzeuge erhalten (Feed, Zusammenfassung, Zustand, Hook), wurden zu "https://github.[blob]" gekürzt: Der Redaktor hielt die Adresse für eine undurchsichtige Zeichenfolge. Vollständige https-Adressen von github.com bleiben jetzt unverändert; Tokens, Schlüssel, E-Mails, IP-Adressen und persönliche Pfade werden weiterhin bereinigt, auch innerhalb eines Links.
+
 ## [1.7.8]
 
 ### Hinzugefügt
