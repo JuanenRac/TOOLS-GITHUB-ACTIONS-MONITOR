@@ -1459,6 +1459,8 @@ class Handler(BaseHTTPRequestHandler):
                 self.wfile.flush()
         except (ConnectionError, OSError):
             DISCONNECTS[0] += 1      # the listener went away: nothing to report
+        except (ValueError, TypeError) as error:      # a frame that cannot be written ends this listener, never the server
+            degraded.note("ai.stream", error)
         finally:
             ai_alerts.stream_release()
 
