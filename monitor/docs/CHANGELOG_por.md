@@ -39,6 +39,16 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - **O fluxo de eventos para IA já não morre com uma linha de registo normal**: a linha do feed é limpa campo a campo e só depois escrita, em vez de limpar um JSON já escrito (uma causa que terminasse em `password: x`, `token=x` ou `DB_PASSWORD=x` estragava-o). Uma linha que não se consiga limpar é saltada e o fluxo continua; as respostas do servidor MCP são limpas da mesma forma. No limpador, o valor de um par `chave=valor` termina numa aspa, numa vírgula ou num ponto e vírgula, e um valor entre aspas é limpo por inteiro.
 
+- **O que depende de quem pergunta é sempre respondido pelo seu próprio login**: `gh api user`, `user/orgs`, as notificações, uma pesquisa de `@me`, `gh auth` e `gh repo list` sem proprietário nunca vão para a GitHub App nem para a segunda conta, por muitas chamadas que lhes restem (com a segunda conta ativa, o monitor podia tomar como proprietário o titular dessa conta e listar as suas organizações).
+
+- **Uma chamada a `gh` só é uma leitura se estiver numa lista branca**: `gh api ENDPOINT` com, no máximo, as opções `--jq`, `--paginate`, `-H` (das que uma leitura envia), `-i` e `--cache`. As formas coladas de uma escrita (`-XPOST`, `--method=DELETE`, `-fa=b`, `--field=a=b`, `--input=-`) e qualquer outra opção vão para o seu login em vez de serem repartidas pelas fontes.
+
+- **O ficheiro do token da segunda conta** (`extra_reader.file`) tem de estar dentro da pasta de contas do monitor (`accounts/`, ou `MONITOR_ACCOUNTS_DIR`) e é aberto sem seguir uma ligação e só se for um ficheiro normal e pequeno; fora dessa pasta a definição fica vazia. O novo interruptor `extra_reader.any_folder` (desligado por defeito, só local) levanta a regra da pasta para um ficheiro que tenha de ficar noutro sítio.
+
+- **Um painel central com data no futuro já não merece confiança**: a sua idade era reduzida a zero e contava como fresco para sempre; agora está atrasado, o resumo diz que a data não é fiável e tolera-se um relógio adiantado até cinco minutos.
+
+- **O teste das portas das contas já não falha quando várias suites correm ao mesmo tempo**: o supervisor aceita que lhe indiquem por onde começar a procurar portas livres (o valor por defeito continua a ser 18800) e os testes pedem ao sistema um troço sem uso em vez de um fixo.
+
 ## [1.7.9]
 
 ### Corrigido

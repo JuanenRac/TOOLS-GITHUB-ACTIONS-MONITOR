@@ -35,7 +35,7 @@ MAX_BODY = 1_048_576
 def free_port(start=CHILD_PORT_START, taken=()):
     """A free TCP port on 127.0.0.1, from `start` upwards, never one of `taken`: a child that was given its port but has not started yet has not bound it, so the system alone cannot tell it is spoken for."""
     import socket
-    for port in range(start, start + 400):
+    for port in range(start, min(start + 400, 65536)):
         if port in taken:
             continue
         with socket.socket() as probe:
@@ -111,8 +111,9 @@ def fetch(url, timeout=6, data=None, headers=None, method=None):
 
 
 class Supervisor:
-    def __init__(self, base=None, command_for=None):
+    def __init__(self, base=None, command_for=None, port_start=None):
         self.base = base
+        self.port_start = port_start or CHILD_PORT_START
         self.lock = threading.Lock()
         self.children = {}
         self.command_for = command_for          # tests pass their own command (a stub); None = account_child.py
@@ -127,7 +128,7 @@ class Supervisor:
                 self.children.pop(account_id).stop()
             for account_id in wanted:
                 if account_id not in self.children:
-                    port = free_port(CHILD_PORT_START, {c.port for c in self.children.values()})
+                    port = free_port(self.port_start, {c.port for c in self.children.values()})
                     command = self.command_for(account_id, port) if self.command_for else None
                     self.children[account_id] = Child(account_id, port, command)
         return wanted

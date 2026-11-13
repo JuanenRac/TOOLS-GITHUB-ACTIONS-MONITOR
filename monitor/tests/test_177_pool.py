@@ -27,6 +27,9 @@ class Pool(unittest.TestCase):
         github_app.reset()
         self.dir = tempfile.TemporaryDirectory()
         self.addCleanup(self.dir.cleanup)
+        patcher = mock.patch.dict(os.environ, {"MONITOR_ACCOUNTS_DIR": self.dir.name})      # the file of the second account must live under the accounts folder
+        patcher.start()
+        self.addCleanup(patcher.stop)
         self.file = Path(self.dir.name) / "second.txt"
         self.file.write_text(TOKEN + "\n", encoding="utf-8")
 
@@ -121,6 +124,9 @@ class QuotaTab(unittest.TestCase):
         github_app.reset()
         self.dir = tempfile.TemporaryDirectory()
         self.addCleanup(self.dir.cleanup)
+        patcher = mock.patch.dict(os.environ, {"MONITOR_ACCOUNTS_DIR": self.dir.name})      # the file of the second account must live under the accounts folder
+        patcher.start()
+        self.addCleanup(patcher.stop)
         self.file = Path(self.dir.name) / "second.txt"
         self.file.write_text(TOKEN + chr(10), encoding="utf-8")
 

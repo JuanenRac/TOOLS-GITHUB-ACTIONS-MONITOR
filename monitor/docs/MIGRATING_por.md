@@ -114,3 +114,9 @@ Os seus dados não se movem: `actions_monitor.json`, as caches, os registos, `co
 | `cli` | as ferramentas de linha de comandos |
 | `ui` | Acerca de, documentos de ajuda, vistas de terminal |
 | `i18n`, `util` | os oito idiomas; pequenos utilitários partilhados |
+
+# De 1.7.9 para 1.8.0
+
+Não é preciso converter nada. Uma definição pode precisar de uma alteração:
+
+- extra_reader.file aponta para fora da pasta de contas, pelo que a segunda conta NÃO é usada. Mova o ficheiro do token para a pasta de contas (accounts/, ou a pasta indicada por MONITOR_ACCOUNTS_DIR) e mantenha o seu caminho em extra_reader.file, ou ative extra_reader.any_folder em Definições > Quota.

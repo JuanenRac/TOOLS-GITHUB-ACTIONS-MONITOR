@@ -86,7 +86,7 @@ DEFAULTS = {
     "cache": {"etag": {"enabled": True, "ttl_hours": 24}},   # conditional reads: a 304 answer costs no quota (etagcache.py)
     "display": {"timezone": "local", "blink_red_tiles": True},   # blink_red_tiles: the red tiles and red items of the bar blink softly until the cause is solved; zone of the times written for people (log, reports, command line, notifications): local | utc | an IANA name such as Europe/Madrid
     "modes": {"auto_low": True, "auto_low_enter": 1000, "auto_low_exit": 2500, "low": {"refresh_seconds": 240, "cold_refresh_seconds": 1800, "runs_per_repo": 10, "hot_hours": 2}},      # see modes.py: only what is shown in the Quota tab
-    "extra_reader": {"enabled": False, "file": ""},      # a second read-only account: only the PATH of the file with its token (readpool.py)
+    "extra_reader": {"enabled": False, "file": "", "any_folder": False},      # a second read-only account: only the PATH of the file with its token (readpool.py)
     "github_app": {"enabled": False, "app_id": "", "key_path": "", "installation_id": ""},      # an optional GitHub App for the READS (its own allowance); only the PATH of the key is kept here (github_app.py)
     "central": {"source": "off", "max_age_minutes": 120, "git_dir": ""},      # the central panel of the profile repository as a base line that spends no allowance (central_source.py): off | git | http
     "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
@@ -2524,7 +2524,7 @@ def main():
         print(platform_compat.gh_install_hint())
         return 1
     try:
-        me = gh("api", "user", retries=0)
+        me = gh("api", "user", retries=0, as_user=True)
         toolconfig.prime_owner((me or {}).get("login"))   # the owner to watch when "github_owner" is empty, from the call that checks the login: no extra call
     except AuthError:
         print(i18n.t("mon.auth_rejected"))
@@ -2568,6 +2568,13 @@ def main():
     threading.Thread(target=update_loop, daemon=True).start()
     if not LITE["on"]:
         start_sentinel(config)
+    try:      # the token file of the second account is only accepted inside the accounts folder: a configuration that points elsewhere is told once, with the way out
+        from github_actions_monitor.data_pipeline import readpool
+        block = config.get("extra_reader") if isinstance(config.get("extra_reader"), dict) else {}
+        if block.get("enabled") is True and block.get("file") and not readpool.settings(config)["file"]:
+            print(i18n.t("mon.extra_file_outside"), flush=True)
+    except Exception as error:   # noqa: BLE001 - a notice never stops the start
+        degraded.note("loop.extra", error)
     server = None
     listen = {"network": False, "host": "127.0.0.1"} if LITE["on"] else localguard.settings_from(config)
     access_token, access_generated = "", False

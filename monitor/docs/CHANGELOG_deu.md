@@ -39,6 +39,16 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **Der Ereignisstrom für KIs stirbt nicht mehr an einer gewöhnlichen Log-Zeile**: Die Zeile des Feeds wird feldweise bereinigt und dann geschrieben, statt ein bereits geschriebenes JSON zu bereinigen (eine Ursache, die auf `password: x`, `token=x` oder `DB_PASSWORD=x` endete, zerstörte es). Eine Zeile, die sich nicht bereinigen lässt, wird übersprungen und der Strom läuft weiter; die Antworten des MCP-Servers werden genauso bereinigt. Im Bereiniger endet der Wert eines `Schlüssel=Wert`-Paares an einem Anführungszeichen, einem Komma oder einem Semikolon, und ein Wert in Anführungszeichen wird ganz bereinigt.
 
+- **Was davon abhängt, wer fragt, beantwortet immer dein eigener Login**: `gh api user`, `user/orgs`, Benachrichtigungen, eine Suche nach `@me`, `gh auth` und `gh repo list` ohne Eigentümer gehen nie an die GitHub-App oder das zweite Konto, wie viele Aufrufe diese auch übrig haben (bei aktivem zweiten Konto konnte der Monitor dessen Inhaber als seinen Eigentümer nehmen und seine Organisationen auflisten).
+
+- **Ein `gh`-Aufruf ist nur dann ein Lesen, wenn er auf einer Positivliste steht**: `gh api ENDPOINT` mit höchstens den Optionen `--jq`, `--paginate`, `-H` (von der Art, die ein Lesen sendet), `-i` und `--cache`. Die angehängten Schreibweisen eines Schreibens (`-XPOST`, `--method=DELETE`, `-fa=b`, `--field=a=b`, `--input=-`) und jede andere Option gehen an deinen Login, statt auf die Quellen verteilt zu werden.
+
+- **Die Token-Datei des zweiten Kontos** (`extra_reader.file`) muss im Kontenordner des Monitors liegen (`accounts/` oder `MONITOR_ACCOUNTS_DIR`) und wird ohne Link-Folgen geöffnet, und nur wenn sie eine kleine normale Datei ist; außerhalb dieses Ordners ist die Einstellung leer. Der neue Schalter `extra_reader.any_folder` (standardmäßig aus, nur lokal) hebt die Ordnerregel für eine Datei auf, die woanders bleiben muss.
+
+- **Einem Zentralpanel mit Datum in der Zukunft wird nicht mehr vertraut**: Sein Alter wurde auf null begrenzt und galt für immer als frisch; jetzt ist es veraltet, die Zusammenfassung sagt, dass dem Datum nicht zu trauen ist, und eine bis zu fünf Minuten vorgehende Uhr wird toleriert.
+
+- **Der Test der Ports der Konten schlägt nicht mehr fehl, wenn Suiten gleichzeitig laufen**: Dem Supervisor kann gesagt werden, wo er mit der Suche nach freien Ports beginnen soll (Standard bleibt 18800), und die Tests fragen das System nach einem unbenutzten Bereich statt nach einem festen.
+
 ## [1.7.9]
 
 ### Behoben

@@ -116,6 +116,7 @@ _f("quota", "modes", "modes.low.hot_hours", "int", (1, 48), restart=False, unit=
 _f("quota", "saving", "network.etag", "bool", restart=True)
 _f("quota", "extra_reader", "extra_reader.enabled", "bool", restart=False, secure=True)
 _f("quota", "extra_reader", "extra_reader.file", "path", restart=False, secure=True)
+_f("quota", "extra_reader", "extra_reader.any_folder", "bool", restart=False, secure=True)
 _f("quota", "github_app", "github_app.enabled", "bool", restart=False, secure=True)
 _f("quota", "github_app", "github_app.app_id", "text", re.compile(r"^[0-9]{1,12}$"), restart=False, secure=True)
 _f("quota", "github_app", "github_app.key_path", "path", restart=False, secure=True)

@@ -39,6 +39,16 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - **Le flux d'événements pour IA ne meurt plus sur une ligne de journal ordinaire** : la ligne du flux est nettoyée champ par champ puis écrite, au lieu de nettoyer un JSON déjà écrit (une cause qui finissait par `password: x`, `token=x` ou `DB_PASSWORD=x` le cassait). Une ligne impossible à nettoyer est ignorée et le flux continue ; les réponses du serveur MCP sont nettoyées de la même façon. Dans le nettoyeur, la valeur d'une paire `clé=valeur` s'arrête à un guillemet, une virgule ou un point-virgule, et une valeur entre guillemets est nettoyée en entier.
 
+- **Ce qui dépend de celui qui demande est toujours servi par votre propre login** : `gh api user`, `user/orgs`, les notifications, une recherche de `@me`, `gh auth` et `gh repo list` sans propriétaire ne vont jamais à la GitHub App ni au second compte, quel que soit le nombre d'appels qui leur restent (avec le second compte actif, le moniteur pouvait prendre le titulaire de ce compte comme propriétaire et lister ses organisations).
+
+- **Un appel `gh` n'est une lecture que s'il figure sur une liste blanche** : `gh api ENDPOINT` avec au plus les options `--jq`, `--paginate`, `-H` (de celles qu'envoie une lecture), `-i` et `--cache`. Les formes collées d'une écriture (`-XPOST`, `--method=DELETE`, `-fa=b`, `--field=a=b`, `--input=-`) et toute autre option vont à votre login au lieu d'être réparties entre les sources.
+
+- **Le fichier du jeton du second compte** (`extra_reader.file`) doit se trouver dans le dossier des comptes du moniteur (`accounts/`, ou `MONITOR_ACCOUNTS_DIR`) et s'ouvre sans suivre de lien et seulement s'il s'agit d'un petit fichier ordinaire ; hors de ce dossier le réglage est vide. Le nouvel interrupteur `extra_reader.any_folder` (désactivé par défaut, local seulement) lève la règle du dossier pour un fichier qui doit rester ailleurs.
+
+- **Un panneau central daté du futur n'est plus cru** : son âge était ramené à zéro et il comptait comme frais pour toujours ; il est maintenant en retard, le résumé dit que la date n'est pas fiable et une horloge en avance de cinq minutes au plus est tolérée.
+
+- **Le test des ports des comptes n'échoue plus quand plusieurs suites tournent en même temps** : le superviseur peut recevoir le point de départ de la recherche de ports libres (la valeur par défaut reste 18800) et les tests demandent au système une plage inutilisée au lieu d'une plage fixe.
+
 ## [1.7.9]
 
 ### Corrigé

@@ -16,30 +16,60 @@ GH_TOKEN. Create it as a fine-grained token with read-only permissions, in a fil
 import os
 import re
 import time
+from pathlib import Path
 
 from github_actions_monitor.integrations import github_app
 
-DEFAULTS = {"enabled": False, "file": ""}
+DEFAULTS = {"enabled": False, "file": "", "any_folder": False}
 TOKEN_RE = re.compile(r"^(?:gh[pousr]_[A-Za-z0-9_]{20,255}|github_pat_[A-Za-z0-9_]{20,255}|[A-Fa-f0-9]{40})$")
 PAUSE = 300      # seconds a failing source is left out
 ASSUMED = 3000   # the calls assumed left in a source that has not been probed yet
 _STATE = {"left": {}, "failed": {}, "turn": 0}
 
 
+def inside_accounts(path):
+    """True when `path` is a file under the folder of the accounts of the monitor (`accounts/`, or MONITOR_ACCOUNTS_DIR) and no part of the way from that folder to the file is a link."""
+    from github_actions_monitor.accounts import accounts
+    try:
+        root = Path(os.path.abspath(accounts.root_dir()))
+        target = Path(os.path.abspath(path))
+        relative = target.relative_to(root)
+    except (ValueError, OSError):
+        return False
+    if not relative.parts:
+        return False
+    step = root
+    for part in relative.parts:
+        step = step / part
+        if os.path.islink(step):
+            return False
+    return True
+
+
 def settings(config):
+    """`file` is empty unless the path is acceptable: plain text, no network path, never the D: drive and, unless `extra_reader.any_folder` is on (off by default), inside the accounts folder."""
     block = (config or {}).get("extra_reader") if isinstance((config or {}).get("extra_reader"), dict) else {}
     path = block.get("file") if isinstance(block.get("file"), str) else ""
     good = bool(path) and len(path) <= 260 and not any(ord(c) < 32 for c in path) and not path.startswith(("\\\\", "//")) and not re.match(r"^(?:[Dd]:|/mnt/[dD](?:/|$))", path)
-    return {"enabled": block.get("enabled") is True, "file": path if good else ""}
+    anywhere = block.get("any_folder") is True
+    if good and not anywhere and not inside_accounts(path):
+        good = False
+    return {"enabled": block.get("enabled") is True, "file": path if good else "", "any_folder": anywhere}
 
 
 def token_from_file(path):
-    """The token inside the file (first line), or "" when the file is missing, too big or does not hold a token. The value is returned to the caller and kept nowhere."""
+    """The token inside the file (first line), or "" when the file is missing, too big, a link or does not hold a token. The value is returned to the caller and kept nowhere. The file is opened
+    without following a link (where the system can: O_NOFOLLOW) and only a regular file is read."""
     try:
-        if not path or os.path.getsize(path) > 1024:
+        if not path or os.path.islink(path):
             return ""
-        with open(path, "r", encoding="utf-8", errors="ignore") as handle:
-            line = handle.readline().strip()
+        fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_BINARY", 0))
+        with os.fdopen(fd, "rb") as handle:
+            import stat
+            info = os.fstat(handle.fileno())
+            if not stat.S_ISREG(info.st_mode) or info.st_size > 1024:
+                return ""
+            line = handle.readline(1100).decode("utf-8", "ignore").strip()
         return line if TOKEN_RE.match(line) else ""
     except OSError:
         return ""
