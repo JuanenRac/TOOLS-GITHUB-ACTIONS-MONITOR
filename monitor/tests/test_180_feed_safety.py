@@ -136,6 +136,12 @@ class AnAddressOfGithubPassesOnlyInTheShapesOfAClosedList(unittest.TestCase):
                 self.assertNotIn(secret, out, f"{name}: {out}")
             self.assertNotIn("", out, name)
 
+    def test_a_classic_token_of_forty_hexadecimal_digits_in_the_path_does_not_travel(self):
+        for url in (f"https://github.com/o/r/{H40}", f"https://github.com/o/r/blob/main/{H40}", f"https://github.com/o/r/releases/download/v1/{H40}", f"https://api.github.com/repos/o/r/{H40}"):
+            self.assertNotIn(H40, ai_alerts.redact(url), url)
+        self.assertIn("github.com", ai_alerts.redact("https://github.com/o/r/actions/runs/1"))
+        self.assertIn(H40, ai_alerts.redact(f"https://github.com/o/r/commit/{H40}"), "the sha of a commit is public and has its own shape")
+
     def test_the_address_is_cut_at_the_first_character_outside_the_list(self):
         for text, expected in (("https://github.com/o/r?x=1", "https://github.com/o/r?x=1"), ("https://github.com/o/r:443/x", "https://github.com/o/r:443/x"),
                                ("https://github.com/o/r#L10", "https://github.com/o/r#L10")):
