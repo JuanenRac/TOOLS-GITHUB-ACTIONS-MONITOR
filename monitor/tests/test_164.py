@@ -556,7 +556,7 @@ class NetworkMode(unittest.TestCase):
         localguard.configure(False)
 
     def test_off_by_default_and_a_public_address_is_never_accepted(self):
-        self.assertEqual(localguard.settings_from({}), {"network": False, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "proxy_public_host": "", "trusted_proxy": False})
+        self.assertEqual(localguard.settings_from({}), {"network": False, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "proxy_public_host": "", "trusted_proxy": False, "local_port": 0})
         for host in ("8.8.8.8", "example.com", "", "0.0.0.0/0"):
             self.assertEqual(localguard.settings_from({"listen": {"network": True, "host": host}})["host"], "127.0.0.1", host)
         for host in ("192.168.1.20", "10.0.0.5", "172.16.4.4", "0.0.0.0"):
@@ -1432,7 +1432,7 @@ class TerminalApplication(unittest.TestCase):
         from github_actions_monitor.ui import tui_textual as tt
         settings = {"groups": [{"id": "basic", "fields": [{"key": "open_browser", "type": "bool", "secure": False}, {"key": "airgapped", "type": "bool", "secure": True}]},
                                {"id": "sentinel", "fields": [{"key": "sentinel.workers", "type": "int"}]}, {"id": "polling", "fields": [{"key": "names", "type": "names"}, {"key": "refresh_seconds", "type": "int"}]}]}
-        self.assertEqual([f["key"] for _g, f in tt.editable_fields(settings)], ["open_browser", "refresh_seconds"], "no security option, no complex type, only the common groups")
+        self.assertEqual([f["key"] for _g, f in tt.editable_fields(settings)], ["open_browser", "names", "refresh_seconds"], "no security option, lists and maps allowed, only the common groups")
         self.assertEqual(tt.parse_value({"type": "int"}, " 42 "), (42, None))
         self.assertEqual(tt.parse_value({"type": "float"}, "x"), (None, "type"))
         self.assertEqual(tt.parse_value({"type": "text"}, " a "), ("a", None))

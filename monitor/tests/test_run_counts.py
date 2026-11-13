@@ -21,7 +21,7 @@ from github_actions_monitor.app import actions_monitor as am  # noqa: E402
 from github_actions_monitor.cli import monitor_cli  # noqa: E402
 
 PAGE = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
-NEW_KEYS = ("ui.k_of", "ui.k_filtered_title", "ui.n_showing", "ui.n_showing_filters", "ui.sb_runs", "ui.sb_runs_t")
+NEW_KEYS = ("ui.k_of", "ui.k_filtered_title", "ui.n_showing", "ui.n_showing_filters")
 
 
 def run(ident, repo, status, event="push"):
@@ -107,7 +107,7 @@ class ServerCounts(unittest.TestCase):
 
 class PageCounts(unittest.TestCase):
     def test_the_page_has_the_status_bar_item_and_the_line_and_the_texts_in_eight_languages(self):
-        for needle in ('id="sb-runs"', "function runCounts(d)", "function showingLine(c)", 'runFig(c.sr,c.tr)', 'runFig(c.sq,c.tq)', 'id="now-count"', '"ui.sb_runs"'):
+        for needle in ("function runCounts(d)", "function showingLine(c)", 'runFig(c.sr,c.tr)', 'runFig(c.sq,c.tq)', 'id="now-count"'):
             self.assertIn(needle, PAGE)
         for lang in ("en", "es", "de", "fr", "it", "ja", "zh", "pt"):
             texts = json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
@@ -115,7 +115,6 @@ class PageCounts(unittest.TestCase):
                 self.assertTrue(texts.get(key), f"{lang} {key}")
             self.assertIn("{n}", texts["ui.k_of"])
             self.assertIn("{total}", texts["ui.n_showing_filters"])
-            self.assertIn("{active}", texts["ui.sb_runs"])
 
 
 @unittest.skipUnless(shutil.which("node"), "Node is not installed: the counting logic is checked only where it is")

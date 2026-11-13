@@ -13,6 +13,7 @@ The supervisor keeps the rules of the monitor: the same host and origin guard, t
 network mode is on, exactly like a single monitor. The lite edition never runs this.
 """
 import json
+import os
 import subprocess
 import sys
 import threading
@@ -24,6 +25,7 @@ from pathlib import Path
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
 
 from github_actions_monitor.accounts import accounts  # noqa: E402
+from github_actions_monitor.security import auth_http
 from github_actions_monitor.security import netguard
 CHILD_PORT_START = 18800          # the children listen on 127.0.0.1 from here; the supervisor asks the system for a free one when it is taken
 HEALTH_EVERY = 5.0
@@ -35,7 +37,7 @@ MAX_BODY = 1_048_576
 def free_port(start=CHILD_PORT_START, taken=()):
     """A free TCP port on 127.0.0.1, from `start` upwards, never one of `taken`: a child that was given its port but has not started yet has not bound it, so the system alone cannot tell it is spoken for."""
     import socket
-    for port in range(start, start + 400):
+    for port in range(start, min(start + 400, 65536)):
         if port in taken:
             continue
         with socket.socket() as probe:
@@ -66,7 +68,7 @@ class Child:
     def start(self):
         try:
             own_group = {"start_new_session": True} if sys.platform != "win32" else {}       # a group of its own, so that stopping it reaches everything it started
-            self.proc = subprocess.Popen(self.command, cwd=str(HERE), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, **own_group)
+            self.proc = subprocess.Popen(self.command, cwd=str(HERE), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, env={**os.environ, auth_http.CHILD_ENV: "1"}, **own_group)
             self.started, self.error = time.time(), ""
         except OSError as error:
             self.proc, self.error = None, str(error)[:120]
@@ -111,8 +113,9 @@ def fetch(url, timeout=6, data=None, headers=None, method=None):
 
 
 class Supervisor:
-    def __init__(self, base=None, command_for=None):
+    def __init__(self, base=None, command_for=None, port_start=None):
         self.base = base
+        self.port_start = port_start or CHILD_PORT_START
         self.lock = threading.Lock()
         self.children = {}
         self.command_for = command_for          # tests pass their own command (a stub); None = account_child.py
@@ -127,7 +130,7 @@ class Supervisor:
                 self.children.pop(account_id).stop()
             for account_id in wanted:
                 if account_id not in self.children:
-                    port = free_port(CHILD_PORT_START, {c.port for c in self.children.values()})
+                    port = free_port(self.port_start, {c.port for c in self.children.values()})
                     command = self.command_for(account_id, port) if self.command_for else None
                     self.children[account_id] = Child(account_id, port, command)
         return wanted
@@ -347,13 +350,18 @@ class Handler(BaseHTTPRequestHandler):
         status, data, back = fetch(child.url("/api/webhook"), timeout=FORWARD_TIMEOUT, data=body, headers=headers, method="POST")
         self.reply(status or 502, data if status else b'{"ok": false}', back.get("Content-Type", "application/json"))
 
+    @staticmethod
+    def team_config():
+        from github_actions_monitor.app import toolconfig
+        return toolconfig.raw_config()
+
     def route(self, method):
         sup = SUPERVISOR["obj"]
         route = self.path.split("?")[0]
         if method == "POST" and route == "/api/webhook" and sup is not None:
             self.webhook(sup)
             return
-        if not self.gate():
+        if not self.gate() or not auth_http.gate(self, self.team_config()):      # team mode (off by default): the login and the roles are asked here, once, for every account
             return
         if sup is None:
             self.json({"error": "not ready"}, 503)
@@ -363,13 +371,18 @@ class Handler(BaseHTTPRequestHandler):
             self.json({"ok": True, "supervisor": True, "accounts": len(sup.children), "default": accounts.default_account(sup.base)})
             return
         if method == "GET" and route == "/api/accounts":
-            self.json(sup.summary())
+            listed = sup.summary()
+            seen = auth_http.visible_accounts(self, [a["id"] for a in listed["accounts"]])
+            self.json({**listed, "accounts": [a for a in listed["accounts"] if a["id"] in seen]})
             return
         if method == "GET" and route in ("/", "/index.html"):
             self.page(sup)
             return
         if method == "GET" and route.startswith("/api/accounts/") and route.endswith("/status"):
             account_id = route[len("/api/accounts/"):-len("/status")]
+            if accounts.valid_id(account_id) and not auth_http.visible_accounts(self, [account_id]):
+                self.json({"error": "this account is not yours", "code": "account_scope"}, 403)
+                return
             result = sup.status(account_id) if accounts.valid_id(account_id) else None
             self.json(result if result is not None else {"error": "unknown account"}, 200 if result is not None else 404)
             return
@@ -392,7 +405,7 @@ class Handler(BaseHTTPRequestHandler):
             self.json({"error": "account not answering", "account": account_id}, 502)
             return
         page = data.decode("utf-8", "replace")
-        info = json.dumps({"current": account_id, "default": accounts.default_account(sup.base), "accounts": [a["id"] for a in sup.summary()["accounts"]]}).replace("</", "<\\/")
+        info = json.dumps({"current": account_id, "default": accounts.default_account(sup.base), "accounts": auth_http.visible_accounts(self, [a["id"] for a in sup.summary()["accounts"]])}).replace("</", "<\\/")
         self.reply(200, page.replace("/*ACCOUNTS_DATA*/null", info, 1), "text/html; charset=utf-8")
 
     def forward(self, sup, method, route):
@@ -414,7 +427,10 @@ class Handler(BaseHTTPRequestHandler):
                 self.json({"error": "size"}, 413)
                 return
             body = self.rfile.read(size)
-        headers = {k: v for k, v in self.headers.items() if k.lower() not in NO_FORWARD}
+        headers = {k: v for k, v in self.headers.items() if k.lower() not in NO_FORWARD and k.lower() != auth_http.USER_HEADER.lower()}      # a header of the client never says who is acting
+        context = getattr(self, "auth_user", None)
+        if context:
+            headers[auth_http.USER_HEADER] = context["user"]
         headers["Host"] = f"127.0.0.1:{child.port}"           # the child answers to its own address: the supervisor already checked the one the browser used
         if "Origin" in headers:
             headers["Origin"] = f"http://127.0.0.1:{child.port}"

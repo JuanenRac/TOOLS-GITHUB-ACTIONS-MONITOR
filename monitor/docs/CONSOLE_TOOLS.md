@@ -21,3 +21,4 @@ Two optional command line tools. The monitor itself needs no package; the termin
 
 - `pip install rich`, then `py -3 tui.py [--port 8765] [--refresh 5] [--once] [--theme dark|light]`. It draws a live grid of what is running, the red workflows, the signing queue and the report, read from the running monitor on `127.0.0.1` (it uses no GitHub quota).
 - It is read-only: there is no key that re-runs, closes or writes anything. Without Rich it says how to install it and exits with code 3; the monitor and its tests never need Rich.
+- The interactive terminal application `tui_textual.py` (`pip install textual`; add `--lite` for the lite edition) edits the simple settings of the groups it lists, **lists** (type the items separated by commas: `a, b, c`) and **maps** of numbers (`name=3, other=5`) in the Settings tab; the server checks every value again, and the options of security can only be changed in the page.

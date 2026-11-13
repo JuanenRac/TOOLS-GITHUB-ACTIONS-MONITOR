@@ -39,3 +39,6 @@ monitor/update_check*.json
 
 # Backups made by tools/migrate_layout.py
 monitor/layout_backup_*/
+monitor/auth_audit.jsonl
+monitor/auth_audit.jsonl.1
+monitor/_global/

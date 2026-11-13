@@ -107,18 +107,52 @@ def should_retry_with_user(error_text):
     return bool(re.search(r"not accessible by integration|bad credentials|installation .*(suspended|not found)|401", str(error_text), re.I))
 
 
-def is_read(args):
-    """True for a `gh` call that only reads (no method other than GET, no field that turns a call into a POST)."""
+#: the only options of `gh api` that a read may carry: the filter, the pages, a header of the kind a read sends, the status line and the cache. Everything else that starts with `-` (a method, a field,
+#: a body, in any spelling: `-XPOST`, `--method=DELETE`, `-fa=b`, `--input=-`) makes the call one that is never spread over the other sources
+READ_FLAGS = {"--jq": True, "-q": True, "--paginate": False, "-H": True, "--header": True, "-i": False, "--include": False, "--cache": True}
+READ_HEADERS = ("accept", "if-none-match", "if-modified-since", "x-github-api-version")
+#: what depends on WHO asks: the endpoints of the signed-in account. They are answered by the login of the user, never by the App or by a second account
+IDENTITY_RE = re.compile(r"^(?:user|users/@me|notifications|applications|installation|app)(?:[/?]|$)|@me\b", re.I)
+
+
+def identity_read(args):
+    """True when the answer depends on who asks (the account itself, its organisations, its notifications, a search for `@me`, `gh auth`, `gh repo list` without an owner)."""
     args = [str(a) for a in args]
-    for i, a in enumerate(args):
-        if a in ("-X", "--method") and i + 1 < len(args) and args[i + 1].upper() != "GET":
-            return False
-        if a in ("-f", "-F", "--field", "--raw-field", "--input"):
-            return False
     if not args:
         return False
-    if args[0] == "api":
+    if args[0] == "auth":
         return True
+    if args[0] == "repo" and len(args) > 1 and args[1] == "list":
+        return len(args) < 3 or args[2].startswith("-")
+    if args[0] == "api":
+        endpoint = next((a for a in args[1:] if not a.startswith("-") and a not in ("api",)), "")
+        return bool(IDENTITY_RE.search(endpoint.lstrip("/")))
+    return False
+
+
+def is_read(args):
+    """True for a `gh` call that only reads and does not depend on who asks. A WHITE list: `gh api ENDPOINT` with only the options of READ_FLAGS (and a header of the kind a read sends), or
+    a verb that only reads (`gh run list`, `gh release view`...). When in doubt it is not a read, and then the user's login makes the call."""
+    args = [str(a) for a in args]
+    if not args or identity_read(args):
+        return False
+    if args[0] == "api":
+        endpoints, i = 0, 1
+        while i < len(args):
+            a = args[i]
+            if a.startswith("-"):
+                if a not in READ_FLAGS:
+                    return False
+                if READ_FLAGS[a]:
+                    if i + 1 >= len(args):
+                        return False
+                    if a in ("-H", "--header") and args[i + 1].split(":", 1)[0].strip().lower() not in READ_HEADERS:
+                        return False
+                    i += 1
+            else:
+                endpoints += 1
+            i += 1
+        return endpoints == 1
     return len(args) > 1 and args[1] in ("list", "view", "status", "diff", "checks", "download")      # gh run list, gh release view...: a verb that only reads
 
 

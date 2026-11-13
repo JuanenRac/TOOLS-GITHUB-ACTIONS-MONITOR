@@ -114,3 +114,9 @@ I tuoi dati non si spostano: `actions_monitor.json`, le cache, i log, `config_ba
 | `cli` | gli strumenti da riga di comando |
 | `ui` | Informazioni, documenti di aiuto, viste da terminale |
 | `i18n`, `util` | le otto lingue; piccole utilità condivise |
+
+# Da 1.7.9 a 1.8.0
+
+Non c'è nulla da convertire. Un'impostazione può richiedere uno spostamento:
+
+- extra_reader.file punta fuori dalla cartella degli account, quindi il secondo account NON viene usato. Sposta il file del token nella cartella degli account (accounts/, o la cartella indicata da MONITOR_ACCOUNTS_DIR) e lascia il suo percorso in extra_reader.file, oppure attiva extra_reader.any_folder in Impostazioni > Quota.
