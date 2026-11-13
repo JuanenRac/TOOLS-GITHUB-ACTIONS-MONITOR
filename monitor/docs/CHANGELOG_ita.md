@@ -23,6 +23,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - Il supervisore degli account filtra per utente: `GET /api/accounts`, `/api/accounts/<id>/status`, la pagina di un account e ogni richiesta con `?account=` o `X-Account-Id` mostrano e raggiungono solo gli account assegnati all'utente (un admin li vede tutti), e il monitor di un account sa chi agisce. Un silenziamento della scheda Avvisi ora conserva chi l'ha fatto: `muted_by` in `GET /api/alerts` e nella cronologia dei silenziamenti.
 
+- **La pagina della modalità team mostra chi ha effettuato l'accesso**: un riquadro nell'intestazione con nome e ruolo (un testo, non solo un colore) che apre un menu per cambiare la password, vedere e gestire gli utenti e il registro (solo amministratori) e uscire; la prima volta, con la modalità attiva e senza utenti, rimanda a `/login`. Ogni modifica inviata dalla pagina porta il token CSRF, una sessione terminata porta la persona a `/login` e un token errato viene rinnovato e provato una volta. In modalità individuale e nell'edizione lite la pagina non disegna né chiede nulla di nuovo; `tests/test_auth_page.py` esegue il wrapper di `fetch` in Node contro una rete finta.
+
 ### Sicurezza
 
 - **Il blocco per token errati frena di nuovo (modalità di rete)**: un indirizzo che non è questo computer ed è bloccato viene rifiutato PRIMA di giudicare il suo token, in qualunque modo lo presenti (intestazione, cookie, `?access=` e `POST /api/access`); finora un indirizzo bloccato poteva continuare a indovinare e il token giusto entrava comunque. Chi è a questo computer non viene mai bloccato fuori dal proprio monitor.

@@ -30,6 +30,7 @@ Standardmäßig aus: eine Person nutzt den Monitor ohne Anmeldung. Mit `auth.ena
 - **Endpunkte.** `/api/auth/login`, `logout`, `me`, `bootstrap`, `password`; für Admins `/api/auth/users` (mit `/update`, `/delete`, `/revoke`) und `/api/auth/audit`. Fehler sind JSON mit stabilem Code: `{"error": "...", "code": "..."}`.
 - **Protokoll.** `auth_audit.jsonl` (private Datei; eine ältere Kopie bleibt erhalten) hält Anmeldungen, Sperren, abgelehnte Anfragen und Benutzeränderungen fest; nie ein Passwort, einen Hash oder ein Token. `auth.audit` schaltet es ab.
 - **Mehrere Konten.** Mit den Konten aus `ACCOUNTS.md` listet `GET /api/accounts` nur die dem Benutzer zugewiesenen Konten auf, und nur diese erreichen `/api/accounts/<id>/status` und jede Anfrage mit `?account=` oder `X-Account-Id` (ein Admin sieht alle). Der Monitor eines Kontos erfährt, wer handelt; eine Stummschaltung im Tab Alarme hält daher fest, wer sie gemacht hat (`muted_by` in `GET /api/alerts` und im Verlauf der Stummschaltungen).
+- **Die Seite.** Ein Feld in der Kopfzeile zeigt Name und Rolle der angemeldeten Person und öffnet ein Menü: mein Passwort ändern, die Benutzer und das Protokoll (Administratoren), abmelden. Jede Änderung der Seite trägt das CSRF-Token; im Einzelmodus und in der Lite-Edition zeichnet die Seite nichts und fragt nichts Neues.
 - **Risiko.** Über unverschlüsseltes HTTP in einem Netz laufen Cookie und Passwörter im Klartext: HTTPS oder ein VPN nutzen, wie beim Netzwerkmodus.
 
 ## Ein vom Monitor gespeichertes GitHub-Token

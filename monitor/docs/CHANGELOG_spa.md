@@ -23,6 +23,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - El supervisor de cuentas filtra por usuario: `GET /api/accounts`, `/api/accounts/<id>/status`, la página de una cuenta y toda petición con `?account=` o `X-Account-Id` muestran y alcanzan solo las cuentas asignadas al usuario (un admin ve todas), y el monitor de una cuenta sabe quién actúa. Un silencio de la pestaña Alertas guarda ahora quién lo hizo: `muted_by` en `GET /api/alerts` y en el historial de silencios.
 
+- **La página del modo equipo muestra quién ha entrado**: una caja en la cabecera con el nombre y el rol (un texto, no solo un color) que abre un menú para cambiar la contraseña, ver y gestionar los usuarios y la auditoría (solo administradores) y cerrar sesión; la primera vez, con el modo activado y sin usuarios, señala `/login`. Cada cambio que envía la página lleva el token CSRF, una sesión terminada lleva a la persona a `/login` y un token erróneo se renueva y se prueba una vez. En el modo individual y en la edición lite la página no dibuja ni pide nada nuevo; `tests/test_auth_page.py` ejecuta el envoltorio de `fetch` en Node contra una red falsa.
+
 ### Seguridad
 
 - **El bloqueo por tokens erróneos vuelve a frenar (modo red)**: una dirección que no es este equipo y está bloqueada se rechaza ANTES de juzgar su token, se presente como se presente (cabecera, cookie, `?access=` y `POST /api/access`); hasta ahora una dirección bloqueada podía seguir adivinando y el token correcto aún entraba. Quien está en este equipo nunca queda bloqueado en su propio monitor.

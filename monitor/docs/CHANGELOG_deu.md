@@ -23,6 +23,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - Der Kontenüberwacher filtert nach Benutzer: `GET /api/accounts`, `/api/accounts/<id>/status`, die Seite eines Kontos und jede Anfrage mit `?account=` oder `X-Account-Id` zeigen und erreichen nur die dem Benutzer zugewiesenen Konten (ein Admin sieht alle), und der Monitor eines Kontos erfährt, wer handelt. Eine Stummschaltung im Tab Alarme hält jetzt fest, wer sie gemacht hat: `muted_by` in `GET /api/alerts` und im Verlauf der Stummschaltungen.
 
+- **Die Seite des Teammodus zeigt, wer angemeldet ist**: Ein Feld in der Kopfzeile mit Name und Rolle (ein Text, nicht nur eine Farbe), das ein Menü zum Ändern des Passworts, zum Ansehen und Verwalten der Benutzer und des Protokolls (nur Administratoren) und zum Abmelden öffnet; beim ersten Mal, mit eingeschaltetem Modus und ohne Benutzer, verweist es auf `/login`. Jede Änderung der Seite trägt das CSRF-Token, eine beendete Sitzung führt zu `/login`, und ein falsches Token wird erneuert und einmal versucht. Im Einzelmodus und in der Lite-Edition zeichnet die Seite nichts und fragt nichts Neues; `tests/test_auth_page.py` führt den Wrapper von `fetch` in Node gegen ein falsches Netz aus.
+
 ### Sicherheit
 
 - **Die Sperre bei falschen Tokens bremst wieder (Netzwerkmodus)**: Eine gesperrte Adresse, die nicht dieser Computer ist, wird abgewiesen, BEVOR ihr Token beurteilt wird, auf jedem Weg (Header, Cookie, `?access=` und `POST /api/access`); bisher konnte eine gesperrte Adresse weiter raten, und das richtige Token kam trotzdem durch. Wer an diesem Computer sitzt, wird nie aus dem eigenen Monitor ausgesperrt.
