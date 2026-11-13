@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-MONITEUR GITHUB ACTIONS + SENTINELLE (version 1.7.9)
+MONITEUR GITHUB ACTIONS + SENTINELLE (version 1.8.0)
 ====================================================
 LEQUEL LANCER ? (un nouvel utilisateur décide en deux minutes)
   COMPLET   MONITOR_GITHUB_ACTIONS.*       la page avec la sentinelle (port 8765) : alertes, file de signature, analytique. Commencez ici si vous avez plusieurs dépôts.

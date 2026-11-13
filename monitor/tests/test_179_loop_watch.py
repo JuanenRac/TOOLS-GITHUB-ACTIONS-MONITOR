@@ -109,7 +109,7 @@ class Heartbeat(unittest.TestCase):
 
 class LoopWithFalseCollaborators(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
+        self.tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
         self.addCleanup(self.tmp.cleanup)
         self.log = Path(self.tmp.name) / "log.txt"
         self.release = threading.Event()
@@ -226,7 +226,7 @@ class Wiring(unittest.TestCase):
         end = PAGE.index("function freshFail(")
         code = PAGE[start:end] + ("console.log(JSON.stringify([loopBad(null,20),loopBad({stuck:true,running_seconds:1},20),loopBad({running_seconds:100},20),"
                                   "loopBad({running_seconds:601},20),loopBad({running_seconds:601},300)]))")
-        with tempfile.TemporaryDirectory() as tmp:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
             path = Path(tmp) / "t.js"
             path.write_text(code, encoding="utf-8")
             out = subprocess.run([NODE, str(path)], capture_output=True, text=True, timeout=60, check=True)
