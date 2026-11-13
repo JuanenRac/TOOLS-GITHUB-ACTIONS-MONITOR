@@ -49,6 +49,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **Der Test der Ports der Konten schlägt nicht mehr fehl, wenn Suiten gleichzeitig laufen**: Dem Supervisor kann gesagt werden, wo er mit der Suche nach freien Ports beginnen soll (Standard bleibt 18800), und die Tests fragen das System nach einem unbenutzten Bereich statt nach einem festen.
 
+- **Eine kaputte Seite macht die CI rot**: Ein neuer Job (`page`, ohne `continue-on-error`) öffnet die Seite des Demo-Monitors in einem echten Browser (`tools/check_page.py`), geht durch jeden Tab und jeden Unter-Tab der Einstellungen, verlangt in jedem eine Mindestzahl von Feldern und schlägt bei jedem Fehler der Seite, jeder unbehandelten Promise und jedem console.error fehl. Eine absichtlich kaputte Seite (eine zweite Definition, eine Zuweisung an den Namen einer Funktion, ein Aufruf einer nicht vorhandenen Funktion) muss ihn scheitern lassen. Der Test, der doppelt definierte Funktionen sucht, erkennt nun auch eine eingerückte Deklaration, eine mit `async` und eine Zuweisung an den Namen einer Funktion.
+
 ## [1.7.9]
 
 ### Behoben

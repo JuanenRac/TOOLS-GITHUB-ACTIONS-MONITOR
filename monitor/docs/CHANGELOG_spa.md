@@ -49,6 +49,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - **La prueba de los puertos de las cuentas ya no falla cuando varias suites corren a la vez**: el supervisor admite que se le indique desde dónde buscar puertos libres (el valor por defecto sigue siendo 18800) y las pruebas piden al sistema un tramo sin uso en vez de uno fijo.
 
+- **Una página rota pone el CI en rojo**: un nuevo job (`page`, sin `continue-on-error`) abre la página del monitor de demostración en un navegador real (`tools/check_page.py`), recorre cada pestaña y cada subpestaña de Ajustes, exige un mínimo de campos en cada una y falla ante cualquier error de la página, promesa no gestionada o console.error. Una página rota a propósito (una segunda definición, una asignación al nombre de una función, una llamada a una función que no existe) debe hacerlo fallar. La prueba que busca funciones definidas dos veces ve ahora también una declaración con sangría, una con `async` y una asignación al nombre de una función.
+
 ## [1.7.9]
 
 ### Corregido

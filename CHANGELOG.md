@@ -73,6 +73,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **A central panel dated in the future is not trusted**: its age was clamped to zero, so it counted as fresh for ever; now it is behind, the summary says the date is not trusted and a clock that runs ahead by up to five minutes is tolerated.
 
+- **A page that breaks turns the CI red**: a new job (`page`, without `continue-on-error`) opens the page of the demo monitor in a real browser (`tools/check_page.py`), goes through every tab and every sub-tab of Settings, requires a minimum of fields in each one and fails on any error of the page, unhandled promise or console.error. A page broken on purpose (a second definition, an assignment to the name of a function, a call to a function that does not exist) must make it fail. The test that looks for functions defined twice now also sees a declaration with an indent, one with `async` and an assignment to the name of a function.
+
 ## [1.7.9]
 
 ### Fixed

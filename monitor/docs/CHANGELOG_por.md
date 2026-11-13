@@ -49,6 +49,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - **O teste das portas das contas já não falha quando várias suites correm ao mesmo tempo**: o supervisor aceita que lhe indiquem por onde começar a procurar portas livres (o valor por defeito continua a ser 18800) e os testes pedem ao sistema um troço sem uso em vez de um fixo.
 
+- **Uma página estragada põe o CI a vermelho**: um novo job (`page`, sem `continue-on-error`) abre a página do monitor de demonstração num navegador real (`tools/check_page.py`), percorre cada separador e cada subseparador das Definições, exige um mínimo de campos em cada um e falha perante qualquer erro da página, promessa não tratada ou console.error. Uma página estragada de propósito (uma segunda definição, uma atribuição ao nome de uma função, uma chamada a uma função que não existe) tem de o fazer falhar. O teste que procura funções definidas duas vezes passa a ver também uma declaração com recuo, uma com `async` e uma atribuição ao nome de uma função.
+
 ## [1.7.9]
 
 ### Corrigido
