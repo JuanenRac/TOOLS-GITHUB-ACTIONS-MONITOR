@@ -13,6 +13,7 @@ The supervisor keeps the rules of the monitor: the same host and origin guard, t
 network mode is on, exactly like a single monitor. The lite edition never runs this.
 """
 import json
+import os
 import subprocess
 import sys
 import threading
@@ -24,6 +25,7 @@ from pathlib import Path
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
 
 from github_actions_monitor.accounts import accounts  # noqa: E402
+from github_actions_monitor.security import auth_http
 from github_actions_monitor.security import netguard
 CHILD_PORT_START = 18800          # the children listen on 127.0.0.1 from here; the supervisor asks the system for a free one when it is taken
 HEALTH_EVERY = 5.0
@@ -66,7 +68,7 @@ class Child:
     def start(self):
         try:
             own_group = {"start_new_session": True} if sys.platform != "win32" else {}       # a group of its own, so that stopping it reaches everything it started
-            self.proc = subprocess.Popen(self.command, cwd=str(HERE), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, **own_group)
+            self.proc = subprocess.Popen(self.command, cwd=str(HERE), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, env={**os.environ, auth_http.CHILD_ENV: "1"}, **own_group)
             self.started, self.error = time.time(), ""
         except OSError as error:
             self.proc, self.error = None, str(error)[:120]
@@ -347,13 +349,18 @@ class Handler(BaseHTTPRequestHandler):
         status, data, back = fetch(child.url("/api/webhook"), timeout=FORWARD_TIMEOUT, data=body, headers=headers, method="POST")
         self.reply(status or 502, data if status else b'{"ok": false}', back.get("Content-Type", "application/json"))
 
+    @staticmethod
+    def team_config():
+        from github_actions_monitor.app import toolconfig
+        return toolconfig.raw_config()
+
     def route(self, method):
         sup = SUPERVISOR["obj"]
         route = self.path.split("?")[0]
         if method == "POST" and route == "/api/webhook" and sup is not None:
             self.webhook(sup)
             return
-        if not self.gate():
+        if not self.gate() or not auth_http.gate(self, self.team_config()):      # team mode (off by default): the login and the roles are asked here, once, for every account
             return
         if sup is None:
             self.json({"error": "not ready"}, 503)

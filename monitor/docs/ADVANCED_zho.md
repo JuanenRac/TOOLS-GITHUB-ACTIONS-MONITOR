@@ -19,6 +19,18 @@
 - **用 POST 打开会话。** 除了带 `?access=` 的地址已弃用:默认仍可使用(已有的设置不会失效),且只对 `GET` 有效,但令牌会留在历史记录、日志和 `Referer` 中,监视器会用 `Deprecation` 响应头回应。关闭 `listen.query_access` 即可拒绝它,只用 `POST /api/access` 或请求头 `X-Monitor-Access` 打开会话。带 `?access=` 的地址仍然可用。当 `listen.host` 为 `0.0.0.0` 时,设置页顶部会显示红色横幅提醒。架构中标记为安全的所有设置(不仅是 `listen.*`、`github_token.*`、`act.*` 和 `github_actions.*`,还有 Webhook、AI 操作、通知、OpenTelemetry、镜像、runner 和输出)只能在本机修改。
 - **在网络上监听时的第一步。** 先关闭 `listen.query_access` (这样令牌就不会出现在地址、历史记录或日志中; 用 `POST /api/access` 或请求头打开会话), 并在前面加上 HTTPS (`listen.tls_cert_file` 中的证书或 HTTPS 代理) 或 VPN。网络模式启动时若仍接受旧地址, 控制台会重复这条提示。
 
+## 团队模式：用户与角色
+
+默认关闭：一个人无需登录使用监视器。开启 `auth.enabled`（无需重启）后，在第一位管理员创建之前什么都不会改变。lite 版从不登录。
+
+- **第一位管理员。** 在运行监视器的电脑上打开 `/login` 创建（只能在该电脑上、只能一次；经代理到达的请求会被拒绝）。或在控制台运行：`python -m github_actions_monitor.security.auth_cli create-admin 名称 --password-env 变量名`（密码绝不出现在命令行中）。此后页面会要求登录；同一工具的 `reset-password` 和 `revoke` 可找回丢失的管理员密码。
+- **角色。** `viewer` 只读（所有 GET）；`maintainer` 还可静音和确认警报、更改工作模式；`admin` 还可更改设置、用户以及一切可能触及 GitHub 或外部的内容。未列出的路由对除 admin 外的所有人关闭。每个用户还有可查看的账户列表（admin 可看全部）：用 `?account=` 或 `X-Account-Id` 请求其他账户，在 API 和导出中都返回 403 `account_scope`。
+- **会话。** 浏览器获得 Cookie `monitor_session`（HttpOnly、SameSite=Strict，HTTPS 时加 Secure）和 CSRF 令牌（`X-CSRF-Token`，由登录和 `/api/auth/me` 返回），每个 POST 都必须携带。脚本或应用使用 `POST /api/auth/login` 并传 `{"client": "api"}`，将得到的令牌以 `Authorization: Bearer msn_...` 发送（`auth.allow_bearer` 可关闭）。页面的一次性令牌（`session_guard`）在会话之外仍然适用。
+- **密码。** 仅以加盐的 scrypt 哈希保存，至少 `auth.min_length` 个字符。错误密码达到 `auth.max_failed_logins` 次后，该用户被锁定 `auth.lockout_minutes` 分钟，每个地址还有自己的请求上限。新的密码、角色或状态会结束该用户的会话；始终至少保留一位有效管理员。
+- **端点。** `/api/auth/login`、`logout`、`me`、`bootstrap`、`password`；管理员可用 `/api/auth/users`（含 `/update`、`/delete`、`/revoke`）和 `/api/auth/audit`。错误为带稳定代码的 JSON：`{"error": "...", "code": "..."}`。
+- **审计。** `auth_audit.jsonl`（私有文件，保留一份旧副本）记录登录、锁定、被拒绝的请求和用户变更；绝不记录密码、哈希或令牌。`auth.audit` 可关闭。
+- **风险。** 在网络上使用未加密的 HTTP 时，Cookie 和密码以明文传输：与网络模式一样，请使用 HTTPS 或 VPN。
+
 ## 监视器保存的 GitHub 令牌
 
 默认仍是你自己的 `gh` 登录。开启 `github_token.enabled` 后,你可以在设置 > 高级中粘贴令牌:它保存在系统安全存储中(Windows DPAPI、macOS 钥匙串、Linux Secret Service),只有在缺失时才保存到权限 600 的文件中(页面会说明)。它绝不会写入 `actions_monitor.json`、日志、“关于”面板或支持文本,只通过进程环境传给 `gh`。**删除令牌**按钮会从所有位置清除它。
