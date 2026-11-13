@@ -13,6 +13,10 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - **`listen.trusted_proxy`** (apagado por defecto, solo local, en los ocho idiomas): detrás de un proxy inverso propio en el mismo equipo, un intento fallido se cuenta contra la última dirección de `X-Forwarded-For` en vez de contra el proxy, para que los tokens erróneos de una persona no bloqueen a todos. Solo cambia ese recuento: una petición que llega por un proxy sigue sin tratarse nunca como este equipo.
 
+### Corregido
+
+- La página de Ajustes mostraba "El monitor local no responde" y ninguna pestaña: la caja de la pestaña Cuota tenía el mismo nombre que una función más antigua de la pestaña Básico y esta la sustituía. La caja de Cuota cambia de nombre y un test falla ahora si una función de la página se define dos veces.
+
 ## [1.7.7]
 
 ### Añadido

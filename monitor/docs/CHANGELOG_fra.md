@@ -13,6 +13,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - **`listen.trusted_proxy`** (désactivé par défaut, local uniquement, dans les huit langues) : derrière un proxy inverse à vous sur le même ordinateur, un échec est compté sur la dernière adresse de `X-Forwarded-For` et non sur le proxy, pour que les jetons erronés d'une personne ne bloquent pas tout le monde. Cela ne change que ce comptage : une requête qui passe par un proxy n'est toujours jamais traitée comme cet ordinateur.
 
+### Corrigé
+
+- La page Réglages affichait « Le moniteur local ne répond pas » et aucun onglet : la boîte de l'onglet Quota portait le même nom qu'une fonction plus ancienne de l'onglet Base et celle-ci la remplaçait. La boîte du Quota est renommée, et un test échoue désormais si une fonction de la page est définie deux fois.
+
 ## [1.7.7]
 
 ### Ajouté

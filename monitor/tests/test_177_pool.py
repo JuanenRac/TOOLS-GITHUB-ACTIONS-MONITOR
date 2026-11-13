@@ -148,6 +148,14 @@ class QuotaTab(unittest.TestCase):
         self.assertNotIn(str(self.file), text)
         self.assertEqual(readpool.snapshot()["left"]["extra"], 4900)
 
+    def test_no_function_of_the_page_is_defined_twice(self):
+        """A second definition silently replaces the first one (the Quota tab box was replaced by the async box of the Basic tab and Settings stopped rendering)."""
+        import re
+        page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        names = [m[2] for m in re.findall(r"(?m)^(async )?(function )([A-Za-z0-9_$]+)", page)]
+        twice = sorted({n for n in names if names.count(n) > 1})
+        self.assertEqual(twice, [])
+
     def test_the_tab_the_endpoint_and_the_buttons_are_there(self):
         import settings_api
         page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
@@ -157,7 +165,7 @@ class QuotaTab(unittest.TestCase):
         for key in ("github_app.enabled", "central.source", "extra_reader.enabled", "extra_reader.file", "modes.auto_low", "modes.low.refresh_seconds", "network.etag"):
             self.assertIn(key, keys)
         self.assertIn('path == "/api/quota-pool/status"', source)
-        self.assertIn('if(g.id==="quota")panel.appendChild(quotaBox())', page)
+        self.assertIn('if(g.id==="quota")panel.appendChild(quotaTabBox())', page)
         for key in ("ui.qt_test_app", "ui.qt_test_extra", "ui.qt_perms", "ui.qt_recommended", "ui.qt_defaults", "ui.cfg_g_quota"):
             self.assertIn(key, page + "ui.cfg_g_quota")
             for lang in i18n.LANGS:

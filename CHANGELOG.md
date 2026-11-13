@@ -14,6 +14,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **`listen.trusted_proxy`** (off by default, local-only, in the eight languages): behind a reverse proxy of your own on the same computer, a failed attempt is counted against the last address of `X-Forwarded-For` instead of against the proxy, so the wrong tokens of one person do not lock out everybody. It only changes that counting: a request that comes through a proxy is still never treated as this computer.
 
+### Fixed
+
+- The Settings page showed "The local monitor does not respond" and no tabs: the box of the Quota tab had the same name as an older function of the Basic tab and was replaced by it. The Quota box is renamed, and a test now fails if a function of the page is defined twice.
+
 ## [1.7.7]
 
 ### Added

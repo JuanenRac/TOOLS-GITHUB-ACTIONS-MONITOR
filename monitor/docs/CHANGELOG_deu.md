@@ -13,6 +13,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **`listen.trusted_proxy`** (standardmäßig aus, nur lokal, in den acht Sprachen): Hinter einem eigenen Reverse-Proxy auf demselben Computer wird ein Fehlversuch gegen die letzte Adresse von `X-Forwarded-For` statt gegen den Proxy gezählt, damit falsche Tokens einer Person nicht alle aussperren. Es ändert nur diese Zählung: Eine Anfrage über einen Proxy gilt weiterhin nie als dieser Computer.
 
+### Behoben
+
+- Die Einstellungsseite zeigte "Der lokale Monitor antwortet nicht" und keine Tabs: Die Box des Tabs Kontingent hatte denselben Namen wie eine ältere Funktion des Tabs Basis und wurde von ihr ersetzt. Die Kontingent-Box ist umbenannt, und ein Test schlägt jetzt fehl, wenn eine Funktion der Seite doppelt definiert ist.
+
 ## [1.7.7]
 
 ### Hinzugefügt
