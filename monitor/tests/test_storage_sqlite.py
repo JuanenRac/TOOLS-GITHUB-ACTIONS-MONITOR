@@ -342,6 +342,47 @@ class TwoAccounts(unittest.TestCase):
             self.assertGreater(reads, 3)
             self.assertLess(slowest, 2.0, "a read waited for a writer")
 
+    def test_model_b_the_page_answers_over_http_while_two_processes_tick(self):
+        """A real HTTP server (the page of one process) reads the shared database for every request while two other processes write their ticks: every answer is complete and prompt."""
+        import http.server
+        import urllib.request
+        with tempfile.TemporaryDirectory() as tmp:
+            shared = Path(tmp) / "shared.sqlite3"
+            store = sqlite_storage.SqliteStorage(shared)
+
+            class Page(http.server.BaseHTTPRequestHandler):
+                def do_GET(self):      # what an endpoint of the page does: read the feed of an account and the list of accounts
+                    body = json.dumps({"events": store.load_events("alpha", None, 20), "accounts": store.list_accounts(), "state": store.load_sentinel_state("beta", "sentinel_cache")}).encode()
+                    self.send_response(200)
+                    self.send_header("Content-Length", str(len(body)))
+                    self.end_headers()
+                    self.wfile.write(body)
+
+                def log_message(self, *args):
+                    pass
+
+            server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Page)
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            procs = [subprocess.Popen([sys.executable, "-I", "-c", TICKER, str(HERE / "src"), str(shared), name, "300"]) for name in ("alpha", "beta")]
+            slowest, answers = 0.0, 0
+            try:
+                while any(p.poll() is None for p in procs):
+                    start = time.perf_counter()
+                    with urllib.request.urlopen(f"http://127.0.0.1:{server.server_address[1]}/", timeout=10) as answer:
+                        document = json.loads(answer.read())
+                    slowest = max(slowest, time.perf_counter() - start)
+                    answers += 1
+                    self.assertTrue(all(e["kind"] == "tick" and e["who"] == "alpha" for e in document["events"]))
+            finally:
+                for p in procs:
+                    self.assertEqual(p.wait(timeout=180), 0)
+                server.shutdown()
+                server.server_close()
+                store.close()
+            self.assertGreater(answers, 3)
+            self.assertLess(slowest, 3.0, "a request of the page waited for a writer")
+
     def test_several_threads_in_one_process_share_one_storage(self):
         with tempfile.TemporaryDirectory() as tmp:
             s = sqlite_storage.SqliteStorage(Path(tmp) / "s.sqlite3")
