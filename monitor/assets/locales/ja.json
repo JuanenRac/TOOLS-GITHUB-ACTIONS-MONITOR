@@ -1843,6 +1843,7 @@
  "ui.l_pending": "署名待ち",
  "ui.l_red": "赤の CI",
  "ui.l_unsigned": "未署名",
+ "ui.lamp_was": "以前: {level}",
  "ui.lang_label": "言語",
  "ui.link_run": "run を見る",
  "ui.link_run_short": "run",

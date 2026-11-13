@@ -17,6 +17,7 @@ Everything listed here is written and tested; it is either already in the main b
 - A storage layer behind one interface, with the file backend that keeps the layout of `accounts/<id>/`, atomic writes and backups that any backend can restore.
 - An optional SQLite backend (off by default), one database per account, versioned migrations, a busy timeout that can be set, and tools to move the state between the file backend and SQLite in either direction with a dry run first.
 - The history of changes is translated in the eight languages back to 1.0.0, and a test keeps it complete.
+- Retention and rotation of the history (events and analytics kept for a number of days, delete or archive, one audit line per pass, a size warning in the doctor; the state of the sentinels and the configuration are never touched).
 
 ### Finished and waiting to be merged
 
@@ -29,11 +30,10 @@ Everything listed here is written and tested; it is either already in the main b
 - The active notice to an external AI (off by default, a first confirmation per provider, only the redacted fields of a closed list, a cap of calls and of cost an hour, the key by the name of a variable, and the AI never runs an action).
 - The terminal application edits lists and maps.
 - Team mode (off by default): users, roles (admin, maintainer, viewer) and sessions kept in the storage, a login page, a Bearer token for clients that are not a browser, stable JSON errors and a recovery of an administrator from the console of this computer. Individual mode keeps working without a login and the lite edition never has one.
+- A livelier page: animated icons, status bulbs whose motion follows their state, answers to hover, focus and click, all of it off with reduced motion and light in the lite edition.
 
 ### Still being finished
 
-- Retention and rotation of the history (events and analytics kept for a number of days, delete or archive, one audit line per pass, a size warning in the doctor; the state of the sentinels and the configuration are never touched).
-- A livelier page: animated icons, status bulbs whose motion follows their state, answers to hover, focus and click, all of it off with reduced motion and light in the lite edition.
 - Silences that remember who made them (needs team mode).
 
 ## Planned, in this order

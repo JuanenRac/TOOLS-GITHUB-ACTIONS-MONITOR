@@ -12,6 +12,7 @@ Tudo o que se segue está escrito e testado; ou já está no ramo principal, ou 
 - Uma camada de armazenamento atrás de uma única interface, com o suporte de ficheiros que mantém a disposição de `accounts/<id>/`, escritas atómicas e cópias de segurança que qualquer suporte pode restaurar.
 - Um suporte SQLite opcional (desativado por predefinição), uma base de dados por conta, migrações com versão, um tempo de espera configurável e ferramentas para mover o estado entre o suporte de ficheiros e o SQLite nos dois sentidos, primeiro com uma simulação.
 - O histórico de alterações está traduzido nas oito línguas até à 1.0.0 e um teste mantém-no completo.
+- Retenção e rotação do histórico (eventos e análises durante um número de dias, apagar ou arquivar, uma linha de auditoria por passagem, um aviso de tamanho no doctor; o estado das sentinelas e a configuração nunca são tocados).
 
 ### Concluído e à espera de integração
 
@@ -24,11 +25,10 @@ Tudo o que se segue está escrito e testado; ou já está no ramo principal, ou 
 - O aviso ativo a uma IA externa (desativado por predefinição, uma primeira confirmação por fornecedor, só os campos redigidos de uma lista fechada, um limite de chamadas e de custo por hora, a chave pelo nome de uma variável, e a IA nunca executa uma ação).
 - A aplicação de terminal edita listas e mapas.
 - Modo de equipa (desativado por predefinição): utilizadores, funções (admin, maintainer, viewer) e sessões guardados no armazenamento, uma página de início de sessão, um token Bearer para clientes que não são um navegador, erros JSON estáveis e a recuperação de um administrador a partir da consola deste computador. O modo individual continua sem início de sessão e a edição lite nunca o tem.
+- Uma página mais viva: ícones animados, luzes de estado cujo movimento segue o estado, respostas a passar o rato, foco e clique; tudo se desliga com movimento reduzido e é leve na edição lite.
 
 ### Ainda a ser concluído
 
-- Retenção e rotação do histórico (eventos e análises durante um número de dias, apagar ou arquivar, uma linha de auditoria por passagem, um aviso de tamanho no doctor; o estado das sentinelas e a configuração nunca são tocados).
-- Uma página mais viva: ícones animados, luzes de estado cujo movimento segue o estado, respostas a passar o rato, foco e clique; tudo se desliga com movimento reduzido e é leve na edição lite.
 - Silêncios que recordam quem os definiu (exige o modo de equipa).
 
 ## Previsto, por esta ordem

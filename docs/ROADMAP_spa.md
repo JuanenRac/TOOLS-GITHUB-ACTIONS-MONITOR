@@ -12,6 +12,7 @@ Todo lo que sigue está escrito y probado; o ya está en la rama principal o esp
 - Una capa de almacenamiento tras una sola interfaz, con el soporte de ficheros que mantiene la disposición de `accounts/<id>/`, escrituras atómicas y copias de seguridad que cualquier soporte puede restaurar.
 - Un soporte SQLite opcional (apagado por defecto), una base por cuenta, migraciones con versión, un tiempo de espera ajustable y herramientas para pasar el estado entre el soporte de ficheros y SQLite en ambos sentidos, con una simulación previa.
 - El historial de cambios está traducido a los ocho idiomas hasta la 1.0.0 y una prueba lo mantiene completo.
+- Retención y rotación del historial (eventos y analíticas durante un número de días, borrar o archivar, una línea de auditoría por pasada, aviso de tamaño en el doctor; el estado de los centinelas y la configuración nunca se tocan).
 
 ### Terminado y a la espera de fusionarse
 
@@ -24,11 +25,10 @@ Todo lo que sigue está escrito y probado; o ya está en la rama principal o esp
 - El aviso activo a una IA externa (apagado por defecto, una primera confirmación por proveedor, solo los campos redactados de una lista cerrada, un tope de llamadas y de coste por hora, la clave por el nombre de una variable, y la IA nunca ejecuta una acción).
 - La aplicación de terminal edita listas y mapas.
 - Modo equipo (apagado por defecto): usuarios, roles (admin, maintainer, viewer) y sesiones guardados en el almacenamiento, página de acceso, un token Bearer para clientes que no son un navegador, errores JSON estables y una recuperación de un administrador desde la consola de este equipo. El modo individual sigue sin acceso y la edición lite nunca lo tiene.
+- Una página con más vida: iconos animados, bombillas de estado cuyo movimiento sigue su estado, respuestas al pasar, enfocar y pulsar; todo se apaga con movimiento reducido y es ligero en la edición lite.
 
 ### Aún en cierre
 
-- Retención y rotación del historial (eventos y analíticas durante un número de días, borrar o archivar, una línea de auditoría por pasada, aviso de tamaño en el doctor; el estado de los centinelas y la configuración nunca se tocan).
-- Una página con más vida: iconos animados, bombillas de estado cuyo movimiento sigue su estado, respuestas al pasar, enfocar y pulsar; todo se apaga con movimiento reducido y es ligero en la edición lite.
 - Silencios que recuerdan quién los puso (necesita el modo equipo).
 
 ## Previsto, en este orden

@@ -12,6 +12,7 @@ Tutto ciò che segue è scritto e provato; o è già nel ramo principale o atten
 - Un livello di archiviazione dietro un'unica interfaccia, con il supporto a file che mantiene la disposizione di `accounts/<id>/`, scritture atomiche e copie di sicurezza che qualsiasi supporto può ripristinare.
 - Un supporto SQLite facoltativo (spento per impostazione predefinita), un database per account, migrazioni con versione, un tempo di attesa regolabile e strumenti per spostare lo stato tra il supporto a file e SQLite nei due sensi, prima con una simulazione.
 - La cronologia delle modifiche è tradotta nelle otto lingue fino alla 1.0.0 e un test la mantiene completa.
+- Conservazione e rotazione della cronologia (eventi e analisi per un numero di giorni, eliminare o archiviare, una riga di audit per passata, un avviso di dimensione nel doctor; lo stato delle sentinelle e la configurazione non vengono mai toccati).
 
 ### Finito e in attesa di essere unito
 
@@ -24,11 +25,10 @@ Tutto ciò che segue è scritto e provato; o è già nel ramo principale o atten
 - L'avviso attivo a un'IA esterna (spento per impostazione predefinita, una prima conferma per fornitore, solo i campi oscurati di una lista chiusa, un tetto di chiamate e di costo all'ora, la chiave tramite il nome di una variabile, e l'IA non esegue mai un'azione).
 - L'applicazione da terminale modifica elenchi e mappe.
 - Modalità team (spenta per impostazione predefinita): utenti, ruoli (admin, maintainer, viewer) e sessioni conservati nell'archiviazione, una pagina di accesso, un token Bearer per i client che non sono un browser, errori JSON stabili e il ripristino di un amministratore dalla console di questo computer. La modalità individuale continua senza accesso e l'edizione lite non ne ha mai.
+- Una pagina più viva: icone animate, spie di stato il cui movimento segue lo stato, risposte a passaggio, focus e clic; tutto si spegne con il movimento ridotto ed è leggero nell'edizione lite.
 
 ### Ancora in rifinitura
 
-- Conservazione e rotazione della cronologia (eventi e analisi per un numero di giorni, eliminare o archiviare, una riga di audit per passata, un avviso di dimensione nel doctor; lo stato delle sentinelle e la configurazione non vengono mai toccati).
-- Una pagina più viva: icone animate, spie di stato il cui movimento segue lo stato, risposte a passaggio, focus e clic; tutto si spegne con il movimento ridotto ed è leggero nell'edizione lite.
 - Silenzi che ricordano chi li ha impostati (richiede la modalità team).
 
 ## Previsto, in quest'ordine

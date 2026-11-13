@@ -29,6 +29,8 @@ Er startet mit dem vollständigen Monitor und läuft im selben Prozess in einem 
 
 Jede Prüfung hat eine von fünf Stufen: **ok** (nichts zu tun), **info** (gut zu wissen), **warn** (bald ansehen), **bad** (jetzt handeln) und **unknown** (noch nicht prüfbar: **unknown wird nie grün gezeigt**). Der Bericht oben im Reiter fasst alles in wenigen Zeilen zusammen; die Details öffnen sich je Prüfung. Ein im Monitor herausgefiltertes Repository wird nicht geprüft.
 
+Jede Lampe hat neben der Farbe auch eine Form (ein Häkchen für ok, ein Ausrufezeichen für warn, ein Kreuz für bad, ein *i* für info und ein Fragezeichen für unknown), sodass die Stufe nie allein von der Farbe abhängt. Fahren Sie mit der Maus über eine Lampe oder erreichen Sie sie mit der Tastatur, um die Stufe in Worten und den Zustand vor der Änderung zu lesen. Die Lampen atmen in einem Rhythmus, der ihrer Stufe folgt, eine Lampe, die sich ändert, spielt einen kurzen Übergang ab, und wenn Ihr System reduzierte Bewegung verlangt, bewegt sich nichts.
+
 ## Die Prüfungen
 
 | Prüfung | Was geprüft wird und die genaue Regel | Wo einstellbar | Stufe und was zu tun ist |

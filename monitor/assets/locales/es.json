@@ -1843,6 +1843,7 @@
  "ui.l_pending": "pendientes de firma",
  "ui.l_red": "CI en rojo",
  "ui.l_unsigned": "sin firmar",
+ "ui.lamp_was": "antes: {level}",
  "ui.lang_label": "Idioma",
  "ui.link_run": "ver run",
  "ui.link_run_short": "run",

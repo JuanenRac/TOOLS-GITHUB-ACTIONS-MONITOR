@@ -29,6 +29,8 @@ Arranca con el monitor completo y corre en el mismo proceso, en su propio hilo, 
 
 Cada comprobación tiene uno de cinco niveles: **ok** (nada que hacer), **info** (conviene saberlo), **warn** (míralo pronto), **bad** (actúa ya) y **unknown** (aún no se pudo comprobar: **desconocido nunca se muestra como verde**). El parte de arriba de la pestaña lo resume en pocas líneas; el detalle se abre por comprobación. Un repositorio que filtraste en el monitor no se comprueba.
 
+Cada bombilla tiene una forma además de un color (una marca para ok, una exclamación para warn, una cruz para bad, una *i* para info y una interrogación para unknown), de modo que el nivel nunca depende solo del color. Pasa el ratón por una bombilla, o llega a ella con el teclado, para leer su nivel con palabras y cómo estaba antes de cambiar. Las bombillas respiran a un ritmo que sigue su nivel, la que cambia hace una transición breve, y si tu sistema pide movimiento reducido no se mueve nada.
+
 ## Las comprobaciones
 
 | Comprobación | Qué comprueba y la regla exacta | Dónde se configura | Nivel y qué hacer |

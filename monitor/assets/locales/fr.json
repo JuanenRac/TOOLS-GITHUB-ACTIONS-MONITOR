@@ -1843,6 +1843,7 @@
  "ui.l_pending": "signature en attente",
  "ui.l_red": "CI rouge",
  "ui.l_unsigned": "non signés",
+ "ui.lamp_was": "avant : {level}",
  "ui.lang_label": "Langue",
  "ui.link_run": "voir le run",
  "ui.link_run_short": "run",

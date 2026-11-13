@@ -29,6 +29,8 @@ Arranca com o monitor completo e corre no mesmo processo, num fio próprio, com 
 
 Cada verificação tem um de cinco níveis: **ok** (nada a fazer), **info** (convém saber), **warn** (veja em breve), **bad** (aja já) e **unknown** (ainda não foi possível verificar: **unknown nunca é mostrado a verde**). O relatório no topo do separador resume tudo em poucas linhas; o detalhe abre por verificação. Um repositório que filtrou no monitor não é verificado.
 
+Cada luz tem uma forma além de uma cor (um visto para ok, um ponto de exclamação para warn, uma cruz para bad, um *i* para info e um ponto de interrogação para unknown), por isso o nível nunca depende só da cor. Passe o rato por cima de uma luz, ou chegue a ela com o teclado, para ler o seu nível por palavras e como estava antes de mudar. As luzes respiram a um ritmo que segue o seu nível, a que muda faz uma transição breve e, se o sistema pedir movimento reduzido, não se mexe nada.
+
 ## As verificações
 
 | Verificação | O que verifica e a regra exata | Onde se configura | Nível e o que fazer |

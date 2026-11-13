@@ -67,11 +67,13 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
-      - name: Open the page, go through every tab and raise nothing (and a page broken on purpose must fail)
+      - name: Open the page, go through every tab and raise nothing (a page broken on purpose must fail; the lamps move, or stand still when asked)
         env:
           MONITOR_BROWSER_TESTS: "1"
           MONITOR_REQUIRE_BROWSER: "1"
-        run: python -m unittest discover -s monitor/tests -p "test_180_page_smoke.py" -v
+        run: |
+          python -m unittest discover -s monitor/tests -p "test_180_page_smoke.py" -v
+          python -m unittest discover -s monitor/tests -p "test_180_motion.py" -v
 
   container:
     name: The example container builds

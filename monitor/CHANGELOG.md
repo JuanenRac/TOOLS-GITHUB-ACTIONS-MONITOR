@@ -60,6 +60,22 @@ when this file and `tool_version.py` disagree.
 
 - **The page of the team mode shows who is signed in**: a box in the header with the name and the role (a text, not only a colour) that opens a menu to change the password, to see and manage the users and the audit (administrators only) and to sign out; the first time, with the mode on and no user yet, it points to `/login`. Every change the page sends carries the CSRF token, a session that ended sends the person to `/login`, and a wrong token is renewed and tried once. In the individual mode and in the lite edition the page draws nothing and asks nothing new; `tests/test_auth_page.py` runs the wrapper of `fetch` in Node against a fake network.
 
+- **Every status lamp has a shape as well as a colour**: a tick for ok, an exclamation mark for warn, a cross for bad, an i for info and a question mark for unknown, in the lamps of the sentinels and in the lamp of the bar at the foot, so the level never depends on the colour alone.
+
+- **The lamps are alive**: each one breathes at a pace that follows its level (slow when all is well, quick when something is red) with a soft glow of its own colour.
+
+- **A lamp that changes plays one short transition**, and the tooltip of the lamps of the sentinels says what the level was before (also for a keyboard user, with the focus on the lamp).
+
+- **The boxes at the top answer when their state changes**: a short pop when a box turns red, yellow, green or starts running, a small tick when a figure changes and a slight bob of the icon of the active runs.
+
+- **Hover and focus say more**: the lamps of the sentinels lift and show their text in a tip that follows the keyboard focus too, and the rows of the alerts answer to the pointer.
+
+- **Filters move**: when you change a filter, the rows that are drawn arrive with a short slide instead of jumping.
+
+- **Less motion means no motion**: with the preference of the system for reduced motion nothing breathes, pops or slides, and the light edition keeps its figures and its bar with the same lamps. No library was added.
+
+- A check of the life of the page in a real browser (the lamps are animated, every lamp has a shape and a text, a changed lamp plays its transition, the same page with reduced motion stands still, nothing is logged as an error), run by the job of the page.
+
 ### Fixed
 
 - The dashboard could stay on one old picture while the monitor was running: a call to `gh` that never returned (a child process holding its pipes after the timeout) held the refresh loop for good while the page still answered at once. Every `gh` call is now bounded by a hard deadline in a helper thread, and a loop that still hangs is found and restarted by the watchdog above.

@@ -12,6 +12,7 @@ Tout ce qui suit est écrit et testé ; c'est soit déjà dans la branche princi
 - Une couche de stockage derrière une seule interface, avec le support fichiers qui garde la disposition de `accounts/<id>/`, des écritures atomiques et des sauvegardes que n'importe quel support peut restaurer.
 - Un support SQLite facultatif (désactivé par défaut), une base par compte, des migrations versionnées, un délai d'attente réglable et des outils pour déplacer l'état entre le support fichiers et SQLite dans les deux sens, avec une simulation d'abord.
 - L'historique des changements est traduit dans les huit langues jusqu'à la 1.0.0, et un test le garde complet.
+- Rétention et rotation de l'historique (événements et analyses pendant un nombre de jours, supprimer ou archiver, une ligne d'audit par passage, un avertissement de taille dans le doctor ; l'état des sentinelles et la configuration ne sont jamais touchés).
 
 ### Terminé et en attente de fusion
 
@@ -24,11 +25,10 @@ Tout ce qui suit est écrit et testé ; c'est soit déjà dans la branche princi
 - L'avis actif à une IA externe (désactivé par défaut, une première confirmation par fournisseur, seulement les champs expurgés d'une liste fermée, un plafond d'appels et de coût par heure, la clé par le nom d'une variable, et l'IA n'exécute jamais d'action).
 - L'application de terminal édite les listes et les tables.
 - Mode équipe (désactivé par défaut) : utilisateurs, rôles (admin, maintainer, viewer) et sessions gardés dans le stockage, une page de connexion, un jeton Bearer pour les clients qui ne sont pas un navigateur, des erreurs JSON stables et une récupération d'un administrateur depuis la console de cet ordinateur. Le mode individuel continue sans connexion et l'édition lite n'en a jamais.
+- Une page plus vivante : icônes animées, voyants d'état dont le mouvement suit l'état, réponses au survol, au focus et au clic ; tout s'éteint avec le mouvement réduit et reste léger dans l'édition lite.
 
 ### Encore en finition
 
-- Rétention et rotation de l'historique (événements et analyses pendant un nombre de jours, supprimer ou archiver, une ligne d'audit par passage, un avertissement de taille dans le doctor ; l'état des sentinelles et la configuration ne sont jamais touchés).
-- Une page plus vivante : icônes animées, voyants d'état dont le mouvement suit l'état, réponses au survol, au focus et au clic ; tout s'éteint avec le mouvement réduit et reste léger dans l'édition lite.
 - Des silences qui retiennent qui les a posés (demande le mode équipe).
 
 ## Prévu, dans cet ordre

@@ -373,6 +373,39 @@ header .tile.wide{min-width:0;grid-column:span 2}
 .authbox{position:relative;display:inline-block;margin-top:4px}.authbtn{font:inherit;font-size:12px;font-weight:700;padding:3px 10px;border:1px solid var(--line2);border-radius:999px;background:var(--panel2);color:var(--text);cursor:pointer;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.authbtn:focus-visible{outline:2px solid var(--acc);outline-offset:2px}.authbtn[data-role=admin]{border-color:var(--warn)}.authbtn[data-role=maintainer]{border-color:var(--run)}.authbtn.authhint{border-style:dashed;color:var(--mut)}
 .authmenu{position:absolute;right:0;top:calc(100% + 4px);z-index:60;min-width:190px;display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line2);border-radius:var(--radius);box-shadow:var(--shadow,0 6px 20px rgba(0,0,0,.35));padding:4px}.authmenu[hidden]{display:none}.authmenu button{font:inherit;text-align:left;padding:7px 10px;border:0;border-radius:6px;background:transparent;color:var(--text);cursor:pointer}.authmenu button:hover,.authmenu button:focus-visible{background:var(--panel2);outline:none}
 .authpanel{position:fixed;inset:0;z-index:80;overflow:auto;background:var(--bg);color:var(--text);padding:18px 22px}.authpanel[hidden]{display:none}.authpanel h2{margin:0 0 10px;font-size:18px}.authpanel h3{margin:18px 0 6px;font-size:14px}.authpanel .authx{position:absolute;right:16px;top:12px}.authpanel table{border-collapse:collapse;width:100%;font-size:13px}.authpanel td,.authpanel th{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left}.authpanel input,.authpanel select{font:inherit;padding:4px 6px;border:1px solid var(--line2);border-radius:6px;background:var(--panel);color:var(--text)}.authpanel button.authact{font:inherit;padding:4px 10px;border:1px solid var(--line2);border-radius:6px;background:var(--panel2);color:var(--text);cursor:pointer}.authpanel .authmsg{min-height:1.3em;margin:6px 0;font-size:13px;color:var(--mut)}.authpanel .authmsg.bad{color:var(--bad)}.authpanel pre{font-size:12px;white-space:pre-wrap;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px;max-height:240px;overflow:auto}
+/* life of the lamps: every lamp has a shape as well as a colour (the state never depends on the colour alone), breathes while it is on, and says what it was when it changes; all of it is off when the user asks for less motion */
+.sem.ok,.sb-lamp.ok{--lamp:var(--ok)}.sem.warn,.sb-lamp.warn{--lamp:var(--warn)}.sem.bad,.sb-lamp.bad{--lamp:var(--bad)}.sem.info{--lamp:var(--run)}.sem.unknown{--lamp:var(--grey)}
+.sem i,.sb-lamp{display:inline-grid;place-items:center;font-style:normal;font-weight:700;font-size:8px;line-height:1;color:var(--on-bad);transition:background-color .45s ease,box-shadow .45s ease,transform .3s ease}
+.sb-lamp{font-size:7px}
+.sem.ok i,.sem.info i,.sem.unknown i{box-shadow:0 0 5px var(--lamp,transparent)}.sem.warn i,.sem.bad i{box-shadow:0 0 6px var(--lamp)}
+.sem.ok i::after,.sb-lamp.ok::after{content:"\2713"}.sem.warn i::after,.sb-lamp.warn::after{content:"!"}.sem.bad i::after,.sb-lamp.bad::after{content:"\00d7";font-size:1.25em}.sem.info i::after{content:"i"}.sem.unknown i::after{content:"?"}
+.sem.warn i,.sb-lamp.warn{color:#1a1a1a}
+.sem{transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+.sem:hover,.sem:focus-visible{transform:translateY(-1px);border-color:var(--lamp,var(--run));box-shadow:0 3px 10px rgba(0,0,0,.28)}
+.sem:focus-visible{outline:2px solid var(--run);outline-offset:2px}
+.sem[data-tip]{position:relative}
+.sem[data-tip]:hover::after,.sem[data-tip]:focus-visible::after{content:attr(data-tip);position:absolute;left:0;top:calc(100% + 6px);z-index:40;width:max-content;max-width:min(320px,80vw);padding:5px 9px;border:1px solid var(--line2);border-radius:8px;background:var(--panel2);color:var(--text);font-size:12px;line-height:1.35;text-align:left;white-space:normal;box-shadow:0 6px 18px rgba(0,0,0,.35);pointer-events:none}
+.tile b,.tile .ico,.badge{transition:color .4s ease,background-color .4s ease}
+.alrow{transition:background-color .15s ease,transform .15s ease}.alrow:hover{transform:translateX(2px)}
+@media (prefers-reduced-motion:no-preference){
+@keyframes lamp-breath{0%,100%{box-shadow:0 0 2px 0 var(--lamp)}50%{box-shadow:0 0 8px 2px var(--lamp)}}
+@keyframes lamp-flip{0%{transform:scale(.3);box-shadow:0 0 0 0 var(--lamp)}50%{transform:scale(1.55);box-shadow:0 0 0 7px transparent}100%{transform:scale(1)}}
+@keyframes tile-flip{0%{transform:scale(.97)}40%{transform:scale(1.035)}100%{transform:scale(1)}}
+@keyframes num-tick{from{opacity:.35;transform:translateY(-3px)}to{opacity:1;transform:none}}
+@keyframes ico-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+@keyframes fx-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.sem.ok i,.sb-lamp.ok{animation:lamp-breath 4.2s ease-in-out infinite}
+.sem.warn i,.sb-lamp.warn{animation:lamp-breath 2.8s ease-in-out infinite}
+.sem.bad i,.sb-lamp.bad{animation:lamp-breath 1.6s ease-in-out infinite,pulse-dot 1.8s ease-in-out infinite}
+.sem.info i{animation:lamp-breath 2.2s ease-in-out infinite}
+.sem i.lamp-flip,.sb-lamp.lamp-flip{animation:lamp-flip .75s cubic-bezier(.2,.8,.2,1)}
+.tile.lamp-flip:not(.skel){animation:tile-flip .6s ease-out}
+.tile b.tick{animation:num-tick .5s ease-out}
+.sem[data-tip]:hover::after,.sem[data-tip]:focus-visible::after{animation:fx-in .16s ease-out}
+.tile.run .ico{animation:ico-bob 2.4s ease-in-out infinite}
+.fx :where(#now>*,.alrow,.rrow,.job,tbody tr){animation:fx-in .32s ease-out both}
+}
+@media (prefers-reduced-motion:reduce){.sem,.alrow{transition:none}.sem:hover,.sem:focus-visible,.alrow:hover{transform:none}}
 </style>
 </head>
 <body>
@@ -534,6 +567,11 @@ window.addEventListener("error",e=>{const b=document.getElementById("err");b.sty
 const $=id=>document.getElementById(id);
 /* life of the page: figures that count up, short and cheap (one requestAnimationFrame per figure), and nothing at all when the user asks for less motion */
 const REDUCED=window.matchMedia?matchMedia("(prefers-reduced-motion: reduce)"):{matches:false};
+/* the lamps remember their last level: a lamp that changes plays one short transition (and the tooltip says what it was); nothing at all when the user asks for less motion */
+const LAMPS=new Map();
+function lampTrack(key,el,level){const prev=LAMPS.get(key);LAMPS.set(key,level);if(prev===undefined||prev===level||!el||REDUCED.matches)return prev;el.classList.remove("lamp-flip");void el.offsetWidth;el.classList.add("lamp-flip");setTimeout(()=>el.classList.remove("lamp-flip"),900);return prev}
+/* a short movement when the user changes a filter: the rows that are drawn arrive instead of jumping */
+function fxFilter(e){if(REDUCED.matches||!e.target||!e.target.closest||!e.target.closest("select,input,button"))return;const m=document.querySelector("main");if(!m)return;m.classList.remove("fx");void m.offsetWidth;m.classList.add("fx");clearTimeout(fxFilter.timer);fxFilter.timer=setTimeout(()=>m.classList.remove("fx"),520)}
 /* the red tile counts WORKFLOWS (the same unit in both editions) and says in how many repositories they are */
 function redUnits(workflows,repos){const t=$("kp-red");if(!t)return;const sm=t.querySelector("small");if(sm)sm.textContent=workflows?T("ui.k_red_units",{repos:repos}):T("ui.k_red")}
 function kSet(id,v){
@@ -542,6 +580,7 @@ function kSet(id,v){
   const from=typeof el._v==="number"?el._v:0,to=v;el._v=to;
   if(el._raf)cancelAnimationFrame(el._raf);
   if(from===to){el.textContent=to;return}
+  el.classList.remove("tick");void el.offsetWidth;el.classList.add("tick");setTimeout(()=>el.classList.remove("tick"),700);
   const t0=performance.now(),dur=Math.min(700,250+Math.abs(to-from)*12);
   const step=now=>{const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,3);el.textContent=Math.round(from+(to-from)*e);if(k<1)el._raf=requestAnimationFrame(step);else el.textContent=to};
   el._raf=requestAnimationFrame(step);
@@ -731,6 +770,7 @@ DATA=null;
 const FILTER={eco:store.get("am-f-eco")||"",state:store.get("am-f-state")||"",q:store.get("am-f-q")||""};
 if(QS.get("repo")){FILTER.q=QS.get("repo")}
 fillEco();$("g-state").value=FILTER.state;$("g-q").value=FILTER.q;
+[".filters","#al-filters"].forEach(q=>{const box=document.querySelector(q);if(box){box.addEventListener("input",fxFilter);box.addEventListener("change",fxFilter);box.addEventListener("click",fxFilter)}});
 ["g-eco","g-state","g-q"].forEach(id=>$(id).addEventListener(id==="g-q"?"input":"change",()=>{FILTER.eco=$("g-eco").value;FILTER.state=$("g-state").value;FILTER.q=$("g-q").value;store.set("am-f-eco",FILTER.eco);store.set("am-f-state",FILTER.state);store.set("am-f-q",FILTER.q);if(DATA)render(DATA);renderSent()}));
 /* list filter (one click on red / pending signature / failures): not saved, it is of the moment */
 FILTER.list=null;FILTER.listLabel="";
@@ -1041,7 +1081,9 @@ function renderSent0(){
   const loadingText=s.loading==="starting"?T("ui.starting"):s.loading;
   $("s-stamp").textContent=(s.loading?T("ui.s_loading",{n:loadingText})+" ":"")+"· "+clock(s.generated)+(s.cache_age_seconds?" "+T("ui.s_cache",{dur:fmt(s.cache_age_seconds)}):"")+((s.a7&&s.a7.by_ecosystem)?T("ui.s_min24")+s.a7.by_ecosystem.filter(m=>m.min24).map(m=>m.ecosystem+" "+m.min24).join(", "):"");
   const sems=[["a1","ui.a1",s.a1.level],["a2","ui.a2",s.a2.level],["a3","ui.a3",s.a3.level],["a4","ui.a4",s.a4.level],["a5","ui.a5",s.a5.level],["a6","ui.a6",s.a6.level],["a7","ui.a7",s.a7.level],["a8","ui.a8",s.a8.level],["a9","ui.a9",(s.a9||{}).level||"unknown"],["a10","ui.a10",(s.a10||{}).level||"unknown"],["a11","ui.a11",(s.a11||{}).level||"unknown"],["a12","ui.a12",ANA&&ANA.enabled!==false&&(ANA.slower||[]).length?"warn":(ANA&&(ANA.duration||[]).length?"ok":"unknown")],["a13","ui.a13",(s.lint&&s.lint.enabled)?(s.lint.summary.bad?"bad":(s.lint.summary.warn?"warn":"ok")):"unknown"]];
-  $("s-sems").innerHTML=sems.map(([k,n,l])=>`<button type="button" class="sem ${l}" data-goto="${k}" title="${esc(LVN(l)+(k==="a2"?T("ui.sem_a2"):(k==="a5"?T("ui.sem_a5"):"")))}"><i></i>${esc(T(n))}</button>`).join("");
+  const semTip=(k,l)=>{const was=LAMPS.get("sem:"+k);return LVN(l)+(k==="a2"?T("ui.sem_a2"):(k==="a5"?T("ui.sem_a5"):""))+(was&&was!==l?" \u00b7 "+T("ui.lamp_was",{level:LVN(was)}):"")};
+  $("s-sems").innerHTML=sems.map(([k,n,l])=>`<button type="button" class="sem ${l}" data-goto="${k}" data-tip="${esc(semTip(k,l))}" aria-description="${esc(semTip(k,l))}"><i></i>${esc(T(n))}</button>`).join("");
+  sems.forEach(([k,n,l])=>lampTrack("sem:"+k,$("s-sems").querySelector('[data-goto="'+k+'"] i'),l));
   const ecoLabel=k=>I18N.ecosystems[k]||k;
   $("s-parte").innerHTML=s.parte.map(p=>`<div class="pline ${p.level} ${p.head?"head":""}">${esc(p.text)}</div>`).join("")
    +(s.by_ecosystem?`<table style="margin-top:8px"><thead><tr>${["ui.be_eco","ui.be_repos","ui.be_red","ui.be_stuck","ui.be_alerts","ui.be_prs","ui.be_cands","ui.be_unsigned","ui.be_hyg","ui.be_depoff"].map(h=>`<th>${esc(T(h))}</th>`).join("")}</tr></thead><tbody>${Object.keys(s.by_ecosystem).map(k=>{const r=s.by_ecosystem[k]||{};const c=(v,bad)=>`<td${v&&bad?' style="color:var(--bad);font-weight:600"':""}>${v||0}</td>`;return `<tr><td><b>${esc(ecoLabel(k))}</b></td><td>${r.repos||0}</td>${c(r.red,1)}${c(r.stuck,1)}${c(r.alerts,1)}${c(r.prs)}${c(r.candidates)}${c(r.pending_sign,1)}${c(r.hygiene)}${c(r.dep_off,1)}</tr>`}).join("")}</tbody></table>`:"");
@@ -1390,7 +1432,7 @@ const TILE_KEY="am-tiles";let TILE_CACHE={};try{TILE_CACHE=JSON.parse(store.get(
 let TILES_LIVE=false,QUOTA_RESET=null;
 function tilesRestore(){document.querySelectorAll(".tile [data-v]").forEach(el=>{const t=el.closest(".tile"),v=TILE_CACHE[el.id];if(v!=null&&v!==""){el.textContent=v;t.classList.remove("skel");t.classList.add("stale")}})}
 function tileSave(){const out={};document.querySelectorAll(".tile [data-v]").forEach(el=>{const v=typeof el._v==="number"?el._v:el.textContent;if(v!=="–")out[el.id]=v});try{store.set(TILE_KEY,JSON.stringify(out))}catch(e){}}
-function tileState(id,cls){const el=$(id);if(!el)return;const t=el.closest(".tile");t.classList.remove("ok","warn","bad","run","skel","stale");if(cls)t.classList.add(cls)}
+function tileState(id,cls){const el=$(id);if(!el)return;const t=el.closest(".tile");t.classList.remove("ok","warn","bad","run","skel","stale");if(cls)t.classList.add(cls);lampTrack("tile:"+id,t,cls||"none")}
 function tileClock(id,t){const el=$(id);if(!el)return;const o=t?new Date(t):null;if(!o||isNaN(o)){el.textContent="–";el._v=undefined;return}const f=(x)=>{try{return o.toLocaleTimeString(LOC(),{timeZone:TZ,...x})}catch(e){return o.toLocaleTimeString(LOC(),x)}};const z=(new Intl.DateTimeFormat(LOC(),{timeZone:TZ,timeZoneName:"short"}).formatToParts(o).find(x=>x.type==="timeZoneName")||{}).value||"";el.textContent=f({hour:"2-digit",minute:"2-digit",second:"2-digit"})+" ";const sp=document.createElement("span");sp.className="tz";sp.textContent=z;el.appendChild(sp);el._v=undefined}
 function tileText(id,text){const el=$(id);if(el){el.textContent=text;el._v=undefined}}
 function quotaCount(){if(!QUOTA_RESET)return;const m=Math.max(0,Math.round((QUOTA_RESET-Date.now())/60000));$("tv-renews").textContent=T("ui.t_renews",{time:clock(QUOTA_RESET.toISOString(),{hour:"2-digit",minute:"2-digit"}),min:m})}
@@ -1657,6 +1699,7 @@ function renderBar(){
   if(!list.length){lamp.className="sb-lamp ok";txt.textContent=T("ui.sb_none");txt.title="";more.hidden=true;open.hidden=true}
   else{const top=list[0];lamp.className="sb-lamp "+top.level;txt.textContent=top.text;txt.title=top.hint||top.text;more.hidden=list.length<2;open.hidden=list.length<2;
     if(list.length>1){more.textContent=T("ui.sb_more",{n:list.length-1});more.title=T("ui.sb_open_all")}}
+  lampTrack("sb",lamp,list.length?list[0].level:"ok");
   if(!dlgs.notes.hidden)renderNotes();
   renderBarFacts();
 }
