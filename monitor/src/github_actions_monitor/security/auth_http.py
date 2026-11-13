@@ -352,6 +352,7 @@ def login_page():
     texts = {k: t("auth." + k) for k in ("title", "user", "password", "sign_in", "bootstrap_note", "create_admin", "wrong", "locked", "failed", "rate")}
     from html import escape
     e = {k: escape(v, quote=True) for k, v in texts.items()}
+    texts_json = json.dumps(texts).replace("</", "<\/")
     return f"""<!doctype html>
 <html lang="{escape(i18n.language())}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{e['title']}</title>
@@ -370,7 +371,7 @@ button{{padding:10px;border:0;border-radius:6px;background:var(--acc);color:#fff
 <label>{e['password']}<input id="p" name="password" type="password" autocomplete="current-password" required maxlength="200"></label>
 <div id="msg" role="alert"></div><button id="b" type="submit">{e['sign_in']}</button></form>
 <script>
-const T={json.dumps(texts).replace('</', '<\\/')};
+const T={texts_json};
 const f=document.getElementById('f'),m=document.getElementById('msg');let boot=false;
 fetch('/api/auth/me',{{credentials:'same-origin'}}).then(r=>r.json()).then(s=>{{if(s.authenticated){{location.href='/';return}}
  boot=!!s.bootstrap;if(boot){{document.getElementById('note').hidden=false;document.getElementById('b').textContent=T.create_admin;document.getElementById('p').autocomplete='new-password'}}}}).catch(()=>{{}});
