@@ -488,7 +488,7 @@ class Webhook(unittest.TestCase):
         self.assertNotIn("0.0.0.0", source.replace("never bind it to 0.0.0.0", ""))
         self.assertIn('(listen["host"] if listen["network"] else "127.0.0.1", port)', source)      # the address comes from the setting listen.* and is loopback unless it is turned on
         import localguard
-        self.assertEqual(localguard.settings_from({}), {"network": False, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "proxy_public_host": ""})
+        self.assertEqual(localguard.settings_from({}), {"network": False, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "proxy_public_host": "", "trusted_proxy": False})
         self.assertEqual(localguard.settings_from({"listen": {"network": True, "host": "8.8.8.8"}})["host"], "127.0.0.1")        # a public address is never accepted
         self.assertIn("class QuietServer(ThreadingHTTPServer)", source)
 
