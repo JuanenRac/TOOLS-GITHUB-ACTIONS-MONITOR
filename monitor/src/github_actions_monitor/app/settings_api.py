@@ -305,6 +305,7 @@ _f("advanced", "network", "listen.proxy_public_host", "text", PROXY_HOST_RE, sec
 _f("advanced", "network", "listen.max_failed_attempts", "int", (3, 100), unit="", secure=True)
 _f("advanced", "network", "listen.query_access", "bool", secure=True)
 _f("advanced", "network", "listen.trusted_proxy", "bool", secure=True)
+_f("advanced", "network", "listen.local_port", "int", (0, 65535), unit="", secure=True)
 _f("advanced", "token", "github_token.enabled", "bool", restart=False, secure=True)
 _f("advanced", "token", "github_token.store", "enum", ("auto", "system", "file"), restart=False, secure=True)
 _f("advanced", "ghactions", "github_actions.enabled", "bool", restart=False, secure=True)
@@ -540,8 +541,14 @@ def webhook_state(config):
     return "defined" if len(secret) >= 32 else "short"
 
 
-def describe(path=CONFIG_FILE, lite=False):
-    """What the page shows: {"groups": [{"id", "blocks": [{"id", "title_key", "fields": [...]}], "fields": [...]}], "backups": N}. A field: {"key", "type", "value", "default", "min",
+def _remote_visible():
+    from github_actions_monitor.security import localguard
+    return localguard.REMOTE_WRITABLE
+
+
+def describe(path=CONFIG_FILE, lite=False, remote=False):
+    """`remote` = the asker is a client of the network, not this computer: the value of every setting that a client of the network may not change (see localguard.REMOTE_WRITABLE) is
+    left out and the field only says whether it is defined (paths of keys, names of variables and channels are for the computer of the monitor). What the page shows: {"groups": [{"id", "blocks": [{"id", "title_key", "fields": [...]}], "fields": [...]}], "backups": N}. A field: {"key", "type", "value", "default", "min",
     "max", "enum", "restart", "unit", "secure", "label", "help", "block", "master"}. Values come from the file over the template; nothing outside SCHEMA is ever included."""
     template = {}
     try:
@@ -571,9 +578,13 @@ def describe(path=CONFIG_FILE, lite=False):
                     value = "all"
                 if kind == "status":
                     value = webhook_state(current)
+                hidden = remote and key not in _remote_visible()
+                if hidden:
+                    kind, default = "status", None
+                    value = "defined" if value not in (None, "", [], {}, False) else "undefined"
                 item = {"key": key, "type": kind, "value": value if value is not None else ("" if kind in ("text", "path", "enum") else None), "default": default, "restart": restart,
                         "unit": META[key]["unit"], "secure": META[key]["secure"], "label": label_keys(key), "help": help_key(key), "block": block,
-                        "master": index == 0 and kind == "bool" and len(keys) > 1}
+                        "master": index == 0 and kind == "bool" and len(keys) > 1, **({"redacted": True} if hidden else {})}
                 if kind in ("int", "float"):
                     item["min"], item["max"] = bounds
                 if kind == "intmap":

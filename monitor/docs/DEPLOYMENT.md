@@ -78,17 +78,20 @@ services:
 
 ## Behind a reverse proxy
 
-Keep the monitor on `127.0.0.1` and never bind it to `0.0.0.0`: it has no login. If you must reach it from another machine, put a reverse proxy with authentication and TLS in front. The monitor refuses any request whose `Host` is not its own address, so the proxy must send it:
+By default the monitor only listens on `127.0.0.1`. If you must reach it from another machine, put a reverse proxy with TLS in front, turn the network mode on (`listen.network`: then every request must carry the access token) and DECLARE the proxy (`listen.proxy_public_host` with its public name, `listen.secure_cookie`, or `listen.trusted_proxy`). The monitor refuses any request whose `Host` is not its own address or that public name, so the proxy must send it, and it must add the real address of the client:
 
 ```nginx
 location / {
-    auth_basic           "monitor";
-    auth_basic_user_file /etc/nginx/monitor.htpasswd;
     proxy_pass           http://127.0.0.1:8765;
-    proxy_set_header     Host 127.0.0.1:8765;   # the monitor refuses any other Host
+    proxy_set_header     Host $host;                                  # the public name: set it in listen.proxy_public_host
+    proxy_set_header     X-Forwarded-For $proxy_add_x_forwarded_for;  # APPENDS the real address of the client; never copy the one the client sent
+    proxy_set_header     X-Forwarded-Proto $scheme;
 }
 ```
 
+Once a proxy is declared, nothing that arrives on the main port counts as "this computer", whatever its headers say (a proxy that forgets a header would otherwise make every client of the internet look local). The keys that decide exposure, the actions on GitHub and the tests of the channels therefore cannot be used from there. To use them, open a second port that only listens on `127.0.0.1` with `listen.local_port` (a number from 1024 to 65535) and use it from the computer of the monitor: it asks for the same access token.
+
+`listen.trusted_proxy` assumes that the proxy runs on the SAME computer as the monitor (the monitor believes `X-Forwarded-For` on any connection that arrives over loopback): do not use it with a proxy on another machine. The wrong tokens of all the clients of the proxy are also counted together (three times the limit of one address), so that changing the header at every attempt does not defeat the lock-out.
 
 ## Minimum permissions of the login (`gh` or a fine-grained token)
 

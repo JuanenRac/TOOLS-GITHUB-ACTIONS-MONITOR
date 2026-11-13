@@ -19,7 +19,7 @@ import threading
 import time
 
 LOOPBACK_HOSTS = ("127.0.0.1", "localhost")
-STATE = {"network": False, "host": "127.0.0.1", "token": "", "allowed": set(), "secure": False, "proxy_host": "", "trusted_proxy": False}
+STATE = {"network": False, "host": "127.0.0.1", "token": "", "allowed": set(), "secure": False, "proxy_host": "", "trusted_proxy": False, "behind_proxy": False}
 #: the public name of an HTTPS proxy that forwards `Host` without a port (the proxy on port 443): a plain host name, never an address with a port, a path or a user
 PROXY_HOST_RE = re.compile(r"^[a-z0-9]([a-z0-9.-]{0,98}[a-z0-9])?$")
 COOKIE = "monitor_access"
@@ -81,13 +81,16 @@ def proxy_host_clean(value):
     return text if PROXY_HOST_RE.match(text) else ""
 
 
-def configure(network, host="127.0.0.1", token="", allowed=(), secure=False, proxy_host="", trusted_proxy=False):
+def configure(network, host="127.0.0.1", token="", allowed=(), secure=False, proxy_host="", trusted_proxy=False, behind_proxy=False):
     """Sets the mode of the process. `secure` = the connection is HTTPS (direct TLS or a proxy in front): the cookie then carries Secure. `proxy_host` = the public name of an HTTPS proxy that
-    forwards `Host` and `Origin` without a port (a proxy on port 443); it only counts when the session is HTTPS. Returns the state (the token is never part of it)."""
+    forwards `Host` and `Origin` without a port (a proxy on port 443); it only counts when the session is HTTPS. `behind_proxy` = the owner declared a reverse proxy in front (also
+    implied by a public proxy name or by `trusted_proxy`): then a request that arrives over loopback is NOT "this computer", because the proxy sits on loopback and makes every client look
+    local; the person at this computer uses the second, loopback-only port (`listen.local_port`). Returns the state (the token is never part of it)."""
     STATE["network"] = bool(network)
     STATE["secure"] = bool(network and secure)
     STATE["proxy_host"] = proxy_host_clean(proxy_host) if network and secure else ""
     STATE["trusted_proxy"] = bool(network and trusted_proxy)      # listen.trusted_proxy: off unless the owner says the proxy in front is theirs (see client_key)
+    STATE["behind_proxy"] = bool(network and (behind_proxy or trusted_proxy or proxy_host_clean(proxy_host)))
     STATE["host"] = host if network else "127.0.0.1"
     STATE["token"] = token if network else ""
     STATE["allowed"] = {str(a).lower() for a in allowed} | (own_addresses() if network and host == "0.0.0.0" else set())
@@ -100,9 +103,9 @@ def public_state():
     return {"network": STATE["network"], "host": STATE["host"], "token_required": STATE["network"], "secure": STATE["secure"]}
 
 
-def cookie_header(token):
-    """The Set-Cookie value that remembers the access token: HttpOnly, SameSite=Strict and, when the connection is HTTPS, Secure."""
-    return f"{COOKIE}={token}; Path=/; HttpOnly; SameSite=Strict" + ("; Secure" if STATE["secure"] else "")
+def cookie_header(token, secure=None):
+    """The Set-Cookie value that remembers the access token: HttpOnly, SameSite=Strict and, when the connection is HTTPS, Secure (`secure` overrides that: the local port is plain HTTP)."""
+    return f"{COOKIE}={token}; Path=/; HttpOnly; SameSite=Strict" + ("; Secure" if (STATE["secure"] if secure is None else secure) else "")
 
 
 _lock = threading.Lock()
@@ -176,20 +179,23 @@ def make_token():
     return secrets.token_urlsafe(24)
 
 
-def local_request_ok(headers, port):
+def local_request_ok(headers, port, door=False):
     """DNS-rebinding / cross-site guard: Host must be this server and Origin (if any) too. The Origin must carry the scheme of the session (https when the connection is HTTPS, direct TLS
     or a proxy with `secure_cookie`; http otherwise) and exactly one of our own host:port pairs; the other scheme, another host or port and a malformed value are refused. The one
     exception is `listen.proxy_public_host`: an HTTPS proxy on the default port forwards `Host` and `Origin` without a port, so that one name, and only under an HTTPS session, is also
-    accepted as it is (the host and the origin must both be exactly that name, never any other host without a port)."""
-    allowed_hosts = {f"127.0.0.1:{port}", f"localhost:{port}"} | {f"{h}:{port}" for h in STATE["allowed"]}
-    if STATE["secure"] and STATE.get("proxy_host"):
-        allowed_hosts.add(STATE["proxy_host"])
+    accepted as it is (the host and the origin must both be exactly that name, never any other host without a port). `door` = the second port that only listens on loopback
+    (`listen.local_port`, plain HTTP): only the loopback names of that port count."""
+    allowed_hosts = {f"127.0.0.1:{port}", f"localhost:{port}"}
+    if not door:
+        allowed_hosts |= {f"{h}:{port}" for h in STATE["allowed"]}
+        if STATE["secure"] and STATE.get("proxy_host"):
+            allowed_hosts.add(STATE["proxy_host"])
     if (headers.get("Host") or "").lower() not in {h.lower() for h in allowed_hosts}:
         return False
     origin = headers.get("Origin")
     if origin is None:
         return True
-    scheme = "https" if STATE["secure"] else "http"
+    scheme = "https" if STATE["secure"] and not door else "http"
     return origin.lower() in {f"{scheme}://{h.lower()}" for h in allowed_hosts}
 
 
@@ -263,13 +269,36 @@ def client_key(client_address, headers=None):
         return peer      # a header that is not an address is ignored: the peer is counted
 
 
+#: the failures of a trusted proxy that the proxy itself cannot tell apart are counted here as well, with a looser limit (see note_proxy_failure)
+PROXY_KEY = "proxy:all"
+PROXY_FACTOR = 3
+
+
+def is_locked_out(client_address, headers=None):
+    """True when the address of this request (client_key) is locked, or, with `listen.trusted_proxy`, when the clients of the proxy as a whole have failed too often (a proxy that does not
+    ADD `X-Forwarded-For` lets the client choose its own address, and rotating it must not turn the lock into nothing)."""
+    if is_locked(client_key(client_address, headers)):
+        return True
+    return bool(STATE.get("trusted_proxy") and headers is not None and from_this_computer(client_address) and is_locked(PROXY_KEY))
+
+
+def note_proxy_failure(client_address, headers, limit):
+    """Counts a wrong token against all the clients of the trusted proxy together (PROXY_FACTOR times the limit of one address)."""
+    if STATE.get("trusted_proxy") and headers is not None and from_this_computer(client_address):
+        note_failure(PROXY_KEY, limit * PROXY_FACTOR)
+
+
 FORWARD_HEADERS = ("Forwarded", "X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Proto", "X-Forwarded-Port", "X-Real-IP", "Via")
 
 
-def is_this_computer(client_address, headers=None):
+def is_this_computer(client_address, headers=None, door=False):
     """True when the request really comes from a person on this computer: the TCP peer is loopback AND the request does not come through a reverse proxy on the same machine (a proxy
-    makes every client look like 127.0.0.1). A request that carries a forwarding header, or whose Host is the public name of the proxy (`listen.proxy_public_host`), is never "this computer"."""
+    makes every client look like 127.0.0.1). A request that carries a forwarding header, or whose Host is the public name of the proxy (`listen.proxy_public_host`), is never "this computer".
+    With a proxy DECLARED (`proxy_public_host`, `secure_cookie` or `trusted_proxy`) nothing that arrives over loopback counts, whatever its headers say (a proxy that forgets to add them would
+    make every client of the internet look local): the person at this computer comes in by the second port that only listens on loopback (`listen.local_port`), which is `door`."""
     if not from_this_computer(client_address):
+        return False
+    if STATE.get("behind_proxy") and not door:
         return False
     if headers is None:
         return True
@@ -293,11 +322,13 @@ def query_token_counts(command, path, config):
 
 
 def settings_from(config):
-    """{"network": bool, "host": str, "token_env": str, "allowed_hosts": [...], "proxy_public_host": str} from the configuration, with the conservative default."""
+    """{"network": bool, "host": str, "token_env": str, "allowed_hosts": [...], "proxy_public_host": str, "trusted_proxy": bool, "local_port": int} from the configuration, with the conservative default."""
     cfg = config.get("listen") if isinstance(config, dict) and isinstance(config.get("listen"), dict) else {}
     host = cfg.get("host") if isinstance(cfg.get("host"), str) and host_ok(cfg.get("host")) else "127.0.0.1"
+    door = cfg.get("local_port")
+    door = door if isinstance(door, int) and not isinstance(door, bool) and 1024 <= door <= 65535 else 0
     network = cfg.get("network") is True
     env = cfg.get("token_env") if isinstance(cfg.get("token_env"), str) else "MONITOR_ACCESS_TOKEN"
     allowed = [h for h in (cfg.get("allowed_hosts") or []) if isinstance(h, str) and 0 < len(h) <= 100]
     return {"network": network, "host": host if network else "127.0.0.1", "token_env": env or "MONITOR_ACCESS_TOKEN", "allowed_hosts": allowed,
-            "proxy_public_host": proxy_host_clean(cfg.get("proxy_public_host")), "trusted_proxy": cfg.get("trusted_proxy") is True}
+            "proxy_public_host": proxy_host_clean(cfg.get("proxy_public_host")), "trusted_proxy": cfg.get("trusted_proxy") is True, "local_port": door}

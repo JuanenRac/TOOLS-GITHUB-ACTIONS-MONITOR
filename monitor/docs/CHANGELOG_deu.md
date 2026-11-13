@@ -19,6 +19,18 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - `tools/migrate_layout.py` für einen Ordner, der eine flache Installation war: standardmäßig ein Probelauf; `--apply` kopiert Ihre Konfiguration nach `layout_backup_<Stempel>/config/` und VERSCHIEBT (nie löschen, nie überschreiben) die alten Module, die alte Seite, die alten Beispiele und `locales/` nach `layout_backup_<Stempel>/old_code/`. `--doctor` warnt, solange solche Reste existieren. `MIGRATING.md` beschreibt es in den acht Sprachen.
 
+### Sicherheit
+
+- **Die Sperre bei falschen Tokens bremst wieder (Netzwerkmodus)**: Eine gesperrte Adresse, die nicht dieser Computer ist, wird abgewiesen, BEVOR ihr Token beurteilt wird, auf jedem Weg (Header, Cookie, `?access=` und `POST /api/access`); bisher konnte eine gesperrte Adresse weiter raten, und das richtige Token kam trotzdem durch. Wer an diesem Computer sitzt, wird nie aus dem eigenen Monitor ausgesperrt.
+
+- **Ein deklarierter Reverse-Proxy lässt Loopback nicht mehr „dieser Computer“ bedeuten** (`listen.proxy_public_host`, `listen.secure_cookie` oder `listen.trusted_proxy`): Ein Proxy, der seine Weiterleitungs-Header vergisst, kann nicht mehr jeden Client des Internets zum Eigentümer machen. Wer am Rechner des Monitors sitzt, nutzt den neuen zweiten Port, der nur auf `127.0.0.1` lauscht (`listen.local_port`, 0 = aus, Neustart nötig, dasselbe Zugriffstoken). Mit `listen.trusted_proxy` werden falsche Tokens außerdem für alle Clients des Proxys zusammen gezählt (dreifaches Limit einer Adresse), sodass das Wechseln von `X-Forwarded-For` die Sperre nicht aushebelt.
+
+- **Die Anleitung zum Reverse-Proxy** (`DEPLOYMENT.md`, acht Sprachen) enthält das ganze Rezept: öffentlicher `Host`, `X-Forwarded-For $proxy_add_x_forwarded_for`, `X-Forwarded-Proto`, Netzwerkmodus und Deklaration des Proxys; sie sagt nicht mehr, der Monitor habe „kein Login“, und weist darauf hin, dass `listen.trusted_proxy` einen Proxy auf demselben Computer voraussetzt.
+
+- **`GET /api/settings` für einen Client des Netzwerks** liefert den Wert nur für die Einstellungen, die er ändern darf; bei jeder anderen Einstellung (Pfade von Schlüsseln und Tokens, Ordner, Namen von Variablen) sagt er nur, ob sie definiert ist.
+
+- **Test jeder Route „nur dieser Computer“**: Eine Tabelle der Routen wird gegen einen echten Server mit einem Client außerhalb von Loopback durchlaufen (und der Quelltext wird geprüft, damit eine neue Route nicht vergessen wird).
+
 ## [1.7.9]
 
 ### Behoben

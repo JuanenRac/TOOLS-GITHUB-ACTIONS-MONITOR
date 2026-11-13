@@ -19,6 +19,18 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - `tools/migrate_layout.py` para una carpeta que era una instalación plana: simulación por defecto; `--apply` copia tu configuración a `layout_backup_<marca>/config/` y MUEVE (nunca borra ni pisa) los módulos, la página, los ejemplos y `locales/` antiguos a `layout_backup_<marca>/old_code/`. `--doctor` avisa mientras queden restos así. `MIGRATING.md` lo describe en los ocho idiomas.
 
+### Seguridad
+
+- **El bloqueo por tokens erróneos vuelve a frenar (modo red)**: una dirección que no es este equipo y está bloqueada se rechaza ANTES de juzgar su token, se presente como se presente (cabecera, cookie, `?access=` y `POST /api/access`); hasta ahora una dirección bloqueada podía seguir adivinando y el token correcto aún entraba. Quien está en este equipo nunca queda bloqueado en su propio monitor.
+
+- **Un proxy inverso declarado hace que loopback deje de significar «este equipo»** (`listen.proxy_public_host`, `listen.secure_cookie` o `listen.trusted_proxy`): un proxy que olvide sus cabeceras de reenvío ya no puede convertir a cualquier cliente de internet en el dueño. Quien está en el equipo del monitor usa el nuevo segundo puerto que solo escucha en `127.0.0.1` (`listen.local_port`, 0 = apagado, requiere reinicio, mismo token de acceso). Con `listen.trusted_proxy`, los tokens erróneos de todos los clientes del proxy se cuentan además juntos (tres veces el límite de una dirección), así que rotar `X-Forwarded-For` no anula el bloqueo.
+
+- **La guía del proxy inverso** (`DEPLOYMENT.md`, ocho idiomas) da la receta completa: `Host` público, `X-Forwarded-For $proxy_add_x_forwarded_for`, `X-Forwarded-Proto`, el modo red y la declaración del proxy; ya no dice que el monitor «no tiene login», y avisa de que `listen.trusted_proxy` supone un proxy en el mismo equipo.
+
+- **`GET /api/settings` para un cliente de la red** devuelve el valor solo de los ajustes que puede cambiar; de cualquier otro ajuste (rutas de claves y tokens, carpetas, nombres de variables) dice únicamente si está definido.
+
+- **Prueba de cada ruta «solo este equipo»**: una tabla de rutas se recorre contra un servidor real con un cliente que no está en loopback (y se examina el código para que una ruta nueva no se olvide).
+
 ## [1.7.9]
 
 ### Corregido

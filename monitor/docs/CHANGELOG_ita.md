@@ -19,6 +19,18 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - `tools/migrate_layout.py` per una cartella che era un'installazione piatta: simulazione per impostazione predefinita; `--apply` copia la tua configurazione in `layout_backup_<marca>/config/` e SPOSTA (mai cancella né sovrascrive) i vecchi moduli, pagina, esempi e `locales/` in `layout_backup_<marca>/old_code/`. `--doctor` avvisa finché esistono tali resti. `MIGRATING.md` lo descrive nelle otto lingue.
 
+### Sicurezza
+
+- **Il blocco per token errati frena di nuovo (modalità di rete)**: un indirizzo che non è questo computer ed è bloccato viene rifiutato PRIMA di giudicare il suo token, in qualunque modo lo presenti (intestazione, cookie, `?access=` e `POST /api/access`); finora un indirizzo bloccato poteva continuare a indovinare e il token giusto entrava comunque. Chi è a questo computer non viene mai bloccato fuori dal proprio monitor.
+
+- **Un reverse proxy dichiarato fa sì che loopback non significhi più «questo computer»** (`listen.proxy_public_host`, `listen.secure_cookie` o `listen.trusted_proxy`): un proxy che dimentica le intestazioni di inoltro non può più trasformare qualunque client di internet nel proprietario. Chi è al computer del monitor usa la nuova seconda porta in ascolto solo su `127.0.0.1` (`listen.local_port`, 0 = spento, serve un riavvio, stesso token di accesso). Con `listen.trusted_proxy`, i token errati di tutti i client del proxy sono contati anche insieme (il triplo del limite di un indirizzo), quindi ruotare `X-Forwarded-For` non annulla il blocco.
+
+- **La guida del reverse proxy** (`DEPLOYMENT.md`, otto lingue) dà la ricetta completa: `Host` pubblico, `X-Forwarded-For $proxy_add_x_forwarded_for`, `X-Forwarded-Proto`, la modalità di rete e la dichiarazione del proxy; non dice più che il monitor «non ha login» e avverte che `listen.trusted_proxy` presuppone un proxy sullo stesso computer.
+
+- **`GET /api/settings` per un client della rete** restituisce il valore solo delle impostazioni che può cambiare; per ogni altra impostazione (percorsi di chiavi e token, cartelle, nomi di variabili) dice soltanto se è definita.
+
+- **Prova di ogni route «solo questo computer»**: una tabella delle route viene percorsa contro un vero server con un client fuori da loopback (e il codice sorgente viene esaminato perché una nuova route non venga dimenticata).
+
 ## [1.7.9]
 
 ### Corretto

@@ -19,6 +19,18 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - `tools/migrate_layout.py` para uma pasta que era uma instalação plana: simulação por defeito; `--apply` copia a sua configuração para `layout_backup_<marca>/config/` e MOVE (nunca apaga nem substitui) os módulos, a página, os exemplos e `locales/` antigos para `layout_backup_<marca>/old_code/`. `--doctor` avisa enquanto existirem tais restos. `MIGRATING.md` descreve-o nos oito idiomas.
 
+### Segurança
+
+- **O bloqueio por tokens errados volta a travar (modo de rede)**: um endereço que não é este computador e está bloqueado é recusado ANTES de o seu token ser avaliado, seja qual for a forma de o apresentar (cabeçalho, cookie, `?access=` e `POST /api/access`); até agora um endereço bloqueado podia continuar a adivinhar e o token certo entrava na mesma. Quem está neste computador nunca fica bloqueado fora do seu próprio monitor.
+
+- **Um proxy inverso declarado faz com que o loopback deixe de significar «este computador»** (`listen.proxy_public_host`, `listen.secure_cookie` ou `listen.trusted_proxy`): um proxy que se esqueça dos cabeçalhos de reencaminhamento já não pode transformar qualquer cliente da internet no dono. Quem está no computador do monitor usa a nova segunda porta que só escuta em `127.0.0.1` (`listen.local_port`, 0 = desligado, requer reinício, o mesmo token de acesso). Com `listen.trusted_proxy`, os tokens errados de todos os clientes do proxy contam também em conjunto (o triplo do limite de um endereço), pelo que rodar `X-Forwarded-For` não anula o bloqueio.
+
+- **O guia do proxy inverso** (`DEPLOYMENT.md`, oito idiomas) dá a receita completa: `Host` público, `X-Forwarded-For $proxy_add_x_forwarded_for`, `X-Forwarded-Proto`, o modo de rede e a declaração do proxy; já não diz que o monitor «não tem início de sessão» e avisa que `listen.trusted_proxy` pressupõe um proxy no mesmo computador.
+
+- **`GET /api/settings` para um cliente da rede** devolve o valor apenas das definições que pode alterar; de qualquer outra definição (caminhos de chaves e tokens, pastas, nomes de variáveis) diz só se está definida.
+
+- **Teste de cada rota «só este computador»**: uma tabela de rotas é percorrida contra um servidor real com um cliente fora do loopback (e o código-fonte é examinado para que uma rota nova não seja esquecida).
+
 ## [1.7.9]
 
 ### Corrigido
