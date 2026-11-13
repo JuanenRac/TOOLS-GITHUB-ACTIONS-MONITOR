@@ -19,6 +19,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - `tools/migrate_layout.py` para una carpeta que era una instalación plana: simulación por defecto; `--apply` copia tu configuración a `layout_backup_<marca>/config/` y MUEVE (nunca borra ni pisa) los módulos, la página, los ejemplos y `locales/` antiguos a `layout_backup_<marca>/old_code/`. `--doctor` avisa mientras queden restos así. `MIGRATING.md` lo describe en los ocho idiomas.
 
+- **Una página rota pone el CI en rojo**: un nuevo job (`page`, sin `continue-on-error`) abre la página del monitor de demostración en un navegador real (`tools/check_page.py`), recorre cada pestaña y cada subpestaña de Ajustes, exige un mínimo de campos en cada una y falla ante cualquier error de la página, promesa no gestionada o `console.error`. Una página rota a propósito (una segunda definición, una asignación al nombre de una función, una llamada a una función que no existe) debe hacerlo fallar. La prueba que busca funciones definidas dos veces ve ahora también una declaración con sangría, una con `async` y una asignación al nombre de una función.
+
 ## [1.7.9]
 
 ### Corregido

@@ -19,6 +19,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - `tools/migrate_layout.py` per una cartella che era un'installazione piatta: simulazione per impostazione predefinita; `--apply` copia la tua configurazione in `layout_backup_<marca>/config/` e SPOSTA (mai cancella né sovrascrive) i vecchi moduli, pagina, esempi e `locales/` in `layout_backup_<marca>/old_code/`. `--doctor` avvisa finché esistono tali resti. `MIGRATING.md` lo descrive nelle otto lingue.
 
+- **Una pagina rotta mette la CI in rosso**: un nuovo job (`page`, senza `continue-on-error`) apre la pagina del monitor dimostrativo in un browser reale (`tools/check_page.py`), percorre ogni scheda e ogni sottoscheda delle Impostazioni, richiede un minimo di campi in ciascuna e fallisce a qualsiasi errore della pagina, promessa non gestita o `console.error`. Una pagina rotta di proposito (una seconda definizione, un'assegnazione al nome di una funzione, una chiamata a una funzione che non esiste) deve farlo fallire. Il test che cerca funzioni definite due volte ora vede anche una dichiarazione con rientro, una con `async` e un'assegnazione al nome di una funzione.
+
 ## [1.7.9]
 
 ### Corretto

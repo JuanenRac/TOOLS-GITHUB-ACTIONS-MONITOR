@@ -19,6 +19,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - `tools/migrate_layout.py` para uma pasta que era uma instalação plana: simulação por defeito; `--apply` copia a sua configuração para `layout_backup_<marca>/config/` e MOVE (nunca apaga nem substitui) os módulos, a página, os exemplos e `locales/` antigos para `layout_backup_<marca>/old_code/`. `--doctor` avisa enquanto existirem tais restos. `MIGRATING.md` descreve-o nos oito idiomas.
 
+- **Uma página estragada põe o CI a vermelho**: um novo job (`page`, sem `continue-on-error`) abre a página do monitor de demonstração num navegador real (`tools/check_page.py`), percorre cada separador e cada subseparador das Definições, exige um mínimo de campos em cada um e falha perante qualquer erro da página, promessa não tratada ou `console.error`. Uma página estragada de propósito (uma segunda definição, uma atribuição ao nome de uma função, uma chamada a uma função que não existe) tem de o fazer falhar. O teste que procura funções definidas duas vezes passa a ver também uma declaração com recuo, uma com `async` e uma atribuição ao nome de uma função.
+
 ## [1.7.9]
 
 ### Corrigido

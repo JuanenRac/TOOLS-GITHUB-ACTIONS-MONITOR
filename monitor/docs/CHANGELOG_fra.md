@@ -19,6 +19,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - `tools/migrate_layout.py` pour un dossier qui était une installation plate : simulation par défaut ; `--apply` copie votre configuration vers `layout_backup_<horodatage>/config/` et DÉPLACE (jamais supprimer ni écraser) les anciens modules, page, exemples et `locales/` vers `layout_backup_<horodatage>/old_code/`. `--doctor` avertit tant que de tels restes existent. `MIGRATING.md` le décrit dans les huit langues.
 
+- **Une page cassée met la CI au rouge** : un nouveau job (`page`, sans `continue-on-error`) ouvre la page du moniteur de démonstration dans un vrai navigateur (`tools/check_page.py`), parcourt chaque onglet et chaque sous-onglet des Réglages, exige un minimum de champs dans chacun et échoue à la moindre erreur de la page, promesse non gérée ou `console.error`. Une page cassée exprès (une seconde définition, une affectation au nom d'une fonction, un appel à une fonction qui n'existe pas) doit le faire échouer. Le test qui cherche les fonctions définies deux fois voit désormais aussi une déclaration indentée, une déclaration avec `async` et une affectation au nom d'une fonction.
+
 ## [1.7.9]
 
 ### Corrigé

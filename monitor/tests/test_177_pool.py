@@ -150,11 +150,9 @@ class QuotaTab(unittest.TestCase):
 
     def test_no_function_of_the_page_is_defined_twice(self):
         """A second definition silently replaces the first one (the Quota tab box was replaced by the async box of the Basic tab and Settings stopped rendering)."""
-        import re
+        import pagecheck
         page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
-        names = [m[2] for m in re.findall(r"(?m)^(async )?(function )([A-Za-z0-9_$]+)", page)]
-        twice = sorted({n for n in names if names.count(n) > 1})
-        self.assertEqual(twice, [])
+        self.assertEqual(pagecheck.duplicates(page), [])      # any indent, `async`, and an assignment to the name of a function (tests/pagecheck.py)
 
     def test_the_tab_the_endpoint_and_the_buttons_are_there(self):
         from github_actions_monitor.app import settings_api
