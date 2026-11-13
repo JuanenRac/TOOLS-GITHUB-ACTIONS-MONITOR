@@ -39,6 +39,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - Le superviseur de comptes filtre par utilisateur : `GET /api/accounts`, `/api/accounts/<id>/status`, la page d'un compte et toute requête avec `?account=` ou `X-Account-Id` ne montrent et n'atteignent que les comptes attribués à l'utilisateur (un admin les voit tous), et le moniteur d'un compte sait qui agit. Une mise en sourdine de l'onglet Alertes conserve désormais qui l'a faite : `muted_by` dans `GET /api/alerts` et dans l'historique des sourdines.
 
+- **La page du mode équipe montre qui est connecté** : une boîte dans l'en-tête avec le nom et le rôle (un texte, pas seulement une couleur) qui ouvre un menu pour changer le mot de passe, voir et gérer les utilisateurs et le journal (administrateurs seulement) et se déconnecter ; la première fois, avec le mode activé et sans utilisateur, elle renvoie à `/login`. Chaque modification envoyée par la page porte le jeton CSRF, une session terminée mène à `/login` et un jeton erroné est renouvelé et essayé une fois. En mode individuel et dans l'édition lite, la page ne dessine ni ne demande rien de nouveau ; `tests/test_auth_page.py` exécute l'enveloppe de `fetch` dans Node contre un faux réseau.
+
 ### Sécurité
 
 - **Le verrouillage des mauvais jetons freine de nouveau (mode réseau)** : une adresse qui n'est pas cet ordinateur et qui est verrouillée est refusée AVANT que son jeton soit jugé, quelle que soit la façon de le présenter (en-tête, cookie, `?access=` et `POST /api/access`) ; jusqu'ici une adresse verrouillée pouvait continuer à deviner et le bon jeton entrait quand même. La personne devant cet ordinateur n'est jamais verrouillée hors de son propre moniteur.

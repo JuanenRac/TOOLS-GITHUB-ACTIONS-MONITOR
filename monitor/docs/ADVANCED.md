@@ -30,6 +30,7 @@ Off by default: one person uses the monitor with no login. With `auth.enabled` o
 - **Endpoints.** `/api/auth/login`, `logout`, `me`, `bootstrap`, `password`; for admins `/api/auth/users` (with `/update`, `/delete`, `/revoke`) and `/api/auth/audit`. Errors are JSON with a stable code: `{"error": "...", "code": "..."}`.
 - **Audit.** `auth_audit.jsonl` (a private file; one older copy is kept) records logins, locks, refused requests and changes of users; never a password, a hash or a token. `auth.audit` turns it off.
 - **Several accounts.** With the accounts of `ACCOUNTS.md`, `GET /api/accounts` lists, and `/api/accounts/<id>/status` and every request with `?account=` or `X-Account-Id` reach, only the accounts assigned to the user (an admin sees all). The monitor of an account is told who is acting, so a silence of the Alerts tab records who made it (`muted_by` in `GET /api/alerts` and the history of silences).
+- **The page.** A box in the header shows the name and the role of the person who is signed in and opens a menu: change my password, the users and the audit (administrators), sign out. Every change the page sends carries the CSRF token; in the individual mode and in the lite edition the page draws and asks nothing new.
 - **Risk.** Over plain HTTP on a network the cookie and the passwords travel in clear: use HTTPS or a VPN, as for the network mode.
 
 ## A GitHub token kept by the monitor

@@ -57,6 +57,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **The terminal application edits lists and maps**: in the Settings tab of `tui_textual.py`, a list (the items separated by commas) and a map of numbers (`name=3, other=5`) can be typed and saved like a simple setting; the server checks every value again, the options of security still change only in the page, and the guide of the console tools says so.
 
+- **The page of the team mode shows who is signed in**: a box in the header with the name and the role (a text, not only a colour) that opens a menu to change the password, to see and manage the users and the audit (administrators only) and to sign out; the first time, with the mode on and no user yet, it points to `/login`. Every change the page sends carries the CSRF token, a session that ended sends the person to `/login`, and a wrong token is renewed and tried once. In the individual mode and in the lite edition the page draws nothing and asks nothing new; `tests/test_auth_page.py` runs the wrapper of `fetch` in Node against a fake network.
+
 ### Fixed
 
 - The dashboard could stay on one old picture while the monitor was running: a call to `gh` that never returned (a child process holding its pipes after the timeout) held the refresh loop for good while the page still answered at once. Every `gh` call is now bounded by a hard deadline in a helper thread, and a loop that still hangs is found and restarted by the watchdog above.

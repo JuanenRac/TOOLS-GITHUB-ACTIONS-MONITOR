@@ -30,6 +30,7 @@ Disattivata di default: una persona usa il monitor senza login. Con `auth.enable
 - **Endpoint.** `/api/auth/login`, `logout`, `me`, `bootstrap`, `password`; per gli admin `/api/auth/users` (con `/update`, `/delete`, `/revoke`) e `/api/auth/audit`. Gli errori sono JSON con codice stabile: `{"error": "...", "code": "..."}`.
 - **Audit.** `auth_audit.jsonl` (file privato; si conserva una copia precedente) registra accessi, blocchi, richieste rifiutate e modifiche degli utenti; mai una password, un hash o un token. `auth.audit` lo disattiva.
 - **Più account.** Con gli account di `ACCOUNTS.md`, `GET /api/accounts` elenca, e `/api/accounts/<id>/status` e ogni richiesta con `?account=` o `X-Account-Id` raggiungono, solo gli account assegnati all'utente (un admin li vede tutti). Il monitor di un account sa chi agisce: un silenziamento della scheda Avvisi registra quindi chi l'ha fatto (`muted_by` in `GET /api/alerts` e nella cronologia dei silenziamenti).
+- **La pagina.** Un riquadro nell'intestazione mostra nome e ruolo della persona connessa e apre un menu: cambia la mia password, gli utenti e il registro (amministratori), esci. Ogni modifica inviata dalla pagina porta il token CSRF; in modalità individuale e nell'edizione lite la pagina non disegna né chiede nulla di nuovo.
 - **Rischio.** Con HTTP non cifrato in una rete, cookie e password viaggiano in chiaro: usa HTTPS o una VPN, come per la modalità di rete.
 
 ## Un token GitHub conservato dal monitor
