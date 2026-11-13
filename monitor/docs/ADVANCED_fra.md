@@ -62,3 +62,7 @@ Avec `otlp.enabled` activé et un `otlp.endpoint` (HTTPS, ou HTTP sur cet ordina
 - Le serveur MCP parle uniquement sur l'entrée et la sortie standard ; ne le placez jamais derrière un port réseau.
 
 `listen.trusted_proxy` (désactivé par défaut) : seulement si un proxy inverse À VOUS sur le même ordinateur est la seule entrée. Les échecs sont alors comptés sur la dernière adresse de `X-Forwarded-For` (celle qu'ajoute votre proxy) et non sur le proxy ; une requête qui passe par un proxy n'est toujours jamais traitée comme cet ordinateur. Si quelqu'un d'autre peut joindre directement le moniteur, laissez-le désactivé.
+
+## La boucle de rafraîchissement : battement et chien de garde
+
+`/api/data` renvoie aussi `loop` : la phase du cycle de rafraîchissement (`collect`, `maintain`, `publish`, `log`, `extras`, `idle`), depuis combien de temps le cycle tourne, le dernier bon cycle, la dernière erreur et la phase où elle s'est produite, les relances et tout problème d'écriture du journal ou du résumé pour l'IA. La barre du bas de la page l'affiche en rouge quand un cycle dure beaucoup trop et en avertissement quand un fichier ne peut pas être écrit. Un chien de garde relance dans un nouveau thread le cycle qui dépasse `watchdog_minutes` (10 par défaut, 0 le désactive), après avoir écrit dans `actions_monitor_log.txt` la trace de tous les threads.

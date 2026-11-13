@@ -62,3 +62,7 @@ Con `otlp.enabled` attivo e un `otlp.endpoint` (HTTPS, o HTTP su questo computer
 - Il server MCP parla solo su ingresso e uscita standard; non metterlo mai dietro una porta di rete.
 
 `listen.trusted_proxy` (disattivato per impostazione predefinita): solo se un reverse proxy TUO sullo stesso computer è l'unico ingresso. I tentativi falliti vengono allora contati sull'ultimo indirizzo di `X-Forwarded-For` (quello che aggiunge il tuo proxy) e non sul proxy; una richiesta che passa da un proxy non è comunque mai trattata come questo computer. Se qualcun altro può raggiungere direttamente il monitor, lascialo spento.
+
+## Il ciclo di aggiornamento: battito e watchdog
+
+`/api/data` restituisce anche `loop`: la fase del ciclo di aggiornamento (`collect`, `maintain`, `publish`, `log`, `extras`, `idle`), da quanto è in corso il ciclo, l'ultimo ciclo riuscito, l'ultimo errore e la fase in cui è avvenuto, i riavvii e ogni problema di scrittura del registro o del riepilogo per l'IA. La barra in basso della pagina lo mostra in rosso quando un ciclo dura troppo e come avviso quando un file non si può scrivere. Un watchdog riavvia in un nuovo thread il ciclo che supera `watchdog_minutes` (10 per impostazione predefinita, 0 lo disattiva), dopo aver scritto in `actions_monitor_log.txt` la traccia di tutti i thread.

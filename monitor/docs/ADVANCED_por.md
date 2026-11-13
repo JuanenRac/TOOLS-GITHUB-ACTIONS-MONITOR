@@ -62,3 +62,7 @@ Com `otlp.enabled` ligado e um `otlp.endpoint` (HTTPS, ou HTTP neste computador)
 - O servidor MCP fala apenas por entrada e saída padrão; nunca o ponha atrás de uma porta de rede.
 
 `listen.trusted_proxy` (desativado por defeito): só se um proxy inverso SEU no mesmo computador for a única entrada. As tentativas falhadas são então contadas contra o último endereço de `X-Forwarded-For` (o que o seu proxy acrescenta) e não contra o proxy; um pedido que chega por um proxy continua a nunca ser tratado como este computador. Se mais alguém puder chegar diretamente ao monitor, deixe-o desligado.
+
+## O ciclo de atualização: batimento e vigilante
+
+`/api/data` devolve também `loop`: a fase do ciclo de atualização (`collect`, `maintain`, `publish`, `log`, `extras`, `idle`), há quanto tempo o ciclo está a correr, o último ciclo bom, o último erro e a fase em que ocorreu, os reinícios e qualquer problema ao escrever o registo ou o resumo para a IA. A barra inferior da página mostra-o a vermelho quando um ciclo demora demasiado e como aviso quando não se consegue escrever um ficheiro. Um vigilante reinicia numa thread nova o ciclo que exceda `watchdog_minutes` (por defeito 10, 0 desliga-o), depois de escrever em `actions_monitor_log.txt` o rasto de todas as threads.
