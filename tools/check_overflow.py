@@ -111,8 +111,10 @@ def free_port():
         return probe.getsockname()[1]
 
 
-def relay(target_port):
-    """A relay in front of the demo: the page of the monitor comes back with the measuring script before </body>; everything else is passed through."""
+def relay(target_port, probe=None, head=None, change=None):
+    """A relay in front of the demo: the page of the monitor comes back with the measuring script before </body>; everything else is passed through. `head` (bytes) is put right after <head>, so
+    that it runs before any script of the page; `probe` replaces the measuring script; `change(bytes) -> bytes` edits the page first (the smoke test uses it to break the page on purpose)."""
+    tail = (probe if probe is not None else PROBE).encode("utf-8")
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *args):
             pass
@@ -124,7 +126,11 @@ def relay(target_port):
             except urllib.error.HTTPError as err:
                 body, kind, code = err.read(), err.headers.get("Content-Type", "text/plain"), err.code
             if "text/html" in kind and b"</body>" in body:
-                body = body.replace(b"</body>", PROBE.encode("utf-8") + b"</body>", 1)
+                if change is not None:
+                    body = change(body)
+                if head:
+                    body = body.replace(b"<head>", b"<head>" + head, 1)
+                body = body.replace(b"</body>", tail + b"</body>", 1)
             self.send_response(code)
             self.send_header("Content-Type", kind)
             self.send_header("Content-Length", str(len(body)))
@@ -141,19 +147,19 @@ def relay(target_port):
     return server
 
 
-def measure(browser, url, size, tries=3):
+def measure(browser, url, size, tries=3, report="overflow-report"):
     """Opens the page and returns the overflows; a browser that answers nothing (a busy computer) is asked again."""
     for attempt in range(tries):
         try:
-            return measure_once(browser, url, size)
+            return measure_once(browser, url, size, report)
         except RuntimeError:
             if attempt == tries - 1:
                 raise
             time.sleep(2)
 
 
-def measure_once(browser, url, size):
-    """Opens the page once and returns the list of overflows the script found (or raises when the browser gave no answer)."""
+def measure_once(browser, url, size, report="overflow-report"):
+    """Opens the page once and returns the list of overflows the script found (or raises when the browser gave no answer). With another `report` it returns the whole document the script wrote."""
     profile = tempfile.mkdtemp(prefix="ghamon_ovf_")
     try:
         child = subprocess.Popen([browser, "--headless=new", f"--user-data-dir={profile}", "--disable-gpu", *(["--no-sandbox", "--disable-dev-shm-usage"] if sys.platform.startswith("linux") else []), "--hide-scrollbars", "--virtual-time-budget=20000", f"--window-size={size[0]},{size[1]}",
@@ -165,11 +171,13 @@ def measure_once(browser, url, size):
             dom = child.communicate()[0].decode("utf-8", "replace")
     finally:
         shutil.rmtree(profile, ignore_errors=True)
-    hit = re.search(r'<pre id="overflow-report"[^>]*>(.*?)</pre>', dom, re.S)
+    hit = re.search(r'<pre id="%s"[^>]*>(.*?)</pre>' % re.escape(report), dom, re.S)
     if not hit:
         raise RuntimeError("the browser gave no measurement for " + url)
     import html
     result = json.loads(html.unescape(hit.group(1)))
+    if report != "overflow-report":
+        return result
     if not result.get("ok"):
         raise RuntimeError("the measuring script failed: " + str(result.get("error")))
     return result["found"]

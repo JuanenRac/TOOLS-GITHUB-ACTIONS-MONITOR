@@ -44,8 +44,8 @@
 | | |
 |---|---|
 | **Reifegrad** | functional |
-| **Tests** | 1413 Testmethoden (`python -m unittest discover -s monitor/tests`) |
-| **Einstellungen** | 297 Einstellungen, alle mit Hilfe |
+| **Tests** | 1447 Testmethoden (`python -m unittest discover -s monitor/tests`) |
+| **Einstellungen** | 299 Einstellungen, alle mit Hilfe |
 | **Sprachen** | 8 (Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch) |
 | **Im CI getestet auf** | ubuntu, windows, macos, Python 3.11, 3.13 |
 

@@ -15,16 +15,41 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - Die Befehle der Anleitungen (`python read_report.py`, `python actions_monitor.py --doctor`, `python monitor_cli.py status` ...) funktionieren weiter: Eine kleine Einstiegsdatei mit demselben Namen bleibt im Produktordner, sodass auch die per Pfad registrierten Hooks und MCP-Server weiterlaufen. Das Release-Zip behält seinen Ordnernamen und enthält jetzt `src/`, `assets/` und `tools/`.
 
-- **Die Leiste am Fuß der Seite ist eine einzige Zeile und sagt nur, was die Felder oben nicht sagen**: Verbindung, Kontingent, Läufe, letzte Abfrage und Repositories wurden doppelt angezeigt (als Felder oben und als Elemente der Leiste); die Leiste behält die Wächter, den Hinweis auf den Low-Modus (den einzigen Modus, den sie nennt), die KI, das Konto, die Version, die Adresse, den Ton-Chip und die Uhr und bricht bei keiner Breite mehr um (auf einem schmalen Bildschirm verschwinden zuerst Datum und Zone). Ein Browsertest misst sie in mehreren Sprachen, breit und schmal.
-- **Das Feld „Repositories werden geladen“** wird im Browser geprüft: Es ist sichtbar, solange Repositories laden, und verschwindet mit dem letzten.
-
 ### Hinzugefügt
 
 - `tools/migrate_layout.py` für einen Ordner, der eine flache Installation war: standardmäßig ein Probelauf; `--apply` kopiert Ihre Konfiguration nach `layout_backup_<Stempel>/config/` und VERSCHIEBT (nie löschen, nie überschreiben) die alten Module, die alte Seite, die alten Beispiele und `locales/` nach `layout_backup_<Stempel>/old_code/`. `--doctor` warnt, solange solche Reste existieren. `MIGRATING.md` beschreibt es in den acht Sprachen.
 
+### Sicherheit
+
+- **Die Sperre bei falschen Tokens bremst wieder (Netzwerkmodus)**: Eine gesperrte Adresse, die nicht dieser Computer ist, wird abgewiesen, BEVOR ihr Token beurteilt wird, auf jedem Weg (Header, Cookie, `?access=` und `POST /api/access`); bisher konnte eine gesperrte Adresse weiter raten, und das richtige Token kam trotzdem durch. Wer an diesem Computer sitzt, wird nie aus dem eigenen Monitor ausgesperrt.
+
+- **Ein deklarierter Reverse-Proxy lässt Loopback nicht mehr „dieser Computer“ bedeuten** (`listen.proxy_public_host`, `listen.secure_cookie` oder `listen.trusted_proxy`): Ein Proxy, der seine Weiterleitungs-Header vergisst, kann nicht mehr jeden Client des Internets zum Eigentümer machen. Wer am Rechner des Monitors sitzt, nutzt den neuen zweiten Port, der nur auf `127.0.0.1` lauscht (`listen.local_port`, 0 = aus, Neustart nötig, dasselbe Zugriffstoken). Mit `listen.trusted_proxy` werden falsche Tokens außerdem für alle Clients des Proxys zusammen gezählt (dreifaches Limit einer Adresse), sodass das Wechseln von `X-Forwarded-For` die Sperre nicht aushebelt.
+
+- **Die Anleitung zum Reverse-Proxy** (`DEPLOYMENT.md`, acht Sprachen) enthält das ganze Rezept: öffentlicher `Host`, `X-Forwarded-For $proxy_add_x_forwarded_for`, `X-Forwarded-Proto`, Netzwerkmodus und Deklaration des Proxys; sie sagt nicht mehr, der Monitor habe „kein Login“, und weist darauf hin, dass `listen.trusted_proxy` einen Proxy auf demselben Computer voraussetzt.
+
+- **`GET /api/settings` für einen Client des Netzwerks** liefert den Wert nur für die Einstellungen, die er ändern darf; bei jeder anderen Einstellung (Pfade von Schlüsseln und Tokens, Ordner, Namen von Variablen) sagt er nur, ob sie definiert ist.
+
+- **Test jeder Route „nur dieser Computer“**: Eine Tabelle der Routen wird gegen einen echten Server mit einem Client außerhalb von Loopback durchlaufen (und der Quelltext wird geprüft, damit eine neue Route nicht vergessen wird).
+
+- **Eine GitHub-Adresse passiert den Bereiniger nur in den Formen einer geschlossenen Liste** (ein Repository, ein Lauf mit Job oder Versuch, ein Commit, eine Issue, ein Pull Request, eine Datei); sie wird am ersten Zeichen abgeschnitten, das kein Buchstabe, keine Ziffer, kein Punkt, Bindestrich, Unterstrich oder Schrägstrich ist, und der Rest wird wie jeder Text bereinigt. Bisher gelangte ein an einen Link geklebtes Geheimnis (eine kodierte Abfrage, eine Liste mit Kommas, ein Doppelpunkt, ein undurchsichtiges Pfadsegment, eine E-Mail-Adresse, die in der Adresse beginnt) unverändert zur KI.
+
+- **Der Hook des KI-Clients übergibt keinen Log-Text**: nur Repository, Workflow, Ergebnis und Link jeder Warnung. Die Anweisung, ohne Aufforderung zu handeln, ist entfallen; die Schlusszeile sagt nun, dass ein Log Text von Dritten enthalten kann, dass er nicht vertrauenswürdige Daten sind und dass darin gefundene Anweisungen nie befolgt werden. In den acht Sprachen.
+
 ### Behoben
 
-- Die Zusammenfassung für die KI-Werkzeuge (`ALERTS_BRIEF.md`) und das Protokoll (`actions_monitor_log.txt`) stimmen jetzt mit einem laufenden Monitor überein: Die Zusammenfassung hat eine Zeile `Monitor:` (Zyklus abgeschlossen, Zyklus läuft, Verbindung verloren, letzter Zyklus fehlgeschlagen) und die Zeit dieses Hinweises, sodass ein Zyklus, der noch Repositories liest, nicht mehr die Zeit des vorigen Zyklus als letztes Wort stehen lässt (die aufgeführten Alarme stammen aus dem letzten vollständigen Zyklus, und ein Teilzyklus öffnet oder schließt nie einen); das Protokoll schreibt zu Beginn eines Zyklus eine Zeile `cycle=started`.
+- **Der Ereignisstrom für KIs stirbt nicht mehr an einer gewöhnlichen Log-Zeile**: Die Zeile des Feeds wird feldweise bereinigt und dann geschrieben, statt ein bereits geschriebenes JSON zu bereinigen (eine Ursache, die auf `password: x`, `token=x` oder `DB_PASSWORD=x` endete, zerstörte es). Eine Zeile, die sich nicht bereinigen lässt, wird übersprungen und der Strom läuft weiter; die Antworten des MCP-Servers werden genauso bereinigt. Im Bereiniger endet der Wert eines `Schlüssel=Wert`-Paares an einem Anführungszeichen, einem Komma oder einem Semikolon, und ein Wert in Anführungszeichen wird ganz bereinigt.
+
+- **Was davon abhängt, wer fragt, beantwortet immer dein eigener Login**: `gh api user`, `user/orgs`, Benachrichtigungen, eine Suche nach `@me`, `gh auth` und `gh repo list` ohne Eigentümer gehen nie an die GitHub-App oder das zweite Konto, wie viele Aufrufe diese auch übrig haben (bei aktivem zweiten Konto konnte der Monitor dessen Inhaber als seinen Eigentümer nehmen und seine Organisationen auflisten).
+
+- **Ein `gh`-Aufruf ist nur dann ein Lesen, wenn er auf einer Positivliste steht**: `gh api ENDPOINT` mit höchstens den Optionen `--jq`, `--paginate`, `-H` (von der Art, die ein Lesen sendet), `-i` und `--cache`. Die angehängten Schreibweisen eines Schreibens (`-XPOST`, `--method=DELETE`, `-fa=b`, `--field=a=b`, `--input=-`) und jede andere Option gehen an deinen Login, statt auf die Quellen verteilt zu werden.
+
+- **Die Token-Datei des zweiten Kontos** (`extra_reader.file`) muss im Kontenordner des Monitors liegen (`accounts/` oder `MONITOR_ACCOUNTS_DIR`) und wird ohne Link-Folgen geöffnet, und nur wenn sie eine kleine normale Datei ist; außerhalb dieses Ordners ist die Einstellung leer. Der neue Schalter `extra_reader.any_folder` (standardmäßig aus, nur lokal) hebt die Ordnerregel für eine Datei auf, die woanders bleiben muss.
+
+- **Einem Zentralpanel mit Datum in der Zukunft wird nicht mehr vertraut**: Sein Alter wurde auf null begrenzt und galt für immer als frisch; jetzt ist es veraltet, die Zusammenfassung sagt, dass dem Datum nicht zu trauen ist, und eine bis zu fünf Minuten vorgehende Uhr wird toleriert.
+
+- **Der Test der Ports der Konten schlägt nicht mehr fehl, wenn Suiten gleichzeitig laufen**: Dem Supervisor kann gesagt werden, wo er mit der Suche nach freien Ports beginnen soll (Standard bleibt 18800), und die Tests fragen das System nach einem unbenutzten Bereich statt nach einem festen.
+
+- **Eine kaputte Seite macht die CI rot**: Ein neuer Job (`page`, ohne `continue-on-error`) öffnet die Seite des Demo-Monitors in einem echten Browser (`tools/check_page.py`), geht durch jeden Tab und jeden Unter-Tab der Einstellungen, verlangt in jedem eine Mindestzahl von Feldern und schlägt bei jedem Fehler der Seite, jeder unbehandelten Promise und jedem console.error fehl. Eine absichtlich kaputte Seite (eine zweite Definition, eine Zuweisung an den Namen einer Funktion, ein Aufruf einer nicht vorhandenen Funktion) muss ihn scheitern lassen. Der Test, der doppelt definierte Funktionen sucht, erkennt nun auch eine eingerückte Deklaration, eine mit `async` und eine Zuweisung an den Namen einer Funktion.
 
 ## [1.7.9]
 

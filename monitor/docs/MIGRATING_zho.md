@@ -114,3 +114,9 @@
 | `cli` | 命令行工具 |
 | `ui` | 关于、帮助文档、终端视图 |
 | `i18n`、`util` | 八种语言;共享的小工具 |
+
+# 从 1.7.9 到 1.8.0
+
+无需转换。有一项设置可能需要调整:
+
+- extra_reader.file 指向账户文件夹之外,因此不会使用第二个账户。请把令牌文件移到账户文件夹(accounts/,或 MONITOR_ACCOUNTS_DIR 指定的文件夹)并在 extra_reader.file 中保留其路径,或在 设置 > 配额 中开启 extra_reader.any_folder。

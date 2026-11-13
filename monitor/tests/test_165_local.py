@@ -232,12 +232,12 @@ class NetworkMode(unittest.TestCase):
 
     def test_wrong_tokens_lock_an_address_out_for_a_while(self):
         access = "T" * 24
-        with LiveServer({}, network=access) as server:
+        with LiveServer({}, network=access) as server, mock.patch.object(localguard, "from_this_computer", return_value=False):      # a client of the network: the person at this computer is never locked out (tests/test_180_network.py)
             codes = [server.call("/api/health", headers={"X-Monitor-Access": "wrong" * 5})[0] for _ in range(12)]
             self.assertEqual(codes[:9], [401] * 9)
             self.assertEqual(codes[-1], 429)
             self.assertEqual(server.call("/api/health", headers={"X-Monitor-Access": "wrong" * 5})[0], 429, "a wrong token waits while the lock lasts")
-            self.assertEqual(server.call("/api/health", headers={"X-Monitor-Access": access})[0], 200, "the right token always gets in (behind a proxy on this machine everybody shares one address)")
+            self.assertEqual(server.call("/api/health", headers={"X-Monitor-Access": access})[0], 429, "and so does the right one: a locked address cannot keep guessing")
 
     def test_the_limiter_counts_per_address_and_expires(self):
         for _ in range(4):

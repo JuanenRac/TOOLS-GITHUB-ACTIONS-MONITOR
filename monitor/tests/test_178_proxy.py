@@ -60,7 +60,8 @@ class TrustedProxy(unittest.TestCase):
             localguard.configure(True, "127.0.0.1", "t" * 20, (), trusted_proxy=flag)
             self.assertFalse(localguard.is_this_computer(LOOP, Headers({"X-Forwarded-For": "127.0.0.1"})), flag)
             self.assertFalse(localguard.is_this_computer(LOOP, Headers({"X-Forwarded-For": "198.51.100.7"})), flag)
-            self.assertTrue(localguard.is_this_computer(LOOP, Headers({})), flag)
+            self.assertEqual(localguard.is_this_computer(LOOP, Headers({})), not flag, "a declared proxy (trusted_proxy) makes loopback stop meaning this computer")
+            self.assertTrue(localguard.is_this_computer(LOOP, Headers({}), door=True), flag)
 
     def test_the_wrong_tokens_of_one_person_lock_only_that_person_when_it_is_on(self):
         for flag, expect_other_locked in ((False, True), (True, False)):
