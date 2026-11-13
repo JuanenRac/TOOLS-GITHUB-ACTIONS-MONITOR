@@ -34,7 +34,7 @@ python actions_monitor.py --migrate-accounts --apply  # 复制到 accounts/defau
 python actions_monitor.py --accounts                  # 列出账户
 ```
 
-原文件绝不会被移动或删除：检查无误后由你自己删除。第二次运行会被拒绝，因此两种状态绝不会混在一起。要添加账户，请创建带有其 `github_owner` 的 `accounts/<id>/actions_monitor.json`（复制模板 `actions_monitor.example.json`）。
+原文件绝不会被移动或删除：检查无误后由你自己删除。第二次运行会被拒绝，因此两种状态绝不会混在一起。要添加账户，请创建带有其 `github_owner` 的 `accounts/<id>/actions_monitor.json`（复制模板 `assets/examples/actions_monitor.example.json`）。
 
 ## 运行
 

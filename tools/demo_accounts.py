@@ -17,7 +17,7 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent / "monitor"
-sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "src"))
 NAMES = (("personal", "demo-owner"), ("org-acme", "acme-demo"), ("client-labs", "labs-demo"))
 
 
@@ -26,8 +26,8 @@ def main():
     folder = Path(tempfile.mkdtemp(prefix="ghamon_demo_accounts_"))
     import os
     os.environ["MONITOR_ACCOUNTS_DIR"] = str(folder / "accounts")
-    import accounts
-    import accounts_supervisor as supervisor
+    from github_actions_monitor.accounts import accounts
+    from github_actions_monitor.accounts import accounts_supervisor as supervisor
     for account_id, owner in NAMES:
         accounts.create_account(account_id, owner)
     (folder / "accounts" / accounts.GLOBAL_NAME).write_text('{"default_account": "personal", "enabled_accounts": "all"}', encoding="utf-8")

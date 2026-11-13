@@ -6,13 +6,13 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import i18n  # noqa: E402
-import localguard  # noqa: E402
-import settings_api  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.security import localguard  # noqa: E402
+from github_actions_monitor.app import settings_api  # noqa: E402
 
 
 class Headers(dict):
@@ -82,7 +82,7 @@ class TrustedProxy(unittest.TestCase):
             for prefix in ("cfg.f.", "cfg.h."):
                 self.assertNotEqual(i18n.tl(lang, prefix + "listen.trusted_proxy"), prefix + "listen.trusted_proxy", lang)
             self.assertIn("X-Forwarded-For", i18n.tl(lang, "cfg.h.listen.trusted_proxy"), lang)
-        source = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        source = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         self.assertEqual(source.count("localguard.client_key(self.client_address, self.headers)"), 2)
         self.assertIn('"trusted_proxy": False', source)
 

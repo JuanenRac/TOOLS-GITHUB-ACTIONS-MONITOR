@@ -15,13 +15,13 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import actions_monitor as am  # noqa: E402
-import localguard  # noqa: E402
-import settings_api  # noqa: E402
+from github_actions_monitor.app import actions_monitor as am  # noqa: E402
+from github_actions_monitor.security import localguard  # noqa: E402
+from github_actions_monitor.app import settings_api  # noqa: E402
 from test_164 import LiveServer  # noqa: E402
 from test_166 import make_certificate  # noqa: E402
 
@@ -285,7 +285,7 @@ class ProxyHostInTheSettings(unittest.TestCase):
 
     def test_the_page_texts_exist_in_the_eight_languages(self):
         for lang in ("en", "es", "de", "fr", "it", "ja", "pt", "zh"):
-            texts = json.loads((HERE / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
+            texts = json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
             for key in ("cfg.f.listen.proxy_public_host", "cfg.h.listen.proxy_public_host"):
                 self.assertTrue(isinstance(texts.get(key), str) and texts[key].strip(), (lang, key))
 

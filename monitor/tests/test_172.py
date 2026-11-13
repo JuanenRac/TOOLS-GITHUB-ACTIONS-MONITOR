@@ -10,13 +10,13 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import i18n  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
 
-PAGE = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+PAGE = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
 HEADER = PAGE[PAGE.index("<header>"):PAGE.index("</header>") + 9]
 SIDE = PAGE.split('<aside class="sidebar"', 1)[1].split("</aside>", 1)[0]
 FIRST_ROW = ("kt-active", "kt-queued", "kp-fail", "kt-ok", "kt-min", "kt-issues", "kp-red", "kp-sign")
@@ -114,7 +114,7 @@ class PanelAndNotice(unittest.TestCase):
 
     def test_the_about_panel_and_the_console_still_say_it(self):
         self.assertIn("function updLine(", PAGE)
-        text = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        text = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         self.assertIn("updatecheck.notice(", text)
 
     def test_the_guide_of_the_settings_says_where_the_gear_is_in_each_language(self):
@@ -144,7 +144,7 @@ class NothingNextToTheCode(unittest.TestCase):
         before = {n for n in _testenv.WATCHED if (HERE / n).exists()}
         case = unittest.TestCase()
         remove = _testenv.guard(case)
-        script = "import sys; sys.path.insert(0, %r); sys.argv = ['x', '--lite']; import actions_monitor as am; am.enable_lite(); am.load_config(); print('ran')" % str(HERE)
+        script = "import sys; sys.path.insert(0, %r); sys.argv = ['x', '--lite']; from github_actions_monitor.app import actions_monitor as am; am.enable_lite(); am.load_config(); print('ran')" % str(HERE / "src")
         done = subprocess.run([sys.executable, "-I", "-c", script], capture_output=True, text=True, timeout=60)
         self.assertEqual(done.stdout.strip(), "ran", done.stderr)
         remove()
@@ -162,7 +162,7 @@ class TheCatalogueOfAPerson(unittest.TestCase):
     def classify(self, config, repos):
         import os
         from unittest import mock
-        import toolconfig
+        from github_actions_monitor.app import toolconfig
         env = {k: v for k, v in os.environ.items() if k != "MONITOR_ECOSYSTEMS_FILE"}      # _testenv pins a catalogue for the tests: here the one of the configuration decides
         with mock.patch.dict(os.environ, env, clear=True):
             toolconfig.forget()
@@ -180,7 +180,7 @@ class TheCatalogueOfAPerson(unittest.TestCase):
         self.assertNotIn(got["OTHER"], ("armor", "urtc"))
 
     def test_with_the_neutral_template_everything_falls_into_the_last_group(self):
-        template = HERE / "ecosystems.example.json"
+        template = HERE / "assets" / "examples" / "ecosystems.example.json"
         got = self.classify({"ecosystems_file": str(template), "ecosystems": "all"}, ["ARMOR-SERVER", "URTC-WEB", "OTHER"])
         self.assertEqual(len(set(got.values())), 1, got)
 

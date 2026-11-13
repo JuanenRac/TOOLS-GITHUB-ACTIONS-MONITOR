@@ -16,17 +16,17 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest import mock
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-import events as event_feed  # noqa: E402
-import export_status  # noqa: E402
-import gha_dispatch_all as gd  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+from github_actions_monitor.data_pipeline import events as event_feed  # noqa: E402
+from github_actions_monitor.cli import export_status  # noqa: E402
+from github_actions_monitor.cli import gha_dispatch_all as gd  # noqa: E402
 import make_release as mr  # noqa: E402
-import monitor_link  # noqa: E402
-import release_notes  # noqa: E402
-import sentinel_local as sl  # noqa: E402
-import sigverify  # noqa: E402
-import surface  # noqa: E402
-import webhook  # noqa: E402
+from github_actions_monitor.integrations import monitor_link  # noqa: E402
+from github_actions_monitor.cli import release_notes  # noqa: E402
+from github_actions_monitor.sentinels import sentinel_local as sl  # noqa: E402
+from github_actions_monitor.security import sigverify  # noqa: E402
+from github_actions_monitor.app import surface  # noqa: E402
+from github_actions_monitor.security import webhook  # noqa: E402
 from test_next_level import OTHER_SIGN, PUB, SIGN  # noqa: E402
 from test_signstate import NOW, run, snapshot  # noqa: E402
 
@@ -386,7 +386,7 @@ class SurfaceInTheSnapshot(_testenv.Spanish, unittest.TestCase):
         self.assertEqual(event_feed.diff(new, new, True), [])
 
     def test_example_config_matches_the_defaults(self):
-        example = json.loads((Path(__file__).resolve().parents[1] / "actions_monitor.example.json").read_text(encoding="utf-8"))
+        example = json.loads((Path(__file__).resolve().parents[1] / "assets" / "examples" / "actions_monitor.example.json").read_text(encoding="utf-8"))
         self.assertEqual(mr.nested_problems(example["sentinel"]["surface"], surface.DEFAULTS), [])
         broken = json.loads(json.dumps(example["sentinel"]["surface"]))
         del broken["checks"]["pr_human"]["days"]
@@ -408,11 +408,11 @@ class SurfaceInTheSnapshot(_testenv.Spanish, unittest.TestCase):
         self.assertEqual(sl.parse_repo_node(node, [])["vuln_hi"], [{"sev": "high", "created": "2026-01-01T00:00:00Z"}])
 
     def test_the_page_has_the_new_panel(self):
-        html = (Path(__file__).resolve().parents[1] / "actions_monitor.html").read_text(encoding="utf-8")
+        html = (Path(__file__).resolve().parents[1] / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         for needle in ('"a10"', "ui.a10_title", "ui.th_attestation", "by_ecosystem"):
             self.assertIn(needle, html)
         import json
-        self.assertIn("Superficie", json.loads((Path(__file__).resolve().parents[1] / "locales" / "es.json").read_text(encoding="utf-8"))["ui.a10_title"])
+        self.assertIn("Superficie", json.loads((Path(__file__).resolve().parents[1] / "assets" / "locales" / "es.json").read_text(encoding="utf-8"))["ui.a10_title"])
 
 
 class Exports(unittest.TestCase):
@@ -484,10 +484,10 @@ class Webhook(unittest.TestCase):
         self.assertEqual(webhook.handle(self.CONFIG, b"x" * (webhook.MAX_BODY + 1), {}, ["R"])[0], 413)
 
     def test_the_server_never_binds_to_all_interfaces(self):
-        source = (Path(__file__).resolve().parents[1] / "actions_monitor.py").read_text(encoding="utf-8")
+        source = (Path(__file__).resolve().parents[1] / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         self.assertNotIn("0.0.0.0", source.replace("never bind it to 0.0.0.0", ""))
         self.assertIn('(listen["host"] if listen["network"] else "127.0.0.1", port)', source)      # the address comes from the setting listen.* and is loopback unless it is turned on
-        import localguard
+        from github_actions_monitor.security import localguard
         self.assertEqual(localguard.settings_from({}), {"network": False, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "proxy_public_host": "", "trusted_proxy": False})
         self.assertEqual(localguard.settings_from({"listen": {"network": True, "host": "8.8.8.8"}})["host"], "127.0.0.1")        # a public address is never accepted
         self.assertIn("class QuietServer(ThreadingHTTPServer)", source)
@@ -655,13 +655,13 @@ class ReleaseNotes(unittest.TestCase):
 
 class GateAndVersion(unittest.TestCase):
     def test_version_is_1_5_0_and_the_changelog_agrees(self):
-        import tool_version
+        from github_actions_monitor import tool_version
         self.assertEqual(tool_version.TOOL_VERSION, "1.7.9")
         self.assertEqual(mr.gate_static(), "1.7.9")
 
     def test_new_files_travel_and_state_files_do_not(self):
         names = {p.relative_to(mr.HERE).as_posix() for p in mr.members()}
-        for needed in ("surface.py", "webhook.py", "export_status.py", "monitor_link.py", "release_notes.py", "profiles.example.json", "docs/CI_RED_SCHEMA.md"):
+        for needed in ("src/github_actions_monitor/app/surface.py", "src/github_actions_monitor/security/webhook.py", "src/github_actions_monitor/cli/export_status.py", "src/github_actions_monitor/integrations/monitor_link.py", "src/github_actions_monitor/cli/release_notes.py", "assets/examples/profiles.example.json", "docs/CI_RED_SCHEMA.md"):
             self.assertIn(needed, names)
         self.assertEqual(mr.check_entries(["github_actions_monitor/profiles.example.json", "github_actions_monitor/docs/CI_RED_SCHEMA.md"]), [])
 

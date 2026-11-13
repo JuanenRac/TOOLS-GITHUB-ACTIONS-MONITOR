@@ -6,13 +6,13 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import i18n  # noqa: E402
-import quotawatch  # noqa: E402
-import signals  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.data_pipeline import quotawatch  # noqa: E402
+from github_actions_monitor.data_pipeline import signals  # noqa: E402
 
 
 class Trend(unittest.TestCase):
@@ -51,7 +51,7 @@ class Trend(unittest.TestCase):
         sig = [s for s in doc["signals"] if s["id"] == "quota.trend"][0]
         self.assertEqual(sig["level"], "watch")
         self.assertIn("other tools are spending most of the allowance", sig["summary"])
-        page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         self.assertIn('T("ui.qt_trend"', page)
         for lang in i18n.LANGS:
             self.assertIn("{x}", i18n.tl(lang, "ui.qt_trend"), lang)
@@ -61,7 +61,7 @@ class Trend(unittest.TestCase):
 class EventsForTheStream(unittest.TestCase):
     def test_the_allowance_the_connection_and_the_health_travel_as_events_and_are_resolved(self):
         import tempfile
-        import ai_alerts
+        from github_actions_monitor.integrations import ai_alerts
         down = signals.state({"figures": {}, "offline": {"offline": True, "since": "s"}, "quota_block": {"blocked": True, "until": "2026-01-01T11:00:00Z", "unread": 12}}, [], "complete")
         rows = signals.extra_alert_rows(down)
         self.assertEqual({r["workflow"] for r in rows}, {"quota", "connection"})

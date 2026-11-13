@@ -44,7 +44,7 @@
 | | |
 |---|---|
 | **Maturità** | functional |
-| **Test** | 1264 metodi di test (`python -m unittest discover -s monitor/tests`) |
+| **Test** | 1286 metodi di test (`python -m unittest discover -s monitor/tests`) |
 | **Impostazioni** | 288 impostazioni, tutte con aiuto |
 | **Lingue** | 8 (inglese, spagnolo, tedesco, francese, italiano, giapponese, cinese e portoghese) |
 | **Provato nel CI su** | ubuntu, windows, macos, Python 3.11, 3.13 |
@@ -192,7 +192,7 @@ Un secondo prodotto, più semplice, nello stesso pacchetto: la pagina di ciò ch
 
 ## Impostazioni
 
-Tutto vive in `actions_monitor.json` (creato da `actions_monitor.example.json`). La scheda **Impostazioni** lo modifica in modo sicuro; token e segreti non vengono mai mostrati né salvati. Ecosistemi, obiettivi di build e profili a lotti sono file separati che indichi tu (`ecosystems_file`, `targets_file`, `profiles_file`); sono inclusi modelli neutri `*.example.json`. Riferimento completo: [`monitor/docs/SETTINGS_ita.md`](monitor/docs/SETTINGS_ita.md).
+Tutto vive in `actions_monitor.json` (creato da `monitor/assets/examples/actions_monitor.example.json`). La scheda **Impostazioni** lo modifica in modo sicuro; token e segreti non vengono mai mostrati né salvati. Ecosistemi, obiettivi di build e profili a lotti sono file separati che indichi tu (`ecosystems_file`, `targets_file`, `profiles_file`); sono inclusi modelli neutri `*.example.json`. Riferimento completo: [`monitor/docs/SETTINGS_ita.md`](monitor/docs/SETTINGS_ita.md).
 
 ## Uscite per Grafana e dashboard
 
@@ -224,44 +224,26 @@ python -m unittest discover -s monitor/tests
 
 ```
 TOOLS-GITHUB-ACTIONS-MONITOR/
-├── monitor/                                  il programma
-├── docs/                                     architettura, schermate, roadmap
-├── tools/                                    immagini, guide e demo
-├── deploy/                                   esempio di container
-├── images/                                   banner e immagini
-├── .github/                                  CI e moduli
-├── CHANGELOG.md                              modifiche per versione
-├── LICENSE NOTICE AUTHORS                    licenze e autore
-├── CONTRIBUTING.md SECURITY.md               contribuire, segnalare
-├── SUPPORT.md CODE_OF_CONDUCT.md             supporto e condotta
+├── monitor/                                il programma
+├── docs/                                   architettura, schermate, roadmap
+├── tools/                                  immagini, guide e demo
+├── deploy/                                 esempio di container
+├── images/                                 banner e immagini
+├── .github/                                CI e moduli
+├── CHANGELOG.md                            modifiche per versione
+├── LICENSE NOTICE AUTHORS                  licenze e autore
+├── CONTRIBUTING.md SECURITY.md             contribuire, segnalare
+├── SUPPORT.md CODE_OF_CONDUCT.md           supporto e condotta
 └── monitor/
-    ├── actions_monitor.py                    server locale
-    ├── actions_monitor.html                  la pagina web
-    ├── MONITOR_LITE_GITHUB_ACTIONS.*         l'edizione lite
-    ├── sentinel_local.py                     avvisi e rapporto
-    ├── sentinel_collab.py  alert_center.py   sentinella issue, avvisi
-    ├── surface.py readiness.py               controlli, preparazione
-    ├── settings_api.py outputs.py            impostazioni, metriche
-    ├── signstate.py sigverify.py             firma: stato, verifica
-    ├── monitor_cli.py                        riga di comando client
-    ├── read_report.py                        rapporto da terminale
-    ├── gha_dispatch_all.py                   build a lotti
-    ├── events.py report_history.py           eventi e storico
-    ├── ci_red.py export_status.py            file per altri
-    ├── etagcache.py resilience.py            letture condizionali
-    ├── analytics.py lint_workflows.py        durate, flaky, linter
-    ├── notifiers.py ai_actions.py            notifiche, elenco chiuso IA
-    ├── tui.py migrate_state.py               vista console, migrazione
-    ├── about.py  helpdocs.py                 pannelli Informazioni e Guida
-    ├── quota.py  quotas.json                 piano, minuti e quote
-    ├── modes.py  updatecheck.py              modalità di lavoro, avviso di versione
-    ├── doctor.py  demo_mode.py               --doctor e --demo
-    ├── discovery.py  banner.py               rilevamento, banner di edizione
-    ├── tui_textual.py                        terminale interattivo
-    ├── i18n.py locales/                      otto lingue
-    ├── toolconfig.py workspace.py            impostazioni, cloni
-    ├── tests/                                test offline
-    └── docs/                                 guide, schemi, Grafana
+    ├── MONITOR_GITHUB_ACTIONS.*            i lanciatori (doppio clic)
+    ├── MONITOR_LITE_GITHUB_ACTIONS.*       l'edizione lite
+    ├── BATCH_GITHUB_ACTIONS.*              il menu delle build a lotti
+    ├── src/                                il pacchetto importabile
+    ├── assets/                             esempi, pagina, lingue
+    ├── actions_monitor.py read_report.py   punti d'ingresso degli strumenti
+    ├── tests/                              test offline
+    ├── docs/                               guide, schemi, Grafana
+    └── tools/                              script di rilascio e migrazione
 ```
 
 ## Documentazione

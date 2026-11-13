@@ -7,12 +7,12 @@ import unittest.mock
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import i18n  # noqa: E402
-import sentinel_local as sl  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.sentinels import sentinel_local as sl  # noqa: E402
 from test_sentinel import NOW, run  # noqa: E402
 
 
@@ -70,7 +70,7 @@ class TagAheadOfManifest(unittest.TestCase):
     """1.5.0: a release tag that is ahead of the version of the manifest has its own line in the report (stable code tag_vs_manifest)."""
 
     def with_rows(self, rows):
-        import surface
+        from github_actions_monitor.app import surface
         real = surface.build
 
         def fake(inp):

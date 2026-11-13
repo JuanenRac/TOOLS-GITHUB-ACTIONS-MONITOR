@@ -11,20 +11,20 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import actions_monitor as am  # noqa: E402
-import i18n  # noqa: E402
-import toolconfig  # noqa: E402
+from github_actions_monitor.app import actions_monitor as am  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.app import toolconfig  # noqa: E402
 
 ACCOUNT = ["demo-alpha-core", "demo-alpha-app", "demo-beta-fw", "random-notes", "another-thing", "MYPROJECT-X", "TEAM-Y"]
 
 
 class CatchAll(unittest.TestCase):
     def setUp(self):
-        self.example = json.loads((HERE / "ecosystems.example.json").read_text(encoding="utf-8"))["ecosystems"]
+        self.example = json.loads((HERE / "assets" / "examples" / "ecosystems.example.json").read_text(encoding="utf-8"))["ecosystems"]
         toolconfig.set_ecosystems(self.example)
 
     def tearDown(self):
@@ -87,7 +87,7 @@ class HiddenRepositories(unittest.TestCase):
         data = am.build({**am.DEFAULTS, "mode": "full"}, [], 0.0, 0, False, "")
         self.assertIn("hidden", data)
         self.assertIn("discovered", data)
-        page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         for needle in ('id="hidden"', "ui.hidden_repos", "d.repos.length<tot/2"):
             self.assertIn(needle, page, needle)
         for lang in i18n.LANGS:
@@ -106,7 +106,7 @@ class LiteStart(unittest.TestCase):
             with tempfile.TemporaryDirectory() as tmp:
                 am.LITE["on"], am.CONFIG_FILE = True, Path(tmp) / "actions_monitor_lite.json"
                 with mock.patch.object(am, "HERE", Path(tmp)):
-                    (Path(tmp) / "actions_monitor.example.json").write_bytes((HERE / "actions_monitor.example.json").read_bytes())
+                    (Path(tmp) / "actions_monitor.example.json").write_bytes((HERE / "assets" / "examples" / "actions_monitor.example.json").read_bytes())
                     if complete is not None:
                         (Path(tmp) / "actions_monitor.json").write_text(json.dumps(complete), encoding="utf-8")
                     with contextlib.redirect_stdout(out):

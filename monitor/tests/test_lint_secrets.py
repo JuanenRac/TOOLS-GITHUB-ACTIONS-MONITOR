@@ -8,12 +8,12 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import lint_workflows  # noqa: E402
-import settings_api as sa  # noqa: E402
+from github_actions_monitor.cli import lint_workflows  # noqa: E402
+from github_actions_monitor.app import settings_api as sa  # noqa: E402
 
 BASE = "name: CI\non: [push]\npermissions:\n  contents: read\njobs:\n  t:\n    runs-on: ubuntu-latest\n    env:\n"
 REAL = "q9Zr7LmV3xTb2WkP8sYd4NcA6hGj"

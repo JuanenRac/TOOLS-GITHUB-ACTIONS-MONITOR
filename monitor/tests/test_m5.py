@@ -12,8 +12,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import make_release as mr  # noqa: E402
-import sentinel_local as sl  # noqa: E402
-import surface  # noqa: E402
+from github_actions_monitor.sentinels import sentinel_local as sl  # noqa: E402
+from github_actions_monitor.app import surface  # noqa: E402
 
 NOW = datetime(2026, 11, 6, 12, 0, 0, tzinfo=timezone.utc)
 CAPS = {"runs_per_repo": 6, "cold_runs_per_repo": 3}
@@ -121,7 +121,7 @@ class A10Quota(unittest.TestCase):
         self.assertEqual(surface.settings({"sentinel": {"surface": {"budget_share": "all"}}})["budget_share"], 0.5)   # a bad type keeps the default
 
     def test_the_example_configuration_shows_the_quota_options(self):
-        example = json.loads((HERE / "actions_monitor.example.json").read_text(encoding="utf-8"))
+        example = json.loads((HERE / "assets" / "examples" / "actions_monitor.example.json").read_text(encoding="utf-8"))
         self.assertEqual(example["sentinel"]["surface"]["budget_share"], 0.5)
         self.assertEqual(example["sentinel"]["surface"]["min_rate_factor"], 2.0)
         self.assertIs(example["sentinel"]["a2_full_sample_unknown"], True)
@@ -135,31 +135,32 @@ class A10Quota(unittest.TestCase):
 class ProfilesExample(unittest.TestCase):
     def test_the_example_is_coherent_with_the_neutral_catalogues(self):
         self.assertEqual(mr.example_profiles_problems(), [])
-        data = json.loads((HERE / "profiles.example.json").read_text(encoding="utf-8"))
+        data = json.loads((HERE / "assets" / "examples" / "profiles.example.json").read_text(encoding="utf-8"))
         self.assertIn("MYPROJECT-FIRMWARE", json.dumps(data))
         self.assertNotIn("HYDRA", json.dumps(data))
 
     def test_it_is_in_the_zip_and_has_the_authorship(self):
         self.assertIn("profiles.example.json", mr.DATA_JSON)
-        self.assertIn("profiles.example.json", mr.REQUIRED_MEMBERS)
-        self.assertEqual(mr.authorship_problems({"p/profiles.example.json": (HERE / "profiles.example.json").read_bytes(), **{f"p/{n}": (HERE / n).read_bytes() for n in mr.LEGAL}}), [])
+        self.assertIn("assets/examples/profiles.example.json", mr.REQUIRED_MEMBERS)
+        self.assertEqual(mr.authorship_problems({"p/profiles.example.json": (HERE / "assets" / "examples" / "profiles.example.json").read_bytes(), **{f"p/{n}": (HERE / n).read_bytes() for n in mr.LEGAL}}), [])
 
     def test_a_broken_example_is_detected(self):
         with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "assets" / "examples").mkdir(parents=True)
             for name in ("targets.example.json", "ecosystems.example.json", "profiles.example.json"):
-                shutil.copy(HERE / name, tmp)
-            data = json.loads((Path(tmp) / "profiles.example.json").read_text(encoding="utf-8"))
+                shutil.copy(HERE / "assets" / "examples" / name, Path(tmp) / "assets" / "examples")
+            data = json.loads((Path(tmp) / "assets" / "examples" / "profiles.example.json").read_text(encoding="utf-8"))
             data["profiles"]["bad"] = {"names": ["NOT-A-TARGET"]}
             data["profiles"]["empty"] = {"workflows": ["apk-build.yml"], "ecosystems": ["main"]}   # valid, but the example has no APK target
             data["profiles"]["wrong_eco"] = {"workflows": ["firmware-build.yml"], "ecosystems": ["nope"]}
-            (Path(tmp) / "profiles.example.json").write_text(json.dumps(data), encoding="utf-8")
+            (Path(tmp) / "assets" / "examples" / "profiles.example.json").write_text(json.dumps(data), encoding="utf-8")
             problems = "; ".join(mr.example_profiles_problems(Path(tmp)))
         self.assertIn("NOT-A-TARGET", problems)
         self.assertIn("profile empty selects no target", problems)
         self.assertIn("nope", problems)
 
     def test_the_global_state_is_restored(self):
-        import gha_dispatch_all as gd
+        from github_actions_monitor.cli import gha_dispatch_all as gd
         before = gd.ECOSYSTEMS
         mr.example_profiles_problems()
         self.assertEqual(gd.ECOSYSTEMS, before)
@@ -214,7 +215,7 @@ class WritesToGithubWording(unittest.TestCase):
 class Version(unittest.TestCase):
     def test_new_texts_exist_in_the_eight_catalogues(self):
         for lang in mr.LANGS:
-            cat = json.loads((HERE / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
+            cat = json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
             for key in ("ui.a2_inconclusive", "ui.a10_paused"):
                 self.assertTrue(cat.get(key, "").strip(), f"{lang}: {key}")
 

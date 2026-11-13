@@ -9,12 +9,12 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import central_source  # noqa: E402
-import i18n  # noqa: E402
+from github_actions_monitor.sentinels import central_source  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
 
 EXAMPLE = (HERE / "tests" / "fixtures" / "central_sentinel_example.json").read_text(encoding="utf-8")
 ASOF = 1767261600       # 2026-01-01T10:00:00Z
@@ -81,7 +81,7 @@ class CentralSource(unittest.TestCase):
 
     def test_the_red_rule_is_the_one_of_the_file(self):
         """The file keeps the same rows as redrule.red_workflows (repo, workflow, since): the monitor and the central panel agree on what is red."""
-        import redrule
+        from github_actions_monitor.data_pipeline import redrule
         runs = {"demo-beta-fw": [{"repo": "demo-beta-fw", "name": "ci", "path": "ci.yml", "status": "completed", "conclusion": "failure", "branch": "main", "started": "2026-01-01T08:00:00Z", "url": "u"}]}
         rows = redrule.red_workflows(runs, None)[0]
         data = json.loads(EXAMPLE)
@@ -103,7 +103,7 @@ class Integration(unittest.TestCase):
         central_source.reset()
 
     def test_the_state_carries_the_central_panel_with_its_age_and_does_not_trust_a_late_one(self):
-        import signals
+        from github_actions_monitor.data_pipeline import signals
         fresh = central_source.read({"central": {"source": "http"}}, "o", opener=lambda url: EXAMPLE, now=ASOF + 600)
         doc = signals.state({"figures": {}}, [], "complete", {"central": fresh}, now=ASOF + 600)
         sig = [s for s in doc["signals"] if s["id"] == "health.central"][0]
@@ -119,8 +119,8 @@ class Integration(unittest.TestCase):
         self.assertFalse([s for s in off["signals"] if s["id"] == "health.central"])
 
     def test_in_low_the_repositories_red_in_the_panel_are_read_live_and_the_rest_waits(self):
-        import actions_monitor as am
-        import modes
+        from github_actions_monitor.app import actions_monitor as am
+        from github_actions_monitor.app import modes
         central_source.read({"central": {"source": "http"}}, "o", opener=lambda url: EXAMPLE, now=ASOF + 60)
         original = am.central_result
         am.central_result = lambda config=None: central_source.read({"central": {"source": "http"}}, "o", opener=lambda url: EXAMPLE, now=ASOF + 60)
@@ -140,7 +140,7 @@ class Integration(unittest.TestCase):
             am.central_result = original
 
     def test_the_settings_exist_in_the_eight_languages(self):
-        import settings_api
+        from github_actions_monitor.app import settings_api
         for key in ("central.source", "central.max_age_minutes"):
             self.assertIn(key, settings_api.FIELDS)
             for lang in i18n.LANGS:

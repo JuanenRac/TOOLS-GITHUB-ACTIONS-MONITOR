@@ -7,7 +7,7 @@
 
 # Kontingente und Tarife
 
-Den Monitor nutzt jede Art von Konto, deshalb nimmt er keine an. Die Zahlen unten stehen in `monitor/quotas.json` (bearbeiten Sie die Datei, um GitHubs Änderungen ohne neue Monitor-Version zu übernehmen) und wurden mit der öffentlichen Dokumentation von GitHub abgeglichen; sie ändern sich, sehen Sie sie also als Ausgangspunkt und schauen Sie in die in der Datei genannten Seiten. Wählen Sie Ihren Tarif unter **Einstellungen > Grundlagen** (`account.plan`); solange er *unbekannt* ist, wird keine Kontingentzahl gezeigt.
+Den Monitor nutzt jede Art von Konto, deshalb nimmt er keine an. Die Zahlen unten stehen in `monitor/assets/examples/quotas.json` (eine Kopie namens `quotas.json` neben den Startern hat Vorrang) (bearbeiten Sie die Datei, um GitHubs Änderungen ohne neue Monitor-Version zu übernehmen) und wurden mit der öffentlichen Dokumentation von GitHub abgeglichen; sie ändern sich, sehen Sie sie also als Ausgangspunkt und schauen Sie in die in der Datei genannten Seiten. Wählen Sie Ihren Tarif unter **Einstellungen > Grundlagen** (`account.plan`); solange er *unbekannt* ist, wird keine Kontingentzahl gezeigt.
 
 ## Das API-Kontingent
 

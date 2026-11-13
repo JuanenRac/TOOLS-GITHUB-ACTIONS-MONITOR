@@ -7,7 +7,7 @@
 
 # Quotas e planos
 
-O monitor é usado por todos os tipos de conta, por isso nunca assume nenhum. Os valores abaixo estão em `monitor/quotas.json` (edite-o para acompanhar as mudanças do GitHub sem uma versão nova do monitor) e foram confrontados com a documentação pública do GitHub; mudam com o tempo, por isso use-os como ponto de partida e consulte as páginas indicadas no ficheiro. Escolha o seu plano em **Definições > Básico** (`account.plan`); enquanto for *desconhecido* não se mostra nenhum valor de quota.
+O monitor é usado por todos os tipos de conta, por isso nunca assume nenhum. Os valores abaixo estão em `monitor/assets/examples/quotas.json` (uma cópia chamada `quotas.json` junto dos lançadores tem prioridade) (edite-o para acompanhar as mudanças do GitHub sem uma versão nova do monitor) e foram confrontados com a documentação pública do GitHub; mudam com o tempo, por isso use-os como ponto de partida e consulte as páginas indicadas no ficheiro. Escolha o seu plano em **Definições > Básico** (`account.plan`); enquanto for *desconhecido* não se mostra nenhum valor de quota.
 
 ## A quota da API
 

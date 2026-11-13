@@ -2,12 +2,12 @@
 
 ## Pila tecnológica
 - **Lenguaje**: Python 3.11 o superior; el núcleo no necesita paquetes (la vista de terminal, `tui.py`, usa Rich, que es opcional; las pruebas omiten lo que lo necesita si falta).
-- **Interfaz**: una página web local (`monitor/actions_monitor.html`) servida en `127.0.0.1`, más herramientas de línea de comandos.
+- **Interfaz**: una página web local (`monitor/assets/static/actions_monitor.html`) servida en `127.0.0.1`, más herramientas de línea de comandos.
 - **Fuente de datos**: el cliente oficial de línea de comandos de GitHub, `gh` (llamadas de solo lectura por defecto).
 
 ## Pautas
 1. **Primero las pruebas**: `python -m unittest discover -s monitor/tests` debe pasar antes de un pull request. Sin conexión: las pruebas nunca llaman a GitHub. Para probar los servicios reales a mano, usa `python tools/manual_check_live.py`.
-2. **Ocho idiomas**: todo texto que lea un usuario vive en `monitor/locales/<lang>.json` para en, es, de, fr, it, ja, zh y pt (portugués europeo). Una clave nueva va a los ocho ficheros; las pruebas comprueban que tengan las mismas claves.
+2. **Ocho idiomas**: todo texto que lea un usuario vive en `monitor/assets/locales/<lang>.json` para en, es, de, fr, it, ja, zh y pt (portugués europeo). Una clave nueva va a los ocho ficheros; las pruebas comprueban que tengan las mismas claves.
 3. **Sin secretos**: por defecto el monitor no guarda ningún token (se lo pide a `gh`); el único token opcional vive solo en el almacén seguro del sistema (`secretstore.py`). No añadas código que lea, imprima, registre o escriba credenciales en ningún otro sitio, y no subas nunca un `actions_monitor.json` real.
 4. **Seguro por defecto**: todo lo que escribe en GitHub, ejecuta un programa, abre un puerto de red o envía datos fuera está apagado por defecto, tiene su propio interruptor en Ajustes > Avanzado, pide una confirmación propia y escucha en `127.0.0.1` salvo que el modo red esté activo. Una función así trae pruebas que demuestran que se niega sin el interruptor, sin la confirmación y sin el token, y que nada se filtra a un registro.
 5. **Pasos pequeños**: un cambio por pull request, con la línea correspondiente en `CHANGELOG.md`.

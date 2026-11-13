@@ -13,9 +13,9 @@ from unittest import mock
 
 import _testenv  # noqa: F401
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-import gha_dispatch_all as gd  # noqa: E402
-import monitor_link  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+from github_actions_monitor.cli import gha_dispatch_all as gd  # noqa: E402
+from github_actions_monitor.integrations import monitor_link  # noqa: E402
 
 
 class FakeAnswer(io.BytesIO):

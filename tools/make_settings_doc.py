@@ -9,7 +9,7 @@
     python tools/make_settings_doc.py            # rewrites the marked part of the eight files
     python tools/make_settings_doc.py --check    # exit 1 when a file is out of date
 
-The tab names, the block titles and the labels are the very texts of monitor/locales/*.json, so the guide always uses the words of the page.
+The tab names, the block titles and the labels are the very texts of monitor/assets/locales/*.json, so the guide always uses the words of the page.
 """
 import json
 import sys
@@ -17,8 +17,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 MON = ROOT / "monitor"
-sys.path.insert(0, str(MON))
-import settings_api as sa  # noqa: E402
+sys.path.insert(0, str(MON / "src"))
+from github_actions_monitor.app import settings_api as sa  # noqa: E402
 
 BEGIN, END = "<!-- settings:begin -->", "<!-- settings:end -->"
 FILES = {"en": "SETTINGS.md", "es": "SETTINGS_spa.md", "de": "SETTINGS_deu.md", "fr": "SETTINGS_fra.md", "it": "SETTINGS_ita.md", "ja": "SETTINGS_jpn.md", "zh": "SETTINGS_zho.md", "pt": "SETTINGS_por.md"}
@@ -96,7 +96,7 @@ ECO_NEW = {'en': 'Which repositories are watched: the example catalogue of ecosy
 
 
 def locale(lang):
-    return json.loads((MON / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
+    return json.loads((MON / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
 
 
 def render(lang):

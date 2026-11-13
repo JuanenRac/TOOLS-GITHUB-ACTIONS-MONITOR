@@ -8,15 +8,15 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import i18n  # noqa: E402
-import settings_api  # noqa: E402
-import soundalert  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.app import settings_api  # noqa: E402
+from github_actions_monitor.integrations import soundalert  # noqa: E402
 
-PAGE = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+PAGE = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
 KEYS = ("sound.enabled", "sound.on_new_red", "sound.on_connection_lost", "sound.cooldown_seconds", "sound.volume", "sound.server_beep")
 
 
@@ -61,7 +61,7 @@ class ServerSide(unittest.TestCase):
         self.assertEqual(calls[-1], ["afplay", "/System/Library/Sounds/Glass.aiff"])
         with mock.patch.object(soundalert.sys, "platform", "linux"), mock.patch.object(soundalert.shutil, "which", return_value="/x"):
             self.assertEqual(soundalert._play(mock.Mock(side_effect=OSError("gone"))), "")      # a program that breaks is not a failure of the monitor
-        source = (HERE / "soundalert.py").read_text(encoding="utf-8")
+        source = (HERE / "src" / "github_actions_monitor" / "integrations" / "soundalert.py").read_text(encoding="utf-8")
         self.assertNotIn("shell=True", source)
         self.assertNotIn("urllib", source)
 
@@ -78,7 +78,7 @@ class Settings(unittest.TestCase):
                 self.assertNotEqual(i18n.tl(lang, key), key, (lang, key))
 
     def test_the_server_beep_is_a_local_only_setting(self):
-        import localguard
+        from github_actions_monitor.security import localguard
         self.assertNotIn("sound.server_beep", localguard.REMOTE_WRITABLE)
 
 

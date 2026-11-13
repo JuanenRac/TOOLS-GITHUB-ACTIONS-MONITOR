@@ -15,11 +15,11 @@ from pathlib import Path
 import _testenv  # noqa: F401
 
 HERE = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(HERE))
-import actions_monitor as am  # noqa: E402
-import i18n  # noqa: E402
-import outputs  # noqa: E402
-import settings_api as sa  # noqa: E402
+sys.path.insert(0, str(HERE / "src"))
+from github_actions_monitor.app import actions_monitor as am  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.integrations import outputs  # noqa: E402
+from github_actions_monitor.app import settings_api as sa  # noqa: E402
 
 
 class Validation(unittest.TestCase):
@@ -159,7 +159,7 @@ class Endpoints(unittest.TestCase):
         self.path.write_text(json.dumps({"refresh_seconds": 45, "webhook": {"secret": "TOP-SECRET"}}), encoding="utf-8")
         self.saved = (am.CONFIG_FILE, sa.BACKUP_DIR, sa.CONFIG_FILE)
         am.CONFIG_FILE, sa.BACKUP_DIR = self.path, Path(self.tmp.name) / "config_backups"
-        import toolconfig
+        from github_actions_monitor.app import toolconfig
         self.saved_raw = toolconfig.CONFIG_FILE
         toolconfig.CONFIG_FILE = self.path
         toolconfig.forget()
@@ -169,7 +169,7 @@ class Endpoints(unittest.TestCase):
         threading.Thread(target=self.server.serve_forever, daemon=True).start()
 
     def tearDown(self):
-        import toolconfig
+        from github_actions_monitor.app import toolconfig
         self.server.shutdown()
         self.server.server_close()
         am.CONFIG_FILE, sa.BACKUP_DIR, sa.CONFIG_FILE = self.saved
@@ -322,7 +322,7 @@ class Metrics(unittest.TestCase):
 
 
 class Icons(unittest.TestCase):
-    page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+    page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
 
     def test_every_used_icon_exists_in_the_sprite(self):
         defined = set(re.findall(r'<symbol id="i-([a-z0-9]+)"', self.page))
@@ -372,7 +372,7 @@ class Icons(unittest.TestCase):
 
 class PageLife(unittest.TestCase):
     """1.5.0: the life of the page (animations that stop with prefers-reduced-motion, figures that count up, tooltips), the ordered unsigned figure and the issue suggestion."""
-    page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+    page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
 
     def test_every_animation_is_inside_the_no_preference_query_or_switched_off(self):
         marker = "@media (prefers-reduced-motion:"

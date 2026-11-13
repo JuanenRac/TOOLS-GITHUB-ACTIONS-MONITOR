@@ -10,13 +10,13 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import i18n  # noqa: E402
-import migrate_state  # noqa: E402
-import settings_api as sa  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.cli import migrate_state  # noqa: E402
+from github_actions_monitor.app import settings_api as sa  # noqa: E402
 
 
 class AiSettings(unittest.TestCase):

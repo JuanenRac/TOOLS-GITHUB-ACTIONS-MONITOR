@@ -10,11 +10,11 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
 REPO = HERE.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import tool_version  # noqa: E402
+from github_actions_monitor import tool_version  # noqa: E402
 
 TEXT = (HERE / "CHANGELOG.md").read_text(encoding="utf-8").replace("\r\n", "\n")
 GROUPED_SINCE = (1, 5, 1)

@@ -17,7 +17,7 @@ GPL-3.0-or-later - see LICENSE
 5. 首次使用：
    - 页面显示“你的”仓库（你登录的 GitHub 账户）。要监视其他账户，请在 actions_monitor.json 中设置 "github_owner"。
    - 在页面的“设置”选项卡(齿轮图标)中选择语言。默认以英语启动,选择会被记住。其他设置也在那里。
-   - 若要按名称前缀给仓库分组或使用批处理工具，请复制 ecosystems.example.json / targets.example.json，并在 actions_monitor.json 中
+   - 若要按名称前缀给仓库分组或使用批处理工具，请复制 assets/examples/ecosystems.example.json / assets/examples/targets.example.json，并在 actions_monitor.json 中
      用 "ecosystems_file"、"targets_file" 指向它们。详情见 README_zh.txt。
    - 没有本地克隆？同样可用，只是处于精简模式（只显示 GitHub API 提供的内容），页面会告诉你。
 6. 它不会做的事：不会自行签名或发布任何内容，自身不会向 GitHub 写入任何东西（只有你运行的 `dispatch --go`、`dispatch --real` 和 `finalize --execute` 会），只监听 127.0.0.1，也不保存任何令牌。签名和发布是你自己执行的命令；

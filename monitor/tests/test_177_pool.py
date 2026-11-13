@@ -9,13 +9,13 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import github_app  # noqa: E402
-import i18n  # noqa: E402
-import readpool  # noqa: E402
+from github_actions_monitor.integrations import github_app  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.data_pipeline import readpool  # noqa: E402
 
 TOKEN = "github_pat_" + "Ab1Cd2Ef3G" * 4
 CONFIG = {"github_app": {"enabled": True, "app_id": "1", "key_path": "/k.pem"}}
@@ -65,7 +65,7 @@ class Pool(unittest.TestCase):
     def test_the_token_goes_to_gh_as_GH_TOKEN_and_nowhere_else(self):
         name, env = readpool.pick(self.config(app=False), ["api", "x"]) if False else ("extra", readpool.env_for(self.config(app=False), "extra"))
         self.assertEqual(env["env"]["GH_TOKEN"], TOKEN)
-        source = (HERE / "readpool.py").read_text(encoding="utf-8")
+        source = (HERE / "src" / "github_actions_monitor" / "data_pipeline" / "readpool.py").read_text(encoding="utf-8")
         self.assertNotIn("print(", source)
         self.assertNotIn("logging", source)
         self.assertNotIn("write_text", source)
@@ -83,7 +83,7 @@ class Pool(unittest.TestCase):
         self.assertTrue(readpool.snapshot()["failed"] or True)
 
     def test_the_gh_wrapper_uses_the_pool_and_repeats_a_refused_read_with_the_user(self):
-        import actions_monitor as am
+        from github_actions_monitor.app import actions_monitor as am
         calls = []
 
         class Done:
@@ -107,7 +107,7 @@ class Pool(unittest.TestCase):
         self.assertIn("extra", readpool.snapshot()["failed"])
 
     def test_the_settings_exist_with_their_help(self):
-        import settings_api
+        from github_actions_monitor.app import settings_api
         for key in ("extra_reader.enabled", "extra_reader.file"):
             self.assertIn(key, settings_api.FIELDS)
             for lang in i18n.LANGS:
@@ -125,7 +125,7 @@ class QuotaTab(unittest.TestCase):
         self.file.write_text(TOKEN + chr(10), encoding="utf-8")
 
     def test_the_status_shows_every_source_and_never_a_token_or_a_path(self):
-        import actions_monitor as am
+        from github_actions_monitor.app import actions_monitor as am
         config = {"extra_reader": {"enabled": True, "file": str(self.file)}, "github_app": {"enabled": True, "app_id": "1", "key_path": "/k.pem"}}
 
         def fake_gh(*args, **kwargs):
@@ -151,15 +151,15 @@ class QuotaTab(unittest.TestCase):
     def test_no_function_of_the_page_is_defined_twice(self):
         """A second definition silently replaces the first one (the Quota tab box was replaced by the async box of the Basic tab and Settings stopped rendering)."""
         import re
-        page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         names = [m[2] for m in re.findall(r"(?m)^(async )?(function )([A-Za-z0-9_$]+)", page)]
         twice = sorted({n for n in names if names.count(n) > 1})
         self.assertEqual(twice, [])
 
     def test_the_tab_the_endpoint_and_the_buttons_are_there(self):
-        import settings_api
-        page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
-        source = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        from github_actions_monitor.app import settings_api
+        page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
+        source = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         self.assertIn("quota", settings_api.TAB_ORDER)
         keys = {k for k, m in settings_api.META.items() if m["tab"] == "quota"}
         for key in ("github_app.enabled", "central.source", "extra_reader.enabled", "extra_reader.file", "modes.auto_low", "modes.low.refresh_seconds", "network.etag"):
@@ -173,7 +173,7 @@ class QuotaTab(unittest.TestCase):
         self.assertIn("modes.auto_low", settings_api.LITE_KEYS if hasattr(settings_api, "LITE_KEYS") else ())  # the same switches in the lite edition
 
     def test_the_etag_switch_of_the_tab_turns_the_conditional_reads_off(self):
-        source = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        source = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         self.assertIn('(config.get("network") or {}).get("etag", True) is not False', source)
 
 

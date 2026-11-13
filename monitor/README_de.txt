@@ -24,10 +24,10 @@ WAS ER NIE TUT   Er lauscht nur auf 127.0.0.1, außer Sie schalten den Netzwerkm
 SPRACHE    8 Sprachen: en, es, de, fr, it, ja, zh, pt (europäisches Portugiesisch). Der Start erfolgt auf ENGLISCH: die Sprache des Systems entscheidet nicht. Eine andere wählst du im Tab EINSTELLUNGEN der Seite
            (Zahnrad-Symbol; der Browser merkt sie sich), mit "language" in actions_monitor.json, mit der Umgebungsvariable MONITOR_LANG oder mit --lang CODE in den Kommandozeilenwerkzeugen (schlägt alles andere).
            Zeilen, die Skripte lesen (SKIP, DISPATCHED, READY, FAILED, Summary:, BUILD ONLY...), sind immer englisch.
-KONFIG     actions_monitor.json (beim ersten Start aus actions_monitor.example.json erzeugt). Nützliche Schlüssel: github_owner (leer = das Konto von gh),
+KONFIG     actions_monitor.json (beim ersten Start aus assets/examples/actions_monitor.example.json erzeugt). Nützliche Schlüssel: github_owner (leer = das Konto von gh),
            language, ecosystems_file, targets_file, refresh_seconds, cold_refresh_seconds, max_workers, min_rate_remaining, sentinel.*
-           ecosystems_file: gruppiert Repositories nach Namenspräfix (siehe ecosystems.example.json; "*" = alle Repositories). targets_file: Katalog der Builds für die
-           Batch-Werkzeuge (siehe targets.example.json). profiles_file (profiles.example.json): Batch-Profile. Schlüssel, die mit "_" beginnen, sind Metadaten.
+           ecosystems_file: gruppiert Repositories nach Namenspräfix (siehe assets/examples/ecosystems.example.json; "*" = alle Repositories). targets_file: Katalog der Builds für die
+           Batch-Werkzeuge (siehe assets/examples/targets.example.json). profiles_file (assets/examples/profiles.example.json): Batch-Profile. Schlüssel, die mit "_" beginnen, sind Metadaten.
 WORKSPACE  OPTIONAL: ein Ordner mit lokalen Klonen deiner Repositories (MONITOR_ROOT, "workspace_root" in der JSON-Datei oder ein übergeordneter Ordner mit der Datei .monitor-root).
            Ohne ihn startet der Monitor im REDUZIERTEN MODUS und sagt das: nur, was die GitHub-API liefert (keine lokale Signatur-Warteschlange, kein Audit-Bericht, kein CHANGELOG-Scan).
            Mit ihm gibt es zusätzlich Release-Kandidaten, die Signatur-Warteschlange und die Batch-Werkzeuge. Signaturprotokolle: "signed_dir"; Audit-Dateien: "audit_dir".

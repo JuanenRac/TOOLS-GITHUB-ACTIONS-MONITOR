@@ -10,18 +10,18 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import actions_monitor as am  # noqa: E402
-import doctor  # noqa: E402
-import i18n  # noqa: E402
-import redrule  # noqa: E402
-import sentinel_collab  # noqa: E402
-import sentinel_local  # noqa: E402
+from github_actions_monitor.app import actions_monitor as am  # noqa: E402
+from github_actions_monitor.cli import doctor  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.data_pipeline import redrule  # noqa: E402
+from github_actions_monitor.sentinels import sentinel_collab  # noqa: E402
+from github_actions_monitor.sentinels import sentinel_local  # noqa: E402
 
-PAGE = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+PAGE = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
 
 
 def run(ident, repo, name, conclusion, branch="main", started="2026-01-01T10:00:00Z", status="completed"):
@@ -111,7 +111,7 @@ class ClockOfTheBar(unittest.TestCase):
 
 class RedTilesBlink(unittest.TestCase):
     def test_only_red_tiles_blink_and_the_setting_can_turn_it_off(self):
-        import settings_api
+        from github_actions_monitor.app import settings_api
         self.assertRegex(PAGE, r'@media \(prefers-reduced-motion:no-preference\)\{:root\[data-blink="1"\] \.tile\.bad:not\(\.skel\)')      # only the red state, only with motion allowed
         self.assertNotRegex(PAGE, r'data-blink="1"\] \.tile\.(ok|warn|run)')
         self.assertRegex(PAGE, r'@media \(prefers-reduced-motion:reduce\)\{:root\[data-blink="1"\] \.tile\.bad[^}]*inset 0 0 0 3px var\(--bad\)')      # reduced motion: a fixed thicker edge
@@ -145,7 +145,7 @@ class UpdateCheckNeverBlocks(unittest.TestCase):
     def test_a_slow_read_is_made_in_the_background_and_the_answer_of_the_cache_is_immediate(self):
         import threading
         import time as _time
-        import updatecheck
+        from github_actions_monitor.app import updatecheck
         gate = threading.Event()
         calls = []
 
@@ -168,7 +168,7 @@ class UpdateCheckNeverBlocks(unittest.TestCase):
                 _time.sleep(0.05)
             self.assertEqual(len(calls), 1, "one read at a time")
             self.assertTrue(updatecheck.check({}, "1.0.0", slow_reader, state_file=state_file, background=True)["newer"], "the next answer has what the thread read")
-            self.assertIn("background=True", (HERE / "actions_monitor.py").read_text(encoding="utf-8"))
+            self.assertIn("background=True", (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

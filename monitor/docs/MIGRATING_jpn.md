@@ -89,3 +89,28 @@
 - **複数のアカウント** は任意です。使うには `python actions_monitor.py --migrate-accounts`（試験実行）を実行し、続けて `--apply` を付けてファイルを `accounts/default/` にコピーします。元のファイルは、あなたが削除するまで残ります。アカウントを追加するには `accounts/<id>/actions_monitor.json` を作ります。`ACCOUNTS.md` を参照してください。
 - `accounts/` フォルダーがあると、`python actions_monitor.py` はアカウントごとに 1 つのモニターを実行するスーパーバイザーを起動します。`--account <id>` は 1 つだけを実行します。lite 版にはこれらは一切ありません。
 - 新機能: ページのアドレスでの `?view=` と `?chrome=0`、`GET /api/accounts`、`GET /api/live-status`、そしてすべてのアカウント向けの 1 つの `POST /api/webhook`。
+
+# 1.7.x から新しいフォルダ構成へ
+
+コードは `src/github_actions_monitor/` に、ページ・サンプルファイル・言語は `assets/` に、リリースと移行のスクリプトは `tools/` に置かれるようになりました。普段使うものは何も変わりません。起動スクリプト(`MONITOR_GITHUB_ACTIONS`、`MONITOR_LITE_GITHUB_ACTIONS`、`BATCH_GITHUB_ACTIONS`)は同じ場所にあり、同じアドレスとポートを開きます。このガイドのコマンド(`python read_report.py`、`python actions_monitor.py --doctor`、`python monitor_cli.py status` など)も、同じ名前の小さな入口ファイルが製品フォルダに残るため、そのまま動きます。起動スクリプトは `src/` をパスに加えて `python -m github_actions_monitor`(完全版)と `python -m github_actions_monitor.lite`(lite 版)を実行します。
+
+データは移動しません。`actions_monitor.json`、キャッシュ、ログ、`config_backups/`、`accounts/`、独自のカタログファイルは、起動スクリプトの隣の製品フォルダに残り、`src/` の中には決して入りません。プログラムに同梱される中立のサンプルと `quotas.json` は `assets/examples/` に移りました。起動スクリプトの隣に自分の `quotas.json` を置けば、そちらが優先されます。
+
+## 手順
+
+1. モニターを止め、新しいバージョンを古いフォルダの上に展開します(`actions_monitor.json` は残します)。
+2. いつもどおり起動します。ほかに何もしなくても動きます。
+3. 古いフラット構成の残りを片付けるには、`python tools/migrate_layout.py`(ドライラン)を実行し、続けて `python tools/migrate_layout.py --apply` を実行します。設定ファイルを `layout_backup_<日時>/config/` にコピーし、古いモジュール・古いページ・古いサンプル・古い `locales/` フォルダを `layout_backup_<日時>/old_code/` に移動します。削除も上書きもせず、データには触れません。古いファイルが残っている間は `python actions_monitor.py --doctor` が知らせます。
+4. 古いフラットな名前でモジュールを import していた自作スクリプト(`import read_report`)は、`src/` をパスに加えて `github_actions_monitor.<パッケージ>.<モジュール>` を import します。
+
+| パッケージ | 内容 |
+|---|---|
+| `app` | サーバー、設定、動作モード、共有設定 |
+| `accounts` | 複数アカウント:レジストリ、スーパーバイザー、子プロセス |
+| `sentinels` | センチネル、アラートセンター、パネル |
+| `security` | ローカルガード、シークレット、Webhook、確認、ネットワークガード、署名、非公開ファイル |
+| `data_pipeline` | イベント、分析、条件付き読み取り、検出、クォータ、main の赤の規則 |
+| `integrations` | GitHub、通知、OpenTelemetry、ミラー、ランナー、MCP、AI のフィードとフック |
+| `cli` | コマンドラインツール |
+| `ui` | 情報、ヘルプ文書、ターミナル表示 |
+| `i18n`、`util` | 8 言語、共有の小さな補助 |

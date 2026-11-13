@@ -15,13 +15,13 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import actions_monitor as am  # noqa: E402
-import i18n  # noqa: E402
-import settings_api as sa  # noqa: E402
+from github_actions_monitor.app import actions_monitor as am  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.app import settings_api as sa  # noqa: E402
 
 
 class LiteSwitch(unittest.TestCase):
@@ -36,8 +36,8 @@ class LiteSwitch(unittest.TestCase):
 
     def test_lite_has_its_own_files_and_port(self):
         saved = (am.LITE["on"], am.CONFIG_FILE, am.LOG_FILE, sa.CONFIG_FILE, sa.BACKUP_DIR)
-        import etagcache
-        import toolconfig
+        from github_actions_monitor.data_pipeline import etagcache
+        from github_actions_monitor.app import toolconfig
         saved_etag, saved_tool = etagcache.CACHE_FILE, toolconfig.CONFIG_FILE
         try:
             am.enable_lite()
@@ -65,9 +65,9 @@ class LiteSwitch(unittest.TestCase):
             am.LITE["on"], am.CONFIG_FILE = saved
 
     def test_the_lite_core_never_starts_the_sentinel(self):
-        text = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        text = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         self.assertRegex(text, r"if not LITE\[\"on\"\]:\n\s+start_sentinel\(config\)")
-        self.assertRegex(text, r"if not LITE\[\"on\"\]:\n\s+import report_history")
+        self.assertRegex(text, r"if not LITE\[\"on\"\]:\n\s+from github_actions_monitor.data_pipeline import report_history")
 
 
 class LiteSettings(unittest.TestCase):
@@ -136,7 +136,7 @@ class LiteServer(unittest.TestCase):
 
 
 class LitePage(unittest.TestCase):
-    page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+    page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
 
     def test_the_page_hides_what_lite_does_not_have(self):
         for needle in ("const LITE=!!I18N.lite", ".lite #n-sent", ".lite #t-sent", ".lite #kp-sign", "if(LITE)return;", 'LITE?["now","charts","repos","hist","cfg"]'):
@@ -150,12 +150,12 @@ class LitePage(unittest.TestCase):
 
     def test_the_launchers(self):
         bat = (HERE / "MONITOR_LITE_GITHUB_ACTIONS.bat").read_bytes()
-        self.assertIn(b"actions_monitor.py --lite", bat)
+        self.assertIn(b"-m github_actions_monitor.lite", bat)
         self.assertIn(b"\r\n", bat)
         for name in ("MONITOR_LITE_GITHUB_ACTIONS.sh", "MONITOR_LITE_GITHUB_ACTIONS.command"):
             text = (HERE / name).read_text(encoding="utf-8")
             self.assertTrue(text.startswith("#!/usr/bin/env bash\n"))
-        self.assertIn("--lite", (HERE / "MONITOR_LITE_GITHUB_ACTIONS.sh").read_text(encoding="utf-8"))
+        self.assertIn("-m github_actions_monitor.lite", (HERE / "MONITOR_LITE_GITHUB_ACTIONS.sh").read_text(encoding="utf-8"))
         import make_release
         names = {p.name for p in make_release.members()}
         self.assertTrue({"MONITOR_LITE_GITHUB_ACTIONS.bat", "MONITOR_LITE_GITHUB_ACTIONS.sh", "MONITOR_LITE_GITHUB_ACTIONS.command"} <= names)
@@ -169,10 +169,10 @@ class ActCommand(unittest.TestCase):
         self.assertIn('data-copy="${esc(c)}"', self.page)
         self.assertRegex(self.page, r"\[A-Za-z0-9\._-\]\+\\\.ya\?ml")          # only a plain workflow file name
         self.assertNotIn("/api/act/status?since=0", self.page)
-        self.assertIn("/api/act", __import__("actions_monitor").LITE_PATHS, "the lite edition has no /api/act endpoint (it answers 404)")
+        self.assertIn("/api/act", __import__("github_actions_monitor.app.actions_monitor", fromlist=["_"]).LITE_PATHS, "the lite edition has no /api/act endpoint (it answers 404)")
 
     def test_running_act_exists_only_as_a_confirmed_action_of_the_ai(self):
-        import ai_actions
+        from github_actions_monitor.integrations import ai_actions
         self.assertIn("act_local", ai_actions.CLOSED_LIST)
         self.assertNotIn("act_local", ai_actions.RUNNABLE)
 

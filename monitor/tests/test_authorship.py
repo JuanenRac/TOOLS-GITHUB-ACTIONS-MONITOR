@@ -8,13 +8,13 @@ from contextlib import redirect_stdout
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import actions_monitor  # noqa: E402
-import i18n  # noqa: E402
-from tool_version import AUTHOR, LICENSE_ID  # noqa: E402
+from github_actions_monitor.app import actions_monitor  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.tool_version import AUTHOR, LICENSE_ID  # noqa: E402
 
 
 class Authorship(unittest.TestCase):
@@ -35,7 +35,7 @@ class Authorship(unittest.TestCase):
         self.assertIn('"ui.about"', page)
 
     def test_version_flag_of_the_reader_prints_the_author(self):
-        import read_report
+        from github_actions_monitor.cli import read_report
         old = sys.argv
         sys.argv = ["read_report.py", "--version"]
         buf = io.StringIO()
@@ -47,12 +47,12 @@ class Authorship(unittest.TestCase):
         self.assertIn(AUTHOR, buf.getvalue())
 
     def test_the_batch_tool_has_a_version_flag_with_the_author(self):
-        text = (HERE / "gha_dispatch_all.py").read_text(encoding="utf-8")
+        text = (HERE / "src" / "github_actions_monitor" / "cli" / "gha_dispatch_all.py").read_text(encoding="utf-8")
         self.assertIn('action="version"', text)
         self.assertIn("i18n.about_line()", text)
 
     def test_the_start_up_line_prints_the_author(self):
-        text = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        text = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         self.assertIn("i18n.about_line()", text)
 
 

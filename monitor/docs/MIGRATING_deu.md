@@ -89,3 +89,28 @@ Es muss nichts umgewandelt werden: Ohne einen Ordner `accounts/` arbeitet der Mo
 - **Mehrere Konten** sind optional. Um sie zu nutzen, führe `python actions_monitor.py --migrate-accounts` aus (ein Probelauf) und füge dann `--apply` hinzu, um deine Dateien nach `accounts/default/` zu kopieren; die Originale bleiben, bis du sie löschst. Weitere Konten legst du als `accounts/<id>/actions_monitor.json` an. Siehe `ACCOUNTS.md`.
 - Mit einem Ordner `accounts/` startet `python actions_monitor.py` einen Supervisor, der pro Konto einen Monitor ausführt; `--account <id>` führt nur eines aus. Die Lite-Ausgabe hat nichts davon.
 - Neu: `?view=` und `?chrome=0` in der Adresse der Seite, `GET /api/accounts`, `GET /api/live-status` und ein einziger `POST /api/webhook` für alle Konten.
+
+# Von 1.7.x zur neuen Ordnerstruktur
+
+Der Code liegt jetzt in `src/github_actions_monitor/`, die Seite, die Beispieldateien und die Sprachen in `assets/`, die Release- und Migrationsskripte in `tools/`. Nichts, was Sie benutzen, ändert sich: Die Starter (`MONITOR_GITHUB_ACTIONS`, `MONITOR_LITE_GITHUB_ACTIONS`, `BATCH_GITHUB_ACTIONS`) bleiben, wo sie waren, und öffnen dieselbe Adresse und denselben Port, und die Befehle dieser Anleitung (`python read_report.py`, `python actions_monitor.py --doctor`, `python monitor_cli.py status` ...) funktionieren weiter, weil im Produktordner eine kleine Einstiegsdatei mit demselben Namen bleibt. Die Starter rufen `python -m github_actions_monitor` (komplett) und `python -m github_actions_monitor.lite` (Lite) mit `src/` im Pfad auf.
+
+Ihre Daten wandern nicht: `actions_monitor.json`, die Caches, die Protokolle, `config_backups/`, `accounts/` und Ihre eigenen Katalogdateien bleiben im Produktordner neben den Startern, nie in `src/`. Die neutralen Beispiele und die `quotas.json`, die mit dem Programm kommen, liegen jetzt in `assets/examples/`; eine eigene `quotas.json` neben den Startern hat weiterhin Vorrang.
+
+## Schritte
+
+1. Monitor beenden und die neue Version über den alten Ordner entpacken (Ihre `actions_monitor.json` behalten).
+2. Wie gewohnt starten. Es läuft auch, wenn Sie nichts weiter tun.
+3. Um die Reste des alten flachen Layouts zu entfernen: `python tools/migrate_layout.py` (Probelauf) und danach `python tools/migrate_layout.py --apply`. Es kopiert Ihre Konfigurationsdateien nach `layout_backup_<Stempel>/config/` und verschiebt die alten Module, die alte Seite, die alten Beispiele und den alten Ordner `locales/` nach `layout_backup_<Stempel>/old_code/`. Nichts wird gelöscht, nichts Vorhandenes überschrieben, Ihre Daten bleiben unberührt. `python actions_monitor.py --doctor` warnt, solange alte Dateien übrig sind.
+4. Ein eigenes Skript, das ein Modul unter seinem alten flachen Namen importiert hat (`import read_report`), importiert jetzt `github_actions_monitor.<Paket>.<Modul>` mit `src/` im Pfad.
+
+| Paket | Inhalt |
+|---|---|
+| `app` | der Server, die Einstellungen, die Arbeitsmodi, die gemeinsame Konfiguration |
+| `accounts` | mehrere Konten: Register, Supervisor, Kindprozess |
+| `sentinels` | die Wächter, das Alarmzentrum, die Panels |
+| `security` | lokale Wache, Geheimnisse, Webhook, Bestätigung, Netzwache, Signaturen, private Dateien |
+| `data_pipeline` | Ereignisse, Analytik, bedingte Lesungen, Erkennung, Kontingente, die Rot-auf-main-Regel |
+| `integrations` | GitHub, Benachrichtigungen, OpenTelemetry, Spiegel, Runner, MCP, KI-Feed und -Hook |
+| `cli` | die Befehlszeilenwerkzeuge |
+| `ui` | Info, Hilfedokumente, Terminalansichten |
+| `i18n`, `util` | die acht Sprachen; kleine gemeinsame Helfer |

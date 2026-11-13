@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certifi
  && apt-get update && apt-get install -y --no-install-recommends gh && rm -rf /var/lib/apt/lists/*
 COPY monitor /app
 WORKDIR /app
+ENV PYTHONPATH=/app/src
 RUN useradd --create-home --uid 1000 monitor && chown -R monitor /app
 USER monitor
-CMD ["python", "actions_monitor.py", "--no-browser", "--port", "8765"]
+CMD ["python", "-m", "github_actions_monitor", "--no-browser", "--port", "8765"]

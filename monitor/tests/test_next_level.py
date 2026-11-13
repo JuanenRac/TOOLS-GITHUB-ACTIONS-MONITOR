@@ -16,13 +16,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from unittest import mock
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-import ci_red  # noqa: E402
-import gha_dispatch_all as gd  # noqa: E402
-import report_history  # noqa: E402
-import sentinel_local as sl  # noqa: E402
-import sigverify  # noqa: E402
-import signstate  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+from github_actions_monitor.data_pipeline import ci_red  # noqa: E402
+from github_actions_monitor.cli import gha_dispatch_all as gd  # noqa: E402
+from github_actions_monitor.data_pipeline import report_history  # noqa: E402
+from github_actions_monitor.sentinels import sentinel_local as sl  # noqa: E402
+from github_actions_monitor.security import sigverify  # noqa: E402
+from github_actions_monitor.sentinels import signstate  # noqa: E402
 from test_signstate import BUILD_AT, NOW, run, snapshot  # noqa: E402
 
 Q, B = sigverify._Q, sigverify.BASE
@@ -392,7 +392,7 @@ class ReportHistory(unittest.TestCase):
 
 
 class Page(unittest.TestCase):
-    HTML = (Path(__file__).resolve().parents[1] / "actions_monitor.html").read_text(encoding="utf-8")
+    HTML = (Path(__file__).resolve().parents[1] / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
 
     def test_kpis_queue_panel_and_budget_are_in_the_page(self):
         for needle in ('id="kp-red"', 'id="kp-sign"', 'id="k-budget"', "focusSignQueue", 'id="sign-queue"', "ui.rp_build_sign", "ui.rp_suggested", "ui.df_lines"):

@@ -34,7 +34,7 @@ python actions_monitor.py --migrate-accounts --apply  # kopiert es nach accounts
 python actions_monitor.py --accounts                  # listet die Konten
 ```
 
-Die Originale werden nie verschoben oder gelöscht: Du löschst sie selbst, wenn du alles geprüft hast. Ein zweiter Lauf verweigert sich, damit sich zwei Zustände nie mischen. Um ein Konto hinzuzufügen, lege `accounts/<id>/actions_monitor.json` mit seinem `github_owner` an (kopiere die Vorlage `actions_monitor.example.json`).
+Die Originale werden nie verschoben oder gelöscht: Du löschst sie selbst, wenn du alles geprüft hast. Ein zweiter Lauf verweigert sich, damit sich zwei Zustände nie mischen. Um ein Konto hinzuzufügen, lege `accounts/<id>/actions_monitor.json` mit seinem `github_owner` an (kopiere die Vorlage `assets/examples/actions_monitor.example.json`).
 
 ## Ausführen
 

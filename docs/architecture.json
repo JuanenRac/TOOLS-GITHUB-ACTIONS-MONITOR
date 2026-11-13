@@ -22,7 +22,7 @@
       "code": [
         "monitor/MONITOR_GITHUB_ACTIONS.bat",
         "monitor/MONITOR_LITE_GITHUB_ACTIONS.bat",
-        "monitor/banner.py"
+        "monitor/src/github_actions_monitor/util/banner.py"
       ]
     },
     {
@@ -36,10 +36,10 @@
         "and Help offline, 8 languages"
       ],
       "code": [
-        "monitor/actions_monitor.html",
-        "monitor/about.py",
-        "monitor/helpdocs.py",
-        "monitor/settings_api.py"
+        "monitor/assets/static/actions_monitor.html",
+        "monitor/src/github_actions_monitor/ui/about.py",
+        "monitor/src/github_actions_monitor/ui/helpdocs.py",
+        "monitor/src/github_actions_monitor/app/settings_api.py"
       ]
     },
     {
@@ -53,11 +53,11 @@
         "--doctor, --demo, --about"
       ],
       "code": [
-        "monitor/monitor_cli.py",
-        "monitor/tui.py",
-        "monitor/tui_textual.py",
-        "monitor/doctor.py",
-        "monitor/demo_mode.py"
+        "monitor/src/github_actions_monitor/cli/monitor_cli.py",
+        "monitor/src/github_actions_monitor/ui/tui.py",
+        "monitor/src/github_actions_monitor/ui/tui_textual.py",
+        "monitor/src/github_actions_monitor/cli/doctor.py",
+        "monitor/src/github_actions_monitor/app/demo_mode.py"
       ]
     },
     {
@@ -71,9 +71,9 @@
         "with its own folder and port"
       ],
       "code": [
-        "monitor/accounts.py",
-        "monitor/accounts_supervisor.py",
-        "monitor/account_child.py"
+        "monitor/src/github_actions_monitor/accounts/accounts.py",
+        "monitor/src/github_actions_monitor/accounts/accounts_supervisor.py",
+        "monitor/src/github_actions_monitor/accounts/account_child.py"
       ]
     },
     {
@@ -87,11 +87,11 @@
         "of alerts; its own config"
       ],
       "code": [
-        "monitor/surface.py",
-        "monitor/readiness.py",
-        "monitor/analytics.py",
-        "monitor/lint_workflows.py",
-        "monitor/alert_center.py"
+        "monitor/src/github_actions_monitor/app/surface.py",
+        "monitor/src/github_actions_monitor/sentinels/readiness.py",
+        "monitor/src/github_actions_monitor/data_pipeline/analytics.py",
+        "monitor/src/github_actions_monitor/cli/lint_workflows.py",
+        "monitor/src/github_actions_monitor/sentinels/alert_center.py"
       ]
     },
     {
@@ -105,12 +105,12 @@
         "of the plan, discovery, updates"
       ],
       "code": [
-        "monitor/etagcache.py",
-        "monitor/resilience.py",
-        "monitor/redrule.py",
-        "monitor/quota.py",
-        "monitor/discovery.py",
-        "monitor/updatecheck.py"
+        "monitor/src/github_actions_monitor/data_pipeline/etagcache.py",
+        "monitor/src/github_actions_monitor/util/resilience.py",
+        "monitor/src/github_actions_monitor/data_pipeline/redrule.py",
+        "monitor/src/github_actions_monitor/data_pipeline/quota.py",
+        "monitor/src/github_actions_monitor/data_pipeline/discovery.py",
+        "monitor/src/github_actions_monitor/app/updatecheck.py"
       ]
     },
     {
@@ -124,11 +124,11 @@
         "contract, a clock each"
       ],
       "code": [
-        "monitor/sentinel_base.py",
-        "monitor/sentinel_registry.py",
-        "monitor/sentinel_ci.py",
-        "monitor/sentinel_collab.py",
-        "monitor/sentinel_local.py"
+        "monitor/src/github_actions_monitor/sentinels/sentinel_base.py",
+        "monitor/src/github_actions_monitor/sentinels/sentinel_registry.py",
+        "monitor/src/github_actions_monitor/sentinels/sentinel_ci.py",
+        "monitor/src/github_actions_monitor/sentinels/sentinel_collab.py",
+        "monitor/src/github_actions_monitor/sentinels/sentinel_local.py"
       ]
     },
     {
@@ -143,7 +143,7 @@
       ],
       "code": [
         "monitor/MONITOR_LITE_GITHUB_ACTIONS.sh",
-        "monitor/actions_monitor.py::LITE"
+        "monitor/src/github_actions_monitor/app/actions_monitor.py::LITE"
       ]
     },
     {
@@ -157,8 +157,8 @@
         "a signed webhook may push events"
       ],
       "code": [
-        "monitor/webhook.py",
-        "monitor/quotas.json"
+        "monitor/src/github_actions_monitor/security/webhook.py",
+        "monitor/assets/examples/quotas.json"
       ]
     },
     {
@@ -172,10 +172,10 @@
         "JSON, /api/health, reports"
       ],
       "code": [
-        "monitor/ci_red.py",
-        "monitor/outputs.py",
-        "monitor/export_status.py",
-        "monitor/report_history.py"
+        "monitor/src/github_actions_monitor/data_pipeline/ci_red.py",
+        "monitor/src/github_actions_monitor/integrations/outputs.py",
+        "monitor/src/github_actions_monitor/cli/export_status.py",
+        "monitor/src/github_actions_monitor/data_pipeline/report_history.py"
       ]
     },
     {
@@ -189,10 +189,10 @@
         "ollama, anthropic, copilot"
       ],
       "code": [
-        "monitor/notifiers.py",
+        "monitor/src/github_actions_monitor/integrations/notifiers.py",
         ".github/workflows/dashboard-dispatch.yml",
-        "monitor/sentinel_ai.py",
-        "monitor/ai_actions.py"
+        "monitor/src/github_actions_monitor/sentinels/sentinel_ai.py",
+        "monitor/src/github_actions_monitor/integrations/ai_actions.py"
       ]
     }
   ],

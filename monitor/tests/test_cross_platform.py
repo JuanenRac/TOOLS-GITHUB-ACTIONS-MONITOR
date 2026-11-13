@@ -8,9 +8,9 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 
-import platform_compat  # noqa: E402
+from github_actions_monitor.util import platform_compat  # noqa: E402
 
 
 class CommandText(unittest.TestCase):
@@ -26,11 +26,11 @@ class CommandText(unittest.TestCase):
 
 class PythonCommand(unittest.TestCase):
     def test_windows_with_launcher_uses_py(self):
-        with mock.patch("platform_compat.shutil.which", return_value=r"C:\Windows\py.exe"):
+        with mock.patch("github_actions_monitor.util.platform_compat.shutil.which", return_value=r"C:\Windows\py.exe"):
             self.assertEqual(platform_compat.python_argv(windows=True), ["py", "-3"])
 
     def test_windows_without_launcher_uses_the_running_python(self):
-        with mock.patch("platform_compat.shutil.which", return_value=None):
+        with mock.patch("github_actions_monitor.util.platform_compat.shutil.which", return_value=None):
             self.assertEqual(platform_compat.python_argv(windows=True), [sys.executable])
 
     def test_posix_never_uses_py(self):
@@ -64,7 +64,7 @@ class Launchers(unittest.TestCase):
     def test_the_monitor_launcher_checks_gh_and_runs_the_monitor(self):
         text = (HERE / "MONITOR_GITHUB_ACTIONS.sh").read_text(encoding="utf-8")
         self.assertIn("command -v gh", text)
-        self.assertIn("actions_monitor.py", text)
+        self.assertIn("-m github_actions_monitor", text)
 
     def test_the_batch_launcher_offers_the_same_six_options_as_the_bat(self):
         sh = (HERE / "BATCH_GITHUB_ACTIONS.sh").read_text(encoding="utf-8")
@@ -84,11 +84,11 @@ class Packaging(unittest.TestCase):
 
 class SourcesStayPortable(unittest.TestCase):
     def test_no_tool_hardcodes_the_windows_python_launcher_for_children(self):
-        text = (HERE / "gha_dispatch_all.py").read_text(encoding="utf-8")
+        text = (HERE / "src" / "github_actions_monitor" / "cli" / "gha_dispatch_all.py").read_text(encoding="utf-8")
         self.assertNotIn('cmd = ["py", "-3"', text)
 
     def test_finalize_command_starts_with_the_platform_python(self):
-        import gha_dispatch_all
+        from github_actions_monitor.cli import gha_dispatch_all
         name = next(iter(gha_dispatch_all.TARGETS))
         argv = gha_dispatch_all.finalize_command(name, 123)
         self.assertEqual(argv[:len(platform_compat.python_argv())], platform_compat.python_argv())

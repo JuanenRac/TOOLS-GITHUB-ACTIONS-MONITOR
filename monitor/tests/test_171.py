@@ -10,17 +10,17 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import i18n  # noqa: E402
-import sentinel_base  # noqa: E402
-import sentinel_ci  # noqa: E402
-import sentinel_local  # noqa: E402
-import sentinel_registry as reg  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.sentinels import sentinel_base  # noqa: E402
+from github_actions_monitor.sentinels import sentinel_ci  # noqa: E402
+from github_actions_monitor.sentinels import sentinel_local  # noqa: E402
+from github_actions_monitor.sentinels import sentinel_registry as reg  # noqa: E402
 
-PAGE = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+PAGE = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
 THEMES = ["Armor", "Aqua", "Midnight", "Ember", "Forest", "Violet", "Solar", "Ice", "Crimson", "Mono", "High contrast", "Metallic", "Professional", "Videogame", "Terminal", "Blueprint"]
 
 
@@ -207,17 +207,17 @@ class CiSentinel(unittest.TestCase):
 
 class LiteKnowsNoSentinelContract(unittest.TestCase):
     def test_lite_never_loads_the_contract_the_registry_or_the_ci_sentinel(self):
-        script = ("import sys; sys.path.insert(0, %r); sys.argv = ['x', '--lite']; import actions_monitor as am; am.enable_lite()\n"
+        script = ("import sys; sys.path.insert(0, %r); sys.argv = ['x', '--lite']; from github_actions_monitor.app import actions_monitor as am; am.enable_lite()\n"
                   "import threading, urllib.request\nfrom http.server import ThreadingHTTPServer\n"
                   "s = ThreadingHTTPServer(('127.0.0.1', 0), am.Handler); threading.Thread(target=s.serve_forever, daemon=True).start()\n"
                   "urllib.request.urlopen('http://127.0.0.1:%%d/' %% s.server_address[1], timeout=8).read()\n"
-                  "print([m for m in ('sentinel_base', 'sentinel_registry', 'sentinel_ci', 'sentinel_local') if m in sys.modules])" % str(HERE))
+                  "print([m for m in ('github_actions_monitor.sentinels.sentinel_base', 'github_actions_monitor.sentinels.sentinel_registry', 'github_actions_monitor.sentinels.sentinel_ci', 'github_actions_monitor.sentinels.sentinel_local') if m in sys.modules])" % str(HERE / "src"))
         done = subprocess.run([sys.executable, "-I", "-c", script], capture_output=True, text=True, timeout=60)
         self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
         self.assertEqual(done.stdout.strip(), "[]")
 
     def test_the_monitor_starts_the_sentinels_through_the_registry(self):
-        text = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        text = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         self.assertIn("sentinel_registry.SentinelRegistry.build(ctx, config)", text)
         self.assertIn('SENTINEL["registry"].start()', text)
         self.assertNotIn("sentinel_local.Sentinel(ctx, config)", text)
@@ -357,7 +357,7 @@ class RefusedPostKeepsItsAnswer(unittest.TestCase):
         import json
         import threading
         from http.server import ThreadingHTTPServer
-        import actions_monitor as am
+        from github_actions_monitor.app import actions_monitor as am
         self.am, self.json = am, json
         self.saved = dict(am.LIVE_CONFIG)
         am.LIVE_CONFIG["session_guard"] = True
@@ -404,7 +404,7 @@ class RefusedPostKeepsItsAnswer(unittest.TestCase):
 
     def test_a_body_that_was_read_is_not_read_twice_and_the_answer_is_the_same(self):
         import tempfile
-        import settings_api
+        from github_actions_monitor.app import settings_api
         with tempfile.TemporaryDirectory() as tmp:
             saved = (self.am.CONFIG_FILE, settings_api.CONFIG_FILE, settings_api.BACKUP_DIR)
             self.am.CONFIG_FILE = settings_api.CONFIG_FILE = Path(tmp) / "c.json"

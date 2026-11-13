@@ -16,20 +16,20 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import ai_actions  # noqa: E402
-import analytics  # noqa: E402
-import etagcache  # noqa: E402
-import i18n  # noqa: E402
-import lint_workflows  # noqa: E402
-import notifiers  # noqa: E402
-import outputs  # noqa: E402
-import resilience  # noqa: E402
-import sentinel_ai as ai  # noqa: E402
-import webhook  # noqa: E402
+from github_actions_monitor.integrations import ai_actions  # noqa: E402
+from github_actions_monitor.data_pipeline import analytics  # noqa: E402
+from github_actions_monitor.data_pipeline import etagcache  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.cli import lint_workflows  # noqa: E402
+from github_actions_monitor.integrations import notifiers  # noqa: E402
+from github_actions_monitor.integrations import outputs  # noqa: E402
+from github_actions_monitor.util import resilience  # noqa: E402
+from github_actions_monitor.sentinels import sentinel_ai as ai  # noqa: E402
+from github_actions_monitor.security import webhook  # noqa: E402
 from test_settings_outputs import DATA, NOW, SNAP  # noqa: E402
 
 
@@ -301,7 +301,7 @@ class Linter(unittest.TestCase):
 
     def test_the_report_gets_one_line_when_there_are_findings(self):
         from test_report_lines import snapshot
-        import sentinel_local as sl
+        from github_actions_monitor.sentinels import sentinel_local as sl
         by_repo = {"demo-one": [{"file": "ci.yml", "line": 1, "rule": "unpinned_uses", "severity": "warn", "detail": "x@v1"}]}
         lint = {"by_repo": by_repo, "summary": lint_workflows.summarize(by_repo), "in_report": True}
         s = snapshot(lint=lint)
@@ -433,7 +433,7 @@ class Notifications(unittest.TestCase):
         self.assertEqual(cfg["channels"]["slack"], {"enabled": True, "url_env": ""})
 
     def test_the_feed_calls_its_listeners_and_survives_a_failing_one(self):
-        import events
+        from github_actions_monitor.data_pipeline import events
         feed = events.Feed(Path(tempfile.mkdtemp()) / "e.jsonl", Path(tempfile.mkdtemp()) / "s.json")
         got = []
         feed.listeners += [lambda ev: 1 / 0, got.extend]
@@ -649,7 +649,7 @@ class Metrics160(unittest.TestCase):
 
 class Endpoints160(unittest.TestCase):
     def setUp(self):
-        import actions_monitor as am
+        from github_actions_monitor.app import actions_monitor as am
         self.am = am
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), am.Handler)
         self.port = self.server.server_address[1]
@@ -721,7 +721,7 @@ class ClientsThatLeave(unittest.TestCase):
             raise BrokenPipeError()
 
     def handler(self):
-        import actions_monitor as am
+        from github_actions_monitor.app import actions_monitor as am
         h = am.Handler.__new__(am.Handler)
         h.wfile = self.Aborting()
         h.request_version = "HTTP/1.1"
@@ -777,7 +777,7 @@ class ClientsThatLeave(unittest.TestCase):
     def test_a_real_client_that_hangs_up_does_not_print_anything(self):
         import contextlib
         import io
-        import actions_monitor as am
+        from github_actions_monitor.app import actions_monitor as am
         server = am.QuietServer(("127.0.0.1", 0), am.Handler)
         threading.Thread(target=server.serve_forever, daemon=True).start()
         err = io.StringIO()
@@ -797,14 +797,14 @@ class ClientsThatLeave(unittest.TestCase):
     def test_the_counter_is_in_the_metrics_and_the_webhook_uses_the_same_handler(self):
         text = outputs.metrics_text(SNAP, DATA, now=NOW, extra={"disconnects": 3})
         self.assertIn("ghamon_client_disconnects_total 3", text)
-        import actions_monitor as am
+        from github_actions_monitor.app import actions_monitor as am
         self.assertIn("disconnects", am.metrics_extra())
         self.assertEqual(am.Handler.handle_post.__qualname__.split(".")[0], "Handler")      # /api/webhook is one more path of that class
 
 
 class TerminalView(unittest.TestCase):
     def test_without_rich_it_says_how_to_install_it(self):
-        import tui
+        from github_actions_monitor.ui import tui
         with mock.patch.object(tui, "rich_available", return_value=False):
             with mock.patch("builtins.print") as shown:
                 self.assertEqual(tui.main(["--once"]), 3)
@@ -812,7 +812,7 @@ class TerminalView(unittest.TestCase):
 
     def test_the_core_never_imports_rich(self):
         for name in ("actions_monitor", "sentinel_local", "outputs", "settings_api", "notifiers", "analytics"):
-            text = (HERE / f"{name}.py").read_text(encoding="utf-8")
+            text = _testenv.module_file(name).read_text(encoding="utf-8")
             self.assertNotRegex(text, r"(?m)^\s*(import|from)\s+(rich|textual)\b", name)
 
     def test_the_picture_is_drawn_when_rich_is_there(self):
@@ -820,7 +820,7 @@ class TerminalView(unittest.TestCase):
             import rich  # noqa: F401
         except ImportError:
             self.skipTest("rich is not installed")
-        import tui
+        from github_actions_monitor.ui import tui
         from rich.console import Console
         data = {"repos": ["a", "b"], "active": [{"repo": "a", "name": "CI", "status": "in_progress", "seconds": 90, "stuck": False}], "rate": {"remaining": 4000, "limit": 5000}}
         snap = {"a2": {"red": [{"repo": "b", "workflow": "CI", "streak": 2}]}, "a5": {"pending_sign": [], "sign_queue": [{"name": "fw", "hours": 3, "trust": "failed"}]}, "parte": [{"level": "bad", "text": "b is red"}]}
@@ -865,13 +865,13 @@ class DocsAndSchemas(unittest.TestCase):
     def test_the_published_schemas_describe_what_the_tool_writes(self):
         folder = HERE / "docs" / "schemas"
         red = json.loads((folder / "ci_red.schema.json").read_text(encoding="utf-8"))
-        import ci_red
+        from github_actions_monitor.data_pipeline import ci_red
         built = ci_red.build(SNAP)
         for key in red["required"]:
             self.assertIn(key, built)
         self.assertEqual(red["properties"]["schema"]["const"], ci_red.SCHEMA)
         public = json.loads((folder / "ci_status_public.schema.json").read_text(encoding="utf-8"))
-        import export_status
+        from github_actions_monitor.cli import export_status
         for key in public["required"]:
             self.assertIn(key, export_status.public_status(SNAP))
         event = json.loads((folder / "notification_event.schema.json").read_text(encoding="utf-8"))

@@ -7,6 +7,18 @@
 
 ツール自体(モニター + センチネル + バッチツール)のバージョンで、独自のセマンティックバージョニングです。元は英語の CHANGELOG.md で、このファイルは同じバージョンと節を持ちます。
 
+## [Unreleased]
+
+### 変更
+
+- **フォルダ構成を刷新、動作は同じ**:コードはインポート可能なパッケージとして `src/github_actions_monitor/`(`app`、`accounts`、`sentinels`、`security`、`data_pipeline`、`integrations`、`cli`、`ui`、`i18n`、`util`)に置かれ、ページ、中立のサンプルと `quotas.json`、8 言語のカタログは `assets/`(`static`、`examples`、`locales`)に、`make_release.py` は `tools/` に移りました。起動スクリプトは製品フォルダに残り、`python -m github_actions_monitor`(完全版)または `python -m github_actions_monitor.lite`(lite 版)を実行します。アドレスもポートも同じです。利用者のデータ(`actions_monitor.json`、キャッシュ、ログ、`accounts/`、カタログ)は引き続き起動スクリプトの隣にあり、`src/` の中には入りません。
+
+- ガイドのコマンド(`python read_report.py`、`python actions_monitor.py --doctor`、`python monitor_cli.py status` など)はそのまま動きます。同じ名前の小さな入口ファイルが製品フォルダに残るため、パスで登録済みのフックや MCP サーバーも動き続けます。リリースの zip はフォルダ名を保ち、新たに `src/`、`assets/`、`tools/` を含みます。
+
+### 追加
+
+- 平らなインストールだったフォルダ向けの `tools/migrate_layout.py`:既定はドライラン。`--apply` で設定を `layout_backup_<日時>/config/` にコピーし、古いモジュール・ページ・サンプル・`locales/` を `layout_backup_<日時>/old_code/` に移動します(削除も上書きもしません)。そうした残りがある間は `--doctor` が知らせます。`MIGRATING.md` に 8 言語で説明があります。
+
 ## [1.7.9]
 
 ### 修正

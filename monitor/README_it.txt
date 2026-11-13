@@ -24,10 +24,10 @@ COSA NON FA MAI   Ascolta solo su 127.0.0.1 a meno che tu non attivi la modalit�
 LINGUA     8 lingue: en, es, de, fr, it, ja, zh, pt (portoghese del Portogallo). Parte in INGLESE: la lingua del sistema non decide. Scegline un'altra nella scheda IMPOSTAZIONI della pagina
            (icona dell'ingranaggio; il browser la ricorda), oppure con "language" in actions_monitor.json, con la variabile d'ambiente MONITOR_LANG o con --lang CODICE negli strumenti da riga di comando (prevale su tutto).
            Le righe lette dagli script (SKIP, DISPATCHED, READY, FAILED, Summary:, BUILD ONLY...) sono sempre in inglese.
-CONFIG     actions_monitor.json (creato da actions_monitor.example.json al primo avvio). Chiavi utili: github_owner (vuoto = l'account di gh),
+CONFIG     actions_monitor.json (creato da assets/examples/actions_monitor.example.json al primo avvio). Chiavi utili: github_owner (vuoto = l'account di gh),
            language, ecosystems_file, targets_file, refresh_seconds, cold_refresh_seconds, max_workers, min_rate_remaining, sentinel.*
-           ecosystems_file: raggruppa i repository per prefisso del nome (vedi ecosystems.example.json; "*" = tutti i repository). targets_file: catalogo delle build per
-           gli strumenti di batch (vedi targets.example.json). profiles_file (profiles.example.json): profili di batch. Le chiavi che iniziano con "_" in questi file sono metadati.
+           ecosystems_file: raggruppa i repository per prefisso del nome (vedi assets/examples/ecosystems.example.json; "*" = tutti i repository). targets_file: catalogo delle build per
+           gli strumenti di batch (vedi assets/examples/targets.example.json). profiles_file (assets/examples/profiles.example.json): profili di batch. Le chiavi che iniziano con "_" in questi file sono metadati.
 WORKSPACE  FACOLTATIVO: una cartella con cloni locali dei tuoi repository (MONITOR_ROOT, "workspace_root" nel json, o una cartella superiore con un file .monitor-root).
            Senza, il monitor parte in MODALITÀ RIDOTTA e lo dice: solo ciò che dà l'API di GitHub (niente coda di firma locale, niente rapporto di audit, niente scansione del CHANGELOG).
            Con il workspace hai anche le release candidate, la coda di firma e gli strumenti di batch. Registri di firma: "signed_dir"; file di audit: "audit_dir".

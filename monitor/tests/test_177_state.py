@@ -13,18 +13,18 @@ import urllib.request
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import actions_monitor as am  # noqa: E402
-import ai_alerts  # noqa: E402
-import i18n  # noqa: E402
-import sentinel_panels  # noqa: E402
-import signals  # noqa: E402
+from github_actions_monitor.app import actions_monitor as am  # noqa: E402
+from github_actions_monitor.integrations import ai_alerts  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.sentinels import sentinel_panels  # noqa: E402
+from github_actions_monitor.data_pipeline import signals  # noqa: E402
 from test_177_panels import snapshot  # noqa: E402
 
-PAGE = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+PAGE = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
 
 
 def data():
@@ -91,7 +91,7 @@ class Editions(unittest.TestCase):
         self.assertEqual({s["id"] for s in lite["signals"]} & {s["id"] for s in full["signals"]} >= {"now.runs", "alerts.unresolved", "quota", "connection", "health.refresh"}, True)
 
     def test_the_channels_are_shared_by_both_editions(self):
-        source = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        source = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         for path in ("/api/ai/state", "/api/ai/stream", "/api/ai/brief", "/api/ai/alerts"):
             self.assertIn(f'"{path}"', source.split("LITE_SHARED = (")[1].split(")")[0], path)
         self.assertEqual(source.count('path not in LITE_SHARED'), 2)
@@ -99,7 +99,7 @@ class Editions(unittest.TestCase):
         self.assertNotIn('if LITE["on"]', body)      # the feed is written by the lite edition too
 
     def test_the_settings_of_the_connection_the_sound_and_the_look_are_in_the_lite_page_too(self):
-        import settings_api
+        from github_actions_monitor.app import settings_api
         for key in ("ai_alerts.enabled", "ai_alerts.stream.enabled", "ai_alerts.client_hook.enabled", "sound.enabled", "sound.server_beep", "display.blink_red_tiles", "display.timezone"):
             self.assertIn(key, settings_api.LITE_KEYS, key)
 
@@ -151,7 +151,7 @@ class Brief(unittest.TestCase):
             self.assertIn("signals to act on", brief)
 
     def test_the_mcp_tools_read_the_same_state(self):
-        import mcp_server
+        from github_actions_monitor.integrations import mcp_server
         names = [t["name"] for t in mcp_server.TOOLS]
         for tool in ("monitor_state", "signals", "diagnose", "act"):
             self.assertIn(tool, names)

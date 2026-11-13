@@ -11,9 +11,9 @@ import _testenv  # noqa: F401
 from pathlib import Path
 from unittest import mock
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-import gha_dispatch_all as gd  # noqa: E402
-import workspace  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+from github_actions_monitor.cli import gha_dispatch_all as gd  # noqa: E402
+from github_actions_monitor.app import workspace  # noqa: E402
 
 NAME_RE = re.compile(r"^[A-Za-z0-9._:-]{1,100}$")
 
@@ -27,8 +27,8 @@ class Targets(unittest.TestCase):
             self.assertIsInstance(target["extra"], list, name)
 
     def test_the_signing_tools_exist_on_disk(self):
-        if not gd.TOOLS_DIR.is_dir():
-            self.skipTest("integration test: needs the 2_release_y_firma tools next to this folder")
+        if not gd.TOOLS_DIR.is_dir() or not any((gd.TOOLS_DIR / t["tool"]).is_file() for t in gd.TARGETS.values()):
+            self.skipTest("integration test: needs the 2_release_y_firma tools (MONITOR_TOOLS_DIR or tools_dir)")
         missing = [f"{n}: {t['tool']}" for n, t in gd.TARGETS.items() if not (gd.TOOLS_DIR / t["tool"]).is_file()]
         self.assertEqual(missing, [])
 

@@ -17,7 +17,7 @@ AVVIO RAPIDO - Monitor di GitHub Actions + Sentinella
 5. Primo utilizzo:
    - La pagina mostra i TUOI repository (l'account GitHub con cui hai effettuato l'accesso). Per monitorare un altro account imposta "github_owner" in actions_monitor.json.
    - Scegli la lingua nella scheda Impostazioni della pagina (icona dell'ingranaggio; parte in inglese e la scelta viene ricordata). Lì ci sono anche le altre impostazioni.
-   - Per raggruppare i repository per prefisso del nome o usare gli strumenti di batch, copia ecosystems.example.json / targets.example.json e fai puntare
+   - Per raggruppare i repository per prefisso del nome o usare gli strumenti di batch, copia assets/examples/ecosystems.example.json / assets/examples/targets.example.json e fai puntare
      actions_monitor.json a essi ("ecosystems_file", "targets_file"). I dettagli sono in README_it.txt.
    - Nessun clone locale? Funziona comunque, in modalità ridotta (solo ciò che dà l'API di GitHub), e la pagina te lo dice.
 6. Cosa NON fa: non firma e non pubblica nulla da solo, da solo non scrive nulla su GitHub (solo `dispatch --go`, `dispatch --real` e `finalize --execute`, che esegui tu, lo fanno), ascolta solo su 127.0.0.1 e non conserva alcun token. Firmare e pubblicare sono

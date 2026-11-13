@@ -7,7 +7,7 @@
 
 # Quotas and plans
 
-The monitor is used by every kind of account, so it never assumes one. The figures below live in `monitor/quotas.json` (edit it to follow GitHub's changes without a new version of the monitor) and were checked against the public documentation of GitHub; they change over time, so treat them as a starting point and look at the pages named in the file. Choose your plan in **Settings > Basic** (`account.plan`); while it is *unknown* no quota figure is shown.
+The monitor is used by every kind of account, so it never assumes one. The figures below live in `monitor/assets/examples/quotas.json` (a copy named `quotas.json` next to the launchers wins over it) (edit it to follow GitHub's changes without a new version of the monitor) and were checked against the public documentation of GitHub; they change over time, so treat them as a starting point and look at the pages named in the file. Choose your plan in **Settings > Basic** (`account.plan`); while it is *unknown* no quota figure is shown.
 
 ## The API allowance
 

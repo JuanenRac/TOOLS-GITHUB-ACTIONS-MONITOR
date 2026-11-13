@@ -15,13 +15,13 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import doctor  # noqa: E402
-import github_app  # noqa: E402
-import i18n  # noqa: E402
+from github_actions_monitor.cli import doctor  # noqa: E402
+from github_actions_monitor.integrations import github_app  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
 
 SECRET_TOKEN = "ghs_" + "A1b2C3d4E5" * 4
 CONFIG = {"github_app": {"enabled": True, "app_id": "12345", "key_path": "/some/where/key.pem"}}
@@ -78,7 +78,7 @@ class JwtAndToken(unittest.TestCase):
             jwt = github_app.make_jwt("12345", str(key))
             signature = jwt.split(".")[2]
             self.assertGreater(len(base64.urlsafe_b64decode(signature + "=" * (-len(signature) % 4))), 200)
-            source = (HERE / "github_app.py").read_text(encoding="utf-8")
+            source = (HERE / "src" / "github_actions_monitor" / "integrations" / "github_app.py").read_text(encoding="utf-8")
             self.assertNotIn("read_text(key", source)
             self.assertNotIn("open(key", source)
             self.assertIn('["openssl", "dgst", "-sha256", "-sign", key_path]', source)      # only the PATH goes to openssl
@@ -130,13 +130,13 @@ class SettingsAndDoctor(unittest.TestCase):
         cfg = github_app.settings({"github_app": {"enabled": True, "app_id": "abc", "key_path": "D:/keys/k.pem", "installation_id": "9"}})
         self.assertEqual((cfg["app_id"], cfg["key_path"], cfg["installation_id"]), ("", "", "9"))      # no letters in an id, never the D: drive
         self.assertFalse(github_app.settings({})["enabled"])
-        import settings_api
+        from github_actions_monitor.app import settings_api
         for key in ("github_app.enabled", "github_app.app_id", "github_app.key_path", "github_app.installation_id"):
             self.assertIn(key, settings_api.FIELDS)
             for lang in i18n.LANGS:
                 for prefix in ("cfg.f.", "cfg.h."):
                     self.assertNotEqual(i18n.tl(lang, prefix + key), prefix + key, (lang, key))
-        import localguard
+        from github_actions_monitor.security import localguard
         self.assertNotIn("github_app.key_path", localguard.REMOTE_WRITABLE)
 
     def test_the_doctor_checks_openssl_and_the_key_file_and_never_prints_them(self):
@@ -160,7 +160,7 @@ class SettingsAndDoctor(unittest.TestCase):
                 self.assertNotEqual(i18n.tl(lang, key_name), key_name, lang)
 
     def test_the_monitor_hands_the_app_token_only_to_reads(self):
-        import actions_monitor as am
+        from github_actions_monitor.app import actions_monitor as am
         old = am.LIVE_CONFIG
         am.LIVE_CONFIG = CONFIG
         try:

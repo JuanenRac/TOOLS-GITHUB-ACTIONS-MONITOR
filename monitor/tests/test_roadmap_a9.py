@@ -7,8 +7,8 @@ import _testenv  # noqa: F401
 from datetime import datetime, timezone
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-import roadmap_a9 as rm  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+from github_actions_monitor.sentinels import roadmap_a9 as rm  # noqa: E402
 
 NOW = datetime(2026, 11, 5, 12, 0, 0, tzinfo=timezone.utc)
 DEFS = {k: {"title": t, "cards": 10, "status": {"Done": 4, "Backlog": 6}} for k, t in rm.BOARDS}
@@ -121,7 +121,7 @@ class Github(_testenv.Spanish, unittest.TestCase):
 
 class Definitions(unittest.TestCase):
     def test_the_real_definitions_are_readable(self):
-        import workspace
+        from github_actions_monitor.app import workspace
         if not workspace.available():
             self.skipTest("integration test: needs the workspace of the repositories")
         profile = workspace.workspace_root() / "JuanenRac"

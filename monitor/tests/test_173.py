@@ -11,16 +11,16 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import accounts  # noqa: E402
-import events  # noqa: E402
-import i18n  # noqa: E402
-import sentinel_collab as sc  # noqa: E402
-import sentinel_registry  # noqa: E402
-import settings_api  # noqa: E402
+from github_actions_monitor.accounts import accounts  # noqa: E402
+from github_actions_monitor.data_pipeline import events  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.sentinels import sentinel_collab as sc  # noqa: E402
+from github_actions_monitor.sentinels import sentinel_registry  # noqa: E402
+from github_actions_monitor.app import settings_api  # noqa: E402
 
 NOW = time.mktime(time.strptime("2026-11-10 12:00:00", "%Y-%m-%d %H:%M:%S")) - time.timezone
 DAY = 86400
@@ -186,7 +186,7 @@ class Rounds(unittest.TestCase):
             self.assertEqual(call[0], "api")
             self.assertFalse({"-X", "--method", "-f", "-F", "--field", "--raw-field", "--input"} & set(call), call)
             self.assertTrue(call[-1].startswith("repos/") and ("/issues" in call[-1] or "/pulls" in call[-1]), call)
-        code = (HERE / "sentinel_collab.py").read_text(encoding="utf-8").split('"""', 2)[2]
+        code = (HERE / "src" / "github_actions_monitor" / "sentinels" / "sentinel_collab.py").read_text(encoding="utf-8").split('"""', 2)[2]
         for word in ("POST", "PATCH", "PUT", "DELETE", "--method"):
             self.assertNotIn(word, code, word)
 
@@ -356,14 +356,14 @@ class Registry(unittest.TestCase):
 
 class Wiring(unittest.TestCase):
     def test_every_account_and_the_demo_keep_the_state_of_collab_apart(self):
-        self.assertIn(("sentinel_collab", "STATE_FILE", "sentinel_state/collab_state.json"), accounts.STATE_FILES)
+        self.assertIn(("github_actions_monitor.sentinels.sentinel_collab", "STATE_FILE", "sentinel_state/collab_state.json"), accounts.STATE_FILES)
         self.assertIn("collab_state.json", [old for old, _new in accounts.LEGACY])
-        import demo_mode
-        self.assertIn("sentinel_collab", [m for m, _a, _n in demo_mode.STATE_FILES])
+        from github_actions_monitor.app import demo_mode
+        self.assertIn("github_actions_monitor.sentinels.sentinel_collab", [m for m, _a, _n in demo_mode.STATE_FILES])
         self.assertIn("collab_state.json", _testenv.WATCHED)
 
     def test_the_notifications_know_the_two_new_events_and_the_schema_lists_them(self):
-        import notifiers
+        from github_actions_monitor.integrations import notifiers
         self.assertIn("collab_new", notifiers.KNOWN_EVENTS)
         self.assertIn("collab_fixed", notifiers.KNOWN_EVENTS)
         schema = json.loads((HERE / "docs" / "schemas" / "notification_event.schema.json").read_text(encoding="utf-8"))
@@ -378,11 +378,11 @@ class Wiring(unittest.TestCase):
             self.assertIn("monitor/collab_state.json", (HERE.parent / ".gitignore").read_text(encoding="utf-8").splitlines())
 
     def test_the_endpoint_is_absent_from_lite_and_the_page_has_the_layer(self):
-        text = (HERE / "actions_monitor.py").read_text(encoding="utf-8")
+        text = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         self.assertIn('"/api/sentinel"', text.split("LITE_PATHS = (", 1)[1].split(")", 1)[0])
         self.assertIn('path == "/api/sentinel/collab"', text)
         self.assertNotIn("sentinel_collab", (HERE / "actions_monitor_lite.py").read_text(encoding="utf-8") if (HERE / "actions_monitor_lite.py").exists() else "")
-        page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         for needle in ('section("collab"', "function collabBox", "/api/sentinel/collab", "ui.collab_off"):
             self.assertIn(needle, page, needle)
         self.assertLess(page.index('section("a13"'), page.index('section("collab"'))

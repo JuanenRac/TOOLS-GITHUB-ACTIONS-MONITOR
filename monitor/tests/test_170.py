@@ -18,13 +18,13 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import accounts  # noqa: E402
-import accounts_supervisor as sup  # noqa: E402
-import localguard  # noqa: E402
+from github_actions_monitor.accounts import accounts  # noqa: E402
+from github_actions_monitor.accounts import accounts_supervisor as sup  # noqa: E402
+from github_actions_monitor.security import localguard  # noqa: E402
 
 
 class AccountIds(unittest.TestCase):
@@ -408,7 +408,8 @@ class Isolation(Running):
         for command in (c.command for c in self.supervisor.children.values()):
             self.assertNotIn("0.0.0.0", " ".join(command))
 
-
+
+
 
 class WebhookRouting(Running):
     """One /api/webhook for the whole installation: the event goes to the account that watches the owner of the repository."""
@@ -476,7 +477,7 @@ class TokenOfTheRightAccount(unittest.TestCase):
         node = shutil.which("node")
         if not node:
             self.skipTest("no node here: the page is checked in a browser by tools/make_screenshots.py")
-        page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         start = page.index("(function(){const raw=window.fetch.bind(window)")
         snippet = page[start:page.index("})();", start) + 5]
         script = ("const calls=[];globalThis.window={fetch:async(u,o)=>{calls.push(String(u));return {json:async()=>({token:'T'})}}};\n" + snippet +
@@ -496,7 +497,7 @@ class LiveStatus(unittest.TestCase):
     """The Live view shows the receiver of webhooks: on or off, counters, the newest event. Never the secret."""
 
     def setUp(self):
-        import actions_monitor as am
+        from github_actions_monitor.app import actions_monitor as am
         self.am = am
         saved = dict(am.WEBHOOK_STATS), list(am.LIVE_EVENTS)
         self.addCleanup(lambda: (am.WEBHOOK_STATS.update(saved[0]), am.LIVE_EVENTS.__setitem__(slice(None), saved[1])))
@@ -534,7 +535,7 @@ class LiveStatus(unittest.TestCase):
                   "s = ThreadingHTTPServer(('127.0.0.1', 0), am.Handler); threading.Thread(target=s.serve_forever, daemon=True).start()\n"
                   "try:\n    urllib.request.urlopen('http://127.0.0.1:%d/api/live-status' % s.server_address[1], timeout=5); print('200')\n"
                   "except urllib.error.HTTPError as e:\n    print(e.code)\n")
-        done = subprocess.run([sys.executable, "-I", "-c", "import sys; sys.path.insert(0, %r); sys.argv = ['x', '--lite']; import actions_monitor as am; am.enable_lite(); am.gh_read = am.gh = (lambda *a, **k: (_ for _ in ()).throw(RuntimeError('no network in this test'))); %s" % (str(HERE), script)],
+        done = subprocess.run([sys.executable, "-I", "-c", "import sys; sys.path.insert(0, %r); sys.argv = ['x', '--lite']; from github_actions_monitor.app import actions_monitor as am; am.enable_lite(); am.gh_read = am.gh = (lambda *a, **k: (_ for _ in ()).throw(RuntimeError('no network in this test'))); %s" % (str(HERE / "src"), script)],
                               capture_output=True, text=True, timeout=60)
         self.assertEqual(done.stdout.strip(), "404", done.stdout + done.stderr)
 
@@ -546,7 +547,7 @@ class LiteKnowsNothing(unittest.TestCase):
         _testenv.guard(self)
 
     def run_lite(self, code):
-        script = "import sys; sys.path.insert(0, %r); sys.argv = ['x', '--lite']; import actions_monitor as am; am.enable_lite(); am.gh_read = am.gh = (lambda *a, **k: (_ for _ in ()).throw(RuntimeError('no network in this test'))); %s" % (str(HERE), code)
+        script = "import sys; sys.path.insert(0, %r); sys.argv = ['x', '--lite']; from github_actions_monitor.app import actions_monitor as am; am.enable_lite(); am.gh_read = am.gh = (lambda *a, **k: (_ for _ in ()).throw(RuntimeError('no network in this test'))); %s" % (str(HERE / "src"), code)
         done = subprocess.run([sys.executable, "-I", "-c", script], capture_output=True, text=True, timeout=60)
         self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
         return done.stdout.strip()
@@ -556,7 +557,7 @@ class LiteKnowsNothing(unittest.TestCase):
                             "from http.server import ThreadingHTTPServer\n"
                             "s = ThreadingHTTPServer(('127.0.0.1', 0), am.Handler); threading.Thread(target=s.serve_forever, daemon=True).start()\n"
                             "urllib.request.urlopen('http://127.0.0.1:%d/' % s.server_address[1], timeout=8).read()\n"
-                            "print([m for m in ('accounts', 'accounts_supervisor', 'account_child', 'sentinel_local') if m in sys.modules])")
+                            "print([m for m in ('github_actions_monitor.accounts.accounts', 'github_actions_monitor.accounts.accounts_supervisor', 'github_actions_monitor.accounts.account_child', 'github_actions_monitor.sentinels.sentinel_local') if m in sys.modules])")
         self.assertEqual(out, "[]")
 
     def test_the_options_of_the_accounts_are_not_in_the_help_of_lite(self):
@@ -573,15 +574,15 @@ class LiteKnowsNothing(unittest.TestCase):
             self.assertIn(option, done.stdout, option)
 
     def test_the_page_of_one_account_has_no_data_for_the_switcher(self):
-        import actions_monitor as am
-        self.assertIn("/*ACCOUNTS_DATA*/null", (HERE / "actions_monitor.html").read_text(encoding="utf-8"))
+        from github_actions_monitor.app import actions_monitor as am
+        self.assertIn("/*ACCOUNTS_DATA*/null", (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8"))
         page = am.render_page()
         self.assertIn("const ACC=/*ACCOUNTS_DATA*/null;", page, "only the supervisor fills it in")
 
     def test_without_an_accounts_folder_the_complete_monitor_is_the_old_single_one(self):
         with tempfile.TemporaryDirectory() as tmp, mock.patch.dict(os.environ, {"MONITOR_ACCOUNTS_DIR": str(Path(tmp) / "accounts")}):
             self.assertEqual(accounts.layout(), "single")
-            import actions_monitor as am
+            from github_actions_monitor.app import actions_monitor as am
             self.assertEqual((am.CHILD["account"], am.state_dir()), ("", am.HERE))
 
 
@@ -595,9 +596,11 @@ class ChildRedirect(unittest.TestCase):
             "sys.path.insert(0, %r)\n"
             "t = tempfile.mkdtemp()\n"
             "os.environ['MONITOR_ACCOUNTS_DIR'] = str(Path(t) / 'accounts')\n"
-            "import accounts, account_child\n"
+            "from github_actions_monitor.accounts import accounts, account_child\n"
             "accounts.create_account('alpha', 'a')\n"
-            "import actions_monitor as am, etagcache, analytics, events, sentinel_ai, sentinel_local, settings_api, toolconfig\n"
+            "from github_actions_monitor.app import actions_monitor as am, settings_api, toolconfig\n"
+            "from github_actions_monitor.data_pipeline import etagcache, analytics, events\n"
+            "from github_actions_monitor.sentinels import sentinel_ai, sentinel_local\n"
             "root = Path(t) / 'accounts' / 'alpha'\n"
             "account_child.redirect('alpha')\n"
             "bad = []\n"
@@ -607,7 +610,7 @@ class ChildRedirect(unittest.TestCase):
             "stores = {'etag': etagcache.EtagCache().path, 'analytics': analytics.Store().path, 'events': events.Feed().events_file, 'events_state': events.Feed().state_file, 'ai': sentinel_ai.Store().path}\n"
             "bad += [name for name, path in stores.items() if root not in Path(path).parents]\n"
             "bad += [name for name, path in {'config': am.CONFIG_FILE, 'settings': settings_api.CONFIG_FILE, 'toolconfig': toolconfig.CONFIG_FILE, 'backups': settings_api.BACKUP_DIR}.items() if root not in Path(path).parents]\n"
-            "print('BAD', bad)\n") % str(HERE)
+            "print('BAD', bad)\n") % str(HERE / "src")
         done = subprocess.run([sys.executable, "-I", "-c", code], capture_output=True, text=True, timeout=90)
         self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
         self.assertTrue(done.stdout.strip().endswith("BAD []"), done.stdout)

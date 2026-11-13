@@ -34,7 +34,7 @@ python actions_monitor.py --migrate-accounts --apply  # lo copia in accounts/def
 python actions_monitor.py --accounts                  # elenca gli account
 ```
 
-Gli originali non vengono mai spostati né eliminati: li elimini tu dopo aver controllato. Una seconda esecuzione si rifiuta, così due stati non si mescolano mai. Per aggiungere un account, crea `accounts/<id>/actions_monitor.json` con il suo `github_owner` (copia il modello `actions_monitor.example.json`).
+Gli originali non vengono mai spostati né eliminati: li elimini tu dopo aver controllato. Una seconda esecuzione si rifiuta, così due stati non si mescolano mai. Per aggiungere un account, crea `accounts/<id>/actions_monitor.json` con il suo `github_owner` (copia il modello `assets/examples/actions_monitor.example.json`).
 
 ## Esecuzione
 

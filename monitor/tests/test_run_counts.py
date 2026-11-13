@@ -13,14 +13,14 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import actions_monitor as am  # noqa: E402
-import monitor_cli  # noqa: E402
+from github_actions_monitor.app import actions_monitor as am  # noqa: E402
+from github_actions_monitor.cli import monitor_cli  # noqa: E402
 
-PAGE = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+PAGE = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
 NEW_KEYS = ("ui.k_of", "ui.k_filtered_title", "ui.n_showing", "ui.n_showing_filters", "ui.sb_runs", "ui.sb_runs_t")
 
 
@@ -110,7 +110,7 @@ class PageCounts(unittest.TestCase):
         for needle in ('id="sb-runs"', "function runCounts(d)", "function showingLine(c)", 'runFig(c.sr,c.tr)', 'runFig(c.sq,c.tq)', 'id="now-count"', '"ui.sb_runs"'):
             self.assertIn(needle, PAGE)
         for lang in ("en", "es", "de", "fr", "it", "ja", "zh", "pt"):
-            texts = json.loads((HERE / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
+            texts = json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
             for key in NEW_KEYS:
                 self.assertTrue(texts.get(key), f"{lang} {key}")
             self.assertIn("{n}", texts["ui.k_of"])

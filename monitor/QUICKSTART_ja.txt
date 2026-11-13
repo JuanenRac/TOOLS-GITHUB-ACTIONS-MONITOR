@@ -17,7 +17,7 @@ GPL-3.0-or-later - see LICENSE
 5. 最初の使い方:
    - ページには「あなたの」リポジトリ（ログインした GitHub アカウント）が表示されます。別のアカウントを監視するには actions_monitor.json の "github_owner" を設定します。
    - 言語はページの「設定」タブ（歯車アイコン）で選びます。起動時は英語で、選択は記憶されます。ほかの設定もそこにあります。
-   - 名前の接頭辞でリポジトリをまとめたり、バッチツールを使ったりするには、ecosystems.example.json / targets.example.json をコピーし、
+   - 名前の接頭辞でリポジトリをまとめたり、バッチツールを使ったりするには、assets/examples/ecosystems.example.json / assets/examples/targets.example.json をコピーし、
      actions_monitor.json の "ecosystems_file" と "targets_file" で指定します。詳細は README_ja.txt にあります。
    - ローカルクローンがなくても、縮小モード（GitHub API が返す情報だけ）で動作し、ページがその旨を表示します。
 6. しないこと: 自動で署名・公開することはなく、単独では GitHub に何も書き込まず（書き込むのは、あなたが実行する `dispatch --go`、`dispatch --real`、`finalize --execute` だけ）、127.0.0.1 でのみ待ち受け、トークンも保持しません。署名と公開はあなた自身が実行する

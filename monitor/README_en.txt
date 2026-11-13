@@ -24,10 +24,10 @@ WHAT IT NEVER DOES   It listens only on 127.0.0.1 unless you switch on the netwo
 LANGUAGE   8 languages: en, es, de, fr, it, ja, zh, pt (European Portuguese). It starts in ENGLISH: the language of your system does not decide. Choose another one in the SETTINGS tab of the page
            (gear icon; the browser remembers it), or set "language" in actions_monitor.json, or the environment variable MONITOR_LANG, or --lang CODE in the command line tools (it beats the rest).
            Lines that scripts read (SKIP, DISPATCHED, READY, FAILED, Summary:, BUILD ONLY...) are always English.
-CONFIG     actions_monitor.json (created from actions_monitor.example.json on the first start). Useful keys: github_owner (empty = the account of gh),
+CONFIG     actions_monitor.json (created from assets/examples/actions_monitor.example.json on the first start). Useful keys: github_owner (empty = the account of gh),
            language, ecosystems_file, targets_file, refresh_seconds, cold_refresh_seconds, max_workers, min_rate_remaining, sentinel.*
-           ecosystems_file: groups repositories by name prefix (see ecosystems.example.json; "*" = every repository). targets_file: the catalogue of builds
-           for the batch tools (see targets.example.json). profiles_file (profiles.example.json): batch profiles. Keys that start with "_" in these files are metadata.
+           ecosystems_file: groups repositories by name prefix (see assets/examples/ecosystems.example.json; "*" = every repository). targets_file: the catalogue of builds
+           for the batch tools (see assets/examples/targets.example.json). profiles_file (assets/examples/profiles.example.json): batch profiles. Keys that start with "_" in these files are metadata.
 WORKSPACE  OPTIONAL: a folder with local clones of your repositories (MONITOR_ROOT, "workspace_root" in the json, or a parent folder with a .monitor-root file).
            Without it the monitor starts in REDUCED MODE and says so: only what the GitHub API gives (no local signing queue, no audit report, no CHANGELOG scan).
            With it you also get release candidates, the signing queue and the batch tools. Signing records: "signed_dir"; audit files: "audit_dir".

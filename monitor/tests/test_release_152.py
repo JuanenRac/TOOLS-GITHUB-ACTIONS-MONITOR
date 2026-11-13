@@ -10,15 +10,15 @@ import unittest.mock
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-import ci_red  # noqa: E402
-import export_status  # noqa: E402
-import i18n  # noqa: E402
-import outputs  # noqa: E402
-import signstate  # noqa: E402
+from github_actions_monitor.data_pipeline import ci_red  # noqa: E402
+from github_actions_monitor.cli import export_status  # noqa: E402
+from github_actions_monitor import i18n  # noqa: E402
+from github_actions_monitor.integrations import outputs  # noqa: E402
+from github_actions_monitor.sentinels import signstate  # noqa: E402
 from test_report_lines import codes, snapshot  # noqa: E402
 from test_settings_outputs import DATA, NOW, SNAP  # noqa: E402
 
@@ -55,7 +55,7 @@ class SignQueueFilter(unittest.TestCase):
         self.assertIn("trust", export_status.FIELDS)
 
     def test_the_page_has_the_filter_and_a_distinct_look_per_trust(self):
-        page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         for needle in ('id="sq-trust"', ".tq-verified", ".tq-unknown", ".tq-failed", 'q.trust'):
             self.assertIn(needle, page)
         for lang in i18n.LANGS:
@@ -66,7 +66,7 @@ class SignQueueFilter(unittest.TestCase):
 
 class ReadinessChips(unittest.TestCase):
     def test_the_header_has_the_chips_and_the_texts_exist(self):
-        page = (HERE / "actions_monitor.html").read_text(encoding="utf-8")
+        page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         self.assertIn('id="k-ready"', page)
         self.assertIn(".rdy-chip.warn", page)
         for lang in i18n.LANGS:
@@ -80,7 +80,7 @@ class ReadinessChips(unittest.TestCase):
 
 class IssueCloseGrouped(unittest.TestCase):
     def with_close_rows(self, rows):
-        import surface
+        from github_actions_monitor.app import surface
         real = surface.build
 
         def fake(inp):

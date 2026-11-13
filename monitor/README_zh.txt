@@ -24,10 +24,10 @@ GitHub Actions 监视器 + 哨兵（版本 1.7.9）
 语言       8 种语言:en、es、de、fr、it、ja、zh、pt(葡萄牙语为葡萄牙本土)。默认以英语启动:不由系统语言决定。请在页面的“设置”选项卡(齿轮图标,浏览器会记住)中选择其他语言,
            或用 actions_monitor.json 的 "language"、环境变量 MONITOR_LANG,或命令行工具的 --lang 代码(优先级最高)。
            脚本读取的行(SKIP、DISPATCHED、READY、FAILED、Summary:、BUILD ONLY……)始终为英语。
-配置       actions_monitor.json（首次启动时由 actions_monitor.example.json 生成）。常用键：github_owner（留空 = gh 登录的账户）、
+配置       actions_monitor.json（首次启动时由 assets/examples/actions_monitor.example.json 生成）。常用键：github_owner（留空 = gh 登录的账户）、
            language、ecosystems_file、targets_file、refresh_seconds、cold_refresh_seconds、max_workers、min_rate_remaining、sentinel.*
-           ecosystems_file：按名称前缀给仓库分组（见 ecosystems.example.json；"*" = 所有仓库）。targets_file：批处理工具使用的构建目录（见 targets.example.json）。
-           profiles_file (profiles.example.json)：批次配置。这些文件中以 "_" 开头的键是元数据。
+           ecosystems_file：按名称前缀给仓库分组（见 assets/examples/ecosystems.example.json；"*" = 所有仓库）。targets_file：批处理工具使用的构建目录（见 assets/examples/targets.example.json）。
+           profiles_file (assets/examples/profiles.example.json)：批次配置。这些文件中以 "_" 开头的键是元数据。
 工作区     可选：存放你仓库本地克隆的文件夹（MONITOR_ROOT、json 中的 "workspace_root"，或含有 .monitor-root 文件的上级文件夹）。
            没有它时，监视器以“精简模式”启动并明确告知：只显示 GitHub API 提供的内容（没有本地签名队列、审计报告，也不读取 CHANGELOG）。
            有它时还会有发布候选、签名队列和批处理工具。签名记录目录："signed_dir"；审计文件目录："audit_dir"。

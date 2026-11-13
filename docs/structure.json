@@ -176,29 +176,16 @@
       "accent": "a",
       "rows": [
         {
-          "name": "actions_monitor.py",
+          "name": "MONITOR_GITHUB_ACTIONS.*",
           "desc": {
-            "en": "local server",
-            "es": "servidor local",
-            "de": "lokaler Server",
-            "fr": "serveur local",
-            "it": "server locale",
-            "ja": "ローカルサーバー",
-            "zh": "本地服务器",
-            "pt": "servidor local"
-          }
-        },
-        {
-          "name": "actions_monitor.html",
-          "desc": {
-            "en": "the web page",
-            "es": "la página web",
-            "de": "die Webseite",
-            "fr": "la page web",
-            "it": "la pagina web",
-            "ja": "Web ページ",
-            "zh": "网页",
-            "pt": "a página web"
+            "en": "the launchers (double click)",
+            "es": "los lanzadores (doble clic)",
+            "de": "die Starter (Doppelklick)",
+            "fr": "les lanceurs (double clic)",
+            "it": "i lanciatori (doppio clic)",
+            "ja": "起動スクリプト(ダブルクリック)",
+            "zh": "启动脚本(双击)",
+            "pt": "os lançadores (duplo clique)"
           }
         },
         {
@@ -216,301 +203,57 @@
           }
         },
         {
-          "name": "sentinel_local.py",
+          "name": "BATCH_GITHUB_ACTIONS.*",
           "desc": {
-            "en": "alerts and report",
-            "es": "alertas y parte",
-            "de": "Warnungen, Bericht",
-            "fr": "alertes, rapport",
-            "it": "avvisi e rapporto",
-            "ja": "アラートとレポート",
-            "zh": "警报与报告",
-            "pt": "alertas e relatório"
+            "en": "the batch tools menu",
+            "es": "el menú de compilaciones por lotes",
+            "de": "das Menü der Build-Stapel",
+            "fr": "le menu des builds par lots",
+            "it": "il menu delle build a lotti",
+            "ja": "バッチビルドのメニュー",
+            "zh": "批量构建菜单",
+            "pt": "o menu das compilações por lotes"
           }
         },
         {
-          "name": "sentinel_collab.py  alert_center.py",
+          "name": "src/",
           "desc": {
-            "en": "issues sentinel, alerts",
-            "es": "centinela de incidencias, alertas",
-            "de": "Issue-Wächter, Alarme",
-            "fr": "sentinelle d'issues, alertes",
-            "it": "sentinella issue, avvisi",
-            "ja": "Issue 番人とアラート",
-            "zh": "Issue 哨兵与警报",
-            "pt": "sentinela de issues, alertas"
+            "en": "the importable package",
+            "es": "el paquete importable",
+            "de": "das importierbare Paket",
+            "fr": "le paquet importable",
+            "it": "il pacchetto importabile",
+            "ja": "インポート可能なパッケージ",
+            "zh": "可导入的包",
+            "pt": "o pacote importável"
           }
         },
         {
-          "name": "surface.py  readiness.py",
+          "name": "assets/",
           "desc": {
-            "en": "repo checks, readiness",
-            "es": "comprobaciones, preparación",
-            "de": "Prüfungen, Bereitschaft",
-            "fr": "contrôles, préparation",
-            "it": "controlli, preparazione",
-            "ja": "検査とリリース準備",
-            "zh": "检查与发布就绪",
-            "pt": "verificações, preparação"
+            "en": "examples, the page, languages",
+            "es": "ejemplos, la página, idiomas",
+            "de": "Beispiele, Seite, Sprachen",
+            "fr": "exemples, page, langues",
+            "it": "esempi, pagina, lingue",
+            "ja": "例・ページ・言語",
+            "zh": "示例、网页、语言",
+            "pt": "exemplos, a página, idiomas"
+          }
+        },
+        {
+          "name": "actions_monitor.py  read_report.py",
+          "desc": {
+            "en": "entry points of the tools",
+            "es": "puntos de entrada de las herramientas",
+            "de": "Einstiegspunkte der Werkzeuge",
+            "fr": "points d'entrée des outils",
+            "it": "punti d'ingresso degli strumenti",
+            "ja": "ツールの入口",
+            "zh": "工具入口",
+            "pt": "pontos de entrada das ferramentas"
           },
-          "tree_name": "surface.py readiness.py"
-        },
-        {
-          "name": "settings_api.py  outputs.py",
-          "desc": {
-            "en": "settings tabs, metrics",
-            "es": "ajustes, métricas",
-            "de": "Einstellungen, Metriken",
-            "fr": "réglages, métriques",
-            "it": "impostazioni, metriche",
-            "ja": "設定とメトリクス",
-            "zh": "设置与指标",
-            "pt": "definições, métricas"
-          },
-          "tree_name": "settings_api.py outputs.py"
-        },
-        {
-          "name": "signstate.py  sigverify.py",
-          "desc": {
-            "en": "signing state and check",
-            "es": "firma: estado y control",
-            "de": "Signatur: Stand, Prüfung",
-            "fr": "signature : état, contrôle",
-            "it": "firma: stato, verifica",
-            "ja": "署名の状態と検証",
-            "zh": "签名状态与验证",
-            "pt": "assinatura: estado e controlo"
-          },
-          "tree_name": "signstate.py sigverify.py"
-        },
-        {
-          "name": "monitor_cli.py",
-          "desc": {
-            "en": "command line as a client",
-            "es": "línea de comandos cliente",
-            "de": "Befehlszeile als Client",
-            "fr": "ligne de commande cliente",
-            "it": "riga di comando client",
-            "ja": "クライアント用コマンド",
-            "zh": "客户端命令行",
-            "pt": "linha de comandos cliente"
-          }
-        },
-        {
-          "name": "read_report.py",
-          "desc": {
-            "en": "report from the terminal",
-            "es": "el parte en terminal",
-            "de": "Bericht im Terminal",
-            "fr": "rapport en terminal",
-            "it": "rapporto da terminale",
-            "ja": "ターミナルでレポート",
-            "zh": "终端报告",
-            "pt": "relatório no terminal"
-          }
-        },
-        {
-          "name": "gha_dispatch_all.py",
-          "desc": {
-            "en": "batch builds",
-            "es": "compilaciones por lotes",
-            "de": "Build-Stapel",
-            "fr": "builds par lots",
-            "it": "build a lotti",
-            "ja": "バッチビルド",
-            "zh": "批量构建",
-            "pt": "compilações por lotes"
-          }
-        },
-        {
-          "name": "events.py  report_history.py",
-          "desc": {
-            "en": "events and history",
-            "es": "eventos e historial",
-            "de": "Ereignisse, Verlauf",
-            "fr": "événements, historique",
-            "it": "eventi e storico",
-            "ja": "イベントと履歴",
-            "zh": "事件与历史",
-            "pt": "eventos e histórico"
-          },
-          "tree_name": "events.py report_history.py"
-        },
-        {
-          "name": "ci_red.py  export_status.py",
-          "desc": {
-            "en": "files others read",
-            "es": "ficheros para otros",
-            "de": "Dateien für andere",
-            "fr": "fichiers pour d'autres",
-            "it": "file per altri",
-            "ja": "他ツール向けファイル",
-            "zh": "供其他工具读取",
-            "pt": "ficheiros para outros"
-          },
-          "tree_name": "ci_red.py export_status.py"
-        },
-        {
-          "name": "etagcache.py  resilience.py",
-          "tree_name": "etagcache.py resilience.py",
-          "desc": {
-            "en": "conditional reads, lost connection",
-            "es": "lecturas condicionales, conexión",
-            "de": "bedingte Lesungen, Verbindung",
-            "fr": "lectures conditionnelles",
-            "it": "letture condizionali",
-            "ja": "条件付き読み取りと接続",
-            "zh": "条件读取与连接",
-            "pt": "leituras condicionais"
-          }
-        },
-        {
-          "name": "analytics.py  lint_workflows.py",
-          "tree_name": "analytics.py lint_workflows.py",
-          "desc": {
-            "en": "durations, flaky, workflow linter",
-            "es": "duraciones, flaky, linter",
-            "de": "Dauer, flaky, Workflow-Linter",
-            "fr": "durées, flaky, linter",
-            "it": "durate, flaky, linter",
-            "ja": "所要時間・不安定・Lint",
-            "zh": "时长、不稳定、检查器",
-            "pt": "durações, flaky, linter"
-          }
-        },
-        {
-          "name": "notifiers.py  ai_actions.py",
-          "tree_name": "notifiers.py ai_actions.py",
-          "desc": {
-            "en": "notifications, AI closed list",
-            "es": "notificaciones, lista cerrada IA",
-            "de": "Benachrichtigungen, KI-Liste",
-            "fr": "notifications, liste fermée IA",
-            "it": "notifiche, elenco chiuso IA",
-            "ja": "通知と AI の限定リスト",
-            "zh": "通知与 AI 封闭列表",
-            "pt": "notificações, lista fechada IA"
-          }
-        },
-        {
-          "name": "tui.py  migrate_state.py",
-          "tree_name": "tui.py migrate_state.py",
-          "desc": {
-            "en": "terminal view, state migration",
-            "es": "vista de consola, migración",
-            "de": "Konsolenansicht, Migration",
-            "fr": "vue console, migration",
-            "it": "vista console, migrazione",
-            "ja": "ターミナル表示と移行",
-            "zh": "终端视图与迁移",
-            "pt": "vista de consola, migração"
-          }
-        },
-        {
-          "name": "about.py  helpdocs.py",
-          "desc": {
-            "en": "About and Help panels",
-            "es": "paneles Acerca de y Ayuda",
-            "de": "Über- und Hilfe-Panels",
-            "fr": "panneaux À propos et Aide",
-            "it": "pannelli Informazioni e Guida",
-            "ja": "情報とヘルプのパネル",
-            "zh": "关于与帮助面板",
-            "pt": "painéis Acerca de e Ajuda"
-          }
-        },
-        {
-          "name": "quota.py  quotas.json",
-          "desc": {
-            "en": "plan, minutes and quotas",
-            "es": "plan, minutos y cuotas",
-            "de": "Tarif, Minuten, Kontingente",
-            "fr": "offre, minutes et quotas",
-            "it": "piano, minuti e quote",
-            "ja": "プラン・分数・クォータ",
-            "zh": "套餐、分钟数与配额",
-            "pt": "plano, minutos e quotas"
-          }
-        },
-        {
-          "name": "modes.py  updatecheck.py",
-          "desc": {
-            "en": "working modes, update notice",
-            "es": "modos de trabajo, aviso de versión",
-            "de": "Arbeitsmodi, Versionshinweis",
-            "fr": "modes de travail, avis de version",
-            "it": "modalità di lavoro, avviso di versione",
-            "ja": "動作モード・更新通知",
-            "zh": "工作模式、版本提示",
-            "pt": "modos de trabalho, aviso de versão"
-          }
-        },
-        {
-          "name": "doctor.py  demo_mode.py",
-          "desc": {
-            "en": "--doctor and --demo",
-            "es": "--doctor y --demo",
-            "de": "--doctor und --demo",
-            "fr": "--doctor et --demo",
-            "it": "--doctor e --demo",
-            "ja": "--doctor と --demo",
-            "zh": "--doctor 与 --demo",
-            "pt": "--doctor e --demo"
-          }
-        },
-        {
-          "name": "discovery.py  banner.py",
-          "desc": {
-            "en": "discovery, edition banner",
-            "es": "descubrimiento, banner de edición",
-            "de": "Erkennung, Ausgaben-Banner",
-            "fr": "découverte, bannière d'édition",
-            "it": "rilevamento, banner di edizione",
-            "ja": "検出・版バナー",
-            "zh": "发现、版本横幅",
-            "pt": "descoberta, banner da edição"
-          }
-        },
-        {
-          "name": "tui_textual.py",
-          "desc": {
-            "en": "interactive terminal",
-            "es": "terminal interactivo",
-            "de": "interaktives Terminal",
-            "fr": "terminal interactif",
-            "it": "terminale interattivo",
-            "ja": "対話型ターミナル",
-            "zh": "交互式终端",
-            "pt": "terminal interativo"
-          }
-        },
-        {
-          "name": "i18n.py  locales/",
-          "desc": {
-            "en": "eight languages",
-            "es": "ocho idiomas",
-            "de": "acht Sprachen",
-            "fr": "huit langues",
-            "it": "otto lingue",
-            "ja": "8言語",
-            "zh": "八种语言",
-            "pt": "oito idiomas"
-          },
-          "tree_name": "i18n.py locales/"
-        },
-        {
-          "name": "toolconfig.py  workspace.py",
-          "desc": {
-            "en": "settings and clones",
-            "es": "ajustes y clones",
-            "de": "Einstellungen, Klone",
-            "fr": "réglages, clones",
-            "it": "impostazioni, cloni",
-            "ja": "設定とクローン",
-            "zh": "设置与克隆",
-            "pt": "definições e clones"
-          },
-          "tree_name": "toolconfig.py workspace.py"
+          "tree_name": "actions_monitor.py read_report.py"
         },
         {
           "name": "tests/",
@@ -536,6 +279,19 @@
             "ja": "ガイドとスキーマ",
             "zh": "指南、模式、Grafana",
             "pt": "guias, esquemas, Grafana"
+          }
+        },
+        {
+          "name": "tools/",
+          "desc": {
+            "en": "release and migration scripts",
+            "es": "scripts de versión y migración",
+            "de": "Release- und Migrationsskripte",
+            "fr": "scripts de version et de migration",
+            "it": "script di rilascio e migrazione",
+            "ja": "リリースと移行のスクリプト",
+            "zh": "发布与迁移脚本",
+            "pt": "scripts de versão e migração"
           }
         }
       ]

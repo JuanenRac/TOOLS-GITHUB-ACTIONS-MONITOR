@@ -7,7 +7,7 @@
 
 # Cuotas y planes
 
-El monitor lo usa cualquier tipo de cuenta, así que nunca da una por supuesta. Las cifras de abajo viven en `monitor/quotas.json` (edítalo para seguir los cambios de GitHub sin una versión nueva del monitor) y se contrastaron con la documentación pública de GitHub; cambian con el tiempo, así que tómalas como punto de partida y mira las páginas que nombra el archivo. Elige tu plan en **Ajustes > Básico** (`account.plan`); mientras sea *desconocido* no se muestra ninguna cifra de cuota.
+El monitor lo usa cualquier tipo de cuenta, así que nunca da una por supuesta. Las cifras de abajo viven en `monitor/assets/examples/quotas.json` (una copia llamada `quotas.json` junto a los lanzadores tiene prioridad) (edítalo para seguir los cambios de GitHub sin una versión nueva del monitor) y se contrastaron con la documentación pública de GitHub; cambian con el tiempo, así que tómalas como punto de partida y mira las páginas que nombra el archivo. Elige tu plan en **Ajustes > Básico** (`account.plan`); mientras sea *desconocido* no se muestra ninguna cifra de cuota.
 
 ## La cuota de la API
 
