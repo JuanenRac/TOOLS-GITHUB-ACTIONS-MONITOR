@@ -60,3 +60,5 @@ Com `otlp.enabled` ligado e um `otlp.endpoint` (HTTPS, ou HTTP neste computador)
 - **O seu próprio token** fica no armazenamento do sistema, se existir; o ficheiro simples (permissões 600) é o armazenamento mais fraco. Vai só para o `gh`, nunca para o `act` nem para os seus comandos. O `--doctor` mostra o armazenamento, nunca o token.
 - **Combinações a evitar** (o `--doctor` nomeia-as): modo de rede em todas as interfaces; ações da IA que executam com o modo de rede ligado; `act` com o modo de rede ligado; o token num ficheiro simples.
 - O servidor MCP fala apenas por entrada e saída padrão; nunca o ponha atrás de uma porta de rede.
+
+`listen.trusted_proxy` (desativado por defeito): só se um proxy inverso SEU no mesmo computador for a única entrada. As tentativas falhadas são então contadas contra o último endereço de `X-Forwarded-For` (o que o seu proxy acrescenta) e não contra o proxy; um pedido que chega por um proxy continua a nunca ser tratado como este computador. Se mais alguém puder chegar diretamente ao monitor, deixe-o desligado.

@@ -7,6 +7,12 @@
 
 Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il proprio semver. La fonte è il CHANGELOG.md in inglese; questo file ha le stesse versioni e sezioni.
 
+## [Unreleased]
+
+### Aggiunto
+
+- **`listen.trusted_proxy`** (disattivato per impostazione predefinita, solo locale, nelle otto lingue): dietro un reverse proxy proprio sullo stesso computer, un tentativo fallito viene contato sull'ultimo indirizzo di `X-Forwarded-For` invece che sul proxy, così i token errati di una persona non bloccano tutti. Cambia solo questo conteggio: una richiesta che passa da un proxy non è comunque mai trattata come questo computer.
+
 ## [1.7.7]
 
 ### Aggiunto

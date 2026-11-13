@@ -19,7 +19,7 @@ import threading
 import time
 
 LOOPBACK_HOSTS = ("127.0.0.1", "localhost")
-STATE = {"network": False, "host": "127.0.0.1", "token": "", "allowed": set(), "secure": False, "proxy_host": ""}
+STATE = {"network": False, "host": "127.0.0.1", "token": "", "allowed": set(), "secure": False, "proxy_host": "", "trusted_proxy": False}
 #: the public name of an HTTPS proxy that forwards `Host` without a port (the proxy on port 443): a plain host name, never an address with a port, a path or a user
 PROXY_HOST_RE = re.compile(r"^[a-z0-9]([a-z0-9.-]{0,98}[a-z0-9])?$")
 COOKIE = "monitor_access"
@@ -81,12 +81,13 @@ def proxy_host_clean(value):
     return text if PROXY_HOST_RE.match(text) else ""
 
 
-def configure(network, host="127.0.0.1", token="", allowed=(), secure=False, proxy_host=""):
+def configure(network, host="127.0.0.1", token="", allowed=(), secure=False, proxy_host="", trusted_proxy=False):
     """Sets the mode of the process. `secure` = the connection is HTTPS (direct TLS or a proxy in front): the cookie then carries Secure. `proxy_host` = the public name of an HTTPS proxy that
     forwards `Host` and `Origin` without a port (a proxy on port 443); it only counts when the session is HTTPS. Returns the state (the token is never part of it)."""
     STATE["network"] = bool(network)
     STATE["secure"] = bool(network and secure)
     STATE["proxy_host"] = proxy_host_clean(proxy_host) if network and secure else ""
+    STATE["trusted_proxy"] = bool(network and trusted_proxy)      # listen.trusted_proxy: off unless the owner says the proxy in front is theirs (see client_key)
     STATE["host"] = host if network else "127.0.0.1"
     STATE["token"] = token if network else ""
     STATE["allowed"] = {str(a).lower() for a in allowed} | (own_addresses() if network and host == "0.0.0.0" else set())
@@ -247,6 +248,21 @@ def from_this_computer(client_address):
         return False
 
 
+def client_key(client_address, headers=None):
+    """The address a failed attempt and a lock are counted against. By default the TCP peer. With `listen.trusted_proxy` ON, a request whose peer is THIS computer (the reverse proxy the owner put in
+    front) is counted against the LAST address of `X-Forwarded-For` (the one the proxy itself appended: an earlier one can be written by the client), so that one person's wrong tokens do not lock
+    everybody out of the same proxy. It only changes the counting: a request that carries a forwarding header is still never "this computer" (is_this_computer), whatever it says."""
+    peer = str(client_address[0])
+    if not (STATE.get("trusted_proxy") and headers is not None and from_this_computer(client_address)):
+        return peer
+    forwarded = headers.get("X-Forwarded-For") or ""
+    last = forwarded.split(",")[-1].strip()
+    try:
+        return "fwd:" + str(ipaddress.ip_address(last.split("%")[0]))
+    except ValueError:
+        return peer      # a header that is not an address is ignored: the peer is counted
+
+
 FORWARD_HEADERS = ("Forwarded", "X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Proto", "X-Forwarded-Port", "X-Real-IP", "Via")
 
 
@@ -284,4 +300,4 @@ def settings_from(config):
     env = cfg.get("token_env") if isinstance(cfg.get("token_env"), str) else "MONITOR_ACCESS_TOKEN"
     allowed = [h for h in (cfg.get("allowed_hosts") or []) if isinstance(h, str) and 0 < len(h) <= 100]
     return {"network": network, "host": host if network else "127.0.0.1", "token_env": env or "MONITOR_ACCESS_TOKEN", "allowed_hosts": allowed,
-            "proxy_public_host": proxy_host_clean(cfg.get("proxy_public_host"))}
+            "proxy_public_host": proxy_host_clean(cfg.get("proxy_public_host")), "trusted_proxy": cfg.get("trusted_proxy") is True}

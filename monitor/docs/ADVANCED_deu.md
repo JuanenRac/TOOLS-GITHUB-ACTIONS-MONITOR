@@ -60,3 +60,5 @@ Mit `otlp.enabled` an und einem `otlp.endpoint` (HTTPS oder HTTP auf diesem Rech
 - **Dein eigenes Token** liegt im Speicher des Systems, wenn es einen gibt; die einfache Datei (Rechte 600) ist der schwächste Speicher. Es geht nur an `gh`, nie an `act` oder deine Befehle. `--doctor` zeigt den Speicher, nie das Token.
 - **Zu vermeidende Kombinationen** (`--doctor` nennt sie): Netzwerkmodus auf allen Schnittstellen; KI-Aktionen, die bei aktivem Netzwerkmodus ausführen; `act` bei aktivem Netzwerkmodus; das Token in einer einfachen Datei.
 - Der MCP-Server spricht nur über Standardeingabe und -ausgabe; niemals hinter einen Netzwerkport legen.
+
+`listen.trusted_proxy` (standardmäßig aus): nur wenn ein EIGENER Reverse-Proxy auf demselben Computer der einzige Zugang ist. Fehlversuche werden dann gegen die letzte Adresse von `X-Forwarded-For` (die Ihr Proxy anhängt) und nicht gegen den Proxy gezählt; eine Anfrage über einen Proxy gilt weiterhin nie als dieser Computer. Wenn jemand anderes den Monitor direkt erreichen kann, aus lassen.

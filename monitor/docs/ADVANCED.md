@@ -60,3 +60,5 @@ With `otlp.enabled` on and an `otlp.endpoint` (HTTPS, or HTTP on this computer),
 - **Your own token** is kept in the store of the system when there is one; the plain file (permissions 600) is the weakest store. It goes to `gh` only, never to `act` or to your commands. `--doctor` shows the store, never the token.
 - **Combinations to avoid** (`--doctor` names them): network mode on every interface; AI actions that execute while the network mode is on; `act` while the network mode is on; the token in a plain file.
 - The MCP server speaks over standard input and output only; never put it behind a network port.
+
+`listen.trusted_proxy` (off by default): only if a reverse proxy of YOURS on the same computer is the only way in. Failed attempts are then counted against the last address of `X-Forwarded-For` (the one your proxy adds) and not against the proxy; a request that comes through a proxy is still never treated as this computer. If anybody else can reach the monitor directly, leave it off.
