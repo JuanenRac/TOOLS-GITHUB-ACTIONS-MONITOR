@@ -2,6 +2,10 @@
 
 Ideas que no cupieron en la versión actual, sin orden prometido. Son direcciones, no compromisos; un issue o un pull request es la mejor forma de adelantar una.
 
+## Hecho en la 1.8.0
+
+Una nueva organización de carpetas (el paquete en `src/`, la página, los ejemplos y los idiomas en `assets/`); la barra inferior es una sola línea y dice solo lo que los marcos de arriba no dicen; el resumen para las herramientas de IA y el registro coinciden con un monitor en marcha; una lectura opcional de los repositorios tranquilos por GraphQL (desactivada por defecto) con su contabilidad; el aviso activo a una IA externa (desactivado por defecto, una primera confirmación por proveedor, solo los campos redactados de una lista cerrada, un tope de llamadas y de coste por hora, la clave por el nombre de una variable, y la IA nunca ejecuta una acción); la aplicación de terminal edita listas y mapas; y el historial de cambios está traducido a los ocho idiomas hasta la 1.0.0.
+
 ## Hecho en la 1.7.9
 
 ### Corregido
@@ -66,14 +70,13 @@ Pruebas de aislamiento de la edición lite y de la demo, ninguna petición de re
 
 Lo que la 1.6.4 no alcanzó, y por qué:
 
-- **Decidido, no hecho en la 1.6.6**: el aviso activo a una IA externa (apagado por defecto, una primera confirmación por proveedor, solo los campos ya filtrados de la lista cerrada, un tope de llamadas y de coste por hora, la clave por el nombre de una variable de entorno, y la IA nunca ejecuta una acción) con su variante de comando saliente (lista cerrada, sin shell); y los repositorios de varios propietarios en una página (el monitor identifica un repositorio solo por su nombre, así que necesita el propietario en cada identificador; es la base de varias cuentas). Cada uno es una función con su diseño y sus pruebas, así que la 1.6.6 cerró primero las correcciones.
-- **Las entradas antiguas del historial de cambios en los otros siete idiomas**: la Ayuda muestra el historial en cada idioma y de la 1.6.8 a la 1.6.3 están traducidas; la 1.6.2 y las anteriores conservan el texto en inglés bajo un aviso traducido y se irán traduciendo versión a versión, de la más nueva a la más vieja.
-- **Varios propietarios en un proceso y en una página**: desde la 1.7.0 cada cuenta es un monitor propio y la página las muestra una al lado de otra, pero dentro de un monitor un repositorio se identifica solo por su nombre, así que dos propietarios en el mismo monitor se mezclarían. Las cuentas de la 1.7.0 son la manera de mantenerlos aparte; llevarlas a un solo proceso, con el propietario en cada identificador, es lo que queda.
+- **Varios propietarios en un proceso y en una página**: desde la 1.7.0 cada cuenta es un monitor propio y la página las muestra una al lado de otra, pero dentro de un monitor un repositorio sigue identificándose solo por su nombre, así que dos propietarios en el mismo monitor se mezclarían. Llevarlos a un solo proceso exige el propietario en cada identificador (las lecturas, los identificadores de alerta, las listas de los ajustes, los centinelas y la página); no se pudo demostrar sin repositorios de dos propietarios reales, así que las cuentas de la 1.7.0 siguen siendo la forma de mantenerlos separados.
 - **El informe de facturación con un login que pueda leerlo**: la respuesta real de un login sin el permiso `user` es «no encontrado» y el monitor vuelve a la estimación (comprobado); las cifras en sí no se han comparado con una cuenta de facturación.
 - **Los precios de los runners grandes** de `quotas.json` salen de la memoria de la lista pública de precios y están marcados como no verificados; compáralos con la página de facturación de GitHub y edita el fichero.
 - **`gh copilot`**: sus banderas se comprueban con `gh copilot -- --help`, que necesita la línea de comandos de Copilot; aquí no está instalada, así que siguen sin verificar.
 - **Notificaciones, webhook, Enterprise Server y los ejemplos de servicio** contra servicios reales: `tools/manual_check_live.py` los comprueba a mano; necesitan tus canales y equipos, así que no se ejecutaron aquí.
-- **La aplicación de terminal** edita los ajustes sencillos y muestra el estado de la IA; la explicación de un workflow en rojo concreto y la edición de listas y mapas siguen en la página.
+- **La aplicación de terminal** edita los ajustes sencillos, las listas y los mapas de números y muestra el estado de la IA; la explicación de un workflow en rojo concreto se queda en la página.
+- **Solo el propietario puede demostrarlo en una instalación real**: varias cuentas con el centinela Collab sobre repositorios reales, una GitHub App y una segunda cuenta de solo lectura con claves reales, y el proxy HTTPS con un certificado real. Se prueban a mano (`tools/manual_check_live.py`) y no se dan por hechos.
 - **Una comprobación de versión nueva que descargue o instale**: nunca; el monitor solo avisa.
 
 ## Más adelante
