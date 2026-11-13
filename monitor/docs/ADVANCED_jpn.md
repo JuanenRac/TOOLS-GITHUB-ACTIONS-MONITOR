@@ -29,6 +29,7 @@
 - **パスワード。** ソルト付き scrypt ハッシュとしてのみ保存され、`auth.min_length` 文字以上が必要です。誤ったパスワードが `auth.max_failed_logins` 回に達すると、そのユーザーは `auth.lockout_minutes` 分ロックされ、アドレスごとにもリクエスト上限があります。パスワード・ロール・状態を変更すると、そのユーザーのセッションは終了します。有効な管理者は常に1人以上残ります。
 - **エンドポイント。** `/api/auth/login`、`logout`、`me`、`bootstrap`、`password`。管理者用に `/api/auth/users`（`/update`、`/delete`、`/revoke`）と `/api/auth/audit`。エラーは安定したコード付きの JSON です：`{"error": "...", "code": "..."}`。
 - **監査。** `auth_audit.jsonl`（非公開ファイル、古い1世代を保持）にログイン、ロック、拒否されたリクエスト、ユーザーの変更を記録します。パスワード・ハッシュ・トークンは記録しません。`auth.audit` でオフにできます。
+- **複数アカウント。** `ACCOUNTS.md` のアカウントでは、`GET /api/accounts` の一覧、`/api/accounts/<id>/status`、`?account=` や `X-Account-Id` を付けたすべてのリクエストは、そのユーザーに割り当てられたアカウントだけが対象です（admin はすべて）。アカウントのモニターは操作者を知るため、アラートタブのミュートは誰が行ったかを記録します（`GET /api/alerts` の `muted_by` とミュート履歴）。
 - **リスク。** ネットワーク上の暗号化されない HTTP では Cookie とパスワードが平文で流れます。ネットワークモードと同様に HTTPS か VPN を使ってください。
 
 ## モニターが保持する GitHub トークン

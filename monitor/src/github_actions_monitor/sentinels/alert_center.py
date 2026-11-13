@@ -121,11 +121,22 @@ def history(limit=30):
         return list(reversed(_load()["history"]))[:limit]
 
 
+def covering(alert, live):
+    """The silences that cover this alert."""
+    return [e for e in live if (e["scope"] == "alert" and e["value"] == alert.get("id") and not changed(e, alert)) or (e["scope"] == "code" and e["value"] == alert.get("code"))
+            or (e["scope"] == "sentinel" and e["value"] == alert.get("sentinel"))]
+
+
 def muted_until(alert, live):
     """The end of the silence that covers this alert (the longest one that does), or None."""
-    ends = [e["until"] for e in live if (e["scope"] == "alert" and e["value"] == alert.get("id") and not changed(e, alert)) or (e["scope"] == "code" and e["value"] == alert.get("code"))
-            or (e["scope"] == "sentinel" and e["value"] == alert.get("sentinel"))]
+    ends = [e["until"] for e in covering(alert, live)]
     return max(ends) if ends else None
+
+
+def muted_by(alert, live):
+    """Who made the silence that lasts longest on this alert ('' when nobody is named: the individual mode, or no silence)."""
+    found = covering(alert, live)
+    return str(max(found, key=lambda e: e["until"]).get("who") or "") if found else ""
 
 
 def changed(entry, alert):
@@ -148,7 +159,7 @@ def collect(registry, now=None):
         alerts = []
     for alert in alerts:
         if isinstance(alert, dict) and alert.get("id"):
-            out.append(dict(alert, muted_until=muted_until(alert, live)))
+            out.append(dict(alert, muted_until=muted_until(alert, live), muted_by=muted_by(alert, live)))
     return out
 
 

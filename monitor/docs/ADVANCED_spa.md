@@ -29,6 +29,7 @@ Desactivado por defecto: una persona usa el monitor sin login. Con `auth.enabled
 - **Contraseñas.** Solo se guardan como hash scrypt con sal y deben tener `auth.min_length` caracteres. Tras `auth.max_failed_logins` contraseñas erróneas el usuario se bloquea `auth.lockout_minutes`, y cada dirección tiene su propio límite de peticiones. Una contraseña, rol o estado nuevo cierra las sesiones de ese usuario; siempre queda al menos un administrador activo.
 - **Endpoints.** `/api/auth/login`, `logout`, `me`, `bootstrap`, `password`; para admins `/api/auth/users` (con `/update`, `/delete`, `/revoke`) y `/api/auth/audit`. Los errores son JSON con código estable: `{"error": "...", "code": "..."}`.
 - **Auditoría.** `auth_audit.jsonl` (archivo privado; se conserva una copia anterior) registra accesos, bloqueos, peticiones rechazadas y cambios de usuarios; nunca una contraseña, un hash ni un token. `auth.audit` la desactiva.
+- **Varias cuentas.** Con las cuentas de `ACCOUNTS.md`, `GET /api/accounts` lista, y `/api/accounts/<id>/status` y toda petición con `?account=` o `X-Account-Id` alcanzan, solo las cuentas asignadas al usuario (un admin ve todas). El monitor de una cuenta sabe quién actúa, así que un silencio de la pestaña Alertas guarda quién lo hizo (`muted_by` en `GET /api/alerts` y el historial de silencios).
 - **Riesgo.** Con HTTP sin cifrar en una red, la cookie y las contraseñas viajan en claro: usa HTTPS o una VPN, como en el modo red.
 
 ## Un token de GitHub guardado por el monitor

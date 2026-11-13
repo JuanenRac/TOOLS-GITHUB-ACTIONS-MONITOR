@@ -109,6 +109,27 @@ def _address(handler):
     return localguard.client_key(handler.client_address, handler.headers)
 
 
+USER_HEADER = "X-Monitor-User"       # the supervisor tells the monitor of an account who is acting (the child trusts it only when it is an account child)
+
+
+def acting_user(handler):
+    """The name of the person behind a request ('' in the individual mode): the session of the gate, or the header the supervisor adds for an account child."""
+    context = getattr(handler, "auth_user", None)
+    if context:
+        return context["user"]
+    if os.environ.get(CHILD_ENV):
+        return auth.clean_username(handler.headers.get(USER_HEADER))
+    return ""
+
+
+def visible_accounts(handler, ids):
+    """The account ids this request may see: all of them without a session (individual mode) or for an admin, else only the ones assigned to the user."""
+    context = getattr(handler, "auth_user", None)
+    if not context:
+        return list(ids)
+    return [i for i in ids if auth.can_see_account(context["accounts"], i)]
+
+
 def requested_account(handler):
     """The account a request is for: ?account=<id> or the header X-Account-Id, else the default one."""
     from urllib.parse import parse_qs
@@ -153,7 +174,8 @@ def gate(handler, config, lite=False):
     if not auth.allows(context["role"], needed):
         auth.audit(cfg, "denied", context["user"], context["role"], _address(handler), path, "denied", "forbidden_role")
         return fail(handler, "forbidden_role", 403)
-    if not auth.can_see_account(context["accounts"], requested_account(handler)) and not path.startswith("/api/auth/"):
+    listing = path == "/api/accounts" or path.startswith("/api/accounts/")      # the supervisor filters these by user itself
+    if not listing and not path.startswith("/api/auth/") and not auth.can_see_account(context["accounts"], requested_account(handler)):
         auth.audit(cfg, "denied", context["user"], context["role"], _address(handler), path, "denied", "account_scope")
         return fail(handler, "account_scope", 403)
     if method not in ("GET", "HEAD") and kind == "cookie" and not hmac.compare_digest((handler.headers.get("X-CSRF-Token") or "").encode(), context["csrf"].encode()):

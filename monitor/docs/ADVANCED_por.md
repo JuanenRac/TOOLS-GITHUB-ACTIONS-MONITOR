@@ -29,6 +29,7 @@ Desativado por predefinição: uma pessoa usa o monitor sem início de sessão. 
 - **Palavras-passe.** Guardadas apenas como hash scrypt com sal, com pelo menos `auth.min_length` carateres. Após `auth.max_failed_logins` palavras-passe erradas o utilizador fica bloqueado `auth.lockout_minutes` minutos, e cada endereço tem o seu próprio limite de pedidos. Uma nova palavra-passe, função ou estado termina as sessões desse utilizador; fica sempre pelo menos um administrador ativo.
 - **Endpoints.** `/api/auth/login`, `logout`, `me`, `bootstrap`, `password`; para admins `/api/auth/users` (com `/update`, `/delete`, `/revoke`) e `/api/auth/audit`. Os erros são JSON com código estável: `{"error": "...", "code": "..."}`.
 - **Auditoria.** `auth_audit.jsonl` (ficheiro privado; é mantida uma cópia anterior) regista inícios de sessão, bloqueios, pedidos recusados e alterações de utilizadores; nunca uma palavra-passe, um hash ou um token. `auth.audit` desativa-a.
+- **Várias contas.** Com as contas de `ACCOUNTS.md`, `GET /api/accounts` lista, e `/api/accounts/<id>/status` e todo o pedido com `?account=` ou `X-Account-Id` alcançam, apenas as contas atribuídas ao utilizador (um admin vê todas). O monitor de uma conta sabe quem age: um silêncio do separador Alertas regista assim quem o fez (`muted_by` em `GET /api/alerts` e o histórico de silêncios).
 - **Risco.** Com HTTP sem cifra numa rede, o cookie e as palavras-passe circulam em claro: use HTTPS ou uma VPN, como no modo de rede.
 
 ## Um token do GitHub guardado pelo monitor

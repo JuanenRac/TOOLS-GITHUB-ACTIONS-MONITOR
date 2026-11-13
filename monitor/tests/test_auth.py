@@ -25,6 +25,9 @@ from github_actions_monitor.app import actions_monitor as am  # noqa: E402
 from github_actions_monitor.app import settings_api, toolconfig  # noqa: E402
 from github_actions_monitor.security import auth, auth_http, localguard  # noqa: E402
 from github_actions_monitor.storage import factory  # noqa: E402
+from github_actions_monitor.accounts import accounts_supervisor as sup  # noqa: E402
+from github_actions_monitor.sentinels import alert_center  # noqa: E402
+import test_170 as t170  # noqa: E402
 
 PASSWORD = "correct horse battery"
 CFG = auth.settings({"auth": {"enabled": True}})
@@ -414,6 +417,94 @@ class LiveTeam(unittest.TestCase):
             self.assertIn(i18n.tl(lang, "auth.sign_in"), page)
             self.assertNotIn("auth.sign_in", page, lang)
             self.assertNotEqual(i18n.tl(lang, "cfg.h.auth.enabled"), "cfg.h.auth.enabled", lang)
+
+    def test_the_silence_keeps_who_made_it_and_the_alert_list_says_it(self):
+        self.start({"auth": {"enabled": True}, "session_guard": False})
+        from unittest import mock
+        patch = mock.patch.object(alert_center, "STATE_FILE", Path(self.tmp.name) / "alert_mutes.json")
+        patch.start()
+        self.addCleanup(patch.stop)
+        self.make_admin()
+        admin = self.sign_in("root")
+        self.add_user(admin, "main", "maintainer")
+        main = self.sign_in("main")
+        status, body, _ = self.call("/api/alerts/mute", {"scope": "code", "value": "ci.stuck", "hours": 2}, main)
+        self.assertEqual((status, body["ok"], body["mute"]["who"]), (200, True, "main"))
+        live = alert_center.active()
+        self.assertEqual(alert_center.muted_by({"code": "ci.stuck"}, live), "main")
+        self.assertEqual(alert_center.muted_by({"code": "other"}, live), "")
+        self.assertEqual(alert_center.history()[0]["who"], "main")
+
+    def test_in_the_individual_mode_nobody_is_named(self):
+        self.start({"session_guard": False})
+        from unittest import mock
+        patch = mock.patch.object(alert_center, "STATE_FILE", Path(self.tmp.name) / "alert_mutes.json")
+        patch.start()
+        self.addCleanup(patch.stop)
+        self.assertEqual(self.call("/api/alerts/mute", {"scope": "code", "value": "ci.stuck"})[1]["mute"]["who"], "")
+
+
+class TeamSupervisor(t170.Running):
+    """The supervisor with several accounts: each user lists and reaches only the accounts assigned to them."""
+
+    def setUp(self):
+        from unittest import mock
+        stub = t170.STUB.replace('"token": self.headers.get("X-Monitor-Token")}', '"token": self.headers.get("X-Monitor-Token"), "user": self.headers.get("X-Monitor-User")}').replace(
+            '"host": self.headers.get("Host")})', '"host": self.headers.get("Host"), "user": self.headers.get("X-Monitor-User")})')
+        for patcher in (mock.patch.object(t170, "STUB", stub), mock.patch.object(sup.Handler, "team_config", staticmethod(lambda: {"auth": {"enabled": True}, "session_guard": False}))):
+            patcher.start()
+            self.addCleanup(patcher.stop)
+        super().setUp()
+        self.tmp2 = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp2.cleanup)
+        self.storage = new_storage(self.tmp2.name)
+        auth.use_storage(self.storage)
+        auth.AUDIT_FILE = Path(self.tmp2.name) / "audit.jsonl"
+        auth_http.forget_cache()
+        localguard.reset_limits()
+
+        def undo():
+            auth.use_storage(None)
+            auth.AUDIT_FILE = None
+            auth_http.forget_cache()
+            self.storage.close()
+        self.addCleanup(undo)
+        auth.create_user(self.storage, "root", PASSWORD, "admin")
+        auth.create_user(self.storage, "ana", PASSWORD, "maintainer", ["alpha"])
+        auth.create_user(self.storage, "bob", PASSWORD, "viewer", ["beta"])
+        auth_http.forget_cache()
+
+    def sign(self, name):
+        status, body, head = t170.get(self.url + "/api/auth/login", headers={"Content-Type": "application/json"}, data=json.dumps({"username": name, "password": PASSWORD}).encode())
+        self.assertEqual(status, 200, body)
+        return {"Cookie": head["Set-Cookie"].split(";")[0], "X-CSRF-Token": body["csrf"]}
+
+    def test_the_list_and_the_status_show_only_the_accounts_of_the_user(self):
+        for name, expected in (("root", ["alpha", "beta"]), ("ana", ["alpha"]), ("bob", ["beta"])):
+            headers = self.sign(name)
+            self.assertEqual([a["id"] for a in t170.get(self.url + "/api/accounts", headers)[1]["accounts"]], expected, name)
+        ana = self.sign("ana")
+        self.assertEqual(t170.get(self.url + "/api/accounts/alpha/status", ana)[0], 200)
+        status, body, _ = t170.get(self.url + "/api/accounts/beta/status", ana)
+        self.assertEqual((status, body["code"]), (403, "account_scope"))
+        self.assertEqual(t170.get(self.url + "/api/accounts/beta/status", self.sign("root"))[0], 200)
+        self.assertEqual(t170.get(self.url + "/api/accounts")[0], 401, "without a session nothing is listed")
+
+    def test_a_request_for_another_account_never_reaches_its_monitor(self):
+        ana = self.sign("ana")
+        self.assertEqual(t170.get(self.url + "/api/echo?account=alpha", ana)[1]["account"], "alpha")
+        for path, extra in (("/api/echo?account=beta", {}), ("/api/echo", {"X-Account-Id": "beta"})):
+            status, body, _ = t170.get(self.url + path, {**ana, **extra})
+            self.assertEqual((status, body["code"]), (403, "account_scope"), path)
+
+    def test_the_page_lists_only_the_accounts_of_the_user(self):
+        page = t170.get(self.url + "/?account=alpha", {**self.sign("ana"), "Accept": "text/html"})[1]
+        self.assertIn('"accounts": ["alpha"]', page)
+
+    def test_the_monitor_of_an_account_is_told_who_acts_and_a_forged_name_is_dropped(self):
+        ana = {**self.sign("ana"), "Content-Type": "application/json", "X-Monitor-User": "root"}
+        status, body, _ = t170.get(self.url + "/api/alerts/mute?account=alpha", ana, data=b"{}")
+        self.assertEqual((status, body.get("user")), (200, "ana"), body)
 
 
 class Recovery(unittest.TestCase):

@@ -370,13 +370,18 @@ class Handler(BaseHTTPRequestHandler):
             self.json({"ok": True, "supervisor": True, "accounts": len(sup.children), "default": accounts.default_account(sup.base)})
             return
         if method == "GET" and route == "/api/accounts":
-            self.json(sup.summary())
+            listed = sup.summary()
+            seen = auth_http.visible_accounts(self, [a["id"] for a in listed["accounts"]])
+            self.json({**listed, "accounts": [a for a in listed["accounts"] if a["id"] in seen]})
             return
         if method == "GET" and route in ("/", "/index.html"):
             self.page(sup)
             return
         if method == "GET" and route.startswith("/api/accounts/") and route.endswith("/status"):
             account_id = route[len("/api/accounts/"):-len("/status")]
+            if accounts.valid_id(account_id) and not auth_http.visible_accounts(self, [account_id]):
+                self.json({"error": "this account is not yours", "code": "account_scope"}, 403)
+                return
             result = sup.status(account_id) if accounts.valid_id(account_id) else None
             self.json(result if result is not None else {"error": "unknown account"}, 200 if result is not None else 404)
             return
@@ -399,7 +404,7 @@ class Handler(BaseHTTPRequestHandler):
             self.json({"error": "account not answering", "account": account_id}, 502)
             return
         page = data.decode("utf-8", "replace")
-        info = json.dumps({"current": account_id, "default": accounts.default_account(sup.base), "accounts": [a["id"] for a in sup.summary()["accounts"]]}).replace("</", "<\\/")
+        info = json.dumps({"current": account_id, "default": accounts.default_account(sup.base), "accounts": auth_http.visible_accounts(self, [a["id"] for a in sup.summary()["accounts"]])}).replace("</", "<\\/")
         self.reply(200, page.replace("/*ACCOUNTS_DATA*/null", info, 1), "text/html; charset=utf-8")
 
     def forward(self, sup, method, route):
@@ -421,7 +426,10 @@ class Handler(BaseHTTPRequestHandler):
                 self.json({"error": "size"}, 413)
                 return
             body = self.rfile.read(size)
-        headers = {k: v for k, v in self.headers.items() if k.lower() not in NO_FORWARD}
+        headers = {k: v for k, v in self.headers.items() if k.lower() not in NO_FORWARD and k.lower() != auth_http.USER_HEADER.lower()}      # a header of the client never says who is acting
+        context = getattr(self, "auth_user", None)
+        if context:
+            headers[auth_http.USER_HEADER] = context["user"]
         headers["Host"] = f"127.0.0.1:{child.port}"           # the child answers to its own address: the supervisor already checked the one the browser used
         if "Origin" in headers:
             headers["Origin"] = f"http://127.0.0.1:{child.port}"

@@ -29,6 +29,7 @@
 - **密码。** 仅以加盐的 scrypt 哈希保存，至少 `auth.min_length` 个字符。错误密码达到 `auth.max_failed_logins` 次后，该用户被锁定 `auth.lockout_minutes` 分钟，每个地址还有自己的请求上限。新的密码、角色或状态会结束该用户的会话；始终至少保留一位有效管理员。
 - **端点。** `/api/auth/login`、`logout`、`me`、`bootstrap`、`password`；管理员可用 `/api/auth/users`（含 `/update`、`/delete`、`/revoke`）和 `/api/auth/audit`。错误为带稳定代码的 JSON：`{"error": "...", "code": "..."}`。
 - **审计。** `auth_audit.jsonl`（私有文件，保留一份旧副本）记录登录、锁定、被拒绝的请求和用户变更；绝不记录密码、哈希或令牌。`auth.audit` 可关闭。
+- **多个账户。** 使用 `ACCOUNTS.md` 的账户时，`GET /api/accounts` 只列出、`/api/accounts/<id>/status` 以及所有带 `?account=` 或 `X-Account-Id` 的请求只能访问分配给该用户的账户（admin 可看全部）。账户的监视器知道是谁在操作，因此“警报”标签页的静音会记录是谁做的（`GET /api/alerts` 中的 `muted_by` 和静音历史）。
 - **风险。** 在网络上使用未加密的 HTTP 时，Cookie 和密码以明文传输：与网络模式一样，请使用 HTTPS 或 VPN。
 
 ## 监视器保存的 GitHub 令牌

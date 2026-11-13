@@ -1607,7 +1607,7 @@ class Handler(BaseHTTPRequestHandler):
             try:
                 size = int(self.headers.get("Content-Length") or 0)
                 request = json.loads(self.rfile.read(size) if 0 < size <= 2048 else b"{}")
-                self.json_reply(handle_advanced_post(path, request if isinstance(request, dict) else {}))
+                self.json_reply(handle_advanced_post(path, request if isinstance(request, dict) else {}, auth_http.acting_user(self)))
             except Exception:   # noqa: BLE001 - the answer never repeats the request: it could hold a token
                 self.json_reply({"ok": False, "status": "request"}, 400)
             return
@@ -2143,7 +2143,7 @@ def advanced_get(path, query):
     return otlp.status(config)
 
 
-def handle_advanced_post(path, request):
+def handle_advanced_post(path, request, who=""):
     """The plan / confirm pairs of the actions on GitHub and of `act`, the token of GitHub and the welcome flag. Answers never contain the request."""
     config = toolconfig.raw_config()
     if path in ("/api/alerts/mute", "/api/alerts/unmute"):      # a local silence (never a change on GitHub): scope alert|code|sentinel, hours optional
@@ -2157,7 +2157,7 @@ def handle_advanced_post(path, request):
                 if alert.get("id") == value:
                     until_change = (alert.get("details") or {}).get("updated") if isinstance(alert.get("details"), dict) else None
                     break
-        entry = alert_center.mute(scope, value, request.get("hours"), config, until_change=until_change)
+        entry = alert_center.mute(scope, value, request.get("hours"), config, who=who, until_change=until_change)
         return {"ok": entry is not None, "mute": entry}
     if path == "/api/ai/ack":
         from github_actions_monitor.integrations import ai_alerts
