@@ -66,3 +66,7 @@ Para varias pantallas abre una ventana por vista, por ejemplo `?view=now&chrome=
 - Varias cuentas son varios procesos: cada uno lee GitHub por su cuenta, así que el margen lo comparte el login que uses. Míralo en las tarjetas y baja `refresh_seconds` o `max_workers` por cuenta si hace falta.
 - Las comprobaciones que necesitan un navegador real, cuentas reales de GitHub y un túnel de webhook real las haces tú; las pruebas usan sustitutos del monitor de una cuenta y nunca llaman a GitHub.
 - Una versión posterior traerá las cuentas a un solo proceso; la disposición de carpetas y la API de arriba se mantienen.
+
+## Dónde guarda una cuenta su estado
+
+Por defecto en archivos dentro de `accounts/<id>/`. Una cuenta puede guardarlo en una base de datos: `"storage": {"backend": "sqlite"}` en su propia configuración le da `accounts/<id>/storage.sqlite3`, y solo el proceso de esa cuenta la escribe. La configuración de la cuenta sigue siendo un archivo JSON. Véase [STORAGE_spa.md](STORAGE_spa.md).

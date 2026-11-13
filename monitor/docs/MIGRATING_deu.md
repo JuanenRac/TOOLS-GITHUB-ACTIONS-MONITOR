@@ -115,6 +115,10 @@ Ihre Daten wandern nicht: `actions_monitor.json`, die Caches, die Protokolle, `c
 | `ui` | Info, Hilfedokumente, Terminalansichten |
 | `i18n`, `util` | die acht Sprachen; kleine gemeinsame Helfer |
 
+## Zustand zwischen Dateien und SQLite verschieben (1.8.0)
+
+Zum Aktualisieren muss nichts migriert werden: Dateien bleiben der Standard. Wenn Sie den Zustand in SQLite wollen, zeigt `python tools/migrate_storage.py --from file --to sqlite`, was kopiert würde (Probelauf); mit `--apply` wird kopiert und geprüft. Ihre Dateien werden nie geändert oder gelöscht. Siehe [STORAGE_deu.md](STORAGE_deu.md).
+
 # Von 1.7.9 auf 1.8.0
 
 Nichts muss umgewandelt werden. Eine Einstellung kann eine Änderung brauchen:

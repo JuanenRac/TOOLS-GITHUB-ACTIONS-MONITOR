@@ -57,3 +57,7 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python monitor_cli
 ## The access token in the command line
 
 In the network mode the token is read from `MONITOR_ACCESS_TOKEN`, then `MONITOR_TOKEN`, then the first line of `--token-file FILE` (keep that file readable by you only: on a system with file modes the command warns when others can read it), and last from `--token`, which shows in the list of processes and therefore prints a warning on stderr.
+
+## The storage tools
+
+`python tools/migrate_storage.py` moves the state between files and SQLite, and `python tools/backup_storage.py` makes, checks and restores backups of either (both are described in [STORAGE.md](STORAGE.md)). `--doctor` has two checks for them: the storage and the retention.

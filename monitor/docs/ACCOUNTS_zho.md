@@ -66,3 +66,7 @@ python actions_monitor.py --accounts                  # 列出账户
 - 多个账户就是多个进程：每个进程各自读取 GitHub，因此额度由你使用的登录共享。请在卡片中留意，必要时按账户调低 `refresh_seconds` 或 `max_workers`。
 - 需要真实浏览器、真实 GitHub 账户和真实 webhook 隧道的检查由你来做；测试使用账户监视器的替身，绝不会调用 GitHub。
 - 后续版本会把这些账户合并到一个进程中；上面的文件夹布局和 API 保持不变。
+
+## 账户把状态保存在哪里
+
+默认保存在 `accounts/<id>/` 内的文件中。账户也可以改用数据库:在它自己的配置中写 `"storage": {"backend": "sqlite"}`,就会使用 `accounts/<id>/storage.sqlite3`,而且只有该账户的进程会写它。账户的配置仍是 JSON 文件。详见 [STORAGE_zho.md](STORAGE_zho.md)。

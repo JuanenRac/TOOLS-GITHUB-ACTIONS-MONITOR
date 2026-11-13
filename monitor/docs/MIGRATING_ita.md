@@ -115,6 +115,10 @@ I tuoi dati non si spostano: `actions_monitor.json`, le cache, i log, `config_ba
 | `ui` | Informazioni, documenti di aiuto, viste da terminale |
 | `i18n`, `util` | le otto lingue; piccole utilità condivise |
 
+## Spostare lo stato tra file e SQLite (1.8.0)
+
+Per aggiornare non serve migrare nulla: i file restano il predefinito. Se vuoi lo stato in SQLite, `python tools/migrate_storage.py --from file --to sqlite` mostra cosa copierebbe (simulazione); aggiungi `--apply` per copiare e verificare. I tuoi file non vengono mai modificati né eliminati. Vedi [STORAGE_ita.md](STORAGE_ita.md).
+
 # Da 1.7.9 a 1.8.0
 
 Non c'è nulla da convertire. Un'impostazione può richiedere uno spostamento:

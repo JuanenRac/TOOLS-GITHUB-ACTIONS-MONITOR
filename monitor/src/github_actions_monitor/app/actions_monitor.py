@@ -1187,6 +1187,19 @@ EXTRAS_WARNED = []
 CONNECTION_WAS = {"lost": False}
 
 
+def retention_tick(config):
+    """The tick of maintenance of the retention: when it is due (once per `retention.interval_hours`) the events and the analytics older than their limits are removed or archived. The
+    lite edition has no such job. A failure is counted and never stops the cycle."""
+    if LITE["on"]:
+        return
+    try:
+        from github_actions_monitor.storage import retention, runtime
+        storage, account = runtime.process_storage(CHILD["account"] or None)
+        retention.tick(storage, account, config)
+    except Exception as error:   # noqa: BLE001 - housekeeping never stops the monitor
+        degraded.note("retention", error)
+
+
 def maintain(config, data):
     """After each cycle: the conditional-read cache is saved, a few completed runs have their jobs sampled and the analytics are refreshed."""
     quota_watch(config)
@@ -1199,6 +1212,7 @@ def maintain(config, data):
     except Exception as error:   # noqa: BLE001 - a sound never stops a cycle
         degraded.note("loop.extra2", error)
     maintain_extras(toolconfig.raw_config() if not LITE["on"] else config, data)
+    retention_tick(toolconfig.raw_config() if not LITE["on"] else config)
     try:
         if ETAG["cache"]:
             ETAG["cache"].save()

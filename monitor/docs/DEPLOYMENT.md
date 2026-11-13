@@ -102,3 +102,7 @@ Once a proxy is declared, nothing that arrives on the main port counts as "this 
 ## Many repositories
 
 Conditional reads (`cache.etag`) make an unchanged repository cost no quota; `mode: lite`, `ecosystems`, `exclude` and `max_workers` limit the work; the incoming webhook removes the polling of the repositories that send events. `discover_limit` is the most repositories listed for an account (default 1000).
+
+## Running for months: storage and retention
+
+Keep `accounts/` (or the database) on a volume that survives the container, and make a backup with `python tools/backup_storage.py backup FILE.zip --backend file` (or `sqlite`) before an update. Out of the box a short pass removes events older than 90 days and analytics older than 180 days; set `retention` in the configuration to change that, and `MONITOR_SERVICE=1` makes `--doctor` treat the monitor as a service (it then warns when there is no `retention` block or the events grow large). With SQLite, one database per account is the default; one shared file is possible and documented in [STORAGE.md](STORAGE.md).

@@ -66,3 +66,7 @@ For several screens open one window per view, for example `?view=now&chrome=0`, 
 - Several accounts are several processes: each one reads GitHub on its own, so the allowance is shared by the login you use. Watch it in the cards, and lower `refresh_seconds` or `max_workers` per account if you need to.
 - The checks that need a real browser, real GitHub accounts and a real webhook tunnel are for you to run; the tests use stand-ins for the monitor of an account and never call GitHub.
 - A later version brings the accounts into one process; the folder layout and the API above stay.
+
+## Where an account keeps its state
+
+By default in files inside `accounts/<id>/`. An account can keep it in a database instead: `"storage": {"backend": "sqlite"}` in its own configuration gives it `accounts/<id>/storage.sqlite3`, and only the process of that account writes it. The configuration of the account stays a JSON file. See [STORAGE.md](STORAGE.md).

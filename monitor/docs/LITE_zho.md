@@ -27,3 +27,7 @@
 ## 命令行
 
 `python monitor_cli.py status --lite`、`doctor --lite` 和 `health --lite` 会查询端口 8766 上的精简版监视器（见 [CLI_zho.md](CLI_zho.md)）；需要账户或哨兵的命令会被拒绝。页面同样有底部状态栏和可排序的表格。
+
+## 存储
+
+精简版只使用普通文件:没有数据库,没有保留任务,也没有 [STORAGE_zho.md](STORAGE_zho.md) 中的任何选项。

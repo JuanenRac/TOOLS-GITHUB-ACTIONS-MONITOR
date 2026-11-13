@@ -27,3 +27,7 @@ La Configuración corta tiene la cuenta (`github_owner`), los repositorios y eco
 ## La línea de comandos
 
 `python monitor_cli.py status --lite`, `doctor --lite` y `health --lite` preguntan al monitor lite en el puerto 8766 (ver [CLI_spa.md](CLI_spa.md)); los comandos que necesitan cuentas o centinelas se rechazan. La página también tiene la barra de estado al pie y las tablas ordenables.
+
+## Almacenamiento
+
+La edición lite guarda solo archivos normales: sin base de datos, sin tarea de retención y sin ninguna de las opciones de [STORAGE_spa.md](STORAGE_spa.md).

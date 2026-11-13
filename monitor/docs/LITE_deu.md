@@ -27,3 +27,7 @@ Die kurzen Einstellungen enthalten das Konto (`github_owner`), die zu beobachten
 ## Die Befehlszeile
 
 `python monitor_cli.py status --lite`, `doctor --lite` und `health --lite` fragen den Lite-Monitor auf Port 8766 (siehe [CLI_deu.md](CLI_deu.md)); Befehle, die Konten oder Wächter brauchen, werden abgelehnt. Die Seite hat ebenfalls die Statusleiste am Fuß und die sortierbaren Tabellen.
+
+## Speicherung
+
+Die Lite-Ausgabe speichert nur gewöhnliche Dateien: keine Datenbank, kein Aufbewahrungsjob und keine der Optionen aus [STORAGE_deu.md](STORAGE_deu.md).

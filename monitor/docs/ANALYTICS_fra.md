@@ -30,3 +30,7 @@ Un workflow qui a ÉCHOUÉ puis RÉUSSI sur le même commit (ou dont le run a de
 ## Quand la connexion est perdue
 
 Si toutes les lectures d'un cycle échouent pour un problème de connexion (pas de login ni de quota), la page garde la dernière image et affiche un bandeau rouge `pas de connexion depuis HH:MM`. Rien ne lève d'exception ; le moniteur reprend seul et écrit un événement `offline` et un `online`, une fois chacun (ils peuvent être notifiés). `ghamon_offline` vaut 1 entre-temps.
+
+## Combien de temps l'historique est conservé
+
+En plus de `keep_days` du bloc d'analyses, le passage de conservation supprime les jours de l'historique plus anciens que `retention.analytics_days` (180 par défaut) ; les échantillons eux-mêmes sont limités par `max_samples`. Voir [STORAGE_fra.md](STORAGE_fra.md).

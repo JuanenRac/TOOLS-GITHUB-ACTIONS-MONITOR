@@ -479,6 +479,15 @@
       "max_per_hour": 6
     }
   },
+  "retention": {
+    "enabled": true,
+    "events_days": 90,
+    "analytics_days": 180,
+    "mode": "archive",
+    "events_max_kb": 512,
+    "interval_hours": 24,
+    "warn_events_mb": 20
+  },
   "tui": {
     "theme": "dark",
     "refresh_seconds": 5
