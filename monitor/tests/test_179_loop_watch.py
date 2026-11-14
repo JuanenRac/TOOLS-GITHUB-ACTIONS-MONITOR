@@ -124,7 +124,36 @@ class LoopWithFalseCollaborators(unittest.TestCase):
         am.STATE.pop("complete", None)
         am.WATCH.reset()
         self.config = dict(am.DEFAULTS)
-        self.addCleanup(lambda: am.WATCH.new_generation())      # whatever loop is still alive leaves
+        self.addCleanup(self.every_loop_leaves)      # runs first: whatever loop is still alive leaves before the doubles are put back
+
+    def every_loop_leaves(self):
+        """Frees the loops that wait for the test, tells them they are old and waits until they are gone: a loop that outlives its test would write its failures into the watch of the next one."""
+        self.release.set()
+        am.WATCH.new_generation()
+        for thread in [t for t in threading.enumerate() if t.name.startswith("refresh-loop-")]:
+            thread.join(3)
+
+    def later(self, seconds=5.0):
+        """Moves the clock of the watch forward instead of sleeping: how long a cycle has run is then what the test says, not what a slow runner managed to wait (a loop of an earlier test that
+        starts a cycle late would otherwise reset the count)."""
+        self.fake_now[0] += seconds
+
+    def fake_clock(self):
+        self.fake_now = [time.time()]
+        patch = mock.patch.object(am.WATCH, "clock", lambda: self.fake_now[0])
+        patch.start()
+        self.addCleanup(patch.stop)
+
+    def stuck_after_moving_the_clock(self):
+        """The verdict of the watchdog once the clock moved; tried a few times because a stray cycle that begins right then starts the count again, and the next move settles it."""
+        verdict = ""
+        for _attempt in range(20):
+            self.later()
+            verdict = am.watchdog_once(self.config)
+            if verdict:
+                break
+            time.sleep(0.02)
+        return verdict
 
     def fast_sleep(self):
         real = am.sleep_for
@@ -140,12 +169,13 @@ class LoopWithFalseCollaborators(unittest.TestCase):
                 return fake_data("OLD")
             return fake_data("NEW")
 
+        self.fake_clock()
         with mock.patch.object(am, "collect", collect), self.fast_sleep():
             first = am.start_loop(self.config)
             self.assertTrue(wait_for(lambda: len(calls) == 1))
             self.assertEqual(am.WATCH.snapshot()["phase"], "collect")
             self.assertEqual(am.watchdog_once(self.config), "", "not yet over the limit")
-            time.sleep(0.5)
+            self.later()
             self.assertEqual(am.WATCH.snapshot(limit_seconds=0.4)["stuck"], True)
             self.assertEqual(am.watchdog_once(self.config), "stuck")
             self.assertTrue(wait_for(lambda: (am.STATE["data"] or {}).get("updated") == "NEW"), "the new loop published")
@@ -196,11 +226,11 @@ class LoopWithFalseCollaborators(unittest.TestCase):
         def maintain(config, data):
             self.release.wait(30)
 
+        self.fake_clock()
         with mock.patch.object(am, "collect", lambda config, publish=None: fake_data("D")), mock.patch.object(am, "maintain", maintain), self.fast_sleep():
             am.start_loop(self.config)
             self.assertTrue(wait_for(lambda: am.WATCH.snapshot()["phase"] == "maintain"))
-            time.sleep(0.5)
-            self.assertEqual(am.watchdog_once(self.config), "stuck")
+            self.assertEqual(self.stuck_after_moving_the_clock(), "stuck")
             self.assertEqual(am.WATCH.snapshot()["last_error_phase"], "maintain")
 
 

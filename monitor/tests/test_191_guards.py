@@ -38,6 +38,18 @@ class WhatTheCiAlreadyTaughtUs(unittest.TestCase):
                     found.append(f"{path.name}:{number}")
         self.assertEqual(found, [], "cap it: min(port + margin, 64000), and check that the stretch has a free port")
 
+    def test_a_test_does_not_wait_with_a_real_sleep_for_the_clock_of_the_watchdog(self):
+        """'' != 'stuck' on a slow runner: the test slept half a second and a stray loop had started the count again. Move the clock of the watch (see LoopWithFalseCollaborators.later) instead."""
+        found = []
+        for path in sorted(HERE.glob("test_*.py")):
+            if path.name == Path(__file__).name:
+                continue
+            lines = path.read_text(encoding="utf-8").splitlines()
+            for number, line in enumerate(lines):
+                if "watchdog_once(" in line and "def " not in line and any(re.search(r"time\.sleep\(\s*0?\.[3-9]|time\.sleep\(\s*[1-9]", lines[k]) for k in range(max(0, number - 3), number)):
+                    found.append(f"{path.name}:{number + 1}")
+        self.assertEqual(found, [], "do not sleep for the watchdog: move the clock of WATCH")
+
     def test_no_setting_ends_in_a_word_reserved_for_secrets(self):
         from github_actions_monitor.app import settings_api
         bad = [k for k in settings_api.FIELDS if RESERVED.search(k.split(".")[-1]) and not k.startswith("sentinel.readiness.health.weights.") and not k.endswith(("token_env", "github_token.enabled", "github_token.store"))]
