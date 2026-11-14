@@ -36,6 +36,7 @@ ENDPOINTS = (
     ("GET", "/api/ai/stream", "server-sent events of the alerts (off by default)"),
     ("GET", "/api/ai/lessons", "the lessons that apply now, the repeated failures with their trend and the library (`?fmt=md`, `?fmt=brief&repo=NAME` for the brief before a push)"),
     ("GET", "/api/ai/failures", "the book of failures, newest first (`?since=SECONDS&repo=NAME&category=NAME&limit=N`)"),
+    ("GET", "/api/skills", "the two skills of the monitor (`?name=internal|external[&file=references/api.md]`), also installable with `monitor_cli.py install-skill`"),
     ("POST", "/api/ai/ack", "acknowledge an alert: only the local state, never GitHub"),
 )
 TOOLS = (

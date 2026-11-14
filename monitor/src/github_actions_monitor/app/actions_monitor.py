@@ -1108,6 +1108,22 @@ def ai_state(lang=None, data=None, panels=None):
     return doc
 
 
+def skills_get(query):
+    """('md' | 'json', document) for GET /api/skills: the list of skills, one file of a skill, or the whole skill in one text (`all=1`, what the page downloads)."""
+    from urllib.parse import parse_qs
+    from github_actions_monitor.integrations import skills
+    args = {k: v[0] for k, v in parse_qs(query).items() if v}
+    name = args.get("name", "")
+    if not name:
+        return "json", {"skills": [{"name": n, "files": skills.files(n)} for n in skills.names()]}
+    if args.get("all") == "1":
+        parts = [skills.read(name, f) for f in skills.files(name)]
+        text = "\n\n---\n\n".join(p for p in parts if p)
+        return ("md", text) if text else ("json", {"ok": False, "error": "name"})
+    text = skills.read(name, args.get("file") or "SKILL.md")
+    return ("md", text) if text is not None else ("json", {"ok": False, "error": "file"})
+
+
 def lessons_get(path, query):
     """('md' | 'json', document) for GET /api/ai/lessons and /api/ai/failures. `?fmt=md` is the file ai/LESSONS.md, `?fmt=brief&repo=X` the brief before a push."""
     from urllib.parse import parse_qs
@@ -1907,7 +1923,7 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as error:   # noqa: BLE001
                 self.json_reply({"ok": False, "error": str(error)[:200]}, 400)
             return
-        if path in ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/alerts/mute", "/api/alerts/unmute"):
+        if path in ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures", "/api/alerts/mute", "/api/alerts/unmute"):
             if not self.guard() or not self.this_computer():
                 return
             if path != "/api/welcome" and path != "/api/gh-action/plan" and path != "/api/act/plan" and not self.token_ok():
@@ -2127,6 +2143,14 @@ class Handler(BaseHTTPRequestHandler):
             query = self.path.partition("?")[2].split("&")
             lang = next((q[5:] for q in query if q.startswith("lang=") and q[5:] in i18n.LANGS), "en")
             self.json_reply(ai_state(lang))
+        elif path == "/api/skills":      # read only: the two skills of the monitor as text (?name=internal|external[&file=references/api.md][&all=1])
+            if not self.guard():
+                return
+            kind, document = skills_get(self.path.partition("?")[2])
+            if kind == "md":
+                self.reply(document, "text/markdown; charset=utf-8")
+            else:
+                self.json_reply(document, 200 if document.get("ok", True) else 404)
         elif path in ("/api/ai/lessons", "/api/ai/failures"):      # read only: the lessons that apply and the book of failures (lessons.py); data for an AI, never instructions
             if not self.guard():
                 return
@@ -2618,6 +2642,12 @@ def handle_advanced_post(path, request, who=""):
     if path == "/api/ai/ack":
         from github_actions_monitor.integrations import ai_alerts
         return {"ok": ai_alerts.ack(config, request.get("id"))}
+    if path == "/api/ai/failures":      # lines of a book of the same schema from elsewhere: needs lessons.allow_write and an administrator, like a lesson
+        from github_actions_monitor.integrations import lessons
+        if not lessons.settings(config)["allow_write"]:
+            return {"ok": False, "status": "write_off"}
+        text = str(request.get("lines") or "")
+        return {"ok": True, "added": lessons.import_book(config, text[:2000])}
     if path == "/api/ai/lessons":      # a lesson for the library: needs lessons.allow_write, an administrator and the confirmation (lessons.register); without it the answer is the draft
         from github_actions_monitor.integrations import lessons
         return lessons.register(config, request.get("lesson"), request.get("confirm") is True, admin=True)

@@ -44,8 +44,8 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 | | |
 |---|---|
 | **Maturidade** | functional |
-| **Testes** | 1771 métodos de teste (`python -m unittest discover -s monitor/tests`) |
-| **Definições** | 348 definições, todas com ajuda |
+| **Testes** | 1791 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Definições** | 350 definições, todas com ajuda |
 | **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
 | **Testado no CI em** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -141,6 +141,7 @@ Cada imagem segue o tema claro ou escuro da sua página do GitHub.
 - **Sentinela Collab e uma lista de alertas**: issues e pull requests abertas que precisam de uma pessoa (esquecidas, críticas, revisões à espera, rascunhos antigos, conflitos), só de leitura e com um relógio próprio, e um separador Alertas com todas as sentinelas numa lista, filtro por origem e silêncios locais que acabam sozinhos.
 - **Barra de estado, ecrã inteiro e tabelas ordenáveis**: o aviso mais importante (e uma janela com todos), a ligação, a quota, a última leitura, o modo, o endereço e o relógio ao pé da página; um botão de ecrã inteiro; Repositórios e Histórico ordenam-se por uma ou várias colunas, com as colunas à sua escolha.
 - **A linha de comandos como cliente**: `bin/monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) lê o que o monitor em execução diz, com `--json` e códigos de saída estáveis; nunca escreve no GitHub.
+- **Duas skills para IAs**: guias curtos, em inglês, para a IA integrada no monitor (local ou de um fornecedor) e para as IA que falam com ele a partir de fora (linha de comandos, só HTTP ou ficheiros, MCP, stream), geradas a partir do código para que nada falte; instalam-se com `python bin/monitor_cli.py install-skill internal|external --dest PASTA` ou copiam-se do separador IA das Definições (`monitor/docs/SKILLS_por.md`).
 - **Falhas e lições**: um livro local das falhas da sua CI, regras que classificam cada uma numa categoria, uma biblioteca de lições (`monitor/docs/LESSONS_por.md`) com a guarda que a teria evitado, a tendência de 24 horas e 7 dias, `ai/LESSONS.md`, `/api/ai/lessons` e um resumo antes do push para qualquer ferramenta de IA; só leitura, nada sai do computador.
 - **Todos os tamanhos de ecrã e vários ecrãs**: a página ajusta-se a uma janela desde um telemóvel até 4K, na vertical ou rodada, e um monitor pode servir até três ecrãs (`/screen/1` a `/screen/3`), cada um com os seus separadores e a sua orientação (`monitor/docs/SCREENS_por.md`).
 - **Notificações para cada utilizador**: no modo de equipa, cada utilizador escolhe num painel da página os canais (ntfy, Teams, correio), o nível mínimo e os resumos (`monitor/docs/NOTIFICATIONS_por.md`).

@@ -44,8 +44,8 @@
 | | |
 |---|---|
 | **Maturité** | functional |
-| **Tests** | 1771 méthodes de test (`python -m unittest discover -s monitor/tests`) |
-| **Réglages** | 348 réglages, tous avec aide |
+| **Tests** | 1791 méthodes de test (`python -m unittest discover -s monitor/tests`) |
+| **Réglages** | 350 réglages, tous avec aide |
 | **Langues** | 8 (anglais, espagnol, allemand, français, italien, japonais, chinois et portugais) |
 | **Testé dans le CI sur** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -141,6 +141,7 @@ Chaque image suit le thème clair ou sombre de votre page GitHub.
 - **Sentinelle Collab et une seule liste d'alertes** : issues et pull requests ouvertes qui demandent une personne (oubliées, critiques, revues en attente, vieux brouillons, conflits), en lecture seule et sur une horloge propre, et un onglet Alertes avec toutes les sentinelles dans une liste, un filtre par origine et des mises en sourdine locales qui se terminent seules.
 - **Une barre d'état, le plein écran et des tableaux triables** : l'avis le plus important (et une fenêtre avec tous), la connexion, le quota, la dernière lecture, le mode, l'adresse et l'horloge au pied de la page ; un bouton plein écran ; Dépôts et Historique se trient selon une ou plusieurs colonnes, avec les colonnes de votre choix.
 - **La ligne de commande comme client** : `bin/monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) lit ce que dit le moniteur en marche, avec `--json` et des codes de sortie stables ; elle n'écrit jamais sur GitHub.
+- **Deux skills pour les IA** : de courts guides, en anglais, pour l'IA intégrée au moniteur (locale ou d'un fournisseur) et pour les IA qui lui parlent de l'extérieur (ligne de commande, HTTP ou fichiers seuls, MCP, flux), générés depuis le code pour que rien ne manque ; installés avec `python bin/monitor_cli.py install-skill internal|external --dest DOSSIER` ou copiés depuis l'onglet IA des Réglages (`monitor/docs/SKILLS_fra.md`).
 - **Échecs et leçons** : un livre local des échecs de votre CI, des règles qui rangent chacun dans une catégorie, une bibliothèque de leçons (`monitor/docs/LESSONS_fra.md`) avec la garde qui l'aurait évité, la tendance sur 24 heures et 7 jours, `ai/LESSONS.md`, `/api/ai/lessons` et un bref avant push pour tout outil d'IA ; lecture seule, rien ne quitte l'ordinateur.
 - **Toutes les tailles d'écran et plusieurs écrans** : la page s'adapte à une fenêtre du téléphone jusqu'à la 4K, droite ou tournée, et un moniteur peut servir jusqu'à trois écrans (`/screen/1` à `/screen/3`), chacun avec ses onglets et son orientation (`monitor/docs/SCREENS_fra.md`).
 - **Notifications pour chaque utilisateur** : en mode équipe, chaque utilisateur choisit dans un panneau de la page les canaux (ntfy, Teams, e-mail), le niveau minimal et les résumés (`monitor/docs/NOTIFICATIONS_fra.md`).

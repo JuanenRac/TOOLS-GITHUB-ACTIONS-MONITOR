@@ -44,8 +44,8 @@
 | | |
 |---|---|
 | **Reifegrad** | functional |
-| **Tests** | 1771 Testmethoden (`python -m unittest discover -s monitor/tests`) |
-| **Einstellungen** | 348 Einstellungen, alle mit Hilfe |
+| **Tests** | 1791 Testmethoden (`python -m unittest discover -s monitor/tests`) |
+| **Einstellungen** | 350 Einstellungen, alle mit Hilfe |
 | **Sprachen** | 8 (Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch) |
 | **Im CI getestet auf** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -141,6 +141,7 @@ Jedes Bild folgt dem hellen oder dunklen Design Ihrer GitHub-Seite.
 - **Collab-Wächter und eine Alarmliste**: offene Issues und Pull Requests, die einen Menschen brauchen (vergessen, kritisch, wartende Reviews, alte Entwürfe, Konflikte), nur lesend und mit eigener Uhr, dazu ein Reiter Alarme mit allen Wächtern in einer Liste, Filter nach Herkunft und lokale Stummschaltungen, die von selbst enden.
 - **Statusleiste, Vollbild und sortierbare Tabellen**: der wichtigste Hinweis (und ein Fenster mit allen), die Verbindung, das Kontingent, die letzte Lesung, der Modus, die Adresse und die Uhr am Fuß der Seite; ein Vollbild-Knopf; Repositories und Verlauf sortieren nach einer oder mehreren Spalten, mit den Spalten deiner Wahl.
 - **Die Befehlszeile als Client**: `bin/monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) liest, was der laufende Monitor sagt, mit `--json` und stabilen Exit-Codes; sie schreibt nie nach GitHub.
+- **Zwei Skills für KIs**: kurze Anleitungen, auf Englisch, für die im Monitor eingebaute KI (lokal oder von einem Anbieter) und für KIs, die von außen mit ihm sprechen (Kommandozeile, reines HTTP oder Dateien, MCP, Stream), aus dem Code erzeugt, damit nichts fehlt; installiert mit `python bin/monitor_cli.py install-skill internal|external --dest ORDNER` oder kopiert aus dem Reiter KI der Einstellungen (`monitor/docs/SKILLS_deu.md`).
 - **Fehler und Lehren**: ein lokales Buch der Fehler Ihrer CI, Regeln, die jeden einer Kategorie zuordnen, eine Bibliothek von Lehren (`monitor/docs/LESSONS_deu.md`) mit der Absicherung, die ihn verhindert hätte, der Trend über 24 Stunden und 7 Tage, `ai/LESSONS.md`, `/api/ai/lessons` und ein Briefing vor dem Push für jedes KI-Werkzeug; nur lesend, nichts verlässt den Rechner.
 - **Jede Bildschirmgröße und mehrere Bildschirme**: Die Seite passt sich einem Fenster vom Smartphone bis 4K an, aufrecht oder gedreht, und ein Monitor kann bis zu drei Bildschirme bedienen (`/screen/1` bis `/screen/3`), jeder mit eigenen Reitern und eigener Ausrichtung (`monitor/docs/SCREENS_deu.md`).
 - **Benachrichtigungen für jeden Benutzer**: Im Teammodus wählt jeder Benutzer in einem Panel der Seite Kanäle (ntfy, Teams, E-Mail), die niedrigste Stufe und Zusammenfassungen (`monitor/docs/NOTIFICATIONS_deu.md`).

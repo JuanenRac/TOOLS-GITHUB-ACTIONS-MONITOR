@@ -1423,6 +1423,15 @@ async function cfgExtras(){
     $("ai-test").addEventListener("click",async()=>{try{const r=await fetch("/api/ai/test",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});const j=await r.json();$("ai-test-out").textContent=j.ok?T("ui.ai_test_ok",{ms:j.ms}):(j.error||"");if(j.daily_limit!=null)$("ai-usage").textContent=T("ui.ai_usage",{n:j.used_today,limit:j.daily_limit})}catch(e){$("ai-test-out").textContent=String(e)}});
     $("ai-unlock").addEventListener("click",async()=>{await fetch("/api/ai/actions/unlock",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});cfgExtras()});
   }
+  if(ai&&!ai.querySelector(".sk-extra")){
+    /* the two skills of the monitor (skills/): copy the core or download the whole skill with its references */
+    const sk=document.createElement("div");sk.className="cfg-group sk-extra";
+    sk.innerHTML=`<h3 id="sk-h"></h3><div class="help" id="sk-help"></div><div class="inl">${["internal","external"].map(k=>`<b data-skn="${k}"></b> <button type="button" data-skc="${k}"></button> <button type="button" data-skd="${k}"></button>`).join(" · ")} <span id="sk-out" class="mut" role="status"></span></div>`;
+    ai.appendChild(sk);$("sk-h").textContent=T("ui.sk_h");$("sk-help").textContent=T("ui.sk_help");
+    sk.querySelectorAll("b[data-skn]").forEach(b=>{b.textContent=T("ui.sk_"+b.dataset.skn)});
+    sk.querySelectorAll("button[data-skc]").forEach(b=>{b.textContent=T("ui.sk_copy");b.addEventListener("click",async()=>{try{const r=await fetch("/api/skills?name="+b.dataset.skc,{cache:"no-store"});const t=await r.text();await navigator.clipboard.writeText(t);$("sk-out").textContent=T("ui.sk_copied")}catch(e){$("sk-out").textContent=String(e.message||e)}})});
+    sk.querySelectorAll("button[data-skd]").forEach(b=>{b.textContent=T("ui.sk_download");b.addEventListener("click",async()=>{try{const r=await fetch("/api/skills?name="+b.dataset.skd+"&all=1",{cache:"no-store"});const t=await r.text();const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t],{type:"text/markdown"}));a.download="github-actions-monitor-"+b.dataset.skd+".md";document.body.appendChild(a);a.click();a.remove()}catch(e){$("sk-out").textContent=String(e.message||e)}})});
+  }
   if($("ai-log")){try{const r=await fetch("/api/ai/actions",{cache:"no-store"});const j=await r.json();$("ai-log").innerHTML=(j.log||[]).length?j.log.map(x=>`<div>${esc(x.at)} · ${esc(x.command)} · ${x.code===0?esc(T("ui.ai_run_ok")):esc(T("ui.ai_run_failed",{code:x.code}))}</div>`).join(""):esc(T("ui.ai_log_none"));
     if(j.ai)$("ai-usage").textContent=T("ui.ai_usage",{n:j.ai.used_today,limit:j.ai.daily_limit})}catch(e){}}
   const nt=document.getElementById("cfp-notify");

@@ -44,8 +44,8 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 1771 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **设置** | 348 个设置,均有帮助 |
+| **测试** | 1791 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **设置** | 350 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
 
@@ -141,6 +141,7 @@
 - **Collab 哨兵与统一警报列表**：需要人来处理的未关闭 Issue 和拉取请求（被遗忘的、严重的、等待评审的、陈旧草稿、冲突），只读且按自己的周期运行；“警报”标签页把所有哨兵汇总成一个列表，可按来源筛选，并提供会自行结束的本地静音。
 - **状态栏、全屏与可排序的表格**：页面底部显示最重要的提示（以及显示全部提示的窗口）、连接、配额、最近一次读取、模式、地址和时钟；全屏按钮；“仓库”和“历史”可按一列或多列排序，并可自选列。
 - **作为客户端的命令行**：`bin/monitor_cli.py`（`status`、`health`、`alerts`、`accounts`、`live`、`doctor`）读取运行中监视器给出的信息，支持 `--json` 和稳定的退出码；从不向 GitHub 写入。
+- **两份面向 AI 的技能包**：简短的英文指南，分别给监视器内置的 AI(本地或来自提供商)和从外部与其交互的 AI(命令行、仅 HTTP 或文件、MCP、事件流)，由代码生成以确保没有遗漏；可用 `python bin/monitor_cli.py install-skill internal|external --dest 文件夹` 安装，或在设置的 AI 标签页中复制（`monitor/docs/SKILLS_zho.md`）。
 - **失败与经验**：本地的 CI 失败记录簿、把每个失败归入某个类别的规则、附带本可阻止该失败的防护的经验库（`monitor/docs/LESSONS_zho.md`）、24 小时和 7 天的趋势、`ai/LESSONS.md`、`/api/ai/lessons`，以及供任何 AI 工具使用的推送前简报；只读，不会有内容离开本机。
 - **各种屏幕尺寸与多块屏幕**：页面可适应从手机到 4K 的窗口，竖放或旋转均可，一台监视器最多可提供三块屏幕（`/screen/1` 到 `/screen/3`），每块都有自己的标签页和方向（`monitor/docs/SCREENS_zho.md`）。
 - **每位用户的通知**：在团队模式下，每位用户在页面的面板中选择渠道（ntfy、Teams、电子邮件）、最低级别和汇总（`monitor/docs/NOTIFICATIONS_zho.md`）。
