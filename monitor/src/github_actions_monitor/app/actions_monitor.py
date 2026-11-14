@@ -78,6 +78,7 @@ DEFAULTS = {
     "show_unclassified": True,     # repositories that no ecosystem claims are shown in an automatic group "Unclassified" instead of disappearing
     "stuck_minutes": 120,
     "watchdog_minutes": 10,      # a refresh cycle that runs longer than this is dumped to the log and restarted in a new thread (0 = off)
+    "watchdog_max_abandoned": 8,      # calls to GitHub that gave up waiting but never returned: with this many still alive no new call is started and the health check says so (0 = no limit)
     "runs_per_repo": 20,
     "cold_runs_per_repo": 5,
     "hot_hours": 3,
@@ -312,7 +313,7 @@ def gh(*args, timeout=40, retries=2, as_user=False, source=None):
         try:
             CALLS["n"] += 1      # the calls of this monitor: the trend of the consumption tells them from the ones other tools make (quotawatch.py)
             extra = via or secretstore.gh_kwargs()
-            result = cycle_watch.bounded(lambda: subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8", timeout=timeout, **extra), timeout + 15)      # a child that keeps its pipes open cannot hold the loop
+            result = cycle_watch.bounded(lambda: subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8", timeout=timeout, **extra), timeout + 15, abandoned_limit(None))      # a child that keeps its pipes open cannot hold the loop
         except subprocess.TimeoutExpired:
             last = "timeout"
             time.sleep(resilience.backoff(attempt))
@@ -354,7 +355,7 @@ def run_gh(args, timeout=40):
     """(returncode, stdout, stderr) of one `gh` call with a fixed argument list (no shell)."""
     try:
         extra = secretstore.gh_kwargs()
-        done = cycle_watch.bounded(lambda: subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout, **extra), timeout + 15)
+        done = cycle_watch.bounded(lambda: subprocess.run(["gh", *args], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout, **extra), timeout + 15, abandoned_limit(None))
         return done.returncode, done.stdout, done.stderr
     except subprocess.TimeoutExpired:
         return 1, "", "timeout"
@@ -1373,6 +1374,14 @@ def watchdog_restart(config, reason):
     return start_loop(config)
 
 
+def abandoned_limit(config):
+    """How many calls that never returned may stay alive before new calls to GitHub are refused (`watchdog_max_abandoned`)."""
+    try:
+        return max(0, int((LIVE_CONFIG or config or DEFAULTS).get("watchdog_max_abandoned", cycle_watch.DEFAULT_MAX_ABANDONED)))
+    except (TypeError, ValueError):
+        return cycle_watch.DEFAULT_MAX_ABANDONED
+
+
 def watchdog_limit(config):
     try:
         return max(0, int((LIVE_CONFIG or config).get("watchdog_minutes", 10))) * 60
@@ -2220,7 +2229,10 @@ def cycle_verdict():
     """'' when the refresh loop is fine, 'stuck' when one cycle has run longer than the limit of the watchdog (`watchdog_minutes`, 30 minutes when that is off) and 'dead' when its thread is gone."""
     thread = LOOP["thread"]
     limit = watchdog_limit(LIVE_CONFIG or DEFAULTS) or 1800
-    return cycle_watch.check(WATCH, limit, thread is not None and thread.is_alive())
+    verdict = cycle_watch.check(WATCH, limit, thread is not None and thread.is_alive())
+    if not verdict and cycle_watch.blocked(abandoned_limit(None)):
+        return "blocked"      # too many calls to GitHub that never returned are still alive: restarting the loop would not free them, so the monitor says it is degraded instead
+    return verdict
 
 
 def health_payload(deep=False):
@@ -2234,7 +2246,7 @@ def health_payload(deep=False):
     if not LITE["on"]:
         verdict = "" if DEMO["on"] else cycle_verdict()
         snap = WATCH.snapshot(limit_seconds=watchdog_limit(LIVE_CONFIG or DEFAULTS))
-        out["cycle"] = {"phase": snap["phase"], "running_seconds": snap["running_seconds"], "seconds_since_ok": snap["seconds_since_ok"], "stuck": verdict == "stuck", "dead": verdict == "dead"}
+        out["cycle"] = {"phase": snap["phase"], "running_seconds": snap["running_seconds"], "seconds_since_ok": snap["seconds_since_ok"], "stuck": verdict == "stuck", "dead": verdict == "dead", "blocked": verdict == "blocked", "abandoned_calls": cycle_watch.abandoned()}
         out["credential"] = credential.snapshot()
         if deep and verdict:
             out["ok"] = False

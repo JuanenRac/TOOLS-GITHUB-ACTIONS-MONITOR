@@ -9,6 +9,7 @@
 """
 import ipaddress
 import re
+import urllib.error
 import urllib.parse
 import urllib.request
 
@@ -70,10 +71,35 @@ def parse_node_metrics(text):
     return out
 
 
+MAX_REDIRECTS = 3
+MAX_BYTES = 500_000
+
+
+class PrivateRedirects(urllib.request.HTTPRedirectHandler):
+    """An exporter may answer with a redirect, but only to an address that passes the same test as the one in the configuration (this computer or a private address, no credentials) and keeps
+    the scheme; at most MAX_REDIRECTS hops. Anything else ends the read with no figures."""
+    max_redirections = MAX_REDIRECTS
+    max_repeats = 2
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        target = urllib.parse.urljoin(req.full_url, newurl)
+        if not private_address(target) or urllib.parse.urlsplit(target).scheme != urllib.parse.urlsplit(req.full_url).scheme:
+            raise urllib.error.URLError("redirect to a place that is not allowed")
+        return super().redirect_request(req, fp, code, msg, headers, target)
+
+
+def open_exporter(url, timeout=5):
+    """The text of an exporter (at most MAX_BYTES), with no proxy and with every redirect judged again."""
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), PrivateRedirects())
+    with opener.open(url, timeout=timeout) as answer:
+        return answer.read(MAX_BYTES).decode("utf-8", "replace")
+
+
 def read_metrics(url, opener=None, timeout=5):
     try:
-        opener = opener or (lambda u: urllib.request.urlopen(u, timeout=timeout).read(500_000).decode("utf-8", "replace"))
-        return parse_node_metrics(opener(url))
+        if opener is None and not private_address(url):
+            return {}
+        return parse_node_metrics((opener or (lambda u: open_exporter(u, timeout)))(url))
     except Exception:   # noqa: BLE001 - an exporter that does not answer just has no figures
         return {}
 

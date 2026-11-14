@@ -44,8 +44,8 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **テスト** | テストメソッド 1640 件(`python -m unittest discover -s monitor/tests`) |
-| **設定** | 設定 313 件、すべてヘルプ付き |
+| **テスト** | テストメソッド 1657 件(`python -m unittest discover -s monitor/tests`) |
+| **設定** | 設定 314 件、すべてヘルプ付き |
 | **言語** | 8(英語、スペイン語、ドイツ語、フランス語、イタリア語、日本語、中国語、ポルトガル語) |
 | **CI で検証したシステム** | ubuntu, windows、Python 3.11, 3.13 |
 
