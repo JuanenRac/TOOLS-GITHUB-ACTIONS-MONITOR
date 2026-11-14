@@ -13,6 +13,8 @@ when this file and `tool_version.py` disagree.
 
 ### Changed
 
+- **Each user sets their notifications in the page**: in the team mode the menu of the signed-in user has the entry Notifications, a panel with the same preferences as the API (channels with their destinations, sentinels, lowest level, events of the system for an administrator, hourly or daily digest), a test message and a button to mark the pending alerts as seen. A secret that is already stored is shown as stored and is never put back in the page; an empty box keeps it. The guide of the notifications has the section in the eight languages, and a browser test checks that only what was typed is sent.
+
 - **Screens: the page in every size and one monitor for several screens**: the layout follows the window from a phone to 4K - a window taller than wide (a turned monitor, a tablet) stacks the panels, and windows of 2400 px and of 3200 px or more get a larger type instead of a stretched layout. `ui.orientation` forces portrait or landscape (the address can do it for one window with `?orient=`), `/screen/1`, `/screen/2` and `/screen/3` show only the tabs set in `ui.screen1_tabs` and its siblings (each with its own orientation) and `ui.rotate_seconds` turns through them by itself. Every screen reads the same state, so nothing is polled twice. A browser test goes through every tab in nine sizes (1080p, 21:9, 32:9, 4K, turned, tablet and phone) and the guide `docs/SCREENS.md` has the table and a recipe for two or three screens.
 
 - **A package for the auditor**: `docs/AUDIT_PACKAGE.md` (in the eight languages) has the security checklist of the team mode, a table of what earlier reviews found with the fix and the test that keeps it fixed, how to run the tests and the limits that are known.
