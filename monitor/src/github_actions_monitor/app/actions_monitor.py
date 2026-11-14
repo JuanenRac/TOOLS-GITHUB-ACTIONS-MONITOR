@@ -2094,7 +2094,7 @@ class Handler(BaseHTTPRequestHandler):
                 return
             with LOCK:      # only the references are taken under the lock: writing to a slow or dead connection with the lock held froze every other page and the cycle itself
                 picture = {"data": STATE["data"], "error": STATE["error"], "hint": STATE["hint"]}
-            picture["loop"] = WATCH.snapshot(limit_seconds=watchdog_limit(LIVE_CONFIG or DEFAULTS))
+            picture = {**picture, "loop": WATCH.snapshot(limit_seconds=watchdog_limit(LIVE_CONFIG or DEFAULTS))}
             self.reply(json.dumps(picture), "application/json; charset=utf-8")
         elif path in ("/", "/index.html"):
             if not self.guard():      # the page checks the Host like the API does (a rebinding page gets a 403, not the monitor)
