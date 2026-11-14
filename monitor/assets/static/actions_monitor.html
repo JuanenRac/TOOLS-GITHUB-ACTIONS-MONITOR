@@ -106,10 +106,10 @@ section>.body{flex:1;min-height:0;overflow:auto}
 .row{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center}
 a{color:var(--run);text-decoration:none}a:hover{text-decoration:underline}
 .badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:600;color:#fff}
-.b-success{background:var(--ok);color:var(--on-ok)}.b-failure,.b-timed_out,.b-startup_failure{background:var(--bad);color:var(--on-bad)}.b-cancelled,.b-skipped{background:var(--grey)}.b-run{background:var(--run);color:var(--on-run)}.b-queued{background:var(--warn);color:var(--on-warn)}
+.b-success{background:var(--ok);color:var(--on-ok)}.b-failure,.b-timed_out,.b-startup_failure{background:var(--bad);color:var(--on-bad)}.b-cancelled{background:var(--grey)}.b-skipped{background:transparent;color:var(--mut);border:1px dashed var(--grey)}.b-run{background:var(--run);color:var(--on-run)}.b-queued{background:var(--warn);color:var(--on-warn)}
 .job{display:grid;grid-template-columns:minmax(120px,1.2fr) 3fr auto;gap:10px;align-items:center;margin:5px 0;font-size:13px}
 .bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin-bottom:2px}.bar i{display:block;height:100%;background:var(--run);transition:width .4s}
-.bar i.done{background:var(--ok)}.bar i.fail{background:var(--bad)}
+.bar i.done{background:var(--ok)}.bar i.fail{background:var(--bad)}.bar i.skip{background:transparent;border-right:2px dashed var(--grey)}
 table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
 th{color:var(--mut);font-weight:600;position:sticky;top:0;background:var(--panel)}
 svg{display:block;max-width:none}svg text{fill:var(--mut);font-size:12px}
@@ -597,8 +597,9 @@ const dtime=t=>new Date(t).toLocaleString(LOC(),{year:"2-digit",month:"2-digit",
 const ago=t=>t?fmt((Date.now()-new Date(t).getTime())/1000):"";
 const COLORS={success:"var(--ok)",failure:"var(--bad)",timed_out:"var(--bad)",startup_failure:"var(--bad)",cancelled:"var(--grey)",skipped:"var(--grey)"};
 const BAD=["failure","timed_out","startup_failure"];
-const label=r=>r.status!=="completed"?(r.status==="in_progress"?T("ui.st_running"):T("ui.st_queued")):(r.conclusion||"?");
-const badge=r=>{const c=r.status!=="completed"?(r.status==="in_progress"?"run":"queued"):(r.conclusion||"skipped");return `<span class="badge b-${c}">${esc(label(r))}</span>`};
+const concl_=c=>c==="skipped"?T("ui.concl_skipped"):(c==="cancelled"?T("ui.concl_cancelled"):c);      // skipped is not red: its own words, its own dashed look
+const label=r=>r.status!=="completed"?(r.status==="in_progress"?T("ui.st_running"):T("ui.st_queued")):(concl_(r.conclusion)||"?");
+const badge=r=>{const c=r.status!=="completed"?(r.status==="in_progress"?"run":"queued"):(r.conclusion||"skipped");return `<span class="badge b-${c}"${c==="skipped"?` title="${esc(T("ui.skipped_hint"))}"`:""}>${esc(label(r))}</span>`};
 const yn=b=>b?T("ui.yes"):T("ui.no");
 const qlang=()=>"lang="+encodeURIComponent(LANG);
 
@@ -871,8 +872,8 @@ function nowGroups(act){      // one entry per repository, in the order of the r
 }
 function nowRun(r,wrap){      // the line of one run with its jobs; `wrap` = false inside the unfolded list of a repository
   const jobs=(r.jobs||[]).map(j=>{const pct=j.steps_total?Math.round(100*j.steps_done/j.steps_total):(j.status==="completed"?100:0);
-    const cls=j.conclusion==="failure"?"fail":(j.status==="completed"?"done":"");
-    return `<div class="job"><span>${esc(j.name)}</span><div><div class="bar"><i class="${cls}" style="width:${pct}%"></i></div><span class="mut">${j.status==="in_progress"?esc(j.step||T("ui.preparing")):esc(j.conclusion||j.status)}</span></div><span class="mut">${j.steps_done}/${j.steps_total} · ${fmt(j.seconds)}</span></div>`}).join("");
+    const cls=j.conclusion==="failure"?"fail":(j.conclusion==="skipped"?"skip":(j.status==="completed"?"done":""));
+    return `<div class="job"><span>${esc(j.name)}</span><div><div class="bar"><i class="${cls}" style="width:${pct}%"></i></div><span class="mut">${j.status==="in_progress"?esc(j.step||T("ui.preparing")):esc(concl_(j.conclusion)||j.status)}</span></div><span class="mut">${j.steps_done}/${j.steps_total} · ${fmt(j.seconds)}</span></div>`}).join("");
   const row=`<div class="row">${badge(r)} ${wrap?`<b class="rl" data-repo-open="${esc(r.repo)}">${esc(r.repo)}</b> `:""}<span>${esc(r.name)}</span> <span class="mut">${esc(r.event)} · ${esc(r.branch)} · ${esc(r.sha)} · ${esc(r.actor)}</span> <span>${esc(T("ui.took",{dur:fmt(r.seconds)}))}</span>${r.stuck?`<span class="badge b-failure">${esc(T("ui.badge_stuck"))}</span>`:""} <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(T("ui.open_gh"))}</a></div>${jobs}`;
   return wrap?`<div class="card ${r.stuck?"stuck":""} ${r.status!=="in_progress"?"queued":""}" data-now-repo="${esc(r.repo)}" data-now-n="1">${row}</div>`:`<div class="subrun ${r.stuck?"stuck":""} ${r.status!=="in_progress"?"queued":""}">${row}</div>`
 }
