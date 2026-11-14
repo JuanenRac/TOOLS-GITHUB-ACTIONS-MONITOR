@@ -1702,7 +1702,7 @@ function authRender(){const box=$("auth-box");if(!box)return;const m=AUTHME,btn=
 function authClose(){const menu=$("auth-menu"),btn=$("auth-btn");if(menu){menu.hidden=true}if(btn)btn.setAttribute("aria-expanded","false")}
 function authMenu(){const menu=$("auth-menu"),btn=$("auth-btn");menu.replaceChildren();
   const item=(key,fn)=>{const b=ae("button",{type:"button",role:"menuitem"},T(key));b.onclick=()=>{authClose();fn()};menu.append(b)};
-  item("ui.auth_change_pw",authPassword);if(AUTHME&&AUTHME.role==="admin")item("ui.auth_users",authUsers);
+  item("ui.auth_change_pw",authPassword);item("ui.auth_notify",authNotify);if(AUTHME&&AUTHME.role==="admin")item("ui.auth_users",authUsers);
   item("ui.auth_logout",async()=>{await authPost("/api/auth/logout");location.href="/login"});
   menu.hidden=false;btn.setAttribute("aria-expanded","true");const first=menu.querySelector("button");if(first)first.focus()}
 document.addEventListener("click",e=>{const box=$("auth-box");if(box&&!box.contains(e.target))authClose()});
@@ -1713,6 +1713,33 @@ function authPassword(){const p=authPanel(T("ui.auth_change_pw")),msg=ae("div",{
   const go=ae("button",{type:"button",class:"authact"},T("ui.auth_pw_save"));
   go.onclick=async()=>{const r=await authPost("/api/auth/password",{current:cur.value,new:nw.value});msg.className="authmsg"+(r.ok?"":" bad");msg.textContent=r.ok?T("ui.auth_pw_done"):T("ui.auth_pw_fail")+(r.j&&r.j.code?" ("+r.j.code+")":"");if(r.ok){cur.value=nw.value=""}};
   p.append(cur,document.createTextNode(" "),nw,document.createTextNode(" "),go,msg)}
+async function authNotify(){const p=authPanel(T("ui.auth_notify")),msg=ae("div",{class:"authmsg",role:"status"});
+  const say=(ok,t)=>{msg.className="authmsg"+(ok?"":" bad");msg.textContent=t};
+  let j=null;try{const r=await fetch("/api/auth/me/notify",{cache:"no-store"});j=await r.json()}catch(e){}
+  if(!j||!j.prefs){say(false,T("ui.nt_failed"));p.append(msg);return}
+  const pr=j.prefs,ntBox=(label,on)=>{const i=ae("input",{type:"checkbox"});i.checked=!!on;const l=ae("label",{class:"inl"});l.append(i,document.createTextNode(" "+label));return [l,i]};
+  const ntText=(label,val,kind,kept)=>{const i=ae("input",{type:kind||"text",maxlength:"300","aria-label":label,placeholder:kept?T("ui.nt_secret_kept"):label,autocomplete:"off"});if(val)i.value=val;const l=ae("label",{class:"inl"});l.append(document.createTextNode(label+" "),i);return [l,i]};
+  const ntSel=(label,opts,val)=>{const s2=ae("select");opts.forEach(([v,t])=>{const o=ae("option",{value:v},t);if(v===val)o.selected=true;s2.append(o)});const l=ae("label",{class:"inl"});l.append(document.createTextNode(label+" "),s2);return [l,s2]};
+  const dst=pr.destinations||{},sec=pr.secrets||{};
+  if(!j.enabled)p.append(ae("p",{class:"mut"},T("ui.nt_off_server")));
+  p.append(ae("p",{class:"mut"},T("ui.nt_unseen",{n:j.unseen||0})));
+  const [lE,iE]=ntBox(T("ui.nt_enabled"),pr.enabled);p.append(lE);
+  p.append(ae("h3",{},T("ui.nt_channels")));
+  const ch={};[["ntfy"],["teams"],["email"]].forEach(([n])=>{const [l,i]=ntBox(n,(pr.channels||[]).includes(n));ch[n]=i;p.append(l)});
+  const [lT,iT]=ntText(T("ui.nt_ntfy_topic"),(dst.ntfy||{}).topic);const [lK,iK]=ntText(T("ui.nt_ntfy_token"),"","password",sec.ntfy);const [lW,iW]=ntText(T("ui.nt_teams_webhook"),"","password",sec.teams);const [lA,iA]=ntText(T("ui.nt_email_address"),(dst.email||{}).address);
+  [lT,lK,lW,lA].forEach(l=>{p.append(l)});
+  p.append(ae("h3",{},T("ui.nt_sentinels")));
+  const [lC,iC]=ntBox(T("ui.nt_sent_ci"),(pr.sentinels||[]).includes("ci")),[lO,iO]=ntBox(T("ui.nt_sent_collab"),(pr.sentinels||[]).includes("collab"));p.append(lC,lO);
+  const [lM,iM]=ntSel(T("ui.nt_min_level"),[["info",T("ui.nt_level_info")],["warn",T("ui.nt_level_warn")],["bad",T("ui.nt_level_bad")]],pr.min_level);p.append(lM);
+  let iS=null;if((pr.families||[]).includes("system")){const [lS,i2]=ntBox(T("ui.nt_system"),pr.system);iS=i2;p.append(lS)}
+  const [lD,iD]=ntSel(T("ui.nt_digest"),[["off",T("ui.nt_digest_off")],["hourly",T("ui.nt_digest_hourly")],["daily",T("ui.nt_digest_daily")]],pr.digest);p.append(lD);
+  const save=ae("button",{type:"button",class:"authact"},T("ui.nt_save")),test=ae("button",{type:"button",class:"authact"},T("ui.nt_test")),seen=ae("button",{type:"button",class:"authact"},T("ui.nt_seen"));
+  save.onclick=async()=>{const body={enabled:iE.checked,channels:Object.keys(ch).filter(n=>ch[n].checked),sentinels:[iC.checked?"ci":null,iO.checked?"collab":null].filter(Boolean),min_level:iM.value,digest:iD.value,destinations:{ntfy:{topic:iT.value.trim()},email:{address:iA.value.trim()}},secrets:{}};
+    if(iS)body.system=iS.checked;if(iK.value)body.secrets.ntfy=iK.value;if(iW.value)body.secrets.teams=iW.value;
+    const r=await authPost("/api/auth/me/notify",body);say(r.ok,r.ok?T("ui.nt_saved"):T("ui.nt_failed")+(r.j&&r.j.code?" ("+r.j.code+")":""));if(r.ok){iK.value=iW.value=""}};
+  test.onclick=async()=>{const r=await authPost("/api/auth/me/notify/test",{});say(r.ok&&r.j&&r.j.ok,r.ok&&r.j&&r.j.ok?T("ui.nt_test_ok"):T("ui.nt_test_fail")+(r.j&&r.j.code?" ("+r.j.code+")":""))};
+  seen.onclick=async()=>{const r=await authPost("/api/auth/me/notify/seen",{});say(r.ok,r.ok?T("ui.nt_seen_done"):T("ui.nt_failed"))};
+  p.append(save,document.createTextNode(" "),test,document.createTextNode(" "),seen,msg)}
 async function authUsers(){const p=authPanel(T("ui.auth_users")),msg=ae("div",{class:"authmsg",role:"status"}),tbl=ae("table"),log=ae("pre");
   const say=(ok,t)=>{msg.className="authmsg"+(ok?"":" bad");msg.textContent=t};
   const roles=["viewer","maintainer","admin"],roleSel=v=>{const s=ae("select");roles.forEach(r=>{const o=ae("option",{value:r},T("ui.auth_role_"+r));if(r===v)o.selected=true;s.append(o)});return s};

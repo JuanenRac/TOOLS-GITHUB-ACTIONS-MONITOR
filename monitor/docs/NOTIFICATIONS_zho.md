@@ -42,3 +42,7 @@
 - `email`：用户的地址，经本机无需登录的中继发送（`notify.channels.email`）。
 
 Teams Webhook 地址和 ntfy 令牌由系统加密保存（DPAPI、钥匙串、Secret Service 或私有文件），绝不会出现在响应、日志或配置中；删除用户时一并删除。`MONITOR_SECRET_BACKEND=file` 强制使用私有文件。在管理员开启之前，每个渠道都是关闭的。摘要汇总用户尚未查看的告警（最多 `notify.digest.max_items` 条）；`POST /api/auth/me/notify/seen` 将其标记为已读，不再发送；`POST /api/auth/me/notify/test` 向该用户的渠道发送测试消息。管理员可在 `GET /api/auth/notify` 读取所有人的偏好（不含任何密钥）。
+
+### 每位用户的面板
+
+在团队模式下，已登录用户的菜单（顶部的名字）里有**通知**一项。面板显示并保存与 `GET/POST /api/auth/me/notify` 相同的偏好：是否接收通知、渠道（带主题和可选令牌的 ntfy、带频道网址的 Teams、带地址的电子邮件）、哨兵（CI、协作）、最低级别、系统事件（仅管理员）以及每条告警是立即发送还是按小时或按天汇总。已保存的密钥只显示为已保存，绝不会回到页面中；只有输入新的才会发送，留空则保留。**发送测试**会向您的渠道发一条消息，**我已查看告警**会把待处理的标记为已查看。如果管理员没有开启 `notify.users.enabled`，面板会说明：您可以保存选择，但暂不会发送任何内容。
