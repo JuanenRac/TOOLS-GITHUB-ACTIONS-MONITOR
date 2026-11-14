@@ -52,3 +52,7 @@ Un giro legge al massimo `max_repos_per_tick` repository, con due richieste cond
 ## Limiti
 
 Di ogni repository si leggono solo le prime 100 issue aperte e le prime 100 pull request aperte, le aggiornate più di recente per prime. Collab non propone né esegue nulla; le azioni su issue e pull request spettano a un'edizione successiva.
+
+## Lettura con l'API di ricerca
+
+Con `sentinels.collab.search_api` attivo (spento per impostazione predefinita) la sentinella Collab chiede le issue e le pull request aperte di tutto l'account in poche chiamate dell'API di ricerca invece di due liste per repository. L'API di ricerca ha una quota propria (30 chiamate al minuto) che la quota REST non paga. Dopo si leggono solo i conflitti delle pull request cambiate. Gli avvisi sono gli stessi nei due modi, un test li confronta; se l'API di ricerca fallisce, il giro legge ogni repository come prima. Una pull request trovata così non dice se è stata chiesta una revisione, quindi la regola delle revisioni in attesa conta solo ciò che danno le liste.

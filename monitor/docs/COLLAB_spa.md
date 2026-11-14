@@ -52,3 +52,7 @@ Una ronda lee como mucho `max_repos_per_tick` repositorios, con dos peticiones c
 ## Límites
 
 Solo se leen las primeras 100 incidencias abiertas y 100 pull requests abiertos de cada repositorio, los actualizados más recientemente primero. Collab no propone ni ejecuta nada; las acciones sobre incidencias y pull requests son de una edición posterior.
+
+## Lectura con la API de búsqueda
+
+Con `sentinels.collab.search_api` activado (desactivado por defecto) el centinela de colaboración pide las incidencias y pull requests abiertas de toda la cuenta en pocas llamadas de la API de búsqueda en lugar de dos listas por repositorio. La API de búsqueda tiene una cuota propia (30 llamadas por minuto) que no paga la cuota REST. Después solo se leen los conflictos de los pull requests que cambiaron. Las alertas son las mismas de las dos formas, una prueba las compara; si la API de búsqueda falla, la ronda lee cada repositorio como antes. Un pull request hallado así no dice si se pidió una revisión, así que la regla de revisiones pendientes cuenta solo lo que dan las listas.

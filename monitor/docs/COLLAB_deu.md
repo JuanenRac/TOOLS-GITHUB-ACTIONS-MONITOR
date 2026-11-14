@@ -52,3 +52,7 @@ Eine Runde liest höchstens `max_repos_per_tick` Repositories, je zwei bedingte 
 ## Grenzen
 
 Pro Repository werden nur die ersten 100 offenen Issues und 100 offenen Pull Requests gelesen, die zuletzt aktualisierten zuerst. Collab schlägt nichts vor und führt nichts aus; Aktionen auf Issues und Pull Requests gehören zu einer späteren Ausgabe.
+
+## Lesen mit der Such-API
+
+Ist `sentinels.collab.search_api` an (standardmäßig aus), fragt der Collab-Wächter die offenen Issues und Pull Requests des ganzen Kontos in wenigen Aufrufen der Such-API ab statt zweier Listen je Repository. Die Such-API hat ein eigenes Kontingent (30 Aufrufe pro Minute), das das REST-Kontingent nicht belastet. Danach werden nur die Konflikte der geänderten Pull Requests gelesen. Die Alarme sind auf beide Arten gleich, ein Test vergleicht sie; fällt die Such-API aus, liest die Runde jedes Repository wie zuvor. Ein so gefundener Pull Request sagt nicht, ob ein Review angefordert wurde, die Regel für wartende Reviews zählt also nur, was die Listen liefern.

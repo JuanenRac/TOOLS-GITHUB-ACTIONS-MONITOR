@@ -22,6 +22,7 @@ alert a little sooner, and it pauses while the allowance is below `min_rate_rema
 """
 import json
 import os
+import re
 import threading
 import time
 from datetime import datetime, timezone
@@ -38,11 +39,12 @@ from github_actions_monitor.storage import state_io
 from github_actions_monitor.util import paths
 STATE_FILE = paths.place("collab_state.json")
 PER_PAGE = 100
+SEARCH_PAGES = 5                     # pages of 100 of the Search API for each kind (it never gives more than 1000 results)
 DETAILS_PER_TICK = 6                 # pull request details read in one round (the only calls beyond the two lists of a repository)
 DETAIL_EVERY = 6 * 3600              # a pull request is looked at again for conflicts at most this often
 OUTSIDE = ("NONE", "FIRST_TIMER", "FIRST_TIME_CONTRIBUTOR", "CONTRIBUTOR", "MANNEQUIN")      # author_association of someone who is not part of the team
 DEFAULTS = {
-    "enabled": False, "refresh_seconds": 600, "max_repos_per_tick": 10, "min_rate_remaining": 1000, "repos": "all",
+    "enabled": False, "refresh_seconds": 600, "max_repos_per_tick": 10, "min_rate_remaining": 1000, "repos": "all", "search_api": False,
     "rules": {"issue_stale_days": 14, "issue_critical_labels": ["security", "critical"], "pr_review_pending_days": 3, "pr_draft_max_days": 30, "pr_conflict_days": 7, "watch_external_comments": False, "ignore_labels": ["monitor:ignore"]},
 }
 BOUNDS = {"refresh_seconds": (60, 86400), "max_repos_per_tick": (1, 100), "min_rate_remaining": (100, 5000), "issue_stale_days": (1, 365), "pr_review_pending_days": (1, 90),
@@ -66,6 +68,8 @@ def settings(config):
 
     if isinstance(block.get("enabled"), bool):
         merged["enabled"] = block["enabled"]
+    if isinstance(block.get("search_api"), bool):
+        merged["search_api"] = block["search_api"]
     for key in ("refresh_seconds", "max_repos_per_tick", "min_rate_remaining"):
         if number(block.get(key), key) is not None:
             merged[key] = block[key]
@@ -222,6 +226,29 @@ class SentinelCollab(sentinel_base.BaseSentinel):
         data = self.ctx["gh"]("api", endpoint, retries=1)
         return data if isinstance(data, dict) else {}
 
+    def search_lists(self, owner):
+        """With `search_api` on: ALL the open issues and pull requests of the account in a few calls of the Search API (its own allowance, 30 a minute) instead of two lists for each repository.
+        {repo: {"issues": [raw], "prs": [raw]}}, or None when the account name is not plain or any page fails (the round then reads each repository as before)."""
+        if not re.fullmatch(r"[A-Za-z0-9-]{1,39}", str(owner or "")):
+            return None
+        lists = {}
+        try:
+            for kind, key in (("issue", "issues"), ("pr", "prs")):
+                for page in range(1, SEARCH_PAGES + 1):
+                    data = self.read_one(f"search/issues?q=user:{owner}+is:open+is:{kind}&sort=updated&order=desc&per_page={PER_PAGE}&page={page}")
+                    items = [i for i in (data.get("items") if isinstance(data.get("items"), list) else []) if isinstance(i, dict)]
+                    for item in items:
+                        repo = str(item.get("repository_url") or "").rsplit("/", 1)[-1]
+                        if repo:
+                            lists.setdefault(repo, {"issues": [], "prs": []})[key].append(item)
+                    if len(items) < PER_PAGE:
+                        break
+        except Exception as error:   # noqa: BLE001 - a way to read less never stops the round: the usual reading takes over
+            self.errors["search"] = {"message": str(error)[:80], "at": stamp(time.time())}
+            return None
+        self.errors.pop("search", None)
+        return lists
+
     def scope(self):
         repos = list(self.ctx["repos_fn"]())
         wanted = self.cfg["repos"]
@@ -246,9 +273,10 @@ class SentinelCollab(sentinel_base.BaseSentinel):
             return False
         repos = self.scope()
         budget = [DETAILS_PER_TICK]
-        for repo in self._order(repos)[:self.cfg["max_repos_per_tick"]]:
+        found = self.search_lists(toolconfig.github_owner()) if self.cfg["search_api"] else None
+        for repo in self._order(repos)[:(len(repos) if found is not None else self.cfg["max_repos_per_tick"])]:
             try:
-                self.scan(repo, now, budget)
+                self.scan(repo, now, budget, found)
                 self.errors.pop(repo, None)
             except Exception as error:     # one repository that fails never stops the round
                 self.errors[repo] = {"message": str(error)[:80], "at": stamp(now)}
@@ -264,12 +292,19 @@ class SentinelCollab(sentinel_base.BaseSentinel):
         self.persist()
         return True
 
-    def scan(self, repo, now, budget):
+    def scan(self, repo, now, budget, found=None):
         owner = toolconfig.github_owner()
         with self.lock:
             mine = dict(self.state["per_repo"].get(repo) or {})
         etag = dict(mine.get("etag") or {})
         issues, prs = mine.get("issues") or [], mine.get("prs") or []
+        if found is not None:      # the lists came from the Search API: the same slim items, nothing more is asked for them
+            raw = found.get(repo) or {"issues": [], "prs": []}
+            before = {p["number"]: p for p in prs}
+            issues, prs = [slim_issue(i) for i in raw["issues"]], [slim_pull(p, before.get(p.get("number"))) for p in raw["prs"]]
+            self.details(owner, repo, prs, budget, now)
+            self._commit(repo, issues, prs, etag, now)
+            return
         status, data, tag = self.fetch_list(f"repos/{owner}/{repo}/issues?state=open&sort=updated&direction=desc&per_page={PER_PAGE}", etag.get("issues", "") if mine.get("issues") is not None else "")
         if status == 200:
             issues, etag["issues"] = [slim_issue(i) for i in data if isinstance(i, dict) and "pull_request" not in i], tag      # the issues list also holds the pull requests: they are the other list
@@ -277,6 +312,11 @@ class SentinelCollab(sentinel_base.BaseSentinel):
         if status == 200:
             before = {p["number"]: p for p in prs}
             prs, etag["pulls"] = [slim_pull(p, before.get(p.get("number"))) for p in data if isinstance(p, dict)], tag
+        self.details(owner, repo, prs, budget, now)
+        self._commit(repo, issues, prs, etag, now)
+
+    def details(self, owner, repo, prs, budget, now):
+        """The conflicts of the pull requests that changed (the only calls beyond the lists), at most `budget` in one round."""
         for pull in prs:
             if pull["draft"] or pull["bot"]:
                 continue
@@ -286,7 +326,6 @@ class SentinelCollab(sentinel_base.BaseSentinel):
                 dirty = self.read_one(f"repos/{owner}/{repo}/pulls/{pull['number']}").get("mergeable_state") == "dirty"
                 pull["dirty_since"] = (pull.get("dirty_since") or now) if dirty else None
                 pull["checked"], pull["seen"] = now, pull["updated"]
-        self._commit(repo, issues, prs, etag, now)
 
     def _commit(self, repo, issues, prs, etag, now):
         """Applies the rules to what is known of one repository, replaces its alerts, and writes the events of what changed (nothing the first time the repository is looked at)."""
