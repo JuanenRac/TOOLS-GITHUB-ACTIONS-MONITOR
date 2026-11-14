@@ -102,6 +102,7 @@ section{background:var(--panel);border:1px solid var(--line);border-radius:10px;
 section>.body{flex:1;min-height:0;overflow:auto}
 .card{border:1px solid var(--line);border-left:4px solid var(--run);border-radius:8px;padding:8px 12px;margin-bottom:8px}
 .card.stuck{border-left-color:var(--bad)}.card.queued{border-left-color:var(--warn)}
+.card.group summary{cursor:pointer}.card.group .subrun{margin:6px 0 0 14px;padding:6px 0 0 10px;border-top:1px solid var(--line);border-left:3px solid var(--run)}.card.group .subrun.stuck{border-left-color:var(--bad)}.card.group .subrun.queued{border-left-color:var(--warn)}
 .row{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center}
 a{color:var(--run);text-decoration:none}a:hover{text-decoration:underline}
 .badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:600;color:#fff}
@@ -853,25 +854,43 @@ const GH="https://"+(I18N.host||"github.com")+"/";
 function alerts(d){
   const a=[];
   d.issues.filter(i=>repoVisible(i.repo,d)).forEach(i=>a.push(`<div class="alert"><b>${esc(i.labels.join(", "))}</b> · ${esc(i.repo)} #${i.number}: ${esc(i.title)} — <a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(T("ui.a_open"))}</a> <span class="mut">(${hora(i.created)})</span></div>`));
-  d.active.filter(r=>r.stuck&&repoVisible(r.repo,d)).forEach(r=>a.push(`<div class="alert"><b>${esc(T("ui.a_stuck"))}</b> · ${esc(T("ui.a_stuck_line",{repo:r.repo,name:r.name,dur:fmt(r.seconds),limit:d.stuck_minutes}))} — <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(T("ui.link_run"))}</a></div>`));
+  nowGroups(d.active.filter(r=>r.stuck&&repoVisible(r.repo,d))).forEach(g=>{const r=g.reduce((m,x)=>x.seconds>m.seconds?x:m,g[0]);      // a repository with several stuck runs is ONE alert
+    a.push(`<div class="alert" data-alert-repo="${esc(r.repo)}"><b>${esc(T("ui.a_stuck"))}</b> · ${esc(g.length>1?T("ui.a_stuck_many",{repo:r.repo,n:g.length,dur:fmt(r.seconds),limit:d.stuck_minutes}):T("ui.a_stuck_line",{repo:r.repo,name:r.name,dur:fmt(r.seconds),limit:d.stuck_minutes}))} — <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(T("ui.link_run"))}</a></div>`)});
   const withIssue=new Set(d.issues.map(i=>i.repo));
-  d.failing.filter(r=>repoVisible(r.repo,d)&&!withIssue.has(r.repo)).slice(0,30).forEach(r=>a.push(`<div class="alert warn"><b>${esc(T("ui.a_unresolved"))}</b> · ${esc(T("ui.a_unresolved_line",{repo:r.repo,name:r.name,conclusion:r.conclusion,since:hora(r.started)}))} — <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(T("ui.link_run"))}</a> <span class="mut">${esc(T("ui.a_no_issue"))}</span></div>`));
+  nowGroups(d.failing.filter(r=>repoVisible(r.repo,d)&&!withIssue.has(r.repo))).slice(0,30).forEach(g=>{const r=g[0];      // one line per repository, however many workflows of it fail
+    const text=g.length>1?T("ui.a_unresolved_many",{repo:r.repo,n:g.length,names:g.map(x=>x.name).join(", "),since:hora(g.reduce((m,x)=>String(x.started)<String(m)?x.started:m,g[0].started))}):T("ui.a_unresolved_line",{repo:r.repo,name:r.name,conclusion:r.conclusion,since:hora(r.started)});
+    a.push(`<div class="alert warn" data-alert-repo="${esc(r.repo)}"><b>${esc(T("ui.a_unresolved"))}</b> · ${esc(text)} — <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(T("ui.link_run"))}</a> <span class="mut">${esc(T("ui.a_no_issue"))}</span></div>`)});
   {const qb=d.quota_block;if(qb&&qb.blocked)a.push(`<div class="alert warn" id="quota-alert"><b>${esc(T("ui.a_quota_out",{time:qb.until?clock(qb.until,{hour:"2-digit",minute:"2-digit"}):"?",n:qb.unread||0}))}</b></div>`)}
   {const errs=Object.entries(d.errors||{});if(errs.length>3)a.push(`<div class="alert warn"><b>${esc(T("ui.a_nodata_many",{n:errs.length}))}</b>: ${esc(errs[0][1])}</div>`);else errs.forEach(([k,v])=>a.push(`<div class="alert warn"><b>${esc(T("ui.a_nodata",{key:k}))}</b>: ${esc(v)}</div>`))}
   OPENALERTS=a.length;try{renderBar()}catch(e){}      // the bar at the foot says the same as this list: it is never "no notices" while alerts are open
   $("alerts").innerHTML=a.length?a.join(""):`<span style="color:var(--ok)">${esc(T("ui.a_none"))}</span>`;
 }
+const NOW_OPEN=new Set();      // the repositories whose runs the person unfolded: a refresh must not fold them again
+function nowGroups(act){      // one entry per repository, in the order of the runs: a repository appears ONCE however many workflows it has running or queued
+  const by=new Map();act.forEach(r=>{if(!by.has(r.repo))by.set(r.repo,[]);by.get(r.repo).push(r)});return [...by.values()]
+}
+function nowRun(r,wrap){      // the line of one run with its jobs; `wrap` = false inside the unfolded list of a repository
+  const jobs=(r.jobs||[]).map(j=>{const pct=j.steps_total?Math.round(100*j.steps_done/j.steps_total):(j.status==="completed"?100:0);
+    const cls=j.conclusion==="failure"?"fail":(j.status==="completed"?"done":"");
+    return `<div class="job"><span>${esc(j.name)}</span><div><div class="bar"><i class="${cls}" style="width:${pct}%"></i></div><span class="mut">${j.status==="in_progress"?esc(j.step||T("ui.preparing")):esc(j.conclusion||j.status)}</span></div><span class="mut">${j.steps_done}/${j.steps_total} · ${fmt(j.seconds)}</span></div>`}).join("");
+  const row=`<div class="row">${badge(r)} ${wrap?`<b class="rl" data-repo-open="${esc(r.repo)}">${esc(r.repo)}</b> `:""}<span>${esc(r.name)}</span> <span class="mut">${esc(r.event)} · ${esc(r.branch)} · ${esc(r.sha)} · ${esc(r.actor)}</span> <span>${esc(T("ui.took",{dur:fmt(r.seconds)}))}</span>${r.stuck?`<span class="badge b-failure">${esc(T("ui.badge_stuck"))}</span>`:""} <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(T("ui.open_gh"))}</a></div>${jobs}`;
+  return wrap?`<div class="card ${r.stuck?"stuck":""} ${r.status!=="in_progress"?"queued":""}" data-now-repo="${esc(r.repo)}" data-now-n="1">${row}</div>`:`<div class="subrun ${r.stuck?"stuck":""} ${r.status!=="in_progress"?"queued":""}">${row}</div>`
+}
+function nowCard(g){
+  if(g.length===1)return nowRun(g[0],true);
+  const repo=g[0].repo,run=g.filter(r=>r.status==="in_progress").length,queued=g.length-run,stuck=g.some(r=>r.stuck);
+  const count=[run?T("ui.n_group_run",{n:run}):"",queued?T("ui.n_group_queued",{n:queued}):""].filter(Boolean).join(" · ");
+  return `<div class="card group ${stuck?"stuck":""}" data-now-repo="${esc(repo)}" data-now-n="${g.length}"><details${NOW_OPEN.has(repo)?" open":""} data-now-details="${esc(repo)}"><summary class="row"><b class="rl" data-repo-open="${esc(repo)}">${esc(repo)}</b> <span class="badge ${stuck?"b-failure":"b-in_progress"}">${esc(count)}</span>${stuck?` <span class="badge b-failure">${esc(T("ui.badge_stuck"))}</span>`:""}</summary>${g.map(r=>nowRun(r,false)).join("")}</details></div>`
+}
 function now_(d){
   const act=d.active.filter(r=>runVisible(r,d)),cnt=showingLine(runCounts(d));
   if(!act.length){$("now").innerHTML=cnt+'<span class="mut">'+esc(T("ui.n_nothing")+(filtersOn()?T("ui.n_with_filters"):"")+".")+'</span>';return}
+  if(!now_.bound){now_.bound=true;$("now").addEventListener("toggle",e=>{const el=e.target,k=el&&el.getAttribute&&el.getAttribute("data-now-details");if(k!==null&&k!==undefined){if(el.open)NOW_OPEN.add(k);else NOW_OPEN.delete(k)}},true)}
   act.sort((a,b)=>(d.ecosystems[a.repo]||"").localeCompare(d.ecosystems[b.repo]||""));
   let lastEco="";
-  $("now").innerHTML=cnt+act.map(r=>{
-    const eco=d.ecosystems[r.repo]||"other",head=eco!==lastEco?`<h3 style="margin:10px 0 6px;font-size:13px;color:var(--mut);text-transform:uppercase">${esc(eco)}</h3>`:"";lastEco=eco;
-    const jobs=(r.jobs||[]).map(j=>{const pct=j.steps_total?Math.round(100*j.steps_done/j.steps_total):(j.status==="completed"?100:0);
-      const cls=j.conclusion==="failure"?"fail":(j.status==="completed"?"done":"");
-      return `<div class="job"><span>${esc(j.name)}</span><div><div class="bar"><i class="${cls}" style="width:${pct}%"></i></div><span class="mut">${j.status==="in_progress"?esc(j.step||T("ui.preparing")):esc(j.conclusion||j.status)}</span></div><span class="mut">${j.steps_done}/${j.steps_total} · ${fmt(j.seconds)}</span></div>`}).join("");
-    return head+`<div class="card ${r.stuck?"stuck":""} ${r.status!=="in_progress"?"queued":""}"><div class="row">${badge(r)} <b class="rl" data-repo-open="${esc(r.repo)}">${esc(r.repo)}</b> <span>${esc(r.name)}</span> <span class="mut">${esc(r.event)} · ${esc(r.branch)} · ${esc(r.sha)} · ${esc(r.actor)}</span> <span>${esc(T("ui.took",{dur:fmt(r.seconds)}))}</span>${r.stuck?`<span class="badge b-failure">${esc(T("ui.badge_stuck"))}</span>`:""} <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(T("ui.open_gh"))}</a></div>${jobs}</div>`}).join("");
+  $("now").innerHTML=cnt+nowGroups(act).map(g=>{
+    const eco=d.ecosystems[g[0].repo]||"other",head=eco!==lastEco?`<h3 style="margin:10px 0 6px;font-size:13px;color:var(--mut);text-transform:uppercase">${esc(eco)}</h3>`:"";lastEco=eco;
+    return head+nowCard(g)}).join("");
 }
 function box(id){const el=$(id);return {el,w:Math.max(260,el.clientWidth||600),h:Math.max(160,el.clientHeight||260)}}
 function donut(ok,bad,other){

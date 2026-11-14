@@ -316,27 +316,6 @@ def gate_static():
     return tool_version.TOOL_VERSION
 
 
-# File types Gmail refuses to receive, even inside a zip (list published by Google).
-MAIL_BLOCKED = frozenset(".ade .adp .apk .appx .appxbundle .bat .cab .chm .cmd .com .cpl .diagcab .diagcfg .diagpkg .dll .dmg .ex .ex_ .exe .hta .img "
-                         ".ins .iso .isp .jar .jnlp .js .jse .lib .lnk .mde .mjs .msc .msi .msix .msixbundle .msp .mst .nsh .pif .ps1 .scr .sct .shb "
-                         ".sys .vb .vbe .vbs .vhd .vxd .wsc .wsf .wsh .xll".split())
-
-MAIL_NOTE = """# Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
-# GPL-3.0-or-later - see LICENSE
-
-E-MAIL VERSION / VERSION PARA CORREO
-Mail services (Gmail, among others) refuse files with the extension .bat, even inside a zip. In this zip the two Windows launchers are named *.bat.txt.
-EN  Rename MONITOR_GITHUB_ACTIONS.bat.txt and BATCH_GITHUB_ACTIONS.bat.txt by removing the final ".txt" (or run: py -3 actions_monitor.py). Linux and macOS: use the .sh / .command files.
-ES  Gmail y otros servicios rechazan los .bat. Quita el ".txt" final de MONITOR_GITHUB_ACTIONS.bat.txt y BATCH_GITHUB_ACTIONS.bat.txt (o ejecuta: py -3 actions_monitor.py). En Linux y macOS usa los .sh / .command.
-DE  Mail-Dienste lehnen .bat ab. Entferne das ".txt" am Ende von MONITOR_GITHUB_ACTIONS.bat.txt und BATCH_GITHUB_ACTIONS.bat.txt (oder: py -3 actions_monitor.py). Unter Linux und macOS die .sh / .command verwenden.
-FR  Gmail et d'autres services refusent les .bat. Retirez le ".txt" final de MONITOR_GITHUB_ACTIONS.bat.txt et BATCH_GITHUB_ACTIONS.bat.txt (ou lancez : py -3 actions_monitor.py). Sous Linux et macOS, utilisez les .sh / .command.
-IT  Gmail e altri servizi rifiutano i .bat. Togli il ".txt" finale da MONITOR_GITHUB_ACTIONS.bat.txt e BATCH_GITHUB_ACTIONS.bat.txt (oppure esegui: py -3 actions_monitor.py). Su Linux e macOS usa i .sh / .command.
-JA  Gmail などは .bat を拒否します。MONITOR_GITHUB_ACTIONS.bat.txt と BATCH_GITHUB_ACTIONS.bat.txt の末尾の「.txt」を削除してください（または py -3 actions_monitor.py を実行）。Linux と macOS では .sh / .command を使います。
-ZH  Gmail 等邮件服务会拒收 .bat 文件。请删除 MONITOR_GITHUB_ACTIONS.bat.txt 和 BATCH_GITHUB_ACTIONS.bat.txt 末尾的“.txt”（或运行：py -3 actions_monitor.py）。Linux 和 macOS 请使用 .sh / .command 文件。
-PT  O Gmail e outros serviços recusam ficheiros .bat. Retire o ".txt" final de MONITOR_GITHUB_ACTIONS.bat.txt e BATCH_GITHUB_ACTIONS.bat.txt (ou execute: py -3 actions_monitor.py). No Linux e no macOS use os ficheiros .sh / .command.
-"""
-
-
 def write_zip(target, entries):
     with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as z:
         for name in sorted(entries):
@@ -391,29 +370,6 @@ def clean_install_check(archive, entries, python=None):
         return f"{len(found)} files, version {smoke.stdout.strip().splitlines()[0][:40]}, suite: {' '.join(tail)}"
 
 
-def write_mail_variant(out, entries):
-    """The same zip with the Windows launchers renamed to *.bat.txt (mail services refuse .bat, even inside a zip) and a note in 8 languages."""
-    renamed = {}
-    for name, data in entries.items():
-        renamed[name + ".txt" if name.endswith(".bat") else name] = data
-    renamed["github_actions_monitor/README_MAIL.txt"] = MAIL_NOTE.encode("utf-8")
-    refused = sorted(n for n in renamed if "." + n.rsplit("/", 1)[-1].rsplit(".", 1)[-1].lower() in MAIL_BLOCKED and "." in n.rsplit("/", 1)[-1])
-    if refused:
-        fail("the e-mail variant holds file types that Gmail refuses: " + ", ".join(refused))
-    target = out / "github_actions_monitor_mail.zip"
-    with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as z:
-        for name in sorted(renamed):
-            info = zipfile.ZipInfo(name, FIXED_TIME)
-            info.compress_type = zipfile.ZIP_DEFLATED
-            info.create_system = 3
-            info.external_attr = (0o755 if name.endswith((".sh", ".command")) else 0o644) << 16
-            z.writestr(info, renamed[name])
-    with zipfile.ZipFile(target) as z:
-        if z.testzip() is not None:
-            fail("the e-mail zip is corrupt")
-    return target
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--out")
@@ -462,10 +418,6 @@ def main():
     if (out / "SHA256SUMS").read_text(encoding="ascii").split()[0] != hashlib.sha256(target.read_bytes()).hexdigest():
         fail("SHA256SUMS does not match the zip")
     print(f"{target} ({target.stat().st_size / 1024:.0f} KB, {len(entries)} files) tool {version} sha256 {digest[:16]}")
-    mail = write_mail_variant(out, entries)
-    mail_digest = hashlib.sha256(mail.read_bytes()).hexdigest()
-    (out / "SHA256SUMS").write_text(f"{digest}  {target.name}\n{mail_digest}  {mail.name}\n", encoding="ascii", newline="\n")
-    print(f"{mail} ({mail.stat().st_size / 1024:.0f} KB) e-mail variant, sha256 {mail_digest[:16]}")
     return 0
 
 

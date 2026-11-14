@@ -1,0 +1,4 @@
+# The optional packages the CI installs (the monitor itself needs none): the terminal views.
+# This file is also the key of the pip cache of every Python job of ci.yml.
+rich
+textual

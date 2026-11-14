@@ -478,7 +478,8 @@ class DegradedCounter(unittest.TestCase):
 
     def test_doctor_reads_what_the_running_monitor_saved(self):
         from github_actions_monitor.cli import doctor
-        path = Path(self.tmp.name) / "degraded.json"
+        (Path(self.tmp.name) / "data").mkdir(exist_ok=True)
+        path = Path(self.tmp.name) / "data" / "degraded.json"      # the counters of the running monitor live in data/
         self.degraded.attach(path)
         self.degraded.note("mirror.item", OSError("disk"))
         self.degraded.save(force=True)
