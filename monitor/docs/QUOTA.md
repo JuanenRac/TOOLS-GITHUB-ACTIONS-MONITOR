@@ -71,3 +71,12 @@ By default each read goes to the source (user, GitHub App, second account) with 
 - `readpool.reserve.<source>` (0 to 4000): calls kept free in that source. While a source has no more calls left than its reserve, the monitor does not read with it if another source can. Use `readpool.reserve.user` to leave calls to the `gh` of your tools and agents.
 
 Writes and actions always use the token of the user. The bar of the allowance and the working modes (fast and turbo) count the SUM of all the sources: the tile shows the sum and its tooltip the figure of each source, and the Quota tab (State) adds a line with the total next to the allowance of the user, the App and the second account.
+
+## Read less: the webhook first and free sources
+
+Both ways are **off by default** and only touch quiet repositories (those whose latest runs are all finished and green). A repository that is running, red or touched by an event is read as always.
+
+- `savings.webhook_first`: while the incoming webhook is alive (it delivered an event in the last `savings.webhook_window_minutes`), a quiet repository is not read on its slow turn: GitHub tells when something happens. It is still read in full every `savings.webhook_full_minutes`. Without a live webhook nothing changes.
+- `savings.feeds.enabled`: before a quiet repository is read with the API, the newest commit of its default branch is asked from a source that costs no allowance - the public Atom feed of the commits, `git ls-remote`, or either (`savings.feeds.method`: `atom`, `git`, `auto`). If it is the commit of the last full read, the repository is left as it is. Every `savings.feeds.max_age_minutes` it is read in full anyway. Public repositories only: for a private one, an error or an odd answer the repository is read with the API as always. Only GET requests to github.com leave the computer, never a password, and nothing is written. Not used when the monitor is air-gapped.
+
+What it costs: a run that starts without a push (a schedule, a re-run) on a quiet repository is seen at the next full read, not at once. The Quota tab (State) shows the reads each way has spared since the monitor started (about one call of the API each): conditional reads, GraphQL, webhook first, Atom feed, git and the central panel.

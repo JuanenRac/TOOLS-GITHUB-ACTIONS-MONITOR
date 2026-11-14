@@ -233,6 +233,12 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `runners.enabled` | `false` | advanced | Watch self-hosted runners |
 | `runners.scope` | `"owner"` | advanced | Where to look |
 | `runs_per_repo` | `20` | polling | Runs read per hot repository |
+| `savings.feeds.enabled` (secure) | `false` | quota | Ask a free source first |
+| `savings.feeds.max_age_minutes` | `240` | quota | Full read at least every (free sources) |
+| `savings.feeds.method` | `"atom"` | quota | Which free source |
+| `savings.webhook_first` | `false` | quota | Webhook first |
+| `savings.webhook_full_minutes` | `360` | quota | Full read at least every |
+| `savings.webhook_window_minutes` | `60` | quota | The webhook counts as alive for |
 | `sentinel.a2_full_sample_unknown` | `-` | sentinel | Unknown when sample is full |
 | `sentinel.a2_resolve_max_calls_per_tick` | `-` | sentinel | A2 lookups per cycle |
 | `sentinel.a2_resolve_ttl_seconds` | `-` | sentinel | A2 answers kept |

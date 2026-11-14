@@ -71,3 +71,12 @@ Por defecto cada lectura va a la fuente (usuario, GitHub App, segunda cuenta) co
 - `readpool.reserve.<fuente>` (0 a 4000): llamadas que se dejan libres en esa fuente. Mientras una fuente tenga como mucho las llamadas de su reserva, el monitor no lee con ella si otra puede. Usa `readpool.reserve.user` para dejar llamadas al `gh` de tus herramientas y agentes.
 
 Las escrituras y acciones usan siempre el token del usuario. La barra de cuota y los modos de trabajo (rápido y turbo) cuentan la SUMA de todas las fuentes: el recuadro muestra la suma y su ayuda emergente la cifra de cada fuente, y la pestaña Cuota (Estado) añade una línea con el total junto a la cuota del usuario, la App y la segunda cuenta.
+
+## Leer menos: el webhook primero y las fuentes gratuitas
+
+Las dos vías están **desactivadas por defecto** y solo afectan a los repositorios tranquilos (aquellos cuyas últimas ejecuciones han terminado y están en verde). Un repositorio en ejecución, en rojo o tocado por un evento se lee como siempre.
+
+- `savings.webhook_first`: mientras el webhook entrante está vivo (entregó un evento en los últimos `savings.webhook_window_minutes`), un repositorio tranquilo no se lee en su turno lento: GitHub avisa cuando pasa algo. Aun así se lee completo cada `savings.webhook_full_minutes`. Sin un webhook vivo no cambia nada.
+- `savings.feeds.enabled`: antes de leer con la API un repositorio tranquilo, se pregunta el último commit de su rama por defecto a una fuente que no gasta cuota - el feed Atom público de los commits, `git ls-remote`, o cualquiera de los dos (`savings.feeds.method`: `atom`, `git`, `auto`). Si es el commit de la última lectura completa, el repositorio se deja como está. Cada `savings.feeds.max_age_minutes` se lee completo de todos modos. Solo repositorios públicos: con uno privado, un error o una respuesta rara, el repositorio se lee con la API como siempre. Solo salen del equipo peticiones GET a github.com, nunca una contraseña, y no se escribe nada. No se usa si el monitor está aislado de la red (air-gapped).
+
+Lo que cuesta: una ejecución que empieza sin un push (una programación, una repetición) en un repositorio tranquilo se ve en la siguiente lectura completa, no al instante. La pestaña Cuota (Estado) muestra las lecturas que ha ahorrado cada vía desde que arrancó el monitor (cerca de una llamada de la API cada una): lecturas condicionales, GraphQL, webhook primero, feed Atom, git y panel central.

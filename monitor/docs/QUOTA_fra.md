@@ -71,3 +71,12 @@ Par défaut chaque lecture va à la source (utilisateur, GitHub App, second comp
 - `readpool.reserve.<source>` (0 à 4000) : appels laissés libres dans cette source. Tant qu'une source a au plus les appels de sa réserve, le moniteur ne lit pas avec elle si une autre peut. Utilisez `readpool.reserve.user` pour laisser des appels au `gh` de vos outils et agents.
 
 Les écritures et actions utilisent toujours le jeton de l'utilisateur. La barre de quota et les modes de travail (rapide et turbo) comptent la SOMME de toutes les sources : la tuile montre la somme et son infobulle le chiffre de chaque source, et l'onglet Quota (État) ajoute une ligne avec le total à côté du quota de l'utilisateur, de l'App et du second compte.
+
+## Lire moins : le webhook d'abord et les sources gratuites
+
+Les deux voies sont **désactivées par défaut** et ne touchent que les dépôts calmes (ceux dont les dernières exécutions sont toutes terminées et vertes). Un dépôt en cours d'exécution, rouge ou touché par un événement est lu comme d'habitude.
+
+- `savings.webhook_first` : tant que le webhook entrant est vivant (il a livré un événement dans les `savings.webhook_window_minutes` dernières minutes), un dépôt calme n'est pas lu à son tour lent : GitHub prévient quand il se passe quelque chose. Il est quand même lu en entier toutes les `savings.webhook_full_minutes`. Sans webhook vivant, rien ne change.
+- `savings.feeds.enabled` : avant de lire un dépôt calme avec l'API, le dernier commit de sa branche par défaut est demandé à une source qui ne coûte pas de quota - le flux Atom public des commits, `git ls-remote`, ou l'un ou l'autre (`savings.feeds.method` : `atom`, `git`, `auto`). Si c'est le commit de la dernière lecture complète, le dépôt reste tel quel. Toutes les `savings.feeds.max_age_minutes`, il est lu en entier de toute façon. Dépôts publics seulement : pour un dépôt privé, une erreur ou une réponse étrange, le dépôt est lu avec l'API comme d'habitude. Seules des requêtes GET vers github.com quittent l'ordinateur, jamais un mot de passe, et rien n'est écrit. Non utilisé quand le moniteur est isolé du réseau (air-gapped).
+
+Ce que cela coûte : une exécution qui démarre sans push (une planification, une relance) sur un dépôt calme est vue à la prochaine lecture complète, pas aussitôt. L'onglet Quota (État) montre les lectures évitées par chaque voie depuis le démarrage du moniteur (environ un appel de l'API chacune) : lectures conditionnelles, GraphQL, webhook d'abord, flux Atom, git et panneau central.
