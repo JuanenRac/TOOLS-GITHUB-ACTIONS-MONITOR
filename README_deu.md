@@ -44,7 +44,7 @@
 | | |
 |---|---|
 | **Reifegrad** | functional |
-| **Tests** | 1552 Testmethoden (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 1572 Testmethoden (`python -m unittest discover -s monitor/tests`) |
 | **Einstellungen** | 313 Einstellungen, alle mit Hilfe |
 | **Sprachen** | 8 (Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch) |
 | **Im CI getestet auf** | ubuntu, windows, macos, Python 3.11, 3.13 |
@@ -227,7 +227,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 ├── monitor/                                das Programm
 ├── docs/                                   Architektur, Bilder, Fahrplan
 ├── tools/                                  Bilder, Anleitungen, Demo
-├── deploy/                                 Container-Beispiel
+├── deploy/                                 Image, Compose, systemd
 ├── images/                                 Banner und Bilder
 ├── .github/                                CI und Formulare
 ├── CHANGELOG.md                            Änderungen je Version
@@ -258,7 +258,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/AI_deu.md`](monitor/docs/AI_deu.md): der KI-Assistent: Anbieter, Sicherheit und Aktionen
 - [`monitor/docs/ANALYTICS_deu.md`](monitor/docs/ANALYTICS_deu.md): Analytik, bedingte Lesungen und verlorene Verbindung
 - [`monitor/docs/CONSOLE_TOOLS_deu.md`](monitor/docs/CONSOLE_TOOLS_deu.md): der Workflow-Linter und die Konsolenansicht
-- [`monitor/docs/DEPLOYMENT_deu.md`](monitor/docs/DEPLOYMENT_deu.md): als Dienst betreiben, hinter einem Proxy, Berechtigungen
+- [`monitor/docs/DEPLOYMENT_deu.md`](monitor/docs/DEPLOYMENT_deu.md): als Dienst betreiben (das offizielle Image, Compose, systemd), hinter einem Proxy, wenn GitHub den Zugang widerruft, Berechtigungen
 - [`monitor/QUICKSTART_de.txt`](monitor/QUICKSTART_de.txt): erste Schritte, in acht Sprachen
 - [`monitor/docs/FIRST_STEPS_deu.md`](monitor/docs/FIRST_STEPS_deu.md): Ihre ersten fünf Minuten
 - [`monitor/docs/SENTINEL_deu.md`](monitor/docs/SENTINEL_deu.md): der Wächter und seine Prüfungen A1-A13
