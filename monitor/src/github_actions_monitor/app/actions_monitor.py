@@ -95,6 +95,7 @@ DEFAULTS = {
     "extra_reader": {"enabled": False, "file": "", "any_folder": False},      # a second read-only account: only the PATH of the file with its token (readpool.py)
     "github_app": {"enabled": False, "app_id": "", "key_path": "", "installation_id": ""},      # an optional GitHub App for the READS (its own allowance); only the PATH of the key is kept here (github_app.py)
     "central": {"source": "off", "max_age_minutes": 120, "git_dir": ""},      # the central panel of the profile repository as a base line that spends no allowance (central_source.py): off | git | http
+    "ui": {"orientation": "auto", "rotate_seconds": 0, "screen1_tabs": "", "screen1_orientation": "auto", "screen2_tabs": "", "screen2_orientation": "auto", "screen3_tabs": "", "screen3_orientation": "auto"},   # the screens (docs/SCREENS.md): the orientation of the page, and which tabs each /screen/N shows
     "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
     "updates": {"check": True},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
     "airgapped": False,            # True: nothing is requested from the network except GitHub's data you asked for; the update check is off
@@ -1474,7 +1475,7 @@ def render_page():
     """actions_monitor.html with the catalogues of the interface (keys "ui.*") for the 8 languages and the default language inlined."""
     page = (paths.STATIC / "actions_monitor.html").read_text(encoding="utf-8")
     data = {"default": i18n.language(), "langs": list(i18n.LANGS), "names": i18n.NATIVE_NAMES, "html": i18n.HTML_LANG, "locale": i18n.BROWSER_LOCALE, "catalogues": i18n.ui_catalogues(),
-            "ecosystems": {**{"other": i18n.t("ui.eco_other")}, **{key: item["label"] for key, item in toolconfig.ecosystems().items()}}, "owner": toolconfig.github_owner(), "tz": tzdisplay.setting(), "blink": (toolconfig.raw_config().get("display") or {}).get("blink_red_tiles", True) is not False, "sound": {k: v for k, v in __import__("github_actions_monitor.integrations.soundalert", fromlist=["_"]).settings(toolconfig.raw_config()).items() if k != "server_beep"}, "host": github_host(), "lite": LITE["on"], "network": localguard.public_state(), "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
+            "ecosystems": {**{"other": i18n.t("ui.eco_other")}, **{key: item["label"] for key, item in toolconfig.ecosystems().items()}}, "owner": toolconfig.github_owner(), "tz": tzdisplay.setting(), "screens": {k: v for k, v in (toolconfig.raw_config().get("ui") or {}).items() if k in DEFAULTS["ui"]}, "blink": (toolconfig.raw_config().get("display") or {}).get("blink_red_tiles", True) is not False, "sound": {k: v for k, v in __import__("github_actions_monitor.integrations.soundalert", fromlist=["_"]).settings(toolconfig.raw_config()).items() if k != "server_beep"}, "host": github_host(), "lite": LITE["on"], "network": localguard.public_state(), "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
     blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     return page.replace("/*I18N_DATA*/null", blob, 1)
 
@@ -2178,7 +2179,7 @@ class Handler(BaseHTTPRequestHandler):
                 picture = {"data": STATE["data"], "error": STATE["error"], "hint": STATE["hint"]}
             picture = {**picture, "loop": WATCH.snapshot(limit_seconds=watchdog_limit(LIVE_CONFIG or DEFAULTS))}
             self.reply(json.dumps(picture), "application/json; charset=utf-8")
-        elif path in ("/", "/index.html"):
+        elif path in ("/", "/index.html") or re.fullmatch(r"/screen/[1-3]/?", path):
             if not self.guard():      # the page checks the Host like the API does (a rebinding page gets a 403, not the monitor)
                 return
             self.reply(render_page(), "text/html; charset=utf-8")

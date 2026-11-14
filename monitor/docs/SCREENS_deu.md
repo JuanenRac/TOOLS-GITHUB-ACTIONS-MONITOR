@@ -1,0 +1,51 @@
+<!--
+  Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+  GPL-3.0-or-later - see LICENSE
+-->
+
+[🇺🇸 English](SCREENS.md) | [🇪🇸 Español](SCREENS_spa.md) | [🇫🇷 Français](SCREENS_fra.md) | [🇮🇹 Italiano](SCREENS_ita.md) | **🇩🇪 Deutsch** | [🇨🇳 简体中文](SCREENS_zho.md) | [🇯🇵 日本語](SCREENS_jpn.md) | [🇵🇹 Português](SCREENS_por.md)
+
+# Bildschirme, Größen und Ausrichtung
+
+Die Seite passt sich der Größe ihres Fensters an, vom Telefon bis 4K, hochkant oder quer, und ein Monitor kann mehrere Bildschirme bedienen, jeder mit den Tabs Ihrer Wahl. Nichts wird doppelt abgefragt: alle Bildschirme lesen denselben Zustand.
+
+## Adressen
+
+- `/` - die ganze Seite.
+- `/screen/1`, `/screen/2`, `/screen/3` - die für diesen Bildschirm festgelegten Tabs (`ui.screen1_tabs` ...). Jede in einem Fenster des eigenen Monitors oder Fernsehers öffnen.
+- `?orient=portrait` oder `?orient=landscape` erzwingt das Layout eines Fensters; `?tabs=now,charts` und `?rotate=30` legen Tabs und Sekunden dazwischen für ein Fenster fest.
+
+## Einstellungen
+
+| Einstellung | Wirkung |
+|---|---|
+| `ui.orientation` | auto folgt dem Fenster; portrait stapelt die Panels in einer Spalte; landscape behält das Nebeneinander. |
+| `ui.rotate_seconds` | 0 = aus. Sekunden zwischen den Tabs eines Bildschirms mit mehr als einem. |
+| `ui.screen1_tabs` | Tabs von /screen/1, durch Kommas getrennt: now, al, sent, charts, repos, hist, cfg. Leer = alle. |
+| `ui.screen1_orientation` | auto, portrait oder landscape nur für /screen/1. |
+| `ui.screen2_tabs` | Tabs von /screen/2. |
+| `ui.screen2_orientation` | Ausrichtung von /screen/2. |
+| `ui.screen3_tabs` | Tabs von /screen/3. |
+| `ui.screen3_orientation` | Ausrichtung von /screen/3. |
+
+## Getestete Größen
+
+Ein Browser-Test öffnet die Seite in jeder dieser Größen, geht alle Tabs durch und schlägt bei seitlichem Scrollen oder Text außerhalb seines Kastens fehl. Fenster ab 2400 px erhalten eine größere Schrift (ab 3200 px eine noch größere) statt eines gestreckten Layouts; ein höheres als breites Fenster stapelt die Panels.
+
+| Größe | Art |
+|---|---|
+| 1920x1080 | Full HD |
+| 2560x1080 | 21:9 |
+| 3440x1440 | 21:9 |
+| 5120x1440 | 32:9 |
+| 3840x2160 | 4K |
+| 1080x1920 | Full HD |
+| 2160x3840 | 4K |
+| 768x1024 | tablet |
+| 390x844 | phone |
+
+## Rezept für einen Arbeitsplatz mit zwei oder drei Bildschirmen
+
+1. Auf dem Rechner, auf dem der Monitor läuft, `ui.screen1_tabs` auf `now,al`, `ui.screen2_tabs` auf `charts,repos` und für einen gedrehten Monitor `ui.screen2_orientation` auf `portrait` setzen.
+2. `http://dieser-rechner:8765/screen/1` im Fenster des ersten Monitors und `/screen/2` im zweiten öffnen; F11 für Vollbild. Von einem anderen Rechner den Netzmodus mit Zugriffstoken nutzen.
+3. Für einen Wandbildschirm, den niemand bedient, mehrere Tabs vergeben und `ui.rotate_seconds` auf 20-30 setzen.

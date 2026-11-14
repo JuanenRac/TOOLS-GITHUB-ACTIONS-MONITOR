@@ -21,6 +21,7 @@ POST (session_guard) is still checked by the route itself.
 import hmac
 import json
 import os
+import re
 import time
 
 from github_actions_monitor import i18n
@@ -188,7 +189,7 @@ def gate(handler, config, lite=False):
         return fail(handler, "bootstrap_required", 403)
     if needed is None:
         return True
-    is_page = method == "GET" and path in ("/", "/index.html")
+    is_page = method == "GET" and (path in ("/", "/index.html") or re.fullmatch(r"/screen/[1-3]/?", path) is not None)
     token, kind = presented_token(handler.headers, cfg)
     context = auth.find_session(storage, token) if token else None
     if context is None:
