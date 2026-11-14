@@ -1203,9 +1203,20 @@ def retention_tick(config):
         degraded.note("retention", error)
 
 
+def digest_tick(config):
+    """The digests of the users (notify.users.enabled, OFF by default) whose time has come, from a thread of their own so that a slow relay never holds the cycle. Never raises."""
+    try:
+        from github_actions_monitor.integrations import dispatcher
+        if dispatcher.settings(config)["enabled"]:
+            threading.Thread(target=dispatcher.run_digests, args=(config,), kwargs={"title": i18n.t("notify.digest_title", n="{n}")}, name="notify-digest", daemon=True).start()
+    except Exception as error:   # noqa: BLE001
+        degraded.note("notify", error)
+
+
 def maintain(config, data):
     """After each cycle: the conditional-read cache is saved, a few completed runs have their jobs sampled and the analytics are refreshed."""
     quota_watch(config)
+    digest_tick(config)
     try:      # the connection that goes down is announced once, by the same switch as a new red
         from github_actions_monitor.integrations import soundalert
         lost = bool((data.get("offline") or {}).get("offline"))

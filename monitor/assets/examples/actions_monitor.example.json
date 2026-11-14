@@ -353,7 +353,27 @@
       "http_local": {
         "enabled": false,
         "url": ""
+      },
+      "ntfy": {
+        "enabled": false,
+        "server": "https://ntfy.sh"
+      },
+      "teams": {
+        "enabled": false
+      },
+      "email": {
+        "enabled": false,
+        "host": "127.0.0.1",
+        "port": 25,
+        "sender": "monitor@localhost"
       }
+    },
+    "users": {
+      "enabled": false,
+      "max_per_hour": 10
+    },
+    "digest": {
+      "max_items": 50
     }
   },
   "display": {
