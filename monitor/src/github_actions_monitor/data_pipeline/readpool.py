@@ -6,10 +6,8 @@
   app     the installation token of a GitHub App (github_app.py)                   with github_app.enabled
   extra   a second read-only account, given as the PATH of a file with its token   with extra_reader.enabled + extra_reader.file
 
-Each source has its own allowance. By default a read goes to the source with the most calls left (the figure of the last free `rate_limit` probe, minus the reads made since), so the reads are spread and none runs
-dry first. Two settings change that (block `readpool`, both off by default): `readpool.prefer.<kind>` names the source that answers a KIND of read first (runs, security alerts, issues and pull requests, history, discovery, the rest;
-`auto` keeps the spread) and `readpool.reserve.<source>` keeps at least that many calls free in a source for what other programs do with it (the `gh` of your tools and agents on the allowance of the user): a source under its
-reserve takes no read while another one can. The allowances are added up for the figure the working modes and the page use. A source that fails (a refused token, a missing permission) is left out for five minutes and the read is made again with the next one, the user last. Only READS are spread (github_app.is_read):
+Each source has its own allowance. A read goes to the source with the most calls left (the figure of the last free `rate_limit` probe, minus the reads made since), so the reads are spread and none runs
+dry first; a source that fails (a refused token, a missing permission) is left out for five minutes and the read is made again with the next one, the user last. Only READS are spread (github_app.is_read):
 writes and actions keep the token of the user.
 
 The token of the extra account is read from its file at the moment of use, kept only in the memory of the call, and never stored in the configuration, printed, logged or sent anywhere but to `gh` as
@@ -24,12 +22,6 @@ from github_actions_monitor.integrations import github_app
 
 DEFAULTS = {"enabled": False, "file": "", "any_folder": False}
 TOKEN_RE = re.compile(r"^(?:gh[pousr]_[A-Za-z0-9_]{20,255}|github_pat_[A-Za-z0-9_]{20,255}|[A-Fa-f0-9]{40})\Z")
-KINDS = ("runs", "security", "issues", "history", "discovery", "other")
-SOURCES = ("user", "app", "extra")
-PREFERENCES = ("auto",) + SOURCES
-KIND_RE = (("security", re.compile(r"code-scanning|dependabot|secret-scanning|vulnerab|security-advisor", re.I)), ("runs", re.compile(r"actions/|/runs?|/workflows?|check-runs|check-suites", re.I)),
-           ("issues", re.compile(r"/issues|/pulls?", re.I)), ("history", re.compile(r"/releases?|/commits?|/tags|/compare/|/contents/|/git/", re.I)),
-           ("discovery", re.compile(r"^(?:orgs|search|users)/|/repos\?|^repositories|^orgs/[^/]+/repos", re.I)))
 PAUSE = 300      # seconds a failing source is left out
 ASSUMED = 3000   # the calls assumed left in a source that has not been probed yet
 _STATE = {"left": {}, "failed": {}, "turn": 0}
@@ -87,45 +79,6 @@ def file_warning(path):
     return github_app.key_warning(path) if path else ""
 
 
-def pool_settings(config):
-    """`readpool.prefer.<kind>` (auto, user, app, extra) and `readpool.reserve.<source>` (calls kept free, 0 to 4000), each with its conservative default: the spread of always and no reserve."""
-    block = (config or {}).get("readpool") if isinstance((config or {}).get("readpool"), dict) else {}
-    prefer = block.get("prefer") if isinstance(block.get("prefer"), dict) else {}
-    reserve = block.get("reserve") if isinstance(block.get("reserve"), dict) else {}
-    return {"prefer": {k: prefer[k] if prefer.get(k) in PREFERENCES else "auto" for k in KINDS},
-            "reserve": {s: reserve[s] if isinstance(reserve.get(s), int) and not isinstance(reserve.get(s), bool) and 0 <= reserve[s] <= 4000 else 0 for s in SOURCES}}
-
-
-def kind_of(args):
-    """The kind of a read, from the call: `gh api ENDPOINT` by its endpoint, `gh run list` by its verb. The endpoint decides, not the repository."""
-    args = [str(a) for a in args]
-    if args and args[0] == "api":
-        endpoint = next((a for a in args[1:] if not a.startswith("-")), "").lstrip("/")
-        for kind, pattern in KIND_RE:
-            if pattern.search(endpoint):
-                return kind
-        return "other"
-    return {"run": "runs", "workflow": "runs", "issue": "issues", "pr": "issues", "release": "history", "search": "discovery"}.get(args[0] if args else "", "other")
-
-
-def below_reserve(name, config):
-    """True when the last known allowance of the source is not above the reserve asked for it (nothing known = not below)."""
-    keep = pool_settings(config)["reserve"].get(name, 0)
-    left = _STATE["left"].get(name)
-    return bool(keep) and left is not None and left <= keep
-
-
-def pooled(sources):
-    """The allowance of ALL the sources added up: {"remaining", "limit", "reset"} (the reset of the user when there is one, else the earliest). `sources` is {name: {"remaining", "limit", "reset"}}; raises
-    ValueError when it is empty. One source gives its own figures unchanged."""
-    if not sources:
-        raise ValueError("no source")
-    if len(sources) == 1:
-        return dict(next(iter(sources.values())))
-    first = sources.get("user") or min(sources.values(), key=lambda s: str(s.get("reset")))
-    return {"remaining": sum(int(s["remaining"]) for s in sources.values()), "limit": sum(int(s["limit"]) for s in sources.values()), "reset": first["reset"]}
-
-
 def available(config, now=None):
     """The names of the sources that can read now, in the order of preference when the allowances are equal."""
     now = time.time() if now is None else now
@@ -158,11 +111,6 @@ def pick(config, args, now=None):
         return "user", {}
     _STATE["turn"] += 1
     ranked = sorted(names, key=lambda n: (-_STATE["left"].get(n, ASSUMED), (names.index(n) + _STATE["turn"]) % len(names)))
-    ranked = [n for n in ranked if not below_reserve(n, config)] + [n for n in ranked if below_reserve(n, config)]      # a source under its reserve answers only when no other can
-    wanted = pool_settings(config)["prefer"][kind_of(args)]
-    if wanted in ranked and not below_reserve(wanted, config):
-        ranked.remove(wanted)
-        ranked.insert(0, wanted)      # the preferred source of this kind first; if it fails the others follow, the user last
     for name in ranked:
         token = ""
         if name == "app":
