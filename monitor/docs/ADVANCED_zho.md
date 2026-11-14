@@ -84,3 +84,16 @@
 ## 没有管理员时网络模式不会启动
 
 当 `auth.enabled` 与 `listen.network` 都开启而尚无用户时，监控器不会启动，并说明后续步骤：第一位管理员只能在本机创建，因此请先关闭 `listen.network` 并启动监控器（只监听本机），打开页面创建管理员，然后开启 `listen.network` 并重新启动。本地模式（127.0.0.1）始终可以启动。
+
+## 最新功能的开关
+
+以下所有功能均在本地且只读，除非另有说明，默认都是关闭的。每项在页面(? 按钮)和本文件夹中都有指南。 (经验记录默认开启，只写入本地文件；其余均关闭)
+
+- `lessons.enabled` - docs/LESSONS_zho.md
+- `savings.webhook_first`, `savings.feeds.enabled` - docs/QUOTA_zho.md
+- `sentinels.collab.search_api` - docs/COLLAB_zho.md
+- `logs.failed_step.enabled`, `github_app.share_reads` - docs/EXTRAS_zho.md
+- `reports.workflow_hygiene.enabled`, `reports.queue.enabled`, `reports.release_view.enabled`, `reports.supply_chain.enabled` - docs/EXTRAS_zho.md
+- `ai.skill` - docs/SKILLS_zho.md
+- `ui.orientation`, `ui.screen1_tabs` - docs/SCREENS_zho.md
+- `notify.users.enabled` - docs/NOTIFICATIONS_zho.md

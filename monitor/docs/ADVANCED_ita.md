@@ -84,3 +84,16 @@ Con `otlp.enabled` attivo e un `otlp.endpoint` (HTTPS, o HTTP su questo computer
 ## La modalità rete non parte senza amministratore
 
 Con `auth.enabled` e `listen.network` attivi e nessun utente, il monitor non si avvia e spiega come proseguire: il primo amministratore può essere creato solo da questo computer, quindi disattiva `listen.network`, avvia il monitor (ascolta solo su questo computer), apri la pagina e crea l'amministratore; poi attiva `listen.network` e riavvia. La modalità locale (127.0.0.1) parte sempre.
+
+## Interruttori delle funzioni più recenti
+
+Tutto ciò che segue è locale e in sola lettura, e spento salvo diversa indicazione. Ognuna ha la sua guida nella pagina (pulsante ?) e in questa cartella. (le lezioni sono attive e scrivono solo un file locale; il resto è spento)
+
+- `lessons.enabled` - docs/LESSONS_ita.md
+- `savings.webhook_first`, `savings.feeds.enabled` - docs/QUOTA_ita.md
+- `sentinels.collab.search_api` - docs/COLLAB_ita.md
+- `logs.failed_step.enabled`, `github_app.share_reads` - docs/EXTRAS_ita.md
+- `reports.workflow_hygiene.enabled`, `reports.queue.enabled`, `reports.release_view.enabled`, `reports.supply_chain.enabled` - docs/EXTRAS_ita.md
+- `ai.skill` - docs/SKILLS_ita.md
+- `ui.orientation`, `ui.screen1_tabs` - docs/SCREENS_ita.md
+- `notify.users.enabled` - docs/NOTIFICATIONS_ita.md
