@@ -38,7 +38,7 @@ Everything listed here is written and tested; it is either already in the main b
 
 ## Planned, in this order
 
-Each version carries everything of its stretch of the plan: nothing is left hanging from an earlier version and nothing is pushed to the next one. After 1.8.3 and after 1.9.3 the product goes through an independent review and its findings are closed in the stabilization version that follows. There is no 1.8.1: users, roles and sessions arrive with 1.8.0.
+Each version carries everything of its stretch of the plan: nothing is left hanging from an earlier version and nothing is pushed to the next one. After 1.8.3 and after 1.9.3 the product goes through an independent review and its findings are closed in the stabilization version that follows. 1.8.1 is a corrective release of 1.8.0: the box "loading repositories" leaves with the last repository and a reload of the page gets its data at once.
 
 ### 1.8.2 - Official Docker image and service mode
 

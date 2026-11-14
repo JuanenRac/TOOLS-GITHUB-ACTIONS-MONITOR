@@ -8,7 +8,7 @@
 
 The history of GitHub Actions Monitor, from the first version to the latest. Each version groups its changes under Added, Changed, Fixed and Security.
 
-## [Unreleased]
+## [1.8.1]
 
 ### Fixed
 

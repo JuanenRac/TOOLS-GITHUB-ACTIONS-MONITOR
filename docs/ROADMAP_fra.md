@@ -33,7 +33,7 @@ Tout ce qui suit est écrit et testé ; c'est soit déjà dans la branche princi
 
 ## Prévu, dans cet ordre
 
-Chaque version porte tout ce qui est de son tronçon du plan : rien ne reste suspendu à une version antérieure et rien n'est repoussé à la suivante. Après la 1.8.3 et après la 1.9.3, le produit passe une revue indépendante dont les constats sont clos dans la version de stabilisation suivante. Il n'y a pas de 1.8.1 : utilisateurs, rôles et sessions arrivent avec la 1.8.0.
+Chaque version porte tout ce qui est de son tronçon du plan : rien ne reste suspendu à une version antérieure et rien n'est repoussé à la suivante. Après la 1.8.3 et après la 1.9.3, le produit passe une revue indépendante dont les constats sont clos dans la version de stabilisation suivante. 1.8.1 est une version corrective de la 1.8.0 : le cadre « chargement des dépôts » disparaît avec le dernier dépôt et le rechargement de la page obtient ses données aussitôt.
 
 ### 1.8.2 - Image Docker officielle et mode service
 

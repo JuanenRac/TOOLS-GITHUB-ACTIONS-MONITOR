@@ -7,7 +7,7 @@
 
 Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem Semver. Die Quelle ist das englische CHANGELOG.md; diese Datei enthält dieselben Versionen und Abschnitte.
 
-## [Unreleased]
+## [1.8.1]
 
 ### Behoben
 

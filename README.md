@@ -31,7 +31,7 @@
 
 | | |
 |---|---|
-| **Version** | **1.8.0** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **1.8.1** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Needs** | Python 3.11+ and the GitHub CLI (`gh auth login`); nothing else (the terminal view uses the optional package `rich`) |
 | **Opens** | a page on `127.0.0.1` only, in eight languages |
 | **Writes to GitHub** | never by itself: only batch commands you run with an explicit `--go` |
@@ -39,7 +39,7 @@
 
 <!-- glance:begin -->
 
-**Measured today** (v1.8.0)
+**Measured today** (v1.8.1)
 
 | | |
 |---|---|

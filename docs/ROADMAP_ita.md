@@ -33,7 +33,7 @@ Tutto ciò che segue è scritto e provato; o è già nel ramo principale o atten
 
 ## Previsto, in quest'ordine
 
-Ogni versione porta tutto quello del suo tratto del piano: nulla resta appeso a una versione precedente e nulla è rimandato alla successiva. Dopo la 1.8.3 e dopo la 1.9.3 il prodotto passa una revisione indipendente e i suoi rilievi si chiudono nella versione di stabilizzazione seguente. Non esiste una 1.8.1: utenti, ruoli e sessioni arrivano con la 1.8.0.
+Ogni versione porta tutto quello del suo tratto del piano: nulla resta appeso a una versione precedente e nulla è rimandato alla successiva. Dopo la 1.8.3 e dopo la 1.9.3 il prodotto passa una revisione indipendente e i suoi rilievi si chiudono nella versione di stabilizzazione seguente. 1.8.1 è una versione correttiva della 1.8.0: il riquadro «caricamento dei repository» scompare con l'ultimo repository e il ricaricamento della pagina ottiene subito i dati.
 
 ### 1.8.2 - Immagine Docker ufficiale e modalità servizio
 

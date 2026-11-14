@@ -7,7 +7,7 @@
 
 Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com o seu próprio semver. A fonte é o CHANGELOG.md em inglês; este ficheiro tem as mesmas versões e secções.
 
-## [Unreleased]
+## [1.8.1]
 
 ### Corrigido
 
