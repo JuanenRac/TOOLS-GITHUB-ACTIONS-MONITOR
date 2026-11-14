@@ -33,6 +33,8 @@ def redirect(account_id, base=None):
     for module in (ai_actions, ghactions, updatecheck):      # these load on demand inside the monitor: they must exist now, or their logs would stay next to the code, shared by every account
         sys.modules.setdefault(module.__name__, module)
     folder = accounts.account_dir(account_id, base)
+    from github_actions_monitor.integrations import ai_alerts      # the feed for the AIs, its brief and the ledger of the notices are this account's own: ai/accounts/<id>/
+    ai_alerts.ACCOUNT["id"] = account_id
     from github_actions_monitor.sentinels import sentinel_local  # the sentinel is part of the complete edition: its files are per account too
     from github_actions_monitor.sentinels import sentinel_collab  # and so are the files of the second one
     from github_actions_monitor.sentinels import alert_center  # and the silences of the alerts

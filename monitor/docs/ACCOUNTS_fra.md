@@ -70,3 +70,5 @@ Pour plusieurs écrans, ouvrez une fenêtre par vue, par exemple `?view=now&chro
 ## Où un compte garde son état
 
 Par défaut dans des fichiers sous `accounts/<id>/`. Un compte peut le garder dans une base de données : `"storage": {"backend": "sqlite"}` dans sa propre configuration lui donne `accounts/<id>/storage.sqlite3`, et seul le processus de ce compte l'écrit. La configuration du compte reste un fichier JSON. Voir [STORAGE_fra.md](STORAGE_fra.md).
+
+Le flux pour les IA de chaque compte (ses alertes, son résumé et le registre des avis à une IA externe) lui est propre aussi : `ai/accounts/<id>/`. Chaque alerte porte son compte, et l'actualisation d'un compte ne ferme jamais les alertes d'un autre. Si vous choisissez exprès le même `ai_alerts.folder` pour plusieurs comptes, ils le partagent sans risque : chacun garde et ferme uniquement ses propres alertes.

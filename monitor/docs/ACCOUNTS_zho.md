@@ -70,3 +70,5 @@ python bin/actions_monitor.py --accounts                  # 列出账户
 ## 账户把状态保存在哪里
 
 默认保存在 `accounts/<id>/` 内的文件中。账户也可以改用数据库:在它自己的配置中写 `"storage": {"backend": "sqlite"}`,就会使用 `accounts/<id>/storage.sqlite3`,而且只有该账户的进程会写它。账户的配置仍是 JSON 文件。详见 [STORAGE_zho.md](STORAGE_zho.md)。
+
+每个账号面向 AI 的订阅源（其警报、简报以及发给外部 AI 的通知账本）同样是它自己的：`ai/accounts/<id>/`。每条警报都带有所属账号，一个账号的刷新绝不会关闭另一个账号的警报。若你有意为多个账号设置同一个 `ai_alerts.folder`，它们也能安全共用：每个账号只保留并关闭自己的警报。

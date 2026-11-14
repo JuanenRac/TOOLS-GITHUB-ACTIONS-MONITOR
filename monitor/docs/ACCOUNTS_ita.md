@@ -70,3 +70,5 @@ Per più schermi apri una finestra per vista, ad esempio `?view=now&chrome=0`, `
 ## Dove un account conserva il suo stato
 
 Per impostazione predefinita in file dentro `accounts/<id>/`. Un account può conservarlo in un database: `"storage": {"backend": "sqlite"}` nella sua configurazione gli assegna `accounts/<id>/storage.sqlite3`, e solo il processo di quell'account lo scrive. La configurazione dell'account resta un file JSON. Vedi [STORAGE_ita.md](STORAGE_ita.md).
+
+Anche il flusso per le IA di ogni account (i suoi avvisi, il suo riepilogo e il registro degli avvisi a una IA esterna) è suo: `ai/accounts/<id>/`. Ogni avviso porta il proprio account e l'aggiornamento di un account non chiude mai gli avvisi di un altro. Se scegli di proposito lo stesso `ai_alerts.folder` per più account, lo condividono senza rischi: ciascuno conserva e chiude solo i propri avvisi.
