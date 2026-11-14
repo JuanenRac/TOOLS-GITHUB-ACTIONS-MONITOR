@@ -60,6 +60,12 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Fixed
 
+- **The pause of the hook of an AI tool is kept in one step**: reading the last moment and writing the new one take a lock, so two events at the same time cannot both pass; and when the moment cannot be written the answer is "do not block", not "ok" (before, a failed write still allowed the block and the pause was never applied).
+
+- **The exporter of a self-hosted runner can no longer send the monitor somewhere else**: a redirect is followed only to this computer or a private address, with the same scheme, no credentials, and at most three times; a public host, another scheme or a loop ends the read with no figures. No proxy is used for it.
+
+- **Calls to GitHub that never return are counted, and the monitor stops piling them up**: when a call gives up waiting its thread is remembered until it ends; with `watchdog_max_abandoned` of them (8 by default, 0 = no limit) still alive the monitor starts no new call to GitHub, and the deep health check answers "degraded" with the number, instead of restarting the loop again and again while threads and connections pile up.
+
 - **With the team mode on and no user yet, only the person at this computer gets in**: until the first administrator exists a request from anywhere else (the network, or through a proxy) is answered 403 "create the first administrator from this computer first" for everything that is not public (health check, login page, webhook); before, the whole monitor stayed open to the network during that time. Turning the team mode on changes nothing for the person at this computer, who still creates the first administrator from the login page.
 
 - **The process of each account answers only to its supervisor**: it asks for the key the supervisor gave it when it started it, on every request; another user of the same machine who reaches the port of an account process gets a 403 instead of the data, whatever the team mode says.
