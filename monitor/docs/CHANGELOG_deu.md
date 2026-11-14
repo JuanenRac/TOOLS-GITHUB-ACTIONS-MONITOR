@@ -45,6 +45,16 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - Der Test eines Kontos, das sofort stirbt, hängt nicht mehr von der Geschwindigkeit des Rechners ab: Die Wartezeit vor dem erneuten Start eines Kontos wird mit einer Uhr geprüft, die der Test selbst gibt, und ein zweiter Test prüft den Plan der Wartezeiten, ohne die echte Zeit zu lesen (der alte scheiterte unter Last in der Schranke eines Releases).
 
+## [1.8.2]
+
+### Hinzugefügt
+
+- Offizielles Docker-Image, Compose und systemd, um den Monitor als Dienst zu betreiben, eine tiefe Gesundheitsprüfung, und ein von GitHub widerrufener Zugang macht nur sein Konto blind.
+
+- Aufgeräumter Produktordner: Konfiguration, Daten, Protokolle und KI-Dateien in eigenen Ordnern, mit automatischem und umkehrbarem Umzug, und eine Karte für KIs (`ai/INDEX.json`).
+
+- Härtung: Der Netzwerkmodus startet nicht ohne ersten Administrator, jedes Konto hat seinen eigenen Feed für KIs, gemeinsame Dateien werden Schritt für Schritt geändert, und das GitHub-Kontingent wird nach Lesetyp aufgeteilt.
+
 ## [1.8.1]
 
 ### Behoben
