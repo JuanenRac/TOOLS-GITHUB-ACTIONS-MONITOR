@@ -21,6 +21,11 @@
 python bin/monitor_cli.py gh-token --read-only
 ```
 
-## 尚未包含
+## 四个可选报告
 
-工作流卫生面板、队列报告、版本就绪或受阻视图以及供应链面板不属于此版本。
+四个都**默认关闭**。它们显示在警报标签页底部的“可选报告”区块和 `GET /api/reports` 中。读取 GitHub 的报告每个周期最多消耗 `reports.max_calls_per_cycle` 次调用，每次只读几个仓库，并把读到的内容在内存中保留一天。
+
+- `reports.workflow_hygiene.enabled`：读取各仓库的工作流文件，列出写得不好的地方——未固定到提交的 action、未限制的权限、没有 `timeout-minutes` 的作业、没有 `concurrency` 组、`pull_request_target` 与注入风险、明文机密(即读取本地克隆的 A13 面板的 linter 规则，外加两条新规则)。
+- `reports.queue.enabled`：读取几个等待过的已完成运行的作业，并按运行器类型(Linux、Windows、macOS、大型、自托管)说明作业在开始前等了多久。
+- `reports.release_view.enabled`：完全不调用；根据哨兵已知的信息，说明哪些仓库“就绪”可发版(变更日志有条目或有无人发布的绿色构建、没有红色项、没有等待中的签名)，哪些“受阻”以及原因。
+- `reports.supply_chain.enabled`：读取各仓库的最新版本，并根据文件名说明其是否带有软件物料清单(SBOM)、校验和以及签名或证明。绝不下载文件。

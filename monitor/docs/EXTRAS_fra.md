@@ -21,6 +21,11 @@ Les deux sont **désactivés par défaut** et s'activent dans les Réglages.
 python bin/monitor_cli.py gh-token --read-only
 ```
 
-## Pas encore là
+## Quatre rapports facultatifs
 
-Le panneau d'hygiène des workflows, le rapport de file d'attente, la vue version prête ou bloquée et le panneau de chaîne d'approvisionnement ne font pas partie de cette version.
+Les quatre sont désactivés par défaut. Ils apparaissent dans un bloc « Rapports facultatifs » en bas de l'onglet Alertes et dans `GET /api/reports`. Ceux qui lisent GitHub dépensent au plus `reports.max_calls_per_cycle` appels par cycle, lisent quelques dépôts à chaque fois et gardent ce qu'ils lisent en mémoire pendant un jour.
+
+- `reports.workflow_hygiene.enabled` : lit les fichiers de workflow des dépôts et liste ce qui est mal écrit - actions non épinglées à un commit, permissions non limitées, un job sans `timeout-minutes`, pas de groupe `concurrency`, risques `pull_request_target` et injection, secrets en clair (les règles du linter du panneau A13, qui lit des clones locaux, plus les deux nouvelles).
+- `reports.queue.enabled` : lit les jobs de quelques exécutions terminées qui ont attendu et dit combien un job a attendu avant de démarrer pour chaque sorte de runner (Linux, Windows, macOS, plus grands, auto-hébergés).
+- `reports.release_view.enabled` : aucun appel ; d'après ce que sait le sentinelle, dit quels dépôts sont PRÊTS pour une version (entrées dans le changelog ou build vert que personne n'a publié, rien de rouge, aucune signature en attente) et lesquels sont BLOQUÉS, et pourquoi.
+- `reports.supply_chain.enabled` : lit la dernière version des dépôts et dit, d'après les noms de ses fichiers, si elle porte une nomenclature logicielle (SBOM), des sommes de contrôle et une signature ou attestation. Les fichiers ne sont jamais téléchargés.

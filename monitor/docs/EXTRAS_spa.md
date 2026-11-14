@@ -21,6 +21,11 @@ Ambos están **desactivados por defecto** y se activan en Ajustes.
 python bin/monitor_cli.py gh-token --read-only
 ```
 
-## Todavía no está
+## Cuatro informes opcionales
 
-El panel de higiene de workflows, el informe de cola, la vista de versión lista o bloqueada y el panel de cadena de suministro no forman parte de esta versión.
+Los cuatro están desactivados por defecto. Aparecen en un bloque "Informes opcionales" al final de la pestaña Alertas y en `GET /api/reports`. Los que leen GitHub gastan como mucho `reports.max_calls_per_cycle` llamadas en un ciclo, leen pocos repositorios cada vez y guardan lo leído en memoria durante un día.
+
+- `reports.workflow_hygiene.enabled`: lee los archivos de workflow de los repositorios y enumera lo mal escrito - acciones no fijadas a un commit, permisos sin limitar, un trabajo sin `timeout-minutes`, sin grupo `concurrency`, riesgos de `pull_request_target` e inyección, secretos en claro (las reglas del linter del panel A13, que lee clones locales, más las dos nuevas).
+- `reports.queue.enabled`: lee los trabajos de unas pocas ejecuciones terminadas que esperaron y dice cuánto esperó un trabajo antes de empezar para cada tipo de runner (Linux, Windows, macOS, grandes, autoalojados).
+- `reports.release_view.enabled`: sin ninguna llamada; con lo que el centinela sabe dice qué repositorios están LISTOS para una versión (entradas en el changelog o una compilación verde que nadie publicó, nada en rojo, ninguna firma esperando) y cuáles BLOQUEADOS, y por qué.
+- `reports.supply_chain.enabled`: lee la última versión de los repositorios y dice, por los nombres de sus archivos, si lleva una lista de materiales de software (SBOM), sumas de control y una firma o atestación. Los archivos nunca se descargan.

@@ -21,6 +21,11 @@ Beide sind **standardmäßig aus** und werden in den Einstellungen eingeschaltet
 python bin/monitor_cli.py gh-token --read-only
 ```
 
-## Noch nicht dabei
+## Vier optionale Berichte
 
-Das Panel zur Workflow-Hygiene, der Warteschlangenbericht, die Ansicht Release bereit oder blockiert und das Panel der Lieferkette gehören nicht zu dieser Version.
+Alle vier sind standardmäßig aus. Sie erscheinen in einem Block "Optionale Berichte" am Ende des Reiters Alarme und in `GET /api/reports`. Die, die GitHub lesen, verbrauchen höchstens `reports.max_calls_per_cycle` Aufrufe pro Zyklus, lesen jedes Mal einige Repositories und halten das Gelesene einen Tag im Speicher.
+
+- `reports.workflow_hygiene.enabled`: liest die Workflow-Dateien der Repositories und listet Schlechtgeschriebenes auf - nicht an einen Commit gebundene Actions, unbegrenzte Berechtigungen, einen Job ohne `timeout-minutes`, keine `concurrency`-Gruppe, `pull_request_target`- und Injection-Risiken, Geheimnisse im Klartext (die Regeln des Linters des Panels A13, das lokale Klone liest, plus die zwei neuen).
+- `reports.queue.enabled`: liest die Jobs einiger beendeter Läufe, die gewartet haben, und sagt für jede Runner-Art (Linux, Windows, macOS, größere, selbst gehostete), wie lange ein Job vor dem Start wartete.
+- `reports.release_view.enabled`: kein Aufruf; aus dem, was der Wächter weiß, sagt er, welche Repositories für ein Release BEREIT sind (Einträge im Changelog oder ein grüner Build, den niemand veröffentlicht hat, nichts rot, keine Signatur wartet) und welche BLOCKIERT sind, und warum.
+- `reports.supply_chain.enabled`: liest das neueste Release der Repositories und sagt anhand der Dateinamen, ob es eine Software-Stückliste (SBOM), Prüfsummen und eine Signatur oder Attestierung enthält. Die Dateien werden nie heruntergeladen.
