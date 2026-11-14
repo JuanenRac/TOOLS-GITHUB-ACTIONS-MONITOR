@@ -1,0 +1,74 @@
+# GitHub Actions monitor with Docker Compose. Copy deploy/.env.example to deploy/.env, fill it in and run:
+#
+#   docker compose -f deploy/compose.yaml up -d                     the monitor alone, on 127.0.0.1:8765 of this machine
+#   docker compose -f deploy/compose.yaml --profile proxy up -d     the monitor behind the Caddy reverse proxy (TLS) of deploy/Caddyfile
+#
+# The login of GitHub is a file (a Docker secret), never a variable of the environment: create it with the minimum permissions listed in monitor/docs/DEPLOYMENT.md.
+#   printf '%s' "ghp_..." > deploy/gh_token.txt && chmod 600 deploy/gh_token.txt
+# To replace it later without restarting: `docker compose exec monitor python monitor_cli.py credential replace --account default --new-token-file -` (token on the standard input).
+name: github-actions-monitor
+
+services:
+  monitor:
+    image: ${MONITOR_IMAGE:-ghcr.io/juanenrac/tools-github-actions-monitor:latest}
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    restart: unless-stopped
+    init: false                       # the image has its own init (tini): it passes SIGHUP and SIGTERM on
+    read_only: true                   # the code is never written; the two volumes and /tmp are the only places that are
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      MONITOR_GITHUB_OWNER: ${MONITOR_GITHUB_OWNER:?set MONITOR_GITHUB_OWNER in deploy/.env}      # the user or organisation to watch (more accounts: MONITOR_ACCOUNTS)
+      MONITOR_LANG: ${MONITOR_LANG:-}
+      GH_TOKEN_FILE: /run/secrets/gh_token
+      # behind the proxy (profile "proxy"): the public name and the cookie of an HTTPS session
+      MONITOR_PROXY_PUBLIC_HOST: ${MONITOR_PUBLIC_HOST:-}
+      MONITOR_SECURE_COOKIE: ${MONITOR_SECURE_COOKIE:-}
+      MONITOR_ALLOWED_HOSTS: ${MONITOR_ALLOWED_HOSTS:-}
+      MONITOR_TEAM_MODE: ${MONITOR_TEAM_MODE:-}                        # 1 = users and roles (create the first administrator at /login or with auth_cli)
+    secrets:
+      - gh_token
+    volumes:
+      - monitor-config:/config
+      - monitor-data:/data
+    ports:
+      - "127.0.0.1:${MONITOR_PORT:-8765}:8765"                          # only this machine; remove it when the proxy is the only way in
+    healthcheck:
+      test: ["CMD", "python", "-m", "github_actions_monitor.cli.healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  caddy:
+    profiles: ["proxy"]
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    depends_on:
+      monitor:
+        condition: service_healthy
+    environment:
+      MONITOR_SITE: ${MONITOR_SITE:?set MONITOR_SITE in deploy/.env (see deploy/Caddyfile)}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+secrets:
+  gh_token:
+    file: ./gh_token.txt
+
+volumes:
+  monitor-config:
+  monitor-data:
+  caddy-data:
+  caddy-config:

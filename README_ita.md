@@ -44,7 +44,7 @@
 | | |
 |---|---|
 | **Maturità** | functional |
-| **Test** | 1552 metodi di test (`python -m unittest discover -s monitor/tests`) |
+| **Test** | 1572 metodi di test (`python -m unittest discover -s monitor/tests`) |
 | **Impostazioni** | 313 impostazioni, tutte con aiuto |
 | **Lingue** | 8 (inglese, spagnolo, tedesco, francese, italiano, giapponese, cinese e portoghese) |
 | **Provato nel CI su** | ubuntu, windows, macos, Python 3.11, 3.13 |
@@ -227,7 +227,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 ├── monitor/                                il programma
 ├── docs/                                   architettura, schermate, roadmap
 ├── tools/                                  immagini, guide e demo
-├── deploy/                                 esempio di container
+├── deploy/                                 immagine, compose, systemd
 ├── images/                                 banner e immagini
 ├── .github/                                CI e moduli
 ├── CHANGELOG.md                            modifiche per versione
@@ -258,7 +258,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/AI_ita.md`](monitor/docs/AI_ita.md): l'assistente IA: provider, sicurezza e azioni
 - [`monitor/docs/ANALYTICS_ita.md`](monitor/docs/ANALYTICS_ita.md): analisi, letture condizionali e connessione persa
 - [`monitor/docs/CONSOLE_TOOLS_ita.md`](monitor/docs/CONSOLE_TOOLS_ita.md): il linter dei workflow e la vista console
-- [`monitor/docs/DEPLOYMENT_ita.md`](monitor/docs/DEPLOYMENT_ita.md): eseguirlo come servizio, dietro un proxy, permessi
+- [`monitor/docs/DEPLOYMENT_ita.md`](monitor/docs/DEPLOYMENT_ita.md): eseguirlo come servizio (l'immagine ufficiale, Compose, systemd), dietro un proxy, quando GitHub revoca l'accesso, permessi
 - [`monitor/QUICKSTART_it.txt`](monitor/QUICKSTART_it.txt): primi passi, in otto lingue
 - [`monitor/docs/FIRST_STEPS_ita.md`](monitor/docs/FIRST_STEPS_ita.md): i tuoi primi cinque minuti
 - [`monitor/docs/SENTINEL_ita.md`](monitor/docs/SENTINEL_ita.md): la sentinella e i suoi controlli A1-A13

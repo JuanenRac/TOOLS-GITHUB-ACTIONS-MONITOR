@@ -44,7 +44,7 @@
 | | |
 |---|---|
 | **Maturité** | functional |
-| **Tests** | 1552 méthodes de test (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 1572 méthodes de test (`python -m unittest discover -s monitor/tests`) |
 | **Réglages** | 313 réglages, tous avec aide |
 | **Langues** | 8 (anglais, espagnol, allemand, français, italien, japonais, chinois et portugais) |
 | **Testé dans le CI sur** | ubuntu, windows, macos, Python 3.11, 3.13 |
@@ -227,7 +227,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 ├── monitor/                                le programme
 ├── docs/                                   architecture, captures, feuille de route
 ├── tools/                                  images, guides et démo
-├── deploy/                                 exemple de conteneur
+├── deploy/                                 image, compose, systemd
 ├── images/                                 bannière et images
 ├── .github/                                CI et formulaires
 ├── CHANGELOG.md                            changements par version
@@ -258,7 +258,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/AI_fra.md`](monitor/docs/AI_fra.md): l'assistant IA : fournisseurs, sécurité et actions
 - [`monitor/docs/ANALYTICS_fra.md`](monitor/docs/ANALYTICS_fra.md): analyses, lectures conditionnelles et connexion perdue
 - [`monitor/docs/CONSOLE_TOOLS_fra.md`](monitor/docs/CONSOLE_TOOLS_fra.md): le linter de workflows et la vue console
-- [`monitor/docs/DEPLOYMENT_fra.md`](monitor/docs/DEPLOYMENT_fra.md): l'exécuter comme service, derrière un proxy, permissions
+- [`monitor/docs/DEPLOYMENT_fra.md`](monitor/docs/DEPLOYMENT_fra.md): l'exécuter comme service (l'image officielle, Compose, systemd), derrière un proxy, quand GitHub révoque l'accès, permissions
 - [`monitor/QUICKSTART_fr.txt`](monitor/QUICKSTART_fr.txt): premiers pas, en huit langues
 - [`monitor/docs/FIRST_STEPS_fra.md`](monitor/docs/FIRST_STEPS_fra.md) : vos cinq premières minutes
 - [`monitor/docs/SENTINEL_fra.md`](monitor/docs/SENTINEL_fra.md) : la sentinelle et ses contrôles A1-A13

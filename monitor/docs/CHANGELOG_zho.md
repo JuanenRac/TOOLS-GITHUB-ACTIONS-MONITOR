@@ -9,8 +9,41 @@
 
 ## [Unreleased]
 
+### 变更
+
+- **`/api/health` 说得更多，`?deep=1` 问得更多**：除 `ok`、`version`、`loaded` 和 `offline` 外，响应还包含刷新周期（`cycle`）、账户的 GitHub 登录（`credential`）的状态，以及监视器在哪里监听（`listening`）；监督进程使用相同的字段。`/api/health?deep=1` 是深度检查：当某个账户的刷新周期卡住或消失时返回 503；在监督进程中，其循环停止、任意账户的周期卡住，或启动后没有任何账户响应时也返回 503。不带 `deep` 时，不会出现以前不会失败的失败。
+
+- 通知类型 `credential_blind` 和 `credential_back` 为新增；`credential_blind` 在默认列表和示例配置中。警报标签页、`/api/alerts` 和命令行认识级别 `critical` 和哨兵 `system`，严重警报排在最前面。
+
+- `--doctor` 也会按每个账户自己的凭据文件来区分其登录，因此各自获得替换的两个账户不会被报告为共用同一个令牌。
+
+- 发布闸门的时间限制默认为 3600 秒（原先为 900 和 1800，对负载较高的计算机太短）。`MONITOR_RELEASE_TEST_TIMEOUT` 和 `MONITOR_RELEASE_CLEAN_TIMEOUT` 可以修改它们（60 到 86400 秒），默认值在闸门运行时读取，而不是在模块加载时。
+
+### 新增
+
+- **官方 Docker 镜像与服务模式**：`deploy/Dockerfile` 为多阶段构建（来自其已签名 apt 仓库的 GitHub CLI、不含测试的已编译代码，以及仅含 Python、`gh`、CA 证书和代码的最终镜像，只读且属于 root）。它以用户 10001（从不以 root）运行，带两个卷（`/config` 和 `/data`），以 `tini` 作为 init，健康检查即深度检查。`python -m github_actions_monitor.service` 根据有文档说明的环境变量准备好人在首次启动前手工要做的一切：配置、第一个账户（或用 `MONITOR_ACCOUNTS` 创建多个）、`listen` 和 `auth` 的键，以及只生成一次、以 600 权限保存且从不打印的访问令牌。`MONITOR_CONFIG` 把配置文件放在代码之外。
+
+- **带反向代理的 Compose 与 systemd**：`deploy/compose.yaml`（代码只读、无 capability、登录作为 Docker secret），前面可选 Caddy（`deploy/Caddyfile`；公开域名自动 TLS，私有名称用自有机构，或不用 TLS）、`deploy/.env.example`，以及针对传统安装的 `deploy/github-actions-monitor.service` 及其 env 文件（已加固、失败时重启、启动后检查深度健康、`systemctl reload` 时重新读取凭据文件）。八种语言的指南 `DEPLOYMENT.md` 列出了每个环境变量、作为服务的首次启动、备份、升级以及镜像来源证明的校验。
+
+- **`linux/amd64` 和 `linux/arm64` 镜像发布到 ghcr.io**：工作流 `release-image.yml` 在发布版本时（或手动）构建并发布，每个作业使用最小权限、每个 action 按提交固定、每个作业设时间限制，标签为 `X.Y.Z`、`X.Y` 和 `latest`，并附带来源证明。推送是单独的一步，只有发布版本才会执行：同一个工作流在手动启动且关闭 `push` 时只构建不推送，CI 在每次变更时构建镜像。
+
+- **深度健康检查**：`/api/health?deep=1`（见上），供容器或服务管理器使用的 `python -m github_actions_monitor.cli.healthcheck`（退出码 0、1、2、3），以及可在任何计算机上使用的 `monitor_cli.py health --deep`。GitHub 登录无效的账户会被点名，但不算故障：重启无法修复丢失的登录。
+
+- **GitHub 撤销或让登录过期，只会让该账户失明**：连续两次被拒绝，且拒绝表明登录本身无效（401、`Bad credentials`、令牌过期或被撤销、账户被停用、没有登录）后，该账户失明；其他账户继续运行。页面、`/api/accounts`（`state: blind`）、健康检查和命令行都会说明，严重的系统警报（`system.credential_blind`）只打开一次，渠道只通知一次（`credential_blind`，恢复时为 `credential_back`），账户会继续尝试。仅某一项权限被拒绝（某个仓库的 403）不会让账户失明。以已失效的登录启动的服务不会放弃，而是保持运行并处于失明状态。
+
+- **无需重启任何东西即可替换登录**：端点 `/api/accounts/<id>/credential`（团队模式下需 `admin` 会话；否则为监视器所在的计算机）、`monitor_cli.py credential replace --account ID --new-token-file 文件`（`-` 表示标准输入；令牌绝不会从命令行选项中读取），以及系统支持时的 SIGHUP（每个账户重新读取其凭据文件）。新令牌在保存之前会先向 GitHub 验证，因此 GitHub 拒绝的令牌不会改变任何内容；有效的令牌只保存在该账户的文件夹中（权限 600）并立即使用。`GH_TOKEN_FILE` 指定一个供所有账户使用的登录文件，在启动时和收到 SIGHUP 时读取。令牌绝不会出现在响应、日志、警报或审计中。
+
+- **多账户监督进程以网络模式监听**，与单账户监视器一样：每个请求都带访问令牌（Cookie、请求头或 `/api/access`）、令牌错误后锁定、`Host` 检查、可选的使用您证书的 TLS、本机操作者使用的第二个端口（`listen.local_port`），而决定暴露范围的键、GitHub 登录和对 GitHub 的操作只能来自监视器所在的计算机（账户把来自网络的请求视为远程请求）。
+
+- **页面和工具会说明监视器在哪里监听**：本机、网络或代理之后（`listen.proxy_public_host`、`listen.secure_cookie`、`listen.trusted_proxy`），显示在页面底部栏、`/api/accounts`、`/api/health` 以及 `monitor_cli.py status` 和 `monitor_cli.py accounts` 的前几行。
+
+- **命令行可对另一台计算机上的监视器工作**：`--url` 或 `MONITOR_URL`，用 `--ca-file` 或 `MONITOR_CA_FILE` 信任自有 HTTPS 证书的颁发机构；在团队模式下，用 `--user` 配合 `--password-file`（或 `MONITOR_USER`、`MONITOR_PASSWORD_FILE`）以 Bearer 会话登录（`auth.allow_bearer`）。对于失明的账户，`status` 和 `accounts` 以退出码 3 结束。
+
+- **测试**：CI 中的容器测试会构建镜像，以只读且非 root 方式启动，撤销两个账户之一的登录，并检查只有该账户失明、严重警报打开、深度健康检查保持正常、被拒绝的令牌不改变任何内容、有效令牌无需重启即可让账户恢复，以及 SIGHUP 也能做到；此外，对已撤销登录的每种行为（计数、其他账户、警报、通知、替换、文件、SIGHUP、角色、审计以及绝不出现的令牌）各有一个回归测试。
+
 ### 修复
 
+- 立即退出的账户的测试不再依赖计算机的速度：重新启动账户前的等待由测试自己提供的时钟来检查，第二个测试在不读取真实时间的情况下检查等待的时间表（旧测试曾在发布闸门的高负载下失败）。
 - 读完最后一个仓库后,“正在加载仓库”框仍留在页面上:现在读取一结束,完成的画面就会送达页面,不再等待随后的维护工作(给 AI 工具的简报、警报中心);Sentinel 面板列表很长时,这份简报也不会再无限循环(正是这个循环让最后的部分画面 131 / 131 一直留在页面上)。
 - 刷新页面(F5)不再需要几分钟才能拿到数据:简报的无限循环占满了监视器的处理器时间,页面因此中止放弃;此外,数据端点的响应是在持有全局锁的情况下写入连接的,所以一个停滞的连接(关闭的标签页)会冻结其他所有页面和刷新周期。现在只在取画面时持有该锁。浏览器测试检查该框在加载时显示、并随最后一个仓库消失;服务器测试检查简报会结束、完成的画面先于维护工作发布、停滞的连接不会阻塞刷新。
 

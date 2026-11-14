@@ -1,0 +1,22 @@
+# Reverse proxy for the monitor (deploy/compose.yaml, profile "proxy").
+#
+# MONITOR_SITE is the address Caddy serves, set in deploy/.env:
+#   monitor.example.org        a public name: Caddy gets and renews its certificate by itself (HTTPS)
+#   monitor.lan                a name of your own network: also uncomment `tls internal` below (Caddy's own certificate authority)
+#   http://monitor.lan         plain HTTP on a network you trust: set MONITOR_ALLOWED_HOSTS=monitor.lan in deploy/.env too (the monitor then knows that name; the cookie is not marked Secure)
+# For the two HTTPS forms set MONITOR_PUBLIC_HOST (the same name) and MONITOR_SECURE_COOKIE=1 in deploy/.env.
+#
+# The monitor refuses a request whose Host is not its own address or MONITOR_PUBLIC_HOST, and asks for its access token (or a login of the team mode) on every request: the proxy adds no
+# password of its own. Caddy puts the real address of the client at the end of X-Forwarded-For and never copies the one the client sent.
+{$MONITOR_SITE} {
+	# tls internal
+	encode zstd gzip
+	header {
+		-Server
+		Referrer-Policy no-referrer
+		X-Content-Type-Options nosniff
+	}
+	reverse_proxy monitor:8765 {
+		flush_interval -1      # the stream for an AI tool (/api/ai/stream) is not buffered
+	}
+}

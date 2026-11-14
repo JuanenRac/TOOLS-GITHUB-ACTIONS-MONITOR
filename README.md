@@ -44,7 +44,7 @@
 | | |
 |---|---|
 | **Maturity** | functional |
-| **Tests** | 1552 test methods (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 1572 test methods (`python -m unittest discover -s monitor/tests`) |
 | **Settings** | 313 settings, all with help |
 | **Languages** | 8 (English, Spanish, German, French, Italian, Japanese, Chinese, Portuguese) |
 | **Tested in the CI on** | ubuntu, windows, macos, Python 3.11, 3.13 |
@@ -227,7 +227,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 ├── monitor/                                the program
 ├── docs/                                   architecture, screenshots, roadmap
 ├── tools/                                  pictures, guides and demo
-├── deploy/                                 container example
+├── deploy/                                 image, compose, systemd
 ├── images/                                 banner and pictures
 ├── .github/                                CI and issue forms
 ├── CHANGELOG.md                            changes per version
@@ -258,7 +258,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/AI.md`](monitor/docs/AI.md): the AI assistant: providers, safety and actions
 - [`monitor/docs/ANALYTICS.md`](monitor/docs/ANALYTICS.md): analytics, conditional reads and the lost connection
 - [`monitor/docs/CONSOLE_TOOLS.md`](monitor/docs/CONSOLE_TOOLS.md): the workflow linter and the terminal view
-- [`monitor/docs/DEPLOYMENT.md`](monitor/docs/DEPLOYMENT.md): running it as a service, behind a proxy, permissions
+- [`monitor/docs/DEPLOYMENT.md`](monitor/docs/DEPLOYMENT.md): running it as a service (the official image, Compose, systemd), behind a proxy, when GitHub revokes the login, permissions
 - [`monitor/QUICKSTART_en.txt`](monitor/QUICKSTART_en.txt): first steps, in eight languages
 - [`monitor/docs/FIRST_STEPS.md`](monitor/docs/FIRST_STEPS.md): your first five minutes
 - [`monitor/docs/SENTINEL.md`](monitor/docs/SENTINEL.md): the sentinel and its checks A1-A13

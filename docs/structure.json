@@ -66,14 +66,14 @@
         {
           "name": "deploy/",
           "desc": {
-            "en": "container example",
-            "es": "ejemplo de contenedor",
-            "de": "Container-Beispiel",
-            "fr": "exemple de conteneur",
-            "it": "esempio di container",
-            "ja": "コンテナーの例",
-            "zh": "容器示例",
-            "pt": "exemplo de contentor"
+            "en": "image, compose, systemd",
+            "es": "imagen, compose, systemd",
+            "de": "Image, Compose, systemd",
+            "fr": "image, compose, systemd",
+            "it": "immagine, compose, systemd",
+            "ja": "イメージ、Compose、systemd",
+            "zh": "镜像、Compose、systemd",
+            "pt": "imagem, compose, systemd"
           }
         },
         {

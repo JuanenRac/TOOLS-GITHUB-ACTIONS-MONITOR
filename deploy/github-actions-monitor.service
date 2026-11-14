@@ -1,0 +1,52 @@
+# The monitor as a service on a machine with systemd (no container). Install it as root:
+#
+#   useradd --system --home-dir /var/lib/github-actions-monitor --create-home --shell /usr/sbin/nologin monitor
+#   install -d -o monitor -g monitor -m 700 /var/lib/github-actions-monitor /etc/github-actions-monitor
+#   unzip the release in /opt/github_actions_monitor (the folder of the product, owned by root)
+#   install -m 600 -o monitor deploy/github-actions-monitor.env /etc/github-actions-monitor/env     # then edit it
+#   install -m 644 deploy/github-actions-monitor.service /etc/systemd/system/
+#   systemctl daemon-reload && systemctl enable --now github-actions-monitor
+#
+# It listens on 127.0.0.1 only unless you turn the network mode on in the env file. `systemctl reload github-actions-monitor` (SIGHUP) makes every account read its credential files again.
+[Unit]
+Description=GitHub Actions monitor
+Documentation=https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=monitor
+Group=monitor
+WorkingDirectory=/opt/github_actions_monitor
+EnvironmentFile=/etc/github-actions-monitor/env
+Environment=PYTHONPATH=/opt/github_actions_monitor/src PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
+ExecStart=/usr/bin/python3 -m github_actions_monitor.service
+ExecReload=/bin/kill -HUP $MAINPID
+# the deep health check: the supervisor and the refresh cycle of every account are alive (it never calls GitHub)
+ExecStartPost=/bin/sh -c 'for i in 1 2 3 4 5 6 7 8 9 10 11 12; do /usr/bin/python3 -m github_actions_monitor.cli.healthcheck >/dev/null && exit 0; sleep 5; done; exit 1'
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=90
+TimeoutStopSec=20
+KillMode=control-group
+# hardening: nothing but its own folders is writable, no new privileges, no devices, no other users' processes
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=false
+SystemCallArchitectures=native
+CapabilityBoundingSet=
+ReadWritePaths=/var/lib/github-actions-monitor
+StateDirectory=github-actions-monitor
+
+[Install]
+WantedBy=multi-user.target
