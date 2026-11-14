@@ -5,8 +5,8 @@
 # Three stages: `gh` fetches the GitHub CLI from its signed apt repository, `app` prepares the code (compiled, without the tests), and the final image holds only Python, `gh`, the CA
 # certificates and the code, read-only and owned by root. It runs as the user 10001, never as root, and keeps everything it writes in two volumes:
 #
-#   /config   actions_monitor.json (written on the first start, kept after)
-#   /data     the accounts (one folder each), the access token of the service, the state, the login of `gh`
+#   /config   actions_monitor.json (written on the first start, kept after) and the other files of configuration (targets, quotas ...)
+#   /data     data/ of the monitor: the accounts (one folder each), the state, the access token of the service, the login of `gh`, and logs/ and ai/ (what the AI tools read, with INDEX.json)
 #
 # The environment variables are listed in monitor/docs/DEPLOYMENT.md. The image listens on every interface of the container in the NETWORK MODE (every request needs the access token) and
 # publishes no port by itself: publish 8765 on 127.0.0.1 or put the reverse proxy of deploy/compose.yaml in front of it.
@@ -38,7 +38,7 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/* \
  && groupadd --gid 10001 monitor \
  && useradd --uid 10001 --gid 10001 --no-create-home --home-dir /data --shell /usr/sbin/nologin monitor \
- && mkdir -p /config /data/accounts /data/state /data/secrets /data/gh \
+ && mkdir -p /config /data/accounts /data/state /data/secrets /data/gh /data/logs /data/ai \
  && chown -R 10001:10001 /config /data \
  && chmod 700 /data/secrets /data/state
 COPY --from=gh /usr/bin/gh /usr/local/bin/gh
@@ -48,6 +48,8 @@ ENV PYTHONPATH=/app/src \
     PYTHONDONTWRITEBYTECODE=1 \
     MONITOR_SERVICE=1 \
     MONITOR_CONFIG=/config/actions_monitor.json \
+    MONITOR_CONFIG_DIR=/config \
+    MONITOR_DATA_DIR=/data \
     MONITOR_ACCOUNTS_DIR=/data/accounts \
     MONITOR_STATE_DIR=/data/state \
     MONITOR_SECRET_DIR=/data/secrets \

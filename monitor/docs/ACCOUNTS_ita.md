@@ -11,7 +11,7 @@ L'edizione completa può osservare più account GitHub (una persona o un'organiz
 
 ## Quando non c'è nulla da fare
 
-Senza una cartella `accounts/` il monitor funziona esattamente come prima: un account, i suoi file accanto al codice. Continui a leggere solo se ne vuoi più di uno.
+Senza una cartella `accounts/` il monitor funziona esattamente come prima: un account, i suoi file nelle cartelle `config/`, `data/` e `logs/` (vedi LAYOUT). Continui a leggere solo se ne vuoi più di uno.
 
 ## La cartella degli account
 
@@ -29,16 +29,16 @@ L'id di un account è formato da lettere minuscole, cifre, `_` e `-` (fino a 40 
 ## Passare da un account a più
 
 ```
-python actions_monitor.py --migrate-accounts          # mostra cosa verrebbe copiato, non scrive nulla
-python actions_monitor.py --migrate-accounts --apply  # lo copia in accounts/default/
-python actions_monitor.py --accounts                  # elenca gli account
+python bin/actions_monitor.py --migrate-accounts          # mostra cosa verrebbe copiato, non scrive nulla
+python bin/actions_monitor.py --migrate-accounts --apply  # lo copia in accounts/default/
+python bin/actions_monitor.py --accounts                  # elenca gli account
 ```
 
 Gli originali non vengono mai spostati né eliminati: li elimini tu dopo aver controllato. Una seconda esecuzione si rifiuta, così due stati non si mescolano mai. Per aggiungere un account, crea `accounts/<id>/actions_monitor.json` con il suo `github_owner` (copia il modello `assets/examples/actions_monitor.example.json`).
 
 ## Esecuzione
 
-`python actions_monitor.py` con una cartella `accounts/` avvia il supervisore, un piccolo processo sulla porta di sempre (8765) che avvia un monitor per account e dà alla pagina e agli strumenti un unico indirizzo. Non legge nulla da GitHub e non scrive nulla. Se un account muore, lo riavvia con un'attesa crescente (2, 5, 15, 30, 60 e poi 120 secondi) e il riepilogo lo dichiara fermo nel frattempo. `python actions_monitor.py --account personal` esegue solo quell'account, come un monitor normale.
+`python bin/actions_monitor.py` con una cartella `accounts/` avvia il supervisore, un piccolo processo sulla porta di sempre (8765) che avvia un monitor per account e dà alla pagina e agli strumenti un unico indirizzo. Non legge nulla da GitHub e non scrive nulla. Se un account muore, lo riavvia con un'attesa crescente (2, 5, 15, 30, 60 e poi 120 secondi) e il riepilogo lo dichiara fermo nel frattempo. `python bin/actions_monitor.py --account personal` esegue solo quell'account, come un monitor normale.
 
 ## La pagina
 

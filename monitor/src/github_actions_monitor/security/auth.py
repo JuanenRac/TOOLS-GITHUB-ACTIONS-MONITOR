@@ -409,9 +409,9 @@ def change_own_password(storage, username, current, new, cfg, keep_token=None):
 def audit_path():
     if AUDIT_FILE is not None:
         return Path(AUDIT_FILE)
-    from github_actions_monitor.util.paths import ROOT
+    from github_actions_monitor.util import paths
     chosen = os.environ.get("MONITOR_STATE_DIR", "").strip()      # a service keeps it in the volume of its data, apart from the code
-    return (Path(chosen) if chosen else ROOT) / "auth_audit.jsonl"
+    return (Path(chosen) if chosen else paths.folder("logs")) / "auth_audit.jsonl"
 
 
 def audit(cfg, action, user="", role="", address="", path="", result="ok", code=""):

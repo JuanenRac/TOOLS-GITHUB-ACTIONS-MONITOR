@@ -12,8 +12,8 @@
 ## 步骤
 
 1. 停止监视器，把新版本解压到旧文件夹上（保留你的 `actions_monitor.json`）。
-2. 查看会发生什么变化：`python migrate_state.py`（演练，不会改动任何内容）。
-3. 执行：`python migrate_state.py --apply` 把旧文件复制到新名称并保留旧文件；加上 `--move` 则改为重命名。已存在的内容绝不会被覆盖，设置 `parte_history_days` 会在保存 `actions_monitor.json` 的副本之后改为 `report_history_days`。
+2. 查看会发生什么变化：`python bin/migrate_state.py`（演练，不会改动任何内容）。
+3. 执行：`python bin/migrate_state.py --apply` 把旧文件复制到新名称并保留旧文件；加上 `--move` 则改为重命名。已存在的内容绝不会被覆盖，设置 `parte_history_days` 会在保存 `actions_monitor.json` 的副本之后改为 `report_history_days`。
 4. 用 `MONITOR_GITHUB_ACTIONS`（与以前相同的启动器）启动监视器，批处理工具使用 `BATCH_GITHUB_ACTIONS`。
 5. 删除你可能还留着的旧启动器：`LOTE_GITHUB_ACTIONS.bat`、`.sh` 和 `.command`。
 
@@ -21,7 +21,7 @@
 
 | 1.5.0 之前 | 1.5.0 起 |
 |---|---|
-| `leer_parte.py` | `read_report.py` |
+| `leer_parte.py` | `bin/read_report.py` |
 | `eventos.py`, `parte_history.py` | `events.py`, `report_history.py` |
 | `LOTE_GITHUB_ACTIONS.*` | `BATCH_GITHUB_ACTIONS.*` |
 | `eventos_monitor.jsonl`, `eventos_estado.json` | `events_monitor.jsonl`, `events_state.json` |
@@ -39,7 +39,7 @@
 
 1. 停止监视器，把新版本解压覆盖到旧文件夹（保留你的 `actions_monitor.json` 和目录文件）。
 2. 像以前一样启动。旁边会出现新文件（`etag_cache.json`、`analytics_history.json`、`update_check.json`、`sentinel_history.json`），可随时删除。
-3. 可选：`python actions_monitor.py --doctor` 检查安装。
+3. 可选：`python bin/actions_monitor.py --doctor` 检查安装。
 
 变化：出现了**精简版**（`MONITOR_LITE_GITHUB_ACTIONS`，端口 8766，独立的 `actions_monitor_lite.json`，无哨兵）；**main 上为红**统一为一条规则（每个工作流在默认分支上最后一次已完成的 run；已取消、已跳过、neutral 和 stale 的 run 不代表任何结论），因此某个数字可能与 1.5.x 不同；设置页以**基本**标签页开头；通知、分析、linter、webhook 事件和 AI 助手已存在，但在你开启之前都是**关闭**的；向 GitHub 写入仍需你明确确认。Rich 和 Textual 仍是可选的；需要 Python 3.11 或更高版本。
 
@@ -65,7 +65,7 @@
 - **HTTPS 下的网络模式**:现在可以从页面进行更改;`Origin` 必须带有会话的协议和监视器的端口。在代理之后请在地址中保留监视器的端口,否则检查会拒绝。
 - **网络模式**:架构中标记为 `secure` 的所有设置只能在本机修改(以前只有 `listen.`、`github_token.`、`act.`、`github_actions.`)。在其他电脑上修改 `webhook.*`、`notify.*` 等的脚本现在会收到 403 `local_only`。
 - **act**:Stop 之后运行立即空闲;紧接着的启动不再返回 `busy`。
-- 监视器旁边新增文件 `degraded.json` 和 `degraded_lite.json`(被忽略失败的计数器);可随时删除。
+- `data/` 中新增文件 `degraded.json` 和 `degraded_lite.json`(被忽略失败的计数器);可随时删除。
 - 更新历史(帮助 > 更新日志)已翻译:每种语言一个 `docs/CHANGELOG_<语言>.md` 文件。
 
 # 从 1.6.6 到 1.6.7
@@ -86,13 +86,13 @@
 
 无需转换任何内容：没有 `accounts/` 文件夹时，监视器的工作方式与以前完全一样。
 
-- **多个账户** 是可选的。要使用它们，请运行 `python actions_monitor.py --migrate-accounts`（试运行），然后加上 `--apply` 把你的文件复制到 `accounts/default/`；原文件会一直保留，直到你自己删除。其他账户以 `accounts/<id>/actions_monitor.json` 的形式添加。参见 `ACCOUNTS.md`。
-- 存在 `accounts/` 文件夹时，`python actions_monitor.py` 会启动一个监督程序，为每个账户运行一个监视器；`--account <id>` 只运行其中一个。精简版没有这些内容。
+- **多个账户** 是可选的。要使用它们，请运行 `python bin/actions_monitor.py --migrate-accounts`（试运行），然后加上 `--apply` 把你的文件复制到 `accounts/default/`；原文件会一直保留，直到你自己删除。其他账户以 `accounts/<id>/actions_monitor.json` 的形式添加。参见 `ACCOUNTS.md`。
+- 存在 `accounts/` 文件夹时，`python bin/actions_monitor.py` 会启动一个监督程序，为每个账户运行一个监视器；`--account <id>` 只运行其中一个。精简版没有这些内容。
 - 新增：页面地址中的 `?view=` 和 `?chrome=0`、`GET /api/accounts`、`GET /api/live-status`，以及供所有账户使用的一个 `POST /api/webhook`。
 
 # 从 1.7.x 到新的文件夹布局
 
-代码现在位于 `src/github_actions_monitor/`,网页、示例文件和语言文件位于 `assets/`,发布与迁移脚本位于 `tools/`。你日常使用的东西都没有变:启动脚本(`MONITOR_GITHUB_ACTIONS`、`MONITOR_LITE_GITHUB_ACTIONS`、`BATCH_GITHUB_ACTIONS`)仍在原处,打开相同的地址和端口;本指南中的命令(`python read_report.py`、`python actions_monitor.py --doctor`、`python monitor_cli.py status` 等)仍然有效,因为产品文件夹里保留了同名的小型入口文件。启动脚本在把 `src/` 加入路径后运行 `python -m github_actions_monitor`(完整版)和 `python -m github_actions_monitor.lite`(lite 版)。
+代码现在位于 `src/github_actions_monitor/`,网页、示例文件和语言文件位于 `assets/`,发布与迁移脚本位于 `tools/`。你日常使用的东西都没有变:启动脚本(`MONITOR_GITHUB_ACTIONS`、`MONITOR_LITE_GITHUB_ACTIONS`、`BATCH_GITHUB_ACTIONS`)仍在原处,打开相同的地址和端口;本指南中的命令(`python bin/read_report.py`、`python bin/actions_monitor.py --doctor`、`python bin/monitor_cli.py status` 等)仍然有效,因为产品文件夹里保留了同名的小型入口文件。启动脚本在把 `src/` 加入路径后运行 `python -m github_actions_monitor`(完整版)和 `python -m github_actions_monitor.lite`(lite 版)。
 
 你的数据不会移动:`actions_monitor.json`、缓存、日志、`config_backups/`、`accounts/` 以及你自己的目录文件都留在启动脚本旁边的产品文件夹里,绝不会进入 `src/`。随程序发布的中性示例和 `quotas.json` 现在位于 `assets/examples/`;你放在启动脚本旁边的自己的 `quotas.json` 仍然优先。
 
@@ -100,7 +100,7 @@
 
 1. 停止监视器,把新版本解压到旧文件夹之上(保留你的 `actions_monitor.json`)。
 2. 照常启动。即使不做别的也能正常工作。
-3. 要清理旧的平铺布局留下的文件:先运行 `python tools/migrate_layout.py`(试运行),再运行 `python tools/migrate_layout.py --apply`。它会把你的配置文件复制到 `layout_backup_<时间戳>/config/`,并把旧模块、旧网页、旧示例和旧的 `locales/` 文件夹移到 `layout_backup_<时间戳>/old_code/`。不会删除任何内容,也不会覆盖已有文件,你的数据不受影响。只要还有旧文件,`python actions_monitor.py --doctor` 就会提醒。
+3. 要清理旧的平铺布局留下的文件:先运行 `python tools/migrate_layout.py`(试运行),再运行 `python tools/migrate_layout.py --apply`。它会把你的配置文件复制到 `layout_backup_<时间戳>/config/`,并把旧模块、旧网页、旧示例和旧的 `locales/` 文件夹移到 `layout_backup_<时间戳>/old_code/`。不会删除任何内容,也不会覆盖已有文件,你的数据不受影响。只要还有旧文件,`python bin/actions_monitor.py --doctor` 就会提醒。
 4. 你自己的脚本如果按旧的平铺名称导入模块(`import read_report`),现在应在把 `src/` 加入路径后导入 `github_actions_monitor.<包>.<模块>`。
 
 | 包 | 内容 |

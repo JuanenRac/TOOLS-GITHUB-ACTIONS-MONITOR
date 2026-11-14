@@ -22,7 +22,7 @@ scrape or a refresh of a dashboard costs no GitHub API quota. Switching them on 
 | `/api/outputs/grafana.json` | JSON tables for the Grafana "Infinity" / JSON data source | `outputs.json.enabled` |
 | `/api/outputs/dashboard.json` | the document of `ci_red.json` (schema 2, see CI_RED_SCHEMA.md) for a status dashboard | `outputs.dashboard.enabled` |
 
-A request to a path whose switch is off gets `404`. The older way of giving the same document to a dashboard, `ci_red.json` and `read_report.py --export-status`, is unchanged: it is a contract.
+A request to a path whose switch is off gets `404`. The older way of giving the same document to a dashboard, `ci_red.json` and `bin/read_report.py --export-status`, is unchanged: it is a contract.
 
 ## Prometheus metrics
 
@@ -74,7 +74,7 @@ workflows of a repository at once until they finish. From a webhook dashboard wi
 
 ## The signing queue by trust
 
-Each row of the queue has a `trust`: `verified` (the signature was checked against the public key), `unknown` (the format cannot be checked here: never a guess) or `failed` (it was checked and does not match). The Sentinel tab has a Signature filter with the count of each kind and marks the rows (green, grey or red edge). From the console: `py -3 read_report.py --export-sign-queue FILE --sign-trust failed`.
+Each row of the queue has a `trust`: `verified` (the signature was checked against the public key), `unknown` (the format cannot be checked here: never a guess) or `failed` (it was checked and does not match). The Sentinel tab has a Signature filter with the count of each kind and marks the rows (green, grey or red edge). From the console: `py -3 bin/read_report.py --export-sign-queue FILE --sign-trust failed`.
 
 ## In the network mode
 

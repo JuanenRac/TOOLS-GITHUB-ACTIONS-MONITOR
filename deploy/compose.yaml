@@ -5,7 +5,7 @@
 #
 # The login of GitHub is a file (a Docker secret), never a variable of the environment: create it with the minimum permissions listed in monitor/docs/DEPLOYMENT.md.
 #   printf '%s' "ghp_..." > deploy/gh_token.txt && chmod 600 deploy/gh_token.txt
-# To replace it later without restarting: `docker compose exec monitor python monitor_cli.py credential replace --account default --new-token-file -` (token on the standard input).
+# To replace it later without restarting: `docker compose exec monitor python bin/monitor_cli.py credential replace --account default --new-token-file -` (token on the standard input).
 name: github-actions-monitor
 
 services:

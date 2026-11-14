@@ -44,7 +44,7 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 1573 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **测试** | 1601 个测试方法(`python -m unittest discover -s monitor/tests`) |
 | **设置** | 313 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows, macos,Python 3.11, 3.13 |
@@ -140,7 +140,7 @@
 - **哨兵**：安全警报、仓库卫生、陈旧的拉取请求、可发布的版本、等待签名的构建，以及通俗易懂的报告。
 - **Collab 哨兵与统一警报列表**：需要人来处理的未关闭 Issue 和拉取请求（被遗忘的、严重的、等待评审的、陈旧草稿、冲突），只读且按自己的周期运行；“警报”标签页把所有哨兵汇总成一个列表，可按来源筛选，并提供会自行结束的本地静音。
 - **状态栏、全屏与可排序的表格**：页面底部显示最重要的提示（以及显示全部提示的窗口）、连接、配额、最近一次读取、模式、地址和时钟；全屏按钮；“仓库”和“历史”可按一列或多列排序，并可自选列。
-- **作为客户端的命令行**：`monitor_cli.py`（`status`、`health`、`alerts`、`accounts`、`live`、`doctor`）读取运行中监视器给出的信息，支持 `--json` 和稳定的退出码；从不向 GitHub 写入。
+- **作为客户端的命令行**：`bin/monitor_cli.py`（`status`、`health`、`alerts`、`accounts`、`live`、`doctor`）读取运行中监视器给出的信息，支持 `--json` 和稳定的退出码；从不向 GitHub 写入。
 - **设置页面**：在浏览器中修改路径、间隔、配额和开关；只有固定且经过验证的键，每次保存前都会备份。
 - **图表与历史**：计算分钟数、失败和成功，配有动画条形图和每日历史（尊重“减少动态效果”设置）。
 - **八种语言**（en、es、de、fr、it、ja、zh、pt），以英语为基础；在设置中切换。
@@ -161,13 +161,13 @@
 | 只看什么在运行、什么失败了（**从这里开始**） | `MONITOR_LITE_GITHUB_ACTIONS` | 8766 |
 | 让整个账户被替你监视：警报、发布、签名、就绪度、分析 | `MONITOR_GITHUB_ACTIONS`（含[哨兵](monitor/docs/SENTINEL_zho.md)） | 8765 |
 
-控制台窗口的标题和第一行会说明正在运行哪一个。还拿不准？`python actions_monitor.py --demo` 用虚构数据打开页面，`--doctor` 检查你的安装。[你的前五分钟](monitor/docs/FIRST_STEPS_zho.md)
+控制台窗口的标题和第一行会说明正在运行哪一个。还拿不准？`python bin/actions_monitor.py --demo` 用虚构数据打开页面，`--doctor` 检查你的安装。[你的前五分钟](monitor/docs/FIRST_STEPS_zho.md)
 
 ## 快速开始
 
 1. 安装 Python 3.11 或更新版本和 [GitHub CLI](https://cli.github.com/)，然后运行 `gh auth login`。
 2. 下载本仓库（或最新发布的 zip），打开 `monitor` 文件夹。
-3. 启动：Windows 运行 `MONITOR_GITHUB_ACTIONS.bat`，Linux 运行 `./MONITOR_GITHUB_ACTIONS.sh`，macOS 双击 `MONITOR_GITHUB_ACTIONS.command`，或在任何系统运行 `python actions_monitor.py`。
+3. 启动：Windows 运行 `MONITOR_GITHUB_ACTIONS.bat`，Linux 运行 `./MONITOR_GITHUB_ACTIONS.sh`，macOS 双击 `MONITOR_GITHUB_ACTIONS.command`，或在任何系统运行 `python bin/actions_monitor.py`。
 4. 打开它打印的地址（`http://127.0.0.1:<端口>`）。首次启动时会根据示例创建 `actions_monitor.json`。
 5. 打开 **设置**，填写你的 GitHub 账号、生态系统（按名称前缀分组的仓库）和其他内容。
 
@@ -206,7 +206,7 @@
 - **分析**:每个工作流的时长、排队时间和每个步骤的 p50 / p95,不稳定的工作流(在同一提交上先失败后通过)以及变慢的工作流;导出到 Prometheus 和 Grafana。
 - **节省配额并能应对断网**:条件读取(304 不消耗任何配额)以及带离线横幅、可自动恢复的“最后画面”模式。
 - **入站 Webhook 与通知**:已签名的事件实时更新仓库;可选地向 Telegram、Discord、Slack、Matrix、MQTT 或本地地址发送消息(绝不写入 GitHub)。
-- **工作流检查器与终端视图**:`lint_workflows.py` 在推送前检查 `.github/workflows`;`tui.py`(可选,使用 `rich`)在控制台中显示实时表格。
+- **工作流检查器与终端视图**:`bin/lint_workflows.py` 在推送前检查 `.github/workflows`;`bin/tui.py`(可选,使用 `rich`)在控制台中显示实时表格。
 - **AI 助手(默认关闭)**:用 Ollama、OpenAI 兼容服务、Anthropic 或 `gh copilot` 做总结、分类和解释;命令只来自封闭列表,且每一条都要经你确认后才会执行。
 - 设置页面在保存备份副本之后，才会写入固定且经过验证的键。
 
@@ -224,26 +224,26 @@ python -m unittest discover -s monitor/tests
 
 ```
 TOOLS-GITHUB-ACTIONS-MONITOR/
-├── monitor/                                程序本体
-├── docs/                                   架构、截图、路线图
-├── tools/                                  图片、指南与演示
-├── deploy/                                 镜像、Compose、systemd
-├── images/                                 横幅图和图片
-├── .github/                                CI 和议题表单
-├── CHANGELOG.md                            各版本变更
-├── LICENSE NOTICE AUTHORS                  许可证和作者
-├── CONTRIBUTING.md SECURITY.md             参与方式、报告
-├── SUPPORT.md CODE_OF_CONDUCT.md           支持和行为准则
+├── monitor/                            程序本体
+├── docs/                               架构、截图、路线图
+├── tools/                              图片、指南与演示
+├── deploy/                             镜像、Compose、systemd
+├── images/                             横幅图和图片
+├── .github/                            CI 和议题表单
+├── CHANGELOG.md                        各版本变更
+├── LICENSE NOTICE AUTHORS              许可证和作者
+├── CONTRIBUTING.md SECURITY.md         参与方式、报告
+├── SUPPORT.md CODE_OF_CONDUCT.md       支持和行为准则
 └── monitor/
-    ├── MONITOR_GITHUB_ACTIONS.*            启动脚本(双击)
-    ├── MONITOR_LITE_GITHUB_ACTIONS.*       lite 版(无哨兵)
-    ├── BATCH_GITHUB_ACTIONS.*              批量构建菜单
-    ├── src/                                可导入的包
-    ├── assets/                             示例、网页、语言
-    ├── actions_monitor.py read_report.py   工具入口
-    ├── tests/                              离线测试
-    ├── docs/                               指南、模式、Grafana
-    └── tools/                              发布与迁移脚本
+    ├── MONITOR_GITHUB_ACTIONS.*        启动脚本(双击)
+    ├── MONITOR_LITE_GITHUB_ACTIONS.*   lite 版(无哨兵)
+    ├── BATCH_GITHUB_ACTIONS.*          批量构建菜单
+    ├── src/                            可导入的包
+    ├── assets/                         示例、网页、语言
+    ├── bin/                            简短命令(read_report、monitor_cli 等)
+    ├── tests/                          离线测试
+    ├── docs/                           指南、快速入门、模式、Grafana
+    └── tools/                          发布与迁移脚本
 ```
 
 ## 文档
@@ -259,7 +259,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ANALYTICS_zho.md`](monitor/docs/ANALYTICS_zho.md): 分析、条件读取与连接丢失
 - [`monitor/docs/CONSOLE_TOOLS_zho.md`](monitor/docs/CONSOLE_TOOLS_zho.md): 工作流检查器与终端视图
 - [`monitor/docs/DEPLOYMENT_zho.md`](monitor/docs/DEPLOYMENT_zho.md): 作为服务运行（官方镜像、Compose、systemd）、反向代理之后、GitHub 撤销登录时、权限
-- [`monitor/QUICKSTART_zh.txt`](monitor/QUICKSTART_zh.txt): 入门步骤（八种语言）
+- [`monitor/docs/LAYOUT_zho.md`](monitor/docs/LAYOUT_zho.md): 监视器的文件夹、从 1.8.1 的迁移以及给 AI 的地图
+- [`monitor/docs/QUICKSTART_zh.txt`](monitor/docs/QUICKSTART_zh.txt): 入门步骤（八种语言）
 - [`monitor/docs/FIRST_STEPS_zho.md`](monitor/docs/FIRST_STEPS_zho.md)：你的前五分钟
 - [`monitor/docs/SENTINEL_zho.md`](monitor/docs/SENTINEL_zho.md)：哨兵及其检查 A1-A13
 - [`monitor/docs/COLLAB_zho.md`](monitor/docs/COLLAB_zho.md)：Collab 哨兵、警报标签页与静音

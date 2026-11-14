@@ -95,7 +95,7 @@ La línea de comandos toma el token de acceso con su propio nombre, el modo red 
 
 ## Hecho en la 1.7.4
 
-Una barra al pie de la página con el aviso más importante (y una ventana con todos), la conexión, la cuota, la última lectura, el modo, la dirección y el reloj; un botón de pantalla completa; tablas de Repositorios e Historial que se ordenan por una o varias columnas con las columnas que elijas; `monitor_cli.py`, la línea de comandos como cliente del monitor en marcha (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) con `--json` y códigos de salida estables, y su guía en ocho idiomas; los registros de cambios comprobados en orden, el README del paquete sin historial dentro y los dibujos hechos de nuevo.
+Una barra al pie de la página con el aviso más importante (y una ventana con todos), la conexión, la cuota, la última lectura, el modo, la dirección y el reloj; un botón de pantalla completa; tablas de Repositorios e Historial que se ordenan por una o varias columnas con las columnas que elijas; `bin/monitor_cli.py`, la línea de comandos como cliente del monitor en marcha (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) con `--json` y códigos de salida estables, y su guía en ocho idiomas; los registros de cambios comprobados en orden, el README del paquete sin historial dentro y los dibujos hechos de nuevo.
 
 ## Hecho en la 1.7.3
 

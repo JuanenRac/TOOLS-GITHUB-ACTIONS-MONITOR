@@ -3,7 +3,11 @@ __pycache__/
 build/
 dist/
 
-# Real per-machine settings and live data of the monitor are never committed
+# Real per-machine settings and live data of the monitor are never committed (config/, data/, logs/ and ai/ of the product folder; the lines below are the places of 1.8.1 and older)
+monitor/config/
+monitor/data/
+monitor/logs/
+monitor/ai/
 monitor/actions_monitor.json
 monitor/ci_red.json
 monitor/sentinel_cache.json

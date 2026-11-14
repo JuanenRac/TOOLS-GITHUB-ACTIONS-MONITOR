@@ -12,17 +12,17 @@
 
 ## どこで待ち受けるか
 
-モニターは 3 通りのどれかで待ち受け、ページ、`GET /api/accounts`、`monitor_cli.py status`、`monitor_cli.py accounts` がそのどれかを示します。**このコンピューター**（`127.0.0.1` のみ。既定でログインなし）、**ネットワーク**（ネットワークモード `listen.network`: `listen.host` でも待ち受け、すべてのリクエストがアクセストークンを持つ）、または**プロキシの背後**（手前にリバースプロキシを宣言したネットワークモード: `listen.proxy_public_host`、`listen.secure_cookie`、`listen.trusted_proxy`）。イメージとサービスユニットは 2 番目と 3 番目のために作られており、手で起動したモニターは 1 番目のままです。
+モニターは 3 通りのどれかで待ち受け、ページ、`GET /api/accounts`、`bin/monitor_cli.py status`、`bin/monitor_cli.py accounts` がそのどれかを示します。**このコンピューター**（`127.0.0.1` のみ。既定でログインなし）、**ネットワーク**（ネットワークモード `listen.network`: `listen.host` でも待ち受け、すべてのリクエストがアクセストークンを持つ）、または**プロキシの背後**（手前にリバースプロキシを宣言したネットワークモード: `listen.proxy_public_host`、`listen.secure_cookie`、`listen.trusted_proxy`）。イメージとサービスユニットは 2 番目と 3 番目のために作られており、手で起動したモニターは 1 番目のままです。
 
 ネットワークモードでは、複数アカウントのスーパーバイザーも 1 アカウントのモニターと同じルールに従います。すべてのリクエストでアクセストークン（Cookie、ヘッダー、または `POST /api/access`）、誤ったトークンの後のロックアウト、`Host` の検査、お使いの証明書による任意の TLS、コンピューターの前にいる人用の 2 つ目のポート（`listen.local_port`）、そして公開範囲を決めるキー、GitHub のログイン、GitHub への操作はモニターのコンピューターからのみ（ネットワークからのリクエストはリモートと印を付けてアカウントに届きます）。
 
 ## ブラウザーなしで、そしてヘルスチェック
 
-`python -m github_actions_monitor.service` はサービスの入口です。環境変数からフォルダーと最初のアカウントを用意し（下の表を参照）、ブラウザーなしでモニターを起動します。自分で管理するモニターには、引き続き `python actions_monitor.py --no-browser --port 8765` が使えます。
+`python -m github_actions_monitor.service` はサービスの入口です。環境変数からフォルダーと最初のアカウントを用意し（下の表を参照）、ブラウザーなしでモニターを起動します。自分で管理するモニターには、引き続き `python bin/actions_monitor.py --no-browser --port 8765` が使えます。
 
 `GET /api/health` は `{"ok": true, "version": ..., "loaded": ..., "offline": ...}` に加えて、更新サイクルとアカウントの GitHub ログインの状態を返します。GitHub は呼び出しません。`GET /api/health?deep=1` は詳細チェックで、アカウントの更新サイクルが `watchdog_minutes`（0 なら 30 分）より長く動いている、またはそのスレッドが消えている場合に 503 を返します。複数アカウントのスーパーバイザーでは、監視ループ自体が止まった場合、いずれかのアカウントのサイクルが固まった場合、起動後にどのアカウントも応答しない場合にも 503 です。GitHub ログインが使えないアカウント（ブラインド）は応答に名前が出ますが、障害ではありません。再起動では失ったログインは直らず、新しいログインが必要です。
 
-`python -m github_actions_monitor.cli.healthcheck` は、コンテナーやサービスマネージャー向けにその呼び出しを行います（終了コード 0 正常、1 異常、2 応答なし、3 拒否）。アクセストークンは `MONITOR_ACCESS_TOKEN`、`MONITOR_ACCESS_TOKEN_FILE` が指すファイル、またはサービスが `MONITOR_STATE_DIR` に保持するファイルから読みます。`monitor_cli.py health --deep` はどのコンピューターからでも同じことを行います。
+`python -m github_actions_monitor.cli.healthcheck` は、コンテナーやサービスマネージャー向けにその呼び出しを行います（終了コード 0 正常、1 異常、2 応答なし、3 拒否）。アクセストークンは `MONITOR_ACCESS_TOKEN`、`MONITOR_ACCESS_TOKEN_FILE` が指すファイル、またはサービスが `MONITOR_STATE_DIR` に保持するファイルから読みます。`bin/monitor_cli.py health --deep` はどのコンピューターからでも同じことを行います。
 
 ## 公式イメージ
 
@@ -53,7 +53,7 @@ docker compose -f deploy/compose.yaml up -d                          # on 127.0.
 docker compose -f deploy/compose.yaml --profile proxy up -d          # behind Caddy (deploy/Caddyfile)
 ```
 
-プロキシの背後では、モニターは自分の公開名とセッションが HTTPS であることを知る必要があります: `MONITOR_PROXY_PUBLIC_HOST` と `MONITOR_SECURE_COOKIE=1`。すると、メインポートに届くものはモニターのコンピューターとは見なされません。2 つ目のポート（`MONITOR_LOCAL_PORT`、イメージでは 8766、ループバックのみ）を `docker compose exec monitor python monitor_cli.py ...` で使います（イメージは `MONITOR_URL` をそこに向けています）。
+プロキシの背後では、モニターは自分の公開名とセッションが HTTPS であることを知る必要があります: `MONITOR_PROXY_PUBLIC_HOST` と `MONITOR_SECURE_COOKIE=1`。すると、メインポートに届くものはモニターのコンピューターとは見なされません。2 つ目のポート（`MONITOR_LOCAL_PORT`、イメージでは 8766、ループバックのみ）を `docker compose exec monitor python bin/monitor_cli.py ...` で使います（イメージは `MONITOR_URL` をそこに向けています）。
 
 ## systemd による従来のインストール
 
@@ -70,7 +70,7 @@ systemctl reload github-actions-monitor                              # SIGHUP: r
 
 env ファイルはデータを `/var/lib/github-actions-monitor` に、ログインを `/etc/github-actions-monitor/gh_token`（モード 600）に置きます。そこでネットワークモードを有効にしない限り、`127.0.0.1` で待ち受けます。
 
-launchd（macOS）: `ProgramArguments` = `/usr/bin/python3`、`-m`、`github_actions_monitor.service`、変数は `EnvironmentVariables`、`KeepAlive` と `RunAtLoad` は true。Windows: `schtasks /Create /SC ONLOGON /TN GhaMonitor /TR "py -3 C:/path/to/actions_monitor.py --no-browser"`。
+launchd（macOS）: `ProgramArguments` = `/usr/bin/python3`、`-m`、`github_actions_monitor.service`、変数は `EnvironmentVariables`、`KeepAlive` と `RunAtLoad` は true。Windows: `schtasks /Create /SC ONLOGON /TN GhaMonitor /TR "py -3 C:/path/to/bin/actions_monitor.py --no-browser"`。
 
 ## 環境変数
 
@@ -86,6 +86,8 @@ launchd（macOS）: `ProgramArguments` = `/usr/bin/python3`、`-m`、`github_act
 | `MONITOR_CONFIG` | 設定ファイル（イメージでは `/config/actions_monitor.json`）。最初の起動で作られ、上書きされません。 |
 | `MONITOR_ACCOUNTS_DIR` | アカウントのフォルダー。アカウントごとに 1 つ（イメージでは `/data/accounts`）。 |
 | `MONITOR_STATE_DIR` | そのままではコードの隣に置かれるファイル: サービスのアクセストークン、ログインの監査（イメージでは `/data/state`）。 |
+| `MONITOR_CONFIG_DIR` | フォルダー `config/`: 設定ファイル（`targets.json`、`quotas.json` など）と `config_backups/`（イメージでは `/config`）。 |
+| `MONITOR_DATA_DIR` | フォルダー `data/`: 状態、キャッシュ、アカウント。`MONITOR_LOGS_DIR` / `MONITOR_AI_DIR` で別に指定しない限り `logs/` と `ai/` はその中に置かれます（イメージでは `/data`）。LAYOUT を参照。 |
 | `MONITOR_SECRET_DIR` | モニター自身が保持するトークンの置き場所（有効にした場合。イメージでは `/data/secrets`）。 |
 | `GH_CONFIG_DIR` | `gh` の設定フォルダー（イメージでは `/data/gh`）。 |
 | `GH_TOKEN_FILE` | 1 行目に GitHub トークンを書いたファイル（Docker シークレット、systemd の credential）。起動時と SIGHUP で読み込みます。 |
@@ -105,23 +107,23 @@ launchd（macOS）: `ProgramArguments` = `/usr/bin/python3`、`-m`、`github_act
 | `MONITOR_QUERY_ACCESS` | `0` = `?access=` 付きのアドレスではセッションを開きません（`listen.query_access`）。`POST /api/access` を使ってください。 |
 | `MONITOR_TEAM_MODE` | `1` = チームモード（`auth.enabled`）: ユーザー、ロール、セッション。 |
 | `MONITOR_SERVICE` | `1` = サービスとして動作: 使えないログインでも諦めず、doctor が保持設定を確認します。イメージとサービスが設定します。 |
-| `MONITOR_URL` | `monitor_cli.py` とヘルスチェック用: モニターのアドレス（イメージでは 2 つ目のポート）。 |
-| `MONITOR_CA_FILE` | `monitor_cli.py` 用: モニターの HTTPS 証明書に署名した認証局の PEM ファイル。 |
-| `MONITOR_USER` | チームモードの `monitor_cli.py` 用: サインインするユーザー。 |
-| `MONITOR_PASSWORD_FILE` | `monitor_cli.py` 用: 1 行目に `MONITOR_USER` のパスワードを書いたファイル。 |
+| `MONITOR_URL` | `bin/monitor_cli.py` とヘルスチェック用: モニターのアドレス（イメージでは 2 つ目のポート）。 |
+| `MONITOR_CA_FILE` | `bin/monitor_cli.py` 用: モニターの HTTPS 証明書に署名した認証局の PEM ファイル。 |
+| `MONITOR_USER` | チームモードの `bin/monitor_cli.py` 用: サインインするユーザー。 |
+| `MONITOR_PASSWORD_FILE` | `bin/monitor_cli.py` 用: 1 行目に `MONITOR_USER` のパスワードを書いたファイル。 |
 | `MONITOR_RELEASE_TEST_TIMEOUT` | `tools/make_release.py`: ゲートが失敗するまでに通常のスイートが使える秒数（既定 3600、60〜86400）。 |
 | `MONITOR_RELEASE_CLEAN_TIMEOUT` | `tools/make_release.py`: 展開した zip のスイートが使える秒数（既定 3600、60〜86400）。 |
 
 ## GitHub がログインを失効させたとき
 
-各アカウントは独立したプロセスなので、使えなくなったログインはそのアカウントだけに影響します。ログイン自体が使えないという拒否（401、`Bad credentials`、期限切れまたは失効したトークン、停止されたアカウント、ログインなし）が 2 回続くと、アカウントは**ブラインド**になります。ページ、詳細ヘルスチェック、`GET /api/accounts`（`state: blind`）、`monitor_cli.py` がそれを示し、アラートタブに**重大なシステムアラート**（`system.credential_blind`、センチネル `system`）が開き、通知の種類 `credential_blind`（既定で有効）と `credential_back` がチャンネルに一度だけ知らせます。1 つの権限の拒否（1 つのリポジトリへの 403）ではアカウントはブラインドになりません。他のアカウントは動き続け、詳細ヘルスチェックは正常のままです。アカウントは試行を続け、最初に成功したサイクルでアラートが閉じます。
+各アカウントは独立したプロセスなので、使えなくなったログインはそのアカウントだけに影響します。ログイン自体が使えないという拒否（401、`Bad credentials`、期限切れまたは失効したトークン、停止されたアカウント、ログインなし）が 2 回続くと、アカウントは**ブラインド**になります。ページ、詳細ヘルスチェック、`GET /api/accounts`（`state: blind`）、`bin/monitor_cli.py` がそれを示し、アラートタブに**重大なシステムアラート**（`system.credential_blind`、センチネル `system`）が開き、通知の種類 `credential_blind`（既定で有効）と `credential_back` がチャンネルに一度だけ知らせます。1 つの権限の拒否（1 つのリポジトリへの 403）ではアカウントはブラインドになりません。他のアカウントは動き続け、詳細ヘルスチェックは正常のままです。アカウントは試行を続け、最初に成功したサイクルでアラートが閉じます。
 
 すでに使えないログインで起動したサービスは、諦めずにブラインドのまま動き続けるので、置き換える対象があります。アカウントのトークンは、最初に見つかったものが優先されます: そのフォルダーのファイル `credential`（置き換えで書かれる）、`GH_TOKEN_FILE` が指すファイル、そして `gh` が使うもの（`GH_TOKEN` または自身のログイン）。置き換えにはスーパーバイザーやアカウントの再起動は不要で、方法は 3 つです:
 
 ```sh
 # 1. the command line (a token is read from a file or the standard input, never from a flag)
-docker compose exec -T monitor python monitor_cli.py credential replace --account default --new-token-file - < new_token.txt
-python monitor_cli.py credential replace --url https://monitor.example.org --user ann --password-file pw.txt --account default --new-token-file new_token.txt
+docker compose exec -T monitor python bin/monitor_cli.py credential replace --account default --new-token-file - < new_token.txt
+python bin/monitor_cli.py credential replace --url https://monitor.example.org --user ann --password-file pw.txt --account default --new-token-file new_token.txt
 
 # 2. the administrator endpoint (an administrator session in the team mode, or the computer of the monitor)
 #    POST /api/accounts/<id>/credential   {"action": "replace", "token": "..."}   or   {"action": "reload"}
@@ -136,7 +138,7 @@ systemctl reload github-actions-monitor
 
 ## 最初の起動、バックアップ、アップグレード
 
-サービスとしての最初の起動: 所有者とログイン（`GH_TOKEN_FILE`）を設定して起動し、アクセストークンを一度読み（`/data/state/access_token`）、ページを開いて `monitor_cli.py health --deep` を実行します。`MONITOR_SERVICE=1` での `python actions_monitor.py --doctor` は、保持設定のブロックがないことや、同じトークンを共有するアカウントについても警告します。
+サービスとしての最初の起動: 所有者とログイン（`GH_TOKEN_FILE`）を設定して起動し、アクセストークンを一度読み（`/data/state/access_token`）、ページを開いて `bin/monitor_cli.py health --deep` を実行します。`MONITOR_SERVICE=1` での `python bin/actions_monitor.py --doctor` は、保持設定のブロックがないことや、同じトークンを共有するアカウントについても警告します。
 
 バックアップ: 保持すべきものはすべて 2 つのボリュームにあります。アップグレード前にストレージの整合したコピーと、ボリュームのコピーを取ってください:
 
@@ -172,7 +174,7 @@ location / {
 
 ## 別のコンピューターに対するコマンドライン
 
-`monitor_cli.py` は別のマシンのモニターに対しても動きます: `--url https://monitor.example.org`（または `MONITOR_URL`）、アクセストークンは `MONITOR_ACCESS_TOKEN` または `--token-file`、独自の HTTPS 証明書に署名した認証局を信頼するための `--ca-file`（または `MONITOR_CA_FILE`）、そしてチームモードでは `--user 名前` と `--password-file ファイル`（または `MONITOR_USER`、`MONITOR_PASSWORD_FILE`）で Bearer セッションによりサインインします（`auth.allow_bearer`）。`status`、`accounts`、`alerts`、`health`（`--deep`）、`credential` も同様に動作し、終了コードも同じです（3 = 拒否。`status` と `accounts` ではブラインドのアカウントも 3）。別のコンピューターへの平文 HTTP は警告を表示します。
+`bin/monitor_cli.py` は別のマシンのモニターに対しても動きます: `--url https://monitor.example.org`（または `MONITOR_URL`）、アクセストークンは `MONITOR_ACCESS_TOKEN` または `--token-file`、独自の HTTPS 証明書に署名した認証局を信頼するための `--ca-file`（または `MONITOR_CA_FILE`）、そしてチームモードでは `--user 名前` と `--password-file ファイル`（または `MONITOR_USER`、`MONITOR_PASSWORD_FILE`）で Bearer セッションによりサインインします（`auth.allow_bearer`）。`status`、`accounts`、`alerts`、`health`（`--deep`）、`credential` も同様に動作し、終了コードも同じです（3 = 拒否。`status` と `accounts` ではブラインドのアカウントも 3）。別のコンピューターへの平文 HTTP は警告を表示します。
 
 ## ログインに必要な最小限の権限(`gh` または細粒度トークン)
 

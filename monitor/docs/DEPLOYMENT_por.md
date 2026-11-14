@@ -12,17 +12,17 @@ O monitor é um programa que, por defeito, escuta apenas em `127.0.0.1` e não t
 
 ## Onde escuta
 
-O monitor escuta de uma de três maneiras, e a página, `GET /api/accounts`, `monitor_cli.py status` e `monitor_cli.py accounts` dizem qual: **este computador** (apenas `127.0.0.1`: o predefinido, sem início de sessão), **a rede** (o modo de rede, `listen.network`: escuta também em `listen.host` e todos os pedidos levam o token de acesso) ou **atrás de um proxy** (o modo de rede com um proxy inverso declarado à frente: `listen.proxy_public_host`, `listen.secure_cookie` ou `listen.trusted_proxy`). A imagem e a unidade do serviço foram feitas para a segunda e a terceira; um monitor iniciado à mão fica na primeira.
+O monitor escuta de uma de três maneiras, e a página, `GET /api/accounts`, `bin/monitor_cli.py status` e `bin/monitor_cli.py accounts` dizem qual: **este computador** (apenas `127.0.0.1`: o predefinido, sem início de sessão), **a rede** (o modo de rede, `listen.network`: escuta também em `listen.host` e todos os pedidos levam o token de acesso) ou **atrás de um proxy** (o modo de rede com um proxy inverso declarado à frente: `listen.proxy_public_host`, `listen.secure_cookie` ou `listen.trusted_proxy`). A imagem e a unidade do serviço foram feitas para a segunda e a terceira; um monitor iniciado à mão fica na primeira.
 
 No modo de rede, o supervisor de várias contas segue as mesmas regras do monitor de uma conta: o token de acesso em cada pedido (cookie, cabeçalho ou `POST /api/access`), bloqueio após tokens errados, a verificação de `Host`, TLS opcional com o seu certificado, a segunda porta de quem está no computador (`listen.local_port`), e as chaves que decidem a exposição, o acesso ao GitHub e as ações no GitHub apenas a partir do computador do monitor (um pedido vindo da rede chega à conta marcado como remoto).
 
 ## Sem navegador e a verificação de saúde
 
-`python -m github_actions_monitor.service` é a entrada de um serviço: prepara as pastas e a primeira conta a partir do ambiente (ver a tabela abaixo) e arranca o monitor sem navegador. `python actions_monitor.py --no-browser --port 8765` continua a servir para um monitor que gere por si.
+`python -m github_actions_monitor.service` é a entrada de um serviço: prepara as pastas e a primeira conta a partir do ambiente (ver a tabela abaixo) e arranca o monitor sem navegador. `python bin/actions_monitor.py --no-browser --port 8765` continua a servir para um monitor que gere por si.
 
 `GET /api/health` responde `{"ok": true, "version": ..., "loaded": ..., "offline": ...}` mais o estado do ciclo de atualização e do acesso ao GitHub da conta; não chama o GitHub. `GET /api/health?deep=1` é a verificação profunda: responde 503 quando o ciclo de atualização de uma conta dura mais de `watchdog_minutes` (30 minutos se for 0) ou o seu fio desapareceu; no supervisor de várias contas também quando o próprio ciclo de supervisão parou, quando o ciclo de QUALQUER conta está preso ou quando nenhuma conta responde depois do arranque. Uma conta cujo acesso ao GitHub não serve (cega) é nomeada na resposta, mas não é uma falha: reiniciar não repara um acesso perdido, um novo repara.
 
-`python -m github_actions_monitor.cli.healthcheck` faz essa chamada para um contentor ou um gestor de serviços (código de saída 0 saudável, 1 não saudável, 2 sem resposta, 3 recusado). Lê o token de acesso de `MONITOR_ACCESS_TOKEN`, do ficheiro indicado por `MONITOR_ACCESS_TOKEN_FILE` ou do que o serviço guarda em `MONITOR_STATE_DIR`. `monitor_cli.py health --deep` faz o mesmo a partir de qualquer computador.
+`python -m github_actions_monitor.cli.healthcheck` faz essa chamada para um contentor ou um gestor de serviços (código de saída 0 saudável, 1 não saudável, 2 sem resposta, 3 recusado). Lê o token de acesso de `MONITOR_ACCESS_TOKEN`, do ficheiro indicado por `MONITOR_ACCESS_TOKEN_FILE` ou do que o serviço guarda em `MONITOR_STATE_DIR`. `bin/monitor_cli.py health --deep` faz o mesmo a partir de qualquer computador.
 
 ## A imagem oficial
 
@@ -53,7 +53,7 @@ docker compose -f deploy/compose.yaml up -d                          # on 127.0.
 docker compose -f deploy/compose.yaml --profile proxy up -d          # behind Caddy (deploy/Caddyfile)
 ```
 
-Atrás do proxy, o monitor tem de conhecer o seu nome público e saber que a sessão é HTTPS: `MONITOR_PROXY_PUBLIC_HOST` e `MONITOR_SECURE_COOKIE=1`. Nada do que chega à porta principal conta então como o computador do monitor: use a segunda porta (`MONITOR_LOCAL_PORT`, 8766 na imagem, só loopback) com `docker compose exec monitor python monitor_cli.py ...` (a imagem aponta `MONITOR_URL` para ela).
+Atrás do proxy, o monitor tem de conhecer o seu nome público e saber que a sessão é HTTPS: `MONITOR_PROXY_PUBLIC_HOST` e `MONITOR_SECURE_COOKIE=1`. Nada do que chega à porta principal conta então como o computador do monitor: use a segunda porta (`MONITOR_LOCAL_PORT`, 8766 na imagem, só loopback) com `docker compose exec monitor python bin/monitor_cli.py ...` (a imagem aponta `MONITOR_URL` para ela).
 
 ## Uma instalação clássica com systemd
 
@@ -70,7 +70,7 @@ systemctl reload github-actions-monitor                              # SIGHUP: r
 
 O ficheiro env guarda os dados em `/var/lib/github-actions-monitor` e o acesso em `/etc/github-actions-monitor/gh_token` (modo 600). Escuta em `127.0.0.1`, a menos que aí ative o modo de rede.
 
-launchd (macOS): `ProgramArguments` = `/usr/bin/python3`, `-m`, `github_actions_monitor.service`, as variáveis em `EnvironmentVariables`, `KeepAlive` e `RunAtLoad` a true. Windows: `schtasks /Create /SC ONLOGON /TN GhaMonitor /TR "py -3 C:/caminho/para/actions_monitor.py --no-browser"`.
+launchd (macOS): `ProgramArguments` = `/usr/bin/python3`, `-m`, `github_actions_monitor.service`, as variáveis em `EnvironmentVariables`, `KeepAlive` e `RunAtLoad` a true. Windows: `schtasks /Create /SC ONLOGON /TN GhaMonitor /TR "py -3 C:/caminho/para/bin/actions_monitor.py --no-browser"`.
 
 ## Variáveis de ambiente
 
@@ -86,6 +86,8 @@ Só são lidos os nomes desta tabela. No serviço, um valor ilegível é ignorad
 | `MONITOR_CONFIG` | O ficheiro de configuração (a imagem: `/config/actions_monitor.json`); criado no primeiro arranque e nunca substituído. |
 | `MONITOR_ACCOUNTS_DIR` | A pasta das contas, uma pasta por conta (a imagem: `/data/accounts`). |
 | `MONITOR_STATE_DIR` | Ficheiros que de outro modo ficariam junto ao código: o token de acesso do serviço, a auditoria dos inícios de sessão (a imagem: `/data/state`). |
+| `MONITOR_CONFIG_DIR` | A pasta `config/`: os ficheiros de configuração (`targets.json`, `quotas.json` ...) e `config_backups/` (a imagem: `/config`). |
+| `MONITOR_DATA_DIR` | A pasta `data/`: o estado, as caches e as contas; `logs/` e `ai/` ficam lá dentro, salvo se `MONITOR_LOGS_DIR` / `MONITOR_AI_DIR` disserem outra coisa (a imagem: `/data`). Ver LAYOUT. |
 | `MONITOR_SECRET_DIR` | Onde vive o token guardado pelo próprio monitor, se o ativar (a imagem: `/data/secrets`). |
 | `GH_CONFIG_DIR` | A pasta de configuração do `gh` (a imagem: `/data/gh`). |
 | `GH_TOKEN_FILE` | Um ficheiro com o token do GitHub na primeira linha (um segredo do Docker, uma credencial do systemd). Lido no arranque e de novo com SIGHUP. |
@@ -105,23 +107,23 @@ Só são lidos os nomes desta tabela. No serviço, um valor ilegível é ignorad
 | `MONITOR_QUERY_ACCESS` | `0` = o endereço com `?access=` já não abre sessão (`listen.query_access`); use `POST /api/access`. |
 | `MONITOR_TEAM_MODE` | `1` = o modo de equipa (`auth.enabled`): utilizadores, papéis e sessões. |
 | `MONITOR_SERVICE` | `1` = corre como serviço: não desiste perante um acesso que não serve e o doctor verifica a retenção. A imagem e o serviço ativam-no. |
-| `MONITOR_URL` | Para o `monitor_cli.py` e a verificação de saúde: o endereço do monitor (a imagem: a segunda porta). |
-| `MONITOR_CA_FILE` | Para o `monitor_cli.py`: um ficheiro PEM com a autoridade que assinou o certificado HTTPS do monitor. |
-| `MONITOR_USER` | Para o `monitor_cli.py` no modo de equipa: o utilizador com que iniciar sessão. |
-| `MONITOR_PASSWORD_FILE` | Para o `monitor_cli.py`: um ficheiro com a palavra-passe de `MONITOR_USER` na primeira linha. |
+| `MONITOR_URL` | Para o `bin/monitor_cli.py` e a verificação de saúde: o endereço do monitor (a imagem: a segunda porta). |
+| `MONITOR_CA_FILE` | Para o `bin/monitor_cli.py`: um ficheiro PEM com a autoridade que assinou o certificado HTTPS do monitor. |
+| `MONITOR_USER` | Para o `bin/monitor_cli.py` no modo de equipa: o utilizador com que iniciar sessão. |
+| `MONITOR_PASSWORD_FILE` | Para o `bin/monitor_cli.py`: um ficheiro com a palavra-passe de `MONITOR_USER` na primeira linha. |
 | `MONITOR_RELEASE_TEST_TIMEOUT` | `tools/make_release.py`: segundos que a suite normal pode demorar antes de a porta falhar (por defeito 3600; de 60 a 86400). |
 | `MONITOR_RELEASE_CLEAN_TIMEOUT` | `tools/make_release.py`: segundos que a suite do zip extraído pode demorar (por defeito 3600; de 60 a 86400). |
 
 ## Quando o GitHub revoga ou deixa caducar o acesso
 
-Cada conta é um processo próprio, pelo que um acesso que deixa de funcionar só afeta essa conta. Após duas recusas seguidas que dizem que o próprio acesso não serve (um 401, `Bad credentials`, um token caducado ou revogado, uma conta suspensa, nenhum acesso), a conta fica **cega**: a página, a verificação de saúde profunda, `GET /api/accounts` (`state: blind`) e o `monitor_cli.py` dizem-no, abre-se um **alerta crítico de sistema** (`system.credential_blind`, sentinela `system`) no separador de alertas, e os tipos de notificação `credential_blind` (ativo por defeito) e `credential_back` avisam os canais uma vez. A recusa de uma só permissão (um 403 para um repositório) não torna uma conta cega. As outras contas continuam e a verificação de saúde profunda mantém-se verde. A conta continua a tentar e o primeiro ciclo bom fecha o alerta.
+Cada conta é um processo próprio, pelo que um acesso que deixa de funcionar só afeta essa conta. Após duas recusas seguidas que dizem que o próprio acesso não serve (um 401, `Bad credentials`, um token caducado ou revogado, uma conta suspensa, nenhum acesso), a conta fica **cega**: a página, a verificação de saúde profunda, `GET /api/accounts` (`state: blind`) e o `bin/monitor_cli.py` dizem-no, abre-se um **alerta crítico de sistema** (`system.credential_blind`, sentinela `system`) no separador de alertas, e os tipos de notificação `credential_blind` (ativo por defeito) e `credential_back` avisam os canais uma vez. A recusa de uma só permissão (um 403 para um repositório) não torna uma conta cega. As outras contas continuam e a verificação de saúde profunda mantém-se verde. A conta continua a tentar e o primeiro ciclo bom fecha o alerta.
 
 Um serviço que arranca com um acesso que já não serve fica ativo e cego em vez de desistir, para haver algo a substituir. O token de uma conta vem de, ganha o primeiro que existir: o ficheiro `credential` da sua pasta (escrito por uma substituição), o ficheiro indicado por `GH_TOKEN_FILE`, depois o que o `gh` usa (`GH_TOKEN` ou o seu próprio início de sessão). Uma substituição não precisa de reiniciar o supervisor nem a conta, de três maneiras:
 
 ```sh
 # 1. the command line (a token is read from a file or the standard input, never from a flag)
-docker compose exec -T monitor python monitor_cli.py credential replace --account default --new-token-file - < new_token.txt
-python monitor_cli.py credential replace --url https://monitor.example.org --user ann --password-file pw.txt --account default --new-token-file new_token.txt
+docker compose exec -T monitor python bin/monitor_cli.py credential replace --account default --new-token-file - < new_token.txt
+python bin/monitor_cli.py credential replace --url https://monitor.example.org --user ann --password-file pw.txt --account default --new-token-file new_token.txt
 
 # 2. the administrator endpoint (an administrator session in the team mode, or the computer of the monitor)
 #    POST /api/accounts/<id>/credential   {"action": "replace", "token": "..."}   or   {"action": "reload"}
@@ -136,7 +138,7 @@ O novo token é verificado no GitHub (a chamada `rate_limit`, gratuita) ANTES de
 
 ## Primeiro arranque, cópia de segurança e atualização
 
-Primeiro arranque como serviço: defina o proprietário e o acesso (`GH_TOKEN_FILE`), arranque, leia uma vez o token de acesso (`/data/state/access_token`), abra a página e execute `monitor_cli.py health --deep`. `python actions_monitor.py --doctor` com `MONITOR_SERVICE=1` avisa ainda de um bloco de retenção em falta e de contas que partilham o mesmo token.
+Primeiro arranque como serviço: defina o proprietário e o acesso (`GH_TOKEN_FILE`), arranque, leia uma vez o token de acesso (`/data/state/access_token`), abra a página e execute `bin/monitor_cli.py health --deep`. `python bin/actions_monitor.py --doctor` com `MONITOR_SERVICE=1` avisa ainda de um bloco de retenção em falta e de contas que partilham o mesmo token.
 
 Cópia de segurança: tudo o que há a guardar está nos dois volumes. Faça uma cópia consistente do armazenamento antes de atualizar e uma cópia dos volumes:
 
@@ -172,7 +174,7 @@ Com um proxy declarado, nada do que chega pela porta principal conta como «este
 
 ## A linha de comandos contra outro computador
 
-O `monitor_cli.py` funciona contra um monitor de outra máquina: `--url https://monitor.example.org` (ou `MONITOR_URL`), o token de acesso de `MONITOR_ACCESS_TOKEN` ou `--token-file`, `--ca-file` (ou `MONITOR_CA_FILE`) para confiar na autoridade que assinou um certificado HTTPS próprio e, no modo de equipa, `--user NOME` com `--password-file FICHEIRO` (ou `MONITOR_USER`, `MONITOR_PASSWORD_FILE`), que inicia sessão com uma sessão Bearer (`auth.allow_bearer`). `status`, `accounts`, `alerts`, `health` (`--deep`) e `credential` funcionam da mesma forma e os códigos de saída são os mesmos (3 = recusado, também para uma conta cega em `status` e `accounts`). HTTP simples para outro computador imprime um aviso.
+O `bin/monitor_cli.py` funciona contra um monitor de outra máquina: `--url https://monitor.example.org` (ou `MONITOR_URL`), o token de acesso de `MONITOR_ACCESS_TOKEN` ou `--token-file`, `--ca-file` (ou `MONITOR_CA_FILE`) para confiar na autoridade que assinou um certificado HTTPS próprio e, no modo de equipa, `--user NOME` com `--password-file FICHEIRO` (ou `MONITOR_USER`, `MONITOR_PASSWORD_FILE`), que inicia sessão com uma sessão Bearer (`auth.allow_bearer`). `status`, `accounts`, `alerts`, `health` (`--deep`) e `credential` funcionam da mesma forma e os códigos de saída são os mesmos (3 = recusado, também para uma conta cega em `status` e `accounts`). HTTP simples para outro computador imprime um aviso.
 
 ## Permissões mínimas do acesso (`gh` ou um token de granularidade fina)
 

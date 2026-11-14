@@ -17,8 +17,8 @@ from pathlib import Path
 from github_actions_monitor.security import private_io
 from github_actions_monitor.storage import state_io
 
-from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
-STATE_FILE = HERE / "update_check.json"
+from github_actions_monitor.util import paths
+STATE_FILE = paths.place("update_check.json")
 REPO = "JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR"
 ENDPOINT = f"repos/{REPO}/releases/latest"
 URL_RE = re.compile(r"^https://github\.com/" + re.escape(REPO) + r"/releases/tag/[A-Za-z0-9._-]{1,40}$")

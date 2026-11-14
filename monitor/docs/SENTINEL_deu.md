@@ -15,7 +15,7 @@ Der **Wächter** ist die zweite Hälfte der vollständigen Ausgabe. Der *Monitor
 
 Er startet mit dem vollständigen Monitor und läuft im selben Prozess in einem eigenen Thread mit eigenem Budget an GitHub-Aufrufen (`sentinel.budget_per_hour`, standardmäßig 600, und `sentinel.max_calls_per_tick`). Liegt das GitHub-Kontingent unter `sentinel.min_rate_remaining`, fragt er nicht mehr und die Seite meldet die Pause wegen Kontingent. Nichts davon schreibt auf GitHub.
 
-## Dateien, die er schreibt (neben dem Monitor, nie veröffentlicht)
+## Dateien, die er schreibt (in den Ordnern des Monitors, nie veröffentlicht)
 
 | Datei | Inhalt |
 |---|---|

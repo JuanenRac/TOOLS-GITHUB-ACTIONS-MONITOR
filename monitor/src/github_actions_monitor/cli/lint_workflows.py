@@ -3,7 +3,7 @@
 # GPL-3.0-or-later - see LICENSE
 """A small linter for the workflow files of a repository (`.github/workflows/*.yml`), to run BEFORE you push. Read-only and local: it opens files, nothing else.
 
-  py -3 lint_workflows.py [PATH ...] [--json] [--fail-on info|warn|bad] [--lang CODE]
+  py -3 bin/lint_workflows.py [PATH ...] [--json] [--fail-on info|warn|bad] [--lang CODE]
 
 With no PATH it looks at `.github/workflows` of the current folder. A PATH is a workflow file or a folder that holds them (or a repository root).
 

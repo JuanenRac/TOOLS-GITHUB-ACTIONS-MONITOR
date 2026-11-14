@@ -11,7 +11,7 @@ O que o monitor escreve, como exportá-lo e o que precisa quem lê o ficheiro. O
 
 ## O que o monitor escreve
 
-`ci_red.json` ao lado de `actions_monitor.py`, atualizado após cada passagem da sentinela (esquema 2):
+`ci_red.json` ao lado de `bin/actions_monitor.py`, atualizado após cada passagem da sentinela (esquema 2):
 
 | Campo | Significado |
 |---|---|
@@ -27,8 +27,8 @@ O que o monitor escreve, como exportá-lo e o que precisa quem lê o ficheiro. O
 ## Como exportá-lo
 
 ```
-py -3 read_report.py --export-status DIR          # ci_status_public.json + .md, apenas o que pode ser publicado
-py -3 read_report.py --export-sign-queue FILE     # a fila de assinatura
+py -3 bin/read_report.py --export-status DIR          # ci_status_public.json + .md, apenas o que pode ser publicado
+py -3 bin/read_report.py --export-sign-queue FILE     # a fila de assinatura
 ```
 
 Ambos leem o monitor em execução em `127.0.0.1` (sem quota do GitHub). Recusam-se a escrever enquanto o instantâneo está a carregar e explicam porquê; nesse caso o código de saída não é zero.
@@ -46,7 +46,7 @@ Não publica o ficheiro, não faz push para o repositório do perfil e não toca
 
 ## O painel do perfil (contrato do consumidor)
 
-O painel de estado de um repositório de perfil pode ler o mesmo documento de duas maneiras: do monitor em execução (`GET /api/outputs/dashboard.json`, desligado até ativar `outputs.dashboard.enabled`, apenas este computador) ou do ficheiro escrito por `py -3 read_report.py --export-status DIR` (só os workflows vermelhos, nunca o lado da assinatura). Aquilo com que o painel pode contar, verificado por um teste deste repositório:
+O painel de estado de um repositório de perfil pode ler o mesmo documento de duas maneiras: do monitor em execução (`GET /api/outputs/dashboard.json`, desligado até ativar `outputs.dashboard.enabled`, apenas este computador) ou do ficheiro escrito por `py -3 bin/read_report.py --export-status DIR` (só os workflows vermelhos, nunca o lado da assinatura). Aquilo com que o painel pode contar, verificado por um teste deste repositório:
 
 1. `schema` é `2` e os campos só se acrescentam.
 2. O documento servido é exatamente o de `ci_red.json`.

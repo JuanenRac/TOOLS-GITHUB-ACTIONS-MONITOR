@@ -11,7 +11,7 @@
 
 ## モニターが書き出すもの
 
-`actions_monitor.py` の隣にある `ci_red.json` で、センチネルの各パスの後に更新されます（スキーマ 2）。
+`bin/actions_monitor.py` の隣にある `ci_red.json` で、センチネルの各パスの後に更新されます（スキーマ 2）。
 
 | フィールド | 意味 |
 |---|---|
@@ -27,8 +27,8 @@
 ## エクスポートの方法
 
 ```
-py -3 read_report.py --export-status DIR          # ci_status_public.json + .md、公開してよいものだけ
-py -3 read_report.py --export-sign-queue FILE     # 署名キュー
+py -3 bin/read_report.py --export-status DIR          # ci_status_public.json + .md、公開してよいものだけ
+py -3 bin/read_report.py --export-sign-queue FILE     # 署名キュー
 ```
 
 どちらも `127.0.0.1` で動作中のモニターを読み取ります（GitHub のクォータは消費しません）。スナップショットの読み込み中は書き出しを拒否して理由を示し、その場合の終了コードは 0 以外になります。
@@ -46,7 +46,7 @@ py -3 read_report.py --export-sign-queue FILE     # 署名キュー
 
 ## プロフィールのダッシュボード(利用側の取り決め)
 
-プロフィールリポジトリのステータスダッシュボードは、同じ文書を 2 通りで読めます。実行中のモニターから(`GET /api/outputs/dashboard.json`。`outputs.dashboard.enabled` をオンにするまで無効で、このコンピューターのみ)、または `py -3 read_report.py --export-status DIR` が書くファイルから(赤のワークフローのみで、署名側は含みません)。ダッシュボードが前提にしてよいこと(このリポジトリのテストで確認済み):
+プロフィールリポジトリのステータスダッシュボードは、同じ文書を 2 通りで読めます。実行中のモニターから(`GET /api/outputs/dashboard.json`。`outputs.dashboard.enabled` をオンにするまで無効で、このコンピューターのみ)、または `py -3 bin/read_report.py --export-status DIR` が書くファイルから(赤のワークフローのみで、署名側は含みません)。ダッシュボードが前提にしてよいこと(このリポジトリのテストで確認済み):
 
 1. `schema` は `2` で、フィールドは追加のみ。
 2. 配信される文書は `ci_red.json` と完全に同じ。

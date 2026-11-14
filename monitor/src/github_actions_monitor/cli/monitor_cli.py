@@ -1,6 +1,6 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 # GPL-3.0-or-later - see LICENSE
-"""The command line as a client of the monitor (1.7.4): one entry, `python monitor_cli.py COMMAND [options]`, that reads what the running monitor says (`GET /api/...` on this computer, or
+"""The command line as a client of the monitor (1.7.4): one entry, `python bin/monitor_cli.py COMMAND [options]`, that reads what the running monitor says (`GET /api/...` on this computer, or
 `--url` / the variable MONITOR_URL) and never repeats the work of the page against GitHub. The scripts that already exist (read_report.py, --doctor, gha_dispatch_all.py ...) keep working.
 
   status    one screen: version, edition, repositories, what runs, what fails, the allowance

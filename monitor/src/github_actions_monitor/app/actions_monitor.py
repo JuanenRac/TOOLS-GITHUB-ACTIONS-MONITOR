@@ -9,7 +9,7 @@ unresolved failures and the open build-failed / build-stuck issues. Nothing is w
 to GitHub and no secret is read: it only asks the `gh` command line (already logged in)
 for public run data.
 
-  py -3 actions_monitor.py [--port 8765] [--no-browser] [--discover]
+  py -3 bin/actions_monitor.py [--port 8765] [--no-browser] [--discover]
 
 The repositories to watch, the refresh times and the "stuck" limit live in
 actions_monitor.json next to this file (created on the first run):
@@ -58,10 +58,10 @@ from github_actions_monitor.app import updatecheck
 from github_actions_monitor.tool_version import AUTHOR, LICENSE_ID, TOOL_VERSION
 from github_actions_monitor.security import private_io
 
-from github_actions_monitor.util import paths
+from github_actions_monitor.util import paths, rootmigrate
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
 CONFIG_FILE = paths.config_file()
-LOG_FILE = HERE / "actions_monitor_log.txt"
+LOG_FILE = paths.place("actions_monitor_log.txt")
 NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}$")
 DEFAULTS = {
     "repos": "all",
@@ -131,7 +131,7 @@ CHILD = {"account": "", "folder": ""}      # set by account_child.py: this proce
 
 def state_dir():
     """Where the small state files of this process live: the folder of the account when this is the monitor of one account, else next to the code, as always."""
-    return Path(CHILD["folder"]) if CHILD["folder"] else HERE
+    return Path(CHILD["folder"]) if CHILD["folder"] else paths.folder("data")
 LITE_SHARED = ("/api/ai/state", "/api/ai/stream", "/api/ai/brief", "/api/ai/alerts", "/api/ai/ack")      # the channels for an AI tool are the same in both editions
 LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/notify", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events")   # they do not exist in lite
 
@@ -160,11 +160,11 @@ def enable_lite():
     global CONFIG_FILE, LOG_FILE
     from github_actions_monitor.app import settings_api
     LITE["on"] = True
-    CONFIG_FILE = HERE / "actions_monitor_lite.json"
-    LOG_FILE = HERE / "actions_monitor_log_lite.txt"
+    CONFIG_FILE = paths.place("actions_monitor_lite.json")
+    LOG_FILE = paths.place("actions_monitor_log_lite.txt")
     settings_api.CONFIG_FILE = toolconfig.CONFIG_FILE = CONFIG_FILE
-    settings_api.BACKUP_DIR = HERE / "config_backups_lite"
-    etagcache.CACHE_FILE = HERE / "etag_cache_lite.json"
+    settings_api.BACKUP_DIR = paths.place("config_backups_lite")
+    etagcache.CACHE_FILE = paths.place("etag_cache_lite.json")
 
 
 RESTART_PENDING = set()   # settings changed from the page since this process started that only apply after a restart
@@ -217,7 +217,7 @@ def load_config():
             if example.is_file() and LITE["on"]:   # lite: the same template with the sentinel off and the light reading
                 template = json.loads(example.read_text(encoding="utf-8"))
                 template.update({"mode": "lite", "ecosystems": "all", "sentinel": {"enabled": False}, "webhook": {"enabled": False, "secret": ""}})
-                inherited = lite_inheritance(HERE / "actions_monitor.json")
+                inherited = lite_inheritance(paths.place("actions_monitor.json"))
                 template.update(inherited)
                 if inherited:
                     print(i18n.t("mon.lite_inherited", keys=", ".join(sorted(inherited))))
@@ -1815,7 +1815,7 @@ class Handler(BaseHTTPRequestHandler):
                     return
                 target = toolconfig._data_path("MONITOR_ECOSYSTEMS_FILE", "ecosystems_file", toolconfig.DEFAULT_ECOSYSTEMS_FILE)
                 if target.stem.endswith(".example"):
-                    target = HERE / target.name.replace(".example", "")   # the neutral template travels in assets/examples; the file of the person goes in the product folder
+                    target = paths.place(target.name.replace(".example", ""))   # the neutral template travels in assets/examples; the file of the person goes in config/
                 result = discovery.add_group(target, chosen[0]["key"], chosen[0]["prefix"], example=paths.EXAMPLES / "ecosystems.example.json")
                 if result["ok"]:
                     toolconfig.forget()
@@ -2011,6 +2011,11 @@ class Handler(BaseHTTPRequestHandler):
                 return
             payload, code = health_reply("deep=1" in self.path.partition("?")[2].split("&"))
             self.json_reply(payload, code)
+        elif path == "/api/paths":      # where everything is: the folders in use and what is still next to the launchers; no secret
+            if not self.guard():
+                return
+            from github_actions_monitor.integrations import ai_index
+            self.json_reply(ai_index.paths_report("lite" if LITE["on"] else "complete"))
         elif path == "/api/about":      # the About panel: versions, links, files, health, credits, the update notice; no secret and no repository name
             if not self.guard():
                 return
@@ -2376,8 +2381,8 @@ def quota_payload():
 
 def about_payload():
     from github_actions_monitor.ui import about
-    paths = {"config": CONFIG_FILE, "log": LOG_FILE, "etag_cache": etagcache.CACHE_FILE, "package_folder": HERE}
-    data = about.info(LITE["on"], health_payload(), paths, update_info(), i18n.language())
+    places = {"config": CONFIG_FILE, "log": LOG_FILE, "etag_cache": etagcache.CACHE_FILE, "package_folder": HERE}
+    data = about.info(LITE["on"], health_payload(), places, update_info(), i18n.language())
     data["support"] = about.support_text(data)
     return data
 
@@ -2761,6 +2766,12 @@ def supervisor_main(argv):
 def main():
     if "--demo" in sys.argv[1:]:
         return demo_main()
+    if not CHILD["account"]:
+        rootmigrate.auto()      # an installation of 1.8.1 or older: its data, logs and AI files move into config/, data/, logs/ and ai/ (undo: python -m github_actions_monitor.util.rootmigrate --undo)
+    paths.ensure()      # config/, data/, logs/ and ai/ exist before anything is written
+    if not CHILD["account"]:
+        from github_actions_monitor.integrations import ai_index
+        ai_index.write("lite" if lite_requested() else "complete")      # ai/INDEX.json and ai/README.md: the map for the AI tools that read this installation
     code = accounts_cli(sys.argv[1:]) if not lite_requested() else None
     if code is not None:
         return code

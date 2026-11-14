@@ -15,7 +15,7 @@ Wohin es geschrieben wird, legt `actions_monitor.json` fest:
 
 | Schlüssel (`sentinel.`) | Bedeutung |
 |---|---|
-| `ci_red_file` | `""` = `ci_red.json` neben dem Monitor (Standard); `"off"` = wird nicht geschrieben; ein Pfad = dorthin (relative Pfade beziehen sich auf den Monitor-Ordner; ein Laufwerk D:, ein UNC-Pfad oder ein Laufwerk, das das laufende System nicht nutzen kann, wird abgelehnt) |
+| `ci_red_file` | `""` = `ai/ci_red.json` des Monitors (Standard); `"off"` = wird nicht geschrieben; ein Pfad = dorthin (relative Pfade beziehen sich auf den Monitor-Ordner; ein Laufwerk D:, ein UNC-Pfad oder ein Laufwerk, das das laufende System nicht nutzen kann, wird abgelehnt) |
 | `ci_red_audit_copy` | `true` kopiert es zusätzlich in den Audit-Ordner, sofern dieser existiert |
 
 ## Aufbau
@@ -65,14 +65,14 @@ Nichts im Monitor veröffentlicht diese Datei in einem Repository. Braucht ein �
 öffentlichen Laufdaten neu berechnen oder exportieren Sie den unkritischen Teil selbst:
 
 ```
-python3 read_report.py --export-status DIR
+python3 bin/read_report.py --export-status DIR
 ```
 
 Das schreibt `ci_status_public.json` und `ci_status_public.md` in den von Ihnen genannten Ordner und **nur** die Liste der roten Workflows (Repository,
 Ökosystem, Workflow, Ergebnis, seit wann, Serie, Link zum Lauf). Kein Signaturzustand, keine Schlüsselnamen, keine lokalen Pfade, keine Befehle. Das Werkzeug führt nie einen Commit oder
 Push aus; was danach mit dem Ordner geschieht, liegt bei Ihnen.
 
-`python3 read_report.py --export-sign-queue FILE` (`.json` oder `.csv`) schreibt die globale Signaturwarteschlange mit den exakten lokalen Befehlen. Diese Datei ist
+`python3 bin/read_report.py --export-sign-queue FILE` (`.json` oder `.csv`) schreibt die globale Signaturwarteschlange mit den exakten lokalen Befehlen. Diese Datei ist
 für den PC bestimmt, auf dem der Monitor läuft, und sagt das auch in ihrem Inneren.
 
 Optionales Feld `ai_hint` (neu in 1.6.4) in jedem roten Workflow: `{"class": "real|transient", "cause", "action"}` für eine KI oder ein Skript. Verbraucher, die mit `.get()` lesen, können es ignorieren.

@@ -28,7 +28,7 @@ from pathlib import Path
 from github_actions_monitor.security import private_io
 from github_actions_monitor.security import netguard
 
-from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
+from github_actions_monitor.util import paths
 FEED = "ai_alerts.jsonl"
 BRIEF = "ALERTS_BRIEF.md"
 STATE = "ai_alerts_state.json"
@@ -182,7 +182,7 @@ def in_use(folder_text):
 def folder_of(cfg):
     text = cfg["folder"].strip()
     ok = bool(text) and len(text) <= 260 and not any(ord(c) < 32 for c in text) and not text.startswith(("\\\\", "//")) and not re.match(r"^(?:[Dd]:|/mnt/[dD](?:/|$))", text)
-    return Path(text) if ok else HERE
+    return Path(text) if ok else paths.folder("ai")      # ai/ (or where MONITOR_AI_DIR / config/paths.json put it): what an AI reads lives in one folder
 
 
 def classify(conclusion, text="", patterns=None):

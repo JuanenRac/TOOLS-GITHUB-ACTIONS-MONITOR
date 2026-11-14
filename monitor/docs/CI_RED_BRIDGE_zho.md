@@ -11,7 +11,7 @@
 
 ## 监视器写出的内容
 
-`ci_red.json` 位于 `actions_monitor.py` 旁边，在每次哨兵巡检后刷新（模式 2）：
+`ci_red.json` 位于 `bin/actions_monitor.py` 旁边，在每次哨兵巡检后刷新（模式 2）：
 
 | 字段 | 含义 |
 |---|---|
@@ -27,8 +27,8 @@
 ## 如何导出
 
 ```
-py -3 read_report.py --export-status DIR          # ci_status_public.json + .md，仅包含可以公开的内容
-py -3 read_report.py --export-sign-queue FILE     # 签名队列
+py -3 bin/read_report.py --export-status DIR          # ci_status_public.json + .md，仅包含可以公开的内容
+py -3 bin/read_report.py --export-sign-queue FILE     # 签名队列
 ```
 
 两者都读取运行中的、位于 `127.0.0.1` 的监视器（不消耗 GitHub 配额）。快照加载期间它们会拒绝写入并说明原因；此时退出码不为零。
@@ -46,7 +46,7 @@ py -3 read_report.py --export-sign-queue FILE     # 签名队列
 
 ## 个人主页仪表板(使用方约定)
 
-个人主页仓库的状态仪表板可以通过两种方式读取同一份文档:从运行中的监视器(`GET /api/outputs/dashboard.json`,在开启 `outputs.dashboard.enabled` 之前关闭,仅限本机),或从 `py -3 read_report.py --export-status DIR` 写出的文件(只含红色工作流,绝不含签名部分)。仪表板可以依赖的内容(由本仓库的测试检查):
+个人主页仓库的状态仪表板可以通过两种方式读取同一份文档:从运行中的监视器(`GET /api/outputs/dashboard.json`,在开启 `outputs.dashboard.enabled` 之前关闭,仅限本机),或从 `py -3 bin/read_report.py --export-status DIR` 写出的文件(只含红色工作流,绝不含签名部分)。仪表板可以依赖的内容(由本仓库的测试检查):
 
 1. `schema` 为 `2`,字段只会增加。
 2. 提供的文档与 `ci_red.json` 完全一致。

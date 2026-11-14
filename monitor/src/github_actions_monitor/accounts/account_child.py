@@ -1,6 +1,6 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 # GPL-3.0-or-later - see LICENSE
-"""The monitor of ONE account, started by the supervisor (accounts_supervisor.py) as its own process: `python account_child.py ACCOUNT_ID --port N`.
+"""The monitor of ONE account, started by the supervisor (accounts_supervisor.py) as its own process: `python bin/account_child.py ACCOUNT_ID --port N`.
 
 It is the same monitor as always, run with the files of one folder `accounts/<id>/`: before the monitor starts, the place of each state file is pointed at that folder, and the default
 of the stores that were built with a fixed path (the cache of conditional reads, the history of analytics, the event feed, the cache of the AI) is pointed there too. Nothing else

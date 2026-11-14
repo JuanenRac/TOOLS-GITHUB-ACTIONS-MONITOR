@@ -265,21 +265,22 @@ class TheDoctor(unittest.TestCase):
         status, detail = doctor.storage_check({"storage": {"backend": "sqlite"}}, self.folder)
         self.assertEqual(status, "warn")
         self.assertIn("no database yet", detail)
-        self.assertEqual(list(self.folder.glob("*.sqlite3*")), [])
+        self.assertEqual(list(self.folder.rglob("*.sqlite3*")), [])
 
     def test_a_sound_database_is_ok_and_a_damaged_or_newer_one_is_not(self):
-        s = sqlite_storage.SqliteStorage(self.folder / "storage.sqlite3")
+        (self.folder / "data").mkdir(exist_ok=True)
+        s = sqlite_storage.SqliteStorage(self.folder / "data" / "storage.sqlite3")
         s.save_config("default", {"a": 1})
         s.close()
         self.assertEqual(doctor.storage_check({"storage": {"backend": "sqlite"}}, self.folder), ("ok", "sqlite"))
-        con = sqlite3.connect(str(self.folder / "storage.sqlite3"))
+        con = sqlite3.connect(str(self.folder / "data" / "storage.sqlite3"))
         con.execute("UPDATE meta SET value = '99' WHERE key = 'schema_version'")
         con.commit()
         con.close()
         status, detail = doctor.storage_check({"storage": {"backend": "sqlite"}}, self.folder)
         self.assertEqual(status, "warn")
         self.assertIn("newer", detail)
-        (self.folder / "storage.sqlite3").write_bytes(b"this is not a database at all" * 50)
+        (self.folder / "data" / "storage.sqlite3").write_bytes(b"this is not a database at all" * 50)
         self.assertEqual(doctor.storage_check({"storage": {"backend": "sqlite"}}, self.folder)[0], "warn")
 
     def test_each_account_is_looked_at(self):
@@ -295,12 +296,14 @@ class TheDoctor(unittest.TestCase):
         self.assertIn("alpha: no database yet", detail)
 
     def test_a_small_feed_on_a_desktop_is_ok(self):
-        (self.folder / "events_monitor.jsonl").write_text("x\n" * 100, encoding="utf-8")
+        (self.folder / "data").mkdir(exist_ok=True)
+        (self.folder / "data" / "events_monitor.jsonl").write_text("x\n" * 100, encoding="utf-8")
         status, _detail = doctor.retention_check({}, self.folder, {})
         self.assertEqual(status, "ok")
 
     def test_a_big_feed_warns(self):
-        (self.folder / "events_monitor.jsonl").write_bytes(b"x" * (3 * 1024 * 1024))
+        (self.folder / "data").mkdir(exist_ok=True)
+        (self.folder / "data" / "events_monitor.jsonl").write_bytes(b"x" * (3 * 1024 * 1024))
         status, detail = doctor.retention_check({"retention": {"warn_events_mb": 1}}, self.folder, {})
         self.assertEqual(status, "warn")
         self.assertIn("3 MB > 1 MB", detail)

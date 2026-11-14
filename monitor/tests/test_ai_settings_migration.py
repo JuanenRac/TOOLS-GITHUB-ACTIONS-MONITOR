@@ -91,7 +91,7 @@ class Migration(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root, audit, signed, config = self.make(tmp)
             self.assertEqual(migrate_state.run(apply=True, root=root, audit=audit, signed=signed, config_path=config, out=lambda x: None), 0)
-            self.assertEqual((root / "events_monitor.jsonl").read_text(encoding="utf-8"), '{"a":1}\n')
+            self.assertEqual((root / "data" / "events_monitor.jsonl").read_text(encoding="utf-8"), '{"a":1}\n')
             self.assertTrue((root / "eventos_monitor.jsonl").exists())
             self.assertTrue((audit / "SENTINEL_REPORT_DAY_2000-01-01.txt").exists())
             self.assertTrue((audit / "RELEASE_CANDIDATES.txt").exists())
@@ -103,12 +103,13 @@ class Migration(unittest.TestCase):
     def test_move_renames_and_nothing_is_ever_overwritten(self):
         with tempfile.TemporaryDirectory() as tmp:
             root, audit, signed, config = self.make(tmp)
-            (root / "events_monitor.jsonl").write_text("MINE", encoding="utf-8")
+            (root / "data").mkdir()
+            (root / "data" / "events_monitor.jsonl").write_text("MINE", encoding="utf-8")
             migrate_state.run(apply=True, move=True, root=root, audit=audit, signed=signed, config_path=config, out=lambda x: None)
-            self.assertEqual((root / "events_monitor.jsonl").read_text(encoding="utf-8"), "MINE")
+            self.assertEqual((root / "data" / "events_monitor.jsonl").read_text(encoding="utf-8"), "MINE")
             self.assertTrue((root / "eventos_monitor.jsonl").exists())   # not moved: the target existed
             self.assertFalse((root / "eventos_estado.json").exists())    # moved
-            self.assertTrue((root / "events_state.json").exists())
+            self.assertTrue((root / "data" / "events_state.json").exists())
 
     def test_nothing_to_do_says_so(self):
         with tempfile.TemporaryDirectory() as tmp:

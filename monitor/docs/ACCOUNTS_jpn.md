@@ -11,7 +11,7 @@
 
 ## 何もする必要がないとき
 
-`accounts/` フォルダーがなければ、モニターはこれまでとまったく同じように動作します。アカウントは 1 つで、ファイルはコードの隣にあります。複数が必要なときだけ読み進めてください。
+`accounts/` フォルダーがなければ、モニターはこれまでとまったく同じように動作します。アカウントは 1 つで、ファイルは `config/`、`data/`、`logs/` の各フォルダーにあります(LAYOUT を参照)。複数が必要なときだけ読み進めてください。
 
 ## アカウントのフォルダー
 
@@ -29,16 +29,16 @@ accounts/
 ## 1 つから複数へ移る
 
 ```
-python actions_monitor.py --migrate-accounts          # コピーされるものを表示するだけで、何も書き込みません
-python actions_monitor.py --migrate-accounts --apply  # accounts/default/ にコピーします
-python actions_monitor.py --accounts                  # アカウントを一覧表示します
+python bin/actions_monitor.py --migrate-accounts          # コピーされるものを表示するだけで、何も書き込みません
+python bin/actions_monitor.py --migrate-accounts --apply  # accounts/default/ にコピーします
+python bin/actions_monitor.py --accounts                  # アカウントを一覧表示します
 ```
 
 元のファイルは決して移動も削除もされません。確認したあとで自分で削除してください。2 回目の実行は拒否されるため、2 つの状態が混ざることはありません。アカウントを追加するには、`github_owner` を指定した `accounts/<id>/actions_monitor.json` を作成します（テンプレート `assets/examples/actions_monitor.example.json` をコピーしてください）。
 
 ## 実行
 
-`accounts/` フォルダーがある状態で `python actions_monitor.py` を実行すると、スーパーバイザーが起動します。いつものポート（8765）で動く小さなプロセスで、アカウントごとに 1 つのモニターを起動し、ページとツールに単一のアドレスを提供します。GitHub からは何も読まず、何も書きません。アカウントが停止すると、待ち時間を延ばしながら（2、5、15、30、60、その後 120 秒）再起動し、その間は概要で停止中と表示します。`python actions_monitor.py --account personal` はそのアカウントだけを通常のモニターとして実行します。
+`accounts/` フォルダーがある状態で `python bin/actions_monitor.py` を実行すると、スーパーバイザーが起動します。いつものポート（8765）で動く小さなプロセスで、アカウントごとに 1 つのモニターを起動し、ページとツールに単一のアドレスを提供します。GitHub からは何も読まず、何も書きません。アカウントが停止すると、待ち時間を延ばしながら（2、5、15、30、60、その後 120 秒）再起動し、その間は概要で停止中と表示します。`python bin/actions_monitor.py --account personal` はそのアカウントだけを通常のモニターとして実行します。
 
 ## ページ
 

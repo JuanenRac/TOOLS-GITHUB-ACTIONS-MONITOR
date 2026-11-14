@@ -43,16 +43,16 @@ WATCHED = ("actions_monitor.json", "actions_monitor_lite.json", "update_check.js
 
 
 def guard(case):
-    """Registers a cleanup on a TestCase: the files of the monitor that this test creates next to the code (the template of a first start, the update notice) are removed afterwards. Only
+    """Registers a cleanup on a TestCase: the files of the monitor that this test creates in its folders (config/, data/, logs/) (the template of a first start, the update notice) are removed afterwards. Only
     what did not exist before is removed."""
-    folder = Path(__file__).resolve().parent.parent
-    before = {name for name in WATCHED if (folder / name).exists()}
+    from github_actions_monitor.util import paths
+    before = {name for name in WATCHED if paths.place(name).exists()}
 
     def remove_new():
         for name in WATCHED:
             if name not in before:
                 try:
-                    (folder / name).unlink()
+                    paths.place(name).unlink()
                 except OSError:
                     pass
     case.addCleanup(remove_new)

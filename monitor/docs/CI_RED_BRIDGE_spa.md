@@ -11,7 +11,7 @@ Qué escribe el monitor, cómo exportarlo y qué necesita quien lee el fichero. 
 
 ## Qué escribe el monitor
 
-`ci_red.json` junto a `actions_monitor.py`, actualizado tras cada pasada del centinela (esquema 2):
+`ci_red.json` junto a `bin/actions_monitor.py`, actualizado tras cada pasada del centinela (esquema 2):
 
 | Campo | Significado |
 |---|---|
@@ -27,8 +27,8 @@ Qué escribe el monitor, cómo exportarlo y qué necesita quien lee el fichero. 
 ## Cómo exportarlo
 
 ```
-py -3 read_report.py --export-status DIR          # ci_status_public.json + .md, solo lo que se puede publicar
-py -3 read_report.py --export-sign-queue FILE     # la cola de firma
+py -3 bin/read_report.py --export-status DIR          # ci_status_public.json + .md, solo lo que se puede publicar
+py -3 bin/read_report.py --export-sign-queue FILE     # la cola de firma
 ```
 
 Ambos leen el monitor en ejecución en `127.0.0.1` (sin cuota de GitHub). Se niegan a escribir mientras la instantánea está cargando y explican por qué; en ese caso el código de salida no es cero.
@@ -46,7 +46,7 @@ No publica el fichero, no hace push al repositorio del perfil y no toca ningún 
 
 ## El panel del perfil (contrato del consumidor)
 
-El panel de estado de un repositorio de perfil puede leer el mismo documento de dos maneras: del monitor en marcha (`GET /api/outputs/dashboard.json`, apagado hasta activar `outputs.dashboard.enabled`, solo este equipo) o del archivo que escribe `py -3 read_report.py --export-status DIR` (solo los workflows en rojo, nunca la parte de firma). Lo que el panel puede dar por seguro, comprobado por una prueba de este repositorio:
+El panel de estado de un repositorio de perfil puede leer el mismo documento de dos maneras: del monitor en marcha (`GET /api/outputs/dashboard.json`, apagado hasta activar `outputs.dashboard.enabled`, solo este equipo) o del archivo que escribe `py -3 bin/read_report.py --export-status DIR` (solo los workflows en rojo, nunca la parte de firma). Lo que el panel puede dar por seguro, comprobado por una prueba de este repositorio:
 
 1. `schema` es `2` y los campos solo se añaden.
 2. El documento servido es exactamente el de `ci_red.json`.

@@ -23,12 +23,12 @@ Un inventario de **señales**, las mismas que muestra la página: la pestaña Ah
 2. `ai_alerts.jsonl`: una línea por evento (abierta, reconocida, resuelta), con un id estable.
 3. `GET /api/ai/state`: todo el inventario como JSON versionado (`schema`, `edition`, `signals`, `act`, `watch`), solo lectura. `GET /api/sentinel/panels` da solo los paneles.
 4. `GET /api/ai/stream`: eventos en directo (SSE), reanudables, con límite de oyentes y de tiempo.
-5. Herramientas MCP (`mcp_server.py`): `monitor_state`, `signals`, `alerts_open`, `diagnose`, `sentinel_panels`, `get_quota`; `act` (reconocer) solo con `--allow-ack`.
-6. El hook: `python monitor_cli.py ai-hook install [--assistant|--cursor|--generic] [--scope project|user] [--dry-run]` (también `status` y `uninstall`) añade un pequeño script que da a la sesión de la IA el resumen al empezar y antes de terminar.
+5. Herramientas MCP (`bin/mcp_server.py`): `monitor_state`, `signals`, `alerts_open`, `diagnose`, `sentinel_panels`, `get_quota`; `act` (reconocer) solo con `--allow-ack`.
+6. El hook: `python bin/monitor_cli.py ai-hook install [--assistant|--cursor|--generic] [--scope project|user] [--dry-run]` (también `status` y `uninstall`) añade un pequeño script que da a la sesión de la IA el resumen al empezar y antes de terminar.
 
 ## Paso a paso
 1. Ajustes, pestaña *IA externa*, bloque *Alertas para IAs*: activa `ai_alerts.enabled`. Opcionalmente `ai_alerts.diagnose.enabled` (el paso que falla y las últimas líneas del log de cada ejecución roja), `ai_alerts.stream.enabled` y `ai_alerts.client_hook.enabled`.
-2. Ejecuta `python monitor_cli.py ai-hook install --assistant --dry-run` para ver el cambio y luego sin `--dry-run`.
+2. Ejecuta `python bin/monitor_cli.py ai-hook install --assistant --dry-run` para ver el cambio y luego sin `--dry-run`.
 3. Abre una sesión de tu herramienta de IA en la carpeta: recibe el resumen. La barra inferior muestra el latido de la IA (cuándo leyó por última vez).
 4. Usa el botón *Probar conexión* de la página de ajustes para comprobar que el flujo se escribe.
 

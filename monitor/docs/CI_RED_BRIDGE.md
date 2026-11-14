@@ -11,7 +11,7 @@ What the monitor writes, how to export it and what a reader of the file needs. T
 
 ## What the monitor writes
 
-`ci_red.json` next to `actions_monitor.py`, refreshed after every sentinel pass (schema 2):
+`ci_red.json` next to `bin/actions_monitor.py`, refreshed after every sentinel pass (schema 2):
 
 | Field | Meaning |
 |---|---|
@@ -27,8 +27,8 @@ What the monitor writes, how to export it and what a reader of the file needs. T
 ## How to export it
 
 ```
-py -3 read_report.py --export-status DIR          # ci_status_public.json + .md, only what may be published
-py -3 read_report.py --export-sign-queue FILE     # the signing queue
+py -3 bin/read_report.py --export-status DIR          # ci_status_public.json + .md, only what may be published
+py -3 bin/read_report.py --export-sign-queue FILE     # the signing queue
 ```
 
 Both read the running monitor on `127.0.0.1` (no GitHub quota). They refuse to write while the snapshot is loading and tell why; the exit code is not zero in that case.
@@ -46,7 +46,7 @@ It does not publish the file, does not push to the profile repository and does n
 
 ## The profile dashboard (consumer contract)
 
-The status dashboard of a profile repository can read the same document in two ways: from the running monitor (`GET /api/outputs/dashboard.json`, off until `outputs.dashboard.enabled` is on, this computer only) or from the file written by `py -3 read_report.py --export-status DIR` (red workflows only, never the signing side). What the dashboard may rely on, checked by a test of this repository:
+The status dashboard of a profile repository can read the same document in two ways: from the running monitor (`GET /api/outputs/dashboard.json`, off until `outputs.dashboard.enabled` is on, this computer only) or from the file written by `py -3 bin/read_report.py --export-status DIR` (red workflows only, never the signing side). What the dashboard may rely on, checked by a test of this repository:
 
 1. `schema` is `2` and fields are only ever added.
 2. The served document is exactly the one of `ci_red.json`.

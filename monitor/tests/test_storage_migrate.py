@@ -126,7 +126,7 @@ class Migration(unittest.TestCase):
         FileStorage(flat, "flat").append_event("default", {"at": NEW, "kind": "k"})
         code, _ = run_cli(migrate_storage, ["--from", "file", "--to", "sqlite", "--accounts-dir", str(flat), "--flat", "--apply"])
         self.assertEqual(code, 0)
-        self.assertTrue((flat / "storage.sqlite3").is_file())
+        self.assertTrue((flat / "data" / "storage.sqlite3").is_file())
 
     def test_the_same_backend_on_both_sides_is_refused(self):
         self.assertEqual(run_cli(migrate_storage, ["--from", "file", "--to", "file", "--accounts-dir", str(self.root)])[0], 2)

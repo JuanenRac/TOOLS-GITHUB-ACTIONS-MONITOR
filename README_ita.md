@@ -44,7 +44,7 @@
 | | |
 |---|---|
 | **Maturità** | functional |
-| **Test** | 1573 metodi di test (`python -m unittest discover -s monitor/tests`) |
+| **Test** | 1601 metodi di test (`python -m unittest discover -s monitor/tests`) |
 | **Impostazioni** | 313 impostazioni, tutte con aiuto |
 | **Lingue** | 8 (inglese, spagnolo, tedesco, francese, italiano, giapponese, cinese e portoghese) |
 | **Provato nel CI su** | ubuntu, windows, macos, Python 3.11, 3.13 |
@@ -140,7 +140,7 @@ Ogni immagine segue il tema chiaro o scuro della tua pagina GitHub.
 - **Sentinella**: avvisi di sicurezza, igiene dei repository, pull request vecchie, versioni pronte da pubblicare, build in attesa di firma e un rapporto in linguaggio semplice.
 - **Sentinella Collab e un'unica lista di avvisi**: issue e pull request aperte che richiedono una persona (dimenticate, critiche, revisioni in attesa, vecchie bozze, conflitti), in sola lettura e con un orologio proprio, e una scheda Avvisi con tutte le sentinelle in un elenco, filtro per origine e silenziamenti locali che finiscono da soli.
 - **Barra di stato, schermo intero e tabelle ordinabili**: l'avviso più importante (e una finestra con tutti), la connessione, la quota, l'ultima lettura, la modalità, l'indirizzo e l'orologio a piè di pagina; un pulsante a schermo intero; Repository e Cronologia si ordinano per una o più colonne, con le colonne a tua scelta.
-- **La riga di comando come client**: `monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) legge ciò che dice il monitor in esecuzione, con `--json` e codici di uscita stabili; non scrive mai su GitHub.
+- **La riga di comando come client**: `bin/monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) legge ciò che dice il monitor in esecuzione, con `--json` e codici di uscita stabili; non scrive mai su GitHub.
 - **Pagina delle impostazioni**: cambia percorsi, intervalli, quote e interruttori dal browser; solo un elenco fisso di chiavi validate, con copia di sicurezza prima di ogni salvataggio.
 - **Grafici e storico**: minuti di calcolo, errori e successi con barre animate e uno storico giornaliero (rispetta il movimento ridotto).
 - **Otto lingue** (en, es, de, fr, it, ja, zh, pt) con l'inglese come base; si cambia nelle impostazioni.
@@ -161,13 +161,13 @@ Ogni immagine segue il tema chiaro o scuro della tua pagina GitHub.
 | vedere cosa gira e cosa fallisce, nient'altro (**inizia da qui**) | `MONITOR_LITE_GITHUB_ACTIONS` | 8766 |
 | tutto l'account sorvegliato per te: avvisi, release, firma, prontezza, analitica | `MONITOR_GITHUB_ACTIONS` (con la [sentinella](monitor/docs/SENTINEL_ita.md)) | 8765 |
 
-La finestra della console indica quale gira, nel titolo e nella prima riga. Ancora un dubbio? `python actions_monitor.py --demo` apre la pagina con dati inventati e `--doctor` verifica la tua installazione. [I tuoi primi cinque minuti](monitor/docs/FIRST_STEPS_ita.md)
+La finestra della console indica quale gira, nel titolo e nella prima riga. Ancora un dubbio? `python bin/actions_monitor.py --demo` apre la pagina con dati inventati e `--doctor` verifica la tua installazione. [I tuoi primi cinque minuti](monitor/docs/FIRST_STEPS_ita.md)
 
 ## Avvio rapido
 
 1. Installa Python 3.11 o successivo e la [CLI di GitHub](https://cli.github.com/), poi esegui `gh auth login`.
 2. Scarica questo repository (o lo zip dell'ultima release) e apri la cartella `monitor`.
-3. Avvialo: Windows `MONITOR_GITHUB_ACTIONS.bat`, Linux `./MONITOR_GITHUB_ACTIONS.sh`, macOS doppio clic su `MONITOR_GITHUB_ACTIONS.command`, oppure `python actions_monitor.py` ovunque.
+3. Avvialo: Windows `MONITOR_GITHUB_ACTIONS.bat`, Linux `./MONITOR_GITHUB_ACTIONS.sh`, macOS doppio clic su `MONITOR_GITHUB_ACTIONS.command`, oppure `python bin/actions_monitor.py` ovunque.
 4. Apri l'indirizzo stampato (`http://127.0.0.1:<porta>`). Al primo avvio crea `actions_monitor.json` dall'esempio.
 5. Apri **Impostazioni** per indicare il tuo account GitHub, gli ecosistemi (gruppi di repository per prefisso del nome) e il resto.
 
@@ -206,7 +206,7 @@ Tutto spento per impostazione predefinita, solo locale (`127.0.0.1`) e senza tok
 - **Analisi**: p50 / p95 della durata, del tempo in coda e di ogni passo di ogni workflow, workflow instabili (falliti e poi passati sullo stesso commit) e workflow diventati più lenti; esportati in Prometheus e Grafana.
 - **Risparmia quota e sopravvive a un'interruzione**: letture condizionali (un 304 non costa nulla) e una modalità ultima immagine con avviso offline che riprende da sola.
 - **Webhook in ingresso e notifiche**: eventi firmati aggiornano un repository in tempo reale; messaggi facoltativi a Telegram, Discord, Slack, Matrix, MQTT o un indirizzo locale (mai una scrittura su GitHub).
-- **Linter dei workflow e vista console**: `lint_workflows.py` controlla `.github/workflows` prima del push; `tui.py` (facoltativo, con `rich`) mostra una griglia in tempo reale nella console.
+- **Linter dei workflow e vista console**: `bin/lint_workflows.py` controlla `.github/workflows` prima del push; `bin/tui.py` (facoltativo, con `rich`) mostra una griglia in tempo reale nella console.
 - **Assistente IA (spento per impostazione predefinita)**: riassunti, classificazione e spiegazioni con Ollama, un servizio compatibile OpenAI, Anthropic o `gh copilot`; solo comandi di un elenco chiuso, eseguiti solo dopo aver confermato ciascuno.
 - La pagina delle impostazioni scrive un elenco fisso di chiavi validate, dopo aver salvato una copia di sicurezza.
 
@@ -224,26 +224,26 @@ python -m unittest discover -s monitor/tests
 
 ```
 TOOLS-GITHUB-ACTIONS-MONITOR/
-├── monitor/                                il programma
-├── docs/                                   architettura, schermate, roadmap
-├── tools/                                  immagini, guide e demo
-├── deploy/                                 immagine, compose, systemd
-├── images/                                 banner e immagini
-├── .github/                                CI e moduli
-├── CHANGELOG.md                            modifiche per versione
-├── LICENSE NOTICE AUTHORS                  licenze e autore
-├── CONTRIBUTING.md SECURITY.md             contribuire, segnalare
-├── SUPPORT.md CODE_OF_CONDUCT.md           supporto e condotta
+├── monitor/                            il programma
+├── docs/                               architettura, schermate, roadmap
+├── tools/                              immagini, guide e demo
+├── deploy/                             immagine, compose, systemd
+├── images/                             banner e immagini
+├── .github/                            CI e moduli
+├── CHANGELOG.md                        modifiche per versione
+├── LICENSE NOTICE AUTHORS              licenze e autore
+├── CONTRIBUTING.md SECURITY.md         contribuire, segnalare
+├── SUPPORT.md CODE_OF_CONDUCT.md       supporto e condotta
 └── monitor/
-    ├── MONITOR_GITHUB_ACTIONS.*            i lanciatori (doppio clic)
-    ├── MONITOR_LITE_GITHUB_ACTIONS.*       l'edizione lite
-    ├── BATCH_GITHUB_ACTIONS.*              il menu delle build a lotti
-    ├── src/                                il pacchetto importabile
-    ├── assets/                             esempi, pagina, lingue
-    ├── actions_monitor.py read_report.py   punti d'ingresso degli strumenti
-    ├── tests/                              test offline
-    ├── docs/                               guide, schemi, Grafana
-    └── tools/                              script di rilascio e migrazione
+    ├── MONITOR_GITHUB_ACTIONS.*        i lanciatori (doppio clic)
+    ├── MONITOR_LITE_GITHUB_ACTIONS.*   l'edizione lite
+    ├── BATCH_GITHUB_ACTIONS.*          il menu delle build a lotti
+    ├── src/                            il pacchetto importabile
+    ├── assets/                         esempi, pagina, lingue
+    ├── bin/                            i comandi brevi (read_report, monitor_cli ...)
+    ├── tests/                          test offline
+    ├── docs/                           guide, avvii rapidi, schemi, Grafana
+    └── tools/                          script di rilascio e migrazione
 ```
 
 ## Documentazione
@@ -259,7 +259,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ANALYTICS_ita.md`](monitor/docs/ANALYTICS_ita.md): analisi, letture condizionali e connessione persa
 - [`monitor/docs/CONSOLE_TOOLS_ita.md`](monitor/docs/CONSOLE_TOOLS_ita.md): il linter dei workflow e la vista console
 - [`monitor/docs/DEPLOYMENT_ita.md`](monitor/docs/DEPLOYMENT_ita.md): eseguirlo come servizio (l'immagine ufficiale, Compose, systemd), dietro un proxy, quando GitHub revoca l'accesso, permessi
-- [`monitor/QUICKSTART_it.txt`](monitor/QUICKSTART_it.txt): primi passi, in otto lingue
+- [`monitor/docs/LAYOUT_ita.md`](monitor/docs/LAYOUT_ita.md): le cartelle del monitor, il passaggio dalla 1.8.1 e la mappa per le IA
+- [`monitor/docs/QUICKSTART_it.txt`](monitor/docs/QUICKSTART_it.txt): primi passi, in otto lingue
 - [`monitor/docs/FIRST_STEPS_ita.md`](monitor/docs/FIRST_STEPS_ita.md): i tuoi primi cinque minuti
 - [`monitor/docs/SENTINEL_ita.md`](monitor/docs/SENTINEL_ita.md): la sentinella e i suoi controlli A1-A13
 - [`monitor/docs/COLLAB_ita.md`](monitor/docs/COLLAB_ita.md): la sentinella Collab, la scheda Avvisi e i silenziamenti

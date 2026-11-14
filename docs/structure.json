@@ -242,18 +242,17 @@
           }
         },
         {
-          "name": "actions_monitor.py  read_report.py",
+          "name": "bin/",
           "desc": {
-            "en": "entry points of the tools",
-            "es": "puntos de entrada de las herramientas",
-            "de": "Einstiegspunkte der Werkzeuge",
-            "fr": "points d'entrée des outils",
-            "it": "punti d'ingresso degli strumenti",
-            "ja": "ツールの入口",
-            "zh": "工具入口",
-            "pt": "pontos de entrada das ferramentas"
-          },
-          "tree_name": "actions_monitor.py read_report.py"
+            "en": "the short commands (read_report, monitor_cli ...)",
+            "es": "los comandos cortos (read_report, monitor_cli ...)",
+            "de": "die kurzen Befehle (read_report, monitor_cli ...)",
+            "fr": "les commandes courtes (read_report, monitor_cli ...)",
+            "it": "i comandi brevi (read_report, monitor_cli ...)",
+            "ja": "短いコマンド(read_report、monitor_cli など)",
+            "zh": "简短命令(read_report、monitor_cli 等)",
+            "pt": "os comandos curtos (read_report, monitor_cli ...)"
+          }
         },
         {
           "name": "tests/",
@@ -271,14 +270,14 @@
         {
           "name": "docs/",
           "desc": {
-            "en": "guides, schemas, Grafana",
-            "es": "guías, esquemas, Grafana",
-            "de": "Anleitungen, Schemas",
-            "fr": "guides, schémas, Grafana",
-            "it": "guide, schemi, Grafana",
-            "ja": "ガイドとスキーマ",
-            "zh": "指南、模式、Grafana",
-            "pt": "guias, esquemas, Grafana"
+            "en": "guides, quickstarts, schemas, Grafana",
+            "es": "guías, inicios rápidos, esquemas, Grafana",
+            "de": "Anleitungen, Schnellstarts, Schemas",
+            "fr": "guides, démarrages rapides, schémas, Grafana",
+            "it": "guide, avvii rapidi, schemi, Grafana",
+            "ja": "ガイド、クイックスタート、スキーマ",
+            "zh": "指南、快速入门、模式、Grafana",
+            "pt": "guias, inícios rápidos, esquemas, Grafana"
           }
         },
         {

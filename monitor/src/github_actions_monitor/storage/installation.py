@@ -15,6 +15,7 @@ It offers what `backup` and `migrate` need (list_accounts, export_account, impor
 from pathlib import Path
 
 from github_actions_monitor.storage import base
+from github_actions_monitor.util import paths
 from github_actions_monitor.storage.file_storage import FLAT_ACCOUNT, FileStorage
 from github_actions_monitor.storage.sqlite_storage import SqliteStorage
 
@@ -35,7 +36,7 @@ class Installation:
         base.check_account(account_id)
         if self._files is not None:
             return self._files
-        path = self.db or (self.root / DB_NAME if self.flat else self.root / account_id / DB_NAME)
+        path = self.db or (paths.place(DB_NAME, self.root) if self.flat else self.root / account_id / DB_NAME)
         if str(path) not in self._open:
             self._open[str(path)] = SqliteStorage(path)
         return self._open[str(path)]
@@ -43,7 +44,7 @@ class Installation:
     def global_storage(self):
         if self._files is not None:
             return self._files
-        path = self.db or (self.root / DB_NAME if self.flat else self.root / GLOBAL_FOLDER / DB_NAME)
+        path = self.db or (paths.place(DB_NAME, self.root) if self.flat else self.root / GLOBAL_FOLDER / DB_NAME)
         if str(path) not in self._open:
             self._open[str(path)] = SqliteStorage(path)
         return self._open[str(path)]
@@ -55,7 +56,7 @@ class Installation:
         if self.db:
             return self.account_storage(FLAT_ACCOUNT).list_accounts() if self.db.is_file() else []
         if self.flat:
-            return [FLAT_ACCOUNT] if (self.root / DB_NAME).is_file() else []
+            return [FLAT_ACCOUNT] if paths.place(DB_NAME, self.root).is_file() else []
         try:
             candidates = sorted(p.name for p in self.root.iterdir() if p.is_dir() and base.ACCOUNT_RE.match(p.name) and (p / DB_NAME).is_file())
         except OSError:

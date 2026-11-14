@@ -17,7 +17,7 @@ Por cada cuenta: la configuración (`actions_monitor.json`), el estado de los ce
 
 |  | `file` (predeterminado) | `sqlite` |
 |---|---|---|
-| Dónde | `accounts/<id>/` (junto a los lanzadores si no hay `accounts/`) | `accounts/<id>/storage.sqlite3`, una base de datos por cuenta |
+| Dónde | `data/accounts/<id>/` (los ficheros de `data/` y `config/` si no hay `accounts/`) | `accounts/<id>/storage.sqlite3`, una base de datos por cuenta |
 | Escrituras | un archivo temporal, volcado al disco y renombrado | una transacción corta, diario WAL |
 | Elígelo para | una persona; archivos que puedes leer y editar | un servicio que funciona durante meses; muchos eventos |
 

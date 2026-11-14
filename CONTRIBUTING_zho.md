@@ -1,7 +1,7 @@
 # 为 GitHub Actions Monitor 做贡献
 
 ## 技术栈
-- **语言**:Python 3.11 或更高;核心不需要任何包(终端视图 `tui.py` 使用可选的 Rich,缺少时测试会跳过依赖它的部分)。
+- **语言**:Python 3.11 或更高;核心不需要任何包(终端视图 `bin/tui.py` 使用可选的 Rich,缺少时测试会跳过依赖它的部分)。
 - **界面**:在 `127.0.0.1` 提供的本地网页(`monitor/assets/static/actions_monitor.html`),外加命令行工具。
 - **数据源**:官方 GitHub 命令行客户端 `gh`(默认只读调用)。
 

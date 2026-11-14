@@ -15,7 +15,7 @@ Where it goes is set in `actions_monitor.json`:
 
 | key (`sentinel.`) | meaning |
 |---|---|
-| `ci_red_file` | `""` = `ci_red.json` next to the monitor (default); `"off"` = not written; a path = there (relative paths are relative to the monitor folder; a D: drive, a UNC path or a drive the running system cannot use is refused) |
+| `ci_red_file` | `""` = `ai/ci_red.json` of the monitor (default); `"off"` = not written; a path = there (relative paths are relative to the monitor folder; a D: drive, a UNC path or a drive the running system cannot use is refused) |
 | `ci_red_audit_copy` | `true` also copies it into the audit folder when that folder exists |
 
 ## Shape
@@ -65,14 +65,14 @@ Nothing in the monitor publishes this file to a repository. If a public dashboar
 public run data, or export the non-sensitive part yourself:
 
 ```
-python3 read_report.py --export-status DIR
+python3 bin/read_report.py --export-status DIR
 ```
 
 This writes `ci_status_public.json` and `ci_status_public.md` into the folder you name and **only** the list of red workflows (repository,
 ecosystem, workflow, conclusion, since, streak, run link). No signing state, no key names, no local paths, no commands. The tool never commits or
 pushes; what happens to the folder afterwards is up to you.
 
-`python3 read_report.py --export-sign-queue FILE` (`.json` or `.csv`) writes the global signing queue with the exact local commands. That file is
+`python3 bin/read_report.py --export-sign-queue FILE` (`.json` or `.csv`) writes the global signing queue with the exact local commands. That file is
 for the PC that runs the monitor and says so inside.
 
 Optional field `ai_hint` (added in 1.6.4) in each red workflow: `{"class": "real|transient", "cause", "action"}` for an AI or a script. Consumers that read with `.get()` can ignore it.

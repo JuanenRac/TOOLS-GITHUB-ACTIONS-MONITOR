@@ -22,7 +22,7 @@ Scrape oder die Aktualisierung eines Dashboards kein Kontingent der GitHub-API. 
 | `/api/outputs/grafana.json` | JSON-Tabellen für die Grafana-Datenquelle „Infinity“ / JSON | `outputs.json.enabled` |
 | `/api/outputs/dashboard.json` | das Dokument von `ci_red.json` (Schema 2, siehe CI_RED_SCHEMA_deu.md) für ein Status-Dashboard | `outputs.dashboard.enabled` |
 
-Eine Anfrage an einen Pfad, dessen Schalter aus ist, erhält `404`. Der ältere Weg, dasselbe Dokument an ein Dashboard zu geben, `ci_red.json` und `read_report.py --export-status`, bleibt unverändert: Er ist ein Vertrag.
+Eine Anfrage an einen Pfad, dessen Schalter aus ist, erhält `404`. Der ältere Weg, dasselbe Dokument an ein Dashboard zu geben, `ci_red.json` und `bin/read_report.py --export-status`, bleibt unverändert: Er ist ein Vertrag.
 
 ## Prometheus-Metriken
 
@@ -74,7 +74,7 @@ Workflows eines Repositorys auf einmal, bis sie beendet sind. Von einem Webhook-
 
 ## Die Signatur-Warteschlange nach Vertrauen
 
-Jede Zeile der Warteschlange hat ein `trust`: `verified` (Signatur gegen den öffentlichen Schlüssel geprüft), `unknown` (das Format lässt sich hier nicht prüfen: nie geraten) oder `failed` (geprüft und nicht passend). Der Reiter Wächter hat einen Filter Signatur mit der Anzahl je Art und markiert die Zeilen (grüner, grauer oder roter Rand). Auf der Konsole: `py -3 read_report.py --export-sign-queue FILE --sign-trust failed`.
+Jede Zeile der Warteschlange hat ein `trust`: `verified` (Signatur gegen den öffentlichen Schlüssel geprüft), `unknown` (das Format lässt sich hier nicht prüfen: nie geraten) oder `failed` (geprüft und nicht passend). Der Reiter Wächter hat einen Filter Signatur mit der Anzahl je Art und markiert die Zeilen (grüner, grauer oder roter Rand). Auf der Konsole: `py -3 bin/read_report.py --export-sign-queue FILE --sign-trust failed`.
 
 ## Im Netzwerkmodus
 

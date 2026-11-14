@@ -12,17 +12,17 @@
 
 ## 在哪里监听
 
-监视器有三种监听方式，页面、`GET /api/accounts`、`monitor_cli.py status` 和 `monitor_cli.py accounts` 都会说明是哪一种：**本机**（仅 `127.0.0.1`：默认，无登录）、**网络**（网络模式 `listen.network`：同时监听 `listen.host`，每个请求都带访问令牌）或**代理之后**（前面声明了反向代理的网络模式：`listen.proxy_public_host`、`listen.secure_cookie` 或 `listen.trusted_proxy`）。镜像和服务单元是为第二种和第三种准备的；手动启动的监视器停留在第一种。
+监视器有三种监听方式，页面、`GET /api/accounts`、`bin/monitor_cli.py status` 和 `bin/monitor_cli.py accounts` 都会说明是哪一种：**本机**（仅 `127.0.0.1`：默认，无登录）、**网络**（网络模式 `listen.network`：同时监听 `listen.host`，每个请求都带访问令牌）或**代理之后**（前面声明了反向代理的网络模式：`listen.proxy_public_host`、`listen.secure_cookie` 或 `listen.trusted_proxy`）。镜像和服务单元是为第二种和第三种准备的；手动启动的监视器停留在第一种。
 
 在网络模式下，多账户的监督进程遵循与单账户监视器相同的规则：每个请求都带访问令牌（Cookie、请求头或 `POST /api/access`）、令牌错误后锁定、`Host` 检查、可选的使用您证书的 TLS、本机操作者使用的第二个端口（`listen.local_port`），而决定暴露范围的键、GitHub 登录和对 GitHub 的操作只能来自监视器所在的计算机（来自网络的请求会以“远程”标记送达账户）。
 
 ## 无浏览器与健康检查
 
-`python -m github_actions_monitor.service` 是服务的入口：它根据环境变量准备文件夹和第一个账户（见下表），并在无浏览器的情况下启动监视器。`python actions_monitor.py --no-browser --port 8765` 仍可用于您自己管理的监视器。
+`python -m github_actions_monitor.service` 是服务的入口：它根据环境变量准备文件夹和第一个账户（见下表），并在无浏览器的情况下启动监视器。`python bin/actions_monitor.py --no-browser --port 8765` 仍可用于您自己管理的监视器。
 
 `GET /api/health` 返回 `{"ok": true, "version": ..., "loaded": ..., "offline": ...}`，外加刷新周期和该账户 GitHub 登录的状态；它不会调用 GitHub。`GET /api/health?deep=1` 是深度检查：当某个账户的刷新周期运行时间超过 `watchdog_minutes`（为 0 时按 30 分钟）或其线程已消失时返回 503；在多账户监督进程中，监督循环本身停止、任意账户的周期卡住，或启动完成后没有任何账户响应时也会返回 503。GitHub 登录无效（失明）的账户会在响应中列出，但不算故障：重启无法修复丢失的登录，换一个新的才行。
 
-`python -m github_actions_monitor.cli.healthcheck` 为容器或服务管理器发出该调用（退出码 0 健康，1 不健康，2 无响应，3 被拒绝）。它从 `MONITOR_ACCESS_TOKEN`、`MONITOR_ACCESS_TOKEN_FILE` 指定的文件，或服务保存在 `MONITOR_STATE_DIR` 的文件中读取访问令牌。`monitor_cli.py health --deep` 可在任何计算机上做同样的事。
+`python -m github_actions_monitor.cli.healthcheck` 为容器或服务管理器发出该调用（退出码 0 健康，1 不健康，2 无响应，3 被拒绝）。它从 `MONITOR_ACCESS_TOKEN`、`MONITOR_ACCESS_TOKEN_FILE` 指定的文件，或服务保存在 `MONITOR_STATE_DIR` 的文件中读取访问令牌。`bin/monitor_cli.py health --deep` 可在任何计算机上做同样的事。
 
 ## 官方镜像
 
@@ -53,7 +53,7 @@ docker compose -f deploy/compose.yaml up -d                          # on 127.0.
 docker compose -f deploy/compose.yaml --profile proxy up -d          # behind Caddy (deploy/Caddyfile)
 ```
 
-在代理之后，监视器必须知道自己的公开名称，以及会话是 HTTPS：`MONITOR_PROXY_PUBLIC_HOST` 和 `MONITOR_SECURE_COOKIE=1`。此时到达主端口的任何请求都不再算作监视器所在的计算机：请使用第二个端口（`MONITOR_LOCAL_PORT`，镜像中为 8766，仅限回环），配合 `docker compose exec monitor python monitor_cli.py ...`（镜像已把 `MONITOR_URL` 指向它）。
+在代理之后，监视器必须知道自己的公开名称，以及会话是 HTTPS：`MONITOR_PROXY_PUBLIC_HOST` 和 `MONITOR_SECURE_COOKIE=1`。此时到达主端口的任何请求都不再算作监视器所在的计算机：请使用第二个端口（`MONITOR_LOCAL_PORT`，镜像中为 8766，仅限回环），配合 `docker compose exec monitor python bin/monitor_cli.py ...`（镜像已把 `MONITOR_URL` 指向它）。
 
 ## 使用 systemd 的传统安装
 
@@ -70,7 +70,7 @@ systemctl reload github-actions-monitor                              # SIGHUP: r
 
 env 文件把数据放在 `/var/lib/github-actions-monitor`，登录放在 `/etc/github-actions-monitor/gh_token`（权限 600）。除非在其中启用网络模式，否则只监听 `127.0.0.1`。
 
-launchd（macOS）：`ProgramArguments` = `/usr/bin/python3`、`-m`、`github_actions_monitor.service`，变量放在 `EnvironmentVariables`，`KeepAlive` 和 `RunAtLoad` 设为 true。Windows：`schtasks /Create /SC ONLOGON /TN GhaMonitor /TR "py -3 C:/path/to/actions_monitor.py --no-browser"`。
+launchd（macOS）：`ProgramArguments` = `/usr/bin/python3`、`-m`、`github_actions_monitor.service`，变量放在 `EnvironmentVariables`，`KeepAlive` 和 `RunAtLoad` 设为 true。Windows：`schtasks /Create /SC ONLOGON /TN GhaMonitor /TR "py -3 C:/path/to/bin/actions_monitor.py --no-browser"`。
 
 ## 环境变量
 
@@ -86,6 +86,8 @@ launchd（macOS）：`ProgramArguments` = `/usr/bin/python3`、`-m`、`github_ac
 | `MONITOR_CONFIG` | 配置文件（镜像中为 `/config/actions_monitor.json`）；首次启动时创建，之后不会被覆盖。 |
 | `MONITOR_ACCOUNTS_DIR` | 账户文件夹，每个账户一个文件夹（镜像中为 `/data/accounts`）。 |
 | `MONITOR_STATE_DIR` | 否则会放在代码旁边的文件：服务的访问令牌、登录审计（镜像中为 `/data/state`）。 |
+| `MONITOR_CONFIG_DIR` | 文件夹 `config/`：配置文件（`targets.json`、`quotas.json` 等）和 `config_backups/`（镜像中为 `/config`）。 |
+| `MONITOR_DATA_DIR` | 文件夹 `data/`：状态、缓存和账户；除非 `MONITOR_LOGS_DIR` / `MONITOR_AI_DIR` 另有指定，`logs/` 和 `ai/` 位于其中（镜像中为 `/data`）。见 LAYOUT。 |
 | `MONITOR_SECRET_DIR` | 若启用，监视器自己保存的令牌所在位置（镜像中为 `/data/secrets`）。 |
 | `GH_CONFIG_DIR` | `gh` 的配置文件夹（镜像中为 `/data/gh`）。 |
 | `GH_TOKEN_FILE` | 第一行为 GitHub 令牌的文件（Docker secret、systemd credential）。启动时读取，收到 SIGHUP 时再读。 |
@@ -105,23 +107,23 @@ launchd（macOS）：`ProgramArguments` = `/usr/bin/python3`、`-m`、`github_ac
 | `MONITOR_QUERY_ACCESS` | `0` = 带 `?access=` 的地址不再打开会话（`listen.query_access`）；请使用 `POST /api/access`。 |
 | `MONITOR_TEAM_MODE` | `1` = 团队模式（`auth.enabled`）：用户、角色和会话。 |
 | `MONITOR_SERVICE` | `1` = 以服务方式运行：登录无效时不放弃，doctor 会检查保留策略。镜像和服务单元已设置。 |
-| `MONITOR_URL` | 供 `monitor_cli.py` 和健康检查使用：监视器的地址（镜像中为第二个端口）。 |
-| `MONITOR_CA_FILE` | 供 `monitor_cli.py` 使用：签发监视器 HTTPS 证书的颁发机构的 PEM 文件。 |
-| `MONITOR_USER` | 团队模式下供 `monitor_cli.py` 使用：要登录的用户。 |
-| `MONITOR_PASSWORD_FILE` | 供 `monitor_cli.py` 使用：第一行为 `MONITOR_USER` 密码的文件。 |
+| `MONITOR_URL` | 供 `bin/monitor_cli.py` 和健康检查使用：监视器的地址（镜像中为第二个端口）。 |
+| `MONITOR_CA_FILE` | 供 `bin/monitor_cli.py` 使用：签发监视器 HTTPS 证书的颁发机构的 PEM 文件。 |
+| `MONITOR_USER` | 团队模式下供 `bin/monitor_cli.py` 使用：要登录的用户。 |
+| `MONITOR_PASSWORD_FILE` | 供 `bin/monitor_cli.py` 使用：第一行为 `MONITOR_USER` 密码的文件。 |
 | `MONITOR_RELEASE_TEST_TIMEOUT` | `tools/make_release.py`：常规测试套件在闸门失败之前可用的秒数（默认 3600；60 到 86400）。 |
 | `MONITOR_RELEASE_CLEAN_TIMEOUT` | `tools/make_release.py`：解压后的 zip 中测试套件可用的秒数（默认 3600；60 到 86400）。 |
 
 ## 当 GitHub 撤销登录或登录过期时
 
-每个账户都是独立的进程，所以登录失效只影响该账户。连续两次被拒绝，且拒绝表明登录本身无效（401、`Bad credentials`、令牌过期或被撤销、账户被停用、根本没有登录）后，该账户进入**失明**状态：页面、深度健康检查、`GET /api/accounts`（`state: blind`）和 `monitor_cli.py` 都会说明，警报标签页会打开一条**严重的系统警报**（`system.credential_blind`，哨兵 `system`），通知类型 `credential_blind`（默认开启）和 `credential_back` 会各通知渠道一次。仅某一项权限被拒绝（某个仓库的 403）不会让账户失明。其他账户继续运行，深度健康检查保持正常。该账户会继续尝试，第一个成功的周期会关闭警报。
+每个账户都是独立的进程，所以登录失效只影响该账户。连续两次被拒绝，且拒绝表明登录本身无效（401、`Bad credentials`、令牌过期或被撤销、账户被停用、根本没有登录）后，该账户进入**失明**状态：页面、深度健康检查、`GET /api/accounts`（`state: blind`）和 `bin/monitor_cli.py` 都会说明，警报标签页会打开一条**严重的系统警报**（`system.credential_blind`，哨兵 `system`），通知类型 `credential_blind`（默认开启）和 `credential_back` 会各通知渠道一次。仅某一项权限被拒绝（某个仓库的 403）不会让账户失明。其他账户继续运行，深度健康检查保持正常。该账户会继续尝试，第一个成功的周期会关闭警报。
 
 以已经失效的登录启动的服务不会放弃，而是保持运行并处于失明状态，这样才有东西可以替换。账户的令牌来源按先到先得：其文件夹中的 `credential` 文件（由替换写入）、`GH_TOKEN_FILE` 指定的文件，然后是 `gh` 使用的登录（`GH_TOKEN` 或其自身登录）。替换无需重启监督进程或账户，有三种方式：
 
 ```sh
 # 1. the command line (a token is read from a file or the standard input, never from a flag)
-docker compose exec -T monitor python monitor_cli.py credential replace --account default --new-token-file - < new_token.txt
-python monitor_cli.py credential replace --url https://monitor.example.org --user ann --password-file pw.txt --account default --new-token-file new_token.txt
+docker compose exec -T monitor python bin/monitor_cli.py credential replace --account default --new-token-file - < new_token.txt
+python bin/monitor_cli.py credential replace --url https://monitor.example.org --user ann --password-file pw.txt --account default --new-token-file new_token.txt
 
 # 2. the administrator endpoint (an administrator session in the team mode, or the computer of the monitor)
 #    POST /api/accounts/<id>/credential   {"action": "replace", "token": "..."}   or   {"action": "reload"}
@@ -136,7 +138,7 @@ systemctl reload github-actions-monitor
 
 ## 首次启动、备份与升级
 
-作为服务首次启动：设置所有者和登录（`GH_TOKEN_FILE`），启动，读取一次访问令牌（`/data/state/access_token`），打开页面并运行 `monitor_cli.py health --deep`。设置 `MONITOR_SERVICE=1` 后运行 `python actions_monitor.py --doctor`，还会提示缺少保留策略块以及共用同一令牌的账户。
+作为服务首次启动：设置所有者和登录（`GH_TOKEN_FILE`），启动，读取一次访问令牌（`/data/state/access_token`），打开页面并运行 `bin/monitor_cli.py health --deep`。设置 `MONITOR_SERVICE=1` 后运行 `python bin/actions_monitor.py --doctor`，还会提示缺少保留策略块以及共用同一令牌的账户。
 
 备份：需要保留的内容都在两个卷里。升级前请对存储做一份一致的备份，并备份这些卷：
 
@@ -172,7 +174,7 @@ location / {
 
 ## 针对另一台计算机的命令行
 
-`monitor_cli.py` 可以对另一台机器上的监视器工作：`--url https://monitor.example.org`（或 `MONITOR_URL`），访问令牌来自 `MONITOR_ACCESS_TOKEN` 或 `--token-file`，用 `--ca-file`（或 `MONITOR_CA_FILE`）信任签发您自有 HTTPS 证书的机构；在团队模式下，用 `--user 名称` 配合 `--password-file 文件`（或 `MONITOR_USER`、`MONITOR_PASSWORD_FILE`），以 Bearer 会话登录（`auth.allow_bearer`）。`status`、`accounts`、`alerts`、`health`（`--deep`）和 `credential` 的工作方式相同，退出码也相同（3 = 被拒绝；在 `status` 和 `accounts` 中，失明的账户同样返回 3）。通过明文 HTTP 连接到另一台计算机时会打印警告。
+`bin/monitor_cli.py` 可以对另一台机器上的监视器工作：`--url https://monitor.example.org`（或 `MONITOR_URL`），访问令牌来自 `MONITOR_ACCESS_TOKEN` 或 `--token-file`，用 `--ca-file`（或 `MONITOR_CA_FILE`）信任签发您自有 HTTPS 证书的机构；在团队模式下，用 `--user 名称` 配合 `--password-file 文件`（或 `MONITOR_USER`、`MONITOR_PASSWORD_FILE`），以 Bearer 会话登录（`auth.allow_bearer`）。`status`、`accounts`、`alerts`、`health`（`--deep`）和 `credential` 的工作方式相同，退出码也相同（3 = 被拒绝；在 `status` 和 `accounts` 中，失明的账户同样返回 3）。通过明文 HTTP 连接到另一台计算机时会打印警告。
 
 ## 登录所需的最小权限(`gh` 或细粒度令牌)
 

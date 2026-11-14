@@ -7,7 +7,7 @@
 
 # モニターのクライアントとしてのコマンドライン
 
-`python monitor_cli.py コマンド` は、実行中のモニターが把握している内容を問い合わせ（`127.0.0.1`、または `--url` / `MONITOR_URL` のアドレスへの `GET`）、表示します。ページが GitHub に対して行う処理を繰り返さず、GitHub には一切書き込まず、設定も変更しません。従来のツール（`read_report.py`、`--doctor`、`gha_dispatch_all.py`）はそのまま使えます。
+`python bin/monitor_cli.py コマンド` は、実行中のモニターが把握している内容を問い合わせ（`127.0.0.1`、または `--url` / `MONITOR_URL` のアドレスへの `GET`）、表示します。ページが GitHub に対して行う処理を繰り返さず、GitHub には一切書き込まず、設定も変更しません。従来のツール（`bin/read_report.py`、`--doctor`、`bin/gha_dispatch_all.py`）はそのまま使えます。
 
 ## コマンド
 
@@ -38,21 +38,21 @@
 ## 例
 
 ```
-python monitor_cli.py health && python monitor_cli.py alerts --fail-on error
-python monitor_cli.py alerts --sentinel collab --level warning --json
-python monitor_cli.py status --account org-acme
-MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python monitor_cli.py health --json
+python bin/monitor_cli.py health && python bin/monitor_cli.py alerts --fail-on error
+python bin/monitor_cli.py alerts --sentinel collab --level warning --json
+python bin/monitor_cli.py status --account org-acme
+MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python bin/monitor_cli.py health --json
 ```
 
 `health` は 3 つを区別します：モニターが応答しない（2）、GitHub ログインが失敗（3）、割り当て切れまたは GitHub に接続できない（4）。最初の読み取りが終わっていないモニターは、空の数字ではなくそのことを伝えます（4）。
 
 ## Lite 版
 
-`python monitor_cli.py status --lite`、`doctor --lite`、`health --lite` はポート 8766 と通信します。アカウント、番人、Webhook 受信が必要なコマンドは終了コード 1 で拒否されます。Lite 版にはアカウントもアラート API もありません。
+`python bin/monitor_cli.py status --lite`、`doctor --lite`、`health --lite` はポート 8766 と通信します。アカウント、番人、Webhook 受信が必要なコマンドは終了コード 1 で拒否されます。Lite 版にはアカウントもアラート API もありません。
 
 ## `ai-hook`: モニターが見ているものを AI ツールに伝える
 
-`python monitor_cli.py ai-hook install|status|uninstall [--assistant|--cursor|--generic] [--scope project|user] [--project-dir DIR] [--dry-run] [--json]` は、モニターが動いていなくても使えます。AI ツールのフック設定に連携スクリプト `ai_hook.py` を追加・表示・削除します (AI 向けアラートのガイドを参照)。設定ファイルはマージされ、コピーが保存され、`--json` の出力は純粋な ASCII です。既定の動作は `status` です。
+`python bin/monitor_cli.py ai-hook install|status|uninstall [--assistant|--cursor|--generic] [--scope project|user] [--project-dir DIR] [--dry-run] [--json]` は、モニターが動いていなくても使えます。AI ツールのフック設定に連携スクリプト `bin/ai_hook.py` を追加・表示・削除します (AI 向けアラートのガイドを参照)。設定ファイルはマージされ、コピーが保存され、`--json` の出力は純粋な ASCII です。既定の動作は `status` です。
 
 ## コマンドラインでのアクセストークン
 

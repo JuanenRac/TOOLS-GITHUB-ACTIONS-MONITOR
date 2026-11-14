@@ -15,7 +15,7 @@ Dónde se escribe se define en `actions_monitor.json`:
 
 | clave (`sentinel.`) | significado |
 |---|---|
-| `ci_red_file` | `""` = `ci_red.json` junto al monitor (por defecto); `"off"` = no se escribe; una ruta = allí (las rutas relativas lo son respecto a la carpeta del monitor; se rechaza una unidad D:, una ruta UNC o una unidad que el sistema en ejecución no pueda usar) |
+| `ci_red_file` | `""` = `ai/ci_red.json` del monitor (por defecto); `"off"` = no se escribe; una ruta = allí (las rutas relativas lo son respecto a la carpeta del monitor; se rechaza una unidad D:, una ruta UNC o una unidad que el sistema en ejecución no pueda usar) |
 | `ci_red_audit_copy` | `true` además lo copia en la carpeta de auditoría cuando esa carpeta existe |
 
 ## Forma
@@ -65,14 +65,14 @@ Nada en el monitor publica este fichero en un repositorio. Si un panel público 
 datos públicos de las ejecuciones, o bien exporta tú mismo la parte no sensible:
 
 ```
-python3 read_report.py --export-status DIR
+python3 bin/read_report.py --export-status DIR
 ```
 
 Esto escribe `ci_status_public.json` y `ci_status_public.md` en la carpeta que indiques y **solo** la lista de workflows en rojo (repositorio,
 ecosistema, workflow, conclusión, desde cuándo, racha, enlace a la ejecución). Sin estado de firma, sin nombres de claves, sin rutas locales, sin comandos. La herramienta nunca hace commit ni
 push; lo que ocurra con la carpeta después depende de ti.
 
-`python3 read_report.py --export-sign-queue FILE` (`.json` o `.csv`) escribe la cola global de firma con los comandos locales exactos. Ese fichero es
+`python3 bin/read_report.py --export-sign-queue FILE` (`.json` o `.csv`) escribe la cola global de firma con los comandos locales exactos. Ese fichero es
 para el PC que ejecuta el monitor y lo dice en su interior.
 
 Campo opcional `ai_hint` (añadido en la 1.6.4) en cada workflow en rojo: `{"class": "real|transient", "cause", "action"}` para una IA o un script. Los consumidores que leen con `.get()` pueden ignorarlo.

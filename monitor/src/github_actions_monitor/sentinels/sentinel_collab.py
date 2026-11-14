@@ -35,8 +35,8 @@ from github_actions_monitor.app import toolconfig
 from github_actions_monitor.security import private_io
 from github_actions_monitor.storage import state_io
 
-from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
-STATE_FILE = HERE / "collab_state.json"
+from github_actions_monitor.util import paths
+STATE_FILE = paths.place("collab_state.json")
 PER_PAGE = 100
 DETAILS_PER_TICK = 6                 # pull request details read in one round (the only calls beyond the two lists of a repository)
 DETAIL_EVERY = 6 * 3600              # a pull request is looked at again for conflicts at most this often

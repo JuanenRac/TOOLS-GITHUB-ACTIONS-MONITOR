@@ -100,7 +100,7 @@ The command line takes the access token under its own name, the network mode is 
 
 ## Done in 1.7.4
 
-A bar at the foot of the page with the most important notice (and a window with all of them), the connection, the allowance, the last read, the mode, the address and the clock; a full screen button; Repositories and History tables that sort by one or several columns with the columns of your choice; `monitor_cli.py`, the command line as a client of the running monitor (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) with `--json` and stable exit codes, and its guide in eight languages; the changelogs checked to be in order, the README of the package without a history inside, and the pictures drawn again.
+A bar at the foot of the page with the most important notice (and a window with all of them), the connection, the allowance, the last read, the mode, the address and the clock; a full screen button; Repositories and History tables that sort by one or several columns with the columns of your choice; `bin/monitor_cli.py`, the command line as a client of the running monitor (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) with `--json` and stable exit codes, and its guide in eight languages; the changelogs checked to be in order, the README of the package without a history inside, and the pictures drawn again.
 
 ## Done in 1.7.3
 

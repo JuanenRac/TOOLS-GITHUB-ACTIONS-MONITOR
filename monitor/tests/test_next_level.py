@@ -233,7 +233,7 @@ class CiRedBridge(unittest.TestCase):
 
     def test_relative_and_default_paths(self):
         base = Path(tempfile.gettempdir()) / "base"
-        self.assertEqual(ci_red.target_path("", base, windows=False), base / "ci_red.json")
+        self.assertEqual(ci_red.target_path("", base, windows=False), base / "ai" / "ci_red.json")
         self.assertEqual(ci_red.target_path("sub/x.json", base, windows=False), base / "sub" / "x.json")
         self.assertIsNone(ci_red.target_path("off", base))
 

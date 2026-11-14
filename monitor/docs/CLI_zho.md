@@ -7,7 +7,7 @@
 
 # 作为监视器客户端的命令行
 
-`python monitor_cli.py 命令` 向正在运行的监视器询问它所知道的信息（对 `127.0.0.1` 或 `--url` / `MONITOR_URL` 地址发出 `GET`）并打印出来。它不会重复页面对 GitHub 的工作，从不向 GitHub 写入，也不更改任何设置。旧的工具（`read_report.py`、`--doctor`、`gha_dispatch_all.py`）照常可用。
+`python bin/monitor_cli.py 命令` 向正在运行的监视器询问它所知道的信息（对 `127.0.0.1` 或 `--url` / `MONITOR_URL` 地址发出 `GET`）并打印出来。它不会重复页面对 GitHub 的工作，从不向 GitHub 写入，也不更改任何设置。旧的工具（`bin/read_report.py`、`--doctor`、`bin/gha_dispatch_all.py`）照常可用。
 
 ## 命令
 
@@ -38,21 +38,21 @@
 ## 示例
 
 ```
-python monitor_cli.py health && python monitor_cli.py alerts --fail-on error
-python monitor_cli.py alerts --sentinel collab --level warning --json
-python monitor_cli.py status --account org-acme
-MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python monitor_cli.py health --json
+python bin/monitor_cli.py health && python bin/monitor_cli.py alerts --fail-on error
+python bin/monitor_cli.py alerts --sentinel collab --level warning --json
+python bin/monitor_cli.py status --account org-acme
+MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python bin/monitor_cli.py health --json
 ```
 
 `health` 区分三种情况：监视器没有响应（2）、GitHub 登录失败（3）、配额耗尽或无法连接 GitHub（4）；尚未完成首次读取的监视器会如实说明（4），而不是显示空数字。
 
 ## 精简版
 
-`python monitor_cli.py status --lite`、`doctor --lite` 和 `health --lite` 与端口 8766 通信。需要账户、哨兵或 Webhook 接收器的命令会以退出码 1 被拒绝。精简版没有账户，也没有警报 API。
+`python bin/monitor_cli.py status --lite`、`doctor --lite` 和 `health --lite` 与端口 8766 通信。需要账户、哨兵或 Webhook 接收器的命令会以退出码 1 被拒绝。精简版没有账户，也没有警报 API。
 
 ## `ai-hook`: 告诉 AI 工具监控器看到了什么
 
-`python monitor_cli.py ai-hook install|status|uninstall [--assistant|--cursor|--generic] [--scope project|user] [--project-dir DIR] [--dry-run] [--json]` 不需要监控器正在运行。它在 AI 工具的钩子设置中添加、显示或移除联动脚本 `ai_hook.py` (见 AI 告警指南): 设置文件会被合并, 保留一份备份, `--json` 的输出是纯 ASCII。默认动作是 `status`。
+`python bin/monitor_cli.py ai-hook install|status|uninstall [--assistant|--cursor|--generic] [--scope project|user] [--project-dir DIR] [--dry-run] [--json]` 不需要监控器正在运行。它在 AI 工具的钩子设置中添加、显示或移除联动脚本 `bin/ai_hook.py` (见 AI 告警指南): 设置文件会被合并, 保留一份备份, `--json` 的输出是纯 ASCII。默认动作是 `status`。
 
 ## 命令行中的访问令牌
 

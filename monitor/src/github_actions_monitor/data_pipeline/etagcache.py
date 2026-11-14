@@ -19,8 +19,8 @@ import time
 from pathlib import Path
 from github_actions_monitor.security import private_io
 
-from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
-CACHE_FILE = HERE / "etag_cache.json"
+from github_actions_monitor.util import paths
+CACHE_FILE = paths.place("etag_cache.json")
 MAX_ENTRIES = 600
 ETAG_RE = re.compile(r'^(?:W/)?"[A-Za-z0-9._+/=-]{1,200}"$')
 STATUS_RE = re.compile(r"^HTTP/\S+\s+(\d{3})")

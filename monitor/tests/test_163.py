@@ -124,7 +124,7 @@ class HelpIndex(unittest.TestCase):
 
     def test_every_document_is_in_the_index_in_every_language_that_exists(self):
         files = helpdocs.index()["files"]
-        for path in list((HERE / "docs").glob("*.md")) + list(ROOT.glob("README*.md")) + list(HERE.glob("QUICKSTART_*.txt")) + [ROOT / "docs" / "ROADMAP.md", HERE / "CHANGELOG.md", ROOT / "CONTRIBUTING.md"]:
+        for path in list((HERE / "docs").glob("*.md")) + list(ROOT.glob("README*.md")) + list((HERE / "docs").glob("QUICKSTART_*.txt")) + [ROOT / "docs" / "ROADMAP.md", HERE / "CHANGELOG.md", ROOT / "CONTRIBUTING.md"]:
             self.assertIn(path.name, files, path.name)
         ids = {t["id"] for t in helpdocs.topics("en")}
         for needed in ("readme", "quickstart", "first_steps", "sentinel", "settings", "migrating", "roadmap", "changelog", "contributing"):

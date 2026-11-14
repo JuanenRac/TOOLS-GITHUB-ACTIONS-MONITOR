@@ -1,7 +1,7 @@
 # Contribuir a GitHub Actions Monitor
 
 ## Pila tecnológica
-- **Lenguaje**: Python 3.11 o superior; el núcleo no necesita paquetes (la vista de terminal, `tui.py`, usa Rich, que es opcional; las pruebas omiten lo que lo necesita si falta).
+- **Lenguaje**: Python 3.11 o superior; el núcleo no necesita paquetes (la vista de terminal, `bin/tui.py`, usa Rich, que es opcional; las pruebas omiten lo que lo necesita si falta).
 - **Interfaz**: una página web local (`monitor/assets/static/actions_monitor.html`) servida en `127.0.0.1`, más herramientas de línea de comandos.
 - **Fuente de datos**: el cliente oficial de línea de comandos de GitHub, `gh` (llamadas de solo lectura por defecto).
 

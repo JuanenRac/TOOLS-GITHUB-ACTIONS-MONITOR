@@ -15,7 +15,7 @@ L'emplacement d'écriture se définit dans `actions_monitor.json` :
 
 | clé (`sentinel.`) | signification |
 |---|---|
-| `ci_red_file` | `""` = `ci_red.json` à côté du moniteur (par défaut) ; `"off"` = non écrit ; un chemin = écrit à cet endroit (les chemins relatifs sont relatifs au dossier du moniteur ; un lecteur D:, un chemin UNC ou un lecteur que le système en cours d'exécution ne peut pas utiliser est refusé) |
+| `ci_red_file` | `""` = `ai/ci_red.json` du moniteur (par défaut) ; `"off"` = non écrit ; un chemin = écrit à cet endroit (les chemins relatifs sont relatifs au dossier du moniteur ; un lecteur D:, un chemin UNC ou un lecteur que le système en cours d'exécution ne peut pas utiliser est refusé) |
 | `ci_red_audit_copy` | `true` le copie aussi dans le dossier d'audit lorsque ce dossier existe |
 
 ## Structure
@@ -65,14 +65,14 @@ Rien dans le moniteur ne publie ce fichier dans un dépôt. Si un tableau de bor
 données publiques des exécutions, soit exportez vous-même la partie non sensible :
 
 ```
-python3 read_report.py --export-status DIR
+python3 bin/read_report.py --export-status DIR
 ```
 
 Cette commande écrit `ci_status_public.json` et `ci_status_public.md` dans le dossier que vous indiquez, et **uniquement** la liste des workflows rouges (dépôt,
 écosystème, workflow, conclusion, depuis quand, série, lien vers l'exécution). Aucun état de signature, aucun nom de clé, aucun chemin local, aucune commande. L'outil ne fait jamais de commit ni de
 push ; ce qu'il advient ensuite du dossier relève de vous.
 
-`python3 read_report.py --export-sign-queue FILE` (`.json` ou `.csv`) écrit la file de signature globale avec les commandes locales exactes. Ce fichier est
+`python3 bin/read_report.py --export-sign-queue FILE` (`.json` ou `.csv`) écrit la file de signature globale avec les commandes locales exactes. Ce fichier est
 destiné au PC qui exécute le moniteur et l'indique à l'intérieur.
 
 Champ optionnel `ai_hint` (ajouté en 1.6.4) dans chaque workflow rouge : `{"class": "real|transient", "cause", "action"}` pour une IA ou un script. Les consommateurs qui lisent avec `.get()` peuvent l'ignorer.

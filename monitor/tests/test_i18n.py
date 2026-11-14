@@ -392,16 +392,16 @@ class AuthorshipAndRelease(unittest.TestCase):
         self.assertEqual(mr.locale_problems(self.entries()), [])
         names = {p.relative_to(HERE).as_posix() for p in mr.members()}
         for needed in ("LICENSE", "NOTICE", "AUTHORS", "README.txt", "src/github_actions_monitor/i18n/__init__.py", "src/github_actions_monitor/app/toolconfig.py", "assets/examples/targets.example.json", "assets/examples/ecosystems.example.json",
-                       *[f"assets/locales/{l}.json" for l in LANGS], *[f"README_{l}.txt" for l in LANGS], *[f"QUICKSTART_{l}.txt" for l in LANGS]):
+                       *[f"assets/locales/{l}.json" for l in LANGS], *[f"docs/README_{l}.txt" for l in LANGS], *[f"docs/QUICKSTART_{l}.txt" for l in LANGS]):
             self.assertIn(needed, names)
 
     def test_every_readme_and_quickstart_says_it_signs_nothing_by_itself(self):
         for lang in LANGS:
             for kind in ("README", "QUICKSTART"):
-                text = (HERE / f"{kind}_{lang}.txt").read_text(encoding="utf-8")
+                text = (HERE / "docs" / f"{kind}_{lang}.txt").read_text(encoding="utf-8")
                 self.assertIn("127.0.0.1", text)
                 self.assertIn("gh auth login", text)
-        self.assertEqual(len({(HERE / f"README_{l}.txt").read_text(encoding="utf-8").count("\n") for l in LANGS}) >= 1, True)
+        self.assertEqual(len({(HERE / "docs" / f"README_{l}.txt").read_text(encoding="utf-8").count("\n") for l in LANGS}) >= 1, True)
 
     def test_the_example_config_passes_its_own_gate_and_is_neutral(self):
         text = mr.template()

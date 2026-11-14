@@ -7,7 +7,7 @@
     python tools/make_help_index.py --check    fail when the file differs from what the documents give (the CI runs it)
 
 Sources (every language that exists; English is the fallback when a document is not translated):
-  README*.md of the repository, monitor/QUICKSTART_<xx>.txt, monitor/README_<xx>.txt, every guide monitor/docs/NAME.md with its NAME_<xxx>.md translations,
+  README*.md of the repository, monitor/docs/QUICKSTART_<xx>.txt, monitor/docs/README_<xx>.txt, every guide monitor/docs/NAME.md with its NAME_<xxx>.md translations,
   docs/ROADMAP.md, monitor/CHANGELOG.md, CONTRIBUTING.md, SECURITY.md and SUPPORT.md.
 The result is one JSON file that travels in the package: the local server answers the Help panel and the console help from it, without Internet.
 """
@@ -103,8 +103,8 @@ def first_title(text, fallback):
 def sources():
     """[(topic id, group, {lang: Path}, plain)]"""
     out = [("readme", "start", {l: ROOT / f"README{SUFFIX[l]}.md" for l in LANGS}, False),
-           ("quickstart", "start", {l: MON / f"QUICKSTART{SHORT[l]}.txt" for l in LANGS}, True),
-           ("package", "start", {l: MON / f"README{SHORT[l]}.txt" for l in LANGS}, True)]
+           ("quickstart", "start", {l: MON / "docs" / f"QUICKSTART{SHORT[l]}.txt" for l in LANGS}, True),
+           ("package", "start", {l: MON / "docs" / f"README{SHORT[l]}.txt" for l in LANGS}, True)]
     names = sorted({p.stem for p in (MON / "docs").glob("*.md") if not re.search(r"_(spa|deu|fra|ita|jpn|zho|por)$", p.stem)})
     for name in names:
         out.append((name.lower(), "guides", {l: MON / "docs" / f"{name}{SUFFIX[l]}.md" for l in LANGS}, False))

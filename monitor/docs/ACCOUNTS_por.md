@@ -11,7 +11,7 @@ A edição completa pode vigiar várias contas do GitHub (uma pessoa ou uma orga
 
 ## Quando não há nada a fazer
 
-Sem uma pasta `accounts/`, o monitor funciona exatamente como antes: uma conta, com os seus ficheiros junto do código. Só continua a ler se quiser mais do que uma.
+Sem uma pasta `accounts/`, o monitor funciona exatamente como antes: uma conta, com os seus ficheiros nas pastas `config/`, `data/` e `logs/` (ver LAYOUT). Só continua a ler se quiser mais do que uma.
 
 ## A pasta das contas
 
@@ -29,16 +29,16 @@ O id de uma conta são letras minúsculas, dígitos, `_` e `-` (até 40 caratere
 ## Passar de uma conta para várias
 
 ```
-python actions_monitor.py --migrate-accounts          # mostra o que seria copiado, não escreve nada
-python actions_monitor.py --migrate-accounts --apply  # copia-o para accounts/default/
-python actions_monitor.py --accounts                  # lista as contas
+python bin/actions_monitor.py --migrate-accounts          # mostra o que seria copiado, não escreve nada
+python bin/actions_monitor.py --migrate-accounts --apply  # copia-o para accounts/default/
+python bin/actions_monitor.py --accounts                  # lista as contas
 ```
 
 Os originais nunca são movidos nem apagados: apaga-os você depois de verificar. Uma segunda execução recusa-se, para que dois estados nunca se misturem. Para acrescentar uma conta, crie `accounts/<id>/actions_monitor.json` com o seu `github_owner` (copie o modelo `assets/examples/actions_monitor.example.json`).
 
 ## Executar
 
-`python actions_monitor.py` com uma pasta `accounts/` arranca o supervisor, um processo pequeno na porta de sempre (8765) que arranca um monitor por conta e dá à página e às ferramentas um único endereço. Não lê nada do GitHub e não escreve nada. Se uma conta morrer, arranca-a de novo com uma espera crescente (2, 5, 15, 30, 60 e depois 120 segundos) e o resumo diz que está em baixo entretanto. `python actions_monitor.py --account personal` executa só essa conta, como um monitor normal.
+`python bin/actions_monitor.py` com uma pasta `accounts/` arranca o supervisor, um processo pequeno na porta de sempre (8765) que arranca um monitor por conta e dá à página e às ferramentas um único endereço. Não lê nada do GitHub e não escreve nada. Se uma conta morrer, arranca-a de novo com uma espera crescente (2, 5, 15, 30, 60 e depois 120 segundos) e o resumo diz que está em baixo entretanto. `python bin/actions_monitor.py --account personal` executa só essa conta, como um monitor normal.
 
 ## A página
 

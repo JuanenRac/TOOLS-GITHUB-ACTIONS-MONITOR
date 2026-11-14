@@ -3,9 +3,9 @@
 # GPL-3.0-or-later - see LICENSE
 """Brings the files written by versions before 1.5.0 to the English names, without losing anything.
 
-    python migrate_state.py             # dry run: says what it would do and changes nothing
-    python migrate_state.py --apply     # copies the old files to the new names (the old ones stay where they are)
-    python migrate_state.py --apply --move   # renames them instead of copying
+    python bin/migrate_state.py             # dry run: says what it would do and changes nothing
+    python bin/migrate_state.py --apply     # copies the old files to the new names (the old ones stay where they are)
+    python bin/migrate_state.py --apply --move   # renames them instead of copying
 
 What it looks at (only these, and never overwrites a file that already exists under the new name):
   events_monitor.jsonl, events_state.json   <- eventos_monitor.jsonl, eventos_estado.json   (next to this file)
@@ -22,7 +22,8 @@ import shutil
 import sys
 from pathlib import Path
 
-from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
+from github_actions_monitor.util import paths
+from github_actions_monitor.util.paths import ROOT as HERE   # the product folder
 
 from github_actions_monitor import i18n  # noqa: E402
 from github_actions_monitor.util import platform_compat  # noqa: E402
@@ -35,8 +36,11 @@ def plan(root=None, audit=None, signed=None):
     root = Path(root) if root else HERE
     audit = Path(audit) if audit else workspace.audit_dir_soft()
     signed = Path(signed) if signed else workspace.signed_dir_soft()
-    pairs = [(root / "eventos_monitor.jsonl", root / "events_monitor.jsonl"), (root / "eventos_estado.json", root / "events_state.json"),
-             (audit / "CANDIDATAS_RELEASE.txt", audit / "RELEASE_CANDIDATES.txt")]
+    pairs = []
+    for old_name, new_name in (("eventos_monitor.jsonl", "events_monitor.jsonl"), ("eventos_estado.json", "events_state.json")):
+        old = next((c for c in (paths.place(old_name, root), root / old_name) if c.is_file()), paths.place(old_name, root))      # data/ now, next to the launchers before 1.8.2
+        pairs.append((old, paths.place(new_name, root)))
+    pairs.append((audit / "CANDIDATAS_RELEASE.txt", audit / "RELEASE_CANDIDATES.txt"))
     if audit.is_dir():
         for old in sorted(audit.glob("PARTE_CENTINELA_*")):
             if old.suffix in (".txt", ".json"):
@@ -61,7 +65,7 @@ def run(apply=False, move=False, root=None, audit=None, signed=None, config_path
     t = i18n.t
     status = 0
     pairs = plan(root, audit, signed)
-    config_path = Path(config_path) if config_path else HERE / "actions_monitor.json"
+    config_path = Path(config_path) if config_path else paths.config_file()
     todo = 0
     for old, new in pairs:
         if new.exists():

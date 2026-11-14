@@ -5,14 +5,14 @@
 
 Nothing is compiled on this PC. The commands only talk to GitHub through `gh`:
 
-  py -3 gha_dispatch_all.py plan     [--only NAME ... | --ecosystem E] [--json]
+  py -3 bin/gha_dispatch_all.py plan     [--only NAME ... | --ecosystem E] [--json]
                                                              what would be built (no calls that change anything); --json = machine-readable
-  py -3 gha_dispatch_all.py dispatch [--only NAME ... | --ecosystem E] --go
+  py -3 bin/gha_dispatch_all.py dispatch [--only NAME ... | --ecosystem E] --go
                                                              fires workflow_dispatch for each target (dry_run=true: artefacts + attestation, no draft)
-  py -3 gha_dispatch_all.py status                           state of the last batch (runs, jobs, open build-failed/build-stuck issues)
-  py -3 gha_dispatch_all.py finalize [--json] [--execute]    lists, per ready target, the exact local command that downloads, verifies,
+  py -3 bin/gha_dispatch_all.py status                           state of the last batch (runs, jobs, open build-failed/build-stuck issues)
+  py -3 bin/gha_dispatch_all.py finalize [--json] [--execute]    lists, per ready target, the exact local command that downloads, verifies,
                                                              signs and publishes (--execute runs them one by one, asking first)
-  py -3 gha_dispatch_all.py hygiene [--write-candidates]     targets with a problem, build workflows no target covers, default branch that is not main;
+  py -3 bin/gha_dispatch_all.py hygiene [--write-candidates]     targets with a problem, build workflows no target covers, default branch that is not main;
                                                              --write-candidates PROPOSES the missing entries in targets.candidates.json (never touches targets.json)
 
   E = armor | urtc | hydra | eh3d (the targets of that ecosystem; EH3D has none today and says so).
@@ -62,7 +62,7 @@ def te(key, /, **values):
     """Text of a MACHINE-READ line (markers such as SKIP, DISPATCHED, READY, FAILED, Summary, BUILD ONLY): always English, whatever the language, because scripts parse them. The human phrases passed in as values stay translated."""
     return i18n.tl("en", key, **values)
 
-from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
+from github_actions_monitor.util import paths
 ROOT = workspace.workspace_root_soft()  # the workspace with the repositories (MONITOR_ROOT, actions_monitor.json or a marker file; see workspace.py)
 BATCH_DIR = workspace.signed_dir_soft() / "batches"
 LEGACY_BATCH_DIR = workspace.signed_dir_soft() / "lotes"   # before 1.5.0
@@ -86,7 +86,7 @@ BAD_CONCLUSIONS = ("failure", "timed_out", "startup_failure", "action_required")
 PROFILES_FILE = toolconfig.profiles_path()   # "profiles_file" in actions_monitor.json, default profiles.json
 DEFAULT_MIN_RATE = 1500   # `dispatch --go` refuses to start when the GitHub allowance left is below this (profiles.json min_rate_remaining or --min-rate)
 CANARY_WAIT_SECONDS = 1800
-CANDIDATES_FILE = HERE / "targets.candidates.json"
+CANDIDATES_FILE = paths.place("targets.candidates.json")
 # convention: ecosystem prefix -> default signing tool, from the ecosystems file ("tool"; "firmware_tool" + "firmware_extra" for a firmware workflow that needs its own tool)
 
 

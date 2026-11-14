@@ -5,14 +5,14 @@ GITHUB ACTIONS MONITOR + SENTINEL - 1.8.1
 ==========================================
 Choose your language / Elige tu idioma / Sprache wählen / Choisissez votre langue / Scegli la lingua / 言語を選択 / 选择语言 / Escolha o idioma:
 
-  English ........ README_en.txt   QUICKSTART_en.txt
-  Español ........ README_es.txt   QUICKSTART_es.txt
-  Deutsch ........ README_de.txt   QUICKSTART_de.txt
-  Français ....... README_fr.txt   QUICKSTART_fr.txt
-  Italiano ....... README_it.txt   QUICKSTART_it.txt
-  日本語 ......... README_ja.txt   QUICKSTART_ja.txt
-  中文 ........... README_zh.txt   QUICKSTART_zh.txt
-  Português (PT) . README_pt.txt   QUICKSTART_pt.txt
+  English ........ docs/README_en.txt   docs/QUICKSTART_en.txt
+  Español ........ docs/README_es.txt   docs/QUICKSTART_es.txt
+  Deutsch ........ docs/README_de.txt   docs/QUICKSTART_de.txt
+  Français ....... docs/README_fr.txt   docs/QUICKSTART_fr.txt
+  Italiano ....... docs/README_it.txt   docs/QUICKSTART_it.txt
+  日本語 ......... docs/README_ja.txt   docs/QUICKSTART_ja.txt
+  中文 ........... docs/README_zh.txt   docs/QUICKSTART_zh.txt
+  Português (PT) . docs/README_pt.txt   docs/QUICKSTART_pt.txt
 
 QUICK START (English)
   1. Install Python 3.10+ and the GitHub CLI (gh); then run once:  gh auth login

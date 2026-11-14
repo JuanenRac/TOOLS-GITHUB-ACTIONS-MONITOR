@@ -15,7 +15,7 @@ O local onde é escrito define-se em `actions_monitor.json`:
 
 | chave (`sentinel.`) | significado |
 |---|---|
-| `ci_red_file` | `""` = `ci_red.json` ao lado do monitor (predefinição); `"off"` = não é escrito; um caminho = é escrito aí (os caminhos relativos são relativos à pasta do monitor; é recusada uma unidade D:, um caminho UNC ou uma unidade que o sistema em execução não possa usar) |
+| `ci_red_file` | `""` = `ai/ci_red.json` do monitor (predefinição); `"off"` = não é escrito; um caminho = é escrito aí (os caminhos relativos são relativos à pasta do monitor; é recusada uma unidade D:, um caminho UNC ou uma unidade que o sistema em execução não possa usar) |
 | `ci_red_audit_copy` | `true` copia-o também para a pasta de auditoria quando essa pasta existe |
 
 ## Estrutura
@@ -65,14 +65,14 @@ Nada no monitor publica este ficheiro num repositório. Se um painel público pr
 dados públicos das execuções, ou exporte você próprio a parte não sensível:
 
 ```
-python3 read_report.py --export-status DIR
+python3 bin/read_report.py --export-status DIR
 ```
 
 Isto escreve `ci_status_public.json` e `ci_status_public.md` na pasta que indicar e **apenas** a lista de workflows a vermelho (repositório,
 ecossistema, workflow, conclusão, desde quando, sequência, ligação à execução). Sem estado de assinatura, sem nomes de chaves, sem caminhos locais, sem comandos. A ferramenta nunca faz commit nem
 push; o que acontece à pasta depois fica ao seu critério.
 
-`python3 read_report.py --export-sign-queue FILE` (`.json` ou `.csv`) escreve a fila de assinatura global com os comandos locais exatos. Esse ficheiro é
+`python3 bin/read_report.py --export-sign-queue FILE` (`.json` ou `.csv`) escreve a fila de assinatura global com os comandos locais exatos. Esse ficheiro é
 para o PC que executa o monitor e diz isso no seu interior.
 
 Campo opcional `ai_hint` (acrescentado na 1.6.4) em cada workflow vermelho: `{"class": "real|transient", "cause", "action"}` para uma IA ou um script. Os consumidores que leem com `.get()` podem ignorá-lo.

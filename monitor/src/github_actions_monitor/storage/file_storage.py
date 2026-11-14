@@ -23,6 +23,7 @@ from pathlib import Path
 
 from github_actions_monitor.accounts import accounts as accounts_module
 from github_actions_monitor.security import private_io
+from github_actions_monitor.util import paths
 from github_actions_monitor.storage import archive, base, locks
 
 EVENTS_REL = "events/events_monitor.jsonl"
@@ -120,7 +121,9 @@ class FileStorage(base.Storage):
     def _path(self, account_id, rel):
         """The file for `rel` (a name of the layout of accounts/<id>/); in the flat installation the old name of that file next to the launchers."""
         folder = self._account_dir(account_id)
-        return folder / (_FLAT_NAMES.get(rel, rel) if self.layout == "flat" else rel)
+        if self.layout == "flat":
+            return paths.place(_FLAT_NAMES.get(rel, rel), folder)       # config/, data/, logs/ ... of the product folder
+        return folder / rel
 
     def _doc_rel(self, name):
         base.check_name(name)
@@ -248,7 +251,7 @@ class FileStorage(base.Storage):
 
     # -- global records
     def _records_path(self, kind):
-        return self.root / GLOBAL_DIR / f"{base.check_kind(kind)}.json"
+        return (paths.place(GLOBAL_DIR, self.root) if self.layout == "flat" else self.root / GLOBAL_DIR) / f"{base.check_kind(kind)}.json"
 
     def _read_records(self, kind):
         data = read_json(self._records_path(kind), dict, {})
@@ -311,7 +314,7 @@ class FileStorage(base.Storage):
     # -- accounts, export, import, verification
     def list_accounts(self):
         if self.layout == "flat":
-            return [FLAT_ACCOUNT] if (self.root / CONFIG_REL).is_file() else []
+            return [FLAT_ACCOUNT] if paths.place(CONFIG_REL, self.root).is_file() else []
         try:
             return sorted(p.name for p in self.root.iterdir() if p.is_dir() and base.ACCOUNT_RE.match(p.name) and (p / CONFIG_REL).is_file())
         except OSError:

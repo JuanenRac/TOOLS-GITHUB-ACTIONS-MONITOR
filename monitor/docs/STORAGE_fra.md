@@ -17,7 +17,7 @@ Pour chaque compte : la configuration (`actions_monitor.json`), l'état des sent
 
 |  | `file` (par défaut) | `sqlite` |
 |---|---|---|
-| Où | `accounts/<id>/` (à côté des lanceurs s'il n'y a pas de `accounts/`) | `accounts/<id>/storage.sqlite3`, une base par compte |
+| Où | `data/accounts/<id>/` (les fichiers de `data/` et `config/` s'il n'y a pas de `accounts/`) | `accounts/<id>/storage.sqlite3`, une base par compte |
 | Écritures | un fichier temporaire, vidé sur le disque, puis renommé | une courte transaction, journal WAL |
 | À choisir pour | une personne ; des fichiers lisibles et modifiables | un service qui tourne pendant des mois ; beaucoup d'événements |
 

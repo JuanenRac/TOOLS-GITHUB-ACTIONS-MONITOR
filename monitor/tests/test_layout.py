@@ -19,7 +19,7 @@ sys.path.insert(0, str(HERE / "tests"))
 import _testenv  # noqa: F401,E402
 from github_actions_monitor.app import toolconfig  # noqa: E402
 from github_actions_monitor.cli import doctor  # noqa: E402
-from github_actions_monitor.util import layout, paths  # noqa: E402
+from github_actions_monitor.util import layout, paths, rootmigrate  # noqa: E402
 import make_release as mr  # noqa: E402
 import migrate_layout  # noqa: E402
 
@@ -40,7 +40,8 @@ class TheTree(unittest.TestCase):
 
     def test_no_module_of_logic_is_left_flat_next_to_the_launchers(self):
         """The only .py files of the product folder are the entry points: tiny, with no function and no class, and they do nothing when they are imported."""
-        flat = {p.stem: p for p in HERE.glob("*.py")}
+        self.assertEqual(list(HERE.glob("*.py")), [], "the root holds no .py file")
+        flat = {p.stem: p for p in (HERE / "bin").glob("*.py")}
         self.assertEqual(set(flat), ENTRY_POINTS)
         for name, path in flat.items():
             text = path.read_text(encoding="utf-8")
@@ -68,10 +69,11 @@ class TheTree(unittest.TestCase):
 
     def test_the_zip_lists_the_new_layout_and_the_launchers_stay_in_the_root(self):
         names = {p.relative_to(HERE).as_posix() for p in mr.members()}
-        for needed in ("MONITOR_GITHUB_ACTIONS.sh", "MONITOR_LITE_GITHUB_ACTIONS.bat", "BATCH_GITHUB_ACTIONS.command", "read_report.py", "src/github_actions_monitor/__main__.py", "src/github_actions_monitor/lite.py",
+        for needed in ("MONITOR_GITHUB_ACTIONS.sh", "MONITOR_LITE_GITHUB_ACTIONS.bat", "BATCH_GITHUB_ACTIONS.command", "bin/read_report.py", "src/github_actions_monitor/__main__.py", "src/github_actions_monitor/lite.py",
                        "assets/static/actions_monitor.html", "assets/examples/quotas.json", "assets/locales/pt.json", "tools/make_release.py", "tools/migrate_layout.py"):
             self.assertIn(needed, names)
-        self.assertFalse([n for n in names if n.endswith(".py") and "/" not in n and n[:-3] not in ENTRY_POINTS])
+        self.assertFalse([n for n in names if n.endswith(".py") and "/" not in n])
+        self.assertEqual({n[4:-3] for n in names if n.startswith("bin/")}, ENTRY_POINTS)
         self.assertEqual(mr.check_entries(["github_actions_monitor/" + n for n in sorted(names)]), [])
 
     def test_the_launchers_start_the_package_with_src_on_the_path(self):
@@ -121,12 +123,12 @@ class TheEntryPoints(unittest.TestCase):
         self.assertEqual(done.stdout.split(), ["lite", "True", "['--lite']"], done.stderr)
 
     def test_the_old_commands_still_work_through_the_entry_points(self):
-        done = subprocess.run([sys.executable, "-I", str(HERE / "read_report.py"), "--version"], capture_output=True, text=True, encoding="utf-8", timeout=60, cwd=str(HERE))
+        done = subprocess.run([sys.executable, "-I", str(HERE / "bin" / "read_report.py"), "--version"], capture_output=True, text=True, encoding="utf-8", timeout=60, cwd=str(HERE))
         self.assertEqual(done.returncode, 0, done.stderr)
         self.assertIn("github_actions_monitor", done.stdout)
 
     def test_importing_an_entry_point_by_its_old_name_starts_nothing(self):
-        done = subprocess.run([sys.executable, "-I", "-c", f"import sys; sys.path.insert(0, {str(HERE)!r}); import actions_monitor, read_report; print('quiet')"], capture_output=True, text=True, timeout=30)
+        done = subprocess.run([sys.executable, "-I", "-c", f"import sys; sys.path.insert(0, {str(HERE / "bin")!r}); import actions_monitor, read_report; print('quiet')"], capture_output=True, text=True, timeout=30)
         self.assertEqual(done.stdout.strip(), "quiet", done.stderr)
 
 
@@ -206,6 +208,8 @@ class MigratingAnOldInstallation(unittest.TestCase):
         self.assertEqual(status, "warn")
         self.assertIn("read_report.py", detail)
         migrate_layout.apply(self.root, stamp="t3")
+        self.assertEqual(doctor.layout_check(self.root)[0], "warn", "the data of 1.8.1 and older is still next to the launchers")
+        rootmigrate.apply(self.root, stamp="t3")
         self.assertEqual(doctor.layout_check(self.root)[0], "ok")
         self.assertIn("layout", doctor.ORDER)
 
