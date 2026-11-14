@@ -49,3 +49,15 @@ Um teste de navegador abre a página em cada um destes tamanhos, percorre todos 
 1. No computador que executa o monitor, ponha `ui.screen1_tabs` em `now,al`, `ui.screen2_tabs` em `charts,repos` e, para um monitor rodado, `ui.screen2_orientation` em `portrait`.
 2. Abra `http://este-computador:8765/screen/1` numa janela do primeiro monitor e `/screen/2` no segundo; F11 para ecrã inteiro. A partir de outro computador, use o modo de rede com o seu token de acesso.
 3. Para um ecrã de parede em que ninguém toca, dê-lhe vários separadores e ponha `ui.rotate_seconds` em 20-30.
+
+## Imagens
+
+O separador Agora em quatro tamanhos, com dados inventados (4K, um monitor 21:9, um monitor rodado, um telemóvel):
+
+![4K 3840x2160](../../docs/screenshots/web_size_4k_light.png)
+
+![ultrawide 3440x1440](../../docs/screenshots/web_size_ultrawide_light.png)
+
+![rodado 1080x1920](../../docs/screenshots/web_size_portrait_light.png)
+
+![telemóvel 390x844](../../docs/screenshots/web_size_phone_light.png)

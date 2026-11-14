@@ -49,3 +49,15 @@ A browser test opens the page in each of these sizes, goes through every tab and
 1. On the computer that runs the monitor, set `ui.screen1_tabs` to `now,al`, `ui.screen2_tabs` to `charts,repos` and, for a turned monitor, `ui.screen2_orientation` to `portrait`.
 2. Open `http://this-computer:8765/screen/1` in a window on the first monitor and `/screen/2` on the second; press F11 for full screen. From another computer, use the network mode with its access token.
 3. For a wall screen nobody touches, give it several tabs and set `ui.rotate_seconds` to 20-30.
+
+## Pictures
+
+The tab Now in four sizes, with invented data (4K, a 21:9 monitor, a turned monitor, a phone):
+
+![4K 3840x2160](../../docs/screenshots/web_size_4k_light.png)
+
+![ultrawide 3440x1440](../../docs/screenshots/web_size_ultrawide_light.png)
+
+![turned 1080x1920](../../docs/screenshots/web_size_portrait_light.png)
+
+![phone 390x844](../../docs/screenshots/web_size_phone_light.png)

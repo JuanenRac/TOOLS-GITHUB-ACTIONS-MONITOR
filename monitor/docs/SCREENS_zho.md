@@ -49,3 +49,15 @@
 1. 在运行监控器的电脑上，把 `ui.screen1_tabs` 设为 `now,al`，`ui.screen2_tabs` 设为 `charts,repos`，旋转的显示器把 `ui.screen2_orientation` 设为 `portrait`。
 2. 在第一块显示器的窗口打开 `http://本机:8765/screen/1`，第二块打开 `/screen/2`，按 F11 全屏。从其他电脑访问请使用网络模式和访问令牌。
 3. 对无人触碰的墙面屏幕，给它多个标签页并把 `ui.rotate_seconds` 设为 20-30。
+
+## 图片
+
+“现在”标签页在四种尺寸下的样子，使用虚构数据(4K、21:9 显示器、旋转的显示器、手机)：
+
+![4K 3840x2160](../../docs/screenshots/web_size_4k_light.png)
+
+![超宽屏 3440x1440](../../docs/screenshots/web_size_ultrawide_light.png)
+
+![旋转 1080x1920](../../docs/screenshots/web_size_portrait_light.png)
+
+![手机 390x844](../../docs/screenshots/web_size_phone_light.png)
