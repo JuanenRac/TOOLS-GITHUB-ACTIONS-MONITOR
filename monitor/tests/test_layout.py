@@ -128,7 +128,7 @@ class TheEntryPoints(unittest.TestCase):
         self.assertIn("github_actions_monitor", done.stdout)
 
     def test_importing_an_entry_point_by_its_old_name_starts_nothing(self):
-        done = subprocess.run([sys.executable, "-I", "-c", f"import sys; sys.path.insert(0, {str(HERE / "bin")!r}); import actions_monitor, read_report; print('quiet')"], capture_output=True, text=True, timeout=30)
+        done = subprocess.run([sys.executable, "-I", "-c", "import sys; sys.path.insert(0, " + repr(str(HERE / "bin")) + "); import actions_monitor, read_report; print('quiet')"], capture_output=True, text=True, timeout=30)
         self.assertEqual(done.stdout.strip(), "quiet", done.stderr)
 
 
