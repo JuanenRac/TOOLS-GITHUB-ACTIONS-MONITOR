@@ -1093,6 +1093,7 @@
  "mon.migrate_problem": "問題: {text}",
  "mon.migrate_would": "{kind} をコピーします: {name} -> {target}",
  "mon.network_first_steps": "ネットワークモードの最初の手順: listen.query_access をオフにし (トークンをアドレスに載せない)、HTTPS (証明書またはプロキシ) か VPN を使ってください。",
+ "mon.network_needs_admin": "ネットワークモード（listen.network）がチームモード（auth.enabled）と同時に有効ですが、管理者がまだおらず、最初の管理者はこのコンピューターからしか作成できません。モニターは起動しません。listen.network をオフにしてモニターを起動し（このコンピューターのみで待ち受けます）、ページを開いて管理者を作成してから、listen.network をオンにして再起動してください。",
  "mon.network_on": "ネットワークモード: {host}:{port} で待ち受け中。すべてのリクエストにアクセストークンが必要です。信頼できるネットワークでのみ使用してください。",
  "mon.network_plain": "この接続は暗号化されない HTTP です。トークンとデータは暗号化されません。信頼できるネットワークでのみ使うか、前段に HTTPS プロキシを置いてください（ネットワークガイド参照）。",
  "mon.network_token": "このアドレスを一度開いてください(アクセスCookieが設定されます): {url}",

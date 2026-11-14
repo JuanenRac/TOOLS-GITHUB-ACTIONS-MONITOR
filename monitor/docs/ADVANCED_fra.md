@@ -80,3 +80,7 @@ Avec `otlp.enabled` activé et un `otlp.endpoint` (HTTPS, ou HTTP sur cet ordina
 ## La boucle de rafraîchissement : battement et chien de garde
 
 `/api/data` renvoie aussi `loop` : la phase du cycle de rafraîchissement (`collect`, `maintain`, `publish`, `log`, `extras`, `idle`), depuis combien de temps le cycle tourne, le dernier bon cycle, la dernière erreur et la phase où elle s'est produite, les relances et tout problème d'écriture du journal ou du résumé pour l'IA. La barre du bas de la page l'affiche en rouge quand un cycle dure beaucoup trop et en avertissement quand un fichier ne peut pas être écrit. Un chien de garde relance dans un nouveau thread le cycle qui dépasse `watchdog_minutes` (10 par défaut, 0 le désactive), après avoir écrit dans `actions_monitor_log.txt` la trace de tous les threads.
+
+## Le mode réseau ne démarre pas sans administrateur
+
+Avec `auth.enabled` et `listen.network` activés et aucun utilisateur, le moniteur ne démarre pas et explique la suite : le premier administrateur ne peut être créé que depuis cet ordinateur ; désactivez donc `listen.network`, démarrez le moniteur (il n'écoute que sur cet ordinateur), ouvrez la page et créez l'administrateur, puis activez `listen.network` et redémarrez. Le mode local (127.0.0.1) démarre toujours.

@@ -80,3 +80,7 @@ Com `otlp.enabled` ligado e um `otlp.endpoint` (HTTPS, ou HTTP neste computador)
 ## O ciclo de atualização: batimento e vigilante
 
 `/api/data` devolve também `loop`: a fase do ciclo de atualização (`collect`, `maintain`, `publish`, `log`, `extras`, `idle`), há quanto tempo o ciclo está a correr, o último ciclo bom, o último erro e a fase em que ocorreu, os reinícios e qualquer problema ao escrever o registo ou o resumo para a IA. A barra inferior da página mostra-o a vermelho quando um ciclo demora demasiado e como aviso quando não se consegue escrever um ficheiro. Um vigilante reinicia numa thread nova o ciclo que exceda `watchdog_minutes` (por defeito 10, 0 desliga-o), depois de escrever em `actions_monitor_log.txt` o rasto de todas as threads.
+
+## O modo de rede não arranca sem administrador
+
+Com `auth.enabled` e `listen.network` ativos e nenhum utilizador ainda, o monitor não arranca e explica como continuar: o primeiro administrador só pode ser criado a partir deste computador; por isso desative `listen.network`, arranque o monitor (escuta apenas neste computador), abra a página e crie o administrador; depois ative `listen.network` e arranque de novo. O modo local (127.0.0.1) arranca sempre.

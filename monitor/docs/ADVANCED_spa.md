@@ -80,3 +80,7 @@ Con `otlp.enabled` activado y un `otlp.endpoint` (HTTPS, o HTTP en este equipo),
 ## El bucle de refresco: latido y vigilante
 
 `/api/data` devuelve también `loop`: la fase del ciclo de refresco (`collect`, `maintain`, `publish`, `log`, `extras`, `idle`), cuánto lleva el ciclo en marcha, el último ciclo bueno, el último error y la fase en que ocurrió, los reinicios y cualquier problema al escribir el registro o el resumen para la IA. La barra inferior de la página lo muestra en rojo cuando un ciclo dura demasiado y como aviso cuando no se puede escribir un fichero. Un vigilante reinicia en un hilo nuevo el ciclo que dure más de `watchdog_minutes` (por defecto 10, 0 lo apaga), tras escribir en `actions_monitor_log.txt` la traza de todos los hilos.
+
+## El modo red no arranca sin administrador
+
+Con `auth.enabled` y `listen.network` activados y ningún usuario todavía, el monitor no arranca y explica cómo seguir: el primer administrador solo se puede crear desde este equipo, así que desactiva `listen.network`, arranca el monitor (escucha solo en este equipo), abre la página y crea el administrador; después activa `listen.network` y arráncalo de nuevo. El modo local (127.0.0.1) siempre arranca.

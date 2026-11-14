@@ -1093,6 +1093,7 @@
  "mon.migrate_problem": "problem: {text}",
  "mon.migrate_would": "would copy {kind}: {name} -> {target}",
  "mon.network_first_steps": "First steps for the network mode: turn listen.query_access off (the token must not travel in an address), and use HTTPS (a certificate or a proxy) or a VPN.",
+ "mon.network_needs_admin": "The network mode (listen.network) is on together with the team mode (auth.enabled), but there is no administrator yet, and the first one can only be created from this computer. The monitor does not start. Turn listen.network off, start the monitor (it then listens on this computer only), open the page and create the administrator, then turn listen.network on and start it again.",
  "mon.network_on": "NETWORK MODE: listening on {host}:{port}. Every request needs the access token; use it only on a network you trust.",
  "mon.network_plain": "This connection is plain HTTP: the token and the data are not encrypted. Use it only on a network you trust, or put an HTTPS proxy in front (see the network guide).",
  "mon.network_token": "Open this address once (it sets the access cookie): {url}",

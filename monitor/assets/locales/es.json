@@ -1093,6 +1093,7 @@
  "mon.migrate_problem": "problema: {text}",
  "mon.migrate_would": "copiaría {kind}: {name} -> {target}",
  "mon.network_first_steps": "Primeros pasos del modo red: desactiva listen.query_access (el token no debe viajar en una dirección) y usa HTTPS (certificado o proxy) o una VPN.",
+ "mon.network_needs_admin": "El modo red (listen.network) está activado junto con el modo equipo (auth.enabled), pero aún no hay ningún administrador y el primero solo se puede crear desde este equipo. El monitor no arranca. Desactiva listen.network, arranca el monitor (así escucha solo en este equipo), abre la página y crea el administrador; después activa listen.network y arráncalo de nuevo.",
  "mon.network_on": "MODO RED: escuchando en {host}:{port}. Cada petición necesita el token de acceso; úsalo solo en una red de confianza.",
  "mon.network_plain": "Esta conexión es HTTP sin cifrar: el token y los datos no van cifrados. Úsala solo en una red de confianza, o pon delante un proxy HTTPS (consulta la guía de red).",
  "mon.network_token": "Abre esta dirección una vez (guarda la cookie de acceso): {url}",

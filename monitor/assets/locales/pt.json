@@ -1093,6 +1093,7 @@
  "mon.migrate_problem": "problema: {text}",
  "mon.migrate_would": "copiaria {kind}: {name} -> {target}",
  "mon.network_first_steps": "Primeiros passos do modo de rede: desligue listen.query_access (o token não deve viajar num endereço) e use HTTPS (certificado ou proxy) ou uma VPN.",
+ "mon.network_needs_admin": "O modo de rede (listen.network) está ativo juntamente com o modo de equipa (auth.enabled), mas ainda não há nenhum administrador e o primeiro só pode ser criado a partir deste computador. O monitor não arranca. Desative listen.network, arranque o monitor (assim escuta apenas neste computador), abra a página e crie o administrador; depois ative listen.network e arranque-o de novo.",
  "mon.network_on": "MODO REDE: a escutar em {host}:{port}. Cada pedido precisa do token de acesso; use-o apenas numa rede de confiança.",
  "mon.network_plain": "Esta ligação é HTTP simples: o token e os dados não vão cifrados. Use-a apenas numa rede de confiança, ou ponha à frente um proxy HTTPS (consulte o guia de rede).",
  "mon.network_token": "Abra este endereço uma vez (define o cookie de acesso): {url}",
