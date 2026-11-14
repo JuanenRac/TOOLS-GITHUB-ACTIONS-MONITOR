@@ -71,3 +71,12 @@ Per impostazione predefinita ogni lettura va alla fonte (utente, GitHub App, sec
 - `readpool.reserve.<fonte>` (da 0 a 4000): chiamate lasciate libere in quella fonte. Finché una fonte ha al massimo le chiamate della sua riserva, il monitor non legge con essa se un'altra può. Usa `readpool.reserve.user` per lasciare chiamate al `gh` dei tuoi strumenti e agenti.
 
 Scritture e azioni usano sempre il token dell'utente. La barra della quota e le modalità di lavoro (veloce e turbo) contano la SOMMA di tutte le fonti: il riquadro mostra la somma e il suggerimento il valore di ogni fonte, e la scheda Quota (Stato) aggiunge una riga con il totale accanto alla quota di utente, App e secondo account.
+
+## Leggere meno: prima il webhook e le fonti gratuite
+
+Le due vie sono **disattivate per impostazione predefinita** e riguardano solo i repository tranquilli (quelli le cui ultime esecuzioni sono tutte concluse e verdi). Un repository in esecuzione, rosso o toccato da un evento viene letto come sempre.
+
+- `savings.webhook_first`: finché il webhook in ingresso è vivo (ha consegnato un evento negli ultimi `savings.webhook_window_minutes` minuti), un repository tranquillo non viene letto nel suo turno lento: GitHub avvisa quando succede qualcosa. Viene comunque letto per intero ogni `savings.webhook_full_minutes`. Senza un webhook vivo non cambia nulla.
+- `savings.feeds.enabled`: prima di leggere con l'API un repository tranquillo, l'ultimo commit del suo ramo predefinito viene chiesto a una fonte che non consuma quota - il feed Atom pubblico dei commit, `git ls-remote`, o l'una o l'altra (`savings.feeds.method`: `atom`, `git`, `auto`). Se è il commit dell'ultima lettura completa, il repository resta com'è. Ogni `savings.feeds.max_age_minutes` viene comunque letto per intero. Solo repository pubblici: con uno privato, un errore o una risposta strana, il repository viene letto con l'API come sempre. Dal computer escono solo richieste GET verso github.com, mai una password, e non si scrive nulla. Non si usa se il monitor è isolato dalla rete (air-gapped).
+
+Quanto costa: un'esecuzione che parte senza un push (una pianificazione, un nuovo tentativo) su un repository tranquillo si vede alla lettura completa successiva, non subito. La scheda Quota (Stato) mostra le letture risparmiate da ciascuna via da quando il monitor è partito (circa una chiamata dell'API ciascuna): letture condizionali, GraphQL, prima il webhook, feed Atom, git e pannello centrale.
