@@ -109,6 +109,23 @@ class TheTableOfPlaces(unittest.TestCase):
         self.assertEqual([p.name for p in paths.ROOT.iterdir() if p.is_file() and paths.kind_of(p.name)], [])
 
 
+class TheWritersMakeTheFoldersOfTheMonitor(unittest.TestCase):
+    def test_a_file_of_the_monitor_can_be_written_before_its_folder_exists_and_any_other_cannot(self):
+        from github_actions_monitor.security import private_io
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            with mock.patch.dict(os.environ, {"MONITOR_DATA_DIR": str(tmp / "vol")}):
+                private_io.write_private(paths.place("etag_cache.json"), "{}")
+                self.assertTrue((tmp / "vol" / "etag_cache.json").is_file())
+                with private_io.open_append(paths.place("ai_actions_log.jsonl")) as log:
+                    log.write("x\n")
+                self.assertTrue((tmp / "vol" / "logs" / "ai_actions_log.jsonl").is_file())
+                self.assertTrue(paths.is_own(tmp / "vol" / "data" / "x"))
+                self.assertFalse(paths.is_own(tmp / "elsewhere" / "x"))
+            with self.assertRaises(OSError):
+                private_io.write_private(tmp / "elsewhere" / "x.json", "{}")
+
+
 class Migration(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

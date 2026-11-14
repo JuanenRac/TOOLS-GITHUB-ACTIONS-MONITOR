@@ -1,13 +1,27 @@
 name: CI
 
+# What runs where: every pull request runs Ubuntu and Windows. macOS (the slowest and the scarcest runner) runs on a push to main, on a tag, every night, by hand, and on a pull request
+# that carries the label `full-ci`. A new push to the same pull request cancels the run it supersedes; main, tags and the nightly run are never cancelled.
 on:
   push:
     branches: [main]
+    tags: ["v*"]
   pull_request:
+    types: [opened, synchronize, reopened, labeled]
+  schedule:
+    - cron: "23 3 * * *"
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  HOMEBREW_NO_AUTO_UPDATE: "1"      # a macOS job never spends minutes updating Homebrew
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
 
 jobs:
   tests:
@@ -17,15 +31,39 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest]
         python: ["3.11", "3.13"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: .github/ci-requirements.txt
       - name: Rich and Textual, for the optional terminal views (the monitor itself needs no package)
-        run: python -m pip install rich textual
+        run: python -m pip install -r .github/ci-requirements.txt
+      - name: Unit tests (offline)
+        run: python -m unittest discover -s monitor/tests
+
+  tests-macos:
+    name: Tests (macos-15, Python ${{ matrix.python }})
+    # not on every pull request: a push to main, a tag, the nightly run, a manual run, or a pull request with the label `full-ci`
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'full-ci')
+    runs-on: macos-15      # Apple Silicon, fixed: the moving label of the latest macOS changes image without notice
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: .github/ci-requirements.txt
+      - name: Rich and Textual, for the optional terminal views (the monitor itself needs no package)
+        run: python -m pip install -r .github/ci-requirements.txt
       - name: Unit tests (offline)
         run: python -m unittest discover -s monitor/tests
 
@@ -38,6 +76,8 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
+          cache: pip
+          cache-dependency-path: .github/ci-requirements.txt
       - name: The pictures agree with their description files
         run: |
           python tools/make_architecture.py --check
@@ -57,6 +97,8 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
+          cache: pip
+          cache-dependency-path: .github/ci-requirements.txt
       - name: No text leaves its box, the Quota tab included, the sound logic, the bottom bar in one line and the loading box
         env:
           MONITOR_BROWSER_TESTS: "1"
@@ -71,6 +113,8 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
+          cache: pip
+          cache-dependency-path: .github/ci-requirements.txt
       - name: Open the page, go through every tab and raise nothing (a page broken on purpose must fail; the lamps move, or stand still when asked)
         env:
           MONITOR_BROWSER_TESTS: "1"
@@ -78,6 +122,7 @@ jobs:
         run: |
           python -m unittest discover -s monitor/tests -p "test_180_page_smoke.py" -v
           python -m unittest discover -s monitor/tests -p "test_180_motion.py" -v
+          python -m unittest discover -s monitor/tests -p "test_183_now_panel.py" -v
 
   container:
     name: The image builds, runs read-only without root and survives a revoked login

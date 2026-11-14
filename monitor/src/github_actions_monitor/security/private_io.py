@@ -28,8 +28,16 @@ def _fix_mode(path, mode):
         pass
 
 
+def _make_parent(path):
+    """A file of config/, data/, logs/ or ai/ can be written before those folders exist (a fresh install, a test that does not start the monitor); any other folder must exist already."""
+    from github_actions_monitor.util import paths
+    if paths.is_own(path):
+        Path(path).parent.mkdir(parents=True, exist_ok=True)
+
+
 def write_tmp(tmp, text):
     """Writes `text` (str or bytes) to `tmp`, creating it with mode 0600 and tightening one that already existed."""
+    _make_parent(tmp)
     data = text.encode("utf-8") if isinstance(text, str) else bytes(text)
     fd = os.open(str(tmp), os.O_WRONLY | os.O_CREAT | os.O_TRUNC | _BINARY, FILE_MODE)
     with os.fdopen(fd, "wb") as handle:
@@ -48,6 +56,7 @@ def write_private(path, text):
 
 def open_append(path):
     """A text file object (UTF-8, "\\n") open for appending; a file that did not exist is created with mode 0600."""
+    _make_parent(path)
     fd = os.open(str(path), os.O_WRONLY | os.O_CREAT | os.O_APPEND | _BINARY, FILE_MODE)
     _fix_mode(path, FILE_MODE)
     return os.fdopen(fd, "a", encoding="utf-8", newline="\n")

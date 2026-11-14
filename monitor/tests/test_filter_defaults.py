@@ -108,7 +108,8 @@ class LiteStart(unittest.TestCase):
                 with mock.patch.object(am, "HERE", Path(tmp)):
                     (Path(tmp) / "actions_monitor.example.json").write_bytes((HERE / "assets" / "examples" / "actions_monitor.example.json").read_bytes())
                     if complete is not None:
-                        (Path(tmp) / "actions_monitor.json").write_text(json.dumps(complete), encoding="utf-8")
+                        (Path(tmp) / "config").mkdir()
+                        (Path(tmp) / "config" / "actions_monitor.json").write_text(json.dumps(complete), encoding="utf-8")
                     with contextlib.redirect_stdout(out):
                         config = am.load_config()
                     written = json.loads(am.CONFIG_FILE.read_text(encoding="utf-8"))

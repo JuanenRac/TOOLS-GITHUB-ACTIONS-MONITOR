@@ -555,8 +555,8 @@ class Wiring(unittest.TestCase):
     def test_the_account_children_do_not_ask_for_a_second_login(self):
         import os
         from unittest import mock
-        handler = mock.Mock(path="/api/alerts", command="GET")
-        with mock.patch.dict(os.environ, {auth_http.CHILD_ENV: "1"}):
+        handler = mock.Mock(path="/api/alerts", command="GET", headers={auth_http.SUPERVISOR_KEY_HEADER: "key-of-the-supervisor"})
+        with mock.patch.dict(os.environ, {auth_http.CHILD_ENV: "1", auth_http.SUPERVISOR_KEY_ENV: "key-of-the-supervisor"}):
             self.assertTrue(auth_http.gate(handler, {"auth": {"enabled": True}}))
         self.assertTrue(auth_http.gate(handler, {"auth": {"enabled": True}}, lite=True))
 

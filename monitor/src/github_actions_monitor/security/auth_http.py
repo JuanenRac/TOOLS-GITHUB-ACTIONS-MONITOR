@@ -14,8 +14,8 @@
 Read-only routes (they never change anything): every GET. Routes that change the state of the monitor (never GitHub, except the explicit actions): every POST, listed by role in
 `auth.required_role`. Errors are JSON with a stable code: {"error": "<text in English>", "code": "<code>"}.
 
-The gate (`gate`) answers False after it has answered the request; True means "go on". It does nothing at all (True) in the lite edition, in an account child process, when `auth.enabled`
-is off, and while no user exists: the individual mode is the same monitor as before. The access token of the network mode is checked BEFORE this gate (localguard); the one-use token of a
+The gate (`gate`) answers False after it has answered the request; True means "go on". It does nothing at all (True) in the lite edition and when `auth.enabled` is off; in an account child process it only asks for the key of the supervisor; while no user exists the person at this
+computer works as in the individual mode and everybody else is refused (403) everything that is not public. The access token of the network mode is checked BEFORE this gate (localguard); the one-use token of a
 POST (session_guard) is still checked by the route itself.
 """
 import hmac
@@ -27,6 +27,8 @@ from github_actions_monitor import i18n
 from github_actions_monitor.security import auth, localguard
 
 MAX_BODY = 4096
+SUPERVISOR_KEY_ENV = "MONITOR_SUPERVISOR_KEY"        # the proof the supervisor gives to the process of each account (the same names as in actions_monitor.py and accounts_supervisor.py)
+SUPERVISOR_KEY_HEADER = "X-Monitor-Supervisor"
 CHILD_ENV = "MONITOR_AUTH_CHILD"      # set by the supervisor for the monitors of each account: they answer to the supervisor on this computer, which is the one that asks for the login
 MESSAGES = {"auth_required": "sign in first", "forbidden_role": "your role cannot do this", "account_scope": "this account is not yours", "csrf": "missing or wrong CSRF token",
             "invalid_credentials": "wrong user name or password", "locked": "too many attempts, try later", "rate": "too many requests", "bootstrap_closed": "the first administrator already exists",
@@ -34,7 +36,8 @@ MESSAGES = {"auth_required": "sign in first", "forbidden_role": "your role canno
             "user_unknown": "unknown user", "user_exists": "that user already exists", "last_admin": "there must always be an active administrator", "role_invalid": "unknown role",
             "username_invalid": "the user name must be 2-40 characters: a-z, 0-9, dot, dash, underscore", "accounts_invalid": "invalid list of accounts", "active_invalid": "active must be true or false",
             "password_missing": "password missing", "password_short": "password too short", "password_too_long": "password too long", "password_weak": "password too weak",
-            "bearer_off": "tokens for scripts are turned off", "not_found": "not found"}
+            "bearer_off": "tokens for scripts are turned off", "not_found": "not found",
+            "bootstrap_required": "create the first administrator from this computer first", "supervisor_only": "this process only answers to its supervisor"}
 _cache = {"at": 0.0, "exist": False}
 
 
@@ -145,10 +148,28 @@ def active(config, lite=False):
     return cfg["enabled"] and _users_exist(auth.get_storage(config))
 
 
+def at_this_computer(handler):
+    """True when the request really comes from a person at this computer (see localguard.is_this_computer), also through the second local port."""
+    door = bool(getattr(handler, "local_door", False) is True or getattr(handler, "door", False) is True)
+    return localguard.is_this_computer(handler.client_address, handler.headers, door=door)
+
+
+def child_gate(handler):
+    """The monitor of one account answers only to its supervisor: every request must carry the key the supervisor gave this process when it started it. Anybody else who reaches
+    the port of the child (another user of the machine) gets a 403 and never reaches the data, whatever the team mode says. No key in the environment = nothing is answered."""
+    key = os.environ.get(SUPERVISOR_KEY_ENV, "")
+    given = handler.headers.get(SUPERVISOR_KEY_HEADER) or ""
+    if key and isinstance(given, str) and hmac.compare_digest(key.encode(), given.encode()):
+        return True
+    return fail(handler, "supervisor_only", 403)
+
+
 def gate(handler, config, lite=False):
     """True = the request goes on. False = it has been answered (401, 403, 429, a redirect, or an endpoint of /api/auth)."""
-    if lite or os.environ.get(CHILD_ENV):
+    if lite:
         return True
+    if os.environ.get(CHILD_ENV):
+        return child_gate(handler)
     cfg = auth.settings(config)
     path = handler.path.split("?")[0]
     method = handler.command
@@ -157,9 +178,14 @@ def gate(handler, config, lite=False):
     if not cfg["enabled"]:
         return True
     storage = auth.get_storage(config)
-    if not _users_exist(storage):
-        return True      # nobody has been created yet: the individual mode, exactly as before
     needed = auth.required_role(method, path)
+    if not _users_exist(storage):
+        # nobody has been created yet: the person at this computer works as in the individual mode (and creates the first administrator); anybody else is kept out of everything
+        # that is not public until that administrator exists, so turning the team mode on in the network mode never leaves the monitor open to the network
+        if needed is None or at_this_computer(handler):
+            return True
+        auth.audit(cfg, "denied", address=_address(handler), path=path, result="denied", code="bootstrap_required")
+        return fail(handler, "bootstrap_required", 403)
     if needed is None:
         return True
     is_page = method == "GET" and path in ("/", "/index.html")
