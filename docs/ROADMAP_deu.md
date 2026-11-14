@@ -37,11 +37,11 @@ Jede Version enthält alles aus ihrem Abschnitt des Plans: nichts bleibt von ein
 
 ### 1.8.2 - Offizielles Docker-Image und Dienstmodus
 
-Ein mehrstufiges Image mit unprivilegiertem Benutzer, Volumes für Daten und Konfiguration, dokumentierte Umgebungsvariablen, ein Compose-Beispiel mit optionalem Reverse-Proxy und TLS, eine systemd-Unit für die klassische Installation und eine tiefe Gesundheitsprüfung, die fehlschlägt, wenn der Supervisor oder der Zyklus eines Kontos hängt. Ein Zugangsdatum, das GitHub widerruft oder ablaufen lässt, markiert nur dieses Konto als blind, löst einen kritischen Systemalarm aus und lässt sich ersetzen, ohne den Supervisor neu zu starten. Sicherung, Aktualisierung und erster Start als Dienst sind dokumentiert; die Seite sagt, ob sie auf diesem Rechner, im Netzwerk oder hinter einem Proxy lauscht; die Kommandozeile arbeitet gegen einen entfernten Monitor. Die Lite-Ausgabe bleibt lokal. Außerdem: ein Bericht über die Wartezeit der Jobs in der Warteschlange je Runner.
+Ein mehrstufiges Image mit unprivilegiertem Benutzer, Volumes für Daten und Konfiguration, dokumentierte Umgebungsvariablen, ein Compose-Beispiel mit optionalem Reverse-Proxy und TLS, eine systemd-Unit für die klassische Installation und eine tiefe Gesundheitsprüfung, die fehlschlägt, wenn der Supervisor oder der Zyklus eines Kontos hängt. Ein Zugangsdatum, das GitHub widerruft oder ablaufen lässt, markiert nur dieses Konto als blind, löst einen kritischen Systemalarm aus und lässt sich ersetzen, ohne den Supervisor neu zu starten. Sicherung, Aktualisierung und erster Start als Dienst sind dokumentiert; die Seite sagt, ob sie auf diesem Rechner, im Netzwerk oder hinter einem Proxy lauscht; die Kommandozeile arbeitet gegen einen entfernten Monitor. Die Lite-Ausgabe bleibt lokal.
 
 ### 1.8.3 - Benachrichtigungen je Benutzer
 
-Einstellungen je Benutzer (Kanal, Wächter, niedrigste Stufe), ein Verteiler, der anhand von Einstellungen und Rollen entscheidet, wer benachrichtigt wird, Kanäle als einfache Plug-ins und Zusammenfassungen der noch ungelesenen Alarme. Außerdem: ein wegen der beobachteten Pfade übersprungener Job wird getrennt von einem roten Job angezeigt.
+Einstellungen je Benutzer (Kanal, Wächter, niedrigste Stufe), ein Verteiler, der anhand von Einstellungen und Rollen entscheidet, wer benachrichtigt wird, Kanäle als einfache Plug-ins und Zusammenfassungen der noch ungelesenen Alarme. Außerdem: ein Bericht über die Wartezeit der Jobs in der Warteschlange je Runner, und ein wegen der beobachteten Pfade übersprungener Job wird getrennt von einem roten Job angezeigt.
 
 ### 1.8.4 - Stabilisierung
 

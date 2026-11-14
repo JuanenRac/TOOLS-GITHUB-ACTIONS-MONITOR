@@ -37,11 +37,11 @@ Chaque version porte tout ce qui est de son tronçon du plan : rien ne reste sus
 
 ### 1.8.2 - Image Docker officielle et mode service
 
-Une image multi-étapes avec un utilisateur sans privilèges, des volumes pour les données et la configuration, des variables d'environnement documentées, un exemple de compose avec proxy inverse et TLS facultatifs, une unité systemd pour qui préfère l'installation classique et un contrôle de santé profond qui échoue si le superviseur ou le cycle d'un compte est bloqué. Un identifiant que GitHub révoque ou laisse expirer marque seulement ce compte comme aveugle, déclenche une alerte système critique et peut être remplacé sans redémarrer le superviseur. Sauvegarde, mise à jour et premier démarrage en service sont documentés ; la page dit si elle écoute sur cet ordinateur, sur le réseau ou derrière un proxy ; la ligne de commande fonctionne contre un moniteur distant. L'édition lite reste locale. Aussi : un rapport du temps que les jobs attendent en file pour chaque runner.
+Une image multi-étapes avec un utilisateur sans privilèges, des volumes pour les données et la configuration, des variables d'environnement documentées, un exemple de compose avec proxy inverse et TLS facultatifs, une unité systemd pour qui préfère l'installation classique et un contrôle de santé profond qui échoue si le superviseur ou le cycle d'un compte est bloqué. Un identifiant que GitHub révoque ou laisse expirer marque seulement ce compte comme aveugle, déclenche une alerte système critique et peut être remplacé sans redémarrer le superviseur. Sauvegarde, mise à jour et premier démarrage en service sont documentés ; la page dit si elle écoute sur cet ordinateur, sur le réseau ou derrière un proxy ; la ligne de commande fonctionne contre un moniteur distant. L'édition lite reste locale.
 
 ### 1.8.3 - Notifications par utilisateur
 
-Préférences par utilisateur (canal, sentinelle, niveau minimal), un répartiteur qui décide qui prévenir d'après les préférences et les rôles, des canaux comme simples modules et des synthèses des alertes pas encore lues. Aussi : un job sauté à cause des chemins surveillés est montré à part d'un job rouge.
+Préférences par utilisateur (canal, sentinelle, niveau minimal), un répartiteur qui décide qui prévenir d'après les préférences et les rôles, des canaux comme simples modules et des synthèses des alertes pas encore lues. Aussi : un rapport du temps que les jobs attendent en file pour chaque runner, et un job sauté à cause des chemins surveillés est montré à part d'un job rouge.
 
 ### 1.8.4 - Stabilisation
 
