@@ -22,6 +22,7 @@ from pathlib import Path
 from github_actions_monitor.integrations import ai_alerts
 from github_actions_monitor.security import private_io
 from github_actions_monitor.sentinels import sentinel_ai
+from github_actions_monitor.storage import locks
 
 LEDGER = "ai_notify_state.json"
 LOG = "ai_notify.jsonl"
@@ -71,22 +72,29 @@ def _read(path):
     return {"calls": [c for c in (calls or []) if isinstance(c, list) and len(c) == 2 and all(isinstance(x, (int, float)) for x in c)]}
 
 
+LOCK_WAIT = 10.0      # seconds a notice waits for another one to finish its reservation
+
+
 def _spend(config, now, cfg):
-    """Counts the call BEFORE it is made (a provider that fails also spends the cap). Returns None when it may go, else the reason it may not."""
+    """RESERVES the call BEFORE it is made (a provider that fails also spends the cap): read, check, add and write are ONE step under a lock that excludes the other threads and the other
+    processes that share the ledger, so the cap can never be passed by notices that run at the same time. The reservation is on disk before anything is sent; if the process dies between
+    the reservation and the sending, the call stays counted until its hour is over (the cap errs on the side of sending less, and there is nothing to release or to clean up).
+    Returns None when it may go, else the reason it may not."""
     ledger, _log = _paths(config)
-    state = _read(ledger)
-    state["calls"] = [c for c in state["calls"] if now - c[0] < 3600]
-    if len(state["calls"]) >= cfg["max_calls_per_hour"]:
-        return "cap_calls"
-    if sum(c[1] for c in state["calls"]) + cfg["cost_per_call_cents"] > cfg["max_cost_per_hour_cents"]:
-        return "cap_cost"
-    state["calls"].append([now, cfg["cost_per_call_cents"]])
     try:
-        Path(ledger).parent.mkdir(parents=True, exist_ok=True)
-        tmp = Path(str(ledger) + ".tmp")
-        private_io.write_tmp(tmp, json.dumps(state))
-        os.replace(tmp, ledger)
-    except OSError:
+        with locks.process_lock(ledger, LOCK_WAIT):
+            state = _read(ledger)
+            state["calls"] = [c for c in state["calls"] if now - c[0] < 3600]
+            if len(state["calls"]) >= cfg["max_calls_per_hour"]:
+                return "cap_calls"
+            if sum(c[1] for c in state["calls"]) + cfg["cost_per_call_cents"] > cfg["max_cost_per_hour_cents"]:
+                return "cap_cost"
+            state["calls"].append([now, cfg["cost_per_call_cents"]])
+            Path(ledger).parent.mkdir(parents=True, exist_ok=True)
+            tmp = Path(str(ledger) + ".tmp")
+            private_io.write_tmp(tmp, json.dumps(state))
+            os.replace(tmp, ledger)
+    except (OSError, TimeoutError):
         return "no_ledger"      # a cap that cannot be kept is a cap that is not kept: nothing is sent
     return None
 

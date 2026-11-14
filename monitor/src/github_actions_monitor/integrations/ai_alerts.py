@@ -27,6 +27,7 @@ import urllib.request
 from pathlib import Path
 from github_actions_monitor.security import private_io
 from github_actions_monitor.security import netguard
+from github_actions_monitor.storage import locks
 
 from github_actions_monitor.util import paths
 FEED = "ai_alerts.jsonl"
@@ -34,12 +35,14 @@ BRIEF = "ALERTS_BRIEF.md"
 STATE = "ai_alerts_state.json"
 HEARTBEAT = "ai_heartbeat.json"
 FIELDS = ("id", "severity", "class", "repo", "workflow", "conclusion", "since", "streak", "url", "cause", "action", "state")      # the closed list a hook or an endpoint may carry
-EXTRA = ("diagnosis", "origin", "panel")      # what the feed, the stream and the endpoints add to FIELDS (never the hook: its list is the closed one above)
+EXTRA = ("diagnosis", "origin", "panel", "account_id")      # what the feed, the stream and the endpoints add to FIELDS (never the hook: its list is the closed one above)
 RUN_RE = re.compile(r"/actions/runs/(\d+)")
 ANSI_RE = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
 STAMP_RE = re.compile(r"^\d{4}-\d\d-\d\dT[\d:.]+Z\s*")
 RELEVANT_RE = re.compile(r"(?i)\b(error|errors|fail|failed|failure|fatal|exception|traceback|not found|denied|cannot|can't|unable|exit code|assert\w*|no such)\b")
 VIA = ("stream", "mcp", "hook", "endpoint")
+ACCOUNT = {"id": ""}      # set by account_child.py: this process is the monitor of ONE account of an installation with several (empty = the single account of the product folder)
+LOCK_WAIT = 10.0      # seconds an operation on the state of the feed waits for another one (of this process or of another process that shares the folder)
 TRANSIENT_DEFAULT = [r"\b50[234]\b", r"bad gateway", r"service unavailable", r"gateway time-?out", r"timed? ?out", r"rate limit", r"secondary rate", r"tls", r"connection (?:reset|refused|closed)",
                      r"unexpected eof", r"codeql.*download", r"download.*codeql", r"could not resolve host", r"no space left", r"the runner has received a shutdown signal"]
 LOOP_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/%-]{0,100})?$")
@@ -182,7 +185,10 @@ def in_use(folder_text):
 def folder_of(cfg):
     text = cfg["folder"].strip()
     ok = bool(text) and len(text) <= 260 and not any(ord(c) < 32 for c in text) and not text.startswith(("\\\\", "//")) and not re.match(r"^(?:[Dd]:|/mnt/[dD](?:/|$))", text)
-    return Path(text) if ok else paths.folder("ai")      # ai/ (or where MONITOR_AI_DIR / config/paths.json put it): what an AI reads lives in one folder
+    if ok:
+        return Path(text)      # the person chose this folder: if several accounts share it, every alert still carries its account and an account only closes its own
+    own = paths.folder("ai")      # ai/ (or where MONITOR_AI_DIR / config/paths.json put it): what an AI reads lives in one folder
+    return own / "accounts" / ACCOUNT["id"] if ACCOUNT["id"] else own      # one feed, one brief and one ledger for each account of an installation with several
 
 
 def classify(conclusion, text="", patterns=None):
@@ -202,14 +208,20 @@ def classify(conclusion, text="", patterns=None):
     return "real", "the workflow failed (read the log of the run)"
 
 
-def alert_id(repo, workflow):
-    return hashlib.sha1(f"{repo}|{workflow}".encode()).hexdigest()[:12]
+def account_id():
+    return ACCOUNT["id"]
+
+
+def alert_id(repo, workflow, account=None):
+    """The stable id of an alert. The account is part of it (the same workflow can be red in two accounts); the single account of the product folder has none, so its ids do not change."""
+    account = ACCOUNT["id"] if account is None else account
+    return hashlib.sha1((f"{account}|{repo}|{workflow}" if account else f"{repo}|{workflow}").encode()).hexdigest()[:12]
 
 
 def build_panel_alert(row):
     """An alert that comes from a panel of the Sentinel tab (A1..A13, the second sentinel): "real" when the panel says act ("bad"), "watch" when it says keep an eye on it ("warn")."""
     real = row.get("level") == "bad"
-    return {"id": alert_id(row["repo"], row["workflow"]), "severity": "high" if real else "warn", "class": "real" if real else "watch", "repo": row["repo"], "workflow": row["workflow"], "conclusion": "panel",
+    return {"id": alert_id(row["repo"], row["workflow"]), "account_id": account_id(), "severity": "high" if real else "warn", "class": "real" if real else "watch", "repo": row["repo"], "workflow": row["workflow"], "conclusion": "panel",
             "since": None, "streak": 1, "url": row.get("url"), "cause": redact(str(row.get("detail") or ""), 240), "panel": row.get("panel"),
             "action": f"open the panel {str(row.get('panel')).upper()} of the Sentinel tab and deal with it"}
 
@@ -221,7 +233,7 @@ def build_alert(row, patterns, text=""):
     streak = int(row.get("streak") or 1)
     severity = "info" if kind == "transient" and streak < 3 else ("high" if streak >= 3 or kind == "real" and row.get("conclusion") == "failure" else "warn")
     action = "re-run once and look again" if kind == "transient" and streak < 3 else "open the log of the run, find the first failing step and fix it"
-    return {"id": alert_id(row["repo"], row["workflow"]), "severity": severity, "class": kind, "repo": row["repo"], "workflow": row["workflow"], "conclusion": row.get("conclusion"),
+    return {"id": alert_id(row["repo"], row["workflow"]), "account_id": account_id(), "severity": severity, "class": kind, "repo": row["repo"], "workflow": row["workflow"], "conclusion": row.get("conclusion"),
             "since": row.get("since"), "streak": streak, "url": row.get("url"), "cause": redact(cause, 200), "action": action}
 
 
@@ -411,25 +423,52 @@ def update(config, red_rows, now=None, texts=None, opener=None, runner=None, own
         return {"opened": [], "resolved": [], "alerts": []}
     folder = folder_of(cfg)
     private_io.private_dir(folder)
-    state = _read(folder / STATE, {})
-    seen, opened, resolved = set(), [], []
+    account = account_id()
     budget = cfg["diagnose"]["max_per_cycle"] if runner is not None and cfg["diagnose"]["enabled"] else 0
     if extra_rows:      # the signals of the monitor that are not a red workflow or a panel (the allowance, the connection, the health): an event when they appear, change or are solved
         red_rows = list(red_rows) + list(extra_rows)
     if panels:
         from github_actions_monitor.sentinels import sentinel_panels
         red_rows = list(red_rows) + sentinel_panels.alert_rows(panels)      # what the panels of the Sentinel tab ask for travels the same way as a red workflow
+    fresh = {}      # the diagnoses read from GitHub: they are made BEFORE the state is locked (a log can take long) and written into the state under the lock
+    if budget:
+        known = _read(folder / STATE, {})
+        for row in red_rows:
+            ident = alert_id(row["repo"], row["workflow"])
+            old = known.get(ident)
+            diagnosis = old.get("diagnosis") if old and old.get("state") != "resolved" else None
+            run = run_id_of(row.get("url"))
+            if budget and run and (not diagnosis or diagnosis.get("run") != run):
+                budget -= 1
+                try:
+                    found = diagnose(owner, row["repo"], row.get("url"), runner, cfg["diagnose"]["log_lines"], cfg["diagnose"]["max_bytes"])
+                    if found:
+                        fresh[ident] = found
+                except Exception as error:   # noqa: BLE001 - a diagnosis that fails never stops the feed
+                    degraded.note("ai_alerts.diagnose", error)
+    try:
+        with locks.process_lock(folder / STATE, LOCK_WAIT):      # read -> change -> write of the state is ONE step for every thread and process that touches this folder (update, ack, status)
+            result = _update_locked(cfg, folder, account, red_rows, now, texts, fresh, panels, sections, status)
+    except TimeoutError as error:
+        degraded.note("ai_alerts.lock", error)      # another process keeps the feed for too long: this refresh is skipped, nothing is lost (the next one brings it up to date)
+        return {"opened": [], "resolved": [], "alerts": sorted(_read(folder / STATE, {}).values(), key=lambda a: (a["repo"], a["workflow"]))}
+    if cfg["hook"]["enabled"]:      # the hook is a request to this computer: it goes out after the state is released
+        for alert in result["opened"]:
+            if alert["class"] == "real" and HOOK.allowed(cfg["hook"]["max_per_hour"], now):
+                try:
+                    HOOK.send(cfg["hook"]["url"], alert, now, opener)
+                except Exception as error:   # noqa: BLE001 - a hook that is down never stops the monitor
+                    degraded.note("ai_alerts.hook", error)
+    return result
+
+
+def _update_locked(cfg, folder, account, red_rows, now, texts, fresh, panels, sections, status):
+    state = _read(folder / STATE, {})
+    seen, opened, resolved = set(), [], []
     for row in red_rows:
         ident = alert_id(row["repo"], row["workflow"])
         old = state.get(ident)
-        diagnosis = old.get("diagnosis") if old and old.get("state") != "resolved" else None
-        run = run_id_of(row.get("url"))
-        if budget and run and (not diagnosis or diagnosis.get("run") != run):
-            budget -= 1
-            try:
-                diagnosis = diagnose(owner, row["repo"], row.get("url"), runner, cfg["diagnose"]["log_lines"], cfg["diagnose"]["max_bytes"]) or diagnosis
-            except Exception as error:   # noqa: BLE001 - a diagnosis that fails never stops the feed
-                degraded.note("ai_alerts.diagnose", error)
+        diagnosis = fresh.get(ident) or (old.get("diagnosis") if old and old.get("state") != "resolved" else None)
         text = ((texts or {}).get(ident, "") + "\n" + "\n".join((diagnosis or {}).get("lines") or [])).strip()
         alert = build_alert(row, cfg["transient_patterns"], text)
         alert["diagnosis"] = diagnosis
@@ -442,7 +481,7 @@ def update(config, red_rows, now=None, texts=None, opener=None, runner=None, own
             opened.append(alert)
         state[alert["id"]] = alert
     for key, old in list(state.items()):
-        if key not in seen and old.get("state") != "resolved":
+        if key not in seen and old.get("state") != "resolved" and (old.get("account_id") or "") == account:      # only the alerts of THIS account: an alert of another account is not in this snapshot and is not closed by its absence
             old["state"], old["resolved_at"] = "resolved", int(now)
             resolved.append(old)
     for item in state.values():
@@ -459,14 +498,6 @@ def update(config, red_rows, now=None, texts=None, opener=None, runner=None, own
     _write(folder / STATE, json.dumps(state, ensure_ascii=False, indent=1) + "\n")
     alerts = sorted(state.values(), key=lambda a: (a["repo"], a["workflow"]))
     _write(folder / BRIEF, brief(alerts, cfg["brief_max_bytes"], now, panels, sections, status))
-    if cfg["hook"]["enabled"]:
-        for alert in opened:
-            if alert["class"] == "real" and HOOK.allowed(cfg["hook"]["max_per_hour"], now):
-                try:
-                    HOOK.send(cfg["hook"]["url"], alert, now, opener)
-                except Exception as error:   # noqa: BLE001 - a hook that is down never stops the monitor
-                    degraded.note("ai_alerts.hook", error)
-                    pass
     return {"opened": opened, "resolved": resolved, "alerts": alerts}
 
 
@@ -479,11 +510,12 @@ def monitor_status(config, status, now=None):
     now = time.time() if now is None else now
     folder = folder_of(cfg)
     try:
-        state = _read(folder / STATE, {})
-        alerts = sorted(state.values(), key=lambda a: (a["repo"], a["workflow"]))
         private_io.private_dir(folder)
-        _write(folder / BRIEF, brief(alerts, cfg["brief_max_bytes"], now, None, "", status))
-    except OSError:
+        with locks.process_lock(folder / STATE, LOCK_WAIT):
+            state = _read(folder / STATE, {})
+            alerts = sorted(state.values(), key=lambda a: (a["repo"], a["workflow"]))
+            _write(folder / BRIEF, brief(alerts, cfg["brief_max_bytes"], now, None, "", status))
+    except (OSError, TimeoutError):
         return False
     return True
 
@@ -492,14 +524,18 @@ def ack(config, alert_id_, now=None):
     """Marks an open alert as acknowledged (local state only). True when it existed."""
     cfg = settings(config)
     folder = folder_of(cfg)
-    state = _read(folder / STATE, {})
-    item = state.get(str(alert_id_))
-    if not item or item.get("state") != "open":
+    try:
+        with locks.process_lock(folder / STATE, LOCK_WAIT):      # the same lock as update(): an acknowledgement is never undone by a refresh that read the state before it
+            state = _read(folder / STATE, {})
+            item = state.get(str(alert_id_))
+            if not item or item.get("state") != "open":
+                return False
+            item["state"] = "acknowledged"
+            _write(folder / STATE, json.dumps(state, ensure_ascii=False, indent=1) + "\n")
+            _event(folder, "acknowledged", item, time.time() if now is None else now)
+            return True
+    except (OSError, TimeoutError):
         return False
-    item["state"] = "acknowledged"
-    _write(folder / STATE, json.dumps(state, ensure_ascii=False, indent=1) + "\n")
-    _event(folder, "acknowledged", item, time.time() if now is None else now)
-    return True
 
 
 def alerts(config, since=0, states=None):

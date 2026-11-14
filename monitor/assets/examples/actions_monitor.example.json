@@ -411,7 +411,7 @@
     "max_failed_logins": 5,
     "lockout_minutes": 15,
     "min_length": 10,
-    "allow_bearer": true,
+    "allow_bearer": false,
     "audit": true
   },
   "listen": {

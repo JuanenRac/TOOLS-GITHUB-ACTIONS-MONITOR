@@ -67,11 +67,23 @@ when this file and `tool_version.py` disagree.
 
 - **Calls to GitHub that never return are counted, and the monitor stops piling them up**: when a call gives up waiting its thread is remembered until it ends; with `watchdog_max_abandoned` of them (8 by default, 0 = no limit) still alive the monitor starts no new call to GitHub, and the deep health check answers "degraded" with the number, instead of restarting the loop again and again while threads and connections pile up.
 
+- **Each account has its own feed for the AIs**: with several accounts, every account process keeps its alerts, its brief and the ledger of the notices to an external AI in its own folder (ai/accounts/ and the id of the account) instead of one folder that all of them rewrote. An alert carries its account and its id depends on it, so the same workflow red in two accounts is two alerts; the refresh of one account closes only its own alerts (before, an account closed the alerts of the others because they were not in its snapshot). Installations with one account change nothing. The alerts that an older version left in the shared folder stay there and are closed by the account of the product folder.
+
+- **Refresh, acknowledgement and status of the feed for the AIs are one step at a time**: they take the same lock, between threads and between processes that share a folder, so an acknowledgement is no longer undone by a refresh that read the state a moment before. A refresh that cannot get the lock in ten seconds is skipped and tried again at the next cycle; the diagnosis of a log is read before the lock is taken.
+
+- **The cap of notices to an external AI cannot be passed by notices that run at the same time**: the calls and the cost of the hour are checked and reserved in one locked step before anything is sent, also across processes that share the ledger. A reservation made by a process that died before sending counts until its hour is over.
+
 - **With the team mode on and no user yet, only the person at this computer gets in**: until the first administrator exists a request from anywhere else (the network, or through a proxy) is answered 403 "create the first administrator from this computer first" for everything that is not public (health check, login page, webhook); before, the whole monitor stayed open to the network during that time. Turning the team mode on changes nothing for the person at this computer, who still creates the first administrator from the login page.
 
 - **The process of each account answers only to its supervisor**: it asks for the key the supervisor gave it when it started it, on every request; another user of the same machine who reaches the port of an account process gets a 403 instead of the data, whatever the team mode says.
 
 - The test of an account that dies at once no longer depends on the speed of the computer: the wait before an account is started again is checked with a clock that the test gives, and a second test checks the schedule of the waits without reading the real time (the old one failed under load in the gate of a release).
+
+- **Saving the settings never goes on without the lock of the file**: when another process keeps the lock for more than ten seconds the save is refused with "another process is saving the settings: try again in a moment" and nothing is written; before, it went on after the wait and could undo the save of the other process.
+
+- **The command of the sentinel is checked before it is run**: it has to be a list whose first word is the full path of a program that is not a shell (not sh, bash, cmd, powershell and the like), with no shell characters in any word, no word with a blank after the first, and no flag that makes a program read a command line (-c, /c, -Command). Anything else is not run at all.
+
+- **Tokens for scripts are off by default**: the login with the client "api" and the Authorization: Bearer header are refused until the setting for tokens for scripts and apps is turned on in the Advanced tab; the browser session is unchanged. A token or a password never reaches the audit file.
 
 ## [1.8.1]
 

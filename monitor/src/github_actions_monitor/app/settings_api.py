@@ -654,12 +654,18 @@ def _backup(path):
 
 
 _WRITE_LOCK = threading.RLock()
+LOCK_WAIT = 10.0      # seconds a save waits for the lock file of another process (the tests shorten it)
+
+
+class LockBusy(OSError):
+    """The lock file of the configuration is held by another process for longer than the wait: nothing is written (a save without the lock could undo the other one)."""
 
 
 @contextlib.contextmanager
 def file_lock(path, timeout=10.0):
-    """Exclusive lock around read -> change -> write of the configuration: a lock of this process (two requests of the page at once) AND, best effort, a lock file next to it
-    (another process that saves at the same time). Without it the second save would start from the file as it was before the first and undo it."""
+    """Exclusive lock around read -> change -> write of the configuration: a lock of this process (two requests of the page at once) AND a lock file next to it (another process that
+    saves at the same time). Without it the second save would start from the file as it was before the first and undo it. When the lock of another process is not released within
+    `timeout` the save FAILS with LockBusy; it never goes on without the lock. (A lock file that cannot even be created, for example a read-only folder, does not block: the write itself fails then.)"""
     with _WRITE_LOCK:
         handle = None
         try:
@@ -677,8 +683,11 @@ def file_lock(path, timeout=10.0):
                     break
                 except OSError:
                     if time.time() > end:
-                        break          # the lock of another process is stuck: the lock of this process still protects the page
+                        handle.close()
+                        raise LockBusy("the configuration is locked by another process") from None
                     time.sleep(0.05)
+        except LockBusy:
+            raise
         except OSError:
             handle = None
         try:
@@ -702,8 +711,11 @@ def apply(changes, path=CONFIG_FILE, lite=False):
     if errors:
         return {"ok": False, "errors": errors}
     path = Path(path)
-    with file_lock(path):
-        return _apply_locked(clean, path)
+    try:
+        with file_lock(path, LOCK_WAIT):
+            return _apply_locked(clean, path)
+    except LockBusy:
+        return {"ok": False, "errors": {"_": "busy"}}
 
 
 def _apply_locked(clean, path):

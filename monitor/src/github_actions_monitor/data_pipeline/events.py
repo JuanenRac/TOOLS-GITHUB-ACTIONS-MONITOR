@@ -16,6 +16,7 @@ security_aged, pr_workflow_touch.  Nothing is emitted while the sentinel is stil
 Only local data is used: it never calls GitHub.
 """
 import json
+import ntpath
 import os
 import time
 from datetime import datetime, timezone
@@ -115,10 +116,33 @@ def diff(old, new, loaded):
     return events
 
 
+SHELLS = frozenset({"sh", "bash", "zsh", "dash", "ash", "ksh", "csh", "tcsh", "fish", "cmd", "powershell", "pwsh", "wscript", "cscript", "mshta", "env", "xargs", "busybox"})
+SHELL_FLAGS = frozenset({"-c", "/c", "/k", "-command", "-encodedcommand", "-e", "-ec", "-enc", "--command"})
+METACHARACTERS = frozenset(";&|<>$`")      # the control characters (new line, NUL ...) are refused separately
+
+
+def valid_notify_command(command):
+    """The list to run (a copy) when `sentinel.notify_command` is a safe one, else None: a list of at most 16 short texts; the first is the ABSOLUTE path of a program that is not a shell or an interpreter of
+    commands; no text carries a shell metacharacter or a control character, and no later text has a blank (one argument = one word) or is a flag that makes a program read a command line (-c, /c, -Command)."""
+    if not isinstance(command, list) or not 0 < len(command) <= 16 or not all(isinstance(x, str) and 0 < len(x) <= 260 for x in command):
+        return None
+    if any(c in METACHARACTERS or ord(c) < 32 for x in command for c in x):
+        return None
+    program = command[0]
+    stem = os.path.basename(program.replace("\\", "/")).lower()
+    stem = stem.rsplit(".", 1)[0] if stem.rsplit(".", 1)[-1] in ("exe", "bat", "cmd", "com", "sh", "ps1") else stem
+    if not (os.path.isabs(program) or ntpath.isabs(program) or program.startswith("/")) or stem in SHELLS:
+        return None
+    if any(" " in x or chr(9) in x or x.lower() in SHELL_FLAGS for x in command[1:]):
+        return None
+    return list(command)
+
+
 class Feed:
     def __init__(self, events_file=EVENTS_FILE, state_file=STATE_FILE, notify_command=None):
         self.events_file, self.state_file = Path(events_file), Path(state_file)
-        self.notify_command = [str(x) for x in notify_command] if isinstance(notify_command, list) and notify_command else None
+        self.notify_command = valid_notify_command(notify_command)       # an unsafe command is not run at all
+        self.notify_rejected = bool(notify_command) and self.notify_command is None
         try:
             self.state = state_io.load_json(self.state_file)
         except (OSError, ValueError):
