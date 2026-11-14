@@ -699,6 +699,7 @@
  "cli.bad_shape": "O monitor respondeu com dados numa forma que este comando não entende (é a mesma versão?).",
  "cli.bad_url": "O endereço não é válido: use http://anfitrião:porta ou https://anfitrião:porta.",
  "cli.ca_file_bad": "O ficheiro da autoridade de certificação {file} não existe.",
+ "cli.close_head": "{n} tipos de falha repetidos sem guarda",
  "cli.credential_done": "Feito: {status}.",
  "cli.credential_failed": "Não feito: {status}.",
  "cli.credential_needs_account": "Este monitor tem várias contas: indique qual com --account ID.",

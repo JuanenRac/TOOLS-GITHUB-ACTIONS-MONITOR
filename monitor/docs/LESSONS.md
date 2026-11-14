@@ -74,3 +74,7 @@ Reading is always allowed. Writing a lesson needs three things: `lessons.allow_w
 ## Settings
 
 `lessons.enabled`, `lessons.allow_write`, `lessons.retention_days`, `lessons.max_entries`, `lessons.brief_max_bytes` and `lessons.recurring_from`, in the AI tab of the Settings. The panel **Lessons from the failures** is at the bottom of the Alerts tab.
+
+## Close of a round
+
+At the end of a batch of work, `python bin/monitor_cli.py lessons close` lists the repeated kinds of failure that still have no lesson of your own with its guard (`needs_guard` in `GET /api/ai/lessons`) and exits with a non-zero code while there is one. Write the guard, or say why it cannot exist yet, and run it again.

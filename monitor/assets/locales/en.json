@@ -699,6 +699,7 @@
  "cli.bad_shape": "The monitor answered with data in a shape this command does not understand (is it the same version?).",
  "cli.bad_url": "The address is not valid: use http://host:port or https://host:port.",
  "cli.ca_file_bad": "The certificate authority file {file} does not exist.",
+ "cli.close_head": "{n} repeated kinds of failure without a guard",
  "cli.credential_done": "Done: {status}.",
  "cli.credential_failed": "Not done: {status}.",
  "cli.credential_needs_account": "This monitor has several accounts: say which one with --account ID.",

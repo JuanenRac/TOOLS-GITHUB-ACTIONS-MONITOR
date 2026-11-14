@@ -74,3 +74,7 @@ Leggere è sempre consentito. Scrivere una lezione richiede tre cose: `lessons.a
 ## Impostazioni
 
 `lessons.enabled`, `lessons.allow_write`, `lessons.retention_days`, `lessons.max_entries`, `lessons.brief_max_bytes` e `lessons.recurring_from`, nella scheda IA delle Impostazioni. Il pannello **Lezioni dai fallimenti** è in fondo alla scheda Avvisi.
+
+## Chiusura di un giro
+
+Alla fine di un lotto di lavoro, `python bin/monitor_cli.py lessons close` elenca i tipi di fallimento ripetuti che non hanno ancora una lezione propria con la sua guardia (`needs_guard` in `GET /api/ai/lessons`) ed esce con un codice diverso da zero finché ce n'è uno. Scrivi la guardia, o spiega perché non può ancora esistere, e rilancia.
