@@ -33,7 +33,7 @@ Alles hier Aufgeführte ist geschrieben und getestet; es ist entweder schon im H
 
 ## Geplant, in dieser Reihenfolge
 
-Jede Version enthält alles aus ihrem Abschnitt des Plans: nichts bleibt von einer früheren Version offen, und nichts wird auf die nächste verschoben. Nach 1.8.3 und nach 1.9.3 durchläuft das Produkt eine unabhängige Prüfung, deren Befunde in der folgenden Stabilisierungsversion geschlossen werden. Eine 1.8.1 gibt es nicht: Benutzer, Rollen und Sitzungen kommen mit 1.8.0.
+Jede Version enthält alles aus ihrem Abschnitt des Plans: nichts bleibt von einer früheren Version offen, und nichts wird auf die nächste verschoben. Nach 1.8.3 und nach 1.9.3 durchläuft das Produkt eine unabhängige Prüfung, deren Befunde in der folgenden Stabilisierungsversion geschlossen werden. 1.8.1 ist eine Korrekturversion von 1.8.0: Das Feld „Repositories werden geladen“ verschwindet mit dem letzten Repository, und das Neuladen der Seite holt die Daten sofort.
 
 ### 1.8.2 - Offizielles Docker-Image und Dienstmodus
 
