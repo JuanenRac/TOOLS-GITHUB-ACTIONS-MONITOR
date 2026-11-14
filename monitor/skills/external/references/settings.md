@@ -337,6 +337,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinels.collab.rules.pr_draft_max_days` | `-` | sentinel | Days of a draft |
 | `sentinels.collab.rules.pr_review_pending_days` | `-` | sentinel | Days waiting for review |
 | `sentinels.collab.rules.watch_external_comments` | `-` | sentinel | Watch outsiders |
+| `sentinels.collab.search_api` | `-` | sentinel | Read issues and pull requests with the Search API |
 | `session_guard` (secure) | `true` | basic | One-use token for changes |
 | `show_unclassified` | `true` | general | Show unclassified repositories |
 | `signed_dir` | `-` | paths | Folder of signature records |
