@@ -10,6 +10,7 @@ import json
 import os
 import socket
 import sys
+import tempfile
 import threading
 import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -167,7 +168,11 @@ class WhereIsOpenssl(unittest.TestCase):
     def test_the_status_and_the_doctor_say_which_one(self):
         with mock.patch.object(github_app, "find_openssl", lambda: "/found/openssl"), mock.patch.object(github_app.shutil, "which", lambda name: None):
             self.assertEqual(github_app.status({})["openssl_path"], "/found/openssl")
-            key = Path(__file__)
+            keys = tempfile.TemporaryDirectory()
+            self.addCleanup(keys.cleanup)
+            key = Path(keys.name) / "app.pem"
+            key.write_text("x", encoding="utf-8")
+            os.chmod(key, 0o600)
             status, detail = doctor.github_app_check({"github_app": {"enabled": True, "app_id": "1", "key_path": str(key)}})
             self.assertIn("/found/openssl", detail)
             self.assertEqual(status, "ok", detail)

@@ -36,7 +36,7 @@ def settings(config):
     ok_path = bool(key) and len(key) <= 260 and not any(ord(c) < 32 for c in key) and not key.startswith(("\\\\", "//")) and not re.match(r"^(?:[Dd]:|/mnt/[dD](?:/|$))", key)
     ident = lambda value: str(value) if str(value).isdigit() and 0 < len(str(value)) <= 12 else ""      # noqa: E731
     program = block.get("openssl_path") if isinstance(block.get("openssl_path"), str) else ""
-    program = program if program and len(program) <= 260 and not any(ord(c) < 32 for c in program) and os.path.basename(program).lower() in ("openssl", "openssl.exe") else ""
+    program = program if program and len(program) <= 260 and not any(ord(c) < 32 for c in program) and re.split(r"[\\/]", program)[-1].lower() in ("openssl", "openssl.exe") else ""
     OPENSSL["configured"] = program
     return {"enabled": block.get("enabled") is True, "app_id": ident(block.get("app_id", "")), "key_path": key if ok_path else "", "installation_id": ident(block.get("installation_id", "")), "openssl_path": program}
 
