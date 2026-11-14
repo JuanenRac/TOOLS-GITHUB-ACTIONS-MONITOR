@@ -9,9 +9,9 @@ Without --apply it only SHOWS what it would copy, account by account (a dry run:
 read back and compared item by item (configuration, sentinel state, documents, analytics, every event, the users and sessions); the exit code is 0 only when that comparison is clean.
 Your files are never changed or deleted. An interrupted run leaves each account whole or as it was: run the same command again and it resumes (accounts that are already identical are skipped).
 
-  --accounts-dir  the folder of the accounts (default: accounts/ next to the launchers, or MONITOR_ACCOUNTS_DIR); with --flat the product folder itself
-  --db            ONE shared database (model B). Without it each account gets its own, accounts/<id>/storage.sqlite3 (model A, the default)
-  --flat          the installation without an accounts/ folder: one account, "default", with its files next to the launchers
+  --accounts-dir  the folder of the accounts (default: data/accounts/ of the product folder, or MONITOR_ACCOUNTS_DIR); with --flat the product folder itself
+  --db            ONE shared database (model B). Without it each account gets its own, data/accounts/<id>/storage.sqlite3 (model A, the default)
+  --flat          the installation without an accounts/ folder: one account, "default", with its files in config/, data/ and logs/ of the product folder
 
 After a clean run, set  "storage": {"backend": "sqlite"}  in the configuration of the account (or of the monitor) and restart it.
 """

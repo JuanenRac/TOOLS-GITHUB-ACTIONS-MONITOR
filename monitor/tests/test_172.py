@@ -126,29 +126,32 @@ class PanelAndNotice(unittest.TestCase):
 
 class NothingNextToTheCode(unittest.TestCase):
     def test_the_guard_removes_what_a_test_created_and_keeps_what_was_there(self):
-        folder = HERE
+        from github_actions_monitor.util import paths
         watched = _testenv.WATCHED
-        existing = [n for n in watched if (folder / n).exists()]
+        existing = [n for n in watched if paths.place(n).exists()]
         case = unittest.TestCase()
         remove = _testenv.guard(case)
         created = [n for n in watched if n not in existing][:2]
         for name in created:
-            (folder / name).write_text("{}", encoding="utf-8")
+            paths.place(name).parent.mkdir(parents=True, exist_ok=True)
+            paths.place(name).write_text("{}", encoding="utf-8")
         remove()
         for name in created:
-            self.assertFalse((folder / name).exists(), name)
+            self.assertFalse(paths.place(name).exists(), name)
         for name in existing:
-            self.assertTrue((folder / name).exists(), name)
+            self.assertTrue(paths.place(name).exists(), name)
 
     def test_a_lite_process_leaves_no_file_next_to_the_code_when_the_test_that_started_it_is_over(self):
-        before = {n for n in _testenv.WATCHED if (HERE / n).exists()}
+        from github_actions_monitor.util import paths
+        before = {n for n in _testenv.WATCHED if paths.place(n).exists()}
         case = unittest.TestCase()
         remove = _testenv.guard(case)
         script = "import sys; sys.path.insert(0, %r); sys.argv = ['x', '--lite']; from github_actions_monitor.app import actions_monitor as am; am.enable_lite(); am.load_config(); print('ran')" % str(HERE / "src")
         done = subprocess.run([sys.executable, "-I", "-c", script], capture_output=True, text=True, timeout=60)
         self.assertEqual(done.stdout.strip(), "ran", done.stderr)
         remove()
-        self.assertEqual({n for n in _testenv.WATCHED if (HERE / n).exists()}, before)
+        self.assertEqual({n for n in _testenv.WATCHED if paths.place(n).exists()}, before)
+        self.assertEqual([n for n in _testenv.WATCHED if (HERE / n).exists()], [], "and nothing at all next to the launchers")
 
     def test_the_modules_that_used_to_leave_files_register_the_guard(self):
         for name, needle in (("test_164.py", "_testenv.guard(self)"), ("test_164.py", "_testenv.guard(unittest.TestCase())"), ("test_170.py", "_testenv.guard(self)")):
