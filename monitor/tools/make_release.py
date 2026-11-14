@@ -251,14 +251,29 @@ def template(here=HERE):
     return json.dumps(data, indent=2) + "\n"
 
 
-TEST_TIMEOUT = 900            # seconds for the ordinary suite
-CLEAN_INSTALL_TIMEOUT = 1800  # seconds for the suite run from the extracted zip
+TEST_TIMEOUT = 3600           # seconds for the ordinary suite (the default; MONITOR_RELEASE_TEST_TIMEOUT raises or lowers it: the suite takes 40 minutes and more on a loaded computer)
+CLEAN_INSTALL_TIMEOUT = 3600  # seconds for the suite run from the extracted zip (the default; MONITOR_RELEASE_CLEAN_TIMEOUT)
 
 
-def run_tests(timeout=TEST_TIMEOUT):
+def limit(variable, default, env=None):
+    """The time limit in seconds: the environment variable `variable` when it holds a whole number of seconds from 60 to 86400, else `default`. Read when it is needed, not when the module loads."""
+    text = str((os.environ if env is None else env).get(variable, "")).strip()
+    return int(text) if text.isdigit() and 60 <= int(text) <= 86400 else default
+
+
+def test_timeout(env=None):
+    return limit("MONITOR_RELEASE_TEST_TIMEOUT", TEST_TIMEOUT, env)
+
+
+def clean_install_timeout(env=None):
+    return limit("MONITOR_RELEASE_CLEAN_TIMEOUT", CLEAN_INSTALL_TIMEOUT, env)
+
+
+def run_tests(timeout=None):
     """Stage 1 of the gate: the ordinary suite, ONCE, with a time limit. The nested "clean folder" test is switched off here (MONITOR_NO_NESTED): the clean install is its own stage
     (clean_install_check), so the suite never runs twice inside one command."""
     env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", MONITOR_NO_NESTED="1")
+    timeout = test_timeout() if timeout is None else timeout      # read when called, so a variable set after the import still counts
     try:
         result = subprocess.run([sys.executable, "-I", "-m", "unittest", "discover", "-s", "tests"], cwd=str(HERE), capture_output=True, text=True,
                                 encoding="utf-8", errors="replace", env=env, timeout=timeout)
@@ -367,9 +382,9 @@ def clean_install_check(archive, entries, python=None):
             fail("clean install: python -m github_actions_monitor.lite does not start:\n" + (lite.stderr or lite.stdout)[-800:])
         try:
             suite = subprocess.run([python, "-I", "-m", "unittest", "discover", "-s", "tests"], cwd=str(base), capture_output=True, text=True, encoding="utf-8", errors="replace",
-                                   env=env, timeout=CLEAN_INSTALL_TIMEOUT)
+                                   env=env, timeout=clean_install_timeout())
         except subprocess.TimeoutExpired:
-            fail(f"clean install: the suite from the extracted zip did not finish in {CLEAN_INSTALL_TIMEOUT} s")
+            fail(f"clean install: the suite from the extracted zip did not finish in {clean_install_timeout()} s")
         if suite.returncode != 0:
             fail("clean install: the suite fails from the extracted zip:\nstdout:\n" + suite.stdout[-1000:] + "\nstderr:\n" + suite.stderr[-1500:])
         tail = (suite.stderr or suite.stdout).strip().splitlines()[-3:]

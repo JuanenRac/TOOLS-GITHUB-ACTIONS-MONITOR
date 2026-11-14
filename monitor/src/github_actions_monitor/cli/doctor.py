@@ -261,7 +261,12 @@ def shared_credential(folder=HERE, env=None, loader=None):
                 except Exception:       # noqa: BLE001
                     kept = ""
             secret = kept
-        secret = secret or inherited
+        try:      # a login put in place for this account alone (security/credential.py) is the one it uses before any other
+            from github_actions_monitor.security import credential
+            own = credential.read_file(credential.path_in(accounts.account_dir(account_id, folder)))
+        except Exception:       # noqa: BLE001
+            own = ""
+        secret = own or secret or inherited
         if secret:
             groups.setdefault(fingerprint(secret), []).append(account_id)
     shared = {fp: names for fp, names in groups.items() if len(names) > 1}

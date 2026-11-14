@@ -232,7 +232,7 @@ class TheSettingsAClientOfTheNetworkCannotChangeAreNotReadByItEither(NetworkCase
 
 #: every route that answers 403 "local_only" to a client of the network (the keys, the actions on GitHub, the tests of channels, the state of the pool and of the App)
 LOCAL_ONLY_POST = ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test", "/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan",
-                   "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/alerts/mute", "/api/alerts/unmute")
+                   "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/alerts/mute", "/api/alerts/unmute", "/api/credential")
 LOCAL_ONLY_GET = ("/api/quota-pool/status", "/api/github-app/status")
 
 
@@ -260,7 +260,7 @@ class EveryLocalOnlyRouteRefusesAClientOfTheNetwork(NetworkCase):
         for match in re.finditer(r'(?:path == "([^"]+)"|path in \(([^)]*)\)):[^\n]*\n\s+if not self\.guard\(\) or not self\.this_computer\(\)', SOURCE):
             found.update([match.group(1)] if match.group(1) else re.findall(r'"([^"]+)"', match.group(2)))
         self.assertEqual(found, set(LOCAL_ONLY_POST) | set(LOCAL_ONLY_GET), "a new route that is local only goes in the table (and a route that stops being local only must be taken out on purpose)")
-        self.assertEqual(SOURCE.count("self.this_computer()"), 4, "a new call to this_computer() needs its row in the table above")
+        self.assertEqual(SOURCE.count("self.this_computer()"), 5, "a new call to this_computer() needs its row in the table above")
 
 
 if __name__ == "__main__":

@@ -27,6 +27,7 @@ import json
 import os
 import random
 import re
+import signal
 import ssl
 import subprocess
 import sys
@@ -50,6 +51,7 @@ from github_actions_monitor.util import platform_compat
 from github_actions_monitor.data_pipeline import redrule
 from github_actions_monitor.util import resilience
 from github_actions_monitor.security import secretstore
+from github_actions_monitor.security import credential
 from github_actions_monitor.app import toolconfig
 from github_actions_monitor.util import tzdisplay
 from github_actions_monitor.app import updatecheck
@@ -58,7 +60,7 @@ from github_actions_monitor.security import private_io
 
 from github_actions_monitor.util import paths
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
-CONFIG_FILE = HERE / "actions_monitor.json"
+CONFIG_FILE = paths.config_file()
 LOG_FILE = HERE / "actions_monitor_log.txt"
 NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}$")
 DEFAULTS = {
@@ -131,7 +133,7 @@ def state_dir():
     """Where the small state files of this process live: the folder of the account when this is the monitor of one account, else next to the code, as always."""
     return Path(CHILD["folder"]) if CHILD["folder"] else HERE
 LITE_SHARED = ("/api/ai/state", "/api/ai/stream", "/api/ai/brief", "/api/ai/alerts", "/api/ai/ack")      # the channels for an AI tool are the same in both editions
-LITE_PATHS = ("/api/gh-action", "/api/act", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/notify", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events")   # they do not exist in lite
+LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/notify", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events")   # they do not exist in lite
 
 
 LITE_INHERIT = ("github_owner", "ecosystems", "ecosystems_file", "targets_file", "profiles_file", "exclude", "repos", "language", "runs_per_repo", "cold_runs_per_repo", "hot_hours", "stuck_minutes", "refresh_seconds", "cold_refresh_seconds")   # what a first lite start copies from actions_monitor.json
@@ -1308,6 +1310,7 @@ def run_cycle(config, generation):
     if time.time() < RATE_BLOCK["until"]:
         delay = max(delay, min(3900, int(RATE_BLOCK["until"] - time.time()) + 1))
     WATCH.ok()
+    credential_ok(config)
     return delay
 
 
@@ -1322,19 +1325,21 @@ def loop(config, generation=None):
             if not WATCH.current(generation):
                 return
             WATCH.fail(error)
+            outcome = credential_refusal(error, config)
             with LOCK:
                 STATE["error"], STATE["hint"] = str(error), "auth"   # the page writes the hint in its own language
             brief_status(toolconfig.raw_config() if not LITE["on"] else config, "running, but the last cycle failed to sign in to GitHub; the alerts below are from the last complete cycle")
-            delay = 60
+            delay = CONFIRM_DELAY if outcome == "strike" else 60      # the first refusal is confirmed soon: one stray 401 must not hide a lost login for a whole minute
         except Exception as error:
             if not WATCH.current(generation):
                 return
             WATCH.fail(error)
+            outcome = credential_refusal(error, config)
             degraded.note("loop.cycle", error)
             with LOCK:
                 STATE["error"] = str(error)
             brief_status(toolconfig.raw_config() if not LITE["on"] else config, f"running, but the last cycle failed ({type(error).__name__}); the alerts below are from the last complete cycle")
-            delay = 60
+            delay = CONFIRM_DELAY if outcome == "strike" else 60
         sleep_for(delay, generation)
 
 
@@ -1348,6 +1353,9 @@ def start_loop(config):
 
 
 LOOP = {"thread": None}
+SUPERVISOR_KEY_ENV = "MONITOR_SUPERVISOR_KEY"        # given by the supervisor to the process of each account: the proof that a request to change the login comes from it
+SUPERVISOR_KEY_HEADER = "X-Monitor-Supervisor"
+REMOTE_HEADER = "X-Monitor-Remote"                   # the supervisor adds "1" when the person is not at this computer; a child that was not started by it ignores it
 
 
 def watchdog_restart(config, reason):
@@ -1549,7 +1557,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def is_local(self):
         """True when this request really comes from a person at this computer (see localguard.is_this_computer)."""
-        return localguard.is_this_computer(self.client_address, self.headers, door=self.local_door)
+        return not self.remote_through_supervisor() and localguard.is_this_computer(self.client_address, self.headers, door=self.local_door)
 
     def guard(self):
         if self.request_ok():
@@ -1630,8 +1638,37 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def credential_post(self):
+        """POST /api/credential {"action": "replace", "token": "..."} | {"action": "reload"}. In the monitor of one account it is only for the supervisor (it proves itself with the key it gave this process at
+        start; the supervisor already asked for an administrator or for this computer); in a monitor on its own the person must be at this computer (and have the one-use token of the page). The token
+        is checked against GitHub before it is kept and is never repeated in the answer."""
+        key = os.environ.get(SUPERVISOR_KEY_ENV, "")
+        if CHILD["account"]:
+            import hmac
+            if not key or not hmac.compare_digest(key.encode(), (self.headers.get(SUPERVISOR_KEY_HEADER) or "").encode()):
+                self.json_reply({"ok": False, "status": "forbidden"}, 403)
+                return
+        elif not self.token_ok():
+            return
+        try:
+            size = int(self.headers.get("Content-Length") or 0)
+            request = json.loads(self.rfile.read(size) if 0 < size <= 1024 else b"{}")
+            request = request if isinstance(request, dict) else {}
+            ok, status, info = credential_change(str(request.get("action") or ""), request.get("token") or "")
+        except (ValueError, OSError):
+            self.json_reply({"ok": False, "status": "request"}, 400)
+            return
+        self.json_reply({"ok": ok, "status": status, "credential": info}, 200 if ok else (400 if status in ("format", "request") else 422))
+
+    def remote_through_supervisor(self):
+        """True when the supervisor says the person is not at this computer (the network mode of the supervisor): this process then treats the request like a remote one."""
+        return bool(os.environ.get(auth_http.CHILD_ENV)) and self.headers.get(REMOTE_HEADER) == "1"
+
     def this_computer(self):
         """Keys and actions that decide exposure or reach GitHub can only be changed from the same computer while the network mode is on (a 403 otherwise)."""
+        if self.remote_through_supervisor():
+            self.json_reply({"ok": False, "errors": {"_": "local_only"}}, 403)
+            return False
         if not localguard.STATE["network"] or self.is_local():
             return True
         self.json_reply({"ok": False, "errors": {"_": "local_only"}}, 403)
@@ -1688,6 +1725,11 @@ class Handler(BaseHTTPRequestHandler):
             return
         if path == "/api/access":      # network mode: open the session with the access token in the BODY (never in the address); the cookie comes back and the token is not repeated
             self.open_session()
+            return
+        if path == "/api/credential":      # replace the login of this account, or read its files again, without a restart (complete edition)
+            if not self.guard() or not self.this_computer():
+                return
+            self.credential_post()
             return
         if path == "/api/hot-only":   # "only hot" switch: local request only, tiny body {"on": true|false}
             if not self.guard():
@@ -1820,7 +1862,7 @@ class Handler(BaseHTTPRequestHandler):
                     return
                 request = json.loads(self.rfile.read(size))
                 changes = request.get("changes") if isinstance(request, dict) else None
-                if localguard.STATE["network"] and not self.is_local() and isinstance(changes, dict) and any(localguard.local_only_key(k) for k in changes):
+                if (localguard.STATE["network"] or self.remote_through_supervisor()) and not self.is_local() and isinstance(changes, dict) and any(localguard.local_only_key(k) for k in changes):
                     self.json_reply({"ok": False, "errors": {"_": "local_only"}}, 403)
                     return
                 result = settings_api.apply(changes, CONFIG_FILE, lite=LITE["on"])
@@ -1937,7 +1979,7 @@ class Handler(BaseHTTPRequestHandler):
             if not self.guard():
                 return
             from github_actions_monitor.app import settings_api
-            self.json_reply({"ok": True, **settings_api.describe(CONFIG_FILE, lite=LITE["on"], remote=localguard.STATE["network"] and not self.is_local()), "restart_pending": sorted(RESTART_PENDING)})
+            self.json_reply({"ok": True, **settings_api.describe(CONFIG_FILE, lite=LITE["on"], remote=(localguard.STATE["network"] or self.remote_through_supervisor()) and not self.is_local()), "restart_pending": sorted(RESTART_PENDING)})
         elif path == "/metrics" or path.startswith("/api/outputs/"):   # optional outputs, off unless switched on (outputs.py); local request only, no quota used
             if not self.guard():
                 return
@@ -1967,7 +2009,8 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/api/health":   # for a service manager or a container check: local only, no GitHub call
             if not self.guard():
                 return
-            self.json_reply(health_payload())
+            payload, code = health_reply("deep=1" in self.path.partition("?")[2].split("&"))
+            self.json_reply(payload, code)
         elif path == "/api/about":      # the About panel: versions, links, files, health, credits, the update notice; no secret and no repository name
             if not self.guard():
                 return
@@ -2060,7 +2103,7 @@ class Handler(BaseHTTPRequestHandler):
             if not self.guard():
                 return
             refresh_feed()      # the bar polls every 30 seconds: the feed follows the sentinel without waiting for a cycle
-            self.json_reply(statusbar_payload(self.server.server_address[1], not localguard.STATE["network"] or self.is_local()))
+            self.json_reply(statusbar_payload(self.server.server_address[1], (not localguard.STATE["network"] and not self.remote_through_supervisor()) or self.is_local()))
         elif path in ("/api/alerts", "/api/events"):      # one list of the alerts of every sentinel, and the events of the feed (1.7.3; read only; the account comes from ?account= or the process)
             if not self.guard():
                 return
@@ -2155,19 +2198,139 @@ def alerts_payload(ask):
     from github_actions_monitor.sentinels import alert_center
     refresh_feed()
     registry = SENTINEL["registry"]
-    everything = alert_center.collect(registry)
+    extra = credential_alerts()
+    everything = alert_center.collect(registry, extra=extra)
     chosen = alert_center.select(everything, ask.get("sentinel", ""), ask.get("level", ""), ask.get("muted", "show") if ask.get("muted") in ("show", "hide", "only") else "show")
     return {"schema": 1, "account": CHILD["account"] or None, "alerts": chosen, "summary": alert_center.summary(everything), "mutes": alert_center.active(), "history": alert_center.history(20),
-            "mute_hours": alert_center.hours_setting(LIVE_CONFIG or toolconfig.raw_config()), "sentinels": registry.names() if registry else []}
+            "mute_hours": alert_center.hours_setting(LIVE_CONFIG or toolconfig.raw_config()), "sentinels": (registry.names() if registry else []) + (["system"] if extra else [])}
 
 
-def health_payload():
+def service_mode():
+    """True for a monitor that runs as a service: the process of one account under a supervisor, or MONITOR_SERVICE=1 (the image, the systemd unit). It does not give up when the login of GitHub is no good at
+    start: it stays up, says so, and waits for another one."""
+    return bool(CHILD["account"]) or os.environ.get("MONITOR_SERVICE", "").strip() == "1"
+
+
+def cycle_verdict():
+    """'' when the refresh loop is fine, 'stuck' when one cycle has run longer than the limit of the watchdog (`watchdog_minutes`, 30 minutes when that is off) and 'dead' when its thread is gone."""
+    thread = LOOP["thread"]
+    limit = watchdog_limit(LIVE_CONFIG or DEFAULTS) or 1800
+    return cycle_watch.check(WATCH, limit, thread is not None and thread.is_alive())
+
+
+def health_payload(deep=False):
+    """The answer of /api/health. It never calls GitHub. Always: whether the data are loaded, the connection, and (complete edition) the state of the cycle and of the login of this account. With `deep` the
+    answer also says whether the monitor is fit to serve: `ok` is false when the refresh loop is stuck or gone (see `health_reply`)."""
     with LOCK:
         loaded = bool(STATE.get("data"))
     out = {"ok": True, "lite": LITE["on"], "version": TOOL_VERSION, "uptime_seconds": int(time.time() - STARTED), "loaded": loaded, "offline": LINK.state()["offline"], "degraded": degraded.snapshot()["total"]}
     if CHILD["account"]:
         out["account"] = CHILD["account"]
+    if not LITE["on"]:
+        verdict = "" if DEMO["on"] else cycle_verdict()
+        snap = WATCH.snapshot(limit_seconds=watchdog_limit(LIVE_CONFIG or DEFAULTS))
+        out["cycle"] = {"phase": snap["phase"], "running_seconds": snap["running_seconds"], "seconds_since_ok": snap["seconds_since_ok"], "stuck": verdict == "stuck", "dead": verdict == "dead"}
+        out["credential"] = credential.snapshot()
+        if deep and verdict:
+            out["ok"] = False
     return out
+
+
+def health_reply(deep=False):
+    """(payload, HTTP status): 200, or 503 when `deep` and the monitor is not fit to serve. The lite edition has no deep check and always answers 200."""
+    payload = health_payload(deep and not LITE["on"])
+    return payload, 200 if payload["ok"] else 503
+
+
+CONFIRM_DELAY = 20      # seconds before the next cycle while a refusal of the login waits to be confirmed
+
+
+def credential_refusal(error, config):
+    """A cycle ended with a refusal of the login: after `credential.CONFIRM` in a row the account is blind and the alert opens (once). Returns 'blind', 'strike' or ''. Never raises, never in the lite edition."""
+    if LITE["on"]:
+        return ""
+    try:
+        outcome = credential.note_refusal(str(error))
+        if outcome == "blind":
+            announce_credential("credential_blind", config)
+        return outcome
+    except Exception as failure:   # noqa: BLE001 - a notice never stops the loop
+        degraded.note("loop.step", failure)
+        return ""
+
+
+def credential_ok(config):
+    """A cycle ended well: a blind account is back (one notice)."""
+    if LITE["on"]:
+        return
+    try:
+        if credential.note_success() == "back":
+            announce_credential("credential_back", config)
+    except Exception as failure:   # noqa: BLE001
+        degraded.note("loop.step", failure)
+
+
+def announce_credential(kind, config):
+    """`credential_blind` / `credential_back` go to the console, the event feed and the notifications, once per change. The text never carries the token."""
+    from github_actions_monitor.integrations import notifiers
+    info = credential.snapshot()
+    account = CHILD["account"] or ""
+    reason = i18n.t("credential.reason_" + info["reason"]) if info["reason"] else ""
+    event = {"kind": kind, "code": kind, "level": "bad" if kind == "credential_blind" else "ok", "repo": "", "owner": "main", "url": None, "args": {"account": account, "reason": info["reason"]},
+             "text": i18n.t("evt." + kind, account=account or toolconfig.github_owner(config) or "-", reason=reason)}
+    print(event["text"], flush=True)
+    sentinel = SENTINEL["obj"]
+    try:
+        if sentinel is not None:
+            sentinel.feed._append([event])
+        notifiers.notify(config, event)
+    except Exception as error:   # noqa: BLE001 - never stops the loop
+        degraded.note("loop.step", error)
+
+
+def credential_alerts():
+    """The critical system alert of a blind account, ready for the Alerts tab (the title in the language of the page)."""
+    if LITE["on"]:
+        return []
+    info = credential.snapshot()
+    reason = i18n.t("credential.reason_" + info["reason"]) if info["reason"] else ""
+    return credential.system_alerts(CHILD["account"] or "", i18n.t("credential.alert_title", reason=reason))
+
+
+def verify_credential():
+    """One free call to GitHub with the login the process uses now (the allowance endpoint: it works for every kind of token and costs nothing). (ok, why)."""
+    try:
+        gh("api", "rate_limit", retries=0, as_user=True)
+        return True, ""
+    except AuthError:
+        return False, "rejected"
+    except Exception:   # noqa: BLE001 - no network, no gh: the old login stays
+        return False, "unreachable"
+
+
+def credential_change(action, token=""):
+    """Replaces the login of this account (`replace`, with the token) or reads its files again (`reload`) while everything runs. Returns (ok, status, snapshot). Never repeats the token."""
+    config = LIVE_CONFIG or DEFAULTS
+    folder = state_dir()
+    was_blind = credential.is_blind()
+    if action == "replace":
+        ok, status = credential.replace(folder, token, verify_credential)
+    elif action == "reload":
+        status = credential.reload(folder, verify_credential)
+        ok = status in ("reloaded", "unchanged", "none")
+    else:
+        return False, "request", credential.snapshot()
+    if ok and status in ("saved", "reloaded"):
+        if was_blind:
+            announce_credential("credential_back", config)
+        if not DEMO["on"]:
+            start_loop(config)      # a new loop reads at once instead of waiting for the end of its pause
+    return ok, status, credential.snapshot()
+
+
+def reload_on_signal(signum=None, frame=None):
+    """SIGHUP (where the system has it): read the credential files again, in a thread of its own so the handler returns at once."""
+    threading.Thread(target=credential_change, args=("reload",), daemon=True, name="credential-reload").start()
 
 
 def update_info():
@@ -2509,15 +2672,82 @@ def accounts_cli(argv):
     return 0
 
 
+def network_setup(config, lite=False):
+    """The way this process listens, from `listen.*`: (listen, tls_context, access_token, token_was_generated). By default only this computer: nothing is configured and the token stays empty. In the
+    network mode the access token comes from the environment variable named in `listen.token_env`, or from the file named by the same variable plus `_FILE` (a secret of a container), else a fresh one
+    is made at each start; the certificate is loaded when one is given and a certificate that cannot be used raises (the process never falls back to plain HTTP behind the owner's back). Used by the
+    monitor of one account and by the supervisor of several, so both answer to the same rules."""
+    listen = {"network": False, "host": "127.0.0.1"} if lite else localguard.settings_from(config)
+    access_token, generated, tls_ctx = "", False, None
+    if listen["network"]:
+        access_token = secret_from_environment(listen["token_env"])
+        if len(access_token) < 16:
+            access_token, generated = localguard.make_token(), True      # a fresh token at each start, shown once in this console and nowhere else
+        tls = localguard.tls_settings(config)
+        if tls["cert"] or tls["key"]:      # HTTPS served directly with YOUR certificate
+            tls_ctx = localguard.tls_context(tls["cert"], tls["key"])
+        localguard.configure(True, listen["host"], access_token, listen["allowed_hosts"], secure=tls_ctx is not None or tls["secure_cookie"], proxy_host=listen["proxy_public_host"], trusted_proxy=listen["trusted_proxy"],
+                           behind_proxy=tls["secure_cookie"])
+    return listen, tls_ctx, access_token, generated
+
+
+def secret_from_environment(name):
+    """The value of the environment variable `name`, else the first line of the file named by `name + "_FILE"` (the way a container hands over a secret), else ''. The value is never printed."""
+    value = os.environ.get(name, "").strip()
+    if value:
+        return value
+    path = os.environ.get(name + "_FILE", "").strip()
+    if path:
+        try:
+            with open(path, "r", encoding="utf-8-sig") as handle:
+                return handle.readline().strip()
+        except (OSError, UnicodeError):
+            return ""
+    return ""
+
+
 def supervisor_main(argv):
     """Several accounts: this process is the supervisor (accounts_supervisor.py) and starts one monitor per account. Returns an exit code."""
     from github_actions_monitor.accounts import accounts
     from github_actions_monitor.accounts import accounts_supervisor
     port = next((int(argv[i + 1]) for i, a in enumerate(argv) if a == "--port" and i + 1 < len(argv) and argv[i + 1].isdigit()), 8765)
-    i18n.set_language(i18n.detect(None))
+    config = toolconfig.raw_config()
+    i18n.set_language(i18n.detect(config.get("language")))
     platform_compat.console_utf8()
-    server, sup = accounts_supervisor.serve(port)
-    url = f"http://127.0.0.1:{server.server_address[1]}/"
+    try:      # the same listening rules as the monitor of one account: by default only this computer; `listen.*` opens the network mode (access token, optional certificate, declared proxy)
+        listen, tls_ctx, access_token, generated = network_setup(config)
+    except (OSError, ValueError, ssl.SSLError) as error:
+        print(i18n.t("mon.tls_failed", error=str(error)[:200]))
+        return 1
+    host = listen["host"] if listen["network"] else "127.0.0.1"
+    server = sup = None
+    for candidate in range(port, port + 10):
+        try:
+            server, sup = accounts_supervisor.serve(candidate, host, tls=tls_ctx)
+            if candidate != port:
+                print(i18n.t("mon.port_busy", port=port, used=candidate))
+            break
+        except OSError:
+            continue
+    if server is None:
+        print(i18n.t("mon.no_port", port=port))
+        return 1
+    url = f"{'https' if tls_ctx is not None else 'http'}://{localguard.display_host(server.server_address[0])}:{server.server_address[1]}/"
+    if listen["network"]:
+        print(i18n.t("mon.network_on", host=listen["host"], port=server.server_address[1]), flush=True)
+        if tls_ctx is None and not localguard.STATE["secure"]:
+            print(i18n.t("mon.network_plain"), flush=True)
+        if generated:
+            print(i18n.t("mon.network_token_post", url=url, token=access_token), flush=True)      # the only place a generated token is shown
+    if listen["network"] and listen["local_port"] and listen["local_port"] != server.server_address[1]:      # the way in of the person at this computer when a reverse proxy is declared
+        try:
+            door = accounts_supervisor.Server(("127.0.0.1", listen["local_port"]), accounts_supervisor.DoorHandler)
+            threading.Thread(target=door.serve_forever, daemon=True, name="supervisor-door").start()
+            print(i18n.t("mon.local_door", port=listen["local_port"]), flush=True)
+        except OSError:
+            print(i18n.t("mon.local_door_failed", port=listen["local_port"]), flush=True)
+    if hasattr(signal, "SIGHUP") and threading.current_thread() is threading.main_thread():
+        signal.signal(signal.SIGHUP, lambda signum, frame: threading.Thread(target=sup.reload_credentials, daemon=True, name="credential-reload").start())      # kill -HUP: every account reads its credential files again
     print(i18n.t("mon.accounts_started", n=len(accounts.enabled_accounts()), url=url), flush=True)
     try:
         server.serve_forever()
@@ -2557,6 +2787,8 @@ def main():
     i18n.cli_language() if "--lang" in " ".join(sys.argv) else None
     from github_actions_monitor.security import secretstore
     secretstore.apply_to_environment(config)       # the optional token kept by the monitor (off by default) goes to GH_TOKEN of this process; nothing is printed
+    if not LITE["on"]:
+        credential.apply_stored(state_dir())      # a login put in place with the administrator endpoint, or the file named by GH_TOKEN_FILE: first match of credential.stored()
     parser = argparse.ArgumentParser(description=i18n.t("mon.description"), formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--port", type=int, default=LITE_PORT if LITE["on"] else 8765, help=i18n.t("mon.help_port"))
     parser.add_argument("--lite", action="store_true", help=i18n.t("mon.help_lite"))
@@ -2603,15 +2835,22 @@ def main():
     if not platform_compat.gh_available():
         print(platform_compat.gh_install_hint())
         return 1
+    started_blind = False
     try:
         me = gh("api", "user", retries=0, as_user=True)
         toolconfig.prime_owner((me or {}).get("login"))   # the owner to watch when "github_owner" is empty, from the call that checks the login: no extra call
-    except AuthError:
-        print(i18n.t("mon.auth_rejected"))
-        return 1
+    except AuthError as error:
+        if not (service_mode() and not LITE["on"]):
+            print(i18n.t("mon.auth_rejected"))
+            return 1
+        started_blind = credential.mark_blind(str(error))      # a service stays up with a login that no longer works: it says so and waits for another one (an administrator or SIGHUP)
+        print(i18n.t("mon.auth_rejected_service"), flush=True)
     except Exception as error:
-        print(i18n.t("mon.gh_not_ready", error=error))
-        return 1
+        if not (service_mode() and not LITE["on"]):
+            print(i18n.t("mon.gh_not_ready", error=error))
+            return 1
+        started_blind = credential.mark_blind(str(error))
+        print(i18n.t("mon.gh_not_ready_service", error=credential.redact(error)), flush=True)
     if not toolconfig.github_owner(config):
         print(i18n.t("mon.no_owner"))
         return 1
@@ -2644,6 +2883,10 @@ def main():
         print(banner_mode_line(MODE.name, "" if ok else why), flush=True)
     degraded.attach(state_dir() / ("degraded_lite.json" if LITE["on"] else "degraded.json"))
     start_loop(config)
+    if started_blind:
+        announce_credential("credential_blind", config)
+    if not LITE["on"] and hasattr(signal, "SIGHUP") and threading.current_thread() is threading.main_thread():
+        signal.signal(signal.SIGHUP, reload_on_signal)      # kill -HUP: read the credential files again, no restart (where the system has the signal)
     threading.Thread(target=watchdog_loop, args=(config,), daemon=True, name="refresh-watchdog").start()
     threading.Thread(target=update_loop, daemon=True).start()
     if not LITE["on"]:
@@ -2656,23 +2899,12 @@ def main():
     except Exception as error:   # noqa: BLE001 - a notice never stops the start
         degraded.note("loop.extra", error)
     server = None
-    listen = {"network": False, "host": "127.0.0.1"} if LITE["on"] else localguard.settings_from(config)
-    access_token, access_generated = "", False
-    tls_ctx = None
+    try:
+        listen, tls_ctx, access_token, access_generated = network_setup(config, lite=LITE["on"])
+    except (OSError, ValueError, ssl.SSLError) as error:
+        print(i18n.t("mon.tls_failed", error=str(error)[:200]))
+        return 1
     if listen["network"]:
-        access_token = os.environ.get(listen["token_env"], "").strip()
-        if len(access_token) < 16:
-            access_token, access_generated = localguard.make_token(), True      # a fresh token at each start, shown once in this console and nowhere else
-        tls = localguard.tls_settings(config)
-        tls_ctx = None
-        if tls["cert"] or tls["key"]:      # HTTPS served directly with YOUR certificate; if it cannot be used the monitor does not start on plain HTTP behind your back
-            try:
-                tls_ctx = localguard.tls_context(tls["cert"], tls["key"])
-            except (OSError, ValueError, ssl.SSLError) as error:
-                print(i18n.t("mon.tls_failed", error=str(error)[:200]))
-                return 1
-        localguard.configure(True, listen["host"], access_token, listen["allowed_hosts"], secure=tls_ctx is not None or tls["secure_cookie"], proxy_host=listen["proxy_public_host"], trusted_proxy=listen["trusted_proxy"],
-                           behind_proxy=tls["secure_cookie"])
         LIVE_CONFIG["session_guard"] = True      # the one-use token of the page is not optional on the network
     for port in range(args.port, args.port + 10):
         try:

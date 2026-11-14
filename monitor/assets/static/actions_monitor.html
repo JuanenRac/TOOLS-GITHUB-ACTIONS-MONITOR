@@ -1542,7 +1542,9 @@ $("wiz-next").addEventListener("click",()=>{if(WIZ.n<3){WIZ.n++;wizDraw()}else w
 $("wiz-back").addEventListener("click",()=>{if(WIZ.n>1){WIZ.n--;wizDraw()}});$("wiz-skip").addEventListener("click",wizDone);
 if(!store.get("am-wizard-done")&&QS.get("nowizard")!=="1"){fetch("/api/welcome",{cache:"no-store"}).then(r=>r.json()).catch(()=>({})).then(j=>{if(j&&j.done){store.set("am-wizard-done","1");return}dlgs.wiz.hidden=false;wizDraw()})}
 /* network mode: a bar on every tab while the monitor answers other computers */
-if(I18N.network&&I18N.network.network){const nb=$("netbar");nb.hidden=false;nb.textContent=T("ui.adv_net_bar");if(I18N.network.host==="0.0.0.0"){const nw=$("cfg-netwarn");nw.hidden=false;nw.textContent=T("ui.adv_net_all")}}
+const LISTEN=(ACC&&ACC.listening&&ACC.listening.mode)||(I18N.network&&I18N.network.mode)||(I18N.network&&I18N.network.network?"network":"this_computer");
+const LISTEN_HOST=ACC&&ACC.listening&&ACC.listening.host;
+if(LISTEN!=="this_computer"){const nb=$("netbar");nb.hidden=false;nb.textContent=T(LISTEN==="proxy"?"ui.adv_net_bar_proxy":"ui.adv_net_bar");if(LISTEN!=="proxy"&&(LISTEN_HOST==="0.0.0.0"||(!LISTEN_HOST&&I18N.network&&I18N.network.host==="0.0.0.0"))){const nw=$("cfg-netwarn");nw.hidden=false;nw.textContent=T("ui.adv_net_all")}}
 /* the update notice: one quiet read now and then (the server asks GitHub at most once a day) */
 aboutLoad();setInterval(aboutLoad,6*3600*1000);
 /* working modes: normal, fast, turbo (the estimate is shown BEFORE it is switched on; fast and turbo come back to normal by themselves) */
@@ -1718,7 +1720,7 @@ function renderBarFacts(){
   {const ai=SBINFO&&!LITE?SBINFO.ai:null;set("sb-ai",!ai||!ai.enabled?"":(ai.streams>0?T("ui.sb_ai_stream"):ai.connected?T("ui.sb_ai_on",{via:ai.via||"-",ago:agoText(ai.age_seconds)}):T("ui.sb_ai_off")),T("ui.sb_ai_t"))}
   set("sb-acc",T("ui.sb_account",{name:(ACC&&ACC.current)||OWNER||"-"}),T("ui.sb_account_t"));
   set("sb-ver","v"+(I18N.version||"")+" · "+T(LITE?"ui.sb_lite":"ui.sb_complete"),T("ui.sb_version_t"));
-  if(SBINFO)set("sb-addr",(SBINFO.bind==="0.0.0.0"&&SBINFO.lan_address?SBINFO.lan_address:"127.0.0.1")+":"+SBINFO.port,T("ui.sb_addr_t",{local:"127.0.0.1:"+SBINFO.port,lan:(SBINFO.lan_address||"-")+":"+SBINFO.port}));
+  if(SBINFO)set("sb-addr",(SBINFO.bind==="0.0.0.0"&&SBINFO.lan_address?SBINFO.lan_address:"127.0.0.1")+":"+SBINFO.port+" · "+T("ui.listen_short_"+LISTEN),T("ui.sb_addr_t",{local:"127.0.0.1:"+SBINFO.port,lan:(SBINFO.lan_address||"-")+":"+SBINFO.port})+" · "+T("ui.listen_long_"+LISTEN));
 }
 function agoText(s){s=Math.max(0,Math.round(s||0));return s>=3600?Math.floor(s/3600)+" h":s>=60?Math.floor(s/60)+" min":s+" s"}
 function renderClock(){const e=$("sb-clock");if(!e)return;const now=new Date(),part=(o)=>{try{return now.toLocaleString(LOC(),{timeZone:TZ,...o})}catch(x){return now.toLocaleString(LOC(),o)}};

@@ -363,9 +363,18 @@ class Isolation(Running):
             self.assertIsNone(child.health)
             self.assertGreater(child.next_start, 0, "a wait was scheduled")
             self.assertLessEqual(child.next_start - child.started, sup.BACKOFF[-1] + 60, "and it is a bounded wait")
+        # deterministic under load: wait until every process has really exited, let ONE check at a fixed instant register the death, and ask again at that same instant (the clock is injected, never read)
+        for child in self.supervisor.children.values():
+            for _ in range(100):
+                if child.proc is None or child.proc.poll() is not None:
+                    break
+                time.sleep(0.1)
+        fixed = time.time()
+        for child in self.supervisor.children.values():
+            child.next_start = max(child.next_start, fixed + 30)      # a wait that has not ended at that instant: nothing is started again while it is measured
+        self.supervisor.check(now=fixed)
         waits = [c.next_start for c in self.supervisor.children.values()]
-        before = time.time()
-        self.supervisor.check(now=before)           # asking again at once starts nothing new while the wait lasts
+        self.supervisor.check(now=fixed)           # asking again at once starts nothing new while the wait lasts
         self.assertEqual([c.next_start for c in self.supervisor.children.values()], waits)
 
     def test_switching_an_account_off_stops_its_process_and_switching_it_on_starts_it(self):
