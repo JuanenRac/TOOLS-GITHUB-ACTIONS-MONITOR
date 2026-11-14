@@ -109,6 +109,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `github_app.installation_id` (secure) | `""` | quota | Installation number (optional) |
 | `github_app.key_path` (secure) | `""` | quota | Path of the private key |
 | `github_app.openssl_path` (secure) | `-` | quota | Path of the program openssl |
+| `github_app.share_reads` (secure) | `false` | quota | Let tools take a read-only token of the App |
 | `github_owner` | `""` | general | GitHub account |
 | `github_token.enabled` (secure) | `false` | advanced | Keep a GitHub token in the monitor |
 | `github_token.store` (secure) | `"auto"` | advanced | Where the token is kept |
@@ -147,6 +148,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `listen.tls_key_file` (secure) | `""` | advanced | Private key file for HTTPS (PEM) |
 | `listen.token_env` (secure) | `"MONITOR_ACCESS_TOKEN"` | advanced | Environment variable with the access token |
 | `listen.trusted_proxy` (secure) | `false` | advanced | Trust the reverse proxy in front |
+| `logs.failed_step.enabled` (secure) | `false` | ai | Show the log of the failed step |
+| `logs.failed_step.lines` | `12` | ai | Lines of the failed step |
+| `logs.failed_step.max_bytes` | `2000` | ai | Size of the failed step text |
 | `max_workers` | `20` | polling | Parallel requests |
 | `min_rate_remaining` | `800` | polling | Pause below this allowance |
 | `mirror.enabled` (secure) | `false` | advanced | Keep a local copy of artifacts |

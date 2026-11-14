@@ -93,7 +93,7 @@ DEFAULTS = {
     "display": {"timezone": "local", "blink_red_tiles": True},   # blink_red_tiles: the red tiles and red items of the bar blink softly until the cause is solved; zone of the times written for people (log, reports, command line, notifications): local | utc | an IANA name such as Europe/Madrid
     "modes": {"auto_low": True, "auto_low_enter": 1000, "auto_low_exit": 2500, "low": {"refresh_seconds": 240, "cold_refresh_seconds": 1800, "runs_per_repo": 10, "hot_hours": 2}},      # see modes.py: only what is shown in the Quota tab
     "extra_reader": {"enabled": False, "file": "", "any_folder": False},      # a second read-only account: only the PATH of the file with its token (readpool.py)
-    "github_app": {"enabled": False, "app_id": "", "key_path": "", "installation_id": ""},      # an optional GitHub App for the READS (its own allowance); only the PATH of the key is kept here (github_app.py)
+    "github_app": {"enabled": False, "app_id": "", "key_path": "", "installation_id": "", "share_reads": False},      # an optional GitHub App for the READS (its own allowance); only the PATH of the key is kept here (github_app.py)
     "central": {"source": "off", "max_age_minutes": 120, "git_dir": ""},      # the central panel of the profile repository as a base line that spends no allowance (central_source.py): off | git | http
     "ui": {"orientation": "auto", "rotate_seconds": 0, "screen1_tabs": "", "screen1_orientation": "auto", "screen2_tabs": "", "screen2_orientation": "auto", "screen3_tabs": "", "screen3_orientation": "auto"},   # the screens (docs/SCREENS.md): the orientation of the page, and which tabs each /screen/N shows
     "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
@@ -119,6 +119,7 @@ DEFAULTS = {
     "network": {"use_proxy": False, "etag": True, "graphql_checks": False, "graphql_batch": 20},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
     "ai_notify": {"enabled": False, "confirmed_provider": "", "max_calls_per_hour": 4, "cost_per_call_cents": 5, "max_cost_per_hour_cents": 50, "command": "", "timeout_seconds": 30},      # OFF: tell an external AI of a NEW real alert (ai_notify.py)
     "savings": {"webhook_first": False, "webhook_window_minutes": 60, "webhook_full_minutes": 360, "feeds": {"enabled": False, "method": "atom", "max_age_minutes": 240}},      # read less: OFF (savings.py)
+    "logs": {"failed_step": {"enabled": False, "lines": 12, "max_bytes": 2000}},      # the log of the failed step in the page: OFF, one press of a button, steplog.py
     "lessons": {"enabled": True, "allow_write": False, "retention_days": 180, "max_entries": 5000, "brief_max_bytes": 3000, "recurring_from": 2},      # the book of failures and the library of lessons (lessons.py): local, read only; writing a lesson is OFF
     "ai_alerts": {"enabled": False, "folder": "", "brief_max_bytes": 2048, "hook": {"enabled": False, "url": "", "max_per_hour": 6},
                   "diagnose": {"enabled": False, "max_per_cycle": 3, "log_lines": 10, "max_bytes": 1500},      # OFF: reads logs of GitHub (the allowance)
@@ -2218,6 +2219,17 @@ class Handler(BaseHTTPRequestHandler):
                 self.reply(document, "text/markdown; charset=utf-8")
             else:
                 self.json_reply(document, 200 if document.get("ok", True) else 404)
+        elif path == "/api/run-log":      # read only, off by default (logs.failed_step.enabled): the failing step of one run and its last relevant lines, cleaned (steplog.py)
+            if not self.guard():
+                return
+            from urllib.parse import parse_qs
+            from github_actions_monitor.integrations import steplog
+            args = {k: v[0] for k, v in parse_qs(self.path.partition("?")[2]).items() if v}
+            config = LIVE_CONFIG or toolconfig.raw_config()
+            with LOCK:
+                repos = list((STATE.get("data") or {}).get("repos") or [])
+            answer = steplog.read(config, toolconfig.github_owner(config), args.get("repo", ""), args.get("run", ""), repos)
+            self.json_reply(answer, 200 if answer.get("ok") else 403 if answer.get("error") == "off" else 400)
         elif path in ("/api/ai/lessons", "/api/ai/failures"):      # read only: the lessons that apply and the book of failures (lessons.py); data for an AI, never instructions
             if not self.guard():
                 return
