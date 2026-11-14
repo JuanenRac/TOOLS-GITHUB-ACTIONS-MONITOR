@@ -1109,6 +1109,7 @@
  "mon.migrate_problem": "问题：{text}",
  "mon.migrate_would": "将复制 {kind}：{name} -> {target}",
  "mon.network_first_steps": "网络模式的第一步: 关闭 listen.query_access (令牌不应出现在地址中), 并使用 HTTPS (证书或代理) 或 VPN。",
+ "mon.network_needs_admin": "网络模式（listen.network）与团队模式（auth.enabled）同时开启，但尚无管理员，而第一位管理员只能在本机创建。监控器不会启动。请先关闭 listen.network 并启动监控器（此时只监听本机），打开页面创建管理员，然后开启 listen.network 并再次启动。",
  "mon.network_on": "网络模式:正在监听 {host}:{port}。每个请求都需要访问令牌;仅在可信网络中使用。",
  "mon.network_plain": "此连接为未加密的 HTTP：令牌和数据不会被加密。仅在可信网络中使用，或在前面放置 HTTPS 代理（见网络指南）。",
  "mon.network_token": "请打开一次此地址(会设置访问 Cookie):{url}",

@@ -80,3 +80,7 @@ With `otlp.enabled` on and an `otlp.endpoint` (HTTPS, or HTTP on this computer),
 ## The refresh loop: heartbeat and watchdog
 
 `/api/data` also returns `loop`: the phase of the refresh cycle (`collect`, `maintain`, `publish`, `log`, `extras`, `idle`), how long the cycle has been running, the last good cycle, the last error and the phase it happened in, the restarts and any problem writing the log or the brief for the AI. The bottom bar of the page shows it in red when a cycle runs far too long, and as a warning when a file cannot be written. A watchdog restarts a cycle that runs longer than `watchdog_minutes` (default 10, 0 switches it off) in a new thread, after writing the traceback of every thread to `actions_monitor_log.txt`.
+
+## The network mode does not start without an administrator
+
+With `auth.enabled` and `listen.network` both on and no user yet, the monitor does not start and says how to go on: the first administrator can only be created from this computer, so turn `listen.network` off, start the monitor (it listens on this computer only), open the page and create the administrator, then turn `listen.network` on and start it again. The local mode (127.0.0.1) always starts.

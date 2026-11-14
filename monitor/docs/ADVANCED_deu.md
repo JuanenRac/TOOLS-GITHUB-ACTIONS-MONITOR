@@ -80,3 +80,7 @@ Mit `otlp.enabled` an und einem `otlp.endpoint` (HTTPS oder HTTP auf diesem Rech
 ## Die Aktualisierungsschleife: Herzschlag und Wächter
 
 `/api/data` liefert zusätzlich `loop`: die Phase des Aktualisierungszyklus (`collect`, `maintain`, `publish`, `log`, `extras`, `idle`), wie lange der Zyklus läuft, den letzten guten Zyklus, den letzten Fehler samt Phase, die Neustarts und jedes Problem beim Schreiben des Protokolls oder der Übersicht für die KI. Die untere Leiste der Seite zeigt es rot, wenn ein Zyklus viel zu lange läuft, und als Warnung, wenn eine Datei nicht geschrieben werden kann. Ein Wächter startet einen Zyklus, der länger als `watchdog_minutes` läuft (Standard 10, 0 schaltet ihn aus), in einem neuen Thread neu, nachdem er die Traceback aller Threads in `actions_monitor_log.txt` geschrieben hat.
+
+## Der Netzwerkmodus startet nicht ohne Administrator
+
+Sind `auth.enabled` und `listen.network` eingeschaltet und gibt es noch keinen Benutzer, startet der Monitor nicht und sagt, wie es weitergeht: Der erste Administrator kann nur an diesem Rechner angelegt werden. Schalten Sie also `listen.network` aus, starten Sie den Monitor (er lauscht nur auf diesem Rechner), öffnen Sie die Seite und legen Sie den Administrator an; schalten Sie danach `listen.network` ein und starten Sie neu. Der lokale Modus (127.0.0.1) startet immer.

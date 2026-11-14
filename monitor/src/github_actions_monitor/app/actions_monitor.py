@@ -1268,6 +1268,15 @@ def sleep_for(seconds, generation=None):
         time.sleep(min(1.0, max(0.0, end - time.time())))
 
 
+def degraded_line(text):
+    """One line of a failure that was swallowed on purpose, in the log of the monitor, with the time. A log that cannot be written is not one more failure."""
+    try:
+        with private_io.open_append(LOG_FILE) as log:
+            log.write(tzdisplay.localize(f"{datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')} {text}\n"))
+    except Exception:   # noqa: BLE001
+        pass
+
+
 def write_cycle_log(data):
     """One line of counts per cycle (never titles). A failure is not swallowed: the heartbeat keeps it and the page and the doctor show it."""
     try:
@@ -2791,6 +2800,19 @@ def supervisor_main(argv):
     return 0
 
 
+def network_needs_administrator(config):
+    """True when the network mode is asked together with the team mode and there is no administrator yet: the first one can only be created from this computer, so the monitor does not open the
+    network before that (it would answer 403 to everybody else anyway). The local mode never asks. A storage that cannot be read is not a reason to refuse."""
+    from github_actions_monitor.security import auth
+    try:
+        if not localguard.settings_from(config)["network"] or not auth.settings(config)["enabled"]:
+            return False
+        return not auth.users_exist(auth.get_storage(config))
+    except Exception as error:   # noqa: BLE001
+        degraded.note("loop.extra", error)
+        return False
+
+
 def main():
     if "--demo" in sys.argv[1:]:
         return demo_main()
@@ -2803,6 +2825,9 @@ def main():
     code = accounts_cli(sys.argv[1:]) if not lite_requested() else None
     if code is not None:
         return code
+    if not CHILD["account"] and not lite_requested() and network_needs_administrator(toolconfig.raw_config()):      # H1: no network before the first administrator exists
+        print(i18n.t("mon.network_needs_admin"))
+        return 1
     if not CHILD["account"] and "--account" not in sys.argv[1:]:      # a second monitor on a port that a monitor already listens on would share it: say so and stop (an account process is started by its supervisor on a port of its own)
         wanted = next((int(sys.argv[i + 1]) for i, a in enumerate(sys.argv) if a == "--port" and i + 1 < len(sys.argv) and sys.argv[i + 1].isdigit()), LITE_PORT if lite_requested() else 8765)
         if exclusive.monitor_on(wanted):
@@ -2926,6 +2951,7 @@ def main():
         ok, why = MODE.set(wanted, args.mode_minutes if args.mode_minutes is not None else modes.settings(config)["default_minutes"], config)
         print(banner_mode_line(MODE.name, "" if ok else why), flush=True)
     degraded.attach(state_dir() / ("degraded_lite.json" if LITE["on"] else "degraded.json"))
+    degraded.set_writer(degraded_line)
     start_loop(config)
     if started_blind:
         announce_credential("credential_blind", config)
