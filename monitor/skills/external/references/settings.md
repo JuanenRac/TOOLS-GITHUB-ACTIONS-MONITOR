@@ -109,7 +109,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `github_app.installation_id` (secure) | `""` | quota | Installation number (optional) |
 | `github_app.key_path` (secure) | `""` | quota | Path of the private key |
 | `github_app.openssl_path` (secure) | `-` | quota | Path of the program openssl |
-| `github_app.share_token` (secure) | `false` | quota | Let tools take a read-only token of the App |
+| `github_app.share_reads` (secure) | `false` | quota | Let tools take a read-only token of the App |
 | `github_owner` | `""` | general | GitHub account |
 | `github_token.enabled` (secure) | `false` | advanced | Keep a GitHub token in the monitor |
 | `github_token.store` (secure) | `"auto"` | advanced | Where the token is kept |

@@ -130,7 +130,7 @@ _f("quota", "extra_reader", "extra_reader.enabled", "bool", restart=False, secur
 _f("quota", "extra_reader", "extra_reader.file", "path", restart=False, secure=True)
 _f("quota", "extra_reader", "extra_reader.any_folder", "bool", restart=False, secure=True)
 _f("quota", "github_app", "github_app.enabled", "bool", restart=False, secure=True)
-_f("quota", "github_app", "github_app.share_token", "bool", restart=False, secure=True)
+_f("quota", "github_app", "github_app.share_reads", "bool", restart=False, secure=True)
 _f(_T_AI, "failed_step", "logs.failed_step.enabled", "bool", restart=False, secure=True)
 _f(_T_AI, "failed_step", "logs.failed_step.lines", "int", (3, 40), restart=False, unit="")
 _f(_T_AI, "failed_step", "logs.failed_step.max_bytes", "int", (200, 4000), restart=False, unit="")

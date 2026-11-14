@@ -1,7 +1,7 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 # GPL-3.0-or-later - see LICENSE
 """Two optional extras, both off by default: the log of the failed step in the page (one press of a button, cleaned, only for watched repositories) and a read-only token of the GitHub App for the
-tools of the person (`monitor_cli.py gh-token --read-only`, only with github_app.share_token, only to the standard output)."""
+tools of the person (`monitor_cli.py gh-token --read-only`, only with github_app.share_reads, only to the standard output)."""
 import json
 import sys
 import unittest
@@ -91,14 +91,14 @@ class TheReadOnlyToken(unittest.TestCase):
             with self.assertRaises(monitor_cli.CliError) as off:
                 monitor_cli.cmd_gh_token(self.ctx())
             self.assertEqual(off.exception.code, monitor_cli.EXIT_AUTH)
-        on = {"github_app": {"enabled": True, "app_id": "1", "key_path": "k", "share_token": True}}
+        on = {"github_app": {"enabled": True, "app_id": "1", "key_path": "k", "share_reads": True}}
         with mock.patch("github_actions_monitor.app.toolconfig.raw_config", return_value=on), mock.patch.object(github_app, "token", return_value=""):
             with self.assertRaises(monitor_cli.CliError) as none:
                 monitor_cli.cmd_gh_token(self.ctx())
             self.assertEqual(none.exception.code, monitor_cli.EXIT_DEGRADED)
 
     def test_the_token_goes_only_to_the_standard_output_line_and_not_into_the_payload(self):
-        on = {"github_app": {"enabled": True, "app_id": "1", "key_path": "k", "share_token": True}}
+        on = {"github_app": {"enabled": True, "app_id": "1", "key_path": "k", "share_reads": True}}
         with mock.patch("github_actions_monitor.app.toolconfig.raw_config", return_value=on), mock.patch.object(github_app, "token", return_value=TOKEN):
             payload, lines, code = monitor_cli.cmd_gh_token(self.ctx())
         self.assertEqual((lines, code), ([TOKEN], 0))
@@ -108,15 +108,15 @@ class TheReadOnlyToken(unittest.TestCase):
 
     def test_the_settings_are_off_and_have_their_text_in_eight_languages(self):
         from github_actions_monitor.app import actions_monitor as am
-        self.assertFalse(am.DEFAULTS["github_app"]["share_token"])
+        self.assertFalse(am.DEFAULTS["github_app"]["share_reads"])
         self.assertFalse(am.DEFAULTS["logs"]["failed_step"]["enabled"])
-        self.assertFalse(github_app.settings({})["share_token"])
-        for key in ("github_app.share_token", "logs.failed_step.enabled", "logs.failed_step.lines", "logs.failed_step.max_bytes"):
+        self.assertFalse(github_app.settings({})["share_reads"])
+        for key in ("github_app.share_reads", "logs.failed_step.enabled", "logs.failed_step.lines", "logs.failed_step.max_bytes"):
             self.assertIn(key, settings_api.FIELDS)
             for lang in i18n.LANGS:
                 self.assertNotEqual(i18n.tl(lang, "cfg.f." + key), "cfg.f." + key, (lang, key))
                 self.assertNotEqual(i18n.tl(lang, "cfg.h." + key), "cfg.h." + key, (lang, key))
-        self.assertTrue(settings_api.META["github_app.share_token"]["secure"] and settings_api.META["logs.failed_step.enabled"]["secure"])
+        self.assertTrue(settings_api.META["github_app.share_reads"]["secure"] and settings_api.META["logs.failed_step.enabled"]["secure"])
         for lang in i18n.LANGS:
             catalogue = json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
             for key in ("ui.fs_button", "ui.fs_off", "ui.fs_none", "ui.cfg_b_failed_step", "cli.gh_token_flag", "cli.gh_token_off", "cli.gh_token_none", "cli.help_read_only"):

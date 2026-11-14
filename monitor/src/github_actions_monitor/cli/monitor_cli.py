@@ -271,13 +271,13 @@ def cmd_install_skill(ctx):
 
 def cmd_gh_token(ctx):
     """gh-token --read-only: prints a one-hour installation token of the GitHub App of the monitor, so that the reads of a tool (a `gh` of an agent) spend the allowance of the App and not the one of the
-    user. Only with github_app.share_token on (off by default). The token goes to the standard output and nowhere else: never to a file or a log. Run it without --json."""
+    user. Only with github_app.share_reads on (off by default). The token goes to the standard output and nowhere else: never to a file or a log. Run it without --json."""
     from github_actions_monitor.app import toolconfig
     from github_actions_monitor.integrations import github_app
     config = toolconfig.raw_config()
     if not ctx.get("read_only"):
         raise CliError(EXIT_USAGE, i18n.t("cli.gh_token_flag"))
-    if not github_app.settings(config)["share_token"]:
+    if not github_app.settings(config)["share_reads"]:
         raise CliError(EXIT_AUTH, i18n.t("cli.gh_token_off"))
     value = github_app.token(config)
     if not value:
