@@ -84,3 +84,16 @@ Avec `otlp.enabled` activé et un `otlp.endpoint` (HTTPS, ou HTTP sur cet ordina
 ## Le mode réseau ne démarre pas sans administrateur
 
 Avec `auth.enabled` et `listen.network` activés et aucun utilisateur, le moniteur ne démarre pas et explique la suite : le premier administrateur ne peut être créé que depuis cet ordinateur ; désactivez donc `listen.network`, démarrez le moniteur (il n'écoute que sur cet ordinateur), ouvrez la page et créez l'administrateur, puis activez `listen.network` et redémarrez. Le mode local (127.0.0.1) démarre toujours.
+
+## Interrupteurs des fonctions les plus récentes
+
+Tout ce qui suit est local et en lecture seule, et désactivé sauf indication contraire. Chacune a son guide dans la page (bouton ?) et dans ce dossier. (les leçons sont activées et n'écrivent qu'un fichier local ; le reste est désactivé)
+
+- `lessons.enabled` - docs/LESSONS_fra.md
+- `savings.webhook_first`, `savings.feeds.enabled` - docs/QUOTA_fra.md
+- `sentinels.collab.search_api` - docs/COLLAB_fra.md
+- `logs.failed_step.enabled`, `github_app.share_reads` - docs/EXTRAS_fra.md
+- `reports.workflow_hygiene.enabled`, `reports.queue.enabled`, `reports.release_view.enabled`, `reports.supply_chain.enabled` - docs/EXTRAS_fra.md
+- `ai.skill` - docs/SKILLS_fra.md
+- `ui.orientation`, `ui.screen1_tabs` - docs/SCREENS_fra.md
+- `notify.users.enabled` - docs/NOTIFICATIONS_fra.md
