@@ -50,6 +50,17 @@ class WhatTheCiAlreadyTaughtUs(unittest.TestCase):
                     found.append(f"{path.name}:{number + 1}")
         self.assertEqual(found, [], "do not sleep for the watchdog: move the clock of WATCH")
 
+    def test_a_limit_of_real_time_grows_with_the_load_of_the_computer(self):
+        """'a read waited for a writer' 5.29 s not less than 2.0 on a busy runner: a test that measures real seconds takes its limit from _timing.limit()."""
+        found = []
+        for path in sorted(HERE.glob("test_*.py")):
+            if path.name == Path(__file__).name:
+                continue
+            for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+                if re.search(r"assertLess\(\s*(?:slowest|time\.time\(\) - \w+),\s*[\d.]+\s*[,)]", line):
+                    found.append(f"{path.name}:{number}")
+        self.assertEqual(found, [], "use _timing.limit(seconds) instead of a fixed number of seconds")
+
     def test_no_setting_ends_in_a_word_reserved_for_secrets(self):
         from github_actions_monitor.app import settings_api
         bad = [k for k in settings_api.FIELDS if RESERVED.search(k.split(".")[-1]) and not k.startswith("sentinel.readiness.health.weights.") and not k.endswith(("token_env", "github_token.enabled", "github_token.store"))]
