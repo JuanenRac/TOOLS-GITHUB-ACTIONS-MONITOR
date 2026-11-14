@@ -24,7 +24,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-from github_actions_monitor.util import paths
+from github_actions_monitor.util import exclusive, paths
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder
 
 from github_actions_monitor.accounts import accounts  # noqa: E402
@@ -624,7 +624,7 @@ class DoorHandler(Handler):
     door = True
 
 
-class Server(ThreadingHTTPServer):
+class Server(exclusive.ExclusiveBind, ThreadingHTTPServer):
     """The server of the supervisor: with a certificate (`listen.tls_cert_file`) every connection is wrapped in TLS in the thread of its own, and a client that goes away is not worth a traceback."""
 
     tls_context = None
