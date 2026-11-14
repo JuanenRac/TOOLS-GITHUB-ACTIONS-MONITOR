@@ -27,6 +27,17 @@ class WhatTheCiAlreadyTaughtUs(unittest.TestCase):
         self.assertTrue(PINNED.search('self.assertEqual(body["categories"][0]["category"], "test")'))
         self.assertFalse(PINNED.search('self.assertIn("test", [c["category"] for c in body["categories"]])'))
 
+    def test_a_test_never_starts_its_ports_at_the_port_the_system_gave_plus_a_margin_without_a_cap(self):
+        """A port near the top of the range left a stretch of ports without room and a Windows runner failed with 'no free port'."""
+        found = []
+        for path in sorted(HERE.glob("test_*.py")):
+            if path.name == Path(__file__).name:
+                continue
+            for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+                if re.search(r"getsockname\(\)\[1\]\s*\+\s*\d", line) and "min(" not in line:
+                    found.append(f"{path.name}:{number}")
+        self.assertEqual(found, [], "cap it: min(port + margin, 64000), and check that the stretch has a free port")
+
     def test_no_setting_ends_in_a_word_reserved_for_secrets(self):
         from github_actions_monitor.app import settings_api
         bad = [k for k in settings_api.FIELDS if RESERVED.search(k.split(".")[-1]) and not k.startswith("sentinel.readiness.health.weights.") and not k.endswith(("token_env", "github_token.enabled", "github_token.store"))]
