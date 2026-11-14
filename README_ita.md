@@ -45,7 +45,7 @@
 |---|---|
 | **Maturità** | functional |
 | **Test** | 1832 metodi di test (`python -m unittest discover -s monitor/tests`) |
-| **Impostazioni** | 361 impostazioni, tutte con aiuto |
+| **Impostazioni** | 366 impostazioni, tutte con aiuto |
 | **Lingue** | 8 (inglese, spagnolo, tedesco, francese, italiano, giapponese, cinese e portoghese) |
 | **Provato nel CI su** | ubuntu, windows, Python 3.11, 3.13 |
 

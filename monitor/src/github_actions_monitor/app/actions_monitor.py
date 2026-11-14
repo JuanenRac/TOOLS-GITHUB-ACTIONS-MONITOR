@@ -120,6 +120,7 @@ DEFAULTS = {
     "ai_notify": {"enabled": False, "confirmed_provider": "", "max_calls_per_hour": 4, "cost_per_call_cents": 5, "max_cost_per_hour_cents": 50, "command": "", "timeout_seconds": 30},      # OFF: tell an external AI of a NEW real alert (ai_notify.py)
     "savings": {"webhook_first": False, "webhook_window_minutes": 60, "webhook_full_minutes": 360, "feeds": {"enabled": False, "method": "atom", "max_age_minutes": 240}},      # read less: OFF (savings.py)
     "logs": {"failed_step": {"enabled": False, "lines": 12, "max_bytes": 2000}},      # the log of the failed step in the page: OFF, one press of a button, steplog.py
+    "reports": {"workflow_hygiene": {"enabled": False}, "queue": {"enabled": False}, "release_view": {"enabled": False}, "supply_chain": {"enabled": False}, "max_calls_per_cycle": 4},      # four optional reports, all OFF (reports.py)
     "lessons": {"enabled": True, "allow_write": False, "retention_days": 180, "max_entries": 5000, "brief_max_bytes": 3000, "recurring_from": 2},      # the book of failures and the library of lessons (lessons.py): local, read only; writing a lesson is OFF
     "ai_alerts": {"enabled": False, "folder": "", "brief_max_bytes": 2048, "hook": {"enabled": False, "url": "", "max_per_hour": 6},
                   "diagnose": {"enabled": False, "max_per_cycle": 3, "log_lines": 10, "max_bytes": 1500},      # OFF: reads logs of GitHub (the allowance)
@@ -1287,6 +1288,8 @@ def maintain_extras(config, data):
     spare = remaining is None or remaining > 2 * config.get("min_rate_remaining", 800)
     for name, job in (("ai_alerts", lambda: feed_alerts(config, data)),
                       ("finops", lambda: spare and read_costs(config, data)),
+                      ("reports", lambda: spare and __import__("github_actions_monitor.integrations.reports", fromlist=["_"]).cycle(config, toolconfig.github_owner(config), list(data.get("repos") or []), data.get("runs") or [],
+                                                                                                                                  lambda endpoint: gh_read(endpoint, retries=0))),
                       ("mirror", lambda: spare and __import__("github_actions_monitor.integrations.mirror", fromlist=["_"]).cycle(config, data.get("runs") or [], toolconfig.github_owner(config), lambda e: gh_read(e, retries=0), download_artifact)),
                       ("otlp", lambda: __import__("github_actions_monitor.integrations.otlp", fromlist=["_"]).export(config, data, TOOL_VERSION))):
         try:
@@ -2219,6 +2222,15 @@ class Handler(BaseHTTPRequestHandler):
                 self.reply(document, "text/markdown; charset=utf-8")
             else:
                 self.json_reply(document, 200 if document.get("ok", True) else 404)
+        elif path == "/api/reports":      # read only: the four optional reports (workflow hygiene, queue by runner, release ready or blocked, supply chain), each on only when its setting is
+            if not self.guard():
+                return
+            from github_actions_monitor.integrations import reports
+            snapshot = None
+            sentinel = SENTINEL.get("obj")
+            if sentinel is not None and reports.settings(LIVE_CONFIG or toolconfig.raw_config())["release_view"]:
+                snapshot = sentinel.snapshot()
+            self.json_reply(reports.payload(LIVE_CONFIG or toolconfig.raw_config(), snapshot))
         elif path == "/api/run-log":      # read only, off by default (logs.failed_step.enabled): the failing step of one run and its last relevant lines, cleaned (steplog.py)
             if not self.guard():
                 return

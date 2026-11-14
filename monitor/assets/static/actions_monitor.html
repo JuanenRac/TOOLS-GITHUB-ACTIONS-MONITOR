@@ -477,6 +477,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <div id="al-list"><span class="mut">–</span></div>
 <h3 style="font-size:13px;margin:14px 0 4px" data-i18n="ui.al_hist_title"></h3><div id="al-hist" class="mut">–</div>
 </div></section>
+<section id="rep-box" hidden><h2 data-i18n="ui.rep_title"></h2><div class="body"><div id="rep-list"></div></div></section>
 <section id="les-box"><h2 data-i18n="ui.les_title"></h2><div class="body"><p class="mut" data-i18n="ui.les_intro"></p><div id="les-list"><span class="mut">–</span></div></div></section></div>
 <div class="tab" id="t-sent" role="tabpanel" aria-labelledby="n-sent">
 <div class="lcol">
@@ -1248,8 +1249,22 @@ $("t-sent").addEventListener("click",async e=>{
 var ALERTS=null;const ALF={s:QS.get("sentinel")||store.get("am-al-s")||"",l:"",m:store.get("am-al-m")==="1"};
 async function alertsTick(){if(LITE)return;try{const r=await fetch("/api/alerts",{cache:"no-store"});if(r.ok)ALERTS=await r.json()}catch(e){}try{renderAlerts()}catch(e){}lessonsTick()}
 /* the lessons of the failures of this CI (lessons.py): what keeps failing, the trend, what to do and the guard to add; local data, read only */
+/* the four optional reports (reports.py): drawn only when one of them is on */
+var REP=null;
+async function reportsTick(){if(LITE)return;try{const r=await fetch("/api/reports",{cache:"no-store"});if(r.ok)REP=await r.json()}catch(e){}try{renderReports()}catch(e){}}
+function renderReports(){
+  const box=$("rep-box"),list=$("rep-list");if(!box||!list||!REP)return;
+  const on=["workflow_hygiene","queue","release_view","supply_chain"].filter(k=>REP[k]&&REP[k].enabled);box.hidden=!on.length;if(!on.length)return;
+  const part=(k,body)=>`<h3 style="font-size:13px;margin:10px 0 4px">${esc(T("ui.rep_"+k))}</h3>${body}`,none=`<span class="mut">${esc(T("ui.rep_none"))}</span>`,row=(a,b,c)=>`<div class="alrow"><span class="chip ${c||""}">${esc(a)}</span><span class="tt">${esc(b)}</span></div>`;
+  let h="";
+  if(REP.workflow_hygiene.enabled)h+=part("workflow_hygiene",REP.workflow_hygiene.repos.length?REP.workflow_hygiene.repos.slice(0,12).map(r=>row(r.repo,Object.entries(r.findings.reduce((m,f)=>(m[f.rule]=(m[f.rule]||0)+1,m),{})).map(([k,n])=>{const t=T("ui.rep_rule_"+k);return (t===("ui.rep_rule_"+k)?k:t)+" ×"+n}).join(" · "),"warn")).join(""):none);
+  if(REP.queue.enabled){const g=Object.entries(REP.queue.groups);h+=part("queue",g.length?g.map(([k,v])=>row(k,T("ui.rep_wait",{n:v.jobs,m:v.median,x:v.max}))).join(""):none)}
+  if(REP.release_view.enabled)h+=part("release_view",REP.release_view.repos.length?REP.release_view.repos.slice(0,16).map(r=>row(T("ui.rep_"+r.state),r.repo+(r.entries?" · "+r.entries:"")+(r.reasons.length?" · "+r.reasons.map(x=>T("ui.rep_r_"+x)).join(", "):""),r.state==="blocked"?"bad":"")).join(""):none);
+  if(REP.supply_chain.enabled)h+=part("supply_chain",REP.supply_chain.repos.length?REP.supply_chain.repos.slice(0,20).map(r=>row(r.tag||"-",r.repo+" · SBOM "+(r.sbom?"✓":"✗")+" · "+T("ui.rep_sums")+" "+(r.checksums?"✓":"✗")+" · "+T("ui.rep_sig")+" "+(r.signature?"✓":"✗"),r.sbom&&r.signature?"":"warn")).join(""):none);
+  list.innerHTML=h;
+}
 var LESS=null;
-async function lessonsTick(){if(LITE)return;try{const r=await fetch("/api/ai/lessons",{cache:"no-store"});if(r.ok)LESS=await r.json()}catch(e){}try{renderLessons()}catch(e){}}
+async function lessonsTick(){reportsTick();if(LITE)return;try{const r=await fetch("/api/ai/lessons",{cache:"no-store"});if(r.ok)LESS=await r.json()}catch(e){}try{renderLessons()}catch(e){}}
 function renderLessons(){
   const box=$("les-list");if(!box)return;const L=LESS;
   if(!L){box.innerHTML='<span class="mut">–</span>';return}

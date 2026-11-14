@@ -226,6 +226,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `readpool.reserve.user` | `-` | quota | readpool.reserve.user |
 | `refresh_seconds` | `45` | polling | Refresh of hot repositories |
 | `report_history_days` | `30` | general | Days of report history kept |
+| `reports.max_calls_per_cycle` | `4` | sentinel | Most calls of the optional reports in a cycle |
+| `reports.queue.enabled` (secure) | `false` | sentinel | Report on the wait for a runner |
+| `reports.release_view.enabled` | `false` | sentinel | Show which releases are ready or blocked |
+| `reports.supply_chain.enabled` (secure) | `false` | sentinel | Report on the supply chain of releases |
+| `reports.workflow_hygiene.enabled` (secure) | `false` | sentinel | Report on workflow files |
 | `repos` | `"all"` | general | Repositories |
 | `retention.analytics_days` | `-` | paths | Keep analytics history for |
 | `retention.enabled` (secure) | `-` | paths | Purge old events and analytics |

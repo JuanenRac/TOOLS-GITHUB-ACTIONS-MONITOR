@@ -77,7 +77,7 @@ def free_stretch():
     import socket
     with socket.socket() as s:
         s.bind(("127.0.0.1", 0))
-        return s.getsockname()[1] + 20
+        return min(s.getsockname()[1] + 20, 64000)      # a port near the top of the range would leave the 400 ports that free_port looks at without room: 'no free port' on a runner
 
 
 class Running(unittest.TestCase):
