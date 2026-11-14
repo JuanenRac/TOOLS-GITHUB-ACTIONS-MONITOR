@@ -246,6 +246,17 @@ def _endpoint(handler, config, cfg, method, path):
                 return False
             _send(handler, {"users": auth.list_users(storage)} if path.endswith("users") else {"audit": auth.read_audit()})
             return False
+        if path in ("/api/auth/me/notify", "/api/auth/notify"):      # the notification preferences: your own, or (admin) everybody's, never a secret
+            from github_actions_monitor.integrations import dispatcher
+            context = _require(handler, storage, cfg, "admin" if path == "/api/auth/notify" else "viewer")
+            if context is None:
+                return False
+            if path == "/api/auth/notify":
+                _send(handler, {"users": {name: dispatcher.get_prefs(storage, name) for name in sorted(storage.list_records("users"))}})
+            else:
+                _send(handler, {"prefs": dispatcher.get_prefs(storage, context["user"]), "enabled": dispatcher.settings(config)["enabled"],
+                                "unseen": sum(len(dispatcher.pending(storage, a, context["user"])) for a in storage.list_accounts())})
+            return False
         return fail(handler, "not_found", 404)
     if method != "POST":
         return fail(handler, "not_found", 404)
@@ -276,6 +287,8 @@ def _endpoint(handler, config, cfg, method, path):
             return fail(handler, code, 400 if code != "invalid_credentials" else 403)
         _send(handler, {"ok": True})
         return False
+    if path.startswith("/api/auth/me/notify"):
+        return _notify(handler, storage, cfg, config, context, body, path, address)
     if path.startswith("/api/auth/users"):
         if context["role"] != "admin":
             auth.audit(cfg, "denied", context["user"], context["role"], address, path, "denied", "forbidden_role")
@@ -340,6 +353,33 @@ def _login(handler, storage, cfg, body, address):
     else:
         headers["Set-Cookie"] = session_cookie(session["token"], cfg)
     _send(handler, answer, headers=headers)
+    return False
+
+
+def _notify(handler, storage, cfg, config, context, body, path, address):
+    """POST /api/auth/me/notify (save your preferences), /api/auth/me/notify/seen (you have seen your alerts: the digests drop them), /api/auth/me/notify/test (a test message to your channels)."""
+    from github_actions_monitor.integrations import channels, dispatcher
+    sub = path[len("/api/auth/me/notify"):].strip("/")
+    user = context["user"]
+    if sub == "":
+        prefs, code = dispatcher.set_prefs(storage, user, body)
+        auth.audit(cfg, "notify_prefs", user, context["role"], address, path, "denied" if code else "ok", code)
+        if code:
+            return fail(handler, code, 404 if code == "user_unknown" else 400)
+        _send(handler, {"ok": True, "prefs": prefs})
+    elif sub == "seen":
+        _send(handler, {"ok": True, "dropped": dispatcher.mark_seen(storage, user)})
+    elif sub == "test":
+        prefs = dispatcher.get_prefs(storage, user)
+        if not prefs["channels"]:
+            return fail(handler, "no_channel", 400)
+        server = channels.server_settings(config)
+        notify = config.get("notify") if isinstance(config.get("notify"), dict) else {}
+        results = dispatcher._send(user, prefs, dispatcher.message_of({"repo": "Monitor", "text": i18n.t("evt.test"), "level": "info"}), server, notify.get("allow_private_targets") is True,
+                                   (config.get("network") or {}).get("use_proxy") is True if isinstance(config.get("network"), dict) else False)
+        _send(handler, {"ok": all(r["ok"] for r in results), "results": results})
+    else:
+        return fail(handler, "not_found", 404)
     return False
 
 

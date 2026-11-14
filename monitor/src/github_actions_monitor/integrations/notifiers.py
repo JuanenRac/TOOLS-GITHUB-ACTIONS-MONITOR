@@ -202,6 +202,8 @@ def allowed_now(limit, now=None):
 
 def notify(config, event, opener=None, connect=None, now=None):
     """Sends `event` through every enabled channel when notifications are on and the event kind is one the user asked for. Returns the list of results ([] when nothing was sent)."""
+    from github_actions_monitor.integrations import dispatcher      # the users of the team mode who asked for this event (OFF by default, its own switch)
+    dispatcher.dispatch(config, event)
     cfg = settings(config)
     if not cfg["enabled"] or event.get("kind") not in cfg["events"] or event.get("owner", "main") != "main":
         return []

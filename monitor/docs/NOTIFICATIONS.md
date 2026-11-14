@@ -32,3 +32,13 @@ Optional and **off by default**. The events of the feed (a new red, a stuck buil
 ## The limit per hour counts messages
 
 `notify.max_per_hour` limits the MESSAGES that leave the computer, not the events: an event that goes to three channels uses three of the allowance, one for each channel. When the allowance is not enough for every channel, the first channels in the list get the message and the rest are dropped (the page counts them as "limited"). A channel that cannot send (no secret, a wrong address) books nothing. The count is made under one lock, so several threads can never go over the limit.
+
+## Notifications for each user (team mode)
+
+Off by default (`notify.users.enabled`). With the team mode on, every user chooses in `GET/POST /api/auth/me/notify` the channels (`ntfy`, `teams`, `email`), the sentinels (`ci`, `collab`), the lowest level (`info`, `warn`, `bad`), whether they want the events of the system, and whether the messages come at once or gathered in a digest (`hourly`, `daily`). The role decides what a user may be told: a viewer, the events of CI of the accounts they may see; a maintainer also what waits for a person to act (a build waiting for its signature, a release that is due); an administrator also the events of the system. An event of an account never reaches someone who may not see that account. `notify.users.max_per_hour` caps the messages one user gets.
+
+- `ntfy`: the topic of each user on the server `notify.channels.ntfy.server` (https, or one on this computer); an access token is optional.
+- `teams`: the address of the incoming webhook of a Teams channel (hosts of Microsoft only).
+- `email`: the address of the user, sent through a relay on this computer that needs no login (`notify.channels.email`).
+
+The address of the Teams webhook and the token of ntfy are kept encrypted by the system (DPAPI, Keychain, Secret Service, or a private file) and never come back in an answer, a log or the configuration; deleting a user deletes them. `MONITOR_SECRET_BACKEND=file` forces the private file. Every channel is off until the administrator turns it on. The digest gathers the alerts the user has not seen (up to `notify.digest.max_items`); `POST /api/auth/me/notify/seen` marks them as seen and they are not sent; `POST /api/auth/me/notify/test` sends a test message to the channels of the user. An administrator reads everybody's preferences (never a secret) in `GET /api/auth/notify`.

@@ -303,6 +303,8 @@ def delete_user(storage, username):
         storage.delete_record("users", name)
         storage.delete_record("user_accounts", name)
         revoke_sessions(storage, name)
+    from github_actions_monitor.integrations import dispatcher      # the secrets of the notification channels of that user go with them
+    dispatcher.forget_user(name)
     return ""
 
 
