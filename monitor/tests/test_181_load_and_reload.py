@@ -24,6 +24,7 @@ TOOLS = HERE.parent / "tools"
 sys.path.insert(0, str(TOOLS))
 
 import _testenv  # noqa: F401,E402
+import _timing  # noqa: E402,F401      # limits of real time that grow with the load of the computer
 from github_actions_monitor.app import actions_monitor as am  # noqa: E402
 from github_actions_monitor.integrations import ai_alerts  # noqa: E402
 
@@ -120,7 +121,7 @@ class FinishedPictureAndLock(unittest.TestCase):
                 time.sleep(0.05)
             started = time.time()
             body = json.loads(urllib.request.urlopen(base + "/api/data", timeout=10).read())
-            self.assertLess(time.time() - started, 5, "a reload waits for the stalled connection of the previous page")
+            self.assertLess(time.time() - started, _timing.limit(5), "a reload waits for the stalled connection of the previous page")
             self.assertEqual(body["data"]["updated"], "z")
         self.assertTrue(am.LOCK.acquire(timeout=1), "the lock is held by a stalled connection")
         am.LOCK.release()

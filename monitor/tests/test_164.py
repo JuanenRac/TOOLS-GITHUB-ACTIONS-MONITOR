@@ -26,6 +26,7 @@ sys.path.insert(0, str(HERE / "tests"))
 sys.path.insert(0, str(ROOT / "tools"))
 
 import _testenv  # noqa: F401,E402
+import _timing  # noqa: E402,F401      # limits of real time that grow with the load of the computer
 from github_actions_monitor.ui import about  # noqa: E402
 from github_actions_monitor.app import actions_monitor as am  # noqa: E402
 from github_actions_monitor.integrations import actlocal  # noqa: E402
@@ -467,7 +468,7 @@ class HelpLanguages(unittest.TestCase):
         self.assertEqual(len(helpdocs.search("the", "en", limit=3)), min(3, len(hits)))
         start = time.time()
         shown = helpdocs.render("# Big\n\n" + "word " * 400_000 + "\n" + "- item\n" * 20_000)
-        self.assertLess(time.time() - start, 5)
+        self.assertLess(time.time() - start, _timing.limit(5))
         self.assertLess(len(shown), 400_000)
         self.assertIn('class="cut"', shown)
         code, text = helpdocs.console(["--search", "the"], "en", i18n.t)

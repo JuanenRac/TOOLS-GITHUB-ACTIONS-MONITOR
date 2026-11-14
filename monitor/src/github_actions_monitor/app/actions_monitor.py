@@ -2984,6 +2984,13 @@ def network_needs_administrator(config):
         return False
 
 
+INFO_FLAGS = ("-h", "--help", "--version", "--about", "--doctor", "--help-topics", "--help-search")      # they answer and leave: a monitor that is already on the port (the one of the person) must not stop them
+
+
+def only_informs():
+    return any(flag in sys.argv[1:] for flag in INFO_FLAGS)
+
+
 def main():
     if "--demo" in sys.argv[1:]:
         return demo_main()
@@ -2996,10 +3003,10 @@ def main():
     code = accounts_cli(sys.argv[1:]) if not lite_requested() else None
     if code is not None:
         return code
-    if not CHILD["account"] and not lite_requested() and network_needs_administrator(toolconfig.raw_config()):      # H1: no network before the first administrator exists
+    if not CHILD["account"] and not only_informs() and not lite_requested() and network_needs_administrator(toolconfig.raw_config()):      # H1: no network before the first administrator exists
         print(i18n.t("mon.network_needs_admin"))
         return 1
-    if not CHILD["account"] and "--account" not in sys.argv[1:]:      # a second monitor on a port that a monitor already listens on would share it: say so and stop (an account process is started by its supervisor on a port of its own)
+    if not CHILD["account"] and not only_informs() and "--account" not in sys.argv[1:]:      # a second monitor on a port that a monitor already listens on would share it: say so and stop (an account process is started by its supervisor on a port of its own)
         wanted = next((int(sys.argv[i + 1]) for i, a in enumerate(sys.argv) if a == "--port" and i + 1 < len(sys.argv) and sys.argv[i + 1].isdigit()), LITE_PORT if lite_requested() else 8765)
         if exclusive.monitor_on(wanted):
             print(i18n.t("mon.already_running", port=wanted))

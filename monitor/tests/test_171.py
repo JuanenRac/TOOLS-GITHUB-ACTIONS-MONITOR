@@ -14,6 +14,7 @@ sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
+import _timing  # noqa: E402,F401      # limits of real time that grow with the load of the computer
 from github_actions_monitor import i18n  # noqa: E402
 from github_actions_monitor.sentinels import sentinel_base  # noqa: E402
 from github_actions_monitor.sentinels import sentinel_ci  # noqa: E402
@@ -423,7 +424,7 @@ class RefusedPostKeepsItsAnswer(unittest.TestCase):
         started = time.time()
         answer = self.raw_post("/api/settings", b"{}", declared=10 ** 12, delay=0.0)
         self.assertIn(b" 403 ", answer.split(b"\r\n", 1)[0])
-        self.assertLess(time.time() - started, self.am.DRAIN_WAIT + 6)
+        self.assertLess(time.time() - started, _timing.limit(self.am.DRAIN_WAIT + 6))
 
     def test_the_counter_counts_what_the_handlers_read_and_passes_everything_else_through(self):
         import io

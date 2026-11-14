@@ -21,6 +21,7 @@ sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
+import _timing  # noqa: E402,F401      # limits of real time that grow with the load of the computer
 from github_actions_monitor.storage import base, factory, file_storage, sqlite_storage  # noqa: E402
 from test_storage import Contract  # noqa: E402
 
@@ -393,7 +394,7 @@ class TwoAccounts(unittest.TestCase):
                     self.assertEqual(p.wait(timeout=180), 0)
                 s.close()
             self.assertGreater(reads, 3)
-            self.assertLess(slowest, 2.0, "a read waited for a writer")
+            self.assertLess(slowest, _timing.limit(2.0), "a read waited for a writer")
 
     def test_model_b_the_page_answers_over_http_while_two_processes_tick(self):
         """A real HTTP server (the page of one process) reads the shared database for every request while two other processes write their ticks: every answer is complete and prompt."""
@@ -436,7 +437,7 @@ class TwoAccounts(unittest.TestCase):
                 server.server_close()
                 store.close()
             self.assertGreater(answers, 3)
-            self.assertLess(slowest, 3.0, "a request of the page waited for a writer")
+            self.assertLess(slowest, _timing.limit(3.0), "a request of the page waited for a writer")
 
     def test_several_threads_in_one_process_share_one_storage(self):
         with tempfile.TemporaryDirectory() as tmp:

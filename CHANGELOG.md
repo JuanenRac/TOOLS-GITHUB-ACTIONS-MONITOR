@@ -10,6 +10,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+### Fixed
+
+- **`--help` and the other flags that only answer work while a monitor is running**: the check that stops a second monitor on the same port ran before the flags were read, so `--help` (and the quality gate of a release that calls it) failed on a computer where the monitor was already on port 8765. And the tests that measure real seconds take their limit from the load of the computer, so a busy runner no longer fails them.
+
 ## [1.8.3]
 
 ### Changed
