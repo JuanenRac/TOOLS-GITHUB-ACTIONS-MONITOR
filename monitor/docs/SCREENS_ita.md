@@ -49,3 +49,15 @@ Un test del browser apre la pagina in ciascuna di queste dimensioni, percorre tu
 1. Sul computer che esegue il monitor, imposta `ui.screen1_tabs` su `now,al`, `ui.screen2_tabs` su `charts,repos` e, per un monitor ruotato, `ui.screen2_orientation` su `portrait`.
 2. Apri `http://questo-computer:8765/screen/1` in una finestra del primo monitor e `/screen/2` sul secondo; F11 per lo schermo intero. Da un altro computer usa la modalità rete con il suo token di accesso.
 3. Per uno schermo a parete che nessuno tocca, dagli più schede e imposta `ui.rotate_seconds` su 20-30.
+
+## Immagini
+
+La scheda Adesso in quattro dimensioni, con dati inventati (4K, un monitor 21:9, un monitor ruotato, un telefono):
+
+![4K 3840x2160](../../docs/screenshots/web_size_4k_light.png)
+
+![ultrawide 3440x1440](../../docs/screenshots/web_size_ultrawide_light.png)
+
+![ruotato 1080x1920](../../docs/screenshots/web_size_portrait_light.png)
+
+![telefono 390x844](../../docs/screenshots/web_size_phone_light.png)

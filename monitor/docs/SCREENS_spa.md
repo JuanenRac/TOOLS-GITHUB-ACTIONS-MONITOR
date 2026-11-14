@@ -49,3 +49,15 @@ Una prueba de navegador abre la página en cada uno de estos tamaños, recorre t
 1. En el equipo que ejecuta el monitor, pon `ui.screen1_tabs` en `now,al`, `ui.screen2_tabs` en `charts,repos` y, para un monitor girado, `ui.screen2_orientation` en `portrait`.
 2. Abre `http://este-equipo:8765/screen/1` en una ventana del primer monitor y `/screen/2` en el segundo; pulsa F11 para pantalla completa. Desde otro equipo, usa el modo red con su token de acceso.
 3. Para una pantalla de pared que nadie toca, dale varias pestañas y pon `ui.rotate_seconds` en 20-30.
+
+## Imágenes
+
+La pestaña Ahora en cuatro tamaños, con datos inventados (4K, un monitor 21:9, un monitor girado, un móvil):
+
+![4K 3840x2160](../../docs/screenshots/web_size_4k_light.png)
+
+![ultrawide 3440x1440](../../docs/screenshots/web_size_ultrawide_light.png)
+
+![girado 1080x1920](../../docs/screenshots/web_size_portrait_light.png)
+
+![móvil 390x844](../../docs/screenshots/web_size_phone_light.png)

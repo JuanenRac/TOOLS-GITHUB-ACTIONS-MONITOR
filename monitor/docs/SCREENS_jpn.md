@@ -49,3 +49,15 @@
 1. モニターを実行しているコンピューターで、`ui.screen1_tabs` を `now,al`、`ui.screen2_tabs` を `charts,repos` にし、回転したモニターなら `ui.screen2_orientation` を `portrait` にします。
 2. 1台目のモニターのウィンドウで `http://このコンピューター:8765/screen/1`、2台目で `/screen/2` を開き、F11 で全画面にします。別のコンピューターからはネットワークモードとアクセストークンを使います。
 3. 誰も触れない壁面の画面には複数のタブを割り当て、`ui.rotate_seconds` を 20〜30 にします。
+
+## 画像
+
+「現在」タブを4つのサイズで表示した例です(架空のデータ。4K、21:9モニター、回転したモニター、スマートフォン):
+
+![4K 3840x2160](../../docs/screenshots/web_size_4k_light.png)
+
+![ウルトラワイド 3440x1440](../../docs/screenshots/web_size_ultrawide_light.png)
+
+![回転 1080x1920](../../docs/screenshots/web_size_portrait_light.png)
+
+![スマートフォン 390x844](../../docs/screenshots/web_size_phone_light.png)
