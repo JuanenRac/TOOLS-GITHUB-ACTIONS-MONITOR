@@ -47,6 +47,7 @@ from github_actions_monitor import i18n
 from github_actions_monitor.security import auth_http
 from github_actions_monitor.security import localguard
 from github_actions_monitor.app import modes
+from github_actions_monitor.util import exclusive
 from github_actions_monitor.util import platform_compat
 from github_actions_monitor.data_pipeline import redrule
 from github_actions_monitor.util import resilience
@@ -251,7 +252,7 @@ def pool_status():
     if app.get("enabled"):
         rate = app.get("rate") or {}
         out["sources"].append({"name": "app", "ok": bool(app.get("ok")), "app": app.get("app", ""), "remaining": rate.get("remaining"), "limit": rate.get("limit"), "reset": rate.get("reset"),
-                               "missing": [p for p, v in (app.get("permissions") or {}).items() if v == "missing"], "error": app.get("error", ""), "warning": app.get("warning", ""), "openssl": app.get("openssl")})
+                               "missing": [p for p, v in (app.get("permissions") or {}).items() if v == "missing"], "error": app.get("error", ""), "warning": app.get("warning", ""), "openssl": app.get("openssl"), "openssl_path": app.get("openssl_path", "")})
     extra = readpool.settings(config)
     if extra["enabled"]:
         item = {"name": "extra", "ok": False, "warning": readpool.file_warning(extra["file"])}
@@ -1434,7 +1435,7 @@ def watchdog_loop(config, every=30):
 HOST_RE = re.compile(r"^[A-Za-z0-9.-]{1,100}\Z")
 
 
-class QuietServer(ThreadingHTTPServer):
+class QuietServer(exclusive.ExclusiveBind, ThreadingHTTPServer):
     """The server of the monitor: a client that disconnects is not an error worth a traceback; any other error is still shown."""
 
     tls_context = None
@@ -2827,6 +2828,11 @@ def main():
     if not CHILD["account"] and not lite_requested() and network_needs_administrator(toolconfig.raw_config()):      # H1: no network before the first administrator exists
         print(i18n.t("mon.network_needs_admin"))
         return 1
+    if not CHILD["account"] and "--account" not in sys.argv[1:]:      # a second monitor on a port that a monitor already listens on would share it: say so and stop (an account process is started by its supervisor on a port of its own)
+        wanted = next((int(sys.argv[i + 1]) for i, a in enumerate(sys.argv) if a == "--port" and i + 1 < len(sys.argv) and sys.argv[i + 1].isdigit()), LITE_PORT if lite_requested() else 8765)
+        if exclusive.monitor_on(wanted):
+            print(i18n.t("mon.already_running", port=wanted))
+            return 1
     if not lite_requested() and not CHILD["account"]:
         from github_actions_monitor.accounts import accounts
         asked = next((sys.argv[i + 1] for i, a in enumerate(sys.argv) if a == "--account" and i + 1 < len(sys.argv)), "")

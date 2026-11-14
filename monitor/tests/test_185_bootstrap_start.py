@@ -67,7 +67,7 @@ class NeedsAnAdministrator(unittest.TestCase):
         gone = RuntimeError("went on")
         with mock.patch.object(sys, "argv", ["actions_monitor.py"]), mock.patch.object(am.toolconfig, "raw_config", lambda: {"auth": {"enabled": True}}), mock.patch.object(am, "accounts_cli", lambda argv: None), \
                 mock.patch.object(am.paths, "ensure", lambda *a: None), mock.patch.object(am.rootmigrate, "auto", lambda *a: None), mock.patch("github_actions_monitor.integrations.ai_index.write", lambda *a, **k: None), \
-                mock.patch.object(am, "lite_requested", lambda: False), mock.patch("github_actions_monitor.accounts.accounts.layout", side_effect=gone):
+                mock.patch.object(am, "lite_requested", lambda: False), mock.patch.object(am.exclusive, "monitor_on", lambda port: False), mock.patch("github_actions_monitor.accounts.accounts.layout", side_effect=gone):
             with self.assertRaises(RuntimeError) as raised:
                 am.main()
         self.assertIs(raised.exception, gone, "the start passed the check and reached the choice of layout")
