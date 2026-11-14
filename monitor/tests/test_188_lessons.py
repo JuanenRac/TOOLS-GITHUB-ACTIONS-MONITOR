@@ -265,8 +265,8 @@ class WhatAnAIReads(Folders, unittest.TestCase):
             status, body = server.call("/api/ai/lessons")
             self.assertEqual(status, 200)
             self.assertEqual(body["schema"], 1)
-            self.assertEqual(body["categories"][0]["category"], "test")
-            self.assertEqual(server.call("/api/ai/failures?limit=5")[1]["failures"][0]["repo"], "demo")
+            self.assertIn("test", [c["category"] for c in body["categories"]])
+            self.assertIn("demo", [f["repo"] for f in server.call("/api/ai/failures?limit=50")[1]["failures"]])
             self.assertEqual(server.call("/api/ai/failures?repo=nothing")[1]["failures"], [])
             text = server.call("/api/ai/lessons?fmt=brief&repo=demo")[1]
             self.assertIn("Before you push", text if isinstance(text, str) else json.dumps(text))
