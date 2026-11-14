@@ -55,6 +55,8 @@ LOOP_URL_RE = re.compile(r"^(http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(
 CHAT_RE = re.compile(r"^(-?[0-9]{1,20})?\Z")
 ROOM_RE = re.compile(r"^(![A-Za-z0-9:._-]{3,120})?\Z")
 TOPIC_RE = re.compile(r"^[A-Za-z0-9/_.-]{1,100}\Z")
+NTFY_SERVER_RE = re.compile(r"^(https://[A-Za-z0-9._~:/-]{4,200}|http://(127\.0\.0\.1|localhost)(:[0-9]{1,5})?)\Z")      # a ntfy server: https, or one on this computer
+SENDER_RE = re.compile(r"^[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,200}\Z")
 PATTERN_RE = re.compile(r"^[A-Za-z0-9._*-]{1,100}:[A-Za-z0-9._*/-]{1,100}:[a-z_*]{1,30}\Z")      # repository:file:rule, with * for "any"
 FILE_PATTERN_RE = re.compile(r"^[A-Za-z0-9._*?-]{1,80}\Z")   # a file name pattern of the audit folder (no folders)
 FILE_NAME_RE = re.compile(r"^[A-Za-z0-9._-][A-Za-z0-9._/-]{0,79}\Z")
@@ -286,6 +288,16 @@ _f("notify", "ch_mqtt", "notify.channels.mqtt.port", "int", (1, 65535), unit="",
 _f("notify", "ch_mqtt", "notify.channels.mqtt.topic", "text", TOPIC_RE, label=["cfg.p.topic"], help="cfg.h.p.topic")
 _f("notify", "ch_http_local", "notify.channels.http_local.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on")
 _f("notify", "ch_http_local", "notify.channels.http_local.url", "text", LOOP_URL_RE, label=["cfg.p.local_url"], help="cfg.h.p.local_url")
+_f("notify", "users", "notify.users.enabled", "bool", restart=False, secure=True)
+_f("notify", "users", "notify.users.max_per_hour", "int", (1, 600), restart=False, unit="")
+_f("notify", "digest", "notify.digest.max_items", "int", (5, 200), restart=False, unit="")
+_f("notify", "ch_ntfy", "notify.channels.ntfy.enabled", "bool", restart=False, secure=True, label=["cfg.p.channel_on"], help="cfg.h.channel_on")
+_f("notify", "ch_ntfy", "notify.channels.ntfy.server", "text", NTFY_SERVER_RE, restart=False, secure=True, label=["cfg.p.server"], help="cfg.h.p.server")
+_f("notify", "ch_teams", "notify.channels.teams.enabled", "bool", restart=False, secure=True, label=["cfg.p.channel_on"], help="cfg.h.channel_on")
+_f("notify", "ch_email", "notify.channels.email.enabled", "bool", restart=False, secure=True, label=["cfg.p.channel_on"], help="cfg.h.channel_on")
+_f("notify", "ch_email", "notify.channels.email.host", "text", LOOP_HOST_RE, restart=False, secure=True, label=["cfg.p.local_host"], help="cfg.h.p.local_host")
+_f("notify", "ch_email", "notify.channels.email.port", "int", (1, 65535), restart=False, secure=True, unit="", label=["cfg.p.port"], help="cfg.h.p.port")
+_f("notify", "ch_email", "notify.channels.email.sender", "text", SENDER_RE, restart=False, secure=True, label=["cfg.p.sender"], help="cfg.h.p.sender")
 # --- Analytics
 _f("analytics", "main", "analytics.enabled", "bool")
 _f("analytics", "main", "analytics.keep_days", "int", (1, 365))

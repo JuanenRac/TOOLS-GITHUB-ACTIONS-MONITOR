@@ -32,3 +32,13 @@ Optionnelles et **désactivées par défaut**. Les événements du flux (un nouv
 ## La limite par heure compte les messages
 
 `notify.max_per_hour` limite les MESSAGES qui quittent l'ordinateur, pas les événements : un événement envoyé à trois canaux consomme trois unités, une par canal. Si le quota ne suffit pas pour tous les canaux, les premiers de la liste reçoivent le message et les autres sont écartés (la page les compte comme « limités »). Un canal qui ne peut pas envoyer (pas de secret, mauvaise adresse) ne consomme rien. Le décompte se fait sous un seul verrou : plusieurs threads ne peuvent donc jamais dépasser la limite.
+
+## Notifications par utilisateur (mode équipe)
+
+Désactivé par défaut (`notify.users.enabled`). Avec le mode équipe activé, chaque utilisateur choisit dans `GET/POST /api/auth/me/notify` les canaux (`ntfy`, `teams`, `email`), les sentinelles (`ci`, `collab`), le niveau minimal (`info`, `warn`, `bad`), s'il veut les événements du système et si les messages arrivent tout de suite ou réunis dans un résumé (`hourly`, `daily`). Le rôle décide de ce qu'un utilisateur peut apprendre : un lecteur, les événements de CI des comptes qu'il peut voir ; un mainteneur, en plus ce qui attend une personne (une compilation en attente de signature, une version à publier) ; un administrateur, en plus les événements du système. Un événement d'un compte n'atteint jamais quelqu'un qui ne peut pas voir ce compte. `notify.users.max_per_hour` limite les messages reçus par un utilisateur.
+
+- `ntfy` : le sujet de chaque utilisateur sur le serveur `notify.channels.ntfy.server` (https, ou un serveur de cet ordinateur) ; un jeton d'accès est facultatif.
+- `teams` : l'adresse du webhook entrant d'un canal Teams (hôtes de Microsoft seulement).
+- `email` : l'adresse de l'utilisateur, envoyée par un relais de cet ordinateur sans connexion (`notify.channels.email`).
+
+L'adresse du webhook Teams et le jeton ntfy sont gardés chiffrés par le système (DPAPI, Trousseau, Secret Service ou un fichier privé) et ne reviennent jamais dans une réponse, un journal ou la configuration ; supprimer un utilisateur les supprime. `MONITOR_SECRET_BACKEND=file` impose le fichier privé. Chaque canal est désactivé tant que l'administrateur ne l'active pas. Le résumé réunit les alertes que l'utilisateur n'a pas vues (jusqu'à `notify.digest.max_items`) ; `POST /api/auth/me/notify/seen` les marque comme vues et elles ne sont pas envoyées ; `POST /api/auth/me/notify/test` envoie un message d'essai aux canaux de l'utilisateur. Un administrateur lit les préférences de tous (jamais un secret) dans `GET /api/auth/notify`.
