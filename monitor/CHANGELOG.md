@@ -13,6 +13,7 @@ when this file and `tool_version.py` disagree.
 
 ### Changed
 
+- **A package for the auditor**: `docs/AUDIT_PACKAGE.md` (in the eight languages) has the security checklist of the team mode, a table of what earlier reviews found with the fix and the test that keeps it fixed, how to run the tests and the limits that are known.
 - **A job that did not run is shown apart from a failure**: a job or run that GitHub skipped because of a condition or a path filter now has its own words ("skipped (path filter)"), a dashed outline instead of a filled colour and a hint that says it is not a failure; in the list of jobs of a running workflow its bar is empty with a dashed edge, neither green nor red. A cancelled run says "cancelled". The rule that decides what is red did not change: a skipped run never made a workflow red.
 - **Runs read through GraphQL no longer break the Sentinel**: a run that comes without a duration (the rows of `network.graphql_checks` and the runs of a webhook that have not finished) made the count of minutes of the Sentinel and the check for stuck runs fail with a TypeError on every cycle, so the panels, the red workflows and the daily report were swallowed on purpose (the count of `degraded` grew by itself). A missing duration now counts as zero.
 
