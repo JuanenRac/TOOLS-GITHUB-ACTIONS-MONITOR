@@ -364,7 +364,7 @@ class Isolation(Running):
             self.assertGreater(child.next_start, 0, "a wait was scheduled")
             self.assertLessEqual(child.next_start - child.started, sup.BACKOFF[-1] + 60, "and it is a bounded wait")
         waits = [c.next_start for c in self.supervisor.children.values()]
-        before = time.time()
+        before = min(waits) - 1                     # a moment inside every wait: the real clock may already be past a short one on a loaded machine
         self.supervisor.check(now=before)           # asking again at once starts nothing new while the wait lasts
         self.assertEqual([c.next_start for c in self.supervisor.children.values()], waits)
 
