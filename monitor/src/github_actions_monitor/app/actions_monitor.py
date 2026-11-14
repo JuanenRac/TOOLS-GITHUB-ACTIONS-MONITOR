@@ -241,7 +241,7 @@ def pool_status():
     from github_actions_monitor.integrations import github_app
     from github_actions_monitor.data_pipeline import readpool
     config = LIVE_CONFIG or toolconfig.raw_config()
-    out = {"sources": [], "recommended": {"modes.auto_low": True, "network.etag": True}, "trend": __import__("github_actions_monitor.data_pipeline.quotawatch", fromlist=["_"]).trend()}
+    out = {"total": None, "sources": [], "recommended": {"modes.auto_low": True, "network.etag": True}, "trend": __import__("github_actions_monitor.data_pipeline.quotawatch", fromlist=["_"]).trend()}
     try:
         core = gh("api", "rate_limit", retries=0, as_user=True)["resources"]["core"]
         out["sources"].append({"name": "user", "ok": True, "remaining": core["remaining"], "limit": core["limit"], "reset": core["reset"]})
@@ -265,6 +265,9 @@ def pool_status():
             except Exception as error:   # noqa: BLE001
                 item["error"] = github_app.clean(str(error))[:120]
         out["sources"].append(item)
+    live = [s for s in out["sources"] if s.get("ok") and isinstance(s.get("remaining"), int)]
+    if len(live) > 1:
+        out["total"] = {"remaining": sum(s["remaining"] for s in live), "limit": sum(s["limit"] for s in live), "sources": len(live)}
     return out
 
 
@@ -803,8 +806,9 @@ def build(config, repos, started, refreshed, loading, progress_text):
 
         threading.Thread(target=refresh_issues, daemon=True).start()
     try:
+        from github_actions_monitor.data_pipeline import readpool
         rate_sources = rate_probes(config)      # free of quota: it is also read while loading, so the allowance is on the page from the first moment
-        rate = max(rate_sources.values(), key=lambda r: r["remaining"])
+        rate = readpool.pooled(rate_sources)      # the sum of the allowances: the bar, the working modes and the pauses count against all of them
     except Exception:
         rate, rate_sources = None, {}
     rate_user = (rate_sources.get("user") if rate is not None else None)
