@@ -74,10 +74,19 @@ def get(url, headers=None, data=None, method=None):
 
 
 def free_stretch():
+    """The start of a stretch of ports for the children of a supervisor: a port the system just gave (bind to 0) plus a margin, kept below 64000 so that the 400 ports free_port looks at have room, and
+    checked: a stretch where free_port finds nothing (a runner keeps ranges busy or excluded) is dropped and a new one is asked, at most ten times."""
     import socket
-    with socket.socket() as s:
-        s.bind(("127.0.0.1", 0))
-        return min(s.getsockname()[1] + 20, 64000)      # a port near the top of the range would leave the 400 ports that free_port looks at without room: 'no free port' on a runner
+    for _attempt in range(10):
+        with socket.socket() as s:
+            s.bind(("127.0.0.1", 0))
+            start = min(s.getsockname()[1] + 20, 64000)
+        try:
+            sup.free_port(start)
+            return start
+        except OSError:
+            continue
+    raise OSError("no stretch of free ports after ten tries")
 
 
 class Running(unittest.TestCase):
