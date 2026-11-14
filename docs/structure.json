@@ -281,6 +281,19 @@
           }
         },
         {
+          "name": "skills/",
+          "desc": {
+            "en": "the two skills for AIs",
+            "es": "las dos skills para IAs",
+            "de": "die zwei Skills für KIs",
+            "fr": "les deux skills pour les IA",
+            "it": "le due skill per le IA",
+            "ja": "AI 向けの2つのスキル",
+            "zh": "面向 AI 的两份技能包",
+            "pt": "as duas skills para IAs"
+          }
+        },
+        {
           "name": "tools/",
           "desc": {
             "en": "release and migration scripts",

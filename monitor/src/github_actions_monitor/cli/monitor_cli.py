@@ -43,7 +43,8 @@ from github_actions_monitor.tool_version import TOOL_VERSION
 from github_actions_monitor.security import netguard
 
 EXIT_OK, EXIT_USAGE, EXIT_DOWN, EXIT_AUTH, EXIT_DEGRADED, EXIT_ALERTS = 0, 1, 2, 3, 4, 5
-COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "ai-hook", "credential", "lessons")
+COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "ai-hook", "credential", "lessons", "install-skill")
+SKILL_ACTIONS = ("internal", "external")
 LESSONS_ACTIONS = ("list", "brief", "failures")
 AI_HOOK_ACTIONS = ("install", "status", "uninstall")
 CREDENTIAL_ACTIONS = ("replace", "reload")
@@ -254,6 +255,20 @@ def cmd_lessons(ctx):
     return answer, lines, EXIT_OK
 
 
+def cmd_install_skill(ctx):
+    """install-skill internal|external --dest FOLDER: copies a skill of the monitor to the folder an AI tool reads its skills from. Works without a running monitor; never overwrites a file that differs."""
+    from github_actions_monitor.integrations import skills
+    name = ctx["action"]
+    if name not in SKILL_ACTIONS:
+        raise CliError(EXIT_USAGE, i18n.t("cli.skill_action"))
+    result = skills.install(name, ctx.get("dest"))
+    if result["error"] == "dest" or (not ctx.get("dest")):
+        raise CliError(EXIT_USAGE, i18n.t("cli.skill_dest"))
+    lines = [i18n.t("cli.skill_done", n=len(result["written"]), same=len(result["same"]), kept=len(result["kept"]), dest=result["dest"])]
+    lines += [f"  {i18n.t('cli.skill_kept')}: {f}" for f in result["kept"]]
+    return result, lines, EXIT_OK if result["ok"] else EXIT_DEGRADED
+
+
 def cmd_live(ctx):
     events = fetch(ctx["base"], "/api/live-events", {"account": ctx["account"]}, ctx["timeout"], ctx["token"])
     status = fetch(ctx["base"], "/api/live-status", {"account": ctx["account"]}, ctx["timeout"], ctx["token"])
@@ -423,13 +438,13 @@ def cmd_credential(ctx):
     return {"action": action, "ok": ok, **shown}, [line], EXIT_OK if ok else EXIT_DEGRADED
 
 
-HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "live": cmd_live, "doctor": cmd_doctor, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons}
+HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "live": cmd_live, "doctor": cmd_doctor, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "install-skill": cmd_install_skill}
 
 
 def build_parser():
     ap = argparse.ArgumentParser(prog="monitor_cli.py", description=i18n.t("cli.description"), epilog=i18n.t("cli.epilog"), formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("command", choices=COMMANDS, help=i18n.t("cli.help_command"))
-    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS, default=None, help=i18n.t("cli.help_ai_action"))
+    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS + SKILL_ACTIONS, default=None, help=i18n.t("cli.help_ai_action"))
     ap.add_argument("--json", action="store_true", help=i18n.t("cli.help_json"))
     for name in ("assistant", "cursor", "generic"):
         ap.add_argument("--" + name, dest="target", action="store_const", const=name, default="", help=i18n.t("cli.help_" + name))
@@ -451,6 +466,7 @@ def build_parser():
     ap.add_argument("--level", choices=LEVELS, default="", help=i18n.t("cli.help_level"))
     ap.add_argument("--muted", choices=("show", "hide", "only"), default="hide", help=i18n.t("cli.help_muted"))
     ap.add_argument("--fail-on", choices=LEVELS, default="", dest="fail_on", help=i18n.t("cli.help_fail_on"))
+    ap.add_argument("--dest", metavar="FOLDER", default="", help=i18n.t("cli.help_dest"))
     ap.add_argument("--repo", metavar="NAME", default="", help=i18n.t("cli.help_repo"))
     ap.add_argument("--lang", metavar="CODE", help=i18n.t("cli.help_lang"))
     ap.add_argument("--version", action="store_true", help=i18n.t("cli.help_version"))
@@ -477,7 +493,7 @@ def main(argv=None):
     try:
         ctx = {"base": base_url(args.url, args.lite), "account": args.account, "timeout": max(1.0, min(60.0, args.timeout)), "token": resolve_token(flag=args.token, token_file=args.token_file),
                "sentinel": args.sentinel, "level": args.level, "muted": args.muted, "fail_on": args.fail_on, "lite": args.lite,
-               "action": args.action or "", "target": args.target, "scope": args.scope, "project_dir": args.project_dir, "dry_run": args.dry_run, "deep": args.deep, "new_token_file": args.new_token_file, "repo": args.repo if re.fullmatch(r"[A-Za-z0-9._-]{0,100}", args.repo) else ""}
+               "action": args.action or "", "target": args.target, "scope": args.scope, "project_dir": args.project_dir, "dry_run": args.dry_run, "deep": args.deep, "new_token_file": args.new_token_file, "dest": args.dest, "repo": args.repo if re.fullmatch(r"[A-Za-z0-9._-]{0,100}", args.repo) else ""}
         CLIENT.update({"session": "", "ca": (args.ca_file or os.environ.get("MONITOR_CA_FILE") or "").strip()})
         if CLIENT["ca"] and not os.path.isfile(CLIENT["ca"]):
             raise CliError(EXIT_USAGE, i18n.t("cli.ca_file_bad", file=CLIENT["ca"]))

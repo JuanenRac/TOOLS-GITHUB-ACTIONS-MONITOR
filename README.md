@@ -44,8 +44,8 @@
 | | |
 |---|---|
 | **Maturity** | functional |
-| **Tests** | 1789 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Settings** | 354 settings, all with help |
+| **Tests** | 1809 test methods (`python -m unittest discover -s monitor/tests`) |
+| **Settings** | 356 settings, all with help |
 | **Languages** | 8 (English, Spanish, German, French, Italian, Japanese, Chinese, Portuguese) |
 | **Tested in the CI on** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -141,6 +141,7 @@ Each picture follows the light or dark theme of your GitHub page.
 - **Collab sentinel and one list of alerts**: open issues and pull requests that need a person (forgotten, critical, reviews waiting, old drafts, conflicts), read only and on a clock of its own, and an Alerts tab with every sentinel in one list, a filter by origin and local silences that end by themselves.
 - **A status bar, full screen and tables you can sort**: the most important notice (and a window with all of them), the connection, the allowance, the last read, the mode, the address and the clock at the foot of the page; a full screen button; Repositories and History sort by one or several columns, with the columns you choose.
 - **The command line as a client**: `bin/monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) reads what the running monitor says, with `--json` and stable exit codes; it never writes to GitHub.
+- **Two skills for AIs**: short guides, in English, for the AI built into the monitor (local or from a provider) and for the AIs that talk to it from outside (command line, plain HTTP or files, MCP, stream), generated from the code so that nothing is left out; installed with `python bin/monitor_cli.py install-skill internal|external --dest FOLDER` or copied from the AI tab of the Settings (`monitor/docs/SKILLS.md`).
 - **Failures and lessons**: a local book of the failures of your CI, rules that file each one under a category, a library of lessons (`monitor/docs/LESSONS.md`) with the guard that would have stopped it, the trend over 24 hours and 7 days, `ai/LESSONS.md`, `/api/ai/lessons` and a brief before a push for any AI tool; read only, nothing leaves the computer.
 - **Every screen size and several screens**: the page fits a window from a phone to 4K, upright or turned, and one monitor can serve up to three screens (`/screen/1` to `/screen/3`), each with its own tabs and orientation (`monitor/docs/SCREENS.md`).
 - **Notifications for each user**: in the team mode every user chooses channels (ntfy, Teams, e-mail), the lowest level and digests in a panel of the page (`monitor/docs/NOTIFICATIONS.md`).
@@ -258,6 +259,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/WEBHOOK.md`](monitor/docs/WEBHOOK.md): the incoming webhook
 - [`monitor/docs/LITE.md`](monitor/docs/LITE.md): The lite edition
 - [`monitor/docs/NOTIFICATIONS.md`](monitor/docs/NOTIFICATIONS.md): notifications and the adapter contract
+- [`monitor/docs/SKILLS.md`](monitor/docs/SKILLS.md): the two skills for AIs, how they are made and how to install them
 - [`monitor/docs/SCREENS.md`](monitor/docs/SCREENS.md): sizes, orientation and several screens
 - [`monitor/docs/LESSONS.md`](monitor/docs/LESSONS.md): the book of failures, the library of lessons and the brief before a push
 - [`monitor/docs/AI.md`](monitor/docs/AI.md): the AI assistant: providers, safety and actions

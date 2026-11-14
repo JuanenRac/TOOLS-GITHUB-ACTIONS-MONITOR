@@ -74,6 +74,7 @@ def members():
     names += [HERE / n for n in LEGAL] + [HERE / "CHANGELOG.md", HERE / "README.txt"]
     names += sorted((HERE / "docs").glob("README_*.txt")) + sorted((HERE / "docs").glob("QUICKSTART_*.txt")) + sorted((HERE / "assets" / "locales").glob("*.json")) + sorted((HERE / "assets" / "ai").glob("*.md"))
     names += sorted((HERE / "docs").glob("*.md"))
+    names += sorted((HERE / "skills").rglob("*.md"))      # the two skills of the monitor (internal and external) with their references
     names += sorted((HERE / "docs").rglob("*.json"))   # the example dashboard of Grafana
     names += sorted((HERE / "tests").glob("*.py")) + sorted((HERE / "tests" / "fixtures").glob("*.json"))
     return [p for p in names if p.is_file()]
