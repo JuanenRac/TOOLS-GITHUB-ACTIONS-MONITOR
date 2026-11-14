@@ -21,7 +21,7 @@ from pathlib import Path
 from github_actions_monitor.integrations import github_app
 
 DEFAULTS = {"enabled": False, "file": "", "any_folder": False}
-TOKEN_RE = re.compile(r"^(?:gh[pousr]_[A-Za-z0-9_]{20,255}|github_pat_[A-Za-z0-9_]{20,255}|[A-Fa-f0-9]{40})$")
+TOKEN_RE = re.compile(r"^(?:gh[pousr]_[A-Za-z0-9_]{20,255}|github_pat_[A-Za-z0-9_]{20,255}|[A-Fa-f0-9]{40})\Z")
 PAUSE = 300      # seconds a failing source is left out
 ASSUMED = 3000   # the calls assumed left in a source that has not been probed yet
 _STATE = {"left": {}, "failed": {}, "turn": 0}

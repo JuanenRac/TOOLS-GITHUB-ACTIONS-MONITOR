@@ -46,7 +46,7 @@ _RULES = (
              r"sentinel_ai_cache\.json|collab_state\.json|alert_mutes\.json|update_check\.json|welcome_state\.json|orgs_state\.json|degraded\.json|targets\.candidates\.json|"
              r"storage\.sqlite3|access_token|credential|accounts|state|secrets|_global|_no_workspace"),
 )
-_COMPILED = tuple((kind, re.compile(r"^(?:" + body + r")$")) for kind, body in _RULES)
+_COMPILED = tuple((kind, re.compile(r"^(?:" + body + r")\Z")) for kind, body in _RULES)
 _VARIANT = re.compile(r"_(lite|demo)(?=\.|$)")
 
 

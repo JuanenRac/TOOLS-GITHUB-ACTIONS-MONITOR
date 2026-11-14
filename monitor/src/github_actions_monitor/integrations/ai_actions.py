@@ -24,9 +24,9 @@ from github_actions_monitor.security import private_io
 
 from github_actions_monitor.util import paths
 LOG_FILE = paths.place("ai_actions_log.jsonl")
-NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}$")
-FILE_RE = re.compile(r"^[A-Za-z0-9._-]{1,80}\.ya?ml$")
-JOB_RE = re.compile(r"^[A-Za-z0-9_-]{1,60}$")
+NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}\Z")
+FILE_RE = re.compile(r"^[A-Za-z0-9._-]{1,80}\.ya?ml\Z")
+JOB_RE = re.compile(r"^[A-Za-z0-9_-]{1,60}\Z")
 CLOSED_LIST = ("rerun_failed", "rerun", "close_issue", "act_local")
 RUNNABLE = ("rerun_failed", "rerun", "close_issue")        # act_local is only a suggestion
 DEFAULTS = {"enabled": False, "execute": False, "allowed": ["rerun_failed", "close_issue"], "max_per_hour": 5, "ttl_seconds": 600}

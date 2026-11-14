@@ -216,7 +216,7 @@ def ollama_chat(cfg, system, user):
     return (body.get("message") or {}).get("content", "")
 
 
-ENV_NAME = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}$")
+ENV_NAME = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}\Z")
 
 
 def compat_problem(cfg):

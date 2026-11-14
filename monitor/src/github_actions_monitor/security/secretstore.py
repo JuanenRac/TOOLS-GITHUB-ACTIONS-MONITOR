@@ -22,7 +22,7 @@ from pathlib import Path
 
 SERVICE = "github-actions-monitor"
 ACCOUNT = "github-token"
-TOKEN_RE = re.compile(r"^(gh[pousr]_[A-Za-z0-9]{20,255}|github_pat_[A-Za-z0-9_]{20,255}|[0-9a-f]{40})$")
+TOKEN_RE = re.compile(r"^(gh[pousr]_[A-Za-z0-9]{20,255}|github_pat_[A-Za-z0-9_]{20,255}|[0-9a-f]{40})\Z")
 STORES = ("auto", "system", "file")
 
 

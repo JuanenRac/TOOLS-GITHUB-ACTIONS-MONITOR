@@ -29,7 +29,7 @@ from github_actions_monitor.util import platform_compat
 from github_actions_monitor.app import toolconfig
 
 BAD = ("failure", "timed_out", "startup_failure", "action_required")
-HEX40 = re.compile(r"^[0-9a-fA-F]{40}$")
+HEX40 = re.compile(r"^[0-9a-fA-F]{40}\Z")
 HIGH = ("critical", "high")
 
 DEFAULTS = {
@@ -312,7 +312,7 @@ def scan_clone(path):
 
 
 # ---------- pure rules (tested without network) ----------
-VERSION_TAG = re.compile(r"^v?\d+\.\d+(?:\.\d+){0,2}(?:[-+][0-9A-Za-z.-]+)?$")
+VERSION_TAG = re.compile(r"^v?\d+\.\d+(?:\.\d+){0,2}(?:[-+][0-9A-Za-z.-]+)?\Z")
 
 
 def is_version_tag(tag):

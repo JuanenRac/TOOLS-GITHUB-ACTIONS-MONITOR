@@ -21,7 +21,7 @@ import time
 LOOPBACK_HOSTS = ("127.0.0.1", "localhost")
 STATE = {"network": False, "host": "127.0.0.1", "token": "", "allowed": set(), "secure": False, "proxy_host": "", "trusted_proxy": False, "behind_proxy": False}
 #: the public name of an HTTPS proxy that forwards `Host` without a port (the proxy on port 443): a plain host name, never an address with a port, a path or a user
-PROXY_HOST_RE = re.compile(r"^[a-z0-9]([a-z0-9.-]{0,98}[a-z0-9])?$")
+PROXY_HOST_RE = re.compile(r"^[a-z0-9]([a-z0-9.-]{0,98}[a-z0-9])?\Z")
 COOKIE = "monitor_access"
 #: keys that can only be written from the same computer while the network mode is on
 LOCAL_ONLY_PREFIXES = ("listen.", "github_token.", "act.", "github_actions.")

@@ -10,8 +10,8 @@ branches. Hot repositories (a run in progress, a red workflow) keep being read t
 This module only builds the query and reads the answer; actions_monitor.py makes the call (`gh api graphql`, the login of the user)."""
 import re
 
-NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}$")
-OWNER_RE = re.compile(r"^[A-Za-z0-9-]{1,39}$")
+NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}\Z")
+OWNER_RE = re.compile(r"^[A-Za-z0-9-]{1,39}\Z")
 DEFAULT_BATCH = 20
 STATS = {"calls": 0, "repos": 0, "fallbacks": 0, "cost": 0, "errors": 0}
 

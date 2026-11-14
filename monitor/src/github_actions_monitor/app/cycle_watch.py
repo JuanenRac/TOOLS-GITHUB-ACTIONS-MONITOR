@@ -99,7 +99,7 @@ class CycleWatch:
             since_ok = int(now - self.last_ok) if self.last_ok else None
             return {"phase": self.phase_name, "cycle_started": self.cycle_started or None, "running_seconds": int(running), "last_cycle_ok": self.last_ok or None,
                     "seconds_since_ok": since_ok, "cycles": self.cycles, "restarts": self.restarts, "last_error": self.last_error, "last_error_phase": self.last_error_phase,
-                    "log_error": self.log_error, "stuck": bool(limit_seconds and running > limit_seconds), "limit_seconds": int(limit_seconds or 0)}
+                    "log_error": self.log_error, "stuck": bool(limit_seconds and running > limit_seconds), "limit_seconds": int(limit_seconds or 0), "abandoned_calls": abandoned()}
 
 
 def check(watch, limit_seconds, thread_alive, now=None):
@@ -122,9 +122,33 @@ def dump_stacks(stream):
         return False
 
 
-def bounded(fn, deadline):
+DEFAULT_MAX_ABANDONED = 8
+ABANDONED = []      # the threads that bounded() left behind and that have not ended yet
+_ABANDONED_LOCK = threading.Lock()
+
+
+class TooManyAbandoned(subprocess.TimeoutExpired):
+    """bounded() starts nothing new while `max_abandoned` calls that never returned are still alive (it is a timeout for whoever called it)."""
+
+
+def abandoned():
+    """How many of the calls that bounded() gave up on are still alive (the ones that ended are forgotten)."""
+    with _ABANDONED_LOCK:
+        ABANDONED[:] = [t for t in ABANDONED if t.is_alive()]
+        return len(ABANDONED)
+
+
+def blocked(max_abandoned=DEFAULT_MAX_ABANDONED):
+    """True when the calls left behind reached the limit: the monitor is degraded (it cannot make more calls to GitHub until some of them end). 0 as limit switches this off."""
+    return bool(max_abandoned) and abandoned() >= max_abandoned
+
+
+def bounded(fn, deadline, max_abandoned=DEFAULT_MAX_ABANDONED):
     """Runs fn() and gives its result, but never waits longer than `deadline` seconds: a call that hangs (a child process that holds its pipes, a read without a timeout) is left behind in a daemon
-    thread and TimeoutExpired is raised, so the loop goes on."""
+    thread and TimeoutExpired is raised, so the loop goes on. The threads left behind are counted: with `max_abandoned` of them still alive nothing new is started (TooManyAbandoned), so a failure
+    that never ends cannot pile up threads, sockets and memory without limit."""
+    if blocked(max_abandoned):
+        raise TooManyAbandoned("call", 0)
     box = {}
 
     def work():
@@ -137,6 +161,8 @@ def bounded(fn, deadline):
     thread.start()
     thread.join(deadline)
     if thread.is_alive():
+        with _ABANDONED_LOCK:
+            ABANDONED.append(thread)
         raise subprocess.TimeoutExpired("call", deadline)
     if "error" in box:
         raise box["error"]
