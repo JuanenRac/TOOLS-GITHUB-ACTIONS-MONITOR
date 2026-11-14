@@ -84,3 +84,16 @@ With `otlp.enabled` on and an `otlp.endpoint` (HTTPS, or HTTP on this computer),
 ## The network mode does not start without an administrator
 
 With `auth.enabled` and `listen.network` both on and no user yet, the monitor does not start and says how to go on: the first administrator can only be created from this computer, so turn `listen.network` off, start the monitor (it listens on this computer only), open the page and create the administrator, then turn `listen.network` on and start it again. The local mode (127.0.0.1) always starts.
+
+## Switches of the newest features
+
+Everything below is local and read only, and off unless it says it is on. Each has its guide in the page (the ? button) and in this folder. (lessons is on and only writes a local file; the rest are off)
+
+- `lessons.enabled` - docs/LESSONS.md
+- `savings.webhook_first`, `savings.feeds.enabled` - docs/QUOTA.md
+- `sentinels.collab.search_api` - docs/COLLAB.md
+- `logs.failed_step.enabled`, `github_app.share_reads` - docs/EXTRAS.md
+- `reports.workflow_hygiene.enabled`, `reports.queue.enabled`, `reports.release_view.enabled`, `reports.supply_chain.enabled` - docs/EXTRAS.md
+- `ai.skill` - docs/SKILLS.md
+- `ui.orientation`, `ui.screen1_tabs` - docs/SCREENS.md
+- `notify.users.enabled` - docs/NOTIFICATIONS.md

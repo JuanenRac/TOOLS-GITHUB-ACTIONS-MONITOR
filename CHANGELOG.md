@@ -42,6 +42,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Added
 
+- **The newest switches are in the advanced guide and the quick start**: `docs/ADVANCED.md` lists, in eight languages, the switch of each new feature (lessons, reading less, the Search API, the failed step, the read-only App access, the optional reports, the guide of the AI, the screens, the notifications of each user) with the guide that explains it, and the quick start tells how to read the lessons before a push and how to install the two guides for AIs.
+
 - **The Collab sentinel can read with the Search API (off)**: `sentinels.collab.search_api` asks the open issues and pull requests of the whole account in a few calls of the Search API (its own allowance) instead of two lists for each repository, and reads only the conflicts of the pull requests that changed. The alerts are the same in both ways and, if the Search API fails, the round reads each repository as before. Guide: `docs/COLLAB.md` in eight languages.
 - **The skills name every signal and every panel, and a round of work can be closed**: `skills/*/references/signals.md` is generated from the code (each signal id of `GET /api/ai/state` and each panel of the Sentinel) and the coverage test fails when a new signal or panel is not named. `python bin/monitor_cli.py lessons close` lists the repeated kinds of failure that still have no lesson of your own with its guard (`needs_guard` in `GET /api/ai/lessons`) and exits with a non-zero code while there is one.
 

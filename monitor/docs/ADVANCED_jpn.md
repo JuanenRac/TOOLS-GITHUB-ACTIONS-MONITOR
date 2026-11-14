@@ -84,3 +84,16 @@
 ## 管理者がいないとネットワークモードは起動しません
 
 `auth.enabled` と `listen.network` がともにオンでユーザーがまだいない場合、モニターは起動せず、次の手順を表示します。最初の管理者はこのコンピューターからしか作成できないため、`listen.network` をオフにしてモニターを起動し（このコンピューターのみで待ち受けます）、ページを開いて管理者を作成してから、`listen.network` をオンにして再起動してください。ローカルモード（127.0.0.1）は常に起動します。
+
+## 最新機能のスイッチ
+
+以下はすべてローカルで読み取り専用であり、特に記載がなければ既定ではオフです。それぞれのガイドはページ(? ボタン)とこのフォルダーにあります。 (レッスンはオンで、ローカルファイルに書き込むだけです。それ以外はオフです)
+
+- `lessons.enabled` - docs/LESSONS_jpn.md
+- `savings.webhook_first`, `savings.feeds.enabled` - docs/QUOTA_jpn.md
+- `sentinels.collab.search_api` - docs/COLLAB_jpn.md
+- `logs.failed_step.enabled`, `github_app.share_reads` - docs/EXTRAS_jpn.md
+- `reports.workflow_hygiene.enabled`, `reports.queue.enabled`, `reports.release_view.enabled`, `reports.supply_chain.enabled` - docs/EXTRAS_jpn.md
+- `ai.skill` - docs/SKILLS_jpn.md
+- `ui.orientation`, `ui.screen1_tabs` - docs/SCREENS_jpn.md
+- `notify.users.enabled` - docs/NOTIFICATIONS_jpn.md

@@ -84,3 +84,16 @@ Com `otlp.enabled` ligado e um `otlp.endpoint` (HTTPS, ou HTTP neste computador)
 ## O modo de rede não arranca sem administrador
 
 Com `auth.enabled` e `listen.network` ativos e nenhum utilizador ainda, o monitor não arranca e explica como continuar: o primeiro administrador só pode ser criado a partir deste computador; por isso desative `listen.network`, arranque o monitor (escuta apenas neste computador), abra a página e crie o administrador; depois ative `listen.network` e arranque de novo. O modo local (127.0.0.1) arranca sempre.
+
+## Interruptores das funcionalidades mais novas
+
+Tudo o que se segue é local e só de leitura, e está desligado a não ser que se diga o contrário. Cada uma tem o seu guia na página (botão ?) e nesta pasta. (as lições estão ligadas e só escrevem um ficheiro local; o resto está desligado)
+
+- `lessons.enabled` - docs/LESSONS_por.md
+- `savings.webhook_first`, `savings.feeds.enabled` - docs/QUOTA_por.md
+- `sentinels.collab.search_api` - docs/COLLAB_por.md
+- `logs.failed_step.enabled`, `github_app.share_reads` - docs/EXTRAS_por.md
+- `reports.workflow_hygiene.enabled`, `reports.queue.enabled`, `reports.release_view.enabled`, `reports.supply_chain.enabled` - docs/EXTRAS_por.md
+- `ai.skill` - docs/SKILLS_por.md
+- `ui.orientation`, `ui.screen1_tabs` - docs/SCREENS_por.md
+- `notify.users.enabled` - docs/NOTIFICATIONS_por.md
