@@ -61,6 +61,8 @@ when this file and `tool_version.py` disagree.
 
 ### Fixed
 
+- **A second monitor on the same port no longer starts, and openssl is found outside the PATH**: on Windows the port of the monitor is bound for the monitor alone, so two processes can no longer listen on 8765 at once, and a start that finds a monitor already answering on its port says so and stops instead of taking another one. `openssl` is searched in the PATH, in the places where Git for Windows keeps it and in the usual folders of macOS and Linux (a monitor started from a `.bat` or a service finds it); `github_app.openssl_path` chooses one by hand, the status of the App shows `openssl_path` and the doctor says which one signs when it is not the one of the PATH.
+
 - **The OpenTelemetry export obeys the rule for outgoing requests**: a collector on this computer is called directly and a redirect from it is not followed; any other collector is refused when it, or a redirect, leads to a loopback, private, link-local or metadata address (unless the setting that allows private targets is on), and the proxy of the environment is not used. Before, the export used a plain request that followed every redirect.
 
 - **The proxy of the environment is said to be a frontier of trust**: the help of its setting (and the code) now say that the proxy resolves the name again on its own, so the check before the proxy is a first filter, not a guarantee, and that it should be turned on only behind a managed proxy that refuses loopback, private, link-local and metadata destinations. It stays off by default.

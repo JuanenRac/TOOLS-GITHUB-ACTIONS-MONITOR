@@ -56,3 +56,9 @@ GitHub 为每个账户提供有限的 **API 调用配额**,由使用它的所有
 与配额有关的一切都在一处:*设置*中的*配额*标签页。它汇集了模式(`modes.auto_low`、`modes.auto_low_enter`、`modes.auto_low_exit` 以及 `modes.low.*` 中的节省模式数值)、节省(`network.etag`,与 `cache.etag.enabled` 一起生效)、中央面板(`central.source`、`central.max_age_minutes`)、GitHub App(`github_app.*`)和**用于读取的第二个账户**。标签页中的按钮会显示每个来源(你的登录、App、第二个账户)的配额和恢复时间,测试 App 和第二个账户,列出 App 缺少的权限,并应用推荐值或默认值。
 
 第二个账户(`extra_reader.enabled`、`extra_reader.file`)是只读账户,其细粒度令牌保存在任何仓库之外的文本文件中,只有你能读取;设置中**只保存**该文件的路径。监视器在使用时读取令牌,保存在内存中,绝不存储、打印或记录。读取会按各来源的剩余调用数(免费 `rate_limit` 调用的数值减去此后已做的读取)在你的登录、App 和第二个账户之间分配;被拒绝的来源会被排除五分钟,并用下一个来源重新读取。写入和操作从不使用它。它用于你自己的账户(例如对这些仓库有读取权限的自己的第二个账户),而不是用他人账户绕过限制的办法。该文件必须位于监控的账户文件夹内(`accounts/`,或 `MONITOR_ACCOUNTS_DIR` 指定的文件夹),并且绝不会通过链接读取;`extra_reader.any_folder`(默认关闭)可取消文件夹限制。取决于“谁在询问”的内容(你的账户、其组织、通知、对 `@me` 的搜索、`gh auth`、没有所有者的 `gh repo list`)始终由你自己的登录回答,只有简单的 `gh api ENDPOINT` 读取(最多带有 `--jq`、`--paginate`、`-H`、`-i` 和 `--cache` 选项)才会在各来源之间分配:任何其他调用都交给你的登录。
+
+## openssl 程序与每个端口一个监控器
+
+监控器先在 PATH 中查找 `openssl`，找不到时再查找 Git for Windows 存放它的位置（Program Files 以及用户 Programs 下的 `Git\usr\bin`、`Git\mingw64\bin`）和 macOS、Linux 的常用目录，因此从 `.bat` 或服务启动的监控器也能找到。`github_app.openssl_path`（程序的绝对路径）可手动指定。`/api/github-app/status` 显示 `openssl` 和 `openssl_path`，当使用的不是 PATH 中的那个时，doctor 会说明由哪一个签名。
+
+在 Windows 上，监控器独占其端口（SO_EXCLUSIVEADDRUSE）：两个进程不能再同时监听 8765。如果在另一个监控器已在该端口应答时又启动一个，它会说明情况并退出，而不是去找别的端口。

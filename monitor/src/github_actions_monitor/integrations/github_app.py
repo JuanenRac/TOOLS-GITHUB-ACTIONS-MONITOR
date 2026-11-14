@@ -23,7 +23,8 @@ import urllib.request
 from datetime import datetime, timezone
 
 API = "https://api.github.com"
-DEFAULTS = {"enabled": False, "app_id": "", "key_path": "", "installation_id": ""}
+DEFAULTS = {"enabled": False, "app_id": "", "key_path": "", "installation_id": "", "openssl_path": ""}
+OPENSSL = {"configured": ""}      # the program chosen in the configuration (settings() keeps it here so that the signature finds it)
 PERMISSIONS = ("actions", "checks", "security_events", "statuses", "contents", "vulnerability_alerts", "issues", "pull_requests", "secret_scanning_alerts", "metadata")
 _STATE = {"token": "", "expires": 0.0, "installation": "", "error": "", "failed_at": 0.0}
 RETRY_AFTER = 300      # seconds before a failed App is tried again (the reads use the token of the user meanwhile)
@@ -34,7 +35,38 @@ def settings(config):
     key = block.get("key_path") if isinstance(block.get("key_path"), str) else ""
     ok_path = bool(key) and len(key) <= 260 and not any(ord(c) < 32 for c in key) and not key.startswith(("\\\\", "//")) and not re.match(r"^(?:[Dd]:|/mnt/[dD](?:/|$))", key)
     ident = lambda value: str(value) if str(value).isdigit() and 0 < len(str(value)) <= 12 else ""      # noqa: E731
-    return {"enabled": block.get("enabled") is True, "app_id": ident(block.get("app_id", "")), "key_path": key if ok_path else "", "installation_id": ident(block.get("installation_id", ""))}
+    program = block.get("openssl_path") if isinstance(block.get("openssl_path"), str) else ""
+    program = program if program and len(program) <= 260 and not any(ord(c) < 32 for c in program) and os.path.basename(program).lower() in ("openssl", "openssl.exe") else ""
+    OPENSSL["configured"] = program
+    return {"enabled": block.get("enabled") is True, "app_id": ident(block.get("app_id", "")), "key_path": key if ok_path else "", "installation_id": ident(block.get("installation_id", "")), "openssl_path": program}
+
+
+def known_openssl(env=None, exists=None):
+    """Places where an openssl lives that is NOT in the PATH of an ordinary console: the one that comes with Git for Windows (a launcher from a .bat or a service does not see it) and the usual ones of macOS and Linux."""
+    env = os.environ if env is None else env
+    exists = exists or os.path.isfile
+    roots = [env.get(name, "") for name in ("ProgramFiles", "ProgramW6432", "ProgramFiles(x86)")]
+    if env.get("LOCALAPPDATA"):
+        roots.append(os.path.join(env["LOCALAPPDATA"], "Programs"))
+    found = []
+    for root in roots:
+        if root:
+            for parts in (("Git", "usr", "bin", "openssl.exe"), ("Git", "mingw64", "bin", "openssl.exe")):
+                found.append(os.path.join(root, *parts))
+    found += ["/opt/homebrew/bin/openssl", "/usr/local/bin/openssl", "/usr/bin/openssl"]
+    return [path for path in found if exists(path)]
+
+
+def find_openssl(exists=None, env=None):
+    """The program to sign with: the one named in `github_app.openssl_path`, else the one of the PATH, else one of Git for Windows or of the usual places. "" when there is none."""
+    exists = exists or os.path.isfile
+    if OPENSSL["configured"] and exists(OPENSSL["configured"]):
+        return OPENSSL["configured"]
+    on_path = shutil.which("openssl")
+    if on_path:
+        return on_path
+    known = known_openssl(env, exists)
+    return known[0] if known else ""
 
 
 def _b64(data):
@@ -42,7 +74,8 @@ def _b64(data):
 
 
 def _sign(data, key_path):
-    done = subprocess.run(["openssl", "dgst", "-sha256", "-sign", key_path], input=data, capture_output=True, timeout=20, shell=False)
+    program = find_openssl() or "openssl"
+    done = subprocess.run([program, "dgst", "-sha256", "-sign", key_path], input=data, capture_output=True, timeout=20, shell=False)
     if done.returncode != 0 or not done.stdout:
         raise RuntimeError("openssl could not sign (check the key file)")
     return done.stdout
@@ -171,7 +204,7 @@ def key_warning(key_path):
 def status(config, opener=None, signer=None, now=None):
     """What the settings page shows (never the key or the token): {"enabled", "ok", "installation_id", "expires_epoch", "rate", "permissions", "app", "error", "warning", "openssl"}."""
     cfg = settings(config)
-    out = {"enabled": cfg["enabled"], "ok": False, "openssl": bool(shutil.which("openssl")), "warning": key_warning(cfg["key_path"]) if cfg["key_path"] else "", "error": ""}
+    out = {"enabled": cfg["enabled"], "ok": False, "openssl": bool(find_openssl()), "openssl_path": find_openssl(), "warning": key_warning(cfg["key_path"]) if cfg["key_path"] else "", "error": ""}
     if not cfg["enabled"]:
         return out
     got = token(config, opener, signer, now, force=True)

@@ -214,7 +214,8 @@ def github_app_check(config):
     if not cfg["enabled"]:
         return "ok", "off"
     problems = []
-    if not shutil.which("openssl"):
+    program = github_app.find_openssl()
+    if not program:
         problems.append("openssl missing")
     if not cfg["app_id"]:
         problems.append("app_id missing")
@@ -224,7 +225,8 @@ def github_app_check(config):
         warning = github_app.key_warning(cfg["key_path"])
         if warning:
             problems.append(warning)
-    return ("warn", "; ".join(problems)) if problems else ("ok", "on")
+    where = f"on (openssl: {program})" if program and not shutil.which("openssl") else "on"      # found outside the PATH (Git for Windows): said, so that nobody wonders which one signs
+    return ("warn", "; ".join(problems)) if problems else ("ok", where)
 
 
 def fingerprint(secret):

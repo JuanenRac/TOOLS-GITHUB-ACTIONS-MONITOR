@@ -123,6 +123,7 @@ _f("quota", "github_app", "github_app.enabled", "bool", restart=False, secure=Tr
 _f("quota", "github_app", "github_app.app_id", "text", re.compile(r"^[0-9]{1,12}\Z"), restart=False, secure=True)
 _f("quota", "github_app", "github_app.key_path", "path", restart=False, secure=True)
 _f("quota", "github_app", "github_app.installation_id", "text", re.compile(r"^[0-9]{0,12}\Z"), restart=False, secure=True)
+_f("quota", "github_app", "github_app.openssl_path", "path", restart=False, secure=True)
 _f("quota", "central", "central.source", "enum", ("off", "git", "http"), restart=False, secure=True)
 _f("quota", "central", "central.max_age_minutes", "int", (5, 10080), unit="min", restart=False)
 _f(_T_GENERAL, "sound", "sound.on_new_red", "bool", restart=False)
