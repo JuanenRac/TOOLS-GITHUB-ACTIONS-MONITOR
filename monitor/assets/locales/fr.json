@@ -707,6 +707,7 @@
  "cli.bad_shape": "Le moniteur a répondu avec des données dans une forme que cette commande ne comprend pas (même version ?).",
  "cli.bad_url": "L'adresse n'est pas valide : utilisez http://hôte:port ou https://hôte:port.",
  "cli.ca_file_bad": "Le fichier de l'autorité de certification {file} n'existe pas.",
+ "cli.close_head": "{n} types d'échec répétés sans garde",
  "cli.credential_done": "Fait : {status}.",
  "cli.credential_failed": "Non fait : {status}.",
  "cli.credential_needs_account": "Ce moniteur a plusieurs comptes : indiquez lequel avec --account ID.",

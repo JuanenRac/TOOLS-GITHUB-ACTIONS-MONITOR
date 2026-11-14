@@ -707,6 +707,7 @@
  "cli.bad_shape": "监控器返回的数据格式此命令无法识别 (是同一版本吗?)。",
  "cli.bad_url": "地址无效：请使用 http://主机:端口 或 https://主机:端口。",
  "cli.ca_file_bad": "证书颁发机构文件 {file} 不存在。",
+ "cli.close_head": "{n} 种重复的失败尚无防护",
  "cli.credential_done": "完成：{status}。",
  "cli.credential_failed": "未完成：{status}。",
  "cli.credential_needs_account": "此监视器有多个账户：请用 --account ID 指定。",

@@ -105,6 +105,22 @@ NOTES = {
     "/api/webhook": ("POST", "the incoming webhook of GitHub (signed with HMAC)"),
     "/api/welcome": ("GET,POST", "the first-run welcome flag"),
 }
+#: signal id -> what it says (every id that signals.py makes must be here; the ones of the panels of the Sentinel are `sentinel.<panel>`)
+SIGNAL_NOTES = {
+    "now.runs": "running, queued and stuck runs (level act when a run is stuck)",
+    "now.fail24": "failures and successes of the last 24 hours",
+    "alerts.unresolved": "workflows red on the default branch (act when there is one)",
+    "alerts.issues": "open issues of failed builds",
+    "repos.errors": "repositories read without data",
+    "quota": "the allowance of the API: low, used up or fine",
+    "quota.trend": "who spends the allowance (the monitor or other tools)",
+    "quota.accounting": "conditional reads answered 304 and reads spared",
+    "connection": "online or offline since",
+    "health.refresh": "how old the data is (stale means the picture is old)",
+    "health.mode": "the working mode (normal, fast, turbo, low)",
+    "health.central": "the central panel read without allowance and whether it is trusted",
+    "health.doctor": "warnings of the doctor: timezone, risks, failures swallowed on purpose (degraded)",
+}
 #: where a thing is described, for the coverage table: category -> (internal skill, external skill)
 WHERE = {
     "endpoints": ("references/api.md", "references/api.md"),
@@ -114,6 +130,8 @@ WHERE = {
     "roles": ("references/roles.md", "references/roles.md"),
     "tabs": ("references/tabs.md", "references/tabs.md"),
     "classes": ("SKILL.md (Alert classes)", "SKILL.md (Alert classes)"),
+    "signals": ("references/signals.md", "references/signals.md"),
+    "panels": ("references/signals.md", "references/signals.md"),
 }
 
 
@@ -128,6 +146,40 @@ def role_of(method, path):
     from github_actions_monitor.security import auth
     needed = auth.required_role(method, path)
     return needed or "public"
+
+
+def signal_ids():
+    """Every signal id that signals.py can make, from its source, plus one for each panel of the Sentinel."""
+    from github_actions_monitor.sentinels import sentinel_panels
+    text = (MON / "src" / "github_actions_monitor" / "data_pipeline" / "signals.py").read_text(encoding="utf-8")
+    found = set(re.findall(r'_signal\("([a-z0-9_.]+)"', text))
+    return sorted(found | {"sentinel." + key for key in sentinel_panels.ORDER})
+
+
+def panel_ids():
+    from github_actions_monitor.sentinels import sentinel_panels
+    return list(sentinel_panels.ORDER)
+
+
+def signals_md():
+    from github_actions_monitor import i18n
+    i18n.set_language("en")
+    missing = [s for s in signal_ids() if s not in SIGNAL_NOTES and not s.startswith("sentinel.")]
+    if missing:
+        raise SystemExit("signals without a note in tools/make_skill_refs.py: " + ", ".join(missing))
+    lines = ["# Signals and panels", "", "Generated from the code. `GET /api/ai/state` lists the signals the monitor says now, each with a level (`act` somebody has to do something, `watch` keep an eye on it, `info` nothing to do) and rows with",
+             "the repository, a link, how old it is and the next step. `GET /api/sentinel/panels` gives the panels of the Sentinel as data.", "", "| signal | what it says |", "| --- | --- |"]
+    for sid in signal_ids():
+        if sid.startswith("sentinel."):
+            title = i18n.tl("en", f"ui.{sid.split('.')[1]}_title") if sid != "sentinel.collab" else i18n.tl("en", "ui.collab_title")
+            lines.append(f"| `{sid}` | the panel `{sid.split('.')[1]}` of the Sentinel: {title} |")
+        else:
+            lines.append(f"| `{sid}` | {SIGNAL_NOTES[sid]} |")
+    lines += ["", "## Panels of the Sentinel", "", "| panel | title |", "| --- | --- |"]
+    for key in panel_ids():
+        title = i18n.tl("en", "ui.collab_title") if key == "collab" else i18n.tl("en", f"ui.{key}_title")
+        lines.append(f"| `{key}` | {title} |")
+    return "\n".join(lines) + "\n"
 
 
 def api_md():
@@ -220,7 +272,7 @@ def coverage_md():
     from github_actions_monitor.cli import monitor_cli
     from github_actions_monitor.integrations import ai_index
     counts = {"endpoints": len(endpoints()), "commands": len(monitor_cli.COMMANDS), "settings": len(settings_api.FIELDS), "files": len(ai_index.FILES) + 3, "roles": len(auth.ROLES),
-              "tabs": len(set(re.findall(r'data-tab="([a-z]+)"', (MON / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")))), "classes": 6}
+              "tabs": len(set(re.findall(r'data-tab="([a-z]+)"', (MON / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")))), "classes": 6, "signals": len(signal_ids()), "panels": len(panel_ids())}
     lines = ["# Coverage of the two skills", "", "Generated from the code. Each row is a kind of thing that a person or an AI can touch; `internal` is the skill of the AI of the monitor, `external` the skill of the AIs that talk to the monitor.",
              "A test fails when something in the code is not named in these skills, so this table cannot fall behind.", "", "| kind | how many | internal skill | external skill |", "| --- | --- | --- | --- |"]
     for kind, number in counts.items():
@@ -229,8 +281,8 @@ def coverage_md():
     return "\n".join(lines) + "\n"
 
 
-BUILDERS = {"api.md": api_md, "cli.md": cli_md, "settings.md": settings_md, "files.md": files_md, "roles.md": roles_md, "tabs.md": tabs_md}
-FOR = {"internal": ("api.md", "settings.md", "files.md", "roles.md", "tabs.md"), "external": tuple(BUILDERS)}
+BUILDERS = {"signals.md": signals_md, "api.md": api_md, "cli.md": cli_md, "settings.md": settings_md, "files.md": files_md, "roles.md": roles_md, "tabs.md": tabs_md}
+FOR = {"internal": ("api.md", "settings.md", "files.md", "roles.md", "tabs.md", "signals.md"), "external": tuple(BUILDERS)}
 
 
 HEADER = "<!--\n  Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>\n  GPL-3.0-or-later - see LICENSE\n-->\n\n"      # the zip refuses a file without its authorship

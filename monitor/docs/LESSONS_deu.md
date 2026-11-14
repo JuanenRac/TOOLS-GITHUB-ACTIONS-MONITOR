@@ -74,3 +74,7 @@ Lesen ist immer erlaubt. Eine Lehre zu schreiben erfordert drei Dinge: `lessons.
 ## Einstellungen
 
 `lessons.enabled`, `lessons.allow_write`, `lessons.retention_days`, `lessons.max_entries`, `lessons.brief_max_bytes` und `lessons.recurring_from`, im KI-Reiter der Einstellungen. Das Panel **Lehren aus den Fehlern** steht am Ende des Reiters Alarme.
+
+## Abschluss einer Runde
+
+Am Ende eines Arbeitspakets listet `python bin/monitor_cli.py lessons close` die wiederholten Fehlerarten auf, die noch keine eigene Lehre mit Absicherung haben (`needs_guard` in `GET /api/ai/lessons`), und endet mit einem Code ungleich null, solange es eine gibt. Schreiben Sie die Absicherung oder sagen Sie, warum es sie noch nicht geben kann, und starten Sie erneut.

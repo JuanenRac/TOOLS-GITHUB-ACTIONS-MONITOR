@@ -707,6 +707,7 @@
  "cli.bad_shape": "モニターの応答のデータ形式をこのコマンドは理解できません (同じバージョンですか?)。",
  "cli.bad_url": "アドレスが正しくありません。http://ホスト:ポート または https://ホスト:ポート を使ってください。",
  "cli.ca_file_bad": "認証局ファイル {file} が存在しません。",
+ "cli.close_head": "ガードのない繰り返しの失敗の種類: {n}",
  "cli.credential_done": "完了: {status}。",
  "cli.credential_failed": "実行されませんでした: {status}。",
  "cli.credential_needs_account": "このモニターには複数のアカウントがあります。--account ID で指定してください。",
