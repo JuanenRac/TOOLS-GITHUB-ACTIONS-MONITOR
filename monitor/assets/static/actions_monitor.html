@@ -476,7 +476,8 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <div class="row" id="al-filters" role="group" data-i18n-aria="ui.al_filters"><span id="al-chips"></span><label><span data-i18n="ui.al_level"></span> <select id="al-level"><option value="" data-i18n="ui.f_all"></option><option value="error" data-i18n="ui.lv_bad"></option><option value="warning" data-i18n="ui.lv_warn"></option><option value="info" data-i18n="ui.lv_info"></option></select></label><label class="inl"><input type="checkbox" id="al-muted"> <span data-i18n="ui.al_show_muted"></span></label></div>
 <div id="al-list"><span class="mut">–</span></div>
 <h3 style="font-size:13px;margin:14px 0 4px" data-i18n="ui.al_hist_title"></h3><div id="al-hist" class="mut">–</div>
-</div></section></div>
+</div></section>
+<section id="les-box"><h2 data-i18n="ui.les_title"></h2><div class="body"><p class="mut" data-i18n="ui.les_intro"></p><div id="les-list"><span class="mut">–</span></div></div></section></div>
 <div class="tab" id="t-sent" role="tabpanel" aria-labelledby="n-sent">
 <div class="lcol">
 <section><h2><span data-i18n="ui.s_report"></span> <span class="mut" id="s-stamp" style="font-weight:400"></span> <a id="lnk-txt" href="/api/sentinel/parte.txt" target="_blank" rel="noopener" class="ia" data-i18n-title="ui.ic_text" data-i18n-aria="ui.ic_text"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-text"/></svg></a></h2><div class="body"><div id="s-err" role="alert"></div><div class="sems" id="s-sems"></div><div id="s-parte"><span class="mut" data-i18n="ui.loading"></span></div></div></section>
@@ -1245,7 +1246,20 @@ $("t-sent").addEventListener("click",async e=>{
 });
 /* the Alerts tab: the alerts of every sentinel in one list, a filter by origin and level, and local silences with an end (the monitor never writes to GitHub) */
 var ALERTS=null;const ALF={s:QS.get("sentinel")||store.get("am-al-s")||"",l:"",m:store.get("am-al-m")==="1"};
-async function alertsTick(){if(LITE)return;try{const r=await fetch("/api/alerts",{cache:"no-store"});if(r.ok)ALERTS=await r.json()}catch(e){}try{renderAlerts()}catch(e){}}
+async function alertsTick(){if(LITE)return;try{const r=await fetch("/api/alerts",{cache:"no-store"});if(r.ok)ALERTS=await r.json()}catch(e){}try{renderAlerts()}catch(e){}lessonsTick()}
+/* the lessons of the failures of this CI (lessons.py): what keeps failing, the trend, what to do and the guard to add; local data, read only */
+var LESS=null;
+async function lessonsTick(){if(LITE)return;try{const r=await fetch("/api/ai/lessons",{cache:"no-store"});if(r.ok)LESS=await r.json()}catch(e){}try{renderLessons()}catch(e){}}
+function renderLessons(){
+  const box=$("les-list");if(!box)return;const L=LESS;
+  if(!L){box.innerHTML='<span class="mut">–</span>';return}
+  if(!L.enabled){box.innerHTML=`<span class="mut">${esc(T("ui.les_off"))}</span>`;return}
+  const cs=L.categories||[],now=new Set((L.apply_now||[]).map(x=>x.category));
+  if(!cs.length){box.innerHTML=`<span class="mut">${esc(T("ui.les_empty"))}</span>`;return}
+  const lsName=c=>{const k="ui.les_c_"+c;return T(k)===k?c:T(k)},lsTrend=t=>T("ui.les_t_"+t);
+  box.innerHTML=cs.map(c=>{const ls=c.lesson||{};
+    return `<div class="alrow"><span class="chip ${c.recurring?"bad":"warn"}">${esc(lsName(c.category))}</span><span title="${esc(T("ui.les_h_24"))} · ${esc(T("ui.les_h_7"))}">${c.n24} · ${c.n7}</span><span class="tt">${esc(ls.do||"")}${ls.guard?`<br><span class="mut">${esc(T("ui.les_h_guard"))}: ${esc(ls.guard)}</span>`:""}${c.repos&&c.repos.length?`<br><span class="mut">${esc(c.repos.slice(0,4).join(", "))}</span>`:""}</span><span class="chip">${esc(lsTrend(c.trend))}${c.recurring?" · "+esc(T("ui.les_repeats")):""}${now.has(c.category)?" · "+esc(T("ui.les_applies")):""}</span></div>`}).join("")
+}
 async function alertMute(scope,value,on,untilChange){try{const body={scope:scope,value:value};if(untilChange)body.until_change=true;await fetch(on?"/api/alerts/mute":"/api/alerts/unmute",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})}catch(e){}alertsTick()}
 function onChange(a){return ((ALERTS&&ALERTS.mutes)||[]).some(m=>m.scope==="alert"&&m.value===a.id&&m.until_change)}   // the silence of this alert ends when the item changes
 function renderAlerts(){

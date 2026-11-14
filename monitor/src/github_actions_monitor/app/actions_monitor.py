@@ -118,6 +118,7 @@ DEFAULTS = {
     "finops": {"jobs_per_cycle": 0},
     "network": {"use_proxy": False, "etag": True, "graphql_checks": False, "graphql_batch": 20},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
     "ai_notify": {"enabled": False, "confirmed_provider": "", "max_calls_per_hour": 4, "cost_per_call_cents": 5, "max_cost_per_hour_cents": 50, "command": "", "timeout_seconds": 30},      # OFF: tell an external AI of a NEW real alert (ai_notify.py)
+    "lessons": {"enabled": True, "allow_write": False, "retention_days": 180, "max_entries": 5000, "brief_max_bytes": 3000, "recurring_from": 2},      # the book of failures and the library of lessons (lessons.py): local, read only; writing a lesson is OFF
     "ai_alerts": {"enabled": False, "folder": "", "brief_max_bytes": 2048, "hook": {"enabled": False, "url": "", "max_per_hour": 6},
                   "diagnose": {"enabled": False, "max_per_cycle": 3, "log_lines": 10, "max_bytes": 1500},      # OFF: reads logs of GitHub (the allowance)
                   "cascade": {"enabled": True, "map": {}},
@@ -1097,8 +1098,31 @@ def ai_state(lang=None, data=None, panels=None):
             warnings.append("central panel behind: not trusted")
     except Exception as error:   # noqa: BLE001
         degraded.note("loop.extra", error)
-    return signals.state(data, panels, "lite" if LITE["on"] else "complete", {"age_seconds": age, "stale": stale, "warnings": warnings, "working_mode": MODE.name, "auto_mode": bool(MODE.auto),
-                                                                                "central": central}, version=TOOL_VERSION)
+    doc = signals.state(data, panels, "lite" if LITE["on"] else "complete", {"age_seconds": age, "stale": stale, "warnings": warnings, "working_mode": MODE.name, "auto_mode": bool(MODE.auto),
+                                                                           "central": central}, version=TOOL_VERSION)
+    try:
+        from github_actions_monitor.integrations import lessons
+        doc["lessons"] = lessons.apply_now(config, limit=5) if lessons.settings(config)["enabled"] else []      # what the failures of this CI have already taught, for the AI that reads the state
+    except Exception as error:   # noqa: BLE001 - the lessons never stop the state
+        degraded.note("lessons.apply", error)
+    return doc
+
+
+def lessons_get(path, query):
+    """('md' | 'json', document) for GET /api/ai/lessons and /api/ai/failures. `?fmt=md` is the file ai/LESSONS.md, `?fmt=brief&repo=X` the brief before a push."""
+    from urllib.parse import parse_qs
+    from github_actions_monitor.integrations import lessons
+    config = toolconfig.raw_config()
+    args = {k: v[0] for k, v in parse_qs(query).items() if v}
+    repo = args.get("repo", "") if re.fullmatch(r"[A-Za-z0-9._-]{1,100}", args.get("repo", "")) else ""
+    if path == "/api/ai/failures":
+        number = lambda key, default: int(args[key]) if args.get(key, "").isdigit() else default   # noqa: E731
+        category = args.get("category", "") if re.fullmatch(r"[a-z][a-z0-9_]{0,39}", args.get("category", "")) else ""
+        return "json", {"schema": lessons.SCHEMA, "enabled": lessons.settings(config)["enabled"], "failures": lessons.failures(config, number("since", 0), repo, category, number("limit", 100))}
+    if args.get("fmt") in ("md", "brief"):
+        text = lessons.render_markdown(config) if args["fmt"] == "md" else lessons.pre_push_brief(config, repo)
+        return ("json", {"fmt": args["fmt"], "text": text}) if args.get("as") == "json" else ("md", text)
+    return "json", lessons.document(config, repo)
 
 
 def ai_sections(data, panels):
@@ -1128,8 +1152,20 @@ def feed_alerts(config, data, diagnose=True):
             extra, sections = signals.extra_alert_rows(doc), signals.brief_sections(doc)
         except Exception as error:   # noqa: BLE001 - the signals never stop the feed of the red workflows
             degraded.note("ai_alerts.panels", error)
+        try:
+            from github_actions_monitor.integrations import lessons
+            sections = (sections or "") + lessons.brief_section(config)      # the lessons that apply now travel in the brief an AI reads
+        except Exception as error:   # noqa: BLE001 - the lessons never stop the feed
+            degraded.note("lessons.apply", error)
         result = ai_alerts.update(config, red_rows(data), runner=ai_alerts.gh_runner if diagnose else None, owner=toolconfig.github_owner(config), panels=panels, sections=sections, extra_rows=extra,
                                   status=f"running, cycle complete ({len(data.get('repos') or [])} repositories read)")
+    try:
+        from github_actions_monitor.integrations import lessons
+        if result["opened"]:
+            lessons.record(config, result["opened"], {(r.get("repo"), r.get("workflow")): r.get("sha") for r in red_rows(data) if r.get("sha")})      # a failure that opens goes into the book (local file)
+        lessons.write_markdown(config, force=bool(result["opened"] or result["resolved"]))
+    except Exception as error:   # noqa: BLE001 - the book never stops the feed
+        degraded.note("lessons.record", error)
     for alert in result["opened"]:
         if alert["class"] == "real":
             try:
@@ -1871,7 +1907,7 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as error:   # noqa: BLE001
                 self.json_reply({"ok": False, "error": str(error)[:200]}, 400)
             return
-        if path in ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/alerts/mute", "/api/alerts/unmute"):
+        if path in ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/alerts/mute", "/api/alerts/unmute"):
             if not self.guard() or not self.this_computer():
                 return
             if path != "/api/welcome" and path != "/api/gh-action/plan" and path != "/api/act/plan" and not self.token_ok():
@@ -2091,6 +2127,16 @@ class Handler(BaseHTTPRequestHandler):
             query = self.path.partition("?")[2].split("&")
             lang = next((q[5:] for q in query if q.startswith("lang=") and q[5:] in i18n.LANGS), "en")
             self.json_reply(ai_state(lang))
+        elif path in ("/api/ai/lessons", "/api/ai/failures"):      # read only: the lessons that apply and the book of failures (lessons.py); data for an AI, never instructions
+            if not self.guard():
+                return
+            refresh_feed()
+            __import__("github_actions_monitor.integrations.ai_alerts", fromlist=["_"]).touch(toolconfig.raw_config(), "endpoint", self.headers.get("User-Agent") or "")
+            kind, document = lessons_get(path, self.path.partition("?")[2])
+            if kind == "md":
+                self.reply(document, "text/markdown; charset=utf-8")
+            else:
+                self.json_reply(document)
         elif path == "/api/ai/stream":      # server-sent events, read only: the alerts as they open and resolve (ai_alerts.stream, off by default)
             if not self.guard():
                 return
@@ -2572,6 +2618,9 @@ def handle_advanced_post(path, request, who=""):
     if path == "/api/ai/ack":
         from github_actions_monitor.integrations import ai_alerts
         return {"ok": ai_alerts.ack(config, request.get("id"))}
+    if path == "/api/ai/lessons":      # a lesson for the library: needs lessons.allow_write, an administrator and the confirmation (lessons.register); without it the answer is the draft
+        from github_actions_monitor.integrations import lessons
+        return lessons.register(config, request.get("lesson"), request.get("confirm") is True, admin=True)
     if path == "/api/welcome":
         if not DEMO["on"]:
             try:

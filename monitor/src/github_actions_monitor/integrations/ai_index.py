@@ -23,6 +23,7 @@ FILES = (
     ("ai_hook_state.json", "the cooldown of the gate script bin/ai_hook.py", "json", "bin/ai_hook.py", "when the hook blocks"),
     ("ai_notify.jsonl", "the optional active notice to an AI tool (off by default)", "jsonl", "the monitor", "only with that option on"),
     ("ai_notify_state.json", "the state of that notice", "json", "the monitor", "only with that option on"),
+    ("LESSONS.md", "what the failures of this CI have taught, short: the category, what to do and the guard to add (`lessons.*`)", "markdown", "the monitor", "when a failure opens or resolves"),
     ("ci_red.json", "the red workflows of every repository and those waiting for a signature (UTC)", "json", "the monitor", "every sentinel cycle"),
 )
 #: (method, path, what): the read-only endpoints of the running monitor an AI may use
@@ -33,6 +34,8 @@ ENDPOINTS = (
     ("GET", "/api/ai/alerts", "the feed since a moment (`?since=SECONDS`)"),
     ("GET", "/api/ai/state", "every signal of the monitor, versioned"),
     ("GET", "/api/ai/stream", "server-sent events of the alerts (off by default)"),
+    ("GET", "/api/ai/lessons", "the lessons that apply now, the repeated failures with their trend and the library (`?fmt=md`, `?fmt=brief&repo=NAME` for the brief before a push)"),
+    ("GET", "/api/ai/failures", "the book of failures, newest first (`?since=SECONDS&repo=NAME&category=NAME&limit=N`)"),
     ("POST", "/api/ai/ack", "acknowledge an alert: only the local state, never GitHub"),
 )
 TOOLS = (

@@ -20,6 +20,7 @@ import urllib.request
 from pathlib import Path
 
 from github_actions_monitor.integrations import ai_alerts  # noqa: E402
+from github_actions_monitor.integrations import lessons  # noqa: E402
 from github_actions_monitor.app import toolconfig  # noqa: E402
 from github_actions_monitor.tool_version import TOOL_VERSION  # noqa: E402
 from github_actions_monitor.security import netguard
@@ -37,6 +38,10 @@ TOOLS = [
     {"name": "get_quota", "description": "GitHub allowance and Actions minutes, from the running monitor.", "inputSchema": {"type": "object", "properties": {}}},
     {"name": "alerts_open", "description": "Open CI alerts of the monitor, real ones first: age of the feed, failing step, last log lines and the red repository they fall together under.", "inputSchema": {"type": "object", "properties": {"only_real": {"type": "boolean"}}}},
     {"name": "alert_diagnose", "description": "The failing step and the last relevant lines of the log of one alert (by id); reads the log from GitHub only when the feed has no diagnosis yet.", "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"]}},
+    {"name": "lessons_apply", "description": "The lessons of this CI that apply now (open alerts and repeated failures), or to the text of a log: category, what failed, what to do and the guard. Read only.", "inputSchema": {"type": "object", "properties": {"repo": {"type": "string"}, "text": {"type": "string"}}}},
+    {"name": "lessons_recurring", "description": "The kinds of failure that keep happening: failures in 24 hours and 7 days, the trend and the guard to add. Read only.", "inputSchema": {"type": "object", "properties": {}}},
+    {"name": "lessons_brief", "description": "The brief to read before a push (the lessons that apply, the guards to run, what is red in the repository). Read only.", "inputSchema": {"type": "object", "properties": {"repo": {"type": "string"}}}},
+    {"name": "lesson_propose", "description": "Checks a lesson (category, what, why, do, guard) and returns the draft; writes nothing. With confirm=true and --allow-lessons it is written to the library when lessons.allow_write is on.", "inputSchema": {"type": "object", "properties": {"category": {"type": "string"}, "what": {"type": "string"}, "why": {"type": "string"}, "do": {"type": "string"}, "guard": {"type": "string"}, "confirm": {"type": "boolean"}}, "required": ["category", "what", "do"]}},
     {"name": "alert_ack", "description": "Acknowledge an alert (local state only; needs --allow-ack).", "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"]}},
     {"name": "ack_alert", "description": "Acknowledge an alert (local state only; needs --allow-ack).", "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"]}},
 ]
@@ -74,7 +79,7 @@ def run_gh(args, timeout=60):
     return done.returncode, done.stdout, done.stderr
 
 
-def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_get):
+def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_get, allow_lessons=False):
     """The text a tool answers (already cleaned). Raises ValueError for a bad request."""
     if name == "get_alerts":
         states = None if arguments.get("include_resolved") else ("open", "acknowledged")
@@ -124,6 +129,20 @@ def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_g
         return ai_alerts.redact("Failed steps:\n" + ("\n".join(steps) or "(none listed)") + "\n\nEnd of the failed log:\n" + fragment, 4000)
     if name == "get_quota":
         return ai_alerts.redact_json(getter("/api/quota"), 3000)
+    if name in ("lessons_apply", "lessons_recurring", "lessons_brief", "lesson_propose"):
+        provider = lessons.provider(config)
+        if name == "lessons_apply":
+            repo = str(arguments.get("repo", ""))
+            return ai_alerts.redact_json(provider.applicable(repo if NAME_RE.match(repo) else "", str(arguments.get("text", ""))[:4000]), 8000, indent=1)
+        if name == "lessons_recurring":
+            return ai_alerts.redact_json(provider.recurrences(), 8000, indent=1)
+        if name == "lessons_brief":
+            repo = str(arguments.get("repo", ""))
+            return ai_alerts.redact(provider.pre_push_brief(repo if NAME_RE.match(repo) else ""), 4000)
+        request = {k: arguments.get(k) for k in ("category", "what", "why", "do", "guard")}
+        if arguments.get("confirm") is True and not allow_lessons:
+            raise ValueError("writing a lesson is off: start the server with --allow-lessons and turn on lessons.allow_write")
+        return ai_alerts.redact_json(provider.register(request, arguments.get("confirm") is True, admin=allow_lessons) if arguments.get("confirm") is True else provider.propose(request), 3000, indent=1)
     if name in ("ack_alert", "alert_ack", "act"):
         if not allow_ack:
             raise ValueError("acknowledging is off: start the server with --allow-ack")
@@ -219,7 +238,7 @@ def main(argv=None, stdin=None, stdout=None):
         elif not line.strip():
             continue
         else:
-            answer = serve_line(line, config, "--allow-ack" in argv)
+            answer = serve_line(line, config, "--allow-ack" in argv, allow_lessons="--allow-lessons" in argv)
         if answer is not None:
             stdout.write(json.dumps(answer) + "\n")
             stdout.flush()

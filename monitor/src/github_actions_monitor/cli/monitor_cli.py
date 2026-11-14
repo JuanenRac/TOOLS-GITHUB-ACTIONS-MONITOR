@@ -29,6 +29,7 @@ import argparse
 import ipaddress
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -42,7 +43,8 @@ from github_actions_monitor.tool_version import TOOL_VERSION
 from github_actions_monitor.security import netguard
 
 EXIT_OK, EXIT_USAGE, EXIT_DOWN, EXIT_AUTH, EXIT_DEGRADED, EXIT_ALERTS = 0, 1, 2, 3, 4, 5
-COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "ai-hook", "credential")
+COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "ai-hook", "credential", "lessons")
+LESSONS_ACTIONS = ("list", "brief", "failures")
 AI_HOOK_ACTIONS = ("install", "status", "uninstall")
 CREDENTIAL_ACTIONS = ("replace", "reload")
 LITE_COMMANDS = ("status", "doctor", "health", "check")
@@ -231,6 +233,27 @@ def cmd_alerts(ctx):
     return answer, lines, code
 
 
+def cmd_lessons(ctx):
+    """lessons [list | brief | failures] [--repo NAME]: what the failures of this CI have taught (read only; the brief is the one to read before a push)."""
+    action = ctx["action"] or "list"
+    if action not in LESSONS_ACTIONS:
+        raise CliError(EXIT_USAGE, i18n.t("cli.lessons_action"))
+    if action == "brief":
+        answer = fetch(ctx["base"], "/api/ai/lessons", {"fmt": "brief", "as": "json", "repo": ctx.get("repo")}, ctx["timeout"], ctx["token"])
+        return answer, str(answer.get("text") or "").splitlines(), EXIT_OK
+    if action == "failures":
+        answer = fetch(ctx["base"], "/api/ai/failures", {"repo": ctx.get("repo"), "limit": 20}, ctx["timeout"], ctx["token"])
+        rows = answer.get("failures") or []
+        return answer, [i18n.t("cli.failures_head", n=len(rows))] + [f"  {r.get('category', '?'):<16} {r.get('repo', '-')}  {r.get('workflow', '')}  {r.get('root_cause', '')[:80]}" for r in rows], EXIT_OK
+    answer = fetch(ctx["base"], "/api/ai/lessons", {"repo": ctx.get("repo")}, ctx["timeout"], ctx["token"])
+    rows = answer.get("categories") or []
+    lines = [i18n.t("cli.lessons_head", n=len(rows))]
+    for row in rows:
+        lesson = row.get("lesson") or {}
+        lines.append(f"  {row.get('category', '?'):<16} {row.get('n24', 0)}/24h {row.get('n7', 0)}/7d {row.get('trend', '')}  {lesson.get('do', '')}")
+    return answer, lines, EXIT_OK
+
+
 def cmd_live(ctx):
     events = fetch(ctx["base"], "/api/live-events", {"account": ctx["account"]}, ctx["timeout"], ctx["token"])
     status = fetch(ctx["base"], "/api/live-status", {"account": ctx["account"]}, ctx["timeout"], ctx["token"])
@@ -400,13 +423,13 @@ def cmd_credential(ctx):
     return {"action": action, "ok": ok, **shown}, [line], EXIT_OK if ok else EXIT_DEGRADED
 
 
-HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "live": cmd_live, "doctor": cmd_doctor, "health": cmd_health, "check": cmd_health}
+HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "live": cmd_live, "doctor": cmd_doctor, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons}
 
 
 def build_parser():
     ap = argparse.ArgumentParser(prog="monitor_cli.py", description=i18n.t("cli.description"), epilog=i18n.t("cli.epilog"), formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("command", choices=COMMANDS, help=i18n.t("cli.help_command"))
-    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS, default=None, help=i18n.t("cli.help_ai_action"))
+    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS, default=None, help=i18n.t("cli.help_ai_action"))
     ap.add_argument("--json", action="store_true", help=i18n.t("cli.help_json"))
     for name in ("assistant", "cursor", "generic"):
         ap.add_argument("--" + name, dest="target", action="store_const", const=name, default="", help=i18n.t("cli.help_" + name))
@@ -428,6 +451,7 @@ def build_parser():
     ap.add_argument("--level", choices=LEVELS, default="", help=i18n.t("cli.help_level"))
     ap.add_argument("--muted", choices=("show", "hide", "only"), default="hide", help=i18n.t("cli.help_muted"))
     ap.add_argument("--fail-on", choices=LEVELS, default="", dest="fail_on", help=i18n.t("cli.help_fail_on"))
+    ap.add_argument("--repo", metavar="NAME", default="", help=i18n.t("cli.help_repo"))
     ap.add_argument("--lang", metavar="CODE", help=i18n.t("cli.help_lang"))
     ap.add_argument("--version", action="store_true", help=i18n.t("cli.help_version"))
     return ap
@@ -453,7 +477,7 @@ def main(argv=None):
     try:
         ctx = {"base": base_url(args.url, args.lite), "account": args.account, "timeout": max(1.0, min(60.0, args.timeout)), "token": resolve_token(flag=args.token, token_file=args.token_file),
                "sentinel": args.sentinel, "level": args.level, "muted": args.muted, "fail_on": args.fail_on, "lite": args.lite,
-               "action": args.action or "", "target": args.target, "scope": args.scope, "project_dir": args.project_dir, "dry_run": args.dry_run, "deep": args.deep, "new_token_file": args.new_token_file}
+               "action": args.action or "", "target": args.target, "scope": args.scope, "project_dir": args.project_dir, "dry_run": args.dry_run, "deep": args.deep, "new_token_file": args.new_token_file, "repo": args.repo if re.fullmatch(r"[A-Za-z0-9._-]{0,100}", args.repo) else ""}
         CLIENT.update({"session": "", "ca": (args.ca_file or os.environ.get("MONITOR_CA_FILE") or "").strip()})
         if CLIENT["ca"] and not os.path.isfile(CLIENT["ca"]):
             raise CliError(EXIT_USAGE, i18n.t("cli.ca_file_bad", file=CLIENT["ca"]))
