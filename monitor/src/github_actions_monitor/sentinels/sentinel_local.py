@@ -459,10 +459,10 @@ def minutes(runs_by_repo, now):
                 continue
             age = (now - started).total_seconds()
             if age <= 86400:
-                d1 += run.get("seconds", 0)
+                d1 += run.get("seconds") or 0
                 n1 += 1
             if age <= 7 * 86400:
-                d7 += run.get("seconds", 0)
+                d7 += run.get("seconds") or 0
         if d7:
             rows[repo] = {"min24": round(d1 / 60), "min7d": round(d7 / 60), "runs24": n1}
     return rows

@@ -791,7 +791,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
             active.append(run)
     for run in active:
         run["jobs"] = run_jobs(run["repo"], run["id"]) if (run["status"] == "in_progress" and not loading) else []
-        run["stuck"] = run["seconds"] > config["stuck_minutes"] * 60
+        run["stuck"] = (run.get("seconds") or 0) > config["stuck_minutes"] * 60
     if not loading and time.time() - ISSUE_CACHE["at"] > config["issues_refresh_seconds"] and not ISSUE_CACHE["busy"]:
         ISSUE_CACHE["busy"] = True  # the issues load in the background so the first page does not wait for them
 
