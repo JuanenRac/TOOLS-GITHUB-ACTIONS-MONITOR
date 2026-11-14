@@ -1278,6 +1278,9 @@ def run_cycle(config, generation):
         WATCH.log_failed(error)
     brief_status(toolconfig.raw_config() if not LITE["on"] else config, "running, a cycle has started, the alerts below are from the last complete cycle")
     data = collect(config, publish)
+    if WATCH.current(generation):      # the finished picture goes to the page NOW: the box "loading repositories" must not wait for the upkeep that follows (it may be slow)
+        with LOCK:
+            STATE["data"], STATE["error"], STATE["hint"] = data, None, None
     WATCH.phase("maintain")
     transition = LINK.end_cycle()
     if transition:
@@ -2089,8 +2092,10 @@ class Handler(BaseHTTPRequestHandler):
         elif path.startswith("/api/data"):
             if not self.guard():
                 return
-            with LOCK:
-                self.reply(json.dumps({"data": STATE["data"], "error": STATE["error"], "hint": STATE["hint"], "loop": WATCH.snapshot(limit_seconds=watchdog_limit(LIVE_CONFIG or DEFAULTS))}), "application/json; charset=utf-8")
+            with LOCK:      # only the references are taken under the lock: writing to a slow or dead connection with the lock held froze every other page and the cycle itself
+                picture = {"data": STATE["data"], "error": STATE["error"], "hint": STATE["hint"]}
+            picture = {**picture, "loop": WATCH.snapshot(limit_seconds=watchdog_limit(LIVE_CONFIG or DEFAULTS))}
+            self.reply(json.dumps(picture), "application/json; charset=utf-8")
         elif path in ("/", "/index.html"):
             if not self.guard():      # the page checks the Host like the API does (a rebinding page gets a 403, not the monitor)
                 return

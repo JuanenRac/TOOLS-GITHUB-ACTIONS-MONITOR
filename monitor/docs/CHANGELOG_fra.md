@@ -7,6 +7,13 @@
 
 Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son propre semver. La source est le CHANGELOG.md en anglais ; ce fichier contient les mêmes versions et sections.
 
+## [Unreleased]
+
+### Corrigé
+
+- Le cadre « chargement des dépôts » restait sur la page après la lecture du dernier dépôt : l’image terminée arrive désormais sur la page dès la fin de la lecture, sans attendre l’entretien qui suit (le résumé pour les outils d’IA, le centre d’alertes), et une longue liste de panneaux du Sentinel ne peut plus faire boucler ce résumé sans fin (cette boucle maintenait la dernière image partielle, 131 / 131, à l’écran).
+- Recharger la page (F5) ne prend plus des minutes pour obtenir les données : la boucle sans fin du résumé consommait tout le processeur du moniteur et la page abandonnait avec une interruption ; de plus, la réponse du point d’accès aux données était écrite dans la connexion alors que le verrou global était tenu, si bien qu’une connexion bloquée (un onglet fermé) gelait toutes les autres pages et le cycle d’actualisation. Le verrou n’est plus tenu que le temps de prendre l’image. Un test de navigateur vérifie que le cadre s’affiche pendant le chargement et disparaît avec le dernier dépôt, et des tests du serveur vérifient que le résumé se termine, que l’image terminée est publiée avant l’entretien et qu’une connexion bloquée n’empêche pas un rechargement.
+
 ## [1.8.0]
 
 ### Modifié

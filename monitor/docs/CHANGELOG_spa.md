@@ -7,6 +7,13 @@
 
 Versión de la propia herramienta (monitor + centinela + herramientas por lotes), con su propio semver. La fuente es el CHANGELOG.md en inglés; este fichero lleva las mismas versiones y secciones.
 
+## [Unreleased]
+
+### Corregido
+
+- El cuadro «cargando repositorios» se quedaba en la página tras leer el último repositorio: la imagen terminada llega ahora a la página en cuanto acaba la lectura, sin esperar al mantenimiento posterior (el resumen para las herramientas de IA, el centro de alertas), y una lista larga de paneles del Centinela ya no puede hacer que ese resumen se repita sin fin (ese bucle mantenía en pantalla la última imagen parcial, 131 / 131).
+- Recargar la página (F5) ya no tarda minutos en traer los datos: el bucle sin fin del resumen consumía todo el procesador del monitor y la página se rendía con un aborto; además, la respuesta del endpoint de datos se escribía en la conexión con el cerrojo global tomado, de modo que una conexión detenida (una pestaña cerrada) bloqueaba todas las demás páginas y el ciclo de actualización. Ahora el cerrojo solo se mantiene para tomar la imagen. Una prueba de navegador comprueba que el cuadro aparece al cargar y desaparece con el último repositorio, y pruebas del servidor comprueban que el resumen termina, que la imagen terminada se publica antes del mantenimiento y que una conexión detenida no bloquea una recarga.
+
 ## [1.8.0]
 
 ### Cambiado
