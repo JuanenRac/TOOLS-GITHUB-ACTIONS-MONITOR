@@ -45,6 +45,16 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - O teste de uma conta que morre de imediato já não depende da velocidade do computador: a espera antes de voltar a arrancar uma conta é verificada com um relógio que o próprio teste dá, e um segundo teste verifica o calendário das esperas sem ler a hora real (o antigo falhava sob carga na porta de uma versão).
 
+## [1.8.2]
+
+### Adicionado
+
+- Imagem oficial do Docker, Compose e systemd para usar o monitor como serviço, uma verificação de saúde profunda, e um acesso revogado pelo GitHub deixa cega só a sua conta.
+
+- Pasta do produto arrumada: configuração, dados, registos e ficheiros para IA nas suas pastas, com uma mudança automática e reversível, e um mapa para as IA (`ai/INDEX.json`).
+
+- Reforço: o modo de rede não arranca sem um primeiro administrador, cada conta tem o seu próprio feed para as IA, os ficheiros partilhados mudam passo a passo, e a quota do GitHub reparte-se por tipo de leitura.
+
 ## [1.8.1]
 
 ### Corrigido

@@ -45,6 +45,16 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - Il test di un account che muore subito non dipende più dalla velocità del computer: l'attesa prima di riavviare un account viene verificata con un orologio che dà il test stesso, e un secondo test verifica il calendario delle attese senza leggere l'ora reale (il vecchio falliva sotto carico nella porta di una versione).
 
+## [1.8.2]
+
+### Aggiunto
+
+- Immagine Docker ufficiale, Compose e systemd per usare il monitor come servizio, un controllo di salute approfondito, e un accesso revocato da GitHub rende cieco solo il suo account.
+
+- Cartella del prodotto in ordine: configurazione, dati, registri e file per le IA nelle loro cartelle, con uno spostamento automatico e reversibile, e una mappa per le IA (`ai/INDEX.json`).
+
+- Rafforzamento: la modalità rete non parte senza un primo amministratore, ogni account ha il suo feed per le IA, i file condivisi cambiano passo passo, e la quota di GitHub è ripartita per tipo di lettura.
+
 ## [1.8.1]
 
 ### Corretto

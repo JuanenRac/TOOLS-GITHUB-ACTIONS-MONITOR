@@ -45,6 +45,16 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - Le test d'un compte qui meurt aussitôt ne dépend plus de la vitesse de l'ordinateur : l'attente avant de relancer un compte est vérifiée avec une horloge que donne le test lui-même, et un second test vérifie le calendrier des attentes sans lire l'heure réelle (l'ancien échouait sous charge dans la porte d'une version).
 
+## [1.8.2]
+
+### Ajouté
+
+- Image Docker officielle, Compose et systemd pour faire tourner le moniteur comme un service, un contrôle de santé approfondi, et un accès révoqué par GitHub rend aveugle seulement son compte.
+
+- Dossier du produit rangé : configuration, données, journaux et fichiers pour les IA dans leurs dossiers, avec un déplacement automatique et réversible, et une carte pour les IA (`ai/INDEX.json`).
+
+- Durcissement : le mode réseau ne démarre pas sans premier administrateur, chaque compte a son propre flux pour les IA, les fichiers partagés changent pas à pas, et le quota de GitHub est réparti par type de lecture.
+
 ## [1.8.1]
 
 ### Corrigé
