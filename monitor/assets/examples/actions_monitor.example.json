@@ -491,6 +491,14 @@
   "finops": {
     "jobs_per_cycle": 0
   },
+  "lessons": {
+    "enabled": true,
+    "allow_write": false,
+    "retention_days": 180,
+    "max_entries": 5000,
+    "brief_max_bytes": 3000,
+    "recurring_from": 2
+  },
   "ai_alerts": {
     "enabled": false,
     "folder": "",

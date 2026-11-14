@@ -42,7 +42,7 @@ class Folders(unittest.TestCase):
         self.config = {"ai_alerts": {"enabled": True}}
 
 
-class TheClassifier(Folders):
+class TheClassifier(Folders, unittest.TestCase):
     CASES = (("API rate limit exceeded", "quota"), ("connection reset by peer", "flaky_network"), ("Invalid workflow file", "workflow_config"), ("Resource not accessible by integration", "permissions"),
              ("Bad credentials", "secret_config"), ("generated file is out of date", "derived_files"), ("ModuleNotFoundError: No module named x", "dependencies"), ("mypy found 3 errors", "types"),
              ("ruff check failed", "linter"), ("AssertionError: 2 != 3", "test"), ("something nobody has seen", "other"))
@@ -74,7 +74,7 @@ class TheClassifier(Folders):
         self.assertEqual(lessons.classify("x" * 100000 + " AssertionError")[0], "other")
 
 
-class TheBook(Folders):
+class TheBook(Folders, unittest.TestCase):
     def test_a_failure_becomes_one_line_of_the_closed_schema(self):
         written = lessons.record(self.config, [alert()], {("demo", "ci.yml"): "abcdef0123456789"}, now=NOW)
         self.assertEqual(len(written), 1)
@@ -134,7 +134,7 @@ class TheBook(Folders):
         self.assertEqual(len(lessons.failures(self.config, limit=1)), 1)
 
 
-class TheAnalysis(Folders):
+class TheAnalysis(Folders, unittest.TestCase):
     def fill(self):
         for index in range(3):
             lessons.record(self.config, [alert(workflow=f"t{index}", run=10 + index)], now=NOW - index * 3600)
@@ -167,7 +167,7 @@ class TheAnalysis(Folders):
         self.assertEqual(lessons.settings({"lessons": {"recurring_from": 1}})["recurring_from"], 2, "a value out of range gives the default")
 
 
-class TheLibrary(Folders):
+class TheLibrary(Folders, unittest.TestCase):
     def test_the_built_in_lessons_come_from_the_catalogue_in_each_language(self):
         for lang in i18n.LANGS:
             with i18n.use_language(lang):
@@ -215,7 +215,7 @@ class TheLibrary(Folders):
         self.assertNotIn(token, (paths.folder("config") / lessons.LIBRARY).read_text(encoding="utf-8"))
 
 
-class WhatAnAIReads(Folders):
+class WhatAnAIReads(Folders, unittest.TestCase):
     def setUp(self):
         super().setUp()
         self.config = {"ai_alerts": {"enabled": True, "folder": str(Path(self.tmp.name) / "ai")}}
@@ -291,7 +291,7 @@ class WhatAnAIReads(Folders):
         self.assertIn("/api/ai/lessons", {row[1] for row in ai_index.ENDPOINTS})
 
 
-class Providers(Folders):
+class Providers(Folders, unittest.TestCase):
     def test_the_file_provider_answers_for_a_text_and_for_the_book(self):
         provider = lessons.provider(self.config)
         self.assertEqual(provider.name, "file")
@@ -323,7 +323,7 @@ class Providers(Folders):
         self.assertNotIn("Known lesson", system)
 
 
-class TheTools(Folders):
+class TheTools(Folders, unittest.TestCase):
     def test_the_mcp_tools_read_and_only_write_with_the_flag_and_the_switch(self):
         lessons.record(self.config, [alert(workflow="a", run=1), alert(workflow="b", run=2)], now=time.time())
         names = {t["name"] for t in mcp_server.TOOLS}
