@@ -1,7 +1,7 @@
 # Contribuire a GitHub Actions Monitor
 
 ## Stack tecnologico
-- **Linguaggio**: Python 3.11 o successivo; il nucleo non richiede pacchetti (la vista da terminale, `tui.py`, usa Rich, opzionale; i test saltano ciò che ne ha bisogno se manca).
+- **Linguaggio**: Python 3.11 o successivo; il nucleo non richiede pacchetti (la vista da terminale, `bin/tui.py`, usa Rich, opzionale; i test saltano ciò che ne ha bisogno se manca).
 - **Interfaccia**: una pagina web locale (`monitor/assets/static/actions_monitor.html`) servita su `127.0.0.1`, più strumenti da riga di comando.
 - **Fonte dei dati**: il client ufficiale da riga di comando di GitHub, `gh` (chiamate di sola lettura per impostazione predefinita).
 

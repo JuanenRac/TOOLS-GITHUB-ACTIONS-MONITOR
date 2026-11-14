@@ -581,13 +581,13 @@ class LiteKnowsNothing(unittest.TestCase):
         self.assertEqual(out, "[]")
 
     def test_the_options_of_the_accounts_are_not_in_the_help_of_lite(self):
-        done = subprocess.run([sys.executable, str(HERE / "actions_monitor.py"), "--lite", "--help"], capture_output=True, text=True, timeout=60, cwd=str(HERE))
+        done = subprocess.run([sys.executable, str(HERE / "bin" / "actions_monitor.py"), "--lite", "--help"], capture_output=True, text=True, timeout=60, cwd=str(HERE))
         self.assertEqual(done.returncode, 0, done.stderr)
         for option in ("--account", "--accounts", "--migrate-accounts", "--apply"):
             self.assertNotIn(option, done.stdout, option)
 
     def test_the_complete_edition_has_the_options_of_the_accounts_in_its_help(self):
-        done = subprocess.run([sys.executable, str(HERE / "actions_monitor.py"), "--help"], capture_output=True, text=True, timeout=60, cwd=str(HERE),
+        done = subprocess.run([sys.executable, str(HERE / "bin" / "actions_monitor.py"), "--help"], capture_output=True, text=True, timeout=60, cwd=str(HERE),
                               env=dict(os.environ, MONITOR_ACCOUNTS_DIR=str(Path(tempfile.gettempdir()) / "no_such_accounts_dir")))
         self.assertEqual(done.returncode, 0, done.stderr)
         for option in ("--account", "--accounts", "--migrate-accounts"):
@@ -603,7 +603,7 @@ class LiteKnowsNothing(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp, mock.patch.dict(os.environ, {"MONITOR_ACCOUNTS_DIR": str(Path(tmp) / "accounts")}):
             self.assertEqual(accounts.layout(), "single")
             from github_actions_monitor.app import actions_monitor as am
-            self.assertEqual((am.CHILD["account"], am.state_dir()), ("", am.HERE))
+            self.assertEqual((am.CHILD["account"], am.state_dir()), ("", am.HERE / "data"))
 
 
 class ChildRedirect(unittest.TestCase):
@@ -643,7 +643,7 @@ class ChildRedirect(unittest.TestCase):
 
     def test_a_child_for_an_unknown_account_refuses_to_start(self):
         with tempfile.TemporaryDirectory() as tmp:
-            done = subprocess.run([sys.executable, "-I", str(HERE / "account_child.py"), "ghost", "--port", "1"], capture_output=True, text=True, timeout=60,
+            done = subprocess.run([sys.executable, "-I", str(HERE / "bin" / "account_child.py"), "ghost", "--port", "1"], capture_output=True, text=True, timeout=60,
                                   env=dict(os.environ, MONITOR_ACCOUNTS_DIR=str(Path(tmp) / "accounts")))
             self.assertEqual(done.returncode, 2)
             self.assertIn("unknown account", done.stdout)

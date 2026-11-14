@@ -3,7 +3,7 @@
   "_license": "GPL-3.0-or-later - see LICENSE",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ci_status_public.json (schema 1)",
-  "description": "The public export of read_report.py --export-status: the red workflows only, never the signing side.",
+  "description": "The public export of bin/read_report.py --export-status: the red workflows only, never the signing side.",
   "type": "object",
   "required": [
     "schema",

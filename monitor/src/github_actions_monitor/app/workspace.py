@@ -18,6 +18,7 @@ import os
 from pathlib import Path
 
 from github_actions_monitor import i18n
+from github_actions_monitor.util import paths
 
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
 MARKERS = (".monitor-root",)
@@ -33,7 +34,7 @@ def _env(*names):
 
 def _config(key):
     try:
-        value = json.loads((HERE / "actions_monitor.json").read_text(encoding="utf-8")).get(key)
+        value = json.loads(paths.config_file().read_text(encoding="utf-8")).get(key)
     except (OSError, ValueError):
         return None
     return Path(value) if value else None

@@ -1,7 +1,7 @@
 # Zu GitHub Actions Monitor beitragen
 
 ## Technologie
-- **Sprache**: Python 3.11 oder neuer, der Kern braucht keine Pakete (die Terminalansicht `tui.py` nutzt Rich, das optional ist; die Tests überspringen, was es braucht, wenn es fehlt).
+- **Sprache**: Python 3.11 oder neuer, der Kern braucht keine Pakete (die Terminalansicht `bin/tui.py` nutzt Rich, das optional ist; die Tests überspringen, was es braucht, wenn es fehlt).
 - **Oberfläche**: eine lokale Webseite (`monitor/assets/static/actions_monitor.html`) auf `127.0.0.1` sowie Kommandozeilenwerkzeuge.
 - **Datenquelle**: der offizielle GitHub-Kommandozeilenclient `gh` (standardmäßig nur lesende Aufrufe).
 

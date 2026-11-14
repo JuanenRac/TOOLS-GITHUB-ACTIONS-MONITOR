@@ -16,8 +16,15 @@ import time
 from pathlib import Path
 
 from github_actions_monitor.util import paths
-from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
-QUOTAS_FILE = HERE / "quotas.json" if (HERE / "quotas.json").is_file() else paths.EXAMPLES / "quotas.json"   # your own copy (next to the monitor) wins over the one that travels in assets/examples
+
+
+def _default_file():
+    """Your own config/quotas.json when it exists, else the one that travels in assets/examples."""
+    own = paths.place("quotas.json")
+    return own if own.is_file() else paths.EXAMPLES / "quotas.json"
+
+
+QUOTAS_FILE = _default_file()
 PLANS = ("unknown", "free", "pro", "team", "enterprise")
 SYSTEMS = ("linux", "windows", "macos")
 DEFAULT_SETTINGS = {"plan": "unknown", "billing_api": False, "warn_percent": 75, "alert_percent": 90, "default_runner": "linux"}
@@ -27,7 +34,7 @@ FALLBACK = {"plans": {}, "rates_usd_per_minute": {"linux": 0.006, "windows": 0.0
 
 def load(path=None):
     try:
-        data = json.loads(Path(path or QUOTAS_FILE).read_text(encoding="utf-8"))
+        data = json.loads(Path(path or (_default_file() if QUOTAS_FILE.parent == paths.EXAMPLES else QUOTAS_FILE)).read_text(encoding="utf-8"))
     except (OSError, ValueError):
         data = {}
     out = {k: (dict(v) if isinstance(v, dict) else v) for k, v in FALLBACK.items()}

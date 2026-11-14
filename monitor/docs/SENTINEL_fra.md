@@ -15,7 +15,7 @@ La **sentinelle** est la seconde moitié de l'édition complète. Le *moniteur* 
 
 Elle démarre avec le moniteur complet et tourne dans le même processus, dans son propre fil, avec son propre budget d'appels à GitHub (`sentinel.budget_per_hour`, 600 par défaut, et `sentinel.max_calls_per_tick`). Quand le quota de GitHub passe sous `sentinel.min_rate_remaining`, elle cesse de demander et la page indique la pause pour quota. Rien de ce qu'elle fait n'écrit sur GitHub.
 
-## Fichiers qu'elle écrit (à côté du moniteur, jamais publiés)
+## Fichiers qu'elle écrit (dans les dossiers du moniteur, jamais publiés)
 
 | Fichier | Contenu |
 |---|---|

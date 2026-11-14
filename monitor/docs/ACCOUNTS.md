@@ -11,7 +11,7 @@ The complete edition can watch several GitHub accounts (a person or an organisat
 
 ## When there is nothing to do
 
-Without an `accounts/` folder the monitor works exactly as before: one account, its files next to the code. You only read on if you want more than one.
+Without an `accounts/` folder the monitor works exactly as before: one account, its files in the folders `config/`, `data/` and `logs/` (see LAYOUT). You only read on if you want more than one.
 
 ## The folder of accounts
 
@@ -29,16 +29,16 @@ The id of an account is lower case letters, digits, `_` and `-` (up to 40 charac
 ## Moving from one account to several
 
 ```
-python actions_monitor.py --migrate-accounts          # shows what would be copied, writes nothing
-python actions_monitor.py --migrate-accounts --apply  # copies it into accounts/default/
-python actions_monitor.py --accounts                  # lists the accounts
+python bin/actions_monitor.py --migrate-accounts          # shows what would be copied, writes nothing
+python bin/actions_monitor.py --migrate-accounts --apply  # copies it into accounts/default/
+python bin/actions_monitor.py --accounts                  # lists the accounts
 ```
 
 The originals are never moved or deleted: you delete them yourself once you have checked. A second run refuses, so two states never mix. To add an account, create `accounts/<id>/actions_monitor.json` with its `github_owner` (copy the template `assets/examples/actions_monitor.example.json`).
 
 ## Running
 
-`python actions_monitor.py` with an `accounts/` folder starts the supervisor, one small process on the usual port (8765) that starts one monitor per account and gives the page and the tools a single address. It reads nothing from GitHub and writes nothing. If an account dies it starts it again with a growing wait (2, 5, 15, 30, 60 and then 120 seconds) and the summary says it is down meanwhile. `python actions_monitor.py --account personal` runs only that account, as an ordinary monitor.
+`python bin/actions_monitor.py` with an `accounts/` folder starts the supervisor, one small process on the usual port (8765) that starts one monitor per account and gives the page and the tools a single address. It reads nothing from GitHub and writes nothing. If an account dies it starts it again with a growing wait (2, 5, 15, 30, 60 and then 120 seconds) and the summary says it is down meanwhile. `python bin/actions_monitor.py --account personal` runs only that account, as an ordinary monitor.
 
 ## The page
 

@@ -140,13 +140,13 @@ class Runtime(unittest.TestCase):
 
     def test_lite_ignores_sqlite_and_creates_no_database(self):
         self.assertIsNone(runtime.bind({"storage": {"backend": "sqlite"}}, None, Path(self.tmp.name), lite=True))
-        self.assertEqual(list(Path(self.tmp.name).glob("*.sqlite3*")), [])
+        self.assertEqual(list(Path(self.tmp.name).rglob("*.sqlite3*")), [])
 
     def test_sqlite_binds_one_database_for_the_process(self):
         storage = runtime.bind({"storage": {"backend": "sqlite"}}, None, Path(self.tmp.name))
         self.addCleanup(storage.close)
         self.assertEqual(state_io.bound(), (storage, "default"))
-        self.assertEqual(storage.path, Path(self.tmp.name) / "storage.sqlite3")
+        self.assertEqual(storage.path, Path(self.tmp.name) / "data" / "storage.sqlite3")
 
     def test_a_database_that_cannot_be_opened_stops_the_start(self):
         blocked = Path(self.tmp.name) / "blocker"

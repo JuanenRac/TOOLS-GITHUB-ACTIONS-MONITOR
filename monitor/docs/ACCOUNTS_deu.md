@@ -11,7 +11,7 @@ Die komplette Ausgabe kann mehrere GitHub-Konten (eine Person oder eine Organisa
 
 ## Wenn nichts zu tun ist
 
-Ohne einen Ordner `accounts/` arbeitet der Monitor genau wie bisher: ein Konto, seine Dateien neben dem Code. Du liest nur weiter, wenn du mehr als eines willst.
+Ohne einen Ordner `accounts/` arbeitet der Monitor genau wie bisher: ein Konto, seine Dateien in den Ordnern `config/`, `data/` und `logs/` (siehe LAYOUT). Du liest nur weiter, wenn du mehr als eines willst.
 
 ## Der Ordner der Konten
 
@@ -29,16 +29,16 @@ Die ID eines Kontos besteht aus Kleinbuchstaben, Ziffern, `_` und `-` (bis zu 40
 ## Von einem Konto zu mehreren
 
 ```
-python actions_monitor.py --migrate-accounts          # zeigt, was kopiert würde, schreibt nichts
-python actions_monitor.py --migrate-accounts --apply  # kopiert es nach accounts/default/
-python actions_monitor.py --accounts                  # listet die Konten
+python bin/actions_monitor.py --migrate-accounts          # zeigt, was kopiert würde, schreibt nichts
+python bin/actions_monitor.py --migrate-accounts --apply  # kopiert es nach accounts/default/
+python bin/actions_monitor.py --accounts                  # listet die Konten
 ```
 
 Die Originale werden nie verschoben oder gelöscht: Du löschst sie selbst, wenn du alles geprüft hast. Ein zweiter Lauf verweigert sich, damit sich zwei Zustände nie mischen. Um ein Konto hinzuzufügen, lege `accounts/<id>/actions_monitor.json` mit seinem `github_owner` an (kopiere die Vorlage `assets/examples/actions_monitor.example.json`).
 
 ## Ausführen
 
-`python actions_monitor.py` mit einem Ordner `accounts/` startet den Supervisor, einen kleinen Prozess auf dem üblichen Port (8765), der pro Konto einen Monitor startet und der Seite und den Werkzeugen eine einzige Adresse gibt. Er liest nichts von GitHub und schreibt nichts. Stirbt ein Konto, startet er es mit wachsender Wartezeit neu (2, 5, 15, 30, 60 und danach 120 Sekunden), und die Übersicht meldet es in der Zwischenzeit als ausgefallen. `python actions_monitor.py --account personal` führt nur dieses Konto aus, als gewöhnlicher Monitor.
+`python bin/actions_monitor.py` mit einem Ordner `accounts/` startet den Supervisor, einen kleinen Prozess auf dem üblichen Port (8765), der pro Konto einen Monitor startet und der Seite und den Werkzeugen eine einzige Adresse gibt. Er liest nichts von GitHub und schreibt nichts. Stirbt ein Konto, startet er es mit wachsender Wartezeit neu (2, 5, 15, 30, 60 und danach 120 Sekunden), und die Übersicht meldet es in der Zwischenzeit als ausgefallen. `python bin/actions_monitor.py --account personal` führt nur dieses Konto aus, als gewöhnlicher Monitor.
 
 ## Die Seite
 

@@ -3,7 +3,7 @@
 # GPL-3.0-or-later - see LICENSE
 """The interactive terminal application (OPTIONAL: it needs the package `textual`; nothing else of the monitor does).
 
-  py -3 tui_textual.py [--lite] [--port N] [--lang CODE] [--theme dark|light]
+  py -3 bin/tui_textual.py [--lite] [--port N] [--lang CODE] [--theme dark|light]
 
 It reads the same local API as the web page (`/api/data`, `/api/sentinel`, `/api/analytics`, `/api/settings`): no GitHub quota is used. Tabs: Summary, Repositories, Builds, Performance,
 Scripts (the workflow linter, with level filters) and Settings (the basic switches). Keys: r refresh, o open the web page, f filter, 1 2 3 lint levels, a About, ? Help, q quit. The data are

@@ -12,17 +12,17 @@ The monitor is a program that, by default, listens on `127.0.0.1` only and has n
 
 ## Where it listens
 
-The monitor listens in one of three ways, and the page, `GET /api/accounts`, `monitor_cli.py status` and `monitor_cli.py accounts` say which: **this computer** (only `127.0.0.1`: the default, no login), **the network** (the network mode, `listen.network`: it also listens on `listen.host` and every request carries the access token) or **behind a proxy** (the network mode with a reverse proxy declared in front: `listen.proxy_public_host`, `listen.secure_cookie` or `listen.trusted_proxy`). The image and the service unit are made for the second and the third; a monitor you start by hand stays on the first.
+The monitor listens in one of three ways, and the page, `GET /api/accounts`, `bin/monitor_cli.py status` and `bin/monitor_cli.py accounts` say which: **this computer** (only `127.0.0.1`: the default, no login), **the network** (the network mode, `listen.network`: it also listens on `listen.host` and every request carries the access token) or **behind a proxy** (the network mode with a reverse proxy declared in front: `listen.proxy_public_host`, `listen.secure_cookie` or `listen.trusted_proxy`). The image and the service unit are made for the second and the third; a monitor you start by hand stays on the first.
 
 In the network mode the supervisor of several accounts follows the same rules as the monitor of one account: the access token on every request (cookie, header or `POST /api/access`), a lock-out after wrong tokens, the `Host` check, optional TLS with your certificate, the second port of the person at the computer (`listen.local_port`), and the keys that decide exposure, the login of GitHub and the actions on GitHub only from the computer of the monitor (a request from the network reaches the account marked as remote).
 
 ## Without a browser, and the health check
 
-`python -m github_actions_monitor.service` is the entry of a service: it prepares the folders and the first account from the environment (see the table below) and starts the monitor without a browser. `python actions_monitor.py --no-browser --port 8765` still works for a monitor you manage yourself.
+`python -m github_actions_monitor.service` is the entry of a service: it prepares the folders and the first account from the environment (see the table below) and starts the monitor without a browser. `python bin/actions_monitor.py --no-browser --port 8765` still works for a monitor you manage yourself.
 
 `GET /api/health` answers `{"ok": true, "version": ..., "loaded": ..., "offline": ...}` plus the state of the refresh cycle and of the GitHub login of the account; it makes no call to GitHub. `GET /api/health?deep=1` is the deep check: it answers 503 when the refresh cycle of an account has run longer than `watchdog_minutes` (30 minutes if that is 0) or its thread is gone; in the supervisor of several accounts also when the supervision loop itself has stopped, when the cycle of ANY account is stuck, or when no account answers once the start is over. An account whose GitHub login is no good (blind) is named in the answer but is not a failure: a restart does not fix a lost login, a new one does.
 
-`python -m github_actions_monitor.cli.healthcheck` makes that call for a container or a service manager (exit code 0 healthy, 1 unhealthy, 2 no answer, 3 refused). It reads the access token from `MONITOR_ACCESS_TOKEN`, from the file named by `MONITOR_ACCESS_TOKEN_FILE` or from the file the service keeps in `MONITOR_STATE_DIR`. `monitor_cli.py health --deep` does the same from any computer.
+`python -m github_actions_monitor.cli.healthcheck` makes that call for a container or a service manager (exit code 0 healthy, 1 unhealthy, 2 no answer, 3 refused). It reads the access token from `MONITOR_ACCESS_TOKEN`, from the file named by `MONITOR_ACCESS_TOKEN_FILE` or from the file the service keeps in `MONITOR_STATE_DIR`. `bin/monitor_cli.py health --deep` does the same from any computer.
 
 ## The official image
 
@@ -53,7 +53,7 @@ docker compose -f deploy/compose.yaml up -d                          # on 127.0.
 docker compose -f deploy/compose.yaml --profile proxy up -d          # behind Caddy (deploy/Caddyfile)
 ```
 
-Behind the proxy the monitor must know its public name and that the session is HTTPS: `MONITOR_PROXY_PUBLIC_HOST` and `MONITOR_SECURE_COOKIE=1`. Nothing that arrives on the main port then counts as the computer of the monitor: use the second port (`MONITOR_LOCAL_PORT`, 8766 in the image, loopback only) with `docker compose exec monitor python monitor_cli.py ...` (the image sets `MONITOR_URL` to it).
+Behind the proxy the monitor must know its public name and that the session is HTTPS: `MONITOR_PROXY_PUBLIC_HOST` and `MONITOR_SECURE_COOKIE=1`. Nothing that arrives on the main port then counts as the computer of the monitor: use the second port (`MONITOR_LOCAL_PORT`, 8766 in the image, loopback only) with `docker compose exec monitor python bin/monitor_cli.py ...` (the image sets `MONITOR_URL` to it).
 
 ## A classic install with systemd
 
@@ -70,7 +70,7 @@ systemctl reload github-actions-monitor                              # SIGHUP: r
 
 The env file keeps the data in `/var/lib/github-actions-monitor` and the login in `/etc/github-actions-monitor/gh_token` (mode 600). It listens on `127.0.0.1` unless you turn the network mode on there.
 
-launchd (macOS): `ProgramArguments` = `/usr/bin/python3`, `-m`, `github_actions_monitor.service`, the variables in `EnvironmentVariables`, `KeepAlive` and `RunAtLoad` true. Windows: `schtasks /Create /SC ONLOGON /TN GhaMonitor /TR "py -3 C:/path/to/actions_monitor.py --no-browser"`.
+launchd (macOS): `ProgramArguments` = `/usr/bin/python3`, `-m`, `github_actions_monitor.service`, the variables in `EnvironmentVariables`, `KeepAlive` and `RunAtLoad` true. Windows: `schtasks /Create /SC ONLOGON /TN GhaMonitor /TR "py -3 C:/path/to/bin/actions_monitor.py --no-browser"`.
 
 ## Environment variables
 
@@ -86,6 +86,8 @@ Only the names in this table are read. In the service a value that cannot be rea
 | `MONITOR_CONFIG` | The configuration file (the image: `/config/actions_monitor.json`); made on the first start and never overwritten. |
 | `MONITOR_ACCOUNTS_DIR` | The folder of the accounts, one folder each (the image: `/data/accounts`). |
 | `MONITOR_STATE_DIR` | Files that would otherwise sit next to the code: the access token of the service, the audit of the logins (the image: `/data/state`). |
+| `MONITOR_CONFIG_DIR` | The folder `config/`: the configuration files (`targets.json`, `quotas.json` ...) and `config_backups/` (the image: `/config`). |
+| `MONITOR_DATA_DIR` | The folder `data/`: the state, the caches and the accounts; `logs/` and `ai/` go inside it unless `MONITOR_LOGS_DIR` / `MONITOR_AI_DIR` say otherwise (the image: `/data`). See LAYOUT. |
 | `MONITOR_SECRET_DIR` | Where the token kept by the monitor itself lives, if you turn that on (the image: `/data/secrets`). |
 | `GH_CONFIG_DIR` | The configuration folder of `gh` (the image: `/data/gh`). |
 | `GH_TOKEN_FILE` | A file with the GitHub token on its first line (a Docker secret, a systemd credential). Read at the start and again on SIGHUP. |
@@ -105,23 +107,23 @@ Only the names in this table are read. In the service a value that cannot be rea
 | `MONITOR_QUERY_ACCESS` | `0` = the address with `?access=` no longer opens a session (`listen.query_access`); use `POST /api/access`. |
 | `MONITOR_TEAM_MODE` | `1` = the team mode (`auth.enabled`): users, roles and sessions. |
 | `MONITOR_SERVICE` | `1` = it runs as a service: it does not give up on a login that is no good, and the doctor checks retention. The image and the service set it. |
-| `MONITOR_URL` | For `monitor_cli.py` and the health check: the address of the monitor (the image: the second port). |
-| `MONITOR_CA_FILE` | For `monitor_cli.py`: a PEM file with the authority that signed the HTTPS certificate of the monitor. |
-| `MONITOR_USER` | For `monitor_cli.py` in the team mode: the user to sign in as. |
-| `MONITOR_PASSWORD_FILE` | For `monitor_cli.py`: a file with the password of `MONITOR_USER` on its first line. |
+| `MONITOR_URL` | For `bin/monitor_cli.py` and the health check: the address of the monitor (the image: the second port). |
+| `MONITOR_CA_FILE` | For `bin/monitor_cli.py`: a PEM file with the authority that signed the HTTPS certificate of the monitor. |
+| `MONITOR_USER` | For `bin/monitor_cli.py` in the team mode: the user to sign in as. |
+| `MONITOR_PASSWORD_FILE` | For `bin/monitor_cli.py`: a file with the password of `MONITOR_USER` on its first line. |
 | `MONITOR_RELEASE_TEST_TIMEOUT` | `tools/make_release.py`: seconds the ordinary suite may take before the gate fails (default 3600; 60 to 86400). |
 | `MONITOR_RELEASE_CLEAN_TIMEOUT` | `tools/make_release.py`: seconds the suite of the extracted zip may take (default 3600; 60 to 86400). |
 
 ## When GitHub revokes or expires the login
 
-Every account is a process of its own, so a login that stops working touches only that account. After two refusals in a row that say the login itself is no good (a 401, `Bad credentials`, an expired or revoked token, a suspended account, no login at all) the account is **blind**: the page, the deep health check, `GET /api/accounts` (`state: blind`) and `monitor_cli.py` say so, a **critical system alert** (`system.credential_blind`, sentinel `system`) opens in the Alerts tab, and the notification kinds `credential_blind` (on by default) and `credential_back` tell the channels once. A refusal of a single permission (a 403 for one repository) does not make an account blind. The other accounts go on and the deep health check stays green. The account keeps trying, and the first good cycle closes the alert.
+Every account is a process of its own, so a login that stops working touches only that account. After two refusals in a row that say the login itself is no good (a 401, `Bad credentials`, an expired or revoked token, a suspended account, no login at all) the account is **blind**: the page, the deep health check, `GET /api/accounts` (`state: blind`) and `bin/monitor_cli.py` say so, a **critical system alert** (`system.credential_blind`, sentinel `system`) opens in the Alerts tab, and the notification kinds `credential_blind` (on by default) and `credential_back` tell the channels once. A refusal of a single permission (a 403 for one repository) does not make an account blind. The other accounts go on and the deep health check stays green. The account keeps trying, and the first good cycle closes the alert.
 
 A service that starts with a login that is already no good stays up and blind instead of giving up, so there is something to replace. The token of an account comes from, first match wins: the file `credential` in its folder (written by a replacement), the file named by `GH_TOKEN_FILE`, then what `gh` uses (`GH_TOKEN` or its own login). A replacement needs no restart of the supervisor or of the account, in three ways:
 
 ```sh
 # 1. the command line (a token is read from a file or the standard input, never from a flag)
-docker compose exec -T monitor python monitor_cli.py credential replace --account default --new-token-file - < new_token.txt
-python monitor_cli.py credential replace --url https://monitor.example.org --user ann --password-file pw.txt --account default --new-token-file new_token.txt
+docker compose exec -T monitor python bin/monitor_cli.py credential replace --account default --new-token-file - < new_token.txt
+python bin/monitor_cli.py credential replace --url https://monitor.example.org --user ann --password-file pw.txt --account default --new-token-file new_token.txt
 
 # 2. the administrator endpoint (an administrator session in the team mode, or the computer of the monitor)
 #    POST /api/accounts/<id>/credential   {"action": "replace", "token": "..."}   or   {"action": "reload"}
@@ -136,7 +138,7 @@ The new token is checked against GitHub (the `rate_limit` call, free) BEFORE it 
 
 ## First start, backup and upgrade
 
-First start as a service: set the owner and the login (`GH_TOKEN_FILE`), start it, read the access token once (`/data/state/access_token`), open the page and run `monitor_cli.py health --deep`. `python actions_monitor.py --doctor` with `MONITOR_SERVICE=1` also warns about a missing retention block and about accounts that share one token.
+First start as a service: set the owner and the login (`GH_TOKEN_FILE`), start it, read the access token once (`/data/state/access_token`), open the page and run `bin/monitor_cli.py health --deep`. `python bin/actions_monitor.py --doctor` with `MONITOR_SERVICE=1` also warns about a missing retention block and about accounts that share one token.
 
 Backup: everything to keep is in the two volumes. Make a consistent copy of the storage before an upgrade, and a copy of the volumes:
 
@@ -172,7 +174,7 @@ Once a proxy is declared, nothing that arrives on the main port counts as "this 
 
 ## The command line against another computer
 
-`monitor_cli.py` works against a monitor on another machine: `--url https://monitor.example.org` (or `MONITOR_URL`), the access token from `MONITOR_ACCESS_TOKEN` or `--token-file`, `--ca-file` (or `MONITOR_CA_FILE`) to trust the authority that signed an HTTPS certificate of your own and, in the team mode, `--user NAME` with `--password-file FILE` (or `MONITOR_USER`, `MONITOR_PASSWORD_FILE`), which signs in with a Bearer session (`auth.allow_bearer`). `status`, `accounts`, `alerts`, `health` (`--deep`) and `credential` work the same way and the exit codes are the same (3 = refused, also for a blind account in `status` and `accounts`). Plain HTTP to another computer prints a warning.
+`bin/monitor_cli.py` works against a monitor on another machine: `--url https://monitor.example.org` (or `MONITOR_URL`), the access token from `MONITOR_ACCESS_TOKEN` or `--token-file`, `--ca-file` (or `MONITOR_CA_FILE`) to trust the authority that signed an HTTPS certificate of your own and, in the team mode, `--user NAME` with `--password-file FILE` (or `MONITOR_USER`, `MONITOR_PASSWORD_FILE`), which signs in with a Bearer session (`auth.allow_bearer`). `status`, `accounts`, `alerts`, `health` (`--deep`) and `credential` work the same way and the exit codes are the same (3 = refused, also for a blind account in `status` and `accounts`). Plain HTTP to another computer prints a warning.
 
 ## Minimum permissions of the login (`gh` or a fine-grained token)
 

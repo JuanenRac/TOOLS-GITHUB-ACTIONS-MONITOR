@@ -22,7 +22,7 @@ scrape ou l'actualisation d'un tableau de bord ne consomme aucun quota de l'API 
 | `/api/outputs/grafana.json` | Tables JSON pour la source de données « Infinity » / JSON de Grafana | `outputs.json.enabled` |
 | `/api/outputs/dashboard.json` | le document de `ci_red.json` (schéma 2, voir CI_RED_SCHEMA_fra.md) pour un tableau de bord d'état | `outputs.dashboard.enabled` |
 
-Une requête vers un chemin dont l'interrupteur est désactivé reçoit `404`. L'ancienne méthode pour fournir le même document à un tableau de bord, `ci_red.json` et `read_report.py --export-status`, reste inchangée : c'est un contrat.
+Une requête vers un chemin dont l'interrupteur est désactivé reçoit `404`. L'ancienne méthode pour fournir le même document à un tableau de bord, `ci_red.json` et `bin/read_report.py --export-status`, reste inchangée : c'est un contrat.
 
 ## Métriques Prometheus
 
@@ -74,7 +74,7 @@ workflows d'un dépôt à la fois jusqu'à leur fin. D'un tableau de bord de web
 
 ## La file de signature par confiance
 
-Chaque ligne de la file a un `trust` : `verified` (signature vérifiée avec la clé publique), `unknown` (le format ne peut pas être vérifié ici : jamais deviné) ou `failed` (vérifiée et non conforme). L'onglet Sentinelle a un filtre Signature avec le nombre de chaque sorte et marque les lignes (bord vert, gris ou rouge). En console : `py -3 read_report.py --export-sign-queue FILE --sign-trust failed`.
+Chaque ligne de la file a un `trust` : `verified` (signature vérifiée avec la clé publique), `unknown` (le format ne peut pas être vérifié ici : jamais deviné) ou `failed` (vérifiée et non conforme). L'onglet Sentinelle a un filtre Signature avec le nombre de chaque sorte et marque les lignes (bord vert, gris ou rouge). En console : `py -3 bin/read_report.py --export-sign-queue FILE --sign-trust failed`.
 
 ## En mode réseau
 

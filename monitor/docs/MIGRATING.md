@@ -12,8 +12,8 @@ Version 1.5.0 gave English names to files, folders, scripts and one setting. Not
 ## Steps
 
 1. Stop the monitor and unzip the new version over the old folder (keep your `actions_monitor.json`).
-2. See what would change: `python migrate_state.py` (a dry run, it changes nothing).
-3. Do it: `python migrate_state.py --apply` copies the old files to the new names and keeps the old ones; add `--move` to rename them instead. Nothing that already exists is overwritten, and the setting `parte_history_days` becomes `report_history_days` after saving a copy of `actions_monitor.json`.
+2. See what would change: `python bin/migrate_state.py` (a dry run, it changes nothing).
+3. Do it: `python bin/migrate_state.py --apply` copies the old files to the new names and keeps the old ones; add `--move` to rename them instead. Nothing that already exists is overwritten, and the setting `parte_history_days` becomes `report_history_days` after saving a copy of `actions_monitor.json`.
 4. Start the monitor with `MONITOR_GITHUB_ACTIONS` (the same launcher as before) and use `BATCH_GITHUB_ACTIONS` for the batch tools.
 5. Delete the old launchers you may still have: `LOTE_GITHUB_ACTIONS.bat`, `.sh` and `.command`.
 
@@ -21,7 +21,7 @@ Version 1.5.0 gave English names to files, folders, scripts and one setting. Not
 
 | Before 1.5.0 | From 1.5.0 |
 |---|---|
-| `leer_parte.py` | `read_report.py` |
+| `leer_parte.py` | `bin/read_report.py` |
 | `eventos.py`, `parte_history.py` | `events.py`, `report_history.py` |
 | `LOTE_GITHUB_ACTIONS.*` | `BATCH_GITHUB_ACTIONS.*` |
 | `eventos_monitor.jsonl`, `eventos_estado.json` | `events_monitor.jsonl`, `events_state.json` |
@@ -39,7 +39,7 @@ Nothing you have has to be converted: the monitor keeps reading your `actions_mo
 
 1. Stop the monitor and unzip the new version over the old folder (keep your `actions_monitor.json` and your catalogue files).
 2. Start it as before. New files appear next to it (`etag_cache.json`, `analytics_history.json`, `update_check.json`, `sentinel_history.json`); they can be deleted at any time.
-3. Optional: `python actions_monitor.py --doctor` checks the installation.
+3. Optional: `python bin/actions_monitor.py --doctor` checks the installation.
 
 What is different: the **lite edition** exists (`MONITOR_LITE_GITHUB_ACTIONS`, port 8766, its own `actions_monitor_lite.json`, no sentinel); **red on main** is one rule (the last finished run of each workflow on the default branch; cancelled, skipped, neutral and stale runs say nothing), so a figure may differ from 1.5.x; the Settings page has a **Basic** tab first; notifications, analytics, the linter, the webhook events and the AI assistant exist and are **off** until you switch them on; writing to GitHub still needs your explicit confirmation. Rich and Textual stay optional; Python 3.11 or newer.
 
@@ -65,7 +65,7 @@ Nothing has to be converted. What now behaves differently, on purpose:
 - **Network mode over HTTPS**: the changes made from the page now work; the `Origin` must have the scheme of the session and the port of the monitor. Behind a proxy keep the monitor's port in the address, or the check refuses it.
 - **Network mode**: every setting that the schema marks `secure` can only be changed from the computer itself (before: only `listen.`, `github_token.`, `act.`, `github_actions.`). A script on another computer that changed `webhook.*`, `notify.*` and similar now gets 403 `local_only`.
 - **act**: after Stop the run is free at once; a start right after no longer answers `busy`.
-- New files next to the monitor: `degraded.json` and `degraded_lite.json` (the counters of swallowed failures); they can be deleted at any time.
+- New files in `data/`: `degraded.json` and `degraded_lite.json` (the counters of swallowed failures); they can be deleted at any time.
 - The history of changes (Help > Changelog) is translated: one file `docs/CHANGELOG_<lang>.md` per language.
 
 # From 1.6.6 to 1.6.7
@@ -86,13 +86,13 @@ Nothing has to be converted and no setting changes.
 
 Nothing has to be converted: without an `accounts/` folder the monitor works exactly as before.
 
-- **Several accounts** are optional. To use them run `python actions_monitor.py --migrate-accounts` (a dry run), then add `--apply` to copy your files into `accounts/default/`; the originals stay until you delete them. Add more accounts as `accounts/<id>/actions_monitor.json`. See `ACCOUNTS.md`.
-- With an `accounts/` folder, `python actions_monitor.py` starts a supervisor that runs one monitor per account; `--account <id>` runs only one. The lite edition does not have any of this.
+- **Several accounts** are optional. To use them run `python bin/actions_monitor.py --migrate-accounts` (a dry run), then add `--apply` to copy your files into `accounts/default/`; the originals stay until you delete them. Add more accounts as `accounts/<id>/actions_monitor.json`. See `ACCOUNTS.md`.
+- With an `accounts/` folder, `python bin/actions_monitor.py` starts a supervisor that runs one monitor per account; `--account <id>` runs only one. The lite edition does not have any of this.
 - New: `?view=` and `?chrome=0` in the address of the page, `GET /api/accounts`, `GET /api/live-status`, and one `POST /api/webhook` for all the accounts.
 
 # From 1.7.x to the new folder layout
 
-The code now lives in `src/github_actions_monitor/`, the page, the example files and the languages in `assets/`, and the release and migration scripts in `tools/`. Nothing you use changes: the launchers (`MONITOR_GITHUB_ACTIONS`, `MONITOR_LITE_GITHUB_ACTIONS`, `BATCH_GITHUB_ACTIONS`) stay where they were and open the same address and port, and the commands of this guide (`python read_report.py`, `python actions_monitor.py --doctor`, `python monitor_cli.py status` ...) still work, because a small entry-point file with the same name stays in the product folder. The launchers run `python -m github_actions_monitor` (complete) and `python -m github_actions_monitor.lite` (lite) with `src/` on the path.
+The code now lives in `src/github_actions_monitor/`, the page, the example files and the languages in `assets/`, and the release and migration scripts in `tools/`. Nothing you use changes: the launchers (`MONITOR_GITHUB_ACTIONS`, `MONITOR_LITE_GITHUB_ACTIONS`, `BATCH_GITHUB_ACTIONS`) stay where they were and open the same address and port, and the commands of this guide (`python bin/read_report.py`, `python bin/actions_monitor.py --doctor`, `python bin/monitor_cli.py status` ...) still work, because a small entry-point file with the same name stays in the product folder. The launchers run `python -m github_actions_monitor` (complete) and `python -m github_actions_monitor.lite` (lite) with `src/` on the path.
 
 Your data does not move: `actions_monitor.json`, the caches, the logs, `config_backups/`, `accounts/` and your own catalogue files stay in the product folder next to the launchers, never inside `src/`. The neutral examples and the `quotas.json` that travel with the program are now in `assets/examples/`; a `quotas.json` of your own next to the launchers still wins.
 
@@ -100,7 +100,7 @@ Your data does not move: `actions_monitor.json`, the caches, the logs, `config_b
 
 1. Stop the monitor and unzip the new version over the old folder (keep your `actions_monitor.json`).
 2. Start it as always. It works even if you do nothing else.
-3. To remove the leftovers of the old flat layout: `python tools/migrate_layout.py` (a dry run) and then `python tools/migrate_layout.py --apply`. It copies your configuration files to `layout_backup_<stamp>/config/` and moves the old modules, the old page, the old examples and the old `locales/` folder to `layout_backup_<stamp>/old_code/`. Nothing is deleted and nothing that exists is overwritten; your data is not touched. `python actions_monitor.py --doctor` warns while old files are left.
+3. To remove the leftovers of the old flat layout: `python tools/migrate_layout.py` (a dry run) and then `python tools/migrate_layout.py --apply`. It copies your configuration files to `layout_backup_<stamp>/config/` and moves the old modules, the old page, the old examples and the old `locales/` folder to `layout_backup_<stamp>/old_code/`. Nothing is deleted and nothing that exists is overwritten; your data is not touched. `python bin/actions_monitor.py --doctor` warns while old files are left.
 4. A script of yours that imported a module by its old flat name (`import read_report`) now imports `github_actions_monitor.<package>.<module>` with `src/` on the path.
 
 | Package | What it holds |

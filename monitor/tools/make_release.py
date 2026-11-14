@@ -5,9 +5,9 @@
 
   py -3 tools/make_release.py [--out DIR]   default: <signed_dir>/github_actions_monitor/ (see workspace.py; never on D:)
 
-The zip (folder github_actions_monitor/) carries: the launchers (*.bat, *.sh, *.command) and the tiny entry points (*.py) in its root, the package src/github_actions_monitor/**, assets/ (examples/ with the neutral
-*.example.json and quotas.json, static/ with the page, locales/*.json), tools/*.py, docs/*.md, CHANGELOG.md, the README_<lang>.txt
-and QUICKSTART_<lang>.txt in the 8 languages (+ README.txt), LICENSE, NOTICE, AUTHORS, assets/examples/actions_monitor.example.json (the template; the tool copies it to
+The zip (folder github_actions_monitor/) carries: the launchers (*.bat, *.sh, *.command) in its root, the tiny entry points (bin/*.py), the package src/github_actions_monitor/**, assets/ (examples/ with the neutral
+*.example.json and quotas.json, static/ with the page, locales/*.json, ai/ with the guide for AI tools), tools/*.py, docs/*.md, CHANGELOG.md, docs/README_<lang>.txt
+and docs/QUICKSTART_<lang>.txt in the 8 languages (+ README.txt), LICENSE, NOTICE, AUTHORS, assets/examples/actions_monitor.example.json (the template; the tool copies it to
 actions_monitor.json on first start) and tests/*.py. Every member has a fixed timestamp, so the same sources give the same bytes.
 
 The gate (nothing is written unless ALL of it passes):
@@ -19,7 +19,7 @@ The gate (nothing is written unless ALL of it passes):
   6. nothing private travels (no absolute path of a person, no key folder, no foreign e-mail, no token); the 8 locales have exactly the same keys;
   7. after writing, the zip is opened again, its members re-checked (launchers keep the executable bit) and SHA256SUMS written from the bytes on disk;
   8. CLEAN INSTALL (before anything is left in the output folder): the zip is extracted into a new, empty temporary directory and, from THERE (python -I, nothing of
-     this folder on the path), every member must be present, every module must compile, `read_report.py --version` and `python -m github_actions_monitor.lite --help` (with src/ on the path) must run and the whole test suite must pass.
+     this folder on the path), every member must be present, every module must compile, `bin/read_report.py --version` and `python -m github_actions_monitor.lite --help` (with src/ on the path) must run and the whole test suite must pass.
 """
 import argparse
 import hashlib
@@ -51,11 +51,11 @@ LEGAL = ("LICENSE", "NOTICE", "AUTHORS")
 DATA_JSON = ("targets.example.json", "ecosystems.example.json", "profiles.example.json", "quotas.json")   # only the neutral examples travel: your own files stay outside the package
 PKG = "src/github_actions_monitor"
 REQUIRED_MEMBERS = (f"{PKG}/i18n/__init__.py", f"{PKG}/app/toolconfig.py", f"{PKG}/cli/launcher_msg.py", "LICENSE", "NOTICE", "AUTHORS", "README.txt", f"{EXAMPLES_DIR}/targets.example.json", f"{EXAMPLES_DIR}/ecosystems.example.json",
-                    *[f"assets/locales/{l}.json" for l in LANGS], *[f"README_{l}.txt" for l in LANGS], *[f"QUICKSTART_{l}.txt" for l in LANGS], f"{PKG}/cli/gha_dispatch_all.py", f"{PKG}/sentinels/sentinel_local.py",
+                    *[f"assets/locales/{l}.json" for l in LANGS], *[f"docs/README_{l}.txt" for l in LANGS], *[f"docs/QUICKSTART_{l}.txt" for l in LANGS], f"{PKG}/cli/gha_dispatch_all.py", f"{PKG}/sentinels/sentinel_local.py",
                     f"{PKG}/app/actions_monitor.py", "assets/static/actions_monitor.html", "CHANGELOG.md",
                     f"{PKG}/tool_version.py", f"{PKG}/cli/read_report.py", f"{PKG}/util/platform_compat.py", f"{PKG}/app/surface.py", f"{PKG}/sentinels/readiness.py", f"{EXAMPLES_DIR}/profiles.example.json",
                     f"{PKG}/cli/export_status.py", f"{PKG}/security/webhook.py", f"{PKG}/integrations/monitor_link.py", f"{PKG}/cli/release_notes.py", f"{PKG}/__main__.py", f"{PKG}/lite.py", f"{PKG}/util/paths.py",
-                    "docs/CI_RED_SCHEMA.md", "MONITOR_GITHUB_ACTIONS.sh", "MONITOR_GITHUB_ACTIONS.bat", "read_report.py", "actions_monitor.py", "tools/make_release.py", "tools/migrate_layout.py", f"{EXAMPLES_DIR}/{EXAMPLE}")
+                    "docs/CI_RED_SCHEMA.md", "MONITOR_GITHUB_ACTIONS.sh", "MONITOR_GITHUB_ACTIONS.bat", "bin/read_report.py", "bin/actions_monitor.py", "bin/ai_hook.py", "assets/ai/README.md", f"{PKG}/util/rootmigrate.py", "tools/make_release.py", "tools/migrate_layout.py", f"{EXAMPLES_DIR}/{EXAMPLE}")
 
 
 class GateError(SystemExit):
@@ -67,12 +67,12 @@ def fail(message):
 
 
 def members():
-    names = [p for p in sorted(HERE.glob("*.py")) + sorted(HERE.glob("*.bat")) + sorted(HERE.glob("*.sh")) + sorted(HERE.glob("*.command"))]   # the launchers and the tiny entry points of the product folder
+    names = [p for p in sorted(HERE.glob("*.bat")) + sorted(HERE.glob("*.sh")) + sorted(HERE.glob("*.command")) + sorted((HERE / "bin").glob("*.py"))]   # the launchers of the product folder and the tiny entry points of bin/
     names += sorted(p for p in (HERE / "src").rglob("*.py") if "__pycache__" not in p.parts)                                                      # the importable package
     names += sorted((HERE / "tools").glob("*.py"))
     names += [HERE / "assets" / "examples" / n for n in DATA_JSON] + [HERE / "assets" / "static" / "actions_monitor.html"]
     names += [HERE / n for n in LEGAL] + [HERE / "CHANGELOG.md", HERE / "README.txt"]
-    names += sorted(HERE.glob("README_*.txt")) + sorted(HERE.glob("QUICKSTART_*.txt")) + sorted((HERE / "assets" / "locales").glob("*.json"))
+    names += sorted((HERE / "docs").glob("README_*.txt")) + sorted((HERE / "docs").glob("QUICKSTART_*.txt")) + sorted((HERE / "assets" / "locales").glob("*.json")) + sorted((HERE / "assets" / "ai").glob("*.md"))
     names += sorted((HERE / "docs").glob("*.md"))
     names += sorted((HERE / "docs").rglob("*.json"))   # the example dashboard of Grafana
     names += sorted((HERE / "tests").glob("*.py")) + sorted((HERE / "tests" / "fixtures").glob("*.json"))
@@ -352,9 +352,9 @@ def clean_install_check(archive, entries, python=None):
         env = {k: v for k, v in os.environ.items() if not k.startswith(("MONITOR_", "JUANENRAC_"))}
         env["PYTHONDONTWRITEBYTECODE"] = "1"
         env["MONITOR_NO_NESTED"] = "1"      # the suite of the extracted copy must not start a third one
-        smoke = subprocess.run([python, "-I", "read_report.py", "--version"], cwd=str(base), capture_output=True, text=True, encoding="utf-8", errors="replace", env=env, timeout=120)
+        smoke = subprocess.run([python, "-I", "bin/read_report.py", "--version"], cwd=str(base), capture_output=True, text=True, encoding="utf-8", errors="replace", env=env, timeout=120)
         if smoke.returncode != 0 or not smoke.stdout.strip():
-            fail("clean install: read_report.py --version does not run:\n" + (smoke.stderr or smoke.stdout)[-800:])
+            fail("clean install: bin/read_report.py --version does not run:\n" + (smoke.stderr or smoke.stdout)[-800:])
         lite = subprocess.run([python, "-I", "-c", "import sys; sys.path.insert(0, 'src'); from github_actions_monitor import lite; sys.exit(lite.main(['--help']))"], cwd=str(base), capture_output=True, text=True,
                               encoding="utf-8", errors="replace", env=env, timeout=120)
         if lite.returncode != 0 or "--port" not in lite.stdout:

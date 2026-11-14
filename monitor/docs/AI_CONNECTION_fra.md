@@ -23,12 +23,12 @@ Un inventaire de **signaux**, les mêmes que ceux de la page : l'onglet Maintena
 2. `ai_alerts.jsonl` : une ligne par événement (ouverte, acquittée, résolue), avec un identifiant stable.
 3. `GET /api/ai/state` : tout l'inventaire en JSON versionné (`schema`, `edition`, `signals`, `act`, `watch`), lecture seule. `GET /api/sentinel/panels` ne donne que les panneaux.
 4. `GET /api/ai/stream` : événements en direct (SSE), reprenables, limités en auditeurs et en durée.
-5. Outils MCP (`mcp_server.py`) : `monitor_state`, `signals`, `alerts_open`, `diagnose`, `sentinel_panels`, `get_quota` ; `act` (acquitter) seulement avec `--allow-ack`.
-6. Le hook : `python monitor_cli.py ai-hook install [--assistant|--cursor|--generic] [--scope project|user] [--dry-run]` (aussi `status` et `uninstall`) ajoute un petit script qui donne à la session de l'IA le résumé au démarrage et avant l'arrêt.
+5. Outils MCP (`bin/mcp_server.py`) : `monitor_state`, `signals`, `alerts_open`, `diagnose`, `sentinel_panels`, `get_quota` ; `act` (acquitter) seulement avec `--allow-ack`.
+6. Le hook : `python bin/monitor_cli.py ai-hook install [--assistant|--cursor|--generic] [--scope project|user] [--dry-run]` (aussi `status` et `uninstall`) ajoute un petit script qui donne à la session de l'IA le résumé au démarrage et avant l'arrêt.
 
 ## Pas à pas
 1. Réglages, onglet *IA externe*, bloc *Alertes pour les IA* : activez `ai_alerts.enabled`. En option `ai_alerts.diagnose.enabled` (l'étape qui échoue et les dernières lignes du journal de chaque exécution rouge), `ai_alerts.stream.enabled` et `ai_alerts.client_hook.enabled`.
-2. Lancez `python monitor_cli.py ai-hook install --assistant --dry-run` pour voir le changement, puis sans `--dry-run`.
+2. Lancez `python bin/monitor_cli.py ai-hook install --assistant --dry-run` pour voir le changement, puis sans `--dry-run`.
 3. Ouvrez une session de votre outil d'IA dans le dossier : elle reçoit le résumé. La barre du bas montre le battement de l'IA (quand elle a lu pour la dernière fois).
 4. Utilisez le bouton *Tester la connexion* de la page des réglages pour vérifier que le flux s'écrit.
 

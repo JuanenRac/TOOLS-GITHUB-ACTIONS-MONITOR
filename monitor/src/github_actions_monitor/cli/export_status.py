@@ -2,10 +2,10 @@
 # GPL-3.0-or-later - see LICENSE
 """Explicit, optional exports of what the monitor knows. Nothing here runs by itself and nothing is ever committed or pushed.
 
-  read_report.py --export-status DIR        writes ci_status_public.json (+ .md) into a folder YOU name: ONLY the list of red workflows
+  bin/read_report.py --export-status DIR        writes ci_status_public.json (+ .md) into a folder YOU name: ONLY the list of red workflows
                                            (repository, workflow, conclusion, since, streak, run link). No signing state, no key names,
                                            no local paths, no commands. What happens to the folder afterwards is up to you.
-  read_report.py --export-sign-queue FILE   writes the global signing queue (.json or .csv by the extension) INCLUDING the exact local
+  bin/read_report.py --export-sign-queue FILE   writes the global signing queue (.json or .csv by the extension) INCLUDING the exact local
                                            commands: it is for this PC only and says so inside the file.
 
 The public dashboard does not need these files: it recomputes the same red rule itself.

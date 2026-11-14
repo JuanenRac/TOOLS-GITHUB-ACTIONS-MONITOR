@@ -31,7 +31,7 @@
 
 | | |
 |---|---|
-| **バージョン** | **1.8.0** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **バージョン** | **1.8.1** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **必要なもの** | Python 3.11 以上と GitHub CLI（`gh auth login`）。それ以外は不要(ターミナル表示は任意のパッケージ `rich` を使います) |
 | **開く先** | `127.0.0.1` 上のページのみ、8言語対応 |
 | **GitHub への書き込み** | 自動では行いません。明示的な `--go` を付けて実行したバッチコマンドのみ |
@@ -39,12 +39,12 @@
 
 <!-- glance:begin -->
 
-**現時点の実測** (v1.8.0)
+**現時点の実測** (v1.8.1)
 
 | | |
 |---|---|
 | **成熟度** | functional |
-| **テスト** | テストメソッド 1588 件(`python -m unittest discover -s monitor/tests`) |
+| **テスト** | テストメソッド 1616 件(`python -m unittest discover -s monitor/tests`) |
 | **設定** | 設定 313 件、すべてヘルプ付き |
 | **言語** | 8(英語、スペイン語、ドイツ語、フランス語、イタリア語、日本語、中国語、ポルトガル語) |
 | **CI で検証したシステム** | ubuntu, windows、Python 3.11, 3.13 |
@@ -140,7 +140,7 @@
 - **センチネル**：セキュリティアラート、リポジトリの衛生、古いプルリクエスト、公開準備の整ったバージョン、署名待ちのビルド、平易な言葉のレポート。
 - **Collab 番人と 1 つのアラート一覧**：人の手が必要な未解決の Issue とプルリクエスト（放置、重大、レビュー待ち、古い下書き、コンフリクト）を、読み取り専用・独自の周期で確認。アラートタブにはすべての番人を 1 つの一覧にまとめ、由来での絞り込みと、自動で終わるローカルのミュートを備えます。
 - **ステータスバー、全画面表示、並べ替えできる表**：最も重要な通知（とすべてを見るウィンドウ）、接続、割り当て、直近の読み取り、モード、アドレス、時計をページ下部に表示。全画面表示ボタン。リポジトリと履歴は 1 つまたは複数の列で並べ替えでき、列も選べます。
-- **クライアントとしてのコマンドライン**：`monitor_cli.py`（`status`、`health`、`alerts`、`accounts`、`live`、`doctor`）は実行中のモニターの内容を読み、`--json` と固定の終了コードに対応します。GitHub には書き込みません。
+- **クライアントとしてのコマンドライン**：`bin/monitor_cli.py`（`status`、`health`、`alerts`、`accounts`、`live`、`doctor`）は実行中のモニターの内容を読み、`--json` と固定の終了コードに対応します。GitHub には書き込みません。
 - **設定ページ**：パス、間隔、クォータ、スイッチをブラウザーから変更できます。検証済みの固定キーのみで、保存前に必ずバックアップを取ります。
 - **グラフと履歴**：計算時間、失敗、成功をアニメーションするバーと日次履歴で表示します（動きの軽減設定を尊重します）。
 - **8言語**（en、es、de、fr、it、ja、zh、pt）。英語が基本で、設定で切り替えます。
@@ -161,13 +161,13 @@
 | 何が動き何が失敗したかだけを見たい（**まずはこちら**） | `MONITOR_LITE_GITHUB_ACTIONS` | 8766 |
 | アカウント全体を見張ってほしい: アラート、リリース、署名、準備状況、分析 | `MONITOR_GITHUB_ACTIONS`（[センチネル](monitor/docs/SENTINEL_jpn.md)付き） | 8765 |
 
-コンソールウィンドウのタイトルと1行目でどちらが動いているかわかります。迷うときは `python actions_monitor.py --demo` で架空のデータのページを開き、`--doctor` でインストールを確認できます。[最初の5分間](monitor/docs/FIRST_STEPS_jpn.md)
+コンソールウィンドウのタイトルと1行目でどちらが動いているかわかります。迷うときは `python bin/actions_monitor.py --demo` で架空のデータのページを開き、`--doctor` でインストールを確認できます。[最初の5分間](monitor/docs/FIRST_STEPS_jpn.md)
 
 ## クイックスタート
 
 1. Python 3.11 以上と [GitHub CLI](https://cli.github.com/) をインストールし、`gh auth login` を実行します。
 2. このリポジトリ（または最新リリースの zip）をダウンロードし、`monitor` フォルダーを開きます。
-3. 起動：Windows は `MONITOR_GITHUB_ACTIONS.bat`、Linux は `./MONITOR_GITHUB_ACTIONS.sh`、macOS は `MONITOR_GITHUB_ACTIONS.command` をダブルクリック、どの環境でも `python actions_monitor.py` で起動できます。
+3. 起動：Windows は `MONITOR_GITHUB_ACTIONS.bat`、Linux は `./MONITOR_GITHUB_ACTIONS.sh`、macOS は `MONITOR_GITHUB_ACTIONS.command` をダブルクリック、どの環境でも `python bin/actions_monitor.py` で起動できます。
 4. 表示されたアドレス（`http://127.0.0.1:<ポート>`）を開きます。初回起動時に、サンプルから `actions_monitor.json` を作成します。
 5. **設定** を開き、GitHub アカウント、エコシステム（名前の接頭辞によるリポジトリのグループ）などを設定します。
 
@@ -206,7 +206,7 @@
 - **分析**:各ワークフローの所要時間・待ち時間・各ステップの p50 / p95、不安定なワークフロー(同じコミットで失敗後に成功)、遅くなったワークフロー。Prometheus と Grafana に出力。
 - **割り当てを節約し、断線に耐える**:条件付き読み取り(304 は無料)と、オフライン表示付きで自動再開する最終状態モード。
 - **受信 Webhook と通知**:署名付きイベントでリポジトリをリアルタイムに更新。Telegram・Discord・Slack・Matrix・MQTT・ローカルアドレスへの任意のメッセージ(GitHub への書き込みは一切なし)。
-- **ワークフロー Lint とターミナル表示**:`lint_workflows.py` は push 前に `.github/workflows` を検査し、`tui.py`(任意、`rich` 使用)はコンソールにライブ表を表示します。
+- **ワークフロー Lint とターミナル表示**:`bin/lint_workflows.py` は push 前に `.github/workflows` を検査し、`bin/tui.py`(任意、`rich` 使用)はコンソールにライブ表を表示します。
 - **AI アシスタント(既定ではオフ)**:Ollama、OpenAI 互換サービス、Anthropic、`gh copilot` による要約・仕分け・説明。コマンドは限定リストのものだけで、1 件ずつ確認した後にのみ実行されます。
 - 設定ページは、バックアップを保存してから、検証済みの固定キーだけを書き込みます。
 
@@ -224,26 +224,26 @@ python -m unittest discover -s monitor/tests
 
 ```
 TOOLS-GITHUB-ACTIONS-MONITOR/
-├── monitor/                                プログラム本体
-├── docs/                                   構成図・画面・ロードマップ
-├── tools/                                  図・ガイド・デモ
-├── deploy/                                 イメージ、Compose、systemd
-├── images/                                 バナーと図
-├── .github/                                CI と Issue フォーム
-├── CHANGELOG.md                            バージョン別の変更
-├── LICENSE NOTICE AUTHORS                  ライセンスと作者
-├── CONTRIBUTING.md SECURITY.md             参加方法、報告
-├── SUPPORT.md CODE_OF_CONDUCT.md           サポートと行動規範
+├── monitor/                            プログラム本体
+├── docs/                               構成図・画面・ロードマップ
+├── tools/                              図・ガイド・デモ
+├── deploy/                             イメージ、Compose、systemd
+├── images/                             バナーと図
+├── .github/                            CI と Issue フォーム
+├── CHANGELOG.md                        バージョン別の変更
+├── LICENSE NOTICE AUTHORS              ライセンスと作者
+├── CONTRIBUTING.md SECURITY.md         参加方法、報告
+├── SUPPORT.md CODE_OF_CONDUCT.md       サポートと行動規範
 └── monitor/
-    ├── MONITOR_GITHUB_ACTIONS.*            起動スクリプト(ダブルクリック)
-    ├── MONITOR_LITE_GITHUB_ACTIONS.*       lite 版(センチネルなし)
-    ├── BATCH_GITHUB_ACTIONS.*              バッチビルドのメニュー
-    ├── src/                                インポート可能なパッケージ
-    ├── assets/                             例・ページ・言語
-    ├── actions_monitor.py read_report.py   ツールの入口
-    ├── tests/                              オフラインテスト
-    ├── docs/                               ガイドとスキーマ
-    └── tools/                              リリースと移行のスクリプト
+    ├── MONITOR_GITHUB_ACTIONS.*        起動スクリプト(ダブルクリック)
+    ├── MONITOR_LITE_GITHUB_ACTIONS.*   lite 版(センチネルなし)
+    ├── BATCH_GITHUB_ACTIONS.*          バッチビルドのメニュー
+    ├── src/                            インポート可能なパッケージ
+    ├── assets/                         例・ページ・言語
+    ├── bin/                            短いコマンド(read_report、monitor_cli など)
+    ├── tests/                          オフラインテスト
+    ├── docs/                           ガイド、クイックスタート、スキーマ
+    └── tools/                          リリースと移行のスクリプト
 ```
 
 ## ドキュメント
@@ -259,7 +259,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ANALYTICS_jpn.md`](monitor/docs/ANALYTICS_jpn.md): 分析、条件付き読み取り、接続の喪失
 - [`monitor/docs/CONSOLE_TOOLS_jpn.md`](monitor/docs/CONSOLE_TOOLS_jpn.md): ワークフロー Lint とターミナル表示
 - [`monitor/docs/DEPLOYMENT_jpn.md`](monitor/docs/DEPLOYMENT_jpn.md): サービスとして動かす（公式イメージ、Compose、systemd）、プロキシの背後、GitHub がログインを失効させたとき、権限
-- [`monitor/QUICKSTART_ja.txt`](monitor/QUICKSTART_ja.txt): 最初の手順（8言語）
+- [`monitor/docs/LAYOUT_jpn.md`](monitor/docs/LAYOUT_jpn.md): モニターのフォルダー、1.8.1 からの移行、AI 向けのマップ
+- [`monitor/docs/QUICKSTART_ja.txt`](monitor/docs/QUICKSTART_ja.txt): 最初の手順（8言語）
 - [`monitor/docs/FIRST_STEPS_jpn.md`](monitor/docs/FIRST_STEPS_jpn.md): 最初の5分間
 - [`monitor/docs/SENTINEL_jpn.md`](monitor/docs/SENTINEL_jpn.md): センチネルとチェック A1〜A13
 - [`monitor/docs/COLLAB_jpn.md`](monitor/docs/COLLAB_jpn.md): Collab 番人、アラートタブ、ミュート

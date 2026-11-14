@@ -9,16 +9,16 @@
 
 任意のコマンドラインツールが 2 つあります。モニター本体はパッケージを必要とせず、ターミナル表示は必要なときだけ Rich を使います。
 
-## ワークフロー Lint:`lint_workflows.py`
+## ワークフロー Lint:`bin/lint_workflows.py`
 
-- `py -3 lint_workflows.py [パス ...] [--json] [--fail-on info|warn|bad]` は push の前に `.github/workflows/*.yml` を検査します。パスを省略すると現在のフォルダーを見ます。ファイルを開くだけです。
+- `py -3 bin/lint_workflows.py [パス ...] [--json] [--fail-on info|warn|bad]` は push の前に `.github/workflows/*.yml` を検査します。パスを省略すると現在のフォルダーを見ます。ファイルを開くだけです。
 - ルール(設定タブ、サブタブ「ワークフロー Lint」で個別にオフにしたり重大度を変更できます):`unpinned_uses`(完全なコミット SHA で固定されていないアクション)、`permissions`(`permissions:` ブロックが無い、または `write-all`)、`secrets_in_clear`(トークンやキーのように見えるものがファイルに書かれている)、`injection`(第三者のテキストが `run:` スクリプトに埋め込まれている)、`pr_target`(プルリクエストのコードをチェックアウトする `pull_request_target`)。
 - 指摘が `--fail-on`(既定 `bad`)に達すると終了コードは 1 になるため、push 前フックとして使えます。モニターがクローンを参照できる場合は、日次レポートにも 1 行追加します。
 - シークレットらしく見える値は、出力も保存もされずに分類されます。既知のトークン形式や高エントロピーの長い文字列は重大(`bad`)、`placeholder`、`dummy`、`changeme`、`ci` のように読めるダミーは情報のみ、それ以外は警告で、`${{ secrets.X }}`、`${X}`、空の値は指摘になりません。指摘を黙らせるには、その行または直前の行にコメントを書きます:`# monitor-lint: ignore secrets_in_clear docker compose config 用のダミーのため`(ルール名または `all`)。または設定 `lint.ignore` に `リポジトリ:ファイル:ルール`(`*` 可)のパターンを並べます。
 
 
-## ターミナル表示:`tui.py`
+## ターミナル表示:`bin/tui.py`
 
-- `pip install rich` の後、`py -3 tui.py [--port 8765] [--refresh 5] [--once] [--theme dark|light]`。実行中のもの、赤のワークフロー、署名キュー、レポートのライブ表を、`127.0.0.1` で動いているモニターから読み取って描画します(GitHub の割り当ては使いません)。
+- `pip install rich` の後、`py -3 bin/tui.py [--port 8765] [--refresh 5] [--once] [--theme dark|light]`。実行中のもの、赤のワークフロー、署名キュー、レポートのライブ表を、`127.0.0.1` で動いているモニターから読み取って描画します(GitHub の割り当ては使いません)。
 - 読み取り専用で、再実行・クローズ・書き込みを行うキーはありません。Rich が無いときはインストール方法を表示してコード 3 で終了します。モニターとそのテストは Rich を必要としません。
-- 対話型ターミナルアプリ `tui_textual.py`(`pip install textual`。lite 版には `--lite` を付けます)は、設定タブで、一覧表示されるグループの単純な設定、**リスト**(項目をカンマで区切って入力:`a, b, c`)、数値の**マップ**(`name=3, other=5`)を編集できます。サーバーが各値を再度検証し、セキュリティのオプションはページでのみ変更できます。
+- 対話型ターミナルアプリ `bin/tui_textual.py`(`pip install textual`。lite 版には `--lite` を付けます)は、設定タブで、一覧表示されるグループの単純な設定、**リスト**(項目をカンマで区切って入力:`a, b, c`)、数値の**マップ**(`name=3, other=5`)を編集できます。サーバーが各値を再度検証し、セキュリティのオプションはページでのみ変更できます。

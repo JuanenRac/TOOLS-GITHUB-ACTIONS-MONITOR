@@ -17,7 +17,7 @@ Per ogni account: la configurazione (`actions_monitor.json`), lo stato delle sen
 
 |  | `file` (predefinita) | `sqlite` |
 |---|---|---|
-| Dove | `accounts/<id>/` (accanto ai lanciatori se non c'è `accounts/`) | `accounts/<id>/storage.sqlite3`, un database per account |
+| Dove | `data/accounts/<id>/` (i file di `data/` e `config/` se non c'è `accounts/`) | `accounts/<id>/storage.sqlite3`, un database per account |
 | Scritture | un file temporaneo, scritto su disco e rinominato | una breve transazione, journal WAL |
 | Sceglila per | una persona; file che puoi leggere e modificare | un servizio attivo per mesi; molti eventi |
 

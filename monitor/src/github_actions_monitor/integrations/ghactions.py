@@ -19,8 +19,8 @@ from github_actions_monitor.security import confirmation
 from github_actions_monitor.security import secretstore
 from github_actions_monitor.security import private_io
 
-from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
-LOG_FILE = HERE / "github_actions_log.jsonl"
+from github_actions_monitor.util import paths
+LOG_FILE = paths.place("github_actions_log.jsonl")
 NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}$")
 NUMBER_RE = re.compile(r"^[0-9]{1,12}$")
 METHODS = ("merge", "squash", "rebase")

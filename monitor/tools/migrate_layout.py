@@ -20,7 +20,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(HERE / "src"))            # works also under `py -3 -I`
 from github_actions_monitor import i18n  # noqa: E402
-from github_actions_monitor.util import layout  # noqa: E402
+from github_actions_monitor.util import layout, paths  # noqa: E402
 
 CONFIG_FILES = ("actions_monitor.json", "actions_monitor_lite.json", "targets.json", "ecosystems.json", "profiles.json", "quotas.json")
 
@@ -43,7 +43,7 @@ def apply(root, stamp=None):
     (backup / "config").mkdir(parents=True)
     (backup / "old_code").mkdir()
     for name in CONFIG_FILES:
-        source = root / name
+        source = next((c for c in (paths.place(name, root), root / name) if c.is_file()), root / name)      # config/ now, next to the launchers before 1.8.2
         if source.is_file():
             shutil.copy2(source, backup / "config" / name)
             copied.append(name)

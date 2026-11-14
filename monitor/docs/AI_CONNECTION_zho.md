@@ -23,12 +23,12 @@
 2. `ai_alerts.jsonl`:每个事件(打开、确认、解决)一行,带稳定的 id。
 3. `GET /api/ai/state`:整份清单,带版本的 JSON(`schema`、`edition`、`signals`、`act`、`watch`),只读。`GET /api/sentinel/panels` 只给出面板。
 4. `GET /api/ai/stream`:服务器发送事件,可续传,限制监听者数量和时长。
-5. MCP 工具(`mcp_server.py`):`monitor_state`、`signals`、`alerts_open`、`diagnose`、`sentinel_panels`、`get_quota`;`act`(确认)仅在 `--allow-ack` 时可用。
-6. 钩子:`python monitor_cli.py ai-hook install [--assistant|--cursor|--generic] [--scope project|user] [--dry-run]`(还有 `status` 和 `uninstall`)添加一个小脚本,在 AI 会话开始时和结束前把简报交给它。
+5. MCP 工具(`bin/mcp_server.py`):`monitor_state`、`signals`、`alerts_open`、`diagnose`、`sentinel_panels`、`get_quota`;`act`(确认)仅在 `--allow-ack` 时可用。
+6. 钩子:`python bin/monitor_cli.py ai-hook install [--assistant|--cursor|--generic] [--scope project|user] [--dry-run]`(还有 `status` 和 `uninstall`)添加一个小脚本,在 AI 会话开始时和结束前把简报交给它。
 
 ## 逐步操作
 1. 设置中的“外部 AI”标签页,“AI 警报”区块:打开 `ai_alerts.enabled`。可选 `ai_alerts.diagnose.enabled`(失败的步骤和每个红色运行日志的最后几行)、`ai_alerts.stream.enabled` 和 `ai_alerts.client_hook.enabled`。
-2. 运行 `python monitor_cli.py ai-hook install --assistant --dry-run` 查看改动,然后去掉 `--dry-run` 再运行。
+2. 运行 `python bin/monitor_cli.py ai-hook install --assistant --dry-run` 查看改动,然后去掉 `--dry-run` 再运行。
 3. 在该文件夹中打开 AI 工具的会话:它会收到简报。底部状态栏显示 AI 的心跳(最近一次读取的时间)。
 4. 使用设置页面的“测试连接”按钮检查信息流是否已写入。
 

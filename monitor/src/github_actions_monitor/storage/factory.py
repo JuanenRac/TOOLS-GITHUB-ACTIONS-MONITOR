@@ -41,8 +41,8 @@ def create_storage(block=None, account_id=None, lite=False, base_dir=None):
             return SqliteStorage(cfg["path"], cfg["busy_timeout_ms"])
         if accounts.layout(base_dir) == "accounts" or account_id not in (None, accounts.DEFAULT_ID):
             return SqliteStorage(accounts.account_dir(account_id or accounts.DEFAULT_ID, base_dir) / DB_NAME, cfg["busy_timeout_ms"])
-        from github_actions_monitor.util.paths import ROOT
-        return SqliteStorage((Path(base_dir) if base_dir else ROOT) / DB_NAME, cfg["busy_timeout_ms"])
+        from github_actions_monitor.util import paths
+        return SqliteStorage(paths.place(DB_NAME, base_dir), cfg["busy_timeout_ms"])
     if cfg["backend"] != "file":
         raise base.StorageError("backend")
     if cfg["path"]:
@@ -50,7 +50,7 @@ def create_storage(block=None, account_id=None, lite=False, base_dir=None):
     if accounts.layout(base_dir) == "accounts" or account_id not in (None, accounts.DEFAULT_ID):
         return FileStorage(accounts.root_dir(base_dir), "accounts")
     from github_actions_monitor.util.paths import ROOT
-    return FileStorage(Path(base_dir) if base_dir else ROOT, "flat")
+    return FileStorage(Path(base_dir) if base_dir else ROOT, "flat")      # the product folder: config/, data/, logs/ ... are resolved inside it
 
 
 def create_global_storage(block=None, lite=False, base_dir=None):

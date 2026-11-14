@@ -50,12 +50,11 @@ from github_actions_monitor.security import private_io
 from github_actions_monitor.storage import state_io
 
 from github_actions_monitor.util import paths
-from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
 GITHUB_DIR = workspace.workspace_root_soft()
 SIGNED_DIR = workspace.signed_dir_soft()   # local records of the signing: batches/*.json and <REPO>/release-<version>/ (optional: without it the monitor runs in reduced mode)
 AUDIT_DIR = workspace.audit_dir_soft()
-CACHE_FILE = HERE / "sentinel_cache.json"
-HISTORY_FILE = HERE / "sentinel_history.json"
+CACHE_FILE = paths.place("sentinel_cache.json")
+HISTORY_FILE = paths.place("sentinel_history.json")
 HISTORY_DAYS = 60
 # One criterion of "red", the same as the public dashboard (the profile repository's scripts/ci_watch.py: RED = failure, timed_out, startup_failure, action_required).
 # A run that waits for an approval is red too: it needs a person. Cancelled, skipped, neutral and stale say nothing.

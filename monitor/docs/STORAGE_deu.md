@@ -17,7 +17,7 @@ Pro Konto: die Konfiguration (`actions_monitor.json`), der Zustand der Wächter,
 
 |  | `file` (Standard) | `sqlite` |
 |---|---|---|
-| Wo | `accounts/<id>/` (neben den Startdateien, wenn es kein `accounts/` gibt) | `accounts/<id>/storage.sqlite3`, eine Datenbank pro Konto |
+| Wo | `data/accounts/<id>/` (die Dateien von `data/` und `config/`, wenn es kein `accounts/` gibt) | `accounts/<id>/storage.sqlite3`, eine Datenbank pro Konto |
 | Schreiben | eine temporäre Datei, auf die Platte geschrieben, dann umbenannt | eine kurze Transaktion, WAL-Journal |
 | Wählen Sie ihn für | eine Person; Dateien, die Sie lesen und bearbeiten können | einen Dienst, der monatelang läuft; viele Ereignisse |
 

@@ -18,8 +18,8 @@ from pathlib import Path
 from github_actions_monitor.security import private_io
 from github_actions_monitor.storage import state_io
 
-from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
-STATE_FILE = HERE / "alert_mutes.json"      # an account moves it into its own folder (accounts.STATE_FILES)
+from github_actions_monitor.util import paths
+STATE_FILE = paths.place("alert_mutes.json")      # an account moves it into its own folder (accounts.STATE_FILES)
 SCOPES = ("alert", "code", "sentinel")
 DEFAULT_HOURS = 24
 MAX_HOURS = 720

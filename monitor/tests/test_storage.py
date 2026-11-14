@@ -269,7 +269,7 @@ class FileLayout(unittest.TestCase):
         self.assertEqual(found, {"actions_monitor.json", "sentinel_state/sentinel_cache.json", "sentinel_state/collab_state.json", "events/events_state.json", "alert_mutes.json",
                                  "update_check.json", "analytics/analytics_history.json", "events/events_monitor.jsonl"})
 
-    def test_the_flat_installation_keeps_the_names_next_to_the_launchers(self):
+    def test_the_flat_installation_keeps_the_names_in_the_folders_of_the_product(self):
         s = file_storage.FileStorage(self.root, "flat")
         s.save_config("default", {"github_owner": "x"})
         s.save_sentinel_state("default", "sentinel_cache", {"a": 1})
@@ -279,7 +279,7 @@ class FileLayout(unittest.TestCase):
         s.save_analytics("default", {"daily": {}})
         s.append_event("default", {"kind": "k"})
         found = {p.relative_to(self.root).as_posix() for p in self.root.rglob("*") if p.is_file()}
-        self.assertEqual(found, {"actions_monitor.json", "sentinel_cache.json", "collab_state.json", "events_state.json", "alert_mutes.json", "analytics_history.json", "events_monitor.jsonl"})
+        self.assertEqual(found, {"config/actions_monitor.json", "data/sentinel_cache.json", "data/collab_state.json", "data/events_state.json", "data/alert_mutes.json", "data/analytics_history.json", "data/events_monitor.jsonl"})
         self.assertEqual(s.list_accounts(), ["default"])
         self.assertEqual(s.verify(), [])
 
@@ -380,10 +380,10 @@ class Factory(unittest.TestCase):
         self.assertEqual((s.backend, s.layout, s.root), ("file", "flat", self.root))
 
     def test_with_accounts_it_is_the_layout_of_accounts(self):
-        (self.root / "accounts" / "alpha").mkdir(parents=True)
-        (self.root / "accounts" / "alpha" / "actions_monitor.json").write_text("{}", encoding="utf-8")
+        (self.root / "data" / "accounts" / "alpha").mkdir(parents=True)
+        (self.root / "data" / "accounts" / "alpha" / "actions_monitor.json").write_text("{}", encoding="utf-8")
         s = factory.create_storage({"backend": "file"}, "alpha", base_dir=self.root)
-        self.assertEqual((s.layout, s.root), ("accounts", self.root / "accounts"))
+        self.assertEqual((s.layout, s.root), ("accounts", self.root / "data" / "accounts"))
 
     def test_a_path_sets_the_folder_of_the_accounts(self):
         s = factory.create_storage({"backend": "file", "path": str(self.root / "elsewhere")}, "alpha", base_dir=self.root)

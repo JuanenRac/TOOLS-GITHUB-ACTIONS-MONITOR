@@ -38,8 +38,8 @@ from github_actions_monitor import i18n
 from github_actions_monitor.security import private_io
 from github_actions_monitor.storage import state_io
 
-from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
-CACHE_FILE = HERE / "sentinel_ai_cache.json"
+from github_actions_monitor.util import paths
+CACHE_FILE = paths.place("sentinel_ai_cache.json")
 # the label shown with every answer is the text "ai.label" of the current language
 LABEL = "ai.label"
 VERDICTS = ("falso positivo", "real", "dudosa")

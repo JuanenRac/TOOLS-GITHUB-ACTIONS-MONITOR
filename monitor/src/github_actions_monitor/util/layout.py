@@ -44,6 +44,10 @@ def stale(root=None):
     for path in sorted(root.glob("*.py")):
         if path.stem in modules and not is_entry_point(path):
             found.append(Path(path.name))
+    if (root / "bin").is_dir():       # 1.8.2: the entry points moved to bin/; the ones next to the launchers are the old copies (a hook registered by their path must be registered again: monitor_cli.py ai-hook install)
+        for path in sorted((root / "bin").glob("*.py")):
+            if (root / path.name).is_file() and is_entry_point(root / path.name):
+                found.append(Path(path.name))
     for name in MOVED_ASSETS:
         if (root / name).is_file() and (root / "assets").is_dir():
             found.append(Path(name))

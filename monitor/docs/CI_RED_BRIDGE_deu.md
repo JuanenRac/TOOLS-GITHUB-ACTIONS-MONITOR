@@ -11,7 +11,7 @@ Was der Monitor schreibt, wie man es exportiert und was ein Leser der Datei brau
 
 ## Was der Monitor schreibt
 
-`ci_red.json` neben `actions_monitor.py`, nach jedem Durchlauf des Wächters aktualisiert (Schema 2):
+`ci_red.json` neben `bin/actions_monitor.py`, nach jedem Durchlauf des Wächters aktualisiert (Schema 2):
 
 | Feld | Bedeutung |
 |---|---|
@@ -27,8 +27,8 @@ Was der Monitor schreibt, wie man es exportiert und was ein Leser der Datei brau
 ## So exportieren Sie es
 
 ```
-py -3 read_report.py --export-status DIR          # ci_status_public.json + .md, nur was veröffentlicht werden darf
-py -3 read_report.py --export-sign-queue FILE     # die Signaturwarteschlange
+py -3 bin/read_report.py --export-status DIR          # ci_status_public.json + .md, nur was veröffentlicht werden darf
+py -3 bin/read_report.py --export-sign-queue FILE     # die Signaturwarteschlange
 ```
 
 Beide lesen den laufenden Monitor auf `127.0.0.1` (ohne GitHub-Kontingent). Sie weigern sich zu schreiben, solange der Snapshot lädt, und nennen den Grund; der Exitcode ist in diesem Fall nicht null.
@@ -46,7 +46,7 @@ Er veröffentlicht die Datei nicht, pusht nicht in das Profil-Repository und ber
 
 ## Das Dashboard des Profils (Vertrag des Verbrauchers)
 
-Das Status-Dashboard eines Profil-Repositorys kann dasselbe Dokument auf zwei Wegen lesen: vom laufenden Monitor (`GET /api/outputs/dashboard.json`, aus, bis `outputs.dashboard.enabled` an ist, nur dieser Rechner) oder aus der Datei, die `py -3 read_report.py --export-status DIR` schreibt (nur rote Workflows, nie die Signaturseite). Worauf sich das Dashboard verlassen darf, von einem Test dieses Repositorys geprüft:
+Das Status-Dashboard eines Profil-Repositorys kann dasselbe Dokument auf zwei Wegen lesen: vom laufenden Monitor (`GET /api/outputs/dashboard.json`, aus, bis `outputs.dashboard.enabled` an ist, nur dieser Rechner) oder aus der Datei, die `py -3 bin/read_report.py --export-status DIR` schreibt (nur rote Workflows, nie die Signaturseite). Worauf sich das Dashboard verlassen darf, von einem Test dieses Repositorys geprüft:
 
 1. `schema` ist `2`, Felder werden nur hinzugefügt.
 2. Das ausgelieferte Dokument ist genau das von `ci_red.json`.

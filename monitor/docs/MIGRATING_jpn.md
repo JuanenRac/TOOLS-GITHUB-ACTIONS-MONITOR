@@ -12,8 +12,8 @@
 ## 手順
 
 1. モニターを停止し、新しいバージョンを古いフォルダーの上に展開します（`actions_monitor.json` は残します）。
-2. 何が変わるかを確認します：`python migrate_state.py`（ドライラン。何も変更しません）。
-3. 実行します：`python migrate_state.py --apply` は古いファイルを新しい名前にコピーし、古いファイルは残します。`--move` を付けると代わりに名前を変更します。既にあるものは上書きされず、設定 `parte_history_days` は `actions_monitor.json` のコピーを保存した後に `report_history_days` になります。
+2. 何が変わるかを確認します：`python bin/migrate_state.py`（ドライラン。何も変更しません）。
+3. 実行します：`python bin/migrate_state.py --apply` は古いファイルを新しい名前にコピーし、古いファイルは残します。`--move` を付けると代わりに名前を変更します。既にあるものは上書きされず、設定 `parte_history_days` は `actions_monitor.json` のコピーを保存した後に `report_history_days` になります。
 4. モニターは `MONITOR_GITHUB_ACTIONS`（これまでと同じランチャー）で起動し、バッチツールには `BATCH_GITHUB_ACTIONS` を使います。
 5. 残っている古いランチャーを削除します：`LOTE_GITHUB_ACTIONS.bat`、`.sh`、`.command`。
 
@@ -21,7 +21,7 @@
 
 | 1.5.0 より前 | 1.5.0 以降 |
 |---|---|
-| `leer_parte.py` | `read_report.py` |
+| `leer_parte.py` | `bin/read_report.py` |
 | `eventos.py`, `parte_history.py` | `events.py`, `report_history.py` |
 | `LOTE_GITHUB_ACTIONS.*` | `BATCH_GITHUB_ACTIONS.*` |
 | `eventos_monitor.jsonl`, `eventos_estado.json` | `events_monitor.jsonl`, `events_state.json` |
@@ -39,7 +39,7 @@
 
 1. モニターを止め、新しいバージョンを古いフォルダーの上に展開します（`actions_monitor.json` とカタログファイルは残します）。
 2. 今までどおり起動します。隣に新しいファイル（`etag_cache.json`、`analytics_history.json`、`update_check.json`、`sentinel_history.json`）が作られます。いつでも削除できます。
-3. 任意: `python actions_monitor.py --doctor` でインストールを確認できます。
+3. 任意: `python bin/actions_monitor.py --doctor` でインストールを確認できます。
 
 変わる点: **lite 版**が加わりました（`MONITOR_LITE_GITHUB_ACTIONS`、ポート 8766、専用の `actions_monitor_lite.json`、センチネルなし）。**main で赤**は1つの規則になりました（各ワークフローの既定ブランチで最後に完了した run。取り消し・スキップ・neutral・stale は判定に影響しません）。そのため数値が 1.5.x と異なる場合があります。設定ページは先頭に**基本**タブがあります。通知、分析、リンター、webhook イベント、AI アシスタントはありますが、有効にするまで**オフ**です。GitHub への書き込みには引き続き明示的な確認が必要です。Rich と Textual は任意で、Python 3.11 以上が必要です。
 
@@ -65,7 +65,7 @@
 - **HTTPS のネットワークモード**: ページからの変更が動作するようになりました。`Origin` にはセッションのスキームとモニターのポートが必要です。プロキシの背後ではアドレスにモニターのポートを残してください。そうしないと検査で拒否されます。
 - **ネットワークモード**: スキーマが `secure` とするすべての設定は、そのコンピューター自身からのみ変更できます(以前は `listen.`、`github_token.`、`act.`、`github_actions.` のみ)。別のコンピューターから `webhook.*` や `notify.*` などを変更していたスクリプトは 403 `local_only` を受け取ります。
 - **act**: Stop の後は実行がすぐに解放され、直後の開始は `busy` を返しません。
-- モニターの隣に新しいファイル `degraded.json` と `degraded_lite.json`(握りつぶした失敗のカウンター)ができます。いつでも削除できます。
+- `data/` に新しいファイル `degraded.json` と `degraded_lite.json`(握りつぶした失敗のカウンター)ができます。いつでも削除できます。
 - 変更履歴(ヘルプ > 変更履歴)が翻訳されました。言語ごとに `docs/CHANGELOG_<言語>.md` が1つあります。
 
 # 1.6.6 から 1.6.7 へ
@@ -86,13 +86,13 @@
 
 変換が必要なものはありません。`accounts/` フォルダーがなければ、モニターはこれまでとまったく同じように動作します。
 
-- **複数のアカウント** は任意です。使うには `python actions_monitor.py --migrate-accounts`（試験実行）を実行し、続けて `--apply` を付けてファイルを `accounts/default/` にコピーします。元のファイルは、あなたが削除するまで残ります。アカウントを追加するには `accounts/<id>/actions_monitor.json` を作ります。`ACCOUNTS.md` を参照してください。
-- `accounts/` フォルダーがあると、`python actions_monitor.py` はアカウントごとに 1 つのモニターを実行するスーパーバイザーを起動します。`--account <id>` は 1 つだけを実行します。lite 版にはこれらは一切ありません。
+- **複数のアカウント** は任意です。使うには `python bin/actions_monitor.py --migrate-accounts`（試験実行）を実行し、続けて `--apply` を付けてファイルを `accounts/default/` にコピーします。元のファイルは、あなたが削除するまで残ります。アカウントを追加するには `accounts/<id>/actions_monitor.json` を作ります。`ACCOUNTS.md` を参照してください。
+- `accounts/` フォルダーがあると、`python bin/actions_monitor.py` はアカウントごとに 1 つのモニターを実行するスーパーバイザーを起動します。`--account <id>` は 1 つだけを実行します。lite 版にはこれらは一切ありません。
 - 新機能: ページのアドレスでの `?view=` と `?chrome=0`、`GET /api/accounts`、`GET /api/live-status`、そしてすべてのアカウント向けの 1 つの `POST /api/webhook`。
 
 # 1.7.x から新しいフォルダ構成へ
 
-コードは `src/github_actions_monitor/` に、ページ・サンプルファイル・言語は `assets/` に、リリースと移行のスクリプトは `tools/` に置かれるようになりました。普段使うものは何も変わりません。起動スクリプト(`MONITOR_GITHUB_ACTIONS`、`MONITOR_LITE_GITHUB_ACTIONS`、`BATCH_GITHUB_ACTIONS`)は同じ場所にあり、同じアドレスとポートを開きます。このガイドのコマンド(`python read_report.py`、`python actions_monitor.py --doctor`、`python monitor_cli.py status` など)も、同じ名前の小さな入口ファイルが製品フォルダに残るため、そのまま動きます。起動スクリプトは `src/` をパスに加えて `python -m github_actions_monitor`(完全版)と `python -m github_actions_monitor.lite`(lite 版)を実行します。
+コードは `src/github_actions_monitor/` に、ページ・サンプルファイル・言語は `assets/` に、リリースと移行のスクリプトは `tools/` に置かれるようになりました。普段使うものは何も変わりません。起動スクリプト(`MONITOR_GITHUB_ACTIONS`、`MONITOR_LITE_GITHUB_ACTIONS`、`BATCH_GITHUB_ACTIONS`)は同じ場所にあり、同じアドレスとポートを開きます。このガイドのコマンド(`python bin/read_report.py`、`python bin/actions_monitor.py --doctor`、`python bin/monitor_cli.py status` など)も、同じ名前の小さな入口ファイルが製品フォルダに残るため、そのまま動きます。起動スクリプトは `src/` をパスに加えて `python -m github_actions_monitor`(完全版)と `python -m github_actions_monitor.lite`(lite 版)を実行します。
 
 データは移動しません。`actions_monitor.json`、キャッシュ、ログ、`config_backups/`、`accounts/`、独自のカタログファイルは、起動スクリプトの隣の製品フォルダに残り、`src/` の中には決して入りません。プログラムに同梱される中立のサンプルと `quotas.json` は `assets/examples/` に移りました。起動スクリプトの隣に自分の `quotas.json` を置けば、そちらが優先されます。
 
@@ -100,7 +100,7 @@
 
 1. モニターを止め、新しいバージョンを古いフォルダの上に展開します(`actions_monitor.json` は残します)。
 2. いつもどおり起動します。ほかに何もしなくても動きます。
-3. 古いフラット構成の残りを片付けるには、`python tools/migrate_layout.py`(ドライラン)を実行し、続けて `python tools/migrate_layout.py --apply` を実行します。設定ファイルを `layout_backup_<日時>/config/` にコピーし、古いモジュール・古いページ・古いサンプル・古い `locales/` フォルダを `layout_backup_<日時>/old_code/` に移動します。削除も上書きもせず、データには触れません。古いファイルが残っている間は `python actions_monitor.py --doctor` が知らせます。
+3. 古いフラット構成の残りを片付けるには、`python tools/migrate_layout.py`(ドライラン)を実行し、続けて `python tools/migrate_layout.py --apply` を実行します。設定ファイルを `layout_backup_<日時>/config/` にコピーし、古いモジュール・古いページ・古いサンプル・古い `locales/` フォルダを `layout_backup_<日時>/old_code/` に移動します。削除も上書きもせず、データには触れません。古いファイルが残っている間は `python bin/actions_monitor.py --doctor` が知らせます。
 4. 古いフラットな名前でモジュールを import していた自作スクリプト(`import read_report`)は、`src/` をパスに加えて `github_actions_monitor.<パッケージ>.<モジュール>` を import します。
 
 | パッケージ | 内容 |

@@ -9,7 +9,7 @@
 
 **1. Installa il necessario.** Python 3.11 o successivo e la GitHub CLI (`gh`). Poi accedi una volta: `gh auth login`. Il monitor non salva mai un token: lo chiede a `gh` (a meno che tu non attivi il token opzionale del monitor in Impostazioni > Avanzate).
 
-**2. Verifica tutto con un comando.** `python actions_monitor.py --doctor` indica, per ogni problema, il comando esatto che lo risolve. Vuoi dare prima un'occhiata? `python actions_monitor.py --demo` apre la pagina con dati inventati: senza `gh`, senza accesso, senza rete.
+**2. Verifica tutto con un comando.** `python bin/actions_monitor.py --doctor` indica, per ogni problema, il comando esatto che lo risolve. Vuoi dare prima un'occhiata? `python bin/actions_monitor.py --demo` apre la pagina con dati inventati: senza `gh`, senza accesso, senza rete.
 
 **3. Avvialo.** Doppio clic su `MONITOR_LITE_GITHUB_ACTIONS` per l'edizione semplice (porta 8766) o su `MONITOR_GITHUB_ACTIONS` per quella completa con sentinella (porta 8765). La finestra della console indica l'edizione, nel titolo e nella prima riga.
 

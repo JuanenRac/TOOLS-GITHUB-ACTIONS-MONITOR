@@ -31,7 +31,7 @@
 
 | | |
 |---|---|
-| **Version** | **1.8.0** · [alle Releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **1.8.1** · [alle Releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Voraussetzung** | Python 3.11+ und die GitHub-CLI (`gh auth login`); sonst nichts (die Konsolenansicht nutzt das optionale Paket `rich`) |
 | **Öffnet** | eine Seite nur auf `127.0.0.1`, in acht Sprachen |
 | **Schreibt auf GitHub** | nie von selbst: nur Stapelbefehle, die du mit ausdrücklichem `--go` startest |
@@ -39,12 +39,12 @@
 
 <!-- glance:begin -->
 
-**Heute gemessen** (v1.8.0)
+**Heute gemessen** (v1.8.1)
 
 | | |
 |---|---|
 | **Reifegrad** | functional |
-| **Tests** | 1588 Testmethoden (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 1616 Testmethoden (`python -m unittest discover -s monitor/tests`) |
 | **Einstellungen** | 313 Einstellungen, alle mit Hilfe |
 | **Sprachen** | 8 (Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch) |
 | **Im CI getestet auf** | ubuntu, windows, Python 3.11, 3.13 |
@@ -140,7 +140,7 @@ Jedes Bild folgt dem hellen oder dunklen Design Ihrer GitHub-Seite.
 - **Wächter**: Sicherheitswarnungen, Repository-Hygiene, alte Pull Requests, veröffentlichungsbereite Versionen, noch nicht signierte Builds und ein Bericht in einfacher Sprache.
 - **Collab-Wächter und eine Alarmliste**: offene Issues und Pull Requests, die einen Menschen brauchen (vergessen, kritisch, wartende Reviews, alte Entwürfe, Konflikte), nur lesend und mit eigener Uhr, dazu ein Reiter Alarme mit allen Wächtern in einer Liste, Filter nach Herkunft und lokale Stummschaltungen, die von selbst enden.
 - **Statusleiste, Vollbild und sortierbare Tabellen**: der wichtigste Hinweis (und ein Fenster mit allen), die Verbindung, das Kontingent, die letzte Lesung, der Modus, die Adresse und die Uhr am Fuß der Seite; ein Vollbild-Knopf; Repositories und Verlauf sortieren nach einer oder mehreren Spalten, mit den Spalten deiner Wahl.
-- **Die Befehlszeile als Client**: `monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) liest, was der laufende Monitor sagt, mit `--json` und stabilen Exit-Codes; sie schreibt nie nach GitHub.
+- **Die Befehlszeile als Client**: `bin/monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) liest, was der laufende Monitor sagt, mit `--json` und stabilen Exit-Codes; sie schreibt nie nach GitHub.
 - **Einstellungsseite**: Pfade, Intervalle, Kontingente und Schalter im Browser ändern; nur eine feste Liste geprüfter Schlüssel, mit Sicherung vor jedem Speichern.
 - **Diagramme und Verlauf**: Rechenminuten, Fehler und Erfolge mit animierten Balken und Tagesverlauf (berücksichtigt reduzierte Bewegung).
 - **Acht Sprachen** (en, es, de, fr, it, ja, zh, pt) mit Englisch als Basis; Wechsel in den Einstellungen.
@@ -161,13 +161,13 @@ Jedes Bild folgt dem hellen oder dunklen Design Ihrer GitHub-Seite.
 | nur sehen, was läuft und was fehlschlägt (**hier beginnen**) | `MONITOR_LITE_GITHUB_ACTIONS` | 8766 |
 | das ganze Konto für Sie überwacht: Alarme, Releases, Signatur, Bereitschaft, Analytik | `MONITOR_GITHUB_ACTIONS` (mit dem [Wächter](monitor/docs/SENTINEL_deu.md)) | 8765 |
 
-Das Konsolenfenster nennt die laufende Ausgabe in Titel und erster Zeile. Noch unsicher? `python actions_monitor.py --demo` öffnet die Seite mit erfundenen Daten, `--doctor` prüft Ihre Installation. [Ihre ersten fünf Minuten](monitor/docs/FIRST_STEPS_deu.md)
+Das Konsolenfenster nennt die laufende Ausgabe in Titel und erster Zeile. Noch unsicher? `python bin/actions_monitor.py --demo` öffnet die Seite mit erfundenen Daten, `--doctor` prüft Ihre Installation. [Ihre ersten fünf Minuten](monitor/docs/FIRST_STEPS_deu.md)
 
 ## Schnellstart
 
 1. Installiere Python 3.11 oder neuer und die [GitHub-CLI](https://cli.github.com/) und führe `gh auth login` aus.
 2. Lade dieses Repository (oder das Zip des neuesten Releases) herunter und öffne den Ordner `monitor`.
-3. Starte es: Windows `MONITOR_GITHUB_ACTIONS.bat`, Linux `./MONITOR_GITHUB_ACTIONS.sh`, macOS Doppelklick auf `MONITOR_GITHUB_ACTIONS.command`, oder überall `python actions_monitor.py`.
+3. Starte es: Windows `MONITOR_GITHUB_ACTIONS.bat`, Linux `./MONITOR_GITHUB_ACTIONS.sh`, macOS Doppelklick auf `MONITOR_GITHUB_ACTIONS.command`, oder überall `python bin/actions_monitor.py`.
 4. Öffne die ausgegebene Adresse (`http://127.0.0.1:<Port>`). Beim ersten Start entsteht `actions_monitor.json` aus dem Beispiel.
 5. Öffne **Einstellungen**, um dein GitHub-Konto, die Ökosysteme (Gruppen von Repositories nach Namenspräfix) und alles Weitere festzulegen.
 
@@ -206,7 +206,7 @@ Standardmäßig aus, nur lokal (`127.0.0.1`) und ohne zusätzliches Token. Nach 
 - **Analytik**: p50 / p95 von Dauer, Wartezeit und jedem Schritt jedes Workflows, instabile Workflows (fehlgeschlagen, dann bestanden auf demselben Commit) und langsamer gewordene Workflows; Export nach Prometheus und Grafana.
 - **Spart Kontingent und übersteht einen Ausfall**: bedingte Lesungen (ein 304 kostet nichts) und ein Modus mit letztem Bild und Offline-Banner, der von selbst weitermacht.
 - **Eingehender Webhook und Benachrichtigungen**: signierte Ereignisse aktualisieren ein Repository in Echtzeit; optionale Nachrichten an Telegram, Discord, Slack, Matrix, MQTT oder eine lokale Adresse (nie ein Schreibzugriff auf GitHub).
-- **Workflow-Linter und Konsolenansicht**: `lint_workflows.py` prüft `.github/workflows` vor dem Push; `tui.py` (optional, mit `rich`) zeigt ein Live-Raster in der Konsole.
+- **Workflow-Linter und Konsolenansicht**: `bin/lint_workflows.py` prüft `.github/workflows` vor dem Push; `bin/tui.py` (optional, mit `rich`) zeigt ein Live-Raster in der Konsole.
 - **KI-Assistent (standardmäßig aus)**: Zusammenfassungen, Einordnung und Erklärungen mit Ollama, einem OpenAI-kompatiblen Dienst, Anthropic oder `gh copilot`; Befehle nur aus einer geschlossenen Liste, ausgeführt erst nach Bestätigung jedes einzelnen.
 - Die Einstellungsseite schreibt eine feste Liste geprüfter Schlüssel, nachdem eine Sicherungskopie gespeichert wurde.
 
@@ -224,26 +224,26 @@ python -m unittest discover -s monitor/tests
 
 ```
 TOOLS-GITHUB-ACTIONS-MONITOR/
-├── monitor/                                das Programm
-├── docs/                                   Architektur, Bilder, Fahrplan
-├── tools/                                  Bilder, Anleitungen, Demo
-├── deploy/                                 Image, Compose, systemd
-├── images/                                 Banner und Bilder
-├── .github/                                CI und Formulare
-├── CHANGELOG.md                            Änderungen je Version
-├── LICENSE NOTICE AUTHORS                  Lizenzen und Urheber
-├── CONTRIBUTING.md SECURITY.md             mithelfen, melden
-├── SUPPORT.md CODE_OF_CONDUCT.md           Support und Verhalten
+├── monitor/                            das Programm
+├── docs/                               Architektur, Bilder, Fahrplan
+├── tools/                              Bilder, Anleitungen, Demo
+├── deploy/                             Image, Compose, systemd
+├── images/                             Banner und Bilder
+├── .github/                            CI und Formulare
+├── CHANGELOG.md                        Änderungen je Version
+├── LICENSE NOTICE AUTHORS              Lizenzen und Urheber
+├── CONTRIBUTING.md SECURITY.md         mithelfen, melden
+├── SUPPORT.md CODE_OF_CONDUCT.md       Support und Verhalten
 └── monitor/
-    ├── MONITOR_GITHUB_ACTIONS.*            die Starter (Doppelklick)
-    ├── MONITOR_LITE_GITHUB_ACTIONS.*       die Lite-Ausgabe
-    ├── BATCH_GITHUB_ACTIONS.*              das Menü der Build-Stapel
-    ├── src/                                das importierbare Paket
-    ├── assets/                             Beispiele, Seite, Sprachen
-    ├── actions_monitor.py read_report.py   Einstiegspunkte der Werkzeuge
-    ├── tests/                              Offline-Tests
-    ├── docs/                               Anleitungen, Schemas
-    └── tools/                              Release- und Migrationsskripte
+    ├── MONITOR_GITHUB_ACTIONS.*        die Starter (Doppelklick)
+    ├── MONITOR_LITE_GITHUB_ACTIONS.*   die Lite-Ausgabe
+    ├── BATCH_GITHUB_ACTIONS.*          das Menü der Build-Stapel
+    ├── src/                            das importierbare Paket
+    ├── assets/                         Beispiele, Seite, Sprachen
+    ├── bin/                            die kurzen Befehle (read_report, monitor_cli ...)
+    ├── tests/                          Offline-Tests
+    ├── docs/                           Anleitungen, Schnellstarts, Schemas
+    └── tools/                          Release- und Migrationsskripte
 ```
 
 ## Dokumentation
@@ -259,7 +259,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ANALYTICS_deu.md`](monitor/docs/ANALYTICS_deu.md): Analytik, bedingte Lesungen und verlorene Verbindung
 - [`monitor/docs/CONSOLE_TOOLS_deu.md`](monitor/docs/CONSOLE_TOOLS_deu.md): der Workflow-Linter und die Konsolenansicht
 - [`monitor/docs/DEPLOYMENT_deu.md`](monitor/docs/DEPLOYMENT_deu.md): als Dienst betreiben (das offizielle Image, Compose, systemd), hinter einem Proxy, wenn GitHub den Zugang widerruft, Berechtigungen
-- [`monitor/QUICKSTART_de.txt`](monitor/QUICKSTART_de.txt): erste Schritte, in acht Sprachen
+- [`monitor/docs/LAYOUT_deu.md`](monitor/docs/LAYOUT_deu.md): die Ordner des Monitors, der Umzug ab 1.8.1 und die Karte für KIs
+- [`monitor/docs/QUICKSTART_de.txt`](monitor/docs/QUICKSTART_de.txt): erste Schritte, in acht Sprachen
 - [`monitor/docs/FIRST_STEPS_deu.md`](monitor/docs/FIRST_STEPS_deu.md): Ihre ersten fünf Minuten
 - [`monitor/docs/SENTINEL_deu.md`](monitor/docs/SENTINEL_deu.md): der Wächter und seine Prüfungen A1-A13
 - [`monitor/docs/COLLAB_deu.md`](monitor/docs/COLLAB_deu.md): der Collab-Wächter, der Reiter Alarme und die Stummschaltungen

@@ -17,7 +17,7 @@
 
 |  | `file`(默认) | `sqlite` |
 |---|---|---|
-| 位置 | `accounts/<id>/`(没有 `accounts/` 时在启动器旁边) | `accounts/<id>/storage.sqlite3`,每个账户一个数据库 |
+| 位置 | `data/accounts/<id>/`(没有 `accounts/` 时为 `data/` 和 `config/` 中的文件) | `accounts/<id>/storage.sqlite3`,每个账户一个数据库 |
 | 写入 | 先写临时文件并刷到磁盘,再改名 | 一个短事务,WAL 日志 |
 | 适用于 | 个人使用;可以阅读和编辑的文件 | 连续运行数月的服务;事件很多 |
 

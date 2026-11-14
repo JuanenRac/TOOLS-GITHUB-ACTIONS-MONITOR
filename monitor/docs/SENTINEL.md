@@ -15,7 +15,7 @@ The **sentinel** is the second half of the complete edition. The *monitor* shows
 
 It starts with the complete monitor and runs in the same process, in its own thread, with its own budget of GitHub calls (`sentinel.budget_per_hour`, 600 by default, and `sentinel.max_calls_per_tick`). When the allowance of GitHub is below `sentinel.min_rate_remaining` it stops asking and the page says it is paused for quota. Nothing it does writes to GitHub.
 
-## Files it writes (next to the monitor, never published)
+## Files it writes (in the folders of the monitor, never published)
 
 | File | What it holds |
 |---|---|

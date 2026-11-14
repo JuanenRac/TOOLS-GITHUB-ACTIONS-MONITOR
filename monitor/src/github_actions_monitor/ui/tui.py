@@ -3,7 +3,7 @@
 # GPL-3.0-or-later - see LICENSE
 """A live terminal view of the running monitor (OPTIONAL: it needs the `rich` package; nothing else of the monitor does).
 
-  py -3 tui.py [--port 8765] [--refresh 5] [--once] [--theme dark|light] [--lang CODE]
+  py -3 bin/tui.py [--port 8765] [--refresh 5] [--once] [--theme dark|light] [--lang CODE]
 
 It reads the local monitor on 127.0.0.1 (`/api/data` and `/api/sentinel`: no GitHub quota is used) and draws a grid that refreshes by itself: what is running, the red workflows, what waits for a
 signature and the report of the sentinel. It is read-only: there is no key that re-runs, closes or writes anything. Quit with Ctrl+C.

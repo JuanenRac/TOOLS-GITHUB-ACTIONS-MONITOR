@@ -33,8 +33,8 @@ cleanup() {
   chmod -R u+rwX "$WORK" 2>/dev/null; rm -rf "$WORK"
 }
 trap cleanup EXIT
-cli() { docker exec -e MONITOR_ACCESS_TOKEN="$ACCESS" "$NAME" python /app/monitor_cli.py "$@"; }
-cli_in() { docker exec -i -e MONITOR_ACCESS_TOKEN="$ACCESS" "$NAME" python /app/monitor_cli.py "$@"; }
+cli() { docker exec -e MONITOR_ACCESS_TOKEN="$ACCESS" "$NAME" python /app/bin/monitor_cli.py "$@"; }
+cli_in() { docker exec -i -e MONITOR_ACCESS_TOKEN="$ACCESS" "$NAME" python /app/bin/monitor_cli.py "$@"; }
 account_state() { cli accounts --json 2>/dev/null | python3 -c 'import json,sys; d=json.load(sys.stdin)["data"]; print({a["id"]: a["state"] for a in d["accounts"]}.get(sys.argv[1], "?"))' "$1"; }
 wait_for() { # wait_for SECONDS "description" command...
   local limit="$1" what="$2"; shift 2
@@ -70,8 +70,8 @@ wait_for 150 "the container is healthy (deep health check)" bash -c "[ \"\$(dock
 check "it does not run as root" bash -c "[ \"\$(docker exec $NAME id -u)\" != 0 ]"
 check "the code is read-only" bash -c "! docker exec $NAME sh -c 'echo x > /app/src/github_actions_monitor/__init__.py'"
 check "the deep health check from the command line says healthy" cli health --deep
-check "it says it listens on the network" bash -c "docker exec -e MONITOR_ACCESS_TOKEN=$ACCESS $NAME python /app/monitor_cli.py accounts --json | python3 -c 'import json,sys; sys.exit(0 if json.load(sys.stdin)[\"data\"][\"listening\"] == \"network\" else 1)'"
-check "without the access token every request is refused" bash -c "! docker exec -e MONITOR_ACCESS_TOKEN= $NAME python /app/monitor_cli.py accounts"
+check "it says it listens on the network" bash -c "docker exec -e MONITOR_ACCESS_TOKEN=$ACCESS $NAME python /app/bin/monitor_cli.py accounts --json | python3 -c 'import json,sys; sys.exit(0 if json.load(sys.stdin)[\"data\"][\"listening\"] == \"network\" else 1)'"
+check "without the access token every request is refused" bash -c "! docker exec -e MONITOR_ACCESS_TOKEN= $NAME python /app/bin/monitor_cli.py accounts"
 wait_for 120 "alpha is ok" state_is alpha ok
 wait_for 120 "beta is ok" state_is beta ok
 
@@ -79,9 +79,9 @@ say "--- the login of alpha is revoked ---"
 printf '%s\n' "$GOOD3" > "$WORK/good"       # GOOD1 (the token of alpha) is no longer accepted; the token of beta stays good
 wait_for 240 "alpha turns blind" state_is alpha blind
 check "beta is still ok (only that account is blind)" state_is beta ok
-check "the critical system alert is open" bash -c "cli() { docker exec -e MONITOR_ACCESS_TOKEN=$ACCESS $NAME python /app/monitor_cli.py \"\$@\"; }; cli alerts --account alpha --sentinel system --json | python3 -c 'import json,sys; a=json.load(sys.stdin)[\"data\"][\"alerts\"]; sys.exit(0 if any(x[\"level\"]==\"critical\" and x[\"code\"]==\"system.credential_blind\" for x in a) else 1)'"
+check "the critical system alert is open" bash -c "cli() { docker exec -e MONITOR_ACCESS_TOKEN=$ACCESS $NAME python /app/bin/monitor_cli.py \"\$@\"; }; cli alerts --account alpha --sentinel system --json | python3 -c 'import json,sys; a=json.load(sys.stdin)[\"data\"][\"alerts\"]; sys.exit(0 if any(x[\"level\"]==\"critical\" and x[\"code\"]==\"system.credential_blind\" for x in a) else 1)'"
 check "the deep health check stays green (a restart does not fix a lost login)" cli health --deep
-check "the status command says the account cannot sign in" bash -c "cli() { docker exec -e MONITOR_ACCESS_TOKEN=$ACCESS $NAME python /app/monitor_cli.py \"\$@\"; }; ! cli status --account alpha"
+check "the status command says the account cannot sign in" bash -c "cli() { docker exec -e MONITOR_ACCESS_TOKEN=$ACCESS $NAME python /app/bin/monitor_cli.py \"\$@\"; }; ! cli status --account alpha"
 
 say "--- a new login without a restart ---"
 STARTED="$(docker inspect -f '{{.State.StartedAt}}' "$NAME")"
@@ -92,7 +92,7 @@ printf '%s\n%s\n' "$GOOD2" "$GOOD3" > "$WORK/good"
 printf '%s\n' "$GOOD2" | cli_in credential replace --account alpha --new-token-file - >/dev/null 2>&1
 [ $? -eq 0 ] && pass "the new token is accepted" || fail "the new token is accepted"
 wait_for 90 "alpha is ok again" state_is alpha ok
-check "the critical alert closed" bash -c "cli() { docker exec -e MONITOR_ACCESS_TOKEN=$ACCESS $NAME python /app/monitor_cli.py \"\$@\"; }; cli alerts --account alpha --sentinel system --json | python3 -c 'import json,sys; sys.exit(0 if not json.load(sys.stdin)[\"data\"][\"alerts\"] else 1)'"
+check "the critical alert closed" bash -c "cli() { docker exec -e MONITOR_ACCESS_TOKEN=$ACCESS $NAME python /app/bin/monitor_cli.py \"\$@\"; }; cli alerts --account alpha --sentinel system --json | python3 -c 'import json,sys; sys.exit(0 if not json.load(sys.stdin)[\"data\"][\"alerts\"] else 1)'"
 check "the new token is kept in the folder of that account only (mode 600)" bash -c "[ \"\$(docker exec $NAME stat -c %a /data/accounts/alpha/credential)\" = 600 ] && ! docker exec $NAME test -e /data/accounts/beta/credential_alpha"
 [ "$(docker inspect -f '{{.State.StartedAt}}' "$NAME")" = "$STARTED" ] && pass "nothing was restarted" || fail "nothing was restarted"
 check "the token is nowhere in the log" bash -c "! docker logs $NAME 2>&1 | grep -q '$GOOD2'"

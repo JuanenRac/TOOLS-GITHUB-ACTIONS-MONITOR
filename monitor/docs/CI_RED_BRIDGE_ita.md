@@ -11,7 +11,7 @@ Che cosa scrive il monitor, come esportarlo e che cosa serve a chi legge il file
 
 ## Che cosa scrive il monitor
 
-`ci_red.json` accanto a `actions_monitor.py`, aggiornato dopo ogni passaggio della sentinella (schema 2):
+`ci_red.json` accanto a `bin/actions_monitor.py`, aggiornato dopo ogni passaggio della sentinella (schema 2):
 
 | Campo | Significato |
 |---|---|
@@ -27,8 +27,8 @@ Che cosa scrive il monitor, come esportarlo e che cosa serve a chi legge il file
 ## Come esportarlo
 
 ```
-py -3 read_report.py --export-status DIR          # ci_status_public.json + .md, solo ciò che può essere pubblicato
-py -3 read_report.py --export-sign-queue FILE     # la coda di firma
+py -3 bin/read_report.py --export-status DIR          # ci_status_public.json + .md, solo ciò che può essere pubblicato
+py -3 bin/read_report.py --export-sign-queue FILE     # la coda di firma
 ```
 
 Entrambi leggono il monitor in esecuzione su `127.0.0.1` (senza quota di GitHub). Si rifiutano di scrivere mentre lo snapshot è in caricamento e ne spiegano il motivo; in tal caso il codice di uscita non è zero.
@@ -46,7 +46,7 @@ Non pubblica il file, non esegue push sul repository del profilo e non tocca alc
 
 ## Il dashboard del profilo (contratto del consumatore)
 
-Il dashboard di stato di un repository di profilo può leggere lo stesso documento in due modi: dal monitor in esecuzione (`GET /api/outputs/dashboard.json`, spento finché `outputs.dashboard.enabled` non è attivo, solo questo computer) o dal file scritto da `py -3 read_report.py --export-status DIR` (solo i workflow rossi, mai il lato firma). Ciò su cui il dashboard può contare, verificato da un test di questo repository:
+Il dashboard di stato di un repository di profilo può leggere lo stesso documento in due modi: dal monitor in esecuzione (`GET /api/outputs/dashboard.json`, spento finché `outputs.dashboard.enabled` non è attivo, solo questo computer) o dal file scritto da `py -3 bin/read_report.py --export-status DIR` (solo i workflow rossi, mai il lato firma). Ciò su cui il dashboard può contare, verificato da un test di questo repository:
 
 1. `schema` vale `2` e i campi si aggiungono soltanto.
 2. Il documento servito è esattamente quello di `ci_red.json`.

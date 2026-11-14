@@ -33,7 +33,7 @@ Alles hier Aufgeführte ist geschrieben und getestet; es ist entweder schon im H
 
 ## Geplant, in dieser Reihenfolge
 
-Jede Version enthält alles aus ihrem Abschnitt des Plans: nichts bleibt von einer früheren Version offen, und nichts wird auf die nächste verschoben. Nach 1.8.3 und nach 1.9.3 durchläuft das Produkt eine unabhängige Prüfung, deren Befunde in der folgenden Stabilisierungsversion geschlossen werden. Eine 1.8.1 gibt es nicht: Benutzer, Rollen und Sitzungen kommen mit 1.8.0.
+Jede Version enthält alles aus ihrem Abschnitt des Plans: nichts bleibt von einer früheren Version offen, und nichts wird auf die nächste verschoben. Nach 1.8.3 und nach 1.9.3 durchläuft das Produkt eine unabhängige Prüfung, deren Befunde in der folgenden Stabilisierungsversion geschlossen werden. 1.8.1 ist eine Korrekturversion von 1.8.0: Das Feld „Repositories werden geladen“ verschwindet mit dem letzten Repository, und das Neuladen der Seite holt die Daten sofort.
 
 ### 1.8.2 - Offizielles Docker-Image und Dienstmodus
 
@@ -95,7 +95,7 @@ Die Befehlszeile nimmt das Zugriffstoken unter seinem eigenen Namen, der Netzwer
 
 ## Erledigt in 1.7.4
 
-Eine Leiste am Fuß der Seite mit dem wichtigsten Hinweis (und einem Fenster mit allen), der Verbindung, dem Kontingent, der letzten Lesung, dem Modus, der Adresse und der Uhr; ein Vollbild-Knopf; Tabellen für Repositories und Verlauf, die nach einer oder mehreren Spalten sortieren, mit den Spalten deiner Wahl; `monitor_cli.py`, die Befehlszeile als Client des laufenden Monitors (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) mit `--json` und stabilen Exit-Codes samt Anleitung in acht Sprachen; die auf Reihenfolge geprüften Änderungsprotokolle, die README des Pakets ohne Verlauf darin und neu gezeichnete Bilder.
+Eine Leiste am Fuß der Seite mit dem wichtigsten Hinweis (und einem Fenster mit allen), der Verbindung, dem Kontingent, der letzten Lesung, dem Modus, der Adresse und der Uhr; ein Vollbild-Knopf; Tabellen für Repositories und Verlauf, die nach einer oder mehreren Spalten sortieren, mit den Spalten deiner Wahl; `bin/monitor_cli.py`, die Befehlszeile als Client des laufenden Monitors (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) mit `--json` und stabilen Exit-Codes samt Anleitung in acht Sprachen; die auf Reihenfolge geprüften Änderungsprotokolle, die README des Pakets ohne Verlauf darin und neu gezeichnete Bilder.
 
 ## Erledigt in 1.7.3
 

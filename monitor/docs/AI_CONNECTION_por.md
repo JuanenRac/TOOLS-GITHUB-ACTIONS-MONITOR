@@ -23,12 +23,12 @@ Um inventário de **sinais**, os mesmos que a página mostra: o separador Agora 
 2. `ai_alerts.jsonl`: uma linha por evento (aberto, reconhecido, resolvido), com um id estável.
 3. `GET /api/ai/state`: todo o inventário como JSON versionado (`schema`, `edition`, `signals`, `act`, `watch`), só de leitura. `GET /api/sentinel/panels` dá só os painéis.
 4. `GET /api/ai/stream`: eventos em direto (SSE), retomáveis, limitados em ouvintes e em tempo.
-5. Ferramentas MCP (`mcp_server.py`): `monitor_state`, `signals`, `alerts_open`, `diagnose`, `sentinel_panels`, `get_quota`; `act` (reconhecer) só com `--allow-ack`.
-6. O hook: `python monitor_cli.py ai-hook install [--assistant|--cursor|--generic] [--scope project|user] [--dry-run]` (também `status` e `uninstall`) junta um pequeno script que dá à sessão da IA o resumo ao começar e antes de terminar.
+5. Ferramentas MCP (`bin/mcp_server.py`): `monitor_state`, `signals`, `alerts_open`, `diagnose`, `sentinel_panels`, `get_quota`; `act` (reconhecer) só com `--allow-ack`.
+6. O hook: `python bin/monitor_cli.py ai-hook install [--assistant|--cursor|--generic] [--scope project|user] [--dry-run]` (também `status` e `uninstall`) junta um pequeno script que dá à sessão da IA o resumo ao começar e antes de terminar.
 
 ## Passo a passo
 1. Definições, separador *IA externa*, bloco *Alertas para IA*: ative `ai_alerts.enabled`. Opcionalmente `ai_alerts.diagnose.enabled` (o passo que falha e as últimas linhas do registo de cada execução vermelha), `ai_alerts.stream.enabled` e `ai_alerts.client_hook.enabled`.
-2. Execute `python monitor_cli.py ai-hook install --assistant --dry-run` para ver a alteração e depois sem `--dry-run`.
+2. Execute `python bin/monitor_cli.py ai-hook install --assistant --dry-run` para ver a alteração e depois sem `--dry-run`.
 3. Abra uma sessão da sua ferramenta de IA na pasta: recebe o resumo. A barra inferior mostra o batimento da IA (quando leu pela última vez).
 4. Use o botão *Testar ligação* da página de definições para verificar que o feed é escrito.
 

@@ -22,7 +22,7 @@ consulta de scrape o un refresco de un panel no gasta cuota de la API de GitHub.
 | `/api/outputs/grafana.json` | Tablas JSON para la fuente de datos «Infinity» / JSON de Grafana | `outputs.json.enabled` |
 | `/api/outputs/dashboard.json` | el documento de `ci_red.json` (esquema 2, véase CI_RED_SCHEMA_spa.md) para un panel de estado | `outputs.dashboard.enabled` |
 
-Una petición a una ruta cuyo interruptor está apagado recibe `404`. La forma anterior de entregar el mismo documento a un panel, `ci_red.json` y `read_report.py --export-status`, no cambia: es un contrato.
+Una petición a una ruta cuyo interruptor está apagado recibe `404`. La forma anterior de entregar el mismo documento a un panel, `ci_red.json` y `bin/read_report.py --export-status`, no cambia: es un contrato.
 
 ## Métricas de Prometheus
 
@@ -74,7 +74,7 @@ workflows de un repositorio a la vez hasta que terminan. De un panel de webhooks
 
 ## La cola de firma por confianza
 
-Cada fila de la cola tiene un `trust`: `verified` (la firma se comprobó con la clave pública), `unknown` (el formato no se puede comprobar aquí: nunca se adivina) o `failed` (se comprobó y no coincide). La pestaña Centinela tiene un filtro Firma con el número de cada tipo y marca las filas (borde verde, gris o rojo). Desde la consola: `py -3 read_report.py --export-sign-queue FILE --sign-trust failed`.
+Cada fila de la cola tiene un `trust`: `verified` (la firma se comprobó con la clave pública), `unknown` (el formato no se puede comprobar aquí: nunca se adivina) o `failed` (se comprobó y no coincide). La pestaña Centinela tiene un filtro Firma con el número de cada tipo y marca las filas (borde verde, gris o rojo). Desde la consola: `py -3 bin/read_report.py --export-sign-queue FILE --sign-trust failed`.
 
 ## En el modo red
 

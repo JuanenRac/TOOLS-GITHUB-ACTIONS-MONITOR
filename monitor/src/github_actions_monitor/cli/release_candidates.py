@@ -4,7 +4,7 @@
 """Release candidates: every project with at least ONE entry in CHANGELOG [Unreleased] whose latest published GitHub release is
 more than 2 days old is a candidate for closing its version and launching a release.
 
-  py -3 release_candidates.py [--days 2] [--min-entries 1] [--out FILE]
+  py -3 bin/release_candidates.py [--days 2] [--min-entries 1] [--out FILE]
 
 Lists the repositories of the ecosystems of the ecosystems file that this tool handles (never an "external" one; never the repositories without a CHANGELOG). Read-only (git + gh GET).
 Columns: entries, age of the last release in days (or "no release"), version in the changelog, and what the release carries

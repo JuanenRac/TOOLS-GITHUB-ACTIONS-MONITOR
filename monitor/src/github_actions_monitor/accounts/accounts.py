@@ -4,7 +4,7 @@
 
 The lite edition never imports this module: it watches one account and has no folder of accounts.
 
-Layout (next to the monitor, or where MONITOR_ACCOUNTS_DIR points; `MONITOR_ROOT` is the folder of the clones of the repositories and is not touched):
+Layout (in data/accounts next to the monitor, or where MONITOR_ACCOUNTS_DIR points; `MONITOR_ROOT` is the folder of the clones of the repositories and is not touched):
 
     accounts/
       global.json                 optional: {"default_account": "personal", "enabled_accounts": ["personal", "org-acme"] or "all"}
@@ -69,7 +69,7 @@ def clean_id(value, fallback=DEFAULT_ID):
 def root_dir(base=None):
     """The folder `accounts/`: MONITOR_ACCOUNTS_DIR when it is set, else next to the monitor (`base`)."""
     env = os.environ.get("MONITOR_ACCOUNTS_DIR", "").strip()
-    return Path(env) if env else Path(base or HERE) / "accounts"
+    return Path(env) if env else paths.place("accounts", base)
 
 
 def account_dir(account_id, base=None):
@@ -152,7 +152,12 @@ def migration_plan(base=None, source=None, account_id=DEFAULT_ID):
     target = account_dir(account_id, base)
     if (target / CONFIG_NAME).exists() or (target / MARKER).exists():
         return []
-    return [(source / old, target / new, "folder" if (source / old).is_dir() else "file") for old, new in LEGACY if (source / old).exists()]
+    items = []
+    for old, new in LEGACY:
+        found = next((c for c in (paths.place(old, source), source / old) if c.exists()), None)      # the place of now (data/, logs/ ...), else next to the launchers as before 1.8.2
+        if found is not None:
+            items.append((found, target / new, "folder" if found.is_dir() else "file"))
+    return items
 
 
 def migrate(base=None, source=None, account_id=DEFAULT_ID, apply=False):

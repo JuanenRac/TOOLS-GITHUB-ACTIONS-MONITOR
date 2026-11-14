@@ -219,28 +219,28 @@ class Factory(unittest.TestCase):
         self.root = Path(self.tmp.name)
 
     def test_sqlite_is_one_file_per_account_by_default(self):
-        (self.root / "accounts" / "alpha").mkdir(parents=True)
-        (self.root / "accounts" / "alpha" / "actions_monitor.json").write_text("{}", encoding="utf-8")
+        (self.root / "data" / "accounts" / "alpha").mkdir(parents=True)
+        (self.root / "data" / "accounts" / "alpha" / "actions_monitor.json").write_text("{}", encoding="utf-8")
         s = factory.create_storage({"backend": "sqlite"}, "alpha", base_dir=self.root)
         self.addCleanup(s.close)
-        self.assertEqual(s.path, self.root / "accounts" / "alpha" / "storage.sqlite3")
+        self.assertEqual(s.path, self.root / "data" / "accounts" / "alpha" / "storage.sqlite3")
 
     def test_a_path_is_one_shared_file(self):
         s = factory.create_storage({"backend": "sqlite", "path": str(self.root / "shared" / "all.db")}, "alpha", base_dir=self.root)
         self.addCleanup(s.close)
         self.assertEqual(s.path, self.root / "shared" / "all.db")
 
-    def test_a_single_installation_keeps_its_database_next_to_the_launchers(self):
+    def test_a_single_installation_keeps_its_database_in_data(self):
         s = factory.create_storage({"backend": "sqlite"}, None, base_dir=self.root)
         self.addCleanup(s.close)
-        self.assertEqual(s.path, self.root / "storage.sqlite3")
+        self.assertEqual(s.path, self.root / "data" / "storage.sqlite3")
 
     def test_the_global_records_have_a_storage_of_their_own(self):
         files = factory.create_global_storage(None, base_dir=self.root)
-        self.assertEqual((files.backend, files.root), ("file", self.root / "accounts"))
+        self.assertEqual((files.backend, files.root), ("file", self.root / "data" / "accounts"))
         sql = factory.create_global_storage({"backend": "sqlite"}, base_dir=self.root)
         self.addCleanup(sql.close)
-        self.assertEqual(sql.path, self.root / "accounts" / "_global" / "storage.sqlite3")
+        self.assertEqual(sql.path, self.root / "data" / "accounts" / "_global" / "storage.sqlite3")
         sql.put_record("users", "ana", {"role": "admin"})
         self.assertEqual(sql.get_record("users", "ana"), {"role": "admin"})
         self.assertEqual(factory.create_global_storage({"backend": "sqlite"}, lite=True, base_dir=self.root).backend, "file")

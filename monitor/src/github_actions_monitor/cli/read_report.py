@@ -3,7 +3,7 @@
 # GPL-3.0-or-later - see LICENSE
 """Prints, as short plain text, what the running monitor/sentinel says right now (report, red CI, builds stuck, unchecked repos, Dependabot count).
 
-  py -3 read_report.py [--port 8765] [--json] [--lang CODE]
+  py -3 bin/read_report.py [--port 8765] [--json] [--lang CODE]
 
 Reads http://127.0.0.1:<port>/api/sentinel (local only, no GitHub calls: it costs no API quota). If the monitor is not running it says so.
 """

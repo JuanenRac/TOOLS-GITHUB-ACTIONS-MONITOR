@@ -33,7 +33,7 @@ Tudo o que se segue está escrito e testado; ou já está no ramo principal, ou 
 
 ## Previsto, por esta ordem
 
-Cada versão leva tudo o que é do seu troço do plano: nada fica pendurado de uma versão anterior e nada se adia para a seguinte. Depois da 1.8.3 e depois da 1.9.3 o produto passa por uma revisão independente e as suas conclusões fecham-se na versão de estabilização seguinte. Não há 1.8.1: utilizadores, funções e sessões chegam com a 1.8.0.
+Cada versão leva tudo o que é do seu troço do plano: nada fica pendurado de uma versão anterior e nada se adia para a seguinte. Depois da 1.8.3 e depois da 1.9.3 o produto passa por uma revisão independente e as suas conclusões fecham-se na versão de estabilização seguinte. A 1.8.1 é uma versão corretiva da 1.8.0: a caixa «a carregar repositórios» desaparece com o último repositório e o recarregamento da página obtém logo os dados.
 
 ### 1.8.2 - Imagem Docker oficial e modo de serviço
 
@@ -95,7 +95,7 @@ A linha de comandos lê o token de acesso com o seu próprio nome, o modo de red
 
 ## Feito na 1.7.4
 
-Uma barra ao pé da página com o aviso mais importante (e uma janela com todos), a ligação, a quota, a última leitura, o modo, o endereço e o relógio; um botão de ecrã inteiro; tabelas de Repositórios e Histórico que se ordenam por uma ou várias colunas com as colunas à sua escolha; `monitor_cli.py`, a linha de comandos como cliente do monitor em execução (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) com `--json` e códigos de saída estáveis, e o seu guia em oito idiomas; os registos de alterações verificados na ordem, o README do pacote sem histórico lá dentro e as imagens redesenhadas.
+Uma barra ao pé da página com o aviso mais importante (e uma janela com todos), a ligação, a quota, a última leitura, o modo, o endereço e o relógio; um botão de ecrã inteiro; tabelas de Repositórios e Histórico que se ordenam por uma ou várias colunas com as colunas à sua escolha; `bin/monitor_cli.py`, a linha de comandos como cliente do monitor em execução (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) com `--json` e códigos de saída estáveis, e o seu guia em oito idiomas; os registos de alterações verificados na ordem, o README do pacote sem histórico lá dentro e as imagens redesenhadas.
 
 ## Feito na 1.7.3
 

@@ -9,7 +9,7 @@
 
 **1. 安装所需的两样东西。** Python 3.11 或更高版本，以及 GitHub CLI（`gh`）。然后登录一次：`gh auth login`。监视器从不保存令牌：它向 `gh` 索取（除非你在“设置 > 高级”中开启监视器的可选令牌）。
 
-**2. 用一条命令检查一切。** `python actions_monitor.py --doctor` 会为每个问题给出能修复它的确切命令。想先看看？`python actions_monitor.py --demo` 用虚构数据打开页面：无需 `gh`、登录或网络。
+**2. 用一条命令检查一切。** `python bin/actions_monitor.py --doctor` 会为每个问题给出能修复它的确切命令。想先看看？`python bin/actions_monitor.py --demo` 用虚构数据打开页面：无需 `gh`、登录或网络。
 
 **3. 启动。** 双击 `MONITOR_LITE_GITHUB_ACTIONS` 使用简易版（端口 8766），或双击 `MONITOR_GITHUB_ACTIONS` 使用带哨兵的完整版（端口 8765）。控制台窗口的标题和第一行会说明是哪个版本。
 

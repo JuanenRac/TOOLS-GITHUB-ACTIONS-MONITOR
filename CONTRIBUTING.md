@@ -1,7 +1,7 @@
 # Contributing to GitHub Actions Monitor
 
 ## Technology stack
-- **Language**: Python 3.11 or newer, the core needs no packages (the terminal view, `tui.py`, uses Rich, which is optional; the tests skip what needs it when it is missing).
+- **Language**: Python 3.11 or newer, the core needs no packages (the terminal view, `bin/tui.py`, uses Rich, which is optional; the tests skip what needs it when it is missing).
 - **Interface**: a local web page (`monitor/assets/static/actions_monitor.html`) served on `127.0.0.1`, plus command line tools.
 - **Data source**: the official GitHub command line client `gh` (read-only calls by default).
 

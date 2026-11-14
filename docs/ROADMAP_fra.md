@@ -33,7 +33,7 @@ Tout ce qui suit est écrit et testé ; c'est soit déjà dans la branche princi
 
 ## Prévu, dans cet ordre
 
-Chaque version porte tout ce qui est de son tronçon du plan : rien ne reste suspendu à une version antérieure et rien n'est repoussé à la suivante. Après la 1.8.3 et après la 1.9.3, le produit passe une revue indépendante dont les constats sont clos dans la version de stabilisation suivante. Il n'y a pas de 1.8.1 : utilisateurs, rôles et sessions arrivent avec la 1.8.0.
+Chaque version porte tout ce qui est de son tronçon du plan : rien ne reste suspendu à une version antérieure et rien n'est repoussé à la suivante. Après la 1.8.3 et après la 1.9.3, le produit passe une revue indépendante dont les constats sont clos dans la version de stabilisation suivante. 1.8.1 est une version corrective de la 1.8.0 : le cadre « chargement des dépôts » disparaît avec le dernier dépôt et le rechargement de la page obtient ses données aussitôt.
 
 ### 1.8.2 - Image Docker officielle et mode service
 
@@ -95,7 +95,7 @@ La ligne de commande prend le jeton d'accès sous son propre nom, le mode résea
 
 ## Fait dans la 1.7.4
 
-Une barre au pied de la page avec l'avis le plus important (et une fenêtre avec tous), la connexion, le quota, la dernière lecture, le mode, l'adresse et l'horloge ; un bouton plein écran ; des tableaux Dépôts et Historique qui se trient selon une ou plusieurs colonnes, avec les colonnes de votre choix ; `monitor_cli.py`, la ligne de commande comme client du moniteur en marche (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) avec `--json` et des codes de sortie stables, et son guide en huit langues ; les journaux des modifications vérifiés dans l'ordre, le README du paquet sans historique à l'intérieur et les images redessinées.
+Une barre au pied de la page avec l'avis le plus important (et une fenêtre avec tous), la connexion, le quota, la dernière lecture, le mode, l'adresse et l'horloge ; un bouton plein écran ; des tableaux Dépôts et Historique qui se trient selon une ou plusieurs colonnes, avec les colonnes de votre choix ; `bin/monitor_cli.py`, la ligne de commande comme client du moniteur en marche (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) avec `--json` et des codes de sortie stables, et son guide en huit langues ; les journaux des modifications vérifiés dans l'ordre, le README du paquet sans historique à l'intérieur et les images redessinées.
 
 ## Fait dans la 1.7.3
 

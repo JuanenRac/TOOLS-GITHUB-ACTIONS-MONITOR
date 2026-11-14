@@ -513,7 +513,7 @@ class Installer(Folder):
 
     def test_status_finds_what_is_installed_and_what_rules_it(self):
         self.assertFalse(ai_hook_install.status(str(self.folder), str(self.folder / "h"), {})["installed"])
-        ai_hook_install.install("assistant", "project", str(self.folder), python=sys.executable, script=str(HERE / "ai_hook.py"))
+        ai_hook_install.install("assistant", "project", str(self.folder), python=sys.executable, script=str(HERE / "bin" / "ai_hook.py"))
         report = ai_hook_install.status(str(self.folder), str(self.folder / "h"), {})
         self.assertTrue(report["installed"])
         row_ = [r for r in report["targets"] if r["target"] == "assistant" and r["scope"] == "project"][0]

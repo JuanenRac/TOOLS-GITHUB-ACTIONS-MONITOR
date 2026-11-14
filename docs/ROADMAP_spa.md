@@ -33,7 +33,7 @@ Todo lo que sigue está escrito y probado; o ya está en la rama principal o esp
 
 ## Previsto, en este orden
 
-Cada versión lleva todo lo de su tramo del plan: nada queda colgando de una versión anterior ni se aplaza a la siguiente. Tras la 1.8.3 y tras la 1.9.3 el producto pasa por una revisión independiente y sus hallazgos se cierran en la versión de estabilización siguiente. No hay 1.8.1: usuarios, roles y sesiones llegan con la 1.8.0.
+Cada versión lleva todo lo de su tramo del plan: nada queda colgando de una versión anterior ni se aplaza a la siguiente. Tras la 1.8.3 y tras la 1.9.3 el producto pasa por una revisión independiente y sus hallazgos se cierran en la versión de estabilización siguiente. La 1.8.1 es una versión correctiva de la 1.8.0: el cuadro «cargando repositorios» desaparece con el último repositorio y recargar la página trae los datos al instante.
 
 ### 1.8.2 - Imagen Docker oficial y modo servicio
 
@@ -95,7 +95,7 @@ La línea de comandos toma el token de acceso con su propio nombre, el modo red 
 
 ## Hecho en la 1.7.4
 
-Una barra al pie de la página con el aviso más importante (y una ventana con todos), la conexión, la cuota, la última lectura, el modo, la dirección y el reloj; un botón de pantalla completa; tablas de Repositorios e Historial que se ordenan por una o varias columnas con las columnas que elijas; `monitor_cli.py`, la línea de comandos como cliente del monitor en marcha (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) con `--json` y códigos de salida estables, y su guía en ocho idiomas; los registros de cambios comprobados en orden, el README del paquete sin historial dentro y los dibujos hechos de nuevo.
+Una barra al pie de la página con el aviso más importante (y una ventana con todos), la conexión, la cuota, la última lectura, el modo, la dirección y el reloj; un botón de pantalla completa; tablas de Repositorios e Historial que se ordenan por una o varias columnas con las columnas que elijas; `bin/monitor_cli.py`, la línea de comandos como cliente del monitor en marcha (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) con `--json` y códigos de salida estables, y su guía en ocho idiomas; los registros de cambios comprobados en orden, el README del paquete sin historial dentro y los dibujos hechos de nuevo.
 
 ## Hecho en la 1.7.3
 

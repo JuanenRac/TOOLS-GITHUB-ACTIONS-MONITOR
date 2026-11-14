@@ -15,7 +15,7 @@ El **centinela** es la segunda mitad de la edición completa. El *monitor* muest
 
 Arranca con el monitor completo y corre en el mismo proceso, en su propio hilo, con su propio presupuesto de llamadas a GitHub (`sentinel.budget_per_hour`, 600 por defecto, y `sentinel.max_calls_per_tick`). Cuando la cuota de GitHub baja de `sentinel.min_rate_remaining` deja de preguntar y la página dice que está en pausa por cuota. Nada de lo que hace escribe en GitHub.
 
-## Archivos que escribe (junto al monitor, nunca se publican)
+## Archivos que escribe (en las carpetas del monitor, nunca se publican)
 
 | Archivo | Qué contiene |
 |---|---|

@@ -19,8 +19,8 @@ from pathlib import Path
 
 from github_actions_monitor.security import private_io
 
-from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
-SCRIPT = HERE / "ai_hook.py"
+from github_actions_monitor.util import paths
+SCRIPT = paths.BIN / "ai_hook.py"
 MARKER = "ai_hook.py"
 TARGETS = ("assistant", "cursor", "generic")
 SCOPES = ("project", "user")

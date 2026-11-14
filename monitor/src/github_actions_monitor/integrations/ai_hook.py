@@ -2,7 +2,7 @@
 # GPL-3.0-or-later - see LICENSE
 """The gate script of an AI tool: it tells the AI session what the monitor sees, without a skill or a plugin. Installed by `monitor_cli.py ai-hook install` (see docs/AI_ALERTS.md).
 
-    python ai_hook.py EVENT [--format assistant|cursor|generic] [--config FILE]
+    python bin/ai_hook.py EVENT [--format assistant|cursor|generic] [--config FILE]
 
 The tool runs it at some moments and writes a JSON document to its standard input (`hook_event_name` among other things):
   * SessionStart / UserPromptSubmit: when real red alerts are open it writes the summary of ALERTS_BRIEF.md as extra context for the AI;
@@ -20,6 +20,18 @@ import time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parents[3]      # the product folder (src/github_actions_monitor/integrations/ai_hook.py): this gate script needs nothing but the standard library, not even the package
+
+
+def own_folder(kind):
+    """config/ or ai/ of the product (the same answer as util/paths.py, which this script does not import): MONITOR_<KIND>_DIR, else <data>/<kind> when MONITOR_DATA_DIR is set, else <product>/<kind>."""
+    chosen = (os.environ.get("MONITOR_" + kind.upper() + "_DIR") or "").strip()
+    if not chosen:
+        data = (os.environ.get("MONITOR_DATA_DIR") or "").strip()
+        return Path(data) / kind if data and kind != "config" else HERE / kind
+    path = Path(chosen)
+    return path if path.is_absolute() else HERE / path
+
+
 DEFAULTS = {"enabled": True, "block_on_stop": False, "cooldown_minutes": 20, "stale_hours": 3, "max_lines": 12, "max_chars": 2400}
 TEXTS = {
     "en": {"head": "[MONITOR] {n} real red alert(s) open (brief updated {age} ago):", "stale": "(Warning: the brief is {age} old; the monitor may be stopped.)",
@@ -54,7 +66,7 @@ def language(env=None):
 
 def load_config(path=None):
     """The `ai_alerts` block of the configuration file of the monitor (next to this script, or MONITOR_CONFIG, or --config), or {}."""
-    candidate = Path(path or os.environ.get("MONITOR_CONFIG") or HERE / "actions_monitor.json")
+    candidate = Path(path or os.environ.get("MONITOR_CONFIG") or own_folder("config") / "actions_monitor.json")
     try:
         data = json.loads(candidate.read_text(encoding="utf-8"))
         return data.get("ai_alerts") if isinstance(data.get("ai_alerts"), dict) else {}
@@ -78,7 +90,7 @@ def settings(block):
 def feed_folder(block):
     text = block.get("folder") if isinstance(block.get("folder"), str) else ""
     ok = bool(text.strip()) and len(text) <= 260 and not any(ord(c) < 32 for c in text) and not text.startswith(("\\\\", "//")) and not re.match(r"^(?:[Dd]:|/mnt/[dD](?:/|$))", text.strip())
-    return Path(text.strip()) if ok else HERE
+    return Path(text.strip()) if ok else own_folder("ai")
 
 
 def read_brief(folder, now):

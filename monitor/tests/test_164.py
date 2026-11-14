@@ -43,7 +43,7 @@ from github_actions_monitor.data_pipeline import orgs  # noqa: E402
 from github_actions_monitor.integrations import otlp  # noqa: E402
 from github_actions_monitor.data_pipeline import quota  # noqa: E402
 from github_actions_monitor.data_pipeline import redrule  # noqa: E402
-from github_actions_monitor.util import resilience  # noqa: E402
+from github_actions_monitor.util import paths, resilience  # noqa: E402
 from github_actions_monitor.integrations import runners  # noqa: E402
 from github_actions_monitor.security import secretstore  # noqa: E402
 from github_actions_monitor.app import settings_api  # noqa: E402
@@ -219,7 +219,7 @@ class DemoIsolation(unittest.TestCase):
                    "github_actions_log.jsonl", "welcome_state.json", "orgs_state.json"]
 
         def snapshot():
-            return {n: ((HERE / n).stat().st_mtime_ns, (HERE / n).read_bytes()) if (HERE / n).exists() else None for n in watched}
+            return {n: ((paths.place(n)).stat().st_mtime_ns, (paths.place(n)).read_bytes()) if (paths.place(n)).exists() else None for n in watched}
         before = snapshot()
         saved = (am.CONFIG_FILE, settings_api.CONFIG_FILE, toolconfig.CONFIG_FILE, dict(am.LIVE_CONFIG), settings_api.BACKUP_DIR, am.LITE["on"], am.DEMO["on"], am.LOG_FILE,
                  updatecheck.STATE_FILE, __import__("github_actions_monitor.data_pipeline.etagcache", fromlist=["_"]).CACHE_FILE, __import__("github_actions_monitor.data_pipeline.events", fromlist=["_"]).EVENTS_FILE, set(am.RESTART_PENDING))
@@ -380,7 +380,8 @@ class DoctorChecks(unittest.TestCase):
     def test_targets_only_example_is_a_warning_and_an_own_file_is_ok(self):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertEqual({c["id"]: c for c in doctor.run(self.runner, folder=tmp, ports=(0,))}["targets"]["status"], "warn")
-            (Path(tmp) / "targets.json").write_text("{}", encoding="utf-8")
+            (Path(tmp) / "config").mkdir()
+            (Path(tmp) / "config" / "targets.json").write_text("{}", encoding="utf-8")
             self.assertEqual({c["id"]: c for c in doctor.run(self.runner, folder=tmp, ports=(0,))}["targets"]["status"], "ok")
 
     def test_every_check_has_its_texts_in_every_language(self):
@@ -1275,13 +1276,13 @@ class SmallThings(unittest.TestCase):
 
     def test_the_readme_of_the_package_starts_with_the_choice_of_launcher(self):
         for lang in ("en", "es", "de", "fr", "it", "ja", "zh", "pt"):
-            head = "\n".join((HERE / f"README_{lang}.txt").read_text(encoding="utf-8").splitlines()[:24])
+            head = "\n".join((HERE / "docs" / f"README_{lang}.txt").read_text(encoding="utf-8").splitlines()[:24])
             for launcher in ("MONITOR_GITHUB_ACTIONS", "MONITOR_LITE_GITHUB_ACTIONS", "BATCH_GITHUB_ACTIONS", "--doctor", "--demo"):
                 self.assertIn(launcher, head, (lang, launcher))
             self.assertIn("tui_textual.py", head, lang)
 
     def test_the_version(self):
-        self.assertEqual(TOOL_VERSION, "1.8.0")
+        self.assertEqual(TOOL_VERSION, "1.8.1")
         if (ROOT / "electro-hobby-3d.project.json").is_file():          # not inside the zip
             self.assertEqual(json.loads((ROOT / "electro-hobby-3d.project.json").read_text(encoding="utf-8"))["version"], TOOL_VERSION)
         self.assertIn(f"## [{TOOL_VERSION}]", (HERE / "CHANGELOG.md").read_text(encoding="utf-8"))

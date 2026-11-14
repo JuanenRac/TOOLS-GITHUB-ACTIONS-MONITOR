@@ -44,7 +44,13 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 ### Corretto
 
 - Il test di un account che muore subito non dipende più dalla velocità del computer: l'attesa prima di riavviare un account viene verificata con un orologio che dà il test stesso, e un secondo test verifica il calendario delle attese senza leggere l'ora reale (il vecchio falliva sotto carico nella porta di una versione).
+
+## [1.8.1]
+
+### Corretto
+
 - Il riquadro «caricamento dei repository» restava sulla pagina dopo la lettura dell’ultimo repository: l’immagine completa arriva ora alla pagina appena finisce la lettura, senza attendere la manutenzione successiva (il riepilogo per gli strumenti di IA, il centro avvisi), e un lungo elenco di pannelli del Sentinel non può più far girare questo riepilogo all’infinito (quel ciclo teneva sulla pagina l’ultima immagine parziale, 131 / 131).
+
 - Ricaricare la pagina (F5) non richiede più minuti per ottenere i dati: il ciclo infinito del riepilogo consumava tutto il processore del monitor e la pagina si arrendeva con un’interruzione; inoltre la risposta dell’endpoint dei dati veniva scritta nella connessione con il blocco globale trattenuto, così una connessione ferma (una scheda chiusa) bloccava tutte le altre pagine e il ciclo di aggiornamento. Ora il blocco è trattenuto solo per prendere l’immagine. Un test nel browser verifica che il riquadro compaia durante il caricamento e scompaia con l’ultimo repository, e test del server verificano che il riepilogo termini, che l’immagine completa sia pubblicata prima della manutenzione e che una connessione ferma non blocchi un ricaricamento.
 
 ## [1.8.0]

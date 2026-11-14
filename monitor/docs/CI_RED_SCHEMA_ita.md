@@ -15,7 +15,7 @@ Dove viene scritto si imposta in `actions_monitor.json`:
 
 | chiave (`sentinel.`) | significato |
 |---|---|
-| `ci_red_file` | `""` = `ci_red.json` accanto al monitor (predefinito); `"off"` = non viene scritto; un percorso = lì (i percorsi relativi sono relativi alla cartella del monitor; un'unità D:, un percorso UNC o un'unità che il sistema in esecuzione non può usare viene rifiutata) |
+| `ci_red_file` | `""` = `ai/ci_red.json` del monitor (predefinito); `"off"` = non viene scritto; un percorso = lì (i percorsi relativi sono relativi alla cartella del monitor; un'unità D:, un percorso UNC o un'unità che il sistema in esecuzione non può usare viene rifiutata) |
 | `ci_red_audit_copy` | `true` lo copia anche nella cartella di audit quando questa esiste |
 
 ## Struttura
@@ -65,14 +65,14 @@ Nulla nel monitor pubblica questo file in un repository. Se una dashboard pubbli
 dati pubblici delle esecuzioni, oppure esporta tu stesso la parte non sensibile:
 
 ```
-python3 read_report.py --export-status DIR
+python3 bin/read_report.py --export-status DIR
 ```
 
 Questo scrive `ci_status_public.json` e `ci_status_public.md` nella cartella indicata e **solo** l'elenco dei workflow rossi (repository,
 ecosistema, workflow, conclusione, da quando, serie, link all'esecuzione). Nessuno stato di firma, nessun nome di chiave, nessun percorso locale, nessun comando. Lo strumento non esegue mai commit né
 push; che cosa accada alla cartella dopo dipende da te.
 
-`python3 read_report.py --export-sign-queue FILE` (`.json` o `.csv`) scrive la coda di firma globale con i comandi locali esatti. Quel file è
+`python3 bin/read_report.py --export-sign-queue FILE` (`.json` o `.csv`) scrive la coda di firma globale con i comandi locali esatti. Quel file è
 per il PC che esegue il monitor e lo dichiara al proprio interno.
 
 Campo opzionale `ai_hint` (aggiunto nella 1.6.4) in ogni workflow rosso: `{"class": "real|transient", "cause", "action"}` per un'IA o uno script. I consumatori che leggono con `.get()` possono ignorarlo.
