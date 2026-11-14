@@ -95,5 +95,5 @@ Todo lo siguiente es local y de solo lectura, y está desactivado salvo que se d
 - `logs.failed_step.enabled`, `github_app.share_reads` - docs/EXTRAS_spa.md
 - `reports.workflow_hygiene.enabled`, `reports.queue.enabled`, `reports.release_view.enabled`, `reports.supply_chain.enabled` - docs/EXTRAS_spa.md
 - `ai.skill` - docs/SKILLS_spa.md
-- `ui.orientation`, `ui.screen1_tabs` - docs/SCREENS_spa.md
+- `ui.orientation`, `ui.screen1_tabs`, `ui.now_sort` - docs/SCREENS_spa.md
 - `notify.users.enabled` - docs/NOTIFICATIONS_spa.md

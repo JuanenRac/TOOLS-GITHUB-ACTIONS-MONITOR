@@ -27,6 +27,11 @@
 | `ui.screen2_orientation` | /screen/2 的方向。 |
 | `ui.screen3_tabs` | /screen/3 的标签页。 |
 | `ui.screen3_orientation` | /screen/3 的方向。 |
+| `ui.now_sort` | 对未自行选择的人,“正在发生”的排序:ecosystem、severity、age、newest、repo、event 或 state。 |
+
+## 列表的排序
+
+第一个标签页的 **正在发生** 部分默认按生态系统排序,每个生态系统带一个标题。该部分上方的列表可以更改:生态系统、严重程度(先卡住的,再有失败作业的,再运行中的,最后排队中的)、运行时长(最久的在前)、最新的在前、仓库、触发方式(push、pull_request、schedule 等)和状态(运行中在排队中之前)。所选方式会按人记住:团队模式下由服务器与用户一起保存(`GET` 和 `POST /api/auth/me/view`,换浏览器也会跟随),否则由当前浏览器保存。在有人选择之前,排序取配置文件中的 `ui.now_sort`(缺失或错误时为生态系统)。
 
 ## 已测试的尺寸
 

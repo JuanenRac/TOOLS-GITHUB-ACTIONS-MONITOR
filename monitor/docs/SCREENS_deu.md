@@ -27,6 +27,11 @@ Die Seite passt sich der Größe ihres Fensters an, vom Telefon bis 4K, hochkant
 | `ui.screen2_orientation` | Ausrichtung von /screen/2. |
 | `ui.screen3_tabs` | Tabs von /screen/3. |
 | `ui.screen3_orientation` | Ausrichtung von /screen/3. |
+| `ui.now_sort` | Reihenfolge von Läuft gerade für alle, die keine gewählt haben: ecosystem, severity, age, newest, repo, event oder state. |
+
+## Reihenfolge der Listen
+
+Der Abschnitt **Läuft gerade** auf dem ersten Tab ist nach Ökosystem sortiert, mit einer Überschrift je Ökosystem. Die Liste über dem Abschnitt ändert das: Ökosystem, Schweregrad (zuerst hängende, dann Runs mit fehlgeschlagenem Job, dann laufende, dann wartende), Alter (längste Laufzeit zuerst), neueste zuerst, Repository, Auslöser (push, pull_request, schedule...) und Status (laufend vor wartend). Die Auswahl wird für jede Person gemerkt: im Teammodus speichert sie der Server beim Benutzer (`GET` und `POST /api/auth/me/view`, sie folgt dem Benutzer also in einen anderen Browser), sonst dieser Browser. Bis jemand wählt, gilt `ui.now_sort` der Konfigurationsdatei (Ökosystem, wenn der Wert fehlt oder falsch ist).
 
 ## Getestete Größen
 
