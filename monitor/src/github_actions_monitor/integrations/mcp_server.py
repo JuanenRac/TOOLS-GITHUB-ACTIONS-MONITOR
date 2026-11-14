@@ -24,7 +24,7 @@ from github_actions_monitor.app import toolconfig  # noqa: E402
 from github_actions_monitor.tool_version import TOOL_VERSION  # noqa: E402
 from github_actions_monitor.security import netguard
 
-NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}$")
+NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}\Z")
 TOOLS = [
     {"name": "get_alerts", "description": "Open CI alerts of the monitor (real ones first), with probable cause and suggested action.", "inputSchema": {"type": "object", "properties": {"include_resolved": {"type": "boolean"}}}},
     {"name": "get_red_repos", "description": "Repositories with a workflow that is red on its default branch.", "inputSchema": {"type": "object", "properties": {}}},

@@ -42,7 +42,7 @@ _TABLE = {
     "Africa/Johannesburg": (120, "SAST", "SAST", ""), "Africa/Cairo": (120, "EET", "EEST", "eg"), "UTC": (0, "UTC", "UTC", ""), "Etc/UTC": (0, "UTC", "UTC", ""),
     "GMT": (0, "GMT", "GMT", ""),
 }
-_NAME_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_+./-]{0,63}$")
+_NAME_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_+./-]{0,63}\Z")
 
 
 def _nth_weekday(year, month, weekday, n):

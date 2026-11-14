@@ -25,7 +25,7 @@ MAX_HITS = 30                 # the most results a search ever returns (the page
 CONSOLE_HITS = 20             # the console shows this many and says how many more there are
 MAX_RENDER_CHARS = 150_000    # a section longer than this is cut (with a notice): a huge document can not hold the server thread
 MAX_RENDER_LINES = 4000
-URL_RE = re.compile(r"^https?://[^\s<>\"']{1,300}$")
+URL_RE = re.compile(r"^https?://[^\s<>\"']{1,300}\Z")
 
 
 def index():

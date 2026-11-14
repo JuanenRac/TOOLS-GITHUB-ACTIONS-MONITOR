@@ -72,12 +72,12 @@ BUILD_WORKFLOWS = ("firmware-build.yml", "package-build.yml", "apk-build.yml", "
                    "dist-build.yml", "release-files-build.yml")
 # the ecosystems marked "external" in the ecosystems file are reported apart, never added (toolconfig.is_internal)
 ECOSYSTEMS = tuple(toolconfig.ecosystem_names())
-NAME_RE = re.compile(r"^[A-Za-z0-9._:-]{1,100}$")
-TOOL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,98}\.py$")           # a plain file name: no folder, no drive, no "..", no leading dash
-INPUT_KEY_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]{0,63}$")             # the name of an input of a workflow
+NAME_RE = re.compile(r"^[A-Za-z0-9._:-]{1,100}\Z")
+TOOL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,98}\.py\Z")           # a plain file name: no folder, no drive, no "..", no leading dash
+INPUT_KEY_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]{0,63}\Z")             # the name of an input of a workflow
 RESERVED_INPUTS = ("dry_run", "ref")                                    # decided by this program, never by the catalogue
-FLAG_RE = re.compile(r"^--[a-z][a-z0-9-]{0,40}$")                       # a long flag of a signing tool (finalize_flags)
-SHA_RE = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
+FLAG_RE = re.compile(r"^--[a-z][a-z0-9-]{0,40}\Z")                       # a long flag of a signing tool (finalize_flags)
+SHA_RE = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})\Z")
 GIT_TIMEOUT = 60
 CI_PAGES = 5                                                             # pages of 100 runs read before the sample counts as incomplete
 DEFAULT_REQUIRED_CI = ("ci.yml",)                                        # the workflow file of the CI of a repository when nothing else is configured
@@ -116,7 +116,7 @@ def extra_inputs(extra):
     return inputs, problems
 
 
-SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+SHA_RE = re.compile(r"^[0-9a-f]{40}\Z")
 
 
 def dispatch_args(workflow, repo, real, extra, sha=None):

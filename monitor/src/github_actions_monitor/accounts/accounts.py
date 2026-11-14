@@ -24,7 +24,7 @@ from github_actions_monitor.security import private_io
 
 from github_actions_monitor.util import paths
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
-ACCOUNT_ID_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{0,39}$")
+ACCOUNT_ID_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{0,39}\Z")
 DEFAULT_ID = "default"
 GLOBAL_NAME = "global.json"
 CONFIG_NAME = "actions_monitor.json"

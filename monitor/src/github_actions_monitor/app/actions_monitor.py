@@ -62,7 +62,7 @@ from github_actions_monitor.util import paths, rootmigrate
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
 CONFIG_FILE = paths.config_file()
 LOG_FILE = paths.place("actions_monitor_log.txt")
-NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}$")
+NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}\Z")
 DEFAULTS = {
     "repos": "all",
     "github_owner": "",     # "" = the account of `gh` (asked once at start)
@@ -1398,7 +1398,7 @@ def watchdog_loop(config, every=30):
             degraded.note("loop.watchdog", error)
 
 
-HOST_RE = re.compile(r"^[A-Za-z0-9.-]{1,100}$")
+HOST_RE = re.compile(r"^[A-Za-z0-9.-]{1,100}\Z")
 
 
 class QuietServer(ThreadingHTTPServer):

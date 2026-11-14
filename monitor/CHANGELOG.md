@@ -61,6 +61,8 @@ when this file and `tool_version.py` disagree.
 
 ### Fixed
 
+- **A name with a line feed at the end is no longer a valid name**: the checks of account ids, repository names, keys, owners, addresses and the like ended in the end-of-line mark, which also accepts a text that is followed by one more line feed ("alpha" and "alpha" plus a line feed were the same id). They now end at the end of the text, 76 checks in all, and a test keeps every new check that way.
+
 - **With the team mode on and no user yet, only the person at this computer gets in**: until the first administrator exists a request from anywhere else (the network, or through a proxy) is answered 403 "create the first administrator from this computer first" for everything that is not public (health check, login page, webhook); before, the whole monitor stayed open to the network during that time. Turning the team mode on changes nothing for the person at this computer, who still creates the first administrator from the login page.
 
 - **The process of each account answers only to its supervisor**: it asks for the key the supervisor gave it when it started it, on every request; another user of the same machine who reaches the port of an account process gets a 403 instead of the data, whatever the team mode says.

@@ -42,7 +42,7 @@ RELEVANT_RE = re.compile(r"(?i)\b(error|errors|fail|failed|failure|fatal|excepti
 VIA = ("stream", "mcp", "hook", "endpoint")
 TRANSIENT_DEFAULT = [r"\b50[234]\b", r"bad gateway", r"service unavailable", r"gateway time-?out", r"timed? ?out", r"rate limit", r"secondary rate", r"tls", r"connection (?:reset|refused|closed)",
                      r"unexpected eof", r"codeql.*download", r"download.*codeql", r"could not resolve host", r"no space left", r"the runner has received a shutdown signal"]
-LOOP_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/%-]{0,100})?$")
+LOOP_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/%-]{0,100})?\Z")
 
 _SECRETS = [
     (re.compile(r"(?s)-----BEGIN [A-Z ]*PRIVATE KEY-----.*?(?:-----END [A-Z ]*PRIVATE KEY-----|$)"), "[pem]"),

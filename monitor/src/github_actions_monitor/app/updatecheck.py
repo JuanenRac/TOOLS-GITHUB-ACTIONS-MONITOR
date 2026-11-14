@@ -21,8 +21,8 @@ from github_actions_monitor.util import paths
 STATE_FILE = paths.place("update_check.json")
 REPO = "JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR"
 ENDPOINT = f"repos/{REPO}/releases/latest"
-URL_RE = re.compile(r"^https://github\.com/" + re.escape(REPO) + r"/releases/tag/[A-Za-z0-9._-]{1,40}$")
-TAG_RE = re.compile(r"^v?(\d{1,6})\.(\d{1,6})\.(\d{1,6})(?:\.(\d{1,6}))?$")
+URL_RE = re.compile(r"^https://github\.com/" + re.escape(REPO) + r"/releases/tag/[A-Za-z0-9._-]{1,40}\Z")
+TAG_RE = re.compile(r"^v?(\d{1,6})\.(\d{1,6})\.(\d{1,6})(?:\.(\d{1,6}))?\Z")
 INTERVAL = 24 * 3600
 
 

@@ -23,8 +23,8 @@ from github_actions_monitor.security import confirmation
 from github_actions_monitor.app import degraded
 from github_actions_monitor.security import secretstore
 
-ENTRY_RE = re.compile(r"^([A-Za-z0-9._-]{1,100}):([A-Za-z0-9._-]{1,80}\.ya?ml):([a-z_]{1,30})$")
-JOB_RE = re.compile(r"^[A-Za-z0-9_-]{1,80}$")
+ENTRY_RE = re.compile(r"^([A-Za-z0-9._-]{1,100}):([A-Za-z0-9._-]{1,80}\.ya?ml):([a-z_]{1,30})\Z")
+JOB_RE = re.compile(r"^[A-Za-z0-9_-]{1,80}\Z")
 EVENTS = ("push", "pull_request", "workflow_dispatch", "schedule", "release", "pull_request_target")
 MAX_LINES = 2000
 MAX_BYTES = 200_000

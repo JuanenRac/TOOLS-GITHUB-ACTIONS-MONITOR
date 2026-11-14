@@ -13,7 +13,7 @@ import time
 from pathlib import Path
 from github_actions_monitor.security import private_io
 
-LOGIN_RE = re.compile(r"^[A-Za-z0-9-]{1,39}$")
+LOGIN_RE = re.compile(r"^[A-Za-z0-9-]{1,39}\Z")
 INTERVAL = 24 * 3600
 
 

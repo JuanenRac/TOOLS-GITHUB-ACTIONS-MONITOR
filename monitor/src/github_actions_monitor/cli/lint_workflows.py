@@ -32,7 +32,7 @@ from pathlib import Path
 
 from github_actions_monitor import i18n  # noqa: E402
 
-SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+SHA_RE = re.compile(r"^[0-9a-f]{40}\Z")
 USES_RE = re.compile(r"^\s*-?\s*uses:\s*['\"]?([^'\"\s#]+)")
 SEVERITIES = ("info", "warn", "bad")
 RULES = ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target")
@@ -45,7 +45,7 @@ ASSIGN_RE = re.compile(r"""(?i)\b([\w-]*(?:password|passwd|secret|token|api[_-]?
 FILLER = ("placeholder", "dummy", "example", "changeme", "change-me", "change_me", "fake", "sample", "not-a-real", "notreal", "redacted", "todo", "xxx", "test", "local", "demo", "nothing", "your-", "your_", "ci-", "-ci", "_ci",
           "value", "secret-here", "insert", "replace", "ignored", "unused", "empty", "none")
 IGNORE_RE = re.compile(r"#\s*monitor-lint:\s*ignore\s+([a-z_]+)")
-IGNORE_PATTERN_RE = re.compile(r"^[A-Za-z0-9._*-]{1,100}:[A-Za-z0-9._*/-]{1,100}:[a-z_*]{1,30}$")
+IGNORE_PATTERN_RE = re.compile(r"^[A-Za-z0-9._*-]{1,100}:[A-Za-z0-9._*/-]{1,100}:[a-z_*]{1,30}\Z")
 ORDER = {"info": 0, "warn": 1, "bad": 2}
 
 

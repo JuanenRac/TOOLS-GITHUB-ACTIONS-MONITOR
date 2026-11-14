@@ -19,7 +19,7 @@ from github_actions_monitor.security import private_io
 
 PREFIX = "SENTINEL_REPORT_DAY_"
 LEGACY_PREFIX = "PARTE_CENTINELA_DIA_"   # the name used by versions before 1.5.0: still read (and kept in the retention), never written
-DAY_RE = re.compile(r"^(?:" + re.escape(PREFIX) + "|" + re.escape(LEGACY_PREFIX) + r")(\d{4}-\d{2}-\d{2})\.(txt|json)$")
+DAY_RE = re.compile(r"^(?:" + re.escape(PREFIX) + "|" + re.escape(LEGACY_PREFIX) + r")(\d{4}-\d{2}-\d{2})\.(txt|json)\Z")
 DEFAULT_DAYS = 30
 NEWER_KINDS = ("budget", "parte")
 

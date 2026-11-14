@@ -97,8 +97,8 @@ def box(owner, watched, discovered, hidden_names):
     return {"owner": owner, "watched": watched, "discovered": discovered, "hidden": len(hidden_names), "hidden_names": list(hidden_names)[:50]}
 
 
-KEY_RE = re.compile(r"^[a-z0-9_]{1,40}$")
-PREFIX_RE = re.compile(r"^[A-Za-z0-9._-]{2,60}$")
+KEY_RE = re.compile(r"^[a-z0-9_]{1,40}\Z")
+PREFIX_RE = re.compile(r"^[A-Za-z0-9._-]{2,60}\Z")
 
 
 def add_group(path, key, prefix, label=None, example=None, keep=5):
