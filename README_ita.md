@@ -44,8 +44,8 @@
 | | |
 |---|---|
 | **Maturità** | functional |
-| **Test** | 1734 metodi di test (`python -m unittest discover -s monitor/tests`) |
-| **Impostazioni** | 342 impostazioni, tutte con aiuto |
+| **Test** | 1771 metodi di test (`python -m unittest discover -s monitor/tests`) |
+| **Impostazioni** | 348 impostazioni, tutte con aiuto |
 | **Lingue** | 8 (inglese, spagnolo, tedesco, francese, italiano, giapponese, cinese e portoghese) |
 | **Provato nel CI su** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -141,6 +141,9 @@ Ogni immagine segue il tema chiaro o scuro della tua pagina GitHub.
 - **Sentinella Collab e un'unica lista di avvisi**: issue e pull request aperte che richiedono una persona (dimenticate, critiche, revisioni in attesa, vecchie bozze, conflitti), in sola lettura e con un orologio proprio, e una scheda Avvisi con tutte le sentinelle in un elenco, filtro per origine e silenziamenti locali che finiscono da soli.
 - **Barra di stato, schermo intero e tabelle ordinabili**: l'avviso più importante (e una finestra con tutti), la connessione, la quota, l'ultima lettura, la modalità, l'indirizzo e l'orologio a piè di pagina; un pulsante a schermo intero; Repository e Cronologia si ordinano per una o più colonne, con le colonne a tua scelta.
 - **La riga di comando come client**: `bin/monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) legge ciò che dice il monitor in esecuzione, con `--json` e codici di uscita stabili; non scrive mai su GitHub.
+- **Fallimenti e lezioni**: un registro locale dei fallimenti della tua CI, regole che classificano ciascuno in una categoria, una libreria di lezioni (`monitor/docs/LESSONS_ita.md`) con la guardia che l'avrebbe evitato, la tendenza su 24 ore e 7 giorni, `ai/LESSONS.md`, `/api/ai/lessons` e un riepilogo prima del push per qualsiasi strumento di IA; sola lettura, nulla lascia il computer.
+- **Ogni dimensione di schermo e più schermi**: la pagina si adatta a una finestra dal telefono al 4K, dritta o ruotata, e un monitor può servire fino a tre schermi (da `/screen/1` a `/screen/3`), ciascuno con le sue schede e il suo orientamento (`monitor/docs/SCREENS_ita.md`).
+- **Notifiche per ogni utente**: in modalità team ogni utente sceglie in un pannello della pagina i canali (ntfy, Teams, e-mail), il livello minimo e i riepiloghi (`monitor/docs/NOTIFICATIONS_ita.md`).
 - **Pagina delle impostazioni**: cambia percorsi, intervalli, quote e interruttori dal browser; solo un elenco fisso di chiavi validate, con copia di sicurezza prima di ogni salvataggio.
 - **Grafici e storico**: minuti di calcolo, errori e successi con barre animate e uno storico giornaliero (rispetta il movimento ridotto).
 - **Otto lingue** (en, es, de, fr, it, ja, zh, pt) con l'inglese come base; si cambia nelle impostazioni.

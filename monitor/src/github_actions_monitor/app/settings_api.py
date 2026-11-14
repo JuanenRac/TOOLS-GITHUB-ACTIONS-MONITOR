@@ -403,6 +403,12 @@ _f(_T_AI, "alerts", "ai_alerts.client_hook.cooldown_minutes", "int", (1, 1440), 
 _f(_T_AI, "alerts", "ai_alerts.client_hook.stale_hours", "int", (1, 168), restart=False)
 _f(_T_AI, "alerts", "ai_alerts.client_hook.max_lines", "int", (1, 40), restart=False, unit="")
 _f(_T_AI, "alerts", "ai_alerts.client_hook.max_chars", "int", (400, 8000), restart=False, unit="")
+_f(_T_AI, "lessons", "lessons.enabled", "bool", restart=False)
+_f(_T_AI, "lessons", "lessons.allow_write", "bool", restart=False, secure=True)
+_f(_T_AI, "lessons", "lessons.retention_days", "int", (1, 3650), restart=False)
+_f(_T_AI, "lessons", "lessons.max_entries", "int", (100, 100000), restart=False, unit="")
+_f(_T_AI, "lessons", "lessons.brief_max_bytes", "int", (500, 20000), restart=False, unit="")
+_f(_T_AI, "lessons", "lessons.recurring_from", "int", (2, 20), restart=False, unit="")
 # @@MORE_SETTINGS@@
 
 TAB_ORDER = ("basic", "general", "polling", "cache", "quota", "sentinel", "surface", "readiness", "paths", "outputs", "ai", "webhook", "notify", "analytics", "lint", "advanced", "console")
