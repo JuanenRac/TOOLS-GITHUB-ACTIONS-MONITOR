@@ -38,7 +38,7 @@ SESSION_COOKIE = "monitor_session"
 SCRYPT_N, SCRYPT_R, SCRYPT_P = 2 ** 14, 8, 1
 PBKDF2_ROUNDS = 600_000
 MAX_PASSWORD_BYTES = 256
-DEFAULTS = {"enabled": False, "session_hours": 12, "max_failed_logins": 5, "lockout_minutes": 15, "min_length": 10, "allow_bearer": True, "audit": True}
+DEFAULTS = {"enabled": False, "session_hours": 12, "max_failed_logins": 5, "lockout_minutes": 15, "min_length": 10, "allow_bearer": False, "audit": True}
 AUDIT_MAX_BYTES = 1_000_000
 AUDIT_FILE = None                           # tests point this to a temporary file; None = auth_audit.jsonl in the product folder
 _lock = threading.RLock()
@@ -58,7 +58,7 @@ def settings(config):
             "max_failed_logins": _int(cfg.get("max_failed_logins"), 3, 20, DEFAULTS["max_failed_logins"]),
             "lockout_minutes": _int(cfg.get("lockout_minutes"), 1, 1440, DEFAULTS["lockout_minutes"]),
             "min_length": _int(cfg.get("min_length"), 8, 64, DEFAULTS["min_length"]),
-            "allow_bearer": cfg.get("allow_bearer") is not False,
+            "allow_bearer": cfg.get("allow_bearer") is True,
             "audit": cfg.get("audit") is not False}
 
 
