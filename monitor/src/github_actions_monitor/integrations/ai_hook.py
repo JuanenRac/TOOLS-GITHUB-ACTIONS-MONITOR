@@ -164,20 +164,64 @@ def touch(folder, now):
         pass
 
 
-def cooldown_ok(folder, minutes, now):
-    """True (and the moment is kept) when the last block was more than `minutes` ago."""
-    path = folder / "ai_hook_state.json"
+LOCK_STALE = 10.0      # seconds after which a lock file left by a process that died is taken over
+LOCK_WAIT = 2.0
+
+
+def take_lock(path, wait=None):
+    """The descriptor of a lock file created exclusively next to `path` (None when it could not be taken in `wait` seconds): only one process or thread at a time passes. Standard library only."""
+    lock = str(path) + ".lock"
+    end = time.time() + (LOCK_WAIT if wait is None else wait)
+    while True:
+        try:
+            fd = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+            os.write(fd, str(os.getpid()).encode("ascii"))
+            return fd
+        except FileExistsError:
+            try:
+                if time.time() - os.stat(lock).st_mtime > LOCK_STALE:
+                    os.unlink(lock)
+                    continue
+            except OSError:
+                continue
+        except OSError:
+            return None
+        if time.time() > end:
+            return None
+        time.sleep(0.02)
+
+
+def drop_lock(path, fd):
     try:
-        last = float(json.loads(path.read_text(encoding="utf-8")).get("last_block", 0))
-    except (OSError, ValueError, AttributeError, TypeError):
-        last = 0.0
-    if now - last < minutes * 60:
-        return False
-    try:
-        private_write(path, json.dumps({"last_block": now}))
+        os.close(fd)
+        os.unlink(str(path) + ".lock")
     except OSError:
         pass
-    return True
+
+
+def cooldown_ok(folder, minutes, now):
+    """True when the last block was more than `minutes` ago AND the moment of this one is kept: reading the last moment and writing the new one is one step (a lock file), so two events at the same
+    time cannot both pass. When the moment cannot be kept (no lock, the folder cannot be written) the answer is False: a block that cannot be limited is not made."""
+    path = folder / "ai_hook_state.json"
+    fd = take_lock(path)
+    if fd is None:
+        return False
+    try:
+        try:
+            last = float(json.loads(path.read_text(encoding="utf-8")).get("last_block", 0))
+        except (OSError, ValueError, AttributeError, TypeError):
+            last = 0.0
+        if now - last < minutes * 60:
+            return False
+        try:
+            tmp = Path(str(path) + ".tmp")
+            private_write(tmp, json.dumps({"last_block": now}))
+            os.replace(tmp, path)
+        except OSError:
+            return False
+        return True
+    finally:
+        drop_lock(path, fd)
 
 
 def answer(kind, event_kind, text, fmt):
