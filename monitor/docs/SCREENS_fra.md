@@ -49,3 +49,15 @@ Un test de navigateur ouvre la page dans chacune de ces tailles, parcourt tous l
 1. Sur l'ordinateur qui exécute le moniteur, mettez `ui.screen1_tabs` à `now,al`, `ui.screen2_tabs` à `charts,repos` et, pour un écran tourné, `ui.screen2_orientation` à `portrait`.
 2. Ouvrez `http://cet-ordinateur:8765/screen/1` dans une fenêtre du premier écran et `/screen/2` sur le second ; F11 pour le plein écran. Depuis un autre ordinateur, utilisez le mode réseau avec son jeton d'accès.
 3. Pour un écran mural que personne ne touche, donnez-lui plusieurs onglets et mettez `ui.rotate_seconds` à 20-30.
+
+## Images
+
+L'onglet Maintenant en quatre tailles, avec des données inventées (4K, un moniteur 21:9, un moniteur tourné, un téléphone) :
+
+![4K 3840x2160](../../docs/screenshots/web_size_4k_light.png)
+
+![ultra-large 3440x1440](../../docs/screenshots/web_size_ultrawide_light.png)
+
+![tourné 1080x1920](../../docs/screenshots/web_size_portrait_light.png)
+
+![téléphone 390x844](../../docs/screenshots/web_size_phone_light.png)

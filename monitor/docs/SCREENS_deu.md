@@ -49,3 +49,15 @@ Ein Browser-Test öffnet die Seite in jeder dieser Größen, geht alle Tabs durc
 1. Auf dem Rechner, auf dem der Monitor läuft, `ui.screen1_tabs` auf `now,al`, `ui.screen2_tabs` auf `charts,repos` und für einen gedrehten Monitor `ui.screen2_orientation` auf `portrait` setzen.
 2. `http://dieser-rechner:8765/screen/1` im Fenster des ersten Monitors und `/screen/2` im zweiten öffnen; F11 für Vollbild. Von einem anderen Rechner den Netzmodus mit Zugriffstoken nutzen.
 3. Für einen Wandbildschirm, den niemand bedient, mehrere Tabs vergeben und `ui.rotate_seconds` auf 20-30 setzen.
+
+## Bilder
+
+Der Reiter Jetzt in vier Größen, mit erfundenen Daten (4K, ein 21:9-Monitor, ein gedrehter Monitor, ein Smartphone):
+
+![4K 3840x2160](../../docs/screenshots/web_size_4k_light.png)
+
+![Ultrawide 3440x1440](../../docs/screenshots/web_size_ultrawide_light.png)
+
+![gedreht 1080x1920](../../docs/screenshots/web_size_portrait_light.png)
+
+![Smartphone 390x844](../../docs/screenshots/web_size_phone_light.png)
