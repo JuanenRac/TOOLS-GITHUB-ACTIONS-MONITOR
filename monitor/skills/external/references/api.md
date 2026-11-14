@@ -72,6 +72,7 @@ a call marked *this computer only* is refused when it comes from the network. Ev
 | `/api/quota` | GET | viewer | plan, billable minutes, allowance of the API, concurrency, long jobs |
 | `/api/quota-pool/status` | GET | viewer | every read source with its allowance, the sum, and what each way of reading less has spared (this computer only) |
 | `/api/refresh-repos` | POST | maintainer | read the list of repositories again |
+| `/api/run-log` | GET | admin | the failing step of one run and its last relevant lines, cleaned (`?repo=&run=`; off by default, `logs.failed_step.enabled`; administrators in the team mode) |
 | `/api/runners` | GET | viewer | self-hosted runners (opt-in) |
 | `/api/sentinel` | GET | viewer | the snapshot of the Sentinel (checks A1-A13) |
 | `/api/sentinel/ai` | GET | viewer | the AI explanation of a failed build or a CodeQL alert (a person asks; cached) |

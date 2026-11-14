@@ -95,6 +95,7 @@ NOTES = {
     "/api/sentinel/historial": ("GET", "the history of the daily report"),
     "/api/sentinel/panels": ("GET", "the panels A1-A13 as data (level, one line, rows to act on)"),
     "/api/sentinel/parte/save": ("POST", "save the daily report"),
+    "/api/run-log": ("GET", "the failing step of one run and its last relevant lines, cleaned (`?repo=&run=`; off by default, `logs.failed_step.enabled`; administrators in the team mode)"),
     "/api/session-token": ("GET", "a one-use token that the next change of a setting needs"),
     "/api/settings": ("GET,POST", "read and change the settings (a fixed list of keys, validated, with a backup)"),
     "/api/skills": ("GET", "the two skills of the monitor (`?name=internal|external[&file=NAME]`) as text"),

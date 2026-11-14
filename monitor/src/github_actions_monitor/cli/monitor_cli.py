@@ -43,7 +43,7 @@ from github_actions_monitor.tool_version import TOOL_VERSION
 from github_actions_monitor.security import netguard
 
 EXIT_OK, EXIT_USAGE, EXIT_DOWN, EXIT_AUTH, EXIT_DEGRADED, EXIT_ALERTS = 0, 1, 2, 3, 4, 5
-COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "ai-hook", "credential", "lessons", "install-skill")
+COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "ai-hook", "credential", "lessons", "install-skill", "gh-token")
 SKILL_ACTIONS = ("internal", "external")
 LESSONS_ACTIONS = ("list", "brief", "failures")
 AI_HOOK_ACTIONS = ("install", "status", "uninstall")
@@ -269,6 +269,22 @@ def cmd_install_skill(ctx):
     return result, lines, EXIT_OK if result["ok"] else EXIT_DEGRADED
 
 
+def cmd_gh_token(ctx):
+    """gh-token --read-only: prints a one-hour installation token of the GitHub App of the monitor, so that the reads of a tool (a `gh` of an agent) spend the allowance of the App and not the one of the
+    user. Only with github_app.share_token on (off by default). The token goes to the standard output and nowhere else: never to a file or a log. Run it without --json."""
+    from github_actions_monitor.app import toolconfig
+    from github_actions_monitor.integrations import github_app
+    config = toolconfig.raw_config()
+    if not ctx.get("read_only"):
+        raise CliError(EXIT_USAGE, i18n.t("cli.gh_token_flag"))
+    if not github_app.settings(config)["share_token"]:
+        raise CliError(EXIT_AUTH, i18n.t("cli.gh_token_off"))
+    value = github_app.token(config)
+    if not value:
+        raise CliError(EXIT_DEGRADED, i18n.t("cli.gh_token_none"))
+    return {"ok": True}, [value], EXIT_OK
+
+
 def cmd_live(ctx):
     events = fetch(ctx["base"], "/api/live-events", {"account": ctx["account"]}, ctx["timeout"], ctx["token"])
     status = fetch(ctx["base"], "/api/live-status", {"account": ctx["account"]}, ctx["timeout"], ctx["token"])
@@ -438,7 +454,7 @@ def cmd_credential(ctx):
     return {"action": action, "ok": ok, **shown}, [line], EXIT_OK if ok else EXIT_DEGRADED
 
 
-HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "live": cmd_live, "doctor": cmd_doctor, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "install-skill": cmd_install_skill}
+HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "live": cmd_live, "doctor": cmd_doctor, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill}
 
 
 def build_parser():
@@ -467,6 +483,7 @@ def build_parser():
     ap.add_argument("--muted", choices=("show", "hide", "only"), default="hide", help=i18n.t("cli.help_muted"))
     ap.add_argument("--fail-on", choices=LEVELS, default="", dest="fail_on", help=i18n.t("cli.help_fail_on"))
     ap.add_argument("--dest", metavar="FOLDER", default="", help=i18n.t("cli.help_dest"))
+    ap.add_argument("--read-only", action="store_true", dest="read_only", help=i18n.t("cli.help_read_only"))
     ap.add_argument("--repo", metavar="NAME", default="", help=i18n.t("cli.help_repo"))
     ap.add_argument("--lang", metavar="CODE", help=i18n.t("cli.help_lang"))
     ap.add_argument("--version", action="store_true", help=i18n.t("cli.help_version"))
@@ -493,7 +510,7 @@ def main(argv=None):
     try:
         ctx = {"base": base_url(args.url, args.lite), "account": args.account, "timeout": max(1.0, min(60.0, args.timeout)), "token": resolve_token(flag=args.token, token_file=args.token_file),
                "sentinel": args.sentinel, "level": args.level, "muted": args.muted, "fail_on": args.fail_on, "lite": args.lite,
-               "action": args.action or "", "target": args.target, "scope": args.scope, "project_dir": args.project_dir, "dry_run": args.dry_run, "deep": args.deep, "new_token_file": args.new_token_file, "dest": args.dest, "repo": args.repo if re.fullmatch(r"[A-Za-z0-9._-]{0,100}", args.repo) else ""}
+               "action": args.action or "", "target": args.target, "scope": args.scope, "project_dir": args.project_dir, "dry_run": args.dry_run, "deep": args.deep, "new_token_file": args.new_token_file, "dest": args.dest, "read_only": args.read_only, "repo": args.repo if re.fullmatch(r"[A-Za-z0-9._-]{0,100}", args.repo) else ""}
         CLIENT.update({"session": "", "ca": (args.ca_file or os.environ.get("MONITOR_CA_FILE") or "").strip()})
         if CLIENT["ca"] and not os.path.isfile(CLIENT["ca"]):
             raise CliError(EXIT_USAGE, i18n.t("cli.ca_file_bad", file=CLIENT["ca"]))
