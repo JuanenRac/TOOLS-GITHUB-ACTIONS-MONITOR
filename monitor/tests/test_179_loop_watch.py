@@ -124,7 +124,14 @@ class LoopWithFalseCollaborators(unittest.TestCase):
         am.STATE.pop("complete", None)
         am.WATCH.reset()
         self.config = dict(am.DEFAULTS)
-        self.addCleanup(lambda: am.WATCH.new_generation())      # whatever loop is still alive leaves
+        self.addCleanup(self.every_loop_leaves)      # runs first: whatever loop is still alive leaves before the doubles are put back
+
+    def every_loop_leaves(self):
+        """Frees the loops that wait for the test, tells them they are old and waits until they are gone: a loop that outlives its test would write its failures into the watch of the next one."""
+        self.release.set()
+        am.WATCH.new_generation()
+        for thread in [t for t in threading.enumerate() if t.name.startswith("refresh-loop-")]:
+            thread.join(3)
 
     def later(self, seconds=5.0):
         """Moves the clock of the watch forward instead of sleeping: how long a cycle has run is then what the test says, not what a slow runner managed to wait (a loop of an earlier test that
