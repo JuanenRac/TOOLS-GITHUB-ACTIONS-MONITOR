@@ -42,11 +42,11 @@ Each version carries everything of its stretch of the plan: nothing is left hang
 
 ### 1.8.2 - Official Docker image and service mode
 
-A multi-stage image with a non-root user, volumes for data and configuration, documented environment variables, a compose example with an optional reverse proxy and TLS, a systemd unit for those who prefer a classic install, and a deep health check that fails when the supervisor or the cycle of an account is stuck. A credential that GitHub revokes or lets expire marks only that account as blind, raises a critical system alert and can be replaced without restarting the supervisor. Backup, upgrade and first start as a service are documented; the page says whether it listens on this computer, on the network or behind a proxy; the command line works against a remote monitor. The lite edition stays local. Also: a report of the time jobs wait in the queue for each runner.
+A multi-stage image with a non-root user, volumes for data and configuration, documented environment variables, a compose example with an optional reverse proxy and TLS, a systemd unit for those who prefer a classic install, and a deep health check that fails when the supervisor or the cycle of an account is stuck. A credential that GitHub revokes or lets expire marks only that account as blind, raises a critical system alert and can be replaced without restarting the supervisor. Backup, upgrade and first start as a service are documented; the page says whether it listens on this computer, on the network or behind a proxy; the command line works against a remote monitor. The lite edition stays local.
 
 ### 1.8.3 - Notifications per user
 
-Preferences per user (channel, sentinel, lowest level), a dispatcher that resolves who is told from the preferences and the roles, channels as simple plugins, and digests of the alerts not yet read. Also: a job skipped because of the paths it watches is shown apart from a red job.
+Preferences per user (channel, sentinel, lowest level), a dispatcher that resolves who is told from the preferences and the roles, channels as simple plugins, and digests of the alerts not yet read. Also: a report of the time jobs wait in the queue for each runner, and a job skipped because of the paths it watches is shown apart from a red job.
 
 ### 1.8.4 - Stabilization
 

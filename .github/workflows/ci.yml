@@ -13,6 +13,7 @@ jobs:
   tests:
     name: Tests (${{ matrix.os }}, Python ${{ matrix.python }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
@@ -31,6 +32,7 @@ jobs:
   pictures:
     name: Pictures and documentation
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
@@ -48,6 +50,7 @@ jobs:
   browser:
     name: The page in a browser (eight languages, every tab)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     continue-on-error: true      # the fonts of a runner differ from the ones of a desktop: this job reports, it does not turn the CI red
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -62,6 +65,7 @@ jobs:
   page:
     name: The page works in a browser (every tab, every sub-tab of Settings, no error)
     runs-on: ubuntu-latest      # a failure here turns the CI red
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
@@ -76,13 +80,18 @@ jobs:
           python -m unittest discover -s monitor/tests -p "test_180_motion.py" -v
 
   container:
-    name: The example container builds
-    runs-on: ubuntu-latest
+    name: The image builds, runs read-only without root and survives a revoked login
+    runs-on: ubuntu-24.04      # the runner image is fixed: the test starts a container and reads the logs of a service
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Build the image of deploy/Dockerfile
         run: docker build -f deploy/Dockerfile -t github-actions-monitor .
       - name: The monitor and the GitHub CLI are in the image
         run: |
-          docker run --rm github-actions-monitor python -c "from github_actions_monitor.app import actions_monitor; from github_actions_monitor import tool_version; print(tool_version.TOOL_VERSION)"
-          docker run --rm github-actions-monitor gh --version
+          docker run --rm --entrypoint python github-actions-monitor -c "from github_actions_monitor.app import actions_monitor; from github_actions_monitor import tool_version; print(tool_version.TOOL_VERSION)"
+          docker run --rm --entrypoint gh github-actions-monitor --version
+      - name: Start it read-only and as a service, revoke a login, replace it without a restart, send SIGHUP
+        run: bash deploy/test/container_test.sh github-actions-monitor

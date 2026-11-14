@@ -147,15 +147,17 @@ def changed(entry, alert):
     return bool(now) and str(now) != kept
 
 
-def collect(registry, now=None):
-    """Every alert of every sentinel of the registry, each with `muted_until` (None when it is not silenced). A sentinel that fails leaves its alerts out and the others still answer."""
+def collect(registry, now=None, extra=()):
+    """Every alert of every sentinel of the registry, each with `muted_until` (None when it is not silenced). A sentinel that fails leaves its alerts out and the others still answer. `extra` are the
+    alerts of the system itself (a login of GitHub that no longer works): they belong to no sentinel, carry `sentinel: "system"` and are listed even when there is no registry."""
     live, out = active(now), []
-    if registry is None:
-        return out
-    try:
-        alerts = registry.alerts()
-    except Exception:       # noqa: BLE001 - the list is for reading; one broken sentinel must not blank the tab
-        alerts = []
+    alerts = []
+    if registry is not None:
+        try:
+            alerts = list(registry.alerts())
+        except Exception:       # noqa: BLE001 - the list is for reading; one broken sentinel must not blank the tab
+            alerts = []
+    alerts = list(extra or ()) + alerts
     for alert in alerts:
         if isinstance(alert, dict) and alert.get("id"):
             out.append(dict(alert, muted_until=muted_until(alert, live), muted_by=muted_by(alert, live)))
@@ -169,7 +171,7 @@ def select(alerts, sentinel="", level="", muted="show"):
         chosen = [a for a in chosen if not a.get("muted_until")]
     elif muted == "only":
         chosen = [a for a in chosen if a.get("muted_until")]
-    order = {"error": 0, "warning": 1, "info": 2}
+    order = {"critical": -1, "error": 0, "warning": 1, "info": 2}
     return sorted(chosen, key=lambda a: (order.get(a.get("level"), 3), str(a.get("created_at") or ""), a.get("id", "")))
 
 

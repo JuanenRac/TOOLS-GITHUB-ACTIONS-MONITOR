@@ -44,7 +44,7 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 1530 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **测试** | 1573 个测试方法(`python -m unittest discover -s monitor/tests`) |
 | **设置** | 313 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows, macos,Python 3.11, 3.13 |
@@ -227,7 +227,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 ├── monitor/                                程序本体
 ├── docs/                                   架构、截图、路线图
 ├── tools/                                  图片、指南与演示
-├── deploy/                                 容器示例
+├── deploy/                                 镜像、Compose、systemd
 ├── images/                                 横幅图和图片
 ├── .github/                                CI 和议题表单
 ├── CHANGELOG.md                            各版本变更
@@ -258,7 +258,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/AI_zho.md`](monitor/docs/AI_zho.md): AI 助手:提供方、安全与操作
 - [`monitor/docs/ANALYTICS_zho.md`](monitor/docs/ANALYTICS_zho.md): 分析、条件读取与连接丢失
 - [`monitor/docs/CONSOLE_TOOLS_zho.md`](monitor/docs/CONSOLE_TOOLS_zho.md): 工作流检查器与终端视图
-- [`monitor/docs/DEPLOYMENT_zho.md`](monitor/docs/DEPLOYMENT_zho.md): 作为服务运行、反向代理之后、权限
+- [`monitor/docs/DEPLOYMENT_zho.md`](monitor/docs/DEPLOYMENT_zho.md): 作为服务运行（官方镜像、Compose、systemd）、反向代理之后、GitHub 撤销登录时、权限
 - [`monitor/QUICKSTART_zh.txt`](monitor/QUICKSTART_zh.txt): 入门步骤（八种语言）
 - [`monitor/docs/FIRST_STEPS_zho.md`](monitor/docs/FIRST_STEPS_zho.md)：你的前五分钟
 - [`monitor/docs/SENTINEL_zho.md`](monitor/docs/SENTINEL_zho.md)：哨兵及其检查 A1-A13

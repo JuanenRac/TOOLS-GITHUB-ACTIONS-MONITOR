@@ -44,7 +44,7 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **テスト** | テストメソッド 1530 件(`python -m unittest discover -s monitor/tests`) |
+| **テスト** | テストメソッド 1573 件(`python -m unittest discover -s monitor/tests`) |
 | **設定** | 設定 313 件、すべてヘルプ付き |
 | **言語** | 8(英語、スペイン語、ドイツ語、フランス語、イタリア語、日本語、中国語、ポルトガル語) |
 | **CI で検証したシステム** | ubuntu, windows, macos、Python 3.11, 3.13 |
@@ -227,7 +227,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 ├── monitor/                                プログラム本体
 ├── docs/                                   構成図・画面・ロードマップ
 ├── tools/                                  図・ガイド・デモ
-├── deploy/                                 コンテナーの例
+├── deploy/                                 イメージ、Compose、systemd
 ├── images/                                 バナーと図
 ├── .github/                                CI と Issue フォーム
 ├── CHANGELOG.md                            バージョン別の変更
@@ -258,7 +258,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/AI_jpn.md`](monitor/docs/AI_jpn.md): AI アシスタント:プロバイダー、安全性、アクション
 - [`monitor/docs/ANALYTICS_jpn.md`](monitor/docs/ANALYTICS_jpn.md): 分析、条件付き読み取り、接続の喪失
 - [`monitor/docs/CONSOLE_TOOLS_jpn.md`](monitor/docs/CONSOLE_TOOLS_jpn.md): ワークフロー Lint とターミナル表示
-- [`monitor/docs/DEPLOYMENT_jpn.md`](monitor/docs/DEPLOYMENT_jpn.md): サービスとして動かす、プロキシの背後、権限
+- [`monitor/docs/DEPLOYMENT_jpn.md`](monitor/docs/DEPLOYMENT_jpn.md): サービスとして動かす（公式イメージ、Compose、systemd）、プロキシの背後、GitHub がログインを失効させたとき、権限
 - [`monitor/QUICKSTART_ja.txt`](monitor/QUICKSTART_ja.txt): 最初の手順（8言語）
 - [`monitor/docs/FIRST_STEPS_jpn.md`](monitor/docs/FIRST_STEPS_jpn.md): 最初の5分間
 - [`monitor/docs/SENTINEL_jpn.md`](monitor/docs/SENTINEL_jpn.md): センチネルとチェック A1〜A13

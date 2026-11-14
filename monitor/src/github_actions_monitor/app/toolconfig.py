@@ -26,7 +26,7 @@ from github_actions_monitor.security import private_io
 
 from github_actions_monitor.util import paths
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
-CONFIG_FILE = HERE / "actions_monitor.json"
+CONFIG_FILE = paths.config_file()
 DEFAULT_ECOSYSTEMS_FILE = "ecosystems.json"
 DEFAULT_TARGETS_FILE = "targets.json"
 DEFAULT_PROFILES_FILE = "profiles.json"

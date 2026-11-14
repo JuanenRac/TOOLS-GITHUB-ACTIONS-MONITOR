@@ -26,7 +26,7 @@ Opcionais e **desligadas por predefinição**. Os eventos do feed (um vermelho n
 ## O contrato dos adaptadores
 
 - Para chegar a um serviço que não está na lista, execute um pequeno recetor neste computador e aponte `http_local` para ele. Recebe um POST com `Content-Type: application/json` e este corpo: `{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`.
-- `kind` é um de `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `collab_new`, `collab_fixed`. Os campos só se acrescentam. Responda com qualquer 2xx; o resto conta como falha.
+- `kind` é um de `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`. Os campos só se acrescentam. Responda com qualquer 2xx; o resto conta como falha.
 - `mqtt` publica o mesmo JSON como carga de uma mensagem QoS 0 em `notify.channels.mqtt.topic`.
 
 ## O limite por hora conta mensagens

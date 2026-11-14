@@ -44,7 +44,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 | | |
 |---|---|
 | **Maturidade** | functional |
-| **Testes** | 1530 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Testes** | 1573 métodos de teste (`python -m unittest discover -s monitor/tests`) |
 | **Definições** | 313 definições, todas com ajuda |
 | **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
 | **Testado no CI em** | ubuntu, windows, macos, Python 3.11, 3.13 |
@@ -227,7 +227,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 ├── monitor/                                o programa
 ├── docs/                                   arquitetura, capturas, roteiro
 ├── tools/                                  imagens, guias e demo
-├── deploy/                                 exemplo de contentor
+├── deploy/                                 imagem, compose, systemd
 ├── images/                                 banner e imagens
 ├── .github/                                CI e formulários
 ├── CHANGELOG.md                            mudanças por versão
@@ -258,7 +258,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/AI_por.md`](monitor/docs/AI_por.md): o assistente de IA: fornecedores, segurança e ações
 - [`monitor/docs/ANALYTICS_por.md`](monitor/docs/ANALYTICS_por.md): análises, leituras condicionais e ligação perdida
 - [`monitor/docs/CONSOLE_TOOLS_por.md`](monitor/docs/CONSOLE_TOOLS_por.md): o linter de workflows e a vista de consola
-- [`monitor/docs/DEPLOYMENT_por.md`](monitor/docs/DEPLOYMENT_por.md): executá-lo como serviço, atrás de um proxy, permissões
+- [`monitor/docs/DEPLOYMENT_por.md`](monitor/docs/DEPLOYMENT_por.md): executá-lo como serviço (a imagem oficial, Compose, systemd), atrás de um proxy, quando o GitHub revoga o acesso, permissões
 - [`monitor/QUICKSTART_pt.txt`](monitor/QUICKSTART_pt.txt): primeiros passos, em oito idiomas
 - [`monitor/docs/FIRST_STEPS_por.md`](monitor/docs/FIRST_STEPS_por.md): os seus primeiros cinco minutos
 - [`monitor/docs/SENTINEL_por.md`](monitor/docs/SENTINEL_por.md): a sentinela e as suas verificações A1-A13

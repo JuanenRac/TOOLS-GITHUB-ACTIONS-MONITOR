@@ -37,11 +37,11 @@ Cada versión lleva todo lo de su tramo del plan: nada queda colgando de una ver
 
 ### 1.8.2 - Imagen Docker oficial y modo servicio
 
-Una imagen de varias etapas con usuario sin privilegios, volúmenes para datos y configuración, variables de entorno documentadas, un ejemplo de compose con proxy inverso y TLS opcionales, una unidad de systemd para quien prefiera la instalación clásica y una comprobación de salud profunda que falla si el supervisor o el ciclo de una cuenta están atascados. Una credencial que GitHub revoca o deja caducar marca solo esa cuenta como ciega, lanza una alerta crítica de sistema y se puede sustituir sin reiniciar el supervisor. Copia de seguridad, actualización y primer arranque como servicio quedan documentados; la página dice si escucha en este equipo, en la red o detrás de un proxy; la línea de comandos funciona contra un monitor remoto. La edición lite sigue siendo local. Además: un informe del tiempo que esperan los trabajos en cola por cada runner.
+Una imagen de varias etapas con usuario sin privilegios, volúmenes para datos y configuración, variables de entorno documentadas, un ejemplo de compose con proxy inverso y TLS opcionales, una unidad de systemd para quien prefiera la instalación clásica y una comprobación de salud profunda que falla si el supervisor o el ciclo de una cuenta están atascados. Una credencial que GitHub revoca o deja caducar marca solo esa cuenta como ciega, lanza una alerta crítica de sistema y se puede sustituir sin reiniciar el supervisor. Copia de seguridad, actualización y primer arranque como servicio quedan documentados; la página dice si escucha en este equipo, en la red o detrás de un proxy; la línea de comandos funciona contra un monitor remoto. La edición lite sigue siendo local.
 
 ### 1.8.3 - Notificaciones por usuario
 
-Preferencias por usuario (canal, centinela, nivel mínimo), un despachador que decide a quién avisar según las preferencias y los roles, canales como complementos sencillos y resúmenes de las alertas aún no leídas. Además: un trabajo omitido por las rutas que vigila se muestra aparte de un trabajo en rojo.
+Preferencias por usuario (canal, centinela, nivel mínimo), un despachador que decide a quién avisar según las preferencias y los roles, canales como complementos sencillos y resúmenes de las alertas aún no leídas. Además: un informe del tiempo que esperan los trabajos en cola por cada runner, y un trabajo omitido por las rutas que vigila se muestra aparte de un trabajo en rojo.
 
 ### 1.8.4 - Estabilización
 

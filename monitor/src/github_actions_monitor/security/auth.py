@@ -410,7 +410,8 @@ def audit_path():
     if AUDIT_FILE is not None:
         return Path(AUDIT_FILE)
     from github_actions_monitor.util.paths import ROOT
-    return ROOT / "auth_audit.jsonl"
+    chosen = os.environ.get("MONITOR_STATE_DIR", "").strip()      # a service keeps it in the volume of its data, apart from the code
+    return (Path(chosen) if chosen else ROOT) / "auth_audit.jsonl"
 
 
 def audit(cfg, action, user="", role="", address="", path="", result="ok", code=""):

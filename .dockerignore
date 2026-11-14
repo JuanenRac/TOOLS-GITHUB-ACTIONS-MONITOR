@@ -1,0 +1,22 @@
+# The build context is the root of the repository; the image takes only monitor/ (without the data of whoever develops it).
+*
+!monitor
+monitor/tests
+monitor/**/__pycache__
+monitor/**/*.pyc
+monitor/accounts
+monitor/config_backups
+monitor/actions_monitor.json
+monitor/actions_monitor_lite.json
+monitor/*.lock
+monitor/*.jsonl
+monitor/*_cache.json
+monitor/*_state.json
+monitor/*_history.json
+monitor/*_log.txt
+monitor/ALERTS_BRIEF.md
+monitor/ci_red.json
+monitor/degraded.json
+monitor/update_check*.json
+monitor/analytics_history.json
+monitor/ai_heartbeat.json

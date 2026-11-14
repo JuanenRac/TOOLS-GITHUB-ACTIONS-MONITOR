@@ -4,3 +4,6 @@
 *.bat text eol=crlf
 *.cmd text eol=crlf
 *.svg text eol=lf
+# everything that is built into the image, run inside it or read by a service on Linux keeps LF in every checkout (a CR in a shebang or in a Dockerfile breaks it)
+deploy/** text eol=lf
+.dockerignore text eol=lf

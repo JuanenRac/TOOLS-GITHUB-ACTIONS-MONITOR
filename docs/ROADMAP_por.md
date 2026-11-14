@@ -37,11 +37,11 @@ Cada versão leva tudo o que é do seu troço do plano: nada fica pendurado de u
 
 ### 1.8.2 - Imagem Docker oficial e modo de serviço
 
-Uma imagem em várias fases com utilizador sem privilégios, volumes para dados e configuração, variáveis de ambiente documentadas, um exemplo de compose com proxy inverso e TLS opcionais, uma unidade systemd para quem prefira a instalação clássica e uma verificação de saúde profunda que falha se o supervisor ou o ciclo de uma conta estiver bloqueado. Uma credencial que o GitHub revoga ou deixa caducar marca só essa conta como cega, lança um alerta de sistema crítico e pode ser substituída sem reiniciar o supervisor. Cópia de segurança, atualização e primeiro arranque como serviço ficam documentados; a página diz se escuta neste computador, na rede ou atrás de um proxy; a linha de comandos funciona contra um monitor remoto. A edição lite continua local. Além disso: um relatório do tempo que os jobs esperam na fila por cada runner.
+Uma imagem em várias fases com utilizador sem privilégios, volumes para dados e configuração, variáveis de ambiente documentadas, um exemplo de compose com proxy inverso e TLS opcionais, uma unidade systemd para quem prefira a instalação clássica e uma verificação de saúde profunda que falha se o supervisor ou o ciclo de uma conta estiver bloqueado. Uma credencial que o GitHub revoga ou deixa caducar marca só essa conta como cega, lança um alerta de sistema crítico e pode ser substituída sem reiniciar o supervisor. Cópia de segurança, atualização e primeiro arranque como serviço ficam documentados; a página diz se escuta neste computador, na rede ou atrás de um proxy; a linha de comandos funciona contra um monitor remoto. A edição lite continua local.
 
 ### 1.8.3 - Notificações por utilizador
 
-Preferências por utilizador (canal, sentinela, nível mínimo), um distribuidor que decide quem avisar segundo as preferências e as funções, canais como plug-ins simples e resumos dos alertas ainda não lidos. Além disso: um job ignorado pelos caminhos que vigia é mostrado à parte de um job vermelho.
+Preferências por utilizador (canal, sentinela, nível mínimo), um distribuidor que decide quem avisar segundo as preferências e as funções, canais como plug-ins simples e resumos dos alertas ainda não lidos. Além disso: um relatório do tempo que os jobs esperam na fila por cada runner, e um job ignorado pelos caminhos que vigia é mostrado à parte de um job vermelho.
 
 ### 1.8.4 - Estabilização
 

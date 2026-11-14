@@ -44,7 +44,7 @@
 | | |
 |---|---|
 | **Madurez** | functional |
-| **Tests** | 1530 métodos de test (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 1573 métodos de test (`python -m unittest discover -s monitor/tests`) |
 | **Ajustes** | 313 ajustes, todos con ayuda |
 | **Idiomas** | 8 (inglés, español, alemán, francés, italiano, japonés, chino y portugués) |
 | **Probado en el CI en** | ubuntu, windows, macos, Python 3.11, 3.13 |
@@ -227,7 +227,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 ├── monitor/                                el programa
 ├── docs/                                   arquitectura, capturas, hoja de ruta
 ├── tools/                                  dibujos, guías y demo
-├── deploy/                                 ejemplo de contenedor
+├── deploy/                                 imagen, compose, systemd
 ├── images/                                 banner y dibujos
 ├── .github/                                CI y formularios
 ├── CHANGELOG.md                            cambios por versión
@@ -258,7 +258,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/AI_spa.md`](monitor/docs/AI_spa.md): el asistente de IA: proveedores, seguridad y acciones
 - [`monitor/docs/ANALYTICS_spa.md`](monitor/docs/ANALYTICS_spa.md): analítica, lecturas condicionales y conexión perdida
 - [`monitor/docs/CONSOLE_TOOLS_spa.md`](monitor/docs/CONSOLE_TOOLS_spa.md): el linter de workflows y la vista de consola
-- [`monitor/docs/DEPLOYMENT_spa.md`](monitor/docs/DEPLOYMENT_spa.md): ejecutarlo como servicio, tras un proxy, permisos
+- [`monitor/docs/DEPLOYMENT_spa.md`](monitor/docs/DEPLOYMENT_spa.md): ejecutarlo como servicio (la imagen oficial, Compose, systemd), tras un proxy, cuando GitHub revoca el acceso, permisos
 - [`monitor/QUICKSTART_es.txt`](monitor/QUICKSTART_es.txt): primeros pasos, en ocho idiomas
 - [`monitor/docs/FIRST_STEPS_spa.md`](monitor/docs/FIRST_STEPS_spa.md): tus primeros cinco minutos
 - [`monitor/docs/SENTINEL_spa.md`](monitor/docs/SENTINEL_spa.md): el centinela y sus comprobaciones A1-A13

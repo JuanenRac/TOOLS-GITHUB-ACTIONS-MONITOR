@@ -37,11 +37,11 @@ Ogni versione porta tutto quello del suo tratto del piano: nulla resta appeso a 
 
 ### 1.8.2 - Immagine Docker ufficiale e modalità servizio
 
-Un'immagine a più fasi con utente non privilegiato, volumi per dati e configurazione, variabili d'ambiente documentate, un esempio di compose con reverse proxy e TLS facoltativi, un'unità systemd per chi preferisce l'installazione classica e un controllo di salute profondo che fallisce se il supervisore o il ciclo di un account è bloccato. Una credenziale che GitHub revoca o lascia scadere segna solo quell'account come cieco, genera un allarme di sistema critico e si può sostituire senza riavviare il supervisore. Backup, aggiornamento e primo avvio come servizio sono documentati; la pagina dice se ascolta su questo computer, sulla rete o dietro un proxy; la riga di comando funziona contro un monitor remoto. L'edizione lite resta locale. Inoltre: un rapporto sul tempo che i job attendono in coda per ogni runner.
+Un'immagine a più fasi con utente non privilegiato, volumi per dati e configurazione, variabili d'ambiente documentate, un esempio di compose con reverse proxy e TLS facoltativi, un'unità systemd per chi preferisce l'installazione classica e un controllo di salute profondo che fallisce se il supervisore o il ciclo di un account è bloccato. Una credenziale che GitHub revoca o lascia scadere segna solo quell'account come cieco, genera un allarme di sistema critico e si può sostituire senza riavviare il supervisore. Backup, aggiornamento e primo avvio come servizio sono documentati; la pagina dice se ascolta su questo computer, sulla rete o dietro un proxy; la riga di comando funziona contro un monitor remoto. L'edizione lite resta locale.
 
 ### 1.8.3 - Notifiche per utente
 
-Preferenze per utente (canale, sentinella, livello minimo), un distributore che decide chi avvisare in base alle preferenze e ai ruoli, canali come semplici plugin e riepiloghi degli avvisi non ancora letti. Inoltre: un job saltato per i percorsi che osserva è mostrato a parte da un job rosso.
+Preferenze per utente (canale, sentinella, livello minimo), un distributore che decide chi avvisare in base alle preferenze e ai ruoli, canali come semplici plugin e riepiloghi degli avvisi non ancora letti. Inoltre: un rapporto sul tempo che i job attendono in coda per ogni runner, e un job saltato per i percorsi che osserva è mostrato a parte da un job rosso.
 
 ### 1.8.4 - Stabilizzazione
 
