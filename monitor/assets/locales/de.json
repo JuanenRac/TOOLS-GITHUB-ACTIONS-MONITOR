@@ -697,6 +697,7 @@
  "cli.bad_shape": "Der Monitor hat mit Daten in einer Form geantwortet, die dieser Befehl nicht versteht (dieselbe Version?).",
  "cli.bad_url": "Die Adresse ist ungültig: Nutze http://host:port oder https://host:port.",
  "cli.ca_file_bad": "Die Datei der Zertifizierungsstelle {file} existiert nicht.",
+ "cli.close_head": "{n} wiederholte Fehlerarten ohne Absicherung",
  "cli.credential_done": "Erledigt: {status}.",
  "cli.credential_failed": "Nicht ausgeführt: {status}.",
  "cli.credential_needs_account": "Dieser Monitor hat mehrere Konten: Geben Sie mit --account ID an, welches.",

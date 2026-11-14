@@ -49,4 +49,4 @@ No alert is open and nothing repeats: say "nothing to act on". The monitor is de
 - `references/learning.md`: the book, the categories, the library, the trend and how to propose a lesson.
 - `references/providers.md`: local and external providers, their limits and example settings.
 - `references/security.md`: prompt injection, secrets, minimum permissions, what is audited.
-- `references/api.md`, `references/settings.md`, `references/files.md`, `references/roles.md`, `references/tabs.md`: generated from the code.
+- `references/api.md`, `references/settings.md`, `references/files.md`, `references/roles.md`, `references/tabs.md`, `references/signals.md` (every signal id and every panel of the Sentinel): generated from the code.

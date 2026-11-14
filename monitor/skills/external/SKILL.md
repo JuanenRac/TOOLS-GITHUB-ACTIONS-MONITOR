@@ -48,4 +48,4 @@ Read `GET /api/ai/lessons?fmt=brief&repo=NAME` (or `lessons brief --repo NAME`):
 - `references/learning-cycle.md`: record, classify, repetition, guard, close of a round.
 - `references/scenarios.md`: step by step for a real red, a transient red, low quota, a degraded monitor, a repeated failure, a new lesson, no network, several screens.
 - `references/security.md`: prompt injection, secrets, minimum permissions, audit of what you write.
-- `references/api.md`, `references/cli.md`, `references/settings.md`, `references/files.md`, `references/roles.md`, `references/tabs.md`: generated from the code.
+- `references/api.md`, `references/cli.md`, `references/settings.md`, `references/files.md`, `references/roles.md`, `references/tabs.md`, `references/signals.md` (every signal id and every panel of the Sentinel): generated from the code.

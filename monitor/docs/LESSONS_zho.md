@@ -74,3 +74,7 @@ lessons.register_provider("wiki", lambda config: WikiProvider())
 ## 设置
 
 `lessons.enabled`、`lessons.allow_write`、`lessons.retention_days`、`lessons.max_entries`、`lessons.brief_max_bytes` 和 `lessons.recurring_from`，位于设置的 AI 标签页。面板**从失败中得到的经验**在警报标签页的底部。
+
+## 一轮工作的收尾
+
+完成一批工作后，`python bin/monitor_cli.py lessons close` 会列出仍没有自己的经验及其防护的重复失败类型(`GET /api/ai/lessons` 中的 `needs_guard`)，只要还有一种就以非零退出码结束。请写下防护，或说明为何暂时无法存在，然后再运行一次。

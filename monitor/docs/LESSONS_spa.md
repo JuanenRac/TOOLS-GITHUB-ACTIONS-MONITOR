@@ -74,3 +74,7 @@ Leer siempre se puede. Escribir una lección exige tres cosas: `lessons.allow_wr
 ## Ajustes
 
 `lessons.enabled`, `lessons.allow_write`, `lessons.retention_days`, `lessons.max_entries`, `lessons.brief_max_bytes` y `lessons.recurring_from`, en la pestaña IA de Ajustes. El panel **Lecciones de los fallos** está al final de la pestaña Alertas.
+
+## Cierre de una ronda
+
+Al terminar un lote de trabajo, `python bin/monitor_cli.py lessons close` lista los tipos de fallo repetidos que aún no tienen una lección propia con su guardia (`needs_guard` en `GET /api/ai/lessons`) y sale con un código distinto de cero mientras haya alguno. Escriba la guardia, o diga por qué todavía no puede existir, y ejecútelo otra vez.

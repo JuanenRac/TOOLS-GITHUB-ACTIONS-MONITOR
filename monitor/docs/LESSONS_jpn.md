@@ -74,3 +74,7 @@ lessons.register_provider("wiki", lambda config: WikiProvider())
 ## 設定
 
 `lessons.enabled`、`lessons.allow_write`、`lessons.retention_days`、`lessons.max_entries`、`lessons.brief_max_bytes`、`lessons.recurring_from`。設定の AI タブにあります。**失敗から学んだこと** パネルはアラートタブの下部にあります。
+
+## ラウンドの締め
+
+作業のまとまりの最後に `python bin/monitor_cli.py lessons close` を実行すると、自分のレッスンとそのガードがまだない繰り返しの失敗の種類(`GET /api/ai/lessons` の `needs_guard`)が一覧表示され、1つでも残っている間は 0 以外の終了コードで終わります。ガードを書くか、まだ存在できない理由を述べて、もう一度実行してください。

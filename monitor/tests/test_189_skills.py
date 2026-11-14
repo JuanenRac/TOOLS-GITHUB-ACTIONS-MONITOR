@@ -83,10 +83,18 @@ class NothingIsLeftOut(unittest.TestCase):
             missing += [f"file {f}" for f in sorted(files) if f"`{f}`" not in text]
             missing += [f"tab {t}" for t in sorted(tabs) if f"`{t}`" not in text]
             self.assertEqual(missing, [], f"{name}: something in the code is not described to the AIs; add a note in tools/make_skill_refs.py")
+        for name in skills.names():
+            text = corpus(name)
+            lost = [s for s in make_skill_refs.signal_ids() if f"`{s}`" not in text] + [p for p in make_skill_refs.panel_ids() if f"`{p}`" not in text]
+            self.assertEqual(lost, [], f"{name}: a signal or a panel of the code is not named")
         external = corpus("external")
         self.assertEqual([c for c in monitor_cli.COMMANDS if f"`{c}`" not in external], [])
         for flag in (a for a in monitor_cli.build_parser()._actions if a.option_strings):
             self.assertIn(flag.option_strings[-1] if flag.option_strings[-1].startswith("--") else flag.option_strings[0], external)
+
+    def test_a_new_signal_without_a_note_stops_the_generator(self):
+        with mock.patch.object(make_skill_refs, "signal_ids", return_value=["now.brand-new"]), self.assertRaises(SystemExit):
+            make_skill_refs.signals_md()
 
     def test_a_new_endpoint_without_a_note_stops_the_generator(self):
         with mock.patch.object(make_skill_refs, "endpoints", return_value=["/api/brand-new"]), self.assertRaises(SystemExit):
@@ -103,7 +111,7 @@ class NothingIsLeftOut(unittest.TestCase):
 
     def test_the_coverage_table_names_every_kind(self):
         text = (HERE / "skills" / "COVERAGE.md").read_text(encoding="utf-8")
-        for kind in ("endpoints", "commands", "settings", "files", "roles", "tabs", "classes"):
+        for kind in ("endpoints", "commands", "settings", "files", "roles", "tabs", "classes", "signals", "panels"):
             self.assertRegex(text, rf"\| {kind} \| \d+ \|")
 
 

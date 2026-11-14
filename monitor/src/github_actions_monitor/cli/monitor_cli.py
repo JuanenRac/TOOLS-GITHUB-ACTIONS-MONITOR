@@ -45,7 +45,7 @@ from github_actions_monitor.security import netguard
 EXIT_OK, EXIT_USAGE, EXIT_DOWN, EXIT_AUTH, EXIT_DEGRADED, EXIT_ALERTS = 0, 1, 2, 3, 4, 5
 COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "ai-hook", "credential", "lessons", "install-skill", "gh-token")
 SKILL_ACTIONS = ("internal", "external")
-LESSONS_ACTIONS = ("list", "brief", "failures")
+LESSONS_ACTIONS = ("list", "brief", "failures", "close")
 AI_HOOK_ACTIONS = ("install", "status", "uninstall")
 CREDENTIAL_ACTIONS = ("replace", "reload")
 LITE_COMMANDS = ("status", "doctor", "health", "check")
@@ -242,6 +242,11 @@ def cmd_lessons(ctx):
     if action == "brief":
         answer = fetch(ctx["base"], "/api/ai/lessons", {"fmt": "brief", "as": "json", "repo": ctx.get("repo")}, ctx["timeout"], ctx["token"])
         return answer, str(answer.get("text") or "").splitlines(), EXIT_OK
+    if action == "close":
+        answer = fetch(ctx["base"], "/api/ai/lessons", {"repo": ctx.get("repo")}, ctx["timeout"], ctx["token"])
+        pending = [r for r in answer.get("categories") or [] if r.get("needs_guard")]
+        lines = [i18n.t("cli.close_head", n=len(pending))] + [f"  {r.get('category', '?'):<16} {r.get('n7', 0)}/7d {', '.join(r.get('repos') or [])}" for r in pending]
+        return {"pending": [r.get("category") for r in pending]}, lines, EXIT_ALERTS if pending else EXIT_OK
     if action == "failures":
         answer = fetch(ctx["base"], "/api/ai/failures", {"repo": ctx.get("repo"), "limit": 20}, ctx["timeout"], ctx["token"])
         rows = answer.get("failures") or []
