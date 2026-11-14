@@ -7,7 +7,7 @@
 
 Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il proprio semver. La fonte è il CHANGELOG.md in inglese; questo file ha le stesse versioni e sezioni.
 
-## [Unreleased]
+## [1.8.0]
 
 ### Modificato
 
