@@ -45,6 +45,16 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - La prueba de una cuenta que muere al instante ya no depende de la velocidad del equipo: la espera antes de volver a arrancar una cuenta se comprueba con un reloj que da la propia prueba, y una segunda prueba comprueba el calendario de las esperas sin leer la hora real (la antigua fallaba bajo carga en la puerta de una versión).
 
+## [1.8.3]
+
+### Añadido
+
+- Notificaciones para cada usuario (ntfy, Teams, correo, resúmenes) con un panel en la página; un trabajo omitido se muestra aparte de un fallo; la página en todos los tamaños y un monitor para varias pantallas.
+
+- Un libro de fallos y una biblioteca de lecciones, dos skills para IAs y un paquete para el auditor.
+
+- Leer menos de la cuota (webhook primero, fuentes gratuitas, API de búsqueda) e informes opcionales, todo desactivado.
+
 ## [1.8.2]
 
 ### Añadido

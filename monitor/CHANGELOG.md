@@ -11,6 +11,8 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+## [1.8.3]
+
 ### Changed
 
 - **Each user sets their notifications in the page**: in the team mode the menu of the signed-in user has the entry Notifications, a panel with the same preferences as the API (channels with their destinations, sentinels, lowest level, events of the system for an administrator, hourly or daily digest), a test message and a button to mark the pending alerts as seen. A secret that is already stored is shown as stored and is never put back in the page; an empty box keeps it. The guide of the notifications has the section in the eight languages, and a browser test checks that only what was typed is sent.

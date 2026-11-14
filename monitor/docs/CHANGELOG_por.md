@@ -45,6 +45,16 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - O teste de uma conta que morre de imediato já não depende da velocidade do computador: a espera antes de voltar a arrancar uma conta é verificada com um relógio que o próprio teste dá, e um segundo teste verifica o calendário das esperas sem ler a hora real (o antigo falhava sob carga na porta de uma versão).
 
+## [1.8.3]
+
+### Adicionado
+
+- Notificações para cada utilizador (ntfy, Teams, correio, resumos) com um painel na página; uma tarefa omitida mostra-se à parte de uma falha; a página em todos os tamanhos e um monitor para vários ecrãs.
+
+- Um livro de falhas e uma biblioteca de lições, duas skills para IA e um pacote para o auditor.
+
+- Ler menos da quota (webhook primeiro, fontes gratuitas, API de pesquisa) e relatórios opcionais, tudo desligado.
+
 ## [1.8.2]
 
 ### Adicionado

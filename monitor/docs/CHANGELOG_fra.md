@@ -45,6 +45,16 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - Le test d'un compte qui meurt aussitôt ne dépend plus de la vitesse de l'ordinateur : l'attente avant de relancer un compte est vérifiée avec une horloge que donne le test lui-même, et un second test vérifie le calendrier des attentes sans lire l'heure réelle (l'ancien échouait sous charge dans la porte d'une version).
 
+## [1.8.3]
+
+### Ajouté
+
+- Notifications pour chaque utilisateur (ntfy, Teams, e-mail, résumés) avec un panneau dans la page ; un job ignoré est montré à part d'un échec ; la page dans toutes les tailles et un moniteur pour plusieurs écrans.
+
+- Un livre des échecs et une bibliothèque de leçons, deux skills pour les IA et un paquet pour l'auditeur.
+
+- Lire moins de quota (webhook d'abord, sources gratuites, API de recherche) et des rapports facultatifs, tout désactivé.
+
 ## [1.8.2]
 
 ### Ajouté

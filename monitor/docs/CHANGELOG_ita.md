@@ -45,6 +45,16 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - Il test di un account che muore subito non dipende più dalla velocità del computer: l'attesa prima di riavviare un account viene verificata con un orologio che dà il test stesso, e un secondo test verifica il calendario delle attese senza leggere l'ora reale (il vecchio falliva sotto carico nella porta di una versione).
 
+## [1.8.3]
+
+### Aggiunto
+
+- Notifiche per ogni utente (ntfy, Teams, e-mail, riepiloghi) con un pannello nella pagina; un job saltato è mostrato a parte da un errore; la pagina in ogni dimensione e un monitor per più schermi.
+
+- Un registro dei fallimenti e una libreria di lezioni, due skill per le IA e un pacchetto per il revisore.
+
+- Leggere meno quota (prima il webhook, fonti gratuite, API di ricerca) e rapporti facoltativi, tutto disattivato.
+
 ## [1.8.2]
 
 ### Aggiunto

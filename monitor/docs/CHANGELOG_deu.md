@@ -45,6 +45,16 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - Der Test eines Kontos, das sofort stirbt, hängt nicht mehr von der Geschwindigkeit des Rechners ab: Die Wartezeit vor dem erneuten Start eines Kontos wird mit einer Uhr geprüft, die der Test selbst gibt, und ein zweiter Test prüft den Plan der Wartezeiten, ohne die echte Zeit zu lesen (der alte scheiterte unter Last in der Schranke eines Releases).
 
+## [1.8.3]
+
+### Hinzugefügt
+
+- Benachrichtigungen für jeden Benutzer (ntfy, Teams, E-Mail, Zusammenfassungen) mit einem Panel in der Seite; ein übersprungener Job wird getrennt von einem Fehler gezeigt; die Seite in jeder Größe und ein Monitor für mehrere Bildschirme.
+
+- Ein Fehlerbuch und eine Bibliothek von Lehren, zwei Skills für KIs und ein Paket für den Prüfer.
+
+- Weniger Kontingent lesen (Webhook zuerst, kostenlose Quellen, Such-API) und optionale Berichte, alles aus.
+
 ## [1.8.2]
 
 ### Hinzugefügt
