@@ -16,7 +16,7 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 
-from github_actions_monitor.security import secretstore
+from github_actions_monitor.security import netguard, secretstore
 
 SCOPE = {"name": "github-actions-monitor"}
 STATE = {"sent": set(), "total": 0, "last_ok": None, "last_error": "", "next": 0.0}
@@ -78,10 +78,19 @@ def metrics(figures, resource, now=None):
     return {"resourceMetrics": [{"resource": {"attributes": resource}, "scopeMetrics": [{"scope": SCOPE, "metrics": gauges}]}]}
 
 
-def _post(url, document, opener=None):
+def _send(request, config=None):
+    """The request through the rule of netguard: a collector on this computer is called directly and its redirects are not followed; any other collector is refused when its name, or a redirect, leads
+    to a private address (loopback, private, link-local, metadata) unless `notify.allow_private_targets` is on; no proxy of the environment is used."""
+    notify = config.get("notify") if isinstance(config, dict) and isinstance(config.get("notify"), dict) else {}
+    if urllib.parse.urlsplit(request.full_url).hostname in ("127.0.0.1", "localhost", "::1"):
+        return netguard.local_open(request, timeout=10, follow_redirects=False).read()
+    return netguard.open_url(request, timeout=10, allow_private=notify.get("allow_private_targets") is True).read()
+
+
+def _post(url, document, opener=None, config=None):
     body = json.dumps(document).encode("utf-8")
     request = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"}, method="POST")
-    (opener or (lambda r: urllib.request.urlopen(r, timeout=10).read()))(request)
+    (opener or (lambda r: _send(r, config)))(request)
 
 
 def export(config, data, version, now=None, post=None):
@@ -95,8 +104,8 @@ def export(config, data, version, now=None, post=None):
     fresh = [r for r in data.get("runs") or [] if r.get("status") == "completed" and (r.get("repo"), r.get("id")) not in STATE["sent"]][:200]
     try:
         if fresh:
-            _post(cfg["endpoint"] + "/v1/traces", traces(fresh, resource), post)
-        _post(cfg["endpoint"] + "/v1/metrics", metrics(data.get("figures") or {}, resource, now), post)
+            _post(cfg["endpoint"] + "/v1/traces", traces(fresh, resource), post, config)
+        _post(cfg["endpoint"] + "/v1/metrics", metrics(data.get("figures") or {}, resource, now), post, config)
     except Exception as error:   # noqa: BLE001 - a collector that is down is not the monitor's problem
         degraded.note("otlp.send", error)
         STATE["last_error"] = secretstore.redact(str(error))[:160]

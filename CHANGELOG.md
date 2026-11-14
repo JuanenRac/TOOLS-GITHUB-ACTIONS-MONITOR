@@ -60,6 +60,12 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Fixed
 
+- **The OpenTelemetry export obeys the rule for outgoing requests**: a collector on this computer is called directly and a redirect from it is not followed; any other collector is refused when it, or a redirect, leads to a loopback, private, link-local or metadata address (unless the setting that allows private targets is on), and the proxy of the environment is not used. Before, the export used a plain request that followed every redirect.
+
+- **The proxy of the environment is said to be a frontier of trust**: the help of its setting (and the code) now say that the proxy resolves the name again on its own, so the check before the proxy is a first filter, not a guarantee, and that it should be turned on only behind a managed proxy that refuses loopback, private, link-local and metadata destinations. It stays off by default.
+
+- **A test keeps the page from putting free text into markup without escaping it**: every text of the API that goes into a markup string passes through the escaping function, and the two places that write it as plain text are listed; the help documents are checked to escape their markup and to refuse scripts and non-web links.
+
 - **A name with a line feed at the end is no longer a valid name**: the checks of account ids, repository names, keys, owners, addresses and the like ended in the end-of-line mark, which also accepts a text that is followed by one more line feed ("alpha" and "alpha" plus a line feed were the same id). They now end at the end of the text, 76 checks in all, and a test keeps every new check that way.
 
 - **The pause of the hook of an AI tool is kept in one step**: reading the last moment and writing the new one take a lock, so two events at the same time cannot both pass; and when the moment cannot be written the answer is "do not block", not "ok" (before, a failed write still allowed the block and the pause was never applied).

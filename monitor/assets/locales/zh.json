@@ -441,7 +441,7 @@
  "cfg.h.network.etag": "默认开启。返回 304 的读取不消耗配额。与 cache.etag.enabled 一起生效:任一关闭则每次读取都是普通读取。需要重启。",
  "cfg.h.network.graphql_batch": "1 到 30(默认 20):一次 GraphQL 查询请求的仓库数量。",
  "cfg.h.network.graphql_checks": "默认关闭。不活跃的仓库改为用 GraphQL 分批读取(它有独立的配额),而不是每个仓库一次 REST 调用;活跃的仓库以及 GraphQL 没有应答的仓库仍通过 REST 读取。代价:只能看到默认分支的最后一次提交(未在其上运行的工作流不会列出),没有时长、重试次数或其他分支。参见 QUOTA.md。",
- "cfg.h.network.use_proxy": "关闭 = 发出的通知忽略 http_proxy 和 https_proxy。开启 = 使用它们, 并在代理收到请求之前检查目标地址 (以及每次重定向)。",
+ "cfg.h.network.use_proxy": "关闭 = 外发通知忽略 http_proxy 和 https_proxy。开启 = 使用它们，并在代理收到请求之前检查目的地（以及每次重定向）。代理会自行再次解析域名，因此它是一条信任边界：仅在会拒绝回环、私有、链路本地和元数据目的地的受管代理之后才开启。",
  "cfg.h.notify.allow_private_targets": "关闭 = 拒绝属于或解析到本机或本地网络的目标(127.x、10.x、172.16-31.x、192.168.x、含云元数据地址的 169.254.x、::1、fc00::/7),重定向后同样拒绝。开启 = 允许你自己网络中的 Matrix 服务器。",
  "cfg.h.notify.enabled": "在此项和某个渠道开启之前,不会有任何内容离开本机。",
  "cfg.h.notify.events": "red_new、stuck_new、pending_sign、offline、online、workflow_failed 等,每行一个。",
