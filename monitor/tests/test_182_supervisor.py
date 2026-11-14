@@ -193,8 +193,8 @@ class Credential(Running):
         child = self.supervisor.child("alpha")
         status, _, _ = get(child.url("/api/credential"), data=b"{}", headers={"Content-Type": "application/json", "X-Monitor-Supervisor": "guess"}, method="POST")
         self.assertEqual(status, 403)
-        answer = get(self.url + "/api/echo?account=alpha", headers={"X-Monitor-Supervisor": self.supervisor.key, "X-Monitor-Remote": "1"})[1]
-        self.assertIsNone(answer["supervisor"])
+        answer = get(self.url + "/api/echo?account=alpha", headers={"X-Monitor-Supervisor": "guess", "X-Monitor-Remote": "1"})[1]
+        self.assertEqual(answer["supervisor"], self.supervisor.key, "what the client sent is dropped; the supervisor puts its own key on every request to a child")
         self.assertIsNone(answer["remote"], "a client cannot say it is remote or the supervisor")
 
     def test_the_key_is_given_to_every_account_process(self):

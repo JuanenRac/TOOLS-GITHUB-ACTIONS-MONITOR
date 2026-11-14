@@ -20,6 +20,7 @@ import sys
 import threading
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -61,6 +62,7 @@ class Child:
 
     def __init__(self, account_id, port, command=None, key=""):
         self.id, self.port, self.proc, self.key = account_id, port, None, key
+        CHILD_KEYS[port] = key         # every request of this supervisor to that port carries the key (see fetch): the process of an account answers to nobody else
         self.command = command or [sys.executable, "-I", str(paths.BIN / "account_child.py"), account_id, "--port", str(port)]
         self.started = 0.0
         self.failures = 0              # starts in a row that did not get healthy
@@ -105,8 +107,17 @@ class Child:
         return f"http://127.0.0.1:{self.port}{path}"
 
 
+CHILD_KEYS = {}      # port of an account process -> the key the supervisor gave it
+
+
 def fetch(url, timeout=6, data=None, headers=None, method=None):
-    """(status, body bytes, headers dict) of one local request; (0, b'', {}) when the child does not answer. Never raises."""
+    """(status, body bytes, headers dict) of one local request; (0, b'', {}) when the child does not answer. Never raises. A request to the port of an account process carries the key of the supervisor."""
+    try:
+        key = CHILD_KEYS.get(urllib.parse.urlsplit(url).port)
+    except ValueError:
+        key = None
+    if key:
+        headers = {**(headers or {}), SUPERVISOR_KEY_HEADER: key}
     request = urllib.request.Request(url, data=data, headers=headers or {}, method=method or ("POST" if data is not None else "GET"))
     try:
         with netguard.local_open(request, timeout=timeout) as answer:
