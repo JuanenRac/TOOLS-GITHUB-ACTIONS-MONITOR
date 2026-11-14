@@ -62,3 +62,12 @@ GitHub 为每个账户提供有限的 **API 调用配额**,由使用它的所有
 监控器先在 PATH 中查找 `openssl`，找不到时再查找 Git for Windows 存放它的位置（Program Files 以及用户 Programs 下的 `Git\usr\bin`、`Git\mingw64\bin`）和 macOS、Linux 的常用目录，因此从 `.bat` 或服务启动的监控器也能找到。`github_app.openssl_path`（程序的绝对路径）可手动指定。`/api/github-app/status` 显示 `openssl` 和 `openssl_path`，当使用的不是 PATH 中的那个时，doctor 会说明由哪一个签名。
 
 在 Windows 上，监控器独占其端口（SO_EXCLUSIVEADDRUSE）：两个进程不能再同时监听 8765。如果在另一个监控器已在该端口应答时又启动一个，它会说明情况并退出，而不是去找别的端口。
+
+## 配额分配：首选来源与保留量
+
+默认情况下，每次读取都交给剩余调用最多的来源（用户、GitHub App、第二个账户）。`readpool` 块可在设置的“配额”标签页中改变这一点，默认值保持一贯的保守（`auto`，保留量 0）：
+
+- `readpool.prefer.<类型>`（`auto`、`user`、`app`、`extra`）：某一类读取优先由哪个来源应答。类型由调用本身判定：`runs`（运行、工作流、检查）、`security`（代码扫描、Dependabot、密钥扫描）、`issues`（议题和拉取请求）、`history`（发布、提交、标签、内容）、`discovery`（组织、搜索、仓库列表）以及 `other`。若首选来源失败或低于其保留量，则由其他来源应答，用户排在最后。
+- `readpool.reserve.<来源>`（0 到 4000）：该来源保留的空闲调用数。当某来源的剩余调用不超过其保留量时，只要有其他来源可用，监控器就不用它读取。用 `readpool.reserve.user` 可为你的工具和代理的 `gh` 给用户留出调用。
+
+写入和操作始终使用用户的令牌。配额条和工作模式（快速和加速）按所有来源的总和计算：磁贴显示总和，其提示显示各来源的数值，配额标签页（状态）在用户、App 和第二个账户的配额旁增加一行总计。

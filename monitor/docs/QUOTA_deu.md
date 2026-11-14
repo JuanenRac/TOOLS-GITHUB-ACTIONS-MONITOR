@@ -62,3 +62,12 @@ Das zweite Konto (`extra_reader.enabled`, `extra_reader.file`) ist ein Nur-Lese-
 Der Monitor sucht `openssl` im PATH und, falls es dort fehlt, dort, wo Git for Windows es ablegt (`Git\usr\bin`, `Git\mingw64\bin` in Programme und in den Programmen des Benutzers) sowie in den üblichen Ordnern von macOS und Linux; so findet es auch ein Monitor, der aus einer `.bat` oder als Dienst gestartet wird. `github_app.openssl_path` (absoluter Pfad zum Programm) wählt eines von Hand. `/api/github-app/status` zeigt `openssl` und `openssl_path`, und der Doctor nennt das signierende Programm, wenn es nicht das aus dem PATH ist.
 
 Unter Windows wird der Port des Monitors exklusiv gebunden (SO_EXCLUSIVEADDRUSE): zwei Prozesse können nicht mehr gleichzeitig auf 8765 lauschen. Und ein Monitor, der startet, während schon ein Monitor auf seinem Port antwortet, sagt das und beendet sich, statt einen anderen Port zu suchen.
+
+## Aufteilung des Kontingents: bevorzugte Quelle und Reserve
+
+Standardmäßig geht jeder Lesezugriff an die Quelle (Benutzer, GitHub App, zweites Konto) mit den meisten freien Aufrufen. Der Block `readpool` ändert das im Tab Kontingent der Einstellungen, mit den bisherigen vorsichtigen Standardwerten (`auto`, Reserve 0):
+
+- `readpool.prefer.<Art>` (`auto`, `user`, `app`, `extra`): die Quelle, die eine ART Lesezugriff zuerst beantwortet. Die Arten ergeben sich aus dem Aufruf: `runs` (Läufe, Workflows, Checks), `security` (Code Scanning, Dependabot, Secret Scanning), `issues` (Issues und Pull Requests), `history` (Releases, Commits, Tags, Inhalte), `discovery` (Organisationen, Suche, Repository-Listen) und `other`. Fällt die bevorzugte Quelle aus oder liegt sie unter ihrer Reserve, antworten die anderen, der Benutzer zuletzt.
+- `readpool.reserve.<Quelle>` (0 bis 4000): in dieser Quelle freigehaltene Aufrufe. Solange eine Quelle höchstens so viele Aufrufe wie ihre Reserve hat, liest der Monitor nicht mit ihr, wenn eine andere kann. Mit `readpool.reserve.user` bleiben dem `gh` deiner Werkzeuge und Agenten Aufrufe.
+
+Schreibzugriffe und Aktionen nutzen immer das Token des Benutzers. Die Kontingentanzeige und die Arbeitsmodi (schnell und Turbo) zählen die SUMME aller Quellen: die Kachel zeigt die Summe, ihr Tooltip den Wert jeder Quelle, und der Tab Kontingent (Status) fügt neben dem Kontingent von Benutzer, App und zweitem Konto eine Zeile mit der Gesamtsumme hinzu.

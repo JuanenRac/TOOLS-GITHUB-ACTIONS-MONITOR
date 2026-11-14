@@ -44,8 +44,8 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 1696 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **设置** | 325 个设置,均有帮助 |
+| **测试** | 1705 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **设置** | 334 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
 

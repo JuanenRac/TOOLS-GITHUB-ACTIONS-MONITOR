@@ -1427,7 +1427,8 @@ function quotaTabBox(){
   const run=async(what)=>{out.textContent="…";try{const r=await fetch("/api/quota-pool/status",{cache:"no-store"});const d=await r.json();
     const rows=(d.sources||[]).filter(s=>what==="all"||(what==="app"&&s.name==="app")||(what==="extra"&&s.name==="extra")||(what==="perms"&&s.name==="app"));
     const tr=d.trend||{},trl=(what==="all"&&tr.minutes)?`<div>${esc(T("ui.qt_trend",{m:tr.minutes,a:tr.all_per_hour,o:tr.own_per_hour,x:tr.others_per_hour}))}${tr.others_warn?" · <b>"+esc(T("ui.qt_others"))+"</b>":""}</div>`:"";
-    out.innerHTML=trl+rows.map(s=>`<div><b>${esc(s.name)}</b> · ${esc(T(s.ok?"ui.qt_ok":"ui.qt_fail"))}${s.app?" · "+esc(s.app):""}${s.remaining!=null?" · "+esc(s.remaining+"/"+s.limit+" "+T("ui.qt_left")):""}${s.reset?" · "+esc(clock(new Date(s.reset*1000).toISOString(),{hour:"2-digit",minute:"2-digit"})):""}${(s.missing&&s.missing.length&&(what==="perms"||what==="app"||what==="all"))?" · "+esc(T("ui.qt_missing"))+": "+esc(s.missing.join(", ")):""}${s.error?" · "+esc(s.error):""}${s.warning?" · "+esc(s.warning):""}</div>`).join("")||esc(T("ui.qt_fail"))}catch(e){out.textContent=String(e)}};
+    const sum=(what==="all"&&d.total)?`<div><b>Σ</b> · ${esc(d.total.remaining+"/"+d.total.limit+" "+T("ui.qt_left"))} · ${esc(d.total.sources)}</div>`:"";
+    out.innerHTML=trl+sum+rows.map(s=>`<div><b>${esc(s.name)}</b> · ${esc(T(s.ok?"ui.qt_ok":"ui.qt_fail"))}${s.app?" · "+esc(s.app):""}${s.remaining!=null?" · "+esc(s.remaining+"/"+s.limit+" "+T("ui.qt_left")):""}${s.reset?" · "+esc(clock(new Date(s.reset*1000).toISOString(),{hour:"2-digit",minute:"2-digit"})):""}${(s.missing&&s.missing.length&&(what==="perms"||what==="app"||what==="all"))?" · "+esc(T("ui.qt_missing"))+": "+esc(s.missing.join(", ")):""}${s.error?" · "+esc(s.error):""}${s.warning?" · "+esc(s.warning):""}</div>`).join("")||esc(T("ui.qt_fail"))}catch(e){out.textContent=String(e)}};
   [["ui.qt_state","all"],["ui.qt_test_app","app"],["ui.qt_test_extra","extra"],["ui.qt_perms","perms"]].forEach(([k,w])=>{const b=document.createElement("button");b.type="button";b.textContent=T(k);b.addEventListener("click",()=>run(w));bar.appendChild(b)});
   const apply=async(values)=>{try{const r=await fetch("/api/settings?"+qlang(),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({changes:values})});const j=await r.json();cfgMsg(j.ok?"":"err",j.ok?T("ui.cfg_saved",{n:Object.keys(values).length}):JSON.stringify(j.errors||{}));cfgLoad()}catch(e){cfgMsg("err",String(e))}};
   [["ui.qt_recommended",{"modes.auto_low":true,"network.etag":true}],["ui.qt_defaults",Object.assign({"central.source":"off","extra_reader.enabled":false,"github_app.enabled":false},QT_DEFAULTS)]].forEach(([k,v])=>{const b=document.createElement("button");b.type="button";b.textContent=T(k);b.addEventListener("click",()=>apply(v));bar.appendChild(b)});
@@ -1472,7 +1473,7 @@ function paintTiles(d){
   const saved=d.etag&&d.etag.saved!=null?d.etag.saved:null;kSet("tv-etag",saved==null?0:saved);tileState("kt-etag",saved>0?"ok":"");
   if(d.rate){
     const used=d.rate.limit-d.rate.remaining,pct=Math.max(0,Math.min(100,Math.round(d.rate.remaining/d.rate.limit*100))),low=d.min_rate||800;
-    tileText("tv-quota",d.rate.remaining+"/"+d.rate.limit);$("tq-fill").style.width=pct+"%";
+    tileText("tv-quota",d.rate.remaining+"/"+d.rate.limit);{const rs=d.rate_sources||{},ks=Object.keys(rs);$("kt-quota").title=ks.length>1?ks.map(k=>k+" "+rs[k].remaining+"/"+rs[k].limit).join(" · ")+" · Σ "+d.rate.remaining+"/"+d.rate.limit:""}$("tq-fill").style.width=pct+"%";
     tileState("kt-quota",d.paused_quota||d.rate.remaining<low?"bad":(d.rate.remaining<low*2?"warn":"ok"));
     QUOTA_RESET=new Date(d.rate.reset);quotaCount();
   }

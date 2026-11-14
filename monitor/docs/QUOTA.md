@@ -62,3 +62,12 @@ The second account (`extra_reader.enabled`, `extra_reader.file`) is a read-only 
 The monitor looks for `openssl` in the PATH and, if it is not there, where Git for Windows keeps it (`Git\usr\bin`, `Git\mingw64\bin` in Program Files and in the user's Programs) and in the usual folders of macOS and Linux, so a monitor started from a `.bat` or a service finds it. `github_app.openssl_path` (an absolute path to the program) chooses one by hand. `/api/github-app/status` shows `openssl` and `openssl_path`, and the doctor says which one signs when it is not the one of the PATH.
 
 On Windows the port of the monitor is bound for the monitor alone (SO_EXCLUSIVEADDRUSE): two processes can no longer listen on 8765 at the same time. And a monitor that starts while another monitor already answers on its port says so and stops instead of looking for another port.
+
+## Sharing the allowance: preferred source and reserve
+
+By default each read goes to the source (user, GitHub App, second account) with the most calls left. The block `readpool` changes that, in the Quota tab of the settings, with the conservative defaults of always (`auto`, reserve 0):
+
+- `readpool.prefer.<kind>` (`auto`, `user`, `app`, `extra`): the source that answers a KIND of read first. The kinds are told by the call: `runs` (runs, workflows, checks), `security` (code scanning, Dependabot, secret scanning), `issues` (issues and pull requests), `history` (releases, commits, tags, contents), `discovery` (organisations, search, repository lists) and `other`. If the preferred source fails or is under its reserve, the others answer, the user last.
+- `readpool.reserve.<source>` (0 to 4000): calls kept free in that source. While a source has no more calls left than its reserve, the monitor does not read with it if another source can. Use `readpool.reserve.user` to leave calls to the `gh` of your tools and agents.
+
+Writes and actions always use the token of the user. The bar of the allowance and the working modes (fast and turbo) count the SUM of all the sources: the tile shows the sum and its tooltip the figure of each source, and the Quota tab (State) adds a line with the total next to the allowance of the user, the App and the second account.

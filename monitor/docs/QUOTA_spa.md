@@ -62,3 +62,12 @@ La segunda cuenta (`extra_reader.enabled`, `extra_reader.file`) es una cuenta de
 El monitor busca `openssl` en el PATH y, si no está, donde lo guarda Git for Windows (`Git\usr\bin`, `Git\mingw64\bin` en Archivos de programa y en los Programas del usuario) y en las carpetas habituales de macOS y Linux, de modo que un monitor lanzado desde un `.bat` o un servicio lo encuentra. `github_app.openssl_path` (ruta absoluta al programa) permite elegir uno a mano. `/api/github-app/status` muestra `openssl` y `openssl_path`, y el doctor dice cuál firma cuando no es el del PATH.
 
 En Windows el puerto del monitor se abre en exclusiva (SO_EXCLUSIVEADDRUSE): dos procesos ya no pueden escuchar en el 8765 a la vez. Y un monitor que arranca mientras otro monitor ya responde en su puerto lo dice y se detiene en vez de buscar otro puerto.
+
+## Reparto de la cuota: fuente preferida y reserva
+
+Por defecto cada lectura va a la fuente (usuario, GitHub App, segunda cuenta) con más llamadas libres. El bloque `readpool` lo cambia, en la pestaña Cuota de los ajustes, con los valores conservadores de siempre (`auto`, reserva 0):
+
+- `readpool.prefer.<tipo>` (`auto`, `user`, `app`, `extra`): la fuente que responde primero a un TIPO de lectura. Los tipos los da la propia llamada: `runs` (ejecuciones, workflows, checks), `security` (code scanning, Dependabot, secret scanning), `issues` (issues y pull requests), `history` (versiones, commits, etiquetas, contenido), `discovery` (organizaciones, búsqueda, listas de repositorios) y `other`. Si la fuente preferida falla o está bajo su reserva, responden las demás, el usuario la última.
+- `readpool.reserve.<fuente>` (0 a 4000): llamadas que se dejan libres en esa fuente. Mientras una fuente tenga como mucho las llamadas de su reserva, el monitor no lee con ella si otra puede. Usa `readpool.reserve.user` para dejar llamadas al `gh` de tus herramientas y agentes.
+
+Las escrituras y acciones usan siempre el token del usuario. La barra de cuota y los modos de trabajo (rápido y turbo) cuentan la SUMA de todas las fuentes: el recuadro muestra la suma y su ayuda emergente la cifra de cada fuente, y la pestaña Cuota (Estado) añade una línea con el total junto a la cuota del usuario, la App y la segunda cuenta.

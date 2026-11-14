@@ -62,3 +62,12 @@ Il secondo account (`extra_reader.enabled`, `extra_reader.file`) è un account d
 Il monitor cerca `openssl` nel PATH e, se non c'è, dove lo tiene Git for Windows (`Git\usr\bin`, `Git\mingw64\bin` in Program Files e nei Programmi dell'utente) e nelle cartelle abituali di macOS e Linux, così lo trova anche un monitor avviato da un `.bat` o da un servizio. `github_app.openssl_path` (percorso assoluto del programma) ne sceglie uno a mano. `/api/github-app/status` mostra `openssl` e `openssl_path`, e il doctor dice quale firma quando non è quello del PATH.
 
 In Windows la porta del monitor è aperta in esclusiva (SO_EXCLUSIVEADDRUSE): due processi non possono più ascoltare sull'8765 insieme. E un monitor che parte mentre un altro monitor risponde già sulla sua porta lo dice e si ferma invece di cercare un'altra porta.
+
+## Ripartizione della quota: fonte preferita e riserva
+
+Per impostazione predefinita ogni lettura va alla fonte (utente, GitHub App, secondo account) con più chiamate libere. Il blocco `readpool` lo cambia, nella scheda Quota delle impostazioni, con i valori prudenti di sempre (`auto`, riserva 0):
+
+- `readpool.prefer.<tipo>` (`auto`, `user`, `app`, `extra`): la fonte che risponde per prima a un TIPO di lettura. I tipi si riconoscono dalla chiamata: `runs` (esecuzioni, workflow, check), `security` (code scanning, Dependabot, secret scanning), `issues` (issue e pull request), `history` (release, commit, tag, contenuti), `discovery` (organizzazioni, ricerca, elenchi di repository) e `other`. Se la fonte preferita fallisce o è sotto la sua riserva rispondono le altre, l'utente per ultimo.
+- `readpool.reserve.<fonte>` (da 0 a 4000): chiamate lasciate libere in quella fonte. Finché una fonte ha al massimo le chiamate della sua riserva, il monitor non legge con essa se un'altra può. Usa `readpool.reserve.user` per lasciare chiamate al `gh` dei tuoi strumenti e agenti.
+
+Scritture e azioni usano sempre il token dell'utente. La barra della quota e le modalità di lavoro (veloce e turbo) contano la SOMMA di tutte le fonti: il riquadro mostra la somma e il suggerimento il valore di ogni fonte, e la scheda Quota (Stato) aggiunge una riga con il totale accanto alla quota di utente, App e secondo account.

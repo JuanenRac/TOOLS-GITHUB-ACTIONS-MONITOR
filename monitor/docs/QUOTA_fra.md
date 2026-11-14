@@ -62,3 +62,12 @@ Le second compte (`extra_reader.enabled`, `extra_reader.file`) est un compte en 
 Le moniteur cherche `openssl` dans le PATH et, s'il n'y est pas, là où Git for Windows le range (`Git\usr\bin`, `Git\mingw64\bin` dans Program Files et dans les Programmes de l'utilisateur) et dans les dossiers habituels de macOS et Linux ; un moniteur lancé depuis un `.bat` ou un service le trouve donc. `github_app.openssl_path` (chemin absolu du programme) en choisit un à la main. `/api/github-app/status` montre `openssl` et `openssl_path`, et le doctor dit lequel signe quand ce n'est pas celui du PATH.
 
 Sous Windows le port du moniteur est ouvert en exclusivité (SO_EXCLUSIVEADDRUSE) : deux processus ne peuvent plus écouter sur le 8765 en même temps. Et un moniteur qui démarre alors qu'un autre répond déjà sur son port le dit et s'arrête au lieu de chercher un autre port.
+
+## Répartition du quota : source préférée et réserve
+
+Par défaut chaque lecture va à la source (utilisateur, GitHub App, second compte) qui a le plus d'appels libres. Le bloc `readpool` le modifie, dans l'onglet Quota des réglages, avec les valeurs prudentes d'avant (`auto`, réserve 0) :
+
+- `readpool.prefer.<type>` (`auto`, `user`, `app`, `extra`) : la source qui répond d'abord à un TYPE de lecture. Les types viennent de l'appel : `runs` (exécutions, workflows, checks), `security` (code scanning, Dependabot, secret scanning), `issues` (issues et pull requests), `history` (versions, commits, étiquettes, contenu), `discovery` (organisations, recherche, listes de dépôts) et `other`. Si la source préférée échoue ou est sous sa réserve, les autres répondent, l'utilisateur en dernier.
+- `readpool.reserve.<source>` (0 à 4000) : appels laissés libres dans cette source. Tant qu'une source a au plus les appels de sa réserve, le moniteur ne lit pas avec elle si une autre peut. Utilisez `readpool.reserve.user` pour laisser des appels au `gh` de vos outils et agents.
+
+Les écritures et actions utilisent toujours le jeton de l'utilisateur. La barre de quota et les modes de travail (rapide et turbo) comptent la SOMME de toutes les sources : la tuile montre la somme et son infobulle le chiffre de chaque source, et l'onglet Quota (État) ajoute une ligne avec le total à côté du quota de l'utilisateur, de l'App et du second compte.

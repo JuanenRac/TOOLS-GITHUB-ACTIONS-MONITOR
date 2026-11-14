@@ -62,3 +62,12 @@ A segunda conta (`extra_reader.enabled`, `extra_reader.file`) é uma conta só d
 O monitor procura `openssl` no PATH e, se não estiver lá, onde o Git for Windows o guarda (`Git\usr\bin`, `Git\mingw64\bin` em Program Files e nos Programas do utilizador) e nas pastas habituais do macOS e do Linux, de modo que um monitor iniciado a partir de um `.bat` ou de um serviço o encontra. `github_app.openssl_path` (caminho absoluto do programa) escolhe um à mão. `/api/github-app/status` mostra `openssl` e `openssl_path`, e o doctor diz qual assina quando não é o do PATH.
 
 No Windows a porta do monitor é aberta em exclusivo (SO_EXCLUSIVEADDRUSE): dois processos já não podem escutar no 8765 ao mesmo tempo. E um monitor que arranca enquanto outro monitor já responde na sua porta di-lo e para, em vez de procurar outra porta.
+
+## Repartição da quota: fonte preferida e reserva
+
+Por predefinição cada leitura vai para a fonte (utilizador, GitHub App, segunda conta) com mais chamadas livres. O bloco `readpool` altera isso, no separador Quota das definições, com os valores prudentes de sempre (`auto`, reserva 0):
+
+- `readpool.prefer.<tipo>` (`auto`, `user`, `app`, `extra`): a fonte que responde primeiro a um TIPO de leitura. Os tipos resultam da própria chamada: `runs` (execuções, workflows, verificações), `security` (code scanning, Dependabot, secret scanning), `issues` (issues e pull requests), `history` (versões, commits, etiquetas, conteúdo), `discovery` (organizações, pesquisa, listas de repositórios) e `other`. Se a fonte preferida falhar ou estiver abaixo da sua reserva, respondem as outras, o utilizador por último.
+- `readpool.reserve.<fonte>` (0 a 4000): chamadas deixadas livres nessa fonte. Enquanto uma fonte tiver no máximo as chamadas da sua reserva, o monitor não lê com ela se outra puder. Use `readpool.reserve.user` para deixar chamadas ao `gh` das suas ferramentas e agentes.
+
+As escritas e ações usam sempre o token do utilizador. A barra de quota e os modos de trabalho (rápido e turbo) contam a SOMA de todas as fontes: o mosaico mostra a soma e a sua dica o valor de cada fonte, e o separador Quota (Estado) acrescenta uma linha com o total junto à quota do utilizador, da App e da segunda conta.
