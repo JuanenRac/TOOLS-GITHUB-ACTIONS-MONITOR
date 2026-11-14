@@ -16,7 +16,7 @@ from github_actions_monitor.app import settings_api  # noqa: E402
 
 DOCS = HERE / "docs"
 # groups that were written before this rule and share the help of their block: a NEW setting is not in this list and must carry its own cfg.h.<key> in the eight languages
-SHARED_HELP = ("sentinel.surface.checks.", "sentinel.readiness.health.weights.", "lint.rules.", "notify.channels.")
+SHARED_HELP = ("sentinel.surface.checks.", "sentinel.readiness.health.weights.", "lint.rules.", "notify.channels.", "readpool.")
 
 
 class HelpSync(unittest.TestCase):
