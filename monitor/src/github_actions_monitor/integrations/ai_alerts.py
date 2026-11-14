@@ -368,8 +368,13 @@ def brief(alerts, limit, now=None, panels=None, sections="", status=""):
     if panels:      # the panels of the Sentinel tab have a section of their own, with the same size limit as the list above (it never pushes the CI alerts out)
         from github_actions_monitor.sentinels import sentinel_panels
         section = sentinel_panels.brief_section(panels)
-        while len(section.encode("utf-8")) > limit and section.count("\n") > 3:
-            section = section.rsplit("\n", 2)[0] + "\n- ... more in ai_alerts.jsonl\n"
+        rows = section.rstrip("\n").split("\n")
+        total = len(rows)
+        while len(("\n".join(rows) + "\n").encode("utf-8")) > limit and len(rows) > 4:
+            rows.pop()      # one line less every turn: the loop always ends
+        if len(rows) < total:
+            rows[-1] = "- ... more in ai_alerts.jsonl"
+        section = "\n".join(rows) + "\n"
         text += "\n" + section
     if sections:      # what to do now, what is pending, the health of the monitor (signals.py), with the same size limit
         block = sections

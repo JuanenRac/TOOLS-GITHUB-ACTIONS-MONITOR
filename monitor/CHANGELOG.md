@@ -9,6 +9,13 @@ Version of the tool itself (monitor + sentinel + batch tools), semver of its own
 and is shown as `tool_version` in the sentinel snapshot and by `read_report.py --version`; `make_release.py` refuses to build
 when this file and `tool_version.py` disagree.
 
+## [Unreleased]
+
+### Fixed
+
+- **The "loading repositories" box stays on the page after the last repository is read**: the finished picture now reaches the page as soon as the reading ends, without waiting for the upkeep that follows it (the brief for the AI tools, the alert centre), and a long list of Sentinel panels can no longer make that brief loop for ever (it was the loop that kept the last partial picture, 131 / 131, on the page).
+- **Reloading the page (F5) no longer takes minutes to get the data**: the endless loop of the brief used all the processor time of the monitor and the page gave up with an abort; besides, the answer of the data endpoint was written to the connection with the global lock held, so one stalled connection (a closed tab) froze every other page and the refresh cycle. The lock is now held only to take the picture. A browser test checks that the box shows while loading and leaves with the last repository, and server tests check that the brief ends, that the finished picture is published before the upkeep and that a stalled connection does not block a reload.
+
 ## [1.8.0]
 
 ### Changed

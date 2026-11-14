@@ -7,6 +7,13 @@
 
 Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com o seu próprio semver. A fonte é o CHANGELOG.md em inglês; este ficheiro tem as mesmas versões e secções.
 
+## [Unreleased]
+
+### Corrigido
+
+- A caixa «a carregar repositórios» ficava na página depois de ler o último repositório: a imagem terminada chega agora à página assim que a leitura acaba, sem esperar pela manutenção seguinte (o resumo para as ferramentas de IA, o centro de alertas), e uma lista longa de painéis do Sentinel já não pode fazer esse resumo repetir-se sem fim (esse ciclo mantinha no ecrã a última imagem parcial, 131 / 131).
+- Recarregar a página (F5) já não demora minutos a obter os dados: o ciclo sem fim do resumo gastava todo o processador do monitor e a página desistia com um aborto; além disso, a resposta do ponto de acesso aos dados era escrita na ligação com o bloqueio global retido, pelo que uma ligação parada (um separador fechado) bloqueava todas as outras páginas e o ciclo de atualização. O bloqueio só é agora retido para tirar a imagem. Um teste de navegador verifica que a caixa aparece durante o carregamento e desaparece com o último repositório, e testes do servidor verificam que o resumo termina, que a imagem terminada é publicada antes da manutenção e que uma ligação parada não bloqueia um recarregamento.
+
 ## [1.8.0]
 
 ### Alterado
