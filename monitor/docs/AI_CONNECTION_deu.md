@@ -23,12 +23,12 @@ Ein Inventar von **Signalen**, dieselben wie auf der Seite: der Tab Jetzt und se
 2. `ai_alerts.jsonl`: eine Zeile pro Ereignis (geöffnet, bestätigt, gelöst) mit stabiler ID.
 3. `GET /api/ai/state`: das ganze Inventar als versioniertes JSON (`schema`, `edition`, `signals`, `act`, `watch`), nur lesend. `GET /api/sentinel/panels` liefert nur die Panels.
 4. `GET /api/ai/stream`: Server-Sent Events, fortsetzbar, in Zuhörern und Zeit begrenzt.
-5. MCP-Werkzeuge (`mcp_server.py`): `monitor_state`, `signals`, `alerts_open`, `diagnose`, `sentinel_panels`, `get_quota`; `act` (bestätigen) nur mit `--allow-ack`.
-6. Der Hook: `python monitor_cli.py ai-hook install [--assistant|--cursor|--generic] [--scope project|user] [--dry-run]` (auch `status` und `uninstall`) fügt ein kleines Skript hinzu, das der KI-Sitzung beim Start und vor dem Ende die Zusammenfassung gibt.
+5. MCP-Werkzeuge (`bin/mcp_server.py`): `monitor_state`, `signals`, `alerts_open`, `diagnose`, `sentinel_panels`, `get_quota`; `act` (bestätigen) nur mit `--allow-ack`.
+6. Der Hook: `python bin/monitor_cli.py ai-hook install [--assistant|--cursor|--generic] [--scope project|user] [--dry-run]` (auch `status` und `uninstall`) fügt ein kleines Skript hinzu, das der KI-Sitzung beim Start und vor dem Ende die Zusammenfassung gibt.
 
 ## Schritt für Schritt
 1. Einstellungen, Tab *Externe KI*, Block *Warnungen für KIs*: `ai_alerts.enabled` einschalten. Optional `ai_alerts.diagnose.enabled` (der fehlschlagende Schritt und die letzten Logzeilen jedes roten Laufs), `ai_alerts.stream.enabled` und `ai_alerts.client_hook.enabled`.
-2. `python monitor_cli.py ai-hook install --assistant --dry-run` zeigt die Änderung, danach ohne `--dry-run`.
+2. `python bin/monitor_cli.py ai-hook install --assistant --dry-run` zeigt die Änderung, danach ohne `--dry-run`.
 3. Eine Sitzung Ihres KI-Werkzeugs im Ordner öffnen: Sie erhält die Zusammenfassung. Die untere Leiste zeigt den Herzschlag der KI (wann sie zuletzt gelesen hat).
 4. Mit der Schaltfläche *Verbindung testen* der Einstellungsseite prüfen, ob der Feed geschrieben wird.
 

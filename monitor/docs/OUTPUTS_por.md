@@ -22,7 +22,7 @@ scrape ou a atualização de um painel não gasta quota da API do GitHub. Ativá
 | `/api/outputs/grafana.json` | Tabelas JSON para a fonte de dados «Infinity» / JSON do Grafana | `outputs.json.enabled` |
 | `/api/outputs/dashboard.json` | o documento de `ci_red.json` (esquema 2, ver CI_RED_SCHEMA_por.md) para um painel de estado | `outputs.dashboard.enabled` |
 
-Um pedido a um caminho cujo interruptor está desligado recebe `404`. A forma anterior de entregar o mesmo documento a um painel, `ci_red.json` e `read_report.py --export-status`, não muda: é um contrato.
+Um pedido a um caminho cujo interruptor está desligado recebe `404`. A forma anterior de entregar o mesmo documento a um painel, `ci_red.json` e `bin/read_report.py --export-status`, não muda: é um contrato.
 
 ## Métricas do Prometheus
 
@@ -74,7 +74,7 @@ workflows de um repositório de uma só vez até terminarem. De um painel de web
 
 ## A fila de assinatura por confiança
 
-Cada linha da fila tem um `trust`: `verified` (assinatura verificada com a chave pública), `unknown` (o formato não se pode verificar aqui: nunca se adivinha) ou `failed` (verificada e não corresponde). O separador Sentinela tem um filtro Assinatura com o número de cada tipo e marca as linhas (margem verde, cinzenta ou vermelha). Na consola: `py -3 read_report.py --export-sign-queue FILE --sign-trust failed`.
+Cada linha da fila tem um `trust`: `verified` (assinatura verificada com a chave pública), `unknown` (o formato não se pode verificar aqui: nunca se adivinha) ou `failed` (verificada e não corresponde). O separador Sentinela tem um filtro Assinatura com o número de cada tipo e marca as linhas (margem verde, cinzenta ou vermelha). Na consola: `py -3 bin/read_report.py --export-sign-queue FILE --sign-trust failed`.
 
 ## No modo de rede
 

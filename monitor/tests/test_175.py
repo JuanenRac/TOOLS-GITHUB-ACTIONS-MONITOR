@@ -112,7 +112,7 @@ class CliToken(unittest.TestCase):
 
     def test_the_quickstart_of_every_language_names_the_variable(self):
         for lang in LANGS:
-            self.assertIn("MONITOR_ACCESS_TOKEN", (HERE / f"QUICKSTART_{lang}.txt").read_text(encoding="utf-8"), lang)
+            self.assertIn("MONITOR_ACCESS_TOKEN", (HERE / "docs" / f"QUICKSTART_{lang}.txt").read_text(encoding="utf-8"), lang)
 
 
 class PlainHttpWarning(unittest.TestCase):

@@ -3,7 +3,7 @@
 # GPL-3.0-or-later - see LICENSE
 """A local MCP server (Model Context Protocol over standard input and output) so that an AI tool - an assistant in a terminal or an editor - can ask the monitor what is red.
 
-    python mcp_server.py [--allow-ack]
+    python bin/mcp_server.py [--allow-ack]
 
 Read only by default. Tools: get_alerts (the open alerts of the feed), get_red_repos, get_run_failure(repo, run) (the failed steps of a run and a short, cleaned fragment of its log),
 get_quota (the allowance and the minutes, from a running monitor), alerts_open (the open alerts with their age, diagnosis and the origin they fall together under), alert_diagnose(id) (the failing

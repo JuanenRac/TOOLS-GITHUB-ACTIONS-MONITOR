@@ -21,7 +21,7 @@
 | `/api/outputs/grafana.json` | Grafana の「Infinity」/ JSON データソース向けの JSON テーブル | `outputs.json.enabled` |
 | `/api/outputs/dashboard.json` | ステータスダッシュボード向けの `ci_red.json` のドキュメント（スキーマ 2、CI_RED_SCHEMA_jpn.md を参照） | `outputs.dashboard.enabled` |
 
-スイッチがオフのパスへのリクエストには `404` が返ります。同じドキュメントをダッシュボードに渡す従来の方法である `ci_red.json` と `read_report.py --export-status` は変更されません。これは契約です。
+スイッチがオフのパスへのリクエストには `404` が返ります。同じドキュメントをダッシュボードに渡す従来の方法である `ci_red.json` と `bin/read_report.py --export-status` は変更されません。これは契約です。
 
 ## Prometheus メトリクス
 
@@ -67,7 +67,7 @@ GitHub Actions 向けの他のツールの仕組みを調べて、いくつか�
 
 ## 信頼度別の署名キュー
 
-キューの各行には `trust` があります。`verified`(公開鍵で署名を検証済み)、`unknown`(ここでは形式を検証できない:推測はしません)、`failed`(検証したが一致しない)。センチネルタブには署名フィルターがあり、種類ごとの件数を表示し、行に印(緑・灰・赤の縁)を付けます。コンソールからは `py -3 read_report.py --export-sign-queue FILE --sign-trust failed`。
+キューの各行には `trust` があります。`verified`(公開鍵で署名を検証済み)、`unknown`(ここでは形式を検証できない:推測はしません)、`failed`(検証したが一致しない)。センチネルタブには署名フィルターがあり、種類ごとの件数を表示し、行に印(緑・灰・赤の縁)を付けます。コンソールからは `py -3 bin/read_report.py --export-sign-queue FILE --sign-trust failed`。
 
 ## ネットワークモードでは
 

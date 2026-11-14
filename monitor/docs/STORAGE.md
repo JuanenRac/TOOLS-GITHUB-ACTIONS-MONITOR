@@ -17,7 +17,7 @@ For each account: the configuration (`actions_monitor.json`), the state of the s
 
 |  | `file` (default) | `sqlite` |
 |---|---|---|
-| Where | `accounts/<id>/` (next to the launchers when there is no `accounts/`) | `accounts/<id>/storage.sqlite3`, one database per account |
+| Where | `data/accounts/<id>/` (the files of `data/` and `config/` when there is no `accounts/`) | `accounts/<id>/storage.sqlite3`, one database per account |
 | Writes | a temporary file, flushed, then renamed | one short transaction, WAL journal |
 | Choose it for | one person; files you can read and edit | a service that runs for months; many events |
 

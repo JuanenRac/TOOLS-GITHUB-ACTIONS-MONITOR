@@ -12,8 +12,8 @@ La versione 1.5.0 ha dato nomi inglesi a file, cartelle, script e a un'impostazi
 ## Passi
 
 1. Ferma il monitor e decomprimi la nuova versione sulla vecchia cartella (conserva il tuo `actions_monitor.json`).
-2. Guarda cosa cambierebbe: `python migrate_state.py` (simulazione, non cambia nulla).
-3. Fallo: `python migrate_state.py --apply` copia i vecchi file ai nuovi nomi e conserva i vecchi; aggiungi `--move` per rinominarli. Ciò che esiste già non viene mai sovrascritto, e l'impostazione `parte_history_days` diventa `report_history_days` dopo aver salvato una copia di `actions_monitor.json`.
+2. Guarda cosa cambierebbe: `python bin/migrate_state.py` (simulazione, non cambia nulla).
+3. Fallo: `python bin/migrate_state.py --apply` copia i vecchi file ai nuovi nomi e conserva i vecchi; aggiungi `--move` per rinominarli. Ciò che esiste già non viene mai sovrascritto, e l'impostazione `parte_history_days` diventa `report_history_days` dopo aver salvato una copia di `actions_monitor.json`.
 4. Avvia il monitor con `MONITOR_GITHUB_ACTIONS` (lo stesso avviatore di prima) e usa `BATCH_GITHUB_ACTIONS` per gli strumenti a lotti.
 5. Elimina i vecchi avviatori che ti restano: `LOTE_GITHUB_ACTIONS.bat`, `.sh` e `.command`.
 
@@ -21,7 +21,7 @@ La versione 1.5.0 ha dato nomi inglesi a file, cartelle, script e a un'impostazi
 
 | Prima della 1.5.0 | Dalla 1.5.0 |
 |---|---|
-| `leer_parte.py` | `read_report.py` |
+| `leer_parte.py` | `bin/read_report.py` |
 | `eventos.py`, `parte_history.py` | `events.py`, `report_history.py` |
 | `LOTE_GITHUB_ACTIONS.*` | `BATCH_GITHUB_ACTIONS.*` |
 | `eventos_monitor.jsonl`, `eventos_estado.json` | `events_monitor.jsonl`, `events_state.json` |
@@ -39,7 +39,7 @@ Non c'è nulla da convertire: il monitor continua a leggere il tuo `actions_moni
 
 1. Ferma il monitor e decomprimi la nuova versione sulla vecchia cartella (conserva il tuo `actions_monitor.json` e i file di catalogo).
 2. Avvialo come prima. Accanto compaiono nuovi file (`etag_cache.json`, `analytics_history.json`, `update_check.json`, `sentinel_history.json`); si possono eliminare in qualsiasi momento.
-3. Facoltativo: `python actions_monitor.py --doctor` verifica l'installazione.
+3. Facoltativo: `python bin/actions_monitor.py --doctor` verifica l'installazione.
 
 Cosa cambia: esiste l'**edizione lite** (`MONITOR_LITE_GITHUB_ACTIONS`, porta 8766, il suo `actions_monitor_lite.json`, senza sentinella); il **rosso su main** è una sola regola (l'ultimo run terminato di ogni workflow sul branch predefinito; i run annullati, saltati, neutri e scaduti non dicono nulla), quindi una cifra può differire dalla 1.5.x; la pagina Impostazioni inizia con la scheda **Di base**; notifiche, analitica, linter, eventi del webhook e assistente IA esistono e sono **spenti** finché non li attivi; scrivere su GitHub richiede ancora la tua conferma esplicita. Rich e Textual restano opzionali; Python 3.11 o successivo.
 
@@ -65,7 +65,7 @@ Non c'è nulla da convertire. Cosa si comporta diversamente, di proposito:
 - **Modalità rete su HTTPS**: le modifiche fatte dalla pagina ora funzionano; l'`Origin` deve avere lo schema della sessione e la porta del monitor. Dietro un proxy mantieni la porta del monitor nell'indirizzo, altrimenti il controllo lo rifiuta.
 - **Modalità rete**: ogni impostazione che lo schema contrassegna `secure` si cambia solo dal computer stesso (prima: solo `listen.`, `github_token.`, `act.`, `github_actions.`). Uno script su un altro computer che cambiava `webhook.*`, `notify.*` e simili ora riceve 403 `local_only`.
 - **act**: dopo Stop l'esecuzione è libera subito; un avvio immediato non risponde più `busy`.
-- File nuovi accanto al monitor: `degraded.json` e `degraded_lite.json` (i contatori dei guasti ingoiati); si possono eliminare in qualsiasi momento.
+- File nuovi in `data/`: `degraded.json` e `degraded_lite.json` (i contatori dei guasti ingoiati); si possono eliminare in qualsiasi momento.
 - Il registro delle modifiche (Aiuto > Registro delle modifiche) è tradotto: un file `docs/CHANGELOG_<lingua>.md` per lingua.
 
 # Dalla 1.6.6 alla 1.6.7
@@ -86,13 +86,13 @@ Non c'è nulla da convertire e nessuna impostazione cambia.
 
 Non c'è nulla da convertire: senza una cartella `accounts/` il monitor funziona esattamente come prima.
 
-- Gli **account multipli** sono facoltativi. Per usarli esegui `python actions_monitor.py --migrate-accounts` (una prova) e poi aggiungi `--apply` per copiare i tuoi file in `accounts/default/`; gli originali restano finché non li elimini. Aggiungi altri account come `accounts/<id>/actions_monitor.json`. Vedi `ACCOUNTS.md`.
-- Con una cartella `accounts/`, `python actions_monitor.py` avvia un supervisore che esegue un monitor per account; `--account <id>` ne esegue solo uno. L'edizione lite non ha nulla di tutto questo.
+- Gli **account multipli** sono facoltativi. Per usarli esegui `python bin/actions_monitor.py --migrate-accounts` (una prova) e poi aggiungi `--apply` per copiare i tuoi file in `accounts/default/`; gli originali restano finché non li elimini. Aggiungi altri account come `accounts/<id>/actions_monitor.json`. Vedi `ACCOUNTS.md`.
+- Con una cartella `accounts/`, `python bin/actions_monitor.py` avvia un supervisore che esegue un monitor per account; `--account <id>` ne esegue solo uno. L'edizione lite non ha nulla di tutto questo.
 - Novità: `?view=` e `?chrome=0` nell'indirizzo della pagina, `GET /api/accounts`, `GET /api/live-status` e un solo `POST /api/webhook` per tutti gli account.
 
 # Dalla 1.7.x alla nuova struttura delle cartelle
 
-Il codice ora vive in `src/github_actions_monitor/`, la pagina, i file di esempio e le lingue in `assets/`, e gli script di rilascio e di migrazione in `tools/`. Niente di ciò che usi cambia: i lanciatori (`MONITOR_GITHUB_ACTIONS`, `MONITOR_LITE_GITHUB_ACTIONS`, `BATCH_GITHUB_ACTIONS`) restano dove erano e aprono lo stesso indirizzo e la stessa porta, e i comandi di questa guida (`python read_report.py`, `python actions_monitor.py --doctor`, `python monitor_cli.py status` ...) continuano a funzionare, perché nella cartella del prodotto resta un piccolo file di ingresso con lo stesso nome. I lanciatori eseguono `python -m github_actions_monitor` (completo) e `python -m github_actions_monitor.lite` (lite) con `src/` nel percorso.
+Il codice ora vive in `src/github_actions_monitor/`, la pagina, i file di esempio e le lingue in `assets/`, e gli script di rilascio e di migrazione in `tools/`. Niente di ciò che usi cambia: i lanciatori (`MONITOR_GITHUB_ACTIONS`, `MONITOR_LITE_GITHUB_ACTIONS`, `BATCH_GITHUB_ACTIONS`) restano dove erano e aprono lo stesso indirizzo e la stessa porta, e i comandi di questa guida (`python bin/read_report.py`, `python bin/actions_monitor.py --doctor`, `python bin/monitor_cli.py status` ...) continuano a funzionare, perché nella cartella del prodotto resta un piccolo file di ingresso con lo stesso nome. I lanciatori eseguono `python -m github_actions_monitor` (completo) e `python -m github_actions_monitor.lite` (lite) con `src/` nel percorso.
 
 I tuoi dati non si spostano: `actions_monitor.json`, le cache, i log, `config_backups/`, `accounts/` e i tuoi file di catalogo restano nella cartella del prodotto accanto ai lanciatori, mai dentro `src/`. Gli esempi neutri e il `quotas.json` che viaggiano con il programma ora sono in `assets/examples/`; un tuo `quotas.json` accanto ai lanciatori ha ancora la precedenza.
 
@@ -100,7 +100,7 @@ I tuoi dati non si spostano: `actions_monitor.json`, le cache, i log, `config_ba
 
 1. Ferma il monitor e decomprimi la nuova versione sulla vecchia cartella (conserva il tuo `actions_monitor.json`).
 2. Avvialo come sempre. Funziona anche se non fai altro.
-3. Per togliere i resti del vecchio layout piatto: `python tools/migrate_layout.py` (simulazione) e poi `python tools/migrate_layout.py --apply`. Copia i tuoi file di configurazione in `layout_backup_<marca>/config/` e sposta i vecchi moduli, la vecchia pagina, i vecchi esempi e la vecchia cartella `locales/` in `layout_backup_<marca>/old_code/`. Non si cancella nulla, non si sovrascrive nulla di esistente e i tuoi dati non vengono toccati. `python actions_monitor.py --doctor` avvisa finché restano vecchi file.
+3. Per togliere i resti del vecchio layout piatto: `python tools/migrate_layout.py` (simulazione) e poi `python tools/migrate_layout.py --apply`. Copia i tuoi file di configurazione in `layout_backup_<marca>/config/` e sposta i vecchi moduli, la vecchia pagina, i vecchi esempi e la vecchia cartella `locales/` in `layout_backup_<marca>/old_code/`. Non si cancella nulla, non si sovrascrive nulla di esistente e i tuoi dati non vengono toccati. `python bin/actions_monitor.py --doctor` avvisa finché restano vecchi file.
 4. Un tuo script che importava un modulo con il vecchio nome piatto (`import read_report`) ora importa `github_actions_monitor.<pacchetto>.<modulo>` con `src/` nel percorso.
 
 | Pacchetto | Contenuto |

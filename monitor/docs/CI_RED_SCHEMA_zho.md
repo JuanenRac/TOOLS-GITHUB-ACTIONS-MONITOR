@@ -14,7 +14,7 @@
 
 | 键（`sentinel.`） | 含义 |
 |---|---|
-| `ci_red_file` | `""` = 监视器旁边的 `ci_red.json`（默认）；`"off"` = 不写出；路径 = 写到该处（相对路径相对于监视器文件夹；D: 盘、UNC 路径或运行中的系统无法使用的驱动器会被拒绝） |
+| `ci_red_file` | `""` = 监视器的 `ai/ci_red.json`（默认）；`"off"` = 不写出；路径 = 写到该处（相对路径相对于监视器文件夹；D: 盘、UNC 路径或运行中的系统无法使用的驱动器会被拒绝） |
 | `ci_red_audit_copy` | `true` 时，若审计文件夹存在，还会将其复制到该文件夹 |
 
 ## 结构
@@ -60,11 +60,11 @@
 监视器中没有任何功能会把此文件发布到仓库。如果公开的仪表板需要红色列表，要么让它根据公开的运行数据重新计算该规则，要么自行导出其中不敏感的部分：
 
 ```
-python3 read_report.py --export-status DIR
+python3 bin/read_report.py --export-status DIR
 ```
 
 这会在您指定的文件夹中写入 `ci_status_public.json` 和 `ci_status_public.md`，且**只**包含红色工作流的列表（仓库、生态系统、工作流、结论、起始时间、连续次数、运行链接）。不含签名状态、密钥名称、本地路径或命令。该工具绝不会提交或推送；之后如何处置该文件夹由您决定。
 
-`python3 read_report.py --export-sign-queue FILE`（`.json` 或 `.csv`）会写出全局签名队列以及确切的本地命令。该文件仅供运行监视器的那台 PC 使用，并在文件内部注明了这一点。
+`python3 bin/read_report.py --export-sign-queue FILE`（`.json` 或 `.csv`）会写出全局签名队列以及确切的本地命令。该文件仅供运行监视器的那台 PC 使用，并在文件内部注明了这一点。
 
 每个红色工作流中的可选字段 `ai_hint`(1.6.4 新增):`{"class": "real|transient", "cause", "action"}`,供 AI 或脚本使用。用 `.get()` 读取的使用方可以忽略它。

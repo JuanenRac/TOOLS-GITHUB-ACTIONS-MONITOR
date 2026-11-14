@@ -1,7 +1,7 @@
 # Contribuer à GitHub Actions Monitor
 
 ## Pile technique
-- **Langage** : Python 3.11 ou plus récent ; le cœur n'a besoin d'aucun paquet (la vue terminal, `tui.py`, utilise Rich, optionnel ; les tests ignorent ce qui en dépend s'il manque).
+- **Langage** : Python 3.11 ou plus récent ; le cœur n'a besoin d'aucun paquet (la vue terminal, `bin/tui.py`, utilise Rich, optionnel ; les tests ignorent ce qui en dépend s'il manque).
 - **Interface** : une page web locale (`monitor/assets/static/actions_monitor.html`) servie sur `127.0.0.1`, plus des outils en ligne de commande.
 - **Source de données** : le client officiel en ligne de commande de GitHub, `gh` (appels en lecture seule par défaut).
 

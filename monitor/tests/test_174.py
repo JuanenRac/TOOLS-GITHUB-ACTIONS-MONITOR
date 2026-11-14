@@ -177,7 +177,7 @@ class Usage(unittest.TestCase):
             catalogue = json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
             for key in used:
                 self.assertTrue(catalogue.get(key), (lang, key))
-            done = subprocess.run([sys.executable, "-I", str(HERE / "monitor_cli.py"), "--help", "--lang", lang], capture_output=True, text=True, encoding="utf-8", timeout=30)
+            done = subprocess.run([sys.executable, "-I", str(HERE / "bin" / "monitor_cli.py"), "--help", "--lang", lang], capture_output=True, text=True, encoding="utf-8", timeout=30)
             self.assertEqual(done.returncode, 0, (lang, done.stderr))
             self.assertIn("health", done.stdout)
 
@@ -311,7 +311,7 @@ class Changelogs(unittest.TestCase):
 
     def test_the_readme_of_the_package_has_no_history_inside_and_points_to_the_changelog(self):
         for lang in ("en", "es", "de", "fr", "it", "ja", "zh", "pt"):
-            text = (HERE / f"README_{lang}.txt").read_text(encoding="utf-8")
+            text = (HERE / "docs" / f"README_{lang}.txt").read_text(encoding="utf-8")
             self.assertEqual(re.findall(r"^\S.*\d\.\d\.\d.*CHANGELOG\.md[)）]\s*$", text, re.M), [], lang)
             self.assertIn("CHANGELOG", text, lang)
 

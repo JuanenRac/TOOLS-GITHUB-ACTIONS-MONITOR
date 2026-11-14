@@ -22,7 +22,7 @@ scrape o l'aggiornamento di una dashboard non consuma quota delle API di GitHub.
 | `/api/outputs/grafana.json` | Tabelle JSON per l'origine dati «Infinity» / JSON di Grafana | `outputs.json.enabled` |
 | `/api/outputs/dashboard.json` | il documento di `ci_red.json` (schema 2, vedi CI_RED_SCHEMA_ita.md) per una dashboard di stato | `outputs.dashboard.enabled` |
 
-Una richiesta a un percorso il cui interruttore è disattivato riceve `404`. Il modo precedente di fornire lo stesso documento a una dashboard, `ci_red.json` e `read_report.py --export-status`, resta invariato: è un contratto.
+Una richiesta a un percorso il cui interruttore è disattivato riceve `404`. Il modo precedente di fornire lo stesso documento a una dashboard, `ci_red.json` e `bin/read_report.py --export-status`, resta invariato: è un contratto.
 
 ## Metriche Prometheus
 
@@ -74,7 +74,7 @@ workflow di un repository insieme fino alla loro conclusione. Da una dashboard d
 
 ## La coda di firma per affidabilità
 
-Ogni riga della coda ha un `trust`: `verified` (firma verificata con la chiave pubblica), `unknown` (il formato qui non si può verificare: mai indovinato) o `failed` (verificata e non corrisponde). La scheda Sentinella ha un filtro Firma con il numero di ciascun tipo e segna le righe (bordo verde, grigio o rosso). Da console: `py -3 read_report.py --export-sign-queue FILE --sign-trust failed`.
+Ogni riga della coda ha un `trust`: `verified` (firma verificata con la chiave pubblica), `unknown` (il formato qui non si può verificare: mai indovinato) o `failed` (verificata e non corrisponde). La scheda Sentinella ha un filtro Firma con il numero di ciascun tipo e segna le righe (bordo verde, grigio o rosso). Da console: `py -3 bin/read_report.py --export-sign-queue FILE --sign-trust failed`.
 
 ## In modalità rete
 

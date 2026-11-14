@@ -15,7 +15,7 @@ A **sentinela** é a segunda metade da edição completa. O *monitor* mostra o q
 
 Arranca com o monitor completo e corre no mesmo processo, num fio próprio, com o seu orçamento de chamadas ao GitHub (`sentinel.budget_per_hour`, 600 por defeito, e `sentinel.max_calls_per_tick`). Quando a quota do GitHub desce abaixo de `sentinel.min_rate_remaining` deixa de perguntar e a página indica a pausa por quota. Nada do que faz escreve no GitHub.
 
-## Ficheiros que escreve (junto ao monitor, nunca publicados)
+## Ficheiros que escreve (nas pastas do monitor, nunca publicados)
 
 | Ficheiro | O que contém |
 |---|---|

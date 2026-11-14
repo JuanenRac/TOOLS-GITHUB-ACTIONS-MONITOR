@@ -95,7 +95,7 @@ Die Befehlszeile nimmt das Zugriffstoken unter seinem eigenen Namen, der Netzwer
 
 ## Erledigt in 1.7.4
 
-Eine Leiste am Fuß der Seite mit dem wichtigsten Hinweis (und einem Fenster mit allen), der Verbindung, dem Kontingent, der letzten Lesung, dem Modus, der Adresse und der Uhr; ein Vollbild-Knopf; Tabellen für Repositories und Verlauf, die nach einer oder mehreren Spalten sortieren, mit den Spalten deiner Wahl; `monitor_cli.py`, die Befehlszeile als Client des laufenden Monitors (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) mit `--json` und stabilen Exit-Codes samt Anleitung in acht Sprachen; die auf Reihenfolge geprüften Änderungsprotokolle, die README des Pakets ohne Verlauf darin und neu gezeichnete Bilder.
+Eine Leiste am Fuß der Seite mit dem wichtigsten Hinweis (und einem Fenster mit allen), der Verbindung, dem Kontingent, der letzten Lesung, dem Modus, der Adresse und der Uhr; ein Vollbild-Knopf; Tabellen für Repositories und Verlauf, die nach einer oder mehreren Spalten sortieren, mit den Spalten deiner Wahl; `bin/monitor_cli.py`, die Befehlszeile als Client des laufenden Monitors (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) mit `--json` und stabilen Exit-Codes samt Anleitung in acht Sprachen; die auf Reihenfolge geprüften Änderungsprotokolle, die README des Pakets ohne Verlauf darin und neu gezeichnete Bilder.
 
 ## Erledigt in 1.7.3
 

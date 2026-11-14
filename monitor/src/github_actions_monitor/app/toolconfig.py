@@ -96,8 +96,7 @@ def language(config=None):
 
 def _read_json(name, default):
     path = Path(name)
-    if not path.is_absolute():
-        path = HERE / path
+    path = _anchor(path)
     path = shipped_example(path)
     try:
         value = json.loads(path.read_text(encoding="utf-8"))
@@ -111,8 +110,7 @@ def _data_path(env_name, key, default, config=None):
     When the default does not exist the neutral <name>.example.json of the package is used, so a fresh install works without any file of its own."""
     value = os.environ.get(env_name) or (config if config is not None else raw_config()).get(key)
     explicit = isinstance(value, str) and bool(value.strip())
-    path = Path(value if explicit else default)
-    path = path if path.is_absolute() else HERE / path
+    path = _anchor(Path(value if explicit else default))
     if not explicit and not path.is_file():
         example = paths.EXAMPLES / (path.stem + ".example" + path.suffix)
         if example.is_file():
@@ -120,10 +118,20 @@ def _data_path(env_name, key, default, config=None):
     return shipped_example(path)
 
 
+def _anchor(path):
+    """An absolute path stays; a bare file name the monitor knows (targets.json ...) is in its folder (config/); any other relative path starts at the product folder."""
+    path = Path(path)
+    if path.is_absolute():
+        return path
+    if len(path.parts) == 1 and paths.kind_of(path.name):
+        return paths.place(path.name)
+    return HERE / path
+
+
 def shipped_example(path):
     """A neutral `<name>.example.json` named without a folder (as the template of the configuration does) lives in assets/examples/ now: when it is not next to the monitor, that copy is the one."""
     path = Path(path)
-    if path.name.endswith(".example.json") and not path.is_file() and path.parent == HERE and (paths.EXAMPLES / path.name).is_file():
+    if path.name.endswith(".example.json") and not path.is_file() and path.parent in (HERE, paths.folder("config")) and (paths.EXAMPLES / path.name).is_file():
         return paths.EXAMPLES / path.name
     return path
 
@@ -134,14 +142,14 @@ CATALOG_FILES = (("ecosystems_file", DEFAULT_ECOSYSTEMS_FILE), ("targets_file", 
 def catalog_in_example(config=None):
     """The default catalogue files that do not exist (and are not replaced by a file named in the configuration): those run on their neutral .example.json."""
     cfg = config if config is not None else raw_config()
-    return [name for key, name in CATALOG_FILES if not cfg.get(key) and not (HERE / name).is_file() and (paths.EXAMPLES / name.replace(".json", ".example.json")).is_file()]
+    return [name for key, name in CATALOG_FILES if not cfg.get(key) and not paths.place(name).is_file() and (paths.EXAMPLES / name.replace(".json", ".example.json")).is_file()]
 
 
 def init_catalog():
     """Copies each neutral .example.json to the default name when that file is missing. Returns [(name, created)]."""
     out = []
     for _key, name in CATALOG_FILES:
-        target, example = HERE / name, paths.EXAMPLES / name.replace(".json", ".example.json")
+        target, example = paths.place(name), paths.EXAMPLES / name.replace(".json", ".example.json")
         if target.is_file():
             out.append((name, False))
         elif example.is_file():

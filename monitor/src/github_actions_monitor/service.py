@@ -23,7 +23,7 @@ from pathlib import Path
 from github_actions_monitor import i18n
 from github_actions_monitor.accounts import accounts
 from github_actions_monitor.security import private_io
-from github_actions_monitor.util import paths
+from github_actions_monitor.util import paths, rootmigrate
 
 #: environment variable -> (section, key, kind) of the configuration. A variable that is not set changes nothing; one that is set but empty or badly written is ignored with a notice.
 LISTEN_ENV = {
@@ -151,7 +151,7 @@ def prepare_accounts(env=None):
 def state_dir(env=None):
     env = os.environ if env is None else env
     chosen = (env.get("MONITOR_STATE_DIR") or "").strip()
-    return Path(chosen) if chosen else paths.ROOT
+    return Path(chosen) if chosen else paths.folder("data")
 
 
 def token_file(env=None):
@@ -224,6 +224,8 @@ def prepare(env=None, out=print):
 def main(argv=None):
     args = list(sys.argv[1:] if argv is None else argv)
     i18n.set_language(i18n.detect(os.environ.get("MONITOR_LANG")))
+    rootmigrate.auto()
+    paths.ensure()
     code = prepare()
     if code:
         return code

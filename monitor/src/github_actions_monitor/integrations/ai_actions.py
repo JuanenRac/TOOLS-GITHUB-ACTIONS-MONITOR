@@ -22,8 +22,8 @@ import time
 from pathlib import Path
 from github_actions_monitor.security import private_io
 
-from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
-LOG_FILE = HERE / "ai_actions_log.jsonl"
+from github_actions_monitor.util import paths
+LOG_FILE = paths.place("ai_actions_log.jsonl")
 NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}$")
 FILE_RE = re.compile(r"^[A-Za-z0-9._-]{1,80}\.ya?ml$")
 JOB_RE = re.compile(r"^[A-Za-z0-9_-]{1,60}$")

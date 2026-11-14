@@ -11,7 +11,7 @@ L'édition complète peut surveiller plusieurs comptes GitHub (une personne ou u
 
 ## Quand il n'y a rien à faire
 
-Sans dossier `accounts/`, le moniteur fonctionne exactement comme avant : un compte, ses fichiers à côté du code. Vous ne lisez la suite que si vous en voulez plus d'un.
+Sans dossier `accounts/`, le moniteur fonctionne exactement comme avant : un compte, ses fichiers dans les dossiers `config/`, `data/` et `logs/` (voir LAYOUT). Vous ne lisez la suite que si vous en voulez plus d'un.
 
 ## Le dossier des comptes
 
@@ -29,16 +29,16 @@ L'identifiant d'un compte se compose de lettres minuscules, de chiffres, de `_` 
 ## Passer d'un compte à plusieurs
 
 ```
-python actions_monitor.py --migrate-accounts          # montre ce qui serait copié, n'écrit rien
-python actions_monitor.py --migrate-accounts --apply  # le copie dans accounts/default/
-python actions_monitor.py --accounts                  # liste les comptes
+python bin/actions_monitor.py --migrate-accounts          # montre ce qui serait copié, n'écrit rien
+python bin/actions_monitor.py --migrate-accounts --apply  # le copie dans accounts/default/
+python bin/actions_monitor.py --accounts                  # liste les comptes
 ```
 
 Les originaux ne sont jamais déplacés ni supprimés : vous les supprimez vous-même après vérification. Une seconde exécution refuse, pour que deux états ne se mélangent jamais. Pour ajouter un compte, créez `accounts/<id>/actions_monitor.json` avec son `github_owner` (copiez le modèle `assets/examples/actions_monitor.example.json`).
 
 ## Exécuter
 
-`python actions_monitor.py` avec un dossier `accounts/` démarre le superviseur, un petit processus sur le port habituel (8765) qui démarre un moniteur par compte et donne à la page et aux outils une seule adresse. Il ne lit rien de GitHub et n'écrit rien. Si un compte meurt, il le redémarre avec une attente croissante (2, 5, 15, 30, 60 puis 120 secondes) et le résumé le dit en panne entre-temps. `python actions_monitor.py --account personal` n'exécute que ce compte, comme un moniteur ordinaire.
+`python bin/actions_monitor.py` avec un dossier `accounts/` démarre le superviseur, un petit processus sur le port habituel (8765) qui démarre un moniteur par compte et donne à la page et aux outils une seule adresse. Il ne lit rien de GitHub et n'écrit rien. Si un compte meurt, il le redémarre avec une attente croissante (2, 5, 15, 30, 60 puis 120 secondes) et le résumé le dit en panne entre-temps. `python bin/actions_monitor.py --account personal` n'exécute que ce compte, comme un moniteur ordinaire.
 
 ## La page
 

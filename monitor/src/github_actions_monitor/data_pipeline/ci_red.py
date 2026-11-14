@@ -32,7 +32,7 @@ from github_actions_monitor.util import tzdisplay
 from github_actions_monitor.tool_version import TOOL_VERSION
 from github_actions_monitor.security import private_io
 
-from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
+from github_actions_monitor.util import paths
 DEFAULT_NAME = "ci_red.json"
 
 
@@ -60,16 +60,19 @@ def build(snapshot):
             "pending_sign_hours_threshold": (snapshot.get("a5") or {}).get("pending_sign_hours"), "repos": dict(sorted(repos.items()))}
 
 
-def target_path(setting, base=HERE, windows=None):
+def target_path(setting, base=None, windows=None):
     """None when disabled or when the destination is not allowed. `windows` = None means "this system" (the tests pass True/False)."""
     text = str(setting or "").strip()
     if text.lower() == "off":
         return None
     if text and (text.startswith(("\\\\", "//")) or (_FOREIGN_DRIVE.match(text) and not _own_drive_path(text, os.name == "nt" if windows is None else windows))):
         return None   # a D: drive (a removable drive) on any system, and a drive/UNC path that this system cannot use
-    path = Path(text) if text else Path(DEFAULT_NAME)
+    if not text or text == DEFAULT_NAME:
+        path = paths.place(DEFAULT_NAME, base)      # ai/ci_red.json: with the rest of what an AI reads
+    else:
+        path = Path(text)
     if not path.is_absolute():
-        path = Path(base) / path
+        path = Path(base or paths.ROOT) / path
     return None if str(path).upper().startswith("D:") else path
 
 
@@ -85,11 +88,16 @@ def _write_atomic(path, payload):
     os.replace(tmp, path)
 
 
-def export(snapshot, cfg, audit_dir=None, base=HERE):
+def export(snapshot, cfg, audit_dir=None, base=None):
     """Writes the file(s); returns the list of paths written ([] when disabled, loading or on any problem)."""
     if not snapshot or snapshot.get("loading") or snapshot.get("enabled") is False:
         return []
     path = target_path((cfg or {}).get("ci_red_file"), base)
+    if path is not None and path == paths.place(DEFAULT_NAME, base):
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)      # ai/ of a fresh install; any other folder must exist already
+        except OSError:
+            return []
     written = []
     payload = build(snapshot)
     targets = [path] if path else []

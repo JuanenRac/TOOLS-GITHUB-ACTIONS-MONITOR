@@ -16,11 +16,12 @@ import sys
 import tempfile
 from pathlib import Path
 
-from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
+from github_actions_monitor.util import paths
+from github_actions_monitor.util.paths import ROOT as HERE   # the product folder
 ORDER = ("python", "gh", "login", "quota", "network", "folder", "port", "docker", "rich", "textual", "targets", "token", "exposure", "risks", "backend", "degraded", "credential", "timezone", "github_app", "layout", "storage", "retention")
 FIX = {"python": "https://www.python.org/downloads/", "gh": "winget install --id GitHub.cli   |   brew install gh   |   sudo apt install gh", "login": "gh auth login",
-       "quota": "gh api rate_limit", "network": "gh api rate_limit", "folder": "", "port": "python actions_monitor.py --port 8800", "docker": "", "rich": "pip install rich",
-       "textual": "pip install textual", "targets": "python actions_monitor.py --init-catalog", "token": "", "exposure": "", "risks": "", "backend": "", "degraded": "", "credential": "", "timezone": "", "github_app": "", "layout": "python tools/migrate_layout.py", "storage": "python tools/migrate_storage.py --from file --to sqlite", "retention": ""}
+       "quota": "gh api rate_limit", "network": "gh api rate_limit", "folder": "", "port": "python bin/actions_monitor.py --port 8800", "docker": "", "rich": "pip install rich",
+       "textual": "pip install textual", "targets": "python bin/actions_monitor.py --init-catalog", "token": "", "exposure": "", "risks": "", "backend": "", "degraded": "", "credential": "", "timezone": "", "github_app": "", "layout": "python -m github_actions_monitor.util.rootmigrate --apply", "storage": "python tools/migrate_storage.py --from file --to sqlite", "retention": ""}
 
 
 def default_runner(args, timeout=20):
@@ -89,8 +90,8 @@ def run(runner=default_runner, folder=HERE, ports=(8765, 8766), python=None, con
     out["docker"] = ("ok" if shutil.which("docker") else "warn", "")
     out["rich"] = ("ok" if _module("rich") else "warn", "")
     out["textual"] = ("ok" if _module("textual") else "warn", "")
-    own = [n for n in ("targets.json", "ecosystems.json", "profiles.json") if (Path(folder) / n).is_file()]
-    out["targets"] = ("ok" if (Path(folder) / "targets.json").is_file() else "warn", ", ".join(own) if own else "example only")
+    own = [n for n in ("targets.json", "ecosystems.json", "profiles.json") if paths.place(n, folder).is_file()]
+    out["targets"] = ("ok" if paths.place("targets.json", folder).is_file() else "warn", ", ".join(own) if own else "example only")
     guard = config.get("session_guard", True) is True
     out["token"] = ("ok" if guard else "warn", "one-use, 10 min" if guard else "off")
     listen = config.get("listen") if isinstance(config.get("listen"), dict) else {}
@@ -99,7 +100,7 @@ def run(runner=default_runner, folder=HERE, ports=(8765, 8766), python=None, con
     out["risks"] = risks(config)
     out["backend"] = token_backend(config)
     from github_actions_monitor.app import degraded
-    swallowed, origins = degraded.read(folder)
+    swallowed, origins = degraded.read(paths.folder("data", folder))
     out["degraded"] = ("warn" if swallowed else "ok", (f"{swallowed}: " + ", ".join(f"{k} {v}" for k, v in sorted(origins.items(), key=lambda kv: -kv[1])[:5])) if swallowed else "0")
     out["credential"] = shared_credential(folder)
     out["timezone"] = time_zone(config)
@@ -120,12 +121,13 @@ def time_zone(config):
 
 
 def layout_check(folder=HERE):
-    """("ok" | "warn", detail): files of the old flat layout (versions up to 1.7.9) still lying next to the new one. The monitor does not use them; tools/migrate_layout.py moves them away."""
-    from github_actions_monitor.util import layout
-    left = layout.stale(folder)
+    """("ok" | "warn", detail): files of the old flat layout (versions up to 1.7.9) or data of 1.8.1 and older (state, logs, AI files) still lying next to the launchers. The monitor starts by moving
+    the second kind by itself (rootmigrate); tools/migrate_layout.py moves the first away."""
+    from github_actions_monitor.util import layout, rootmigrate
+    left = [p.as_posix() for p in layout.stale(folder)] + [source.name for source, _destination in rootmigrate.plan(folder)]
     if not left:
-        return "ok", "src/ + assets/"
-    return "warn", f"{len(left)}: " + ", ".join(p.as_posix() for p in left[:5])
+        return "ok", "src/ assets/ config/ data/ logs/ ai/"
+    return "warn", f"{len(left)}: " + ", ".join(left[:5])
 
 
 def _account_configs(config, folder):
@@ -157,7 +159,7 @@ def storage_check(config, folder=HERE):
         if settings["backend"] != "sqlite":
             continue
         from github_actions_monitor.storage import sqlite_storage
-        path = Path(settings["path"]) if settings["path"] else (accounts.account_dir(account_id, folder) / factory.DB_NAME if account_id else Path(folder) / factory.DB_NAME)
+        path = Path(settings["path"]) if settings["path"] else (accounts.account_dir(account_id, folder) / factory.DB_NAME if account_id else paths.place(factory.DB_NAME, folder))
         info = sqlite_storage.inspect(path)
         label = account_id or "default"
         if not info["exists"]:
@@ -188,11 +190,11 @@ def retention_check(config, folder=HERE, env=None):
     for account_id, cfg in _account_configs(config, folder):
         cfg_r = retention.settings(cfg)
         sqlite = factory.settings(cfg.get("storage"))["backend"] == "sqlite"
-        base = accounts.account_dir(account_id, folder) if account_id else Path(folder)
+        base = accounts.account_dir(account_id, folder) if account_id else paths.folder("data", folder)
         if sqlite:
             size = (base / "storage.sqlite3").stat().st_size if (base / "storage.sqlite3").is_file() else 0
         else:
-            size = (_folder_bytes(base / "events") if account_id else sum(p.stat().st_size for p in Path(folder).glob("events_monitor.jsonl") if p.is_file()))
+            size = (_folder_bytes(base / "events") if account_id else sum(p.stat().st_size for p in base.glob("events_monitor.jsonl") if p.is_file()))
         biggest = max(biggest, size)
         label = account_id or "default"
         if size > cfg_r["warn_events_mb"] * 1024 * 1024:

@@ -202,7 +202,7 @@ class WritesToGithubWording(unittest.TestCase):
     def test_readme_and_quickstart_in_the_eight_languages_name_the_three_commands(self):
         for lang in mr.LANGS:
             for stem in ("README", "QUICKSTART"):
-                text = (HERE / f"{stem}_{lang}.txt").read_text(encoding="utf-8")
+                text = (HERE / "docs" / f"{stem}_{lang}.txt").read_text(encoding="utf-8")
                 for needle in self.NEEDLES if stem == "README" else ("dispatch --go", "--real", "finalize --execute"):
                     self.assertIn(needle, text, f"{stem}_{lang}.txt lacks {needle}")
 

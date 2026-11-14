@@ -11,7 +11,7 @@ Ce que le moniteur écrit, comment l'exporter et ce dont a besoin le lecteur du 
 
 ## Ce que le moniteur écrit
 
-`ci_red.json` à côté de `actions_monitor.py`, actualisé après chaque passage de la sentinelle (schéma 2) :
+`ci_red.json` à côté de `bin/actions_monitor.py`, actualisé après chaque passage de la sentinelle (schéma 2) :
 
 | Champ | Signification |
 |---|---|
@@ -27,8 +27,8 @@ Ce que le moniteur écrit, comment l'exporter et ce dont a besoin le lecteur du 
 ## Comment l'exporter
 
 ```
-py -3 read_report.py --export-status DIR          # ci_status_public.json + .md, uniquement ce qui peut être publié
-py -3 read_report.py --export-sign-queue FILE     # la file de signature
+py -3 bin/read_report.py --export-status DIR          # ci_status_public.json + .md, uniquement ce qui peut être publié
+py -3 bin/read_report.py --export-sign-queue FILE     # la file de signature
 ```
 
 Les deux lisent le moniteur en cours d'exécution sur `127.0.0.1` (sans quota GitHub). Ils refusent d'écrire tant que l'instantané se charge et en indiquent la raison ; le code de sortie n'est alors pas nul.
@@ -46,7 +46,7 @@ Il ne publie pas le fichier, ne pousse rien vers le dépôt du profil et ne touc
 
 ## Le tableau d'état du profil (contrat du consommateur)
 
-Le tableau d'état d'un dépôt de profil peut lire le même document de deux façons : depuis le moniteur en marche (`GET /api/outputs/dashboard.json`, désactivé tant que `outputs.dashboard.enabled` ne l'est pas, cet ordinateur seulement) ou depuis le fichier écrit par `py -3 read_report.py --export-status DIR` (workflows rouges seulement, jamais le côté signature). Ce sur quoi le tableau peut compter, vérifié par un test de ce dépôt :
+Le tableau d'état d'un dépôt de profil peut lire le même document de deux façons : depuis le moniteur en marche (`GET /api/outputs/dashboard.json`, désactivé tant que `outputs.dashboard.enabled` ne l'est pas, cet ordinateur seulement) ou depuis le fichier écrit par `py -3 bin/read_report.py --export-status DIR` (workflows rouges seulement, jamais le côté signature). Ce sur quoi le tableau peut compter, vérifié par un test de ce dépôt :
 
 1. `schema` vaut `2` et les champs ne font que s'ajouter.
 2. Le document servi est exactement celui de `ci_red.json`.

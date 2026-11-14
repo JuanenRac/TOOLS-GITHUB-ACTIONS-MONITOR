@@ -236,9 +236,9 @@ class CiRedExport(unittest.TestCase):
         s = self.snap()
         with tempfile.TemporaryDirectory() as tmp:
             written = ci_red.export(s, {"ci_red_file": ""}, audit_dir=None, base=Path(tmp))
-            self.assertEqual(written, [Path(tmp) / "ci_red.json"])
-            data = json.loads((Path(tmp) / "ci_red.json").read_text(encoding="utf-8"))
-            self.assertEqual(sorted(p.name for p in Path(tmp).iterdir()), ["ci_red.json"])   # no .tmp left behind
+            self.assertEqual(written, [Path(tmp) / "ai" / "ci_red.json"])        # with the rest of what an AI reads
+            data = json.loads((Path(tmp) / "ai" / "ci_red.json").read_text(encoding="utf-8"))
+            self.assertEqual(sorted(p.name for p in (Path(tmp) / "ai").iterdir()), ["ci_red.json"])   # no .tmp left behind
         self.assertEqual(data["repos"]["R"]["red"][0]["workflow"], "Build")
         self.assertTrue(data["complete"])
         self.assertEqual(data["tool_version"], tool_version.TOOL_VERSION)
@@ -256,7 +256,7 @@ class CiRedExport(unittest.TestCase):
             got = ci_red.export(s, {"ci_red_file": "sub_not_there/x.json", "ci_red_audit_copy": True}, audit_dir=Path(tmp) / "no_such_dir", base=Path(tmp))
             self.assertEqual(got, [])   # the folder does not exist: no exception
             got = ci_red.export(s, {"ci_red_audit_copy": True}, audit_dir=Path(tmp) / "no_such_dir", base=Path(tmp))
-            self.assertEqual(got, [Path(tmp) / "ci_red.json"])
+            self.assertEqual(got, [Path(tmp) / "ai" / "ci_red.json"])
             (Path(tmp) / "audits").mkdir()
             got = ci_red.export(s, {"ci_red_audit_copy": True}, audit_dir=Path(tmp) / "audits", base=Path(tmp))
             self.assertEqual(len(got), 2)

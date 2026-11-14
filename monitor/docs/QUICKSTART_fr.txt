@@ -1,0 +1,30 @@
+Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+GPL-3.0-or-later - see LICENSE
+
+DÉMARRAGE RAPIDE - Moniteur GitHub Actions + Sentinelle
+========================================================
+1. Installez Python 3.11 ou supérieur (python.org ; sous Linux/macOS il est souvent déjà là : python3 --version).
+2. Installez GitHub CLI (gh) :
+     Windows :  winget install --id GitHub.cli
+     macOS :    brew install gh
+     Linux :    votre gestionnaire de paquets (par exemple : sudo apt install gh) ou https://cli.github.com
+3. Connectez-vous une fois :  gh auth login   (choisissez GitHub.com et suivez les étapes dans le navigateur). Le moniteur ne stocke jamais de jeton : il le demande à gh (sauf si vous activez le jeton optionnel du moniteur dans Réglages > Avancé).
+4. Lancez le moniteur :
+     Windows :  double-clic sur MONITOR_GITHUB_ACTIONS.bat
+     macOS :    double-clic sur MONITOR_GITHUB_ACTIONS.command   (s'il ne s'ouvre pas : chmod +x *.sh *.command dans un terminal)
+     Linux :    ./MONITOR_GITHUB_ACTIONS.sh
+   Une page s'ouvre sur http://127.0.0.1:8765 (uniquement sur votre ordinateur). Arrêt avec Ctrl+C dans la fenêtre.
+5. Première utilisation :
+   - La page affiche VOS dépôts (le compte GitHub avec lequel vous êtes connecté). Pour surveiller un autre compte, renseignez "github_owner" dans actions_monitor.json.
+   - Choisissez votre langue dans l'onglet Réglages de la page (icône d'engrenage ; démarrage en anglais, le choix est mémorisé). Les autres réglages y sont aussi.
+   - Pour regrouper les dépôts par préfixe de nom ou utiliser les outils de lot, copiez assets/examples/ecosystems.example.json / assets/examples/targets.example.json et faites-y pointer
+     actions_monitor.json ("ecosystems_file", "targets_file"). Le détail est dans README_fr.txt.
+   - Pas de clones locaux ? Cela fonctionne quand même, en mode réduit (seulement ce que donne l'API GitHub), et la page vous le dit.
+6. Ce qu'il ne fait PAS : il ne signe et ne publie rien tout seul, n'écrit rien sur GitHub de lui-même (seuls `dispatch --go`, `dispatch --real` et `finalize --execute`, que vous exécutez, le font), n'écoute que sur 127.0.0.1 et ne garde aucun jeton. Signer et publier sont
+   des commandes que vous lancez vous-même ; le moniteur ne fait que les afficher en texte.
+7. Extras optionnels (désactivés ou à part) : bin/lint_workflows.py contrôle vos fichiers de workflow avant le push ; bin/tui.py affiche une grille en direct dans la console (pip install rich) ; les notifications, le webhook entrant
+   et l'assistant IA s'activent dans l'onglet Réglages ; pour l'exécuter comme service, derrière un proxy ou dans un conteneur, voir docs/DEPLOYMENT_fra.md.
+8. Vous voulez seulement surveiller vos runs ? Lancez plutôt MONITOR_LITE_GITHUB_ACTIONS (l'édition lite : sans sentinelle, des Réglages courts, port 8766). Voir docs/LITE_fra.md.
+Des problèmes ? Voir « PROBLÈMES » dans README_fr.txt.
+9. L'aide est incluse : le bouton rond ? de la page (ou la touche ?) ouvre toute la documentation hors ligne ; le bouton i affiche À propos et copie les informations pour le support (sans secret). En console : python bin/actions_monitor.py --doctor (vérifie l'installation et indique comment corriger chaque problème), --demo (la page avec des données inventées, sans gh), --about, --help-topics, --help-search MOTS. Plus : docs/FIRST_STEPS_fra.md, docs/SENTINEL_fra.md, docs/QUOTAS_fra.md.
+10. Ligne de commande : python bin/monitor_cli.py status | health | doctor | alerts (guide : docs/CLI.md). Si le moniteur écoute sur le réseau, donnez-lui le jeton d'accès dans la variable MONITOR_ACCESS_TOKEN (l'alias MONITOR_TOKEN fonctionne aussi ; --token est le dernier recours) et utilisez https hors d'un réseau que vous contrôlez.

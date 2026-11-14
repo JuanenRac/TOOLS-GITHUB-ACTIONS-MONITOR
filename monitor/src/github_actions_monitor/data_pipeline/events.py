@@ -26,9 +26,9 @@ from github_actions_monitor.app import toolconfig
 from github_actions_monitor.security import private_io
 from github_actions_monitor.storage import locks, state_io
 
-from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
-EVENTS_FILE = HERE / "events_monitor.jsonl"
-STATE_FILE = HERE / "events_state.json"
+from github_actions_monitor.util import paths
+EVENTS_FILE = paths.place("events_monitor.jsonl")
+STATE_FILE = paths.place("events_state.json")
 MAX_BYTES = 512 * 1024   # the feed is trimmed to its newest half when it grows beyond this
 LOW_RATE = 1500
 DUE_ENTRIES = 2   # a repository with this many entries under [Unreleased] is due for its version and release

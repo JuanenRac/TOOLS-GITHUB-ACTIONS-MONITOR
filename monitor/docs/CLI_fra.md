@@ -7,7 +7,7 @@
 
 # La ligne de commande comme client du moniteur
 
-`python monitor_cli.py COMMANDE` demande au moniteur en marche ce qu'il sait (un `GET` sur `127.0.0.1`, ou sur l'adresse de `--url` / `MONITOR_URL`) et l'affiche. Elle ne refait pas le travail de la page auprès de GitHub, n'écrit jamais sur GitHub et ne change aucun réglage. Les anciens outils (`read_report.py`, `--doctor`, `gha_dispatch_all.py`) continuent de fonctionner comme avant.
+`python bin/monitor_cli.py COMMANDE` demande au moniteur en marche ce qu'il sait (un `GET` sur `127.0.0.1`, ou sur l'adresse de `--url` / `MONITOR_URL`) et l'affiche. Elle ne refait pas le travail de la page auprès de GitHub, n'écrit jamais sur GitHub et ne change aucun réglage. Les anciens outils (`bin/read_report.py`, `--doctor`, `bin/gha_dispatch_all.py`) continuent de fonctionner comme avant.
 
 ## Commandes
 
@@ -38,21 +38,21 @@ Les heures écrites pour les personnes (la ligne `Last read`, les sourdines, le 
 ## Exemples
 
 ```
-python monitor_cli.py health && python monitor_cli.py alerts --fail-on error
-python monitor_cli.py alerts --sentinel collab --level warning --json
-python monitor_cli.py status --account org-acme
-MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python monitor_cli.py health --json
+python bin/monitor_cli.py health && python bin/monitor_cli.py alerts --fail-on error
+python bin/monitor_cli.py alerts --sentinel collab --level warning --json
+python bin/monitor_cli.py status --account org-acme
+MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python bin/monitor_cli.py health --json
 ```
 
 `health` distingue trois choses : le moniteur ne répond pas (2), la connexion GitHub échoue (3), et le quota est épuisé ou GitHub est injoignable (4) ; un moniteur qui n'a pas fini sa première lecture le dit (4) au lieu de montrer des chiffres vides.
 
 ## L'édition lite
 
-`python monitor_cli.py status --lite`, `doctor --lite` et `health --lite` parlent au port 8766. Les commandes qui demandent des comptes, des sentinelles ou le récepteur de webhook sont refusées avec le code de sortie 1. L'édition lite n'a ni comptes ni API d'alertes.
+`python bin/monitor_cli.py status --lite`, `doctor --lite` et `health --lite` parlent au port 8766. Les commandes qui demandent des comptes, des sentinelles ou le récepteur de webhook sont refusées avec le code de sortie 1. L'édition lite n'a ni comptes ni API d'alertes.
 
 ## `ai-hook` : dire à un outil d'IA ce que voit le moniteur
 
-`python monitor_cli.py ai-hook install|status|uninstall [--assistant|--cursor|--generic] [--scope project|user] [--project-dir DIR] [--dry-run] [--json]` n'a pas besoin d'un moniteur en marche. Il ajoute, montre ou retire le script de liaison `ai_hook.py` dans les réglages de crochets d'un outil d'IA (voir le guide des alertes pour IA) : le fichier de réglages est fusionné, une copie est gardée et la réponse de `--json` est de l'ASCII pur. `status` est l'action par défaut.
+`python bin/monitor_cli.py ai-hook install|status|uninstall [--assistant|--cursor|--generic] [--scope project|user] [--project-dir DIR] [--dry-run] [--json]` n'a pas besoin d'un moniteur en marche. Il ajoute, montre ou retire le script de liaison `bin/ai_hook.py` dans les réglages de crochets d'un outil d'IA (voir le guide des alertes pour IA) : le fichier de réglages est fusionné, une copie est gardée et la réponse de `--json` est de l'ASCII pur. `status` est l'action par défaut.
 
 ## Le jeton d'accès en ligne de commande
 

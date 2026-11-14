@@ -9,16 +9,16 @@
 
 两个可选的命令行工具。监视器本身不需要任何包;终端视图在你需要时使用 Rich。
 
-## 工作流检查器:`lint_workflows.py`
+## 工作流检查器:`bin/lint_workflows.py`
 
-- `py -3 lint_workflows.py [路径 ...] [--json] [--fail-on info|warn|bad]` 在推送前检查 `.github/workflows/*.yml`。不带路径时查看当前文件夹。它只打开文件。
+- `py -3 bin/lint_workflows.py [路径 ...] [--json] [--fail-on info|warn|bad]` 在推送前检查 `.github/workflows/*.yml`。不带路径时查看当前文件夹。它只打开文件。
 - 规则(可在设置标签页的“工作流检查器”子标签页中分别关闭或调整严重程度):`unpinned_uses`(未固定到完整提交 SHA 的 Action)、`permissions`(没有 `permissions:` 块或为 `write-all`)、`secrets_in_clear`(看起来像写在文件里的令牌或密钥)、`injection`(第三方文本被粘贴进 `run:` 脚本)和 `pr_target`(检出拉取请求代码的 `pull_request_target`)。
 - 当某项发现达到 `--fail-on`(默认 `bad`)时退出码为 1,因此可作为推送前钩子。当监视器能看到你的克隆时,还会在每日报告中增加一行。
 - 看起来像密钥的值会被分类,但绝不会被打印或保存:已知的令牌格式或高熵的长字符串为严重(`bad`);`placeholder`、`dummy`、`changeme`、`ci` 之类可读的占位符只是信息;其他情况为警告;`${{ secrets.X }}`、`${X}` 或空值不算发现。要让某项发现不再出现,在它所在行或上一行写注释:`# monitor-lint: ignore secrets_in_clear 因为这是 docker compose config 的占位符`(规则名或 `all`);或在设置 `lint.ignore` 中列出 `仓库:文件:规则` 模式(可用 `*`)。
 
 
-## 终端视图:`tui.py`
+## 终端视图:`bin/tui.py`
 
-- 先执行 `pip install rich`,然后 `py -3 tui.py [--port 8765] [--refresh 5] [--once] [--theme dark|light]`。它绘制一个实时表格,显示正在运行的内容、红色工作流、签名队列和报告,数据来自 `127.0.0.1` 上运行的监视器(不使用 GitHub 配额)。
+- 先执行 `pip install rich`,然后 `py -3 bin/tui.py [--port 8765] [--refresh 5] [--once] [--theme dark|light]`。它绘制一个实时表格,显示正在运行的内容、红色工作流、签名队列和报告,数据来自 `127.0.0.1` 上运行的监视器(不使用 GitHub 配额)。
 - 它是只读的:没有任何按键会重新运行、关闭或写入内容。没有 Rich 时它会说明如何安装并以代码 3 退出;监视器及其测试从不需要 Rich。
-- 交互式终端应用 `tui_textual.py`(`pip install textual`;精简版加 `--lite`)可在“设置”标签页中编辑其所列分组的简单设置、**列表**(各项以逗号分隔输入:`a, b, c`)和数字**映射**(`name=3, other=5`);服务器会再次校验每个值,安全相关选项只能在页面中修改。
+- 交互式终端应用 `bin/tui_textual.py`(`pip install textual`;精简版加 `--lite`)可在“设置”标签页中编辑其所列分组的简单设置、**列表**(各项以逗号分隔输入:`a, b, c`)和数字**映射**(`name=3, other=5`);服务器会再次校验每个值,安全相关选项只能在页面中修改。

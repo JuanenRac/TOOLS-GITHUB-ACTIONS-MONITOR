@@ -3,7 +3,7 @@
 # GPL-3.0-or-later - see LICENSE
 # GitHub Actions build batch (Linux and macOS): NOTHING is compiled on this machine.
 #   1 = plan, 2 = FIRE the batch (dry_run=true), 3 = status, 4 = finalize (download, verify, sign and publish; asks before each one), 5 = hygiene, 6 = quit
-# The menu texts come from launcher_msg.py (your language).
+# The menu texts come from bin/launcher_msg.py (your language).
 cd "$(dirname "$0")" || exit 1
 export PYTHONPATH="$(pwd)/src${PYTHONPATH:+:$PYTHONPATH}"
 PY="$(command -v python3 || command -v python)"

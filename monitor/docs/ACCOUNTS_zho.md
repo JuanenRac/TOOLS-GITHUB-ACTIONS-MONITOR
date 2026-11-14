@@ -11,7 +11,7 @@
 
 ## 无需任何操作时
 
-没有 `accounts/` 文件夹时，监视器的工作方式与以前完全一样：一个账户，文件放在代码旁边。只有当你想要多个账户时才需要继续阅读。
+没有 `accounts/` 文件夹时，监视器的工作方式与以前完全一样：一个账户，文件放在 `config/`、`data/` 和 `logs/` 文件夹中（见 LAYOUT）。只有当你想要多个账户时才需要继续阅读。
 
 ## 账户文件夹
 
@@ -29,16 +29,16 @@ accounts/
 ## 从一个账户迁移到多个
 
 ```
-python actions_monitor.py --migrate-accounts          # 显示将复制的内容，不写入任何东西
-python actions_monitor.py --migrate-accounts --apply  # 复制到 accounts/default/
-python actions_monitor.py --accounts                  # 列出账户
+python bin/actions_monitor.py --migrate-accounts          # 显示将复制的内容，不写入任何东西
+python bin/actions_monitor.py --migrate-accounts --apply  # 复制到 accounts/default/
+python bin/actions_monitor.py --accounts                  # 列出账户
 ```
 
 原文件绝不会被移动或删除：检查无误后由你自己删除。第二次运行会被拒绝，因此两种状态绝不会混在一起。要添加账户，请创建带有其 `github_owner` 的 `accounts/<id>/actions_monitor.json`（复制模板 `assets/examples/actions_monitor.example.json`）。
 
 ## 运行
 
-存在 `accounts/` 文件夹时运行 `python actions_monitor.py` 会启动监督程序，这是一个运行在常用端口（8765）上的小进程，它为每个账户启动一个监视器，并为页面和工具提供唯一的地址。它不从 GitHub 读取任何内容，也不写入任何内容。如果某个账户停止，它会以逐渐增加的等待时间重新启动它（2、5、15、30、60，然后 120 秒），在此期间概览会显示它已停止。`python actions_monitor.py --account personal` 只运行该账户，作为普通监视器。
+存在 `accounts/` 文件夹时运行 `python bin/actions_monitor.py` 会启动监督程序，这是一个运行在常用端口（8765）上的小进程，它为每个账户启动一个监视器，并为页面和工具提供唯一的地址。它不从 GitHub 读取任何内容，也不写入任何内容。如果某个账户停止，它会以逐渐增加的等待时间重新启动它（2、5、15、30、60，然后 120 秒），在此期间概览会显示它已停止。`python bin/actions_monitor.py --account personal` 只运行该账户，作为普通监视器。
 
 ## 页面
 

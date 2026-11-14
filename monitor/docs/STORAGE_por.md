@@ -17,7 +17,7 @@ Por cada conta: a configuração (`actions_monitor.json`), o estado das sentinel
 
 |  | `file` (predefinido) | `sqlite` |
 |---|---|---|
-| Onde | `accounts/<id>/` (junto dos lançadores se não houver `accounts/`) | `accounts/<id>/storage.sqlite3`, uma base de dados por conta |
+| Onde | `data/accounts/<id>/` (os ficheiros de `data/` e `config/` se não houver `accounts/`) | `accounts/<id>/storage.sqlite3`, uma base de dados por conta |
 | Escritas | um ficheiro temporário, gravado no disco e renomeado | uma transação curta, diário WAL |
 | Escolha-o para | uma pessoa; ficheiros que pode ler e editar | um serviço que corre durante meses; muitos eventos |
 

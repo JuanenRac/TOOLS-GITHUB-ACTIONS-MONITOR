@@ -21,7 +21,7 @@
 | `/api/outputs/grafana.json` | 适用于 Grafana “Infinity” / JSON 数据源的 JSON 表格 | `outputs.json.enabled` |
 | `/api/outputs/dashboard.json` | 面向状态仪表板的 `ci_red.json` 文档（模式 2，参见 CI_RED_SCHEMA_zho.md） | `outputs.dashboard.enabled` |
 
-对开关已关闭的路径发出的请求会得到 `404`。向仪表板提供同一文档的旧方式，即 `ci_red.json` 和 `read_report.py --export-status`，保持不变：它是一项契约。
+对开关已关闭的路径发出的请求会得到 `404`。向仪表板提供同一文档的旧方式，即 `ci_red.json` 和 `bin/read_report.py --export-status`，保持不变：它是一项契约。
 
 ## Prometheus 指标
 
@@ -67,7 +67,7 @@ scrape_configs:
 
 ## 按可信度划分的签名队列
 
-队列的每一行都有 `trust`:`verified`(已用公钥验证签名)、`unknown`(此处无法检查该格式:从不猜测)或 `failed`(已检查但不匹配)。哨兵标签页有签名筛选器,显示每类数量并标记各行(绿色、灰色或红色边)。在控制台:`py -3 read_report.py --export-sign-queue FILE --sign-trust failed`。
+队列的每一行都有 `trust`:`verified`(已用公钥验证签名)、`unknown`(此处无法检查该格式:从不猜测)或 `failed`(已检查但不匹配)。哨兵标签页有签名筛选器,显示每类数量并标记各行(绿色、灰色或红色边)。在控制台:`py -3 bin/read_report.py --export-sign-queue FILE --sign-trust failed`。
 
 ## 在网络模式下
 

@@ -23,7 +23,8 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
+from github_actions_monitor.util import paths
+from github_actions_monitor.util.paths import ROOT as HERE   # the product folder
 
 from github_actions_monitor.accounts import accounts  # noqa: E402
 from github_actions_monitor.security import auth_http
@@ -60,7 +61,7 @@ class Child:
 
     def __init__(self, account_id, port, command=None, key=""):
         self.id, self.port, self.proc, self.key = account_id, port, None, key
-        self.command = command or [sys.executable, "-I", str(HERE / "account_child.py"), account_id, "--port", str(port)]
+        self.command = command or [sys.executable, "-I", str(paths.BIN / "account_child.py"), account_id, "--port", str(port)]
         self.started = 0.0
         self.failures = 0              # starts in a row that did not get healthy
         self.next_start = 0.0
@@ -342,7 +343,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer  # noqa: E40
 
 SUPERVISOR = {"obj": None}
 #: what the supervisor answers itself; everything else under /api/ goes to the account asked for
-OWN_PATHS = ("/api/accounts", "/api/health")
+OWN_PATHS = ("/api/accounts", "/api/health", "/api/paths")
 NO_FORWARD = ("host", "connection", "content-length", "transfer-encoding", "accept-encoding", "x-account-id", "x-monitor-remote", "x-monitor-supervisor")
 #: the headers of a child's answer that are passed on
 PASS_BACK = ("content-type", "set-cookie", "cache-control", "location", "referrer-policy")
@@ -496,6 +497,10 @@ class Handler(BaseHTTPRequestHandler):
             return
         if method == "POST" and route.startswith("/api/accounts/") and route.endswith("/credential"):
             self.credential(sup, route[len("/api/accounts/"):-len("/credential")])
+            return
+        if method == "GET" and route == "/api/paths":
+            from github_actions_monitor.integrations import ai_index
+            self.json(ai_index.paths_report("complete"))
             return
         if method == "GET" and route == "/api/accounts":
             listed = sup.summary()

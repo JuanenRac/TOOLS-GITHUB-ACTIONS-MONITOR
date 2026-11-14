@@ -15,7 +15,7 @@
 
 它随完整版监视器启动，在同一进程的独立线程中运行，拥有自己的 GitHub 调用预算（`sentinel.budget_per_hour`，默认 600，以及 `sentinel.max_calls_per_tick`）。当 GitHub 剩余配额低于 `sentinel.min_rate_remaining` 时它停止请求，页面会显示因配额而暂停。它做的任何事都不会写入 GitHub。
 
-## 它写入的文件（位于监视器旁，从不公开）
+## 它写入的文件（位于监视器的文件夹中，从不公开）
 
 | 文件 | 内容 |
 |---|---|

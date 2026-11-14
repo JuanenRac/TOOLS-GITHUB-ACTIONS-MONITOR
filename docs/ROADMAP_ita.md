@@ -95,7 +95,7 @@ La riga di comando prende il token di accesso con il suo nome, la modalità di r
 
 ## Fatto nella 1.7.4
 
-Una barra a piè di pagina con l'avviso più importante (e una finestra con tutti), la connessione, la quota, l'ultima lettura, la modalità, l'indirizzo e l'orologio; un pulsante a schermo intero; tabelle Repository e Cronologia che si ordinano per una o più colonne con le colonne a tua scelta; `monitor_cli.py`, la riga di comando come client del monitor in esecuzione (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) con `--json` e codici di uscita stabili, e la sua guida in otto lingue; i registri delle modifiche controllati nell'ordine, il README del pacchetto senza cronologia dentro e le immagini ridisegnate.
+Una barra a piè di pagina con l'avviso più importante (e una finestra con tutti), la connessione, la quota, l'ultima lettura, la modalità, l'indirizzo e l'orologio; un pulsante a schermo intero; tabelle Repository e Cronologia che si ordinano per una o più colonne con le colonne a tua scelta; `bin/monitor_cli.py`, la riga di comando come client del monitor in esecuzione (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) con `--json` e codici di uscita stabili, e la sua guida in otto lingue; i registri delle modifiche controllati nell'ordine, il README del pacchetto senza cronologia dentro e le immagini ridisegnate.
 
 ## Fatto nella 1.7.3
 

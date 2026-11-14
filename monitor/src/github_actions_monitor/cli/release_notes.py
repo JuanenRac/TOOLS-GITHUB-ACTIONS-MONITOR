@@ -4,7 +4,7 @@
 """Draft of release notes from the commits since the last tag. A PROPOSAL for a person to edit: it reads the local clone with `git log`, prints
 Markdown (or writes it to a file you name) and never publishes, tags, pushes or touches GitHub.
 
-  py -3 release_notes.py REPO [--root DIR] [--since TAG] [--out FILE]
+  py -3 bin/release_notes.py REPO [--root DIR] [--since TAG] [--out FILE]
 
 REPO is a folder name under the workspace root (MONITOR_ROOT, "workspace_root" in actions_monitor.json, or --root). Commit subjects that mention
 internal-review wording, tool names or co-author trailers are left out of the draft (they do not belong in public notes); the footer says how many were left out.
