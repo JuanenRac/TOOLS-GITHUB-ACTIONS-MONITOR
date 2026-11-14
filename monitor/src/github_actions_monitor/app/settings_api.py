@@ -125,6 +125,8 @@ _f("quota", "github_app", "github_app.enabled", "bool", restart=False, secure=Tr
 _f("quota", "github_app", "github_app.app_id", "text", re.compile(r"^[0-9]{1,12}\Z"), restart=False, secure=True)
 _f("quota", "github_app", "github_app.key_path", "path", restart=False, secure=True)
 _f("quota", "github_app", "github_app.installation_id", "text", re.compile(r"^[0-9]{0,12}\Z"), restart=False, secure=True)
+_f("quota", "github_app", "github_app.openssl_path", "path", restart=False, secure=True)
+
 for _kind in ("runs", "security", "issues", "history", "discovery", "other"):
     _f("quota", "rp_prefer", f"readpool.prefer.{_kind}", "enum", ("auto", "user", "app", "extra"), restart=False, label=["cfg.p.rp_prefer", "cfg.p.rp_kind_" + _kind], help="cfg.h.rp_prefer")
 for _source in ("user", "app", "extra"):

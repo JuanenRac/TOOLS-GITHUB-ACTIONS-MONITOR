@@ -81,7 +81,7 @@ class JwtAndToken(unittest.TestCase):
             source = (HERE / "src" / "github_actions_monitor" / "integrations" / "github_app.py").read_text(encoding="utf-8")
             self.assertNotIn("read_text(key", source)
             self.assertNotIn("open(key", source)
-            self.assertIn('["openssl", "dgst", "-sha256", "-sign", key_path]', source)      # only the PATH goes to openssl
+            self.assertIn('[program, "dgst", "-sha256", "-sign", key_path]', source)      # only the PATH goes to openssl, and the program is the one that was found
 
     def test_the_token_is_found_cached_and_renewed_before_it_expires(self):
         fake = FakeGitHub()
