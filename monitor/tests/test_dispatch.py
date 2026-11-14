@@ -88,7 +88,8 @@ class Workspace(unittest.TestCase):
 
     def test_the_configuration_file_is_read(self):
         with tempfile.TemporaryDirectory() as tmp:
-            (Path(tmp) / "actions_monitor.json").write_text(json.dumps({"workspace_root": "Y:/ws", "audit_dir": "Y:/au"}), encoding="utf-8")
+            (Path(tmp) / "config").mkdir()
+            (Path(tmp) / "config" / "actions_monitor.json").write_text(json.dumps({"workspace_root": "Y:/ws", "audit_dir": "Y:/au"}), encoding="utf-8")
             with mock.patch.object(workspace, "HERE", Path(tmp)):
                 self.assertEqual(workspace._config("workspace_root"), Path("Y:/ws"))
                 self.assertEqual(workspace._config("audit_dir"), Path("Y:/au"))

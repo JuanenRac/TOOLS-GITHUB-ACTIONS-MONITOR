@@ -113,6 +113,15 @@ def describe(base=None):
     return out
 
 
+def is_own(path):
+    """True when `path` lies inside config/, data/, logs/ or ai/ of this installation: the monitor may make the folders on the way to it (a fresh install has none yet)."""
+    try:
+        target = Path(path).resolve()
+        return any(target.is_relative_to(folder(kind).resolve()) for kind in KINDS)
+    except (OSError, ValueError):
+        return False
+
+
 def ensure(base=None):
     """Creates the folders config/, data/, logs/ and ai/ when they are missing (a fresh install has none). Returns the list of folders that exist afterwards; a folder that cannot be made is skipped."""
     made = []

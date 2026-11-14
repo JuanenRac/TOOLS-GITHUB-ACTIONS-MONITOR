@@ -217,7 +217,7 @@ def load_config():
             if example.is_file() and LITE["on"]:   # lite: the same template with the sentinel off and the light reading
                 template = json.loads(example.read_text(encoding="utf-8"))
                 template.update({"mode": "lite", "ecosystems": "all", "sentinel": {"enabled": False}, "webhook": {"enabled": False, "secret": ""}})
-                inherited = lite_inheritance(paths.place("actions_monitor.json"))
+                inherited = lite_inheritance(paths.place("actions_monitor.json", HERE))
                 template.update(inherited)
                 if inherited:
                     print(i18n.t("mon.lite_inherited", keys=", ".join(sorted(inherited))))

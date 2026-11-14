@@ -34,7 +34,8 @@ def _env(*names):
 
 def _config(key):
     try:
-        value = json.loads(paths.config_file().read_text(encoding="utf-8")).get(key)
+        own = paths.config_file() if Path(HERE).resolve() == paths.ROOT.resolve() else paths.place("actions_monitor.json", HERE)      # HERE is the product folder (the tests point it elsewhere)
+        value = json.loads(own.read_text(encoding="utf-8")).get(key)
     except (OSError, ValueError):
         return None
     return Path(value) if value else None
