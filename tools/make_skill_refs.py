@@ -95,6 +95,7 @@ NOTES = {
     "/api/sentinel/historial": ("GET", "the history of the daily report"),
     "/api/sentinel/panels": ("GET", "the panels A1-A13 as data (level, one line, rows to act on)"),
     "/api/sentinel/parte/save": ("POST", "save the daily report"),
+    "/api/reports": ("GET", "the four optional reports: workflow hygiene, wait for a runner, release ready or blocked, supply chain of the latest release (each on only when its setting is)"),
     "/api/run-log": ("GET", "the failing step of one run and its last relevant lines, cleaned (`?repo=&run=`; off by default, `logs.failed_step.enabled`; administrators in the team mode)"),
     "/api/session-token": ("GET", "a one-use token that the next change of a setting needs"),
     "/api/settings": ("GET,POST", "read and change the settings (a fixed list of keys, validated, with a backup)"),

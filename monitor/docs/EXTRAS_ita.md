@@ -21,6 +21,11 @@ Entrambi sono **disattivati per impostazione predefinita** e si attivano nelle I
 python bin/monitor_cli.py gh-token --read-only
 ```
 
-## Non ancora qui
+## Quattro rapporti facoltativi
 
-Il pannello di igiene dei workflow, il rapporto di coda, la vista release pronta o bloccata e il pannello della catena di fornitura non fanno parte di questa versione.
+Tutti e quattro sono disattivati per impostazione predefinita. Compaiono in un blocco "Rapporti facoltativi" in fondo alla scheda Avvisi e in `GET /api/reports`. Quelli che leggono GitHub spendono al massimo `reports.max_calls_per_cycle` chiamate per ciclo, leggono pochi repository ogni volta e tengono in memoria per un giorno ciò che leggono.
+
+- `reports.workflow_hygiene.enabled`: legge i file di workflow dei repository ed elenca ciò che è scritto male - action non fissate a un commit, permessi non limitati, un job senza `timeout-minutes`, nessun gruppo `concurrency`, rischi di `pull_request_target` e injection, segreti in chiaro (le regole del linter del pannello A13, che legge cloni locali, più le due nuove).
+- `reports.queue.enabled`: legge i job di alcune esecuzioni concluse che hanno aspettato e dice quanto ha aspettato un job prima di partire per ogni tipo di runner (Linux, Windows, macOS, più grandi, self-hosted).
+- `reports.release_view.enabled`: nessuna chiamata; da ciò che la sentinella sa dice quali repository sono PRONTI per una release (voci nel changelog o una build verde che nessuno ha pubblicato, nulla di rosso, nessuna firma in attesa) e quali BLOCCATI, e perché.
+- `reports.supply_chain.enabled`: legge l'ultima release dei repository e dice, dai nomi dei file, se contiene una distinta dei materiali software (SBOM), checksum e una firma o attestazione. I file non vengono mai scaricati.
