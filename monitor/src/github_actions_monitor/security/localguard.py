@@ -99,8 +99,18 @@ def configure(network, host="127.0.0.1", token="", allowed=(), secure=False, pro
     return public_state()
 
 
+def listening():
+    """Where this monitor can be reached from, in one word for the page, the summary of the accounts and the command line: `mode` is "this_computer" (only 127.0.0.1: the default), "network" (it
+    also listens on `host` and every request needs the access token) or "proxy" (the network mode with a reverse proxy declared in front: `listen.proxy_public_host`, `listen.secure_cookie` or
+    `listen.trusted_proxy`). `host` is the address it listens on and `secure` whether the session is HTTPS (direct TLS or a proxy that terminates it)."""
+    mode = "this_computer"
+    if STATE["network"]:
+        mode = "proxy" if STATE.get("behind_proxy") else "network"
+    return {"mode": mode, "host": STATE["host"], "secure": STATE["secure"], "token_required": STATE["network"]}
+
+
 def public_state():
-    return {"network": STATE["network"], "host": STATE["host"], "token_required": STATE["network"], "secure": STATE["secure"]}
+    return {"network": STATE["network"], "host": STATE["host"], "token_required": STATE["network"], "secure": STATE["secure"], "mode": listening()["mode"]}
 
 
 def cookie_header(token, secure=None):

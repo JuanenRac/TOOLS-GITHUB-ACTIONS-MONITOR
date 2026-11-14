@@ -319,7 +319,8 @@
       "red_new",
       "stuck_new",
       "pending_sign",
-      "offline"
+      "offline",
+      "credential_blind"
     ],
     "max_per_hour": 20,
     "channels": {

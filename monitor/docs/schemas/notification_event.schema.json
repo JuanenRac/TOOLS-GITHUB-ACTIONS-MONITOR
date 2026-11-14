@@ -25,7 +25,9 @@
         "alerts_up",
         "workflow_failed",
         "collab_new",
-        "collab_fixed"
+        "collab_fixed",
+        "credential_blind",
+        "credential_back"
       ]
     },
     "repo": {

@@ -11,7 +11,12 @@
   ai-hook   install | status | uninstall the gate script that tells an AI tool what the monitor sees (--assistant, --cursor or --generic; --scope project|user); it needs no
             running monitor and writes only the settings file of that tool (merged, with a backup), never anything on GitHub
   health    a quick check before reading anything heavy: is the monitor reachable, does it accept this client, does the GitHub credential of the account answer (a limit of the
-            allowance is told apart from a credential that failed). Alias: check
+            allowance is told apart from a credential that failed). Alias: check. With --deep it also asks whether the supervisor and the refresh cycle of every account are alive
+  credential  replace | reload: put another login of GitHub in place of the one of an account that GitHub revoked (or let expire) without restarting anything; the token is read from a
+            file (--new-token-file, or - for the standard input), never from a flag, and it is checked against GitHub before it is kept. Needs an administrator in the team mode, or this computer
+
+A monitor on another computer works the same way: --url (or MONITOR_URL) names it; --ca-file (or MONITOR_CA_FILE) trusts the certificate authority of its HTTPS certificate; in the team mode
+--user NAME with --password-file FILE (or MONITOR_USER, MONITOR_PASSWORD_FILE) signs in and the session travels as a Bearer token (`auth.allow_bearer` must be on).
 
 Every command takes --json (the answer as one JSON document), --account ID, --url URL, --timeout SECONDS and --lang CODE. In the network mode the access token is read from MONITOR_ACCESS_TOKEN,
 then from its alias MONITOR_TOKEN, then from --token-file (a file only you can read) and last from --token (it shows in the list of processes, so it prints a warning on stderr); plain http to another computer prints a warning on stderr. Nothing here writes to GitHub or changes a setting.
@@ -37,10 +42,13 @@ from github_actions_monitor.tool_version import TOOL_VERSION
 from github_actions_monitor.security import netguard
 
 EXIT_OK, EXIT_USAGE, EXIT_DOWN, EXIT_AUTH, EXIT_DEGRADED, EXIT_ALERTS = 0, 1, 2, 3, 4, 5
-COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "ai-hook")
+COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "ai-hook", "credential")
 AI_HOOK_ACTIONS = ("install", "status", "uninstall")
+CREDENTIAL_ACTIONS = ("replace", "reload")
 LITE_COMMANDS = ("status", "doctor", "health", "check")
-LEVELS = ("info", "warning", "error")
+LEVELS = ("info", "warning", "error", "critical")
+from github_actions_monitor.cli import monitor_admin      # noqa: E402
+CLIENT = monitor_admin.CLIENT      # the session of the team mode and the authority of the certificate: one dict, shared
 PORTS = {"complete": 8765, "lite": 8766}
 TOKEN_VARIABLES = ("MONITOR_ACCESS_TOKEN", "MONITOR_TOKEN")      # the first is the one the monitor itself reads; the second is an alias
 
@@ -109,12 +117,32 @@ def base_url(url=None, lite=False, env=None):
     return f"{parts.scheme}://{parts.netloc}"
 
 
+request_headers = monitor_admin.request_headers
+open_url = monitor_admin.open_url
+
+
+def post_json(base, path, payload, timeout=8, token=""):
+    """(status, document) of the one request with a body this command line makes (see monitor_admin); CliError(2) when nothing answers."""
+    try:
+        return monitor_admin.send_json(base, path, payload, timeout, token)
+    except monitor_admin.Unreachable:
+        raise CliError(EXIT_DOWN, i18n.t("cli.unreachable", url=base)) from None
+
+
+def sign_in(base, user, password, timeout=8, token=""):
+    """Opens a session of the team mode for a script: POST /api/auth/login with client "api" and keeps the Bearer token in CLIENT. Raises CliError(3) when the monitor refuses it."""
+    status, answer = post_json(base, "/api/auth/login", {"username": user, "password": password, "client": "api"}, timeout, token)
+    if status != 200 or not answer.get("token"):
+        raise CliError(EXIT_AUTH, i18n.t("cli.login_refused", code=answer.get("code") or status))
+    CLIENT["session"] = str(answer["token"])
+
+
 def fetch(base, path, query=None, timeout=8, token=""):
     """GET one JSON document of the monitor. Raises CliError(2) when it cannot be reached, CliError(3) when it refuses, CliError(4) for an answer that is not JSON."""
     url = base + path + (("?" + urlencode({k: v for k, v in (query or {}).items() if v not in (None, "")})) if query else "")
-    request = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": f"monitor_cli/{TOOL_VERSION}", **({"X-Monitor-Access": token} if token else {})})
+    request = urllib.request.Request(url, headers=request_headers(token))
     try:
-        with netguard.local_open(request, timeout=timeout, follow_redirects=False) as answer:     # noqa: S310 - http/https only, checked in base_url
+        with open_url(request, timeout) as answer:     # noqa: S310 - http/https only, checked in base_url
             body = answer.read(4_000_000)
     except urllib.error.HTTPError as error:
         if error.code in (401, 403):
@@ -151,12 +179,18 @@ def cmd_status(ctx):
     payload = {"version": health.get("version"), "edition": "lite" if health.get("lite") else "complete", "account": health.get("account"), "uptime_seconds": health.get("uptime_seconds"),
                "repos": len(data.get("repos") or []), "active": figures.get("active"), "queued": figures.get("queued"), "failures_24h": figures.get("fail24"), "successes_24h": figures.get("ok24"),
                "red_workflows": figures.get("red"), "updated": data.get("updated"), "updated_local": tzdisplay.stamp(data["updated"]) if data.get("updated") else None, "offline": bool((data.get("offline") or {}).get("offline")),
-               "allowance": {"remaining": rate.get("remaining"), "limit": rate.get("limit"), "reset": rate.get("reset")}, "error": answer.get("error") or None}
+               "allowance": {"remaining": rate.get("remaining"), "limit": rate.get("limit"), "reset": rate.get("reset")}, "error": answer.get("error") or None,
+               "listening": health.get("listening") if health.get("listening") in ("this_computer", "network", "proxy") else None, "credential": (health.get("credential") or {}).get("state") if isinstance(health.get("credential"), dict) else None}
     lines = [i18n.t("cli.status_head", version=payload["version"], edition=i18n.t("cli.edition_" + ("lite" if payload["edition"] == "lite" else "complete")), account=payload["account"] or "-"),
              i18n.t("cli.status_repos", n=payload["repos"], active=payload["active"], queued=payload["queued"], fail=payload["failures_24h"], ok=payload["successes_24h"]),
              i18n.t("cli.status_allowance", remaining=rate.get("remaining", "-"), limit=rate.get("limit", "-")),
              i18n.t("cli.status_updated", when=payload["updated_local"] or "-")]
+    if payload["listening"]:
+        lines.append(i18n.t("cli.status_listening", where=i18n.t("cli.listening_" + payload["listening"])))
     code = EXIT_OK
+    if payload["credential"] == "blind":
+        lines.append(i18n.t("cli.status_blind"))
+        code = EXIT_AUTH
     if not data and not answer.get("error"):      # the monitor has not read GitHub yet: nothing to report is not "all right" (same as `health`)
         lines.append(i18n.t("cli.health_no_data"))
         code = EXIT_DEGRADED
@@ -173,7 +207,12 @@ def cmd_accounts(ctx):
     answer = fetch(ctx["base"], "/api/accounts", None, ctx["timeout"], ctx["token"])
     rows = answer.get("accounts") or []
     lines = [i18n.t("cli.accounts_head", n=len(rows))] + [f"  {a.get('id')}  {a.get('state', '-')}  {i18n.t('cli.accounts_row', repos=a.get('repos', '-'), running=a.get('running', '-'), failing=a.get('failing', '-'))}" for a in rows]
-    return answer, lines, EXIT_OK
+    if answer.get("listening") in ("this_computer", "network", "proxy"):
+        lines.append(i18n.t("cli.status_listening", where=i18n.t("cli.listening_" + answer["listening"])))
+    blind = [a.get("id") for a in rows if a.get("state") == "blind"]
+    if blind:
+        lines.append(i18n.t("cli.accounts_blind", accounts=", ".join(str(b) for b in blind)))
+    return answer, lines, EXIT_AUTH if blind else EXIT_OK
 
 
 def cmd_alerts(ctx):
@@ -181,12 +220,12 @@ def cmd_alerts(ctx):
     alerts = answer.get("alerts") or []
     lines = [i18n.t("cli.alerts_head", n=len(alerts))]
     for a in alerts:
-        mark = {"error": "[ERR ]", "warning": "[warn]", "info": "[info]"}.get(a.get("level"), "[    ]")
+        mark = {"critical": "[CRIT]", "error": "[ERR ]", "warning": "[warn]", "info": "[info]"}.get(a.get("level"), "[    ]")
         lines.append(f"  {mark} {a.get('sentinel', '?'):<6} {a.get('code', '')}  {a.get('repo') or '-'}  {a.get('title', '')}" + (f"  ({i18n.t('cli.alerts_muted', until=a['muted_until'])})" if a.get("muted_until") else ""))
     code = EXIT_OK
     wanted = ctx.get("fail_on")
     if wanted:
-        worst = {"info": 0, "warning": 1, "error": 2}
+        worst = {"info": 0, "warning": 1, "error": 2, "critical": 3}
         if any(worst.get(a.get("level"), 0) >= worst[wanted] and not a.get("muted_until") for a in alerts):
             code = EXIT_ALERTS
     return answer, lines, code
@@ -210,10 +249,42 @@ def cmd_doctor(ctx):
     return doctor.as_json(checks, edition), doctor.text(checks, i18n.t, edition).rstrip("\n").split("\n"), doctor.exit_code(checks)
 
 
+def deep_health(ctx):
+    """The deep check of the monitor (`GET /api/health?deep=1`) with the session of this command: (exit code, text, document). 4 when the supervisor or the refresh cycle of an account is stuck."""
+    from github_actions_monitor.cli import healthcheck
+    asked = {"account": ctx["account"]} if ctx["account"] else {}
+    request = urllib.request.Request(ctx["base"] + "/api/health?deep=1" + ("&" + urlencode(asked) if asked else ""), headers=request_headers(ctx["token"]))
+    try:
+        with open_url(request, ctx["timeout"]) as answer:
+            status, body = answer.status, answer.read(1_000_000)
+    except urllib.error.HTTPError as error:
+        status, body = error.code, error.read(1_000_000)
+        error.close()
+    except (urllib.error.URLError, OSError, ValueError):
+        return EXIT_DOWN, i18n.t("healthcheck.unreachable"), None
+    try:
+        document = json.loads(body.decode("utf-8"))
+    except ValueError:
+        document = None
+    document = document if isinstance(document, dict) else None
+    code, text = healthcheck.judge(status, document)
+    return {healthcheck.EXIT_OK: EXIT_OK, healthcheck.EXIT_UNHEALTHY: EXIT_DEGRADED, healthcheck.EXIT_DOWN: EXIT_DOWN, healthcheck.EXIT_REFUSED: EXIT_AUTH}[code], text, document
+
+
 def cmd_health(ctx):
-    """Reachable? accepted? does the credential of GitHub answer? Reads only what is needed, in this order, and stops at the first failure."""
+    """Reachable? accepted? does the credential of GitHub answer? Reads only what is needed, in this order, and stops at the first failure. With --deep it asks the deep check first."""
     out = {"monitor": "unreachable", "access": None, "github": None, "allowance": None, "exit": EXIT_DOWN}
     lines = []
+    if ctx.get("deep"):
+        code, text, document = deep_health(ctx)
+        out.update({"deep": document, "exit": code})
+        lines.append(text)
+        if code != EXIT_OK:
+            out["monitor"] = "unreachable" if code == EXIT_DOWN else ("refused" if code == EXIT_AUTH else "unhealthy")
+            return out, lines, code
+        if isinstance(document, dict) and document.get("supervisor") and not ctx["account"]:      # the supervisor of several accounts answers for all of them: there is no single account to read after it
+            out["monitor"] = "ok"
+            return out, lines, EXIT_OK
     try:
         health = fetch(ctx["base"], "/api/health", {"account": ctx["account"]}, ctx["timeout"], ctx["token"])
     except CliError as error:
@@ -286,13 +357,56 @@ def cmd_ai_hook(ctx):
     return report, lines, EXIT_OK
 
 
-HANDLERS = {"ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "live": cmd_live, "doctor": cmd_doctor, "health": cmd_health, "check": cmd_health}
+def read_new_token(path):
+    """The token for `credential replace`: the first line of a file, or of the standard input for `-`. Never a command line flag (it would show in the list of processes). CliError(1) if there is none."""
+    try:
+        if path == "-":
+            line = sys.stdin.readline()
+        else:
+            with open(path, "r", encoding="utf-8-sig") as handle:
+                line = handle.readline()
+    except (OSError, UnicodeError):
+        raise CliError(EXIT_USAGE, i18n.t("cli.token_file_bad", file=path)) from None
+    if not line.strip():
+        raise CliError(EXIT_USAGE, i18n.t("cli.token_file_bad", file=path))
+    return line.strip()
+
+
+def cmd_credential(ctx):
+    """`credential replace|reload [--account ID] [--new-token-file FILE|-]`: another login of GitHub for one account, while everything runs. 0 done; 3 the monitor refuses you; 4 GitHub refused the new token
+    (nothing changed) or the monitor could not do it."""
+    action = ctx.get("action") or ""
+    if action not in CREDENTIAL_ACTIONS:
+        raise CliError(EXIT_USAGE, i18n.t("cli.credential_usage"))
+    payload = {"action": action}
+    if action == "replace":
+        if not ctx.get("new_token_file"):
+            raise CliError(EXIT_USAGE, i18n.t("cli.credential_needs_file"))
+        payload["token"] = read_new_token(ctx["new_token_file"])
+    accounts_path = "/api/accounts/%s/credential" % ctx["account"] if ctx["account"] else None
+    health = fetch(ctx["base"], "/api/health", None, ctx["timeout"], ctx["token"])
+    path = accounts_path if health.get("supervisor") and accounts_path else ("/api/credential" if not health.get("supervisor") else None)
+    if path is None:
+        raise CliError(EXIT_USAGE, i18n.t("cli.credential_needs_account"))
+    status, answer = post_json(ctx["base"], path, payload, max(ctx["timeout"], 30.0), ctx["token"])
+    shown = {k: v for k, v in answer.items() if k != "token"}      # an answer never carries the token, and this command does not print one in any case
+    if status in (401, 403):
+        raise CliError(EXIT_AUTH, i18n.t("cli.credential_refused", code=answer.get("code") or answer.get("status") or status))
+    if status == 404:
+        raise CliError(EXIT_DEGRADED, i18n.t("cli.credential_unknown"))
+    result = str(answer.get("status") or "")
+    ok = status == 200 and answer.get("ok") is True
+    line = i18n.t("cli.credential_" + ("done" if ok else "failed"), status=i18n.t("cli.credential_status_" + result) if result else str(status))
+    return {"action": action, "ok": ok, **shown}, [line], EXIT_OK if ok else EXIT_DEGRADED
+
+
+HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "live": cmd_live, "doctor": cmd_doctor, "health": cmd_health, "check": cmd_health}
 
 
 def build_parser():
     ap = argparse.ArgumentParser(prog="monitor_cli.py", description=i18n.t("cli.description"), epilog=i18n.t("cli.epilog"), formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("command", choices=COMMANDS, help=i18n.t("cli.help_command"))
-    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS, default=None, help=i18n.t("cli.help_ai_action"))
+    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS, default=None, help=i18n.t("cli.help_ai_action"))
     ap.add_argument("--json", action="store_true", help=i18n.t("cli.help_json"))
     for name in ("assistant", "cursor", "generic"):
         ap.add_argument("--" + name, dest="target", action="store_const", const=name, default="", help=i18n.t("cli.help_" + name))
@@ -304,8 +418,13 @@ def build_parser():
     ap.add_argument("--lite", action="store_true", help=i18n.t("cli.help_lite"))
     ap.add_argument("--token-file", metavar="FILE", default="", dest="token_file", help=i18n.t("cli.help_token_file"))
     ap.add_argument("--token", metavar="TOKEN", default="", help=i18n.t("cli.help_token"))
+    ap.add_argument("--deep", action="store_true", help=i18n.t("cli.help_deep"))
+    ap.add_argument("--user", metavar="NAME", default="", help=i18n.t("cli.help_user"))
+    ap.add_argument("--password-file", metavar="FILE", default="", dest="password_file", help=i18n.t("cli.help_password_file"))
+    ap.add_argument("--ca-file", metavar="FILE", default="", dest="ca_file", help=i18n.t("cli.help_ca_file"))
+    ap.add_argument("--new-token-file", metavar="FILE", default="", dest="new_token_file", help=i18n.t("cli.help_new_token_file"))
     ap.add_argument("--timeout", type=float, default=8.0, metavar="SECONDS", help=i18n.t("cli.help_timeout"))
-    ap.add_argument("--sentinel", choices=("ci", "collab"), default="", help=i18n.t("cli.help_sentinel"))
+    ap.add_argument("--sentinel", choices=("ci", "collab", "system"), default="", help=i18n.t("cli.help_sentinel"))
     ap.add_argument("--level", choices=LEVELS, default="", help=i18n.t("cli.help_level"))
     ap.add_argument("--muted", choices=("show", "hide", "only"), default="hide", help=i18n.t("cli.help_muted"))
     ap.add_argument("--fail-on", choices=LEVELS, default="", dest="fail_on", help=i18n.t("cli.help_fail_on"))
@@ -334,7 +453,17 @@ def main(argv=None):
     try:
         ctx = {"base": base_url(args.url, args.lite), "account": args.account, "timeout": max(1.0, min(60.0, args.timeout)), "token": resolve_token(flag=args.token, token_file=args.token_file),
                "sentinel": args.sentinel, "level": args.level, "muted": args.muted, "fail_on": args.fail_on, "lite": args.lite,
-               "action": args.action or "", "target": args.target, "scope": args.scope, "project_dir": args.project_dir, "dry_run": args.dry_run}
+               "action": args.action or "", "target": args.target, "scope": args.scope, "project_dir": args.project_dir, "dry_run": args.dry_run, "deep": args.deep, "new_token_file": args.new_token_file}
+        CLIENT.update({"session": "", "ca": (args.ca_file or os.environ.get("MONITOR_CA_FILE") or "").strip()})
+        if CLIENT["ca"] and not os.path.isfile(CLIENT["ca"]):
+            raise CliError(EXIT_USAGE, i18n.t("cli.ca_file_bad", file=CLIENT["ca"]))
+        who = (args.user or os.environ.get("MONITOR_USER") or "").strip()
+        if who and args.command not in ("doctor", "ai-hook"):
+            secret_file = (args.password_file or os.environ.get("MONITOR_PASSWORD_FILE") or "").strip()
+            password = read_token_file(secret_file) if secret_file else (os.environ.get("MONITOR_PASSWORD") or "")
+            if not password:
+                raise CliError(EXIT_USAGE, i18n.t("cli.password_missing"))
+            sign_in(ctx["base"], who, password, ctx["timeout"], ctx["token"])
         insecure = plain_http_to_network(ctx["base"])
         if insecure:
             print(i18n.t("cli.plain_http", host=insecure), file=sys.stderr)

@@ -26,7 +26,7 @@ Optionnelles et **désactivées par défaut**. Les événements du flux (un nouv
 ## Le contrat des adaptateurs
 
 - Pour joindre un service absent de la liste, lancez un petit récepteur sur cet ordinateur et pointez `http_local` vers lui. Il reçoit un POST avec `Content-Type: application/json` et ce corps : `{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`.
-- `kind` vaut `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `collab_new` ou `collab_fixed`. Les champs ne font que s'ajouter. Répondez par un 2xx ; tout le reste compte comme un échec.
+- `kind` vaut `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `collab_new`, `collab_fixed`, `credential_blind` ou `credential_back`. Les champs ne font que s'ajouter. Répondez par un 2xx ; tout le reste compte comme un échec.
 - `mqtt` publie le même JSON comme charge d'un message QoS 0 sur `notify.channels.mqtt.topic`.
 
 ## La limite par heure compte les messages
