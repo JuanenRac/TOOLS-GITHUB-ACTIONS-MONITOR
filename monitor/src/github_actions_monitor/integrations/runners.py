@@ -13,7 +13,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}$")
+NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}\Z")
 
 
 def settings(config):

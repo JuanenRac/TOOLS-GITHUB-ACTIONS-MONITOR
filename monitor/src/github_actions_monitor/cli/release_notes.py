@@ -29,7 +29,7 @@ class _Text(dict):
 TEXT = _Text.fromkeys(("no_clone", "no_commits", "heading", "since", "start", "footer", "d_refused", "wrote", "left_out"), "")
 GROUPS = (("feat", "Added"), ("fix", "Fixed"), ("perf", "Performance"), ("docs", "Documentation"), ("refactor", "Changed"), ("test", "Tests"), ("ci", "CI"), ("build", "Build"), ("chore", "Maintenance"))
 LEFT_OUT = re.compile(r"audit|claude|assistant|co-authored|\bAI\b", re.I)
-PREFIX = re.compile(r"^(\w+)(?:\([^)]*\))?!?:\s*(.+)$")
+PREFIX = re.compile(r"^(\w+)(?:\([^)]*\))?!?:\s*(.+)\Z")
 
 
 def git(root, repo, *args):

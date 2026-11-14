@@ -21,8 +21,8 @@ from github_actions_monitor.security import private_io
 
 from github_actions_monitor.util import paths
 LOG_FILE = paths.place("github_actions_log.jsonl")
-NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}$")
-NUMBER_RE = re.compile(r"^[0-9]{1,12}$")
+NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}\Z")
+NUMBER_RE = re.compile(r"^[0-9]{1,12}\Z")
 METHODS = ("merge", "squash", "rebase")
 # action -> (HTTP method, endpoint, scope the token needs, what the number is)
 ACTIONS = {

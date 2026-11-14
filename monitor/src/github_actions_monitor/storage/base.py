@@ -26,10 +26,10 @@ from abc import ABC, abstractmethod
 
 #: global kinds of records (the tables of the SQLite backend); a new kind is added here AND in a schema migration
 RECORD_KINDS = ("users", "user_accounts", "sessions")
-NAME_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{0,59}$")      # a sentinel / document name: also a file name, so it can never carry a path
-ACCOUNT_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{0,39}$")   # same rule as accounts.valid_id
-KEY_RE = re.compile(r"^[A-Za-z0-9._@:+-]{1,200}$")        # the key of a record
-TS_RE = re.compile(r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d+)?Z?)?$")
+NAME_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{0,59}\Z")      # a sentinel / document name: also a file name, so it can never carry a path
+ACCOUNT_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{0,39}\Z")   # same rule as accounts.valid_id
+KEY_RE = re.compile(r"^[A-Za-z0-9._@:+-]{1,200}\Z")        # the key of a record
+TS_RE = re.compile(r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d+)?Z?)?\Z")
 
 
 class StorageError(Exception):

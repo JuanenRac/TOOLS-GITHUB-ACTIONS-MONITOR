@@ -60,6 +60,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Fixed
 
+- **A name with a line feed at the end is no longer a valid name**: the checks of account ids, repository names, keys, owners, addresses and the like ended in the end-of-line mark, which also accepts a text that is followed by one more line feed ("alpha" and "alpha" plus a line feed were the same id). They now end at the end of the text, 76 checks in all, and a test keeps every new check that way.
+
 - **The pause of the hook of an AI tool is kept in one step**: reading the last moment and writing the new one take a lock, so two events at the same time cannot both pass; and when the moment cannot be written the answer is "do not block", not "ok" (before, a failed write still allowed the block and the pause was never applied).
 
 - **The exporter of a self-hosted runner can no longer send the monitor somewhere else**: a redirect is followed only to this computer or a private address, with the same scheme, no credentials, and at most three times; a public host, another scheme or a loop ends the read with no figures. No proxy is used for it.

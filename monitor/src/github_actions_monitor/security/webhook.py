@@ -20,9 +20,9 @@ from datetime import datetime, timezone
 from github_actions_monitor import i18n
 from github_actions_monitor.app import toolconfig
 
-NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}$")
-DELIVERY_RE = re.compile(r"^[A-Za-z0-9-]{8,64}$")   # X-GitHub-Delivery: a GUID
-FULL_NAME_RE = re.compile(r"^([A-Za-z0-9-]{1,39})/([A-Za-z0-9._-]{1,100})$")
+NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}\Z")
+DELIVERY_RE = re.compile(r"^[A-Za-z0-9-]{8,64}\Z")   # X-GitHub-Delivery: a GUID
+FULL_NAME_RE = re.compile(r"^([A-Za-z0-9-]{1,39})/([A-Za-z0-9._-]{1,100})\Z")
 MIN_SECRET = 32
 MAX_BODY = 262144
 MAX_DELIVERIES = 2000        # the replay memory is bounded: the oldest delivery ids fall out first
@@ -172,7 +172,7 @@ def handle(config, body, headers, watched):
 LIVE_FIELDS = ("event", "repo", "run_id", "status", "conclusion", "branch", "sha", "url", "attempt", "workflow", "path", "started", "seconds", "job", "queue")
 
 
-GITHUB_URL = re.compile(r"^https://[A-Za-z0-9.-]+/[A-Za-z0-9._/-]{1,200}$")   # a link to the run on github.com or on a GitHub Enterprise Server host
+GITHUB_URL = re.compile(r"^https://[A-Za-z0-9.-]+/[A-Za-z0-9._/-]{1,200}\Z")   # a link to the run on github.com or on a GitHub Enterprise Server host
 
 
 def _time(text):

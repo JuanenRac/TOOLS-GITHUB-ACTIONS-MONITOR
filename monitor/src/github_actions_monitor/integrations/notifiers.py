@@ -31,7 +31,7 @@ CHANNELS = ("telegram", "discord", "slack", "matrix", "mqtt", "http_local")
 KNOWN_EVENTS = ("red_new", "red_fixed", "stuck_new", "pending_sign", "release_due", "rate_low", "offline", "online", "alerts_up", "workflow_failed", "collab_new", "collab_fixed", "credential_blind", "credential_back")
 DEFAULT_EVENTS = ["red_new", "stuck_new", "pending_sign", "offline", "credential_blind"]
 LOOPBACK = ("127.0.0.1", "localhost", "::1", "[::1]")
-ENV_RE = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}$")
+ENV_RE = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}\Z")
 TIMEOUT = 8
 DEFAULTS = {"enabled": False, "allow_private_targets": False, "use_proxy": False, "events": list(DEFAULT_EVENTS), "max_per_hour": 20,
             "channels": {

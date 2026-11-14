@@ -40,29 +40,29 @@ BACKUP_DIR = CONFIG_FILE.parent / "config_backups"
 BACKUPS = 10
 MAX_BODY = 16384
 
-NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}$")
-LABEL_RE = re.compile(r"^[\w .:/+-]{1,50}$")      # a label of GitHub may hold a colon, a space or a slash ("monitor:ignore", "good first issue")
+NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}\Z")
+LABEL_RE = re.compile(r"^[\w .:/+-]{1,50}\Z")      # a label of GitHub may hold a colon, a space or a slash ("monitor:ignore", "good first issue")
 LABEL_KEYS = ("sentinels.collab.rules.issue_critical_labels", "sentinels.collab.rules.ignore_labels")
-TZ_RE = re.compile(r"^(?:local|utc|UTC|[A-Za-z][A-Za-z0-9_+./-]{1,63})$")      # display.timezone: local, utc or an IANA name
-OWNER_RE = re.compile(r"^[A-Za-z0-9-]{0,39}$")
-MODEL_RE = re.compile(r"^[A-Za-z0-9._:/@-]{0,100}$")
-OLLAMA_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}/?$")   # the local service only: nothing leaves this computer
-HTTPS_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250})?$")
-PROXY_HOST_RE = re.compile(r"^([A-Za-z0-9]([A-Za-z0-9.-]{0,98}[A-Za-z0-9])?)?$")      # the public NAME of an HTTPS proxy: a host name only, no port, path, user or space (empty = none)
-ENV_NAME_RE = re.compile(r"^([A-Z_][A-Z0-9_]{0,63})?$")   # the NAME of an environment variable, never the key itself
-LOOP_HOST_RE = re.compile(r"^(127\.0\.0\.1|localhost|\[::1\])$")                      # a broker or a service ON THIS COMPUTER
-LOOP_URL_RE = re.compile(r"^(http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/%-]{0,100})?)?$")
-CHAT_RE = re.compile(r"^(-?[0-9]{1,20})?$")
-ROOM_RE = re.compile(r"^(![A-Za-z0-9:._-]{3,120})?$")
-TOPIC_RE = re.compile(r"^[A-Za-z0-9/_.-]{1,100}$")
-PATTERN_RE = re.compile(r"^[A-Za-z0-9._*-]{1,100}:[A-Za-z0-9._*/-]{1,100}:[a-z_*]{1,30}$")      # repository:file:rule, with * for "any"
-FILE_PATTERN_RE = re.compile(r"^[A-Za-z0-9._*?-]{1,80}$")   # a file name pattern of the audit folder (no folders)
-FILE_NAME_RE = re.compile(r"^[A-Za-z0-9._-][A-Za-z0-9._/-]{0,79}$")
-LISTEN_HOST_RE = re.compile(r"^(127\.0\.0\.1|localhost|0\.0\.0\.0|10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|192\.168\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[01])\.[0-9]{1,3}\.[0-9]{1,3})$")   # this computer or a private address: never a public one
-OTLP_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250}|http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/%-]{0,100})?)?$")   # HTTPS anywhere, plain HTTP only on this computer
-ACT_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}:[A-Za-z0-9._-]{1,80}\.ya?ml:[a-z_]{1,30}$")      # repository:workflow-file:event, no wildcard
-IDENT_RE = re.compile(r"^[A-Za-z0-9_.-]{1,60}$")
-SOURCE_KEYS = {"ecosystem": NAME_RE, "kind": re.compile(r"^(pin_table|lock_files)$"), "provider": NAME_RE, "file": FILE_NAME_RE, "key": IDENT_RE,
+TZ_RE = re.compile(r"^(?:local|utc|UTC|[A-Za-z][A-Za-z0-9_+./-]{1,63})\Z")      # display.timezone: local, utc or an IANA name
+OWNER_RE = re.compile(r"^[A-Za-z0-9-]{0,39}\Z")
+MODEL_RE = re.compile(r"^[A-Za-z0-9._:/@-]{0,100}\Z")
+OLLAMA_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}/?\Z")   # the local service only: nothing leaves this computer
+HTTPS_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250})?\Z")
+PROXY_HOST_RE = re.compile(r"^([A-Za-z0-9]([A-Za-z0-9.-]{0,98}[A-Za-z0-9])?)?\Z")      # the public NAME of an HTTPS proxy: a host name only, no port, path, user or space (empty = none)
+ENV_NAME_RE = re.compile(r"^([A-Z_][A-Z0-9_]{0,63})?\Z")   # the NAME of an environment variable, never the key itself
+LOOP_HOST_RE = re.compile(r"^(127\.0\.0\.1|localhost|\[::1\])\Z")                      # a broker or a service ON THIS COMPUTER
+LOOP_URL_RE = re.compile(r"^(http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/%-]{0,100})?)?\Z")
+CHAT_RE = re.compile(r"^(-?[0-9]{1,20})?\Z")
+ROOM_RE = re.compile(r"^(![A-Za-z0-9:._-]{3,120})?\Z")
+TOPIC_RE = re.compile(r"^[A-Za-z0-9/_.-]{1,100}\Z")
+PATTERN_RE = re.compile(r"^[A-Za-z0-9._*-]{1,100}:[A-Za-z0-9._*/-]{1,100}:[a-z_*]{1,30}\Z")      # repository:file:rule, with * for "any"
+FILE_PATTERN_RE = re.compile(r"^[A-Za-z0-9._*?-]{1,80}\Z")   # a file name pattern of the audit folder (no folders)
+FILE_NAME_RE = re.compile(r"^[A-Za-z0-9._-][A-Za-z0-9._/-]{0,79}\Z")
+LISTEN_HOST_RE = re.compile(r"^(127\.0\.0\.1|localhost|0\.0\.0\.0|10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|192\.168\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[01])\.[0-9]{1,3}\.[0-9]{1,3})\Z")   # this computer or a private address: never a public one
+OTLP_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250}|http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/%-]{0,100})?)?\Z")   # HTTPS anywhere, plain HTTP only on this computer
+ACT_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}:[A-Za-z0-9._-]{1,80}\.ya?ml:[a-z_]{1,30}\Z")      # repository:workflow-file:event, no wildcard
+IDENT_RE = re.compile(r"^[A-Za-z0-9_.-]{1,60}\Z")
+SOURCE_KEYS = {"ecosystem": NAME_RE, "kind": re.compile(r"^(pin_table|lock_files)\Z"), "provider": NAME_RE, "file": FILE_NAME_RE, "key": IDENT_RE,
                "lock_name": FILE_NAME_RE, "version_key": IDENT_RE}
 _FOREIGN = re.compile(r"^(?:[Dd]:|/mnt/[dD](?:/|$)|/[dD](?:/|$))")
 
@@ -120,9 +120,9 @@ _f("quota", "extra_reader", "extra_reader.enabled", "bool", restart=False, secur
 _f("quota", "extra_reader", "extra_reader.file", "path", restart=False, secure=True)
 _f("quota", "extra_reader", "extra_reader.any_folder", "bool", restart=False, secure=True)
 _f("quota", "github_app", "github_app.enabled", "bool", restart=False, secure=True)
-_f("quota", "github_app", "github_app.app_id", "text", re.compile(r"^[0-9]{1,12}$"), restart=False, secure=True)
+_f("quota", "github_app", "github_app.app_id", "text", re.compile(r"^[0-9]{1,12}\Z"), restart=False, secure=True)
 _f("quota", "github_app", "github_app.key_path", "path", restart=False, secure=True)
-_f("quota", "github_app", "github_app.installation_id", "text", re.compile(r"^[0-9]{0,12}$"), restart=False, secure=True)
+_f("quota", "github_app", "github_app.installation_id", "text", re.compile(r"^[0-9]{0,12}\Z"), restart=False, secure=True)
 _f("quota", "central", "central.source", "enum", ("off", "git", "http"), restart=False, secure=True)
 _f("quota", "central", "central.max_age_minutes", "int", (5, 10080), unit="min", restart=False)
 _f(_T_GENERAL, "sound", "sound.on_new_red", "bool", restart=False)
@@ -355,7 +355,7 @@ _f(_T_AI, "alerts", "ai_alerts.brief_max_bytes", "int", (512, 20000), restart=Fa
 _f(_T_AI, "alerts", "ai_alerts.hook.enabled", "bool", restart=False, secure=True)
 _f(_T_AI, "alerts", "ai_alerts.hook.url", "text", LOOP_URL_RE, restart=False, secure=True)
 _f(_T_AI, "notice", "ai_notify.enabled", "bool", restart=False, secure=True)
-_f(_T_AI, "notice", "ai_notify.confirmed_provider", "text", re.compile(r"^[a-z0-9-]{0,40}$"), restart=False, secure=True)
+_f(_T_AI, "notice", "ai_notify.confirmed_provider", "text", re.compile(r"^[a-z0-9-]{0,40}\Z"), restart=False, secure=True)
 _f(_T_AI, "notice", "ai_notify.max_calls_per_hour", "int", (1, 60), restart=False, secure=True, unit="calls")
 _f(_T_AI, "notice", "ai_notify.cost_per_call_cents", "int", (0, 10000), restart=False, secure=True, unit="")
 _f(_T_AI, "notice", "ai_notify.max_cost_per_hour_cents", "int", (0, 100000), restart=False, secure=True, unit="")

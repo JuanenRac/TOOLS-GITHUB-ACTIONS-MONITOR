@@ -32,7 +32,7 @@ from github_actions_monitor.storage import base as storage_base
 ROLES = ("viewer", "maintainer", "admin")
 RANK = {role: index for index, role in enumerate(ROLES)}
 ALL_ACCOUNTS = "*"
-USERNAME_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{1,39}$")
+USERNAME_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{1,39}\Z")
 TOKEN_PREFIX = "msn_"                       # a session token for a client that is not a browser; it can never be mistaken for the access token of the network mode
 SESSION_COOKIE = "monitor_session"
 SCRYPT_N, SCRYPT_R, SCRYPT_P = 2 ** 14, 8, 1
