@@ -33,7 +33,7 @@ Todo lo que sigue está escrito y probado; o ya está en la rama principal o esp
 
 ## Previsto, en este orden
 
-Cada versión lleva todo lo de su tramo del plan: nada queda colgando de una versión anterior ni se aplaza a la siguiente. Tras la 1.8.3 y tras la 1.9.3 el producto pasa por una revisión independiente y sus hallazgos se cierran en la versión de estabilización siguiente. No hay 1.8.1: usuarios, roles y sesiones llegan con la 1.8.0.
+Cada versión lleva todo lo de su tramo del plan: nada queda colgando de una versión anterior ni se aplaza a la siguiente. Tras la 1.8.3 y tras la 1.9.3 el producto pasa por una revisión independiente y sus hallazgos se cierran en la versión de estabilización siguiente. La 1.8.1 es una versión correctiva de la 1.8.0: el cuadro «cargando repositorios» desaparece con el último repositorio y recargar la página trae los datos al instante.
 
 ### 1.8.2 - Imagen Docker oficial y modo servicio
 

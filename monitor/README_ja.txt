@@ -1,7 +1,7 @@
 Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 GPL-3.0-or-later - see LICENSE
 
-GitHub Actions モニター + センチネル（バージョン 1.8.0）
+GitHub Actions モニター + センチネル（バージョン 1.8.1）
 ========================================================
 どれを起動する? (新しい利用者が2分で決められます)
   完全版  MONITOR_GITHUB_ACTIONS.*       センチネル付きのページ(ポート 8765): アラート、署名キュー、分析。複数のリポジトリがあるならここから。

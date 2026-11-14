@@ -44,7 +44,13 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 ### Behoben
 
 - Der Test eines Kontos, das sofort stirbt, hängt nicht mehr von der Geschwindigkeit des Rechners ab: Die Wartezeit vor dem erneuten Start eines Kontos wird mit einer Uhr geprüft, die der Test selbst gibt, und ein zweiter Test prüft den Plan der Wartezeiten, ohne die echte Zeit zu lesen (der alte scheiterte unter Last in der Schranke eines Releases).
+
+## [1.8.1]
+
+### Behoben
+
 - Das Feld „Repositories werden geladen“ blieb nach dem Lesen des letzten Repositorys auf der Seite: Das fertige Bild erreicht die Seite jetzt, sobald das Lesen endet, ohne auf die nachfolgende Pflege zu warten (die Kurzfassung für die KI-Werkzeuge, die Alarmzentrale), und eine lange Liste von Sentinel-Panels kann diese Kurzfassung nicht mehr endlos wiederholen (diese Schleife hielt das letzte Teilbild, 131 / 131, auf der Seite).
+
 - Das Neuladen der Seite (F5) braucht keine Minuten mehr, bis die Daten da sind: Die Endlosschleife der Kurzfassung verbrauchte die ganze Rechenzeit des Monitors und die Seite gab mit einem Abbruch auf; außerdem wurde die Antwort des Datenendpunkts bei gehaltener globaler Sperre in die Verbindung geschrieben, sodass eine hängende Verbindung (ein geschlossener Tab) alle anderen Seiten und den Aktualisierungszyklus blockierte. Die Sperre wird jetzt nur noch zum Entnehmen des Bildes gehalten. Ein Browsertest prüft, dass das Feld beim Laden erscheint und mit dem letzten Repository verschwindet, und Servertests prüfen, dass die Kurzfassung endet, dass das fertige Bild vor der Pflege veröffentlicht wird und dass eine hängende Verbindung ein Neuladen nicht blockiert.
 
 ## [1.8.0]
