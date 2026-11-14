@@ -65,6 +65,10 @@ when this file and `tool_version.py` disagree.
 
 ### Fixed
 
+- **A failure that the monitor swallows on purpose leaves a line in its log**: every `degraded` count now also writes one line to the log file with the origin, the kind of error, the place in the code where it was raised, the cleaned message (never a token) and the count; a failure that repeats writes its first twenty lines and then one in twenty-five, and the recent failures of the doctor and the page carry the place too. Before, the reason was only on the console.
+
+- **The network mode does not start before the first administrator exists**: with `auth.enabled` and `listen.network` both on and no user yet, the monitor stops at the start and says how to go on (turn `listen.network` off, start the monitor, create the administrator from this computer, turn it on and start again). The local mode and the individual mode start as always.
+
 - **The OpenTelemetry export obeys the rule for outgoing requests**: a collector on this computer is called directly and a redirect from it is not followed; any other collector is refused when it, or a redirect, leads to a loopback, private, link-local or metadata address (unless the setting that allows private targets is on), and the proxy of the environment is not used. Before, the export used a plain request that followed every redirect.
 
 - **The proxy of the environment is said to be a frontier of trust**: the help of its setting (and the code) now say that the proxy resolves the name again on its own, so the check before the proxy is a first filter, not a guarantee, and that it should be turned on only behind a managed proxy that refuses loopback, private, link-local and metadata destinations. It stays off by default.

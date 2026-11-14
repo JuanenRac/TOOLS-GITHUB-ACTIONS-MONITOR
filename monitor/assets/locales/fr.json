@@ -1106,6 +1106,7 @@
  "mon.migrate_problem": "problème : {text}",
  "mon.migrate_would": "copierait {kind} : {name} -> {target}",
  "mon.network_first_steps": "Premiers pas du mode réseau : désactive listen.query_access (le jeton ne doit pas voyager dans une adresse) et utilise HTTPS (certificat ou proxy) ou un VPN.",
+ "mon.network_needs_admin": "Le mode réseau (listen.network) est activé avec le mode équipe (auth.enabled), mais il n'y a pas encore d'administrateur et le premier ne peut être créé que depuis cet ordinateur. Le moniteur ne démarre pas. Désactivez listen.network, démarrez le moniteur (il n'écoute alors que sur cet ordinateur), ouvrez la page et créez l'administrateur, puis activez listen.network et redémarrez-le.",
  "mon.network_on": "MODE RÉSEAU : écoute sur {host}:{port}. Chaque requête exige le jeton d'accès ; à utiliser seulement sur un réseau de confiance.",
  "mon.network_plain": "Cette connexion est en HTTP non chiffré : le jeton et les données ne sont pas chiffrés. Ne l'utilisez que sur un réseau de confiance, ou placez un proxy HTTPS devant (voir le guide réseau).",
  "mon.network_token": "Ouvrez cette adresse une fois (elle pose le cookie d'accès) : {url}",

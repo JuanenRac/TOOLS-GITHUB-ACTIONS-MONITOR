@@ -1106,6 +1106,7 @@
  "mon.migrate_problem": "problema: {text}",
  "mon.migrate_would": "copierebbe {kind}: {name} -> {target}",
  "mon.network_first_steps": "Primi passi della modalità di rete: disattiva listen.query_access (il token non deve viaggiare in un indirizzo) e usa HTTPS (certificato o proxy) o una VPN.",
+ "mon.network_needs_admin": "La modalità rete (listen.network) è attiva insieme alla modalità team (auth.enabled), ma non c'è ancora alcun amministratore e il primo può essere creato solo da questo computer. Il monitor non si avvia. Disattiva listen.network, avvia il monitor (così ascolta solo su questo computer), apri la pagina e crea l'amministratore; poi attiva listen.network e avvialo di nuovo.",
  "mon.network_on": "MODALITÀ RETE: in ascolto su {host}:{port}. Ogni richiesta richiede il token di accesso; usalo solo su una rete fidata.",
  "mon.network_plain": "Questa connessione è HTTP in chiaro: token e dati non sono cifrati. Usala solo su una rete fidata, oppure metti davanti un proxy HTTPS (vedi la guida di rete).",
  "mon.network_token": "Apri questo indirizzo una volta (imposta il cookie di accesso): {url}",

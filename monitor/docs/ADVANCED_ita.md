@@ -80,3 +80,7 @@ Con `otlp.enabled` attivo e un `otlp.endpoint` (HTTPS, o HTTP su questo computer
 ## Il ciclo di aggiornamento: battito e watchdog
 
 `/api/data` restituisce anche `loop`: la fase del ciclo di aggiornamento (`collect`, `maintain`, `publish`, `log`, `extras`, `idle`), da quanto è in corso il ciclo, l'ultimo ciclo riuscito, l'ultimo errore e la fase in cui è avvenuto, i riavvii e ogni problema di scrittura del registro o del riepilogo per l'IA. La barra in basso della pagina lo mostra in rosso quando un ciclo dura troppo e come avviso quando un file non si può scrivere. Un watchdog riavvia in un nuovo thread il ciclo che supera `watchdog_minutes` (10 per impostazione predefinita, 0 lo disattiva), dopo aver scritto in `actions_monitor_log.txt` la traccia di tutti i thread.
+
+## La modalità rete non parte senza amministratore
+
+Con `auth.enabled` e `listen.network` attivi e nessun utente, il monitor non si avvia e spiega come proseguire: il primo amministratore può essere creato solo da questo computer, quindi disattiva `listen.network`, avvia il monitor (ascolta solo su questo computer), apri la pagina e crea l'amministratore; poi attiva `listen.network` e riavvia. La modalità locale (127.0.0.1) parte sempre.

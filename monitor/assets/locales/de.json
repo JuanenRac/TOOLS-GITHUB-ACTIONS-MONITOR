@@ -1106,6 +1106,7 @@
  "mon.migrate_problem": "Problem: {text}",
  "mon.migrate_would": "würde {kind} kopieren: {name} -> {target}",
  "mon.network_first_steps": "Erste Schritte für den Netzwerkmodus: schalte listen.query_access aus (das Token darf nicht in einer Adresse reisen) und nutze HTTPS (Zertifikat oder Proxy) oder ein VPN.",
+ "mon.network_needs_admin": "Der Netzwerkmodus (listen.network) ist zusammen mit dem Teammodus (auth.enabled) eingeschaltet, es gibt aber noch keinen Administrator, und der erste kann nur an diesem Rechner angelegt werden. Der Monitor startet nicht. Schalten Sie listen.network aus, starten Sie den Monitor (er lauscht dann nur auf diesem Rechner), öffnen Sie die Seite und legen Sie den Administrator an; schalten Sie danach listen.network ein und starten Sie ihn erneut.",
  "mon.network_on": "NETZWERKMODUS: lauscht auf {host}:{port}. Jede Anfrage braucht das Zugriffstoken; nur in vertrauenswürdigen Netzen verwenden.",
  "mon.network_plain": "Diese Verbindung ist unverschlüsseltes HTTP: Token und Daten sind nicht verschlüsselt. Nur in einem vertrauenswürdigen Netz verwenden oder einen HTTPS-Proxy davorschalten (siehe Netzwerk-Anleitung).",
  "mon.network_token": "Diese Adresse einmal öffnen (setzt das Zugriffs-Cookie): {url}",
