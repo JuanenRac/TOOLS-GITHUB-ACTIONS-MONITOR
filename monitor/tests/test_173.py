@@ -278,7 +278,7 @@ class Settings(unittest.TestCase):
 
     def test_the_page_of_settings_has_the_twelve_settings_in_one_block_of_the_sentinel_tab(self):
         keys = [k for k in settings_api.FIELDS if k.startswith("sentinels.collab.")]
-        self.assertEqual(len(keys), 12)         # the eleven of the first look plus the labels that make an item ignored
+        self.assertEqual(len(keys), 13)         # the twelve (with the Search API switch) -- the eleven of the first look plus the labels that make an item ignored
         self.assertTrue(all(settings_api.FIELDS[k][0] == "sentinel" and settings_api.META[k]["block"] == "collab" for k in keys))
         self.assertEqual(settings_api.check_value("sentinels.collab.refresh_seconds", 30), (False, "range"))
         self.assertEqual(settings_api.check_value("sentinels.collab.repos", "all"), (True, "all"))

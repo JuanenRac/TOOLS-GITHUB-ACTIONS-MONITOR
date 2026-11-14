@@ -52,3 +52,7 @@ A round reads at most `max_repos_per_tick` repositories, two conditional request
 ## Limits
 
 Only the first 100 open issues and 100 open pull requests of a repository are read, the most recently updated first. Collab proposes nothing and executes nothing; actions on issues and pull requests belong to a later edition.
+
+## Reading with the Search API
+
+With `sentinels.collab.search_api` on (off by default) the Collab sentinel asks the open issues and pull requests of the whole account in a few calls of the Search API instead of two lists for each repository. The Search API has an allowance of its own (30 calls a minute) that the REST allowance does not pay. Only the conflicts of the pull requests that changed are read afterwards. The alerts are the same in both ways, a test compares them; if the Search API fails, the round reads each repository as before. A pull request found this way does not say whether a review was requested, so the rule of reviews waiting counts only what the lists give.

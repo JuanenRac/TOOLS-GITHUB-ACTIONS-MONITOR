@@ -203,6 +203,7 @@ _f(_T_SENT, "audits", "sentinel.audit_files.rounds", "text", FILE_PATTERN_RE)
 _f(_T_SENT, "audits", "sentinel.audit_files.rounds_extra", "text", FILE_PATTERN_RE)
 # the Collab sentinel (1.7.3): issues and pull requests that need a person; off by default, read only
 _f(_T_SENT, "collab", "sentinels.collab.enabled", "bool")
+_f(_T_SENT, "collab", "sentinels.collab.search_api", "bool", restart=False)
 _f(_T_SENT, "collab", "sentinels.collab.refresh_seconds", "int", (60, 86400))
 _f(_T_SENT, "collab", "sentinels.collab.max_repos_per_tick", "int", (1, 100), unit="calls")
 _f(_T_SENT, "collab", "sentinels.collab.min_rate_remaining", "int", (100, 5000), unit="calls")

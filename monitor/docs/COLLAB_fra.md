@@ -52,3 +52,7 @@ Un tour lit au plus `max_repos_per_tick` dépôts, avec deux requêtes condition
 ## Limites
 
 Seules les 100 premières issues ouvertes et les 100 premières pull requests ouvertes de chaque dépôt sont lues, les plus récemment mises à jour d'abord. Collab ne propose rien et n'exécute rien ; les actions sur les issues et les pull requests relèvent d'une édition ultérieure.
+
+## Lecture avec l'API de recherche
+
+Avec `sentinels.collab.search_api` activé (désactivé par défaut), le sentinelle Collab demande les tickets et pull requests ouverts de tout le compte en quelques appels de l'API de recherche au lieu de deux listes par dépôt. L'API de recherche a son propre quota (30 appels par minute) que le quota REST ne paie pas. Ensuite, seuls les conflits des pull requests modifiés sont lus. Les alertes sont les mêmes des deux façons, un test les compare ; si l'API de recherche échoue, la ronde lit chaque dépôt comme avant. Un pull request trouvé ainsi ne dit pas si une revue a été demandée, donc la règle des revues en attente ne compte que ce que donnent les listes.
