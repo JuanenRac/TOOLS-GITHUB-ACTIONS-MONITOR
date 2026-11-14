@@ -60,6 +60,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Fixed
 
+- **With the team mode on and no user yet, only the person at this computer gets in**: until the first administrator exists a request from anywhere else (the network, or through a proxy) is answered 403 "create the first administrator from this computer first" for everything that is not public (health check, login page, webhook); before, the whole monitor stayed open to the network during that time. Turning the team mode on changes nothing for the person at this computer, who still creates the first administrator from the login page.
+
+- **The process of each account answers only to its supervisor**: it asks for the key the supervisor gave it when it started it, on every request; another user of the same machine who reaches the port of an account process gets a 403 instead of the data, whatever the team mode says.
+
 - The test of an account that dies at once no longer depends on the speed of the computer: the wait before an account is started again is checked with a clock that the test gives, and a second test checks the schedule of the waits without reading the real time (the old one failed under load in the gate of a release).
 
 ## [1.8.1]
