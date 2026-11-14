@@ -118,6 +118,7 @@ DEFAULTS = {
     "finops": {"jobs_per_cycle": 0},
     "network": {"use_proxy": False, "etag": True, "graphql_checks": False, "graphql_batch": 20},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
     "ai_notify": {"enabled": False, "confirmed_provider": "", "max_calls_per_hour": 4, "cost_per_call_cents": 5, "max_cost_per_hour_cents": 50, "command": "", "timeout_seconds": 30},      # OFF: tell an external AI of a NEW real alert (ai_notify.py)
+    "savings": {"webhook_first": False, "webhook_window_minutes": 60, "webhook_full_minutes": 360, "feeds": {"enabled": False, "method": "atom", "max_age_minutes": 240}},      # read less: OFF (savings.py)
     "lessons": {"enabled": True, "allow_write": False, "retention_days": 180, "max_entries": 5000, "brief_max_bytes": 3000, "recurring_from": 2},      # the book of failures and the library of lessons (lessons.py): local, read only; writing a lesson is OFF
     "ai_alerts": {"enabled": False, "folder": "", "brief_max_bytes": 2048, "hook": {"enabled": False, "url": "", "max_per_hour": 6},
                   "diagnose": {"enabled": False, "max_per_cycle": 3, "log_lines": 10, "max_bytes": 1500},      # OFF: reads logs of GitHub (the allowance)
@@ -271,7 +272,24 @@ def pool_status():
     live = [s for s in out["sources"] if s.get("ok") and isinstance(s.get("remaining"), int)]
     if len(live) > 1:
         out["total"] = {"remaining": sum(s["remaining"] for s in live), "limit": sum(s["limit"] for s in live), "sources": len(live)}
+    out["savings"] = savings_report(config)
     return out
+
+
+def savings_report(config):
+    """What each way of reading less has spared since the monitor started (about one call of the API per spared read), and whether it is on: the Quota tab shows it."""
+    from github_actions_monitor.data_pipeline import savings
+    cfg = savings.settings(config)
+    figures = savings.stats(config)
+    graphql = graphql_checks.stats(config) or {}
+    etag = ETAG["cache"].stats() if ETAG["cache"] else None
+    return {"ways": [{"id": "etag", "on": bool(config.get("network", {}).get("etag", True)), "spared": (etag or {}).get("saved", 0)},
+                     {"id": "graphql", "on": graphql_checks.settings(config)["enabled"], "spared": max(0, graphql.get("repos", 0) - graphql.get("calls", 0))},
+                     {"id": "webhook", "on": cfg["webhook_first"], "spared": figures["webhook"]},
+                     {"id": "feed", "on": cfg["feeds"]["enabled"] and cfg["feeds"]["method"] in ("atom", "auto"), "spared": figures["feed"]},
+                     {"id": "git", "on": cfg["feeds"]["enabled"] and cfg["feeds"]["method"] in ("git", "auto"), "spared": figures["git"]},
+                     {"id": "central", "on": (config.get("central") or {}).get("source", "off") != "off", "spared": 0}],
+            "total": figures["total"], "unknown": figures["unknown"]}
 
 
 def rate_probes(config):
@@ -589,6 +607,7 @@ def refresh_runs(repos, config, progress=None):
     only_hot = hot_only_state(now)["on"]
     todo = []
     cold_due = set()      # the repositories that only wait for their slow turn: the ones network.graphql_checks may read in batches
+    slow = []             # the cold repositories whose slow turn has come: (name, cached entry)
     for repo in repos:
         entry = RUN_CACHE.get(repo)
         hot = is_hot(repo, config, now)
@@ -598,8 +617,14 @@ def refresh_runs(repos, config, progress=None):
         elif hot:
             todo.append((repo, config["cold_runs_per_repo"] if lite else tuned(config, "runs_per_repo")))
         elif not only_hot and now - entry["at"] > tuned(config, "cold_refresh_seconds"):
-            todo.append((repo, config["cold_runs_per_repo"]))
-            cold_due.add(repo)
+            if spare_by_webhook(entry, config, now):      # savings.webhook_first (off by default): the slow turn passes with no call
+                continue
+            slow.append((repo, entry))
+    if slow:
+        for repo, spared in zip([r for r, _e in slow], spare_by_feed(slow, config, now)):      # savings.feeds (off by default): the newest commit from a source that costs no allowance
+            if not spared:
+                todo.append((repo, config["cold_runs_per_repo"]))
+                cold_due.add(repo)
     done = 0
     RATE_BLOCK["unread"] = 0
     if time.time() < RATE_BLOCK["until"]:      # the allowance is still used up: nothing is asked until it renews (the old picture stays)
@@ -631,6 +656,47 @@ def refresh_runs(repos, config, progress=None):
     return total
 
 
+HEADS_PENDING = {}      # repo -> the newest commit seen BEFORE its read, stored with the read (savings.feeds)
+
+
+def spare_by_webhook(entry, config, now):
+    """True when the webhook is alive and the slow turn of this cold repository may pass without a call (savings.webhook_first). The repository keeps its runs; the full read still comes
+    at the intervals `savings` sets."""
+    from github_actions_monitor.data_pipeline import savings
+    try:
+        if savings.quiet_by_webhook(config, entry, now):
+            savings.count_webhook()
+            entry["at"] = now
+            return True
+    except Exception as error:   # noqa: BLE001 - a way to save allowance never stops the cycle
+        degraded.note("loop.extra", error)
+    return False
+
+
+def spare_by_feed(slow, config, now):
+    """[bool]: for each (repo, entry) of `slow`, True when a source that costs no allowance says that nothing was pushed since its last full read (savings.feeds.*). The questions are made
+    together, a few at a time. The newest commit that was seen is kept to be stored with the read the repository gets when it is not spared. Anything unknown means: read it as always."""
+    from github_actions_monitor.data_pipeline import savings
+    if not savings.settings(config)["feeds"]["enabled"]:
+        return [False] * len(slow)
+    owner = toolconfig.github_owner(config)
+
+    def one(item):
+        repo, entry = item
+        try:
+            if savings.feed_quiet(config, owner, repo, entry, now):
+                entry["at"] = now
+                return True
+            sha = savings.remember_head(config, owner, repo)
+            if sha:
+                HEADS_PENDING[repo] = sha
+        except Exception as error:   # noqa: BLE001
+            degraded.note("loop.extra", error)
+        return False
+    with ThreadPoolExecutor(max_workers=max(1, min(8, int(config.get("max_workers") or 4)))) as pool:
+        return list(pool.map(one, slow))
+
+
 def graphql_cold(config, repos):
     """network.graphql_checks (off by default): the cold repositories that are due are read with batches of GraphQL (its own allowance) instead of one REST call each. {repo: runs} for the ones
     the batches answered; the others (and everything when the switch is off, a batch fails or the answer is not understood) are read through REST in the same cycle."""
@@ -653,7 +719,7 @@ def note_read(repo, runs, error):
     after resilience.TRANSIENT_CYCLES cycles in a row; any other error is shown at once (the old runs stay)."""
     entry = RUN_CACHE.get(repo)
     if not error:
-        RUN_CACHE[repo] = {"runs": runs, "at": time.time(), "error": None, "fails": 0}
+        RUN_CACHE[repo] = {"runs": runs, "at": time.time(), "full_at": time.time(), "error": None, "fails": 0, "head": HEADS_PENDING.pop(repo, "") or (entry or {}).get("head", "")}
         return
     fails = (entry or {}).get("fails", 0) + 1
     if resilience.is_transient(error) and fails < resilience.TRANSIENT_CYCLES:
@@ -1829,6 +1895,7 @@ class Handler(BaseHTTPRequestHandler):
                 if record and webhook.live_settings(LIVE_CONFIG or DEFAULTS)["record_events"]:
                     apply_live_event(record, LIVE_CONFIG or DEFAULTS)
                 if repo:
+                    __import__("github_actions_monitor.data_pipeline.savings", fromlist=["_"]).note_webhook()      # the webhook is alive: savings.webhook_first may stretch the slow turn of the cold repositories
                     webhook_settle(repo)
                 self.json_reply(answer, code)
             except Exception:
