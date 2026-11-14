@@ -10,6 +10,11 @@ between the check and the connection (DNS rebinding) and every redirect (each ho
 Proxies: the proxy variables of the environment (http_proxy, https_proxy...) are NOT used (an explicit empty ProxyHandler), because a proxy would make the check judge the address of the
 proxy and not the one of the destination, and a proxy that answers with a redirect could send the request to the local network. Only with the setting `network.use_proxy` (off by
 default) the proxies of the environment are used, and then the destination (and the target of every redirect) is checked BEFORE anything is sent to the proxy.
+
+The proxy is a FRONTIER OF TRUST. With a proxy the monitor judges the name it resolves itself, but the proxy resolves the name again on its own and connects: the address the proxy reaches is
+decided by the proxy, not by this check (the name cannot be replaced by the address without breaking the check of the certificate of the destination). So the check before the proxy is a
+first filter, not a guarantee; the guarantee has to come from the proxy (a managed one that refuses loopback, private, link-local and metadata destinations). Turn `network.use_proxy` on only
+behind such a proxy.
 """
 import http.client
 import ipaddress

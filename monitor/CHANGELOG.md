@@ -61,6 +61,12 @@ when this file and `tool_version.py` disagree.
 
 ### Fixed
 
+- **The OpenTelemetry export obeys the rule for outgoing requests**: a collector on this computer is called directly and a redirect from it is not followed; any other collector is refused when it, or a redirect, leads to a loopback, private, link-local or metadata address (unless the setting that allows private targets is on), and the proxy of the environment is not used. Before, the export used a plain request that followed every redirect.
+
+- **The proxy of the environment is said to be a frontier of trust**: the help of its setting (and the code) now say that the proxy resolves the name again on its own, so the check before the proxy is a first filter, not a guarantee, and that it should be turned on only behind a managed proxy that refuses loopback, private, link-local and metadata destinations. It stays off by default.
+
+- **A test keeps the page from putting free text into markup without escaping it**: every text of the API that goes into a markup string passes through the escaping function, and the two places that write it as plain text are listed; the help documents are checked to escape their markup and to refuse scripts and non-web links.
+
 - **Each account has its own feed for the AIs**: with several accounts, every account process keeps its alerts, its brief and the ledger of the notices to an external AI in its own folder (ai/accounts/ and the id of the account) instead of one folder that all of them rewrote. An alert carries its account and its id depends on it, so the same workflow red in two accounts is two alerts; the refresh of one account closes only its own alerts (before, an account closed the alerts of the others because they were not in its snapshot). Installations with one account change nothing. The alerts that an older version left in the shared folder stay there and are closed by the account of the product folder.
 
 - **Refresh, acknowledgement and status of the feed for the AIs are one step at a time**: they take the same lock, between threads and between processes that share a folder, so an acknowledgement is no longer undone by a refresh that read the state a moment before. A refresh that cannot get the lock in ten seconds is skipped and tried again at the next cycle; the diagnosis of a log is read before the lock is taken.
