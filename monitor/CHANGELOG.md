@@ -57,6 +57,12 @@ when this file and `tool_version.py` disagree.
 
 - The test of an account that dies at once no longer depends on the speed of the computer: the wait before an account is started again is checked with a clock that the test gives, and a second test checks the schedule of the waits without reading the real time (the old one failed under load in the gate of a release).
 
+- **Saving the settings never goes on without the lock of the file**: when another process keeps the lock for more than ten seconds the save is refused with "another process is saving the settings: try again in a moment" and nothing is written; before, it went on after the wait and could undo the save of the other process.
+
+- **The command of the sentinel is checked before it is run**: it has to be a list whose first word is the full path of a program that is not a shell (not sh, bash, cmd, powershell and the like), with no shell characters in any word, no word with a blank after the first, and no flag that makes a program read a command line (-c, /c, -Command). Anything else is not run at all.
+
+- **Tokens for scripts are off by default**: the login with the client "api" and the Authorization: Bearer header are refused until the setting for tokens for scripts and apps is turned on in the Advanced tab; the browser session is unchanged. A token or a password never reaches the audit file.
+
 ## [1.8.1]
 
 ### Fixed

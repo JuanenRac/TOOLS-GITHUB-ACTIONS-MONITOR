@@ -25,7 +25,7 @@
 
 - **第一位管理员。** 在运行监视器的电脑上打开 `/login` 创建（只能在该电脑上、只能一次；经代理到达的请求会被拒绝）。或在控制台运行：`python -m github_actions_monitor.security.auth_cli create-admin 名称 --password-env 变量名`（密码绝不出现在命令行中）。此后页面会要求登录；同一工具的 `reset-password` 和 `revoke` 可找回丢失的管理员密码。
 - **角色。** `viewer` 只读（所有 GET）；`maintainer` 还可静音和确认警报、更改工作模式；`admin` 还可更改设置、用户以及一切可能触及 GitHub 或外部的内容。未列出的路由对除 admin 外的所有人关闭。每个用户还有可查看的账户列表（admin 可看全部）：用 `?account=` 或 `X-Account-Id` 请求其他账户，在 API 和导出中都返回 403 `account_scope`。
-- **会话。** 浏览器获得 Cookie `monitor_session`（HttpOnly、SameSite=Strict，HTTPS 时加 Secure）和 CSRF 令牌（`X-CSRF-Token`，由登录和 `/api/auth/me` 返回），每个 POST 都必须携带。脚本或应用使用 `POST /api/auth/login` 并传 `{"client": "api"}`，将得到的令牌以 `Authorization: Bearer msn_...` 发送（`auth.allow_bearer` 可关闭）。页面的一次性令牌（`session_guard`）在会话之外仍然适用。
+- **会话。** 浏览器获得 Cookie `monitor_session`（HttpOnly、SameSite=Strict，HTTPS 时加 Secure）和 CSRF 令牌（`X-CSRF-Token`，由登录和 `/api/auth/me` 返回），每个 POST 都必须携带。脚本或应用使用 `POST /api/auth/login` 并传 `{"client": "api"}`，将得到的令牌以 `Authorization: Bearer msn_...` 发送（仅在 `auth.allow_bearer` 开启时有效；默认关闭）。页面的一次性令牌（`session_guard`）在会话之外仍然适用。
 - **密码。** 仅以加盐的 scrypt 哈希保存，至少 `auth.min_length` 个字符。错误密码达到 `auth.max_failed_logins` 次后，该用户被锁定 `auth.lockout_minutes` 分钟，每个地址还有自己的请求上限。新的密码、角色或状态会结束该用户的会话；始终至少保留一位有效管理员。
 - **端点。** `/api/auth/login`、`logout`、`me`、`bootstrap`、`password`；管理员可用 `/api/auth/users`（含 `/update`、`/delete`、`/revoke`）和 `/api/auth/audit`。错误为带稳定代码的 JSON：`{"error": "...", "code": "..."}`。
 - **审计。** `auth_audit.jsonl`（私有文件，保留一份旧副本）记录登录、锁定、被拒绝的请求和用户变更；绝不记录密码、哈希或令牌。`auth.audit` 可关闭。

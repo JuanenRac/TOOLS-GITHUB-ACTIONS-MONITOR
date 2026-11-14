@@ -51,8 +51,9 @@ class Rules(unittest.TestCase):
         self.assertFalse(auth.settings({"auth": {"enabled": "yes"}})["enabled"], "only a real true turns it on")
         self.assertEqual(auth.settings({"auth": {"session_hours": 5000, "max_failed_logins": 1, "lockout_minutes": "x"}}),
                          {**auth.settings({}), "session_hours": 12, "max_failed_logins": 5, "lockout_minutes": 15})
-        self.assertTrue(auth.settings({})["allow_bearer"])
-        self.assertFalse(auth.settings({"auth": {"allow_bearer": False}})["allow_bearer"])
+        self.assertFalse(auth.settings({})["allow_bearer"], "tokens for scripts are off until somebody turns them on")
+        self.assertFalse(auth.settings({"auth": {"allow_bearer": "yes"}})["allow_bearer"], "only a real true turns it on")
+        self.assertTrue(auth.settings({"auth": {"allow_bearer": True}})["allow_bearer"])
 
     def test_the_password_is_a_salted_scrypt_hash_and_never_the_text(self):
         first, second = auth.hash_password(PASSWORD), auth.hash_password(PASSWORD)
@@ -328,7 +329,7 @@ class LiveTeam(unittest.TestCase):
         self.assertNotEqual(self.call("/api/alerts?account=b", headers=admin)[0], 403, "an admin sees every account")
 
     def test_a_script_uses_a_bearer_token_without_csrf_and_it_can_be_turned_off(self):
-        self.start({"auth": {"enabled": True}, "session_guard": False})
+        self.start({"auth": {"enabled": True, "allow_bearer": True}, "session_guard": False})
         self.make_admin()
         script = self.sign_in("root", client="api")
         self.assertEqual(self.call("/api/auth/me", headers=script)[1]["user"], "root")
@@ -374,7 +375,7 @@ class LiveTeam(unittest.TestCase):
         self.assertEqual(status, 429)
 
     def test_own_password_change_revokes_the_other_sessions(self):
-        self.start({"auth": {"enabled": True}, "session_guard": False})
+        self.start({"auth": {"enabled": True, "allow_bearer": True}, "session_guard": False})
         self.make_admin()
         first, second = self.sign_in("root"), self.sign_in("root", client="api")
         new = "a brand new password"
