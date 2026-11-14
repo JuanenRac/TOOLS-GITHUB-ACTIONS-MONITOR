@@ -13,6 +13,12 @@ when this file and `tool_version.py` disagree.
 
 ### Changed
 
+- **Nothing repeats in the lists of the page**: the panel "Right now" has ONE row for each repository, with a counter ("3 running", "2 queued") and its runs in a folding list that a refresh does not fold again; a repository with a single run looks as before. The alerts of runs possibly stuck and of failing workflows are ONE line for each repository ("3 runs possibly stuck", "2 workflows failing (build, docs)"). The new texts exist in the eight languages and a test in a browser checks that three runs of one repository give one row with a counter of three.
+
+- **The CI of the repository is lighter and does not pile up**: every pull request runs Ubuntu and Windows; macOS runs on a push to main, on a tag, every night, by hand and on a pull request that carries the label full-ci, always on a fixed Apple Silicon image (macOS 15) instead of the label that moves. A new push to a pull request cancels the run it supersedes (main, tags and the nightly run are never cancelled), Homebrew does not update itself, every Python job reads the same pip cache and a test checks all of it. The workflow that publishes the image was tried by hand on main (it builds both platforms and pushes nothing) and passes.
+
+- **The release gate makes the zip and its SHA256SUMS, nothing else**: the variant of the zip for e-mail is gone.
+
 - **`/api/health` says more, and `?deep=1` asks more**: besides `ok`, `version`, `loaded` and `offline` the answer carries the state of the refresh `cycle`, of the GitHub `credential` of the account and where the monitor `listening` is (the supervisor answers the same words). `/api/health?deep=1` is the deep check: 503 when the refresh cycle of an account is stuck or gone and, in the supervisor, also when its loop stopped, when the cycle of any account is stuck or when no account answers after the start. Without `deep` nothing fails that did not fail before.
 
 - The notification kinds `credential_blind` and `credential_back` are new; `credential_blind` is in the default list and in the example configuration. The Alerts tab, `/api/alerts` and the command line know the level `critical` and the sentinel `system`, and a critical alert is listed first.
