@@ -384,9 +384,15 @@ def analyze(config, now=None, entries=None, library=None):
         lesson = lesson_for(category, library)
         out.append({"category": category, "n24": row["n24"], "n7": row["n7"], "prev7": row["prev7"], "trend": trend, "recurring": row["n7"] >= cfg["recurring_from"],
                     "repos": sorted(row["repos"], key=lambda r: (-row["repos"][r], r))[:10], "avoidable_share": round(row["avoidable"] / row["n7"], 2) if row["n7"] else 0.0,
-                    "last": row["last"], "lesson": lesson, "guard": (lesson or {}).get("guard") or "", "propose_guard": row["n7"] >= cfg["recurring_from"]})
+                    "last": row["last"], "lesson": lesson, "guard": (lesson or {}).get("guard") or "", "propose_guard": row["n7"] >= cfg["recurring_from"],
+                    "needs_guard": row["n7"] >= cfg["recurring_from"] and (lesson or {}).get("source") != "library"})
     out.sort(key=lambda r: (not r["recurring"], -r["n7"], -r["n24"], r["category"]))
     return out
+
+
+def round_close(config, now=None):
+    """The close of a round of work: the kinds of failure that repeat and have no lesson of your own with its guard yet (a lesson in the library). Empty means the round can be closed."""
+    return [{"category": r["category"], "n7": r["n7"], "repos": r["repos"], "trend": r["trend"]} for r in analyze(config, now) if r["needs_guard"]]
 
 
 def open_categories(config):

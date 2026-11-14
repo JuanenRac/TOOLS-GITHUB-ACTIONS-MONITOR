@@ -74,3 +74,7 @@ Lire est toujours permis. Écrire une leçon demande trois choses : `lessons.all
 ## Réglages
 
 `lessons.enabled`, `lessons.allow_write`, `lessons.retention_days`, `lessons.max_entries`, `lessons.brief_max_bytes` et `lessons.recurring_from`, dans l'onglet IA des Réglages. Le panneau **Leçons des échecs** est en bas de l'onglet Alertes.
+
+## Clôture d'une ronde
+
+À la fin d'un lot de travail, `python bin/monitor_cli.py lessons close` liste les types d'échec répétés qui n'ont pas encore de leçon à vous avec sa garde (`needs_guard` dans `GET /api/ai/lessons`) et sort avec un code non nul tant qu'il en reste un. Écrivez la garde, ou dites pourquoi elle ne peut pas encore exister, et relancez.

@@ -291,6 +291,31 @@ class WhatAnAIReads(Folders, unittest.TestCase):
         self.assertIn("/api/ai/lessons", {row[1] for row in ai_index.ENDPOINTS})
 
 
+class TheCloseOfARound(Folders, unittest.TestCase):
+    def test_a_repeated_kind_without_a_lesson_of_your_own_keeps_the_round_open(self):
+        for index in range(2):
+            lessons.record(self.config, [alert(workflow=f"w{index}", run=1 + index)], now=time.time())
+        self.assertEqual([r["category"] for r in lessons.round_close(self.config)], ["test"])
+        self.assertTrue(lessons.analyze(self.config)[0]["needs_guard"])
+        on = {"lessons": {"allow_write": True}, **self.config}
+        lessons.register(on, {"category": "test", "what": "x", "do": "y", "guard": "run them"}, True, True)
+        self.assertEqual(lessons.round_close(self.config), [], "a lesson of your own with its guard closes it")
+
+    def test_nothing_repeated_means_a_closed_round(self):
+        lessons.record(self.config, [alert()], now=time.time())
+        self.assertEqual(lessons.round_close(self.config), [])
+
+    def test_the_command_line_exits_with_the_alerts_code_while_something_is_open(self):
+        answer = {"categories": [{"category": "test", "n7": 3, "repos": ["demo"], "needs_guard": True}, {"category": "linter", "needs_guard": False}]}
+        ctx = {"base": "http://127.0.0.1:1", "timeout": 1, "token": "", "action": "close", "repo": ""}
+        with mock.patch.object(monitor_cli, "fetch", lambda *a, **k: answer):
+            data, lines, code = monitor_cli.cmd_lessons(ctx)
+            self.assertEqual((code, data["pending"]), (monitor_cli.EXIT_ALERTS, ["test"]))
+            self.assertIn("test", lines[1])
+        with mock.patch.object(monitor_cli, "fetch", lambda *a, **k: {"categories": []}):
+            self.assertEqual(monitor_cli.cmd_lessons(ctx)[2], 0)
+
+
 class Providers(Folders, unittest.TestCase):
     def test_the_file_provider_answers_for_a_text_and_for_the_book(self):
         provider = lessons.provider(self.config)

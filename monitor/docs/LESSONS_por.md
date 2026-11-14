@@ -74,3 +74,7 @@ Ler é sempre permitido. Escrever uma lição exige três coisas: `lessons.allow
 ## Definições
 
 `lessons.enabled`, `lessons.allow_write`, `lessons.retention_days`, `lessons.max_entries`, `lessons.brief_max_bytes` e `lessons.recurring_from`, no separador IA das Definições. O painel **Lições das falhas** está no fim do separador Alertas.
+
+## Fecho de uma ronda
+
+No fim de um lote de trabalho, `python bin/monitor_cli.py lessons close` lista os tipos de falha repetidos que ainda não têm uma lição própria com a sua guarda (`needs_guard` em `GET /api/ai/lessons`) e termina com um código diferente de zero enquanto houver algum. Escreva a guarda, ou diga porque ainda não pode existir, e execute outra vez.
