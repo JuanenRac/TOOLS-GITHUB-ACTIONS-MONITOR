@@ -70,3 +70,5 @@ Für mehrere Bildschirme öffne ein Fenster pro Ansicht, zum Beispiel `?view=now
 ## Wo ein Konto seinen Zustand speichert
 
 Standardmäßig in Dateien unter `accounts/<id>/`. Ein Konto kann ihn stattdessen in einer Datenbank halten: `"storage": {"backend": "sqlite"}` in seiner eigenen Konfiguration gibt ihm `accounts/<id>/storage.sqlite3`, und nur der Prozess dieses Kontos schreibt sie. Die Konfiguration des Kontos bleibt eine JSON-Datei. Siehe [STORAGE_deu.md](STORAGE_deu.md).
+
+Auch der Feed für die KIs jedes Kontos (seine Meldungen, sein Kurzbericht und das Kontobuch der Hinweise an eine externe KI) gehört ihm allein: `ai/accounts/<id>/`. Jede Meldung trägt ihr Konto, und die Aktualisierung eines Kontos schließt nie die Meldungen eines anderen. Wählen Sie absichtlich denselben `ai_alerts.folder` für mehrere Konten, teilen sie ihn gefahrlos: Jedes behält und schließt nur seine eigenen Meldungen.

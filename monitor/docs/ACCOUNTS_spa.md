@@ -70,3 +70,5 @@ Para varias pantallas abre una ventana por vista, por ejemplo `?view=now&chrome=
 ## Dónde guarda una cuenta su estado
 
 Por defecto en archivos dentro de `accounts/<id>/`. Una cuenta puede guardarlo en una base de datos: `"storage": {"backend": "sqlite"}` en su propia configuración le da `accounts/<id>/storage.sqlite3`, y solo el proceso de esa cuenta la escribe. La configuración de la cuenta sigue siendo un archivo JSON. Véase [STORAGE_spa.md](STORAGE_spa.md).
+
+El feed para las IA de cada cuenta (sus alertas, su resumen y el registro de los avisos a una IA externa) también es solo suyo: `ai/accounts/<id>/`. Cada alerta lleva su cuenta y la actualización de una cuenta nunca cierra las alertas de otra. Si eliges a propósito la misma `ai_alerts.folder` para varias cuentas, la comparten sin riesgo: cada una conserva y cierra solo sus alertas.

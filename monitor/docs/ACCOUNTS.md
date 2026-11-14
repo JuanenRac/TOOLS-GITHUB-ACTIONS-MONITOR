@@ -70,3 +70,5 @@ For several screens open one window per view, for example `?view=now&chrome=0`, 
 ## Where an account keeps its state
 
 By default in files inside `accounts/<id>/`. An account can keep it in a database instead: `"storage": {"backend": "sqlite"}` in its own configuration gives it `accounts/<id>/storage.sqlite3`, and only the process of that account writes it. The configuration of the account stays a JSON file. See [STORAGE.md](STORAGE.md).
+
+The feed for the AIs of each account (its alerts, its brief and the ledger of the notices to an external AI) is its own too: `ai/accounts/<id>/`. Every alert carries its account, and the refresh of one account never closes the alerts of another. If you choose the same `ai_alerts.folder` for several accounts on purpose, they share it safely: each keeps and closes only its own alerts.
