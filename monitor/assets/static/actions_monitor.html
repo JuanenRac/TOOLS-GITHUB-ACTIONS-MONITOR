@@ -407,6 +407,12 @@ header .tile.wide{min-width:0;grid-column:span 2}
 .fx :where(#now>*,.alrow,.rrow,.job,tbody tr){animation:fx-in .32s ease-out both}
 }
 @media (prefers-reduced-motion:reduce){.sem,.alrow{transition:none}.sem:hover,.sem:focus-visible,.alrow:hover{transform:none}}
+/* screens: a portrait window (a turned monitor, a tablet) stacks the panels; ui.orientation can force it; wide and 4K windows get a larger type instead of a stretched layout */
+[role=tab][hidden]{display:none!important}
+@media (orientation:portrait){:root:not([data-orient="landscape"]) #t-sent{grid-template-columns:minmax(0,1fr);overflow:auto}:root:not([data-orient="landscape"]) #t-now{grid-template-columns:minmax(0,1fr);grid-auto-rows:minmax(0,1fr)}:root:not([data-orient="landscape"]) #t-charts{grid-template-columns:minmax(0,1fr);grid-template-rows:none;overflow:auto}:root:not([data-orient="landscape"]) #t-charts section{min-height:260px}:root:not([data-orient="landscape"]) body{overflow:auto}:root:not([data-orient="landscape"]) .hgrid{grid-template-columns:minmax(0,1fr)}:root:not([data-orient="landscape"]) .hcorner{position:static;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;order:-1}}
+:root[data-orient="portrait"] #t-sent{grid-template-columns:minmax(0,1fr);overflow:auto}:root[data-orient="portrait"] #t-now{grid-template-columns:minmax(0,1fr);grid-auto-rows:minmax(0,1fr)}:root[data-orient="portrait"] #t-charts{grid-template-columns:minmax(0,1fr);grid-template-rows:none;overflow:auto}:root[data-orient="portrait"] #t-charts section{min-height:260px}:root[data-orient="portrait"] body{overflow:auto}:root[data-orient="portrait"] .hgrid{grid-template-columns:minmax(0,1fr)}:root[data-orient="portrait"] .hcorner{position:static;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;order:-1}
+@media (min-width:2400px) and (min-height:1000px){html{zoom:1.25}}
+@media (min-width:3200px) and (min-height:1800px){html{zoom:1.6}}
 </style>
 </head>
 <body>
@@ -713,6 +719,17 @@ function showTab(t){if(!TABS.includes(t))t="now";TABS.forEach(x=>{$("t-"+x).clas
 document.querySelector("nav").addEventListener("click",e=>{const b=e.target.closest("button[data-tab]");if(b)showTab(b.dataset.tab)});
 document.querySelector("nav").addEventListener("keydown",e=>{if(!["ArrowRight","ArrowLeft","ArrowDown","ArrowUp"].includes(e.key))return;e.preventDefault();const i=TABS.findIndex(x=>$("n-"+x).getAttribute("aria-selected")==="true"),n=TABS[(i+(e.key==="ArrowRight"||e.key==="ArrowDown"?1:TABS.length-1))%TABS.length];showTab(n);$("n-"+n).focus()});
 showTab(QS.get("tab")||location.hash.slice(1)||store.get("am-tab")||"now");
+(function(){      // the screens (docs/SCREENS.md): /screen/N or ?screen=N shows the tabs set for that screen; ui.orientation (or ?orient=) forces the layout; ui.rotate_seconds (or ?rotate=) turns through its tabs
+  const m=/^\/screen\/([1-3])\/?$/.exec(location.pathname),n=m?m[1]:(/^[1-3]$/.test(QS.get("screen")||"")?QS.get("screen"):""),c=I18N.screens||{},root=document.documentElement;
+  const orient=QS.get("orient")||(n&&c["screen"+n+"_orientation"]&&c["screen"+n+"_orientation"]!=="auto"?c["screen"+n+"_orientation"]:(c.orientation||"auto"));
+  if(orient==="portrait"||orient==="landscape")root.dataset.orient=orient;
+  if(!n)return;root.dataset.screen=n;
+  const list=String(QS.get("tabs")||c["screen"+n+"_tabs"]||"").split(",").map(x=>x.trim()).filter(x=>TABS.includes(x));
+  if(!list.length)return;
+  TABS.forEach(x=>{if(!list.includes(x))$("n-"+x).hidden=true});showTab(list[0]);
+  const sec=+(QS.get("rotate")||c.rotate_seconds||0);if(sec>0&&list.length>1){let k=0;setInterval(()=>{k=(k+1)%list.length;showTab(list[k])},sec*1000)}
+})();
+
 /* ---------- shell of the complete edition: accounts, views and a screen of its own ---------- */
 /* ?view=now|alerts|charts|repos|settings|live  ?chrome=0 (a kiosk: no header buttons, tabs or filters)  ?account=<id>|all  (several accounts only; the lite edition ignores account=)
    Every window keeps its own view: the choice is read from the address, never from one global setting that another window would overwrite. */
