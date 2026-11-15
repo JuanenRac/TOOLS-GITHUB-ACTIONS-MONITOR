@@ -58,3 +58,28 @@ Además del feed que lee una IA (`ALERTS_BRIEF.md`, el stream, el servidor MCP),
 - **La variante de un comando de salida**: `ai_notify.command` (solo en el fichero de configuración, nunca en la página de Ajustes) nombra UN fichero por su ruta absoluta; se inicia sin shell y sin argumentos y recibe el mismo JSON redactado por su entrada estándar.
 
 El aviso se envía desde un hilo propio, de modo que un proveedor lento nunca retiene el ciclo.
+
+## IAs compatibles
+
+Servicios alojados y servidores locales cuyo protocolo el monitor ya habla (`openai-compatible`, `anthropic` u `ollama`). La lista es una tabla neutral, no una recomendación: ninguna está activa por defecto, la clave se lee SIEMPRE de una variable de entorno cuyo nombre indicas (nunca escrita en un ajuste, ni en un registro, un informe o la API) y el preajuste solo rellena la dirección, el nombre de esa variable y un modelo de ejemplo (editable; no se descarga nada ni se incluyen pesos de modelos). En los ajustes de IA elige un preajuste, pulsa el botón de rellenar, revisa, guarda y pulsa «Probar conexión». La lista son datos (`ai_presets.json`) y se sirve en solo lectura en `GET /api/ai/presets`.
+
+| Nombre | Tipo | Proveedor | Dirección | Variable de la clave | Modelos de ejemplo | Privacidad | Estado |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| OpenAI | alojado | `openai-compatible` | `https://api.openai.com/v1` | `OPENAI_API_KEY` | `gpt-4o-mini`, `gpt-4.1-mini` | se envía por internet | compatible por protocolo, no probado con esta herramienta |
+| Anthropic | alojado | `anthropic` | `dirección por defecto` | `ANTHROPIC_API_KEY` | — | se envía por internet | compatible por protocolo, no probado con esta herramienta |
+| Google Gemini | alojado | `openai-compatible` | `https://generativelanguage.googleapis.com/v1beta/openai` | `GEMINI_API_KEY` | `gemini-2.5-flash` | se envía por internet | dirección leída en la documentación pública; compatible por protocolo, no probado con esta herramienta |
+| xAI Grok | alojado | `openai-compatible` | `https://api.x.ai/v1` | `XAI_API_KEY` | `grok-4` | se envía por internet | compatible por protocolo, no probado con esta herramienta |
+| Mistral | alojado | `openai-compatible` | `https://api.mistral.ai/v1` | `MISTRAL_API_KEY` | `mistral-small-latest` | se envía por internet | compatible por protocolo, no probado con esta herramienta |
+| DeepSeek | alojado | `openai-compatible` | `https://api.deepseek.com` | `DEEPSEEK_API_KEY` | `deepseek-chat` | se envía por internet | compatible por protocolo, no probado con esta herramienta |
+| Groq | alojado | `openai-compatible` | `https://api.groq.com/openai/v1` | `GROQ_API_KEY` | `llama-3.3-70b-versatile` | se envía por internet | compatible por protocolo, no probado con esta herramienta |
+| OpenRouter | alojado | `openai-compatible` | `https://openrouter.ai/api/v1` | `OPENROUTER_API_KEY` | `meta-llama/llama-3.3-70b-instruct` | se envía por internet | compatible por protocolo, no probado con esta herramienta |
+| Together AI | alojado | `openai-compatible` | `https://api.together.ai/v1` | `TOGETHER_API_KEY` | `meta-llama/Llama-3.3-70B-Instruct-Turbo` | se envía por internet | dirección leída en la documentación pública; compatible por protocolo, no probado con esta herramienta |
+| Fireworks AI | alojado | `openai-compatible` | `https://api.fireworks.ai/inference/v1` | `FIREWORKS_API_KEY` | `accounts/fireworks/models/llama-v3p1-8b-instruct` | se envía por internet | dirección leída en la documentación pública; compatible por protocolo, no probado con esta herramienta |
+| Perplexity | alojado | `openai-compatible` | `https://api.perplexity.ai` | `PERPLEXITY_API_KEY` | `sonar` | se envía por internet | dirección leída en la documentación pública; compatible por protocolo, no probado con esta herramienta |
+| Cohere | alojado | `openai-compatible` | `https://api.cohere.ai/compatibility/v1` | `COHERE_API_KEY` | `command-a-03-2025` | se envía por internet | dirección leída en la documentación pública; compatible por protocolo, no probado con esta herramienta |
+| Ollama | local | `ollama` | `http://127.0.0.1:11434` | ninguna (servidor local) | `llama3.2`, `mistral`, `qwen2.5`, `deepseek-r1` | se queda en este equipo | compatible por protocolo, no probado con esta herramienta |
+| LM Studio | local | `openai-compatible` | `http://127.0.0.1:1234/v1` | ninguna (servidor local) | `llama-3.2-3b-instruct`, `qwen2.5-7b-instruct`, `gemma-3-4b-it`, `phi-4` | se queda en este equipo | compatible por protocolo, no probado con esta herramienta |
+| llama.cpp server | local | `openai-compatible` | `http://127.0.0.1:8080/v1` | ninguna (servidor local) | `llama-3.2-3b-instruct`, `mistral-7b-instruct`, `qwen2.5-7b-instruct` | se queda en este equipo | compatible por protocolo, no probado con esta herramienta |
+| vLLM | local | `openai-compatible` | `http://127.0.0.1:8000/v1` | ninguna (servidor local) | `meta-llama/Llama-3.2-3B-Instruct`, `Qwen/Qwen2.5-7B-Instruct`, `mistralai/Mistral-7B-Instruct-v0.3` | se queda en este equipo | compatible por protocolo, no probado con esta herramienta |
+| LocalAI | local | `openai-compatible` | `http://127.0.0.1:8081/v1` | ninguna (servidor local) | `llama-3.2-3b-instruct`, `mixtral-8x7b-instruct`, `phi-4` | se queda en este equipo | compatible por protocolo, no probado con esta herramienta |
+| Jan | local | `openai-compatible` | `http://127.0.0.1:1337/v1` | ninguna (servidor local) | `llama3.2-3b-instruct`, `qwen2.5-7b-instruct`, `gemma-3-4b-it` | se queda en este equipo | compatible por protocolo, no probado con esta herramienta |

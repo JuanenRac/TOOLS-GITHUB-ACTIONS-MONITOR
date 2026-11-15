@@ -1591,10 +1591,24 @@ async function cfgExtras(){
   const ai=document.getElementById("cfp-ai");
   if(ai&&!ai.querySelector(".ai-extra")){
     const box=document.createElement("div");box.className="cfg-group ai-extra";
-    box.innerHTML=`<h3></h3><div class="cfg-grid" style="grid-template-columns:1fr"><div class="help" id="ai-premium"></div><div class="inl"><button type="button" id="ai-test"></button><span id="ai-test-out" class="mut"></span><span id="ai-usage" class="mut"></span></div><div><b id="ai-log-h"></b> <button type="button" id="ai-unlock"></button><div id="ai-log" class="mut" style="font-size:12px"></div></div></div>`;
+    box.innerHTML=`<h3></h3><div class="cfg-grid" style="grid-template-columns:1fr"><div class="help" id="ai-premium"></div><div class="inl"><label for="ai-preset" id="ai-preset-l"></label><select id="ai-preset"></select><select id="ai-preset-model"></select><button type="button" id="ai-preset-apply"></button></div><div class="help" id="ai-preset-info"></div><div class="inl"><button type="button" id="ai-test"></button><span id="ai-test-out" class="mut"></span><span id="ai-usage" class="mut"></span></div><div><b id="ai-log-h"></b> <button type="button" id="ai-unlock"></button><div id="ai-log" class="mut" style="font-size:12px"></div></div></div>`;
     ai.appendChild(box);
     box.querySelector("h3").textContent=T("ui.ai_log_h");$("ai-premium").textContent=T("ui.ai_premium");$("ai-test").textContent=T("ui.ai_test");$("ai-unlock").textContent=T("ui.ai_unlock");$("ai-log-h").textContent="";
     $("ai-test").addEventListener("click",async()=>{try{const r=await fetch("/api/ai/test",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});const j=await r.json();$("ai-test-out").textContent=j.ok?T("ui.ai_test_ok",{ms:j.ms}):(j.error||"");if(j.daily_limit!=null)$("ai-usage").textContent=T("ui.ai_usage",{n:j.used_today,limit:j.daily_limit})}catch(e){$("ai-test-out").textContent=String(e)}});
+    $("ai-preset-l").textContent=T("ui.ai_preset");$("ai-preset-apply").textContent=T("ui.ai_preset_apply");
+    fetch("/api/ai/presets",{cache:"no-store"}).then(r=>r.json()).then(j=>{
+      const list=(j&&j.presets)||[],sel=$("ai-preset"),mod=$("ai-preset-model");
+      sel.innerHTML="";const none=document.createElement("option");none.value="";none.textContent=T("ui.ai_preset_none");sel.appendChild(none);
+      list.forEach(p=>{const o=document.createElement("option");o.value=p.id;o.textContent=p.name;sel.appendChild(o)});
+      const show=()=>{const p=list.find(x=>x.id===sel.value);mod.innerHTML="";$("ai-preset-apply").disabled=!p;mod.hidden=!p;
+        if(!p){$("ai-preset-info").textContent="";return}
+        p.models.forEach(m=>{const o=document.createElement("option");o.value=m;o.textContent=m;mod.appendChild(o)});
+        $("ai-preset-info").textContent=[T(p.privacy==="local"?"ui.ai_preset_local":"ui.ai_preset_cloud"),p.api_key_env?T("ui.ai_preset_key",{name:p.api_key_env}):T("ui.ai_preset_nokey"),p.tested?"":T("ui.ai_preset_untested")].filter(Boolean).join(" ")};
+      sel.addEventListener("change",show);show();
+      $("ai-preset-apply").addEventListener("click",()=>{const p=list.find(x=>x.id===sel.value);if(!p)return;
+        const vals={"ai.provider":p.provider,"ai.base_url":p.base_url||"","ai.api_key_env":p.api_key_env||"","ai.model":mod.value||p.models[0]};if(p.ollama_url)vals["ai.ollama_url"]=p.ollama_url;
+        Object.keys(vals).forEach(k=>{const el=document.getElementById("cfg-"+k.replace(/\./g,"-"));if(el){el.value=vals[k];el.dispatchEvent(new Event("input",{bubbles:true}));el.dispatchEvent(new Event("change",{bubbles:true}))}});
+        $("ai-preset-info").textContent=T("ui.ai_preset_applied")}) }).catch(()=>{});
     $("ai-unlock").addEventListener("click",async()=>{await fetch("/api/ai/actions/unlock",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});cfgExtras()});
   }
   if(ai&&!ai.querySelector(".sk-extra")){

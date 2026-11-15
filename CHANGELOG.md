@@ -10,6 +10,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+### Added
+
+- **Presets of AI providers and a table of compatible AIs**: a versioned file of data (`ai_presets.json`, served read only at `GET /api/ai/presets`) lists twelve hosted services (OpenAI, Anthropic, Google Gemini, xAI Grok, Mistral, DeepSeek, Groq, OpenRouter, Together AI, Fireworks AI, Perplexity, Cohere) and six local servers (Ollama, LM Studio, llama.cpp server, vLLM, LocalAI, Jan) with editable example models (Llama, Mistral, Qwen, DeepSeek, Gemma, Phi, gpt-oss; no weights, no downloads). In the AI settings a selector fills the provider, the address, the NAME of the environment variable of the key and a model, shows the privacy of the choice (text sent over the internet or kept on this computer) and says "compatible by protocol, not tested with this tool" where it is so; none is active by default and the key never leaves its environment variable. A server on this computer (`http://127.0.0.1:...`) may now be saved as `ai.base_url` and may work without a key; a remote address still needs https and its key. The three AI guides carry the table in the eight languages, and a fake server with the OpenAI protocol tests the answers 200, 401, 429 and a timeout, with the key absent from every output.
+
 ## [1.9.3]
 
 ### Added
