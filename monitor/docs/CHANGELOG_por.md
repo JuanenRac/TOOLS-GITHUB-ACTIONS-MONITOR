@@ -45,6 +45,20 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - O teste de uma conta que morre de imediato já não depende da velocidade do computador: a espera antes de voltar a arrancar uma conta é verificada com um relógio que o próprio teste dá, e um segundo teste verifica o calendário das esperas sem ler a hora real (o antigo falhava sob carga na porta de uma versão).
 
+## [1.9.1]
+
+### Adicionado
+
+- O sentinela de segurança (só Complete, desligado por predefinição): o terceiro sentinela lê, sem escrever nada no GitHub, os alertas abertos do Dependabot, da análise de código e da análise de segredos, se o ramo predefinido tem proteção, se os fluxos recebem permissão de escrita por predefinição e, se pedido, se há um ficheiro CODEOWNERS, e levanta um alerta por repositório e sinal no separador de Alertas (origem Segurança), com as contagens por gravidade. Uma fonte a que o GitHub não responde para um repositório fica listada como ilegível e nunca é tomada por um certificado de boa saúde. Tem ciclo próprio, um limite de repositórios por ronda, leituras condicionais e uma pausa enquanto a quota estiver baixa, escreve os eventos security_new e security_fixed para os canais de notificação, tem uma caixa no separador Sentinela, nas preferências de cada utilizador e nas definições, uma rota /api/sentinel/security e um guia nos oito idiomas.
+
+- Cada sentinela diz o seu ciclo de vida: saudável, degradado, em pausa, com erro ou desligado, para que «sem alertas» não se confunda com «não conseguiu ver».
+
+- A segurança é uma parte da pontuação: os pontos que as constatações abertas do sentinela de segurança tiram a 100 são a quinta parte, com o seu peso (`score.weights.security`, 25 por predefinição) e os seus próprios limites; só conta enquanto o sentinela estiver ativo e tiver olhado para repositórios suficientes, e sem ele a resposta diz que o número não está completo e as outras partes são reescaladas.
+
+- Os pesos predefinidos da pontuação passam a ser 30, 15, 15, 15 e 25 (fiabilidade, velocidade, recuperação, colaboração, segurança).
+
+- Uma janela com execuções e nenhuma falha não tem nada a recuperar: a parte de recuperação é completa, como um facto e já não como um dado em falta.
+
 ## [1.9.0]
 
 ### Adicionado

@@ -10,6 +10,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+## [1.9.1]
+
 ### Added
 
 - **Security is a part of the score**: the points that the open findings of the Security sentinel take off 100 (a critical alert, a high one, a secret, a branch with no protection, workflows with write permission) are the fifth part, with the weight `score.weights.security` (25 by default) and its own limits; it only counts while the sentinel is on and has looked at enough repositories, and without it the answer says that the number is not complete and the other parts are rescaled. The security figures are the same in the window and in the one before it, because GitHub gives no history of them.

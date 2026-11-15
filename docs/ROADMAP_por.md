@@ -26,10 +26,6 @@ Tudo o que se segue foi entregue na série 1.8 e está testado; nada se dá por 
 
 Cada versão leva tudo o que é do seu troço do plano: nada fica pendurado de uma versão anterior e nada se adia para a seguinte. Depois da 1.8.3 e depois da 1.9.3 o produto passa por uma revisão independente e as suas conclusões fecham-se na versão de estabilização seguinte. A 1.8.1 é uma versão corretiva da 1.8.0: a caixa «a carregar repositórios» desaparece com o último repositório e o recarregamento da página obtém logo os dados.
 
-### 1.9.1 - Sentinela de segurança
-
-A terceira sentinela: Dependabot, análise de código, análise de segredos, proteção de ramos, permissões dos workflows e proprietários do código, com regras por tipo de sinal, o mesmo filtro no separador Alertas e uma penalização na pontuação por alertas críticos abertos. Opcional, na mesma versão: higiene de workflows (ações não fixadas a um commit, jobs sem limite de tempo, workflows sem permissões ou sem concorrência, uso perigoso de pull_request_target), sobre o verificador de workflows que o projeto já tem.
-
 ### 1.9.2 - Saúde do repositório e da equipa
 
 Uma vista de saúde de cada repositório (CI, issues e pull requests, segurança, preparação para uma versão, atividade) e uma da equipa com classificação, totais e filtros; páginas para ambas com ligações diretas para ecrãs de parede. Opcional, na mesma versão: um painel de benchmarks noturnos face a um orçamento (mediana face a uma referência por classe de máquina) e um painel de listas de materiais de software e atestações de cada versão.
@@ -48,7 +44,7 @@ Uma versão principal que limpa a dívida técnica e congela as interfaces públ
 
 Os workflows do próprio monitor cumprem o que a sentinela de higiene pedirá aos outros: ações fixadas a um commit, as permissões mínimas e um limite de tempo em cada job.
 
-## Feito da 1.8.2 à 1.9.0
+## Feito da 1.8.2 à 1.9.1
 
 ### 1.8.2 - Imagem Docker oficial e modo de serviço
 
@@ -65,6 +61,10 @@ Sem grandes funcionalidades. Isolamento entre contas, a página, o armazenamento
 ### 1.9.0 - Uma pontuação
 
 Recolhedores de métricas por conta e por sentinela (taxa de sucesso, duração, tempo de recuperação, débito), um motor de pontuação com limiares que pode alterar, uma tendência face ao período anterior, instantâneos guardados no armazenamento, um widget de pontuação com minigráfico, alertas quando a pontuação desce e um verbo da linha de comandos que a imprime.
+
+### 1.9.1 - Sentinela de segurança
+
+A terceira sentinela: Dependabot, análise de código, análise de segredos, proteção de ramos, permissões dos workflows e proprietários do código, com regras por tipo de sinal, o mesmo filtro no separador Alertas e uma penalização na pontuação por alertas críticos abertos. Opcional, na mesma versão: higiene de workflows (ações não fixadas a um commit, jobs sem limite de tempo, workflows sem permissões ou sem concorrência, uso perigoso de pull_request_target), sobre o verificador de workflows que o projeto já tem.
 
 ## Feito na 1.7.9
 
