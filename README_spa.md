@@ -28,6 +28,41 @@
 
 **GitHub Actions Monitor** es un programa pequeño que se ejecuta en tu propio ordenador. Pregunta a GitHub, con tu propio acceso de `gh`, por las últimas ejecuciones de cada workflow de tus repositorios, decide qué está de verdad en rojo, avisa de lo importante (seguridad, higiene, versiones listas para publicar, cuota) y lo muestra en una página web que solo abre tu equipo. No necesita más que Python y `gh`, nunca guarda un token y, por defecto, solo lee.
 
+## Qué es
+
+- **Un vigilante de tus GitHub Actions**: con tu propio acceso de `gh` lee las últimas ejecuciones de cada workflow de cada repositorio tuyo y decide qué está en rojo, qué está atascado y qué te espera.
+- **Tres centinelas que nunca escriben en GitHub**: CI (ejecuciones y workflows), Collab (issues y pull requests que necesitan a una persona) y Security (Dependabot, escaneo de código, escaneo de secretos, protección de ramas) convierten lo que leen en alertas de una sola lista.
+- **Una página, varias formas de mirarla**: una página local en `127.0.0.1` que se adapta desde un móvil hasta una pantalla mural 4K (hasta tres pantallas a la vez), un cliente de línea de órdenes, una vista en la terminal, ficheros y un punto de acceso para tus propios paneles.
+- **Dos ediciones**: Lite es para una persona y solo muestra las ejecuciones; Complete añade varias cuentas, un equipo con roles, una puntuación, la salud de cada repositorio, informes y un servicio para Docker.
+- **Privado por diseño**: nada sale de tu equipo salvo las llamadas a GitHub hechas con tu acceso; la clave de una IA opcional se queda en una variable de entorno; solo se escribe en GitHub con las órdenes por lotes que lanzas con un `--go` explícito.
+
+## Qué hace
+
+- **Rojo o no, con una sola regla**: la última ejecución terminada de cada workflow en la rama por defecto. Las ejecuciones canceladas u omitidas nunca tapan un fallo anterior.
+- **Centinela**: alertas de seguridad, higiene de repositorios, pull requests antiguas, versiones listas para publicar, compilaciones pendientes de firma y un parte en lenguaje llano.
+- **Centinela Collab y una lista de alertas**: incidencias y pull requests abiertos que necesitan a una persona (olvidados, críticos, revisiones en espera, borradores viejos, conflictos), solo lectura y con un reloj propio, y una pestaña Alertas con todos los centinelas en una lista, filtro por origen y silencios locales que acaban solos.
+- **Barra de estado, pantalla completa y tablas ordenables**: el aviso más importante (y una ventana con todos), la conexión, la cuota, la última lectura, el modo, la dirección y el reloj al pie de la página; un botón de pantalla completa; Repositorios e Historial se ordenan por una o varias columnas, con las columnas que elijas.
+- **La línea de comandos como cliente**: `bin/monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`, `score`) lee lo que dice el monitor en marcha, con `--json` y códigos de salida estables; nunca escribe en GitHub.
+- **Dos skills para IAs**: guías cortas, en inglés, para la IA integrada en el monitor (local o de un proveedor) y para las IA que hablan con él desde fuera (línea de comandos, HTTP o archivos, MCP, stream), generadas desde el código para que no falte nada; se instalan con `python bin/monitor_cli.py install-skill internal|external --dest CARPETA` o se copian desde la pestaña IA de los Ajustes (`monitor/docs/SKILLS_spa.md`).
+- **Fallos y lecciones**: un libro local de los fallos de su CI, reglas que clasifican cada uno en una categoría, una biblioteca de lecciones (`monitor/docs/LESSONS_spa.md`) con la guardia que lo habría evitado, la tendencia de 24 horas y 7 días, `ai/LESSONS.md`, `/api/ai/lessons` y un resumen previo al push para cualquier herramienta de IA; solo lectura, nada sale del equipo.
+- **Todos los tamaños de pantalla y varias pantallas**: la página se ajusta a una ventana desde un móvil hasta 4K, vertical o girada, y un monitor puede servir hasta tres pantallas (`/screen/1` a `/screen/3`), cada una con sus pestañas y su orientación (`monitor/docs/SCREENS_spa.md`).
+- **Una puntuación por cuenta**: un número de 0 a 100, una letra de A a E y una tendencia, hechos con la fiabilidad de la CI, su velocidad, el tiempo de recuperación y lo rápido que se cierran las alertas de colaboración; dice «calibrando» o «datos insuficientes» en vez de un número que no puede respaldar, muestra lo que todavía no cubre, está en la cabecera de la página, tiene una orden `score`, avisa cuando baja y está en las métricas y en el servidor MCP (`monitor/docs/SCORE.md`).
+- **Un centinela de seguridad (solo Complete, apagado por defecto)**: lee, sin escribir nada en GitHub, las alertas abiertas de Dependabot, del análisis de código y del análisis de secretos, si la rama por defecto está protegida, el permiso por defecto de los flujos y, si se pide, los propietarios del código; genera una alerta por repositorio y señal, cuenta los hallazgos como quinta parte de la puntuación y dice lo que no pudo leer (`monitor/docs/SENTINEL_SECURITY.md`).
+- **La salud de cada repositorio y del equipo (solo Complete)**: CI, alertas de los tres centinelas, preparación de versiones y actividad en un estado (malo, aviso, bien o sin ver) con un número de riesgo; la pestaña Equipo ordena primero los repositorios que necesitan a una persona, con filtros, un detalle de cada uno y enlaces directos para pantallas de pared; los mismos datos están en `/api/team/health`, `/api/repos/<owner>/<repo>/health` y la orden `team` (`monitor/docs/HEALTH_spa.md`).
+- **Informes, registro de acciones y Apprise (solo Complete)**: un informe de la cuenta (puntuación, cambios, repositorios que necesitan a una persona, alertas abiertas) escrito en HTML y Markdown según un horario cron o a petición, apagado por defecto (`monitor/docs/REPORT_SCHEDULE_spa.md`); un registro de quién cambió qué, con una cadena de hashes y sin valores ni secretos (`monitor/docs/AUDIT_LOG_spa.md`); y un canal opcional de Apprise para las notificaciones, apagado por defecto.
+- **Como servicio**: la imagen oficial de Docker (sin root, de solo lectura), un fichero Compose con proxy opcional, una unidad de systemd, una comprobación de salud profunda y la orden que crea el primer administrador (`monitor/docs/DEPLOYMENT.md`).
+- **Varias cuentas, un equipo y un sitio para los datos**: un proceso por cuenta, usuarios con roles y sus propias cuentas, los ficheros en `config/`, `data/`, `logs/` y `ai/`, un almacenamiento SQLite opcional con retención y copia de seguridad, y los puertos como ajustes (`monitor/docs/ACCOUNTS.md`, `monitor/docs/STORAGE.md`, `monitor/docs/LAYOUT.md`).
+- **Listas que se ordenan y se pliegan**: «Ocurriendo ahora» de siete maneras y la pestaña de Alertas de nueve, con un botón para plegar o desplegar todos los repositorios; la elección se recuerda por usuario.
+- **Notificaciones para cada usuario**: en el modo equipo cada usuario elige canales (ntfy, Teams, correo), el nivel mínimo y los resúmenes en un panel de la página (`monitor/docs/NOTIFICATIONS_spa.md`).
+- **Página de ajustes**: cambia rutas, intervalos, cuotas e interruptores desde el navegador; solo una lista fija de claves, validadas, con copia de seguridad antes de cada guardado.
+- **Gráficas e historial**: minutos de cómputo, fallos y éxitos con barras animadas y un historial diario (respeta el movimiento reducido).
+- **Ocho idiomas** (en, es, de, fr, it, ja, zh, pt) con el inglés como base; se cambia en Ajustes.
+- **Salidas para paneles**: `ci_red.json`, un punto de acceso Prometheus y una fuente JSON para Grafana, con un panel de Grafana importable.
+- **Herramientas por lotes**: planifican y lanzan muchas compilaciones a la vez; nada se lanza sin `--go`.
+- **Acerca de y Ayuda en la página**: el botón **i** muestra la versión, la edición, los enlaces, los archivos, el estado de salud y un botón que copia la información para soporte; el botón **?** (o la tecla `?`) abre toda la documentación, con búsqueda y en tu idioma, sin Internet. La consola tiene `--about` y `--help-topics`, y una aplicación interactiva de terminal por pestañas (`textual` opcional).
+- **Aviso de versión nueva**: una insignia discreta cuando se publica una versión más nueva; solo lee la página pública de versiones una vez al día, nunca instala nada y se puede apagar (siempre apagado en una instalación aislada).
+- **Cuotas para cualquier cuenta**: plan, minutos facturables (los repositorios públicos no cuestan), cuota de la API leída de las cabeceras de GitHub, concurrencia y jobs cerca del límite de 6 horas; las cifras están en un archivo editable.
+
 ## De un vistazo
 
 | | |
@@ -71,6 +106,46 @@ Cada línea es una parte de este repositorio y la luz dice hasta dónde llega ho
 | Linux y macOS | 🟠 | Probados solo en el CI; el uso diario es en Windows. |
 
 <!-- glance:end -->
+
+## Arquitectura
+
+<p align="center"><img src="images/architecture.svg" alt="Arquitectura" width="100%"></p>
+
+## Empieza aquí: ¿qué edición?
+
+| Si quieres... | Arranque | Puerto |
+|---|---|---|
+| ver lo que corre y lo que falla, nada más (**empieza aquí**) | `MONITOR_LITE_GITHUB_ACTIONS` | 8766 |
+| toda la cuenta vigilada por ti: alertas, releases, firma, preparación, analítica | `MONITOR_GITHUB_ACTIONS` (con el [centinela](monitor/docs/SENTINEL_spa.md)) | 8765 |
+
+La ventana de consola dice cuál corre, en su título y en su primera línea. ¿Aún dudas? `python bin/actions_monitor.py --demo` abre la página con datos inventados y `--doctor` comprueba tu instalación. [Tus primeros cinco minutos](monitor/docs/FIRST_STEPS_spa.md)
+
+## Inicio rápido
+
+1. Instala Python 3.11 o superior y la [CLI de GitHub](https://cli.github.com/), y ejecuta `gh auth login`.
+2. Descarga este repositorio (o el zip de la última release) y abre la carpeta `monitor`.
+3. Arráncalo: en Windows `MONITOR_GITHUB_ACTIONS.bat`, en Linux `./MONITOR_GITHUB_ACTIONS.sh`, en macOS doble clic en `MONITOR_GITHUB_ACTIONS.command`, o `python bin/actions_monitor.py` en cualquier sistema.
+4. Abre la dirección que imprime (`http://127.0.0.1:<puerto>`). En el primer arranque crea `actions_monitor.json` a partir del ejemplo.
+5. Abre **Ajustes** para indicar tu cuenta de GitHub, los ecosistemas (grupos de repositorios por prefijo de nombre) y lo demás.
+
+> ¿Actualizas desde una versión anterior a la 1.5.0? [`monitor/docs/MIGRATING_spa.md`](monitor/docs/MIGRATING_spa.md)
+
+## La edición lite
+
+Un segundo producto, más sencillo, en el mismo paquete: la página de lo que corre y lo que falla, sin el centinela. Es para quien solo quiere vigilar sus runs.
+
+|  | Completa | Lite |
+|---|---|---|
+| Arranque | `MONITOR_GITHUB_ACTIONS` (`.bat` / `.sh` / `.command`) | `MONITOR_LITE_GITHUB_ACTIONS` (los mismos tres) |
+| Puerto | 8765 | 8766 |
+| Pestañas | Ahora, Centinela, Gráficas, Repositorios, Historial, Configuración | Ahora, Gráficas, Repositorios, Historial, una Configuración corta |
+| Cabecera | todos los recuadros, preparación, firma | en curso, en cola, fallos y éxitos de 24 h, minutos de cómputo, issues, rojos en main, repositorios, cuota, conexión |
+| Centinela (alertas, releases, cola de firma, preparación, linter) | sí | no: ni siquiera se importa |
+| Analítica, notificaciones, webhook, IA, salidas Prometheus / Grafana | sí, apagadas hasta que las actives | no: esas rutas responden 404 |
+| Configuración | `actions_monitor.json` | `actions_monitor_lite.json` (se crea en el primer arranque; el centinela va apagado) |
+| Archivos de estado | `etag_cache.json`, `analytics_history.json`... | los mismos nombres con el sufijo `_lite` |
+
+[`monitor/docs/LITE_spa.md`](monitor/docs/LITE_spa.md)
 
 ## Capturas
 
@@ -140,73 +215,6 @@ Cada imagen sigue el tema claro u oscuro de tu página de GitHub.
 
 *Datos de demostración: los repositorios y nombres de las imágenes son inventados.*
 
-## Qué hace
-
-- **Rojo o no, con una sola regla**: la última ejecución terminada de cada workflow en la rama por defecto. Las ejecuciones canceladas u omitidas nunca tapan un fallo anterior.
-- **Centinela**: alertas de seguridad, higiene de repositorios, pull requests antiguas, versiones listas para publicar, compilaciones pendientes de firma y un parte en lenguaje llano.
-- **Centinela Collab y una lista de alertas**: incidencias y pull requests abiertos que necesitan a una persona (olvidados, críticos, revisiones en espera, borradores viejos, conflictos), solo lectura y con un reloj propio, y una pestaña Alertas con todos los centinelas en una lista, filtro por origen y silencios locales que acaban solos.
-- **Barra de estado, pantalla completa y tablas ordenables**: el aviso más importante (y una ventana con todos), la conexión, la cuota, la última lectura, el modo, la dirección y el reloj al pie de la página; un botón de pantalla completa; Repositorios e Historial se ordenan por una o varias columnas, con las columnas que elijas.
-- **La línea de comandos como cliente**: `bin/monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`, `score`) lee lo que dice el monitor en marcha, con `--json` y códigos de salida estables; nunca escribe en GitHub.
-- **Dos skills para IAs**: guías cortas, en inglés, para la IA integrada en el monitor (local o de un proveedor) y para las IA que hablan con él desde fuera (línea de comandos, HTTP o archivos, MCP, stream), generadas desde el código para que no falte nada; se instalan con `python bin/monitor_cli.py install-skill internal|external --dest CARPETA` o se copian desde la pestaña IA de los Ajustes (`monitor/docs/SKILLS_spa.md`).
-- **Fallos y lecciones**: un libro local de los fallos de su CI, reglas que clasifican cada uno en una categoría, una biblioteca de lecciones (`monitor/docs/LESSONS_spa.md`) con la guardia que lo habría evitado, la tendencia de 24 horas y 7 días, `ai/LESSONS.md`, `/api/ai/lessons` y un resumen previo al push para cualquier herramienta de IA; solo lectura, nada sale del equipo.
-- **Todos los tamaños de pantalla y varias pantallas**: la página se ajusta a una ventana desde un móvil hasta 4K, vertical o girada, y un monitor puede servir hasta tres pantallas (`/screen/1` a `/screen/3`), cada una con sus pestañas y su orientación (`monitor/docs/SCREENS_spa.md`).
-- **Una puntuación por cuenta**: un número de 0 a 100, una letra de A a E y una tendencia, hechos con la fiabilidad de la CI, su velocidad, el tiempo de recuperación y lo rápido que se cierran las alertas de colaboración; dice «calibrando» o «datos insuficientes» en vez de un número que no puede respaldar, muestra lo que todavía no cubre, está en la cabecera de la página, tiene una orden `score`, avisa cuando baja y está en las métricas y en el servidor MCP (`monitor/docs/SCORE.md`).
-- **Un centinela de seguridad (solo Complete, apagado por defecto)**: lee, sin escribir nada en GitHub, las alertas abiertas de Dependabot, del análisis de código y del análisis de secretos, si la rama por defecto está protegida, el permiso por defecto de los flujos y, si se pide, los propietarios del código; genera una alerta por repositorio y señal, cuenta los hallazgos como quinta parte de la puntuación y dice lo que no pudo leer (`monitor/docs/SENTINEL_SECURITY.md`).
-- **La salud de cada repositorio y del equipo (solo Complete)**: CI, alertas de los tres centinelas, preparación de versiones y actividad en un estado (malo, aviso, bien o sin ver) con un número de riesgo; la pestaña Equipo ordena primero los repositorios que necesitan a una persona, con filtros, un detalle de cada uno y enlaces directos para pantallas de pared; los mismos datos están en `/api/team/health`, `/api/repos/<owner>/<repo>/health` y la orden `team` (`monitor/docs/HEALTH_spa.md`).
-- **Informes, registro de acciones y Apprise (solo Complete)**: un informe de la cuenta (puntuación, cambios, repositorios que necesitan a una persona, alertas abiertas) escrito en HTML y Markdown según un horario cron o a petición, apagado por defecto (`monitor/docs/REPORT_SCHEDULE_spa.md`); un registro de quién cambió qué, con una cadena de hashes y sin valores ni secretos (`monitor/docs/AUDIT_LOG_spa.md`); y un canal opcional de Apprise para las notificaciones, apagado por defecto.
-- **Como servicio**: la imagen oficial de Docker (sin root, de solo lectura), un fichero Compose con proxy opcional, una unidad de systemd, una comprobación de salud profunda y la orden que crea el primer administrador (`monitor/docs/DEPLOYMENT.md`).
-- **Varias cuentas, un equipo y un sitio para los datos**: un proceso por cuenta, usuarios con roles y sus propias cuentas, los ficheros en `config/`, `data/`, `logs/` y `ai/`, un almacenamiento SQLite opcional con retención y copia de seguridad, y los puertos como ajustes (`monitor/docs/ACCOUNTS.md`, `monitor/docs/STORAGE.md`, `monitor/docs/LAYOUT.md`).
-- **Listas que se ordenan y se pliegan**: «Ocurriendo ahora» de siete maneras y la pestaña de Alertas de nueve, con un botón para plegar o desplegar todos los repositorios; la elección se recuerda por usuario.
-- **Notificaciones para cada usuario**: en el modo equipo cada usuario elige canales (ntfy, Teams, correo), el nivel mínimo y los resúmenes en un panel de la página (`monitor/docs/NOTIFICATIONS_spa.md`).
-- **Página de ajustes**: cambia rutas, intervalos, cuotas e interruptores desde el navegador; solo una lista fija de claves, validadas, con copia de seguridad antes de cada guardado.
-- **Gráficas e historial**: minutos de cómputo, fallos y éxitos con barras animadas y un historial diario (respeta el movimiento reducido).
-- **Ocho idiomas** (en, es, de, fr, it, ja, zh, pt) con el inglés como base; se cambia en Ajustes.
-- **Salidas para paneles**: `ci_red.json`, un punto de acceso Prometheus y una fuente JSON para Grafana, con un panel de Grafana importable.
-- **Herramientas por lotes**: planifican y lanzan muchas compilaciones a la vez; nada se lanza sin `--go`.
-- **Acerca de y Ayuda en la página**: el botón **i** muestra la versión, la edición, los enlaces, los archivos, el estado de salud y un botón que copia la información para soporte; el botón **?** (o la tecla `?`) abre toda la documentación, con búsqueda y en tu idioma, sin Internet. La consola tiene `--about` y `--help-topics`, y una aplicación interactiva de terminal por pestañas (`textual` opcional).
-- **Aviso de versión nueva**: una insignia discreta cuando se publica una versión más nueva; solo lee la página pública de versiones una vez al día, nunca instala nada y se puede apagar (siempre apagado en una instalación aislada).
-- **Cuotas para cualquier cuenta**: plan, minutos facturables (los repositorios públicos no cuestan), cuota de la API leída de las cabeceras de GitHub, concurrencia y jobs cerca del límite de 6 horas; las cifras están en un archivo editable.
-
-## Arquitectura
-
-<p align="center"><img src="images/architecture.svg" alt="Arquitectura" width="100%"></p>
-
-## Empieza aquí: ¿qué edición?
-
-| Si quieres... | Arranque | Puerto |
-|---|---|---|
-| ver lo que corre y lo que falla, nada más (**empieza aquí**) | `MONITOR_LITE_GITHUB_ACTIONS` | 8766 |
-| toda la cuenta vigilada por ti: alertas, releases, firma, preparación, analítica | `MONITOR_GITHUB_ACTIONS` (con el [centinela](monitor/docs/SENTINEL_spa.md)) | 8765 |
-
-La ventana de consola dice cuál corre, en su título y en su primera línea. ¿Aún dudas? `python bin/actions_monitor.py --demo` abre la página con datos inventados y `--doctor` comprueba tu instalación. [Tus primeros cinco minutos](monitor/docs/FIRST_STEPS_spa.md)
-
-## Inicio rápido
-
-1. Instala Python 3.11 o superior y la [CLI de GitHub](https://cli.github.com/), y ejecuta `gh auth login`.
-2. Descarga este repositorio (o el zip de la última release) y abre la carpeta `monitor`.
-3. Arráncalo: en Windows `MONITOR_GITHUB_ACTIONS.bat`, en Linux `./MONITOR_GITHUB_ACTIONS.sh`, en macOS doble clic en `MONITOR_GITHUB_ACTIONS.command`, o `python bin/actions_monitor.py` en cualquier sistema.
-4. Abre la dirección que imprime (`http://127.0.0.1:<puerto>`). En el primer arranque crea `actions_monitor.json` a partir del ejemplo.
-5. Abre **Ajustes** para indicar tu cuenta de GitHub, los ecosistemas (grupos de repositorios por prefijo de nombre) y lo demás.
-
-> ¿Actualizas desde una versión anterior a la 1.5.0? [`monitor/docs/MIGRATING_spa.md`](monitor/docs/MIGRATING_spa.md)
-
-## La edición lite
-
-Un segundo producto, más sencillo, en el mismo paquete: la página de lo que corre y lo que falla, sin el centinela. Es para quien solo quiere vigilar sus runs.
-
-|  | Completa | Lite |
-|---|---|---|
-| Arranque | `MONITOR_GITHUB_ACTIONS` (`.bat` / `.sh` / `.command`) | `MONITOR_LITE_GITHUB_ACTIONS` (los mismos tres) |
-| Puerto | 8765 | 8766 |
-| Pestañas | Ahora, Centinela, Gráficas, Repositorios, Historial, Configuración | Ahora, Gráficas, Repositorios, Historial, una Configuración corta |
-| Cabecera | todos los recuadros, preparación, firma | en curso, en cola, fallos y éxitos de 24 h, minutos de cómputo, issues, rojos en main, repositorios, cuota, conexión |
-| Centinela (alertas, releases, cola de firma, preparación, linter) | sí | no: ni siquiera se importa |
-| Analítica, notificaciones, webhook, IA, salidas Prometheus / Grafana | sí, apagadas hasta que las actives | no: esas rutas responden 404 |
-| Configuración | `actions_monitor.json` | `actions_monitor_lite.json` (se crea en el primer arranque; el centinela va apagado) |
-| Archivos de estado | `etag_cache.json`, `analytics_history.json`... | los mismos nombres con el sufijo `_lite` |
-
-[`monitor/docs/LITE_spa.md`](monitor/docs/LITE_spa.md)
-
 ## Ajustes
 
 Todo vive en `actions_monitor.json` (se crea desde `monitor/assets/examples/actions_monitor.example.json`). La pestaña **Ajustes** lo edita con seguridad; los tokens y secretos nunca se muestran ni se guardan. Los ecosistemas, los objetivos de compilación y los perfiles de lotes son ficheros aparte a los que apuntas (`ecosystems_file`, `targets_file`, `profiles_file`); se incluyen plantillas neutras `*.example.json`. Referencia completa: [`monitor/docs/SETTINGS_spa.md`](monitor/docs/SETTINGS_spa.md).
@@ -261,6 +269,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
     ├── bin/                            los comandos cortos (read_report, monitor_cli ...)
     ├── tests/                          tests sin red
     ├── docs/                           guías, inicios rápidos, esquemas, Grafana
+    ├── skills/                         las dos skills para IAs
     └── tools/                          scripts de versión y migración
 ```
 
