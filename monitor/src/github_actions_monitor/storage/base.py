@@ -60,6 +60,16 @@ def check_key(key):
     return key
 
 
+HOUR_RE = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}\Z")
+
+
+def check_hour(hour):
+    """The key of a score snapshot: the hour it belongs to, UTC, as 'YYYY-MM-DDTHH'."""
+    if not isinstance(hour, str) or not HOUR_RE.match(hour):
+        raise StorageError("hour")
+    return hour
+
+
 def event_ts(event):
     """The `at` of an event as text ('' when it has none)."""
     value = event.get("at") if isinstance(event, dict) else None
@@ -121,6 +131,19 @@ class Storage(ABC):
     def save_analytics(self, account_id, data):
         """Replaces them, atomically."""
 
+    # -- score snapshots (one per account and hour; saving the same hour again replaces it)
+    @abstractmethod
+    def save_score_snapshot(self, account_id, hour, data):
+        """Keeps the snapshot (a dict) of the score of the account for that hour ('YYYY-MM-DDTHH', UTC), replacing the one of the same hour."""
+
+    @abstractmethod
+    def load_score_snapshots(self, account_id, since=None, limit=None):
+        """The snapshots whose hour is not older than `since` (inclusive), the newest `limit` of them (None = all), oldest first, each one with its `hour`."""
+
+    @abstractmethod
+    def purge_score_snapshots(self, account_id, before_hour):
+        """Removes the snapshots of hours older than `before_hour`. Returns {"removed": n}."""
+
     # -- named documents of an account
     @abstractmethod
     def load_doc(self, account_id, name, default=None):
@@ -172,7 +195,7 @@ class Storage(ABC):
 
     @abstractmethod
     def export_account(self, account_id):
-        """Everything of one account as plain data: {"config", "sentinels": {name: dict}, "docs": {name: dict}, "events": [dict], "analytics": dict}. Used by the migration and the backup."""
+        """Everything of one account as plain data: {"config", "sentinels": {name: dict}, "docs": {name: dict}, "events": [dict], "analytics": dict, "scores": [dict]}. Used by the migration and the backup."""
 
     @abstractmethod
     def import_account(self, account_id, payload):

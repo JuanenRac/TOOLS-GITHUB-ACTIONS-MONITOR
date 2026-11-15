@@ -55,7 +55,7 @@ Un monitor lasciato attivo per mesi crescerebbe senza limite, quindi un breve pa
 |---|---|---|
 | `retention.enabled` | attivo | l'interruttore |
 | `retention.events_days` | 90 | gli eventi più vecchi vengono rimossi |
-| `retention.analytics_days` | 180 | i giorni dello storico delle analisi più vecchi vengono rimossi |
+| `retention.analytics_days` | 180 | i giorni dello storico delle analisi più vecchi e le istantanee del punteggio di quei giorni vengono rimossi |
 | `retention.mode` | `archive` | `archive` scrive prima gli eventi vecchi in un `.gz` in `events/archive/` |
 | `retention.events_max_kb` | 512 | limite di dimensione del file del feed con l'archiviazione su file (come sempre) |
 | `retention.warn_events_mb` | 20 | `--doctor` avvisa oltre questa dimensione |

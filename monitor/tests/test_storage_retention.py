@@ -145,7 +145,7 @@ class Backends:
         doc = retention.audit(self.storage, "alpha")
         self.assertEqual(len(doc["runs"]), retention.AUDIT_KEEP)
         self.assertEqual(doc["last_run_epoch"], NOW + 54)
-        self.assertEqual(set(doc["runs"][0]), {"at", "mode", "events_removed", "events_kept", "archived", "analytics_removed", "error"})
+        self.assertEqual(set(doc["runs"][0]), {"at", "mode", "events_removed", "events_kept", "archived", "analytics_removed", "scores_removed", "error"})
 
     def test_a_failing_purge_is_recorded_not_raised_and_removes_nothing(self):
         with mock.patch.object(self.storage, "purge_events", side_effect=OSError("disk full")):

@@ -53,7 +53,7 @@ class Schema(unittest.TestCase):
         s = sqlite_storage.SqliteStorage(self.db)
         self.addCleanup(s.close)
         self.assertEqual(s.schema_version(), sqlite_storage.SCHEMA_VERSION)
-        self.assertTrue({"accounts", "configs", "sentinel_states", "events", "analytics_snapshots", "users", "user_accounts", "sessions", "meta"} <= self.tables())
+        self.assertTrue({"accounts", "configs", "sentinel_states", "events", "analytics_snapshots", "score_snapshots", "users", "user_accounts", "sessions", "meta"} <= self.tables())
         info = s.describe()
         self.assertEqual((info["journal_mode"], info["busy_timeout_ms"]), ("wal", 30000))
         con = sqlite3.connect(str(self.db))
@@ -75,36 +75,36 @@ class Schema(unittest.TestCase):
         s.close()
         s = sqlite_storage.SqliteStorage(self.db)
         self.addCleanup(s.close)
-        self.assertEqual((s.schema_version(), s.load_config("alpha")), (1, {"a": 1}))
+        self.assertEqual((s.schema_version(), s.load_config("alpha")), (2, {"a": 1}))
 
     def test_a_later_migration_runs_on_an_existing_database_and_keeps_the_data(self):
         s = sqlite_storage.SqliteStorage(self.db)
         s.save_config("alpha", {"a": 1})
         s.close()
         later = dict(sqlite_storage.MIGRATIONS)
-        later[2] = ["ALTER TABLE users ADD COLUMN note TEXT", "CREATE INDEX users_note ON users (note)"]
+        later[3] = ["ALTER TABLE users ADD COLUMN note TEXT", "CREATE INDEX users_note ON users (note)"]
         s = sqlite_storage.SqliteStorage(self.db, migrations=later)
         self.addCleanup(s.close)
-        self.assertEqual((s.schema_version(), s.load_config("alpha")), (2, {"a": 1}))
+        self.assertEqual((s.schema_version(), s.load_config("alpha")), (3, {"a": 1}))
 
     def test_a_migration_that_fails_in_the_middle_leaves_the_database_as_it_was(self):
         s = sqlite_storage.SqliteStorage(self.db)
         s.save_config("alpha", {"a": 1})
         s.close()
         later = dict(sqlite_storage.MIGRATIONS)
-        later[2] = ["ALTER TABLE users ADD COLUMN note TEXT", "THIS IS NOT SQL"]
+        later[3] = ["ALTER TABLE users ADD COLUMN note TEXT", "THIS IS NOT SQL"]
         with self.assertRaises(sqlite3.Error):
             sqlite_storage.SqliteStorage(self.db, migrations=later)
         con = sqlite3.connect(str(self.db))
         try:
-            self.assertEqual(con.execute("SELECT value FROM meta WHERE key = 'schema_version'").fetchone()[0], "1")
+            self.assertEqual(con.execute("SELECT value FROM meta WHERE key = 'schema_version'").fetchone()[0], "2")
             self.assertNotIn("note", [c[1] for c in con.execute("PRAGMA table_info(users)")])      # the first statement of the failed migration was rolled back too
         finally:
             con.close()
-        later[2] = ["ALTER TABLE users ADD COLUMN note TEXT"]
+        later[3] = ["ALTER TABLE users ADD COLUMN note TEXT"]
         s = sqlite_storage.SqliteStorage(self.db, migrations=later)      # and the next try runs it whole
         self.addCleanup(s.close)
-        self.assertEqual(s.schema_version(), 2)
+        self.assertEqual(s.schema_version(), 3)
 
     def test_a_process_killed_in_the_middle_of_the_first_migration_leaves_no_half_schema(self):
         code = textwrap.dedent("""
@@ -126,12 +126,12 @@ class Schema(unittest.TestCase):
         self.assertFalse({"accounts", "configs", "events"} & names, names)      # nothing of the schema survived, so there is nothing half done to repair
         s = sqlite_storage.SqliteStorage(self.db)
         self.addCleanup(s.close)
-        self.assertEqual(s.schema_version(), 1)
+        self.assertEqual(s.schema_version(), 2)
         self.assertEqual(s.verify(), [])
 
     def test_a_database_of_a_newer_version_is_refused_and_left_alone(self):
         later = dict(sqlite_storage.MIGRATIONS)
-        later[2] = ["CREATE TABLE future (x TEXT)"]
+        later[3] = ["CREATE TABLE future (x TEXT)"]
         sqlite_storage.SqliteStorage(self.db, migrations=later).close()
         with self.assertRaises(base.StorageError):
             sqlite_storage.SqliteStorage(self.db)

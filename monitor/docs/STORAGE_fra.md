@@ -55,7 +55,7 @@ Un moniteur laissé en marche pendant des mois grossirait sans plafond ; un cour
 |---|---|---|
 | `retention.enabled` | activé | l'interrupteur |
 | `retention.events_days` | 90 | les événements plus anciens sont supprimés |
-| `retention.analytics_days` | 180 | les jours de l'historique d'analyses plus anciens sont supprimés |
+| `retention.analytics_days` | 180 | les jours de l'historique d'analyses plus anciens, ainsi que les instantanés du score de ces jours, sont supprimés |
 | `retention.mode` | `archive` | `archive` écrit d'abord les anciens événements dans un `.gz` de `events/archive/` |
 | `retention.events_max_kb` | 512 | plafond de taille du fichier du flux avec le stockage en fichiers (comme toujours) |
 | `retention.warn_events_mb` | 20 | `--doctor` avertit au-delà de cette taille |

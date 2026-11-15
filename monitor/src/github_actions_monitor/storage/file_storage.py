@@ -28,6 +28,7 @@ from github_actions_monitor.storage import archive, base, locks
 
 EVENTS_REL = "events/events_monitor.jsonl"
 ANALYTICS_REL = "analytics/analytics_history.json"
+SCORES_REL = "analytics/score_snapshots.json"      # {hour: snapshot}
 CONFIG_REL = "actions_monitor.json"
 SENTINEL_DIR = "sentinel_state"
 #: documents with a home of their own in the layout of 1.7; any other name goes to state/<name>.json
@@ -167,6 +168,37 @@ class FileStorage(base.Storage):
 
     def save_analytics(self, account_id, data):
         atomic_write(self._path(account_id, ANALYTICS_REL), json.dumps(data))
+
+    # -- score snapshots
+    def save_score_snapshot(self, account_id, hour, data):
+        base.check_hour(hour)
+        path = self._path(account_id, SCORES_REL)
+        with locks.path_lock(path):
+            current = read_json(path, dict, {})
+            current[hour] = data
+            atomic_write(path, json.dumps(current, ensure_ascii=False, sort_keys=True))
+
+    def load_score_snapshots(self, account_id, since=None, limit=None):
+        if limit is not None and limit <= 0:
+            return []
+        current = read_json(self._path(account_id, SCORES_REL), dict, {})
+        hours = sorted(h for h, v in current.items() if isinstance(h, str) and base.HOUR_RE.match(h) and isinstance(v, dict) and (not since or h >= since))
+        if limit is not None:
+            hours = hours[-int(limit):]
+        return [{**current[h], "hour": h} for h in hours]
+
+    def purge_score_snapshots(self, account_id, before_hour):
+        path = self._path(account_id, SCORES_REL)
+        with locks.path_lock(path):
+            current = read_json(path, dict, None)
+            if not current:
+                return {"removed": 0}
+            old = [h for h in current if isinstance(h, str) and h < before_hour]
+            for hour in old:
+                del current[hour]
+            if old:
+                atomic_write(path, json.dumps(current, ensure_ascii=False, sort_keys=True))
+            return {"removed": len(old)}
 
     # -- events
     def append_events(self, account_id, events):
@@ -344,7 +376,7 @@ class FileStorage(base.Storage):
         return {"config": self.load_config(account_id),
                 "sentinels": {n: self.load_sentinel_state(account_id, n) for n in self._sentinel_names(account_id)},
                 "docs": {n: self.load_doc(account_id, n, {}) for n in self._doc_names(account_id)},
-                "events": events, "analytics": self.load_analytics(account_id)}
+                "events": events, "analytics": self.load_analytics(account_id), "scores": self.load_score_snapshots(account_id)}
 
     def import_account(self, account_id, payload):
         if payload.get("config"):
@@ -355,6 +387,12 @@ class FileStorage(base.Storage):
             self.save_doc(account_id, name, data)
         if payload.get("analytics"):
             self.save_analytics(account_id, payload["analytics"])
+        scores = {s["hour"]: {k: v for k, v in s.items() if k != "hour"} for s in payload.get("scores") or []
+                  if isinstance(s, dict) and isinstance(s.get("hour"), str) and base.HOUR_RE.match(s["hour"])}
+        score_path = self._path(account_id, SCORES_REL)
+        with locks.path_lock(score_path):
+            if scores or score_path.exists():
+                atomic_write(score_path, json.dumps(scores, ensure_ascii=False, sort_keys=True))
         events = [e for e in payload.get("events") or [] if isinstance(e, dict)]
         path = self.events_path(account_id)
         with locks.path_lock(path):
@@ -368,7 +406,7 @@ class FileStorage(base.Storage):
             if bad:
                 problems.append(f"{account_id}: {bad} damaged line(s) in the feed")
             folder = self._account_dir(account_id)
-            for rel in [CONFIG_REL, ANALYTICS_REL, *DOC_PATHS.values(), *(f"{SENTINEL_DIR}/{n}.json" for n in self._sentinel_names(account_id))]:
+            for rel in [CONFIG_REL, ANALYTICS_REL, SCORES_REL, *DOC_PATHS.values(), *(f"{SENTINEL_DIR}/{n}.json" for n in self._sentinel_names(account_id))]:
                 path = self._path(account_id, rel)
                 if path.is_file() and read_json(path, dict, None) is None:
                     problems.append(f"{account_id}: {path.relative_to(folder).as_posix()} is not a JSON object")

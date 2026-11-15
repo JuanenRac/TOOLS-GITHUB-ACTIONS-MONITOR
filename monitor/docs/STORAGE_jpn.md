@@ -55,7 +55,7 @@ python tools/backup_storage.py restore backup.zip --backend file     # 空の保
 |---|---|---|
 | `retention.enabled` | オン | スイッチ |
 | `retention.events_days` | 90 | これより古いイベントを削除 |
-| `retention.analytics_days` | 180 | これより古い分析履歴の日を削除 |
+| `retention.analytics_days` | 180 | これより古い分析履歴の日と、その日のスコアのスナップショットを削除 |
 | `retention.mode` | `archive` | `archive` は古いイベントを先に `events/archive/` の `.gz` に書き出す |
 | `retention.events_max_kb` | 512 | ファイル保存でのフィードファイルのサイズ上限(従来どおり) |
 | `retention.warn_events_mb` | 20 | このサイズを超えると `--doctor` が警告 |
