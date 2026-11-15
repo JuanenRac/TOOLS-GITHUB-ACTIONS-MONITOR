@@ -3,9 +3,23 @@
   GPL-3.0-or-later - see LICENSE
 -->
 
-# Atualizar a partir de uma versão anterior à 1.5.0
+# Atualizar a partir de uma versão anterior
 
 [English](MIGRATING.md) · [Español](MIGRATING_spa.md) · [Français](MIGRATING_fra.md) · [Italiano](MIGRATING_ita.md) · [Deutsch](MIGRATING_deu.md) · [简体中文](MIGRATING_zho.md) · [日本語](MIGRATING_jpn.md) · **Português**
+
+## O caminho curto, a partir de qualquer versão
+
+1. Pare o monitor (e o supervisor, se usa várias contas).
+2. Guarde uma cópia da sua configuração (`actions_monitor.json`, ou a pasta `config/` se existir) e descomprima a nova versão por cima da pasta antiga.
+3. Arranque como sempre. Uma instalação da 1.8.1 ou anterior move por si o que está junto dos lançadores para `config/`, `data/`, `logs/` e `ai/`. Não se apaga nem se substitui nada (um ficheiro que já existe no sítio novo fica e o doctor di-lo), a configuração é primeiro copiada para `config/config_backups/` e cada movimento fica num diário.
+4. Para ver antes ou desfazer, a partir da pasta `src/`: `python -m github_actions_monitor.util.rootmigrate` (uma simulação), `--apply` para mover já e `--undo` para repor tudo. `MONITOR_NO_AUTO_MIGRATION=1` desliga o movimento automático. A verificação `layout` de `python bin/actions_monitor.py --doctor` lista o que ainda está junto dos lançadores.
+5. Para retirar os restos da antiga estrutura plana (módulos antigos, a página antiga, os exemplos antigos e a pasta `locales/` antiga): `python tools/migrate_layout.py` (uma simulação) e depois `--apply`; vão para `layout_backup_<marca>/`, não se apaga nada.
+6. Nomes anteriores à 1.5.0: `python bin/migrate_state.py` e depois `--apply` (ver abaixo).
+7. Um script de porta de uma ferramenta de IA registado com o caminho antigo tem de ser registado de novo: `python bin/monitor_cli.py ai-hook install`.
+
+O que se mantém: a sua configuração, o estado, os registos, as contas e os seus ficheiros de catálogo. O que muda: só os locais (ver o guia das pastas, `LAYOUT.md`). O que nunca muda: `ci_red.json`, o seu esquema e os ficheiros de `--export-status`.
+
+## Antes da 1.5.0
 
 A versão 1.5.0 deu nomes em inglês a ficheiros, pastas, scripts e a uma definição. Não se perde nada: o monitor continua a LER os nomes antigos, por isso pode atualizar primeiro e arrumar depois.
 
@@ -124,3 +138,10 @@ Não é preciso migrar nada para atualizar: os ficheiros continuam a ser o prede
 Não é preciso converter nada. Uma definição pode precisar de uma alteração:
 
 - extra_reader.file aponta para fora da pasta de contas, pelo que a segunda conta NÃO é usada. Mova o ficheiro do token para a pasta de contas (accounts/, ou a pasta indicada por MONITOR_ACCOUNTS_DIR) e mantenha o seu caminho em extra_reader.file, ou ative extra_reader.any_folder em Definições > Quota.
+
+# Da 1.8.x para a 1.9.x
+
+- Não há nada a converter e nada de novo se ativa por surpresa: a sentinela Security, os relatórios agendados e o Apprise estão desligados, e nenhuma predefinição de IA está ativa.
+- **Ligado por predefinição**: a pontuação da conta (só Complete; os pesos predefinidos são agora 30, 15, 15, 15 e 25, e os pesos que definiu mantêm-se) e o registo de ações em `logs/audit_actions.jsonl` (desligue-o nas definições se não o quiser).
+- **Com SQLite**: a base de dados recebe uma tabela para os instantâneos da pontuação (esquema 2) no primeiro arranque; a migração faz-se numa transação e uma interrompida deixa a base como estava.
+- **Os relatórios e o separador Equipa** não precisam de nada: leem o que o monitor já tem.

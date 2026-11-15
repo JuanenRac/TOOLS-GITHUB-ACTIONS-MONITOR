@@ -3,9 +3,23 @@
   GPL-3.0-or-later - see LICENSE
 -->
 
-# 从 1.5.0 之前的版本更新
+# 从早期版本更新
 
 [English](MIGRATING.md) · [Español](MIGRATING_spa.md) · [Français](MIGRATING_fra.md) · [Italiano](MIGRATING_ita.md) · [Deutsch](MIGRATING_deu.md) · **简体中文** · [日本語](MIGRATING_jpn.md) · [Português](MIGRATING_por.md)
+
+## 适用于任何版本的简短流程
+
+1. 停止监视器(如果使用多个账户,也停止监督进程)。
+2. 保留一份配置副本(`actions_monitor.json`,如果存在 `config/` 文件夹则是该文件夹),然后把新版本解压覆盖到旧文件夹上。
+3. 像往常一样启动。1.8.1 或更早版本的安装会自动把启动器旁边的内容移到 `config/`、`data/`、`logs/` 和 `ai/`。不会删除或覆盖任何内容(新位置已有的文件保持不动,doctor 会告知),配置会先复制到 `config/config_backups/`,每次移动都会写入日志。
+4. 若想先查看或撤销,在 `src/` 文件夹中:`python -m github_actions_monitor.util.rootmigrate`(试运行),`--apply` 立即移动,`--undo` 全部还原。`MONITOR_NO_AUTO_MIGRATION=1` 可关闭自动移动。`python bin/actions_monitor.py --doctor` 的 `layout` 检查会列出仍在启动器旁边的内容。
+5. 要清除旧的平铺布局残留(旧模块、旧页面、旧示例和旧的 `locales/` 文件夹):`python tools/migrate_layout.py`(试运行),然后 `--apply`;它们会移到 `layout_backup_<时间戳>/`,不会删除任何内容。
+6. 1.5.0 之前的名称:`python bin/migrate_state.py`,然后 `--apply`(见下文)。
+7. 以旧路径注册的 AI 工具门控脚本必须重新注册:`python bin/monitor_cli.py ai-hook install`。
+
+保留的内容:您的配置、状态、日志、账户和目录文件。移动的内容:只有位置(见文件夹指南 `LAYOUT.md`)。永不改变的内容:`ci_red.json`、其模式以及 `--export-status` 文件。
+
+## 1.5.0 之前
 
 1.5.0 版给文件、文件夹、脚本和一项设置起了英文名称。不会丢失任何内容：监视器仍会读取旧名称，所以你可以先更新，之后再整理。
 
@@ -124,3 +138,10 @@
 无需转换。有一项设置可能需要调整:
 
 - extra_reader.file 指向账户文件夹之外,因此不会使用第二个账户。请把令牌文件移到账户文件夹(accounts/,或 MONITOR_ACCOUNTS_DIR 指定的文件夹)并在 extra_reader.file 中保留其路径,或在 设置 > 配额 中开启 extra_reader.any_folder。
+
+# 从 1.8.x 到 1.9.x
+
+- 无需转换,也不会有意外开启的新功能:Security 哨兵、定时报告和 Apprise 均为关闭,没有启用任何 AI 预设。
+- **默认开启**:账户的评分(仅 Complete;默认权重现为 30、15、15、15 和 25,您自己设置的权重会保留)以及 `logs/audit_actions.jsonl` 中的操作日志(不需要可在设置中关闭)。
+- **使用 SQLite 时**:首次启动时数据库会增加一张评分快照表(模式 2);迁移在一个事务中进行,被中断的迁移会让数据库保持原样。
+- **报告和团队标签页**无需任何操作:它们读取监视器已有的数据。

@@ -3,9 +3,23 @@
   GPL-3.0-or-later - see LICENSE
 -->
 
-# Mise à jour depuis une version antérieure à la 1.5.0
+# Mettre à jour depuis une version antérieure
 
 [English](MIGRATING.md) · [Español](MIGRATING_spa.md) · **Français** · [Italiano](MIGRATING_ita.md) · [Deutsch](MIGRATING_deu.md) · [简体中文](MIGRATING_zho.md) · [日本語](MIGRATING_jpn.md) · [Português](MIGRATING_por.md)
+
+## Le chemin court, depuis n'importe quelle version
+
+1. Arrêtez le moniteur (et le superviseur, si vous utilisez plusieurs comptes).
+2. Gardez une copie de votre configuration (`actions_monitor.json`, ou le dossier `config/` s'il existe) et décompressez la nouvelle version sur l'ancien dossier.
+3. Démarrez comme d'habitude. Une installation de la 1.8.1 ou plus ancienne déplace d'elle-même ce qui se trouve à côté des lanceurs vers `config/`, `data/`, `logs/` et `ai/`. Rien n'est supprimé ni écrasé (un fichier qui existe déjà au nouvel endroit reste et le doctor le dit), la configuration est d'abord copiée dans `config/config_backups/` et chaque déplacement est inscrit dans un journal.
+4. Pour le voir d'abord ou l'annuler, depuis le dossier `src/` : `python -m github_actions_monitor.util.rootmigrate` (une simulation), `--apply` pour déplacer maintenant, `--undo` pour tout remettre. `MONITOR_NO_AUTO_MIGRATION=1` coupe le déplacement automatique. Le contrôle `layout` de `python bin/actions_monitor.py --doctor` liste ce qui reste à côté des lanceurs.
+5. Pour retirer les restes de l'ancienne disposition à plat (anciens modules, ancienne page, anciens exemples et ancien dossier `locales/`) : `python tools/migrate_layout.py` (une simulation) puis `--apply` ; ils vont dans `layout_backup_<horodatage>/`, rien n'est supprimé.
+6. Noms d'avant la 1.5.0 : `python bin/migrate_state.py` puis `--apply` (voir plus bas).
+7. Un script de porte d'un outil d'IA enregistré avec son ancien chemin doit être enregistré de nouveau : `python bin/monitor_cli.py ai-hook install`.
+
+Ce qui est conservé : votre configuration, l'état, les journaux, les comptes et vos fichiers de catalogue. Ce qui bouge : seulement les emplacements (voir le guide des dossiers, `LAYOUT.md`). Ce qui ne change jamais : `ci_red.json`, son schéma et les fichiers de `--export-status`.
+
+## Avant la 1.5.0
 
 La version 1.5.0 a donné des noms anglais aux fichiers, dossiers, scripts et à un réglage. Rien n'est perdu : le moniteur continue de LIRE les anciens noms, vous pouvez donc mettre à jour d'abord et ranger ensuite.
 
@@ -124,3 +138,10 @@ Rien n'est à migrer pour mettre à jour : les fichiers restent le défaut. Si v
 Rien n'est à convertir. Un réglage peut demander un changement :
 
 - extra_reader.file pointe hors du dossier des comptes, donc le second compte n'est PAS utilisé. Déplacez le fichier du jeton dans le dossier des comptes (accounts/, ou le dossier indiqué par MONITOR_ACCOUNTS_DIR) et gardez son chemin dans extra_reader.file, ou activez extra_reader.any_folder dans Réglages > Quota.
+
+# De la 1.8.x à la 1.9.x
+
+- Rien n'est à convertir et rien de nouveau ne s'active par surprise : la sentinelle Security, les rapports programmés et Apprise sont éteints, et aucun préréglage d'IA n'est actif.
+- **Actif par défaut** : la note du compte (Complete seulement ; ses poids par défaut sont maintenant 30, 15, 15, 15 et 25, et les poids que vous avez fixés sont conservés) et le journal des actions dans `logs/audit_actions.jsonl` (désactivable dans les réglages).
+- **Avec SQLite** : la base reçoit une table pour les instantanés de la note (schéma 2) au premier démarrage ; la migration se fait dans une transaction et une migration interrompue laisse la base comme elle était.
+- **Les rapports et l'onglet Équipe** n'exigent rien : ils lisent ce que le moniteur détient déjà.

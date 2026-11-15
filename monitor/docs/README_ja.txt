@@ -10,6 +10,7 @@ GitHub Actions モニター + センチネル（バージョン 1.9.3）
   ターミナル  python bin/tui_textual.py (LITE版は --lite を付ける)   対話型ターミナルアプリ。bin/tui.py --once は1画面だけ出力します。
   診断    python bin/actions_monitor.py --doctor (スクリプト用は --json)   不足しているものと、直すための正確なコマンドを表示します。
   お試し  python bin/actions_monitor.py --demo   架空のデータのページ: gh もログインも不要で、あなたのデータには触れません。
+  COMPLETEにはさらに  各アカウントのスコア、Securityセンチネル(オフ)、各リポジトリとチームの健全性、スケジュールされたレポート(オフ)、操作ログ、Apprise、AIサービスのプリセット。それぞれのガイドは docs/ とページのヘルプにあります。
 
 必要なもの: Python 3.11 以上と、ログイン済みの GitHub CLI（`gh`）（gh auth login）。それ以外は不要です。中核はパッケージを必要とせず、ターミナル表示(bin/tui.py)だけが任意のパッケージ rich を使います。
 初めて使うときの手順: QUICKSTART_ja.txt。
@@ -22,9 +23,9 @@ GitHub Actions モニター + センチネル（バージョン 1.9.3）
            重要な判定に AI は使いません。オプションの AI による説明は、初期設定ではオフです。
 
 言語       8 言語: en, es, de, fr, it, ja, zh, pt（ポルトガル語はポルトガル式）。起動時は英語です。システムの言語では決まりません。別の言語は、ページの「設定」タブ（歯車アイコン。ブラウザーが記憶します）、
-           actions_monitor.json の "language"、環境変数 MONITOR_LANG、またはコマンドラインツールの --lang コード（最優先）で選びます。
+           config/actions_monitor.json の "language"、環境変数 MONITOR_LANG、またはコマンドラインツールの --lang コード（最優先）で選びます。
            スクリプトが読む行（SKIP、DISPATCHED、READY、FAILED、Summary:、BUILD ONLY...）は常に英語です。
-設定       actions_monitor.json（初回起動時に assets/examples/actions_monitor.example.json から作成されます）。主なキー: github_owner（空 = gh のアカウント）、
+設定       config/actions_monitor.json（初回起動時に assets/examples/actions_monitor.example.json から作成されます）。主なキー: github_owner（空 = gh のアカウント）、
            language, ecosystems_file, targets_file, refresh_seconds, cold_refresh_seconds, max_workers, min_rate_remaining, sentinel.*
            ecosystems_file: 名前の接頭辞でリポジトリをまとめます（assets/examples/ecosystems.example.json を参照。"*" = すべてのリポジトリ）。targets_file: バッチツール用のビルド一覧
            （assets/examples/targets.example.json を参照）。profiles_file (assets/examples/profiles.example.json): バッチのプロファイル。これらのファイルで "_" で始まるキーはメタデータです。
@@ -33,14 +34,14 @@ GitHub Actions モニター + センチネル（バージョン 1.9.3）
            ある場合は、リリース候補、署名キュー、バッチツールも使えます。署名記録は "signed_dir"、監査ファイルは "audit_dir" で指定します。
 テスト     py -3 -I -m unittest discover -s tests （Linux/macOS: python3 -I -m unittest discover -s tests）。ネットワークは不要です。
 困ったとき "API rate limit": gh の共有利用枠（1 時間 5000 回）を使い切りました。リセット（gh api rate_limit）を待ち、refresh_seconds を増やすか max_workers を減らしてください。
-           gh が応答しないと、モニターは起動時に停止します。壊れたキャッシュは無視されます。キャッシュをやり直すには sentinel_cache.json を削除してください。
+           gh が応答しないと、モニターは起動時に停止します。壊れたキャッシュは無視されます。キャッシュをやり直すには data/sentinel_cache.json を削除してください。
            パッケージを更新したらモニターを再起動してください（実行中のプロセスは古いコードのままです）。
 
 ツール     bin/read_report.py [--lang コード] [--json] [--export-status フォルダー] [--export-sign-queue ファイル]  実行中のモニターの内容を表示（ローカル、GitHub の利用枠は消費しません）
            bin/gha_dispatch_all.py [--lang コード] plan|dispatch|status|finalize|hygiene    GitHub Actions のビルドをバッチ実行（この PC では何もコンパイルしません）
            bin/release_notes.py REPO [--since タグ] [--out ファイル]    コミットからリリースノートの下書きを作成（提案のみで、何も公開しません）
            bin/release_candidates.py    CHANGELOG の [Unreleased] に項目があり、最新リリースが古いプロジェクト（読み取り専用）
-イベント   センチネルは「変化」（新しい赤、CI の回復、停滞ビルド、新しいアラートなど）ごとに JSON を 1 行、events_monitor.jsonl に書き込みます。各行には、言語に依存しない
+イベント   センチネルは「変化」（新しい赤、CI の回復、停滞ビルド、新しいアラートなど）ごとに JSON を 1 行、data/events_monitor.jsonl に書き込みます。各行には、言語に依存しない
            固定の `code`、`kind`, `level`, `repo`, `args`、そして設定した言語の `text` が含まれます。`tail -F` で追えます。
 赤の CI    基準は 1 つだけ: 既定ブランチでの各 workflow の「最後に完了した run」。赤 = failure, timed_out, startup_failure, action_required。
            cancelled, skipped, neutral, stale は数えません。

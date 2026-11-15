@@ -3,9 +3,23 @@
   GPL-3.0-or-later - see LICENSE
 -->
 
-# Updating from a version before 1.5.0
+# Updating from an earlier version
 
 **English** · [Español](MIGRATING_spa.md) · [Français](MIGRATING_fra.md) · [Italiano](MIGRATING_ita.md) · [Deutsch](MIGRATING_deu.md) · [简体中文](MIGRATING_zho.md) · [日本語](MIGRATING_jpn.md) · [Português](MIGRATING_por.md)
+
+## The short way, from any version
+
+1. Stop the monitor (and the supervisor, if you use several accounts).
+2. Keep a copy of your configuration (`actions_monitor.json`, or the `config/` folder if it exists) and unzip the new version over the old folder.
+3. Start it as always. An installation of 1.8.1 or older moves, by itself, what lies next to the launchers into `config/`, `data/`, `logs/` and `ai/`. Nothing is deleted or overwritten (a file that already exists in the new place stays and the doctor says so), the configuration is copied to `config/config_backups/` first and every move is written to a journal.
+4. To see it first or to undo it, from the `src/` folder: `python -m github_actions_monitor.util.rootmigrate` (a dry run), `--apply` to move now, `--undo` to put everything back. `MONITOR_NO_AUTO_MIGRATION=1` turns the automatic move off. The `layout` check of `python bin/actions_monitor.py --doctor` lists what is still next to the launchers.
+5. To remove the leftovers of the old flat layout (old modules, the old page, the old examples and the old `locales/` folder): `python tools/migrate_layout.py` (a dry run) and then `--apply`; they go to `layout_backup_<stamp>/`, nothing is deleted.
+6. Names from before 1.5.0: `python bin/migrate_state.py` and then `--apply` (see below).
+7. A gate script of an AI tool registered by its old path must be registered again: `python bin/monitor_cli.py ai-hook install`.
+
+What is kept: your configuration, state, logs, accounts and catalogue files. What moves: only the places (see the guide of the folders, `LAYOUT.md`). What never changes: `ci_red.json`, its schema and the `--export-status` files.
+
+## Before 1.5.0
 
 Version 1.5.0 gave English names to files, folders, scripts and one setting. Nothing is lost: the monitor still READS the old names, so you can update first and tidy up afterwards.
 
@@ -124,3 +138,10 @@ Nothing has to be migrated to update: files stay the default. If you want the st
 Nothing has to be converted. One setting can need a move:
 
 - extra_reader.file points outside the accounts folder, so the second account is NOT used. Move the token file into the accounts folder (accounts/, or the folder named by MONITOR_ACCOUNTS_DIR) and keep its path in extra_reader.file, or turn on extra_reader.any_folder in Settings > Quota.
+
+# From 1.8.x to 1.9.x
+
+- Nothing has to be converted and nothing new is on by surprise: the Security sentinel, the scheduled reports and Apprise are off, and no AI preset is active.
+- **On by default**: the score of the account (Complete only; its default weights are now 30, 15, 15, 15 and 25, and weights you set yourself are kept) and the log of actions in `logs/audit_actions.jsonl` (switch it off in Settings if you do not want it).
+- **With SQLite**: the database gets a table for the snapshots of the score (schema 2) on the first start; the migration runs in one transaction and an interrupted one leaves the database as it was.
+- **Reports and the Team tab** need nothing: they read what the monitor already holds.

@@ -1,6 +1,58 @@
 # Roteiro
 
-Ideias que não couberam na versão atual, sem ordem prometida. São direções, não compromissos; uma issue ou um pull request é a melhor forma de fazer avançar uma.
+O que já foi publicado, o que vem a seguir e o que é apenas uma ideia, por essa ordem de certeza. São direções, não compromissos; uma issue ou um pull request é a melhor forma de fazer avançar uma.
+
+## Onde está o monitor agora
+
+Versão 1.9.4. A edição lite mostra o que corre e o que falhou. A edição completa acrescenta três sentinelas (CI, Collab e Security), uma lista de alertas, várias contas e uma equipa com funções, a pontuação de cada conta, a saúde de cada repositório e da equipa, relatórios agendados, um registo de ações, notificações (ntfy, Teams, correio eletrónico e Apprise), um assistente de IA opcional com predefinições de serviços compatíveis, o modo de serviço com Docker e uma página para todos os tamanhos de ecrã, do telemóvel ao 4K.
+
+## Previsto, por esta ordem
+
+Cada versão leva apenas conteúdo real: uma versão sem nada de real a acrescentar é saltada e nunca publicada vazia. Nada disto é dado como provado em serviços reais, salvo se o seu guia o disser.
+
+### 1.9.5 a 1.9.9 - Fecho da terceira fase
+
+O que as revisões da pontuação, da sentinela de segurança, das vistas de saúde, dos relatórios e do registo de ações ainda encontrem; o custo em chamadas ao GitHub com três sentinelas ativas; uma pontuação que se mantém coerente quando uma sentinela está desligada.
+
+### 2.0.0 - Maturidade
+
+Uma versão principal que limpa a dívida técnica e congela as interfaces públicas: sentinelas, armazenamento, alertas, o esquema de eventos e a API de leitura, com uma suite de testes de contrato que os clientes podem executar contra qualquer versão. Um guia para cada forma de usar o produto (lite, individual, serviço, equipa) e uma referência de definições, eventos, métricas e API. A partir da 2.0.1 há uma margem para o que só aparece com uso real prolongado.
+
+Os workflows do próprio monitor cumprem o que a sentinela de higiene pedirá aos outros: ações fixadas a um commit, as permissões mínimas e um limite de tempo em cada job.
+
+## Feito da 1.8.2 à 1.9.4
+
+### 1.9.4 - Predefinições de IA
+
+Uma tabela de doze serviços alojados e seis servidores locais que falam um protocolo que o monitor já conhece, um seletor nas definições de IA que preenche o endereço, o nome da variável da chave e um modelo de exemplo, servidores locais que funcionam sem chave e os endereços dos principais serviços lidos na sua documentação pública.
+
+### 1.9.3 - Relatórios programados e registo de auditoria
+
+Modelos de relatório em HTML e Markdown (PDF opcional) com a pontuação, os alertas principais e as alterações, um agendador e um registo de auditoria só de acrescentar com quem fez o quê e quando, sem qualquer segredo lá dentro. Opcional, na mesma versão: uma vista «versão pronta / bloqueada» com o último commit verde de cada repositório.
+
+### 1.9.2 - Saúde do repositório e da equipa
+
+Uma vista de saúde de cada repositório (CI, issues e pull requests, segurança, preparação para uma versão, atividade) e uma da equipa com classificação, totais e filtros; páginas para ambas com ligações diretas para ecrãs de parede. Opcional, na mesma versão: um painel de benchmarks noturnos face a um orçamento (mediana face a uma referência por classe de máquina) e um painel de listas de materiais de software e atestações de cada versão.
+
+### 1.9.1 - Sentinela de segurança
+
+A terceira sentinela: Dependabot, análise de código, análise de segredos, proteção de ramos, permissões dos workflows e proprietários do código, com regras por tipo de sinal, o mesmo filtro no separador Alertas e uma penalização na pontuação por alertas críticos abertos. Opcional, na mesma versão: higiene de workflows (ações não fixadas a um commit, jobs sem limite de tempo, workflows sem permissões ou sem concorrência, uso perigoso de pull_request_target), sobre o verificador de workflows que o projeto já tem.
+
+### 1.9.0 - Uma pontuação
+
+Recolhedores de métricas por conta e por sentinela (taxa de sucesso, duração, tempo de recuperação, débito), um motor de pontuação com limiares que pode alterar, uma tendência face ao período anterior, instantâneos guardados no armazenamento, um widget de pontuação com minigráfico, alertas quando a pontuação desce e um verbo da linha de comandos que a imprime.
+
+### 1.8.4 - Estabilização
+
+Sem grandes funcionalidades. Isolamento entre contas, a página, o armazenamento, início de sessão e funções, notificações, um GitHub que falha por vezes, o arranque após uma migração interrompida, a recuperação após um corte, um doctor mais amplo, os sítios que escrevem no GitHub, registos sem tokens, uma lista de verificação de segurança do modo de equipa e documentos que coincidem com o comportamento. A série só continua até à 1.8.9 se for preciso.
+
+### 1.8.3 - Notificações por utilizador
+
+Preferências por utilizador (canal, sentinela, nível mínimo), um distribuidor que decide quem avisar segundo as preferências e as funções, canais como plug-ins simples e resumos dos alertas ainda não lidos. Além disso: um relatório do tempo que os jobs esperam na fila por cada runner, e um job ignorado pelos caminhos que vigia é mostrado à parte de um job vermelho.
+
+### 1.8.2 - Imagem Docker oficial e modo de serviço
+
+Uma imagem em várias fases com utilizador sem privilégios, volumes para dados e configuração, variáveis de ambiente documentadas, um exemplo de compose com proxy inverso e TLS opcionais, uma unidade systemd para quem prefira a instalação clássica e uma verificação de saúde profunda que falha se o supervisor ou o ciclo de uma conta estiver bloqueado. Uma credencial que o GitHub revoga ou deixa caducar marca só essa conta como cega, lança um alerta de sistema crítico e pode ser substituída sem reiniciar o supervisor. Cópia de segurança, atualização e primeiro arranque como serviço ficam documentados; a página diz se escuta neste computador, na rede ou atrás de um proxy; a linha de comandos funciona contra um monitor remoto. A edição lite continua local.
 
 ## Feito na 1.8.0
 
@@ -21,50 +73,6 @@ Tudo o que se segue foi entregue na série 1.8 e está testado; nada se dá por 
 - A aplicação de terminal edita listas e mapas.
 - Modo de equipa (desativado por predefinição): utilizadores, funções (admin, maintainer, viewer) e sessões guardados no armazenamento, uma página de início de sessão, um token Bearer para clientes que não são um navegador, erros JSON estáveis e a recuperação de um administrador a partir da consola deste computador. O modo individual continua sem início de sessão e a edição lite nunca o tem.
 - Uma página mais viva: ícones animados, luzes de estado cujo movimento segue o estado, respostas a passar o rato, foco e clique; tudo se desliga com movimento reduzido e é leve na edição lite.
-
-## Previsto, por esta ordem
-
-Cada versão leva tudo o que é do seu troço do plano: nada fica pendurado de uma versão anterior e nada se adia para a seguinte. Depois da 1.8.3 e depois da 1.9.3 o produto passa por uma revisão independente e as suas conclusões fecham-se na versão de estabilização seguinte. A 1.8.1 é uma versão corretiva da 1.8.0: a caixa «a carregar repositórios» desaparece com o último repositório e o recarregamento da página obtém logo os dados.
-
-### 1.9.4 - Estabilização da terceira fase
-
-O mesmo tipo de fecho da 1.8.4 para a pontuação, a sentinela de segurança, as vistas de saúde, os relatórios e o registo de auditoria; o custo em chamadas à API com três sentinelas ativas; uma pontuação que se mantém coerente quando uma sentinela está desligada.
-
-### 2.0.0 - Maturidade
-
-Uma versão principal que limpa a dívida técnica e congela as interfaces públicas: sentinelas, armazenamento, alertas, o esquema de eventos e a API de leitura, com uma suite de testes de contrato que os clientes podem executar contra qualquer versão. Um guia para cada forma de usar o produto (lite, individual, serviço, equipa) e uma referência de definições, eventos, métricas e API. A partir da 2.0.1 há uma margem para o que só aparece com uso real prolongado.
-
-Os workflows do próprio monitor cumprem o que a sentinela de higiene pedirá aos outros: ações fixadas a um commit, as permissões mínimas e um limite de tempo em cada job.
-
-## Feito da 1.8.2 à 1.9.3
-
-### 1.8.2 - Imagem Docker oficial e modo de serviço
-
-Uma imagem em várias fases com utilizador sem privilégios, volumes para dados e configuração, variáveis de ambiente documentadas, um exemplo de compose com proxy inverso e TLS opcionais, uma unidade systemd para quem prefira a instalação clássica e uma verificação de saúde profunda que falha se o supervisor ou o ciclo de uma conta estiver bloqueado. Uma credencial que o GitHub revoga ou deixa caducar marca só essa conta como cega, lança um alerta de sistema crítico e pode ser substituída sem reiniciar o supervisor. Cópia de segurança, atualização e primeiro arranque como serviço ficam documentados; a página diz se escuta neste computador, na rede ou atrás de um proxy; a linha de comandos funciona contra um monitor remoto. A edição lite continua local.
-
-### 1.8.3 - Notificações por utilizador
-
-Preferências por utilizador (canal, sentinela, nível mínimo), um distribuidor que decide quem avisar segundo as preferências e as funções, canais como plug-ins simples e resumos dos alertas ainda não lidos. Além disso: um relatório do tempo que os jobs esperam na fila por cada runner, e um job ignorado pelos caminhos que vigia é mostrado à parte de um job vermelho.
-
-### 1.8.4 - Estabilização
-
-Sem grandes funcionalidades. Isolamento entre contas, a página, o armazenamento, início de sessão e funções, notificações, um GitHub que falha por vezes, o arranque após uma migração interrompida, a recuperação após um corte, um doctor mais amplo, os sítios que escrevem no GitHub, registos sem tokens, uma lista de verificação de segurança do modo de equipa e documentos que coincidem com o comportamento. A série só continua até à 1.8.9 se for preciso.
-
-### 1.9.0 - Uma pontuação
-
-Recolhedores de métricas por conta e por sentinela (taxa de sucesso, duração, tempo de recuperação, débito), um motor de pontuação com limiares que pode alterar, uma tendência face ao período anterior, instantâneos guardados no armazenamento, um widget de pontuação com minigráfico, alertas quando a pontuação desce e um verbo da linha de comandos que a imprime.
-
-### 1.9.1 - Sentinela de segurança
-
-A terceira sentinela: Dependabot, análise de código, análise de segredos, proteção de ramos, permissões dos workflows e proprietários do código, com regras por tipo de sinal, o mesmo filtro no separador Alertas e uma penalização na pontuação por alertas críticos abertos. Opcional, na mesma versão: higiene de workflows (ações não fixadas a um commit, jobs sem limite de tempo, workflows sem permissões ou sem concorrência, uso perigoso de pull_request_target), sobre o verificador de workflows que o projeto já tem.
-
-### 1.9.2 - Saúde do repositório e da equipa
-
-Uma vista de saúde de cada repositório (CI, issues e pull requests, segurança, preparação para uma versão, atividade) e uma da equipa com classificação, totais e filtros; páginas para ambas com ligações diretas para ecrãs de parede. Opcional, na mesma versão: um painel de benchmarks noturnos face a um orçamento (mediana face a uma referência por classe de máquina) e um painel de listas de materiais de software e atestações de cada versão.
-
-### 1.9.3 - Relatórios programados e registo de auditoria
-
-Modelos de relatório em HTML e Markdown (PDF opcional) com a pontuação, os alertas principais e as alterações, um agendador e um registo de auditoria só de acrescentar com quem fez o quê e quando, sem qualquer segredo lá dentro. Opcional, na mesma versão: uma vista «versão pronta / bloqueada» com o último commit verde de cada repositório.
 
 ## Feito na 1.7.9
 
@@ -141,10 +149,10 @@ O que a 1.6.4 não alcançou, e porquê:
 
 ## Mais adiante
 
-- **Mais adaptadores de notificação**: ntfy, Microsoft Teams e e-mail através de um relé local.
-- **Várias contas numa página**: feito na 1.7.0, cada conta no seu próprio monitor sob um supervisor.
-- **Telemetria de hardware dos runners** através de um agente: hoje só se lê um endpoint opcional de node exporter.
+- **Telemetria de hardware dos runners** através de um agente: hoje só se lê um ponto de acesso opcional do node exporter.
+- **Uma quarta fase** (plugins, automatização mais ampla, IA avançada) só depois de várias semanas de 2.0.x estável e de uma decisão explícita.
 
 ## Ideias que precisam primeiro de uma decisão
 
-- Ler na página os registos de um passo falhado, com a mesma limpeza que o assistente de IA aplica.
+- Uma versão em PDF dos relatórios agendados (hoje HTML e Markdown).
+- Uma vista das versões prontas ou bloqueadas, uma por repositório, no separador Equipa.

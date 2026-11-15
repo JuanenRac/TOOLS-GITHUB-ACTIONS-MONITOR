@@ -10,6 +10,7 @@ GitHub Actions 监视器 + 哨兵（版本 1.9.3）
   终端    python bin/tui_textual.py(精简版加 --lite)   交互式终端应用;bin/tui.py --once 输出一屏。
   检查    python bin/actions_monitor.py --doctor(脚本用 --json)   说明缺少什么以及修复它的准确命令。
   试用    python bin/actions_monitor.py --demo   用虚构数据的页面:无需 gh、无需登录,不会碰你的任何数据。
+  COMPLETE 还有  每个账户的评分、Security 哨兵(关闭)、每个仓库和团队的健康状况、定时报告(关闭)、操作日志、Apprise 以及 AI 服务预设;每一项都有指南,位于 docs/ 和页面的帮助中。
 
 运行要求：Python 3.11+，以及已登录的 GitHub CLI（`gh`）（gh auth login）。无需其他东西:核心不需要任何包(终端视图 bin/tui.py 使用可选的 rich 包)。
 首次使用的快速步骤：QUICKSTART_zh.txt。
@@ -22,9 +23,9 @@ GitHub Actions 监视器 + 哨兵（版本 1.9.3）
            关键判断不使用 AI；可选的 AI 解释功能默认关闭。
 
 语言       8 种语言:en、es、de、fr、it、ja、zh、pt(葡萄牙语为葡萄牙本土)。默认以英语启动:不由系统语言决定。请在页面的“设置”选项卡(齿轮图标,浏览器会记住)中选择其他语言,
-           或用 actions_monitor.json 的 "language"、环境变量 MONITOR_LANG,或命令行工具的 --lang 代码(优先级最高)。
+           或用 config/actions_monitor.json 的 "language"、环境变量 MONITOR_LANG,或命令行工具的 --lang 代码(优先级最高)。
            脚本读取的行(SKIP、DISPATCHED、READY、FAILED、Summary:、BUILD ONLY……)始终为英语。
-配置       actions_monitor.json（首次启动时由 assets/examples/actions_monitor.example.json 生成）。常用键：github_owner（留空 = gh 登录的账户）、
+配置       config/actions_monitor.json（首次启动时由 assets/examples/actions_monitor.example.json 生成）。常用键：github_owner（留空 = gh 登录的账户）、
            language、ecosystems_file、targets_file、refresh_seconds、cold_refresh_seconds、max_workers、min_rate_remaining、sentinel.*
            ecosystems_file：按名称前缀给仓库分组（见 assets/examples/ecosystems.example.json；"*" = 所有仓库）。targets_file：批处理工具使用的构建目录（见 assets/examples/targets.example.json）。
            profiles_file (assets/examples/profiles.example.json)：批次配置。这些文件中以 "_" 开头的键是元数据。
@@ -33,14 +34,14 @@ GitHub Actions 监视器 + 哨兵（版本 1.9.3）
            有它时还会有发布候选、签名队列和批处理工具。签名记录目录："signed_dir"；审计文件目录："audit_dir"。
 测试       py -3 -I -m unittest discover -s tests （Linux/macOS：python3 -I -m unittest discover -s tests）。不需要网络。
 问题排查   "API rate limit"：gh 的共享配额（每小时 5000 次）已用完；请等待重置（gh api rate_limit），并调大 refresh_seconds / 调小 max_workers。
-           gh 无响应时监视器会在启动时停止。损坏的缓存文件会被忽略；删除 sentinel_cache.json 可重新开始缓存。
+           gh 无响应时监视器会在启动时停止。损坏的缓存文件会被忽略；删除 data/sentinel_cache.json 可重新开始缓存。
            更新软件包后请重启监视器（正在运行的进程仍使用旧代码）。
 
 工具       bin/read_report.py [--lang 代码] [--json] [--export-status 目录] [--export-sign-queue 文件]  输出正在运行的监视器的内容（本机，不消耗 GitHub 配额）
            bin/gha_dispatch_all.py [--lang 代码] plan|dispatch|status|finalize|hygiene    批量运行 GitHub Actions 构建（你的电脑上不编译任何东西）
            bin/release_notes.py REPO [--since 标签] [--out 文件]    根据提交生成发布说明草稿（仅为建议；不发布任何内容）
            bin/release_candidates.py    CHANGELOG [Unreleased] 中有条目且上次发布较早的项目（只读）
-事件       哨兵每发生一次“变化”（新的红色、CI 恢复、构建卡住、新告警等）就在 events_monitor.jsonl 中写一行 JSON。每行都有与语言无关的稳定 `code`，
+事件       哨兵每发生一次“变化”（新的红色、CI 恢复、构建卡住、新告警等）就在 data/events_monitor.jsonl 中写一行 JSON。每行都有与语言无关的稳定 `code`，
            以及 `kind`、`level`、`repo`、`args` 和以配置语言写成的 `text`。可用 `tail -F` 跟踪。
 红色 CI    只有一个标准：默认分支上每个 workflow 的“最后一次已结束的运行”。红色 = failure、timed_out、startup_failure 或 action_required。
            cancelled、skipped、neutral 和 stale 不计入。
