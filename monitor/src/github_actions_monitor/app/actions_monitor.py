@@ -143,7 +143,7 @@ def state_dir():
     """Where the small state files of this process live: the folder of the account when this is the monitor of one account, else next to the code, as always."""
     return Path(CHILD["folder"]) if CHILD["folder"] else paths.folder("data")
 LITE_SHARED = ("/api/ai/state", "/api/ai/stream", "/api/ai/brief", "/api/ai/alerts", "/api/ai/ack")      # the channels for an AI tool are the same in both editions
-LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/notify", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events")   # they do not exist in lite
+LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/notify", "/api/score", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events")   # they do not exist in lite
 
 
 LITE_INHERIT = ("github_owner", "ecosystems", "ecosystems_file", "targets_file", "profiles_file", "exclude", "repos", "language", "runs_per_repo", "cold_runs_per_repo", "hot_hours", "stuck_minutes", "refresh_seconds", "cold_refresh_seconds")   # what a first lite start copies from actions_monitor.json
@@ -2299,6 +2299,16 @@ class Handler(BaseHTTPRequestHandler):
                 self.json_reply({"data": {"panels": panels, "act": sum(1 for p in panels if p["level"] == "bad"), "watch": sum(1 for p in panels if p["level"] == "warn")}, "error": None})
             except Exception as error:   # noqa: BLE001
                 self.json_reply({"data": {"panels": [], "act": 0, "watch": 0}, "error": str(error)[:200]})
+        elif path in ("/api/score", "/api/score/history"):      # the score of the account of this process, from the snapshots of the hour (read only; Complete only)
+            if not self.guard():
+                return
+            from urllib.parse import parse_qs
+            from github_actions_monitor.scoring import api as score_api
+            from github_actions_monitor.storage import runtime
+            ask = {k: v[0] for k, v in parse_qs(self.path.partition("?")[2]).items() if v}
+            storage, account = runtime.process_storage(CHILD["account"] or None)
+            config = toolconfig.raw_config()
+            self.json_reply(score_api.history(storage, account, config, ask) if path.endswith("/history") else score_api.latest(storage, account, config))
         elif path == "/api/analytics":
             if not self.guard():
                 return
