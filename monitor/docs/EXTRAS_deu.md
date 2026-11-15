@@ -15,7 +15,7 @@ Beide sind **standardmäßig aus** und werden in den Einstellungen eingeschaltet
 
 ## Ein Nur-Lese-Token der GitHub-App für Ihre Werkzeuge
 
-`github_app.share_reads`: Der folgende Befehl gibt auf diesem Rechner ein eine Stunde gültiges Installations-Token Ihrer GitHub-App aus, damit das `gh` Ihrer Werkzeuge und Agenten mit dem Kontingent der App liest und nicht mit Ihrem (`GH_TOKEN`). Das Token geht nur auf die Standardausgabe, nie in eine Datei oder ein Protokoll, und der Befehl braucht `--read-only`; geben Sie der App beim Anlegen nur Leseberechtigungen. Ohne `github_app.share_reads` verweigert er.
+`github_app.share_reads`: Der folgende Befehl gibt auf diesem Rechner ein eine Stunde gültiges Installations-Token Ihrer GitHub-App aus, damit das `gh` Ihrer Werkzeuge und Agenten mit dem Kontingent der App liest und nicht mit Ihrem (`GH_TOKEN`). Das Token geht nur auf die Standardausgabe, nie in eine Datei oder ein Protokoll, und der Befehl braucht `--read-only`; geben Sie der App beim Anlegen nur Leseberechtigungen. Ohne `github_app.share_reads` verweigert er. Das Token wird getrennt von dem des Monitors und nur mit Leseberechtigungen angefordert; enthält die Antwort eine Schreibberechtigung, weigert sich der Befehl, es auszugeben.
 
 ```
 python bin/monitor_cli.py gh-token --read-only

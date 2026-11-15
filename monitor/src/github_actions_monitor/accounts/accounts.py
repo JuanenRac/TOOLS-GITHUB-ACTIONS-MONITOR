@@ -122,6 +122,15 @@ def default_account(base=None):
     return chosen if chosen in on else (on[0] if on else "")
 
 
+def asked_account(path, headers=None):
+    """The account a request asks for, read ONE way for the whole product: `(value, repeated)`. The value comes from `?account=<id>` (decoded and trimmed) or else from the header
+    X-Account-Id; it is '' when none is given. `repeated` is True when `account` appears more than once in the query: nobody can say which one was meant, so the request must be refused (400)."""
+    from urllib.parse import parse_qs
+    values = parse_qs(path.partition("?")[2], keep_blank_values=True).get("account") or []
+    header = (headers.get("X-Account-Id") if headers else "") or ""
+    return ((values[0] if values else "") or header).strip(), len(values) > 1
+
+
 def layout(base=None):
     """'accounts' when the folder of accounts holds at least one account (the supervisor starts), else 'single' (the old layout, nothing changes)."""
     return "accounts" if list_accounts(base) else "single"

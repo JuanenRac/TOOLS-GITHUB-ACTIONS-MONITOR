@@ -15,7 +15,7 @@ Les deux sont **désactivés par défaut** et s'activent dans les Réglages.
 
 ## Un jeton en lecture seule de l'App GitHub pour vos outils
 
-`github_app.share_reads` : la commande ci-dessous affiche, sur cet ordinateur, un jeton d'installation de votre App GitHub valable une heure, pour que le `gh` de vos outils et agents lise avec le quota de l'App et non le vôtre (`GH_TOKEN`). Le jeton va seulement vers la sortie standard, jamais dans un fichier ni un journal, et la commande demande `--read-only` ; donnez à l'App des permissions en lecture seule à sa création. Sans `github_app.share_reads`, elle refuse.
+`github_app.share_reads` : la commande ci-dessous affiche, sur cet ordinateur, un jeton d'installation de votre App GitHub valable une heure, pour que le `gh` de vos outils et agents lise avec le quota de l'App et non le vôtre (`GH_TOKEN`). Le jeton va seulement vers la sortie standard, jamais dans un fichier ni un journal, et la commande demande `--read-only` ; donnez à l'App des permissions en lecture seule à sa création. Sans `github_app.share_reads`, elle refuse. Le jeton est demandé à part de celui que garde le moniteur, avec des permissions en lecture seule ; si la réponse contient une permission d'écriture, la commande refuse de l'afficher.
 
 ```
 python bin/monitor_cli.py gh-token --read-only

@@ -357,6 +357,10 @@ class LiveTeam(unittest.TestCase):
     def test_wrong_passwords_lock_the_user_and_nothing_secret_reaches_the_audit(self):
         self.start({"auth": {"enabled": True, "max_failed_logins": 3, "lockout_minutes": 5}, "session_guard": False})
         self.make_admin()
+        from unittest import mock
+        away = mock.patch.object(auth_http, "at_this_computer", lambda handler: False)      # from the network: the person at the computer is never locked out (see test_195_audit_fixes)
+        away.start()
+        self.addCleanup(away.stop)
         codes = [self.call("/api/auth/login", {"username": "root", "password": f"wrong guess {i}"})[1]["code"] for i in range(3)]
         self.assertEqual(codes, ["invalid_credentials", "invalid_credentials", "locked"])
         status, body, head = self.call("/api/auth/login", {"username": "root", "password": PASSWORD})

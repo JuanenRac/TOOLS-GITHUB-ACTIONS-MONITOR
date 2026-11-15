@@ -43,6 +43,7 @@ BACKUPS = 10
 MAX_BODY = 16384
 
 NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}\Z")
+NET_RE = re.compile(r"^[0-9A-Fa-f:.]{2,45}(?:/[0-9]{1,3})?\Z")      # an address or a block of addresses (listen.trusted_proxies)
 LABEL_RE = re.compile(r"^[\w .:/+-]{1,50}\Z")      # a label of GitHub may hold a colon, a space or a slash ("monitor:ignore", "good first issue")
 LABEL_KEYS = ("sentinels.collab.rules.issue_critical_labels", "sentinels.collab.rules.ignore_labels")
 TZ_RE = re.compile(r"^(?:local|utc|UTC|[A-Za-z][A-Za-z0-9_+./-]{1,63})\Z")      # display.timezone: local, utc or an IANA name
@@ -361,6 +362,7 @@ _f("advanced", "network", "listen.proxy_public_host", "text", PROXY_HOST_RE, sec
 _f("advanced", "network", "listen.max_failed_attempts", "int", (3, 100), unit="", secure=True)
 _f("advanced", "network", "listen.query_access", "bool", secure=True)
 _f("advanced", "network", "listen.trusted_proxy", "bool", secure=True)
+_f("advanced", "network", "listen.trusted_proxies", "names", secure=True)
 # --- Team mode: users with roles (off by default; one person alone needs nothing of this)
 _f("advanced", "auth", "auth.enabled", "bool", restart=False, secure=True)
 _f("advanced", "auth", "auth.session_hours", "int", (1, 720), restart=False, secure=True, unit="h")
@@ -532,7 +534,7 @@ def check_value(path, value):
             return False, "path"
         return True, text
     if kind == "names":
-        pattern = LABEL_RE if path in LABEL_KEYS else NAME_RE
+        pattern = LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else NAME_RE)
         if not isinstance(value, list) or len(value) > 200 or not all(isinstance(v, str) and pattern.match(v) for v in value):
             return False, "names"
         return True, list(value)

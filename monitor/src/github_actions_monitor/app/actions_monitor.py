@@ -45,6 +45,7 @@ from github_actions_monitor.data_pipeline import etagcache
 from github_actions_monitor.data_pipeline import graphql_checks
 from github_actions_monitor import i18n
 from github_actions_monitor.security import auth_http
+from github_actions_monitor.security import envguard
 from github_actions_monitor.security import localguard
 from github_actions_monitor.app import modes
 from github_actions_monitor.util import exclusive
@@ -108,7 +109,7 @@ DEFAULTS = {
     "session_guard": True,         # the page asks for a one-use token before it changes a setting or confirms an action
     "discovery": {"events": True, "suggest_groups": True, "auto_frequency": False, "hide": []},
     "auth": {"enabled": False, "session_hours": 12, "max_failed_logins": 5, "lockout_minutes": 15, "min_length": 10, "allow_bearer": False, "audit": True},     # OFF: one person, no login. On: users with roles once the first administrator exists (security/auth.py)
-    "listen": {"network": False, "trusted_proxy": False, "local_port": 0, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "tls_cert_file": "", "tls_key_file": "", "secure_cookie": False, "proxy_public_host": "", "max_failed_attempts": 10, "query_access": True},     # OFF: only this computer. On: a private address, with an access token for every request
+    "listen": {"network": False, "trusted_proxy": False, "trusted_proxies": [], "local_port": 0, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "tls_cert_file": "", "tls_key_file": "", "secure_cookie": False, "proxy_public_host": "", "max_failed_attempts": 10, "query_access": True},     # OFF: only this computer. On: a private address, with an access token for every request
     "github_token": {"enabled": False, "store": "auto"},       # OFF: the monitor uses your own `gh login`. On: a token kept in the store of the system (secretstore.py)
     "github_actions": {"enabled": False, "allowed": ["rerun_failed", "cancel"], "merge_method": "squash"},      # OFF: actions on GitHub, each one confirmed on its own (ghactions.py)
     "act": {"enabled": False, "allowed": [], "timeout_seconds": 900, "allow_symlinks": False},
@@ -1801,7 +1802,7 @@ class Handler(BaseHTTPRequestHandler):
         """POST /api/credential {"action": "replace", "token": "..."} | {"action": "reload"}. In the monitor of one account it is only for the supervisor (it proves itself with the key it gave this process at
         start; the supervisor already asked for an administrator or for this computer); in a monitor on its own the person must be at this computer (and have the one-use token of the page). The token
         is checked against GitHub before it is kept and is never repeated in the answer."""
-        key = os.environ.get(SUPERVISOR_KEY_ENV, "")
+        key = envguard.get(SUPERVISOR_KEY_ENV)
         if CHILD["account"]:
             import hmac
             if not key or not hmac.compare_digest(key.encode(), (self.headers.get(SUPERVISOR_KEY_HEADER) or "").encode()):
@@ -2896,19 +2897,20 @@ def network_setup(config, lite=False):
     access_token, generated, tls_ctx = "", False, None
     if listen["network"]:
         access_token = secret_from_environment(listen["token_env"])
+        envguard.hold(listen["token_env"])      # read once: the programs this process starts later do not inherit it
         if len(access_token) < 16:
             access_token, generated = localguard.make_token(), True      # a fresh token at each start, shown once in this console and nowhere else
         tls = localguard.tls_settings(config)
         if tls["cert"] or tls["key"]:      # HTTPS served directly with YOUR certificate
             tls_ctx = localguard.tls_context(tls["cert"], tls["key"])
         localguard.configure(True, listen["host"], access_token, listen["allowed_hosts"], secure=tls_ctx is not None or tls["secure_cookie"], proxy_host=listen["proxy_public_host"], trusted_proxy=listen["trusted_proxy"],
-                           behind_proxy=tls["secure_cookie"])
+                           behind_proxy=tls["secure_cookie"], trusted_proxies=listen["trusted_proxies"])
     return listen, tls_ctx, access_token, generated
 
 
 def secret_from_environment(name):
     """The value of the environment variable `name`, else the first line of the file named by `name + "_FILE"` (the way a container hands over a secret), else ''. The value is never printed."""
-    value = os.environ.get(name, "").strip()
+    value = envguard.get(name).strip()
     if value:
         return value
     path = os.environ.get(name + "_FILE", "").strip()

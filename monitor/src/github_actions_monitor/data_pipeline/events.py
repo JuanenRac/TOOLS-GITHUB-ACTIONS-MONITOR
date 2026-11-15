@@ -24,7 +24,7 @@ from pathlib import Path
 
 from github_actions_monitor import i18n
 from github_actions_monitor.app import toolconfig
-from github_actions_monitor.security import private_io
+from github_actions_monitor.security import envguard, private_io
 from github_actions_monitor.storage import locks, state_io
 
 from github_actions_monitor.util import paths
@@ -194,7 +194,7 @@ class Feed:
         for event in events:
             if event.get("kind") in ("red_new", "stuck_new", "pending_sign") and event.get("owner") == "main":
                 try:
-                    subprocess.Popen(self.notify_command + [event["text"]], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    subprocess.Popen(self.notify_command + [event["text"]], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=envguard.clean_environment())
                 except OSError:
                     pass
 

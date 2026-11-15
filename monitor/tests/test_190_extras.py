@@ -92,14 +92,14 @@ class TheReadOnlyToken(unittest.TestCase):
                 monitor_cli.cmd_gh_token(self.ctx())
             self.assertEqual(off.exception.code, monitor_cli.EXIT_AUTH)
         on = {"github_app": {"enabled": True, "app_id": "1", "key_path": "k", "share_reads": True}}
-        with mock.patch("github_actions_monitor.app.toolconfig.raw_config", return_value=on), mock.patch.object(github_app, "token", return_value=""):
+        with mock.patch("github_actions_monitor.app.toolconfig.raw_config", return_value=on), mock.patch.object(github_app, "shared_token", return_value=("", "failed")):
             with self.assertRaises(monitor_cli.CliError) as none:
                 monitor_cli.cmd_gh_token(self.ctx())
             self.assertEqual(none.exception.code, monitor_cli.EXIT_DEGRADED)
 
     def test_the_token_goes_only_to_the_standard_output_line_and_not_into_the_payload(self):
         on = {"github_app": {"enabled": True, "app_id": "1", "key_path": "k", "share_reads": True}}
-        with mock.patch("github_actions_monitor.app.toolconfig.raw_config", return_value=on), mock.patch.object(github_app, "token", return_value=TOKEN):
+        with mock.patch("github_actions_monitor.app.toolconfig.raw_config", return_value=on), mock.patch.object(github_app, "shared_token", return_value=(TOKEN, "")):
             payload, lines, code = monitor_cli.cmd_gh_token(self.ctx())
         self.assertEqual((lines, code), ([TOKEN], 0))
         self.assertNotIn(TOKEN, json.dumps(payload))

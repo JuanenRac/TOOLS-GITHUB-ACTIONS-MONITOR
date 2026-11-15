@@ -20,7 +20,7 @@ import time
 from pathlib import Path
 
 from github_actions_monitor.integrations import ai_alerts
-from github_actions_monitor.security import private_io
+from github_actions_monitor.security import envguard, private_io
 from github_actions_monitor.sentinels import sentinel_ai
 from github_actions_monitor.storage import locks
 
@@ -110,7 +110,7 @@ def _log(config, line):
 
 def _command(path, text, timeout):
     """The outgoing command: one existing file by absolute path, no shell, no arguments, the JSON on its standard input; its output is returned as text."""
-    done = subprocess.run([path], input=text, capture_output=True, text=True, encoding="utf-8", timeout=timeout, shell=False, check=False)      # noqa: S603 - the path is validated by the caller
+    done = subprocess.run([path], input=text, capture_output=True, text=True, encoding="utf-8", timeout=timeout, shell=False, check=False, env=envguard.clean_environment())      # noqa: S603 - the path is validated by the caller
     return done.stdout
 
 

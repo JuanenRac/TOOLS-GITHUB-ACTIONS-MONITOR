@@ -29,6 +29,7 @@ from github_actions_monitor.util.paths import ROOT as HERE   # the product folde
 
 from github_actions_monitor.accounts import accounts  # noqa: E402
 from github_actions_monitor.security import auth_http
+from github_actions_monitor.security import envguard
 from github_actions_monitor.security import netguard
 CHILD_PORT_START = 18800          # the children listen on 127.0.0.1 from here; the supervisor asks the system for a free one when it is taken
 HEALTH_EVERY = 5.0
@@ -78,7 +79,7 @@ class Child:
     def start(self):
         try:
             own_group = {"start_new_session": True} if sys.platform != "win32" else {}       # a group of its own, so that stopping it reaches everything it started
-            self.proc = subprocess.Popen(self.command, cwd=str(HERE), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, env={**os.environ, auth_http.CHILD_ENV: "1", SUPERVISOR_KEY_ENV: self.key}, **own_group)
+            self.proc = subprocess.Popen(self.command, cwd=str(HERE), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, env=envguard.for_account_process({auth_http.CHILD_ENV: "1", SUPERVISOR_KEY_ENV: self.key}), **own_group)
             self.started, self.error = time.time(), ""
         except OSError as error:
             self.proc, self.error = None, str(error)[:120]
@@ -311,15 +312,18 @@ class Supervisor:
 
 def account_of(path, headers, base=None):
     """The account a request is for: `?account=<id>` or the header X-Account-Id, else the default; None for one that is not enabled (the answer is then 404)."""
-    query = path.partition("?")[2]
-    asked = ""
-    for part in query.split("&"):
-        key, _, value = part.partition("=")
-        if key == "account":
-            asked = value
-    asked = asked or (headers.get("X-Account-Id") if headers else "") or ""
+    chosen, state = resolve_account(path, headers, base)
+    return chosen if state == "ok" else None
+
+
+def resolve_account(path, headers, base=None):
+    """The ONE place that decides which account a request is for. Returns `(account, state)`: state is "ok" (the account is enabled), "unknown" (named but not enabled: 404) or "repeated"
+    (`account` given more than once: 400). The gate of the team mode judges this value and the forwarding uses this same value, so what is checked is what is served."""
+    asked, repeated = accounts.asked_account(path, headers)
+    if repeated:
+        return "", "repeated"
     chosen = asked or accounts.default_account(base)
-    return chosen if chosen in accounts.enabled_accounts(base) else None
+    return chosen, ("ok" if chosen in accounts.enabled_accounts(base) else "unknown")
 
 
 def account_of_event(body, base=None):
@@ -344,7 +348,8 @@ def account_of_event(body, base=None):
 def strip_account(path):
     """The path without the `account=` parameter, so the child sees the request as if it were alone."""
     route, _, query = path.partition("?")
-    kept = [p for p in query.split("&") if p and not p.startswith("account=")]
+    from urllib.parse import unquote_plus
+    kept = [p for p in query.split("&") if p and unquote_plus(p.partition("=")[0]) != "account"]
     return route + ("?" + "&".join(kept) if kept else "")
 
 
@@ -466,7 +471,11 @@ class Handler(BaseHTTPRequestHandler):
             self.json({"ok": False}, 413)
             return
         body = self.rfile.read(size)
-        account_id = account_of(self.path, self.headers, sup.base) if ("account=" in self.path or self.headers.get("X-Account-Id")) else account_of_event(body, sup.base)
+        asked, repeated = accounts.asked_account(self.path, self.headers)
+        if repeated:
+            self.json({"ok": False, "error": "account_repeated"}, 400)
+            return
+        account_id = account_of(self.path, self.headers, sup.base) if asked else account_of_event(body, sup.base)
         child = sup.child(account_id) if account_id else None
         if child is None:
             self.json({"ok": True, "ignored": True}, 202)          # no account watches that owner: answered, never acted on (what a single monitor says for a repository it does not watch)
@@ -493,7 +502,13 @@ class Handler(BaseHTTPRequestHandler):
         if method == "POST" and route == "/api/access":
             self.open_session()
             return
-        if not self.gate() or not auth_http.gate(self, self.team_config()):      # team mode (off by default): the login and the roles are asked here, once, for every account
+        if not self.gate():
+            return
+        self.resolved_account, state = resolve_account(self.path, self.headers, sup.base) if sup is not None else ("", "ok")      # the account is decided ONCE: the gate judges it and the forwarding serves it
+        if state == "repeated":
+            self.json({"error": "the account is given more than once", "code": "account_repeated"}, 400)
+            return
+        if not auth_http.gate(self, self.team_config()):      # team mode (off by default): the login and the roles are asked here, once, for every account
             return
         if sup is None:
             self.json({"error": "not ready"}, 503)
@@ -582,7 +597,7 @@ class Handler(BaseHTTPRequestHandler):
         self.reply(200, page.replace("/*ACCOUNTS_DATA*/null", info, 1), "text/html; charset=utf-8")
 
     def forward(self, sup, method, route):
-        account_id = account_of(self.path, self.headers, sup.base)
+        account_id = self.resolved_account if self.resolved_account in accounts.enabled_accounts(sup.base) else None      # the very account the gate of the team mode judged
         if account_id is None:
             self.json({"error": "unknown account"}, 404)
             return
@@ -600,11 +615,11 @@ class Handler(BaseHTTPRequestHandler):
                 self.json({"error": "size"}, 413)
                 return
             body = self.rfile.read(size)
-        headers = {k: v for k, v in self.headers.items() if k.lower() not in NO_FORWARD and k.lower() != auth_http.USER_HEADER.lower()}      # a header of the client never says who is acting
+        headers = {k: v for k, v in self.headers.items() if k.lower() not in NO_FORWARD and k.lower() not in (auth_http.USER_HEADER.lower(), auth_http.ACCOUNT_HEADER.lower())}      # a header of the client never says who is acting
         context = getattr(self, "auth_user", None)
         if context:
             headers[auth_http.USER_HEADER] = context["user"]
-        headers["Host"] = f"127.0.0.1:{child.port}"           # the child answers to its own address: the supervisor already checked the one the browser used
+            headers[auth_http.ACCOUNT_HEADER] = account_id          # and for which account: the process of that account refuses a user that is not its own        headers["Host"] = f"127.0.0.1:{child.port}"           # the child answers to its own address: the supervisor already checked the one the browser used
         if localguard.STATE["network"] and not self.this_computer():
             headers[REMOTE_HEADER] = "1"          # the account then treats the request like a remote one: the keys that decide exposure and the actions on GitHub stay with the computer of the monitor
         if "Origin" in headers:

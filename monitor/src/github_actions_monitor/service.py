@@ -33,6 +33,7 @@ LISTEN_ENV = {
     "MONITOR_PROXY_PUBLIC_HOST": ("listen", "proxy_public_host", "text"),
     "MONITOR_SECURE_COOKIE": ("listen", "secure_cookie", "bool"),
     "MONITOR_TRUSTED_PROXY": ("listen", "trusted_proxy", "bool"),
+    "MONITOR_TRUSTED_PROXIES": ("listen", "trusted_proxies", "list"),
     "MONITOR_LOCAL_PORT": ("listen", "local_port", "int"),
     "MONITOR_TLS_CERT_FILE": ("listen", "tls_cert_file", "text"),
     "MONITOR_TLS_KEY_FILE": ("listen", "tls_key_file", "text"),

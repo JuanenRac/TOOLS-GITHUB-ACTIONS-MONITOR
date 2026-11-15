@@ -19,7 +19,7 @@ import threading
 import time
 
 LOOPBACK_HOSTS = ("127.0.0.1", "localhost")
-STATE = {"network": False, "host": "127.0.0.1", "token": "", "allowed": set(), "secure": False, "proxy_host": "", "trusted_proxy": False, "behind_proxy": False}
+STATE = {"network": False, "host": "127.0.0.1", "token": "", "allowed": set(), "secure": False, "proxy_host": "", "trusted_proxy": False, "behind_proxy": False, "proxy_nets": ()}
 #: the public name of an HTTPS proxy that forwards `Host` without a port (the proxy on port 443): a plain host name, never an address with a port, a path or a user
 PROXY_HOST_RE = re.compile(r"^[a-z0-9]([a-z0-9.-]{0,98}[a-z0-9])?\Z")
 COOKIE = "monitor_access"
@@ -81,7 +81,18 @@ def proxy_host_clean(value):
     return text if PROXY_HOST_RE.match(text) else ""
 
 
-def configure(network, host="127.0.0.1", token="", allowed=(), secure=False, proxy_host="", trusted_proxy=False, behind_proxy=False):
+def proxy_networks(values):
+    """The networks of `listen.trusted_proxies` (an address or a block such as 172.29.77.0/24) as objects; anything that is not one is left out."""
+    nets = []
+    for value in values if isinstance(values, (list, tuple)) else ():
+        try:
+            nets.append(ipaddress.ip_network(str(value).strip().split("%")[0], strict=False))
+        except ValueError:
+            continue
+    return tuple(nets[:32])
+
+
+def configure(network, host="127.0.0.1", token="", allowed=(), secure=False, proxy_host="", trusted_proxy=False, behind_proxy=False, trusted_proxies=()):
     """Sets the mode of the process. `secure` = the connection is HTTPS (direct TLS or a proxy in front): the cookie then carries Secure. `proxy_host` = the public name of an HTTPS proxy that
     forwards `Host` and `Origin` without a port (a proxy on port 443); it only counts when the session is HTTPS. `behind_proxy` = the owner declared a reverse proxy in front (also
     implied by a public proxy name or by `trusted_proxy`): then a request that arrives over loopback is NOT "this computer", because the proxy sits on loopback and makes every client look
@@ -91,6 +102,7 @@ def configure(network, host="127.0.0.1", token="", allowed=(), secure=False, pro
     STATE["proxy_host"] = proxy_host_clean(proxy_host) if network and secure else ""
     STATE["trusted_proxy"] = bool(network and trusted_proxy)      # listen.trusted_proxy: off unless the owner says the proxy in front is theirs (see client_key)
     STATE["behind_proxy"] = bool(network and (behind_proxy or trusted_proxy or proxy_host_clean(proxy_host)))
+    STATE["proxy_nets"] = proxy_networks(trusted_proxies) if network and trusted_proxy else ()      # listen.trusted_proxies: the proxy may also be in another container or machine, at these addresses
     STATE["host"] = host if network else "127.0.0.1"
     STATE["token"] = token if network else ""
     STATE["allowed"] = {str(a).lower() for a in allowed} | (own_addresses() if network and host == "0.0.0.0" else set())
@@ -264,12 +276,24 @@ def from_this_computer(client_address):
         return False
 
 
+def trusted_peer(client_address):
+    """True when the TCP peer is the proxy the owner declared: this computer (loopback) or an address inside `listen.trusted_proxies`. It only decides whose `X-Forwarded-For` is believed to COUNT
+    failed attempts; it never makes a request "this computer"."""
+    if from_this_computer(client_address):
+        return True
+    try:
+        peer = ipaddress.ip_address(str(client_address[0]).split("%")[0])
+    except (ValueError, IndexError, TypeError):
+        return False
+    return any(peer in net for net in STATE.get("proxy_nets") or () if net.version == peer.version)
+
+
 def client_key(client_address, headers=None):
     """The address a failed attempt and a lock are counted against. By default the TCP peer. With `listen.trusted_proxy` ON, a request whose peer is THIS computer (the reverse proxy the owner put in
     front) is counted against the LAST address of `X-Forwarded-For` (the one the proxy itself appended: an earlier one can be written by the client), so that one person's wrong tokens do not lock
     everybody out of the same proxy. It only changes the counting: a request that carries a forwarding header is still never "this computer" (is_this_computer), whatever it says."""
     peer = str(client_address[0])
-    if not (STATE.get("trusted_proxy") and headers is not None and from_this_computer(client_address)):
+    if not (STATE.get("trusted_proxy") and headers is not None and trusted_peer(client_address)):
         return peer
     forwarded = headers.get("X-Forwarded-For") or ""
     last = forwarded.split(",")[-1].strip()
@@ -289,12 +313,12 @@ def is_locked_out(client_address, headers=None):
     ADD `X-Forwarded-For` lets the client choose its own address, and rotating it must not turn the lock into nothing)."""
     if is_locked(client_key(client_address, headers)):
         return True
-    return bool(STATE.get("trusted_proxy") and headers is not None and from_this_computer(client_address) and is_locked(PROXY_KEY))
+    return bool(STATE.get("trusted_proxy") and headers is not None and trusted_peer(client_address) and is_locked(PROXY_KEY))
 
 
 def note_proxy_failure(client_address, headers, limit):
     """Counts a wrong token against all the clients of the trusted proxy together (PROXY_FACTOR times the limit of one address)."""
-    if STATE.get("trusted_proxy") and headers is not None and from_this_computer(client_address):
+    if STATE.get("trusted_proxy") and headers is not None and trusted_peer(client_address):
         note_failure(PROXY_KEY, limit * PROXY_FACTOR)
 
 
@@ -341,4 +365,5 @@ def settings_from(config):
     env = cfg.get("token_env") if isinstance(cfg.get("token_env"), str) else "MONITOR_ACCESS_TOKEN"
     allowed = [h for h in (cfg.get("allowed_hosts") or []) if isinstance(h, str) and 0 < len(h) <= 100]
     return {"network": network, "host": host if network else "127.0.0.1", "token_env": env or "MONITOR_ACCESS_TOKEN", "allowed_hosts": allowed,
-            "proxy_public_host": proxy_host_clean(cfg.get("proxy_public_host")), "trusted_proxy": cfg.get("trusted_proxy") is True, "local_port": door}
+            "proxy_public_host": proxy_host_clean(cfg.get("proxy_public_host")), "trusted_proxy": cfg.get("trusted_proxy") is True, "local_port": door,
+            "trusted_proxies": [h for h in (cfg.get("trusted_proxies") or []) if isinstance(h, str) and 0 < len(h) <= 60] if isinstance(cfg.get("trusted_proxies"), list) else []}
