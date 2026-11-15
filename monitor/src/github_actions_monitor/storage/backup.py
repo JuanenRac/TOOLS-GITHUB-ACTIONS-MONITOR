@@ -15,6 +15,7 @@ import hashlib
 import json
 import os
 import zipfile
+import zlib
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -25,10 +26,17 @@ FORMAT = 1
 DUMP, MANIFEST = "dump.jsonl", "manifest.json"
 
 
+NOT_KEPT = ("sessions",)      # a backup never carries the sessions (they hold the CSRF token of each one) and restoring one never brings a revoked session back to life
+
+
+def _without_sessions(records):
+    return {kind: rows for kind, rows in (records or {}).items() if kind not in NOT_KEPT}
+
+
 def _dump_lines(storage):
     for account_id in storage.list_accounts():
         yield json.dumps({"account": account_id, "payload": storage.export_account(account_id)}, ensure_ascii=False, sort_keys=True)
-    yield json.dumps({"records": storage.export_records()}, ensure_ascii=False, sort_keys=True)
+    yield json.dumps({"records": _without_sessions(storage.export_records())}, ensure_ascii=False, sort_keys=True)
 
 
 def make_backup(storage, dest):
@@ -110,7 +118,7 @@ def verify_backup(path):
                         last_records = True
                     else:
                         problems.append("a line of the dump has no account")
-        except (OSError, zipfile.BadZipFile, EOFError) as error:
+        except (OSError, zipfile.BadZipFile, EOFError, zlib.error) as error:
             return [f"the dump cannot be read: {str(error)[:80]}"]
     if size != manifest.get("dump_bytes"):
         problems.append("the size of the dump differs from the manifest")
@@ -142,5 +150,5 @@ def restore_backup(path, storage, force=False):
                     restored["accounts"] += 1
                     restored["events"] += len(parsed["payload"].get("events") or [])
                 else:
-                    storage.import_records(parsed["records"])
+                    storage.import_records(_without_sessions(parsed["records"]))      # also for a backup made before sessions were left out
     return restored

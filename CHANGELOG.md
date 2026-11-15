@@ -10,8 +10,16 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+### Added
+
+- **The first administrator of a container**: with the team mode on, the service that cannot start because there is no administrator yet now says the exact command that creates the first one (`docker compose run --rm --entrypoint python monitor -m github_actions_monitor.security.auth_cli create-admin NAME`) instead of advising to turn the network mode off, which a container cannot do. The deployment guide in the eight languages, the example file and the Compose file explain the step, and the container test follows it from a first start without an administrator. Optionally `MONITOR_ADMIN_USER` together with `MONITOR_ADMIN_PASSWORD_FILE` (a Docker secret, for example) creates the first administrator on the first start; the password is read from the file and never printed.
+
 ### Fixed
 
+- **The migration of the product folder can be undone even when it was cut half way**: what is about to move is written to the journal before it moves, with paths relative to the folder, so a power cut or a kill in the middle no longer leaves moved files that nothing remembers, and a folder renamed or mounted elsewhere after the migration still undoes. The undo deletes the journal only when everything it lists is back; otherwise it keeps what could not be put back.
+- **A symbolic link is never moved by the migration**: a configuration file that is a relative link would have been left broken in its new folder. It stays where it is and the start says so.
+- **A backup no longer carries the sessions and restoring one never brings a revoked session back**: the backup left out the sessions (they hold the token against forged requests of each one), and a restore ignores them even in a backup made by an older version.
+- **The log of a failed step refuses an id that is not plain digits** (a superscript digit passed the check and raised an error) with the same answer as any other bad request.
 - **`--help` and the other flags that only answer work while a monitor is running**: the check that stops a second monitor on the same port ran before the flags were read, so `--help` (and the quality gate of a release that calls it) failed on a computer where the monitor was already on port 8765. And the tests that measure real seconds take their limit from the load of the computer, so a busy runner no longer fails them.
 
 ## [1.8.3]

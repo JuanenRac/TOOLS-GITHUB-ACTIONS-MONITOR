@@ -106,6 +106,8 @@ launchd（macOS）: `ProgramArguments` = `/usr/bin/python3`、`-m`、`github_act
 | `MONITOR_TLS_KEY_FILE` | その証明書の秘密鍵（`listen.tls_key_file`）。 |
 | `MONITOR_QUERY_ACCESS` | `0` = `?access=` 付きのアドレスではセッションを開きません（`listen.query_access`）。`POST /api/access` を使ってください。 |
 | `MONITOR_TEAM_MODE` | `1` = チームモード（`auth.enabled`）: ユーザー、ロール、セッション。 |
+| `MONITOR_ADMIN_USER` | `MONITOR_ADMIN_PASSWORD_FILE` と併用: チームモードがオンでユーザーがまだいないときにサービスが作成する最初の管理者。 |
+| `MONITOR_ADMIN_PASSWORD_FILE` | `MONITOR_ADMIN_USER` のパスワードを 1 行目に書いたファイル(たとえば Docker シークレット)。 |
 | `MONITOR_SERVICE` | `1` = サービスとして動作: 使えないログインでも諦めず、doctor が保持設定を確認します。イメージとサービスが設定します。 |
 | `MONITOR_URL` | `bin/monitor_cli.py` とヘルスチェック用: モニターのアドレス（イメージでは 2 つ目のポート）。 |
 | `MONITOR_CA_FILE` | `bin/monitor_cli.py` 用: モニターの HTTPS 証明書に署名した認証局の PEM ファイル。 |
@@ -135,6 +137,17 @@ systemctl reload github-actions-monitor
 ```
 
 新しいトークンは、保持される前に GitHub で確認されます（`rate_limit` の呼び出し、無料）。GitHub が拒否するトークンは何も変更せず 422（`rejected`）を返します。有効なトークンはそのアカウントのフォルダーだけに書かれ（モード 600）、すぐに使われ、アカウントは待たずに読み直します。チームモードでは、このエンドポイントは `admin` セッション（Cookie セッションの CSRF トークン付き）用で、監査には誰が行ったかが記録され、トークンは記録されません。チームモードなしでネットワークモードが有効な場合は、モニターのコンピューターだけが行えます。トークンが応答、ログ、アラート、ページに現れることはありません。
+
+## コンテナでの最初の管理者
+
+`MONITOR_TEAM_MODE=1` ではイメージはネットワークで待ち受け、最初の管理者(モニターのあるコンピューターからしか作成できません)が存在するまでモニターはネットワークを開きません。コンテナ内では `/login` で作成できず、ネットワークモードも切れない(イメージが起動のたびに設定します)ため、サービスは最初の起動で終了コード 1 で止まります。サービスを起動する前に、同じボリュームで最初の管理者を一度作成してください(パスワードはコンソールで尋ねられ、コマンドラインには書きません):
+
+```sh
+docker compose run --rm --entrypoint python monitor -m github_actions_monitor.security.auth_cli create-admin NAME
+docker compose up -d
+```
+
+または、サービスに作成させることもできます。`MONITOR_ADMIN_USER` と `MONITOR_ADMIN_PASSWORD_FILE`(たとえば Docker シークレットなど、1 行目にパスワードを書いたファイル)を設定すると、チームモードがオンでユーザーがまだいないとき、最初の起動でその管理者が作成されます。パスワードは表示されません。
 
 ## 最初の起動、バックアップ、アップグレード
 

@@ -106,6 +106,8 @@ Only the names in this table are read. In the service a value that cannot be rea
 | `MONITOR_TLS_KEY_FILE` | The private key of that certificate (`listen.tls_key_file`). |
 | `MONITOR_QUERY_ACCESS` | `0` = the address with `?access=` no longer opens a session (`listen.query_access`); use `POST /api/access`. |
 | `MONITOR_TEAM_MODE` | `1` = the team mode (`auth.enabled`): users, roles and sessions. |
+| `MONITOR_ADMIN_USER` | With `MONITOR_ADMIN_PASSWORD_FILE`: the first administrator the service creates when the team mode is on and there is no user yet. |
+| `MONITOR_ADMIN_PASSWORD_FILE` | The file (for example a Docker secret) with the password of `MONITOR_ADMIN_USER` on its first line. |
 | `MONITOR_SERVICE` | `1` = it runs as a service: it does not give up on a login that is no good, and the doctor checks retention. The image and the service set it. |
 | `MONITOR_URL` | For `bin/monitor_cli.py` and the health check: the address of the monitor (the image: the second port). |
 | `MONITOR_CA_FILE` | For `bin/monitor_cli.py`: a PEM file with the authority that signed the HTTPS certificate of the monitor. |
@@ -135,6 +137,17 @@ systemctl reload github-actions-monitor
 ```
 
 The new token is checked against GitHub (the `rate_limit` call, free) BEFORE it is kept: a token GitHub refuses changes nothing and answers 422 (`rejected`). A good one is written to the folder of that account only (mode 600), used at once, and the account reads again without waiting. In the team mode the endpoint is for an `admin` session (with the CSRF token of a cookie session) and the audit records who did it, never the token; without the team mode, while the network mode is on, only the computer of the monitor may. The token is never in an answer, a log, an alert or the page.
+
+## The first administrator in a container
+
+With `MONITOR_TEAM_MODE=1` the image listens on the network, and the monitor does not open the network before the first administrator exists (which can only be created from the computer of the monitor). Inside a container that cannot be done at `/login`, and the network mode cannot be turned off (the image sets it at every start), so the service would stop with exit code 1 on its first start. Create the first administrator once, on the same volumes, before starting the service (the password is asked on the console, never put in the command line):
+
+```sh
+docker compose run --rm --entrypoint python monitor -m github_actions_monitor.security.auth_cli create-admin NAME
+docker compose up -d
+```
+
+Or let the service create it: set `MONITOR_ADMIN_USER` and `MONITOR_ADMIN_PASSWORD_FILE` (a file, for example a Docker secret, with the password on its first line); the first start creates that administrator when the team mode is on and no user exists yet, and never prints the password.
 
 ## First start, backup and upgrade
 

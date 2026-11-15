@@ -106,6 +106,8 @@ Só são lidos os nomes desta tabela. No serviço, um valor ilegível é ignorad
 | `MONITOR_TLS_KEY_FILE` | A chave privada desse certificado (`listen.tls_key_file`). |
 | `MONITOR_QUERY_ACCESS` | `0` = o endereço com `?access=` já não abre sessão (`listen.query_access`); use `POST /api/access`. |
 | `MONITOR_TEAM_MODE` | `1` = o modo de equipa (`auth.enabled`): utilizadores, papéis e sessões. |
+| `MONITOR_ADMIN_USER` | Com `MONITOR_ADMIN_PASSWORD_FILE`: o primeiro administrador que o serviço cria quando o modo de equipa está ativo e ainda não há utilizadores. |
+| `MONITOR_ADMIN_PASSWORD_FILE` | O ficheiro (por exemplo um segredo do Docker) com a palavra-passe de `MONITOR_ADMIN_USER` na primeira linha. |
 | `MONITOR_SERVICE` | `1` = corre como serviço: não desiste perante um acesso que não serve e o doctor verifica a retenção. A imagem e o serviço ativam-no. |
 | `MONITOR_URL` | Para o `bin/monitor_cli.py` e a verificação de saúde: o endereço do monitor (a imagem: a segunda porta). |
 | `MONITOR_CA_FILE` | Para o `bin/monitor_cli.py`: um ficheiro PEM com a autoridade que assinou o certificado HTTPS do monitor. |
@@ -135,6 +137,17 @@ systemctl reload github-actions-monitor
 ```
 
 O novo token é verificado no GitHub (a chamada `rate_limit`, gratuita) ANTES de ser guardado: um token que o GitHub recusa não altera nada e responde 422 (`rejected`). Um bom é escrito apenas na pasta dessa conta (modo 600), usado de imediato, e a conta volta a ler sem esperar. No modo de equipa, o endpoint é para uma sessão `admin` (com o token CSRF de uma sessão por cookie) e a auditoria regista quem o fez, nunca o token; sem o modo de equipa, com o modo de rede ativo, só o computador do monitor pode. O token nunca aparece numa resposta, num registo, num alerta nem na página.
+
+## O primeiro administrador num contentor
+
+Com `MONITOR_TEAM_MODE=1` a imagem escuta na rede, e o monitor não abre a rede antes de existir o primeiro administrador (que só se pode criar a partir do computador do monitor). Dentro de um contentor isso não se pode fazer em `/login` e o modo de rede não se pode desligar (a imagem define-o em cada arranque), por isso o serviço pararia com o código de saída 1 no primeiro arranque. Crie o primeiro administrador uma vez, nos mesmos volumes, antes de arrancar o serviço (a palavra-passe é pedida na consola, nunca vai na linha de comandos):
+
+```sh
+docker compose run --rm --entrypoint python monitor -m github_actions_monitor.security.auth_cli create-admin NAME
+docker compose up -d
+```
+
+Ou deixe que o serviço o crie: defina `MONITOR_ADMIN_USER` e `MONITOR_ADMIN_PASSWORD_FILE` (um ficheiro, por exemplo um segredo do Docker, com a palavra-passe na primeira linha); o primeiro arranque cria esse administrador quando o modo de equipa está ativo e ainda não existe nenhum utilizador, e nunca imprime a palavra-passe.
 
 ## Primeiro arranque, cópia de segurança e atualização
 

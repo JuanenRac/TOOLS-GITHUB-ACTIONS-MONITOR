@@ -235,7 +235,10 @@ class BackupTool(unittest.TestCase):
         back = Path(self.tmp.name) / "back"
         self.assertEqual(run_cli(backup_storage, ["restore", second, "--backend", "file", "--accounts-dir", str(back)])[0], 0)
         self.assertEqual(FileStorage(back, "accounts").export_account("alpha"), self.files.export_account("alpha"))
-        self.assertEqual(FileStorage(back, "accounts").export_records(), self.files.export_records())
+        kept = {kind: rows for kind, rows in self.files.export_records().items() if kind != "sessions"}
+        restored = FileStorage(back, "accounts").export_records()
+        self.assertEqual({kind: rows for kind, rows in restored.items() if kind != "sessions"}, kept)
+        self.assertEqual(restored["sessions"], {}, "a backup carries no sessions")
 
     def test_a_damaged_backup_is_not_restored(self):
         self.assertEqual(run_cli(backup_storage, ["backup", self.zip, "--backend", "file", "--accounts-dir", str(self.root)])[0], 0)

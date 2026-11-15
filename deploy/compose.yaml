@@ -31,7 +31,9 @@ services:
       MONITOR_PROXY_PUBLIC_HOST: ${MONITOR_PUBLIC_HOST:-}
       MONITOR_SECURE_COOKIE: ${MONITOR_SECURE_COOKIE:-}
       MONITOR_ALLOWED_HOSTS: ${MONITOR_ALLOWED_HOSTS:-}
-      MONITOR_TEAM_MODE: ${MONITOR_TEAM_MODE:-}                        # 1 = users and roles (create the first administrator at /login or with auth_cli)
+      MONITOR_TEAM_MODE: ${MONITOR_TEAM_MODE:-}                        # 1 = users and roles (the first administrator: auth_cli create-admin once, see deploy/.env.example)
+      MONITOR_ADMIN_USER: ${MONITOR_ADMIN_USER:-}                      # optional: the first administrator, created on the first start with the password of the file below
+      MONITOR_ADMIN_PASSWORD_FILE: ${MONITOR_ADMIN_PASSWORD_FILE:-}    # a file (a Docker secret) with its password on the first line
     secrets:
       - gh_token
     volumes:

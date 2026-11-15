@@ -106,6 +106,8 @@ launchd（macOS）：`ProgramArguments` = `/usr/bin/python3`、`-m`、`github_ac
 | `MONITOR_TLS_KEY_FILE` | 该证书的私钥（`listen.tls_key_file`）。 |
 | `MONITOR_QUERY_ACCESS` | `0` = 带 `?access=` 的地址不再打开会话（`listen.query_access`）；请使用 `POST /api/access`。 |
 | `MONITOR_TEAM_MODE` | `1` = 团队模式（`auth.enabled`）：用户、角色和会话。 |
+| `MONITOR_ADMIN_USER` | 与 `MONITOR_ADMIN_PASSWORD_FILE` 一起使用:团队模式开启且还没有用户时,服务创建的第一个管理员。 |
+| `MONITOR_ADMIN_PASSWORD_FILE` | 文件(例如 Docker 机密),第一行是 `MONITOR_ADMIN_USER` 的密码。 |
 | `MONITOR_SERVICE` | `1` = 以服务方式运行：登录无效时不放弃，doctor 会检查保留策略。镜像和服务单元已设置。 |
 | `MONITOR_URL` | 供 `bin/monitor_cli.py` 和健康检查使用：监视器的地址（镜像中为第二个端口）。 |
 | `MONITOR_CA_FILE` | 供 `bin/monitor_cli.py` 使用：签发监视器 HTTPS 证书的颁发机构的 PEM 文件。 |
@@ -135,6 +137,17 @@ systemctl reload github-actions-monitor
 ```
 
 新令牌在保存之前会先向 GitHub 验证（调用 `rate_limit`，免费）：GitHub 拒绝的令牌不会改变任何内容，并返回 422（`rejected`）。有效的令牌只写入该账户的文件夹（权限 600），立即使用，账户无需等待就会重新读取。在团队模式下，该端点仅限 `admin` 会话（Cookie 会话需带 CSRF 令牌），审计会记录是谁操作的，但绝不记录令牌；没有团队模式且网络模式开启时，只有监视器所在的计算机可以操作。令牌绝不会出现在响应、日志、警报或页面中。
+
+## 容器中的第一个管理员
+
+设置 `MONITOR_TEAM_MODE=1` 时,镜像会在网络上监听,而在第一个管理员存在之前(只能在监视器所在的计算机上创建),监视器不会开放网络。在容器里无法通过 `/login` 创建,网络模式也无法关闭(镜像每次启动都会设置),所以服务在首次启动时会以退出码 1 停止。请在启动服务之前,在相同的卷上创建一次第一个管理员(密码在控制台询问,绝不放在命令行中):
+
+```sh
+docker compose run --rm --entrypoint python monitor -m github_actions_monitor.security.auth_cli create-admin NAME
+docker compose up -d
+```
+
+或者让服务来创建:设置 `MONITOR_ADMIN_USER` 和 `MONITOR_ADMIN_PASSWORD_FILE`(一个文件,例如 Docker 机密,密码在第一行);当团队模式已开启且还没有任何用户时,首次启动会创建该管理员,并且从不打印密码。
 
 ## 首次启动、备份与升级
 

@@ -207,7 +207,9 @@ class Contract:
         self.assertEqual(target.list_accounts(), ["alpha", "beta"])
         for name in ("alpha", "beta"):
             self.assertEqual(target.export_account(name), self.storage.export_account(name))
-        self.assertEqual(target.export_records(), self.storage.export_records())
+        kept = {kind: rows for kind, rows in self.storage.export_records().items() if kind != "sessions"}
+        self.assertEqual({kind: rows for kind, rows in target.export_records().items() if kind != "sessions"}, kept)
+        self.assertEqual(target.export_records()["sessions"], {}, "the sessions are not in a backup")
         with self.assertRaises(base.StorageError):      # not over data that is already there
             backup_module.restore_backup(zip_path, target)
         backup_module.restore_backup(zip_path, target, force=True)

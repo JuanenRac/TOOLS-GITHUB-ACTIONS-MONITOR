@@ -106,6 +106,8 @@ Seuls les noms de ce tableau sont lus. Dans le service, une valeur illisible est
 | `MONITOR_TLS_KEY_FILE` | La clé privée de ce certificat (`listen.tls_key_file`). |
 | `MONITOR_QUERY_ACCESS` | `0` = l'adresse avec `?access=` n'ouvre plus de session (`listen.query_access`) ; utilisez `POST /api/access`. |
 | `MONITOR_TEAM_MODE` | `1` = le mode équipe (`auth.enabled`) : utilisateurs, rôles et sessions. |
+| `MONITOR_ADMIN_USER` | Avec `MONITOR_ADMIN_PASSWORD_FILE` : le premier administrateur que le service crée quand le mode équipe est actif et qu'il n'y a pas encore d'utilisateur. |
+| `MONITOR_ADMIN_PASSWORD_FILE` | Le fichier (par exemple un secret Docker) avec le mot de passe de `MONITOR_ADMIN_USER` sur sa première ligne. |
 | `MONITOR_SERVICE` | `1` = il tourne comme un service : il n'abandonne pas devant un accès inutilisable, et le doctor vérifie la rétention. L'image et le service l'activent. |
 | `MONITOR_URL` | Pour `bin/monitor_cli.py` et le contrôle de santé : l'adresse du moniteur (l'image : le second port). |
 | `MONITOR_CA_FILE` | Pour `bin/monitor_cli.py` : un fichier PEM avec l'autorité qui a signé le certificat HTTPS du moniteur. |
@@ -135,6 +137,17 @@ systemctl reload github-actions-monitor
 ```
 
 Le nouveau jeton est vérifié auprès de GitHub (l'appel `rate_limit`, gratuit) AVANT d'être gardé : un jeton que GitHub refuse ne change rien et répond 422 (`rejected`). Un bon jeton est écrit dans le dossier de ce compte seulement (mode 600), utilisé aussitôt, et le compte relit sans attendre. En mode équipe, le point d'accès est réservé à une session `admin` (avec le jeton CSRF d'une session par cookie) et l'audit enregistre qui l'a fait, jamais le jeton ; sans mode équipe, avec le mode réseau actif, seul l'ordinateur du moniteur le peut. Le jeton n'apparaît jamais dans une réponse, un journal, une alerte ni la page.
+
+## Le premier administrateur dans un conteneur
+
+Avec `MONITOR_TEAM_MODE=1`, l'image écoute sur le réseau, et le moniteur n'ouvre pas le réseau avant que le premier administrateur existe (qui ne peut être créé que depuis l'ordinateur du moniteur). Dans un conteneur, cela ne peut pas se faire sur `/login` et le mode réseau ne peut pas être désactivé (l'image le fixe à chaque démarrage) : le service s'arrêterait donc avec le code de sortie 1 dès son premier démarrage. Créez le premier administrateur une fois, sur les mêmes volumes, avant de démarrer le service (le mot de passe est demandé dans la console, jamais passé dans la ligne de commande) :
+
+```sh
+docker compose run --rm --entrypoint python monitor -m github_actions_monitor.security.auth_cli create-admin NAME
+docker compose up -d
+```
+
+Ou laissez le service le créer : définissez `MONITOR_ADMIN_USER` et `MONITOR_ADMIN_PASSWORD_FILE` (un fichier, par exemple un secret Docker, avec le mot de passe sur sa première ligne) ; le premier démarrage crée cet administrateur quand le mode équipe est actif et qu'aucun utilisateur n'existe, et n'affiche jamais le mot de passe.
 
 ## Premier démarrage, sauvegarde et mise à jour
 
