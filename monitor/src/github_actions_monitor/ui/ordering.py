@@ -8,14 +8,18 @@ follows them to another browser). Anything outside the closed list is dropped, n
 
 * "now": the section "Happening now" of the first tab. `ecosystem` (the default, with a heading per ecosystem), `severity` (stuck first, then the runs with a failed job, then the rest), `age`
   (the longest running first), `newest` (the latest start first), `repo`, `event` (the kind of trigger: push, pull_request, schedule...) and `state` (running before queued).
+* "alerts": the list of the Alerts tab. `server` (the default: as the monitor sends them), `severity` (critical, error, warning, info), `streak` (the longest run of failures in a row first),
+  `class` (real before watch: an error or critical alert is real, a warning or info one is to watch), `age` (the oldest first), `newest`, `repo`, `origin` (the sentinel that raised it) and `state`
+  (open before silenced).
 * "fold": whether the repositories of "Happening now" are all unfolded (`open`) or all folded (`closed`, the default), for any of the orders above; it is chosen with the two buttons next to the list.
 """
 KINDS = {
     "now": ("ecosystem", "severity", "age", "newest", "repo", "event", "state"),
+    "alerts": ("server", "severity", "streak", "class", "age", "newest", "repo", "origin", "state"),
     "fold": ("open", "closed"),
 }
-DEFAULTS = {"now": "ecosystem", "fold": "closed"}
-SETTINGS = {"now": "now_sort"}
+DEFAULTS = {"now": "ecosystem", "alerts": "server", "fold": "closed"}
+SETTINGS = {"now": "now_sort", "alerts": "alerts_sort"}
 
 
 def configured(config, kind):

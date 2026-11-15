@@ -59,7 +59,7 @@ class TheClosedList(unittest.TestCase):
             self.assertEqual(ordering.configured(wrong, "now"), "ecosystem", wrong)
 
     def test_the_page_lists_the_same_orders_in_its_code_its_select_and_the_eight_catalogues(self):
-        listed = re.search(r'const SORTS=\{now:\[([^\]]*)\],fold:\["open","closed"\]\}', PAGE)
+        listed = re.search(r'const SORTS=\{now:\[([^\]]*)\],alerts:', PAGE)
         self.assertIsNotNone(listed)
         self.assertEqual(re.findall(r'"([a-z]+)"', listed.group(1)), list(NOW))
         select = re.search(r'<select id="now-sort"[^>]*>(.*?)</select>', PAGE, re.S).group(1)
@@ -111,7 +111,7 @@ class WhatAUserKeeps(unittest.TestCase):
 
     def test_what_is_not_in_the_closed_list_is_refused_and_nothing_is_kept(self):
         _admin, vic, _ann = self.team()
-        for body, code in (({"now": "alerts"}, "order_invalid"), ({"now": 3}, "order_invalid"), ({"alerts": "age"}, "kind_invalid"), ({"now": "age", "x": "y"}, "kind_invalid")):
+        for body, code in (({"now": "alerts"}, "order_invalid"), ({"now": 3}, "order_invalid"), ({"other": "age"}, "kind_invalid"), ({"now": "age", "x": "y"}, "kind_invalid")):
             status, answer, _ = self.call("/api/auth/me/view", body, vic)
             self.assertEqual((status, answer["code"]), (400, code), body)
         self.assertEqual(self.call("/api/auth/me/view", headers=vic)[1], {"view": {}})
@@ -149,6 +149,7 @@ class TheStorageRules(unittest.TestCase):
 
     def test_the_view_keeps_only_known_lists_with_known_orders(self):
         self.assertEqual(ordering.clean_view({"now": "state", "alerts": "x", "other": "age"}), {"now": "state"})
+        self.assertEqual(ordering.clean_view({"now": "state", "alerts": "streak"}), {"now": "state", "alerts": "streak"})
         for raw in (None, [], "now", 3):
             self.assertEqual(ordering.clean_view(raw), {})
 
