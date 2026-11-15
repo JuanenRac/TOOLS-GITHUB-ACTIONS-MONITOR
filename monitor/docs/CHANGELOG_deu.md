@@ -69,6 +69,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - Eine Anleitung zur Punktzahl in den acht Sprachen.
 
+### Behoben
+
+- Die Bilder des Reiters Diagramme passen wieder: Der Ring des Ergebnisses der letzten 24 Std. wurde von seinem Kasten abgeschnitten und seine Legende ragte aus der Zeichnung, die Balken der Dauern waren etwas höher als ihr Rahmen, und die letzte Stunde der Zeitleiste ragte rechts heraus. Die Zeilen des Reiters schrumpfen nicht mehr unter das, was ein Bild braucht (der Reiter scrollt stattdessen), die Legende des Rings wird nach ihren Wörtern bemessen und rückt unter den Ring, wenn sie daneben nicht passt, und die Ränder fassen die Hälfte der letzten Beschriftung. Eine neue Prüfung öffnet den Reiter in den acht Sprachen, breit und schmal, hell und dunkel, und misst jedes Bild.
+
 ## [1.8.4]
 
 ### Hinzugefügt

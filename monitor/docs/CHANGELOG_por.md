@@ -69,6 +69,10 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - Um guia da pontuação nos oito idiomas.
 
+### Corrigido
+
+- As imagens do separador Gráficos voltam a encaixar: o anel do resultado das últimas 24 h ficava cortado pela sua caixa e a legenda saía do desenho, as barras das durações eram um pouco mais altas do que a moldura e a última hora da linha do tempo saía pela direita. As linhas do separador já não encolhem abaixo do que uma imagem precisa (o separador desloca-se), a legenda do anel mede-se pelas suas palavras e passa para baixo do anel quando não cabe ao lado, e as margens guardam metade da última etiqueta. Uma verificação nova abre o separador nos oito idiomas, largo e estreito, claro e escuro, e mede cada imagem.
+
 ## [1.8.4]
 
 ### Adicionado
