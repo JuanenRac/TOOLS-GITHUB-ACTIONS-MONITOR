@@ -40,6 +40,10 @@ A janela é o número de dias de execuções que a pontuação observa: `score.w
 
 Cada conta tem a sua própria pontuação. O detalhe decompõe-na por repositório (só as partes de CI, as piores primeiro). Não há um número único para toda a instalação.
 
+## Na página
+
+Uma ficha no cabeçalho, junto às fichas de preparação, mostra a pontuação: o número, a letra, uma seta com a variação face à janela anterior e uma pequena linha dos últimos dias. A cor segue a letra (A e B verde, C âmbar, D e E vermelho). Enquanto não há número, é neutra e diz porquê (a calibrar, dados insuficientes). Uma estrela depois da letra significa que uma parte ainda não conta (hoje, a segurança): um número alto não quer então dizer que esteja tudo bem. Ao passar o rato mostra a cobertura, as partes com os seus pesos e o repositório mais fraco. A ficha não aparece no Lite nem com a pontuação desligada (`score.enabled`).
+
 ## A API
 
 `GET /api/score` responde com o último instantâneo da conta: `state`, `score`, `letter`, `trend`, `parts`, `coverage`, `data_quality`, `complete`, `missing_parts`, `repos`, `age_seconds` e `stale` (verdadeiro quando o instantâneo tem mais de três horas). `GET /api/score/history` responde com os pontos ao longo do tempo, do mais antigo ao mais recente (`?hours=` para trás a partir de agora, no máximo 90 dias, e `?limit=`, no máximo 2000). Um número em falta é `null`, nunca 0. No modo equipa, quem pode ver a conta pode ler a sua pontuação; os pesos e os limites são definições que só um administrador altera.
