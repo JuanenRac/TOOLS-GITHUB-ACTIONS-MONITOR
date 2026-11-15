@@ -103,11 +103,11 @@ def repo_rows(runs, end, cfg):
     return rows[:MAX_REPOS]
 
 
-def make_snapshot(ledger, cfg, now, account=None):
-    """The snapshot of the account for the window that ends at `now`."""
+def make_snapshot(ledger, cfg, now, account=None, security=None):
+    """The snapshot of the account for the window that ends at `now`. `security` is {"penalty", "repos"} from the Security sentinel, or None while it is off or has seen too little."""
     runs, collab = ledger_runs(ledger), ledger_collab(ledger)
     watched_hours = max(0.0, (now - ledger["first_seen"]) / 3600.0)
-    answer = engine.score_window(runs, collab, now, cfg, watched_hours=watched_hours)
+    answer = engine.score_window(runs, collab, now, cfg, watched_hours=watched_hours, security=security)
     return {"schema": SCHEMA, "at": now, "account": account, "window_days": cfg["window_days"], **answer, "repos": repo_rows(runs, now, cfg)}
 
 
@@ -115,7 +115,7 @@ def hour_key(now):
     return datetime.fromtimestamp(now, timezone.utc).strftime("%Y-%m-%dT%H")
 
 
-def tick(storage, account_id, config, runs, collab_alerts, now=None, force=False, collab_known=True):
+def tick(storage, account_id, config, runs, collab_alerts, now=None, force=False, collab_known=True, security=None):
     """One pass: updates the ledger, writes the snapshot of the hour and returns it; None when the score is off or the pass is not due. Needs the storage of the account."""
     now = time.time() if now is None else now
     cfg = engine.settings(config)
@@ -127,7 +127,7 @@ def tick(storage, account_id, config, runs, collab_alerts, now=None, force=False
     keep_days = min(180, 2 * cfg["window_days"] + 1)
     update_ledger(ledger, runs, collab_alerts, now, keep_days, collab_known)
     ledger["last_tick"] = now
-    snapshot = make_snapshot(ledger, cfg, now, account_id)
+    snapshot = make_snapshot(ledger, cfg, now, account_id, security)
     snapshot["drop"] = drop.detect(snapshot, cfg)
     fresh = bool(snapshot["drop"]) and not ledger.get("drop_open")      # the moment the drop appears: the only time it goes out through the notification channels
     ledger["drop_open"] = bool(snapshot["drop"])

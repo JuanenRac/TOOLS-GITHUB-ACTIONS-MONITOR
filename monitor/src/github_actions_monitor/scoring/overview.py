@@ -18,12 +18,12 @@ def _number(value):
 def row(account, answer):
     """One line for one account from its /api/score answer (None when it could not be read)."""
     if not isinstance(answer, dict) or not isinstance(answer.get("state"), str):
-        return {"account": account, "state": "unreachable", "score": None, "letter": None, "coverage": None, "repos": 0, "weight": 0}
+        return {"account": account, "state": "unreachable", "score": None, "letter": None, "coverage": None, "repos": 0, "weight": 0, "missing": []}
     repos = [r for r in (answer.get("repos") or []) if isinstance(r, dict) and _number(r.get("score"))]
     scored = answer["state"] == "scored" and _number(answer.get("score"))
     return {"account": account, "state": answer["state"], "score": answer["score"] if scored else None, "letter": answer.get("letter") if scored else None,
             "coverage": answer.get("coverage") if _number(answer.get("coverage")) else None, "repos": len(repos), "weight": max(1, len(repos)) if scored else 0,
-            "stale": bool(answer.get("stale"))}
+            "stale": bool(answer.get("stale")), "missing": [str(x) for x in (answer.get("missing_parts") or [])] if scored else []}
 
 
 def combine(answers, cfg=None):
@@ -45,6 +45,6 @@ def combine(answers, cfg=None):
         out["state"] = "off"
     else:
         out["state"] = "calibrating"
-    out["complete"] = False
-    out["missing_parts"] = list(engine.MISSING_PARTS)
+    out["missing_parts"] = sorted({m for r in counted for m in r["missing"]})
+    out["complete"] = bool(counted) and not out["missing_parts"]      # complete only when every account in the mean has all its parts
     return out

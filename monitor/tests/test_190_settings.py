@@ -32,6 +32,7 @@ class Agreement(unittest.TestCase):
         expected = {"score.enabled", "score.window_days", "score.calibrating_hours", "score.min_runs", "score.min_coverage", "score.trend_flat",
                     "score.alert.enabled", "score.alert.drop_points", "score.alert.notify_external"}
         expected |= {f"score.weights.{p}" for p in engine.PARTS} | {f"score.grades.{g}" for g in "ABCD"}
+        self.assertIn("score.weights.security", expected)
         self.assertEqual(set(score_keys()), expected)
 
     def test_the_example_file_holds_the_defaults_of_the_engine(self):

@@ -15,10 +15,11 @@ A weighted sum of four parts, each one from 0 to 100. A part is 100 at its **goo
 
 | Part | Weight | What it measures | Good | Bad |
 |---|---|---|---|---|
-| Reliability | 40 | share of the finished runs that succeed (cancelled and skipped runs do not count) | 98 % | 50 % |
-| Speed | 20 | 95th percentile of the duration of the successful runs | 10 min | 60 min |
-| Recovery | 20 | median time from the first failure of a workflow to its next success | 30 min | 24 h |
-| Collaboration | 20 | median time an alert of the collaboration sentinel stays open until it is gone | 2 days | 14 days |
+| Reliability | 30 | share of the finished runs that succeed (cancelled and skipped runs do not count) | 98 % | 50 % |
+| Speed | 15 | 95th percentile of the duration of the successful runs | 10 min | 60 min |
+| Recovery | 15 | median time from the first failure of a workflow to its next success | 30 min | 24 h |
+| Collaboration | 15 | median time an alert of the collaboration sentinel stays open until it is gone | 2 days | 14 days |
+| Security | 25 | the points that the open findings of the Security sentinel take off 100 (only while that sentinel is on) | 0 points | 100 points |
 
 The letter is A from 90, B from 80, C from 70, D from 55 and E below. The trend compares the score with the window just before it: up, down or flat (a change smaller than `score.trend_flat` points is flat).
 
@@ -30,7 +31,7 @@ The score never shows a number it cannot stand behind. The answer always carries
 - **insufficient_data**: fewer than `score.min_runs` finished runs in the window (20 by default), or the parts that have data weigh less than `score.min_coverage` of the total (half by default). No number.
 - **scored**: a number, a letter and a trend. A part without data is left out and the others are rescaled; that lowers the `coverage` (for example 0.8 when the collaboration sentinel is off). It is never counted as 0 and never as 100.
 
-Security is not a part yet. Until it is, every answer says `complete: false` and lists `security` under `missing_parts`, so a score of 85 is never read as "all clear".
+Security is a part like the others, but it only has data while the Security sentinel is on and has looked at enough repositories. Without it the answer says `complete: false` and lists `security` under `missing_parts`, and the other parts are rescaled, so the number is never read as an all clear. GitHub gives no history of the findings, so the security part is the same in the window and in the one before it: the trend shows what the CI and the collaboration did. The weights are 30, 15, 15, 15 and 25 by default. A window with runs and no failure at all has nothing to recover: its recovery part is full, as a fact and not as a gap.
 
 ## The window
 

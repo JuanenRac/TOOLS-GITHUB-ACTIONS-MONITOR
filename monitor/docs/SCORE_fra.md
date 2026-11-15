@@ -15,10 +15,11 @@ Une somme pondérée de quatre parties, chacune de 0 à 100. Une partie vaut 100
 
 | Partie | Poids | Ce qu'elle mesure | Bonne | Mauvaise |
 |---|---|---|---|---|
-| Fiabilité | 40 | part des exécutions terminées qui réussissent (les annulées et ignorées ne comptent pas) | 98 % | 50 % |
-| Rapidité | 20 | 95e centile de la durée des exécutions réussies | 10 min | 60 min |
-| Rétablissement | 20 | durée médiane entre le premier échec d'un workflow et son succès suivant | 30 min | 24 h |
-| Collaboration | 20 | durée médiane pendant laquelle une alerte de la sentinelle de collaboration reste ouverte jusqu'à sa disparition | 2 jours | 14 jours |
+| Fiabilité | 30 | part des exécutions terminées qui réussissent (les annulées et ignorées ne comptent pas) | 98 % | 50 % |
+| Rapidité | 15 | 95e centile de la durée des exécutions réussies | 10 min | 60 min |
+| Rétablissement | 15 | durée médiane entre le premier échec d'un workflow et son succès suivant | 30 min | 24 h |
+| Collaboration | 15 | durée médiane pendant laquelle une alerte de la sentinelle de collaboration reste ouverte jusqu'à sa disparition | 2 jours | 14 jours |
+| Sécurité | 25 | les points que les constats ouverts de la sentinelle de sécurité retirent à 100 (seulement tant que cette sentinelle est active) | 0 point | 100 points |
 
 La lettre est A à partir de 90, B à partir de 80, C à partir de 70, D à partir de 55 et E en dessous. La tendance compare le score à la fenêtre qui précède : en hausse, en baisse ou stable (une variation inférieure à `score.trend_flat` points est stable).
 
@@ -30,7 +31,7 @@ Le score n'affiche jamais un nombre qu'il ne peut pas justifier. La réponse por
 - **insufficient_data** (données insuffisantes) : moins de `score.min_runs` exécutions terminées dans la fenêtre (20 par défaut), ou les parties qui ont des données pèsent moins de `score.min_coverage` du total (la moitié par défaut). Pas de nombre.
 - **scored** (noté) : un nombre, une lettre et une tendance. Une partie sans données est écartée et les autres sont remises à l'échelle ; cela abaisse la `coverage` (par exemple 0,8 quand la sentinelle de collaboration est éteinte). Elle ne compte jamais comme 0 ni comme 100.
 
-La sécurité n'est pas encore une partie. D'ici là, chaque réponse indique `complete: false` et liste `security` dans `missing_parts` : un score de 85 ne se lit donc jamais comme « tout va bien ».
+La sécurité est une partie comme les autres, mais elle n'a de données que tant que la sentinelle de sécurité est active et a examiné assez de dépôts. Sans elle, la réponse dit `complete: false` et liste `security` sous `missing_parts`, et les autres parties sont remises à l'échelle : le nombre ne se lit donc jamais comme « tout va bien ». GitHub ne donne pas d'historique des constats, si bien que la partie sécurité est la même dans la fenêtre et dans celle d'avant : la tendance montre ce qu'ont fait la CI et la collaboration. Les poids sont 30, 15, 15, 15 et 25 par défaut. Une fenêtre avec des exécutions et aucun échec n'a rien à rétablir : sa partie rétablissement est pleine, comme un fait et non comme un manque.
 
 ## La fenêtre
 

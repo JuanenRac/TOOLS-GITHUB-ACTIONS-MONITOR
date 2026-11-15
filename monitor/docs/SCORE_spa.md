@@ -15,10 +15,11 @@ Una suma ponderada de cuatro partes, cada una de 0 a 100. Una parte vale 100 en 
 
 | Parte | Peso | Qué mide | Bueno | Malo |
 |---|---|---|---|---|
-| Fiabilidad | 40 | proporción de ejecuciones terminadas que salen bien (las canceladas y omitidas no cuentan) | 98 % | 50 % |
-| Velocidad | 20 | percentil 95 de la duración de las ejecuciones correctas | 10 min | 60 min |
-| Recuperación | 20 | tiempo mediano desde el primer fallo de un flujo hasta su siguiente éxito | 30 min | 24 h |
-| Colaboración | 20 | tiempo mediano que una alerta del centinela de colaboración está abierta hasta que desaparece | 2 días | 14 días |
+| Fiabilidad | 30 | proporción de ejecuciones terminadas que salen bien (las canceladas y omitidas no cuentan) | 98 % | 50 % |
+| Velocidad | 15 | percentil 95 de la duración de las ejecuciones correctas | 10 min | 60 min |
+| Recuperación | 15 | tiempo mediano desde el primer fallo de un flujo hasta su siguiente éxito | 30 min | 24 h |
+| Colaboración | 15 | tiempo mediano que una alerta del centinela de colaboración está abierta hasta que desaparece | 2 días | 14 días |
+| Seguridad | 25 | los puntos que los hallazgos abiertos del centinela de seguridad restan a 100 (solo mientras ese centinela está activo) | 0 puntos | 100 puntos |
 
 La letra es A desde 90, B desde 80, C desde 70, D desde 55 y E por debajo. La tendencia compara la puntuación con la ventana inmediatamente anterior: sube, baja o estable (un cambio menor que `score.trend_flat` puntos es estable).
 
@@ -30,7 +31,7 @@ La puntuación nunca muestra un número que no pueda respaldar. La respuesta sie
 - **insufficient_data** (datos insuficientes): menos de `score.min_runs` ejecuciones terminadas en la ventana (20 por defecto), o las partes con datos pesan menos de `score.min_coverage` del total (la mitad por defecto). Sin número.
 - **scored** (puntuada): un número, una letra y una tendencia. Una parte sin datos se deja fuera y las demás se reescalan; eso baja la `coverage` (por ejemplo 0,8 si el centinela de colaboración está apagado). Nunca cuenta como 0 ni como 100.
 
-La seguridad todavía no es una parte. Mientras tanto, cada respuesta dice `complete: false` y lista `security` en `missing_parts`, así que un 85 nunca se lee como "todo en orden".
+La seguridad es una parte como las demás, pero solo tiene datos mientras el centinela de seguridad está activo y ha mirado suficientes repositorios. Sin él, la respuesta dice `complete: false` y lista `security` en `missing_parts`, y las demás partes se reescalan, así que el número nunca se lee como un todo en orden. GitHub no da histórico de los hallazgos, así que la parte de seguridad es la misma en la ventana y en la anterior: la tendencia muestra lo que hicieron la CI y la colaboración. Los pesos son 30, 15, 15, 15 y 25 por defecto. Una ventana con ejecuciones y ningún fallo no tiene nada que recuperar: su parte de recuperación es completa, como un hecho y no como un hueco.
 
 ## La ventana
 

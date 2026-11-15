@@ -106,5 +106,17 @@ class Merge(unittest.TestCase):
         self.assertEqual(out["a/y"]["success_rate"], 0.0)
 
 
+class Quiet(unittest.TestCase):
+    def test_runs_and_no_failure_means_nothing_to_recover(self):
+        m = collector.collect_runs([run(1), run(2)], T0, T0 + DAY)
+        self.assertEqual((m["mttr"], m["samples"]["recoveries"]), (0.0, 0))
+
+    def test_a_failure_that_has_not_recovered_is_still_unknown_not_zero(self):
+        self.assertIsNone(collector.collect_runs([run(1), run(2, "failure")], T0, T0 + DAY)["mttr"])
+
+    def test_no_runs_at_all_is_unknown(self):
+        self.assertIsNone(collector.collect_runs([], T0, T0 + DAY)["mttr"])
+
+
 if __name__ == "__main__":
     unittest.main()
