@@ -23,7 +23,7 @@
 2. `ai_alerts.jsonl`:每个事件(打开、确认、解决)一行,带稳定的 id。
 3. `GET /api/ai/state`:整份清单,带版本的 JSON(`schema`、`edition`、`signals`、`act`、`watch`),只读。`GET /api/sentinel/panels` 只给出面板。
 4. `GET /api/ai/stream`:服务器发送事件,可续传,限制监听者数量和时长。
-5. MCP 工具(`bin/mcp_server.py`):`monitor_state`、`signals`、`alerts_open`、`diagnose`、`sentinel_panels`、`get_quota`;`act`(确认)仅在 `--allow-ack` 时可用。
+5. MCP 工具(`bin/mcp_server.py`):`monitor_state`、`signals`、`alerts_open`、`diagnose`、`sentinel_panels`、`get_quota`、`get_score`;`act`(确认)仅在 `--allow-ack` 时可用。
 6. 钩子:`python bin/monitor_cli.py ai-hook install [--assistant|--cursor|--generic] [--scope project|user] [--dry-run]`(还有 `status` 和 `uninstall`)添加一个小脚本,在 AI 会话开始时和结束前把简报交给它。
 
 ## 逐步操作

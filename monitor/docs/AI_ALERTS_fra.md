@@ -17,7 +17,7 @@ Un workflow rouge ne sert à rien si personne de ceux qui travaillent sur le dé
 ## Comment une IA le lit
 - Mettez ceci dans les instructions de votre projet ou skill : *« Au début, lis ALERTS_BRIEF.md (chemin) et dis quelles alertes réelles sont ouvertes. »*
 - Ou interrogez le moniteur en marche : `GET /api/ai/brief` (Markdown, ou `?fmt=json`) et `GET /api/ai/alerts?since=SECONDES`. Mêmes règles que le reste de la page (cet ordinateur ; avec le mode réseau, le jeton d'accès).
-- Ou ajoutez le serveur MCP (lecture seule) : `python bin/mcp_server.py`, outils `get_alerts`, `get_red_repos`, `get_run_failure`, `get_quota` ; `--allow-ack` ajoute `ack_alert` (état local seulement). Gemini CLI, Codex et VS Code (Copilot) : ajoutez la même commande comme serveur stdio dans leurs réglages MCP.
+- Ou ajoutez le serveur MCP (lecture seule) : `python bin/mcp_server.py`, outils `get_alerts`, `get_red_repos`, `get_run_failure`, `get_quota`, `get_score` ; `--allow-ack` ajoute `ack_alert` (état local seulement). Gemini CLI, Codex et VS Code (Copilot) : ajoutez la même commande comme serveur stdio dans leurs réglages MCP.
 
 ## Avertissements qui vous parviennent
 - Une NOUVELLE alerte réelle va aux canaux de notification que vous avez déjà configurés (Réglages > Notifications).

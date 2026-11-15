@@ -41,6 +41,7 @@ Todos os nomes começam por `ghamon_`. Apenas medidores (gauges). Um valor desco
 | `ghamon_repo_pending_sign_hours` | `repo`, `ecosystem` | a espera mais longa de um repositório (requer `per_repo`) |
 | `ghamon_surface_paused`, `ghamon_surface_paused_remaining`, `ghamon_surface_paused_needed` | | 1 enquanto as verificações de superfície (A10) esperam por quota do GitHub, com a quota restante e a necessária |
 | `ghamon_api_rate_remaining`, `ghamon_api_rate_limit` | | a quota da API do GitHub |
+| `ghamon_score`, `ghamon_score_coverage`, `ghamon_score_scored` | | a pontuação da conta (0 a 100, só enquanto tem número), a proporção dos seus pesos com dados e 1 quando tem número (só Complete; veja-se SCORE.md) |
 | `ghamon_sentinel_calls_last_hour`, `ghamon_sentinel_budget_per_hour` | | as chamadas à API da sentinela face ao seu orçamento |
 | `ghamon_repos_watched`, `ghamon_runs_active`, `ghamon_runs_stuck`, `ghamon_runs_failing`, `ghamon_issues_open`, `ghamon_quota_paused` | | os números em tempo real do separador Agora |
 

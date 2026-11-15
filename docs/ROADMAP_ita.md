@@ -2,20 +2,15 @@
 
 Idee che non sono entrate nella versione attuale, senza ordine promesso. Sono direzioni, non impegni; una issue o una pull request è il modo migliore per farne avanzare una.
 
-## Nella 1.8.0 (la prossima versione)
+## Fatto nella 1.8.0
 
-Tutto ciò che segue è scritto e provato; o è già nel ramo principale o attende in una pull request. Nulla è dato per dimostrato su servizi reali (vedi «Prossimi passi»).
-
-### Già nel ramo principale
+Tutto ciò che segue è stato consegnato nella serie 1.8 ed è provato; nulla si dà per dimostrato con servizi reali.
 
 - Una nuova organizzazione delle cartelle (il pacchetto in `src/`, la pagina, gli esempi e le lingue in `assets/`), con uno strumento di migrazione che sposta una vecchia installazione piatta senza cancellare nulla.
 - Un livello di archiviazione dietro un'unica interfaccia, con il supporto a file che mantiene la disposizione di `accounts/<id>/`, scritture atomiche e copie di sicurezza che qualsiasi supporto può ripristinare.
 - Un supporto SQLite facoltativo (spento per impostazione predefinita), un database per account, migrazioni con versione, un tempo di attesa regolabile e strumenti per spostare lo stato tra il supporto a file e SQLite nei due sensi, prima con una simulazione.
 - La cronologia delle modifiche è tradotta nelle otto lingue fino alla 1.0.0 e un test la mantiene completa.
 - Conservazione e rotazione della cronologia (eventi e analisi per un numero di giorni, eliminare o archiviare, una riga di audit per passata, un avviso di dimensione nel doctor; lo stato delle sentinelle e la configurazione non vengono mai toccati).
-
-### Finito e in attesa di essere unito
-
 - Modalità di rete: il freno di blocco torna ad agire prima di guardare il token, un reverse proxy dichiarato non è mai scambiato per questo computer, le letture remote delle impostazioni si limitano a ciò che un client remoto può cambiare e la guida alla distribuzione ha la ricetta completa.
 - Il flusso per l'IA è ripulito campo per campo, passano solo indirizzi GitHub di forme chiuse e l'hook non consegna testo dei log, solo il repository, il workflow, il risultato e il collegamento.
 - Le letture di identità sono sempre dell'utente, una lettura è giudicata su una lista bianca e il file del token del secondo account resta dentro la cartella degli account.
@@ -26,10 +21,6 @@ Tutto ciò che segue è scritto e provato; o è già nel ramo principale o atten
 - L'applicazione da terminale modifica elenchi e mappe.
 - Modalità team (spenta per impostazione predefinita): utenti, ruoli (admin, maintainer, viewer) e sessioni conservati nell'archiviazione, una pagina di accesso, un token Bearer per i client che non sono un browser, errori JSON stabili e il ripristino di un amministratore dalla console di questo computer. La modalità individuale continua senza accesso e l'edizione lite non ne ha mai.
 - Una pagina più viva: icone animate, spie di stato il cui movimento segue lo stato, risposte a passaggio, focus e clic; tutto si spegne con il movimento ridotto ed è leggero nell'edizione lite.
-
-### Ancora in rifinitura
-
-- Silenzi che ricordano chi li ha impostati (richiede la modalità team).
 
 ## Previsto, in quest'ordine
 

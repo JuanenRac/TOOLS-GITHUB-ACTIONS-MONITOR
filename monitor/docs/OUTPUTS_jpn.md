@@ -40,6 +40,7 @@
 | `ghamon_repo_pending_sign_hours` | `repo`, `ecosystem` | リポジトリの最長の待ち時間（`per_repo` が必要） |
 | `ghamon_surface_paused`、`ghamon_surface_paused_remaining`、`ghamon_surface_paused_needed` | | サーフェスチェック（A10）が GitHub のクォータを待っている間は 1。残りのクォータと必要なクォータも示す |
 | `ghamon_api_rate_remaining`、`ghamon_api_rate_limit` | | GitHub API の許容量 |
+| `ghamon_score`, `ghamon_score_coverage`, `ghamon_score_scored` | | アカウントのスコア（0〜100、数値があるときだけ）、データのある重みの割合、数値があるとき 1（Complete のみ。SCORE.md を参照） |
 | `ghamon_sentinel_calls_last_hour`、`ghamon_sentinel_budget_per_hour` | | センチネルの API 呼び出し数とその予算 |
 | `ghamon_repos_watched`、`ghamon_runs_active`、`ghamon_runs_stuck`、`ghamon_runs_failing`、`ghamon_issues_open`、`ghamon_quota_paused` | | 「今」タブのライブの数値 |
 
