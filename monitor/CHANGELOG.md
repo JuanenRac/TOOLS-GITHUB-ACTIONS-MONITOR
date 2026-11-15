@@ -11,6 +11,14 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+### Added
+
+- **A harness and the reproductions of the independent review, in the repository**: `tools/audit_harness.py --check` starts, with no GitHub, a supervisor with three accounts (alpha, beta, default) and four users (administrator, maintainer of alpha only, viewer of beta only, one switched off), asks the routes that decide the isolation of the accounts and prints what each user gets; `tests/test_193_regressions.py` holds the reproductions of the review of 1.8.3 (accounts of a request, accounts kept when a password changes, silences of a remote maintainer, the test message and its hourly limit, a restored copy and revoked sessions, the lock and the administrator, the keys a started program does not inherit).
+
+### Changed
+
+- **A test no longer reads a file of the person who wrote it**: the check against the real file of the profile repository runs only when `MONITOR_REAL_CENTRAL_FILE` says where it is.
+
 ## [1.9.2]
 
 ### Added

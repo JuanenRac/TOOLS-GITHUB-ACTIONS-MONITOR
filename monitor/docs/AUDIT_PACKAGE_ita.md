@@ -35,6 +35,10 @@ Ciò che serve a un revisore per verificare la modalità team, l'esposizione di 
 | Due monitor potevano ascoltare sulla stessa porta; l'openssl di Git for Windows non veniva trovato; i guasti inghiottiti di proposito non lasciavano traccia della loro origine | La porta viene presa in esclusiva e un secondo monitor rifiuta di partire; openssl è cercato dove lo tiene Git for Windows; ogni guasto inghiottito scrive una riga con tipo e luogo | `test_185_startup.py (OnePerPort, WhereIsOpenssl), test_185_degraded.py` |
 | Le esecuzioni senza durata (lette via GraphQL) facevano fallire la sentinella a ogni ciclo | Una durata assente vale zero | `test_186_unfinished_rows.py` |
 
+## Un banco di prova e le riproduzioni per chi revisiona
+
+`python tools/audit_harness.py --check` avvia, in una cartella temporanea e senza GitHub (un `gh` finto), un supervisore con tre account (`alpha`, `beta` e `default`) e quattro utenti (`admin`; `maintainer` solo di `alpha`; `viewer` solo di `beta`; `inactive`, disattivato), interroga le rotte che decidono l'isolamento degli account e stampa una riga per risposta (`ok` o `WRONG`); termina con 0 quando tutte sono giuste. Senza `--check` stampa l'indirizzo e gli utenti e attende. Le riproduzioni della revisione indipendente della 1.8.3 sono in `tests/test_193_regressions.py`: ciascuna falliva in quella versione e ora passa.
+
 ## Eseguire i test
 
 Dalla cartella `monitor/`: `python -m unittest discover -s tests`. I test non richiedono rete né token GitHub. I test del browser vengono eseguiti se è installato Edge, Chrome o Chromium (o con `MONITOR_BROWSER_TESTS=1`). I file della tabella sono in `monitor/tests/`.

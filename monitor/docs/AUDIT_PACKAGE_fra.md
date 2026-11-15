@@ -35,6 +35,10 @@ Ce dont un auditeur a besoin pour vérifier le mode équipe, l'exposition résea
 | Deux moniteurs pouvaient écouter sur un port ; l'openssl de Git for Windows n'était pas trouvé ; les échecs avalés volontairement ne laissaient aucune trace de leur origine | Le port est pris en exclusivité et un second moniteur refuse de démarrer ; openssl est cherché là où Git for Windows le range ; chaque échec avalé écrit une ligne avec son type et son lieu | `test_185_startup.py (OnePerPort, WhereIsOpenssl), test_185_degraded.py` |
 | Les exécutions sans durée (lues par GraphQL) faisaient échouer la sentinelle à chaque cycle | Une durée absente compte pour zéro | `test_186_unfinished_rows.py` |
 
+## Un banc et les reproductions pour qui relit
+
+`python tools/audit_harness.py --check` démarre, dans un dossier temporaire et sans GitHub (un faux `gh`), un superviseur avec trois comptes (`alpha`, `beta` et `default`) et quatre utilisateurs (`admin` ; `maintainer` d'`alpha` seulement ; `viewer` de `beta` seulement ; `inactive`, désactivé), interroge les routes qui décident l'isolement des comptes et imprime une ligne par réponse (`ok` ou `WRONG`) ; il sort avec 0 quand toutes sont justes. Sans `--check` il imprime l'adresse et les utilisateurs et attend. Les reproductions de la revue indépendante de la 1.8.3 sont dans `tests/test_193_regressions.py` : chacune échouait sur cette version et passe maintenant.
+
 ## Lancer les tests
 
 Depuis le dossier `monitor/` : `python -m unittest discover -s tests`. Les tests n'ont besoin ni du réseau ni d'un jeton GitHub. Les tests de navigateur s'exécutent si Edge, Chrome ou Chromium est installé (ou avec `MONITOR_BROWSER_TESTS=1`). Les fichiers du tableau sont dans `monitor/tests/`.
