@@ -388,7 +388,7 @@
       "enabled": false,
       "max_per_hour": 10
     },
-    "digest": {
+    "report_schedule": {
       "max_items": 50
     }
   },
@@ -534,10 +534,19 @@
     "interval_hours": 24,
     "warn_events_mb": 20
   },
+<<<<<<< HEAD
   "audit_log": {
     "enabled": true,
     "max_mb": 10,
     "maintainers_can_read": false
+=======
+  "report_schedule": {
+    "enabled": false,
+    "cron": "0 8 * * 1",
+    "formats": "both",
+    "keep": 12,
+    "top": 10
+>>>>>>> origin/main
   },
   "score": {
     "enabled": true,

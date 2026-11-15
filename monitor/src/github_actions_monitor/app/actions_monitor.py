@@ -143,7 +143,11 @@ def state_dir():
     """Where the small state files of this process live: the folder of the account when this is the monitor of one account, else next to the code, as always."""
     return Path(CHILD["folder"]) if CHILD["folder"] else paths.folder("data")
 LITE_SHARED = ("/api/ai/state", "/api/ai/stream", "/api/ai/brief", "/api/ai/alerts", "/api/ai/ack")      # the channels for an AI tool are the same in both editions
+<<<<<<< HEAD
 LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/notify", "/api/score", "/api/audit-log", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events")   # they do not exist in lite
+=======
+LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/notify", "/api/score", "/api/report-files", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events")   # they do not exist in lite
+>>>>>>> origin/main
 
 
 LITE_INHERIT = ("github_owner", "ecosystems", "ecosystems_file", "targets_file", "profiles_file", "exclude", "repos", "language", "runs_per_repo", "cold_runs_per_repo", "hot_hours", "stuck_minutes", "refresh_seconds", "cold_refresh_seconds")   # what a first lite start copies from actions_monitor.json
@@ -1369,6 +1373,7 @@ def score_tick(config, data):
         degraded.note("score", error)
 
 
+<<<<<<< HEAD
 def audit_action(handler, action, target="", details=None, result="ok"):
     """One line in the log of actions (security/audit_log.py): who did what on this account. Never raises; a value of a setting never goes in, only the names."""
     try:
@@ -1377,6 +1382,39 @@ def audit_action(handler, action, target="", details=None, result="ok"):
         audit_log.record(toolconfig.raw_config(), action, context.get("user") or auth_http.acting_user(handler), context.get("role", ""), CHILD["account"] or "", target, result, details)
     except Exception as error:   # noqa: BLE001 - the log of actions never stops a request
         degraded.note("audit_log", error)
+=======
+def report_gather():
+    """What a report is made of, read from what the monitor holds (never GitHub): the latest score snapshot, every open alert and the team ranking."""
+    from github_actions_monitor.health import repo_view
+    from github_actions_monitor.scoring import api as score_api
+    from github_actions_monitor.sentinels import alert_center
+    from github_actions_monitor.storage import runtime
+    config = toolconfig.raw_config()
+    storage, account = runtime.process_storage(CHILD["account"] or None)
+    snapshot = score_api.latest(storage, account, config)
+    try:
+        alerts = alert_center.collect(SENTINEL["registry"], extra=credential_alerts() + score_alerts())
+    except Exception as error:   # noqa: BLE001 - the report still has the rest
+        degraded.note("reports.alerts", error)
+        alerts = []
+    return snapshot, alerts, repo_view.team_view(health_views())
+
+
+def report_account():
+    return CHILD["account"] or toolconfig.github_owner() or "main"
+
+
+def report_tick(config):
+    """The scheduled report, once a cycle: cheap while it is off or not due. Complete only; a failure is noted and never stops the cycle."""
+    if LITE["on"] or DEMO["on"]:
+        return
+    try:
+        from github_actions_monitor.reporting import report_service
+        if report_service.settings(config)["enabled"]:
+            report_service.tick(config, report_account(), report_gather)
+    except Exception as error:   # noqa: BLE001
+        degraded.note("reports", error)
+>>>>>>> origin/main
 
 
 def health_views(now=None):
@@ -1464,6 +1502,7 @@ def maintain(config, data):
     maintain_extras(toolconfig.raw_config() if not LITE["on"] else config, data)
     retention_tick(toolconfig.raw_config() if not LITE["on"] else config)
     score_tick(toolconfig.raw_config() if not LITE["on"] else config, data)
+    report_tick(toolconfig.raw_config() if not LITE["on"] else config)
     try:
         if ETAG["cache"]:
             ETAG["cache"].save()
@@ -2103,7 +2142,7 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as error:   # noqa: BLE001
                 self.json_reply({"ok": False, "error": str(error)[:200]}, 400)
             return
-        if path in ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures", "/api/alerts/mute", "/api/alerts/unmute"):
+        if path in ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures", "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run"):
             if not self.guard() or not self.this_computer():
                 return
             if path != "/api/welcome" and path != "/api/gh-action/plan" and path != "/api/act/plan" and not self.token_ok():
@@ -2443,6 +2482,7 @@ class Handler(BaseHTTPRequestHandler):
             storage, account = runtime.process_storage(CHILD["account"] or None)
             config = toolconfig.raw_config()
             self.json_reply(score_api.history(storage, account, config, ask) if path.endswith("/history") else score_api.latest(storage, account, config))
+<<<<<<< HEAD
         elif path == "/api/audit-log":      # the log of actions of this account: an administrator, or a maintainer when the setting says so (Complete only)
             if not self.guard():
                 return
@@ -2453,6 +2493,32 @@ class Handler(BaseHTTPRequestHandler):
                 self.json_reply({"error": "forbidden", "code": "forbidden_role"}, 403)
                 return
             self.json_reply({"schema": 1, "account": CHILD["account"] or "", "enabled": audit_log.settings(config)["enabled"], "chain": audit_log.verify(), "entries": audit_log.read(200)})
+=======
+        elif path in ("/api/report-files", "/api/report-files/file"):      # the scheduled reports: the list and one file, read only, of the account of this process (Complete only)
+            if not self.guard():
+                return
+            from urllib.parse import parse_qs
+            from github_actions_monitor.reporting import report_service
+            config, account = toolconfig.raw_config(), report_account()
+            if path == "/api/report-files":
+                cfg = report_service.settings(config)
+                self.json_reply({"schema": 1, "account": account, "enabled": cfg["enabled"], "cron": cfg["cron"], "formats": cfg["formats"], "reports": report_service.listing(account)})
+                return
+            name = (parse_qs(self.path.partition("?")[2]).get("name") or [""])[0]
+            found = report_service.read_file(account, name)
+            if found is None:
+                self.json_reply({"error": "unknown report", "code": "report_unknown"}, 404)
+                return
+            body = found[0]
+            self.send_response(200)
+            self.send_header("Content-Type", found[1])
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.end_headers()
+            self.wfile.write(body)
+>>>>>>> origin/main
         elif path == "/api/analytics":
             if not self.guard():
                 return
@@ -2913,6 +2979,13 @@ def handle_advanced_post(path, request, who=""):
         entry = alert_center.mute(scope, value, request.get("hours"), config, who=who, until_change=until_change)
         _audit_plain("alert_mute", who, f"{scope}:{value}"[:120], {"hours": request.get("hours")})
         return {"ok": entry is not None, "mute": entry}
+    if path == "/api/report-files/run":      # write a report now (admin, from this computer); Complete only
+        if LITE["on"]:
+            return {"ok": False, "status": "lite"}
+        from github_actions_monitor.reporting import report_service
+        snapshot, alerts, team = report_gather()
+        done = report_service.run(config, report_account(), snapshot, alerts, team)
+        return {"ok": True, "files": done["files"], "at": done["at"]}
     if path == "/api/ai/ack":
         from github_actions_monitor.integrations import ai_alerts
         return {"ok": ai_alerts.ack(config, request.get("id"))}

@@ -499,6 +499,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 </div>
 <div class="tab" id="t-team" role="tabpanel" aria-labelledby="n-team">
 <section><h2 data-i18n="ui.team_title"></h2><div class="body"><div class="tbl-tools" id="team-tools"></div><div class="mut" id="team-sum"></div><table><thead><tr id="team-head"></tr></thead><tbody id="team-rows"></tbody></table><div id="team-extra"></div></div></section>
+<section id="rs-sec"><h2 data-i18n="ui.rs_title"></h2><div class="body"><div class="mut" id="rs-state"></div><ul id="rs-list"></ul><button id="rs-run" type="button" data-i18n="ui.rs_run"></button> <span class="mut" id="rs-msg" role="status"></span></div></section>
 </div>
 <div class="tab" id="t-hist" role="tabpanel" aria-labelledby="n-hist">
 <section><h2 data-i18n="ui.h_title"></h2>
@@ -1394,13 +1395,28 @@ async function scoreTick(){
 }
 /* the health of the team (1.9.2): GET /api/team/health with the filters of the tab, and GET /api/repos/<owner>/<repo>/health in a dialog; ?view=team and ?view=repo&repo=owner/name are the deep links */
 let TEAM=null,TEAM_F={eco:"",sev:"",q:""};
+/* the scheduled reports (1.9.3): GET /api/report-files lists them, GET /api/report-files/file?name= opens one, POST /api/report-files/run writes one now (from this computer) */
+let RS=null;
+async function rsLoad(){
+  if(LITE)return;
+  try{const r=await fetch("/api/report-files",{cache:"no-store"});RS=r.ok?await r.json():null}catch(e){RS=null}
+  rsPaint()}
+function rsPaint(){
+  const st=$("rs-state"),ul=$("rs-list");
+  if(!RS){st.textContent="";ul.innerHTML="";return}
+  st.textContent=RS.enabled?T("ui.rs_on",{cron:RS.cron}):T("ui.rs_off");
+  ul.innerHTML=(RS.reports||[]).length?RS.reports.slice(0,20).map(r=>`<li><a href="/api/report-files/file?name=${encodeURIComponent(r.name)}" target="_blank" rel="noopener">${esc(r.name)}</a> <span class="mut">${esc(T("ui.rs_kind_"+r.kind))} · ${esc(String(Math.max(1,Math.round(r.bytes/1024))))} KB</span></li>`).join(""):`<li class="mut">${esc(T("ui.rs_none"))}</li>`}
+$("rs-run").addEventListener("click",async()=>{
+  const msg=$("rs-msg");msg.textContent="";
+  try{const r=await fetch("/api/report-files/run",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});const d=await r.json();msg.textContent=d&&d.ok?T("ui.rs_done"):T("ui.rs_failed")}catch(e){msg.textContent=T("ui.rs_failed")}
+  rsLoad()});
 const TEAM_COLS=["ui.team_c_repo","ui.team_c_state","ui.team_c_risk","ui.team_c_red","ui.team_c_alerts","ui.team_c_fail","ui.team_c_last","ui.team_c_next"];
 const stateChip=s=>`<span class="chip ${s==="bad"?"bad":s==="warn"?"warn":s==="ok"?"ok":""}">${esc(T("ui.team_sev_"+s))}</span>`;
 async function teamLoad(){
   if(LITE)return;
   const p=new URLSearchParams();if(TEAM_F.eco)p.set("ecosystem",TEAM_F.eco);if(TEAM_F.sev)p.set("severity",TEAM_F.sev);if(TEAM_F.q)p.set("q",TEAM_F.q);
   try{const r=await fetch("/api/team/health?"+p.toString(),{cache:"no-store"});TEAM=r.ok?await r.json():null}catch(e){TEAM=null}
-  teamPaint()}
+  teamPaint();rsLoad()}
 function teamTools(){
   const el=$("team-tools");if(el.dataset.built)return;el.dataset.built="1";
   const ecos=[...new Set(Object.keys((TEAM&&TEAM.by_ecosystem)||{}))].sort();

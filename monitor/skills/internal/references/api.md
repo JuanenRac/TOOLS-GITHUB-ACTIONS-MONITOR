@@ -74,6 +74,9 @@ a call marked *this computer only* is refused when it comes from the network. Ev
 | `/api/quota` | GET | viewer | plan, billable minutes, allowance of the API, concurrency, long jobs |
 | `/api/quota-pool/status` | GET | viewer | every read source with its allowance, the sum, and what each way of reading less has spared (this computer only) |
 | `/api/refresh-repos` | POST | maintainer | read the list of repositories again |
+| `/api/report-files` | GET | viewer | the scheduled reports of the account: whether the schedule is on, its cron expression, the formats and the list of the files written (name, kind, size), newest first (Complete only) |
+| `/api/report-files/file` | GET | viewer | one scheduled report by `?name=`: only a file the service wrote for this account (HTML page or Markdown); anything else is 404 `report_unknown` (Complete only) |
+| `/api/report-files/run` | POST | admin | writes a report now (administrator, from this computer only); answers the names of the files (Complete only) |
 | `/api/reports` | GET | viewer | the four optional reports: workflow hygiene, wait for a runner, release ready or blocked, supply chain of the latest release (each on only when its setting is) |
 | `/api/repos` | GET | viewer | the prefix of `/api/repos/<owner>/<repo>/health`: the health of one repository (CI of the last 24 hours, open alerts of every sentinel, release readiness, activity, and which sentinels did not see it fully); 404 `repo_unknown` for a repository the monitor does not know (Complete only) |
 | `/api/run-log` | GET | admin | the failing step of one run and its last relevant lines, cleaned (`?repo=&run=`; off by default, `logs.failed_step.enabled`; administrators in the team mode) |

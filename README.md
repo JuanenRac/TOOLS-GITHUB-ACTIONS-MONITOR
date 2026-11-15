@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2151_passing-brightgreen.svg" alt="2151 tests">
+  <img src="https://img.shields.io/badge/Tests-2179_passing-brightgreen.svg" alt="2179 tests">
 </p>
 
 > Watches the workflows of every repository you own and tells you, on one local page, what is red, what is stuck and what is waiting for you.
@@ -45,8 +45,8 @@
 | | |
 |---|---|
 | **Maturity** | functional |
-| **Tests** | 2151 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Settings** | 405 settings, all with help |
+| **Tests** | 2179 test methods (`python -m unittest discover -s monitor/tests`) |
+| **Settings** | 407 settings, all with help |
 | **Languages** | 8 (English, Spanish, German, French, Italian, Japanese, Chinese, Portuguese) |
 | **Tested in the CI on** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -286,8 +286,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/SENTINEL.md`](monitor/docs/SENTINEL.md): the sentinel and its checks A1-A13
 - [`monitor/docs/COLLAB.md`](monitor/docs/COLLAB.md): the Collab sentinel, the Alerts tab and the silences
 - [`monitor/docs/SENTINEL_SECURITY.md`](monitor/docs/SENTINEL_SECURITY.md): The Security sentinel: Dependabot, code scanning, secrets, branch protection, workflow permissions and CODEOWNERS, and what it could not check
-- [`monitor/docs/AUDIT_LOG.md`](monitor/docs/AUDIT_LOG.md): The log of actions: who changed what, the chain of hashes, who reads it and the settings
 - [`monitor/docs/HEALTH.md`](monitor/docs/HEALTH.md): The health of a repository and of the team: what it is made of, the Team tab, the deep links and the API
+- [`monitor/docs/REPORT_SCHEDULE.md`](monitor/docs/REPORT_SCHEDULE.md): Scheduled reports: the score, what changed, the repositories that need a person and the open alerts as HTML and Markdown, the schedule and the files
 - [`monitor/docs/CLI.md`](monitor/docs/CLI.md): the command line as a client of the monitor
 - [`monitor/docs/ACCOUNTS.md`](monitor/docs/ACCOUNTS.md): several accounts, one process each
 - [`monitor/docs/QUOTAS.md`](monitor/docs/QUOTAS.md): quotas and plans of GitHub
