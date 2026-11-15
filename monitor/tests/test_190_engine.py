@@ -15,9 +15,13 @@ from github_actions_monitor.scoring import engine  # noqa: E402
 CFG = engine.settings({})
 
 
-def metrics(rate=0.98, p95=600, mttr=1800, collab=172800, runs=100, recoveries=5, closed=5):
-    return {"success_rate": rate, "duration_p95": p95, "mttr": mttr, "collab_resolution_time": collab,
-            "samples": {"runs": runs, "durations": runs, "recoveries": recoveries, "collab_closed": closed}}
+def metrics(rate=0.98, p95=600, mttr=1800, collab=172800, runs=100, recoveries=5, closed=5, penalty=0, repos=5):
+    out = {"success_rate": rate, "duration_p95": p95, "mttr": mttr, "collab_resolution_time": collab,
+           "samples": {"runs": runs, "durations": runs, "recoveries": recoveries, "collab_closed": closed}}
+    if penalty is not None:
+        out["security_penalty"] = penalty
+        out["samples"]["security_repos"] = repos
+    return out
 
 
 class Parts(unittest.TestCase):
@@ -43,16 +47,16 @@ class Scored(unittest.TestCase):
     def test_weights_are_applied(self):
         # reliability 100 (weight 40), the other three 0 (weight 60)
         r = engine.compute(metrics(p95=3600, mttr=86400, collab=1209600), CFG)
-        self.assertEqual(r["score"], 40.0)
-        self.assertEqual(r["letter"], "E")
+        self.assertEqual(r["score"], 55.0)         # reliability 100 (30) and security 100 (25) of 100
+        self.assertEqual(r["letter"], "D")
 
     def test_letters_follow_the_cuts(self):
         g = CFG["grades"]
         self.assertEqual([engine.letter(s, g) for s in (95, 90, 89.9, 80, 70, 55, 54.9, 0)], ["A", "A", "B", "B", "C", "D", "E", "E"])
 
     def test_the_answer_always_carries_coverage_quality_and_the_missing_security(self):
-        r = engine.compute(metrics(), CFG)
-        self.assertEqual(r["coverage"], 1.0)
+        r = engine.compute(metrics(penalty=None), CFG)
+        self.assertEqual(r["coverage"], 0.75)
         self.assertEqual(r["missing_parts"], ["security"])
         self.assertFalse(r["complete"])
         self.assertEqual(r["data_quality"]["runs"], 100)
@@ -61,7 +65,7 @@ class Scored(unittest.TestCase):
     def test_a_part_without_data_is_left_out_and_lowers_coverage(self):
         r = engine.compute(metrics(collab=None, closed=0), CFG)
         self.assertEqual(r["state"], "scored")
-        self.assertEqual(r["coverage"], 0.8)
+        self.assertEqual(r["coverage"], 0.85)
         self.assertEqual(r["score"], 100.0)            # rescaled over the parts that have data, never counted as 0
         self.assertFalse([p for p in r["parts"] if p["part"] == "collaboration"][0]["available"])
 
@@ -75,7 +79,7 @@ class NoNumber(unittest.TestCase):
         self.assertEqual(r["data_quality"]["reasons"], ["few_runs"])
 
     def test_low_coverage_is_insufficient(self):
-        r = engine.compute(metrics(p95=None, mttr=None, collab=None), CFG)
+        r = engine.compute(metrics(p95=None, mttr=None, collab=None, penalty=None), CFG)
         self.assertEqual(r["state"], "insufficient_data")
         self.assertIn("low_coverage", r["data_quality"]["reasons"])
 
@@ -125,7 +129,7 @@ class Window(unittest.TestCase):
 
 class Settings(unittest.TestCase):
     def test_defaults_are_the_decided_ones(self):
-        self.assertEqual(CFG["weights"], {"reliability": 40, "speed": 20, "recovery": 20, "collaboration": 20})
+        self.assertEqual(CFG["weights"], {"reliability": 30, "speed": 15, "recovery": 15, "collaboration": 15, "security": 25})
         self.assertEqual((CFG["window_days"], CFG["calibrating_hours"], CFG["min_runs"], CFG["min_coverage"]), (7, 24, 20, 0.5))
         self.assertEqual(CFG["alert"], {"enabled": True, "drop_points": 10, "notify_external": False})
 
@@ -142,8 +146,58 @@ class Settings(unittest.TestCase):
         self.assertTrue(cfg["alert"]["notify_external"])
 
     def test_all_zero_weights_are_refused(self):
-        cfg = engine.settings({"score": {"weights": {"reliability": 0, "speed": 0, "recovery": 0, "collaboration": 0}}})
+        cfg = engine.settings({"score": {"weights": {"reliability": 0, "speed": 0, "recovery": 0, "collaboration": 0, "security": 0}}})
         self.assertEqual(cfg["weights"], CFG["weights"])
+
+
+class Security(unittest.TestCase):
+    def test_no_findings_is_a_full_part_and_the_answer_is_complete(self):
+        r = engine.compute(metrics(penalty=0), CFG)
+        part = [p for p in r["parts"] if p["part"] == "security"][0]
+        self.assertEqual((part["score"], part["available"], part["weight"]), (100.0, True, 25))
+        self.assertEqual((r["missing_parts"], r["complete"], r["coverage"]), ([], True, 1.0))
+
+    def test_the_penalty_takes_points_off_one_to_one_and_stops_at_zero(self):
+        for penalty, expected in ((0, 100.0), (30, 70.0), (100, 0.0), (400, 0.0)):
+            part = [p for p in engine.compute(metrics(penalty=penalty), CFG)["parts"] if p["part"] == "security"][0]
+            self.assertEqual(part["score"], expected, penalty)
+
+    def test_open_findings_lower_the_number_by_the_weight_of_the_part(self):
+        clean = engine.compute(metrics(penalty=0), CFG)["score"]
+        dirty = engine.compute(metrics(penalty=100), CFG)["score"]
+        self.assertEqual((clean, dirty), (100.0, 75.0))
+
+    def test_without_the_sentinel_the_part_is_left_out_and_said(self):
+        r = engine.compute(metrics(penalty=None), CFG)
+        part = [p for p in r["parts"] if p["part"] == "security"][0]
+        self.assertEqual((part["score"], part["available"]), (None, False))
+        self.assertEqual(r["score"], 100.0)           # rescaled over the four parts that have data
+
+    def test_the_weight_is_a_setting_and_zero_takes_the_part_out_of_the_sum(self):
+        cfg = engine.settings({"score": {"weights": {"security": 0}}})
+        self.assertEqual(engine.compute(metrics(penalty=100), cfg)["score"], 100.0)
+
+    def test_the_security_figures_are_the_same_in_both_windows(self):
+        cfg = engine.settings({"score": {"min_runs": 5}})
+        day = 86400.0
+        end = 1_700_000_000.0 + 14 * day
+        runs = [{"repo": "a/x", "name": f"w{i % 3}", "status": "completed", "conclusion": "success", "seconds": 100, "started": end - 12 * day + i * 600} for i in range(40)]
+        runs += [{"repo": "a/x", "name": f"w{i % 3}", "status": "completed", "conclusion": "success", "seconds": 100, "started": end - 5 * day + i * 600} for i in range(40)]
+        r = engine.score_window(runs, [], end, cfg, security={"penalty": 40, "repos": 3})
+        self.assertEqual(r["trend"]["direction"], "flat")
+        self.assertEqual([p["value"] for p in r["parts"] if p["part"] == "security"], [40.0])
+        self.assertEqual(engine.with_security({"samples": {}}, {"penalty": "x", "repos": 2}), {"samples": {}})
+        self.assertEqual(engine.with_security({"samples": {}}, {"penalty": 3, "repos": 0}), {"samples": {}})
+
+    def test_a_window_with_runs_and_no_failure_has_nothing_to_recover_and_that_is_data(self):
+        cfg = engine.settings({"score": {"min_runs": 5}})
+        end = 1_700_000_000.0 + 14 * 86400.0
+        runs = [{"repo": "a/x", "name": "ci", "status": "completed", "conclusion": "success", "seconds": 100, "started": end - 3 * 86400.0 + i * 60} for i in range(30)]
+        r = engine.score_window(runs, [], end, cfg)
+        parts = {p["part"]: p for p in r["parts"]}
+        self.assertEqual((parts["recovery"]["value"], parts["recovery"]["score"]), (0.0, 100.0))
+        self.assertEqual(r["state"], "scored")
+        self.assertEqual(r["coverage"], 0.6)
 
 
 if __name__ == "__main__":

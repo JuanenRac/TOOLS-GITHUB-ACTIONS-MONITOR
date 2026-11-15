@@ -270,7 +270,7 @@ _f(_T_SENT, "score", "score.trend_flat", "int", (0, 100), restart=False, unit="p
 _f(_T_SENT, "score", "score.alert.enabled", "bool", restart=False)
 _f(_T_SENT, "score", "score.alert.drop_points", "int", (1, 100), restart=False, unit="pts")
 _f(_T_SENT, "score", "score.alert.notify_external", "bool", restart=False, secure=True)
-for _w in ("reliability", "speed", "recovery", "collaboration"):
+for _w in ("reliability", "speed", "recovery", "collaboration", "security"):
     _f(_T_SENT, "score_weights", f"score.weights.{_w}", "int", (0, 1000), restart=False, unit="pts")
 for _g in ("A", "B", "C", "D"):
     _f(_T_SENT, "score_grades", f"score.grades.{_g}", "int", (0, 100), restart=False, unit="pts")

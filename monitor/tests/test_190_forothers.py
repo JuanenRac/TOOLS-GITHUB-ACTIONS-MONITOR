@@ -65,8 +65,9 @@ class Demo(unittest.TestCase):
         fake = demo_mode.score_answer(1_800_000_000)
         self.assertEqual(sorted(set(real) - set(fake)), [])
         self.assertEqual(fake["state"], "scored")
-        self.assertFalse(fake["complete"])
-        self.assertEqual(fake["missing_parts"], ["security"])
+        self.assertTrue(fake["complete"])
+        self.assertEqual(fake["missing_parts"], [])
+        self.assertEqual({p["part"] for p in fake["parts"]}, set(engine.PARTS))
         self.assertTrue(all(0 <= p["score"] <= 100 for p in fake["parts"] if p["score"] is not None))
 
     def test_the_demo_history_is_a_line_of_points_in_order(self):

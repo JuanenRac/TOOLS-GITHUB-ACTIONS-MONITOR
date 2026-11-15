@@ -88,5 +88,50 @@ class Wiring(unittest.TestCase):
         self.assertEqual(degraded.COUNTS.get("score", 0), before + 1)
 
 
+class SecurityPart(unittest.TestCase):
+    """What the Security sentinel gives the score: its penalty and how many repositories it comes from, and nothing while it is off or has looked at too little."""
+
+    def setUp(self):
+        self.old = actions_monitor.LITE["on"]
+        self.addCleanup(lambda: actions_monitor.LITE.update(on=self.old))
+
+    class Sentinel:
+        def __init__(self, enabled=True, scope=10, checked=10, penalty=35):
+            self.enabled, self.scope, self.checked, self.penalty = enabled, scope, checked, penalty
+
+        def get_status(self):
+            return {"repos_in_scope": self.scope, "repos_checked": self.checked}
+
+        def get_metrics(self):
+            return {"security_penalty": self.penalty}
+
+    class Registry:
+        def __init__(self, sentinel):
+            self.sentinel = sentinel
+
+        def get(self, name):
+            return self.sentinel if name == "security" else None
+
+    def test_the_penalty_and_the_repositories_go_to_the_score(self):
+        got = actions_monitor.score_security(self.Registry(self.Sentinel()), {})
+        self.assertEqual(got, {"penalty": 35, "repos": 10})
+
+    def test_off_or_absent_gives_nothing(self):
+        self.assertIsNone(actions_monitor.score_security(self.Registry(None), {}))
+        self.assertIsNone(actions_monitor.score_security(self.Registry(self.Sentinel(enabled=False)), {}))
+        self.assertIsNone(actions_monitor.score_security(None, {}))
+
+    def test_too_few_repositories_looked_at_gives_nothing(self):
+        self.assertIsNone(actions_monitor.score_security(self.Registry(self.Sentinel(checked=4)), {}))
+        self.assertIsNone(actions_monitor.score_security(self.Registry(self.Sentinel(checked=0)), {}))
+        self.assertIsNone(actions_monitor.score_security(self.Registry(self.Sentinel(scope=0, checked=0)), {}))
+        self.assertIsNotNone(actions_monitor.score_security(self.Registry(self.Sentinel(checked=5)), {}))
+
+    def test_the_least_coverage_is_the_one_of_the_score_settings(self):
+        sentinel = self.Sentinel(checked=7)
+        self.assertIsNone(actions_monitor.score_security(self.Registry(sentinel), {"score": {"min_coverage": 0.8}}))
+        self.assertIsNotNone(actions_monitor.score_security(self.Registry(sentinel), {"score": {"min_coverage": 0.6}}))
+
+
 if __name__ == "__main__":
     unittest.main()

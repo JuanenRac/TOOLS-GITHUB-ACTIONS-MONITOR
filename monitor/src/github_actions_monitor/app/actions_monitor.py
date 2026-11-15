@@ -1334,6 +1334,19 @@ def retention_tick(config):
         degraded.note("retention", error)
 
 
+def score_security(registry, config):
+    """{"penalty", "repos"} from the Security sentinel for the security part of the score, or None while the sentinel is off or has looked at fewer repositories than the score asks for (min_coverage)."""
+    sentinel = registry.get("security") if registry else None
+    if sentinel is None or not getattr(sentinel, "enabled", False):
+        return None
+    from github_actions_monitor.scoring import engine as score_engine
+    status = sentinel.get_status()
+    scope, checked = status.get("repos_in_scope") or 0, status.get("repos_checked") or 0
+    if not scope or not checked or checked / scope < score_engine.settings(config)["min_coverage"]:
+        return None
+    return {"penalty": sentinel.get_metrics().get("security_penalty", 0), "repos": checked}
+
+
 def score_tick(config, data):
     """The pass of the score (once every few minutes at most): the runs and the alerts of the collaboration sentinel go to the ledger and the snapshot of the hour is written. Complete only; a
     failure is counted and never stops the cycle."""
@@ -1346,7 +1359,7 @@ def score_tick(config, data):
         collab = registry.get("collab") if registry else None
         known = bool(collab is not None and getattr(collab, "enabled", False) and not (collab.get_status() or {}).get("loading"))
         storage, account = runtime.process_storage(CHILD["account"] or None)
-        snapshot = score_service.tick(storage, account, config, data.get("runs") or [], collab.get_alerts() if known else [], collab_known=known)
+        snapshot = score_service.tick(storage, account, config, data.get("runs") or [], collab.get_alerts() if known else [], collab_known=known, security=score_security(registry, config))
         if snapshot and snapshot.get("drop_new") and snapshot.get("drop"):      # the moment a drop appears; it leaves the panel only when the person asked for it
             from github_actions_monitor.scoring import drop as score_drop, engine as score_engine
             sentinel = SENTINEL["obj"]

@@ -6,7 +6,8 @@ For one window of time [start, end) it computes, from the runs that STARTED insi
 
   success_rate               successes / (successes + failures); cancelled, skipped and unfinished runs are not counted either way
   duration_p50, duration_p95 seconds of the successful runs
-  mttr                       median seconds from the first failure of a workflow to its next success (only recoveries that ended inside the window)
+  mttr                       median seconds from the first failure of a workflow to its next success (only recoveries that ended inside the window); 0 when the window has runs and no failure at all
+                             (nothing had to recover: that is data, not a gap), None while a failure has not recovered yet
   throughput                 finished runs per day
   collab_resolution_time     median seconds an item of the collaboration sentinel stayed open (only items closed inside the window)
   collab_open                items still open at the end of the window
@@ -71,11 +72,12 @@ def collect_runs(runs, start, end):
     seconds = [r["seconds"] for r in good if isinstance(r.get("seconds"), (int, float)) and not isinstance(r.get("seconds"), bool) and r["seconds"] > 0]
     spans = recoveries(timed)
     judged = len(good) + len(bad)
+    quiet = judged > 0 and not bad
     days = max((end - start) / DAY, 1e-9)
     return {
         "success_rate": (len(good) / judged) if judged else None,
         "duration_p50": percentile(seconds, 50), "duration_p95": percentile(seconds, 95),
-        "mttr": percentile(spans, 50) if spans else None,
+        "mttr": percentile(spans, 50) if spans else (0.0 if quiet else None),
         "throughput": (judged / days) if judged else None,
         "samples": {"runs": judged, "durations": len(seconds), "recoveries": len(spans)},
     }
