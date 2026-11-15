@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2060_passing-brightgreen.svg" alt="2060 tests">
+  <img src="https://img.shields.io/badge/Tests-2066_passing-brightgreen.svg" alt="2066 tests">
 </p>
 
 > Surveille les workflows de tous vos dépôts et vous dit, sur une page locale, ce qui est rouge, ce qui est bloqué et ce qui vous attend.
@@ -45,7 +45,7 @@
 | | |
 |---|---|
 | **Maturité** | functional |
-| **Tests** | 2060 méthodes de test (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 2066 méthodes de test (`python -m unittest discover -s monitor/tests`) |
 | **Réglages** | 388 réglages, tous avec aide |
 | **Langues** | 8 (anglais, espagnol, allemand, français, italien, japonais, chinois et portugais) |
 | **Testé dans le CI sur** | ubuntu, windows, Python 3.11, 3.13 |
@@ -145,14 +145,10 @@ Chaque image suit le thème clair ou sombre de votre page GitHub.
 - **Sentinelle** : alertes de sécurité, hygiène des dépôts, pull requests anciennes, versions prêtes à publier, builds en attente de signature et rapport en langage clair.
 - **Sentinelle Collab et une seule liste d'alertes** : issues et pull requests ouvertes qui demandent une personne (oubliées, critiques, revues en attente, vieux brouillons, conflits), en lecture seule et sur une horloge propre, et un onglet Alertes avec toutes les sentinelles dans une liste, un filtre par origine et des mises en sourdine locales qui se terminent seules.
 - **Une barre d'état, le plein écran et des tableaux triables** : l'avis le plus important (et une fenêtre avec tous), la connexion, le quota, la dernière lecture, le mode, l'adresse et l'horloge au pied de la page ; un bouton plein écran ; Dépôts et Historique se trient selon une ou plusieurs colonnes, avec les colonnes de votre choix.
-- **La ligne de commande comme client** : `bin/monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`, `score`) lit ce que dit le moniteur en marche, avec `--json` et des codes de sortie stables ; elle n'écrit jamais sur GitHub.
+- **La ligne de commande comme client** : `bin/monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) lit ce que dit le moniteur en marche, avec `--json` et des codes de sortie stables ; elle n'écrit jamais sur GitHub.
 - **Deux skills pour les IA** : de courts guides, en anglais, pour l'IA intégrée au moniteur (locale ou d'un fournisseur) et pour les IA qui lui parlent de l'extérieur (ligne de commande, HTTP ou fichiers seuls, MCP, flux), générés depuis le code pour que rien ne manque ; installés avec `python bin/monitor_cli.py install-skill internal|external --dest DOSSIER` ou copiés depuis l'onglet IA des Réglages (`monitor/docs/SKILLS_fra.md`).
 - **Échecs et leçons** : un livre local des échecs de votre CI, des règles qui rangent chacun dans une catégorie, une bibliothèque de leçons (`monitor/docs/LESSONS_fra.md`) avec la garde qui l'aurait évité, la tendance sur 24 heures et 7 jours, `ai/LESSONS.md`, `/api/ai/lessons` et un bref avant push pour tout outil d'IA ; lecture seule, rien ne quitte l'ordinateur.
 - **Toutes les tailles d'écran et plusieurs écrans** : la page s'adapte à une fenêtre du téléphone jusqu'à la 4K, droite ou tournée, et un moniteur peut servir jusqu'à trois écrans (`/screen/1` à `/screen/3`), chacun avec ses onglets et son orientation (`monitor/docs/SCREENS_fra.md`).
-- **Un score par compte** : un nombre de 0 à 100, une lettre de A à E et une tendance, construits à partir de la fiabilité de la CI, de sa rapidité, du temps de rétablissement et de la vitesse à laquelle les alertes de collaboration sont closes ; il dit « calibrage » ou « données insuffisantes » plutôt qu'un nombre qu'il ne peut pas justifier, montre ce qu'il ne couvre pas encore, se trouve dans l'en-tête de la page, a une commande `score`, prévient quand il baisse et figure dans les métriques et le serveur MCP (`monitor/docs/SCORE.md`).
-- **En tant que service** : l'image Docker officielle (sans root, en lecture seule), un fichier Compose avec proxy facultatif, une unité systemd, un contrôle de santé approfondi et la commande qui crée le premier administrateur (`monitor/docs/DEPLOYMENT.md`).
-- **Plusieurs comptes, une équipe et un endroit pour les données** : un processus par compte, des utilisateurs avec des rôles et leurs propres comptes, les fichiers dans `config/`, `data/`, `logs/` et `ai/`, un stockage SQLite facultatif avec conservation et sauvegarde, et les ports comme réglages (`monitor/docs/ACCOUNTS.md`, `monitor/docs/STORAGE.md`, `monitor/docs/LAYOUT.md`).
-- **Des listes que l'on trie et que l'on plie** : « En cours » de sept façons et l'onglet Alertes de neuf, avec un bouton pour plier ou déplier tous les dépôts ; le choix est retenu pour chaque utilisateur.
 - **Notifications pour chaque utilisateur** : en mode équipe, chaque utilisateur choisit dans un panneau de la page les canaux (ntfy, Teams, e-mail), le niveau minimal et les résumés (`monitor/docs/NOTIFICATIONS_fra.md`).
 - **Page de réglages** : modifiez chemins, intervalles, quotas et interrupteurs depuis le navigateur ; seulement une liste fixe de clés validées, avec sauvegarde avant chaque enregistrement.
 - **Graphiques et historique** : minutes de calcul, échecs et succès avec des barres animées et un historique quotidien (respecte la réduction des animations).
@@ -216,7 +212,6 @@ Tout est désactivé par défaut, local uniquement (`127.0.0.1`) et sans jeton s
 - Il n'écoute que sur `127.0.0.1` et refuse les requêtes dont le `Host` ou l'`Origin` n'est pas local. Ne le liez jamais à `0.0.0.0` : il n'a pas de connexion.
 - Il ne stocke aucun jeton : il utilise votre propre `gh` (sauf si vous activez le jeton optionnel du moniteur dans Réglages > Avancé).
 - Il n'écrit rien sur GitHub de lui-même. Seuls `dispatch --go`, `dispatch --real` et `finalize --execute` écrivent, et seulement quand vous les lancez.
-- Le mode réseau et le mode équipe sont désactivés par défaut ; une fois activés, la connexion, les rôles, les verrouillages et le journal d'audit protègent la page, et chaque requête est jugée pour un seul compte (`monitor/docs/DEPLOYMENT.md`, `monitor/docs/ACCOUNTS.md`).
 - **Analyses** : p50 / p95 de la durée, du temps en file et de chaque étape de chaque workflow, workflows instables (échoués puis réussis sur le même commit) et workflows devenus plus lents ; export vers Prometheus et Grafana.
 - **Économise le quota et survit à une coupure** : lectures conditionnelles (un 304 ne coûte rien) et un mode dernière image avec bandeau hors ligne qui reprend seul.
 - **Webhook entrant et notifications** : des événements signés mettent un dépôt à jour en temps réel ; messages optionnels vers Telegram, Discord, Slack, Matrix, MQTT ou une adresse locale (jamais une écriture sur GitHub).
@@ -284,12 +279,6 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/MODES_fra.md`](monitor/docs/MODES_fra.md) : modes de travail : normal, rapide et turbo
 - [`monitor/docs/AI_CONNECTION_fra.md`](monitor/docs/AI_CONNECTION_fra.md): Connecter un outil d'IA : tout ce que dit le moniteur, en signaux, dans le résumé, le point d'accès, les outils MCP et le hook
 - [`monitor/docs/QUOTA_fra.md`](monitor/docs/QUOTA_fra.md): Plus de quota, moins de dépense : mode économe, le panneau central, une GitHub App et comment partager le quota
-- [`monitor/docs/EXTRAS_fra.md`](monitor/docs/EXTRAS_fra.md): Extras facultatifs : le journal de l'étape en échec et un jeton en lecture seule de la GitHub App
-- [`monitor/docs/SCORE_fra.md`](monitor/docs/SCORE_fra.md): Le score d'un compte : parties, états, API, la pastille de l'en-tête, l'alerte et les réglages
-- [`monitor/docs/STORAGE_fra.md`](monitor/docs/STORAGE_fra.md): Stockage et conservation : fichiers ou SQLite, sauvegarde, migration et ce qui est gardé
-- [`monitor/docs/ADVANCED_fra.md`](monitor/docs/ADVANCED_fra.md): Fonctions avancées (toutes désactivées par défaut)
-- [`monitor/docs/AI_ALERTS_fra.md`](monitor/docs/AI_ALERTS_fra.md): Alertes pour les IA : le flux, le résumé, le hook et le stream
-- [`monitor/docs/AUDIT_PACKAGE_fra.md`](monitor/docs/AUDIT_PACKAGE_fra.md): Dossier pour l'auditeur
 
 ## Contribuer
 

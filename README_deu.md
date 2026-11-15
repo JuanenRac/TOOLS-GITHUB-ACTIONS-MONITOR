@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2060_passing-brightgreen.svg" alt="2060 tests">
+  <img src="https://img.shields.io/badge/Tests-2066_passing-brightgreen.svg" alt="2066 tests">
 </p>
 
 > Überwacht die Workflows aller deiner Repositories und zeigt dir auf einer lokalen Seite, was rot ist, was hängt und was auf dich wartet.
@@ -45,7 +45,7 @@
 | | |
 |---|---|
 | **Reifegrad** | functional |
-| **Tests** | 2060 Testmethoden (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 2066 Testmethoden (`python -m unittest discover -s monitor/tests`) |
 | **Einstellungen** | 388 Einstellungen, alle mit Hilfe |
 | **Sprachen** | 8 (Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch) |
 | **Im CI getestet auf** | ubuntu, windows, Python 3.11, 3.13 |
@@ -145,14 +145,10 @@ Jedes Bild folgt dem hellen oder dunklen Design Ihrer GitHub-Seite.
 - **Wächter**: Sicherheitswarnungen, Repository-Hygiene, alte Pull Requests, veröffentlichungsbereite Versionen, noch nicht signierte Builds und ein Bericht in einfacher Sprache.
 - **Collab-Wächter und eine Alarmliste**: offene Issues und Pull Requests, die einen Menschen brauchen (vergessen, kritisch, wartende Reviews, alte Entwürfe, Konflikte), nur lesend und mit eigener Uhr, dazu ein Reiter Alarme mit allen Wächtern in einer Liste, Filter nach Herkunft und lokale Stummschaltungen, die von selbst enden.
 - **Statusleiste, Vollbild und sortierbare Tabellen**: der wichtigste Hinweis (und ein Fenster mit allen), die Verbindung, das Kontingent, die letzte Lesung, der Modus, die Adresse und die Uhr am Fuß der Seite; ein Vollbild-Knopf; Repositories und Verlauf sortieren nach einer oder mehreren Spalten, mit den Spalten deiner Wahl.
-- **Die Befehlszeile als Client**: `bin/monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`, `score`) liest, was der laufende Monitor sagt, mit `--json` und stabilen Exit-Codes; sie schreibt nie nach GitHub.
+- **Die Befehlszeile als Client**: `bin/monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) liest, was der laufende Monitor sagt, mit `--json` und stabilen Exit-Codes; sie schreibt nie nach GitHub.
 - **Zwei Skills für KIs**: kurze Anleitungen, auf Englisch, für die im Monitor eingebaute KI (lokal oder von einem Anbieter) und für KIs, die von außen mit ihm sprechen (Kommandozeile, reines HTTP oder Dateien, MCP, Stream), aus dem Code erzeugt, damit nichts fehlt; installiert mit `python bin/monitor_cli.py install-skill internal|external --dest ORDNER` oder kopiert aus dem Reiter KI der Einstellungen (`monitor/docs/SKILLS_deu.md`).
 - **Fehler und Lehren**: ein lokales Buch der Fehler Ihrer CI, Regeln, die jeden einer Kategorie zuordnen, eine Bibliothek von Lehren (`monitor/docs/LESSONS_deu.md`) mit der Absicherung, die ihn verhindert hätte, der Trend über 24 Stunden und 7 Tage, `ai/LESSONS.md`, `/api/ai/lessons` und ein Briefing vor dem Push für jedes KI-Werkzeug; nur lesend, nichts verlässt den Rechner.
 - **Jede Bildschirmgröße und mehrere Bildschirme**: Die Seite passt sich einem Fenster vom Smartphone bis 4K an, aufrecht oder gedreht, und ein Monitor kann bis zu drei Bildschirme bedienen (`/screen/1` bis `/screen/3`), jeder mit eigenen Reitern und eigener Ausrichtung (`monitor/docs/SCREENS_deu.md`).
-- **Eine Punktzahl je Konto**: eine Zahl von 0 bis 100, ein Buchstabe von A bis E und ein Trend, gebildet aus der Zuverlässigkeit der CI, ihrer Geschwindigkeit, der Wiederherstellungszeit und der Schnelligkeit, mit der Zusammenarbeitswarnungen geschlossen werden; sie sagt „Kalibrierung“ oder „zu wenige Daten“ statt einer Zahl, die sie nicht belegen kann, zeigt, was sie noch nicht abdeckt, steht in der Kopfzeile der Seite, hat einen Befehl `score`, warnt beim Abfall und steckt in den Metriken und im MCP-Server (`monitor/docs/SCORE.md`).
-- **Als Dienst**: das offizielle Docker-Image (ohne Root, schreibgeschützt), eine Compose-Datei mit optionalem Proxy, eine systemd-Unit, eine tiefe Gesundheitsprüfung und der Befehl, der den ersten Administrator anlegt (`monitor/docs/DEPLOYMENT.md`).
-- **Mehrere Konten, ein Team und ein Ort für die Daten**: ein Prozess je Konto, Benutzer mit Rollen und eigenen Konten, die Dateien in `config/`, `data/`, `logs/` und `ai/`, ein optionaler SQLite-Speicher mit Aufbewahrung und Sicherung und die Ports als Einstellungen (`monitor/docs/ACCOUNTS.md`, `monitor/docs/STORAGE.md`, `monitor/docs/LAYOUT.md`).
-- **Listen, die man sortiert und einklappt**: „Gerade aktiv“ auf sieben Arten und der Reiter Warnungen auf neun, mit einer Schaltfläche zum Ein- und Ausklappen aller Repositories; die Wahl wird für jeden Benutzer gemerkt.
 - **Benachrichtigungen für jeden Benutzer**: Im Teammodus wählt jeder Benutzer in einem Panel der Seite Kanäle (ntfy, Teams, E-Mail), die niedrigste Stufe und Zusammenfassungen (`monitor/docs/NOTIFICATIONS_deu.md`).
 - **Einstellungsseite**: Pfade, Intervalle, Kontingente und Schalter im Browser ändern; nur eine feste Liste geprüfter Schlüssel, mit Sicherung vor jedem Speichern.
 - **Diagramme und Verlauf**: Rechenminuten, Fehler und Erfolge mit animierten Balken und Tagesverlauf (berücksichtigt reduzierte Bewegung).
@@ -216,7 +212,6 @@ Standardmäßig aus, nur lokal (`127.0.0.1`) und ohne zusätzliches Token. Nach 
 - Es lauscht nur auf `127.0.0.1` und weist Anfragen ab, deren `Host` oder `Origin` nicht lokal ist. Nie an `0.0.0.0` binden: Es hat keine Anmeldung.
 - Es speichert kein Token: Es nutzt dein eigenes `gh` (außer Sie schalten das optionale Token des Monitors unter Einstellungen > Erweitert ein).
 - Es schreibt von selbst nichts auf GitHub. Nur `dispatch --go`, `dispatch --real` und `finalize --execute` schreiben, und nur wenn du sie startest.
-- Netzwerkmodus und Teammodus sind standardmäßig aus; sind sie an, schützen Anmeldung, Rollen, Sperren und das Prüfprotokoll die Seite, und jede Anfrage wird nur für ein Konto beurteilt (`monitor/docs/DEPLOYMENT.md`, `monitor/docs/ACCOUNTS.md`).
 - **Analytik**: p50 / p95 von Dauer, Wartezeit und jedem Schritt jedes Workflows, instabile Workflows (fehlgeschlagen, dann bestanden auf demselben Commit) und langsamer gewordene Workflows; Export nach Prometheus und Grafana.
 - **Spart Kontingent und übersteht einen Ausfall**: bedingte Lesungen (ein 304 kostet nichts) und ein Modus mit letztem Bild und Offline-Banner, der von selbst weitermacht.
 - **Eingehender Webhook und Benachrichtigungen**: signierte Ereignisse aktualisieren ein Repository in Echtzeit; optionale Nachrichten an Telegram, Discord, Slack, Matrix, MQTT oder eine lokale Adresse (nie ein Schreibzugriff auf GitHub).
@@ -284,12 +279,6 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/MODES_deu.md`](monitor/docs/MODES_deu.md): Arbeitsmodi: normal, schnell und Turbo
 - [`monitor/docs/AI_CONNECTION_deu.md`](monitor/docs/AI_CONNECTION_deu.md): Ein KI-Werkzeug verbinden: alles, was der Monitor sagt, als Signale, in der Zusammenfassung, im Endpunkt, in den MCP-Werkzeugen und im Hook
 - [`monitor/docs/QUOTA_deu.md`](monitor/docs/QUOTA_deu.md): Mehr Kontingent, weniger Verbrauch: Sparmodus, das zentrale Panel, eine GitHub-App und wie man das Kontingent teilt
-- [`monitor/docs/EXTRAS_deu.md`](monitor/docs/EXTRAS_deu.md): Optionale Extras: das Protokoll des fehlgeschlagenen Schritts und ein schreibgeschütztes Token der GitHub-App
-- [`monitor/docs/SCORE_deu.md`](monitor/docs/SCORE_deu.md): Die Punktzahl eines Kontos: Teile, Zustände, API, der Chip in der Kopfzeile, die Warnung und die Einstellungen
-- [`monitor/docs/STORAGE_deu.md`](monitor/docs/STORAGE_deu.md): Speicherung und Aufbewahrung: Dateien oder SQLite, Sicherung, Migration und was behalten wird
-- [`monitor/docs/ADVANCED_deu.md`](monitor/docs/ADVANCED_deu.md): Erweiterte Funktionen (alle standardmäßig aus)
-- [`monitor/docs/AI_ALERTS_deu.md`](monitor/docs/AI_ALERTS_deu.md): Meldungen für KIs: der Feed, die Kurzfassung, der Hook und der Stream
-- [`monitor/docs/AUDIT_PACKAGE_deu.md`](monitor/docs/AUDIT_PACKAGE_deu.md): Paket für den Prüfer
 
 ## Mitwirken
 

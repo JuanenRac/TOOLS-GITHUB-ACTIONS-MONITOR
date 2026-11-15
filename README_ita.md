@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2060_passing-brightgreen.svg" alt="2060 tests">
+  <img src="https://img.shields.io/badge/Tests-2066_passing-brightgreen.svg" alt="2066 tests">
 </p>
 
 > Controlla i workflow di tutti i tuoi repository e ti dice, su una pagina locale, cosa è rosso, cosa è bloccato e cosa ti aspetta.
@@ -45,7 +45,7 @@
 | | |
 |---|---|
 | **Maturità** | functional |
-| **Test** | 2060 metodi di test (`python -m unittest discover -s monitor/tests`) |
+| **Test** | 2066 metodi di test (`python -m unittest discover -s monitor/tests`) |
 | **Impostazioni** | 388 impostazioni, tutte con aiuto |
 | **Lingue** | 8 (inglese, spagnolo, tedesco, francese, italiano, giapponese, cinese e portoghese) |
 | **Provato nel CI su** | ubuntu, windows, Python 3.11, 3.13 |
@@ -145,14 +145,10 @@ Ogni immagine segue il tema chiaro o scuro della tua pagina GitHub.
 - **Sentinella**: avvisi di sicurezza, igiene dei repository, pull request vecchie, versioni pronte da pubblicare, build in attesa di firma e un rapporto in linguaggio semplice.
 - **Sentinella Collab e un'unica lista di avvisi**: issue e pull request aperte che richiedono una persona (dimenticate, critiche, revisioni in attesa, vecchie bozze, conflitti), in sola lettura e con un orologio proprio, e una scheda Avvisi con tutte le sentinelle in un elenco, filtro per origine e silenziamenti locali che finiscono da soli.
 - **Barra di stato, schermo intero e tabelle ordinabili**: l'avviso più importante (e una finestra con tutti), la connessione, la quota, l'ultima lettura, la modalità, l'indirizzo e l'orologio a piè di pagina; un pulsante a schermo intero; Repository e Cronologia si ordinano per una o più colonne, con le colonne a tua scelta.
-- **La riga di comando come client**: `bin/monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`, `score`) legge ciò che dice il monitor in esecuzione, con `--json` e codici di uscita stabili; non scrive mai su GitHub.
+- **La riga di comando come client**: `bin/monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) legge ciò che dice il monitor in esecuzione, con `--json` e codici di uscita stabili; non scrive mai su GitHub.
 - **Due skill per le IA**: brevi guide, in inglese, per l'IA integrata nel monitor (locale o di un fornitore) e per le IA che gli parlano dall'esterno (riga di comando, solo HTTP o file, MCP, stream), generate dal codice perché non manchi nulla; si installano con `python bin/monitor_cli.py install-skill internal|external --dest CARTELLA` o si copiano dalla scheda IA delle Impostazioni (`monitor/docs/SKILLS_ita.md`).
 - **Fallimenti e lezioni**: un registro locale dei fallimenti della tua CI, regole che classificano ciascuno in una categoria, una libreria di lezioni (`monitor/docs/LESSONS_ita.md`) con la guardia che l'avrebbe evitato, la tendenza su 24 ore e 7 giorni, `ai/LESSONS.md`, `/api/ai/lessons` e un riepilogo prima del push per qualsiasi strumento di IA; sola lettura, nulla lascia il computer.
 - **Ogni dimensione di schermo e più schermi**: la pagina si adatta a una finestra dal telefono al 4K, dritta o ruotata, e un monitor può servire fino a tre schermi (da `/screen/1` a `/screen/3`), ciascuno con le sue schede e il suo orientamento (`monitor/docs/SCREENS_ita.md`).
-- **Un punteggio per ogni account**: un numero da 0 a 100, una lettera da A a E e una tendenza, costruiti con l'affidabilità della CI, la sua velocità, il tempo di ripristino e la rapidità con cui si chiudono gli avvisi di collaborazione; dice «calibrazione» o «dati insufficienti» al posto di un numero che non può sostenere, mostra ciò che non copre ancora, sta nell'intestazione della pagina, ha un comando `score`, avvisa quando cala ed è nelle metriche e nel server MCP (`monitor/docs/SCORE.md`).
-- **Come servizio**: l'immagine Docker ufficiale (senza root, in sola lettura), un file Compose con proxy facoltativo, un'unità systemd, un controllo di salute approfondito e il comando che crea il primo amministratore (`monitor/docs/DEPLOYMENT.md`).
-- **Più account, un team e un posto per i dati**: un processo per account, utenti con ruoli e propri account, i file in `config/`, `data/`, `logs/` e `ai/`, un archivio SQLite facoltativo con retention e backup, e le porte come impostazioni (`monitor/docs/ACCOUNTS.md`, `monitor/docs/STORAGE.md`, `monitor/docs/LAYOUT.md`).
-- **Elenchi che si ordinano e si ripiegano**: «In corso adesso» in sette modi e la scheda Avvisi in nove, con un pulsante per ripiegare o aprire tutti i repository; la scelta viene ricordata per ogni utente.
 - **Notifiche per ogni utente**: in modalità team ogni utente sceglie in un pannello della pagina i canali (ntfy, Teams, e-mail), il livello minimo e i riepiloghi (`monitor/docs/NOTIFICATIONS_ita.md`).
 - **Pagina delle impostazioni**: cambia percorsi, intervalli, quote e interruttori dal browser; solo un elenco fisso di chiavi validate, con copia di sicurezza prima di ogni salvataggio.
 - **Grafici e storico**: minuti di calcolo, errori e successi con barre animate e uno storico giornaliero (rispetta il movimento ridotto).
@@ -216,7 +212,6 @@ Tutto spento per impostazione predefinita, solo locale (`127.0.0.1`) e senza tok
 - Ascolta solo su `127.0.0.1` e rifiuta le richieste il cui `Host` o `Origin` non è locale. Non associarlo mai a `0.0.0.0`: non ha login.
 - Non memorizza alcun token: usa il tuo `gh` (a meno che tu non attivi il token opzionale del monitor in Impostazioni > Avanzate).
 - Non scrive nulla su GitHub da solo. Solo `dispatch --go`, `dispatch --real` e `finalize --execute` scrivono, e solo quando li avvii tu.
-- La modalità di rete e la modalità squadra sono spente per impostazione predefinita; quando sono accese, l'accesso, i ruoli, i blocchi e il registro di audit proteggono la pagina, e ogni richiesta è valutata per un solo account (`monitor/docs/DEPLOYMENT.md`, `monitor/docs/ACCOUNTS.md`).
 - **Analisi**: p50 / p95 della durata, del tempo in coda e di ogni passo di ogni workflow, workflow instabili (falliti e poi passati sullo stesso commit) e workflow diventati più lenti; esportati in Prometheus e Grafana.
 - **Risparmia quota e sopravvive a un'interruzione**: letture condizionali (un 304 non costa nulla) e una modalità ultima immagine con avviso offline che riprende da sola.
 - **Webhook in ingresso e notifiche**: eventi firmati aggiornano un repository in tempo reale; messaggi facoltativi a Telegram, Discord, Slack, Matrix, MQTT o un indirizzo locale (mai una scrittura su GitHub).
@@ -284,12 +279,6 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/MODES_ita.md`](monitor/docs/MODES_ita.md): modalità di lavoro: normale, veloce e turbo
 - [`monitor/docs/AI_CONNECTION_ita.md`](monitor/docs/AI_CONNECTION_ita.md): Collegare uno strumento di IA: tutto ciò che dice il monitor, come segnali, nel riepilogo, nell'endpoint, negli strumenti MCP e nell'hook
 - [`monitor/docs/QUOTA_ita.md`](monitor/docs/QUOTA_ita.md): Più quota, meno spesa: modalità risparmio, il pannello centrale, una GitHub App e come condividere la quota
-- [`monitor/docs/EXTRAS_ita.md`](monitor/docs/EXTRAS_ita.md): Extra facoltativi: il registro del passo fallito e un token di sola lettura della GitHub App
-- [`monitor/docs/SCORE_ita.md`](monitor/docs/SCORE_ita.md): Il punteggio di un account: parti, stati, API, la pastiglia dell'intestazione, l'avviso e le impostazioni
-- [`monitor/docs/STORAGE_ita.md`](monitor/docs/STORAGE_ita.md): Archiviazione e conservazione: file o SQLite, backup, migrazione e cosa si conserva
-- [`monitor/docs/ADVANCED_ita.md`](monitor/docs/ADVANCED_ita.md): Funzioni avanzate (tutte spente di default)
-- [`monitor/docs/AI_ALERTS_ita.md`](monitor/docs/AI_ALERTS_ita.md): Avvisi per le IA: il flusso, il riepilogo, l'hook e lo stream
-- [`monitor/docs/AUDIT_PACKAGE_ita.md`](monitor/docs/AUDIT_PACKAGE_ita.md): Pacchetto per il revisore
 
 ## Contribuire
 

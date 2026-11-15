@@ -79,7 +79,7 @@ def shot(url, target, size, tries=3):
         try:
             # Popen with its output sent to the null device and an explicit kill on timeout: with capture_output a browser that leaves a helper process alive keeps the pipe open and
             # subprocess.run waited for ever (or raised after the time limit, which ended the whole script without a word).
-            child = subprocess.Popen([edge(), "--headless=new", f"--user-data-dir={profile}", "--disable-gpu", "--hide-scrollbars", "--virtual-time-budget=9000", f"--window-size={size[0]},{size[1]}",
+            child = subprocess.Popen([edge(), "--headless=new", f"--user-data-dir={profile}", "--disable-gpu", "--hide-scrollbars", "--autoplay-policy=no-user-gesture-required", "--virtual-time-budget=9000", f"--window-size={size[0]},{size[1]}",
                                       f"--screenshot={target}", url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
             try:
                 child.wait(timeout=60)
