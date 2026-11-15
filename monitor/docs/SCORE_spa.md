@@ -44,6 +44,10 @@ Cada cuenta tiene su propia puntuación. Su detalle la desglosa por repositorio 
 
 Una ficha en la cabecera, junto a las fichas de preparación, muestra la puntuación: el número, la letra, una flecha con el cambio respecto a la ventana anterior y una pequeña línea con los últimos días. Su color sigue a la letra (A y B verde, C ámbar, D y E rojo). Mientras no hay número es neutra y dice por qué (calibrando, datos insuficientes). Una estrella tras la letra significa que una parte todavía no cuenta (hoy, la seguridad): un número alto no es entonces un todo en orden. Al pasar el ratón muestra la cobertura, las partes con sus pesos y el repositorio más débil. La ficha no se muestra en Lite ni con la puntuación apagada (`score.enabled`).
 
+## Para otras herramientas
+
+Las métricas (`/metrics`, con la salida Prometheus activada) llevan tres series sin etiquetas: `ghamon_score_scored` (1 cuando la cuenta tiene número), `ghamon_score_coverage` (la proporción de los pesos con datos, de 0 a 1) y `ghamon_score` (el número, solo mientras lo hay: nunca se exporta como 0 cuando no lo hay). El servidor MCP tiene una herramienta de solo lectura `get_score` con la respuesta de la API. `--demo` muestra una puntuación inventada y no escribe nada. El panel de Grafana de ejemplo (`docs/grafana/monitor_dashboard.json`) tiene un panel de la puntuación y otro de la puntuación en el tiempo.
+
 ## La API
 
 `GET /api/score` responde la última instantánea de la cuenta: `state`, `score`, `letter`, `trend`, `parts`, `coverage`, `data_quality`, `complete`, `missing_parts`, `repos`, `age_seconds` y `stale` (verdadero si la instantánea tiene más de tres horas). `GET /api/score/history` responde los puntos en el tiempo, del más antiguo al más reciente (`?hours=` hacia atrás desde ahora, 90 días como máximo, y `?limit=`, 2000 como máximo). Un número ausente es `null`, nunca 0. En el modo equipo, quien puede ver la cuenta puede leer su puntuación; los pesos y los límites son ajustes y solo un administrador los cambia.

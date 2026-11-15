@@ -539,6 +539,96 @@
           }
         }
       ]
+    },
+    {
+      "id": 11,
+      "type": "stat",
+      "title": "Score",
+      "gridPos": {
+        "x": 0,
+        "y": 21,
+        "w": 4,
+        "h": 5
+      },
+      "description": "Score of the account (0 to 100). It has no value while the account is calibrating or has too little data.",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 100,
+          "noValue": "no number yet",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 55
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "green",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "ghamon_score",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Score over time",
+      "gridPos": {
+        "x": 4,
+        "y": 21,
+        "w": 20,
+        "h": 5
+      },
+      "description": "The score and the share of its weights that have data (coverage x 100). A gap means there was no number.",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "ghamon_score",
+          "legendFormat": "score",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        },
+        {
+          "refId": "B",
+          "expr": "ghamon_score_coverage * 100",
+          "legendFormat": "coverage (%)",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ]
     }
   ]
 }

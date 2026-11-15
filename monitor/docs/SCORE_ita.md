@@ -44,6 +44,10 @@ Ogni account ha il proprio punteggio. Il dettaglio lo scompone per repository (s
 
 Una pastiglia nell'intestazione, accanto alle pastiglie di preparazione, mostra il punteggio: il numero, la lettera, una freccia con la variazione rispetto alla finestra precedente e una piccola linea degli ultimi giorni. Il suo colore segue la lettera (A e B verde, C ambra, D ed E rosso). Finché non c'è un numero è neutra e dice perché (calibrazione, dati insufficienti). Una stella dopo la lettera significa che una parte non è ancora conteggiata (oggi, la sicurezza): un numero alto non significa allora che sia tutto a posto. Al passaggio del mouse mostra la copertura, le parti con i loro pesi e il repository più debole. La pastiglia non compare in Lite né con il punteggio spento (`score.enabled`).
 
+## Per altri strumenti
+
+Le metriche (`/metrics`, con l'uscita Prometheus attiva) portano tre serie senza etichette: `ghamon_score_scored` (1 quando l'account ha un numero), `ghamon_score_coverage` (la quota dei pesi con dati, da 0 a 1) e `ghamon_score` (il numero, solo quando c'è: non viene mai esportato come 0 quando manca). Il server MCP ha uno strumento di sola lettura `get_score` con la risposta dell'API. `--demo` mostra un punteggio inventato e non scrive nulla. La dashboard Grafana di esempio (`docs/grafana/monitor_dashboard.json`) ha un pannello del punteggio e uno del punteggio nel tempo.
+
 ## L'API
 
 `GET /api/score` risponde con l'ultima istantanea dell'account: `state`, `score`, `letter`, `trend`, `parts`, `coverage`, `data_quality`, `complete`, `missing_parts`, `repos`, `age_seconds` e `stale` (vero se l'istantanea ha più di tre ore). `GET /api/score/history` risponde con i punti nel tempo, dal più vecchio al più recente (`?hours=` all'indietro da adesso, al massimo 90 giorni, e `?limit=`, al massimo 2000). Un numero assente è `null`, mai 0. Nella modalità squadra chi può vedere l'account può leggerne il punteggio; i pesi e i limiti sono impostazioni che solo un amministratore cambia.
