@@ -118,6 +118,7 @@ _f(_T_GENERAL, "screens", "ui.screen2_orientation", "enum", ("auto", "portrait",
 _f(_T_GENERAL, "screens", "ui.screen3_tabs", "text", re.compile(r"^[a-z,]{0,60}\Z"), restart=False)
 _f(_T_GENERAL, "screens", "ui.screen3_orientation", "enum", ("auto", "portrait", "landscape"), restart=False)
 _f(_T_GENERAL, "order", "ui.now_sort", "enum", ordering.KINDS["now"], restart=False)
+_f(_T_GENERAL, "order", "ui.alerts_sort", "enum", ordering.KINDS["alerts"], restart=False)
 _f(_T_GENERAL, "ports", "ports.complete", "int", (ports.LOW, ports.HIGH), restart=True)
 _f(_T_GENERAL, "ports", "ports.lite", "int", (ports.LOW, ports.HIGH), restart=True)
 _f(_T_GENERAL, "sound", "sound.enabled", "bool", restart=False)

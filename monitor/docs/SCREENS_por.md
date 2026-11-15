@@ -28,10 +28,13 @@ A página adapta-se ao tamanho da janela, do telemóvel ao 4K, na vertical ou na
 | `ui.screen3_tabs` | Separadores de /screen/3. |
 | `ui.screen3_orientation` | Orientação de /screen/3. |
 | `ui.now_sort` | Ordem de A acontecer agora para quem não escolheu: ecosystem, severity, age, newest, repo, event ou state. |
+| `ui.alerts_sort` | Ordem do separador Alertas para quem não escolheu: server, severity, streak, class, age, newest, repo, origin ou state. |
 
 ## Ordem das listas
 
 A secção **A acontecer agora** do primeiro separador está ordenada por ecossistema, com um título para cada um. A lista por cima da secção altera-a: ecossistema, gravidade (primeiro as bloqueadas, depois as que têm uma tarefa com falha, depois as em curso e por fim as em fila), antiguidade (a que leva mais tempo, primeiro), mais recente primeiro, repositório, disparador (push, pull_request, schedule...) e estado (em curso antes de em fila). A escolha fica guardada para cada pessoa: no modo de equipa é o servidor que a guarda com o utilizador (`GET` e `POST /api/auth/me/view`, por isso acompanha-o noutro navegador); caso contrário, é este navegador. Enquanto ninguém escolhe, a ordem é `ui.now_sort` do ficheiro de configuração (ecossistema se faltar ou estiver errado). Os botões **Expandir tudo** e **Recolher tudo** junto à lista expandem ou recolhem de uma vez todos os repositórios da secção, com qualquer ordem; a escolha é lembrada por pessoa no mesmo sítio e sobrevive a uma atualização (um repositório que abra ou feche à mão depois mantém a sua escolha).
+
+A lista do separador **Alertas** mantém a ordem que o monitor envia até alguém escolher outra com a lista por cima: gravidade (crítico, erro, aviso, info), a maior sequência de falhas seguidas primeiro, classe (um alerta de erro ou crítico é real e vai antes dos que há que vigiar), os mais antigos primeiro, os mais recentes primeiro, repositório, origem (a sentinela que o levantou) e estado (abertos antes de silenciados). Fica guardada do mesmo modo e, enquanto ninguém escolhe, vale `ui.alerts_sort` do ficheiro de configuração (`server` se faltar ou estiver errado).
 
 ## Tamanhos testados
 
