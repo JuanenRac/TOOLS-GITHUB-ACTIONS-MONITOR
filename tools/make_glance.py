@@ -102,7 +102,23 @@ def block(lang, f):
     return (f"{BEGIN}\n\n**{t['h']}** (v{f['version']})\n\n| | |\n|---|---|\n" + "\n".join(rows) + f"\n\n## {t['ps']}\n\n{t['intro']}\n\n{t['legend']}\n\n| {t['cols'][0]} | {t['cols'][1]} | {t['cols'][2]} |\n|---|---|---|\n{status}\n\n{END}")
 
 
+BADGE_RE = re.compile(r'<img src="https://img\.shields\.io/badge/Tests-[\d,.]+_passing-brightgreen\.svg" alt="[^"]*">')
+LANGUAGES_BADGE_RE = re.compile(r'^([ \t]*)<img src="https://img\.shields\.io/badge/Languages-8-[^\n]*\n', re.M)
+
+
+def tests_badge(f):
+    """The badge with the number of tests (the dashboard of the profile reads `Tests-<number>` in the README): the same count as the table, measured and never typed."""
+    return f'<img src="https://img.shields.io/badge/Tests-{f["tests"]}_passing-brightgreen.svg" alt="{f["tests"]} tests">'
+
+
+def with_badge(text, f):
+    if BADGE_RE.search(text):
+        return BADGE_RE.sub(lambda m: tests_badge(f), text, count=1)
+    return LANGUAGES_BADGE_RE.sub(lambda m: m.group(0) + m.group(1) + tests_badge(f) + "\n", text, count=1)
+
+
 def render(lang, text, f):
+    text = with_badge(text, f)
     new = block(lang, f)
     if BEGIN in text:
         return re.sub(re.escape(BEGIN) + r".*?" + re.escape(END), lambda m: new, text, flags=re.S)
