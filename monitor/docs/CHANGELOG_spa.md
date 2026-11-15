@@ -45,6 +45,20 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - La prueba de una cuenta que muere al instante ya no depende de la velocidad del equipo: la espera antes de volver a arrancar una cuenta se comprueba con un reloj que da la propia prueba, y una segunda prueba comprueba el calendario de las esperas sin leer la hora real (la antigua fallaba bajo carga en la puerta de una versión).
 
+## [1.8.4]
+
+### Añadido
+
+- Ordenar «Ocurriendo ahora» de siete maneras y la lista de la pestaña Alertas de nueve, con botones para desplegar o plegar todos los repositorios; la elección se recuerda por usuario.
+
+- Los puertos del monitor completo y del lite son ajustes del fichero de configuración y del menú de Ajustes (los valores por defecto no cambian).
+
+- El primer administrador de un contenedor: el mensaje del servicio dice la orden exacta, y la guía, el fichero de ejemplo y la prueba del contenedor lo explican.
+
+### Corregido
+
+- Una petición del modo de equipo con varias cuentas se resuelve en una sola cuenta; el deshacer de la migración de carpetas funciona aunque se interrumpa; la copia de seguridad no lleva sesiones; un enlace simbólico no se mueve; el proxy de Compose ya no bloquea a todos por los intentos de uno.
+
 ## [1.8.3]
 
 ### Añadido

@@ -45,6 +45,20 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - Der Test eines Kontos, das sofort stirbt, hängt nicht mehr von der Geschwindigkeit des Rechners ab: Die Wartezeit vor dem erneuten Start eines Kontos wird mit einer Uhr geprüft, die der Test selbst gibt, und ein zweiter Test prüft den Plan der Wartezeiten, ohne die echte Zeit zu lesen (der alte scheiterte unter Last in der Schranke eines Releases).
 
+## [1.8.4]
+
+### Hinzugefügt
+
+- „Läuft gerade“ lässt sich auf sieben Arten sortieren und die Liste des Tabs Alarme auf neun, mit Schaltflächen zum Aufklappen oder Zuklappen aller Repositories; die Wahl wird pro Benutzer gemerkt.
+
+- Die Ports des vollständigen und des Lite-Monitors sind Einstellungen in der Konfigurationsdatei und im Einstellungsmenü (die Standardwerte bleiben).
+
+- Der erste Administrator eines Containers: die Meldung des Dienstes nennt den genauen Befehl, und die Anleitung, die Beispieldatei und der Containertest erklären ihn.
+
+### Behoben
+
+- Eine Anfrage im Teammodus mit mehreren Konten wird nur einem Konto zugeordnet; das Rückgängigmachen der Ordnermigration funktioniert auch nach einem Abbruch; die Sicherung enthält keine Sitzungen; ein symbolischer Link wird nicht verschoben; der Compose-Proxy sperrt nicht mehr alle wegen der Versuche eines Einzelnen.
+
 ## [1.8.3]
 
 ### Hinzugefügt
