@@ -44,7 +44,7 @@ from github_actions_monitor.tool_version import TOOL_VERSION
 from github_actions_monitor.security import netguard
 
 EXIT_OK, EXIT_USAGE, EXIT_DOWN, EXIT_AUTH, EXIT_DEGRADED, EXIT_ALERTS = 0, 1, 2, 3, 4, 5
-COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "ai-hook", "credential", "lessons", "install-skill", "gh-token")
+COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "score", "ai-hook", "credential", "lessons", "install-skill", "gh-token")
 SKILL_ACTIONS = ("internal", "external")
 LESSONS_ACTIONS = ("list", "brief", "failures", "close")
 AI_HOOK_ACTIONS = ("install", "status", "uninstall")
@@ -233,6 +233,53 @@ def cmd_alerts(ctx):
         if any(worst.get(a.get("level"), 0) >= worst[wanted] and not a.get("muted_until") for a in alerts):
             code = EXIT_ALERTS
     return answer, lines, code
+
+
+def _signed(number):
+    return f"{number:+g}"
+
+
+def cmd_score(ctx):
+    """score [--compare]: the score of the account, read from the same source as the page (`/api/score`). Read only. With --compare the history of the window is read too and the score is set
+    against the oldest point of it. A score that does not exist yet (calibrating, not enough data, off) is not an error: exit 0 and the reason."""
+    answer = fetch(ctx["base"], "/api/score", {"account": ctx["account"]}, ctx["timeout"], ctx["token"])
+    state = answer.get("state")
+    account = answer.get("account") or ctx["account"] or "-"
+    payload = dict(answer)
+    if isinstance(answer.get("score"), (int, float)) and state == "scored":
+        trend = answer.get("trend") or {}
+        direction = trend.get("direction") if trend.get("direction") in ("up", "down", "flat", "unknown") else "unknown"
+        words = i18n.t("cli.score_trend_" + direction, delta=abs(trend["delta"]) if isinstance(trend.get("delta"), (int, float)) else "")
+        lines = [i18n.t("cli.score_head", account=account, score=answer["score"], letter=answer.get("letter") or "-", trend=words)]
+    else:
+        key = "cli.score_state_" + str(state) if state in ("calibrating", "insufficient_data", "off", "scored") else "cli.score_state_calibrating"
+        lines = [i18n.t("cli.score_none", account=account, state=i18n.t(key))]
+    quality = answer.get("data_quality") or {}
+    if state != "off":
+        lines.append(i18n.t("cli.score_coverage", coverage=round(float(answer.get("coverage") or 0) * 100), runs=quality.get("runs", 0), days=answer.get("window_days", "-")))
+    for part in answer.get("parts") or []:
+        name = i18n.t("cli.score_p_" + str(part.get("part"))) if part.get("part") in ("reliability", "speed", "recovery", "collaboration") else str(part.get("part"))
+        lines.append(i18n.t("cli.score_part", part=name, score=part["score"], weight=part.get("weight")) if isinstance(part.get("score"), (int, float)) else i18n.t("cli.score_part_none", part=name, weight=part.get("weight")))
+    if answer.get("missing_parts"):
+        lines.append(i18n.t("cli.score_missing", parts=", ".join(str(p) for p in answer["missing_parts"])))
+    for repo in (answer.get("repos") or [])[:10]:
+        lines.append(i18n.t("cli.score_repo", repo=repo.get("repo"), score=repo["score"], letter=repo.get("letter") or "-", runs=repo.get("runs", 0)) if isinstance(repo.get("score"), (int, float))
+                     else i18n.t("cli.score_repo_none", repo=repo.get("repo"), state=repo.get("state"), runs=repo.get("runs", 0)))
+    if answer.get("stale") and answer.get("age_seconds") is not None:
+        lines.append(i18n.t("cli.score_stale", age=ago_text(answer["age_seconds"])))
+    if ctx.get("compare"):
+        hours = int(answer.get("window_days") or 7) * 24
+        history = fetch(ctx["base"], "/api/score/history", {"account": ctx["account"], "hours": hours}, ctx["timeout"], ctx["token"])
+        points = [p for p in history.get("points") or [] if isinstance(p.get("score"), (int, float))]
+        if len(points) >= 2 and isinstance(answer.get("score"), (int, float)):
+            scores = [p["score"] for p in points]
+            delta = round(answer["score"] - points[0]["score"], 1)
+            payload["compare"] = {"hours": hours, "from_score": points[0]["score"], "delta": delta, "lowest": min(scores), "highest": max(scores), "points": len(points)}
+            lines.append(i18n.t("cli.score_compare", hours=hours, delta=_signed(delta), low=min(scores), high=max(scores), n=len(points)))
+        else:
+            payload["compare"] = None
+            lines.append(i18n.t("cli.score_compare_none"))
+    return payload, lines, EXIT_OK
 
 
 def cmd_lessons(ctx):
@@ -462,7 +509,7 @@ def cmd_credential(ctx):
     return {"action": action, "ok": ok, **shown}, [line], EXIT_OK if ok else EXIT_DEGRADED
 
 
-HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "live": cmd_live, "doctor": cmd_doctor, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill}
+HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "live": cmd_live, "doctor": cmd_doctor, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill}
 
 
 def build_parser():
@@ -493,6 +540,7 @@ def build_parser():
     ap.add_argument("--dest", metavar="FOLDER", default="", help=i18n.t("cli.help_dest"))
     ap.add_argument("--read-only", action="store_true", dest="read_only", help=i18n.t("cli.help_read_only"))
     ap.add_argument("--repo", metavar="NAME", default="", help=i18n.t("cli.help_repo"))
+    ap.add_argument("--compare", action="store_true", help=i18n.t("cli.help_compare"))
     ap.add_argument("--lang", metavar="CODE", help=i18n.t("cli.help_lang"))
     ap.add_argument("--version", action="store_true", help=i18n.t("cli.help_version"))
     return ap
@@ -517,7 +565,7 @@ def main(argv=None):
         return EXIT_USAGE
     try:
         ctx = {"base": base_url(args.url, args.lite), "account": args.account, "timeout": max(1.0, min(60.0, args.timeout)), "token": resolve_token(flag=args.token, token_file=args.token_file),
-               "sentinel": args.sentinel, "level": args.level, "muted": args.muted, "fail_on": args.fail_on, "lite": args.lite,
+               "sentinel": args.sentinel, "level": args.level, "muted": args.muted, "fail_on": args.fail_on, "lite": args.lite, "compare": args.compare,
                "action": args.action or "", "target": args.target, "scope": args.scope, "project_dir": args.project_dir, "dry_run": args.dry_run, "deep": args.deep, "new_token_file": args.new_token_file, "dest": args.dest, "read_only": args.read_only, "repo": args.repo if re.fullmatch(r"[A-Za-z0-9._-]{0,100}", args.repo) else ""}
         CLIENT.update({"session": "", "ca": (args.ca_file or os.environ.get("MONITOR_CA_FILE") or "").strip()})
         if CLIENT["ca"] and not os.path.isfile(CLIENT["ca"]):

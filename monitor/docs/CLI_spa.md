@@ -18,6 +18,7 @@
 | `doctor` | las comprobaciones de `--doctor` de esta instalación (el monitor no tiene que estar en marcha) | sí |
 | `accounts` | las cuentas del supervisor (solo con varias cuentas) | no |
 | `alerts` | las alertas de todos los centinelas en una lista: `--sentinel ci\|collab`, `--level info\|warning\|error`, `--muted show\|hide\|only` | no |
+| `score` | la puntuación de la cuenta: número, letra, tendencia, partes, cobertura y el desglose por repositorio; `--compare` la compara con el histórico de la ventana | no |
 | `live` | el estado del receptor del webhook y los últimos eventos | no |
 
 Opciones de todos los comandos: `--json` (la respuesta como un documento JSON: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (puerto 8766), `--timeout SEGUNDOS` (de 1 a 60), `--lang CÓDIGO`. En el modo red pon el token de acceso en la variable de entorno `MONITOR_ACCESS_TOKEN`, la que lee el propio monitor (`MONITOR_TOKEN` se acepta como alias; `--token TOKEN` es el último recurso, porque una opción se ve en la lista de procesos). El orden es: `MONITOR_ACCESS_TOKEN`, luego `MONITOR_TOKEN`, luego `--token`. Viaja en la cabecera `X-Monitor-Access`, nunca en la dirección ni en pantalla. Un `--url` con `http` sin cifrar hacia otro ordenador imprime un aviso por stderr (el token y las respuestas viajarían sin cifrar): usa `https` fuera de una red que controles.
