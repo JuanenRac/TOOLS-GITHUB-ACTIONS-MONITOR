@@ -35,6 +35,10 @@
 | 两个监控器可以监听同一个端口；找不到 Git for Windows 的 openssl；有意吞掉的失败不留来源痕迹 | 端口以独占方式占用，第二个监控器拒绝启动；在 Git for Windows 存放的位置查找 openssl；每个被吞掉的失败都会写入一行包含类型和位置的日志 | `test_185_startup.py (OnePerPort, WhereIsOpenssl), test_185_degraded.py` |
 | 没有时长的运行（经 GraphQL 读取）使哨兵在每个周期失败 | 缺失的时长按零计 | `test_186_unfinished_rows.py` |
 
+## 面向审阅者的测试台和复现用例
+
+`python tools/audit_harness.py --check` 会在临时文件夹中、不连接 GitHub（使用假的 `gh`）启动一个监督进程，包含三个账户（`alpha`、`beta` 和 `default`）和四个用户（`admin`；仅属于 `alpha` 的 `maintainer`；仅属于 `beta` 的 `viewer`；已停用的 `inactive`），请求决定账户隔离的路由，并为每个响应打印一行（`ok` 或 `WRONG`）；全部正确时以 0 退出。不带 `--check` 时只打印地址和用户并等待。1.8.3 独立审查的复现用例在 `tests/test_193_regressions.py` 中：每个用例在该版本上失败，现在通过。
+
 ## 如何运行测试
 
 在 `monitor/` 文件夹中运行：`python -m unittest discover -s tests`。测试不需要网络，也不需要 GitHub 令牌。安装了 Edge、Chrome 或 Chromium 时（或设置 `MONITOR_BROWSER_TESTS=1`）会运行浏览器测试。表中的文件位于 `monitor/tests/`。

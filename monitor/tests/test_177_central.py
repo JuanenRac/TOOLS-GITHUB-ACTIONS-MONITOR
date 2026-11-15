@@ -2,6 +2,7 @@
 # GPL-3.0-or-later - see LICENSE
 """The central panel as a base line that spends no allowance: git or http, its age, behind = not trusted, and Low mode asks live only for what the file cannot say."""
 import json
+import os
 import sys
 import tempfile
 import time
@@ -89,9 +90,9 @@ class CentralSource(unittest.TestCase):
         self.assertTrue({"repo", "wf"} <= set(data["ci"]["red"][0]))      # the real rows: {"repo", "wf"}
 
     def test_the_real_file_of_the_profile_repository_is_read_when_it_is_there(self):
-        real = Path("C:/Users/juane/Documents/GitHub/JuanenRac/data/sentinel.json")
+        real = Path(os.environ.get("MONITOR_REAL_CENTRAL_FILE") or "no-such-file")      # a copy of the real file of the profile repository, when somebody has one and says where
         if not real.is_file():
-            self.skipTest("no copy of the real file on this computer")
+            self.skipTest("no copy of the real file: set MONITOR_REAL_CENTRAL_FILE to read it")
         result = central_source.read({"central": {"source": "http"}}, "o", opener=lambda url: real.read_text(encoding="utf-8"), now=time.time())
         self.assertTrue(result["ok"], result)
         self.assertIsInstance(result["data"]["ci"]["red"], list)

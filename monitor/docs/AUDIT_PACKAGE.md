@@ -35,6 +35,10 @@ What an auditor needs to check the team mode, the network exposure and the handl
 | Two monitors could listen on one port; openssl of Git for Windows was not found; failures swallowed on purpose left no trace of where they came from | The port is taken exclusively and a second monitor refuses to start; openssl is searched where Git for Windows keeps it; each swallowed failure writes a line with its kind and place | `test_185_startup.py (OnePerPort, WhereIsOpenssl), test_185_degraded.py` |
 | Runs without a duration (read through GraphQL) made the Sentinel fail on every cycle | A missing duration counts as zero | `test_186_unfinished_rows.py` |
 
+## A harness and the reproductions for reviewers
+
+`python tools/audit_harness.py --check` starts, in a temporary folder and with no GitHub (a fake `gh`), a supervisor with three accounts (`alpha`, `beta`, `default`) and four users (`admin`; `maintainer` of `alpha` only; `viewer` of `beta` only; `inactive`, switched off), asks the routes that decide the isolation of the accounts and prints one line for each answer (`ok` or `WRONG`); it exits with 0 when all are right. Without `--check` it prints the address and the users and waits. The reproductions of the independent review of 1.8.3 live in `tests/test_193_regressions.py`: each one failed on that version and passes now.
+
 ## How to run the tests
 
 From the folder `monitor/`: `python -m unittest discover -s tests`. The tests need no network and no GitHub token. The browser tests run when Edge, Chrome or Chromium is installed (or with `MONITOR_BROWSER_TESTS=1`). The files named in the table are in `monitor/tests/`.

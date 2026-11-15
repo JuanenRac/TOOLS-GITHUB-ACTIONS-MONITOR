@@ -35,6 +35,10 @@
 | 2つのモニターが同じポートで待ち受け可能で、Git for Windows の openssl が見つからず、意図的に握りつぶした失敗の出所が残らなかった | ポートは排他的に確保し、2つ目のモニターは起動を拒否する。openssl は Git for Windows の置き場所を探す。握りつぶした失敗ごとに種類と場所の行をログに書く | `test_185_startup.py (OnePerPort, WhereIsOpenssl), test_185_degraded.py` |
 | 所要時間のない実行（GraphQL で取得）がセンチネルを毎サイクル失敗させた | 所要時間がない場合は 0 として数える | `test_186_unfinished_rows.py` |
 
+## レビュー担当者向けのハーネスと再現テスト
+
+`python tools/audit_harness.py --check` は、一時フォルダー内で GitHub なし（偽の `gh`）に、3 つのアカウント（`alpha`、`beta`、`default`）と 4 人のユーザー（`admin`、`alpha` だけの `maintainer`、`beta` だけの `viewer`、無効化された `inactive`）を持つスーパーバイザーを起動し、アカウントの分離を決めるルートを呼び出して応答ごとに 1 行（`ok` または `WRONG`）を出力します。すべて正しければ終了コード 0 で終わります。`--check` なしではアドレスとユーザーを表示して待機します。1.8.3 の独立レビューの再現は `tests/test_193_regressions.py` にあり、そのバージョンでは失敗し、現在は成功します。
+
 ## テストの実行
 
 `monitor/` フォルダーで `python -m unittest discover -s tests` を実行します。テストにネットワークも GitHub トークンも不要です。Edge、Chrome、Chromium がある場合（または `MONITOR_BROWSER_TESTS=1`）にブラウザテストが実行されます。表のファイルは `monitor/tests/` にあります。
