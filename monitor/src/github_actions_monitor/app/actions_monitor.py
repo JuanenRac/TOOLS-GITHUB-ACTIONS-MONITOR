@@ -1340,7 +1340,7 @@ def score_tick(config, data):
     if LITE["on"] or data.get("loading") or (data.get("offline") or {}).get("offline"):
         return
     try:
-        from github_actions_monitor.scoring import service as score_service
+        from github_actions_monitor.scoring import ledger as score_service
         from github_actions_monitor.storage import runtime
         registry = SENTINEL["registry"]
         collab = registry.get("collab") if registry else None

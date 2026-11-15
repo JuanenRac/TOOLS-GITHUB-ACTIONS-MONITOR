@@ -83,7 +83,7 @@ class Wiring(unittest.TestCase):
 
     def test_a_failure_is_counted_and_not_raised(self):
         before = degraded.COUNTS.get("score", 0)
-        with mock.patch("github_actions_monitor.scoring.service.tick", side_effect=RuntimeError("boom")):
+        with mock.patch("github_actions_monitor.scoring.ledger.tick", side_effect=RuntimeError("boom")):
             actions_monitor.score_tick({}, {"runs": runs()})
         self.assertEqual(degraded.COUNTS.get("score", 0), before + 1)
 

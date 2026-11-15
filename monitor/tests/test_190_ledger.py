@@ -11,7 +11,7 @@ sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-from github_actions_monitor.scoring import engine, service  # noqa: E402
+from github_actions_monitor.scoring import engine, ledger as service  # noqa: E402
 from github_actions_monitor.storage import file_storage, sqlite_storage  # noqa: E402
 
 NOW = 1_800_000_000.0
