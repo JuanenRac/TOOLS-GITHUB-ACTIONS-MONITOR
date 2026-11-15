@@ -33,7 +33,9 @@ services:
       MONITOR_ALLOWED_HOSTS: ${MONITOR_ALLOWED_HOSTS:-}
       MONITOR_TRUSTED_PROXY: ${MONITOR_TRUSTED_PROXY:-}                # 1 with the profile "proxy": the failed attempts are counted against the client behind Caddy, not against Caddy
       MONITOR_TRUSTED_PROXIES: ${MONITOR_TRUSTED_PROXIES:-}            # the network of this compose (MONITOR_SUBNET): the only addresses whose X-Forwarded-For is believed
-      MONITOR_TEAM_MODE: ${MONITOR_TEAM_MODE:-}                        # 1 = users and roles (create the first administrator at /login or with auth_cli)
+      MONITOR_TEAM_MODE: ${MONITOR_TEAM_MODE:-}                        # 1 = users and roles (the first administrator: auth_cli create-admin once, see deploy/.env.example)
+      MONITOR_ADMIN_USER: ${MONITOR_ADMIN_USER:-}                      # optional: the first administrator, created on the first start with the password of the file below
+      MONITOR_ADMIN_PASSWORD_FILE: ${MONITOR_ADMIN_PASSWORD_FILE:-}    # a file (a Docker secret) with its password on the first line
     secrets:
       - gh_token
     volumes:

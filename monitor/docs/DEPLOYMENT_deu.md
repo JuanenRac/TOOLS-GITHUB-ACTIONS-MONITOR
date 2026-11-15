@@ -111,6 +111,8 @@ Gelesen werden nur die Namen dieser Tabelle. Im Dienst wird ein nicht lesbarer W
 | `MONITOR_TLS_KEY_FILE` | Der private Schlüssel dieses Zertifikats (`listen.tls_key_file`). |
 | `MONITOR_QUERY_ACCESS` | `0` = die Adresse mit `?access=` öffnet keine Sitzung mehr (`listen.query_access`); verwenden Sie `POST /api/access`. |
 | `MONITOR_TEAM_MODE` | `1` = der Teammodus (`auth.enabled`): Benutzer, Rollen und Sitzungen. |
+| `MONITOR_ADMIN_USER` | Zusammen mit `MONITOR_ADMIN_PASSWORD_FILE`: der erste Administrator, den der Dienst anlegt, wenn der Teammodus an ist und es noch keinen Benutzer gibt. |
+| `MONITOR_ADMIN_PASSWORD_FILE` | Die Datei (zum Beispiel ein Docker-Secret) mit dem Passwort von `MONITOR_ADMIN_USER` in der ersten Zeile. |
 | `MONITOR_SERVICE` | `1` = läuft als Dienst: gibt bei einem unbrauchbaren Zugang nicht auf, und der Doctor prüft die Aufbewahrung. Image und Dienst setzen es. |
 | `MONITOR_URL` | Für `bin/monitor_cli.py` und die Gesundheitsprüfung: die Adresse des Monitors (im Image: der zweite Port). |
 | `MONITOR_CA_FILE` | Für `bin/monitor_cli.py`: eine PEM-Datei mit der Stelle, die das HTTPS-Zertifikat des Monitors signiert hat. |
@@ -140,6 +142,17 @@ systemctl reload github-actions-monitor
 ```
 
 Das neue Token wird bei GitHub geprüft (der Aufruf `rate_limit`, kostenlos), BEVOR es behalten wird: Ein Token, das GitHub ablehnt, ändert nichts und antwortet 422 (`rejected`). Ein gutes wird nur in den Ordner dieses Kontos geschrieben (Modus 600), sofort verwendet, und das Konto liest ohne Wartezeit neu. Im Teammodus ist der Endpunkt für eine `admin`-Sitzung (mit dem CSRF-Token einer Cookie-Sitzung), und das Audit hält fest, wer es getan hat, nie das Token; ohne Teammodus darf bei eingeschaltetem Netzwerkmodus nur der Rechner des Monitors. Das Token steht nie in einer Antwort, einem Log, einem Alarm oder der Seite.
+
+## Der erste Administrator in einem Container
+
+Mit `MONITOR_TEAM_MODE=1` lauscht das Image im Netzwerk, und der Monitor öffnet das Netzwerk nicht, bevor der erste Administrator existiert (der nur vom Rechner des Monitors aus angelegt werden kann). In einem Container geht das nicht über `/login`, und der Netzwerkmodus lässt sich nicht ausschalten (das Image setzt ihn bei jedem Start), daher würde der Dienst beim ersten Start mit Exit-Code 1 enden. Legen Sie den ersten Administrator einmal auf denselben Volumes an, bevor Sie den Dienst starten (das Passwort wird in der Konsole abgefragt und steht nie in der Befehlszeile):
+
+```sh
+docker compose run --rm --entrypoint python monitor -m github_actions_monitor.security.auth_cli create-admin NAME
+docker compose up -d
+```
+
+Oder lassen Sie den Dienst ihn anlegen: Setzen Sie `MONITOR_ADMIN_USER` und `MONITOR_ADMIN_PASSWORD_FILE` (eine Datei, zum Beispiel ein Docker-Secret, mit dem Passwort in der ersten Zeile); der erste Start legt diesen Administrator an, wenn der Teammodus an ist und es noch keinen Benutzer gibt, und gibt das Passwort nie aus.
 
 ## Erster Start, Sicherung und Aktualisierung
 

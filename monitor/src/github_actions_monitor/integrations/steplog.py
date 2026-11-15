@@ -31,7 +31,7 @@ def read(config, owner, repo, run, watched, runner=None):
     cfg = settings(config)
     if not cfg["enabled"]:
         return {"ok": False, "error": "off"}
-    if not NAME_RE.match(str(repo)) or str(repo) not in set(watched) or not str(run).isdigit() or not 0 < int(run) < 10 ** 14:
+    if not NAME_RE.match(str(repo)) or str(repo) not in set(watched) or not re.fullmatch(r"[0-9]{1,14}", str(run)) or not 0 < int(run) < 10 ** 14:
         return {"ok": False, "error": "request"}
     key = (repo, int(run))
     with _LOCK:

@@ -107,5 +107,22 @@ wait_for 120 "alpha is ok again after SIGHUP" state_is alpha ok
 [ "$(docker inspect -f '{{.State.StartedAt}}' "$NAME")" = "$STARTED" ] && pass "SIGHUP restarted nothing" || fail "SIGHUP restarted nothing"
 check "the container is still healthy" bash -c "[ \"\$(docker inspect -f '{{.State.Health.Status}}' $NAME)\" = healthy ]"
 
+say "--- the team mode on a first start, following only what the guide says ---"
+mkdir -p "$WORK/team/data" "$WORK/team/config"; chmod -R 777 "$WORK/team"
+TEAM_ENV=(-v "$WORK/team/data:/data" -v "$WORK/team/config:/config" -v "$WORK/gh:/usr/local/bin/gh:ro" -v "$WORK/good:/fake/good:ro" -v "$WORK/secret/gh_token:/run/secrets/gh_token:ro"
+  -e FAKE_GH_GOOD=/fake/good -e GH_TOKEN_FILE=/run/secrets/gh_token -e MONITOR_GITHUB_OWNER=team-owner -e MONITOR_TEAM_MODE=1)
+docker run --name "$NAME-team" "${TEAM_ENV[@]}" --read-only --tmpfs /tmp --cap-drop ALL --security-opt no-new-privileges:true "$IMAGE" >"$WORK/team1.log" 2>&1
+TEAM_CODE=$?
+[ "$TEAM_CODE" -ne 0 ] && pass "without an administrator the first start stops (exit code $TEAM_CODE)" || fail "without an administrator the first start stops"
+check "and it says the exact command that creates the first one" grep -q "auth_cli create-admin" "$WORK/team1.log"
+docker rm -f "$NAME-team" >/dev/null 2>&1
+printf '%s\n' "a long enough passphrase 1" > "$WORK/team/pw"; chmod 644 "$WORK/team/pw"
+docker run --rm --entrypoint python "${TEAM_ENV[@]}" -v "$WORK/team/pw:/run/secrets/admin_pw:ro" -e ADMIN_PW_FILE=/run/secrets/admin_pw "$IMAGE" \
+  -c 'import os,sys; os.environ["PW"]=open(os.environ["ADMIN_PW_FILE"]).read().strip(); from github_actions_monitor.security import auth_cli; sys.exit(auth_cli.main(["create-admin","ops","--password-env","PW"]))' >"$WORK/team2.log" 2>&1
+check "the documented command creates the first administrator" grep -q "^done" "$WORK/team2.log"
+docker run -d --name "$NAME-team" "${TEAM_ENV[@]}" -e MONITOR_ACCESS_TOKEN="$ACCESS" --read-only --tmpfs /tmp --cap-drop ALL --security-opt no-new-privileges:true "$IMAGE" >/dev/null
+wait_for 150 "the team container is healthy with its administrator" bash -c "[ \"\$(docker inspect -f '{{.State.Health.Status}}' $NAME-team)\" = healthy ]"
+docker rm -f "$NAME-team" >/dev/null 2>&1
+
 if [ "$FAILED" = "0" ]; then say "CONTAINER_TEST=PASS"; else say "CONTAINER_TEST=FAIL"; fi
 exit "$FAILED"

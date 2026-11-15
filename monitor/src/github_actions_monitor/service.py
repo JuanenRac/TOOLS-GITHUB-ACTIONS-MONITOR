@@ -219,7 +219,37 @@ def prepare(env=None, out=print):
     how = ensure_access_token(config, env)
     if how == "created":
         out(i18n.t("service.token_created", file=token_file(env)))
+    prepare_admin(config, env, out)
     return 0
+
+
+def prepare_admin(config, env=None, out=print):
+    """The first administrator of the team mode without a console: when `MONITOR_ADMIN_USER` and `MONITOR_ADMIN_PASSWORD_FILE` (a file, for example a Docker secret) are both set, the team mode is on and no user exists yet,
+    that administrator is created. Returns the user name created, or "". The password is read from the file and never printed."""
+    env = os.environ if env is None else env
+    name = (env.get("MONITOR_ADMIN_USER") or "").strip()
+    file = (env.get("MONITOR_ADMIN_PASSWORD_FILE") or "").strip()
+    if not name or not file:
+        return ""
+    from github_actions_monitor.security import auth
+    cfg = auth.settings(config or {})
+    if not cfg["enabled"]:
+        return ""
+    try:
+        password = Path(file).read_text(encoding="utf-8").strip()
+        storage = auth.get_storage(config or {})
+        if auth.users_exist(storage):
+            return ""
+        user, code = auth.create_user(storage, name, password, "admin", None, cfg["min_length"])
+    except (OSError, ValueError):
+        out(i18n.t("service.admin_unreadable", file=file))
+        return ""
+    if code:
+        out(i18n.t("service.admin_refused", code=code))
+        return ""
+    auth.audit(cfg, "service_create_admin", name, "admin", "service", "", "ok", "")
+    out(i18n.t("service.admin_created", name=name))
+    return name
 
 
 def main(argv=None):

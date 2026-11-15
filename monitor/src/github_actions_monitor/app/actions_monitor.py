@@ -3008,7 +3008,7 @@ def main():
     if code is not None:
         return code
     if not CHILD["account"] and not only_informs() and not lite_requested() and network_needs_administrator(toolconfig.raw_config()):      # H1: no network before the first administrator exists
-        print(i18n.t("mon.network_needs_admin"))
+        print(i18n.t("mon.network_needs_admin_service" if os.environ.get("MONITOR_SERVICE") == "1" else "mon.network_needs_admin"))      # the service cannot turn the network off (its environment sets it): it says the exact command
         return 1
     if not CHILD["account"] and not only_informs() and "--account" not in sys.argv[1:]:      # a second monitor on a port that a monitor already listens on would share it: say so and stop (an account process is started by its supervisor on a port of its own)
         wanted = ports.from_argv(sys.argv, "lite" if lite_requested() else "complete")
