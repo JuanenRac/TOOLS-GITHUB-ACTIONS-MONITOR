@@ -145,10 +145,14 @@
 - **センチネル**：セキュリティアラート、リポジトリの衛生、古いプルリクエスト、公開準備の整ったバージョン、署名待ちのビルド、平易な言葉のレポート。
 - **Collab 番人と 1 つのアラート一覧**：人の手が必要な未解決の Issue とプルリクエスト（放置、重大、レビュー待ち、古い下書き、コンフリクト）を、読み取り専用・独自の周期で確認。アラートタブにはすべての番人を 1 つの一覧にまとめ、由来での絞り込みと、自動で終わるローカルのミュートを備えます。
 - **ステータスバー、全画面表示、並べ替えできる表**：最も重要な通知（とすべてを見るウィンドウ）、接続、割り当て、直近の読み取り、モード、アドレス、時計をページ下部に表示。全画面表示ボタン。リポジトリと履歴は 1 つまたは複数の列で並べ替えでき、列も選べます。
-- **クライアントとしてのコマンドライン**：`bin/monitor_cli.py`（`status`、`health`、`alerts`、`accounts`、`live`、`doctor`）は実行中のモニターの内容を読み、`--json` と固定の終了コードに対応します。GitHub には書き込みません。
+- **クライアントとしてのコマンドライン**：`bin/monitor_cli.py`（`status`、`health`、`alerts`、`accounts`、`live`、`doctor`、`score`）は実行中のモニターの内容を読み、`--json` と固定の終了コードに対応します。GitHub には書き込みません。
 - **AI 向けの2つのスキル**：モニターに組み込まれた AI(ローカルまたはプロバイダー)と、外部からモニターと連携する AI(コマンドライン、HTTP やファイルのみ、MCP、ストリーム)向けの短い英語のガイドで、漏れがないようコードから生成されます。`python bin/monitor_cli.py install-skill internal|external --dest フォルダー` でインストールするか、設定の AI タブからコピーします（`monitor/docs/SKILLS_jpn.md`）。
 - **失敗とレッスン**：CI の失敗のローカルなブック、各失敗をカテゴリに分類するルール、それを防げたガードを添えたレッスンのライブラリ（`monitor/docs/LESSONS_jpn.md`）、24時間と7日間の傾向、`ai/LESSONS.md`、`/api/ai/lessons`、そしてあらゆる AI ツール向けのプッシュ前の概要。読み取り専用で、コンピューターの外には何も出ません。
 - **あらゆる画面サイズと複数の画面**：ページはスマートフォンから4Kまでのウィンドウに、縦でも横でも適応し、1台のモニターで最大3つの画面（`/screen/1` から `/screen/3`）を提供できます。各画面に独自のタブと向きを設定できます（`monitor/docs/SCREENS_jpn.md`）。
+- **アカウントごとのスコア**：CI の信頼性、速度、復旧にかかる時間、コラボレーションのアラートがどれだけ早く閉じられるかから作られる 0〜100 の数値、A〜E の文字評価、傾向。裏付けのない数値の代わりに「較正中」「データ不足」と表示し、まだカバーしていないものを示し、ページのヘッダーに表示され、`score` コマンドがあり、低下すると警告し、メトリクスと MCP サーバーにも含まれます（`monitor/docs/SCORE.md`）。
+- **サービスとして**：公式 Docker イメージ（非 root、読み取り専用）、任意のプロキシ付き Compose ファイル、systemd ユニット、詳細なヘルスチェック、最初の管理者を作るコマンド（`monitor/docs/DEPLOYMENT.md`）。
+- **複数アカウント、チーム、データの置き場所**：アカウントごとに 1 プロセス、ロールと専用アカウントを持つユーザー、`config/`、`data/`、`logs/`、`ai/` に分けたファイル、保持期間とバックアップ付きの任意の SQLite ストレージ、設定になったポート（`monitor/docs/ACCOUNTS.md`、`monitor/docs/STORAGE.md`、`monitor/docs/LAYOUT.md`）。
+- **並べ替えと折りたたみができる一覧**：「いま起きていること」は 7 通り、アラートタブは 9 通りで並べ替えられ、すべてのリポジトリを折りたたむ／開くボタンがあります。選択はユーザーごとに記憶されます。
 - **ユーザーごとの通知**：チームモードでは、各ユーザーがページのパネルでチャンネル（ntfy、Teams、メール）、最低レベル、まとめ通知を選べます（`monitor/docs/NOTIFICATIONS_jpn.md`）。
 - **設定ページ**：パス、間隔、クォータ、スイッチをブラウザーから変更できます。検証済みの固定キーのみで、保存前に必ずバックアップを取ります。
 - **グラフと履歴**：計算時間、失敗、成功をアニメーションするバーと日次履歴で表示します（動きの軽減設定を尊重します）。
@@ -212,6 +216,7 @@
 - `127.0.0.1` でのみ待ち受け、`Host` または `Origin` がローカルでないリクエストは拒否します。ログインがないため、`0.0.0.0` には決して割り当てないでください。
 - トークンは保存せず、あなた自身の `gh` を使います（設定 > 詳細設定でモニターの任意トークンをオンにした場合を除く）。
 - 自動では GitHub に何も書き込みません。書き込むのは `dispatch --go`、`dispatch --real`、`finalize --execute` だけで、あなたが実行したときのみです。
+- ネットワークモードとチームモードは既定でオフです。オンにすると、ログイン、ロール、ロックアウト、監査ログがページを守り、各リクエストは 1 つのアカウントについてのみ判定されます（`monitor/docs/DEPLOYMENT.md`、`monitor/docs/ACCOUNTS.md`）。
 - **分析**:各ワークフローの所要時間・待ち時間・各ステップの p50 / p95、不安定なワークフロー(同じコミットで失敗後に成功)、遅くなったワークフロー。Prometheus と Grafana に出力。
 - **割り当てを節約し、断線に耐える**:条件付き読み取り(304 は無料)と、オフライン表示付きで自動再開する最終状態モード。
 - **受信 Webhook と通知**:署名付きイベントでリポジトリをリアルタイムに更新。Telegram・Discord・Slack・Matrix・MQTT・ローカルアドレスへの任意のメッセージ(GitHub への書き込みは一切なし)。
@@ -273,12 +278,19 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/FIRST_STEPS_jpn.md`](monitor/docs/FIRST_STEPS_jpn.md): 最初の5分間
 - [`monitor/docs/SENTINEL_jpn.md`](monitor/docs/SENTINEL_jpn.md): センチネルとチェック A1〜A13
 - [`monitor/docs/COLLAB_jpn.md`](monitor/docs/COLLAB_jpn.md): Collab 番人、アラートタブ、ミュート
+- [`monitor/docs/SENTINEL_SECURITY_jpn.md`](monitor/docs/SENTINEL_SECURITY_jpn.md): セキュリティセンチネル：Dependabot、コードスキャン、シークレット、ブランチ保護、ワークフローの権限、CODEOWNERS、確認できなかったこと
 - [`monitor/docs/CLI_jpn.md`](monitor/docs/CLI_jpn.md): モニターのクライアントとしてのコマンドライン
 - [`monitor/docs/ACCOUNTS_jpn.md`](monitor/docs/ACCOUNTS_jpn.md): 複数アカウント（1 つにつき 1 プロセス）
 - [`monitor/docs/QUOTAS_jpn.md`](monitor/docs/QUOTAS_jpn.md): GitHub のクォータとプラン
 - [`monitor/docs/MODES_jpn.md`](monitor/docs/MODES_jpn.md): 動作モード: 通常・高速・ターボ
 - [`monitor/docs/AI_CONNECTION_jpn.md`](monitor/docs/AI_CONNECTION_jpn.md): AI ツールを接続する:モニターが伝えるすべてをシグナルとして、ブリーフ、エンドポイント、MCP ツール、フックで提供
 - [`monitor/docs/QUOTA_jpn.md`](monitor/docs/QUOTA_jpn.md): クォータを増やし、消費を減らす:節約モード、中央パネル、GitHub App、クォータの共有方法
+- [`monitor/docs/EXTRAS_jpn.md`](monitor/docs/EXTRAS_jpn.md): 任意の追加機能：失敗したステップのログと GitHub App の読み取り専用トークン
+- [`monitor/docs/SCORE_jpn.md`](monitor/docs/SCORE_jpn.md): アカウントのスコア：要素、状態、API、ヘッダーのチップ、アラート、設定
+- [`monitor/docs/STORAGE_jpn.md`](monitor/docs/STORAGE_jpn.md): 保存と保持：ファイルまたは SQLite、バックアップ、移行、残すもの
+- [`monitor/docs/ADVANCED_jpn.md`](monitor/docs/ADVANCED_jpn.md): 詳細機能（すべて既定でオフ）
+- [`monitor/docs/AI_ALERTS_jpn.md`](monitor/docs/AI_ALERTS_jpn.md): AI 向けアラート：フィード、ブリーフ、フック、ストリーム
+- [`monitor/docs/AUDIT_PACKAGE_jpn.md`](monitor/docs/AUDIT_PACKAGE_jpn.md): 監査担当者向けパッケージ
 
 ## コントリビュート
 

@@ -145,10 +145,14 @@ Each picture follows the light or dark theme of your GitHub page.
 - **Sentinel**: security alerts, repository hygiene, stale pull requests, releases that are ready to cut, builds waiting to be signed, and a plain-language report.
 - **Collab sentinel and one list of alerts**: open issues and pull requests that need a person (forgotten, critical, reviews waiting, old drafts, conflicts), read only and on a clock of its own, and an Alerts tab with every sentinel in one list, a filter by origin and local silences that end by themselves.
 - **A status bar, full screen and tables you can sort**: the most important notice (and a window with all of them), the connection, the allowance, the last read, the mode, the address and the clock at the foot of the page; a full screen button; Repositories and History sort by one or several columns, with the columns you choose.
-- **The command line as a client**: `bin/monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) reads what the running monitor says, with `--json` and stable exit codes; it never writes to GitHub.
+- **The command line as a client**: `bin/monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`, `score`) reads what the running monitor says, with `--json` and stable exit codes; it never writes to GitHub.
 - **Two skills for AIs**: short guides, in English, for the AI built into the monitor (local or from a provider) and for the AIs that talk to it from outside (command line, plain HTTP or files, MCP, stream), generated from the code so that nothing is left out; installed with `python bin/monitor_cli.py install-skill internal|external --dest FOLDER` or copied from the AI tab of the Settings (`monitor/docs/SKILLS.md`).
 - **Failures and lessons**: a local book of the failures of your CI, rules that file each one under a category, a library of lessons (`monitor/docs/LESSONS.md`) with the guard that would have stopped it, the trend over 24 hours and 7 days, `ai/LESSONS.md`, `/api/ai/lessons` and a brief before a push for any AI tool; read only, nothing leaves the computer.
 - **Every screen size and several screens**: the page fits a window from a phone to 4K, upright or turned, and one monitor can serve up to three screens (`/screen/1` to `/screen/3`), each with its own tabs and orientation (`monitor/docs/SCREENS.md`).
+- **A score for each account**: a number from 0 to 100, a letter from A to E and a trend, from the reliability of the CI, its speed, the time to recover and how fast the collaboration alerts are closed; it says "calibrating" or "not enough data" instead of a number it cannot stand behind, shows what it does not cover yet, sits in the header of the page, has a `score` command, warns when it drops and is in the metrics and the MCP server (`monitor/docs/SCORE.md`).
+- **As a service**: the official Docker image (non-root, read-only), a Compose file with an optional proxy, a systemd unit, a deep health check and the command that creates the first administrator (`monitor/docs/DEPLOYMENT.md`).
+- **Several accounts, a team and a place for the data**: one process per account, users with roles and their own accounts, the files in `config/`, `data/`, `logs/` and `ai/`, an optional SQLite storage with retention and backup, and the ports as settings (`monitor/docs/ACCOUNTS.md`, `monitor/docs/STORAGE.md`, `monitor/docs/LAYOUT.md`).
+- **Lists you can sort and fold**: Happening now in seven ways and the Alerts tab in nine, with a button to fold or unfold every repository; the choice is remembered for each user.
 - **Notifications for each user**: in the team mode every user chooses channels (ntfy, Teams, e-mail), the lowest level and digests in a panel of the page (`monitor/docs/NOTIFICATIONS.md`).
 - **Settings page**: change paths, intervals, quotas and switches from the browser; only a fixed list of keys, validated, with a backup before every save.
 - **Charts and history**: compute minutes, failures and successes with animated bars and a daily history (it respects reduced motion).
@@ -212,6 +216,7 @@ All off by default, local only (`127.0.0.1`) and with no extra token. When enabl
 - It listens on `127.0.0.1` only and refuses requests whose `Host` or `Origin` is not local. Never bind it to `0.0.0.0`: it has no login.
 - It stores no token: it asks your own `gh` (unless you switch on the optional token of the monitor in Settings > Advanced).
 - It writes nothing to GitHub on its own. Only `dispatch --go`, `dispatch --real` and `finalize --execute` write, and only when you run them.
+- The network mode and the team mode are off by default; when they are on, the login, the roles, the lock-outs and the audit log protect the page, and every request is judged for one account only (`monitor/docs/DEPLOYMENT.md`, `monitor/docs/ACCOUNTS.md`).
 - **Analytics**: p50 / p95 of the duration, of the queue time and of each step of every workflow, flaky workflows (failed, then passed on the same commit) and workflows that got slower; exported to Prometheus and Grafana.
 - **Saves quota and survives a cut**: conditional reads (a 304 costs nothing) and a last-picture mode with an offline banner that resumes by itself.
 - **Incoming webhook and notifications**: signed events update a repository in real time; optional messages to Telegram, Discord, Slack, Matrix, MQTT or a local address (never a write to GitHub).
@@ -277,12 +282,18 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/FIRST_STEPS.md`](monitor/docs/FIRST_STEPS.md): your first five minutes
 - [`monitor/docs/SENTINEL.md`](monitor/docs/SENTINEL.md): the sentinel and its checks A1-A13
 - [`monitor/docs/COLLAB.md`](monitor/docs/COLLAB.md): the Collab sentinel, the Alerts tab and the silences
+- [`monitor/docs/SENTINEL_SECURITY.md`](monitor/docs/SENTINEL_SECURITY.md): The Security sentinel: Dependabot, code scanning, secrets, branch protection, workflow permissions and CODEOWNERS, and what it could not check
 - [`monitor/docs/CLI.md`](monitor/docs/CLI.md): the command line as a client of the monitor
 - [`monitor/docs/ACCOUNTS.md`](monitor/docs/ACCOUNTS.md): several accounts, one process each
 - [`monitor/docs/QUOTAS.md`](monitor/docs/QUOTAS.md): quotas and plans of GitHub
 - [`monitor/docs/MODES.md`](monitor/docs/MODES.md): working modes: normal, fast and turbo
 - [`monitor/docs/AI_CONNECTION.md`](monitor/docs/AI_CONNECTION.md): Connect an AI tool: everything the monitor says, as signals, in the brief, the endpoint, the MCP tools and the hook
 - [`monitor/docs/QUOTA.md`](monitor/docs/QUOTA.md): More quota, less spending: Low mode, the central panel, a GitHub App and how to share the allowance
+- [`monitor/docs/SCORE.md`](monitor/docs/SCORE.md): The score of an account: parts, states, API, the chip in the header, the alert and the settings
+- [`monitor/docs/STORAGE.md`](monitor/docs/STORAGE.md): Storage and retention: files or SQLite, backup, migration and what is kept
+- [`monitor/docs/ADVANCED.md`](monitor/docs/ADVANCED.md): Advanced features (all off by default)
+- [`monitor/docs/AI_ALERTS.md`](monitor/docs/AI_ALERTS.md): Alerts for AIs: the feed, the brief, the hook and the stream
+- [`monitor/docs/AUDIT_PACKAGE.md`](monitor/docs/AUDIT_PACKAGE.md): Package for the auditor
 
 ## Contributing
 
