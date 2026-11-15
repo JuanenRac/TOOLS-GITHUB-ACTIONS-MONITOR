@@ -48,6 +48,10 @@
 
 `GET /api/score` はアカウントの最新のスナップショットを返します：`state`、`score`、`letter`、`trend`、`parts`、`coverage`、`data_quality`、`complete`、`missing_parts`、`repos`、`age_seconds`、`stale`（スナップショットが 3 時間より古いと真）。`GET /api/score/history` は時間に沿った点を古い順に返します（`?hours=` は現在からさかのぼる時間で最大 90 日、`?limit=` は最大 2000）。ない数値は `null` で、0 ではありません。チームモードでは、そのアカウントを見られる人はスコアを読めます。重みと限度は設定で、変更できるのは管理者だけです。
 
+## 低下のアラート
+
+スコアが直前の期間と比べて `score.alert.drop_points` 点（既定は 10）以上下がったとき、またはより低い文字評価になったとき、アラートタブにアラート `score.dropped`（警告。文字評価が E なら重大）が古いスコアと新しいスコアとともに表示されます。スナップショットが低下を示している間は残り、スコアが回復すると消えます。ほかのアラートと同様にミュートできます。パネルでは既定でオンです。外部の通知チャネル（イベント `score_dropped`）には、既定ではオフの `score.alert.notify_external` がオンの場合に限り、表示された瞬間にだけ送られます。`score.alert.enabled` でアラートをオフにできます。
+
 ## 設定
 
 設定ページの「番人」サブタブにある「アカウントのスコア」「スコアの重み」「スコアの文字評価」の各ブロック：`score.enabled`、`score.window_days`、`score.calibrating_hours`、`score.min_runs`、`score.min_coverage`、`score.trend_flat`、`score.weights.reliability`、`score.weights.speed`、`score.weights.recovery`、`score.weights.collaboration`、`score.grades.A` から `score.grades.D`、`score.alert.enabled`、`score.alert.drop_points`、`score.alert.notify_external`（既定はオフ）。各要素の良好と不良の限度はファイルの `score.limits` から読み込まれます（サンプルファイルを参照）。ページでは編集しません。

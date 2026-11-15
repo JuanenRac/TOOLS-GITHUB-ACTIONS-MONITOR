@@ -48,6 +48,10 @@ Une pastille dans l'en-tête, à côté des pastilles de préparation, montre le
 
 `GET /api/score` renvoie le dernier instantané du compte : `state`, `score`, `letter`, `trend`, `parts`, `coverage`, `data_quality`, `complete`, `missing_parts`, `repos`, `age_seconds` et `stale` (vrai quand l'instantané a plus de trois heures). `GET /api/score/history` renvoie les points dans le temps, du plus ancien au plus récent (`?hours=` en remontant depuis maintenant, 90 jours au plus, et `?limit=`, 2000 au plus). Un nombre absent vaut `null`, jamais 0. En mode équipe, quiconque peut voir le compte peut lire son score ; les poids et les limites sont des réglages que seul un administrateur modifie.
 
+## L'alerte en cas de baisse
+
+Quand le score baisse de `score.alert.drop_points` points (10 par défaut) ou plus par rapport à la fenêtre précédente, ou passe à une lettre inférieure, l'onglet Alertes affiche l'alerte `score.dropped` (un avertissement ; critique si la lettre est E), avec l'ancien et le nouveau score. Elle reste tant que l'instantané montre la baisse et disparaît quand le score se rétablit ; on peut la mettre en sourdine comme toute autre alerte. Elle est active pour le panneau par défaut. Elle sort par les canaux de notification externes (événement `score_dropped`) uniquement si `score.alert.notify_external` est activé, ce qui n'est pas le cas par défaut, et seulement au moment où elle apparaît. `score.alert.enabled` désactive l'alerte.
+
 ## Les réglages
 
 Dans la page des réglages, sous-onglet Sentinelle, blocs Score du compte, Poids du score et Lettres du score : `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, de `score.grades.A` à `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` et `score.alert.notify_external` (désactivé par défaut). Les limites bonne et mauvaise de chaque partie sont lues dans le fichier, sous `score.limits` (voir le fichier d'exemple) ; elles ne s'éditent pas dans la page.
