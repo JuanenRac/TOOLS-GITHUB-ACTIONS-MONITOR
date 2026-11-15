@@ -32,7 +32,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 
 | | |
 |---|---|
-| **Versão** | **1.9.0** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versão** | **1.9.1** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Requisitos** | Python 3.11+ e a CLI do GitHub (`gh auth login`); mais nada (a vista de consola usa o pacote opcional `rich`) |
 | **Abre** | uma página só em `127.0.0.1`, em oito idiomas |
 | **Escreve no GitHub** | nunca sozinho: apenas os comandos por lotes que lançar com um `--go` explícito |
@@ -40,7 +40,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 
 <!-- glance:begin -->
 
-**Medido hoje** (v1.9.0)
+**Medido hoje** (v1.9.1)
 
 | | |
 |---|---|
@@ -150,6 +150,7 @@ Cada imagem segue o tema claro ou escuro da sua página do GitHub.
 - **Falhas e lições**: um livro local das falhas da sua CI, regras que classificam cada uma numa categoria, uma biblioteca de lições (`monitor/docs/LESSONS_por.md`) com a guarda que a teria evitado, a tendência de 24 horas e 7 dias, `ai/LESSONS.md`, `/api/ai/lessons` e um resumo antes do push para qualquer ferramenta de IA; só leitura, nada sai do computador.
 - **Todos os tamanhos de ecrã e vários ecrãs**: a página ajusta-se a uma janela desde um telemóvel até 4K, na vertical ou rodada, e um monitor pode servir até três ecrãs (`/screen/1` a `/screen/3`), cada um com os seus separadores e a sua orientação (`monitor/docs/SCREENS_por.md`).
 - **Uma pontuação por conta**: um número de 0 a 100, uma letra de A a E e uma tendência, feitos com a fiabilidade da CI, a sua velocidade, o tempo de recuperação e a rapidez com que se fecham os alertas de colaboração; diz «a calibrar» ou «dados insuficientes» em vez de um número que não consegue sustentar, mostra o que ainda não cobre, está no cabeçalho da página, tem um comando `score`, avisa quando desce e está nas métricas e no servidor MCP (`monitor/docs/SCORE.md`).
+- **Um sentinela de segurança (só Complete, desligado por predefinição)**: lê, sem escrever nada no GitHub, os alertas abertos do Dependabot, da análise de código e da análise de segredos, se o ramo predefinido está protegido, a permissão predefinida dos fluxos e, se pedir, os proprietários do código; gera um alerta por repositório e sinal, conta os achados como quinta parte da pontuação e diz o que não conseguiu ler (`monitor/docs/SENTINEL_SECURITY_por.md`).
 - **Como serviço**: a imagem oficial do Docker (sem root, só de leitura), um ficheiro Compose com proxy opcional, uma unidade systemd, uma verificação de saúde profunda e o comando que cria o primeiro administrador (`monitor/docs/DEPLOYMENT.md`).
 - **Várias contas, uma equipa e um lugar para os dados**: um processo por conta, utilizadores com papéis e as suas próprias contas, os ficheiros em `config/`, `data/`, `logs/` e `ai/`, um armazenamento SQLite opcional com retenção e cópia de segurança, e as portas como definições (`monitor/docs/ACCOUNTS.md`, `monitor/docs/STORAGE.md`, `monitor/docs/LAYOUT.md`).
 - **Listas que se ordenam e se dobram**: «A acontecer agora» de sete maneiras e o separador de Alertas de nove, com um botão para dobrar ou desdobrar todos os repositórios; a escolha fica guardada por utilizador.

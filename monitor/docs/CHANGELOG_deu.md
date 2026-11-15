@@ -45,6 +45,20 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - Der Test eines Kontos, das sofort stirbt, hängt nicht mehr von der Geschwindigkeit des Rechners ab: Die Wartezeit vor dem erneuten Start eines Kontos wird mit einer Uhr geprüft, die der Test selbst gibt, und ein zweiter Test prüft den Plan der Wartezeiten, ohne die echte Zeit zu lesen (der alte scheiterte unter Last in der Schranke eines Releases).
 
+## [1.9.1]
+
+### Hinzugefügt
+
+- Der Sicherheitswächter (nur Complete, standardmäßig aus): Der dritte Wächter liest, ohne etwas auf GitHub zu schreiben, die offenen Warnungen von Dependabot, Code-Scanning und Secret-Scanning, ob der Standardbranch Schutz hat, ob Workflows standardmäßig Schreibrechte erhalten und, auf Wunsch, ob es eine CODEOWNERS-Datei gibt, und löst je Repository und Signal eine Warnung im Reiter Warnungen aus (Herkunft Sicherheit), mit den Zahlen nach Schwere. Eine Quelle, die GitHub für ein Repository nicht beantwortet, wird als nicht lesbar geführt und nie als Gesundheitszeugnis genommen. Er hat einen eigenen Zyklus, eine Obergrenze an Repositories je Durchlauf, bedingte Lesevorgänge und pausiert bei knappem Kontingent, schreibt die Ereignisse security_new und security_fixed für die Benachrichtigungskanäle, hat ein Feld im Reiter Wächter, in den Einstellungen jedes Benutzers und in den Einstellungen, eine Route unter /api/sentinel/security und eine Anleitung in den acht Sprachen.
+
+- Jeder Wächter nennt seinen Lebenszyklus: gesund, eingeschränkt, pausiert, Fehler oder aus, damit „keine Warnungen“ nicht mit „konnte nicht nachsehen“ verwechselt wird.
+
+- Sicherheit ist ein Teil der Punktzahl: Die Punkte, die die offenen Befunde des Sicherheitswächters von 100 abziehen, sind der fünfte Teil, mit seinem Gewicht (`score.weights.security`, standardmäßig 25) und eigenen Grenzen; er zählt nur, solange der Wächter an ist und genug Repositories angesehen hat, und ohne ihn sagt die Antwort, dass die Zahl nicht vollständig ist, und die anderen Teile werden neu skaliert.
+
+- Die Standardgewichte der Punktzahl sind jetzt 30, 15, 15, 15 und 25 (Zuverlässigkeit, Geschwindigkeit, Wiederherstellung, Zusammenarbeit, Sicherheit).
+
+- Ein Fenster mit Läufen und ohne jeden Fehlschlag hat nichts wiederherzustellen: Der Wiederherstellungsteil ist voll, als Tatsache und nicht mehr als fehlende Angabe.
+
 ## [1.9.0]
 
 ### Hinzugefügt

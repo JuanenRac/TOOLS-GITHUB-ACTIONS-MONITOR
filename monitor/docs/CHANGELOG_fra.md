@@ -45,6 +45,20 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - Le test d'un compte qui meurt aussitôt ne dépend plus de la vitesse de l'ordinateur : l'attente avant de relancer un compte est vérifiée avec une horloge que donne le test lui-même, et un second test vérifie le calendrier des attentes sans lire l'heure réelle (l'ancien échouait sous charge dans la porte d'une version).
 
+## [1.9.1]
+
+### Ajouté
+
+- La sentinelle de sécurité (Complete seulement, désactivée par défaut) : la troisième sentinelle lit, sans rien écrire sur GitHub, les alertes ouvertes de Dependabot, de l'analyse de code et de l'analyse des secrets, si la branche par défaut est protégée, si les workflows reçoivent l'écriture par défaut et, si on le demande, s'il y a un fichier CODEOWNERS, et lève une alerte par dépôt et par signal dans l'onglet Alertes (origine Sécurité), avec les décomptes par gravité. Une source que GitHub ne renvoie pas pour un dépôt est listée comme illisible et n'est jamais prise pour un certificat de bonne santé. Elle a son propre cycle, un plafond de dépôts par tour, des lectures conditionnelles et une pause tant que le quota est bas, écrit les évènements security_new et security_fixed pour les canaux de notification, a une boîte dans l'onglet Sentinelle, dans les préférences de chaque utilisateur et dans les réglages, une route /api/sentinel/security et un guide dans les huit langues.
+
+- Chaque sentinelle indique son cycle de vie : sain, dégradé, en pause, en erreur ou désactivé, pour qu'« aucune alerte » ne soit pas confondu avec « n'a pas pu regarder ».
+
+- La sécurité est une partie du score : les points que les constats ouverts de la sentinelle de sécurité retirent à 100 forment la cinquième partie, avec son poids (`score.weights.security`, 25 par défaut) et ses propres limites ; elle ne compte que tant que la sentinelle est active et a examiné assez de dépôts, et sans elle la réponse dit que le nombre n'est pas complet et les autres parties sont remises à l'échelle.
+
+- Les poids par défaut du score deviennent 30, 15, 15, 15 et 25 (fiabilité, rapidité, rétablissement, collaboration, sécurité).
+
+- Une fenêtre avec des exécutions et aucun échec n'a rien à rétablir : la partie rétablissement est pleine, comme un fait et non plus comme une donnée manquante.
+
 ## [1.9.0]
 
 ### Ajouté
