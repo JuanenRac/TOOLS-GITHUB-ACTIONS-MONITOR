@@ -1,0 +1,26 @@
+<!--
+  Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+  GPL-3.0-or-later - see LICENSE
+-->
+
+[🇺🇸 English](AUDIT_LOG.md) | [🇪🇸 Español](AUDIT_LOG_spa.md) | [🇫🇷 Français](AUDIT_LOG_fra.md) | [🇮🇹 Italiano](AUDIT_LOG_ita.md) | [🇩🇪 Deutsch](AUDIT_LOG_deu.md) | **🇨🇳 简体中文** | [🇯🇵 日本語](AUDIT_LOG_jpn.md) | [🇵🇹 Português](AUDIT_LOG_por.md)
+
+# 操作日志
+
+仅 Complete，默认开启。除了访问审计（登录、锁定、拒绝）之外，监视器还保留一份**操作**日志：谁在什么时候、在哪个账户上修改了什么。包括设置的修改、静音及其解除、用户、密码、通知偏好或凭据的修改。每个操作一行 JSON，写入 `logs/audit_actions.jsonl`，从不重写。
+
+## 一行写了什么
+
+`at`、`action`（简单的词，如 `settings_change` 或 `alert_mute`）、`user`、`role`、`account`、`target`（简短的标识，如设置名或警报代码）、`result`（`ok`、`denied` 或 `error`），必要时还有 `details`。**绝不写入任何值或机密**：修改设置时只写设置的名称，不写设置的值；名称看起来像机密的键（token、password、key、cookie、authorization、session 等）会被丢弃；所有文本都会像给 AI 的备注一样被清理，并截断为 200 个字符。
+
+## 哈希链
+
+每一行都带有 `prev`（上一行的哈希）和 `hash`（它自己与 `prev` 的哈希）。事后被修改、删除或插入的行会破坏哈希链，`GET /api/audit-log` 会指出位置（`chain.broken_at`）。超过 `audit_log.max_mb` 后，旧部分会另存为 `audit_actions.jsonl.1`，哈希链在新文件中继续。哈希链能发现篡改，但无法阻止能访问该文件的人把它整个删除，所以请在重要的地方保留一份副本。
+
+## 谁能读取
+
+管理员（没有团队模式时则是电脑前的人）。维护者仅在 `audit_log.maintainers_can_read` 开启时可以读取；其他人都不能。`GET /api/audit-log` 返回最近 200 行和哈希链的状态。Lite 版没有这些。
+
+## 设置
+
+设置，哨兵标签页，**操作日志**区块：`audit_log.enabled`（开启）、`audit_log.max_mb`（10）和 `audit_log.maintainers_can_read`（关闭）。

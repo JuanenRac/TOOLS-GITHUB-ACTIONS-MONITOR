@@ -12,6 +12,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Added
 
+- **A log of actions (Complete only, on by default)**: next to the audit of the accesses, `logs/audit_actions.jsonl` keeps one JSON line for each change (who, what, when, on which account): a change of settings (the names of the settings, never their values), a silence and its removal, a change of users, passwords, notification preferences or credentials. Each line carries the hash of the one before it, so a line that is changed, cut out or put in later is found (`GET /api/audit-log` says where the chain breaks); past `audit_log.max_mb` the old part is kept as one more file and the chain goes on. No value and no secret is ever written (a key that looks like a secret is dropped, every text is cleaned and cut). An administrator reads it, and a maintainer only when `audit_log.maintainers_can_read` is on. Three settings in the Sentinel tab and the guide AUDIT_LOG.md in the eight languages.
+
 - **A harness and the reproductions of the independent review, in the repository**: `tools/audit_harness.py --check` starts, with no GitHub, a supervisor with three accounts (alpha, beta, default) and four users (administrator, maintainer of alpha only, viewer of beta only, one switched off), asks the routes that decide the isolation of the accounts and prints what each user gets; `tests/test_193_regressions.py` holds the reproductions of the review of 1.8.3 (accounts of a request, accounts kept when a password changes, silences of a remote maintainer, the test message and its hourly limit, a restored copy and revoked sessions, the lock and the administrator, the keys a started program does not inherit).
 
 ### Changed
