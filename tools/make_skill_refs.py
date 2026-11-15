@@ -43,6 +43,7 @@ NOTES = {
     "/api/ai/alerts": ("GET", "the feed of alerts since a moment (`?since=SECONDS`)"),
     "/api/ai/brief": ("GET", "the short brief of the real open alerts (Markdown, or `?fmt=json`)"),
     "/api/ai/failures": ("GET", "the book of failures, newest first (`?since=&repo=&category=&limit=`)"),
+    "/api/ai/presets": ("GET", "the presets of AI providers (address, name of the variable of the key, example models, privacy); data only, never a key"),
     "/api/ai/lessons": ("GET,POST", "GET: the lessons that apply now, the repeated failures and the library (`?fmt=md|brief&repo=`); POST: write a lesson (switch, administrator, confirmation)"),
     "/api/ai/state": ("GET", "every signal of the monitor, versioned, plus the lessons that apply now"),
     "/api/ai/stream": ("GET", "server-sent events of the alerts as they open and resolve (off by default)"),

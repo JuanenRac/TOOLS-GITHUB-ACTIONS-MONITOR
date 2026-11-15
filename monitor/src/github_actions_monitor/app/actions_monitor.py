@@ -2403,6 +2403,11 @@ class Handler(BaseHTTPRequestHandler):
                 self.reply(document, "text/markdown; charset=utf-8")
             else:
                 self.json_reply(document)
+        elif path == "/api/ai/presets":      # read only: the presets of AI providers (ai_presets.json): address, name of the variable of the key, example models, privacy; never a key
+            if not self.guard():
+                return
+            from github_actions_monitor.sentinels import ai_presets
+            self.json_reply({"ok": True, "presets": ai_presets.load()})
         elif path == "/api/ai/stream":      # server-sent events, read only: the alerts as they open and resolve (ai_alerts.stream, off by default)
             if not self.guard():
                 return
