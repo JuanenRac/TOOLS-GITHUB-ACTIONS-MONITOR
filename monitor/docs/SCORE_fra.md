@@ -40,6 +40,10 @@ La fenêtre est le nombre de jours d'exécutions que regarde le score : `score.w
 
 Chaque compte a son propre score. Son détail le ventile par dépôt (les parties de CI seulement, les pires d'abord). Il n'y a pas de nombre unique pour toute l'installation.
 
+## Sur la page
+
+Une pastille dans l'en-tête, à côté des pastilles de préparation, montre le score : le nombre, la lettre, une flèche avec l'évolution par rapport à la fenêtre précédente et une petite courbe des derniers jours. Sa couleur suit la lettre (A et B vert, C ambre, D et E rouge). Tant qu'il n'y a pas de nombre, elle est neutre et dit pourquoi (calibrage, données insuffisantes). Une étoile après la lettre signifie qu'une partie n'est pas encore comptée (aujourd'hui, la sécurité) : un nombre élevé ne veut alors pas dire que tout va bien. Au survol, elle montre la couverture, les parties avec leurs poids et le dépôt le plus faible. La pastille n'apparaît pas dans Lite ni quand le score est désactivé (`score.enabled`).
+
 ## L'API
 
 `GET /api/score` renvoie le dernier instantané du compte : `state`, `score`, `letter`, `trend`, `parts`, `coverage`, `data_quality`, `complete`, `missing_parts`, `repos`, `age_seconds` et `stale` (vrai quand l'instantané a plus de trois heures). `GET /api/score/history` renvoie les points dans le temps, du plus ancien au plus récent (`?hours=` en remontant depuis maintenant, 90 jours au plus, et `?limit=`, 2000 au plus). Un nombre absent vaut `null`, jamais 0. En mode équipe, quiconque peut voir le compte peut lire son score ; les poids et les limites sont des réglages que seul un administrateur modifie.
