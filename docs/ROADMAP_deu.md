@@ -35,22 +35,6 @@ Alles hier Aufgeführte ist geschrieben und getestet; es ist entweder schon im H
 
 Jede Version enthält alles aus ihrem Abschnitt des Plans: nichts bleibt von einer früheren Version offen, und nichts wird auf die nächste verschoben. Nach 1.8.3 und nach 1.9.3 durchläuft das Produkt eine unabhängige Prüfung, deren Befunde in der folgenden Stabilisierungsversion geschlossen werden. 1.8.1 ist eine Korrekturversion von 1.8.0: Das Feld „Repositories werden geladen“ verschwindet mit dem letzten Repository, und das Neuladen der Seite holt die Daten sofort.
 
-### 1.8.2 - Offizielles Docker-Image und Dienstmodus
-
-Ein mehrstufiges Image mit unprivilegiertem Benutzer, Volumes für Daten und Konfiguration, dokumentierte Umgebungsvariablen, ein Compose-Beispiel mit optionalem Reverse-Proxy und TLS, eine systemd-Unit für die klassische Installation und eine tiefe Gesundheitsprüfung, die fehlschlägt, wenn der Supervisor oder der Zyklus eines Kontos hängt. Ein Zugangsdatum, das GitHub widerruft oder ablaufen lässt, markiert nur dieses Konto als blind, löst einen kritischen Systemalarm aus und lässt sich ersetzen, ohne den Supervisor neu zu starten. Sicherung, Aktualisierung und erster Start als Dienst sind dokumentiert; die Seite sagt, ob sie auf diesem Rechner, im Netzwerk oder hinter einem Proxy lauscht; die Kommandozeile arbeitet gegen einen entfernten Monitor. Die Lite-Ausgabe bleibt lokal.
-
-### 1.8.3 - Benachrichtigungen je Benutzer
-
-Einstellungen je Benutzer (Kanal, Wächter, niedrigste Stufe), ein Verteiler, der anhand von Einstellungen und Rollen entscheidet, wer benachrichtigt wird, Kanäle als einfache Plug-ins und Zusammenfassungen der noch ungelesenen Alarme. Außerdem: ein Bericht über die Wartezeit der Jobs in der Warteschlange je Runner, und ein wegen der beobachteten Pfade übersprungener Job wird getrennt von einem roten Job angezeigt.
-
-### 1.8.4 - Stabilisierung
-
-Keine großen Funktionen. Isolation zwischen Konten, die Seite, der Speicher, Anmeldung und Rollen, Benachrichtigungen, ein GitHub, das zeitweise ausfällt, der Start nach einer unterbrochenen Migration, die Wiederherstellung nach einem Abbruch, ein erweiterter Doctor, die Stellen, die auf GitHub schreiben, Protokolle ohne Token, eine Sicherheits-Checkliste für den Teammodus und Dokumente, die zum Verhalten passen. Die Serie läuft nur bei Bedarf bis 1.8.9 weiter.
-
-### 1.9.0 - Eine Bewertung
-
-Metrik-Sammler je Konto und je Wächter (Erfolgsquote, Dauer, Zeit bis zur Behebung, Durchsatz), eine Bewertungs-Engine mit änderbaren Schwellen, ein Trend gegenüber dem Vorzeitraum, im Speicher abgelegte Momentaufnahmen, ein Bewertungs-Widget mit Sparkline, Alarme bei sinkender Bewertung und ein Kommandozeilen-Verb, das sie ausgibt.
-
 ### 1.9.1 - Sicherheitswächter
 
 Der dritte Wächter: Dependabot, Code-Scanning, Secret-Scanning, Branch-Schutz, Workflow-Berechtigungen und Code-Besitzer, mit Regeln je Signalart, demselben Filter im Reiter Alarme und einem Abzug in der Bewertung für offene kritische Alarme. Optional, im selben Release: Workflow-Hygiene (Actions, die nicht an einen Commit gebunden sind, Jobs ohne Zeitlimit, Workflows ohne Berechtigungen oder ohne Nebenläufigkeitsregel, gefährliche Nutzung von pull_request_target), aufgebaut auf dem Workflow-Prüfer, den das Projekt schon hat.
@@ -72,6 +56,24 @@ Derselbe Abschluss wie bei 1.8.4 für Bewertung, Sicherheitswächter, Gesundheit
 Eine Hauptversion, die technische Schulden abbaut und die öffentlichen Schnittstellen einfriert: Wächter, Speicher, Alarme, das Ereignisschema und die Lese-API, mit einer Suite von Vertragstests, die Clients gegen jedes Release ausführen können. Eine Anleitung für jede Nutzungsart (Lite, einzeln, Dienst, Team) und eine Referenz für Einstellungen, Ereignisse, Metriken und API. Ab 2.0.1 gibt es ein Polster für das, was erst bei langer echter Nutzung auftaucht.
 
 Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
+
+## Erledigt in 1.8.2 bis 1.9.0
+
+### 1.8.2 - Offizielles Docker-Image und Dienstmodus
+
+Ein mehrstufiges Image mit unprivilegiertem Benutzer, Volumes für Daten und Konfiguration, dokumentierte Umgebungsvariablen, ein Compose-Beispiel mit optionalem Reverse-Proxy und TLS, eine systemd-Unit für die klassische Installation und eine tiefe Gesundheitsprüfung, die fehlschlägt, wenn der Supervisor oder der Zyklus eines Kontos hängt. Ein Zugangsdatum, das GitHub widerruft oder ablaufen lässt, markiert nur dieses Konto als blind, löst einen kritischen Systemalarm aus und lässt sich ersetzen, ohne den Supervisor neu zu starten. Sicherung, Aktualisierung und erster Start als Dienst sind dokumentiert; die Seite sagt, ob sie auf diesem Rechner, im Netzwerk oder hinter einem Proxy lauscht; die Kommandozeile arbeitet gegen einen entfernten Monitor. Die Lite-Ausgabe bleibt lokal.
+
+### 1.8.3 - Benachrichtigungen je Benutzer
+
+Einstellungen je Benutzer (Kanal, Wächter, niedrigste Stufe), ein Verteiler, der anhand von Einstellungen und Rollen entscheidet, wer benachrichtigt wird, Kanäle als einfache Plug-ins und Zusammenfassungen der noch ungelesenen Alarme. Außerdem: ein Bericht über die Wartezeit der Jobs in der Warteschlange je Runner, und ein wegen der beobachteten Pfade übersprungener Job wird getrennt von einem roten Job angezeigt.
+
+### 1.8.4 - Stabilisierung
+
+Keine großen Funktionen. Isolation zwischen Konten, die Seite, der Speicher, Anmeldung und Rollen, Benachrichtigungen, ein GitHub, das zeitweise ausfällt, der Start nach einer unterbrochenen Migration, die Wiederherstellung nach einem Abbruch, ein erweiterter Doctor, die Stellen, die auf GitHub schreiben, Protokolle ohne Token, eine Sicherheits-Checkliste für den Teammodus und Dokumente, die zum Verhalten passen. Die Serie läuft nur bei Bedarf bis 1.8.9 weiter.
+
+### 1.9.0 - Eine Bewertung
+
+Metrik-Sammler je Konto und je Wächter (Erfolgsquote, Dauer, Zeit bis zur Behebung, Durchsatz), eine Bewertungs-Engine mit änderbaren Schwellen, ein Trend gegenüber dem Vorzeitraum, im Speicher abgelegte Momentaufnahmen, ein Bewertungs-Widget mit Sparkline, Alarme bei sinkender Bewertung und ein Kommandozeilen-Verb, das sie ausgibt.
 
 ## Erledigt in 1.7.9
 

@@ -40,22 +40,6 @@ Everything listed here is written and tested; it is either already in the main b
 
 Each version carries everything of its stretch of the plan: nothing is left hanging from an earlier version and nothing is pushed to the next one. After 1.8.3 and after 1.9.3 the product goes through an independent review and its findings are closed in the stabilization version that follows. 1.8.1 is a corrective release of 1.8.0: the box "loading repositories" leaves with the last repository and a reload of the page gets its data at once.
 
-### 1.8.2 - Official Docker image and service mode
-
-A multi-stage image with a non-root user, volumes for data and configuration, documented environment variables, a compose example with an optional reverse proxy and TLS, a systemd unit for those who prefer a classic install, and a deep health check that fails when the supervisor or the cycle of an account is stuck. A credential that GitHub revokes or lets expire marks only that account as blind, raises a critical system alert and can be replaced without restarting the supervisor. Backup, upgrade and first start as a service are documented; the page says whether it listens on this computer, on the network or behind a proxy; the command line works against a remote monitor. The lite edition stays local.
-
-### 1.8.3 - Notifications per user
-
-Preferences per user (channel, sentinel, lowest level), a dispatcher that resolves who is told from the preferences and the roles, channels as simple plugins, and digests of the alerts not yet read. Also: a report of the time jobs wait in the queue for each runner, and a job skipped because of the paths it watches is shown apart from a red job.
-
-### 1.8.4 - Stabilization
-
-No large features. Isolation between accounts, the page, the storage, login and roles, notifications, a GitHub that fails now and then, start after an interrupted migration, recovery after a kill, a wider doctor, the places that write to GitHub, logs without tokens, a security checklist of team mode, and documents that agree with the behaviour. The series goes on to 1.8.9 only if needed.
-
-### 1.9.0 - One score
-
-Collectors of metrics per account and per sentinel (success rate, duration, time to recover, throughput), a score engine with thresholds you can change, a trend against the previous period, snapshots kept in the storage, a score widget with a sparkline, alerts when the score drops, and a command line verb that prints it.
-
 ### 1.9.1 - Security sentinel
 
 The third sentinel: Dependabot, code scanning, secret scanning, branch protection, workflow permissions and code owners, with rules by kind of signal, the same filter in the Alerts tab and a penalty in the score for open critical alerts. Optional, in the same release: workflow hygiene (actions that are not pinned to a commit, jobs without a time limit, workflows without permissions or without concurrency, dangerous use of pull_request_target), built on the workflow checker the project already has.
@@ -77,6 +61,24 @@ The same kind of closing as 1.8.4 for the score, the security sentinel, the heal
 A major version that cleans up technical debt and freezes the public interfaces: sentinels, storage, alerts, the event schema and the read API, with a suite of contract tests that clients can run against any release. One guide for each way to use the product (lite, individual, service, team) and a reference of settings, events, metrics and API. 2.0.1 onwards is a cushion for what only shows with long real use.
 
 The monitor's own workflows keep to what the hygiene sentinel will ask of others: actions pinned to a commit, the least permissions and a time limit on every job.
+
+## Done in 1.8.2 to 1.9.0
+
+### 1.8.2 - Official Docker image and service mode
+
+A multi-stage image with a non-root user, volumes for data and configuration, documented environment variables, a compose example with an optional reverse proxy and TLS, a systemd unit for those who prefer a classic install, and a deep health check that fails when the supervisor or the cycle of an account is stuck. A credential that GitHub revokes or lets expire marks only that account as blind, raises a critical system alert and can be replaced without restarting the supervisor. Backup, upgrade and first start as a service are documented; the page says whether it listens on this computer, on the network or behind a proxy; the command line works against a remote monitor. The lite edition stays local.
+
+### 1.8.3 - Notifications per user
+
+Preferences per user (channel, sentinel, lowest level), a dispatcher that resolves who is told from the preferences and the roles, channels as simple plugins, and digests of the alerts not yet read. Also: a report of the time jobs wait in the queue for each runner, and a job skipped because of the paths it watches is shown apart from a red job.
+
+### 1.8.4 - Stabilization
+
+No large features. Isolation between accounts, the page, the storage, login and roles, notifications, a GitHub that fails now and then, start after an interrupted migration, recovery after a kill, a wider doctor, the places that write to GitHub, logs without tokens, a security checklist of team mode, and documents that agree with the behaviour. The series goes on to 1.8.9 only if needed.
+
+### 1.9.0 - One score
+
+Collectors of metrics per account and per sentinel (success rate, duration, time to recover, throughput), a score engine with thresholds you can change, a trend against the previous period, snapshots kept in the storage, a score widget with a sparkline, alerts when the score drops, and a command line verb that prints it.
 
 ## Done in 1.7.9
 

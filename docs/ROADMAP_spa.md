@@ -35,22 +35,6 @@ Todo lo que sigue está escrito y probado; o ya está en la rama principal o esp
 
 Cada versión lleva todo lo de su tramo del plan: nada queda colgando de una versión anterior ni se aplaza a la siguiente. Tras la 1.8.3 y tras la 1.9.3 el producto pasa por una revisión independiente y sus hallazgos se cierran en la versión de estabilización siguiente. La 1.8.1 es una versión correctiva de la 1.8.0: el cuadro «cargando repositorios» desaparece con el último repositorio y recargar la página trae los datos al instante.
 
-### 1.8.2 - Imagen Docker oficial y modo servicio
-
-Una imagen de varias etapas con usuario sin privilegios, volúmenes para datos y configuración, variables de entorno documentadas, un ejemplo de compose con proxy inverso y TLS opcionales, una unidad de systemd para quien prefiera la instalación clásica y una comprobación de salud profunda que falla si el supervisor o el ciclo de una cuenta están atascados. Una credencial que GitHub revoca o deja caducar marca solo esa cuenta como ciega, lanza una alerta crítica de sistema y se puede sustituir sin reiniciar el supervisor. Copia de seguridad, actualización y primer arranque como servicio quedan documentados; la página dice si escucha en este equipo, en la red o detrás de un proxy; la línea de comandos funciona contra un monitor remoto. La edición lite sigue siendo local.
-
-### 1.8.3 - Notificaciones por usuario
-
-Preferencias por usuario (canal, centinela, nivel mínimo), un despachador que decide a quién avisar según las preferencias y los roles, canales como complementos sencillos y resúmenes de las alertas aún no leídas. Además: un informe del tiempo que esperan los trabajos en cola por cada runner, y un trabajo omitido por las rutas que vigila se muestra aparte de un trabajo en rojo.
-
-### 1.8.4 - Estabilización
-
-Sin grandes funciones. Aislamiento entre cuentas, la página, el almacenamiento, acceso y roles, notificaciones, un GitHub que falla a ratos, el arranque tras una migración interrumpida, la recuperación tras un corte, un doctor más amplio, los sitios que escriben en GitHub, registros sin tokens, una lista de comprobación de seguridad del modo equipo y documentos que coinciden con el comportamiento. La serie sigue hasta la 1.8.9 solo si hace falta.
-
-### 1.9.0 - Una puntuación
-
-Recolectores de métricas por cuenta y por centinela (tasa de éxito, duración, tiempo de recuperación, rendimiento), un motor de puntuación con umbrales que puedes cambiar, tendencia frente al periodo anterior, instantáneas guardadas en el almacenamiento, un widget de puntuación con minigráfica, alertas cuando la puntuación baja y un verbo de la línea de comandos que la imprime.
-
 ### 1.9.1 - Centinela de seguridad
 
 El tercer centinela: Dependabot, análisis de código, análisis de secretos, protección de ramas, permisos de los workflows y propietarios del código, con reglas por tipo de señal, el mismo filtro en la pestaña Alertas y una penalización en la puntuación por alertas críticas abiertas. Opcional, en la misma versión: higiene de workflows (acciones que no están fijadas a un commit, trabajos sin límite de tiempo, workflows sin permisos o sin concurrencia, uso peligroso de pull_request_target), sobre el comprobador de workflows que el proyecto ya tiene.
@@ -72,6 +56,24 @@ El mismo tipo de cierre que la 1.8.4 para la puntuación, el centinela de seguri
 Una versión mayor que limpia la deuda técnica y congela las interfaces públicas: centinelas, almacenamiento, alertas, el esquema de eventos y la API de lectura, con una suite de pruebas de contrato que los clientes pueden ejecutar contra cualquier versión. Una guía para cada forma de usar el producto (lite, individual, servicio, equipo) y una referencia de ajustes, eventos, métricas y API. De la 2.0.1 en adelante hay un colchón para lo que solo aparece con un uso real prolongado.
 
 Los workflows del propio monitor cumplen lo que el centinela de higiene pedirá a los demás: acciones fijadas a un commit, los permisos mínimos y un límite de tiempo en cada trabajo.
+
+## Hecho en la 1.8.2 a la 1.9.0
+
+### 1.8.2 - Imagen Docker oficial y modo servicio
+
+Una imagen de varias etapas con usuario sin privilegios, volúmenes para datos y configuración, variables de entorno documentadas, un ejemplo de compose con proxy inverso y TLS opcionales, una unidad de systemd para quien prefiera la instalación clásica y una comprobación de salud profunda que falla si el supervisor o el ciclo de una cuenta están atascados. Una credencial que GitHub revoca o deja caducar marca solo esa cuenta como ciega, lanza una alerta crítica de sistema y se puede sustituir sin reiniciar el supervisor. Copia de seguridad, actualización y primer arranque como servicio quedan documentados; la página dice si escucha en este equipo, en la red o detrás de un proxy; la línea de comandos funciona contra un monitor remoto. La edición lite sigue siendo local.
+
+### 1.8.3 - Notificaciones por usuario
+
+Preferencias por usuario (canal, centinela, nivel mínimo), un despachador que decide a quién avisar según las preferencias y los roles, canales como complementos sencillos y resúmenes de las alertas aún no leídas. Además: un informe del tiempo que esperan los trabajos en cola por cada runner, y un trabajo omitido por las rutas que vigila se muestra aparte de un trabajo en rojo.
+
+### 1.8.4 - Estabilización
+
+Sin grandes funciones. Aislamiento entre cuentas, la página, el almacenamiento, acceso y roles, notificaciones, un GitHub que falla a ratos, el arranque tras una migración interrumpida, la recuperación tras un corte, un doctor más amplio, los sitios que escriben en GitHub, registros sin tokens, una lista de comprobación de seguridad del modo equipo y documentos que coinciden con el comportamiento. La serie sigue hasta la 1.8.9 solo si hace falta.
+
+### 1.9.0 - Una puntuación
+
+Recolectores de métricas por cuenta y por centinela (tasa de éxito, duración, tiempo de recuperación, rendimiento), un motor de puntuación con umbrales que puedes cambiar, tendencia frente al periodo anterior, instantáneas guardadas en el almacenamiento, un widget de puntuación con minigráfica, alertas cuando la puntuación baja y un verbo de la línea de comandos que la imprime.
 
 ## Hecho en la 1.7.9
 

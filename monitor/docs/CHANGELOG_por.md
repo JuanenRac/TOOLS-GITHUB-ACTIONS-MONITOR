@@ -45,6 +45,30 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - O teste de uma conta que morre de imediato já não depende da velocidade do computador: a espera antes de voltar a arrancar uma conta é verificada com um relógio que o próprio teste dá, e um segundo teste verifica o calendário das esperas sem ler a hora real (o antigo falhava sob carga na porta de uma versão).
 
+## [1.9.0]
+
+### Adicionado
+
+- A pontuação de cada conta (só no Complete): um número de 0 a 100, uma letra de A a E e uma tendência, feitos com a fiabilidade da CI, a velocidade, a recuperação e a colaboração. Quando não consegue sustentar um número diz «a calibrar» ou «dados insuficientes», e dá sempre a cobertura, a qualidade dos dados e o que ainda não conta (a segurança), para que um 85 não seja lido como «está tudo bem».
+
+- As definições da pontuação na página de Definições (janela de dias escolhida pelo utilizador, calibração, mínimo de execuções e de cobertura, pesos, cortes das letras e alerta por descida), nos oito idiomas.
+
+- Um instantâneo da pontuação por hora nos dois armazenamentos (esquema 2 da base de dados, a migração corre numa só transação), incluído na exportação, na cópia de segurança, na migração entre armazenamentos e na retenção.
+
+- `GET /api/score` e `GET /api/score/history`: o número, a letra, a tendência, as partes, a cobertura, a qualidade dos dados, o que falta e a decomposição por repositório; quem pode ver uma conta lê a sua pontuação e só um administrador altera as definições.
+
+- Uma ficha no cabeçalho da página com o número, a letra, a tendência e uma pequena linha dos últimos dias; neutra e com o motivo quando não há número, e com uma estrela enquanto uma parte não conta.
+
+- O comando `score` da linha de comandos, com `--compare` para a comparar com o histórico da janela.
+
+- O alerta `score.dropped` quando a pontuação desce 10 pontos ou passa a uma letra inferior (crítico se passar a E): aparece no separador de Alertas, pode ser silenciado e só sai pelos canais de notificação externos se for pedido.
+
+- `GET /api/score/global` do supervisor: a média das contas pontuadas que quem pergunta pode ver, apenas a título informativo e com a indicação de quem entra nela.
+
+- A pontuação para outras ferramentas: três séries sem etiquetas nas métricas, a ferramenta `get_score` do servidor MCP, painéis da pontuação no painel Grafana de exemplo e uma pontuação inventada em `--demo`.
+
+- Um guia da pontuação nos oito idiomas.
+
 ## [1.8.4]
 
 ### Adicionado

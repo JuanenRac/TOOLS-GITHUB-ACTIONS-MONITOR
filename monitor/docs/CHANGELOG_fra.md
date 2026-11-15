@@ -45,6 +45,30 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - Le test d'un compte qui meurt aussitôt ne dépend plus de la vitesse de l'ordinateur : l'attente avant de relancer un compte est vérifiée avec une horloge que donne le test lui-même, et un second test vérifie le calendrier des attentes sans lire l'heure réelle (l'ancien échouait sous charge dans la porte d'une version).
 
+## [1.9.0]
+
+### Ajouté
+
+- Le score de chaque compte (Complete seulement) : un nombre de 0 à 100, une lettre de A à E et une tendance, construits à partir de la fiabilité de la CI, de la rapidité, du rétablissement et de la collaboration. Quand il ne peut pas justifier un nombre, il dit « calibrage » ou « données insuffisantes », et il donne toujours la couverture, la qualité des données et ce qui ne compte pas encore (la sécurité), si bien qu'un 85 ne se lit pas comme « tout va bien ».
+
+- Les réglages du score dans la page des réglages (fenêtre en jours choisie par l'utilisateur, calibrage, minimum d'exécutions et de couverture, poids, seuils des lettres et alerte en cas de baisse), dans les huit langues.
+
+- Un instantané du score chaque heure dans les deux stockages (schéma 2 de la base, la migration se fait en une seule transaction), inclus dans l'export, la sauvegarde, la migration entre stockages et la rétention.
+
+- `GET /api/score` et `GET /api/score/history` : le nombre, la lettre, la tendance, les parties, la couverture, la qualité des données, ce qui manque et la ventilation par dépôt ; qui peut voir un compte lit son score, et seul un administrateur change les réglages.
+
+- Une pastille dans l'en-tête de la page avec le nombre, la lettre, la tendance et une petite courbe des derniers jours ; neutre et avec la raison quand il n'y a pas de nombre, et avec une étoile tant qu'une partie ne compte pas.
+
+- La commande `score` de la ligne de commande, avec `--compare` pour la comparer à l'historique de la fenêtre.
+
+- L'alerte `score.dropped` quand le score baisse de 10 points ou passe à une lettre inférieure (critique à E) : elle apparaît dans l'onglet Alertes, peut être mise en sourdine et ne sort par les canaux de notification externes que si on le demande.
+
+- `GET /api/score/global` du superviseur : la moyenne des comptes notés que le demandeur peut voir, à titre d'information seulement et avec qui y entre.
+
+- Le score pour d'autres outils : trois séries sans étiquettes dans les métriques, l'outil `get_score` du serveur MCP, des panneaux du score dans le tableau Grafana d'exemple et un score inventé dans `--demo`.
+
+- Un guide du score dans les huit langues.
+
 ## [1.8.4]
 
 ### Ajouté

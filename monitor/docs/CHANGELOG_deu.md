@@ -45,6 +45,30 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - Der Test eines Kontos, das sofort stirbt, hängt nicht mehr von der Geschwindigkeit des Rechners ab: Die Wartezeit vor dem erneuten Start eines Kontos wird mit einer Uhr geprüft, die der Test selbst gibt, und ein zweiter Test prüft den Plan der Wartezeiten, ohne die echte Zeit zu lesen (der alte scheiterte unter Last in der Schranke eines Releases).
 
+## [1.9.0]
+
+### Hinzugefügt
+
+- Die Punktzahl jedes Kontos (nur in Complete): eine Zahl von 0 bis 100, ein Buchstabe von A bis E und ein Trend, gebildet aus der Zuverlässigkeit der CI, der Geschwindigkeit, der Wiederherstellung und der Zusammenarbeit. Wo sie keine Zahl belegen kann, sagt sie „Kalibrierung“ oder „zu wenige Daten“, und sie nennt immer die Abdeckung, die Datenqualität und das, was noch nicht zählt (die Sicherheit), damit eine 85 nicht als „alles in Ordnung“ gelesen wird.
+
+- Die Einstellungen der Punktzahl auf der Einstellungsseite (vom Benutzer gewähltes Zeitfenster in Tagen, Kalibrierung, Mindestzahl an Läufen und Abdeckung, Gewichte, Grenzen der Buchstaben und Warnung bei Abfall) in den acht Sprachen.
+
+- Eine Momentaufnahme der Punktzahl pro Stunde in beiden Speichern (Schema 2 der Datenbank, die Migration läuft in einer einzigen Transaktion), enthalten in Export, Sicherung, Migration zwischen den Speichern und Aufbewahrung.
+
+- `GET /api/score` und `GET /api/score/history`: die Zahl, der Buchstabe, der Trend, die Teile, die Abdeckung, die Datenqualität, das Fehlende und die Aufteilung nach Repository; wer ein Konto sehen darf, liest seine Punktzahl, und nur ein Administrator ändert die Einstellungen.
+
+- Ein Chip in der Kopfzeile der Seite mit Zahl, Buchstabe, Trend und einer kleinen Linie der letzten Tage; neutral und mit dem Grund, wenn es keine Zahl gibt, und mit einem Stern, solange ein Teil nicht zählt.
+
+- Der Befehl `score` der Kommandozeile, mit `--compare` zum Vergleich mit dem Verlauf des Fensters.
+
+- Die Warnung `score.dropped`, wenn die Punktzahl um 10 Punkte fällt oder auf einen niedrigeren Buchstaben geht (kritisch bei E): sie erscheint im Reiter Warnungen, lässt sich stummschalten und geht nur auf Wunsch über die externen Benachrichtigungskanäle hinaus.
+
+- `GET /api/score/global` des Supervisors: der Mittelwert der bewerteten Konten, die der Fragende sehen darf, nur zur Information und mit der Angabe, wer darin enthalten ist.
+
+- Die Punktzahl für andere Werkzeuge: drei Reihen ohne Labels in den Metriken, das Werkzeug `get_score` des MCP-Servers, Panels der Punktzahl im Beispiel-Dashboard für Grafana und eine erfundene Punktzahl in `--demo`.
+
+- Eine Anleitung zur Punktzahl in den acht Sprachen.
+
 ## [1.8.4]
 
 ### Hinzugefügt
