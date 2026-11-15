@@ -40,6 +40,7 @@
 | `ghamon_repo_pending_sign_hours` | `repo`, `ecosystem` | 某个仓库最长的等待时间（需要 `per_repo`） |
 | `ghamon_surface_paused`、`ghamon_surface_paused_remaining`、`ghamon_surface_paused_needed` | | 表面检查（A10）等待 GitHub 配额期间为 1，同时给出剩余配额和所需配额 |
 | `ghamon_api_rate_remaining`、`ghamon_api_rate_limit` | | GitHub API 的配额 |
+| `ghamon_score`, `ghamon_score_coverage`, `ghamon_score_scored` | | 账户评分（0 到 100，仅在有数值时存在）、有数据的权重所占比例，以及有数值时为 1（仅 Complete；见 SCORE.md） |
 | `ghamon_sentinel_calls_last_hour`、`ghamon_sentinel_budget_per_hour` | | 哨兵的 API 调用次数及其预算 |
 | `ghamon_repos_watched`、`ghamon_runs_active`、`ghamon_runs_stuck`、`ghamon_runs_failing`、`ghamon_issues_open`、`ghamon_quota_paused` | | “当前”选项卡的实时数据 |
 

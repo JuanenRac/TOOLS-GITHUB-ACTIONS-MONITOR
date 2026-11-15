@@ -69,6 +69,10 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - Um guia da pontuação nos oito idiomas.
 
+### Alterado
+
+- A ajuda está em dia com toda a série 1.8 e com a 1.9.0: o README do repositório e as suas sete traduções diziam a versão 1.8.1 e nada do que veio depois; agora a versão da tabela Num relance é escrita pelo gerador a partir da versão da ferramenta, O que faz nomeia o modo de serviço e a imagem Docker, várias contas e a equipa, o armazenamento, as listas que se ordenam e se dobram e a pontuação, a tabela de estado tem as linhas do que é novo, a secção de Segurança diz como se protegem os modos de rede e de equipa, a Documentação lista todos os guias, os guias da linha de comandos, das ferramentas de IA e das métricas nomeiam a pontuação, e o roteiro já não apresenta a série 1.8 como a próxima versão. Um teste novo e uma verificação da porta da versão recusam uma ajuda que diga outra versão, um guia que o README não liste e um README do pacote com um cabeçalho velho, e o guia de contribuição pede que cada versão leia a ajuda inteira.
+
 ## [1.8.4]
 
 ### Adicionado

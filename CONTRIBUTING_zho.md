@@ -13,6 +13,7 @@
 5. **小步前进**:每个 pull request 一项更改,并在 `CHANGELOG.md` 加上对应的一行。
 6. **图片**:编辑 `docs/architecture.json` 或 `docs/structure.json`,再运行 `python tools/make_architecture.py` / `python tools/make_structure.py`;不要手工编辑 SVG。
 7. **八种语言的更新日志**:`monitor/CHANGELOG.md` 的每条新条目都要在 `monitor/docs/CHANGELOG_<spa|deu|fra|ita|jpn|zho|por>.md` 中提供翻译(版本和章节相同;尚未翻译的条目在已翻译的提示下保留英文原文)。任何翻译缺少某个版本时,`python tools/make_help_index.py --check` 和发布检查都会失败。
+8. **每个版本都要复查全部帮助**：发布前（在该版本的发布拉取请求中）阅读所有帮助主题 - 仓库的 README 及其翻译（概览、功能、项目状态、测试、仓库结构、文档、安全）、`monitor/docs/` 中的每份指南、快速入门以及软件包的 README - 并在八种语言中修正任何已经过时的数字、版本、命令、路径、图片或功能列表。帮助的生成器和测试（`tools/make_glance.py`、`tools/make_help_index.py`、`tools/make_screenshots.py`、`monitor/tests/test_190_help_current.py`）只能发现其中一部分。
 
 ## 每次发布后刷新状态看板
 

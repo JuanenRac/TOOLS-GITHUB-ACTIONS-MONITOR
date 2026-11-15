@@ -69,6 +69,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - Un guide du score dans les huit langues.
 
+### Modifié
+
+- L'aide est à jour de toute la série 1.8 et de la 1.9.0 : le README du dépôt et ses sept traductions disaient la version 1.8.1 et rien de ce qui a suivi ; maintenant la version du tableau En un coup d'œil est écrite par le générateur à partir de la version de l'outil, Ce qu'il fait nomme le mode service et l'image Docker, plusieurs comptes et l'équipe, le stockage, les listes qui se trient et se plient et le score, le tableau d'état a les lignes des nouveautés, la section Sécurité dit comment les modes réseau et équipe sont protégés, la Documentation liste tous les guides, les guides de la ligne de commande, des outils d'IA et des métriques nomment le score, et la feuille de route ne présente plus la série 1.8 comme la prochaine version. Un nouveau test et une vérification de la porte de la version refusent une aide qui dit une autre version, un guide que le README ne liste pas et un README du paquet avec un vieux titre, et le guide de contribution demande à chaque version de relire toute l'aide.
+
 ## [1.8.4]
 
 ### Ajouté

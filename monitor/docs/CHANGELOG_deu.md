@@ -69,6 +69,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - Eine Anleitung zur Punktzahl in den acht Sprachen.
 
+### Geändert
+
+- Die Hilfe ist auf dem Stand der ganzen Reihe 1.8 und von 1.9.0: Das README des Repositorys und seine sieben Übersetzungen nannten die Version 1.8.1 und nichts von dem, was danach kam; jetzt schreibt der Generator die Version der Tabelle Auf einen Blick aus der Version des Werkzeugs, Was es tut nennt den Dienstmodus und das Docker-Image, mehrere Konten und das Team, die Speicherung, die Listen zum Sortieren und Einklappen und die Punktzahl, die Statustabelle hat die Zeilen des Neuen, der Abschnitt Sicherheit sagt, wie Netzwerk- und Teammodus geschützt sind, die Dokumentation listet jede Anleitung, die Anleitungen zur Befehlszeile, zu den KI-Werkzeugen und zu den Metriken nennen die Punktzahl, und die Roadmap stellt die Reihe 1.8 nicht mehr als nächstes Release dar. Ein neuer Test und eine Prüfung im Tor des Releases weisen eine Hilfe zurück, die eine andere Version nennt, eine Anleitung, die das README nicht aufführt, und ein README des Pakets mit alter Überschrift, und der Leitfaden zum Mitwirken verlangt, dass jede Version die ganze Hilfe liest.
+
 ## [1.8.4]
 
 ### Hinzugefügt

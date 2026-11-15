@@ -13,6 +13,7 @@
 5. **Petits pas** : une modification par pull request, avec la ligne correspondante dans `CHANGELOG.md`.
 6. **Images** : modifiez `docs/architecture.json` ou `docs/structure.json` et lancez `python tools/make_architecture.py` / `python tools/make_structure.py` ; ne modifiez jamais le SVG à la main.
 7. **Journal des modifications en huit langues** : chaque nouvelle entrée de `monitor/CHANGELOG.md` reçoit sa traduction dans `monitor/docs/CHANGELOG_<spa|deu|fra|ita|jpn|zho|por>.md` (mêmes versions et sections ; une entrée pas encore traduite garde le texte anglais sous un avis traduit). `python tools/make_help_index.py --check` et la porte de version échouent si une version manque dans une traduction.
+8. **Chaque version relit toute l'aide** : avant une publication (dans sa pull request de version), lisez TOUS les sujets de l'aide - le README du dépôt et ses traductions (En un coup d'œil, Ce qu'il fait, État du projet, Tests, Structure du dépôt, Documentation, Sécurité), chaque guide de `monitor/docs/`, les démarrages rapides et les README du paquet - et corrigez tout chiffre, version, commande, chemin, image ou liste de fonctions devenu périmé, dans les huit langues. Les générateurs et les tests de l'aide (`tools/make_glance.py`, `tools/make_help_index.py`, `tools/make_screenshots.py`, `monitor/tests/test_190_help_current.py`) n'en attrapent qu'une partie.
 
 ## Rafraîchir un tableau d'état après chaque version
 

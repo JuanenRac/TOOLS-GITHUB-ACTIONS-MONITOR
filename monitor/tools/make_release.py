@@ -286,6 +286,33 @@ def run_tests(timeout=None):
     return tail[0]
 
 
+VERSION_CELL = re.compile(r"^\| \*\*[^*|\n]+\*\* \| \*\*(\d+(?:\.\d+)+)\*\* · \[", re.M)      # | **Version** | **1.9.0** · [all releases](...) of "At a glance"
+VERSION_WORDS = re.compile(r"(?i)(?:version|versión|versione|versão|バージョン|版本)\s*(\d+\.\d+\.\d+)")
+HELP_HISTORY = ("CHANGELOG", "ROADMAP", "MIGRATING", "LAYOUT")      # topics that talk about other versions on purpose
+HELP_VERSION_OTHER = {"0.0.4"}      # the version of the text format of Prometheus, not ours
+
+
+def help_version_problems(version):
+    """What the help says about the version of the product, against `version`: the "At a glance" table of the README of the repository and its translations (when the repository is there), the heading of
+    the READMEs of the package and every "version X.Y.Z" of a topic that is not history. A help that still says the previous version is a defect of the release, not a detail."""
+    problems = []
+    for readme in sorted(HERE.parent.glob("README*.md")):
+        found = VERSION_CELL.search(readme.read_text(encoding="utf-8"))
+        if found and found.group(1) != version:
+            problems.append(f"{readme.name} says version {found.group(1)} in At a glance (tool_version.py says {version}): run tools/make_glance.py --apply")
+    for name in ["README.txt"] + [f"docs/README_{lang}.txt" for lang in LANGS]:
+        target = HERE / name
+        if target.is_file() and version not in target.read_text(encoding="utf-8").split("\n", 6)[3]:
+            problems.append(f"{name} does not say version {version} in its heading")
+    for topic in sorted((HERE / "docs").glob("*.md")) + sorted((HERE / "docs").glob("*.txt")):
+        if topic.name.startswith(HELP_HISTORY):
+            continue
+        for found in VERSION_WORDS.finditer(topic.read_text(encoding="utf-8")):
+            if found.group(1) not in (version, *HELP_VERSION_OTHER):
+                problems.append(f"{topic.name} talks about version {found.group(1)} as if it were the current one")
+    return problems
+
+
 def gate_static():
     """Checks that need no tests run: example complete, targets valid, version and changelog agree, required files present."""
     from github_actions_monitor.cli import gha_dispatch_all
@@ -314,6 +341,9 @@ def gate_static():
     problems = changelog_translation_problems()
     if problems:
         fail("; ".join(problems))
+    problems = help_version_problems(tool_version.TOOL_VERSION)
+    if problems:
+        fail("the help is not up to date with the version: " + "; ".join(problems))
     return tool_version.TOOL_VERSION
 
 

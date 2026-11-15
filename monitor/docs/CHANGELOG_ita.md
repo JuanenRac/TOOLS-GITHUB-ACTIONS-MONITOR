@@ -69,6 +69,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - Una guida al punteggio negli otto idiomi.
 
+### Modificato
+
+- La guida è aggiornata a tutta la serie 1.8 e alla 1.9.0: il README del repository e le sue sette traduzioni dicevano la versione 1.8.1 e nulla di ciò che è venuto dopo; ora la versione della tabella In breve la scrive il generatore a partire dalla versione dello strumento, Cosa fa nomina la modalità servizio e l'immagine Docker, più account e il team, l'archiviazione, gli elenchi che si ordinano e si ripiegano e il punteggio, la tabella di stato ha le righe delle novità, la sezione Sicurezza dice come sono protette le modalità di rete e squadra, la Documentazione elenca ogni guida, le guide della riga di comando, degli strumenti di IA e delle metriche nominano il punteggio, e la roadmap non presenta più la serie 1.8 come la prossima versione. Un nuovo test e un controllo della porta della release rifiutano una guida che dice un'altra versione, una guida che il README non elenca e un README del pacchetto con un titolo vecchio, e la guida al contributo chiede a ogni versione di rileggere tutta la guida.
+
 ## [1.8.4]
 
 ### Aggiunto
