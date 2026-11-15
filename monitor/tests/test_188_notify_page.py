@@ -92,7 +92,7 @@ class ThePanel(unittest.TestCase):
         found = check_overflow.measure(check_overflow.edge(), f"{self.base}?lang=en&nowizard=1", check_overflow.SIZES["desktop"])
         self.assertIn("The administrator has not turned on notifications", found["texts"])
         self.assertIn("Alerts you have not seen: 3", found["texts"])
-        self.assertEqual(found["checked"], [True, True, False, False, True, False, False], found)      # enabled; ntfy, teams, email; CI, collaboration; system
+        self.assertEqual(found["checked"], [True, True, False, False, True, False, False, False], found)      # enabled; ntfy, teams, email; CI, collaboration, security; system
         self.assertEqual(found["topic"][0], "mine")
         self.assertTrue(all(v == "" for v in found["pw_values"]), "a stored secret is never put back in the page")
         self.assertIn("stored", found["placeholders"][0])
