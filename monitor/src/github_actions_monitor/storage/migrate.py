@@ -18,7 +18,7 @@ def canonical(value):
 
 def _count(payload):
     return {"events": len(payload.get("events") or []), "sentinels": len(payload.get("sentinels") or {}), "docs": len(payload.get("docs") or {}),
-            "config": bool(payload.get("config")), "analytics": bool(payload.get("analytics"))}
+            "config": bool(payload.get("config")), "analytics": bool(payload.get("analytics")), "scores": len(payload.get("scores") or [])}
 
 
 def _same(source_payload, target_payload):
@@ -26,6 +26,8 @@ def _same(source_payload, target_payload):
     if canonical(source_payload.get("config") or {}) != canonical(target_payload.get("config") or {}):
         return False
     if canonical(source_payload.get("analytics") or {}) != canonical(target_payload.get("analytics") or {}):
+        return False
+    if canonical(source_payload.get("scores") or []) != canonical(target_payload.get("scores") or []):
         return False
     if canonical(source_payload.get("events") or []) != canonical(target_payload.get("events") or []):
         return False

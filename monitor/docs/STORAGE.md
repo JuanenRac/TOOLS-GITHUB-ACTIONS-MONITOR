@@ -55,7 +55,7 @@ A monitor left running for months would grow without a ceiling, so a short pass 
 |---|---|---|
 | `retention.enabled` | on | the switch |
 | `retention.events_days` | 90 | events older than this are removed |
-| `retention.analytics_days` | 180 | days of the analytics history older than this are removed |
+| `retention.analytics_days` | 180 | days of the analytics history older than this are removed, and so are the score snapshots of those days |
 | `retention.mode` | `archive` | `archive` writes the old events to a `.gz` in `events/archive/` first |
 | `retention.events_max_kb` | 512 | ceiling in size of the feed file with the file backend (as always) |
 | `retention.warn_events_mb` | 20 | `--doctor` warns above this size |

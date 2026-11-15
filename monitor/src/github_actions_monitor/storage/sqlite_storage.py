@@ -29,7 +29,7 @@ from pathlib import Path
 
 from github_actions_monitor.storage import archive, base
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 BUSY_MS = 30000      # how long a statement waits for another writer before it gives up (SQLite's own busy handler)
 RETRIES = 8          # and how many times the steps that SQLite does not make wait (switching to WAL, taking the writer lock) are tried again, with a growing pause
 #: version -> the statements that bring a database from version-1 to version
@@ -46,6 +46,9 @@ MIGRATIONS = {
         "CREATE TABLE user_accounts (key TEXT PRIMARY KEY, data TEXT NOT NULL, expires REAL, updated REAL NOT NULL)",
         "CREATE TABLE sessions (key TEXT PRIMARY KEY, data TEXT NOT NULL, expires REAL, updated REAL NOT NULL)",
         "CREATE INDEX sessions_expires ON sessions (expires)",
+    ],
+    2: [
+        "CREATE TABLE score_snapshots (account_id TEXT NOT NULL, hour TEXT NOT NULL, data TEXT NOT NULL, updated REAL NOT NULL, PRIMARY KEY (account_id, hour))",
     ],
 }
 
@@ -239,6 +242,38 @@ class SqliteStorage(base.Storage):
             self._touch(conn, account_id)
             conn.execute("INSERT OR REPLACE INTO analytics_snapshots (account_id, data, updated) VALUES (?, ?, ?)", (account_id, _dumps(data), time.time()))
 
+    # -- score snapshots
+    def save_score_snapshot(self, account_id, hour, data):
+        base.check_account(account_id)
+        base.check_hour(hour)
+        with self._write() as conn:
+            self._touch(conn, account_id)
+            conn.execute("INSERT OR REPLACE INTO score_snapshots (account_id, hour, data, updated) VALUES (?, ?, ?, ?)", (account_id, hour, _dumps(data), time.time()))
+
+    def load_score_snapshots(self, account_id, since=None, limit=None):
+        base.check_account(account_id)
+        if limit is not None and limit <= 0:
+            return []
+        sql, args = "SELECT hour, data FROM score_snapshots WHERE account_id = ?", [account_id]
+        if since:
+            sql, args = sql + " AND hour >= ?", args + [since]
+        if limit is None:
+            rows = self._conn().execute(sql + " ORDER BY hour ASC", args).fetchall()
+        else:
+            rows = self._conn().execute(sql + " ORDER BY hour DESC LIMIT ?", args + [int(limit)]).fetchall()[::-1]
+        out = []
+        for hour, text in rows:
+            item = _loads(text, dict)
+            if item is not None:
+                out.append({**item, "hour": hour})
+        return out
+
+    def purge_score_snapshots(self, account_id, before_hour):
+        base.check_account(account_id)
+        with self._write() as conn:
+            cursor = conn.execute("DELETE FROM score_snapshots WHERE account_id = ? AND hour < ?", (account_id, before_hour))
+            return {"removed": cursor.rowcount}
+
     # -- events
     def append_events(self, account_id, events):
         base.check_account(account_id)
@@ -351,7 +386,8 @@ class SqliteStorage(base.Storage):
             sentinels = {r[0]: _loads(r[1], dict, {}) for r in conn.execute("SELECT name, data FROM sentinel_states WHERE account_id = ? ORDER BY name", (account_id,))}
             docs = {r[0]: _loads(r[1], dict, {}) for r in conn.execute("SELECT name, data FROM docs WHERE account_id = ? ORDER BY name", (account_id,))}
             events = [_loads(r[0], dict) for r in conn.execute("SELECT data FROM events WHERE account_id = ? ORDER BY ts, id", (account_id,))]
-        return {"config": _loads(config[0], dict, {}) if config else {}, "sentinels": sentinels, "docs": docs, "events": [e for e in events if e is not None],
+            scores = [{**(_loads(r[1], dict, {}) or {}), "hour": r[0]} for r in conn.execute("SELECT hour, data FROM score_snapshots WHERE account_id = ? ORDER BY hour", (account_id,))]
+        return {"scores": scores, "config": _loads(config[0], dict, {}) if config else {}, "sentinels": sentinels, "docs": docs, "events": [e for e in events if e is not None],
                 "analytics": _loads(analytics[0], dict, {}) if analytics else {}}
 
     def import_account(self, account_id, payload):
@@ -369,6 +405,9 @@ class SqliteStorage(base.Storage):
                 conn.execute("INSERT OR REPLACE INTO docs (account_id, name, data, updated) VALUES (?, ?, ?, ?)", (account_id, name, _dumps(data), now))
             if payload.get("analytics"):
                 conn.execute("INSERT OR REPLACE INTO analytics_snapshots (account_id, data, updated) VALUES (?, ?, ?)", (account_id, _dumps(payload["analytics"]), now))
+            conn.execute("DELETE FROM score_snapshots WHERE account_id = ?", (account_id,))
+            conn.executemany("INSERT INTO score_snapshots (account_id, hour, data, updated) VALUES (?, ?, ?, ?)",
+                             [(account_id, s["hour"], _dumps(s), now) for s in payload.get("scores") or [] if isinstance(s, dict) and isinstance(s.get("hour"), str) and base.HOUR_RE.match(s["hour"])])
             conn.execute("DELETE FROM events WHERE account_id = ?", (account_id,))
             conn.executemany("INSERT INTO events (account_id, ts, kind, data) VALUES (?, ?, ?, ?)",
                              [(account_id, base.event_ts(e), str(e.get("kind") or ""), _dumps(e)) for e in payload.get("events") or [] if isinstance(e, dict)])
@@ -382,7 +421,7 @@ class SqliteStorage(base.Storage):
         if self.schema_version() != self.target:
             problems.append(f"schema version {self.schema_version()} (expected {self.target})")
         try:
-            for table, column in (("configs", "data"), ("sentinel_states", "data"), ("docs", "data"), ("events", "data"), ("analytics_snapshots", "data")):
+            for table, column in (("configs", "data"), ("sentinel_states", "data"), ("docs", "data"), ("events", "data"), ("analytics_snapshots", "data"), ("score_snapshots", "data")):
                 bad = conn.execute(f"SELECT COUNT(*) FROM {table} WHERE json_valid({column}) = 0").fetchone()[0]
                 if bad:
                     problems.append(f"{table}: {bad} row(s) that are not JSON")
