@@ -1,9 +1,9 @@
 @echo off
 rem Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 rem GPL-3.0-or-later - see LICENSE
-rem GitHub Actions monitor, LITE edition: what is running, the failures of the last 24 hours, the history and basic charts. No sentinel. Local only, port 8766.
+rem GitHub Actions monitor, LITE edition: what is running, the failures of the last 24 hours, the history and basic charts. No sentinel. Local only, port ports.lite (8766 by default).
 rem Stop: Ctrl+C in this window. The window does NOT close by itself.
-title GitHub Actions Monitor LITE - port 8766 - no sentinel
+title GitHub Actions Monitor LITE - no sentinel
 cd /d "%~dp0"
 if not defined PYTHONPATH goto nopp
 set "PYTHONPATH=%~dp0src;%PYTHONPATH%"

@@ -96,4 +96,5 @@ Tudo o que se segue é local e só de leitura, e está desligado a não ser que 
 - `reports.workflow_hygiene.enabled`, `reports.queue.enabled`, `reports.release_view.enabled`, `reports.supply_chain.enabled` - docs/EXTRAS_por.md
 - `ai.skill` - docs/SKILLS_por.md
 - `ui.orientation`, `ui.screen1_tabs`, `ui.now_sort` - docs/SCREENS_por.md
+- `ports.complete`, `ports.lite` - docs/DEPLOYMENT_por.md
 - `notify.users.enabled` - docs/NOTIFICATIONS_por.md

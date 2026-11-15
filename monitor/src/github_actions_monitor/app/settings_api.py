@@ -33,6 +33,7 @@ from github_actions_monitor.app import surface
 from github_actions_monitor.app import toolconfig
 from github_actions_monitor.security import private_io
 from github_actions_monitor.ui import ordering
+from github_actions_monitor.util import ports
 
 from github_actions_monitor.util import paths
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
@@ -117,6 +118,8 @@ _f(_T_GENERAL, "screens", "ui.screen2_orientation", "enum", ("auto", "portrait",
 _f(_T_GENERAL, "screens", "ui.screen3_tabs", "text", re.compile(r"^[a-z,]{0,60}\Z"), restart=False)
 _f(_T_GENERAL, "screens", "ui.screen3_orientation", "enum", ("auto", "portrait", "landscape"), restart=False)
 _f(_T_GENERAL, "order", "ui.now_sort", "enum", ordering.KINDS["now"], restart=False)
+_f(_T_GENERAL, "ports", "ports.complete", "int", (ports.LOW, ports.HIGH), restart=True)
+_f(_T_GENERAL, "ports", "ports.lite", "int", (ports.LOW, ports.HIGH), restart=True)
 _f(_T_GENERAL, "sound", "sound.enabled", "bool", restart=False)
 _f("quota", "modes", "modes.auto_low", "bool", restart=False)
 _f("quota", "modes", "modes.auto_low_enter", "int", (50, 4000), restart=False, unit="calls")
@@ -583,7 +586,7 @@ def check_value_list(value):
     return True, list(value)
 
 
-LITE_KEYS = ("github_owner", "language", "repos", "ecosystems", "exclude", "refresh_seconds", "open_browser", "updates.check", "airgapped") + tuple(
+LITE_KEYS = ("ports.complete", "ports.lite", "github_owner", "language", "repos", "ecosystems", "exclude", "refresh_seconds", "open_browser", "updates.check", "airgapped") + tuple(
     k for k in FIELDS if k.startswith(("ai_alerts.", "sound.", "display.", "modes.", "central.", "extra_reader.", "github_app.", "network.etag", "network.graphql")))      # the short settings page of the lite product; the connection with an AI tool, the sound and the look are the same in both editions
 
 
@@ -601,6 +604,9 @@ def validate(changes, lite=False):
             clean[path] = result
         else:
             errors[str(path)[:80]] = result
+    if "ports.complete" in clean and clean.get("ports.complete") == clean.get("ports.lite"):      # two editions cannot listen on one port
+        errors["ports.lite"] = "same_port"
+        del clean["ports.lite"], clean["ports.complete"]
     return clean, errors
 
 

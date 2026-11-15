@@ -96,4 +96,5 @@ Tutto ciò che segue è locale e in sola lettura, e spento salvo diversa indicaz
 - `reports.workflow_hygiene.enabled`, `reports.queue.enabled`, `reports.release_view.enabled`, `reports.supply_chain.enabled` - docs/EXTRAS_ita.md
 - `ai.skill` - docs/SKILLS_ita.md
 - `ui.orientation`, `ui.screen1_tabs`, `ui.now_sort` - docs/SCREENS_ita.md
+- `ports.complete`, `ports.lite` - docs/DEPLOYMENT_ita.md
 - `notify.users.enabled` - docs/NOTIFICATIONS_ita.md

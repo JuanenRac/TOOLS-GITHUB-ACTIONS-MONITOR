@@ -21,6 +21,7 @@ from pathlib import Path
 from github_actions_monitor import i18n  # noqa: E402
 from github_actions_monitor.util import platform_compat  # noqa: E402
 from github_actions_monitor.security import netguard
+from github_actions_monitor.util import ports
 
 INSTALL_HINT = "pip install rich"
 
@@ -34,8 +35,8 @@ def rich_available():
 
 
 def default_port(lite=False):
-    """8766 for the lite edition (--lite or MONITOR_MODE=lite), 8765 for the complete one."""
-    return 8766 if (lite or os.environ.get("MONITOR_MODE", "").strip().lower() == "lite") else 8765
+    """The port of the lite edition (--lite or MONITOR_MODE=lite, 8766 unless the configuration says another) or of the complete one (8765 unless it says another)."""
+    return ports.resolve("lite" if (lite or os.environ.get("MONITOR_MODE", "").strip().lower() == "lite") else "complete")
 
 
 LITE_PORT = 8766
@@ -140,14 +141,14 @@ def main(argv=None):
         print(i18n.t("lp.not_running", port=args.port))
         return 2
     if args.once:
-        console.print(build(data, snap, args.theme, args.lite or args.port == 8766))
+        console.print(build(data, snap, args.theme, args.lite or args.port == ports.resolve("lite")))
         return 0
     try:
-        with Live(build(data, snap, args.theme, args.lite or args.port == 8766), console=console, refresh_per_second=2, screen=False) as live:
+        with Live(build(data, snap, args.theme, args.lite or args.port == ports.resolve("lite")), console=console, refresh_per_second=2, screen=False) as live:
             while True:
                 time.sleep(max(2, args.refresh))
                 data, snap = fetch(args.port, lite=args.lite)
-                live.update(build(data, snap, args.theme, args.lite or args.port == 8766))
+                live.update(build(data, snap, args.theme, args.lite or args.port == ports.resolve("lite")))
     except KeyboardInterrupt:
         pass
     return 0

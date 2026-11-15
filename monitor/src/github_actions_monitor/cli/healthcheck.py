@@ -17,6 +17,7 @@ import urllib.request
 from github_actions_monitor import i18n
 from github_actions_monitor.cli import monitor_cli
 from github_actions_monitor.security import netguard
+from github_actions_monitor.util import ports
 
 EXIT_OK, EXIT_UNHEALTHY, EXIT_DOWN, EXIT_REFUSED = 0, 1, 2, 3
 
@@ -96,7 +97,7 @@ def main(argv=None):
         return EXIT_OK if stop.code in (0, None) else EXIT_UNHEALTHY
     if args.lang:
         i18n.set_language(args.lang)
-    base = args.url.strip().rstrip("/") or os.environ.get("MONITOR_URL", "").strip().rstrip("/") or f"http://127.0.0.1:{(os.environ.get('MONITOR_PORT') or '8765').strip()}"
+    base = args.url.strip().rstrip("/") or os.environ.get("MONITOR_URL", "").strip().rstrip("/") or f"http://127.0.0.1:{ports.resolve('complete')}"
     try:
         base = monitor_cli.base_url(base)
     except monitor_cli.CliError as error:

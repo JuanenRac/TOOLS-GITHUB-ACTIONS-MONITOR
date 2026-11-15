@@ -22,6 +22,7 @@ from github_actions_monitor import i18n  # noqa: E402
 from github_actions_monitor.util import platform_compat  # noqa: E402
 from github_actions_monitor.ui import tui  # noqa: E402
 from github_actions_monitor.security import netguard
+from github_actions_monitor.util import ports
 
 INSTALL_HINT = "pip install textual"
 BASIC_SWITCHES = ("open_browser", "updates.check", "airgapped", "discovery.events", "discovery.suggest_groups", "discovery.auto_frequency")
@@ -388,7 +389,7 @@ def main(argv=None):
     if get(port, "/api/health") is None:
         print(i18n.t("lp.not_running", port=port))
         return 2
-    make_app(port, args.lite or port == 8766, args.theme).run()
+    make_app(port, args.lite or port == ports.resolve("lite"), args.theme).run()
     return 0
 
 

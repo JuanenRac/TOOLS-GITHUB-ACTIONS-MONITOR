@@ -16,6 +16,10 @@ O monitor escuta de uma de três maneiras, e a página, `GET /api/accounts`, `bi
 
 No modo de rede, o supervisor de várias contas segue as mesmas regras do monitor de uma conta: o token de acesso em cada pedido (cookie, cabeçalho ou `POST /api/access`), bloqueio após tokens errados, a verificação de `Host`, TLS opcional com o seu certificado, a segunda porta de quem está no computador (`listen.local_port`), e as chaves que decidem a exposição, o acesso ao GitHub e as ações no GitHub apenas a partir do computador do monitor (um pedido vindo da rede chega à conta marcado como remoto).
 
+## As portas das duas edições
+
+A edição completa escuta na porta 8765 e a lite na 8766, a menos que o ficheiro de configuração indique outra: `ports.complete` e `ports.lite` (um inteiro de 1024 a 65535, requer reinício; também estão na página de Definições, bloco Portas). Os dois números são lidos num só sítio, por isso o arranque, a verificação «já existe um monitor nesta porta», `--doctor`, a verificação de saúde (`python -m github_actions_monitor.cli.healthcheck`), a linha de comandos (`--lite` fala com a porta lite), as vistas de terminal e os lançadores coincidem. A ordem é: `--port N` na linha de comandos, depois `MONITOR_PORT` (o serviço e o contentor definem-no; só a edição completa), depois o ficheiro da edição, depois o da outra edição (um menu pode definir ambas) e por fim o predefinido. A edição lite nunca usa a porta da completa: se ambas indicarem o mesmo número, a lite mantém 8766, e a página de Definições recusa guardar o mesmo número para as duas. Se a porta estiver ocupada, o monitor usa a seguinte livre, até dez acima.
+
 ## Sem navegador e a verificação de saúde
 
 `python -m github_actions_monitor.service` é a entrada de um serviço: prepara as pastas e a primeira conta a partir do ambiente (ver a tabela abaixo) e arranca o monitor sem navegador. `python bin/actions_monitor.py --no-browser --port 8765` continua a servir para um monitor que gere por si.

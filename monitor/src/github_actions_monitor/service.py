@@ -23,7 +23,7 @@ from pathlib import Path
 from github_actions_monitor import i18n
 from github_actions_monitor.accounts import accounts
 from github_actions_monitor.security import private_io
-from github_actions_monitor.util import paths, rootmigrate
+from github_actions_monitor.util import paths, ports, rootmigrate
 
 #: environment variable -> (section, key, kind) of the configuration. A variable that is not set changes nothing; one that is set but empty or badly written is ignored with a notice.
 LISTEN_ENV = {
@@ -233,7 +233,7 @@ def main(argv=None):
         return 0
     from github_actions_monitor.app import actions_monitor
     port = os.environ.get("MONITOR_PORT", "").strip()
-    sys.argv = [sys.argv[0], "--no-browser", "--port", port if port.isdigit() else str(DEFAULT_PORT), *[a for a in args if a != "--prepare-only"]]
+    sys.argv = [sys.argv[0], "--no-browser", "--port", port if port.isdigit() else str(ports.resolve("complete")), *[a for a in args if a != "--prepare-only"]]
     return actions_monitor.main()
 
 
