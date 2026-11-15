@@ -518,6 +518,37 @@
     "interval_hours": 24,
     "warn_events_mb": 20
   },
+  "score": {
+    "enabled": true,
+    "window_days": 7,
+    "calibrating_hours": 24,
+    "min_runs": 20,
+    "min_coverage": 0.5,
+    "trend_flat": 2,
+    "weights": {
+      "reliability": 40,
+      "speed": 20,
+      "recovery": 20,
+      "collaboration": 20
+    },
+    "limits": {
+      "reliability": {"good": 0.98, "bad": 0.5},
+      "speed": {"good": 600, "bad": 3600},
+      "recovery": {"good": 1800, "bad": 86400},
+      "collaboration": {"good": 172800, "bad": 1209600}
+    },
+    "grades": {
+      "A": 90,
+      "B": 80,
+      "C": 70,
+      "D": 55
+    },
+    "alert": {
+      "enabled": true,
+      "drop_points": 10,
+      "notify_external": false
+    }
+  },
   "tui": {
     "theme": "dark",
     "refresh_seconds": 5

@@ -251,6 +251,23 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `savings.webhook_first` | `false` | quota | Webhook first |
 | `savings.webhook_full_minutes` | `360` | quota | Full read at least every |
 | `savings.webhook_window_minutes` | `60` | quota | The webhook counts as alive for |
+| `score.alert.drop_points` | `-` | sentinel | Drop that raises the alert |
+| `score.alert.enabled` | `-` | sentinel | Alert on a drop |
+| `score.alert.notify_external` (secure) | `-` | sentinel | Notify outside the panel |
+| `score.calibrating_hours` | `-` | sentinel | Calibration time |
+| `score.enabled` | `-` | sentinel | Score on |
+| `score.grades.A` | `-` | sentinel | Least score for A |
+| `score.grades.B` | `-` | sentinel | Least score for B |
+| `score.grades.C` | `-` | sentinel | Least score for C |
+| `score.grades.D` | `-` | sentinel | Least score for D |
+| `score.min_coverage` | `-` | sentinel | Least coverage for a score |
+| `score.min_runs` | `-` | sentinel | Least finished runs |
+| `score.trend_flat` | `-` | sentinel | Flat trend below |
+| `score.weights.collaboration` | `-` | sentinel | Weight: collaboration |
+| `score.weights.recovery` | `-` | sentinel | Weight: recovery |
+| `score.weights.reliability` | `-` | sentinel | Weight: reliability |
+| `score.weights.speed` | `-` | sentinel | Weight: speed |
+| `score.window_days` | `-` | sentinel | Score window |
 | `sentinel.a2_full_sample_unknown` | `-` | sentinel | Unknown when sample is full |
 | `sentinel.a2_resolve_max_calls_per_tick` | `-` | sentinel | A2 lookups per cycle |
 | `sentinel.a2_resolve_ttl_seconds` | `-` | sentinel | A2 answers kept |

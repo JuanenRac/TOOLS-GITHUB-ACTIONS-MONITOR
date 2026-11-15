@@ -246,6 +246,20 @@ for _w in ("red", "stuck", "secret", "high_alert", "alert", "stale_pr", "unsigne
 _f(_T_READY, "pins", "sentinel.readiness.pins.refresh_seconds", "int", (60, 86400))
 _f(_T_READY, "pins", "sentinel.readiness.pins.max_depth", "int", (1, 12))
 _f(_T_READY, "pins", "sentinel.readiness.pins.sources", "sources")
+# --- Score of the account (Complete only). The limits of every part (score.limits.*) are read from the file and shown in the guide, not edited here.
+_f(_T_SENT, "score", "score.enabled", "bool", restart=False)
+_f(_T_SENT, "score", "score.window_days", "int", (1, 90), restart=False)
+_f(_T_SENT, "score", "score.calibrating_hours", "int", (0, 720), restart=False)
+_f(_T_SENT, "score", "score.min_runs", "int", (1, 100000), restart=False, unit="")
+_f(_T_SENT, "score", "score.min_coverage", "float", (0.0, 1.0), restart=False, unit="x")
+_f(_T_SENT, "score", "score.trend_flat", "int", (0, 100), restart=False, unit="pts")
+_f(_T_SENT, "score", "score.alert.enabled", "bool", restart=False)
+_f(_T_SENT, "score", "score.alert.drop_points", "int", (1, 100), restart=False, unit="pts")
+_f(_T_SENT, "score", "score.alert.notify_external", "bool", restart=False, secure=True)
+for _w in ("reliability", "speed", "recovery", "collaboration"):
+    _f(_T_SENT, "score_weights", f"score.weights.{_w}", "int", (0, 1000), restart=False, unit="pts")
+for _g in ("A", "B", "C", "D"):
+    _f(_T_SENT, "score_grades", f"score.grades.{_g}", "int", (0, 100), restart=False, unit="pts")
 # --- Folders and files
 _f(_T_PATHS, "workspace", "workspace_root", "path")
 _f(_T_PATHS, "workspace", "signed_dir", "path")
