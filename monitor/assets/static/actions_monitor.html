@@ -122,7 +122,7 @@ svg{display:block;max-width:none}svg text{fill:var(--mut);font-size:12px}
 #t-charts .wide{grid-column:1/-1}
 #t-hist,#t-repos{grid-template-rows:minmax(0,1fr)}
 /* Sentinel */
-.sortbar{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:0 0 8px}.sortbar select{max-width:100%}
+.sortbar{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:0 0 8px}.sortbar select{max-width:100%}.sortbar .foldbtns{display:flex;flex-wrap:wrap;gap:6px}
 #t-al{grid-template-columns:minmax(0,1fr);overflow:auto}#al-filters{align-items:center;gap:10px;margin:0 0 10px}#al-chips button{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:999px;padding:3px 12px;margin:0 4px 0 0;cursor:pointer}#al-chips button[aria-pressed=true]{background:var(--acc);color:var(--on-acc,#fff);border-color:var(--acc)}
 .alrow{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:6px 10px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line)}.alrow.muted{opacity:.6}.alrow .tt{min-width:0;overflow-wrap:anywhere}.alrow .acts{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}.alrow .acts button{font-size:12px;padding:2px 8px}.origin{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:1px 8px;border-radius:6px;border:1px solid var(--line)}.origin.ci{border-color:var(--acc);color:var(--acc)}.origin.collab{border-color:var(--ok);color:var(--ok)}
 @media (max-width:700px){.alrow{grid-template-columns:auto minmax(0,1fr)}.alrow .tt{grid-column:1/-1}.alrow .acts{grid-column:1/-1;justify-content:flex-start}.alrow>.chip,.alrow>.origin{justify-self:start}}
@@ -470,7 +470,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <div class="tab" id="t-live" role="region" data-i18n-aria="ui.live_title"><section><h2 data-i18n="ui.live_title"></h2><div class="body"><div class="livebar"><div class="livebox" id="live-wh" role="status"></div><label class="livebox"><span data-i18n="ui.live_mode"></span> <select id="live-mode"><option value="normal"></option><option value="fast"></option><option value="turbo"></option><option value="low"></option></select></label></div><p class="mut" data-i18n="ui.live_hint"></p><div class="livebox" id="live-check" role="note"><b data-i18n="ui.live_ck_title"></b><ol><li data-i18n="ui.live_ck_1"></li><li data-i18n="ui.live_ck_2"></li><li data-i18n="ui.live_ck_3"></li><li data-i18n="ui.live_ck_4"></li></ol></div><ul class="livelist" id="live-list"><li class="mut" data-i18n="ui.live_empty"></li></ul></div></section></div>
 <div class="tab on" id="t-now" role="tabpanel" aria-labelledby="n-now">
 <section><h2 data-i18n="ui.alerts"></h2><div class="body" id="alerts"><span class="mut">–</span></div></section>
-<section><h2 data-i18n="ui.happening"></h2><div class="sortbar"><label><span data-i18n="ui.sort_by"></span> <select id="now-sort" data-i18n-title="ui.sort_now_title"><option value="ecosystem" data-i18n="ui.sort_now_ecosystem"></option><option value="severity" data-i18n="ui.sort_now_severity"></option><option value="age" data-i18n="ui.sort_now_age"></option><option value="newest" data-i18n="ui.sort_now_newest"></option><option value="repo" data-i18n="ui.sort_now_repo"></option><option value="event" data-i18n="ui.sort_now_event"></option><option value="state" data-i18n="ui.sort_now_state"></option></select></label></div><div class="body" id="now"><span class="mut">–</span></div></section>
+<section><h2 data-i18n="ui.happening"></h2><div class="sortbar"><label><span data-i18n="ui.sort_by"></span> <select id="now-sort" data-i18n-title="ui.sort_now_title"><option value="ecosystem" data-i18n="ui.sort_now_ecosystem"></option><option value="severity" data-i18n="ui.sort_now_severity"></option><option value="age" data-i18n="ui.sort_now_age"></option><option value="newest" data-i18n="ui.sort_now_newest"></option><option value="repo" data-i18n="ui.sort_now_repo"></option><option value="event" data-i18n="ui.sort_now_event"></option><option value="state" data-i18n="ui.sort_now_state"></option></select></label><span class="foldbtns" role="group" data-i18n-aria="ui.fold_title"><button type="button" id="now-open" data-i18n="ui.fold_open_all" data-i18n-title="ui.fold_title"></button><button type="button" id="now-close" data-i18n="ui.fold_close_all" data-i18n-title="ui.fold_title"></button></span></div><div class="body" id="now"><span class="mut">–</span></div></section>
 </div>
 <div class="tab" id="t-al" role="tabpanel" aria-labelledby="n-al">
 <section><h2><span data-i18n="ui.al_title"></span> <span class="mut" id="al-count" style="font-weight:400"></span></h2><div class="body">
@@ -886,6 +886,7 @@ function alerts(d){
   OPENALERTS=a.length;try{renderBar()}catch(e){}      // the bar at the foot says the same as this list: it is never "no notices" while alerts are open
   $("alerts").innerHTML=a.length?a.join(""):`<span style="color:var(--ok)">${esc(T("ui.a_none"))}</span>`;
 }
+const NOW_SHUT=new Set();      // the repositories the person folded by hand while "expand all" is on
 const NOW_OPEN=new Set();      // the repositories whose runs the person unfolded: a refresh must not fold them again
 function nowGroups(act){      // one entry per repository, in the order of the runs: a repository appears ONCE however many workflows it has running or queued
   const by=new Map();act.forEach(r=>{if(!by.has(r.repo))by.set(r.repo,[]);by.get(r.repo).push(r)});return [...by.values()]
@@ -901,10 +902,10 @@ function nowCard(g){
   if(g.length===1)return nowRun(g[0],true);
   const repo=g[0].repo,run=g.filter(r=>r.status==="in_progress").length,queued=g.length-run,stuck=g.some(r=>r.stuck);
   const count=[run?T("ui.n_group_run",{n:run}):"",queued?T("ui.n_group_queued",{n:queued}):""].filter(Boolean).join(" · ");
-  return `<div class="card group ${stuck?"stuck":""}" data-now-repo="${esc(repo)}" data-now-n="${g.length}"><details${NOW_OPEN.has(repo)?" open":""} data-now-details="${esc(repo)}"><summary class="row"><b class="rl" data-repo-open="${esc(repo)}">${esc(repo)}</b> <span class="badge ${stuck?"b-failure":"b-in_progress"}">${esc(count)}</span>${stuck?` <span class="badge b-failure">${esc(T("ui.badge_stuck"))}</span>`:""}</summary>${g.map(r=>nowRun(r,false)).join("")}</details></div>`
+  return `<div class="card group ${stuck?"stuck":""}" data-now-repo="${esc(repo)}" data-now-n="${g.length}"><details${nowIsOpen(repo)?" open":""} data-now-details="${esc(repo)}"><summary class="row"><b class="rl" data-repo-open="${esc(repo)}">${esc(repo)}</b> <span class="badge ${stuck?"b-failure":"b-in_progress"}">${esc(count)}</span>${stuck?` <span class="badge b-failure">${esc(T("ui.badge_stuck"))}</span>`:""}</summary>${g.map(r=>nowRun(r,false)).join("")}</details></div>`
 }
 /* the order of the lists (ui/ordering.py): what this user chose (the server remembers it in team mode, this browser otherwise) over `ui.now_sort` of the configuration file over the default */
-const SORTS={now:["ecosystem","severity","age","newest","repo","event","state"]},SORT_CFG={now:"now_sort"},SORT_DEFAULT={now:"ecosystem"},VIEWSRV={team:false,view:{}};
+const SORTS={now:["ecosystem","severity","age","newest","repo","event","state"],fold:["open","closed"]},SORT_CFG={now:"now_sort"},SORT_DEFAULT={now:"ecosystem",fold:"closed"},VIEWSRV={team:false,view:{}};
 function sortGet(kind){
   const ok=k=>SORTS[kind].includes(k),mine=VIEWSRV.team?VIEWSRV.view[kind]:store.get("am-sort-"+kind),cfg=(I18N.screens||{})[SORT_CFG[kind]];
   return ok(mine)?mine:(ok(cfg)?cfg:SORT_DEFAULT[kind])
@@ -930,13 +931,16 @@ function nowSorted(act,key,eco){      // the cards (one per repository) in the o
   const f=by[key]||by.severity;
   return nowGroups(act).sort((a,b)=>f(a,b)||cmpText(a[0].repo,b[0].repo))
 }
+function nowIsOpen(repo){return NOW_OPEN.has(repo)||(sortGet("fold")==="open"&&!NOW_SHUT.has(repo))}      // unfolded by hand, or all unfolded and not folded by hand
+function nowFold(mode){NOW_OPEN.clear();NOW_SHUT.clear();sortSet("fold",mode);if(DATA)now_(DATA)}      // expand all / collapse all, whatever the order; remembered like the order
+$("now-open").addEventListener("click",()=>nowFold("open"));$("now-close").addEventListener("click",()=>nowFold("closed"));
 $("now-sort").addEventListener("change",()=>{sortSet("now",$("now-sort").value);if(DATA)now_(DATA)});
 sortLoad();
 function now_(d){
   $("now-sort").value=sortGet("now");
   const act=d.active.filter(r=>runVisible(r,d)),cnt=showingLine(runCounts(d));
   if(!act.length){$("now").innerHTML=cnt+'<span class="mut">'+esc(T("ui.n_nothing")+(filtersOn()?T("ui.n_with_filters"):"")+".")+'</span>';return}
-  if(!now_.bound){now_.bound=true;$("now").addEventListener("toggle",e=>{const el=e.target,k=el&&el.getAttribute&&el.getAttribute("data-now-details");if(k!==null&&k!==undefined){if(el.open)NOW_OPEN.add(k);else NOW_OPEN.delete(k)}},true)}
+  if(!now_.bound){now_.bound=true;$("now").addEventListener("toggle",e=>{const el=e.target,k=el&&el.getAttribute&&el.getAttribute("data-now-details");if(k!==null&&k!==undefined){if(el.open){NOW_OPEN.add(k);NOW_SHUT.delete(k)}else{NOW_OPEN.delete(k);NOW_SHUT.add(k)}}},true)}
   const key=sortGet("now");
   let lastEco="";
   $("now").innerHTML=cnt+nowSorted(act,key,d.ecosystems).map(g=>{

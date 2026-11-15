@@ -59,7 +59,7 @@ class TheClosedList(unittest.TestCase):
             self.assertEqual(ordering.configured(wrong, "now"), "ecosystem", wrong)
 
     def test_the_page_lists_the_same_orders_in_its_code_its_select_and_the_eight_catalogues(self):
-        listed = re.search(r'const SORTS=\{now:\[([^\]]*)\]\}', PAGE)
+        listed = re.search(r'const SORTS=\{now:\[([^\]]*)\],fold:\["open","closed"\]\}', PAGE)
         self.assertIsNotNone(listed)
         self.assertEqual(re.findall(r'"([a-z]+)"', listed.group(1)), list(NOW))
         select = re.search(r'<select id="now-sort"[^>]*>(.*?)</select>', PAGE, re.S).group(1)
@@ -185,6 +185,21 @@ PROBE = r"""
     const sent=[];window.fetch=async(u,o)=>{sent.push([String(u),o&&o.body]);return {ok:true,json:async()=>({view:{}})}};
     VIEWSRV.team=true;VIEWSRV.view={now:"newest"};r.team_get=sortGet("now");
     sortSet("now","state");r.team_set=sortGet("now");r.sent=sent;sortSet("now","bogus");r.after_bogus=sortGet("now");r.sent_n=sent.length;
+    // expand all / collapse all, with any order, kept by a refresh and remembered like the order
+    VIEWSRV.team=false;VIEWSRV.view={};store.set("am-sort-fold","");
+    DATA=Object.assign({},DATA,{active:["one","two","three"].flatMap(n=>[run(n,{seconds:10}),run(n,{seconds:20})]),ecosystems:{one:"a",two:"a",three:"b"}});      // three repositories with two runs each: the ones that fold
+    const openN=()=>[...document.querySelectorAll("#now details[data-now-details]")].filter(e=>e.open).length,allN=()=>document.querySelectorAll("#now details[data-now-details]").length;
+    r.fold={};
+    for(const k of ["ecosystem","severity","repo"]){sel.value=k;sel.dispatchEvent(new Event("change"));
+      document.getElementById("now-open").click();const up=openN();now_(DATA);const kept=openN();
+      document.getElementById("now-close").click();const down=openN();now_(DATA);
+      r.fold[k]=[allN(),up,kept,down,openN()]}
+    document.getElementById("now-open").click();r.fold_kept=store.get("am-sort-fold");
+    document.querySelector("#now details[data-now-details]").open=false;await wait(50);now_(DATA);r.fold_one_shut=[allN(),openN()];
+    document.getElementById("now-close").click();r.fold_back=store.get("am-sort-fold");
+    store.set("am-sort-fold","nope");r.fold_wrong=sortGet("fold");store.set("am-sort-fold","");r.fold_default=sortGet("fold");
+    const sent2=[];window.fetch=async(u,o)=>{sent2.push([String(u),o&&o.body]);return {ok:true,json:async()=>({view:{}})}};
+    VIEWSRV.team=true;document.getElementById("now-open").click();r.fold_team=[sortGet("fold"),sent2];
     out.textContent=JSON.stringify({ok:true,found:r});
   }catch(e){out.textContent=JSON.stringify({ok:false,error:String(e),found:{}})}
 })();
@@ -260,6 +275,49 @@ class InTheBrowser(unittest.TestCase):
         self.assertEqual((f["team_get"], f["team_set"], f["after_bogus"]), ("newest", "state", "state"))
         self.assertEqual(f["sent"], [["/api/auth/me/view", '{"now":"state"}']])
         self.assertEqual(f["sent_n"], 1)
+
+    def test_expand_all_and_collapse_all_work_with_any_order_survive_a_refresh_and_are_remembered(self):
+        f = self.found
+        for key, (total, up, kept, down, after) in f["fold"].items():
+            self.assertEqual((total, up, kept, down, after), (3, 3, 3, 0, 0), key)
+        self.assertEqual(f["fold_kept"], "open")
+        self.assertEqual(f["fold_one_shut"], [3, 2], "a repository folded by hand stays folded while the rest is unfolded")
+        self.assertEqual((f["fold_back"], f["fold_wrong"], f["fold_default"]), ("closed", "closed", "closed"))
+        self.assertEqual(f["fold_team"], ["open", [["/api/auth/me/view", '{"fold":"open"}']]])
+
+
+class TheFoldChoice(unittest.TestCase):
+    def test_the_choice_is_a_closed_list_with_the_folded_default_and_the_buttons_are_in_the_catalogues_and_the_guides(self):
+        self.assertEqual(ordering.KINDS["fold"], ("open", "closed"))
+        self.assertEqual(ordering.DEFAULTS["fold"], "closed")
+        self.assertEqual(ordering.clean_view({"fold": "open", "now": "age", "x": "y"}), {"fold": "open", "now": "age"})
+        self.assertEqual(ordering.clean_view({"fold": "maybe"}), {})
+        self.assertEqual(ordering.configured({"ui": {}}, "fold"), "closed")
+        for tag in ('id="now-open"', 'id="now-close"'):
+            self.assertIn(tag, PAGE)
+        for lang in i18n.LANGS:
+            catalogue = json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
+            for key in ("ui.fold_open_all", "ui.fold_close_all", "ui.fold_title"):
+                self.assertTrue(catalogue.get(key), (lang, key))
+        tails = dict(zip(i18n.LANGS, ("", "_spa", "_deu", "_fra", "_ita", "_jpn", "_zho", "_por")))
+        for lang, tail in {"en": "", "es": "_spa", "de": "_deu", "fr": "_fra", "it": "_ita", "ja": "_jpn", "zh": "_zho", "pt": "_por"}.items():
+            catalogue = json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
+            guide = (HERE / "docs" / f"SCREENS{tail}.md").read_text(encoding="utf-8")
+            self.assertIn("**" + catalogue["ui.fold_open_all"] + "**", guide, lang)
+            self.assertIn("**" + catalogue["ui.fold_close_all"] + "**", guide, lang)
+        self.assertEqual(len(tails), 8)
+
+    def test_the_server_keeps_the_choice_in_the_record_of_the_user_next_to_the_order(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        storage = ta.new_storage(Path(tmp.name))
+        self.addCleanup(storage.close)
+        storage.put_record("users", "vic", {"role": "viewer"})
+        self.assertEqual(ordering.set_view(storage, "vic", {"fold": "open"}), ({"fold": "open"}, ""))
+        self.assertEqual(ordering.set_view(storage, "vic", {"now": "age"}), ({"fold": "open", "now": "age"}, ""))
+        self.assertEqual(ordering.set_view(storage, "vic", {"fold": "maybe"}), (None, "order_invalid"))
+        self.assertEqual(ordering.get_view(storage, "vic"), {"fold": "open", "now": "age"})
+        self.assertEqual(ordering.set_view(storage, "vic", {"fold": ""}), ({"now": "age"}, ""))
 
 
 if __name__ == "__main__":

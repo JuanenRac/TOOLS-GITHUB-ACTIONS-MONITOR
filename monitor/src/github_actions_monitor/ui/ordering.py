@@ -8,18 +8,20 @@ follows them to another browser). Anything outside the closed list is dropped, n
 
 * "now": the section "Happening now" of the first tab. `ecosystem` (the default, with a heading per ecosystem), `severity` (stuck first, then the runs with a failed job, then the rest), `age`
   (the longest running first), `newest` (the latest start first), `repo`, `event` (the kind of trigger: push, pull_request, schedule...) and `state` (running before queued).
+* "fold": whether the repositories of "Happening now" are all unfolded (`open`) or all folded (`closed`, the default), for any of the orders above; it is chosen with the two buttons next to the list.
 """
 KINDS = {
     "now": ("ecosystem", "severity", "age", "newest", "repo", "event", "state"),
+    "fold": ("open", "closed"),
 }
-DEFAULTS = {"now": "ecosystem"}
+DEFAULTS = {"now": "ecosystem", "fold": "closed"}
 SETTINGS = {"now": "now_sort"}
 
 
 def configured(config, kind):
     """The order the configuration file asks for a list (`ui.<setting>`), or the default of the list when it is missing or not one of the closed list."""
     section = (config or {}).get("ui") if isinstance((config or {}).get("ui"), dict) else {}
-    value = section.get(SETTINGS[kind])
+    value = section.get(SETTINGS.get(kind, ""))
     return value if value in KINDS[kind] else DEFAULTS[kind]
 
 
