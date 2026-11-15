@@ -19,6 +19,7 @@
 | `accounts` | as contas do supervisor (só com várias contas) | não |
 | `alerts` | os alertas de todas as sentinelas numa lista: `--sentinel ci\|collab`, `--level info\|warning\|error`, `--muted show\|hide\|only` | não |
 | `score` | a pontuação da conta: número, letra, tendência, partes, cobertura e a decomposição por repositório; `--compare` compara-a com o histórico da janela | não |
+| `team` | a saúde dos repositórios por ordem, primeiro os que precisam de uma pessoa; `--severity warn\|bad` fica com os piores e `--repo owner/name` dá o detalhe de um | não |
 | `live` | o estado do recetor do webhook e os últimos eventos | não |
 
 Opções de todos os comandos: `--json` (a resposta como um documento JSON: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (porta 8766), `--timeout SEGUNDOS` (de 1 a 60), `--lang CÓDIGO`. No modo de rede ponha o token de acesso na variável de ambiente `MONITOR_ACCESS_TOKEN`, a que o próprio monitor lê (`MONITOR_TOKEN` é aceite como alias; `--token TOKEN` é o último recurso, porque uma opção aparece na lista de processos). A ordem: `MONITOR_ACCESS_TOKEN`, depois `MONITOR_TOKEN`, depois `--token`. Viaja no cabeçalho `X-Monitor-Access`, nunca no endereço nem no ecrã. Um `--url` com `http` sem cifra para outro computador imprime um aviso no stderr (o token e as respostas viajariam em claro): use `https` fora de uma rede que controle.

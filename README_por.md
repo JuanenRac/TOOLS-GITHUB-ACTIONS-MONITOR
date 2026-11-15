@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2136_passing-brightgreen.svg" alt="2136 tests">
+  <img src="https://img.shields.io/badge/Tests-2148_passing-brightgreen.svg" alt="2148 tests">
 </p>
 
 > Vigia os workflows de todos os seus repositórios e diz-lhe, numa página local, o que está a vermelho, o que está encravado e o que o espera.
@@ -32,7 +32,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 
 | | |
 |---|---|
-| **Versão** | **1.9.1** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versão** | **1.9.2** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Requisitos** | Python 3.11+ e a CLI do GitHub (`gh auth login`); mais nada (a vista de consola usa o pacote opcional `rich`) |
 | **Abre** | uma página só em `127.0.0.1`, em oito idiomas |
 | **Escreve no GitHub** | nunca sozinho: apenas os comandos por lotes que lançar com um `--go` explícito |
@@ -40,12 +40,12 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 
 <!-- glance:begin -->
 
-**Medido hoje** (v1.9.1)
+**Medido hoje** (v1.9.2)
 
 | | |
 |---|---|
 | **Maturidade** | functional |
-| **Testes** | 2136 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Testes** | 2148 métodos de teste (`python -m unittest discover -s monitor/tests`) |
 | **Definições** | 402 definições, todas com ajuda |
 | **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
 | **Testado no CI em** | ubuntu, windows, Python 3.11, 3.13 |
@@ -83,6 +83,7 @@ Cada linha é uma parte deste repositório e a luz diz até onde chega hoje: o q
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_analytics_light.png"><img src="docs/screenshots/web_sentinel_analytics_dark.png" alt="A12 · Análises: durações, tempo em fila, passos e workflows instáveis" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_charts_light.png"><img src="docs/screenshots/web_charts_dark.png" alt="Gráficos" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_repositories_light.png"><img src="docs/screenshots/web_repositories_dark.png" alt="Repositórios" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_team_light.png"><img src="docs/screenshots/web_team_dark.png" alt="Equipa: a saúde dos repositórios, por ordem" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_history_light.png"><img src="docs/screenshots/web_history_dark.png" alt="Histórico" width="92%"></picture></p>
 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_about_light.png"><img src="docs/screenshots/web_about_dark.png" alt="Acerca de" width="92%"></picture></p>
@@ -151,6 +152,7 @@ Cada imagem segue o tema claro ou escuro da sua página do GitHub.
 - **Todos os tamanhos de ecrã e vários ecrãs**: a página ajusta-se a uma janela desde um telemóvel até 4K, na vertical ou rodada, e um monitor pode servir até três ecrãs (`/screen/1` a `/screen/3`), cada um com os seus separadores e a sua orientação (`monitor/docs/SCREENS_por.md`).
 - **Uma pontuação por conta**: um número de 0 a 100, uma letra de A a E e uma tendência, feitos com a fiabilidade da CI, a sua velocidade, o tempo de recuperação e a rapidez com que se fecham os alertas de colaboração; diz «a calibrar» ou «dados insuficientes» em vez de um número que não consegue sustentar, mostra o que ainda não cobre, está no cabeçalho da página, tem um comando `score`, avisa quando desce e está nas métricas e no servidor MCP (`monitor/docs/SCORE.md`).
 - **Um sentinela de segurança (só Complete, desligado por predefinição)**: lê, sem escrever nada no GitHub, os alertas abertos do Dependabot, da análise de código e da análise de segredos, se o ramo predefinido está protegido, a permissão predefinida dos fluxos e, se pedir, os proprietários do código; gera um alerta por repositório e sinal, conta os achados como quinta parte da pontuação e diz o que não conseguiu ler (`monitor/docs/SENTINEL_SECURITY_por.md`).
+- **A saúde de cada repositório e da equipa (só Complete)**: CI, alertas das três sentinelas, preparação das versões e atividade num estado (mau, aviso, bom ou não visto) com um número de risco; o separador Equipa põe primeiro os repositórios que precisam de uma pessoa, com filtros, um detalhe de cada um e ligações diretas para ecrãs de parede; os mesmos dados estão em `/api/team/health`, `/api/repos/<owner>/<repo>/health` e no comando `team` (`monitor/docs/HEALTH_por.md`).
 - **Como serviço**: a imagem oficial do Docker (sem root, só de leitura), um ficheiro Compose com proxy opcional, uma unidade systemd, uma verificação de saúde profunda e o comando que cria o primeiro administrador (`monitor/docs/DEPLOYMENT.md`).
 - **Várias contas, uma equipa e um lugar para os dados**: um processo por conta, utilizadores com papéis e as suas próprias contas, os ficheiros em `config/`, `data/`, `logs/` e `ai/`, um armazenamento SQLite opcional com retenção e cópia de segurança, e as portas como definições (`monitor/docs/ACCOUNTS.md`, `monitor/docs/STORAGE.md`, `monitor/docs/LAYOUT.md`).
 - **Listas que se ordenam e se dobram**: «A acontecer agora» de sete maneiras e o separador de Alertas de nove, com um botão para dobrar ou desdobrar todos os repositórios; a escolha fica guardada por utilizador.
@@ -280,6 +282,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/SENTINEL_por.md`](monitor/docs/SENTINEL_por.md): a sentinela e as suas verificações A1-A13
 - [`monitor/docs/COLLAB_por.md`](monitor/docs/COLLAB_por.md): a sentinela Collab, o separador Alertas e os silêncios
 - [`monitor/docs/SENTINEL_SECURITY_por.md`](monitor/docs/SENTINEL_SECURITY_por.md): O sentinela de segurança: Dependabot, análise de código, segredos, proteção de ramos, permissões dos fluxos e CODEOWNERS, e o que não conseguiu verificar
+- [`monitor/docs/HEALTH_por.md`](monitor/docs/HEALTH_por.md): A saúde de um repositório e da equipa: de que é feita, o separador Equipa, as ligações diretas e a API
 - [`monitor/docs/CLI_por.md`](monitor/docs/CLI_por.md): a linha de comandos como cliente do monitor
 - [`monitor/docs/ACCOUNTS_por.md`](monitor/docs/ACCOUNTS_por.md): várias contas, um processo cada
 - [`monitor/docs/QUOTAS_por.md`](monitor/docs/QUOTAS_por.md): quotas e planos do GitHub

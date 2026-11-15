@@ -45,6 +45,16 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - La prueba de una cuenta que muere al instante ya no depende de la velocidad del equipo: la espera antes de volver a arrancar una cuenta se comprueba con un reloj que da la propia prueba, y una segunda prueba comprueba el calendario de las esperas sin leer la hora real (la antigua fallaba bajo carga en la puerta de una versión).
 
+## [1.9.2]
+
+### Añadido
+
+- **La salud de cada repositorio y del equipo (solo Complete)**: con lo que el monitor ya tiene (ejecuciones, flujos rojos y atascados, las alertas abiertas de los tres centinelas y la preparación de versiones) se calcula un estado por repositorio (malo, aviso, bien o sin ver) y un número de riesgo; un repositorio que ningún centinela miró o que uno no pudo leer nunca sale como bien y dice por quién no fue visto del todo. `GET /api/repos/<owner>/<repo>/health` da el detalle y `GET /api/team/health` la clasificación, los totales, las cifras por ecosistema y por centinela y los filtros (ecosistema, gravedad mínima, trozo del nombre). Nunca llaman a GitHub.
+
+- **La pestaña Equipo y el detalle de un repositorio**: la clasificación con los repositorios que necesitan a una persona primero, tres filtros, y al pulsar un repositorio una ventana con su CI, sus alertas, la versión y la actividad; los enlaces directos `?view=team`, `?view=repos` y `?view=repo&repo=owner/name` (con `chrome=0` para pantallas de pared) abren cada vista. La edición Lite no la tiene.
+
+- **La orden `team`**: `monitor_cli.py team` imprime la clasificación (`--severity warn|bad`) y `team --repo owner/name` el detalle de uno, con `--json`; solo lectura y de las mismas rutas que la página. La guía HEALTH.md, en los ocho idiomas, explica todo.
+
 ## [1.9.1]
 
 ### Añadido

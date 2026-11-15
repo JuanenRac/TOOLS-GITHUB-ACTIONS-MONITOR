@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2136_passing-brightgreen.svg" alt="2136 tests">
+  <img src="https://img.shields.io/badge/Tests-2148_passing-brightgreen.svg" alt="2148 tests">
 </p>
 
 > Watches the workflows of every repository you own and tells you, on one local page, what is red, what is stuck and what is waiting for you.
@@ -32,7 +32,7 @@
 
 | | |
 |---|---|
-| **Version** | **1.9.1** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **1.9.2** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Needs** | Python 3.11+ and the GitHub CLI (`gh auth login`); nothing else (the terminal view uses the optional package `rich`) |
 | **Opens** | a page on `127.0.0.1` only, in eight languages |
 | **Writes to GitHub** | never by itself: only batch commands you run with an explicit `--go` |
@@ -40,12 +40,12 @@
 
 <!-- glance:begin -->
 
-**Measured today** (v1.9.1)
+**Measured today** (v1.9.2)
 
 | | |
 |---|---|
 | **Maturity** | functional |
-| **Tests** | 2136 test methods (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 2148 test methods (`python -m unittest discover -s monitor/tests`) |
 | **Settings** | 402 settings, all with help |
 | **Languages** | 8 (English, Spanish, German, French, Italian, Japanese, Chinese, Portuguese) |
 | **Tested in the CI on** | ubuntu, windows, Python 3.11, 3.13 |
@@ -83,6 +83,7 @@ Each line is one part of this repository and the light says how far it is today:
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_analytics_light.png"><img src="docs/screenshots/web_sentinel_analytics_dark.png" alt="A12 · Analytics: durations, queue time, steps and flaky workflows" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_charts_light.png"><img src="docs/screenshots/web_charts_dark.png" alt="Charts" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_repositories_light.png"><img src="docs/screenshots/web_repositories_dark.png" alt="Repositories" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_team_light.png"><img src="docs/screenshots/web_team_dark.png" alt="Team: the health of the repositories, ranked" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_history_light.png"><img src="docs/screenshots/web_history_dark.png" alt="History" width="92%"></picture></p>
 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_about_light.png"><img src="docs/screenshots/web_about_dark.png" alt="About" width="92%"></picture></p>
@@ -151,6 +152,7 @@ Each picture follows the light or dark theme of your GitHub page.
 - **Every screen size and several screens**: the page fits a window from a phone to 4K, upright or turned, and one monitor can serve up to three screens (`/screen/1` to `/screen/3`), each with its own tabs and orientation (`monitor/docs/SCREENS.md`).
 - **A score for each account**: a number from 0 to 100, a letter from A to E and a trend, from the reliability of the CI, its speed, the time to recover and how fast the collaboration alerts are closed; it says "calibrating" or "not enough data" instead of a number it cannot stand behind, shows what it does not cover yet, sits in the header of the page, has a `score` command, warns when it drops and is in the metrics and the MCP server (`monitor/docs/SCORE.md`).
 - **A security sentinel (Complete only, off by default)**: it reads, without writing anything to GitHub, the open Dependabot, code scanning and secret scanning alerts, whether the default branch is protected, the default permission of the workflows and, if you ask, the code owners; it raises one alert for each repository and signal, counts the findings as the fifth part of the score and says what it could not read (`monitor/docs/SENTINEL_SECURITY.md`).
+- **The health of each repository and of the team (Complete only)**: CI, alerts of the three sentinels, release readiness and activity in one state (bad, warning, OK or not seen) with a risk number; the Team tab ranks the repositories that need a person first, with filters, a detail for each one and deep links for wall screens; the same data are at `/api/team/health`, `/api/repos/<owner>/<repo>/health` and the `team` command (`monitor/docs/HEALTH.md`).
 - **As a service**: the official Docker image (non-root, read-only), a Compose file with an optional proxy, a systemd unit, a deep health check and the command that creates the first administrator (`monitor/docs/DEPLOYMENT.md`).
 - **Several accounts, a team and a place for the data**: one process per account, users with roles and their own accounts, the files in `config/`, `data/`, `logs/` and `ai/`, an optional SQLite storage with retention and backup, and the ports as settings (`monitor/docs/ACCOUNTS.md`, `monitor/docs/STORAGE.md`, `monitor/docs/LAYOUT.md`).
 - **Lists you can sort and fold**: Happening now in seven ways and the Alerts tab in nine, with a button to fold or unfold every repository; the choice is remembered for each user.
@@ -284,6 +286,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/SENTINEL.md`](monitor/docs/SENTINEL.md): the sentinel and its checks A1-A13
 - [`monitor/docs/COLLAB.md`](monitor/docs/COLLAB.md): the Collab sentinel, the Alerts tab and the silences
 - [`monitor/docs/SENTINEL_SECURITY.md`](monitor/docs/SENTINEL_SECURITY.md): The Security sentinel: Dependabot, code scanning, secrets, branch protection, workflow permissions and CODEOWNERS, and what it could not check
+- [`monitor/docs/HEALTH.md`](monitor/docs/HEALTH.md): The health of a repository and of the team: what it is made of, the Team tab, the deep links and the API
 - [`monitor/docs/CLI.md`](monitor/docs/CLI.md): the command line as a client of the monitor
 - [`monitor/docs/ACCOUNTS.md`](monitor/docs/ACCOUNTS.md): several accounts, one process each
 - [`monitor/docs/QUOTAS.md`](monitor/docs/QUOTAS.md): quotas and plans of GitHub

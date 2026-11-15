@@ -45,6 +45,16 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - Il test di un account che muore subito non dipende più dalla velocità del computer: l'attesa prima di riavviare un account viene verificata con un orologio che dà il test stesso, e un secondo test verifica il calendario delle attese senza leggere l'ora reale (il vecchio falliva sotto carico nella porta di una versione).
 
+## [1.9.2]
+
+### Aggiunto
+
+- **La salute di ogni repository e del team (solo Complete)**: con ciò che il monitor già possiede (esecuzioni, workflow rossi e bloccati, avvisi aperti delle tre sentinelle e preparazione delle versioni) si calcola uno stato per repository (cattivo, avvertimento, buono o non visto) e un numero di rischio; un repository che nessuna sentinella ha guardato o che una non ha potuto leggere non appare mai come buono e dice da chi non è stato visto del tutto. `GET /api/repos/<owner>/<repo>/health` dà il dettaglio e `GET /api/team/health` la classifica, i totali, i numeri per ecosistema e per sentinella e i filtri (ecosistema, gravità minima, parte del nome). Non chiamano mai GitHub.
+
+- **La scheda Team e il dettaglio di un repository**: la classifica con i repository che richiedono una persona per primi, tre filtri, e al clic su un repository una finestra con la sua CI, i suoi avvisi, la versione e l'attività; i link diretti `?view=team`, `?view=repos` e `?view=repo&repo=owner/name` (con `chrome=0` per schermi a parete) aprono ogni vista. L'edizione Lite non ce l'ha.
+
+- **Il comando `team`**: `monitor_cli.py team` stampa la classifica (`--severity warn|bad`) e `team --repo owner/name` il dettaglio di uno, con `--json`; sola lettura e dalle stesse rotte della pagina. La guida HEALTH.md, nelle otto lingue, spiega tutto.
+
 ## [1.9.1]
 
 ### Aggiunto

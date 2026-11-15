@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2136_passing-brightgreen.svg" alt="2136 tests">
+  <img src="https://img.shields.io/badge/Tests-2148_passing-brightgreen.svg" alt="2148 tests">
 </p>
 
 > 监视你所有仓库的工作流，并在一个本地页面上告诉你：哪些是红的、哪些卡住了、哪些在等你处理。
@@ -32,7 +32,7 @@
 
 | | |
 |---|---|
-| **版本** | **1.9.1** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **版本** | **1.9.2** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **需要** | Python 3.11+ 和 GitHub CLI（`gh auth login`）；不需要其他东西(终端视图使用可选的 `rich` 包) |
 | **打开** | 仅在 `127.0.0.1` 上的页面，支持八种语言 |
 | **写入 GitHub** | 绝不自行写入：只有你用明确的 `--go` 运行的批处理命令才会 |
@@ -40,12 +40,12 @@
 
 <!-- glance:begin -->
 
-**今日实测** (v1.9.1)
+**今日实测** (v1.9.2)
 
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 2136 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **测试** | 2148 个测试方法(`python -m unittest discover -s monitor/tests`) |
 | **设置** | 402 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
@@ -83,6 +83,7 @@
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_analytics_light.png"><img src="docs/screenshots/web_sentinel_analytics_dark.png" alt="A12 · 分析:时长、排队时间、步骤与不稳定的工作流" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_charts_light.png"><img src="docs/screenshots/web_charts_dark.png" alt="图表" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_repositories_light.png"><img src="docs/screenshots/web_repositories_dark.png" alt="仓库" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_team_light.png"><img src="docs/screenshots/web_team_dark.png" alt="团队：仓库健康状况排名" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_history_light.png"><img src="docs/screenshots/web_history_dark.png" alt="历史" width="92%"></picture></p>
 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_about_light.png"><img src="docs/screenshots/web_about_dark.png" alt="关于" width="92%"></picture></p>
@@ -151,6 +152,7 @@
 - **各种屏幕尺寸与多块屏幕**：页面可适应从手机到 4K 的窗口，竖放或旋转均可，一台监视器最多可提供三块屏幕（`/screen/1` 到 `/screen/3`），每块都有自己的标签页和方向（`monitor/docs/SCREENS_zho.md`）。
 - **每个账户一个评分**：由 CI 的可靠性、速度、恢复时间以及协作告警被关闭的快慢得出的 0 到 100 的数值、A 到 E 的等级和趋势；无法支撑数值时显示“校准中”或“数据不足”，并说明尚未涵盖的内容，显示在页面页眉，有 `score` 命令，下降时会提醒，并出现在指标和 MCP 服务器中（`monitor/docs/SCORE.md`）。
 - **安全哨兵（仅 Complete，默认关闭）**：它不向 GitHub 写入任何内容，只读取 Dependabot、代码扫描和密钥扫描的未处理警报、默认分支是否受保护、工作流的默认权限，以及（如有需要）代码所有者；每个仓库和每种信号生成一条警报，把发现计入评分的第五部分，并说明哪些内容无法读取（`monitor/docs/SENTINEL_SECURITY_zho.md`）。
+- **每个仓库和团队的健康状况（仅 Complete）**：把 CI、三个哨兵的警报、发布就绪情况和活跃度汇总为一个状态（差、警告、正常或未查看）和一个风险值；团队标签页把最需要人处理的仓库排在前面，提供筛选、每个仓库的详情以及用于墙面屏幕的深度链接；同样的数据也可通过 `/api/team/health`、`/api/repos/<owner>/<repo>/health` 和 `team` 命令获得（`monitor/docs/HEALTH_zho.md`）。
 - **作为服务运行**：官方 Docker 镜像（非 root、只读）、带可选代理的 Compose 文件、systemd 单元、深度健康检查，以及创建第一个管理员的命令（`monitor/docs/DEPLOYMENT.md`）。
 - **多账户、团队和数据的存放位置**：每个账户一个进程，带角色和各自账户的用户，文件分放在 `config/`、`data/`、`logs/` 和 `ai/`，可选的 SQLite 存储及其保留与备份，端口成为设置项（`monitor/docs/ACCOUNTS.md`、`monitor/docs/STORAGE.md`、`monitor/docs/LAYOUT.md`）。
 - **可排序、可折叠的列表**：“正在发生”有七种排序方式，告警标签页有九种，并有折叠或展开所有仓库的按钮；该选择按用户记忆。
@@ -280,6 +282,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/SENTINEL_zho.md`](monitor/docs/SENTINEL_zho.md)：哨兵及其检查 A1-A13
 - [`monitor/docs/COLLAB_zho.md`](monitor/docs/COLLAB_zho.md)：Collab 哨兵、警报标签页与静音
 - [`monitor/docs/SENTINEL_SECURITY_zho.md`](monitor/docs/SENTINEL_SECURITY_zho.md): 安全哨兵：Dependabot、代码扫描、密钥、分支保护、工作流权限和 CODEOWNERS，以及它无法检查的内容
+- [`monitor/docs/HEALTH_zho.md`](monitor/docs/HEALTH_zho.md): 仓库与团队的健康状况：组成、团队标签页、深度链接和 API
 - [`monitor/docs/CLI_zho.md`](monitor/docs/CLI_zho.md)：作为监视器客户端的命令行
 - [`monitor/docs/ACCOUNTS_zho.md`](monitor/docs/ACCOUNTS_zho.md)：多个账户，每个账户一个进程
 - [`monitor/docs/QUOTAS_zho.md`](monitor/docs/QUOTAS_zho.md)：GitHub 的配额与套餐

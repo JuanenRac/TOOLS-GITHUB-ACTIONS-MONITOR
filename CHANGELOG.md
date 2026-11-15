@@ -10,6 +10,14 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+## [1.9.2]
+
+### Added
+
+- **The health of each repository and of the team (Complete only)**: from what the monitor already holds (runs, red and stuck workflows, the open alerts of the three sentinels and the readiness of the releases) a state is worked out for each repository (bad, warning, OK or not seen) with a risk number; a repository that no sentinel looked at, or that one could not read, never comes out as OK and says who did not see it fully. `GET /api/repos/<owner>/<repo>/health` gives the detail and `GET /api/team/health` the ranking, the totals, the numbers by ecosystem and by sentinel and the filters (ecosystem, least severity, a piece of the name). They never call GitHub.
+- **The Team tab and the detail of a repository**: the ranking with the repositories that need a person first, three filters, and a window with the CI, the alerts, the release and the activity when a repository is clicked; the deep links `?view=team`, `?view=repos` and `?view=repo&repo=owner/name` (with `chrome=0` for wall screens) open each view. The Lite edition does not have it.
+- **The `team` command**: `monitor_cli.py team` prints the ranking (`--severity warn|bad`) and `team --repo owner/name` the detail of one, with `--json`; read only and from the same routes as the page. The guide HEALTH.md, in the eight languages, explains it all.
+
 ## [1.9.1]
 
 ### Added
