@@ -35,6 +35,10 @@ O que um auditor precisa para verificar o modo de equipa, a exposição na rede 
 | Dois monitores podiam escutar na mesma porta; o openssl do Git for Windows não era encontrado; as falhas engolidas de propósito não deixavam rasto da origem | A porta é tomada em exclusivo e um segundo monitor recusa-se a arrancar; o openssl é procurado onde o Git for Windows o guarda; cada falha engolida escreve uma linha com o seu tipo e lugar | `test_185_startup.py (OnePerPort, WhereIsOpenssl), test_185_degraded.py` |
 | As execuções sem duração (lidas por GraphQL) faziam a sentinela falhar em cada ciclo | Uma duração em falta conta como zero | `test_186_unfinished_rows.py` |
 
+## Um arnês e as reproduções para quem revê
+
+`python tools/audit_harness.py --check` arranca, numa pasta temporária e sem GitHub (um `gh` falso), um supervisor com três contas (`alpha`, `beta` e `default`) e quatro utilizadores (`admin`; `maintainer` só de `alpha`; `viewer` só de `beta`; `inactive`, desativado), pergunta as rotas que decidem o isolamento das contas e imprime uma linha por resposta (`ok` ou `WRONG`); sai com 0 quando todas estão certas. Sem `--check` imprime o endereço e os utilizadores e espera. As reproduções da revisão independente da 1.8.3 estão em `tests/test_193_regressions.py`: cada uma falhava nessa versão e passa agora.
+
 ## Como executar os testes
 
 A partir da pasta `monitor/`: `python -m unittest discover -s tests`. Os testes não precisam de rede nem de token do GitHub. Os testes de navegador correm se houver Edge, Chrome ou Chromium (ou com `MONITOR_BROWSER_TESTS=1`). Os ficheiros da tabela estão em `monitor/tests/`.

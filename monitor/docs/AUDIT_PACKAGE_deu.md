@@ -35,6 +35,10 @@ Was ein Prüfer braucht, um den Teammodus, die Netzwerkfreigabe und den Umgang m
 | Zwei Monitore konnten auf einem Port lauschen; openssl von Git for Windows wurde nicht gefunden; absichtlich verschluckte Fehler ließen keine Spur ihrer Herkunft | Der Port wird exklusiv belegt und ein zweiter Monitor startet nicht; openssl wird dort gesucht, wo Git for Windows es ablegt; jeder verschluckte Fehler schreibt eine Zeile mit Art und Ort | `test_185_startup.py (OnePerPort, WhereIsOpenssl), test_185_degraded.py` |
 | Läufe ohne Dauer (über GraphQL gelesen) ließen den Wächter in jedem Zyklus scheitern | Eine fehlende Dauer zählt als null | `test_186_unfinished_rows.py` |
 
+## Ein Prüfstand und die Reproduktionen für Prüfer
+
+`python tools/audit_harness.py --check` startet in einem temporären Ordner und ohne GitHub (ein falsches `gh`) einen Supervisor mit drei Konten (`alpha`, `beta` und `default`) und vier Benutzern (`admin`; `maintainer` nur von `alpha`; `viewer` nur von `beta`; `inactive`, abgeschaltet), fragt die Routen ab, die die Trennung der Konten entscheiden, und druckt je Antwort eine Zeile (`ok` oder `WRONG`); er endet mit 0, wenn alle stimmen. Ohne `--check` zeigt er die Adresse und die Benutzer und wartet. Die Reproduktionen der unabhängigen Prüfung von 1.8.3 stehen in `tests/test_193_regressions.py`: Jede scheiterte in jener Version und besteht jetzt.
+
 ## Tests ausführen
 
 Im Ordner `monitor/`: `python -m unittest discover -s tests`. Die Tests brauchen weder Netz noch GitHub-Token. Die Browser-Tests laufen, wenn Edge, Chrome oder Chromium installiert ist (oder mit `MONITOR_BROWSER_TESTS=1`). Die Dateien der Tabelle liegen in `monitor/tests/`.
