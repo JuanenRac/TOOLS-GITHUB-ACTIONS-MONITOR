@@ -29,6 +29,10 @@
 - `kind` 为 `red_new`、`red_fixed`、`stuck_new`、`pending_sign`、`release_due`、`rate_low`、`offline`、`online`、`alerts_up`、`workflow_failed`、`collab_new`、`collab_fixed`、`credential_blind`、`credential_back`, `score_dropped`, `security_new`, `security_fixed` 之一。字段只会增加。返回任意 2xx;其他一律算作失败。
 - `mqtt` 把同样的 JSON 作为 QoS 0 消息的负载发布到 `notify.channels.mqtt.topic`。
 
+## Apprise（可选，默认关闭）
+
+`apprise` 渠道把消息交给 `apprise` 命令（请自行安装，例如 `pip install apprise`），从而可以到达它支持的任何服务。这些地址包含各服务的机密，所以放在名称为 `notify.channels.apprise.urls_env` 的环境变量中（用空格或逗号分隔，最多十个）；调用期间它们会写入一个私有的临时文件，绝不放进命令参数，命令得到的环境中不含监视器的密钥。**Apprise 自行建立连接，监视器对私有地址的防护不适用于它**，所以它能到达哪里取决于你给它的地址；因此该渠道有独立的开关，默认关闭，并标记为安全设置。若找不到该命令，渠道会显示 `not_installed`；失败与其他失败一样被计数，绝不会让监视器停止。
+
 ## 每小时上限统计的是消息
 
 `notify.max_per_hour` 限制的是离开电脑的「消息」，而不是事件：发往三个渠道的一个事件会消耗三个额度，每个渠道一个。额度不足以覆盖所有渠道时，列表中靠前的渠道收到消息，其余的被丢弃（页面将其计为“受限”）。无法发送的渠道（没有密钥、地址错误）不消耗额度。计数在同一把锁下完成，因此多个线程永远不会超过上限。

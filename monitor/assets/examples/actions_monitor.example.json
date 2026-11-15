@@ -370,6 +370,10 @@
         "enabled": false,
         "url": ""
       },
+      "apprise": {
+        "enabled": false,
+        "urls_env": ""
+      },
       "ntfy": {
         "enabled": false,
         "server": "https://ntfy.sh"

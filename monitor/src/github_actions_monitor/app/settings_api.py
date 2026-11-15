@@ -338,6 +338,8 @@ _f("notify", "ch_discord", "notify.channels.discord.enabled", "bool", label=["cf
 _f("notify", "ch_discord", "notify.channels.discord.url_env", "text", ENV_NAME_RE, label=["cfg.p.url_env"], help="cfg.h.p.url_env")
 _f("notify", "ch_slack", "notify.channels.slack.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on")
 _f("notify", "ch_slack", "notify.channels.slack.url_env", "text", ENV_NAME_RE, label=["cfg.p.url_env"], help="cfg.h.p.url_env")
+_f("notify", "ch_apprise", "notify.channels.apprise.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on", secure=True)
+_f("notify", "ch_apprise", "notify.channels.apprise.urls_env", "text", ENV_NAME_RE, label=["cfg.p.url_env"], help="cfg.h.p.apprise_env")
 _f("notify", "ch_matrix", "notify.channels.matrix.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on")
 _f("notify", "ch_matrix", "notify.channels.matrix.homeserver", "text", HTTPS_RE, label=["cfg.p.homeserver"], help="cfg.h.p.homeserver")
 _f("notify", "ch_matrix", "notify.channels.matrix.room", "text", ROOM_RE, label=["cfg.p.room"], help="cfg.h.p.room")

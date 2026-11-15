@@ -8,6 +8,8 @@
   matrix      a room message          `homeserver` (https), `room`, token in the variable named by `token_env`
   mqtt        a message to a broker ON THIS COMPUTER (127.0.0.1 / localhost) for lights and beacons in a workshop
   http_local  a POST of the same JSON to an address ON THIS COMPUTER (127.0.0.1 / localhost)
+  apprise     the `apprise` command (if it is installed) with the Apprise addresses held in the environment variable named by `urls_env`; Apprise opens the connections itself, so
+              the guard of this module (resolved address, redirects) does NOT apply to it: it is off until you switch it on, and what it reaches is up to the addresses you give it
 
 Rules, all tested: a secret (token, webhook URL) is read from the environment at the moment of sending and is never written to the configuration, to a log or to the page (only the NAME of
 the variable is configured); a notification is only a message with a link: it never re-runs, cancels or writes anything on GitHub; every channel has its own switch; the whole thing is
@@ -16,8 +18,11 @@ off until `notify.enabled` is true; a send that fails is ignored (and counted) s
 import json
 import os
 import re
+import shutil
 import socket
 import struct
+import subprocess
+import tempfile
 import threading
 import time
 import urllib.error
@@ -27,7 +32,7 @@ from urllib.parse import quote, urlparse
 from github_actions_monitor.security import netguard
 from github_actions_monitor.util import tzdisplay
 
-CHANNELS = ("telegram", "discord", "slack", "matrix", "mqtt", "http_local")
+CHANNELS = ("telegram", "discord", "slack", "matrix", "mqtt", "http_local", "apprise")
 KNOWN_EVENTS = ("red_new", "red_fixed", "stuck_new", "pending_sign", "release_due", "rate_low", "offline", "online", "alerts_up", "workflow_failed", "collab_new", "collab_fixed", "credential_blind", "credential_back", "score_dropped", "security_new", "security_fixed")
 DEFAULT_EVENTS = ["red_new", "stuck_new", "pending_sign", "offline", "credential_blind"]
 LOOPBACK = ("127.0.0.1", "localhost", "::1", "[::1]")
@@ -41,6 +46,7 @@ DEFAULTS = {"enabled": False, "allow_private_targets": False, "use_proxy": False
                 "matrix": {"enabled": False, "homeserver": "", "room": "", "token_env": ""},
                 "mqtt": {"enabled": False, "host": "127.0.0.1", "port": 1883, "topic": "ghamon/events"},
                 "http_local": {"enabled": False, "url": ""},
+                "apprise": {"enabled": False, "urls_env": ""},
             }}
 _lock = threading.Lock()
 _sent = []          # timestamps of the messages that left (for max_per_hour)
@@ -109,6 +115,10 @@ def check_channel(name, cfg, allow_private=False):
     if name == "http_local":
         url = urlparse(str(cfg.get("url")))
         return None if url.scheme == "http" and is_loopback(url.hostname or "") else "bad_host"
+    if name == "apprise":
+        if not secret(cfg.get("urls_env")):
+            return "no_secret"
+        return None if shutil.which("apprise") else "not_installed"
     return "bad_value"
 
 
@@ -178,9 +188,45 @@ def send_channel(name, cfg, event, opener=None, connect=None, allow_private=Fals
                 sock.close()
         elif name == "http_local":
             _post(cfg["url"], record, opener=opener)
+        elif name == "apprise":
+            return apprise_send(cfg, text, event)
         return {"channel": name, "ok": True, "reason": ""}
     except (OSError, urllib.error.URLError, ValueError) as error:
         return {"channel": name, "ok": False, "reason": netguard.reason_of(error)}
+
+
+def apprise_urls(raw):
+    """The Apprise addresses of the variable: separated by spaces, commas or lines, at most 10, each a plain `scheme://...` of printable characters (nothing that could be read as an option of the command)."""
+    out = []
+    for part in re.split(r"[\s,]+", str(raw or "")):
+        if re.match(r"^[A-Za-z][A-Za-z0-9+.-]{1,30}://\S{1,500}\Z", part) and not part.startswith("-") and len(out) < 10:
+            out.append(part)
+    return out
+
+
+def apprise_send(cfg, text, event, run=None):
+    """Hands the message to the `apprise` command. The addresses (they hold the secrets of the services) go in a private temporary file that is removed at once, never in the arguments, and the command
+    gets an environment without the keys of the monitor. Returns {"channel", "ok", "reason"}; never raises."""
+    urls = apprise_urls(secret(cfg.get("urls_env")))
+    if not urls:
+        return {"channel": "apprise", "ok": False, "reason": "bad_value"}
+    path = None
+    try:
+        handle, path = tempfile.mkstemp(prefix="apprise_", suffix=".yml")
+        with os.fdopen(handle, "w", encoding="utf-8") as stream:
+            stream.write("urls:" + chr(10) + "".join(f"  - {url}" + chr(10) for url in urls))
+        env = {k: v for k, v in os.environ.items() if k in ("PATH", "HOME", "SYSTEMROOT", "TEMP", "TMP", "LANG", "USERPROFILE", "APPDATA", "LOCALAPPDATA")}
+        title = str(event.get("kind") or "monitor")[:60]
+        done = (run or subprocess.run)(["apprise", "-c", path, "-t", title, "-b", text[:3000]], capture_output=True, timeout=TIMEOUT * 2, env=env, check=False)
+        return {"channel": "apprise", "ok": done.returncode == 0, "reason": "" if done.returncode == 0 else "failed"}
+    except (OSError, subprocess.SubprocessError, ValueError) as error:
+        return {"channel": "apprise", "ok": False, "reason": netguard.reason_of(error) if isinstance(error, (OSError, ValueError)) else "failed"}
+    finally:
+        if path:
+            try:
+                os.unlink(path)
+            except OSError:
+                pass
 
 
 def reserve(limit, count, now=None):

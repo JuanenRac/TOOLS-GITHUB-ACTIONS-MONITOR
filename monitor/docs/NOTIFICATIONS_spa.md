@@ -29,6 +29,10 @@ Opcionales y **apagadas por defecto**. Los eventos del feed (un rojo nuevo, un b
 - `kind` es uno de `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `score_dropped`, `security_new`, `security_fixed`. Los campos solo se añaden. Responde cualquier 2xx; lo demás cuenta como fallo.
 - `mqtt` publica el mismo JSON como carga de un mensaje QoS 0 en `notify.channels.mqtt.topic`.
 
+## Apprise (opcional, apagado por defecto)
+
+El canal `apprise` entrega el mensaje a la orden `apprise` (instálala tú, por ejemplo `pip install apprise`) para llegar a cualquiera de los servicios que conoce. Las direcciones contienen los secretos de esos servicios, así que están en una variable de entorno cuyo NOMBRE es `notify.channels.apprise.urls_env` (separadas por espacios o comas, como mucho diez); se escriben en un fichero temporal privado durante el instante de la llamada, nunca en los argumentos de la orden, y la orden recibe un entorno sin las claves del monitor. **Apprise abre sus propias conexiones: la protección del monitor contra direcciones privadas no se le aplica**, así que lo que alcance depende de las direcciones que le des; por eso el canal tiene su propio interruptor, apagado por defecto, y está marcado como ajuste de seguridad. Si falta la orden, el canal dice `not_installed`; un fallo se cuenta como cualquier otro y nunca detiene el monitor.
+
 ## El límite por hora cuenta mensajes
 
 `notify.max_per_hour` limita los MENSAJES que salen del ordenador, no los eventos: un evento que va a tres canales gasta tres unidades, una por canal. Si el cupo no alcanza para todos los canales, los primeros de la lista reciben el mensaje y el resto se descarta (la página lo cuenta como «limitado»). Un canal que no puede enviar (sin secreto, dirección incorrecta) no consume nada. El recuento se hace con un solo bloqueo, así que varios hilos nunca superan el límite.

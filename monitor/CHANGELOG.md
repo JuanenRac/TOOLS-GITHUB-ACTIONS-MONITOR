@@ -13,6 +13,8 @@ when this file and `tool_version.py` disagree.
 
 ### Added
 
+- **Apprise as a channel of notifications (Complete, off by default)**: `notify.channels.apprise` hands the message to the `apprise` command, if it is installed, so that any service Apprise knows can be reached. The addresses (they hold the secrets of those services) are read from the environment variable named by `urls_env`, written to a private temporary file for the instant of the call and removed, never put in the arguments, and the command gets an environment without the keys of the monitor. Apprise opens its own connections, so the guard of the monitor on private addresses does not apply to it: the channel has its own switch, marked as a security setting. A missing command is the reason `not_installed`, a failure is counted and never stops the monitor.
+
 - **A harness and the reproductions of the independent review, in the repository**: `tools/audit_harness.py --check` starts, with no GitHub, a supervisor with three accounts (alpha, beta, default) and four users (administrator, maintainer of alpha only, viewer of beta only, one switched off), asks the routes that decide the isolation of the accounts and prints what each user gets; `tests/test_193_regressions.py` holds the reproductions of the review of 1.8.3 (accounts of a request, accounts kept when a password changes, silences of a remote maintainer, the test message and its hourly limit, a restored copy and revoked sessions, the lock and the administrator, the keys a started program does not inherit).
 
 ### Changed

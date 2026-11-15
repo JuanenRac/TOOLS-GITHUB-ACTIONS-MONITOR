@@ -29,6 +29,10 @@ Opcionais e **desligadas por predefinição**. Os eventos do feed (um vermelho n
 - `kind` é um de `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `score_dropped`, `security_new`, `security_fixed`. Os campos só se acrescentam. Responda com qualquer 2xx; o resto conta como falha.
 - `mqtt` publica o mesmo JSON como carga de uma mensagem QoS 0 em `notify.channels.mqtt.topic`.
 
+## Apprise (opcional, desligado por predefinição)
+
+O canal `apprise` entrega a mensagem ao comando `apprise` (instale-o você, por exemplo `pip install apprise`) para chegar a qualquer um dos serviços que ele conhece. Os endereços contêm os segredos desses serviços, por isso estão numa variável de ambiente cujo NOME é `notify.channels.apprise.urls_env` (separados por espaços ou vírgulas, no máximo dez); são escritos num ficheiro temporário privado durante o instante da chamada, nunca nos argumentos do comando, e o comando recebe um ambiente sem as chaves do monitor. **O Apprise abre as suas próprias ligações: a proteção do monitor contra endereços privados não se aplica**, por isso o que alcança depende dos endereços que lhe der; é por isso que o canal tem o seu próprio interruptor, desligado por predefinição, e está marcado como definição de segurança. Se o comando faltar, o canal diz `not_installed`; uma falha conta-se como qualquer outra e nunca pára o monitor.
+
 ## O limite por hora conta mensagens
 
 `notify.max_per_hour` limita as MENSAGENS que saem do computador, não os eventos: um evento enviado para três canais gasta três unidades, uma por canal. Se a quota não chega para todos os canais, os primeiros da lista recebem a mensagem e os restantes são descartados (a página conta-os como «limitados»). Um canal que não consegue enviar (sem segredo, endereço errado) não gasta nada. A contagem é feita sob um único bloqueio, por isso vários fios nunca ultrapassam o limite.
