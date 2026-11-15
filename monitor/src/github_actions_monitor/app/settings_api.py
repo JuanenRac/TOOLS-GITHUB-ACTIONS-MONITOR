@@ -47,6 +47,7 @@ NET_RE = re.compile(r"^[0-9A-Fa-f:.]{2,45}(?:/[0-9]{1,3})?\Z")      # an address
 LABEL_RE = re.compile(r"^[\w .:/+-]{1,50}\Z")      # a label of GitHub may hold a colon, a space or a slash ("monitor:ignore", "good first issue")
 LABEL_KEYS = ("sentinels.collab.rules.issue_critical_labels", "sentinels.collab.rules.ignore_labels")
 TZ_RE = re.compile(r"^(?:local|utc|UTC|[A-Za-z][A-Za-z0-9_+./-]{1,63})\Z")      # display.timezone: local, utc or an IANA name
+CRON_RE = re.compile(r"^[0-9*/,\- ]{9,60}\Z")      # report_schedule.cron: five fields of numbers, lists, ranges and steps (reporting/schedule.py reads it)
 OWNER_RE = re.compile(r"^[A-Za-z0-9-]{0,39}\Z")
 MODEL_RE = re.compile(r"^[A-Za-z0-9._:/@-]{0,100}\Z")
 OLLAMA_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}/?\Z")   # the local service only: nothing leaves this computer
@@ -274,6 +275,12 @@ for _w in ("reliability", "speed", "recovery", "collaboration", "security"):
     _f(_T_SENT, "score_weights", f"score.weights.{_w}", "int", (0, 1000), restart=False, unit="pts")
 for _g in ("A", "B", "C", "D"):
     _f(_T_SENT, "score_grades", f"score.grades.{_g}", "int", (0, 100), restart=False, unit="pts")
+# --- Scheduled reports (Complete only): HTML and Markdown on a cron schedule, off by default
+_f(_T_SENT, "report_schedule", "report_schedule.enabled", "bool", restart=False)
+_f(_T_SENT, "report_schedule", "report_schedule.cron", "text", CRON_RE, restart=False)
+_f(_T_SENT, "report_schedule", "report_schedule.formats", "enum", ("html", "markdown", "both"), restart=False)
+_f(_T_SENT, "report_schedule", "report_schedule.keep", "int", (1, 500), restart=False, unit="")
+_f(_T_SENT, "report_schedule", "report_schedule.top", "int", (1, 50), restart=False, unit="")
 # --- Folders and files
 _f(_T_PATHS, "workspace", "workspace_root", "path")
 _f(_T_PATHS, "workspace", "signed_dir", "path")
@@ -553,6 +560,9 @@ def check_value(path, value):
         if path == "display.timezone":      # a name the system and the built-in table do not know would silently show the local time: it is refused
             from github_actions_monitor.util import tzdisplay
             return (True, value.strip()) if bounds.match(value.strip()) and tzdisplay.valid_setting(value.strip()) else (False, "text")
+        if path == "report_schedule.cron":      # a schedule the reports could not read would silently never run: it is refused
+            from github_actions_monitor.reporting import schedule
+            return (True, " ".join(value.split())) if bounds.match(value.strip()) and schedule.parse(value) is not None else (False, "text")
         return (True, value.strip()) if bounds.match(value.strip()) else (False, "text")
     if kind == "path":
         if not isinstance(value, str):

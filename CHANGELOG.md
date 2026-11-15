@@ -10,6 +10,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+### Added
+
+- **Scheduled reports (Complete only, off by default)**: the monitor writes a report of the account on a cron schedule (`report_schedule.cron`, five fields in the local time, `0 8 * * 1` by default) or when an administrator asks at this computer: the score (no number while it is calibrating or has too little data), what changed since the last report, the repositories that need a person and the open alerts, as one HTML page with a print style (a PDF is the print-to-PDF of the browser) and as Markdown. It is made from what the monitor already holds, asks GitHub for nothing and sends nothing: the files stay in `data/reports/`, the oldest runs go after `report_schedule.keep`, a report is written once for each scheduled minute (a long stop gives one, not a pile), the first one waits for the first scheduled minute after the switch-on, a failure is noted and tried again at the next one, and every text from the data is escaped. The Team tab lists the files and has the button "Write a report now"; `GET /api/report-files`, `GET /api/report-files/file?name=` (only a file the service wrote for the account) and `POST /api/report-files/run` are the routes. Five settings in the Sentinel tab, the guide REPORT_SCHEDULE.md in the eight languages.
+
 ## [1.9.2]
 
 ### Added
