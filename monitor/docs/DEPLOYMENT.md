@@ -16,6 +16,10 @@ The monitor listens in one of three ways, and the page, `GET /api/accounts`, `bi
 
 In the network mode the supervisor of several accounts follows the same rules as the monitor of one account: the access token on every request (cookie, header or `POST /api/access`), a lock-out after wrong tokens, the `Host` check, optional TLS with your certificate, the second port of the person at the computer (`listen.local_port`), and the keys that decide exposure, the login of GitHub and the actions on GitHub only from the computer of the monitor (a request from the network reaches the account marked as remote).
 
+## The ports of the two editions
+
+The complete edition listens on port 8765 and the lite one on 8766 unless the configuration file says another: `ports.complete` and `ports.lite` (a whole number from 1024 to 65535, restart needed; they are also in the Settings page, block Ports). Both numbers are read in one place, so the start, the check "there is already a monitor on this port", `--doctor`, the health check (`python -m github_actions_monitor.cli.healthcheck`), the command line (`--lite` talks to the lite port), the terminal views and the launchers all agree. The order is: `--port N` on the command line, then `MONITOR_PORT` (the service and the container set it; the complete edition only), then the file of the edition, then the file of the other edition (one menu can set both), then the default. The lite edition never takes the port of the complete one: when both name the same number, the lite one keeps 8766, and the Settings page refuses to save the same number for both. When the port is busy the monitor takes the next free one, up to ten above.
+
 ## Without a browser, and the health check
 
 `python -m github_actions_monitor.service` is the entry of a service: it prepares the folders and the first account from the environment (see the table below) and starts the monitor without a browser. `python bin/actions_monitor.py --no-browser --port 8765` still works for a monitor you manage yourself.

@@ -16,6 +16,10 @@ El monitor escucha de una de tres maneras, y la página, `GET /api/accounts`, `b
 
 En el modo red el supervisor de varias cuentas sigue las mismas reglas que el monitor de una cuenta: el token de acceso en cada petición (cookie, cabecera o `POST /api/access`), bloqueo tras tokens erróneos, la comprobación de `Host`, TLS opcional con tu certificado, el segundo puerto de quien está en el equipo (`listen.local_port`), y las claves que deciden la exposición, el acceso a GitHub y las acciones sobre GitHub solo desde el equipo del monitor (una petición de la red llega a la cuenta marcada como remota).
 
+## Los puertos de las dos ediciones
+
+La edición completa escucha en el puerto 8765 y la lite en el 8766, salvo que el fichero de configuración diga otro: `ports.complete` y `ports.lite` (un entero de 1024 a 65535, requiere reinicio; también están en la página de Ajustes, bloque Puertos). Los dos números se leen en un solo sitio, así que el arranque, la comprobación «ya hay un monitor en este puerto», `--doctor`, el chequeo de salud (`python -m github_actions_monitor.cli.healthcheck`), la línea de comandos (`--lite` habla con el puerto lite), las vistas de terminal y los lanzadores coinciden. El orden es: `--port N` en la línea de comandos, luego `MONITOR_PORT` (lo ponen el servicio y el contenedor; solo la edición completa), luego el fichero de la edición, luego el de la otra edición (un menú puede fijar ambos) y por último el predeterminado. La edición lite nunca toma el puerto de la completa: si ambos nombran el mismo número, la lite conserva el 8766, y la página de Ajustes se niega a guardar el mismo número para las dos. Si el puerto está ocupado, el monitor toma el siguiente libre, hasta diez por encima.
+
 ## Sin navegador y la comprobación de salud
 
 `python -m github_actions_monitor.service` es la entrada de un servicio: prepara las carpetas y la primera cuenta a partir del entorno (ver la tabla de abajo) y arranca el monitor sin navegador. `python bin/actions_monitor.py --no-browser --port 8765` sigue valiendo para un monitor que gestionas tú.

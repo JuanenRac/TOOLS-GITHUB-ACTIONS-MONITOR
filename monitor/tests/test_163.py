@@ -673,7 +673,7 @@ class EditionBanner(unittest.TestCase):
         self.assertEqual(loud.getvalue(), chr(27) + "]0;GitHub Actions Monitor LITE" + chr(7))
 
     def test_the_launchers_and_the_start_up_code_carry_the_mark(self):
-        for name, mark in (("MONITOR_LITE_GITHUB_ACTIONS", "LITE - port 8766 - no sentinel"), ("MONITOR_GITHUB_ACTIONS", "COMPLETE - port 8765 - sentinel on")):
+        for name, mark in (("MONITOR_LITE_GITHUB_ACTIONS", "LITE - no sentinel"), ("MONITOR_GITHUB_ACTIONS", "COMPLETE - sentinel on")):
             self.assertIn("title GitHub Actions Monitor " + mark, (HERE / (name + ".bat")).read_text(encoding="utf-8"))
             for ext in (".sh", ".command"):
                 text = (HERE / (name + ext)).read_text(encoding="utf-8")

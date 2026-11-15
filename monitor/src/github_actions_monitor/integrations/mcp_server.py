@@ -24,6 +24,7 @@ from github_actions_monitor.integrations import lessons  # noqa: E402
 from github_actions_monitor.app import toolconfig  # noqa: E402
 from github_actions_monitor.tool_version import TOOL_VERSION  # noqa: E402
 from github_actions_monitor.security import netguard
+from github_actions_monitor.util import ports
 
 NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}\Z")
 TOOLS = [
@@ -69,7 +70,8 @@ def open_summary(config):
     return ai_alerts.redact(f"{len(rows)} real CI alert(s) open (brief updated {info['updated_local']}): {first}. Use alerts_open and alert_diagnose.", 600)
 
 
-def local_get(path, port=8765):
+def local_get(path, port=None):
+    port = port or ports.resolve("complete")
     with netguard.local_open(f"http://127.0.0.1:{port}{path}", timeout=10) as answer:
         return json.load(answer)
 
