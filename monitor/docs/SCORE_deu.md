@@ -15,10 +15,11 @@ Eine gewichtete Summe aus vier Teilen, jeder von 0 bis 100. Ein Teil ist an sein
 
 | Teil | Gewicht | Was er misst | Gut | Schlecht |
 |---|---|---|---|---|
-| Zuverlässigkeit | 40 | Anteil der beendeten Läufe, die gelingen (abgebrochene und übersprungene zählen nicht) | 98 % | 50 % |
-| Geschwindigkeit | 20 | 95. Perzentil der Dauer der erfolgreichen Läufe | 10 Min. | 60 Min. |
-| Wiederherstellung | 20 | mittlere Zeit vom ersten Fehlschlag eines Workflows bis zu seinem nächsten Erfolg | 30 Min. | 24 Std. |
-| Zusammenarbeit | 20 | mittlere Zeit, die eine Warnung des Zusammenarbeits-Wächters offen bleibt, bis sie verschwindet | 2 Tage | 14 Tage |
+| Zuverlässigkeit | 30 | Anteil der beendeten Läufe, die gelingen (abgebrochene und übersprungene zählen nicht) | 98 % | 50 % |
+| Geschwindigkeit | 15 | 95. Perzentil der Dauer der erfolgreichen Läufe | 10 Min. | 60 Min. |
+| Wiederherstellung | 15 | mittlere Zeit vom ersten Fehlschlag eines Workflows bis zu seinem nächsten Erfolg | 30 Min. | 24 Std. |
+| Zusammenarbeit | 15 | mittlere Zeit, die eine Warnung des Zusammenarbeits-Wächters offen bleibt, bis sie verschwindet | 2 Tage | 14 Tage |
+| Sicherheit | 25 | die Punkte, die die offenen Befunde des Sicherheitswächters von 100 abziehen (nur solange dieser Wächter an ist) | 0 Punkte | 100 Punkte |
 
 Der Buchstabe ist A ab 90, B ab 80, C ab 70, D ab 55 und darunter E. Der Trend vergleicht die Punktzahl mit dem unmittelbar vorangehenden Fenster: steigend, fallend oder stabil (eine Änderung unter `score.trend_flat` Punkten ist stabil).
 
@@ -30,7 +31,7 @@ Die Punktzahl zeigt nie eine Zahl, die sie nicht belegen kann. Die Antwort enth�
 - **insufficient_data** (zu wenige Daten): weniger als `score.min_runs` beendete Läufe im Fenster (standardmäßig 20) oder die Teile mit Daten wiegen weniger als `score.min_coverage` des Ganzen (standardmäßig die Hälfte). Keine Zahl.
 - **scored** (bewertet): eine Zahl, ein Buchstabe und ein Trend. Ein Teil ohne Daten wird weggelassen und die übrigen werden neu skaliert; das senkt die `coverage` (zum Beispiel 0,8, wenn der Zusammenarbeits-Wächter aus ist). Er zählt nie als 0 und nie als 100.
 
-Sicherheit ist noch kein Teil. Bis dahin sagt jede Antwort `complete: false` und führt `security` unter `missing_parts` auf, damit eine 85 nie als „alles in Ordnung“ gelesen wird.
+Sicherheit ist ein Teil wie die anderen, hat aber nur Daten, solange der Sicherheitswächter an ist und genug Repositories angesehen hat. Ohne ihn sagt die Antwort `complete: false` und führt `security` unter `missing_parts` auf, und die anderen Teile werden neu skaliert, damit die Zahl nie als „alles in Ordnung“ gelesen wird. GitHub liefert keinen Verlauf der Befunde, deshalb ist der Sicherheitsteil im Fenster und im davor liegenden derselbe: Der Trend zeigt, was die CI und die Zusammenarbeit getan haben. Die Gewichte sind standardmäßig 30, 15, 15, 15 und 25. Ein Fenster mit Läufen und ohne jeden Fehlschlag hat nichts wiederherzustellen: Sein Wiederherstellungsteil ist voll, als Tatsache und nicht als Lücke.
 
 ## Das Fenster
 

@@ -48,9 +48,11 @@ class Combine(unittest.TestCase):
             out = overview.combine(answers)
             self.assertEqual((out["state"], out["score"], out["letter"]), (state, None, None), answers)
 
-    def test_the_answer_says_that_security_is_not_in_it(self):
-        out = overview.combine({"a": answer()})
+    def test_the_answer_says_that_security_is_not_in_it_while_an_account_lacks_it(self):
+        out = overview.combine({"a": {**answer(), "missing_parts": ["security"]}, "b": answer()})
         self.assertEqual((out["complete"], out["missing_parts"]), (False, ["security"]))
+        done = overview.combine({"a": answer(), "b": answer()})
+        self.assertEqual((done["complete"], done["missing_parts"]), (True, []))
 
     def test_a_scored_account_without_a_breakdown_counts_once(self):
         out = overview.combine({"a": {**answer(score=80.0), "repos": []}, "b": answer(score=60.0, repos=1)})

@@ -526,16 +526,18 @@
     "min_coverage": 0.5,
     "trend_flat": 2,
     "weights": {
-      "reliability": 40,
-      "speed": 20,
-      "recovery": 20,
-      "collaboration": 20
+      "reliability": 30,
+      "speed": 15,
+      "recovery": 15,
+      "collaboration": 15,
+      "security": 25
     },
     "limits": {
       "reliability": {"good": 0.98, "bad": 0.5},
       "speed": {"good": 600, "bad": 3600},
       "recovery": {"good": 1800, "bad": 86400},
-      "collaboration": {"good": 172800, "bad": 1209600}
+      "collaboration": {"good": 172800, "bad": 1209600},
+      "security": {"good": 0, "bad": 100}
     },
     "grades": {
       "A": 90,

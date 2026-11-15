@@ -266,6 +266,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `score.weights.collaboration` | `-` | sentinel | Weight: collaboration |
 | `score.weights.recovery` | `-` | sentinel | Weight: recovery |
 | `score.weights.reliability` | `-` | sentinel | Weight: reliability |
+| `score.weights.security` | `-` | sentinel | Weight: security |
 | `score.weights.speed` | `-` | sentinel | Weight: speed |
 | `score.window_days` | `-` | sentinel | Score window |
 | `sentinel.a2_full_sample_unknown` | `-` | sentinel | Unknown when sample is full |

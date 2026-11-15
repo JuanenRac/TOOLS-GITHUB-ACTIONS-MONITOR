@@ -258,7 +258,7 @@ def cmd_score(ctx):
     if state != "off":
         lines.append(i18n.t("cli.score_coverage", coverage=round(float(answer.get("coverage") or 0) * 100), runs=quality.get("runs", 0), days=answer.get("window_days", "-")))
     for part in answer.get("parts") or []:
-        name = i18n.t("cli.score_p_" + str(part.get("part"))) if part.get("part") in ("reliability", "speed", "recovery", "collaboration") else str(part.get("part"))
+        name = i18n.t("cli.score_p_" + str(part.get("part"))) if part.get("part") in ("reliability", "speed", "recovery", "collaboration", "security") else str(part.get("part"))
         lines.append(i18n.t("cli.score_part", part=name, score=part["score"], weight=part.get("weight")) if isinstance(part.get("score"), (int, float)) else i18n.t("cli.score_part_none", part=name, weight=part.get("weight")))
     if answer.get("missing_parts"):
         lines.append(i18n.t("cli.score_missing", parts=", ".join(str(p) for p in answer["missing_parts"])))

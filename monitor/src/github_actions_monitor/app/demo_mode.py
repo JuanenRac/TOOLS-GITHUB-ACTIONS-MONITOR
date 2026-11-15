@@ -70,10 +70,11 @@ def redirect_state(tmp):
 def score_answer(now=None):
     """The score of the demo account (invented, like everything of --demo): scored, a B, going up, with a part not collected yet and the weakest repository first."""
     now = datetime.now(timezone.utc).timestamp() if now is None else now
-    return {"schema": 1, "account": None, "enabled": True, "state": "scored", "score": 84.0, "letter": "B", "trend": {"direction": "up", "delta": 2.5}, "coverage": 0.8, "complete": False,
-            "missing_parts": ["security"], "window_days": 7, "at": now, "age_seconds": 30, "stale": False,
-            "parts": [{"part": "reliability", "weight": 40, "value": 0.93, "score": 89.6, "samples": 31, "available": True}, {"part": "speed", "weight": 20, "value": 540, "score": 100.0, "samples": 26, "available": True},
-                      {"part": "recovery", "weight": 20, "value": 4300, "score": 70.0, "samples": 3, "available": True}, {"part": "collaboration", "weight": 20, "value": None, "score": None, "samples": 0, "available": False}],
+    return {"schema": 1, "account": None, "enabled": True, "state": "scored", "score": 85.0, "letter": "B", "trend": {"direction": "up", "delta": 2.5}, "coverage": 0.85, "complete": True,
+            "missing_parts": [], "window_days": 7, "at": now, "age_seconds": 30, "stale": False,
+            "parts": [{"part": "reliability", "weight": 30, "value": 0.93, "score": 89.6, "samples": 31, "available": True}, {"part": "speed", "weight": 15, "value": 540, "score": 100.0, "samples": 26, "available": True},
+                      {"part": "recovery", "weight": 15, "value": 4300, "score": 70.0, "samples": 3, "available": True}, {"part": "collaboration", "weight": 15, "value": None, "score": None, "samples": 0, "available": False},
+                      {"part": "security", "weight": 25, "value": 12.0, "score": 88.0, "samples": 6, "available": True}],
             "repos": [{"repo": "demo-gamma-api", "state": "scored", "score": 62.0, "letter": "D", "runs": 25, "success_rate": 0.8}, {"repo": "demo-alpha-app", "state": "scored", "score": 78.0, "letter": "C", "runs": 22, "success_rate": 0.86}],
             "data_quality": {"runs": 79, "min_runs": 20, "coverage": 0.8, "min_coverage": 0.5, "watched_hours": 200.0, "reasons": []}, "drop": None}
 
