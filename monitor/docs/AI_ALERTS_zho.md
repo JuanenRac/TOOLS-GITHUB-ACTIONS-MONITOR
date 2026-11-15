@@ -17,7 +17,7 @@
 ## AI 如何读取
 - 在项目或技能的说明中加入:*“开始时读取 ALERTS_BRIEF.md(路径),并说明有哪些真实警报未处理。”*
 - 或询问正在运行的监视器:`GET /api/ai/brief`(Markdown,或 `?fmt=json`)和 `GET /api/ai/alerts?since=秒数`。规则与页面其他部分相同(本机;网络模式下需要访问令牌)。
-- 或添加 MCP 服务器(只读):`python bin/mcp_server.py`,工具有 `get_alerts`、`get_red_repos`、`get_run_failure`、`get_quota`;`--allow-ack` 增加 `ack_alert`(仅本地状态)。Gemini CLI、Codex 和 VS Code(Copilot):在其 MCP 设置中把同样的命令添加为 stdio 服务器。
+- 或添加 MCP 服务器(只读):`python bin/mcp_server.py`,工具有 `get_alerts`、`get_red_repos`、`get_run_failure`、`get_quota`、`get_score`;`--allow-ack` 增加 `ack_alert`(仅本地状态)。Gemini CLI、Codex 和 VS Code(Copilot):在其 MCP 设置中把同样的命令添加为 stdio 服务器。
 
 ## 到达你的提醒
 - 新的真实警报会发送到你已配置的通知渠道(设置 > 通知)。

@@ -32,6 +32,14 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 - **The score of an account turns its metrics into a number from 0 to 100, a letter from A to E and a trend**: a weighted sum of four parts (reliability of the CI 40, speed 20, recovery 20, collaboration 20; the weights and the limits of every part are settings), compared with the window before. It never shows a number it cannot stand behind: an account watched for less than a day is "calibrating", one with fewer than 20 finished runs or with too little of the weight backed by data is "not enough data", and every answer carries its coverage, the quality of the data and the parts not collected yet, so 85 is never read as "all clear".
 - **The metrics behind the account score are collected from the data the monitor already has**: success rate, the median and the 95th percentile of the duration, the time a failing workflow takes to recover, runs per day, how long collaboration items stay open and how many are still open, for any window of time. A number with nothing behind it is reported as missing and never as zero, and the amount of data behind every number is kept, so the score can say that there is not enough data instead of inventing one.
 
+### Changed
+
+- **The help is up to date with the whole 1.8 series and 1.9.0**: the README of the repository and its seven translations said version 1.8.1 and nothing of what came after; now the version of the table At a glance is written by the generator from the version of the tool, What it does names the service mode and the Docker image, several accounts and the team, the storage, the lists that sort and fold and the score, the status table has the rows of what is new, the Security section says how the network and team modes are protected, the Documentation lists every guide, the guides of the command line, the AI tools and the metrics name the score, and the roadmap no longer presents the 1.8 series as the next release. A new test and a check of the gate of the release refuse a help that says another version, a guide that the README does not list and a package README with an old heading, and the contributing guide asks every version to read the whole help.
+
+### Fixed
+
+- **The pictures of the Charts tab fit again**: the ring of the result of the last 24 hours was cut by its box and its legend ran out of the drawing, the bars of the durations were a little taller than their frame and the last hour of the timeline stuck out on the right. The rows of the tab no longer shrink below what a picture needs (the tab scrolls instead), the legend of the ring is measured from its words and goes under the ring when it does not fit beside it, and the margins hold half of the last label. A new check opens the tab in the eight languages, wide and narrow, light and dark, and measures every picture.
+
 ## [1.8.4]
 
 ### Added

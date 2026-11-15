@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2084_passing-brightgreen.svg" alt="2084 tests">
+  <img src="https://img.shields.io/badge/Tests-2103_passing-brightgreen.svg" alt="2103 tests">
 </p>
 
 > 所有するすべてのリポジトリのワークフローを監視し、赤いもの・止まっているもの・対応待ちのものを、ローカルの1ページで教えます。
@@ -32,7 +32,7 @@
 
 | | |
 |---|---|
-| **バージョン** | **1.8.1** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **バージョン** | **1.9.0** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **必要なもの** | Python 3.11 以上と GitHub CLI（`gh auth login`）。それ以外は不要(ターミナル表示は任意のパッケージ `rich` を使います) |
 | **開く先** | `127.0.0.1` 上のページのみ、8言語対応 |
 | **GitHub への書き込み** | 自動では行いません。明示的な `--go` を付けて実行したバッチコマンドのみ |
@@ -45,7 +45,7 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **テスト** | テストメソッド 2084 件(`python -m unittest discover -s monitor/tests`) |
+| **テスト** | テストメソッド 2103 件(`python -m unittest discover -s monitor/tests`) |
 | **設定** | 設定 401 件、すべてヘルプ付き |
 | **言語** | 8(英語、スペイン語、ドイツ語、フランス語、イタリア語、日本語、中国語、ポルトガル語) |
 | **CI で検証したシステム** | ubuntu, windows、Python 3.11, 3.13 |
@@ -64,6 +64,10 @@
 | AI ツール接続と MCP | 🟡 | フィード、状態、ストリーム、フック、MCP ツールは実サーバーと模擬クライアントでテスト済み。独立したユーザーはまだ使っていません。 |
 | Lite 版 | 🟡 | CI でテスト済みで、完全版とチャネルと設定を共有。実使用はこれまで少なめ。 |
 | GitHub App、中央パネル、節約モード | 🟠 | 新機能:模擬サーバーとファイルでテスト済み。実サービスでの長期稼働はまだありません。 |
+| アカウントごとのスコア | 🟡 | 合成データ、テスト用データ、模擬サーバーで検証済み。実アカウントで数週間見守った実績はまだありません。 |
+| Docker イメージとサービスモード | 🟡 | イメージは CI でビルドして検証済み（非 root、読み取り専用、失効したログイン）。長期稼働のサービスとしての実績はまだ短いです。 |
+| チームモードと複数アカウント | 🟡 | 実プロセスと模擬ユーザーで検証済み。実際のチームが長く使った実績はまだありません。 |
+| ストレージ（ファイルと SQLite） | 🟡 | 両方のバックエンドと、その間の移行で検証済み。数か月経ったデータベースのアップグレードはまだ経験していません。 |
 | Linux と macOS | 🟠 | CI でのみテスト。日常の使用は Windows です。 |
 
 <!-- glance:end -->

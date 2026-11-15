@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2084_passing-brightgreen.svg" alt="2084 tests">
+  <img src="https://img.shields.io/badge/Tests-2103_passing-brightgreen.svg" alt="2103 tests">
 </p>
 
 > 监视你所有仓库的工作流，并在一个本地页面上告诉你：哪些是红的、哪些卡住了、哪些在等你处理。
@@ -32,7 +32,7 @@
 
 | | |
 |---|---|
-| **版本** | **1.8.1** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **版本** | **1.9.0** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **需要** | Python 3.11+ 和 GitHub CLI（`gh auth login`）；不需要其他东西(终端视图使用可选的 `rich` 包) |
 | **打开** | 仅在 `127.0.0.1` 上的页面，支持八种语言 |
 | **写入 GitHub** | 绝不自行写入：只有你用明确的 `--go` 运行的批处理命令才会 |
@@ -45,7 +45,7 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 2084 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **测试** | 2103 个测试方法(`python -m unittest discover -s monitor/tests`) |
 | **设置** | 401 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
@@ -64,6 +64,10 @@
 | AI 工具连接与 MCP | 🟡 | 信息流、状态、事件流、钩子和 MCP 工具已用真实服务器和模拟客户端测试;尚无独立用户使用过。 |
 | Lite 版 | 🟡 | 已在 CI 中测试,与完整版共用通道和设置;迄今实际使用较少。 |
 | GitHub App、中央面板和节省模式 | 🟠 | 新功能:已用模拟服务器和文件测试;尚未长时间对真实服务运行。 |
+| 每个账户的评分 | 🟡 | 已用合成数据序列、测试数据和模拟服务器验证；尚未在真实账户上连续观察数周。 |
+| Docker 镜像与服务模式 | 🟡 | 镜像在 CI 中构建并验证（非 root、只读、登录被撤销）；作为长期运行服务的时间还不长。 |
+| 团队模式与多账户 | 🟡 | 已用真实进程和模拟用户验证；真实团队尚未长期使用。 |
+| 存储（文件与 SQLite） | 🟡 | 已用两种存储及其间的迁移验证；已使用数月的数据库尚未经历过升级。 |
 | Linux 和 macOS | 🟠 | 仅在 CI 中测试;日常使用在 Windows 上。 |
 
 <!-- glance:end -->

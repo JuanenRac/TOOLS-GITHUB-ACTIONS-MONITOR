@@ -23,7 +23,7 @@
 2. `ai_alerts.jsonl`:イベント(開く、確認、解決)ごとに 1 行、安定した ID 付き。
 3. `GET /api/ai/state`:インベントリ全体をバージョン付き JSON(`schema`、`edition`、`signals`、`act`、`watch`)で、読み取り専用。`GET /api/sentinel/panels` はパネルのみ。
 4. `GET /api/ai/stream`:サーバー送信イベント。再開可能で、リスナー数と時間に上限があります。
-5. MCP ツール(`bin/mcp_server.py`):`monitor_state`、`signals`、`alerts_open`、`diagnose`、`sentinel_panels`、`get_quota`。`act`(確認)は `--allow-ack` のときのみ。
+5. MCP ツール(`bin/mcp_server.py`):`monitor_state`、`signals`、`alerts_open`、`diagnose`、`sentinel_panels`、`get_quota`、`get_score`。`act`(確認)は `--allow-ack` のときのみ。
 6. フック:`python bin/monitor_cli.py ai-hook install [--assistant|--cursor|--generic] [--scope project|user] [--dry-run]`(`status` と `uninstall` もあり)は、AI セッションの開始時と終了前にブリーフを渡す小さなスクリプトを追加します。
 
 ## 手順

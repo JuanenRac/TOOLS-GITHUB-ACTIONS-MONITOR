@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2084_passing-brightgreen.svg" alt="2084 tests">
+  <img src="https://img.shields.io/badge/Tests-2103_passing-brightgreen.svg" alt="2103 tests">
 </p>
 
 > Surveille les workflows de tous vos dépôts et vous dit, sur une page locale, ce qui est rouge, ce qui est bloqué et ce qui vous attend.
@@ -32,7 +32,7 @@
 
 | | |
 |---|---|
-| **Version** | **1.8.1** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **1.9.0** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Prérequis** | Python 3.11+ et la CLI GitHub (`gh auth login`) ; rien d'autre (la vue console utilise le paquet optionnel `rich`) |
 | **S'ouvre** | sur une page `127.0.0.1` uniquement, en huit langues |
 | **Écrit sur GitHub** | jamais seul : seulement les commandes par lots que vous lancez avec un `--go` explicite |
@@ -45,7 +45,7 @@
 | | |
 |---|---|
 | **Maturité** | functional |
-| **Tests** | 2084 méthodes de test (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 2103 méthodes de test (`python -m unittest discover -s monitor/tests`) |
 | **Réglages** | 401 réglages, tous avec aide |
 | **Langues** | 8 (anglais, espagnol, allemand, français, italien, japonais, chinois et portugais) |
 | **Testé dans le CI sur** | ubuntu, windows, Python 3.11, 3.13 |
@@ -64,6 +64,10 @@ Chaque ligne est une partie de ce dépôt et le voyant dit où elle en est aujou
 | Connexion à un outil d'IA et MCP | 🟡 | Le flux, l'état, le flux en direct, le hook et les outils MCP sont testés avec un vrai serveur et un client simulé ; aucun utilisateur indépendant ne les a encore utilisés. |
 | Édition lite | 🟡 | Testée dans le CI et partage les canaux et réglages de la complète ; peu d'usage réel jusqu'ici. |
 | GitHub App, panneau central et mode économe | 🟠 | Nouveau : testé avec des serveurs et fichiers simulés ; pas encore tourné longtemps avec le vrai service. |
+| Score de chaque compte | 🟡 | Testé avec des séries synthétiques, des jeux d'essai et des serveurs simulés ; il n'a pas encore été observé pendant des semaines sur de vrais comptes. |
+| Image Docker et mode service | 🟡 | L'image est construite et testée dans la CI (sans root, en lecture seule, avec une connexion révoquée) ; encore peu de temps comme service de longue durée. |
+| Mode équipe et plusieurs comptes | 🟡 | Testé avec de vrais processus et des utilisateurs simulés ; une vraie équipe ne l'a pas utilisé longtemps. |
+| Stockage (fichiers et SQLite) | 🟡 | Testé avec les deux supports et les migrations entre eux ; une base de données de plusieurs mois n'a pas encore connu de mise à jour. |
 | Linux et macOS | 🟠 | Testés seulement dans le CI ; l'usage quotidien est sous Windows. |
 
 <!-- glance:end -->

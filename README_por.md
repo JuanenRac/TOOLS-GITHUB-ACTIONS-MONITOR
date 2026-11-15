@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2084_passing-brightgreen.svg" alt="2084 tests">
+  <img src="https://img.shields.io/badge/Tests-2103_passing-brightgreen.svg" alt="2103 tests">
 </p>
 
 > Vigia os workflows de todos os seus repositórios e diz-lhe, numa página local, o que está a vermelho, o que está encravado e o que o espera.
@@ -32,7 +32,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 
 | | |
 |---|---|
-| **Versão** | **1.8.1** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versão** | **1.9.0** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Requisitos** | Python 3.11+ e a CLI do GitHub (`gh auth login`); mais nada (a vista de consola usa o pacote opcional `rich`) |
 | **Abre** | uma página só em `127.0.0.1`, em oito idiomas |
 | **Escreve no GitHub** | nunca sozinho: apenas os comandos por lotes que lançar com um `--go` explícito |
@@ -45,7 +45,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 | | |
 |---|---|
 | **Maturidade** | functional |
-| **Testes** | 2084 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Testes** | 2103 métodos de teste (`python -m unittest discover -s monitor/tests`) |
 | **Definições** | 401 definições, todas com ajuda |
 | **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
 | **Testado no CI em** | ubuntu, windows, Python 3.11, 3.13 |
@@ -64,6 +64,10 @@ Cada linha é uma parte deste repositório e a luz diz até onde chega hoje: o q
 | Ligação a uma ferramenta de IA e MCP | 🟡 | O feed, o estado, o fluxo, o hook e as ferramentas MCP são testados com um servidor real e um cliente simulado; nenhum utilizador independente os usou ainda. |
 | Edição lite | 🟡 | Testada no CI e partilha os canais e definições da completa; pouco uso real até agora. |
 | GitHub App, painel central e modo poupança | 🟠 | Novo: testado com servidores e ficheiros simulados; ainda não correu muito tempo com o serviço real. |
+| Pontuação de cada conta | 🟡 | Testada com séries sintéticas, dados de teste e servidores simulados; ainda não foi observada durante semanas em contas reais. |
+| Imagem Docker e modo de serviço | 🟡 | A imagem é construída e testada na CI (sem root, só de leitura, com um acesso revogado); ainda pouco tempo como serviço de longa duração. |
+| Modo de equipa e várias contas | 🟡 | Testado com processos reais e utilizadores simulados; uma equipa real ainda não o usou durante muito tempo. |
+| Armazenamento (ficheiros e SQLite) | 🟡 | Testado com os dois suportes e as migrações entre eles; uma base de dados com meses ainda não passou por uma atualização. |
 | Linux e macOS | 🟠 | Testados só no CI; o uso diário é no Windows. |
 
 <!-- glance:end -->

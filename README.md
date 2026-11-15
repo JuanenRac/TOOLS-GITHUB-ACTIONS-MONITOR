@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2084_passing-brightgreen.svg" alt="2084 tests">
+  <img src="https://img.shields.io/badge/Tests-2103_passing-brightgreen.svg" alt="2103 tests">
 </p>
 
 > Watches the workflows of every repository you own and tells you, on one local page, what is red, what is stuck and what is waiting for you.
@@ -32,7 +32,7 @@
 
 | | |
 |---|---|
-| **Version** | **1.8.1** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **1.9.0** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Needs** | Python 3.11+ and the GitHub CLI (`gh auth login`); nothing else (the terminal view uses the optional package `rich`) |
 | **Opens** | a page on `127.0.0.1` only, in eight languages |
 | **Writes to GitHub** | never by itself: only batch commands you run with an explicit `--go` |
@@ -45,7 +45,7 @@
 | | |
 |---|---|
 | **Maturity** | functional |
-| **Tests** | 2084 test methods (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 2103 test methods (`python -m unittest discover -s monitor/tests`) |
 | **Settings** | 401 settings, all with help |
 | **Languages** | 8 (English, Spanish, German, French, Italian, Japanese, Chinese, Portuguese) |
 | **Tested in the CI on** | ubuntu, windows, Python 3.11, 3.13 |
@@ -64,6 +64,10 @@ Each line is one part of this repository and the light says how far it is today:
 | Connection with an AI tool and MCP | 🟡 | The feed, the state, the stream, the hook and the MCP tools are tested with a real server and a simulated client; no independent user has run them yet. |
 | Lite edition | 🟡 | Tested in the CI and shares the channels and settings of the complete one; little real use so far. |
 | GitHub App, central panel and Low mode | 🟠 | New: tested with simulated servers and files; not yet run for a long time against the real service. |
+| Score of each account | 🟡 | Tested with synthetic series, fixtures and simulated servers; it has not been watched for weeks on real accounts yet. |
+| Docker image and service mode | 🟡 | The image is built and tested in the CI (non-root, read-only, a revoked login); little time yet as a long-lived service. |
+| Team mode and several accounts | 🟡 | Tested with real processes and simulated users; a real team has not used it for long. |
+| Storage (files and SQLite) | 🟡 | Tested with both backends and the migrations between them; a database that is months old has not been through an upgrade yet. |
 | Linux and macOS | 🟠 | Tested in the CI only; the daily use is on Windows. |
 
 <!-- glance:end -->

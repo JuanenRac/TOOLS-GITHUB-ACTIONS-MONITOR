@@ -7,20 +7,15 @@
 
 Ideas that did not fit in the current version, in no promised order. They are directions, not commitments; an issue or a pull request is the best way to move one forward.
 
-## In 1.8.0 (the next release)
+## Done in 1.8.0
 
-Everything listed here is written and tested; it is either already in the main branch or waiting in a pull request. Nothing is claimed as proven on live services (see "Next").
-
-### Already in the main branch
+Everything listed here shipped in the 1.8 series and is tested; nothing is claimed as proven on live services.
 
 - A new folder layout (the package in `src/`, the page, the examples and the languages in `assets/`), with a migration tool that moves an old flat installation without deleting anything.
 - A storage layer behind one interface, with the file backend that keeps the layout of `accounts/<id>/`, atomic writes and backups that any backend can restore.
 - An optional SQLite backend (off by default), one database per account, versioned migrations, a busy timeout that can be set, and tools to move the state between the file backend and SQLite in either direction with a dry run first.
 - The history of changes is translated in the eight languages back to 1.0.0, and a test keeps it complete.
 - Retention and rotation of the history (events and analytics kept for a number of days, delete or archive, one audit line per pass, a size warning in the doctor; the state of the sentinels and the configuration are never touched).
-
-### Finished and waiting to be merged
-
 - Network mode: the lock-out brakes again before the token is looked at, a declared reverse proxy is never taken for this computer, remote reads of the settings are limited to what a remote client may change, and the deployment guide has the full recipe.
 - The AI feed is cleaned field by field, only GitHub addresses of closed shapes pass, and the hook hands over no log text, only the repository, the workflow, the result and the link.
 - Identity reads are always the user's, a read is judged on a white list, and the token file of the second account stays inside the accounts folder.
@@ -31,10 +26,6 @@ Everything listed here is written and tested; it is either already in the main b
 - The terminal application edits lists and maps.
 - Team mode (off by default): users, roles (admin, maintainer, viewer) and sessions kept in the storage, a login page, a Bearer token for clients that are not a browser, stable JSON errors and a recovery of an administrator from the console of this computer. Individual mode keeps working without a login and the lite edition never has one.
 - A livelier page: animated icons, status bulbs whose motion follows their state, answers to hover, focus and click, all of it off with reduced motion and light in the lite edition.
-
-### Still being finished
-
-- Silences that remember who made them (needs team mode).
 
 ## Planned, in this order
 

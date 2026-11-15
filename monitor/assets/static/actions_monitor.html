@@ -118,7 +118,7 @@ svg{display:block;max-width:none}svg text{fill:var(--mut);font-size:12px}
 .alert{padding:7px 10px;border:1px solid var(--bad);border-radius:8px;margin-bottom:6px}.alert.warn{border-color:var(--warn)}
 /* tabs: each one fits the screen */
 #t-now{grid-template-columns:minmax(0,1fr) minmax(0,2.2fr);gap:12px}
-#t-charts{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) minmax(0,1.3fr);grid-template-rows:minmax(0,1fr) minmax(0,1.2fr);gap:12px}
+#t-charts{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) minmax(0,1.3fr);grid-template-rows:minmax(260px,1fr) minmax(300px,1.2fr);gap:12px;overflow:auto}
 #t-charts .wide{grid-column:1/-1}
 #t-hist,#t-repos{grid-template-rows:minmax(0,1fr)}
 /* Sentinel */
@@ -957,17 +957,20 @@ function now_(d){
     return head+nowCard(g)}).join("");
 }
 function box(id){const el=$(id);return {el,w:Math.max(260,el.clientWidth||600),h:Math.max(160,el.clientHeight||260)}}
+function textW(s,px){return [...String(s)].reduce((a,c)=>a+(c.charCodeAt(0)>0x2e80?px:px*0.56),0)}
 function donut(ok,bad,other){
   const {el,w,h}=box("donut"),tot=ok+bad+other;
   if(!tot){el.innerHTML=`<span class="mut">${esc(T("ui.d_none"))}</span>`;return}
-  const size=Math.min(w*0.5,h-8,260),r=size/2-14,cx=size/2,cy=size/2+4,sw=Math.max(18,size*0.14);
   const parts=[[ok,"var(--ok)",T("ui.d_ok")],[bad,"var(--bad)",T("ui.d_fail")],[other,"var(--grey)",T("ui.d_other")]];
-  let acc=0,svg=`<svg width="${w}" height="${Math.max(size+8,130)}" viewBox="0 0 ${w} ${Math.max(size+8,130)}" role="img" aria-label="${esc(T("ui.d_aria"))}">`;
+  const lw=Math.ceil(Math.max(...parts.map(p=>textW(p[2]+": "+p[0],14))))+26,side=w-lw-20>=100;
+  const size=side?Math.min(w-lw-20,h-8,260):Math.max(70,Math.min(w-8,h-8-parts.length*22-10,200)),r=size/2-14,cx=side?size/2:w/2,cy=size/2+4,sw=Math.max(18,size*0.14);
+  const vh=side?Math.max(size+8,parts.length*30+24):size+8+parts.length*22+10,vw=Math.ceil(side?Math.max(w,size+16+lw):w);
+  let acc=0,svg=`<svg width="${vw}" height="${vh}" viewBox="0 0 ${vw} ${vh}" role="img" aria-label="${esc(T("ui.d_aria"))}">`;
   parts.forEach(p=>{if(!p[0])return;const a0=acc/tot*2*Math.PI,a1=(acc+p[0])/tot*2*Math.PI;acc+=p[0];
     const x=(a,rr)=>cx+rr*Math.sin(a),y=(a,rr)=>cy-rr*Math.cos(a),large=a1-a0>Math.PI?1:0;
     svg+=p[0]===tot?`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${p[1]}" stroke-width="${sw}"/>`:`<path d="M${x(a0,r)} ${y(a0,r)} A${r} ${r} 0 ${large} 1 ${x(a1,r)} ${y(a1,r)}" fill="none" stroke="${p[1]}" stroke-width="${sw}"/>`});
-  svg+=`<text x="${cx}" y="${cy+8}" text-anchor="middle" style="font-size:${Math.round(size*0.17)}px;font-weight:600;fill:var(--text)">${tot}</text>`;
-  parts.forEach((p,i)=>{const ly=cy-34+i*30;svg+=`<rect x="${size+16}" y="${ly-11}" width="14" height="14" rx="2" fill="${p[1]}"/><text x="${size+38}" y="${ly}" style="font-size:14px;fill:var(--text)">${esc(p[2])}: <tspan style="font-weight:600">${p[0]}</tspan></text>`});
+  svg+=`<text x="${cx}" y="${cy+8}" text-anchor="middle" data-inside="1" style="font-size:${Math.round(size*0.17)}px;font-weight:600;fill:var(--text)">${tot}</text>`;
+  parts.forEach((p,i)=>{const lx=side?size+16:Math.max(8,(w-lw)/2),ly=side?cy-34+i*30:size+8+14+i*22;svg+=`<rect x="${lx}" y="${ly-11}" width="14" height="14" rx="2" fill="${p[1]}"/><text x="${lx+22}" y="${ly}" style="font-size:14px;fill:var(--text)">${esc(p[2])}: <tspan style="font-weight:600">${p[0]}</tspan></text>`});
   el.innerHTML=svg+"</svg>";
 }
 function rates(last){
@@ -982,7 +985,7 @@ function timeline(last){
   const {el,w}=box("timeline");
   const repos=[...new Set(last.map(r=>r.repo))].sort();
   if(!repos.length){el.innerHTML=`<span class="mut">${esc(T("ui.t_none"))}</span>`;return}
-  const rowH=24,L=Math.min(230,Math.max(140,Math.round(w*0.22))),R=14,T0=Date.now()-864e5,span=864e5,h=repos.length*rowH+46,inner=w-L-R,top=20;
+  const rowH=24,L=Math.min(230,Math.max(140,Math.round(w*0.22))),R=Math.ceil(textW(clock(new Date(),{hour:"2-digit",minute:"2-digit"}),12)/2)+8,T0=Date.now()-864e5,span=864e5,h=repos.length*rowH+46,inner=w-L-R,top=20;
   const hm={hour:"2-digit",minute:"2-digit"};
   let svg=`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(T("ui.t_aria"))}">`;
   for(let i=0;i<=6;i++){const x=L+inner*i/6,tm=new Date(T0+span*i/6);svg+=`<line x1="${x}" x2="${x}" y1="${top-4}" y2="${h-22}" stroke="var(--line)"/><text x="${x}" y="12" text-anchor="middle" style="font-size:12px">${clock(tm,hm)}</text><text x="${x}" y="${h-6}" text-anchor="middle" style="font-size:12px">${clock(tm,hm)}</text>`}
@@ -995,9 +998,9 @@ function timeline(last){
 function durations(runs){
   const {el,w,h}=box("durations"),rs=runs.filter(r=>r.status==="completed").slice(0,60).reverse();
   if(!rs.length){el.innerHTML=`<span class="mut">${esc(T("ui.no_data"))}</span>`;return}
-  const max=Math.max(...rs.map(r=>r.seconds),60),H=Math.max(120,h-34),L=52,bw=(w-L-6)/rs.length,mn=T("ui.u_min");
-  let svg=`<svg width="${w}" height="${H+30}" viewBox="0 -12 ${w} ${H+42}" role="img" aria-label="${esc(T("ui.dur_aria"))}">`;
-  [0,.5,1].forEach(f=>{const y=H-H*f;svg+=`<line x1="${L}" x2="${w}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="0" y="${y+4}" style="font-size:12px">${(max*f/60).toFixed(max/60<5?1:0)} ${esc(mn)}</text>`});
+  const max=Math.max(...rs.map(r=>r.seconds),60),H=Math.max(120,h-42),mn=T("ui.u_min"),ticks=[0,.5,1].map(f=>(max*f/60).toFixed(max/60<5?1:0)+" "+mn),L=Math.max(52,Math.ceil(Math.max(...ticks.map(t=>textW(t,12))))+10),bw=(w-L-6)/rs.length;
+  let svg=`<svg width="${w}" height="${H+42}" viewBox="0 -12 ${w} ${H+42}" role="img" aria-label="${esc(T("ui.dur_aria"))}">`;
+  [0,.5,1].forEach(f=>{const y=H-H*f;svg+=`<line x1="${L}" x2="${w}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="0" y="${y+4}" style="font-size:12px">${esc((max*f/60).toFixed(max/60<5?1:0)+" "+mn)}</text>`});
   rs.forEach((r,i)=>{const hh=Math.max(2,H*r.seconds/max);svg+=`<rect x="${L+i*bw+1}" y="${H-hh}" width="${Math.max(3,bw-2)}" height="${hh}" rx="1" fill="${COLORS[r.conclusion]||"var(--grey)"}"><title>${esc(r.repo)} · ${esc(r.name)} · ${esc(r.conclusion)} · ${fmt(r.seconds)}</title></rect>`});
   svg+=`<text x="${L}" y="${H+22}" style="font-size:12px">${esc(T("ui.oldest"))}</text><text x="${w-6}" y="${H+22}" text-anchor="end" style="font-size:12px">${esc(T("ui.newest"))}</text>`;
   el.innerHTML=svg+"</svg>";

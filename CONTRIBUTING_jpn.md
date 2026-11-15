@@ -13,6 +13,7 @@
 5. **小さな一歩**: Pull Request 1件につき変更1つ、対応する行を `CHANGELOG.md` に。
 6. **図**: `docs/architecture.json` か `docs/structure.json` を編集して `python tools/make_architecture.py` / `python tools/make_structure.py` を実行します。SVG を手で編集しないでください。
 7. **8言語の変更履歴**: `monitor/CHANGELOG.md` の新しい項目には、それぞれ `monitor/docs/CHANGELOG_<spa|deu|fra|ita|jpn|zho|por>.md` に翻訳を付けます(同じバージョンと節。未翻訳の項目は翻訳された注記の下に英語の本文を残します)。翻訳にバージョンが欠けていると、`python tools/make_help_index.py --check` とリリースゲートが失敗します。
+8. **バージョンごとにヘルプ全体を見直す**：リリースの前（そのリリースのプルリクエストの中で）、すべてのヘルプのトピック - リポジトリの README とその翻訳（概要、できること、プロジェクトの状況、テスト、リポジトリ構成、ドキュメント、セキュリティ）、`monitor/docs/` の各ガイド、クイックスタート、パッケージの README - を読み、古くなった数値、バージョン、コマンド、パス、画像、機能の一覧を 8 言語で直します。ヘルプのジェネレーターとテスト（`tools/make_glance.py`、`tools/make_help_index.py`、`tools/make_screenshots.py`、`monitor/tests/test_190_help_current.py`）が検出できるのは一部だけです。
 
 ## リリースごとのステータスダッシュボード更新
 

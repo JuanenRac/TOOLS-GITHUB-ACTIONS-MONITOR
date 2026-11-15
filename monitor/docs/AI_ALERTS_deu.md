@@ -17,7 +17,7 @@ Ein roter Workflow nützt nichts, wenn niemand, der am Repository arbeitet, davo
 ## Wie eine KI es liest
 - Schreibe in die Anweisungen deines Projekts oder Skills: *„Lies zu Beginn ALERTS_BRIEF.md (Pfad) und nenne die offenen echten Meldungen.“*
 - Oder frage den laufenden Monitor: `GET /api/ai/brief` (Markdown, oder `?fmt=json`) und `GET /api/ai/alerts?since=SEKUNDEN`. Es gelten dieselben Regeln wie für den Rest der Seite (dieser Rechner; im Netzwerkmodus das Zugriffstoken).
-- Oder füge den MCP-Server hinzu (nur lesend): `python bin/mcp_server.py`, Werkzeuge `get_alerts`, `get_red_repos`, `get_run_failure`, `get_quota`; `--allow-ack` ergänzt `ack_alert` (nur lokaler Zustand). Gemini CLI, Codex und VS Code (Copilot): denselben Befehl als stdio-Server in den MCP-Einstellungen eintragen.
+- Oder füge den MCP-Server hinzu (nur lesend): `python bin/mcp_server.py`, Werkzeuge `get_alerts`, `get_red_repos`, `get_run_failure`, `get_quota`, `get_score`; `--allow-ack` ergänzt `ack_alert` (nur lokaler Zustand). Gemini CLI, Codex und VS Code (Copilot): denselben Befehl als stdio-Server in den MCP-Einstellungen eintragen.
 
 ## Meldungen, die dich erreichen
 - Eine NEUE echte Meldung geht an die Benachrichtigungskanäle, die du schon eingerichtet hast (Einstellungen > Benachrichtigungen).

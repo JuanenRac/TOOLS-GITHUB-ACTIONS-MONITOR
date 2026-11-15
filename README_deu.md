@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2084_passing-brightgreen.svg" alt="2084 tests">
+  <img src="https://img.shields.io/badge/Tests-2103_passing-brightgreen.svg" alt="2103 tests">
 </p>
 
 > Überwacht die Workflows aller deiner Repositories und zeigt dir auf einer lokalen Seite, was rot ist, was hängt und was auf dich wartet.
@@ -32,7 +32,7 @@
 
 | | |
 |---|---|
-| **Version** | **1.8.1** · [alle Releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **1.9.0** · [alle Releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Voraussetzung** | Python 3.11+ und die GitHub-CLI (`gh auth login`); sonst nichts (die Konsolenansicht nutzt das optionale Paket `rich`) |
 | **Öffnet** | eine Seite nur auf `127.0.0.1`, in acht Sprachen |
 | **Schreibt auf GitHub** | nie von selbst: nur Stapelbefehle, die du mit ausdrücklichem `--go` startest |
@@ -45,7 +45,7 @@
 | | |
 |---|---|
 | **Reifegrad** | functional |
-| **Tests** | 2084 Testmethoden (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 2103 Testmethoden (`python -m unittest discover -s monitor/tests`) |
 | **Einstellungen** | 401 Einstellungen, alle mit Hilfe |
 | **Sprachen** | 8 (Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch) |
 | **Im CI getestet auf** | ubuntu, windows, Python 3.11, 3.13 |
@@ -64,6 +64,10 @@ Jede Zeile ist ein Teil dieses Repositories, und die Ampel sagt, wie weit er heu
 | Verbindung zu einem KI-Werkzeug und MCP | 🟡 | Feed, Zustand, Stream, Hook und MCP-Werkzeuge sind mit einem echten Server und einem simulierten Client getestet; noch kein unabhängiger Nutzer hat sie benutzt. |
 | Lite-Edition | 🟡 | Im CI getestet und teilt Kanäle und Einstellungen mit der vollständigen; bisher wenig echter Einsatz. |
 | GitHub-App, zentrales Panel und Sparmodus | 🟠 | Neu: mit simulierten Servern und Dateien getestet; noch nicht lange gegen den echten Dienst gelaufen. |
+| Punktzahl jedes Kontos | 🟡 | Mit synthetischen Reihen, Testdaten und simulierten Servern geprüft; noch nicht wochenlang an echten Konten beobachtet. |
+| Docker-Image und Dienstmodus | 🟡 | Das Image wird in der CI gebaut und geprüft (ohne Root, schreibgeschützt, mit widerrufener Anmeldung); noch wenig Zeit als Langzeitdienst. |
+| Teammodus und mehrere Konten | 🟡 | Mit echten Prozessen und simulierten Benutzern geprüft; ein echtes Team hat ihn noch nicht lange genutzt. |
+| Speicherung (Dateien und SQLite) | 🟡 | Mit beiden Speichern und den Migrationen dazwischen geprüft; eine monatealte Datenbank hat noch kein Update durchlaufen. |
 | Linux und macOS | 🟠 | Nur im CI getestet; der tägliche Einsatz ist unter Windows. |
 
 <!-- glance:end -->
