@@ -44,6 +44,10 @@ Jedes Konto hat seine eigene Punktzahl. Das Detail gliedert sie nach Repository 
 
 Ein Chip in der Kopfzeile, neben den Bereitschafts-Chips, zeigt die Punktzahl: die Zahl, den Buchstaben, einen Pfeil mit der Änderung gegenüber dem vorherigen Fenster und eine kleine Linie der letzten Tage. Seine Farbe folgt dem Buchstaben (A und B grün, C bernstein, D und E rot). Solange es keine Zahl gibt, ist er neutral und sagt warum (Kalibrierung, zu wenige Daten). Ein Stern hinter dem Buchstaben bedeutet, dass ein Teil noch nicht eingerechnet ist (heute die Sicherheit): eine hohe Zahl heißt dann nicht, dass alles in Ordnung ist. Beim Darüberfahren zeigt er die Abdeckung, die Teile mit ihren Gewichten und das schwächste Repository. Der Chip erscheint weder in Lite noch bei ausgeschalteter Punktzahl (`score.enabled`).
 
+## Für andere Werkzeuge
+
+Die Metriken (`/metrics`, wenn die Prometheus-Ausgabe an ist) enthalten drei Reihen ohne Labels: `ghamon_score_scored` (1, wenn das Konto eine Zahl hat), `ghamon_score_coverage` (der Anteil der Gewichte mit Daten, von 0 bis 1) und `ghamon_score` (die Zahl, nur solange es eine gibt: sie wird nie als 0 exportiert, wenn keine da ist). Der MCP-Server hat ein schreibgeschütztes Werkzeug `get_score` mit der Antwort der API. `--demo` zeigt eine erfundene Punktzahl und schreibt nichts. Das Beispiel-Dashboard für Grafana (`docs/grafana/monitor_dashboard.json`) hat ein Panel für die Punktzahl und eines für die Punktzahl im Zeitverlauf.
+
 ## Die API
 
 `GET /api/score` liefert die neueste Momentaufnahme des Kontos: `state`, `score`, `letter`, `trend`, `parts`, `coverage`, `data_quality`, `complete`, `missing_parts`, `repos`, `age_seconds` und `stale` (wahr, wenn die Momentaufnahme älter als drei Stunden ist). `GET /api/score/history` liefert die Punkte über die Zeit, älteste zuerst (`?hours=` ab jetzt rückwärts, höchstens 90 Tage, und `?limit=`, höchstens 2000). Eine fehlende Zahl ist `null`, nie 0. Im Teammodus darf die Punktzahl lesen, wer das Konto sehen darf; die Gewichte und die Grenzen sind Einstellungen, die nur ein Administrator ändert.
