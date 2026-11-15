@@ -283,6 +283,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/COLLAB_ita.md`](monitor/docs/COLLAB_ita.md): la sentinella Collab, la scheda Avvisi e i silenziamenti
 - [`monitor/docs/SENTINEL_SECURITY_ita.md`](monitor/docs/SENTINEL_SECURITY_ita.md): La sentinella di sicurezza: Dependabot, analisi del codice, segreti, protezione dei branch, permessi dei workflow e CODEOWNERS, e ciò che non ha potuto controllare
 - [`monitor/docs/HEALTH_ita.md`](monitor/docs/HEALTH_ita.md): La salute di un repository e del team: di cosa è fatta, la scheda Team, i link diretti e l'API
+- [`monitor/docs/REPORT_SCHEDULE_ita.md`](monitor/docs/REPORT_SCHEDULE_ita.md): Rapporti pianificati: il punteggio, cosa è cambiato, i repository che richiedono una persona e gli avvisi aperti in HTML e Markdown, la pianificazione e i file
 - [`monitor/docs/CLI_ita.md`](monitor/docs/CLI_ita.md): la riga di comando come client del monitor
 - [`monitor/docs/ACCOUNTS_ita.md`](monitor/docs/ACCOUNTS_ita.md): più account, un processo ciascuno
 - [`monitor/docs/QUOTAS_ita.md`](monitor/docs/QUOTAS_ita.md): quote e piani di GitHub
