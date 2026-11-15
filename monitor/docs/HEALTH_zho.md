@@ -1,0 +1,29 @@
+<!--
+  Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+  GPL-3.0-or-later - see LICENSE
+-->
+
+[🇺🇸 English](HEALTH.md) | [🇪🇸 Español](HEALTH_spa.md) | [🇫🇷 Français](HEALTH_fra.md) | [🇮🇹 Italiano](HEALTH_ita.md) | [🇩🇪 Deutsch](HEALTH_deu.md) | **🇨🇳 简体中文** | [🇯🇵 日本語](HEALTH_jpn.md) | [🇵🇹 Português](HEALTH_por.md)
+
+# 仓库与团队的健康状况
+
+仅 Complete。两个只读视图，由监视器已有的数据生成（运行记录、红色和卡住的工作流、各哨兵的未处理警报、发布就绪情况）。它们从不调用 GitHub。
+
+## 仓库健康由什么组成
+
+| 部分 | 含义 |
+|---|---|
+| CI | 最近 24 小时的成功与失败、当前为红色的工作流、卡住的运行 |
+| 警报 | CI、协作和安全三个哨兵的全部未处理警报，按哨兵和级别统计 |
+| 发布 | 发布就绪情况中该仓库的一行（如果有） |
+| 活跃度 | 最近一次运行的开始时间以及 7 天内的运行数 |
+| 谁看过它 | 每个哨兵的生命周期：正常、降级、暂停、出错或关闭 |
+
+状态为 **差**（有红色工作流，或有严重或错误级别的警报）、**警告**（有警告警报或卡住的运行）、**正常**，或 **未查看**（没有可判断的依据）。没有任何哨兵查看过、或哨兵无法读取的仓库绝不会显示为正常：它会写明“未被完整查看，涉及：”并列出是谁。风险值是排名所依据的数字：每个红色工作流（30）、卡住的运行（10）、严重警报（25）、错误警报（10）、警告警报（3）和信息警报（1）都会加分，所有仓库的权重相同。
+
+## 在哪里查看
+
+- **团队**标签页：排名（最需要人处理的仓库在前）、合计、按生态系统和按哨兵的数字，以及三个筛选条件：生态系统、最低严重程度和名称片段。点击仓库可查看详情。
+- 用于墙面屏幕的深度链接：`?view=team&chrome=0`、`?view=repos&chrome=0` 和 `?view=repo&repo=owner/name&chrome=0`。
+- API：`GET /api/team/health?ecosystem=&severity=&q=&label=` 和 `GET /api/repos/<owner>/<repo>/health`。两者都需要查看该账户的权限；响应带有 `schema: 1`。未知仓库返回 404 和 `code: repo_unknown`。
+- Lite 版保留其简单的运行视图，没有该标签页，也没有这些路由。
