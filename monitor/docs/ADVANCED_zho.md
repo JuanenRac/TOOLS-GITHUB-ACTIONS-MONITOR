@@ -96,4 +96,5 @@
 - `reports.workflow_hygiene.enabled`, `reports.queue.enabled`, `reports.release_view.enabled`, `reports.supply_chain.enabled` - docs/EXTRAS_zho.md
 - `ai.skill` - docs/SKILLS_zho.md
 - `ui.orientation`, `ui.screen1_tabs`, `ui.now_sort`, `ui.alerts_sort` - docs/SCREENS_zho.md
+- `ports.complete`, `ports.lite` - docs/DEPLOYMENT_zho.md
 - `notify.users.enabled` - docs/NOTIFICATIONS_zho.md

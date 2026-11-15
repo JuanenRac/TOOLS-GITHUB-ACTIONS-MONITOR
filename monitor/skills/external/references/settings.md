@@ -210,6 +210,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `outputs.json.enabled` (secure) | `-` | outputs | Grafana JSON source |
 | `outputs.prometheus.enabled` (secure) | `-` | outputs | Prometheus: /metrics |
 | `outputs.prometheus.per_repo` | `-` | outputs | Prometheus: series per repository |
+| `ports.complete` | `8765` | general | Port of the complete edition |
+| `ports.lite` | `8766` | general | Port of the lite edition |
 | `profiles_file` | `-` | paths | Batch profiles file |
 | `quota.alert_percent` | `90` | basic | Alert at this share of the included minutes |
 | `quota.billing_api` (secure) | `false` | basic | Read the real usage from the billing report of GitHub |
