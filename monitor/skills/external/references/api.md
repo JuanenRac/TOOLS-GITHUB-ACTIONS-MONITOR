@@ -28,6 +28,7 @@ a call marked *this computer only* is refused when it comes from the network. Ev
 | `/api/ai/brief` | GET | viewer | the short brief of the real open alerts (Markdown, or `?fmt=json`) |
 | `/api/ai/failures` | GET | viewer | the book of failures, newest first (`?since=&repo=&category=&limit=`) |
 | `/api/ai/lessons` | GET,POST | viewer / admin | GET: the lessons that apply now, the repeated failures and the library (`?fmt=md|brief&repo=`); POST: write a lesson (switch, administrator, confirmation) |
+| `/api/ai/presets` | GET | viewer | the presets of AI providers (address, name of the variable of the key, example models, privacy); data only, never a key |
 | `/api/ai/state` | GET | viewer | every signal of the monitor, versioned, plus the lessons that apply now |
 | `/api/ai/stream` | GET | viewer | server-sent events of the alerts as they open and resolve (off by default) |
 | `/api/ai/test` | POST | admin | test the connection to the AI provider (this computer only) |

@@ -235,6 +235,8 @@ def compat_problem(cfg):
         return i18n.t("ai.need_https")
     if not cfg.get("model"):
         return i18n.t("ai.need_model")
+    if _loopback(cfg["base_url"]) and not cfg.get("api_key_env"):
+        return None      # a server on this computer (LM Studio, llama.cpp, vLLM...) may need no key at all
     if not ENV_NAME.match(cfg.get("api_key_env") or ""):
         return i18n.t("ai.need_env_name")
     if not os.environ.get(cfg["api_key_env"]):
@@ -246,14 +248,14 @@ def openai_compatible_chat(cfg, system, user):
     problem = compat_problem(cfg)
     if problem:
         raise RuntimeError(problem)
-    key = os.environ[cfg["api_key_env"]]  # in memory for the call only; never logged
+    key = os.environ.get(cfg.get("api_key_env") or "", "")  # in memory for the call only; never logged
     url = cfg["base_url"].rstrip("/")
     if not url.endswith("/chat/completions"):
         url += "/chat/completions"
     try:
         body = _post_json(url, {"model": cfg["model"], "temperature": 0.1, "max_tokens": 500,
                                 "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]},
-                          {"Authorization": "Bearer " + key, "api-key": key}, cfg["timeout_seconds"])
+                          {"Authorization": "Bearer " + key, "api-key": key} if key else {}, cfg["timeout_seconds"])
     except urllib.error.HTTPError as error:
         raise RuntimeError(i18n.t("ai.provider_answered", code=error.code)) from None
     return (((body.get("choices") or [{}])[0]).get("message") or {}).get("content", "")
