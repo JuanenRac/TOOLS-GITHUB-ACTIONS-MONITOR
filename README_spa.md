@@ -145,10 +145,14 @@ Cada imagen sigue el tema claro u oscuro de tu página de GitHub.
 - **Centinela**: alertas de seguridad, higiene de repositorios, pull requests antiguas, versiones listas para publicar, compilaciones pendientes de firma y un parte en lenguaje llano.
 - **Centinela Collab y una lista de alertas**: incidencias y pull requests abiertos que necesitan a una persona (olvidados, críticos, revisiones en espera, borradores viejos, conflictos), solo lectura y con un reloj propio, y una pestaña Alertas con todos los centinelas en una lista, filtro por origen y silencios locales que acaban solos.
 - **Barra de estado, pantalla completa y tablas ordenables**: el aviso más importante (y una ventana con todos), la conexión, la cuota, la última lectura, el modo, la dirección y el reloj al pie de la página; un botón de pantalla completa; Repositorios e Historial se ordenan por una o varias columnas, con las columnas que elijas.
-- **La línea de comandos como cliente**: `bin/monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`) lee lo que dice el monitor en marcha, con `--json` y códigos de salida estables; nunca escribe en GitHub.
+- **La línea de comandos como cliente**: `bin/monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`, `score`) lee lo que dice el monitor en marcha, con `--json` y códigos de salida estables; nunca escribe en GitHub.
 - **Dos skills para IAs**: guías cortas, en inglés, para la IA integrada en el monitor (local o de un proveedor) y para las IA que hablan con él desde fuera (línea de comandos, HTTP o archivos, MCP, stream), generadas desde el código para que no falte nada; se instalan con `python bin/monitor_cli.py install-skill internal|external --dest CARPETA` o se copian desde la pestaña IA de los Ajustes (`monitor/docs/SKILLS_spa.md`).
 - **Fallos y lecciones**: un libro local de los fallos de su CI, reglas que clasifican cada uno en una categoría, una biblioteca de lecciones (`monitor/docs/LESSONS_spa.md`) con la guardia que lo habría evitado, la tendencia de 24 horas y 7 días, `ai/LESSONS.md`, `/api/ai/lessons` y un resumen previo al push para cualquier herramienta de IA; solo lectura, nada sale del equipo.
 - **Todos los tamaños de pantalla y varias pantallas**: la página se ajusta a una ventana desde un móvil hasta 4K, vertical o girada, y un monitor puede servir hasta tres pantallas (`/screen/1` a `/screen/3`), cada una con sus pestañas y su orientación (`monitor/docs/SCREENS_spa.md`).
+- **Una puntuación por cuenta**: un número de 0 a 100, una letra de A a E y una tendencia, hechos con la fiabilidad de la CI, su velocidad, el tiempo de recuperación y lo rápido que se cierran las alertas de colaboración; dice «calibrando» o «datos insuficientes» en vez de un número que no puede respaldar, muestra lo que todavía no cubre, está en la cabecera de la página, tiene una orden `score`, avisa cuando baja y está en las métricas y en el servidor MCP (`monitor/docs/SCORE.md`).
+- **Como servicio**: la imagen oficial de Docker (sin root, de solo lectura), un fichero Compose con proxy opcional, una unidad de systemd, una comprobación de salud profunda y la orden que crea el primer administrador (`monitor/docs/DEPLOYMENT.md`).
+- **Varias cuentas, un equipo y un sitio para los datos**: un proceso por cuenta, usuarios con roles y sus propias cuentas, los ficheros en `config/`, `data/`, `logs/` y `ai/`, un almacenamiento SQLite opcional con retención y copia de seguridad, y los puertos como ajustes (`monitor/docs/ACCOUNTS.md`, `monitor/docs/STORAGE.md`, `monitor/docs/LAYOUT.md`).
+- **Listas que se ordenan y se pliegan**: «Ocurriendo ahora» de siete maneras y la pestaña de Alertas de nueve, con un botón para plegar o desplegar todos los repositorios; la elección se recuerda por usuario.
 - **Notificaciones para cada usuario**: en el modo equipo cada usuario elige canales (ntfy, Teams, correo), el nivel mínimo y los resúmenes en un panel de la página (`monitor/docs/NOTIFICATIONS_spa.md`).
 - **Página de ajustes**: cambia rutas, intervalos, cuotas e interruptores desde el navegador; solo una lista fija de claves, validadas, con copia de seguridad antes de cada guardado.
 - **Gráficas e historial**: minutos de cómputo, fallos y éxitos con barras animadas y un historial diario (respeta el movimiento reducido).
@@ -212,6 +216,7 @@ Todo apagado por defecto, solo local (`127.0.0.1`) y sin token adicional. Al act
 - Escucha solo en `127.0.0.1` y rechaza las peticiones cuyo `Host` u `Origin` no sean locales. No lo enlaces nunca a `0.0.0.0`: no tiene inicio de sesión.
 - No guarda ningún token: usa tu propio `gh` (salvo que actives el token opcional del monitor en Ajustes > Avanzado).
 - No escribe nada en GitHub por sí solo. Solo `dispatch --go`, `dispatch --real` y `finalize --execute` escriben, y únicamente cuando tú los lanzas.
+- El modo de red y el modo de equipo están apagados por defecto; encendidos, el acceso, los roles, los bloqueos y el registro de auditoría protegen la página, y cada petición se juzga para una sola cuenta (`monitor/docs/DEPLOYMENT.md`, `monitor/docs/ACCOUNTS.md`).
 - **Analítica**: p50 / p95 de la duración, del tiempo en cola y de cada paso de cada workflow, workflows inestables (fallan y luego pasan en el mismo commit) y workflows que se han vuelto más lentos; exportado a Prometheus y Grafana.
 - **Ahorra cuota y sobrevive a un corte**: lecturas condicionales (un 304 no cuesta nada) y un modo de última imagen con aviso de sin conexión que se reanuda solo.
 - **Webhook de entrada y notificaciones**: eventos firmados actualizan un repositorio en tiempo real; mensajes opcionales a Telegram, Discord, Slack, Matrix, MQTT o una dirección local (nunca una escritura en GitHub).
@@ -279,6 +284,12 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/MODES_spa.md`](monitor/docs/MODES_spa.md): modos de trabajo: normal, rápido y turbo
 - [`monitor/docs/AI_CONNECTION_spa.md`](monitor/docs/AI_CONNECTION_spa.md): Conectar una herramienta de IA: todo lo que dice el monitor, como señales, en el resumen, el endpoint, las herramientas MCP y el hook
 - [`monitor/docs/QUOTA_spa.md`](monitor/docs/QUOTA_spa.md): Más cuota, menos gasto: modo Bajo, el panel central, una GitHub App y cómo compartir la cuota
+- [`monitor/docs/EXTRAS_spa.md`](monitor/docs/EXTRAS_spa.md): Extras opcionales: el registro del paso fallido y un token de solo lectura de la GitHub App
+- [`monitor/docs/SCORE_spa.md`](monitor/docs/SCORE_spa.md): La puntuación de una cuenta: partes, estados, API, la ficha de la cabecera, la alerta y los ajustes
+- [`monitor/docs/STORAGE_spa.md`](monitor/docs/STORAGE_spa.md): Almacenamiento y retención: ficheros o SQLite, copia de seguridad, migración y qué se conserva
+- [`monitor/docs/ADVANCED_spa.md`](monitor/docs/ADVANCED_spa.md): Funciones avanzadas (todas apagadas por defecto)
+- [`monitor/docs/AI_ALERTS_spa.md`](monitor/docs/AI_ALERTS_spa.md): Avisos para IAs: el feed, el resumen, el hook y el stream
+- [`monitor/docs/AUDIT_PACKAGE_spa.md`](monitor/docs/AUDIT_PACKAGE_spa.md): Paquete para el auditor
 
 ## Contribuir
 
