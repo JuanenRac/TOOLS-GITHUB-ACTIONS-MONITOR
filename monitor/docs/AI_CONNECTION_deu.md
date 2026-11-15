@@ -66,7 +66,7 @@ Gehostete Dienste und lokale Server, deren Protokoll der Monitor bereits spricht
 | Name | Art | Anbieter | Adresse | Schlüsselvariable | Beispielmodelle | Datenschutz | Stand |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | OpenAI | gehostet | `openai-compatible` | `https://api.openai.com/v1` | `OPENAI_API_KEY` | `gpt-4o-mini`, `gpt-4.1-mini` | wird über das Internet gesendet | protokollkompatibel, mit diesem Werkzeug nicht getestet |
-| Anthropic | gehostet | `anthropic` | `Standardadresse` | `ANTHROPIC_API_KEY` | `claude-sonnet-5-5` | wird über das Internet gesendet | protokollkompatibel, mit diesem Werkzeug nicht getestet |
+| Anthropic | gehostet | `anthropic` | `Standardadresse` | `ANTHROPIC_API_KEY` | — | wird über das Internet gesendet | protokollkompatibel, mit diesem Werkzeug nicht getestet |
 | Google Gemini | gehostet | `openai-compatible` | `https://generativelanguage.googleapis.com/v1beta/openai` | `GEMINI_API_KEY` | `gemini-2.5-flash` | wird über das Internet gesendet | Adresse in der öffentlichen Dokumentation gelesen; protokollkompatibel, mit diesem Werkzeug nicht getestet |
 | xAI Grok | gehostet | `openai-compatible` | `https://api.x.ai/v1` | `XAI_API_KEY` | `grok-4` | wird über das Internet gesendet | protokollkompatibel, mit diesem Werkzeug nicht getestet |
 | Mistral | gehostet | `openai-compatible` | `https://api.mistral.ai/v1` | `MISTRAL_API_KEY` | `mistral-small-latest` | wird über das Internet gesendet | protokollkompatibel, mit diesem Werkzeug nicht getestet |

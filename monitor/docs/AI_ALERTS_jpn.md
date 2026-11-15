@@ -48,7 +48,7 @@
 | 名前 | 種類 | プロバイダー | アドレス | キーの変数 | モデルの例 | プライバシー | 状態 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | OpenAI | ホスト型 | `openai-compatible` | `https://api.openai.com/v1` | `OPENAI_API_KEY` | `gpt-4o-mini`, `gpt-4.1-mini` | インターネット経由で送信 | プロトコル互換で、このツールでは未検証 |
-| Anthropic | ホスト型 | `anthropic` | `既定のアドレス` | `ANTHROPIC_API_KEY` | `claude-sonnet-5-5` | インターネット経由で送信 | プロトコル互換で、このツールでは未検証 |
+| Anthropic | ホスト型 | `anthropic` | `既定のアドレス` | `ANTHROPIC_API_KEY` | — | インターネット経由で送信 | プロトコル互換で、このツールでは未検証 |
 | Google Gemini | ホスト型 | `openai-compatible` | `https://generativelanguage.googleapis.com/v1beta/openai` | `GEMINI_API_KEY` | `gemini-2.5-flash` | インターネット経由で送信 | 公式ドキュメントで確認したアドレス。プロトコル互換で、このツールでは未検証 |
 | xAI Grok | ホスト型 | `openai-compatible` | `https://api.x.ai/v1` | `XAI_API_KEY` | `grok-4` | インターネット経由で送信 | プロトコル互換で、このツールでは未検証 |
 | Mistral | ホスト型 | `openai-compatible` | `https://api.mistral.ai/v1` | `MISTRAL_API_KEY` | `mistral-small-latest` | インターネット経由で送信 | プロトコル互換で、このツールでは未検証 |

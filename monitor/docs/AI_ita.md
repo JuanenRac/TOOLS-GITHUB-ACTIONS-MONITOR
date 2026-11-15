@@ -37,7 +37,7 @@ Servizi ospitati e server locali di cui il monitor parla già il protocollo (`op
 | Nome | Tipo | Fornitore | Indirizzo | Variabile della chiave | Modelli di esempio | Privacy | Stato |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | OpenAI | ospitato | `openai-compatible` | `https://api.openai.com/v1` | `OPENAI_API_KEY` | `gpt-4o-mini`, `gpt-4.1-mini` | inviato via internet | compatibile per protocollo, non provato con questo strumento |
-| Anthropic | ospitato | `anthropic` | `indirizzo predefinito` | `ANTHROPIC_API_KEY` | `claude-sonnet-5-5` | inviato via internet | compatibile per protocollo, non provato con questo strumento |
+| Anthropic | ospitato | `anthropic` | `indirizzo predefinito` | `ANTHROPIC_API_KEY` | — | inviato via internet | compatibile per protocollo, non provato con questo strumento |
 | Google Gemini | ospitato | `openai-compatible` | `https://generativelanguage.googleapis.com/v1beta/openai` | `GEMINI_API_KEY` | `gemini-2.5-flash` | inviato via internet | indirizzo letto nella documentazione pubblica; compatibile per protocollo, non provato con questo strumento |
 | xAI Grok | ospitato | `openai-compatible` | `https://api.x.ai/v1` | `XAI_API_KEY` | `grok-4` | inviato via internet | compatibile per protocollo, non provato con questo strumento |
 | Mistral | ospitato | `openai-compatible` | `https://api.mistral.ai/v1` | `MISTRAL_API_KEY` | `mistral-small-latest` | inviato via internet | compatibile per protocollo, non provato con questo strumento |

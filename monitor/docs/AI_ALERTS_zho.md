@@ -48,7 +48,7 @@
 | 名称 | 类型 | 提供方 | 地址 | 密钥变量 | 示例模型 | 隐私 | 状态 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | OpenAI | 托管 | `openai-compatible` | `https://api.openai.com/v1` | `OPENAI_API_KEY` | `gpt-4o-mini`, `gpt-4.1-mini` | 通过互联网发送 | 协议兼容,尚未用本工具测试 |
-| Anthropic | 托管 | `anthropic` | `默认地址` | `ANTHROPIC_API_KEY` | `claude-sonnet-5-5` | 通过互联网发送 | 协议兼容,尚未用本工具测试 |
+| Anthropic | 托管 | `anthropic` | `默认地址` | `ANTHROPIC_API_KEY` | — | 通过互联网发送 | 协议兼容,尚未用本工具测试 |
 | Google Gemini | 托管 | `openai-compatible` | `https://generativelanguage.googleapis.com/v1beta/openai` | `GEMINI_API_KEY` | `gemini-2.5-flash` | 通过互联网发送 | 地址取自公开文档;协议兼容,尚未用本工具测试 |
 | xAI Grok | 托管 | `openai-compatible` | `https://api.x.ai/v1` | `XAI_API_KEY` | `grok-4` | 通过互联网发送 | 协议兼容,尚未用本工具测试 |
 | Mistral | 托管 | `openai-compatible` | `https://api.mistral.ai/v1` | `MISTRAL_API_KEY` | `mistral-small-latest` | 通过互联网发送 | 协议兼容,尚未用本工具测试 |

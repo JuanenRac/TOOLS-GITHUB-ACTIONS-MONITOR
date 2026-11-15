@@ -37,7 +37,7 @@ Hosted services and local servers whose protocol the monitor already speaks (`op
 | Name | Kind | Provider | Address | Key variable | Example models | Privacy | State |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | OpenAI | hosted | `openai-compatible` | `https://api.openai.com/v1` | `OPENAI_API_KEY` | `gpt-4o-mini`, `gpt-4.1-mini` | sent over the internet | compatible by protocol, not tested with this tool |
-| Anthropic | hosted | `anthropic` | `default address` | `ANTHROPIC_API_KEY` | `claude-sonnet-5-5` | sent over the internet | compatible by protocol, not tested with this tool |
+| Anthropic | hosted | `anthropic` | `default address` | `ANTHROPIC_API_KEY` | — | sent over the internet | compatible by protocol, not tested with this tool |
 | Google Gemini | hosted | `openai-compatible` | `https://generativelanguage.googleapis.com/v1beta/openai` | `GEMINI_API_KEY` | `gemini-2.5-flash` | sent over the internet | address read in the public documentation; compatible by protocol, not tested with this tool |
 | xAI Grok | hosted | `openai-compatible` | `https://api.x.ai/v1` | `XAI_API_KEY` | `grok-4` | sent over the internet | compatible by protocol, not tested with this tool |
 | Mistral | hosted | `openai-compatible` | `https://api.mistral.ai/v1` | `MISTRAL_API_KEY` | `mistral-small-latest` | sent over the internet | compatible by protocol, not tested with this tool |
