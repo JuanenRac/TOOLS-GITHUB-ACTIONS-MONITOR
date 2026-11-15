@@ -46,7 +46,7 @@ Une pastille dans l'en-tête, à côté des pastilles de préparation, montre le
 
 ## Pour d'autres outils
 
-Les métriques (`/metrics`, quand la sortie Prometheus est activée) portent trois séries sans étiquettes : `ghamon_score_scored` (1 quand le compte a un nombre), `ghamon_score_coverage` (la part des poids qui ont des données, de 0 à 1) et `ghamon_score` (le nombre, seulement quand il y en a un : il n'est jamais exporté comme 0 quand il n'y en a pas). Le serveur MCP a un outil en lecture seule `get_score` avec la réponse de l'API. `--demo` montre un score inventé et n'écrit rien.
+Les métriques (`/metrics`, quand la sortie Prometheus est activée) portent trois séries sans étiquettes : `ghamon_score_scored` (1 quand le compte a un nombre), `ghamon_score_coverage` (la part des poids qui ont des données, de 0 à 1) et `ghamon_score` (le nombre, seulement quand il y en a un : il n'est jamais exporté comme 0 quand il n'y en a pas). Le serveur MCP a un outil en lecture seule `get_score` avec la réponse de l'API. `--demo` montre un score inventé et n'écrit rien. Le tableau de bord Grafana d'exemple (`docs/grafana/monitor_dashboard.json`) a un panneau du score et un panneau du score dans le temps.
 
 ## L'API
 

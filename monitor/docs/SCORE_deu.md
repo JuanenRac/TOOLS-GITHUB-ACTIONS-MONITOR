@@ -46,7 +46,7 @@ Ein Chip in der Kopfzeile, neben den Bereitschafts-Chips, zeigt die Punktzahl: d
 
 ## Für andere Werkzeuge
 
-Die Metriken (`/metrics`, wenn die Prometheus-Ausgabe an ist) enthalten drei Reihen ohne Labels: `ghamon_score_scored` (1, wenn das Konto eine Zahl hat), `ghamon_score_coverage` (der Anteil der Gewichte mit Daten, von 0 bis 1) und `ghamon_score` (die Zahl, nur solange es eine gibt: sie wird nie als 0 exportiert, wenn keine da ist). Der MCP-Server hat ein schreibgeschütztes Werkzeug `get_score` mit der Antwort der API. `--demo` zeigt eine erfundene Punktzahl und schreibt nichts.
+Die Metriken (`/metrics`, wenn die Prometheus-Ausgabe an ist) enthalten drei Reihen ohne Labels: `ghamon_score_scored` (1, wenn das Konto eine Zahl hat), `ghamon_score_coverage` (der Anteil der Gewichte mit Daten, von 0 bis 1) und `ghamon_score` (die Zahl, nur solange es eine gibt: sie wird nie als 0 exportiert, wenn keine da ist). Der MCP-Server hat ein schreibgeschütztes Werkzeug `get_score` mit der Antwort der API. `--demo` zeigt eine erfundene Punktzahl und schreibt nichts. Das Beispiel-Dashboard für Grafana (`docs/grafana/monitor_dashboard.json`) hat ein Panel für die Punktzahl und eines für die Punktzahl im Zeitverlauf.
 
 ## Die API
 

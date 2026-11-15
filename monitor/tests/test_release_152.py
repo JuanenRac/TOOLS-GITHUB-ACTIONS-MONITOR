@@ -115,7 +115,7 @@ class GrafanaBoards(unittest.TestCase):
         return set(re.findall(r"ghamon_[a-z0-9_]+", text))
 
     def test_every_metric_of_every_board_is_served(self):
-        served = outputs.metrics_text(SNAP, DATA, now=NOW)
+        served = outputs.metrics_text(SNAP, DATA, now=NOW, extra={"score": {"state": "scored", "score": 80.0, "coverage": 0.8}})
         for name in ("monitor_dashboard.json", "red_by_ecosystem.json"):
             board = json.loads((HERE / "docs" / "grafana" / name).read_text(encoding="utf-8"))
             self.assertTrue(self.names(board), name)

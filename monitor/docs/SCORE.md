@@ -46,7 +46,7 @@ A chip in the header, next to the readiness chips, shows the score: the number, 
 
 ## For other tools
 
-The metrics (`/metrics`, when the Prometheus output is on) carry three series without labels: `ghamon_score_scored` (1 when the account has a number), `ghamon_score_coverage` (the share of the weights with data, from 0 to 1) and `ghamon_score` (the number, only while there is one: it is never exported as 0 when there is none). The MCP server has a read-only tool `get_score` with the answer of the API. `--demo` shows an invented score and writes nothing.
+The metrics (`/metrics`, when the Prometheus output is on) carry three series without labels: `ghamon_score_scored` (1 when the account has a number), `ghamon_score_coverage` (the share of the weights with data, from 0 to 1) and `ghamon_score` (the number, only while there is one: it is never exported as 0 when there is none). The MCP server has a read-only tool `get_score` with the answer of the API. `--demo` shows an invented score and writes nothing. The example Grafana dashboard (`docs/grafana/monitor_dashboard.json`) has a Score panel and a Score over time panel.
 
 ## The API
 

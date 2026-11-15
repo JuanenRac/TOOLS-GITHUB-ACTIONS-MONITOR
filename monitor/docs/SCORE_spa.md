@@ -46,7 +46,7 @@ Una ficha en la cabecera, junto a las fichas de preparación, muestra la puntuac
 
 ## Para otras herramientas
 
-Las métricas (`/metrics`, con la salida Prometheus activada) llevan tres series sin etiquetas: `ghamon_score_scored` (1 cuando la cuenta tiene número), `ghamon_score_coverage` (la proporción de los pesos con datos, de 0 a 1) y `ghamon_score` (el número, solo mientras lo hay: nunca se exporta como 0 cuando no lo hay). El servidor MCP tiene una herramienta de solo lectura `get_score` con la respuesta de la API. `--demo` muestra una puntuación inventada y no escribe nada.
+Las métricas (`/metrics`, con la salida Prometheus activada) llevan tres series sin etiquetas: `ghamon_score_scored` (1 cuando la cuenta tiene número), `ghamon_score_coverage` (la proporción de los pesos con datos, de 0 a 1) y `ghamon_score` (el número, solo mientras lo hay: nunca se exporta como 0 cuando no lo hay). El servidor MCP tiene una herramienta de solo lectura `get_score` con la respuesta de la API. `--demo` muestra una puntuación inventada y no escribe nada. El panel de Grafana de ejemplo (`docs/grafana/monitor_dashboard.json`) tiene un panel de la puntuación y otro de la puntuación en el tiempo.
 
 ## La API
 

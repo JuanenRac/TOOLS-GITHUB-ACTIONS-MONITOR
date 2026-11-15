@@ -92,5 +92,24 @@ class Handler(unittest.TestCase):
         self.assertIsNone(actions_monitor.score_metrics())
 
 
+class Grafana(unittest.TestCase):
+    def test_the_example_dashboard_has_the_score_panels_with_names_the_metrics_export(self):
+        board = json.loads((HERE / "docs" / "grafana" / "monitor_dashboard.json").read_text(encoding="utf-8"))
+        exprs = " ".join(t.get("expr", "") for p in board["panels"] for t in p.get("targets", []))
+        for name in ("ghamon_score", "ghamon_score_coverage"):
+            self.assertIn(name, exprs)
+        ids = [p["id"] for p in board["panels"]]
+        self.assertEqual(len(ids), len(set(ids)))
+        boxes = [(p["gridPos"]["x"], p["gridPos"]["y"], p["gridPos"]["w"], p["gridPos"]["h"]) for p in board["panels"]]
+        for i, (x1, y1, w1, h1) in enumerate(boxes):
+            for x2, y2, w2, h2 in boxes[i + 1:]:
+                self.assertFalse(x1 < x2 + w2 and x2 < x1 + w1 and y1 < y2 + h2 and y2 < y1 + h1, "two panels overlap")
+        self.assertTrue(all(b[0] + b[2] <= 24 for b in boxes))
+
+    def test_the_guide_says_so_in_the_eight_languages(self):
+        for suffix in ("", "_spa", "_deu", "_fra", "_ita", "_jpn", "_por", "_zho"):
+            self.assertIn("docs/grafana/monitor_dashboard.json", (HERE / "docs" / f"SCORE{suffix}.md").read_text(encoding="utf-8"), suffix)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -46,7 +46,7 @@
 
 ## 供其他工具使用
 
-指标（`/metrics`，在开启 Prometheus 输出时）带有三个无标签的序列：`ghamon_score_scored`（账户有数值时为 1）、`ghamon_score_coverage`（有数据的权重所占比例，0 到 1）和 `ghamon_score`（数值，仅在有数值时存在：没有数值时绝不会导出为 0）。MCP 服务器有一个只读工具 `get_score`，返回 API 的回答。`--demo` 显示一个虚构的评分，且不写入任何内容。
+指标（`/metrics`，在开启 Prometheus 输出时）带有三个无标签的序列：`ghamon_score_scored`（账户有数值时为 1）、`ghamon_score_coverage`（有数据的权重所占比例，0 到 1）和 `ghamon_score`（数值，仅在有数值时存在：没有数值时绝不会导出为 0）。MCP 服务器有一个只读工具 `get_score`，返回 API 的回答。`--demo` 显示一个虚构的评分，且不写入任何内容。 示例 Grafana 仪表盘（`docs/grafana/monitor_dashboard.json`）包含一个评分面板和一个评分随时间变化的面板。
 
 ## API
 

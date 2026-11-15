@@ -46,7 +46,7 @@
 
 ## 他のツール向け
 
-メトリクス（Prometheus 出力がオンのときの `/metrics`）には、ラベルのない 3 つの系列があります：`ghamon_score_scored`（アカウントに数値があれば 1）、`ghamon_score_coverage`（データのある重みの割合、0〜1）、`ghamon_score`（数値。ある間だけ出力され、ないときに 0 として出力されることはありません）。MCP サーバーには API の回答を返す読み取り専用のツール `get_score` があります。`--demo` は架空のスコアを表示し、何も書き込みません。
+メトリクス（Prometheus 出力がオンのときの `/metrics`）には、ラベルのない 3 つの系列があります：`ghamon_score_scored`（アカウントに数値があれば 1）、`ghamon_score_coverage`（データのある重みの割合、0〜1）、`ghamon_score`（数値。ある間だけ出力され、ないときに 0 として出力されることはありません）。MCP サーバーには API の回答を返す読み取り専用のツール `get_score` があります。`--demo` は架空のスコアを表示し、何も書き込みません。 サンプルの Grafana ダッシュボード（`docs/grafana/monitor_dashboard.json`）には、スコアのパネルと、スコアの推移のパネルがあります。
 
 ## API
 
