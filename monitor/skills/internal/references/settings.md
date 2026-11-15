@@ -147,6 +147,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `listen.tls_cert_file` (secure) | `""` | advanced | Certificate file for HTTPS (PEM) |
 | `listen.tls_key_file` (secure) | `""` | advanced | Private key file for HTTPS (PEM) |
 | `listen.token_env` (secure) | `"MONITOR_ACCESS_TOKEN"` | advanced | Environment variable with the access token |
+| `listen.trusted_proxies` (secure) | `[]` | advanced | Addresses of the proxy when it is not on this computer |
 | `listen.trusted_proxy` (secure) | `false` | advanced | Trust the reverse proxy in front |
 | `logs.failed_step.enabled` (secure) | `false` | ai | Show the log of the failed step |
 | `logs.failed_step.lines` | `12` | ai | Lines of the failed step |

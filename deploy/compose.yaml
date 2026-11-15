@@ -31,6 +31,8 @@ services:
       MONITOR_PROXY_PUBLIC_HOST: ${MONITOR_PUBLIC_HOST:-}
       MONITOR_SECURE_COOKIE: ${MONITOR_SECURE_COOKIE:-}
       MONITOR_ALLOWED_HOSTS: ${MONITOR_ALLOWED_HOSTS:-}
+      MONITOR_TRUSTED_PROXY: ${MONITOR_TRUSTED_PROXY:-}                # 1 with the profile "proxy": the failed attempts are counted against the client behind Caddy, not against Caddy
+      MONITOR_TRUSTED_PROXIES: ${MONITOR_TRUSTED_PROXIES:-}            # the network of this compose (MONITOR_SUBNET): the only addresses whose X-Forwarded-For is believed
       MONITOR_TEAM_MODE: ${MONITOR_TEAM_MODE:-}                        # 1 = users and roles (create the first administrator at /login or with auth_cli)
     secrets:
       - gh_token
@@ -66,6 +68,12 @@ services:
 secrets:
   gh_token:
     file: ./gh_token.txt
+
+networks:
+  default:                            # a fixed network, so that the monitor can name the address range of the proxy (MONITOR_TRUSTED_PROXIES); change it if it clashes with yours
+    ipam:
+      config:
+        - subnet: ${MONITOR_SUBNET:-172.29.77.0/24}
 
 volumes:
   monitor-config:

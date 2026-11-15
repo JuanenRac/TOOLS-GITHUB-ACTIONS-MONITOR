@@ -15,7 +15,7 @@ Both are **off by default** and are switched on in the Settings.
 
 ## A read-only token of the GitHub App for your tools
 
-`github_app.share_reads`: the command below prints, on this computer, an installation token of your GitHub App that lasts one hour, so that the `gh` of your tools and agents reads with the allowance of the App and not with yours (`GH_TOKEN`). The token goes only to the standard output, never to a file or a log, and the command needs `--read-only`; give the App read-only permissions when you create it. Without `github_app.share_reads` it refuses.
+`github_app.share_reads`: the command below prints, on this computer, an installation token of your GitHub App that lasts one hour, so that the `gh` of your tools and agents reads with the allowance of the App and not with yours (`GH_TOKEN`). The token goes only to the standard output, never to a file or a log, and the command needs `--read-only`; give the App read-only permissions when you create it. Without `github_app.share_reads` it refuses. The token is asked for apart from the one the monitor keeps, with read permissions only; if the answer carries any write permission the command refuses to print it.
 
 ```
 python bin/monitor_cli.py gh-token --read-only

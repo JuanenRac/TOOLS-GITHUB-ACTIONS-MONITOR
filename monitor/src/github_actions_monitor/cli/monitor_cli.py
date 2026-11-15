@@ -284,7 +284,9 @@ def cmd_gh_token(ctx):
         raise CliError(EXIT_USAGE, i18n.t("cli.gh_token_flag"))
     if not github_app.settings(config)["share_reads"]:
         raise CliError(EXIT_AUTH, i18n.t("cli.gh_token_off"))
-    value = github_app.token(config)
+    value, reason = github_app.shared_token(config)      # asked apart, for read permissions only; a token that could write is refused
+    if reason == "not_read_only":
+        raise CliError(EXIT_AUTH, i18n.t("cli.gh_token_not_read_only"))
     if not value:
         raise CliError(EXIT_DEGRADED, i18n.t("cli.gh_token_none"))
     return {"ok": True}, [value], EXIT_OK

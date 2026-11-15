@@ -15,7 +15,7 @@
 
 ## 给您的工具使用的 GitHub App 只读令牌
 
-`github_app.share_reads`：下面的命令会在本机打印您的 GitHub App 的一小时安装令牌，使您的工具和代理的 `gh` 使用 App 的配额而不是您的配额读取(`GH_TOKEN`)。令牌只输出到标准输出，绝不写入文件或日志，命令需要 `--read-only`；创建 App 时请只授予只读权限。未开启 `github_app.share_reads` 时命令会拒绝。
+`github_app.share_reads`：下面的命令会在本机打印您的 GitHub App 的一小时安装令牌，使您的工具和代理的 `gh` 使用 App 的配额而不是您的配额读取(`GH_TOKEN`)。令牌只输出到标准输出，绝不写入文件或日志，命令需要 `--read-only`；创建 App 时请只授予只读权限。未开启 `github_app.share_reads` 时命令会拒绝。 该令牌与监控自己保存的令牌分开申请，仅含读取权限；如果响应中带有任何写入权限，命令会拒绝输出。
 
 ```
 python bin/monitor_cli.py gh-token --read-only

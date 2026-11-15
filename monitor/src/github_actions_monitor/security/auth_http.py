@@ -25,7 +25,7 @@ import re
 import time
 
 from github_actions_monitor import i18n
-from github_actions_monitor.security import auth, localguard
+from github_actions_monitor.security import auth, envguard, localguard
 
 MAX_BODY = 4096
 SUPERVISOR_KEY_ENV = "MONITOR_SUPERVISOR_KEY"        # the proof the supervisor gives to the process of each account (the same names as in actions_monitor.py and accounts_supervisor.py)
@@ -38,7 +38,8 @@ MESSAGES = {"auth_required": "sign in first", "forbidden_role": "your role canno
             "username_invalid": "the user name must be 2-40 characters: a-z, 0-9, dot, dash, underscore", "accounts_invalid": "invalid list of accounts", "active_invalid": "active must be true or false",
             "password_missing": "password missing", "password_short": "password too short", "password_too_long": "password too long", "password_weak": "password too weak",
             "bearer_off": "tokens for scripts are turned off", "not_found": "not found",
-            "bootstrap_required": "create the first administrator from this computer first", "supervisor_only": "this process only answers to its supervisor"}
+            "bootstrap_required": "create the first administrator from this computer first", "supervisor_only": "this process only answers to its supervisor",
+            "account_repeated": "the account is given more than once"}
 _cache = {"at": 0.0, "exist": False}
 
 
@@ -114,6 +115,8 @@ def _address(handler):
 
 
 USER_HEADER = "X-Monitor-User"       # the supervisor tells the monitor of an account who is acting (the child trusts it only when it is an account child)
+ACCOUNT_HEADER = "X-Monitor-Account"      # ... and for which account it resolved the request: the child refuses a user that was resolved for another account
+OWN_ACCOUNT = {"id": ""}      # set by accounts/account_child.py: the account this process is the monitor of
 
 
 def acting_user(handler):
@@ -135,10 +138,14 @@ def visible_accounts(handler, ids):
 
 
 def requested_account(handler):
-    """The account a request is for: ?account=<id> or the header X-Account-Id, else the default one."""
-    from urllib.parse import parse_qs
-    asked = (parse_qs(handler.path.partition("?")[2]).get("account") or [""])[0] or handler.headers.get("X-Account-Id") or ""
-    return asked.strip().lower() or "default"
+    """The account a request is judged for. The supervisor resolves it ONCE (`handler.resolved_account`, the very account it then serves); without a supervisor it is read the same way
+    (accounts.asked_account) and, when none is asked, it is the default one. A request that repeats `account` is ambiguous: it is judged for no account (None) and refused."""
+    resolved = getattr(handler, "resolved_account", None)
+    if resolved:
+        return resolved
+    from github_actions_monitor.accounts import accounts
+    asked, repeated = accounts.asked_account(handler.path, handler.headers)
+    return None if repeated else (asked or "default")
 
 
 def active(config, lite=False):
@@ -158,9 +165,13 @@ def at_this_computer(handler):
 def child_gate(handler):
     """The monitor of one account answers only to its supervisor: every request must carry the key the supervisor gave this process when it started it. Anybody else who reaches
     the port of the child (another user of the machine) gets a 403 and never reaches the data, whatever the team mode says. No key in the environment = nothing is answered."""
-    key = os.environ.get(SUPERVISOR_KEY_ENV, "")
+    key = envguard.get(SUPERVISOR_KEY_ENV)
     given = handler.headers.get(SUPERVISOR_KEY_HEADER) or ""
     if key and isinstance(given, str) and hmac.compare_digest(key.encode(), given.encode()):
+        user = handler.headers.get(USER_HEADER)
+        resolved = handler.headers.get(ACCOUNT_HEADER) or ""
+        if user and OWN_ACCOUNT["id"] and resolved != OWN_ACCOUNT["id"]:      # defence in depth: a user the supervisor resolved for another account never reaches the data of this one
+            return fail(handler, "account_scope", 403)
         return True
     return fail(handler, "supervisor_only", 403)
 
@@ -202,7 +213,10 @@ def gate(handler, config, lite=False):
         auth.audit(cfg, "denied", context["user"], context["role"], _address(handler), path, "denied", "forbidden_role")
         return fail(handler, "forbidden_role", 403)
     listing = path == "/api/accounts" or path.startswith("/api/accounts/")      # the supervisor filters these by user itself
-    if not listing and not path.startswith("/api/auth/") and not auth.can_see_account(context["accounts"], requested_account(handler)):
+    wanted = requested_account(handler)
+    if wanted is None:
+        return fail(handler, "account_repeated", 400)
+    if not listing and not path.startswith("/api/auth/") and not auth.can_see_account(context["accounts"], wanted):
         auth.audit(cfg, "denied", context["user"], context["role"], _address(handler), path, "denied", "account_scope")
         return fail(handler, "account_scope", 403)
     if method not in ("GET", "HEAD") and kind == "cookie" and not hmac.compare_digest((handler.headers.get("X-CSRF-Token") or "").encode(), context["csrf"].encode()):
@@ -318,7 +332,7 @@ def _require(handler, storage, cfg, role, csrf=False):
 def _bootstrap(handler, storage, cfg, body, address):
     if _users_exist(storage):
         return fail(handler, "bootstrap_closed", 409)
-    if not localguard.is_this_computer(handler.client_address, handler.headers):
+    if not at_this_computer(handler):
         auth.audit(cfg, "bootstrap", address=address, result="denied", code="bootstrap_local_only")
         return fail(handler, "bootstrap_local_only", 403)
     user, code = auth.bootstrap_admin(storage, body.get("username"), body.get("password"), cfg["min_length"])
@@ -334,14 +348,15 @@ def _login(handler, storage, cfg, body, address):
     kind = "bearer" if body.get("client") == "api" else "cookie"
     if kind == "bearer" and not cfg["allow_bearer"]:
         return fail(handler, "bearer_off", 403)
-    if localguard.is_locked(address):
+    here = at_this_computer(handler)      # the person at the computer of the monitor is not locked out by anybody's wrong passwords, and theirs lock nobody
+    if not here and localguard.is_locked(address):
         return fail(handler, "locked", 429)
     if not _users_exist(storage):
         return fail(handler, "invalid_credentials", 401)
-    session, code = auth.login(storage, body.get("username"), body.get("password"), cfg, kind)
+    session, code = auth.login(storage, body.get("username"), body.get("password"), cfg, kind, local=here)
     name = auth.clean_username(body.get("username"))
     if session is None:
-        if code == "invalid_credentials":
+        if code == "invalid_credentials" and not here:
             localguard.note_failure(address, max(cfg["max_failed_logins"] * 4, 20))
         auth.audit(cfg, "login", name, "", address, handler.path, "locked" if code == "locked" else "denied", code)
         headers = {"Retry-After": str(auth.locked_for(storage, name))} if code == "locked" else None
@@ -376,6 +391,9 @@ def _notify(handler, storage, cfg, config, context, body, path, address):
             return fail(handler, "no_channel", 400)
         server = channels.server_settings(config)
         notify = config.get("notify") if isinstance(config.get("notify"), dict) else {}
+        if not dispatcher._reserve(user, dispatcher.settings(config)["max_per_hour"]):      # a test message counts against the hourly limit of the user, like any other
+            dispatcher._count([], 1)
+            return fail(handler, "rate", 429)
         results = dispatcher._send(user, prefs, dispatcher.message_of({"repo": "Monitor", "text": i18n.t("evt.test"), "level": "info"}), server, notify.get("allow_private_targets") is True,
                                    (config.get("network") or {}).get("use_proxy") is True if isinstance(config.get("network"), dict) else False)
         _send(handler, {"ok": all(r["ok"] for r in results), "results": results})

@@ -14,13 +14,12 @@ Neither way is used for a repository that is hot (running, red, or touched by an
 seen at the next full read - that is the price of these switches, said in docs/QUOTA.md. The counters (`stats`) say how many reads each way spared; one spared read is about one call of the API.
 Nothing here writes anything or sends anything but a GET to github.com (through netguard) or `git ls-remote` of a public address.
 """
-import os
 import re
 import subprocess
 import time
 import xml.etree.ElementTree as ElementTree
 
-from github_actions_monitor.security import netguard
+from github_actions_monitor.security import envguard, netguard
 
 NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}\Z")
 OWNER_RE = re.compile(r"^[A-Za-z0-9-]{1,39}\Z")
@@ -102,7 +101,7 @@ def head_git(owner, repo, runner=None, timeout=20):
         if runner is not None:
             code, out = runner(args)
         else:
-            done = subprocess.run(args, capture_output=True, timeout=timeout, env={**os.environ, "GIT_TERMINAL_PROMPT": "0", "GIT_ASKPASS": "", "GCM_INTERACTIVE": "never"})
+            done = subprocess.run(args, capture_output=True, timeout=timeout, env={**envguard.clean_environment(), "GIT_TERMINAL_PROMPT": "0", "GIT_ASKPASS": "", "GCM_INTERACTIVE": "never"})
             code, out = done.returncode, done.stdout.decode("utf-8", "replace")
     except (OSError, subprocess.SubprocessError):
         return ""

@@ -21,6 +21,7 @@ import time
 from pathlib import Path
 
 from github_actions_monitor.integrations import github_app
+from github_actions_monitor.security import envguard
 
 DEFAULTS = {"enabled": False, "file": "", "any_folder": False}
 TOKEN_RE = re.compile(r"^(?:gh[pousr]_[A-Za-z0-9_]{20,255}|github_pat_[A-Za-z0-9_]{20,255}|[A-Fa-f0-9]{40})\Z")
@@ -175,7 +176,7 @@ def pick(config, args, now=None):
             return "user", {}
         if token:
             _STATE["left"][name] = _STATE["left"].get(name, ASSUMED) - 1      # the reads made since the last probe
-            env = dict(os.environ)
+            env = envguard.clean_environment()
             env["GH_TOKEN"] = token
             return name, {"env": env}
         note_failure(name, now)
@@ -187,7 +188,7 @@ def env_for(config, name):
     token = github_app.token(config) if name == "app" else token_from_file(settings(config)["file"]) if name == "extra" else ""
     if name == "user" or not token:
         return {}
-    env = dict(os.environ)
+    env = envguard.clean_environment()
     env["GH_TOKEN"] = token
     return {"env": env}
 
