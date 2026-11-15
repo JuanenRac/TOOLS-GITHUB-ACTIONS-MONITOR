@@ -195,7 +195,8 @@ def gh_kwargs():
     to `gh` calls ONLY - never to `act`, to a notification command or to any program of the user."""
     if not APPLIED["token"]:
         return {}
-    env = dict(os.environ)
+    from github_actions_monitor.security import envguard
+    env = envguard.clean_environment()
     env["GH_TOKEN"] = APPLIED["token"]
     return {"env": env}
 

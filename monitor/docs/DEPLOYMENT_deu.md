@@ -105,6 +105,7 @@ Gelesen werden nur die Namen dieser Tabelle. Im Dienst wird ein nicht lesbarer W
 | `MONITOR_PROXY_PUBLIC_HOST` | Der öffentliche Name des Reverse-Proxys (`listen.proxy_public_host`); er meldet den Proxy an. |
 | `MONITOR_SECURE_COOKIE` | `1` = die Sitzung ist HTTPS (ein Proxy beendet sie): Das Cookie bekommt Secure (`listen.secure_cookie`). |
 | `MONITOR_TRUSTED_PROXY` | `1` = der Proxy läuft auf DEMSELBEN Rechner, und sein `X-Forwarded-For` wird geglaubt (`listen.trusted_proxy`). |
+| `MONITOR_TRUSTED_PROXIES` | Adressen oder Netze des Proxys, wenn er nicht auf diesem Rechner läuft, durch Kommas getrennt (`listen.trusted_proxies`); nur zusammen mit `MONITOR_TRUSTED_PROXY`. Die Compose-Datei verwendet dafür das Netz `MONITOR_SUBNET`. |
 | `MONITOR_LOCAL_PORT` | Ein zweiter Port, nur Loopback, für die Person am Rechner, wenn ein Proxy angemeldet ist (`listen.local_port`; im Image 8766). |
 | `MONITOR_TLS_CERT_FILE` | Ein Zertifikat (PEM), um HTTPS direkt auszuliefern (`listen.tls_cert_file`); mit Schlüssel. Ist es unbrauchbar, startet der Monitor nicht mit reinem HTTP. |
 | `MONITOR_TLS_KEY_FILE` | Der private Schlüssel dieses Zertifikats (`listen.tls_key_file`). |
@@ -174,7 +175,7 @@ location / {
 
 Sobald ein Proxy deklariert ist, gilt nichts, was am Hauptport ankommt, als „dieser Computer“, was auch immer die Header sagen (ein Proxy, der einen Header vergisst, ließe sonst jeden Client des Internets lokal aussehen). Die Schlüssel, die die Erreichbarkeit bestimmen, die Aktionen auf GitHub und die Tests der Kanäle lassen sich von dort daher nicht verwenden. Um sie zu nutzen, öffne mit `listen.local_port` (eine Zahl von 1024 bis 65535) einen zweiten Port, der nur auf `127.0.0.1` lauscht, und benutze ihn am Rechner des Monitors: Er verlangt dasselbe Zugriffstoken.
 
-`listen.trusted_proxy` setzt voraus, dass der Proxy auf DEMSELBEN Rechner wie der Monitor läuft (der Monitor glaubt `X-Forwarded-For` bei jeder Verbindung über Loopback): Verwende es nicht mit einem Proxy auf einem anderen Rechner. Die falschen Tokens aller Clients des Proxys werden außerdem zusammen gezählt (das Dreifache des Limits einer Adresse), damit das Ändern des Headers bei jedem Versuch die Sperre nicht aushebelt.
+`listen.trusted_proxy` setzt voraus, dass der Proxy auf DEMSELBEN Rechner wie der Monitor läuft (der Monitor glaubt `X-Forwarded-For` bei jeder Verbindung über Loopback): Verwende es nicht mit einem Proxy auf einem anderen Rechner. Die falschen Tokens aller Clients des Proxys werden außerdem zusammen gezählt (das Dreifache des Limits einer Adresse), damit das Ändern des Headers bei jedem Versuch die Sperre nicht aushebelt. Läuft der Proxy in einem anderen Container oder auf einem anderen Rechner, tragen Sie seine Adresse oder sein Netz in `listen.trusted_proxies` ein (`MONITOR_TRUSTED_PROXIES`; in der Docker-Compose-Datei das Netz `MONITOR_SUBNET`): Bei einer Verbindung von diesen Adressen oder von diesem Rechner wird sein `X-Forwarded-For` zum Zählen der Versuche geglaubt; eine Anfrage gilt dadurch nie als dieser Rechner.
 
 ## Die Kommandozeile gegen einen anderen Rechner
 

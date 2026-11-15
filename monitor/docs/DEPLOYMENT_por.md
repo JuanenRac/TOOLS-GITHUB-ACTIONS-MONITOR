@@ -105,6 +105,7 @@ Só são lidos os nomes desta tabela. No serviço, um valor ilegível é ignorad
 | `MONITOR_PROXY_PUBLIC_HOST` | O nome público do proxy inverso (`listen.proxy_public_host`); declara o proxy. |
 | `MONITOR_SECURE_COOKIE` | `1` = a sessão é HTTPS (um proxy termina-a): o cookie leva Secure (`listen.secure_cookie`). |
 | `MONITOR_TRUSTED_PROXY` | `1` = o proxy corre na MESMA máquina e o seu `X-Forwarded-For` é acreditado (`listen.trusted_proxy`). |
+| `MONITOR_TRUSTED_PROXIES` | Endereços ou redes do proxy quando não está nesta máquina, separados por vírgulas (`listen.trusted_proxies`); só com `MONITOR_TRUSTED_PROXY`. O ficheiro Compose usa a rede `MONITOR_SUBNET`. |
 | `MONITOR_LOCAL_PORT` | Uma segunda porta, só loopback, para quem está no computador quando há um proxy declarado (`listen.local_port`; 8766 na imagem). |
 | `MONITOR_TLS_CERT_FILE` | Um certificado (PEM) para servir HTTPS diretamente (`listen.tls_cert_file`); com a chave. Se não puder ser usado, o monitor não arranca em HTTP simples. |
 | `MONITOR_TLS_KEY_FILE` | A chave privada desse certificado (`listen.tls_key_file`). |
@@ -174,7 +175,7 @@ location / {
 
 Com um proxy declarado, nada do que chega pela porta principal conta como «este computador», diga o que disser nos cabeçalhos (um proxy que se esqueça de um cabeçalho faria parecer locais todos os clientes da internet). Por isso as chaves que decidem a exposição, as ações no GitHub e os testes dos canais não podem ser usados a partir daí. Para os usar, abra com `listen.local_port` (um número de 1024 a 65535) uma segunda porta que só escuta em `127.0.0.1` e use-a a partir do computador do monitor: pede o mesmo token de acesso.
 
-`listen.trusted_proxy` pressupõe que o proxy corre no MESMO computador que o monitor (o monitor acredita em `X-Forwarded-For` em qualquer ligação que chegue por loopback): não o use com um proxy noutra máquina. Os tokens errados de todos os clientes do proxy são também contados em conjunto (o triplo do limite de um endereço), para que mudar o cabeçalho a cada tentativa não anule o bloqueio.
+`listen.trusted_proxy` pressupõe que o proxy corre no MESMO computador que o monitor (o monitor acredita em `X-Forwarded-For` em qualquer ligação que chegue por loopback): não o use com um proxy noutra máquina. Os tokens errados de todos os clientes do proxy são também contados em conjunto (o triplo do limite de um endereço), para que mudar o cabeçalho a cada tentativa não anule o bloqueio. Se o proxy estiver noutro contentor ou noutra máquina, indique o seu endereço ou rede em `listen.trusted_proxies` (`MONITOR_TRUSTED_PROXIES`; no ficheiro Docker Compose, a rede `MONITOR_SUBNET`): numa ligação desses endereços, ou deste computador, o seu `X-Forwarded-For` é acreditado para contar as tentativas; nunca faz com que um pedido conte como este computador.
 
 ## A linha de comandos contra outro computador
 

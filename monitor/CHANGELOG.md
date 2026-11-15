@@ -19,6 +19,24 @@ when this file and `tool_version.py` disagree.
 
 ### Fixed
 
+- **Team mode with several accounts: the account of a request is decided once**: the gate of the team mode and the forwarding to the monitor of the account read `account` in two different ways, so a request that repeated it was judged for the account of the user and served from another one. Now one function decides the account, the gate judges that value and the same value is forwarded, a request that gives `account` more than once answers 400 `account_repeated`, and the process of each account refuses a user the supervisor resolved for another account.
+
+- **A new password or role no longer moves a person to another account**: changing only the password or only the role of a user (in the page, in the API or with the console reset) kept nothing of their assigned accounts and left them with the main one; the accounts they had are kept unless the request names others or the user becomes an administrator.
+
+- **The person at the computer can create the first administrator through the local port, and is never locked out of their own login**: with a reverse proxy declared the first administrator could not be created from the second local port; and wrong passwords from the network no longer lock out the person who is at the computer of the monitor. A name that does not exist is now counted and locked like a real one, so "locked" does not tell which names exist.
+
+- **The test message of a user counts against the hourly limit** of messages of that user, like any other notice.
+
+- **The e-mail channel works with its default sender**: the default sender at `localhost` was refused as a bad value without saying which field; it is accepted, and a wrong sender is reported as `bad_sender`.
+
+- **`gh-token --read-only` hands out a token that can only read**: it is asked for apart from the one the monitor keeps, with read permissions only, and the command refuses to print it when the answer carries a write permission.
+
+- **The supervisor key and the access token leave the environment of the process**: both are read once at start and taken out of the environment, so `gh`, `git` and the command of a notice do not inherit them.
+
+- **Behind the Docker Compose proxy, one visitor's wrong tokens no longer lock out everybody**: Caddy is another container, so every visitor reached the monitor with the address of the proxy. The new `listen.trusted_proxies` setting (`MONITOR_TRUSTED_PROXIES`) names the address or network of the proxy, and the Compose file gives its network a fixed range (`MONITOR_SUBNET`).
+
+- **The guide says what the code does for silencing and acknowledging**: a maintainer silences and acknowledges alerts from the computer of the monitor only, never from the network, in the eight languages of the guide.
+
 - **`--help` and the other flags that only answer work while a monitor is running**: the check that stops a second monitor on the same port ran before the flags were read, so `--help` (and the quality gate of a release that calls it) failed on a computer where the monitor was already on port 8765. And the tests that measure real seconds take their limit from the load of the computer, so a busy runner no longer fails them.
 
 ## [1.8.3]

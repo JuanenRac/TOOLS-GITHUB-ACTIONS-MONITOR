@@ -105,6 +105,7 @@ launchd（macOS）: `ProgramArguments` = `/usr/bin/python3`、`-m`、`github_act
 | `MONITOR_PROXY_PUBLIC_HOST` | リバースプロキシの公開名（`listen.proxy_public_host`）。プロキシを宣言します。 |
 | `MONITOR_SECURE_COOKIE` | `1` = セッションは HTTPS（プロキシが終端）: Cookie に Secure が付きます（`listen.secure_cookie`）。 |
 | `MONITOR_TRUSTED_PROXY` | `1` = プロキシは同じマシンで動いており、その `X-Forwarded-For` を信用します（`listen.trusted_proxy`）。 |
+| `MONITOR_TRUSTED_PROXIES` | プロキシがこのマシンにないときのそのアドレスまたはネットワーク（カンマ区切り、`listen.trusted_proxies`）。`MONITOR_TRUSTED_PROXY` と併用します。Compose ファイルではネットワーク `MONITOR_SUBNET` を使います。 |
 | `MONITOR_LOCAL_PORT` | プロキシ宣言時にコンピューターの前にいる人のための、ループバック専用の 2 つ目のポート（`listen.local_port`。イメージでは 8766）。 |
 | `MONITOR_TLS_CERT_FILE` | HTTPS を直接提供するための証明書（PEM、`listen.tls_cert_file`）。鍵とともに指定します。使えない場合、モニターは平文 HTTP では起動しません。 |
 | `MONITOR_TLS_KEY_FILE` | その証明書の秘密鍵（`listen.tls_key_file`）。 |
@@ -174,7 +175,7 @@ location / {
 
 プロキシを宣言すると、メインポートに届くものはヘッダーの内容にかかわらず「このコンピューター」とは見なされません(ヘッダーを付け忘れるプロキシがあると、インターネット上のすべてのクライアントがローカルに見えてしまうためです)。そのため、公開範囲を決めるキー、GitHub 上の操作、チャンネルのテストはそこからは使えません。使うには、`listen.local_port`(1024〜65535 の数値)で `127.0.0.1` だけで待ち受ける第2のポートを開き、モニターのあるコンピューターからそれを使ってください。同じアクセストークンが必要です。
 
-`listen.trusted_proxy` は、プロキシがモニターと「同じ」コンピューター上で動いていることを前提とします(モニターはループバックで届くあらゆる接続の `X-Forwarded-For` を信じます)。別のマシン上のプロキシでは使わないでください。プロキシのすべてのクライアントの誤ったトークンは合計でも数えられます(1つのアドレスの上限の3倍)。試行のたびにヘッダーを変えてもロックアウトは無効になりません。
+`listen.trusted_proxy` は、プロキシがモニターと「同じ」コンピューター上で動いていることを前提とします(モニターはループバックで届くあらゆる接続の `X-Forwarded-For` を信じます)。別のマシン上のプロキシでは使わないでください。プロキシのすべてのクライアントの誤ったトークンは合計でも数えられます(1つのアドレスの上限の3倍)。試行のたびにヘッダーを変えてもロックアウトは無効になりません。 プロキシが別のコンテナや別のマシンにある場合は、そのアドレスまたはネットワークを `listen.trusted_proxies`（`MONITOR_TRUSTED_PROXIES`。Docker Compose ファイルではネットワーク `MONITOR_SUBNET`）に列挙してください。それらのアドレスまたはこのコンピューターからの接続では、試行回数の集計に `X-Forwarded-For` が信用されます。リクエストがこのコンピューターとして扱われることはありません。
 
 ## 別のコンピューターに対するコマンドライン
 

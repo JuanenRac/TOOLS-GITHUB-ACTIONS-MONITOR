@@ -15,7 +15,7 @@ Ambos estão **desligados por predefinição** e ligam-se nas Definições.
 
 ## Um token só de leitura da App do GitHub para as suas ferramentas
 
-`github_app.share_reads`: o comando seguinte escreve, neste computador, um token de instalação da sua App do GitHub com a duração de uma hora, para que o `gh` das suas ferramentas e agentes leia com a quota da App e não com a sua (`GH_TOKEN`). O token vai só para a saída padrão, nunca para um ficheiro nem para um registo, e o comando precisa de `--read-only`; dê à App permissões só de leitura ao criá-la. Sem `github_app.share_reads` recusa.
+`github_app.share_reads`: o comando seguinte escreve, neste computador, um token de instalação da sua App do GitHub com a duração de uma hora, para que o `gh` das suas ferramentas e agentes leia com a quota da App e não com a sua (`GH_TOKEN`). O token vai só para a saída padrão, nunca para um ficheiro nem para um registo, e o comando precisa de `--read-only`; dê à App permissões só de leitura ao criá-la. Sem `github_app.share_reads` recusa. O token é pedido à parte do que o monitor guarda, só com permissões de leitura; se a resposta trouxer alguma permissão de escrita, o comando recusa-se a imprimi-lo.
 
 ```
 python bin/monitor_cli.py gh-token --read-only

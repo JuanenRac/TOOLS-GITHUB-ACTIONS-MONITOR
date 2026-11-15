@@ -131,6 +131,32 @@ def token(config, opener=None, signer=None, now=None, force=False):
         return ""
 
 
+def shared_token(config, opener=None, signer=None, now=None):
+    """A token to hand to ANOTHER tool (`monitor_cli.py gh-token --read-only`): asked for apart from the one the monitor keeps, with `permissions` cut down to read for every permission the monitor
+    needs, so that even an App that was given a write permission yields a token that cannot write. The answer is checked: a token that carries any `write` or `admin` is refused. Returns
+    `(token, "")` or `("", reason)` with reason one of: off, failed, not_read_only."""
+    cfg = settings(config)
+    now = time.time() if now is None else now
+    if not (cfg["enabled"] and cfg["app_id"] and cfg["key_path"]):
+        return "", "off"
+    try:
+        jwt = make_jwt(cfg["app_id"], cfg["key_path"], now, signer)
+        install = cfg["installation_id"] or _STATE["installation"]
+        if not install:
+            data, _ = _call("GET", "/app/installations", jwt, opener=opener)
+            if not data:
+                return "", "failed"
+            install = str(data[0]["id"])
+        asked = json.dumps({"permissions": {name: "read" for name in PERMISSIONS}}, separators=(",", ":")).encode()
+        data, _ = _call("POST", f"/app/installations/{install}/access_tokens", jwt, asked, opener=opener)
+        granted = data.get("permissions")
+        if not isinstance(granted, dict) or any(str(level).lower() in ("write", "admin") for level in granted.values()):
+            return "", "not_read_only"      # the answer does not prove a token that only reads: it is never handed out
+        return str(data["token"]), ""
+    except Exception:   # noqa: BLE001 - a broken App is "no token", never a traceback with a secret in it
+        return "", "failed"
+
+
 def clean(text):
     """Never a token or a key in a message."""
     return re.sub(r"(gh[opsu]_[A-Za-z0-9]{20,}|-----BEGIN[^-]*-----|Bearer\s+\S+|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_.-]+)", "[removed]", text)

@@ -164,6 +164,7 @@ _storage = {"obj": None}
 def use_storage(storage):
     """Sets the storage the users live in (tests, and the first use of the server)."""
     _storage["obj"] = storage
+    GHOSTS.clear()
 
 
 def get_storage(config=None):
@@ -280,10 +281,13 @@ def update_user(storage, username, role=None, active=None, accounts=None, passwo
                 return None, problem
             record["hash"] = hash_password(password)
             record["failed"], record["locked_until"] = 0, 0
+        old_role = record.get("role")
+        if accounts is None and new_role != "admin" and old_role != "admin":
+            kept = (storage.get_record("user_accounts", name) or {}).get("accounts")      # nothing asked about the accounts: the ones saved stay (a new password or role never moves a person to another account)
+            accounts = [a for a in kept if isinstance(a, str)] if isinstance(kept, list) else None
         clean = _clean_accounts(accounts, new_role)
         if clean is None:
             return None, "accounts_invalid"
-        old_role = record.get("role")
         record["role"], record["active"] = new_role, new_active
         storage.put_record("users", name, record)
         storage.put_record("user_accounts", name, {"accounts": clean})
@@ -326,10 +330,36 @@ def revoke_sessions(storage, username):
     return count
 
 
-def login(storage, username, password, cfg, kind="cookie", now=None):
+GHOSTS = {}      # a name that is not a user (or is an inactive one) is locked after the same number of wrong passwords as a real one, so "locked" does not tell which names exist
+MAX_GHOSTS = 2000
+
+
+def _ghost_attempt(name, cfg, now, local):
+    """The answer for a name that cannot sign in: the same wrong-password counting and the same lock as a real user. A person at this computer is never counted."""
+    if not name:
+        return "invalid_credentials"
+    with _lock:
+        row = GHOSTS.get(name) or {"failed": 0, "until": 0}
+        if not local and row["until"] > now:
+            return "locked"
+        if local:
+            return "invalid_credentials"
+        row["failed"] += 1
+        code = "invalid_credentials"
+        if row["failed"] >= cfg["max_failed_logins"]:
+            row["until"], row["failed"], code = now + cfg["lockout_minutes"] * 60, 0, "locked"
+        if len(GHOSTS) >= MAX_GHOSTS and name not in GHOSTS:
+            for key in [k for k, v in GHOSTS.items() if v["until"] <= now] or [next(iter(GHOSTS))]:
+                GHOSTS.pop(key, None)
+        GHOSTS[name] = row
+        return code
+
+
+def login(storage, username, password, cfg, kind="cookie", now=None, local=False):
     """Checks a password. Returns (session info, code): on success ({"token", "csrf", "user", "role", "expires"}, ""); otherwise (None, "invalid_credentials" | "locked", retry seconds in `cfg["_retry"]` is not used:
     the second value of a lock is "locked" and `locked_for(...)` tells for how long). A wrong password counts against the USER (it locks after `max_failed_logins`) so that a guess spread over many addresses
-    is stopped too; the address has its own limit in the server."""
+    is stopped too; the address has its own limit in the server. `local` = the person is at the computer of the monitor: the lock of the user does not apply to them and their wrong passwords are not
+    counted against the user (nobody can be locked out of their own machine, and nobody locks another out from it). A name that does not exist is counted and locked the same way."""
     now = _now() if now is None else now
     name = clean_username(username)
     if not isinstance(password, str) or not password or len(password.encode("utf-8")) > MAX_PASSWORD_BYTES:
@@ -339,10 +369,12 @@ def login(storage, username, password, cfg, kind="cookie", now=None):
         record = storage.get_record("users", name) if name else None
         if record is None or record.get("active", True) is not True:
             burn_time(password)
-            return None, "invalid_credentials"
-        if record.get("locked_until", 0) > now:
+            return None, _ghost_attempt(name, cfg, now, local)
+        if record.get("locked_until", 0) > now and not local:
             return None, "locked"
         if not verify_password(password, record.get("hash", "")):
+            if local:
+                return None, "invalid_credentials"
             record["failed"] = int(record.get("failed", 0)) + 1
             if record["failed"] >= cfg["max_failed_logins"]:
                 record["locked_until"], record["failed"] = now + cfg["lockout_minutes"] * 60, 0
@@ -362,8 +394,10 @@ def login(storage, username, password, cfg, kind="cookie", now=None):
 
 
 def locked_for(storage, username, now=None):
-    record = storage.get_record("users", clean_username(username)) or {}
-    return max(0, int(record.get("locked_until", 0) - (_now() if now is None else now)))
+    name = clean_username(username)
+    record = storage.get_record("users", name) or {}
+    until = record.get("locked_until", 0) if record and record.get("active", True) is True else (GHOSTS.get(name) or {}).get("until", 0)
+    return max(0, int(until - (_now() if now is None else now)))
 
 
 def find_session(storage, token, now=None):

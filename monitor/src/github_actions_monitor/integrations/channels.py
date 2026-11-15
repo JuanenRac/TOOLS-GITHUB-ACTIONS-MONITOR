@@ -28,6 +28,7 @@ LOOPBACK = ("127.0.0.1", "localhost", "::1", "[::1]")
 LEVEL_PRIORITY = {"bad": "5", "critical": "5", "warn": "4", "info": "3", "ok": "2"}
 TEAMS_HOSTS = ("webhook.office.com", "outlook.office.com", "logic.azure.com", "powerplatform.com", "api.powerplatform.com")
 ADDRESS_RE = re.compile(r"^[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,200}\.[A-Za-z]{2,24}\Z")
+SENDER_RE = re.compile(r"^[A-Za-z0-9._%+-]{1,64}@(?:[A-Za-z0-9.-]{1,200}\.[A-Za-z]{2,24}|localhost)\Z")      # the sender may also be at `localhost`: it is the default and the relay is this computer
 TOPIC_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}\Z")
 HOST_RE = re.compile(r"^[A-Za-z0-9.-]{1,200}\Z")
 
@@ -127,7 +128,7 @@ class Email(Channel):
             return "bad_host"
         if not (_loopback(host) or (allow_private and host.replace(".", "").isdigit() and netguard.blocked_ip(host))):
             return "bad_host"       # a relay of THIS computer; another address of the local network only with notify.allow_private_targets
-        return None if ADDRESS_RE.match(str(cfg.get("sender"))) else "bad_value"
+        return None if SENDER_RE.match(str(cfg.get("sender"))) else "bad_sender"      # the reason names the field that is wrong
 
     def check_destination(self, dest, secret=""):
         return None if ADDRESS_RE.match(str((dest or {}).get("address", ""))) else "bad_value"
