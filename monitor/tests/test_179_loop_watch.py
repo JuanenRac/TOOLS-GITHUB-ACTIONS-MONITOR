@@ -18,6 +18,7 @@ sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
+import _timing  # noqa: E402,F401      # limits of real time that grow with the load of the computer
 from github_actions_monitor import i18n  # noqa: E402
 from github_actions_monitor.app import actions_monitor as am  # noqa: E402
 from github_actions_monitor.app import cycle_watch, settings_api  # noqa: E402
@@ -100,7 +101,7 @@ class Heartbeat(unittest.TestCase):
         started = time.time()
         with self.assertRaises(subprocess.TimeoutExpired):
             cycle_watch.bounded(lambda: release.wait(30), 0.2)
-        self.assertLess(time.time() - started, 5)
+        self.assertLess(time.time() - started, _timing.limit(5))
         release.set()
         self.assertEqual(cycle_watch.bounded(lambda: 7, 5), 7)
         with self.assertRaises(ValueError):

@@ -23,6 +23,7 @@ sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
+import _timing  # noqa: E402,F401      # limits of real time that grow with the load of the computer
 from github_actions_monitor.app import actions_monitor as am  # noqa: E402
 from github_actions_monitor.integrations import actlocal  # noqa: E402
 from github_actions_monitor.integrations import ai_alerts  # noqa: E402
@@ -137,7 +138,7 @@ class ActEndsAsATree(unittest.TestCase):
     def test_the_time_limit_ends_the_child_and_the_grandchild(self):
         started = time.time()
         actlocal._worker(self.item(2), subprocess.Popen, time.time)
-        self.assertLess(time.time() - started, 60, "the worker returned although the grandchild kept the pipe open")
+        self.assertLess(time.time() - started, _timing.limit(60), "the worker returned although the grandchild kept the pipe open")
         self.assertFalse(self.alive(), "the grandchild is still running")
         self.assertIsNotNone(actlocal.status()["exit"])
         self.assertFalse(actlocal.status()["running"])
