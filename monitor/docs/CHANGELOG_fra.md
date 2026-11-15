@@ -69,15 +69,13 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - Un guide du score dans les huit langues.
 
-<<<<<<< HEAD
 ### Modifié
 
 - L'aide est à jour de toute la série 1.8 et de la 1.9.0 : le README du dépôt et ses sept traductions disaient la version 1.8.1 et rien de ce qui a suivi ; maintenant la version du tableau En un coup d'œil est écrite par le générateur à partir de la version de l'outil, Ce qu'il fait nomme le mode service et l'image Docker, plusieurs comptes et l'équipe, le stockage, les listes qui se trient et se plient et le score, le tableau d'état a les lignes des nouveautés, la section Sécurité dit comment les modes réseau et équipe sont protégés, la Documentation liste tous les guides, les guides de la ligne de commande, des outils d'IA et des métriques nomment le score, et la feuille de route ne présente plus la série 1.8 comme la prochaine version. Un nouveau test et une vérification de la porte de la version refusent une aide qui dit une autre version, un guide que le README ne liste pas et un README du paquet avec un vieux titre, et le guide de contribution demande à chaque version de relire toute l'aide.
-=======
+
 ### Corrigé
 
 - Les images de l'onglet Graphiques s'ajustent de nouveau : l'anneau du résultat des dernières 24 h était coupé par sa boîte et sa légende sortait du dessin, les barres des durées étaient un peu plus hautes que leur cadre et la dernière heure de la frise dépassait à droite. Les lignes de l'onglet ne rétrécissent plus en dessous de ce dont une image a besoin (l'onglet défile à la place), la légende de l'anneau est mesurée d'après ses mots et passe sous l'anneau quand elle ne tient pas à côté, et les marges contiennent la moitié de la dernière étiquette. Une nouvelle vérification ouvre l'onglet dans les huit langues, large et étroit, clair et sombre, et mesure chaque image.
->>>>>>> origin/main
 
 ## [1.8.4]
 

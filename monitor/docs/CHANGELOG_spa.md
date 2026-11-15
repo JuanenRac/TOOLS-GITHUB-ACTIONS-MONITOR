@@ -69,15 +69,13 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - Una guía de la puntuación en los ocho idiomas.
 
-<<<<<<< HEAD
 ### Cambiado
 
 - La ayuda está al día con toda la serie 1.8 y la 1.9.0: el README del repositorio y sus siete traducciones decían la versión 1.8.1 y nada de lo posterior; ahora la versión de la tabla De un vistazo la escribe el generador a partir de la versión de la herramienta, Qué hace nombra el modo servicio y la imagen de Docker, varias cuentas y el equipo, el almacenamiento, las listas que se ordenan y se pliegan y la puntuación, la tabla de estado tiene las filas de lo nuevo, la sección de Seguridad dice cómo se protegen los modos de red y de equipo, la Documentación lista todas las guías, las guías de la línea de comandos, de las herramientas de IA y de las métricas nombran la puntuación, y la hoja de ruta ya no presenta la serie 1.8 como la próxima versión. Una prueba nueva y una comprobación de la puerta de la versión rechazan una ayuda que diga otra versión, una guía que el README no liste y un README del paquete con un encabezado viejo, y la guía de contribución pide que cada versión lea toda la ayuda.
-=======
+
 ### Corregido
 
 - Las imágenes de la pestaña Gráficas vuelven a encajar: el anillo del resultado de las últimas 24 h quedaba cortado por su caja y su leyenda salía del dibujo, las barras de las duraciones eran algo más altas que su marco y la última hora de la línea de tiempo sobresalía por la derecha. Las filas de la pestaña ya no se encogen por debajo de lo que necesita una imagen (la pestaña se desplaza), la leyenda del anillo se mide a partir de sus palabras y pasa debajo del anillo cuando no cabe a su lado, y los márgenes guardan la mitad de la última etiqueta. Una comprobación nueva abre la pestaña en los ocho idiomas, ancha y estrecha, en claro y oscuro, y mide cada imagen.
->>>>>>> origin/main
 
 ## [1.8.4]
 
