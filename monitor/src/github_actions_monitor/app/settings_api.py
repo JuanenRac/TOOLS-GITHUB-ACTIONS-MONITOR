@@ -32,6 +32,7 @@ from github_actions_monitor import i18n
 from github_actions_monitor.app import surface
 from github_actions_monitor.app import toolconfig
 from github_actions_monitor.security import private_io
+from github_actions_monitor.ui import ordering
 
 from github_actions_monitor.util import paths
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
@@ -115,6 +116,8 @@ _f(_T_GENERAL, "screens", "ui.screen2_tabs", "text", re.compile(r"^[a-z,]{0,60}\
 _f(_T_GENERAL, "screens", "ui.screen2_orientation", "enum", ("auto", "portrait", "landscape"), restart=False)
 _f(_T_GENERAL, "screens", "ui.screen3_tabs", "text", re.compile(r"^[a-z,]{0,60}\Z"), restart=False)
 _f(_T_GENERAL, "screens", "ui.screen3_orientation", "enum", ("auto", "portrait", "landscape"), restart=False)
+_f(_T_GENERAL, "order", "ui.now_sort", "enum", ordering.KINDS["now"], restart=False)
+_f(_T_GENERAL, "order", "ui.alerts_sort", "enum", ordering.KINDS["alerts"], restart=False)
 _f(_T_GENERAL, "sound", "sound.enabled", "bool", restart=False)
 _f("quota", "modes", "modes.auto_low", "bool", restart=False)
 _f("quota", "modes", "modes.auto_low_enter", "int", (50, 4000), restart=False, unit="calls")

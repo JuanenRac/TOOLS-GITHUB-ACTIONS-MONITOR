@@ -357,6 +357,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `tools_dir` | `-` | paths | Folder of the local signing tools |
 | `tui.refresh_seconds` | `-` | console | Refresh |
 | `tui.theme` | `-` | console | Colours |
+| `ui.alerts_sort` | `"server"` | general | Order of the alerts |
+| `ui.now_sort` | `"ecosystem"` | general | Order of the runs happening now |
 | `ui.orientation` | `"auto"` | general | Orientation of the page |
 | `ui.rotate_seconds` | `0` | general | Seconds between tabs of a screen |
 | `ui.screen1_orientation` | `"auto"` | general | Orientation of screen 1 |

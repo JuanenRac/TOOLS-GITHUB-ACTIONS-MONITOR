@@ -27,6 +27,14 @@ The page adapts to the size of its window, from a phone to 4K, upright or turned
 | `ui.screen2_orientation` | Orientation of /screen/2. |
 | `ui.screen3_tabs` | Tabs of /screen/3. |
 | `ui.screen3_orientation` | Orientation of /screen/3. |
+| `ui.now_sort` | Order of Happening now for who has not chosen one: ecosystem, severity, age, newest, repo, event or state. |
+| `ui.alerts_sort` | Order of the Alerts tab for who has not chosen: server, severity, streak, class, age, newest, repo, origin or state. |
+
+## Order of the lists
+
+The section **Happening now** of the first tab is sorted by ecosystem, with a heading for each one. The list above the section changes it: ecosystem, severity (stuck first, then runs with a failed job, then running, then queued), age (longest running first), newest first, repository, trigger (push, pull_request, schedule...) and state (running before queued). The choice is remembered for each person: in the team mode the server keeps it with the user (`GET` and `POST /api/auth/me/view`, so it follows the user to another browser), otherwise this browser does. Until someone chooses, the order is `ui.now_sort` of the configuration file (ecosystem when it is missing or wrong). The buttons **Expand all** and **Collapse all** next to the list unfold or fold every repository of the section at once, in any order, and the choice is remembered for each person in the same place and survives a refresh (a repository you open or close by hand afterwards keeps your choice).
+
+The list of the **Alerts** tab keeps the order the monitor sends unless a person chooses another with the list above it: severity (critical, error, warning, info), the longest streak of failures in a row first, class (an error or critical alert is real and goes before the ones to watch), the oldest first, the newest first, repository, origin (the sentinel that raised it) and state (open before silenced). It is remembered the same way, and until someone chooses, `ui.alerts_sort` of the configuration file applies (`server` when it is missing or wrong).
 
 ## Sizes tested
 
