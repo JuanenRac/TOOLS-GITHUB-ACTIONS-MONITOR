@@ -32,7 +32,7 @@
 
 | | |
 |---|---|
-| **Versión** | **1.9.0** · [todas las versiones](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versión** | **1.9.1** · [todas las versiones](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Necesita** | Python 3.11+ y la CLI de GitHub (`gh auth login`); nada más (la vista de consola usa el paquete opcional `rich`) |
 | **Se abre** | en una página de `127.0.0.1` solamente, en ocho idiomas |
 | **Escribe en GitHub** | nunca por sí solo: solo las órdenes por lotes que lances con un `--go` explícito |
@@ -40,7 +40,7 @@
 
 <!-- glance:begin -->
 
-**Medido hoy** (v1.9.0)
+**Medido hoy** (v1.9.1)
 
 | | |
 |---|---|
@@ -150,6 +150,7 @@ Cada imagen sigue el tema claro u oscuro de tu página de GitHub.
 - **Fallos y lecciones**: un libro local de los fallos de su CI, reglas que clasifican cada uno en una categoría, una biblioteca de lecciones (`monitor/docs/LESSONS_spa.md`) con la guardia que lo habría evitado, la tendencia de 24 horas y 7 días, `ai/LESSONS.md`, `/api/ai/lessons` y un resumen previo al push para cualquier herramienta de IA; solo lectura, nada sale del equipo.
 - **Todos los tamaños de pantalla y varias pantallas**: la página se ajusta a una ventana desde un móvil hasta 4K, vertical o girada, y un monitor puede servir hasta tres pantallas (`/screen/1` a `/screen/3`), cada una con sus pestañas y su orientación (`monitor/docs/SCREENS_spa.md`).
 - **Una puntuación por cuenta**: un número de 0 a 100, una letra de A a E y una tendencia, hechos con la fiabilidad de la CI, su velocidad, el tiempo de recuperación y lo rápido que se cierran las alertas de colaboración; dice «calibrando» o «datos insuficientes» en vez de un número que no puede respaldar, muestra lo que todavía no cubre, está en la cabecera de la página, tiene una orden `score`, avisa cuando baja y está en las métricas y en el servidor MCP (`monitor/docs/SCORE.md`).
+- **Un centinela de seguridad (solo Complete, apagado por defecto)**: lee, sin escribir nada en GitHub, las alertas abiertas de Dependabot, del análisis de código y del análisis de secretos, si la rama por defecto está protegida, el permiso por defecto de los flujos y, si se pide, los propietarios del código; genera una alerta por repositorio y señal, cuenta los hallazgos como quinta parte de la puntuación y dice lo que no pudo leer (`monitor/docs/SENTINEL_SECURITY.md`).
 - **Como servicio**: la imagen oficial de Docker (sin root, de solo lectura), un fichero Compose con proxy opcional, una unidad de systemd, una comprobación de salud profunda y la orden que crea el primer administrador (`monitor/docs/DEPLOYMENT.md`).
 - **Varias cuentas, un equipo y un sitio para los datos**: un proceso por cuenta, usuarios con roles y sus propias cuentas, los ficheros en `config/`, `data/`, `logs/` y `ai/`, un almacenamiento SQLite opcional con retención y copia de seguridad, y los puertos como ajustes (`monitor/docs/ACCOUNTS.md`, `monitor/docs/STORAGE.md`, `monitor/docs/LAYOUT.md`).
 - **Listas que se ordenan y se pliegan**: «Ocurriendo ahora» de siete maneras y la pestaña de Alertas de nueve, con un botón para plegar o desplegar todos los repositorios; la elección se recuerda por usuario.

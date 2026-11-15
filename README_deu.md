@@ -32,7 +32,7 @@
 
 | | |
 |---|---|
-| **Version** | **1.9.0** · [alle Releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **1.9.1** · [alle Releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Voraussetzung** | Python 3.11+ und die GitHub-CLI (`gh auth login`); sonst nichts (die Konsolenansicht nutzt das optionale Paket `rich`) |
 | **Öffnet** | eine Seite nur auf `127.0.0.1`, in acht Sprachen |
 | **Schreibt auf GitHub** | nie von selbst: nur Stapelbefehle, die du mit ausdrücklichem `--go` startest |
@@ -40,7 +40,7 @@
 
 <!-- glance:begin -->
 
-**Heute gemessen** (v1.9.0)
+**Heute gemessen** (v1.9.1)
 
 | | |
 |---|---|
@@ -150,6 +150,7 @@ Jedes Bild folgt dem hellen oder dunklen Design Ihrer GitHub-Seite.
 - **Fehler und Lehren**: ein lokales Buch der Fehler Ihrer CI, Regeln, die jeden einer Kategorie zuordnen, eine Bibliothek von Lehren (`monitor/docs/LESSONS_deu.md`) mit der Absicherung, die ihn verhindert hätte, der Trend über 24 Stunden und 7 Tage, `ai/LESSONS.md`, `/api/ai/lessons` und ein Briefing vor dem Push für jedes KI-Werkzeug; nur lesend, nichts verlässt den Rechner.
 - **Jede Bildschirmgröße und mehrere Bildschirme**: Die Seite passt sich einem Fenster vom Smartphone bis 4K an, aufrecht oder gedreht, und ein Monitor kann bis zu drei Bildschirme bedienen (`/screen/1` bis `/screen/3`), jeder mit eigenen Reitern und eigener Ausrichtung (`monitor/docs/SCREENS_deu.md`).
 - **Eine Punktzahl je Konto**: eine Zahl von 0 bis 100, ein Buchstabe von A bis E und ein Trend, gebildet aus der Zuverlässigkeit der CI, ihrer Geschwindigkeit, der Wiederherstellungszeit und der Schnelligkeit, mit der Zusammenarbeitswarnungen geschlossen werden; sie sagt „Kalibrierung“ oder „zu wenige Daten“ statt einer Zahl, die sie nicht belegen kann, zeigt, was sie noch nicht abdeckt, steht in der Kopfzeile der Seite, hat einen Befehl `score`, warnt beim Abfall und steckt in den Metriken und im MCP-Server (`monitor/docs/SCORE.md`).
+- **Ein Sicherheitswächter (nur Complete, standardmäßig aus)**: Er liest, ohne etwas in GitHub zu schreiben, die offenen Meldungen von Dependabot, Code-Scanning und Secret-Scanning, ob der Standardzweig geschützt ist, die Standardberechtigung der Workflows und auf Wunsch die Code-Eigentümer; er meldet einen Alarm je Repository und Signal, zählt die Funde als fünften Teil der Bewertung und sagt, was er nicht lesen konnte (`monitor/docs/SENTINEL_SECURITY_deu.md`).
 - **Als Dienst**: das offizielle Docker-Image (ohne Root, schreibgeschützt), eine Compose-Datei mit optionalem Proxy, eine systemd-Unit, eine tiefe Gesundheitsprüfung und der Befehl, der den ersten Administrator anlegt (`monitor/docs/DEPLOYMENT.md`).
 - **Mehrere Konten, ein Team und ein Ort für die Daten**: ein Prozess je Konto, Benutzer mit Rollen und eigenen Konten, die Dateien in `config/`, `data/`, `logs/` und `ai/`, ein optionaler SQLite-Speicher mit Aufbewahrung und Sicherung und die Ports als Einstellungen (`monitor/docs/ACCOUNTS.md`, `monitor/docs/STORAGE.md`, `monitor/docs/LAYOUT.md`).
 - **Listen, die man sortiert und einklappt**: „Gerade aktiv“ auf sieben Arten und der Reiter Warnungen auf neun, mit einer Schaltfläche zum Ein- und Ausklappen aller Repositories; die Wahl wird für jeden Benutzer gemerkt.

@@ -45,6 +45,20 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - Il test di un account che muore subito non dipende più dalla velocità del computer: l'attesa prima di riavviare un account viene verificata con un orologio che dà il test stesso, e un secondo test verifica il calendario delle attese senza leggere l'ora reale (il vecchio falliva sotto carico nella porta di una versione).
 
+## [1.9.1]
+
+### Aggiunto
+
+- La sentinella di sicurezza (solo Complete, spenta per impostazione predefinita): la terza sentinella legge, senza scrivere nulla su GitHub, gli avvisi aperti di Dependabot, dell'analisi del codice e della scansione dei segreti, se il branch predefinito ha protezione, se i workflow ricevono il permesso di scrittura per impostazione predefinita e, se richiesto, se c'è un file CODEOWNERS, e solleva un avviso per repository e segnale nella scheda Avvisi (origine Sicurezza), con i conteggi per gravità. Una fonte a cui GitHub non risponde per un repository è elencata come non leggibile e non è mai presa per un certificato di buona salute. Ha un ciclo proprio, un tetto di repository per giro, letture condizionali e una pausa finché la quota è bassa, scrive gli eventi security_new e security_fixed per i canali di notifica, ha un riquadro nella scheda Sentinella, nelle preferenze di ogni utente e nelle impostazioni, una rotta /api/sentinel/security e una guida negli otto idiomi.
+
+- Ogni sentinella dichiara il suo ciclo di vita: sano, degradato, in pausa, in errore o spento, così «nessun avviso» non si confonde con «non ha potuto guardare».
+
+- La sicurezza è una parte del punteggio: i punti che i rilievi aperti della sentinella di sicurezza tolgono a 100 sono la quinta parte, con il suo peso (`score.weights.security`, 25 per impostazione predefinita) e propri limiti; conta solo finché la sentinella è attiva e ha guardato abbastanza repository, e senza di essa la risposta dice che il numero non è completo e le altre parti vengono riscalate.
+
+- I pesi predefiniti del punteggio diventano 30, 15, 15, 15 e 25 (affidabilità, velocità, ripristino, collaborazione, sicurezza).
+
+- Una finestra con esecuzioni e nessun errore non ha nulla da ripristinare: la parte di ripristino è piena, come un fatto e non più come un dato mancante.
+
 ## [1.9.0]
 
 ### Aggiunto

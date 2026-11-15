@@ -32,7 +32,7 @@
 
 | | |
 |---|---|
-| **Version** | **1.9.0** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **1.9.1** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Prérequis** | Python 3.11+ et la CLI GitHub (`gh auth login`) ; rien d'autre (la vue console utilise le paquet optionnel `rich`) |
 | **S'ouvre** | sur une page `127.0.0.1` uniquement, en huit langues |
 | **Écrit sur GitHub** | jamais seul : seulement les commandes par lots que vous lancez avec un `--go` explicite |
@@ -40,7 +40,7 @@
 
 <!-- glance:begin -->
 
-**Mesuré aujourd'hui** (v1.9.0)
+**Mesuré aujourd'hui** (v1.9.1)
 
 | | |
 |---|---|
@@ -150,6 +150,7 @@ Chaque image suit le thème clair ou sombre de votre page GitHub.
 - **Échecs et leçons** : un livre local des échecs de votre CI, des règles qui rangent chacun dans une catégorie, une bibliothèque de leçons (`monitor/docs/LESSONS_fra.md`) avec la garde qui l'aurait évité, la tendance sur 24 heures et 7 jours, `ai/LESSONS.md`, `/api/ai/lessons` et un bref avant push pour tout outil d'IA ; lecture seule, rien ne quitte l'ordinateur.
 - **Toutes les tailles d'écran et plusieurs écrans** : la page s'adapte à une fenêtre du téléphone jusqu'à la 4K, droite ou tournée, et un moniteur peut servir jusqu'à trois écrans (`/screen/1` à `/screen/3`), chacun avec ses onglets et son orientation (`monitor/docs/SCREENS_fra.md`).
 - **Un score par compte** : un nombre de 0 à 100, une lettre de A à E et une tendance, construits à partir de la fiabilité de la CI, de sa rapidité, du temps de rétablissement et de la vitesse à laquelle les alertes de collaboration sont closes ; il dit « calibrage » ou « données insuffisantes » plutôt qu'un nombre qu'il ne peut pas justifier, montre ce qu'il ne couvre pas encore, se trouve dans l'en-tête de la page, a une commande `score`, prévient quand il baisse et figure dans les métriques et le serveur MCP (`monitor/docs/SCORE.md`).
+- **Une sentinelle de sécurité (Complete seulement, désactivée par défaut)** : elle lit, sans rien écrire dans GitHub, les alertes ouvertes de Dependabot, de l'analyse de code et de la détection de secrets, si la branche par défaut est protégée, la permission par défaut des workflows et, sur demande, les propriétaires du code ; elle lève une alerte par dépôt et par signal, compte les constats comme cinquième partie du score et dit ce qu'elle n'a pas pu lire (`monitor/docs/SENTINEL_SECURITY_fra.md`).
 - **En tant que service** : l'image Docker officielle (sans root, en lecture seule), un fichier Compose avec proxy facultatif, une unité systemd, un contrôle de santé approfondi et la commande qui crée le premier administrateur (`monitor/docs/DEPLOYMENT.md`).
 - **Plusieurs comptes, une équipe et un endroit pour les données** : un processus par compte, des utilisateurs avec des rôles et leurs propres comptes, les fichiers dans `config/`, `data/`, `logs/` et `ai/`, un stockage SQLite facultatif avec conservation et sauvegarde, et les ports comme réglages (`monitor/docs/ACCOUNTS.md`, `monitor/docs/STORAGE.md`, `monitor/docs/LAYOUT.md`).
 - **Des listes que l'on trie et que l'on plie** : « En cours » de sept façons et l'onglet Alertes de neuf, avec un bouton pour plier ou déplier tous les dépôts ; le choix est retenu pour chaque utilisateur.

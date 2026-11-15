@@ -45,6 +45,20 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - La prueba de una cuenta que muere al instante ya no depende de la velocidad del equipo: la espera antes de volver a arrancar una cuenta se comprueba con un reloj que da la propia prueba, y una segunda prueba comprueba el calendario de las esperas sin leer la hora real (la antigua fallaba bajo carga en la puerta de una versión).
 
+## [1.9.1]
+
+### Añadido
+
+- El centinela de seguridad (solo Complete, apagado por defecto): el tercer centinela lee, sin escribir nada en GitHub, las alertas abiertas de Dependabot, del análisis de código y del análisis de secretos, si la rama por defecto tiene protección, si los flujos reciben permiso de escritura por defecto y, si se pide, si hay un archivo CODEOWNERS, y genera una alerta por repositorio y señal en la pestaña de Alertas (origen Seguridad), con las cuentas por gravedad. Una fuente que GitHub no responde para un repositorio se lista como no legible y nunca se toma por un certificado de buena salud. Tiene ciclo propio, tope de repositorios por ronda, lecturas condicionales y pausa mientras la cuota es baja, escribe los eventos security_new y security_fixed para los canales de notificación, tiene un recuadro en la pestaña Centinela, en las preferencias de cada usuario y en los ajustes, una ruta en /api/sentinel/security y una guía en los ocho idiomas.
+
+- Cada centinela dice su ciclo de vida: sano, degradado, en pausa, con error o apagado, para que «sin alertas» no se confunda con «no pudo mirar».
+
+- La seguridad es una parte de la puntuación: los puntos que los hallazgos abiertos del centinela de seguridad restan a 100 son la quinta parte, con su peso (`score.weights.security`, 25 por defecto) y sus propios límites; solo cuenta mientras el centinela está activo y ha mirado suficientes repositorios, y sin él la respuesta dice que el número no está completo y las demás partes se reescalan.
+
+- Los pesos por defecto de la puntuación pasan a ser 30, 15, 15, 15 y 25 (fiabilidad, velocidad, recuperación, colaboración, seguridad).
+
+- Una ventana con ejecuciones y ningún fallo no tiene nada que recuperar: la parte de recuperación es completa, como un hecho y ya no como un dato que falta.
+
 ## [1.9.0]
 
 ### Añadido

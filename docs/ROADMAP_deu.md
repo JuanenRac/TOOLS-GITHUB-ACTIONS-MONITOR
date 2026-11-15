@@ -26,10 +26,6 @@ Alles Folgende wurde in der Reihe 1.8 ausgeliefert und ist getestet; nichts gilt
 
 Jede Version enthält alles aus ihrem Abschnitt des Plans: nichts bleibt von einer früheren Version offen, und nichts wird auf die nächste verschoben. Nach 1.8.3 und nach 1.9.3 durchläuft das Produkt eine unabhängige Prüfung, deren Befunde in der folgenden Stabilisierungsversion geschlossen werden. 1.8.1 ist eine Korrekturversion von 1.8.0: Das Feld „Repositories werden geladen“ verschwindet mit dem letzten Repository, und das Neuladen der Seite holt die Daten sofort.
 
-### 1.9.1 - Sicherheitswächter
-
-Der dritte Wächter: Dependabot, Code-Scanning, Secret-Scanning, Branch-Schutz, Workflow-Berechtigungen und Code-Besitzer, mit Regeln je Signalart, demselben Filter im Reiter Alarme und einem Abzug in der Bewertung für offene kritische Alarme. Optional, im selben Release: Workflow-Hygiene (Actions, die nicht an einen Commit gebunden sind, Jobs ohne Zeitlimit, Workflows ohne Berechtigungen oder ohne Nebenläufigkeitsregel, gefährliche Nutzung von pull_request_target), aufgebaut auf dem Workflow-Prüfer, den das Projekt schon hat.
-
 ### 1.9.2 - Gesundheit von Repository und Team
 
 Eine Gesundheitsansicht je Repository (CI, Issues und Pull Requests, Sicherheit, Release-Bereitschaft, Aktivität) und eine fürs Team mit Rangliste, Summen und Filtern; Seiten für beide mit Direktlinks für Wandbildschirme. Optional, im selben Release: ein Panel nächtlicher Benchmarks gegen ein Budget (Median gegen eine Basislinie je Maschinenklasse) und ein Panel mit Software-Stücklisten und Attestierungen jedes Releases.
@@ -48,7 +44,7 @@ Eine Hauptversion, die technische Schulden abbaut und die öffentlichen Schnitts
 
 Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
 
-## Erledigt in 1.8.2 bis 1.9.0
+## Erledigt in 1.8.2 bis 1.9.1
 
 ### 1.8.2 - Offizielles Docker-Image und Dienstmodus
 
@@ -65,6 +61,10 @@ Keine großen Funktionen. Isolation zwischen Konten, die Seite, der Speicher, An
 ### 1.9.0 - Eine Bewertung
 
 Metrik-Sammler je Konto und je Wächter (Erfolgsquote, Dauer, Zeit bis zur Behebung, Durchsatz), eine Bewertungs-Engine mit änderbaren Schwellen, ein Trend gegenüber dem Vorzeitraum, im Speicher abgelegte Momentaufnahmen, ein Bewertungs-Widget mit Sparkline, Alarme bei sinkender Bewertung und ein Kommandozeilen-Verb, das sie ausgibt.
+
+### 1.9.1 - Sicherheitswächter
+
+Der dritte Wächter: Dependabot, Code-Scanning, Secret-Scanning, Branch-Schutz, Workflow-Berechtigungen und Code-Besitzer, mit Regeln je Signalart, demselben Filter im Reiter Alarme und einem Abzug in der Bewertung für offene kritische Alarme. Optional, im selben Release: Workflow-Hygiene (Actions, die nicht an einen Commit gebunden sind, Jobs ohne Zeitlimit, Workflows ohne Berechtigungen oder ohne Nebenläufigkeitsregel, gefährliche Nutzung von pull_request_target), aufgebaut auf dem Workflow-Prüfer, den das Projekt schon hat.
 
 ## Erledigt in 1.7.9
 
