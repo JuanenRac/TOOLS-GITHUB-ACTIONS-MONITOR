@@ -17,7 +17,7 @@ sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
 from github_actions_monitor.app import actions_monitor, degraded, settings_api  # noqa: E402
-from github_actions_monitor.reporting import builder, render, schedule, service  # noqa: E402
+from github_actions_monitor.reporting import report_builder as builder, report_render as render, report_schedule as schedule, report_service as service  # noqa: E402
 
 LANGS = ("en", "es", "de", "fr", "it", "ja", "zh", "pt")
 SNAP = {"state": "scored", "score": 82.5, "letter": "B", "trend": {"direction": "up", "delta": 3.0}, "coverage": 0.9, "missing_parts": [], "parts": [{"part": "speed", "score": 70, "weight": 15}]}

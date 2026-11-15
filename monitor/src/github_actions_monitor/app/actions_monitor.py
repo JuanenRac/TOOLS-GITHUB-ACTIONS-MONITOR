@@ -1395,7 +1395,7 @@ def report_tick(config):
     if LITE["on"] or DEMO["on"]:
         return
     try:
-        from github_actions_monitor.reporting import service as report_service
+        from github_actions_monitor.reporting import report_service
         if report_service.settings(config)["enabled"]:
             report_service.tick(config, report_account(), report_gather)
     except Exception as error:   # noqa: BLE001
@@ -2470,7 +2470,7 @@ class Handler(BaseHTTPRequestHandler):
             if not self.guard():
                 return
             from urllib.parse import parse_qs
-            from github_actions_monitor.reporting import service as report_service
+            from github_actions_monitor.reporting import report_service
             config, account = toolconfig.raw_config(), report_account()
             if path == "/api/report-files":
                 cfg = report_service.settings(config)
@@ -2942,7 +2942,7 @@ def handle_advanced_post(path, request, who=""):
     if path == "/api/report-files/run":      # write a report now (admin, from this computer); Complete only
         if LITE["on"]:
             return {"ok": False, "status": "lite"}
-        from github_actions_monitor.reporting import service as report_service
+        from github_actions_monitor.reporting import report_service
         snapshot, alerts, team = report_gather()
         done = report_service.run(config, report_account(), snapshot, alerts, team)
         return {"ok": True, "files": done["files"], "at": done["at"]}

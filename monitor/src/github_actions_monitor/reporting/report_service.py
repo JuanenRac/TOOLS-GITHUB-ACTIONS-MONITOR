@@ -8,7 +8,7 @@ from pathlib import Path
 
 from github_actions_monitor import i18n
 from github_actions_monitor.app import degraded
-from github_actions_monitor.reporting import builder, render, schedule
+from github_actions_monitor.reporting import report_builder as builder, report_render as render, report_schedule as schedule
 from github_actions_monitor.security import private_io
 from github_actions_monitor.util import paths
 

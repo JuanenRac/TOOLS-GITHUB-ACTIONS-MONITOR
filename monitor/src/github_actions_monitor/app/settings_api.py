@@ -47,7 +47,7 @@ NET_RE = re.compile(r"^[0-9A-Fa-f:.]{2,45}(?:/[0-9]{1,3})?\Z")      # an address
 LABEL_RE = re.compile(r"^[\w .:/+-]{1,50}\Z")      # a label of GitHub may hold a colon, a space or a slash ("monitor:ignore", "good first issue")
 LABEL_KEYS = ("sentinels.collab.rules.issue_critical_labels", "sentinels.collab.rules.ignore_labels")
 TZ_RE = re.compile(r"^(?:local|utc|UTC|[A-Za-z][A-Za-z0-9_+./-]{1,63})\Z")      # display.timezone: local, utc or an IANA name
-CRON_RE = re.compile(r"^[0-9*/,\- ]{9,60}\Z")      # report_schedule.cron: five fields of numbers, lists, ranges and steps (reporting/schedule.py reads it)
+CRON_RE = re.compile(r"^[0-9*/,\- ]{9,60}\Z")      # report_schedule.cron: five fields of numbers, lists, ranges and steps (reporting/report_schedule.py reads it)
 OWNER_RE = re.compile(r"^[A-Za-z0-9-]{0,39}\Z")
 MODEL_RE = re.compile(r"^[A-Za-z0-9._:/@-]{0,100}\Z")
 OLLAMA_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}/?\Z")   # the local service only: nothing leaves this computer
@@ -561,7 +561,7 @@ def check_value(path, value):
             from github_actions_monitor.util import tzdisplay
             return (True, value.strip()) if bounds.match(value.strip()) and tzdisplay.valid_setting(value.strip()) else (False, "text")
         if path == "report_schedule.cron":      # a schedule the reports could not read would silently never run: it is refused
-            from github_actions_monitor.reporting import schedule
+            from github_actions_monitor.reporting import report_schedule as schedule
             return (True, " ".join(value.split())) if bounds.match(value.strip()) and schedule.parse(value) is not None else (False, "text")
         return (True, value.strip()) if bounds.match(value.strip()) else (False, "text")
     if kind == "path":
