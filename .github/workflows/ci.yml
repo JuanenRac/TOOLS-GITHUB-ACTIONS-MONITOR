@@ -123,6 +123,7 @@ jobs:
           python -m unittest discover -s monitor/tests -p "test_180_page_smoke.py" -v
           python -m unittest discover -s monitor/tests -p "test_180_motion.py" -v
           python -m unittest discover -s monitor/tests -p "test_183_now_panel.py" -v
+          python -m unittest discover -s monitor/tests -p "test_194_sort_now.py" -v
 
   container:
     name: The image builds, runs read-only without root and survives a revoked login

@@ -10,6 +10,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+### Added
+
+- **The section Happening now can be sorted in seven ways**: a list above the section chooses ecosystem (the default, with a heading for each one, as ever), severity (stuck first, then the runs with a failed job, then running, then queued), age (the longest running first), newest first, repository, trigger or state. The choice is remembered for each user - in the team mode by the server (`GET` and `POST /api/auth/me/view`, so it follows the user to another browser), otherwise by the browser - and until someone chooses, `ui.now_sort` of the configuration file applies. Two buttons next to the list, Expand all and Collapse all, unfold or fold every repository of the section at once, in any order; the choice is remembered together with the order and kept when the page refreshes. Help, guides in the eight languages and both skills say so.
+
 ### Fixed
 
 - **`--help` and the other flags that only answer work while a monitor is running**: the check that stops a second monitor on the same port ran before the flags were read, so `--help` (and the quality gate of a release that calls it) failed on a computer where the monitor was already on port 8765. And the tests that measure real seconds take their limit from the load of the computer, so a busy runner no longer fails them.

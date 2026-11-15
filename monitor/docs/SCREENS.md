@@ -27,6 +27,11 @@ The page adapts to the size of its window, from a phone to 4K, upright or turned
 | `ui.screen2_orientation` | Orientation of /screen/2. |
 | `ui.screen3_tabs` | Tabs of /screen/3. |
 | `ui.screen3_orientation` | Orientation of /screen/3. |
+| `ui.now_sort` | Order of Happening now for who has not chosen one: ecosystem, severity, age, newest, repo, event or state. |
+
+## Order of the lists
+
+The section **Happening now** of the first tab is sorted by ecosystem, with a heading for each one. The list above the section changes it: ecosystem, severity (stuck first, then runs with a failed job, then running, then queued), age (longest running first), newest first, repository, trigger (push, pull_request, schedule...) and state (running before queued). The choice is remembered for each person: in the team mode the server keeps it with the user (`GET` and `POST /api/auth/me/view`, so it follows the user to another browser), otherwise this browser does. Until someone chooses, the order is `ui.now_sort` of the configuration file (ecosystem when it is missing or wrong). The buttons **Expand all** and **Collapse all** next to the list unfold or fold every repository of the section at once, in any order, and the choice is remembered for each person in the same place and survives a refresh (a repository you open or close by hand afterwards keeps your choice).
 
 ## Sizes tested
 

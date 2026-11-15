@@ -41,6 +41,7 @@ a call marked *this computer only* is refused when it comes from the network. Ev
 | `/api/auth/logout` | POST | public | sign out |
 | `/api/auth/me` | GET | public | who is signed in and with which role |
 | `/api/auth/me/notify` | GET,POST | viewer / admin | the notification preferences of the signed-in user |
+| `/api/auth/me/view` | GET,POST | viewer / admin | the order of the lists of the page and the unfold-all choice that the signed-in user chose |
 | `/api/auth/notify` | GET | viewer | the notification dispatcher and the digests (administrators) |
 | `/api/auth/password` | POST | viewer | change my own password |
 | `/api/auth/users` | GET,POST | admin / admin | list and manage users (administrators) |
