@@ -1334,6 +1334,23 @@ def retention_tick(config):
         degraded.note("retention", error)
 
 
+def score_tick(config, data):
+    """The pass of the score (once every few minutes at most): the runs and the alerts of the collaboration sentinel go to the ledger and the snapshot of the hour is written. Complete only; a
+    failure is counted and never stops the cycle."""
+    if LITE["on"] or data.get("loading") or (data.get("offline") or {}).get("offline"):
+        return
+    try:
+        from github_actions_monitor.scoring import ledger as score_service
+        from github_actions_monitor.storage import runtime
+        registry = SENTINEL["registry"]
+        collab = registry.get("collab") if registry else None
+        known = bool(collab is not None and getattr(collab, "enabled", False) and not (collab.get_status() or {}).get("loading"))
+        storage, account = runtime.process_storage(CHILD["account"] or None)
+        score_service.tick(storage, account, config, data.get("runs") or [], collab.get_alerts() if known else [], collab_known=known)
+    except Exception as error:   # noqa: BLE001 - the score never stops the monitor
+        degraded.note("score", error)
+
+
 def digest_tick(config):
     """The digests of the users (notify.users.enabled, OFF by default) whose time has come, from a thread of their own so that a slow relay never holds the cycle. Never raises."""
     try:
@@ -1358,6 +1375,7 @@ def maintain(config, data):
         degraded.note("loop.extra2", error)
     maintain_extras(toolconfig.raw_config() if not LITE["on"] else config, data)
     retention_tick(toolconfig.raw_config() if not LITE["on"] else config)
+    score_tick(toolconfig.raw_config() if not LITE["on"] else config, data)
     try:
         if ETAG["cache"]:
             ETAG["cache"].save()
