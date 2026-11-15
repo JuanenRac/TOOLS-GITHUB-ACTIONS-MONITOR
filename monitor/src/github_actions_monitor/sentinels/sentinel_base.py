@@ -17,6 +17,24 @@ from typing import ClassVar, Literal, TypedDict
 LEVELS = ("info", "warning", "error", "critical")
 
 
+LIFECYCLES = ("healthy", "degraded", "paused", "error", "off")
+
+
+def lifecycle(status):
+    """Where a sentinel stands, from its status: `off` (not switched on), `paused` (waiting for allowance), `error` (it fails and has read nothing yet), `degraded` (some reads fail, a source
+    cannot be read, or it has not finished its first look) or `healthy`. "No alerts" only means something when this is `healthy`: a sentinel that could not look has no alerts either."""
+    if not isinstance(status, dict) or not status.get("enabled", True) or status.get("level") == "off":
+        return "off"
+    if status.get("paused"):
+        return "paused"
+    errors = status.get("errors") or []
+    if errors and not status.get("repos_checked") and status.get("level") in (None, "unknown"):
+        return "error"
+    if errors or status.get("unavailable") or status.get("loading") or status.get("level") == "unknown":
+        return "degraded"
+    return "healthy"
+
+
 class Alert(TypedDict):
     id: str                    # stable for the same finding between two cycles: "ci.red:REPO:ci.yml"
     code: str                  # stable and independent of the language: "ci.red", "ci.stuck", "collab.issue.stale"...

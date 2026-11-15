@@ -26,7 +26,7 @@ FOLDERS_OF_THE_PRODUCT = ("src", "assets", "docs", "bin", "tools", "tests", "dep
 OLD_FILES = {
     "actions_monitor.json": "config", "actions_monitor_lite.json": "config", "targets.json": "config", "ecosystems.json": "config", "profiles.json": "config", "quotas.json": "config",
     "etag_cache.json": "data", "etag_cache_lite.json": "data", "events_monitor.jsonl": "data", "events_state.json": "data", "eventos_monitor.jsonl": "data", "analytics_history.json": "data",
-    "sentinel_cache.json": "data", "sentinel_history.json": "data", "sentinel_ai_cache.json": "data", "collab_state.json": "data", "alert_mutes.json": "data", "update_check.json": "data",
+    "sentinel_cache.json": "data", "sentinel_history.json": "data", "sentinel_ai_cache.json": "data", "collab_state.json": "data", "security_state.json": "data", "alert_mutes.json": "data", "update_check.json": "data",
     "update_check_lite.json": "data", "welcome_state.json": "data", "orgs_state.json": "data", "degraded.json": "data", "degraded_lite.json": "data", "storage.sqlite3": "data",
     "actions_monitor_log.txt": "logs", "actions_monitor_log_lite.txt": "logs", "ai_actions_log.jsonl": "logs", "github_actions_log.jsonl": "logs", "auth_audit.jsonl": "logs",
     "ALERTS_BRIEF.md": "ai", "ai_alerts.jsonl": "ai", "ai_alerts_state.json": "ai", "ai_heartbeat.json": "ai", "ai_hook_state.json": "ai", "ci_red.json": "ai",

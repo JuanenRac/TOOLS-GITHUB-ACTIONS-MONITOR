@@ -15,7 +15,9 @@ from github_actions_monitor.sentinels import sentinel_base
 def _registry():
     from github_actions_monitor.sentinels import sentinel_ci
     from github_actions_monitor.sentinels import sentinel_collab
-    return {sentinel_ci.SentinelCI.name: sentinel_ci.SentinelCI, sentinel_collab.SentinelCollab.name: sentinel_collab.SentinelCollab}
+    from github_actions_monitor.sentinels import sentinel_security
+    return {sentinel_ci.SentinelCI.name: sentinel_ci.SentinelCI, sentinel_collab.SentinelCollab.name: sentinel_collab.SentinelCollab,
+            sentinel_security.SentinelSecurity.name: sentinel_security.SentinelSecurity}
 
 
 def section(config, name):
@@ -89,7 +91,12 @@ class SentinelRegistry:
         return ran
 
     def status(self):
-        return {name: self.items[name].get_status() for name in self.names()}
+        """The status of every sentinel, each with its `lifecycle` (see `sentinel_base.lifecycle`)."""
+        out = {}
+        for name in self.names():
+            status = self.items[name].get_status()
+            out[name] = {**status, "lifecycle": sentinel_base.lifecycle(status)} if isinstance(status, dict) and "lifecycle" not in status else status
+        return out
 
     def alerts(self):
         """The alerts of every enabled sentinel in one list, the worst first."""
