@@ -69,6 +69,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - Un guide du score dans les huit langues.
 
+### Corrigé
+
+- Les images de l'onglet Graphiques s'ajustent de nouveau : l'anneau du résultat des dernières 24 h était coupé par sa boîte et sa légende sortait du dessin, les barres des durées étaient un peu plus hautes que leur cadre et la dernière heure de la frise dépassait à droite. Les lignes de l'onglet ne rétrécissent plus en dessous de ce dont une image a besoin (l'onglet défile à la place), la légende de l'anneau est mesurée d'après ses mots et passe sous l'anneau quand elle ne tient pas à côté, et les marges contiennent la moitié de la dernière étiquette. Une nouvelle vérification ouvre l'onglet dans les huit langues, large et étroit, clair et sombre, et mesure chaque image.
+
 ## [1.8.4]
 
 ### Ajouté

@@ -69,6 +69,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - Una guida al punteggio negli otto idiomi.
 
+### Corretto
+
+- Le immagini della scheda Grafici tornano a stare al loro posto: l'anello del risultato delle ultime 24 h era tagliato dal suo riquadro e la sua legenda usciva dal disegno, le barre delle durate erano un po' più alte della loro cornice e l'ultima ora della linea del tempo sporgeva a destra. Le righe della scheda non si restringono più sotto ciò che serve a un'immagine (la scheda scorre), la legenda dell'anello si misura dalle sue parole e passa sotto l'anello quando non sta di fianco, e i margini tengono metà dell'ultima etichetta. Un nuovo controllo apre la scheda negli otto idiomi, larga e stretta, chiara e scura, e misura ogni immagine.
+
 ## [1.8.4]
 
 ### Aggiunto

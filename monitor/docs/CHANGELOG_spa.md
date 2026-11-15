@@ -69,6 +69,10 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - Una guía de la puntuación en los ocho idiomas.
 
+### Corregido
+
+- Las imágenes de la pestaña Gráficas vuelven a encajar: el anillo del resultado de las últimas 24 h quedaba cortado por su caja y su leyenda salía del dibujo, las barras de las duraciones eran algo más altas que su marco y la última hora de la línea de tiempo sobresalía por la derecha. Las filas de la pestaña ya no se encogen por debajo de lo que necesita una imagen (la pestaña se desplaza), la leyenda del anillo se mide a partir de sus palabras y pasa debajo del anillo cuando no cabe a su lado, y los márgenes guardan la mitad de la última etiqueta. Una comprobación nueva abre la pestaña en los ocho idiomas, ancha y estrecha, en claro y oscuro, y mide cada imagen.
+
 ## [1.8.4]
 
 ### Añadido
