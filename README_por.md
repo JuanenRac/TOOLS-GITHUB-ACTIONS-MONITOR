@@ -40,7 +40,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 
 <!-- glance:begin -->
 
-**Medido hoje** (v1.8.4)
+**Medido hoje** (v1.9.0)
 
 | | |
 |---|---|

@@ -35,22 +35,6 @@ Tout ce qui suit est écrit et testé ; c'est soit déjà dans la branche princi
 
 Chaque version porte tout ce qui est de son tronçon du plan : rien ne reste suspendu à une version antérieure et rien n'est repoussé à la suivante. Après la 1.8.3 et après la 1.9.3, le produit passe une revue indépendante dont les constats sont clos dans la version de stabilisation suivante. 1.8.1 est une version corrective de la 1.8.0 : le cadre « chargement des dépôts » disparaît avec le dernier dépôt et le rechargement de la page obtient ses données aussitôt.
 
-### 1.8.2 - Image Docker officielle et mode service
-
-Une image multi-étapes avec un utilisateur sans privilèges, des volumes pour les données et la configuration, des variables d'environnement documentées, un exemple de compose avec proxy inverse et TLS facultatifs, une unité systemd pour qui préfère l'installation classique et un contrôle de santé profond qui échoue si le superviseur ou le cycle d'un compte est bloqué. Un identifiant que GitHub révoque ou laisse expirer marque seulement ce compte comme aveugle, déclenche une alerte système critique et peut être remplacé sans redémarrer le superviseur. Sauvegarde, mise à jour et premier démarrage en service sont documentés ; la page dit si elle écoute sur cet ordinateur, sur le réseau ou derrière un proxy ; la ligne de commande fonctionne contre un moniteur distant. L'édition lite reste locale.
-
-### 1.8.3 - Notifications par utilisateur
-
-Préférences par utilisateur (canal, sentinelle, niveau minimal), un répartiteur qui décide qui prévenir d'après les préférences et les rôles, des canaux comme simples modules et des synthèses des alertes pas encore lues. Aussi : un rapport du temps que les jobs attendent en file pour chaque runner, et un job sauté à cause des chemins surveillés est montré à part d'un job rouge.
-
-### 1.8.4 - Stabilisation
-
-Pas de grandes fonctions. Isolation entre comptes, la page, le stockage, connexion et rôles, notifications, un GitHub qui flanche par moments, le démarrage après une migration interrompue, la reprise après une coupure, un doctor élargi, les endroits qui écrivent sur GitHub, des journaux sans jetons, une liste de contrôle de sécurité du mode équipe et des documents conformes au comportement. La série ne va jusqu'à la 1.8.9 que si nécessaire.
-
-### 1.9.0 - Un score
-
-Des collecteurs de métriques par compte et par sentinelle (taux de réussite, durée, temps de rétablissement, débit), un moteur de score aux seuils modifiables, une tendance par rapport à la période précédente, des instantanés gardés dans le stockage, un widget de score avec sa courbe, des alertes quand le score baisse et un verbe de ligne de commande qui l'affiche.
-
 ### 1.9.1 - Sentinelle de sécurité
 
 La troisième sentinelle : Dependabot, analyse de code, analyse des secrets, protection des branches, permissions des workflows et propriétaires du code, avec des règles par type de signal, le même filtre dans l'onglet Alertes et une pénalité dans le score pour les alertes critiques ouvertes. Facultatif, dans la même version : hygiène des workflows (actions non fixées à un commit, jobs sans limite de temps, workflows sans permissions ou sans concurrence, usage dangereux de pull_request_target), sur le vérificateur de workflows que le projet a déjà.
@@ -72,6 +56,24 @@ La même sorte de clôture que la 1.8.4 pour le score, la sentinelle de sécurit
 Une version majeure qui nettoie la dette technique et fige les interfaces publiques : sentinelles, stockage, alertes, le schéma d'événements et l'API de lecture, avec une suite de tests de contrat que les clients peuvent lancer contre n'importe quelle version. Un guide pour chaque façon d'utiliser le produit (lite, individuel, service, équipe) et une référence des réglages, événements, métriques et API. À partir de la 2.0.1, un coussin pour ce qui n'apparaît qu'à l'usage réel prolongé.
 
 Les workflows du moniteur lui-même respectent ce que la sentinelle d'hygiène demandera aux autres : actions fixées à un commit, permissions minimales et une limite de temps sur chaque job.
+
+## Fait dans la 1.8.2 à la 1.9.0
+
+### 1.8.2 - Image Docker officielle et mode service
+
+Une image multi-étapes avec un utilisateur sans privilèges, des volumes pour les données et la configuration, des variables d'environnement documentées, un exemple de compose avec proxy inverse et TLS facultatifs, une unité systemd pour qui préfère l'installation classique et un contrôle de santé profond qui échoue si le superviseur ou le cycle d'un compte est bloqué. Un identifiant que GitHub révoque ou laisse expirer marque seulement ce compte comme aveugle, déclenche une alerte système critique et peut être remplacé sans redémarrer le superviseur. Sauvegarde, mise à jour et premier démarrage en service sont documentés ; la page dit si elle écoute sur cet ordinateur, sur le réseau ou derrière un proxy ; la ligne de commande fonctionne contre un moniteur distant. L'édition lite reste locale.
+
+### 1.8.3 - Notifications par utilisateur
+
+Préférences par utilisateur (canal, sentinelle, niveau minimal), un répartiteur qui décide qui prévenir d'après les préférences et les rôles, des canaux comme simples modules et des synthèses des alertes pas encore lues. Aussi : un rapport du temps que les jobs attendent en file pour chaque runner, et un job sauté à cause des chemins surveillés est montré à part d'un job rouge.
+
+### 1.8.4 - Stabilisation
+
+Pas de grandes fonctions. Isolation entre comptes, la page, le stockage, connexion et rôles, notifications, un GitHub qui flanche par moments, le démarrage après une migration interrompue, la reprise après une coupure, un doctor élargi, les endroits qui écrivent sur GitHub, des journaux sans jetons, une liste de contrôle de sécurité du mode équipe et des documents conformes au comportement. La série ne va jusqu'à la 1.8.9 que si nécessaire.
+
+### 1.9.0 - Un score
+
+Des collecteurs de métriques par compte et par sentinelle (taux de réussite, durée, temps de rétablissement, débit), un moteur de score aux seuils modifiables, une tendance par rapport à la période précédente, des instantanés gardés dans le stockage, un widget de score avec sa courbe, des alertes quand le score baisse et un verbe de ligne de commande qui l'affiche.
 
 ## Fait dans la 1.7.9
 

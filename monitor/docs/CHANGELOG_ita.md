@@ -45,6 +45,30 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - Il test di un account che muore subito non dipende più dalla velocità del computer: l'attesa prima di riavviare un account viene verificata con un orologio che dà il test stesso, e un secondo test verifica il calendario delle attese senza leggere l'ora reale (il vecchio falliva sotto carico nella porta di una versione).
 
+## [1.9.0]
+
+### Aggiunto
+
+- Il punteggio di ogni account (solo in Complete): un numero da 0 a 100, una lettera da A a E e una tendenza, costruiti con l'affidabilità della CI, la velocità, il ripristino e la collaborazione. Quando non può sostenere un numero dice «calibrazione» o «dati insufficienti», e dà sempre la copertura, la qualità dei dati e ciò che non conta ancora (la sicurezza), così un 85 non si legge come «tutto a posto».
+
+- Le impostazioni del punteggio nella pagina Impostazioni (finestra in giorni scelta dall'utente, calibrazione, minimo di esecuzioni e di copertura, pesi, soglie delle lettere e avviso in caso di calo), negli otto idiomi.
+
+- Un'istantanea del punteggio ogni ora in entrambi gli archivi (schema 2 del database, la migrazione avviene in una sola transazione), inclusa nell'esportazione, nel backup, nella migrazione tra archivi e nella retention.
+
+- `GET /api/score` e `GET /api/score/history`: il numero, la lettera, la tendenza, le parti, la copertura, la qualità dei dati, ciò che manca e la scomposizione per repository; chi può vedere un account ne legge il punteggio e solo un amministratore cambia le impostazioni.
+
+- Una pastiglia nell'intestazione della pagina con numero, lettera, tendenza e una piccola linea degli ultimi giorni; neutra e con il motivo quando non c'è un numero, e con una stella finché una parte non conta.
+
+- Il comando `score` della riga di comando, con `--compare` per confrontarlo con lo storico della finestra.
+
+- L'avviso `score.dropped` quando il punteggio cala di 10 punti o passa a una lettera inferiore (critico a E): compare nella scheda Avvisi, si può silenziare ed esce dai canali di notifica esterni solo se richiesto.
+
+- `GET /api/score/global` del supervisore: la media degli account valutati che chi chiede può vedere, solo a titolo informativo e con l'indicazione di chi ne fa parte.
+
+- Il punteggio per altri strumenti: tre serie senza etichette nelle metriche, lo strumento `get_score` del server MCP, pannelli del punteggio nella dashboard Grafana di esempio e un punteggio inventato in `--demo`.
+
+- Una guida al punteggio negli otto idiomi.
+
 ## [1.8.4]
 
 ### Aggiunto

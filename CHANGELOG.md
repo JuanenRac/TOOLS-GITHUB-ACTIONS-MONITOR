@@ -10,6 +10,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+## [1.9.0]
+
 ### Added
 
 - **The score of the whole installation, for information**: with several accounts, `GET /api/score/global` of the supervisor gives the mean of the scored accounts the asker may see, weighted by their repositories that have a number, always with how many accounts are in it and each account listed with its state; an account without a number is left out of the mean and with none scored there is no number, never a 100. Each account keeps its own score.

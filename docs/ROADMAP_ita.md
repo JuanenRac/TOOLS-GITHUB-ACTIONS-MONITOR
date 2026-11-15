@@ -35,22 +35,6 @@ Tutto ciò che segue è scritto e provato; o è già nel ramo principale o atten
 
 Ogni versione porta tutto quello del suo tratto del piano: nulla resta appeso a una versione precedente e nulla è rimandato alla successiva. Dopo la 1.8.3 e dopo la 1.9.3 il prodotto passa una revisione indipendente e i suoi rilievi si chiudono nella versione di stabilizzazione seguente. 1.8.1 è una versione correttiva della 1.8.0: il riquadro «caricamento dei repository» scompare con l'ultimo repository e il ricaricamento della pagina ottiene subito i dati.
 
-### 1.8.2 - Immagine Docker ufficiale e modalità servizio
-
-Un'immagine a più fasi con utente non privilegiato, volumi per dati e configurazione, variabili d'ambiente documentate, un esempio di compose con reverse proxy e TLS facoltativi, un'unità systemd per chi preferisce l'installazione classica e un controllo di salute profondo che fallisce se il supervisore o il ciclo di un account è bloccato. Una credenziale che GitHub revoca o lascia scadere segna solo quell'account come cieco, genera un allarme di sistema critico e si può sostituire senza riavviare il supervisore. Backup, aggiornamento e primo avvio come servizio sono documentati; la pagina dice se ascolta su questo computer, sulla rete o dietro un proxy; la riga di comando funziona contro un monitor remoto. L'edizione lite resta locale.
-
-### 1.8.3 - Notifiche per utente
-
-Preferenze per utente (canale, sentinella, livello minimo), un distributore che decide chi avvisare in base alle preferenze e ai ruoli, canali come semplici plugin e riepiloghi degli avvisi non ancora letti. Inoltre: un rapporto sul tempo che i job attendono in coda per ogni runner, e un job saltato per i percorsi che osserva è mostrato a parte da un job rosso.
-
-### 1.8.4 - Stabilizzazione
-
-Nessuna grande funzione. Isolamento tra account, la pagina, l'archiviazione, accesso e ruoli, notifiche, un GitHub che a tratti cede, l'avvio dopo una migrazione interrotta, il ripristino dopo un'interruzione, un doctor più ampio, i punti che scrivono su GitHub, log senza token, una lista di controllo di sicurezza della modalità team e documenti coerenti con il comportamento. La serie arriva alla 1.8.9 solo se serve.
-
-### 1.9.0 - Un punteggio
-
-Raccoglitori di metriche per account e per sentinella (tasso di successo, durata, tempo di ripristino, throughput), un motore di punteggio con soglie modificabili, un andamento rispetto al periodo precedente, istantanee conservate nell'archiviazione, un widget del punteggio con minigrafico, avvisi quando il punteggio scende e un verbo della riga di comando che lo stampa.
-
 ### 1.9.1 - Sentinella di sicurezza
 
 La terza sentinella: Dependabot, analisi del codice, analisi dei segreti, protezione dei rami, permessi dei workflow e proprietari del codice, con regole per tipo di segnale, lo stesso filtro nella scheda Avvisi e una penalità nel punteggio per gli avvisi critici aperti. Facoltativo, nella stessa versione: igiene dei workflow (azioni non fissate a un commit, job senza limite di tempo, workflow senza permessi o senza concorrenza, uso pericoloso di pull_request_target), sul verificatore di workflow che il progetto ha già.
@@ -72,6 +56,24 @@ La stessa chiusura della 1.8.4 per punteggio, sentinella di sicurezza, viste di 
 Una versione maggiore che ripulisce il debito tecnico e congela le interfacce pubbliche: sentinelle, archiviazione, avvisi, lo schema degli eventi e l'API di lettura, con una suite di test di contratto che i client possono eseguire contro qualsiasi versione. Una guida per ogni modo di usare il prodotto (lite, individuale, servizio, team) e un riferimento di impostazioni, eventi, metriche e API. Dalla 2.0.1 in poi c'è un cuscinetto per ciò che emerge solo con un uso reale prolungato.
 
 I workflow del monitor stesso rispettano ciò che la sentinella di igiene chiederà agli altri: azioni fissate a un commit, permessi minimi e un limite di tempo su ogni job.
+
+## Fatto dalla 1.8.2 alla 1.9.0
+
+### 1.8.2 - Immagine Docker ufficiale e modalità servizio
+
+Un'immagine a più fasi con utente non privilegiato, volumi per dati e configurazione, variabili d'ambiente documentate, un esempio di compose con reverse proxy e TLS facoltativi, un'unità systemd per chi preferisce l'installazione classica e un controllo di salute profondo che fallisce se il supervisore o il ciclo di un account è bloccato. Una credenziale che GitHub revoca o lascia scadere segna solo quell'account come cieco, genera un allarme di sistema critico e si può sostituire senza riavviare il supervisore. Backup, aggiornamento e primo avvio come servizio sono documentati; la pagina dice se ascolta su questo computer, sulla rete o dietro un proxy; la riga di comando funziona contro un monitor remoto. L'edizione lite resta locale.
+
+### 1.8.3 - Notifiche per utente
+
+Preferenze per utente (canale, sentinella, livello minimo), un distributore che decide chi avvisare in base alle preferenze e ai ruoli, canali come semplici plugin e riepiloghi degli avvisi non ancora letti. Inoltre: un rapporto sul tempo che i job attendono in coda per ogni runner, e un job saltato per i percorsi che osserva è mostrato a parte da un job rosso.
+
+### 1.8.4 - Stabilizzazione
+
+Nessuna grande funzione. Isolamento tra account, la pagina, l'archiviazione, accesso e ruoli, notifiche, un GitHub che a tratti cede, l'avvio dopo una migrazione interrotta, il ripristino dopo un'interruzione, un doctor più ampio, i punti che scrivono su GitHub, log senza token, una lista di controllo di sicurezza della modalità team e documenti coerenti con il comportamento. La serie arriva alla 1.8.9 solo se serve.
+
+### 1.9.0 - Un punteggio
+
+Raccoglitori di metriche per account e per sentinella (tasso di successo, durata, tempo di ripristino, throughput), un motore di punteggio con soglie modificabili, un andamento rispetto al periodo precedente, istantanee conservate nell'archiviazione, un widget del punteggio con minigrafico, avvisi quando il punteggio scende e un verbo della riga di comando che lo stampa.
 
 ## Fatto nella 1.7.9
 
