@@ -2174,6 +2174,15 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as error:
                 self.json_reply({"data": None, "error": i18n.t("mon.history_failed", error=error)})
             return
+        if path == "/api/sentinel/security":      # what GitHub says is open or missing about security (the Security sentinel; off by default; read only)
+            if not self.guard():
+                return
+            security = (SENTINEL["registry"].get("security") if SENTINEL["registry"] else None)
+            try:
+                self.json_reply({"data": security.snapshot() if security else None, "error": SENTINEL["error"] or (None if security else i18n.t("mon.sentinel_not_loaded"))})
+            except Exception as error:      # shown as a notice in the tab
+                self.json_reply({"data": None, "error": i18n.t("mon.sentinel_failed", error=error)})
+            return
         if path == "/api/sentinel/collab":      # the issues and pull requests that need a person (the Collab sentinel; off by default; read only)
             if not self.guard():
                 return
@@ -2909,6 +2918,9 @@ def start_sentinel(config):
         collab = SENTINEL["registry"].get("collab")
         if collab is not None:
             collab.feed.listeners.append(notifiers.make_listener(toolconfig.raw_config))
+        security = SENTINEL["registry"].get("security")
+        if security is not None:
+            security.feed.listeners.append(notifiers.make_listener(toolconfig.raw_config))
         SENTINEL["registry"].start()
     except Exception as error:
         SENTINEL["error"] = i18n.t("mon.sentinel_start_failed", error=error)

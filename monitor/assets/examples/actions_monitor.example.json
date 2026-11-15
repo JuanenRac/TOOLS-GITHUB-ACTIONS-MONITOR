@@ -198,6 +198,22 @@
     }
   },
   "sentinels": {
+    "security": {
+      "enabled": false,
+      "refresh_seconds": 1800,
+      "max_repos_per_tick": 5,
+      "min_rate_remaining": 1500,
+      "repos": "all",
+      "signals": {
+        "dependabot": {"enabled": true, "min_severity": "high"},
+        "code_scanning": {"enabled": true, "min_severity": "high"},
+        "secret": {"enabled": true},
+        "branch": {"enabled": true},
+        "workflow": {"enabled": true},
+        "codeowners": {"enabled": false}
+      },
+      "penalty": {"critical": 25, "high": 10, "medium": 3, "low": 1, "branch": 5, "workflow": 3, "codeowners": 1}
+    },
     "collab": {
       "enabled": false,
       "refresh_seconds": 600,

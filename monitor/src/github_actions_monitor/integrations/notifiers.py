@@ -28,7 +28,7 @@ from github_actions_monitor.security import netguard
 from github_actions_monitor.util import tzdisplay
 
 CHANNELS = ("telegram", "discord", "slack", "matrix", "mqtt", "http_local")
-KNOWN_EVENTS = ("red_new", "red_fixed", "stuck_new", "pending_sign", "release_due", "rate_low", "offline", "online", "alerts_up", "workflow_failed", "collab_new", "collab_fixed", "credential_blind", "credential_back", "score_dropped")
+KNOWN_EVENTS = ("red_new", "red_fixed", "stuck_new", "pending_sign", "release_due", "rate_low", "offline", "online", "alerts_up", "workflow_failed", "collab_new", "collab_fixed", "credential_blind", "credential_back", "score_dropped", "security_new", "security_fixed")
 DEFAULT_EVENTS = ["red_new", "stuck_new", "pending_sign", "offline", "credential_blind"]
 LOOPBACK = ("127.0.0.1", "localhost", "::1", "[::1]")
 ENV_RE = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}\Z")

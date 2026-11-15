@@ -41,6 +41,7 @@ def redirect(account_id, base=None):
     auth_http.OWN_ACCOUNT["id"] = account_id
     from github_actions_monitor.sentinels import sentinel_local  # the sentinel is part of the complete edition: its files are per account too
     from github_actions_monitor.sentinels import sentinel_collab  # and so are the files of the second one
+    from github_actions_monitor.sentinels import sentinel_security  # and the files of the third one
     from github_actions_monitor.sentinels import alert_center  # and the silences of the alerts
     for module, attribute, relative in accounts.STATE_FILES:
         loaded = sys.modules.get(module)

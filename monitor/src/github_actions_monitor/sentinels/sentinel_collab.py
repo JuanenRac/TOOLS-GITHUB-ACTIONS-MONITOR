@@ -371,6 +371,12 @@ class SentinelCollab(sentinel_base.BaseSentinel):
                  "details": {"number": a["number"], "title": a["title"], "url": a["url"], "labels": a.get("labels") or [], "updated": a.get("updated")}, "created_at": a["created_at"]} for a in sorted(items, key=lambda x: x["id"])]
 
     def get_status(self):
+        """The state, with its `lifecycle` (healthy | degraded | paused | error | off): no alerts only means something when it is healthy."""
+        status = self._status()
+        status["lifecycle"] = sentinel_base.lifecycle(status)
+        return status
+
+    def _status(self):
         if not self.enabled:
             return {"enabled": False, "level": "off", "loading": "", "errors": [], "refresh_seconds": self.refresh_seconds, "repos_in_scope": 0, "repos_checked": 0, "last_full_scan": None, "paused": False}
         repos = self.scope()

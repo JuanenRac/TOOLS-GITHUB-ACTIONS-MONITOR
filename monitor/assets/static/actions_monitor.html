@@ -1131,7 +1131,7 @@ function freshDog(){if(freshWatch(nowMs()))tick(true)}
 setInterval(freshDog,5000);setInterval(freshPaint,1000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)tick(true)});
 /* ---------- Sentinel ---------- */
-var SENT=null,SENT_ERR=null,ANA=null,COLLAB=null;const AIRES={};
+var SENT=null,SENT_ERR=null,ANA=null,COLLAB=null,SECUR=null;const AIRES={};
 const OPEN=new Set((QS.get("open")||store.get("am-s-open")||"a1,a2,a3").split(",").filter(Boolean));
 const LVN=l=>T("ui.lv_"+l)===("ui.lv_"+l)?l:T("ui.lv_"+l);
 const safeUrl=u=>typeof u==="string"&&u.startsWith("https://github.com/")?u:"#";
@@ -1246,8 +1246,15 @@ function renderSent0(){
    +section("a11",T("ui.a11_title"),a11o.level||"unknown",T("ui.sc_a11",{n:a11o.ready||0,m:a11o.behind||0}),a11)
    +section("a12",T("ui.a12_title"),ANA&&ANA.enabled!==false&&(ANA.slower||[]).length?"warn":(ANA&&(ANA.duration||[]).length?"ok":"unknown"),T("ui.sc_a12",{n:(ANA&&ANA.duration||[]).length,m:(ANA&&ANA.flaky||[]).length}),analyticsBox())
    +section("a13",T("ui.a13_title"),(s.lint&&s.lint.enabled)?(s.lint.summary.bad?"bad":(s.lint.summary.warn?"warn":"ok")):"unknown",s.lint&&s.lint.enabled?T("ui.sc_a13",{n:s.lint.summary.findings,m:s.lint.summary.repos}):"",lintBox(s))
-   +section("collab",T("ui.collab_title"),collabLevel(),COLLAB&&COLLAB.enabled!==false?T("ui.collab_count",{n:(COLLAB.alerts||[]).length,m:(COLLAB.status||{}).repos_checked||0}):"",collabBox());
+   +section("collab",T("ui.collab_title"),collabLevel(),COLLAB&&COLLAB.enabled!==false?T("ui.collab_count",{n:(COLLAB.alerts||[]).length,m:(COLLAB.status||{}).repos_checked||0}):"",collabBox())
+   +section("security",T("ui.sec_title"),secLevel(),SECUR&&SECUR.enabled!==false?T("ui.sec_count",{n:(SECUR.alerts||[]).length,m:(SECUR.status||{}).repos_checked||0}):"",secBox());
 }
+function secBox(){
+  const c=SECUR;if(!c||c.enabled===false)return mut_(T("ui.sec_off"));
+  const rows=(c.alerts||[]).filter(a=>sVis(a.repo)),st=c.status||{},un=Object.keys(st.unavailable||{});
+  const tbl=rows.length?`<table>${thk(["ui.th_repo","ui.th_alert","ui.th_age"])}<tbody>${rows.map(a=>`<tr><td><b class="rl" data-repo-open="${esc(a.repo)}">${esc(a.repo)}</b></td><td class="wrap"><span class="chip ${a.level==="critical"||a.level==="error"?"bad":a.level==="info"?"":"warn"}" title="${esc(a.code)}">${esc(T("ui.sec_sig_"+(a.details||{}).signal))}</span> ${esc(a.title)}</td><td>${esc(ago(a.created_at))}</td></tr>`).join("")}</tbody></table>`:(st.lifecycle==="healthy"?ok_(T("ui.sec_none")):"");
+  return `<div class="mut" style="margin-bottom:6px">${esc(T("ui.life_"+(st.lifecycle||"off")))}</div>`+tbl+(un.length?`<div class="mut" style="margin-top:8px">${esc(T("ui.sec_unavailable",{list:un.map(k=>T("ui.sec_sig_"+k)+" ("+st.unavailable[k]+")").join(", ")}))}</div>`:"")+`<div class="mut" style="margin-top:8px">${esc(T("ui.sec_foot",{c:st.repos_checked||0,r:st.repos_in_scope||0,s:st.refresh_seconds||0}))}${(st.errors||[]).length?" · "+esc(st.errors.map(e=>e.section).slice(0,4).join(", ")):""}</div>`}
+function secLevel(){const c=SECUR;return !c||c.enabled===false?"unknown":(c.level||"unknown")}
 function collabBox(){
   const c=COLLAB;if(!c||c.enabled===false)return mut_(T("ui.collab_off"));
   const rows=(c.alerts||[]).filter(a=>sVis(a.repo)),st=c.status||{};
@@ -1386,6 +1393,7 @@ async function sentTick(){alertsTick();
   try{const r=await fetch("/api/sentinel?"+qlang(),{cache:"no-store"});const j=await r.json();SENT_ERR=j.error||null;if(j.data)SENT=j.data}
   catch(e){SENT_ERR=T("ui.err_sentinel_down",{msg:e})}
   try{const r=await fetch("/api/sentinel/collab?"+qlang(),{cache:"no-store"});if(r.ok){const j=await r.json();COLLAB=j.data||null}}catch(e){COLLAB=null}
+  try{const r=await fetch("/api/sentinel/security?"+qlang(),{cache:"no-store"});if(r.ok){const j=await r.json();SECUR=j.data||null}}catch(e){SECUR=null}
   try{renderSent()}catch(e){SENT_ERR=T("ui.err_sentinel_draw",{msg:e.message});const b=$("s-err");b.style.display="block";b.textContent=T("ui.s_warn")+SENT_ERR}
 }
 /* side panel of a repo: only data the page already has (monitor and Sentinel snapshots), no new GitHub calls */
@@ -1836,12 +1844,12 @@ async function authNotify(){const p=authPanel(T("ui.auth_notify")),msg=ae("div",
   const [lT,iT]=ntText(T("ui.nt_ntfy_topic"),(dst.ntfy||{}).topic);const [lK,iK]=ntText(T("ui.nt_ntfy_token"),"","password",sec.ntfy);const [lW,iW]=ntText(T("ui.nt_teams_webhook"),"","password",sec.teams);const [lA,iA]=ntText(T("ui.nt_email_address"),(dst.email||{}).address);
   [lT,lK,lW,lA].forEach(l=>{p.append(l)});
   p.append(ae("h3",{},T("ui.nt_sentinels")));
-  const [lC,iC]=ntBox(T("ui.nt_sent_ci"),(pr.sentinels||[]).includes("ci")),[lO,iO]=ntBox(T("ui.nt_sent_collab"),(pr.sentinels||[]).includes("collab"));p.append(lC,lO);
+  const [lC,iC]=ntBox(T("ui.nt_sent_ci"),(pr.sentinels||[]).includes("ci")),[lO,iO]=ntBox(T("ui.nt_sent_collab"),(pr.sentinels||[]).includes("collab")),[lSec,iSec]=ntBox(T("ui.nt_sent_security"),(pr.sentinels||[]).includes("security"));p.append(lC,lO,lSec);
   const [lM,iM]=ntSel(T("ui.nt_min_level"),[["info",T("ui.nt_level_info")],["warn",T("ui.nt_level_warn")],["bad",T("ui.nt_level_bad")]],pr.min_level);p.append(lM);
   let iS=null;if((pr.families||[]).includes("system")){const [lS,i2]=ntBox(T("ui.nt_system"),pr.system);iS=i2;p.append(lS)}
   const [lD,iD]=ntSel(T("ui.nt_digest"),[["off",T("ui.nt_digest_off")],["hourly",T("ui.nt_digest_hourly")],["daily",T("ui.nt_digest_daily")]],pr.digest);p.append(lD);
   const save=ae("button",{type:"button",class:"authact"},T("ui.nt_save")),test=ae("button",{type:"button",class:"authact"},T("ui.nt_test")),seen=ae("button",{type:"button",class:"authact"},T("ui.nt_seen"));
-  save.onclick=async()=>{const body={enabled:iE.checked,channels:Object.keys(ch).filter(n=>ch[n].checked),sentinels:[iC.checked?"ci":null,iO.checked?"collab":null].filter(Boolean),min_level:iM.value,digest:iD.value,destinations:{ntfy:{topic:iT.value.trim()},email:{address:iA.value.trim()}},secrets:{}};
+  save.onclick=async()=>{const body={enabled:iE.checked,channels:Object.keys(ch).filter(n=>ch[n].checked),sentinels:[iC.checked?"ci":null,iO.checked?"collab":null,iSec.checked?"security":null].filter(Boolean),min_level:iM.value,digest:iD.value,destinations:{ntfy:{topic:iT.value.trim()},email:{address:iA.value.trim()}},secrets:{}};
     if(iS)body.system=iS.checked;if(iK.value)body.secrets.ntfy=iK.value;if(iW.value)body.secrets.teams=iW.value;
     const r=await authPost("/api/auth/me/notify",body);say(r.ok,r.ok?T("ui.nt_saved"):T("ui.nt_failed")+(r.j&&r.j.code?" ("+r.j.code+")":""));if(r.ok){iK.value=iW.value=""}};
   test.onclick=async()=>{const r=await authPost("/api/auth/me/notify/test",{});say(r.ok&&r.j&&r.j.ok,r.ok&&r.j&&r.j.ok?T("ui.nt_test_ok"):T("ui.nt_test_fail")+(r.j&&r.j.code?" ("+r.j.code+")":""))};
