@@ -2,15 +2,16 @@
 # GPL-3.0-or-later - see LICENSE
 """ScoreEngine: turns the metrics of a window (see `collector`) into a number from 0 to 100, a letter from A to E and a trend against the window before. Pure functions.
 
-The number is a weighted sum of four parts, each one 0..100: CI reliability (success rate), speed (95th percentile of the duration), recovery (time to recover)
-and collaboration (time to resolve). The weights and the limits of every part are settings (`score.*`), conservative by default.
+The number is a weighted sum of five parts, each one 0..100: CI reliability (success rate), speed (95th percentile of the duration), recovery (time to recover),
+collaboration (time to resolve) and security (the points the open findings of the Security sentinel take off 100). The weights and the limits of every part are settings (`score.*`), conservative by default.
 
 What the score never does (the same philosophy as the readiness score of the sentinel): show a number it cannot stand behind.
   state `calibrating`        the account has been watched for less than `calibrating_hours`: no number, no letter
   state `insufficient_data`  fewer than `min_runs` finished runs in the window, or the parts that have data weigh less than `min_coverage` of the total: no number
   state `scored`             a number, a letter, a trend; `coverage` (share of the weights that had data) and `data_quality` always travel with it
-A part with no data is left out and the others are rescaled, which lowers `coverage`; it is never counted as 0 and never as 100. Security is not a part yet: the answer
-says so (`missing_parts`) and `complete` is False, so 85 is never read as "all clear".
+A part with no data is left out and the others are rescaled, which lowers `coverage`; it is never counted as 0 and never as 100. Security only has data while its sentinel is on and has looked at
+enough repositories; without it the answer says so (`missing_parts`) and `complete` is False, so 85 is never read as "all clear". GitHub gives no history of the findings, so the security part is the
+same in the window and in the one before it: the trend shows what the CI and the collaboration did.
 """
 import copy
 
@@ -23,17 +24,17 @@ DEFAULTS = {
     "min_runs": 20,               # fewer finished runs in the window: not enough data
     "min_coverage": 0.5,          # parts with data must weigh at least this share
     "trend_flat": 2,              # a change smaller than this many points is "flat"
-    "weights": {"reliability": 40, "speed": 20, "recovery": 20, "collaboration": 20},
+    "weights": {"reliability": 30, "speed": 15, "recovery": 15, "collaboration": 15, "security": 25},
     # each part is 100 at `good` and 0 at `bad`, linear in between (reliability: share of successful runs; the others: seconds, lower is better)
     "limits": {"reliability": {"good": 0.98, "bad": 0.5}, "speed": {"good": 600, "bad": 3600}, "recovery": {"good": 1800, "bad": 86400},
-               "collaboration": {"good": 172800, "bad": 1209600}},
+               "collaboration": {"good": 172800, "bad": 1209600}, "security": {"good": 0, "bad": 100}},
     "grades": {"A": 90, "B": 80, "C": 70, "D": 55},          # minimum score of each letter; below the last one is E
     "alert": {"enabled": True, "drop_points": 10, "notify_external": False},
 }
-PARTS = ("reliability", "speed", "recovery", "collaboration")
-SOURCE = {"reliability": "success_rate", "speed": "duration_p95", "recovery": "mttr", "collaboration": "collab_resolution_time"}
-SAMPLES = {"reliability": "runs", "speed": "durations", "recovery": "recoveries", "collaboration": "collab_closed"}
-MISSING_PARTS = ("security",)      # parts that exist in the design and are not collected yet
+PARTS = ("reliability", "speed", "recovery", "collaboration", "security")
+SOURCE = {"reliability": "success_rate", "speed": "duration_p95", "recovery": "mttr", "collaboration": "collab_resolution_time", "security": "security_penalty"}
+SAMPLES = {"reliability": "runs", "speed": "durations", "recovery": "recoveries", "collaboration": "collab_closed", "security": "security_repos"}
+MISSING_PARTS = ("security",)      # the parts that depend on something that can be off (a sentinel): when they have no data the answer says so and is not `complete`
 
 
 def _number(value):
@@ -124,7 +125,8 @@ def compute(metrics, cfg, watched_hours=None, previous=None):
     runs = (metrics.get("samples") or {}).get("runs", 0)
     rows, weight_total, weight_with_data, total = _parts(metrics, cfg)
     coverage = round(weight_with_data / weight_total, 3) if weight_total else 0.0
-    base = {"parts": rows, "coverage": coverage, "missing_parts": list(MISSING_PARTS), "complete": False, "window_days": cfg["window_days"],
+    missing = [r["part"] for r in rows if r["part"] in MISSING_PARTS and not r["available"]]
+    base = {"parts": rows, "coverage": coverage, "missing_parts": missing, "complete": not missing, "window_days": cfg["window_days"],
             "score": None, "letter": None, "trend": None}
     reasons = []
     if _number(watched_hours) and watched_hours < cfg["calibrating_hours"]:
@@ -156,11 +158,18 @@ def trend(score, previous, flat):
     return {"direction": direction, "delta": delta}
 
 
-def score_window(runs, collab_items, end, cfg, watched_hours=None):
+def with_security(metrics, security):
+    """The metrics with the security figures added: `security` is {"penalty": points, "repos": how many repositories they come from} or None (no data for that part)."""
+    if isinstance(security, dict) and _number(security.get("penalty")) and _number(security.get("repos")) and security["repos"] > 0:
+        metrics = {**metrics, "security_penalty": float(security["penalty"]), "samples": {**(metrics.get("samples") or {}), "security_repos": int(security["repos"])}}
+    return metrics
+
+
+def score_window(runs, collab_items, end, cfg, watched_hours=None, security=None):
     """Convenience: the window [end - window_days, end), the one before it for the trend, and the answer. The previous window is scored with the same rules
-    and only gives a trend when it was itself `scored`."""
+    and only gives a trend when it was itself `scored`. The security figures (see `with_security`) are the same in both windows: GitHub gives no history of them."""
     span = cfg["window_days"] * collector.DAY
-    now_metrics = collector.collect(runs, collab_items, end - span, end)
-    before_metrics = collector.collect(runs, collab_items, end - 2 * span, end - span)
+    now_metrics = with_security(collector.collect(runs, collab_items, end - span, end), security)
+    before_metrics = with_security(collector.collect(runs, collab_items, end - 2 * span, end - span), security)
     before = compute(before_metrics, cfg, watched_hours=None)
     return compute(now_metrics, cfg, watched_hours=watched_hours, previous=before["score"] if before["state"] == "scored" else None)
