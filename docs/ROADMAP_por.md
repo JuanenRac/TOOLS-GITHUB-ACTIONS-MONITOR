@@ -26,10 +26,6 @@ Tudo o que se segue foi entregue na série 1.8 e está testado; nada se dá por 
 
 Cada versão leva tudo o que é do seu troço do plano: nada fica pendurado de uma versão anterior e nada se adia para a seguinte. Depois da 1.8.3 e depois da 1.9.3 o produto passa por uma revisão independente e as suas conclusões fecham-se na versão de estabilização seguinte. A 1.8.1 é uma versão corretiva da 1.8.0: a caixa «a carregar repositórios» desaparece com o último repositório e o recarregamento da página obtém logo os dados.
 
-### 1.9.3 - Relatórios programados e registo de auditoria
-
-Modelos de relatório em HTML e Markdown (PDF opcional) com a pontuação, os alertas principais e as alterações, um agendador e um registo de auditoria só de acrescentar com quem fez o quê e quando, sem qualquer segredo lá dentro. Opcional, na mesma versão: uma vista «versão pronta / bloqueada» com o último commit verde de cada repositório.
-
 ### 1.9.4 - Estabilização da terceira fase
 
 O mesmo tipo de fecho da 1.8.4 para a pontuação, a sentinela de segurança, as vistas de saúde, os relatórios e o registo de auditoria; o custo em chamadas à API com três sentinelas ativas; uma pontuação que se mantém coerente quando uma sentinela está desligada.
@@ -40,7 +36,7 @@ Uma versão principal que limpa a dívida técnica e congela as interfaces públ
 
 Os workflows do próprio monitor cumprem o que a sentinela de higiene pedirá aos outros: ações fixadas a um commit, as permissões mínimas e um limite de tempo em cada job.
 
-## Feito da 1.8.2 à 1.9.2
+## Feito da 1.8.2 à 1.9.3
 
 ### 1.8.2 - Imagem Docker oficial e modo de serviço
 
@@ -65,6 +61,10 @@ A terceira sentinela: Dependabot, análise de código, análise de segredos, pro
 ### 1.9.2 - Saúde do repositório e da equipa
 
 Uma vista de saúde de cada repositório (CI, issues e pull requests, segurança, preparação para uma versão, atividade) e uma da equipa com classificação, totais e filtros; páginas para ambas com ligações diretas para ecrãs de parede. Opcional, na mesma versão: um painel de benchmarks noturnos face a um orçamento (mediana face a uma referência por classe de máquina) e um painel de listas de materiais de software e atestações de cada versão.
+
+### 1.9.3 - Relatórios programados e registo de auditoria
+
+Modelos de relatório em HTML e Markdown (PDF opcional) com a pontuação, os alertas principais e as alterações, um agendador e um registo de auditoria só de acrescentar com quem fez o quê e quando, sem qualquer segredo lá dentro. Opcional, na mesma versão: uma vista «versão pronta / bloqueada» com o último commit verde de cada repositório.
 
 ## Feito na 1.7.9
 

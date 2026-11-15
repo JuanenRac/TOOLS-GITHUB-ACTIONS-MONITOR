@@ -26,10 +26,6 @@ Tutto ciò che segue è stato consegnato nella serie 1.8 ed è provato; nulla si
 
 Ogni versione porta tutto quello del suo tratto del piano: nulla resta appeso a una versione precedente e nulla è rimandato alla successiva. Dopo la 1.8.3 e dopo la 1.9.3 il prodotto passa una revisione indipendente e i suoi rilievi si chiudono nella versione di stabilizzazione seguente. 1.8.1 è una versione correttiva della 1.8.0: il riquadro «caricamento dei repository» scompare con l'ultimo repository e il ricaricamento della pagina ottiene subito i dati.
 
-### 1.9.3 - Rapporti programmati e registro di audit
-
-Modelli di rapporto in HTML e Markdown (PDF facoltativo) con punteggio, avvisi principali e modifiche, un pianificatore e un registro di audit di sola aggiunta su chi ha fatto cosa e quando, senza alcun segreto dentro. Facoltativo, nella stessa versione: una vista «versione pronta / bloccata» con l'ultimo commit verde di ogni repository.
-
 ### 1.9.4 - Stabilizzazione della terza fase
 
 La stessa chiusura della 1.8.4 per punteggio, sentinella di sicurezza, viste di salute, rapporti e registro di audit; il costo in chiamate API con tre sentinelle attive; un punteggio che resta coerente quando una sentinella è spenta.
@@ -40,7 +36,7 @@ Una versione maggiore che ripulisce il debito tecnico e congela le interfacce pu
 
 I workflow del monitor stesso rispettano ciò che la sentinella di igiene chiederà agli altri: azioni fissate a un commit, permessi minimi e un limite di tempo su ogni job.
 
-## Fatto dalla 1.8.2 alla 1.9.2
+## Fatto dalla 1.8.2 alla 1.9.3
 
 ### 1.8.2 - Immagine Docker ufficiale e modalità servizio
 
@@ -65,6 +61,10 @@ La terza sentinella: Dependabot, analisi del codice, analisi dei segreti, protez
 ### 1.9.2 - Salute del repository e del team
 
 Una vista di salute di ogni repository (CI, issue e pull request, sicurezza, prontezza per una versione, attività) e una del team con classifica, totali e filtri; pagine per entrambe con collegamenti diretti per schermi a parete. Facoltativo, nella stessa versione: un pannello di benchmark notturni rispetto a un budget (mediana rispetto a una base per classe di macchina) e un pannello di distinte dei materiali software e attestazioni di ogni versione.
+
+### 1.9.3 - Rapporti programmati e registro di audit
+
+Modelli di rapporto in HTML e Markdown (PDF facoltativo) con punteggio, avvisi principali e modifiche, un pianificatore e un registro di audit di sola aggiunta su chi ha fatto cosa e quando, senza alcun segreto dentro. Facoltativo, nella stessa versione: una vista «versione pronta / bloccata» con l'ultimo commit verde di ogni repository.
 
 ## Fatto nella 1.7.9
 
