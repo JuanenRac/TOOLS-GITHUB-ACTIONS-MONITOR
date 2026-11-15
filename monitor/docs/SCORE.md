@@ -48,6 +48,10 @@ A chip in the header, next to the readiness chips, shows the score: the number, 
 
 `GET /api/score` answers the latest snapshot of the account: `state`, `score`, `letter`, `trend`, `parts`, `coverage`, `data_quality`, `complete`, `missing_parts`, `repos`, `age_seconds` and `stale` (true when the snapshot is more than three hours old). `GET /api/score/history` answers the points over time, oldest first (`?hours=` back from now, 90 days at most, and `?limit=`, 2000 at most). A missing number is `null`, never 0. In the team mode anybody who may see the account may read its score; the weights and the limits are settings and only an administrator changes them.
 
+## The alert on a drop
+
+When the score falls by `score.alert.drop_points` points (10 by default) or more against the window before, or goes down to a lower letter, the Alerts tab shows the alert `score.dropped` (a warning; critical when the letter is E), with the old and the new score. It stays while the snapshot shows the drop and goes when the score recovers, and it can be silenced like any other alert. It is on for the panel by default. It goes out through the external notification channels (event `score_dropped`) only if `score.alert.notify_external` is on, which is off by default, and only the moment it appears. `score.alert.enabled` switches the alert off.
+
 ## The settings
 
 In the Settings page, Sentinel sub-tab, blocks Account score, Score weights and Score letters: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.grades.A` to `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` and `score.alert.notify_external` (off by default). The good and bad limits of every part are read from the file, under `score.limits` (see the example file); they are not edited in the page.

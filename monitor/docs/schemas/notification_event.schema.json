@@ -27,7 +27,8 @@
         "collab_new",
         "collab_fixed",
         "credential_blind",
-        "credential_back"
+        "credential_back",
+        "score_dropped"
       ]
     },
     "repo": {

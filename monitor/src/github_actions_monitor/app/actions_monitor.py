@@ -1346,9 +1346,34 @@ def score_tick(config, data):
         collab = registry.get("collab") if registry else None
         known = bool(collab is not None and getattr(collab, "enabled", False) and not (collab.get_status() or {}).get("loading"))
         storage, account = runtime.process_storage(CHILD["account"] or None)
-        score_service.tick(storage, account, config, data.get("runs") or [], collab.get_alerts() if known else [], collab_known=known)
+        snapshot = score_service.tick(storage, account, config, data.get("runs") or [], collab.get_alerts() if known else [], collab_known=known)
+        if snapshot and snapshot.get("drop_new") and snapshot.get("drop"):      # the moment a drop appears; it leaves the panel only when the person asked for it
+            from github_actions_monitor.scoring import drop as score_drop, engine as score_engine
+            sentinel = SENTINEL["obj"]
+            if score_engine.settings(config)["alert"]["notify_external"] and sentinel is not None:
+                sentinel.feed.emit([score_drop.event(snapshot["drop"])])
     except Exception as error:   # noqa: BLE001 - the score never stops the monitor
         degraded.note("score", error)
+
+
+def score_alerts():
+    """The alert of a score that has dropped, for the Alerts tab: from the latest snapshot, only while it is fresh (an old one says nothing). Complete only; never raises."""
+    if LITE["on"]:
+        return []
+    try:
+        from github_actions_monitor.scoring import api as score_api, drop as score_drop, engine as score_engine
+        from github_actions_monitor.storage import runtime
+        config = toolconfig.raw_config()
+        if not score_engine.settings(config)["alert"]["enabled"] or not score_engine.settings(config)["enabled"]:
+            return []
+        storage, account = runtime.process_storage(CHILD["account"] or None)
+        latest = score_api.latest(storage, account, config)
+        if latest.get("stale") or not latest.get("drop"):
+            return []
+        return [score_drop.alert(latest, latest["drop"], CHILD["account"] or "")]
+    except Exception as error:   # noqa: BLE001 - the list of alerts must still answer
+        degraded.note("score.alert", error)
+        return []
 
 
 def digest_tick(config):
@@ -2430,7 +2455,7 @@ def alerts_payload(ask):
     from github_actions_monitor.sentinels import alert_center
     refresh_feed()
     registry = SENTINEL["registry"]
-    extra = credential_alerts()
+    extra = credential_alerts() + score_alerts()
     everything = alert_center.collect(registry, extra=extra)
     chosen = alert_center.select(everything, ask.get("sentinel", ""), ask.get("level", ""), ask.get("muted", "show") if ask.get("muted") in ("show", "hide", "only") else "show")
     return {"schema": 1, "account": CHILD["account"] or None, "alerts": chosen, "summary": alert_center.summary(everything), "mutes": alert_center.active(), "history": alert_center.history(20),
