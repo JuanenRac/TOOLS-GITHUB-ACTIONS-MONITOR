@@ -38,7 +38,7 @@ La ventana es el número de días de ejecuciones que mira la puntuación: `score
 
 ## Por repositorio y por cuenta
 
-Cada cuenta tiene su propia puntuación. Su detalle la desglosa por repositorio (solo las partes de CI, los peores primero). No hay un número único para toda la instalación.
+Cada cuenta tiene su propia puntuación. Su detalle la desglosa por repositorio (solo las partes de CI, los peores primero). No hay un número único para toda la instalación. Solo como información, `GET /api/score/global` del supervisor da la media de las cuentas puntuadas que el solicitante puede ver, ponderada por sus repositorios con número y siempre con cuántas cuentas entran; una cuenta sin número se lista y se deja fuera.
 
 ## En la página
 

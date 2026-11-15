@@ -38,7 +38,7 @@ A janela é o número de dias de execuções que a pontuação observa: `score.w
 
 ## Por repositório e por conta
 
-Cada conta tem a sua própria pontuação. O detalhe decompõe-na por repositório (só as partes de CI, as piores primeiro). Não há um número único para toda a instalação.
+Cada conta tem a sua própria pontuação. O detalhe decompõe-na por repositório (só as partes de CI, as piores primeiro). Não há um número único para toda a instalação. Apenas a título informativo, `GET /api/score/global` do supervisor dá a média das contas pontuadas que quem pergunta pode ver, ponderada pelos seus repositórios com número e sempre com quantas contas entram; uma conta sem número é listada e deixada de fora.
 
 ## Na página
 

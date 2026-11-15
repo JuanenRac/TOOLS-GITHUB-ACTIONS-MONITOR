@@ -38,7 +38,7 @@ La finestra è il numero di giorni di esecuzioni che il punteggio guarda: `score
 
 ## Per repository e per account
 
-Ogni account ha il proprio punteggio. Il dettaglio lo scompone per repository (solo le parti di CI, i peggiori per primi). Non esiste un numero unico per l'intera installazione.
+Ogni account ha il proprio punteggio. Il dettaglio lo scompone per repository (solo le parti di CI, i peggiori per primi). Non esiste un numero unico per l'intera installazione. Solo a titolo informativo, `GET /api/score/global` del supervisore dà la media degli account valutati che chi chiede può vedere, ponderata per i loro repository con un numero e sempre con quanti account ne fanno parte; un account senza numero è elencato e lasciato fuori.
 
 ## Nella pagina
 
