@@ -44,6 +44,10 @@
 
 页眉中、紧挨着就绪度标签的一个标签显示评分：数值、等级、与上一窗口相比变化的箭头，以及最近几天的小折线。其颜色随等级而定（A 和 B 为绿色，C 为琥珀色，D 和 E 为红色）。没有数值时它为中性色，并说明原因（校准中、数据不足）。等级后的星号表示有一个部分尚未计入（目前是安全性）：此时高分并不代表一切正常。鼠标悬停时显示覆盖率、各部分及其权重以及最弱的仓库。在 Lite 中或评分关闭（`score.enabled`）时不显示该标签。
 
+## 供其他工具使用
+
+指标（`/metrics`，在开启 Prometheus 输出时）带有三个无标签的序列：`ghamon_score_scored`（账户有数值时为 1）、`ghamon_score_coverage`（有数据的权重所占比例，0 到 1）和 `ghamon_score`（数值，仅在有数值时存在：没有数值时绝不会导出为 0）。MCP 服务器有一个只读工具 `get_score`，返回 API 的回答。`--demo` 显示一个虚构的评分，且不写入任何内容。
+
 ## API
 
 `GET /api/score` 返回账户的最新快照：`state`、`score`、`letter`、`trend`、`parts`、`coverage`、`data_quality`、`complete`、`missing_parts`、`repos`、`age_seconds` 和 `stale`（快照超过三小时则为真）。`GET /api/score/history` 返回随时间变化的点，最早的在前（`?hours=` 从现在向前，最多 90 天，`?limit=` 最多 2000）。缺失的数值为 `null`，绝不是 0。在团队模式下，能看到该账户的人都可以读取其评分；权重和界限是设置项，只有管理员可以更改。

@@ -44,6 +44,10 @@ Each account has its own score. Its detail breaks it down by repository (the CI 
 
 A chip in the header, next to the readiness chips, shows the score: the number, the letter, an arrow with the change against the window before and a small line with the last days. Its colour follows the letter (A and B green, C amber, D and E red). While there is no number it is neutral and says why (calibrating, not enough data). A star after the letter means that a part is not counted yet (today, security): a high number is then not an all clear. Hovering over it shows the coverage, the parts with their weights and the weakest repository. The chip is not shown in Lite, nor when the score is off (`score.enabled`).
 
+## For other tools
+
+The metrics (`/metrics`, when the Prometheus output is on) carry three series without labels: `ghamon_score_scored` (1 when the account has a number), `ghamon_score_coverage` (the share of the weights with data, from 0 to 1) and `ghamon_score` (the number, only while there is one: it is never exported as 0 when there is none). The MCP server has a read-only tool `get_score` with the answer of the API. `--demo` shows an invented score and writes nothing.
+
 ## The API
 
 `GET /api/score` answers the latest snapshot of the account: `state`, `score`, `letter`, `trend`, `parts`, `coverage`, `data_quality`, `complete`, `missing_parts`, `repos`, `age_seconds` and `stale` (true when the snapshot is more than three hours old). `GET /api/score/history` answers the points over time, oldest first (`?hours=` back from now, 90 days at most, and `?limit=`, 2000 at most). A missing number is `null`, never 0. In the team mode anybody who may see the account may read its score; the weights and the limits are settings and only an administrator changes them.
