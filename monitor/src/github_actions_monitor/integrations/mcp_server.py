@@ -37,6 +37,7 @@ TOOLS = [
     {"name": "diagnose", "description": "The failing step and the last lines of the log of one alert (by id); same as alert_diagnose.", "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"]}},
     {"name": "act", "description": "Acknowledge an alert (local state only; needs --allow-ack); same as alert_ack.", "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"]}},
     {"name": "get_quota", "description": "GitHub allowance and Actions minutes, from the running monitor.", "inputSchema": {"type": "object", "properties": {}}},
+    {"name": "get_score", "description": "The score of the account (0 to 100, a letter and a trend) with its parts, coverage, quality of the data and the parts not collected yet; a state instead of a number when there is not enough data. Complete edition only.", "inputSchema": {"type": "object", "properties": {}}},
     {"name": "alerts_open", "description": "Open CI alerts of the monitor, real ones first: age of the feed, failing step, last log lines and the red repository they fall together under.", "inputSchema": {"type": "object", "properties": {"only_real": {"type": "boolean"}}}},
     {"name": "alert_diagnose", "description": "The failing step and the last relevant lines of the log of one alert (by id); reads the log from GitHub only when the feed has no diagnosis yet.", "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"]}},
     {"name": "lessons_apply", "description": "The lessons of this CI that apply now (open alerts and repeated failures), or to the text of a log: category, what failed, what to do and the guard. Read only.", "inputSchema": {"type": "object", "properties": {"repo": {"type": "string"}, "text": {"type": "string"}}}},
@@ -131,6 +132,8 @@ def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_g
         return ai_alerts.redact("Failed steps:\n" + ("\n".join(steps) or "(none listed)") + "\n\nEnd of the failed log:\n" + fragment, 4000)
     if name == "get_quota":
         return ai_alerts.redact_json(getter("/api/quota"), 3000)
+    if name == "get_score":
+        return ai_alerts.redact_json(getter("/api/score"), 6000)
     if name in ("lessons_apply", "lessons_recurring", "lessons_brief", "lesson_propose"):
         provider = lessons.provider(config)
         if name == "lessons_apply":

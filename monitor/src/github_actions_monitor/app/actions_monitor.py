@@ -2324,6 +2324,10 @@ class Handler(BaseHTTPRequestHandler):
             from github_actions_monitor.scoring import api as score_api
             from github_actions_monitor.storage import runtime
             ask = {k: v[0] for k, v in parse_qs(self.path.partition("?")[2]).items() if v}
+            if DEMO["on"]:      # --demo writes nothing: an invented score answers
+                from github_actions_monitor.app import demo_mode
+                self.json_reply(demo_mode.score_history(ask) if path.endswith("/history") else demo_mode.score_answer())
+                return
             storage, account = runtime.process_storage(CHILD["account"] or None)
             config = toolconfig.raw_config()
             self.json_reply(score_api.history(storage, account, config, ask) if path.endswith("/history") else score_api.latest(storage, account, config))
@@ -2657,11 +2661,26 @@ def token_required():
     return (LIVE_CONFIG or {}).get("session_guard") is True
 
 
+def score_metrics():
+    """The few figures of the score that /metrics shows (state, number, coverage), or None in Lite, with the score off or when nothing can be read."""
+    if LITE["on"]:
+        return None
+    try:
+        from github_actions_monitor.scoring import api as score_api
+        from github_actions_monitor.storage import runtime
+        storage, account = runtime.process_storage(CHILD["account"] or None)
+        latest = score_api.latest(storage, account, toolconfig.raw_config())
+        return None if latest.get("state") == "off" else {"state": latest.get("state"), "score": latest.get("score"), "coverage": latest.get("coverage")}
+    except Exception as error:   # noqa: BLE001 - /metrics must still answer
+        degraded.note("score.metrics", error)
+        return None
+
+
 def metrics_extra():
-    """What /metrics and the Grafana source add to the sentinel's picture: conditional reads, the connection, the analytics, the live events and the notifications."""
+    """What /metrics and the Grafana source add to the sentinel's picture: conditional reads, the connection, the analytics, the live events, the notifications and the score."""
     from github_actions_monitor.integrations import notifiers
     return {"etag": ETAG["cache"].stats() if ETAG["cache"] else None, "offline": LINK.state()["offline"], "analytics": ANALYTICS["summary"], "live_events": len(LIVE_EVENTS),
-            "notify": dict(notifiers.STATS), "disconnects": DISCONNECTS[0]}
+            "notify": dict(notifiers.STATS), "disconnects": DISCONNECTS[0], "score": score_metrics()}
 
 
 def handle_action_post(path, request):

@@ -133,6 +133,12 @@ def _extra_metrics(out, extra, eco, per_repo):
     if notify:
         out.add("notifications_sent_total", "Notifications that left the computer.", _int(notify.get("sent")), kind="counter")
         out.add("notifications_failed_total", "Notifications that could not be sent.", _int(notify.get("failed")), kind="counter")
+    score = extra.get("score") if isinstance(extra.get("score"), dict) else None
+    if score:
+        out.add("score_scored", "1 when the score of the account has a number, 0 while it is calibrating or has too little data.", 1 if score.get("state") == "scored" else 0)
+        out.add("score_coverage", "Share of the weights of the score that have data (0 to 1).", score.get("coverage") or 0)
+        if score.get("state") == "scored" and isinstance(score.get("score"), (int, float)):
+            out.add("score", "Score of the account, from 0 to 100 (only while it has a number).", score["score"])
     summary = extra.get("analytics") if isinstance(extra.get("analytics"), dict) else None
     if not summary or not summary.get("enabled", True):
         return
