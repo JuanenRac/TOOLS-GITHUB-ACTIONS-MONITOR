@@ -29,6 +29,10 @@ Optionnelles et **désactivées par défaut**. Les événements du flux (un nouv
 - `kind` vaut `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `collab_new`, `collab_fixed`, `credential_blind` ou `credential_back`, `score_dropped`, `security_new`, `security_fixed`. Les champs ne font que s'ajouter. Répondez par un 2xx ; tout le reste compte comme un échec.
 - `mqtt` publie le même JSON comme charge d'un message QoS 0 sur `notify.channels.mqtt.topic`.
 
+## Apprise (facultatif, désactivé par défaut)
+
+Le canal `apprise` confie le message à la commande `apprise` (à installer vous-même, par exemple `pip install apprise`) pour atteindre n'importe lequel des services qu'elle connaît. Les adresses contiennent les secrets de ces services : elles sont donc dans une variable d'environnement dont le NOM est `notify.channels.apprise.urls_env` (séparées par des espaces ou des virgules, dix au plus) ; elles sont écrites dans un fichier temporaire privé le temps de l'appel, jamais dans les arguments de la commande, et la commande reçoit un environnement sans les clés du moniteur. **Apprise ouvre ses propres connexions : la protection du moniteur contre les adresses privées ne s'applique pas**, donc ce qu'il atteint dépend des adresses que vous lui donnez ; c'est pourquoi le canal a son propre interrupteur, désactivé par défaut, et est marqué comme réglage de sécurité. Si la commande manque, le canal dit `not_installed` ; un échec est compté comme les autres et n'arrête jamais le moniteur.
+
 ## La limite par heure compte les messages
 
 `notify.max_per_hour` limite les MESSAGES qui quittent l'ordinateur, pas les événements : un événement envoyé à trois canaux consomme trois unités, une par canal. Si le quota ne suffit pas pour tous les canaux, les premiers de la liste reçoivent le message et les autres sont écartés (la page les compte comme « limités »). Un canal qui ne peut pas envoyer (pas de secret, mauvaise adresse) ne consomme rien. Le décompte se fait sous un seul verrou : plusieurs threads ne peuvent donc jamais dépasser la limite.

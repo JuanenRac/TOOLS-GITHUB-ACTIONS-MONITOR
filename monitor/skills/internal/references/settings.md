@@ -175,6 +175,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `network.graphql_checks` | `false` | quota | Read quiet repositories through GraphQL (own allowance) |
 | `network.use_proxy` (secure) | `false` | notify | Use the proxy of the environment for notifications |
 | `notify.allow_private_targets` (secure) | `-` | notify | Allow private destinations |
+| `notify.channels.apprise.enabled` (secure) | `-` | notify | notify.channels.apprise.enabled |
+| `notify.channels.apprise.urls_env` | `-` | notify | notify.channels.apprise.urls_env |
 | `notify.channels.discord.enabled` | `-` | notify | notify.channels.discord.enabled |
 | `notify.channels.discord.url_env` | `-` | notify | notify.channels.discord.url_env |
 | `notify.channels.email.enabled` (secure) | `-` | notify | notify.channels.email.enabled |

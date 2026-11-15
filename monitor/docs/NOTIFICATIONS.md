@@ -29,6 +29,10 @@ Optional and **off by default**. The events of the feed (a new red, a stuck buil
 - `kind` is one of `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `score_dropped`, `security_new`, `security_fixed`. Fields are only ever added. Answer any 2xx; anything else is counted as a failure.
 - `mqtt` publishes the same JSON as the payload of a QoS 0 message on `notify.channels.mqtt.topic`.
 
+## Apprise (optional, off by default)
+
+The channel `apprise` hands the message to the `apprise` command (install it yourself, for example `pip install apprise`) so that any of the services it knows can be reached. The addresses hold the secrets of those services, so they are in an environment variable whose NAME is `notify.channels.apprise.urls_env` (separated by spaces or commas, at most ten); they are written to a private temporary file for the instant of the call, never to the arguments of the command, and the command gets an environment without the keys of the monitor. **Apprise opens its own connections: the guard of the monitor against private addresses does not apply to it**, so what it reaches is up to the addresses you give it; that is why the channel has its own switch, off by default, and is marked as a security setting. If the command is missing the channel says `not_installed`; a failure is counted like any other and never stops the monitor.
+
 ## The limit per hour counts messages
 
 `notify.max_per_hour` limits the MESSAGES that leave the computer, not the events: an event that goes to three channels uses three of the allowance, one for each channel. When the allowance is not enough for every channel, the first channels in the list get the message and the rest are dropped (the page counts them as "limited"). A channel that cannot send (no secret, a wrong address) books nothing. The count is made under one lock, so several threads can never go over the limit.

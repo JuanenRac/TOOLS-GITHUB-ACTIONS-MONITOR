@@ -29,6 +29,10 @@ Facoltative e **spenta per impostazione predefinita**. Gli eventi del feed (un n
 - `kind` è uno tra `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `score_dropped`, `security_new`, `security_fixed`. I campi si aggiungono soltanto. Rispondi con un 2xx qualsiasi; il resto conta come errore.
 - `mqtt` pubblica lo stesso JSON come payload di un messaggio QoS 0 su `notify.channels.mqtt.topic`.
 
+## Apprise (facoltativo, spento per impostazione predefinita)
+
+Il canale `apprise` consegna il messaggio al comando `apprise` (installalo tu, per esempio `pip install apprise`) per raggiungere uno qualsiasi dei servizi che conosce. Gli indirizzi contengono i segreti di quei servizi, quindi stanno in una variabile d'ambiente il cui NOME è `notify.channels.apprise.urls_env` (separati da spazi o virgole, al massimo dieci); vengono scritti in un file temporaneo privato per l'istante della chiamata, mai negli argomenti del comando, e il comando riceve un ambiente senza le chiavi del monitor. **Apprise apre connessioni proprie: la protezione del monitor contro gli indirizzi privati non si applica**, quindi ciò che raggiunge dipende dagli indirizzi che gli dai; per questo il canale ha un interruttore proprio, spento per impostazione predefinita, ed è segnato come impostazione di sicurezza. Se il comando manca il canale dice `not_installed`; un errore viene contato come gli altri e non ferma mai il monitor.
+
 ## Il limite orario conta i messaggi
 
 `notify.max_per_hour` limita i MESSAGGI che escono dal computer, non gli eventi: un evento inviato a tre canali consuma tre unità, una per canale. Se la quota non basta per tutti i canali, i primi della lista ricevono il messaggio e gli altri vengono scartati (la pagina li conta come «limitati»). Un canale che non può inviare (nessun segreto, indirizzo errato) non consuma nulla. Il conteggio avviene sotto un unico blocco, quindi più thread non superano mai il limite.
