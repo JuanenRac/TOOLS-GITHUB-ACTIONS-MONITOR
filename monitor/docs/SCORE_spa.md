@@ -48,6 +48,10 @@ Una ficha en la cabecera, junto a las fichas de preparación, muestra la puntuac
 
 `GET /api/score` responde la última instantánea de la cuenta: `state`, `score`, `letter`, `trend`, `parts`, `coverage`, `data_quality`, `complete`, `missing_parts`, `repos`, `age_seconds` y `stale` (verdadero si la instantánea tiene más de tres horas). `GET /api/score/history` responde los puntos en el tiempo, del más antiguo al más reciente (`?hours=` hacia atrás desde ahora, 90 días como máximo, y `?limit=`, 2000 como máximo). Un número ausente es `null`, nunca 0. En el modo equipo, quien puede ver la cuenta puede leer su puntuación; los pesos y los límites son ajustes y solo un administrador los cambia.
 
+## La alerta por caída
+
+Cuando la puntuación baja `score.alert.drop_points` puntos (10 por defecto) o más frente a la ventana anterior, o pasa a una letra inferior, la pestaña de Alertas muestra la alerta `score.dropped` (un aviso; crítica si la letra es E), con la puntuación antigua y la nueva. Permanece mientras la instantánea muestre la caída y desaparece cuando la puntuación se recupera, y puede silenciarse como cualquier otra alerta. Está activada para el panel por defecto. Sale por los canales de notificación externos (evento `score_dropped`) solo si `score.alert.notify_external` está activado, lo que no ocurre por defecto, y solo en el momento en que aparece. `score.alert.enabled` apaga la alerta.
+
 ## Los ajustes
 
 En la página de Ajustes, subpestaña Centinela, bloques Puntuación de la cuenta, Pesos de la puntuación y Letras de la puntuación: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, de `score.grades.A` a `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` y `score.alert.notify_external` (apagado por defecto). Los límites bueno y malo de cada parte se leen del fichero, en `score.limits` (véase el fichero de ejemplo); no se editan en la página.

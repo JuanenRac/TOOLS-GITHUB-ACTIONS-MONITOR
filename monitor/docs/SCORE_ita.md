@@ -48,6 +48,10 @@ Una pastiglia nell'intestazione, accanto alle pastiglie di preparazione, mostra 
 
 `GET /api/score` risponde con l'ultima istantanea dell'account: `state`, `score`, `letter`, `trend`, `parts`, `coverage`, `data_quality`, `complete`, `missing_parts`, `repos`, `age_seconds` e `stale` (vero se l'istantanea ha più di tre ore). `GET /api/score/history` risponde con i punti nel tempo, dal più vecchio al più recente (`?hours=` all'indietro da adesso, al massimo 90 giorni, e `?limit=`, al massimo 2000). Un numero assente è `null`, mai 0. Nella modalità squadra chi può vedere l'account può leggerne il punteggio; i pesi e i limiti sono impostazioni che solo un amministratore cambia.
 
+## L'avviso in caso di calo
+
+Quando il punteggio cala di `score.alert.drop_points` punti (10 per impostazione predefinita) o più rispetto alla finestra precedente, o passa a una lettera inferiore, la scheda Avvisi mostra l'avviso `score.dropped` (un avvertimento; critico se la lettera è E), con il punteggio vecchio e quello nuovo. Resta finché l'istantanea mostra il calo e sparisce quando il punteggio si riprende; si può silenziare come qualsiasi altro avviso. È attivo per il pannello per impostazione predefinita. Esce dai canali di notifica esterni (evento `score_dropped`) solo se `score.alert.notify_external` è attivo, il che non accade per impostazione predefinita, e solo nel momento in cui compare. `score.alert.enabled` disattiva l'avviso.
+
 ## Le impostazioni
 
 Nella pagina Impostazioni, sotto-scheda Sentinella, blocchi Punteggio dell'account, Pesi del punteggio e Lettere del punteggio: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, da `score.grades.A` a `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` e `score.alert.notify_external` (spento per impostazione predefinita). I limiti buono e cattivo di ogni parte si leggono dal file, sotto `score.limits` (vedi il file di esempio); non si modificano nella pagina.

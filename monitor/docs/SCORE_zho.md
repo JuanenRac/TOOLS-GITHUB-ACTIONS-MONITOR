@@ -48,6 +48,10 @@
 
 `GET /api/score` 返回账户的最新快照：`state`、`score`、`letter`、`trend`、`parts`、`coverage`、`data_quality`、`complete`、`missing_parts`、`repos`、`age_seconds` 和 `stale`（快照超过三小时则为真）。`GET /api/score/history` 返回随时间变化的点，最早的在前（`?hours=` 从现在向前，最多 90 天，`?limit=` 最多 2000）。缺失的数值为 `null`，绝不是 0。在团队模式下，能看到该账户的人都可以读取其评分；权重和界限是设置项，只有管理员可以更改。
 
+## 评分下降告警
+
+当评分与前一窗口相比下降 `score.alert.drop_points` 点（默认 10）或更多，或降到更低的等级时，告警标签页会显示告警 `score.dropped`（警告；等级为 E 时为严重），并给出旧评分和新评分。只要快照仍显示下降，它就一直存在，评分恢复后消失，并且可以像其他告警一样被静音。面板默认开启该告警。只有在 `score.alert.notify_external` 开启时（默认关闭），它才会通过外部通知渠道发出（事件 `score_dropped`），而且只在它出现的那一刻发送。`score.alert.enabled` 可关闭该告警。
+
 ## 设置
 
 在设置页面的“哨兵”子标签中，“账户评分”“评分权重”和“评分等级”三个区块：`score.enabled`、`score.window_days`、`score.calibrating_hours`、`score.min_runs`、`score.min_coverage`、`score.trend_flat`、`score.weights.reliability`、`score.weights.speed`、`score.weights.recovery`、`score.weights.collaboration`、`score.grades.A` 至 `score.grades.D`、`score.alert.enabled`、`score.alert.drop_points` 和 `score.alert.notify_external`（默认关闭）。每个部分的良好和较差界限从文件中读取，位于 `score.limits` 之下（见示例文件）；不在页面中编辑。

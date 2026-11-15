@@ -48,6 +48,10 @@ Uma ficha no cabeçalho, junto às fichas de preparação, mostra a pontuação:
 
 `GET /api/score` responde com o último instantâneo da conta: `state`, `score`, `letter`, `trend`, `parts`, `coverage`, `data_quality`, `complete`, `missing_parts`, `repos`, `age_seconds` e `stale` (verdadeiro quando o instantâneo tem mais de três horas). `GET /api/score/history` responde com os pontos ao longo do tempo, do mais antigo ao mais recente (`?hours=` para trás a partir de agora, no máximo 90 dias, e `?limit=`, no máximo 2000). Um número em falta é `null`, nunca 0. No modo equipa, quem pode ver a conta pode ler a sua pontuação; os pesos e os limites são definições que só um administrador altera.
 
+## O alerta por descida
+
+Quando a pontuação desce `score.alert.drop_points` pontos (10 por predefinição) ou mais face à janela anterior, ou passa a uma letra inferior, o separador de Alertas mostra o alerta `score.dropped` (um aviso; crítico se a letra for E), com a pontuação antiga e a nova. Mantém-se enquanto o instantâneo mostrar a descida e desaparece quando a pontuação recupera, e pode ser silenciado como qualquer outro alerta. Está ativo para o painel por predefinição. Sai pelos canais de notificação externos (evento `score_dropped`) só se `score.alert.notify_external` estiver ativo, o que não acontece por predefinição, e só no momento em que aparece. `score.alert.enabled` desliga o alerta.
+
 ## As definições
 
 Na página de Definições, subseparador Sentinela, blocos Pontuação da conta, Pesos da pontuação e Letras da pontuação: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, de `score.grades.A` a `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` e `score.alert.notify_external` (desligado por predefinição). Os limites bom e mau de cada parte são lidos do ficheiro, em `score.limits` (veja-se o ficheiro de exemplo); não se editam na página.
