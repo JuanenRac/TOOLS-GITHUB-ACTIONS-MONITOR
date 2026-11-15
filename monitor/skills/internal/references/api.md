@@ -35,6 +35,7 @@ a call marked *this computer only* is refused when it comes from the network. Ev
 | `/api/alerts/mute` | POST | maintainer | silence an alert, a code or a sentinel for some hours (local only) |
 | `/api/alerts/unmute` | POST | maintainer | end a silence |
 | `/api/analytics` | GET | viewer | history, trends and the numbers behind the charts |
+| `/api/audit-log` | GET | viewer | the log of actions of the account (who changed what, when): the last 200 lines and whether the chain of hashes holds; an administrator, or a maintainer when `audit_log.maintainers_can_read` is on; names only, never values or secrets (Complete only) |
 | `/api/auth/audit` | GET | admin | the audit of the team mode (administrators) |
 | `/api/auth/bootstrap` | POST | public | create the first administrator (this computer only, once) |
 | `/api/auth/login` | POST | public | sign in (team mode) |

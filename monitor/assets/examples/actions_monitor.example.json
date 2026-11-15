@@ -534,6 +534,11 @@
     "interval_hours": 24,
     "warn_events_mb": 20
   },
+  "audit_log": {
+    "enabled": true,
+    "max_mb": 10,
+    "maintainers_can_read": false
+  },
   "report_schedule": {
     "enabled": false,
     "cron": "0 8 * * 1",

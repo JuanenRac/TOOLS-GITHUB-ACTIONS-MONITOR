@@ -46,7 +46,7 @@
 |---|---|
 | **Madurez** | functional |
 | **Tests** | 2179 métodos de test (`python -m unittest discover -s monitor/tests`) |
-| **Ajustes** | 407 ajustes, todos con ayuda |
+| **Ajustes** | 410 ajustes, todos con ayuda |
 | **Idiomas** | 8 (inglés, español, alemán, francés, italiano, japonés, chino y portugués) |
 | **Probado en el CI en** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -282,6 +282,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/SENTINEL_spa.md`](monitor/docs/SENTINEL_spa.md): el centinela y sus comprobaciones A1-A13
 - [`monitor/docs/COLLAB_spa.md`](monitor/docs/COLLAB_spa.md): el centinela Collab, la pestaña Alertas y los silencios
 - [`monitor/docs/SENTINEL_SECURITY_spa.md`](monitor/docs/SENTINEL_SECURITY_spa.md): El centinela de seguridad: Dependabot, análisis de código, secretos, protección de ramas, permisos de los flujos y CODEOWNERS, y lo que no pudo comprobar
+- [`monitor/docs/AUDIT_LOG_spa.md`](monitor/docs/AUDIT_LOG_spa.md): El registro de acciones: quién cambió qué, la cadena de hashes, quién lo lee y los ajustes
 - [`monitor/docs/HEALTH_spa.md`](monitor/docs/HEALTH_spa.md): La salud de un repositorio y del equipo: de qué se compone, la pestaña Equipo, los enlaces directos y la API
 - [`monitor/docs/REPORT_SCHEDULE_spa.md`](monitor/docs/REPORT_SCHEDULE_spa.md): Informes programados: la puntuación, lo que ha cambiado, los repositorios que necesitan a una persona y las alertas abiertas en HTML y Markdown, el horario y los ficheros
 - [`monitor/docs/CLI_spa.md`](monitor/docs/CLI_spa.md): la línea de comandos como cliente del monitor

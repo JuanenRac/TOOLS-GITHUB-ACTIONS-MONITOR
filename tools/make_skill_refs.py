@@ -54,6 +54,7 @@ NOTES = {
     "/api/score": ("GET", "the score of the account: a number from 0 to 100, a letter from A to E and a trend, with its parts, its coverage, the quality of the data and a breakdown by repository (Complete only; null and a state instead of a number when there is not enough data)"),
     "/api/score/global": ("GET", "the score of the whole installation, for information only (supervisor): the mean of the scored accounts the asker may see, weighted by their repositories with a number, with who is in it (Complete only)"),
     "/api/score/history": ("GET", "the points of the score over time (`?hours=`, `?limit=`), oldest first (Complete only)"),
+    "/api/audit-log": ("GET", "the log of actions of the account (who changed what, when): the last 200 lines and whether the chain of hashes holds; an administrator, or a maintainer when `audit_log.maintainers_can_read` is on; names only, never values or secrets (Complete only)"),
     "/api/report-files": ("GET", "the scheduled reports of the account: whether the schedule is on, its cron expression, the formats and the list of the files written (name, kind, size), newest first (Complete only)"),
     "/api/report-files/file": ("GET", "one scheduled report by `?name=`: only a file the service wrote for this account (HTML page or Markdown); anything else is 404 `report_unknown` (Complete only)"),
     "/api/report-files/run": ("POST", "writes a report now (administrator, from this computer only); answers the names of the files (Complete only)"),
