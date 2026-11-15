@@ -29,7 +29,7 @@ import urllib.error
 import urllib.request
 from urllib.parse import quote, urlparse
 
-from github_actions_monitor.security import netguard
+from github_actions_monitor.security import netguard, private_io
 from github_actions_monitor.util import tzdisplay
 
 CHANNELS = ("telegram", "discord", "slack", "matrix", "mqtt", "http_local", "apprise")
@@ -212,9 +212,9 @@ def apprise_send(cfg, text, event, run=None):
         return {"channel": "apprise", "ok": False, "reason": "bad_value"}
     path = None
     try:
-        handle, path = tempfile.mkstemp(prefix="apprise_", suffix=".yml")
-        with os.fdopen(handle, "w", encoding="utf-8") as stream:
-            stream.write("urls:" + chr(10) + "".join(f"  - {url}" + chr(10) for url in urls))
+        folder = tempfile.mkdtemp(prefix="apprise_")      # a folder only this user can open
+        path = os.path.join(folder, "apprise.yml")
+        private_io.write_private(path, "urls:" + chr(10) + "".join(f"  - {url}" + chr(10) for url in urls))
         env = {k: v for k, v in os.environ.items() if k in ("PATH", "HOME", "SYSTEMROOT", "TEMP", "TMP", "LANG", "USERPROFILE", "APPDATA", "LOCALAPPDATA")}
         title = str(event.get("kind") or "monitor")[:60]
         done = (run or subprocess.run)(["apprise", "-c", path, "-t", title, "-b", text[:3000]], capture_output=True, timeout=TIMEOUT * 2, env=env, check=False)
@@ -225,6 +225,7 @@ def apprise_send(cfg, text, event, run=None):
         if path:
             try:
                 os.unlink(path)
+                os.rmdir(os.path.dirname(path))
             except OSError:
                 pass
 

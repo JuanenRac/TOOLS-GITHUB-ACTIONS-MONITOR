@@ -72,6 +72,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `analytics.slow_factor` | `-` | analytics | Slower than usual |
 | `analytics.steps` | `-` | analytics | Time per step |
 | `audit_dir` | `-` | paths | Folder of audit files |
+| `audit_log.enabled` (secure) | `-` | sentinel | Log of actions on |
+| `audit_log.maintainers_can_read` (secure) | `-` | sentinel | Maintainers may read it |
+| `audit_log.max_mb` | `-` | sentinel | Size before it is rotated |
 | `auth.allow_bearer` (secure) | `false` | advanced | Tokens for scripts and apps |
 | `auth.audit` (secure) | `true` | advanced | Audit of the accesses |
 | `auth.enabled` (secure) | `false` | advanced | Team mode: users and roles |

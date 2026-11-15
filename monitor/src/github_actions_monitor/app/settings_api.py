@@ -275,6 +275,10 @@ for _w in ("reliability", "speed", "recovery", "collaboration", "security"):
     _f(_T_SENT, "score_weights", f"score.weights.{_w}", "int", (0, 1000), restart=False, unit="pts")
 for _g in ("A", "B", "C", "D"):
     _f(_T_SENT, "score_grades", f"score.grades.{_g}", "int", (0, 100), restart=False, unit="pts")
+# --- The log of actions (Complete only): who changed what, with a chain of hashes; on by default, only names and never values
+_f(_T_SENT, "audit_log", "audit_log.enabled", "bool", restart=False, secure=True)
+_f(_T_SENT, "audit_log", "audit_log.max_mb", "int", (1, 500), restart=False, unit="MB")
+_f(_T_SENT, "audit_log", "audit_log.maintainers_can_read", "bool", restart=False, secure=True)
 # --- Scheduled reports (Complete only): HTML and Markdown on a cron schedule, off by default
 _f(_T_SENT, "report_schedule", "report_schedule.enabled", "bool", restart=False)
 _f(_T_SENT, "report_schedule", "report_schedule.cron", "text", CRON_RE, restart=False)

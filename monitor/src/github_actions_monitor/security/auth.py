@@ -450,9 +450,22 @@ def audit_path():
     return (Path(chosen) if chosen else paths.folder("logs")) / "auth_audit.jsonl"
 
 
+def _record_action(action, user, role, path, result, code):
+    """The changes (not the logins, logouts and refusals, which the audit of the accesses keeps) also go to the log of actions of audit_log.py. Never raises."""
+    if action in ("denied", "login", "logout"):
+        return
+    try:
+        from github_actions_monitor.app import toolconfig
+        from github_actions_monitor.security import audit_log
+        audit_log.record(toolconfig.raw_config(), action, user, role, target=str(path).split("?")[0], result=result, details={"code": code} if code else None)
+    except Exception:   # noqa: BLE001 - the log of actions never stops a request
+        pass
+
+
 def audit(cfg, action, user="", role="", address="", path="", result="ok", code=""):
     """One line per event: a login (good or bad), a lock, a logout, a refused request, a change of users. Never a password, a token or a hash. The file is private (0600) and, past a megabyte,
     the old part is kept as `.1` (one generation), so it never grows without a limit."""
+    _record_action(action, user, role, path, result, code)
     if not cfg.get("audit", True):
         return
     entry = {"at": _stamp(), "action": str(action)[:40], "user": str(user)[:40], "role": str(role)[:12], "address": str(address)[:64], "path": str(path).split("?")[0][:120], "result": result, "code": str(code)[:40]}
