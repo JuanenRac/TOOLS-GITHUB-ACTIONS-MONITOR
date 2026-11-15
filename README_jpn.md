@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2117_passing-brightgreen.svg" alt="2117 tests">
+  <img src="https://img.shields.io/badge/Tests-2148_passing-brightgreen.svg" alt="2148 tests">
 </p>
 
 > 所有するすべてのリポジトリのワークフローを監視し、赤いもの・止まっているもの・対応待ちのものを、ローカルの1ページで教えます。
@@ -32,7 +32,7 @@
 
 | | |
 |---|---|
-| **バージョン** | **1.9.1** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **バージョン** | **1.9.2** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **必要なもの** | Python 3.11 以上と GitHub CLI（`gh auth login`）。それ以外は不要(ターミナル表示は任意のパッケージ `rich` を使います) |
 | **開く先** | `127.0.0.1` 上のページのみ、8言語対応 |
 | **GitHub への書き込み** | 自動では行いません。明示的な `--go` を付けて実行したバッチコマンドのみ |
@@ -40,12 +40,12 @@
 
 <!-- glance:begin -->
 
-**現時点の実測** (v1.9.1)
+**現時点の実測** (v1.9.2)
 
 | | |
 |---|---|
 | **成熟度** | functional |
-| **テスト** | テストメソッド 2117 件(`python -m unittest discover -s monitor/tests`) |
+| **テスト** | テストメソッド 2148 件(`python -m unittest discover -s monitor/tests`) |
 | **設定** | 設定 402 件、すべてヘルプ付き |
 | **言語** | 8(英語、スペイン語、ドイツ語、フランス語、イタリア語、日本語、中国語、ポルトガル語) |
 | **CI で検証したシステム** | ubuntu, windows、Python 3.11, 3.13 |
@@ -83,6 +83,7 @@
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_analytics_light.png"><img src="docs/screenshots/web_sentinel_analytics_dark.png" alt="A12 · 分析:所要時間・待ち時間・ステップ・不安定なワークフロー" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_charts_light.png"><img src="docs/screenshots/web_charts_dark.png" alt="グラフ" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_repositories_light.png"><img src="docs/screenshots/web_repositories_dark.png" alt="リポジトリ" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_team_light.png"><img src="docs/screenshots/web_team_dark.png" alt="チーム：リポジトリの健全性ランキング" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_history_light.png"><img src="docs/screenshots/web_history_dark.png" alt="履歴" width="92%"></picture></p>
 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_about_light.png"><img src="docs/screenshots/web_about_dark.png" alt="バージョン情報" width="92%"></picture></p>
@@ -151,6 +152,7 @@
 - **あらゆる画面サイズと複数の画面**：ページはスマートフォンから4Kまでのウィンドウに、縦でも横でも適応し、1台のモニターで最大3つの画面（`/screen/1` から `/screen/3`）を提供できます。各画面に独自のタブと向きを設定できます（`monitor/docs/SCREENS_jpn.md`）。
 - **アカウントごとのスコア**：CI の信頼性、速度、復旧にかかる時間、コラボレーションのアラートがどれだけ早く閉じられるかから作られる 0〜100 の数値、A〜E の文字評価、傾向。裏付けのない数値の代わりに「較正中」「データ不足」と表示し、まだカバーしていないものを示し、ページのヘッダーに表示され、`score` コマンドがあり、低下すると警告し、メトリクスと MCP サーバーにも含まれます（`monitor/docs/SCORE.md`）。
 - **セキュリティセンチネル（Complete のみ、初期状態はオフ）**：GitHub には何も書き込まず、Dependabot・コードスキャン・シークレットスキャンの未解決アラート、既定ブランチが保護されているか、ワークフローの既定の権限、依頼があればコードオーナーを読み取ります。リポジトリとシグナルごとに 1 件のアラートを出し、検出結果をスコアの 5 番目の要素として数え、読み取れなかったものを伝えます（`monitor/docs/SENTINEL_SECURITY_jpn.md`）。
+- **各リポジトリとチームの健全性（Complete のみ）**：CI、3 つのセンチネルのアラート、リリース準備状況、アクティビティを 1 つの状態（不良・警告・OK・未確認）とリスク値にまとめます。チームタブは人の手が必要なリポジトリを先頭に並べ、フィルター、リポジトリごとの詳細、壁掛け画面用のディープリンクを備えます。同じデータは `/api/team/health`、`/api/repos/<owner>/<repo>/health`、`team` コマンドで得られます（`monitor/docs/HEALTH_jpn.md`）。
 - **サービスとして**：公式 Docker イメージ（非 root、読み取り専用）、任意のプロキシ付き Compose ファイル、systemd ユニット、詳細なヘルスチェック、最初の管理者を作るコマンド（`monitor/docs/DEPLOYMENT.md`）。
 - **複数アカウント、チーム、データの置き場所**：アカウントごとに 1 プロセス、ロールと専用アカウントを持つユーザー、`config/`、`data/`、`logs/`、`ai/` に分けたファイル、保持期間とバックアップ付きの任意の SQLite ストレージ、設定になったポート（`monitor/docs/ACCOUNTS.md`、`monitor/docs/STORAGE.md`、`monitor/docs/LAYOUT.md`）。
 - **並べ替えと折りたたみができる一覧**：「いま起きていること」は 7 通り、アラートタブは 9 通りで並べ替えられ、すべてのリポジトリを折りたたむ／開くボタンがあります。選択はユーザーごとに記憶されます。
@@ -280,6 +282,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/SENTINEL_jpn.md`](monitor/docs/SENTINEL_jpn.md): センチネルとチェック A1〜A13
 - [`monitor/docs/COLLAB_jpn.md`](monitor/docs/COLLAB_jpn.md): Collab 番人、アラートタブ、ミュート
 - [`monitor/docs/SENTINEL_SECURITY_jpn.md`](monitor/docs/SENTINEL_SECURITY_jpn.md): セキュリティセンチネル：Dependabot、コードスキャン、シークレット、ブランチ保護、ワークフローの権限、CODEOWNERS、確認できなかったこと
+- [`monitor/docs/HEALTH_jpn.md`](monitor/docs/HEALTH_jpn.md): リポジトリとチームの健全性：構成、チームタブ、ディープリンク、API
 - [`monitor/docs/CLI_jpn.md`](monitor/docs/CLI_jpn.md): モニターのクライアントとしてのコマンドライン
 - [`monitor/docs/ACCOUNTS_jpn.md`](monitor/docs/ACCOUNTS_jpn.md): 複数アカウント（1 つにつき 1 プロセス）
 - [`monitor/docs/QUOTAS_jpn.md`](monitor/docs/QUOTAS_jpn.md): GitHub のクォータとプラン

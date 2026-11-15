@@ -7,7 +7,7 @@
 
 Generated from the code. It reads what the running monitor says (and never writes to GitHub). `--json` prints one JSON document; the exit codes are stable.
 
-Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `ai-hook`, `credential`, `lessons`, `install-skill`, `gh-token`.
+Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `install-skill`, `gh-token`.
 
 | flag | what |
 | --- | --- |
@@ -37,6 +37,7 @@ Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `
 | `--dest` | install-skill: the folder the skill is copied into (a subfolder github-actions-monitor-<name> is made) |
 | `--read-only` | gh-token: required, prints a one-hour read-only token of the GitHub App (only with github_app.share_reads on) |
 | `--repo` | lessons: only this repository |
+| `--severity` | team: only the repositories in this state or a worse one |
 | `--compare` | score: also compare with the history of the window |
 | `--lang` | language of the texts (en, es, de, fr, it, ja, zh, pt) |
 | `--version` | print the version |

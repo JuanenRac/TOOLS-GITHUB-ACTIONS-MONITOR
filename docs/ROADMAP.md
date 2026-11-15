@@ -31,10 +31,6 @@ Everything listed here shipped in the 1.8 series and is tested; nothing is claim
 
 Each version carries everything of its stretch of the plan: nothing is left hanging from an earlier version and nothing is pushed to the next one. After 1.8.3 and after 1.9.3 the product goes through an independent review and its findings are closed in the stabilization version that follows. 1.8.1 is a corrective release of 1.8.0: the box "loading repositories" leaves with the last repository and a reload of the page gets its data at once.
 
-### 1.9.2 - Repository health and team health
-
-A health view of each repository (CI, issues and pull requests, security, readiness for a release, activity) and one of the team with ranking, totals and filters; pages for both with deep links for wall screens. Optional, in the same release: a panel of nightly benchmarks against a budget (median against a baseline per class of machine) and a panel of software bills of materials and attestations of each release.
-
 ### 1.9.3 - Scheduled reports and audit log
 
 Report templates in HTML and Markdown (PDF optional) with the score, the top alerts and the changes, a scheduler, and an append-only audit log of who did what and when, with no secret in it. Optional, in the same release: a "release ready / blocked" view with the last green commit of each repository.
@@ -49,7 +45,7 @@ A major version that cleans up technical debt and freezes the public interfaces:
 
 The monitor's own workflows keep to what the hygiene sentinel will ask of others: actions pinned to a commit, the least permissions and a time limit on every job.
 
-## Done in 1.8.2 to 1.9.1
+## Done in 1.8.2 to 1.9.2
 
 ### 1.8.2 - Official Docker image and service mode
 
@@ -70,6 +66,10 @@ Collectors of metrics per account and per sentinel (success rate, duration, time
 ### 1.9.1 - Security sentinel
 
 The third sentinel: Dependabot, code scanning, secret scanning, branch protection, workflow permissions and code owners, with rules by kind of signal, the same filter in the Alerts tab and a penalty in the score for open critical alerts. Optional, in the same release: workflow hygiene (actions that are not pinned to a commit, jobs without a time limit, workflows without permissions or without concurrency, dangerous use of pull_request_target), built on the workflow checker the project already has.
+
+### 1.9.2 - Repository health and team health
+
+A health view of each repository (CI, issues and pull requests, security, readiness for a release, activity) and one of the team with ranking, totals and filters; pages for both with deep links for wall screens. Optional, in the same release: a panel of nightly benchmarks against a budget (median against a baseline per class of machine) and a panel of software bills of materials and attestations of each release.
 
 ## Done in 1.7.9
 

@@ -15,5 +15,6 @@ Generated from the page. The same data is in the endpoints; an AI does not need 
 - `now`: Right now (runs, one row per repository)
 - `repos`: Repositories
 - `sent`: Sentinel (checks A1-A13, Collab)
+- `team`: Team (health of the repositories ranked by risk, with filters and the detail of each)
 
 Screens: `/screen/1` to `/screen/3` show the tabs chosen in `ui.screenN_tabs`.

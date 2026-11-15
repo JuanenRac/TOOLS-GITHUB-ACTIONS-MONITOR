@@ -54,6 +54,9 @@ NOTES = {
     "/api/score": ("GET", "the score of the account: a number from 0 to 100, a letter from A to E and a trend, with its parts, its coverage, the quality of the data and a breakdown by repository (Complete only; null and a state instead of a number when there is not enough data)"),
     "/api/score/global": ("GET", "the score of the whole installation, for information only (supervisor): the mean of the scored accounts the asker may see, weighted by their repositories with a number, with who is in it (Complete only)"),
     "/api/score/history": ("GET", "the points of the score over time (`?hours=`, `?limit=`), oldest first (Complete only)"),
+    "/api/team": ("GET", "the prefix of the health views of the repositories and of the team (see /api/team/health); Complete only"),
+    "/api/team/health": ("GET", "the health of the team: every repository ranked by risk with the ones that need a person first, the totals by state, the numbers by ecosystem and by sentinel; filters `?ecosystem=`, `?severity=warn|bad`, `?q=`, `?label=` (read only, from what the monitor holds; Complete only)"),
+    "/api/repos": ("GET", "the prefix of `/api/repos/<owner>/<repo>/health`: the health of one repository (CI of the last 24 hours, open alerts of every sentinel, release readiness, activity, and which sentinels did not see it fully); 404 `repo_unknown` for a repository the monitor does not know (Complete only)"),
     "/api/auth/audit": ("GET", "the audit of the team mode (administrators)"),
     "/api/auth/bootstrap": ("POST", "create the first administrator (this computer only, once)"),
     "/api/auth/login": ("POST", "sign in (team mode)"),
@@ -264,7 +267,7 @@ def tabs_md():
     page = (MON / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
     tabs = sorted(set(re.findall(r'data-tab="([a-z]+)"', page)))
     names = {"now": "Right now (runs, one row per repository)", "al": "Alerts (every sentinel in one list, silences, lessons from the failures)", "sent": "Sentinel (checks A1-A13, Collab)",
-             "charts": "Charts and history", "repos": "Repositories", "hist": "History of runs", "cfg": "Settings (tabs Basic, General ... AI, Quota ...)", "interface": "Interface"}
+             "charts": "Charts and history", "repos": "Repositories", "team": "Team (health of the repositories ranked by risk, with filters and the detail of each)", "hist": "History of runs", "cfg": "Settings (tabs Basic, General ... AI, Quota ...)", "interface": "Interface"}
     lines = ["# Tabs of the page", "", "Generated from the page. The same data is in the endpoints; an AI does not need the page.", ""]
     lines += [f"- `{t}`: {names.get(t, t)}" for t in tabs]
     lines += ["", "Screens: `/screen/1` to `/screen/3` show the tabs chosen in `ui.screenN_tabs`."]

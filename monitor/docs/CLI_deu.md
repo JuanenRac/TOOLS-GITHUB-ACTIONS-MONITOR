@@ -19,6 +19,7 @@
 | `accounts` | die Konten des Supervisors (nur bei mehreren Konten) | nein |
 | `alerts` | die Alarme aller Wächter in einer Liste: `--sentinel ci\|collab`, `--level info\|warning\|error`, `--muted show\|hide\|only` | nein |
 | `score` | die Punktzahl des Kontos: Zahl, Buchstabe, Trend, Teile, Abdeckung und die Aufteilung nach Repository; `--compare` vergleicht sie mit dem Verlauf des Fensters | nein |
+| `team` | die Gesundheit der Repositorys als Rangliste, zuerst die, die einen Menschen brauchen; `--severity warn\|bad` behält die schlechteren und `--repo owner/name` zeigt die Einzelheiten eines Repositorys | nein |
 | `live` | der Zustand des Webhook-Empfängers und die letzten Ereignisse | nein |
 
 Optionen aller Befehle: `--json` (die Antwort als ein JSON-Dokument: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (Port 8766), `--timeout SEKUNDEN` (1 bis 60), `--lang CODE`. Im Netzwerkmodus gehört das Zugriffstoken in die Umgebungsvariable `MONITOR_ACCESS_TOKEN`, die der Monitor selbst liest (`MONITOR_TOKEN` wird als Alias akzeptiert; `--token TOKEN` ist der letzte Ausweg, weil eine Option in der Prozessliste erscheint). Die Reihenfolge: `MONITOR_ACCESS_TOKEN`, dann `MONITOR_TOKEN`, dann `--token`. Es reist im Header `X-Monitor-Access`, nie in der Adresse und nie auf dem Bildschirm. Ein `--url` mit unverschlüsseltem `http` zu einem anderen Rechner gibt eine Warnung auf stderr aus (Token und Antworten würden unverschlüsselt reisen): Nutze außerhalb eines Netzes, das du kontrollierst, `https`.

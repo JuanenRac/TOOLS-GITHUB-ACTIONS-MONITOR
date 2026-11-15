@@ -26,10 +26,6 @@ Todo lo que sigue se entregó en la serie 1.8 y está probado; nada se da por de
 
 Cada versión lleva todo lo de su tramo del plan: nada queda colgando de una versión anterior ni se aplaza a la siguiente. Tras la 1.8.3 y tras la 1.9.3 el producto pasa por una revisión independiente y sus hallazgos se cierran en la versión de estabilización siguiente. La 1.8.1 es una versión correctiva de la 1.8.0: el cuadro «cargando repositorios» desaparece con el último repositorio y recargar la página trae los datos al instante.
 
-### 1.9.2 - Salud del repositorio y del equipo
-
-Una vista de salud de cada repositorio (CI, incidencias y pull requests, seguridad, preparación para una versión, actividad) y una del equipo con clasificación, totales y filtros; páginas para ambas con enlaces directos para pantallas de pared. Opcional, en la misma versión: un panel de benchmarks nocturnos frente a un presupuesto (mediana frente a una referencia por clase de máquina) y un panel de listas de materiales de software y atestaciones de cada versión.
-
 ### 1.9.3 - Informes programados y registro de auditoría
 
 Plantillas de informe en HTML y Markdown (PDF opcional) con la puntuación, las alertas principales y los cambios, un planificador y un registro de auditoría de solo añadir con quién hizo qué y cuándo, sin ningún secreto dentro. Opcional, en la misma versión: una vista «versión lista / bloqueada» con el último commit en verde de cada repositorio.
@@ -44,7 +40,7 @@ Una versión mayor que limpia la deuda técnica y congela las interfaces públic
 
 Los workflows del propio monitor cumplen lo que el centinela de higiene pedirá a los demás: acciones fijadas a un commit, los permisos mínimos y un límite de tiempo en cada trabajo.
 
-## Hecho en la 1.8.2 a la 1.9.1
+## Hecho en la 1.8.2 a la 1.9.2
 
 ### 1.8.2 - Imagen Docker oficial y modo servicio
 
@@ -65,6 +61,10 @@ Recolectores de métricas por cuenta y por centinela (tasa de éxito, duración,
 ### 1.9.1 - Centinela de seguridad
 
 El tercer centinela: Dependabot, análisis de código, análisis de secretos, protección de ramas, permisos de los workflows y propietarios del código, con reglas por tipo de señal, el mismo filtro en la pestaña Alertas y una penalización en la puntuación por alertas críticas abiertas. Opcional, en la misma versión: higiene de workflows (acciones que no están fijadas a un commit, trabajos sin límite de tiempo, workflows sin permisos o sin concurrencia, uso peligroso de pull_request_target), sobre el comprobador de workflows que el proyecto ya tiene.
+
+### 1.9.2 - Salud del repositorio y del equipo
+
+Una vista de salud de cada repositorio (CI, incidencias y pull requests, seguridad, preparación para una versión, actividad) y una del equipo con clasificación, totales y filtros; páginas para ambas con enlaces directos para pantallas de pared. Opcional, en la misma versión: un panel de benchmarks nocturnos frente a un presupuesto (mediana frente a una referencia por clase de máquina) y un panel de listas de materiales de software y atestaciones de cada versión.
 
 ## Hecho en la 1.7.9
 
