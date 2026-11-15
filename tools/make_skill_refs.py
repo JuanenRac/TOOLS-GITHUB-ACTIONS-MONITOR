@@ -52,6 +52,7 @@ NOTES = {
     "/api/alerts/unmute": ("POST", "end a silence"),
     "/api/analytics": ("GET", "history, trends and the numbers behind the charts"),
     "/api/score": ("GET", "the score of the account: a number from 0 to 100, a letter from A to E and a trend, with its parts, its coverage, the quality of the data and a breakdown by repository (Complete only; null and a state instead of a number when there is not enough data)"),
+    "/api/score/global": ("GET", "the score of the whole installation, for information only (supervisor): the mean of the scored accounts the asker may see, weighted by their repositories with a number, with who is in it (Complete only)"),
     "/api/score/history": ("GET", "the points of the score over time (`?hours=`, `?limit=`), oldest first (Complete only)"),
     "/api/auth/audit": ("GET", "the audit of the team mode (administrators)"),
     "/api/auth/bootstrap": ("POST", "create the first administrator (this computer only, once)"),

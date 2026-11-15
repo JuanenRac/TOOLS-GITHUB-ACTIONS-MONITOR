@@ -38,7 +38,7 @@ La fenêtre est le nombre de jours d'exécutions que regarde le score : `score.w
 
 ## Par dépôt et par compte
 
-Chaque compte a son propre score. Son détail le ventile par dépôt (les parties de CI seulement, les pires d'abord). Il n'y a pas de nombre unique pour toute l'installation.
+Chaque compte a son propre score. Son détail le ventile par dépôt (les parties de CI seulement, les pires d'abord). Il n'y a pas de nombre unique pour toute l'installation. À titre d'information seulement, `GET /api/score/global` du superviseur donne la moyenne des comptes notés que le demandeur peut voir, pondérée par leurs dépôts ayant un nombre, toujours avec le nombre de comptes pris en compte ; un compte sans nombre est listé et écarté.
 
 ## Sur la page
 

@@ -359,7 +359,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer  # noqa: E40
 
 SUPERVISOR = {"obj": None}
 #: what the supervisor answers itself; everything else under /api/ goes to the account asked for
-OWN_PATHS = ("/api/accounts", "/api/health", "/api/paths")
+OWN_PATHS = ("/api/accounts", "/api/health", "/api/paths", "/api/score/global")
+MAX_SCORE_ACCOUNTS = 50      # accounts asked for the score of the installation
 NO_FORWARD = ("host", "connection", "content-length", "transfer-encoding", "accept-encoding", "x-account-id", "x-monitor-remote", "x-monitor-supervisor")
 #: the headers of a child's answer that are passed on
 PASS_BACK = ("content-type", "set-cookie", "cache-control", "location", "referrer-policy")
@@ -533,6 +534,9 @@ class Handler(BaseHTTPRequestHandler):
             seen = auth_http.visible_accounts(self, [a["id"] for a in listed["accounts"]])
             self.json({**listed, "accounts": [a for a in listed["accounts"] if a["id"] in seen]})
             return
+        if method == "GET" and route == "/api/score/global":
+            self.score_global(sup)
+            return
         if method == "GET" and route in ("/", "/index.html"):
             self.page(sup)
             return
@@ -546,6 +550,39 @@ class Handler(BaseHTTPRequestHandler):
             return
         self.forward(sup, method, route)
 
+
+    def score_global(self, sup):
+        """GET /api/score/global: the score of the whole installation, FOR INFORMATION: the mean of the scored accounts the asker may see, weighted by their repositories with a number, always with who is
+        in it (see scoring/overview.py). Each account is asked its own /api/score with the same headers a forwarded request carries, so the team mode judges it the same; one that does not answer is listed
+        as unreachable and left out of the mean. At most 50 accounts, eight at a time, four seconds each."""
+        from concurrent.futures import ThreadPoolExecutor
+        from github_actions_monitor.scoring import overview
+        ids = auth_http.visible_accounts(self, [a["id"] for a in sup.summary()["accounts"]])[:MAX_SCORE_ACCOUNTS]
+        context = getattr(self, "auth_user", None)
+        base_headers = {k: v for k, v in self.headers.items() if k.lower() not in NO_FORWARD and k.lower() not in (auth_http.USER_HEADER.lower(), auth_http.ACCOUNT_HEADER.lower())}
+        remote = localguard.STATE["network"] and not self.this_computer()
+
+        def ask(account_id):
+            child = sup.child(account_id)
+            if child is None or child.health is None:
+                return account_id, None
+            headers = dict(base_headers)
+            headers["Host"] = f"127.0.0.1:{child.port}"
+            if context:
+                headers[auth_http.USER_HEADER] = context["user"]
+                headers[auth_http.ACCOUNT_HEADER] = account_id
+            if remote:
+                headers[REMOTE_HEADER] = "1"
+            headers.pop("Origin", None)
+            status, data, _ = fetch(child.url("/api/score"), timeout=4, headers=headers)
+            try:
+                return account_id, (json.loads(data) if status == 200 else None)
+            except (ValueError, TypeError):
+                return account_id, None
+
+        with ThreadPoolExecutor(max_workers=max(1, min(8, len(ids)))) as pool:
+            answers = dict(pool.map(ask, ids))
+        self.json(overview.combine(answers))
 
     def credential(self, sup, account_id):
         """POST /api/accounts/<id>/credential {"action": "replace", "token": "..."} | {"action": "reload"}: put another login in place of the one of ONE account (or read its files again) while everything

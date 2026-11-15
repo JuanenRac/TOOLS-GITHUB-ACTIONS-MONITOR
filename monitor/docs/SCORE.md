@@ -38,7 +38,7 @@ The window is the number of days of runs the score looks at: `score.window_days`
 
 ## By repository and by account
 
-Each account has its own score. Its detail breaks it down by repository (the CI parts only, the worst first). There is no single number for the whole installation.
+Each account has its own score. Its detail breaks it down by repository (the CI parts only, the worst first). There is no single number for the whole installation. Only for information, `GET /api/score/global` of the supervisor gives the mean of the scored accounts the asker may see, weighted by their repositories with a number, always with how many accounts are in it; an account without a number is listed and left out.
 
 ## On the page
 

@@ -38,7 +38,7 @@ Das Fenster ist die Zahl der Tage an Läufen, die die Punktzahl betrachtet: `sco
 
 ## Nach Repository und nach Konto
 
-Jedes Konto hat seine eigene Punktzahl. Das Detail gliedert sie nach Repository auf (nur die CI-Teile, die schlechtesten zuerst). Eine einzige Zahl für die ganze Installation gibt es nicht.
+Jedes Konto hat seine eigene Punktzahl. Das Detail gliedert sie nach Repository auf (nur die CI-Teile, die schlechtesten zuerst). Eine einzige Zahl für die ganze Installation gibt es nicht. Nur zur Information liefert `GET /api/score/global` des Supervisors den Mittelwert der bewerteten Konten, die der Fragende sehen darf, gewichtet nach ihren Repositories mit einer Zahl und immer mit der Angabe, wie viele Konten darin sind; ein Konto ohne Zahl wird aufgeführt und ausgelassen.
 
 ## Auf der Seite
 

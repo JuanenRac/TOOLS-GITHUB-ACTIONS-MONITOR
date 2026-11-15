@@ -12,6 +12,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Added
 
+- **The score of the whole installation, for information**: with several accounts, `GET /api/score/global` of the supervisor gives the mean of the scored accounts the asker may see, weighted by their repositories that have a number, always with how many accounts are in it and each account listed with its state; an account without a number is left out of the mean and with none scored there is no number, never a 100. Each account keeps its own score.
 - **The score for other tools**: the metrics (`/metrics`) get three series without labels, `ghamon_score_scored`, `ghamon_score_coverage` and `ghamon_score` (the number is only exported while there is one, never as 0), the MCP server gets a read-only tool `get_score`, the example Grafana dashboard gets a Score panel and a Score over time panel, and `--demo` shows an invented score and writes nothing.
 
 - **The score warns when it drops**: when the score of an account falls by 10 points or more against the window before (`score.alert.drop_points`), or goes down to a lower letter, the Alerts tab shows a warning, critical when the letter is E, with the old and the new score. It goes away when the score recovers and can be silenced like any other alert. It is on for the panel by default; it goes out through the external notification channels (the new event `score_dropped`) only when `score.alert.notify_external` is on, which is off by default, and only the moment it appears. `score.alert.enabled` switches it off.
