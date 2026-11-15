@@ -36,7 +36,7 @@ EDGES = (r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe", r"C:\P
 TABS = ("interface", "basic", "general", "polling", "cache", "sentinel", "surface", "readiness", "paths", "outputs", "ai", "webhook", "notify", "analytics", "lint", "advanced", "console")
 WEB = [("about", "tab=now&dlg=about", (1400, 900)), ("help", "tab=cfg&dlg=help&topic=sentinel", (1400, 900)), ("now", "tab=now", (1400, 820)), ("alerts", "tab=al", (1400, 820)), ("sentinel", "tab=sent&open=a2", (1400, 1000)), ("sentinel_queue", "tab=sent&open=a5", (1400, 900)), ("sentinel_analytics", "tab=sent&open=a12,a13", (1400, 1200)),
        ("size_4k", "tab=now", (3840, 2160)), ("size_ultrawide", "tab=now", (3440, 1440)), ("size_portrait", "tab=now", (1080, 1920)), ("size_phone", "tab=now", (390, 844)),
-       ("charts", "tab=charts", (1400, 820)), ("repositories", "tab=repos", (1400, 820)), ("history", "tab=hist", (1400, 820))] + [(f"settings_{t}", f"tab=cfg&cfgtab={t}", (1400, 820)) for t in TABS]
+       ("charts", "tab=charts", (1400, 820)), ("repositories", "tab=repos", (1400, 820)), ("team", "tab=team", (1400, 820)), ("history", "tab=hist", (1400, 820))] + [(f"settings_{t}", f"tab=cfg&cfgtab={t}", (1400, 820)) for t in TABS]
 
 
 LITE_WEB = [("lite_about", "tab=now&dlg=about", (1400, 900)), ("lite_basic", "tab=cfg&cfgtab=basic", (1400, 900)), ("lite_now", "tab=now", (1400, 820)), ("lite_charts", "tab=charts", (1400, 820)), ("lite_history", "tab=hist", (1400, 820)), ("lite_settings", "tab=cfg&cfgtab=general", (1400, 700))]

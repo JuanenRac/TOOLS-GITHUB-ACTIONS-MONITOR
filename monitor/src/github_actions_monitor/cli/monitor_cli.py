@@ -34,7 +34,7 @@ import sys
 import urllib.error
 import urllib.request
 from pathlib import Path
-from urllib.parse import urlencode, urlparse
+from urllib.parse import quote, urlencode, urlparse
 
 from github_actions_monitor import i18n
 from github_actions_monitor.util import platform_compat
@@ -44,7 +44,7 @@ from github_actions_monitor.tool_version import TOOL_VERSION
 from github_actions_monitor.security import netguard
 
 EXIT_OK, EXIT_USAGE, EXIT_DOWN, EXIT_AUTH, EXIT_DEGRADED, EXIT_ALERTS = 0, 1, 2, 3, 4, 5
-COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "score", "ai-hook", "credential", "lessons", "install-skill", "gh-token")
+COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "score", "team", "ai-hook", "credential", "lessons", "install-skill", "gh-token")
 SKILL_ACTIONS = ("internal", "external")
 LESSONS_ACTIONS = ("list", "brief", "failures", "close")
 AI_HOOK_ACTIONS = ("install", "status", "uninstall")
@@ -282,6 +282,34 @@ def cmd_score(ctx):
     return payload, lines, EXIT_OK
 
 
+def cmd_team(ctx):
+    """team [--severity warn|bad] [--repo OWNER/NAME]: the health of the repositories, ranked with the ones that need a person first (`/api/team/health`), or the detail of one repository
+    (`/api/repos/<owner>/<repo>/health`). Read only, from what the monitor already holds; a repository that was not fully seen is said, never shown as healthy."""
+    if ctx.get("repo"):
+        owner, _, name = ctx["repo"].partition("/")
+        if not owner or not name or "/" in name:
+            raise CliError(EXIT_USAGE, i18n.t("cli.team_repo_bad"))
+        answer = fetch(ctx["base"], f"/api/repos/{quote(owner, safe='')}/{quote(name, safe='')}/health", {"account": ctx["account"]}, ctx["timeout"], ctx["token"])
+        view = answer["health"]
+        ci, alerts = view["ci"], view["alerts"]
+        lines = [i18n.t("cli.repo_head", repo=view["repo"], state=i18n.t("cli.team_state_" + view["state"]), risk=view["risk"]),
+                 i18n.t("cli.repo_ci", ok=ci["successes_24h"], bad=ci["failures_24h"], red=", ".join(ci["red_workflows"]) or "-", stuck=ci["stuck_runs"]),
+                 i18n.t("cli.repo_alerts", n=alerts["total"])]
+        for item in alerts["items"][:10]:
+            lines.append(f"  [{item.get('level', '?')}] {item.get('sentinel', '?')} {item.get('code', '')}  {item.get('title', '')}")
+        if view.get("not_fully_seen"):
+            lines.append(i18n.t("cli.repo_unseen", list=", ".join(view["not_fully_seen"])))
+        return answer, lines, EXIT_OK
+    answer = fetch(ctx["base"], "/api/team/health", {"account": ctx["account"], "severity": ctx.get("severity")}, ctx["timeout"], ctx["token"])
+    totals = answer["totals"]
+    lines = [i18n.t("cli.team_head", shown=answer["shown"], all=answer["all"], bad=totals.get("bad", 0), warn=totals.get("warn", 0), ok=totals.get("ok", 0), unknown=totals.get("unknown", 0))]
+    if not answer["ranking"]:
+        lines.append(i18n.t("cli.team_none"))
+    for row in answer["ranking"][:20]:
+        lines.append(i18n.t("cli.team_row", state=i18n.t("cli.team_state_" + row["state"]), risk=row["risk"], repo=row["repo"], alerts=row["alerts"], red=row["red_workflows"]))
+    return answer, lines, EXIT_OK
+
+
 def cmd_lessons(ctx):
     """lessons [list | brief | failures] [--repo NAME]: what the failures of this CI have taught (read only; the brief is the one to read before a push)."""
     action = ctx["action"] or "list"
@@ -509,7 +537,7 @@ def cmd_credential(ctx):
     return {"action": action, "ok": ok, **shown}, [line], EXIT_OK if ok else EXIT_DEGRADED
 
 
-HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "live": cmd_live, "doctor": cmd_doctor, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill}
+HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill}
 
 
 def build_parser():
@@ -540,6 +568,7 @@ def build_parser():
     ap.add_argument("--dest", metavar="FOLDER", default="", help=i18n.t("cli.help_dest"))
     ap.add_argument("--read-only", action="store_true", dest="read_only", help=i18n.t("cli.help_read_only"))
     ap.add_argument("--repo", metavar="NAME", default="", help=i18n.t("cli.help_repo"))
+    ap.add_argument("--severity", choices=("warn", "bad"), default="", help=i18n.t("cli.help_severity"))
     ap.add_argument("--compare", action="store_true", help=i18n.t("cli.help_compare"))
     ap.add_argument("--lang", metavar="CODE", help=i18n.t("cli.help_lang"))
     ap.add_argument("--version", action="store_true", help=i18n.t("cli.help_version"))
@@ -565,8 +594,8 @@ def main(argv=None):
         return EXIT_USAGE
     try:
         ctx = {"base": base_url(args.url, args.lite), "account": args.account, "timeout": max(1.0, min(60.0, args.timeout)), "token": resolve_token(flag=args.token, token_file=args.token_file),
-               "sentinel": args.sentinel, "level": args.level, "muted": args.muted, "fail_on": args.fail_on, "lite": args.lite, "compare": args.compare,
-               "action": args.action or "", "target": args.target, "scope": args.scope, "project_dir": args.project_dir, "dry_run": args.dry_run, "deep": args.deep, "new_token_file": args.new_token_file, "dest": args.dest, "read_only": args.read_only, "repo": args.repo if re.fullmatch(r"[A-Za-z0-9._-]{0,100}", args.repo) else ""}
+               "sentinel": args.sentinel, "level": args.level, "muted": args.muted, "fail_on": args.fail_on, "lite": args.lite, "compare": args.compare, "severity": args.severity,
+               "action": args.action or "", "target": args.target, "scope": args.scope, "project_dir": args.project_dir, "dry_run": args.dry_run, "deep": args.deep, "new_token_file": args.new_token_file, "dest": args.dest, "read_only": args.read_only, "repo": args.repo if re.fullmatch(r"[A-Za-z0-9._/-]{0,201}", args.repo) else ""}
         CLIENT.update({"session": "", "ca": (args.ca_file or os.environ.get("MONITOR_CA_FILE") or "").strip()})
         if CLIENT["ca"] and not os.path.isfile(CLIENT["ca"]):
             raise CliError(EXIT_USAGE, i18n.t("cli.ca_file_bad", file=CLIENT["ca"]))

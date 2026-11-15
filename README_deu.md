@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2117_passing-brightgreen.svg" alt="2117 tests">
+  <img src="https://img.shields.io/badge/Tests-2148_passing-brightgreen.svg" alt="2148 tests">
 </p>
 
 > Überwacht die Workflows aller deiner Repositories und zeigt dir auf einer lokalen Seite, was rot ist, was hängt und was auf dich wartet.
@@ -32,7 +32,7 @@
 
 | | |
 |---|---|
-| **Version** | **1.9.1** · [alle Releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **1.9.2** · [alle Releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Voraussetzung** | Python 3.11+ und die GitHub-CLI (`gh auth login`); sonst nichts (die Konsolenansicht nutzt das optionale Paket `rich`) |
 | **Öffnet** | eine Seite nur auf `127.0.0.1`, in acht Sprachen |
 | **Schreibt auf GitHub** | nie von selbst: nur Stapelbefehle, die du mit ausdrücklichem `--go` startest |
@@ -40,12 +40,12 @@
 
 <!-- glance:begin -->
 
-**Heute gemessen** (v1.9.1)
+**Heute gemessen** (v1.9.2)
 
 | | |
 |---|---|
 | **Reifegrad** | functional |
-| **Tests** | 2117 Testmethoden (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 2148 Testmethoden (`python -m unittest discover -s monitor/tests`) |
 | **Einstellungen** | 402 Einstellungen, alle mit Hilfe |
 | **Sprachen** | 8 (Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch) |
 | **Im CI getestet auf** | ubuntu, windows, Python 3.11, 3.13 |
@@ -83,6 +83,7 @@ Jede Zeile ist ein Teil dieses Repositories, und die Ampel sagt, wie weit er heu
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_analytics_light.png"><img src="docs/screenshots/web_sentinel_analytics_dark.png" alt="A12 · Analytik: Dauer, Wartezeit, Schritte und instabile Workflows" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_charts_light.png"><img src="docs/screenshots/web_charts_dark.png" alt="Diagramme" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_repositories_light.png"><img src="docs/screenshots/web_repositories_dark.png" alt="Repositories" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_team_light.png"><img src="docs/screenshots/web_team_dark.png" alt="Team: die Gesundheit der Repositorys, als Rangliste" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_history_light.png"><img src="docs/screenshots/web_history_dark.png" alt="Verlauf" width="92%"></picture></p>
 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_about_light.png"><img src="docs/screenshots/web_about_dark.png" alt="Über" width="92%"></picture></p>
@@ -151,6 +152,7 @@ Jedes Bild folgt dem hellen oder dunklen Design Ihrer GitHub-Seite.
 - **Jede Bildschirmgröße und mehrere Bildschirme**: Die Seite passt sich einem Fenster vom Smartphone bis 4K an, aufrecht oder gedreht, und ein Monitor kann bis zu drei Bildschirme bedienen (`/screen/1` bis `/screen/3`), jeder mit eigenen Reitern und eigener Ausrichtung (`monitor/docs/SCREENS_deu.md`).
 - **Eine Punktzahl je Konto**: eine Zahl von 0 bis 100, ein Buchstabe von A bis E und ein Trend, gebildet aus der Zuverlässigkeit der CI, ihrer Geschwindigkeit, der Wiederherstellungszeit und der Schnelligkeit, mit der Zusammenarbeitswarnungen geschlossen werden; sie sagt „Kalibrierung“ oder „zu wenige Daten“ statt einer Zahl, die sie nicht belegen kann, zeigt, was sie noch nicht abdeckt, steht in der Kopfzeile der Seite, hat einen Befehl `score`, warnt beim Abfall und steckt in den Metriken und im MCP-Server (`monitor/docs/SCORE.md`).
 - **Ein Sicherheitswächter (nur Complete, standardmäßig aus)**: Er liest, ohne etwas in GitHub zu schreiben, die offenen Meldungen von Dependabot, Code-Scanning und Secret-Scanning, ob der Standardzweig geschützt ist, die Standardberechtigung der Workflows und auf Wunsch die Code-Eigentümer; er meldet einen Alarm je Repository und Signal, zählt die Funde als fünften Teil der Bewertung und sagt, was er nicht lesen konnte (`monitor/docs/SENTINEL_SECURITY_deu.md`).
+- **Die Gesundheit jedes Repositorys und des Teams (nur Complete)**: CI, Meldungen der drei Wächter, Release-Bereitschaft und Aktivität in einem Zustand (schlecht, Warnung, OK oder nicht gesehen) mit einer Risikozahl; der Tab Team reiht zuerst die Repositorys, die einen Menschen brauchen, mit Filtern, einer Einzelansicht und Direktlinks für Wandbildschirme; dieselben Daten liefern `/api/team/health`, `/api/repos/<owner>/<repo>/health` und der Befehl `team` (`monitor/docs/HEALTH_deu.md`).
 - **Als Dienst**: das offizielle Docker-Image (ohne Root, schreibgeschützt), eine Compose-Datei mit optionalem Proxy, eine systemd-Unit, eine tiefe Gesundheitsprüfung und der Befehl, der den ersten Administrator anlegt (`monitor/docs/DEPLOYMENT.md`).
 - **Mehrere Konten, ein Team und ein Ort für die Daten**: ein Prozess je Konto, Benutzer mit Rollen und eigenen Konten, die Dateien in `config/`, `data/`, `logs/` und `ai/`, ein optionaler SQLite-Speicher mit Aufbewahrung und Sicherung und die Ports als Einstellungen (`monitor/docs/ACCOUNTS.md`, `monitor/docs/STORAGE.md`, `monitor/docs/LAYOUT.md`).
 - **Listen, die man sortiert und einklappt**: „Gerade aktiv“ auf sieben Arten und der Reiter Warnungen auf neun, mit einer Schaltfläche zum Ein- und Ausklappen aller Repositories; die Wahl wird für jeden Benutzer gemerkt.
@@ -280,6 +282,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/SENTINEL_deu.md`](monitor/docs/SENTINEL_deu.md): der Wächter und seine Prüfungen A1-A13
 - [`monitor/docs/COLLAB_deu.md`](monitor/docs/COLLAB_deu.md): der Collab-Wächter, der Reiter Alarme und die Stummschaltungen
 - [`monitor/docs/SENTINEL_SECURITY_deu.md`](monitor/docs/SENTINEL_SECURITY_deu.md): Der Sicherheitswächter: Dependabot, Code-Scanning, Geheimnisse, Branch-Schutz, Workflow-Berechtigungen und CODEOWNERS, und was er nicht prüfen konnte
+- [`monitor/docs/HEALTH_deu.md`](monitor/docs/HEALTH_deu.md): Die Gesundheit eines Repositorys und des Teams: woraus sie besteht, der Tab Team, die Direktlinks und die API
 - [`monitor/docs/CLI_deu.md`](monitor/docs/CLI_deu.md): die Befehlszeile als Client des Monitors
 - [`monitor/docs/ACCOUNTS_deu.md`](monitor/docs/ACCOUNTS_deu.md): mehrere Konten, je ein Prozess
 - [`monitor/docs/QUOTAS_deu.md`](monitor/docs/QUOTAS_deu.md): Kontingente und Tarife von GitHub

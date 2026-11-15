@@ -45,6 +45,16 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - Der Test eines Kontos, das sofort stirbt, hängt nicht mehr von der Geschwindigkeit des Rechners ab: Die Wartezeit vor dem erneuten Start eines Kontos wird mit einer Uhr geprüft, die der Test selbst gibt, und ein zweiter Test prüft den Plan der Wartezeiten, ohne die echte Zeit zu lesen (der alte scheiterte unter Last in der Schranke eines Releases).
 
+## [1.9.2]
+
+### Hinzugefügt
+
+- **Die Gesundheit jedes Repositorys und des Teams (nur Complete)**: Aus dem, was der Monitor schon hat (Läufe, rote und hängende Workflows, die offenen Meldungen der drei Wächter und die Release-Bereitschaft), entsteht je Repository ein Zustand (schlecht, Warnung, OK oder nicht gesehen) und eine Risikozahl; ein Repository, das kein Wächter angesehen hat oder das einer nicht lesen konnte, erscheint nie als OK und sagt, von wem es nicht vollständig gesehen wurde. `GET /api/repos/<owner>/<repo>/health` liefert die Einzelheiten und `GET /api/team/health` die Rangliste, die Summen, die Zahlen je Ökosystem und je Wächter und die Filter (Ökosystem, Mindestschwere, Namensteil). Sie rufen nie GitHub auf.
+
+- **Der Tab Team und die Einzelansicht eines Repositorys**: die Rangliste mit den Repositorys, die einen Menschen brauchen, zuerst, drei Filter und beim Klick auf ein Repository ein Fenster mit CI, Meldungen, Release und Aktivität; die Direktlinks `?view=team`, `?view=repos` und `?view=repo&repo=owner/name` (mit `chrome=0` für Wandbildschirme) öffnen jede Ansicht. Die Lite-Edition hat ihn nicht.
+
+- **Der Befehl `team`**: `monitor_cli.py team` gibt die Rangliste aus (`--severity warn|bad`) und `team --repo owner/name` die Einzelheiten eines Repositorys, mit `--json`; nur lesend und aus denselben Routen wie die Seite. Die Anleitung HEALTH.md in den acht Sprachen erklärt alles.
+
 ## [1.9.1]
 
 ### Hinzugefügt

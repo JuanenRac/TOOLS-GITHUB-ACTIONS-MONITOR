@@ -57,7 +57,7 @@ background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 
 .tile.skel b{color:transparent;border-radius:5px;background:linear-gradient(100deg,var(--line) 30%,var(--line2) 50%,var(--line) 70%);background-size:200% 100%}
 .tile.skel small{opacity:.6}.tile.stale b{opacity:.55}
 .tile[hidden]{display:none}
-.lite #n-sent,.lite #t-sent,.lite #n-al,.lite #t-al,.lite #kp-sign,.lite #k-ready,.lite #k-budget,.lite #kt-etag{display:none!important}
+.lite #n-team,.lite #t-team,.lite #n-sent,.lite #t-sent,.lite #n-al,.lite #t-al,.lite #kp-sign,.lite #k-ready,.lite #k-budget,.lite #kt-etag{display:none!important}
 /* the complete edition with several accounts: the switcher of the top bar, the page "all accounts" and the views of a screen of its own (?view=&chrome=0) */
 #accbar{display:none;flex-direction:column;align-items:stretch;gap:6px;padding:8px;border:1px solid var(--line);border-radius:var(--radius);background:var(--side-active);color:var(--side-text)}
 .acc #accbar{display:flex}#accbar label{display:flex;flex-direction:column;align-items:stretch;gap:4px;font-weight:600;color:var(--side-hi)}#accbar select{width:100%}
@@ -438,6 +438,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 </div></div>
 <div class="nav-group" data-group="data"><button type="button" class="nav-group-title" aria-expanded="true"><i aria-hidden="true">&#9662;</i><strong data-i18n="ui.nav_g_data"></strong></button><div class="nav-items">
 <button role="tab" id="n-repos" data-tab="repos" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-repos"/></svg><span class="nl" data-i18n="ui.tab_repos"></span></button>
+<button role="tab" id="n-team" data-tab="team" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-repos"/></svg><span class="nl" data-i18n="ui.tab_team"></span></button>
 <button role="tab" id="n-hist" data-tab="hist" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-history"/></svg><span class="nl" data-i18n="ui.tab_hist"></span></button>
 </div></div>
 <div class="nav-group" data-group="system"><button type="button" class="nav-group-title" aria-expanded="true"><i aria-hidden="true">&#9662;</i><strong data-i18n="ui.nav_g_system"></strong></button><div class="nav-items">
@@ -496,6 +497,9 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <div class="tab" id="t-repos" role="tabpanel" aria-labelledby="n-repos">
 <section><h2 data-i18n="ui.r_title"></h2><div class="body"><div class="tbl-tools" id="repos-tools"></div><table><thead><tr id="repos-head"></tr></thead><tbody id="repo-rows"></tbody></table></div></section>
 </div>
+<div class="tab" id="t-team" role="tabpanel" aria-labelledby="n-team">
+<section><h2 data-i18n="ui.team_title"></h2><div class="body"><div class="tbl-tools" id="team-tools"></div><div class="mut" id="team-sum"></div><table><thead><tr id="team-head"></tr></thead><tbody id="team-rows"></tbody></table><div id="team-extra"></div></div></section>
+</div>
 <div class="tab" id="t-hist" role="tabpanel" aria-labelledby="n-hist">
 <section><h2 data-i18n="ui.h_title"></h2>
 <div class="row" style="margin-bottom:8px">
@@ -536,6 +540,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <span class="sb-item sb-clock" id="sb-clock" role="timer" aria-live="off"><span class="ck-d" id="ck-d"></span><span class="ck-t" id="ck-t"></span><span class="ck-z" id="ck-z"></span></span>
 </div>
 </footer>
+<div id="rh-dlg" class="dlg" role="dialog" aria-modal="true" aria-labelledby="rh-h" hidden><div class="dlg-box"><div class="dlg-top"><h2 id="rh-h" data-i18n="ui.rh_title"></h2><span class="sp"></span><button id="rh-close" class="ib" type="button" data-i18n-title="ui.close" data-i18n-aria="ui.close"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-close"/></svg></button></div><div class="dlg-body" id="rh-body"></div></div></div>
 <div id="notes-dlg" class="dlg" role="dialog" aria-modal="true" aria-labelledby="notes-h" hidden><div class="dlg-box"><div class="dlg-top"><h2 id="notes-h" data-i18n="ui.sb_all_title"></h2><label class="inl"><span data-i18n="ui.sb_filter"></span> <select id="notes-level"><option value="" data-i18n="ui.f_all"></option><option value="bad" data-i18n="ui.sb_lv_bad"></option><option value="warn" data-i18n="ui.sb_lv_warn"></option></select></label><span class="sp"></span><button id="notes-close" class="ib" type="button" data-i18n-title="ui.close" data-i18n-aria="ui.close"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-close"/></svg></button></div><div class="dlg-body" id="notes-body"></div></div></div>
 <aside id="rp" role="complementary" data-i18n-aria="ui.rp_aria" hidden></aside>
 <div class="authpanel" id="auth-panel" role="dialog" aria-modal="true" hidden></div>
@@ -717,7 +722,7 @@ function soundLockPaint(){const b=$("snd-lock");if(!b)return;const on=soundLocke
 function soundUnlock(test){const c=audioCtx();if(!c)return;const done=()=>{soundLockPaint();soundChip();if(test)playTones(soundCfg().vol)};try{const p=c.resume();if(p&&p.then)p.then(done,done);else done()}catch(e){done()}}
 function soundChip(){const b=$("sb-sound");if(!b)return;const on=!SOUND.muted&&soundCfg().enabled;b.textContent=T(on?"ui.snd_on":"ui.snd_off");b.title=T("ui.snd_chip_t");b.setAttribute("aria-pressed",on?"true":"false");b.className="sb-item sb-sound"+(on?"":" off")}
 document.documentElement.dataset.blink=I18N.blink===false?"0":"1";
-const TABS=LITE?["now","charts","repos","hist","cfg"]:["now","al","sent","charts","repos","hist","cfg"];
+const TABS=LITE?["now","charts","repos","hist","cfg"]:["now","al","sent","charts","repos","team","hist","cfg"];
 function showTab(t){if(!TABS.includes(t))t="now";TABS.forEach(x=>{$("t-"+x).classList.toggle("on",x===t);$("n-"+x).setAttribute("aria-selected",x===t)});store.set("am-tab",t);CURTAB=t;applyGroups();setViewTitle();if(DATA&&t==="charts")setTimeout(()=>render(DATA),30);try{if(location.hash!=="#"+t)window.history.replaceState(null,"","#"+t)}catch(e){}}
 document.querySelector("nav").addEventListener("click",e=>{const b=e.target.closest("button[data-tab]");if(b)showTab(b.dataset.tab)});
 document.querySelector("nav").addEventListener("keydown",e=>{if(!["ArrowRight","ArrowLeft","ArrowDown","ArrowUp"].includes(e.key))return;e.preventDefault();const i=TABS.findIndex(x=>$("n-"+x).getAttribute("aria-selected")==="true"),n=TABS[(i+(e.key==="ArrowRight"||e.key==="ArrowDown"?1:TABS.length-1))%TABS.length];showTab(n);$("n-"+n).focus()});
@@ -736,7 +741,7 @@ showTab(QS.get("tab")||location.hash.slice(1)||store.get("am-tab")||"now");
 /* ---------- shell of the complete edition: accounts, views and a screen of its own ---------- */
 /* ?view=now|alerts|charts|repos|settings|live  ?chrome=0 (a kiosk: no header buttons, tabs or filters)  ?account=<id>|all  (several accounts only; the lite edition ignores account=)
    Every window keeps its own view: the choice is read from the address, never from one global setting that another window would overwrite. */
-const VIEWS={now:"now",alerts:"al",charts:"charts",repos:"repos",settings:"cfg",live:"live"};
+const VIEWS={now:"now",alerts:"al",charts:"charts",repos:"repos",team:"team",repo:"team",settings:"cfg",live:"live"};
 const VIEW=QS.get("view")&&VIEWS[QS.get("view")]?QS.get("view"):"";
 if(QS.get("chrome")==="0")document.body.classList.add("kiosk");
 function accUrl(id){const u=new URL(location.href);if(id)u.searchParams.set("account",id);else u.searchParams.delete("account");return u.pathname+u.search}
@@ -1387,6 +1392,54 @@ async function scoreTick(){
   if(a.state==="scored"){try{const r=await fetch("/api/score/history?hours="+((a.window_days||7)*24),{cache:"no-store"});if(r.ok)pts=((await r.json()).points||[]).filter(p=>typeof p.score==="number")}catch(e){}}
   try{el.innerHTML=scoreChip(a,pts);el.hidden=false}catch(e){el.hidden=true}
 }
+/* the health of the team (1.9.2): GET /api/team/health with the filters of the tab, and GET /api/repos/<owner>/<repo>/health in a dialog; ?view=team and ?view=repo&repo=owner/name are the deep links */
+let TEAM=null,TEAM_F={eco:"",sev:"",q:""};
+const TEAM_COLS=["ui.team_c_repo","ui.team_c_state","ui.team_c_risk","ui.team_c_red","ui.team_c_alerts","ui.team_c_fail","ui.team_c_last","ui.team_c_next"];
+const stateChip=s=>`<span class="chip ${s==="bad"?"bad":s==="warn"?"warn":s==="ok"?"ok":""}">${esc(T("ui.team_sev_"+s))}</span>`;
+async function teamLoad(){
+  if(LITE)return;
+  const p=new URLSearchParams();if(TEAM_F.eco)p.set("ecosystem",TEAM_F.eco);if(TEAM_F.sev)p.set("severity",TEAM_F.sev);if(TEAM_F.q)p.set("q",TEAM_F.q);
+  try{const r=await fetch("/api/team/health?"+p.toString(),{cache:"no-store"});TEAM=r.ok?await r.json():null}catch(e){TEAM=null}
+  teamPaint()}
+function teamTools(){
+  const el=$("team-tools");if(el.dataset.built)return;el.dataset.built="1";
+  const ecos=[...new Set(Object.keys((TEAM&&TEAM.by_ecosystem)||{}))].sort();
+  el.innerHTML=`<label class="inl">${esc(T("ui.team_f_eco"))} <select id="team-eco"><option value="">${esc(T("ui.team_sev_all"))}</option>${ecos.map(e=>`<option value="${esc(e)}">${esc(I18N.ecosystems&&I18N.ecosystems[e]||e)}</option>`).join("")}</select></label> `+
+   `<label class="inl">${esc(T("ui.team_f_sev"))} <select id="team-sev"><option value="">${esc(T("ui.team_sev_all"))}</option>${["warn","bad"].map(s=>`<option value="${s}">${esc(T("ui.team_sev_"+s))}</option>`).join("")}</select></label> `+
+   `<label class="inl">${esc(T("ui.team_f_q"))} <input id="team-q" type="search" maxlength="80"></label>`;
+  $("team-eco").addEventListener("change",e=>{TEAM_F.eco=e.target.value;teamLoad()});$("team-sev").addEventListener("change",e=>{TEAM_F.sev=e.target.value;teamLoad()});
+  let t=null;$("team-q").addEventListener("input",e=>{clearTimeout(t);t=setTimeout(()=>{TEAM_F.q=e.target.value.trim();teamLoad()},250)})}
+function teamPaint(){
+  teamTools();$("team-head").innerHTML=TEAM_COLS.map(c=>`<th>${esc(T(c))}</th>`).join("");
+  if(!TEAM){$("team-sum").textContent="";$("team-rows").innerHTML="";$("team-extra").innerHTML="";return}
+  const tt=TEAM.totals||{};
+  $("team-sum").textContent=T("ui.team_shown",{shown:TEAM.shown,all:TEAM.all})+" · "+T("ui.team_totals",{bad:tt.bad||0,warn:tt.warn||0,ok:tt.ok||0,unknown:tt.unknown||0});
+  $("team-rows").innerHTML=(TEAM.ranking||[]).length?TEAM.ranking.map(r=>`<tr><td><b class="rl" data-health-open="${esc(r.repo)}" tabindex="0" role="button">${esc(r.repo)}</b></td><td>${stateChip(r.state)}</td><td>${esc(r.risk)}</td><td>${esc(r.red_workflows||0)}</td><td>${esc(r.alerts||0)}</td><td>${esc(r.failures_24h||0)}</td><td>${r.last_run_at?esc(ago(r.last_run_at)):""}</td><td class="wrap">${esc(r.release_next||"")}</td></tr>`).join(""):`<tr><td colspan="8" class="mut">${esc(T("ui.team_none"))}</td></tr>`;
+  const eco=Object.entries(TEAM.by_ecosystem||{}),sen=Object.entries((TEAM.alerts||{}).by_sentinel||{});
+  $("team-extra").innerHTML=(eco.length?`<h3 style="margin:12px 0 4px;font-size:13px">${esc(T("ui.team_by_eco"))}</h3><div class="mut">${eco.map(([k,v])=>esc((I18N.ecosystems&&I18N.ecosystems[k]||k||"-")+": "+v.repos+" ("+T("ui.team_totals",{bad:v.bad,warn:v.warn,ok:v.ok,unknown:v.unknown})+")")).join("<br>")}</div>`:"")+
+   (sen.length?`<h3 style="margin:12px 0 4px;font-size:13px">${esc(T("ui.team_by_sent"))}</h3><div class="mut">${sen.map(([k,n])=>esc((T("ui.al_o_"+k)===("ui.al_o_"+k)?k:T("ui.al_o_"+k))+": "+n)).join(" · ")}</div>`:"")}
+async function repoHealthOpen(repo){
+  if(LITE)return;
+  const owner=(ACC&&ACC.owner)||(DATA&&DATA.owner)||(repo.includes("/")?repo.split("/")[0]:""),name=repo.includes("/")?repo.split("/")[1]:repo;
+  let doc=null;
+  try{const r=await fetch("/api/repos/"+encodeURIComponent(owner)+"/"+encodeURIComponent(name)+"/health",{cache:"no-store"});doc=r.ok?(await r.json()).health:null}catch(e){doc=null}
+  $("rh-h").textContent=T("ui.rh_title")+": "+repo;
+  $("rh-body").innerHTML=doc?repoHealthHtml(doc):`<span class="mut">${esc(T("ui.rh_none"))}</span>`;
+  dlgOpen("rh")}
+function repoHealthHtml(v){
+  const ci=v.ci||{},al=v.alerts||{},act=v.activity||{},src=Object.entries(v.sources||{});
+  const rows=[[T("ui.team_c_state"),stateChip(v.state)+" · "+esc(T("ui.team_c_risk")+" "+v.risk),true],
+    [T("ui.rh_ci"),esc(ci.runs_24h?T("ui.rh_ci_line",{ok:ci.successes_24h,bad:ci.failures_24h,n:ci.runs_24h}):T("ui.rh_none")),true],
+    [T("ui.rh_red"),(ci.red_workflows||[]).length?esc(ci.red_workflows.join(", ")):mut_("-"),true],[T("ui.rh_stuck"),String(ci.stuck_runs||0)],
+    [T("ui.rh_alerts"),(al.items||[]).length?al.items.map(a=>`<div><span class="chip ${a.level==="critical"||a.level==="error"?"bad":a.level==="info"?"":"warn"}">${esc(T("ui.al_o_"+a.sentinel)===("ui.al_o_"+a.sentinel)?a.sentinel:T("ui.al_o_"+a.sentinel))}</span> ${esc(a.title)}</div>`).join(""):esc(T("ui.rh_no_alerts")),true],
+    [T("ui.rh_ready"),v.readiness?esc((v.readiness.entries||0)+" · "+(v.readiness.next||"")):esc(T("ui.rh_no_ready")),true],
+    [T("ui.rh_activity"),act.last_run_at?esc(T("ui.rh_act_line",{when:ago(act.last_run_at),n:act.runs_7d||0})):mut_("-"),true],
+    [T("ui.rh_sources"),src.map(([k,l])=>esc((T("ui.al_o_"+k)===("ui.al_o_"+k)?k:T("ui.al_o_"+k))+": "+T("ui.rh_life_"+l))).join(" · "),true]];
+  let html=dl(rows);if((v.not_fully_seen||[]).length)html+=`<div class="mut" style="margin-top:8px">${esc(T("ui.rh_unseen",{list:v.not_fully_seen.map(k=>T("ui.al_o_"+k)===("ui.al_o_"+k)?k:T("ui.al_o_"+k)).join(", ")}))}</div>`;
+  return html}
+document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("[data-health-open]");if(t)repoHealthOpen(t.dataset.healthOpen)});
+document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.dataset&&e.target.dataset.healthOpen){e.preventDefault();repoHealthOpen(e.target.dataset.healthOpen)}});
+$("rh-close").addEventListener("click",()=>dlgClose("rh"));
 async function sentTick(){alertsTick();
   if(LITE)return;
   try{const r=await fetch("/api/analytics",{cache:"no-store"});if(r.ok)ANA=await r.json()}catch(e){}
@@ -1637,7 +1690,7 @@ document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.tar
 document.addEventListener("keyup",e=>{if(e.target.tagName==="BUTTON")e.target.classList.remove("pressing")});
 
 /* About, Help, the first-start guide, the update notice, the restart bar and the level filter of the linter */
-const dlgs={about:$("about-dlg"),help:$("help-dlg"),wiz:$("wiz-dlg"),notes:$("notes-dlg")};
+const dlgs={about:$("about-dlg"),help:$("help-dlg"),wiz:$("wiz-dlg"),notes:$("notes-dlg"),rh:$("rh-dlg")};
 let LASTFOCUS=null;
 function dlgOpen(k){LASTFOCUS=document.activeElement;dlgs[k].hidden=false}
 function dlgClose(k){dlgs[k].hidden=true;if(LASTFOCUS&&LASTFOCUS.focus)try{LASTFOCUS.focus()}catch(e){}}
@@ -1873,7 +1926,7 @@ async function authUsers(){const p=authPanel(T("ui.auth_users")),msg=ae("div",{c
   p.append(msg,tbl,ae("h3",{},T("ui.auth_user_add")),nm," ",pw," ",rl," ",ac," ",add,ae("h3",{},T("ui.auth_audit")),log);await load()}
 applyStatic();fillThemes();applyTheme(theme);applySide();applyGroups();setViewTitle();applyDense(DENSE);cfgLoad();authInit();
 diffTick();setInterval(diffTick,60000);
-sentTick();setInterval(sentTick,15000);scoreTick();setInterval(scoreTick,60000);
+sentTick();setInterval(sentTick,15000);scoreTick();setInterval(scoreTick,60000);if(!LITE){teamLoad();setInterval(()=>{if(CURTAB==="team")teamLoad()},30000);if(VIEW==="repo"&&QS.get("repo"))repoHealthOpen(QS.get("repo"))}
 let rz;window.addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{if(DATA)render(DATA)},200)});
 tick();setInterval(tick,10000);
 /* ---------- the bar at the foot: the most important notice (all of them in a window), the connection, the allowance and the facts of this monitor ---------- */

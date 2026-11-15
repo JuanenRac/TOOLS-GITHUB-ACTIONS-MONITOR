@@ -45,6 +45,16 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - Le test d'un compte qui meurt aussitôt ne dépend plus de la vitesse de l'ordinateur : l'attente avant de relancer un compte est vérifiée avec une horloge que donne le test lui-même, et un second test vérifie le calendrier des attentes sans lire l'heure réelle (l'ancien échouait sous charge dans la porte d'une version).
 
+## [1.9.2]
+
+### Ajouté
+
+- **La santé de chaque dépôt et de l'équipe (Complete seulement)** : à partir de ce que le moniteur détient déjà (exécutions, workflows rouges et bloqués, alertes ouvertes des trois sentinelles et préparation des versions), on calcule un état par dépôt (mauvais, avertissement, bon ou non vu) et un nombre de risque ; un dépôt qu'aucune sentinelle n'a regardé ou qu'une n'a pas pu lire n'apparaît jamais comme bon et dit par qui il n'a pas été entièrement vu. `GET /api/repos/<owner>/<repo>/health` donne le détail et `GET /api/team/health` le classement, les totaux, les chiffres par écosystème et par sentinelle et les filtres (écosystème, gravité minimale, morceau du nom). Elles n'appellent jamais GitHub.
+
+- **L'onglet Équipe et le détail d'un dépôt** : le classement avec les dépôts qui demandent une personne en premier, trois filtres, et au clic sur un dépôt une fenêtre avec sa CI, ses alertes, la version et l'activité ; les liens directs `?view=team`, `?view=repos` et `?view=repo&repo=owner/name` (avec `chrome=0` pour les écrans muraux) ouvrent chaque vue. L'édition Lite ne l'a pas.
+
+- **La commande `team`** : `monitor_cli.py team` affiche le classement (`--severity warn|bad`) et `team --repo owner/name` le détail d'un dépôt, avec `--json` ; en lecture seule et depuis les mêmes routes que la page. Le guide HEALTH.md, dans les huit langues, explique tout.
+
 ## [1.9.1]
 
 ### Ajouté

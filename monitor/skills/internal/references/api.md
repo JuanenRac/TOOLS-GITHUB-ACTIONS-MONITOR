@@ -74,6 +74,7 @@ a call marked *this computer only* is refused when it comes from the network. Ev
 | `/api/quota-pool/status` | GET | viewer | every read source with its allowance, the sum, and what each way of reading less has spared (this computer only) |
 | `/api/refresh-repos` | POST | maintainer | read the list of repositories again |
 | `/api/reports` | GET | viewer | the four optional reports: workflow hygiene, wait for a runner, release ready or blocked, supply chain of the latest release (each on only when its setting is) |
+| `/api/repos` | GET | viewer | the prefix of `/api/repos/<owner>/<repo>/health`: the health of one repository (CI of the last 24 hours, open alerts of every sentinel, release readiness, activity, and which sentinels did not see it fully); 404 `repo_unknown` for a repository the monitor does not know (Complete only) |
 | `/api/run-log` | GET | admin | the failing step of one run and its last relevant lines, cleaned (`?repo=&run=`; off by default, `logs.failed_step.enabled`; administrators in the team mode) |
 | `/api/runners` | GET | viewer | self-hosted runners (opt-in) |
 | `/api/score` | GET | viewer | the score of the account: a number from 0 to 100, a letter from A to E and a trend, with its parts, its coverage, the quality of the data and a breakdown by repository (Complete only; null and a state instead of a number when there is not enough data) |
@@ -91,5 +92,7 @@ a call marked *this computer only* is refused when it comes from the network. Ev
 | `/api/skills` | GET | viewer | the two skills of the monitor (`?name=internal|external[&file=NAME]`) as text |
 | `/api/statusbar` | GET | viewer | the data of the status bar of the page |
 | `/api/tags` | GET | viewer | tags and releases of the repositories |
+| `/api/team` | GET | viewer | the prefix of the health views of the repositories and of the team (see /api/team/health); Complete only |
+| `/api/team/health` | GET | viewer | the health of the team: every repository ranked by risk with the ones that need a person first, the totals by state, the numbers by ecosystem and by sentinel; filters `?ecosystem=`, `?severity=warn|bad`, `?q=`, `?label=` (read only, from what the monitor holds; Complete only) |
 | `/api/webhook` | POST | public | the incoming webhook of GitHub (signed with HMAC) |
 | `/api/welcome` | GET,POST | viewer / maintainer | the first-run welcome flag |
