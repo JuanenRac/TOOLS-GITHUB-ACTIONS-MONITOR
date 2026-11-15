@@ -77,12 +77,13 @@ def run(storage, account_id, cfg, now=None):
     """One pass for one account with the settings `cfg` (from `settings`). Returns the audit line it wrote. A failure is recorded in the line (`error`) and never raised."""
     now = time.time() if now is None else now
     events_before, analytics_before = cutoffs(cfg, now)
-    line = {"at": _stamp(datetime.fromtimestamp(now, timezone.utc)), "mode": cfg["mode"], "events_removed": 0, "events_kept": 0, "archived": "", "analytics_removed": 0, "error": ""}
+    line = {"at": _stamp(datetime.fromtimestamp(now, timezone.utc)), "mode": cfg["mode"], "events_removed": 0, "events_kept": 0, "archived": "", "analytics_removed": 0, "scores_removed": 0, "error": ""}
     try:
         archive_dir = storage.archive_dir(account_id) if cfg["mode"] == "archive" else None
         result = storage.purge_events(account_id, events_before, archive_dir=archive_dir)
         line.update(events_removed=result["removed"], events_kept=result["kept"], archived=Path(result["archived"]).name if result["archived"] else "")
         line["analytics_removed"] = storage.purge_analytics(account_id, analytics_before)["removed"]
+        line["scores_removed"] = storage.purge_score_snapshots(account_id, analytics_before + "T00")["removed"]
     except Exception as error:      # noqa: BLE001 - a purge that cannot run is said in the audit; the monitor goes on
         line["error"] = f"{type(error).__name__}: {str(error)[:120]}"
     doc = audit(storage, account_id)

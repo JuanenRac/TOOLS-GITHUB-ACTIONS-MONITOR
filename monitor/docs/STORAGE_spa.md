@@ -55,7 +55,7 @@ Un monitor que funciona durante meses crecería sin techo, así que una pasada c
 |---|---|---|
 | `retention.enabled` | activado | el interruptor |
 | `retention.events_days` | 90 | se eliminan los eventos más antiguos que esto |
-| `retention.analytics_days` | 180 | se eliminan los días del histórico de analíticas más antiguos que esto |
+| `retention.analytics_days` | 180 | se eliminan los días del histórico de analíticas y las instantáneas de la puntuación más antiguos que esto |
 | `retention.mode` | `archive` | `archive` escribe antes los eventos antiguos en un `.gz` en `events/archive/` |
 | `retention.events_max_kb` | 512 | tope de tamaño del archivo del feed con el almacenamiento en archivos (como siempre) |
 | `retention.warn_events_mb` | 20 | `--doctor` avisa por encima de este tamaño |

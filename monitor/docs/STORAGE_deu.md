@@ -55,7 +55,7 @@ Ein monatelang laufender Monitor würde ohne Obergrenze wachsen, daher entfernt 
 |---|---|---|
 | `retention.enabled` | an | der Schalter |
 | `retention.events_days` | 90 | ältere Ereignisse werden entfernt |
-| `retention.analytics_days` | 180 | ältere Tage des Analyseverlaufs werden entfernt |
+| `retention.analytics_days` | 180 | ältere Tage des Analyseverlaufs und die Punktzahl-Momentaufnahmen dieser Tage werden entfernt |
 | `retention.mode` | `archive` | `archive` schreibt die alten Ereignisse zuerst in eine `.gz` in `events/archive/` |
 | `retention.events_max_kb` | 512 | Größenobergrenze der Feed-Datei beim Dateispeicher (wie immer) |
 | `retention.warn_events_mb` | 20 | `--doctor` warnt oberhalb dieser Größe |
