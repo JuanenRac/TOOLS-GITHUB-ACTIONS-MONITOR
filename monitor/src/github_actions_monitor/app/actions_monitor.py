@@ -143,11 +143,7 @@ def state_dir():
     """Where the small state files of this process live: the folder of the account when this is the monitor of one account, else next to the code, as always."""
     return Path(CHILD["folder"]) if CHILD["folder"] else paths.folder("data")
 LITE_SHARED = ("/api/ai/state", "/api/ai/stream", "/api/ai/brief", "/api/ai/alerts", "/api/ai/ack")      # the channels for an AI tool are the same in both editions
-<<<<<<< HEAD
-LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/notify", "/api/score", "/api/audit-log", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events")   # they do not exist in lite
-=======
-LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/notify", "/api/score", "/api/report-files", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events")   # they do not exist in lite
->>>>>>> origin/main
+LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/notify", "/api/score", "/api/report-files", "/api/audit-log", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events")   # they do not exist in lite
 
 
 LITE_INHERIT = ("github_owner", "ecosystems", "ecosystems_file", "targets_file", "profiles_file", "exclude", "repos", "language", "runs_per_repo", "cold_runs_per_repo", "hot_hours", "stuck_minutes", "refresh_seconds", "cold_refresh_seconds")   # what a first lite start copies from actions_monitor.json
@@ -1373,7 +1369,6 @@ def score_tick(config, data):
         degraded.note("score", error)
 
 
-<<<<<<< HEAD
 def audit_action(handler, action, target="", details=None, result="ok"):
     """One line in the log of actions (security/audit_log.py): who did what on this account. Never raises; a value of a setting never goes in, only the names."""
     try:
@@ -1382,7 +1377,6 @@ def audit_action(handler, action, target="", details=None, result="ok"):
         audit_log.record(toolconfig.raw_config(), action, context.get("user") or auth_http.acting_user(handler), context.get("role", ""), CHILD["account"] or "", target, result, details)
     except Exception as error:   # noqa: BLE001 - the log of actions never stops a request
         degraded.note("audit_log", error)
-=======
 def report_gather():
     """What a report is made of, read from what the monitor holds (never GitHub): the latest score snapshot, every open alert and the team ranking."""
     from github_actions_monitor.health import repo_view
@@ -1414,7 +1408,6 @@ def report_tick(config):
             report_service.tick(config, report_account(), report_gather)
     except Exception as error:   # noqa: BLE001
         degraded.note("reports", error)
->>>>>>> origin/main
 
 
 def health_views(now=None):
@@ -2482,7 +2475,6 @@ class Handler(BaseHTTPRequestHandler):
             storage, account = runtime.process_storage(CHILD["account"] or None)
             config = toolconfig.raw_config()
             self.json_reply(score_api.history(storage, account, config, ask) if path.endswith("/history") else score_api.latest(storage, account, config))
-<<<<<<< HEAD
         elif path == "/api/audit-log":      # the log of actions of this account: an administrator, or a maintainer when the setting says so (Complete only)
             if not self.guard():
                 return
@@ -2493,7 +2485,6 @@ class Handler(BaseHTTPRequestHandler):
                 self.json_reply({"error": "forbidden", "code": "forbidden_role"}, 403)
                 return
             self.json_reply({"schema": 1, "account": CHILD["account"] or "", "enabled": audit_log.settings(config)["enabled"], "chain": audit_log.verify(), "entries": audit_log.read(200)})
-=======
         elif path in ("/api/report-files", "/api/report-files/file"):      # the scheduled reports: the list and one file, read only, of the account of this process (Complete only)
             if not self.guard():
                 return
@@ -2518,7 +2509,6 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("X-Content-Type-Options", "nosniff")
             self.end_headers()
             self.wfile.write(body)
->>>>>>> origin/main
         elif path == "/api/analytics":
             if not self.guard():
                 return
