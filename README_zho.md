@@ -28,6 +28,41 @@
 
 **GitHub Actions Monitor** 是运行在你自己电脑上的小程序。它通过你自己的 `gh` 登录向 GitHub 查询仓库中每个工作流的最近运行，判断哪些真正是红的，提醒重要事项（安全、卫生、可发布的版本、配额），并把一切显示在只有你的机器能打开的网页上。它只需要 Python 和 `gh`，从不保存令牌，默认只读取。
 
+## 这是什么
+
+- **GitHub Actions 的看守**:使用您自己的 `gh` 登录,读取您所有仓库中每个工作流的最近运行,判断什么是红色、什么卡住了、什么在等您处理。
+- **三个从不写入 GitHub 的哨兵**:CI(运行和工作流)、Collab(需要人处理的 issue 和拉取请求)和 Security(Dependabot、代码扫描、密钥扫描、分支保护)把读到的内容变成同一份列表中的警报。
+- **一个页面,多种查看方式**:位于 `127.0.0.1` 的本地页面,从手机到 4K 墙面屏都能适配(最多同时三块屏幕),另有命令行客户端、终端视图、文件和供您自己仪表板使用的端点。
+- **两个版本**:Lite 面向一个人,只显示运行;Complete 增加多账户、带角色的团队、评分、每个仓库的健康状况、报告和 Docker 服务。
+- **从设计上保护隐私**:除了用您的登录对 GitHub 发出的调用,没有任何内容离开您的电脑;可选 AI 的密钥只留在环境变量中;只有您带明确的 `--go` 运行的批处理命令才会写入 GitHub。
+
+## 功能
+
+- **是否为红，只用一条规则**：默认分支上每个工作流最后一次已结束的运行。已取消或已跳过的运行不会掩盖之前的失败。
+- **哨兵**：安全警报、仓库卫生、陈旧的拉取请求、可发布的版本、等待签名的构建，以及通俗易懂的报告。
+- **Collab 哨兵与统一警报列表**：需要人来处理的未关闭 Issue 和拉取请求（被遗忘的、严重的、等待评审的、陈旧草稿、冲突），只读且按自己的周期运行；“警报”标签页把所有哨兵汇总成一个列表，可按来源筛选，并提供会自行结束的本地静音。
+- **状态栏、全屏与可排序的表格**：页面底部显示最重要的提示（以及显示全部提示的窗口）、连接、配额、最近一次读取、模式、地址和时钟；全屏按钮；“仓库”和“历史”可按一列或多列排序，并可自选列。
+- **作为客户端的命令行**：`bin/monitor_cli.py`（`status`、`health`、`alerts`、`accounts`、`live`、`doctor`、`score`）读取运行中监视器给出的信息，支持 `--json` 和稳定的退出码；从不向 GitHub 写入。
+- **两份面向 AI 的技能包**：简短的英文指南，分别给监视器内置的 AI(本地或来自提供商)和从外部与其交互的 AI(命令行、仅 HTTP 或文件、MCP、事件流)，由代码生成以确保没有遗漏；可用 `python bin/monitor_cli.py install-skill internal|external --dest 文件夹` 安装，或在设置的 AI 标签页中复制（`monitor/docs/SKILLS_zho.md`）。
+- **失败与经验**：本地的 CI 失败记录簿、把每个失败归入某个类别的规则、附带本可阻止该失败的防护的经验库（`monitor/docs/LESSONS_zho.md`）、24 小时和 7 天的趋势、`ai/LESSONS.md`、`/api/ai/lessons`，以及供任何 AI 工具使用的推送前简报；只读，不会有内容离开本机。
+- **各种屏幕尺寸与多块屏幕**：页面可适应从手机到 4K 的窗口，竖放或旋转均可，一台监视器最多可提供三块屏幕（`/screen/1` 到 `/screen/3`），每块都有自己的标签页和方向（`monitor/docs/SCREENS_zho.md`）。
+- **每个账户一个评分**：由 CI 的可靠性、速度、恢复时间以及协作告警被关闭的快慢得出的 0 到 100 的数值、A 到 E 的等级和趋势；无法支撑数值时显示“校准中”或“数据不足”，并说明尚未涵盖的内容，显示在页面页眉，有 `score` 命令，下降时会提醒，并出现在指标和 MCP 服务器中（`monitor/docs/SCORE.md`）。
+- **安全哨兵（仅 Complete，默认关闭）**：它不向 GitHub 写入任何内容，只读取 Dependabot、代码扫描和密钥扫描的未处理警报、默认分支是否受保护、工作流的默认权限，以及（如有需要）代码所有者；每个仓库和每种信号生成一条警报，把发现计入评分的第五部分，并说明哪些内容无法读取（`monitor/docs/SENTINEL_SECURITY_zho.md`）。
+- **每个仓库和团队的健康状况（仅 Complete）**：把 CI、三个哨兵的警报、发布就绪情况和活跃度汇总为一个状态（差、警告、正常或未查看）和一个风险值；团队标签页把最需要人处理的仓库排在前面，提供筛选、每个仓库的详情以及用于墙面屏幕的深度链接；同样的数据也可通过 `/api/team/health`、`/api/repos/<owner>/<repo>/health` 和 `team` 命令获得（`monitor/docs/HEALTH_zho.md`）。
+- **报告、操作日志和 Apprise（仅 Complete）**：按 cron 计划或按需生成账户报告（评分、变化、需要人处理的仓库、未处理的警报），格式为 HTML 和 Markdown，默认关闭（`monitor/docs/REPORT_SCHEDULE_zho.md`）；记录谁修改了什么的日志，带哈希链，不含任何值或机密（`monitor/docs/AUDIT_LOG_zho.md`）；以及可选的 Apprise 通知渠道，默认关闭。
+- **作为服务运行**：官方 Docker 镜像（非 root、只读）、带可选代理的 Compose 文件、systemd 单元、深度健康检查，以及创建第一个管理员的命令（`monitor/docs/DEPLOYMENT.md`）。
+- **多账户、团队和数据的存放位置**：每个账户一个进程，带角色和各自账户的用户，文件分放在 `config/`、`data/`、`logs/` 和 `ai/`，可选的 SQLite 存储及其保留与备份，端口成为设置项（`monitor/docs/ACCOUNTS.md`、`monitor/docs/STORAGE.md`、`monitor/docs/LAYOUT.md`）。
+- **可排序、可折叠的列表**：“正在发生”有七种排序方式，告警标签页有九种，并有折叠或展开所有仓库的按钮；该选择按用户记忆。
+- **每位用户的通知**：在团队模式下，每位用户在页面的面板中选择渠道（ntfy、Teams、电子邮件）、最低级别和汇总（`monitor/docs/NOTIFICATIONS_zho.md`）。
+- **设置页面**：在浏览器中修改路径、间隔、配额和开关；只有固定且经过验证的键，每次保存前都会备份。
+- **图表与历史**：计算分钟数、失败和成功，配有动画条形图和每日历史（尊重“减少动态效果”设置）。
+- **八种语言**（en、es、de、fr、it、ja、zh、pt），以英语为基础；在设置中切换。
+- **面向仪表板的输出**：`ci_red.json`、Prometheus 端点和 Grafana 用 JSON 数据源，并附带可导入的 Grafana 仪表板。
+- **批处理工具**：一次计划并触发多个构建；没有 `--go` 就不会触发任何东西。
+- **页面内的“关于”和“帮助”**：**i** 按钮显示版本、版本类型、链接、文件、运行状况和复制支持信息的按钮；**?** 按钮（或 `?` 键）可离线打开全部文档，支持搜索并使用你的语言。控制台提供 `--about` 和 `--help-topics`，以及分标签页的交互式终端应用（可选 `textual`）。
+- **新版本提示**：发布较新版本时显示低调的徽章；它每天只读取一次公开发布页，从不安装任何内容，可以关闭（隔离网络安装中始终关闭）。
+- **适用于任何账户的配额**：套餐、计费分钟数（公开仓库不计费）、从 GitHub 响应头读取的 API 配额、并发数，以及接近 6 小时上限的作业；数字保存在可编辑的文件中。
+
 ## 概览
 
 | | |
@@ -71,6 +106,46 @@
 | Linux 和 macOS | 🟠 | 仅在 CI 中测试;日常使用在 Windows 上。 |
 
 <!-- glance:end -->
+
+## 架构
+
+<p align="center"><img src="images/architecture.svg" alt="架构" width="100%"></p>
+
+## 从这里开始：选哪个版本？
+
+| 如果你想... | 启动 | 端口 |
+|---|---|---|
+| 只看什么在运行、什么失败了（**从这里开始**） | `MONITOR_LITE_GITHUB_ACTIONS` | 8766 |
+| 让整个账户被替你监视：警报、发布、签名、就绪度、分析 | `MONITOR_GITHUB_ACTIONS`（含[哨兵](monitor/docs/SENTINEL_zho.md)） | 8765 |
+
+控制台窗口的标题和第一行会说明正在运行哪一个。还拿不准？`python bin/actions_monitor.py --demo` 用虚构数据打开页面，`--doctor` 检查你的安装。[你的前五分钟](monitor/docs/FIRST_STEPS_zho.md)
+
+## 快速开始
+
+1. 安装 Python 3.11 或更新版本和 [GitHub CLI](https://cli.github.com/)，然后运行 `gh auth login`。
+2. 下载本仓库（或最新发布的 zip），打开 `monitor` 文件夹。
+3. 启动：Windows 运行 `MONITOR_GITHUB_ACTIONS.bat`，Linux 运行 `./MONITOR_GITHUB_ACTIONS.sh`，macOS 双击 `MONITOR_GITHUB_ACTIONS.command`，或在任何系统运行 `python bin/actions_monitor.py`。
+4. 打开它打印的地址（`http://127.0.0.1:<端口>`）。首次启动时会根据示例创建 `actions_monitor.json`。
+5. 打开 **设置**，填写你的 GitHub 账号、生态系统（按名称前缀分组的仓库）和其他内容。
+
+> 从 1.5.0 之前的版本更新？ [`monitor/docs/MIGRATING_zho.md`](monitor/docs/MIGRATING_zho.md)
+
+## lite 版
+
+同一软件包里的第二个、更简单的产品:显示正在运行和失败内容的页面,没有哨兵。适合只想看自己运行情况的人。
+
+|  | 完整版 | lite 版 |
+|---|---|---|
+| 启动 | `MONITOR_GITHUB_ACTIONS`(`.bat` / `.sh` / `.command`) | `MONITOR_LITE_GITHUB_ACTIONS`(同样三个) |
+| 端口 | 8765 | 8766 |
+| 标签页 | 现在、哨兵、图表、仓库、历史、设置 | 现在、图表、仓库、历史、简短设置 |
+| 页眉 | 所有磁贴、就绪、签名 | 运行中、排队、24 小时的失败与成功、计算分钟、issue、main 上的红色、仓库、配额、连接 |
+| 哨兵(警报、发布、签名队列、就绪、检查器) | 有 | 无:甚至不会被导入 |
+| 分析、通知、Webhook、AI、Prometheus / Grafana 输出 | 有,开启前默认关闭 | 无:这些路径返回 404 |
+| 配置 | `actions_monitor.json` | `actions_monitor_lite.json`(首次启动时创建;其中哨兵为关闭) |
+| 状态文件 | `etag_cache.json`、`analytics_history.json` 等 | 同名文件加后缀 `_lite` |
+
+[`monitor/docs/LITE_zho.md`](monitor/docs/LITE_zho.md)
 
 ## 截图
 
@@ -140,73 +215,6 @@
 
 *演示数据：图片中的仓库和名称均为虚构。*
 
-## 功能
-
-- **是否为红，只用一条规则**：默认分支上每个工作流最后一次已结束的运行。已取消或已跳过的运行不会掩盖之前的失败。
-- **哨兵**：安全警报、仓库卫生、陈旧的拉取请求、可发布的版本、等待签名的构建，以及通俗易懂的报告。
-- **Collab 哨兵与统一警报列表**：需要人来处理的未关闭 Issue 和拉取请求（被遗忘的、严重的、等待评审的、陈旧草稿、冲突），只读且按自己的周期运行；“警报”标签页把所有哨兵汇总成一个列表，可按来源筛选，并提供会自行结束的本地静音。
-- **状态栏、全屏与可排序的表格**：页面底部显示最重要的提示（以及显示全部提示的窗口）、连接、配额、最近一次读取、模式、地址和时钟；全屏按钮；“仓库”和“历史”可按一列或多列排序，并可自选列。
-- **作为客户端的命令行**：`bin/monitor_cli.py`（`status`、`health`、`alerts`、`accounts`、`live`、`doctor`、`score`）读取运行中监视器给出的信息，支持 `--json` 和稳定的退出码；从不向 GitHub 写入。
-- **两份面向 AI 的技能包**：简短的英文指南，分别给监视器内置的 AI(本地或来自提供商)和从外部与其交互的 AI(命令行、仅 HTTP 或文件、MCP、事件流)，由代码生成以确保没有遗漏；可用 `python bin/monitor_cli.py install-skill internal|external --dest 文件夹` 安装，或在设置的 AI 标签页中复制（`monitor/docs/SKILLS_zho.md`）。
-- **失败与经验**：本地的 CI 失败记录簿、把每个失败归入某个类别的规则、附带本可阻止该失败的防护的经验库（`monitor/docs/LESSONS_zho.md`）、24 小时和 7 天的趋势、`ai/LESSONS.md`、`/api/ai/lessons`，以及供任何 AI 工具使用的推送前简报；只读，不会有内容离开本机。
-- **各种屏幕尺寸与多块屏幕**：页面可适应从手机到 4K 的窗口，竖放或旋转均可，一台监视器最多可提供三块屏幕（`/screen/1` 到 `/screen/3`），每块都有自己的标签页和方向（`monitor/docs/SCREENS_zho.md`）。
-- **每个账户一个评分**：由 CI 的可靠性、速度、恢复时间以及协作告警被关闭的快慢得出的 0 到 100 的数值、A 到 E 的等级和趋势；无法支撑数值时显示“校准中”或“数据不足”，并说明尚未涵盖的内容，显示在页面页眉，有 `score` 命令，下降时会提醒，并出现在指标和 MCP 服务器中（`monitor/docs/SCORE.md`）。
-- **安全哨兵（仅 Complete，默认关闭）**：它不向 GitHub 写入任何内容，只读取 Dependabot、代码扫描和密钥扫描的未处理警报、默认分支是否受保护、工作流的默认权限，以及（如有需要）代码所有者；每个仓库和每种信号生成一条警报，把发现计入评分的第五部分，并说明哪些内容无法读取（`monitor/docs/SENTINEL_SECURITY_zho.md`）。
-- **每个仓库和团队的健康状况（仅 Complete）**：把 CI、三个哨兵的警报、发布就绪情况和活跃度汇总为一个状态（差、警告、正常或未查看）和一个风险值；团队标签页把最需要人处理的仓库排在前面，提供筛选、每个仓库的详情以及用于墙面屏幕的深度链接；同样的数据也可通过 `/api/team/health`、`/api/repos/<owner>/<repo>/health` 和 `team` 命令获得（`monitor/docs/HEALTH_zho.md`）。
-- **报告、操作日志和 Apprise（仅 Complete）**：按 cron 计划或按需生成账户报告（评分、变化、需要人处理的仓库、未处理的警报），格式为 HTML 和 Markdown，默认关闭（`monitor/docs/REPORT_SCHEDULE_zho.md`）；记录谁修改了什么的日志，带哈希链，不含任何值或机密（`monitor/docs/AUDIT_LOG_zho.md`）；以及可选的 Apprise 通知渠道，默认关闭。
-- **作为服务运行**：官方 Docker 镜像（非 root、只读）、带可选代理的 Compose 文件、systemd 单元、深度健康检查，以及创建第一个管理员的命令（`monitor/docs/DEPLOYMENT.md`）。
-- **多账户、团队和数据的存放位置**：每个账户一个进程，带角色和各自账户的用户，文件分放在 `config/`、`data/`、`logs/` 和 `ai/`，可选的 SQLite 存储及其保留与备份，端口成为设置项（`monitor/docs/ACCOUNTS.md`、`monitor/docs/STORAGE.md`、`monitor/docs/LAYOUT.md`）。
-- **可排序、可折叠的列表**：“正在发生”有七种排序方式，告警标签页有九种，并有折叠或展开所有仓库的按钮；该选择按用户记忆。
-- **每位用户的通知**：在团队模式下，每位用户在页面的面板中选择渠道（ntfy、Teams、电子邮件）、最低级别和汇总（`monitor/docs/NOTIFICATIONS_zho.md`）。
-- **设置页面**：在浏览器中修改路径、间隔、配额和开关；只有固定且经过验证的键，每次保存前都会备份。
-- **图表与历史**：计算分钟数、失败和成功，配有动画条形图和每日历史（尊重“减少动态效果”设置）。
-- **八种语言**（en、es、de、fr、it、ja、zh、pt），以英语为基础；在设置中切换。
-- **面向仪表板的输出**：`ci_red.json`、Prometheus 端点和 Grafana 用 JSON 数据源，并附带可导入的 Grafana 仪表板。
-- **批处理工具**：一次计划并触发多个构建；没有 `--go` 就不会触发任何东西。
-- **页面内的“关于”和“帮助”**：**i** 按钮显示版本、版本类型、链接、文件、运行状况和复制支持信息的按钮；**?** 按钮（或 `?` 键）可离线打开全部文档，支持搜索并使用你的语言。控制台提供 `--about` 和 `--help-topics`，以及分标签页的交互式终端应用（可选 `textual`）。
-- **新版本提示**：发布较新版本时显示低调的徽章；它每天只读取一次公开发布页，从不安装任何内容，可以关闭（隔离网络安装中始终关闭）。
-- **适用于任何账户的配额**：套餐、计费分钟数（公开仓库不计费）、从 GitHub 响应头读取的 API 配额、并发数，以及接近 6 小时上限的作业；数字保存在可编辑的文件中。
-
-## 架构
-
-<p align="center"><img src="images/architecture.svg" alt="架构" width="100%"></p>
-
-## 从这里开始：选哪个版本？
-
-| 如果你想... | 启动 | 端口 |
-|---|---|---|
-| 只看什么在运行、什么失败了（**从这里开始**） | `MONITOR_LITE_GITHUB_ACTIONS` | 8766 |
-| 让整个账户被替你监视：警报、发布、签名、就绪度、分析 | `MONITOR_GITHUB_ACTIONS`（含[哨兵](monitor/docs/SENTINEL_zho.md)） | 8765 |
-
-控制台窗口的标题和第一行会说明正在运行哪一个。还拿不准？`python bin/actions_monitor.py --demo` 用虚构数据打开页面，`--doctor` 检查你的安装。[你的前五分钟](monitor/docs/FIRST_STEPS_zho.md)
-
-## 快速开始
-
-1. 安装 Python 3.11 或更新版本和 [GitHub CLI](https://cli.github.com/)，然后运行 `gh auth login`。
-2. 下载本仓库（或最新发布的 zip），打开 `monitor` 文件夹。
-3. 启动：Windows 运行 `MONITOR_GITHUB_ACTIONS.bat`，Linux 运行 `./MONITOR_GITHUB_ACTIONS.sh`，macOS 双击 `MONITOR_GITHUB_ACTIONS.command`，或在任何系统运行 `python bin/actions_monitor.py`。
-4. 打开它打印的地址（`http://127.0.0.1:<端口>`）。首次启动时会根据示例创建 `actions_monitor.json`。
-5. 打开 **设置**，填写你的 GitHub 账号、生态系统（按名称前缀分组的仓库）和其他内容。
-
-> 从 1.5.0 之前的版本更新？ [`monitor/docs/MIGRATING_zho.md`](monitor/docs/MIGRATING_zho.md)
-
-## lite 版
-
-同一软件包里的第二个、更简单的产品:显示正在运行和失败内容的页面,没有哨兵。适合只想看自己运行情况的人。
-
-|  | 完整版 | lite 版 |
-|---|---|---|
-| 启动 | `MONITOR_GITHUB_ACTIONS`(`.bat` / `.sh` / `.command`) | `MONITOR_LITE_GITHUB_ACTIONS`(同样三个) |
-| 端口 | 8765 | 8766 |
-| 标签页 | 现在、哨兵、图表、仓库、历史、设置 | 现在、图表、仓库、历史、简短设置 |
-| 页眉 | 所有磁贴、就绪、签名 | 运行中、排队、24 小时的失败与成功、计算分钟、issue、main 上的红色、仓库、配额、连接 |
-| 哨兵(警报、发布、签名队列、就绪、检查器) | 有 | 无:甚至不会被导入 |
-| 分析、通知、Webhook、AI、Prometheus / Grafana 输出 | 有,开启前默认关闭 | 无:这些路径返回 404 |
-| 配置 | `actions_monitor.json` | `actions_monitor_lite.json`(首次启动时创建;其中哨兵为关闭) |
-| 状态文件 | `etag_cache.json`、`analytics_history.json` 等 | 同名文件加后缀 `_lite` |
-
-[`monitor/docs/LITE_zho.md`](monitor/docs/LITE_zho.md)
-
 ## 设置
 
 一切都在 `actions_monitor.json` 中（由 `monitor/assets/examples/actions_monitor.example.json` 创建）。**设置** 标签页可安全地编辑它；令牌和机密绝不会显示或保存。生态系统、构建目标和批处理配置是你指定的独立文件（`ecosystems_file`、`targets_file`、`profiles_file`）；附带中性的 `*.example.json` 模板。完整参考：[`monitor/docs/SETTINGS_zho.md`](monitor/docs/SETTINGS_zho.md)。
@@ -261,6 +269,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
     ├── bin/                            简短命令(read_report、monitor_cli 等)
     ├── tests/                          离线测试
     ├── docs/                           指南、快速入门、模式、Grafana
+    ├── skills/                         面向 AI 的两份技能包
     └── tools/                          发布与迁移脚本
 ```
 

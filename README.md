@@ -28,6 +28,41 @@
 
 **GitHub Actions Monitor** is a small program that runs on your own computer. It asks GitHub, through your own `gh` login, for the latest runs of every workflow of your repositories, decides what is really red, raises alerts (security, hygiene, releases that are ready, quota) and shows everything on a web page that only your machine can open. It has no dependencies beyond Python and `gh`, it never stores a token and, by default, it only reads.
 
+## What it is
+
+- **A watcher for your GitHub Actions**: with your own `gh` login it reads the latest runs of every workflow of every repository you own and decides what is red, what is stuck and what is waiting for you.
+- **Three sentinels that never write to GitHub**: CI (runs and workflows), Collab (issues and pull requests that need a person) and Security (Dependabot, code scanning, secret scanning, branch protection) turn what they read into alerts in one list.
+- **One page, several ways to look at it**: a local page on `127.0.0.1` that fits from a phone to a 4K wall screen (up to three screens at once), a command line client, a view in the terminal, files and an endpoint for your own dashboards.
+- **Two editions**: Lite is for one person and only shows the runs; Complete adds several accounts, a team with roles, a score, the health of each repository, reports and a service for Docker.
+- **Private by design**: nothing leaves your computer except the calls to GitHub made with your login; the key of an optional AI stays in an environment variable; writing to GitHub happens only with batch commands you run with an explicit `--go`.
+
+## What it does
+
+- **Red or not, by one rule**: the last finished run of each workflow on the default branch. Cancelled and skipped runs never hide an earlier failure.
+- **Sentinel**: security alerts, repository hygiene, stale pull requests, releases that are ready to cut, builds waiting to be signed, and a plain-language report.
+- **Collab sentinel and one list of alerts**: open issues and pull requests that need a person (forgotten, critical, reviews waiting, old drafts, conflicts), read only and on a clock of its own, and an Alerts tab with every sentinel in one list, a filter by origin and local silences that end by themselves.
+- **A status bar, full screen and tables you can sort**: the most important notice (and a window with all of them), the connection, the allowance, the last read, the mode, the address and the clock at the foot of the page; a full screen button; Repositories and History sort by one or several columns, with the columns you choose.
+- **The command line as a client**: `bin/monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`, `score`) reads what the running monitor says, with `--json` and stable exit codes; it never writes to GitHub.
+- **Two skills for AIs**: short guides, in English, for the AI built into the monitor (local or from a provider) and for the AIs that talk to it from outside (command line, plain HTTP or files, MCP, stream), generated from the code so that nothing is left out; installed with `python bin/monitor_cli.py install-skill internal|external --dest FOLDER` or copied from the AI tab of the Settings (`monitor/docs/SKILLS.md`).
+- **Failures and lessons**: a local book of the failures of your CI, rules that file each one under a category, a library of lessons (`monitor/docs/LESSONS.md`) with the guard that would have stopped it, the trend over 24 hours and 7 days, `ai/LESSONS.md`, `/api/ai/lessons` and a brief before a push for any AI tool; read only, nothing leaves the computer.
+- **Every screen size and several screens**: the page fits a window from a phone to 4K, upright or turned, and one monitor can serve up to three screens (`/screen/1` to `/screen/3`), each with its own tabs and orientation (`monitor/docs/SCREENS.md`).
+- **A score for each account**: a number from 0 to 100, a letter from A to E and a trend, from the reliability of the CI, its speed, the time to recover and how fast the collaboration alerts are closed; it says "calibrating" or "not enough data" instead of a number it cannot stand behind, shows what it does not cover yet, sits in the header of the page, has a `score` command, warns when it drops and is in the metrics and the MCP server (`monitor/docs/SCORE.md`).
+- **A security sentinel (Complete only, off by default)**: it reads, without writing anything to GitHub, the open Dependabot, code scanning and secret scanning alerts, whether the default branch is protected, the default permission of the workflows and, if you ask, the code owners; it raises one alert for each repository and signal, counts the findings as the fifth part of the score and says what it could not read (`monitor/docs/SENTINEL_SECURITY.md`).
+- **The health of each repository and of the team (Complete only)**: CI, alerts of the three sentinels, release readiness and activity in one state (bad, warning, OK or not seen) with a risk number; the Team tab ranks the repositories that need a person first, with filters, a detail for each one and deep links for wall screens; the same data are at `/api/team/health`, `/api/repos/<owner>/<repo>/health` and the `team` command (`monitor/docs/HEALTH.md`).
+- **Reports, a log of actions and Apprise (Complete only)**: a report of the account (score, what changed, repositories that need a person, open alerts) written as HTML and Markdown on a cron schedule or on demand, off by default (`monitor/docs/REPORT_SCHEDULE.md`); a log of who changed what, with a chain of hashes and no value or secret in it (`monitor/docs/AUDIT_LOG.md`); and an optional Apprise channel for notifications, off by default.
+- **As a service**: the official Docker image (non-root, read-only), a Compose file with an optional proxy, a systemd unit, a deep health check and the command that creates the first administrator (`monitor/docs/DEPLOYMENT.md`).
+- **Several accounts, a team and a place for the data**: one process per account, users with roles and their own accounts, the files in `config/`, `data/`, `logs/` and `ai/`, an optional SQLite storage with retention and backup, and the ports as settings (`monitor/docs/ACCOUNTS.md`, `monitor/docs/STORAGE.md`, `monitor/docs/LAYOUT.md`).
+- **Lists you can sort and fold**: Happening now in seven ways and the Alerts tab in nine, with a button to fold or unfold every repository; the choice is remembered for each user.
+- **Notifications for each user**: in the team mode every user chooses channels (ntfy, Teams, e-mail), the lowest level and digests in a panel of the page (`monitor/docs/NOTIFICATIONS.md`).
+- **Settings page**: change paths, intervals, quotas and switches from the browser; only a fixed list of keys, validated, with a backup before every save.
+- **Charts and history**: compute minutes, failures and successes with animated bars and a daily history (it respects reduced motion).
+- **Eight languages** (en, es, de, fr, it, ja, zh, pt) with English as the base; switch in Settings.
+- **Outputs for dashboards**: `ci_red.json`, a Prometheus endpoint and a JSON source for Grafana, with an importable Grafana dashboard.
+- **Batch tools**: plan and dispatch many builds at once; nothing is fired without `--go`.
+- **About and Help in the page**: the **i** button shows the version, the edition, the links, the files, the health and a button that copies the information for support; the **?** button (or the key `?`) opens the whole documentation, searchable and in your language, with no Internet. The console has `--about` and `--help-topics`, and a tab-by-tab interactive terminal application (optional `textual`).
+- **Notice of a newer version**: a discreet badge when a newer release is published; it only reads the public releases page once a day, never installs anything and can be switched off (always off when air-gapped).
+- **Quotas for every account**: plan, billable minutes (public repositories cost none), allowance of the API read from GitHub's headers, concurrency and jobs near the 6-hour limit; the figures are in an editable file.
+
 ## At a glance
 
 | | |
@@ -71,6 +106,46 @@ Each line is one part of this repository and the light says how far it is today:
 | Linux and macOS | 🟠 | Tested in the CI only; the daily use is on Windows. |
 
 <!-- glance:end -->
+
+## Architecture
+
+<p align="center"><img src="images/architecture.svg" alt="Architecture" width="100%"></p>
+
+## Start here: which edition?
+
+| If you want... | Start | Port |
+|---|---|---|
+| to watch what runs and what failed, nothing more (**start here**) | `MONITOR_LITE_GITHUB_ACTIONS` | 8766 |
+| the whole account watched for you: alerts, releases, signing, readiness, analytics | `MONITOR_GITHUB_ACTIONS` (with the [sentinel](monitor/docs/SENTINEL.md)) | 8765 |
+
+The console window says which one is running, in its title and in its first line. Not sure yet? `python bin/actions_monitor.py --demo` opens the page with invented data, and `--doctor` checks your installation. [Your first five minutes](monitor/docs/FIRST_STEPS.md)
+
+## Quick start
+
+1. Install Python 3.11 or newer and the [GitHub CLI](https://cli.github.com/), then run `gh auth login`.
+2. Download this repository (or the zip of the latest release) and open the `monitor` folder.
+3. Start it: Windows `MONITOR_GITHUB_ACTIONS.bat`, Linux `./MONITOR_GITHUB_ACTIONS.sh`, macOS double-click `MONITOR_GITHUB_ACTIONS.command`, or `python bin/actions_monitor.py` anywhere.
+4. Open the address it prints (`http://127.0.0.1:<port>`). On first start it creates `actions_monitor.json` from the example.
+5. Open **Settings** to set your GitHub account, the ecosystems (groups of repositories by name prefix) and anything else.
+
+> Updating from a version before 1.5.0? [`monitor/docs/MIGRATING.md`](monitor/docs/MIGRATING.md)
+
+## The lite edition
+
+A second, simpler product in the same package: the page of what is running and what failed, without the sentinel. It is for people who only want to watch their runs.
+
+|  | Complete | Lite |
+|---|---|---|
+| Start | `MONITOR_GITHUB_ACTIONS` (`.bat` / `.sh` / `.command`) | `MONITOR_LITE_GITHUB_ACTIONS` (same three) |
+| Port | 8765 | 8766 |
+| Tabs | Now, Sentinel, Charts, Repositories, History, Settings | Now, Charts, Repositories, History, a short Settings |
+| Header | all the tiles, readiness, signing | running, queued, failures and successes of 24 h, compute minutes, issues, red on main, repositories, allowance, connection |
+| Sentinel (alerts, releases, signing queue, readiness, linter) | yes | no: it is not even imported |
+| Analytics, notifications, webhook, AI, Prometheus / Grafana outputs | yes, off until you switch them on | no: those paths answer 404 |
+| Configuration | `actions_monitor.json` | `actions_monitor_lite.json` (created on the first start; the sentinel is off in it) |
+| State files | `etag_cache.json`, `analytics_history.json`... | the same names with the suffix `_lite` |
+
+[`monitor/docs/LITE.md`](monitor/docs/LITE.md)
 
 ## Screenshots
 
@@ -140,73 +215,6 @@ Each picture follows the light or dark theme of your GitHub page.
 
 *Demo data: the repositories and names in the pictures are invented.*
 
-## What it does
-
-- **Red or not, by one rule**: the last finished run of each workflow on the default branch. Cancelled and skipped runs never hide an earlier failure.
-- **Sentinel**: security alerts, repository hygiene, stale pull requests, releases that are ready to cut, builds waiting to be signed, and a plain-language report.
-- **Collab sentinel and one list of alerts**: open issues and pull requests that need a person (forgotten, critical, reviews waiting, old drafts, conflicts), read only and on a clock of its own, and an Alerts tab with every sentinel in one list, a filter by origin and local silences that end by themselves.
-- **A status bar, full screen and tables you can sort**: the most important notice (and a window with all of them), the connection, the allowance, the last read, the mode, the address and the clock at the foot of the page; a full screen button; Repositories and History sort by one or several columns, with the columns you choose.
-- **The command line as a client**: `bin/monitor_cli.py` (`status`, `health`, `alerts`, `accounts`, `live`, `doctor`, `score`) reads what the running monitor says, with `--json` and stable exit codes; it never writes to GitHub.
-- **Two skills for AIs**: short guides, in English, for the AI built into the monitor (local or from a provider) and for the AIs that talk to it from outside (command line, plain HTTP or files, MCP, stream), generated from the code so that nothing is left out; installed with `python bin/monitor_cli.py install-skill internal|external --dest FOLDER` or copied from the AI tab of the Settings (`monitor/docs/SKILLS.md`).
-- **Failures and lessons**: a local book of the failures of your CI, rules that file each one under a category, a library of lessons (`monitor/docs/LESSONS.md`) with the guard that would have stopped it, the trend over 24 hours and 7 days, `ai/LESSONS.md`, `/api/ai/lessons` and a brief before a push for any AI tool; read only, nothing leaves the computer.
-- **Every screen size and several screens**: the page fits a window from a phone to 4K, upright or turned, and one monitor can serve up to three screens (`/screen/1` to `/screen/3`), each with its own tabs and orientation (`monitor/docs/SCREENS.md`).
-- **A score for each account**: a number from 0 to 100, a letter from A to E and a trend, from the reliability of the CI, its speed, the time to recover and how fast the collaboration alerts are closed; it says "calibrating" or "not enough data" instead of a number it cannot stand behind, shows what it does not cover yet, sits in the header of the page, has a `score` command, warns when it drops and is in the metrics and the MCP server (`monitor/docs/SCORE.md`).
-- **A security sentinel (Complete only, off by default)**: it reads, without writing anything to GitHub, the open Dependabot, code scanning and secret scanning alerts, whether the default branch is protected, the default permission of the workflows and, if you ask, the code owners; it raises one alert for each repository and signal, counts the findings as the fifth part of the score and says what it could not read (`monitor/docs/SENTINEL_SECURITY.md`).
-- **The health of each repository and of the team (Complete only)**: CI, alerts of the three sentinels, release readiness and activity in one state (bad, warning, OK or not seen) with a risk number; the Team tab ranks the repositories that need a person first, with filters, a detail for each one and deep links for wall screens; the same data are at `/api/team/health`, `/api/repos/<owner>/<repo>/health` and the `team` command (`monitor/docs/HEALTH.md`).
-- **Reports, a log of actions and Apprise (Complete only)**: a report of the account (score, what changed, repositories that need a person, open alerts) written as HTML and Markdown on a cron schedule or on demand, off by default (`monitor/docs/REPORT_SCHEDULE.md`); a log of who changed what, with a chain of hashes and no value or secret in it (`monitor/docs/AUDIT_LOG.md`); and an optional Apprise channel for notifications, off by default.
-- **As a service**: the official Docker image (non-root, read-only), a Compose file with an optional proxy, a systemd unit, a deep health check and the command that creates the first administrator (`monitor/docs/DEPLOYMENT.md`).
-- **Several accounts, a team and a place for the data**: one process per account, users with roles and their own accounts, the files in `config/`, `data/`, `logs/` and `ai/`, an optional SQLite storage with retention and backup, and the ports as settings (`monitor/docs/ACCOUNTS.md`, `monitor/docs/STORAGE.md`, `monitor/docs/LAYOUT.md`).
-- **Lists you can sort and fold**: Happening now in seven ways and the Alerts tab in nine, with a button to fold or unfold every repository; the choice is remembered for each user.
-- **Notifications for each user**: in the team mode every user chooses channels (ntfy, Teams, e-mail), the lowest level and digests in a panel of the page (`monitor/docs/NOTIFICATIONS.md`).
-- **Settings page**: change paths, intervals, quotas and switches from the browser; only a fixed list of keys, validated, with a backup before every save.
-- **Charts and history**: compute minutes, failures and successes with animated bars and a daily history (it respects reduced motion).
-- **Eight languages** (en, es, de, fr, it, ja, zh, pt) with English as the base; switch in Settings.
-- **Outputs for dashboards**: `ci_red.json`, a Prometheus endpoint and a JSON source for Grafana, with an importable Grafana dashboard.
-- **Batch tools**: plan and dispatch many builds at once; nothing is fired without `--go`.
-- **About and Help in the page**: the **i** button shows the version, the edition, the links, the files, the health and a button that copies the information for support; the **?** button (or the key `?`) opens the whole documentation, searchable and in your language, with no Internet. The console has `--about` and `--help-topics`, and a tab-by-tab interactive terminal application (optional `textual`).
-- **Notice of a newer version**: a discreet badge when a newer release is published; it only reads the public releases page once a day, never installs anything and can be switched off (always off when air-gapped).
-- **Quotas for every account**: plan, billable minutes (public repositories cost none), allowance of the API read from GitHub's headers, concurrency and jobs near the 6-hour limit; the figures are in an editable file.
-
-## Architecture
-
-<p align="center"><img src="images/architecture.svg" alt="Architecture" width="100%"></p>
-
-## Start here: which edition?
-
-| If you want... | Start | Port |
-|---|---|---|
-| to watch what runs and what failed, nothing more (**start here**) | `MONITOR_LITE_GITHUB_ACTIONS` | 8766 |
-| the whole account watched for you: alerts, releases, signing, readiness, analytics | `MONITOR_GITHUB_ACTIONS` (with the [sentinel](monitor/docs/SENTINEL.md)) | 8765 |
-
-The console window says which one is running, in its title and in its first line. Not sure yet? `python bin/actions_monitor.py --demo` opens the page with invented data, and `--doctor` checks your installation. [Your first five minutes](monitor/docs/FIRST_STEPS.md)
-
-## Quick start
-
-1. Install Python 3.11 or newer and the [GitHub CLI](https://cli.github.com/), then run `gh auth login`.
-2. Download this repository (or the zip of the latest release) and open the `monitor` folder.
-3. Start it: Windows `MONITOR_GITHUB_ACTIONS.bat`, Linux `./MONITOR_GITHUB_ACTIONS.sh`, macOS double-click `MONITOR_GITHUB_ACTIONS.command`, or `python bin/actions_monitor.py` anywhere.
-4. Open the address it prints (`http://127.0.0.1:<port>`). On first start it creates `actions_monitor.json` from the example.
-5. Open **Settings** to set your GitHub account, the ecosystems (groups of repositories by name prefix) and anything else.
-
-> Updating from a version before 1.5.0? [`monitor/docs/MIGRATING.md`](monitor/docs/MIGRATING.md)
-
-## The lite edition
-
-A second, simpler product in the same package: the page of what is running and what failed, without the sentinel. It is for people who only want to watch their runs.
-
-|  | Complete | Lite |
-|---|---|---|
-| Start | `MONITOR_GITHUB_ACTIONS` (`.bat` / `.sh` / `.command`) | `MONITOR_LITE_GITHUB_ACTIONS` (same three) |
-| Port | 8765 | 8766 |
-| Tabs | Now, Sentinel, Charts, Repositories, History, Settings | Now, Charts, Repositories, History, a short Settings |
-| Header | all the tiles, readiness, signing | running, queued, failures and successes of 24 h, compute minutes, issues, red on main, repositories, allowance, connection |
-| Sentinel (alerts, releases, signing queue, readiness, linter) | yes | no: it is not even imported |
-| Analytics, notifications, webhook, AI, Prometheus / Grafana outputs | yes, off until you switch them on | no: those paths answer 404 |
-| Configuration | `actions_monitor.json` | `actions_monitor_lite.json` (created on the first start; the sentinel is off in it) |
-| State files | `etag_cache.json`, `analytics_history.json`... | the same names with the suffix `_lite` |
-
-[`monitor/docs/LITE.md`](monitor/docs/LITE.md)
-
 ## Settings
 
 Everything lives in `actions_monitor.json` (created from `monitor/assets/examples/actions_monitor.example.json`). The **Settings** tab edits it safely; tokens and secrets are never shown or saved. Ecosystems, build targets and batch profiles are separate files you point to (`ecosystems_file`, `targets_file`, `profiles_file`); neutral `*.example.json` templates are included. Full reference: [`monitor/docs/SETTINGS.md`](monitor/docs/SETTINGS.md).
@@ -261,6 +269,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
     ├── bin/                            the short commands (read_report, monitor_cli ...)
     ├── tests/                          offline tests
     ├── docs/                           guides, quickstarts, schemas, Grafana
+    ├── skills/                         the two skills for AIs
     └── tools/                          release and migration scripts
 ```
 

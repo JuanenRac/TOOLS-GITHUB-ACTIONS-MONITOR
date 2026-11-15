@@ -2,7 +2,7 @@
   "repo": "TOOLS-GITHUB-ACTIONS-MONITOR",
   "ecosystem": "monitor",
   "tagline": "Two editions of one local monitor: the lite one shows what runs and what failed, the complete one adds sentinels, alerts and accounts.",
-  "description": "GitHub Actions Monitor is a local program with two editions that share one core. The complete edition (port 8765) adds the sentinels (CI with its checks A1 to A13, and Collab for issues and pull requests), one list of alerts with local silences, several accounts, analytics, the workflow linter, notifications and an optional AI assistant. The lite edition (port 8766) has no sentinel and its own configuration and state files. Both read GitHub through your own gh login with conditional reads, apply one rule for red on main, know the quotas of your plan and answer the web panel, the console and the interactive terminal on 127.0.0.1 only. Outputs are ci_red.json, Prometheus metrics, JSON for Grafana, a health check, notifications and an optional dashboard notice. Nothing is written to GitHub unless you confirm it.",
+  "description": "GitHub Actions Monitor is a local program with two editions that share one core. The complete edition (port 8765) adds the sentinels (CI with its checks A1 to A13, Collab for issues and pull requests, and Security for Dependabot, code scanning, secret scanning and branch rules), one list of alerts with local silences, a score and a health view of each repository and of the team, scheduled reports, a log of actions, several accounts, analytics, the workflow linter, notifications (Apprise included) and an optional AI assistant with presets of compatible services. The lite edition (port 8766) has no sentinel and its own configuration and state files. Both read GitHub through your own gh login with conditional reads, apply one rule for red on main, know the quotas of your plan and answer the web panel, the console and the interactive terminal on 127.0.0.1 only. Outputs are ci_red.json, Prometheus metrics, JSON for Grafana, a health check, notifications and an optional dashboard notice. Nothing is written to GitHub unless you confirm it.",
   "columns": [
     "INTERFACES",
     "THE MONITOR",
@@ -82,9 +82,9 @@
       "level": "tested",
       "title": "Complete, port 8765",
       "lines": [
-        "analytics, linter, reports,",
-        "signing queue and the tab",
-        "of alerts; its own config"
+        "analytics, linter, score, team",
+        "health, reports, signing queue",
+        "and the tab of alerts"
       ],
       "code": [
         "monitor/src/github_actions_monitor/app/surface.py",
@@ -117,11 +117,11 @@
       "id": "sentinels",
       "column": 1,
       "level": "tested",
-      "title": "Sentinels CI and Collab",
+      "title": "Three sentinels",
       "lines": [
-        "CI checks A1-A13 and Collab",
-        "(issues, pull requests); one",
-        "contract, a clock each"
+        "CI checks A1-A13, Collab and",
+        "Security (Dependabot, scanning,",
+        "branch rules); one contract"
       ],
       "code": [
         "monitor/src/github_actions_monitor/sentinels/sentinel_base.py",
@@ -184,9 +184,9 @@
       "level": "config",
       "title": "Notices and AI assistant",
       "lines": [
-        "chat, MQTT, a local HTTP address,",
-        "a dashboard notice; optional AI:",
-        "ollama, anthropic, copilot"
+        "chat, MQTT, Apprise, a local HTTP",
+        "address; optional AI with presets",
+        "for 12 services and 6 local ones"
       ],
       "code": [
         "monitor/src/github_actions_monitor/integrations/notifiers.py",
