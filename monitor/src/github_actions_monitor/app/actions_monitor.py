@@ -143,7 +143,7 @@ def state_dir():
     """Where the small state files of this process live: the folder of the account when this is the monitor of one account, else next to the code, as always."""
     return Path(CHILD["folder"]) if CHILD["folder"] else paths.folder("data")
 LITE_SHARED = ("/api/ai/state", "/api/ai/stream", "/api/ai/brief", "/api/ai/alerts", "/api/ai/ack")      # the channels for an AI tool are the same in both editions
-LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/notify", "/api/score", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events")   # they do not exist in lite
+LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/notify", "/api/score", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events")   # they do not exist in lite
 
 
 LITE_INHERIT = ("github_owner", "ecosystems", "ecosystems_file", "targets_file", "profiles_file", "exclude", "repos", "language", "runs_per_repo", "cold_runs_per_repo", "hot_hours", "stuck_minutes", "refresh_seconds", "cold_refresh_seconds")   # what a first lite start copies from actions_monitor.json
@@ -1356,6 +1356,46 @@ def score_tick(config, data):
         degraded.note("score", error)
 
 
+def health_views(now=None):
+    """The health of every repository the monitor watches, from what it already holds (runs, red and stuck, the alerts of every sentinel, the readiness of the releases). Never calls GitHub."""
+    from github_actions_monitor.health import repo_view
+    from github_actions_monitor.sentinels import alert_center
+    now = time.time() if now is None else now
+    with LOCK:
+        data = dict(STATE.get("data") or {})
+    runs = (data.get("runs") or [])
+    failing, active = data.get("failing") or [], data.get("active") or []
+    registry = SENTINEL["registry"]
+    try:
+        alerts = alert_center.collect(registry, extra=credential_alerts() + score_alerts())
+    except Exception as error:   # noqa: BLE001 - the health still answers without the alerts
+        degraded.note("health.alerts", error)
+        alerts = []
+    sources = {}
+    try:
+        for name, status in (registry.status() if registry else {}).items():
+            sources[name] = (status or {}).get("lifecycle") or ("healthy" if (status or {}).get("enabled", True) else "off")
+    except Exception as error:   # noqa: BLE001
+        degraded.note("health.sources", error)
+    ready = {}
+    try:
+        sentinel = SENTINEL["obj"]
+        snapshot = sentinel.snapshot() if sentinel else None
+        for row in (((snapshot or {}).get("a11") or {}).get("sections") or [{}])[0].get("rows") or []:
+            if isinstance(row, list) and len(row) >= 7:
+                ready[str(row[0])] = {"entries": row[1], "ci": row[2], "version": row[3], "build": row[4], "signing": row[5], "next": row[6]}
+    except Exception as error:   # noqa: BLE001
+        degraded.note("health.readiness", error)
+    names = sorted({r.get("repo") for r in runs if isinstance(r, dict) and r.get("repo")} | {r for r in (data.get("repos") or []) if isinstance(r, str)} | {a.get("repo") for a in alerts if a.get("repo")})
+    views = []
+    for repo in names:
+        eco = toolconfig.ecosystem_of(repo)
+        view = repo_view.repo_view(repo, runs, failing, active, alerts, ready.get(repo), sources, eco, now)
+        view["ecosystem_label"] = toolconfig.label_of(eco)
+        views.append(view)
+    return views
+
+
 def score_alerts():
     """The alert of a score that has dropped, for the Alerts tab: from the latest snapshot, only while it is fresh (an old one says nothing). Complete only; never raises."""
     if LITE["on"]:
@@ -2351,6 +2391,20 @@ class Handler(BaseHTTPRequestHandler):
                 self.json_reply({"data": {"panels": panels, "act": sum(1 for p in panels if p["level"] == "bad"), "watch": sum(1 for p in panels if p["level"] == "warn")}, "error": None})
             except Exception as error:   # noqa: BLE001
                 self.json_reply({"data": {"panels": [], "act": 0, "watch": 0}, "error": str(error)[:200]})
+        elif path == "/api/team/health" or (path.startswith("/api/repos/") and path.endswith("/health")):      # the health of a repository and of the team, read only, from what is held (Complete only)
+            if not self.guard():
+                return
+            from urllib.parse import parse_qs, unquote
+            from github_actions_monitor.health import repo_view
+            ask = {k: v[0] for k, v in parse_qs(self.path.partition("?")[2]).items() if v}
+            views = health_views()
+            if path == "/api/team/health":
+                self.json_reply(repo_view.team_view(views, ask.get("ecosystem", ""), ask.get("severity", ""), ask.get("q", "")[:80], ask.get("label", "")[:40]))
+            else:
+                parts = [unquote(x) for x in path.split("/")]      # ["", "api", "repos", owner, repo, "health"]
+                owner, name = (parts[3], parts[4]) if len(parts) == 6 else ("", "")
+                found = next((v for v in views if v["repo"] == name), None) if owner.lower() == toolconfig.github_owner().lower() else None
+                self.json_reply({"schema": 1, "health": found} if found else {"error": "unknown repository", "code": "repo_unknown"}, 200 if found else 404)
         elif path in ("/api/score", "/api/score/history"):      # the score of the account of this process, from the snapshots of the hour (read only; Complete only)
             if not self.guard():
                 return
