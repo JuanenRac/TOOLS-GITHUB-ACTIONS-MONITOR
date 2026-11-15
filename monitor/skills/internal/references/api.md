@@ -76,6 +76,8 @@ a call marked *this computer only* is refused when it comes from the network. Ev
 | `/api/reports` | GET | viewer | the four optional reports: workflow hygiene, wait for a runner, release ready or blocked, supply chain of the latest release (each on only when its setting is) |
 | `/api/run-log` | GET | admin | the failing step of one run and its last relevant lines, cleaned (`?repo=&run=`; off by default, `logs.failed_step.enabled`; administrators in the team mode) |
 | `/api/runners` | GET | viewer | self-hosted runners (opt-in) |
+| `/api/score` | GET | viewer | the score of the account: a number from 0 to 100, a letter from A to E and a trend, with its parts, its coverage, the quality of the data and a breakdown by repository (Complete only; null and a state instead of a number when there is not enough data) |
+| `/api/score/history` | GET | viewer | the points of the score over time (`?hours=`, `?limit=`), oldest first (Complete only) |
 | `/api/sentinel` | GET | viewer | the snapshot of the Sentinel (checks A1-A13) |
 | `/api/sentinel/ai` | GET | viewer | the AI explanation of a failed build or a CodeQL alert (a person asks; cached) |
 | `/api/sentinel/collab` | GET | viewer | issues and pull requests that need a person |
