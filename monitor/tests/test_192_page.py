@@ -25,7 +25,10 @@ class TeamTab(unittest.TestCase):
 
     def test_the_browser_checks_go_through_every_tab_of_the_list(self):
         for tool in ("check_page.py", "check_overflow.py"):
-            text = (ROOT / "tools" / tool).read_text(encoding="utf-8")
+            path = ROOT / "tools" / tool
+            if not path.is_file():   # the browser tools live in the repository, not in the product folder that travels in the zip
+                self.skipTest(f"{tool} is not next to the product folder")
+            text = path.read_text(encoding="utf-8")
             self.assertIn("for(const t of TABS)", text, tool)
 
     def test_the_deep_links_are_known_to_the_page(self):
