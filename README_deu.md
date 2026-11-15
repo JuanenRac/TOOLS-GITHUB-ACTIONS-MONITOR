@@ -32,7 +32,7 @@
 
 | | |
 |---|---|
-| **Version** | **1.9.2** · [alle Releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **1.9.3** · [alle Releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Voraussetzung** | Python 3.11+ und die GitHub-CLI (`gh auth login`); sonst nichts (die Konsolenansicht nutzt das optionale Paket `rich`) |
 | **Öffnet** | eine Seite nur auf `127.0.0.1`, in acht Sprachen |
 | **Schreibt auf GitHub** | nie von selbst: nur Stapelbefehle, die du mit ausdrücklichem `--go` startest |
@@ -40,7 +40,7 @@
 
 <!-- glance:begin -->
 
-**Heute gemessen** (v1.9.2)
+**Heute gemessen** (v1.9.3)
 
 | | |
 |---|---|
@@ -153,6 +153,7 @@ Jedes Bild folgt dem hellen oder dunklen Design Ihrer GitHub-Seite.
 - **Eine Punktzahl je Konto**: eine Zahl von 0 bis 100, ein Buchstabe von A bis E und ein Trend, gebildet aus der Zuverlässigkeit der CI, ihrer Geschwindigkeit, der Wiederherstellungszeit und der Schnelligkeit, mit der Zusammenarbeitswarnungen geschlossen werden; sie sagt „Kalibrierung“ oder „zu wenige Daten“ statt einer Zahl, die sie nicht belegen kann, zeigt, was sie noch nicht abdeckt, steht in der Kopfzeile der Seite, hat einen Befehl `score`, warnt beim Abfall und steckt in den Metriken und im MCP-Server (`monitor/docs/SCORE.md`).
 - **Ein Sicherheitswächter (nur Complete, standardmäßig aus)**: Er liest, ohne etwas in GitHub zu schreiben, die offenen Meldungen von Dependabot, Code-Scanning und Secret-Scanning, ob der Standardzweig geschützt ist, die Standardberechtigung der Workflows und auf Wunsch die Code-Eigentümer; er meldet einen Alarm je Repository und Signal, zählt die Funde als fünften Teil der Bewertung und sagt, was er nicht lesen konnte (`monitor/docs/SENTINEL_SECURITY_deu.md`).
 - **Die Gesundheit jedes Repositorys und des Teams (nur Complete)**: CI, Meldungen der drei Wächter, Release-Bereitschaft und Aktivität in einem Zustand (schlecht, Warnung, OK oder nicht gesehen) mit einer Risikozahl; der Tab Team reiht zuerst die Repositorys, die einen Menschen brauchen, mit Filtern, einer Einzelansicht und Direktlinks für Wandbildschirme; dieselben Daten liefern `/api/team/health`, `/api/repos/<owner>/<repo>/health` und der Befehl `team` (`monitor/docs/HEALTH_deu.md`).
+- **Berichte, Aktionsprotokoll und Apprise (nur Complete)**: ein Bericht des Kontos (Punktzahl, Änderungen, Repositorys, die einen Menschen brauchen, offene Meldungen) als HTML und Markdown nach Cron-Zeitplan oder auf Wunsch, standardmäßig aus (`monitor/docs/REPORT_SCHEDULE_deu.md`); ein Protokoll, wer was geändert hat, mit Hash-Kette und ohne Werte oder Geheimnisse (`monitor/docs/AUDIT_LOG_deu.md`); und ein optionaler Apprise-Kanal für Benachrichtigungen, standardmäßig aus.
 - **Als Dienst**: das offizielle Docker-Image (ohne Root, schreibgeschützt), eine Compose-Datei mit optionalem Proxy, eine systemd-Unit, eine tiefe Gesundheitsprüfung und der Befehl, der den ersten Administrator anlegt (`monitor/docs/DEPLOYMENT.md`).
 - **Mehrere Konten, ein Team und ein Ort für die Daten**: ein Prozess je Konto, Benutzer mit Rollen und eigenen Konten, die Dateien in `config/`, `data/`, `logs/` und `ai/`, ein optionaler SQLite-Speicher mit Aufbewahrung und Sicherung und die Ports als Einstellungen (`monitor/docs/ACCOUNTS.md`, `monitor/docs/STORAGE.md`, `monitor/docs/LAYOUT.md`).
 - **Listen, die man sortiert und einklappt**: „Gerade aktiv“ auf sieben Arten und der Reiter Warnungen auf neun, mit einer Schaltfläche zum Ein- und Ausklappen aller Repositories; die Wahl wird für jeden Benutzer gemerkt.

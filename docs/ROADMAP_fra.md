@@ -26,10 +26,6 @@ Tout ce qui suit a été livré dans la série 1.8 et est testé ; rien n'est do
 
 Chaque version porte tout ce qui est de son tronçon du plan : rien ne reste suspendu à une version antérieure et rien n'est repoussé à la suivante. Après la 1.8.3 et après la 1.9.3, le produit passe une revue indépendante dont les constats sont clos dans la version de stabilisation suivante. 1.8.1 est une version corrective de la 1.8.0 : le cadre « chargement des dépôts » disparaît avec le dernier dépôt et le rechargement de la page obtient ses données aussitôt.
 
-### 1.9.3 - Rapports programmés et journal d'audit
-
-Des modèles de rapport en HTML et Markdown (PDF facultatif) avec le score, les principales alertes et les changements, un planificateur et un journal d'audit en ajout seul de qui a fait quoi et quand, sans aucun secret dedans. Facultatif, dans la même version : une vue « version prête / bloquée » avec le dernier commit vert de chaque dépôt.
-
 ### 1.9.4 - Stabilisation de la troisième phase
 
 La même sorte de clôture que la 1.8.4 pour le score, la sentinelle de sécurité, les vues de santé, les rapports et le journal d'audit ; le coût en appels d'API avec trois sentinelles actives ; un score qui reste cohérent quand une sentinelle est éteinte.
@@ -40,7 +36,7 @@ Une version majeure qui nettoie la dette technique et fige les interfaces publiq
 
 Les workflows du moniteur lui-même respectent ce que la sentinelle d'hygiène demandera aux autres : actions fixées à un commit, permissions minimales et une limite de temps sur chaque job.
 
-## Fait dans la 1.8.2 à la 1.9.2
+## Fait dans la 1.8.2 à la 1.9.3
 
 ### 1.8.2 - Image Docker officielle et mode service
 
@@ -65,6 +61,10 @@ La troisième sentinelle : Dependabot, analyse de code, analyse des secrets, pro
 ### 1.9.2 - Santé du dépôt et de l'équipe
 
 Une vue de santé de chaque dépôt (CI, tickets et pull requests, sécurité, préparation à une version, activité) et une de l'équipe avec classement, totaux et filtres ; des pages pour les deux avec des liens directs pour écrans muraux. Facultatif, dans la même version : un panneau de benchmarks de nuit face à un budget (médiane face à une référence par classe de machine) et un panneau de nomenclatures logicielles et d'attestations de chaque version.
+
+### 1.9.3 - Rapports programmés et journal d'audit
+
+Des modèles de rapport en HTML et Markdown (PDF facultatif) avec le score, les principales alertes et les changements, un planificateur et un journal d'audit en ajout seul de qui a fait quoi et quand, sans aucun secret dedans. Facultatif, dans la même version : une vue « version prête / bloquée » avec le dernier commit vert de chaque dépôt.
 
 ## Fait dans la 1.7.9
 

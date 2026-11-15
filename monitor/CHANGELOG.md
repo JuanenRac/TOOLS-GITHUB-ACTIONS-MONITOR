@@ -11,6 +11,8 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+## [1.9.3]
+
 ### Added
 
 - **Apprise as a channel of notifications (Complete, off by default)**: `notify.channels.apprise` hands the message to the `apprise` command, if it is installed, so that any service Apprise knows can be reached. The addresses (they hold the secrets of those services) are read from the environment variable named by `urls_env`, written to a private temporary file for the instant of the call and removed, never put in the arguments, and the command gets an environment without the keys of the monitor. Apprise opens its own connections, so the guard of the monitor on private addresses does not apply to it: the channel has its own switch, marked as a security setting. A missing command is the reason `not_installed`, a failure is counted and never stops the monitor.

@@ -26,10 +26,6 @@ Alles Folgende wurde in der Reihe 1.8 ausgeliefert und ist getestet; nichts gilt
 
 Jede Version enthält alles aus ihrem Abschnitt des Plans: nichts bleibt von einer früheren Version offen, und nichts wird auf die nächste verschoben. Nach 1.8.3 und nach 1.9.3 durchläuft das Produkt eine unabhängige Prüfung, deren Befunde in der folgenden Stabilisierungsversion geschlossen werden. 1.8.1 ist eine Korrekturversion von 1.8.0: Das Feld „Repositories werden geladen“ verschwindet mit dem letzten Repository, und das Neuladen der Seite holt die Daten sofort.
 
-### 1.9.3 - Geplante Berichte und Prüfprotokoll
-
-Berichtsvorlagen in HTML und Markdown (PDF optional) mit Bewertung, wichtigsten Alarmen und Änderungen, ein Planer und ein nur anhängendes Prüfprotokoll, wer was wann getan hat, ohne jedes Geheimnis darin. Optional, im selben Release: eine Ansicht „Release bereit / blockiert“ mit dem letzten grünen Commit jedes Repositorys.
-
 ### 1.9.4 - Stabilisierung der dritten Phase
 
 Derselbe Abschluss wie bei 1.8.4 für Bewertung, Sicherheitswächter, Gesundheitsansichten, Berichte und Prüfprotokoll; die Kosten an API-Aufrufen bei drei laufenden Wächtern; eine Bewertung, die stimmig bleibt, wenn ein Wächter aus ist.
@@ -40,7 +36,7 @@ Eine Hauptversion, die technische Schulden abbaut und die öffentlichen Schnitts
 
 Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
 
-## Erledigt in 1.8.2 bis 1.9.2
+## Erledigt in 1.8.2 bis 1.9.3
 
 ### 1.8.2 - Offizielles Docker-Image und Dienstmodus
 
@@ -65,6 +61,10 @@ Der dritte Wächter: Dependabot, Code-Scanning, Secret-Scanning, Branch-Schutz, 
 ### 1.9.2 - Gesundheit von Repository und Team
 
 Eine Gesundheitsansicht je Repository (CI, Issues und Pull Requests, Sicherheit, Release-Bereitschaft, Aktivität) und eine fürs Team mit Rangliste, Summen und Filtern; Seiten für beide mit Direktlinks für Wandbildschirme. Optional, im selben Release: ein Panel nächtlicher Benchmarks gegen ein Budget (Median gegen eine Basislinie je Maschinenklasse) und ein Panel mit Software-Stücklisten und Attestierungen jedes Releases.
+
+### 1.9.3 - Geplante Berichte und Prüfprotokoll
+
+Berichtsvorlagen in HTML und Markdown (PDF optional) mit Bewertung, wichtigsten Alarmen und Änderungen, ein Planer und ein nur anhängendes Prüfprotokoll, wer was wann getan hat, ohne jedes Geheimnis darin. Optional, im selben Release: eine Ansicht „Release bereit / blockiert“ mit dem letzten grünen Commit jedes Repositorys.
 
 ## Erledigt in 1.7.9
 
