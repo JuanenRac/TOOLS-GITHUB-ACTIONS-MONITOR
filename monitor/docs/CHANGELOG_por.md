@@ -45,6 +45,20 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - O teste de uma conta que morre de imediato já não depende da velocidade do computador: a espera antes de voltar a arrancar uma conta é verificada com um relógio que o próprio teste dá, e um segundo teste verifica o calendário das esperas sem ler a hora real (o antigo falhava sob carga na porta de uma versão).
 
+## [1.8.4]
+
+### Adicionado
+
+- «A acontecer agora» ordena-se de sete maneiras e a lista do separador Alertas de nove, com botões para expandir ou recolher todos os repositórios; a escolha é lembrada por utilizador.
+
+- As portas do monitor completo e do lite são definições do ficheiro de configuração e do menu Definições (os valores predefinidos não mudam).
+
+- O primeiro administrador de um contentor: a mensagem do serviço indica o comando exato, e o guia, o ficheiro de exemplo e o teste do contentor explicam-no.
+
+### Corrigido
+
+- Um pedido do modo de equipa com várias contas é atribuído a uma só conta; a anulação da migração das pastas funciona mesmo depois de uma interrupção; a cópia de segurança não leva sessões; uma ligação simbólica não é movida; o proxy do Compose já não bloqueia todos pelas tentativas de um só.
+
 ## [1.8.3]
 
 ### Adicionado

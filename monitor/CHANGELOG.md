@@ -11,6 +11,8 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+## [1.8.4]
+
 ### Added
 
 - **The list of the Alerts tab can be sorted in nine ways**: a list above the alerts chooses as the monitor sends them (the default, as ever), severity, the longest streak of failures first, class (real before watch), oldest first, newest first, repository, origin or state (open before silenced), and an alert that failed several times in a row shows its streak. The choice is remembered for each user like the order of Happening now (`GET` and `POST /api/auth/me/view` in the team mode, the browser otherwise) and until someone chooses, `ui.alerts_sort` of the configuration file applies. Help, guides in the eight languages and both skills say so.

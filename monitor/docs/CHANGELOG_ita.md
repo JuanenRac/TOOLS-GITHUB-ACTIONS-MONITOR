@@ -45,6 +45,20 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - Il test di un account che muore subito non dipende più dalla velocità del computer: l'attesa prima di riavviare un account viene verificata con un orologio che dà il test stesso, e un secondo test verifica il calendario delle attese senza leggere l'ora reale (il vecchio falliva sotto carico nella porta di una versione).
 
+## [1.8.4]
+
+### Aggiunto
+
+- «In corso adesso» si ordina in sette modi e l'elenco della scheda Avvisi in nove, con pulsanti per espandere o comprimere tutti i repository; la scelta viene ricordata per ogni utente.
+
+- Le porte del monitor completo e di quello lite sono impostazioni del file di configurazione e del menu Impostazioni (i valori predefiniti non cambiano).
+
+- Il primo amministratore di un contenitore: il messaggio del servizio indica il comando esatto, e la guida, il file di esempio e il test del contenitore lo spiegano.
+
+### Corretto
+
+- Una richiesta della modalità team con più account viene assegnata a un solo account; l'annullamento della migrazione delle cartelle funziona anche dopo un'interruzione; il backup non contiene sessioni; un collegamento simbolico non viene spostato; il proxy di Compose non blocca più tutti per i tentativi di uno solo.
+
 ## [1.8.3]
 
 ### Aggiunto

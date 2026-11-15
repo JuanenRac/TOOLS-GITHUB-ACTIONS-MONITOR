@@ -39,7 +39,7 @@
 
 <!-- glance:begin -->
 
-**Heute gemessen** (v1.8.3)
+**Heute gemessen** (v1.8.4)
 
 | | |
 |---|---|

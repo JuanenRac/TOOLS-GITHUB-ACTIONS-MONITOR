@@ -45,6 +45,20 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - Le test d'un compte qui meurt aussitôt ne dépend plus de la vitesse de l'ordinateur : l'attente avant de relancer un compte est vérifiée avec une horloge que donne le test lui-même, et un second test vérifie le calendrier des attentes sans lire l'heure réelle (l'ancien échouait sous charge dans la porte d'une version).
 
+## [1.8.4]
+
+### Ajouté
+
+- « En cours » se trie de sept façons et la liste de l'onglet Alertes de neuf, avec des boutons pour déplier ou replier tous les dépôts ; le choix est mémorisé pour chaque utilisateur.
+
+- Les ports du moniteur complet et du moniteur lite sont des réglages du fichier de configuration et du menu Réglages (les valeurs par défaut ne changent pas).
+
+- Le premier administrateur d'un conteneur : le message du service donne la commande exacte, et le guide, le fichier d'exemple et le test du conteneur l'expliquent.
+
+### Corrigé
+
+- Une requête du mode équipe avec plusieurs comptes est attribuée à un seul compte ; l'annulation de la migration des dossiers fonctionne même après une interruption ; la sauvegarde ne contient pas de sessions ; un lien symbolique n'est pas déplacé ; le proxy de Compose ne bloque plus tout le monde à cause des essais d'une seule personne.
+
 ## [1.8.3]
 
 ### Ajouté

@@ -39,7 +39,7 @@
 
 <!-- glance:begin -->
 
-**Misurato oggi** (v1.8.3)
+**Misurato oggi** (v1.8.4)
 
 | | |
 |---|---|
