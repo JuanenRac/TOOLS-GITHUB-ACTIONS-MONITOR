@@ -18,6 +18,7 @@
 | `doctor` | les contrôles de `--doctor` pour cette installation (le moniteur n'a pas besoin de tourner) | oui |
 | `accounts` | les comptes du superviseur (plusieurs comptes seulement) | non |
 | `alerts` | les alertes de toutes les sentinelles dans une liste : `--sentinel ci\|collab`, `--level info\|warning\|error`, `--muted show\|hide\|only` | non |
+| `score` | le score du compte : nombre, lettre, tendance, parties, couverture et ventilation par dépôt ; `--compare` le compare à l'historique de la fenêtre | non |
 | `live` | l'état du récepteur de webhook et les derniers évènements | non |
 
 Options de toutes les commandes : `--json` (la réponse comme un document JSON : `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (port 8766), `--timeout SECONDES` (1 à 60), `--lang CODE`. En mode réseau, mettez le jeton d'accès dans la variable d'environnement `MONITOR_ACCESS_TOKEN`, celle que lit le moniteur lui-même (`MONITOR_TOKEN` est accepté comme alias ; `--token JETON` est le dernier recours, car une option apparaît dans la liste des processus). L'ordre : `MONITOR_ACCESS_TOKEN`, puis `MONITOR_TOKEN`, puis `--token`. Il voyage dans l'en-tête `X-Monitor-Access`, jamais dans l'adresse ni à l'écran. Un `--url` en `http` non chiffré vers un autre ordinateur affiche un avertissement sur stderr (le jeton et les réponses circuleraient en clair) : utilisez `https` hors d'un réseau que vous contrôlez.

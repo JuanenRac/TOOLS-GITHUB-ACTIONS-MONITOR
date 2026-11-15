@@ -18,6 +18,7 @@
 | `doctor` | the checks of `--doctor` for this installation (the monitor need not be running) | yes |
 | `accounts` | the accounts of the supervisor (several accounts only) | no |
 | `alerts` | the alerts of every sentinel in one list: `--sentinel ci\|collab`, `--level info\|warning\|error`, `--muted show\|hide\|only` | no |
+| `score` | the score of the account: number, letter, trend, parts, coverage and the breakdown by repository; `--compare` sets it against the history of the window | no |
 | `live` | the state of the webhook receiver and the last events | no |
 
 Options of every command: `--json` (the answer as one JSON document: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (port 8766), `--timeout SECONDS` (1 to 60), `--lang CODE`. In the network mode put the access token in the environment variable `MONITOR_ACCESS_TOKEN`, the one the monitor itself reads (`MONITOR_TOKEN` is accepted as an alias; `--token TOKEN` is the last resort, because a flag shows in the list of processes). The order is: `MONITOR_ACCESS_TOKEN`, then `MONITOR_TOKEN`, then `--token`. It travels in the header `X-Monitor-Access`, never in the address and never on screen. A `--url` with plain `http` to another computer prints a warning on stderr (the token and the answers would travel unencrypted): use `https` outside a network you control.

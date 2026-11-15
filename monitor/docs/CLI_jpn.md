@@ -18,6 +18,7 @@
 | `doctor` | この環境に対する `--doctor` の検査（モニターが動いていなくても可） | 可 |
 | `accounts` | スーパーバイザーのアカウント一覧（複数アカウント時のみ） | 不可 |
 | `alerts` | すべての番人のアラートを 1 つの一覧で：`--sentinel ci\|collab`、`--level info\|warning\|error`、`--muted show\|hide\|only` | 不可 |
+| `score` | アカウントのスコア：数値、文字評価、傾向、要素、カバレッジ、リポジトリ別の内訳。`--compare` で期間の履歴と比較します | 不可 |
 | `live` | Webhook 受信の状態と直近のイベント | 不可 |
 
 全コマンド共通のオプション：`--json`（応答を 1 つの JSON 文書で：`{"ok", "exit", "data"}`）、`--account ID`、`--url URL`、`--lite`（ポート 8766）、`--timeout 秒`（1〜60）、`--lang コード`。ネットワークモードではアクセストークンを、モニター自身が読む環境変数 `MONITOR_ACCESS_TOKEN` に設定します(`MONITOR_TOKEN` は別名として受け付けます。`--token TOKEN` は最後の手段で、オプションはプロセス一覧に表示されるためです)。優先順位は `MONITOR_ACCESS_TOKEN`、`MONITOR_TOKEN`、`--token` の順です。ヘッダー `X-Monitor-Access` で送られ、アドレスや画面には出ません。別のコンピューターへの暗号化されていない `http` の `--url` では stderr に警告を出します(トークンと応答が平文で送られるため)。管理下にないネットワークでは `https` を使ってください。
