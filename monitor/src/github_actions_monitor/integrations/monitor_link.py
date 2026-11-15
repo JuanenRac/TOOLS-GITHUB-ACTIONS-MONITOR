@@ -9,18 +9,25 @@ alert goes away at once). Nothing leaves this PC; if the monitor is not running 
 import json
 import urllib.request
 from github_actions_monitor.security import netguard
+from github_actions_monitor.util import ports
 
-PORTS = range(8765, 8775)   # the monitor uses the first free port from 8765
+PORTS = range(8765, 8775)   # the default: the monitor uses the first free port from its own (8765 unless `ports.complete` says another)
+
+
+def candidates():
+    """The ports a monitor of the complete edition may be listening on: from its own, the next ten."""
+    first = ports.resolve("complete")
+    return range(first, first + len(PORTS))
 PATH = "/api/refresh-repos"
 
 
-def notify_refresh(repos, ports=PORTS, timeout=2.0, opener=None):
+def notify_refresh(repos, ports=None, timeout=2.0, opener=None):
     """Returns the port of the monitor that accepted the request, or None. Never raises."""
     names = sorted({str(r) for r in repos if r})
     if not names:
         return None
     body = json.dumps({"repos": names}).encode("utf-8")
-    for port in ports:
+    for port in (candidates() if ports is None else ports):
         request = urllib.request.Request(f"http://127.0.0.1:{port}{PATH}", data=body, method="POST", headers={"Content-Type": "application/json"})
         try:
             with (opener or netguard.local_open)(request, timeout=timeout) as answer:

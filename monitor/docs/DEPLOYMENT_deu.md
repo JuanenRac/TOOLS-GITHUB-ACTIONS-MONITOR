@@ -16,6 +16,10 @@ Der Monitor lauscht auf eine von drei Arten, und die Seite, `GET /api/accounts`,
 
 Im Netzwerkmodus folgt der Supervisor mehrerer Konten denselben Regeln wie der Monitor eines Kontos: das Zugriffstoken bei jeder Anfrage (Cookie, Header oder `POST /api/access`), Sperre nach falschen Token, die `Host`-Prüfung, optional TLS mit Ihrem Zertifikat, der zweite Port der Person am Rechner (`listen.local_port`), und die Schlüssel, die über die Erreichbarkeit entscheiden, der GitHub-Zugang und die Aktionen auf GitHub nur vom Rechner des Monitors aus (eine Anfrage aus dem Netzwerk erreicht das Konto als entfernt markiert).
 
+## Die Ports der beiden Editionen
+
+Die komplette Edition lauscht auf Port 8765 und die Lite-Edition auf 8766, sofern die Konfigurationsdatei keinen anderen nennt: `ports.complete` und `ports.lite` (eine ganze Zahl von 1024 bis 65535, Neustart nötig; sie stehen auch auf der Seite Einstellungen, Block Ports). Beide Zahlen werden an einer Stelle gelesen, daher stimmen Start, die Prüfung „Auf diesem Port läuft schon ein Monitor“, `--doctor`, die Gesundheitsprüfung (`python -m github_actions_monitor.cli.healthcheck`), die Kommandozeile (`--lite` spricht den Lite-Port an), die Terminalansichten und die Starter überein. Die Reihenfolge: `--port N` auf der Kommandozeile, dann `MONITOR_PORT` (Dienst und Container setzen ihn; nur die komplette Edition), dann die Datei der Edition, dann die Datei der anderen Edition (ein Menü kann beide setzen), dann der Standard. Die Lite-Edition nimmt nie den Port der kompletten: nennen beide dieselbe Zahl, behält Lite 8766, und die Einstellungsseite weigert sich, dieselbe Zahl für beide zu speichern. Ist der Port belegt, nimmt der Monitor den nächsten freien, bis zu zehn darüber.
+
 ## Ohne Browser, und die Gesundheitsprüfung
 
 `python -m github_actions_monitor.service` ist der Einstieg eines Dienstes: Er bereitet Ordner und erstes Konto aus der Umgebung vor (siehe Tabelle unten) und startet den Monitor ohne Browser. `python bin/actions_monitor.py --no-browser --port 8765` gilt weiter für einen Monitor, den Sie selbst verwalten.

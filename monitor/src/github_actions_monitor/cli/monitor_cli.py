@@ -20,7 +20,7 @@ A monitor on another computer works the same way: --url (or MONITOR_URL) names i
 
 Every command takes --json (the answer as one JSON document), --account ID, --url URL, --timeout SECONDS and --lang CODE. In the network mode the access token is read from MONITOR_ACCESS_TOKEN,
 then from its alias MONITOR_TOKEN, then from --token-file (a file only you can read) and last from --token (it shows in the list of processes, so it prints a warning on stderr); plain http to another computer prints a warning on stderr. Nothing here writes to GitHub or changes a setting.
-The lite edition answers `status`, `doctor` and `health` (use --lite for its port 8766); the rest need the complete edition.
+The lite edition answers `status`, `doctor` and `health` (use --lite for its port, 8766 unless `ports.lite` says another); the rest need the complete edition.
 
 Exit codes (stable): 0 all right; 1 wrong use of the command; 2 the monitor cannot be reached; 3 the monitor or GitHub refuses the credential (access token of the network mode, or the login
 of GitHub); 4 the monitor answers but is degraded (offline, allowance exhausted, no data yet) or an answer that cannot be read; 5 `alerts --fail-on LEVEL` found alerts of that level or worse.
@@ -38,6 +38,7 @@ from urllib.parse import urlencode, urlparse
 
 from github_actions_monitor import i18n
 from github_actions_monitor.util import platform_compat
+from github_actions_monitor.util import ports
 from github_actions_monitor.util import tzdisplay
 from github_actions_monitor.tool_version import TOOL_VERSION
 from github_actions_monitor.security import netguard
@@ -52,7 +53,7 @@ LITE_COMMANDS = ("status", "doctor", "health", "check")
 LEVELS = ("info", "warning", "error", "critical")
 from github_actions_monitor.cli import monitor_admin      # noqa: E402
 CLIENT = monitor_admin.CLIENT      # the session of the team mode and the authority of the certificate: one dict, shared
-PORTS = {"complete": 8765, "lite": 8766}
+PORTS = dict(ports.DEFAULTS)      # the defaults; the port in use is ports.resolve (configuration file, MONITOR_PORT)
 TOKEN_VARIABLES = ("MONITOR_ACCESS_TOKEN", "MONITOR_TOKEN")      # the first is the one the monitor itself reads; the second is an alias
 
 
@@ -109,7 +110,7 @@ def base_url(url=None, lite=False, env=None):
     env = os.environ if env is None else env
     chosen = (url or env.get("MONITOR_URL") or "").strip()
     if not chosen:
-        return f"http://127.0.0.1:{PORTS['lite' if lite else 'complete']}"
+        return f"http://127.0.0.1:{ports.resolve('lite' if lite else 'complete', env=env)}"
     parts = urlparse(chosen if "://" in chosen else "http://" + chosen)
     try:
         port_ok = parts.port is None or 0 < parts.port < 65536

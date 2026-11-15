@@ -58,7 +58,7 @@ def _writable(folder):
         return False
 
 
-def run(runner=default_runner, folder=HERE, ports=(8765, 8766), python=None, config=None):
+def run(runner=default_runner, folder=HERE, ports=None, python=None, config=None):
     """The list of checks, in ORDER. `config` is the content of the configuration file ({} when there is none)."""
     config = config if isinstance(config, dict) else {}
     version = python or sys.version_info[:3]
@@ -84,6 +84,9 @@ def run(runner=default_runner, folder=HERE, ports=(8765, 8766), python=None, con
         for name in ("login", "quota", "network"):
             out[name] = ("warn", "gh")
     out["folder"] = ("ok" if _writable(folder) else "fail", str(folder))
+    if ports is None:      # the ports of the two editions as the configuration files set them
+        from github_actions_monitor.util import ports as port_rules
+        ports = tuple(port_rules.both().values())
     free = [p for p in ports if _port_free(p)]
     busy = [p for p in ports if p not in free]
     out["port"] = ("ok" if free else "warn", ("free " + ", ".join(str(p) for p in free) if free else "") + (" · " if free and busy else "") + ("busy " + ", ".join(str(p) for p in busy) if busy else ""))
@@ -315,7 +318,8 @@ def token_backend(config, store_factory=None):
 def text(checks, translate, banner_for=None):
     sign = {"ok": "[ OK ]", "warn": "[warn]", "fail": "[FAIL]"}
     from github_actions_monitor.util import banner
-    lines = [translate("doctor.title"), "=" * 40] if not banner_for else [banner.line(banner_for == "lite", 8766 if banner_for == "lite" else 8765, "actions_monitor_lite.json" if banner_for == "lite" else "actions_monitor.json", translate), translate("doctor.title"), "=" * 40]
+    from github_actions_monitor.util import ports as port_rules
+    lines = [translate("doctor.title"), "=" * 40] if not banner_for else [banner.line(banner_for == "lite", port_rules.resolve("lite" if banner_for == "lite" else "complete"), "actions_monitor_lite.json" if banner_for == "lite" else "actions_monitor.json", translate), translate("doctor.title"), "=" * 40]
     for item in checks:
         row = f"{sign[item['status']]} {translate('doctor.t.' + item['id'])}" + (f" ({item['detail']})" if item["detail"] else "")
         lines.append(row)

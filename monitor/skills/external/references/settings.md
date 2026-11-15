@@ -211,6 +211,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `outputs.json.enabled` (secure) | `-` | outputs | Grafana JSON source |
 | `outputs.prometheus.enabled` (secure) | `-` | outputs | Prometheus: /metrics |
 | `outputs.prometheus.per_repo` | `-` | outputs | Prometheus: series per repository |
+| `ports.complete` | `8765` | general | Port of the complete edition |
+| `ports.lite` | `8766` | general | Port of the lite edition |
 | `profiles_file` | `-` | paths | Batch profiles file |
 | `quota.alert_percent` | `90` | basic | Alert at this share of the included minutes |
 | `quota.billing_api` (secure) | `false` | basic | Read the real usage from the billing report of GitHub |
@@ -358,6 +360,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `tools_dir` | `-` | paths | Folder of the local signing tools |
 | `tui.refresh_seconds` | `-` | console | Refresh |
 | `tui.theme` | `-` | console | Colours |
+| `ui.alerts_sort` | `"server"` | general | Order of the alerts |
+| `ui.now_sort` | `"ecosystem"` | general | Order of the runs happening now |
 | `ui.orientation` | `"auto"` | general | Orientation of the page |
 | `ui.rotate_seconds` | `0` | general | Seconds between tabs of a screen |
 | `ui.screen1_orientation` | `"auto"` | general | Orientation of screen 1 |

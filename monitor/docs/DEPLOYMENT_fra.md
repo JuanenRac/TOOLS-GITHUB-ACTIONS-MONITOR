@@ -16,6 +16,10 @@ Le moniteur écoute de trois façons possibles, et la page, `GET /api/accounts`,
 
 En mode réseau, le superviseur de plusieurs comptes suit les mêmes règles que le moniteur d'un compte : le jeton d'accès sur chaque requête (cookie, en-tête ou `POST /api/access`), un verrouillage après de mauvais jetons, la vérification de `Host`, un TLS facultatif avec votre certificat, le second port de la personne devant la machine (`listen.local_port`), et les clés qui décident de l'exposition, l'accès à GitHub et les actions sur GitHub uniquement depuis l'ordinateur du moniteur (une requête venue du réseau atteint le compte marquée comme distante).
 
+## Les ports des deux éditions
+
+L'édition complète écoute sur le port 8765 et la lite sur le 8766, sauf si le fichier de configuration en indique un autre : `ports.complete` et `ports.lite` (un entier de 1024 à 65535, redémarrage nécessaire ; ils figurent aussi dans la page Réglages, bloc Ports). Les deux numéros sont lus à un seul endroit, si bien que le démarrage, la vérification « un moniteur tourne déjà sur ce port », `--doctor`, le contrôle de santé (`python -m github_actions_monitor.cli.healthcheck`), la ligne de commande (`--lite` parle au port lite), les vues de terminal et les lanceurs s'accordent. L'ordre est : `--port N` sur la ligne de commande, puis `MONITOR_PORT` (le service et le conteneur le fixent ; édition complète seulement), puis le fichier de l'édition, puis celui de l'autre édition (un menu peut fixer les deux), puis la valeur par défaut. L'édition lite ne prend jamais le port de la complète : si les deux indiquent le même numéro, la lite garde 8766, et la page Réglages refuse d'enregistrer le même numéro pour les deux. Si le port est occupé, le moniteur prend le suivant libre, jusqu'à dix au-dessus.
+
 ## Sans navigateur, et le contrôle de santé
 
 `python -m github_actions_monitor.service` est l'entrée d'un service : il prépare les dossiers et le premier compte à partir de l'environnement (voir le tableau ci-dessous) et lance le moniteur sans navigateur. `python bin/actions_monitor.py --no-browser --port 8765` reste valable pour un moniteur que vous gérez vous-même.

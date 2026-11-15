@@ -9,7 +9,7 @@ unresolved failures and the open build-failed / build-stuck issues. Nothing is w
 to GitHub and no secret is read: it only asks the `gh` command line (already logged in)
 for public run data.
 
-  py -3 bin/actions_monitor.py [--port 8765] [--no-browser] [--discover]
+  py -3 bin/actions_monitor.py [--port 8765] [--no-browser] [--discover]      (the default port is `ports.complete` of the configuration file, 8765 unless it says another)
 
 The repositories to watch, the refresh times and the "stuck" limit live in
 actions_monitor.json next to this file (created on the first run):
@@ -50,6 +50,7 @@ from github_actions_monitor.security import localguard
 from github_actions_monitor.app import modes
 from github_actions_monitor.util import exclusive
 from github_actions_monitor.util import platform_compat
+from github_actions_monitor.util import ports
 from github_actions_monitor.data_pipeline import redrule
 from github_actions_monitor.util import resilience
 from github_actions_monitor.security import secretstore
@@ -96,7 +97,8 @@ DEFAULTS = {
     "extra_reader": {"enabled": False, "file": "", "any_folder": False},      # a second read-only account: only the PATH of the file with its token (readpool.py)
     "github_app": {"enabled": False, "app_id": "", "key_path": "", "installation_id": "", "share_reads": False},      # an optional GitHub App for the READS (its own allowance); only the PATH of the key is kept here (github_app.py)
     "central": {"source": "off", "max_age_minutes": 120, "git_dir": ""},      # the central panel of the profile repository as a base line that spends no allowance (central_source.py): off | git | http
-    "ui": {"orientation": "auto", "rotate_seconds": 0, "screen1_tabs": "", "screen1_orientation": "auto", "screen2_tabs": "", "screen2_orientation": "auto", "screen3_tabs": "", "screen3_orientation": "auto"},   # the screens (docs/SCREENS.md): the orientation of the page, and which tabs each /screen/N shows
+    "ports": {"complete": 8765, "lite": 8766},      # the port of each edition (util/ports.py); --port wins, then MONITOR_PORT for the complete one
+    "ui": {"orientation": "auto", "rotate_seconds": 0, "screen1_tabs": "", "screen1_orientation": "auto", "screen2_tabs": "", "screen2_orientation": "auto", "screen3_tabs": "", "screen3_orientation": "auto", "now_sort": "ecosystem", "alerts_sort": "server"},   # the screens (docs/SCREENS.md): the orientation of the page, and which tabs each /screen/N shows
     "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
     "updates": {"check": True},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
     "airgapped": False,            # True: nothing is requested from the network except GitHub's data you asked for; the update check is off
@@ -2835,14 +2837,14 @@ def demo_main():
     i18n.cli_language() if "--lang" in " ".join(sys.argv) else None
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("--demo", action="store_true")
-    parser.add_argument("--port", type=int, default=8765)
+    parser.add_argument("--port", type=int, default=None)
     parser.add_argument("--no-browser", action="store_true")
     parser.add_argument("--lang")
     parser.add_argument("--lite", action="store_true")
     args, _rest = parser.parse_known_args()
     LITE["on"] = True       # the demo shows the page without the sentinel: its invented data are the runs, the figures and the history
     platform_compat.console_utf8()
-    server, url = demo_mode.start(sys.modules[__name__], args.port)
+    server, url = demo_mode.start(sys.modules[__name__], ports.resolve("complete", flag=args.port))
     from github_actions_monitor.util import banner
     banner.set_title("GitHub Actions Monitor DEMO")
     print(i18n.t("mon.demo", url=url))
@@ -2925,7 +2927,7 @@ def supervisor_main(argv):
     """Several accounts: this process is the supervisor (accounts_supervisor.py) and starts one monitor per account. Returns an exit code."""
     from github_actions_monitor.accounts import accounts
     from github_actions_monitor.accounts import accounts_supervisor
-    port = next((int(argv[i + 1]) for i, a in enumerate(argv) if a == "--port" and i + 1 < len(argv) and argv[i + 1].isdigit()), 8765)
+    port = ports.from_argv(argv, "complete")
     config = toolconfig.raw_config()
     i18n.set_language(i18n.detect(config.get("language")))
     platform_compat.console_utf8()
@@ -3009,7 +3011,7 @@ def main():
         print(i18n.t("mon.network_needs_admin"))
         return 1
     if not CHILD["account"] and not only_informs() and "--account" not in sys.argv[1:]:      # a second monitor on a port that a monitor already listens on would share it: say so and stop (an account process is started by its supervisor on a port of its own)
-        wanted = next((int(sys.argv[i + 1]) for i, a in enumerate(sys.argv) if a == "--port" and i + 1 < len(sys.argv) and sys.argv[i + 1].isdigit()), LITE_PORT if lite_requested() else 8765)
+        wanted = ports.from_argv(sys.argv, "lite" if lite_requested() else "complete")
         if exclusive.monitor_on(wanted):
             print(i18n.t("mon.already_running", port=wanted))
             return 1
@@ -3039,7 +3041,7 @@ def main():
     if not LITE["on"]:
         credential.apply_stored(state_dir())      # a login put in place with the administrator endpoint, or the file named by GH_TOKEN_FILE: first match of credential.stored()
     parser = argparse.ArgumentParser(description=i18n.t("mon.description"), formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--port", type=int, default=LITE_PORT if LITE["on"] else 8765, help=i18n.t("mon.help_port"))
+    parser.add_argument("--port", type=int, default=None, help=i18n.t("mon.help_port"))      # none = the port of the edition: ports.complete / ports.lite of the configuration file
     parser.add_argument("--lite", action="store_true", help=i18n.t("mon.help_lite"))
     parser.add_argument("--no-browser", action="store_true", help=i18n.t("mon.help_no_browser"))
     parser.add_argument("--discover", action="store_true", help=i18n.t("mon.help_discover"))
@@ -3059,6 +3061,7 @@ def main():
         parser.add_argument("--migrate-accounts", action="store_true", help=i18n.t("mon.help_migrate_accounts"))
         parser.add_argument("--apply", action="store_true", help=i18n.t("mon.help_apply"))
     args = parser.parse_args()
+    args.port = ports.resolve("lite" if LITE["on"] else "complete", flag=args.port)
     platform_compat.console_utf8()
     if args.about:
         from github_actions_monitor.ui import about

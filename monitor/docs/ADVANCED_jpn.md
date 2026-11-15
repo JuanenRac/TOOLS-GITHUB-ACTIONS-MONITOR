@@ -95,5 +95,6 @@
 - `logs.failed_step.enabled`, `github_app.share_reads` - docs/EXTRAS_jpn.md
 - `reports.workflow_hygiene.enabled`, `reports.queue.enabled`, `reports.release_view.enabled`, `reports.supply_chain.enabled` - docs/EXTRAS_jpn.md
 - `ai.skill` - docs/SKILLS_jpn.md
-- `ui.orientation`, `ui.screen1_tabs` - docs/SCREENS_jpn.md
+- `ui.orientation`, `ui.screen1_tabs`, `ui.now_sort`, `ui.alerts_sort` - docs/SCREENS_jpn.md
+- `ports.complete`, `ports.lite` - docs/DEPLOYMENT_jpn.md
 - `notify.users.enabled` - docs/NOTIFICATIONS_jpn.md

@@ -16,6 +16,7 @@ from pathlib import Path
 from github_actions_monitor.cli import export_status
 from github_actions_monitor import i18n
 from github_actions_monitor.util import platform_compat
+from github_actions_monitor.util import ports
 from github_actions_monitor.tool_version import TOOL_VERSION  # noqa: E402
 from github_actions_monitor.security import netguard
 
@@ -24,7 +25,7 @@ def main():
     i18n.cli_language()
     platform_compat.console_utf8()
     ap = argparse.ArgumentParser(description=i18n.t("lp.description"))
-    ap.add_argument("--port", type=int, default=8765, help=i18n.t("lp.help_port"))
+    ap.add_argument("--port", type=int, default=None, help=i18n.t("lp.help_port"))
     ap.add_argument("--json", action="store_true", help=i18n.t("lp.help_json"))
     ap.add_argument("--lang", metavar="CODE", help=i18n.t("lp.help_lang"))
     ap.add_argument("--version", action="store_true", help=i18n.t("lp.help_version"))
@@ -32,6 +33,7 @@ def main():
     ap.add_argument("--export-sign-queue", metavar="FILE", help=i18n.t("lp.help_export_queue"))
     ap.add_argument("--sign-trust", choices=("all", "verified", "unknown", "failed"), default="all", help=i18n.t("lp.help_sign_trust"))
     args = ap.parse_args()
+    args.port = ports.resolve("complete", flag=args.port)
     if args.lang:
         i18n.set_language(args.lang)
     if args.version:

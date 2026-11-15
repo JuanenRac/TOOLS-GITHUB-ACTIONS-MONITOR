@@ -57,6 +57,7 @@ NOTES = {
     "/api/auth/logout": ("POST", "sign out"),
     "/api/auth/me": ("GET", "who is signed in and with which role"),
     "/api/auth/me/notify": ("GET,POST", "the notification preferences of the signed-in user"),
+    "/api/auth/me/view": ("GET,POST", "the order of the lists of the page and the unfold-all choice that the signed-in user chose"),
     "/api/auth/notify": ("GET", "the notification dispatcher and the digests (administrators)"),
     "/api/auth/password": ("POST", "change my own password"),
     "/api/auth/users": ("GET,POST", "list and manage users (administrators)"),

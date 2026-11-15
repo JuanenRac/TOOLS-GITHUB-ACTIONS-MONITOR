@@ -95,5 +95,6 @@ Everything below is local and read only, and off unless it says it is on. Each h
 - `logs.failed_step.enabled`, `github_app.share_reads` - docs/EXTRAS.md
 - `reports.workflow_hygiene.enabled`, `reports.queue.enabled`, `reports.release_view.enabled`, `reports.supply_chain.enabled` - docs/EXTRAS.md
 - `ai.skill` - docs/SKILLS.md
-- `ui.orientation`, `ui.screen1_tabs` - docs/SCREENS.md
+- `ui.orientation`, `ui.screen1_tabs`, `ui.now_sort`, `ui.alerts_sort` - docs/SCREENS.md
+- `ports.complete`, `ports.lite` - docs/DEPLOYMENT.md
 - `notify.users.enabled` - docs/NOTIFICATIONS.md

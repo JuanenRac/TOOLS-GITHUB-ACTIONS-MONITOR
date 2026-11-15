@@ -16,6 +16,10 @@ Il monitor ascolta in uno di tre modi, e la pagina, `GET /api/accounts`, `bin/mo
 
 In modalità rete il supervisore di più account segue le stesse regole del monitor di un account: il token di accesso a ogni richiesta (cookie, intestazione o `POST /api/access`), blocco dopo token errati, il controllo di `Host`, TLS facoltativo con il tuo certificato, la seconda porta di chi è al computer (`listen.local_port`), e le chiavi che decidono l'esposizione, l'accesso a GitHub e le azioni su GitHub solo dal computer del monitor (una richiesta dalla rete raggiunge l'account contrassegnata come remota).
 
+## Le porte delle due edizioni
+
+L'edizione completa ascolta sulla porta 8765 e la lite sulla 8766, salvo che il file di configurazione ne indichi un'altra: `ports.complete` e `ports.lite` (un intero da 1024 a 65535, serve il riavvio; sono anche nella pagina Impostazioni, blocco Porte). I due numeri si leggono in un solo punto, quindi l'avvio, il controllo «c'è già un monitor su questa porta», `--doctor`, il controllo di salute (`python -m github_actions_monitor.cli.healthcheck`), la riga di comando (`--lite` parla con la porta lite), le viste da terminale e i lanciatori concordano. L'ordine è: `--port N` sulla riga di comando, poi `MONITOR_PORT` (lo impostano il servizio e il container; solo l'edizione completa), poi il file dell'edizione, poi quello dell'altra edizione (un menu può impostarle entrambe), poi il valore predefinito. L'edizione lite non prende mai la porta della completa: se entrambe indicano lo stesso numero, la lite mantiene 8766, e la pagina Impostazioni rifiuta di salvare lo stesso numero per entrambe. Se la porta è occupata, il monitor prende la successiva libera, fino a dieci sopra.
+
 ## Senza browser e il controllo di salute
 
 `python -m github_actions_monitor.service` è l'ingresso di un servizio: prepara le cartelle e il primo account dall'ambiente (vedi la tabella sotto) e avvia il monitor senza browser. `python bin/actions_monitor.py --no-browser --port 8765` vale ancora per un monitor che gestisci tu.

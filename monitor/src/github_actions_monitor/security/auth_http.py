@@ -272,6 +272,13 @@ def _endpoint(handler, config, cfg, method, path):
                 _send(handler, {"prefs": dispatcher.get_prefs(storage, context["user"]), "enabled": dispatcher.settings(config)["enabled"],
                                 "unseen": sum(len(dispatcher.pending(storage, a, context["user"])) for a in storage.list_accounts())})
             return False
+        if path == "/api/auth/me/view":      # the order of the lists of the page that this user chose (ui/ordering.py)
+            from github_actions_monitor.ui import ordering
+            context = _require(handler, storage, cfg, "viewer")
+            if context is None:
+                return False
+            _send(handler, {"view": ordering.get_view(storage, context["user"])})
+            return False
         return fail(handler, "not_found", 404)
     if method != "POST":
         return fail(handler, "not_found", 404)
@@ -304,6 +311,13 @@ def _endpoint(handler, config, cfg, method, path):
         return False
     if path.startswith("/api/auth/me/notify"):
         return _notify(handler, storage, cfg, config, context, body, path, address)
+    if path == "/api/auth/me/view":
+        from github_actions_monitor.ui import ordering
+        view, code = ordering.set_view(storage, context["user"], body)
+        if code:
+            return fail(handler, code, 404 if code == "user_unknown" else 400)
+        _send(handler, {"ok": True, "view": view})
+        return False
     if path.startswith("/api/auth/users"):
         if context["role"] != "admin":
             auth.audit(cfg, "denied", context["user"], context["role"], address, path, "denied", "forbidden_role")
