@@ -14,7 +14,7 @@ import time
 from datetime import datetime, timezone
 
 from github_actions_monitor.data_pipeline.analytics import BAD
-from github_actions_monitor.scoring import collector, engine
+from github_actions_monitor.scoring import collector, drop, engine
 
 LEDGER_DOC = "score_ledger"
 MIN_INTERVAL = 600          # seconds between two passes
@@ -25,7 +25,7 @@ SCHEMA = 1
 
 
 def empty_ledger(now):
-    return {"first_seen": now, "last_tick": 0, "runs": {}, "collab": {}}
+    return {"first_seen": now, "last_tick": 0, "runs": {}, "collab": {}, "drop_open": False}
 
 
 def clean_ledger(data, now):
@@ -37,6 +37,7 @@ def clean_ledger(data, now):
         ledger["first_seen"] = float(data["first_seen"])
     if isinstance(data.get("last_tick"), (int, float)) and not isinstance(data.get("last_tick"), bool):
         ledger["last_tick"] = float(data["last_tick"])
+    ledger["drop_open"] = data.get("drop_open") is True
     for key, row in (data.get("runs") or {}).items() if isinstance(data.get("runs"), dict) else []:
         if isinstance(row, list) and len(row) == 5 and isinstance(row[0], (int, float)) and row[1] in ("success", *BAD):
             ledger["runs"][str(key)] = row
@@ -127,6 +128,10 @@ def tick(storage, account_id, config, runs, collab_alerts, now=None, force=False
     update_ledger(ledger, runs, collab_alerts, now, keep_days, collab_known)
     ledger["last_tick"] = now
     snapshot = make_snapshot(ledger, cfg, now, account_id)
+    snapshot["drop"] = drop.detect(snapshot, cfg)
+    fresh = bool(snapshot["drop"]) and not ledger.get("drop_open")      # the moment the drop appears: the only time it goes out through the notification channels
+    ledger["drop_open"] = bool(snapshot["drop"])
     storage.save_doc(account_id, LEDGER_DOC, ledger)
     storage.save_score_snapshot(account_id, hour_key(now), snapshot)
+    snapshot = {**snapshot, "drop_new": fresh}
     return snapshot
