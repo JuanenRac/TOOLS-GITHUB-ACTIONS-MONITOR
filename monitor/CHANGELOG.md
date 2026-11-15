@@ -11,6 +11,10 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+### Added
+
+- **The metrics behind the account score are collected from the data the monitor already has**: success rate, the median and the 95th percentile of the duration, the time a failing workflow takes to recover, runs per day, how long collaboration items stay open and how many are still open, for any window of time. A number with nothing behind it is reported as missing and never as zero, and the amount of data behind every number is kept, so the score can say that there is not enough data instead of inventing one.
+
 ## [1.8.4]
 
 ### Added
