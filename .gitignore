@@ -26,6 +26,7 @@ monitor/analytics_history.json
 monitor/ai_actions_log.jsonl
 monitor/sentinel_ai_cache.json
 monitor/collab_state.json
+monitor/security_state.json
 monitor/alert_mutes.json
 monitor/ai_alerts_state.json
 monitor/ALERTS_BRIEF.md

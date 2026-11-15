@@ -363,6 +363,19 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinels.collab.rules.pr_review_pending_days` | `-` | sentinel | Days waiting for review |
 | `sentinels.collab.rules.watch_external_comments` | `-` | sentinel | Watch outsiders |
 | `sentinels.collab.search_api` | `-` | sentinel | Read issues and pull requests with the Search API |
+| `sentinels.security.enabled` | `-` | sentinel | Security sentinel on |
+| `sentinels.security.max_repos_per_tick` | `-` | sentinel | Repositories per round |
+| `sentinels.security.min_rate_remaining` | `-` | sentinel | Allowance kept free |
+| `sentinels.security.refresh_seconds` | `-` | sentinel | Security cycle |
+| `sentinels.security.repos` | `-` | sentinel | Repositories watched for security |
+| `sentinels.security.signals.branch.enabled` | `-` | sentinel | Branch protection |
+| `sentinels.security.signals.code_scanning.enabled` | `-` | sentinel | Code scanning alerts |
+| `sentinels.security.signals.code_scanning.min_severity` | `-` | sentinel | Code scanning: least severity |
+| `sentinels.security.signals.codeowners.enabled` | `-` | sentinel | CODEOWNERS file |
+| `sentinels.security.signals.dependabot.enabled` | `-` | sentinel | Dependabot alerts |
+| `sentinels.security.signals.dependabot.min_severity` | `-` | sentinel | Dependabot: least severity |
+| `sentinels.security.signals.secret.enabled` | `-` | sentinel | Secret scanning alerts |
+| `sentinels.security.signals.workflow.enabled` | `-` | sentinel | Workflow permissions |
 | `session_guard` (secure) | `true` | basic | One-use token for changes |
 | `show_unclassified` | `true` | general | Show unclassified repositories |
 | `signed_dir` | `-` | paths | Folder of signature records |

@@ -28,8 +28,8 @@ MIN_LEVELS = ("info", "warn", "bad")
 RANK = {"ok": 0, "info": 1, "warn": 2, "bad": 3, "critical": 3}
 DIGESTS = ("off", "hourly", "daily")
 DIGEST_SECONDS = {"hourly": 3600, "daily": 86400}
-SENTINELS = ("ci", "collab")
-FAMILIES = {"ci": ("red_new", "red_fixed", "stuck_new", "workflow_failed", "alerts_up", "ai_alert", "collab_new", "collab_fixed"),
+SENTINELS = ("ci", "collab", "security")
+FAMILIES = {"ci": ("red_new", "red_fixed", "stuck_new", "workflow_failed", "alerts_up", "ai_alert", "collab_new", "collab_fixed", "security_new", "security_fixed"),
             "release": ("pending_sign", "release_due"),
             "system": ("offline", "online", "rate_low", "credential_blind", "credential_back", "quota_warn", "quota_over", "quota_alert")}
 ROLE_FAMILIES = {"viewer": ("ci",), "maintainer": ("ci", "release"), "admin": ("ci", "release", "system")}
@@ -63,7 +63,7 @@ def family_of(kind):
 
 
 def sentinel_of(kind):
-    return "collab" if str(kind).startswith("collab_") else "ci"
+    return "collab" if str(kind).startswith("collab_") else ("security" if str(kind).startswith("security_") else "ci")
 
 
 def secret_name(user, channel):

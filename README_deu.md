@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2066_passing-brightgreen.svg" alt="2066 tests">
+  <img src="https://img.shields.io/badge/Tests-2103_passing-brightgreen.svg" alt="2103 tests">
 </p>
 
 > Überwacht die Workflows aller deiner Repositories und zeigt dir auf einer lokalen Seite, was rot ist, was hängt und was auf dich wartet.
@@ -45,8 +45,8 @@
 | | |
 |---|---|
 | **Reifegrad** | functional |
-| **Tests** | 2066 Testmethoden (`python -m unittest discover -s monitor/tests`) |
-| **Einstellungen** | 388 Einstellungen, alle mit Hilfe |
+| **Tests** | 2103 Testmethoden (`python -m unittest discover -s monitor/tests`) |
+| **Einstellungen** | 401 Einstellungen, alle mit Hilfe |
 | **Sprachen** | 8 (Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch) |
 | **Im CI getestet auf** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -278,6 +278,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/FIRST_STEPS_deu.md`](monitor/docs/FIRST_STEPS_deu.md): Ihre ersten fünf Minuten
 - [`monitor/docs/SENTINEL_deu.md`](monitor/docs/SENTINEL_deu.md): der Wächter und seine Prüfungen A1-A13
 - [`monitor/docs/COLLAB_deu.md`](monitor/docs/COLLAB_deu.md): der Collab-Wächter, der Reiter Alarme und die Stummschaltungen
+- [`monitor/docs/SENTINEL_SECURITY_deu.md`](monitor/docs/SENTINEL_SECURITY_deu.md): Der Sicherheitswächter: Dependabot, Code-Scanning, Geheimnisse, Branch-Schutz, Workflow-Berechtigungen und CODEOWNERS, und was er nicht prüfen konnte
 - [`monitor/docs/CLI_deu.md`](monitor/docs/CLI_deu.md): die Befehlszeile als Client des Monitors
 - [`monitor/docs/ACCOUNTS_deu.md`](monitor/docs/ACCOUNTS_deu.md): mehrere Konten, je ein Prozess
 - [`monitor/docs/QUOTAS_deu.md`](monitor/docs/QUOTAS_deu.md): Kontingente und Tarife von GitHub

@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2066_passing-brightgreen.svg" alt="2066 tests">
+  <img src="https://img.shields.io/badge/Tests-2103_passing-brightgreen.svg" alt="2103 tests">
 </p>
 
 > Surveille les workflows de tous vos dépôts et vous dit, sur une page locale, ce qui est rouge, ce qui est bloqué et ce qui vous attend.
@@ -45,8 +45,8 @@
 | | |
 |---|---|
 | **Maturité** | functional |
-| **Tests** | 2066 méthodes de test (`python -m unittest discover -s monitor/tests`) |
-| **Réglages** | 388 réglages, tous avec aide |
+| **Tests** | 2103 méthodes de test (`python -m unittest discover -s monitor/tests`) |
+| **Réglages** | 401 réglages, tous avec aide |
 | **Langues** | 8 (anglais, espagnol, allemand, français, italien, japonais, chinois et portugais) |
 | **Testé dans le CI sur** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -278,6 +278,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/FIRST_STEPS_fra.md`](monitor/docs/FIRST_STEPS_fra.md) : vos cinq premières minutes
 - [`monitor/docs/SENTINEL_fra.md`](monitor/docs/SENTINEL_fra.md) : la sentinelle et ses contrôles A1-A13
 - [`monitor/docs/COLLAB_fra.md`](monitor/docs/COLLAB_fra.md) : la sentinelle Collab, l'onglet Alertes et les sourdines
+- [`monitor/docs/SENTINEL_SECURITY_fra.md`](monitor/docs/SENTINEL_SECURITY_fra.md): La sentinelle de sécurité : Dependabot, analyse de code, secrets, protection des branches, permissions des workflows et CODEOWNERS, et ce qu'elle n'a pas pu vérifier
 - [`monitor/docs/CLI_fra.md`](monitor/docs/CLI_fra.md) : la ligne de commande comme client du moniteur
 - [`monitor/docs/ACCOUNTS_fra.md`](monitor/docs/ACCOUNTS_fra.md) : plusieurs comptes, un processus chacun
 - [`monitor/docs/QUOTAS_fra.md`](monitor/docs/QUOTAS_fra.md) : quotas et offres de GitHub
