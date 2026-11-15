@@ -2,20 +2,15 @@
 
 Ideas que no cupieron en la versión actual, sin orden prometido. Son direcciones, no compromisos; un issue o un pull request es la mejor forma de adelantar una.
 
-## En la 1.8.0 (la próxima versión)
+## Hecho en la 1.8.0
 
-Todo lo que sigue está escrito y probado; o ya está en la rama principal o espera en una pull request. Nada se da por demostrado con servicios reales (véase «Siguiente»).
-
-### Ya en la rama principal
+Todo lo que sigue se entregó en la serie 1.8 y está probado; nada se da por demostrado con servicios reales.
 
 - Una nueva organización de carpetas (el paquete en `src/`, la página, los ejemplos y los idiomas en `assets/`), con una herramienta de migración que mueve una instalación plana antigua sin borrar nada.
 - Una capa de almacenamiento tras una sola interfaz, con el soporte de ficheros que mantiene la disposición de `accounts/<id>/`, escrituras atómicas y copias de seguridad que cualquier soporte puede restaurar.
 - Un soporte SQLite opcional (apagado por defecto), una base por cuenta, migraciones con versión, un tiempo de espera ajustable y herramientas para pasar el estado entre el soporte de ficheros y SQLite en ambos sentidos, con una simulación previa.
 - El historial de cambios está traducido a los ocho idiomas hasta la 1.0.0 y una prueba lo mantiene completo.
 - Retención y rotación del historial (eventos y analíticas durante un número de días, borrar o archivar, una línea de auditoría por pasada, aviso de tamaño en el doctor; el estado de los centinelas y la configuración nunca se tocan).
-
-### Terminado y a la espera de fusionarse
-
 - Modo red: el freno de bloqueo vuelve a actuar antes de mirar el token, un proxy inverso declarado nunca se toma por este equipo, las lecturas remotas de los ajustes se limitan a lo que un cliente remoto puede cambiar y la guía de despliegue trae la receta completa.
 - El canal para la IA se limpia campo a campo, solo pasan direcciones de GitHub de formas cerradas y el gancho no entrega texto de registros, solo el repositorio, el workflow, el resultado y el enlace.
 - Las lecturas de identidad son siempre del usuario, una lectura se juzga con una lista blanca y el fichero de token de la segunda cuenta se queda dentro de la carpeta de cuentas.
@@ -26,10 +21,6 @@ Todo lo que sigue está escrito y probado; o ya está en la rama principal o esp
 - La aplicación de terminal edita listas y mapas.
 - Modo equipo (apagado por defecto): usuarios, roles (admin, maintainer, viewer) y sesiones guardados en el almacenamiento, página de acceso, un token Bearer para clientes que no son un navegador, errores JSON estables y una recuperación de un administrador desde la consola de este equipo. El modo individual sigue sin acceso y la edición lite nunca lo tiene.
 - Una página con más vida: iconos animados, bombillas de estado cuyo movimiento sigue su estado, respuestas al pasar, enfocar y pulsar; todo se apaga con movimiento reducido y es ligero en la edición lite.
-
-### Aún en cierre
-
-- Silencios que recuerdan quién los puso (necesita el modo equipo).
 
 ## Previsto, en este orden
 

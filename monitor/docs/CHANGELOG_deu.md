@@ -69,6 +69,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - Eine Anleitung zur Punktzahl in den acht Sprachen.
 
+### Geändert
+
+- Die Hilfe ist auf dem Stand der ganzen Reihe 1.8 und von 1.9.0: Das README des Repositorys und seine sieben Übersetzungen nannten die Version 1.8.1 und nichts von dem, was danach kam; jetzt schreibt der Generator die Version der Tabelle Auf einen Blick aus der Version des Werkzeugs, Was es tut nennt den Dienstmodus und das Docker-Image, mehrere Konten und das Team, die Speicherung, die Listen zum Sortieren und Einklappen und die Punktzahl, die Statustabelle hat die Zeilen des Neuen, der Abschnitt Sicherheit sagt, wie Netzwerk- und Teammodus geschützt sind, die Dokumentation listet jede Anleitung, die Anleitungen zur Befehlszeile, zu den KI-Werkzeugen und zu den Metriken nennen die Punktzahl, und die Roadmap stellt die Reihe 1.8 nicht mehr als nächstes Release dar. Ein neuer Test und eine Prüfung im Tor des Releases weisen eine Hilfe zurück, die eine andere Version nennt, eine Anleitung, die das README nicht aufführt, und ein README des Pakets mit alter Überschrift, und der Leitfaden zum Mitwirken verlangt, dass jede Version die ganze Hilfe liest.
+
 ### Behoben
 
 - Die Bilder des Reiters Diagramme passen wieder: Der Ring des Ergebnisses der letzten 24 Std. wurde von seinem Kasten abgeschnitten und seine Legende ragte aus der Zeichnung, die Balken der Dauern waren etwas höher als ihr Rahmen, und die letzte Stunde der Zeitleiste ragte rechts heraus. Die Zeilen des Reiters schrumpfen nicht mehr unter das, was ein Bild braucht (der Reiter scrollt stattdessen), die Legende des Rings wird nach ihren Wörtern bemessen und rückt unter den Ring, wenn sie daneben nicht passt, und die Ränder fassen die Hälfte der letzten Beschriftung. Eine neue Prüfung öffnet den Reiter in den acht Sprachen, breit und schmal, hell und dunkel, und misst jedes Bild.

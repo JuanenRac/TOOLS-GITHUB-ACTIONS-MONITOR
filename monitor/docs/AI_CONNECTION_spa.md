@@ -23,7 +23,7 @@ Un inventario de **señales**, las mismas que muestra la página: la pestaña Ah
 2. `ai_alerts.jsonl`: una línea por evento (abierta, reconocida, resuelta), con un id estable.
 3. `GET /api/ai/state`: todo el inventario como JSON versionado (`schema`, `edition`, `signals`, `act`, `watch`), solo lectura. `GET /api/sentinel/panels` da solo los paneles.
 4. `GET /api/ai/stream`: eventos en directo (SSE), reanudables, con límite de oyentes y de tiempo.
-5. Herramientas MCP (`bin/mcp_server.py`): `monitor_state`, `signals`, `alerts_open`, `diagnose`, `sentinel_panels`, `get_quota`; `act` (reconocer) solo con `--allow-ack`.
+5. Herramientas MCP (`bin/mcp_server.py`): `monitor_state`, `signals`, `alerts_open`, `diagnose`, `sentinel_panels`, `get_quota`, `get_score`; `act` (reconocer) solo con `--allow-ack`.
 6. El hook: `python bin/monitor_cli.py ai-hook install [--assistant|--cursor|--generic] [--scope project|user] [--dry-run]` (también `status` y `uninstall`) añade un pequeño script que da a la sesión de la IA el resumen al empezar y antes de terminar.
 
 ## Paso a paso

@@ -17,7 +17,7 @@ Un workflow en rojo no sirve de nada si nadie de los que trabajan en el reposito
 ## Cómo la lee una IA
 - Pon esto en las instrucciones de tu proyecto o skill: *«Al empezar, lee ALERTS_BRIEF.md (ruta) y di qué alertas reales hay abiertas.»*
 - O pregunta al monitor en marcha: `GET /api/ai/brief` (Markdown, o `?fmt=json`) y `GET /api/ai/alerts?since=SEGUNDOS`. Siguen las mismas reglas que el resto de la página (este equipo; con el modo red, el token de acceso).
-- O añade el servidor MCP (solo lectura): `python bin/mcp_server.py`, herramientas `get_alerts`, `get_red_repos`, `get_run_failure`, `get_quota`; `--allow-ack` añade `ack_alert` (solo estado local). Gemini CLI, Codex y VS Code (Copilot): añade el mismo comando como servidor stdio en sus ajustes MCP.
+- O añade el servidor MCP (solo lectura): `python bin/mcp_server.py`, herramientas `get_alerts`, `get_red_repos`, `get_run_failure`, `get_quota`, `get_score`; `--allow-ack` añade `ack_alert` (solo estado local). Gemini CLI, Codex y VS Code (Copilot): añade el mismo comando como servidor stdio en sus ajustes MCP.
 
 ## Avisos que te llegan
 - Una alerta real NUEVA va a los canales de notificación que ya configuraste (Ajustes > Notificaciones).

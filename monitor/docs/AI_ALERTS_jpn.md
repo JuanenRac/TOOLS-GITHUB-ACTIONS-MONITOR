@@ -17,7 +17,7 @@
 ## AIの読み方
 - プロジェクトやスキルの指示に次を入れます: *「開始時に ALERTS_BRIEF.md(パス)を読み、開いている実際のアラートを伝えること。」*
 - または動作中のモニターに問い合わせます: `GET /api/ai/brief`(Markdown、または `?fmt=json`)と `GET /api/ai/alerts?since=秒`。ページの他の部分と同じ規則です(このPC。ネットワークモードではアクセストークン)。
-- または MCP サーバー(読み取り専用)を追加します: `python bin/mcp_server.py`、ツール `get_alerts`、`get_red_repos`、`get_run_failure`、`get_quota`。`--allow-ack` で `ack_alert`(ローカル状態のみ)が加わります。Gemini CLI、Codex、VS Code(Copilot)では同じコマンドを MCP 設定に stdio サーバーとして追加します。
+- または MCP サーバー(読み取り専用)を追加します: `python bin/mcp_server.py`、ツール `get_alerts`、`get_red_repos`、`get_run_failure`、`get_quota`、`get_score`。`--allow-ack` で `ack_alert`(ローカル状態のみ)が加わります。Gemini CLI、Codex、VS Code(Copilot)では同じコマンドを MCP 設定に stdio サーバーとして追加します。
 
 ## 届く通知
 - 新しい実際のアラートは、すでに設定した通知チャネルに送られます(設定 > 通知)。

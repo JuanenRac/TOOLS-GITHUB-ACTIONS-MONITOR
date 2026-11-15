@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2053_passing-brightgreen.svg" alt="2053 tests">
+  <img src="https://img.shields.io/badge/Tests-2066_passing-brightgreen.svg" alt="2066 tests">
 </p>
 
 > 监视你所有仓库的工作流，并在一个本地页面上告诉你：哪些是红的、哪些卡住了、哪些在等你处理。
@@ -32,7 +32,7 @@
 
 | | |
 |---|---|
-| **版本** | **1.8.1** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **版本** | **1.9.0** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **需要** | Python 3.11+ 和 GitHub CLI（`gh auth login`）；不需要其他东西(终端视图使用可选的 `rich` 包) |
 | **打开** | 仅在 `127.0.0.1` 上的页面，支持八种语言 |
 | **写入 GitHub** | 绝不自行写入：只有你用明确的 `--go` 运行的批处理命令才会 |
@@ -45,7 +45,7 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 2053 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **测试** | 2066 个测试方法(`python -m unittest discover -s monitor/tests`) |
 | **设置** | 388 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
@@ -64,6 +64,10 @@
 | AI 工具连接与 MCP | 🟡 | 信息流、状态、事件流、钩子和 MCP 工具已用真实服务器和模拟客户端测试;尚无独立用户使用过。 |
 | Lite 版 | 🟡 | 已在 CI 中测试,与完整版共用通道和设置;迄今实际使用较少。 |
 | GitHub App、中央面板和节省模式 | 🟠 | 新功能:已用模拟服务器和文件测试;尚未长时间对真实服务运行。 |
+| 每个账户的评分 | 🟡 | 已用合成数据序列、测试数据和模拟服务器验证；尚未在真实账户上连续观察数周。 |
+| Docker 镜像与服务模式 | 🟡 | 镜像在 CI 中构建并验证（非 root、只读、登录被撤销）；作为长期运行服务的时间还不长。 |
+| 团队模式与多账户 | 🟡 | 已用真实进程和模拟用户验证；真实团队尚未长期使用。 |
+| 存储（文件与 SQLite） | 🟡 | 已用两种存储及其间的迁移验证；已使用数月的数据库尚未经历过升级。 |
 | Linux 和 macOS | 🟠 | 仅在 CI 中测试;日常使用在 Windows 上。 |
 
 <!-- glance:end -->
@@ -141,10 +145,14 @@
 - **哨兵**：安全警报、仓库卫生、陈旧的拉取请求、可发布的版本、等待签名的构建，以及通俗易懂的报告。
 - **Collab 哨兵与统一警报列表**：需要人来处理的未关闭 Issue 和拉取请求（被遗忘的、严重的、等待评审的、陈旧草稿、冲突），只读且按自己的周期运行；“警报”标签页把所有哨兵汇总成一个列表，可按来源筛选，并提供会自行结束的本地静音。
 - **状态栏、全屏与可排序的表格**：页面底部显示最重要的提示（以及显示全部提示的窗口）、连接、配额、最近一次读取、模式、地址和时钟；全屏按钮；“仓库”和“历史”可按一列或多列排序，并可自选列。
-- **作为客户端的命令行**：`bin/monitor_cli.py`（`status`、`health`、`alerts`、`accounts`、`live`、`doctor`）读取运行中监视器给出的信息，支持 `--json` 和稳定的退出码；从不向 GitHub 写入。
+- **作为客户端的命令行**：`bin/monitor_cli.py`（`status`、`health`、`alerts`、`accounts`、`live`、`doctor`、`score`）读取运行中监视器给出的信息，支持 `--json` 和稳定的退出码；从不向 GitHub 写入。
 - **两份面向 AI 的技能包**：简短的英文指南，分别给监视器内置的 AI(本地或来自提供商)和从外部与其交互的 AI(命令行、仅 HTTP 或文件、MCP、事件流)，由代码生成以确保没有遗漏；可用 `python bin/monitor_cli.py install-skill internal|external --dest 文件夹` 安装，或在设置的 AI 标签页中复制（`monitor/docs/SKILLS_zho.md`）。
 - **失败与经验**：本地的 CI 失败记录簿、把每个失败归入某个类别的规则、附带本可阻止该失败的防护的经验库（`monitor/docs/LESSONS_zho.md`）、24 小时和 7 天的趋势、`ai/LESSONS.md`、`/api/ai/lessons`，以及供任何 AI 工具使用的推送前简报；只读，不会有内容离开本机。
 - **各种屏幕尺寸与多块屏幕**：页面可适应从手机到 4K 的窗口，竖放或旋转均可，一台监视器最多可提供三块屏幕（`/screen/1` 到 `/screen/3`），每块都有自己的标签页和方向（`monitor/docs/SCREENS_zho.md`）。
+- **每个账户一个评分**：由 CI 的可靠性、速度、恢复时间以及协作告警被关闭的快慢得出的 0 到 100 的数值、A 到 E 的等级和趋势；无法支撑数值时显示“校准中”或“数据不足”，并说明尚未涵盖的内容，显示在页面页眉，有 `score` 命令，下降时会提醒，并出现在指标和 MCP 服务器中（`monitor/docs/SCORE.md`）。
+- **作为服务运行**：官方 Docker 镜像（非 root、只读）、带可选代理的 Compose 文件、systemd 单元、深度健康检查，以及创建第一个管理员的命令（`monitor/docs/DEPLOYMENT.md`）。
+- **多账户、团队和数据的存放位置**：每个账户一个进程，带角色和各自账户的用户，文件分放在 `config/`、`data/`、`logs/` 和 `ai/`，可选的 SQLite 存储及其保留与备份，端口成为设置项（`monitor/docs/ACCOUNTS.md`、`monitor/docs/STORAGE.md`、`monitor/docs/LAYOUT.md`）。
+- **可排序、可折叠的列表**：“正在发生”有七种排序方式，告警标签页有九种，并有折叠或展开所有仓库的按钮；该选择按用户记忆。
 - **每位用户的通知**：在团队模式下，每位用户在页面的面板中选择渠道（ntfy、Teams、电子邮件）、最低级别和汇总（`monitor/docs/NOTIFICATIONS_zho.md`）。
 - **设置页面**：在浏览器中修改路径、间隔、配额和开关；只有固定且经过验证的键，每次保存前都会备份。
 - **图表与历史**：计算分钟数、失败和成功，配有动画条形图和每日历史（尊重“减少动态效果”设置）。
@@ -208,6 +216,7 @@
 - 它只监听 `127.0.0.1`，并拒绝 `Host` 或 `Origin` 不是本地的请求。切勿绑定到 `0.0.0.0`：它没有登录。
 - 它不保存任何令牌：使用你自己的 `gh`（除非你在“设置 > 高级”中开启监视器的可选令牌）。
 - 它不会自行向 GitHub 写入任何内容。只有 `dispatch --go`、`dispatch --real` 和 `finalize --execute` 会写入，且仅在你运行它们时。
+- 网络模式和团队模式默认关闭；开启后，登录、角色、锁定和审计日志保护页面，每个请求只针对一个账户进行判断（`monitor/docs/DEPLOYMENT.md`、`monitor/docs/ACCOUNTS.md`）。
 - **分析**:每个工作流的时长、排队时间和每个步骤的 p50 / p95,不稳定的工作流(在同一提交上先失败后通过)以及变慢的工作流;导出到 Prometheus 和 Grafana。
 - **节省配额并能应对断网**:条件读取(304 不消耗任何配额)以及带离线横幅、可自动恢复的“最后画面”模式。
 - **入站 Webhook 与通知**:已签名的事件实时更新仓库;可选地向 Telegram、Discord、Slack、Matrix、MQTT 或本地地址发送消息(绝不写入 GitHub)。
@@ -275,6 +284,12 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/MODES_zho.md`](monitor/docs/MODES_zho.md)：工作模式：普通、快速和极速
 - [`monitor/docs/AI_CONNECTION_zho.md`](monitor/docs/AI_CONNECTION_zho.md): 连接 AI 工具:监视器说的一切,以信号形式出现在简报、端点、MCP 工具和钩子中
 - [`monitor/docs/QUOTA_zho.md`](monitor/docs/QUOTA_zho.md): 更多配额,更少消耗:节省模式、中央面板、GitHub App 以及如何共享配额
+- [`monitor/docs/EXTRAS_zho.md`](monitor/docs/EXTRAS_zho.md): 可选附加功能：失败步骤的日志和 GitHub App 的只读令牌
+- [`monitor/docs/SCORE_zho.md`](monitor/docs/SCORE_zho.md): 账户评分：各部分、状态、API、页眉中的标签、告警和设置
+- [`monitor/docs/STORAGE_zho.md`](monitor/docs/STORAGE_zho.md): 存储与保留：文件或 SQLite、备份、迁移以及保留的内容
+- [`monitor/docs/ADVANCED_zho.md`](monitor/docs/ADVANCED_zho.md): 高级功能（默认全部关闭）
+- [`monitor/docs/AI_ALERTS_zho.md`](monitor/docs/AI_ALERTS_zho.md): 给 AI 的警报：事件流、简报、钩子和数据流
+- [`monitor/docs/AUDIT_PACKAGE_zho.md`](monitor/docs/AUDIT_PACKAGE_zho.md): 审计员资料包
 
 ## 参与贡献
 

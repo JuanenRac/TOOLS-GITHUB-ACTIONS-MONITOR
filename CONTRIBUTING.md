@@ -13,6 +13,7 @@
 5. **Small steps**: one change per pull request, with the matching line in `CHANGELOG.md`.
 6. **Pictures**: edit `docs/architecture.json` or `docs/structure.json` and run `python tools/make_architecture.py` / `python tools/make_structure.py`; never edit the SVG by hand.
 7. **Changelog in eight languages**: every new entry of `monitor/CHANGELOG.md` gets its translation in `monitor/docs/CHANGELOG_<spa|deu|fra|ita|jpn|zho|por>.md` (same versions and sections; an entry not yet translated keeps the English text under a translated notice). `python tools/make_help_index.py --check` and the release gate fail when a version is missing in a translation.
+8. **Every version reviews the whole help**: before a release (in its release pull request) read EVERY help topic - the README of the repository and its translations (At a glance, What it does, Project status, Tests, Repository structure, Documentation, Security), every guide of `monitor/docs/`, the quickstarts and the READMEs of the package - and fix any figure, version, command, path, picture or list of features that went stale, in the eight languages. The generators and the tests of the help (`tools/make_glance.py`, `tools/make_help_index.py`, `tools/make_screenshots.py`, `monitor/tests/test_190_help_current.py`) catch only part of it.
 
 ## Refreshing a status dashboard after each release
 
