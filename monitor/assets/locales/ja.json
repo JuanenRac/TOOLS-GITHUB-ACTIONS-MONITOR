@@ -2971,5 +2971,20 @@
  "ui.cov_atleast": "合計で少なくとも {n} 件",
  "ui.sampling_low": "{n} 件のリポジトリはカバー範囲が狭く、実行一覧が数分しかさかのぼれないため、古い失敗が見えないことがあります。リポジトリごとの実行数を増やすか、二度目の確認をオンにしてください。",
  "ui.sampling_estimate": "{n} 件のリポジトリで1時間あたり約 {est} リクエスト(直近1時間で {used} 件使用)。GitHub の上限は1時間 5,000 件です。",
- "ui.sampling_waiting": "リクエスト予算を使い切りました。{n} 件のリポジトリは次の1時間まで待機し、赤いものを先に読みます。"
+ "ui.sampling_waiting": "リクエスト予算を使い切りました。{n} 件のリポジトリは次の1時間まで待機し、赤いものを先に読みます。",
+ "ui.cfg_b_causes": "共通の原因と失敗したジョブ",
+ "evt.red_cause": "共有ワークフロー {shared} が原因で CI が赤：{repos} 個のリポジトリの {count} 件のワークフロー",
+ "ui.a2_cause": "共通の原因",
+ "ui.a2_cause_line": "{shared} は {repos} 個のリポジトリの赤い {count} 件のワークフローから呼ばれています",
+ "ui.a2_failed_jobs": "{total} 件中 {failed} 件のジョブが失敗",
+ "cfg.f.ci.group.reusable": "共有ワークフローごとに赤をまとめる",
+ "cfg.h.ci.group.reusable": "既定ではオフ。オンにすると、同じ再利用可能ワークフローを呼ぶ赤のワークフローは1つの原因とみなされ、赤の一覧にグループ行が表示され、新しい赤の通知も影響数とともに1回だけ伝えます。赤の行は隠れません。",
+ "cfg.f.ci.group.min": "共通の原因とみなすワークフロー数",
+ "cfg.h.ci.group.min": "再利用可能ワークフローは、赤のワークフローがこの数以上になると共通の原因として示されます（既定 2）。",
+ "cfg.f.ci.failed_jobs.enabled": "赤い実行でどのジョブが失敗したか表示する",
+ "cfg.h.ci.failed_jobs.enabled": "既定ではオフ。オンにすると、赤い実行ごとにジョブを一度だけ読み取り（1回の呼び出し、1サイクルに数件）、赤の行に失敗したジョブをプラットフォーム別にまとめて表示します。",
+ "cfg.f.ci.failed_jobs.max_per_cycle": "1サイクルで読む実行数",
+ "cfg.h.ci.failed_jobs.max_per_cycle": "1サイクルでジョブを読む赤い実行の最大数（1件につき1回の呼び出し、既定 4）。実行が変わらない間は結果を保持します。",
+ "cfg.f.ci.failed_jobs.group_by": "ジョブのグループ化の基準",
+ "cfg.h.ci.failed_jobs.group_by": "auto（既定）：ジョブ名のシステム（ubuntu、windows、macos など）、なければマトリクスの最初のパラメータ、なければスラッシュの前の部分。platform、matrix、prefix はいずれかを強制します。"
 }

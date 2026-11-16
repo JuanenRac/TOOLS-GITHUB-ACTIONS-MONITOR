@@ -2971,5 +2971,20 @@
  "ui.cov_atleast": "al menos {n} ejecuciones en total",
  "ui.sampling_low": "{n} repositorios tienen cobertura baja: su lista de ejecuciones solo llega unos minutos atrás, así que un fallo más antiguo puede no verse. Sube las ejecuciones por repositorio o activa la segunda mirada.",
  "ui.sampling_estimate": "Unas {est} peticiones por hora para {n} repositorios ({used} usadas en la última hora); el límite de GitHub es de 5.000 por hora.",
- "ui.sampling_waiting": "Presupuesto de peticiones agotado: {n} repositorios esperan a la próxima hora; los que están en rojo se leen primero."
+ "ui.sampling_waiting": "Presupuesto de peticiones agotado: {n} repositorios esperan a la próxima hora; los que están en rojo se leen primero.",
+ "ui.cfg_b_causes": "Causas compartidas y jobs fallidos",
+ "evt.red_cause": "CI en rojo por el workflow compartido {shared}: {count} workflows en {repos} repositorios",
+ "ui.a2_cause": "Causa compartida",
+ "ui.a2_cause_line": "{shared} lo llaman {count} workflows en rojo de {repos} repositorios",
+ "ui.a2_failed_jobs": "Han fallado {failed} de {total} jobs",
+ "cfg.f.ci.group.reusable": "Agrupar rojos por workflow compartido",
+ "cfg.h.ci.group.reusable": "Desactivado por defecto. Activado: los workflows en rojo que llaman al mismo workflow reutilizable tienen una causa; la lista de rojos muestra una línea de grupo y la notificación de los rojos nuevos lo dice una vez con el número de afectados en lugar de una por cada uno. No se oculta ninguna fila roja.",
+ "cfg.f.ci.group.min": "Workflows necesarios para una causa compartida",
+ "cfg.h.ci.group.min": "Un workflow reutilizable se señala como causa compartida a partir de tantos workflows en rojo (por defecto 2).",
+ "cfg.f.ci.failed_jobs.enabled": "Mostrar qué jobs de un run en rojo han fallado",
+ "cfg.h.ci.failed_jobs.enabled": "Desactivado por defecto. Activado: de cada run en rojo el monitor lee sus jobs una vez (una llamada, unos pocos runs por ciclo) y la fila roja dice qué jobs han fallado, agrupados por plataforma, para que un workflow con muchos jobs no diga solo rojo.",
+ "cfg.f.ci.failed_jobs.max_per_cycle": "Runs leídos por ciclo",
+ "cfg.h.ci.failed_jobs.max_per_cycle": "Máximo de runs en rojo cuyos jobs se leen en un ciclo (una llamada cada uno, por defecto 4). La respuesta se conserva mientras el run no cambie.",
+ "cfg.f.ci.failed_jobs.group_by": "Agrupar jobs por",
+ "cfg.h.ci.failed_jobs.group_by": "auto (por defecto): el sistema en el nombre del job (ubuntu, windows, macos...), si no el primer parámetro de la matriz, si no la parte antes de la barra. platform, matrix y prefix fuerzan uno de ellos."
 }

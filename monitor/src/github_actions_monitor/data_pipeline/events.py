@@ -24,6 +24,7 @@ from pathlib import Path
 
 from github_actions_monitor import i18n
 from github_actions_monitor.app import toolconfig
+from github_actions_monitor.data_pipeline import causes
 from github_actions_monitor.security import envguard, private_io
 from github_actions_monitor.storage import locks, state_io
 
@@ -45,7 +46,8 @@ def summarize(snapshot):
     """The few facts the feed cares about, as plain comparable data."""
     a1, a2, a3, a4 = (snapshot.get(k) or {} for k in ("a1", "a2", "a3", "a4"))
     reds = {f"{r.get('repo')}|{r.get('workflow')}": {"repo": r.get("repo"), "workflow": r.get("workflow"), "url": r.get("url"),
-                                                     "streak": r.get("streak"), "since": r.get("since")} for r in a2.get("red") or []}
+                                                     "streak": r.get("streak"), "since": r.get("since"),
+                                                     "reusable": r.get("reusable") or []} for r in a2.get("red") or []}
     stuck = {f"{r.get('repo')}|{r.get('name')}": {"repo": r.get("repo"), "name": r.get("name"), "url": r.get("url")} for r in a1.get("stuck") or []}
     alerts = {}
     for row in a3.get("rows") or []:
@@ -75,6 +77,7 @@ def diff(old, new, loaded):
     for key, r in new["reds"].items():
         if key not in old["reds"]:
             ev("red_new", "bad", r["repo"], r.get("url"), repo=r["repo"], workflow=r["workflow"])
+            events[-1]["reusable"] = r.get("reusable") or []      # the reusable workflows it calls: the same cause for many is told once (ci.group.reusable)
     for key, r in old["reds"].items():
         if key not in new["reds"]:
             ev("red_fixed", "ok", r["repo"], r.get("url"), repo=r["repo"], workflow=r["workflow"])
@@ -113,7 +116,7 @@ def diff(old, new, loaded):
             ev("rate_low", "warn", "", left=new["rate"])
         elif old["rate"] < LOW_RATE <= new["rate"]:
             ev("rate_ok", "ok", "", left=new["rate"])
-    return events
+    return causes.group_events(events)
 
 
 SHELLS = frozenset({"sh", "bash", "zsh", "dash", "ash", "ksh", "csh", "tcsh", "fish", "cmd", "powershell", "pwsh", "wscript", "cscript", "mshta", "env", "xargs", "busybox"})

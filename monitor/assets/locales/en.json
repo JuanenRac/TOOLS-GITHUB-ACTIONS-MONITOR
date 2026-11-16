@@ -2971,5 +2971,20 @@
  "ui.cov_atleast": "at least {n} runs in total",
  "ui.sampling_low": "{n} repositories have low coverage: their list of runs reaches back only a few minutes, so an older failure may not be seen. Raise the runs per repository or turn on the second look.",
  "ui.sampling_estimate": "About {est} requests per hour for {n} repositories ({used} used in the last hour); the allowance of GitHub is 5,000 per hour.",
- "ui.sampling_waiting": "Request budget spent: {n} repositories wait for the next hour, the ones with red are read first."
+ "ui.sampling_waiting": "Request budget spent: {n} repositories wait for the next hour, the ones with red are read first.",
+ "ui.cfg_b_causes": "Shared causes and failed jobs",
+ "evt.red_cause": "CI is red through the shared workflow {shared}: {count} workflows in {repos} repositories",
+ "ui.a2_cause": "Shared cause",
+ "ui.a2_cause_line": "{shared} is called by {count} red workflows in {repos} repositories",
+ "ui.a2_failed_jobs": "{failed} of {total} jobs failed",
+ "cfg.f.ci.group.reusable": "Group reds by shared workflow",
+ "cfg.h.ci.group.reusable": "Off by default. On: red workflows that call the same reusable workflow have one cause; the red list shows a group line for it and the notification of the new reds says it once with the number affected instead of once for each. No red row is hidden.",
+ "cfg.f.ci.group.min": "Workflows needed for a shared cause",
+ "cfg.h.ci.group.min": "A reusable workflow is named as a shared cause from this many red workflows (default 2).",
+ "cfg.f.ci.failed_jobs.enabled": "Show which jobs of a red run failed",
+ "cfg.h.ci.failed_jobs.enabled": "Off by default. On: for each red run the monitor reads its jobs once (one call, a few runs per cycle) and the red row says which jobs failed, grouped by platform, so a workflow with many jobs does not just say red.",
+ "cfg.f.ci.failed_jobs.max_per_cycle": "Runs read per cycle",
+ "cfg.h.ci.failed_jobs.max_per_cycle": "The most red runs whose jobs are read in one cycle (one call each, default 4). The answer is kept while the run stays the same.",
+ "cfg.f.ci.failed_jobs.group_by": "Group jobs by",
+ "cfg.h.ci.failed_jobs.group_by": "auto (default): the system in the name of the job (ubuntu, windows, macos...), else the first parameter of the matrix, else the part before the slash. platform, matrix and prefix force one of those."
 }
