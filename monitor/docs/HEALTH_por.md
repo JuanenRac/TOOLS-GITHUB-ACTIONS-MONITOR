@@ -19,7 +19,7 @@ Só Complete. Duas vistas só de leitura, feitas com o que o monitor já tem (ex
 | Atividade | quando começou a última execução e quantas houve em 7 dias |
 | Quem o viu | o ciclo de vida de cada sentinela: saudável, degradada, em pausa, com erro ou desligada |
 
-O estado é **mau** (um fluxo vermelho, ou um alerta de nível crítico ou erro), **aviso** (um alerta de aviso ou uma execução encravada), **bom** ou **não visto** (nada com que julgar). Um repositório que nenhuma sentinela viu, ou que uma sentinela não conseguiu ler, nunca aparece como bom: diz «não visto por completo por» e enumera quem. O risco é o número pelo qual a classificação se ordena: cada fluxo vermelho (30), execução encravada (10), alerta crítico (25), de erro (10), de aviso (3) e informativo (1) soma pontos, iguais para todos os repositórios.
+O estado é **mau** (um fluxo vermelho, ou um alerta de nível crítico ou erro), **aviso** (um alerta de aviso ou uma execução encravada), **bom** ou **não visto** (nada com que julgar). Um repositório que nenhuma sentinela viu, ou que uma sentinela não conseguiu ler, nunca aparece como bom: diz «não visto por completo por» e enumera quem. O risco é o número pelo qual a classificação se ordena: cada fluxo vermelho (30), execução encravada (10), alerta crítico (25), de erro (10), de aviso (3) e informativo (1) soma pontos, iguais para todos os repositórios. Quando todos os sentinelas estão em erro, em pausa ou degradados (ou todos desligados e nada correu numa semana), um repositório calmo é mostrado como por ver, nunca como OK, e a sua linha na classificação leva um asterisco e nomeia os sentinelas que não o conseguiram ler (`not_fully_seen`; os totais também os contam).
 
 ## Onde vê-la
 

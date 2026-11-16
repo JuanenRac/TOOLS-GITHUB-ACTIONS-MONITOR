@@ -19,7 +19,7 @@ Complete only. Two read-only views, made from what the monitor already holds (ru
 | Activity | when the last run started and how many runs there were in 7 days |
 | What looked at it | the lifecycle of each sentinel: healthy, degraded, paused, error or off |
 
-The state is **bad** (a red workflow, or an alert of level critical or error), **warning** (a warning alert or a stuck run), **OK**, or **not seen** (nothing to judge by). A repository that no sentinel looked at, or that a sentinel could not read, is never shown as OK: it says "not fully seen by" and lists who. The risk is the number the ranking sorts by: every red workflow (30), stuck run (10), critical alert (25), error (10), warning (3) and info (1) adds points, the same for every repository.
+The state is **bad** (a red workflow, or an alert of level critical or error), **warning** (a warning alert or a stuck run), **OK**, or **not seen** (nothing to judge by). A repository that no sentinel looked at, or that a sentinel could not read, is never shown as OK: it says "not fully seen by" and lists who. The risk is the number the ranking sorts by: every red workflow (30), stuck run (10), critical alert (25), error (10), warning (3) and info (1) adds points, the same for every repository. When every sentinel is in error, paused or degraded (or all are off and nothing has run for a week) a quiet repository is shown as not seen, never as OK, and its row in the ranking is marked with an asterisk and lists the sentinels that could not read it (`not_fully_seen`; the totals count them too).
 
 ## Where to see it
 

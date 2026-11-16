@@ -19,7 +19,7 @@ Solo Complete. Dos vistas de solo lectura, hechas con lo que el monitor ya tiene
 | Actividad | cuándo empezó la última ejecución y cuántas hubo en 7 días |
 | Quién lo miró | el ciclo de vida de cada centinela: sano, degradado, en pausa, con error o apagado |
 
-El estado es **malo** (un flujo en rojo, o una alerta de nivel crítico o error), **aviso** (una alerta de aviso o una ejecución atascada), **bien** o **sin ver** (no hay nada con qué juzgar). Un repositorio que ningún centinela miró, o que un centinela no pudo leer, nunca se muestra como bien: dice «no visto del todo por» y enumera quién. El riesgo es el número por el que se ordena la clasificación: cada flujo rojo (30), ejecución atascada (10), alerta crítica (25), de error (10), de aviso (3) e informativa (1) suma puntos, igual para todos los repositorios.
+El estado es **malo** (un flujo en rojo, o una alerta de nivel crítico o error), **aviso** (una alerta de aviso o una ejecución atascada), **bien** o **sin ver** (no hay nada con qué juzgar). Un repositorio que ningún centinela miró, o que un centinela no pudo leer, nunca se muestra como bien: dice «no visto del todo por» y enumera quién. El riesgo es el número por el que se ordena la clasificación: cada flujo rojo (30), ejecución atascada (10), alerta crítica (25), de error (10), de aviso (3) e informativa (1) suma puntos, igual para todos los repositorios. Cuando todos los centinelas están en error, en pausa o degradados (o todos apagados y no ha corrido nada en una semana), un repositorio tranquilo se muestra como sin ver, nunca como OK, y su fila en el ranking lleva un asterisco y nombra los centinelas que no pudieron leerlo (`not_fully_seen`; los totales también los cuentan).
 
 ## Dónde verla
 
