@@ -15,6 +15,7 @@ set "PYTHONPATH=%~dp0src"
 :menu
 py -3 -m github_actions_monitor.cli.launcher_msg menu
 for /f "delims=" %%p in ('py -3 -m github_actions_monitor.cli.launcher_msg choose') do set "ask=%%p"
+set "op="
 set /p op=%ask% 
 if "%op%"=="1" py -3 -m github_actions_monitor.cli.gha_dispatch_all plan
 if "%op%"=="2" py -3 -m github_actions_monitor.cli.gha_dispatch_all dispatch --go
