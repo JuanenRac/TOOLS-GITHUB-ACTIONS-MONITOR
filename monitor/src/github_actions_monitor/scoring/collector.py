@@ -6,8 +6,8 @@ For one window of time [start, end) it computes, from the runs that STARTED insi
 
   success_rate               successes / (successes + failures); cancelled, skipped and unfinished runs are not counted either way
   duration_p50, duration_p95 seconds of the successful runs
-  mttr                       median seconds from the first failure of a workflow to its next success (only recoveries that ended inside the window); 0 when the window has runs and no failure at all
-                             (nothing had to recover: that is data, not a gap), None while a failure has not recovered yet
+  mttr                       median seconds from the first failure of a workflow to its next success (a workflow that is still red at the end of the window counts too, with the time it has been red so far, a lower bound that grows while the red lasts);
+                             0 when the window has runs and no failure at all (nothing had to recover: that is data, not a gap), None only when there is no failure to measure
   throughput                 finished runs per day
   collab_resolution_time     median seconds an item of the collaboration sentinel stayed open (only items closed inside the window)
   collab_open                items still open at the end of the window
@@ -51,8 +51,9 @@ def runs_in_window(runs, start, end):
     return out
 
 
-def recoveries(timed_runs):
-    """Seconds each workflow stayed red: from its first failure to the next success of the same repository and workflow."""
+def red_spans(timed_runs, end=None):
+    """(closed, still_open): the seconds each workflow stayed red from its first failure to the next success of the same repository and workflow, and, when `end` is given,
+    the seconds the workflows that are still red at `end` have been red so far (censored times: the real time is at least that long)."""
     open_since, spans = {}, []
     for t, run in timed_runs:
         key = (run.get("repo"), run.get("name"))
@@ -61,7 +62,13 @@ def recoveries(timed_runs):
             open_since.setdefault(key, t)
         elif conclusion == "success" and key in open_since:
             spans.append(max(0.0, t - open_since.pop(key)))
-    return spans
+    still_open = [max(0.0, end - since) for since in open_since.values()] if end is not None else []
+    return spans, still_open
+
+
+def recoveries(timed_runs):
+    """Seconds each workflow stayed red until it recovered (only the recoveries that happened)."""
+    return red_spans(timed_runs)[0]
 
 
 def collect_runs(runs, start, end):
@@ -70,16 +77,17 @@ def collect_runs(runs, start, end):
     good = [r for _, r in timed if r.get("conclusion") == "success"]
     bad = [r for _, r in timed if r.get("conclusion") in BAD]
     seconds = [r["seconds"] for r in good if isinstance(r.get("seconds"), (int, float)) and not isinstance(r.get("seconds"), bool) and r["seconds"] > 0]
-    spans = recoveries(timed)
+    spans, unrecovered = red_spans(timed, end)
+    measured = spans + unrecovered
     judged = len(good) + len(bad)
     quiet = judged > 0 and not bad
     days = max((end - start) / DAY, 1e-9)
     return {
         "success_rate": (len(good) / judged) if judged else None,
         "duration_p50": percentile(seconds, 50), "duration_p95": percentile(seconds, 95),
-        "mttr": percentile(spans, 50) if spans else (0.0 if quiet else None),
+        "mttr": percentile(measured, 50) if measured else (0.0 if quiet else None),
         "throughput": (judged / days) if judged else None,
-        "samples": {"runs": judged, "durations": len(seconds), "recoveries": len(spans)},
+        "samples": {"runs": judged, "durations": len(seconds), "recoveries": len(spans), "recoveries_open": len(unrecovered)},
     }
 
 

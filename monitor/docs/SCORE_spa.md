@@ -17,7 +17,7 @@ Una suma ponderada de cuatro partes, cada una de 0 a 100. Una parte vale 100 en 
 |---|---|---|---|---|
 | Fiabilidad | 30 | proporción de ejecuciones terminadas que salen bien (las canceladas y omitidas no cuentan) | 98 % | 50 % |
 | Velocidad | 15 | percentil 95 de la duración de las ejecuciones correctas | 10 min | 60 min |
-| Recuperación | 15 | tiempo mediano desde el primer fallo de un flujo hasta su siguiente éxito | 30 min | 24 h |
+| Recuperación | 15 | tiempo mediano desde el primer fallo de un flujo hasta su siguiente éxito; un flujo que sigue en rojo cuenta el tiempo que lleva en rojo hasta ahora | 30 min | 24 h |
 | Colaboración | 15 | tiempo mediano que una alerta del centinela de colaboración está abierta hasta que desaparece | 2 días | 14 días |
 | Seguridad | 25 | los puntos que los hallazgos abiertos del centinela de seguridad restan a 100 (solo mientras ese centinela está activo) | 0 puntos | 100 puntos |
 
@@ -32,6 +32,8 @@ La puntuación nunca muestra un número que no pueda respaldar. La respuesta sie
 - **scored** (puntuada): un número, una letra y una tendencia. Una parte sin datos se deja fuera y las demás se reescalan; eso baja la `coverage` (por ejemplo 0,8 si el centinela de colaboración está apagado). Nunca cuenta como 0 ni como 100.
 
 La seguridad es una parte como las demás, pero solo tiene datos mientras el centinela de seguridad está activo y ha mirado suficientes repositorios. Sin él, la respuesta dice `complete: false` y lista `security` en `missing_parts`, y las demás partes se reescalan, así que el número nunca se lee como un todo en orden. GitHub no da histórico de los hallazgos, así que la parte de seguridad es la misma en la ventana y en la anterior: la tendencia muestra lo que hicieron la CI y la colaboración. Los pesos son 30, 15, 15, 15 y 25 por defecto. Una ventana con ejecuciones y ningún fallo no tiene nada que recuperar: su parte de recuperación es completa, como un hecho y no como un hueco.
+
+Un flujo que sigue en rojo al final de la ventana no se olvida: la parte de recuperación cuenta el tiempo que lleva en rojo hasta ahora, una cota inferior que crece mientras dura el rojo, así que un fallo que nadie arregla baja más el número cada hora. Un fallo arreglado cuenta su tiempo real. Un relanzamiento de una ejecución cuenta como una ejecución más del flujo, de modo que se ven el primer intento fallido y el segundo en verde. Si actualizas desde una versión anterior, los números de una cuenta con un flujo en rojo pueden ser más bajos que antes.
 
 ## La ventana
 

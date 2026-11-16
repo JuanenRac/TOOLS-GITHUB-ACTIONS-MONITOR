@@ -200,5 +200,39 @@ class Security(unittest.TestCase):
         self.assertEqual(r["coverage"], 0.6)
 
 
+
+class UnrecoveredFailure(unittest.TestCase):
+    """A failure nobody fixes must cost points: the two accounts of the audit, with the same runs but for the recovery."""
+
+    def _runs(self, fixed_after):
+        out = [{"repo": "a/x", "name": "ci", "status": "completed", "conclusion": "success", "seconds": 120, "started": 1000.0 + i * 3600} for i in range(30)]
+        out.append({"repo": "a/x", "name": "deploy", "status": "completed", "conclusion": "failure", "seconds": 60, "started": 1000.0 + 40 * 3600})
+        if fixed_after is not None:
+            out.append({"repo": "a/x", "name": "deploy", "status": "completed", "conclusion": "success", "seconds": 60, "started": 1000.0 + 40 * 3600 + fixed_after})
+        return out
+
+    def _score(self, fixed_after, end):
+        cfg = engine.settings({"score": {"weights": {"security": 0, "collaboration": 0}, "min_runs": 5}})
+        return engine.score_window(self._runs(fixed_after), [], end, cfg)
+
+    def test_the_account_that_never_fixed_its_red_scores_below_the_one_that_fixed_it_in_23_hours(self):
+        end = 1000.0 + 40 * 3600 + 3 * 86400
+        never = self._score(None, end)
+        fixed = self._score(23 * 3600, end)
+        self.assertEqual((never["state"], fixed["state"]), ("scored", "scored"))
+        self.assertLess(never["score"], fixed["score"])
+        part = {p["part"]: p for p in never["parts"]}["recovery"]
+        self.assertTrue(part["available"])
+        self.assertEqual(part["score"], 0.0)       # red for three days: past the bad limit
+        self.assertEqual(part["samples"], 1)
+
+    def test_a_red_that_is_not_fixed_does_not_make_the_number_disappear_and_it_worsens_with_time(self):
+        early = self._score(None, 1000.0 + 40 * 3600 + 3600)
+        late = self._score(None, 1000.0 + 40 * 3600 + 30 * 3600)
+        self.assertEqual(early["state"], "scored")
+        self.assertEqual(late["state"], "scored")
+        self.assertLess(late["score"], early["score"])
+
+
 if __name__ == "__main__":
     unittest.main()

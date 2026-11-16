@@ -17,7 +17,7 @@ Eine gewichtete Summe aus vier Teilen, jeder von 0 bis 100. Ein Teil ist an sein
 |---|---|---|---|---|
 | Zuverlässigkeit | 30 | Anteil der beendeten Läufe, die gelingen (abgebrochene und übersprungene zählen nicht) | 98 % | 50 % |
 | Geschwindigkeit | 15 | 95. Perzentil der Dauer der erfolgreichen Läufe | 10 Min. | 60 Min. |
-| Wiederherstellung | 15 | mittlere Zeit vom ersten Fehlschlag eines Workflows bis zu seinem nächsten Erfolg | 30 Min. | 24 Std. |
+| Wiederherstellung | 15 | mittlere Zeit vom ersten Fehlschlag eines Workflows bis zu seinem nächsten Erfolg; ein Workflow, der noch rot ist, zählt die Zeit, die er bisher rot ist | 30 Min. | 24 Std. |
 | Zusammenarbeit | 15 | mittlere Zeit, die eine Warnung des Zusammenarbeits-Wächters offen bleibt, bis sie verschwindet | 2 Tage | 14 Tage |
 | Sicherheit | 25 | die Punkte, die die offenen Befunde des Sicherheitswächters von 100 abziehen (nur solange dieser Wächter an ist) | 0 Punkte | 100 Punkte |
 
@@ -32,6 +32,8 @@ Die Punktzahl zeigt nie eine Zahl, die sie nicht belegen kann. Die Antwort enth�
 - **scored** (bewertet): eine Zahl, ein Buchstabe und ein Trend. Ein Teil ohne Daten wird weggelassen und die übrigen werden neu skaliert; das senkt die `coverage` (zum Beispiel 0,8, wenn der Zusammenarbeits-Wächter aus ist). Er zählt nie als 0 und nie als 100.
 
 Sicherheit ist ein Teil wie die anderen, hat aber nur Daten, solange der Sicherheitswächter an ist und genug Repositories angesehen hat. Ohne ihn sagt die Antwort `complete: false` und führt `security` unter `missing_parts` auf, und die anderen Teile werden neu skaliert, damit die Zahl nie als „alles in Ordnung“ gelesen wird. GitHub liefert keinen Verlauf der Befunde, deshalb ist der Sicherheitsteil im Fenster und im davor liegenden derselbe: Der Trend zeigt, was die CI und die Zusammenarbeit getan haben. Die Gewichte sind standardmäßig 30, 15, 15, 15 und 25. Ein Fenster mit Läufen und ohne jeden Fehlschlag hat nichts wiederherzustellen: Sein Wiederherstellungsteil ist voll, als Tatsache und nicht als Lücke.
+
+Ein Workflow, der am Ende des Fensters noch rot ist, wird nicht vergessen: Der Teil Wiederherstellung zählt die Zeit, die er bisher rot ist, eine untere Grenze, die wächst, solange das Rot dauert; ein Fehler, den niemand behebt, senkt die Zahl also jede Stunde stärker. Ein behobener Fehler zählt seine tatsächliche Zeit. Ein erneuter Lauf eines Laufs zählt als eine weitere Ausführung des Workflows, sodass der fehlgeschlagene erste und der grüne zweite Versuch beide gesehen werden. Wenn du von einer früheren Version aktualisierst, können die Zahlen eines Kontos mit einem roten Workflow niedriger sein als zuvor.
 
 ## Das Fenster
 

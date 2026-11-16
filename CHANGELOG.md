@@ -10,6 +10,14 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+### Changed
+
+- **The score now penalizes a failure that is not fixed**: the recovery part counts a workflow that is still red at the end of the window with the time it has been red so far (a lower bound that grows while the red lasts), instead of leaving it out. Before, an account that never fixed its red could score better than one that fixed it in a day, and the number could vanish while a workflow was red. Expect lower numbers for accounts that have a workflow in red when you update. `docs/SCORE.md` explains it in the eight languages.
+
+### Fixed
+
+- **A re-run of a run is counted as one more execution in the score ledger**: GitHub keeps the id of a run when it is re-run, so the first conclusion stayed for ever; now each attempt is kept, so a failed first attempt and a green second one are both seen and the recovery between them is measured.
+
 ## [2.0.1]
 
 ### Fixed

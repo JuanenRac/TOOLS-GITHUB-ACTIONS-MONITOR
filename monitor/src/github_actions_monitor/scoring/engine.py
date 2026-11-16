@@ -9,6 +9,7 @@ What the score never does (the same philosophy as the readiness score of the sen
   state `calibrating`        the account has been watched for less than `calibrating_hours`: no number, no letter
   state `insufficient_data`  fewer than `min_runs` finished runs in the window, or the parts that have data weigh less than `min_coverage` of the total: no number
   state `scored`             a number, a letter, a trend; `coverage` (share of the weights that had data) and `data_quality` always travel with it
+The recovery part counts a workflow that is still red at the end of the window with the time it has been red so far, so a failure nobody fixes weighs more every hour instead of disappearing.
 A part with no data is left out and the others are rescaled, which lowers `coverage`; it is never counted as 0 and never as 100. Security only has data while its sentinel is on and has looked at
 enough repositories; without it the answer says so (`missing_parts`) and `complete` is False, so 85 is never read as "all clear". GitHub gives no history of the findings, so the security part is the
 same in the window and in the one before it: the trend shows what the CI and the collaboration did.
@@ -110,6 +111,8 @@ def _parts(metrics, cfg):
         value = metrics.get(SOURCE[name])
         sub = part_score(value, lim["good"], lim["bad"])
         samples = (metrics.get("samples") or {}).get(SAMPLES[name], 0)
+        if name == "recovery":
+            samples += (metrics.get("samples") or {}).get("recoveries_open", 0)
         weight_total += weight
         row = {"part": name, "weight": weight, "value": value, "score": sub, "samples": samples, "available": sub is not None}
         if sub is not None:

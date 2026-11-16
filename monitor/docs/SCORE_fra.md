@@ -17,7 +17,7 @@ Une somme pondérée de quatre parties, chacune de 0 à 100. Une partie vaut 100
 |---|---|---|---|---|
 | Fiabilité | 30 | part des exécutions terminées qui réussissent (les annulées et ignorées ne comptent pas) | 98 % | 50 % |
 | Rapidité | 15 | 95e centile de la durée des exécutions réussies | 10 min | 60 min |
-| Rétablissement | 15 | durée médiane entre le premier échec d'un workflow et son succès suivant | 30 min | 24 h |
+| Rétablissement | 15 | durée médiane entre le premier échec d'un workflow et son succès suivant ; un workflow encore en rouge compte le temps qu'il est en rouge jusqu'ici | 30 min | 24 h |
 | Collaboration | 15 | durée médiane pendant laquelle une alerte de la sentinelle de collaboration reste ouverte jusqu'à sa disparition | 2 jours | 14 jours |
 | Sécurité | 25 | les points que les constats ouverts de la sentinelle de sécurité retirent à 100 (seulement tant que cette sentinelle est active) | 0 point | 100 points |
 
@@ -32,6 +32,8 @@ Le score n'affiche jamais un nombre qu'il ne peut pas justifier. La réponse por
 - **scored** (noté) : un nombre, une lettre et une tendance. Une partie sans données est écartée et les autres sont remises à l'échelle ; cela abaisse la `coverage` (par exemple 0,8 quand la sentinelle de collaboration est éteinte). Elle ne compte jamais comme 0 ni comme 100.
 
 La sécurité est une partie comme les autres, mais elle n'a de données que tant que la sentinelle de sécurité est active et a examiné assez de dépôts. Sans elle, la réponse dit `complete: false` et liste `security` sous `missing_parts`, et les autres parties sont remises à l'échelle : le nombre ne se lit donc jamais comme « tout va bien ». GitHub ne donne pas d'historique des constats, si bien que la partie sécurité est la même dans la fenêtre et dans celle d'avant : la tendance montre ce qu'ont fait la CI et la collaboration. Les poids sont 30, 15, 15, 15 et 25 par défaut. Une fenêtre avec des exécutions et aucun échec n'a rien à rétablir : sa partie rétablissement est pleine, comme un fait et non comme un manque.
+
+Un workflow encore en rouge à la fin de la fenêtre n'est pas oublié : la partie rétablissement compte le temps qu'il est en rouge jusqu'ici, une borne inférieure qui grandit tant que le rouge dure ; un échec que personne ne corrige fait donc baisser le chiffre davantage chaque heure. Un échec corrigé compte sa durée réelle. Une relance d'une exécution compte comme une exécution de plus du workflow : le premier essai en échec et le second en vert sont tous deux vus. Si tu mets à jour depuis une version antérieure, les chiffres d'un compte avec un workflow en rouge peuvent être plus bas qu'avant.
 
 ## La fenêtre
 

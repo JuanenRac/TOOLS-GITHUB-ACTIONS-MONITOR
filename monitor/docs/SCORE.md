@@ -17,7 +17,7 @@ A weighted sum of four parts, each one from 0 to 100. A part is 100 at its **goo
 |---|---|---|---|---|
 | Reliability | 30 | share of the finished runs that succeed (cancelled and skipped runs do not count) | 98 % | 50 % |
 | Speed | 15 | 95th percentile of the duration of the successful runs | 10 min | 60 min |
-| Recovery | 15 | median time from the first failure of a workflow to its next success | 30 min | 24 h |
+| Recovery | 15 | median time from the first failure of a workflow to its next success; a workflow that is still red counts the time it has been red so far | 30 min | 24 h |
 | Collaboration | 15 | median time an alert of the collaboration sentinel stays open until it is gone | 2 days | 14 days |
 | Security | 25 | the points that the open findings of the Security sentinel take off 100 (only while that sentinel is on) | 0 points | 100 points |
 
@@ -32,6 +32,8 @@ The score never shows a number it cannot stand behind. The answer always carries
 - **scored**: a number, a letter and a trend. A part without data is left out and the others are rescaled; that lowers the `coverage` (for example 0.8 when the collaboration sentinel is off). It is never counted as 0 and never as 100.
 
 Security is a part like the others, but it only has data while the Security sentinel is on and has looked at enough repositories. Without it the answer says `complete: false` and lists `security` under `missing_parts`, and the other parts are rescaled, so the number is never read as an all clear. GitHub gives no history of the findings, so the security part is the same in the window and in the one before it: the trend shows what the CI and the collaboration did. The weights are 30, 15, 15, 15 and 25 by default. A window with runs and no failure at all has nothing to recover: its recovery part is full, as a fact and not as a gap.
+
+A workflow that is still red at the end of the window is not forgotten: the recovery part counts the time it has been red so far, a lower bound that grows while the red lasts, so a failure that nobody fixes lowers the number more every hour. A fixed failure counts its real time. A re-run of a run counts as one more execution of the workflow, so the failed first attempt and the green second one are both seen. If you update from an earlier version, the numbers of an account with a workflow in red can be lower than before.
 
 ## The window
 

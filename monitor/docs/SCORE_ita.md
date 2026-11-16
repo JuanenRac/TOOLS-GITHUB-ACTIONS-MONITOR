@@ -17,7 +17,7 @@ Una somma ponderata di quattro parti, ciascuna da 0 a 100. Una parte vale 100 al
 |---|---|---|---|---|
 | Affidabilità | 30 | quota delle esecuzioni concluse che riescono (le annullate e le saltate non contano) | 98 % | 50 % |
 | Velocità | 15 | 95° percentile della durata delle esecuzioni riuscite | 10 min | 60 min |
-| Ripristino | 15 | tempo mediano dal primo errore di un workflow al suo successo successivo | 30 min | 24 h |
+| Ripristino | 15 | tempo mediano dal primo errore di un workflow al suo successo successivo; un workflow ancora in rosso conta il tempo per cui è in rosso finora | 30 min | 24 h |
 | Collaborazione | 15 | tempo mediano in cui un avviso della sentinella di collaborazione resta aperto fino a sparire | 2 giorni | 14 giorni |
 | Sicurezza | 25 | i punti che i rilievi aperti della sentinella di sicurezza tolgono a 100 (solo finché quella sentinella è attiva) | 0 punti | 100 punti |
 
@@ -32,6 +32,8 @@ Il punteggio non mostra mai un numero che non può sostenere. La risposta porta 
 - **scored** (valutato): un numero, una lettera e una tendenza. Una parte senza dati viene lasciata fuori e le altre vengono riscalate; questo abbassa la `coverage` (per esempio 0,8 con la sentinella di collaborazione spenta). Non conta mai come 0 né come 100.
 
 La sicurezza è una parte come le altre, ma ha dati solo finché la sentinella di sicurezza è attiva e ha guardato abbastanza repository. Senza di essa la risposta dice `complete: false` ed elenca `security` in `missing_parts`, e le altre parti vengono riscalate: il numero non si legge mai come «tutto a posto». GitHub non dà uno storico dei rilievi, quindi la parte di sicurezza è la stessa nella finestra e in quella precedente: la tendenza mostra ciò che hanno fatto la CI e la collaborazione. I pesi sono 30, 15, 15, 15 e 25 per impostazione predefinita. Una finestra con esecuzioni e nessun errore non ha nulla da ripristinare: la sua parte di ripristino è piena, come un fatto e non come una lacuna.
+
+Un workflow ancora in rosso alla fine della finestra non viene dimenticato: la parte di ripristino conta il tempo per cui è in rosso finora, un limite inferiore che cresce finché il rosso dura; un errore che nessuno corregge abbassa quindi il numero ogni ora di più. Un errore corretto conta il suo tempo reale. Una riesecuzione di un'esecuzione conta come un'esecuzione in più del workflow, così si vedono sia il primo tentativo fallito sia il secondo in verde. Se aggiorni da una versione precedente, i numeri di un account con un workflow in rosso possono essere più bassi di prima.
 
 ## La finestra
 

@@ -29,6 +29,25 @@ class Ledger(unittest.TestCase):
         service.update_ledger(ledger, runs, [], NOW, 15)
         self.assertEqual(sorted(ledger["runs"]), ["1", "2"])
 
+    def test_a_run_that_is_re_run_counts_each_attempt_and_the_recovery_is_seen(self):
+        ledger = service.empty_ledger(NOW)
+        first = {**run(77, 7200, "failure"), "attempt": 1}
+        service.update_ledger(ledger, [first], [], NOW, 15)
+        again = {**run(77, 3600, "success"), "attempt": 2}
+        service.update_ledger(ledger, [first, again], [], NOW, 15)
+        self.assertEqual(sorted(ledger["runs"]), ["77", "77:2"])
+        self.assertEqual([r["conclusion"] for r in sorted(service.ledger_runs(ledger), key=lambda r: r["started"])], ["failure", "success"])
+        metrics = service.collector.collect_runs(service.ledger_runs(ledger), NOW - DAY, NOW)
+        self.assertEqual(metrics["samples"]["recoveries"], 1)
+        self.assertEqual(metrics["mttr"], 3600)
+
+    def test_a_run_seen_again_with_the_same_attempt_is_not_counted_twice(self):
+        ledger = service.empty_ledger(NOW)
+        same = {**run(5, 100), "attempt": 3}
+        service.update_ledger(ledger, [same, dict(same)], [], NOW, 15)
+        service.update_ledger(ledger, [same], [], NOW, 15)
+        self.assertEqual(list(ledger["runs"]), ["5:3"])
+
     def test_old_runs_are_forgotten(self):
         ledger = service.empty_ledger(NOW)
         service.update_ledger(ledger, [run(1, 100), run(2, 20 * DAY)], [], NOW, 15)
