@@ -21,7 +21,7 @@ Lo que puede dar por seguro un script, una pantalla de pared o un cliente móvil
 
 ## El contrato
 
-- `docs/schemas/api_contract.json` lista cada endpoint de lectura con sus claves y tipos en cada edición y los códigos de error.
+- `docs/schemas/api_contract.json` lista cada endpoint de lectura con sus claves y tipos en cada edición y los códigos de error. Las rutas que se pueden leer pero no están congeladas (flujos, texto, exportaciones de otras herramientas) se listan en `unfrozen` del mismo fichero, cada una con su motivo; `/api/data`, que da las ejecuciones, los repositorios y la cuota, sí está congelada.
 - `python tools/check_api_contract.py` comprueba un monitor en marcha contra él (`--lite`, `--url`, `--token-file`) e imprime `CONTRACT=PASS` o `CONTRACT=FAIL`; ejecútalo tras cada actualización del monitor o de tu cliente.
 
 ## Streams
