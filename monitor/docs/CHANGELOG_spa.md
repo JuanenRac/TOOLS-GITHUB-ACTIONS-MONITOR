@@ -13,9 +13,11 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 ### Añadido
 
 - **Las listas largas se leen hasta el final y un corte se dice**: los workflows de un repositorio (148 o 348 son casos reales), los jobs de una ejecución (una matriz de más de 100) y los issues y pull requests abiertos de un repositorio se leen ahora página a página mientras la última estaba llena, hasta `pagination.workflow_pages`, `pagination.job_pages` y `pagination.collab_pages` páginas de 100. Un repositorio que cabe en una página cuesta las mismas peticiones que antes. Cuando algo sigue fuera la página dice «vistos N de M»: bajo la ejecución para sus jobs, en la higiene del repositorio para sus workflows, y en el pie de la pestaña Equipo para los repositorios con más elementos abiertos de los leídos y para la cuenta cuando la API de búsqueda tiene más de sus 1000 resultados.
+- **Las listas largas se leen hasta el final y un corte se dice**: los workflows de un repositorio (148 o 348 son casos reales), los jobs de una ejecución (una matriz de más de 100) y los issues y pull requests abiertos de un repositorio se leen ahora página a página mientras la última estaba llena, hasta `pagination.workflow_pages`, `pagination.job_pages` y `pagination.collab_pages` páginas de 100. Un repositorio que cabe en una página cuesta las mismas peticiones que antes. Cuando algo sigue fuera la página dice «vistos N de M»: bajo la ejecución para sus jobs, en la higiene del repositorio para sus workflows, y en el pie de la pestaña Equipo para los repositorios con más elementos abiertos de los leídos y para la cuenta cuando la API de búsqueda tiene más de sus 1000 resultados.
 
 ### Corregido
 
+- Se encuentra el job que falla de una ejecución con más de 30 jobs: las listas de jobs que leen el aviso para una IA, el asistente y la herramienta por lotes se cortaban en 30 y ahora se cortan en 100 (la misma petición única).
 - Se encuentra el job que falla de una ejecución con más de 30 jobs: las listas de jobs que leen el aviso para una IA, el asistente y la herramienta por lotes se cortaban en 30 y ahora se cortan en 100 (la misma petición única).
 
 ## [2.0.2]

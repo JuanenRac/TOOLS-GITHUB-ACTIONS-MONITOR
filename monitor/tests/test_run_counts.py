@@ -78,9 +78,10 @@ class ServerCounts(unittest.TestCase):
         data = self.check(True)
         self.assertEqual((data["figures"]["active"], data["figures"]["queued"]), (13, 1))
 
-    def test_waiting_and_pending_runs_count_as_queued(self):
+    def test_pending_runs_count_as_queued_and_waiting_ones_do_not(self):
+        # a run held for an approval (status waiting) is neither running nor in the queue of runners
         figures = am.header_figures([], [run(1, "r", "in_progress"), run(2, "r", "waiting"), run(3, "r", "pending"), run(4, "r", "requested")], [])
-        self.assertEqual((figures["active"], figures["queued"]), (1, 3))
+        self.assertEqual((figures["active"], figures["queued"]), (1, 2))
 
     def test_the_status_bar_and_the_command_line_give_the_same_figures(self):
         data = built(False)

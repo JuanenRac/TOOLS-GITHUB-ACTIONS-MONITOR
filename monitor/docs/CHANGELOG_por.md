@@ -13,9 +13,11 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 ### Adicionado
 
 - **As listas longas leem-se até ao fim e um corte diz-se**: os workflows de um repositório (148 ou 348 são casos reais), os jobs de uma execução (uma matriz com mais de 100) e os issues e pull requests abertos de um repositório lêem-se agora página a página enquanto a última estava cheia, até `pagination.workflow_pages`, `pagination.job_pages` e `pagination.collab_pages` páginas de 100. Um repositório que cabe numa página custa os mesmos pedidos de antes. Quando algo continua de fora a página diz «vistos N de M»: sob a execução para os seus jobs, na higiene do repositório para os seus workflows, e no rodapé do separador Equipa para os repositórios com mais itens abertos do que os lidos e para a conta quando a API de pesquisa tem mais do que os seus 1000 resultados.
+- **As listas longas leem-se até ao fim e um corte diz-se**: os workflows de um repositório (148 ou 348 são casos reais), os jobs de uma execução (uma matriz com mais de 100) e os issues e pull requests abertos de um repositório lêem-se agora página a página enquanto a última estava cheia, até `pagination.workflow_pages`, `pagination.job_pages` e `pagination.collab_pages` páginas de 100. Um repositório que cabe numa página custa os mesmos pedidos de antes. Quando algo continua de fora a página diz «vistos N de M»: sob a execução para os seus jobs, na higiene do repositório para os seus workflows, e no rodapé do separador Equipa para os repositórios com mais itens abertos do que os lidos e para a conta quando a API de pesquisa tem mais do que os seus 1000 resultados.
 
 ### Corrigido
 
+- Encontra-se o job que falha numa execução com mais de 30 jobs: as listas de jobs que o aviso para uma IA, o assistente e a ferramenta por lotes liam cortavam-se em 30 e agora cortam-se em 100 (o mesmo pedido único).
 - Encontra-se o job que falha numa execução com mais de 30 jobs: as listas de jobs que o aviso para uma IA, o assistente e a ferramenta por lotes liam cortavam-se em 30 e agora cortam-se em 100 (o mesmo pedido único).
 
 ## [2.0.2]

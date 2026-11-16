@@ -13,7 +13,16 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Added
 
+- **Merge queue**: a failed run of the merge queue of the default branch (`gh-readonly-queue/...`, event `merge_group`) is a red of its own, shown as "(merge queue)" in the red list, the alerts and the team view, and it clears with the next green run of the queue.
+- **Maintenance branches**: `ci.extra_branches` takes patterns (for example `release-*`) of extra branches whose last run also counts; by default only the default branch is watched. A red of such a branch is labelled with its name and never hides, or is hidden by, the default branch.
 - **Long lists are read to the end, and a cut is said**: the workflows of a repository (148 or 348 are real cases), the jobs of a run (a matrix of more than 100) and the open issues and pull requests of a repository are now read page by page while the last page was full, up to `pagination.workflow_pages`, `pagination.job_pages` and `pagination.collab_pages` pages of 100. A repository that fits in one page costs the same requests as before. When something is still left out the page says "seen N of M": under the run for its jobs, in the hygiene of the repository for its workflows, and in the footer of the Team tab for repositories with more open items than were read and for the account when the Search API has more than its 1000 results.
+
+### Changed
+
+- **A red on the default branch only counts when the repository itself caused it**: only runs of the events `push`, `schedule`, `workflow_dispatch` and `merge_group` decide (setting `ci.red_events`), and a run of a pull request that comes from a fork never does, even when the branch of the fork is also called `main`, `master` or `dev` (setting `ci.count_fork_runs`). The same rule feeds the red tile, the alerts, the team view, the brief and the green-without-release check.
+- **A run that waits for an approval is its own state, not a red and not a queue**: `action_required` (a pull request of a fork or a first contribution that nobody approved) and a job held by the protection of an environment no longer turn a workflow red or inflate the queued count; the Now tab shows a separate line "waiting for approval" and the figures carry `awaiting`.
+- **An abandoned workflow is "inactive", not red for ever**: a workflow whose last run failed but which has not run for `ci.inactive_days` days (90 by default, 0 turns it off) leaves the red list and is counted in the `inactive` figure.
+- **Workflows that only react to issues, comments or labels do not count as red CI**: they are told apart by the events they run on (setting `ci.automation_counts`, off by default); every red row now says which kind of workflow it is.
 
 ### Fixed
 
