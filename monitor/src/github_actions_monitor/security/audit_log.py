@@ -21,6 +21,7 @@ ACTION_RE = re.compile(r"^[a-z][a-z0-9_.-]{1,39}\Z")
 FILE = None                       # tests point this to a temporary file; None = audit_actions.jsonl in the logs folder
 _lock = threading.RLock()
 _last = {"path": None, "hash": ""}      # the hash of the last line this process wrote (information only: the file, read under the lock, decides what the next line follows)
+STATS = {"write_failures": 0, "last_write_error_at": None}      # a line that could not be written is counted and shown (GET /api/audit-log), not silent
 TAIL_BYTES = 65536                     # how much of the end of the file is read to find the last hash (the whole file only if no line in that part has one)
 
 
@@ -101,10 +102,11 @@ def _tail_hash(target):
     return ""
 
 
-def record(config, action, user="", role="", account="", target="", result="ok", details=None, now=None):
-    """Appends one line. `target` is a short identifier (a setting name, an alert code, a user name), `details` a small structure that is cleaned. Returns the line, or None when it is off or could not be written."""
+def record(config, action, user="", role="", account="", target="", result="ok", details=None, now=None, force=False):
+    """Appends one line. `target` is a short identifier (a setting name, an alert code, a user name), `details` a small structure that is cleaned. Returns the line, or None when it is off or could not be written.
+    `force` writes it even when the log is switched off (the change that switches it off is the last thing it records)."""
     cfg = settings(config)
-    if not cfg["enabled"] or not ACTION_RE.match(str(action)):
+    if (not cfg["enabled"] and not force) or not ACTION_RE.match(str(action)):
         return None
     now = time.time() if now is None else now
     entry = {"at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now)), "action": str(action), "user": str(user)[:40], "role": str(role)[:12], "account": str(account)[:60],
@@ -124,7 +126,14 @@ def record(config, action, user="", role="", account="", target="", result="ok",
                     handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
                 _last.update(path=str(where), hash=entry["hash"])
         return entry
-    except OSError:      # includes the timeout of the lock between processes
+    except OSError as error:      # includes the timeout of the lock between processes
+        STATS["write_failures"] += 1
+        STATS["last_write_error_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        try:
+            from github_actions_monitor.app import degraded
+            degraded.note("audit_log", error)
+        except Exception:   # noqa: BLE001 - noting the failure must not fail either
+            pass
         return None
 
 

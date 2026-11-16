@@ -19,7 +19,7 @@ Ogni riga porta `prev` (l'hash della riga precedente) e `hash` (l'hash di sé st
 
 ## Chi lo legge
 
-Un amministratore (e la persona al computer quando non c'è la modalità team). Un maintainer solo quando `audit_log.maintainers_can_read` è attivo; nessun altro. `GET /api/audit-log` risponde con le ultime 200 righe e lo stato della catena. Lite non ha nulla di tutto ciò.
+Un amministratore (e la persona al computer quando non c'è la modalità team). Un maintainer solo quando `audit_log.maintainers_can_read` è attivo; nessun altro. `GET /api/audit-log` risponde con le ultime 200 righe e lo stato della catena. Lite non ha nulla di tutto ciò. Un viewer viene rifiutato alla porta. Spegnere il registro scrive la sua ultima riga (il cambiamento che l'ha spento). Una riga che non può essere scritta viene contata: `write_failures` e `last_write_error_at` nella risposta, e un avviso di degradazione. I cambi falliti della propria password non vengono scritti qui (li conserva l'audit degli accessi).
 
 ## Impostazioni
 

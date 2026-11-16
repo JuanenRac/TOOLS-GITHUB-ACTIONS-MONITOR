@@ -19,7 +19,7 @@
 
 ## 谁能读取
 
-管理员（没有团队模式时则是电脑前的人）。维护者仅在 `audit_log.maintainers_can_read` 开启时可以读取；其他人都不能。`GET /api/audit-log` 返回最近 200 行和哈希链的状态。Lite 版没有这些。
+管理员（没有团队模式时则是电脑前的人）。维护者仅在 `audit_log.maintainers_can_read` 开启时可以读取；其他人都不能。`GET /api/audit-log` 返回最近 200 行和哈希链的状态。Lite 版没有这些。 viewer 在入口处就会被拒绝。关闭日志时会写入它自己的最后一行（关闭它的那次更改）。无法写入的行会被计数：回答中的 `write_failures` 和 `last_write_error_at`，以及一条降级通知。修改自己密码失败的记录不写在这里（由访问审计保存）。
 
 ## 设置
 

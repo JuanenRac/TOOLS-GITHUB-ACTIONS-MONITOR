@@ -19,7 +19,7 @@ Each line carries `prev` (the hash of the line before it) and `hash` (the hash o
 
 ## Who reads it
 
-An administrator (and the person at the computer when there is no team mode). A maintainer only when `audit_log.maintainers_can_read` is on; nobody else. `GET /api/audit-log` answers the last 200 lines and the state of the chain. Lite has none of this.
+An administrator (and the person at the computer when there is no team mode). A maintainer only when `audit_log.maintainers_can_read` is on; nobody else. `GET /api/audit-log` answers the last 200 lines and the state of the chain. Lite has none of this. A viewer is refused at the door. Switching the log off writes its own last line (the change that did it). A line that cannot be written is counted: `write_failures` and `last_write_error_at` in the answer, and a degradation notice. Failed changes of one's own password are not written here (the audit of the accesses keeps them).
 
 ## Settings
 

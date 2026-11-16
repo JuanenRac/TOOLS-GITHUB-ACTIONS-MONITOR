@@ -41,6 +41,8 @@ when this file and `tool_version.py` disagree.
 
 - **`migrate_storage` says how many damaged lines of the event feed it cannot copy**: they were left out silently; now the run prints a warning with the count (the source keeps them).
 
+- **The log of actions can no longer be read by a viewer, and it records more of what matters**: the route now needs at least the maintainer role at the door (an administrator, or a maintainer when `audit_log.maintainers_can_read` is on, still decides inside), switching the log off writes its own last line, a line that cannot be written is counted and shown (`write_failures`, `last_write_error_at` in `GET /api/audit-log`, and a degradation notice), and failed changes of one's own password stay in the audit of the accesses instead of filling the log of actions.
+
 ## [2.0.1]
 
 ### Fixed

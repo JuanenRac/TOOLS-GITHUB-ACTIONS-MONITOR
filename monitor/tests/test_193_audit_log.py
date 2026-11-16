@@ -274,5 +274,32 @@ class PerAccount(Base):
                 self.assertEqual([json.loads(line)["account"] for line in p.read_text(encoding="utf-8").splitlines()], [name])
 
 
+
+class FableFindings(Base):
+    def test_a_viewer_never_passes_the_door_of_the_log_of_actions(self):
+        self.assertEqual(auth.required_role("GET", "/api/audit-log"), "maintainer")
+        self.assertEqual(auth.required_role("GET", "/api/audit-log?account=beta"), "maintainer")
+
+    def test_switching_the_log_off_leaves_its_own_line(self):
+        self.assertIsNone(audit_log.record({"audit_log": {"enabled": False}}, "settings_change", user="root", target="settings"))
+        line = audit_log.record({"audit_log": {"enabled": False}}, "settings_change", user="root", target="settings", details={"settings": ["audit_log.enabled"]}, force=True)
+        self.assertEqual(line["details"], {"settings": ["audit_log.enabled"]})
+        self.assertEqual(len(self.lines()), 1)
+
+    def test_a_line_that_cannot_be_written_is_counted(self):
+        before = audit_log.STATS["write_failures"]
+        with mock.patch.object(audit_log.private_io, "open_append", side_effect=OSError("disk full")):
+            self.assertIsNone(audit_log.record({}, "settings_change", user="u", target="t"))
+        self.assertEqual(audit_log.STATS["write_failures"], before + 1)
+        self.assertTrue(audit_log.STATS["last_write_error_at"])
+
+    def test_failed_changes_of_ones_own_password_do_not_fill_the_log_of_actions(self):
+        for _ in range(20):
+            auth._record_action("password", "viewer1", "viewer", "/api/auth/password", "denied", "invalid_credentials")
+        self.assertFalse(self.file.exists())
+        auth._record_action("password", "viewer1", "viewer", "/api/auth/password", "ok", "")
+        self.assertEqual(len(self.lines()), 1)
+
+
 if __name__ == "__main__":
     unittest.main()

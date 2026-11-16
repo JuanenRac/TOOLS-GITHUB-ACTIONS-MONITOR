@@ -19,7 +19,7 @@ Jede Zeile trägt `prev` (den Hash der vorigen Zeile) und `hash` (den Hash ihrer
 
 ## Wer es liest
 
-Ein Administrator (und die Person am Rechner, wenn es keinen Teammodus gibt). Ein Maintainer nur, wenn `audit_log.maintainers_can_read` an ist; sonst niemand. `GET /api/audit-log` antwortet mit den letzten 200 Zeilen und dem Zustand der Kette. Lite hat nichts davon.
+Ein Administrator (und die Person am Rechner, wenn es keinen Teammodus gibt). Ein Maintainer nur, wenn `audit_log.maintainers_can_read` an ist; sonst niemand. `GET /api/audit-log` antwortet mit den letzten 200 Zeilen und dem Zustand der Kette. Lite hat nichts davon. Ein Viewer wird schon an der Tür abgewiesen. Das Ausschalten des Protokolls schreibt seine eigene letzte Zeile (die Änderung, die es ausgeschaltet hat). Eine Zeile, die nicht geschrieben werden kann, wird gezählt: `write_failures` und `last_write_error_at` in der Antwort sowie ein Degradationshinweis. Fehlgeschlagene Änderungen des eigenen Passworts werden hier nicht geschrieben (das Zugriffsprotokoll behält sie).
 
 ## Einstellungen
 

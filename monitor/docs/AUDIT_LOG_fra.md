@@ -19,7 +19,7 @@ Chaque ligne porte `prev` (le hachage de la ligne précédente) et `hash` (le ha
 
 ## Qui le lit
 
-Un administrateur (et la personne devant l'ordinateur quand il n'y a pas de mode équipe). Un mainteneur seulement quand `audit_log.maintainers_can_read` est activé ; personne d'autre. `GET /api/audit-log` répond les 200 dernières lignes et l'état de la chaîne. Lite n'a rien de tout cela.
+Un administrateur (et la personne devant l'ordinateur quand il n'y a pas de mode équipe). Un mainteneur seulement quand `audit_log.maintainers_can_read` est activé ; personne d'autre. `GET /api/audit-log` répond les 200 dernières lignes et l'état de la chaîne. Lite n'a rien de tout cela. Un viewer est refusé à la porte. Éteindre le journal écrit sa propre dernière ligne (le changement qui l'a éteint). Une ligne qui ne peut pas être écrite est comptée : `write_failures` et `last_write_error_at` dans la réponse, et un avis de dégradation. Les changements ratés de son propre mot de passe ne sont pas écrits ici (l'audit des accès les garde).
 
 ## Réglages
 
