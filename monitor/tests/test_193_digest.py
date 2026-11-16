@@ -82,7 +82,7 @@ class Content(unittest.TestCase):
         self.assertEqual((part["total"], [a["id"] for a in part["items"]]), (3, ["b", "d"]))
 
     def test_a_text_is_cut_so_nothing_long_can_hide_in_a_report(self):
-        part = builder.alerts_part([alert("a", title="x" * 5000)], 5)
+        part = builder.alerts_part([alert("a", title="a normal sentence of plain words " * 300)], 5)
         self.assertEqual(len(part["items"][0]["title"]), builder.CUT)
 
     def test_the_first_report_has_nothing_to_compare_and_the_next_one_does(self):

@@ -267,6 +267,10 @@ class EveryLocalOnlyRouteRefusesAClientOfTheNetwork(NetworkCase):
         found = set()
         for match in re.finditer(r'(?:path == "([^"]+)"|path in \(([^)]*)\)):[^\n]*\n\s+if not self\.guard\(\) or not self\.this_computer\(\)', SOURCE):
             found.update([match.group(1)] if match.group(1) else re.findall(r'"([^"]+)"', match.group(2)))
+        # the routes that live in the two tables of the handler count only when the handler really asks for this computer right after reading each table
+        for table, routes in (("THIS_COMPUTER_ACTIONS", actions_monitor.THIS_COMPUTER_ACTIONS), ("THIS_COMPUTER_ADVANCED", actions_monitor.THIS_COMPUTER_ADVANCED)):
+            self.assertRegex(SOURCE, r"if path in " + table + r":[^\n]*\n\s+if not self\.guard\(\) or not self\.this_computer\(\)", table + " must be guarded by this_computer")
+            found.update(routes)
         self.assertEqual(found, set(LOCAL_ONLY_POST) | set(LOCAL_ONLY_GET), "a new route that is local only goes in the table (and a route that stops being local only must be taken out on purpose)")
         self.assertEqual(SOURCE.count("self.this_computer()"), 5, "a new call to this_computer() needs its row in the table above")
 

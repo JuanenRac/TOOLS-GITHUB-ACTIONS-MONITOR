@@ -161,9 +161,10 @@ class EditionName(unittest.TestCase):
 class SilencesAreLocal(unittest.TestCase):
     def test_silencing_needs_the_computer_of_the_monitor(self):
         text = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
-        route = text.split('if path in ("/api/gh-action/plan"', 1)[1].split(")", 1)[0]
-        self.assertIn('"/api/alerts/mute"', route)
-        self.assertIn('"/api/alerts/unmute"', route)
+        self.assertIn("/api/alerts/mute", am.THIS_COMPUTER_ADVANCED)
+        self.assertIn("/api/alerts/unmute", am.THIS_COMPUTER_ADVANCED)
+        gate = text.split("if path in THIS_COMPUTER_ADVANCED:", 1)[1].split("\n", 2)[1]
+        self.assertIn("if not self.guard() or not self.this_computer()", gate)
         self.assertIn("if not self.guard() or not self.this_computer()", text)
 
     def test_a_client_of_the_network_cannot_silence(self):
