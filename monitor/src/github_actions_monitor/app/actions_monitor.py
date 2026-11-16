@@ -110,7 +110,7 @@ DEFAULTS = {
     "account": {"plan": "unknown"},     # free | pro | team | enterprise: the quotas of the plan come from quotas.json (quota.py)
     "quota": {"billing_api": False, "warn_percent": 75, "alert_percent": 90, "default_runner": "linux"},
     "session_guard": True,         # the page asks for a one-use token before it changes a setting or confirms an action
-    "discovery": {"events": True, "suggest_groups": True, "auto_frequency": False, "hide": []},
+    "discovery": {"events": True, "suggest_groups": True, "auto_frequency": False, "hide": [], "skip_archived": True, "fork_policy": "show", "fork_ci_days": 90, "fork_checks_per_pass": 30},
     "auth": {"enabled": False, "session_hours": 12, "max_failed_logins": 5, "lockout_minutes": 15, "min_length": 10, "allow_bearer": False, "audit": True},     # OFF: one person, no login. On: users with roles once the first administrator exists (security/auth.py)
     "listen": {"network": False, "trusted_proxy": False, "trusted_proxies": [], "local_port": 0, "host": "127.0.0.1", "token_env": "MONITOR_ACCESS_TOKEN", "allowed_hosts": [], "tls_cert_file": "", "tls_key_file": "", "secure_cookie": False, "proxy_public_host": "", "max_failed_attempts": 10, "query_access": True},     # OFF: only this computer. On: a private address, with an access token for every request
     "github_token": {"enabled": False, "store": "auto"},       # OFF: the monitor uses your own `gh login`. On: a token kept in the store of the system (secretstore.py)
@@ -192,6 +192,7 @@ RUN_CACHE = {}  # repo -> {"runs": [...], "at": float, "error": str|None}
 PRIVATE = set()                           # private repositories of the account (read with the listing): the only ones whose minutes cost anything
 QUOTA_ALERTS = None
 DISCOVERED = {"at": 0.0, "names": [], "snapshot": {}}
+FORKS = {"known": {}, "kind": None, "kind_at": 0.0, "checked": 0, "kept": 0, "left": 0, "waiting": 0}      # fork_policy: what is known about the CI of each fork (memory only)
 DISCOVERY = {"events": [], "suggestions": []}   # what the last listing of the account brought (memory only)
 HOT_ONLY = {"on": False, "until": 0.0}   # "only hot" switch (memory only): cold repositories are not refreshed until `until` (one long cycle)
 LIVE_CONFIG = {}                          # the config the loop runs with, for the HTTP handler
@@ -455,7 +456,8 @@ def watched_repos(config, force=False):
                 if found:
                     announce_discovery(found, config)
             DISCOVERED["snapshot"] = snapshot
-            DISCOVERED["names"] = sorted(discovery.lifecycle([dict(item, isArchived=bool(item.get("isArchived"))) for item in data if not item.get("isArchived")], rules))
+            items = [dict(item, isArchived=bool(item.get("isArchived"))) for item in data if not item.get("isArchived") or not rules["skip_archived"]]
+            DISCOVERED["names"] = sorted(discovery.lifecycle(items, config.get("discovery") or {}, fork_ci_answers(config, rules, items)))
             DISCOVERED["at"] = time.time()
         known = toolconfig.ecosystem_names(config)
         wanted_eco = config["ecosystems"]
@@ -479,6 +481,23 @@ SAMPLE_INFO = {}      # repo -> {"asked": runs asked for, "total": total_count o
 SAMPLING_STATE = {"dropped": []}      # the repositories that waited in the last cycle because the budget of requests was spent
 BUDGET = sampling.Budget()      # requests for run lists in the last hour
 BRANCH_RE = re.compile(r"^[A-Za-z0-9._/-]{1,200}\Z")
+
+
+def fork_ci_answers(config, rules, items):
+    """{fork name: True | False | None}: only asked when the policy is skip_unless_ci or auto, a few forks per listing (the answer is kept for a week), never in the demo."""
+    if rules["fork_policy"] not in ("skip_unless_ci", "auto") or DEMO["on"]:
+        FORKS.update({"checked": 0, "kept": 0, "left": 0, "waiting": 0})
+        return {}
+    reader = lambda endpoint: gh_read(endpoint, retries=0)      # noqa: E731
+    owner = toolconfig.github_owner(config)
+    if rules["fork_policy"] == "auto" and (FORKS["kind"] is None or time.time() - FORKS["kind_at"] > 86400):
+        FORKS["kind"], FORKS["kind_at"] = discovery.owner_kind(reader, owner), time.time()
+    days = discovery.fork_window(rules, FORKS["kind"])
+    forks = [item["name"] for item in items if item.get("isFork")]
+    answers = discovery.check_forks(forks, FORKS["known"], reader, owner, days, rules["fork_checks_per_pass"])
+    FORKS.update({"checked": sum(1 for v in answers.values() if v is not None), "kept": sum(1 for v in answers.values() if v is True),
+                  "left": sum(1 for v in answers.values() if v is False), "waiting": sum(1 for v in answers.values() if v is None)})
+    return answers
 
 
 def is_fork_run(run):
@@ -2951,7 +2970,7 @@ def discovery_payload():
     box = discovery.box(toolconfig.github_owner(config), len(data.get("repos") or []), HIDDEN["discovered"], HIDDEN["names"])
     from github_actions_monitor.data_pipeline import orgs
     organisations = orgs.view(toolconfig.raw_config(), lambda endpoint: gh_read(endpoint, retries=0), state_dir() / ("orgs_state_lite.json" if LITE["on"] else "orgs_state.json"), offline=LINK.state()["offline"]) if not DEMO["on"] else {"enabled": False, "orgs": []}
-    return {**box, "events": list(reversed(DISCOVERY["events"]))[:20], "suggestions": DISCOVERY["suggestions"], "settings": discovery.settings(config), "demo": DEMO["on"], "organizations": organisations}
+    return {**box, "events": list(reversed(DISCOVERY["events"]))[:20], "suggestions": DISCOVERY["suggestions"], "settings": discovery.settings(config), "owner_kind": FORKS["kind"], "forks": {k: FORKS[k] for k in ("checked", "kept", "left", "waiting")}, "demo": DEMO["on"], "organizations": organisations}
 
 
 class SessionTokens:

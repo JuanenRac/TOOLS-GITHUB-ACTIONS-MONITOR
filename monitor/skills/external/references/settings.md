@@ -97,7 +97,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `discover_refresh_seconds` | `3600` | polling | Search for new repositories |
 | `discovery.auto_frequency` | `false` | basic | Adjust the refresh to the real activity |
 | `discovery.events` | `true` | basic | Tell me about new, vanished and archived repositories |
+| `discovery.fork_checks_per_pass` | `30` | basic | Forks checked per listing |
+| `discovery.fork_ci_days` | `90` | basic | A fork is maintained if its CI ran in the last |
+| `discovery.fork_policy` | `"show"` | basic | Forks |
 | `discovery.hide` | `[]` | basic | Leave out repositories of these kinds |
+| `discovery.skip_archived` | `true` | basic | Leave out archived repositories |
 | `discovery.suggest_groups` | `true` | basic | Suggest groups for unclassified repositories |
 | `dispatch.required_ci` | `["ci.yml"]` | advanced | Workflows that must pass before a build is fired |
 | `display.blink_red_tiles` | `true` | general | Blink red tiles |
