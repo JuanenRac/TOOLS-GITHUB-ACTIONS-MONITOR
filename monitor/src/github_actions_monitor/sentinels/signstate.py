@@ -64,6 +64,7 @@ def completed_runs(runs, branch="main", workflow=None):
     """THE definition of "the runs that count": completed, on the default branch, not cancelled/skipped/neutral/stale (and of one workflow file
     when `workflow` is given). Red (A2), green-without-release (A5) and the target states all start from this list."""
     return [r for r in runs if r.get("status") == "completed" and r.get("branch") == branch and r.get("conclusion") not in IGNORED and not redrule.is_dynamic(r)
+            and not redrule.is_awaiting(r) and redrule.origin_counts(r)
             and (workflow is None or r.get("path") == workflow)]
 
 
