@@ -2931,5 +2931,12 @@
  "wh.unknown_repo": "dépôt non surveillé",
  "ws.not_found": "Espace de travail des dépôts introuvable : définissez MONITOR_ROOT, ou \"workspace_root\" dans actions_monitor.json, ou placez un fichier nommé .monitor-root dans le dossier qui contient les dépôts.",
  "ci.lane_queue": "file de fusion",
- "ci.lane_branch": "branche {branch}"
+ "ci.lane_branch": "branche {branch}",
+ "lint.rule.no_timeout": "un job sans timeout-minutes",
+ "lint.rule.secrets_inherit": "secrets: inherit transmet tous les secrets",
+ "lint.rule.permissions_top": "pas de bloc permissions en tête de fichier",
+ "lint.rule.own_action_ref": "une action à vous qui suit une branche",
+ "cfg.f.lint.own_owners": "Comptes qui sont les vôtres",
+ "cfg.h.lint.own_owners": "Noms des comptes ou organisations dont vous contrôlez les actions et workflows réutilisables, un par ligne. Pour eux, le linter accepte une étiquette de version et ne signale qu'une branche comme @main (règle own_action_ref) ; l'action de tout autre doit rester épinglée à un SHA de commit complet. Vide par défaut : toutes les actions sont jugées comme venant de tiers.",
+ "lint.help_own": "Un compte dont les actions sont à vous (répétable) : une étiquette de version est acceptée, une branche est signalée."
 }

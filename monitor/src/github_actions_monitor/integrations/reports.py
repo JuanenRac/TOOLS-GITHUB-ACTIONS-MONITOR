@@ -50,16 +50,7 @@ def hygiene_findings(text, name="workflow.yml"):
     lines = text.replace("\r\n", "\n").split("\n")
     if not any(re.match(r"concurrency\s*:", line) for line in lines):
         found.append({"rule": "no_concurrency", "line": 1, "severity": "info", "detail": ""})
-    jobs_at = next((i for i, line in enumerate(lines) if re.match(r"jobs\s*:\s*$", line)), None)
-    if jobs_at is not None:
-        starts = [(i, m.group(1)) for i, line in enumerate(lines[jobs_at + 1:], jobs_at + 1) for m in [re.match(r"^  ([A-Za-z0-9_-]+)\s*:\s*$", line)] if m]
-        for index, (start, job) in enumerate(starts):
-            end = starts[index + 1][0] if index + 1 < len(starts) else len(lines)
-            block = [line for line in lines[start + 1:end]]
-            if any(re.match(r"^    uses\s*:", line) for line in block):
-                continue      # a call of a reusable workflow has no steps of its own: the called one carries the limit
-            if not any(re.match(r"^    timeout-minutes\s*:", line) for line in block):
-                found.append({"rule": "no_timeout", "line": start + 1, "severity": "warn", "detail": job})
+    found += [{"rule": "no_timeout", "line": number, "severity": "warn", "detail": job} for number, job in lint_workflows.missing_timeouts(lines)]      # a call of a reusable workflow is left out: the called one carries the limit
     return found
 
 

@@ -23,6 +23,7 @@ when this file and `tool_version.py` disagree.
 
 ### Added
 
+- **Four more rules for the workflow linter, cheap and optional**: `no_timeout` (a job without `timeout-minutes`), `secrets_inherit` (`secrets: inherit` hands every secret to the called workflow) and `permissions_top` (no `permissions:` block at the top of the file even when the jobs have their own) are off until you switch them on in the Settings tab, and `own_action_ref` tells your own actions apart from third parties: with `lint.own_owners` listing your accounts, an action or reusable workflow of yours may follow a version tag but is reported when it follows a branch such as `@main`, while the action of anyone else must still be pinned to a full commit SHA (`unpinned_uses`). Without `lint.own_owners` nothing changes. `lint_workflows.py --own OWNER` does the same on the command line.
 - **Merge queue**: a failed run of the merge queue of the default branch (`gh-readonly-queue/...`, event `merge_group`) is a red of its own, shown as "(merge queue)" in the red list, the alerts and the team view, and it clears with the next green run of the queue.
 - **Maintenance branches**: `ci.extra_branches` takes patterns (for example `release-*`) of extra branches whose last run also counts; by default only the default branch is watched. A red of such a branch is labelled with its name and never hides, or is hidden by, the default branch.
 

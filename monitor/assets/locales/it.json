@@ -2931,5 +2931,12 @@
  "wh.unknown_repo": "repository non monitorato",
  "ws.not_found": "Impossibile trovare il workspace dei repository: imposta MONITOR_ROOT, oppure \"workspace_root\" in actions_monitor.json, oppure metti un file chiamato .monitor-root nella cartella che contiene i repository.",
  "ci.lane_queue": "coda di merge",
- "ci.lane_branch": "branch {branch}"
+ "ci.lane_branch": "branch {branch}",
+ "lint.rule.no_timeout": "un job senza timeout-minutes",
+ "lint.rule.secrets_inherit": "secrets: inherit consegna tutti i segreti",
+ "lint.rule.permissions_top": "nessun blocco permissions in testa al file",
+ "lint.rule.own_action_ref": "una action vostra che segue un ramo",
+ "cfg.f.lint.own_owners": "Account che sono vostri",
+ "cfg.h.lint.own_owners": "Nomi degli account o delle organizzazioni di cui controllate action e workflow riutilizzabili, uno per riga. Per questi il linter accetta un tag di versione e segnala solo un ramo come @main (regola own_action_ref); l'action di chiunque altro deve restare fissata a un SHA di commit completo. Vuoto per impostazione predefinita: ogni action è giudicata come di terzi.",
+ "lint.help_own": "Un account le cui action sono vostre (ripetibile): un tag di versione viene accettato, un ramo segnalato."
 }

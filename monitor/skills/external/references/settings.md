@@ -133,15 +133,24 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `lint.enabled` | `-` | lint | Linter on |
 | `lint.ignore` | `-` | lint | Ignored findings |
 | `lint.in_report` | `-` | lint | Warn in the report |
+| `lint.own_owners` | `-` | lint | Accounts that are yours |
 | `lint.refresh_seconds` | `-` | lint | Scan every |
 | `lint.rules.injection.enabled` | `-` | lint | lint.rules.injection.enabled |
 | `lint.rules.injection.severity` | `-` | lint | lint.rules.injection.severity |
+| `lint.rules.no_timeout.enabled` | `-` | lint | lint.rules.no_timeout.enabled |
+| `lint.rules.no_timeout.severity` | `-` | lint | lint.rules.no_timeout.severity |
+| `lint.rules.own_action_ref.enabled` | `-` | lint | lint.rules.own_action_ref.enabled |
+| `lint.rules.own_action_ref.severity` | `-` | lint | lint.rules.own_action_ref.severity |
 | `lint.rules.permissions.enabled` | `-` | lint | lint.rules.permissions.enabled |
 | `lint.rules.permissions.severity` | `-` | lint | lint.rules.permissions.severity |
+| `lint.rules.permissions_top.enabled` | `-` | lint | lint.rules.permissions_top.enabled |
+| `lint.rules.permissions_top.severity` | `-` | lint | lint.rules.permissions_top.severity |
 | `lint.rules.pr_target.enabled` | `-` | lint | lint.rules.pr_target.enabled |
 | `lint.rules.pr_target.severity` | `-` | lint | lint.rules.pr_target.severity |
 | `lint.rules.secrets_in_clear.enabled` | `-` | lint | lint.rules.secrets_in_clear.enabled |
 | `lint.rules.secrets_in_clear.severity` | `-` | lint | lint.rules.secrets_in_clear.severity |
+| `lint.rules.secrets_inherit.enabled` | `-` | lint | lint.rules.secrets_inherit.enabled |
+| `lint.rules.secrets_inherit.severity` | `-` | lint | lint.rules.secrets_inherit.severity |
 | `lint.rules.unpinned_uses.enabled` | `-` | lint | lint.rules.unpinned_uses.enabled |
 | `lint.rules.unpinned_uses.severity` | `-` | lint | lint.rules.unpinned_uses.severity |
 | `listen.allowed_hosts` (secure) | `[]` | advanced | Names the page may be opened with |

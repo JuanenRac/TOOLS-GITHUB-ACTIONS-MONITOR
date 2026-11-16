@@ -2931,5 +2931,12 @@
  "wh.unknown_repo": "監視対象外のリポジトリです",
  "ws.not_found": "リポジトリのワークスペースが見つかりません。MONITOR_ROOT か actions_monitor.json の \"workspace_root\" を設定するか、リポジトリを含むフォルダーに .monitor-root というファイルを置いてください。",
  "ci.lane_queue": "マージキュー",
- "ci.lane_branch": "ブランチ {branch}"
+ "ci.lane_branch": "ブランチ {branch}",
+ "lint.rule.no_timeout": "timeout-minutes のないジョブ",
+ "lint.rule.secrets_inherit": "secrets: inherit はすべてのシークレットを渡します",
+ "lint.rule.permissions_top": "ファイルの先頭に permissions ブロックがありません",
+ "lint.rule.own_action_ref": "ブランチを追う自分のアクション",
+ "cfg.f.lint.own_owners": "自分のアカウント",
+ "cfg.h.lint.own_owners": "自分で管理しているアクションと再利用可能ワークフローのアカウントまたは組織の名前を、1行に1つ指定します。これらについては、リンターはバージョンタグを受け入れ、@main のようなブランチだけを警告します(ルール own_action_ref)。他者のアクションは引き続き完全なコミット SHA に固定する必要があります。既定は空で、すべてのアクションを第三者のものとして判定します。",
+ "lint.help_own": "アクションが自分のものであるアカウント(複数指定可)。そのバージョンタグは許容し、ブランチは報告します。"
 }

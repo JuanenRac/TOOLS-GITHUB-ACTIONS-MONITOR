@@ -334,8 +334,25 @@
       "pr_target": {
         "enabled": true,
         "severity": "bad"
+      },
+      "no_timeout": {
+        "enabled": false,
+        "severity": "warn"
+      },
+      "secrets_inherit": {
+        "enabled": false,
+        "severity": "warn"
+      },
+      "permissions_top": {
+        "enabled": false,
+        "severity": "info"
+      },
+      "own_action_ref": {
+        "enabled": true,
+        "severity": "warn"
       }
-    }
+    },
+    "own_owners": []
   },
   "notify": {
     "enabled": false,

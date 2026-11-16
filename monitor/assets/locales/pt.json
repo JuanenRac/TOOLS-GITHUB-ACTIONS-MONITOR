@@ -2931,5 +2931,12 @@
  "wh.unknown_repo": "repositório não vigiado",
  "ws.not_found": "Não foi encontrado o espaço de trabalho dos repositórios: defina MONITOR_ROOT, ou \"workspace_root\" em actions_monitor.json, ou coloque um ficheiro chamado .monitor-root na pasta que contém os repositórios.",
  "ci.lane_queue": "fila de fusão",
- "ci.lane_branch": "ramo {branch}"
+ "ci.lane_branch": "ramo {branch}",
+ "lint.rule.no_timeout": "um job sem timeout-minutes",
+ "lint.rule.secrets_inherit": "secrets: inherit entrega todos os segredos",
+ "lint.rule.permissions_top": "sem bloco permissions no início do ficheiro",
+ "lint.rule.own_action_ref": "uma action própria que segue um ramo",
+ "cfg.f.lint.own_owners": "Contas que são suas",
+ "cfg.h.lint.own_owners": "Nomes das contas ou organizações cujas actions e workflows reutilizáveis controla, um por linha. Para elas o linter aceita uma etiqueta de versão e só avisa de um ramo como @main (regra own_action_ref); a action de qualquer outra pessoa tem de continuar fixada a um SHA de commit completo. Vazio por predefinição: todas as actions são julgadas como de terceiros.",
+ "lint.help_own": "Uma conta cujas actions são suas (repetível): uma etiqueta de versão é aceite, um ramo é assinalado."
 }

@@ -2931,5 +2931,12 @@
  "wh.unknown_repo": "该仓库不在监视范围内",
  "ws.not_found": "找不到仓库工作区：请设置 MONITOR_ROOT，或在 actions_monitor.json 中设置 \"workspace_root\"，或在包含这些仓库的文件夹中放一个名为 .monitor-root 的文件。",
  "ci.lane_queue": "合并队列",
- "ci.lane_branch": "分支 {branch}"
+ "ci.lane_branch": "分支 {branch}",
+ "lint.rule.no_timeout": "没有 timeout-minutes 的作业",
+ "lint.rule.secrets_inherit": "secrets: inherit 会传递所有机密",
+ "lint.rule.permissions_top": "文件顶部没有 permissions 块",
+ "lint.rule.own_action_ref": "跟随分支的自有 action",
+ "cfg.f.lint.own_owners": "属于你的账号",
+ "cfg.h.lint.own_owners": "你所控制的 action 和可复用工作流所属的账号或组织名称,每行一个。对它们,检查器接受版本标签,只对 @main 这样的分支发出警告(规则 own_action_ref);其他人的 action 仍必须固定到完整的提交 SHA。默认为空:所有 action 都按第三方处理。",
+ "lint.help_own": "其 action 属于你的账号(可重复):接受其版本标签,报告分支。"
 }

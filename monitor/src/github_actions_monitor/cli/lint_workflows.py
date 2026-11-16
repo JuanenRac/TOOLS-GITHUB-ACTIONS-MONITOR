@@ -3,7 +3,7 @@
 # GPL-3.0-or-later - see LICENSE
 """A small linter for the workflow files of a repository (`.github/workflows/*.yml`), to run BEFORE you push. Read-only and local: it opens files, nothing else.
 
-  py -3 bin/lint_workflows.py [PATH ...] [--json] [--fail-on info|warn|bad] [--lang CODE]
+  py -3 bin/lint_workflows.py [PATH ...] [--own OWNER ...] [--json] [--fail-on info|warn|bad] [--lang CODE]
 
 With no PATH it looks at `.github/workflows` of the current folder. A PATH is a workflow file or a folder that holds them (or a repository root).
 
@@ -15,6 +15,14 @@ Rules (each one can be switched off and given another severity in actions_monito
                      a long string with the entropy of a key); a readable filler (`placeholder`, `dummy`, `changeme`, `ci`...) is only information and any other value is a warning
   injection          a text controlled by someone else (`github.event.*.title`, `body`, `head_ref`...) pasted into a `run:` script
   pr_target          `pull_request_target` together with a checkout of the pull request's code (it runs untrusted code with the repository's permissions)
+
+Four more rules are cheap and optional (the first three are OFF until you switch them on, in the Settings tab or `lint.rules.<rule>.enabled`):
+
+  no_timeout         a job without `timeout-minutes` (a stuck job runs for six hours); a job that only calls a reusable workflow is skipped, the called one carries the limit
+  secrets_inherit    `secrets: inherit` in the call of a reusable workflow (it hands over every secret of the repository, not the ones the called workflow needs)
+  permissions_top    no `permissions:` block at the top of the file, even when the jobs have their own (a job added later would get the broader default)
+  own_action_ref     with `lint.own_owners` (the accounts that are yours), an action or reusable workflow of YOURS that follows a branch (`@main`) instead of a version tag or a commit; a version
+                     tag of your own is accepted, a third party's action is still judged by `unpinned_uses` (a full commit SHA). Without `lint.own_owners` nothing changes
 
 A finding can be silenced where it is, with a comment on the same line or on the line before: `# monitor-lint: ignore secrets_in_clear because it is a filler for docker compose config`
 (a rule name, or `all`). The monitor also reads `lint.ignore` (patterns `repository:file:rule`, with `*`). The VALUE of a suspected secret is never printed or stored: a finding names the
@@ -35,8 +43,12 @@ from github_actions_monitor import i18n  # noqa: E402
 SHA_RE = re.compile(r"^[0-9a-f]{40}\Z")
 USES_RE = re.compile(r"^\s*-?\s*uses:\s*['\"]?([^'\"\s#]+)")
 SEVERITIES = ("info", "warn", "bad")
-RULES = ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target")
-DEFAULT_SEVERITY = {"unpinned_uses": "warn", "permissions": "warn", "secrets_in_clear": "bad", "injection": "warn", "pr_target": "bad"}
+RULES = ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target", "no_timeout", "secrets_inherit", "permissions_top", "own_action_ref")
+DEFAULT_SEVERITY = {"unpinned_uses": "warn", "permissions": "warn", "secrets_in_clear": "bad", "injection": "warn", "pr_target": "bad", "no_timeout": "warn", "secrets_inherit": "warn", "permissions_top": "info",
+                    "own_action_ref": "warn"}
+OFF_BY_DEFAULT = ("no_timeout", "secrets_inherit", "permissions_top")      # the optional rules wait for the person to want them (own_action_ref is inert until lint.own_owners lists an account)
+OWNER_RE = re.compile(r"^[A-Za-z0-9-]{1,39}\Z")
+VERSION_REF_RE = re.compile(r"^v?\d+(?:\.\d+){0,3}(?:[-+][0-9A-Za-z.-]+)?\Z")
 SECRET_PATTERNS = [
     ("github_token", re.compile(r"\bgh[pousr]_[A-Za-z0-9]{30,}\b")), ("github_fine_grained_token", re.compile(r"\bgithub_pat_[A-Za-z0-9_]{40,}\b")), ("aws_access_key", re.compile(r"\bAKIA[0-9A-Z]{16}\b")),
     ("private_key", re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----")), ("slack_token", re.compile(r"\bxox[abprs]-[A-Za-z0-9-]{10,}\b")), ("google_api_key", re.compile(r"\bAIza[0-9A-Za-z_-]{35}\b")),
@@ -74,10 +86,12 @@ UNTRUSTED = re.compile(r"\$\{\{\s*github\.(?:event\.(?:issue|pull_request|commen
 
 def settings(config):
     """`lint` of the configuration: {"enabled", "refresh_seconds", "rules": {rule: {"enabled", "severity"}}}, merged over the defaults."""
-    out = {"enabled": True, "refresh_seconds": 3600, "in_report": True, "ignore": [], "rules": {r: {"enabled": True, "severity": DEFAULT_SEVERITY[r]} for r in RULES}}
+    out = {"enabled": True, "refresh_seconds": 3600, "in_report": True, "ignore": [], "own_owners": [], "rules": {r: {"enabled": r not in OFF_BY_DEFAULT, "severity": DEFAULT_SEVERITY[r]} for r in RULES}}
     user = (config or {}).get("lint")
     if not isinstance(user, dict):
         return out
+    if isinstance(user.get("own_owners"), list):
+        out["own_owners"] = [x.lower() for x in user["own_owners"][:50] if isinstance(x, str) and OWNER_RE.match(x)]
     if isinstance(user.get("ignore"), list):
         out["ignore"] = [x for x in user["ignore"] if isinstance(x, str) and IGNORE_PATTERN_RE.match(x)]
     if isinstance(user.get("enabled"), bool):
@@ -98,9 +112,32 @@ def settings(config):
     return out
 
 
-def lint_text(text, name="workflow.yml", rules=None):
-    """The findings of one workflow file: [{"file", "line", "rule", "severity", "detail"}]. `rules` = settings()["rules"] (all on when None)."""
+def missing_timeouts(lines):
+    """[(line number, job)] of the jobs of a workflow (given as lines) that have no `timeout-minutes`. A job that only calls a reusable workflow (`uses:` at the job) is left out."""
+    jobs_at = next((i for i, line in enumerate(lines) if re.match(r"jobs\s*:\s*$", line)), None)
+    if jobs_at is None:
+        return []
+    starts = [(i, m.group(1)) for i, line in enumerate(lines[jobs_at + 1:], jobs_at + 1) for m in [re.match(r"^  ([A-Za-z0-9_-]+)\s*:\s*$", line)] if m]
+    out = []
+    for index, (start, job) in enumerate(starts):
+        end = starts[index + 1][0] if index + 1 < len(starts) else len(lines)
+        block = lines[start + 1:end]
+        if any(re.match(r"^    uses\s*:", line) for line in block):
+            continue
+        if not any(re.match(r"^    timeout-minutes\s*:", line) for line in block):
+            out.append((start + 1, job))
+    return out
+
+
+def is_own(spec, own):
+    """True when the action or reusable workflow `owner/repo[/path]@ref` belongs to one of the accounts in `own` (lower case names)."""
+    return bool(own) and spec.split("/", 1)[0].lower() in own
+
+
+def lint_text(text, name="workflow.yml", rules=None, own=()):
+    """The findings of one workflow file: [{"file", "line", "rule", "severity", "detail"}]. `rules` = settings()["rules"] (the defaults when None); `own` = the accounts that are yours (lint.own_owners)."""
     rules = rules or settings(None)["rules"]
+    own = tuple(own or ())
     lines = text.replace("\r\n", "\n").split("\n")
     found = []
 
@@ -134,11 +171,17 @@ def lint_text(text, name="workflow.yml", rules=None):
         if uses:
             spec = uses.group(1)
             if not spec.startswith(("./", "docker://")) and "@" in spec and not SHA_RE.match(spec.split("@", 1)[1]):
-                add("unpinned_uses", number, spec)
+                if is_own(spec, own):
+                    if not VERSION_REF_RE.match(spec.split("@", 1)[1]):      # your own action on a branch moves with every push; a version tag of your own is accepted
+                        add("own_action_ref", number, spec)
+                else:
+                    add("unpinned_uses", number, spec)
             if spec.startswith("actions/checkout"):
                 window = "\n".join(lines[number:number + 6])
                 if re.search(r"ref:\s*\$\{\{\s*github\.event\.pull_request\.head\.(?:sha|ref)", window) or re.search(r"ref:\s*\$\{\{\s*github\.head_ref", window):
                     checks_out_pr = True
+        if re.match(r"^\s*secrets\s*:\s*inherit\b", line):
+            add("secrets_inherit", number, "")
         if re.match(r"^\s*permissions\s*:\s*write-all\s*$", line):
             add("permissions", number, "write-all")
         known = next((label for label, pattern in SECRET_PATTERNS if pattern.search(line)), None)
@@ -170,6 +213,11 @@ def lint_text(text, name="workflow.yml", rules=None):
         add("permissions", 1, "missing")
     if pr_target and checks_out_pr:
         add("pr_target", 1, "")
+    if not has_permissions and has_job_permissions and any(re.match(r"^jobs\s*:", l) for l in lines):
+        add("permissions_top", 1, "")
+    if rules.get("no_timeout", {}).get("enabled", False):
+        for number, job in missing_timeouts(lines):
+            add("no_timeout", number, job)
     return found
 
 
@@ -184,7 +232,7 @@ def workflow_files(path):
         return []
 
 
-def lint_path(path, rules=None, root=None):
+def lint_path(path, rules=None, root=None, own=()):
     """The findings of every workflow file under `path`; file names are shown relative to `root` when given."""
     out = []
     for file in workflow_files(path):
@@ -193,7 +241,7 @@ def lint_path(path, rules=None, root=None):
         except OSError:
             continue
         label = str(file.relative_to(root)).replace("\\", "/") if root and Path(root) in file.parents else file.name
-        out += lint_text(text, label, rules)
+        out += lint_text(text, label, rules, own)
     return out
 
 
@@ -203,13 +251,13 @@ def ignored(repo, finding, patterns):
     return any(fnmatch.fnmatchcase(f"{repo}:{name}:{finding['rule']}", pattern) for name in names for pattern in patterns or ())
 
 
-def scan_clones(workspace_root, repos, rules=None, ignore=None):
+def scan_clones(workspace_root, repos, rules=None, ignore=None, own=()):
     """{repo: [findings]} for the repositories that have a clone with workflows. Plain file reads, no network. `ignore` = the patterns of lint.ignore."""
     result = {}
     for repo in repos:
         clone = Path(workspace_root) / repo
         if (clone / ".github" / "workflows").is_dir():
-            found = [f for f in lint_path(clone, rules, clone) if not ignored(repo, f, ignore)]
+            found = [f for f in lint_path(clone, rules, clone, own) if not ignored(repo, f, ignore)]
             if found:
                 result[repo] = found
     return result
@@ -232,13 +280,15 @@ def main(argv=None):
     ap.add_argument("paths", nargs="*", help=i18n.t("lint.help_paths"))
     ap.add_argument("--json", action="store_true", help=i18n.t("lint.help_json"))
     ap.add_argument("--fail-on", choices=SEVERITIES, default="bad", help=i18n.t("lint.help_fail_on"))
+    ap.add_argument("--own", action="append", metavar="OWNER", help=i18n.t("lint.help_own"))
     ap.add_argument("--lang", metavar="CODE", help=i18n.t("cli.help_lang"))
     args = ap.parse_args(argv)
     if args.lang:
         i18n.set_language(args.lang)
     findings = []
+    own = tuple(x.lower() for x in args.own or [] if OWNER_RE.match(x))
     for path in args.paths or ["."]:
-        findings += lint_path(path)
+        findings += lint_path(path, own=own)
     if args.json:
         print(json.dumps(findings, ensure_ascii=False, indent=1))
     else:
