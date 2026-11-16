@@ -46,6 +46,8 @@ NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}\Z")
 NET_RE = re.compile(r"^[0-9A-Fa-f:.]{2,45}(?:/[0-9]{1,3})?\Z")      # an address or a block of addresses (listen.trusted_proxies)
 LABEL_RE = re.compile(r"^[\w .:/+-]{1,50}\Z")      # a label of GitHub may hold a colon, a space or a slash ("monitor:ignore", "good first issue")
 LABEL_KEYS = ("sentinels.collab.rules.issue_critical_labels", "sentinels.collab.rules.ignore_labels")
+GLOB_RE = re.compile(r"^[A-Za-z0-9._*? -]{1,100}\Z")      # a name or a pattern of names (a ruleset may be called "Protect main" or "main-*")
+HYGIENE_SKIP = ("ruleset", "label", "file", "sha", "allowed", "schedule")
 TZ_RE = re.compile(r"^(?:local|utc|UTC|[A-Za-z][A-Za-z0-9_+./-]{1,63})\Z")      # display.timezone: local, utc or an IANA name
 CRON_RE = re.compile(r"^[0-9*/,\- ]{9,60}\Z")      # report_schedule.cron: five fields of numbers, lists, ranges and steps (reporting/report_schedule.py reads it)
 BRANCH_RE = re.compile(r"^[A-Za-z0-9._*/-]{1,100}\Z")      # a branch name or a pattern of branch names (ci.extra_branches)
@@ -212,6 +214,10 @@ _f(_T_SENT, "origin", "ci.inactive_days", "int", (0, 3650), restart=False)
 _f(_T_SENT, "origin", "ci.extra_branches", "names", restart=False)
 _f(_T_SENT, "prs", "sentinel.stale_pr_days", "int", (1, 90))
 _f(_T_SENT, "hygiene_files", "sentinel.required_files", "filegroups")
+_f(_T_SENT, "hygiene_rules", "sentinel.hygiene.ruleset_mode", "enum", ("name", "effective", "off"))
+_f(_T_SENT, "hygiene_rules", "sentinel.hygiene.ruleset_names", "names")
+_f(_T_SENT, "hygiene_rules", "sentinel.hygiene.skip", "names")
+_f(_T_SENT, "hygiene_rules", "sentinel.hygiene.community_fallback", "bool")
 _f(_T_SENT, "minutes", "sentinel.minutes_budget_period", "enum", ("7d", "24h"))
 _f(_T_SENT, "minutes", "sentinel.minutes_budget", "intmap", (0, 1000000), unit="min")
 _f(_T_SENT, "audits", "sentinel.audit_files.reconciliation", "text", FILE_PATTERN_RE)
@@ -589,8 +595,12 @@ def check_value(path, value):
             return False, "path"
         return True, text
     if kind == "names":
-        pattern = LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else NAME_RE))
+        pattern = LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path == "sentinel.hygiene.ruleset_names" else NAME_RE)))
         if not isinstance(value, list) or len(value) > 200 or not all(isinstance(v, str) and pattern.match(v) for v in value):
+            return False, "names"
+        if path == "sentinel.hygiene.ruleset_names" and not value:
+            return False, "names"      # no name at all would flag every repository
+        if path == "sentinel.hygiene.skip" and not set(value) <= set(HYGIENE_SKIP):
             return False, "names"
         return True, list(value)
     if kind == "patterns":

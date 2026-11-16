@@ -302,6 +302,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinel.ci_red_file` | `-` | paths | File for ci_red.json |
 | `sentinel.enabled` | `true` | sentinel | Sentinel on |
 | `sentinel.hot_hours` | `-` | sentinel | Hot period |
+| `sentinel.hygiene.community_fallback` | `-` | sentinel | Count the community profile and the .github repository |
+| `sentinel.hygiene.ruleset_mode` | `-` | sentinel | Branch protection check |
+| `sentinel.hygiene.ruleset_names` | `-` | sentinel | Ruleset names |
+| `sentinel.hygiene.skip` | `-` | sentinel | Hygiene checks to leave out |
 | `sentinel.hygiene_seconds` | `-` | sentinel | Hygiene checks |
 | `sentinel.max_calls_per_tick` | `-` | sentinel | API calls per cycle |
 | `sentinel.min_rate_remaining` | `-` | sentinel | Sentinel pauses below |

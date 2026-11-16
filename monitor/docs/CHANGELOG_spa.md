@@ -9,6 +9,10 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+### Cambiado
+
+- **La higiene (A6) ya no da por hechas las convenciones de un solo dueño**: el nombre del ruleset es un ajuste (`sentinel.hygiene.ruleset_names`, admite patrones); `sentinel.hygiene.ruleset_mode` puede juzgar la rama por defecto por las reglas que GitHub informa como vigentes (endpoints públicos, sin permisos de administrador) se llame como se llame el ruleset; `sentinel.hygiene.skip` deja fuera una comprobación; `sentinel.hygiene.community_fallback` cuenta también el perfil de comunidad y el repositorio `.github` de la cuenta; se acepta una licencia llamada LICENSE-MIT, LICENSE-APACHE, LICENSE.txt, COPYING o reconocida por GitHub; y lo que el token no puede saber (sin permisos de administrador) se muestra como no evaluable, nunca verde y nunca un aviso. Los valores por defecto conservan la regla antigua.
+
 ## [2.0.2]
 
 ### Seguridad

@@ -9,6 +9,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+### Modificato
+
+- **L'igiene (A6) non dà più per scontate le convenzioni di un solo proprietario**: il nome del ruleset è un'impostazione (`sentinel.hygiene.ruleset_names`, modelli ammessi); `sentinel.hygiene.ruleset_mode` può giudicare il ramo predefinito dalle regole che GitHub segnala come in vigore (endpoint pubblici, senza diritti di amministratore), comunque si chiami il ruleset; `sentinel.hygiene.skip` esclude un controllo; `sentinel.hygiene.community_fallback` conta anche il profilo della community e il repository `.github` dell'account; si accetta una licenza chiamata LICENSE-MIT, LICENSE-APACHE, LICENSE.txt, COPYING o riconosciuta da GitHub; e ciò che il token non può sapere (senza diritti di amministratore) appare come non valutabile, mai verde e mai un avviso. I valori predefiniti mantengono la regola vecchia.
+
 ## [2.0.2]
 
 ### Sicurezza

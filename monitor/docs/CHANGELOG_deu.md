@@ -9,6 +9,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+### Geändert
+
+- **Die Hygiene (A6) setzt nicht mehr die Konventionen eines einzelnen Besitzers voraus**: Der Name des Rulesets ist eine Einstellung (`sentinel.hygiene.ruleset_names`, Muster erlaubt); `sentinel.hygiene.ruleset_mode` kann den Standard-Branch nach den Regeln beurteilen, die GitHub als gültig meldet (öffentliche Endpunkte, ohne Administratorrechte), egal wie das Ruleset heißt; `sentinel.hygiene.skip` lässt eine Prüfung aus; `sentinel.hygiene.community_fallback` zählt auch das Community-Profil und das `.github`-Repository des Kontos; eine Lizenz namens LICENSE-MIT, LICENSE-APACHE, LICENSE.txt, COPYING oder von GitHub erkannt wird akzeptiert; und was das Token nicht wissen kann (keine Administratorrechte), erscheint als nicht prüfbar, nie grün und nie eine Warnung. Die Standardwerte behalten die alte Regel.
+
 ## [2.0.2]
 
 ### Sicherheit

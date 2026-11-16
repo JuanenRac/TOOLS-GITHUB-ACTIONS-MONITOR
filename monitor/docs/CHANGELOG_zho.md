@@ -9,6 +9,10 @@
 
 ## [Unreleased]
 
+### 变更
+
+- **卫生检查（A6）不再假定某一位所有者的惯例**：规则集名称成为设置项（`sentinel.hygiene.ruleset_names`，可用模式）；`sentinel.hygiene.ruleset_mode` 可按 GitHub 报告的生效规则（公开端点，无需管理员权限）判断默认分支，不论规则集叫什么；`sentinel.hygiene.skip` 可跳过某项检查；`sentinel.hygiene.community_fallback` 还会计入社区档案和账户的 `.github` 仓库；接受名为 LICENSE-MIT、LICENSE-APACHE、LICENSE.txt、COPYING 或被 GitHub 识别的许可证；令牌无法得知的内容（无管理员权限）显示为“无法评估”，既不是绿色也不是警告。默认值保持旧规则。
+
 ## [2.0.2]
 
 ### 安全

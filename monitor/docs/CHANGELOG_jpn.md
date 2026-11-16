@@ -9,6 +9,10 @@
 
 ## [Unreleased]
 
+### 変更
+
+- **衛生（A6）が特定の所有者の慣習を前提にしなくなりました**: ルールセット名は設定（`sentinel.hygiene.ruleset_names`、パターン可）です。`sentinel.hygiene.ruleset_mode` は、ルールセットの名前に関係なく、GitHub が有効と報告するルール（公開エンドポイント、管理者権限不要）で既定ブランチを判断できます。`sentinel.hygiene.skip` はチェックを除外し、`sentinel.hygiene.community_fallback` はコミュニティプロファイルとアカウントの `.github` リポジトリも数えます。LICENSE-MIT、LICENSE-APACHE、LICENSE.txt、COPYING、または GitHub が認識するライセンスを受け付け、トークンで判断できないこと（管理者権限なし）は「評価不可」と表示され、緑にも警告にもなりません。既定値は従来の規則のままです。
+
 ## [2.0.2]
 
 ### セキュリティ
