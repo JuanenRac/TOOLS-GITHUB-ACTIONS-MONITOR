@@ -22,6 +22,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **One damaged byte in the event feed no longer stops the notifications**: past 512 KB the feed was read again as strict UTF-8 to trim it, a single byte that was not valid raised an error that escaped, the feed then grew without a limit and every new event failed before reaching the notification channels. The trim now reads tolerantly and can never stop the channels.
 
+### Security
+
+- **The image can no longer carry the data of whoever builds it**: the build context excluded the loose files of the old layout but not the `config/`, `data/`, `logs/` and `ai/` folders where the tokens, users, sessions and settings live now; they are excluded, the app stage of the Dockerfile deletes them too, and a test checks both against the list of folders of the product.
+
 ## [2.0.1]
 
 ### Fixed
