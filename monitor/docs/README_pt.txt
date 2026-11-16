@@ -10,6 +10,7 @@ QUAL ARRANCAR? (um utilizador novo decide em dois minutos)
   TERMINAL  python bin/tui_textual.py (acrescente --lite para a edição lite)   a aplicação interativa de terminal; bin/tui.py --once imprime um ecrã.
   VERIFICAR python bin/actions_monitor.py --doctor (--json para scripts)   diz o que falta e o comando exato que o resolve.
   EXPERIMENTAR python bin/actions_monitor.py --demo   a página com dados inventados: sem gh, sem sessão, nada seu é tocado.
+  COMPLETE TAMBÉM  a pontuação de cada conta, a sentinela Security (desligada), a saúde de cada repositório e da equipa, relatórios agendados (desligados), um registo de ações, o Apprise e predefinições de serviços de IA; cada um tem o seu guia em docs/ e na Ajuda da página.
 
 Requisitos: Python 3.11+ e o GitHub CLI (`gh`) com a sessão iniciada (gh auth login). Mais nada: o núcleo não precisa de pacotes (a vista de consola, bin/tui.py, usa o pacote opcional rich).
 Passos rápidos para a primeira utilização: QUICKSTART_pt.txt.
@@ -22,9 +23,9 @@ O QUE NUNCA FAZ   Só escuta em 127.0.0.1, a menos que ligue o modo rede (Defini
            Não há IA no caminho crítico; o explicador opcional com IA vem desligado.
 
 IDIOMA     8 idiomas: en, es, de, fr, it, ja, zh, pt (português de Portugal). Arranca em INGLÊS: o idioma do sistema não decide. Escolha outro no separador DEFINIÇÕES da página
-           (ícone da roda dentada; o navegador lembra-se), ou com "language" em actions_monitor.json, ou com a variável de ambiente MONITOR_LANG, ou com --lang CÓDIGO nas ferramentas de linha de comandos (prevalece sobre tudo).
+           (ícone da roda dentada; o navegador lembra-se), ou com "language" em config/actions_monitor.json, ou com a variável de ambiente MONITOR_LANG, ou com --lang CÓDIGO nas ferramentas de linha de comandos (prevalece sobre tudo).
            As linhas que os scripts leem (SKIP, DISPATCHED, READY, FAILED, Summary:, BUILD ONLY...) estão sempre em inglês.
-CONFIG     actions_monitor.json (criado a partir de assets/examples/actions_monitor.example.json no primeiro arranque). Chaves úteis: github_owner (vazio = a conta do gh),
+CONFIG     config/actions_monitor.json (criado a partir de assets/examples/actions_monitor.example.json no primeiro arranque). Chaves úteis: github_owner (vazio = a conta do gh),
            language, ecosystems_file, targets_file, refresh_seconds, cold_refresh_seconds, max_workers, min_rate_remaining, sentinel.*
            ecosystems_file: agrupa repositórios por prefixo do nome (ver assets/examples/ecosystems.example.json; "*" = todos os repositórios). targets_file: catálogo de builds para as
            ferramentas de lote (ver assets/examples/targets.example.json). profiles_file (assets/examples/profiles.example.json): perfis de lote. As chaves que começam por "_" nestes ficheiros são metadados.
@@ -33,14 +34,14 @@ ESPAÇO DE TRABALHO  OPCIONAL: uma pasta com clones locais dos seus repositório
            Com ele, há também releases candidatas, fila de assinatura e as ferramentas de lote. Registos de assinatura: "signed_dir"; ficheiros de auditoria: "audit_dir".
 TESTES     py -3 -I -m unittest discover -s tests   (Linux/macOS: python3 -I -m unittest discover -s tests). Não precisam de rede.
 PROBLEMAS  "API rate limit": a quota partilhada do gh (5000/hora) esgotou-se; aguarde o reinício (gh api rate_limit) e aumente refresh_seconds / diminua max_workers.
-           O monitor pára ao arrancar se o gh não responder. Um ficheiro de cache corrompido é ignorado; apague sentinel_cache.json para recomeçar a cache.
+           O monitor pára ao arrancar se o gh não responder. Um ficheiro de cache corrompido é ignorado; apague data/sentinel_cache.json para recomeçar a cache.
            Reinicie o monitor depois de atualizar o pacote (um processo em execução mantém o código antigo).
 
 FERRAMENTAS  bin/read_report.py [--lang CÓDIGO] [--json] [--export-status PASTA] [--export-sign-queue FICHEIRO]  imprime o que diz o monitor em execução (local, sem quota do GitHub)
            bin/gha_dispatch_all.py [--lang CÓDIGO] plan|dispatch|status|finalize|hygiene    lote de builds do GitHub Actions (no seu PC não se compila nada)
            bin/release_notes.py REPO [--since ETIQUETA] [--out FICHEIRO]    rascunho de notas de release a partir dos commits (uma proposta; não publica nada)
            bin/release_candidates.py    projetos com entradas em CHANGELOG [Unreleased] e última release antiga (só leitura)
-EVENTOS    A Sentinela escreve uma linha JSON por cada ALTERAÇÃO (novo vermelho, CI recuperada, build bloqueado, alertas novos...) em events_monitor.jsonl. Cada linha traz um
+EVENTOS    A Sentinela escreve uma linha JSON por cada ALTERAÇÃO (novo vermelho, CI recuperada, build bloqueado, alertas novos...) em data/events_monitor.jsonl. Cada linha traz um
            `code` estável (nunca depende do idioma), `kind`, `level`, `repo`, `args` e `text` (no idioma configurado). `tail -F` acompanha-o.
 CI VERMELHA Um único critério: o ÚLTIMO run terminado de cada workflow no ramo predefinido. Vermelho = failure, timed_out, startup_failure ou action_required.
            cancelled, skipped, neutral e stale não contam.

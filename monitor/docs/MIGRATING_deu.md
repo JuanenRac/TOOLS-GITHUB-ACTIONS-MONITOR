@@ -3,9 +3,23 @@
   GPL-3.0-or-later - see LICENSE
 -->
 
-# Aktualisieren von einer Version vor 1.5.0
+# Von einer früheren Version aktualisieren
 
 [English](MIGRATING.md) · [Español](MIGRATING_spa.md) · [Français](MIGRATING_fra.md) · [Italiano](MIGRATING_ita.md) · **Deutsch** · [简体中文](MIGRATING_zho.md) · [日本語](MIGRATING_jpn.md) · [Português](MIGRATING_por.md)
+
+## Der kurze Weg, von jeder Version aus
+
+1. Beenden Sie den Monitor (und den Supervisor, wenn Sie mehrere Konten nutzen).
+2. Sichern Sie Ihre Konfiguration (`actions_monitor.json` oder den Ordner `config/`, falls vorhanden) und entpacken Sie die neue Version über den alten Ordner.
+3. Starten Sie wie gewohnt. Eine Installation ab 1.8.1 oder älter verschiebt von selbst, was neben den Startern liegt, nach `config/`, `data/`, `logs/` und `ai/`. Nichts wird gelöscht oder überschrieben (eine Datei, die am neuen Ort schon existiert, bleibt und der Doctor sagt es), die Konfiguration wird vorher nach `config/config_backups/` kopiert und jede Verschiebung wird in einem Journal festgehalten.
+4. Um es vorher zu sehen oder rückgängig zu machen, aus dem Ordner `src/`: `python -m github_actions_monitor.util.rootmigrate` (Probelauf), `--apply` zum sofortigen Verschieben, `--undo`, um alles zurückzulegen. `MONITOR_NO_AUTO_MIGRATION=1` schaltet das automatische Verschieben aus. Die Prüfung `layout` von `python bin/actions_monitor.py --doctor` listet auf, was noch neben den Startern liegt.
+5. Um die Reste des alten flachen Aufbaus zu entfernen (alte Module, die alte Seite, die alten Beispiele und der alte Ordner `locales/`): `python tools/migrate_layout.py` (Probelauf) und dann `--apply`; sie landen in `layout_backup_<Stempel>/`, nichts wird gelöscht.
+6. Namen aus der Zeit vor 1.5.0: `python bin/migrate_state.py` und dann `--apply` (siehe unten).
+7. Ein Gate-Skript eines KI-Werkzeugs, das mit seinem alten Pfad eingetragen ist, muss neu eingetragen werden: `python bin/monitor_cli.py ai-hook install`.
+
+Was erhalten bleibt: Ihre Konfiguration, der Zustand, die Protokolle, die Konten und Ihre Katalogdateien. Was sich bewegt: nur die Orte (siehe die Anleitung der Ordner, `LAYOUT.md`). Was sich nie ändert: `ci_red.json`, sein Schema und die Dateien von `--export-status`.
+
+## Vor 1.5.0
 
 Version 1.5.0 hat Dateien, Ordnern, Skripten und einer Einstellung englische Namen gegeben. Nichts geht verloren: Der Monitor LIEST die alten Namen weiterhin, du kannst also zuerst aktualisieren und danach aufräumen.
 
@@ -124,3 +138,10 @@ Zum Aktualisieren muss nichts migriert werden: Dateien bleiben der Standard. Wen
 Nichts muss umgewandelt werden. Eine Einstellung kann eine Änderung brauchen:
 
 - extra_reader.file zeigt außerhalb des Kontenordners, daher wird das zweite Konto NICHT verwendet. Verschiebe die Token-Datei in den Kontenordner (accounts/ oder den Ordner, den MONITOR_ACCOUNTS_DIR nennt) und lass ihren Pfad in extra_reader.file, oder schalte extra_reader.any_folder in Einstellungen > Kontingent ein.
+
+# Von 1.8.x auf 1.9.x
+
+- Nichts muss umgewandelt werden und nichts Neues ist überraschend an: Der Sicherheitswächter, die geplanten Berichte und Apprise sind aus, und keine KI-Voreinstellung ist aktiv.
+- **Standardmäßig an**: die Bewertung des Kontos (nur Complete; ihre Standardgewichte sind jetzt 30, 15, 15, 15 und 25, selbst gesetzte Gewichte bleiben erhalten) und das Aktionsprotokoll in `logs/audit_actions.jsonl` (in den Einstellungen abschaltbar).
+- **Mit SQLite**: Die Datenbank erhält beim ersten Start eine Tabelle für die Schnappschüsse der Bewertung (Schema 2); die Migration läuft in einer Transaktion, eine unterbrochene lässt die Datenbank, wie sie war.
+- **Berichte und der Tab Team** brauchen nichts: Sie lesen, was der Monitor schon hat.

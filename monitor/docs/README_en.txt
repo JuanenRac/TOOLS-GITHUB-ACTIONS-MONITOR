@@ -10,6 +10,7 @@ WHICH ONE TO START? (a new user decides in two minutes)
   TERMINAL  python bin/tui_textual.py (add --lite for the lite edition)   the interactive terminal application; bin/tui.py --once prints one screen.
   CHECK     python bin/actions_monitor.py --doctor (--json for scripts)   tells what is missing and the exact command that fixes it.
   TRY IT    python bin/actions_monitor.py --demo   the page with invented data: no gh, no login, nothing of yours is touched.
+  COMPLETE ALSO  the score of each account, the Security sentinel (off), the health of each repository and of the team, scheduled reports (off), a log of actions, Apprise and presets of AI services; each one has its guide in docs/ and in the page Help.
 
 Requirements: Python 3.11+ and the GitHub CLI (`gh`) logged in (gh auth login). Nothing else: the core needs no package (the terminal view, bin/tui.py, uses the optional package rich).
 Quick steps for a first use: QUICKSTART_en.txt.
@@ -22,9 +23,9 @@ WHAT IT NEVER DOES   It listens only on 127.0.0.1 unless you switch on the netwo
            No AI is in the critical path; the optional AI explainer is off by default.
 
 LANGUAGE   8 languages: en, es, de, fr, it, ja, zh, pt (European Portuguese). It starts in ENGLISH: the language of your system does not decide. Choose another one in the SETTINGS tab of the page
-           (gear icon; the browser remembers it), or set "language" in actions_monitor.json, or the environment variable MONITOR_LANG, or --lang CODE in the command line tools (it beats the rest).
+           (gear icon; the browser remembers it), or set "language" in config/actions_monitor.json, or the environment variable MONITOR_LANG, or --lang CODE in the command line tools (it beats the rest).
            Lines that scripts read (SKIP, DISPATCHED, READY, FAILED, Summary:, BUILD ONLY...) are always English.
-CONFIG     actions_monitor.json (created from assets/examples/actions_monitor.example.json on the first start). Useful keys: github_owner (empty = the account of gh),
+CONFIG     config/actions_monitor.json (created from assets/examples/actions_monitor.example.json on the first start). Useful keys: github_owner (empty = the account of gh),
            language, ecosystems_file, targets_file, refresh_seconds, cold_refresh_seconds, max_workers, min_rate_remaining, sentinel.*
            ecosystems_file: groups repositories by name prefix (see assets/examples/ecosystems.example.json; "*" = every repository). targets_file: the catalogue of builds
            for the batch tools (see assets/examples/targets.example.json). profiles_file (assets/examples/profiles.example.json): batch profiles. Keys that start with "_" in these files are metadata.
@@ -33,14 +34,14 @@ WORKSPACE  OPTIONAL: a folder with local clones of your repositories (MONITOR_RO
            With it you also get release candidates, the signing queue and the batch tools. Signing records: "signed_dir"; audit files: "audit_dir".
 TESTS      py -3 -I -m unittest discover -s tests   (Linux/macOS: python3 -I -m unittest discover -s tests). They need no network.
 PROBLEMS   "API rate limit": the shared quota of gh (5000/hour) is used up; wait for the reset (gh api rate_limit) and raise refresh_seconds / lower max_workers.
-           The monitor stops at start if gh does not answer. A corrupt cache file is ignored; delete sentinel_cache.json to start the cache again.
+           The monitor stops at start if gh does not answer. A corrupt cache file is ignored; delete data/sentinel_cache.json to start the cache again.
            Restart the monitor after updating the package (a running process keeps the old code).
 
 TOOLS      bin/read_report.py [--lang CODE] [--json] [--export-status DIR] [--export-sign-queue FILE]  prints what the running monitor says (local, no GitHub quota)
            bin/gha_dispatch_all.py [--lang CODE] plan|dispatch|status|finalize|hygiene    batch of GitHub Actions builds (nothing is compiled on your PC)
            bin/release_notes.py REPO [--since TAG] [--out FILE]    draft of release notes from commits (a proposal; it publishes nothing)
            bin/release_candidates.py    projects with entries in CHANGELOG [Unreleased] and an old last release (read only)
-EVENTS     The Sentinel writes one JSON line per CHANGE (new red, recovered CI, stuck build, new alerts...) in events_monitor.jsonl. Each line has a stable
+EVENTS     The Sentinel writes one JSON line per CHANGE (new red, recovered CI, stuck build, new alerts...) in data/events_monitor.jsonl. Each line has a stable
            `code` (it never depends on the language), `kind`, `level`, `repo`, `args` and `text` (in the configured language). `tail -F` follows it.
 RED CI     One criterion: the LAST finished run of each workflow on the default branch. Red = failure, timed_out, startup_failure or action_required.
            cancelled, skipped, neutral and stale do not count.

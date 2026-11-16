@@ -1,6 +1,58 @@
 # Roadmap
 
-Ideen, die nicht in die aktuelle Version passten, ohne versprochene Reihenfolge. Es sind Richtungen, keine Zusagen; ein Issue oder ein Pull Request ist der beste Weg, eine voranzubringen.
+Was erschienen ist, was als Nächstes kommt und was nur eine Idee ist, in dieser Reihenfolge der Gewissheit. Es sind Richtungen, keine Zusagen; ein Issue oder ein Pull Request ist der beste Weg, eine voranzubringen.
+
+## Wo der Monitor jetzt steht
+
+Version 1.9.4. Die Lite-Ausgabe zeigt, was läuft und was fehlgeschlagen ist. Die vollständige Ausgabe fügt drei Wächter (CI, Collab und Security), eine Liste der Warnungen, mehrere Konten und ein Team mit Rollen, die Bewertung jedes Kontos, die Gesundheit jedes Repositorys und des Teams, geplante Berichte, ein Aktionsprotokoll, Benachrichtigungen (ntfy, Teams, E-Mail und Apprise), einen optionalen KI-Assistenten mit Voreinstellungen kompatibler Dienste, den Dienstmodus mit Docker und eine Seite für jede Bildschirmgröße vom Telefon bis 4K hinzu.
+
+## Geplant, in dieser Reihenfolge
+
+Jede Version enthält nur echten Inhalt: Eine Version ohne echten Inhalt wird übersprungen und nie leer veröffentlicht. Nichts davon gilt als an echten Diensten bewiesen, außer die Anleitung sagt es.
+
+### 1.9.5 bis 1.9.9 - Abschluss der dritten Phase
+
+Was die Prüfungen von Bewertung, Sicherheitswächter, Gesundheitsansichten, Berichten und Aktionsprotokoll noch finden; die Kosten an GitHub-Aufrufen bei drei laufenden Wächtern; eine Bewertung, die stimmig bleibt, wenn ein Wächter ausgeschaltet ist.
+
+### 2.0.0 - Reife
+
+Eine Hauptversion, die technische Schulden abbaut und die öffentlichen Schnittstellen einfriert: Wächter, Speicher, Alarme, das Ereignisschema und die Lese-API, mit einer Suite von Vertragstests, die Clients gegen jedes Release ausführen können. Eine Anleitung für jede Nutzungsart (Lite, einzeln, Dienst, Team) und eine Referenz für Einstellungen, Ereignisse, Metriken und API. Ab 2.0.1 gibt es ein Polster für das, was erst bei langer echter Nutzung auftaucht.
+
+Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
+
+## Erledigt in 1.8.2 bis 1.9.4
+
+### 1.9.4 - KI-Voreinstellungen
+
+Eine Tabelle mit zwölf gehosteten Diensten und sechs lokalen Servern, die ein dem Monitor bekanntes Protokoll sprechen, eine Auswahl in den KI-Einstellungen, die Adresse, den Namen der Schlüsselvariable und ein Beispielmodell ausfüllt, lokale Server, die ohne Schlüssel arbeiten, und die in der öffentlichen Dokumentation gelesenen Adressen der wichtigsten Dienste.
+
+### 1.9.3 - Geplante Berichte und Prüfprotokoll
+
+Berichtsvorlagen in HTML und Markdown (PDF optional) mit Bewertung, wichtigsten Alarmen und Änderungen, ein Planer und ein nur anhängendes Prüfprotokoll, wer was wann getan hat, ohne jedes Geheimnis darin. Optional, im selben Release: eine Ansicht „Release bereit / blockiert“ mit dem letzten grünen Commit jedes Repositorys.
+
+### 1.9.2 - Gesundheit von Repository und Team
+
+Eine Gesundheitsansicht je Repository (CI, Issues und Pull Requests, Sicherheit, Release-Bereitschaft, Aktivität) und eine fürs Team mit Rangliste, Summen und Filtern; Seiten für beide mit Direktlinks für Wandbildschirme. Optional, im selben Release: ein Panel nächtlicher Benchmarks gegen ein Budget (Median gegen eine Basislinie je Maschinenklasse) und ein Panel mit Software-Stücklisten und Attestierungen jedes Releases.
+
+### 1.9.1 - Sicherheitswächter
+
+Der dritte Wächter: Dependabot, Code-Scanning, Secret-Scanning, Branch-Schutz, Workflow-Berechtigungen und Code-Besitzer, mit Regeln je Signalart, demselben Filter im Reiter Alarme und einem Abzug in der Bewertung für offene kritische Alarme. Optional, im selben Release: Workflow-Hygiene (Actions, die nicht an einen Commit gebunden sind, Jobs ohne Zeitlimit, Workflows ohne Berechtigungen oder ohne Nebenläufigkeitsregel, gefährliche Nutzung von pull_request_target), aufgebaut auf dem Workflow-Prüfer, den das Projekt schon hat.
+
+### 1.9.0 - Eine Bewertung
+
+Metrik-Sammler je Konto und je Wächter (Erfolgsquote, Dauer, Zeit bis zur Behebung, Durchsatz), eine Bewertungs-Engine mit änderbaren Schwellen, ein Trend gegenüber dem Vorzeitraum, im Speicher abgelegte Momentaufnahmen, ein Bewertungs-Widget mit Sparkline, Alarme bei sinkender Bewertung und ein Kommandozeilen-Verb, das sie ausgibt.
+
+### 1.8.4 - Stabilisierung
+
+Keine großen Funktionen. Isolation zwischen Konten, die Seite, der Speicher, Anmeldung und Rollen, Benachrichtigungen, ein GitHub, das zeitweise ausfällt, der Start nach einer unterbrochenen Migration, die Wiederherstellung nach einem Abbruch, ein erweiterter Doctor, die Stellen, die auf GitHub schreiben, Protokolle ohne Token, eine Sicherheits-Checkliste für den Teammodus und Dokumente, die zum Verhalten passen. Die Serie läuft nur bei Bedarf bis 1.8.9 weiter.
+
+### 1.8.3 - Benachrichtigungen je Benutzer
+
+Einstellungen je Benutzer (Kanal, Wächter, niedrigste Stufe), ein Verteiler, der anhand von Einstellungen und Rollen entscheidet, wer benachrichtigt wird, Kanäle als einfache Plug-ins und Zusammenfassungen der noch ungelesenen Alarme. Außerdem: ein Bericht über die Wartezeit der Jobs in der Warteschlange je Runner, und ein wegen der beobachteten Pfade übersprungener Job wird getrennt von einem roten Job angezeigt.
+
+### 1.8.2 - Offizielles Docker-Image und Dienstmodus
+
+Ein mehrstufiges Image mit unprivilegiertem Benutzer, Volumes für Daten und Konfiguration, dokumentierte Umgebungsvariablen, ein Compose-Beispiel mit optionalem Reverse-Proxy und TLS, eine systemd-Unit für die klassische Installation und eine tiefe Gesundheitsprüfung, die fehlschlägt, wenn der Supervisor oder der Zyklus eines Kontos hängt. Ein Zugangsdatum, das GitHub widerruft oder ablaufen lässt, markiert nur dieses Konto als blind, löst einen kritischen Systemalarm aus und lässt sich ersetzen, ohne den Supervisor neu zu starten. Sicherung, Aktualisierung und erster Start als Dienst sind dokumentiert; die Seite sagt, ob sie auf diesem Rechner, im Netzwerk oder hinter einem Proxy lauscht; die Kommandozeile arbeitet gegen einen entfernten Monitor. Die Lite-Ausgabe bleibt lokal.
 
 ## Erledigt in 1.8.0
 
@@ -21,50 +73,6 @@ Alles Folgende wurde in der Reihe 1.8 ausgeliefert und ist getestet; nichts gilt
 - Die Terminal-Anwendung bearbeitet Listen und Zuordnungen.
 - Teammodus (standardmäßig aus): Benutzer, Rollen (admin, maintainer, viewer) und Sitzungen im Speicher, eine Anmeldeseite, ein Bearer-Token für Clients, die kein Browser sind, stabile JSON-Fehler und eine Wiederherstellung eines Administrators über die Konsole dieses Rechners. Der Einzelmodus funktioniert weiter ohne Anmeldung, und die Lite-Ausgabe hat nie eine.
 - Eine lebendigere Seite: animierte Symbole, Statuslämpchen, deren Bewegung ihrem Zustand folgt, Reaktionen auf Überfahren, Fokus und Klick; alles aus bei reduzierter Bewegung und schlank in der Lite-Ausgabe.
-
-## Geplant, in dieser Reihenfolge
-
-Jede Version enthält alles aus ihrem Abschnitt des Plans: nichts bleibt von einer früheren Version offen, und nichts wird auf die nächste verschoben. Nach 1.8.3 und nach 1.9.3 durchläuft das Produkt eine unabhängige Prüfung, deren Befunde in der folgenden Stabilisierungsversion geschlossen werden. 1.8.1 ist eine Korrekturversion von 1.8.0: Das Feld „Repositories werden geladen“ verschwindet mit dem letzten Repository, und das Neuladen der Seite holt die Daten sofort.
-
-### 1.9.4 - Stabilisierung der dritten Phase
-
-Derselbe Abschluss wie bei 1.8.4 für Bewertung, Sicherheitswächter, Gesundheitsansichten, Berichte und Prüfprotokoll; die Kosten an API-Aufrufen bei drei laufenden Wächtern; eine Bewertung, die stimmig bleibt, wenn ein Wächter aus ist.
-
-### 2.0.0 - Reife
-
-Eine Hauptversion, die technische Schulden abbaut und die öffentlichen Schnittstellen einfriert: Wächter, Speicher, Alarme, das Ereignisschema und die Lese-API, mit einer Suite von Vertragstests, die Clients gegen jedes Release ausführen können. Eine Anleitung für jede Nutzungsart (Lite, einzeln, Dienst, Team) und eine Referenz für Einstellungen, Ereignisse, Metriken und API. Ab 2.0.1 gibt es ein Polster für das, was erst bei langer echter Nutzung auftaucht.
-
-Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
-
-## Erledigt in 1.8.2 bis 1.9.3
-
-### 1.8.2 - Offizielles Docker-Image und Dienstmodus
-
-Ein mehrstufiges Image mit unprivilegiertem Benutzer, Volumes für Daten und Konfiguration, dokumentierte Umgebungsvariablen, ein Compose-Beispiel mit optionalem Reverse-Proxy und TLS, eine systemd-Unit für die klassische Installation und eine tiefe Gesundheitsprüfung, die fehlschlägt, wenn der Supervisor oder der Zyklus eines Kontos hängt. Ein Zugangsdatum, das GitHub widerruft oder ablaufen lässt, markiert nur dieses Konto als blind, löst einen kritischen Systemalarm aus und lässt sich ersetzen, ohne den Supervisor neu zu starten. Sicherung, Aktualisierung und erster Start als Dienst sind dokumentiert; die Seite sagt, ob sie auf diesem Rechner, im Netzwerk oder hinter einem Proxy lauscht; die Kommandozeile arbeitet gegen einen entfernten Monitor. Die Lite-Ausgabe bleibt lokal.
-
-### 1.8.3 - Benachrichtigungen je Benutzer
-
-Einstellungen je Benutzer (Kanal, Wächter, niedrigste Stufe), ein Verteiler, der anhand von Einstellungen und Rollen entscheidet, wer benachrichtigt wird, Kanäle als einfache Plug-ins und Zusammenfassungen der noch ungelesenen Alarme. Außerdem: ein Bericht über die Wartezeit der Jobs in der Warteschlange je Runner, und ein wegen der beobachteten Pfade übersprungener Job wird getrennt von einem roten Job angezeigt.
-
-### 1.8.4 - Stabilisierung
-
-Keine großen Funktionen. Isolation zwischen Konten, die Seite, der Speicher, Anmeldung und Rollen, Benachrichtigungen, ein GitHub, das zeitweise ausfällt, der Start nach einer unterbrochenen Migration, die Wiederherstellung nach einem Abbruch, ein erweiterter Doctor, die Stellen, die auf GitHub schreiben, Protokolle ohne Token, eine Sicherheits-Checkliste für den Teammodus und Dokumente, die zum Verhalten passen. Die Serie läuft nur bei Bedarf bis 1.8.9 weiter.
-
-### 1.9.0 - Eine Bewertung
-
-Metrik-Sammler je Konto und je Wächter (Erfolgsquote, Dauer, Zeit bis zur Behebung, Durchsatz), eine Bewertungs-Engine mit änderbaren Schwellen, ein Trend gegenüber dem Vorzeitraum, im Speicher abgelegte Momentaufnahmen, ein Bewertungs-Widget mit Sparkline, Alarme bei sinkender Bewertung und ein Kommandozeilen-Verb, das sie ausgibt.
-
-### 1.9.1 - Sicherheitswächter
-
-Der dritte Wächter: Dependabot, Code-Scanning, Secret-Scanning, Branch-Schutz, Workflow-Berechtigungen und Code-Besitzer, mit Regeln je Signalart, demselben Filter im Reiter Alarme und einem Abzug in der Bewertung für offene kritische Alarme. Optional, im selben Release: Workflow-Hygiene (Actions, die nicht an einen Commit gebunden sind, Jobs ohne Zeitlimit, Workflows ohne Berechtigungen oder ohne Nebenläufigkeitsregel, gefährliche Nutzung von pull_request_target), aufgebaut auf dem Workflow-Prüfer, den das Projekt schon hat.
-
-### 1.9.2 - Gesundheit von Repository und Team
-
-Eine Gesundheitsansicht je Repository (CI, Issues und Pull Requests, Sicherheit, Release-Bereitschaft, Aktivität) und eine fürs Team mit Rangliste, Summen und Filtern; Seiten für beide mit Direktlinks für Wandbildschirme. Optional, im selben Release: ein Panel nächtlicher Benchmarks gegen ein Budget (Median gegen eine Basislinie je Maschinenklasse) und ein Panel mit Software-Stücklisten und Attestierungen jedes Releases.
-
-### 1.9.3 - Geplante Berichte und Prüfprotokoll
-
-Berichtsvorlagen in HTML und Markdown (PDF optional) mit Bewertung, wichtigsten Alarmen und Änderungen, ein Planer und ein nur anhängendes Prüfprotokoll, wer was wann getan hat, ohne jedes Geheimnis darin. Optional, im selben Release: eine Ansicht „Release bereit / blockiert“ mit dem letzten grünen Commit jedes Repositorys.
 
 ## Erledigt in 1.7.9
 
@@ -141,10 +149,10 @@ Was 1.6.4 nicht erreicht hat, und warum:
 
 ## Später
 
-- **Weitere Benachrichtigungsadapter**: ntfy, Microsoft Teams und E-Mail über ein lokales Relay.
-- **Mehrere Konten in einer Seite**: in 1.7.0 erledigt, jedes Konto in einem eigenen Monitor unter einem Supervisor.
-- **Hardware-Telemetrie der Runner** über einen Agenten: Heute wird nur ein optionaler Node-Exporter-Endpunkt gelesen.
+- **Hardware-Telemetrie der Runner** über einen Agenten: heute wird nur ein optionaler Node-Exporter-Endpunkt gelesen.
+- **Eine vierte Phase** (Plugins, breitere Automatisierung, fortgeschrittene KI) erst nach mehreren Wochen stabilem 2.0.x und einer ausdrücklichen Entscheidung.
 
 ## Ideen, die zuerst eine Entscheidung brauchen
 
-- Die Logs eines fehlgeschlagenen Schritts in der Seite lesen, mit derselben Bereinigung wie beim KI-Assistenten.
+- Eine PDF-Fassung der geplanten Berichte (heute HTML und Markdown).
+- Eine Ansicht der bereiten oder blockierten Releases, eine je Repository, im Tab Team.

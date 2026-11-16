@@ -3,9 +3,23 @@
   GPL-3.0-or-later - see LICENSE
 -->
 
-# Aggiornare da una versione precedente alla 1.5.0
+# Aggiornare da una versione precedente
 
 [English](MIGRATING.md) · [Español](MIGRATING_spa.md) · [Français](MIGRATING_fra.md) · **Italiano** · [Deutsch](MIGRATING_deu.md) · [简体中文](MIGRATING_zho.md) · [日本語](MIGRATING_jpn.md) · [Português](MIGRATING_por.md)
+
+## La via breve, da qualsiasi versione
+
+1. Ferma il monitor (e il supervisore, se usi più account).
+2. Conserva una copia della tua configurazione (`actions_monitor.json`, o la cartella `config/` se esiste) e decomprimi la nuova versione sopra la vecchia cartella.
+3. Avvialo come sempre. Un'installazione della 1.8.1 o precedente sposta da sola ciò che sta accanto ai lanciatori in `config/`, `data/`, `logs/` e `ai/`. Non si cancella né si sovrascrive nulla (un file che esiste già nel posto nuovo resta e il doctor lo dice), la configurazione viene prima copiata in `config/config_backups/` e ogni spostamento è scritto in un diario.
+4. Per vederlo prima o annullarlo, dalla cartella `src/`: `python -m github_actions_monitor.util.rootmigrate` (una simulazione), `--apply` per spostare ora, `--undo` per rimettere tutto. `MONITOR_NO_AUTO_MIGRATION=1` spegne lo spostamento automatico. Il controllo `layout` di `python bin/actions_monitor.py --doctor` elenca ciò che è ancora accanto ai lanciatori.
+5. Per togliere gli avanzi della vecchia struttura piatta (vecchi moduli, la vecchia pagina, i vecchi esempi e la vecchia cartella `locales/`): `python tools/migrate_layout.py` (una simulazione) e poi `--apply`; vanno in `layout_backup_<marca>/`, non si cancella nulla.
+6. Nomi precedenti alla 1.5.0: `python bin/migrate_state.py` e poi `--apply` (vedi sotto).
+7. Uno script di controllo di uno strumento IA registrato con il vecchio percorso va registrato di nuovo: `python bin/monitor_cli.py ai-hook install`.
+
+Cosa si conserva: la tua configurazione, lo stato, i registri, gli account e i tuoi file di catalogo. Cosa si sposta: solo i luoghi (vedi la guida delle cartelle, `LAYOUT.md`). Cosa non cambia mai: `ci_red.json`, il suo schema e i file di `--export-status`.
+
+## Prima della 1.5.0
 
 La versione 1.5.0 ha dato nomi inglesi a file, cartelle, script e a un'impostazione. Non si perde nulla: il monitor continua a LEGGERE i vecchi nomi, quindi puoi aggiornare prima e riordinare dopo.
 
@@ -124,3 +138,10 @@ Per aggiornare non serve migrare nulla: i file restano il predefinito. Se vuoi l
 Non c'è nulla da convertire. Un'impostazione può richiedere uno spostamento:
 
 - extra_reader.file punta fuori dalla cartella degli account, quindi il secondo account NON viene usato. Sposta il file del token nella cartella degli account (accounts/, o la cartella indicata da MONITOR_ACCOUNTS_DIR) e lascia il suo percorso in extra_reader.file, oppure attiva extra_reader.any_folder in Impostazioni > Quota.
+
+# Dalla 1.8.x alla 1.9.x
+
+- Non c'è nulla da convertire e nulla di nuovo si attiva a sorpresa: la sentinella Security, i rapporti programmati e Apprise sono spenti, e nessun preset dell'IA è attivo.
+- **Attivo per impostazione predefinita**: il punteggio dell'account (solo Complete; i pesi predefiniti sono ora 30, 15, 15, 15 e 25, e i pesi impostati da te restano) e il registro delle azioni in `logs/audit_actions.jsonl` (si spegne nelle impostazioni).
+- **Con SQLite**: il database riceve una tabella per le istantanee del punteggio (schema 2) al primo avvio; la migrazione avviene in una transazione e una interrotta lascia il database com'era.
+- **I rapporti e la scheda Team** non richiedono nulla: leggono ciò che il monitor ha già.

@@ -3,9 +3,23 @@
   GPL-3.0-or-later - see LICENSE
 -->
 
-# 1.5.0 より前のバージョンからの更新
+# 以前のバージョンからの更新
 
 [English](MIGRATING.md) · [Español](MIGRATING_spa.md) · [Français](MIGRATING_fra.md) · [Italiano](MIGRATING_ita.md) · [Deutsch](MIGRATING_deu.md) · [简体中文](MIGRATING_zho.md) · **日本語** · [Português](MIGRATING_por.md)
+
+## どのバージョンからでも使える短い手順
+
+1. モニター(複数アカウントを使っている場合はスーパーバイザーも)を停止します。
+2. 設定(`actions_monitor.json`、または `config/` フォルダーがあればそれ)のコピーを保管し、新しいバージョンを古いフォルダーに上書きして展開します。
+3. いつも通り起動します。1.8.1以前のインストールは、ランチャーの横にあるものを自動的に `config/`、`data/`、`logs/`、`ai/` へ移動します。削除も上書きもされません(新しい場所にすでにあるファイルはそのまま残り、doctorがそれを知らせます)。設定は先に `config/config_backups/` にコピーされ、すべての移動はジャーナルに記録されます。
+4. 事前に確認したり元に戻したりするには、`src/` フォルダーから: `python -m github_actions_monitor.util.rootmigrate`(ドライラン)、`--apply` で今すぐ移動、`--undo` ですべて元に戻します。`MONITOR_NO_AUTO_MIGRATION=1` で自動移動を無効にできます。`python bin/actions_monitor.py --doctor` の `layout` チェックは、ランチャーの横に残っているものを一覧にします。
+5. 古いフラットな構成の残り(古いモジュール、古いページ、古いサンプル、古い `locales/` フォルダー)を取り除くには、`python tools/migrate_layout.py`(ドライラン)の後に `--apply`。これらは `layout_backup_<日時>/` に移され、何も削除されません。
+6. 1.5.0より前の名前: `python bin/migrate_state.py` の後に `--apply`(下記参照)。
+7. 古いパスで登録したAIツールのゲートスクリプトは、登録し直す必要があります: `python bin/monitor_cli.py ai-hook install`。
+
+残るもの: 設定、状態、ログ、アカウント、カタログファイル。移るもの: 場所だけ(フォルダーのガイド `LAYOUT.md` を参照)。決して変わらないもの: `ci_red.json`、そのスキーマ、`--export-status` のファイル。
+
+## 1.5.0より前
 
 バージョン 1.5.0 で、ファイル、フォルダー、スクリプト、1つの設定に英語の名前が付きました。失われるものはありません。モニターは古い名前も引き続き読み込むので、先に更新して、あとで整理できます。
 
@@ -124,3 +138,10 @@
 変換は不要です。1つの設定は対応が必要な場合があります。
 
 - extra_reader.file がアカウントフォルダーの外を指しているため、2つ目のアカウントは使われません。トークンファイルをアカウントフォルダー(accounts/、または MONITOR_ACCOUNTS_DIR が指すフォルダー)に移してパスを extra_reader.file に残すか、設定 > クォータで extra_reader.any_folder をオンにしてください。
+
+# 1.8.xから1.9.xへ
+
+- 変換は不要で、驚くような新しい有効化もありません。Securityセンチネル、スケジュールされたレポート、Appriseはオフで、AIのプリセットも有効ではありません。
+- **初期状態でオン**: アカウントのスコア(Completeのみ。初期の重みは30、15、15、15、25になり、自分で設定した重みはそのまま残ります)と、`logs/audit_actions.jsonl` の操作ログ(不要なら設定でオフにできます)。
+- **SQLiteの場合**: 最初の起動で、スコアのスナップショット用のテーブル(スキーマ2)がデータベースに追加されます。移行は1つのトランザクションで行われ、中断してもデータベースは元のままです。
+- **レポートとチームタブ**は何も必要としません。モニターがすでに持っているものを読み取ります。
