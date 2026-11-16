@@ -33,7 +33,7 @@ from github_actions_monitor.security import netguard, private_io
 from github_actions_monitor.util import tzdisplay
 
 CHANNELS = ("telegram", "discord", "slack", "matrix", "mqtt", "http_local", "apprise")
-KNOWN_EVENTS = ("red_new", "red_fixed", "stuck_new", "pending_sign", "release_due", "rate_low", "offline", "online", "alerts_up", "workflow_failed", "collab_new", "collab_fixed", "credential_blind", "credential_back", "score_dropped", "security_new", "security_fixed")
+KNOWN_EVENTS = ("red_new", "red_fixed", "stuck_new", "pending_sign", "release_due", "rate_low", "offline", "online", "alerts_up", "workflow_failed", "ai_alert", "collab_new", "collab_fixed", "credential_blind", "credential_back", "score_dropped", "security_new", "security_fixed")
 DEFAULT_EVENTS = ["red_new", "stuck_new", "pending_sign", "offline", "credential_blind"]
 LOOPBACK = ("127.0.0.1", "localhost", "::1", "[::1]")
 ENV_RE = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}\Z")
@@ -169,9 +169,9 @@ def send_channel(name, cfg, event, opener=None, connect=None, allow_private=Fals
         if name == "telegram":
             _post(f"https://api.telegram.org/bot{secret(cfg['token_env'])}/sendMessage", {"chat_id": cfg["chat_id"], "text": text, "disable_web_page_preview": True}, opener=opener)
         elif name == "discord":
-            _post(secret(cfg["url_env"]), {"content": text[:1900]}, opener=opener)
+            _post(secret(cfg["url_env"]), {"content": text[:1900], "allowed_mentions": {"parse": []}}, opener=opener)      # the text can hold the title of an issue of a stranger: it mentions nobody
         elif name == "slack":
-            _post(secret(cfg["url_env"]), {"text": text[:3000]}, opener=opener)
+            _post(secret(cfg["url_env"]), {"text": text[:3000].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")}, opener=opener)      # Slack reads <!channel> and <url|text>: escaped as its API asks
         elif name == "matrix":
             home = str(cfg["homeserver"]).rstrip("/")
             txn = f"ghamon{int(time.time() * 1000)}"
@@ -198,10 +198,37 @@ def send_channel(name, cfg, event, opener=None, connect=None, allow_private=Fals
 def apprise_urls(raw):
     """The Apprise addresses of the variable: separated by spaces, commas or lines, at most 10, each a plain `scheme://...` of printable characters (nothing that could be read as an option of the command)."""
     out = []
-    for part in re.split(r"[\s,]+", str(raw or "")):
+    for part in re.split(r"\s+|,(?=[A-Za-z][A-Za-z0-9+.-]{1,30}://)", str(raw or "").strip()):      # a comma is a separator only before the next address: the addresses of Apprise use commas inside (several recipients)
+        part = part.rstrip(",")
         if re.match(r"^[A-Za-z][A-Za-z0-9+.-]{1,30}://\S{1,500}\Z", part) and not part.startswith("-") and len(out) < 10:
             out.append(part)
     return out
+
+
+_SWEPT = []
+
+
+def sweep_apprise(tmp=None, now=None, older=60.0):
+    """Removes the folders `apprise_*` that an earlier run left behind (the process died while the command ran): each holds the addresses of the services, which are secrets. Only the folders of this
+    user's temporary folder, older than `older` seconds and holding nothing but `apprise.yml`. Once per process, before the first send."""
+    now = time.time() if now is None else now
+    base = tmp or tempfile.gettempdir()
+    try:
+        names = os.listdir(base)
+    except OSError:
+        return 0
+    removed = 0
+    for name in names:
+        folder = os.path.join(base, name)
+        try:
+            if name.startswith("apprise_") and os.path.isdir(folder) and not os.path.islink(folder) and now - os.stat(folder).st_mtime > older and set(os.listdir(folder)) <= {"apprise.yml"}:
+                for leftover in os.listdir(folder):
+                    os.unlink(os.path.join(folder, leftover))
+                os.rmdir(folder)
+                removed += 1
+        except OSError:
+            continue
+    return removed
 
 
 def apprise_send(cfg, text, event, run=None):
@@ -211,10 +238,13 @@ def apprise_send(cfg, text, event, run=None):
     if not urls:
         return {"channel": "apprise", "ok": False, "reason": "bad_value"}
     path = None
+    if not _SWEPT:
+        _SWEPT.append(True)
+        sweep_apprise()
     try:
         folder = tempfile.mkdtemp(prefix="apprise_")      # a folder only this user can open
         path = os.path.join(folder, "apprise.yml")
-        private_io.write_private(path, "urls:" + chr(10) + "".join(f"  - {url}" + chr(10) for url in urls))
+        private_io.write_private(path, "urls:" + chr(10) + "".join(f"  - {json.dumps(url)}" + chr(10) for url in urls))
         env = {k: v for k, v in os.environ.items() if k in ("PATH", "HOME", "SYSTEMROOT", "TEMP", "TMP", "LANG", "USERPROFILE", "APPDATA", "LOCALAPPDATA")}
         title = str(event.get("kind") or "monitor")[:60]
         done = (run or subprocess.run)(["apprise", "-c", path, "-t", title, "-b", text[:3000]], capture_output=True, timeout=TIMEOUT * 2, env=env, check=False)

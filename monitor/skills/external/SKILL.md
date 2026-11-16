@@ -31,7 +31,7 @@ The monitor watches the GitHub Actions of a person's repositories on their compu
 
 - READ: alerts, the brief, signals, lessons that apply now, the book of failures, quota, health, paths.
 - BE TOLD: stream of events, or relay the brief every few minutes (`references/protocol.md`).
-- WRITE (permissions in `references/roles.md`): acknowledge an alert (`POST /api/ai/ack`, maintainer, local state only); propose or write a lesson (`POST /api/ai/lessons`, needs `lessons.allow_write`, an administrator and a confirmation); register failures (`POST /api/ai/failures`, same permissions); your own notification preferences (`/api/auth/me/notify`, team mode).
+- WRITE (permissions in `references/roles.md`): acknowledge an alert (`POST /api/ai/ack`, maintainer, local state only, and only from the computer where the monitor runs: from another machine it answers 403 `local_only`); propose or write a lesson (`POST /api/ai/lessons`, needs `lessons.allow_write`, an administrator and a confirmation); register failures (`POST /api/ai/failures`, same permissions); your own notification preferences (`/api/auth/me/notify`, team mode).
 - Never: write to GitHub through the monitor without a plan and a person's confirmation, change settings by yourself, silence alerts to make a brief shorter.
 
 ## Before every push

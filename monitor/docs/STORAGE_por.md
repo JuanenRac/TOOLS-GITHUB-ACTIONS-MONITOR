@@ -45,7 +45,7 @@ python tools/backup_storage.py verify backup.zip
 python tools/backup_storage.py restore backup.zip --backend file     # para um armazenamento vazio (--force sobre contas existentes)
 ```
 
-A migração nunca altera nem apaga os seus ficheiros, retoma após uma interrupção (uma conta é copiada inteira ou não é copiada) e termina com falha se os dois lados diferirem; só então mude o armazenamento e reinicie. Uma cópia feita a partir de ficheiros restaura-se em SQLite e vice-versa. `--db FILE` escolhe a base partilhada do modelo B; `--flat` é a instalação sem `accounts/`. O `--doctor` verifica a base de dados (existe, integridade, esquema) sem a alterar.
+A migração nunca altera nem apaga os seus ficheiros, retoma após uma interrupção (uma conta é copiada inteira ou não é copiada) e termina com falha se os dois lados diferirem; só então mude o armazenamento e reinicie. Uma cópia feita a partir de ficheiros restaura-se em SQLite e vice-versa. `--db FILE` escolhe a base partilhada do modelo B; `--flat` é a instalação sem `accounts/`. O `--doctor` verifica a base de dados (existe, integridade, esquema) sem a alterar. Repetir o mesmo comando é seguro: uma conta cujo destino já tem eventos ou instantâneos mais recentes do que a origem é recusada (`o destino tem dados mais recentes`, código de saída 1, nada escrito) para não apagar o que foi feito depois da primeira cópia; `--force` faz a origem ganhar.
 
 ## Retenção
 

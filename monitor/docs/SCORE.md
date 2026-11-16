@@ -11,7 +11,7 @@ A number from 0 to 100, a letter from A to E and a trend, for each account, made
 
 ## What it is made of
 
-A weighted sum of four parts, each one from 0 to 100. A part is 100 at its **good** limit, 0 at its **bad** limit and linear in between. The weights and the limits are settings.
+A weighted sum of five parts, each one from 0 to 100. A part is 100 at its **good** limit, 0 at its **bad** limit and linear in between. The weights and the limits are settings.
 
 | Part | Weight | What it measures | Good | Bad |
 |---|---|---|---|---|
@@ -29,11 +29,11 @@ The score never shows a number it cannot stand behind. The answer always carries
 
 - **calibrating**: the account has been watched for less than `score.calibrating_hours` (24 by default). No number, no letter.
 - **insufficient_data**: fewer than `score.min_runs` finished runs in the window (20 by default), or the parts that have data weigh less than `score.min_coverage` of the total (half by default). No number.
-- **scored**: a number, a letter and a trend. A part without data is left out and the others are rescaled; that lowers the `coverage` (for example 0.8 when the collaboration sentinel is off). It is never counted as 0 and never as 100.
+- **scored**: a number, a letter and a trend. A part without data is left out and the others are rescaled; that lowers the `coverage` (for example 0.85 when the collaboration sentinel is off). It is never counted as 0 and never as 100.
 
 Security is a part like the others, but it only has data while the Security sentinel is on and has looked at enough repositories. Without it the answer says `complete: false` and lists `security` under `missing_parts`, and the other parts are rescaled, so the number is never read as an all clear. GitHub gives no history of the findings, so the security part is the same in the window and in the one before it: the trend shows what the CI and the collaboration did. The weights are 30, 15, 15, 15 and 25 by default. A window with runs and no failure at all has nothing to recover: its recovery part is full, as a fact and not as a gap.
 
-A workflow that is still red at the end of the window is not forgotten: the recovery part counts the time it has been red so far, a lower bound that grows while the red lasts, so a failure that nobody fixes lowers the number more every hour. A fixed failure counts its real time. A re-run of a run counts as one more execution of the workflow, so the failed first attempt and the green second one are both seen. If you update from an earlier version, the numbers of an account with a workflow in red can be lower than before.
+A workflow that is still red at the end of the window is not forgotten: the recovery part counts the time it has been red so far, a lower bound that grows while the red lasts, so a failure that nobody fixes lowers the number more every hour. A fixed failure counts its real time. A re-run of a run counts as one more execution of the workflow, so the failed first attempt and the green second one are both seen. If you update from an earlier version, the numbers of an account with a workflow in red can be lower than before. When no part has any data the answer is `insufficient_data` with the reason `no_data`. The ledger keeps at most 20000 runs: when it had to drop runs that belong to the current window, `data_quality.truncated` is true and `truncated` is among the reasons, so a success rate that sees only part of the window is not read as complete. In `GET /api/score/global` an account whose snapshot is stale is left out of the mean and counted in `accounts_stale`, and `/metrics` does not export `ghamon_score` for a stale snapshot.
 
 ## The window
 
@@ -61,4 +61,4 @@ When the score falls by `score.alert.drop_points` points (10 by default) or more
 
 ## The settings
 
-In the Settings page, Sentinel sub-tab, blocks Account score, Score weights and Score letters: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.grades.A` to `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` and `score.alert.notify_external` (off by default). The good and bad limits of every part are read from the file, under `score.limits` (see the example file); they are not edited in the page.
+In the Settings page, Sentinel sub-tab, blocks Account score, Score weights and Score letters: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.weights.security`, `score.grades.A` to `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` and `score.alert.notify_external` (off by default). The good and bad limits of every part are read from the file, under `score.limits` (see the example file); they are not edited in the page.

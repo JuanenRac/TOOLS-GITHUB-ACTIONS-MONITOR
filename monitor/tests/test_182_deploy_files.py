@@ -58,6 +58,25 @@ class Dockerfile(unittest.TestCase):
                 self.assertIn(f"`{name}`", guide, f"{name} in DEPLOYMENT{suffix}.md")
 
 
+class DockerIgnore(unittest.TestCase):
+    """The build context is the repository: whoever builds from a used tree must not put their data into the image."""
+
+    def test_every_folder_of_the_person_is_left_out_of_the_build_context(self):
+        from github_actions_monitor.util import paths
+        lines = {line.strip() for line in need(ROOT / ".dockerignore").splitlines() if line.strip() and not line.startswith("#")}
+        for kind in paths.KINDS:
+            self.assertIn("monitor/" + kind, lines, "monitor/%s holds tokens, users or logs and must be in .dockerignore" % kind)
+        self.assertIn("monitor/tests", lines)
+
+    def test_the_dockerfile_drops_them_again_even_if_the_context_ignore_is_bypassed(self):
+        from github_actions_monitor.util import paths
+        text = need(DEPLOY / "Dockerfile")
+        rm = [line for line in text.splitlines() if "rm -rf /build/" in line]
+        self.assertTrue(rm, "the app stage must delete what must not travel")
+        for kind in paths.KINDS:
+            self.assertIn("/build/" + kind, rm[0])
+
+
 class Compose(unittest.TestCase):
     def setUp(self):
         self.text = need(DEPLOY / "compose.yaml")

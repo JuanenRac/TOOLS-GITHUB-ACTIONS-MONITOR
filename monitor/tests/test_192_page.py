@@ -46,5 +46,16 @@ class TeamTab(unittest.TestCase):
                 self.assertTrue(str(keys[key]).strip(), (lang, key))
 
 
+class RepositoryWindow(unittest.TestCase):
+    def test_a_name_without_owner_is_asked_with_the_owner_of_the_page(self):
+        body = PAGE[PAGE.index("async function repoHealthOpen(repo)"):]
+        body = body[:body.index("dlgOpen(\"rh\")")]
+        self.assertIn("OWNER", body, "a row of the ranking carries only the name: the owner is the one of the page")
+        self.assertNotIn(':"")', body.split("name=")[0], "an empty owner asks /api/repos//name/health")
+
+    def test_the_deep_link_of_a_repository_does_not_become_a_text_filter(self):
+        self.assertIn('if(QS.get("repo")&&VIEW!=="repo"){FILTER.q=QS.get("repo")}', PAGE)
+
+
 if __name__ == "__main__":
     unittest.main()

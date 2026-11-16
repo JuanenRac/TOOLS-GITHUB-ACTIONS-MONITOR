@@ -150,5 +150,27 @@ class Tick(unittest.TestCase):
             self.assertEqual(len(storage.load_score_snapshots("alpha")), 1)
 
 
+
+class Truncation(unittest.TestCase):
+    def test_a_ledger_that_dropped_runs_of_the_window_says_so(self):
+        ledger = service.empty_ledger(NOW)
+        old = service.MAX_RUNS
+        service.MAX_RUNS = 5
+        try:
+            service.update_ledger(ledger, [run(i, i * 1000) for i in range(1, 12)], [], NOW, 15)
+        finally:
+            service.MAX_RUNS = old
+        cfg = engine.settings({})
+        snapshot = service.make_snapshot(ledger, cfg, NOW)
+        self.assertTrue(snapshot["data_quality"]["truncated"])
+        self.assertIn("truncated", snapshot["data_quality"]["reasons"])
+        self.assertNotIn("truncated", service.make_snapshot(service.empty_ledger(NOW), cfg, NOW)["data_quality"])
+
+    def test_the_mark_survives_the_storage_and_expires_with_the_window(self):
+        data = service.clean_ledger({"first_seen": NOW, "last_tick": 0, "runs": {}, "collab": {}, "truncated_at": NOW - 30 * DAY}, NOW)
+        snapshot = service.make_snapshot(data, engine.settings({}), NOW)
+        self.assertNotIn("truncated", snapshot["data_quality"])
+
+
 if __name__ == "__main__":
     unittest.main()

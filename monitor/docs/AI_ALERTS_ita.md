@@ -11,7 +11,7 @@ Un workflow rosso non serve a nulla se nessuno di chi lavora sul repository lo v
 - `ai_alerts.jsonl`: una riga per evento (aperto, confermato, risolto) con id stabile, gravità, repository, workflow, esito, da quando, serie, link, una causa probabile (**reale** o **transitoria**), un'azione suggerita e lo stato.
 - `ALERTS_BRIEF.md`: riscritto a ogni ciclo e breve (`ai_alerts.brief_max_bytes`, 2 KB di default). Gli avvisi reali vengono per primi.
 - Le cause transitorie (502/503/504, timeout, limiti di frequenza, errori di download, un'esecuzione mai partita) si distinguono dai guasti reali con regole modificabili in `ai_alerts.transient_patterns`. Un avviso si risolve da solo quando il workflow torna verde e puoi confermarlo (`ack`), cosa che cambia solo questo stato locale.
-- Tutto passa prima da un ripulitore: token, chiavi, indirizzi e-mail, indirizzi IP e la tua cartella personale non arrivano mai ai file, agli endpoint o all'hook.
+- Tutto passa prima da UN solo pulitore (token, chiavi, credenziali dentro gli indirizzi, indirizzi e-mail, indirizzi IP e la tua cartella personale): i file, gli endpoint (`/api/ai/state`, `/api/ai/alerts`, `/api/ai/brief`), il flusso, il server MCP e l'hook. Funziona per modelli: riduce il rischio, non è una garanzia, quindi non farci affidamento per un segreto di forma insolita.
 - La cartella è `ai_alerts.folder` (di default la cartella `ai/` del monitor); scegline una letta dalle tue sessioni IA. `ci_red.json` porta un `ai_hint` opzionale (classe, causa, azione) in ogni workflow rosso.
 
 ## Come lo legge un'IA
@@ -20,7 +20,7 @@ Un workflow rosso non serve a nulla se nessuno di chi lavora sul repository lo v
 - Oppure aggiungi il server MCP (sola lettura): `python bin/mcp_server.py`, strumenti `get_alerts`, `get_red_repos`, `get_run_failure`, `get_quota`, `get_score`; `--allow-ack` aggiunge `ack_alert` (solo stato locale). Gemini CLI, Codex e VS Code (Copilot): aggiungi lo stesso comando come server stdio nelle impostazioni MCP.
 
 ## Avvisi che ti raggiungono
-- Un NUOVO avviso reale va ai canali di notifica che hai già configurato (Impostazioni > Notifiche).
+- Un NUOVO avviso reale che nasce da un pannello o da un segnale del monitor va ai canali di notifica già configurati (Impostazioni > Notifiche) quando l'evento `ai_alert` è in `notify.events` (di default non c'è). Un workflow rosso ha un evento proprio, `red_new`.
 - Opzionale, spento di default: `ai_alerts.hook` invia in POST il nuovo avviso reale (elenco chiuso di campi ripuliti) a un indirizzo di questo computer, al massimo `max_per_hour` volte all'ora, così un tuo script può svegliare una sessione IA.
 - Nulla di tutto ciò invia dati a un fornitore di IA, esegue un comando o scrive su GitHub.
 

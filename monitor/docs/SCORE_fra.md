@@ -11,7 +11,7 @@ Un nombre de 0 à 100, une lettre de A à E et une tendance, pour chaque compte,
 
 ## De quoi il est fait
 
-Une somme pondérée de quatre parties, chacune de 0 à 100. Une partie vaut 100 à sa limite **bonne**, 0 à sa limite **mauvaise**, et varie linéairement entre les deux. Les poids et les limites sont des réglages.
+Une somme pondérée de cinq parties, chacune de 0 à 100. Une partie vaut 100 à sa limite **bonne**, 0 à sa limite **mauvaise**, et varie linéairement entre les deux. Les poids et les limites sont des réglages.
 
 | Partie | Poids | Ce qu'elle mesure | Bonne | Mauvaise |
 |---|---|---|---|---|
@@ -29,11 +29,11 @@ Le score n'affiche jamais un nombre qu'il ne peut pas justifier. La réponse por
 
 - **calibrating** (calibrage) : le compte est surveillé depuis moins de `score.calibrating_hours` (24 par défaut). Ni nombre ni lettre.
 - **insufficient_data** (données insuffisantes) : moins de `score.min_runs` exécutions terminées dans la fenêtre (20 par défaut), ou les parties qui ont des données pèsent moins de `score.min_coverage` du total (la moitié par défaut). Pas de nombre.
-- **scored** (noté) : un nombre, une lettre et une tendance. Une partie sans données est écartée et les autres sont remises à l'échelle ; cela abaisse la `coverage` (par exemple 0,8 quand la sentinelle de collaboration est éteinte). Elle ne compte jamais comme 0 ni comme 100.
+- **scored** (noté) : un nombre, une lettre et une tendance. Une partie sans données est écartée et les autres sont remises à l'échelle ; cela abaisse la `coverage` (par exemple 0,85 quand la sentinelle de collaboration est éteinte). Elle ne compte jamais comme 0 ni comme 100.
 
 La sécurité est une partie comme les autres, mais elle n'a de données que tant que la sentinelle de sécurité est active et a examiné assez de dépôts. Sans elle, la réponse dit `complete: false` et liste `security` sous `missing_parts`, et les autres parties sont remises à l'échelle : le nombre ne se lit donc jamais comme « tout va bien ». GitHub ne donne pas d'historique des constats, si bien que la partie sécurité est la même dans la fenêtre et dans celle d'avant : la tendance montre ce qu'ont fait la CI et la collaboration. Les poids sont 30, 15, 15, 15 et 25 par défaut. Une fenêtre avec des exécutions et aucun échec n'a rien à rétablir : sa partie rétablissement est pleine, comme un fait et non comme un manque.
 
-Un workflow encore en rouge à la fin de la fenêtre n'est pas oublié : la partie rétablissement compte le temps qu'il est en rouge jusqu'ici, une borne inférieure qui grandit tant que le rouge dure ; un échec que personne ne corrige fait donc baisser le chiffre davantage chaque heure. Un échec corrigé compte sa durée réelle. Une relance d'une exécution compte comme une exécution de plus du workflow : le premier essai en échec et le second en vert sont tous deux vus. Si tu mets à jour depuis une version antérieure, les chiffres d'un compte avec un workflow en rouge peuvent être plus bas qu'avant.
+Un workflow encore en rouge à la fin de la fenêtre n'est pas oublié : la partie rétablissement compte le temps qu'il est en rouge jusqu'ici, une borne inférieure qui grandit tant que le rouge dure ; un échec que personne ne corrige fait donc baisser le chiffre davantage chaque heure. Un échec corrigé compte sa durée réelle. Une relance d'une exécution compte comme une exécution de plus du workflow : le premier essai en échec et le second en vert sont tous deux vus. Si tu mets à jour depuis une version antérieure, les chiffres d'un compte avec un workflow en rouge peuvent être plus bas qu'avant. Quand aucune partie n'a de données, la réponse est `insufficient_data` avec la raison `no_data`. Le registre garde au plus 20000 exécutions : quand il a dû en écarter qui appartiennent à la fenêtre actuelle, `data_quality.truncated` est vrai et `truncated` figure parmi les raisons, pour qu'un taux de réussite qui ne voit qu'une partie de la fenêtre ne soit pas pris pour complet. Dans `GET /api/score/global`, un compte dont l'instantané est périmé est exclu de la moyenne et compté dans `accounts_stale`, et `/metrics` n'exporte pas `ghamon_score` pour un instantané périmé.
 
 ## La fenêtre
 
@@ -61,4 +61,4 @@ Quand le score baisse de `score.alert.drop_points` points (10 par défaut) ou pl
 
 ## Les réglages
 
-Dans la page des réglages, sous-onglet Sentinelle, blocs Score du compte, Poids du score et Lettres du score : `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, de `score.grades.A` à `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` et `score.alert.notify_external` (désactivé par défaut). Les limites bonne et mauvaise de chaque partie sont lues dans le fichier, sous `score.limits` (voir le fichier d'exemple) ; elles ne s'éditent pas dans la page.
+Dans la page des réglages, sous-onglet Sentinelle, blocs Score du compte, Poids du score et Lettres du score : `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.weights.security`, de `score.grades.A` à `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` et `score.alert.notify_external` (désactivé par défaut). Les limites bonne et mauvaise de chaque partie sont lues dans le fichier, sous `score.limits` (voir le fichier d'exemple) ; elles ne s'éditent pas dans la page.

@@ -15,11 +15,11 @@ Complete only, on by default. Next to the audit of the accesses (logins, locks, 
 
 ## The chain
 
-Each line carries `prev` (the hash of the line before it) and `hash` (the hash of itself and `prev`). A line that is changed, cut out or put in later breaks the chain, and `GET /api/audit-log` says where (`chain.broken_at`). Past `audit_log.max_mb` the old part is kept as `audit_actions.jsonl.1` and the chain goes on in the new file. The chain shows tampering; it cannot stop someone with access to the file from deleting all of it, so keep a copy where it matters.
+Each line carries `prev` (the hash of the line before it) and `hash` (the hash of itself and `prev`). A line that is changed, cut out or put in later breaks the chain, and `GET /api/audit-log` says where (`chain.broken_at`). Past `audit_log.max_mb` the old part is kept as `audit_actions.jsonl.1` and the chain goes on in the new file. The chain shows tampering; it cannot stop someone with access to the file from deleting all of it, so keep a copy where it matters. With several accounts each account keeps its own file in its folder (`accounts/<id>/audit_actions.jsonl`) and the API only answers the lines of the account that is asked; the lines written before this change stay in the old shared file. The check covers the rotated file too and the link between the two (`segments`, `segment` when a line is broken); `complete: false` means the chain does not begin at its first link because a rotated file was replaced by a later rotation or deleted. Several processes can write the same file: each line is chained to the last line that is really in it, under a lock. The chain has no secret key: whoever can write the file can cut its most recent lines or rewrite it with new hashes, so copy it somewhere else if it must be proof.
 
 ## Who reads it
 
-An administrator (and the person at the computer when there is no team mode). A maintainer only when `audit_log.maintainers_can_read` is on; nobody else. `GET /api/audit-log` answers the last 200 lines and the state of the chain. Lite has none of this.
+An administrator (and the person at the computer when there is no team mode). A maintainer only when `audit_log.maintainers_can_read` is on; nobody else. `GET /api/audit-log` answers the last 200 lines and the state of the chain. Lite has none of this. A viewer is refused at the door. Switching the log off writes its own last line (the change that did it). A line that cannot be written is counted: `write_failures` and `last_write_error_at` in the answer, and a degradation notice. Failed changes of one's own password are not written here (the audit of the accesses keeps them).
 
 ## Settings
 

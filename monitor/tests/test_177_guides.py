@@ -73,5 +73,16 @@ class Guides(unittest.TestCase):
             self.assertNotRegex(text, r"[A-Za-z]:\\Users|\\keys\\\\")      # no personal path
 
 
+class ScoreGuide(unittest.TestCase):
+    def test_every_part_of_the_engine_is_in_the_table_and_in_the_list_of_weights_in_the_eight_languages(self):
+        from github_actions_monitor.scoring import engine
+        for suffix in SUFFIXES:
+            text = (DOCS / f"SCORE{suffix}.md").read_text(encoding="utf-8")
+            for part in engine.PARTS:
+                self.assertIn(f"`score.weights.{part}`", text, (suffix, part))
+            rows = [line for line in text.splitlines() if re.match(r"\|\s*[^|\s-][^|]*\|\s*\d+\s*\|", line)]
+            self.assertEqual(len(rows), len(engine.PARTS), suffix)
+
+
 if __name__ == "__main__":
     unittest.main()

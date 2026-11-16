@@ -234,5 +234,30 @@ class UnrecoveredFailure(unittest.TestCase):
         self.assertLess(late["score"], early["score"])
 
 
+
+class NeverANumberWithoutBase(unittest.TestCase):
+    def test_no_part_with_data_and_no_minimum_coverage_is_not_a_division_by_zero(self):
+        cfg = engine.settings({"score": {"min_coverage": 0, "weights": {"reliability": 0, "speed": 0, "recovery": 0, "security": 0, "collaboration": 10}}})
+        answer = engine.compute({"samples": {"runs": 50}}, cfg)
+        self.assertEqual((answer["state"], answer["score"], answer["letter"]), ("insufficient_data", None, None))
+        self.assertIn("no_data", answer["data_quality"]["reasons"])
+
+    def test_only_a_scored_answer_has_a_number_a_letter_and_a_trend_and_it_always_says_its_coverage(self):
+        full = metrics()
+        for watched, runs in ((1, 100), (None, 1)):
+            answer = engine.compute({**full, "samples": {**full["samples"], "runs": runs}}, engine.settings({}), watched_hours=watched)
+            self.assertNotEqual(answer["state"], "scored")
+            self.assertEqual((answer["score"], answer["letter"], answer["trend"]), (None, None, None))
+        scored = engine.compute(metrics(collab=None, closed=0), engine.settings({}))
+        self.assertEqual(scored["state"], "scored")
+        self.assertTrue(0 < scored["coverage"] < 1, "a number made from part of the weights says how much")
+        self.assertEqual(scored["data_quality"]["coverage"], scored["coverage"])
+
+    def test_the_chip_of_the_page_shows_the_coverage_of_the_number(self):
+        page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
+        self.assertIn("coverage:cov", page)
+        self.assertIn("a.coverage", page)
+
+
 if __name__ == "__main__":
     unittest.main()

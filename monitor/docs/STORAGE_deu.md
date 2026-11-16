@@ -45,7 +45,7 @@ python tools/backup_storage.py verify backup.zip
 python tools/backup_storage.py restore backup.zip --backend file     # in einen leeren Speicher (--force über vorhandene Konten)
 ```
 
-Die Migration ändert oder löscht Ihre Dateien nie, setzt nach einer Unterbrechung fort (ein Konto wird ganz oder gar nicht kopiert) und endet mit einem Fehler, wenn beide Seiten abweichen; erst danach stellen Sie den Speicher um und starten neu. Eine Sicherung aus Dateien lässt sich in SQLite wiederherstellen und umgekehrt. `--db FILE` wählt die gemeinsame Datenbank von Modell B; `--flat` ist die Installation ohne `accounts/`. `--doctor` prüft die Datenbank (vorhanden, Integrität, Schema), ohne sie zu ändern.
+Die Migration ändert oder löscht Ihre Dateien nie, setzt nach einer Unterbrechung fort (ein Konto wird ganz oder gar nicht kopiert) und endet mit einem Fehler, wenn beide Seiten abweichen; erst danach stellen Sie den Speicher um und starten neu. Eine Sicherung aus Dateien lässt sich in SQLite wiederherstellen und umgekehrt. `--db FILE` wählt die gemeinsame Datenbank von Modell B; `--flat` ist die Installation ohne `accounts/`. `--doctor` prüft die Datenbank (vorhanden, Integrität, Schema), ohne sie zu ändern. Den gleichen Befehl erneut auszuführen ist sicher: Ein Konto, dessen Ziel bereits neuere Ereignisse oder Schnappschüsse als die Quelle enthält, wird abgelehnt (`das Ziel hat neuere Daten`, Exit-Code 1, nichts davon geschrieben), damit das nach der ersten Kopie Entstandene nicht gelöscht wird; `--force` lässt die Quelle gewinnen.
 
 ## Aufbewahrung
 

@@ -11,7 +11,7 @@ Um número de 0 a 100, uma letra de A a E e uma tendência, para cada conta, fei
 
 ## De que é feita
 
-Uma soma ponderada de quatro partes, cada uma de 0 a 100. Uma parte vale 100 no seu limite **bom**, 0 no seu limite **mau** e é linear entre os dois. Os pesos e os limites são definições.
+Uma soma ponderada de cinco partes, cada uma de 0 a 100. Uma parte vale 100 no seu limite **bom**, 0 no seu limite **mau** e é linear entre os dois. Os pesos e os limites são definições.
 
 | Parte | Peso | O que mede | Bom | Mau |
 |---|---|---|---|---|
@@ -29,11 +29,11 @@ A pontuação nunca mostra um número que não consiga sustentar. A resposta tra
 
 - **calibrating** (a calibrar): a conta está vigiada há menos de `score.calibrating_hours` (24 por predefinição). Sem número nem letra.
 - **insufficient_data** (dados insuficientes): menos de `score.min_runs` execuções concluídas na janela (20 por predefinição), ou as partes com dados pesam menos de `score.min_coverage` do total (metade por predefinição). Sem número.
-- **scored** (pontuada): um número, uma letra e uma tendência. Uma parte sem dados fica de fora e as outras são reescaladas; isso baixa a `coverage` (por exemplo 0,8 quando o sentinela de colaboração está desligado). Nunca conta como 0 nem como 100.
+- **scored** (pontuada): um número, uma letra e uma tendência. Uma parte sem dados fica de fora e as outras são reescaladas; isso baixa a `coverage` (por exemplo 0,85 quando o sentinela de colaboração está desligado). Nunca conta como 0 nem como 100.
 
 A segurança é uma parte como as outras, mas só tem dados enquanto o sentinela de segurança estiver ativo e tiver olhado para repositórios suficientes. Sem ele, a resposta diz `complete: false` e lista `security` em `missing_parts`, e as outras partes são reescaladas, para que o número nunca seja lido como «está tudo bem». O GitHub não dá histórico das constatações, pelo que a parte de segurança é a mesma na janela e na anterior: a tendência mostra o que a CI e a colaboração fizeram. Os pesos são 30, 15, 15, 15 e 25 por predefinição. Uma janela com execuções e nenhuma falha não tem nada a recuperar: a sua parte de recuperação é completa, como um facto e não como uma lacuna.
 
-Um fluxo que continua a vermelho no fim da janela não é esquecido: a parte de recuperação conta o tempo que está a vermelho até agora, um limite inferior que cresce enquanto o vermelho dura, por isso uma falha que ninguém corrige baixa mais o número a cada hora. Uma falha corrigida conta o seu tempo real. Uma nova execução de uma execução conta como mais uma execução do fluxo, de modo que se veem a primeira tentativa falhada e a segunda a verde. Se atualizar a partir de uma versão anterior, os números de uma conta com um fluxo a vermelho podem ser mais baixos do que antes.
+Um fluxo que continua a vermelho no fim da janela não é esquecido: a parte de recuperação conta o tempo que está a vermelho até agora, um limite inferior que cresce enquanto o vermelho dura, por isso uma falha que ninguém corrige baixa mais o número a cada hora. Uma falha corrigida conta o seu tempo real. Uma nova execução de uma execução conta como mais uma execução do fluxo, de modo que se veem a primeira tentativa falhada e a segunda a verde. Se atualizar a partir de uma versão anterior, os números de uma conta com um fluxo a vermelho podem ser mais baixos do que antes. Quando nenhuma parte tem dados, a resposta é `insufficient_data` com o motivo `no_data`. O livro guarda no máximo 20000 execuções: quando teve de descartar execuções que pertencem à janela atual, `data_quality.truncated` é verdadeiro e `truncated` consta entre os motivos, para que uma taxa de sucesso que vê só parte da janela não seja tomada por completa. Em `GET /api/score/global`, uma conta cujo instantâneo está caducado fica fora da média e é contada em `accounts_stale`, e `/metrics` não exporta `ghamon_score` para um instantâneo caducado.
 
 ## A janela
 
@@ -61,4 +61,4 @@ Quando a pontuação desce `score.alert.drop_points` pontos (10 por predefiniç�
 
 ## As definições
 
-Na página de Definições, subseparador Sentinela, blocos Pontuação da conta, Pesos da pontuação e Letras da pontuação: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, de `score.grades.A` a `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` e `score.alert.notify_external` (desligado por predefinição). Os limites bom e mau de cada parte são lidos do ficheiro, em `score.limits` (veja-se o ficheiro de exemplo); não se editam na página.
+Na página de Definições, subseparador Sentinela, blocos Pontuação da conta, Pesos da pontuação e Letras da pontuação: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.weights.security`, de `score.grades.A` a `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` e `score.alert.notify_external` (desligado por predefinição). Os limites bom e mau de cada parte são lidos do ficheiro, em `score.limits` (veja-se o ficheiro de exemplo); não se editam na página.

@@ -2,7 +2,7 @@
 # GPL-3.0-or-later - see LICENSE
 """The log of actions (Complete only): who did what, when and on which account, one JSON line each, appended and never rewritten. Every line carries the hash of the line before it, so a line that is changed, cut out or put in later breaks the chain and `verify` says where. It never holds a secret: names of settings and short identifiers go in, never a value of a setting, a password, a token, a cookie or a body; every text passes through the same cleaning as the notes for AIs and a key whose name looks like a secret is dropped.
 
-It sits next to the audit of the accesses (`auth.audit`: logins, locks, refusals), which stays as it is; the log of actions is the one an administrator reads to know WHAT was changed. The file is private; past `max_mb` the old part is kept as `.1` (one generation) and the chain goes on in the new file. A failure to write never stops a request."""
+It sits next to the audit of the accesses (`auth.audit`: logins, locks, refusals), which stays as it is; the log of actions is the one an administrator reads to know WHAT was changed. The file is private; past `max_mb` the old part is kept as `.1` (one generation) and the chain goes on in the new file. Several processes may write the same file (the supervisor and the accounts in a container share the state folder): each line is chained to the last line that is IN THE FILE, read under a lock between processes, so the chain stays whole. A failure to write never stops a request."""
 import hashlib
 import json
 import os
@@ -12,6 +12,7 @@ import time
 from pathlib import Path
 
 from github_actions_monitor.security import private_io
+from github_actions_monitor.storage import locks
 
 DEFAULTS = {"enabled": True, "max_mb": 10, "maintainers_can_read": False}
 FILE_NAME = "audit_actions.jsonl"
@@ -19,7 +20,9 @@ SECRET_KEY = re.compile(r"(?i)(token|passw|secret|key|cookie|authorization|crede
 ACTION_RE = re.compile(r"^[a-z][a-z0-9_.-]{1,39}\Z")
 FILE = None                       # tests point this to a temporary file; None = audit_actions.jsonl in the logs folder
 _lock = threading.RLock()
-_last = {"path": None, "hash": ""}
+_last = {"path": None, "hash": ""}      # the hash of the last line this process wrote (information only: the file, read under the lock, decides what the next line follows)
+STATS = {"write_failures": 0, "last_write_error_at": None}      # a line that could not be written is counted and shown (GET /api/audit-log), not silent
+TAIL_BYTES = 65536                     # how much of the end of the file is read to find the last hash (the whole file only if no line in that part has one)
 
 
 def settings(config):
@@ -65,27 +68,45 @@ def _digest(previous, entry):
     return hashlib.sha256((previous + "\n" + body).encode("utf-8")).hexdigest()
 
 
+def _last_hash_of(candidate):
+    """The hash of the last good line of one file, reading only its end first; None when there is none."""
+    try:
+        with open(candidate, "rb") as handle:
+            size = handle.seek(0, 2)
+            start = max(0, size - TAIL_BYTES)
+            while True:
+                handle.seek(start)
+                lines = handle.read().decode("utf-8", errors="replace").splitlines()
+                if start:
+                    lines = lines[1:]      # the first one is probably cut in half
+                for line in reversed(lines):
+                    try:
+                        found = json.loads(line)
+                    except ValueError:
+                        continue
+                    if isinstance(found, dict) and isinstance(found.get("hash"), str):
+                        return found["hash"]
+                if not start:
+                    return None
+                start = 0
+    except OSError:
+        return None
+
+
 def _tail_hash(target):
     """The hash of the last good line of the file (or of its `.1` when this one is new)."""
     for candidate in (target, target.with_name(target.name + ".1")):
-        try:
-            lines = candidate.read_text(encoding="utf-8").splitlines()
-        except OSError:
-            continue
-        for line in reversed(lines):
-            try:
-                found = json.loads(line)
-            except ValueError:
-                continue
-            if isinstance(found, dict) and isinstance(found.get("hash"), str):
-                return found["hash"]
+        found = _last_hash_of(candidate)
+        if found is not None:
+            return found
     return ""
 
 
-def record(config, action, user="", role="", account="", target="", result="ok", details=None, now=None):
-    """Appends one line. `target` is a short identifier (a setting name, an alert code, a user name), `details` a small structure that is cleaned. Returns the line, or None when it is off or could not be written."""
+def record(config, action, user="", role="", account="", target="", result="ok", details=None, now=None, force=False):
+    """Appends one line. `target` is a short identifier (a setting name, an alert code, a user name), `details` a small structure that is cleaned. Returns the line, or None when it is off or could not be written.
+    `force` writes it even when the log is switched off (the change that switches it off is the last thing it records)."""
     cfg = settings(config)
-    if not cfg["enabled"] or not ACTION_RE.match(str(action)):
+    if (not cfg["enabled"] and not force) or not ACTION_RE.match(str(action)):
         return None
     now = time.time() if now is None else now
     entry = {"at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now)), "action": str(action), "user": str(user)[:40], "role": str(role)[:12], "account": str(account)[:60],
@@ -95,26 +116,32 @@ def record(config, action, user="", role="", account="", target="", result="ok",
     where = path()
     try:
         with _lock:
-            if where.exists() and where.stat().st_size > cfg["max_mb"] * 1_000_000:
-                os.replace(where, where.with_name(where.name + ".1"))
             private_io.private_dir(where.parent)
-            if _last["path"] != str(where) or not where.exists():
-                _last.update(path=str(where), hash=_tail_hash(where))
-            entry["prev"] = _last["hash"]
-            entry["hash"] = _digest(entry["prev"], {k: v for k, v in entry.items() if k != "hash"})
-            with private_io.open_append(where) as handle:
-                handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
-            _last["hash"] = entry["hash"]
+            with locks.process_lock(where):      # the supervisor and the accounts may append to the same file: one at a time, each one chained to the line that is really last
+                if where.exists() and where.stat().st_size > cfg["max_mb"] * 1_000_000:
+                    os.replace(where, where.with_name(where.name + ".1"))
+                entry["prev"] = _tail_hash(where)
+                entry["hash"] = _digest(entry["prev"], {k: v for k, v in entry.items() if k != "hash"})
+                with private_io.open_append(where) as handle:
+                    handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
+                _last.update(path=str(where), hash=entry["hash"])
         return entry
-    except OSError:
+    except OSError as error:      # includes the timeout of the lock between processes
+        STATS["write_failures"] += 1
+        STATS["last_write_error_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        try:
+            from github_actions_monitor.app import degraded
+            degraded.note("audit_log", error)
+        except Exception:   # noqa: BLE001 - noting the failure must not fail either
+            pass
         return None
 
 
-def read(limit=200):
-    """The last `limit` lines, newest last."""
+def read(limit=200, account=None):
+    """The last `limit` lines, newest last. With `account` only the lines of that account are kept (the file of an account holds no others; this is the second wall)."""
     try:
-        lines = path().read_text(encoding="utf-8").splitlines()[-max(1, min(int(limit), 1000)):]
-    except (OSError, ValueError):
+        lines = path().read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
         return []
     out = []
     for line in lines:
@@ -122,32 +149,58 @@ def read(limit=200):
             item = json.loads(line)
         except ValueError:
             continue
-        if isinstance(item, dict):
+        if isinstance(item, dict) and (not account or item.get("account") == account):
             out.append(item)
-    return out
-
-
-def verify(target=None):
-    """{"ok", "entries", "broken_at"}: the chain of the file, from its first line (whose `prev` is taken as given, it may come from the `.1` file). `broken_at` is the 1-based line that does not follow from the one before, or that does not hash to what it says."""
-    where = Path(target) if target else path()
     try:
-        lines = where.read_text(encoding="utf-8").splitlines()
+        count = max(1, min(int(limit), 1000))
+    except (TypeError, ValueError):
+        return []
+    return out[-count:]
+
+
+def _read_lines(where):
+    """The lines of a file, or None when it cannot be read (a missing file)."""
+    try:
+        return where.read_text(encoding="utf-8", errors="replace").splitlines()
     except OSError:
-        return {"ok": True, "entries": 0, "broken_at": None}
-    previous = None
+        return None
+
+
+def _walk(lines, previous):
+    """Checks one segment of the chain: (broken_at or None, entries, hash of its last line, `prev` of its first line). `previous` is the hash the first line must follow, or None to take it as given."""
+    first = None
     for number, line in enumerate(lines, 1):
         try:
             entry = json.loads(line)
         except ValueError:
-            return {"ok": False, "entries": number - 1, "broken_at": number}
+            return number, number - 1, previous, first
         if not isinstance(entry, dict) or not isinstance(entry.get("hash"), str) or not isinstance(entry.get("prev"), str):
-            return {"ok": False, "entries": number - 1, "broken_at": number}
+            return number, number - 1, previous, first
+        if first is None:
+            first = entry["prev"]
         if previous is not None and entry["prev"] != previous:
-            return {"ok": False, "entries": number - 1, "broken_at": number}
+            return number, number - 1, previous, first
         if _digest(entry["prev"], {k: v for k, v in entry.items() if k != "hash"}) != entry["hash"]:
-            return {"ok": False, "entries": number - 1, "broken_at": number}
+            return number, number - 1, previous, first
         previous = entry["hash"]
-    return {"ok": True, "entries": len(lines), "broken_at": None}
+    return None, len(lines), previous, first
+
+
+def verify(target=None):
+    """{"ok", "entries", "broken_at", "segments", "complete"}: the chain of the file AND of its rotated `.1` when there is one, with the link between the two (the first line of the file must follow the last line of the `.1`).
+    `broken_at` is the 1-based line, inside `segment` ("rotated" or "active"), that does not follow from the one before or does not hash to what it says. `complete` is False when the chain does not begin at its
+    first link (the `.1` that came before was replaced by a later rotation, or was deleted): what is there is whole but it is not all the history."""
+    where = Path(target) if target else path()
+    parts = [(name, lines) for name, lines in (("rotated", _read_lines(where.with_name(where.name + ".1"))), ("active", _read_lines(where))) if lines]
+    previous, total, complete = None, 0, None
+    for name, lines in parts:
+        broken, count, previous, first = _walk(lines, previous)
+        if complete is None:
+            complete = first == ""
+        if broken:
+            return {"ok": False, "entries": total + count, "broken_at": broken, "segment": name, "segments": len(parts), "complete": bool(complete)}
+        total += count
+    return {"ok": True, "entries": total, "broken_at": None, "segments": len(parts), "complete": True if complete is None else bool(complete)}
 
 
 def may_read(config, role):

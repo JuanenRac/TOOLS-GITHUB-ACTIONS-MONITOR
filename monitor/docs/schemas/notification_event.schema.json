@@ -24,6 +24,7 @@
         "online",
         "alerts_up",
         "workflow_failed",
+        "ai_alert",
         "collab_new",
         "collab_fixed",
         "credential_blind",

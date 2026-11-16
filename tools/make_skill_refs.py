@@ -42,7 +42,7 @@ NOTES = {
     "/api/ai/actions/unlock": ("POST", "a person unlocks the actions of the AI for a short time (this computer only)"),
     "/api/ai/alerts": ("GET", "the feed of alerts since a moment (`?since=SECONDS`)"),
     "/api/ai/brief": ("GET", "the short brief of the real open alerts (Markdown, or `?fmt=json`)"),
-    "/api/ai/failures": ("GET", "the book of failures, newest first (`?since=&repo=&category=&limit=`)"),
+    "/api/ai/failures": ("GET,POST", "the book of failures, newest first (`?since=&repo=&category=&limit=`)"),
     "/api/ai/presets": ("GET", "the presets of AI providers (address, name of the variable of the key, example models, privacy); data only, never a key"),
     "/api/ai/lessons": ("GET,POST", "GET: the lessons that apply now, the repeated failures and the library (`?fmt=md|brief&repo=`); POST: write a lesson (switch, administrator, confirmation)"),
     "/api/ai/state": ("GET", "every signal of the monitor, versioned, plus the lessons that apply now"),
@@ -197,6 +197,7 @@ def signals_md():
 
 
 def api_md():
+    from github_actions_monitor.app.actions_monitor import THIS_COMPUTER_POST
     missing = [p for p in endpoints() if p not in NOTES]
     if missing:
         raise SystemExit("endpoints without a note in tools/make_skill_refs.py: " + ", ".join(missing))
@@ -206,6 +207,8 @@ def api_md():
     for path in endpoints():
         methods, what = NOTES[path]
         roles = " / ".join(role_of(m, path) for m in ("GET", "POST") if m in methods.split(","))
+        if path in THIS_COMPUTER_POST and "this computer only" not in what:      # derived from the list the handler uses, never typed by hand
+            what += " (POST: this computer only)" if "GET" in methods.split(",") else " (this computer only)"
         lines.append(f"| `{path}` | {methods} | {roles} | {what} |")
     return "\n".join(lines) + "\n"
 

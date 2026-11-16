@@ -35,7 +35,8 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from github_actions_monitor import i18n
-from github_actions_monitor.security import private_io
+from github_actions_monitor.security import netguard, private_io
+from github_actions_monitor.security.redactor import redact as _redact
 from github_actions_monitor.storage import state_io
 
 from github_actions_monitor.util import paths
@@ -62,7 +63,7 @@ SECRET_PATTERNS = [
     re.compile(r"\bgh[pousr]_[A-Za-z0-9]{20,}\b"), re.compile(r"\bgithub_pat_[A-Za-z0-9_]{20,}\b"),
     re.compile(r"\bAKIA[0-9A-Z]{16}\b"), re.compile(r"\bxox[abprs]-[A-Za-z0-9-]{10,}\b"),
     re.compile(r"(?i)\b(bearer|token|authorization)\s*[:=]?\s*[A-Za-z0-9._~+/=-]{16,}"),
-    re.compile(r"(?i)\b(password|passwd|secret|api[_-]?key|private[_-]?key)\b\s*[:=]\s*\S+"),
+    re.compile(r"""(?i)(password|passwd|secret|api[_-]?key|private[_-]?key)["']?\s*[:=]\s*(?:"[^"\n]*"|'[^'\n]*'|\S+)"""),
     re.compile(r"\b[A-Fa-f0-9]{40,}\b"), re.compile(r"\b[A-Za-z0-9+/]{48,}={0,2}"),
 ]
 CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
@@ -82,6 +83,8 @@ def ai_config(config):
         merged["timeout_seconds"] = max(5, min(300, int(merged["timeout_seconds"])))
         merged["skill_max_chars"] = max(300, min(12000, int(merged["skill_max_chars"])))
         merged["skill"] = merged["skill"] is True
+        network = (config or {}).get("network")
+        merged["use_proxy"] = isinstance(network, dict) and network.get("use_proxy") is True      # network.use_proxy (off by default): the proxies of the environment, only for a provider that is not on this computer
     except (TypeError, ValueError):
         merged["daily_limit"], merged["max_input_chars"] = AI_DEFAULTS["daily_limit"], AI_DEFAULTS["max_input_chars"]
     return merged
@@ -92,8 +95,11 @@ def model_of(cfg):
 
 
 def sanitize_text(text, max_chars, keep="tail"):
-    """Removes control characters and secrets, neutralises our delimiters and cuts to max_chars."""
+    """Removes control characters and secrets, neutralises our delimiters and cuts to max_chars. The secrets go through the ONE cleaner of the product (security/redactor.py, the same as the feed
+    for the AIs); the short list below is only a second pass over what that one leaves."""
     text = CONTROL.sub("", str(text if text is not None else "").replace("\r\n", "\n").replace("\r", "\n"))
+    text = text[-(max_chars * 3 + 2000):] if keep == "tail" else text[:max_chars * 3 + 2000]      # a long log is cut BEFORE cleaning (the cleaner is not made for megabytes); the final cut comes after it
+    text = _redact(text)
     for pattern in SECRET_PATTERNS:
         text = pattern.sub("[REDACTED]", text)
     text = text.replace("<<<", "< < <").replace(">>>", "> > >")
@@ -129,7 +135,7 @@ def build_prompt(kind, data, nonce, language=None, lesson="", skill=""):
     else:
         task = ("Assess this CodeQL alert. The first line must be exactly 'VEREDICTO: falso positivo', 'VEREDICTO: real' or 'VEREDICTO: dudosa' "
                 f"(fixed protocol words: false positive / real / doubtful). Then, in at most 4 lines in {language}, the reason, quoting the line of code. Do not propose commands.")
-    if lesson:      # the lesson of this kind of failure from the library of the person (lessons.py): written by them or built in, so it is not part of the untrusted data
+    if lesson:      # the BUILT-IN lesson of this kind of failure (lessons.py): written by the maker of the monitor, so it is not part of the untrusted data (a lesson of the library goes with the data)
         task += " " + lesson
     if skill:      # what the monitor is, what the AI may read and never do (skills/internal): written by the maker of the monitor, so it is not part of the untrusted data
         task = "Guide:\n" + skill + "\n\nTask: " + task
@@ -195,10 +201,12 @@ def _loopback(url):
     return host in ("127.0.0.1", "localhost", "::1")
 
 
-def _post_json(url, payload, headers, timeout):
+def _post_json(url, payload, headers, timeout, use_proxy=False):
+    """The call to a provider: no redirect is followed (the key would go on to another address) and no proxy of the environment is used for a server on this computer (nor for any other unless
+    `network.use_proxy`): netguard.open_plain."""
     request = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), method="POST",
                                      headers={"Content-Type": "application/json", **headers})
-    with urllib.request.urlopen(request, timeout=timeout) as answer:  # noqa: S310 (fixed https / loopback URL)
+    with netguard.open_plain(request, timeout=timeout, use_proxy=use_proxy) as answer:
         return json.loads(answer.read(2_000_000).decode("utf-8", "replace"))
 
 
@@ -206,7 +214,7 @@ def ollama_available(cfg):
     if not _loopback(cfg["ollama_url"]):
         return False, i18n.t("ai.ollama_local")
     try:
-        with urllib.request.urlopen(cfg["ollama_url"].rstrip("/") + "/api/tags", timeout=1.5) as answer:  # noqa: S310
+        with netguard.open_plain(urllib.request.Request(cfg["ollama_url"].rstrip("/") + "/api/tags"), timeout=1.5) as answer:
             answer.read(1000)
         return True, ""
     except Exception:
@@ -219,7 +227,7 @@ def ollama_chat(cfg, system, user):
     body = _post_json(cfg["ollama_url"].rstrip("/") + "/api/chat",
                       {"model": model_of(cfg), "stream": False, "options": {"temperature": 0.1},
                        "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]},
-                      {}, cfg["timeout_seconds"])
+                      {}, cfg["timeout_seconds"], cfg.get("use_proxy") is True)
     return (body.get("message") or {}).get("content", "")
 
 
@@ -255,7 +263,7 @@ def openai_compatible_chat(cfg, system, user):
     try:
         body = _post_json(url, {"model": cfg["model"], "temperature": 0.1, "max_tokens": 500,
                                 "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]},
-                          {"Authorization": "Bearer " + key, "api-key": key} if key else {}, cfg["timeout_seconds"])
+                          {"Authorization": "Bearer " + key, "api-key": key} if key else {}, cfg["timeout_seconds"], cfg.get("use_proxy") is True)
     except urllib.error.HTTPError as error:
         raise RuntimeError(i18n.t("ai.provider_answered", code=error.code)) from None
     return (((body.get("choices") or [{}])[0]).get("message") or {}).get("content", "")
@@ -285,7 +293,7 @@ def anthropic_chat(cfg, system, user):
     url = (cfg.get("base_url") or ANTHROPIC_URL).rstrip("/") + "/v1/messages"
     try:
         body = _post_json(url, {"model": cfg["model"], "max_tokens": 600, "temperature": 0.1, "system": system, "messages": [{"role": "user", "content": user}]},
-                          {"x-api-key": key, "anthropic-version": ANTHROPIC_VERSION}, cfg["timeout_seconds"])
+                          {"x-api-key": key, "anthropic-version": ANTHROPIC_VERSION}, cfg["timeout_seconds"], cfg.get("use_proxy") is True)
     except urllib.error.HTTPError as error:
         raise RuntimeError(i18n.t("ai.provider_answered", code=error.code)) from None
     return "".join(part.get("text", "") for part in (body.get("content") or []) if isinstance(part, dict) and part.get("type") == "text")
@@ -366,6 +374,9 @@ def explain(kind, data, cfg, store, transport=None):
         try:
             from github_actions_monitor.integrations import lessons
             lesson = lessons.prompt_block(clean)
+            library = lessons.prompt_data(clean)
+            if library:      # a lesson of the library may have been written by an AI: it is data, between the delimiters, cleaned like the rest
+                clean = clean + "\n\n" + sanitize_text(library, 700, keep="head")
         except Exception:   # noqa: BLE001 - a lesson that cannot be read never stops the explanation
             lesson = ""
     skill = ""

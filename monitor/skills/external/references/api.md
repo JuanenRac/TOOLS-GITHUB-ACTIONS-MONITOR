@@ -16,28 +16,28 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/accounts` | GET | viewer | the accounts of an installation with several, with their state (running, blind) |
 | `/api/act` | GET,POST | viewer / admin | prefix of the local run of a workflow with `act` (see the routes below) |
 | `/api/act/confirm` | POST | admin | confirm a local run of a workflow (plan first, this computer only) |
-| `/api/act/plan` | POST | admin | plan a local run of a workflow; nothing runs until it is confirmed |
+| `/api/act/plan` | POST | admin | plan a local run of a workflow; nothing runs until it is confirmed (this computer only) |
 | `/api/act/status` | GET | viewer | progress of the local run |
-| `/api/act/stop` | POST | admin | stop the local run |
+| `/api/act/stop` | POST | admin | stop the local run (this computer only) |
 | `/api/advanced` | GET | admin | state of the opt-in features (token store, mirror, OpenTelemetry, runners) |
 | `/api/ai` | GET | viewer | prefix of the routes for AIs (see the routes below) |
-| `/api/ai/ack` | POST | maintainer | acknowledge an alert of the feed: changes only the local state, never GitHub |
+| `/api/ai/ack` | POST | maintainer | acknowledge an alert of the feed: changes only the local state, never GitHub (this computer only) |
 | `/api/ai/actions` | GET | viewer | the log of the actions that the AI proposed and a person confirmed |
 | `/api/ai/actions/confirm` | POST | admin | a person confirms one action proposed by the AI (this computer only) |
 | `/api/ai/actions/unlock` | POST | admin | a person unlocks the actions of the AI for a short time (this computer only) |
 | `/api/ai/alerts` | GET | viewer | the feed of alerts since a moment (`?since=SECONDS`) |
 | `/api/ai/brief` | GET | viewer | the short brief of the real open alerts (Markdown, or `?fmt=json`) |
-| `/api/ai/failures` | GET | viewer | the book of failures, newest first (`?since=&repo=&category=&limit=`) |
-| `/api/ai/lessons` | GET,POST | viewer / admin | GET: the lessons that apply now, the repeated failures and the library (`?fmt=md|brief&repo=`); POST: write a lesson (switch, administrator, confirmation) |
+| `/api/ai/failures` | GET,POST | viewer / admin | the book of failures, newest first (`?since=&repo=&category=&limit=`) (POST: this computer only) |
+| `/api/ai/lessons` | GET,POST | viewer / admin | GET: the lessons that apply now, the repeated failures and the library (`?fmt=md|brief&repo=`); POST: write a lesson (switch, administrator, confirmation) (POST: this computer only) |
 | `/api/ai/presets` | GET | viewer | the presets of AI providers (address, name of the variable of the key, example models, privacy); data only, never a key |
 | `/api/ai/state` | GET | viewer | every signal of the monitor, versioned, plus the lessons that apply now |
 | `/api/ai/stream` | GET | viewer | server-sent events of the alerts as they open and resolve (off by default) |
 | `/api/ai/test` | POST | admin | test the connection to the AI provider (this computer only) |
 | `/api/alerts` | GET | viewer | the alerts of every sentinel in one list, with silences and history |
-| `/api/alerts/mute` | POST | maintainer | silence an alert, a code or a sentinel for some hours (local only) |
-| `/api/alerts/unmute` | POST | maintainer | end a silence |
+| `/api/alerts/mute` | POST | maintainer | silence an alert, a code or a sentinel for some hours (local only) (this computer only) |
+| `/api/alerts/unmute` | POST | maintainer | end a silence (this computer only) |
 | `/api/analytics` | GET | viewer | history, trends and the numbers behind the charts |
-| `/api/audit-log` | GET | viewer | the log of actions of the account (who changed what, when): the last 200 lines and whether the chain of hashes holds; an administrator, or a maintainer when `audit_log.maintainers_can_read` is on; names only, never values or secrets (Complete only) |
+| `/api/audit-log` | GET | maintainer | the log of actions of the account (who changed what, when): the last 200 lines and whether the chain of hashes holds; an administrator, or a maintainer when `audit_log.maintainers_can_read` is on; names only, never values or secrets (Complete only) |
 | `/api/auth/audit` | GET | admin | the audit of the team mode (administrators) |
 | `/api/auth/bootstrap` | POST | public | create the first administrator (this computer only, once) |
 | `/api/auth/login` | POST | public | sign in (team mode) |
@@ -56,7 +56,7 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/events` | GET | viewer | the event journal |
 | `/api/gh-action` | POST | admin | prefix of the actions on GitHub (plan and confirm, see below) |
 | `/api/gh-action/confirm` | POST | admin | confirm an action on GitHub (this computer only) |
-| `/api/gh-action/plan` | POST | admin | plan an action on GitHub; nothing is sent until it is confirmed |
+| `/api/gh-action/plan` | POST | admin | plan an action on GitHub; nothing is sent until it is confirmed (this computer only) |
 | `/api/github-app/status` | GET | admin | state of the optional GitHub App for reads (this computer only) |
 | `/api/github-token` | GET,POST | admin / admin | state or change of the token the monitor keeps (administrators, this computer only) |
 | `/api/health` | GET | public | is it alive; `?deep=1` fails when the refresh cycle is stuck |
@@ -102,4 +102,4 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/team` | GET | viewer | the prefix of the health views of the repositories and of the team (see /api/team/health); Complete only |
 | `/api/team/health` | GET | viewer | the health of the team: every repository ranked by risk with the ones that need a person first, the totals by state, the numbers by ecosystem and by sentinel; filters `?ecosystem=`, `?severity=warn|bad`, `?q=`, `?label=` (read only, from what the monitor holds; Complete only) |
 | `/api/webhook` | POST | public | the incoming webhook of GitHub (signed with HMAC) |
-| `/api/welcome` | GET,POST | viewer / maintainer | the first-run welcome flag |
+| `/api/welcome` | GET,POST | viewer / maintainer | the first-run welcome flag (POST: this computer only) |

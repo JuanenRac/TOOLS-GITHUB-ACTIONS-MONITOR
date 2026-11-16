@@ -11,7 +11,7 @@
 
 ## 评分由什么组成
 
-四个部分的加权和，每部分为 0 到 100。每个部分在其**良好**界限为 100，在其**较差**界限为 0，两者之间线性变化。权重和界限都是设置项。
+五个部分的加权和，每部分为 0 到 100。每个部分在其**良好**界限为 100，在其**较差**界限为 0，两者之间线性变化。权重和界限都是设置项。
 
 | 部分 | 权重 | 衡量内容 | 良好 | 较差 |
 |---|---|---|---|---|
@@ -29,11 +29,11 @@
 
 - **calibrating**（校准中）：账户被监视的时间不足 `score.calibrating_hours`（默认 24）。没有数值，也没有等级。
 - **insufficient_data**（数据不足）：窗口内已完成的运行少于 `score.min_runs`（默认 20），或有数据的部分权重不足总权重的 `score.min_coverage`（默认一半）。没有数值。
-- **scored**（已评分）：有数值、等级和趋势。没有数据的部分被舍去，其余部分重新缩放；这会降低 `coverage`（例如协作哨兵关闭时为 0.8）。它从不按 0 或 100 计算。
+- **scored**（已评分）：有数值、等级和趋势。没有数据的部分被舍去，其余部分重新缩放；这会降低 `coverage`（例如协作哨兵关闭时为 0.85）。它从不按 0 或 100 计算。
 
 安全与其他部分一样，但只有在安全哨兵开启并已查看足够多的仓库时才有数据。没有它时，回答会写明 `complete: false`，并在 `missing_parts` 中列出 `security`，其他部分会重新缩放，因此该数值绝不会被理解为“一切正常”。GitHub 不提供发现项的历史，所以安全部分在窗口和其前一个窗口中相同：趋势显示的是 CI 和协作所做的变化。默认权重为 30、15、15、15 和 25。有运行而完全没有失败的窗口没有需要恢复的内容：其恢复部分为满分，这是事实而不是空缺。
 
-窗口结束时仍为红色的工作流不会被遗忘：恢复部分按其迄今处于红色的时间计算，这是一个下限，红色持续多久就增长多久，因此无人修复的失败会让数值每小时降得更多。已修复的失败按其实际时间计算。一次运行的重新运行算作该工作流的又一次执行，因此失败的第一次尝试和绿色的第二次尝试都会被看到。如果从早期版本更新，有红色工作流的账户的数值可能比以前低。
+窗口结束时仍为红色的工作流不会被遗忘：恢复部分按其迄今处于红色的时间计算，这是一个下限，红色持续多久就增长多久，因此无人修复的失败会让数值每小时降得更多。已修复的失败按其实际时间计算。一次运行的重新运行算作该工作流的又一次执行，因此失败的第一次尝试和绿色的第二次尝试都会被看到。如果从早期版本更新，有红色工作流的账户的数值可能比以前低。 当没有任何部分有数据时，回答为 `insufficient_data`，原因为 `no_data`。台账最多保留 20000 次运行：当不得不丢弃属于当前窗口的运行时，`data_quality.truncated` 为 true，且原因中包含 `truncated`，以免只看到窗口一部分的成功率被误认为完整。在 `GET /api/score/global` 中，快照已过期的账户会被排除在平均值之外并计入 `accounts_stale`，`/metrics` 不会导出过期快照的 `ghamon_score`。
 
 ## 窗口
 
@@ -61,4 +61,4 @@
 
 ## 设置
 
-在设置页面的“哨兵”子标签中，“账户评分”“评分权重”和“评分等级”三个区块：`score.enabled`、`score.window_days`、`score.calibrating_hours`、`score.min_runs`、`score.min_coverage`、`score.trend_flat`、`score.weights.reliability`、`score.weights.speed`、`score.weights.recovery`、`score.weights.collaboration`、`score.grades.A` 至 `score.grades.D`、`score.alert.enabled`、`score.alert.drop_points` 和 `score.alert.notify_external`（默认关闭）。每个部分的良好和较差界限从文件中读取，位于 `score.limits` 之下（见示例文件）；不在页面中编辑。
+在设置页面的“哨兵”子标签中，“账户评分”“评分权重”和“评分等级”三个区块：`score.enabled`、`score.window_days`、`score.calibrating_hours`、`score.min_runs`、`score.min_coverage`、`score.trend_flat`、`score.weights.reliability`、`score.weights.speed`、`score.weights.recovery`、`score.weights.collaboration`, `score.weights.security`、`score.grades.A` 至 `score.grades.D`、`score.alert.enabled`、`score.alert.drop_points` 和 `score.alert.notify_external`（默认关闭）。每个部分的良好和较差界限从文件中读取，位于 `score.limits` 之下（见示例文件）；不在页面中编辑。

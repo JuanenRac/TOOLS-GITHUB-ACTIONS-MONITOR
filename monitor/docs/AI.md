@@ -21,6 +21,7 @@ Optional and **off by default**. A language model can summarise the daily report
 ## What it may see
 
 - Every input is cleaned: control characters removed, secrets redacted by pattern, length capped, the content placed between random delimiters and declared untrusted data. The answer is cut and its links defused.
+- The same single cleaner (tokens, keys, credentials inside addresses, e-mail addresses, IP addresses, your home folder) serves this assistant, the feed for AIs, the endpoints and the hook. It works by pattern: it lowers the risk, it is not a guarantee. A call to a provider never follows a redirect (the key would go on to another address) and does not use the proxy variables of the environment: a server on this computer is called directly, and a remote one only goes through the proxy with `network.use_proxy`.
 - In the Settings tab you choose the kinds of event it may analyse (`build`, `codeql`, `report`), the repositories it may see (empty = the ones the monitor watches), the language of the answers, the daily limit of calls and the size limits. A button tests the connection and the page shows the calls used today.
 
 

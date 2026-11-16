@@ -21,6 +21,7 @@ Opcional y **apagado por defecto**. Un modelo de lenguaje puede resumir el parte
 ## Qué puede ver
 
 - Toda entrada se limpia: se quitan los caracteres de control, se tachan los secretos por patrón, se limita la longitud, el contenido va entre delimitadores aleatorios y se declara dato no fiable. La respuesta se corta y sus enlaces se neutralizan.
+- El mismo limpiador único (tokens, claves, credenciales dentro de direcciones, correos, direcciones IP, tu carpeta personal) sirve a este asistente, al feed para IAs, a los endpoints y al gancho. Funciona por patrones: reduce el riesgo, no es una garantía. Una llamada a un proveedor nunca sigue una redirección (la clave pasaría a otra dirección) y no usa las variables de proxy del entorno: un servidor de este equipo se llama directamente y uno remoto solo pasa por el proxy con `network.use_proxy`.
 - En la pestaña Configuración eliges los tipos de evento que puede analizar (`build`, `codeql`, `report`), los repositorios que puede ver (vacío = los que vigila el monitor), el idioma de las respuestas, el límite diario de llamadas y los límites de tamaño. Un botón prueba la conexión y la página muestra las llamadas de hoy.
 
 

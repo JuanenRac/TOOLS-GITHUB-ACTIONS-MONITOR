@@ -18,7 +18,8 @@ def canonical(value):
 
 def _count(payload):
     return {"events": len(payload.get("events") or []), "sentinels": len(payload.get("sentinels") or {}), "docs": len(payload.get("docs") or {}),
-            "config": bool(payload.get("config")), "analytics": bool(payload.get("analytics")), "scores": len(payload.get("scores") or [])}
+            "config": bool(payload.get("config")), "analytics": bool(payload.get("analytics")), "scores": len(payload.get("scores") or []),
+            "damaged": int(payload.get("damaged_events") or 0)}
 
 
 def _same(source_payload, target_payload):
@@ -39,8 +40,22 @@ def _same(source_payload, target_payload):
     return True
 
 
+def _newest(payload):
+    """(newest event time, newest score hour) of a payload, as text ('' when there is none)."""
+    events = [e.get("at") for e in payload.get("events") or [] if isinstance(e, dict) and isinstance(e.get("at"), str)]
+    hours = [s.get("hour") for s in payload.get("scores") or [] if isinstance(s, dict) and isinstance(s.get("hour"), str)]
+    return (max(events) if events else "", max(hours) if hours else "")
+
+
+def _target_is_newer(source_payload, target_payload):
+    """True when the target holds an event or a score snapshot that is newer than anything in the source: the account was used after the first copy and a new copy would erase that."""
+    have, got = _newest(source_payload), _newest(target_payload)
+    return got[0] > have[0] or got[1] > have[1]
+
+
 def plan(source, target, accounts=None):
-    """[{"account", "status", **counts}] for each account of the source (or the ones asked for); status is "new" (not in the target), "differs" or "same"."""
+    """[{"account", "status", **counts}] for each account of the source (or the ones asked for); status is "new" (not in the target), "differs", "same" or "target_newer"
+    (it differs and the target has newer events or snapshots than the source: copying again would replace them)."""
     known = set(target.list_accounts())
     rows = []
     for account in source.list_accounts():
@@ -50,7 +65,8 @@ def plan(source, target, accounts=None):
         if account not in known:
             status = "new"
         else:
-            status = "same" if _same(payload, target.export_account(account)) else "differs"
+            there = target.export_account(account)
+            status = "same" if _same(payload, there) else ("target_newer" if _target_is_newer(payload, there) else "differs")
         rows.append({"account": account, "status": status, **_count(payload)})
     return rows
 
@@ -75,16 +91,33 @@ def verify(source, target, accounts=None, records=True):
     return problems
 
 
-def migrate(source, target, apply=False, accounts=None):
+class _Without:
+    """The source seen without some accounts (the refused ones), so the verification does not report them as differences."""
+
+    def __init__(self, source, skip):
+        self._source, self._skip = source, set(skip)
+
+    def list_accounts(self):
+        return [a for a in self._source.list_accounts() if a not in self._skip]
+
+    def __getattr__(self, name):
+        return getattr(self._source, name)
+
+
+def migrate(source, target, apply=False, accounts=None, force=False):
     """Copies every account (and the global records) of `source` to `target`. Without `apply` it only returns the plan. Returns
-    {"applied", "rows", "copied", "skipped", "events", "problems": [..], "verified"}; `problems` holds what failed to copy or to verify."""
+    {"applied", "rows", "copied", "skipped", "events", "refused": [accounts], "problems": [..], "verified"}; `problems` holds what failed to copy or to verify. An account whose target is newer
+    than the source (`target_newer`) is NOT written unless `force`: it is listed in `refused` and the run does not verify, so nobody loses the data made after the first copy."""
     rows = plan(source, target, accounts)
-    out = {"applied": bool(apply), "rows": rows, "copied": 0, "skipped": 0, "events": 0, "problems": [], "verified": False}
+    out = {"applied": bool(apply), "rows": rows, "copied": 0, "skipped": 0, "events": 0, "refused": [], "problems": [], "verified": False}
     if not apply:
         return out
     for row in rows:
         if row["status"] == "same":
             out["skipped"] += 1
+            continue
+        if row["status"] == "target_newer" and not force:
+            out["refused"].append(row["account"])
             continue
         try:
             target.import_account(row["account"], source.export_account(row["account"]))
@@ -96,6 +129,6 @@ def migrate(source, target, apply=False, accounts=None):
         target.import_records(source.export_records())
     except Exception as error:      # noqa: BLE001
         out["problems"].append(f"records: {type(error).__name__}: {str(error)[:120]}")
-    out["problems"] += verify(source, target, accounts)
-    out["verified"] = not out["problems"]
+    out["problems"] += verify([a for a in out["refused"]] and _Without(source, out["refused"]) or source, target, accounts)
+    out["verified"] = not out["problems"] and not out["refused"]
     return out

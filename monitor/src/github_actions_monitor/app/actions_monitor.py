@@ -1134,6 +1134,21 @@ def panel_list(lang=None):
     return sentinel_panels.panels(snapshot, lambda key, **values: i18n.tl(code, key, **values), analytics=ANALYTICS.get("summary"), collab=collab_alerts, owner=toolconfig.github_owner())
 
 
+# The POST routes that the monitor accepts only from the computer it runs on (guard + this_computer): from the network they answer 403 `local_only`. The handler reads these two lists and the generated
+# references of the skills for the AIs (tools/make_skill_refs.py) read the same ones, so the table an AI reads cannot disagree with the code.
+THIS_COMPUTER_ACTIONS = ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test")
+THIS_COMPUTER_ADVANCED = ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures",
+                          "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run")
+THIS_COMPUTER_POST = THIS_COMPUTER_ACTIONS + THIS_COMPUTER_ADVANCED
+
+
+def whole(text, default=0):
+    """A whole number from a query string or a header: only the digits 0-9 and at most 15 of them. `str.isdigit()` also accepts "\u00b2" and the digits of other scripts, which `int()` refuses, and a
+    number of thousands of digits is refused by `int()` too: both used to cut the connection; now they are the default."""
+    text = str(text if text is not None else "").strip()
+    return int(text) if re.fullmatch(r"[0-9]{1,15}", text) else default
+
+
 def ai_state(lang=None, data=None, panels=None):
     """The document of `GET /api/ai/state`: every signal of the monitor (signals.py), the same in both editions; the lite one says which panels do not exist there."""
     from github_actions_monitor.data_pipeline import signals
@@ -1206,7 +1221,7 @@ def lessons_get(path, query):
     args = {k: v[0] for k, v in parse_qs(query).items() if v}
     repo = args.get("repo", "") if re.fullmatch(r"[A-Za-z0-9._-]{1,100}", args.get("repo", "")) else ""
     if path == "/api/ai/failures":
-        number = lambda key, default: int(args[key]) if args.get(key, "").isdigit() else default   # noqa: E731
+        number = lambda key, default: whole(args.get(key), default)   # noqa: E731
         category = args.get("category", "") if re.fullmatch(r"[a-z][a-z0-9_]{0,39}", args.get("category", "")) else ""
         return "json", {"schema": lessons.SCHEMA, "enabled": lessons.settings(config)["enabled"], "failures": lessons.failures(config, number("since", 0), repo, category, number("limit", 100))}
     if args.get("fmt") in ("md", "brief"):
@@ -1265,7 +1280,8 @@ def feed_alerts(config, data, diagnose=True):
                 degraded.note("loop.extra2", error)
             try:
                 from github_actions_monitor.integrations import notifiers
-                notifiers.notify(config, {"kind": "ai_alert", "code": "ai_alert", "level": "warn", "repo": alert["repo"], "owner": "main", "url": alert.get("url"), "args": {},
+                if alert.get("conclusion") == "panel":      # a red workflow already has its own event (red_new); this one is for the alerts that come from a panel or a signal of the monitor
+                    notifiers.notify(config, {"kind": "ai_alert", "code": "ai_alert", "level": "warn", "repo": alert["repo"], "owner": "main", "url": alert.get("url"), "args": {},
                                           "text": i18n.t("evt.ai_alert", repo=alert["repo"], workflow=alert["workflow"])})
             except Exception as error:   # noqa: BLE001
                 degraded.note("loop.extra2", error)
@@ -1376,12 +1392,12 @@ def score_tick(config, data):
         degraded.note("score", error)
 
 
-def audit_action(handler, action, target="", details=None, result="ok"):
+def audit_action(handler, action, target="", details=None, result="ok", force=False):
     """One line in the log of actions (security/audit_log.py): who did what on this account. Never raises; a value of a setting never goes in, only the names."""
     try:
         from github_actions_monitor.security import audit_log
         context = getattr(handler, "auth_user", None) or {}
-        audit_log.record(toolconfig.raw_config(), action, context.get("user") or auth_http.acting_user(handler), context.get("role", ""), CHILD["account"] or "", target, result, details)
+        audit_log.record(toolconfig.raw_config(), action, context.get("user") or auth_http.acting_user(handler), context.get("role", ""), CHILD["account"] or "", target, result, details, force=force)
     except Exception as error:   # noqa: BLE001 - the log of actions never stops a request
         degraded.note("audit_log", error)
 def report_gather():
@@ -1843,7 +1859,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Connection", "close")
             self.end_headers()
             self.close_connection = True
-            for frame in webhook.sse_frames(config, lambda: (LIVE_TOTAL[0], list(LIVE_EVENTS)), since=int(resume) if str(resume).isdigit() else None):
+            for frame in webhook.sse_frames(config, lambda: (LIVE_TOTAL[0], list(LIVE_EVENTS)), since=whole(resume, None)):
                 self.wfile.write(frame.encode("utf-8"))
                 self.wfile.flush()
         except (ConnectionError, OSError):
@@ -1876,7 +1892,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Connection", "close")
             self.end_headers()
             self.close_connection = True
-            for frame in ai_alerts.stream_frames(config, offset=int(resume) if str(resume).isdigit() else None,
+            for frame in ai_alerts.stream_frames(config, offset=whole(resume, None),
                                                  only_real=(ask.get("only") or [""])[0] == "real"):
                 self.wfile.write(frame.encode("utf-8"))
                 self.wfile.flush()
@@ -1917,7 +1933,7 @@ class Handler(BaseHTTPRequestHandler):
         if query_token and not localguard.query_token_counts(self.command, self.path, LIVE_CONFIG or DEFAULTS):      # deprecated: only the first visit of a page, and only while listen.query_access is on
             query_token = ""
         peer = localguard.client_key(self.client_address, self.headers)
-        if not self.is_local() and localguard.is_locked_out(self.client_address, self.headers):      # the lock is looked at FIRST for every address that is not this computer: a locked address cannot keep guessing, not even with the right token
+        if not self.is_local() and localguard.is_locked_out(self.client_address, self.headers, token_ok=localguard.access_ok(self.headers, query_token)):      # the lock is looked at FIRST for every address that is not this computer: a locked address cannot keep guessing, not even with the right token
             self.json_reply({"error": "locked"}, 429)
             return False
         if not localguard.access_ok(self.headers, query_token):      # the person at this computer is never locked out of their own monitor; a shared proxy address is told apart with listen.trusted_proxy
@@ -1946,7 +1962,7 @@ class Handler(BaseHTTPRequestHandler):
             self.json_reply({"error": "forbidden"}, 403)
             return
         peer = localguard.client_key(self.client_address, self.headers)
-        if not self.is_local() and localguard.is_locked_out(self.client_address, self.headers):      # the same rule as every other request (access_gate)
+        if not self.is_local() and localguard.is_locked_out(self.client_address, self.headers, token_ok=True):      # the lock of this address, as in every other request (access_gate); the common one is looked at below, once the token is known
             self.json_reply({"error": "locked"}, 429)
             return
         try:
@@ -1960,7 +1976,11 @@ class Handler(BaseHTTPRequestHandler):
         except (ValueError, TypeError, OSError):
             self.json_reply({"ok": False, "error": "request"}, 400)
             return
-        if not localguard.access_ok({}, candidate):
+        right = localguard.access_ok({}, candidate)
+        if not self.is_local() and localguard.is_locked_out(self.client_address, self.headers, token_ok=right):
+            self.json_reply({"error": "locked"}, 429)
+            return
+        if not right:
             localguard.note_failure(peer, localguard.max_failed(LIVE_CONFIG or DEFAULTS))
             localguard.note_proxy_failure(self.client_address, self.headers, localguard.max_failed(LIVE_CONFIG or DEFAULTS))
             self.json_reply({"error": "access"}, 401)
@@ -2163,7 +2183,7 @@ class Handler(BaseHTTPRequestHandler):
             except (ValueError, OSError):
                 self.json_reply({"ok": False, "error": "request"}, 400)
             return
-        if path in ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test"):   # one request, one explicit person: local only, small JSON body
+        if path in THIS_COMPUTER_ACTIONS:   # one request, one explicit person: local only, small JSON body
             if not self.guard() or not self.this_computer() or not self.token_ok():
                 return
             try:
@@ -2174,7 +2194,7 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as error:   # noqa: BLE001
                 self.json_reply({"ok": False, "error": str(error)[:200]}, 400)
             return
-        if path in ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures", "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run"):
+        if path in THIS_COMPUTER_ADVANCED:
             if not self.guard() or not self.this_computer():
                 return
             if path != "/api/welcome" and path != "/api/gh-action/plan" and path != "/api/act/plan" and not self.token_ok():
@@ -2204,7 +2224,8 @@ class Handler(BaseHTTPRequestHandler):
                     self.json_reply({"ok": False, "errors": {"_": "local_only"}}, 403)
                     return
                 result = settings_api.apply(changes, CONFIG_FILE, lite=LITE["on"])
-                audit_action(self, "settings_change", "settings", {"settings": sorted(str(k)[:80] for k in changes)[:30]} if isinstance(changes, dict) else None, "ok" if result.get("ok") else "error")
+                touches_log = isinstance(changes, dict) and any(str(k).startswith("audit_log.") for k in changes)      # switching the log off is written even though it is off by then
+                audit_action(self, "settings_change", "settings", {"settings": sorted(str(k)[:80] for k in changes)[:30]} if isinstance(changes, dict) else None, "ok" if result.get("ok") else "error", force=touches_log)
                 if result.get("ok"):
                     RESTART_PENDING.update(result.get("restart") or [])
                     result["restart_pending"] = sorted(RESTART_PENDING)
@@ -2403,7 +2424,7 @@ class Handler(BaseHTTPRequestHandler):
                 return
             query = self.path.partition("?")[2].split("&")
             lang = next((q[5:] for q in query if q.startswith("lang=") and q[5:] in i18n.LANGS), "en")
-            self.json_reply(ai_state(lang))
+            self.json_reply(__import__("github_actions_monitor.security.redactor", fromlist=["_"]).redact_data(ai_state(lang)))      # the same cleaner as the feed, the brief and the MCP
         elif path == "/api/skills":      # read only: the two skills of the monitor as text (?name=internal|external[&file=references/api.md][&all=1])
             if not self.guard():
                 return
@@ -2528,7 +2549,8 @@ class Handler(BaseHTTPRequestHandler):
             if LITE["on"] or not audit_log.may_read(config, context.get("role", "")):
                 self.json_reply({"error": "forbidden", "code": "forbidden_role"}, 403)
                 return
-            self.json_reply({"schema": 1, "account": CHILD["account"] or "", "enabled": audit_log.settings(config)["enabled"], "chain": audit_log.verify(), "entries": audit_log.read(200)})
+            self.json_reply({"schema": 1, "account": CHILD["account"] or "", "enabled": audit_log.settings(config)["enabled"], "chain": audit_log.verify(), "entries": audit_log.read(200, CHILD["account"] or None),
+                             "write_failures": audit_log.STATS["write_failures"], "last_write_error_at": audit_log.STATS["last_write_error_at"]})
         elif path in ("/api/report-files", "/api/report-files/file"):      # the scheduled reports: the list and one file, read only, of the account of this process (Complete only)
             if not self.guard():
                 return
@@ -2570,7 +2592,7 @@ class Handler(BaseHTTPRequestHandler):
             if path == "/api/events":
                 from github_actions_monitor.sentinels import alert_center
                 from github_actions_monitor.data_pipeline import events as events_mod
-                rows = alert_center.read_events(events_mod.EVENTS_FILE, ask.get("sentinel", ""), ask.get("since", ""), min(500, int(ask["limit"])) if str(ask.get("limit", "")).isdigit() else 200)
+                rows = alert_center.read_events(events_mod.EVENTS_FILE, ask.get("sentinel", ""), ask.get("since", ""), min(500, whole(ask.get("limit"), 200)))
                 self.json_reply({"schema": 1, "account": CHILD["account"] or None, "events": rows})
             else:
                 self.json_reply(alerts_payload(ask))
@@ -2896,7 +2918,11 @@ def score_metrics():
         from github_actions_monitor.storage import runtime
         storage, account = runtime.process_storage(CHILD["account"] or None)
         latest = score_api.latest(storage, account, toolconfig.raw_config())
-        return None if latest.get("state") == "off" else {"state": latest.get("state"), "score": latest.get("score"), "coverage": latest.get("coverage")}
+        if latest.get("state") == "off":
+            return None
+        if latest.get("stale"):      # an old number is not exported as if it were current
+            return {"state": "stale", "score": None, "coverage": latest.get("coverage")}
+        return {"state": latest.get("state"), "score": latest.get("score"), "coverage": latest.get("coverage")}
     except Exception as error:   # noqa: BLE001 - /metrics must still answer
         degraded.note("score.metrics", error)
         return None
@@ -2962,7 +2988,7 @@ def advanced_get(path, query):
         from github_actions_monitor.integrations import actlocal
         from urllib.parse import parse_qs
         since = (parse_qs(query).get("since") or ["0"])[0]
-        return actlocal.status(int(since) if since.isdigit() else 0)
+        return actlocal.status(whole(since, 0))
     if path == "/api/ai/brief":
         from github_actions_monitor.integrations import ai_alerts
         from urllib.parse import parse_qs
@@ -2973,7 +2999,7 @@ def advanced_get(path, query):
         from github_actions_monitor.integrations import ai_alerts
         from urllib.parse import parse_qs
         since = (parse_qs(query).get("since") or ["0"])[0]
-        return {"alerts": ai_alerts.alerts(config, int(since) if since.isdigit() else 0)}
+        return {"alerts": ai_alerts.alerts(config, whole(since, 0))}
     if path == "/api/welcome":
         try:
             done = bool(json.loads(welcome_file().read_text(encoding="utf-8")).get("done"))

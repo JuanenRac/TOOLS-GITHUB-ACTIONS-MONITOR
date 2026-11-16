@@ -13,8 +13,13 @@ CSS = ("body{font:14px/1.5 system-ui,Segoe UI,sans-serif;margin:24px auto;max-wi
 MD_SPECIAL = re.compile(r"([\\`*_{}\[\]()<>#|~!])")
 
 
+AUTOLINK = re.compile(r"(?i)\b(https?|ftp):(?=//)|\bwww(?=\.)")
+
+
 def _md(text):
-    return MD_SPECIAL.sub(r"\\\1", str(text if text is not None else "")).replace("\r", " ").replace("\n", " ")
+    """Markdown-safe text: the marks are escaped and an address is broken (a zero-width space after the scheme) so that a visor of Markdown does not turn a stranger's text into a link."""
+    text = MD_SPECIAL.sub(r"\\\1", str(text if text is not None else "")).replace("\r", " ").replace("\n", " ")
+    return AUTOLINK.sub(lambda m: m.group(0) + "\u200b", text)
 
 
 def _num(value):

@@ -82,18 +82,18 @@ def build(data, snap, theme="dark", lite=False):
         running.add_column(t(column), overflow="ellipsis", no_wrap=True)
     for run in (data.get("active") or [])[:12]:
         status = t("tui.stuck") if run.get("stuck") else (t("tui.queued") if run.get("status") == "queued" else t("tui.in_progress"))
-        running.add_row(str(run.get("repo")), str(run.get("name")), Text(status, style=bad if run.get("stuck") else warn if run.get("status") == "queued" else good), hours(run.get("seconds") or 0))
+        running.add_row(Text(str(run.get("repo"))), Text(str(run.get("name"))), Text(status, style=bad if run.get("stuck") else warn if run.get("status") == "queued" else good), hours(run.get("seconds") or 0))
     reds = Table(box=box.SIMPLE_HEAD, expand=True, pad_edge=False)
     for column in ("tui.col_repo", "tui.col_workflow", "tui.col_streak"):
         reds.add_column(t(column), overflow="ellipsis", no_wrap=True)
     for row in ((snap.get("a2") or {}).get("red") or [])[:12]:
-        reds.add_row(str(row.get("repo")), str(row.get("workflow")), Text(str(row.get("streak")), style=bad))
+        reds.add_row(Text(str(row.get("repo"))), Text(str(row.get("workflow"))), Text(str(row.get("streak")), style=bad))
     queue = Table(box=box.SIMPLE_HEAD, expand=True, pad_edge=False)
     for column in ("tui.col_repo", "tui.col_hours", "tui.col_trust"):
         queue.add_column(t(column), no_wrap=True)
     for row in ((snap.get("a5") or {}).get("sign_queue") or [])[:12]:
         trust = row.get("trust") or "unknown"
-        queue.add_row(str(row.get("name")), f"{row.get('hours', 0):.0f}", Text(t("ui.trust_" + trust), style={"verified": good, "failed": bad}.get(trust, dim)))
+        queue.add_row(Text(str(row.get("name"))), f"{row.get('hours', 0):.0f}", Text(t("ui.trust_" + trust), style={"verified": good, "failed": bad}.get(trust, dim)))
     report = Text()
     for line in (snap.get("parte") or [])[:10]:
         report.append(f"[{line.get('level')}] ", style={"bad": bad, "warn": warn, "ok": good}.get(line.get("level"), dim))
@@ -148,7 +148,10 @@ def main(argv=None):
             while True:
                 time.sleep(max(2, args.refresh))
                 data, snap = fetch(args.port, lite=args.lite)
-                live.update(build(data, snap, args.theme, args.lite or args.port == ports.resolve("lite")))
+                try:
+                    live.update(build(data, snap, args.theme, args.lite or args.port == ports.resolve("lite")))
+                except Exception:      # a picture that cannot be drawn is skipped: the view goes on with the next answer
+                    continue
     except KeyboardInterrupt:
         pass
     return 0

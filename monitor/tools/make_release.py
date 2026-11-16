@@ -66,6 +66,11 @@ def fail(message):
     raise GateError("QUALITY GATE FAILED: " + message)
 
 
+def lf_for_scripts(data):
+    """A script that starts with a shebang runs only with Unix line endings (a CR at the end of the shebang line names no interpreter): the zip carries those files with LF, whatever the checkout of the builder did."""
+    return data.replace(b"\r\n", b"\n") if data.startswith(b"#!") else data
+
+
 def members():
     names = [p for p in sorted(HERE.glob("*.bat")) + sorted(HERE.glob("*.sh")) + sorted(HERE.glob("*.command")) + sorted((HERE / "bin").glob("*.py"))]   # the launchers of the product folder and the tiny entry points of bin/
     names += sorted(p for p in (HERE / "src").rglob("*.py") if "__pycache__" not in p.parts)                                                      # the importable package
@@ -437,7 +442,7 @@ def main():
     out = Path(args.out) if args.out else workspace.signed_dir() / "github_actions_monitor"
     if str(out).upper().startswith("D:"):
         raise SystemExit("never write on D:")
-    entries = {f"github_actions_monitor/{p.relative_to(HERE).as_posix()}": p.read_bytes() for p in members()}
+    entries = {f"github_actions_monitor/{p.relative_to(HERE).as_posix()}": lf_for_scripts(p.read_bytes()) for p in members()}
     entries[f"github_actions_monitor/{EXAMPLES_DIR}/{EXAMPLE}"] = template().encode("utf-8")
     missing_text = authorship_problems(entries)
     if missing_text:
@@ -451,6 +456,9 @@ def main():
     crlf = [n for n, data in entries.items() if n.endswith((".sh", ".command")) and b"\r" in data]
     if crlf:
         fail("shell launchers with Windows line endings (they would not run on Linux or macOS): " + ", ".join(crlf))
+    crlf_scripts = [n for n, data in entries.items() if data.startswith(b"#!") and b"\r" in data.split(b"\n", 1)[0]]
+    if crlf_scripts:
+        fail("scripts with a shebang and Windows line endings (they would not run on Linux or macOS): " + ", ".join(crlf_scripts))
     left_out = package_data_problems(entries)
     if left_out:
         fail("data files of the package missing from the zip: " + ", ".join(left_out))

@@ -133,6 +133,7 @@ def password_problem(password, username, minimum):
 MAINTAINER_POST = ("/api/alerts/mute", "/api/alerts/unmute", "/api/ai/ack", "/api/hot-only", "/api/mode", "/api/refresh-repos", "/api/sentinel/parte/save", "/api/discovery/group", "/api/welcome",
                    "/api/session-token")
 #: GET routes only an admin reads (they describe what is configured to reach the outside)
+MAINTAINER_GET = ("/api/audit-log",)      # the log of actions: never a viewer (an administrator, or a maintainer when audit_log.maintainers_can_read says so, is decided by the route)
 ADMIN_GET = ("/api/run-log", "/api/github-token", "/api/advanced", "/api/github-app/status", "/api/auth/users", "/api/auth/audit")
 #: routes that never need a session: the login itself, the health check, the page shell, and the webhook and the network access, which have a proof of their own
 PUBLIC = ("/api/auth/login", "/api/auth/me", "/api/auth/bootstrap", "/api/auth/logout", "/api/health", "/api/webhook", "/api/access", "/login")
@@ -144,7 +145,7 @@ def required_role(method, path):
     if path in PUBLIC:
         return None
     if method in ("GET", "HEAD"):
-        return "admin" if path in ADMIN_GET else "viewer"
+        return "admin" if path in ADMIN_GET else ("maintainer" if path in MAINTAINER_GET else "viewer")
     if path in MAINTAINER_POST:
         return "maintainer"
     if path == "/api/auth/password":      # everybody changes their own password
@@ -371,6 +372,7 @@ def login(storage, username, password, cfg, kind="cookie", now=None, local=False
             burn_time(password)
             return None, _ghost_attempt(name, cfg, now, local)
         if record.get("locked_until", 0) > now and not local:
+            burn_time(password)      # the same work as for a name that does not exist: how long "locked" takes must not tell which names are users
             return None, "locked"
         if not verify_password(password, record.get("hash", "")):
             if local:
@@ -452,7 +454,7 @@ def audit_path():
 
 def _record_action(action, user, role, path, result, code):
     """The changes (not the logins, logouts and refusals, which the audit of the accesses keeps) also go to the log of actions of audit_log.py. Never raises."""
-    if action in ("denied", "login", "logout"):
+    if action in ("denied", "login", "logout") or (action == "password" and result != "ok"):      # a failed change of one's own password stays in the audit of the accesses: any user could fill the log of actions with them
         return
     try:
         from github_actions_monitor.app import toolconfig

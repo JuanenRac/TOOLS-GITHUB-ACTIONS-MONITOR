@@ -21,7 +21,7 @@ Worauf sich ein Skript, ein Wandbildschirm oder ein mobiler Client verlassen kan
 
 ## Der Vertrag
 
-- `docs/schemas/api_contract.json` listet jeden lesenden Endpunkt mit seinen Schlüsseln und Typen in jeder Ausgabe sowie die Fehlercodes auf.
+- `docs/schemas/api_contract.json` listet jeden lesenden Endpunkt mit seinen Schlüsseln und Typen in jeder Ausgabe sowie die Fehlercodes auf. Die lesbaren, aber nicht eingefrorenen Routen (Datenströme, Text, Exporte anderer Werkzeuge) stehen in derselben Datei unter `unfrozen`, jeweils mit ihrem Grund; `/api/data`, das die Läufe, die Repositories und das Kontingent liefert, ist eingefroren.
 - `python tools/check_api_contract.py` prüft einen laufenden Monitor dagegen (`--lite`, `--url`, `--token-file`) und gibt `CONTRACT=PASS` oder `CONTRACT=FAIL` aus; führe es nach jedem Upgrade des Monitors oder deines Clients aus.
 
 ## Streams

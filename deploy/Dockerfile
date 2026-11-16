@@ -24,7 +24,7 @@ RUN apt-get update \
 FROM python:${PYTHON_VERSION}-slim AS app
 COPY monitor /build
 RUN python -m compileall -q -j 0 /build/src \
- && rm -rf /build/tests
+ && rm -rf /build/tests /build/config /build/data /build/logs /build/ai
 
 FROM python:${PYTHON_VERSION}-slim
 ARG VERSION=dev

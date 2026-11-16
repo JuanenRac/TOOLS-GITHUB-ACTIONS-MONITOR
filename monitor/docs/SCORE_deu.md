@@ -11,7 +11,7 @@ Eine Zahl von 0 bis 100, ein Buchstabe von A bis E und ein Trend für jedes Kont
 
 ## Woraus sie besteht
 
-Eine gewichtete Summe aus vier Teilen, jeder von 0 bis 100. Ein Teil ist an seiner **guten** Grenze 100, an seiner **schlechten** Grenze 0 und dazwischen linear. Die Gewichte und die Grenzen sind Einstellungen.
+Eine gewichtete Summe aus fünf Teilen, jeder von 0 bis 100. Ein Teil ist an seiner **guten** Grenze 100, an seiner **schlechten** Grenze 0 und dazwischen linear. Die Gewichte und die Grenzen sind Einstellungen.
 
 | Teil | Gewicht | Was er misst | Gut | Schlecht |
 |---|---|---|---|---|
@@ -29,11 +29,11 @@ Die Punktzahl zeigt nie eine Zahl, die sie nicht belegen kann. Die Antwort enth�
 
 - **calibrating** (Kalibrierung): das Konto wird seit weniger als `score.calibrating_hours` beobachtet (standardmäßig 24). Weder Zahl noch Buchstabe.
 - **insufficient_data** (zu wenige Daten): weniger als `score.min_runs` beendete Läufe im Fenster (standardmäßig 20) oder die Teile mit Daten wiegen weniger als `score.min_coverage` des Ganzen (standardmäßig die Hälfte). Keine Zahl.
-- **scored** (bewertet): eine Zahl, ein Buchstabe und ein Trend. Ein Teil ohne Daten wird weggelassen und die übrigen werden neu skaliert; das senkt die `coverage` (zum Beispiel 0,8, wenn der Zusammenarbeits-Wächter aus ist). Er zählt nie als 0 und nie als 100.
+- **scored** (bewertet): eine Zahl, ein Buchstabe und ein Trend. Ein Teil ohne Daten wird weggelassen und die übrigen werden neu skaliert; das senkt die `coverage` (zum Beispiel 0,85, wenn der Zusammenarbeits-Wächter aus ist). Er zählt nie als 0 und nie als 100.
 
 Sicherheit ist ein Teil wie die anderen, hat aber nur Daten, solange der Sicherheitswächter an ist und genug Repositories angesehen hat. Ohne ihn sagt die Antwort `complete: false` und führt `security` unter `missing_parts` auf, und die anderen Teile werden neu skaliert, damit die Zahl nie als „alles in Ordnung“ gelesen wird. GitHub liefert keinen Verlauf der Befunde, deshalb ist der Sicherheitsteil im Fenster und im davor liegenden derselbe: Der Trend zeigt, was die CI und die Zusammenarbeit getan haben. Die Gewichte sind standardmäßig 30, 15, 15, 15 und 25. Ein Fenster mit Läufen und ohne jeden Fehlschlag hat nichts wiederherzustellen: Sein Wiederherstellungsteil ist voll, als Tatsache und nicht als Lücke.
 
-Ein Workflow, der am Ende des Fensters noch rot ist, wird nicht vergessen: Der Teil Wiederherstellung zählt die Zeit, die er bisher rot ist, eine untere Grenze, die wächst, solange das Rot dauert; ein Fehler, den niemand behebt, senkt die Zahl also jede Stunde stärker. Ein behobener Fehler zählt seine tatsächliche Zeit. Ein erneuter Lauf eines Laufs zählt als eine weitere Ausführung des Workflows, sodass der fehlgeschlagene erste und der grüne zweite Versuch beide gesehen werden. Wenn du von einer früheren Version aktualisierst, können die Zahlen eines Kontos mit einem roten Workflow niedriger sein als zuvor.
+Ein Workflow, der am Ende des Fensters noch rot ist, wird nicht vergessen: Der Teil Wiederherstellung zählt die Zeit, die er bisher rot ist, eine untere Grenze, die wächst, solange das Rot dauert; ein Fehler, den niemand behebt, senkt die Zahl also jede Stunde stärker. Ein behobener Fehler zählt seine tatsächliche Zeit. Ein erneuter Lauf eines Laufs zählt als eine weitere Ausführung des Workflows, sodass der fehlgeschlagene erste und der grüne zweite Versuch beide gesehen werden. Wenn du von einer früheren Version aktualisierst, können die Zahlen eines Kontos mit einem roten Workflow niedriger sein als zuvor. Hat kein Teil Daten, lautet die Antwort `insufficient_data` mit dem Grund `no_data`. Das Buch hält höchstens 20000 Läufe: Musste es Läufe des aktuellen Fensters verwerfen, ist `data_quality.truncated` wahr und `truncated` steht unter den Gründen, damit eine Erfolgsquote, die nur einen Teil des Fensters sieht, nicht für vollständig gehalten wird. In `GET /api/score/global` wird ein Konto mit veraltetem Schnappschuss aus dem Mittelwert genommen und in `accounts_stale` gezählt, und `/metrics` exportiert `ghamon_score` für einen veralteten Schnappschuss nicht.
 
 ## Das Fenster
 
@@ -61,4 +61,4 @@ Fällt die Punktzahl gegenüber dem vorherigen Fenster um `score.alert.drop_poin
 
 ## Die Einstellungen
 
-Auf der Einstellungsseite, Unterreiter Wächter, Blöcke Punktzahl des Kontos, Gewichte der Punktzahl und Buchstaben der Punktzahl: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.grades.A` bis `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` und `score.alert.notify_external` (standardmäßig aus). Die guten und schlechten Grenzen jedes Teils werden aus der Datei gelesen, unter `score.limits` (siehe die Beispieldatei); sie werden nicht auf der Seite bearbeitet.
+Auf der Einstellungsseite, Unterreiter Wächter, Blöcke Punktzahl des Kontos, Gewichte der Punktzahl und Buchstaben der Punktzahl: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.weights.security`, `score.grades.A` bis `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` und `score.alert.notify_external` (standardmäßig aus). Die guten und schlechten Grenzen jedes Teils werden aus der Datei gelesen, unter `score.limits` (siehe die Beispieldatei); sie werden nicht auf der Seite bearbeitet.

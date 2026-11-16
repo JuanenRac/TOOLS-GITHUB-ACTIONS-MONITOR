@@ -261,5 +261,81 @@ class BackupTool(unittest.TestCase):
         self.assertEqual(backup.verify_backup(self.zip), [])
 
 
+
+class RepeatedMigration(unittest.TestCase):
+    def test_repeating_the_command_never_replaces_newer_data_of_the_target(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "accounts"
+            fill(root)
+            argv = ["--from", "file", "--to", "sqlite", "--accounts-dir", str(root), "--apply"]
+            self.assertEqual(run_cli(migrate_storage, argv)[0], 0)
+            sql = installation.open_installation("sqlite", root)
+            payload = sql.export_account("alpha")
+            payload["events"].append({"at": "2026-09-01T00:00:00Z", "kind": "new_after_switch"})
+            sql.import_account("alpha", payload)
+            sql.close()
+            code, text = run_cli(migrate_storage, argv)
+            self.assertEqual(code, 1, text)
+            self.assertIn("REFUSED", text)
+            self.assertIn("alpha", text)
+            sql, files = installation.open_installation("sqlite", root), installation.open_installation("file", root)
+            try:
+                self.assertIn("new_after_switch", [e.get("kind") for e in sql.export_account("alpha")["events"]])
+                rows = migrate.plan(files, sql)
+                self.assertEqual({r["account"]: r["status"] for r in rows}, {"alpha": "target_newer", "beta": "same"})
+            finally:
+                sql.close()
+                files.close()
+            code, text = run_cli(migrate_storage, argv + ["--force"])
+            self.assertEqual(code, 0, text)
+            sql = installation.open_installation("sqlite", root)
+            try:
+                self.assertNotIn("new_after_switch", [e.get("kind") for e in sql.export_account("alpha")["events"]])
+            finally:
+                sql.close()
+
+
+
+class HandMadeBackup(unittest.TestCase):
+    def test_a_backup_with_an_invalid_account_id_is_refused_before_anything_is_written(self):
+        import json
+        import zipfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "accounts"
+            fill(root)
+            good = Path(tmp) / "good.zip"
+            self.assertEqual(run_cli(backup_storage, ["backup", str(good), "--backend", "file", "--accounts-dir", str(root)])[0], 0)
+            with zipfile.ZipFile(good) as bundle:
+                manifest = json.loads(bundle.read(backup.MANIFEST))
+                lines = bundle.read(backup.DUMP).decode("utf-8").splitlines()
+            data = [json.loads(line) for line in lines]
+            second = next(i for i, d in enumerate(data) if d.get("account") == "beta")
+            data[second]["account"] = "../escaped"
+            dump = "".join(json.dumps(d) + "\n" for d in data).encode("utf-8")
+            import hashlib
+            manifest.update(dump_bytes=len(dump), dump_sha256=hashlib.sha256(dump).hexdigest())
+            bad = Path(tmp) / "bad.zip"
+            with zipfile.ZipFile(bad, "w") as bundle:
+                bundle.writestr(backup.DUMP, dump)
+                bundle.writestr(backup.MANIFEST, json.dumps(manifest))
+            self.assertTrue(backup.verify_backup(bad))
+            fresh = Path(tmp) / "fresh"
+            code, _text = run_cli(backup_storage, ["restore", str(bad), "--backend", "file", "--accounts-dir", str(fresh)])
+            self.assertEqual(code, 1)
+            self.assertFalse((fresh / "alpha").exists(), "the first account was not written either")
+
+
+class DamagedLines(unittest.TestCase):
+    def test_the_migration_says_how_many_damaged_lines_of_the_feed_it_does_not_copy(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "accounts"
+            files = fill(root, ("alpha",))
+            path = files.events_path("alpha")
+            path.write_text(path.read_text(encoding="utf-8") + "this is not json\n", encoding="utf-8")
+            code, text = run_cli(migrate_storage, ["--from", "file", "--to", "sqlite", "--accounts-dir", str(root)])
+            self.assertEqual(code, 0)
+            self.assertIn("1 damaged line", text)
+
+
 if __name__ == "__main__":
     unittest.main()

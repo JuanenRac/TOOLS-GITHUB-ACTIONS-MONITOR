@@ -404,7 +404,7 @@ class Handler(BaseHTTPRequestHandler):
         if query_token and not localguard.query_token_counts(self.command, self.path, config):
             query_token = ""
         peer = localguard.client_key(self.client_address, self.headers)
-        if not self.this_computer() and localguard.is_locked_out(self.client_address, self.headers):
+        if not self.this_computer() and localguard.is_locked_out(self.client_address, self.headers, token_ok=localguard.access_ok(self.headers, query_token)):
             self.json({"error": "locked"}, 429)
             return False
         if not localguard.access_ok(self.headers, query_token):
@@ -431,7 +431,7 @@ class Handler(BaseHTTPRequestHandler):
             return
         config = self.team_config()
         peer = localguard.client_key(self.client_address, self.headers)
-        if not self.this_computer() and localguard.is_locked_out(self.client_address, self.headers):
+        if not self.this_computer() and localguard.is_locked_out(self.client_address, self.headers, token_ok=True):
             self.json({"error": "locked"}, 429)
             return
         try:
@@ -445,7 +445,11 @@ class Handler(BaseHTTPRequestHandler):
         except (ValueError, TypeError, OSError):
             self.json({"ok": False, "error": "request"}, 400)
             return
-        if not localguard.access_ok({}, candidate):
+        right = localguard.access_ok({}, candidate)
+        if not self.this_computer() and localguard.is_locked_out(self.client_address, self.headers, token_ok=right):
+            self.json({"error": "locked"}, 429)
+            return
+        if not right:
             localguard.note_failure(peer, localguard.max_failed(config))
             localguard.note_proxy_failure(self.client_address, self.headers, localguard.max_failed(config))
             self.json({"error": "access"}, 401)
@@ -594,6 +598,9 @@ class Handler(BaseHTTPRequestHandler):
             return
         if not accounts.valid_id(account_id) or account_id not in accounts.enabled_accounts(sup.base):
             self.json({"ok": False, "status": "unknown_account"}, 404)
+            return
+        if user and user.get("accounts") is not None and not auth_http.visible_accounts(self, [account_id]):      # the gate lets the three listing routes through because the supervisor filters them: this is the filter
+            self.json({"ok": False, "status": "account_scope", "code": "account_scope"}, 403)
             return
         try:
             size = int(self.headers.get("Content-Length") or 0)

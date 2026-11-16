@@ -30,7 +30,8 @@ def redirect(account_id, base=None):
     from github_actions_monitor.app import settings_api
     from github_actions_monitor.app import toolconfig
     from github_actions_monitor.app import updatecheck
-    for module in (ai_actions, ghactions, updatecheck):      # these load on demand inside the monitor: they must exist now, or their logs would stay next to the code, shared by every account
+    from github_actions_monitor.security import audit_log
+    for module in (ai_actions, ghactions, updatecheck, audit_log):      # these load on demand inside the monitor: they must exist now, or their logs would stay next to the code, shared by every account
         sys.modules.setdefault(module.__name__, module)
     folder = accounts.account_dir(account_id, base)
     from github_actions_monitor.integrations import ai_alerts      # the feed for the AIs, its brief and the ledger of the notices are this account's own: ai/accounts/<id>/
