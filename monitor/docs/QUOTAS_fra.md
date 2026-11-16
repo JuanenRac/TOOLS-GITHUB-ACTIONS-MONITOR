@@ -46,3 +46,10 @@ Le panneau compare les jobs en cours et en file à la limite de votre offre et a
 ## Ce qui n'est pas couvert
 
 Les prix par minute supplémentaire, les runners plus grands, le stockage utilisé, Codespaces et Packages ne sont pas suivis ; le tableau des offres est un point de départ et les limites de macOS changent. Rien de tout cela n'a encore été essayé sur un vrai rapport de facturation : la lecture de `usageItems` suit la description publique et se dégrade en silence.
+
+## Limites connues
+
+- **Les listes d'exécutions sont des échantillons.** Le moniteur lit les dernières `runs_per_repo` exécutions de chaque dépôt (20 par défaut) ; un total que GitHub cesse de compter (2 500 ou 40 000) est affiché comme *au moins*, et un dépôt dont l'échantillon ne remonte que peu dans le temps est marqué *couverture faible*.
+- **Le plan peut être `unknown`.** Les dépôts privés et gratuits ne disent pas quel plan a le compte : avec `account.plan` sur `unknown`, les quotas, les minutes incluses et la limite de concurrence sont affichés comme *inconnus* avec les chiffres qu'on peut connaître (minutes comptées), jamais comme une erreur. Choisissez le plan pour voir les pourcentages.
+- **Un propriétaire par moniteur.** Un dépôt est identifié par son nom ; pour surveiller une autre organisation, lancez un second moniteur avec son propre `github_owner`.
+- **La file de fusion** n'est surveillée que pour la branche par défaut (exécutions de l'événement `merge_group` sur `gh-readonly-queue/<défaut>/...`), et une exécution de la file compte des minutes comme n'importe quelle autre.

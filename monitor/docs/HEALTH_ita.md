@@ -33,3 +33,9 @@ Lo stato è **cattivo** (un workflow rosso, o un avviso di livello critico o err
 La salute del team raggruppa una sola volta per repository le esecuzioni, i workflow rossi, le esecuzioni in corso e gli avvisi, così il costo cresce con la quantità di dati e non con repository per esecuzioni; chiedere un solo repository costruisce solo la sua vista.
 
 Un istante salvato che si trova nel futuro (un computer senza orologio a batteria che parte con una data vecchia, o un orologio corretto a mano) non viene creduto: il punteggio, la pulizia dei dati vecchi e i rapporti programmati sono dovuti subito e scrivono un istante corretto, invece di attendere che il vecchio orologio venga raggiunto.
+
+## La vista della flotta (centinaia di repository)
+
+La scheda **Team** ha una seconda sezione, *Flotta*, per gli account con centinaia di repository. Raggruppa i repository (`fleet.group_by`: ecosistema, etichetta, stato o nessuno), ordina ogni gruppo (`fleet.sort`: rischio, nome, ultima esecuzione o stato) e disegna `fleet.page_size` righe alla volta (50 per impostazione predefinita) con Precedente e Successivo. La pagina riceve tutte le righe una volta da `GET /api/team/fleet?ecosystem=&severity=&q=&label=&group=&sort=&saved=` (sola lettura, al massimo 5.000 righe; `truncated` segnala un taglio) e disegna una sola pagina, quindi la dimensione dell'account non la rallenta.
+
+Una *etichetta* è un modello di nomi di repository: `fleet.labels` accetta righe come `team-*=backend`; il primo modello che corrisponde dà l'etichetta, e raggruppare per etichetta è il modo di distinguere organizzazioni o team in un solo monitor. `fleet.saved_filters` accetta righe come `attention=bad||backend|` (nome, gravità minima, ecosistema, etichetta, testo; ogni parte dopo il nome può essere vuota) e le mostra come filtri già pronti. La classifica sopra la flotta non cambia.

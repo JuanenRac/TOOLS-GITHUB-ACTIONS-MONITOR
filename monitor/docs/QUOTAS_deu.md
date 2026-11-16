@@ -46,3 +46,10 @@ Das Panel vergleicht laufende und wartende Jobs mit dem Limit Ihres Tarifs und w
 ## Was nicht abgedeckt ist
 
 Preise für zusätzliche Minuten, größere Runner, genutzter Speicher, Codespaces und Packages werden nicht verfolgt; die Tariftabelle ist ein Ausgangspunkt, und die macOS-Limits ändern sich. Nichts davon wurde bisher gegen einen echten Abrechnungsbericht erprobt: das Lesen von `usageItems` folgt der öffentlichen Beschreibung und fällt leise zurück.
+
+## Bekannte Grenzen
+
+- **Die Listen der Läufe sind Stichproben.** Der Monitor liest die letzten `runs_per_repo` Läufe jedes Repositorys (standardmäßig 20); eine Summe, die GitHub nicht mehr zählt (2.500 oder 40.000), erscheint als *mindestens*, und ein Repository, dessen Stichprobe nur kurz zurückreicht, wird als *geringe Abdeckung* markiert.
+- **Der Plan kann `unknown` sein.** Private und kostenlose Repositories verraten nicht, welchen Plan das Konto hat: Bleibt `account.plan` auf `unknown`, erscheinen Kontingente, enthaltene Minuten und Parallelitätsgrenze als *unbekannt* mit den Zahlen, die sich wissen lassen (gezählte Minuten), nie als Fehler. Wählen Sie den Plan, um die Prozentwerte zu sehen.
+- **Ein Eigentümer je Monitor.** Ein Repository wird über seinen Namen erkannt; für eine weitere Organisation starten Sie einen zweiten Monitor mit eigenem `github_owner`.
+- **Die Merge-Warteschlange** wird nur für den Standard-Branch beobachtet (Läufe des Ereignisses `merge_group` auf `gh-readonly-queue/<Standard>/...`), und ein Lauf der Warteschlange zählt Minuten wie jeder andere.

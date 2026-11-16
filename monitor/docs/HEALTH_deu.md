@@ -33,3 +33,9 @@ Der Zustand ist **schlecht** (ein roter Workflow oder eine Meldung der Stufe kri
 Die Teamgesundheit gruppiert Läufe, rote Workflows, laufende Läufe und Meldungen einmal nach Repository, sodass der Aufwand mit der Datenmenge wächst und nicht mit Repositorys mal Läufen; die Abfrage eines einzelnen Repositorys baut nur seine Ansicht.
 
 Ein gespeicherter Zeitpunkt in der Zukunft (ein Rechner ohne Batterieuhr mit altem Datum oder eine von Hand korrigierte Uhr) wird nicht geglaubt: Bewertung, Bereinigung alter Daten und geplante Berichte sind sofort fällig und schreiben einen guten Zeitpunkt, statt zu warten, bis die alte Uhr erreicht ist.
+
+## Die Flottenansicht (Hunderte Repositories)
+
+Der Tab **Team** hat einen zweiten Abschnitt, *Flotte*, für Konten mit Hunderten Repositories. Er gruppiert die Repositories (`fleet.group_by`: Ökosystem, Label, Zustand oder keine), ordnet jede Gruppe (`fleet.sort`: Risiko, Name, letzter Lauf oder Zustand) und zeichnet jeweils `fleet.page_size` Zeilen (standardmäßig 50) mit Zurück und Weiter. Die Seite holt alle Zeilen einmal von `GET /api/team/fleet?ecosystem=&severity=&q=&label=&group=&sort=&saved=` (nur lesend, höchstens 5.000 Zeilen; `truncated` zeigt ein Abschneiden an) und zeichnet nur eine Seite, die Größe des Kontos bremst sie also nicht.
+
+Ein *Label* ist ein Muster von Repository-Namen: `fleet.labels` nimmt Zeilen wie `team-*=backend` an; das erste passende Muster gibt das Label, und die Gruppierung nach Label unterscheidet Organisationen oder Teams in einem Monitor. `fleet.saved_filters` nimmt Zeilen wie `attention=bad||backend|` an (Name, geringster Schweregrad, Ökosystem, Label, Text; jeder Teil nach dem Namen darf leer sein) und zeigt sie als fertige Filter. Die Rangliste über der Flotte bleibt unverändert.

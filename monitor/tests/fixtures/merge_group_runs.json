@@ -1,0 +1,13 @@
+{
+  "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+  "_license": "GPL-3.0-or-later - see LICENSE",
+  "note": "Synthetic runs of three repositories that use a merge queue: queue-red has a failed run of the queue of main, queue-green a green one, and no-queue none. The times are hours before 'now'.",
+  "queue": "gh-readonly-queue/main/pr-12-0123456789abcdef",
+  "runs": [
+    {"repo": "queue-red", "id": 1, "path": "ci.yml", "branch": "main", "event": "push", "conclusion": "success", "hours": 30},
+    {"repo": "queue-red", "id": 2, "path": "ci.yml", "branch": "QUEUE", "event": "merge_group", "conclusion": "failure", "hours": 2},
+    {"repo": "queue-green", "id": 3, "path": "ci.yml", "branch": "main", "event": "push", "conclusion": "success", "hours": 30},
+    {"repo": "queue-green", "id": 4, "path": "ci.yml", "branch": "QUEUE", "event": "merge_group", "conclusion": "success", "hours": 2},
+    {"repo": "no-queue", "id": 5, "path": "ci.yml", "branch": "main", "event": "push", "conclusion": "success", "hours": 3}
+  ]
+}
