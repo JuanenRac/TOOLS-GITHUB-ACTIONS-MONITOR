@@ -93,6 +93,7 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/score` | GET | viewer | the score of the account: a number from 0 to 100, a letter from A to E and a trend, with its parts, its coverage, the quality of the data and a breakdown by repository (Complete only; null and a state instead of a number when there is not enough data) |
 | `/api/score/global` | GET | viewer | the score of the whole installation, for information only (supervisor): the mean of the scored accounts the asker may see, weighted by their repositories with a number, with who is in it (Complete only) |
 | `/api/score/history` | GET | viewer | the points of the score over time (`?hours=`, `?limit=`), oldest first (Complete only) |
+| `/api/screens/data` | GET | viewer | what the wall screens show, from what the monitor already holds and never from GitHub: `?screen=overview|now|sentinels`, a closed list of fields (no link, title, job or user name), the names of private repositories hidden unless `screens.show_repo_names` says all (read only; 404 while `screens.enabled` is off) |
 | `/api/sentinel` | GET | viewer | the snapshot of the Sentinel (checks A1-A13) |
 | `/api/sentinel/ai` | GET | viewer | the AI explanation of a failed build or a CodeQL alert (a person asks; cached) |
 | `/api/sentinel/collab` | GET | viewer | issues and pull requests that need a person |
