@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2537_passing-brightgreen.svg" alt="2537 tests">
+  <img src="https://img.shields.io/badge/Tests-2530_passing-brightgreen.svg" alt="2530 tests">
 </p>
 
 > Vigila los workflows de todos tus repositorios y te dice, en una página local, qué está en rojo, qué está atascado y qué te espera.
@@ -81,8 +81,8 @@
 | | |
 |---|---|
 | **Madurez** | functional |
-| **Tests** | 2537 métodos de test (`python -m unittest discover -s monitor/tests`) |
-| **Ajustes** | 467 ajustes, todos con ayuda |
+| **Tests** | 2530 métodos de test (`python -m unittest discover -s monitor/tests`) |
+| **Ajustes** | 458 ajustes, todos con ayuda |
 | **Idiomas** | 8 (inglés, español, alemán, francés, italiano, japonés, chino y portugués) |
 | **Probado en el CI en** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -299,7 +299,6 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/SENTINEL_SECURITY_spa.md`](monitor/docs/SENTINEL_SECURITY_spa.md): El centinela de seguridad: Dependabot, análisis de código, secretos, protección de ramas, permisos de los flujos y CODEOWNERS, y lo que no pudo comprobar
 - [`monitor/docs/AUDIT_LOG_spa.md`](monitor/docs/AUDIT_LOG_spa.md): El registro de acciones: quién cambió qué, la cadena de hashes, quién lo lee y los ajustes
 - [`monitor/docs/HEALTH_spa.md`](monitor/docs/HEALTH_spa.md): La salud de un repositorio y del equipo: de qué se compone, la pestaña Equipo, los enlaces directos y la API
-- [`monitor/docs/ORGANIZATIONS_spa.md`](monitor/docs/ORGANIZATIONS_spa.md): Organizaciones y cuentas grandes
 - [`monitor/docs/REPORT_SCHEDULE_spa.md`](monitor/docs/REPORT_SCHEDULE_spa.md): Informes programados: la puntuación, lo que ha cambiado, los repositorios que necesitan a una persona y las alertas abiertas en HTML y Markdown, el horario y los ficheros
 - [`monitor/docs/CLI_spa.md`](monitor/docs/CLI_spa.md): la línea de comandos como cliente del monitor
 - [`monitor/docs/ACCOUNTS_spa.md`](monitor/docs/ACCOUNTS_spa.md): varias cuentas, un proceso para cada una
@@ -313,6 +312,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ADVANCED_spa.md`](monitor/docs/ADVANCED_spa.md): Funciones avanzadas (todas apagadas por defecto)
 - [`monitor/docs/AI_ALERTS_spa.md`](monitor/docs/AI_ALERTS_spa.md): Avisos para IAs: el feed, el resumen, el hook y el stream
 - [`monitor/docs/AUDIT_PACKAGE_spa.md`](monitor/docs/AUDIT_PACKAGE_spa.md): Paquete para el auditor
+- [`monitor/docs/ORGANIZATIONS_spa.md`](monitor/docs/ORGANIZATIONS_spa.md): Organizaciones y cuentas grandes
 
 ## Contribuir
 

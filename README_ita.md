@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2537_passing-brightgreen.svg" alt="2537 tests">
+  <img src="https://img.shields.io/badge/Tests-2530_passing-brightgreen.svg" alt="2530 tests">
 </p>
 
 > Controlla i workflow di tutti i tuoi repository e ti dice, su una pagina locale, cosa è rosso, cosa è bloccato e cosa ti aspetta.
@@ -81,8 +81,8 @@
 | | |
 |---|---|
 | **Maturità** | functional |
-| **Test** | 2537 metodi di test (`python -m unittest discover -s monitor/tests`) |
-| **Impostazioni** | 467 impostazioni, tutte con aiuto |
+| **Test** | 2530 metodi di test (`python -m unittest discover -s monitor/tests`) |
+| **Impostazioni** | 458 impostazioni, tutte con aiuto |
 | **Lingue** | 8 (inglese, spagnolo, tedesco, francese, italiano, giapponese, cinese e portoghese) |
 | **Provato nel CI su** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -299,7 +299,6 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/SENTINEL_SECURITY_ita.md`](monitor/docs/SENTINEL_SECURITY_ita.md): La sentinella di sicurezza: Dependabot, analisi del codice, segreti, protezione dei branch, permessi dei workflow e CODEOWNERS, e ciò che non ha potuto controllare
 - [`monitor/docs/AUDIT_LOG_ita.md`](monitor/docs/AUDIT_LOG_ita.md): Il registro delle azioni: chi ha cambiato cosa, la catena di hash, chi lo legge e le impostazioni
 - [`monitor/docs/HEALTH_ita.md`](monitor/docs/HEALTH_ita.md): La salute di un repository e del team: di cosa è fatta, la scheda Team, i link diretti e l'API
-- [`monitor/docs/ORGANIZATIONS_ita.md`](monitor/docs/ORGANIZATIONS_ita.md): Organizzazioni e account grandi
 - [`monitor/docs/REPORT_SCHEDULE_ita.md`](monitor/docs/REPORT_SCHEDULE_ita.md): Rapporti pianificati: il punteggio, cosa è cambiato, i repository che richiedono una persona e gli avvisi aperti in HTML e Markdown, la pianificazione e i file
 - [`monitor/docs/CLI_ita.md`](monitor/docs/CLI_ita.md): la riga di comando come client del monitor
 - [`monitor/docs/ACCOUNTS_ita.md`](monitor/docs/ACCOUNTS_ita.md): più account, un processo ciascuno
@@ -313,6 +312,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ADVANCED_ita.md`](monitor/docs/ADVANCED_ita.md): Funzioni avanzate (tutte spente di default)
 - [`monitor/docs/AI_ALERTS_ita.md`](monitor/docs/AI_ALERTS_ita.md): Avvisi per le IA: il flusso, il riepilogo, l'hook e lo stream
 - [`monitor/docs/AUDIT_PACKAGE_ita.md`](monitor/docs/AUDIT_PACKAGE_ita.md): Pacchetto per il revisore
+- [`monitor/docs/ORGANIZATIONS_ita.md`](monitor/docs/ORGANIZATIONS_ita.md): Organizzazioni e account grandi
 
 ## Contribuire
 

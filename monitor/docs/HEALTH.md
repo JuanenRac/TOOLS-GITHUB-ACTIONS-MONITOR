@@ -33,3 +33,9 @@ The state is **bad** (a red workflow, or an alert of level critical or error), *
 The team health groups the runs, red workflows, running runs and alerts by repository once, so the cost grows with the amount of data and not with repositories times runs; asking for one repository builds only its view.
 
 A saved moment that lies in the future (a computer without a battery clock that starts with an old date, or a clock corrected by hand) is not believed: the score, the purge of old data and the scheduled reports are due at once and write a good moment, instead of waiting until the old clock is reached.
+
+## The fleet view (hundreds of repositories)
+
+The **Team** tab has a second section, *Fleet*, for accounts with hundreds of repositories. It groups the repositories (`fleet.group_by`: ecosystem, label, state or none), orders each group (`fleet.sort`: risk, name, last run or state) and draws `fleet.page_size` rows at a time (50 by default) with Previous and Next. The page gets every row once from `GET /api/team/fleet?ecosystem=&severity=&q=&label=&group=&sort=&saved=` (read only, at most 5,000 rows, `truncated` says when it was cut) and only draws one page, so the size of the account does not slow it down.
+
+A *label* is a pattern of repository names: `fleet.labels` takes lines such as `team-*=backend`; the first pattern that fits gives the label, and grouping by label is how organisations or teams are told apart in one monitor. `fleet.saved_filters` takes lines such as `attention=bad||backend|` (name, least severity, ecosystem, label, text; any part after the name may be empty) and shows them as ready-made filters. The ranking above the fleet is unchanged.
