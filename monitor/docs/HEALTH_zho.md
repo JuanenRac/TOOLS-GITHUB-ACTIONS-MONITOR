@@ -27,3 +27,9 @@
 - 用于墙面屏幕的深度链接：`?view=team&chrome=0`、`?view=repos&chrome=0` 和 `?view=repo&repo=owner/name&chrome=0`。
 - API：`GET /api/team/health?ecosystem=&severity=&q=&label=` 和 `GET /api/repos/<owner>/<repo>/health`。两者都需要查看该账户的权限；响应带有 `schema: 1`。未知仓库返回 404 和 `code: repo_unknown`。
 - Lite 版保留其简单的运行视图，没有该标签页，也没有这些路由。
+
+## 数千个仓库与被调回的时钟
+
+团队健康只按仓库对运行、红色工作流、进行中的运行和警报分组一次,因此成本随数据量增长,而不是随“仓库数×运行数”增长;只请求一个仓库时只构建它的视图。
+
+保存在未来的时刻(没有电池时钟、以旧日期启动的电脑,或被手动校正的时钟)不会被相信:评分、旧数据清理和定时报告会立即到期并写入正确的时刻,而不是等旧时钟追上。

@@ -9,6 +9,15 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+
+### Geändert
+
+- **Die Gesundheit des Teams ist mit Tausenden Repositorys schnell**: Läufe, rote Workflows, laufende Läufe und Meldungen werden einmal nach Repository gruppiert, sodass eine Anfrage zur Teamgesundheit nicht mehr für jedes Repository alle durchläuft (2.000 Repositorys brauchten etwa acht Sekunden), und die Gesundheit eines Repositorys baut nur seine eigene Ansicht.
+
+### Behoben
+
+- **Eine zurückgestellte Uhr hält Bewertung, Bereinigung und geplante Berichte nicht mehr an**: Ein gespeicherter Zeitpunkt in der Zukunft (ein Rechner ohne Batterieuhr, der mit altem Datum startet, oder eine von Hand korrigierte Uhr) wird nicht mehr geglaubt; der Durchlauf ist sofort fällig und schreibt einen guten Zeitpunkt, statt tagelang zu warten, bis die alte Uhr ihn erreicht.
+
 ## [2.0.2]
 
 ### Sicherheit

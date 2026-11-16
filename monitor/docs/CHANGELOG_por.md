@@ -9,6 +9,15 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+
+### Alterado
+
+- **A saúde da equipa é rápida com milhares de repositórios**: as execuções, os workflows vermelhos, as execuções em curso e os alertas agrupam-se uma só vez por repositório, pelo que um pedido da saúde da equipa já não os percorre todos por cada repositório (2000 repositórios demoravam cerca de oito segundos), e a saúde de um repositório constrói só a sua própria vista.
+
+### Corrigido
+
+- **Um relógio atrasado já não pára a pontuação, a limpeza nem os relatórios agendados**: uma marca guardada que está no futuro (um computador sem relógio de bateria que arranca com uma data antiga, ou um relógio corrigido à mão) já não se acredita; a passagem é devida de imediato e escreve uma marca correta, em vez de esperar dias até o relógio antigo a alcançar.
+
 ## [2.0.2]
 
 ### Segurança

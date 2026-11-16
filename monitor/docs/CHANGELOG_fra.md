@@ -9,6 +9,15 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+
+### Modifié
+
+- **La santé de l'équipe est rapide avec des milliers de dépôts** : les exécutions, les workflows rouges, les exécutions en cours et les alertes sont regroupés une seule fois par dépôt, si bien qu'une requête de santé de l'équipe ne les parcourt plus tous pour chaque dépôt (2 000 dépôts prenaient environ huit secondes), et la santé d'un dépôt ne construit que sa propre vue.
+
+### Corrigé
+
+- **Une horloge reculée n'arrête plus la note, la purge ni les rapports programmés** : un instant enregistré qui se trouve dans le futur (un ordinateur sans horloge à pile qui démarre avec une vieille date, ou une horloge corrigée à la main) n'est plus cru ; le passage est dû aussitôt et écrit un bon instant, au lieu d'attendre des jours que la vieille horloge l'atteigne.
+
 ## [2.0.2]
 
 ### Sécurité

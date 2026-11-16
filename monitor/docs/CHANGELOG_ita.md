@@ -9,6 +9,15 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+
+### Modificato
+
+- **La salute del team è veloce con migliaia di repository**: le esecuzioni, i workflow rossi, le esecuzioni in corso e gli avvisi si raggruppano una sola volta per repository, così una richiesta della salute del team non li scorre più tutti per ogni repository (2.000 repository richiedevano circa otto secondi), e la salute di un repository costruisce solo la propria vista.
+
+### Corretto
+
+- **Un orologio spostato indietro non ferma più il punteggio, la pulizia né i rapporti programmati**: un istante salvato che si trova nel futuro (un computer senza orologio a batteria che parte con una data vecchia, o un orologio corretto a mano) non viene più creduto; il passaggio è dovuto subito e scrive un istante corretto, invece di attendere giorni finché il vecchio orologio lo raggiunge.
+
 ## [2.0.2]
 
 ### Sicurezza

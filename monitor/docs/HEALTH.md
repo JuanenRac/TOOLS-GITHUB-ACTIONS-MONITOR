@@ -27,3 +27,9 @@ The state is **bad** (a red workflow, or an alert of level critical or error), *
 - Deep links for wall screens: `?view=team&chrome=0`, `?view=repos&chrome=0` and `?view=repo&repo=owner/name&chrome=0`.
 - The API: `GET /api/team/health?ecosystem=&severity=&q=&label=` and `GET /api/repos/<owner>/<repo>/health`. Both need the permission to see the account; the answers carry `schema: 1`. An unknown repository answers 404 with `code: repo_unknown`.
 - The Lite edition keeps its simple view of runs and has neither the tab nor the routes.
+
+## Thousands of repositories and a clock set back
+
+The team health groups the runs, red workflows, running runs and alerts by repository once, so the cost grows with the amount of data and not with repositories times runs; asking for one repository builds only its view.
+
+A saved moment that lies in the future (a computer without a battery clock that starts with an old date, or a clock corrected by hand) is not believed: the score, the purge of old data and the scheduled reports are due at once and write a good moment, instead of waiting until the old clock is reached.

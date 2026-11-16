@@ -9,6 +9,15 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+
+### Cambiado
+
+- **La salud del equipo es rápida con miles de repositorios**: las ejecuciones, los workflows en rojo, las ejecuciones en curso y las alertas se agrupan una sola vez por repositorio, así que una petición de la salud del equipo ya no las recorre todas por cada repositorio (2.000 repositorios tardaban unos ocho segundos), y la salud de un repositorio construye solo su propia vista.
+
+### Corregido
+
+- **Un reloj atrasado ya no detiene la puntuación, la purga ni los informes programados**: una marca guardada que está en el futuro (un equipo sin reloj de batería que arranca con una fecha vieja, o un reloj corregido a mano) ya no se cree; el pase toca de inmediato y escribe una marca correcta, en vez de esperar días hasta que el reloj viejo la alcance.
+
 ## [2.0.2]
 
 ### Seguridad

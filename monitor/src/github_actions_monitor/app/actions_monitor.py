@@ -1443,8 +1443,9 @@ def report_tick(config):
         degraded.note("reports", error)
 
 
-def health_views(now=None):
-    """The health of every repository the monitor watches, from what it already holds (runs, red and stuck, the alerts of every sentinel, the readiness of the releases). Never calls GitHub."""
+def health_views(now=None, only=None):
+    """The health of every repository the monitor watches, from what it already holds (runs, red and stuck, the alerts of every sentinel, the readiness of the releases). Never calls GitHub.
+    The runs, the red workflows, the active runs and the alerts are grouped by repository ONCE, so the cost grows with the data and not with repositories x runs; `only` = one repository name."""
     from github_actions_monitor.health import repo_view
     from github_actions_monitor.sentinels import alert_center
     now = time.time() if now is None else now
@@ -1474,10 +1475,13 @@ def health_views(now=None):
     except Exception as error:   # noqa: BLE001
         degraded.note("health.readiness", error)
     names = sorted({r.get("repo") for r in runs if isinstance(r, dict) and r.get("repo")} | {r for r in (data.get("repos") or []) if isinstance(r, str)} | {a.get("repo") for a in alerts if a.get("repo")})
+    if only is not None:
+        names = [n for n in names if n == only]
+    runs_by, failing_by, active_by, alerts_by = (repo_view.group_by_repo(x) for x in (runs, failing, active, alerts))
     views = []
     for repo in names:
         eco = toolconfig.ecosystem_of(repo)
-        view = repo_view.repo_view(repo, runs, failing, active, alerts, ready.get(repo), sources, eco, now)
+        view = repo_view.repo_view(repo, runs_by.get(repo, []), failing_by.get(repo, []), active_by.get(repo, []), alerts_by.get(repo, []), ready.get(repo), sources, eco, now)
         view["ecosystem_label"] = toolconfig.label_of(eco)
         views.append(view)
     return views
@@ -2528,13 +2532,12 @@ class Handler(BaseHTTPRequestHandler):
             from urllib.parse import parse_qs, unquote
             from github_actions_monitor.health import repo_view
             ask = {k: v[0] for k, v in parse_qs(self.path.partition("?")[2]).items() if v}
-            views = health_views()
             if path == "/api/team/health":
-                self.json_reply(repo_view.team_view(views, ask.get("ecosystem", ""), ask.get("severity", ""), ask.get("q", "")[:80], ask.get("label", "")[:40]))
+                self.json_reply(repo_view.team_view(health_views(), ask.get("ecosystem", ""), ask.get("severity", ""), ask.get("q", "")[:80], ask.get("label", "")[:40]))
             else:
                 parts = [unquote(x) for x in path.split("/")]      # ["", "api", "repos", owner, repo, "health"]
                 owner, name = (parts[3], parts[4]) if len(parts) == 6 else ("", "")
-                found = next((v for v in views if v["repo"] == name), None) if owner.lower() == toolconfig.github_owner().lower() else None
+                found = next(iter(health_views(only=name)), None) if owner.lower() == toolconfig.github_owner().lower() else None      # one repository: only its view is built
                 self.json_reply({"schema": 1, "health": found} if found else {"error": "unknown repository", "code": "repo_unknown"}, 200 if found else 404)
         elif path in ("/api/score", "/api/score/history"):      # the score of the account of this process, from the snapshots of the hour (read only; Complete only)
             if not self.guard():
