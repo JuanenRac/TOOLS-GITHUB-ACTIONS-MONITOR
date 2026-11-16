@@ -10,6 +10,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+### Changed
+
+- **Hygiene (A6) no longer assumes the conventions of one owner**: the name of the ruleset is a setting (`sentinel.hygiene.ruleset_names`, patterns allowed); `sentinel.hygiene.ruleset_mode` can judge the default branch by the rules GitHub reports as in force (public endpoints, no admin rights needed) whatever the ruleset is called; `sentinel.hygiene.skip` leaves a check out; `sentinel.hygiene.community_fallback` also counts the community profile and the `.github` repository of the account; a licence called LICENSE-MIT, LICENSE-APACHE, LICENSE.txt, COPYING or recognised by GitHub is accepted; and what the token cannot know (no admin rights) is shown as not evaluable, never green and never a warning. The defaults keep the old rule.
+
 ## [2.0.2]
 
 ### Security

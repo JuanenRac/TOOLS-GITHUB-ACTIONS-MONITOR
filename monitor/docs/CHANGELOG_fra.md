@@ -9,6 +9,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+### Modifié
+
+- **L'hygiène (A6) ne suppose plus les conventions d'un seul propriétaire** : le nom du ruleset est un réglage (`sentinel.hygiene.ruleset_names`, motifs acceptés) ; `sentinel.hygiene.ruleset_mode` peut juger la branche par défaut d'après les règles que GitHub signale comme en vigueur (points d'accès publics, sans droits d'administrateur), quel que soit le nom du ruleset ; `sentinel.hygiene.skip` écarte un contrôle ; `sentinel.hygiene.community_fallback` compte aussi le profil de communauté et le dépôt `.github` du compte ; une licence nommée LICENSE-MIT, LICENSE-APACHE, LICENSE.txt, COPYING ou reconnue par GitHub est acceptée ; et ce que le jeton ne peut pas savoir (sans droits d'administrateur) s'affiche comme non évaluable, jamais vert et jamais un avertissement. Les valeurs par défaut gardent l'ancienne règle.
+
 ## [2.0.2]
 
 ### Sécurité

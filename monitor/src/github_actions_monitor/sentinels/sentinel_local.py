@@ -21,12 +21,14 @@ hourly budget (budget_per_hour) of REST calls. The last picture is kept in senti
 shows something at once after a restart; the daily trend lives in sentinel_history.json (60 days).
 """
 from github_actions_monitor.app import degraded
+import fnmatch
 import importlib.util
 import json
 import re
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
+from urllib.parse import quote
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -70,7 +72,12 @@ DEFAULTS = {
     "enabled": True, "refresh_seconds": 900, "alerts_hot_seconds": 900, "alerts_cold_seconds": 3600,
     "hygiene_seconds": 21600, "max_calls_per_tick": 70, "budget_per_hour": 600, "workers": 8,
     "candidate_days": 2.0, "pending_sign_hours": 24, "notify_command": [], "candidate_min_entries": 1, "stale_pr_days": 7, "hot_hours": 3,
-    "required_files": [["README.md"], ["LICENSE", "LICENSE.md"], ["CHANGELOG.md"], ["SECURITY.md"]],
+    "required_files": [["README.md"], ["LICENSE", "LICENSE.md", "LICENSE.txt", "LICENSE-APACHE", "LICENSE-MIT", "COPYING"], ["CHANGELOG.md"], ["SECURITY.md"]],
+    # hygiene (A6): how strict it is. ruleset_mode "name" = a ruleset whose name matches ruleset_names (patterns, ACTIVE) must exist (the old rule); "effective" = the default
+    # branch is protected when GitHub reports an effective rule or a branch protection for it (public endpoints, no admin needed), whatever the ruleset is called; "off" = not checked.
+    # skip = checks to leave out (ruleset, label, file, sha, allowed, schedule). community_fallback: a file missing in the repository still counts when the community profile
+    # of GitHub or the organisation's `.github` repository provides it. What the token cannot know is shown as "not evaluable", never as green and never as a warning.
+    "hygiene": {"ruleset_mode": "name", "ruleset_names": ["protect-main"], "skip": [], "community_fallback": False},
     "skip_candidate_prefixes": [], "min_rate_remaining": 800,
     # minutes_budget: ceiling of Actions minutes per ecosystem, e.g. {"hydra": 600}; empty = no ceiling. The period is "7d" (default) or "24h".
     "minutes_budget": {}, "minutes_budget_period": "7d",
@@ -100,6 +107,7 @@ def sentinel_config(config):
     if isinstance(value, dict):
         merged.update({k: v for k, v in value.items() if k in DEFAULTS})
     merged["surface"] = surface.settings(config)   # merged key by key: a partial block keeps the defaults of the rest
+    merged["hygiene"] = hygiene_settings(config)
     merged["readiness"] = readiness.settings(config)
     return merged
 
@@ -344,26 +352,124 @@ def pending_sign(green, now, hours):
     return sorted(out, key=lambda r: -r["hours"])
 
 
-def hygiene_problems(info, perms, required_files):
-    """A6: list of (code, text). `perms` None = not checked yet (not reported as a problem)."""
-    problems = []
-    rulesets = info.get("rulesets") or []
-    if not any(r.get("name") == "protect-main" and str(r.get("enforcement", "")).upper() == "ACTIVE" for r in rulesets):
-        problems.append(("ruleset", i18n.t("hyg.ruleset")))
-    if not info.get("label_dependencies"):
+HYGIENE_CODES = ("ruleset", "label", "file", "sha", "allowed", "schedule")
+HYGIENE_DEFAULTS = {"ruleset_mode": "name", "ruleset_names": ["protect-main"], "skip": [], "community_fallback": False}
+# the kinds of rule that make a branch "protected": a rule that only names who may push (or nothing) does not
+PROTECTIVE_RULES = ("pull_request", "required_status_checks", "non_fast_forward", "deletion", "required_linear_history", "required_signatures", "update", "merge_queue", "required_deployments")
+COMMUNITY_FILES = {"README": "readme", "LICENSE": "license", "COPYING": "license", "CONTRIBUTING": "contributing", "CODE_OF_CONDUCT": "code_of_conduct"}   # file stem -> key of the community profile
+
+
+def hygiene_settings(config):
+    """The merged `sentinel.hygiene` block: a bad value falls back to the default of that key only."""
+    block = ((config or {}).get("sentinel") or {}).get("hygiene") if isinstance(((config or {}).get("sentinel") or {}), dict) else None
+    block = block if isinstance(block, dict) else {}
+    out = {"ruleset_mode": "name", "ruleset_names": list(HYGIENE_DEFAULTS["ruleset_names"]), "skip": [], "community_fallback": False}
+    if block.get("ruleset_mode") in ("name", "effective", "off"):
+        out["ruleset_mode"] = block["ruleset_mode"]
+    names = block.get("ruleset_names")
+    if isinstance(names, list) and names and all(isinstance(n, str) and 0 < len(n) <= 100 for n in names):
+        out["ruleset_names"] = list(names)
+    skip = block.get("skip")
+    if isinstance(skip, list):
+        out["skip"] = [c for c in skip if c in HYGIENE_CODES]
+    if isinstance(block.get("community_fallback"), bool):
+        out["community_fallback"] = block["community_fallback"]
+    return out
+
+
+def is_denied(error):
+    """True when GitHub refused the question because of the permissions of the token (or because the thing is not visible to it): the answer will not change on a retry."""
+    text = str(error).lower()
+    return any(k in text for k in ("403", "404", "forbidden", "must have admin", "not found", "resource not accessible"))
+
+
+def _stem(name):
+    return re.split(r"[.\-]", name.upper(), maxsplit=1)[0]
+
+
+def _file_state(group, present, license_key, perms, org_files, hyg):
+    """"ok", "missing" or "unknown" for one group of alternative file names."""
+    if any(present.get(name) for name in group):
+        return "ok"
+    if license_key and any(_stem(n) in ("LICENSE", "COPYING") for n in group):
+        return "ok"      # GitHub itself recognised a licence file, whatever it is called
+    if not hyg.get("community_fallback"):
+        return "missing"
+    community = (perms or {}).get("community")
+    upper = {n.upper() for n in (org_files or [])}
+    if any(n.upper() in upper for n in group):
+        return "ok"      # the organisation's `.github` repository gives it to every repository
+    if isinstance(community, dict) and any(community.get(COMMUNITY_FILES[_stem(n)]) for n in group if _stem(n) in COMMUNITY_FILES):
+        return "ok"
+    if org_files is None or community is None:
+        return "unknown"      # a source of the fallback could not be read: the file may be provided there
+    return "missing"
+
+
+def _ruleset_state(info, perms, hyg):
+    """"ok", "missing", "unknown" or "skip" for the protection of the default branch."""
+    mode = hyg.get("ruleset_mode", "name")
+    if mode == "off":
+        return "skip"
+    if mode == "effective":
+        found = (perms or {}).get("branch_rules")
+        if not isinstance(found, dict):
+            return "skip"      # not read yet: the pending counter says so
+        rules, protected = found.get("rules"), found.get("protected")
+        if protected is True or (isinstance(rules, list) and any(r in PROTECTIVE_RULES for r in rules)):
+            return "ok"
+        return "missing" if (protected is False and isinstance(rules, list)) else "unknown"
+    patterns = [p.lower() for p in hyg.get("ruleset_names") or ["protect-main"]]
+    for r in info.get("rulesets") or []:
+        if str(r.get("enforcement", "")).upper() == "ACTIVE" and any(fnmatch.fnmatchcase(str(r.get("name", "")).lower(), p) for p in patterns):
+            return "ok"
+    return "missing"
+
+
+def hygiene_review(info, perms, required_files, hyg=None, org_files=None):
+    """A6: (problems, unknown), both lists of (code, text). `perms` None = not checked yet (neither a problem nor unknown: the pending counter says so).
+    "unknown" = this token cannot know (no admin rights, a source that failed): never green and never a warning."""
+    hyg = hyg or HYGIENE_DEFAULTS
+    skip = set(hyg.get("skip") or [])
+    problems, unknown = [], []
+    state = _ruleset_state(info, perms, hyg) if "ruleset" not in skip else "skip"
+    if state == "missing":
+        problems.append(("ruleset", i18n.t("hyg.ruleset", name=" / ".join(hyg.get("ruleset_names") or ["protect-main"])) if hyg.get("ruleset_mode", "name") == "name" else i18n.t("hyg.ruleset_effective")))
+    elif state == "unknown":
+        unknown.append(("ruleset", i18n.t("hyg.unknown", name="ruleset")))
+    if "label" not in skip and not info.get("label_dependencies"):
         problems.append(("label", i18n.t("hyg.label")))
-    present = info.get("files") or {}
-    for group in required_files:
-        if not any(present.get(name) for name in group):
-            problems.append(("file", i18n.t("hyg.file", name="/".join(group))))
+    if "file" not in skip:
+        present = info.get("files") or {}
+        for group in required_files:
+            state = _file_state(group, present, info.get("license"), perms, org_files, hyg)
+            if state == "missing":
+                problems.append(("file", i18n.t("hyg.file", name="/".join(group))))
+            elif state == "unknown":
+                unknown.append(("file", i18n.t("hyg.unknown", name="/".join(group))))
     if perms:
-        if perms.get("sha_pinning_required") is not True:
-            problems.append(("sha", i18n.t("hyg.sha")))
-        if perms.get("allowed_actions") != "selected":
-            problems.append(("allowed", f"allowed_actions={perms.get('allowed_actions')}"))
-        for name in perms.get("wf_disabled") or []:
-            problems.append(("schedule", i18n.t("hyg.schedule", name=name)))
-    return problems
+        denied = bool(perms.get("denied"))
+        if "sha" not in skip:
+            if denied or perms.get("sha_pinning_required") is None:
+                unknown.append(("sha", i18n.t("hyg.unknown", name="sha_pinning_required")))
+            elif perms.get("sha_pinning_required") is not True:
+                problems.append(("sha", i18n.t("hyg.sha")))
+        if "allowed" not in skip:
+            if denied or perms.get("allowed_actions") is None:
+                unknown.append(("allowed", i18n.t("hyg.unknown", name="allowed_actions")))
+            elif perms.get("allowed_actions") != "selected":
+                problems.append(("allowed", f"allowed_actions={perms.get('allowed_actions')}"))
+        if "schedule" not in skip:
+            if perms.get("wf_error"):
+                unknown.append(("schedule", i18n.t("hyg.unknown", name="workflows")))
+            for name in perms.get("wf_disabled") or []:
+                problems.append(("schedule", i18n.t("hyg.schedule", name=name)))
+    return problems, unknown
+
+
+def hygiene_problems(info, perms, required_files, hyg=None, org_files=None):
+    """A6: list of (code, text) of what is wrong; what cannot be known is in hygiene_review."""
+    return hygiene_review(info, perms, required_files, hyg, org_files)[0]
 
 
 def alert_totals(alerts, repo_info):
@@ -684,8 +790,8 @@ def compute_snapshot(inp):
         p = perms.get(repo)
         if not p:
             pending += 1
-        probs = hygiene_problems(info[repo], p, cfg["required_files"])
-        hyg_rows.append({"repo": repo, "problems": [{"code": c, "text": t} for c, t in probs], "checked": bool(p)})
+        probs, unk = hygiene_review(info[repo], p, cfg["required_files"], cfg.get("hygiene"), inp.get("org_files"))
+        hyg_rows.append({"repo": repo, "problems": [{"code": c, "text": t} for c, t in probs], "unknown": [{"code": c, "text": t} for c, t in unk], "checked": bool(p)})
     mins = minutes(runs_by_repo, now)
     errors = [{"section": k, "message": v["message"], "at": v["at"]} for k, v in sorted(inp["errors"].items())]
     sev_total = {"critical": 0, "high": 0}
@@ -714,7 +820,7 @@ def compute_snapshot(inp):
                "pending_sign_hours": cfg["pending_sign_hours"], "states": states, "sign_queue": queue, "signed_unpublished": signed_wait,
                "versions": sorted(({"repo": r, "tag": rel.get("tagName"), "published": rel.get("publishedAt")} for r, rel in releases.items()), key=lambda x: x["repo"]),
                "days": cfg["candidate_days"]},
-        "a6": {"rows": hyg_rows, "pending": pending},
+        "a6": {"rows": hyg_rows, "pending": pending, "unknown": sum(1 for r in hyg_rows if r["unknown"])},
         "a7": {"rows": sorted(({"repo": r, **v} for r, v in mins.items()), key=lambda x: -x["min24"]), "total24": sum(v["min24"] for v in mins.values()),
                "total7d": sum(v["min7d"] for v in mins.values()), "api": inp.get("api"), "budget": minutes_budget(mins, eco, cfg)},
         "a8": inp.get("audits") or {"audits": {}, "rounds": {}, "files": []},
@@ -733,7 +839,7 @@ def compute_snapshot(inp):
     s["a3"]["level"] = "bad" if (s["a3"]["secret_total"] or s["a3"]["high_repos"]) else ("warn" if (s["a3"]["codeql_total"] or s["a3"]["dependabot_total"]) else "ok")
     s["a4"]["level"] = "warn" if any(p["major"] or p["conflict"] for p in dep_prs) else ("info" if dep_prs else "ok")
     s["a5"]["level"] = "warn" if (candidates or s["a5"]["pending_sign"]) else ("info" if green else "ok")
-    s["a6"]["level"] = "warn" if any(r["problems"] for r in hyg_rows) else ("info" if pending else "ok")
+    s["a6"]["level"] = "warn" if any(r["problems"] for r in hyg_rows) else ("info" if pending else ("unknown" if any(r["unknown"] for r in hyg_rows) else "ok"))
     s["a7"]["level"] = "warn" if ((rate and rate["remaining"] < cfg["min_rate_remaining"]) or any(b["level"] != "ok" for b in s["a7"]["budget"])) else "ok"
     s["a8"]["level"] = "info"
     s["a9"]["level"] = s["a9"].get("level", "unknown")
@@ -760,7 +866,7 @@ def compute_snapshot(inp):
 def repo_query(file_names):
     aliases = " ".join(f'f{i}:object(expression:"HEAD:{name}"){{id}}' for i, name in enumerate(file_names))
     return ("query($after:String){rateLimit{remaining cost} repositoryOwner(login:\"%s\"){repositories(first:15,after:$after,ownerAffiliations:OWNER,isArchived:false)"
-            "{totalCount pageInfo{hasNextPage endCursor} nodes{name pushedAt hasVulnerabilityAlertsEnabled defaultBranchRef{name} latestRelease{tagName publishedAt isDraft releaseAssets(first:100){nodes{name}}}"
+            "{totalCount pageInfo{hasNextPage endCursor} nodes{name pushedAt hasVulnerabilityAlertsEnabled licenseInfo{key} defaultBranchRef{name} latestRelease{tagName publishedAt isDraft releaseAssets(first:100){nodes{name}}}"
             " vulnerabilityAlerts(states:OPEN,first:50){totalCount nodes{createdAt securityVulnerability{severity}}}"
             " pullRequests(states:OPEN,first:10){nodes{number title url author{login} createdAt isDraft mergeable reviewDecision commits(last:1){nodes{commit{statusCheckRollup{state}}}} files(first:20){nodes{path}}}}"
             " rulesets(first:5){nodes{name enforcement}} labels(first:20,query:\"dependencies\"){nodes{name}} %s}}}}") % (toolconfig.github_owner(), aliases)
@@ -782,6 +888,7 @@ def parse_repo_node(node, file_names):
         "vuln_enabled": node.get("hasVulnerabilityAlertsEnabled"), "vuln_hi": hi,
         "prs": (node.get("pullRequests") or {}).get("nodes") or [],
         "rulesets": (node.get("rulesets") or {}).get("nodes") or [],
+        "license": (node.get("licenseInfo") or {}).get("key"),
         "label_dependencies": any((l.get("name") or "").lower() == "dependencies" for l in (node.get("labels") or {}).get("nodes") or []),
         "files": {name: bool(node.get(f"f{i}")) for i, name in enumerate(file_names)},
     }
@@ -805,6 +912,7 @@ class Sentinel:
         self.ai_store = sentinel_ai.Store()
         self.lock = threading.RLock()
         self.repo_info, self.alerts, self.perms, self.unreleased = {}, {}, {}, {}
+        self.org_files = {"at": 0.0, "names": None}      # root files of the `.github` repository of the owner (the defaults of the organisation); None = not read
         self.local_versions = {}
         self.pins_cache = {"at": 0.0, "value": None}
         self.lint_cache = {"at": 0.0, "value": None}
@@ -837,6 +945,8 @@ class Sentinel:
             self.repo_info, self.alerts, self.perms = mapping("repo_info"), mapping("alerts"), mapping("perms")
             self.unreleased, self.saved_at = mapping("unreleased"), cached.get("saved")
             self.local_versions = mapping("local_versions")
+            if isinstance(cached.get("org_files"), dict) and isinstance(cached["org_files"].get("names"), list):
+                self.org_files = {"at": float(cached["org_files"].get("at") or 0.0), "names": [str(n) for n in cached["org_files"]["names"]][:400]}
             self.surface.load(cached.get("surface"))
             if isinstance(cached.get("a2_resolved"), dict):
                 self.a2_resolved = cached["a2_resolved"]
@@ -1025,18 +1135,73 @@ class Sentinel:
         return [r for r in self.repo_info if now - (self.perms.get(r) or {}).get("at", 0) > self.cfg["hygiene_seconds"]]
 
     def _fetch_perms(self, repo):
+        owner = toolconfig.github_owner()
         res = {"at": time.time()}
         try:
-            p = self._gh("api", f"repos/{toolconfig.github_owner()}/{repo}/actions/permissions", retries=1) or {}
-            res.update({"allowed_actions": p.get("allowed_actions"), "sha_pinning_required": p.get("sha_pinning_required")})
-            wfs = (self._gh("api", f"repos/{toolconfig.github_owner()}/{repo}/actions/workflows?per_page=100", retries=1) or {}).get("workflows", [])
-            res["wf_disabled"] = [w.get("name") for w in wfs if w.get("state") == "disabled_inactivity"]
-            res["wf_manual"] = [w.get("name") for w in wfs if w.get("state") == "disabled_manually"]   # same call: no extra request
+            try:
+                p = self._gh("api", f"repos/{owner}/{repo}/actions/permissions", retries=1) or {}
+                res.update({"allowed_actions": p.get("allowed_actions"), "sha_pinning_required": p.get("sha_pinning_required")})
+            except Exception as error:
+                if not is_denied(error):
+                    raise
+                res["denied"] = True      # a token without admin rights cannot read this: "not evaluable", not a problem
+            try:
+                wfs = (self._gh("api", f"repos/{owner}/{repo}/actions/workflows?per_page=100", retries=1) or {}).get("workflows", [])
+                res["wf_disabled"] = [w.get("name") for w in wfs if w.get("state") == "disabled_inactivity"]
+                res["wf_manual"] = [w.get("name") for w in wfs if w.get("state") == "disabled_manually"]   # same call: no extra request
+            except Exception as error:
+                if not is_denied(error):
+                    raise
+                res["wf_error"] = True
+            hyg = self.cfg["hygiene"]
+            if hyg["ruleset_mode"] == "effective":
+                res["branch_rules"] = self._fetch_branch_rules(owner, repo, (self.repo_info.get(repo) or {}).get("branch") or "main")
+            if hyg["community_fallback"]:
+                res["community"] = self._fetch_community(owner, repo)
         except Exception as error:
             res = {**(self.perms.get(repo) or {}), "at": time.time() - self.cfg["hygiene_seconds"] + 600, "error": str(error)[:80]}
-            if "allowed_actions" not in res:
+            if "allowed_actions" not in res and not res.get("denied"):
                 return repo, None
         return repo, res
+
+    def _fetch_branch_rules(self, owner, repo, branch):
+        """The public endpoints: the rules in force on the default branch (rulesets) and whether it has a classic protection. None = GitHub did not answer that one."""
+        out = {"protected": None, "rules": None}
+        name = quote(branch, safe="")
+        try:
+            out["protected"] = bool((self._gh("api", f"repos/{owner}/{repo}/branches/{name}", retries=1) or {}).get("protected"))
+        except Exception:
+            pass
+        try:
+            found = self._gh("api", f"repos/{owner}/{repo}/rules/branches/{name}", retries=1)
+            out["rules"] = [str(r.get("type")) for r in found if isinstance(r, dict)] if isinstance(found, list) else None
+        except Exception:
+            pass
+        return out
+
+    def _fetch_community(self, owner, repo):
+        """The community profile of GitHub (it already counts the defaults of the organisation): {"readme": bool, "license": bool, ...} or None when it could not be read."""
+        try:
+            files = (self._gh("api", f"repos/{owner}/{repo}/community/profile", retries=1) or {}).get("files") or {}
+            return {k: bool(files.get(k)) for k in ("readme", "license", "contributing", "code_of_conduct")}
+        except Exception:
+            return None
+
+    def _org_files_tick(self):
+        """Once per hygiene period: the root files of the `.github` repository of the owner (one call), only with community_fallback on."""
+        if not self.cfg["hygiene"]["community_fallback"] or time.time() - self.org_files["at"] < self.cfg["hygiene_seconds"]:
+            return False
+        owner = toolconfig.github_owner()
+        try:
+            tree = self._gh("api", f"repos/{owner}/.github/git/trees/HEAD", retries=1) or {}
+            names = [str(t.get("path")) for t in tree.get("tree") or [] if isinstance(t, dict) and t.get("type") == "blob"][:400]
+            self.org_files = {"at": time.time(), "names": names}
+        except Exception as error:
+            if is_denied(error):
+                self.org_files = {"at": time.time(), "names": []}      # the owner has no `.github` repository: nothing to inherit
+            else:
+                self.org_files = {**self.org_files, "at": time.time() - self.cfg["hygiene_seconds"] + 600}
+        return True
 
     def _budget(self):
         left = self.cfg["budget_per_hour"] - self.calls_last_hour()
@@ -1064,6 +1229,7 @@ class Sentinel:
                         self.alerts[repo] = res
             self.ok("alerts")
             did = True
+        did = self._org_files_tick() or did
         budget = self._budget()
         todo = self._perms_due()
         batch = todo[: max(0, min(budget // 2, 20))]
@@ -1167,7 +1333,7 @@ class Sentinel:
 
     def _persist(self):
         with self.lock:
-            self._save(CACHE_FILE, {"saved": time.time(), "repo_info": self.repo_info, "alerts": self.alerts, "perms": self.perms, "unreleased": self.unreleased, "local_versions": self.local_versions, "surface": self.surface.dump(), "a2_resolved": self.a2_resolved})
+            self._save(CACHE_FILE, {"saved": time.time(), "repo_info": self.repo_info, "alerts": self.alerts, "perms": self.perms, "unreleased": self.unreleased, "local_versions": self.local_versions, "surface": self.surface.dump(), "a2_resolved": self.a2_resolved, "org_files": self.org_files})
         snap = self.snapshot()
         self.last_snap = snap
         self._export_ci_red(snap)
@@ -1224,7 +1390,7 @@ class Sentinel:
                 "api": {"calls_last_hour": len([t for t in self.calls if t > time.time() - 3600]), "budget_per_hour": self.cfg["budget_per_hour"]},
                 "sample_caps": {"runs_per_repo": self.config.get("runs_per_repo"), "cold_runs_per_repo": self.config.get("cold_runs_per_repo")},
                 "surface_paused": self.surface_paused, "a2_resolved": dict(self.a2_resolved), "a2_pending_reason": self.a2_reason, "local_versions": dict(self.local_versions), "pins": pins,
-                "lint": self._lint(repos),
+                "lint": self._lint(repos), "org_files": self.org_files["names"] if self.cfg["hygiene"]["community_fallback"] else None,
             }
         return compute_snapshot(inp)
 

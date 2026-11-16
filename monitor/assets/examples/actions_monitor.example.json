@@ -45,7 +45,11 @@
       ],
       [
         "LICENSE",
-        "LICENSE.md"
+        "LICENSE.md",
+        "LICENSE.txt",
+        "LICENSE-APACHE",
+        "LICENSE-MIT",
+        "COPYING"
       ],
       [
         "CHANGELOG.md"
@@ -54,6 +58,14 @@
         "SECURITY.md"
       ]
     ],
+    "hygiene": {
+      "ruleset_mode": "name",
+      "ruleset_names": [
+        "protect-main"
+      ],
+      "skip": [],
+      "community_fallback": false
+    },
     "pending_sign_hours": 24,
     "notify_command": [],
     "minutes_budget": {},
