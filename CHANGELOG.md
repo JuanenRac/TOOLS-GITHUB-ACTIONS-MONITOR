@@ -10,9 +10,13 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
-### Fixed
 
-- **A lock file left by a writer that died is taken over at once**: the lock file of the file storage holds the number of its process; when that process no longer exists the next writer takes the lock immediately (it used to wait 30 seconds, longer than its own 10-second limit, and failed), and the takeover is logged. When the process cannot be known the age of the file still decides, and that time can be changed with `MONITOR_LOCK_STALE`. A test kills a writer inside the lock and checks that the feed is writable again.
+### Added
+
+- **Merge queue**: a failed run of the merge queue of the default branch (`gh-readonly-queue/...`, event `merge_group`) is a red of its own, shown as "(merge queue)" in the red list, the alerts and the team view, and it clears with the next green run of the queue.
+- **Maintenance branches**: `ci.extra_branches` takes patterns (for example `release-*`) of extra branches whose last run also counts; by default only the default branch is watched. A red of such a branch is labelled with its name and never hides, or is hidden by, the default branch.
+- **A load test with a synthetic account**: 250 repositories and 1,250 workflows, no network, measures the requests of a cycle, the time of the cycle and of the team health, the memory of the held data and how many requests the lookups of A2 need, with wide bounds so that a loaded computer passes.
+
 ### Changed
 
 - **A red on the default branch only counts when the repository itself caused it**: only runs of the events `push`, `schedule`, `workflow_dispatch` and `merge_group` decide (setting `ci.red_events`), and a run of a pull request that comes from a fork never does, even when the branch of the fork is also called `main`, `master` or `dev` (setting `ci.count_fork_runs`). The same rule feeds the red tile, the alerts, the team view, the brief and the green-without-release check.
@@ -20,10 +24,9 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 - **An abandoned workflow is "inactive", not red for ever**: a workflow whose last run failed but which has not run for `ci.inactive_days` days (90 by default, 0 turns it off) leaves the red list and is counted in the `inactive` figure.
 - **Workflows that only react to issues, comments or labels do not count as red CI**: they are told apart by the events they run on (setting `ci.automation_counts`, off by default); every red row now says which kind of workflow it is.
 
-### Added
+### Fixed
 
-- **Merge queue**: a failed run of the merge queue of the default branch (`gh-readonly-queue/...`, event `merge_group`) is a red of its own, shown as "(merge queue)" in the red list, the alerts and the team view, and it clears with the next green run of the queue.
-- **Maintenance branches**: `ci.extra_branches` takes patterns (for example `release-*`) of extra branches whose last run also counts; by default only the default branch is watched. A red of such a branch is labelled with its name and never hides, or is hidden by, the default branch.
+- **A lock file left by a writer that died is taken over at once**: the lock file of the file storage holds the number of its process; when that process no longer exists the next writer takes the lock immediately (it used to wait 30 seconds, longer than its own 10-second limit, and failed), and the takeover is logged. When the process cannot be known the age of the file still decides, and that time can be changed with `MONITOR_LOCK_STALE`. A test kills a writer inside the lock and checks that the feed is writable again.
 
 ## [2.0.2]
 

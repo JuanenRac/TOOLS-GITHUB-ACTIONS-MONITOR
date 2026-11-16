@@ -9,6 +9,11 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+
+### Ajouté
+
+- **Un test de charge avec un compte synthétique** : 250 dépôts et 1 250 workflows, sans réseau, mesure les requêtes d'un cycle, le temps du cycle et de la santé de l'équipe, la mémoire des données gardées et le nombre de requêtes que demandent les recherches A2, avec des bornes larges pour qu'un ordinateur chargé réussisse.
+
 ## [2.0.2]
 
 ### Sécurité

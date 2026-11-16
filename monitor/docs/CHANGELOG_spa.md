@@ -9,6 +9,11 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+
+### Añadido
+
+- **Una prueba de carga con una cuenta sintética**: 250 repositorios y 1.250 workflows, sin red, mide las peticiones de un ciclo, el tiempo del ciclo y de la salud del equipo, la memoria de los datos guardados y cuántas peticiones necesitan las consultas de A2, con límites amplios para que un equipo cargado la pase.
+
 ## [2.0.2]
 
 ### Seguridad

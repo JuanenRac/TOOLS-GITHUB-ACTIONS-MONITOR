@@ -9,6 +9,11 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+
+### Hinzugefügt
+
+- **Ein Lasttest mit einem synthetischen Konto**: 250 Repositorys und 1.250 Workflows, ohne Netz, misst die Anfragen eines Zyklus, die Zeit des Zyklus und der Teamgesundheit, den Speicher der gehaltenen Daten und wie viele Anfragen die A2-Abfragen brauchen, mit weiten Grenzen, damit auch ein ausgelasteter Rechner besteht.
+
 ## [2.0.2]
 
 ### Sicherheit

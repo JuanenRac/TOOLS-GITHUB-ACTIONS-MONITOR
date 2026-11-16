@@ -9,6 +9,11 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+
+### Aggiunto
+
+- **Un test di carico con un account sintetico**: 250 repository e 1.250 workflow, senza rete, misura le richieste di un ciclo, il tempo del ciclo e della salute del team, la memoria dei dati tenuti e quante richieste servono alle ricerche A2, con limiti ampi perché un computer carico lo superi.
+
 ## [2.0.2]
 
 ### Sicurezza
