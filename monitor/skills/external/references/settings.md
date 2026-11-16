@@ -295,6 +295,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinel.audit_files.reconciliation` | `-` | sentinel | Reconciliation files |
 | `sentinel.audit_files.rounds` | `-` | sentinel | Rounds files |
 | `sentinel.audit_files.rounds_extra` | `-` | sentinel | Extra rounds files |
+| `sentinel.bots_apart` | `-` | sentinel | Count bots apart from people |
 | `sentinel.budget_per_hour` | `-` | sentinel | API calls per hour |
 | `sentinel.candidate_days` | `-` | sentinel | Days of a release candidate |
 | `sentinel.candidate_min_entries` | `-` | sentinel | Entries to be a candidate |
