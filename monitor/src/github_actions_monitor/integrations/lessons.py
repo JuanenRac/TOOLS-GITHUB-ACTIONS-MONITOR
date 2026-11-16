@@ -527,17 +527,29 @@ def document(config, repo="", now=None):
             "library": sorted(library.values(), key=lambda x: x["category"]), "updated": int(time.time() if now is None else now)}
 
 
-def prompt_block(text, config=None):
-    """Lines for the prompt of the AI of the monitor: the lesson of the category the log falls in. Written by the person (or built in), so they are trusted; empty when the book is off."""
+def _lesson_of(text, config, source):
     from github_actions_monitor.app import toolconfig
     config = config if config is not None else toolconfig.raw_config()
     if not settings(config)["enabled"]:
-        return ""
+        return None, None
     category, _avoidable, _label = classify(text)
     lesson = lesson_for(category)
-    if not lesson or category == "other":
-        return ""
-    return f"Known lesson ({category}): {lesson['what']} What to do: {lesson['do']}"
+    if not lesson or category == "other" or (lesson.get("source") == "built-in") != (source == "built-in"):
+        return None, None
+    return category, lesson
+
+
+def prompt_block(text, config=None):
+    """Lines for the system part of the prompt of the AI of the monitor: the BUILT-IN lesson of the category the log falls in (written by the maker of the monitor, so it is trusted); empty when the
+    book is off. A lesson of the library is text that a person OR an AI wrote through the API: it goes with the data, see prompt_data()."""
+    category, lesson = _lesson_of(text, config, "built-in")
+    return f"Known lesson ({category}): {lesson['what']} What to do: {lesson['do']}" if lesson else ""
+
+
+def prompt_data(text, config=None):
+    """The lesson of the LIBRARY for the category the log falls in, as a line to put INSIDE the delimiters of untrusted data (an AI can write a lesson through the API; it is never an order)."""
+    category, lesson = _lesson_of(text, config, "library")
+    return f"Lesson from the library ({category}): {lesson['what']} What to do: {lesson['do']}" if lesson else ""
 
 
 # -- the interface of a provider ---------------------------------------------------------------------------------------------------------------------------------------------------------

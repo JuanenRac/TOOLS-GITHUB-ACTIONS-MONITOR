@@ -13,8 +13,27 @@ when this file and `tool_version.py` disagree.
 
 ### Security
 
+- **The cleaner knows more forms of a secret**: PGP key blocks, `--password value` and `mysql -phunter2` on a command line, cookies, `Authorization: Basic ...` with its credential, `ENCRYPTION_KEY=`, `SENTRY_DSN=` and `AWS_CREDS=`, a value with escaped quotes, a phrase after `password:`, a token cut by a line break, `sk_live_` keys, compressed IPv6 addresses, network shares and the folder of root; text hidden behind an encoding (percent codes, zero-width characters, full-width letters) is cleaned too, and a pair whose key says it is a secret (`{"password": ...}`) is replaced whole. It is a cleaner by pattern: the guide and the skills no longer promise that nothing can get through.
+- **The name of a workflow is not an instruction**: the line that the gate script of an AI tool copies for each alert now keeps the repository name only if it is one, cuts the workflow name to a short plain text and the warning names workflows and issue titles as text of third parties.
+- **A lesson that an AI wrote is data**: a lesson of the library goes between the delimiters of untrusted data in the prompt of the integrated assistant; only the built-in lessons stay in the system message.
+- **Discord and Slack**: a stranger's text (the title of an issue) mentions nobody in Discord and is escaped for Slack.
+- **Apprise**: leftover folders with the addresses of the services are swept at the first send, a comma inside an address no longer cuts it, and each address is written quoted.
+- **The presets file is validated like the settings page**: only listed fields are served, addresses must be accepted by the page, a cloud preset cannot point to this computer or a private address, and the variable of the key cannot be one of the system or of the monitor (`GH_TOKEN`, `PATH`, `MONITOR_*`...); the same rule applies to the setting `ai.api_key_env`.
+
 - **One cleaner for everything an AI can read**: the text the integrated assistant sends to a provider now goes through the same cleaner as the feed for AIs (before, a password in `DB_PASSWORD=...`, a user and key inside an address, an `sk-` key, a token, an e-mail address, an IP address or the home folder all went out), the repository, workflow, link and conclusion of every alert are cleaned when the alert is built, and `GET /api/ai/state`, `GET /api/ai/alerts`, `GET /api/ai/brief?fmt=json`, the feed file, its state file and the body of the hook come out cleaned too. A test plants a secret of each kind and fails if one shows up in any of those outputs.
 - **The integrated assistant keeps its key and stays on this computer**: a call to a provider no longer follows a redirect (the key would have gone on to the other address; the redirect is now reported as the answer of the provider) and no longer uses the proxy variables of the environment, so a local server such as Ollama is really called directly. A remote provider goes through the proxy only with `network.use_proxy`.
+
+### Added
+
+- **The notification event `ai_alert`**: a new real alert from a panel or a signal of the monitor can reach the notification channels (add `ai_alert` to `notify.events`; off by default). A red workflow keeps its own event, `red_new`.
+
+### Fixed
+
+- **An answer of the MCP server that is longer than its limit is still a valid document**: rows are left out of the longest list instead of cutting the text, the answer says `truncated` and how many rows are missing, and the health signals (old data, degraded monitor, allowance) are the last to go.
+- **A number that is not a number no longer cuts the connection**: `?since=`, `?limit=` and `Last-Event-ID` accept only the digits 0-9 (and at most 15); anything else is the default.
+- **The state of the scheduled reports is shared safely by several accounts**: each account changes its entry under a lock, and a replace that a reader blocks for a moment on Windows is tried again.
+- **The tables of the skills say which calls are only for this computer**: the table is generated from the same lists the server uses, and `/api/ai/failures` lists its POST.
+- **A report no longer carries raw titles**: the titles of alerts go through the cleaner and Markdown does not turn an address into a link by itself.
 
 ### Changed
 

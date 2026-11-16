@@ -11,7 +11,7 @@ Un workflow rouge ne sert à rien si personne de ceux qui travaillent sur le dé
 - `ai_alerts.jsonl` : une ligne par évènement (ouvert, acquitté, résolu) avec identifiant stable, gravité, dépôt, workflow, conclusion, depuis quand, série, lien, une cause probable (**réelle** ou **passagère**), une action suggérée et l'état.
 - `ALERTS_BRIEF.md` : réécrit à chaque cycle et court (`ai_alerts.brief_max_bytes`, 2 Ko par défaut). Les alertes réelles viennent d'abord.
 - Les causes passagères (502/503/504, délais dépassés, limites de débit, échecs de téléchargement, une exécution qui n'a pas démarré) se distinguent des vrais échecs par des règles modifiables dans `ai_alerts.transient_patterns`. Une alerte se résout seule quand le workflow repasse au vert, et vous pouvez l'acquitter (`ack`), ce qui ne change que cet état local.
-- Tout passe d'abord par un nettoyeur : jetons, clés, adresses e-mail, adresses IP et votre dossier personnel n'atteignent jamais les fichiers, les points d'accès ni le hook.
+- Tout passe d'abord par UN seul nettoyeur (jetons, clés, identifiants dans les adresses, adresses e-mail, adresses IP et votre dossier personnel) : les fichiers, les points d'accès (`/api/ai/state`, `/api/ai/alerts`, `/api/ai/brief`), le flux, le serveur MCP et le crochet. Il fonctionne par motifs : il réduit le risque, ce n'est pas une garantie ; ne comptez pas dessus pour un secret de forme inhabituelle.
 - Le dossier est `ai_alerts.folder` (par défaut le dossier `ai/` du moniteur) ; choisissez-en un que lisent vos sessions IA. `ci_red.json` porte un `ai_hint` optionnel (classe, cause, action) dans chaque workflow rouge.
 
 ## Comment une IA le lit
@@ -20,7 +20,7 @@ Un workflow rouge ne sert à rien si personne de ceux qui travaillent sur le dé
 - Ou ajoutez le serveur MCP (lecture seule) : `python bin/mcp_server.py`, outils `get_alerts`, `get_red_repos`, `get_run_failure`, `get_quota`, `get_score` ; `--allow-ack` ajoute `ack_alert` (état local seulement). Gemini CLI, Codex et VS Code (Copilot) : ajoutez la même commande comme serveur stdio dans leurs réglages MCP.
 
 ## Avertissements qui vous parviennent
-- Une NOUVELLE alerte réelle va aux canaux de notification que vous avez déjà configurés (Réglages > Notifications).
+- Une NOUVELLE alerte réelle issue d'un panneau ou d'un signal du moniteur va vers les canaux de notification déjà configurés (Réglages > Notifications) quand l'événement `ai_alert` figure dans `notify.events` (ce n'est pas le cas par défaut). Un workflow rouge a son propre événement, `red_new`.
 - Optionnel, désactivé par défaut : `ai_alerts.hook` envoie en POST la nouvelle alerte réelle (liste fermée de champs nettoyés) à une adresse de cet ordinateur, au plus `max_per_hour` fois par heure, pour qu'un de vos scripts réveille une session IA.
 - Rien de cela n'envoie de données à un fournisseur d'IA, n'exécute de commande ni n'écrit sur GitHub.
 

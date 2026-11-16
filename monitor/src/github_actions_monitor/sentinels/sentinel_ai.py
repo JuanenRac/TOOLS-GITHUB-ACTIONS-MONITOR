@@ -135,7 +135,7 @@ def build_prompt(kind, data, nonce, language=None, lesson="", skill=""):
     else:
         task = ("Assess this CodeQL alert. The first line must be exactly 'VEREDICTO: falso positivo', 'VEREDICTO: real' or 'VEREDICTO: dudosa' "
                 f"(fixed protocol words: false positive / real / doubtful). Then, in at most 4 lines in {language}, the reason, quoting the line of code. Do not propose commands.")
-    if lesson:      # the lesson of this kind of failure from the library of the person (lessons.py): written by them or built in, so it is not part of the untrusted data
+    if lesson:      # the BUILT-IN lesson of this kind of failure (lessons.py): written by the maker of the monitor, so it is not part of the untrusted data (a lesson of the library goes with the data)
         task += " " + lesson
     if skill:      # what the monitor is, what the AI may read and never do (skills/internal): written by the maker of the monitor, so it is not part of the untrusted data
         task = "Guide:\n" + skill + "\n\nTask: " + task
@@ -374,6 +374,9 @@ def explain(kind, data, cfg, store, transport=None):
         try:
             from github_actions_monitor.integrations import lessons
             lesson = lessons.prompt_block(clean)
+            library = lessons.prompt_data(clean)
+            if library:      # a lesson of the library may have been written by an AI: it is data, between the delimiters, cleaned like the rest
+                clean = clean + "\n\n" + sanitize_text(library, 700, keep="head")
         except Exception:   # noqa: BLE001 - a lesson that cannot be read never stops the explanation
             lesson = ""
     skill = ""
