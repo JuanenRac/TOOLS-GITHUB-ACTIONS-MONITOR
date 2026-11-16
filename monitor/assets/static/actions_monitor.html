@@ -1716,11 +1716,25 @@ function cfgBuild(j){
       box.appendChild(grid);panel.appendChild(box);
     });
     if(g.id==="quota")panel.appendChild(quotaTabBox());
+    if(g.id==="basic"&&(j.presets||[]).length)panel.insertBefore(presetBox(j.presets),panel.firstChild);
     form.appendChild(panel);
   });
   cfgBuildTabs();cfgShowTab(CFG.tab);
   const r=$("cfg-restart");const n=CFG.restart.length;r.style.display=n?"block":"none";r.textContent=n?T("ui.cfg_restart_banner",{n:n}):"";restartBar(n);
   $("cfg-backups").textContent=T("ui.cfg_backups",{n:j.backups||0});cfgRefreshButtons();cfgFilter();cfgExtras();
+}
+/* profiles: a few ready-made groups of settings (the server says which settings each one writes); choosing one writes them through the same checked path as the Save button */
+async function presetApply(p,out){
+  const keys=Object.keys(p.settings||{});if(!keys.length)return;
+  try{const r=await fetch("/api/settings?"+qlang(),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({changes:p.settings})});const j=await r.json();
+    out.className=j.ok?"ok":"err";out.textContent=j.ok?T("ui.preset_applied",{name:T("ui.preset_"+p.id),n:(j.changed||[]).length}):T("ui.cfg_not_saved",{why:Object.keys(j.errors||{}).join(", ")});if(j.ok)cfgLoad()}catch(e){out.className="err";out.textContent=String(e)}}
+function presetBox(presets){
+  const box=document.createElement("div");box.className="cfg-group";box.id="preset-box";const h=document.createElement("h3");h.textContent=T("ui.preset_title");box.appendChild(h);
+  const note=document.createElement("p");note.className="cfg-note";note.textContent=T("ui.preset_hint");box.appendChild(note);
+  const out=document.createElement("div");out.setAttribute("role","status");out.style.padding="4px 12px";
+  presets.forEach(p=>{const row=document.createElement("div");row.className="ifrow";const b=document.createElement("button");b.type="button";b.textContent=T("ui.preset_"+p.id);b.addEventListener("click",()=>presetApply(p,out));
+    const d=document.createElement("span");d.className="mut";d.textContent=T("ui.preset_"+p.id+"_d");row.appendChild(b);row.appendChild(d);box.appendChild(row)});
+  box.appendChild(out);return box;
 }
 /* the Quota tab: the allowance of every source of the reads, the tests of the App and of the second account, what the App lacks, and the recommended values */
 const QT_DEFAULTS={"modes.auto_low":true,"modes.auto_low_enter":1000,"modes.auto_low_exit":2500,"modes.low.refresh_seconds":240,"modes.low.cold_refresh_seconds":1800,"modes.low.runs_per_repo":10,"modes.low.hot_hours":2,"network.etag":true,"central.max_age_minutes":120};
@@ -1858,8 +1872,12 @@ async function wizDraw(){
   const n=WIZ.n,b=$("wiz-body");$("wiz-step").textContent=T("ui.wiz_step",{n:n,total:3});$("wiz-back").disabled=n===1;$("wiz-next").textContent=T(n===3?"ui.wiz_finish":"ui.wiz_next");
   let html=`<h3>${esc(T("ui.wiz_"+n+"_h"))}</h3><p>${esc(T("ui.wiz_"+n+"_t"))}</p>`;
   if(n===2){try{const r=await fetch("/api/discovery",{cache:"no-store"}),j=await r.json();html+=`<p><strong>${esc(T("ui.wiz_found",{owner:j.owner||"–",discovered:j.discovered,watched:j.watched,hidden:j.hidden}))}</strong></p>`}catch(e){}}
-  if(n===3)html+=`<p><button id="wiz-basic" type="button">${esc(T("ui.wiz_open_basic"))}</button> <button id="wiz-help" type="button">${esc(T("ui.wiz_open_help"))}</button></p>`;
+  let presets=[];
+  if(n===3){try{const r=await fetch("/api/settings?"+qlang(),{cache:"no-store"}),j=await r.json();presets=(j&&j.presets)||[]}catch(e){}
+    if(presets.length)html+=`<p><b>${esc(T("ui.wiz_profile"))}</b></p>`+presets.map(p=>`<p><button class="wiz-preset" data-id="${esc(p.id)}" type="button">${esc(T("ui.preset_"+p.id))}</button> <span class="mut">${esc(T("ui.preset_"+p.id+"_d"))}</span></p>`).join("")+`<p id="wiz-preset-out" role="status"></p>`;
+    html+=`<p><button id="wiz-basic" type="button">${esc(T("ui.wiz_open_basic"))}</button> <button id="wiz-help" type="button">${esc(T("ui.wiz_open_help"))}</button></p>`}
   b.innerHTML=html;
+  if(n===3)b.querySelectorAll(".wiz-preset").forEach(btn=>btn.addEventListener("click",()=>presetApply(presets.find(p=>p.id===btn.dataset.id),$("wiz-preset-out"))));
   if(n===3){$("wiz-basic").addEventListener("click",()=>{wizDone();CFG.tab="basic";store.set("am-cfg-tab","basic");showTab("cfg");if(CFG.groups.length)cfgShowTab("basic")});$("wiz-help").addEventListener("click",()=>{wizDone();openHelp(null,"first_steps")})}}
 function wizDone(){store.set("am-wizard-done","1");dlgs.wiz.hidden=true;try{fetch("/api/welcome",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({done:true})})}catch(e){}}
 $("wiz-next").addEventListener("click",()=>{if(WIZ.n<3){WIZ.n++;wizDraw()}else wizDone()});
