@@ -1188,7 +1188,9 @@ function renderSent0(){
   // A2
   const red=s.a2.red.filter(r=>sVis(r.repo));
   const rrun=(r)=>{const id=(r.url||"").split("/").pop();return aiBtn("build",`data-repo="${esc(r.repo)}" data-run="${esc(id)}"`)+aiBox("b"+r.repo+id)};
-  let a2=red.length?`<table>${thk(["ui.th_repo","ui.th_workflow","ui.th_result","ui.th_streak","ui.th_since","ui.th_link"])}<tbody>${red.map(r=>`<tr><td><b class="rl" data-repo-open="${esc(r.repo)}">${esc(r.repo)}</b></td><td>${esc(r.workflow)}</td><td><span class="badge b-failure">${esc(r.conclusion)}</span></td><td>${r.streak}</td><td>${hora(r.since)}</td><td>${link(r.url,T("ui.link_run_short"))}${rrun(r)}</td></tr>`).join("")}</tbody></table>`:ok_(T("ui.a2_none"));
+  const fjobs=r=>{const f=r.failed_jobs;return f&&f.groups&&f.groups.length?`<div class="mut">${esc(T("ui.a2_failed_jobs",{failed:f.failed,total:f.total}))}: ${f.groups.map(g=>esc(g.group)+" ("+g.failed+(g.total>g.failed?"/"+g.total:"")+")").join(", ")}</div>`:""};      // which jobs of an umbrella workflow fail, grouped by platform (ci.failed_jobs)
+  const a2groups=(s.a2.groups||[]).map(g=>`<div class="alert"><b>${esc(T("ui.a2_cause"))}</b> · ${esc(T("ui.a2_cause_line",{shared:g.workflow.split("/").pop(),count:g.count,repos:g.repos.length}))}</div>`).join("");      // red workflows that call the same reusable workflow (ci.group.reusable)
+  let a2=red.length?a2groups+`<table>${thk(["ui.th_repo","ui.th_workflow","ui.th_result","ui.th_streak","ui.th_since","ui.th_link"])}<tbody>${red.map(r=>`<tr><td><b class="rl" data-repo-open="${esc(r.repo)}">${esc(r.repo)}</b></td><td>${esc(r.workflow)}${fjobs(r)}</td><td><span class="badge b-failure">${esc(r.conclusion)}</span></td><td>${r.streak}</td><td>${hora(r.since)}</td><td>${link(r.url,T("ui.link_run_short"))}${rrun(r)}</td></tr>`).join("")}</tbody></table>`:ok_(T("ui.a2_none"));
   // A3
   const rows=s.a3.rows.filter(r=>sVis(r.repo)),cq=s.a3.codeql.filter(a=>sVis(a.repo));
   const sevc=sv=>Object.entries(sv||{}).map(([k,v])=>`<span class="chip ${k==="critical"||k==="high"?"bad":"warn"}">${esc(k)} ${v}</span>`).join("");

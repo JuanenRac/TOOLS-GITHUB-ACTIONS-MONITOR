@@ -2931,5 +2931,20 @@
  "wh.unknown_repo": "Repository wird nicht überwacht",
  "ws.not_found": "Der Workspace der Repositories wurde nicht gefunden: Setze MONITOR_ROOT oder \"workspace_root\" in actions_monitor.json oder lege eine Datei namens .monitor-root in den Ordner mit den Repositories.",
  "ci.lane_queue": "Merge-Queue",
- "ci.lane_branch": "Branch {branch}"
+ "ci.lane_branch": "Branch {branch}",
+ "ui.cfg_b_causes": "Gemeinsame Ursachen und fehlgeschlagene Jobs",
+ "evt.red_cause": "CI ist rot durch den gemeinsamen Workflow {shared}: {count} Workflows in {repos} Repositorys",
+ "ui.a2_cause": "Gemeinsame Ursache",
+ "ui.a2_cause_line": "{shared} wird von {count} roten Workflows in {repos} Repositorys aufgerufen",
+ "ui.a2_failed_jobs": "{failed} von {total} Jobs fehlgeschlagen",
+ "cfg.f.ci.group.reusable": "Rotmeldungen nach gemeinsamem Workflow bündeln",
+ "cfg.h.ci.group.reusable": "Standardmäßig aus. An: Rote Workflows, die denselben wiederverwendbaren Workflow aufrufen, haben eine Ursache; die Rotliste zeigt dafür eine Gruppenzeile, und die Benachrichtigung über neue Rotmeldungen nennt sie einmal mit der Zahl der Betroffenen statt je einmal. Keine rote Zeile wird versteckt.",
+ "cfg.f.ci.group.min": "Workflows für eine gemeinsame Ursache",
+ "cfg.h.ci.group.min": "Ein wiederverwendbarer Workflow gilt ab so vielen roten Workflows als gemeinsame Ursache (Standard 2).",
+ "cfg.f.ci.failed_jobs.enabled": "Zeigen, welche Jobs eines roten Runs fehlschlugen",
+ "cfg.h.ci.failed_jobs.enabled": "Standardmäßig aus. An: Von jedem roten Run liest der Monitor die Jobs einmal (ein Aufruf, wenige Runs pro Zyklus), und die rote Zeile nennt die fehlgeschlagenen Jobs nach Plattform gruppiert, damit ein Workflow mit vielen Jobs nicht nur Rot meldet.",
+ "cfg.f.ci.failed_jobs.max_per_cycle": "Gelesene Runs pro Zyklus",
+ "cfg.h.ci.failed_jobs.max_per_cycle": "Höchstzahl roter Runs, deren Jobs in einem Zyklus gelesen werden (ein Aufruf je Run, Standard 4). Die Antwort bleibt, solange der Run gleich bleibt.",
+ "cfg.f.ci.failed_jobs.group_by": "Jobs gruppieren nach",
+ "cfg.h.ci.failed_jobs.group_by": "auto (Standard): das System im Jobnamen (ubuntu, windows, macos ...), sonst der erste Parameter der Matrix, sonst der Teil vor dem Schrägstrich. platform, matrix und prefix erzwingen eines davon."
 }

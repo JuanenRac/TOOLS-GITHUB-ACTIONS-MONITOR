@@ -22,6 +22,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Added
 
+- **Reds with one root cause are told once, and a red run says which of its jobs failed** (both off by default): `ci.group.reusable` recognises the red workflows that call the same reusable workflow, shows one shared-cause line in the red list and sends one notification with the number of workflows and repositories affected instead of one each (no red row is hidden); `ci.failed_jobs` reads the jobs of a few red runs per cycle (one call each) and the red row names the failed jobs grouped by platform, so an umbrella workflow with a matrix of systems tells which ones fail.
 - **Merge queue**: a failed run of the merge queue of the default branch (`gh-readonly-queue/...`, event `merge_group`) is a red of its own, shown as "(merge queue)" in the red list, the alerts and the team view, and it clears with the next green run of the queue.
 - **Maintenance branches**: `ci.extra_branches` takes patterns (for example `release-*`) of extra branches whose last run also counts; by default only the default branch is watched. A red of such a branch is labelled with its name and never hides, or is hidden by, the default branch.
 

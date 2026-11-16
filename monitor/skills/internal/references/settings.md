@@ -89,6 +89,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ci.automation_counts` | `false` | sentinel | Count automation workflows |
 | `ci.count_fork_runs` | `false` | sentinel | Count runs of forks |
 | `ci.extra_branches` | `[]` | sentinel | Maintenance branches to watch |
+| `ci.failed_jobs.enabled` | `false` | sentinel | Show which jobs of a red run failed |
+| `ci.failed_jobs.group_by` | `"auto"` | sentinel | Group jobs by |
+| `ci.failed_jobs.max_per_cycle` | `4` | sentinel | Runs read per cycle |
+| `ci.group.min` | `2` | sentinel | Workflows needed for a shared cause |
+| `ci.group.reusable` | `false` | sentinel | Group reds by shared workflow |
 | `ci.inactive_days` | `90` | sentinel | Days until a workflow is inactive |
 | `ci.red_events` | `["push", "schedule", "workflow_dispatch", "merge_group"]` | sentinel | Events that can make a branch red |
 | `cold_refresh_seconds` | `600` | polling | Refresh of cold repositories |

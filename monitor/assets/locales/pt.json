@@ -2931,5 +2931,20 @@
  "wh.unknown_repo": "repositório não vigiado",
  "ws.not_found": "Não foi encontrado o espaço de trabalho dos repositórios: defina MONITOR_ROOT, ou \"workspace_root\" em actions_monitor.json, ou coloque um ficheiro chamado .monitor-root na pasta que contém os repositórios.",
  "ci.lane_queue": "fila de fusão",
- "ci.lane_branch": "ramo {branch}"
+ "ci.lane_branch": "ramo {branch}",
+ "ui.cfg_b_causes": "Causas partilhadas e jobs falhados",
+ "evt.red_cause": "CI a vermelho pelo workflow partilhado {shared}: {count} workflows em {repos} repositórios",
+ "ui.a2_cause": "Causa partilhada",
+ "ui.a2_cause_line": "{shared} é chamado por {count} workflows a vermelho em {repos} repositórios",
+ "ui.a2_failed_jobs": "Falharam {failed} de {total} jobs",
+ "cfg.f.ci.group.reusable": "Agrupar vermelhos por workflow partilhado",
+ "cfg.h.ci.group.reusable": "Desativado por defeito. Ativado: os workflows a vermelho que chamam o mesmo workflow reutilizável têm uma só causa; a lista de vermelhos mostra uma linha de grupo e a notificação dos novos vermelhos di-lo uma vez com o número de afetados em vez de uma por cada. Nenhuma linha vermelha é escondida.",
+ "cfg.f.ci.group.min": "Workflows necessários para uma causa partilhada",
+ "cfg.h.ci.group.min": "Um workflow reutilizável é indicado como causa partilhada a partir de tantos workflows a vermelho (predefinição 2).",
+ "cfg.f.ci.failed_jobs.enabled": "Mostrar que jobs de um run a vermelho falharam",
+ "cfg.h.ci.failed_jobs.enabled": "Desativado por defeito. Ativado: de cada run a vermelho o monitor lê os seus jobs uma vez (uma chamada, poucos runs por ciclo) e a linha vermelha diz que jobs falharam, agrupados por plataforma, para que um workflow com muitos jobs não diga apenas vermelho.",
+ "cfg.f.ci.failed_jobs.max_per_cycle": "Runs lidos por ciclo",
+ "cfg.h.ci.failed_jobs.max_per_cycle": "O máximo de runs a vermelho cujos jobs são lidos num ciclo (uma chamada cada, predefinição 4). A resposta mantém-se enquanto o run não mudar.",
+ "cfg.f.ci.failed_jobs.group_by": "Agrupar jobs por",
+ "cfg.h.ci.failed_jobs.group_by": "auto (predefinição): o sistema no nome do job (ubuntu, windows, macos...), senão o primeiro parâmetro da matriz, senão a parte antes da barra. platform, matrix e prefix forçam um deles."
 }
