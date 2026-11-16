@@ -869,7 +869,8 @@ def compute_snapshot(inp):
         "cache_age_seconds": inp.get("cache_age"), "reduced": reduced, "language": i18n.language(), "repos": len(repos), "ecosystems": {r: eco.get(r, "other") for r in repos},
         "rate": rate, "min_rate": cfg["min_rate_remaining"], "errors": errors, "ai": inp.get("ai"),
         "a1": {"stuck": stuck, "issues": issues, "stuck_minutes": data.get("stuck_minutes")},
-        "a2": {"red": red, "groups": causes.groups(red), "workflows_checked": sum(1 for r in repos for _ in {workflow_key(x) for x in runs_by_repo.get(r, [])}),
+        "a2": {"red": red, "groups": causes.groups(red), "workflows_checked": sum(1 for r in repos for _ in {workflow_key(x) for x in runs_by_repo.get(r, []) if not redrule.is_dynamic(x)}),
+               "services": redrule.service_rows([x for r in repos for x in runs_by_repo.get(r, [])])[:200],
                "unchecked": a2_unchecked(runs_by_repo), "full_sample": a2_full_sample(runs_by_repo, caps),
                "inconclusive": a2_repos, "inconclusive_workflows": a2_labels(a2_details), "inconclusive_details": a2_details},
         "a3": {"rows": rows, "codeql_total": sum(t["codeql"] or 0 for t in totals.values()), "dependabot_total": sum(t["dependabot"] or 0 for t in totals.values()),
@@ -1227,8 +1228,9 @@ class Sentinel:
                                          paging.settings(self.config)["workflow_pages"])      # a repository can have hundreds of workflows: the next pages are read, and a cut is said
                 wfs = page["items"]
                 res["wf_seen"], res["wf_total"] = page["seen"], (page["total"] if page["cut"] else None)
-                res["wf_disabled"] = [w.get("name") for w in wfs if w.get("state") == "disabled_inactivity"]
-                res["wf_manual"] = [w.get("name") for w in wfs if w.get("state") == "disabled_manually"]   # same call: no extra request
+                own = [w for w in wfs if not str(w.get("path") or "").startswith("dynamic/")]      # the workflows GitHub makes for itself (Dependabot, the dependency graph, Copilot, the default CodeQL) have no file: they are not the owner's to enable
+                res["wf_disabled"] = [w.get("name") for w in own if w.get("state") == "disabled_inactivity"]
+                res["wf_manual"] = [w.get("name") for w in own if w.get("state") == "disabled_manually"]   # same call: no extra request
             except Exception as error:
                 if not is_denied(error):
                     raise

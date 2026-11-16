@@ -9,6 +9,10 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+### Corregido
+
+- **Los workflows que GitHub hace por su cuenta no son CI en rojo ni ficheros**: las entradas con una ruta que empieza por `dynamic/` (actualizaciones de Dependabot, el grafo de dependencias, el CodeQL por defecto, la revisión y el agente de Copilot) fallaban para siempre en 20 de los 96 repositorios públicos estudiados y se contaban como workflows del repositorio (rojos, abandonados, «desactivados»). El monitor solo guardaba el nombre del fichero de una ejecución, así que la comprobación de la ruta nunca coincidía; ahora se recuerda la ruta entera al leer la ejecución. Esos workflows nunca deciden el color de una rama, no cuentan como workflows a revisar y no aparecen entre los desactivados a mano o por inactividad. Una actualización de Dependabot que falla se lista aparte como aviso, y las demás (Copilot, CodeQL, el grafo de dependencias) como información, en `a2.services` del centinela y en la cifra de cabecera `services_failing`.
+
 ## [2.0.4]
 
 ### Añadido
@@ -18,6 +22,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Corregido
 
+- **Los workflows que GitHub hace por su cuenta no son CI en rojo ni ficheros**: las entradas con una ruta que empieza por `dynamic/` (actualizaciones de Dependabot, el grafo de dependencias, el CodeQL por defecto, la revisión y el agente de Copilot) fallaban para siempre en 20 de los 96 repositorios públicos estudiados y se contaban como workflows del repositorio (rojos, abandonados, «desactivados»). El monitor solo guardaba el nombre del fichero de una ejecución, así que la comprobación de la ruta nunca coincidía; ahora se recuerda la ruta entera al leer la ejecución. Esos workflows nunca deciden el color de una rama, no cuentan como workflows a revisar y no aparecen entre los desactivados a mano o por inactividad. Una actualización de Dependabot que falla se lista aparte como aviso, y las demás (Copilot, CodeQL, el grafo de dependencias) como información, en `a2.services` del centinela y en la cifra de cabecera `services_failing`.
 - **«Ayuda de esta pestaña» abre en todas las pestañas el tema de la pestaña abierta**: al mapa de pestaña a tema le faltaban las pestañas Alertas y Equipo y mandaba Repositorios e Historial al primer tema de la ayuda («GitHub Actions Monitor»). Ahora es una única tabla (`TAB_TOPICS`) con una entrada por cada pestaña del menú lateral, y una prueba falla si una pestaña no tiene tema o tiene uno que no existe. Una prueba en un navegador recorre todas las pestañas y pulsa el botón.
 - **La pestaña Historia ya no acumula su contador**: «Mostrando 200 de N» se añadía a las herramientas de la tabla en cada refresco mientras las herramientas solo se redibujaban al cambiar el orden o las columnas, de modo que crecían miles de copias junto a la lista de columnas. Ahora el contador es un único elemento que se reemplaza o se quita. Una prueba abre la página en un navegador, dibuja la tabla muchas veces (refresco, filtros, todas las columnas, un orden) y comprueba que hay un contador y una pista.
 

@@ -51,8 +51,42 @@ def workflow_key(run):
 
 
 def is_dynamic(run):
-    """A run that GitHub creates for dependency updates (event `dynamic`, a `dynamic/...` path): it is not a build of the repository and never decides."""
-    return run.get("event") == "dynamic" or str(run.get("path") or "").startswith("dynamic/")
+    """A run that GitHub creates for itself (event `dynamic`, a `dynamic/...` path: Dependabot updates, the dependency graph, the default CodeQL, the review and the agent of Copilot): it is not a
+    build of the repository and never decides. The monitor keeps only the name of the file of a run, so `dynamic` is also a flag written when the run is read, from the whole path."""
+    return run.get("event") == "dynamic" or run.get("dynamic") is True or str(run.get("path") or "").startswith("dynamic/")
+
+
+def service_name(path, name=""):
+    """Which service of GitHub a `dynamic/...` workflow is: dependabot (the updates), graph (the dependency graph and its submissions), copilot (review and agent), codeql (the default setup) or other."""
+    text = (str(path or "") + " " + str(name or "")).lower()
+    if "graph" in text or "dependency submission" in text:
+        return "graph"
+    if "dependabot" in text:
+        return "dependabot"
+    if "copilot" in text:
+        return "copilot"
+    if "codeql" in text or "code-scanning" in text:
+        return "codeql"
+    return "other"
+
+
+def service_rows(runs, now=None, policy=None):
+    """The services of GitHub whose last finished run failed, one row each: they are not a red of the repository (nothing in it can be fixed by a push) but they are not silent either.
+    A failing Dependabot update is a warning (the dependencies are not being updated); the others are information. A service that has not run for ci.inactive_days is left out."""
+    policy = policy or POLICY
+    now = time.time() if now is None else now
+    last = {}
+    finished = (r for r in runs if is_dynamic(r) and r.get("status") == "completed" and r.get("conclusion") and r.get("conclusion") not in IGNORED and not is_awaiting(r))
+    for run in sorted(finished, key=lambda r: r.get("started") or ""):
+        last[(run.get("repo"), run.get("service") or service_name(run.get("path"), run.get("name")), workflow_key(run))] = run
+    out = []
+    for (repo, service, _key), run in last.items():
+        stamp = _epoch(run.get("started"))
+        if run.get("conclusion") not in BAD or (policy["inactive_days"] and stamp is not None and now - stamp > policy["inactive_days"] * 86400):
+            continue
+        out.append({"repo": repo, "service": service, "workflow": run.get("name") or workflow_key(run), "conclusion": run.get("conclusion"), "since": run.get("started"), "url": run.get("url"),
+                    "level": "warning" if service == "dependabot" else "info"})
+    return sorted(out, key=lambda r: (r["level"] != "warning", str(r["repo"]), r["service"]))
 
 
 def is_awaiting(run):
@@ -232,10 +266,12 @@ def red_workflows(runs_by_repo, default_branches=None, guess=False, sample=None,
 
 
 def states(runs_by_repo, default_branches=None, guess=False, now=None):
-    """{"inactive": [rows], "awaiting": [rows]} for all repositories: the workflows not red because they were abandoned, and the runs that wait for an approval."""
-    out = {"inactive": [], "awaiting": []}
+    """{"inactive": [rows], "awaiting": [rows], "services": [rows]} for all repositories: the workflows not red because they were abandoned, the runs that wait for an approval and the
+    services of GitHub (dynamic workflows) whose last run failed."""
+    out = {"inactive": [], "awaiting": [], "services": []}
     for repo, runs in runs_by_repo.items():
         branch, _guessed = branch_of(repo, runs, default_branches, guess)
         out["inactive"].extend(row_of(repo, item) for item in classify(runs, branch, now)["inactive"])
         out["awaiting"].extend(awaiting_runs(runs, now))
+        out["services"].extend(service_rows(runs, now))
     return out

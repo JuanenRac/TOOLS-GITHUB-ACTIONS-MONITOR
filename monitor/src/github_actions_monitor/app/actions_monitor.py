@@ -601,17 +601,21 @@ def parse_runs(repo, data):
     runs = []
     TIMING["budget"] = 3
     for run in data.get("workflow_runs", []):
+        full_path = str(run.get("path") or "").split("@")[0]
         queued, seconds, begun = run_times(run)
         if (run.get("run_attempt") or 1) > 1 and run.get("status") == "completed":
             seconds = rerun_seconds(repo, run) if TIMING["on"] else seconds
         runs.append({
             "repo": repo, "id": run["id"], "name": run.get("name") or "", "title": (run.get("display_title") or "")[:90],
-            "event": run.get("event"), "branch": run.get("head_branch"), "fork": is_fork_run(run), "path": (run.get("path") or "").split("@")[0].rsplit("/", 1)[-1], "sha": (run.get("head_sha") or "")[:7],
+            "event": run.get("event"), "branch": run.get("head_branch"), "fork": is_fork_run(run), "path": full_path.rsplit("/", 1)[-1], "sha": (run.get("head_sha") or "")[:7],
             "actor": (run.get("actor") or {}).get("login", ""), "actor_bot": (run.get("actor") or {}).get("type") == "Bot", "status": run.get("status"), "number": run.get("run_number"),
             "queued": queued,
             "conclusion": run.get("conclusion"), "started": begun or run.get("created_at"),
             "seconds": seconds, "url": run.get("html_url"), "attempt": run.get("run_attempt"), "reusable": causes.reusable_paths(run),
         })
+        if full_path.startswith("dynamic/") or run.get("event") == "dynamic":      # a workflow GitHub makes for itself: it has no file, and the whole path says which service it is
+            runs[-1]["dynamic"] = True
+            runs[-1]["service"] = redrule.service_name(full_path, run.get("name"))
     return runs
 
 
@@ -1072,6 +1076,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
     try:
         held = redrule.states({r: [x for x in runs if x["repo"] == r] for r in repos}, {r: m.get("branch") for r, m in repo_meta(repos).items() if m.get("branch")}, True)
         figures["awaiting"], figures["inactive"] = len(held["awaiting"]), len(held["inactive"])
+        figures["services_failing"] = len(held["services"])
     except Exception as error:   # noqa: BLE001 - a figure of the header never stops a cycle
         degraded.note("loop.extra", error)
     return {

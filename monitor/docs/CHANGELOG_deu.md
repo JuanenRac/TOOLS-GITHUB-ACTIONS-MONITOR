@@ -9,6 +9,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+### Behoben
+
+- **Die Workflows, die GitHub für sich selbst anlegt, sind weder rotes CI noch Dateien**: Die Einträge mit einem Pfad, der mit `dynamic/` beginnt (Dependabot-Updates, der Abhängigkeitsgraph, das Standard-CodeQL, Review und Agent von Copilot), schlugen in 20 der 96 untersuchten öffentlichen Repositorys für immer fehl und wurden als Workflows des Repositorys gezählt (rot, aufgegeben, „deaktiviert“). Der Monitor behielt nur den Dateinamen eines Laufs, sodass die Prüfung des Pfads nie zutraf; jetzt wird der ganze Pfad beim Lesen des Laufs gemerkt. Diese Workflows entscheiden nie über die Farbe eines Branches, zählen nicht als zu prüfende Workflows und stehen nicht unter den von Hand oder wegen Inaktivität deaktivierten. Ein fehlschlagendes Dependabot-Update steht gesondert als Warnung, die übrigen (Copilot, CodeQL, Abhängigkeitsgraph) als Information, in `a2.services` des Wächters und in der Kopfzahl `services_failing`.
+
 ## [2.0.4]
 
 ### Hinzugefügt
@@ -18,6 +22,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Behoben
 
+- **Die Workflows, die GitHub für sich selbst anlegt, sind weder rotes CI noch Dateien**: Die Einträge mit einem Pfad, der mit `dynamic/` beginnt (Dependabot-Updates, der Abhängigkeitsgraph, das Standard-CodeQL, Review und Agent von Copilot), schlugen in 20 der 96 untersuchten öffentlichen Repositorys für immer fehl und wurden als Workflows des Repositorys gezählt (rot, aufgegeben, „deaktiviert“). Der Monitor behielt nur den Dateinamen eines Laufs, sodass die Prüfung des Pfads nie zutraf; jetzt wird der ganze Pfad beim Lesen des Laufs gemerkt. Diese Workflows entscheiden nie über die Farbe eines Branches, zählen nicht als zu prüfende Workflows und stehen nicht unter den von Hand oder wegen Inaktivität deaktivierten. Ein fehlschlagendes Dependabot-Update steht gesondert als Warnung, die übrigen (Copilot, CodeQL, Abhängigkeitsgraph) als Information, in `a2.services` des Wächters und in der Kopfzahl `services_failing`.
 - **„Hilfe zu diesem Reiter“ öffnet in jedem Reiter das Thema des geöffneten Reiters**: In der Zuordnung von Reiter zu Thema fehlten die Reiter Warnungen und Team, und Repositories und Verlauf führten zum ersten Thema der Hilfe („GitHub Actions Monitor“). Es ist jetzt eine einzige Tabelle (`TAB_TOPICS`) mit einem Eintrag für jeden Reiter des Seitenmenüs, und ein Test schlägt fehl, wenn ein Reiter kein oder ein nicht vorhandenes Thema hat. Ein Test im Browser geht alle Reiter durch und drückt die Schaltfläche.
 - **Der Reiter Verlauf häuft seinen Zähler nicht mehr an**: „Zeige 200 von N“ wurde bei jeder Aktualisierung an die Werkzeuge der Tabelle angehängt, während die Werkzeuge selbst nur bei einer Änderung der Reihenfolge oder der Spalten neu gezeichnet wurden; so wuchsen tausende Kopien neben der Spaltenliste. Der Zähler ist jetzt ein einziges Element, das ersetzt oder entfernt wird. Ein Test öffnet die Seite in einem Browser, zeichnet die Tabelle viele Male (Aktualisierung, Filter, alle Spalten, eine Reihenfolge) und prüft, dass es einen Zähler und einen Hinweis gibt.
 

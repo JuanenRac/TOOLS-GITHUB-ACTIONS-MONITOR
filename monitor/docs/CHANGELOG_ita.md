@@ -9,6 +9,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+### Corretto
+
+- **I workflow che GitHub crea per sé non sono CI in rosso né file**: le voci con un percorso che inizia con `dynamic/` (aggiornamenti di Dependabot, grafo delle dipendenze, CodeQL predefinito, revisione e agente di Copilot) fallivano per sempre in 20 dei 96 repository pubblici studiati ed erano contate come workflow del repository (rossi, abbandonati, «disattivati»). Il monitor conservava solo il nome del file di un'esecuzione, quindi il controllo del percorso non corrispondeva mai; ora il percorso intero viene ricordato quando si legge l'esecuzione. Quei workflow non decidono mai il colore di un ramo, non contano come workflow da controllare e non compaiono tra quelli disattivati a mano o per inattività. Un aggiornamento di Dependabot che fallisce è elencato a parte come avviso, e gli altri (Copilot, CodeQL, grafo delle dipendenze) come informazione, in `a2.services` della sentinella e nella cifra d'intestazione `services_failing`.
+
 ## [2.0.4]
 
 ### Aggiunto
@@ -18,6 +22,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Corretto
 
+- **I workflow che GitHub crea per sé non sono CI in rosso né file**: le voci con un percorso che inizia con `dynamic/` (aggiornamenti di Dependabot, grafo delle dipendenze, CodeQL predefinito, revisione e agente di Copilot) fallivano per sempre in 20 dei 96 repository pubblici studiati ed erano contate come workflow del repository (rossi, abbandonati, «disattivati»). Il monitor conservava solo il nome del file di un'esecuzione, quindi il controllo del percorso non corrispondeva mai; ora il percorso intero viene ricordato quando si legge l'esecuzione. Quei workflow non decidono mai il colore di un ramo, non contano come workflow da controllare e non compaiono tra quelli disattivati a mano o per inattività. Un aggiornamento di Dependabot che fallisce è elencato a parte come avviso, e gli altri (Copilot, CodeQL, grafo delle dipendenze) come informazione, in `a2.services` della sentinella e nella cifra d'intestazione `services_failing`.
 - **«Aiuto di questa scheda» apre in ogni scheda l'argomento della scheda aperta**: nella mappa da scheda ad argomento mancavano le schede Avvisi e Team, e Repository e Cronologia portavano al primo argomento dell'aiuto («GitHub Actions Monitor»). Ora è un'unica tabella (`TAB_TOPICS`) con una voce per ogni scheda del menu laterale, e un test fallisce se una scheda non ha un argomento o ne ha uno inesistente. Un test in un browser percorre tutte le schede e preme il pulsante.
 - **La scheda Cronologia non accumula più il suo contatore**: «Mostrati 200 di N» veniva aggiunto agli strumenti della tabella a ogni aggiornamento mentre gli strumenti venivano ridisegnati solo quando cambiavano l'ordine o le colonne, così migliaia di copie si accumulavano accanto all'elenco delle colonne. Il contatore è ora un unico elemento che viene sostituito o rimosso. Un test apre la pagina in un browser, disegna la tabella molte volte (aggiornamento, filtri, tutte le colonne, un ordine) e verifica che ci siano un contatore e un suggerimento.
 

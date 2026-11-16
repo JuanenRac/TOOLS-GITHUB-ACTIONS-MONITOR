@@ -11,6 +11,10 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+### Fixed
+
+- **The workflows GitHub makes for itself are neither red CI nor files**: the entries with a path that starts with `dynamic/` (Dependabot updates, the dependency graph, the default CodeQL, the review and the agent of Copilot) failed for ever in 20 of the 96 public repositories studied, and were counted as workflows of the repository (red, abandoned, "disabled"). The monitor kept only the file name of a run, so the check of the path never matched; now the whole path is remembered when the run is read. Those workflows never decide the colour of a branch, are not counted as workflows to check, and are not listed among the workflows disabled by hand or by inactivity. A failing Dependabot update is listed apart as a warning, and the others (Copilot, CodeQL, the dependency graph) as information, in `a2.services` of the sentinel and in the header figure `services_failing`.
+
 ## [2.0.4]
 
 ### Added
@@ -20,6 +24,7 @@ when this file and `tool_version.py` disagree.
 
 ### Fixed
 
+- **The workflows GitHub makes for itself are neither red CI nor files**: the entries with a path that starts with `dynamic/` (Dependabot updates, the dependency graph, the default CodeQL, the review and the agent of Copilot) failed for ever in 20 of the 96 public repositories studied, and were counted as workflows of the repository (red, abandoned, "disabled"). The monitor kept only the file name of a run, so the check of the path never matched; now the whole path is remembered when the run is read. Those workflows never decide the colour of a branch, are not counted as workflows to check, and are not listed among the workflows disabled by hand or by inactivity. A failing Dependabot update is listed apart as a warning, and the others (Copilot, CodeQL, the dependency graph) as information, in `a2.services` of the sentinel and in the header figure `services_failing`.
 - **"Help of this tab" opens the topic of the tab that is open in every tab**: the map from tab to topic was missing the Alerts and Team tabs and sent Repositories and History to the first topic of the Help ("GitHub Actions Monitor"). It is now one table (`TAB_TOPICS`) with an entry for every tab of the side menu, and a test fails when a tab has no topic or one that does not exist. A test in a browser goes through every tab and presses the button.
 - **The History tab no longer piles up its count**: "Showing 200 of N" was appended to the tools of the table at every refresh while the tools themselves were drawn again only when the order or the columns changed, so thousands of copies grew next to the list of columns. The count is now one element that is replaced or removed. A test opens the page in a browser, draws the table many times (refresh, filters, all columns, an order) and checks that there is one count and one hint.
 

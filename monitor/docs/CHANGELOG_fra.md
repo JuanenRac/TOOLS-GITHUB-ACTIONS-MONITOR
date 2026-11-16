@@ -9,6 +9,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+### Corrigé
+
+- **Les workflows que GitHub crée pour lui-même ne sont ni une CI en rouge ni des fichiers** : les entrées dont le chemin commence par `dynamic/` (mises à jour de Dependabot, graphe de dépendances, CodeQL par défaut, revue et agent de Copilot) échouaient indéfiniment dans 20 des 96 dépôts publics étudiés et étaient comptées comme des workflows du dépôt (rouges, abandonnés, « désactivés »). Le moniteur ne gardait que le nom de fichier d'une exécution, si bien que le test du chemin ne correspondait jamais ; désormais le chemin entier est retenu à la lecture de l'exécution. Ces workflows ne décident jamais de la couleur d'une branche, ne comptent pas comme workflows à vérifier et ne figurent pas parmi les workflows désactivés à la main ou par inactivité. Une mise à jour de Dependabot qui échoue est listée à part comme avertissement, et les autres (Copilot, CodeQL, graphe de dépendances) comme information, dans `a2.services` de la sentinelle et dans le chiffre d'en-tête `services_failing`.
+
 ## [2.0.4]
 
 ### Ajouté
@@ -18,6 +22,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Corrigé
 
+- **Les workflows que GitHub crée pour lui-même ne sont ni une CI en rouge ni des fichiers** : les entrées dont le chemin commence par `dynamic/` (mises à jour de Dependabot, graphe de dépendances, CodeQL par défaut, revue et agent de Copilot) échouaient indéfiniment dans 20 des 96 dépôts publics étudiés et étaient comptées comme des workflows du dépôt (rouges, abandonnés, « désactivés »). Le moniteur ne gardait que le nom de fichier d'une exécution, si bien que le test du chemin ne correspondait jamais ; désormais le chemin entier est retenu à la lecture de l'exécution. Ces workflows ne décident jamais de la couleur d'une branche, ne comptent pas comme workflows à vérifier et ne figurent pas parmi les workflows désactivés à la main ou par inactivité. Une mise à jour de Dependabot qui échoue est listée à part comme avertissement, et les autres (Copilot, CodeQL, graphe de dépendances) comme information, dans `a2.services` de la sentinelle et dans le chiffre d'en-tête `services_failing`.
 - **« Aide de cet onglet » ouvre dans chaque onglet le sujet de l'onglet ouvert** : la table d'onglet à sujet n'avait pas les onglets Alertes et Équipe et envoyait Dépôts et Historique vers le premier sujet de l'aide (« GitHub Actions Monitor »). C'est maintenant une seule table (`TAB_TOPICS`) avec une entrée pour chaque onglet du menu latéral, et un test échoue si un onglet n'a pas de sujet ou en a un qui n'existe pas. Un test dans un navigateur parcourt tous les onglets et appuie sur le bouton.
 - **L'onglet Historique n'accumule plus son compteur** : « Affichage de 200 sur N » s'ajoutait aux outils du tableau à chaque rafraîchissement alors que les outils n'étaient redessinés que lorsque l'ordre ou les colonnes changeaient, si bien que des milliers de copies s'accumulaient à côté de la liste des colonnes. Le compteur est maintenant un seul élément qui est remplacé ou retiré. Un test ouvre la page dans un navigateur, dessine le tableau de nombreuses fois (rafraîchissement, filtres, toutes les colonnes, un ordre) et vérifie qu'il y a un compteur et une indication.
 

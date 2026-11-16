@@ -9,6 +9,10 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+### Corrigido
+
+- **Os workflows que o GitHub cria para si próprio não são CI a vermelho nem ficheiros**: as entradas com um caminho que começa por `dynamic/` (atualizações do Dependabot, o grafo de dependências, o CodeQL por omissão, a revisão e o agente do Copilot) falhavam para sempre em 20 dos 96 repositórios públicos estudados e eram contadas como workflows do repositório (vermelhos, abandonados, «desativados»). O monitor guardava apenas o nome do ficheiro de uma execução, pelo que a verificação do caminho nunca coincidia; agora o caminho inteiro é memorizado ao ler a execução. Esses workflows nunca decidem a cor de um ramo, não contam como workflows a verificar e não aparecem entre os desativados à mão ou por inatividade. Uma atualização do Dependabot que falha é listada à parte como aviso, e as outras (Copilot, CodeQL, grafo de dependências) como informação, em `a2.services` do sentinela e no número do cabeçalho `services_failing`.
+
 ## [2.0.4]
 
 ### Adicionado
@@ -18,6 +22,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Corrigido
 
+- **Os workflows que o GitHub cria para si próprio não são CI a vermelho nem ficheiros**: as entradas com um caminho que começa por `dynamic/` (atualizações do Dependabot, o grafo de dependências, o CodeQL por omissão, a revisão e o agente do Copilot) falhavam para sempre em 20 dos 96 repositórios públicos estudados e eram contadas como workflows do repositório (vermelhos, abandonados, «desativados»). O monitor guardava apenas o nome do ficheiro de uma execução, pelo que a verificação do caminho nunca coincidia; agora o caminho inteiro é memorizado ao ler a execução. Esses workflows nunca decidem a cor de um ramo, não contam como workflows a verificar e não aparecem entre os desativados à mão ou por inatividade. Uma atualização do Dependabot que falha é listada à parte como aviso, e as outras (Copilot, CodeQL, grafo de dependências) como informação, em `a2.services` do sentinela e no número do cabeçalho `services_failing`.
 - **«Ajuda deste separador» abre em todos os separadores o tema do separador aberto**: ao mapa de separador para tema faltavam os separadores Alertas e Equipa, e Repositórios e Histórico iam para o primeiro tema da ajuda («GitHub Actions Monitor»). Agora é uma única tabela (`TAB_TOPICS`) com uma entrada por cada separador do menu lateral, e um teste falha se um separador não tiver tema ou tiver um que não existe. Um teste num navegador percorre todos os separadores e prime o botão.
 - **O separador Histórico já não acumula o seu contador**: «A mostrar 200 de N» era acrescentado às ferramentas da tabela a cada atualização, enquanto as ferramentas só eram redesenhadas quando a ordem ou as colunas mudavam, pelo que milhares de cópias cresciam junto à lista de colunas. O contador é agora um único elemento que é substituído ou retirado. Um teste abre a página num navegador, desenha a tabela muitas vezes (atualização, filtros, todas as colunas, uma ordem) e verifica que há um contador e uma dica.
 
