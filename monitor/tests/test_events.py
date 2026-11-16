@@ -52,6 +52,24 @@ class Feed(unittest.TestCase):
             self.assertEqual(feed.feed(snap(reds=[("EH3D-X", "CI")], rate=800)), [])
 
 
+
+class DamagedFeed(unittest.TestCase):
+    def test_one_byte_that_is_not_utf8_in_a_big_feed_stops_neither_the_trim_nor_the_notifications(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "e.jsonl"
+            line = json.dumps({"at": "2026-01-01T00:00:00Z", "kind": "red_new", "text": "x" * 200}) + "\n"
+            path.write_bytes(line.encode("utf-8") * 3000 + b"\xff\n" + line.encode("utf-8") * 10)
+            self.assertGreater(path.stat().st_size, events.MAX_BYTES)
+            feed = events.Feed(path, Path(tmp) / "s.json")
+            delivered = []
+            feed.listeners.append(delivered.extend)
+            out = feed.emit([{"kind": "red_new", "code": "red_new", "level": "bad", "repo": "A", "owner": "main", "text": "boom", "url": None}])
+            self.assertEqual(len(out), 1)
+            self.assertEqual(len(delivered), 1)
+            self.assertLess(path.stat().st_size, events.MAX_BYTES)      # the trim happened
+            self.assertIn("boom", path.read_text(encoding="utf-8"))
+
+
 if __name__ == "__main__":
     unittest.main()
 
