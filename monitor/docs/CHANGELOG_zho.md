@@ -34,6 +34,21 @@
 - **A2 用一次请求解决许多工作流**:需要查询的工作流不少于 `sentinel.a2_resolve_batch_min`(默认 2;0 = 逐个)的仓库,只请求一次其默认分支(不含拉取请求)最新已完成的运行,其中出现的工作流一并解决(最多 `sentinel.a2_resolve_batch_pages` 页,每页 100 条);列表中没有的仍像以前一样逐个查询,因此拥有 100 个以上工作流的仓库只需几个周期即可收敛,而不是每个周期四个。
 - **A2 用一次请求解决许多工作流**:需要查询的工作流不少于 `sentinel.a2_resolve_batch_min`(默认 2;0 = 逐个)的仓库,只请求一次其默认分支(不含拉取请求)最新已完成的运行,其中出现的工作流一并解决(最多 `sentinel.a2_resolve_batch_pages` 页,每页 100 条);列表中没有的仍像以前一样逐个查询,因此拥有 100 个以上工作流的仓库只需几个周期即可收敛,而不是每个周期四个。
 - **fork 和已归档仓库可通过设置选择，在维护的 fork 绝不丢失**：`discovery.skip_archived`（默认开启）决定是否监视已归档仓库；`discovery.fork_policy` 可排除 fork（`skip`），或只保留有自己 CI 的 fork（`skip_unless_ci`：已启用的工作流且在 `discovery.fork_ci_days` 内有运行），`auto` 对组织账户把时间窗口加倍，账户类型每天读取一次；`discovery.fork_checks_per_pass` 限制为此花费的请求数。默认值（`show`）不改变任何行为。
+### 新增
+
+- **Renovate 与 Dependabot 同等对待，检查器区分自有 action 与第三方 action**：`renovate` 的拉取请求在 A4 中作为依赖更新列出（`sentinel.dependency_bots` 指定账户），带有 Renovate 配置的仓库不再被报告为缺少更新机器人。`lint.own_owners` 和 `lint.unpinned_own` 会把未固定的 action 标为自有或第三方，并可降低或隐藏自有的；三条默认关闭的可选规则分别发现没有 `timeout-minutes` 的作业（`lint.rules.no_timeout`）、`secrets: inherit`（`lint.rules.secrets_inherit`）和跟随 `@main` 的自有 action（`lint.rules.own_action_main`）。
+
+### 变更
+
+- **发布文件检查可适应项目**：`sentinel.surface.checks.release_assets.require_sha256` 和 `.require_signature` 不再要求校验和或签名文件，`.allow_empty` 接受没有文件的发布（向包注册表发布的项目），`sentinel.surface.checks.tag_vs_version.prefixes` 会把 `cli-v1.2.0` 这样的标签与清单比较，`.prerelease_ok` 把日期版本号同一天的测试版视为同一版本；`sentinel.require_verified_signature` 原本就可关闭。默认值与以前要求相同。
+
+### 新增
+
+- **机器人与人分开统计**：开启 `sentinel.bots_apart` 后，GitHub 自己标为机器人的账户（Bot 类型，而非按名字猜测）的拉取请求在 A4 中单独计数（`other_bots`），并不计入对等待人处理的旧拉取请求的检查；运行记录现在带有 `actor_bot`。默认值不改变任何行为。
+
+### 新增
+
+- **配置档案**：设置 > 基本 以及首次启动向导的第三步提供三组现成的设置（所有者或团队、开源组织、独立开发者），一键设定卫生检查、fork 与已归档仓库、检查器、发布文件检查以及机器人单独统计；这些值与保存按钮走同一条经过校验的路径，选择之前不会有任何变化，`GET /api/settings` 以 `presets` 列出它们。大型账户的做法见新指南 `docs/LARGE_ACCOUNTS.md`。
 - **数千个仓库时团队健康也很快**:运行、红色工作流、进行中的运行和警报只按仓库分组一次,因此团队健康请求不再为每个仓库遍历全部数据(2,000 个仓库曾耗时约八秒);单个仓库的健康只构建它自己的视图。
 
 ### 修复
