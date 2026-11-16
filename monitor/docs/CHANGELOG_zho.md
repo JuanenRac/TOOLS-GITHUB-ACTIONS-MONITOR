@@ -9,6 +9,10 @@
 
 ## [Unreleased]
 
+### 修复
+
+- **最近 24 小时的圆环只从一个来源计数，不再显示负数**：中心的总数和图例中的三个数字（成功、失败、已取消或其他）均来自服务器（新增 `figures.done24`），总和始终一致；以前总数是按页面收到的运行列表（只包含最新的运行）计算的，“已取消或其他”会变成负数。负数或非数字的值按 0 绘制；如果服务器没有发送总数，则三个数字都按列表计数，卡片会说明这是样本。各仓库的成功率在其列表为样本时也会给出同样的说明。
+
 ### 变更
 
 - **卫生检查（A6）不再假定某一位所有者的惯例**：规则集名称成为设置项（`sentinel.hygiene.ruleset_names`，可用模式）；`sentinel.hygiene.ruleset_mode` 可按 GitHub 报告的生效规则（公开端点，无需管理员权限）判断默认分支，不论规则集叫什么；`sentinel.hygiene.skip` 可跳过某项检查；`sentinel.hygiene.community_fallback` 还会计入社区档案和账户的 `.github` 仓库；接受名为 LICENSE-MIT、LICENSE-APACHE、LICENSE.txt、COPYING 或被 GitHub 识别的许可证；令牌无法得知的内容（无管理员权限）显示为“无法评估”，既不是绿色也不是警告。默认值保持旧规则。

@@ -9,6 +9,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+### Corretto
+
+- **L’anello delle ultime 24 ore conta da un’unica fonte e non mostra mai un numero negativo**: il totale al centro e le tre cifre della legenda (riuscite, fallite, annullate o altre) arrivano dal server (`figures.done24` è nuovo) e la loro somma torna sempre; prima il totale era contato sull’elenco delle esecuzioni ricevuto dalla pagina, che contiene solo le più recenti, e «annullate o altre» diventava negativo. Una cifra negativa o non numerica viene disegnata come 0 e, se il server non invia il totale, le tre cifre sono contate sull’elenco e la scheda dice che è un campione. Anche il tasso di successo per repository lo dice quando il suo elenco è un campione.
+
 ### Modificato
 
 - **L'igiene (A6) non dà più per scontate le convenzioni di un solo proprietario**: il nome del ruleset è un'impostazione (`sentinel.hygiene.ruleset_names`, modelli ammessi); `sentinel.hygiene.ruleset_mode` può giudicare il ramo predefinito dalle regole che GitHub segnala come in vigore (endpoint pubblici, senza diritti di amministratore), comunque si chiami il ruleset; `sentinel.hygiene.skip` esclude un controllo; `sentinel.hygiene.community_fallback` conta anche il profilo della community e il repository `.github` dell'account; si accetta una licenza chiamata LICENSE-MIT, LICENSE-APACHE, LICENSE.txt, COPYING o riconosciuta da GitHub; e ciò che il token non può sapere (senza diritti di amministratore) appare come non valutabile, mai verde e mai un avviso. I valori predefiniti mantengono la regola vecchia.

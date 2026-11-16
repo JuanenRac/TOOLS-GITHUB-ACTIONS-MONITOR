@@ -2186,6 +2186,7 @@
  "ui.d_none": "Keine abgeschlossenen Läufe in 24 Std.",
  "ui.d_ok": "erfolgreich",
  "ui.d_other": "abgebrochen oder andere",
+ "ui.d_sample": "Stichprobe: Diese Liste enthält die neuesten {n} von {total} Läufen.",
  "ui.days_ago": "vor {n} T",
  "ui.dense": "Kompakt: {state}",
  "ui.dense_title": "Kompakte Ansicht des Tabs „Jetzt“",

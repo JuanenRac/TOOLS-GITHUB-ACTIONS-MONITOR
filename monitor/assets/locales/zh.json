@@ -2186,6 +2186,7 @@
  "ui.d_none": "24 小时内没有已结束的运行。",
  "ui.d_ok": "成功",
  "ui.d_other": "已取消或其他",
+ "ui.d_sample": "样本：此列表包含 {total} 次运行中最新的 {n} 次。",
  "ui.days_ago": "{n} 天前",
  "ui.dense": "紧凑：{state}",
  "ui.dense_title": "“当前”标签页的紧凑视图",

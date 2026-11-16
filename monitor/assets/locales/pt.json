@@ -2186,6 +2186,7 @@
  "ui.d_none": "Sem runs concluídos em 24 h.",
  "ui.d_ok": "com sucesso",
  "ui.d_other": "cancelados ou outros",
+ "ui.d_sample": "Amostra: esta lista contém as {n} execuções mais recentes de {total}.",
  "ui.days_ago": "há {n} d",
  "ui.dense": "Denso: {state}",
  "ui.dense_title": "Vista compacta do separador Agora",

@@ -976,7 +976,7 @@ def header_figures(runs, active, issues, now=None, red=None, approx=False):
     done = [r for r in last if r.get("status") == "completed"]
     figures = {"active": sum(1 for r in active if r.get("status") == "in_progress"), "queued": sum(1 for r in active if r.get("status") != "in_progress" and not redrule.is_awaiting(r)),
                "fail24": sum(1 for r in done if r.get("conclusion") in ("failure", "timed_out", "startup_failure")), "ok24": sum(1 for r in done if r.get("conclusion") == "success"),
-               "issues": len(issues), "min24": round(sum(r.get("seconds") or 0 for r in last) / 60)}
+               "done24": len(done), "issues": len(issues), "min24": round(sum(r.get("seconds") or 0 for r in last) / 60)}
     if red is not None:
         figures["red"], figures["red_approx"], figures["red_repos"] = len(red), bool(approx), len({row["repo"] for row in red})
     return figures
