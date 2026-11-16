@@ -185,7 +185,7 @@ PROBE = r"""
     // team mode: the server keeps it
     const sent=[];window.fetch=async(u,o)=>{sent.push([String(u),o&&o.body]);return {ok:true,json:async()=>({view:{}})}};
     VIEWSRV.team=true;VIEWSRV.view={now:"newest"};r.team_get=sortGet("now");
-    sortSet("now","state");r.team_set=sortGet("now");r.sent=sent;sortSet("now","bogus");r.after_bogus=sortGet("now");r.sent_n=sent.length;
+    sortSet("now","state");r.team_set=sortGet("now");r.sent=sent.filter(x=>x[1]);sortSet("now","bogus");r.after_bogus=sortGet("now");r.sent_n=sent.filter(x=>x[1]).length;
     // expand all / collapse all, with any order, kept by a refresh and remembered like the order
     VIEWSRV.team=false;VIEWSRV.view={};store.set("am-sort-fold","");
     DATA=Object.assign({},DATA,{active:["one","two","three"].flatMap(n=>[run(n,{seconds:10}),run(n,{seconds:20})]),ecosystems:{one:"a",two:"a",three:"b"}});      // three repositories with two runs each: the ones that fold
