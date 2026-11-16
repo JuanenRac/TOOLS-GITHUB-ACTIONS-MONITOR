@@ -12,6 +12,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Changed
 
+- **The frozen shape of the API goes one level deeper**: the keys of the nested objects of the read answers (the cycle and the credential of the health, the loop of the data, the folders, the links, the update notice, the counters of the status bar and of the alerts), the exact `code` of the error of an unknown repository, the health of one repository and the envelope of the sentinel answers are part of the contract now. The check tool follows nested objects, and the test feeds a server with the invented data of the demo to check the answers that need data.
+
 - **A red on the default branch only counts when the repository itself caused it**: only runs of the events `push`, `schedule`, `workflow_dispatch` and `merge_group` decide (setting `ci.red_events`), and a run of a pull request that comes from a fork never does, even when the branch of the fork is also called `main`, `master` or `dev` (setting `ci.count_fork_runs`). The same rule feeds the red tile, the alerts, the team view, the brief and the green-without-release check.
 - **A run that waits for an approval is its own state, not a red and not a queue**: `action_required` (a pull request of a fork or a first contribution that nobody approved) and a job held by the protection of an environment no longer turn a workflow red or inflate the queued count; the Now tab shows a separate line "waiting for approval" and the figures carry `awaiting`.
 - **An abandoned workflow is "inactive", not red for ever**: a workflow whose last run failed but which has not run for `ci.inactive_days` days (90 by default, 0 turns it off) leaves the red list and is counted in the `inactive` figure.
