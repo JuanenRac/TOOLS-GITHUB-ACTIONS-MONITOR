@@ -311,6 +311,11 @@ def brief(alerts, limit, now=None, panels=None, sections="", status=""):
         while len(block.encode("utf-8")) > limit and block.count("\n") > 6:
             block = block.rsplit("\n", 3)[0] + "\n"
         text += "\n" + block
+    try:      # when the main model of an AI task failed in the last 24 hours the brief says it (nothing is added otherwise)
+        from github_actions_monitor.sentinels import ai_chain
+        text += ai_chain.brief_lines(stamp)
+    except Exception:   # noqa: BLE001 - a line that cannot be worked out never spoils the brief
+        pass
     return redact(text)
 
 

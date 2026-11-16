@@ -27,15 +27,46 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.catalog.fit_context` | `-` | ai | Fit the input to the context window |
 | `ai.catalog.max_requests_per_day` | `-` | ai | Requests for the list per day |
 | `ai.catalog.ttl_minutes` | `-` | ai | Life of the list of models |
+| `ai.cost_limit_daily` | `-` | ai | Estimated cost per day (all models) |
 | `ai.daily_limit` | `-` | ai | Calls per day |
 | `ai.events` | `-` | ai | Events it may analyse |
+| `ai.fallback` (secure) | `-` | ai | Models to try when the main one fails |
+| `ai.fallback_after_seconds` | `-` | ai | Give up the main model after |
+| `ai.fallback_max_attempts` | `-` | ai | Most models tried per question |
 | `ai.max_input_chars` | `-` | ai | Input size |
 | `ai.max_output_chars` | `-` | ai | Answer size |
 | `ai.model` | `-` | ai | Model |
+| `ai.model_cost_limit_daily` | `-` | ai | Estimated cost per model per day |
+| `ai.model_daily_limit` | `-` | ai | Calls per model per day |
 | `ai.ollama_url` | `-` | ai | Ollama address |
 | `ai.provider` (secure) | `"none"` | ai | AI service |
 | `ai.skill` | `-` | ai | Give the AI its guide |
 | `ai.skill_max_chars` | `-` | ai | Size of the guide in the prompt |
+| `ai.tasks.alert.max_input_chars` | `-` | ai | Input limit (0 = the general one) |
+| `ai.tasks.alert.max_output_chars` | `-` | ai | Output limit (0 = the general one) |
+| `ai.tasks.alert.model` | `-` | ai | Model (empty = the general one) |
+| `ai.tasks.alert.provider` (secure) | `-` | ai | Provider (empty = the general one) |
+| `ai.tasks.alert.timeout_seconds` | `-` | ai | Time limit (0 = the general one) |
+| `ai.tasks.build.max_input_chars` | `-` | ai | Input limit (0 = the general one) |
+| `ai.tasks.build.max_output_chars` | `-` | ai | Output limit (0 = the general one) |
+| `ai.tasks.build.model` | `-` | ai | Model (empty = the general one) |
+| `ai.tasks.build.provider` (secure) | `-` | ai | Provider (empty = the general one) |
+| `ai.tasks.build.timeout_seconds` | `-` | ai | Time limit (0 = the general one) |
+| `ai.tasks.codeql.max_input_chars` | `-` | ai | Input limit (0 = the general one) |
+| `ai.tasks.codeql.max_output_chars` | `-` | ai | Output limit (0 = the general one) |
+| `ai.tasks.codeql.model` | `-` | ai | Model (empty = the general one) |
+| `ai.tasks.codeql.provider` (secure) | `-` | ai | Provider (empty = the general one) |
+| `ai.tasks.codeql.timeout_seconds` | `-` | ai | Time limit (0 = the general one) |
+| `ai.tasks.diagnose.max_input_chars` | `-` | ai | Input limit (0 = the general one) |
+| `ai.tasks.diagnose.max_output_chars` | `-` | ai | Output limit (0 = the general one) |
+| `ai.tasks.diagnose.model` | `-` | ai | Model (empty = the general one) |
+| `ai.tasks.diagnose.provider` (secure) | `-` | ai | Provider (empty = the general one) |
+| `ai.tasks.diagnose.timeout_seconds` | `-` | ai | Time limit (0 = the general one) |
+| `ai.tasks.report.max_input_chars` | `-` | ai | Input limit (0 = the general one) |
+| `ai.tasks.report.max_output_chars` | `-` | ai | Output limit (0 = the general one) |
+| `ai.tasks.report.model` | `-` | ai | Model (empty = the general one) |
+| `ai.tasks.report.provider` (secure) | `-` | ai | Provider (empty = the general one) |
+| `ai.tasks.report.timeout_seconds` | `-` | ai | Time limit (0 = the general one) |
 | `ai.timeout_seconds` | `-` | ai | Time limit |
 | `ai_alerts.brief_max_bytes` | `2048` | ai | Size of the brief |
 | `ai_alerts.cascade.enabled` | `true` | ai | Group alerts that fall together |
