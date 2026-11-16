@@ -15,6 +15,7 @@ import re
 import time
 from pathlib import Path
 
+from github_actions_monitor.security import audit_log
 from github_actions_monitor.security import confirmation
 from github_actions_monitor.security import secretstore
 from github_actions_monitor.security import private_io
@@ -101,6 +102,7 @@ def execute(config, plan_id, run_gh, log_file=None):
     item = PENDING.take(plan_id, "ghaction")
     if item is None:
         return {"ok": False, "status": "unknown_plan"}
+    audit_log.note(f"{item.get('action')} {item.get('repo')}#{item.get('number')}")      # the line of the log of actions says what was confirmed
     have = scopes(run_gh)
     if not permission(item["scope"], have):
         result = {"ok": False, "status": "permission"}

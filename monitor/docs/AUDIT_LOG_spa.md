@@ -7,7 +7,7 @@
 
 # El registro de acciones
 
-Solo Complete, encendido por defecto. Junto a la auditoría de los accesos (inicios de sesión, bloqueos, rechazos), el monitor lleva un registro de **acciones**: quién cambió qué, cuándo y en qué cuenta. Un cambio de ajustes, un silencio o su retirada, un cambio de usuarios, contraseñas, preferencias de notificación o credenciales. Es una línea JSON por acción en `logs/audit_actions.jsonl`, que nunca se reescribe.
+Solo Complete, encendido por defecto. Junto a la auditoría de los accesos (inicios de sesión, bloqueos, rechazos), el monitor lleva un registro de **acciones**: quién cambió qué, cuándo y en qué cuenta. Un cambio de ajustes, un silencio o su retirada, un cambio de usuarios, contraseñas, preferencias de notificación o credenciales. Es una línea JSON por acción en `logs/audit_actions.jsonl`, que nunca se reescribe. También registra lo que se confirma: una acción en GitHub (relanzar, cancelar, disparar, fusionar), una ejecución con `act`, guardar o borrar el token guardado, un cambio del modo de trabajo, un grupo añadido por el descubrimiento, una lección añadida, un informe escrito ahora, el acceso de la cuenta y las acciones de la IA. La línea dice qué se confirmó y el resultado, nunca el cuerpo de la petición. Cada ruta POST queda registrada o listada como exenta con su motivo, y una prueba falla cuando una ruta nueva no es ni lo uno ni lo otro.
 
 ## Qué dice una línea
 

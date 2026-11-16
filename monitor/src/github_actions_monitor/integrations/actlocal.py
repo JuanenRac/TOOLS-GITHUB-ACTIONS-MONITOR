@@ -19,6 +19,7 @@ import threading
 import time
 from pathlib import Path
 
+from github_actions_monitor.security import audit_log
 from github_actions_monitor.security import confirmation
 from github_actions_monitor.app import degraded
 from github_actions_monitor.security import secretstore
@@ -267,6 +268,7 @@ def start(config, plan_id, popen=subprocess.Popen, clock=time.time, threaded=Tru
     item = PENDING.take(plan_id, "act")
     if item is None:
         return {"ok": False, "status": "unknown_plan"}
+    audit_log.note(f"{item.get('repo')} {item.get('workflow')}")      # the line of the log of actions says what was confirmed
     if not workflow_unchanged(item):      # the workflow was edited (or replaced by a link) after the person confirmed the plan: nothing starts
         return {"ok": False, "status": "workflow_changed"}
     with RUN["lock"]:
