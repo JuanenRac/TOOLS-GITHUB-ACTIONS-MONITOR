@@ -2312,6 +2312,7 @@
  "ui.d_none": "Nessun run terminato in 24 h.",
  "ui.d_ok": "riusciti",
  "ui.d_other": "annullati o altri",
+ "ui.d_sample": "Campione: questo elenco contiene le {n} esecuzioni più recenti su {total}.",
  "ui.days_ago": "{n} g fa",
  "ui.dense": "Compatta: {state}",
  "ui.dense_title": "Vista compatta della scheda Adesso",

@@ -2312,6 +2312,7 @@
  "ui.d_none": "24 時間以内に完了した run はありません。",
  "ui.d_ok": "成功",
  "ui.d_other": "キャンセルなど",
+ "ui.d_sample": "サンプル: この一覧には {total} 件中、新しい {n} 件の実行が含まれます。",
  "ui.days_ago": "{n} 日前",
  "ui.dense": "コンパクト: {state}",
  "ui.dense_title": "「現在」タブのコンパクト表示",

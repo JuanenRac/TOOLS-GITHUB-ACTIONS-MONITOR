@@ -9,6 +9,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+### Corretto
+
+- **L’anello delle ultime 24 ore conta da un’unica fonte e non mostra mai un numero negativo**: il totale al centro e le tre cifre della legenda (riuscite, fallite, annullate o altre) arrivano dal server (`figures.done24` è nuovo) e la loro somma torna sempre; prima il totale era contato sull’elenco delle esecuzioni ricevuto dalla pagina, che contiene solo le più recenti, e «annullate o altre» diventava negativo. Una cifra negativa o non numerica viene disegnata come 0 e, se il server non invia il totale, le tre cifre sono contate sull’elenco e la scheda dice che è un campione. Anche il tasso di successo per repository lo dice quando il suo elenco è un campione.
+
 
 ### Aggiunto
 

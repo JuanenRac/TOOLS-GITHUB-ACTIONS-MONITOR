@@ -2312,6 +2312,7 @@
  "ui.d_none": "Sin runs terminados en 24 h.",
  "ui.d_ok": "correctos",
  "ui.d_other": "cancelados u otros",
+ "ui.d_sample": "Muestra: esta lista contiene las {n} ejecuciones más recientes de {total}.",
  "ui.days_ago": "hace {n} d",
  "ui.dense": "Denso: {state}",
  "ui.dense_title": "Vista compacta de la pestaña Ahora",
