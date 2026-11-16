@@ -9,6 +9,11 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+
+### Adicionado
+
+- **Perfis**: Definições > Básico e o terceiro passo do guia do primeiro arranque oferecem três grupos de definições prontos (proprietário ou equipa, organização de código aberto, programador a solo) que fixam num clique a verificação de higiene, os forks e repositórios arquivados, o linter, a verificação dos ficheiros das releases e a contagem à parte dos bots; os valores seguem o mesmo caminho verificado do botão Guardar, nada muda até escolher um e `GET /api/settings` lista-os como `presets`. Uma receita para contas grandes está no novo guia `docs/LARGE_ACCOUNTS.md`.
+
 ## [2.0.2]
 
 ### Segurança

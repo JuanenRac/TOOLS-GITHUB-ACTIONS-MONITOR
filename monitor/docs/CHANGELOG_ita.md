@@ -9,6 +9,11 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+
+### Aggiunto
+
+- **Profili**: Impostazioni > Base e il terzo passo della guida del primo avvio offrono tre gruppi di impostazioni pronti (proprietario o team, organizzazione open source, sviluppatore singolo) che con un clic fissano il controllo di igiene, fork e repository archiviati, il linter, il controllo dei file delle release e il conteggio a parte dei bot; i valori seguono lo stesso percorso verificato del pulsante Salva, non cambia nulla finché non se ne sceglie uno e `GET /api/settings` li elenca come `presets`. Una ricetta per account grandi è nella nuova guida `docs/LARGE_ACCOUNTS.md`.
+
 ## [2.0.2]
 
 ### Sicurezza

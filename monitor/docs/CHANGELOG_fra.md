@@ -9,6 +9,11 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+
+### Ajouté
+
+- **Profils** : Réglages > Base et la troisième étape du guide de premier démarrage proposent trois groupes de réglages prêts (propriétaire ou équipe, organisation open source, développeur solo) qui fixent en un clic le contrôle d'hygiène, les forks et dépôts archivés, le linter, le contrôle des fichiers des releases et le comptage à part des bots ; les valeurs suivent le même chemin contrôlé que le bouton Enregistrer, rien ne change tant qu'un profil n'est pas choisi, et `GET /api/settings` les liste comme `presets`. Une recette pour les grands comptes se trouve dans le nouveau guide `docs/LARGE_ACCOUNTS.md`.
+
 ## [2.0.2]
 
 ### Sécurité

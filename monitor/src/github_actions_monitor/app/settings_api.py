@@ -746,7 +746,8 @@ def describe(path=CONFIG_FILE, lite=False, remote=False):
         backups = len(list(BACKUP_DIR.glob("actions_monitor-*.json")))
     except OSError:
         backups = 0
-    return {"groups": groups, "backups": backups}
+    from github_actions_monitor.app import profiles
+    return {"groups": groups, "backups": backups, "presets": profiles.listing(lite=lite)}
 
 
 def _backup(path):

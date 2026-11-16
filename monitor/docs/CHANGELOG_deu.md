@@ -9,6 +9,11 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+
+### Hinzugefügt
+
+- **Profile**: Einstellungen > Basis und der dritte Schritt der Erststart-Anleitung bieten drei fertige Einstellungsgruppen (Eigentümer oder Team, Open-Source-Organisation, Einzelentwickler), die mit einem Klick die Hygieneprüfung, Forks und archivierte Repositorys, den Linter, die Prüfung der Release-Dateien und die getrennte Zählung von Bots festlegen; die Werte gehen denselben geprüften Weg wie die Schaltfläche Speichern, nichts ändert sich, bis eines gewählt wird, und `GET /api/settings` listet sie als `presets`. Ein Rezept für große Konten steht in der neuen Anleitung `docs/LARGE_ACCOUNTS.md`.
+
 ## [2.0.2]
 
 ### Sicherheit

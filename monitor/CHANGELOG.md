@@ -23,6 +23,7 @@ when this file and `tool_version.py` disagree.
 
 ### Added
 
+- **Profiles**: Settings > Basic and the third step of the first-start guide offer three ready-made groups of settings (owner or team, open-source organisation, solo developer) that set the hygiene check, forks and archived repositories, the linter, the release file checks and the separate count of bots in one click; the values go through the same checked path as the Save button, nothing changes until one is chosen, and `GET /api/settings` lists them as `presets`. A recipe for large accounts is in the new guide `docs/LARGE_ACCOUNTS.md`.
 - **Merge queue**: a failed run of the merge queue of the default branch (`gh-readonly-queue/...`, event `merge_group`) is a red of its own, shown as "(merge queue)" in the red list, the alerts and the team view, and it clears with the next green run of the queue.
 - **Maintenance branches**: `ci.extra_branches` takes patterns (for example `release-*`) of extra branches whose last run also counts; by default only the default branch is watched. A red of such a branch is labelled with its name and never hides, or is hidden by, the default branch.
 

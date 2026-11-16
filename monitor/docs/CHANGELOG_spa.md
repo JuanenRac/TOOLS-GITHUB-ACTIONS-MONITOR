@@ -9,6 +9,11 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+
+### Añadido
+
+- **Perfiles**: Ajustes > Básico y el tercer paso de la guía de primer arranque ofrecen tres grupos de ajustes ya preparados (propietario o equipo, organización de código abierto, desarrollador en solitario) que fijan en un clic la comprobación de higiene, los forks y repositorios archivados, el linter, la comprobación de archivos de las releases y el recuento aparte de bots; los valores pasan por el mismo camino comprobado que el botón Guardar, no cambia nada hasta que se elige uno y `GET /api/settings` los lista como `presets`. Una receta para cuentas grandes está en la nueva guía `docs/LARGE_ACCOUNTS.md`.
+
 ## [2.0.2]
 
 ### Seguridad
