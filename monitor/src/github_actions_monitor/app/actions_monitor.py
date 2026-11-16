@@ -80,7 +80,7 @@ DEFAULTS = {
     "discover_limit": 1000,        # the most repositories listed for the account
     "show_unclassified": True,     # repositories that no ecosystem claims are shown in an automatic group "Unclassified" instead of disappearing
     "stuck_minutes": 120,
-    "ci": {"rerun_timing": False},      # rerun_timing: ask GitHub for the real duration of a re-run (a few calls per read of a repository)
+    "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "extra_branches": [], "rerun_timing": False},      # which runs may make a branch red (redrule.py)
     "watchdog_minutes": 10,      # a refresh cycle that runs longer than this is dumped to the log and restarted in a new thread (0 = off)
     "watchdog_max_abandoned": 8,      # calls to GitHub that gave up waiting but never returned: with this many still alive no new call is started and the health check says so (0 = no limit)
     "runs_per_repo": 20,
@@ -514,6 +514,12 @@ def rerun_seconds(repo, run):
     return value
 
 
+def is_fork_run(run):
+    """True when the head of the run lives in ANOTHER repository (a pull request from a fork): its branch name (`main`, `master`, `dev`) says nothing about the branch of this repository."""
+    head, base = (run.get("head_repository") or {}).get("full_name"), (run.get("repository") or {}).get("full_name")
+    return bool(head and base and str(head).lower() != str(base).lower())
+
+
 def fetch_runs(repo, per_page):
     try:
         data = gh_read(f"repos/{toolconfig.github_owner()}/{repo}/actions/runs?per_page={per_page}")
@@ -531,7 +537,7 @@ def fetch_runs(repo, per_page):
             seconds = rerun_seconds(repo, run) if TIMING["on"] else seconds
         runs.append({
             "repo": repo, "id": run["id"], "name": run.get("name") or "", "title": (run.get("display_title") or "")[:90],
-            "event": run.get("event"), "branch": run.get("head_branch"), "path": (run.get("path") or "").split("@")[0].rsplit("/", 1)[-1], "sha": (run.get("head_sha") or "")[:7],
+            "event": run.get("event"), "branch": run.get("head_branch"), "fork": is_fork_run(run), "path": (run.get("path") or "").split("@")[0].rsplit("/", 1)[-1], "sha": (run.get("head_sha") or "")[:7],
             "actor": (run.get("actor") or {}).get("login", ""), "status": run.get("status"), "number": run.get("run_number"),
             "queued": queued,
             "conclusion": run.get("conclusion"), "started": begun or run.get("created_at"),
@@ -837,14 +843,12 @@ def unresolved_failures(runs, default_branches=None):
     out = []
     for repo, items in by_repo.items():
         branch = (default_branches or {}).get(repo) or redrule.guess_default_branch(items) or "main"
-        last = {}
-        for run in sorted(redrule.completed_runs(items, branch), key=lambda r: r.get("started") or ""):
-            last[redrule.workflow_key(run)] = run
-        out.extend(run for run in last.values() if run.get("conclusion") in redrule.BAD)
+        out.extend(redrule.red_runs(items, branch))
     return out
 
 
 def collect(config, publish=None):
+    redrule.configure(config)
     repos = watched_repos(config)
     started = time.time()
 
@@ -885,7 +889,7 @@ def header_figures(runs, active, issues, now=None, red=None, approx=False):
         seen.add(run.get("id"))
         last.append(run)
     done = [r for r in last if r.get("status") == "completed"]
-    figures = {"active": sum(1 for r in active if r.get("status") == "in_progress"), "queued": sum(1 for r in active if r.get("status") != "in_progress"),
+    figures = {"active": sum(1 for r in active if r.get("status") == "in_progress"), "queued": sum(1 for r in active if r.get("status") != "in_progress" and not redrule.is_awaiting(r)),
                "fail24": sum(1 for r in done if r.get("conclusion") in ("failure", "timed_out", "startup_failure")), "ok24": sum(1 for r in done if r.get("conclusion") == "success"),
                "issues": len(issues), "min24": round(sum(r.get("seconds") or 0 for r in last) / 60)}
     if red is not None:
@@ -949,6 +953,11 @@ def build(config, repos, started, refreshed, loading, progress_text):
         except Exception as error:   # noqa: BLE001 - a figure of the header never stops a cycle
             degraded.note("loop.extra", error)
     figures = header_figures(runs, active, ISSUE_CACHE["items"], red=red, approx=approx)
+    try:
+        held = redrule.states({r: [x for x in runs if x["repo"] == r] for r in repos}, {r: m.get("branch") for r, m in repo_meta(repos).items() if m.get("branch")}, True)
+        figures["awaiting"], figures["inactive"] = len(held["awaiting"]), len(held["inactive"])
+    except Exception as error:   # noqa: BLE001 - a figure of the header never stops a cycle
+        degraded.note("loop.extra", error)
     return {
         "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "updated_local": tzdisplay.stamp(time.time()), "took": round(time.time() - started, 1),
         "repos": repos, "ecosystems": {repo: ecosystem_of(repo) for repo in repos},

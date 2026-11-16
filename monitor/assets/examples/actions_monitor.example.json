@@ -18,6 +18,11 @@
   "show_unclassified": true,
   "stuck_minutes": 120,
   "ci": {
+    "red_events": ["push", "schedule", "workflow_dispatch", "merge_group"],
+    "count_fork_runs": false,
+    "automation_counts": false,
+    "inactive_days": 90,
+    "extra_branches": [],
     "rerun_timing": false
   },
   "watchdog_minutes": 10,

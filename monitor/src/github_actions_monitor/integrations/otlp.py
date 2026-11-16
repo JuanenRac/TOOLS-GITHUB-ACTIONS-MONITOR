@@ -20,7 +20,7 @@ from github_actions_monitor.security import netguard, secretstore
 
 SCOPE = {"name": "github-actions-monitor"}
 STATE = {"sent": set(), "total": 0, "last_ok": None, "last_error": "", "next": 0.0}
-BAD = ("failure", "timed_out", "startup_failure", "action_required")
+BAD = ("failure", "timed_out", "startup_failure")      # the same family as redrule.BAD: a run that waits for an approval is not a failure
 
 
 def settings(config):
