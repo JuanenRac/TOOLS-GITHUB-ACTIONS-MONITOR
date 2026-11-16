@@ -2355,6 +2355,7 @@
  "ui.d_none": "Aucun run terminé en 24 h.",
  "ui.d_ok": "réussis",
  "ui.d_other": "annulés ou autres",
+ "ui.d_sample": "Échantillon : cette liste contient les {n} exécutions les plus récentes sur {total}.",
  "ui.days_ago": "il y a {n} j",
  "ui.dense": "Dense : {state}",
  "ui.dense_title": "Vue compacte de l'onglet Maintenant",

@@ -9,6 +9,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+### Behoben
+
+- **Der Ring der letzten 24 Stunden zählt aus einer einzigen Quelle und zeigt nie eine negative Zahl**: Die Summe in der Mitte und die drei Zahlen der Legende (erfolgreich, fehlgeschlagen, abgebrochen oder andere) kommen vom Server (`figures.done24` ist neu) und ergeben immer die Summe; früher wurde die Summe über die Liste der Läufe gezählt, die die Seite erhält und die nur die neuesten enthält, und „abgebrochen oder andere“ wurde negativ. Eine negative oder keine Zahl wird als 0 gezeichnet, und sendet der Server die Summe nicht, werden die drei Zahlen über die Liste gezählt und die Karte sagt, dass es eine Stichprobe ist. Die Erfolgsquote je Repository sagt dasselbe, wenn ihre Liste eine Stichprobe ist.
+
 
 ### Hinzugefügt
 

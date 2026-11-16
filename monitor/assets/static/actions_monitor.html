@@ -877,7 +877,7 @@ function render(d){
   {const of=$("offline"),o=d.offline||{};of.style.display=o.offline?"block":"none";of.textContent=o.offline?T("ui.offline_banner",{since:clock(o.since)}):""}
   $("g-count").textContent=T("ui.count",{n:d.repos.filter(r=>repoVisible(r,d)).length,m:d.repos.length});
   const nAlert=d.issues.length+d.active.filter(r=>r.stuck).length;$("d-now").hidden=!nAlert;$("d-now").textContent=nAlert;
-  paintTiles(d);alerts(d);now_(d);donut(ok,bad,done.length-ok-bad);rates(last);timeline(last);durations(runs);repos(d,last);filters(d);renderHistory();if(PANEL)renderPanel();tipRows();
+  paintTiles(d);alerts(d);now_(d);{const g=ringFigures(d,done);donut(g.ok,g.bad,g.other,g.sample)}rates(last,d);timeline(last);durations(runs);repos(d,last);filters(d);renderHistory();if(PANEL)renderPanel();tipRows();
 }
 const GH="https://"+(I18N.host||"github.com")+"/";
 function alerts(d){
@@ -967,8 +967,20 @@ function now_(d){
 }
 function box(id){const el=$(id);return {el,w:Math.max(260,el.clientWidth||600),h:Math.max(160,el.clientHeight||260)}}
 function textW(s,px){return [...String(s)].reduce((a,c)=>a+(c.charCodeAt(0)>0x2e80?px:px*0.56),0)}
-function donut(ok,bad,other){
-  const {el,w,h}=box("donut"),tot=ok+bad+other;
+/* The ring and the number in its centre come from ONE source. The server counts every finished run of the 24 hours (ok24, fail24, done24); the list of runs the page receives is only the newest
+   part of them (runs_total says how many there are), so a total counted on the list minus a count of the server went negative. With a server that does not send done24 the three figures are
+   counted on the list and the card says it is a sample */
+function ringFigures(d,done){
+  const F=d.figures||{},n=v=>{v=Math.round(+v);return isFinite(v)&&v>0?v:0},srv=F.done24!=null&&F.ok24!=null&&F.fail24!=null;
+  let ok,bad,tot;
+  if(srv){ok=n(F.ok24);bad=n(F.fail24);tot=Math.max(n(F.done24),ok+bad)}
+  else{ok=done.filter(r=>r.conclusion==="success").length;bad=done.filter(r=>BAD.includes(r.conclusion)).length;tot=done.length}
+  return {ok:ok,bad:bad,other:Math.max(0,tot-ok-bad),sample:!srv&&(d.runs_total||0)>(d.runs||[]).length?(d.runs||[]).length:0}
+}
+function sampleNote(d){const k=(d.runs_total||0)>(d.runs||[]).length?(d.runs||[]).length:0;return k?`<div class="mut" data-sample="1">${esc(T("ui.d_sample",{n:k,total:d.runs_total}))}</div>`:""}
+function donut(ok,bad,other,sample){
+  const {el,w,h}=box("donut"),num=v=>{v=Math.round(+v);return isFinite(v)&&v>0?v:0};      // a figure that is negative or not a number is 0: the ring never draws a false segment
+  ok=num(ok);bad=num(bad);other=num(other);const tot=ok+bad+other;
   if(!tot){el.innerHTML=`<span class="mut">${esc(T("ui.d_none"))}</span>`;return}
   const parts=[[ok,"var(--ok)",T("ui.d_ok")],[bad,"var(--bad)",T("ui.d_fail")],[other,"var(--grey)",T("ui.d_other")]];
   const lw=Math.ceil(Math.max(...parts.map(p=>textW(p[2]+": "+p[0],14))))+26,side=w-lw-20>=100;
@@ -980,14 +992,14 @@ function donut(ok,bad,other){
     svg+=p[0]===tot?`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${p[1]}" stroke-width="${sw}"/>`:`<path d="M${x(a0,r)} ${y(a0,r)} A${r} ${r} 0 ${large} 1 ${x(a1,r)} ${y(a1,r)}" fill="none" stroke="${p[1]}" stroke-width="${sw}"/>`});
   svg+=`<text x="${cx}" y="${cy+8}" text-anchor="middle" data-inside="1" style="font-size:${Math.round(size*0.17)}px;font-weight:600;fill:var(--text)">${tot}</text>`;
   parts.forEach((p,i)=>{const lx=side?size+16:Math.max(8,(w-lw)/2),ly=side?cy-34+i*30:size+8+14+i*22;svg+=`<rect x="${lx}" y="${ly-11}" width="14" height="14" rx="2" fill="${p[1]}"/><text x="${lx+22}" y="${ly}" style="font-size:14px;fill:var(--text)">${esc(p[2])}: <tspan style="font-weight:600">${p[0]}</tspan></text>`});
-  el.innerHTML=svg+"</svg>";
+  el.innerHTML=svg+"</svg>"+(sample?`<div class="mut" data-sample="1">${esc(T("ui.d_sample",{n:sample,total:DATA&&DATA.runs_total||sample}))}</div>`:"");
 }
-function rates(last){
+function rates(last,d){
   const el=$("rates"),by={};
   last.filter(r=>r.status==="completed").forEach(r=>{(by[r.repo]=by[r.repo]||{ok:0,n:0});by[r.repo].n++;if(r.conclusion==="success")by[r.repo].ok++});
   const rows=Object.entries(by).sort((a,b)=>a[1].ok/a[1].n-b[1].ok/b[1].n||b[1].n-a[1].n);
   if(!rows.length){el.innerHTML=`<span class="mut">${esc(T("ui.no_data"))}</span>`;return}
-  el.innerHTML=rows.map(([repo,v])=>{const p=v.ok/v.n,c=p===1?"var(--ok)":p>=.5?"var(--warn)":"var(--bad)";
+  el.innerHTML=(d?sampleNote(d):"")+rows.map(([repo,v])=>{const p=v.ok/v.n,c=p===1?"var(--ok)":p>=.5?"var(--warn)":"var(--bad)";
     return `<div class="rrow" title="${esc(T("ui.rate_title",{repo:repo,ok:v.ok,n:v.n}))}"><span class="rname">${esc(repo)}</span><span class="rbar"><i style="width:${Math.round(p*100)}%;background:${c}"></i></span><span class="rval">${Math.round(p*100)}% <span class="mut">${v.ok}/${v.n}</span></span></div>`}).join("");
 }
 function timeline(last){

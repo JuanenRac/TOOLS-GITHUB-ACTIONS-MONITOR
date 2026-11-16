@@ -9,6 +9,10 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+### Corrigido
+
+- **O anel das últimas 24 horas conta a partir de uma só fonte e nunca mostra um número negativo**: o total ao centro e os três números da legenda (com êxito, com falha, cancelados ou outros) vêm do servidor (`figures.done24` é novo) e somam sempre; antes o total era contado sobre a lista de execuções que a página recebe, que só traz as mais recentes, e «cancelados ou outros» ficava negativo. Um número negativo ou que não seja um número é desenhado como 0 e, se o servidor não enviar o total, os três números são contados sobre a lista e o cartão diz que é uma amostra. A taxa de êxito por repositório diz o mesmo quando a sua lista é uma amostra.
+
 
 ### Adicionado
 

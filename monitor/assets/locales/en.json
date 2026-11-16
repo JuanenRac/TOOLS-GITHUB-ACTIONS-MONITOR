@@ -2355,6 +2355,7 @@
  "ui.d_none": "No finished runs in 24 h.",
  "ui.d_ok": "successful",
  "ui.d_other": "cancelled or other",
+ "ui.d_sample": "Sample: this list holds the newest {n} of {total} runs.",
  "ui.days_ago": "{n} d ago",
  "ui.dense": "Dense: {state}",
  "ui.dense_title": "Compact view of the Now tab",

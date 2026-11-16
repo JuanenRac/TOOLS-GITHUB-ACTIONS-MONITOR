@@ -9,6 +9,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+### Corrigé
+
+- **L’anneau des dernières 24 heures compte à partir d’une seule source et n’affiche jamais un nombre négatif** : le total au centre et les trois chiffres de la légende (réussies, en échec, annulées ou autres) viennent du serveur (`figures.done24` est nouveau) et leur somme est toujours exacte ; avant, le total était compté sur la liste des exécutions reçue par la page, qui ne contient que les plus récentes, et « annulées ou autres » devenait négatif. Un chiffre négatif ou qui n’est pas un nombre est dessiné comme 0, et si le serveur n’envoie pas le total, les trois chiffres sont comptés sur la liste et la carte indique qu’il s’agit d’un échantillon. Le taux de réussite par dépôt le dit aussi lorsque sa liste est un échantillon.
+
 
 ### Ajouté
 
