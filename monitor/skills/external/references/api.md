@@ -27,8 +27,13 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/ai/actions/unlock` | POST | admin | a person unlocks the actions of the AI for a short time (this computer only) |
 | `/api/ai/alerts` | GET | viewer | the feed of alerts since a moment (`?since=SECONDS`) |
 | `/api/ai/brief` | GET | viewer | the short brief of the real open alerts (Markdown, or `?fmt=json`) |
+| `/api/ai/doctor` | POST | admin | why the AI does not answer: provider, address, key (only whether the variable is set), model, catalog, quota; never prints a key (this computer only) |
 | `/api/ai/failures` | GET,POST | viewer / admin | the book of failures, newest first (`?since=&repo=&category=&limit=`) (POST: this computer only) |
 | `/api/ai/lessons` | GET,POST | viewer / admin | GET: the lessons that apply now, the repeated failures and the library (`?fmt=md|brief&repo=`); POST: write a lesson (switch, administrator, confirmation) (POST: this computer only) |
+| `/api/ai/models` | GET | viewer | the models of the AI provider kept from its last list (no request to the provider), the check of the configured model and the table of data per model |
+| `/api/ai/models/data` | POST | admin | write by hand the context window, the prices or the tools of one model in the table (this computer only) |
+| `/api/ai/models/refresh` | POST | admin | read the list of models from the provider now: one request, inside the daily cap (this computer only) |
+| `/api/ai/models/test` | POST | admin | try one model with a synthetic text: latency, tokens, estimated cost and a sample answer (this computer only) |
 | `/api/ai/presets` | GET | viewer | the presets of AI providers (address, name of the variable of the key, example models, privacy); data only, never a key |
 | `/api/ai/state` | GET | viewer | every signal of the monitor, versioned, plus the lessons that apply now |
 | `/api/ai/stream` | GET | viewer | server-sent events of the alerts as they open and resolve (off by default) |

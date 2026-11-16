@@ -1276,7 +1276,8 @@ def panel_list(lang=None):
 
 # The POST routes that the monitor accepts only from the computer it runs on (guard + this_computer): from the network they answer 403 `local_only`. The handler reads these two lists and the generated
 # references of the skills for the AIs (tools/make_skill_refs.py) read the same ones, so the table an AI reads cannot disagree with the code.
-THIS_COMPUTER_ACTIONS = ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test")
+AI_MODEL_POST = ("/api/ai/models/refresh", "/api/ai/models/test", "/api/ai/models/data", "/api/ai/doctor")      # the list of models of the provider, the test of one model, the table of data, the doctor
+THIS_COMPUTER_ACTIONS = ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test") + AI_MODEL_POST
 THIS_COMPUTER_ADVANCED = ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures",
                           "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run")
 THIS_COMPUTER_POST = THIS_COMPUTER_ACTIONS + THIS_COMPUTER_ADVANCED
@@ -2608,6 +2609,11 @@ class Handler(BaseHTTPRequestHandler):
                 return
             from github_actions_monitor.sentinels import ai_presets
             self.json_reply({"ok": True, "presets": ai_presets.load()})
+        elif path == "/api/ai/models":      # read only: the configured provider, the list of models kept (it never asks the provider), the check of the configured model and the table of data per model
+            if not self.guard():
+                return
+            from github_actions_monitor.sentinels import ai_models, sentinel_ai
+            self.json_reply(ai_models.listing(sentinel_ai.ai_config(toolconfig.raw_config()), ai_store()))
         elif path == "/api/ai/stream":      # server-sent events, read only: the alerts as they open and resolve (ai_alerts.stream, off by default)
             if not self.guard():
                 return
@@ -3075,9 +3081,26 @@ def metrics_extra():
             "notify": dict(notifiers.STATS), "disconnects": DISCONNECTS[0], "score": score_metrics()}
 
 
+def ai_store():
+    """The cache and counters of the AI: the ones of the running sentinel, or (lite, or before it starts) the file itself."""
+    from github_actions_monitor.sentinels import sentinel_ai
+    sentinel = SENTINEL["obj"]
+    if sentinel is not None and getattr(sentinel, "ai_store", None) is not None:
+        return sentinel.ai_store
+    if "store" not in AI_FALLBACK_STORE:
+        AI_FALLBACK_STORE["store"] = sentinel_ai.Store(sentinel_ai.CACHE_FILE)
+    return AI_FALLBACK_STORE["store"]
+
+
+AI_FALLBACK_STORE = {}
+
+
 def handle_action_post(path, request):
     """The endpoints that DO something on request of the page: confirm an action of the AI, unlock the actions, test the AI connection, send a test notification."""
     config = toolconfig.raw_config()
+    if path in AI_MODEL_POST:
+        from github_actions_monitor.sentinels import ai_models, sentinel_ai
+        return ai_models.handle_post(path, request, sentinel_ai.ai_config(config), ai_store())
     if path == "/api/ai/actions/confirm":
         from github_actions_monitor.integrations import ai_actions
         return ai_actions.ACTIONS.run(request.get("id"), request.get("command"), config)

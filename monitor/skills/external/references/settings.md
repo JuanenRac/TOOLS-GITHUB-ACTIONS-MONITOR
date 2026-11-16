@@ -23,6 +23,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.answer_language` | `-` | ai | Language of the answers |
 | `ai.api_key_env` | `-` | ai | Key variable |
 | `ai.base_url` (secure) | `-` | ai | Endpoint of an OpenAI-compatible service |
+| `ai.catalog.enabled` (secure) | `-` | ai | Check the model against the provider's list |
+| `ai.catalog.fit_context` | `-` | ai | Fit the input to the context window |
+| `ai.catalog.max_requests_per_day` | `-` | ai | Requests for the list per day |
+| `ai.catalog.ttl_minutes` | `-` | ai | Life of the list of models |
 | `ai.daily_limit` | `-` | ai | Calls per day |
 | `ai.events` | `-` | ai | Events it may analyse |
 | `ai.max_input_chars` | `-` | ai | Input size |
