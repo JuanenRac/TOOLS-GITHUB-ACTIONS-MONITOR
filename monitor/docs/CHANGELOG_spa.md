@@ -9,6 +9,11 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+
+### Cambiado
+
+- **Los forks y los repositorios archivados se eligen con un ajuste y un fork mantenido nunca se pierde**: `discovery.skip_archived` (activado por defecto) decide si se vigilan los archivados; `discovery.fork_policy` puede dejar fuera los forks (`skip`) o conservar solo los que tienen CI propio (`skip_unless_ci`: un workflow activado y una ejecución dentro de `discovery.fork_ci_days`), y `auto` hace lo mismo con una ventana el doble de larga en una organización, cuyo tipo se lee una vez al día; `discovery.fork_checks_per_pass` limita las peticiones que se gastan en ello. El valor por defecto (`show`) no cambia nada.
+
 ## [2.0.2]
 
 ### Seguridad

@@ -9,6 +9,11 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+
+### Modificato
+
+- **Fork e repository archiviati si scelgono con un'impostazione e un fork mantenuto non si perde mai**: `discovery.skip_archived` (attivo di default) decide se gli archiviati si controllano; `discovery.fork_policy` può escludere i fork (`skip`) o tenere solo quelli con una CI propria (`skip_unless_ci`: un workflow attivato e un'esecuzione entro `discovery.fork_ci_days`), e `auto` fa lo stesso con una finestra doppia in un'organizzazione, il cui tipo si legge una volta al giorno; `discovery.fork_checks_per_pass` limita le richieste spese. Il valore predefinito (`show`) non cambia nulla.
+
 ## [2.0.2]
 
 ### Sicurezza

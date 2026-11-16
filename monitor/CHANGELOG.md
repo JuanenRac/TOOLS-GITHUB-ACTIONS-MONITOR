@@ -11,6 +11,11 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+
+### Changed
+
+- **Forks and archived repositories are chosen by a setting, and a maintained fork is never lost**: `discovery.skip_archived` (on by default) decides whether archived repositories are watched; `discovery.fork_policy` can leave forks out (`skip`) or keep only the ones that have a CI of their own (`skip_unless_ci`: an enabled workflow and a run inside `discovery.fork_ci_days`), and `auto` does the same with a window twice as long on an organisation, whose kind is read once a day; `discovery.fork_checks_per_pass` limits the requests spent on it. The default (`show`) changes nothing.
+
 ## [2.0.2]
 
 ### Security

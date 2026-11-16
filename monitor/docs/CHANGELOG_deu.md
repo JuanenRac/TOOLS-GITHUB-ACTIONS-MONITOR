@@ -9,6 +9,11 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+
+### Geändert
+
+- **Forks und archivierte Repositorys werden per Einstellung gewählt, und ein gepflegter Fork geht nie verloren**: `discovery.skip_archived` (standardmäßig an) entscheidet, ob archivierte Repositorys überwacht werden; `discovery.fork_policy` kann Forks auslassen (`skip`) oder nur die mit eigener CI behalten (`skip_unless_ci`: ein aktivierter Workflow und ein Lauf innerhalb von `discovery.fork_ci_days`), und `auto` tut dasselbe mit doppelt so langem Fenster bei einer Organisation, deren Art einmal täglich gelesen wird; `discovery.fork_checks_per_pass` begrenzt die dafür verbrauchten Anfragen. Der Standard (`show`) ändert nichts.
+
 ## [2.0.2]
 
 ### Sicherheit

@@ -443,7 +443,11 @@
     "events": true,
     "suggest_groups": true,
     "auto_frequency": false,
-    "hide": []
+    "hide": [],
+    "skip_archived": true,
+    "fork_policy": "show",
+    "fork_ci_days": 90,
+    "fork_checks_per_pass": 30
   },
   "auth": {
     "enabled": false,

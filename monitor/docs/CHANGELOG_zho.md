@@ -9,6 +9,11 @@
 
 ## [Unreleased]
 
+
+### 变更
+
+- **fork 和已归档仓库可通过设置选择，在维护的 fork 绝不丢失**：`discovery.skip_archived`（默认开启）决定是否监视已归档仓库；`discovery.fork_policy` 可排除 fork（`skip`），或只保留有自己 CI 的 fork（`skip_unless_ci`：已启用的工作流且在 `discovery.fork_ci_days` 内有运行），`auto` 对组织账户把时间窗口加倍，账户类型每天读取一次；`discovery.fork_checks_per_pass` 限制为此花费的请求数。默认值（`show`）不改变任何行为。
+
 ## [2.0.2]
 
 ### 安全

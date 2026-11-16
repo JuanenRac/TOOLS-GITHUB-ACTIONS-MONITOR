@@ -9,6 +9,11 @@
 
 ## [Unreleased]
 
+
+### 変更
+
+- **フォークとアーカイブ済みリポジトリを設定で選べ、保守中のフォークは失われません**: `discovery.skip_archived`（既定でオン）はアーカイブ済みを監視するかを決めます。`discovery.fork_policy` はフォークを除外（`skip`）するか、独自の CI があるものだけ残せます（`skip_unless_ci`: 有効なワークフローと `discovery.fork_ci_days` 以内の実行）。`auto` は組織では期間を2倍にし、アカウントの種類は1日1回読みます。`discovery.fork_checks_per_pass` は消費するリクエストを制限します。既定（`show`）では何も変わりません。
+
 ## [2.0.2]
 
 ### セキュリティ
