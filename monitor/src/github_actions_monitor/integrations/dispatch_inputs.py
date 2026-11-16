@@ -9,7 +9,7 @@ read"), never a guess, so a caller can tell "no inputs" (`[]`) from "unknown" (`
 """
 import re
 
-KEY_RE = re.compile(r"^(\s*)(?:\"([^\"]+)\"|'([^']+)'|([A-Za-z0-9_.-]+))\s*:\s*(.*?)\s*$")
+KEY_RE = re.compile(r"^(\s*)(?:\"([^\"]+)\"|'([^']+)'|([A-Za-z0-9_.-]+))\s*:\s*(.*?)\s*\Z")
 TYPES = ("string", "boolean", "choice", "number", "environment")
 MAX_INPUTS = 25      # GitHub allows 25 inputs
 
