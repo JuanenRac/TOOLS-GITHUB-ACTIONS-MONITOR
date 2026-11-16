@@ -26,6 +26,8 @@ Hay una alerta por repositorio y señal, con las cuentas por gravedad en sus det
 
 Una fuente que GitHub no responde para un repositorio (la función está apagada allí, o el acceso no puede leerla: 403, 404) **no** es una alerta y **no** es un certificado de buena salud. Se lista en el estado bajo `unavailable`, con cuántos repositorios afecta, y la página lo dice. La única excepción es la protección de la rama por defecto: GitHub responde 404 cuando una rama no tiene ninguna, y eso es el hallazgo; un 403 ahí es solo no legible.
 
+Cuando la mayor parte de lo que pesa en la penalización (Dependabot, escaneo de código, secretos) no se puede leer, el nivel es `unknown` y no `ok`, y la parte de seguridad de la puntuación se deja fuera en vez de contar como 100; el estado muestra `sources_readable` y `sources_total`. Si una fuente deja de responder mientras hay una alerta abierta, la alerta se mantiene una semana (marcada con `unread_since`) y nunca se anuncia como corregida. Un repositorio cuyas lecturas siguen fallando espera 5 minutos, 30 minutos y luego 6 horas hasta el siguiente intento, así unos pocos repositorios rotos nunca gastan la ronda entera.
+
 Ahora cada centinela dice su **ciclo de vida**: `healthy` (sano), `degraded` (degradado: algunas lecturas fallan, una fuente no puede leerse o no ha terminado su primera pasada), `paused` (en pausa, esperando la cuota de GitHub), `error` (falla y no ha leído nada aún) u `off` (apagado). «Sin alertas» solo significa algo cuando el ciclo de vida es `healthy`.
 
 ## Coste
