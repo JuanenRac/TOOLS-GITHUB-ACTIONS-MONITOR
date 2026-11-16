@@ -52,6 +52,7 @@ from github_actions_monitor.util import exclusive
 from github_actions_monitor.util import platform_compat
 from github_actions_monitor.util import ports
 from github_actions_monitor.data_pipeline import redrule
+from github_actions_monitor.data_pipeline import stuckrule
 from github_actions_monitor.util import resilience
 from github_actions_monitor.security import secretstore
 from github_actions_monitor.security import credential
@@ -80,7 +81,8 @@ DEFAULTS = {
     "discover_limit": 1000,        # the most repositories listed for the account
     "show_unclassified": True,     # repositories that no ecosystem claims are shown in an automatic group "Unclassified" instead of disappearing
     "stuck_minutes": 120,
-    "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "extra_branches": []},      # which runs may make a branch red (redrule.py)
+    "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "extra_branches": [],
+           "stuck": {"learned": False, "percentile": 95, "margin": 2.0, "min_samples": 3, "min_minutes": 30, "max_minutes": 720, "queue_minutes": 0, "workflow_minutes": [], "runner_minutes": [], "awaiting_stuck": True}},      # which runs may make a branch red (redrule.py)
     "watchdog_minutes": 10,      # a refresh cycle that runs longer than this is dumped to the log and restarted in a new thread (0 = off)
     "watchdog_max_abandoned": 8,      # calls to GitHub that gave up waiting but never returned: with this many still alive no new call is started and the health check says so (0 = no limit)
     "runs_per_repo": 20,
@@ -185,6 +187,7 @@ WATCH = cycle_watch.CycleWatch()      # the heartbeat of the refresh loop (phase
 SENTINEL = {"obj": None, "error": None, "registry": None}  # the CI sentinel (layer A) and the registry of all of them; a failure of any never stops the monitor
 LOCK = threading.Lock()
 ISSUE_CACHE = {"at": 0.0, "items": [], "busy": False}
+RUNNERS_SEEN = {"payload": None}      # the last answer of /api/runners: the labels that only offline runners carry explain a run that waits for ever (stuckrule.py)
 RUN_CACHE = {}  # repo -> {"runs": [...], "at": float, "error": str|None}
 PRIVATE = set()                           # private repositories of the account (read with the listing): the only ones whose minutes cost anything
 QUOTA_ALERTS = None
@@ -764,7 +767,7 @@ def run_jobs(repo, run_id):
         jobs.append({
             "name": job.get("name"), "status": job.get("status"), "conclusion": job.get("conclusion"),
             "steps_total": len(steps), "steps_done": done, "step": current, "runner": job.get("runner_name") or "",
-            "seconds": seconds_between(started, finished) if started else 0, "url": job.get("html_url"),
+            "seconds": seconds_between(started, finished) if started else 0, "url": job.get("html_url"), "labels": [str(x)[:40] for x in (job.get("labels") or [])][:12],
         })
     return jobs
 
@@ -870,9 +873,17 @@ def build(config, repos, started, refreshed, loading, progress_text):
         if run["status"] in ("in_progress", "queued", "waiting", "requested", "pending") and run.get("event") != "dynamic" and (run["repo"], run.get("id")) not in seen_active:
             seen_active.add((run["repo"], run.get("id")))
             active.append(run)
+    stuck_cfg = stuckrule.settings(config)
+    learned = stuckrule.learn(runs, stuck_cfg) if stuck_cfg["learned"] else {}
+    offline = stuckrule.offline_labels(RUNNERS_SEEN.get("payload"))
+    ask_queued = [len(stuck_cfg["runner_minutes"]) > 0 or bool(offline), 10]      # queued runs only read their jobs (one call each) when a runner label can change the verdict
     for run in active:
         run["jobs"] = run_jobs(run["repo"], run["id"]) if (run["status"] == "in_progress" and not loading) else []
-        run["stuck"] = (run.get("seconds") or 0) > config["stuck_minutes"] * 60
+        if run["status"] in stuckrule.QUEUE_STATES and ask_queued[0] and ask_queued[1] > 0 and not loading:
+            ask_queued[1] -= 1
+            run["jobs"] = run_jobs(run["repo"], run["id"])
+        labels = sorted({label for job in run["jobs"] for label in job.get("labels") or []})
+        run["stuck"], run["stuck_reason"], run["stuck_limit"] = stuckrule.evaluate(run, config["stuck_minutes"], stuck_cfg, learned, labels, offline)
     if not loading and time.time() - ISSUE_CACHE["at"] > config["issues_refresh_seconds"] and not ISSUE_CACHE["busy"]:
         ISSUE_CACHE["busy"] = True  # the issues load in the background so the first page does not wait for them
 
@@ -3018,7 +3029,8 @@ def advanced_get(path, query):
         return {"done": done and not DEMO["on"]}
     if path == "/api/runners":
         from github_actions_monitor.integrations import runners
-        return runners.payload(config, lambda endpoint: gh_read(endpoint, retries=0), toolconfig.github_owner(config), DEMO["on"], list((STATE.get("data") or {}).get("repos") or []))
+        RUNNERS_SEEN["payload"] = runners.payload(config, lambda endpoint: gh_read(endpoint, retries=0), toolconfig.github_owner(config), DEMO["on"], list((STATE.get("data") or {}).get("repos") or []))
+        return RUNNERS_SEEN["payload"]
     if path == "/api/mirror":
         from github_actions_monitor.integrations import mirror
         return mirror.status(config)

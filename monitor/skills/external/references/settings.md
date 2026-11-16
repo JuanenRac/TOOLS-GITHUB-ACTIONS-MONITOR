@@ -91,6 +91,16 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ci.extra_branches` | `[]` | sentinel | Maintenance branches to watch |
 | `ci.inactive_days` | `90` | sentinel | Days until a workflow is inactive |
 | `ci.red_events` | `["push", "schedule", "workflow_dispatch", "merge_group"]` | sentinel | Events that can make a branch red |
+| `ci.stuck.awaiting_stuck` | `true` | sentinel | A run waiting for approval can be stuck |
+| `ci.stuck.learned` | `false` | sentinel | Learn the limit of each workflow |
+| `ci.stuck.margin` | `2.0` | sentinel | Margin over that duration |
+| `ci.stuck.max_minutes` | `720` | sentinel | Largest learned limit |
+| `ci.stuck.min_minutes` | `30` | sentinel | Smallest learned limit |
+| `ci.stuck.min_samples` | `3` | sentinel | Finished runs needed to learn |
+| `ci.stuck.percentile` | `95` | sentinel | Percentile of the durations |
+| `ci.stuck.queue_minutes` | `0` | sentinel | Limit for a run waiting for a runner |
+| `ci.stuck.runner_minutes` | `[]` | sentinel | Fixed limits per runner label |
+| `ci.stuck.workflow_minutes` | `[]` | sentinel | Fixed limits per workflow |
 | `cold_refresh_seconds` | `600` | polling | Refresh of cold repositories |
 | `cold_runs_per_repo` | `5` | polling | Runs read per cold repository |
 | `discover_limit` | `1000` | polling | Repositories listed |

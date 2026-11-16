@@ -19,6 +19,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Added
 
+- **A long build is not "stuck" just because it is long, and a stuck run says why it waits**: the block `ci.stuck` can learn the limit of each workflow from its own recent runs (`ci.stuck.learned`: a percentile of their durations times a margin, kept between a minimum and a maximum), fix a limit per workflow file or per runner label (`ci.stuck.workflow_minutes`, `ci.stuck.runner_minutes`) and give the runs that wait for a runner their own longer limit (`ci.stuck.queue_minutes`). Every stuck run now says why: it waits for a runner, for an approval, its runner is offline, or it is a build that runs long. All of it is off or empty by default, so the single `stuck_minutes` limit keeps working exactly as before.
 - **Merge queue**: a failed run of the merge queue of the default branch (`gh-readonly-queue/...`, event `merge_group`) is a red of its own, shown as "(merge queue)" in the red list, the alerts and the team view, and it clears with the next green run of the queue.
 - **Maintenance branches**: `ci.extra_branches` takes patterns (for example `release-*`) of extra branches whose last run also counts; by default only the default branch is watched. A red of such a branch is labelled with its name and never hides, or is hidden by, the default branch.
 

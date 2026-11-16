@@ -629,7 +629,7 @@ def compute_snapshot(inp):
     branches = {r: i.get("branch") for r, i in info.items()}
     data = inp.get("data") or {}
     rate = data.get("rate")
-    stuck = [{"repo": r["repo"], "name": r["name"], "seconds": r["seconds"], "url": r["url"], "status": r["status"]} for r in data.get("active", []) if r.get("stuck")]
+    stuck = [{"repo": r["repo"], "name": r["name"], "seconds": r["seconds"], "url": r["url"], "status": r["status"], "reason": r.get("stuck_reason") or "build", "limit_minutes": r.get("stuck_limit")} for r in data.get("active", []) if r.get("stuck")]
     issues = [{"repo": i["repo"], "number": i["number"], "title": i["title"][:120], "url": i["url"], "labels": i["labels"], "created": i.get("created")} for i in data.get("issues", [])]
     ttl = float(cfg.get("a2_resolve_ttl_seconds") or 0)
     resolved = inp.get("a2_resolved") or {}
