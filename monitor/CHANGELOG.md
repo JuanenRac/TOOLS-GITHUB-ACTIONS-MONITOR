@@ -43,12 +43,14 @@ when this file and `tool_version.py` disagree.
 - **An abandoned workflow is "inactive", not red for ever**: a workflow whose last run failed but which has not run for `ci.inactive_days` days (90 by default, 0 turns it off) leaves the red list and is counted in the `inactive` figure.
 - **Workflows that only react to issues, comments or labels do not count as red CI**: they are told apart by the events they run on (setting `ci.automation_counts`, off by default); every red row now says which kind of workflow it is.
 - **A2 settles many workflows with one request**: a repository with at least `sentinel.a2_resolve_batch_min` workflows to look up (2 by default; 0 = one by one) is asked once for its newest completed runs of the default branch, pull requests left out, and every workflow found in them is settled together (`sentinel.a2_resolve_batch_pages` pages of 100 at most); what the list does not show is asked one by one as before, so a repository with 100 or more workflows converges in a few cycles instead of four workflows per cycle.
+- **The health of the team is fast with thousands of repositories**: the runs, red workflows, running runs and alerts are grouped by repository once, so a request to the team health no longer walks all of them for each repository (2,000 repositories took about eight seconds), and the health of one repository builds only its own view.
 
 ### Fixed
 
 - **Durations and queue times of re-run workflows are no longer absurd**: the wait in the queue and the duration are measured on the latest attempt of a run (`run_attempt`); the creation time of the first try is never used for a re-run, so queues of days and durations of hundreds of days no longer reach the analytics panel, the stuck-run check or the exports. A duration longer than the 35 days a run can last is left empty. The new setting `ci.rerun_timing` (off by default) also asks GitHub for the real duration of finished re-runs.
 - **A try after an approval is not "flaky"**: a run that needed a person to approve it (`action_required`) and then passed, and the runs of pull requests that come from forks, no longer count as flaky workflows.
 - The failing job of a run with more than 30 jobs is found: the lists of jobs that the alert for an AI, the assistant and the batch tool read were cut at 30 and are now cut at 100 (the same single request).
+- **A clock set back no longer stops the score, the purge and the scheduled reports**: a saved moment that lies in the future (a computer without a battery clock that starts with an old date, or a clock corrected by hand) is no longer believed; the pass is due at once and writes a good moment, instead of waiting for days until the old clock is reached again.
 
 ### Security
 

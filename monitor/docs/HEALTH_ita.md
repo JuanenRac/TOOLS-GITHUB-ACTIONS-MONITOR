@@ -27,3 +27,9 @@ Lo stato è **cattivo** (un workflow rosso, o un avviso di livello critico o err
 - Link diretti per schermi a parete: `?view=team&chrome=0`, `?view=repos&chrome=0` e `?view=repo&repo=owner/name&chrome=0`.
 - L'API: `GET /api/team/health?ecosystem=&severity=&q=&label=` e `GET /api/repos/<owner>/<repo>/health`. Entrambe richiedono il permesso di vedere l'account; le risposte portano `schema: 1`. Un repository sconosciuto risponde 404 con `code: repo_unknown`.
 - L'edizione Lite mantiene la sua vista semplice delle esecuzioni e non ha né la scheda né i percorsi.
+
+## Migliaia di repository e un orologio spostato indietro
+
+La salute del team raggruppa una sola volta per repository le esecuzioni, i workflow rossi, le esecuzioni in corso e gli avvisi, così il costo cresce con la quantità di dati e non con repository per esecuzioni; chiedere un solo repository costruisce solo la sua vista.
+
+Un istante salvato che si trova nel futuro (un computer senza orologio a batteria che parte con una data vecchia, o un orologio corretto a mano) non viene creduto: il punteggio, la pulizia dei dati vecchi e i rapporti programmati sono dovuti subito e scrivono un istante corretto, invece di attendere che il vecchio orologio venga raggiunto.
