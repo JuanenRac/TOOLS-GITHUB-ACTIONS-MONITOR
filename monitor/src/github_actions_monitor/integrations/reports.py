@@ -46,7 +46,7 @@ def reset():
 def hygiene_findings(text, name="workflow.yml"):
     """[{"rule", "line", "severity", "detail"}] of one workflow file: the rules of the linter plus `no_timeout` (a job without `timeout-minutes`) and `no_concurrency`."""
     from github_actions_monitor.cli import lint_workflows
-    found = [{"rule": f["rule"], "line": f["line"], "severity": f["severity"], "detail": f.get("detail", "")} for f in lint_workflows.lint_text(text, name)]
+    found = [{"rule": f["rule"], "line": f["line"], "severity": f["severity"], "detail": f.get("detail", "")} for f in lint_workflows.lint_text(text, name) if f["rule"] not in lint_workflows.OPTIONAL]
     lines = text.replace("\r\n", "\n").split("\n")
     if not any(re.match(r"concurrency\s*:", line) for line in lines):
         found.append({"rule": "no_concurrency", "line": 1, "severity": "info", "detail": ""})

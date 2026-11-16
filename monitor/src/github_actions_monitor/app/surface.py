@@ -308,8 +308,11 @@ def scan_clone(path):
         match = next((m for m in CHANGELOG_TOP.finditer(changelog) if m.group(1).strip().lower() != "unreleased"), None)
         top = match.group(1).strip() if match else None
     return {"workflows": workflows, "stacks": stacks, "dependabot_yml": any((base / ".github" / n).is_file() for n in ("dependabot.yml", "dependabot.yaml")),
+            "renovate_cfg": any(p.is_file() for p in [base / n for n in RENOVATE_FILES] + [base / ".github" / n for n in RENOVATE_FILES]),
             "codeql_yml": codeql, "manifest": manifest, "changelog_top": top}
 
+
+RENOVATE_FILES = ("renovate.json", "renovate.json5", ".renovaterc", ".renovaterc.json", ".renovaterc.json5")      # where Renovate reads its configuration (root or .github)
 
 # ---------- pure rules (tested without network) ----------
 VERSION_TAG = re.compile(r"^v?\d+\.\d+(?:\.\d+){0,2}(?:[-+][0-9A-Za-z.-]+)?\Z")
@@ -693,8 +696,8 @@ def build(inp):
         if not scan or not scan["stacks"]:
             continue
         missing = []
-        if not scan["dependabot_yml"]:
-            missing.append("Dependabot")
+        if not (scan["dependabot_yml"] or scan.get("renovate_cfg")):
+            missing.append("Dependabot")      # an update bot is configured when Dependabot or Renovate is
         if not scan["codeql_yml"] and (alerts.get(repo) or {}).get("codeql") is None:
             missing.append("CodeQL")
         if missing:
