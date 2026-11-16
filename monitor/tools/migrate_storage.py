@@ -11,6 +11,7 @@ Your files are never changed or deleted. An interrupted run leaves each account 
 
   --accounts-dir  the folder of the accounts (default: data/accounts/ of the product folder, or MONITOR_ACCOUNTS_DIR); with --flat the product folder itself
   --db            ONE shared database (model B). Without it each account gets its own, data/accounts/<id>/storage.sqlite3 (model A, the default)
+  --force         also replace an account whose target has newer events or snapshots than the source (by default such an account is refused and nothing of it is written)
   --flat          the installation without an accounts/ folder: one account, "default", with its files in config/, data/ and logs/ of the product folder
 
 After a clean run, set  "storage": {"backend": "sqlite"}  in the configuration of the account (or of the monitor) and restart it.
@@ -41,6 +42,7 @@ def main(argv=None):
     parser.add_argument("--account", action="append", metavar="ID", help=i18n.t("mst.help_account"))
     parser.add_argument("--flat", action="store_true", help=i18n.t("mst.help_flat"))
     parser.add_argument("--apply", action="store_true", help=i18n.t("mst.help_apply"))
+    parser.add_argument("--force", action="store_true", help=i18n.t("mst.help_force"))
     parser.add_argument("--lang", metavar="CODE", help=i18n.t("cli.help_lang"))
     args = parser.parse_args(argv)
     if args.lang:
@@ -57,10 +59,16 @@ def main(argv=None):
         print(i18n.t("mst.found", n=len(rows), source=str(source.root)))
         for row in rows:
             print("  " + i18n.t("mst.row", account=row["account"], events=row["events"], sentinels=row["sentinels"], docs=row["docs"], status=i18n.t("mst.s_" + row["status"])))
+        damaged = sum(row.get("damaged", 0) for row in rows)
+        if damaged:      # lines of the feed that are not valid JSON are not copied: a warning, not a failure
+            print(i18n.t("mst.damaged", n=damaged))
         if not args.apply:
             print(i18n.t("mst.dry_run"))
             return 0
-        result = migrate.migrate(source, target, apply=True, accounts=args.account)
+        result = migrate.migrate(source, target, apply=True, accounts=args.account, force=args.force)
+        if result["refused"]:
+            print(i18n.t("mst.refused", accounts=", ".join(result["refused"])))
+            return 1
         if result["verified"]:
             print(i18n.t("mst.done", n=result["copied"], skipped=result["skipped"], events=result["events"]))
             return 0

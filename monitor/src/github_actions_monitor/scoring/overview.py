@@ -4,7 +4,7 @@
 
 There is no real "score of the installation": every account has its own. This is a mean of the scored accounts, weighted by the number of their repositories that have a number, and it always
 carries who is in it (`accounts_scored` of `accounts_total`), the mean coverage and `informative: true`. An account without a number (calibrating, not enough data, off, unreachable) is listed with
-its state and left out of the mean; with none in the mean there is no number, never a 100.
+its state and left out of the mean; an account whose snapshot is stale (no pass for hours) is left out too and counted in `accounts_stale`; with none in the mean there is no number, never a 100.
 """
 from github_actions_monitor.scoring import engine
 
@@ -22,7 +22,7 @@ def row(account, answer):
     repos = [r for r in (answer.get("repos") or []) if isinstance(r, dict) and _number(r.get("score"))]
     scored = answer["state"] == "scored" and _number(answer.get("score"))
     return {"account": account, "state": answer["state"], "score": answer["score"] if scored else None, "letter": answer.get("letter") if scored else None,
-            "coverage": answer.get("coverage") if _number(answer.get("coverage")) else None, "repos": len(repos), "weight": max(1, len(repos)) if scored else 0,
+            "coverage": answer.get("coverage") if _number(answer.get("coverage")) else None, "repos": len(repos), "weight": max(1, len(repos)) if scored and not answer.get("stale") else 0,
             "stale": bool(answer.get("stale")), "missing": [str(x) for x in (answer.get("missing_parts") or [])] if scored else []}
 
 
@@ -32,7 +32,8 @@ def combine(answers, cfg=None):
     rows = [row(account, answer) for account, answer in sorted(answers.items())]
     counted = [r for r in rows if r["weight"] > 0]
     total_weight = sum(r["weight"] for r in counted)
-    out = {"schema": SCHEMA, "informative": True, "accounts_total": len(rows), "accounts_scored": len(counted), "accounts": rows, "score": None, "letter": None, "coverage": None}
+    out = {"schema": SCHEMA, "informative": True, "accounts_total": len(rows), "accounts_scored": len(counted), "accounts_stale": sum(1 for r in rows if r.get("stale") and r["state"] == "scored"),
+           "accounts": rows, "score": None, "letter": None, "coverage": None}
     if counted and total_weight:
         out["score"] = round(sum(r["score"] * r["weight"] for r in counted) / total_weight, 1)
         out["letter"] = engine.letter(out["score"], cfg["grades"])

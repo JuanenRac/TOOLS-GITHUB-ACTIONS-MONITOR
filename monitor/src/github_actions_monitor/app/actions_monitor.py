@@ -2892,7 +2892,11 @@ def score_metrics():
         from github_actions_monitor.storage import runtime
         storage, account = runtime.process_storage(CHILD["account"] or None)
         latest = score_api.latest(storage, account, toolconfig.raw_config())
-        return None if latest.get("state") == "off" else {"state": latest.get("state"), "score": latest.get("score"), "coverage": latest.get("coverage")}
+        if latest.get("state") == "off":
+            return None
+        if latest.get("stale"):      # an old number is not exported as if it were current
+            return {"state": "stale", "score": None, "coverage": latest.get("coverage")}
+        return {"state": latest.get("state"), "score": latest.get("score"), "coverage": latest.get("coverage")}
     except Exception as error:   # noqa: BLE001 - /metrics must still answer
         degraded.note("score.metrics", error)
         return None

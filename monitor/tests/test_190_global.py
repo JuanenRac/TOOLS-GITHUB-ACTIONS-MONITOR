@@ -154,5 +154,16 @@ class Supervisor(unittest.TestCase):
         self.assertEqual(sorted(r["account"] for r in doc["accounts"]), ["alpha", "gamma"])
 
 
+
+class Stale(unittest.TestCase):
+    def test_an_account_with_a_stale_snapshot_is_listed_and_counted_apart_but_not_in_the_mean(self):
+        fresh = answer(score=50.0, repos=1)
+        old = {**answer(score=100.0, letter="A", repos=9), "stale": True}
+        out = overview.combine({"a": fresh, "b": old})
+        self.assertEqual((out["score"], out["accounts_scored"], out["accounts_stale"], out["accounts_total"]), (50.0, 1, 1, 2))
+        only_old = overview.combine({"b": old})
+        self.assertIsNone(only_old["score"])
+
+
 if __name__ == "__main__":
     unittest.main()

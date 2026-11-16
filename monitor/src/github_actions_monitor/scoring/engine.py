@@ -140,6 +140,8 @@ def compute(metrics, cfg, watched_hours=None, previous=None):
             reasons.append("few_runs")
         if coverage < cfg["min_coverage"]:
             reasons.append("low_coverage")
+        if weight_with_data <= 0:      # no part has data (possible with min_coverage 0): there is nothing to average
+            reasons.append("no_data")
         state = "insufficient_data" if reasons else "scored"
     base["state"] = state
     base["data_quality"] = {"runs": runs, "min_runs": cfg["min_runs"], "coverage": coverage, "min_coverage": cfg["min_coverage"],

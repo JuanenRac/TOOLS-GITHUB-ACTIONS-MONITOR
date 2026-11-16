@@ -29,6 +29,18 @@ when this file and `tool_version.py` disagree.
 
 - **The check of the log of actions covers the rotated file too**: `chain` now verifies `audit_actions.jsonl.1` and the link between it and the active file, names the segment (`segment`) when a line is broken, says how many segments it checked (`segments`) and whether the chain begins at its first link (`complete`: false when a rotated file was replaced by a later rotation or deleted).
 
+- **Repeating `migrate_storage` no longer replaces newer data in the target**: running the same command again after switching the backend, for example to move an account added later, rewrote every account that differed from the source and erased the events and snapshots made since the first copy while saying it had copied and verified. An account whose target has newer events or snapshots is now reported as `target newer`, refused without writing anything and the exit code is 1; `--force` makes the source win.
+
+- **The score no longer fails when no part has data**: with `score.min_coverage` at 0 and nothing to weigh the calculation divided by zero and the snapshot was lost; the answer is now `insufficient_data` with the reason `no_data`.
+
+- **The score says when the ledger dropped runs of its window**: past 20000 runs the oldest ones are dropped; when that reaches the current window the snapshot carries `data_quality.truncated` and the reason `truncated`, instead of giving a success rate that looks complete.
+
+- **A stale score no longer counts as current**: the mean of `GET /api/score/global` leaves out accounts whose snapshot is stale (and counts them in `accounts_stale`), and `/metrics` does not export `ghamon_score` for a stale snapshot.
+
+- **A backup is checked completely before a restore writes anything**: an account id or a name that is not valid anywhere in the copy makes `verify` fail, so a restore can no longer stop half way with the first accounts already written.
+
+- **`migrate_storage` says how many damaged lines of the event feed it cannot copy**: they were left out silently; now the run prints a warning with the count (the source keeps them).
+
 ## [2.0.1]
 
 ### Fixed

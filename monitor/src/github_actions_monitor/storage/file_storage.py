@@ -371,12 +371,15 @@ class FileStorage(base.Storage):
         return names
 
     def export_account(self, account_id):
-        events, _bad = self._read_events(account_id)
+        events, bad = self._read_events(account_id)
         events.sort(key=base.event_ts)      # in time order, like the other backend; stable, so the order of writing is kept inside one second
-        return {"config": self.load_config(account_id),
-                "sentinels": {n: self.load_sentinel_state(account_id, n) for n in self._sentinel_names(account_id)},
-                "docs": {n: self.load_doc(account_id, n, {}) for n in self._doc_names(account_id)},
-                "events": events, "analytics": self.load_analytics(account_id), "scores": self.load_score_snapshots(account_id)}
+        payload = {"config": self.load_config(account_id),
+                   "sentinels": {n: self.load_sentinel_state(account_id, n) for n in self._sentinel_names(account_id)},
+                   "docs": {n: self.load_doc(account_id, n, {}) for n in self._doc_names(account_id)},
+                   "events": events, "analytics": self.load_analytics(account_id), "scores": self.load_score_snapshots(account_id)}
+        if bad:
+            payload["damaged_events"] = bad      # only when there are some: the migration tells the person how many lines it cannot copy
+        return payload
 
     def import_account(self, account_id, payload):
         if payload.get("config"):
