@@ -265,6 +265,8 @@ _f(_T_SENT, "stuck", "ci.stuck.min_minutes", "int", (1, 10000), unit="min", rest
 _f(_T_SENT, "stuck", "ci.stuck.max_minutes", "int", (1, 100000), unit="min", restart=False)
 _f(_T_SENT, "stuck", "ci.stuck.queue_minutes", "int", (0, 100000), unit="min", restart=False)
 _f(_T_SENT, "stuck", "ci.stuck.awaiting_stuck", "bool", restart=False)
+_f(_T_SENT, "stuck", "ci.stuck.ghost_enabled", "bool", restart=False)
+_f(_T_SENT, "stuck", "ci.stuck.ghost_days", "int", (1, 3650), restart=False)
 _f(_T_SENT, "stuck", "ci.stuck.workflow_minutes", "names", restart=False)
 _f(_T_SENT, "stuck", "ci.stuck.runner_minutes", "names", restart=False)
 _f(_T_SENT, "prs", "sentinel.stale_pr_days", "int", (1, 90))

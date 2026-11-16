@@ -32,6 +32,8 @@
       "max_minutes": 720,
       "queue_minutes": 0,
       "awaiting_stuck": true,
+      "ghost_enabled": true,
+      "ghost_days": 7,
       "workflow_minutes": [],
       "runner_minutes": []
     },

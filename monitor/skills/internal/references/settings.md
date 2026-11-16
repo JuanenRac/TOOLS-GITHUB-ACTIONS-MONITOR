@@ -142,6 +142,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ci.red_events` | `["push", "schedule", "workflow_dispatch", "merge_group"]` | sentinel | Events that can make a branch red |
 | `ci.rerun_timing` | `false` | sentinel | Ask GitHub for the duration of re-runs |
 | `ci.stuck.awaiting_stuck` | `true` | sentinel | A run waiting for approval can be stuck |
+| `ci.stuck.ghost_days` | `7` | sentinel | Days in the queue until a run is a ghost |
+| `ci.stuck.ghost_enabled` | `true` | sentinel | Tell apart runs queued for days |
 | `ci.stuck.learned` | `false` | sentinel | Learn the limit of each workflow |
 | `ci.stuck.margin` | `2.0` | sentinel | Margin over that duration |
 | `ci.stuck.max_minutes` | `720` | sentinel | Largest learned limit |

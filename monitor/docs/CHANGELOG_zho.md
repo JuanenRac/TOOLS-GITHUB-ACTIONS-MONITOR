@@ -9,6 +9,10 @@
 
 ## [Unreleased]
 
+### 新增
+
+- **排队多日的运行被区分为幽灵队列（设置 `ci.stuck.ghost_enabled`，天数在 `ci.stuck.ghost_days`，默认 7）**：在公开仓库中，GitHub 会让运行在队列里停留数周甚至数月（已关闭的拉取请求、请求不存在的运行器的作业；最长 280 天，在 10 个繁忙仓库中有 8 个）。这些运行会抬高排队数量，被报告为卡住的构建，并影响所有从队列学到的限值。首次尝试且超过限值的排队运行现在既不算排队也不算卡住：它离开“现在”列表和各项计数，一行文字说明有多少个，哨兵把它们单独列出，并为每个仓库给出一条信息通知（`ci.ghost_queue`），绝不是错误。开关默认开启；关闭后，所有排队运行与以前一样处理。
+
 ### 修复
 
 - **GitHub 为自身创建的工作流既不是红色 CI，也不是文件**：路径以 `dynamic/` 开头的条目（Dependabot 更新、依赖关系图、默认的 CodeQL、Copilot 的审查和代理）在所研究的 96 个公开仓库中有 20 个一直失败，并被当作仓库的工作流计入（红色、已放弃、“已禁用”）。监视器只保留运行的文件名，所以对路径的判断从未匹配；现在读取运行时会记住完整路径。这些工作流不再决定分支的颜色，不计入待检查的工作流，也不会出现在手动或因不活跃而禁用的工作流中。失败的 Dependabot 更新会作为警告单独列出，其余（Copilot、CodeQL、依赖关系图）作为信息，位于哨兵的 `a2.services` 和页眉数字 `services_failing` 中。
@@ -34,6 +38,7 @@
 
 ### 新增
 
+- **排队多日的运行被区分为幽灵队列（设置 `ci.stuck.ghost_enabled`，天数在 `ci.stuck.ghost_days`，默认 7）**：在公开仓库中，GitHub 会让运行在队列里停留数周甚至数月（已关闭的拉取请求、请求不存在的运行器的作业；最长 280 天，在 10 个繁忙仓库中有 8 个）。这些运行会抬高排队数量，被报告为卡住的构建，并影响所有从队列学到的限值。首次尝试且超过限值的排队运行现在既不算排队也不算卡住：它离开“现在”列表和各项计数，一行文字说明有多少个，哨兵把它们单独列出，并为每个仓库给出一条信息通知（`ci.ghost_queue`），绝不是错误。开关默认开启；关闭后，所有排队运行与以前一样处理。
 - **墙面屏幕默认关闭**：在设置中开启之前 `screens.enabled` 保持关闭，因此全新安装时 `/screen/overview`、`/screen/now` 和 `/screen/sentinels` 返回 404。
 - **墙面屏幕：地址、设置和数据**（三个页面是 `/screen/overview`、`/screen/now` 和 `/screen/sentinels`，供无人操作的显示器或电视使用）：它们只通过 `/api/screens/data` 读取监视器已有的数据（字段固定的列表：绝不包含 GitHub、链接、提交标题、作业名称或用户名），可用 `screens.enabled` 关闭（此时所有地址返回 404），私有仓库的名称遵循 `screens.show_repo_names`（默认隐藏），失败每秒闪烁不到两次并在 `screens.blink_calm_minutes` 后平静下来（`screens.blink`），窗口只能通过地址变得更安静（`?blink=off`；`?sound=on` 仅在 `screens.sound` 允许时有效），或用 `?monitor`、`?theme`、`?density`、`?refresh`、`?lang`、`?scale` 和 `?rotate` 设置。另有 `screens.default_theme`、`screens.default_density`、`screens.refresh_seconds`、`screens.rotate_seconds`、`screens.burn_in_protection` 和 `screens.night_dim`（docs/SCREENS.md）。
 - **面向数百个仓库的舰队视图**:团队标签页新增一个部分,对仓库分组(按生态、标签、状态或不分组)、排序(按风险、名称、最近运行或状态),并逐页绘制,因此拥有 250 个仓库的账户也能保持页面轻快。标签是仓库名的模式(`fleet.labels`,例如 `team-*=backend`),也可用来区分组织或团队;`fleet.saved_filters` 保存现成的筛选;`fleet.group_by`、`fleet.sort` 和 `fleet.page_size` 设定默认值。它读取 `GET /api/team/fleet`(只读,与团队排名相同的健康数据);上方的排名不变。

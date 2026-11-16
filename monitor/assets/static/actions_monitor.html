@@ -867,11 +867,11 @@ function stuckWhy(k){return k&&k!=="build"?" · "+T("ui.stuck_why_"+k):""}      
 function runCounts(d){
   const F=d.figures||{},run=r=>r.status==="in_progress",vis=d.active.filter(r=>runVisible(r,d)&&r.status!=="waiting");      // a run that waits for an approval is neither running nor queued: it has its own line (ui.n_awaiting)
   const tr=F.active!=null?F.active:d.active.filter(run).length,tq=F.queued!=null?F.queued:d.active.filter(r=>!run(r)&&r.status!=="waiting").length,sr=vis.filter(run).length,sq=vis.length-sr;
-  return {tr:tr,tq:tq,sr:sr,sq:sq,shown:vis.length,total:tr+tq,awaiting:+F.awaiting||0,filters:filtersOn(),differs:sr!==tr||sq!==tq};
+  return {tr:tr,tq:tq,sr:sr,sq:sq,shown:vis.length,total:tr+tq,awaiting:+F.awaiting||0,ghost:+F.ghost||0,ghostDays:+F.ghost_days||0,filters:filtersOn(),differs:sr!==tr||sq!==tq};
 }
 const runFig=(shown,total)=>shown!==total?T("ui.k_of",{n:shown,total:total}):total;
 function runTitle(id,titleKey,shown,total){const el=$(id),t=el&&el.closest(".tile");if(t)t.title=T(titleKey)+(shown!==total?" - "+T("ui.k_filtered_title",{n:shown,total:total}):"")}
-function showingLine(c){const w=c.awaiting?'<div class="mut" id="now-awaiting" role="status">'+esc(T("ui.n_awaiting",{n:c.awaiting}))+"</div>":"";return w+(c.filters||c.differs?'<div class="mut" id="now-count" role="status">'+esc(T(c.filters?"ui.n_showing_filters":"ui.n_showing",{n:c.shown,total:c.total}))+"</div>":"")}
+function showingLine(c){const g=c.ghost?'<div class="mut" id="now-ghost" role="status">'+esc(T("ui.n_ghost",{n:c.ghost,days:c.ghostDays}))+"</div>":"";const w=(c.awaiting?'<div class="mut" id="now-awaiting" role="status">'+esc(T("ui.n_awaiting",{n:c.awaiting}))+"</div>":"")+g;return w+(c.filters||c.differs?'<div class="mut" id="now-count" role="status">'+esc(T(c.filters?"ui.n_showing_filters":"ui.n_showing",{n:c.shown,total:c.total}))+"</div>":"")}
 function render(d){
   try{soundWatch(d)}catch(e){}
   DATA=d;const day=Date.now()-864e5;

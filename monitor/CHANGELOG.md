@@ -11,6 +11,10 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+### Added
+
+- **Runs queued for days are told apart as a ghost queue (setting `ci.stuck.ghost_enabled`, days in `ci.stuck.ghost_days`, default 7)**: on public repositories GitHub leaves runs in the queue for weeks or months (a closed pull request, a job that asks for a runner that does not exist; 280 days at the worst, in 8 of 10 busy repositories). Those runs inflated the queued count, were reported as stuck builds and fed every limit learned from the queue. A queued run of the first attempt older than the limit is now neither queued nor stuck: it leaves the list "Right now" and the counts, a line says how many there are, and the sentinel lists them apart and gives one information notice per repository (`ci.ghost_queue`), never an error. The switch is on by default; turned off, every queued run is treated as before.
+
 ### Fixed
 
 - **The workflows GitHub makes for itself are neither red CI nor files**: the entries with a path that starts with `dynamic/` (Dependabot updates, the dependency graph, the default CodeQL, the review and the agent of Copilot) failed for ever in 20 of the 96 public repositories studied, and were counted as workflows of the repository (red, abandoned, "disabled"). The monitor kept only the file name of a run, so the check of the path never matched; now the whole path is remembered when the run is read. Those workflows never decide the colour of a branch, are not counted as workflows to check, and are not listed among the workflows disabled by hand or by inactivity. A failing Dependabot update is listed apart as a warning, and the others (Copilot, CodeQL, the dependency graph) as information, in `a2.services` of the sentinel and in the header figure `services_failing`.
