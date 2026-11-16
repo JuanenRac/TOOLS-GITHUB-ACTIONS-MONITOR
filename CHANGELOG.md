@@ -27,6 +27,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 - **Workflows that only react to issues, comments or labels do not count as red CI**: they are told apart by the events they run on (setting `ci.automation_counts`, off by default); every red row now says which kind of workflow it is.
 - **A2 settles many workflows with one request**: a repository with at least `sentinel.a2_resolve_batch_min` workflows to look up (2 by default; 0 = one by one) is asked once for its newest completed runs of the default branch, pull requests left out, and every workflow found in them is settled together (`sentinel.a2_resolve_batch_pages` pages of 100 at most); what the list does not show is asked one by one as before, so a repository with 100 or more workflows converges in a few cycles instead of four workflows per cycle.
 
+### Fixed
+
+- **A lock file left by a writer that died is taken over at once**: the lock file of the file storage holds the number of its process; when that process no longer exists the next writer takes the lock immediately (it used to wait 30 seconds, longer than its own 10-second limit, and failed), and the takeover is logged. When the process cannot be known the age of the file still decides, and that time can be changed with `MONITOR_LOCK_STALE`. A test kills a writer inside the lock and checks that the feed is writable again.
+
 ## [2.0.2]
 
 ### Security
