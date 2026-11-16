@@ -23,6 +23,12 @@ when this file and `tool_version.py` disagree.
 
 - **One damaged byte in the event feed no longer stops the notifications**: past 512 KB the feed was read again as strict UTF-8 to trim it, a single byte that was not valid raised an error that escaped, the feed then grew without a limit and every new event failed before reaching the notification channels. The trim now reads tolerantly and can never stop the channels.
 
+- **The log of actions keeps one chain when several processes write the same file**: the supervisor and the accounts of a container share the state folder, and each process chained its lines to the last one it had written itself, so the chain looked broken from the first day. Each line is now chained to the last line that is really in the file, read under a lock between processes (only the end of the file is read), and the lock between processes now also waits when Windows answers "access denied" while another process deletes the lock file.
+
+- **The log of actions is now one file for each account**: in the Complete edition with several accounts the processes of different accounts ended up writing the same `audit_actions.jsonl` (and an administrator of one account could read lines of another); each account now keeps its own file in its folder and `GET /api/audit-log` also keeps only the lines of the account that answers. The lines written before this change stay in the old shared file, which is still read by the supervisor.
+
+- **The check of the log of actions covers the rotated file too**: `chain` now verifies `audit_actions.jsonl.1` and the link between it and the active file, names the segment (`segment`) when a line is broken, says how many segments it checked (`segments`) and whether the chain begins at its first link (`complete`: false when a rotated file was replaced by a later rotation or deleted).
+
 ## [2.0.1]
 
 ### Fixed

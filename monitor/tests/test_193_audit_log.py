@@ -42,7 +42,7 @@ class Chain(Base):
 
     def test_every_line_follows_from_the_one_before(self):
         self.write()
-        self.assertEqual(audit_log.verify(), {"ok": True, "entries": 4, "broken_at": None})
+        self.assertEqual(audit_log.verify(), {"ok": True, "entries": 4, "broken_at": None, "segments": 1, "complete": True})
         rows = [json.loads(x) for x in self.lines()]
         self.assertEqual(rows[0]["prev"], "")
         self.assertTrue(all(rows[i]["prev"] == rows[i - 1]["hash"] for i in range(1, 4)))
@@ -65,7 +65,7 @@ class Chain(Base):
         self.write(2)
         audit_log._last.update(path=None, hash="")      # a new process
         audit_log.record({}, "alert_mute", "root", "admin", "alpha", "code:ci.stuck", now=NOW + 9)
-        self.assertEqual(audit_log.verify(), {"ok": True, "entries": 3, "broken_at": None})
+        self.assertEqual(audit_log.verify(), {"ok": True, "entries": 3, "broken_at": None, "segments": 1, "complete": True})
 
     def test_the_chain_goes_on_in_the_new_file_after_a_rotation(self):
         self.write(2)
@@ -158,6 +158,120 @@ class Writers(Base):
         self.assertIn("ai.provider", text)
         self.assertEqual(json.loads(text)["role"], "admin")
         self.assertFalse(re.search(r"sk-|ghp_|password", text))
+
+
+
+class SeveralProcesses(unittest.TestCase):
+    """The supervisor and the accounts of a container share one file: three real processes write it at the same time and the chain must stay whole."""
+
+    SCRIPT = (
+        "import sys, os\n"
+        "sys.path.insert(0, os.environ['MONITOR_SRC'])\n"
+        "from github_actions_monitor.security import audit_log\n"
+        "who = sys.argv[1]\n"
+        "for i in range(40):\n"
+        "    assert audit_log.record({}, 'settings_change', user=who, target='t%d' % i) is not None\n"
+    )
+
+    def test_three_processes_on_the_same_file_keep_one_chain(self):
+        import os
+        import subprocess
+        with tempfile.TemporaryDirectory() as tmp:
+            script = Path(tmp) / "writer.py"
+            script.write_text(self.SCRIPT, encoding="utf-8")
+            env = {**os.environ, "MONITOR_SRC": str(HERE / "src"), "MONITOR_STATE_DIR": str(Path(tmp) / "state")}
+            procs = [subprocess.Popen([sys.executable, "-I", str(script), name], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE) for name in ("supervisor", "acc1", "acc2")]
+            outputs = [p.communicate(timeout=120) for p in procs]
+            for p, (_out, err) in zip(procs, outputs):
+                self.assertEqual(p.returncode, 0, err.decode("utf-8", "replace")[-500:])
+            target = Path(tmp) / "state" / audit_log.FILE_NAME
+            self.assertEqual(len(target.read_text(encoding="utf-8").splitlines()), 120)
+            self.assertEqual(audit_log.verify(target), {"ok": True, "entries": 120, "broken_at": None, "segments": 1, "complete": True})
+
+    def test_the_tail_is_read_from_the_end_of_a_big_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            audit_log.FILE = Path(tmp) / "audit_actions.jsonl"
+            self.addCleanup(lambda: setattr(audit_log, "FILE", None))
+            for i in range(30):
+                audit_log.record({}, "settings_change", user="u", target="x" * 100 + str(i))
+            old = audit_log.TAIL_BYTES
+            audit_log.TAIL_BYTES = 200      # shorter than one line: the whole file is read as a last resort
+            try:
+                before = audit_log.read(1)[0]["hash"]
+                self.assertEqual(audit_log.record({}, "settings_change", user="u", target="last")["prev"], before)
+            finally:
+                audit_log.TAIL_BYTES = old
+            self.assertTrue(audit_log.verify()["ok"])
+
+
+
+class Segments(Base):
+    def rotate(self):
+        self.write_lines = lambda n: [audit_log.record({}, "settings_change", user="u", target=f"t{i}", now=NOW + i) for i in range(n)]
+        self.write_lines(3)
+        self.file.replace(self.file.with_name(self.file.name + ".1"))
+        audit_log._last.update(path=None, hash="")
+        audit_log.record({}, "settings_change", user="u", target="after", now=NOW + 9)
+
+    def test_the_rotated_file_is_verified_with_the_link_to_the_active_one(self):
+        self.rotate()
+        self.assertEqual(audit_log.verify(), {"ok": True, "entries": 4, "broken_at": None, "segments": 2, "complete": True})
+
+    def test_a_changed_line_of_the_rotated_file_is_found(self):
+        self.rotate()
+        old = self.file.with_name(self.file.name + ".1")
+        old.write_text(old.read_text(encoding="utf-8").replace('"t1"', '"tX"'), encoding="utf-8")
+        result = audit_log.verify()
+        self.assertFalse(result["ok"])
+        self.assertEqual((result["segment"], result["broken_at"]), ("rotated", 2))
+
+    def test_a_rotated_file_that_was_deleted_leaves_a_whole_but_incomplete_chain(self):
+        self.rotate()
+        self.file.with_name(self.file.name + ".1").unlink()
+        result = audit_log.verify()
+        self.assertTrue(result["ok"])
+        self.assertFalse(result["complete"])
+
+    def test_a_rotated_file_that_is_not_the_one_before_breaks_the_link(self):
+        self.rotate()
+        other = Path(self.tmp.name) / "other.jsonl"
+        audit_log.FILE = other
+        audit_log._last.update(path=None, hash="")
+        audit_log.record({}, "settings_change", user="x", target="foreign", now=NOW)
+        self.file.with_name(self.file.name + ".1").write_bytes(other.read_bytes())
+        audit_log.FILE = self.file
+        result = audit_log.verify()
+        self.assertFalse(result["ok"])
+        self.assertEqual((result["segment"], result["broken_at"]), ("active", 1))
+
+
+class PerAccount(Base):
+    def test_the_log_of_an_account_is_its_own_file_and_the_read_keeps_only_its_lines(self):
+        from github_actions_monitor.accounts import accounts
+        self.assertIn(("github_actions_monitor.security.audit_log", "FILE", "audit_actions.jsonl"), accounts.STATE_FILES)
+        audit_log.record({}, "settings_change", user="a", account="alpha", target="one")
+        audit_log.record({}, "settings_change", user="b", account="beta", target="two")
+        self.assertEqual([e["account"] for e in audit_log.read(10, "alpha")], ["alpha"])
+        self.assertEqual([e["account"] for e in audit_log.read(10)], ["alpha", "beta"])
+
+    def test_two_children_of_different_accounts_never_share_the_file(self):
+        import os
+        import subprocess
+        with tempfile.TemporaryDirectory() as tmp:
+            script = Path(tmp) / "child.py"
+            script.write_text("import sys\nsys.path.insert(0, sys.argv[1])\nfrom pathlib import Path\nfrom github_actions_monitor.accounts import account_child\n"
+                              "from github_actions_monitor.security import audit_log\nfolder = account_child.redirect(sys.argv[2], Path(sys.argv[3]))\n"
+                              "audit_log.record({}, 'settings_change', user='u', account=sys.argv[2], target='t')\nprint(audit_log.path())\n", encoding="utf-8")
+            paths = []
+            for name in ("alpha", "beta"):
+                done = subprocess.run([sys.executable, "-I", str(script), str(HERE / "src"), name, tmp], env={**os.environ, "MONITOR_STATE_DIR": str(Path(tmp) / "shared")},
+                                      capture_output=True, text=True, timeout=120)
+                self.assertEqual(done.returncode, 0, done.stderr[-500:])
+                paths.append(Path(done.stdout.strip().splitlines()[-1]))
+            self.assertNotEqual(paths[0], paths[1])
+            self.assertEqual([p.parent.name for p in paths], ["alpha", "beta"])
+            for p, name in zip(paths, ("alpha", "beta")):
+                self.assertEqual([json.loads(line)["account"] for line in p.read_text(encoding="utf-8").splitlines()], [name])
 
 
 if __name__ == "__main__":
