@@ -880,13 +880,13 @@ function render(d){
 const GH="https://"+(I18N.host||"github.com")+"/";
 function alerts(d){
   const a=[];
-  d.issues.filter(i=>repoVisible(i.repo,d)).forEach(i=>a.push(`<div class="alert"><b>${esc(i.labels.join(", "))}</b> · ${esc(i.repo)} #${i.number}: ${esc(i.title)} — <a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(T("ui.a_open"))}</a> <span class="mut">(${hora(i.created)})</span></div>`));
+  d.issues.filter(i=>repoVisible(i.repo,d)).forEach(i=>a.push(`<div class="alert"><b>${esc(i.labels.join(", "))}</b> · ${esc(i.repo)} #${i.number}: ${esc(i.title)} — <a href="${esc(safeUrl(i.url))}" target="_blank" rel="noopener">${esc(T("ui.a_open"))}</a> <span class="mut">(${hora(i.created)})</span></div>`));
   nowGroups(d.active.filter(r=>r.stuck&&repoVisible(r.repo,d))).forEach(g=>{const r=g.reduce((m,x)=>x.seconds>m.seconds?x:m,g[0]);      // a repository with several stuck runs is ONE alert
-    a.push(`<div class="alert" data-alert-repo="${esc(r.repo)}"><b>${esc(T("ui.a_stuck"))}</b> · ${esc(g.length>1?T("ui.a_stuck_many",{repo:r.repo,n:g.length,dur:fmt(r.seconds),limit:d.stuck_minutes}):T("ui.a_stuck_line",{repo:r.repo,name:r.name,dur:fmt(r.seconds),limit:d.stuck_minutes}))} — <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(T("ui.link_run"))}</a></div>`)});
+    a.push(`<div class="alert" data-alert-repo="${esc(r.repo)}"><b>${esc(T("ui.a_stuck"))}</b> · ${esc(g.length>1?T("ui.a_stuck_many",{repo:r.repo,n:g.length,dur:fmt(r.seconds),limit:d.stuck_minutes}):T("ui.a_stuck_line",{repo:r.repo,name:r.name,dur:fmt(r.seconds),limit:d.stuck_minutes}))} — <a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">${esc(T("ui.link_run"))}</a></div>`)});
   const withIssue=new Set(d.issues.map(i=>i.repo));
   nowGroups(d.failing.filter(r=>repoVisible(r.repo,d)&&!withIssue.has(r.repo))).slice(0,30).forEach(g=>{const r=g[0];      // one line per repository, however many workflows of it fail
     const text=g.length>1?T("ui.a_unresolved_many",{repo:r.repo,n:g.length,names:g.map(x=>x.name).join(", "),since:hora(g.reduce((m,x)=>String(x.started)<String(m)?x.started:m,g[0].started))}):T("ui.a_unresolved_line",{repo:r.repo,name:r.name,conclusion:r.conclusion,since:hora(r.started)});
-    a.push(`<div class="alert warn" data-alert-repo="${esc(r.repo)}"><b>${esc(T("ui.a_unresolved"))}</b> · ${esc(text)} — <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(T("ui.link_run"))}</a> <span class="mut">${esc(T("ui.a_no_issue"))}</span></div>`)});
+    a.push(`<div class="alert warn" data-alert-repo="${esc(r.repo)}"><b>${esc(T("ui.a_unresolved"))}</b> · ${esc(text)} — <a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">${esc(T("ui.link_run"))}</a> <span class="mut">${esc(T("ui.a_no_issue"))}</span></div>`)});
   {const qb=d.quota_block;if(qb&&qb.blocked)a.push(`<div class="alert warn" id="quota-alert"><b>${esc(T("ui.a_quota_out",{time:qb.until?clock(qb.until,{hour:"2-digit",minute:"2-digit"}):"?",n:qb.unread||0}))}</b></div>`)}
   {const errs=Object.entries(d.errors||{});if(errs.length>3)a.push(`<div class="alert warn"><b>${esc(T("ui.a_nodata_many",{n:errs.length}))}</b>: ${esc(errs[0][1])}</div>`);else errs.forEach(([k,v])=>a.push(`<div class="alert warn"><b>${esc(T("ui.a_nodata",{key:k}))}</b>: ${esc(v)}</div>`))}
   OPENALERTS=a.length;try{renderBar()}catch(e){}      // the bar at the foot says the same as this list: it is never "no notices" while alerts are open
@@ -901,7 +901,7 @@ function nowRun(r,wrap){      // the line of one run with its jobs; `wrap` = fal
   const jobs=(r.jobs||[]).map(j=>{const pct=j.steps_total?Math.round(100*j.steps_done/j.steps_total):(j.status==="completed"?100:0);
     const cls=j.conclusion==="failure"?"fail":(j.conclusion==="skipped"?"skip":(j.status==="completed"?"done":""));
     return `<div class="job"><span>${esc(j.name)}</span><div><div class="bar"><i class="${cls}" style="width:${pct}%"></i></div><span class="mut">${j.status==="in_progress"?esc(j.step||T("ui.preparing")):esc(concl_(j.conclusion)||j.status)}</span></div><span class="mut">${j.steps_done}/${j.steps_total} · ${fmt(j.seconds)}</span></div>`}).join("");
-  const row=`<div class="row">${badge(r)} ${wrap?`<b class="rl" data-repo-open="${esc(r.repo)}">${esc(r.repo)}</b> `:""}<span>${esc(r.name)}</span> <span class="mut">${esc(r.event)} · ${esc(r.branch)} · ${esc(r.sha)} · ${esc(r.actor)}</span> <span>${esc(T("ui.took",{dur:fmt(r.seconds)}))}</span>${r.stuck?`<span class="badge b-failure">${esc(T("ui.badge_stuck"))}</span>`:""} <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(T("ui.open_gh"))}</a></div>${jobs}`;
+  const row=`<div class="row">${badge(r)} ${wrap?`<b class="rl" data-repo-open="${esc(r.repo)}">${esc(r.repo)}</b> `:""}<span>${esc(r.name)}</span> <span class="mut">${esc(r.event)} · ${esc(r.branch)} · ${esc(r.sha)} · ${esc(r.actor)}</span> <span>${esc(T("ui.took",{dur:fmt(r.seconds)}))}</span>${r.stuck?`<span class="badge b-failure">${esc(T("ui.badge_stuck"))}</span>`:""} <a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">${esc(T("ui.open_gh"))}</a></div>${jobs}`;
   return wrap?`<div class="card ${r.stuck?"stuck":""} ${r.status!=="in_progress"?"queued":""}" data-now-repo="${esc(r.repo)}" data-now-n="1">${row}</div>`:`<div class="subrun ${r.stuck?"stuck":""} ${r.status!=="in_progress"?"queued":""}">${row}</div>`
 }
 function nowCard(g){
@@ -1047,7 +1047,7 @@ function Table(id,cols,again){
 const dash_="–",statusKey_=r=>r?(r.status!=="completed"?r.status:(r.conclusion||"skipped")):"";
 const REPO_TABLE=Table("repos",[
   {id:"repo",label:"ui.th_repo",def:1,fixed:1,sort:r=>r.repo,cell:r=>`<b class="rl" data-repo-open="${esc(r.repo)}" tabindex="0" title="${esc(T("ui.detail_title"))}">${esc(r.repo)}</b>`},
-  {id:"lastrun",label:"ui.th_lastrun",def:1,sort:r=>r.l&&r.l.name,cell:r=>r.l?`<a href="${esc(r.l.url)}" target="_blank" rel="noopener">${esc(r.l.name)}</a>`:dash_},
+  {id:"lastrun",label:"ui.th_lastrun",def:1,sort:r=>r.l&&r.l.name,cell:r=>r.l?`<a href="${esc(safeUrl(r.l.url))}" target="_blank" rel="noopener">${esc(r.l.name)}</a>`:dash_},
   {id:"result",label:"ui.th_result",def:1,sort:r=>statusKey_(r.l),cell:r=>r.l?badge(r.l):""},
   {id:"ago",label:"ui.th_ago",def:1,sort:r=>r.l&&age_(r.l.started),cell:r=>r.l?ago(r.l.started):""},
   {id:"lastok",label:"ui.th_lastok",def:1,sort:r=>r.lastOk&&age_(r.lastOk.started),cell:r=>r.lastOk?ago(r.lastOk.started):dash_},
@@ -1082,7 +1082,7 @@ function repos(d,last){
 function filters(d){const sel=$("f-repo"),cur=sel.value;if(sel.options.length<=1){d.repos.forEach(r=>{const o=document.createElement("option");o.textContent=r;sel.appendChild(o)});sel.value=cur}}
 const HIST_TABLE=Table("hist",[
   {id:"start",label:"ui.th_start",def:1,fixed:1,sort:r=>new Date(r.started).getTime(),cell:r=>hora(r.started)},
-  {id:"repo",label:"ui.th_repo",def:1,sort:r=>r.repo,cell:r=>`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.repo)}</a>`},
+  {id:"repo",label:"ui.th_repo",def:1,sort:r=>r.repo,cell:r=>`<a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">${esc(r.repo)}</a>`},
   {id:"workflow",label:"ui.th_workflow",def:1,sort:r=>r.name,cell:r=>esc(r.name)},
   {id:"event",label:"ui.th_event",def:1,sort:r=>r.event,cell:r=>esc(r.event)},
   {id:"branch",label:"ui.th_branch",def:1,sort:r=>r.branch,cell:r=>esc(r.branch)},
@@ -1143,7 +1143,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden)tick(true)
 var SENT=null,SENT_ERR=null,ANA=null,COLLAB=null,SECUR=null;const AIRES={};
 const OPEN=new Set((QS.get("open")||store.get("am-s-open")||"a1,a2,a3").split(",").filter(Boolean));
 const LVN=l=>T("ui.lv_"+l)===("ui.lv_"+l)?l:T("ui.lv_"+l);
-const safeUrl=u=>typeof u==="string"&&u.startsWith("https://github.com/")?u:"#";
+const safeUrl=u=>typeof u==="string"&&(u.startsWith("https://github.com/")||u.startsWith(GH))?u:"#";
 const link=(u,t)=>`<a href="${esc(safeUrl(u))}" target="_blank" rel="noopener">${esc(t)}</a>`;
 function sVis(repo){if(FILTER.list&&!FILTER.list.includes(repo))return false;const eco=(SENT.ecosystems||{})[repo]||"other";if(FILTER.eco&&eco!==FILTER.eco)return false;if(FILTER.q&&!repo.toLowerCase().includes(FILTER.q.toLowerCase()))return false;return true}
 function spark(v,color){
@@ -1226,7 +1226,7 @@ function renderSent0(){
   // A9
   const rm=s.a9||{boards:[],level:"unknown"};
   const rmStatus=o=>o?Object.entries(o).map(([a,b])=>`<span class="chip ${a==="Blocked"?"warn":""}">${esc(a)} ${b}</span>`).join(" "):'<span class="mut">–</span>';
-  let a9=rm.not_configured?mut_(T("ui.a9_not_configured")):rm.loading?mut_(T("ui.a9_loading")):`<table>${thk(["ui.th_board","ui.th_cards","ui.th_ongh","ui.th_lastseed","ui.th_notice"])}<tbody>${(rm.boards||[]).map(b=>`<tr><td><b>${b.url?`<a href="${esc(b.url)}" target="_blank" rel="noopener">${esc(b.title)}</a>`:esc(b.title)}</b></td><td class="wrap">${b.defs?b.defs.cards+" · "+rmStatus(b.defs.status):"–"}</td><td class="wrap">${b.live?b.live.cards+" · "+rmStatus(b.live.status):mut_(T("ui.no_read"))}</td><td>${b.run?(b.run.url?`<a href="${esc(b.run.url)}" target="_blank" rel="noopener">`:"")+esc(T("ui.a9_run",{conclusion:b.run.conclusion||"?",n:b.run.age_days??"?"}))+(b.run.url?"</a>":""):esc(T("ui.never"))}</td><td class="wrap">${(b.problems||[]).length?(b.problems||[]).map(x=>`<span class="chip warn">${esc(x)}</span>`).join(" "):ok_(T("ui.alive"))}</td></tr>`).join("")}</tbody></table>`;
+  let a9=rm.not_configured?mut_(T("ui.a9_not_configured")):rm.loading?mut_(T("ui.a9_loading")):`<table>${thk(["ui.th_board","ui.th_cards","ui.th_ongh","ui.th_lastseed","ui.th_notice"])}<tbody>${(rm.boards||[]).map(b=>`<tr><td><b>${b.url?`<a href="${esc(safeUrl(b.url))}" target="_blank" rel="noopener">${esc(b.title)}</a>`:esc(b.title)}</b></td><td class="wrap">${b.defs?b.defs.cards+" · "+rmStatus(b.defs.status):"–"}</td><td class="wrap">${b.live?b.live.cards+" · "+rmStatus(b.live.status):mut_(T("ui.no_read"))}</td><td>${b.run?(b.run.url?`<a href="${esc(safeUrl(b.run.url))}" target="_blank" rel="noopener">`:"")+esc(T("ui.a9_run",{conclusion:b.run.conclusion||"?",n:b.run.age_days??"?"}))+(b.run.url?"</a>":""):esc(T("ui.never"))}</td><td class="wrap">${(b.problems||[]).length?(b.problems||[]).map(x=>`<span class="chip warn">${esc(x)}</span>`).join(" "):ok_(T("ui.alive"))}</td></tr>`).join("")}</tbody></table>`;
   if(rm.live_error)a9+=`<div class="mut" style="margin-top:6px">${esc(T("ui.a9_live_err",{e:rm.live_error}))}</div>`;
   if(rm.defs_error)a9+=`<div class="mut" style="margin-top:6px">${esc(T("ui.a9_defs_err",{e:rm.defs_error}))}</div>`;
   if(rm.runs_error)a9+=`<div class="mut" style="margin-top:6px">${esc(T("ui.a9_runs_err",{e:rm.runs_error}))}</div>`;
@@ -1479,9 +1479,9 @@ function renderPanel(){
   const pend=s&&s.a5?(s.a5.pending_sign||[]).filter(g=>g.repo===repo):[],prs=s&&s.a4?s.a4.dependabot.filter(x=>x.repo===repo):[],red=s&&s.a2?s.a2.red.filter(x=>x.repo===repo):[];
   const jobs=act.flatMap(r=>(r.jobs||[]).map(j=>({...j,run:r.name})));
   let h=`<h2>${esc(repo)} <button type="button" class="x ib" id="rp-x" aria-label="${esc(T("ui.close"))}" title="${esc(T("ui.close"))}"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-close"/></svg></button></h2><div class="mut">${esc((d&&d.ecosystems[repo])||"other")}</div>`;
-  h+=`<h3>${esc(T("ui.rp_last"))}</h3>`+(last?`<div class="row">${badge(last)} <a href="${esc(last.url)}" target="_blank" rel="noopener">${esc(last.name)}</a> <span class="mut">${esc(last.branch)} · ${esc(T("ui.rp_ago",{t:ago(last.started)}))} · ${fmt(last.seconds)}</span></div>`:mut_(T("ui.rp_nodata")));
+  h+=`<h3>${esc(T("ui.rp_last"))}</h3>`+(last?`<div class="row">${badge(last)} <a href="${esc(safeUrl(last.url))}" target="_blank" rel="noopener">${esc(last.name)}</a> <span class="mut">${esc(last.branch)} · ${esc(T("ui.rp_ago",{t:ago(last.started)}))} · ${fmt(last.seconds)}</span></div>`:mut_(T("ui.rp_nodata")));
   h+=`<h3>${esc(T("ui.rp_jobs"))}</h3>`+(jobs.length?jobs.map(j=>`<div class="job"><span>${esc(j.name)}</span><div><div class="bar"><i style="width:${j.steps_total?Math.round(100*j.steps_done/j.steps_total):0}%"></i></div><span class="mut">${esc(j.step||j.conclusion||j.status)}</span></div><span class="mut">${j.steps_done}/${j.steps_total}</span></div>`).join(""):mut_(T("ui.rp_nonejobs",{detail:act.length?T("ui.rp_queued",{n:act.length}):T("ui.rp_idle")})));
-  h+=`<h3>${esc(T("ui.rp_fails"))}</h3>`+((fails.length||red.length)?fails.map(r=>`<div class="alert warn">${esc(T("ui.rp_since",{name:r.name,c:r.conclusion,t:hora(r.started)}))} — <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(T("ui.link_run"))}</a></div>`).join("")+red.map(r=>`<div class="alert">${esc(T("ui.rp_red",{wf:r.workflow,n:r.streak}))}</div>`).join(""):ok_(T("ui.rp_none")));
+  h+=`<h3>${esc(T("ui.rp_fails"))}</h3>`+((fails.length||red.length)?fails.map(r=>`<div class="alert warn">${esc(T("ui.rp_since",{name:r.name,c:r.conclusion,t:hora(r.started)}))} — <a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">${esc(T("ui.link_run"))}</a></div>`).join("")+red.map(r=>`<div class="alert">${esc(T("ui.rp_red",{wf:r.workflow,n:r.streak}))}</div>`).join(""):ok_(T("ui.rp_none")));
   h+=`<h3>${esc(T("ui.rp_pending"))}</h3>`+(pend.length?pend.map(g=>`<div class="alert warn">${esc(T("ui.rp_pending_line",{wf:g.workflow||T("ui.rp_green_build"),h:Math.round(g.hours)}))}</div>`).join(""):mut_(T("ui.rp_no")));
   const sts=s&&s.a5?(s.a5.states||[]).filter(x=>x.repo===repo):[],queue=s&&s.a5?(s.a5.sign_queue||[]).filter(x=>x.repo===repo):[];
   const VERP={true:"ui.rp_ver_true",false:"ui.ver_false",unknown:"ui.ver_unknown"};
@@ -1729,7 +1729,7 @@ let LASTFOCUS=null;
 function dlgOpen(k){LASTFOCUS=document.activeElement;dlgs[k].hidden=false}
 function dlgClose(k){dlgs[k].hidden=true;if(LASTFOCUS&&LASTFOCUS.focus)try{LASTFOCUS.focus()}catch(e){}}
 function dl(rows){return "<dl class=\"dl\">"+rows.map(r=>`<dt>${esc(r[0])}</dt><dd>${r[2]?r[1]:esc(r[1])}</dd>`).join("")+"</dl>"}
-function aLink(u,t){return `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(t||u)}</a>`}
+function aLink(u,t){return `<a href="${esc(safeUrl(u))}" target="_blank" rel="noopener noreferrer">${esc(t||u)}</a>`}
 let ABOUT=null;
 function updLine(u){if(!u)return "";if(u.newer)return T("ui.update_available",{version:u.latest})+" · "+aLink(u.url,T("ui.update_open"))+" · "+aLink(u.changelog,T("ui.update_changelog"));
   if(!u.enabled)return T("ui.update_off");return u.latest?T("ui.update_latest"):T("ui.update_unknown")}
