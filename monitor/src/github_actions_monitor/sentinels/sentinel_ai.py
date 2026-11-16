@@ -54,6 +54,8 @@ AI_DEFAULTS = {
     "base_url": "", "api_key_env": "",
     # what the model may look at and say (the settings page): the kinds of event it may analyse, the repositories it may see (empty = only the ones the monitor watches), the language of its answers
     "events": ["build", "codeql", "report"], "allowed_repos": [], "answer_language": "",
+    "tasks": {}, "fallback": "", "fallback_max_attempts": 3, "fallback_after_seconds": 0,      # a model per kind of question and the chain when one fails (ai_chain.py); empty = only the general model
+    "model_daily_limit": 0, "cost_limit_daily": 0, "model_cost_limit_daily": 0,      # budgets (0 = no limit): calls per model per day, estimated cost per model and in total
     "catalog": {"enabled": False, "ttl_minutes": 360, "max_requests_per_day": 20, "fit_context": False},      # the live list of models of the provider (ai_models.py): off for background use, a person asking for it is always served
     "skill": True, "skill_max_chars": 3000,      # the core of the skill of the AI of the monitor (skills/internal/SKILL.md) goes into every prompt, cut to this size (a small local model: 1500)
 }
@@ -85,10 +87,18 @@ def ai_config(config):
         merged["timeout_seconds"] = max(5, min(300, int(merged["timeout_seconds"])))
         merged["skill_max_chars"] = max(300, min(12000, int(merged["skill_max_chars"])))
         merged["skill"] = merged["skill"] is True
+        merged["fallback"] = merged["fallback"] if isinstance(merged["fallback"], (str, list)) else ""
+        merged["tasks"] = merged["tasks"] if isinstance(merged["tasks"], dict) else {}
         network = (config or {}).get("network")
         merged["use_proxy"] = isinstance(network, dict) and network.get("use_proxy") is True      # network.use_proxy (off by default): the proxies of the environment, only for a provider that is not on this computer
     except (TypeError, ValueError):
         merged["daily_limit"], merged["max_input_chars"] = AI_DEFAULTS["daily_limit"], AI_DEFAULTS["max_input_chars"]
+    for key, cast, low, high in (("fallback_max_attempts", int, 1, 5), ("fallback_after_seconds", int, 0, 300), ("model_daily_limit", int, 0, 500),
+                                 ("cost_limit_daily", float, 0.0, 100000.0), ("model_cost_limit_daily", float, 0.0, 100000.0)):      # each one on its own: a wrong value goes back to its default
+        try:
+            merged[key] = max(low, min(high, cast(merged[key])))
+        except (TypeError, ValueError):
+            merged[key] = AI_DEFAULTS[key]
     return merged
 
 
@@ -206,6 +216,14 @@ def _loopback(url):
 _USAGE = threading.local()      # the tokens of the last call of this thread, as the provider reported them (the transports note them; a transport that does not leaves None)
 
 
+class ProviderError(RuntimeError):
+    """A provider answered with an error status: the text is the same as before and the status is kept in `code` (the chain of fallbacks tells a refused key from a quota)."""
+
+    def __init__(self, text, code=None):
+        super().__init__(text)
+        self.code = code
+
+
 def note_usage(body, in_key, out_key):
     """Keeps the tokens a provider reported in its answer (body[in_key], body[out_key]) for the call that is running in this thread."""
     def number(value):
@@ -280,7 +298,7 @@ def openai_compatible_chat(cfg, system, user):
                                 "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]},
                           {"Authorization": "Bearer " + key, "api-key": key} if key else {}, cfg["timeout_seconds"], cfg.get("use_proxy") is True)
     except urllib.error.HTTPError as error:
-        raise RuntimeError(i18n.t("ai.provider_answered", code=error.code)) from None
+        raise ProviderError(i18n.t("ai.provider_answered", code=error.code), error.code) from None
     note_usage(body, "prompt_tokens", "completion_tokens")
     return (((body.get("choices") or [{}])[0]).get("message") or {}).get("content", "")
 
@@ -311,7 +329,7 @@ def anthropic_chat(cfg, system, user):
         body = _post_json(url, {"model": cfg["model"], "max_tokens": 600, "temperature": 0.1, "system": system, "messages": [{"role": "user", "content": user}]},
                           {"x-api-key": key, "anthropic-version": ANTHROPIC_VERSION}, cfg["timeout_seconds"], cfg.get("use_proxy") is True)
     except urllib.error.HTTPError as error:
-        raise RuntimeError(i18n.t("ai.provider_answered", code=error.code)) from None
+        raise ProviderError(i18n.t("ai.provider_answered", code=error.code), error.code) from None
     note_usage(body, "input_tokens", "output_tokens")
     return "".join(part.get("text", "") for part in (body.get("content") or []) if isinstance(part, dict) and part.get("type") == "text")
 
@@ -381,8 +399,9 @@ def status(cfg, store):
     return out
 
 
-def explain(kind, data, cfg, store, transport=None):
-    """Returns {ok, text, verdict, cached, provider, model, label, error}. Never raises."""
+def explain(kind, data, cfg, store, transport=None, task=None):
+    """Returns {ok, text, verdict, cached, provider, model, label, error[, fallback]}. Never raises. The model is the one of the task (`ai.tasks`) or the general one; when it fails, is retired or has
+    spent its budget the next of `ai.fallback` answers (at most `ai.fallback_max_attempts` calls, no loop)."""
     base = {"ok": False, "text": "", "verdict": "", "cached": False, "provider": cfg["provider"], "model": model_of(cfg), "label": i18n.t(LABEL), "error": ""}
     if kind not in KINDS:
         return {**base, "error": i18n.t("err.bad_kind")}
@@ -390,7 +409,12 @@ def explain(kind, data, cfg, store, transport=None):
         return {**base, "error": i18n.t("ai.event_off", kind=kind)}
     if cfg["provider"] == "none":
         return {**base, "error": i18n.t("ai.is_off")}
-    clean = sanitize_text(data, cfg["max_input_chars"], keep="tail" if kind == "build" else "head")
+    from github_actions_monitor.sentinels import ai_chain, ai_models
+    chain = ai_chain.candidates(cfg, kind, task)
+    first = chain[0]["cfg"]
+    base.update({"provider": first["provider"], "model": model_of(first)})
+    first_chars = ai_models.fit_chars(first, store)
+    clean = sanitize_text(data, first_chars, keep="tail" if kind == "build" else "head")
     lesson = ""
     if kind == "build":
         try:
@@ -402,46 +426,94 @@ def explain(kind, data, cfg, store, transport=None):
         except Exception:   # noqa: BLE001 - a lesson that cannot be read never stops the explanation
             lesson = ""
     skill = ""
-    if cfg.get("skill") is True:
+    if first.get("skill") is True:
         try:
             from github_actions_monitor.integrations import skills
-            skill = skills.core("internal", cfg.get("skill_max_chars", 3000))
+            skill = skills.core("internal", first.get("skill_max_chars", 3000))
         except Exception:   # noqa: BLE001 - a guide that cannot be read never stops the explanation
             skill = ""
-    key = hashlib.sha256(f"{kind}|{cfg['provider']}|{model_of(cfg)}|{clean}|{lesson}|{len(skill)}".encode("utf-8")).hexdigest()
+    key = hashlib.sha256(f"{kind}|{first['provider']}|{model_of(first)}|{clean}|{lesson}|{len(skill)}".encode("utf-8")).hexdigest()
     with store.lock:
         hit = store.get(key)
         if hit:
             return {**base, "ok": True, "cached": True, "text": hit["text"], "verdict": hit.get("verdict", ""), "model": hit.get("model", base["model"])}
         if store.used_today() >= cfg["daily_limit"]:
             return {**base, "error": i18n.t("ai.daily_cap", n=cfg['daily_limit'])}
-        store.add_call()  # counted before the call: a failing provider also spends the cap
-        store.save()
-    system, user = build_prompt(kind, clean, _secrets.token_hex(6), cfg.get("answer_language") or None, lesson, skill)
-    try:
-        raw = (transport or TRANSPORTS[cfg["provider"]])(cfg, system, user)
-    except Exception as error:
-        return {**base, "error": sanitize_text(str(error), 300, keep="head")}
-    text = clean_output(raw, cfg["max_output_chars"])
+    if ai_models.catalog_config(first)["enabled"]:
+        have = ai_models.cached(first, store)
+        if have is None or not have["fresh"]:
+            ai_models.fetch(first, store, force=False)      # the list kept is missing or old: one refresh, inside the cap of requests per day; a failure changes nothing
+    failed = []
+    answered = None
+    for index, cand in enumerate(chain):
+        ccfg = dict(cand["cfg"])
+        last = index == len(chain) - 1
+        blocked = ai_chain.budget_block(ccfg, store) or ("retired" if not last and ai_chain.retired(ccfg, store) else None)
+        if blocked:
+            failed.append({"model": cand["label"], "reason": blocked})
+            continue
+        if not last and cfg.get("fallback_after_seconds"):
+            ccfg["timeout_seconds"] = min(ccfg["timeout_seconds"], int(cfg["fallback_after_seconds"]))
+        with store.lock:
+            if store.used_today() >= cfg["daily_limit"]:
+                failed.append({"model": cand["label"], "reason": "daily_cap"})
+                break
+            store.add_call()  # counted before the call: a failing provider also spends the cap
+            ai_chain.add_model_call(store, ccfg)
+            store.save()
+        piece = clean if len(clean) <= ccfg["max_input_chars"] else sanitize_text(clean, ccfg["max_input_chars"], keep="tail" if kind == "build" else "head")
+        system, user = build_prompt(kind, piece, _secrets.token_hex(6), cfg.get("answer_language") or None, lesson, skill)
+        _USAGE.value = None
+        try:
+            raw = (transport or TRANSPORTS[ccfg["provider"]])(ccfg, system, user)
+        except Exception as error:
+            failed.append({"model": cand["label"], "reason": ai_chain.classify(error), "error": sanitize_text(str(error), 300, keep="head")})
+            continue
+        text = clean_output(raw, ccfg["max_output_chars"])
+        if not text:
+            failed.append({"model": cand["label"], "reason": "no_text", "error": i18n.t("ai.no_text")})
+            continue
+        reported = getattr(_USAGE, "value", None)
+        tokens_in, tokens_out = reported if reported and reported[0] is not None and reported[1] is not None else (len(system + user) // 4, len(text) // 4)
+        ai_chain.add_model_usage(store, ccfg, tokens_in, tokens_out, ai_models.cost_of(store, ai_models.provider_label(ccfg), model_of(ccfg), tokens_in, tokens_out))
+        answered = (cand, ccfg, text)
+        break
+    if failed:
+        ai_chain.note_failover(store, ai_chain.task_of(kind, task), failed[0]["model"], failed[0]["reason"], answered[0]["label"] if answered else "")
+    note = {"fallback": {"failed": failed, "used": answered[0]["label"] if answered else ""}} if failed else {}
+    if answered is None:
+        last_failure = failed[-1] if failed else {}
+        reason = last_failure.get("reason")
+        if reason == "daily_cap":
+            why = i18n.t("ai.daily_cap", n=cfg["daily_limit"])
+        elif reason in ("model_calls", "model_cost", "cost"):
+            why = i18n.t("ai.budget_spent", model=last_failure["model"], why=ai_chain.reason_text(reason))
+        else:
+            why = last_failure.get("error") or (ai_chain.reason_text(reason) if reason else "")
+        return {**base, "error": why or i18n.t("ai.no_text"), **note}
+    cand, ccfg, text = answered
     verdict = parse_verdict(text) if kind == "codeql" else ""
-    if not text:
-        return {**base, "error": i18n.t("ai.no_text")}
     with store.lock:
-        store.put(key, {"text": text, "verdict": verdict, "model": model_of(cfg), "at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")})
+        store.put(key, {"text": text, "verdict": verdict, "model": model_of(ccfg), "at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")})
         store.save()
-    return {**base, "ok": True, "text": text, "verdict": verdict}
+    return {**base, "ok": True, "text": text, "verdict": verdict, "provider": ccfg["provider"], "model": model_of(ccfg), **note}
 
 
 def run_call(cfg, store, kind, data, transport=None, language=None):
     """ONE real call to the provider with a text that is already safe (no cache, no lessons, no guide): counted against the daily cap, timed, with the tokens it used (as the provider reported them
     or, if it did not, estimated at four characters per token) and the estimated cost when the table has the prices. Never raises."""
     import time as _time
+    from github_actions_monitor.sentinels import ai_chain
     with store.lock:
         if cfg["provider"] == "none":
             return {"ok": False, "error": i18n.t("ai.is_off")}
         if store.used_today() >= cfg["daily_limit"]:
             return {"ok": False, "error": i18n.t("ai.daily_cap", n=cfg["daily_limit"])}
+        spent = ai_chain.budget_block(cfg, store)
+        if spent:
+            return {"ok": False, "error": i18n.t("ai.budget_spent", model=ai_chain.label_of(cfg), why=ai_chain.reason_text(spent))}
         store.add_call()
+        ai_chain.add_model_call(store, cfg)
         store.save()
     system, user = build_prompt(kind, sanitize_text(data, cfg["max_input_chars"], keep="tail"), _secrets.token_hex(6), language)
     _USAGE.value = None
@@ -457,6 +529,8 @@ def run_call(cfg, store, kind, data, transport=None, language=None):
     tokens_in, tokens_out = (len(system + user) // 4, len(text) // 4) if estimated else reported
     from github_actions_monitor.sentinels import ai_models
     cost = ai_models.cost_of(store, ai_models.provider_label(cfg), model_of(cfg), tokens_in, tokens_out)
+    if text:
+        ai_chain.add_model_usage(store, cfg, tokens_in, tokens_out, cost)
     return {"ok": bool(text), "text": text, "error": "" if text else i18n.t("ai.no_text"), "ms": ms, "tokens_in": tokens_in, "tokens_out": tokens_out, "tokens_estimated": estimated, "cost": cost}
 
 

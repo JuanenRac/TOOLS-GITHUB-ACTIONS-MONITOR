@@ -43,6 +43,7 @@ NOTES = {
     "/api/ai/alerts": ("GET", "the feed of alerts since a moment (`?since=SECONDS`)"),
     "/api/ai/brief": ("GET", "the short brief of the real open alerts (Markdown, or `?fmt=json`)"),
     "/api/ai/failures": ("GET,POST", "the book of failures, newest first (`?since=&repo=&category=&limit=`)"),
+    "/api/ai/budget": ("GET", "the calls and the estimated cost of today for each AI model, the limits and the last failures of a main model (no request to a provider)"),
     "/api/ai/doctor": ("POST", "why the AI does not answer: provider, address, key (only whether the variable is set), model, catalog, quota; never prints a key (this computer only)"),
     "/api/ai/models": ("GET", "the models of the AI provider kept from its last list (no request to the provider), the check of the configured model and the table of data per model"),
     "/api/ai/models/data": ("POST", "write by hand the context window, the prices or the tools of one model in the table (this computer only)"),

@@ -27,6 +27,7 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/ai/actions/unlock` | POST | admin | a person unlocks the actions of the AI for a short time (this computer only) |
 | `/api/ai/alerts` | GET | viewer | the feed of alerts since a moment (`?since=SECONDS`) |
 | `/api/ai/brief` | GET | viewer | the short brief of the real open alerts (Markdown, or `?fmt=json`) |
+| `/api/ai/budget` | GET | viewer | the calls and the estimated cost of today for each AI model, the limits and the last failures of a main model (no request to a provider) |
 | `/api/ai/doctor` | POST | admin | why the AI does not answer: provider, address, key (only whether the variable is set), model, catalog, quota; never prints a key (this computer only) |
 | `/api/ai/failures` | GET,POST | viewer / admin | the book of failures, newest first (`?since=&repo=&category=&limit=`) (POST: this computer only) |
 | `/api/ai/lessons` | GET,POST | viewer / admin | GET: the lessons that apply now, the repeated failures and the library (`?fmt=md|brief&repo=`); POST: write a lesson (switch, administrator, confirmation) (POST: this computer only) |

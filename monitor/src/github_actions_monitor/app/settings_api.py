@@ -60,6 +60,8 @@ RUNNER_LABEL_RE = re.compile(r"^[A-Za-z0-9._*?=/-]{1,60}\Z")      # a label of r
 RUNNER_LABEL_KEYS = ("runners.model.thirdparty_labels", "runners.model.large_labels", "runners.model.self_labels")
 OWNER_RE = re.compile(r"^[A-Za-z0-9-]{0,39}\Z")
 MODEL_RE = re.compile(r"^[A-Za-z0-9._:/@-]{0,100}\Z")
+AI_REF_RE = re.compile(r"^[A-Za-z0-9-]{0,40}\Z")      # a preset (openai, ollama...) or a protocol (anthropic, openai-compatible...) for a task
+AI_FALLBACK_RE = re.compile(r"^[A-Za-z0-9._:/@+=, -]{0,400}\Z")      # provider=model, provider=model
 OLLAMA_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}/?\Z")   # the local service only: nothing leaves this computer
 HTTPS_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250})?\Z")
 AI_URL_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250}|http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/-]{0,100})?)?\Z")   # https, or a server on this computer
@@ -393,6 +395,18 @@ _f(_T_AI, "catalog", "ai.catalog.enabled", "bool", secure=True)
 _f(_T_AI, "catalog", "ai.catalog.ttl_minutes", "int", (5, 10080))
 _f(_T_AI, "catalog", "ai.catalog.max_requests_per_day", "int", (1, 200), unit="calls")
 _f(_T_AI, "catalog", "ai.catalog.fit_context", "bool")
+for _task in ("build", "codeql", "report", "diagnose", "alert"):      # a model for each kind of question: empty = the general one (see sentinels/ai_chain.py)
+    _f(_T_AI, "task_" + _task, f"ai.tasks.{_task}.provider", "text", AI_REF_RE, secure=True)
+    _f(_T_AI, "task_" + _task, f"ai.tasks.{_task}.model", "text", MODEL_RE)
+    _f(_T_AI, "task_" + _task, f"ai.tasks.{_task}.max_input_chars", "int", (0, 20000), unit="chars")
+    _f(_T_AI, "task_" + _task, f"ai.tasks.{_task}.max_output_chars", "int", (0, 8000), unit="chars")
+    _f(_T_AI, "task_" + _task, f"ai.tasks.{_task}.timeout_seconds", "int", (0, 300))
+_f(_T_AI, "fallback", "ai.fallback", "text", AI_FALLBACK_RE, secure=True)
+_f(_T_AI, "fallback", "ai.fallback_max_attempts", "int", (1, 5), unit="")
+_f(_T_AI, "fallback", "ai.fallback_after_seconds", "int", (0, 300))
+_f(_T_AI, "budget", "ai.model_daily_limit", "int", (0, 500), unit="calls")
+_f(_T_AI, "budget", "ai.cost_limit_daily", "float", (0.0, 100000.0), unit="")
+_f(_T_AI, "budget", "ai.model_cost_limit_daily", "float", (0.0, 100000.0), unit="")
 _f(_T_AI, "scope", "ai.events", "names")
 _f(_T_AI, "scope", "ai.allowed_repos", "names")
 _f(_T_AI, "scope", "ai.answer_language", "enum", ("",) + tuple(i18n.LANGS), False)

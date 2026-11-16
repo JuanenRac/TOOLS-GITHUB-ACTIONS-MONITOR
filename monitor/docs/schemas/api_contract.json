@@ -12,6 +12,7 @@
   {"path": "/api/help/topics", "complete": {"topics": "list", "tab_topic": "any", "lang": "str"}, "lite": "same"},
   {"path": "/api/help/topic?id=readme", "complete": {"id": "str", "title": "str", "lang": "str", "fallback": "bool", "plain": "bool", "sections": "list"}, "lite": "same"},
   {"path": "/api/help/search?q=score", "complete": {"hits": "list"}, "lite": "same"},
+  {"path": "/api/ai/budget", "complete": {"ok": "bool", "day": "str", "calls": "int", "calls_limit": "int", "cost": "number", "cost_limit": "any", "models": "list", "failovers": "list"}, "lite": 404},
   {"path": "/api/ai/models", "complete": {"ok": "bool", "provider": "str", "label": "str", "model": "str", "enabled": "bool", "catalog": "object", "models": "list", "check": "object", "table": "list"}, "lite": 404},
   {"path": "/api/ai/presets", "complete": {"ok": "bool", "presets": "list"}, "lite": 404},
   {"path": "/api/skills", "complete": {"skills": "list"}, "lite": "same"},
