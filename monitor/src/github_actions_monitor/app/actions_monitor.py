@@ -53,6 +53,7 @@ from github_actions_monitor.util import exclusive
 from github_actions_monitor.util import platform_compat
 from github_actions_monitor.util import ports
 from github_actions_monitor.data_pipeline import redrule
+from github_actions_monitor.integrations import runner_model
 from github_actions_monitor.data_pipeline import sampling
 from github_actions_monitor.util import resilience
 from github_actions_monitor.security import secretstore
@@ -118,7 +119,10 @@ DEFAULTS = {
     "act": {"enabled": False, "allowed": [], "timeout_seconds": 900, "allow_symlinks": False},
     "dispatch": {"required_ci": ["ci.yml"]},                                 # the workflow files that must have passed on a commit before a batch is fired (gha_dispatch_all.py)         # OFF: run a workflow here with `act`, each run confirmed on its own (actlocal.py)
     "mirror": {"enabled": False, "folder": "", "max_mb": 500, "keep_days": 14, "max_per_cycle": 3},     # OFF: a local copy of the artifacts of the runs (mirror.py)
-    "runners": {"enabled": False, "scope": "owner"},                         # OFF: the self-hosted runners of the account (runners.py)
+    "runners": {"enabled": False, "scope": "owner",                         # OFF: the self-hosted runners of the account (runners.py)
+                "model": {"enabled": False, "jobs_per_cycle": 10, "thirdparty_labels": ["blacksmith", "buildjet", "namespace-profile", "depot", "warpbuild", "ubicloud", "runs-on", "actuated", "cirrus-runners"],
+                          "large_labels": [], "self_labels": [], "queue_warn_minutes": 20, "runaway_runs_per_hour": 20, "runaway_ignore_events": ["pull_request", "pull_request_target"],
+                          "thirdparty_usd_per_minute": 0.0, "alerts": True, "alert_level": "warning"}},      # OFF: kinds of runner, queue and cost by kind, runaway workflows, self-hosted queues (runner_model.py)
     "otlp": {"enabled": False, "endpoint": "", "interval_seconds": 60},       # OFF: OpenTelemetry export to a collector you name (otlp.py)
     "organizations": {"discover": False},                                    # OFF: list the organisations of the login (orgs.py)
     "finops": {"jobs_per_cycle": 0},
@@ -1179,6 +1183,8 @@ def quota_watch(config):
 
 
 RUN_COSTS = {}      # run id -> exact cost from the labels of its jobs (quota.job_costs); filled up to finops.jobs_per_cycle runs per cycle
+RUN_KINDS = {}      # run id -> minutes by kind of runner (runner_model.tally) and when the run started; filled by read_costs while runners.model is on
+RUNNER_JOBS = {"rows": {}, "list": None, "list_at": 0.0}      # (repo, run id) -> the jobs of an unfinished run with their labels (runner_model.compact); the list of self-hosted runners, cached
 
 
 def read_costs(config, data):
@@ -1202,11 +1208,83 @@ def read_costs(config, data):
             RUN_COSTS[run["id"]] = None
             continue
         jobs = [{"seconds": seconds_between(parse_time(j.get("started_at")), parse_time(j.get("completed_at"))), "labels": j.get("labels")} for j in (body or {}).get("jobs") or []]
+        model = runner_model.settings(config)
+        if model["enabled"]:      # a runner of another company is not billed by GitHub: it must not be priced as a standard one
+            RUN_KINDS[run["id"]] = dict(runner_model.tally(jobs, table, runner, model), at=when.timestamp())
+            jobs = [dict(j, labels=["self-hosted"]) if runner_model.kind_of(j.get("labels"), model) == "thirdparty" else j for j in jobs]
         RUN_COSTS[run["id"]] = quota.job_costs(jobs, table, runner)
         done += 1
     while len(RUN_COSTS) > 3000:
         RUN_COSTS.pop(next(iter(RUN_COSTS)))
+    while len(RUN_KINDS) > 3000:
+        RUN_KINDS.pop(next(iter(RUN_KINDS)))
     return done
+
+
+def read_runner_jobs(config, data):
+    """runners.model: reads the jobs (and their `runs-on` labels) of up to runners.model.jobs_per_cycle unfinished runs per cycle, the ones read longest ago first, and forgets the runs that are over.
+    One call per run; 0 = not read. Read only."""
+    cfg = runner_model.settings(config)
+    if not cfg["enabled"] or cfg["jobs_per_cycle"] <= 0 or LITE["on"]:
+        return 0
+    now, held = time.time(), RUNNER_JOBS["rows"]
+    active = {(r["repo"], r["id"]) for r in data.get("active") or [] if r.get("repo") and r.get("id")}
+    for key in [k for k in held if k not in active]:
+        del held[key]
+    done = 0
+    for key in sorted((k for k in active if now - held.get(k, {}).get("at", 0) > 120), key=lambda k: held.get(k, {}).get("at", 0)):
+        if done >= cfg["jobs_per_cycle"]:
+            break
+        try:
+            body = gh_read(f"repos/{toolconfig.github_owner(config)}/{key[0]}/actions/runs/{key[1]}/jobs?per_page=100", retries=0)
+            held[key] = {"at": now, "rows": runner_model.compact(key[0], key[1], body)}
+            done += 1
+        except Exception:   # noqa: BLE001 - this run is tried again later
+            held[key] = {"at": now, "rows": held.get(key, {}).get("rows", [])}
+    return done
+
+
+def runner_list(config):
+    """The self-hosted runners (runners.py), read at most every 5 minutes; None when `runners.enabled` is off or the read failed (the model then says the reason is unknown)."""
+    from github_actions_monitor.integrations import runners
+    if not runners.settings(config)["enabled"] or DEMO["on"]:
+        return None
+    if time.time() - RUNNER_JOBS["list_at"] > 300:
+        RUNNER_JOBS["list_at"] = time.time()
+        try:
+            got = runners.collect(config, lambda endpoint: gh_read(endpoint, retries=0), toolconfig.github_owner(config), list((STATE.get("data") or {}).get("repos") or []))
+            RUNNER_JOBS["list"] = None if got["errors"] and not got["runners"] else got["runners"]
+        except Exception as error:   # noqa: BLE001
+            degraded.note("runners.list", error)
+            RUNNER_JOBS["list"] = None
+    return RUNNER_JOBS["list"]
+
+
+def runner_model_payload(now=None):
+    """GET /api/runners/model: the model of the runners from what the monitor holds (see runner_model.py)."""
+    from github_actions_monitor.data_pipeline import quota
+    config = LIVE_CONFIG or toolconfig.raw_config()
+    now = time.time() if now is None else now
+    data = STATE.get("data") or {}
+    if not runner_model.settings(config)["enabled"]:
+        return {"schema": 1, "enabled": False}
+    rows = [row for held in RUNNER_JOBS["rows"].values() for row in held["rows"]]
+    tallies = [v for v in RUN_KINDS.values() if v.get("at", 0) >= now - 86400]
+    return runner_model.build(config, rows, data.get("runs") or [], tallies, quota.load(), runner_list(config), now, config.get("runs_per_repo") or 0)
+
+
+def runner_alerts():
+    """The alerts of the model of the runners, for the Alerts tab; [] while it is off. Never raises."""
+    if LITE["on"]:
+        return []
+    try:
+        config = LIVE_CONFIG or toolconfig.raw_config()
+        if not runner_model.settings(config)["enabled"]:
+            return []
+        return runner_model.alerts(runner_model_payload(), config, CHILD["account"] or "")
+    except Exception as error:   # noqa: BLE001 - the list of alerts must still answer
+        degraded.note("runners.alerts", error)
+        return []
 
 
 def download_artifact(endpoint, destination):
@@ -1448,6 +1526,7 @@ def maintain_extras(config, data):
     spare = remaining is None or remaining > 2 * config.get("min_rate_remaining", 800)
     for name, job in (("ai_alerts", lambda: feed_alerts(config, data)),
                       ("finops", lambda: spare and read_costs(config, data)),
+                      ("runner_model", lambda: spare and read_runner_jobs(config, data)),
                       ("reports", lambda: spare and __import__("github_actions_monitor.integrations.reports", fromlist=["_"]).cycle(config, toolconfig.github_owner(config), list(data.get("repos") or []), data.get("runs") or [],
                                                                                                                                   lambda endpoint: gh_read(endpoint, retries=0))),
                       ("mirror", lambda: spare and __import__("github_actions_monitor.integrations.mirror", fromlist=["_"]).cycle(config, data.get("runs") or [], toolconfig.github_owner(config), lambda e: gh_read(e, retries=0), download_artifact)),
@@ -1548,7 +1627,7 @@ def report_gather():
     storage, account = runtime.process_storage(CHILD["account"] or None)
     snapshot = score_api.latest(storage, account, config)
     try:
-        alerts = alert_center.collect(SENTINEL["registry"], extra=credential_alerts() + score_alerts())
+        alerts = alert_center.collect(SENTINEL["registry"], extra=credential_alerts() + score_alerts() + runner_alerts())
     except Exception as error:   # noqa: BLE001 - the report still has the rest
         degraded.note("reports.alerts", error)
         alerts = []
@@ -1582,7 +1661,7 @@ def health_views(now=None):
     failing, active = data.get("failing") or [], data.get("active") or []
     registry = SENTINEL["registry"]
     try:
-        alerts = alert_center.collect(registry, extra=credential_alerts() + score_alerts())
+        alerts = alert_center.collect(registry, extra=credential_alerts() + score_alerts() + runner_alerts())
     except Exception as error:   # noqa: BLE001 - the health still answers without the alerts
         degraded.note("health.alerts", error)
         alerts = []
@@ -2650,6 +2729,10 @@ class Handler(BaseHTTPRequestHandler):
                 self.json_reply({"data": {"panels": panels, "act": sum(1 for p in panels if p["level"] == "bad"), "watch": sum(1 for p in panels if p["level"] == "warn")}, "error": None})
             except Exception as error:   # noqa: BLE001
                 self.json_reply({"data": {"panels": [], "act": 0, "watch": 0}, "error": str(error)[:200]})
+        elif path == "/api/runners/model":      # the model of the runners (kinds, queue and cost by kind, runaway workflows, self-hosted queues), read only; {"enabled": false} while it is off
+            if not self.guard():
+                return
+            self.json_reply(runner_model_payload())
         elif path == "/api/team/health" or (path.startswith("/api/repos/") and path.endswith("/health")):      # the health of a repository and of the team, read only, from what is held (Complete only)
             if not self.guard():
                 return
@@ -2820,7 +2903,7 @@ def alerts_payload(ask):
     from github_actions_monitor.sentinels import alert_center
     refresh_feed()
     registry = SENTINEL["registry"]
-    extra = credential_alerts() + score_alerts()
+    extra = credential_alerts() + score_alerts() + runner_alerts()
     everything = alert_center.collect(registry, extra=extra)
     chosen = alert_center.select(everything, ask.get("sentinel", ""), ask.get("level", ""), ask.get("muted", "show") if ask.get("muted") in ("show", "hide", "only") else "show")
     return {"schema": 1, "account": CHILD["account"] or None, "alerts": chosen, "summary": alert_center.summary(everything), "mutes": alert_center.active(), "history": alert_center.history(20),
