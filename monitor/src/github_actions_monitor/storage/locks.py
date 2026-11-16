@@ -61,9 +61,14 @@ def pid_alive(pid):
     return True
 
 
+MIN_AGE = 1.0      # a lock younger than this is not opened to read its pid: a live owner lets go of it in milliseconds, and on Windows a file that is open for reading cannot be deleted by its owner
+
+
 def _owner_gone(lock_file):
-    """The pid written in the lock file, when its process is gone (None when it is alive, unknown or not written yet)."""
+    """The pid written in the lock file, when its process is gone (None when it is alive, unknown, not written yet or too recent to look at)."""
     try:
+        if time.time() - lock_file.stat().st_mtime < MIN_AGE:
+            return None
         text = lock_file.read_text(encoding="ascii", errors="ignore").strip()
         pid = int(text)
     except (OSError, ValueError):
@@ -78,6 +83,20 @@ def path_lock(path):
         if lock is None:
             lock = _LOCKS[key] = threading.RLock()
         return lock
+
+
+def release(lock_file, attempts=100, pause=0.01):
+    """Deletes the lock file of the owner. On Windows the delete is refused for a moment while another process has the file open (a reader); it is tried again for about a second (100 x 10 ms)."""
+    for attempt in range(attempts):
+        try:
+            lock_file.unlink()
+            return True
+        except FileNotFoundError:
+            return True
+        except OSError:
+            if attempt + 1 < attempts:
+                time.sleep(pause)
+    return False
 
 
 @contextlib.contextmanager
@@ -113,7 +132,4 @@ def process_lock(path, timeout=10.0):
             yield
         finally:
             os.close(fd)
-            try:
-                lock_file.unlink()
-            except OSError:
-                pass
+            release(lock_file)
