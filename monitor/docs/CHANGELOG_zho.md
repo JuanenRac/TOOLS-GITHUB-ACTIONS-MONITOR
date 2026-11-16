@@ -35,6 +35,10 @@
 
 - **发布文件检查可适应项目**：`sentinel.surface.checks.release_assets.require_sha256` 和 `.require_signature` 不再要求校验和或签名文件，`.allow_empty` 接受没有文件的发布（向包注册表发布的项目），`sentinel.surface.checks.tag_vs_version.prefixes` 会把 `cli-v1.2.0` 这样的标签与清单比较，`.prerelease_ok` 把日期版本号同一天的测试版视为同一版本；`sentinel.require_verified_signature` 原本就可关闭。默认值与以前要求相同。
 
+### 新增
+
+- **机器人与人分开统计**：开启 `sentinel.bots_apart` 后，GitHub 自己标为机器人的账户（Bot 类型，而非按名字猜测）的拉取请求在 A4 中单独计数（`other_bots`），并不计入对等待人处理的旧拉取请求的检查；运行记录现在带有 `actor_bot`。默认值不改变任何行为。
+
 ## [2.0.2]
 
 ### 安全

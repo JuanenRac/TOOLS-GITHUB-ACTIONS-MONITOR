@@ -35,6 +35,10 @@
 
 - **リリースファイルの確認がプロジェクトに合わせられます**: `sentinel.surface.checks.release_assets.require_sha256` と `.require_signature` はチェックサムや署名ファイルを求めなくなり、`.allow_empty` はファイルのないリリース（パッケージレジストリに公開するプロジェクト）を許可し、`sentinel.surface.checks.tag_vs_version.prefixes` は `cli-v1.2.0` のようなタグをマニフェストと比較し、`.prerelease_ok` は日付バージョンの同日のベータを同じバージョンとして扱います。`sentinel.require_verified_signature` は以前から無効にできます。既定値は従来どおりです。
 
+### 追加
+
+- **ボットを人と分けて数える**: `sentinel.bots_apart` をオンにすると、GitHub 自身がボットとしているアカウント（名前からの推測ではなく Bot 型）のプルリクエストは A4 で別に数えられ（`other_bots`）、人を待つ古いプルリクエストの確認から除外されます。実行にも `actor_bot` が付きます。既定では何も変わりません。
+
 ## [2.0.2]
 
 ### セキュリティ

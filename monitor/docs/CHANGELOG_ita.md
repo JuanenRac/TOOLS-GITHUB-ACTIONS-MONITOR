@@ -35,6 +35,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - **Il controllo dei file di una release si adatta al progetto**: `sentinel.surface.checks.release_assets.require_sha256` e `.require_signature` smettono di chiedere un file di checksum o di firma, `.allow_empty` accetta una release senza file (progetti che pubblicano in un registro di pacchetti), `sentinel.surface.checks.tag_vs_version.prefixes` confronta tag come `cli-v1.2.0` con il manifesto e `.prerelease_ok` tratta le beta di un giorno di una versione a calendario come la stessa versione; `sentinel.require_verified_signature` era già disattivabile. I valori predefiniti chiedono ciò che chiedevano prima.
 
+### Aggiunto
+
+- **I bot a parte dalle persone**: con `sentinel.bots_apart` attivo, le pull request degli account che GitHub stesso segna come bot (tipo Bot, non una supposizione dal nome) si contano a parte in A4 (`other_bots`) e restano fuori dal controllo delle vecchie pull request in attesa di una persona; le esecuzioni ora portano `actor_bot`. Il valore predefinito non cambia nulla.
+
 ## [2.0.2]
 
 ### Sicurezza

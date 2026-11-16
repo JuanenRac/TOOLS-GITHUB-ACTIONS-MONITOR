@@ -229,6 +229,7 @@ _f(_T_SENT, "causes", "ci.failed_jobs.group_by", "enum", ("auto", "platform", "m
 _f(_T_SENT, "durations", "ci.rerun_timing", "bool", restart=False)
 _f(_T_SENT, "prs", "sentinel.stale_pr_days", "int", (1, 90))
 _f(_T_SENT, "prs", "sentinel.dependency_bots", "names")
+_f(_T_SENT, "prs", "sentinel.bots_apart", "bool")
 _f(_T_SENT, "hygiene_files", "sentinel.required_files", "filegroups")
 _f(_T_SENT, "hygiene_rules", "sentinel.hygiene.ruleset_mode", "enum", ("name", "effective", "off"))
 _f(_T_SENT, "hygiene_rules", "sentinel.hygiene.ruleset_names", "names")

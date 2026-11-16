@@ -35,6 +35,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **Die Prüfung der Release-Dateien passt sich dem Projekt an**: `sentinel.surface.checks.release_assets.require_sha256` und `.require_signature` verlangen keine Prüfsummen- oder Signaturdatei mehr, `.allow_empty` akzeptiert ein Release ohne Dateien (Projekte, die in einer Paketregistry veröffentlichen), `sentinel.surface.checks.tag_vs_version.prefixes` vergleicht Tags wie `cli-v1.2.0` mit dem Manifest, und `.prerelease_ok` behandelt die Betas eines Tages einer Kalenderversion als dieselbe Version; `sentinel.require_verified_signature` war schon abschaltbar. Die Standardwerte verlangen dasselbe wie zuvor.
 
+### Hinzugefügt
+
+- **Bots getrennt von Personen**: Mit `sentinel.bots_apart` an werden Pull Requests von Konten, die GitHub selbst als Bots kennzeichnet (Typ Bot, keine Vermutung nach dem Namen), in A4 getrennt gezählt (`other_bots`) und aus der Prüfung alter, auf eine Person wartender Pull Requests ausgenommen; die Läufe tragen jetzt `actor_bot`. Der Standard ändert nichts.
+
 ## [2.0.2]
 
 ### Sicherheit

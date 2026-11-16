@@ -51,6 +51,7 @@
       "dependabot",
       "renovate"
     ],
+    "bots_apart": false,
     "required_files": [
       [
         "README.md"
