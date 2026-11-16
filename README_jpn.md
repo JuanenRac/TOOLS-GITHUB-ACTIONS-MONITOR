@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2509_passing-brightgreen.svg" alt="2509 tests">
+  <img src="https://img.shields.io/badge/Tests-2537_passing-brightgreen.svg" alt="2537 tests">
 </p>
 
 > 所有するすべてのリポジトリのワークフローを監視し、赤いもの・止まっているもの・対応待ちのものを、ローカルの1ページで教えます。
@@ -81,8 +81,8 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **テスト** | テストメソッド 2509 件(`python -m unittest discover -s monitor/tests`) |
-| **設定** | 設定 464 件、すべてヘルプ付き |
+| **テスト** | テストメソッド 2537 件(`python -m unittest discover -s monitor/tests`) |
+| **設定** | 設定 467 件、すべてヘルプ付き |
 | **言語** | 8(英語、スペイン語、ドイツ語、フランス語、イタリア語、日本語、中国語、ポルトガル語) |
 | **CI で検証したシステム** | ubuntu, windows、Python 3.11, 3.13 |
 
@@ -299,6 +299,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/SENTINEL_SECURITY_jpn.md`](monitor/docs/SENTINEL_SECURITY_jpn.md): セキュリティセンチネル：Dependabot、コードスキャン、シークレット、ブランチ保護、ワークフローの権限、CODEOWNERS、確認できなかったこと
 - [`monitor/docs/AUDIT_LOG_jpn.md`](monitor/docs/AUDIT_LOG_jpn.md): 操作ログ：誰が何を変更したか、ハッシュの連鎖、読める人、設定
 - [`monitor/docs/HEALTH_jpn.md`](monitor/docs/HEALTH_jpn.md): リポジトリとチームの健全性：構成、チームタブ、ディープリンク、API
+- [`monitor/docs/ORGANIZATIONS_jpn.md`](monitor/docs/ORGANIZATIONS_jpn.md): 組織と大規模アカウント
 - [`monitor/docs/REPORT_SCHEDULE_jpn.md`](monitor/docs/REPORT_SCHEDULE_jpn.md): 定期レポート：スコア、変化、人の手が必要なリポジトリ、未解決のアラートを HTML と Markdown で、スケジュールとファイル
 - [`monitor/docs/CLI_jpn.md`](monitor/docs/CLI_jpn.md): モニターのクライアントとしてのコマンドライン
 - [`monitor/docs/ACCOUNTS_jpn.md`](monitor/docs/ACCOUNTS_jpn.md): 複数アカウント（1 つにつき 1 プロセス）
@@ -312,7 +313,6 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ADVANCED_jpn.md`](monitor/docs/ADVANCED_jpn.md): 詳細機能（すべて既定でオフ）
 - [`monitor/docs/AI_ALERTS_jpn.md`](monitor/docs/AI_ALERTS_jpn.md): AI 向けアラート：フィード、ブリーフ、フック、ストリーム
 - [`monitor/docs/AUDIT_PACKAGE_jpn.md`](monitor/docs/AUDIT_PACKAGE_jpn.md): 監査担当者向けパッケージ
-- [`monitor/docs/ORGANIZATIONS_jpn.md`](monitor/docs/ORGANIZATIONS_jpn.md): 組織と大規模アカウント:最小のトークン、SSO、読み取りが空になる理由、アカウントの読み取りコスト
 
 ## コントリビュート
 

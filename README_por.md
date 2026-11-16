@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2509_passing-brightgreen.svg" alt="2509 tests">
+  <img src="https://img.shields.io/badge/Tests-2537_passing-brightgreen.svg" alt="2537 tests">
 </p>
 
 > Vigia os workflows de todos os seus repositórios e diz-lhe, numa página local, o que está a vermelho, o que está encravado e o que o espera.
@@ -81,8 +81,8 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 | | |
 |---|---|
 | **Maturidade** | functional |
-| **Testes** | 2509 métodos de teste (`python -m unittest discover -s monitor/tests`) |
-| **Definições** | 464 definições, todas com ajuda |
+| **Testes** | 2537 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Definições** | 467 definições, todas com ajuda |
 | **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
 | **Testado no CI em** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -299,6 +299,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/SENTINEL_SECURITY_por.md`](monitor/docs/SENTINEL_SECURITY_por.md): O sentinela de segurança: Dependabot, análise de código, segredos, proteção de ramos, permissões dos fluxos e CODEOWNERS, e o que não conseguiu verificar
 - [`monitor/docs/AUDIT_LOG_por.md`](monitor/docs/AUDIT_LOG_por.md): O registo de ações: quem mudou o quê, a cadeia de hashes, quem o lê e as definições
 - [`monitor/docs/HEALTH_por.md`](monitor/docs/HEALTH_por.md): A saúde de um repositório e da equipa: de que é feita, o separador Equipa, as ligações diretas e a API
+- [`monitor/docs/ORGANIZATIONS_por.md`](monitor/docs/ORGANIZATIONS_por.md): Organizações e contas grandes
 - [`monitor/docs/REPORT_SCHEDULE_por.md`](monitor/docs/REPORT_SCHEDULE_por.md): Relatórios agendados: a pontuação, o que mudou, os repositórios que precisam de uma pessoa e os alertas abertos em HTML e Markdown, o horário e os ficheiros
 - [`monitor/docs/CLI_por.md`](monitor/docs/CLI_por.md): a linha de comandos como cliente do monitor
 - [`monitor/docs/ACCOUNTS_por.md`](monitor/docs/ACCOUNTS_por.md): várias contas, um processo cada
@@ -312,7 +313,6 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ADVANCED_por.md`](monitor/docs/ADVANCED_por.md): Funções avançadas (todas desligadas por defeito)
 - [`monitor/docs/AI_ALERTS_por.md`](monitor/docs/AI_ALERTS_por.md): Avisos para IAs: o feed, o resumo, o hook e o stream
 - [`monitor/docs/AUDIT_PACKAGE_por.md`](monitor/docs/AUDIT_PACKAGE_por.md): Pacote para o auditor
-- [`monitor/docs/ORGANIZATIONS_por.md`](monitor/docs/ORGANIZATIONS_por.md): Organizações e contas grandes: o token mínimo, SSO, porque uma leitura volta vazia e quanto custa a conta em leituras
 
 ## Contribuir
 

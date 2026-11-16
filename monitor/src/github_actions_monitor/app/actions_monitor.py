@@ -54,6 +54,7 @@ from github_actions_monitor.util import platform_compat
 from github_actions_monitor.util import ports
 from github_actions_monitor.data_pipeline import causes
 from github_actions_monitor.data_pipeline import alertflow
+from github_actions_monitor.data_pipeline import paging
 from github_actions_monitor.data_pipeline import redrule
 from github_actions_monitor.data_pipeline import stuckrule
 from github_actions_monitor.data_pipeline import sampling
@@ -129,6 +130,7 @@ DEFAULTS = {
     "finops": {"jobs_per_cycle": 0},
     "network": {"use_proxy": False, "etag": True, "graphql_checks": False, "graphql_batch": 20},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
     "ai_notify": {"enabled": False, "confirmed_provider": "", "max_calls_per_hour": 4, "cost_per_call_cents": 5, "max_cost_per_hour_cents": 50, "command": "", "timeout_seconds": 30},      # OFF: tell an external AI of a NEW real alert (ai_notify.py)
+    "pagination": {"workflow_pages": 3, "job_pages": 2, "collab_pages": 3},      # pages of 100 followed when a list is full, and said when something is cut (paging.py)
     "sampling": {"default_branch_probe": False, "min_coverage_minutes": 30, "api_budget_per_hour": 0},      # how much of a repository the list of runs shows, a second look at the default branch, a budget of requests (sampling.py)
     "savings": {"webhook_first": False, "webhook_window_minutes": 60, "webhook_full_minutes": 360, "feeds": {"enabled": False, "method": "atom", "max_age_minutes": 240}},      # read less: OFF (savings.py)
     "logs": {"failed_step": {"enabled": False, "lines": 12, "max_bytes": 2000}},      # the log of the failed step in the page: OFF, one press of a button, steplog.py
@@ -869,12 +871,18 @@ def note_read(repo, runs, error):
 
 
 def run_jobs(repo, run_id):
+    return run_jobs_info(repo, run_id)[0]
+
+
+def run_jobs_info(repo, run_id):
+    """(jobs, seen, total): the jobs of a run read in pages of 100 (up to pagination.job_pages); total is what GitHub says there are, so a matrix that is cut is said ("seen 100 of 240")."""
     try:
-        data = gh("api", f"repos/{toolconfig.github_owner()}/{repo}/actions/runs/{run_id}/jobs?per_page=30", retries=1)
+        pages = paging.settings(toolconfig.raw_config())["job_pages"]
+        page = paging.read_pages(lambda path: gh("api", path, retries=1), f"repos/{toolconfig.github_owner()}/{repo}/actions/runs/{run_id}/jobs", "jobs", 100, pages)
     except Exception:
-        return []
+        return [], 0, None
     jobs = []
-    for job in data.get("jobs", []):
+    for job in page["items"]:
         steps = job.get("steps") or []
         done = sum(1 for step in steps if step.get("status") == "completed")
         current = next((step.get("name") for step in steps if step.get("status") == "in_progress"), "")
@@ -885,7 +893,7 @@ def run_jobs(repo, run_id):
             "steps_total": len(steps), "steps_done": done, "step": current, "runner": job.get("runner_name") or "",
             "seconds": seconds_between(started, finished) if started else 0, "url": job.get("html_url"), "labels": [str(x)[:40] for x in (job.get("labels") or [])][:12],
         })
-    return jobs
+    return jobs, page["seen"], (page["total"] if page["cut"] else None)
 
 
 def repo_issues(repo):
@@ -1010,7 +1018,8 @@ def build(config, repos, started, refreshed, loading, progress_text):
     offline = stuckrule.offline_labels(RUNNERS_SEEN.get("payload"))
     ask_queued = [len(stuck_cfg["runner_minutes"]) > 0 or bool(offline), 10]      # queued runs only read their jobs (one call each) when a runner label can change the verdict
     for run in active:
-        run["jobs"] = run_jobs(run["repo"], run["id"]) if (run["status"] == "in_progress" and not loading) else []
+        run["jobs"], seen, total = run_jobs_info(run["repo"], run["id"]) if (run["status"] == "in_progress" and not loading) else ([], 0, None)
+        run["jobs_seen"], run["jobs_total"] = seen, total      # total only when the jobs were cut: "seen N of M"
         if run["status"] in stuckrule.QUEUE_STATES and ask_queued[0] and ask_queued[1] > 0 and not loading:
             ask_queued[1] -= 1
             run["jobs"] = run_jobs(run["repo"], run["id"])
@@ -1587,8 +1596,9 @@ def report_tick(config):
         degraded.note("reports", error)
 
 
-def health_views(now=None):
-    """The health of every repository the monitor watches, from what it already holds (runs, red and stuck, the alerts of every sentinel, the readiness of the releases). Never calls GitHub."""
+def health_views(now=None, only=None):
+    """The health of every repository the monitor watches, from what it already holds (runs, red and stuck, the alerts of every sentinel, the readiness of the releases). Never calls GitHub.
+    The runs, the red workflows, the active runs and the alerts are grouped by repository ONCE, so the cost grows with the data and not with repositories x runs; `only` = one repository name."""
     from github_actions_monitor.health import repo_view
     from github_actions_monitor.sentinels import alert_center
     now = time.time() if now is None else now
@@ -1618,10 +1628,13 @@ def health_views(now=None):
     except Exception as error:   # noqa: BLE001
         degraded.note("health.readiness", error)
     names = sorted({r.get("repo") for r in runs if isinstance(r, dict) and r.get("repo")} | {r for r in (data.get("repos") or []) if isinstance(r, str)} | {a.get("repo") for a in alerts if a.get("repo")})
+    if only is not None:
+        names = [n for n in names if n == only]
+    runs_by, failing_by, active_by, alerts_by = (repo_view.group_by_repo(x) for x in (runs, failing, active, alerts))
     views = []
     for repo in names:
         eco = toolconfig.ecosystem_of(repo)
-        view = repo_view.repo_view(repo, runs, failing, active, alerts, ready.get(repo), sources, eco, now)
+        view = repo_view.repo_view(repo, runs_by.get(repo, []), failing_by.get(repo, []), active_by.get(repo, []), alerts_by.get(repo, []), ready.get(repo), sources, eco, now)
         view["ecosystem_label"] = toolconfig.label_of(eco)
         views.append(view)
     return views
@@ -1682,7 +1695,7 @@ def maintain(config, data):
             return
         for run in analytics.pending_runs(data.get("runs") or [], store, cfg["jobs_per_cycle"]):
             try:
-                body = gh_read(f"repos/{toolconfig.github_owner()}/{run['repo']}/actions/runs/{run['id']}/jobs?per_page=30", retries=0)
+                body = gh_read(f"repos/{toolconfig.github_owner()}/{run['repo']}/actions/runs/{run['id']}/jobs?per_page=100", retries=0)
             except Exception:   # noqa: BLE001 - a job list that cannot be read is skipped for good
                 store.add_jobs(run["repo"], run["name"], run["id"], [], cfg["steps"])
                 continue
@@ -2672,13 +2685,12 @@ class Handler(BaseHTTPRequestHandler):
             from urllib.parse import parse_qs, unquote
             from github_actions_monitor.health import repo_view
             ask = {k: v[0] for k, v in parse_qs(self.path.partition("?")[2]).items() if v}
-            views = health_views()
             if path == "/api/team/health":
-                self.json_reply(repo_view.team_view(views, ask.get("ecosystem", ""), ask.get("severity", ""), ask.get("q", "")[:80], ask.get("label", "")[:40]))
+                self.json_reply(repo_view.team_view(health_views(), ask.get("ecosystem", ""), ask.get("severity", ""), ask.get("q", "")[:80], ask.get("label", "")[:40]))
             else:
                 parts = [unquote(x) for x in path.split("/")]      # ["", "api", "repos", owner, repo, "health"]
                 owner, name = (parts[3], parts[4]) if len(parts) == 6 else ("", "")
-                found = next((v for v in views if v["repo"] == name), None) if owner.lower() == toolconfig.github_owner().lower() else None
+                found = next(iter(health_views(only=name)), None) if owner.lower() == toolconfig.github_owner().lower() else None      # one repository: only its view is built
                 self.json_reply({"schema": 1, "health": found} if found else {"error": "unknown repository", "code": "repo_unknown"}, 200 if found else 404)
         elif path in ("/api/score", "/api/score/history"):      # the score of the account of this process, from the snapshots of the hour (read only; Complete only)
             if not self.guard():

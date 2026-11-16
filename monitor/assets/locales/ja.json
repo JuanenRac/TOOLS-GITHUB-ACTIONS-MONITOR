@@ -3072,5 +3072,16 @@
  "doctor.t.access": "ログインでアカウントまたは組織を読み取れる",
  "doctor.f.access": "組織に対する 403 や 404 は、通常次のいずれかです。トークンが SAML シングルサインオンに対して承認されていない(トークンのページの Configure SSO で承認)、スコープ repo または read:org(細粒度トークンでは読み取り権限)が足りない、リポジトリが非公開でログインから見えない。詳細にどれかが示されます。",
  "doctor.t.estimate": "1時間あたりの読み取りが枠に収まる",
- "doctor.f.estimate": "これだけのリポジトリがあると、モニターはトークンの枠の大部分を使います(現在の設定での推定)。cold_refresh_seconds を大きくする、ホットなリポジトリを減らす、Low モードを有効にする、または GitHub App で読み取ってください(QUOTA.md と ORGANIZATIONS.md を参照)。"
+ "doctor.f.estimate": "これだけのリポジトリがあると、モニターはトークンの枠の大部分を使います(現在の設定での推定)。cold_refresh_seconds を大きくする、ホットなリポジトリを減らす、Low モードを有効にする、または GitHub App で読み取ってください(QUOTA.md と ORGANIZATIONS.md を参照)。",
+ "cfg.f.pagination.workflow_pages": "リポジトリごとのワークフローのページ数",
+ "cfg.h.pagination.workflow_pages": "リポジトリには数百のワークフローがあることがあります。100件のページが満杯の間は次のページを、このページ数まで読みます。100件未満のリポジトリは追加リクエストなし。それでも残る場合は、存在数のうち何件を見たかをページに表示します。",
+ "cfg.f.pagination.job_pages": "実行ごとのジョブのページ数",
+ "cfg.h.pagination.job_pages": "マトリクスは1回の実行で100を超えるジョブを起動することがあります。100件のページが満杯の間は次のページを、このページ数まで読みます。まだ残る場合、実行に「M 件中 N 件を表示」と出ます。",
+ "cfg.f.pagination.collab_pages": "リポジトリごとの Issue とプルリクエストのページ数",
+ "cfg.h.pagination.collab_pages": "リポジトリには数百の未解決 Issue とプルリクエストがあることがあります。100件のページが満杯の間は次のページを、このページ数まで読みます(最初のページは条件付き読み取りのまま。100件未満のリポジトリは追加コストなし)。それ以上ある場合は「チーム」タブに表示します。",
+ "ui.cfg_b_pagination": "長い一覧のページ",
+ "ui.collab_cut": "{n} 件のリポジトリには、読み取った数より多い未解決項目があります(最大 {p} ページ、各100件)",
+ "ui.collab_cut_search": "検索: {total} 件中 {seen} 件を表示",
+ "ui.jobs_cut": "ジョブ: {total} 件中 {seen} 件を表示",
+ "hyg.wf_cut": "ワークフローの一覧が途中で切れています: {total} 件中 {seen} 件を表示"
 }

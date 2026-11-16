@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2509_passing-brightgreen.svg" alt="2509 tests">
+  <img src="https://img.shields.io/badge/Tests-2537_passing-brightgreen.svg" alt="2537 tests">
 </p>
 
 > Überwacht die Workflows aller deiner Repositories und zeigt dir auf einer lokalen Seite, was rot ist, was hängt und was auf dich wartet.
@@ -81,8 +81,8 @@
 | | |
 |---|---|
 | **Reifegrad** | functional |
-| **Tests** | 2509 Testmethoden (`python -m unittest discover -s monitor/tests`) |
-| **Einstellungen** | 464 Einstellungen, alle mit Hilfe |
+| **Tests** | 2537 Testmethoden (`python -m unittest discover -s monitor/tests`) |
+| **Einstellungen** | 467 Einstellungen, alle mit Hilfe |
 | **Sprachen** | 8 (Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch) |
 | **Im CI getestet auf** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -299,6 +299,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/SENTINEL_SECURITY_deu.md`](monitor/docs/SENTINEL_SECURITY_deu.md): Der Sicherheitswächter: Dependabot, Code-Scanning, Geheimnisse, Branch-Schutz, Workflow-Berechtigungen und CODEOWNERS, und was er nicht prüfen konnte
 - [`monitor/docs/AUDIT_LOG_deu.md`](monitor/docs/AUDIT_LOG_deu.md): Das Aktionsprotokoll: wer was geändert hat, die Hash-Kette, wer es liest und die Einstellungen
 - [`monitor/docs/HEALTH_deu.md`](monitor/docs/HEALTH_deu.md): Die Gesundheit eines Repositorys und des Teams: woraus sie besteht, der Tab Team, die Direktlinks und die API
+- [`monitor/docs/ORGANIZATIONS_deu.md`](monitor/docs/ORGANIZATIONS_deu.md): Organisationen und große Konten
 - [`monitor/docs/REPORT_SCHEDULE_deu.md`](monitor/docs/REPORT_SCHEDULE_deu.md): Geplante Berichte: die Punktzahl, was sich geändert hat, die Repositorys, die einen Menschen brauchen, und die offenen Meldungen als HTML und Markdown, der Zeitplan und die Dateien
 - [`monitor/docs/CLI_deu.md`](monitor/docs/CLI_deu.md): die Befehlszeile als Client des Monitors
 - [`monitor/docs/ACCOUNTS_deu.md`](monitor/docs/ACCOUNTS_deu.md): mehrere Konten, je ein Prozess
@@ -312,7 +313,6 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ADVANCED_deu.md`](monitor/docs/ADVANCED_deu.md): Erweiterte Funktionen (alle standardmäßig aus)
 - [`monitor/docs/AI_ALERTS_deu.md`](monitor/docs/AI_ALERTS_deu.md): Meldungen für KIs: der Feed, die Kurzfassung, der Hook und der Stream
 - [`monitor/docs/AUDIT_PACKAGE_deu.md`](monitor/docs/AUDIT_PACKAGE_deu.md): Paket für den Prüfer
-- [`monitor/docs/ORGANIZATIONS_deu.md`](monitor/docs/ORGANIZATIONS_deu.md): Organisationen und große Konten: das kleinste Token, SSO, warum ein Lesevorgang leer bleibt und was das Konto an Lesevorgängen kostet
 
 ## Mitwirken
 
