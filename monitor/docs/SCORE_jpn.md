@@ -11,7 +11,7 @@
 
 ## 何でできているか
 
-4 つの要素の加重和で、各要素は 0〜100 です。要素は **良好** の限度で 100、**不良** の限度で 0 となり、その間は直線的に変わります。重みと限度は設定です。
+5 つの要素の加重和で、各要素は 0〜100 です。要素は **良好** の限度で 100、**不良** の限度で 0 となり、その間は直線的に変わります。重みと限度は設定です。
 
 | 要素 | 重み | 測るもの | 良好 | 不良 |
 |---|---|---|---|---|
@@ -29,7 +29,7 @@
 
 - **calibrating**（較正中）：アカウントを監視した時間が `score.calibrating_hours`（既定は 24）に満たない場合。数値も文字評価もありません。
 - **insufficient_data**（データ不足）：期間内に完了した実行が `score.min_runs`（既定は 20）より少ない場合、またはデータのある要素の重みが合計の `score.min_coverage`（既定は半分）に満たない場合。数値はありません。
-- **scored**（採点済み）：数値、文字評価、傾向があります。データのない要素は除かれ、残りが再スケールされます。これにより `coverage` が下がります（たとえばコラボレーションの番人がオフなら 0.8）。0 としても 100 としても数えません。
+- **scored**（採点済み）：数値、文字評価、傾向があります。データのない要素は除かれ、残りが再スケールされます。これにより `coverage` が下がります（たとえばコラボレーションの番人がオフなら 0.85）。0 としても 100 としても数えません。
 
 セキュリティは他の要素と同じ要素ですが、セキュリティセンチネルがオンで、十分な数のリポジトリを確認している間だけデータがあります。それがないと、回答は `complete: false` となり、`missing_parts` に `security` を挙げ、ほかの要素は再スケールされるので、数値が「すべて問題なし」と読まれることはありません。GitHub は指摘の履歴を提供しないため、セキュリティの要素は期間とその直前の期間で同じです。傾向は CI とコラボレーションの変化を示します。既定の重みは 30、15、15、15、25 です。実行があって失敗がまったくない期間には復旧するものがないので、復旧の要素は満点になり、それは空白ではなく事実です。
 
@@ -61,4 +61,4 @@
 
 ## 設定
 
-設定ページの「番人」サブタブにある「アカウントのスコア」「スコアの重み」「スコアの文字評価」の各ブロック：`score.enabled`、`score.window_days`、`score.calibrating_hours`、`score.min_runs`、`score.min_coverage`、`score.trend_flat`、`score.weights.reliability`、`score.weights.speed`、`score.weights.recovery`、`score.weights.collaboration`、`score.grades.A` から `score.grades.D`、`score.alert.enabled`、`score.alert.drop_points`、`score.alert.notify_external`（既定はオフ）。各要素の良好と不良の限度はファイルの `score.limits` から読み込まれます（サンプルファイルを参照）。ページでは編集しません。
+設定ページの「番人」サブタブにある「アカウントのスコア」「スコアの重み」「スコアの文字評価」の各ブロック：`score.enabled`、`score.window_days`、`score.calibrating_hours`、`score.min_runs`、`score.min_coverage`、`score.trend_flat`、`score.weights.reliability`、`score.weights.speed`、`score.weights.recovery`、`score.weights.collaboration`、`score.weights.security`、`score.grades.A` から `score.grades.D`、`score.alert.enabled`、`score.alert.drop_points`、`score.alert.notify_external`（既定はオフ）。各要素の良好と不良の限度はファイルの `score.limits` から読み込まれます（サンプルファイルを参照）。ページでは編集しません。
