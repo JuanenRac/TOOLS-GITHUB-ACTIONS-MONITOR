@@ -16,6 +16,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Fixed
 
+- **The window of a repository opened from the Team tab showed nothing**: a row of the ranking carries only the name, and the page asked the health of the repository with an empty owner, so the answer was always "not found"; it now uses the owner of the page. The deep link `?view=repo&repo=owner/name` also no longer fills the text filter of the Now tab with the repository, which left that tab empty.
+
 - **The Security sentinel no longer passes "could not read" for "clean"**: when most of the sources that weigh in the penalty (Dependabot, code scanning, secrets) answer 403 or 404 for every repository, the sentinel level is `unknown` instead of `ok` and the security part of the score is left out instead of counting as 100 (the status now carries `sources_readable` and `sources_total`). A source that stops answering while an alert is open keeps the alert for a week, marked as unread, and never announces it as fixed; a `gh` that prints nothing is a failed reading, and a default branch with a slash in its name is asked for encoded.
 
 - **A few repositories that always fail no longer starve the Security sentinel**: a repository whose reads fail waits 5 minutes, 30 minutes and then 6 hours before the next try, and the ones that were not tried yet go first, so the rest of the account is looked at.
