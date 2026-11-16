@@ -21,6 +21,7 @@ Opcional e **desligado por predefinição**. Um modelo de linguagem pode resumir
 ## O que pode ver
 
 - Toda a entrada é limpa: carateres de controlo removidos, segredos ocultados por padrão, comprimento limitado, conteúdo entre delimitadores aleatórios e declarado não fiável. A resposta é cortada e as suas ligações neutralizadas.
+- O mesmo limpador único (tokens, chaves, credenciais dentro de endereços, endereços de e-mail, endereços IP, a sua pasta pessoal) serve este assistente, o feed para IAs, os endpoints e o gancho. Funciona por padrões: reduz o risco, não é uma garantia. Uma chamada a um fornecedor nunca segue um redirecionamento (a chave iria para outro endereço) e não usa as variáveis de proxy do ambiente: um servidor deste computador é chamado diretamente e um remoto só passa pelo proxy com `network.use_proxy`.
 - No separador Definições escolhe os tipos de evento que pode analisar (`build`, `codeql`, `report`), os repositórios que pode ver (vazio = os que o monitor vigia), o idioma das respostas, o limite diário de chamadas e os limites de tamanho. Um botão testa a ligação e a página mostra as chamadas de hoje.
 
 

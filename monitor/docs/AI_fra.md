@@ -21,6 +21,7 @@ Optionnel et **désactivé par défaut**. Un modèle de langage peut résumer le
 ## Ce qu'elle peut voir
 
 - Toute entrée est nettoyée : caractères de contrôle retirés, secrets masqués par motif, longueur limitée, contenu placé entre des délimiteurs aléatoires et déclaré non fiable. La réponse est coupée et ses liens neutralisés.
+- Le même nettoyeur unique (jetons, clés, identifiants dans les adresses, adresses e-mail, adresses IP, votre dossier personnel) sert cet assistant, le flux pour les IA, les points d'accès et le crochet. Il fonctionne par motifs : il réduit le risque, ce n'est pas une garantie. Un appel à un fournisseur ne suit jamais une redirection (la clé irait vers une autre adresse) et n'utilise pas les variables de proxy de l'environnement : un serveur de cet ordinateur est appelé directement, un serveur distant ne passe par le proxy qu'avec `network.use_proxy`.
 - Dans l'onglet Réglages vous choisissez les types d'événement analysables (`build`, `codeql`, `report`), les dépôts visibles (vide = ceux que le moniteur surveille), la langue des réponses, la limite quotidienne d'appels et les limites de taille. Un bouton teste la connexion et la page montre les appels du jour.
 
 

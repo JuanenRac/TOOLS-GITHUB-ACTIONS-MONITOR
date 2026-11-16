@@ -144,6 +144,14 @@ def local_open(request, timeout=8, follow_redirects=True):
     return urllib.request.build_opener(*handlers).open(request, timeout=timeout)
 
 
+def open_plain(request, timeout=8, use_proxy=False):
+    """A call that carries a secret in its headers (the key of a provider of AI): a redirect is NOT followed (the key would go on to another address) and the proxies of the environment are not
+    used unless `use_proxy` (`network.use_proxy`). A call to this computer never goes through a proxy. A redirect ends as an HTTPError with its code."""
+    if _is_loopback_host(request.full_url if not isinstance(request, str) else request):
+        return local_open(request, timeout=timeout, follow_redirects=False)
+    return urllib.request.build_opener(NoRedirect(), *_handlers(True, None, use_proxy)).open(request, timeout=timeout)
+
+
 def reason_of(error):
     """Short stable reason for a failed send: private_target when the rule refused it, else failed."""
     cause = error.reason if isinstance(error, urllib.error.URLError) else error
