@@ -9,7 +9,6 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
-
 ### Alterado
 
 - **Os forks e os repositórios arquivados escolhem-se com uma definição e um fork mantido nunca se perde**: `discovery.skip_archived` (ativado por defeito) decide se os arquivados são vigiados; `discovery.fork_policy` pode deixar os forks de fora (`skip`) ou manter só os que têm CI própria (`skip_unless_ci`: um workflow ativado e uma execução dentro de `discovery.fork_ci_days`), e `auto` faz o mesmo com uma janela com o dobro da duração numa organização, cujo tipo é lido uma vez por dia; `discovery.fork_checks_per_pass` limita os pedidos gastos. O valor por defeito (`show`) não muda nada.

@@ -17,6 +17,13 @@
   "discover_limit": 1000,
   "show_unclassified": true,
   "stuck_minutes": 120,
+  "ci": {
+    "red_events": ["push", "schedule", "workflow_dispatch", "merge_group"],
+    "count_fork_runs": false,
+    "automation_counts": false,
+    "inactive_days": 90,
+    "extra_branches": []
+  },
   "watchdog_minutes": 10,
   "watchdog_max_abandoned": 8,
   "runs_per_repo": 20,

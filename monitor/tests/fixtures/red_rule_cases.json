@@ -379,7 +379,7 @@
    ]
   },
   {
-   "name": "action_required_is_red",
+   "name": "action_required_is_not_red",
    "default_branch": "main",
    "runs": [
     {
@@ -405,13 +405,7 @@
      "sha": "000001a"
     }
    ],
-   "red": [
-    {
-     "workflow": "ci.yml",
-     "conclusion": "action_required",
-     "streak": 1
-    }
-   ]
+   "red": []
   },
   {
    "name": "other_branches_do_not_count",
