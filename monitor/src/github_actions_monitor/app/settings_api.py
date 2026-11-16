@@ -53,6 +53,8 @@ CRON_RE = re.compile(r"^[0-9*/,\- ]{9,60}\Z")      # report_schedule.cron: five 
 BRANCH_RE = re.compile(r"^[A-Za-z0-9._*/-]{1,100}\Z")      # a branch name or a pattern of branch names (ci.extra_branches)
 from github_actions_monitor.health import fleet as _fleet      # noqa: E402 - the two shapes of the lists of the fleet view are defined next to the code that reads them
 FLEET_LABEL_RE, FLEET_FILTER_RE = _fleet.LABEL_RE, _fleet.FILTER_RE
+RUNNER_LABEL_RE = re.compile(r"^[A-Za-z0-9._*?=/-]{1,60}\Z")      # a label of runs-on, or the start / pattern of one (runners.model.*_labels)
+RUNNER_LABEL_KEYS = ("runners.model.thirdparty_labels", "runners.model.large_labels", "runners.model.self_labels")
 OWNER_RE = re.compile(r"^[A-Za-z0-9-]{0,39}\Z")
 MODEL_RE = re.compile(r"^[A-Za-z0-9._:/@-]{0,100}\Z")
 OLLAMA_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}/?\Z")   # the local service only: nothing leaves this computer
@@ -473,6 +475,17 @@ _f("advanced", "mirror", "mirror.keep_days", "int", (1, 365), restart=False)
 _f("advanced", "mirror", "mirror.max_per_cycle", "int", (1, 20), restart=False, unit="")
 _f("advanced", "runners", "runners.enabled", "bool", restart=False)
 _f("advanced", "runners", "runners.scope", "enum", ("owner", "repos"), restart=False)
+_f("advanced", "runner_model", "runners.model.enabled", "bool", restart=False)
+_f("advanced", "runner_model", "runners.model.jobs_per_cycle", "int", (0, 100), unit="calls", restart=False)
+_f("advanced", "runner_model", "runners.model.thirdparty_labels", "names", restart=False)
+_f("advanced", "runner_model", "runners.model.large_labels", "names", restart=False)
+_f("advanced", "runner_model", "runners.model.self_labels", "names", restart=False)
+_f("advanced", "runner_model", "runners.model.thirdparty_usd_per_minute", "float", (0, 10), unit="", restart=False)
+_f("advanced", "runner_model", "runners.model.queue_warn_minutes", "int", (1, 10080), unit="min", restart=False)
+_f("advanced", "runner_model", "runners.model.runaway_runs_per_hour", "int", (0, 1000), unit="", restart=False)
+_f("advanced", "runner_model", "runners.model.runaway_ignore_events", "names", restart=False)
+_f("advanced", "runner_model", "runners.model.alerts", "bool", restart=False)
+_f("advanced", "runner_model", "runners.model.alert_level", "enum", ("info", "warning", "error"), restart=False)
 _f("advanced", "otlp", "otlp.enabled", "bool", restart=False, secure=True)
 _f("advanced", "otlp", "otlp.endpoint", "text", OTLP_RE, restart=False, secure=True)
 _f("advanced", "otlp", "otlp.interval_seconds", "int", (15, 3600), restart=False)
@@ -620,7 +633,7 @@ def check_value(path, value):
             return False, "path"
         return True, text
     if kind == "names":
-        pattern = FLEET_LABEL_RE if path == "fleet.labels" else FLEET_FILTER_RE if path == "fleet.saved_filters" else LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path == "sentinel.hygiene.ruleset_names" else NAME_RE)))
+        pattern = FLEET_LABEL_RE if path == "fleet.labels" else FLEET_FILTER_RE if path == "fleet.saved_filters" else RUNNER_LABEL_RE if path in RUNNER_LABEL_KEYS else LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path == "sentinel.hygiene.ruleset_names" else NAME_RE)))
         if not isinstance(value, list) or len(value) > 200 or not all(isinstance(v, str) and pattern.match(v) for v in value):
             return False, "names"
         if path == "sentinel.hygiene.ruleset_names" and not value:

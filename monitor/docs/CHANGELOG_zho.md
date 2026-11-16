@@ -13,6 +13,7 @@
 ### 新增
 
 - **面向数百个仓库的舰队视图**:团队标签页新增一个部分,对仓库分组(按生态、标签、状态或不分组)、排序(按风险、名称、最近运行或状态),并逐页绘制,因此拥有 250 个仓库的账户也能保持页面轻快。标签是仓库名的模式(`fleet.labels`,例如 `team-*=backend`),也可用来区分组织或团队;`fleet.saved_filters` 保存现成的筛选;`fleet.group_by`、`fleet.sort` 和 `fleet.page_size` 设定默认值。它读取 `GET /api/team/fleet`(只读,与团队排名相同的健康数据);上方的排名不变。
+- **运行器类型、其队列与成本、失控工作流以及宕机的自托管运行器**:开启 `runners.model.enabled` 后,作业的标签(`runs-on`)用于区分 GitHub 托管、大型、第三方付费和自托管运行器(通过 `runners.model.thirdparty_labels`、`runners.model.large_labels` 和 `runners.model.self_labels` 自定义分类)。设置 > 高级会显示按类型的队列、按类型的分钟数与成本(第三方的一分钟仅在设置了 `runners.model.thirdparty_usd_per_minute` 时才计价,GitHub 从不对其计费)、过去一小时至少启动 `runners.model.runaway_runs_per_hour` 次的工作流,以及等待自托管运行器达到 `runners.model.queue_warn_minutes` 分钟或更久的作业及原因(没有在线运行器具有其标签、所有匹配的运行器都在忙,或空闲运行器不接取)。两种警告都是警报(`runners.model.alerts`,级别为 `runners.model.alert_level`,默认 `warning`);只读、默认关闭,并通过 `GET /api/runners/model` 每周期读取 `runners.model.jobs_per_cycle` 次运行。开启 `finops.jobs_per_cycle` 时,第三方运行器上的作业不再按 GitHub 托管计价。
 - **如实的运行列表覆盖范围**:仓库表新增一列“样本回溯范围”,说明每个仓库的运行列表向过去回溯了多久。已满但回溯时间少于 `sampling.min_coverage_minutes`(默认 30,0 为关闭)的列表会标记为“覆盖不足”,而不是看起来完整;比请求数量短的列表为“完整”;GitHub 停止计数的总数(2,500 或 40,000)显示为“至少”。表格上方的提示会统计覆盖不足的仓库数;`GET /api/data` 的 `sampling` 块带有同样的数字。
 - **对默认分支再看一次**(`sampling.default_branch_probe`,默认关闭):当仓库的运行列表已满时,再发出一次请求,获取默认分支的推送(不含拉取请求),使决定 main 是否为红色的运行不会被拉取请求和定时任务挤出。仅由第二次查看找到的运行,不会让列表被视为已满。
 - **每小时请求预算**(`sampling.api_budget_per_hour`,0 = 无):超出后先读取有红色工作流的仓库,其余等待下一小时,页面会说明有多少个在等待。页面还会显示仓库数量和间隔所需的每小时请求数(达到 3,500 或设置了预算时),让大账户在用完额度之前得到提醒。

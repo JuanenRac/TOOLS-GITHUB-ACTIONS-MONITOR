@@ -279,6 +279,17 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `retention.mode` (secure) | `-` | paths | What to do with old events |
 | `retention.warn_events_mb` | `-` | paths | Warn when the events are bigger than |
 | `runners.enabled` | `false` | advanced | Watch self-hosted runners |
+| `runners.model.alert_level` | `"warning"` | advanced | Level of those alerts |
+| `runners.model.alerts` | `true` | advanced | Alerts of the runner model |
+| `runners.model.enabled` | `false` | advanced | Model the runners |
+| `runners.model.jobs_per_cycle` | `10` | advanced | Runs whose jobs are read per cycle |
+| `runners.model.large_labels` | `[]` | advanced | Labels of your larger runners |
+| `runners.model.queue_warn_minutes` | `20` | advanced | Minutes a job may wait for a self-hosted runner |
+| `runners.model.runaway_ignore_events` | `["pull_request", "pull_request_target"]` | advanced | Events that do not count as runaway |
+| `runners.model.runaway_runs_per_hour` | `20` | advanced | Runs per hour of a workflow that fires itself |
+| `runners.model.self_labels` | `[]` | advanced | Extra labels of self-hosted runners |
+| `runners.model.thirdparty_labels` | `["blacksmith", "buildjet", "namespace-profile", "depot", "warpbuild", "ubicloud", "runs-on", "actuated", "cirrus-runners"]` | advanced | Labels of paid third-party runners |
+| `runners.model.thirdparty_usd_per_minute` | `0.0` | advanced | Price of a third-party minute |
 | `runners.scope` | `"owner"` | advanced | Where to look |
 | `runs_per_repo` | `20` | polling | Runs read per hot repository |
 | `sampling.api_budget_per_hour` | `0` | polling | Request budget per hour |

@@ -1882,7 +1882,7 @@ async function advancedExtras(){
   let box=host.querySelector(".adv-live");if(!box){box=document.createElement("div");box.className="cfg-group adv-live";host.appendChild(box)}
   let st={};try{st=await (await fetch("/api/advanced",{cache:"no-store"})).json()}catch(e){return}
   const pick=async p=>{try{return await (await fetch(p,{cache:"no-store"})).json()}catch(e){return null}};
-  const [rn,mi,ot,dc]=await Promise.all([pick("/api/runners"),pick("/api/mirror"),pick("/api/otlp"),pick("/api/discovery")]);
+  const [rn,mi,ot,dc,rm]=await Promise.all([pick("/api/runners"),pick("/api/mirror"),pick("/api/otlp"),pick("/api/discovery"),pick("/api/runners/model")]);
   const tk=st.token||{},gh=st.github_actions||{},ac=st.act||{};let h=`<h3>${esc(T("ui.adv_title"))}</h3>`;
   h+=`<h4>${esc(T("ui.adv_token_h"))}</h4><div class="inl"><span>${esc(tk.enabled?(tk.stored?T("ui.adv_token_where",{backend:tk.backend})+(tk.weak?" · "+T("ui.adv_token_weak"):""):T("ui.adv_token_empty")):T("ui.adv_token_none"))}</span>`;
   if(tk.enabled)h+=`<input id="adv-token" type="password" autocomplete="off" spellcheck="false" placeholder="${esc(T("ui.adv_token_ph"))}"> <button type="button" id="adv-token-save">${esc(T("ui.adv_token_save"))}</button>`;
@@ -1894,6 +1894,15 @@ async function advancedExtras(){
   if(ac.enabled)h+=`<div class="inl"><select id="adv-act-sel">${(ac.allowed||[]).map(a=>`<option>${esc(a)}</option>`).join("")}</select><button type="button" id="adv-act-go">${esc(T("ui.adv_prepare"))}</button><button type="button" id="adv-act-stop">${esc(T("ui.adv_act_stop"))}</button></div><pre id="adv-act-out" aria-live="polite"></pre>`;
   else h+=`<div class="mut">${esc(T("ui.adv_off"))}</div>`;
   h+=`<h4>${esc(T("ui.adv_runners_h"))}</h4>`+(rn&&rn.enabled?`<div>${esc(T("ui.adv_runners_counts",rn.counts))}</div>`+(rn.runners||[]).map(x=>`<div class="mut">${esc(x.name)} · ${esc(x.state)}${x.load1!=null?" · load "+x.load1:""}${x.disk_free_percent!=null?" · disk free "+x.disk_free_percent+" %":""}</div>`).join(""):`<div class="mut">${esc(T("ui.adv_off"))}</div>`);
+  h+=`<h4>${esc(T("ui.adv_model_h"))}</h4>`;
+  if(rm&&rm.enabled){
+    const kn=k=>T("ui.runner_kind_"+k),q=Object.entries(rm.queue||{}),u=Object.entries(rm.usage||{}),rw=(rm.runaway||{}).rows||[],dn=rm.selfhosted||[];
+    h+=q.map(([k,v])=>`<div>${esc(T("ui.adv_model_queue",{kind:kn(k),jobs:v.jobs,minutes:Math.floor(v.oldest_wait_seconds/60)}))}</div>`).join("")+
+      u.map(([k,v])=>`<div class="mut">${esc(T("ui.adv_model_usage",{kind:kn(k),minutes:v.minutes,usd:v.usd==null?T("ui.adv_model_usd_unknown"):"$"+v.usd.toFixed(2)}))}</div>`).join("")+
+      rw.map(r=>`<div>${esc(T("ui.adv_model_runaway",{repo:r.repo,workflow:r.workflow,runs:r.runs_last_hour}))}</div>`).join("")+
+      dn.map(r=>`<div>${esc(T("ui.adv_model_down",{repo:r.repo,labels:(r.labels||[]).join(", "),jobs:r.jobs,minutes:r.oldest_wait_minutes,reason:T("ui.runner_reason_"+r.reason)}))}</div>`).join("")+
+      ((rm.runaway||{}).limited?`<div class="mut">${esc(T("ui.adv_model_limited"))}</div>`:"")+(q.length||u.length||rw.length||dn.length?"":`<div class="mut">${esc(T("ui.adv_model_none"))}</div>`);
+  }else h+=`<div class="mut">${esc(T("ui.adv_off"))}</div>`;
   h+=`<h4>${esc(T("ui.adv_mirror_h"))}</h4><div class="mut">${esc(mi&&mi.enabled?T("ui.adv_mirror_text",{count:mi.count,mb:mi.mb}):T("ui.adv_off"))}</div>`;
   h+=`<h4>${esc(T("ui.adv_otlp_h"))}</h4><div class="mut">${esc(ot&&ot.enabled?T("ui.adv_otlp_text",{host:ot.endpoint_host,spans:ot.spans_sent})+(ot.last_error?" · "+ot.last_error:""):T("ui.adv_off"))}</div>`;
   h+=`<h4>${esc(T("ui.adv_orgs_h"))}</h4><div class="mut">${esc(dc&&dc.organizations&&dc.organizations.enabled?((dc.organizations.orgs||[]).join(", ")||"–")+" · "+T("ui.adv_orgs_hint"):T("ui.adv_off"))}</div>`;
