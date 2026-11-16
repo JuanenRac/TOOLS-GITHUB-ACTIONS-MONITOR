@@ -123,7 +123,7 @@ def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_g
         if not watched(config, repo):
             raise ValueError("that repository is not watched (it is not in the configuration, in ai.allowed_repos or in an open alert)")
         owner = toolconfig.github_owner(config)
-        code, out, err = runner(["api", f"repos/{owner}/{repo}/actions/runs/{run}/jobs?per_page=30"])
+        code, out, err = runner(["api", f"repos/{owner}/{repo}/actions/runs/{run}/jobs?per_page=100"])
         if code != 0:
             raise ValueError(ai_alerts.redact(err.strip()[:200]) or "gh failed")
         steps = [f"{job.get('name')}: {step.get('name')}" for job in (json.loads(out).get("jobs") or []) for step in (job.get("steps") or []) if step.get("conclusion") == "failure"]

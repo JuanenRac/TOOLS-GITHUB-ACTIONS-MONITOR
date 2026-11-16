@@ -2917,5 +2917,16 @@
  "wh.on": "Webhook aktiv (127.0.0.1, nur signierte Anfragen)",
  "wh.too_big": "Inhalt zu groß",
  "wh.unknown_repo": "Repository wird nicht überwacht",
- "ws.not_found": "Der Workspace der Repositories wurde nicht gefunden: Setze MONITOR_ROOT oder \"workspace_root\" in actions_monitor.json oder lege eine Datei namens .monitor-root in den Ordner mit den Repositories."
+ "ws.not_found": "Der Workspace der Repositories wurde nicht gefunden: Setze MONITOR_ROOT oder \"workspace_root\" in actions_monitor.json oder lege eine Datei namens .monitor-root in den Ordner mit den Repositories.",
+ "cfg.f.pagination.workflow_pages": "Workflow-Seiten pro Repository",
+ "cfg.h.pagination.workflow_pages": "Ein Repository kann Hunderte Workflows haben. Solange eine Seite mit 100 voll ist, wird die nächste gelesen, bis zu dieser Seitenzahl; ein Repository mit weniger als 100 kostet keine weitere Anfrage. Bleibt etwas übrig, sagt die Seite, wie viele von wie vielen gesehen wurden.",
+ "cfg.f.pagination.job_pages": "Job-Seiten pro Lauf",
+ "cfg.h.pagination.job_pages": "Eine Matrix kann mehr als 100 Jobs in einem Lauf starten. Solange eine Seite mit 100 voll ist, wird die nächste gelesen, bis zu dieser Seitenzahl. Bleiben Jobs übrig, sagt der Lauf „N von M gesehen“.",
+ "cfg.f.pagination.collab_pages": "Seiten für Issues und Pull Requests pro Repository",
+ "cfg.h.pagination.collab_pages": "Ein Repository kann Hunderte offene Issues und Pull Requests haben. Solange eine Seite mit 100 voll ist, wird die nächste gelesen, bis zu dieser Seitenzahl (die erste behält ihr bedingtes Lesen; ein Repository mit weniger als 100 kostet nichts mehr). Gibt es mehr, sagt es der Tab Team.",
+ "ui.cfg_b_pagination": "Seiten langer Listen",
+ "ui.collab_cut": "{n} Repositorys haben mehr offene Einträge als gelesen wurden (bis zu {p} Seiten zu 100)",
+ "ui.collab_cut_search": "Suche: {seen} von {total} gesehen",
+ "ui.jobs_cut": "Jobs: {seen} von {total} gesehen",
+ "hyg.wf_cut": "die Workflow-Liste ist abgeschnitten: {seen} von {total} gesehen"
 }

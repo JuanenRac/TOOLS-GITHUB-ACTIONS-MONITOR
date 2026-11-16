@@ -56,3 +56,13 @@ Pro Repository werden nur die ersten 100 offenen Issues und 100 offenen Pull Req
 ## Lesen mit der Such-API
 
 Ist `sentinels.collab.search_api` an (standardmäßig aus), fragt der Collab-Wächter die offenen Issues und Pull Requests des ganzen Kontos in wenigen Aufrufen der Such-API ab statt zweier Listen je Repository. Die Such-API hat ein eigenes Kontingent (30 Aufrufe pro Minute), das das REST-Kontingent nicht belastet. Danach werden nur die Konflikte der geänderten Pull Requests gelesen. Die Alarme sind auf beide Arten gleich, ein Test vergleicht sie; fällt die Such-API aus, liest die Runde jedes Repository wie zuvor. Ein so gefundener Pull Request sagt nicht, ob ein Review angefordert wurde, die Regel für wartende Reviews zählt also nur, was die Listen liefern.
+
+## Lange Listen: Seiten und was abgeschnitten wird
+
+Eine GitHub-Seite hat 100 Einträge. Ein Repository kann Hunderte offene Issues und Pull Requests haben, 148 oder 348 Workflows oder eine Matrix mit mehr als 100 Jobs; der Monitor liest daher die nächste Seite, solange die letzte voll war, und sagt, wenn etwas übrig bleibt:
+
+- **Issues und Pull Requests** (dieser Tab): bis zu `pagination.collab_pages` Seiten zu 100 für jede Liste eines Repositorys (die erste Seite behält ihr bedingtes Lesen, ein Repository mit weniger als 100 kostet nichts mehr). Ein Repository mit mehr als gelesen wurde, wird in der Fußzeile des Tabs gezählt; mit der Such-API (`sentinels.collab.search_api`) sagt die Fußzeile „N von M gesehen“, wenn das Konto mehr hat als die 1000 Ergebnisse der Suche.
+- **Workflows eines Repositorys** (Hygiene): bis zu `pagination.workflow_pages` Seiten zu 100. Ist die Liste weiter abgeschnitten, sagt die Hygiene dieses Repositorys „N von M gesehen“, statt vollständig zu wirken.
+- **Jobs eines Laufs** (Tab Jetzt): bis zu `pagination.job_pages` Seiten zu 100; eine abgeschnittene Matrix zeigt unter dem Lauf „Jobs: N von M gesehen“.
+
+Die Standardwerte lesen für ein Repository, das auf eine Seite passt, nichts zusätzlich.

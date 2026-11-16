@@ -2917,5 +2917,16 @@
  "wh.on": "webhook activo (127.0.0.1, solo peticiones firmadas)",
  "wh.too_big": "cuerpo demasiado grande",
  "wh.unknown_repo": "repositorio no vigilado",
- "ws.not_found": "No se encuentra el workspace de los repositorios: define MONITOR_ROOT, o \"workspace_root\" en actions_monitor.json, o pon un fichero llamado .monitor-root en la carpeta que contiene los repositorios."
+ "ws.not_found": "No se encuentra el workspace de los repositorios: define MONITOR_ROOT, o \"workspace_root\" en actions_monitor.json, o pon un fichero llamado .monitor-root en la carpeta que contiene los repositorios.",
+ "cfg.f.pagination.workflow_pages": "Páginas de workflows por repositorio",
+ "cfg.h.pagination.workflow_pages": "Un repositorio puede tener cientos de workflows. Mientras una página de 100 está llena se lee la siguiente, hasta este número de páginas; un repositorio con menos de 100 no cuesta ninguna petición más. Si aún queda algo fuera, la página dice cuántos se vieron de cuántos existen.",
+ "cfg.f.pagination.job_pages": "Páginas de jobs por ejecución",
+ "cfg.h.pagination.job_pages": "Una matriz puede lanzar más de 100 jobs en una ejecución. Mientras una página de 100 está llena se lee la siguiente, hasta este número de páginas. Si aún quedan jobs fuera, la ejecución dice «vistos N de M».",
+ "cfg.f.pagination.collab_pages": "Páginas de issues y pull requests por repositorio",
+ "cfg.h.pagination.collab_pages": "Un repositorio puede tener cientos de issues y pull requests abiertos. Mientras una página de 100 está llena se lee la siguiente, hasta este número de páginas (la primera mantiene su lectura condicional; un repositorio con menos de 100 no cuesta nada más). Si hay más, la pestaña Equipo lo dice.",
+ "ui.cfg_b_pagination": "Páginas de listas largas",
+ "ui.collab_cut": "{n} repositorios tienen más elementos abiertos de los leídos (hasta {p} páginas de 100)",
+ "ui.collab_cut_search": "Búsqueda: vistos {seen} de {total}",
+ "ui.jobs_cut": "jobs: vistos {seen} de {total}",
+ "hyg.wf_cut": "la lista de workflows está cortada: vistos {seen} de {total}"
 }

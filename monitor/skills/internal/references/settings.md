@@ -219,6 +219,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `outputs.json.enabled` (secure) | `-` | outputs | Grafana JSON source |
 | `outputs.prometheus.enabled` (secure) | `-` | outputs | Prometheus: /metrics |
 | `outputs.prometheus.per_repo` | `-` | outputs | Prometheus: series per repository |
+| `pagination.collab_pages` | `3` | polling | Pages of issues and pull requests per repository |
+| `pagination.job_pages` | `2` | polling | Pages of jobs per run |
+| `pagination.workflow_pages` | `3` | polling | Pages of workflows per repository |
 | `ports.complete` | `8765` | general | Port of the complete edition |
 | `ports.lite` | `8766` | general | Port of the lite edition |
 | `profiles_file` | `-` | paths | Batch profiles file |

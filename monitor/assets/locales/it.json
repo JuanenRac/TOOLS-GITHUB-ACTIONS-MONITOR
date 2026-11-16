@@ -2917,5 +2917,16 @@
  "wh.on": "webhook attivo (127.0.0.1, solo richieste firmate)",
  "wh.too_big": "corpo troppo grande",
  "wh.unknown_repo": "repository non monitorato",
- "ws.not_found": "Impossibile trovare il workspace dei repository: imposta MONITOR_ROOT, oppure \"workspace_root\" in actions_monitor.json, oppure metti un file chiamato .monitor-root nella cartella che contiene i repository."
+ "ws.not_found": "Impossibile trovare il workspace dei repository: imposta MONITOR_ROOT, oppure \"workspace_root\" in actions_monitor.json, oppure metti un file chiamato .monitor-root nella cartella che contiene i repository.",
+ "cfg.f.pagination.workflow_pages": "Pagine di workflow per repository",
+ "cfg.h.pagination.workflow_pages": "Un repository può avere centinaia di workflow. Finché una pagina da 100 è piena si legge la successiva, fino a questo numero di pagine; un repository con meno di 100 non costa nessuna richiesta in più. Se resta fuori qualcosa, la pagina dice quanti ne sono stati visti su quanti esistono.",
+ "cfg.f.pagination.job_pages": "Pagine di job per esecuzione",
+ "cfg.h.pagination.job_pages": "Una matrice può avviare più di 100 job in un'esecuzione. Finché una pagina da 100 è piena si legge la successiva, fino a questo numero di pagine. Se restano job fuori, l'esecuzione dice «visti N su M».",
+ "cfg.f.pagination.collab_pages": "Pagine di issue e pull request per repository",
+ "cfg.h.pagination.collab_pages": "Un repository può avere centinaia di issue e pull request aperte. Finché una pagina da 100 è piena si legge la successiva, fino a questo numero di pagine (la prima mantiene la lettura condizionale; un repository con meno di 100 non costa altro). Se ce ne sono di più, la scheda Team lo dice.",
+ "ui.cfg_b_pagination": "Pagine delle liste lunghe",
+ "ui.collab_cut": "{n} repository hanno più elementi aperti di quelli letti (fino a {p} pagine da 100)",
+ "ui.collab_cut_search": "Ricerca: visti {seen} su {total}",
+ "ui.jobs_cut": "job: visti {seen} su {total}",
+ "hyg.wf_cut": "l'elenco dei workflow è troncato: visti {seen} su {total}"
 }

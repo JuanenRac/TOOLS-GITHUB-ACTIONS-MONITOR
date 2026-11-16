@@ -9,6 +9,15 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+
+### Hinzugefügt
+
+- **Lange Listen werden bis zum Ende gelesen, und ein Abschneiden wird gesagt**: die Workflows eines Repositorys (148 oder 348 sind reale Fälle), die Jobs eines Laufs (eine Matrix mit mehr als 100) sowie die offenen Issues und Pull Requests eines Repositorys werden jetzt Seite für Seite gelesen, solange die letzte Seite voll war, bis zu `pagination.workflow_pages`, `pagination.job_pages` und `pagination.collab_pages` Seiten zu 100. Ein Repository, das auf eine Seite passt, kostet dieselben Anfragen wie zuvor. Bleibt etwas übrig, sagt die Seite „N von M gesehen“: unter dem Lauf für seine Jobs, in der Hygiene des Repositorys für seine Workflows und in der Fußzeile des Tabs Team für Repositorys mit mehr offenen Einträgen als gelesen und für das Konto, wenn die Such-API mehr als ihre 1000 Ergebnisse hat.
+
+### Behoben
+
+- Der fehlgeschlagene Job eines Laufs mit mehr als 30 Jobs wird gefunden: Die Joblisten, die der Hinweis für eine KI, der Assistent und das Stapelwerkzeug lesen, wurden bei 30 abgeschnitten und werden jetzt bei 100 abgeschnitten (dieselbe einzelne Anfrage).
+
 ## [2.0.2]
 
 ### Sicherheit

@@ -10,6 +10,15 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+
+### Added
+
+- **Long lists are read to the end, and a cut is said**: the workflows of a repository (148 or 348 are real cases), the jobs of a run (a matrix of more than 100) and the open issues and pull requests of a repository are now read page by page while the last page was full, up to `pagination.workflow_pages`, `pagination.job_pages` and `pagination.collab_pages` pages of 100. A repository that fits in one page costs the same requests as before. When something is still left out the page says "seen N of M": under the run for its jobs, in the hygiene of the repository for its workflows, and in the footer of the Team tab for repositories with more open items than were read and for the account when the Search API has more than its 1000 results.
+
+### Fixed
+
+- The failing job of a run with more than 30 jobs is found: the lists of jobs that the alert for an AI, the assistant and the batch tool read were cut at 30 and are now cut at 100 (the same single request).
+
 ## [2.0.2]
 
 ### Security

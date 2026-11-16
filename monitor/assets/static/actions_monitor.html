@@ -901,7 +901,8 @@ function nowRun(r,wrap){      // the line of one run with its jobs; `wrap` = fal
   const jobs=(r.jobs||[]).map(j=>{const pct=j.steps_total?Math.round(100*j.steps_done/j.steps_total):(j.status==="completed"?100:0);
     const cls=j.conclusion==="failure"?"fail":(j.conclusion==="skipped"?"skip":(j.status==="completed"?"done":""));
     return `<div class="job"><span>${esc(j.name)}</span><div><div class="bar"><i class="${cls}" style="width:${pct}%"></i></div><span class="mut">${j.status==="in_progress"?esc(j.step||T("ui.preparing")):esc(concl_(j.conclusion)||j.status)}</span></div><span class="mut">${j.steps_done}/${j.steps_total} · ${fmt(j.seconds)}</span></div>`}).join("");
-  const row=`<div class="row">${badge(r)} ${wrap?`<b class="rl" data-repo-open="${esc(r.repo)}">${esc(r.repo)}</b> `:""}<span>${esc(r.name)}</span> <span class="mut">${esc(r.event)} · ${esc(r.branch)} · ${esc(r.sha)} · ${esc(r.actor)}</span> <span>${esc(T("ui.took",{dur:fmt(r.seconds)}))}</span>${r.stuck?`<span class="badge b-failure">${esc(T("ui.badge_stuck"))}</span>`:""} <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(T("ui.open_gh"))}</a></div>${jobs}`;
+  const cutJobs=r.jobs_total?`<div class="mut">${esc(T("ui.jobs_cut",{seen:r.jobs_seen,total:r.jobs_total}))}</div>`:"";
+  const row=`<div class="row">${badge(r)} ${wrap?`<b class="rl" data-repo-open="${esc(r.repo)}">${esc(r.repo)}</b> `:""}<span>${esc(r.name)}</span> <span class="mut">${esc(r.event)} · ${esc(r.branch)} · ${esc(r.sha)} · ${esc(r.actor)}</span> <span>${esc(T("ui.took",{dur:fmt(r.seconds)}))}</span>${r.stuck?`<span class="badge b-failure">${esc(T("ui.badge_stuck"))}</span>`:""} <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(T("ui.open_gh"))}</a></div>${jobs}${cutJobs}`;
   return wrap?`<div class="card ${r.stuck?"stuck":""} ${r.status!=="in_progress"?"queued":""}" data-now-repo="${esc(r.repo)}" data-now-n="1">${row}</div>`:`<div class="subrun ${r.stuck?"stuck":""} ${r.status!=="in_progress"?"queued":""}">${row}</div>`
 }
 function nowCard(g){
@@ -1265,7 +1266,8 @@ function collabBox(){
   const c=COLLAB;if(!c||c.enabled===false)return mut_(T("ui.collab_off"));
   const rows=(c.alerts||[]).filter(a=>sVis(a.repo)),st=c.status||{};
   const tbl=rows.length?`<table>${thk(["ui.th_repo","ui.th_alert","ui.th_age","ui.th_link"])}<tbody>${rows.map(a=>`<tr><td><b class="rl" data-repo-open="${esc(a.repo)}">${esc(a.repo)}</b></td><td class="wrap"><span class="chip ${a.level==="error"?"bad":a.level==="info"?"":"warn"}" title="${esc(a.code)}">collab</span> ${esc(a.title)}</td><td>${esc(ago(a.created_at))}</td><td>${link(a.details.url,"#"+a.details.number)}</td></tr>`).join("")}</tbody></table>`:ok_(T("ui.collab_none"));
-  return tbl+`<div class="mut" style="margin-top:8px">${esc(T("ui.collab_foot",{c:st.repos_checked||0,r:st.repos_in_scope||0,s:st.refresh_seconds||0}))}${(st.errors||[]).length?" · "+esc(st.errors.map(e=>e.section).slice(0,4).join(", ")):""}</div>`}
+  const cut=(st.truncated_count?" · "+esc(T("ui.collab_cut",{n:st.truncated_count,p:st.pages||1})):"")+(st.search_cut||[]).map(s=>" · "+esc(T("ui.collab_cut_search",{seen:s.seen,total:s.total}))).join("");
+  return tbl+`<div class="mut" style="margin-top:8px">${esc(T("ui.collab_foot",{c:st.repos_checked||0,r:st.repos_in_scope||0,s:st.refresh_seconds||0}))}${(st.errors||[]).length?" · "+esc(st.errors.map(e=>e.section).slice(0,4).join(", ")):""}${cut}</div>`}
 function collabLevel(){const c=COLLAB;return !c||c.enabled===false?"unknown":(c.level||"unknown")}
 const fmtS=x=>x==null?"–":(x>=3600?(x/3600).toFixed(1)+" h":(x>=120?Math.round(x/60)+" min":Math.round(x)+" s"));
 function analyticsBox(){
