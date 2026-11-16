@@ -61,6 +61,8 @@ NOTES = {
     "/api/report-files/run": ("POST", "writes a report now (administrator, from this computer only); answers the names of the files (Complete only)"),
     "/api/team": ("GET", "the prefix of the health views of the repositories and of the team (see /api/team/health); Complete only"),
     "/api/team/health": ("GET", "the health of the team: every repository ranked by risk with the ones that need a person first, the totals by state, the numbers by ecosystem and by sentinel; filters `?ecosystem=`, `?severity=warn|bad`, `?q=`, `?label=` (read only, from what the monitor holds; Complete only)"),
+    "/api/team/fleet": ("GET", "the same health grouped and ordered for hundreds of repositories: `groups` with their totals and `rows` (one per repository, at most 5,000; the page draws them a page at a time); `?group=ecosystem|label|state|none`, `?sort=risk|name|last_run|state`, `?saved=<name>` and the filters of the team view (read only; Complete only)"),
+    "/api/runners/model": ("GET", "the model of the runners (off by default): `queue` and `usage` by kind (hosted, large, thirdparty, selfhosted, unknown), `runaway` workflows and `selfhosted` queues with their reason; `{\"enabled\": false}` while `runners.model.enabled` is off (read only; Complete only)"),
     "/api/repos": ("GET", "the prefix of `/api/repos/<owner>/<repo>/health`: the health of one repository (CI of the last 24 hours, open alerts of every sentinel, release readiness, activity, and which sentinels did not see it fully); 404 `repo_unknown` for a repository the monitor does not know (Complete only)"),
     "/api/auth/audit": ("GET", "the audit of the team mode (administrators)"),
     "/api/auth/bootstrap": ("POST", "create the first administrator (this computer only, once)"),

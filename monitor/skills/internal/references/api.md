@@ -84,6 +84,7 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/repos` | GET | viewer | the prefix of `/api/repos/<owner>/<repo>/health`: the health of one repository (CI of the last 24 hours, open alerts of every sentinel, release readiness, activity, and which sentinels did not see it fully); 404 `repo_unknown` for a repository the monitor does not know (Complete only) |
 | `/api/run-log` | GET | admin | the failing step of one run and its last relevant lines, cleaned (`?repo=&run=`; off by default, `logs.failed_step.enabled`; administrators in the team mode) |
 | `/api/runners` | GET | viewer | self-hosted runners (opt-in) |
+| `/api/runners/model` | GET | viewer | the model of the runners (off by default): `queue` and `usage` by kind (hosted, large, thirdparty, selfhosted, unknown), `runaway` workflows and `selfhosted` queues with their reason; `{"enabled": false}` while `runners.model.enabled` is off (read only; Complete only) |
 | `/api/score` | GET | viewer | the score of the account: a number from 0 to 100, a letter from A to E and a trend, with its parts, its coverage, the quality of the data and a breakdown by repository (Complete only; null and a state instead of a number when there is not enough data) |
 | `/api/score/global` | GET | viewer | the score of the whole installation, for information only (supervisor): the mean of the scored accounts the asker may see, weighted by their repositories with a number, with who is in it (Complete only) |
 | `/api/score/history` | GET | viewer | the points of the score over time (`?hours=`, `?limit=`), oldest first (Complete only) |
@@ -100,6 +101,7 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/statusbar` | GET | viewer | the data of the status bar of the page |
 | `/api/tags` | GET | viewer | tags and releases of the repositories |
 | `/api/team` | GET | viewer | the prefix of the health views of the repositories and of the team (see /api/team/health); Complete only |
+| `/api/team/fleet` | GET | viewer | the same health grouped and ordered for hundreds of repositories: `groups` with their totals and `rows` (one per repository, at most 5,000; the page draws them a page at a time); `?group=ecosystem|label|state|none`, `?sort=risk|name|last_run|state`, `?saved=<name>` and the filters of the team view (read only; Complete only) |
 | `/api/team/health` | GET | viewer | the health of the team: every repository ranked by risk with the ones that need a person first, the totals by state, the numbers by ecosystem and by sentinel; filters `?ecosystem=`, `?severity=warn|bad`, `?q=`, `?label=` (read only, from what the monitor holds; Complete only) |
 | `/api/webhook` | POST | public | the incoming webhook of GitHub (signed with HMAC) |
 | `/api/welcome` | GET,POST | viewer / maintainer | the first-run welcome flag (POST: this computer only) |

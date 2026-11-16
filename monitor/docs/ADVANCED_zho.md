@@ -53,6 +53,10 @@
 
 开启 `runners.enabled` 后,设置 > 高级会把每个运行器显示为空闲、忙碌或离线。磁盘和负载只显示在 `runners.metrics`({名称:本机或私有地址上 node exporter 的地址})列出的运行器上。
 
+开启 `runners.model.enabled`(默认关闭,只读)后,作业的标签(`runs-on`)用于区分 **GitHub 托管**、**大型**、**第三方付费**和**自托管**运行器。可用 `runners.model.thirdparty_labels`(标签的开头)、`runners.model.large_labels`(您自己的大型运行器组的名称或模式)和 `runners.model.self_labels` 添加自己的名称。每个周期最多读取 `runners.model.jobs_per_cycle` 个未完成的运行(每个一次请求)。`GET /api/runners/model` 和设置 > 高级随后显示按类型的队列(等待中的作业和最长等待)、`finops.jobs_per_cycle` 抽样的已完成运行按类型的分钟数与成本(第三方的一分钟仅在设置了 `runners.model.thirdparty_usd_per_minute` 时才有价格;GitHub 从不对其计费)、过去一小时启动 `runners.model.runaway_runs_per_hour` 次或更多的工作流(拉取请求不计;监视器只能看到每个仓库抽样的运行,上限高于该样本时会说明),以及等待自托管运行器达到 `runners.model.queue_warn_minutes` 分钟或更久的作业及原因:没有在线运行器具有其标签、所有匹配的运行器都在忙,或空闲运行器不接取(`runners.enabled` 关闭时为 `unknown`)。失控的工作流和无人接取的自托管队列都是警报(`runners.model.alerts`,级别 `runners.model.alert_level`)。
+
+**已知限制。** 类型由作业的标签读取,因此您重命名的运行器组需要 `runners.model.large_labels` 或 `runners.model.self_labels`。仓库的套餐可能是 `unknown`(私有或免费仓库不会说明):此时配额显示为无套餐上限,而不是报错。
+
 ## OpenTelemetry
 
 开启 `otlp.enabled` 并设置 `otlp.endpoint`(HTTPS,或本机上的 HTTP)后,已完成的运行作为追踪发出,页眉数字作为指标发出(JSON 格式的 OTLP/HTTP),每个运行仅一次。只发送仓库、工作流、分支、事件、结论和时长。

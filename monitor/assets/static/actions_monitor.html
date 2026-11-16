@@ -499,6 +499,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 </div>
 <div class="tab" id="t-team" role="tabpanel" aria-labelledby="n-team">
 <section><h2 data-i18n="ui.team_title"></h2><div class="body"><div class="tbl-tools" id="team-tools"></div><div class="mut" id="team-sum"></div><table><thead><tr id="team-head"></tr></thead><tbody id="team-rows"></tbody></table><div id="team-extra"></div></div></section>
+<section id="fleet-sec"><h2 data-i18n="ui.fleet_title"></h2><div class="body"><div class="tbl-tools" id="fleet-tools"></div><div class="mut" id="fleet-sum"></div><table><thead><tr id="fleet-head"></tr></thead><tbody id="fleet-rows"></tbody></table><div class="tbl-tools" id="fleet-pager"></div></div></section>
 <section id="rs-sec"><h2 data-i18n="ui.rs_title"></h2><div class="body"><div class="mut" id="rs-state"></div><ul id="rs-list"></ul><button id="rs-run" type="button" data-i18n="ui.rs_run"></button> <span class="mut" id="rs-msg" role="status"></span></div></section>
 </div>
 <div class="tab" id="t-hist" role="tabpanel" aria-labelledby="n-hist">
@@ -1423,7 +1424,38 @@ async function teamLoad(){
   if(LITE)return;
   const p=new URLSearchParams();if(TEAM_F.eco)p.set("ecosystem",TEAM_F.eco);if(TEAM_F.sev)p.set("severity",TEAM_F.sev);if(TEAM_F.q)p.set("q",TEAM_F.q);
   try{const r=await fetch("/api/team/health?"+p.toString(),{cache:"no-store"});TEAM=r.ok?await r.json():null}catch(e){TEAM=null}
-  teamPaint();rsLoad()}
+  teamPaint();fleetLoad();rsLoad()}
+/* the fleet view: GET /api/team/fleet sends every row once (grouped and ordered by the server); the page draws one page of them at a time, so hundreds of repositories do not slow it down */
+let FLEET=null,FLEET_F={group:"",sort:"",saved:""},FLEET_PAGE=0;
+async function fleetLoad(){
+  if(LITE)return;
+  const p=new URLSearchParams();if(TEAM_F.eco)p.set("ecosystem",TEAM_F.eco);if(TEAM_F.sev)p.set("severity",TEAM_F.sev);if(TEAM_F.q)p.set("q",TEAM_F.q);
+  if(FLEET_F.group)p.set("group",FLEET_F.group);if(FLEET_F.sort)p.set("sort",FLEET_F.sort);if(FLEET_F.saved)p.set("saved",FLEET_F.saved);
+  try{const r=await fetch("/api/team/fleet?"+p.toString(),{cache:"no-store"});FLEET=r.ok?await r.json():null}catch(e){FLEET=null}
+  fleetPaint()}
+function fleetTools(){
+  const el=$("fleet-tools"),sig=FLEET?JSON.stringify([FLEET.group_by,FLEET.sort,FLEET.saved_filters,FLEET.filters.saved]):"";
+  if(el.dataset.built===sig)return;el.dataset.built=sig;if(!FLEET)return;
+  const opt=(list,pre,cur)=>list.map(k=>`<option value="${esc(k)}"${k===cur?" selected":""}>${esc(T(pre+k))}</option>`).join("");
+  el.innerHTML=`<label class="inl">${esc(T("ui.fleet_group"))} <select id="fleet-group">${opt(["ecosystem","label","state","none"],"ui.fleet_g_",FLEET.group_by)}</select></label> `+
+   `<label class="inl">${esc(T("ui.fleet_sort"))} <select id="fleet-sort">${opt(["risk","name","last_run","state"],"ui.fleet_s_",FLEET.sort)}</select></label>`+
+   ((FLEET.saved_filters||[]).length?` <label class="inl">${esc(T("ui.fleet_saved"))} <select id="fleet-saved"><option value="">${esc(T("ui.fleet_saved_none"))}</option>${FLEET.saved_filters.map(k=>`<option value="${esc(k)}"${k===FLEET.filters.saved?" selected":""}>${esc(k)}</option>`).join("")}</select></label>`:"");
+  $("fleet-group").addEventListener("change",e=>{FLEET_F.group=e.target.value;FLEET_PAGE=0;fleetLoad()});$("fleet-sort").addEventListener("change",e=>{FLEET_F.sort=e.target.value;FLEET_PAGE=0;fleetLoad()});
+  const sv=$("fleet-saved");if(sv)sv.addEventListener("change",e=>{FLEET_F.saved=e.target.value;FLEET_PAGE=0;fleetLoad()})}
+function fleetPaint(){
+  fleetTools();$("fleet-head").innerHTML=["ui.team_c_repo","ui.team_c_state","ui.team_c_risk","ui.team_c_red","ui.team_c_alerts","ui.team_c_fail","ui.team_c_last"].map(c=>`<th>${esc(T(c))}</th>`).join("");
+  const rows=$("fleet-rows"),pager=$("fleet-pager");
+  if(!FLEET){$("fleet-sum").textContent="";rows.innerHTML="";pager.innerHTML="";return}
+  const size=FLEET.page_size||50,all=FLEET.rows||[],pages=Math.max(1,Math.ceil(all.length/size));FLEET_PAGE=Math.min(FLEET_PAGE,pages-1);
+  $("fleet-sum").textContent=T("ui.fleet_summary",{shown:FLEET.shown,all:FLEET.all,groups:(FLEET.groups||[]).length})+(FLEET.truncated?" · "+T("ui.fleet_truncated"):"");
+  const gi={};(FLEET.groups||[]).forEach(g=>{gi[g.key]=g});let last=null,html="";
+  all.slice(FLEET_PAGE*size,(FLEET_PAGE+1)*size).forEach(r=>{
+    if(FLEET.group_by!=="none"&&r.group!==last){last=r.group;const g=gi[r.group]||{};const nm=FLEET.group_by==="ecosystem"?((I18N.ecosystems&&I18N.ecosystems[r.group])||r.group):FLEET.group_by==="state"?T("ui.team_sev_"+r.group):r.group;
+      html+=`<tr><th colspan="7" class="wrap">${esc(T("ui.fleet_group_line",{key:nm||T("ui.fleet_nogroup"),repos:g.repos||0,risk:g.risk||0,bad:g.bad||0,warn:g.warn||0}))}</th></tr>`}
+    html+=`<tr><td><b class="rl" data-health-open="${esc(r.repo)}" tabindex="0" role="button">${esc(r.repo)}</b></td><td>${stateChip(r.state,r.not_fully_seen)}</td><td>${esc(r.risk)}</td><td>${esc(r.red_workflows||0)}</td><td>${esc(r.alerts||0)}</td><td>${esc(r.failures_24h||0)}</td><td>${r.last_run_at?esc(ago(r.last_run_at)):""}</td></tr>`});
+  rows.innerHTML=html||`<tr><td colspan="7" class="mut">${esc(T("ui.team_none"))}</td></tr>`;
+  pager.innerHTML=pages>1?`<button type="button" id="fleet-prev"${FLEET_PAGE===0?" disabled":""}>${esc(T("ui.fleet_prev"))}</button> <span class="mut">${esc(T("ui.fleet_page",{page:FLEET_PAGE+1,pages:pages}))}</span> <button type="button" id="fleet-next"${FLEET_PAGE>=pages-1?" disabled":""}>${esc(T("ui.fleet_next"))}</button>`:"";
+  const pv=$("fleet-prev"),nx=$("fleet-next");if(pv)pv.addEventListener("click",()=>{FLEET_PAGE--;fleetPaint()});if(nx)nx.addEventListener("click",()=>{FLEET_PAGE++;fleetPaint()})}
 function teamTools(){
   const el=$("team-tools");if(el.dataset.built)return;el.dataset.built="1";
   const ecos=[...new Set(Object.keys((TEAM&&TEAM.by_ecosystem)||{}))].sort();
@@ -1850,7 +1882,7 @@ async function advancedExtras(){
   let box=host.querySelector(".adv-live");if(!box){box=document.createElement("div");box.className="cfg-group adv-live";host.appendChild(box)}
   let st={};try{st=await (await fetch("/api/advanced",{cache:"no-store"})).json()}catch(e){return}
   const pick=async p=>{try{return await (await fetch(p,{cache:"no-store"})).json()}catch(e){return null}};
-  const [rn,mi,ot,dc]=await Promise.all([pick("/api/runners"),pick("/api/mirror"),pick("/api/otlp"),pick("/api/discovery")]);
+  const [rn,mi,ot,dc,rm]=await Promise.all([pick("/api/runners"),pick("/api/mirror"),pick("/api/otlp"),pick("/api/discovery"),pick("/api/runners/model")]);
   const tk=st.token||{},gh=st.github_actions||{},ac=st.act||{};let h=`<h3>${esc(T("ui.adv_title"))}</h3>`;
   h+=`<h4>${esc(T("ui.adv_token_h"))}</h4><div class="inl"><span>${esc(tk.enabled?(tk.stored?T("ui.adv_token_where",{backend:tk.backend})+(tk.weak?" · "+T("ui.adv_token_weak"):""):T("ui.adv_token_empty")):T("ui.adv_token_none"))}</span>`;
   if(tk.enabled)h+=`<input id="adv-token" type="password" autocomplete="off" spellcheck="false" placeholder="${esc(T("ui.adv_token_ph"))}"> <button type="button" id="adv-token-save">${esc(T("ui.adv_token_save"))}</button>`;
@@ -1862,6 +1894,15 @@ async function advancedExtras(){
   if(ac.enabled)h+=`<div class="inl"><select id="adv-act-sel">${(ac.allowed||[]).map(a=>`<option>${esc(a)}</option>`).join("")}</select><button type="button" id="adv-act-go">${esc(T("ui.adv_prepare"))}</button><button type="button" id="adv-act-stop">${esc(T("ui.adv_act_stop"))}</button></div><pre id="adv-act-out" aria-live="polite"></pre>`;
   else h+=`<div class="mut">${esc(T("ui.adv_off"))}</div>`;
   h+=`<h4>${esc(T("ui.adv_runners_h"))}</h4>`+(rn&&rn.enabled?`<div>${esc(T("ui.adv_runners_counts",rn.counts))}</div>`+(rn.runners||[]).map(x=>`<div class="mut">${esc(x.name)} · ${esc(x.state)}${x.load1!=null?" · load "+x.load1:""}${x.disk_free_percent!=null?" · disk free "+x.disk_free_percent+" %":""}</div>`).join(""):`<div class="mut">${esc(T("ui.adv_off"))}</div>`);
+  h+=`<h4>${esc(T("ui.adv_model_h"))}</h4>`;
+  if(rm&&rm.enabled){
+    const kn=k=>T("ui.runner_kind_"+k),q=Object.entries(rm.queue||{}),u=Object.entries(rm.usage||{}),rw=(rm.runaway||{}).rows||[],dn=rm.selfhosted||[];
+    h+=q.map(([k,v])=>`<div>${esc(T("ui.adv_model_queue",{kind:kn(k),jobs:v.jobs,minutes:Math.floor(v.oldest_wait_seconds/60)}))}</div>`).join("")+
+      u.map(([k,v])=>`<div class="mut">${esc(T("ui.adv_model_usage",{kind:kn(k),minutes:v.minutes,usd:v.usd==null?T("ui.adv_model_usd_unknown"):"$"+v.usd.toFixed(2)}))}</div>`).join("")+
+      rw.map(r=>`<div>${esc(T("ui.adv_model_runaway",{repo:r.repo,workflow:r.workflow,runs:r.runs_last_hour}))}</div>`).join("")+
+      dn.map(r=>`<div>${esc(T("ui.adv_model_down",{repo:r.repo,labels:(r.labels||[]).join(", "),jobs:r.jobs,minutes:r.oldest_wait_minutes,reason:T("ui.runner_reason_"+r.reason)}))}</div>`).join("")+
+      ((rm.runaway||{}).limited?`<div class="mut">${esc(T("ui.adv_model_limited"))}</div>`:"")+(q.length||u.length||rw.length||dn.length?"":`<div class="mut">${esc(T("ui.adv_model_none"))}</div>`);
+  }else h+=`<div class="mut">${esc(T("ui.adv_off"))}</div>`;
   h+=`<h4>${esc(T("ui.adv_mirror_h"))}</h4><div class="mut">${esc(mi&&mi.enabled?T("ui.adv_mirror_text",{count:mi.count,mb:mi.mb}):T("ui.adv_off"))}</div>`;
   h+=`<h4>${esc(T("ui.adv_otlp_h"))}</h4><div class="mut">${esc(ot&&ot.enabled?T("ui.adv_otlp_text",{host:ot.endpoint_host,spans:ot.spans_sent})+(ot.last_error?" · "+ot.last_error:""):T("ui.adv_off"))}</div>`;
   h+=`<h4>${esc(T("ui.adv_orgs_h"))}</h4><div class="mut">${esc(dc&&dc.organizations&&dc.organizations.enabled?((dc.organizations.orgs||[]).join(", ")||"–")+" · "+T("ui.adv_orgs_hint"):T("ui.adv_off"))}</div>`;

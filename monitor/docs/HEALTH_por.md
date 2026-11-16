@@ -33,3 +33,9 @@ O estado é **mau** (um fluxo vermelho, ou um alerta de nível crítico ou erro)
 A saúde da equipa agrupa uma só vez por repositório as execuções, os workflows vermelhos, as execuções em curso e os alertas, pelo que o custo cresce com a quantidade de dados e não com repositórios vezes execuções; pedir um só repositório constrói apenas a sua vista.
 
 Uma marca guardada que está no futuro (um computador sem relógio de bateria que arranca com data antiga, ou um relógio corrigido à mão) não se acredita: a pontuação, a limpeza de dados antigos e os relatórios agendados são devidos de imediato e escrevem uma marca correta, em vez de esperar que o relógio antigo seja alcançado.
+
+## A vista de frota (centenas de repositórios)
+
+O separador **Equipa** tem uma segunda secção, *Frota*, para contas com centenas de repositórios. Agrupa os repositórios (`fleet.group_by`: ecossistema, etiqueta, estado ou nenhum), ordena cada grupo (`fleet.sort`: risco, nome, última execução ou estado) e desenha `fleet.page_size` linhas de cada vez (50 por defeito) com Anterior e Seguinte. A página recebe todas as linhas uma vez de `GET /api/team/fleet?ecosystem=&severity=&q=&label=&group=&sort=&saved=` (só de leitura, no máximo 5.000 linhas; `truncated` avisa se foi cortado) e desenha apenas uma página, por isso o tamanho da conta não a atrasa.
+
+Uma *etiqueta* é um padrão de nomes de repositório: `fleet.labels` aceita linhas como `team-*=backend`; o primeiro padrão que corresponder dá a etiqueta, e agrupar por etiqueta é a forma de distinguir organizações ou equipas num só monitor. `fleet.saved_filters` aceita linhas como `attention=bad||backend|` (nome, gravidade mínima, ecossistema, etiqueta, texto; qualquer parte depois do nome pode ficar vazia) e mostra-as como filtros já feitos. A classificação por cima da frota não muda.
