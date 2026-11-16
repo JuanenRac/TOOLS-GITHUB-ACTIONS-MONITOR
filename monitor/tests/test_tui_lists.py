@@ -46,5 +46,25 @@ class ListsAndMaps(unittest.TestCase):
             self.assertEqual(clean, value)
 
 
+class NamesFromGithubAreText(unittest.TestCase):
+    NAMES = ("a [/b]", "t [x, 1]", "[link=http://e.invalid]x[/link]")
+
+    def test_a_name_with_brackets_is_drawn_as_it_is_and_never_as_markup(self):
+        try:
+            from rich.console import Console
+        except ImportError:
+            self.skipTest("rich is not installed")
+        import io
+        from github_actions_monitor.ui import tui
+        for name in self.NAMES:
+            data = {"active": [{"repo": name, "name": name, "status": "in_progress", "seconds": 5}]}
+            snap = {"a2": {"red": [{"repo": name, "workflow": name, "streak": 2}]}, "a5": {"sign_queue": [{"name": name, "hours": 1, "trust": "verified"}]}}
+            out = io.StringIO()
+            Console(file=out, width=200, force_terminal=True, color_system="standard").print(tui.build(data, snap))
+            text = out.getvalue()
+            self.assertIn(name, text, name)
+            self.assertNotIn("]8", text, "a name must not become a link of the terminal")
+
+
 if __name__ == "__main__":
     unittest.main()
