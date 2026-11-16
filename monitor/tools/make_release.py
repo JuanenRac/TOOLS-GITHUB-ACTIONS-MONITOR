@@ -69,6 +69,7 @@ def fail(message):
 def members():
     names = [p for p in sorted(HERE.glob("*.bat")) + sorted(HERE.glob("*.sh")) + sorted(HERE.glob("*.command")) + sorted((HERE / "bin").glob("*.py"))]   # the launchers of the product folder and the tiny entry points of bin/
     names += sorted(p for p in (HERE / "src").rglob("*.py") if "__pycache__" not in p.parts)                                                      # the importable package
+    names += sorted(p for p in (HERE / "src").rglob("*") if p.is_file() and p.suffix in DATA_SUFFIXES and "__pycache__" not in p.parts)      # the data files the package loads (ai_presets.json): without them the product starts with empty presets
     names += sorted((HERE / "tools").glob("*.py"))
     names += [HERE / "assets" / "examples" / n for n in DATA_JSON] + [HERE / "assets" / "static" / "actions_monitor.html"]
     names += [HERE / n for n in LEGAL] + [HERE / "CHANGELOG.md", HERE / "README.txt"]
@@ -78,6 +79,31 @@ def members():
     names += sorted((HERE / "docs").rglob("*.json"))   # the example dashboard of Grafana
     names += sorted((HERE / "tests").glob("*.py")) + sorted((HERE / "tests" / "fixtures").glob("*.json"))
     return [p for p in names if p.is_file()]
+
+
+DATA_SUFFIXES = (".json", ".txt", ".csv", ".yml", ".yaml", ".toml", ".cfg", ".ini", ".html", ".css", ".js", ".svg", ".png")   # data a module of the package may load next to its code
+
+
+def package_data_problems(entries, here=HERE):
+    """Data files of the package that would be left out of the zip: every file under src/github_actions_monitor that is not code or cache, and every data file a
+    module names in quotes (with_name("x.json"), "x.json") that exists next to it, must be among the entries."""
+    base = here / "src" / "github_actions_monitor"
+    inside = {n for n in entries}
+    problems = []
+    for path in sorted(base.rglob("*")):
+        if not path.is_file() or "__pycache__" in path.parts or path.suffix in (".py", ".pyc", ".pyo"):
+            continue
+        name = "github_actions_monitor/" + path.relative_to(here).as_posix()
+        if name not in inside:
+            problems.append(name)
+    for path in sorted(base.rglob("*.py")):
+        for ref in re.findall(r"""["']([A-Za-z0-9_\-]+\.(?:json|csv|ya?ml|toml))["']""", path.read_text(encoding="utf-8")):
+            target = path.with_name(ref)
+            if target.is_file():
+                name = "github_actions_monitor/" + target.relative_to(here).as_posix()
+                if name not in inside and name not in problems:
+                    problems.append(name)
+    return sorted(problems)
 
 
 def check_entries(names):
@@ -425,6 +451,9 @@ def main():
     crlf = [n for n, data in entries.items() if n.endswith((".sh", ".command")) and b"\r" in data]
     if crlf:
         fail("shell launchers with Windows line endings (they would not run on Linux or macOS): " + ", ".join(crlf))
+    left_out = package_data_problems(entries)
+    if left_out:
+        fail("data files of the package missing from the zip: " + ", ".join(left_out))
     bad = check_entries(entries)
     if bad:
         fail("files that must not travel: " + ", ".join(bad))

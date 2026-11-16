@@ -4,19 +4,23 @@ Was erschienen ist, was als Nächstes kommt und was nur eine Idee ist, in dieser
 
 ## Wo der Monitor jetzt steht
 
-Version 2.0.0. Die Lite-Ausgabe zeigt, was läuft und was fehlgeschlagen ist. Die vollständige Ausgabe fügt drei Wächter (CI, Collab und Security), eine Liste der Warnungen, mehrere Konten und ein Team mit Rollen, die Bewertung jedes Kontos, die Gesundheit jedes Repositorys und des Teams, geplante Berichte, ein Aktionsprotokoll, Benachrichtigungen (ntfy, Teams, E-Mail und Apprise), einen optionalen KI-Assistenten mit Voreinstellungen kompatibler Dienste, den Dienstmodus mit Docker und eine Seite für jede Bildschirmgröße vom Telefon bis 4K hinzu.
+Version 2.0.1. Die Lite-Ausgabe zeigt, was läuft und was fehlgeschlagen ist. Die vollständige Ausgabe fügt drei Wächter (CI, Collab und Security), eine Liste der Warnungen, mehrere Konten und ein Team mit Rollen, die Bewertung jedes Kontos, die Gesundheit jedes Repositorys und des Teams, geplante Berichte, ein Aktionsprotokoll, Benachrichtigungen (ntfy, Teams, E-Mail und Apprise), einen optionalen KI-Assistenten mit Voreinstellungen kompatibler Dienste, den Dienstmodus mit Docker und eine Seite für jede Bildschirmgröße vom Telefon bis 4K hinzu.
 
 ## Geplant, in dieser Reihenfolge
 
 Jede Version enthält nur echten Inhalt: Eine Version ohne echten Inhalt wird übersprungen und nie leer veröffentlicht. Nichts davon gilt als an echten Diensten bewiesen, außer die Anleitung sagt es.
 
-### 2.0.1 bis 2.0.9 - Nach dem Einfrieren
+### 2.0.2 bis 2.0.9 - Nach dem Einfrieren
 
 Was sich nur im langen echten Einsatz zeigt: die Migration von 1.8 und 1.9, das Wachstum der Ereignisse und der Datenbank über Monate, Sitzungen nach einem Upgrade, Docker-Volumes, viele Konten mit drei Wächtern und dem Teammodus zugleich und alles, was die Vertragssuite findet. Nichts aus der vierten Phase (Plugins, breite Automatisierung, fortgeschrittene KI) kommt in diese Versionen; eine Version ohne echten Inhalt wird übersprungen.
 
 Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
 
-## Erledigt in 1.8.2 bis 2.0.0
+## Erledigt in 1.8.2 bis 2.0.1
+
+### 2.0.1 - Paketierung und ein fehlender Schlüssel
+
+Das veröffentlichte Zip enthält jetzt die Datei mit den KI-Voreinstellungen und jede andere Datendatei des Pakets, und das Release-Gate schlägt fehl, wenn eine im Zip fehlt; die Seite aller Konten zeigt keinen unübersetzten Statusschlüssel mehr, und ein Test prüft, dass jeder von der Seite verwendete Schlüssel in den acht Katalogen existiert.
 
 ### 2.0.0 - Reife
 

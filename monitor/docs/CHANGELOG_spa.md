@@ -9,6 +9,14 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+## [2.0.1]
+
+### Corregido
+
+- **El zip publicado no llevaba el fichero de preajustes de IA**: el empaquetado ahora incluye todos los ficheros de datos del paquete y la puerta de publicación falla si falta alguno en el zip.
+
+- **Una clave de estado sin traducir en la página de todas las cuentas**: las dos claves que faltaban están ahora en los ocho catálogos, y un test comprueba que cada clave `ui` que usa la página existe en los ocho catálogos.
+
 ## [2.0.0]
 
 ### Añadido

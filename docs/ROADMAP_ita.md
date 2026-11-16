@@ -4,19 +4,23 @@ Ciò che è stato pubblicato, ciò che viene dopo e ciò che è solo un'idea, in
 
 ## A che punto è il monitor
 
-Versione 2.0.0. L'edizione lite mostra ciò che gira e ciò che è fallito. L'edizione completa aggiunge tre sentinelle (CI, Collab e Security), un elenco di avvisi, più account e un team con ruoli, il punteggio di ogni account, la salute di ogni repository e del team, rapporti programmati, un registro delle azioni, notifiche (ntfy, Teams, e-mail e Apprise), un assistente IA facoltativo con preset di servizi compatibili, la modalità servizio con Docker e una pagina per ogni dimensione di schermo, dal telefono al 4K.
+Versione 2.0.1. L'edizione lite mostra ciò che gira e ciò che è fallito. L'edizione completa aggiunge tre sentinelle (CI, Collab e Security), un elenco di avvisi, più account e un team con ruoli, il punteggio di ogni account, la salute di ogni repository e del team, rapporti programmati, un registro delle azioni, notifiche (ntfy, Teams, e-mail e Apprise), un assistente IA facoltativo con preset di servizi compatibili, la modalità servizio con Docker e una pagina per ogni dimensione di schermo, dal telefono al 4K.
 
 ## Previsto, in quest'ordine
 
 Ogni versione porta solo contenuto reale: una versione senza nulla di reale da aggiungere viene saltata e mai pubblicata vuota. Nulla di questo è dato per provato su servizi reali se la sua guida non lo dice.
 
-### Da 2.0.1 a 2.0.9 - Dopo il congelamento
+### Da 2.0.2 a 2.0.9 - Dopo il congelamento
 
 Ciò che emerge solo con un uso reale prolungato: la migrazione dalla 1.8 e dalla 1.9, la crescita degli eventi e del database in mesi, le sessioni dopo un aggiornamento, i volumi Docker, molti account con tre sentinelle e la modalità squadra insieme, e ciò che trova la suite di contratto. Nulla della quarta fase (plugin, automazione estesa, IA avanzata) entra in queste versioni; una versione senza contenuto reale viene saltata.
 
 I workflow del monitor stesso rispettano ciò che la sentinella di igiene chiederà agli altri: azioni fissate a un commit, permessi minimi e un limite di tempo su ogni job.
 
-## Fatto dalla 1.8.2 alla 2.0.0
+## Fatto dalla 1.8.2 alla 2.0.1
+
+### 2.0.1 - Pacchetto e una chiave mancante
+
+Lo zip pubblicato ora contiene il file dei preset IA e ogni altro file di dati del pacchetto, e la porta di rilascio fallisce se ne manca uno nello zip; la pagina di tutti gli account non mostra più una chiave di stato non tradotta, e un test verifica che ogni chiave usata dalla pagina esista negli otto cataloghi.
 
 ### 2.0.0 - Maturità
 

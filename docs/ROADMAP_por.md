@@ -4,19 +4,23 @@ O que já foi publicado, o que vem a seguir e o que é apenas uma ideia, por ess
 
 ## Onde está o monitor agora
 
-Versão 2.0.0. A edição lite mostra o que corre e o que falhou. A edição completa acrescenta três sentinelas (CI, Collab e Security), uma lista de alertas, várias contas e uma equipa com funções, a pontuação de cada conta, a saúde de cada repositório e da equipa, relatórios agendados, um registo de ações, notificações (ntfy, Teams, correio eletrónico e Apprise), um assistente de IA opcional com predefinições de serviços compatíveis, o modo de serviço com Docker e uma página para todos os tamanhos de ecrã, do telemóvel ao 4K.
+Versão 2.0.1. A edição lite mostra o que corre e o que falhou. A edição completa acrescenta três sentinelas (CI, Collab e Security), uma lista de alertas, várias contas e uma equipa com funções, a pontuação de cada conta, a saúde de cada repositório e da equipa, relatórios agendados, um registo de ações, notificações (ntfy, Teams, correio eletrónico e Apprise), um assistente de IA opcional com predefinições de serviços compatíveis, o modo de serviço com Docker e uma página para todos os tamanhos de ecrã, do telemóvel ao 4K.
 
 ## Previsto, por esta ordem
 
 Cada versão leva apenas conteúdo real: uma versão sem nada de real a acrescentar é saltada e nunca publicada vazia. Nada disto é dado como provado em serviços reais, salvo se o seu guia o disser.
 
-### 2.0.1 a 2.0.9 - Depois do congelamento
+### 2.0.2 a 2.0.9 - Depois do congelamento
 
 O que só aparece com uso real prolongado: a migração desde a 1.8 e a 1.9, o crescimento dos eventos e da base de dados ao longo de meses, as sessões após uma atualização, os volumes do Docker, muitas contas com três sentinelas e o modo equipa em simultâneo, e o que a bateria de contrato encontrar. Nada da quarta fase (plugins, automação alargada, IA avançada) entra nestas versões; uma versão sem conteúdo real é saltada.
 
 Os workflows do próprio monitor cumprem o que a sentinela de higiene pedirá aos outros: ações fixadas a um commit, as permissões mínimas e um limite de tempo em cada job.
 
-## Feito da 1.8.2 à 2.0.0
+## Feito da 1.8.2 à 2.0.1
+
+### 2.0.1 - Empacotamento e uma chave em falta
+
+O zip publicado passa a incluir o ficheiro das predefinições de IA e todos os outros ficheiros de dados do pacote, e a porta de lançamento falha se algum faltar no zip; a página de todas as contas já não mostra uma chave de estado por traduzir, e um teste verifica que cada chave usada pela página existe nos oito catálogos.
 
 ### 2.0.0 - Maturidade
 

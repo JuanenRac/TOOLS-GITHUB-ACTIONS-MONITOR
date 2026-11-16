@@ -9,6 +9,14 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+## [2.0.1]
+
+### Corretto
+
+- **Lo zip pubblicato non conteneva il file dei preset IA**: il pacchetto ora include ogni file di dati e la porta di rilascio fallisce se ne manca uno nello zip.
+
+- **Una chiave di stato non tradotta nella pagina di tutti gli account**: le due chiavi mancanti ora sono negli otto cataloghi, e un test verifica che ogni chiave `ui` usata dalla pagina esista negli otto cataloghi.
+
 ## [2.0.0]
 
 ### Aggiunto
