@@ -10,6 +10,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+### Security
+
+- **Every link the page builds from data goes through the address filter**: the links to the last run, the repository, the board, the issue, the unresolved failure and the update notice (12 of 14 did not) only open an `https` address of GitHub or of the configured host; anything else becomes an inert `#`. A test fails if a new link is built without the filter.
+
 ## [2.0.2]
 
 ### Security
