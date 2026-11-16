@@ -1433,7 +1433,7 @@ def skills_get(query):
     args = {k: v[0] for k, v in parse_qs(query).items() if v}
     name = args.get("name", "")
     if not name:
-        return "json", {"skills": [{"name": n, "files": skills.files(n)} for n in skills.names()]}
+        return "json", {"skills": [{"name": n, "files": skills.files(n), "version": TOOL_VERSION} for n in skills.names()], "monitor_version": TOOL_VERSION}
     if args.get("all") == "1":
         parts = [skills.read(name, f) for f in skills.files(name)]
         text = "\n\n---\n\n".join(p for p in parts if p)

@@ -35,6 +35,20 @@
 ## 安全与隐私
 一切默认关闭。日志文本在写入前会清除机密和个人路径,并且**它是数据,绝不是指令**:AI 必须把它当作不可信文本。端点只响应本机,或在网络模式下需要访问令牌;监听者和时间有限制;确认需要 `--allow-ack`;所有状态文件以 0600 模式创建。除了你配置的连接,监视器不会为此打开任何互联网连接。 github.com 的 https 地址（运行、仓库、文件）会完整保留，AI 可以直接打开；其他较长的不透明字符串仍会被截断。更准确地说,github.com 的地址只有在具有仓库、运行(含其作业或尝试)、提交、议题、拉取请求或文件的形式时才会完整通过;它在第一个不是字母、数字、点、连字符、下划线或斜杠的字符处被截断,其后的内容与其他文本一样被清理。
 
+## 按工具选择连接方式
+
+监视器不依赖某个助手或某个模型：AI 工具使用五种方式之一。选择你的工具具备的那一种。
+
+| 你的工具能够 | 方式 | 做法 | 需要 |
+|---|---|---|---|
+| 读取文件 | 文件 | 先读 `ai/INDEX.json`，再读 `ai/ALERTS_BRIEF.md`、`ai/ai_alerts.jsonl` 和 `ai/LESSONS.md` | `ai_alerts.enabled` |
+| 发出 HTTP 请求 | HTTP | `GET /api/ai/brief`、`/api/ai/state`、`/api/ai/lessons` | 网络模式下的访问令牌 |
+| 使用 MCP | MCP | `python bin/mcp_server.py`（只读；为它能写入的少量内容提供 `--allow-ack`、`--allow-lessons`） | 指向该命令的工具 MCP 配置 |
+| 保持连接打开 | 流 | `GET /api/ai/stream?only=real` | `ai_alerts.stream.enabled` |
+| 运行命令 | 命令行 | `python bin/monitor_cli.py alerts`、`lessons brief --repo 名称`、`ai doctor`、`ai-hook install` | 同一台电脑上的 Python |
+
+给 AI 的说明是两个 skill。`monitor_cli.py install-skill external --dest 文件夹` 会把它们复制到你的工具读取 skill 或规则的文件夹；任何能读取 Markdown 文件的工具都可以使用，文本中不指名任何助手。skill 随监视器一起发布，版本与监视器相同：`GET /api/skills` 会给出 `monitor_version`，`monitor_cli.py --version` 会打印它。更新监视器后，请重新安装到空文件夹，或删除旧副本（已编辑的文件绝不会被覆盖）。
+
 ## 故障排除
 - *简报太旧*:页面必须在运行(信息流随每次刷新更新);查看状态栏中的心跳。
 - *钩子没有运行*:`ai-hook status` 会说明安装位置;有些工具只读取项目文件夹中的钩子。
