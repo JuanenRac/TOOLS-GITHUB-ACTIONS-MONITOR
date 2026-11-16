@@ -137,6 +137,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ci.failed_jobs.enabled` | `false` | sentinel | Show which jobs of a red run failed |
 | `ci.failed_jobs.group_by` | `"auto"` | sentinel | Group jobs by |
 | `ci.failed_jobs.max_per_cycle` | `4` | sentinel | Runs read per cycle |
+| `ci.fork_own_ci_days` | `90` | sentinel | Days of own CI that a fork needs |
+| `ci.forks_need_own_ci` | `true` | sentinel | Judge only the forks that have a CI of their own |
 | `ci.group.min` | `2` | sentinel | Workflows needed for a shared cause |
 | `ci.group.reusable` | `false` | sentinel | Group reds by shared workflow |
 | `ci.inactive_days` | `90` | sentinel | Days until a workflow is inactive |

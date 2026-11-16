@@ -41,6 +41,7 @@ from github_actions_monitor.integrations import remote_workflows
 from github_actions_monitor.sentinels import readiness
 from github_actions_monitor.data_pipeline import paging
 from github_actions_monitor.data_pipeline import redrule
+from github_actions_monitor.data_pipeline import fork_ci
 from github_actions_monitor.sentinels import roadmap_a9
 from github_actions_monitor.sentinels import sentinel_ai
 import sys as _sys
@@ -868,8 +869,13 @@ def compute_snapshot(inp):
     if reduced:   # no local workspace: there are no local signing records, so nothing can be said about what is waiting to be signed
         queue, unsigned, signed_wait = [], [], []
     hyg_rows, pending = [], 0
+    forks = [r for r in info if (info.get(r) or {}).get("fork")]      # a fork without a CI of its own is not judged: its files, its licence and its inherited jobs are those of the upstream (fork_ci.py)
+    idle = set(fork_ci.idle_forks(forks, runs_by_repo, set(a2_full_sample(runs_by_repo, caps)), now.timestamp(), dict(fork_ci.POLICY)))
     for repo in sorted(info):
         p = perms.get(repo)
+        if repo in idle:
+            hyg_rows.append({"repo": repo, "problems": [], "unknown": [], "checked": bool(p), "skipped": "fork", "protection": None})
+            continue
         if not p:
             pending += 1
         probs, unk = hygiene_review(info[repo], p, cfg["required_files"], cfg.get("hygiene"), inp.get("org_files"))
@@ -906,7 +912,7 @@ def compute_snapshot(inp):
                "pending_sign_hours": cfg["pending_sign_hours"], "states": states, "sign_queue": queue, "signed_unpublished": signed_wait,
                "versions": sorted(({"repo": r, "tag": rel.get("tagName"), "published": rel.get("publishedAt")} for r, rel in releases.items()), key=lambda x: x["repo"]),
                "days": cfg["candidate_days"]},
-        "a6": {"rows": hyg_rows, "pending": pending, "unknown": sum(1 for r in hyg_rows if r["unknown"])},
+        "a6": {"rows": hyg_rows, "pending": pending, "unknown": sum(1 for r in hyg_rows if r["unknown"]), "forks_idle": sorted(idle)},
         "a7": {"rows": sorted(({"repo": r, **v} for r, v in mins.items()), key=lambda x: -x["min24"]), "total24": sum(v["min24"] for v in mins.values()),
                "total7d": sum(v["min7d"] for v in mins.values()), "api": inp.get("api"), "budget": minutes_budget(mins, eco, cfg)},
         "a8": inp.get("audits") or {"audits": {}, "rounds": {}, "files": []},
@@ -934,6 +940,9 @@ def compute_snapshot(inp):
     s["a11"] = readiness.build(inp, s, cfg.get("readiness") or readiness.DEFAULTS)
     s["a11"]["level"] = s["a11"].get("level", "unknown")
     lint = inp.get("lint")
+    if lint and idle:      # the workflow files of a fork nobody works on are the ones of the upstream
+        left = {r: items for r, items in lint["by_repo"].items() if r not in idle}
+        lint = {**lint, "by_repo": left, "summary": lint_workflows.summarize(left)}
     s["lint"] = {"enabled": False} if not lint else {"enabled": True, "summary": lint["summary"], "in_report": lint.get("in_report", True), "coverage": lint.get("coverage"),
                                                     "rows": [dict(f, repo=r) for r, items in sorted(lint["by_repo"].items()) for f in items][:200]}
     for key in ("a3", "a4", "a5", "a6"):  # an "ok" with the data still loading would be a false green
@@ -952,7 +961,7 @@ def compute_snapshot(inp):
 def repo_query(file_names):
     aliases = " ".join(f'f{i}:object(expression:"HEAD:{name}"){{id}}' for i, name in enumerate(file_names))
     return ("query($after:String){rateLimit{remaining cost} repositoryOwner(login:\"%s\"){repositories(first:15,after:$after,ownerAffiliations:OWNER,isArchived:false)"
-            "{totalCount pageInfo{hasNextPage endCursor} nodes{name pushedAt hasVulnerabilityAlertsEnabled licenseInfo{key} defaultBranchRef{name} latestRelease{tagName publishedAt isDraft releaseAssets(first:100){nodes{name}}}"
+            "{totalCount pageInfo{hasNextPage endCursor} nodes{name pushedAt isFork hasVulnerabilityAlertsEnabled licenseInfo{key} defaultBranchRef{name} latestRelease{tagName publishedAt isDraft releaseAssets(first:100){nodes{name}}}"
             " vulnerabilityAlerts(states:OPEN,first:50){totalCount nodes{createdAt securityVulnerability{severity}}}"
             " pullRequests(states:OPEN,first:10){nodes{number title url author{login __typename} createdAt isDraft mergeable reviewDecision commits(last:1){nodes{commit{statusCheckRollup{state}}}} files(first:20){nodes{path}}}}"
             " rulesets(first:5){nodes{name enforcement}} labels(first:20,query:\"dependencies\"){nodes{name}} %s}}}}") % (toolconfig.github_owner(), aliases)
@@ -967,7 +976,7 @@ def parse_repo_node(node, file_names):
         if key in ("critical", "high") and len(hi) < 20:
             hi.append({"sev": key, "created": v.get("createdAt")})
     return {
-        "name": node["name"], "pushed": node.get("pushedAt"), "branch": (node.get("defaultBranchRef") or {}).get("name") or "main",
+        "name": node["name"], "pushed": node.get("pushedAt"), "fork": node.get("isFork") is True, "branch": (node.get("defaultBranchRef") or {}).get("name") or "main",
         "release": {"tagName": rel["tagName"], "publishedAt": rel["publishedAt"],
                     "asset_flags": signstate.asset_flags([n.get("name", "") for n in (rel.get("releaseAssets") or {}).get("nodes") or []])} if rel and not rel.get("isDraft") else None,
         "vuln_total": (node.get("vulnerabilityAlerts") or {}).get("totalCount", 0), "vuln_sev": sev,
