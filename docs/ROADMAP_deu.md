@@ -16,7 +16,11 @@ Was sich nur im langen echten Einsatz zeigt: die Migration von 1.8 und 1.9, das 
 
 Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
 
-## Erledigt in 1.8.2 bis 2.0.2
+## Erledigt in 1.8.2 bis 2.0.3
+
+### 2.0.3 - Große Konten, weniger falsche Rotmeldungen, Linting ohne Klone und sichereres Speichern
+
+Eine Flottenansicht, seitenweise Listen, ein Anfragebudget und eine ehrliche Abdeckung der Laufliste für Konten mit Hunderten Repositories; ein Rot zählt nur, wenn das Repository selbst es verursacht hat, und Läufe, die auf eine Freigabe warten, aufgegebene Workflows, Workflows, die nur auf Issues reagieren, die Merge-Queue und Wartungsbranches erhalten jeweils den richtigen Platz; der Workflow-Linter und die Oberflächenprüfungen arbeiten über die API oder einen Teilklon ohne Klonen; die Modelle des KI-Anbieters werden gelesen und geprüft, und jeder Link der Seite läuft durch den Adressfilter; die Sperren und das Aktionsprotokoll sind unter Windows sicherer, und das Punktebuch wird nie überschrieben; Wandbildschirme für einen Monitor oder Fernseher, standardmäßig aus; die Tests des Repositorys laufen vorerst nicht mehr auf macOS.
 
 ### 2.0.2 - Sicherere Protokolle, saubererer KI-Text und eine gerechtere Bewertung
 
