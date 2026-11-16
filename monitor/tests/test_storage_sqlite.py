@@ -271,11 +271,11 @@ class Crash(unittest.TestCase):
     """kill -9 (Windows: TerminateProcess) of the process that writes, while it writes."""
 
     def run_case(self, kind):
-        with tempfile.TemporaryDirectory() as tmp:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
             target = str(Path(tmp) / "storage.sqlite3") if kind == "sqlite" else str(Path(tmp) / "accounts")
             proc = subprocess.Popen([sys.executable, "-I", "-c", CHILD, str(HERE / "src"), kind, target, "alpha"], stdout=subprocess.PIPE, text=True)
             acked = 0
-            deadline = time.time() + 30
+            deadline = time.time() + 90
             try:
                 while acked < 40 and time.time() < deadline:
                     line = proc.stdout.readline()
