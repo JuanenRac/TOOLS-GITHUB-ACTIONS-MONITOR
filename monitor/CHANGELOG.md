@@ -27,6 +27,10 @@ when this file and `tool_version.py` disagree.
 
 - **One damaged byte in the event feed no longer stops the notifications**: past 512 KB the feed was read again as strict UTF-8 to trim it, a single byte that was not valid raised an error that escaped, the feed then grew without a limit and every new event failed before reaching the notification channels. The trim now reads tolerantly and can never stop the channels.
 
+### Security
+
+- **The process of each account no longer keeps the key of the supervisor and the access token in its environment**: both leave the environment at the very start of every process (monitor, supervisor and account), before the first `gh` or any other program is started, also when the access token has another name; nothing those programs inherit carries them. The comment that promised the secrets would be hidden from the process list of Linux now states its real limit.
+
 ## [2.0.1]
 
 ### Fixed
