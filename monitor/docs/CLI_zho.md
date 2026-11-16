@@ -63,3 +63,7 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python bin/monitor
 ## 存储工具
 
 `python tools/migrate_storage.py` 在文件与 SQLite 之间迁移状态,`python tools/backup_storage.py` 为两者创建、检查和恢复备份(详见 [STORAGE_zho.md](STORAGE_zho.md))。`--doctor` 为此有两项检查:存储和保留。
+
+## 批量调度器:工作流的输入
+
+`python bin/gha_dispatch_all.py plan --inputs` 还会在每个目标下列出其工作流在手动触发时要求的输入(名称、类型、必填或可选、默认值、选择项的选项以及说明)。它们通过 `git show` 从本地克隆 `origin/main` 中的工作流文件读取:不会触发任何运行、不会发送任何内容,也不会调用 `gh`。`--json` 会为每一行添加 `inputs` 列表;当文件不在 `origin/main` 中或使用读取器不认识的写法(流式 `inputs: {…}`)时为 `null`,工作流不需要输入时为 `[]`。

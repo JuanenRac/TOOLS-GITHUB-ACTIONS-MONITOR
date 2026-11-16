@@ -63,3 +63,7 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python bin/monitor
 ## 保存用のツール
 
 `python tools/migrate_storage.py` は状態をファイルとSQLiteの間で移し、`python tools/backup_storage.py` はどちらのバックアップも作成・検証・復元します(どちらも [STORAGE_jpn.md](STORAGE_jpn.md) で説明しています)。`--doctor` にはそのための2つの検査(保存と保持)があります。
+
+## バッチディスパッチャー:ワークフローの入力
+
+`python bin/gha_dispatch_all.py plan --inputs` は、各ターゲットの下に、手動で起動するときにそのワークフローが要求する入力(名前、型、必須か任意か、既定値、選択肢、説明)も一覧表示します。入力はローカルクローンの `origin/main` にあるワークフローファイルから `git show` で読み取ります。何も起動せず、何も送信せず、`gh` も呼び出しません。`--json` は各行に `inputs` リストを追加します。ファイルが `origin/main` にない場合や、リーダーが知らない書式(フロースタイルの `inputs: {…}`)の場合は `null`、ワークフローが入力を要求しない場合は `[]` です。
