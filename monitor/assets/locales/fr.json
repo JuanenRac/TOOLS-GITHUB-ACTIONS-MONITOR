@@ -3018,5 +3018,16 @@
  "cfg.f.ci.failed_jobs.max_per_cycle": "Runs lus par cycle",
  "cfg.h.ci.failed_jobs.max_per_cycle": "Nombre maximal de runs rouges dont les jobs sont lus en un cycle (un appel chacun, 4 par défaut). La réponse est conservée tant que le run ne change pas.",
  "cfg.f.ci.failed_jobs.group_by": "Grouper les jobs par",
- "cfg.h.ci.failed_jobs.group_by": "auto (par défaut) : le système dans le nom du job (ubuntu, windows, macos...), sinon le premier paramètre de la matrice, sinon la partie avant la barre. platform, matrix et prefix en imposent un."
+ "cfg.h.ci.failed_jobs.group_by": "auto (par défaut) : le système dans le nom du job (ubuntu, windows, macos...), sinon le premier paramètre de la matrice, sinon la partie avant la barre. platform, matrix et prefix en imposent un.",
+ "cfg.f.pagination.workflow_pages": "Pages de workflows par dépôt",
+ "cfg.h.pagination.workflow_pages": "Un dépôt peut avoir des centaines de workflows. Tant qu'une page de 100 est pleine, la suivante est lue, jusqu'à ce nombre de pages ; un dépôt de moins de 100 ne coûte aucune requête de plus. S'il en reste, la page dit combien ont été vus sur combien existent.",
+ "cfg.f.pagination.job_pages": "Pages de jobs par exécution",
+ "cfg.h.pagination.job_pages": "Une matrice peut lancer plus de 100 jobs dans une exécution. Tant qu'une page de 100 est pleine, la suivante est lue, jusqu'à ce nombre de pages. S'il reste des jobs, l'exécution dit « N vus sur M ».",
+ "cfg.f.pagination.collab_pages": "Pages d'issues et de pull requests par dépôt",
+ "cfg.h.pagination.collab_pages": "Un dépôt peut avoir des centaines d'issues et de pull requests ouvertes. Tant qu'une page de 100 est pleine, la suivante est lue, jusqu'à ce nombre de pages (la première garde sa lecture conditionnelle ; un dépôt de moins de 100 ne coûte rien de plus). S'il y en a plus, l'onglet Équipe le dit.",
+ "ui.cfg_b_pagination": "Pages des longues listes",
+ "ui.collab_cut": "{n} dépôts ont plus d'éléments ouverts que ceux lus (jusqu'à {p} pages de 100)",
+ "ui.collab_cut_search": "Recherche : {seen} vus sur {total}",
+ "ui.jobs_cut": "jobs : {seen} vus sur {total}",
+ "hyg.wf_cut": "la liste des workflows est coupée : {seen} vus sur {total}"
 }

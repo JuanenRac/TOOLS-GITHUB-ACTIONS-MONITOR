@@ -9,9 +9,6 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
-### Modifié
-
-- **L'hygiène (A6) ne suppose plus les conventions d'un seul propriétaire** : le nom du ruleset est un réglage (`sentinel.hygiene.ruleset_names`, motifs acceptés) ; `sentinel.hygiene.ruleset_mode` peut juger la branche par défaut d'après les règles que GitHub signale comme en vigueur (points d'accès publics, sans droits d'administrateur), quel que soit le nom du ruleset ; `sentinel.hygiene.skip` écarte un contrôle ; `sentinel.hygiene.community_fallback` compte aussi le profil de communauté et le dépôt `.github` du compte ; une licence nommée LICENSE-MIT, LICENSE-APACHE, LICENSE.txt, COPYING ou reconnue par GitHub est acceptée ; et ce que le jeton ne peut pas savoir (sans droits d'administrateur) s'affiche comme non évaluable, jamais vert et jamais un avertissement. Les valeurs par défaut gardent l'ancienne règle.
 
 ### Ajouté
 
@@ -21,6 +18,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 - **Couverture honnête de la liste d'exécutions** : le tableau des dépôts a une nouvelle colonne, *L'échantillon remonte*, qui dit jusqu'où dans le temps va la liste d'exécutions de chaque dépôt. Une liste pleine qui remonte moins de `sampling.min_coverage_minutes` (30 par défaut ; 0 le désactive) est marquée *couverture faible* au lieu de paraître complète, une liste plus courte que demandé est *complète*, et un total où GitHub cesse de compter (2 500 ou 40 000) est affiché comme *au moins*. Un avis au-dessus du tableau compte les dépôts à couverture faible ; le bloc `sampling` de `GET /api/data` porte les mêmes chiffres.
 - **Second regard sur la branche par défaut** (`sampling.default_branch_probe`, désactivé par défaut) : quand la liste d'exécutions d'un dépôt est pleine, une requête de plus demande les push vers sa branche par défaut sans les pull requests, afin que les exécutions qui décident du rouge sur main ne soient pas chassées par les pull requests et les planifications. Les exécutions que seul le second regard a trouvées ne font jamais compter une liste comme pleine.
 - **Budget de requêtes par heure** (`sampling.api_budget_per_hour`, 0 = aucun) : au-delà, les dépôts avec un workflow rouge sont lus en premier et les autres attendent l'heure suivante, et la page dit combien attendent. La page montre aussi les requêtes par heure qu'exigent le nombre de dépôts et les intervalles (à partir de 3 500, ou dès qu'un budget est fixé), pour avertir un grand compte avant qu'il n'épuise son quota.
+- **Les longues listes sont lues jusqu'au bout, et une coupure est dite** : les workflows d'un dépôt (148 ou 348 sont des cas réels), les jobs d'une exécution (une matrice de plus de 100) et les issues et pull requests ouvertes d'un dépôt sont désormais lus page par page tant que la dernière était pleine, jusqu'à `pagination.workflow_pages`, `pagination.job_pages` et `pagination.collab_pages` pages de 100. Un dépôt qui tient dans une page coûte les mêmes requêtes qu'avant. Quand quelque chose reste dehors, la page dit « N vus sur M » : sous l'exécution pour ses jobs, dans l'hygiène du dépôt pour ses workflows, et dans le pied de l'onglet Équipe pour les dépôts qui ont plus d'éléments ouverts que ceux lus et pour le compte quand l'API de recherche a plus que ses 1000 résultats.
+- **Un test de charge avec un compte synthétique** : 250 dépôts et 1 250 workflows, sans réseau, mesure les requêtes d'un cycle, le temps du cycle et de la santé de l'équipe, la mémoire des données gardées et le nombre de requêtes que demandent les recherches A2, avec des bornes larges pour qu'un ordinateur chargé réussisse.
 
 ### Modifié
 
@@ -42,6 +41,15 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 ### Ajouté
 
 - **Profils** : Réglages > Base et la troisième étape du guide de premier démarrage proposent trois groupes de réglages prêts (propriétaire ou équipe, organisation open source, développeur solo) qui fixent en un clic le contrôle d'hygiène, les forks et dépôts archivés, le linter, le contrôle des fichiers des releases et le comptage à part des bots ; les valeurs suivent le même chemin contrôlé que le bouton Enregistrer, rien ne change tant qu'un profil n'est pas choisi, et `GET /api/settings` les liste comme `presets`. Une recette pour les grands comptes se trouve dans le nouveau guide `docs/LARGE_ACCOUNTS.md`.
+- **La santé de l'équipe est rapide avec des milliers de dépôts** : les exécutions, les workflows rouges, les exécutions en cours et les alertes sont regroupés une seule fois par dépôt, si bien qu'une requête de santé de l'équipe ne les parcourt plus tous pour chaque dépôt (2 000 dépôts prenaient environ huit secondes), et la santé d'un dépôt ne construit que sa propre vue.
+
+### Corrigé
+
+- **Une horloge reculée n'arrête plus la note, la purge ni les rapports programmés** : un instant enregistré qui se trouve dans le futur (un ordinateur sans horloge à pile qui démarre avec une vieille date, ou une horloge corrigée à la main) n'est plus cru ; le passage est dû aussitôt et écrit un bon instant, au lieu d'attendre des jours que la vieille horloge l'atteigne.
+
+### Corrigé
+
+- Le job en échec d'une exécution de plus de 30 jobs est trouvé : les listes de jobs que lisent l'avis pour une IA, l'assistant et l'outil par lots étaient coupées à 30 et le sont maintenant à 100 (la même requête unique).
 
 ## [2.0.2]
 

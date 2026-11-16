@@ -9,9 +9,6 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
-### Modificato
-
-- **L'igiene (A6) non dà più per scontate le convenzioni di un solo proprietario**: il nome del ruleset è un'impostazione (`sentinel.hygiene.ruleset_names`, modelli ammessi); `sentinel.hygiene.ruleset_mode` può giudicare il ramo predefinito dalle regole che GitHub segnala come in vigore (endpoint pubblici, senza diritti di amministratore), comunque si chiami il ruleset; `sentinel.hygiene.skip` esclude un controllo; `sentinel.hygiene.community_fallback` conta anche il profilo della community e il repository `.github` dell'account; si accetta una licenza chiamata LICENSE-MIT, LICENSE-APACHE, LICENSE.txt, COPYING o riconosciuta da GitHub; e ciò che il token non può sapere (senza diritti di amministratore) appare come non valutabile, mai verde e mai un avviso. I valori predefiniti mantengono la regola vecchia.
 
 ### Aggiunto
 
@@ -21,6 +18,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 - **Copertura onesta dell'elenco di esecuzioni**: la tabella dei repository ha una nuova colonna, *Il campione risale a*, che dice fin dove nel tempo arriva l'elenco di esecuzioni di ciascun repository. Un elenco pieno che risale per meno di `sampling.min_coverage_minutes` (30 per impostazione predefinita; 0 lo disattiva) è segnato come *copertura bassa* invece di sembrare completo, un elenco più corto di quanto richiesto è *completo*, e un totale in cui GitHub smette di contare (2.500 o 40.000) è mostrato come *almeno*. Un avviso sopra la tabella conta i repository con copertura bassa; il blocco `sampling` di `GET /api/data` porta gli stessi numeri.
 - **Seconda occhiata al ramo predefinito** (`sampling.default_branch_probe`, disattivata per impostazione predefinita): quando l'elenco di esecuzioni di un repository è pieno, una richiesta in più chiede i push sul ramo predefinito senza pull request, così le esecuzioni che decidono il rosso su main non vengono spinte fuori da pull request e pianificazioni. Le esecuzioni trovate solo dalla seconda occhiata non fanno mai contare un elenco come pieno.
 - **Budget di richieste all'ora** (`sampling.api_budget_per_hour`, 0 = nessuno): oltre, si leggono per primi i repository con un workflow rosso e gli altri attendono l'ora successiva, e la pagina dice quanti attendono. La pagina mostra anche le richieste all'ora che richiedono il numero di repository e gli intervalli (da 3.500 in poi, o quando c'è un budget), per avvisare un account grande prima che esaurisca la quota.
+- **Le liste lunghe si leggono fino in fondo e un taglio viene detto**: i workflow di un repository (148 o 348 sono casi reali), i job di un'esecuzione (una matrice di più di 100) e le issue e pull request aperte di un repository ora si leggono pagina per pagina finché l'ultima era piena, fino a `pagination.workflow_pages`, `pagination.job_pages` e `pagination.collab_pages` pagine da 100. Un repository che sta in una pagina costa le stesse richieste di prima. Quando qualcosa resta fuori la pagina dice «visti N su M»: sotto l'esecuzione per i suoi job, nell'igiene del repository per i suoi workflow, e nel piè della scheda Team per i repository con più elementi aperti di quelli letti e per l'account quando l'API di ricerca ha più dei suoi 1000 risultati.
+- **Un test di carico con un account sintetico**: 250 repository e 1.250 workflow, senza rete, misura le richieste di un ciclo, il tempo del ciclo e della salute del team, la memoria dei dati tenuti e quante richieste servono alle ricerche A2, con limiti ampi perché un computer carico lo superi.
 
 ### Modificato
 
@@ -42,6 +41,15 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 ### Aggiunto
 
 - **Profili**: Impostazioni > Base e il terzo passo della guida del primo avvio offrono tre gruppi di impostazioni pronti (proprietario o team, organizzazione open source, sviluppatore singolo) che con un clic fissano il controllo di igiene, fork e repository archiviati, il linter, il controllo dei file delle release e il conteggio a parte dei bot; i valori seguono lo stesso percorso verificato del pulsante Salva, non cambia nulla finché non se ne sceglie uno e `GET /api/settings` li elenca come `presets`. Una ricetta per account grandi è nella nuova guida `docs/LARGE_ACCOUNTS.md`.
+- **La salute del team è veloce con migliaia di repository**: le esecuzioni, i workflow rossi, le esecuzioni in corso e gli avvisi si raggruppano una sola volta per repository, così una richiesta della salute del team non li scorre più tutti per ogni repository (2.000 repository richiedevano circa otto secondi), e la salute di un repository costruisce solo la propria vista.
+
+### Corretto
+
+- **Un orologio spostato indietro non ferma più il punteggio, la pulizia né i rapporti programmati**: un istante salvato che si trova nel futuro (un computer senza orologio a batteria che parte con una data vecchia, o un orologio corretto a mano) non viene più creduto; il passaggio è dovuto subito e scrive un istante corretto, invece di attendere giorni finché il vecchio orologio lo raggiunge.
+
+### Corretto
+
+- Si trova il job che fallisce di un'esecuzione con più di 30 job: gli elenchi di job che leggono l'avviso per un'IA, l'assistente e lo strumento a lotti erano tagliati a 30 e ora sono tagliati a 100 (la stessa richiesta unica).
 
 ## [2.0.2]
 

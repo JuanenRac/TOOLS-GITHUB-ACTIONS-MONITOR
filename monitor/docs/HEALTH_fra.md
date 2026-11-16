@@ -27,3 +27,9 @@ L'état est **mauvais** (un workflow rouge, ou une alerte de niveau critique ou 
 - Liens directs pour écrans muraux : `?view=team&chrome=0`, `?view=repos&chrome=0` et `?view=repo&repo=owner/name&chrome=0`.
 - L'API : `GET /api/team/health?ecosystem=&severity=&q=&label=` et `GET /api/repos/<owner>/<repo>/health`. Toutes deux demandent le droit de voir le compte ; les réponses portent `schema: 1`. Un dépôt inconnu répond 404 avec `code: repo_unknown`.
 - L'édition Lite garde sa vue simple des exécutions et n'a ni l'onglet ni les routes.
+
+## Des milliers de dépôts et une horloge reculée
+
+La santé de l'équipe regroupe une seule fois par dépôt les exécutions, les workflows rouges, les exécutions en cours et les alertes ; le coût croît donc avec la quantité de données et non avec dépôts fois exécutions ; demander un seul dépôt ne construit que sa vue.
+
+Un instant enregistré qui se trouve dans le futur (un ordinateur sans horloge à pile qui démarre avec une vieille date, ou une horloge corrigée à la main) n'est pas cru : la note, la purge des anciennes données et les rapports programmés sont dus aussitôt et écrivent un bon instant, au lieu d'attendre que la vieille horloge soit atteinte.

@@ -9,9 +9,6 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
-### Alterado
-
-- **A higiene (A6) deixa de dar por garantidas as convenções de um único dono**: o nome do ruleset é uma definição (`sentinel.hygiene.ruleset_names`, aceita padrões); `sentinel.hygiene.ruleset_mode` pode avaliar o ramo por defeito pelas regras que o GitHub indica como em vigor (endpoints públicos, sem direitos de administrador), qualquer que seja o nome do ruleset; `sentinel.hygiene.skip` deixa de fora uma verificação; `sentinel.hygiene.community_fallback` conta também o perfil da comunidade e o repositório `.github` da conta; aceita-se uma licença chamada LICENSE-MIT, LICENSE-APACHE, LICENSE.txt, COPYING ou reconhecida pelo GitHub; e o que o token não pode saber (sem direitos de administrador) aparece como não avaliável, nunca verde e nunca um aviso. Os valores por defeito mantêm a regra antiga.
 
 ### Adicionado
 
@@ -21,6 +18,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 - **Cobertura honesta da lista de execuções**: a tabela de repositórios tem uma coluna nova, *A amostra recua*, que diz até que ponto no passado vai a lista de execuções de cada repositório. Uma lista cheia que recua menos de `sampling.min_coverage_minutes` (30 por predefinição; 0 desativa) é marcada como *cobertura baixa* em vez de parecer completa, uma lista mais curta do que o pedido é *completa*, e um total em que o GitHub deixa de contar (2500 ou 40 000) é mostrado como *pelo menos*. Um aviso sobre a tabela conta os repositórios com cobertura baixa; o bloco `sampling` de `GET /api/data` traz os mesmos números.
 - **Segunda vista ao ramo predefinido** (`sampling.default_branch_probe`, desativada por predefinição): quando a lista de execuções de um repositório está cheia, mais um pedido obtém os push para o ramo predefinido sem pull requests, para que as execuções que decidem o vermelho em main não sejam empurradas para fora por pull requests e agendamentos. As execuções que só a segunda vista encontrou nunca fazem uma lista contar como cheia.
 - **Orçamento de pedidos por hora** (`sampling.api_budget_per_hour`, 0 = nenhum): ao ultrapassá-lo, lêem-se primeiro os repositórios com um workflow vermelho e os restantes esperam pela hora seguinte, e a página diz quantos esperam. A página mostra também os pedidos por hora que o número de repositórios e os intervalos exigem (a partir de 3500, ou sempre que haja orçamento), para avisar uma conta grande antes de esgotar a quota.
+- **As listas longas leem-se até ao fim e um corte diz-se**: os workflows de um repositório (148 ou 348 são casos reais), os jobs de uma execução (uma matriz com mais de 100) e os issues e pull requests abertos de um repositório lêem-se agora página a página enquanto a última estava cheia, até `pagination.workflow_pages`, `pagination.job_pages` e `pagination.collab_pages` páginas de 100. Um repositório que cabe numa página custa os mesmos pedidos de antes. Quando algo continua de fora a página diz «vistos N de M»: sob a execução para os seus jobs, na higiene do repositório para os seus workflows, e no rodapé do separador Equipa para os repositórios com mais itens abertos do que os lidos e para a conta quando a API de pesquisa tem mais do que os seus 1000 resultados.
+- **Um teste de carga com uma conta sintética**: 250 repositórios e 1250 workflows, sem rede, mede os pedidos de um ciclo, o tempo do ciclo e da saúde da equipa, a memória dos dados guardados e quantos pedidos as consultas A2 precisam, com limites largos para que um computador carregado passe.
 
 ### Alterado
 
@@ -42,6 +41,15 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 ### Adicionado
 
 - **Perfis**: Definições > Básico e o terceiro passo do guia do primeiro arranque oferecem três grupos de definições prontos (proprietário ou equipa, organização de código aberto, programador a solo) que fixam num clique a verificação de higiene, os forks e repositórios arquivados, o linter, a verificação dos ficheiros das releases e a contagem à parte dos bots; os valores seguem o mesmo caminho verificado do botão Guardar, nada muda até escolher um e `GET /api/settings` lista-os como `presets`. Uma receita para contas grandes está no novo guia `docs/LARGE_ACCOUNTS.md`.
+- **A saúde da equipa é rápida com milhares de repositórios**: as execuções, os workflows vermelhos, as execuções em curso e os alertas agrupam-se uma só vez por repositório, pelo que um pedido da saúde da equipa já não os percorre todos por cada repositório (2000 repositórios demoravam cerca de oito segundos), e a saúde de um repositório constrói só a sua própria vista.
+
+### Corrigido
+
+- **Um relógio atrasado já não pára a pontuação, a limpeza nem os relatórios agendados**: uma marca guardada que está no futuro (um computador sem relógio de bateria que arranca com uma data antiga, ou um relógio corrigido à mão) já não se acredita; a passagem é devida de imediato e escreve uma marca correta, em vez de esperar dias até o relógio antigo a alcançar.
+
+### Corrigido
+
+- Encontra-se o job que falha numa execução com mais de 30 jobs: as listas de jobs que o aviso para uma IA, o assistente e a ferramenta por lotes liam cortavam-se em 30 e agora cortam-se em 100 (o mesmo pedido único).
 
 ## [2.0.2]
 

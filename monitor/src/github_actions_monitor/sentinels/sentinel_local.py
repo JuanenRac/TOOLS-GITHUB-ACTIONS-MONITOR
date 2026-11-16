@@ -38,6 +38,7 @@ from github_actions_monitor.data_pipeline import events
 from github_actions_monitor import i18n
 from github_actions_monitor.cli import lint_workflows
 from github_actions_monitor.sentinels import readiness
+from github_actions_monitor.data_pipeline import paging
 from github_actions_monitor.data_pipeline import redrule
 from github_actions_monitor.sentinels import roadmap_a9
 from github_actions_monitor.sentinels import sentinel_ai
@@ -504,6 +505,8 @@ def hygiene_review(info, perms, required_files, hyg=None, org_files=None):
                 unknown.append(("schedule", i18n.t("hyg.unknown", name="workflows")))
             for name in perms.get("wf_disabled") or []:
                 problems.append(("schedule", i18n.t("hyg.schedule", name=name)))
+            if perms.get("wf_total"):
+                problems.append(("cut", i18n.t("hyg.wf_cut", seen=perms.get("wf_seen") or 0, total=perms["wf_total"])))
     return problems, unknown
 
 
@@ -1195,7 +1198,10 @@ class Sentinel:
                     raise
                 res["denied"] = True      # a token without admin rights cannot read this: "not evaluable", not a problem
             try:
-                wfs = (self._gh("api", f"repos/{owner}/{repo}/actions/workflows?per_page=100", retries=1) or {}).get("workflows", [])
+                page = paging.read_pages(lambda path: self._gh("api", path, retries=1) or {}, f"repos/{owner}/{repo}/actions/workflows", "workflows", 100,
+                                         paging.settings(self.config)["workflow_pages"])      # a repository can have hundreds of workflows: the next pages are read, and a cut is said
+                wfs = page["items"]
+                res["wf_seen"], res["wf_total"] = page["seen"], (page["total"] if page["cut"] else None)
                 res["wf_disabled"] = [w.get("name") for w in wfs if w.get("state") == "disabled_inactivity"]
                 res["wf_manual"] = [w.get("name") for w in wfs if w.get("state") == "disabled_manually"]   # same call: no extra request
             except Exception as error:
@@ -1568,7 +1574,7 @@ class Sentinel:
                 return sentinel_ai.explain(kind, "", self.ai_cfg, self.ai_store)
             parts = [f"repo: {repo}", f"workflow: {run.get('name')}", f"branch: {run.get('branch')}", f"event: {run.get('event')}"]
             try:
-                jobs = self._gh("api", f"repos/{toolconfig.github_owner()}/{repo}/actions/runs/{run_id}/jobs?per_page=30", retries=1).get("jobs", [])
+                jobs = self._gh("api", f"repos/{toolconfig.github_owner()}/{repo}/actions/runs/{run_id}/jobs?per_page=100", retries=1).get("jobs", [])
                 for job in jobs:
                     if job.get("conclusion") in BAD:
                         steps = [s.get("name") for s in job.get("steps") or [] if s.get("conclusion") in BAD]

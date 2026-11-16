@@ -3018,5 +3018,16 @@
  "cfg.f.ci.failed_jobs.max_per_cycle": "每个周期读取的运行数",
  "cfg.h.ci.failed_jobs.max_per_cycle": "一个周期内最多读取其作业的红色运行数（每个一次调用，默认 4）。运行不变时保留结果。",
  "cfg.f.ci.failed_jobs.group_by": "作业分组依据",
- "cfg.h.ci.failed_jobs.group_by": "auto（默认）：作业名中的系统（ubuntu、windows、macos 等），否则取矩阵的第一个参数，否则取斜杠前的部分。platform、matrix、prefix 可强制使用其中一种。"
+ "cfg.h.ci.failed_jobs.group_by": "auto（默认）：作业名中的系统（ubuntu、windows、macos 等），否则取矩阵的第一个参数，否则取斜杠前的部分。platform、matrix、prefix 可强制使用其中一种。",
+ "cfg.f.pagination.workflow_pages": "每个仓库的工作流页数",
+ "cfg.h.pagination.workflow_pages": "一个仓库可能有数百个工作流。只要一页 100 条已满,就读取下一页,最多读到这个页数;少于 100 个的仓库不会多花请求。若仍有遗漏,页面会说明在多少个中看到了多少个。",
+ "cfg.f.pagination.job_pages": "每次运行的作业页数",
+ "cfg.h.pagination.job_pages": "矩阵一次运行可能启动超过 100 个作业。只要一页 100 条已满,就读取下一页,最多读到这个页数。若仍有作业遗漏,该运行会显示“M 个中看到 N 个”。",
+ "cfg.f.pagination.collab_pages": "每个仓库的议题和拉取请求页数",
+ "cfg.h.pagination.collab_pages": "一个仓库可能有数百个未关闭的议题和拉取请求。只要一页 100 条已满,就读取下一页,最多读到这个页数(第一页保持条件读取;少于 100 的仓库不会多花任何请求)。若还有更多,“团队”标签页会说明。",
+ "ui.cfg_b_pagination": "长列表的分页",
+ "ui.collab_cut": "{n} 个仓库的未关闭项多于已读取的数量(最多 {p} 页,每页 100 条)",
+ "ui.collab_cut_search": "搜索:{total} 个中看到 {seen} 个",
+ "ui.jobs_cut": "作业:{total} 个中看到 {seen} 个",
+ "hyg.wf_cut": "工作流列表被截断:{total} 个中看到 {seen} 个"
 }

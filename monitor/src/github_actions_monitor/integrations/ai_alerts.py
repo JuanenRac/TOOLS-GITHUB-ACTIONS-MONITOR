@@ -211,7 +211,7 @@ def diagnose(owner, repo, url, runner, count=10, max_bytes=1500):
     if not run:
         return None
     try:
-        code, out, _err = runner(["api", f"repos/{owner}/{repo}/actions/runs/{run}/jobs?per_page=30"], 60)
+        code, out, _err = runner(["api", f"repos/{owner}/{repo}/actions/runs/{run}/jobs?per_page=100"], 60)
         if code != 0:
             return {"run": run, "unavailable": True}
         step = ""

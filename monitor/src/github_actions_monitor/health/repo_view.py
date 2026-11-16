@@ -31,6 +31,15 @@ def _ts(value):
         return None
 
 
+def group_by_repo(items):
+    """{repo: [item, ...]} in one pass (the items that are not dictionaries or have no repository are left out): the views then take their own list instead of filtering all of them."""
+    out = {}
+    for item in items or []:
+        if isinstance(item, dict) and item.get("repo"):
+            out.setdefault(item["repo"], []).append(item)
+    return out
+
+
 def ci_part(repo, runs, failing, active, now):
     """The CI of the repository: runs of the last 24 hours and the red and stuck ones. `failing` are the red workflows ({"repo", "workflow"...}), `active` the runs in progress or waiting."""
     mine = [r for r in runs if isinstance(r, dict) and r.get("repo") == repo]
