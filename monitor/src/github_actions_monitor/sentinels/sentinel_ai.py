@@ -54,6 +54,7 @@ AI_DEFAULTS = {
     "base_url": "", "api_key_env": "",
     # what the model may look at and say (the settings page): the kinds of event it may analyse, the repositories it may see (empty = only the ones the monitor watches), the language of its answers
     "events": ["build", "codeql", "report"], "allowed_repos": [], "answer_language": "",
+    "catalog": {"enabled": False, "ttl_minutes": 360, "max_requests_per_day": 20, "fit_context": False},      # the live list of models of the provider (ai_models.py): off for background use, a person asking for it is always served
     "skill": True, "skill_max_chars": 3000,      # the core of the skill of the AI of the monitor (skills/internal/SKILL.md) goes into every prompt, cut to this size (a small local model: 1500)
 }
 KINDS = ("build", "codeql", "report", "release_notes", "ask")
@@ -76,6 +77,7 @@ def ai_config(config):
         merged.update({k: v for k, v in value.items() if k in AI_DEFAULTS})
     if merged["provider"] not in PROVIDERS:
         merged["provider"] = "none"
+    merged["catalog"] = dict(AI_DEFAULTS["catalog"], **{k: v for k, v in (value.get("catalog") if isinstance(value, dict) and isinstance(value.get("catalog"), dict) else {}).items() if k in AI_DEFAULTS["catalog"]})
     try:
         merged["daily_limit"] = max(0, int(merged["daily_limit"]))
         merged["max_input_chars"] = max(500, min(20000, int(merged["max_input_chars"])))
@@ -201,6 +203,18 @@ def _loopback(url):
     return host in ("127.0.0.1", "localhost", "::1")
 
 
+_USAGE = threading.local()      # the tokens of the last call of this thread, as the provider reported them (the transports note them; a transport that does not leaves None)
+
+
+def note_usage(body, in_key, out_key):
+    """Keeps the tokens a provider reported in its answer (body[in_key], body[out_key]) for the call that is running in this thread."""
+    def number(value):
+        return value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else None
+    source = body if isinstance(body, dict) else {}
+    usage = source.get("usage") if isinstance(source.get("usage"), dict) else source
+    _USAGE.value = (number(usage.get(in_key)), number(usage.get(out_key)))
+
+
 def _post_json(url, payload, headers, timeout, use_proxy=False):
     """The call to a provider: no redirect is followed (the key would go on to another address) and no proxy of the environment is used for a server on this computer (nor for any other unless
     `network.use_proxy`): netguard.open_plain."""
@@ -228,6 +242,7 @@ def ollama_chat(cfg, system, user):
                       {"model": model_of(cfg), "stream": False, "options": {"temperature": 0.1},
                        "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]},
                       {}, cfg["timeout_seconds"], cfg.get("use_proxy") is True)
+    note_usage(body, "prompt_eval_count", "eval_count")
     return (body.get("message") or {}).get("content", "")
 
 
@@ -266,6 +281,7 @@ def openai_compatible_chat(cfg, system, user):
                           {"Authorization": "Bearer " + key, "api-key": key} if key else {}, cfg["timeout_seconds"], cfg.get("use_proxy") is True)
     except urllib.error.HTTPError as error:
         raise RuntimeError(i18n.t("ai.provider_answered", code=error.code)) from None
+    note_usage(body, "prompt_tokens", "completion_tokens")
     return (((body.get("choices") or [{}])[0]).get("message") or {}).get("content", "")
 
 
@@ -296,6 +312,7 @@ def anthropic_chat(cfg, system, user):
                           {"x-api-key": key, "anthropic-version": ANTHROPIC_VERSION}, cfg["timeout_seconds"], cfg.get("use_proxy") is True)
     except urllib.error.HTTPError as error:
         raise RuntimeError(i18n.t("ai.provider_answered", code=error.code)) from None
+    note_usage(body, "input_tokens", "output_tokens")
     return "".join(part.get("text", "") for part in (body.get("content") or []) if isinstance(part, dict) and part.get("type") == "text")
 
 
@@ -356,6 +373,11 @@ def status(cfg, store):
         problem = compat_problem(cfg)
         out["available"] = problem is None
         out["message"] = problem or i18n.t("ai.compat_ready")
+    try:
+        from github_actions_monitor.sentinels import ai_models
+        out["catalog"] = ai_models.state_of_configured(cfg, store)      # from the list kept: this never asks the provider
+    except Exception:   # noqa: BLE001 - a state that cannot be worked out never breaks the status
+        out["catalog"] = {"state": "off", "message": ""}
     return out
 
 
@@ -408,6 +430,34 @@ def explain(kind, data, cfg, store, transport=None):
         store.put(key, {"text": text, "verdict": verdict, "model": model_of(cfg), "at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")})
         store.save()
     return {**base, "ok": True, "text": text, "verdict": verdict}
+
+
+def run_call(cfg, store, kind, data, transport=None, language=None):
+    """ONE real call to the provider with a text that is already safe (no cache, no lessons, no guide): counted against the daily cap, timed, with the tokens it used (as the provider reported them
+    or, if it did not, estimated at four characters per token) and the estimated cost when the table has the prices. Never raises."""
+    import time as _time
+    with store.lock:
+        if cfg["provider"] == "none":
+            return {"ok": False, "error": i18n.t("ai.is_off")}
+        if store.used_today() >= cfg["daily_limit"]:
+            return {"ok": False, "error": i18n.t("ai.daily_cap", n=cfg["daily_limit"])}
+        store.add_call()
+        store.save()
+    system, user = build_prompt(kind, sanitize_text(data, cfg["max_input_chars"], keep="tail"), _secrets.token_hex(6), language)
+    _USAGE.value = None
+    started = _time.time()
+    try:
+        raw = (transport or TRANSPORTS[cfg["provider"]])(cfg, system, user)
+    except Exception as error:   # noqa: BLE001
+        return {"ok": False, "error": sanitize_text(str(error), 300, keep="head"), "ms": int((_time.time() - started) * 1000)}
+    ms = int((_time.time() - started) * 1000)
+    text = clean_output(raw, cfg["max_output_chars"])
+    reported = getattr(_USAGE, "value", None)
+    estimated = not (reported and reported[0] is not None and reported[1] is not None)
+    tokens_in, tokens_out = (len(system + user) // 4, len(text) // 4) if estimated else reported
+    from github_actions_monitor.sentinels import ai_models
+    cost = ai_models.cost_of(store, ai_models.provider_label(cfg), model_of(cfg), tokens_in, tokens_out)
+    return {"ok": bool(text), "text": text, "error": "" if text else i18n.t("ai.no_text"), "ms": ms, "tokens_in": tokens_in, "tokens_out": tokens_out, "tokens_estimated": estimated, "cost": cost}
 
 
 def test_connection(cfg, store, transport=None):

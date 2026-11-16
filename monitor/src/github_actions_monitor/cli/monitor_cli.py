@@ -44,8 +44,9 @@ from github_actions_monitor.tool_version import TOOL_VERSION
 from github_actions_monitor.security import netguard
 
 EXIT_OK, EXIT_USAGE, EXIT_DOWN, EXIT_AUTH, EXIT_DEGRADED, EXIT_ALERTS = 0, 1, 2, 3, 4, 5
-COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "score", "team", "ai-hook", "credential", "lessons", "install-skill", "gh-token")
+COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "score", "team", "ai-hook", "credential", "lessons", "install-skill", "gh-token", "ai")
 SKILL_ACTIONS = ("internal", "external")
+AI_ACTIONS = ("models", "doctor", "test")
 LESSONS_ACTIONS = ("list", "brief", "failures", "close")
 AI_HOOK_ACTIONS = ("install", "status", "uninstall")
 CREDENTIAL_ACTIONS = ("replace", "reload")
@@ -336,6 +337,55 @@ def cmd_lessons(ctx):
     return answer, lines, EXIT_OK
 
 
+def _post_ai(ctx, path, payload):
+    """One local-only POST of the AI models family; 403 = the monitor refuses (not this computer or no token), 404 = this monitor has no such route."""
+    status, answer = post_json(ctx["base"], path, payload, max(ctx["timeout"], 30.0), ctx["token"])
+    if status in (401, 403):
+        raise CliError(EXIT_AUTH, i18n.t("cli.refused", code=answer.get("code") or status))
+    if status == 404:
+        raise CliError(EXIT_DEGRADED, i18n.t("cli.not_here", path=path))
+    return answer
+
+
+def cmd_ai(ctx):
+    """ai models [--refresh] | ai test --provider X --model Y | ai doctor: the models of the AI provider, the test of one model with a synthetic text, and why an AI does not answer (never prints a key)."""
+    action = ctx["action"]
+    if action not in AI_ACTIONS:
+        raise CliError(EXIT_USAGE, i18n.t("cli.ai_action"))
+    body = {k: ctx[k] for k in ("provider", "model") if ctx.get(k)}
+    if action == "models":
+        note = ""
+        if ctx.get("refresh"):
+            done = _post_ai(ctx, "/api/ai/models/refresh", body)
+            note = done.get("message") or (i18n.t("cli.ai_refreshed", n=done.get("count", 0)) if done.get("ok") else "")
+        answer = fetch(ctx["base"], "/api/ai/models", None, ctx["timeout"], ctx["token"])
+        rows = answer.get("models") or []
+        unknown = i18n.t("cli.ai_unknown")
+        lines = [i18n.t("cli.ai_models_head", provider=answer.get("label") or answer.get("provider"), model=answer.get("model") or "-", n=len(rows))]
+        if note:
+            lines.append(note)
+        lines.append((answer.get("check") or {}).get("message") or "")
+        for row in rows[:60]:
+            lines.append(f"  {row.get('id', '?'):<44} {i18n.t('cli.ai_ctx')} {row.get('context') or unknown}  {i18n.t('cli.ai_in')} {unknown if row.get('in_per_mtok') is None else row['in_per_mtok']}  "
+                         f"{i18n.t('cli.ai_out')} {unknown if row.get('out_per_mtok') is None else row['out_per_mtok']}")
+        if len(rows) > 60:
+            lines.append(i18n.t("cli.ai_more", n=len(rows) - 60))
+        if not rows:
+            lines.append(i18n.t("cli.ai_no_list"))
+        return answer, [line for line in lines if line], EXIT_OK
+    if action == "test":
+        answer = _post_ai(ctx, "/api/ai/models/test", body)
+        if answer.get("ok"):
+            cost = answer.get("cost")
+            lines = [i18n.t("cli.ai_test_ok", provider=answer.get("provider"), model=answer.get("model"), ms=answer.get("ms"), tin=answer.get("tokens_in"), tout=answer.get("tokens_out"),
+                            est=i18n.t("cli.ai_estimated") if answer.get("tokens_estimated") else "", cost=i18n.t("cli.ai_unknown") if cost is None else cost, at=answer.get("tested_at")), answer.get("answer") or ""]
+            return answer, lines, EXIT_OK
+        return answer, [i18n.t("cli.ai_test_fail", error=answer.get("error") or "?")], EXIT_DEGRADED
+    answer = _post_ai(ctx, "/api/ai/doctor", body)
+    lines = [i18n.t("cli.ai_doctor_" + ("ok" if answer.get("ok") else "head"))] + [f"  [{'ok' if c.get('ok') else '!!'}] {c.get('text', '')}" for c in answer.get("checks") or []]
+    return answer, lines, EXIT_OK if answer.get("ok") else EXIT_DEGRADED
+
+
 def cmd_install_skill(ctx):
     """install-skill internal|external --dest FOLDER: copies a skill of the monitor to the folder an AI tool reads its skills from. Works without a running monitor; never overwrites a file that differs."""
     from github_actions_monitor.integrations import skills
@@ -537,13 +587,13 @@ def cmd_credential(ctx):
     return {"action": action, "ok": ok, **shown}, [line], EXIT_OK if ok else EXIT_DEGRADED
 
 
-HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill}
+HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai}
 
 
 def build_parser():
     ap = argparse.ArgumentParser(prog="monitor_cli.py", description=i18n.t("cli.description"), epilog=i18n.t("cli.epilog"), formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("command", choices=COMMANDS, help=i18n.t("cli.help_command"))
-    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS + SKILL_ACTIONS, default=None, help=i18n.t("cli.help_ai_action"))
+    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS + SKILL_ACTIONS + AI_ACTIONS, default=None, help=i18n.t("cli.help_ai_action"))
     ap.add_argument("--json", action="store_true", help=i18n.t("cli.help_json"))
     for name in ("assistant", "cursor", "generic"):
         ap.add_argument("--" + name, dest="target", action="store_const", const=name, default="", help=i18n.t("cli.help_" + name))
@@ -571,6 +621,9 @@ def build_parser():
     ap.add_argument("--severity", choices=("warn", "bad"), default="", help=i18n.t("cli.help_severity"))
     ap.add_argument("--compare", action="store_true", help=i18n.t("cli.help_compare"))
     ap.add_argument("--lang", metavar="CODE", help=i18n.t("cli.help_lang"))
+    ap.add_argument("--provider", metavar="NAME", default="", help=i18n.t("cli.help_provider"))
+    ap.add_argument("--model", metavar="NAME", default="", help=i18n.t("cli.help_model"))
+    ap.add_argument("--refresh", action="store_true", help=i18n.t("cli.help_refresh"))
     ap.add_argument("--version", action="store_true", help=i18n.t("cli.help_version"))
     return ap
 
@@ -595,7 +648,8 @@ def main(argv=None):
     try:
         ctx = {"base": base_url(args.url, args.lite), "account": args.account, "timeout": max(1.0, min(60.0, args.timeout)), "token": resolve_token(flag=args.token, token_file=args.token_file),
                "sentinel": args.sentinel, "level": args.level, "muted": args.muted, "fail_on": args.fail_on, "lite": args.lite, "compare": args.compare, "severity": args.severity,
-               "action": args.action or "", "target": args.target, "scope": args.scope, "project_dir": args.project_dir, "dry_run": args.dry_run, "deep": args.deep, "new_token_file": args.new_token_file, "dest": args.dest, "read_only": args.read_only, "repo": args.repo if re.fullmatch(r"[A-Za-z0-9._/-]{0,201}", args.repo) else ""}
+               "action": args.action or "", "target": args.target, "scope": args.scope, "project_dir": args.project_dir, "dry_run": args.dry_run, "deep": args.deep, "new_token_file": args.new_token_file, "dest": args.dest, "read_only": args.read_only, "repo": args.repo if re.fullmatch(r"[A-Za-z0-9._/-]{0,201}", args.repo) else "",
+               "provider": args.provider if re.fullmatch(r"[A-Za-z0-9-]{0,40}", args.provider) else "", "model": args.model if re.fullmatch(r"[A-Za-z0-9._:/@+-]{0,100}", args.model) else "", "refresh": args.refresh}
         CLIENT.update({"session": "", "ca": (args.ca_file or os.environ.get("MONITOR_CA_FILE") or "").strip()})
         if CLIENT["ca"] and not os.path.isfile(CLIENT["ca"]):
             raise CliError(EXIT_USAGE, i18n.t("cli.ca_file_bad", file=CLIENT["ca"]))

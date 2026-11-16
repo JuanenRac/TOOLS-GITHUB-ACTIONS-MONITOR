@@ -59,6 +59,16 @@ Besides the feed that an AI reads (`ALERTS_BRIEF.md`, the stream, the MCP server
 
 The notice is sent from a thread of its own, so a slow provider never holds the cycle.
 
+## Models of the provider
+
+The name of the model is free text, but the monitor can read the list of models from the provider and check the name against it. Models and versions change often, so the monitor ships no list of models: the examples of the presets may be out of date.
+
+- **The list.** Settings, tab *External AI*, block *Models and data per model*: *Load the models of the provider* reads the list (`/models` of an OpenAI-style server, the equivalent list of the Anthropic API, `/api/tags` of Ollama) with one read-only request. The key goes in a header, is read from its environment variable and is never stored. Search the list and pick a model with *Use this model*. The list is kept and bounded by `ai.catalog.ttl_minutes` and `ai.catalog.max_requests_per_day`. With `ai.catalog.enabled` on (off by default) the monitor also warns when the configured model no longer appears in the list (retired or renamed); with it off only you trigger the read.
+- **Data per model.** Context window, price of input and output per million tokens and whether it accepts tools are filled only with what the provider returns; what it does not say stays *unknown* (no figure is ever made up). You can type your own values; yours win. With `ai.catalog.fit_context` on (off by default) the input limit is fitted to the context window when it is known.
+- **Test a model.** *Test this model* or `monitor_cli.py ai test --provider NAME --model NAME` asks the model about a SYNTHETIC failure (never data of your repositories) and shows the latency, the tokens, the estimated cost and a sample answer. It counts as one call of the daily cap, and the result ("tested", with the local date) is kept in the table.
+- **Commands.** `monitor_cli.py ai models [--refresh]` shows the models and the data; `ai doctor` explains why an AI does not answer (key variable not set, unknown model, quota, network) and never prints a key.
+- **Routes.** `GET /api/ai/models` (the list kept, the check and the table; read only) and, from this computer only, `POST /api/ai/models/refresh`, `POST /api/ai/models/test`, `POST /api/ai/models/data` and `POST /api/ai/doctor`.
+
 ## Compatible AIs
 
 Hosted services and local servers whose protocol the monitor already speaks (`openai-compatible`, `anthropic` or `ollama`). This list is a neutral table, not a recommendation: none is active by default, the key is ALWAYS read from an environment variable whose name you set (never typed in a setting, never in a log, a report or the API), and the preset only fills in the address, the name of that variable and an example model (editable; nothing is downloaded and no model weights are shipped). In the AI settings choose a preset, press the fill button, review, save, and press "Test connection". The list is data (`ai_presets.json`) and is served read only at `GET /api/ai/presets`.
