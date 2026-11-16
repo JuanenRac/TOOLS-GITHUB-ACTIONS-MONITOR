@@ -33,6 +33,7 @@ from urllib.parse import quote
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from github_actions_monitor.data_pipeline import causes
 from github_actions_monitor.data_pipeline import events
 from github_actions_monitor import i18n
 from github_actions_monitor.cli import lint_workflows
@@ -759,6 +760,11 @@ def compute_snapshot(inp):
     resolved = inp.get("a2_resolved") or {}
     extra = a2_resolved_runs(resolved, branches, now.timestamp(), ttl)
     red = red_workflows({r: runs + extra.get(r, []) for r, runs in runs_by_repo.items()}, branches)
+    jobs_known = inp.get("failed_jobs") or {}
+    for row in red:      # which jobs of the run failed, when ci.failed_jobs read them (causes.py)
+        found = jobs_known.get(f"{row['repo']}|{row.get('run_id')}")
+        if found:
+            row["failed_jobs"] = found
     caps = inp.get("sample_caps") or cfg   # the run-list sizes of the monitor (runs_per_repo, cold_runs_per_repo); a test may pass them in cfg
     totals = alert_totals(alerts, info)
     per_repo = {r: [t["codeql"] or 0, t["dependabot"] or 0, t["secret"] or 0] for r, t in totals.items()}
@@ -821,7 +827,7 @@ def compute_snapshot(inp):
         "cache_age_seconds": inp.get("cache_age"), "reduced": reduced, "language": i18n.language(), "repos": len(repos), "ecosystems": {r: eco.get(r, "other") for r in repos},
         "rate": rate, "min_rate": cfg["min_rate_remaining"], "errors": errors, "ai": inp.get("ai"),
         "a1": {"stuck": stuck, "issues": issues, "stuck_minutes": data.get("stuck_minutes")},
-        "a2": {"red": red, "workflows_checked": sum(1 for r in repos for _ in {workflow_key(x) for x in runs_by_repo.get(r, [])}),
+        "a2": {"red": red, "groups": causes.groups(red), "workflows_checked": sum(1 for r in repos for _ in {workflow_key(x) for x in runs_by_repo.get(r, [])}),
                "unchecked": a2_unchecked(runs_by_repo), "full_sample": a2_full_sample(runs_by_repo, caps),
                "inconclusive": a2_repos, "inconclusive_workflows": a2_labels(a2_details), "inconclusive_details": a2_details},
         "a3": {"rows": rows, "codeql_total": sum(t["codeql"] or 0 for t in totals.values()), "dependabot_total": sum(t["dependabot"] or 0 for t in totals.values()),
@@ -949,6 +955,7 @@ class Sentinel:
         self.surface = surface.Collector(lambda *a, **k: self._gh(*a, **k), GITHUB_DIR, self.cfg["surface"])   # A10: cold calls and local scans, see surface.py
         self.last_snap = None
         self.surface_paused = None   # {"remaining", "needed"} while A10 waits for the allowance, else None
+        self.failed_jobs = {}        # "repo|run id" -> the failed jobs of that red run, grouped (causes.summarize_jobs), see _failed_jobs_tick
         self.a2_resolved = {}        # "repo|workflow file" -> last run on the default branch (or none), see _a2_resolve_tick
         self.a2_reason = "pending"   # why an unresolved workflow is still unresolved: "pending" (waiting its turn) or "quota"
         self.dirty = False
@@ -1260,6 +1267,7 @@ class Sentinel:
             did = True
         did = self._surface_tick() or did
         did = self._a2_resolve_tick() or did
+        did = self._failed_jobs_tick() or did
         if did or self.dirty:
             self.dirty = False
             self._persist()
@@ -1283,6 +1291,31 @@ class Sentinel:
             self.error("surface", error)
             return False
         return bool(used)
+
+    def _failed_jobs_tick(self):
+        """`ci.failed_jobs` (off): reads the jobs of a few red runs (one call each, at most `max_per_cycle` a tick, inside the same quota gate as A2) and keeps the failed ones grouped by platform. A
+        run that is no longer red is forgotten. Nothing is written to GitHub."""
+        cfg = causes.POLICY["failed_jobs"]
+        if not cfg["enabled"]:
+            return False
+        red = [r for r in ((self.last_snap or {}).get("a2") or {}).get("red", []) if r.get("run_id")]
+        wanted = {f"{r['repo']}|{r['run_id']}": r for r in red}
+        with self.lock:
+            self.failed_jobs = {k: v for k, v in self.failed_jobs.items() if k in wanted}
+        rate = (self.ctx["data_fn"]() or {}).get("rate")
+        if self._budget() <= 0 or (rate and rate["remaining"] < self.cfg["min_rate_remaining"]):
+            return False
+        did = False
+        for key, row in [(k, r) for k, r in sorted(wanted.items()) if k not in self.failed_jobs][: cfg["max_per_cycle"]]:
+            try:
+                body = self._gh("api", f"repos/{toolconfig.github_owner()}/{row['repo']}/actions/runs/{row['run_id']}/jobs?filter=latest&per_page=100", retries=1)
+            except Exception as error:      # a failed question is asked again next time; the others go on
+                self.error("failed_jobs", error)
+                continue
+            with self.lock:
+                self.failed_jobs[key] = causes.summarize_jobs(body, cfg["group_by"])
+            did = True
+        return did
 
     def _a2_resolve_tick(self):
         """A2: for a repository with a full run sample that hides a workflow of its clone, asks GitHub for the last run of THAT workflow on the default branch
@@ -1448,7 +1481,7 @@ class Sentinel:
                 "cache_age": round(time.time() - self.saved_at) if (self.saved_at and not self.gql_at) else None,
                 "api": {"calls_last_hour": len([t for t in self.calls if t > time.time() - 3600]), "budget_per_hour": self.cfg["budget_per_hour"]},
                 "sample_caps": {"runs_per_repo": self.config.get("runs_per_repo"), "cold_runs_per_repo": self.config.get("cold_runs_per_repo")},
-                "surface_paused": self.surface_paused, "a2_resolved": dict(self.a2_resolved), "a2_pending_reason": self.a2_reason, "local_versions": dict(self.local_versions), "pins": pins,
+                "surface_paused": self.surface_paused, "a2_resolved": dict(self.a2_resolved), "a2_pending_reason": self.a2_reason, "failed_jobs": dict(self.failed_jobs), "local_versions": dict(self.local_versions), "pins": pins,
                 "lint": self._lint(repos), "org_files": self.org_files["names"] if self.cfg["hygiene"]["community_fallback"] else None,
             }
         return compute_snapshot(inp)

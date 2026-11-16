@@ -2971,5 +2971,20 @@
  "ui.cov_atleast": "almeno {n} esecuzioni in totale",
  "ui.sampling_low": "{n} repository hanno copertura bassa: il loro elenco di esecuzioni risale solo di pochi minuti, quindi un errore più vecchio può non vedersi. Aumenta le esecuzioni per repository o attiva la seconda occhiata.",
  "ui.sampling_estimate": "Circa {est} richieste all'ora per {n} repository ({used} usate nell'ultima ora); il limite di GitHub è di 5.000 all'ora.",
- "ui.sampling_waiting": "Budget di richieste esaurito: {n} repository attendono l'ora successiva, quelli in rosso si leggono per primi."
+ "ui.sampling_waiting": "Budget di richieste esaurito: {n} repository attendono l'ora successiva, quelli in rosso si leggono per primi.",
+ "ui.cfg_b_causes": "Cause condivise e job falliti",
+ "evt.red_cause": "CI rossa per il workflow condiviso {shared}: {count} workflow in {repos} repository",
+ "ui.a2_cause": "Causa condivisa",
+ "ui.a2_cause_line": "{shared} è chiamato da {count} workflow rossi in {repos} repository",
+ "ui.a2_failed_jobs": "{failed} job su {total} falliti",
+ "cfg.f.ci.group.reusable": "Raggruppa i rossi per workflow condiviso",
+ "cfg.h.ci.group.reusable": "Disattivato per impostazione predefinita. Attivo: i workflow rossi che chiamano lo stesso workflow riutilizzabile hanno una sola causa; l'elenco dei rossi mostra una riga di gruppo e la notifica dei nuovi rossi lo dice una volta con il numero di coinvolti invece di una per ciascuno. Nessuna riga rossa viene nascosta.",
+ "cfg.f.ci.group.min": "Workflow necessari per una causa condivisa",
+ "cfg.h.ci.group.min": "Un workflow riutilizzabile è indicato come causa condivisa a partire da questo numero di workflow rossi (predefinito 2).",
+ "cfg.f.ci.failed_jobs.enabled": "Mostra quali job di un run rosso sono falliti",
+ "cfg.h.ci.failed_jobs.enabled": "Disattivato per impostazione predefinita. Attivo: per ogni run rosso il monitor legge i suoi job una volta (una chiamata, pochi run per ciclo) e la riga rossa dice quali job sono falliti, raggruppati per piattaforma, così un workflow con molti job non dice solo rosso.",
+ "cfg.f.ci.failed_jobs.max_per_cycle": "Run letti per ciclo",
+ "cfg.h.ci.failed_jobs.max_per_cycle": "Massimo di run rossi di cui si leggono i job in un ciclo (una chiamata ciascuno, predefinito 4). La risposta viene conservata finché il run non cambia.",
+ "cfg.f.ci.failed_jobs.group_by": "Raggruppa i job per",
+ "cfg.h.ci.failed_jobs.group_by": "auto (predefinito): il sistema nel nome del job (ubuntu, windows, macos...), altrimenti il primo parametro della matrice, altrimenti la parte prima della barra. platform, matrix e prefix ne impongono uno."
 }
