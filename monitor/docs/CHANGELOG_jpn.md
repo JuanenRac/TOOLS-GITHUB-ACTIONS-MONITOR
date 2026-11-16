@@ -9,6 +9,11 @@
 
 ## [Unreleased]
 
+
+### 追加
+
+- **Renovate は Dependabot と同じ扱いになり、リンターは自分のアクションと第三者のアクションを区別します**: `renovate` のプルリクエストは A4 に依存関係の更新として並び（`sentinel.dependency_bots` でアカウントを指定）、Renovate の設定があるリポジトリは更新ボットなしとは報告されません。`lint.own_owners` と `lint.unpinned_own` は固定されていないアクションを自分のものか第三者のものかで示し、自分のものは重要度を下げたり非表示にできます。既定でオフの任意ルール3つが、`timeout-minutes` のないジョブ（`lint.rules.no_timeout`）、`secrets: inherit`（`lint.rules.secrets_inherit`）、`@main` を追う自分のアクション（`lint.rules.own_action_main`）を検出します。
+
 ## [2.0.2]
 
 ### セキュリティ

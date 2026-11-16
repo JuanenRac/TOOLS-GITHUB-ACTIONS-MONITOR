@@ -63,6 +63,8 @@ IGNORED = ("cancelled", "skipped", "neutral", "stale")
 BOT_ACTORS = ("dependabot[bot]", "github-actions[bot]")   # plus the owner of the repositories (toolconfig.github_owner())
 RELEASE_WF = re.compile(r"(release|build|publish|package|apk|firmware|exe|dist|site|sign|deploy)", re.I)
 BUMP_RE = re.compile(r"[Bb]ump\s+(?P<pkg>\S+)\s+from\s+(?P<a>\S+)\s+to\s+(?P<b>\S+)")
+RENOVATE_RE = re.compile(r"[Uu]pdate\s+(?:dependency\s+)?(?P<pkg>\S+)(?:\s+(?:action|docker\s+tag|digest|image|orb))?\s+to\s+(?P<b>v?\d\S*)")      # "Update dependency x to v2.1.0", "Update actions/checkout action to v4"
+DEPENDENCY_BOTS = ("dependabot", "renovate")
 DEFAULT_AUDIT_FILES = {"reconciliation": "RECONCILIATION_TOTAL_*.txt", "rounds": "ROUNDS_MAP_2*.txt", "rounds_extra": "ROUNDS_MAP_EXTRA_*.txt"}   # A8: names of the files of the audit folder
 
 DEFAULTS = {
@@ -72,6 +74,8 @@ DEFAULTS = {
     "candidate_days": 2.0, "pending_sign_hours": 24, "notify_command": [], "candidate_min_entries": 1, "stale_pr_days": 7, "hot_hours": 3,
     "required_files": [["README.md"], ["LICENSE", "LICENSE.md"], ["CHANGELOG.md"], ["SECURITY.md"]],
     "skip_candidate_prefixes": [], "min_rate_remaining": 800,
+    # dependency_bots: the accounts whose pull requests are the dependency updates of A4 (a login with `app/` before it or `[bot]` after it counts too).
+    "dependency_bots": list(DEPENDENCY_BOTS),
     # minutes_budget: ceiling of Actions minutes per ecosystem, e.g. {"hydra": 600}; empty = no ceiling. The period is "7d" (default) or "24h".
     "minutes_budget": {}, "minutes_budget_period": "7d",
     # ci_red_file: where ci_red.json (repo -> red workflows + pending_sign) is written: "" = next to the monitor, "off" = not written, or a path.
@@ -267,7 +271,22 @@ def ecosystem_summary(s, eco):
 
 def parse_bump(title):
     match = BUMP_RE.search(title or "")
-    return (match.group("pkg"), match.group("a"), match.group("b")) if match else None
+    if match:
+        return match.group("pkg"), match.group("a"), match.group("b")
+    renovate = RENOVATE_RE.search(title or "")      # no "from" version in the title: the jump cannot be told (major stays unknown)
+    return (renovate.group("pkg"), None, renovate.group("b")) if renovate else None
+
+
+def is_dependency_bot(login, bots=DEPENDENCY_BOTS):
+    """True when a pull request author is one of the dependency bots: `renovate`, `app/renovate`, `renovate[bot]`, `renovate-bot` all count as `renovate`."""
+    name = (login or "").lower()
+    if name.startswith("app/"):
+        name = name[4:]
+    if name.endswith("[bot]"):
+        name = name[:-5]
+    if name.endswith("-bot"):
+        name = name[:-4]
+    return bool(name) and name in {b.lower() for b in bots or ()}
 
 
 def major_jump(old, new):
@@ -277,7 +296,7 @@ def major_jump(old, new):
     return int(b.group(1)) > int(a.group(1))
 
 
-def classify_pr(repo, pr, now):
+def classify_pr(repo, pr, now, bots=DEPENDENCY_BOTS):
     author = ((pr.get("author") or {}).get("login") or "").lower()
     files = [f.get("path", "") for f in ((pr.get("files") or {}).get("nodes") or [])]
     workflows = [p for p in files if p.startswith(".github/workflows/")]
@@ -285,7 +304,7 @@ def classify_pr(repo, pr, now):
     created = parse_time(pr.get("createdAt"))
     return {
         "repo": repo, "number": pr.get("number"), "title": (pr.get("title") or "")[:140], "url": pr.get("url"),
-        "dependabot": author in ("dependabot", "app/dependabot", "dependabot[bot]"), "draft": bool(pr.get("isDraft")),
+        "dependabot": is_dependency_bot(author, bots), "draft": bool(pr.get("isDraft")),
         "age_days": round((now - created).total_seconds() / 86400, 1) if created else None,
         "conflict": pr.get("mergeable") == "CONFLICTING", "mergeable": pr.get("mergeable") or "UNKNOWN",
         "major": major_jump(bump[1], bump[2]) if bump else None, "pkg": bump[0] if bump else "",
@@ -652,7 +671,8 @@ def compute_snapshot(inp):
     order = {"critical": 0, "high": 1, "error": 2, "medium": 3, "warning": 4, "low": 5}
     codeql_list.sort(key=lambda x: (order.get((x.get("severity") or "").lower(), 9), x["repo"]))
     unavailable = [r for r, a in alerts.items() if a.get("codeql") is None]
-    prs_all = [classify_pr(repo, pr, now) for repo, i in info.items() for pr in i.get("prs", [])]
+    bots = [b for b in (cfg.get("dependency_bots") or DEPENDENCY_BOTS) if isinstance(b, str)]
+    prs_all = [classify_pr(repo, pr, now, bots) for repo, i in info.items() for pr in i.get("prs", [])]
     dep_prs = sorted((p for p in prs_all if p["dependabot"]), key=lambda p: -(p["age_days"] or 0))
     releases = {r: i.get("release") for r, i in info.items() if i.get("release")}
     ages = {}

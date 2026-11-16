@@ -39,6 +39,10 @@
     "candidate_min_entries": 1,
     "skip_candidate_prefixes": [],
     "stale_pr_days": 7,
+    "dependency_bots": [
+      "dependabot",
+      "renovate"
+    ],
     "required_files": [
       [
         "README.md"
@@ -307,6 +311,8 @@
     "enabled": true,
     "refresh_seconds": 3600,
     "in_report": true,
+    "own_owners": [],
+    "unpinned_own": "same",
     "rules": {
       "unpinned_uses": {
         "enabled": true,
@@ -327,6 +333,18 @@
       "pr_target": {
         "enabled": true,
         "severity": "bad"
+      },
+      "no_timeout": {
+        "enabled": false,
+        "severity": "warn"
+      },
+      "secrets_inherit": {
+        "enabled": false,
+        "severity": "warn"
+      },
+      "own_action_main": {
+        "enabled": false,
+        "severity": "info"
       }
     }
   },

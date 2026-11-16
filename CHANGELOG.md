@@ -10,6 +10,11 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+
+### Added
+
+- **Renovate counts like Dependabot, and the linter tells your own actions from third-party ones**: the pull requests of `renovate` are listed in A4 as dependency updates (`sentinel.dependency_bots` names the accounts), and a repository with a Renovate configuration is not reported as missing an update bot. `lint.own_owners` and `lint.unpinned_own` mark an unpinned action as own or third-party and can lower or hide the own ones; three optional rules, off by default, find a job without `timeout-minutes` (`lint.rules.no_timeout`), `secrets: inherit` (`lint.rules.secrets_inherit`) and an own action that follows `@main` (`lint.rules.own_action_main`).
+
 ## [2.0.2]
 
 ### Security

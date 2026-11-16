@@ -205,6 +205,7 @@ _f(_T_SENT, "resolve", "sentinel.a2_full_sample_unknown", "bool")
 _f(_T_SENT, "resolve", "sentinel.a2_resolve_max_calls_per_tick", "int", (0, 50), unit="calls")
 _f(_T_SENT, "resolve", "sentinel.a2_resolve_ttl_seconds", "int", (60, 86400))
 _f(_T_SENT, "prs", "sentinel.stale_pr_days", "int", (1, 90))
+_f(_T_SENT, "prs", "sentinel.dependency_bots", "names")
 _f(_T_SENT, "hygiene_files", "sentinel.required_files", "filegroups")
 _f(_T_SENT, "minutes", "sentinel.minutes_budget_period", "enum", ("7d", "24h"))
 _f(_T_SENT, "minutes", "sentinel.minutes_budget", "intmap", (0, 1000000), unit="min")
@@ -390,7 +391,9 @@ _f("lint", "main", "lint.enabled", "bool")
 _f("lint", "main", "lint.refresh_seconds", "int", (60, 86400))
 _f("lint", "main", "lint.in_report", "bool")
 _f("lint", "main", "lint.ignore", "patterns")
-for _rule in ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target"):
+_f("lint", "own_actions", "lint.own_owners", "names")
+_f("lint", "own_actions", "lint.unpinned_own", "enum", ("same", "info", "ignore"))
+for _rule in ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target", "no_timeout", "secrets_inherit", "own_action_main"):
     _f("lint", "rule_" + _rule, f"lint.rules.{_rule}.enabled", "bool", label=["cfg.p.rule_on"], help="cfg.h.rule_on")
     _f("lint", "rule_" + _rule, f"lint.rules.{_rule}.severity", "enum", ("info", "warn", "bad"), label=["cfg.p.severity"], help="cfg.h.p.severity")
 # --- Terminal view
