@@ -12,6 +12,7 @@
   {"path": "/api/help/topics", "complete": {"topics": "list", "tab_topic": "any", "lang": "str"}, "lite": "same"},
   {"path": "/api/help/topic?id=readme", "complete": {"id": "str", "title": "str", "lang": "str", "fallback": "bool", "plain": "bool", "sections": "list"}, "lite": "same"},
   {"path": "/api/help/search?q=score", "complete": {"hits": "list"}, "lite": "same"},
+  {"path": "/api/ai/models", "complete": {"ok": "bool", "provider": "str", "label": "str", "model": "str", "enabled": "bool", "catalog": "object", "models": "list", "check": "object", "table": "list"}, "lite": 404},
   {"path": "/api/ai/presets", "complete": {"ok": "bool", "presets": "list"}, "lite": 404},
   {"path": "/api/skills", "complete": {"skills": "list"}, "lite": "same"},
   {"path": "/api/statusbar", "complete": {"schema": "int", "version": "str", "edition": "str", "port": "int", "bind": "str", "network": "bool", "lan_address": "str", "account": "any", "uptime_seconds": "int", "demo": "bool", "runs": "object", "sentinels": "list", "workers": "any", "ai": "object"}, "lite": {"schema": "int", "version": "str", "edition": "str", "port": "int", "bind": "str", "network": "bool", "lan_address": "str", "account": "any", "uptime_seconds": "int", "demo": "bool", "runs": "object", "sentinels": "list", "workers": "any", "ai": "any"}},

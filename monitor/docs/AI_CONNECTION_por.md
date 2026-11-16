@@ -73,6 +73,16 @@ Além do feed que uma IA lê (`ALERTS_BRIEF.md`, o stream, o servidor MCP), o mo
 
 O aviso é enviado a partir de um fio de execução próprio, pelo que um fornecedor lento nunca retém o ciclo.
 
+## Modelos do fornecedor
+
+O nome do modelo é texto livre, mas o monitor pode ler a lista de modelos do fornecedor e verificar o nome com ela. Os modelos e as versões mudam com frequência, por isso o monitor não traz nenhuma lista de modelos: os exemplos das predefinições podem estar desatualizados.
+
+- **A lista.** Definições, separador *IA externa*, bloco *Modelos e dados por modelo*: *Carregar os modelos do fornecedor* lê a lista (`/models` de um servidor ao estilo OpenAI, a lista equivalente da API da Anthropic, `/api/tags` do Ollama) com um pedido só de leitura. A chave vai num cabeçalho, é lida da sua variável de ambiente e nunca é guardada. Procure na lista e escolha um modelo com *Usar este modelo*. A lista é guardada e limitada por `ai.catalog.ttl_minutes` e `ai.catalog.max_requests_per_day`. Com `ai.catalog.enabled` ligado (desligado por predefinição) o monitor também avisa quando o modelo configurado deixa de aparecer na lista (retirado ou renomeado); desligado, só você desencadeia a leitura.
+- **Dados por modelo.** A janela de contexto, o preço de entrada e de saída por milhão de tokens e se aceita ferramentas só são preenchidos com o que o fornecedor devolve; o que não diz fica *desconhecido* (nunca se inventa um valor). Pode escrever os seus próprios valores; os seus prevalecem. Com `ai.catalog.fit_context` ligado (desligado por predefinição) o limite de entrada é ajustado à janela de contexto quando esta é conhecida.
+- **Testar um modelo.** *Testar este modelo* ou `monitor_cli.py ai test --provider NOME --model NOME` pergunta ao modelo sobre uma falha SINTÉTICA (nunca dados dos seus repositórios) e mostra a latência, os tokens, o custo estimado e uma resposta de exemplo. Conta como uma chamada do limite diário e o resultado («testado», com a data local) fica na tabela.
+- **Comandos.** `monitor_cli.py ai models [--refresh]` mostra os modelos e os dados; `ai doctor` explica porque é que uma IA não responde (variável da chave por definir, modelo desconhecido, quota, rede) e nunca imprime uma chave.
+- **Rotas.** `GET /api/ai/models` (a lista guardada, a verificação e a tabela; só leitura) e, apenas a partir deste computador, `POST /api/ai/models/refresh`, `POST /api/ai/models/test`, `POST /api/ai/models/data` e `POST /api/ai/doctor`.
+
 ## IAs compatíveis
 
 Serviços alojados e servidores locais cujo protocolo o monitor já fala (`openai-compatible`, `anthropic` ou `ollama`). A lista é uma tabela neutra, não uma recomendação: nenhuma está ativa por predefinição, a chave é lida SEMPRE de uma variável de ambiente cujo nome indica (nunca escrita numa definição, nem num registo, num relatório ou na API) e a predefinição só preenche o endereço, o nome dessa variável e um modelo de exemplo (editável; nada é descarregado e não se incluem pesos de modelos). Nas definições de IA escolha uma predefinição, prima o botão de preencher, reveja, guarde e prima «Testar ligação». A lista são dados (`ai_presets.json`) servidos só de leitura em `GET /api/ai/presets`.

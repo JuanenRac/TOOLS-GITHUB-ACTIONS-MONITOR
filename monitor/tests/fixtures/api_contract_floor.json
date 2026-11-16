@@ -99,6 +99,21 @@
    "lite": "same"
   },
   {
+   "path": "/api/ai/models",
+   "complete": {
+    "ok": "bool",
+    "provider": "str",
+    "label": "str",
+    "model": "str",
+    "enabled": "bool",
+    "catalog": "object",
+    "models": "list",
+    "check": "object",
+    "table": "list"
+   },
+   "lite": 404
+  },
+  {
    "path": "/api/ai/presets",
    "complete": {
     "ok": "bool",

@@ -73,6 +73,16 @@ Neben dem Feed, den eine KI liest (`ALERTS_BRIEF.md`, der Stream, der MCP-Server
 
 Der Hinweis wird aus einem eigenen Thread gesendet, sodass ein langsamer Anbieter den Zyklus nie aufhält.
 
+## Modelle des Anbieters
+
+Der Modellname ist freier Text, aber der Monitor kann die Modellliste vom Anbieter lesen und den Namen damit prüfen. Modelle und Versionen ändern sich oft, deshalb liefert der Monitor keine Modellliste mit: Die Beispiele der Voreinstellungen können veraltet sein.
+
+- **Die Liste.** Einstellungen, Reiter *Externe KI*, Block *Modelle und Daten je Modell*: *Modelle des Anbieters laden* liest die Liste (`/models` eines Servers im OpenAI-Stil, die entsprechende Liste der Anthropic-API, `/api/tags` von Ollama) mit einer lesenden Anfrage. Der Schlüssel geht in einem Header, wird aus seiner Umgebungsvariable gelesen und nie gespeichert. Durchsuche die Liste und wähle mit *Dieses Modell verwenden* ein Modell. Die Liste wird gespeichert und von `ai.catalog.ttl_minutes` und `ai.catalog.max_requests_per_day` begrenzt. Ist `ai.catalog.enabled` an (standardmäßig aus), warnt der Monitor auch, wenn das eingestellte Modell nicht mehr in der Liste steht (eingestellt oder umbenannt); ist es aus, löst nur du das Lesen aus.
+- **Daten je Modell.** Kontextfenster, Preis für Eingabe und Ausgabe pro Million Tokens und ob Werkzeuge unterstützt werden, werden nur mit dem gefüllt, was der Anbieter liefert; was er nicht nennt, bleibt *unbekannt* (es wird nie eine Zahl erfunden). Du kannst eigene Werte eintragen; deine haben Vorrang. Ist `ai.catalog.fit_context` an (standardmäßig aus), wird das Eingabelimit an das Kontextfenster angepasst, wenn es bekannt ist.
+- **Ein Modell testen.** *Dieses Modell testen* oder `monitor_cli.py ai test --provider NAME --model NAME` fragt das Modell zu einem SYNTHETISCHEN Fehler (nie Daten deiner Repositories) und zeigt Latenz, Tokens, geschätzte Kosten und eine Beispielantwort. Es zählt als ein Aufruf des Tageslimits, und das Ergebnis („getestet“, mit lokalem Datum) bleibt in der Tabelle.
+- **Befehle.** `monitor_cli.py ai models [--refresh]` zeigt Modelle und Daten; `ai doctor` erklärt, warum eine KI nicht antwortet (Schlüsselvariable nicht gesetzt, unbekanntes Modell, Kontingent, Netzwerk) und gibt nie einen Schlüssel aus.
+- **Routen.** `GET /api/ai/models` (die gespeicherte Liste, die Prüfung und die Tabelle; nur lesend) und, nur von diesem Rechner aus, `POST /api/ai/models/refresh`, `POST /api/ai/models/test`, `POST /api/ai/models/data` und `POST /api/ai/doctor`.
+
 ## Kompatible KIs
 
 Gehostete Dienste und lokale Server, deren Protokoll der Monitor bereits spricht (`openai-compatible`, `anthropic` oder `ollama`). Die Liste ist eine neutrale Tabelle, keine Empfehlung: Keine ist standardmäßig aktiv, der Schlüssel wird IMMER aus einer Umgebungsvariable gelesen, deren Namen Sie festlegen (nie in einer Einstellung, einem Protokoll, einem Bericht oder der API), und die Voreinstellung füllt nur die Adresse, den Namen dieser Variable und ein Beispielmodell aus (änderbar; nichts wird heruntergeladen, keine Modellgewichte mitgeliefert). Wählen Sie in den KI-Einstellungen eine Voreinstellung, drücken Sie die Schaltfläche zum Ausfüllen, prüfen und speichern Sie, dann „Verbindung testen“. Die Liste sind Daten (`ai_presets.json`) und wird schreibgeschützt unter `GET /api/ai/presets` ausgeliefert.

@@ -240,6 +240,8 @@ _f(_T_SENT, "causes", "ci.failed_jobs.max_per_cycle", "int", (1, 50), restart=Fa
 _f(_T_SENT, "causes", "ci.failed_jobs.group_by", "enum", ("auto", "platform", "matrix", "prefix"), restart=False)
 _f(_T_SENT, "durations", "ci.rerun_timing", "bool", restart=False)
 _f(_T_SENT, "prs", "sentinel.stale_pr_days", "int", (1, 90))
+_f(_T_SENT, "prs", "sentinel.dependency_bots", "names")
+_f(_T_SENT, "prs", "sentinel.bots_apart", "bool")
 _f(_T_SENT, "hygiene_files", "sentinel.required_files", "filegroups")
 _f(_T_SENT, "hygiene_rules", "sentinel.hygiene.ruleset_mode", "enum", ("name", "effective", "off"))
 _f(_T_SENT, "hygiene_rules", "sentinel.hygiene.ruleset_names", "names")
@@ -293,6 +295,11 @@ for _check in surface.DEFAULTS["checks"]:
     _f(_T_SURF, "chk_" + _check, f"sentinel.surface.checks.{_check}.enabled", "bool", label=["cfg.p.check_on"], help="cfg.h.check_on")
     for _param, _bounds in CHECK_PARAMS.get(_check, ()):
         _f(_T_SURF, "chk_" + _check, f"sentinel.surface.checks.{_check}.{_param}", "int", _bounds, label=["cfg.p." + _param], help="cfg.h.p." + _param)
+_f(_T_SURF, "chk_release_assets", "sentinel.surface.checks.release_assets.require_sha256", "bool")
+_f(_T_SURF, "chk_release_assets", "sentinel.surface.checks.release_assets.require_signature", "bool")
+_f(_T_SURF, "chk_release_assets", "sentinel.surface.checks.release_assets.allow_empty", "bool")
+_f(_T_SURF, "chk_tag_vs_version", "sentinel.surface.checks.tag_vs_version.prefixes", "names")
+_f(_T_SURF, "chk_tag_vs_version", "sentinel.surface.checks.tag_vs_version.prerelease_ok", "bool")
 # --- Release readiness (A11)
 _f(_T_READY, "main", "sentinel.readiness.enabled", "bool")
 _f(_T_READY, "main", "sentinel.readiness.min_coverage", "float", (0.0, 1.0), unit="x")
@@ -360,6 +367,10 @@ _f(_T_AI, "limits", "ai.max_output_chars", "int", (200, 8000), unit="chars")
 _f(_T_AI, "limits", "ai.timeout_seconds", "int", (5, 300))
 _f(_T_AI, "limits", "ai.skill", "bool", restart=False)
 _f(_T_AI, "limits", "ai.skill_max_chars", "int", (300, 12000), unit="chars", restart=False)
+_f(_T_AI, "catalog", "ai.catalog.enabled", "bool", secure=True)
+_f(_T_AI, "catalog", "ai.catalog.ttl_minutes", "int", (5, 10080))
+_f(_T_AI, "catalog", "ai.catalog.max_requests_per_day", "int", (1, 200), unit="calls")
+_f(_T_AI, "catalog", "ai.catalog.fit_context", "bool")
 _f(_T_AI, "scope", "ai.events", "names")
 _f(_T_AI, "scope", "ai.allowed_repos", "names")
 _f(_T_AI, "scope", "ai.answer_language", "enum", ("",) + tuple(i18n.LANGS), False)
@@ -429,7 +440,9 @@ _f("lint", "main", "lint.enabled", "bool")
 _f("lint", "main", "lint.refresh_seconds", "int", (60, 86400))
 _f("lint", "main", "lint.in_report", "bool")
 _f("lint", "main", "lint.ignore", "patterns")
-for _rule in ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target"):
+_f("lint", "own_actions", "lint.own_owners", "names")
+_f("lint", "own_actions", "lint.unpinned_own", "enum", ("same", "info", "ignore"))
+for _rule in ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target", "no_timeout", "secrets_inherit", "own_action_main"):
     _f("lint", "rule_" + _rule, f"lint.rules.{_rule}.enabled", "bool", label=["cfg.p.rule_on"], help="cfg.h.rule_on")
     _f("lint", "rule_" + _rule, f"lint.rules.{_rule}.severity", "enum", ("info", "warn", "bad"), label=["cfg.p.severity"], help="cfg.h.p.severity")
 # --- Terminal view
@@ -794,7 +807,8 @@ def describe(path=CONFIG_FILE, lite=False, remote=False):
         backups = len(list(BACKUP_DIR.glob("actions_monitor-*.json")))
     except OSError:
         backups = 0
-    return {"groups": groups, "backups": backups}
+    from github_actions_monitor.app import profiles
+    return {"groups": groups, "backups": backups, "presets": profiles.listing(lite=lite)}
 
 
 def _backup(path):
