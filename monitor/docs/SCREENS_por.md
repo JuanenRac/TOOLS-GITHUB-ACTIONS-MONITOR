@@ -21,7 +21,7 @@ A página adapta-se ao tamanho da janela, do telemóvel ao 4K, na vertical ou na
 |---|---|
 | `ui.orientation` | auto segue a janela; portrait empilha os painéis numa coluna; landscape mantém a disposição lado a lado. |
 | `ui.rotate_seconds` | 0 = desligado. Segundos entre os separadores de um ecrã que tem mais de um. |
-| `ui.screen1_tabs` | Separadores de /screen/1, separados por vírgulas: now, al, sent, charts, repos, hist, cfg. Vazio = todos. |
+| `ui.screen1_tabs` | Separadores de /screen/1, separados por vírgulas: now, al, rep, les, sent, charts, repos, hist, cfg. Vazio = todos. |
 | `ui.screen1_orientation` | auto, portrait ou landscape só para /screen/1. |
 | `ui.screen2_tabs` | Separadores de /screen/2. |
 | `ui.screen2_orientation` | Orientação de /screen/2. |

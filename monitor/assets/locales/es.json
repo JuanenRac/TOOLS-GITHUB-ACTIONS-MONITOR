@@ -824,11 +824,11 @@
  "cfg.h.ui.orientation": "auto sigue a la ventana (una ventana más alta que ancha apila los paneles); portrait o landscape la fuerza. Útil para un monitor girado 90 grados o una tele. La dirección puede forzarla en una ventana: ?orient=portrait.",
  "cfg.h.ui.rotate_seconds": "0 = sin rotación. Con más de una pestaña en una pantalla, la página pasa de una a otra sola cada tantos segundos (para una pantalla que nadie toca). ?rotate=30 lo hace en una ventana.",
  "cfg.h.ui.screen1_orientation": "auto = la orientación general de arriba; portrait o landscape la fuerza solo en /screen/1.",
- "cfg.h.ui.screen1_tabs": "Pestañas que muestra /screen/1, separadas por comas, de: now, al, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Vacío = todas. Abre http://este-equipo:8765/screen/1 en ese monitor.",
+ "cfg.h.ui.screen1_tabs": "Pestañas que muestra /screen/1, separadas por comas, de: now, al, rep, les, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Vacío = todas. Abre http://este-equipo:8765/screen/1 en ese monitor.",
  "cfg.h.ui.screen2_orientation": "auto = la orientación general de arriba; portrait o landscape la fuerza solo en /screen/2.",
- "cfg.h.ui.screen2_tabs": "Pestañas que muestra /screen/2, separadas por comas, de: now, al, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Vacío = todas. Abre http://este-equipo:8765/screen/2 en ese monitor.",
+ "cfg.h.ui.screen2_tabs": "Pestañas que muestra /screen/2, separadas por comas, de: now, al, rep, les, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Vacío = todas. Abre http://este-equipo:8765/screen/2 en ese monitor.",
  "cfg.h.ui.screen3_orientation": "auto = la orientación general de arriba; portrait o landscape la fuerza solo en /screen/3.",
- "cfg.h.ui.screen3_tabs": "Pestañas que muestra /screen/3, separadas por comas, de: now, al, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Vacío = todas. Abre http://este-equipo:8765/screen/3 en ese monitor.",
+ "cfg.h.ui.screen3_tabs": "Pestañas que muestra /screen/3, separadas por comas, de: now, al, rep, les, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Vacío = todas. Abre http://este-equipo:8765/screen/3 en ese monitor.",
  "cfg.h.updates.check": "Una consulta de solo lectura al día a la página pública de versiones, con tu propio gh. Nunca descarga ni instala nada y no envía nada sobre ti.",
  "cfg.h.watchdog_max_abandoned": "Una llamada a GitHub que no responde a tiempo se abandona, pero su hilo puede seguir vivo. Con tantas todavía vivas el monitor no inicia más llamadas a GitHub y su comprobación de salud profunda dice que está degradado, en vez de acumular hilos y conexiones. 0 significa sin límite.",
  "cfg.h.watchdog_minutes": "Si un ciclo de refresco del monitor dura más que esto, el vigilante escribe en el registro dónde está cada hilo y vuelve a empezar el ciclo en un hilo nuevo. 0 apaga el vigilante.",
@@ -3265,5 +3265,8 @@
  "ui.collab_cut": "{n} repositorios tienen más elementos abiertos de los leídos (hasta {p} páginas de 100)",
  "ui.collab_cut_search": "Búsqueda: vistos {seen} de {total}",
  "ui.jobs_cut": "jobs: vistos {seen} de {total}",
+ "ui.rep_all_off": "No hay ningún informe opcional activado. Actívalos en Configuración, pestaña Centinela, bloque Informes opcionales.",
+ "ui.tab_les": "Lecciones",
+ "ui.tab_rep": "Informes",
  "hyg.wf_cut": "la lista de workflows está cortada: vistos {seen} de {total}"
 }

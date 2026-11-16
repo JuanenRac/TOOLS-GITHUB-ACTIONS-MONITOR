@@ -824,11 +824,11 @@
  "cfg.h.ui.orientation": "auto 跟随窗口（高度大于宽度的窗口会把面板堆叠）；portrait 或 landscape 强制指定。适合旋转90度的显示器或电视。地址可为单个窗口强制指定：?orient=portrait。",
  "cfg.h.ui.rotate_seconds": "0 = 不轮换。一个屏幕有多个标签页时，页面每隔这么多秒自动切换（适合无人操作的屏幕）。?rotate=30 可只对一个窗口生效。",
  "cfg.h.ui.screen1_orientation": "auto = 使用上面的总体方向；portrait 或 landscape 仅对 /screen/1 强制指定。",
- "cfg.h.ui.screen1_tabs": "/screen/1 显示的标签页，用逗号分隔，可选：now, al, sent, charts, repos, hist, cfg（lite：now, charts, repos, hist, cfg）。留空 = 全部。在该显示器上打开 http://本机:8765/screen/1。",
+ "cfg.h.ui.screen1_tabs": "/screen/1 显示的标签页，用逗号分隔，可选：now, al, rep, les, sent, charts, repos, hist, cfg（lite：now, charts, repos, hist, cfg）。留空 = 全部。在该显示器上打开 http://本机:8765/screen/1。",
  "cfg.h.ui.screen2_orientation": "auto = 使用上面的总体方向；portrait 或 landscape 仅对 /screen/2 强制指定。",
- "cfg.h.ui.screen2_tabs": "/screen/2 显示的标签页，用逗号分隔，可选：now, al, sent, charts, repos, hist, cfg（lite：now, charts, repos, hist, cfg）。留空 = 全部。在该显示器上打开 http://本机:8765/screen/2。",
+ "cfg.h.ui.screen2_tabs": "/screen/2 显示的标签页，用逗号分隔，可选：now, al, rep, les, sent, charts, repos, hist, cfg（lite：now, charts, repos, hist, cfg）。留空 = 全部。在该显示器上打开 http://本机:8765/screen/2。",
  "cfg.h.ui.screen3_orientation": "auto = 使用上面的总体方向；portrait 或 landscape 仅对 /screen/3 强制指定。",
- "cfg.h.ui.screen3_tabs": "/screen/3 显示的标签页，用逗号分隔，可选：now, al, sent, charts, repos, hist, cfg（lite：now, charts, repos, hist, cfg）。留空 = 全部。在该显示器上打开 http://本机:8765/screen/3。",
+ "cfg.h.ui.screen3_tabs": "/screen/3 显示的标签页，用逗号分隔，可选：now, al, rep, les, sent, charts, repos, hist, cfg（lite：now, charts, repos, hist, cfg）。留空 = 全部。在该显示器上打开 http://本机:8765/screen/3。",
  "cfg.h.updates.check": "每天通过你自己的 gh 向公开发布页发出一次只读请求。从不下载或安装任何内容，也不发送关于你的任何信息。",
  "cfg.h.watchdog_max_abandoned": "对 GitHub 的调用若未及时响应会被放弃，但其线程可能仍然存活。仍有这么多存活时，监视器不再发起新的 GitHub 调用，其深度健康检查会报告为降级，而不是不断堆积线程和连接。0 表示不设上限。",
  "cfg.h.watchdog_minutes": "如果监视器的某次刷新周期超过此时间,看门狗会把各线程的位置写入日志,并在新线程中重新开始该周期。0 表示关闭看门狗。",
@@ -3265,5 +3265,8 @@
  "ui.collab_cut": "{n} 个仓库的未关闭项多于已读取的数量(最多 {p} 页,每页 100 条)",
  "ui.collab_cut_search": "搜索:{total} 个中看到 {seen} 个",
  "ui.jobs_cut": "作业:{total} 个中看到 {seen} 个",
+ "ui.rep_all_off": "未开启任何可选报告。请在设置的“哨兵”选项卡、“可选报告”区块中开启。",
+ "ui.tab_les": "经验教训",
+ "ui.tab_rep": "报告",
  "hyg.wf_cut": "工作流列表被截断:{total} 个中看到 {seen} 个"
 }

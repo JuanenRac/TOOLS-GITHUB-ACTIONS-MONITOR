@@ -17,7 +17,7 @@ from pathlib import Path
 
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
 INDEX_FILE = HERE / "docs" / "help_index.json"
-TAB_TOPICS = {"now": "readme", "sent": "analytics", "charts": "analytics", "repos": "readme", "hist": "readme", "cfg": "settings", "about": "readme", "first": "first_steps", "lite": "lite"}
+TAB_TOPICS = {"now": "readme", "al": "collab", "rep": "extras", "les": "lessons", "sent": "analytics", "charts": "analytics", "repos": "readme", "hist": "readme", "cfg": "settings", "about": "readme", "first": "first_steps", "lite": "lite"}
 _lock = threading.Lock()
 _cache = {"index": None}
 LINK_RE = re.compile(r"\[([^\]]{1,200})\]\(([^)\s]{1,300})(?:\s+\"[^\"]*\")?\)")

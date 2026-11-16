@@ -73,7 +73,7 @@ lessons.register_provider("wiki", lambda config: WikiProvider())
 
 ## 設定
 
-`lessons.enabled`、`lessons.allow_write`、`lessons.retention_days`、`lessons.max_entries`、`lessons.brief_max_bytes`、`lessons.recurring_from`。設定の AI タブにあります。**失敗から学んだこと** パネルはアラートタブの下部にあります。
+`lessons.enabled`、`lessons.allow_write`、`lessons.retention_days`、`lessons.max_entries`、`lessons.brief_max_bytes`、`lessons.recurring_from`。設定の AI タブにあります。**失敗から学んだこと** パネルは左のメニューの「教訓」タブ (アドレス `#lessons`) です。
 
 ## ラウンドの締め
 

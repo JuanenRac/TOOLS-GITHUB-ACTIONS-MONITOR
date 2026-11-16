@@ -824,11 +824,11 @@
  "cfg.h.ui.orientation": "auto suit la fenêtre (une fenêtre plus haute que large empile les panneaux) ; portrait ou landscape la force. Utile pour un écran tourné de 90 degrés ou un téléviseur. L'adresse peut la forcer pour une fenêtre : ?orient=portrait.",
  "cfg.h.ui.rotate_seconds": "0 = pas de rotation. Avec plus d'un onglet sur un écran, la page passe de l'un à l'autre toute seule toutes les tant de secondes (pour un écran que personne ne touche). ?rotate=30 le fait pour une fenêtre.",
  "cfg.h.ui.screen1_orientation": "auto = l'orientation générale ci-dessus ; portrait ou landscape la force seulement sur /screen/1.",
- "cfg.h.ui.screen1_tabs": "Onglets que /screen/1 montre, séparés par des virgules, parmi : now, al, sent, charts, repos, hist, cfg (lite : now, charts, repos, hist, cfg). Vide = tous. Ouvrez http://cet-ordinateur:8765/screen/1 sur cet écran.",
+ "cfg.h.ui.screen1_tabs": "Onglets que /screen/1 montre, séparés par des virgules, parmi : now, al, rep, les, sent, charts, repos, hist, cfg (lite : now, charts, repos, hist, cfg). Vide = tous. Ouvrez http://cet-ordinateur:8765/screen/1 sur cet écran.",
  "cfg.h.ui.screen2_orientation": "auto = l'orientation générale ci-dessus ; portrait ou landscape la force seulement sur /screen/2.",
- "cfg.h.ui.screen2_tabs": "Onglets que /screen/2 montre, séparés par des virgules, parmi : now, al, sent, charts, repos, hist, cfg (lite : now, charts, repos, hist, cfg). Vide = tous. Ouvrez http://cet-ordinateur:8765/screen/2 sur cet écran.",
+ "cfg.h.ui.screen2_tabs": "Onglets que /screen/2 montre, séparés par des virgules, parmi : now, al, rep, les, sent, charts, repos, hist, cfg (lite : now, charts, repos, hist, cfg). Vide = tous. Ouvrez http://cet-ordinateur:8765/screen/2 sur cet écran.",
  "cfg.h.ui.screen3_orientation": "auto = l'orientation générale ci-dessus ; portrait ou landscape la force seulement sur /screen/3.",
- "cfg.h.ui.screen3_tabs": "Onglets que /screen/3 montre, séparés par des virgules, parmi : now, al, sent, charts, repos, hist, cfg (lite : now, charts, repos, hist, cfg). Vide = tous. Ouvrez http://cet-ordinateur:8765/screen/3 sur cet écran.",
+ "cfg.h.ui.screen3_tabs": "Onglets que /screen/3 montre, séparés par des virgules, parmi : now, al, rep, les, sent, charts, repos, hist, cfg (lite : now, charts, repos, hist, cfg). Vide = tous. Ouvrez http://cet-ordinateur:8765/screen/3 sur cet écran.",
  "cfg.h.updates.check": "Une requête en lecture seule par jour vers la page publique des versions, via votre propre gh. Ne télécharge ni n'installe rien et n'envoie rien sur vous.",
  "cfg.h.watchdog_max_abandoned": "Un appel à GitHub qui ne répond pas à temps est abandonné, mais son thread peut rester vivant. Avec autant d'appels encore vivants, le moniteur ne lance plus d'appel à GitHub et son contrôle de santé approfondi le déclare dégradé, au lieu d'accumuler des threads et des connexions. 0 signifie aucune limite.",
  "cfg.h.watchdog_minutes": "Si un cycle de rafraîchissement du moniteur dure plus longtemps, le chien de garde écrit dans le journal où en est chaque thread et relance le cycle dans un nouveau thread. 0 désactive le chien de garde.",
@@ -3265,5 +3265,8 @@
  "ui.collab_cut": "{n} dépôts ont plus d'éléments ouverts que ceux lus (jusqu'à {p} pages de 100)",
  "ui.collab_cut_search": "Recherche : {seen} vus sur {total}",
  "ui.jobs_cut": "jobs : {seen} vus sur {total}",
+ "ui.rep_all_off": "Aucun rapport facultatif n'est activé. Activez-les dans Réglages, onglet Sentinelle, bloc Rapports facultatifs.",
+ "ui.tab_les": "Leçons",
+ "ui.tab_rep": "Rapports",
  "hyg.wf_cut": "la liste des workflows est coupée : {seen} vus sur {total}"
 }

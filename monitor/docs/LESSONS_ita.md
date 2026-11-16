@@ -73,7 +73,7 @@ Leggere è sempre consentito. Scrivere una lezione richiede tre cose: `lessons.a
 
 ## Impostazioni
 
-`lessons.enabled`, `lessons.allow_write`, `lessons.retention_days`, `lessons.max_entries`, `lessons.brief_max_bytes` e `lessons.recurring_from`, nella scheda IA delle Impostazioni. Il pannello **Lezioni dai fallimenti** è in fondo alla scheda Avvisi.
+`lessons.enabled`, `lessons.allow_write`, `lessons.retention_days`, `lessons.max_entries`, `lessons.brief_max_bytes` e `lessons.recurring_from`, nella scheda IA delle Impostazioni. Il pannello **Lezioni dai fallimenti** è la scheda **Lezioni** (voce del menu a sinistra, indirizzo `#lessons`).
 
 ## Chiusura di un giro
 

@@ -73,7 +73,7 @@ Leer siempre se puede. Escribir una lección exige tres cosas: `lessons.allow_wr
 
 ## Ajustes
 
-`lessons.enabled`, `lessons.allow_write`, `lessons.retention_days`, `lessons.max_entries`, `lessons.brief_max_bytes` y `lessons.recurring_from`, en la pestaña IA de Ajustes. El panel **Lecciones de los fallos** está al final de la pestaña Alertas.
+`lessons.enabled`, `lessons.allow_write`, `lessons.retention_days`, `lessons.max_entries`, `lessons.brief_max_bytes` y `lessons.recurring_from`, en la pestaña IA de Ajustes. El panel **Lecciones de los fallos** es la pestaña **Lecciones** (entrada del menú de la izquierda, dirección `#lessons`).
 
 ## Cierre de una ronda
 

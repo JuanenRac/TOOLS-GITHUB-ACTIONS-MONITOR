@@ -23,7 +23,7 @@ python bin/monitor_cli.py gh-token --read-only
 
 ## Quattro rapporti facoltativi
 
-Tutti e quattro sono disattivati per impostazione predefinita. Compaiono in un blocco "Rapporti facoltativi" in fondo alla scheda Avvisi e in `GET /api/reports`. Quelli che leggono GitHub spendono al massimo `reports.max_calls_per_cycle` chiamate per ciclo, leggono pochi repository ogni volta e tengono in memoria per un giorno ciò che leggono.
+Tutti e quattro sono disattivati per impostazione predefinita. Compaiono nella scheda **Rapporti** (voce del menu a sinistra, indirizzo `#reports`) e in `GET /api/reports`. Quelli che leggono GitHub spendono al massimo `reports.max_calls_per_cycle` chiamate per ciclo, leggono pochi repository ogni volta e tengono in memoria per un giorno ciò che leggono.
 
 - `reports.workflow_hygiene.enabled`: legge i file di workflow dei repository ed elenca ciò che è scritto male - action non fissate a un commit, permessi non limitati, un job senza `timeout-minutes`, nessun gruppo `concurrency`, rischi di `pull_request_target` e injection, segreti in chiaro (le regole del linter del pannello A13, che legge cloni locali, più le due nuove).
 - `reports.queue.enabled`: legge i job di alcune esecuzioni concluse che hanno aspettato e dice quanto ha aspettato un job prima di partire per ogni tipo di runner (Linux, Windows, macOS, più grandi, self-hosted).

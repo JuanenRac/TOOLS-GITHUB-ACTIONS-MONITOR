@@ -73,7 +73,7 @@ Reading is always allowed. Writing a lesson needs three things: `lessons.allow_w
 
 ## Settings
 
-`lessons.enabled`, `lessons.allow_write`, `lessons.retention_days`, `lessons.max_entries`, `lessons.brief_max_bytes` and `lessons.recurring_from`, in the AI tab of the Settings. The panel **Lessons from the failures** is at the bottom of the Alerts tab.
+`lessons.enabled`, `lessons.allow_write`, `lessons.retention_days`, `lessons.max_entries`, `lessons.brief_max_bytes` and `lessons.recurring_from`, in the AI tab of the Settings. The panel **Lessons from the failures** is the **Lessons** tab (menu entry on the left, address `#lessons`).
 
 ## Close of a round
 

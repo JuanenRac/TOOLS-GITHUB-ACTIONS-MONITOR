@@ -73,7 +73,7 @@ Lesen ist immer erlaubt. Eine Lehre zu schreiben erfordert drei Dinge: `lessons.
 
 ## Einstellungen
 
-`lessons.enabled`, `lessons.allow_write`, `lessons.retention_days`, `lessons.max_entries`, `lessons.brief_max_bytes` und `lessons.recurring_from`, im KI-Reiter der Einstellungen. Das Panel **Lehren aus den Fehlern** steht am Ende des Reiters Alarme.
+`lessons.enabled`, `lessons.allow_write`, `lessons.retention_days`, `lessons.max_entries`, `lessons.brief_max_bytes` und `lessons.recurring_from`, im KI-Reiter der Einstellungen. Das Panel **Lehren aus den Fehlern** ist der Reiter **Lektionen** (Menüeintrag links, Adresse `#lessons`).
 
 ## Abschluss einer Runde
 

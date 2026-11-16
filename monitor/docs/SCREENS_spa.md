@@ -21,7 +21,7 @@ La página se adapta al tamaño de su ventana, de un móvil a 4K, en vertical o 
 |---|---|
 | `ui.orientation` | auto sigue a la ventana; portrait apila los paneles en una columna; landscape mantiene la disposición lado a lado. |
 | `ui.rotate_seconds` | 0 = apagado. Segundos entre las pestañas de una pantalla que tiene más de una. |
-| `ui.screen1_tabs` | Pestañas de /screen/1, separadas por comas: now, al, sent, charts, repos, hist, cfg. Vacío = todas. |
+| `ui.screen1_tabs` | Pestañas de /screen/1, separadas por comas: now, al, rep, les, sent, charts, repos, hist, cfg. Vacío = todas. |
 | `ui.screen1_orientation` | auto, portrait o landscape solo para /screen/1. |
 | `ui.screen2_tabs` | Pestañas de /screen/2. |
 | `ui.screen2_orientation` | Orientación de /screen/2. |

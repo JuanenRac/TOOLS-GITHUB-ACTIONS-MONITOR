@@ -824,11 +824,11 @@
  "cfg.h.ui.orientation": "auto segue la finestra (una finestra più alta che larga impila i pannelli); portrait o landscape lo forza. Utile per un monitor ruotato di 90 gradi o una TV. L'indirizzo può forzarlo per una finestra: ?orient=portrait.",
  "cfg.h.ui.rotate_seconds": "0 = nessuna rotazione. Con più di una scheda su uno schermo, la pagina passa da una all'altra da sola ogni tanti secondi (per uno schermo che nessuno tocca). ?rotate=30 lo fa per una finestra.",
  "cfg.h.ui.screen1_orientation": "auto = l'orientamento generale sopra; portrait o landscape lo forza solo su /screen/1.",
- "cfg.h.ui.screen1_tabs": "Schede che /screen/1 mostra, separate da virgole, tra: now, al, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Vuoto = tutte. Apri http://questo-computer:8765/screen/1 su quel monitor.",
+ "cfg.h.ui.screen1_tabs": "Schede che /screen/1 mostra, separate da virgole, tra: now, al, rep, les, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Vuoto = tutte. Apri http://questo-computer:8765/screen/1 su quel monitor.",
  "cfg.h.ui.screen2_orientation": "auto = l'orientamento generale sopra; portrait o landscape lo forza solo su /screen/2.",
- "cfg.h.ui.screen2_tabs": "Schede che /screen/2 mostra, separate da virgole, tra: now, al, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Vuoto = tutte. Apri http://questo-computer:8765/screen/2 su quel monitor.",
+ "cfg.h.ui.screen2_tabs": "Schede che /screen/2 mostra, separate da virgole, tra: now, al, rep, les, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Vuoto = tutte. Apri http://questo-computer:8765/screen/2 su quel monitor.",
  "cfg.h.ui.screen3_orientation": "auto = l'orientamento generale sopra; portrait o landscape lo forza solo su /screen/3.",
- "cfg.h.ui.screen3_tabs": "Schede che /screen/3 mostra, separate da virgole, tra: now, al, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Vuoto = tutte. Apri http://questo-computer:8765/screen/3 su quel monitor.",
+ "cfg.h.ui.screen3_tabs": "Schede che /screen/3 mostra, separate da virgole, tra: now, al, rep, les, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Vuoto = tutte. Apri http://questo-computer:8765/screen/3 su quel monitor.",
  "cfg.h.updates.check": "Una richiesta di sola lettura al giorno alla pagina pubblica dei rilasci, con il tuo gh. Non scarica né installa nulla e non invia nulla su di te.",
  "cfg.h.watchdog_max_abandoned": "Una chiamata a GitHub che non risponde in tempo viene abbandonata, ma il suo thread può restare vivo. Con tante chiamate ancora vive il monitor non avvia nuove chiamate a GitHub e il suo controllo di salute approfondito lo dichiara degradato, invece di accumulare thread e connessioni. 0 significa nessun limite.",
  "cfg.h.watchdog_minutes": "Se un ciclo di aggiornamento del monitor dura più di questo, il watchdog scrive nel registro dove si trova ogni thread e riavvia il ciclo in un nuovo thread. 0 disattiva il watchdog.",
@@ -3265,5 +3265,8 @@
  "ui.collab_cut": "{n} repository hanno più elementi aperti di quelli letti (fino a {p} pagine da 100)",
  "ui.collab_cut_search": "Ricerca: visti {seen} su {total}",
  "ui.jobs_cut": "job: visti {seen} su {total}",
+ "ui.rep_all_off": "Nessun rapporto facoltativo è attivo. Attivali in Impostazioni, scheda Sentinella, blocco Rapporti facoltativi.",
+ "ui.tab_les": "Lezioni",
+ "ui.tab_rep": "Rapporti",
  "hyg.wf_cut": "l'elenco dei workflow è troncato: visti {seen} su {total}"
 }

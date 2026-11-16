@@ -824,11 +824,11 @@
  "cfg.h.ui.orientation": "auto segue a janela (uma janela mais alta do que larga empilha os painéis); portrait ou landscape força-a. Útil para um monitor rodado 90 graus ou uma televisão. O endereço pode forçá-la numa janela: ?orient=portrait.",
  "cfg.h.ui.rotate_seconds": "0 = sem rotação. Com mais de um separador num ecrã, a página passa de um para outro sozinha a cada tantos segundos (para um ecrã em que ninguém toca). ?rotate=30 faz isso numa janela.",
  "cfg.h.ui.screen1_orientation": "auto = a orientação geral acima; portrait ou landscape força-a apenas em /screen/1.",
- "cfg.h.ui.screen1_tabs": "Separadores que /screen/1 mostra, separados por vírgulas, entre: now, al, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Vazio = todos. Abra http://este-computador:8765/screen/1 nesse monitor.",
+ "cfg.h.ui.screen1_tabs": "Separadores que /screen/1 mostra, separados por vírgulas, entre: now, al, rep, les, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Vazio = todos. Abra http://este-computador:8765/screen/1 nesse monitor.",
  "cfg.h.ui.screen2_orientation": "auto = a orientação geral acima; portrait ou landscape força-a apenas em /screen/2.",
- "cfg.h.ui.screen2_tabs": "Separadores que /screen/2 mostra, separados por vírgulas, entre: now, al, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Vazio = todos. Abra http://este-computador:8765/screen/2 nesse monitor.",
+ "cfg.h.ui.screen2_tabs": "Separadores que /screen/2 mostra, separados por vírgulas, entre: now, al, rep, les, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Vazio = todos. Abra http://este-computador:8765/screen/2 nesse monitor.",
  "cfg.h.ui.screen3_orientation": "auto = a orientação geral acima; portrait ou landscape força-a apenas em /screen/3.",
- "cfg.h.ui.screen3_tabs": "Separadores que /screen/3 mostra, separados por vírgulas, entre: now, al, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Vazio = todos. Abra http://este-computador:8765/screen/3 nesse monitor.",
+ "cfg.h.ui.screen3_tabs": "Separadores que /screen/3 mostra, separados por vírgulas, entre: now, al, rep, les, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Vazio = todos. Abra http://este-computador:8765/screen/3 nesse monitor.",
  "cfg.h.updates.check": "Um pedido só de leitura por dia à página pública de versões, com o seu próprio gh. Nunca descarrega nem instala nada e não envia nada sobre si.",
  "cfg.h.watchdog_max_abandoned": "Uma chamada ao GitHub que não responde a tempo é abandonada, mas o seu fio pode continuar vivo. Com tantas ainda vivas o monitor não inicia novas chamadas ao GitHub e a sua verificação de saúde profunda diz que está degradado, em vez de acumular fios e ligações. 0 significa sem limite.",
  "cfg.h.watchdog_minutes": "Se um ciclo de atualização do monitor durar mais do que isto, o vigilante escreve no registo onde está cada thread e recomeça o ciclo numa thread nova. 0 desliga o vigilante.",
@@ -3265,5 +3265,8 @@
  "ui.collab_cut": "{n} repositórios têm mais itens abertos do que os lidos (até {p} páginas de 100)",
  "ui.collab_cut_search": "Pesquisa: vistos {seen} de {total}",
  "ui.jobs_cut": "jobs: vistos {seen} de {total}",
+ "ui.rep_all_off": "Nenhum relatório opcional está ligado. Ligue-os em Definições, separador Sentinela, bloco Relatórios opcionais.",
+ "ui.tab_les": "Lições",
+ "ui.tab_rep": "Relatórios",
  "hyg.wf_cut": "a lista de workflows está cortada: vistos {seen} de {total}"
 }
