@@ -212,7 +212,7 @@ def gate(handler, config, lite=False):
     if not auth.allows(context["role"], needed):
         auth.audit(cfg, "denied", context["user"], context["role"], _address(handler), path, "denied", "forbidden_role")
         return fail(handler, "forbidden_role", 403)
-    listing = path == "/api/accounts" or path.startswith("/api/accounts/")      # the supervisor filters these by user itself
+    listing = path == "/api/accounts" or re.fullmatch(r"/api/accounts/[^/]+/(status|credential)", path) is not None      # the only three routes the supervisor filters by user itself; any other path is judged like every route
     wanted = requested_account(handler)
     if wanted is None:
         return fail(handler, "account_repeated", 400)

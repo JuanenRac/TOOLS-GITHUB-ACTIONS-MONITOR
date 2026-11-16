@@ -371,6 +371,7 @@ def login(storage, username, password, cfg, kind="cookie", now=None, local=False
             burn_time(password)
             return None, _ghost_attempt(name, cfg, now, local)
         if record.get("locked_until", 0) > now and not local:
+            burn_time(password)      # the same work as for a name that does not exist: how long "locked" takes must not tell which names are users
             return None, "locked"
         if not verify_password(password, record.get("hash", "")):
             if local:

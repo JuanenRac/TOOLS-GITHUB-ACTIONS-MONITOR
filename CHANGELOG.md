@@ -38,6 +38,11 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **The process of each account no longer keeps the key of the supervisor and the access token in its environment**: both leave the environment at the very start of every process (monitor, supervisor and account), before the first `gh` or any other program is started, also when the access token has another name; nothing those programs inherit carries them. The comment that promised the secrets would be hidden from the process list of Linux now states its real limit.
 - **The image can no longer carry the data of whoever builds it**: the build context excluded the loose files of the old layout but not the `config/`, `data/`, `logs/` and `ai/` folders where the tokens, users, sessions and settings live now; they are excluded, the app stage of the Dockerfile deletes them too, and a test checks both against the list of folders of the product.
+- **Three visitors with wrong tokens can no longer lock everybody out behind the reverse proxy**: the lock shared by the whole proxy now counts only the requests that arrive without a usable `X-Forwarded-For`; a request that carries the address of its visitor is counted against that address alone, the shared lock ends after the lock time and never stops a request that carries the right access token.
+
+- **The time of a login no longer tells which names are users**: a user who is locked now costs the same work as a name that does not exist, so "locked" answers in the same time for both.
+
+- **A path under `/api/accounts/` that the supervisor does not filter is judged like any other route**: only the list, the status and the credential of an account skip the account check of the gate (the supervisor filters them), and the credential of an account is refused to a user who cannot see that account.
 
 ## [2.0.1]
 

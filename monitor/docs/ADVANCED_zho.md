@@ -75,7 +75,7 @@
 - **应避免的组合**（`--doctor` 会指出）：在所有接口上开启网络模式；网络模式开启时 AI 操作可执行；网络模式开启时使用 `act`；令牌保存在普通文件中。
 - MCP 服务器只通过标准输入输出通信；切勿放在网络端口之后。
 
-`listen.trusted_proxy`(默认关闭):仅当同一台计算机上属于你自己的反向代理是唯一入口时使用。此时失败的尝试会计入 `X-Forwarded-For` 的最后一个地址(你的代理追加的那个;在 nginx 中为 `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`),而不是代理本身,并且还会按代理的所有客户端合计计数,上限为三倍。监控会相信任何经回环地址到达的连接上的该请求头,因此绝不要与位于另一台机器上的代理一起使用;如果其他人可以直接访问监控,请保持关闭。声明了代理(`listen.proxy_public_host`、`listen.secure_cookie` 或 `listen.trusted_proxy`)时,从主端口到达的任何请求都不算作本机;`listen.local_port`(0 = 关闭,否则为 1024 到 65535)会为在运行监控的电脑前的人再打开一个只监听 `127.0.0.1` 的端口(见部署指南)。 如果代理位于另一个容器或另一台机器上，请在 `listen.trusted_proxies`（`MONITOR_TRUSTED_PROXIES`；在 Docker Compose 文件中为网络 `MONITOR_SUBNET`）中列出其地址或网络：来自这些地址或本机的连接，其 `X-Forwarded-For` 会被信任用于统计尝试次数；这绝不会使请求被视为本机。
+`listen.trusted_proxy`(默认关闭):仅当同一台计算机上属于你自己的反向代理是唯一入口时使用。此时失败的尝试会计入 `X-Forwarded-For` 的最后一个地址(你的代理追加的那个;在 nginx 中为 `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`),而不是代理本身,并且仅对到达时没有可用 `X-Forwarded-For` 的请求,再把它们合计计数,上限为三倍(这个共同的锁定绝不会拦下带有正确令牌的请求)。监控会相信任何经回环地址到达的连接上的该请求头,因此绝不要与位于另一台机器上的代理一起使用;如果其他人可以直接访问监控,请保持关闭。声明了代理(`listen.proxy_public_host`、`listen.secure_cookie` 或 `listen.trusted_proxy`)时,从主端口到达的任何请求都不算作本机;`listen.local_port`(0 = 关闭,否则为 1024 到 65535)会为在运行监控的电脑前的人再打开一个只监听 `127.0.0.1` 的端口(见部署指南)。 如果代理位于另一个容器或另一台机器上，请在 `listen.trusted_proxies`（`MONITOR_TRUSTED_PROXIES`；在 Docker Compose 文件中为网络 `MONITOR_SUBNET`）中列出其地址或网络：来自这些地址或本机的连接，其 `X-Forwarded-For` 会被信任用于统计尝试次数；这绝不会使请求被视为本机。
 
 ## 刷新循环:心跳与看门狗
 
