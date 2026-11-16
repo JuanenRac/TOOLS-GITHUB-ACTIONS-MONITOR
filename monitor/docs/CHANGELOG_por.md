@@ -9,6 +9,10 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+### Corrigido
+
+- **Um ficheiro de bloqueio deixado vazio por um escritor morto é tomado de imediato, e os testes do proxy já não cortam a ligação no macOS**: um escritor morto entre criar o seu ficheiro de bloqueio e escrever o número do seu processo deixava um ficheiro vazio que ninguém conseguia atribuir, pelo que o escritor seguinte esperava o limite de idade de 30 segundos e desistia aos seus 10 segundos. Um bloqueio vazio com mais de alguns segundos é agora tomado de imediato (um recente, e um com o número de um processo vivo, continuam a ser respeitados). O duplo do teste do proxy lê o pedido antes de responder. Os testes mais lentos do trabalho do macOS (Python 3.13) são agora listados no fim da sua execução.
+
 
 ### Adicionado
 

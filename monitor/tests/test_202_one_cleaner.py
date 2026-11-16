@@ -122,7 +122,9 @@ class _Third(BaseHTTPRequestHandler):
 
     def do_GET(self):
         _Third.hits.append((self.path, dict(self.headers)))
+        self.rfile.read(int(self.headers.get("Content-Length") or 0))      # an unread body makes macOS reset the connection when the double closes it
         self.send_response(200)
+        self.send_header("Content-Length", "0")
         self.end_headers()
 
     do_POST = do_GET

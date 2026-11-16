@@ -9,6 +9,10 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+### Corregido
+
+- **Un fichero de candado que deja vacío un escritor muerto se toma de inmediato, y las pruebas del proxy ya no cortan la conexión en macOS**: un escritor matado entre crear su fichero de candado y escribir el número de su proceso dejaba un fichero vacío que nadie podía atribuir, de modo que el siguiente escritor esperaba el límite de 30 segundos y se rendía a los 10; un candado vacío de más de unos segundos se toma ahora al instante (uno reciente, y uno con el número de un proceso vivo, se siguen respetando). El doble de la prueba del proxy lee la petición antes de responder. Las pruebas más lentas del trabajo de macOS (Python 3.13) se listan ahora al final de su ejecución.
+
 
 ### Añadido
 

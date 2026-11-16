@@ -9,6 +9,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+### Behoben
+
+- **Eine von einem toten Schreiber leer hinterlassene Sperrdatei wird sofort übernommen, und die Proxy-Tests setzen die Verbindung unter macOS nicht mehr zurück**: Ein Schreiber, der zwischen dem Anlegen seiner Sperrdatei und dem Schreiben seiner Prozessnummer beendet wurde, hinterließ eine leere Datei, die niemand zuordnen konnte; der nächste Schreiber wartete auf die Altersgrenze von 30 Sekunden und gab nach seinen eigenen 10 Sekunden auf. Eine leere Sperrdatei, die älter als einige Sekunden ist, wird jetzt sofort übernommen (eine junge und eine mit der Nummer eines lebenden Prozesses bleiben respektiert). Das Testdouble des Proxy-Tests liest die Anfrage, bevor es antwortet. Die langsamsten Tests des macOS-Jobs (Python 3.13) werden am Ende des Laufs aufgelistet.
+
 
 ### Hinzugefügt
 

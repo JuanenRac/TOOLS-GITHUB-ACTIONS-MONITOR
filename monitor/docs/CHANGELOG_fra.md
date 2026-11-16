@@ -9,6 +9,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+### Corrigé
+
+- **Un fichier de verrou laissé vide par un écrivain mort est repris aussitôt, et les tests du proxy ne coupent plus la connexion sous macOS** : un écrivain tué entre la création de son fichier de verrou et l'écriture du numéro de son processus laissait un fichier vide que personne ne pouvait attribuer ; l'écrivain suivant attendait la limite d'âge de 30 secondes et abandonnait après ses propres 10 secondes. Un verrou vide de plus de quelques secondes est désormais repris aussitôt (un verrou récent, ou portant le numéro d'un processus vivant, reste respecté). Le double du test du proxy lit la requête avant de répondre. Les tests les plus lents du travail macOS (Python 3.13) sont maintenant listés à la fin de son exécution.
+
 
 ### Ajouté
 

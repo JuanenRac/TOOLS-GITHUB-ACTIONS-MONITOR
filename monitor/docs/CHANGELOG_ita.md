@@ -9,6 +9,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+### Corretto
+
+- **Un file di blocco lasciato vuoto da uno scrittore morto viene ripreso subito, e i test del proxy non azzerano più la connessione su macOS**: uno scrittore terminato tra la creazione del suo file di blocco e la scrittura del numero del suo processo lasciava un file vuoto che nessuno poteva attribuire, così lo scrittore successivo aspettava il limite di età di 30 secondi e rinunciava dopo i suoi 10 secondi. Un blocco vuoto più vecchio di qualche secondo viene ora ripreso subito (uno recente, e uno con il numero di un processo vivo, restano rispettati). Il doppio del test del proxy legge la richiesta prima di rispondere. I test più lenti del job macOS (Python 3.13) sono ora elencati alla fine della sua esecuzione.
+
 
 ### Aggiunto
 

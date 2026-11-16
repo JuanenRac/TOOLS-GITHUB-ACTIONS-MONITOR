@@ -65,7 +65,7 @@ jobs:
       - name: Rich and Textual, for the optional terminal views (the monitor itself needs no package)
         run: python -m pip install -r .github/ci-requirements.txt
       - name: Unit tests (offline)
-        run: python -m unittest discover -s monitor/tests
+        run: python -m unittest discover -s monitor/tests ${{ matrix.python == '3.13' && '--durations 40' || '' }}      # the 40 slowest tests are listed at the end (Python 3.12 and later): this job is the slow one
 
   pictures:
     name: Pictures and documentation

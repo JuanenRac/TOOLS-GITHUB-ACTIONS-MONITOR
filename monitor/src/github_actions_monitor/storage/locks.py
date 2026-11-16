@@ -64,12 +64,19 @@ def pid_alive(pid):
 MIN_AGE = 1.0      # a lock younger than this is not opened to read its pid: a live owner lets go of it in milliseconds, and on Windows a file that is open for reading cannot be deleted by its owner
 
 
+EMPTY_AFTER = 3.0      # a lock file that is still empty after this long: its writer died between creating it and writing its number (a live one writes it in microseconds)
+
+
 def _owner_gone(lock_file):
-    """The pid written in the lock file, when its process is gone (None when it is alive, unknown, not written yet or too recent to look at)."""
+    """The pid written in the lock file, when its process is gone (None when it is alive, unknown, not written yet or too recent to look at). An empty file that is older than `EMPTY_AFTER`
+    belongs to a writer that died before it wrote its number: it answers 0 (no process), so that it is taken over at once and not after STALE seconds."""
     try:
-        if time.time() - lock_file.stat().st_mtime < MIN_AGE:
+        age = time.time() - lock_file.stat().st_mtime
+        if age < MIN_AGE:
             return None
         text = lock_file.read_text(encoding="ascii", errors="ignore").strip()
+        if not text and age >= EMPTY_AFTER:
+            return 0
         pid = int(text)
     except (OSError, ValueError):
         return None
