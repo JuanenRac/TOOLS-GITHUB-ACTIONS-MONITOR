@@ -70,6 +70,11 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 - **The time of a login no longer tells which names are users**: a user who is locked now costs the same work as a name that does not exist, so "locked" answers in the same time for both.
 
 - **A path under `/api/accounts/` that the supervisor does not filter is judged like any other route**: only the list, the status and the credential of an account skip the account check of the gate (the supervisor filters them), and the credential of an account is refused to a user who cannot see that account.
+- **The log of actions keeps one chain when several processes write the same file**: the supervisor and the accounts of a container share the state folder, and each process chained its lines to the last one it had written itself, so the chain looked broken from the first day. Each line is now chained to the last line that is really in the file, read under a lock between processes (only the end of the file is read), and the lock between processes now also waits when Windows answers "access denied" while another process deletes the lock file.
+
+- **The log of actions is now one file for each account**: in the Complete edition with several accounts the processes of different accounts ended up writing the same `audit_actions.jsonl` (and an administrator of one account could read lines of another); each account now keeps its own file in its folder and `GET /api/audit-log` also keeps only the lines of the account that answers. The lines written before this change stay in the old shared file, which is still read by the supervisor.
+
+- **The check of the log of actions covers the rotated file too**: `chain` now verifies `audit_actions.jsonl.1` and the link between it and the active file, names the segment (`segment`) when a line is broken, says how many segments it checked (`segments`) and whether the chain begins at its first link (`complete`: false when a rotated file was replaced by a later rotation or deleted).
 
 ## [2.0.1]
 

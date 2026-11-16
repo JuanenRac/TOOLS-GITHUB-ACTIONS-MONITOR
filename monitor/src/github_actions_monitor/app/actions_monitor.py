@@ -2548,7 +2548,7 @@ class Handler(BaseHTTPRequestHandler):
             if LITE["on"] or not audit_log.may_read(config, context.get("role", "")):
                 self.json_reply({"error": "forbidden", "code": "forbidden_role"}, 403)
                 return
-            self.json_reply({"schema": 1, "account": CHILD["account"] or "", "enabled": audit_log.settings(config)["enabled"], "chain": audit_log.verify(), "entries": audit_log.read(200)})
+            self.json_reply({"schema": 1, "account": CHILD["account"] or "", "enabled": audit_log.settings(config)["enabled"], "chain": audit_log.verify(), "entries": audit_log.read(200, CHILD["account"] or None)})
         elif path in ("/api/report-files", "/api/report-files/file"):      # the scheduled reports: the list and one file, read only, of the account of this process (Complete only)
             if not self.guard():
                 return

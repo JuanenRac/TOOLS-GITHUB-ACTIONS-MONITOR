@@ -176,6 +176,7 @@ class OneStepAtATime(Feed):
         script = ("import sys, time; sys.path.insert(0, sys.argv[1]); from github_actions_monitor.storage import locks; from pathlib import Path\n"
                   "with locks.process_lock(Path(sys.argv[2]), 20):\n    print('held', flush=True); time.sleep(1.5)\n")
         holder = subprocess.Popen([sys.executable, "-I", "-c", script, str(HERE / "src"), str(self.folder / ai_alerts.STATE)], stdout=subprocess.PIPE, text=True)
+        self.addCleanup(holder.stdout.close)      # runs after the wait below: no pipe is left open
         self.addCleanup(holder.wait, 20)
         self.assertEqual(holder.stdout.readline().strip(), "held")
         with mock.patch.object(ai_alerts, "LOCK_WAIT", 0.2):
