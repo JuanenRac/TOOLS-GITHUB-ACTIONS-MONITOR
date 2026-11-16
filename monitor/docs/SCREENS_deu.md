@@ -87,7 +87,7 @@ Eine Adresse je Monitor. Ein Parameter kann ein Fenster ruhiger oder kleiner mac
 
 | Einstellung | Was sie bewirkt |
 |---|---|
-| `screens.enabled` | Schaltet die drei Seiten ein. Aus: Jede Adresse antwortet mit 404. |
+| `screens.enabled` | Schaltet die drei Seiten ein. Aus: Jede Adresse antwortet mit 404. Standardmäßig aus. |
 | `screens.default_theme` | dark (Standard), light oder contrast. |
 | `screens.default_density` | compact, normal (Standard) oder large. |
 | `screens.refresh_seconds` | Sekunden zwischen den Aktualisierungen eines Fensters (standardmäßig 10). Die Seiten lesen vom Monitor, nie von GitHub, eine kurze Zeit kostet also kein Kontingent. |

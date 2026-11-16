@@ -3285,7 +3285,7 @@
  "ui.cfg_b_wall": "Pantallas de pared",
  "ui.rep_all_off": "No hay ningún informe opcional activado. Actívalos en Configuración, pestaña Centinela, bloque Informes opcionales.",
  "cfg.f.screens.enabled": "Pantallas de pared",
- "cfg.h.screens.enabled": "Activa las pantallas de pared. Desactivadas, /screen/overview, /screen/now y /screen/sentinels responden 404. Solo leen lo que el monitor ya tiene; no cambian nada y no llaman a GitHub.",
+ "cfg.h.screens.enabled": "Activa las pantallas de pared. Desactivadas, /screen/overview, /screen/now y /screen/sentinels responden 404. Solo leen lo que el monitor ya tiene; no cambian nada y no llaman a GitHub. Desactivado por defecto.",
  "cfg.f.screens.default_theme": "Tema de las pantallas de pared",
  "cfg.h.screens.default_theme": "dark (oscuro), light (claro) o contrast (blanco sobre negro, para una pantalla vista de lejos). La dirección puede cambiarlo en una ventana: ?theme=light.",
  "cfg.f.screens.default_density": "Densidad de las pantallas de pared",

@@ -3285,7 +3285,7 @@
  "ui.cfg_b_wall": "Ecrãs de parede",
  "ui.rep_all_off": "Nenhum relatório opcional está ligado. Ligue-os em Definições, separador Sentinela, bloco Relatórios opcionais.",
  "cfg.f.screens.enabled": "Ecrãs de parede",
- "cfg.h.screens.enabled": "Ativa os ecrãs de parede. Desativados, /screen/overview, /screen/now e /screen/sentinels respondem 404. Só leem o que o monitor já tem; não alteram nada e não chamam o GitHub.",
+ "cfg.h.screens.enabled": "Ativa os ecrãs de parede. Desativados, /screen/overview, /screen/now e /screen/sentinels respondem 404. Só leem o que o monitor já tem; não alteram nada e não chamam o GitHub. Desativado por defeito.",
  "cfg.f.screens.default_theme": "Tema dos ecrãs de parede",
  "cfg.h.screens.default_theme": "dark (escuro), light (claro) ou contrast (branco sobre preto, para um ecrã visto ao longe). O endereço pode alterá-lo numa janela: ?theme=light.",
  "cfg.f.screens.default_density": "Densidade dos ecrãs de parede",

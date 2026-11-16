@@ -3285,7 +3285,7 @@
  "ui.cfg_b_wall": "壁掛け画面",
  "ui.rep_all_off": "オプションのレポートはオンになっていません。設定の「センチネル」タブ、「オプションのレポート」ブロックでオンにしてください。",
  "cfg.f.screens.enabled": "壁掛け画面",
- "cfg.h.screens.enabled": "壁掛け画面を有効にします。無効にすると /screen/overview、/screen/now、/screen/sentinels は 404 を返します。モニターがすでに持っている情報を読むだけで、何も変更せず、GitHub も呼び出しません。",
+ "cfg.h.screens.enabled": "壁掛け画面を有効にします。無効にすると /screen/overview、/screen/now、/screen/sentinels は 404 を返します。モニターがすでに持っている情報を読むだけで、何も変更せず、GitHub も呼び出しません。 既定ではオフです。",
  "cfg.f.screens.default_theme": "壁掛け画面のテーマ",
  "cfg.h.screens.default_theme": "dark（ダーク）、light（ライト）、contrast（黒地に白、遠くから見る画面向け）。アドレスで1つのウィンドウだけ変更できます：?theme=light。",
  "cfg.f.screens.default_density": "壁掛け画面の密度",

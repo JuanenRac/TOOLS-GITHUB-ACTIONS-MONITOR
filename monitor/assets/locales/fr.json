@@ -3285,7 +3285,7 @@
  "ui.cfg_b_wall": "Écrans muraux",
  "ui.rep_all_off": "Aucun rapport facultatif n'est activé. Activez-les dans Réglages, onglet Sentinelle, bloc Rapports facultatifs.",
  "cfg.f.screens.enabled": "Écrans muraux",
- "cfg.h.screens.enabled": "Active les écrans muraux. Désactivés, /screen/overview, /screen/now et /screen/sentinels répondent 404. Ils ne lisent que ce que le moniteur détient déjà ; ils ne modifient rien et n'appellent pas GitHub.",
+ "cfg.h.screens.enabled": "Active les écrans muraux. Désactivés, /screen/overview, /screen/now et /screen/sentinels répondent 404. Ils ne lisent que ce que le moniteur détient déjà ; ils ne modifient rien et n'appellent pas GitHub. Désactivé par défaut.",
  "cfg.f.screens.default_theme": "Thème des écrans muraux",
  "cfg.h.screens.default_theme": "dark (sombre), light (clair) ou contrast (blanc sur noir, pour un écran vu de loin). L'adresse peut le changer pour une fenêtre : ?theme=light.",
  "cfg.f.screens.default_density": "Densité des écrans muraux",

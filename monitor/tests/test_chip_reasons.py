@@ -23,6 +23,10 @@ try:
     import check_overflow as co  # noqa: E402
 except ImportError:      # the tools folder does not travel in the zip of a release
     co = None
+try:
+    import check_page  # noqa: E402
+except ImportError:
+    check_page = None
 
 NEEDS_BROWSER = bool(os.environ.get("MONITOR_REQUIRE_BROWSER"))
 REPOS = ["ARMOR-A", "ARMOR-B", "ARMOR-C", "ARMOR-D", "ARMOR-E"]
@@ -142,8 +146,7 @@ class TheChipsInABrowser(unittest.TestCase):
         import socket
         import subprocess
         import time
-        import check_page
-        if co is None or not co.edge():
+        if co is None or check_page is None or not co.edge():
             return
         port = co.free_port()
         demo = subprocess.Popen([sys.executable, "-I", str(HERE.parent / "tools" / "demo_monitor.py"), str(port)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
