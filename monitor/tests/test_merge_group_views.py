@@ -3,7 +3,6 @@
 """Merge queue runs (event merge_group, branch gh-readonly-queue/...) in the views that rank, group and count: the health of a repository, the fleet view, the model of the runners and the quota.
 The runs come from a synthetic fixture; nothing reads the network or the clock."""
 import datetime
-import importlib.util
 import json
 import sys
 import unittest
@@ -73,7 +72,6 @@ class Quota(unittest.TestCase):
         self.assertIn(out["level"], ("ok", "warn", "alert"))
 
 
-@unittest.skipUnless(importlib.util.find_spec("github_actions_monitor.health.fleet"), "the fleet view is not in this tree yet")
 class Fleet(unittest.TestCase):
     def test_a_red_queue_is_in_the_bad_group_and_filters_keep_it(self):
         from github_actions_monitor.health import fleet
@@ -83,7 +81,6 @@ class Fleet(unittest.TestCase):
         self.assertEqual([r["repo"] for r in fleet.fleet_view(health_views(), {}, severity="bad")["rows"]], ["queue-red"])
 
 
-@unittest.skipUnless(importlib.util.find_spec("github_actions_monitor.integrations.runner_model"), "the model of the runners is not in this tree yet")
 class Runners(unittest.TestCase):
     def test_queue_runs_are_not_a_runaway_when_they_are_few_and_are_one_when_they_are_many(self):
         from github_actions_monitor.integrations import runner_model as rm
