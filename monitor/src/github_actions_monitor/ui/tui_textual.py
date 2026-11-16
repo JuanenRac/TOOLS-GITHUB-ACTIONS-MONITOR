@@ -170,6 +170,7 @@ def ai_text(info):
 
 def make_app(port, lite=False, theme="dark"):
     """The Textual application (imports Textual here so the helpers above need nothing)."""
+    from rich.text import Text
     from textual.app import App, ComposeResult
     from textual.containers import VerticalScroll
     from textual.screen import ModalScreen
@@ -285,12 +286,12 @@ def make_app(port, lite=False, theme="dark"):
                 table = self.query_one("#" + name, DataTable)
                 table.clear()
                 for row in rows:
-                    table.add_row(*[str(c) for c in row])
+                    table.add_row(*[Text(str(c)) for c in row])
             if not self.lite:
                 table = self.query_one("#lint-table", DataTable)
                 table.clear()
                 for row in lint_rows(self.snapshot, tuple(self.levels)):
-                    table.add_row(*[str(c) for c in row])
+                    table.add_row(*[Text(str(c)) for c in row])
             if not self.lite:
                 self.query_one("#ai-text", Static).update(ai_text(self.ai_info))
             self.paint_settings(settings)

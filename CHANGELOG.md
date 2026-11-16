@@ -16,6 +16,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Fixed
 
+- **A workflow, job or repository name with brackets no longer breaks the terminal views**: `test [ubuntu, 3.13]` was shown as `test`, `docs [/api]` ended the view with an error, and a name could carry styles or links of the terminal. The names are now drawn as plain text in both views, and a picture that cannot be drawn is skipped instead of ending the view.
+
 - **The Security sentinel no longer passes "could not read" for "clean"**: when most of the sources that weigh in the penalty (Dependabot, code scanning, secrets) answer 403 or 404 for every repository, the sentinel level is `unknown` instead of `ok` and the security part of the score is left out instead of counting as 100 (the status now carries `sources_readable` and `sources_total`). A source that stops answering while an alert is open keeps the alert for a week, marked as unread, and never announces it as fixed; a `gh` that prints nothing is a failed reading, and a default branch with a slash in its name is asked for encoded.
 
 - **A few repositories that always fail no longer starve the Security sentinel**: a repository whose reads fail waits 5 minutes, 30 minutes and then 6 hours before the next try, and the ones that were not tried yet go first, so the rest of the account is looked at.
