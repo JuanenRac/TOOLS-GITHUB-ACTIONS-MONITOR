@@ -56,3 +56,13 @@ Solo se leen las primeras 100 incidencias abiertas y 100 pull requests abiertos 
 ## Lectura con la API de búsqueda
 
 Con `sentinels.collab.search_api` activado (desactivado por defecto) el centinela de colaboración pide las incidencias y pull requests abiertas de toda la cuenta en pocas llamadas de la API de búsqueda en lugar de dos listas por repositorio. La API de búsqueda tiene una cuota propia (30 llamadas por minuto) que no paga la cuota REST. Después solo se leen los conflictos de los pull requests que cambiaron. Las alertas son las mismas de las dos formas, una prueba las compara; si la API de búsqueda falla, la ronda lee cada repositorio como antes. Un pull request hallado así no dice si se pidió una revisión, así que la regla de revisiones pendientes cuenta solo lo que dan las listas.
+
+## Listas largas: páginas y lo que se corta
+
+Una página de GitHub tiene 100 elementos. Un repositorio puede tener cientos de issues y pull requests abiertos, 148 o 348 workflows, o una matriz de más de 100 jobs, así que el monitor lee la página siguiente mientras la última estaba llena y dice cuando algo sigue fuera:
+
+- **Issues y pull requests** (esta pestaña): hasta `pagination.collab_pages` páginas de 100 por cada lista de un repositorio (la primera página mantiene su lectura condicional y un repositorio con menos de 100 no cuesta nada más). Un repositorio con más de lo leído se cuenta en el pie de la pestaña; con la API de búsqueda (`sentinels.collab.search_api`) el pie dice «vistos N de M» cuando la cuenta tiene más de los 1000 resultados que da la búsqueda.
+- **Workflows de un repositorio** (higiene): hasta `pagination.workflow_pages` páginas de 100. Si la lista sigue cortada, la higiene de ese repositorio dice «vistos N de M» en vez de parecer completa.
+- **Jobs de una ejecución** (pestaña Ahora): hasta `pagination.job_pages` páginas de 100; una matriz cortada muestra «jobs: vistos N de M» bajo la ejecución.
+
+Los valores por defecto no leen nada más para un repositorio que cabe en una página.

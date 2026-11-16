@@ -3,6 +3,8 @@
 """A cron expression of five fields (minute, hour, day of month, month, day of week) and the question the scheduler asks: was a run due since the last one? Numbers, `*`, lists (`1,15`), ranges (`1-5`) and steps (`*/15`, `10-50/10`); no names, no `@daily`. The time is the local time of this computer, as for any cron. Pure functions."""
 import time
 
+from github_actions_monitor.util import clock
+
 LIMITS = ((0, 59), (0, 23), (1, 31), (1, 12), (0, 7))      # day of week: 0 and 7 are Sunday
 MAX_LOOKBACK_MINUTES = 8 * 24 * 60      # a schedule that fires every week or oftener looks back this far
 MONTHLY_LOOKBACK_MINUTES = 32 * 24 * 60      # one that names a day of the month: a month, so a monthly report lost to a long stop is still owed
@@ -106,5 +108,5 @@ def due(expression, now, last_run):
     parsed = parse(expression)
     if parsed is None:
         return False
-    since = last_run if last_run is not None else now - 60
+    since = now - 60 if last_run is None or clock.in_future(last_run, now) else last_run      # a last run in the future (clock set back) counts as never: the next named minute fires
     return last_due(parsed, now, since) is not None

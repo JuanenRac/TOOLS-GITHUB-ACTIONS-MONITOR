@@ -2986,5 +2986,16 @@
  "cfg.f.ci.failed_jobs.max_per_cycle": "Run letti per ciclo",
  "cfg.h.ci.failed_jobs.max_per_cycle": "Massimo di run rossi di cui si leggono i job in un ciclo (una chiamata ciascuno, predefinito 4). La risposta viene conservata finché il run non cambia.",
  "cfg.f.ci.failed_jobs.group_by": "Raggruppa i job per",
- "cfg.h.ci.failed_jobs.group_by": "auto (predefinito): il sistema nel nome del job (ubuntu, windows, macos...), altrimenti il primo parametro della matrice, altrimenti la parte prima della barra. platform, matrix e prefix ne impongono uno."
+ "cfg.h.ci.failed_jobs.group_by": "auto (predefinito): il sistema nel nome del job (ubuntu, windows, macos...), altrimenti il primo parametro della matrice, altrimenti la parte prima della barra. platform, matrix e prefix ne impongono uno.",
+ "cfg.f.pagination.workflow_pages": "Pagine di workflow per repository",
+ "cfg.h.pagination.workflow_pages": "Un repository può avere centinaia di workflow. Finché una pagina da 100 è piena si legge la successiva, fino a questo numero di pagine; un repository con meno di 100 non costa nessuna richiesta in più. Se resta fuori qualcosa, la pagina dice quanti ne sono stati visti su quanti esistono.",
+ "cfg.f.pagination.job_pages": "Pagine di job per esecuzione",
+ "cfg.h.pagination.job_pages": "Una matrice può avviare più di 100 job in un'esecuzione. Finché una pagina da 100 è piena si legge la successiva, fino a questo numero di pagine. Se restano job fuori, l'esecuzione dice «visti N su M».",
+ "cfg.f.pagination.collab_pages": "Pagine di issue e pull request per repository",
+ "cfg.h.pagination.collab_pages": "Un repository può avere centinaia di issue e pull request aperte. Finché una pagina da 100 è piena si legge la successiva, fino a questo numero di pagine (la prima mantiene la lettura condizionale; un repository con meno di 100 non costa altro). Se ce ne sono di più, la scheda Team lo dice.",
+ "ui.cfg_b_pagination": "Pagine delle liste lunghe",
+ "ui.collab_cut": "{n} repository hanno più elementi aperti di quelli letti (fino a {p} pagine da 100)",
+ "ui.collab_cut_search": "Ricerca: visti {seen} su {total}",
+ "ui.jobs_cut": "job: visti {seen} su {total}",
+ "hyg.wf_cut": "l'elenco dei workflow è troncato: visti {seen} su {total}"
 }

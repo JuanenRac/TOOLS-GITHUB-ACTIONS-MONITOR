@@ -2986,5 +2986,16 @@
  "cfg.f.ci.failed_jobs.max_per_cycle": "Gelesene Runs pro Zyklus",
  "cfg.h.ci.failed_jobs.max_per_cycle": "Höchstzahl roter Runs, deren Jobs in einem Zyklus gelesen werden (ein Aufruf je Run, Standard 4). Die Antwort bleibt, solange der Run gleich bleibt.",
  "cfg.f.ci.failed_jobs.group_by": "Jobs gruppieren nach",
- "cfg.h.ci.failed_jobs.group_by": "auto (Standard): das System im Jobnamen (ubuntu, windows, macos ...), sonst der erste Parameter der Matrix, sonst der Teil vor dem Schrägstrich. platform, matrix und prefix erzwingen eines davon."
+ "cfg.h.ci.failed_jobs.group_by": "auto (Standard): das System im Jobnamen (ubuntu, windows, macos ...), sonst der erste Parameter der Matrix, sonst der Teil vor dem Schrägstrich. platform, matrix und prefix erzwingen eines davon.",
+ "cfg.f.pagination.workflow_pages": "Workflow-Seiten pro Repository",
+ "cfg.h.pagination.workflow_pages": "Ein Repository kann Hunderte Workflows haben. Solange eine Seite mit 100 voll ist, wird die nächste gelesen, bis zu dieser Seitenzahl; ein Repository mit weniger als 100 kostet keine weitere Anfrage. Bleibt etwas übrig, sagt die Seite, wie viele von wie vielen gesehen wurden.",
+ "cfg.f.pagination.job_pages": "Job-Seiten pro Lauf",
+ "cfg.h.pagination.job_pages": "Eine Matrix kann mehr als 100 Jobs in einem Lauf starten. Solange eine Seite mit 100 voll ist, wird die nächste gelesen, bis zu dieser Seitenzahl. Bleiben Jobs übrig, sagt der Lauf „N von M gesehen“.",
+ "cfg.f.pagination.collab_pages": "Seiten für Issues und Pull Requests pro Repository",
+ "cfg.h.pagination.collab_pages": "Ein Repository kann Hunderte offene Issues und Pull Requests haben. Solange eine Seite mit 100 voll ist, wird die nächste gelesen, bis zu dieser Seitenzahl (die erste behält ihr bedingtes Lesen; ein Repository mit weniger als 100 kostet nichts mehr). Gibt es mehr, sagt es der Tab Team.",
+ "ui.cfg_b_pagination": "Seiten langer Listen",
+ "ui.collab_cut": "{n} Repositorys haben mehr offene Einträge als gelesen wurden (bis zu {p} Seiten zu 100)",
+ "ui.collab_cut_search": "Suche: {seen} von {total} gesehen",
+ "ui.jobs_cut": "Jobs: {seen} von {total} gesehen",
+ "hyg.wf_cut": "die Workflow-Liste ist abgeschnitten: {seen} von {total} gesehen"
 }

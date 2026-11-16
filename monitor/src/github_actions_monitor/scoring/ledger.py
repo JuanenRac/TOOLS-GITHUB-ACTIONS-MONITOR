@@ -16,6 +16,7 @@ from datetime import datetime, timezone
 from github_actions_monitor.data_pipeline.analytics import BAD
 from github_actions_monitor.app import degraded
 from github_actions_monitor.scoring import collector, drop, engine
+from github_actions_monitor.util import clock
 
 LEDGER_DOC = "score_ledger"
 MIN_INTERVAL = 600          # seconds between two passes
@@ -35,9 +36,9 @@ def clean_ledger(data, now):
     if not isinstance(data, dict):
         return ledger
     if isinstance(data.get("first_seen"), (int, float)) and not isinstance(data.get("first_seen"), bool):
-        ledger["first_seen"] = float(data["first_seen"])
+        ledger["first_seen"] = float(clock.settle(data["first_seen"], now))      # a clock set back: the watch counts from now, not from a moment that has not come yet
     if isinstance(data.get("last_tick"), (int, float)) and not isinstance(data.get("last_tick"), bool):
-        ledger["last_tick"] = float(data["last_tick"])
+        ledger["last_tick"] = 0.0 if clock.in_future(data["last_tick"], now) else float(data["last_tick"])      # a pass saved with a clock that was ahead: the next pass is due now and writes a good moment, not when the old clock is reached again
     ledger["drop_open"] = data.get("drop_open") is True
     if isinstance(data.get("truncated_at"), (int, float)) and not isinstance(data.get("truncated_at"), bool):
         ledger["truncated_at"] = float(data["truncated_at"])
