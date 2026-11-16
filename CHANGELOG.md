@@ -26,6 +26,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Fixed
 
+- **A lock file left by a writer that died is taken over at once**: the lock file of the file storage holds the number of its process; when that process no longer exists the next writer takes the lock immediately (it used to wait 30 seconds, longer than its own 10-second limit, and failed), and the takeover is logged. When the process cannot be known the age of the file still decides, and that time can be changed with `MONITOR_LOCK_STALE`. A test kills a writer inside the lock and checks that the feed is writable again.
 - The failing job of a run with more than 30 jobs is found: the lists of jobs that the alert for an AI, the assistant and the batch tool read were cut at 30 and are now cut at 100 (the same single request).
 
 ## [2.0.2]
