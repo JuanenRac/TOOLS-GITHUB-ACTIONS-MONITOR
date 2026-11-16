@@ -147,7 +147,7 @@ class PresetsAreValidatedLikeSettings(unittest.TestCase):
 
 class AReportCarriesCleanTextOnly(unittest.TestCase):
     def test_the_title_of_an_alert_is_cleaned(self):
-        out = report_builder.alerts_part([{"id": "a1", "level": "error", "repo": "r", "title": "token ghp_abcdefghijklmnopqrstuvwxyz0123456789 mail victima.canario@corp-ejemplo.com 10.20.30.40"}], 5)
+        out = report_builder.alerts_part([{"id": "a1", "level": "error", "repo": "r", "title": "token " + "gh" + "p_abcdefghijklmnopqrstuvwxyz0123456789 mail victima.canario@corp-ejemplo.com 10.20.30.40"}], 5)
         text = json.dumps(out)
         for canary in ("victima.canario", "10.20.30.40", "abcdefghijklmnopqrstuvwxyz0123456789"):
             self.assertNotIn(canary, text)
