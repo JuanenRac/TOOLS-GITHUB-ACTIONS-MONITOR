@@ -27,3 +27,9 @@ El estado es **malo** (un flujo en rojo, o una alerta de nivel crítico o error)
 - Enlaces directos para pantallas de pared: `?view=team&chrome=0`, `?view=repos&chrome=0` y `?view=repo&repo=owner/name&chrome=0`.
 - La API: `GET /api/team/health?ecosystem=&severity=&q=&label=` y `GET /api/repos/<owner>/<repo>/health`. Las dos piden permiso para ver la cuenta; las respuestas llevan `schema: 1`. Un repositorio desconocido responde 404 con `code: repo_unknown`.
 - La edición Lite conserva su vista sencilla de ejecuciones y no tiene ni la pestaña ni las rutas.
+
+## La vista de flota (cientos de repositorios)
+
+La pestaña **Equipo** tiene una segunda sección, *Flota*, para cuentas con cientos de repositorios. Agrupa los repositorios (`fleet.group_by`: ecosistema, etiqueta, estado o ninguno), ordena cada grupo (`fleet.sort`: riesgo, nombre, última ejecución o estado) y dibuja `fleet.page_size` filas cada vez (50 por defecto) con Anterior y Siguiente. La página recibe todas las filas una vez de `GET /api/team/fleet?ecosystem=&severity=&q=&label=&group=&sort=&saved=` (solo lectura, 5.000 filas como máximo; `truncated` avisa si se cortó) y dibuja una sola página, así que el tamaño de la cuenta no la ralentiza.
+
+Una *etiqueta* es un patrón de nombres de repositorio: `fleet.labels` admite líneas como `team-*=backend`; el primer patrón que encaja da la etiqueta, y agrupar por etiqueta es la forma de distinguir organizaciones o equipos en un monitor. `fleet.saved_filters` admite líneas como `attention=bad||backend|` (nombre, gravedad mínima, ecosistema, etiqueta, texto; cualquier parte tras el nombre puede quedar vacía) y las muestra como filtros ya hechos. La clasificación que hay sobre la flota no cambia.

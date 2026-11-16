@@ -27,3 +27,9 @@
 - 用于墙面屏幕的深度链接：`?view=team&chrome=0`、`?view=repos&chrome=0` 和 `?view=repo&repo=owner/name&chrome=0`。
 - API：`GET /api/team/health?ecosystem=&severity=&q=&label=` 和 `GET /api/repos/<owner>/<repo>/health`。两者都需要查看该账户的权限；响应带有 `schema: 1`。未知仓库返回 404 和 `code: repo_unknown`。
 - Lite 版保留其简单的运行视图，没有该标签页，也没有这些路由。
+
+## 舰队视图(数百个仓库)
+
+**团队**标签页有第二个部分“舰队”,面向拥有数百个仓库的账户。它对仓库分组(`fleet.group_by`:生态、标签、状态或不分组),对每组排序(`fleet.sort`:风险、名称、最近运行或状态),并通过“上一页”“下一页”每次绘制 `fleet.page_size` 行(默认 50)。页面从 `GET /api/team/fleet?ecosystem=&severity=&q=&label=&group=&sort=&saved=`(只读,最多 5,000 行,被截断时 `truncated` 会提示)一次性获取所有行,只绘制一页,因此账户规模不会拖慢页面。
+
+*标签*是仓库名的模式:`fleet.labels` 接受 `team-*=backend` 这样的行;第一个匹配的模式决定标签,按标签分组即可在一个监视器中区分组织或团队。`fleet.saved_filters` 接受 `attention=bad||backend|` 这样的行(名称、最低严重程度、生态、标签、文本;名称之后的各部分可以为空),并作为现成的筛选器显示。舰队上方的排名保持不变。

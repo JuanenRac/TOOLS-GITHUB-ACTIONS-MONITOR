@@ -51,6 +51,8 @@ HYGIENE_SKIP = ("ruleset", "label", "file", "sha", "allowed", "schedule")
 TZ_RE = re.compile(r"^(?:local|utc|UTC|[A-Za-z][A-Za-z0-9_+./-]{1,63})\Z")      # display.timezone: local, utc or an IANA name
 CRON_RE = re.compile(r"^[0-9*/,\- ]{9,60}\Z")      # report_schedule.cron: five fields of numbers, lists, ranges and steps (reporting/report_schedule.py reads it)
 BRANCH_RE = re.compile(r"^[A-Za-z0-9._*/-]{1,100}\Z")      # a branch name or a pattern of branch names (ci.extra_branches)
+from github_actions_monitor.health import fleet as _fleet      # noqa: E402 - the two shapes of the lists of the fleet view are defined next to the code that reads them
+FLEET_LABEL_RE, FLEET_FILTER_RE = _fleet.LABEL_RE, _fleet.FILTER_RE
 OWNER_RE = re.compile(r"^[A-Za-z0-9-]{0,39}\Z")
 MODEL_RE = re.compile(r"^[A-Za-z0-9._:/@-]{0,100}\Z")
 OLLAMA_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}/?\Z")   # the local service only: nothing leaves this computer
@@ -133,6 +135,11 @@ _f(_T_GENERAL, "order", "ui.alerts_sort", "enum", ordering.KINDS["alerts"], rest
 _f(_T_GENERAL, "ports", "ports.complete", "int", (ports.LOW, ports.HIGH), restart=True)
 _f(_T_GENERAL, "ports", "ports.lite", "int", (ports.LOW, ports.HIGH), restart=True)
 _f(_T_GENERAL, "sound", "sound.enabled", "bool", restart=False)
+_f(_T_GENERAL, "fleet", "fleet.page_size", "int", (10, 500), unit="", restart=False)
+_f(_T_GENERAL, "fleet", "fleet.group_by", "enum", ("ecosystem", "label", "state", "none"), restart=False)
+_f(_T_GENERAL, "fleet", "fleet.sort", "enum", ("risk", "name", "last_run", "state"), restart=False)
+_f(_T_GENERAL, "fleet", "fleet.labels", "names", restart=False)
+_f(_T_GENERAL, "fleet", "fleet.saved_filters", "names", restart=False)
 _f("quota", "modes", "modes.auto_low", "bool", restart=False)
 _f("quota", "modes", "modes.auto_low_enter", "int", (50, 4000), restart=False, unit="calls")
 _f("quota", "modes", "modes.auto_low_exit", "int", (100, 5000), restart=False, unit="calls")
@@ -605,7 +612,7 @@ def check_value(path, value):
             return False, "path"
         return True, text
     if kind == "names":
-        pattern = LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path == "sentinel.hygiene.ruleset_names" else NAME_RE)))
+        pattern = FLEET_LABEL_RE if path == "fleet.labels" else FLEET_FILTER_RE if path == "fleet.saved_filters" else LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path == "sentinel.hygiene.ruleset_names" else NAME_RE)))
         if not isinstance(value, list) or len(value) > 200 or not all(isinstance(v, str) and pattern.match(v) for v in value):
             return False, "names"
         if path == "sentinel.hygiene.ruleset_names" and not value:
