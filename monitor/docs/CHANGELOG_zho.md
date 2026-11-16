@@ -26,6 +26,7 @@
 
 ### 变更
 
+- **仓库的测试暂时不再在 macOS 上运行**：macOS 任务已从 CI 工作流中移除（每个拉取请求、每次推送到 main、每个标签以及夜间运行都在 Ubuntu 和 Windows 上测试），工作流中注明将在以后重新支持 macOS。监视器本身没有任何变化。
 - **A2 用一次请求解决许多工作流**:需要查询的工作流不少于 `sentinel.a2_resolve_batch_min`(默认 2;0 = 逐个)的仓库,只请求一次其默认分支(不含拉取请求)最新已完成的运行,其中出现的工作流一并解决(最多 `sentinel.a2_resolve_batch_pages` 页,每页 100 条);列表中没有的仍像以前一样逐个查询,因此拥有 100 个以上工作流的仓库只需几个周期即可收敛,而不是每个周期四个。
 - **A2 用一次请求解决许多工作流**:需要查询的工作流不少于 `sentinel.a2_resolve_batch_min`(默认 2;0 = 逐个)的仓库,只请求一次其默认分支(不含拉取请求)最新已完成的运行,其中出现的工作流一并解决(最多 `sentinel.a2_resolve_batch_pages` 页,每页 100 条);列表中没有的仍像以前一样逐个查询,因此拥有 100 个以上工作流的仓库只需几个周期即可收敛,而不是每个周期四个。
 - **fork 和已归档仓库可通过设置选择，在维护的 fork 绝不丢失**：`discovery.skip_archived`（默认开启）决定是否监视已归档仓库；`discovery.fork_policy` 可排除 fork（`skip`），或只保留有自己 CI 的 fork（`skip_unless_ci`：已启用的工作流且在 `discovery.fork_ci_days` 内有运行），`auto` 对组织账户把时间窗口加倍，账户类型每天读取一次；`discovery.fork_checks_per_pass` 限制为此花费的请求数。默认值（`show`）不改变任何行为。

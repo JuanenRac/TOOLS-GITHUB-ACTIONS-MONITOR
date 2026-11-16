@@ -1,6 +1,6 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 # GPL-3.0-or-later - see LICENSE
-"""The CI of the repository is cheap and does not pile up: Ubuntu and Windows on every pull request, macOS only where it pays, a pinned Apple Silicon image, the pip cache everywhere, runs superseded by a
+"""The CI of the repository is cheap and does not pile up: Ubuntu and Windows on every pull request, the pip cache everywhere, runs superseded by a
 new push cancelled, and the image workflow written so that GitHub accepts it. The workflows are not part of the zip of the product: without them the tests skip."""
 import re
 import sys
@@ -39,30 +39,25 @@ class TheCiDoesNotPileUp(unittest.TestCase):
         self.assertIn("cancel-in-progress: ${{ github.event_name == 'pull_request' }}", source)
         self.assertNotRegex(source, r"cancel-in-progress: true")
 
-    def test_every_pull_request_runs_ubuntu_and_windows_and_macos_is_a_job_of_its_own(self):
+    def test_every_pull_request_runs_ubuntu_and_windows_and_macos_is_not_tested_for_now(self):
         source = text(CI)
         tests = job(source, "tests")
         self.assertIn("os: [ubuntu-latest, windows-latest]", tests)
-        self.assertNotIn("macos", tests)
-        mac = job(source, "tests-macos")
-        self.assertIn("runs-on: macos-15", mac)
-        self.assertIn("contains(github.event.pull_request.labels.*.name, 'full-ci')", mac)
-        self.assertIn("github.event_name != 'pull_request'", mac)
+        self.assertNotRegex(source, r"(?i)runs-on:.*macos|tests-macos|matrix\.os.*macos|full-ci")
+        self.assertIn("macOS is not tested for now", source)      # said in the workflow, so that nobody takes the missing job for a mistake
 
-    def test_macos_runs_on_main_on_tags_every_night_and_by_hand(self):
+    def test_main_tags_the_nightly_run_and_a_manual_run_still_test(self):
         head = text(CI).split("permissions:")[0]
-        for needle in ("push:", "branches: [main]", 'tags: ["v*"]', "schedule:", "cron:", "workflow_dispatch:", "labeled"):
+        for needle in ("push:", "branches: [main]", 'tags: ["v*"]', "schedule:", "cron:", "workflow_dispatch:"):
             self.assertIn(needle, head)
 
-    def test_no_image_that_moves_and_homebrew_never_updates(self):
-        source = text(CI)
-        self.assertNotIn("macos-latest", source)
-        self.assertRegex(source, r'(?m)^env:\n(?:  .*\n)*?  HOMEBREW_NO_AUTO_UPDATE: "1"')
+    def test_no_image_that_moves(self):
+        self.assertNotIn("macos-latest", text(CI))
 
     def test_every_python_job_uses_the_pip_cache_of_the_same_file(self):
         source = text(CI)
         setups = source.count("uses: actions/setup-python@")
-        self.assertGreaterEqual(setups, 5)
+        self.assertGreaterEqual(setups, 4)
         self.assertEqual(source.count("cache: pip\n"), setups)
         self.assertEqual(source.count("cache-dependency-path: .github/ci-requirements.txt"), setups)
         requirements = (ROOT / ".github" / "ci-requirements.txt").read_text(encoding="utf-8")
