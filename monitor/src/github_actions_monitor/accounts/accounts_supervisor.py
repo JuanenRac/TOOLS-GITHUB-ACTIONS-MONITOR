@@ -599,7 +599,7 @@ class Handler(BaseHTTPRequestHandler):
         if not accounts.valid_id(account_id) or account_id not in accounts.enabled_accounts(sup.base):
             self.json({"ok": False, "status": "unknown_account"}, 404)
             return
-        if user and not auth_http.visible_accounts(self, [account_id]):      # the gate lets the three listing routes through because the supervisor filters them: this is the filter
+        if user and user.get("accounts") is not None and not auth_http.visible_accounts(self, [account_id]):      # the gate lets the three listing routes through because the supervisor filters them: this is the filter
             self.json({"ok": False, "status": "account_scope", "code": "account_scope"}, 403)
             return
         try:
