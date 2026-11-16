@@ -14,6 +14,9 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **Every link the page builds from data goes through the address filter**: the links to the last run, the repository, the board, the issue, the unresolved failure and the update notice (12 of 14 did not) only open an `https` address of GitHub or of the configured host; anything else becomes an inert `#`. A test fails if a new link is built without the filter.
 
+### Fixed
+
+- **A lock file left by a writer that died is taken over at once**: the lock file of the file storage holds the number of its process; when that process no longer exists the next writer takes the lock immediately (it used to wait 30 seconds, longer than its own 10-second limit, and failed), and the takeover is logged. When the process cannot be known the age of the file still decides, and that time can be changed with `MONITOR_LOCK_STALE`. A test kills a writer inside the lock and checks that the feed is writable again.
 ### Changed
 
 - **A red on the default branch only counts when the repository itself caused it**: only runs of the events `push`, `schedule`, `workflow_dispatch` and `merge_group` decide (setting `ci.red_events`), and a run of a pull request that comes from a fork never does, even when the branch of the fork is also called `main`, `master` or `dev` (setting `ci.count_fork_runs`). The same rule feeds the red tile, the alerts, the team view, the brief and the green-without-release check.
