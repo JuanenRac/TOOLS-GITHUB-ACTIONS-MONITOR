@@ -33,6 +33,7 @@ from pathlib import Path
 from github_actions_monitor.data_pipeline import events
 from github_actions_monitor import i18n
 from github_actions_monitor.cli import lint_workflows
+from github_actions_monitor.integrations import remote_workflows
 from github_actions_monitor.sentinels import readiness
 from github_actions_monitor.data_pipeline import redrule
 from github_actions_monitor.sentinels import roadmap_a9
@@ -741,7 +742,7 @@ def compute_snapshot(inp):
     s["a11"] = readiness.build(inp, s, cfg.get("readiness") or readiness.DEFAULTS)
     s["a11"]["level"] = s["a11"].get("level", "unknown")
     lint = inp.get("lint")
-    s["lint"] = {"enabled": False} if not lint else {"enabled": True, "summary": lint["summary"], "in_report": lint.get("in_report", True),
+    s["lint"] = {"enabled": False} if not lint else {"enabled": True, "summary": lint["summary"], "in_report": lint.get("in_report", True), "coverage": lint.get("coverage"),
                                                     "rows": [dict(f, repo=r) for r, items in sorted(lint["by_repo"].items()) for f in items][:200]}
     for key in ("a3", "a4", "a5", "a6"):  # an "ok" with the data still loading would be a false green
         if s[key]["level"] == "ok" and (inp.get("loading") or not info or (key == "a3" and s["a3"]["alerts_checked"] < len(info))):
@@ -806,7 +807,9 @@ class Sentinel:
         self.repo_info, self.alerts, self.perms, self.unreleased = {}, {}, {}, {}
         self.local_versions = {}
         self.pins_cache = {"at": 0.0, "value": None}
-        self.lint_cache = {"at": 0.0, "value": None}
+        self.lint_cache = {"at": 0.0, "value": None, "version": -1}
+        self.remote = remote_workflows.Reader(lambda endpoint: self._gh("api", endpoint, retries=1), toolconfig.github_owner)      # workflow files read without a clone (lint.source)
+        self.sparse = {"running": False, "done": {}, "version": 0}      # repo -> {"at", "ok", "reason"} of the sparse clones of .github
         self.errors = {}
         self.calls = []
         self.gql_at = 0.0
@@ -899,16 +902,24 @@ class Sentinel:
     def _lint(self, repos):
         """The workflow linter over the local clones (plain file reads, cached `lint.refresh_seconds`); None when it is off or there is no workspace."""
         cfg = lint_workflows.settings(self.config)
-        if not cfg["enabled"] or not workspace.has_workspace():
+        if not cfg["enabled"] or (not workspace.has_workspace() and cfg["source"] == "clone"):
             return None
-        if self.lint_cache["value"] is None or time.time() - self.lint_cache["at"] > cfg["refresh_seconds"]:
+        version = (self.remote.version, self.sparse["version"])
+        if self.lint_cache["value"] is None or time.time() - self.lint_cache["at"] > cfg["refresh_seconds"] or self.lint_cache.get("version") != version:
             try:
-                by_repo = lint_workflows.scan_clones(GITHUB_DIR, repos, cfg["rules"], cfg.get("ignore"))
-                value = {"by_repo": by_repo, "summary": lint_workflows.summarize(by_repo), "in_report": cfg["in_report"]}
+                clones = self._clone_repos(repos)
+                by_repo = lint_workflows.scan_clones(GITHUB_DIR, clones, cfg["rules"], cfg.get("ignore")) if clones else {}
+                sparse = [r for r in repos if r not in clones and (self._sparse_root() / r / ".github" / "workflows").is_dir()] if cfg["source"] == "sparse" else []
+                if sparse:
+                    by_repo.update(lint_workflows.scan_clones(self._sparse_root(), sparse, cfg["rules"], cfg.get("ignore")))
+                if cfg["source"] == "auto":
+                    by_repo.update(lint_workflows.lint_remote(self.remote, [r for r in repos if r not in clones], cfg["rules"], cfg.get("ignore")))
+                value = {"by_repo": by_repo, "summary": lint_workflows.summarize(by_repo), "in_report": cfg["in_report"],
+                         "coverage": remote_workflows.coverage(self.remote, repos, clones, sparse, cfg["source"])}
             except Exception as error:   # a workflow file must never stop the picture
                 degraded.note("sentinel.lint", error)
                 value = None
-            self.lint_cache = {"at": time.time(), "value": value}
+            self.lint_cache = {"at": time.time(), "value": value, "version": version}
         return self.lint_cache["value"]
 
     def _export_ci_red(self, snap):
@@ -1075,6 +1086,7 @@ class Sentinel:
             self.ok("hygiene")
             did = True
         did = self._surface_tick() or did
+        did = self._lint_remote_tick() or did
         did = self._a2_resolve_tick() or did
         if did or self.dirty:
             self.dirty = False
@@ -1099,6 +1111,74 @@ class Sentinel:
             self.error("surface", error)
             return False
         return bool(used)
+
+    def _clone_repos(self, repos):
+        """The repositories that have a clone of their own in the workspace (a folder with .git)."""
+        return [r for r in repos if workspace.has_workspace() and ((GITHUB_DIR / r / ".git").exists() or (GITHUB_DIR / r / ".github" / "workflows").is_dir())]
+
+    def _sparse_root(self):
+        return paths.folder("data") / "sparse"
+
+    def _lint_remote_tick(self):
+        """The workflow files of the repositories WITHOUT a clone, when `lint.source` asks for it: `auto` reads them through the API of GitHub (a few calls a tick, inside the hourly budget and the same
+        gate of the allowance as A10, a file whose SHA did not change is not read again); `sparse` brings `.github` with a sparse clone of depth 1 in a thread of its own. Returns whether anything was read."""
+        cfg = lint_workflows.settings(self.config)
+        if not cfg["enabled"] or cfg["source"] == "clone" or not self.repo_info:
+            return False
+        repos = sorted(self.repo_info)
+        clones = set(self._clone_repos(repos))
+        pending = [r for r in repos if r not in clones]
+        rate = (self.ctx["data_fn"]() or {}).get("rate")
+        if rate and rate["remaining"] < self.cfg["min_rate_remaining"] * self.cfg["surface"]["min_rate_factor"]:
+            return False      # the allowance is low: the files wait, the page says so (waiting)
+        if cfg["source"] == "sparse":
+            return self._sparse_start(pending, cfg["sparse"])
+        left = min(cfg["api"]["max_calls_per_tick"], self._budget())
+        did = False
+        for repo in self.remote.due(pending, cfg["api"]["refresh_seconds"]):
+            if left < 1:
+                break
+            left -= self.remote.refresh(repo, left, cfg["api"]["max_files_per_repo"])
+            state = self.remote.state(repo)
+            self.surface.set_remote(repo, surface.scan_remote(self.remote.texts(repo)) if state and state["state"] != "not_evaluable" else None)
+            did = True
+        for repo in clones:
+            if self.remote.state(repo):      # a clone has appeared: the clone wins
+                self.remote.forget([repo])
+                self.surface.set_remote(repo, None)
+        return did
+
+    def _sparse_start(self, pending, cfg):
+        """Starts the thread that refreshes a few sparse clones (git can take a minute: never inside the loop of the sentinel)."""
+        now = time.time()
+        with self.lock:
+            if self.sparse["running"]:
+                return False
+            due = sorted((r for r in pending if now - (self.sparse["done"].get(r) or {}).get("at", 0.0) > cfg["refresh_seconds"]), key=lambda r: (self.sparse["done"].get(r) or {}).get("at", 0.0))[: cfg["max_repos_per_tick"]]
+            if not due:
+                return False
+            self.sparse["running"] = True
+        threading.Thread(target=self._sparse_run, args=(due,), daemon=True, name="lint-sparse").start()
+        return True
+
+    def _sparse_run(self, repos):
+        try:
+            for repo in repos:
+                ok, reason = remote_workflows.sparse_refresh(toolconfig.github_owner(), repo, self._sparse_root())
+                scan = None
+                if ok:
+                    scan = surface.scan_clone(self._sparse_root() / repo)
+                    if scan:
+                        scan = {**scan, "source": "sparse", "not_evaluable": ["stacks", "dependabot_yml", "manifest", "changelog"], "stacks": [], "dependabot_yml": False, "manifest": None, "changelog_top": None}
+                with self.lock:
+                    self.sparse["done"][repo] = {"at": time.time(), "ok": ok, "reason": reason}
+                    self.sparse["version"] += 1
+                self.surface.set_remote(repo, scan)
+        except Exception as error:   # noqa: BLE001 - a clone that fails never stops the sentinel
+            degraded.note("sentinel.lint_sparse", error)
+        finally:
+            with self.lock:
+                self.sparse["running"] = False
 
     def _a2_resolve_tick(self):
         """A2: for a repository with a full run sample that hides a workflow of its clone, asks GitHub for the last run of THAT workflow on the default branch

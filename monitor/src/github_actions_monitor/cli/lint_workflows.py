@@ -3,9 +3,10 @@
 # GPL-3.0-or-later - see LICENSE
 """A small linter for the workflow files of a repository (`.github/workflows/*.yml`), to run BEFORE you push. Read-only and local: it opens files, nothing else.
 
-  py -3 bin/lint_workflows.py [PATH ...] [--json] [--fail-on info|warn|bad] [--lang CODE]
+  py -3 bin/lint_workflows.py [PATH ...] [--remote OWNER/REPO ...] [--json] [--fail-on info|warn|bad] [--lang CODE]
 
-With no PATH it looks at `.github/workflows` of the current folder. A PATH is a workflow file or a folder that holds them (or a repository root).
+With no PATH it looks at `.github/workflows` of the current folder. A PATH is a workflow file or a folder that holds them (or a repository root). `--remote OWNER/REPO` reads the workflow
+files of a repository from GitHub through `gh` instead (no clone; one call for the list and one for each file) and says why when it cannot (SSO not authorised, no access).
 
 Rules (each one can be switched off and given another severity in actions_monitor.json, `lint.rules.<rule>`):
 
@@ -47,6 +48,11 @@ FILLER = ("placeholder", "dummy", "example", "changeme", "change-me", "change_me
 IGNORE_RE = re.compile(r"#\s*monitor-lint:\s*ignore\s+([a-z_]+)")
 IGNORE_PATTERN_RE = re.compile(r"^[A-Za-z0-9._*-]{1,100}:[A-Za-z0-9._*/-]{1,100}:[a-z_*]{1,30}\Z")
 ORDER = {"info": 0, "warn": 1, "bad": 2}
+SOURCES = ("clone", "auto", "sparse")      # where the monitor reads the workflow files: the local clones only (default), the clones and, for the repositories without one, the API of GitHub, or a sparse clone
+API_DEFAULTS = {"refresh_seconds": 21600, "max_calls_per_tick": 20, "max_files_per_repo": 40}
+API_RANGES = {"refresh_seconds": (600, 604800), "max_calls_per_tick": (1, 200), "max_files_per_repo": (1, 100)}
+SPARSE_DEFAULTS = {"refresh_seconds": 21600, "max_repos_per_tick": 2}
+SPARSE_RANGES = {"refresh_seconds": (600, 604800), "max_repos_per_tick": (1, 20)}
 
 
 def entropy(text):
@@ -74,10 +80,19 @@ UNTRUSTED = re.compile(r"\$\{\{\s*github\.(?:event\.(?:issue|pull_request|commen
 
 def settings(config):
     """`lint` of the configuration: {"enabled", "refresh_seconds", "rules": {rule: {"enabled", "severity"}}}, merged over the defaults."""
-    out = {"enabled": True, "refresh_seconds": 3600, "in_report": True, "ignore": [], "rules": {r: {"enabled": True, "severity": DEFAULT_SEVERITY[r]} for r in RULES}}
+    out = {"enabled": True, "refresh_seconds": 3600, "in_report": True, "ignore": [], "rules": {r: {"enabled": True, "severity": DEFAULT_SEVERITY[r]} for r in RULES},
+           "source": "clone", "api": dict(API_DEFAULTS), "sparse": dict(SPARSE_DEFAULTS)}
     user = (config or {}).get("lint")
     if not isinstance(user, dict):
         return out
+    if user.get("source") in SOURCES:
+        out["source"] = user["source"]
+    for block, defaults, ranges in (("api", API_DEFAULTS, API_RANGES), ("sparse", SPARSE_DEFAULTS, SPARSE_RANGES)):
+        given = user.get(block)
+        for key in defaults if isinstance(given, dict) else ():
+            value = given.get(key)
+            if isinstance(value, int) and not isinstance(value, bool) and ranges[key][0] <= value <= ranges[key][1]:
+                out[block][key] = value
     if isinstance(user.get("ignore"), list):
         out["ignore"] = [x for x in user["ignore"] if isinstance(x, str) and IGNORE_PATTERN_RE.match(x)]
     if isinstance(user.get("enabled"), bool):
@@ -215,6 +230,35 @@ def scan_clones(workspace_root, repos, rules=None, ignore=None):
     return result
 
 
+def lint_remote(reader, repos, rules=None, ignore=None):
+    """{repo: [findings]} for the repositories whose workflow files were read without a clone (`remote_workflows.Reader`). Same rules and same `ignore` as `scan_clones`; no network here."""
+    result = {}
+    for repo in repos:
+        texts = reader.texts(repo)
+        found = []
+        for name in sorted(texts):
+            found += [f for f in lint_text(texts[name], ".github/workflows/" + name, rules) if not ignored(repo, f, ignore)]
+        if found:
+            result[repo] = found
+    return result
+
+
+def lint_remote_name(name, read=None):
+    """The findings of `OWNER/REPO` read through the API of GitHub (no clone): `[{"file", "line", "rule", "severity", "detail"}]`, file names as `.github/workflows/NAME`. A repository that cannot be
+    read prints why on the standard error (SSO not authorised, no access...) and gives no findings."""
+    from github_actions_monitor.integrations import remote_workflows
+    owner, _, repo = str(name).partition("/")
+    if not (remote_workflows.NAME_RE.match(owner) and remote_workflows.NAME_RE.match(repo)):
+        print(i18n.t("lint.remote_bad_name", name=str(name)[:80]), file=sys.stderr)
+        return []
+    reader = remote_workflows.Reader(read or remote_workflows.gh_read, lambda: owner)
+    reader.refresh(repo, 400, 100)
+    state = reader.state(repo) or {}
+    if state.get("state") == "not_evaluable":
+        print(i18n.t("lint.remote_failed", name=f"{owner}/{repo}", reason=i18n.t("lint.reason." + state.get("reason", "error"))), file=sys.stderr)
+    return lint_remote(reader, [repo]).get(repo, [])
+
+
 def summarize(by_repo):
     """{"findings": N, "repos": N, "bad": N, "warn": N, "info": N, "by_rule": {rule: N}, "top": [(repo, n)]} for the report."""
     counts = {"bad": 0, "warn": 0, "info": 0}
@@ -232,13 +276,16 @@ def main(argv=None):
     ap.add_argument("paths", nargs="*", help=i18n.t("lint.help_paths"))
     ap.add_argument("--json", action="store_true", help=i18n.t("lint.help_json"))
     ap.add_argument("--fail-on", choices=SEVERITIES, default="bad", help=i18n.t("lint.help_fail_on"))
+    ap.add_argument("--remote", action="append", metavar="OWNER/REPO", help=i18n.t("lint.help_remote"))
     ap.add_argument("--lang", metavar="CODE", help=i18n.t("cli.help_lang"))
     args = ap.parse_args(argv)
     if args.lang:
         i18n.set_language(args.lang)
     findings = []
-    for path in args.paths or ["."]:
+    for path in args.paths or ([] if args.remote else ["."]):
         findings += lint_path(path)
+    for name in args.remote or []:
+        findings += lint_remote_name(name)
     if args.json:
         print(json.dumps(findings, ensure_ascii=False, indent=1))
     else:

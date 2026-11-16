@@ -314,6 +314,16 @@
     "enabled": true,
     "refresh_seconds": 3600,
     "in_report": true,
+    "source": "clone",
+    "api": {
+      "refresh_seconds": 21600,
+      "max_calls_per_tick": 20,
+      "max_files_per_repo": 40
+    },
+    "sparse": {
+      "refresh_seconds": 21600,
+      "max_repos_per_tick": 2
+    },
     "rules": {
       "unpinned_uses": {
         "enabled": true,
