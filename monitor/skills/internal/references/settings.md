@@ -123,6 +123,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `extra_reader.enabled` (secure) | `false` | quota | Read also with a second account |
 | `extra_reader.file` (secure) | `""` | quota | File with the token of the second account |
 | `finops.jobs_per_cycle` | `0` | advanced | Jobs read per cycle for their system |
+| `fleet.group_by` | `"ecosystem"` | general | Group the fleet by |
+| `fleet.labels` | `[]` | general | Labels by repository name |
+| `fleet.page_size` | `50` | general | Repositories per page |
+| `fleet.saved_filters` | `[]` | general | Saved filters |
+| `fleet.sort` | `"risk"` | general | Order inside a group |
 | `github_actions.allowed` (secure) | `["rerun_failed", "cancel"]` | advanced | Actions that can be planned |
 | `github_actions.enabled` (secure) | `false` | advanced | Allow actions on GitHub |
 | `github_actions.merge_method` (secure) | `"squash"` | advanced | Merge method |
@@ -278,6 +283,17 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `retention.mode` (secure) | `-` | paths | What to do with old events |
 | `retention.warn_events_mb` | `-` | paths | Warn when the events are bigger than |
 | `runners.enabled` | `false` | advanced | Watch self-hosted runners |
+| `runners.model.alert_level` | `"warning"` | advanced | Level of those alerts |
+| `runners.model.alerts` | `true` | advanced | Alerts of the runner model |
+| `runners.model.enabled` | `false` | advanced | Model the runners |
+| `runners.model.jobs_per_cycle` | `10` | advanced | Runs whose jobs are read per cycle |
+| `runners.model.large_labels` | `[]` | advanced | Labels of your larger runners |
+| `runners.model.queue_warn_minutes` | `20` | advanced | Minutes a job may wait for a self-hosted runner |
+| `runners.model.runaway_ignore_events` | `["pull_request", "pull_request_target"]` | advanced | Events that do not count as runaway |
+| `runners.model.runaway_runs_per_hour` | `20` | advanced | Runs per hour of a workflow that fires itself |
+| `runners.model.self_labels` | `[]` | advanced | Extra labels of self-hosted runners |
+| `runners.model.thirdparty_labels` | `["blacksmith", "buildjet", "namespace-profile", "depot", "warpbuild", "ubicloud", "runs-on", "actuated", "cirrus-runners"]` | advanced | Labels of paid third-party runners |
+| `runners.model.thirdparty_usd_per_minute` | `0.0` | advanced | Price of a third-party minute |
 | `runners.scope` | `"owner"` | advanced | Where to look |
 | `runs_per_repo` | `20` | polling | Runs read per hot repository |
 | `sampling.api_budget_per_hour` | `0` | polling | Request budget per hour |

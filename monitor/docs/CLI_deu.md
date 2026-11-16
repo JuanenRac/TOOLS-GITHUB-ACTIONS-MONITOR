@@ -64,3 +64,7 @@ Im Netzwerkmodus wird das Token aus `MONITOR_ACCESS_TOKEN`, dann `MONITOR_TOKEN`
 ## Die Speicher-Werkzeuge
 
 `python tools/migrate_storage.py` verschiebt den Zustand zwischen Dateien und SQLite, und `python tools/backup_storage.py` erstellt, prüft und stellt Sicherungen von beiden wieder her (beide sind in [STORAGE_deu.md](STORAGE_deu.md) beschrieben). `--doctor` hat dafür zwei Prüfungen: Speicher und Aufbewahrung.
+
+## Der Batch-Dispatcher: die Eingaben eines Workflows
+
+`python bin/gha_dispatch_all.py plan --inputs` listet zusätzlich unter jedem Ziel die Eingaben auf, die sein Workflow beim manuellen Start verlangt (Name, Typ, erforderlich oder optional, Standardwert, Optionen einer Auswahl und Beschreibung). Sie werden mit `git show` aus der Workflow-Datei in `origin/main` des lokalen Klons gelesen: nichts wird ausgelöst oder gesendet und `gh` wird nicht aufgerufen. `--json` fügt jeder Zeile eine Liste `inputs` hinzu; sie ist `null`, wenn die Datei nicht in `origin/main` liegt oder eine dem Leser unbekannte Form nutzt (der Flussstil `inputs: {…}`), und `[]`, wenn der Workflow keine Eingabe verlangt.

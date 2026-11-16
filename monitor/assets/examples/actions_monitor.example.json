@@ -530,7 +530,33 @@
   },
   "runners": {
     "enabled": false,
-    "scope": "owner"
+    "scope": "owner",
+    "model": {
+      "enabled": false,
+      "jobs_per_cycle": 10,
+      "thirdparty_labels": [
+        "blacksmith",
+        "buildjet",
+        "namespace-profile",
+        "depot",
+        "warpbuild",
+        "ubicloud",
+        "runs-on",
+        "actuated",
+        "cirrus-runners"
+      ],
+      "large_labels": [],
+      "self_labels": [],
+      "queue_warn_minutes": 20,
+      "runaway_runs_per_hour": 20,
+      "runaway_ignore_events": [
+        "pull_request",
+        "pull_request_target"
+      ],
+      "thirdparty_usd_per_minute": 0.0,
+      "alerts": true,
+      "alert_level": "warning"
+    }
   },
   "otlp": {
     "enabled": false,
@@ -542,6 +568,13 @@
   },
   "finops": {
     "jobs_per_cycle": 0
+  },
+  "fleet": {
+    "page_size": 50,
+    "group_by": "ecosystem",
+    "sort": "risk",
+    "labels": [],
+    "saved_filters": []
   },
   "lessons": {
     "enabled": true,

@@ -58,6 +58,8 @@
   {"path": "/api/github-token", "reason": "state of the credential; its keys depend on the store in use"},
   {"path": "/api/live-events/stream", "reason": "a stream of server-sent events, not a JSON document"},
   {"path": "/api/otlp", "reason": "an export format of another standard"},
+ {"path": "/api/team/fleet", "reason": "the fleet view whose rows depend on the settings of the grouping; it is frozen with the next widening of the contract"},
+ {"path": "/api/runners/model", "reason": "an opt-in model of the runners whose keys depend on the settings; it is frozen with the next widening of the contract"},
   {"path": "/api/outputs/", "reason": "files for Prometheus and Grafana, in the format of those tools"},
   {"path": "/api/repos/", "reason": "the 200 answer is described in docs/HEALTH.md; only its 404 is frozen above"},
   {"path": "/api/report-files/file", "reason": "the content of one report file, not a JSON document"},

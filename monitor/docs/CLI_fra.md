@@ -64,3 +64,7 @@ En mode réseau le jeton est lu dans `MONITOR_ACCESS_TOKEN`, puis `MONITOR_TOKEN
 ## Les outils de stockage
 
 `python tools/migrate_storage.py` déplace l'état entre fichiers et SQLite, et `python tools/backup_storage.py` fait, vérifie et restaure des sauvegardes de l'un ou l'autre (les deux sont décrits dans [STORAGE_fra.md](STORAGE_fra.md)). `--doctor` a deux vérifications pour eux : le stockage et la conservation.
+
+## Le répartiteur par lots : les entrées d'un workflow
+
+`python bin/gha_dispatch_all.py plan --inputs` liste aussi, sous chaque cible, les entrées que son workflow demande quand il est lancé à la main (nom, type, obligatoire ou facultative, valeur par défaut, options d'un choix et description). Elles sont lues dans le fichier du workflow à `origin/main` du clone avec `git show` : rien n'est déclenché, rien n'est envoyé et `gh` n'est pas appelé. `--json` ajoute une liste `inputs` à chaque ligne ; elle vaut `null` quand le fichier n'est pas dans `origin/main` ou utilise une forme que le lecteur ne connaît pas (le style en flux `inputs: {…}`), et `[]` quand le workflow ne demande aucune entrée.

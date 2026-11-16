@@ -64,3 +64,7 @@ In the network mode the token is read from `MONITOR_ACCESS_TOKEN`, then `MONITOR
 ## The storage tools
 
 `python tools/migrate_storage.py` moves the state between files and SQLite, and `python tools/backup_storage.py` makes, checks and restores backups of either (both are described in [STORAGE.md](STORAGE.md)). `--doctor` has two checks for them: the storage and the retention.
+
+## The batch dispatcher: the inputs of a workflow
+
+`python bin/gha_dispatch_all.py plan --inputs` also lists, under each target, the inputs its workflow asks for when it is fired by hand (name, type, required or optional, default, options of a choice and description). They are read from the workflow file at `origin/main` of the local clone with `git show`: nothing is fired, nothing is sent and `gh` is not called. `--json` adds an `inputs` list to every row; it is `null` when the file is not in `origin/main` or uses a form the reader does not know (the flow style `inputs: {…}`), and `[]` when the workflow takes no input.

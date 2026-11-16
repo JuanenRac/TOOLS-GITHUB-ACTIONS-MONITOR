@@ -64,3 +64,7 @@ No modo de rede o token é lido de `MONITOR_ACCESS_TOKEN`, depois de `MONITOR_TO
 ## As ferramentas de armazenamento
 
 `python tools/migrate_storage.py` move o estado entre ficheiros e SQLite, e `python tools/backup_storage.py` faz, verifica e restaura cópias de qualquer um deles (ambas estão descritas em [STORAGE_por.md](STORAGE_por.md)). O `--doctor` tem duas verificações para elas: o armazenamento e a retenção.
+
+## O despachante por lotes: as entradas de um workflow
+
+`python bin/gha_dispatch_all.py plan --inputs` lista também, sob cada alvo, as entradas que o seu workflow pede quando é disparado à mão (nome, tipo, obrigatória ou opcional, valor por defeito, opções de uma escolha e descrição). São lidas do ficheiro do workflow em `origin/main` do clone com `git show`: nada é disparado, nada é enviado e o `gh` não é chamado. `--json` acrescenta uma lista `inputs` a cada linha; é `null` quando o ficheiro não está em `origin/main` ou usa uma forma que o leitor não conhece (o estilo de fluxo `inputs: {…}`), e `[]` quando o workflow não pede nenhuma entrada.
