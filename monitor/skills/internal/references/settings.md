@@ -119,6 +119,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `extra_reader.enabled` (secure) | `false` | quota | Read also with a second account |
 | `extra_reader.file` (secure) | `""` | quota | File with the token of the second account |
 | `finops.jobs_per_cycle` | `0` | advanced | Jobs read per cycle for their system |
+| `fleet.group_by` | `"ecosystem"` | general | Group the fleet by |
+| `fleet.labels` | `[]` | general | Labels by repository name |
+| `fleet.page_size` | `50` | general | Repositories per page |
+| `fleet.saved_filters` | `[]` | general | Saved filters |
+| `fleet.sort` | `"risk"` | general | Order inside a group |
 | `github_actions.allowed` (secure) | `["rerun_failed", "cancel"]` | advanced | Actions that can be planned |
 | `github_actions.enabled` (secure) | `false` | advanced | Allow actions on GitHub |
 | `github_actions.merge_method` (secure) | `"squash"` | advanced | Merge method |

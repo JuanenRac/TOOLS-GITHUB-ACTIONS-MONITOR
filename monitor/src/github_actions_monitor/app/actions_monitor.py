@@ -124,6 +124,7 @@ DEFAULTS = {
     "otlp": {"enabled": False, "endpoint": "", "interval_seconds": 60},       # OFF: OpenTelemetry export to a collector you name (otlp.py)
     "organizations": {"discover": False},                                    # OFF: list the organisations of the login (orgs.py)
     "finops": {"jobs_per_cycle": 0},
+    "fleet": {"page_size": 50, "group_by": "ecosystem", "sort": "risk", "labels": [], "saved_filters": []},      # the fleet view of the Team tab (health/fleet.py)
     "network": {"use_proxy": False, "etag": True, "graphql_checks": False, "graphql_batch": 20},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
     "ai_notify": {"enabled": False, "confirmed_provider": "", "max_calls_per_hour": 4, "cost_per_call_cents": 5, "max_cost_per_hour_cents": 50, "command": "", "timeout_seconds": 30},      # OFF: tell an external AI of a NEW real alert (ai_notify.py)
     "pagination": {"workflow_pages": 3, "job_pages": 2, "collab_pages": 3},      # pages of 100 followed when a list is full, and said when something is cut (paging.py)
@@ -2678,6 +2679,14 @@ class Handler(BaseHTTPRequestHandler):
                 owner, name = (parts[3], parts[4]) if len(parts) == 6 else ("", "")
                 found = next(iter(health_views(only=name)), None) if owner.lower() == toolconfig.github_owner().lower() else None      # one repository: only its view is built
                 self.json_reply({"schema": 1, "health": found} if found else {"error": "unknown repository", "code": "repo_unknown"}, 200 if found else 404)
+        elif path == "/api/team/fleet":      # the same health grouped and paged for hundreds of repositories, read only, from what is held (Complete only)
+            if not self.guard():
+                return
+            from urllib.parse import parse_qs
+            from github_actions_monitor.health import fleet
+            ask = {k: v[0] for k, v in parse_qs(self.path.partition("?")[2]).items() if v}
+            self.json_reply(fleet.fleet_view(health_views(), toolconfig.raw_config(), ask.get("ecosystem", ""), ask.get("severity", ""), ask.get("q", "")[:80], ask.get("label", "")[:40],
+                                             ask.get("group", ""), ask.get("sort", ""), ask.get("saved", "")[:30]))
         elif path in ("/api/score", "/api/score/history"):      # the score of the account of this process, from the snapshots of the hour (read only; Complete only)
             if not self.guard():
                 return
