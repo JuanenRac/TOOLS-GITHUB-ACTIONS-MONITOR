@@ -45,6 +45,12 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - La prueba de una cuenta que muere al instante ya no depende de la velocidad del equipo: la espera antes de volver a arrancar una cuenta se comprueba con un reloj que da la propia prueba, y una segunda prueba comprueba el calendario de las esperas sin leer la hora real (la antigua fallaba bajo carga en la puerta de una versión).
 
+## [1.9.4]
+
+### Añadido
+
+- **Preajustes de proveedores de IA y una tabla de IAs compatibles**: un fichero de datos versionado (`ai_presets.json`, servido en solo lectura en `GET /api/ai/presets`) lista doce servicios alojados (OpenAI, Anthropic, Google Gemini, xAI Grok, Mistral, DeepSeek, Groq, OpenRouter, Together AI, Fireworks AI, Perplexity, Cohere) y seis servidores locales (Ollama, LM Studio, servidor de llama.cpp, vLLM, LocalAI, Jan) con modelos de ejemplo editables (Llama, Mistral, Qwen, DeepSeek, Gemma, Phi, gpt-oss; sin pesos ni descargas). En los ajustes de IA un selector rellena el proveedor, la dirección, el NOMBRE de la variable de entorno de la clave y un modelo, muestra la privacidad de la elección (texto enviado por internet o guardado en este equipo) y dice «compatible por protocolo, no probado con esta herramienta» cuando es así; ninguno está activo por defecto y la clave nunca sale de su variable de entorno. Un servidor de este equipo (`http://127.0.0.1:...`) puede guardarse como `ai.base_url` y funcionar sin clave; una dirección remota sigue necesitando https y su clave. Las tres guías de IA llevan la tabla en los ocho idiomas, y un servidor falso con el protocolo de OpenAI prueba las respuestas 200, 401, 429 y un tiempo agotado, con la clave ausente de toda salida.
+
 ## [1.9.3]
 
 ### Añadido

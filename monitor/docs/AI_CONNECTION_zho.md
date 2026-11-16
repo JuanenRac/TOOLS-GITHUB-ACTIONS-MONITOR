@@ -65,14 +65,14 @@ GitHub 配额由监视器、AI 工具和账户下的所有其他工具共享。�
 
 | 名称 | 类型 | 提供方 | 地址 | 密钥变量 | 示例模型 | 隐私 | 状态 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| OpenAI | 托管 | `openai-compatible` | `https://api.openai.com/v1` | `OPENAI_API_KEY` | `gpt-4o-mini`, `gpt-4.1-mini` | 通过互联网发送 | 协议兼容,尚未用本工具测试 |
+| OpenAI | 托管 | `openai-compatible` | `https://api.openai.com/v1` | `OPENAI_API_KEY` | `gpt-4o-mini`, `gpt-4.1-mini` | 通过互联网发送 | 地址取自公开文档;协议兼容,尚未用本工具测试 |
 | Anthropic | 托管 | `anthropic` | `默认地址` | `ANTHROPIC_API_KEY` | — | 通过互联网发送 | 协议兼容,尚未用本工具测试 |
 | Google Gemini | 托管 | `openai-compatible` | `https://generativelanguage.googleapis.com/v1beta/openai` | `GEMINI_API_KEY` | `gemini-2.5-flash` | 通过互联网发送 | 地址取自公开文档;协议兼容,尚未用本工具测试 |
-| xAI Grok | 托管 | `openai-compatible` | `https://api.x.ai/v1` | `XAI_API_KEY` | `grok-4` | 通过互联网发送 | 协议兼容,尚未用本工具测试 |
-| Mistral | 托管 | `openai-compatible` | `https://api.mistral.ai/v1` | `MISTRAL_API_KEY` | `mistral-small-latest` | 通过互联网发送 | 协议兼容,尚未用本工具测试 |
-| DeepSeek | 托管 | `openai-compatible` | `https://api.deepseek.com` | `DEEPSEEK_API_KEY` | `deepseek-chat` | 通过互联网发送 | 协议兼容,尚未用本工具测试 |
-| Groq | 托管 | `openai-compatible` | `https://api.groq.com/openai/v1` | `GROQ_API_KEY` | `llama-3.3-70b-versatile` | 通过互联网发送 | 协议兼容,尚未用本工具测试 |
-| OpenRouter | 托管 | `openai-compatible` | `https://openrouter.ai/api/v1` | `OPENROUTER_API_KEY` | `meta-llama/llama-3.3-70b-instruct` | 通过互联网发送 | 协议兼容,尚未用本工具测试 |
+| xAI Grok | 托管 | `openai-compatible` | `https://api.x.ai/v1` | `XAI_API_KEY` | `grok-4.7` | 通过互联网发送 | 地址取自公开文档;协议兼容,尚未用本工具测试 |
+| Mistral | 托管 | `openai-compatible` | `https://api.mistral.ai/v1` | `MISTRAL_API_KEY` | `mistral-small-latest` | 通过互联网发送 | 地址取自公开文档;协议兼容,尚未用本工具测试 |
+| DeepSeek | 托管 | `openai-compatible` | `https://api.deepseek.com` | `DEEPSEEK_API_KEY` | `deepseek-flash` | 通过互联网发送 | 地址取自公开文档;协议兼容,尚未用本工具测试 |
+| Groq | 托管 | `openai-compatible` | `https://api.groq.com/openai/v1` | `GROQ_API_KEY` | `llama-3.3-70b-versatile` | 通过互联网发送 | 地址取自公开文档;协议兼容,尚未用本工具测试 |
+| OpenRouter | 托管 | `openai-compatible` | `https://openrouter.ai/api/v1` | `OPENROUTER_API_KEY` | `meta-llama/llama-3.3-70b-instruct` | 通过互联网发送 | 地址取自公开文档;协议兼容,尚未用本工具测试 |
 | Together AI | 托管 | `openai-compatible` | `https://api.together.ai/v1` | `TOGETHER_API_KEY` | `meta-llama/Llama-3.3-70B-Instruct-Turbo` | 通过互联网发送 | 地址取自公开文档;协议兼容,尚未用本工具测试 |
 | Fireworks AI | 托管 | `openai-compatible` | `https://api.fireworks.ai/inference/v1` | `FIREWORKS_API_KEY` | `accounts/fireworks/models/llama-v3p1-8b-instruct` | 通过互联网发送 | 地址取自公开文档;协议兼容,尚未用本工具测试 |
 | Perplexity | 托管 | `openai-compatible` | `https://api.perplexity.ai` | `PERPLEXITY_API_KEY` | `sonar` | 通过互联网发送 | 地址取自公开文档;协议兼容,尚未用本工具测试 |
