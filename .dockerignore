@@ -2,6 +2,15 @@
 *
 !monitor
 monitor/tests
+# the folders of the person who runs the monitor (util/paths.KINDS): tokens, users, sessions, logs and the settings never go into an image
+monitor/config
+monitor/data
+monitor/logs
+monitor/ai
+monitor/**/*.tmp
+monitor/**/credential
+monitor/**/access_token
+monitor/**/secrets
 monitor/**/__pycache__
 monitor/**/*.pyc
 monitor/accounts

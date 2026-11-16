@@ -38,6 +38,7 @@ when this file and `tool_version.py` disagree.
 ### Security
 
 - **The process of each account no longer keeps the key of the supervisor and the access token in its environment**: both leave the environment at the very start of every process (monitor, supervisor and account), before the first `gh` or any other program is started, also when the access token has another name; nothing those programs inherit carries them. The comment that promised the secrets would be hidden from the process list of Linux now states its real limit.
+- **The image can no longer carry the data of whoever builds it**: the build context excluded the loose files of the old layout but not the `config/`, `data/`, `logs/` and `ai/` folders where the tokens, users, sessions and settings live now; they are excluded, the app stage of the Dockerfile deletes them too, and a test checks both against the list of folders of the product.
 
 ## [2.0.1]
 
