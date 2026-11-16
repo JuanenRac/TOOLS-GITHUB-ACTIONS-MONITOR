@@ -9,6 +9,11 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+
+### Modificato
+
+- **Il controllo dei file di una release si adatta al progetto**: `sentinel.surface.checks.release_assets.require_sha256` e `.require_signature` smettono di chiedere un file di checksum o di firma, `.allow_empty` accetta una release senza file (progetti che pubblicano in un registro di pacchetti), `sentinel.surface.checks.tag_vs_version.prefixes` confronta tag come `cli-v1.2.0` con il manifesto e `.prerelease_ok` tratta le beta di un giorno di una versione a calendario come la stessa versione; `sentinel.require_verified_signature` era già disattivabile. I valori predefiniti chiedono ciò che chiedevano prima.
+
 ## [2.0.2]
 
 ### Sicurezza

@@ -9,6 +9,11 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+
+### Alterado
+
+- **A verificação dos ficheiros de uma release adapta-se ao projeto**: `sentinel.surface.checks.release_assets.require_sha256` e `.require_signature` deixam de pedir um ficheiro de somas ou de assinatura, `.allow_empty` aceita uma release sem ficheiros (projetos que publicam num registo de pacotes), `sentinel.surface.checks.tag_vs_version.prefixes` compara etiquetas como `cli-v1.2.0` com o manifesto e `.prerelease_ok` trata as betas de um dia de uma versão por calendário como a mesma versão; `sentinel.require_verified_signature` já se podia desativar. Os valores por defeito pedem o mesmo que antes.
+
 ## [2.0.2]
 
 ### Segurança

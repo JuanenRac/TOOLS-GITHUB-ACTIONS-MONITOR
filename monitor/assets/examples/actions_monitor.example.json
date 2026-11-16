@@ -123,10 +123,15 @@
             "apk-build.yml": [
               "sha256"
             ]
-          }
+          },
+          "require_sha256": true,
+          "require_signature": true,
+          "allow_empty": false
         },
         "tag_vs_version": {
-          "enabled": true
+          "enabled": true,
+          "prefixes": [],
+          "prerelease_ok": false
         },
         "packages": {
           "enabled": true

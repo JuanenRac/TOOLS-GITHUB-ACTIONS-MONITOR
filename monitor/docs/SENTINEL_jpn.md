@@ -64,7 +64,8 @@
 | `matrix_os` | マトリクスの 1 つの OS だけで失敗 | on · max_per_tick=4 |
 | `artifacts` | アーティファクトのコスト | on · max_mb=500, retention_days=30 |
 | `required_checks` | 赤または欠落している必須チェック | on |
-| `release_assets` | 不完全な公開済みリリース | on · recent_days=30, required |
+| `release_assets` | 不完全な公開済みリリース | on · recent_days=30, required, require_sha256, require_signature, allow_empty（ファイルのないリリースを許可） |
+| `tag_vs_version` | タグとマニフェストのバージョン | on · prefixes (`sentinel.surface.checks.tag_vs_version.prefixes`), prerelease_ok |
 | `tag_vs_version` | リリースタグとマニフェスト/CHANGELOG のバージョンの比較 | on |
 | `packages` | GitHub Packages | on |
 | `drafts` | 放置された下書きとプレリリース | on · days=14 |

@@ -9,6 +9,11 @@
 
 ## [Unreleased]
 
+
+### 変更
+
+- **リリースファイルの確認がプロジェクトに合わせられます**: `sentinel.surface.checks.release_assets.require_sha256` と `.require_signature` はチェックサムや署名ファイルを求めなくなり、`.allow_empty` はファイルのないリリース（パッケージレジストリに公開するプロジェクト）を許可し、`sentinel.surface.checks.tag_vs_version.prefixes` は `cli-v1.2.0` のようなタグをマニフェストと比較し、`.prerelease_ok` は日付バージョンの同日のベータを同じバージョンとして扱います。`sentinel.require_verified_signature` は以前から無効にできます。既定値は従来どおりです。
+
 ## [2.0.2]
 
 ### セキュリティ
