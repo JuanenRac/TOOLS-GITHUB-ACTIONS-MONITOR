@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2206_passing-brightgreen.svg" alt="2206 tests">
+  <img src="https://img.shields.io/badge/Tests-2225_passing-brightgreen.svg" alt="2225 tests">
 </p>
 
 > 监视你所有仓库的工作流，并在一个本地页面上告诉你：哪些是红的、哪些卡住了、哪些在等你处理。
@@ -51,6 +51,7 @@
 - **每个仓库和团队的健康状况（仅 Complete）**：把 CI、三个哨兵的警报、发布就绪情况和活跃度汇总为一个状态（差、警告、正常或未查看）和一个风险值；团队标签页把最需要人处理的仓库排在前面，提供筛选、每个仓库的详情以及用于墙面屏幕的深度链接；同样的数据也可通过 `/api/team/health`、`/api/repos/<owner>/<repo>/health` 和 `team` 命令获得（`monitor/docs/HEALTH_zho.md`）。
 - **报告、操作日志和 Apprise（仅 Complete）**：按 cron 计划或按需生成账户报告（评分、变化、需要人处理的仓库、未处理的警报），格式为 HTML 和 Markdown，默认关闭（`monitor/docs/REPORT_SCHEDULE_zho.md`）；记录谁修改了什么的日志，带哈希链，不含任何值或机密（`monitor/docs/AUDIT_LOG_zho.md`）；以及可选的 Apprise 通知渠道，默认关闭。
 - **作为服务运行**：官方 Docker 镜像（非 root、只读）、带可选代理的 Compose 文件、systemd 单元、深度健康检查，以及创建第一个管理员的命令（`monitor/docs/DEPLOYMENT.md`）。
+- **冻结的 API 与每种用法的指南**：自 2.0.0 起，每个读取端点的形状和错误码都固定在 `monitor/docs/schemas/api_contract.json` 中，一个工具可据此检查任何正在运行的监视器（`monitor/tools/check_api_contract.py`），并为简易版、个人、服务和团队各提供一份简短指南（`monitor/docs/API_zho.md`）。
 - **多账户、团队和数据的存放位置**：每个账户一个进程，带角色和各自账户的用户，文件分放在 `config/`、`data/`、`logs/` 和 `ai/`，可选的 SQLite 存储及其保留与备份，端口成为设置项（`monitor/docs/ACCOUNTS.md`、`monitor/docs/STORAGE.md`、`monitor/docs/LAYOUT.md`）。
 - **可排序、可折叠的列表**：“正在发生”有七种排序方式，告警标签页有九种，并有折叠或展开所有仓库的按钮；该选择按用户记忆。
 - **每位用户的通知**：在团队模式下，每位用户在页面的面板中选择渠道（ntfy、Teams、电子邮件）、最低级别和汇总（`monitor/docs/NOTIFICATIONS_zho.md`）。
@@ -67,7 +68,7 @@
 
 | | |
 |---|---|
-| **版本** | **1.9.5** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **版本** | **2.0.0** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **需要** | Python 3.11+ 和 GitHub CLI（`gh auth login`）；不需要其他东西(终端视图使用可选的 `rich` 包) |
 | **打开** | 仅在 `127.0.0.1` 上的页面，支持八种语言 |
 | **写入 GitHub** | 绝不自行写入：只有你用明确的 `--go` 运行的批处理命令才会 |
@@ -75,12 +76,12 @@
 
 <!-- glance:begin -->
 
-**今日实测** (v1.9.5)
+**今日实测** (v2.0.0)
 
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 2206 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **测试** | 2225 个测试方法(`python -m unittest discover -s monitor/tests`) |
 | **设置** | 415 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
@@ -281,6 +282,10 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/CI_RED_BRIDGE_zho.md`](monitor/docs/CI_RED_BRIDGE_zho.md): 把 ci_red.json 带到仪表板
 - [`monitor/docs/WEBHOOK_zho.md`](monitor/docs/WEBHOOK_zho.md): 入站 Webhook
 - [`monitor/docs/LITE_zho.md`](monitor/docs/LITE_zho.md): lite 版
+- [`monitor/docs/COMPLETE_INDIVIDUAL_zho.md`](monitor/docs/COMPLETE_INDIVIDUAL_zho.md): 面向个人的完整版
+- [`monitor/docs/COMPLETE_SERVICE_zho.md`](monitor/docs/COMPLETE_SERVICE_zho.md): 作为服务运行的完整版
+- [`monitor/docs/COMPLETE_TEAM_zho.md`](monitor/docs/COMPLETE_TEAM_zho.md): 面向团队的完整版
+- [`monitor/docs/API_zho.md`](monitor/docs/API_zho.md): 面向客户端的 API
 - [`monitor/docs/NOTIFICATIONS_zho.md`](monitor/docs/NOTIFICATIONS_zho.md): 通知与适配器约定
 - [`monitor/docs/AI_zho.md`](monitor/docs/AI_zho.md): AI 助手:提供方、安全与操作
 - [`monitor/docs/ANALYTICS_zho.md`](monitor/docs/ANALYTICS_zho.md): 分析、条件读取与连接丢失

@@ -4,23 +4,23 @@ Ce qui est publié, ce qui vient ensuite et ce qui n'est qu'une idée, dans cet 
 
 ## Où en est le moniteur
 
-Version 1.9.5. L'édition lite montre ce qui tourne et ce qui a échoué. L'édition complète ajoute trois sentinelles (CI, Collab et Security), une liste d'alertes, plusieurs comptes et une équipe avec des rôles, la note de chaque compte, la santé de chaque dépôt et de l'équipe, des rapports programmés, un journal des actions, des notifications (ntfy, Teams, e-mail et Apprise), un assistant d'IA facultatif avec des préréglages de services compatibles, le mode service avec Docker et une page pour toutes les tailles d'écran, du téléphone à la 4K.
+Version 2.0.0. L'édition lite montre ce qui tourne et ce qui a échoué. L'édition complète ajoute trois sentinelles (CI, Collab et Security), une liste d'alertes, plusieurs comptes et une équipe avec des rôles, la note de chaque compte, la santé de chaque dépôt et de l'équipe, des rapports programmés, un journal des actions, des notifications (ntfy, Teams, e-mail et Apprise), un assistant d'IA facultatif avec des préréglages de services compatibles, le mode service avec Docker et une page pour toutes les tailles d'écran, du téléphone à la 4K.
 
 ## Prévu, dans cet ordre
 
 Chaque version ne porte que du contenu réel : une version sans rien de réel à ajouter est sautée et jamais publiée vide. Rien ici n'est tenu pour prouvé sur des services réels sauf si son guide le dit.
 
-### 1.9.6 à 1.9.9 - Clôture de la troisième phase
+### 2.0.1 à 2.0.9 - Après le gel
 
-Ce que les revues de la note, de la sentinelle de sécurité, des vues de santé, des rapports et du journal des actions trouvent encore ; le coût en appels à GitHub avec trois sentinelles actives ; une note qui reste cohérente quand une sentinelle est éteinte.
-
-### 2.0.0 - Maturité
-
-Une version majeure qui nettoie la dette technique et fige les interfaces publiques : sentinelles, stockage, alertes, le schéma d'événements et l'API de lecture, avec une suite de tests de contrat que les clients peuvent lancer contre n'importe quelle version. Un guide pour chaque façon d'utiliser le produit (lite, individuel, service, équipe) et une référence des réglages, événements, métriques et API. À partir de la 2.0.1, un coussin pour ce qui n'apparaît qu'à l'usage réel prolongé.
+Ce qui n'apparaît qu'à l'usage réel prolongé : la migration depuis la 1.8 et la 1.9, la croissance des événements et de la base de données sur des mois, les sessions après une mise à jour, les volumes Docker, beaucoup de comptes avec trois sentinelles et le mode équipe en même temps, et ce que trouve la suite de contrat. Rien de la quatrième phase (greffons, automatisation étendue, IA avancée) n'entre dans ces versions ; une version sans contenu réel est sautée.
 
 Les workflows du moniteur lui-même respectent ce que la sentinelle d'hygiène demandera aux autres : actions fixées à un commit, permissions minimales et une limite de temps sur chaque job.
 
-## Fait dans la 1.8.2 à la 1.9.5
+## Fait dans la 1.8.2 à la 2.0.0
+
+### 2.0.0 - Maturité
+
+L'API de lecture et les interfaces publiques sont figées : un fichier de contrat avec les clés et les types de chaque point d'accès en lecture et les codes d'erreur, une suite de tests et un outil qui le vérifient contre n'importe quel moniteur en marche, un test qui fixe les champs d'une alerte et les méthodes d'une sentinelle et d'un stockage, et un guide pour chaque usage (lite, une personne, service, équipe) et pour les clients de l'API, en huit langues. Les versions 1.9.6 à 1.9.9 n'avaient rien de réel à ajouter après les revues de clôture et ont été sautées.
 
 ### 1.9.5 - Flux des événements en direct
 

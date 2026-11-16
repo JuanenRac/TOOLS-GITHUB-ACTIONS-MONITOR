@@ -9,23 +9,23 @@ What has shipped, what comes next and what is only an idea, in that order of cer
 
 ## Where the monitor is now
 
-Version 1.9.5. The lite edition shows what runs and what failed. The complete edition adds three sentinels (CI, Collab and Security), one list of alerts, several accounts and a team with roles, the score of each account, the health of each repository and of the team, scheduled reports, a log of actions, notifications (ntfy, Teams, e-mail and Apprise), an optional AI assistant with presets of compatible services, the service mode with Docker, and a page for every size of screen from a phone to 4K.
+Version 2.0.0. The lite edition shows what runs and what failed. The complete edition adds three sentinels (CI, Collab and Security), one list of alerts, several accounts and a team with roles, the score of each account, the health of each repository and of the team, scheduled reports, a log of actions, notifications (ntfy, Teams, e-mail and Apprise), an optional AI assistant with presets of compatible services, the service mode with Docker, and a page for every size of screen from a phone to 4K.
 
 ## Planned, in this order
 
 Each version carries only real content: a version with nothing real to add is skipped and never published empty. Nothing here is claimed as proven on live services unless its guide says so.
 
-### 1.9.6 to 1.9.9 - Closing of the third phase
+### 2.0.1 to 2.0.9 - After the freeze
 
-What the reviews of the score, the security sentinel, the health views, the reports and the log of actions still find; the cost in calls to GitHub with three sentinels running; a score that stays coherent when a sentinel is off.
-
-### 2.0.0 - Maturity
-
-A major version that cleans up technical debt and freezes the public interfaces: sentinels, storage, alerts, the event schema and the read API, with a suite of contract tests that clients can run against any release. One guide for each way to use the product (lite, individual, service, team) and a reference of settings, events, metrics and API. 2.0.1 onwards is a cushion for what only shows with long real use.
+What only shows with long real use: the migration from 1.8 and 1.9, the growth of the events and the database over months, sessions after an upgrade, Docker volumes, many accounts with three sentinels and the team mode together, and whatever the contract suite finds. Nothing of the fourth phase (plugins, wide automation, advanced AI) goes into these versions; a version with nothing real to add is skipped.
 
 The monitor's own workflows keep to what the hygiene sentinel will ask of others: actions pinned to a commit, the least permissions and a time limit on every job.
 
-## Done in 1.8.2 to 1.9.5
+## Done in 1.8.2 to 2.0.0
+
+### 2.0.0 - Maturity
+
+The read API and the public interfaces are frozen: a contract file with the keys and types of every read endpoint and the error codes, a suite of tests and a tool that check it against any running monitor, a test that fixes the fields of an alert and the methods of a sentinel and a storage, and one guide for each use (lite, one person, service, team) and for the clients of the API, in eight languages. The versions 1.9.6 to 1.9.9 had nothing real to add after the closing reviews and were skipped.
 
 ### 1.9.5 - Live events stream
 

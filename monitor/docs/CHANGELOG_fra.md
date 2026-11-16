@@ -9,6 +9,22 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+## [2.0.0]
+
+### Ajouté
+
+- **Le contrat de l'API de lecture, figé à partir de maintenant** : `docs/schemas/api_contract.json` liste les 37 points d'accès en lecture avec les clés et les types de leurs réponses dans chaque édition (et lesquels l'édition Lite refuse avec `404`) et les codes d'erreur de la porte (`401 access`, `403 forbidden`, `404`). Une clé listée garde son nom et son type pendant toute la 2.x ; de nouvelles clés peuvent apparaître et rien n'est retiré sans nouvelle version majeure. La suite `test_200_contract.py` le vérifie contre un vrai serveur de chaque édition, ainsi que les règles de la porte : un `Host` étranger donne `403`, le mode réseau demande le jeton dans l'en-tête `X-Monitor-Access` et répond `401 access` sans lui, les mots d'une requête que personne ne lit sont ignorés et toute réponse est du JSON en UTF-8.
+
+- **Un outil pour vérifier n'importe quel moniteur en marche contre le contrat** : `python tools/check_api_contract.py` (`--lite`, `--url`, `--token-file`) lit le contrat, interroge le moniteur avec `GET` seulement, affiche une ligne pour chaque clé manquante ou d'un autre type et finit par `CONTRACT=PASS` ou `CONTRACT=FAIL` (code de sortie 0, 1, ou 2 si personne ne répond). Il s'adresse à ceux dont les scripts, écrans muraux ou clients mobiles dépendent des réponses, après chaque mise à jour du moniteur ou du client. Il n'appelle pas GitHub.
+
+- **Les interfaces des sentinelles et des stockages sont aussi figées par un test** : `test_200_interfaces.py` fixe les neuf champs d'une `Alert`, les méthodes de `BaseSentinel` et de `Storage` avec les noms de leurs paramètres, les types d'enregistrement et le fait que les deux stockages et les trois sentinelles implémentent chaque méthode. Un changement ici est un changement de contrat.
+
+- **Un guide pour chaque usage, en huit langues** : Complète pour une personne (`COMPLETE_INDIVIDUAL.md`), Complète en service (`COMPLETE_SERVICE.md`), Complète pour une équipe (`COMPLETE_TEAM.md`) et l'API pour les clients (`API.md`), à côté du guide court de l'édition Lite. Ils sont dans le panneau d'aide et dans la liste des guides du README, et un test vérifie qu'ils existent en huit langues, que leurs liens se résolvent et que chaque réglage et point d'accès cité existe. Un second test lit chaque guide de la documentation dans les huit langues et échoue si l'un nomme une route que le code n'a pas.
+
+### Modifié
+
+- **Version 2.0.0, le moniteur est déclaré mûr** : désormais les points d'accès en lecture, l'`Alert`, `BaseSentinel` et `Storage` ne changent qu'avec une nouvelle version majeure (un ajout que les anciens clients peuvent ignorer est permis et noté ici). Le message du produit est le même dans le README, les guides et l'aide : Lite est l'édition simple pour une personne sur un ordinateur, Complète est le centre de contrôle (plusieurs comptes, une équipe, un service et des clients). Rien d'autre ne change dans le comportement du moniteur dans cette version.
+
 ## [1.9.5]
 
 ### Ajouté

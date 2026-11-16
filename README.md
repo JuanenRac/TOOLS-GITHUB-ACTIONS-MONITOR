@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2206_passing-brightgreen.svg" alt="2206 tests">
+  <img src="https://img.shields.io/badge/Tests-2225_passing-brightgreen.svg" alt="2225 tests">
 </p>
 
 > Watches the workflows of every repository you own and tells you, on one local page, what is red, what is stuck and what is waiting for you.
@@ -51,6 +51,7 @@
 - **The health of each repository and of the team (Complete only)**: CI, alerts of the three sentinels, release readiness and activity in one state (bad, warning, OK or not seen) with a risk number; the Team tab ranks the repositories that need a person first, with filters, a detail for each one and deep links for wall screens; the same data are at `/api/team/health`, `/api/repos/<owner>/<repo>/health` and the `team` command (`monitor/docs/HEALTH.md`).
 - **Reports, a log of actions and Apprise (Complete only)**: a report of the account (score, what changed, repositories that need a person, open alerts) written as HTML and Markdown on a cron schedule or on demand, off by default (`monitor/docs/REPORT_SCHEDULE.md`); a log of who changed what, with a chain of hashes and no value or secret in it (`monitor/docs/AUDIT_LOG.md`); and an optional Apprise channel for notifications, off by default.
 - **As a service**: the official Docker image (non-root, read-only), a Compose file with an optional proxy, a systemd unit, a deep health check and the command that creates the first administrator (`monitor/docs/DEPLOYMENT.md`).
+- **A frozen API and a guide for each use**: from 2.0.0 the shape of every read endpoint and the error codes are fixed in `monitor/docs/schemas/api_contract.json`, a tool checks any running monitor against it (`monitor/tools/check_api_contract.py`), and there is a short guide for the lite edition, for one person, for a service and for a team (`monitor/docs/API.md`).
 - **Several accounts, a team and a place for the data**: one process per account, users with roles and their own accounts, the files in `config/`, `data/`, `logs/` and `ai/`, an optional SQLite storage with retention and backup, and the ports as settings (`monitor/docs/ACCOUNTS.md`, `monitor/docs/STORAGE.md`, `monitor/docs/LAYOUT.md`).
 - **Lists you can sort and fold**: Happening now in seven ways and the Alerts tab in nine, with a button to fold or unfold every repository; the choice is remembered for each user.
 - **Notifications for each user**: in the team mode every user chooses channels (ntfy, Teams, e-mail), the lowest level and digests in a panel of the page (`monitor/docs/NOTIFICATIONS.md`).
@@ -67,7 +68,7 @@
 
 | | |
 |---|---|
-| **Version** | **1.9.5** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **2.0.0** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Needs** | Python 3.11+ and the GitHub CLI (`gh auth login`); nothing else (the terminal view uses the optional package `rich`) |
 | **Opens** | a page on `127.0.0.1` only, in eight languages |
 | **Writes to GitHub** | never by itself: only batch commands you run with an explicit `--go` |
@@ -75,12 +76,12 @@
 
 <!-- glance:begin -->
 
-**Measured today** (v1.9.5)
+**Measured today** (v2.0.0)
 
 | | |
 |---|---|
 | **Maturity** | functional |
-| **Tests** | 2206 test methods (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 2225 test methods (`python -m unittest discover -s monitor/tests`) |
 | **Settings** | 415 settings, all with help |
 | **Languages** | 8 (English, Spanish, German, French, Italian, Japanese, Chinese, Portuguese) |
 | **Tested in the CI on** | ubuntu, windows, Python 3.11, 3.13 |
@@ -281,6 +282,10 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/CI_RED_BRIDGE.md`](monitor/docs/CI_RED_BRIDGE.md): carrying ci_red.json to a dashboard
 - [`monitor/docs/WEBHOOK.md`](monitor/docs/WEBHOOK.md): the incoming webhook
 - [`monitor/docs/LITE.md`](monitor/docs/LITE.md): The lite edition
+- [`monitor/docs/COMPLETE_INDIVIDUAL.md`](monitor/docs/COMPLETE_INDIVIDUAL.md): Complete edition for one person
+- [`monitor/docs/COMPLETE_SERVICE.md`](monitor/docs/COMPLETE_SERVICE.md): Complete edition as a service
+- [`monitor/docs/COMPLETE_TEAM.md`](monitor/docs/COMPLETE_TEAM.md): Complete edition for a team
+- [`monitor/docs/API.md`](monitor/docs/API.md): The API for clients
 - [`monitor/docs/NOTIFICATIONS.md`](monitor/docs/NOTIFICATIONS.md): notifications and the adapter contract
 - [`monitor/docs/SKILLS.md`](monitor/docs/SKILLS.md): the two skills for AIs, how they are made and how to install them
 - [`monitor/docs/EXTRAS.md`](monitor/docs/EXTRAS.md): optional extras - the log of the failed step and a read-only token of the GitHub App

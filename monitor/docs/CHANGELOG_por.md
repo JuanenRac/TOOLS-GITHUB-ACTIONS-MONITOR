@@ -9,6 +9,22 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+## [2.0.0]
+
+### Adicionado
+
+- **O contrato da API de leitura, congelado a partir de agora**: `docs/schemas/api_contract.json` lista os 37 endpoints de leitura com as chaves e os tipos das suas respostas em cada edição (e quais a edição Lite recusa com `404`) e os códigos de erro da porta (`401 access`, `403 forbidden`, `404`). Uma chave listada mantém o nome e o tipo durante toda a 2.x; podem aparecer chaves novas e nada é retirado sem uma nova versão maior. A bateria `test_200_contract.py` verifica-o contra um servidor real de cada edição e também as regras da porta: um `Host` alheio dá `403`, o modo de rede pede o token no cabeçalho `X-Monitor-Access` e responde `401 access` sem ele, as palavras de uma consulta que ninguém lê são ignoradas e toda a resposta é JSON em UTF-8.
+
+- **Uma ferramenta para verificar qualquer monitor em execução contra o contrato**: `python tools/check_api_contract.py` (`--lite`, `--url`, `--token-file`) lê o contrato, pergunta ao monitor apenas com `GET`, imprime uma linha por cada chave em falta ou de outro tipo e termina com `CONTRACT=PASS` ou `CONTRACT=FAIL` (código de saída 0, 1, ou 2 se ninguém responder). Destina-se a quem tem scripts, ecrãs de parede ou clientes móveis que dependem das respostas, após cada atualização do monitor ou do cliente. Não chama o GitHub.
+
+- **As interfaces de sentinelas e armazenamentos também estão congeladas por um teste**: `test_200_interfaces.py` fixa os nove campos de um `Alert`, os métodos de `BaseSentinel` e de `Storage` com os nomes dos seus parâmetros, os tipos de registo e que os dois armazenamentos e as três sentinelas implementam cada método. Uma alteração aí é uma alteração do contrato.
+
+- **Um guia para cada uso, em oito idiomas**: Completa para uma pessoa (`COMPLETE_INDIVIDUAL.md`), Completa como serviço (`COMPLETE_SERVICE.md`), Completa para uma equipa (`COMPLETE_TEAM.md`) e a API para clientes (`API.md`), ao lado do guia curto da edição Lite. Estão no painel de Ajuda e na lista de guias do README, e um teste verifica que existem em oito idiomas, que as ligações se resolvem e que cada definição e endpoint mencionado existe. Um segundo teste lê todos os guias da documentação nos oito idiomas e falha se algum mencionar uma rota que o código não tem.
+
+### Alterado
+
+- **Versão 2.0.0, o monitor é declarado maduro**: a partir de agora os endpoints de leitura, o `Alert`, o `BaseSentinel` e o `Storage` só mudam com uma nova versão maior (uma adição que os clientes antigos possam ignorar é permitida e anotada aqui). A mensagem do produto é a mesma no README, nos guias e na ajuda: a Lite é a edição simples para uma pessoa num computador, a Completa é o centro de controlo (várias contas, uma equipa, um serviço e clientes). Nada mais no comportamento do monitor muda nesta versão.
+
 ## [1.9.5]
 
 ### Adicionado
