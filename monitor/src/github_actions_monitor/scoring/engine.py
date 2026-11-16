@@ -145,7 +145,7 @@ def compute(metrics, cfg, watched_hours=None, previous=None):
         state = "insufficient_data" if reasons else "scored"
     base["state"] = state
     base["data_quality"] = {"runs": runs, "min_runs": cfg["min_runs"], "coverage": coverage, "min_coverage": cfg["min_coverage"],
-                            "watched_hours": watched_hours, "reasons": reasons}
+                            "watched_hours": watched_hours, "calibrating_hours": cfg["calibrating_hours"], "reasons": reasons}
     if state != "scored":
         return base
     score = round(total / weight_with_data, 1)

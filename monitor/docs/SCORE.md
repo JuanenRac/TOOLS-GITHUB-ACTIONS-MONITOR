@@ -45,7 +45,7 @@ Each account has its own score. Its detail breaks it down by repository (the CI 
 
 ## On the page
 
-A chip in the header, next to the readiness chips, shows the score: the number, the letter, an arrow with the change against the window before and a small line with the last days. Its colour follows the letter (A and B green, C amber, D and E red). While there is no number it is neutral and says why (calibrating, not enough data). A star after the letter means that a part is not counted yet (today, security): a high number is then not an all clear. Hovering over it shows the coverage, the parts with their weights and the weakest repository. The chip is not shown in Lite, nor when the score is off (`score.enabled`).
+A chip in the header, next to the readiness chips, shows the score: the number, the letter, an arrow with the change against the window before and a small line with the last days. Its colour follows the letter (A and B green, C amber, D and E red). While there is no number it is neutral and says why (calibrating, not enough data). A star after the letter means that a part is not counted yet (today, security): a high number is then not an all clear. Hovering over it shows the coverage, the parts with their weights and the weakest repository. The chip is not shown in Lite, nor when the score is off (`score.enabled`). While it calibrates the chip says how long is left of `score.calibrating_hours`, with a bar and the day and hour when the number will appear; with not enough data it says which condition fails (runs or coverage), and the hover also says why a part is not counted (a sentinel that is off, that has not finished its first sweep or that has read too few repositories).
 
 ## For other tools
 

@@ -9,6 +9,11 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+### Corrigé
+
+- **Un groupe des pastilles de préparation dit pourquoi il n'a pas de chiffre, et un dépôt sans aucun workflow ne baisse plus sa couverture** : un dépôt dont le clone n'a aucun fichier de workflow et qui n'a aucune exécution est « non applicable » : il est exclu de la couverture de son groupe (un groupe de cinq dont deux sont neufs et vides se mesure donc sur les trois autres) et listé à part dans l'infobulle et dans le tableau. Un groupe encore sous `sentinel.readiness.min_coverage` affiche les mots « données insuffisantes » (et non un « ? » muet) et son infobulle dit combien de dépôts ont des données face au minimum et lesquels en manquent. Le minimum par défaut ne change pas.
+- **Le score du compte dit combien dure le calibrage et pourquoi il manque quelque chose** : pendant le calibrage, la pastille indique ce qu'il reste de `score.calibrating_hours` avec une barre et le jour et l'heure où le chiffre apparaîtra (`data_quality.calibrating_hours` est nouveau) ; « données insuffisantes » indique la condition qui échoue (exécutions ou couverture), et `GET /api/score` porte `missing_detail` avec la raison pour laquelle une partie n'est pas comptée (sa sentinelle est éteinte, elle n'a pas fini son premier balayage et combien de dépôts elle a lus, elle en a lu trop peu, ses sources sont illisibles, ou les données sont prêtes pour le prochain passage).
+
 
 ### Ajouté
 

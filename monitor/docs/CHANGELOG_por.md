@@ -9,6 +9,11 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+### Corrigido
+
+- **Um grupo das fichas de preparação diz porque não tem número, e um repositório sem nenhum workflow já não baixa a sua cobertura**: um repositório cujo clone não tem ficheiros de workflow e que não tem execuções é «não aplicável»: fica fora da cobertura do seu grupo (um grupo de cinco em que dois são novos e vazios mede-se com os outros três) e é listado à parte no texto ao passar o rato e na tabela. Um grupo ainda abaixo de `sentinel.readiness.min_coverage` mostra as palavras «dados insuficientes» (e não um «?» mudo) e o seu texto diz quantos repositórios têm dados face ao mínimo e quais lhes faltam. O mínimo por omissão não muda.
+- **A pontuação da conta diz quanto dura a calibração e porque falta algo**: durante a calibração, a ficha diz quanto falta de `score.calibrating_hours` com uma barra e o dia e a hora em que o número vai aparecer (`data_quality.calibrating_hours` é novo); «dados insuficientes» diz que condição falha (execuções ou cobertura), e `GET /api/score` traz `missing_detail` com o motivo por que uma parte não conta (a sua sentinela está desligada, não terminou a primeira varredura e quantos repositórios leu, leu poucos, não consegue ler as fontes, ou os dados estão prontos para a próxima passagem).
+
 
 ### Adicionado
 

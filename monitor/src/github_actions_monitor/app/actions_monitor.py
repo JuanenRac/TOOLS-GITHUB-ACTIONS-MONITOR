@@ -1519,6 +1519,35 @@ def score_security(registry, config):
     return {"penalty": sentinel.get_metrics().get("security_penalty", 0), "repos": checked}
 
 
+def score_missing_detail(registry, config, answer):
+    """Why each part of the score that has no data has none: [{"part", "reason", "checked", "scope"}]. reason: `sentinel_off` (it is not running), `first_sweep` (it has not read a repository yet),
+    `partial` (it has read fewer than `score.min_coverage` of its repositories), `unreadable` (the sources could not be read), `next_pass` (the data is there and the next pass of the score takes it)."""
+    from github_actions_monitor.scoring import engine as score_engine
+    sentinels = {"security": "security", "collaboration": "collab"}
+    wanted = list(answer.get("missing_parts") or [])
+    wanted += [p["part"] for p in answer.get("parts") or [] if p.get("part") in sentinels and not p.get("available") and p["part"] not in wanted]
+    minimum = score_engine.settings(config)["min_coverage"]
+    out = []
+    for part in wanted:
+        sentinel = registry.get(sentinels.get(part, part)) if registry else None
+        row = {"part": part, "reason": "sentinel_off", "checked": 0, "scope": 0}
+        if sentinel is not None and getattr(sentinel, "enabled", False):
+            status = sentinel.get_status()
+            scope, checked = status.get("repos_in_scope") or 0, status.get("repos_checked") or 0
+            readable, total = status.get("sources_readable") or 0, status.get("sources_total") or 0
+            row.update(checked=checked, scope=scope)
+            if not scope or not checked:
+                row["reason"] = "first_sweep"
+            elif checked / scope < minimum:
+                row["reason"] = "partial"
+            elif total and readable / total < minimum:
+                row["reason"] = "unreadable"
+            else:
+                row["reason"] = "next_pass"
+        out.append(row)
+    return out
+
+
 def score_tick(config, data):
     """The pass of the score (once every few minutes at most): the runs and the alerts of the collaboration sentinel go to the ledger and the snapshot of the hour is written. Complete only; a
     failure is counted and never stops the cycle."""
@@ -2691,7 +2720,15 @@ class Handler(BaseHTTPRequestHandler):
                 return
             storage, account = runtime.process_storage(CHILD["account"] or None)
             config = toolconfig.raw_config()
-            self.json_reply(score_api.history(storage, account, config, ask) if path.endswith("/history") else score_api.latest(storage, account, config))
+            if path.endswith("/history"):
+                self.json_reply(score_api.history(storage, account, config, ask))
+                return
+            answer = score_api.latest(storage, account, config)
+            try:
+                answer["missing_detail"] = score_missing_detail(SENTINEL.get("registry"), config, answer) if answer.get("state") != "off" else []
+            except Exception:   # noqa: BLE001 - the reason is a help: the answer is given without it
+                answer["missing_detail"] = []
+            self.json_reply(answer)
         elif path == "/api/audit-log":      # the log of actions of this account: an administrator, or a maintainer when the setting says so (Complete only)
             if not self.guard():
                 return
