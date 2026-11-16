@@ -5,8 +5,9 @@
 
 Nothing is compiled on this PC. The commands only talk to GitHub through `gh`:
 
-  py -3 bin/gha_dispatch_all.py plan     [--only NAME ... | --ecosystem E] [--json]
-                                                             what would be built (no calls that change anything); --json = machine-readable
+  py -3 bin/gha_dispatch_all.py plan     [--only NAME ... | --ecosystem E] [--json] [--inputs]
+                                                             what would be built (no calls that change anything); --json = machine-readable; --inputs also lists the manual inputs
+                                                             each workflow asks for (read from origin/main of the clone; nothing is fired)
   py -3 bin/gha_dispatch_all.py dispatch [--only NAME ... | --ecosystem E] --go
                                                              fires workflow_dispatch for each target (dry_run=true: artefacts + attestation, no draft)
   py -3 bin/gha_dispatch_all.py status                           state of the last batch (runs, jobs, open build-failed/build-stuck issues)
@@ -567,15 +568,22 @@ def cmd_hygiene(args):
     return 1 if (broken or uncovered or odd_branch) else 0
 
 
-def plan_rows(names, head=None):
-    """One dict per target for `plan` (human and --json). `head` = function repo -> (sha, problem); default: the local clone."""
+def workflow_inputs(name):
+    """The manual inputs of the workflow of a target, read from the file at origin/main of the local clone (read only, nothing is run): a list, [] for none, None when it could not be read."""
+    from github_actions_monitor.integrations import dispatch_inputs
+    code, text, _err = git_run(ROOT / repo_of(name), "show", f"origin/main:.github/workflows/{TARGETS[name]['workflow']}")
+    return dispatch_inputs.parse(text) if code == 0 else None
+
+
+def plan_rows(names, head=None, inputs=False):
+    """One dict per target for `plan` (human and --json). `head` = function repo -> (sha, problem); default: the local clone. With `inputs` each row also lists the manual inputs of the workflow."""
     head = head or local_head
     rows = []
     for name in names:
         target = TARGETS[name]
         sha, why = head(repo_of(name))
         rows.append({"name": name, "repo": repo_of(name), "ecosystem": ecosystem_of(repo_of(name)), "workflow": target["workflow"], "tool": target["tool"],
-                     "main_sha": sha, "clone_problem": why or ""})
+                     "main_sha": sha, "clone_problem": why or "", **({"inputs": workflow_inputs(name)} if inputs else {})})
     return rows
 
 
@@ -606,7 +614,7 @@ def profile_arg(args):
 
 def cmd_plan(args):
     names = pick(args.only, getattr(args, "ecosystem", None), profile_arg(args))
-    rows = plan_rows(names)
+    rows = plan_rows(names, inputs=getattr(args, "inputs", False))
     problems = preflight(names)
     whole = not args.only and not getattr(args, "ecosystem", None) and not profile_arg(args)
     orphans = orphan_rows() if whole else []   # a whole-catalogue plan always shows what the batch does NOT know yet
@@ -615,6 +623,14 @@ def cmd_plan(args):
         return 2 if problems else 0
     for r in rows:
         print(f"{r['name']:30} {r['workflow']:24} {r['tool']:26} main={r['main_sha'] and r['main_sha'][:7]} {r['clone_problem']}")
+        if "inputs" in r:      # the inputs a person is asked for when firing it by hand; listed, never sent
+            from github_actions_monitor.integrations import dispatch_inputs
+            if r["inputs"] is None:
+                print("    " + t("gd.inputs_unknown"))
+            elif not r["inputs"]:
+                print("    " + t("gd.inputs_none"))
+            for item in r["inputs"] or []:
+                print("    - " + dispatch_inputs.describe(item, t("gd.word_required"), t("gd.word_optional")))
     if whole:
         print("\n" + te("gd.orphans", n=len(orphans)))
         for o in orphans:
@@ -894,6 +910,7 @@ def main():
         group.add_argument("--profile", help=t("gd.help_profile"))
         if name == "plan":
             p.add_argument("--json", action="store_true", help=t("gd.help_plan_json"))
+            p.add_argument("--inputs", action="store_true", help=t("gd.help_plan_inputs"))
         if name == "dispatch":
             p.add_argument("--go", action="store_true", help=t("gd.help_go"))
             p.add_argument("--real", action="store_true", help=t("gd.help_real"))
