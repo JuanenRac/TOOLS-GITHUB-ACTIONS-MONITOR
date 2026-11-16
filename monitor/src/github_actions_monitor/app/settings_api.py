@@ -45,11 +45,13 @@ MAX_BODY = 16384
 NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}\Z")
 NET_RE = re.compile(r"^[0-9A-Fa-f:.]{2,45}(?:/[0-9]{1,3})?\Z")      # an address or a block of addresses (listen.trusted_proxies)
 LABEL_RE = re.compile(r"^[\w .:/+-]{1,50}\Z")      # a label of GitHub may hold a colon, a space or a slash ("monitor:ignore", "good first issue")
+PAIR_KEYS = ("ci.stuck.workflow_minutes", "ci.stuck.runner_minutes")
 LABEL_KEYS = ("sentinels.collab.rules.issue_critical_labels", "sentinels.collab.rules.ignore_labels")
 GLOB_RE = re.compile(r"^[A-Za-z0-9._*? -]{1,100}\Z")      # a name or a pattern of names (a ruleset may be called "Protect main" or "main-*")
 HYGIENE_SKIP = ("ruleset", "label", "file", "sha", "allowed", "schedule")
 TZ_RE = re.compile(r"^(?:local|utc|UTC|[A-Za-z][A-Za-z0-9_+./-]{1,63})\Z")      # display.timezone: local, utc or an IANA name
 CRON_RE = re.compile(r"^[0-9*/,\- ]{9,60}\Z")      # report_schedule.cron: five fields of numbers, lists, ranges and steps (reporting/report_schedule.py reads it)
+PAIR_RE = re.compile(r"^[A-Za-z0-9._*/-]{1,100}=[0-9]{1,5}\Z")      # ci.stuck.workflow_minutes / ci.stuck.runner_minutes: "pattern=minutes"
 BRANCH_RE = re.compile(r"^[A-Za-z0-9._*/-]{1,100}\Z")      # a branch name or a pattern of branch names (ci.extra_branches)
 OWNER_RE = re.compile(r"^[A-Za-z0-9-]{0,39}\Z")
 MODEL_RE = re.compile(r"^[A-Za-z0-9._:/@-]{0,100}\Z")
@@ -227,6 +229,16 @@ _f(_T_SENT, "causes", "ci.failed_jobs.enabled", "bool", restart=False)
 _f(_T_SENT, "causes", "ci.failed_jobs.max_per_cycle", "int", (1, 50), restart=False, unit="calls")
 _f(_T_SENT, "causes", "ci.failed_jobs.group_by", "enum", ("auto", "platform", "matrix", "prefix"), restart=False)
 _f(_T_SENT, "durations", "ci.rerun_timing", "bool", restart=False)
+_f(_T_SENT, "stuck", "ci.stuck.learned", "bool", restart=False)
+_f(_T_SENT, "stuck", "ci.stuck.percentile", "int", (50, 100), restart=False)
+_f(_T_SENT, "stuck", "ci.stuck.margin", "int", (1, 20), restart=False)
+_f(_T_SENT, "stuck", "ci.stuck.min_samples", "int", (2, 100), restart=False)
+_f(_T_SENT, "stuck", "ci.stuck.min_minutes", "int", (1, 10000), unit="min", restart=False)
+_f(_T_SENT, "stuck", "ci.stuck.max_minutes", "int", (1, 100000), unit="min", restart=False)
+_f(_T_SENT, "stuck", "ci.stuck.queue_minutes", "int", (0, 100000), unit="min", restart=False)
+_f(_T_SENT, "stuck", "ci.stuck.awaiting_stuck", "bool", restart=False)
+_f(_T_SENT, "stuck", "ci.stuck.workflow_minutes", "names", restart=False)
+_f(_T_SENT, "stuck", "ci.stuck.runner_minutes", "names", restart=False)
 _f(_T_SENT, "prs", "sentinel.stale_pr_days", "int", (1, 90))
 _f(_T_SENT, "hygiene_files", "sentinel.required_files", "filegroups")
 _f(_T_SENT, "hygiene_rules", "sentinel.hygiene.ruleset_mode", "enum", ("name", "effective", "off"))
@@ -610,7 +622,7 @@ def check_value(path, value):
             return False, "path"
         return True, text
     if kind == "names":
-        pattern = LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path == "sentinel.hygiene.ruleset_names" else NAME_RE)))
+        pattern = LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path == "sentinel.hygiene.ruleset_names" else (PAIR_RE if path in PAIR_KEYS else NAME_RE))))
         if not isinstance(value, list) or len(value) > 200 or not all(isinstance(v, str) and pattern.match(v) for v in value):
             return False, "names"
         if path == "sentinel.hygiene.ruleset_names" and not value:

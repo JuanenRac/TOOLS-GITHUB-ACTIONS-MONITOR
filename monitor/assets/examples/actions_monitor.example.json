@@ -23,6 +23,18 @@
     "automation_counts": false,
     "inactive_days": 90,
     "extra_branches": [],
+    "stuck": {
+      "learned": false,
+      "percentile": 95,
+      "margin": 2,
+      "min_samples": 3,
+      "min_minutes": 30,
+      "max_minutes": 720,
+      "queue_minutes": 0,
+      "awaiting_stuck": true,
+      "workflow_minutes": [],
+      "runner_minutes": []
+    },
     "rerun_timing": false
   },
   "watchdog_minutes": 10,
