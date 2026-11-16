@@ -2931,5 +2931,9 @@
  "wh.unknown_repo": "Repository wird nicht überwacht",
  "ws.not_found": "Der Workspace der Repositories wurde nicht gefunden: Setze MONITOR_ROOT oder \"workspace_root\" in actions_monitor.json oder lege eine Datei namens .monitor-root in den Ordner mit den Repositories.",
  "ci.lane_queue": "Merge-Queue",
- "ci.lane_branch": "Branch {branch}"
+ "ci.lane_branch": "Branch {branch}",
+ "doctor.t.access": "Der Zugang kann das Konto oder die Organisation lesen",
+ "doctor.f.access": "Ein 403 oder 404 bei einer Organisation hat meist eine dieser Ursachen: Das Token ist für das SAML-Single-Sign-on nicht autorisiert (unter Configure SSO auf der Token-Seite freigeben), ihm fehlt der Scope repo oder read:org (bei einem fein abgestuften Token eine Leseberechtigung), oder die Repositories sind privat und der Zugang sieht sie nicht. Die Angabe nennt, welche.",
+ "doctor.t.estimate": "Die Lesevorgänge pro Stunde passen ins Kontingent",
+ "doctor.f.estimate": "Bei so vielen Repositories würde der Monitor einen großen Teil des Token-Kontingents verbrauchen (Schätzung, mit den aktuellen Einstellungen). Erhöhen Sie cold_refresh_seconds, verringern Sie die heißen Repositories, schalten Sie den Low-Modus ein oder lesen Sie mit einer GitHub App (siehe QUOTA.md und ORGANIZATIONS.md)."
 }

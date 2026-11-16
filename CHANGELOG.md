@@ -22,6 +22,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Added
 
+- **Help for organizations and big accounts**: `--doctor` now says why a read of an organization would come back empty instead of leaving a mute "no data" (the token is not authorised for the single sign-on of the organization, a scope or a permission is missing, the list of private repositories is cut short, the login was refused, the allowance is spent) and estimates the reads an hour the account will cost under the current settings against the allowance of the token, with a hook for other parts of the monitor to add their share. A new guide, `ORGANIZATIONS.md` (eight languages), gives the smallest token for a personal account and for an organization (classic and fine-grained), the steps to authorise it for SSO, how to watch an account you do not own with a token that has no scope, and the known limits.
 - **Merge queue**: a failed run of the merge queue of the default branch (`gh-readonly-queue/...`, event `merge_group`) is a red of its own, shown as "(merge queue)" in the red list, the alerts and the team view, and it clears with the next green run of the queue.
 - **Maintenance branches**: `ci.extra_branches` takes patterns (for example `release-*`) of extra branches whose last run also counts; by default only the default branch is watched. A red of such a branch is labelled with its name and never hides, or is hidden by, the default branch.
 

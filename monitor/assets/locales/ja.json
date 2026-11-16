@@ -2931,5 +2931,9 @@
  "wh.unknown_repo": "監視対象外のリポジトリです",
  "ws.not_found": "リポジトリのワークスペースが見つかりません。MONITOR_ROOT か actions_monitor.json の \"workspace_root\" を設定するか、リポジトリを含むフォルダーに .monitor-root というファイルを置いてください。",
  "ci.lane_queue": "マージキュー",
- "ci.lane_branch": "ブランチ {branch}"
+ "ci.lane_branch": "ブランチ {branch}",
+ "doctor.t.access": "ログインでアカウントまたは組織を読み取れる",
+ "doctor.f.access": "組織に対する 403 や 404 は、通常次のいずれかです。トークンが SAML シングルサインオンに対して承認されていない(トークンのページの Configure SSO で承認)、スコープ repo または read:org(細粒度トークンでは読み取り権限)が足りない、リポジトリが非公開でログインから見えない。詳細にどれかが示されます。",
+ "doctor.t.estimate": "1時間あたりの読み取りが枠に収まる",
+ "doctor.f.estimate": "これだけのリポジトリがあると、モニターはトークンの枠の大部分を使います(現在の設定での推定)。cold_refresh_seconds を大きくする、ホットなリポジトリを減らす、Low モードを有効にする、または GitHub App で読み取ってください(QUOTA.md と ORGANIZATIONS.md を参照)。"
 }

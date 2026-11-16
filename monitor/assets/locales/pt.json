@@ -2931,5 +2931,9 @@
  "wh.unknown_repo": "repositório não vigiado",
  "ws.not_found": "Não foi encontrado o espaço de trabalho dos repositórios: defina MONITOR_ROOT, ou \"workspace_root\" em actions_monitor.json, ou coloque um ficheiro chamado .monitor-root na pasta que contém os repositórios.",
  "ci.lane_queue": "fila de fusão",
- "ci.lane_branch": "ramo {branch}"
+ "ci.lane_branch": "ramo {branch}",
+ "doctor.t.access": "O acesso consegue ler a conta ou a organização",
+ "doctor.f.access": "Um 403 ou 404 numa organização costuma ter uma destas causas: o token não está autorizado para o seu início de sessão único SAML (autorize-o em Configure SSO na página do token), falta-lhe o âmbito repo ou read:org (ou, num token de granularidade fina, uma permissão de leitura), ou os repositórios são privados e o acesso não os vê. O detalhe diz qual.",
+ "doctor.t.estimate": "As leituras por hora cabem na quota",
+ "doctor.f.estimate": "Com tantos repositórios o monitor gastaria grande parte da quota do token (estimativa, com as definições atuais). Aumente cold_refresh_seconds, reduza os repositórios quentes, ative o modo Low ou leia com uma GitHub App (ver QUOTA.md e ORGANIZATIONS.md)."
 }

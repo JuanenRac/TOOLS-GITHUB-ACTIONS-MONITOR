@@ -2931,5 +2931,9 @@
  "wh.unknown_repo": "dépôt non surveillé",
  "ws.not_found": "Espace de travail des dépôts introuvable : définissez MONITOR_ROOT, ou \"workspace_root\" dans actions_monitor.json, ou placez un fichier nommé .monitor-root dans le dossier qui contient les dépôts.",
  "ci.lane_queue": "file de fusion",
- "ci.lane_branch": "branche {branch}"
+ "ci.lane_branch": "branche {branch}",
+ "doctor.t.access": "L'accès peut lire le compte ou l'organisation",
+ "doctor.f.access": "Un 403 ou un 404 sur une organisation vient en général de l'une de ces causes : le jeton n'est pas autorisé pour son authentification unique SAML (autorisez-le via Configure SSO sur la page du jeton), il manque la portée repo ou read:org (ou, pour un jeton à granularité fine, une permission de lecture), ou les dépôts sont privés et l'accès ne les voit pas. Le détail dit laquelle.",
+ "doctor.t.estimate": "Les lectures par heure tiennent dans le quota",
+ "doctor.f.estimate": "Avec autant de dépôts, le moniteur consommerait une grande partie du quota du jeton (estimation, avec les réglages actuels). Augmentez cold_refresh_seconds, réduisez les dépôts chauds, activez le mode Low ou lisez avec une GitHub App (voir QUOTA.md et ORGANIZATIONS.md)."
 }

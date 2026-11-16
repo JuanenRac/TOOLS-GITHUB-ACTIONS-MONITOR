@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2364_passing-brightgreen.svg" alt="2364 tests">
+  <img src="https://img.shields.io/badge/Tests-2382_passing-brightgreen.svg" alt="2382 tests">
 </p>
 
 > Vigia os workflows de todos os seus repositórios e diz-lhe, numa página local, o que está a vermelho, o que está encravado e o que o espera.
@@ -81,7 +81,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 | | |
 |---|---|
 | **Maturidade** | functional |
-| **Testes** | 2364 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Testes** | 2382 métodos de teste (`python -m unittest discover -s monitor/tests`) |
 | **Definições** | 420 definições, todas com ajuda |
 | **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
 | **Testado no CI em** | ubuntu, windows, Python 3.11, 3.13 |
@@ -312,6 +312,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ADVANCED_por.md`](monitor/docs/ADVANCED_por.md): Funções avançadas (todas desligadas por defeito)
 - [`monitor/docs/AI_ALERTS_por.md`](monitor/docs/AI_ALERTS_por.md): Avisos para IAs: o feed, o resumo, o hook e o stream
 - [`monitor/docs/AUDIT_PACKAGE_por.md`](monitor/docs/AUDIT_PACKAGE_por.md): Pacote para o auditor
+- [`monitor/docs/ORGANIZATIONS_por.md`](monitor/docs/ORGANIZATIONS_por.md): Organizações e contas grandes: o token mínimo, SSO, porque uma leitura volta vazia e quanto custa a conta em leituras
 
 ## Contribuir
 

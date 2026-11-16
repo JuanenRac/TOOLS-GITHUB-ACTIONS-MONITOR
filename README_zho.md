@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2364_passing-brightgreen.svg" alt="2364 tests">
+  <img src="https://img.shields.io/badge/Tests-2382_passing-brightgreen.svg" alt="2382 tests">
 </p>
 
 > 监视你所有仓库的工作流，并在一个本地页面上告诉你：哪些是红的、哪些卡住了、哪些在等你处理。
@@ -81,7 +81,7 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 2364 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **测试** | 2382 个测试方法(`python -m unittest discover -s monitor/tests`) |
 | **设置** | 420 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
@@ -312,6 +312,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ADVANCED_zho.md`](monitor/docs/ADVANCED_zho.md): 高级功能（默认全部关闭）
 - [`monitor/docs/AI_ALERTS_zho.md`](monitor/docs/AI_ALERTS_zho.md): 给 AI 的警报：事件流、简报、钩子和数据流
 - [`monitor/docs/AUDIT_PACKAGE_zho.md`](monitor/docs/AUDIT_PACKAGE_zho.md): 审计员资料包
+- [`monitor/docs/ORGANIZATIONS_zho.md`](monitor/docs/ORGANIZATIONS_zho.md): 组织与大型账号:最小令牌、SSO、读取为空的原因以及账号的读取成本
 
 ## 参与贡献
 

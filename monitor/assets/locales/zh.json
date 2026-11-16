@@ -2931,5 +2931,9 @@
  "wh.unknown_repo": "该仓库不在监视范围内",
  "ws.not_found": "找不到仓库工作区：请设置 MONITOR_ROOT，或在 actions_monitor.json 中设置 \"workspace_root\"，或在包含这些仓库的文件夹中放一个名为 .monitor-root 的文件。",
  "ci.lane_queue": "合并队列",
- "ci.lane_branch": "分支 {branch}"
+ "ci.lane_branch": "分支 {branch}",
+ "doctor.t.access": "该登录可以读取账号或组织",
+ "doctor.f.access": "对组织出现 403 或 404,通常是以下原因之一:令牌未获其 SAML 单点登录授权(在令牌页面的 Configure SSO 中授权),缺少 repo 或 read:org 权限范围(细粒度令牌则缺少读取权限),或者仓库是私有的而该登录看不到。详情会指出是哪一种。",
+ "doctor.t.estimate": "每小时读取量在配额之内",
+ "doctor.f.estimate": "仓库这么多时,监视器会用掉令牌配额的很大一部分(按当前设置估算)。请调大 cold_refresh_seconds、减少热门仓库、开启 Low 模式,或改用 GitHub App 读取(参见 QUOTA.md 和 ORGANIZATIONS.md)。"
 }
