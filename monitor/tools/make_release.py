@@ -52,7 +52,7 @@ DATA_JSON = ("targets.example.json", "ecosystems.example.json", "profiles.exampl
 PKG = "src/github_actions_monitor"
 REQUIRED_MEMBERS = (f"{PKG}/i18n/__init__.py", f"{PKG}/app/toolconfig.py", f"{PKG}/cli/launcher_msg.py", "LICENSE", "NOTICE", "AUTHORS", "README.txt", f"{EXAMPLES_DIR}/targets.example.json", f"{EXAMPLES_DIR}/ecosystems.example.json",
                     *[f"assets/locales/{l}.json" for l in LANGS], *[f"docs/README_{l}.txt" for l in LANGS], *[f"docs/QUICKSTART_{l}.txt" for l in LANGS], f"{PKG}/cli/gha_dispatch_all.py", f"{PKG}/sentinels/sentinel_local.py",
-                    f"{PKG}/app/actions_monitor.py", "assets/static/actions_monitor.html", "CHANGELOG.md",
+                    f"{PKG}/app/actions_monitor.py", "assets/static/actions_monitor.html", "assets/static/screens.html", "CHANGELOG.md",
                     f"{PKG}/tool_version.py", f"{PKG}/cli/read_report.py", f"{PKG}/util/platform_compat.py", f"{PKG}/app/surface.py", f"{PKG}/sentinels/readiness.py", f"{EXAMPLES_DIR}/profiles.example.json",
                     f"{PKG}/cli/export_status.py", f"{PKG}/security/webhook.py", f"{PKG}/integrations/monitor_link.py", f"{PKG}/cli/release_notes.py", f"{PKG}/__main__.py", f"{PKG}/lite.py", f"{PKG}/util/paths.py",
                     "docs/CI_RED_SCHEMA.md", "MONITOR_GITHUB_ACTIONS.sh", "MONITOR_GITHUB_ACTIONS.bat", "bin/read_report.py", "bin/actions_monitor.py", "bin/ai_hook.py", "assets/ai/README.md", f"{PKG}/util/rootmigrate.py", "tools/make_release.py", "tools/migrate_layout.py", f"{EXAMPLES_DIR}/{EXAMPLE}")
@@ -76,7 +76,7 @@ def members():
     names += sorted(p for p in (HERE / "src").rglob("*.py") if "__pycache__" not in p.parts)                                                      # the importable package
     names += sorted(p for p in (HERE / "src").rglob("*") if p.is_file() and p.suffix in DATA_SUFFIXES and "__pycache__" not in p.parts)      # the data files the package loads (ai_presets.json): without them the product starts with empty presets
     names += sorted((HERE / "tools").glob("*.py"))
-    names += [HERE / "assets" / "examples" / n for n in DATA_JSON] + [HERE / "assets" / "static" / "actions_monitor.html"]
+    names += [HERE / "assets" / "examples" / n for n in DATA_JSON] + [HERE / "assets" / "static" / "actions_monitor.html", HERE / "assets" / "static" / "screens.html"]
     names += [HERE / n for n in LEGAL] + [HERE / "CHANGELOG.md", HERE / "README.txt"]
     names += sorted((HERE / "docs").glob("README_*.txt")) + sorted((HERE / "docs").glob("QUICKSTART_*.txt")) + sorted((HERE / "assets" / "locales").glob("*.json")) + sorted((HERE / "assets" / "ai").glob("*.md"))
     names += sorted((HERE / "docs").glob("*.md"))

@@ -58,6 +58,63 @@ Ein Browser-Test öffnet die Seite in jeder dieser Größen, geht alle Tabs durc
 2. `http://dieser-rechner:8765/screen/1` im Fenster des ersten Monitors und `/screen/2` im zweiten öffnen; F11 für Vollbild. Von einem anderen Rechner den Netzmodus mit Zugriffstoken nutzen.
 3. Für einen Wandbildschirm, den niemand bedient, mehrere Tabs vergeben und `ui.rotate_seconds` auf 20-30 setzen.
 
+## Wandanzeigen: Übersicht, Gerade jetzt und Wächter
+
+Drei Seiten für einen Monitor oder Fernseher, den niemand bedient. Sie haben kein Seitenmenü und keine Navigation, zeigen alles in einer Ansicht mit großer Schrift, animieren, was lebt, und lassen Fehler sanft blinken. Sie lesen nur: Keine Schaltfläche ändert etwas, und sie rufen GitHub nie auf (sie zeigen, was der Monitor schon hat).
+
+| Adresse | Was sie zeigt |
+|---|---|
+| `/screen/overview` | Ring und Buchstabe der Bewertung; die Flotte (grün, rot, hängend, wartend); die letzten 24 Stunden und 7 Tage als Flächendiagramme; eine Heatmap der Repositories nach Stunde; was am längsten rot ist; Runner und Minuten; die letzten Ereignisse; das GitHub-Kontingent als Anzeige. |
+| `/screen/now` | Was in dieser Minute geschieht: laufende Läufe mit Fortschritt und Dauer, die Warteschlange, Läufe, die auf Freigabe warten, aktuelle Fehlschläge, Merges und Releases, fällige Releases und eine Live-Linie der letzten zwei Stunden. |
+| `/screen/sentinels` | Eine Karte je Wächter (A1 bis A12) mit Stufe, offenen Befunden, ob seine Quellen lesbar sind, dem letzten Durchlauf und einem Ring, der dem Durchlauf folgt; ein animiertes Radar, das markiert, was nicht stimmt, und die Warnungen nach Schweregrad. |
+
+### Parameter der Adresse
+
+Eine Adresse je Monitor. Ein Parameter kann ein Fenster ruhiger oder kleiner machen, als die Einstellungen erlauben, nie lauter.
+
+| Parameter | Wirkung |
+|---|---|
+| `?monitor=1` bis `9` | Die Nummer, die neben dem Titel steht. |
+| `?theme=dark`, `light` oder `contrast` | Farben; contrast ist weiß auf schwarz, für einen Bildschirm, der aus der Ferne gelesen wird. |
+| `?density=compact`, `normal` oder `large` | Schriftgröße. `?scale=1.5` vergrößert alles (0,5 bis 3). |
+| `?refresh=10` | Sekunden zwischen den Aktualisierungen (5 bis 120). |
+| `?lang=de` | Sprache (en, es, de, fr, it, ja, zh, pt). |
+| `?rotate=30` | Das Fenster wechselt alle 30 Sekunden von selbst zwischen Übersicht, Gerade jetzt und Wächtern (mindestens 5; 0 = keine Rotation). |
+| `?blink=off` | Fehler behalten einen festen Schein statt zu blinken. Es kann nicht einschalten, was `screens.blink` ausgeschaltet lässt. |
+| `?sound=on` | Ein kurzer Signalton bei einem neuen Fehler, nur wenn `screens.sound` es erlaubt. Standardmäßig aus. |
+
+### Einstellungen der Wandanzeigen
+
+| Einstellung | Was sie bewirkt |
+|---|---|
+| `screens.enabled` | Schaltet die drei Seiten ein. Aus: Jede Adresse antwortet mit 404. |
+| `screens.default_theme` | dark (Standard), light oder contrast. |
+| `screens.default_density` | compact, normal (Standard) oder large. |
+| `screens.refresh_seconds` | Sekunden zwischen den Aktualisierungen eines Fensters (standardmäßig 10). Die Seiten lesen vom Monitor, nie von GitHub, eine kurze Zeit kostet also kein Kontingent. |
+| `screens.rotate_seconds` | 0 (Standard) = keine Rotation; ab 5 wechselt ein Fenster durch die drei Seiten. |
+| `screens.blink` | Fehler blinken sanft (standardmäßig an). |
+| `screens.blink_calm_minutes` | Minuten, nach denen ein Fehler, um den sich niemand gekümmert hat, einen festen Schein behält statt zu blinken (standardmäßig 30; 0 = blinkt bis zur Lösung). |
+| `screens.sound` | Ein Signalton bei einem neuen Fehler (standardmäßig aus). |
+| `screens.burn_in_protection` | Verschiebt alles jede Minute um einige Pixel (standardmäßig an). |
+| `screens.night_dim` | Dunkelt die Anzeigen zwischen `screens.night_dim_from_hour` (22) und `screens.night_dim_to_hour` (7) ab; standardmäßig aus. |
+| `screens.show_repo_names` | all, public (Standard: private Repositories erscheinen als private-1, private-2...) oder none (jeder Name wird ausgeblendet). Für einen Bildschirm, den andere sehen können, public oder none verwenden. |
+
+### Was sie zeigen und was sie verbergen
+
+Die Daten kommen von `/api/screens/data?screen=overview` (oder `now`, `sentinels`): eine geschlossene Liste von Feldern, gebildet aus dem letzten Zyklus, dem Schnappschuss der Wächter, den Warnungen und der Bewertung. Sie enthält nie einen Link, einen Commit-Titel, einen Job-Namen, einen Benutzernamen oder einen Pfad dieses Rechners, und die Workflow-Namen ausgeblendeter Repositories werden ebenfalls ausgeblendet. Im Netzwerkmodus brauchen die Seiten dasselbe Zugriffstoken wie der Rest des Monitors, und die Antwort ist schreibgeschützt.
+
+### Wie sie sich verhalten
+
+- Fehler blinken weniger als zweimal pro Sekunde (nie als Stroboskop); ein neuer Fehler löst einen einzigen Blitz aus; ein Fehler, um den sich `screens.blink_calm_minutes` Minuten niemand gekümmert hat, behält einen festen Schein. Mit der Systemeinstellung für weniger Bewegung oder mit `?blink=off` blinkt und bewegt sich nichts. Ein Fehler wird nie nur durch Farbe gezeigt: Er trägt ein Symbol und ein Wort.
+- Antwortet der Monitor nicht, sagt die Seite es, wird abgedunkelt und versucht es nach 5, 10, 20... Sekunden erneut (bis 60).
+- Ein dauerhaft eingeschalteter Bildschirm ist gegen Einbrennen geschützt: Alles verschiebt sich jede Minute um einige Pixel, und die Seite kann nachts abdunkeln.
+
+### Mehrere Monitore einrichten
+
+1. Wählen Sie für jeden Monitor eine Adresse, zum Beispiel `/screen/overview?monitor=1`, `/screen/now?monitor=2` und `/screen/sentinels?monitor=3`; oder öffnen Sie ein einziges Fenster mit `?rotate=20`.
+2. Öffnen Sie jede in Chrome oder Edge im Kioskmodus: `msedge --kiosk "http://dieser-rechner:8765/screen/now?monitor=2" --edge-kiosk-type=fullscreen` oder `chrome --kiosk "http://dieser-rechner:8765/screen/now?monitor=2"`; mit `--app=ADRESSE` statt `--kiosk` hat das Fenster keine Leisten. Ohne Kioskmodus bittet die unauffällige Schaltfläche am Seitenende um Vollbild.
+3. Von einem anderen Rechner aus verwenden Sie den Netzwerkmodus: Das Zugriffstoken eines Betrachters genügt, weil diese Seiten nie schreiben.
+
 ## Bilder
 
 Der Reiter Jetzt in vier Größen, mit erfundenen Daten (4K, ein 21:9-Monitor, ein gedrehter Monitor, ein Smartphone):

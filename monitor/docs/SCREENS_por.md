@@ -58,6 +58,63 @@ Um teste de navegador abre a página em cada um destes tamanhos, percorre todos 
 2. Abra `http://este-computador:8765/screen/1` numa janela do primeiro monitor e `/screen/2` no segundo; F11 para ecrã inteiro. A partir de outro computador, use o modo de rede com o seu token de acesso.
 3. Para um ecrã de parede em que ninguém toca, dê-lhe vários separadores e ponha `ui.rotate_seconds` em 20-30.
 
+## Ecrãs de parede: visão geral, neste momento e sentinelas
+
+Três páginas para um monitor ou uma televisão em que ninguém toca. Não têm menu lateral nem navegação, mostram tudo numa única vista com letra grande, animam o que está vivo e fazem piscar as falhas com suavidade. Só leem: nenhum botão altera nada e nunca chamam o GitHub (mostram o que o monitor já tem).
+
+| Endereço | O que mostra |
+|---|---|
+| `/screen/overview` | Anel e letra da pontuação; a frota (verdes, vermelhos, bloqueados, em espera); as últimas 24 horas e 7 dias em gráficos de área; um mapa de calor dos repositórios por hora; o que está a vermelho há mais tempo; runners e minutos; os últimos eventos; a quota do GitHub como indicador. |
+| `/screen/now` | O que acontece neste minuto: execuções em curso com progresso e duração, a fila, execuções à espera de aprovação, falhas recentes, fusões e versões publicadas, versões por publicar e uma linha em direto das últimas duas horas. |
+| `/screen/sentinels` | Um cartão por cada sentinela (A1 a A12) com o seu nível, os achados em aberto, se as suas fontes são legíveis, a última varredura e um anel que acompanha a varredura; um radar animado que assinala o que está mal e os alertas por gravidade. |
+
+### Parâmetros do endereço
+
+Um endereço para cada monitor. Um parâmetro pode tornar uma janela mais calma ou mais pequena do que as definições permitem, nunca mais ruidosa.
+
+| Parâmetro | Efeito |
+|---|---|
+| `?monitor=1` a `9` | O número que aparece junto ao título. |
+| `?theme=dark`, `light` ou `contrast` | Cores; contrast é branco sobre preto, para um ecrã visto ao longe. |
+| `?density=compact`, `normal` ou `large` | Tamanho da letra. `?scale=1.5` aumenta tudo (de 0,5 a 3). |
+| `?refresh=10` | Segundos entre atualizações (de 5 a 120). |
+| `?lang=de` | Idioma (en, es, de, fr, it, ja, zh, pt). |
+| `?rotate=30` | A janela passa sozinha por visão geral, neste momento e sentinelas a cada 30 segundos (mínimo 5; 0 = sem rotação). |
+| `?blink=off` | As falhas mantêm um halo fixo em vez de piscar. Não pode ativar o que `screens.blink` mantém desligado. |
+| `?sound=on` | Um sinal sonoro curto a cada falha nova, só se `screens.sound` o permitir. Desativado por defeito. |
+
+### Definições dos ecrãs de parede
+
+| Definição | O que faz |
+|---|---|
+| `screens.enabled` | Ativa as três páginas. Desativado: todos os endereços respondem 404. |
+| `screens.default_theme` | dark (por defeito), light ou contrast. |
+| `screens.default_density` | compact, normal (por defeito) ou large. |
+| `screens.refresh_seconds` | Segundos entre atualizações de uma janela (10 por defeito). As páginas leem do monitor, nunca do GitHub, por isso um tempo curto não gasta quota. |
+| `screens.rotate_seconds` | 0 (por defeito) = sem rotação; a partir de 5, uma janela passa pelas três páginas. |
+| `screens.blink` | As falhas piscam suavemente (ativado por defeito). |
+| `screens.blink_calm_minutes` | Minutos após os quais uma falha a que ninguém atende mantém um halo fixo em vez de piscar (30 por defeito; 0 = pisca até ser resolvida). |
+| `screens.sound` | Um sinal sonoro a cada falha nova (desativado por defeito). |
+| `screens.burn_in_protection` | Desloca tudo alguns píxeis a cada minuto (ativado por defeito). |
+| `screens.night_dim` | Escurece os ecrãs entre `screens.night_dim_from_hour` (22) e `screens.night_dim_to_hour` (7); desativado por defeito. |
+| `screens.show_repo_names` | all, public (por defeito: os repositórios privados aparecem como private-1, private-2...) ou none (todos os nomes ficam ocultos). Use public ou none num ecrã que outras pessoas possam ver. |
+
+### O que mostram e o que ocultam
+
+Os dados vêm de `/api/screens/data?screen=overview` (ou `now`, `sentinels`): uma lista fechada de campos construída com o último ciclo, o instantâneo das sentinelas, os alertas e a pontuação. Nunca contém uma ligação, um título de commit, o nome de um job, o nome de uma pessoa nem um caminho deste computador, e os nomes dos workflows dos repositórios ocultos também ficam ocultos. No modo de rede as páginas precisam do mesmo token de acesso que o resto do monitor e a resposta é só de leitura.
+
+### Como se comportam
+
+- As falhas piscam menos de duas vezes por segundo (nunca de forma estroboscópica); uma falha nova faz um único clarão; uma falha a que ninguém atende durante `screens.blink_calm_minutes` minutos mantém um halo fixo. Com a definição do sistema para reduzir o movimento, ou com `?blink=off`, nada pisca nem se move. Uma falha nunca é mostrada apenas pela cor: leva um símbolo e uma palavra.
+- Quando o monitor não responde, a página di-lo, escurece e tenta de novo após 5, 10, 20... segundos (até 60).
+- Um ecrã sempre ligado é protegido contra a retenção de imagem: tudo se desloca alguns píxeis a cada minuto e a página pode escurecer à noite.
+
+### Montar vários monitores
+
+1. Escolha um endereço para cada monitor, por exemplo `/screen/overview?monitor=1`, `/screen/now?monitor=2` e `/screen/sentinels?monitor=3`; ou abra uma única janela com `?rotate=20`.
+2. Abra cada um no Chrome ou no Edge em modo quiosque: `msedge --kiosk "http://este-computador:8765/screen/now?monitor=2" --edge-kiosk-type=fullscreen` ou `chrome --kiosk "http://este-computador:8765/screen/now?monitor=2"`; com `--app=ENDEREÇO` em vez de `--kiosk` a janela não tem barras. Sem modo quiosque, o botão discreto no fim da página pede o ecrã inteiro.
+3. A partir de outro computador use o modo de rede: basta o token de acesso de um visualizador, porque estas páginas nunca escrevem.
+
 ## Imagens
 
 O separador Agora em quatro tamanhos, com dados inventados (4K, um monitor 21:9, um monitor rodado, um telemóvel):
