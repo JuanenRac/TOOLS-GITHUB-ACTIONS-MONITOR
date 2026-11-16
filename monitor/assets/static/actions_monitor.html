@@ -796,7 +796,7 @@ if(VIEW){
 
 DATA=null;
 const FILTER={eco:store.get("am-f-eco")||"",state:store.get("am-f-state")||"",q:store.get("am-f-q")||""};
-if(QS.get("repo")){FILTER.q=QS.get("repo")}
+if(QS.get("repo")&&VIEW!=="repo"){FILTER.q=QS.get("repo")}
 fillEco();$("g-state").value=FILTER.state;$("g-q").value=FILTER.q;
 [".filters","#al-filters"].forEach(q=>{const box=document.querySelector(q);if(box){box.addEventListener("input",fxFilter);box.addEventListener("change",fxFilter);box.addEventListener("click",fxFilter)}});
 ["g-eco","g-state","g-q"].forEach(id=>$(id).addEventListener(id==="g-q"?"input":"change",()=>{FILTER.eco=$("g-eco").value;FILTER.state=$("g-state").value;FILTER.q=$("g-q").value;store.set("am-f-eco",FILTER.eco);store.set("am-f-state",FILTER.state);store.set("am-f-q",FILTER.q);if(DATA)render(DATA);renderSent()}));
@@ -1436,7 +1436,7 @@ function teamPaint(){
    (sen.length?`<h3 style="margin:12px 0 4px;font-size:13px">${esc(T("ui.team_by_sent"))}</h3><div class="mut">${sen.map(([k,n])=>esc((T("ui.al_o_"+k)===("ui.al_o_"+k)?k:T("ui.al_o_"+k))+": "+n)).join(" · ")}</div>`:"")}
 async function repoHealthOpen(repo){
   if(LITE)return;
-  const owner=(ACC&&ACC.owner)||(DATA&&DATA.owner)||(repo.includes("/")?repo.split("/")[0]:""),name=repo.includes("/")?repo.split("/")[1]:repo;
+  const owner=repo.includes("/")?repo.split("/")[0]:((ACC&&ACC.owner)||(DATA&&DATA.owner)||OWNER),name=repo.includes("/")?repo.split("/")[1]:repo;
   let doc=null;
   try{const r=await fetch("/api/repos/"+encodeURIComponent(owner)+"/"+encodeURIComponent(name)+"/health",{cache:"no-store"});doc=r.ok?(await r.json()).health:null}catch(e){doc=null}
   $("rh-h").textContent=T("ui.rh_title")+": "+repo;
