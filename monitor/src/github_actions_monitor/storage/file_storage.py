@@ -76,13 +76,25 @@ def atomic_write(path, text):
     private_io._fix_mode(path, private_io.FILE_MODE)
 
 
-def read_json(path, kind=dict, default=None):
-    """The JSON of a file when it is a `kind` (dict / list), else `default` (a missing, empty, damaged or wrong-shaped file reads as nothing)."""
-    try:
-        value = json.loads(Path(path).read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return default
-    return value if isinstance(value, kind) else default
+def read_json(path, kind=dict, default=None, strict=False):
+    """The JSON of a file when it is a `kind` (dict / list), else `default` (a missing, empty, damaged or wrong-shaped file reads as nothing).
+    A file that exists and cannot be read for a moment (Windows keeps files that a backup, an antivirus or an editor has open) is read again a few times; if it still cannot be read it is `default`,
+    or an OSError with `strict=True`: whoever reads to change and save must never write on top of a file that it could not read."""
+    last = None
+    for attempt in range(_RETRIES):
+        try:
+            value = json.loads(Path(path).read_text(encoding="utf-8"))
+            return value if isinstance(value, kind) else default
+        except FileNotFoundError:
+            return default
+        except ValueError:
+            return default
+        except OSError as error:
+            last = error
+            time.sleep(0.05 * (attempt + 1))
+    if strict:
+        raise last
+    return default
 
 
 def parse_lines(text):
@@ -174,7 +186,7 @@ class FileStorage(base.Storage):
         base.check_hour(hour)
         path = self._path(account_id, SCORES_REL)
         with locks.path_lock(path):
-            current = read_json(path, dict, {})
+            current = read_json(path, dict, {}, strict=True)
             current[hour] = data
             atomic_write(path, json.dumps(current, ensure_ascii=False, sort_keys=True))
 
@@ -190,7 +202,7 @@ class FileStorage(base.Storage):
     def purge_score_snapshots(self, account_id, before_hour):
         path = self._path(account_id, SCORES_REL)
         with locks.path_lock(path):
-            current = read_json(path, dict, None)
+            current = read_json(path, dict, None, strict=True)
             if not current:
                 return {"removed": 0}
             old = [h for h in current if isinstance(h, str) and h < before_hour]
@@ -208,7 +220,7 @@ class FileStorage(base.Storage):
         path = self.events_path(account_id)
         lines = "".join(json.dumps(e, ensure_ascii=False) + "\n" for e in events)
         path.parent.mkdir(parents=True, exist_ok=True)
-        with locks.path_lock(path):
+        with locks.process_lock(path):      # other processes append to the same file: on Windows "append" is not one step, so two writers would lose or cut lines
             fd = os.open(str(path), os.O_WRONLY | os.O_CREAT | os.O_APPEND | getattr(os, "O_BINARY", 0), private_io.FILE_MODE)
             try:
                 os.write(fd, lines.encode("utf-8"))      # one write for the whole batch: a line is never cut in two by another writer
@@ -271,7 +283,7 @@ class FileStorage(base.Storage):
     def purge_analytics(self, account_id, before_day):
         path = self._path(account_id, ANALYTICS_REL)
         with locks.path_lock(path):
-            data = read_json(path, dict, None)
+            data = read_json(path, dict, None, strict=True)
             if not data or not isinstance(data.get("daily"), dict):
                 return {"removed": 0}
             old = [d for d in data["daily"] if isinstance(d, str) and d < before_day]
@@ -285,8 +297,8 @@ class FileStorage(base.Storage):
     def _records_path(self, kind):
         return (paths.place(GLOBAL_DIR, self.root) if self.layout == "flat" else self.root / GLOBAL_DIR) / f"{base.check_kind(kind)}.json"
 
-    def _read_records(self, kind):
-        data = read_json(self._records_path(kind), dict, {})
+    def _read_records(self, kind, strict=False):
+        data = read_json(self._records_path(kind), dict, {}, strict=strict)
         rows = data.get("records")
         return rows if isinstance(rows, dict) else {}
 
@@ -298,7 +310,7 @@ class FileStorage(base.Storage):
         if not isinstance(data, dict):
             raise base.StorageError("record data")
         with locks.process_lock(self._records_path(kind)):
-            rows = self._read_records(kind)
+            rows = self._read_records(kind, strict=True)
             rows[key] = {"data": data, "expires": expires}
             self._write_records(kind, rows)
 
@@ -308,7 +320,7 @@ class FileStorage(base.Storage):
 
     def delete_record(self, kind, key):
         with locks.process_lock(self._records_path(kind)):
-            rows = self._read_records(kind)
+            rows = self._read_records(kind, strict=True)
             if base.check_key(key) not in rows:
                 return False
             del rows[key]
@@ -320,7 +332,7 @@ class FileStorage(base.Storage):
 
     def purge_records(self, kind, expired_before):
         with locks.process_lock(self._records_path(kind)):
-            rows = self._read_records(kind)
+            rows = self._read_records(kind, strict=True)
             old = [k for k, v in rows.items() if isinstance(v, dict) and isinstance(v.get("expires"), (int, float)) and v["expires"] < expired_before]
             for key in old:
                 del rows[key]
@@ -338,7 +350,7 @@ class FileStorage(base.Storage):
             if not incoming:
                 continue
             with locks.process_lock(self._records_path(kind)):
-                rows = self._read_records(kind)
+                rows = self._read_records(kind, strict=True)
                 for key, row in incoming.items():
                     rows[base.check_key(key)] = {"data": row["data"], "expires": row.get("expires")}
                 self._write_records(kind, rows)

@@ -38,7 +38,7 @@ def process_lock(path, timeout=10.0):
             try:
                 fd = os.open(str(lock_file), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
                 os.write(fd, str(os.getpid()).encode("ascii"))
-            except FileExistsError:
+            except (FileExistsError, PermissionError):      # Windows answers "access denied" while another process is deleting the lock file: wait and try again
                 try:
                     if time.time() - lock_file.stat().st_mtime > STALE:
                         lock_file.unlink()

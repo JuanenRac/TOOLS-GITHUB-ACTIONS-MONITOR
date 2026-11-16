@@ -16,6 +16,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Fixed
 
+- **A file in use no longer reads as empty in the files storage**: on Windows a backup, an antivirus or an editor can hold a file for a moment; the reader tried once, took the file for empty and the next save wrote on top of it (users, score ledger records, score snapshots, analytics). A file that exists is now read again a few times, and whoever reads to change and save stops with an error instead of overwriting. Several processes appending to the same event feed take a lock between processes, so no line is lost or cut on Windows.
+
 - **The Security sentinel no longer passes "could not read" for "clean"**: when most of the sources that weigh in the penalty (Dependabot, code scanning, secrets) answer 403 or 404 for every repository, the sentinel level is `unknown` instead of `ok` and the security part of the score is left out instead of counting as 100 (the status now carries `sources_readable` and `sources_total`). A source that stops answering while an alert is open keeps the alert for a week, marked as unread, and never announces it as fixed; a `gh` that prints nothing is a failed reading, and a default branch with a slash in its name is asked for encoded.
 
 - **A few repositories that always fail no longer starve the Security sentinel**: a repository whose reads fail waits 5 minutes, 30 minutes and then 6 hours before the next try, and the ones that were not tried yet go first, so the rest of the account is looked at.
