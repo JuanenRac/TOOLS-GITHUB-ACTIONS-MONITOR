@@ -238,6 +238,25 @@ class TheSettingsAClientOfTheNetworkCannotChangeAreNotReadByItEither(NetworkCase
         self.assertEqual(set(fields), set(remote), "the same fields, only the values differ")
 
 
+class TheWallScreensFollowTheRulesOfTheNetwork(NetworkCase):
+    """The wall screens only read: a client of the network needs the access token like for any page, a wrong one is refused and counted, and nothing can be written through them."""
+
+    def test_the_token_decides_and_nothing_can_be_written(self):
+        remote = Running(self)
+        for path in ("/screen/overview", "/screen/now", "/screen/sentinels", "/api/screens/data?screen=now"):
+            self.assertEqual(remote.call("GET", path)[0], 200, path)
+            self.assertEqual(remote.call("GET", path, token="wrong")[0], 401, path)
+            self.assertEqual(remote.call("GET", path, token="")[0], 401, path)
+            self.assertNotEqual(remote.call("POST", path, {})[0], 200, path)
+        text = remote.call("GET", "/api/screens/data?screen=overview")[1]
+        self.assertNotIn(TOKEN, json.dumps(text))
+        self.assertEqual(self.config.read_text(encoding="utf-8"), "{}", "nothing was written")
+
+    def test_they_are_not_a_local_only_route(self):
+        self.assertNotIn("/api/screens/data", LOCAL_ONLY_GET)
+        self.assertEqual(Running(self, peer_ip="127.0.0.1").call("GET", "/api/screens/data?screen=sentinels")[0], 200)
+
+
 #: every route that answers 403 "local_only" to a client of the network (the keys, the actions on GitHub, the tests of channels, the state of the pool and of the App)
 LOCAL_ONLY_POST = ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/ai/models/refresh", "/api/ai/models/test", "/api/ai/models/data", "/api/ai/doctor", "/api/notify/test", "/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan",
                    "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures", "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run", "/api/credential")

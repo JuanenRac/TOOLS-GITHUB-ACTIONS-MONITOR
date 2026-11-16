@@ -167,6 +167,11 @@ def about_line():
     return t("ui.about", author=AUTHOR, license=LICENSE_ID)
 
 
+def catalogue_keys():
+    """The keys of the English catalogue (the reference one: every other language has exactly the same)."""
+    return list(_load("en"))
+
+
 def ui_catalogues():
     """{lang: {key: text}} of the keys that start with 'ui.' or 'cfg.' (what the web page needs: the texts and the labels of the settings), for the page to embed."""
     return {lang: {k: v for k, v in _load(lang).items() if k.startswith(("ui.", "cfg.", "surf.t.", "lint.rule."))} for lang in LANGS}

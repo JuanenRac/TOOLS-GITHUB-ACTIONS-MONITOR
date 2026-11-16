@@ -58,6 +58,63 @@ Una prueba de navegador abre la página en cada uno de estos tamaños, recorre t
 2. Abre `http://este-equipo:8765/screen/1` en una ventana del primer monitor y `/screen/2` en el segundo; pulsa F11 para pantalla completa. Desde otro equipo, usa el modo red con su token de acceso.
 3. Para una pantalla de pared que nadie toca, dale varias pestañas y pon `ui.rotate_seconds` en 20-30.
 
+## Pantallas de pared: general, ahora y centinelas
+
+Tres páginas para un monitor o una tele que nadie toca. No tienen menú lateral ni navegación, lo muestran todo en una sola vista con letra grande, animan lo que está vivo y hacen parpadear los fallos con suavidad. Solo leen: ningún botón cambia nada y nunca llaman a GitHub (muestran lo que el monitor ya tiene).
+
+| Dirección | Qué muestra |
+|---|---|
+| `/screen/overview` | Anillo y letra de la puntuación; la flota (verdes, rojos, atascados, esperando); las últimas 24 horas y 7 días en gráficos de área; un mapa de calor de repositorios por hora; lo que lleva más tiempo en rojo; runners y minutos; los últimos eventos; la cuota de GitHub como medidor. |
+| `/screen/now` | Lo que ocurre este minuto: ejecuciones en curso con progreso y duración, la cola, ejecuciones esperando aprobación, fallos recientes, fusiones y versiones publicadas, versiones pendientes y una línea en directo de las últimas dos horas. |
+| `/screen/sentinels` | Una tarjeta por cada centinela (A1 a A12) con su nivel, los hallazgos abiertos, si sus fuentes se pueden leer, el último barrido y un anillo que sigue el barrido; un radar animado que marca lo que va mal y las alertas por gravedad. |
+
+### Parámetros de la dirección
+
+Una dirección para cada monitor. Un parámetro puede hacer una ventana más tranquila o más pequeña de lo que permiten los ajustes, nunca más ruidosa.
+
+| Parámetro | Efecto |
+|---|---|
+| `?monitor=1` a `9` | El número que se muestra junto al título. |
+| `?theme=dark`, `light` o `contrast` | Colores; contrast es blanco sobre negro, para una pantalla vista de lejos. |
+| `?density=compact`, `normal` o `large` | Tamaño de la letra. `?scale=1.5` agranda todo (de 0,5 a 3). |
+| `?refresh=10` | Segundos entre actualizaciones (de 5 a 120). |
+| `?lang=de` | Idioma (en, es, de, fr, it, ja, zh, pt). |
+| `?rotate=30` | La ventana pasa sola por general, ahora y centinelas cada 30 segundos (mínimo 5; 0 = sin rotación). |
+| `?blink=off` | Los fallos conservan un halo fijo en lugar de parpadear. No puede activar lo que `screens.blink` mantiene apagado. |
+| `?sound=on` | Un pitido corto con cada fallo nuevo, solo si `screens.sound` lo permite. Desactivado por defecto. |
+
+### Ajustes de las pantallas de pared
+
+| Ajuste | Qué hace |
+|---|---|
+| `screens.enabled` | Activa las tres páginas. Desactivado: todas las direcciones responden 404. |
+| `screens.default_theme` | dark (por defecto), light o contrast. |
+| `screens.default_density` | compact, normal (por defecto) o large. |
+| `screens.refresh_seconds` | Segundos entre actualizaciones de una ventana (10 por defecto). Las páginas leen del monitor, nunca de GitHub, así que un tiempo corto no gasta cuota. |
+| `screens.rotate_seconds` | 0 (por defecto) = sin rotación; a partir de 5, una ventana pasa por las tres páginas. |
+| `screens.blink` | Los fallos parpadean con suavidad (activado por defecto). |
+| `screens.blink_calm_minutes` | Minutos tras los cuales un fallo que nadie atiende conserva un halo fijo en lugar de parpadear (30 por defecto; 0 = parpadea hasta que se resuelve). |
+| `screens.sound` | Un pitido con cada fallo nuevo (desactivado por defecto). |
+| `screens.burn_in_protection` | Desplaza todo unos píxeles cada minuto (activado por defecto). |
+| `screens.night_dim` | Atenúa las pantallas entre `screens.night_dim_from_hour` (22) y `screens.night_dim_to_hour` (7); desactivado por defecto. |
+| `screens.show_repo_names` | all, public (por defecto: los repositorios privados aparecen como private-1, private-2...) o none (se ocultan todos los nombres). Usa public o none en una pantalla que otras personas puedan ver. |
+
+### Qué muestran y qué ocultan
+
+Los datos salen de `/api/screens/data?screen=overview` (o `now`, `sentinels`): una lista cerrada de campos construida con el último ciclo, la instantánea de los centinelas, las alertas y la puntuación. Nunca contiene un enlace, un título de commit, el nombre de un job, el nombre de una persona ni una ruta de este equipo, y los nombres de workflow de los repositorios ocultos también se ocultan. En el modo red las páginas necesitan el mismo token de acceso que el resto del monitor y la respuesta es de solo lectura.
+
+### Cómo se comportan
+
+- Los fallos parpadean menos de dos veces por segundo (nunca de forma estroboscópica); un fallo nuevo hace un solo destello; un fallo que nadie atiende durante `screens.blink_calm_minutes` conserva un halo fijo. Con el ajuste del sistema para reducir el movimiento, o con `?blink=off`, nada parpadea ni se mueve. Un fallo nunca se muestra solo con color: lleva un símbolo y una palabra.
+- Si el monitor no responde, la página lo dice, se atenúa y reintenta a los 5, 10, 20... segundos (hasta 60).
+- Una pantalla siempre encendida se protege contra el quemado: todo se desplaza unos píxeles cada minuto y la página puede atenuarse de noche.
+
+### Montar varios monitores
+
+1. Elige una dirección para cada monitor, por ejemplo `/screen/overview?monitor=1`, `/screen/now?monitor=2` y `/screen/sentinels?monitor=3`; o abre una sola ventana con `?rotate=20`.
+2. Abre cada una en Chrome o Edge en modo quiosco: `msedge --kiosk "http://este-equipo:8765/screen/now?monitor=2" --edge-kiosk-type=fullscreen` o `chrome --kiosk "http://este-equipo:8765/screen/now?monitor=2"`; con `--app=DIRECCIÓN` en lugar de `--kiosk` la ventana no tiene barras. Sin modo quiosco, el botón discreto del pie de la página pide la pantalla completa.
+3. Desde otro equipo usa el modo red: basta el token de acceso de un visor, porque estas páginas nunca escriben.
+
 ## Imágenes
 
 La pestaña Ahora en cuatro tamaños, con datos inventados (4K, un monitor 21:9, un monitor girado, un móvil):

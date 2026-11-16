@@ -58,6 +58,63 @@ A browser test opens the page in each of these sizes, goes through every tab and
 2. Open `http://this-computer:8765/screen/1` in a window on the first monitor and `/screen/2` on the second; press F11 for full screen. From another computer, use the network mode with its access token.
 3. For a wall screen nobody touches, give it several tabs and set `ui.rotate_seconds` to 20-30.
 
+## Wall screens: overview, right now and sentinels
+
+Three pages for a monitor or a TV that nobody touches. They have no side menu and no navigation, show everything in one view with big type, animate what is alive and make failures blink softly. They only read: no button changes anything, and they never call GitHub (they show what the monitor already holds).
+
+| Address | What it shows |
+|---|---|
+| `/screen/overview` | Score ring and letter; the fleet (green, red, stuck, waiting); the last 24 hours and 7 days as area charts; a heat map of repositories by hour; what has been red the longest; runners and minutes; the latest events; the GitHub allowance as a gauge. |
+| `/screen/now` | What is happening this minute: running runs with progress and duration, the queue, runs waiting for approval, recent failures, merges and releases, releases due and a live line of the last two hours. |
+| `/screen/sentinels` | One card for each sentinel (A1 to A12) with its level, open findings, whether its sources can be read, the last sweep and a ring that follows the sweep; an animated radar that marks what is wrong and the alerts by severity. |
+
+### Parameters of the address
+
+One address for each monitor. A parameter can make a window quieter or smaller than the settings allow, never louder.
+
+| Parameter | Effect |
+|---|---|
+| `?monitor=1` to `9` | The number shown next to the title. |
+| `?theme=dark`, `light` or `contrast` | Colours; contrast is white on black, for a screen seen from far away. |
+| `?density=compact`, `normal` or `large` | Size of the type. `?scale=1.5` enlarges everything (0.5 to 3). |
+| `?refresh=10` | Seconds between updates (5 to 120). |
+| `?lang=de` | Language (en, es, de, fr, it, ja, zh, pt). |
+| `?rotate=30` | The window turns by itself through overview, right now and sentinels every 30 seconds (at least 5; 0 = no rotation). |
+| `?blink=off` | Failures keep a fixed glow instead of blinking. It cannot turn on what `screens.blink` keeps off. |
+| `?sound=on` | A short beep for a new failure, only if `screens.sound` allows it. Off by default. |
+
+### Settings of the wall screens
+
+| Setting | What it does |
+|---|---|
+| `screens.enabled` | Turns the three pages on. Off: every address answers 404. |
+| `screens.default_theme` | dark (default), light or contrast. |
+| `screens.default_density` | compact, normal (default) or large. |
+| `screens.refresh_seconds` | Seconds between updates of a window (10 by default). The pages read the monitor, never GitHub, so a short time costs no allowance. |
+| `screens.rotate_seconds` | 0 (default) = no rotation; above 5, one window turns through the three pages. |
+| `screens.blink` | Failures blink softly (on by default). |
+| `screens.blink_calm_minutes` | Minutes after which a failure that nobody attended to keeps a fixed glow instead of blinking (30 by default; 0 = it blinks until solved). |
+| `screens.sound` | A beep for a new failure (off by default). |
+| `screens.burn_in_protection` | Moves everything a few pixels every minute (on by default). |
+| `screens.night_dim` | Dims the screens between `screens.night_dim_from_hour` (22) and `screens.night_dim_to_hour` (7); off by default. |
+| `screens.show_repo_names` | all, public (default: private repositories appear as private-1, private-2...) or none (every name is hidden). Use public or none for a screen that other people can see. |
+
+### What they show and what they hide
+
+The data come from `/api/screens/data?screen=overview` (or `now`, `sentinels`): a closed list of fields built from the last cycle, the snapshot of the sentinels, the alerts and the score. It never contains a link, a commit title, a job name, a user name or a path of this computer, and the workflow names of hidden repositories are hidden too. In the network mode the pages need the same access token as the rest of the monitor, and the answer is read only.
+
+### How they behave
+
+- Failures blink less than twice a second (never a strobe); a new failure makes a single flash; a failure nobody attended to for `screens.blink_calm_minutes` keeps a fixed glow. With the system setting for less motion, or `?blink=off`, nothing blinks and nothing moves. A failure is never shown by colour alone: it carries a symbol and a word.
+- When the monitor does not answer, the page says so, dims and tries again after 5, 10, 20... seconds (up to 60).
+- A screen that is always on is protected from burn-in: everything moves a few pixels every minute and the page can dim at night.
+
+### Setting up several monitors
+
+1. Choose one address for each monitor, for example `/screen/overview?monitor=1`, `/screen/now?monitor=2` and `/screen/sentinels?monitor=3`; or open one window with `?rotate=20`.
+2. Open each one in Chrome or Edge in kiosk mode: `msedge --kiosk "http://this-computer:8765/screen/now?monitor=2" --edge-kiosk-type=fullscreen` or `chrome --kiosk "http://this-computer:8765/screen/now?monitor=2"`; with `--app=ADDRESS` instead of `--kiosk` the window has no bars. Without kiosk mode, the discreet button at the foot of the page asks for full screen.
+3. From another computer use the network mode: the access token of a viewer is enough, because these pages never write.
+
 ## Pictures
 
 The tab Now in four sizes, with invented data (4K, a 21:9 monitor, a turned monitor, a phone):
