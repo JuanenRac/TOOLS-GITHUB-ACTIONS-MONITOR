@@ -1386,6 +1386,7 @@ function nodataTip(h){
   if(!h.applicable)return T("ui.rdy_nodata_none")+(h.no_ci&&h.no_ci.length?T("ui.rdy_nodata_na",{list:h.no_ci.join(", ")}):"");
   return T("ui.rdy_nodata_tip",{covered:h.covered,applicable:h.applicable,pct:Math.round((h.coverage||0)*100),min:Math.round((h.min_coverage||0)*100),list:(h.missing||[]).join(", ")||"-"})+(h.no_ci&&h.no_ci.length?T("ui.rdy_nodata_na",{list:h.no_ci.join(", ")}):"")
 }
+function scoreSpark(pts){if(pts.length<2)return"";const v=pts.slice(-60).map(p=>p.score),lo=Math.min(...v),hi=Math.max(...v),w=60,h=16,sp=hi-lo||1;const d=v.map((y,i)=>(i*w/(v.length-1)).toFixed(1)+","+(h-2-(y-lo)*(h-4)/sp).toFixed(1)).join(" ");return `<svg class="scr-spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true" focusable="false"><polyline points="${d}" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>`}
 /* the score of the account says what is missing and when it will come: the time left of the calibration with its end, why there are not enough data, and why a part is not counted */
 function scoreWhy(a){
   const q=a.data_quality||{},out=[];
@@ -1405,7 +1406,6 @@ function scoreCalibrating(a){
   const left=Math.max(0,q.calibrating_hours-q.watched_hours),pct=Math.max(0,Math.min(100,Math.round(q.watched_hours/q.calibrating_hours*100)));
   return esc(T("ui.score_cal_left",{left:fmt(Math.ceil(left*60)*60),total:q.calibrating_hours}))+` <span class="scr-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><b style="width:${pct}%"></b></span>`
 }
-function scoreSpark(pts){if(pts.length<2)return"";const v=pts.slice(-60).map(p=>p.score),lo=Math.min(...v),hi=Math.max(...v),w=60,h=16,sp=hi-lo||1;const d=v.map((y,i)=>(i*w/(v.length-1)).toFixed(1)+","+(h-2-(y-lo)*(h-4)/sp).toFixed(1)).join(" ");return `<svg class="scr-spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true" focusable="false"><polyline points="${d}" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>`}
 function scoreChip(a,pts){
   const q=a.data_quality||{},cov=Math.round((a.coverage||0)*100);
   let tip=T("ui.score_tip",{coverage:cov,runs:q.runs||0,days:a.window_days||7});
