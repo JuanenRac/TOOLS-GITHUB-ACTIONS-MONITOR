@@ -170,12 +170,20 @@ class ADeclaredProxyMakesLoopbackStopMeaningThisComputer(NetworkCase):
         self.assertIn("listen.local_port", settings_api.FIELDS)
         self.assertTrue(localguard.local_only_key("listen.local_port"))
 
-    def test_a_proxy_that_does_not_add_the_header_cannot_be_used_to_rotate_the_address(self):
+    def test_a_proxy_that_does_not_say_who_the_visitor_is_counts_all_its_requests_together(self):
+        self.declare(trusted_proxy=True)
+        loopback = Running(self, peer_ip="127.0.0.1")
+        codes = [loopback.call("GET", "/api/health", headers={"Host": "monitor.example"}, token="bad")[0] for i in range(40)]
+        self.assertIn(429, codes, "the requests of the proxy that carry no address are counted together")
+        self.assertEqual(loopback.call("GET", "/api/health", headers={"Host": "monitor.example"}, token="bad")[0], 429)
+        self.assertEqual(loopback.call("GET", "/api/health", headers={"Host": "monitor.example"}, token=TOKEN)[0], 200, "the right token is never refused for the guesses of others")
+
+    def test_visitors_with_their_own_address_never_lock_the_proxy_as_a_whole(self):
         self.declare(trusted_proxy=True)
         loopback = Running(self, peer_ip="127.0.0.1")
         codes = [loopback.call("GET", "/api/health", headers={"Host": "monitor.example", "X-Forwarded-For": f"203.0.113.{i % 250 + 1}"}, token="bad")[0] for i in range(40)]
-        self.assertIn(429, codes, "the clients of the proxy are also counted together")
-        self.assertEqual(loopback.call("GET", "/api/health", headers={"Host": "monitor.example", "X-Forwarded-For": "198.51.100.77"})[0], 429)
+        self.assertNotIn(429, codes)
+        self.assertEqual(loopback.call("GET", "/api/health", headers={"Host": "monitor.example", "X-Forwarded-For": "198.51.100.77"}, token=TOKEN)[0], 200)
 
     def test_one_person_still_does_not_lock_the_others_behind_a_trusted_proxy(self):
         self.declare(trusted_proxy=True)

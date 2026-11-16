@@ -1917,7 +1917,7 @@ class Handler(BaseHTTPRequestHandler):
         if query_token and not localguard.query_token_counts(self.command, self.path, LIVE_CONFIG or DEFAULTS):      # deprecated: only the first visit of a page, and only while listen.query_access is on
             query_token = ""
         peer = localguard.client_key(self.client_address, self.headers)
-        if not self.is_local() and localguard.is_locked_out(self.client_address, self.headers):      # the lock is looked at FIRST for every address that is not this computer: a locked address cannot keep guessing, not even with the right token
+        if not self.is_local() and localguard.is_locked_out(self.client_address, self.headers, token_ok=localguard.access_ok(self.headers, query_token)):      # the lock is looked at FIRST for every address that is not this computer: a locked address cannot keep guessing, not even with the right token
             self.json_reply({"error": "locked"}, 429)
             return False
         if not localguard.access_ok(self.headers, query_token):      # the person at this computer is never locked out of their own monitor; a shared proxy address is told apart with listen.trusted_proxy
@@ -1946,7 +1946,7 @@ class Handler(BaseHTTPRequestHandler):
             self.json_reply({"error": "forbidden"}, 403)
             return
         peer = localguard.client_key(self.client_address, self.headers)
-        if not self.is_local() and localguard.is_locked_out(self.client_address, self.headers):      # the same rule as every other request (access_gate)
+        if not self.is_local() and localguard.is_locked_out(self.client_address, self.headers, token_ok=True):      # the lock of this address, as in every other request (access_gate); the common one is looked at below, once the token is known
             self.json_reply({"error": "locked"}, 429)
             return
         try:
@@ -1960,7 +1960,11 @@ class Handler(BaseHTTPRequestHandler):
         except (ValueError, TypeError, OSError):
             self.json_reply({"ok": False, "error": "request"}, 400)
             return
-        if not localguard.access_ok({}, candidate):
+        right = localguard.access_ok({}, candidate)
+        if not self.is_local() and localguard.is_locked_out(self.client_address, self.headers, token_ok=right):
+            self.json_reply({"error": "locked"}, 429)
+            return
+        if not right:
             localguard.note_failure(peer, localguard.max_failed(LIVE_CONFIG or DEFAULTS))
             localguard.note_proxy_failure(self.client_address, self.headers, localguard.max_failed(LIVE_CONFIG or DEFAULTS))
             self.json_reply({"error": "access"}, 401)

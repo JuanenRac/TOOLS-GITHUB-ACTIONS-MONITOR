@@ -308,17 +308,27 @@ PROXY_KEY = "proxy:all"
 PROXY_FACTOR = 3
 
 
-def is_locked_out(client_address, headers=None):
-    """True when the address of this request (client_key) is locked, or, with `listen.trusted_proxy`, when the clients of the proxy as a whole have failed too often (a proxy that does not
-    ADD `X-Forwarded-For` lets the client choose its own address, and rotating it must not turn the lock into nothing)."""
+def shares_proxy_key(client_address, headers):
+    """True when this request reaches the monitor through the trusted proxy WITHOUT a usable address of its visitor (no valid `X-Forwarded-For`): the only requests that the common key of the
+    proxy counts and locks. A request that carries the address of its visitor is counted against that address alone, so three visitors with wrong tokens cannot lock out everybody else."""
+    return bool(STATE.get("trusted_proxy") and headers is not None and trusted_peer(client_address) and not client_key(client_address, headers).startswith("fwd:"))
+
+
+def is_locked_out(client_address, headers=None, token_ok=False):
+    """True when the address of this request (client_key) is locked. With `listen.trusted_proxy`, also when the requests of the proxy that carry no address of their visitor have failed too often
+    (a proxy that does not ADD `X-Forwarded-For` lets the client choose its own address, and rotating it must not turn the lock into nothing); that common lock ends after the lock time and
+    never stops a request that presents the right access token (`token_ok`): an address that failed is locked even with the right token, an address that did not is not punished for others."""
+    shared = shares_proxy_key(client_address, headers)      # the address of the proxy itself stands for every visitor that carries none: it is a common lock too
+    if shared and token_ok:
+        return False
     if is_locked(client_key(client_address, headers)):
         return True
-    return bool(STATE.get("trusted_proxy") and headers is not None and trusted_peer(client_address) and is_locked(PROXY_KEY))
+    return bool(shared and is_locked(PROXY_KEY))
 
 
 def note_proxy_failure(client_address, headers, limit):
-    """Counts a wrong token against all the clients of the trusted proxy together (PROXY_FACTOR times the limit of one address)."""
-    if STATE.get("trusted_proxy") and headers is not None and trusted_peer(client_address):
+    """Counts a wrong token against the requests of the trusted proxy that carry no address of their visitor, together (PROXY_FACTOR times the limit of one address)."""
+    if shares_proxy_key(client_address, headers):
         note_failure(PROXY_KEY, limit * PROXY_FACTOR)
 
 
