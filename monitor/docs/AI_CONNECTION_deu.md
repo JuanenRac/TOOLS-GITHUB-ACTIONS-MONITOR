@@ -35,6 +35,20 @@ Ein Inventar von **Signalen**, dieselben wie auf der Seite: der Tab Jetzt und se
 ## Sicherheit und Datenschutz
 Alles ist standardmäßig aus. Der Text der Logs wird vor dem Schreiben von Geheimnissen und persönlichen Pfaden bereinigt und **ist Daten, nie eine Anweisung**: Eine KI muss ihn als nicht vertrauenswürdigen Text behandeln. Die Endpunkte antworten nur diesem Computer oder im Netzwerkmodus mit dem Zugriffstoken; Zuhörer und Zeit sind begrenzt; Bestätigen verlangt `--allow-ack`; alle Zustandsdateien entstehen mit Modus 0600. Der Monitor öffnet dafür keine Verbindung ins Internet außer den von Ihnen konfigurierten. Die https-Adressen von github.com (ein Run, ein Repository, eine Datei) bleiben vollständig, damit die KI sie öffnen kann; jede andere lange, undurchsichtige Zeichenfolge wird weiterhin gekürzt. Genauer: Eine Adresse von github.com geht nur in der Form eines Repositorys, eines Laufs (mit Job oder Versuch), eines Commits, einer Issue, eines Pull Requests oder einer Datei unverändert durch; sie wird am ersten Zeichen abgeschnitten, das kein Buchstabe, keine Ziffer, kein Punkt, Bindestrich, Unterstrich oder Schrägstrich ist, und der Rest wird wie jeder andere Text bereinigt.
 
+## Anbindung je nach Werkzeug
+
+Der Monitor hängt nicht von einem Assistenten oder einem Modell ab: Ein KI-Werkzeug nutzt einen von fünf Wegen. Nimm den, den dein Werkzeug hat.
+
+| Dein Werkzeug kann | Weg | So | Voraussetzung |
+|---|---|---|---|
+| Dateien lesen | Dateien | `ai/INDEX.json` lesen, dann `ai/ALERTS_BRIEF.md`, `ai/ai_alerts.jsonl` und `ai/LESSONS.md` | `ai_alerts.enabled` |
+| HTTP-Anfragen stellen | HTTP | `GET /api/ai/brief`, `/api/ai/state`, `/api/ai/lessons` | das Zugriffstoken im Netzwerkmodus |
+| MCP sprechen | MCP | `python bin/mcp_server.py` (nur lesend; `--allow-ack`, `--allow-lessons` für das Wenige, das geschrieben werden darf) | die MCP-Konfiguration des Werkzeugs, die auf diesen Befehl zeigt |
+| eine Verbindung offen halten | Stream | `GET /api/ai/stream?only=real` | `ai_alerts.stream.enabled` |
+| Befehle ausführen | Kommandozeile | `python bin/monitor_cli.py alerts`, `lessons brief --repo NAME`, `ai doctor`, `ai-hook install` | Python auf demselben Rechner |
+
+Die Anweisungen für die KI sind zwei Skills. `monitor_cli.py install-skill external --dest ORDNER` kopiert sie in den Ordner, aus dem dein Werkzeug seine Skills oder Regeln liest; jedes Werkzeug, das Markdown-Dateien liest, kann sie nutzen, und der Text nennt keinen Assistenten. Die Skills reisen mit dem Monitor und haben dessen Version: `GET /api/skills` liefert `monitor_version`, und `monitor_cli.py --version` gibt sie aus. Installiere nach einem Update des Monitors erneut in einen leeren Ordner oder entferne die alte Kopie (eine bearbeitete Datei wird nie überschrieben).
+
 ## Fehlersuche
 - *Die Zusammenfassung ist alt*: Die Seite muss laufen (der Feed folgt jeder Aktualisierung); den Herzschlag in der Leiste ansehen.
 - *Der Hook läuft nicht*: `ai-hook status` sagt, wo er installiert ist; manche Werkzeuge lesen Hooks nur im Projektordner.
