@@ -9,19 +9,23 @@ What has shipped, what comes next and what is only an idea, in that order of cer
 
 ## Where the monitor is now
 
-Version 2.0.0. The lite edition shows what runs and what failed. The complete edition adds three sentinels (CI, Collab and Security), one list of alerts, several accounts and a team with roles, the score of each account, the health of each repository and of the team, scheduled reports, a log of actions, notifications (ntfy, Teams, e-mail and Apprise), an optional AI assistant with presets of compatible services, the service mode with Docker, and a page for every size of screen from a phone to 4K.
+Version 2.0.1. The lite edition shows what runs and what failed. The complete edition adds three sentinels (CI, Collab and Security), one list of alerts, several accounts and a team with roles, the score of each account, the health of each repository and of the team, scheduled reports, a log of actions, notifications (ntfy, Teams, e-mail and Apprise), an optional AI assistant with presets of compatible services, the service mode with Docker, and a page for every size of screen from a phone to 4K.
 
 ## Planned, in this order
 
 Each version carries only real content: a version with nothing real to add is skipped and never published empty. Nothing here is claimed as proven on live services unless its guide says so.
 
-### 2.0.1 to 2.0.9 - After the freeze
+### 2.0.2 to 2.0.9 - After the freeze
 
 What only shows with long real use: the migration from 1.8 and 1.9, the growth of the events and the database over months, sessions after an upgrade, Docker volumes, many accounts with three sentinels and the team mode together, and whatever the contract suite finds. Nothing of the fourth phase (plugins, wide automation, advanced AI) goes into these versions; a version with nothing real to add is skipped.
 
 The monitor's own workflows keep to what the hygiene sentinel will ask of others: actions pinned to a commit, the least permissions and a time limit on every job.
 
-## Done in 1.8.2 to 2.0.0
+## Done in 1.8.2 to 2.0.1
+
+### 2.0.1 - Packaging and a missing key
+
+The published zip now carries the AI presets file and every other data file of the package, and the release gate fails when one is missing from the zip; the all-accounts page no longer shows an untranslated state key, and a test checks that every key the page uses exists in the eight catalogues.
 
 ### 2.0.0 - Maturity
 

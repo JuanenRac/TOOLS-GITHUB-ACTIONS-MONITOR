@@ -4,19 +4,23 @@ Lo ya publicado, lo que viene y lo que solo es una idea, en ese orden de certeza
 
 ## Dónde está el monitor ahora
 
-Versión 2.0.0. La edición lite muestra lo que se ejecuta y lo que falló. La edición completa añade tres centinelas (CI, Collab y Security), una lista de alertas, varias cuentas y un equipo con roles, la puntuación de cada cuenta, la salud de cada repositorio y del equipo, informes programados, un registro de acciones, notificaciones (ntfy, Teams, correo y Apprise), un asistente de IA opcional con preajustes de servicios compatibles, el modo servicio con Docker y una página para todos los tamaños de pantalla, de un móvil a 4K.
+Versión 2.0.1. La edición lite muestra lo que se ejecuta y lo que falló. La edición completa añade tres centinelas (CI, Collab y Security), una lista de alertas, varias cuentas y un equipo con roles, la puntuación de cada cuenta, la salud de cada repositorio y del equipo, informes programados, un registro de acciones, notificaciones (ntfy, Teams, correo y Apprise), un asistente de IA opcional con preajustes de servicios compatibles, el modo servicio con Docker y una página para todos los tamaños de pantalla, de un móvil a 4K.
 
 ## Previsto, en este orden
 
 Cada versión lleva solo contenido real: una versión sin nada real que añadir se salta y nunca se publica vacía. Nada de esto se da por probado con servicios reales salvo que su guía lo diga.
 
-### 2.0.1 a 2.0.9 - Después de la congelación
+### 2.0.2 a 2.0.9 - Después de la congelación
 
 Lo que solo aparece con un uso real prolongado: la migración desde la 1.8 y la 1.9, el crecimiento de los eventos y de la base de datos durante meses, las sesiones tras una actualización, los volúmenes de Docker, muchas cuentas con tres centinelas y el modo equipo a la vez, y lo que encuentre la batería de contrato. Nada de la cuarta fase (plugins, automatización amplia, IA avanzada) entra en estas versiones; una versión sin nada real que añadir se salta.
 
 Los workflows del propio monitor cumplen lo que el centinela de higiene pedirá a los demás: acciones fijadas a un commit, los permisos mínimos y un límite de tiempo en cada trabajo.
 
-## Hecho en la 1.8.2 a la 2.0.0
+## Hecho en la 1.8.2 a la 2.0.1
+
+### 2.0.1 - Empaquetado y una clave que faltaba
+
+El zip publicado ahora lleva el fichero de los preajustes de IA y todos los demás ficheros de datos del paquete, y la puerta de publicación falla si falta alguno en el zip; la página de todas las cuentas ya no muestra una clave de estado sin traducir, y un test comprueba que cada clave que usa la página existe en los ocho catálogos.
 
 ### 2.0.0 - Madurez
 

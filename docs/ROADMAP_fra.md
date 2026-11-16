@@ -4,19 +4,23 @@ Ce qui est publié, ce qui vient ensuite et ce qui n'est qu'une idée, dans cet 
 
 ## Où en est le moniteur
 
-Version 2.0.0. L'édition lite montre ce qui tourne et ce qui a échoué. L'édition complète ajoute trois sentinelles (CI, Collab et Security), une liste d'alertes, plusieurs comptes et une équipe avec des rôles, la note de chaque compte, la santé de chaque dépôt et de l'équipe, des rapports programmés, un journal des actions, des notifications (ntfy, Teams, e-mail et Apprise), un assistant d'IA facultatif avec des préréglages de services compatibles, le mode service avec Docker et une page pour toutes les tailles d'écran, du téléphone à la 4K.
+Version 2.0.1. L'édition lite montre ce qui tourne et ce qui a échoué. L'édition complète ajoute trois sentinelles (CI, Collab et Security), une liste d'alertes, plusieurs comptes et une équipe avec des rôles, la note de chaque compte, la santé de chaque dépôt et de l'équipe, des rapports programmés, un journal des actions, des notifications (ntfy, Teams, e-mail et Apprise), un assistant d'IA facultatif avec des préréglages de services compatibles, le mode service avec Docker et une page pour toutes les tailles d'écran, du téléphone à la 4K.
 
 ## Prévu, dans cet ordre
 
 Chaque version ne porte que du contenu réel : une version sans rien de réel à ajouter est sautée et jamais publiée vide. Rien ici n'est tenu pour prouvé sur des services réels sauf si son guide le dit.
 
-### 2.0.1 à 2.0.9 - Après le gel
+### 2.0.2 à 2.0.9 - Après le gel
 
 Ce qui n'apparaît qu'à l'usage réel prolongé : la migration depuis la 1.8 et la 1.9, la croissance des événements et de la base de données sur des mois, les sessions après une mise à jour, les volumes Docker, beaucoup de comptes avec trois sentinelles et le mode équipe en même temps, et ce que trouve la suite de contrat. Rien de la quatrième phase (greffons, automatisation étendue, IA avancée) n'entre dans ces versions ; une version sans contenu réel est sautée.
 
 Les workflows du moniteur lui-même respectent ce que la sentinelle d'hygiène demandera aux autres : actions fixées à un commit, permissions minimales et une limite de temps sur chaque job.
 
-## Fait dans la 1.8.2 à la 2.0.0
+## Fait dans la 1.8.2 à la 2.0.1
+
+### 2.0.1 - Empaquetage et une clé manquante
+
+Le zip publié contient désormais le fichier des préréglages d'IA et tout autre fichier de données du paquet, et la porte de publication échoue si l'un manque dans le zip ; la page de tous les comptes n'affiche plus de clé d'état non traduite, et un test vérifie que chaque clé utilisée par la page existe dans les huit catalogues.
 
 ### 2.0.0 - Maturité
 

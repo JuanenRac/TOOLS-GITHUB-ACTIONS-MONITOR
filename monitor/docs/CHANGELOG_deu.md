@@ -9,6 +9,14 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+## [2.0.1]
+
+### Behoben
+
+- **Im veröffentlichten Zip fehlte die Datei mit den KI-Voreinstellungen**: Die Paketierung enthält jetzt jede Datendatei des Pakets, und das Release-Gate schlägt fehl, wenn eine im Zip fehlt.
+
+- **Ein unübersetzter Statusschlüssel auf der Seite aller Konten**: Die beiden fehlenden Schlüssel stehen jetzt in den acht Katalogen, und ein Test prüft, dass jeder von der Seite verwendete `ui`-Schlüssel in den acht Katalogen existiert.
+
 ## [2.0.0]
 
 ### Hinzugefügt

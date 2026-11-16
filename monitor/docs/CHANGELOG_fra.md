@@ -9,6 +9,14 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+## [2.0.1]
+
+### Corrigé
+
+- **Le zip publié n'avait pas le fichier des préréglages d'IA** : l'empaquetage inclut désormais tous les fichiers de données du paquet et la porte de publication échoue si l'un manque dans le zip.
+
+- **Une clé d'état non traduite sur la page de tous les comptes** : les deux clés manquantes sont maintenant dans les huit catalogues, et un test vérifie que chaque clé `ui` utilisée par la page existe dans les huit catalogues.
+
 ## [2.0.0]
 
 ### Ajouté

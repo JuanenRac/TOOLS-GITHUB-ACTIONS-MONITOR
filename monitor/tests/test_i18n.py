@@ -99,6 +99,35 @@ class NothingUnresolved(unittest.TestCase):
         missing = {k: f for k, f in used_keys().items() if k not in en and not k.endswith((".", "_")) and k not in ("ui.lv_", "ui.theme_")}
         self.assertEqual(missing, {})
 
+    def test_every_ui_key_used_exists_in_all_eight_catalogues(self):
+        """A key missing from one language shows its raw name on the page for that language only."""
+        missing = {}
+        for lang in LANGS:
+            cat = catalogue(lang)
+            for key in used_keys():
+                if key.startswith("ui.") and key not in cat and not key.endswith((".", "_")) and key not in ("ui.lv_", "ui.theme_"):
+                    missing.setdefault(key, []).append(lang)
+        self.assertEqual(missing, {})
+
+    def test_every_dynamic_ui_prefix_of_the_page_has_keys_in_all_eight_catalogues(self):
+        html = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
+        prefixes = set(re.findall(r'T\("(ui\.[a-z0-9_]+_)"\s*\+', html))
+        self.assertTrue(prefixes)
+        for lang in LANGS:
+            cat = catalogue(lang)
+            for prefix in sorted(prefixes):
+                self.assertTrue(any(k.startswith(prefix) for k in cat), f"{lang}: nothing starts with {prefix}")
+
+    def test_every_state_an_account_can_have_is_translated(self):
+        """The all-accounts page builds ui.acc_state_<state>: each state the supervisor can give must exist in every language."""
+        src = (HERE / "src" / "github_actions_monitor" / "accounts" / "accounts_supervisor.py").read_text(encoding="utf-8")
+        states = set(re.findall(r'(?:^|\s)state = "(\w+)"', src)) | set(re.findall(r'entry\["state"\] = "(\w+)"', src)) | set(re.findall(r'"state": "(\w+)"', src)) | set(re.findall(r'entry\["state"\] = "\w+" if .* else "(\w+)"', src))
+        self.assertTrue({"ok", "stuck", "down", "starting", "blind", "offline"} <= states, states)
+        for lang in LANGS:
+            cat = catalogue(lang)
+            for state in sorted(states):
+                self.assertIn("ui.acc_state_" + state, cat, f"{lang}: {state}")
+
     def test_dynamic_keys_exist(self):
         en = catalogue("en")
         for key, cols in surface.SECTIONS:
@@ -173,7 +202,7 @@ class NoVisibleStringBypassesT(unittest.TestCase):
         self.assertEqual(words, [])
         script = html.split("<script>", 1)[1]
         script = script.replace("const I18N=", "const DATA_I18N=", 1)   # the line with the embedded catalogues is data (the file itself holds no words there)
-        spanish = re.findall(r"[áéíóúñ¿¡«»]|(?:Cargando|Ninguna?|Abrir|Cerrar|desde|lleva|Sin datos|hace|Denso|Actualizado|Copiar|Copiado)", script)
+        spanish = re.findall(r"[áéíóúñ¿¡«»]|(?:Cargando|Ninguna?|Abrir|Cerrar|desde|lleva|Sin datos|hace|Denso|Actualizado|Copiar|Copiado)", script)
         english = re.findall(r"[>(\"'`](?:Loading|Closed?|Nothing|Updated|None\.|No data|Copied|Copy|Repository|Workflow)[ .:\"'<]", script)
         self.assertEqual(spanish + english, [])
 
@@ -359,6 +388,17 @@ class AuthorshipAndRelease(unittest.TestCase):
 
     def test_every_member_of_the_zip_has_the_authorship(self):
         self.assertEqual(mr.authorship_problems(self.entries()), [])
+
+    def test_the_zip_carries_every_data_file_the_package_loads(self):
+        """The presets of the AI providers sit in a json next to the code: a zip with only the .py files started with them empty."""
+        names = {"github_actions_monitor/" + p.relative_to(mr.HERE).as_posix() for p in mr.members()}
+        self.assertIn("github_actions_monitor/src/github_actions_monitor/sentinels/ai_presets.json", names)
+        self.assertEqual(mr.package_data_problems(names), [])
+
+    def test_the_gate_notices_a_data_file_left_out_of_the_zip(self):
+        names = {"github_actions_monitor/" + p.relative_to(mr.HERE).as_posix() for p in mr.members()}
+        names.discard("github_actions_monitor/src/github_actions_monitor/sentinels/ai_presets.json")
+        self.assertEqual(mr.package_data_problems(names), ["github_actions_monitor/src/github_actions_monitor/sentinels/ai_presets.json"])
 
     def test_the_gate_notices_a_file_without_authorship(self):
         entries = self.entries()

@@ -9,6 +9,14 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+## [2.0.1]
+
+### Corrigido
+
+- **O zip publicado não incluía o ficheiro das predefinições de IA**: o empacotamento passa a incluir todos os ficheiros de dados do pacote e a porta de lançamento falha se algum faltar no zip.
+
+- **Uma chave de estado por traduzir na página de todas as contas**: as duas chaves em falta estão agora nos oito catálogos, e um teste verifica que cada chave `ui` usada pela página existe nos oito catálogos.
+
 ## [2.0.0]
 
 ### Adicionado

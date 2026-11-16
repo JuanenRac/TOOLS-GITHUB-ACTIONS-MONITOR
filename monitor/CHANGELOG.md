@@ -11,6 +11,14 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+## [2.0.1]
+
+### Fixed
+
+- **The published zip lacked the AI presets file**: the packaging now includes every data file of the package and the release gate fails if one is missing from the zip.
+
+- **An untranslated state key on the all-accounts page**: the two missing keys are now in the eight catalogues, and a test checks that every `ui` key used by the page exists in the eight catalogues.
+
 ## [2.0.0]
 
 ### Added

@@ -1,4 +1,6 @@
 {
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
  "schema": 1,
  "note": "Data only. Compatible by protocol; 'checked' means the address was read in the public documentation of the provider, 'tested' that this tool was run against the real service (false for all). No weights, no downloads, no key: the key is always read from the environment variable named in 'api_key_env'.",
  "presets": [
