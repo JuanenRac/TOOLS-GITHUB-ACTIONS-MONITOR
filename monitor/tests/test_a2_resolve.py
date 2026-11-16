@@ -146,7 +146,7 @@ class Resolve(unittest.TestCase):
 
     def test_the_call_limit_per_tick_and_the_switch(self):
         with tempfile.TemporaryDirectory() as tmp:
-            s, calls = make(tmp, {}, a2_resolve_max_calls_per_tick=2)
+            s, calls = make(tmp, {}, a2_resolve_max_calls_per_tick=2, a2_resolve_batch_min=0)      # the one-by-one way
             s.surface.scans = scans("ci.yml", "a.yml", "b.yml", "c.yml")
             s._a2_resolve_tick()
             self.assertEqual(len(calls), 2)
