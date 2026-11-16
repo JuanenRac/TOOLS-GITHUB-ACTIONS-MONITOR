@@ -57,9 +57,8 @@ AUDIT_DIR = workspace.audit_dir_soft()
 CACHE_FILE = paths.place("sentinel_cache.json")
 HISTORY_FILE = paths.place("sentinel_history.json")
 HISTORY_DAYS = 60
-# One criterion of "red", the same as the public dashboard (the profile repository's scripts/ci_watch.py: RED = failure, timed_out, startup_failure, action_required).
-# A run that waits for an approval is red too: it needs a person. Cancelled, skipped, neutral and stale say nothing.
-BAD = ("failure", "timed_out", "startup_failure", "action_required")
+# One criterion of "red" (redrule.py): failure, timed_out, startup_failure. A run that waits for an approval (action_required) is its own state, not a red. Cancelled, skipped, neutral and stale say nothing.
+BAD = redrule.BAD
 IGNORED = ("cancelled", "skipped", "neutral", "stale")
 BOT_ACTORS = ("dependabot[bot]", "github-actions[bot]")   # plus the owner of the repositories (toolconfig.github_owner())
 RELEASE_WF = re.compile(r"(release|build|publish|package|apk|firmware|exe|dist|site|sign|deploy)", re.I)

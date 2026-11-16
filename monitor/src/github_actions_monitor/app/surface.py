@@ -28,7 +28,7 @@ from github_actions_monitor import i18n
 from github_actions_monitor.util import platform_compat
 from github_actions_monitor.app import toolconfig
 
-BAD = ("failure", "timed_out", "startup_failure", "action_required")
+BAD = ("failure", "timed_out", "startup_failure")      # the same family as redrule.BAD: a job that waits for an approval is not a failure
 HEX40 = re.compile(r"^[0-9a-fA-F]{40}\Z")
 HIGH = ("critical", "high")
 

@@ -35,6 +35,10 @@ class _NoGhPopen(_RealPopen):
 subprocess.Popen = _NoGhPopen
 
 i18n.set_language("en")
+from github_actions_monitor.data_pipeline import redrule as _redrule  # noqa: E402
+
+_redrule.DEFAULT_INACTIVE_DAYS = 0      # the fixtures of the tests carry fixed dates of the past: no workflow of a test is "abandoned" unless the test asks for it (ci.inactive_days)
+_redrule.POLICY["inactive_days"] = 0
 toolconfig.set_owner("JuanenRac")
 
 
