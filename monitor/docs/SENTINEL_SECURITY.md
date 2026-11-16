@@ -26,6 +26,8 @@ There is one alert per repository and signal, with the counts by severity in its
 
 A source that GitHub does not answer for a repository (the feature is off there, or the login may not read it: 403, 404) is **not** an alert and is **not** a clean bill of health. It is listed in the status under `unavailable`, with how many repositories it concerns, and the page says it. The one exception is the protection of the default branch: GitHub answers 404 for a branch that has none, and that is the finding; a 403 there is only unreadable.
 
+When most of what weighs in the penalty (Dependabot, code scanning, secrets) cannot be read, the level is `unknown`, not `ok`, and the security part of the score is left out instead of counting as 100; the status shows `sources_readable` and `sources_total`. If a source stops answering while an alert is open, the alert stays for a week (marked `unread_since`) and is never announced as fixed. A repository whose reads keep failing waits 5 minutes, 30 minutes and then 6 hours before the next try, so a few broken repositories never use up the whole round.
+
 Every sentinel now tells its **lifecycle**: `healthy`, `degraded` (some reads fail, a source cannot be read, or it has not finished its first look), `paused` (waiting for the GitHub allowance), `error` (it fails and has read nothing yet) or `off`. "No alerts" only means something when the lifecycle is `healthy`.
 
 ## Cost
