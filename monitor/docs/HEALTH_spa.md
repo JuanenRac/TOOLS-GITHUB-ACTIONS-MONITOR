@@ -27,3 +27,9 @@ El estado es **malo** (un flujo en rojo, o una alerta de nivel crítico o error)
 - Enlaces directos para pantallas de pared: `?view=team&chrome=0`, `?view=repos&chrome=0` y `?view=repo&repo=owner/name&chrome=0`.
 - La API: `GET /api/team/health?ecosystem=&severity=&q=&label=` y `GET /api/repos/<owner>/<repo>/health`. Las dos piden permiso para ver la cuenta; las respuestas llevan `schema: 1`. Un repositorio desconocido responde 404 con `code: repo_unknown`.
 - La edición Lite conserva su vista sencilla de ejecuciones y no tiene ni la pestaña ni las rutas.
+
+## Miles de repositorios y un reloj atrasado
+
+La salud del equipo agrupa una sola vez por repositorio las ejecuciones, los workflows en rojo, las ejecuciones en curso y las alertas, así que el coste crece con la cantidad de datos y no con repositorios por ejecuciones; pedir un solo repositorio construye solo su vista.
+
+Una marca guardada que está en el futuro (un equipo sin reloj de batería que arranca con fecha vieja, o un reloj corregido a mano) no se cree: la puntuación, la purga de datos antiguos y los informes programados tocan de inmediato y escriben una marca correcta, en vez de esperar a que se alcance el reloj viejo.

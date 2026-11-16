@@ -34,6 +34,8 @@ when this file and `tool_version.py` disagree.
 - **Honest coverage of the list of runs**: the Repositories table has a new column, *Sample reaches back*, that says how far back in time the list of runs of each repository goes. A full list that reaches back less than `sampling.min_coverage_minutes` (30 by default; 0 turns it off) is marked *low coverage* instead of looking complete, a list shorter than what was asked for is *complete*, and a total that GitHub stops counting (2,500 or 40,000) is shown as *at least*. A notice above the table counts the repositories with low coverage; the block `sampling` of `GET /api/data` carries the same numbers.
 - **Second look at the default branch** (`sampling.default_branch_probe`, off by default): when the list of runs of a repository is full, one more request asks for the pushes to its default branch with pull requests left out, so the runs that decide red on main are not pushed out by pull requests and schedules. The runs that only the second look found never make a list count as full.
 - **Budget of requests per hour** (`sampling.api_budget_per_hour`, 0 = none): past it the repositories with a red workflow are read first and the rest wait for the next hour, and the page says how many wait. The page also shows the requests per hour that the number of repositories and the intervals ask for (from 3,500 on, or whenever a budget is set), so a large account is warned before it runs out of allowance.
+- **Long lists are read to the end, and a cut is said**: the workflows of a repository (148 or 348 are real cases), the jobs of a run (a matrix of more than 100) and the open issues and pull requests of a repository are now read page by page while the last page was full, up to `pagination.workflow_pages`, `pagination.job_pages` and `pagination.collab_pages` pages of 100. A repository that fits in one page costs the same requests as before. When something is still left out the page says "seen N of M": under the run for its jobs, in the hygiene of the repository for its workflows, and in the footer of the Team tab for repositories with more open items than were read and for the account when the Search API has more than its 1000 results.
+- **A load test with a synthetic account**: 250 repositories and 1,250 workflows, no network, measures the requests of a cycle, the time of the cycle and of the team health, the memory of the held data and how many requests the lookups of A2 need, with wide bounds so that a loaded computer passes.
 
 ### Changed
 
@@ -43,11 +45,22 @@ when this file and `tool_version.py` disagree.
 - **An abandoned workflow is "inactive", not red for ever**: a workflow whose last run failed but which has not run for `ci.inactive_days` days (90 by default, 0 turns it off) leaves the red list and is counted in the `inactive` figure.
 - **Workflows that only react to issues, comments or labels do not count as red CI**: they are told apart by the events they run on (setting `ci.automation_counts`, off by default); every red row now says which kind of workflow it is.
 - **A2 settles many workflows with one request**: a repository with at least `sentinel.a2_resolve_batch_min` workflows to look up (2 by default; 0 = one by one) is asked once for its newest completed runs of the default branch, pull requests left out, and every workflow found in them is settled together (`sentinel.a2_resolve_batch_pages` pages of 100 at most); what the list does not show is asked one by one as before, so a repository with 100 or more workflows converges in a few cycles instead of four workflows per cycle.
+- **The health of the team is fast with thousands of repositories**: the runs, red workflows, running runs and alerts are grouped by repository once, so a request to the team health no longer walks all of them for each repository (2,000 repositories took about eight seconds), and the health of one repository builds only its own view.
 
 ### Fixed
 
 - **Durations and queue times of re-run workflows are no longer absurd**: the wait in the queue and the duration are measured on the latest attempt of a run (`run_attempt`); the creation time of the first try is never used for a re-run, so queues of days and durations of hundreds of days no longer reach the analytics panel, the stuck-run check or the exports. A duration longer than the 35 days a run can last is left empty. The new setting `ci.rerun_timing` (off by default) also asks GitHub for the real duration of finished re-runs.
 - **A try after an approval is not "flaky"**: a run that needed a person to approve it (`action_required`) and then passed, and the runs of pull requests that come from forks, no longer count as flaky workflows.
+- The failing job of a run with more than 30 jobs is found: the lists of jobs that the alert for an AI, the assistant and the batch tool read were cut at 30 and are now cut at 100 (the same single request).
+- **A clock set back no longer stops the score, the purge and the scheduled reports**: a saved moment that lies in the future (a computer without a battery clock that starts with an old date, or a clock corrected by hand) is no longer believed; the pass is due at once and writes a good moment, instead of waiting for days until the old clock is reached again.
+
+### Security
+
+- **Every link the page builds from data goes through the address filter**: the links to the last run, the repository, the board, the issue, the unresolved failure and the update notice (12 of 14 did not) only open an `https` address of GitHub or of the configured host; anything else becomes an inert `#`. A test fails if a new link is built without the filter.
+
+### Security
+
+- **Every link the page builds from data goes through the address filter**: the links to the last run, the repository, the board, the issue, the unresolved failure and the update notice (12 of 14 did not) only open an `https` address of GitHub or of the configured host; anything else becomes an inert `#`. A test fails if a new link is built without the filter.
 
 ## [2.0.2]
 

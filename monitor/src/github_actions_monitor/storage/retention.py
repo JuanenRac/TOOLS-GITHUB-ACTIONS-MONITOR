@@ -18,6 +18,8 @@ documents (the silences, what the feed announced, the update notice) and it neve
 """
 import os
 import time
+
+from github_actions_monitor.util import clock
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -97,7 +99,8 @@ def run(storage, account_id, cfg, now=None):
 
 def due(storage, account_id, cfg, now=None):
     now = time.time() if now is None else now
-    return cfg["enabled"] and now - float(audit(storage, account_id).get("last_run_epoch") or 0) >= cfg["interval_hours"] * 3600
+    last = float(audit(storage, account_id).get("last_run_epoch") or 0)
+    return cfg["enabled"] and (clock.in_future(last, now) or now - last >= cfg["interval_hours"] * 3600)      # a last run in the future (clock set back) is due now: the pass writes a good moment
 
 
 def tick(storage, account_id, config, now=None):

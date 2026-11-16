@@ -3049,9 +3049,20 @@
  "cfg.f.ci.failed_jobs.max_per_cycle": "Runs read per cycle",
  "cfg.h.ci.failed_jobs.max_per_cycle": "The most red runs whose jobs are read in one cycle (one call each, default 4). The answer is kept while the run stays the same.",
  "cfg.f.ci.failed_jobs.group_by": "Group jobs by",
+ "cfg.h.ci.failed_jobs.group_by": "auto (default): the system in the name of the job (ubuntu, windows, macos...), else the first parameter of the matrix, else the part before the slash. platform, matrix and prefix force one of those.",
+ "cfg.f.pagination.workflow_pages": "Pages of workflows per repository",
+ "cfg.h.pagination.workflow_pages": "A repository can have hundreds of workflows. While a page of 100 is full, the next one is read, up to this many pages; a repository with fewer than 100 costs no extra request. If something is still left out the page says how many were seen of how many exist.",
+ "cfg.f.pagination.job_pages": "Pages of jobs per run",
+ "cfg.h.pagination.job_pages": "A matrix can start more than 100 jobs in one run. While a page of 100 is full, the next one is read, up to this many pages. If jobs are still left out, the run says \"seen N of M\".",
+ "cfg.f.pagination.collab_pages": "Pages of issues and pull requests per repository",
  "cfg.h.ai.catalog.enabled": "Off: the list of models is read only when you ask for it (the button below or `monitor_cli.py ai models --refresh`). On: the monitor also keeps the list and warns when the configured model no longer appears in it (retired or renamed). It is one read-only request to your provider, with no data of your repositories; the key is read from its environment variable.",
  "cfg.h.ai.catalog.fit_context": "Off: the input limit is the value you set. On: when the context window of the model is known (from the provider or typed in the table) the input is cut to about half of it, never above your limit. A model whose window is unknown keeps your limit.",
  "cfg.h.ai.catalog.max_requests_per_day": "The most requests to the list of models of the provider in a day, whoever asks (the check, the button, the command). At the cap the list kept is shown and nothing more is asked.",
  "cfg.h.ai.catalog.ttl_minutes": "How long the list kept stays valid before the monitor reads it again (only when the check above is on).",
- "cfg.h.ci.failed_jobs.group_by": "auto (default): the system in the name of the job (ubuntu, windows, macos...), else the first parameter of the matrix, else the part before the slash. platform, matrix and prefix force one of those."
+ "cfg.h.pagination.collab_pages": "A repository can have hundreds of open issues and pull requests. While a page of 100 is full, the next one is read, up to this many pages (the first page keeps its conditional read; a repository with fewer than 100 costs nothing more). If more exist, the Team tab says so.",
+ "ui.cfg_b_pagination": "Pages of long lists",
+ "ui.collab_cut": "{n} repositories have more open items than were read (up to {p} pages of 100)",
+ "ui.collab_cut_search": "Search: seen {seen} of {total}",
+ "ui.jobs_cut": "jobs: seen {seen} of {total}",
+ "hyg.wf_cut": "the list of workflows was cut: seen {seen} of {total}"
 }

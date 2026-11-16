@@ -56,3 +56,13 @@ Seules les 100 premières issues ouvertes et les 100 premières pull requests ou
 ## Lecture avec l'API de recherche
 
 Avec `sentinels.collab.search_api` activé (désactivé par défaut), le sentinelle Collab demande les tickets et pull requests ouverts de tout le compte en quelques appels de l'API de recherche au lieu de deux listes par dépôt. L'API de recherche a son propre quota (30 appels par minute) que le quota REST ne paie pas. Ensuite, seuls les conflits des pull requests modifiés sont lus. Les alertes sont les mêmes des deux façons, un test les compare ; si l'API de recherche échoue, la ronde lit chaque dépôt comme avant. Un pull request trouvé ainsi ne dit pas si une revue a été demandée, donc la règle des revues en attente ne compte que ce que donnent les listes.
+
+## Longues listes : pages et ce qui est coupé
+
+Une page de GitHub compte 100 éléments. Un dépôt peut avoir des centaines d'issues et de pull requests ouvertes, 148 ou 348 workflows, ou une matrice de plus de 100 jobs ; le moniteur lit donc la page suivante tant que la dernière était pleine et dit quand quelque chose reste dehors :
+
+- **Issues et pull requests** (cet onglet) : jusqu'à `pagination.collab_pages` pages de 100 pour chaque liste d'un dépôt (la première page garde sa lecture conditionnelle et un dépôt de moins de 100 ne coûte rien de plus). Un dépôt qui a plus que ce qui a été lu est compté dans le pied de l'onglet ; avec l'API de recherche (`sentinels.collab.search_api`) le pied dit « N vus sur M » quand le compte a plus que les 1000 résultats de la recherche.
+- **Workflows d'un dépôt** (hygiène) : jusqu'à `pagination.workflow_pages` pages de 100. Si la liste reste coupée, l'hygiène de ce dépôt dit « N vus sur M » au lieu de paraître complète.
+- **Jobs d'une exécution** (onglet Maintenant) : jusqu'à `pagination.job_pages` pages de 100 ; une matrice coupée affiche « jobs : N vus sur M » sous l'exécution.
+
+Les valeurs par défaut ne lisent rien de plus pour un dépôt qui tient dans une page.

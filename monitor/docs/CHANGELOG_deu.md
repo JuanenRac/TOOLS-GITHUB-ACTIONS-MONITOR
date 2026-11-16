@@ -9,9 +9,6 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
-### Geändert
-
-- **Die Hygiene (A6) setzt nicht mehr die Konventionen eines einzelnen Besitzers voraus**: Der Name des Rulesets ist eine Einstellung (`sentinel.hygiene.ruleset_names`, Muster erlaubt); `sentinel.hygiene.ruleset_mode` kann den Standard-Branch nach den Regeln beurteilen, die GitHub als gültig meldet (öffentliche Endpunkte, ohne Administratorrechte), egal wie das Ruleset heißt; `sentinel.hygiene.skip` lässt eine Prüfung aus; `sentinel.hygiene.community_fallback` zählt auch das Community-Profil und das `.github`-Repository des Kontos; eine Lizenz namens LICENSE-MIT, LICENSE-APACHE, LICENSE.txt, COPYING oder von GitHub erkannt wird akzeptiert; und was das Token nicht wissen kann (keine Administratorrechte), erscheint als nicht prüfbar, nie grün und nie eine Warnung. Die Standardwerte behalten die alte Regel.
 
 ### Hinzugefügt
 
@@ -21,12 +18,23 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 - **Ehrliche Abdeckung der Laufliste**: Die Repository-Tabelle hat eine neue Spalte, *Stichprobe reicht zurück*, die sagt, wie weit in der Zeit die Laufliste jedes Repositorys zurückreicht. Eine volle Liste, die weniger als `sampling.min_coverage_minutes` zurückreicht (standardmäßig 30; 0 schaltet es aus), wird als *geringe Abdeckung* markiert, statt vollständig zu wirken; eine kürzere Liste als angefordert ist *vollständig*, und eine Gesamtzahl, bei der GitHub aufhört zu zählen (2.500 oder 40.000), wird als *mindestens* gezeigt. Ein Hinweis über der Tabelle zählt die Repositorys mit geringer Abdeckung; der Block `sampling` von `GET /api/data` trägt dieselben Zahlen.
 - **Zweiter Blick auf den Standard-Branch** (`sampling.default_branch_probe`, standardmäßig aus): Ist die Laufliste eines Repositorys voll, fragt eine weitere Anfrage die Pushes auf den Standard-Branch ab, ohne Pull Requests, damit die Läufe, die über Rot auf main entscheiden, nicht von Pull Requests und Zeitplänen verdrängt werden. Läufe, die nur der zweite Blick fand, lassen eine Liste nie als voll gelten.
 - **Anfragenbudget pro Stunde** (`sampling.api_budget_per_hour`, 0 = keines): Danach werden Repositorys mit rotem Workflow zuerst gelesen, die übrigen warten auf die nächste Stunde, und die Seite sagt, wie viele warten. Die Seite zeigt außerdem die Anfragen pro Stunde, die Zahl der Repositorys und Intervalle verlangen (ab 3.500 oder sobald ein Budget gesetzt ist), damit ein großes Konto gewarnt wird, bevor sein Kontingent aufgebraucht ist.
+- **Lange Listen werden bis zum Ende gelesen, und ein Abschneiden wird gesagt**: die Workflows eines Repositorys (148 oder 348 sind reale Fälle), die Jobs eines Laufs (eine Matrix mit mehr als 100) sowie die offenen Issues und Pull Requests eines Repositorys werden jetzt Seite für Seite gelesen, solange die letzte Seite voll war, bis zu `pagination.workflow_pages`, `pagination.job_pages` und `pagination.collab_pages` Seiten zu 100. Ein Repository, das auf eine Seite passt, kostet dieselben Anfragen wie zuvor. Bleibt etwas übrig, sagt die Seite „N von M gesehen“: unter dem Lauf für seine Jobs, in der Hygiene des Repositorys für seine Workflows und in der Fußzeile des Tabs Team für Repositorys mit mehr offenen Einträgen als gelesen und für das Konto, wenn die Such-API mehr als ihre 1000 Ergebnisse hat.
+- **Ein Lasttest mit einem synthetischen Konto**: 250 Repositorys und 1.250 Workflows, ohne Netz, misst die Anfragen eines Zyklus, die Zeit des Zyklus und der Teamgesundheit, den Speicher der gehaltenen Daten und wie viele Anfragen die A2-Abfragen brauchen, mit weiten Grenzen, damit auch ein ausgelasteter Rechner besteht.
 
 ### Geändert
 
 - **A2 klärt viele Workflows mit einer Anfrage**: Bei einem Repository mit mindestens `sentinel.a2_resolve_batch_min` nachzuschlagenden Workflows (standardmäßig 2; 0 = einzeln) werden einmal die neuesten abgeschlossenen Läufe des Standard-Branches ohne Pull Requests abgefragt, und jeder darin gefundene Workflow wird gemeinsam geklärt (höchstens `sentinel.a2_resolve_batch_pages` Seiten zu je 100); was die Liste nicht zeigt, wird wie bisher einzeln erfragt. So konvergiert ein Repository mit 100 oder mehr Workflows in wenigen Zyklen statt mit vier Workflows pro Zyklus.
 - **A2 klärt viele Workflows mit einer Anfrage**: Bei einem Repository mit mindestens `sentinel.a2_resolve_batch_min` nachzuschlagenden Workflows (standardmäßig 2; 0 = einzeln) werden einmal die neuesten abgeschlossenen Läufe des Standard-Branches ohne Pull Requests abgefragt, und jeder darin gefundene Workflow wird gemeinsam geklärt (höchstens `sentinel.a2_resolve_batch_pages` Seiten zu je 100); was die Liste nicht zeigt, wird wie bisher einzeln erfragt. So konvergiert ein Repository mit 100 oder mehr Workflows in wenigen Zyklen statt mit vier Workflows pro Zyklus.
 - **Forks und archivierte Repositorys werden per Einstellung gewählt, und ein gepflegter Fork geht nie verloren**: `discovery.skip_archived` (standardmäßig an) entscheidet, ob archivierte Repositorys überwacht werden; `discovery.fork_policy` kann Forks auslassen (`skip`) oder nur die mit eigener CI behalten (`skip_unless_ci`: ein aktivierter Workflow und ein Lauf innerhalb von `discovery.fork_ci_days`), und `auto` tut dasselbe mit doppelt so langem Fenster bei einer Organisation, deren Art einmal täglich gelesen wird; `discovery.fork_checks_per_pass` begrenzt die dafür verbrauchten Anfragen. Der Standard (`show`) ändert nichts.
+- **Die Gesundheit des Teams ist mit Tausenden Repositorys schnell**: Läufe, rote Workflows, laufende Läufe und Meldungen werden einmal nach Repository gruppiert, sodass eine Anfrage zur Teamgesundheit nicht mehr für jedes Repository alle durchläuft (2.000 Repositorys brauchten etwa acht Sekunden), und die Gesundheit eines Repositorys baut nur seine eigene Ansicht.
+
+### Behoben
+
+- **Eine zurückgestellte Uhr hält Bewertung, Bereinigung und geplante Berichte nicht mehr an**: Ein gespeicherter Zeitpunkt in der Zukunft (ein Rechner ohne Batterieuhr, der mit altem Datum startet, oder eine von Hand korrigierte Uhr) wird nicht mehr geglaubt; der Durchlauf ist sofort fällig und schreibt einen guten Zeitpunkt, statt tagelang zu warten, bis die alte Uhr ihn erreicht.
+
+### Behoben
+
+- Der fehlgeschlagene Job eines Laufs mit mehr als 30 Jobs wird gefunden: Die Joblisten, die der Hinweis für eine KI, der Assistent und das Stapelwerkzeug lesen, wurden bei 30 abgeschnitten und werden jetzt bei 100 abgeschnitten (dieselbe einzelne Anfrage).
 
 ## [2.0.2]
 
