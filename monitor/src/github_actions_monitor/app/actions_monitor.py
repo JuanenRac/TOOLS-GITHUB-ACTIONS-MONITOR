@@ -2832,6 +2832,11 @@ class Handler(BaseHTTPRequestHandler):
                 return
             from github_actions_monitor.sentinels import ai_models, sentinel_ai
             self.json_reply(ai_models.listing(sentinel_ai.ai_config(toolconfig.raw_config()), ai_store()))
+        elif path == "/api/ai/budget":      # read only: the calls and the estimated cost of today for each model, the limits and the last failures of a main model
+            if not self.guard():
+                return
+            from github_actions_monitor.sentinels import ai_chain, sentinel_ai
+            self.json_reply(ai_chain.view(sentinel_ai.ai_config(toolconfig.raw_config()), ai_store()))
         elif path == "/api/ai/stream":      # server-sent events, read only: the alerts as they open and resolve (ai_alerts.stream, off by default)
             if not self.guard():
                 return

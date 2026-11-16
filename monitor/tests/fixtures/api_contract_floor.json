@@ -99,6 +99,20 @@
    "lite": "same"
   },
   {
+   "path": "/api/ai/budget",
+   "complete": {
+    "ok": "bool",
+    "day": "str",
+    "calls": "int",
+    "calls_limit": "int",
+    "cost": "number",
+    "cost_limit": "any",
+    "models": "list",
+    "failovers": "list"
+   },
+   "lite": 404
+  },
+  {
    "path": "/api/ai/models",
    "complete": {
     "ok": "bool",
