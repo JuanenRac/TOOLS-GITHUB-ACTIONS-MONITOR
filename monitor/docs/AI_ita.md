@@ -21,6 +21,7 @@ Facoltativo e **spento per impostazione predefinita**. Un modello linguistico pu
 ## Cosa può vedere
 
 - Ogni input viene pulito: caratteri di controllo rimossi, segreti oscurati per modello, lunghezza limitata, contenuto tra delimitatori casuali e dichiarato non attendibile. La risposta viene tagliata e i suoi link disinnescati.
+- Lo stesso unico pulitore (token, chiavi, credenziali dentro gli indirizzi, indirizzi e-mail, indirizzi IP, la tua cartella personale) serve questo assistente, il feed per le IA, gli endpoint e l'hook. Funziona per modelli: riduce il rischio, non è una garanzia. Una chiamata a un fornitore non segue mai un reindirizzamento (la chiave andrebbe a un altro indirizzo) e non usa le variabili di proxy dell'ambiente: un server di questo computer viene chiamato direttamente, uno remoto passa dal proxy solo con `network.use_proxy`.
 - Nella scheda Impostazioni scegli i tipi di evento analizzabili (`build`, `codeql`, `report`), i repository visibili (vuoto = quelli osservati dal monitor), la lingua delle risposte, il limite giornaliero di chiamate e i limiti di dimensione. Un pulsante prova la connessione e la pagina mostra le chiamate di oggi.
 
 
