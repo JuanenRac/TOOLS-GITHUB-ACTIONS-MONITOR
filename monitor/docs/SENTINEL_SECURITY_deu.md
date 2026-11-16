@@ -26,6 +26,8 @@ Es gibt eine Warnung je Repository und Signal, mit den Zahlen nach Schwere in de
 
 Eine Quelle, die GitHub für ein Repository nicht beantwortet (die Funktion ist dort aus oder der Zugang darf sie nicht lesen: 403, 404), ist **keine** Warnung und **kein** Gesundheitszeugnis. Sie steht im Zustand unter `unavailable`, mit der Zahl der betroffenen Repositories, und die Seite sagt es. Die einzige Ausnahme ist der Schutz des Standardbranches: GitHub antwortet 404 für einen Branch ohne Schutz, und das ist der Befund; ein 403 ist dort nur „nicht lesbar“.
 
+Wenn der größte Teil dessen, was in die Abwertung eingeht (Dependabot, Code-Scanning, Geheimnisse), nicht gelesen werden kann, ist die Stufe `unknown` statt `ok`, und der Sicherheitsanteil der Bewertung entfällt, statt als 100 zu zählen; der Zustand zeigt `sources_readable` und `sources_total`. Hört eine Quelle auf zu antworten, solange eine Warnung offen ist, bleibt die Warnung eine Woche lang bestehen (mit `unread_since` markiert) und wird nie als behoben gemeldet. Ein Repository, dessen Lesevorgänge weiter scheitern, wartet 5 Minuten, 30 Minuten und dann 6 Stunden bis zum nächsten Versuch, sodass wenige defekte Repositories nie die ganze Runde verbrauchen.
+
 Jeder Wächter nennt jetzt seinen **Lebenszyklus**: `healthy` (gesund), `degraded` (eingeschränkt: manche Lesevorgänge schlagen fehl, eine Quelle ist nicht lesbar oder der erste Durchgang ist nicht beendet), `paused` (pausiert, wartet auf das GitHub-Kontingent), `error` (schlägt fehl und hat noch nichts gelesen) oder `off` (aus). „Keine Warnungen“ bedeutet nur etwas, wenn der Lebenszyklus `healthy` ist.
 
 ## Kosten

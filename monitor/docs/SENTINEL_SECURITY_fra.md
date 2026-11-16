@@ -26,6 +26,8 @@ Il y a une alerte par dépôt et par signal, avec le décompte par gravité dans
 
 Une source que GitHub ne renvoie pas pour un dépôt (la fonction y est désactivée, ou le compte ne peut pas la lire : 403, 404) n'est **pas** une alerte et n'est **pas** un certificat de bonne santé. Elle est listée dans l'état sous `unavailable`, avec le nombre de dépôts concernés, et la page le dit. La seule exception est la protection de la branche par défaut : GitHub répond 404 pour une branche qui n'en a aucune, et c'est le constat ; un 403 n'y est que « illisible ».
 
+Quand la plus grande partie de ce qui pèse dans la pénalité (Dependabot, analyse de code, secrets) ne peut pas être lue, le niveau est `unknown` et non `ok`, et la part sécurité du score est écartée au lieu de compter pour 100 ; l'état montre `sources_readable` et `sources_total`. Si une source cesse de répondre alors qu'une alerte est ouverte, l'alerte reste une semaine (marquée `unread_since`) et n'est jamais annoncée comme corrigée. Un dépôt dont les lectures échouent toujours attend 5 minutes, 30 minutes puis 6 heures avant le prochain essai, de sorte que quelques dépôts cassés n'épuisent jamais toute la ronde.
+
 Chaque sentinelle indique désormais son **cycle de vie** : `healthy` (sain), `degraded` (dégradé : certaines lectures échouent, une source est illisible ou le premier passage n'est pas terminé), `paused` (en pause, en attente du quota GitHub), `error` (elle échoue et n'a encore rien lu) ou `off` (désactivée). « Aucune alerte » ne signifie quelque chose que si le cycle de vie est `healthy`.
 
 ## Coût

@@ -26,6 +26,8 @@ C'è un avviso per repository e segnale, con i conteggi per gravità nei dettagl
 
 Una fonte a cui GitHub non risponde per un repository (la funzione è spenta lì, o l'accesso non può leggerla: 403, 404) **non** è un avviso e **non** è un certificato di buona salute. È elencata nello stato sotto `unavailable`, con quanti repository riguarda, e la pagina lo dice. L'unica eccezione è la protezione del branch predefinito: GitHub risponde 404 per un branch che non ne ha, e quello è il rilievo; un 403 lì è solo non leggibile.
 
+Quando la maggior parte di ciò che pesa nella penalità (Dependabot, code scanning, segreti) non si può leggere, il livello è `unknown` e non `ok`, e la parte sicurezza del punteggio viene esclusa invece di contare come 100; lo stato mostra `sources_readable` e `sources_total`. Se una fonte smette di rispondere mentre un avviso è aperto, l'avviso resta per una settimana (segnato con `unread_since`) e non viene mai annunciato come risolto. Un repository le cui letture continuano a fallire aspetta 5 minuti, 30 minuti e poi 6 ore prima del tentativo successivo, così pochi repository guasti non consumano mai l'intero giro.
+
 Ora ogni sentinella dichiara il suo **ciclo di vita**: `healthy` (sano), `degraded` (degradato: alcune letture falliscono, una fonte non è leggibile o non ha finito il primo giro), `paused` (in pausa, in attesa della quota di GitHub), `error` (fallisce e non ha ancora letto nulla) oppure `off` (spenta). «Nessun avviso» significa qualcosa solo quando il ciclo di vita è `healthy`.
 
 ## Costo
