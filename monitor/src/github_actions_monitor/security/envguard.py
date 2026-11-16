@@ -1,8 +1,9 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 # GPL-3.0-or-later - see LICENSE
 """The two secrets that reach the monitor through its environment (the key the supervisor gives to the process of each account, and the access token of the network mode) are read ONCE when the
-process starts and taken out of `os.environ`. Every program the monitor starts afterwards (`gh`, `git`, `openssl`, the command of a notice) inherits an environment without them, and on Linux
-`/proc/<pid>/environ` of this process no longer shows them. The values live in this module only; the supervisor hands them to the process of an account explicitly (`for_account_process`).
+process starts and taken out of `os.environ`, in every process (the monitor, the supervisor and the process of each account) and before the first program is started. Every program the monitor starts
+afterwards (`gh`, `git`, `openssl`, the command of a notice) inherits an environment without them. The values live in this module only; the supervisor hands them to the process of an account
+explicitly (`for_account_process`). Limit: on Linux `/proc/<pid>/environ` keeps showing the environment the process was STARTED with, to the same user, whatever is removed afterwards.
 """
 import os
 

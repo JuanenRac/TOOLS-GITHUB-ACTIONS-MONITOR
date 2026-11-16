@@ -3290,6 +3290,7 @@ def only_informs():
 
 
 def main():
+    envguard.hold()      # the supervisor key and the access token leave the environment before ANY program is started (the first `gh` runs long before the network is set up), in every process: monitor, supervisor and account
     if "--demo" in sys.argv[1:]:
         return demo_main()
     if not CHILD["account"]:
@@ -3324,6 +3325,7 @@ def main():
     if lite_requested():
         enable_lite()
     config = load_config()
+    envguard.hold(localguard.settings_from(config)["token_env"])      # the access token may be under another name: it leaves the environment here too
     if LITE["on"]:
         config["mode"] = "full"                      # the lite edition reads as deep as the complete one: its figures must be the same
         config["sentinel"] = {"enabled": False}      # the lite product has no sentinel, whatever the file says
