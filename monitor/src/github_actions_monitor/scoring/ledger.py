@@ -38,6 +38,8 @@ def clean_ledger(data, now):
     if isinstance(data.get("last_tick"), (int, float)) and not isinstance(data.get("last_tick"), bool):
         ledger["last_tick"] = float(data["last_tick"])
     ledger["drop_open"] = data.get("drop_open") is True
+    if isinstance(data.get("truncated_at"), (int, float)) and not isinstance(data.get("truncated_at"), bool):
+        ledger["truncated_at"] = float(data["truncated_at"])
     for key, row in (data.get("runs") or {}).items() if isinstance(data.get("runs"), dict) else []:
         if isinstance(row, list) and len(row) == 5 and isinstance(row[0], (int, float)) and row[1] in ("success", *BAD):
             ledger["runs"][str(key)] = row
@@ -84,6 +86,8 @@ def update_ledger(ledger, runs, collab_alerts, now, keep_days, collab_known=True
     if len(ledger["runs"]) > MAX_RUNS:
         newest = sorted(ledger["runs"].items(), key=lambda kv: kv[1][0], reverse=True)[:MAX_RUNS]
         ledger["runs"] = dict(newest)
+        cut = newest[-1][1][0]      # everything older than the oldest run kept was dropped: from here on the ledger is incomplete
+        ledger["truncated_at"] = max(cut, ledger.get("truncated_at") or 0.0)
     if len(ledger["collab"]) > MAX_COLLAB:
         newest = sorted(ledger["collab"].items(), key=lambda kv: kv[1][0], reverse=True)[:MAX_COLLAB]
         ledger["collab"] = dict(newest)
@@ -117,6 +121,10 @@ def make_snapshot(ledger, cfg, now, account=None, security=None):
     runs, collab = ledger_runs(ledger), ledger_collab(ledger)
     watched_hours = max(0.0, (now - ledger["first_seen"]) / 3600.0)
     answer = engine.score_window(runs, collab, now, cfg, watched_hours=watched_hours, security=security)
+    cut = ledger.get("truncated_at")
+    if isinstance(cut, (int, float)) and cut > now - cfg["window_days"] * collector.DAY:      # the ledger dropped runs that belong to this window: the figures see only part of it, and it is said
+        answer["data_quality"]["truncated"] = True
+        answer["data_quality"]["reasons"] = [*answer["data_quality"]["reasons"], "truncated"]
     return {"schema": SCHEMA, "at": now, "account": account, "window_days": cfg["window_days"], **answer, "repos": repo_rows(runs, now, cfg)}
 
 

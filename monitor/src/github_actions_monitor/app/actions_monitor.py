@@ -1392,12 +1392,12 @@ def score_tick(config, data):
         degraded.note("score", error)
 
 
-def audit_action(handler, action, target="", details=None, result="ok"):
+def audit_action(handler, action, target="", details=None, result="ok", force=False):
     """One line in the log of actions (security/audit_log.py): who did what on this account. Never raises; a value of a setting never goes in, only the names."""
     try:
         from github_actions_monitor.security import audit_log
         context = getattr(handler, "auth_user", None) or {}
-        audit_log.record(toolconfig.raw_config(), action, context.get("user") or auth_http.acting_user(handler), context.get("role", ""), CHILD["account"] or "", target, result, details)
+        audit_log.record(toolconfig.raw_config(), action, context.get("user") or auth_http.acting_user(handler), context.get("role", ""), CHILD["account"] or "", target, result, details, force=force)
     except Exception as error:   # noqa: BLE001 - the log of actions never stops a request
         degraded.note("audit_log", error)
 def report_gather():
@@ -2224,7 +2224,8 @@ class Handler(BaseHTTPRequestHandler):
                     self.json_reply({"ok": False, "errors": {"_": "local_only"}}, 403)
                     return
                 result = settings_api.apply(changes, CONFIG_FILE, lite=LITE["on"])
-                audit_action(self, "settings_change", "settings", {"settings": sorted(str(k)[:80] for k in changes)[:30]} if isinstance(changes, dict) else None, "ok" if result.get("ok") else "error")
+                touches_log = isinstance(changes, dict) and any(str(k).startswith("audit_log.") for k in changes)      # switching the log off is written even though it is off by then
+                audit_action(self, "settings_change", "settings", {"settings": sorted(str(k)[:80] for k in changes)[:30]} if isinstance(changes, dict) else None, "ok" if result.get("ok") else "error", force=touches_log)
                 if result.get("ok"):
                     RESTART_PENDING.update(result.get("restart") or [])
                     result["restart_pending"] = sorted(RESTART_PENDING)
@@ -2548,7 +2549,8 @@ class Handler(BaseHTTPRequestHandler):
             if LITE["on"] or not audit_log.may_read(config, context.get("role", "")):
                 self.json_reply({"error": "forbidden", "code": "forbidden_role"}, 403)
                 return
-            self.json_reply({"schema": 1, "account": CHILD["account"] or "", "enabled": audit_log.settings(config)["enabled"], "chain": audit_log.verify(), "entries": audit_log.read(200, CHILD["account"] or None)})
+            self.json_reply({"schema": 1, "account": CHILD["account"] or "", "enabled": audit_log.settings(config)["enabled"], "chain": audit_log.verify(), "entries": audit_log.read(200, CHILD["account"] or None),
+                             "write_failures": audit_log.STATS["write_failures"], "last_write_error_at": audit_log.STATS["last_write_error_at"]})
         elif path in ("/api/report-files", "/api/report-files/file"):      # the scheduled reports: the list and one file, read only, of the account of this process (Complete only)
             if not self.guard():
                 return
@@ -2916,7 +2918,11 @@ def score_metrics():
         from github_actions_monitor.storage import runtime
         storage, account = runtime.process_storage(CHILD["account"] or None)
         latest = score_api.latest(storage, account, toolconfig.raw_config())
-        return None if latest.get("state") == "off" else {"state": latest.get("state"), "score": latest.get("score"), "coverage": latest.get("coverage")}
+        if latest.get("state") == "off":
+            return None
+        if latest.get("stale"):      # an old number is not exported as if it were current
+            return {"state": "stale", "score": None, "coverage": latest.get("coverage")}
+        return {"state": latest.get("state"), "score": latest.get("score"), "coverage": latest.get("coverage")}
     except Exception as error:   # noqa: BLE001 - /metrics must still answer
         degraded.note("score.metrics", error)
         return None

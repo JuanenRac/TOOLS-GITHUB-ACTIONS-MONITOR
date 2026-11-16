@@ -112,6 +112,13 @@ def verify_backup(path):
                         problems.append("a line of the dump is damaged")
                         continue
                     if isinstance(parsed, dict) and "account" in parsed and isinstance(parsed.get("payload"), dict):
+                        try:      # every id and name is checked here, before anything is written by a restore
+                            base.check_account(parsed["account"])
+                            for part in ("sentinels", "docs"):
+                                for name in parsed["payload"].get(part) or {}:
+                                    base.check_name(name)
+                        except base.StorageError:
+                            problems.append("an account id or a name in the dump is not valid")
                         accounts += 1
                         events += len(parsed["payload"].get("events") or [])
                     elif isinstance(parsed, dict) and "records" in parsed:

@@ -19,7 +19,7 @@ Cada línea lleva `prev` (el hash de la línea anterior) y `hash` (el hash de s�
 
 ## Quién lo lee
 
-Un administrador (y la persona en el equipo cuando no hay modo equipo). Un mantenedor solo cuando `audit_log.maintainers_can_read` está encendido; nadie más. `GET /api/audit-log` responde las últimas 200 líneas y el estado de la cadena. Lite no tiene nada de esto.
+Un administrador (y la persona en el equipo cuando no hay modo equipo). Un mantenedor solo cuando `audit_log.maintainers_can_read` está encendido; nadie más. `GET /api/audit-log` responde las últimas 200 líneas y el estado de la cadena. Lite no tiene nada de esto. Un viewer es rechazado en la puerta. Apagar el registro escribe su propia última línea (el cambio que lo apagó). Una línea que no se puede escribir se cuenta: `write_failures` y `last_write_error_at` en la respuesta, y un aviso de degradación. Los cambios fallidos de la propia clave no se escriben aquí (los guarda la auditoría de accesos).
 
 ## Ajustes
 

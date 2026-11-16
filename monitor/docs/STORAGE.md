@@ -45,7 +45,7 @@ python tools/backup_storage.py verify backup.zip
 python tools/backup_storage.py restore backup.zip --backend file     # into an empty storage (--force over existing accounts)
 ```
 
-The migration never changes or deletes your files, resumes after an interruption (an account is copied whole or not at all) and ends with a failure if the two sides differ; only then set the backend and restart. A backup made from files restores into SQLite and the other way round. `--db FILE` selects the shared database of model B; `--flat` is the installation without `accounts/`. `--doctor` checks the database (present, integrity, schema) without changing it.
+The migration never changes or deletes your files, resumes after an interruption (an account is copied whole or not at all) and ends with a failure if the two sides differ; only then set the backend and restart. A backup made from files restores into SQLite and the other way round. `--db FILE` selects the shared database of model B; `--flat` is the installation without `accounts/`. `--doctor` checks the database (present, integrity, schema) without changing it. Running the same command again is safe: an account whose target already holds newer events or snapshots than the source is refused (`target newer`, exit code 1, nothing of it written) so what was made after the first copy is not erased; `--force` makes the source win.
 
 ## Retention
 

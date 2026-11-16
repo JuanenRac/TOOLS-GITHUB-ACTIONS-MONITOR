@@ -19,7 +19,7 @@ Cada linha leva `prev` (o hash da linha anterior) e `hash` (o hash de si própri
 
 ## Quem o lê
 
-Um administrador (e a pessoa no computador quando não há modo equipa). Um mantenedor só quando `audit_log.maintainers_can_read` está ligado; mais ninguém. `GET /api/audit-log` responde as últimas 200 linhas e o estado da cadeia. A edição Lite não tem nada disto.
+Um administrador (e a pessoa no computador quando não há modo equipa). Um mantenedor só quando `audit_log.maintainers_can_read` está ligado; mais ninguém. `GET /api/audit-log` responde as últimas 200 linhas e o estado da cadeia. A edição Lite não tem nada disto. Um viewer é recusado à porta. Desligar o registo escreve a sua própria última linha (a alteração que o desligou). Uma linha que não pode ser escrita é contada: `write_failures` e `last_write_error_at` na resposta, e um aviso de degradação. As alterações falhadas da própria palavra-passe não são escritas aqui (a auditoria dos acessos guarda-as).
 
 ## Definições
 
