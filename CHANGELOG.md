@@ -22,6 +22,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Added
 
+- **Less noise when there are many alerts, or the same ones again and again** (block `alerts`, all off or empty by default): permanent silences by pattern `repository:workflow:branch` with a reason and an optional review date (`alerts.silences`; the Alerts tab shows them as silenced and one reminder is announced when the review date arrives); a class for short crons and services that fail now and then, announced only after several failures in a row or a high failure rate, once and cleared once (`alerts.service`); one notification for the new reds of the same commit (`alerts.group`); and one summary every so many minutes once more notifications than a threshold were sent in the last hour (`alerts.digest`). The existing channels are unchanged, and the lists and the events feed still show everything.
 - **Merge queue**: a failed run of the merge queue of the default branch (`gh-readonly-queue/...`, event `merge_group`) is a red of its own, shown as "(merge queue)" in the red list, the alerts and the team view, and it clears with the next green run of the queue.
 - **Maintenance branches**: `ci.extra_branches` takes patterns (for example `release-*`) of extra branches whose last run also counts; by default only the default branch is watched. A red of such a branch is labelled with its name and never hides, or is hidden by, the default branch.
 

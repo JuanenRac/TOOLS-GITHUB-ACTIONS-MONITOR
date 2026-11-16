@@ -62,7 +62,16 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai_notify.max_cost_per_hour_cents` (secure) | `50` | ai | Cost cap per hour (cents) |
 | `ai_notify.timeout_seconds` (secure) | `30` | ai | Seconds to wait for the answer |
 | `airgapped` (secure) | `false` | basic | Air-gapped installation |
+| `alerts.digest.minutes` | `0` | sentinel | Minutes between summaries (0 = off) |
+| `alerts.digest.threshold` | `10` | sentinel | Notifications per hour before summarising |
+| `alerts.group.by_commit` | `false` | sentinel | Group new reds of the same commit |
+| `alerts.group.min` | `3` | sentinel | Workflows needed to group |
 | `alerts.mute_hours` | `-` | sentinel | Hours of a silence |
+| `alerts.service.enabled` | `false` | sentinel | Treat short crons as services |
+| `alerts.service.failures` | `3` | sentinel | Failures in a row before it alerts |
+| `alerts.service.rate_percent` | `0` | sentinel | Or when this share of its last runs failed |
+| `alerts.service.workflows` | `[]` | sentinel | More workflows of the service class |
+| `alerts.silences` | `[]` | sentinel | Permanent silences |
 | `analytics.enabled` | `-` | analytics | Analytics on |
 | `analytics.flaky` | `-` | analytics | Flaky detection |
 | `analytics.jobs_per_cycle` | `-` | analytics | Jobs read per cycle |

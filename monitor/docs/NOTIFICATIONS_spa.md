@@ -50,3 +50,12 @@ La dirección del webhook de Teams y el token de ntfy los guarda cifrados el sis
 ### El panel de cada usuario
 
 En el modo equipo, el menú del usuario con sesión (el nombre arriba) tiene la entrada **Notificaciones**. El panel muestra y guarda las mismas preferencias que `GET/POST /api/auth/me/notify`: si quieres notificaciones, los canales (ntfy con su tema y un token opcional, Teams con la dirección web del canal, correo con una dirección), los centinelas (CI, colaboración), el nivel mínimo, los eventos del sistema (solo para un administrador) y si cada alerta llega al momento o en un resumen por hora o por día. Un secreto ya guardado se muestra como guardado y nunca vuelve a la página; solo se envía si escribes uno nuevo, y una casilla vacía lo conserva. **Enviar una prueba** manda un mensaje a tus canales y **He visto mis alertas** marca las pendientes como vistas. Si el administrador no ha activado `notify.users.enabled`, el panel lo dice: puedes guardar tus preferencias, aún no se envía nada.
+
+## Muchos avisos, o los mismos una y otra vez
+
+Cuatro ajustes opcionales del bloque `alerts` (todos apagados o vacíos por defecto) deciden qué llega a los canales de arriba. Las listas, la pestaña Alertas y el registro de eventos siguen mostrándolo todo.
+
+- **Silencios permanentes** (`alerts.silences`): una entrada por línea, `repositorio:workflow:rama;motivo;fecha de revisión`. Todo salvo el repositorio es opcional y `*` vale para cualquier texto. Los avisos que coinciden se muestran como silenciados, nadie recibe notificación y en la fecha de revisión se anuncia un recordatorio; el silencio sigue hasta que lo quites.
+- **Servicios y crons cortos** (`alerts.service`): un workflow que solo se ejecuta programado o a mano y falla de vez en cuando se anuncia solo tras `failures` fallos seguidos, o cuando falló `rate_percent` de sus últimos runs; se anuncia una vez y se despeja una vez en lugar de avisar en bucle. `workflows` añade más workflows a esta clase.
+- **Agrupar por commit** (`alerts.group`): cuando `min` o más workflows de un repositorio se ponen en rojo en el mismo commit, una notificación los lista.
+- **Resumen cuando hay muchos** (`alerts.digest`): pasadas `threshold` notificaciones en la última hora, el resto se retiene y se cuenta en un resumen cada `minutes` minutos. Los eventos retenidos quedan en el registro de eventos.

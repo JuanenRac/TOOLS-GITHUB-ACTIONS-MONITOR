@@ -15,6 +15,7 @@ import threading
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+from github_actions_monitor.data_pipeline import alertflow
 from github_actions_monitor.security import private_io
 from github_actions_monitor.storage import state_io
 
@@ -160,8 +161,20 @@ def collect(registry, now=None, extra=()):
     alerts = list(extra or ()) + alerts
     for alert in alerts:
         if isinstance(alert, dict) and alert.get("id"):
-            out.append(dict(alert, muted_until=muted_until(alert, live), muted_by=muted_by(alert, live)))
+            row = dict(alert, muted_until=muted_until(alert, live), muted_by=muted_by(alert, live))
+            hit = permanent(alert)
+            if hit:      # a permanent silence by pattern (alerts.silences): it has no end, and says why
+                row.update(muted_until=row["muted_until"] or alertflow.FOREVER, muted_permanent=True, muted_reason=hit["reason"], muted_review_by=hit["review_by"])
+            out.append(row)
     return out
+
+
+def permanent(alert):
+    """The silence by pattern (alerts.silences) that covers this alert, else None. Only the alerts of a workflow (red, stuck) have something to match."""
+    if not alert.get("repo") or alert.get("code") not in ("ci.red", "ci.stuck"):
+        return None
+    details = alert.get("details") if isinstance(alert.get("details"), dict) else {}
+    return alertflow.silence_of(alert["repo"], (details.get("workflow"), details.get("name"), details.get("file")), details.get("branch"))
 
 
 def select(alerts, sentinel="", level="", muted="show"):

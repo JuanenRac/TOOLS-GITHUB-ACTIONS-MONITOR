@@ -24,6 +24,7 @@ from pathlib import Path
 
 from github_actions_monitor import i18n
 from github_actions_monitor.app import toolconfig
+from github_actions_monitor.data_pipeline import alertflow
 from github_actions_monitor.security import envguard, private_io
 from github_actions_monitor.storage import locks, state_io
 
@@ -44,8 +45,8 @@ def owner_of(repo):
 def summarize(snapshot):
     """The few facts the feed cares about, as plain comparable data."""
     a1, a2, a3, a4 = (snapshot.get(k) or {} for k in ("a1", "a2", "a3", "a4"))
-    reds = {f"{r.get('repo')}|{r.get('workflow')}": {"repo": r.get("repo"), "workflow": r.get("workflow"), "url": r.get("url"),
-                                                     "streak": r.get("streak"), "since": r.get("since")} for r in a2.get("red") or []}
+    reds = {f"{r.get('repo')}|{r.get('workflow')}": {"repo": r.get("repo"), "workflow": r.get("workflow"), "url": r.get("url"), "streak": r.get("streak"), "since": r.get("since"),
+                                                     "sha": r.get("sha"), "branch": r.get("branch"), "file": r.get("file")} for r in a2.get("red") or [] if alertflow.service_allows(r)}      # a workflow of the class "service" is announced only after it failed often enough (alerts.service)
     stuck = {f"{r.get('repo')}|{r.get('name')}": {"repo": r.get("repo"), "name": r.get("name"), "url": r.get("url")} for r in a1.get("stuck") or []}
     alerts = {}
     for row in a3.get("rows") or []:
@@ -75,6 +76,7 @@ def diff(old, new, loaded):
     for key, r in new["reds"].items():
         if key not in old["reds"]:
             ev("red_new", "bad", r["repo"], r.get("url"), repo=r["repo"], workflow=r["workflow"])
+            events[-1].update({k: r[k] for k in ("sha", "branch", "file") if r.get(k)})      # what the silences by pattern and the grouping by commit look at
     for key, r in old["reds"].items():
         if key not in new["reds"]:
             ev("red_fixed", "ok", r["repo"], r.get("url"), repo=r["repo"], workflow=r["workflow"])
@@ -148,6 +150,7 @@ class Feed:
         except (OSError, ValueError):
             self.state = None
         self.was_loading = True
+        self.flow = alertflow.Flow()
         self.listeners = []   # functions called with the list of new events (the notifications hang here); a failing one never stops the feed
 
     def feed(self, snapshot):
@@ -163,12 +166,13 @@ class Feed:
         self.was_loading = False
         self.state = new
         self._write_state()
+        told, events = self.flow.shape(events, clock())      # silences by pattern, grouping by commit and the summary when there are many (alertflow.py): nothing changes while they are off
         self._append(events)
-        self._notify(events)
+        self._notify(told)
         for listener in self.listeners:
             try:
-                if events:
-                    listener(events)
+                if told:
+                    listener(told)
             except Exception:   # noqa: BLE001 - a notification problem must never stop the feed
                 pass
         return events

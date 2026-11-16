@@ -51,6 +51,7 @@ from github_actions_monitor.app import modes
 from github_actions_monitor.util import exclusive
 from github_actions_monitor.util import platform_compat
 from github_actions_monitor.util import ports
+from github_actions_monitor.data_pipeline import alertflow
 from github_actions_monitor.data_pipeline import redrule
 from github_actions_monitor.util import resilience
 from github_actions_monitor.security import secretstore
@@ -80,6 +81,7 @@ DEFAULTS = {
     "discover_limit": 1000,        # the most repositories listed for the account
     "show_unclassified": True,     # repositories that no ecosystem claims are shown in an automatic group "Unclassified" instead of disappearing
     "stuck_minutes": 120,
+    "alerts": {"silences": [], "service": {"enabled": False, "failures": 3, "rate_percent": 0, "workflows": []}, "group": {"by_commit": False, "min": 3}, "digest": {"minutes": 0, "threshold": 10}},      # what reaches the channels when there are many alerts (alertflow.py): all off or empty
     "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "extra_branches": []},      # which runs may make a branch red (redrule.py)
     "watchdog_minutes": 10,      # a refresh cycle that runs longer than this is dumped to the log and restarted in a new thread (0 = off)
     "watchdog_max_abandoned": 8,      # calls to GitHub that gave up waiting but never returned: with this many still alive no new call is started and the health check says so (0 = no limit)
@@ -805,6 +807,7 @@ def unresolved_failures(runs, default_branches=None):
 
 def collect(config, publish=None):
     redrule.configure(config)
+    alertflow.configure(config)
     repos = watched_repos(config)
     started = time.time()
 

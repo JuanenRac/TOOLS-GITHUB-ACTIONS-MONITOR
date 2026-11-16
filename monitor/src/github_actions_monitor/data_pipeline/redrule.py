@@ -165,7 +165,8 @@ def classify(runs, branch, now=None, policy=None):
                 streak += 1
             else:
                 break
-        item = {"run": last, "streak": streak, "lane": where, "kind": kind}
+        recent = [r.get("conclusion") in BAD for r in items[-10:]]
+        item = {"run": last, "streak": streak, "lane": where, "kind": kind, "recent": (sum(recent), len(recent))}
         quiet_since = newest_of.get(key) or 0
         if policy["inactive_days"] and quiet_since and now - quiet_since > policy["inactive_days"] * 86400:
             out["inactive"].append(item)
@@ -204,7 +205,8 @@ def row_of(repo, item):
     last = item["run"]
     where = item["lane"]
     return {"repo": repo, "workflow": (last.get("name") or workflow_key(last)) + lane_label(where), "conclusion": last.get("conclusion"), "since": last.get("started"), "url": last.get("url"), "streak": item["streak"],
-            "sha": last.get("sha", ""), "origin": "merge_queue" if where == "queue" else ("maintenance" if where else "branch"), "branch": last.get("branch"), "kind": item["kind"]}
+            "sha": last.get("sha", ""), "origin": "merge_queue" if where == "queue" else ("maintenance" if where else "branch"), "branch": last.get("branch"), "kind": item["kind"],
+            "file": workflow_key(last), "recent_runs": item["recent"][1], "fail_rate": round(100 * item["recent"][0] / item["recent"][1]) if item["recent"][1] else 0}
 
 
 def branch_of(repo, runs, default_branches=None, guess=False):
