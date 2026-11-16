@@ -33,6 +33,7 @@ import subprocess
 import sys
 import threading
 import time
+import urllib.parse
 import webbrowser
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
@@ -52,6 +53,7 @@ from github_actions_monitor.util import exclusive
 from github_actions_monitor.util import platform_compat
 from github_actions_monitor.util import ports
 from github_actions_monitor.data_pipeline import redrule
+from github_actions_monitor.data_pipeline import sampling
 from github_actions_monitor.util import resilience
 from github_actions_monitor.security import secretstore
 from github_actions_monitor.security import credential
@@ -122,6 +124,7 @@ DEFAULTS = {
     "finops": {"jobs_per_cycle": 0},
     "network": {"use_proxy": False, "etag": True, "graphql_checks": False, "graphql_batch": 20},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
     "ai_notify": {"enabled": False, "confirmed_provider": "", "max_calls_per_hour": 4, "cost_per_call_cents": 5, "max_cost_per_hour_cents": 50, "command": "", "timeout_seconds": 30},      # OFF: tell an external AI of a NEW real alert (ai_notify.py)
+    "sampling": {"default_branch_probe": False, "min_coverage_minutes": 30, "api_budget_per_hour": 0},      # how much of a repository the list of runs shows, a second look at the default branch, a budget of requests (sampling.py)
     "savings": {"webhook_first": False, "webhook_window_minutes": 60, "webhook_full_minutes": 360, "feeds": {"enabled": False, "method": "atom", "max_age_minutes": 240}},      # read less: OFF (savings.py)
     "logs": {"failed_step": {"enabled": False, "lines": 12, "max_bytes": 2000}},      # the log of the failed step in the page: OFF, one press of a button, steplog.py
     "reports": {"workflow_hygiene": {"enabled": False}, "queue": {"enabled": False}, "release_view": {"enabled": False}, "supply_chain": {"enabled": False}, "max_calls_per_cycle": 4},      # four optional reports, all OFF (reports.py)
@@ -472,6 +475,12 @@ def watched_repos(config, force=False):
     return valid
 
 
+SAMPLE_INFO = {}      # repo -> {"asked": runs asked for, "total": total_count of GitHub or None, "probe": runs only the second look found}
+SAMPLING_STATE = {"dropped": []}      # the repositories that waited in the last cycle because the budget of requests was spent
+BUDGET = sampling.Budget()      # requests for run lists in the last hour
+BRANCH_RE = re.compile(r"^[A-Za-z0-9._/-]{1,200}\Z")
+
+
 def is_fork_run(run):
     """True when the head of the run lives in ANOTHER repository (a pull request from a fork): its branch name (`main`, `master`, `dev`) says nothing about the branch of this repository."""
     head, base = (run.get("head_repository") or {}).get("full_name"), (run.get("repository") or {}).get("full_name")
@@ -487,6 +496,32 @@ def fetch_runs(repo, per_page):
         LINK.record(str(error))
         return [], str(error)
     LINK.record(None)
+    total = data.get("total_count")
+    SAMPLE_INFO[repo] = {"asked": per_page, "total": total if isinstance(total, int) and not isinstance(total, bool) else None, "probe": 0}
+    return parse_runs(repo, data), None
+
+
+def fetch_sampled(repo, per_page, config):
+    """The list of runs of a repository; with sampling.default_branch_probe on and a full list, one more request for the pushes to the default branch, joined to it (sampling.py)."""
+    runs, error = fetch_runs(repo, per_page)
+    if error or len(runs) < per_page or not sampling.settings(config)["default_branch_probe"]:
+        return runs, error
+    branch = (repo_meta([repo]).get(repo) or {}).get("branch") or redrule.guess_default_branch(runs)
+    if not branch or not BRANCH_RE.match(branch):
+        return runs, error
+    try:
+        BUDGET.record(1)
+        data = gh_read(f"repos/{toolconfig.github_owner()}/{repo}/actions/runs?branch={urllib.parse.quote(branch, safe='/')}&event=push&exclude_pull_requests=true&per_page={per_page}")
+    except AuthError:
+        raise
+    except Exception:   # noqa: BLE001 - the second look is extra: the first list stands
+        return runs, error
+    merged, added = sampling.merge_probe(runs, parse_runs(repo, data))
+    SAMPLE_INFO.setdefault(repo, {})["probe"] = added
+    return merged, None
+
+
+def parse_runs(repo, data):
     runs = []
     for run in data.get("workflow_runs", []):
         started = parse_time(run.get("run_started_at") or run.get("created_at"))
@@ -500,7 +535,7 @@ def fetch_runs(repo, per_page):
             "conclusion": run.get("conclusion"), "started": run.get("run_started_at") or run.get("created_at"),
             "seconds": seconds_between(started, updated if finished else None), "url": run.get("html_url"), "attempt": run.get("run_attempt"),
         })
-    return runs, None
+    return runs
 
 
 TUNED = {"refresh_seconds": None, "cold_refresh_seconds": None}
@@ -647,13 +682,18 @@ def refresh_runs(repos, config, progress=None):
     total = len(todo)
     batched = graphql_cold(config, [r for r, _n in todo if r in cold_due])
     if batched:
+        BUDGET.record(1)
         for repo, runs in batched.items():
             note_read(repo, runs, None)
         todo = [item for item in todo if item[0] not in batched]
+    limit = sampling.settings(config)["api_budget_per_hour"]
+    todo, waiting = sampling.plan(todo, red_repos_of([r for r, _n in todo]) if limit else set(), limit, BUDGET.used())      # a spent budget: the repositories with red first, the others wait
+    SAMPLING_STATE["dropped"] = [item[0] for item in waiting]
     for start in range(0, len(todo), 40):  # chunks, so the page can show the first results while the rest loads
         chunk = todo[start:start + 40]
         with ThreadPoolExecutor(max_workers=config["max_workers"]) as pool:
-            results = list(pool.map(lambda item: (item[0], *fetch_runs(*item)), chunk))
+            results = list(pool.map(lambda item: (item[0], *fetch_sampled(item[0], item[1], config)), chunk))
+        BUDGET.record(len(chunk))
         limited = False
         for repo, runs, error in results:
             if error and is_rate_limit(error):
@@ -668,6 +708,16 @@ def refresh_runs(repos, config, progress=None):
         if progress:
             progress(done, len(todo))
     return total
+
+
+def red_repos_of(repos):
+    """The repositories (of `repos`) whose cached runs show a red workflow on main: they are read first when the budget of requests runs short."""
+    out = set()
+    for repo in repos:
+        entry = RUN_CACHE.get(repo)
+        if entry and entry.get("runs") and redrule.red_workflows({repo: entry["runs"]}, None, True)[0]:
+            out.add(repo)
+    return out
 
 
 HEADS_PENDING = {}      # repo -> the newest commit seen BEFORE its read, stored with the read (savings.feeds)
@@ -816,7 +866,7 @@ def collect(config, publish=None):
     return build(config, repos, started, refreshed, False, "")
 
 
-def repo_meta(repos):
+def repo_meta(repos, config=None):
     """{repo: {"private": bool, "branch": str or None, "pushed": ISO or None, "prs": int or None}} for the columns of the Repositories table. The visibility comes from the listing the monitor already
     reads; the rest from the CI sentinel when it has looked (the lite edition has none: those fields are None). Nothing new is read from GitHub."""
     info = {}
@@ -830,7 +880,21 @@ def repo_meta(repos):
         item = info.get(repo) if isinstance(info.get(repo), dict) else {}
         prs = item.get("prs")
         out[repo] = {"private": repo in PRIVATE, "branch": item.get("branch") or None, "pushed": item.get("pushed") or None, "prs": len(prs) if isinstance(prs, list) else None}
+        cached = RUN_CACHE.get(repo)
+        if cached and cached.get("runs") is not None and cached.get("at"):
+            info = SAMPLE_INFO.get(repo) or {}
+            out[repo]["coverage"] = sampling.coverage(cached["runs"], info.get("asked"), info.get("total"), sampling.settings(config or {})["min_coverage_minutes"])
     return out
+
+
+def sampling_summary(config, repos, meta):
+    """The block `sampling` of the data: repositories with low coverage, the requests a setup like this spends per hour, and the budget (sampling.py)."""
+    cfg = sampling.settings(config)
+    low = sorted(r for r in repos if ((meta.get(r) or {}).get("coverage") or {}).get("low"))
+    waiting = [r for r in SAMPLING_STATE["dropped"] if r in set(repos)]
+    estimate = sampling.estimate_per_hour(len(repos), config.get("refresh_seconds") or 45, config.get("cold_refresh_seconds") or 600, probe=cfg["default_branch_probe"])
+    return {"low": low[:50], "low_count": len(low), "estimate_per_hour": estimate, "budget_per_hour": cfg["api_budget_per_hour"], "used_last_hour": BUDGET.used(),
+            "waiting": waiting[:50], "waiting_count": len(waiting), "probe": cfg["default_branch_probe"], "min_coverage_minutes": cfg["min_coverage_minutes"]}
 
 
 def header_figures(runs, active, issues, now=None, red=None, approx=False):
@@ -909,6 +973,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
         except Exception as error:   # noqa: BLE001 - a figure of the header never stops a cycle
             degraded.note("loop.extra", error)
     figures = header_figures(runs, active, ISSUE_CACHE["items"], red=red, approx=approx)
+    meta = repo_meta(repos, config)
     try:
         held = redrule.states({r: [x for x in runs if x["repo"] == r] for r in repos}, {r: m.get("branch") for r, m in repo_meta(repos).items() if m.get("branch")}, True)
         figures["awaiting"], figures["inactive"] = len(held["awaiting"]), len(held["inactive"])
@@ -917,14 +982,14 @@ def build(config, repos, started, refreshed, loading, progress_text):
     return {
         "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "updated_local": tzdisplay.stamp(time.time()), "took": round(time.time() - started, 1),
         "repos": repos, "ecosystems": {repo: ecosystem_of(repo) for repo in repos},
-        "runs": runs[:600], "runs_total": len(runs), "active": active, "issues": ISSUE_CACHE["items"], "failing": unresolved_failures(runs, {r: m.get("branch") for r, m in repo_meta(repos).items() if m.get("branch")}),
+        "runs": runs[:600], "runs_total": len(runs), "active": active, "issues": ISSUE_CACHE["items"], "failing": unresolved_failures(runs, {r: m.get("branch") for r, m in meta.items() if m.get("branch")}),
         "errors": errors, "rate": rate, "rate_user": rate_user, "rate_sources": rate_sources, "quota_trend": __import__("github_actions_monitor.data_pipeline.quotawatch", fromlist=["_"]).trend(), "stuck_minutes": config["stuck_minutes"],
         "mode": config["mode"], "refreshed": refreshed, "hot": hot, "loading": progress_text if loading else "",
         "quota_block": rate_block_state(rate), "min_rate": config["min_rate_remaining"], "paused_quota": bool(rate and rate["remaining"] < config["min_rate_remaining"]),
         "refresh_seconds": config["refresh_seconds"], "hot_only": hot_only_state(),
         "offline": LINK.state(), "etag": ETAG["cache"].stats() if ETAG["cache"] else None, "graphql": graphql_checks.stats(config),
         "hidden": HIDDEN["hidden"], "discovered": HIDDEN["discovered"], "hidden_names": HIDDEN["names"],
-        "figures": figures, "repo_meta": repo_meta(repos),
+        "figures": figures, "repo_meta": meta, "sampling": sampling_summary(config, repos, meta),
     }
 
 

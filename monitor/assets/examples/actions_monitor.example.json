@@ -84,6 +84,8 @@
     "a2_full_sample_unknown": true,
     "a2_resolve_max_calls_per_tick": 4,
     "a2_resolve_ttl_seconds": 3600,
+    "a2_resolve_batch_min": 2,
+    "a2_resolve_batch_pages": 1,
     "surface": {
       "enabled": true,
       "refresh_seconds": 86400,

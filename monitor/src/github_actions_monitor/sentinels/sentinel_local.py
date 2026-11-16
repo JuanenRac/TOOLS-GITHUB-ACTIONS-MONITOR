@@ -27,6 +27,7 @@ import json
 import re
 import threading
 import time
+import urllib.parse
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import quote
 from datetime import datetime, timedelta, timezone
@@ -93,6 +94,9 @@ DEFAULTS = {
     # workflow on the default branch (`gh run list -w <file> --branch <default> -L 1`): red counts as red in A2, none stays inconclusive for that workflow only.
     # Same quota gate as A10 (min_rate_remaining x surface.min_rate_factor, and the hourly budget). max_calls_per_tick 0 = never ask; ttl = how long an answer is kept.
     "a2_resolve_max_calls_per_tick": 4, "a2_resolve_ttl_seconds": 3600,
+    # a2_resolve_batch_min: a repository with at least this many workflows to look up is asked ONCE for its newest completed runs of the default branch (up to a2_resolve_batch_pages
+    # pages of 100, each page one call) and every workflow found in them is resolved together; the rest go one by one as before. 0 = always one by one.
+    "a2_resolve_batch_min": 2, "a2_resolve_batch_pages": 1,
     # surface: the A10 layer ("Actions & releases surface"): a switch per check and its threshold, see surface.py (DEFAULTS is the template).
     "surface": surface.DEFAULTS,
     # readiness: the A11 layer (release readiness, ecosystem health, dependency pins), see readiness.py (DEFAULTS is the template).
@@ -143,7 +147,7 @@ def a2_unchecked(runs_by_repo):
 def a2_full_sample(runs_by_repo, cfg):
     """Repositories whose run list is as long as the sample asked for: an older workflow may be hidden beyond it (informative)."""
     caps = {int((cfg or {}).get("cold_runs_per_repo") or 0), int((cfg or {}).get("runs_per_repo") or 0)} - {0}
-    return sorted(r for r, runs in runs_by_repo.items() if runs and len(runs) in caps)
+    return sorted(r for r, runs in runs_by_repo.items() if runs and len([x for x in runs if not x.get("probe")]) in caps)      # runs only the second look of the default branch found never make a list "full"
 
 
 def a2_missing(runs_by_repo, caps, scans=None):
@@ -161,6 +165,20 @@ def a2_missing(runs_by_repo, caps, scans=None):
         if missing:
             out[repo] = missing
     return out
+
+
+def a2_from_listing(items, names):
+    """{workflow file: the last concluded run} out of one listing of runs (actions/runs, newest first) for the workflows `names`: the same answer as asking each workflow on its own,
+    in the shape of `gh run list` so that a2_pick_concluded and the cache take it unchanged. A workflow with no run in the listing is not in the result (it may be further back)."""
+    grouped = {}
+    for item in items if isinstance(items, list) else []:
+        if not isinstance(item, dict):
+            continue
+        base = str(item.get("path") or "").split("@")[0].rsplit("/", 1)[-1]
+        if base in names:
+            grouped.setdefault(base, []).append({"databaseId": item.get("id"), "name": item.get("name"), "conclusion": item.get("conclusion"), "status": item.get("status"),
+                                                 "createdAt": item.get("created_at"), "startedAt": item.get("run_started_at"), "url": item.get("html_url"), "headSha": item.get("head_sha")})
+    return {name: first for name, first in ((n, a2_pick_concluded(runs)) for n, runs in grouped.items()) if first}
 
 
 A2_RESOLVE_DEPTH = 10                      # completed runs of one workflow asked for; the first with a real conclusion is the one that counts
@@ -1292,7 +1310,20 @@ class Sentinel:
         todo.sort(key=lambda x: float((self.a2_resolved.get(f"{x[0]}|{x[1]}") or {}).get("at") or 0))   # never asked first, then the oldest answer
         branches = {r: i.get("branch") for r, i in self.repo_info.items()}
         did = False
-        for repo, name in todo[: min(limit, budget)]:
+        room = min(limit, budget)
+        batch_min = int(self.cfg.get("a2_resolve_batch_min") or 0)
+        if batch_min > 0:
+            wanted = {}
+            for repo, name in todo:
+                wanted.setdefault(repo, []).append(name)
+            for repo, names in sorted(wanted.items(), key=lambda kv: -len(kv[1])):
+                if len(names) < batch_min or room <= 0:
+                    continue
+                spent, found = self._a2_resolve_batch(repo, names, branches.get(repo) or "main", room, now_ts)
+                room -= spent
+                did = did or spent > 0
+            todo = [(r, n) for r, n in todo if not a2_fresh(self.a2_resolved.get(f"{r}|{n}"), now_ts, ttl)]
+        for repo, name in todo[: max(0, room)]:
             branch = branches.get(repo) or "main"
             try:
                 answer = self._gh("run", "list", "-R", f"{toolconfig.github_owner()}/{repo}", "-w", name, "--branch", branch, "--status", "completed", "-L", str(A2_RESOLVE_DEPTH),
@@ -1313,6 +1344,35 @@ class Sentinel:
         if did:
             self.ok("a2_resolve")
         return did
+
+    def _a2_resolve_batch(self, repo, names, branch, room, now_ts):
+        """One listing of the completed runs of the default branch (not of pull requests) answers many workflows at once. -> (calls spent, workflows resolved). What the listing
+        does not show stays unresolved and is asked one by one later."""
+        pages = max(1, int(self.cfg.get("a2_resolve_batch_pages") or 1))
+        items, spent = [], 0
+        quoted = urllib.parse.quote(branch, safe="/")
+        for page in range(1, pages + 1):
+            if spent >= room:
+                break
+            try:
+                answer = self._gh("api", f"repos/{toolconfig.github_owner()}/{repo}/actions/runs?branch={quoted}&status=completed&exclude_pull_requests=true&per_page=100&page={page}")
+            except Exception as error:   # the one-by-one way is still there
+                self.error("a2_resolve", error)
+                spent += 1
+                break
+            spent += 1
+            listed = (answer or {}).get("workflow_runs") if isinstance(answer, dict) else None
+            listed = listed if isinstance(listed, list) else []
+            items.extend(listed)
+            if len(listed) < 100 or set(names) <= set(a2_from_listing(items, set(names))):
+                break
+        found = a2_from_listing(items, set(names))
+        with self.lock:
+            for name, first in found.items():
+                self.a2_resolved[f"{repo}|{name}"] = {"at": now_ts, "state": "run", "id": first.get("databaseId"), "name": first.get("name") or "", "conclusion": first.get("conclusion") or None,
+                                                     "status": first.get("status") or "completed", "started": first.get("startedAt") or first.get("createdAt"), "url": first.get("url"),
+                                                     "sha": (first.get("headSha") or "")[:7], "branch": branch}
+        return spent, len(found)
 
     def refresh_repos(self, repos):
         """Called by the local endpoint after `finalize`: forget what we know about THESE repositories only and rewrite ci_red.json at once."""
