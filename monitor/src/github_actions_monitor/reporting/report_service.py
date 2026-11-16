@@ -10,6 +10,7 @@ from github_actions_monitor import i18n
 from github_actions_monitor.app import degraded
 from github_actions_monitor.reporting import report_builder as builder, report_render as render, report_schedule as schedule
 from github_actions_monitor.security import private_io
+from github_actions_monitor.storage import locks
 from github_actions_monitor.util import paths
 
 DEFAULTS = {"enabled": False, "cron": "0 8 * * 1", "formats": "both", "keep": 12, "top": 10}
@@ -57,6 +58,22 @@ def _save_state(directory, state):
     private_io.write_private(directory / STATE_FILE, json.dumps(state, indent=1, sort_keys=True))
 
 
+def _update_entry(directory, key, **changes):
+    """Changes the entry of ONE account in the state file that every account of the installation shares: read, change and write are one step under a lock (of the threads and of the processes), so two
+    accounts that finish a report in the same moment never overwrite each other."""
+    with locks.process_lock(directory / STATE_FILE, 10.0):
+        state = _state(directory)
+        state.setdefault("accounts", {}).setdefault(key, {}).update(changes)
+        for attempt in range(10):
+            try:
+                _save_state(directory, state)
+                return
+            except PermissionError:      # Windows: another process has the file open for a moment (a reader); the replace is tried again
+                if attempt == 9:
+                    raise
+                time.sleep(0.02 * (attempt + 1))
+
+
 def run(config, account, snapshot, alerts, team, now=None, base=None, lang=None):
     """Writes one report now (the formats of the settings) and returns {"files": [names], "at": iso}. The memory of what was in it goes to the state file so the next one can say what changed."""
     now = time.time() if now is None else now
@@ -76,11 +93,7 @@ def run(config, account, snapshot, alerts, team, now=None, base=None, lang=None)
         name = f"report_{key}_{stamp}.{EXT[kind]}"
         private_io.write_private(directory / name, text)
         files.append(name)
-    entry = state.setdefault("accounts", {}).setdefault(key, {})
-    entry["memory"] = builder.memory(doc, alerts)
-    entry["last_run"] = now
-    entry["last_files"] = files
-    _save_state(directory, state)
+    _update_entry(directory, key, memory=builder.memory(doc, alerts), last_run=now, last_files=files)
     prune(directory, key, cfg["keep"])
     return {"files": files, "at": doc["generated_at"]}
 
@@ -114,8 +127,7 @@ def tick(config, account, gather, now=None, base=None):
     last = entry.get("last_run")
     if not isinstance(last, (int, float)):
         private_io.private_dir(directory)
-        state.setdefault("accounts", {}).setdefault(key, {})["last_run"] = now
-        _save_state(directory, state)
+        _update_entry(directory, key, last_run=now)
         return None
     if not schedule.due(cfg["cron"], now, last):
         return None
@@ -125,9 +137,8 @@ def tick(config, account, gather, now=None, base=None):
     except Exception as error:   # noqa: BLE001 - a report never stops the monitor
         degraded.note("reports.run", error)
         try:
-            state.setdefault("accounts", {}).setdefault(key, {})["last_run"] = now
-            _save_state(directory, state)
-        except OSError as inner:
+            _update_entry(directory, key, last_run=now)
+        except (OSError, TimeoutError) as inner:
             degraded.note("reports.state", inner)
         return None
 

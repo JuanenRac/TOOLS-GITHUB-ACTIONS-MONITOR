@@ -109,11 +109,11 @@ def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_g
         rows = [a for a in ai_alerts.alerts(config, states=("open", "acknowledged")) if a.get("conclusion") != "panel"]
         return ai_alerts.redact_json(sorted({a["repo"] for a in rows}))
     if name == "monitor_state":
-        return ai_alerts.redact_json(getter("/api/ai/state"), 20000)
+        return ai_alerts.fit_json(getter("/api/ai/state"), 20000, first=_health_row)
     if name == "signals":
         doc = getter("/api/ai/state")
         rows = [s for s in doc.get("signals", []) if (not arguments.get("panel") or s.get("panel") == arguments["panel"] or s["id"].split(".")[0] == arguments["panel"]) and (not arguments.get("only_act") or s.get("level") == "act")]
-        return ai_alerts.redact_json({"edition": doc.get("edition"), "signals": rows}, 16000)
+        return ai_alerts.fit_json({"edition": doc.get("edition"), "signals": rows}, 16000, first=_health_row)
     if name == "sentinel_panels":
         return ai_alerts.redact_json(getter("/api/sentinel/panels"), 12000)
     if name == "get_run_failure":
@@ -153,6 +153,12 @@ def call(name, arguments, config, allow_ack=False, runner=run_gh, getter=local_g
             raise ValueError("acknowledging is off: start the server with --allow-ack")
         return "acknowledged" if ai_alerts.ack(config, arguments.get("id")) else "no such open alert"
     raise ValueError("unknown tool")
+
+
+def _health_row(row):
+    """The signals that tell an AI whether to trust the rest (the data is old, the monitor is degraded, the allowance is gone, the connection is down) are the last to be left out of a long answer."""
+    ident = str(row.get("id") or "") if isinstance(row, dict) else ""
+    return ident.startswith(("health.", "quota", "connection", "edition"))
 
 
 MAX_LINE = 65536     # one JSON message per line; a longer line is refused, not buffered

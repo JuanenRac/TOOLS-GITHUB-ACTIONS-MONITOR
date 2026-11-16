@@ -26,7 +26,7 @@ Optional and **off by default**. The events of the feed (a new red, a stuck buil
 ## The adapter contract
 
 - To reach a service that is not in the list, run a small receiver on this computer and point `http_local` at it. It receives a POST with `Content-Type: application/json` and this body: `{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`.
-- `kind` is one of `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `score_dropped`, `security_new`, `security_fixed`. Fields are only ever added. Answer any 2xx; anything else is counted as a failure.
+- `kind` is one of `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `ai_alert`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `score_dropped`, `security_new`, `security_fixed`. Fields are only ever added. Answer any 2xx; anything else is counted as a failure.
 - `mqtt` publishes the same JSON as the payload of a QoS 0 message on `notify.channels.mqtt.topic`.
 
 ## Apprise (optional, off by default)

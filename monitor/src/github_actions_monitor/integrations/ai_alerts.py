@@ -47,7 +47,7 @@ TRANSIENT_DEFAULT = [r"\b50[234]\b", r"bad gateway", r"service unavailable", r"g
                      r"unexpected eof", r"codeql.*download", r"download.*codeql", r"could not resolve host", r"no space left", r"the runner has received a shutdown signal"]
 LOOP_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/%-]{0,100})?\Z")
 
-from github_actions_monitor.security.redactor import _SECRETS, redact, redact_data, redact_json  # noqa: F401 - the one cleaner lives in security/redactor.py; these names stay here for the callers
+from github_actions_monitor.security.redactor import _SECRETS, fit_json, redact, redact_data, redact_json  # noqa: F401 - the one cleaner lives in security/redactor.py; these names stay here for the callers
 
 
 def _num(block, key, low, high, default):

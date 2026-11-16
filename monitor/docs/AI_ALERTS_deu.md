@@ -11,7 +11,7 @@ Ein roter Workflow nützt nichts, wenn niemand, der am Repository arbeitet, davo
 - `ai_alerts.jsonl`: eine Zeile pro Ereignis (geöffnet, bestätigt, gelöst) mit stabiler ID, Schweregrad, Repository, Workflow, Ergebnis, seit wann, Serie, Link, wahrscheinlicher Ursache (**echt** oder **vorübergehend**), empfohlener Aktion und Status.
 - `ALERTS_BRIEF.md`: wird in jedem Zyklus neu geschrieben und ist kurz (`ai_alerts.brief_max_bytes`, standardmäßig 2 KB). Echte Meldungen stehen zuerst.
 - Vorübergehende Ursachen (502/503/504, Zeitüberschreitungen, Ratenlimits, Download-Fehler, ein nie gestarteter Lauf) werden mit editierbaren Regeln in `ai_alerts.transient_patterns` von echten Fehlern unterschieden. Eine Meldung löst sich von selbst, wenn der Workflow wieder grün ist, und du kannst sie bestätigen (`ack`), was nur diesen lokalen Zustand ändert.
-- Alles läuft zuerst durch einen Bereiniger: Tokens, Schlüssel, E-Mail-Adressen, IP-Adressen und dein Home-Ordner erreichen nie die Dateien, die Endpunkte oder den Hook.
+- Alles läuft zuerst durch EINEN einzigen Bereiniger (Token, Schlüssel, Zugangsdaten in Adressen, E-Mail-Adressen, IP-Adressen und Ihr Home-Ordner): die Dateien, die Endpunkte (`/api/ai/state`, `/api/ai/alerts`, `/api/ai/brief`), der Stream, der MCP-Server und der Hook. Er arbeitet nach Mustern: Er senkt das Risiko, er ist keine Garantie; verlassen Sie sich bei einem Geheimnis ungewöhnlicher Form nicht darauf.
 - Der Ordner ist `ai_alerts.folder` (Standard: der Ordner `ai/` des Monitors); wähle einen, den deine KI-Sitzungen lesen. `ci_red.json` enthält in jedem roten Workflow einen optionalen `ai_hint` (Klasse, Ursache, Aktion).
 
 ## Wie eine KI es liest
@@ -20,7 +20,7 @@ Ein roter Workflow nützt nichts, wenn niemand, der am Repository arbeitet, davo
 - Oder füge den MCP-Server hinzu (nur lesend): `python bin/mcp_server.py`, Werkzeuge `get_alerts`, `get_red_repos`, `get_run_failure`, `get_quota`, `get_score`; `--allow-ack` ergänzt `ack_alert` (nur lokaler Zustand). Gemini CLI, Codex und VS Code (Copilot): denselben Befehl als stdio-Server in den MCP-Einstellungen eintragen.
 
 ## Meldungen, die dich erreichen
-- Eine NEUE echte Meldung geht an die Benachrichtigungskanäle, die du schon eingerichtet hast (Einstellungen > Benachrichtigungen).
+- Eine NEUE echte Warnung, die aus einem Panel oder einem Signal des Monitors stammt, geht an die bereits eingerichteten Benachrichtigungskanäle (Einstellungen > Benachrichtigungen), wenn das Ereignis `ai_alert` in `notify.events` steht (standardmäßig nicht). Ein roter Workflow hat sein eigenes Ereignis, `red_new`.
 - Optional, standardmäßig aus: `ai_alerts.hook` schickt die neue echte Meldung (geschlossene Liste bereinigter Felder) per POST an eine Adresse auf diesem Rechner, höchstens `max_per_hour`-mal pro Stunde, damit ein eigenes Skript eine KI-Sitzung wecken kann.
 - Nichts davon sendet Daten an einen KI-Anbieter, führt einen Befehl aus oder schreibt auf GitHub.
 
