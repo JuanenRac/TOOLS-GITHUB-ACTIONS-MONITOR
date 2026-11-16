@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2689_passing-brightgreen.svg" alt="2689 tests">
+  <img src="https://img.shields.io/badge/Tests-2720_passing-brightgreen.svg" alt="2720 tests">
 </p>
 
 > 所有するすべてのリポジトリのワークフローを監視し、赤いもの・止まっているもの・対応待ちのものを、ローカルの1ページで教えます。
@@ -68,7 +68,7 @@
 
 | | |
 |---|---|
-| **バージョン** | **2.0.2** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **バージョン** | **2.0.3** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **必要なもの** | Python 3.11 以上と GitHub CLI（`gh auth login`）。それ以外は不要(ターミナル表示は任意のパッケージ `rich` を使います) |
 | **開く先** | `127.0.0.1` 上のページのみ、8言語対応 |
 | **GitHub への書き込み** | 自動では行いません。明示的な `--go` を付けて実行したバッチコマンドのみ |
@@ -76,13 +76,13 @@
 
 <!-- glance:begin -->
 
-**現時点の実測** (v2.0.2)
+**現時点の実測** (v2.0.3)
 
 | | |
 |---|---|
 | **成熟度** | functional |
-| **テスト** | テストメソッド 2689 件(`python -m unittest discover -s monitor/tests`) |
-| **設定** | 設定 502 件、すべてヘルプ付き |
+| **テスト** | テストメソッド 2720 件(`python -m unittest discover -s monitor/tests`) |
+| **設定** | 設定 515 件、すべてヘルプ付き |
 | **言語** | 8(英語、スペイン語、ドイツ語、フランス語、イタリア語、日本語、中国語、ポルトガル語) |
 | **CI で検証したシステム** | ubuntu, windows、Python 3.11, 3.13 |
 

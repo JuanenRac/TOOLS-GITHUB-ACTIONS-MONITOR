@@ -58,6 +58,63 @@ Un test del browser apre la pagina in ciascuna di queste dimensioni, percorre tu
 2. Apri `http://questo-computer:8765/screen/1` in una finestra del primo monitor e `/screen/2` sul secondo; F11 per lo schermo intero. Da un altro computer usa la modalità rete con il suo token di accesso.
 3. Per uno schermo a parete che nessuno tocca, dagli più schede e imposta `ui.rotate_seconds` su 20-30.
 
+## Schermi da parete: panoramica, in questo momento e sentinelle
+
+Tre pagine per un monitor o una TV che nessuno tocca. Non hanno menu laterale né navigazione, mostrano tutto in una sola vista con testo grande, animano ciò che è vivo e fanno lampeggiare dolcemente i guasti. Fanno solo lettura: nessun pulsante cambia nulla e non chiamano mai GitHub (mostrano ciò che il monitor ha già).
+
+| Indirizzo | Cosa mostra |
+|---|---|
+| `/screen/overview` | Anello e lettera del punteggio; la flotta (verdi, rossi, bloccati, in attesa); le ultime 24 ore e 7 giorni in grafici ad area; una mappa di calore dei repository per ora; ciò che è rosso da più tempo; runner e minuti; gli ultimi eventi; la quota di GitHub come indicatore. |
+| `/screen/now` | Ciò che accade in questo minuto: esecuzioni in corso con avanzamento e durata, la coda, esecuzioni in attesa di approvazione, errori recenti, merge e release, release in arrivo e una linea in diretta delle ultime due ore. |
+| `/screen/sentinels` | Una scheda per ogni sentinella (da A1 ad A12) con il suo livello, i rilievi aperti, se le sue fonti sono leggibili, l'ultima scansione e un anello che segue la scansione; un radar animato che segna ciò che non va e gli avvisi per gravità. |
+
+### Parametri dell'indirizzo
+
+Un indirizzo per ogni monitor. Un parametro può rendere una finestra più tranquilla o più piccola di quanto consentano le impostazioni, mai più rumorosa.
+
+| Parametro | Effetto |
+|---|---|
+| `?monitor=1` a `9` | Il numero mostrato accanto al titolo. |
+| `?theme=dark`, `light` o `contrast` | Colori; contrast è bianco su nero, per uno schermo visto da lontano. |
+| `?density=compact`, `normal` o `large` | Dimensione del testo. `?scale=1.5` ingrandisce tutto (da 0,5 a 3). |
+| `?refresh=10` | Secondi tra gli aggiornamenti (da 5 a 120). |
+| `?lang=de` | Lingua (en, es, de, fr, it, ja, zh, pt). |
+| `?rotate=30` | La finestra passa da sola per panoramica, in questo momento e sentinelle ogni 30 secondi (minimo 5; 0 = nessuna rotazione). |
+| `?blink=off` | I guasti mantengono un alone fisso invece di lampeggiare. Non può attivare ciò che `screens.blink` tiene spento. |
+| `?sound=on` | Un breve segnale acustico per un nuovo guasto, solo se `screens.sound` lo consente. Disattivato per impostazione predefinita. |
+
+### Impostazioni degli schermi da parete
+
+| Impostazione | Cosa fa |
+|---|---|
+| `screens.enabled` | Attiva le tre pagine. Disattivato: ogni indirizzo risponde 404. Disattivato per impostazione predefinita. |
+| `screens.default_theme` | dark (predefinito), light o contrast. |
+| `screens.default_density` | compact, normal (predefinito) o large. |
+| `screens.refresh_seconds` | Secondi tra gli aggiornamenti di una finestra (10 per impostazione predefinita). Le pagine leggono dal monitor, mai da GitHub, quindi un tempo breve non consuma quota. |
+| `screens.rotate_seconds` | 0 (predefinito) = nessuna rotazione; da 5 in su, una finestra passa per le tre pagine. |
+| `screens.blink` | I guasti lampeggiano dolcemente (attivo per impostazione predefinita). |
+| `screens.blink_calm_minutes` | Minuti dopo i quali un guasto di cui nessuno si occupa mantiene un alone fisso invece di lampeggiare (30 per impostazione predefinita; 0 = lampeggia finché non è risolto). |
+| `screens.sound` | Un segnale acustico per un nuovo guasto (disattivato per impostazione predefinita). |
+| `screens.burn_in_protection` | Sposta tutto di qualche pixel ogni minuto (attivo per impostazione predefinita). |
+| `screens.night_dim` | Attenua gli schermi tra `screens.night_dim_from_hour` (22) e `screens.night_dim_to_hour` (7); disattivato per impostazione predefinita. |
+| `screens.show_repo_names` | all, public (predefinito: i repository privati compaiono come private-1, private-2...) o none (ogni nome è nascosto). Usare public o none per uno schermo che altre persone possono vedere. |
+
+### Cosa mostrano e cosa nascondono
+
+I dati arrivano da `/api/screens/data?screen=overview` (oppure `now`, `sentinels`): un elenco chiuso di campi costruito con l'ultimo ciclo, l'istantanea delle sentinelle, gli avvisi e il punteggio. Non contiene mai un collegamento, un titolo di commit, il nome di un job, il nome di una persona né un percorso di questo computer, e anche i nomi dei workflow dei repository nascosti sono nascosti. In modalità di rete le pagine richiedono lo stesso token di accesso del resto del monitor e la risposta è di sola lettura.
+
+### Come si comportano
+
+- I guasti lampeggiano meno di due volte al secondo (mai in modo stroboscopico); un nuovo guasto produce un solo lampo; un guasto di cui nessuno si occupa per `screens.blink_calm_minutes` minuti mantiene un alone fisso. Con l'impostazione del sistema per ridurre il movimento, oppure con `?blink=off`, nulla lampeggia né si muove. Un guasto non è mai indicato solo dal colore: porta un simbolo e una parola.
+- Quando il monitor non risponde, la pagina lo dice, si attenua e riprova dopo 5, 10, 20... secondi (fino a 60).
+- Uno schermo sempre acceso è protetto dal burn-in: tutto si sposta di qualche pixel ogni minuto e la pagina può attenuarsi di notte.
+
+### Montare più monitor
+
+1. Scegliere un indirizzo per ogni monitor, per esempio `/screen/overview?monitor=1`, `/screen/now?monitor=2` e `/screen/sentinels?monitor=3`; oppure aprire una sola finestra con `?rotate=20`.
+2. Aprire ciascuna in Chrome o Edge in modalità chiosco: `msedge --kiosk "http://questo-computer:8765/screen/now?monitor=2" --edge-kiosk-type=fullscreen` oppure `chrome --kiosk "http://questo-computer:8765/screen/now?monitor=2"`; con `--app=INDIRIZZO` al posto di `--kiosk` la finestra non ha barre. Senza modalità chiosco, il pulsante discreto a piè di pagina chiede lo schermo intero.
+3. Da un altro computer usare la modalità di rete: basta il token di accesso di un visualizzatore, perché queste pagine non scrivono mai.
+
 ## Immagini
 
 La scheda Adesso in quattro dimensioni, con dati inventati (4K, un monitor 21:9, un monitor ruotato, un telefono):

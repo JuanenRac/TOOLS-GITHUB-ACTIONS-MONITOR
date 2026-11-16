@@ -13,7 +13,7 @@ from pathlib import Path
 from unittest import mock
 
 import _testenv  # noqa: F401
-from github_actions_monitor.app import actions_monitor, settings_api
+from github_actions_monitor.app import actions_monitor, settings_api, toolconfig
 from github_actions_monitor.security import localguard
 
 TOKEN = "T" * 24
@@ -236,6 +236,31 @@ class TheSettingsAClientOfTheNetworkCannotChangeAreNotReadByItEither(NetworkCase
         self.assertFalse([f for f in fields.values() if f.get("redacted")])
         remote = self.fields(settings_api.describe(self.config, remote=True))
         self.assertEqual(set(fields), set(remote), "the same fields, only the values differ")
+
+
+class TheWallScreensFollowTheRulesOfTheNetwork(NetworkCase):
+    """The wall screens only read: a client of the network needs the access token like for any page, a wrong one is refused and counted, and nothing can be written through them."""
+
+    def setUp(self):
+        super().setUp()
+        patcher = mock.patch.object(toolconfig, "raw_config", return_value={"screens": {"enabled": True}})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_the_token_decides_and_nothing_can_be_written(self):
+        remote = Running(self)
+        for path in ("/screen/overview", "/screen/now", "/screen/sentinels", "/api/screens/data?screen=now"):
+            self.assertEqual(remote.call("GET", path)[0], 200, path)
+            self.assertEqual(remote.call("GET", path, token="wrong")[0], 401, path)
+            self.assertEqual(remote.call("GET", path, token="")[0], 401, path)
+            self.assertNotEqual(remote.call("POST", path, {})[0], 200, path)
+        text = remote.call("GET", "/api/screens/data?screen=overview")[1]
+        self.assertNotIn(TOKEN, json.dumps(text))
+        self.assertEqual(self.config.read_text(encoding="utf-8"), "{}", "nothing was written")
+
+    def test_they_are_not_a_local_only_route(self):
+        self.assertNotIn("/api/screens/data", LOCAL_ONLY_GET)
+        self.assertEqual(Running(self, peer_ip="127.0.0.1").call("GET", "/api/screens/data?screen=sentinels")[0], 200)
 
 
 #: every route that answers 403 "local_only" to a client of the network (the keys, the actions on GitHub, the tests of channels, the state of the pool and of the App)

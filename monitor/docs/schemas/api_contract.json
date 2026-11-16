@@ -62,6 +62,7 @@
  ],
  "unfrozen": [
   {"path": "/api/ai/stream", "reason": "a stream of server-sent events, not a JSON document"},
+  {"path": "/api/screens/data", "reason": "what the wall screens draw: a closed list of fields that follows the screen asked for (?screen=overview|now|sentinels) and is made for those pages, not for other readers"},
   {"path": "/api/github-app/status", "reason": "state of the GitHub App of the account; its keys depend on the setup"},
   {"path": "/api/github-token", "reason": "state of the credential; its keys depend on the store in use"},
   {"path": "/api/live-events/stream", "reason": "a stream of server-sent events, not a JSON document"},

@@ -16,7 +16,11 @@ Ce qui n'apparaît qu'à l'usage réel prolongé : la migration depuis la 1.8 et
 
 Les workflows du moniteur lui-même respectent ce que la sentinelle d'hygiène demandera aux autres : actions fixées à un commit, permissions minimales et une limite de temps sur chaque job.
 
-## Fait dans la 1.8.2 à la 2.0.2
+## Fait dans la 1.8.2 à la 2.0.3
+
+### 2.0.3 - Gros comptes, moins de faux rouges, lint sans clones et stockage plus sûr
+
+Une vue de flotte, des listes paginées, un budget de requêtes et une couverture honnête de la liste des exécutions pour les comptes de centaines de dépôts ; un rouge ne compte que si le dépôt lui-même l'a causé, et les exécutions en attente d'approbation, les workflows abandonnés, ceux qui ne réagissent qu'aux issues, la file de fusion et les branches de maintenance ont chacun leur place ; le linter de workflows et les contrôles de surface fonctionnent par l'API ou un clone partiel sans cloner ; les modèles du fournisseur d'IA sont lus et vérifiés, et chaque lien de la page passe par le filtre d'adresses ; les verrous et le journal des actions sont plus sûrs sous Windows et le registre de score n'est jamais écrasé ; des écrans muraux pour un moniteur ou un téléviseur, désactivés par défaut ; les tests du dépôt ne tournent plus sur macOS pour l'instant.
 
 ### 2.0.2 - Des journaux plus sûrs, un texte d'IA plus propre et un score plus juste
 

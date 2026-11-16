@@ -16,7 +16,11 @@ O que só aparece com uso real prolongado: a migração desde a 1.8 e a 1.9, o c
 
 Os workflows do próprio monitor cumprem o que a sentinela de higiene pedirá aos outros: ações fixadas a um commit, as permissões mínimas e um limite de tempo em cada job.
 
-## Feito da 1.8.2 à 2.0.2
+## Feito da 1.8.2 à 2.0.3
+
+### 2.0.3 - Contas grandes, menos falsos vermelhos, lint sem clones e armazenamento mais seguro
+
+Uma vista de frota, listas paginadas, um orçamento de pedidos e uma cobertura honesta da lista de execuções para contas com centenas de repositórios; um vermelho só conta quando o próprio repositório o causou, e as execuções à espera de aprovação, os workflows abandonados, os que só reagem a issues, a fila de merge e os ramos de manutenção têm cada um o seu lugar; o linter de workflows e as verificações de superfície funcionam pela API ou com um clone parcial sem clonar; os modelos do fornecedor de IA são lidos e verificados, e cada ligação da página passa pelo filtro de endereços; os bloqueios e o registo de ações são mais seguros no Windows e o livro de pontuação nunca é sobrescrito; ecrãs de parede para um monitor ou uma televisão, desativados por omissão; os testes do repositório deixam, por agora, de correr em macOS.
 
 ### 2.0.2 - Registos mais seguros, texto para IA mais limpo e uma pontuação mais justa
 

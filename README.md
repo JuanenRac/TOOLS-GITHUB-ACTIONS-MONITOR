@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2689_passing-brightgreen.svg" alt="2689 tests">
+  <img src="https://img.shields.io/badge/Tests-2720_passing-brightgreen.svg" alt="2720 tests">
 </p>
 
 > Watches the workflows of every repository you own and tells you, on one local page, what is red, what is stuck and what is waiting for you.
@@ -68,7 +68,7 @@
 
 | | |
 |---|---|
-| **Version** | **2.0.2** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **2.0.3** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Needs** | Python 3.11+ and the GitHub CLI (`gh auth login`); nothing else (the terminal view uses the optional package `rich`) |
 | **Opens** | a page on `127.0.0.1` only, in eight languages |
 | **Writes to GitHub** | never by itself: only batch commands you run with an explicit `--go` |
@@ -76,13 +76,13 @@
 
 <!-- glance:begin -->
 
-**Measured today** (v2.0.2)
+**Measured today** (v2.0.3)
 
 | | |
 |---|---|
 | **Maturity** | functional |
-| **Tests** | 2689 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Settings** | 502 settings, all with help |
+| **Tests** | 2720 test methods (`python -m unittest discover -s monitor/tests`) |
+| **Settings** | 515 settings, all with help |
 | **Languages** | 8 (English, Spanish, German, French, Italian, Japanese, Chinese, Portuguese) |
 | **Tested in the CI on** | ubuntu, windows, Python 3.11, 3.13 |
 

@@ -20,6 +20,10 @@ try:
     import check_overflow as co  # noqa: E402
 except ImportError:      # the tools folder does not travel in the zip of a release
     co = None
+try:
+    import check_page  # noqa: E402
+except ImportError:
+    check_page = None
 
 NOW = datetime.now(timezone.utc)
 NEEDS_BROWSER = bool(os.environ.get("MONITOR_REQUIRE_BROWSER"))
@@ -81,9 +85,8 @@ class TheRingInABrowser(unittest.TestCase):
         import socket
         import subprocess
         import time
-        import check_page
         cls.report = None
-        if co is None or not co.edge():
+        if co is None or check_page is None or not co.edge():
             cls.why = "no browser"
             return
         port = co.free_port()
