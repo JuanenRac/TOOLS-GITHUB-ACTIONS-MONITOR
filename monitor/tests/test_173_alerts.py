@@ -207,7 +207,7 @@ class Wiring(unittest.TestCase):
 
     def test_the_page_has_the_alerts_tab_the_filters_and_the_live_checklist(self):
         page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
-        for needle in ('id="t-al"', 'id="n-al"', "function renderAlerts", "/api/alerts", "alertMute", 'id="live-check"', 'const TABS=LITE?["now","charts","repos","hist","cfg"]:["now","al","sent"', ".lite #n-al"):
+        for needle in ('id="t-al"', 'id="n-al"', "function renderAlerts", "/api/alerts", "alertMute", 'id="live-check"', 'const TABS=LITE?["now","charts","repos","hist","cfg"]:["now","al","rep","les","sent"', ".lite #n-al"):
             self.assertIn(needle, page, needle)
 
     def test_the_new_settings_exist_with_their_texts_in_the_eight_languages(self):

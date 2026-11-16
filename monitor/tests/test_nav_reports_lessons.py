@@ -3,6 +3,7 @@
 """Alerts, Reports and Lessons are three entries of the menu on the left, each with its own panel and its own address (#reports, #lessons). Nothing is lost or repeated, the old addresses still
 open the right panel, every entry has its badge and its words in the eight languages, and Lite does not show them."""
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -88,7 +89,7 @@ const cases = {"": "", "#alerts": "al", "al": "al", "#reports": "rep", "#lessons
 const bad = Object.entries(cases).filter(([k, v]) => tabOf(k) !== v).map(([k, v]) => k + " -> " + tabOf(k) + " (wanted " + v + ")");
 console.log(JSON.stringify(bad));
 """
-        done = subprocess.run(["node", "-e", script], capture_output=True, text=True, timeout=60, creationflags=0x08000000)
+        done = subprocess.run(["node", "-e", script], capture_output=True, text=True, timeout=60, **({"creationflags": 0x08000000} if os.name == "nt" else {}))
         self.assertEqual(done.returncode, 0, done.stderr)
         self.assertEqual(json.loads(done.stdout.strip()), [])
 
