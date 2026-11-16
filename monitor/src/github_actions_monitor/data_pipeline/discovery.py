@@ -7,14 +7,23 @@
   suggest_groups(unclassified, ...)  a prefix shared by three or more repositories that no group claims -> a suggested group; NEVER applied without a confirmation
   auto_frequency(...)                the hot / cold intervals the real activity asks for, inside the quota budget
   box(...)                           the "owner / watched / hidden" figures of the Basic tab
-Settings (all in the `discovery` block of the configuration): events (on), suggest_groups (on), auto_frequency (off), hide (a list of fork, empty, private: repositories of that kind are left out;
-archived repositories are always left out).
+Settings (all in the `discovery` block of the configuration): events (on), suggest_groups (on), auto_frequency (off), hide (a list of fork, empty, private: repositories of that kind are left out),
+skip_archived (on: archived repositories are left out), fork_policy (what to do with forks: show = all of them, skip = none, skip_unless_ci = only the ones that have a CI of their own,
+auto = skip_unless_ci with a window that depends on the kind of account), fork_ci_days (a fork counts as maintained when its CI ran this many days ago; 0 = an enabled workflow is enough),
+fork_checks_per_pass (how many forks are asked about in one listing).
+
+A fork has "a CI of its own" when it has an enabled workflow (a fork starts with its workflows disabled, so an enabled one was switched on by someone) and, if fork_ci_days is not 0, a run in that window.
 """
 import re
+import time
+from datetime import datetime, timezone
 from github_actions_monitor.security import private_io
 
-DEFAULTS = {"events": True, "suggest_groups": True, "auto_frequency": False, "hide": []}
+DEFAULTS = {"events": True, "suggest_groups": True, "auto_frequency": False, "hide": [], "skip_archived": True, "fork_policy": "show", "fork_ci_days": 90, "fork_checks_per_pass": 30}
 EVENT_CODES = ("repo_new", "repo_gone", "repo_archived", "repo_unarchived")
+FORK_POLICIES = ("show", "skip", "skip_unless_ci", "auto")
+FORK_TTL = 7 * 86400      # how long the answer about one fork is kept
+ORG_WINDOW = 2            # on an organisation (policy auto) the window of fork_ci_days is this many times longer
 
 
 def settings(config):
@@ -22,6 +31,12 @@ def settings(config):
     out = {key: block.get(key, default) is True for key, default in DEFAULTS.items() if isinstance(default, bool)}
     hide = block.get("hide")
     out["hide"] = [w for w in hide if w in ("fork", "empty", "private")] if isinstance(hide, list) else []
+    out["fork_policy"] = block.get("fork_policy") if block.get("fork_policy") in FORK_POLICIES else DEFAULTS["fork_policy"]
+    for key, low, high in (("fork_ci_days", 0, 365), ("fork_checks_per_pass", 1, 500)):
+        value = block.get(key)
+        out[key] = value if isinstance(value, int) and not isinstance(value, bool) and low <= value <= high else DEFAULTS[key]
+    if "fork" in out["hide"]:
+        out["fork_policy"] = "skip"      # the older way of leaving every fork out
     return out
 
 
@@ -45,15 +60,66 @@ def diff(previous, current):
     return events
 
 
-def lifecycle(items, rules):
-    """`items` is [{"name", "isArchived", "isFork", "isEmpty", "isPrivate"}]; returns the names that stay."""
-    hide = settings({"discovery": rules})["hide"]
+def lifecycle(items, rules, fork_ci=None):
+    """`items` is [{"name", "isArchived", "isFork", "isEmpty", "isPrivate"}]; returns the names that stay. `fork_ci` is {name: True | False | None} (a fork with a CI of its own, without,
+    not known yet): with the policy skip_unless_ci or auto only the forks answered True stay."""
+    cfg = settings({"discovery": rules})
+    hide, policy, fork_ci = cfg["hide"], cfg["fork_policy"], fork_ci or {}
     keep = []
     for item in items:
-        if item.get("isArchived") or ("fork" in hide and item.get("isFork")) or ("empty" in hide and item.get("isEmpty")) or ("private" in hide and item.get("isPrivate")):
+        if (item.get("isArchived") and cfg["skip_archived"]) or ("empty" in hide and item.get("isEmpty")) or ("private" in hide and item.get("isPrivate")):
+            continue
+        if item.get("isFork") and (policy == "skip" or (policy in ("skip_unless_ci", "auto") and fork_ci.get(item["name"]) is not True)):
             continue
         keep.append(item["name"])
     return keep
+
+
+def owner_kind(reader, owner):
+    """"user", "organization" or None (not known): one read of `users/<owner>`."""
+    try:
+        kind = str((reader(f"users/{owner}") or {}).get("type", "")).lower()
+    except Exception:   # noqa: BLE001 - offline or refused: the policy then uses the plain window
+        return None
+    return {"user": "user", "organization": "organization"}.get(kind)
+
+
+def fork_window(cfg, kind):
+    """The days a fork's CI may be silent and still count as maintained (0 = no window)."""
+    days = cfg["fork_ci_days"]
+    return days * ORG_WINDOW if (cfg["fork_policy"] == "auto" and kind == "organization") else days
+
+
+def fork_has_ci(reader, owner, name, days, now=None):
+    """True when the fork has a workflow switched on and (days > 0) a run inside the window; False when it has none; None when GitHub did not answer."""
+    try:
+        listing = reader(f"repos/{owner}/{name}/actions/workflows?per_page=100") or {}
+        active = [w for w in listing.get("workflows") or [] if isinstance(w, dict) and w.get("state") == "active" and str(w.get("path", "")).startswith(".github/workflows/")]
+        if not active:
+            return False
+        if days <= 0:
+            return True
+        runs = (reader(f"repos/{owner}/{name}/actions/runs?per_page=1") or {}).get("workflow_runs") or []
+        if not runs or not isinstance(runs[0], dict):
+            return False
+        made = datetime.strptime(str(runs[0].get("created_at", ""))[:19], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
+        return ((now or time.time()) - made.timestamp()) <= days * 86400
+    except Exception:   # noqa: BLE001
+        return None
+
+
+def check_forks(forks, known, reader, owner, days, limit, now=None):
+    """`known` is {name: {"ci": bool, "at": ts, "days": n}} (updated here). Asks about at most `limit` forks whose answer is missing, old or made with another window, the oldest first;
+    returns {name: True | False | None}."""
+    now = time.time() if now is None else now
+    due = sorted((n for n in forks if n not in known or now - known[n].get("at", 0) > FORK_TTL or known[n].get("days") != days), key=lambda n: known.get(n, {}).get("at", 0))
+    for name in due[:max(0, limit)]:
+        answer = fork_has_ci(reader, owner, name, days, now)
+        if answer is not None:
+            known[name] = {"ci": answer, "at": now, "days": days}
+    for gone in [n for n in known if n not in forks]:
+        known.pop(gone)
+    return {n: (known[n]["ci"] if n in known else None) for n in forks}
 
 
 def suggest_groups(unclassified, minimum=3, taken=()):
