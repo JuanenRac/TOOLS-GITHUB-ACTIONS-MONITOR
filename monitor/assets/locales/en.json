@@ -3284,7 +3284,7 @@
  "hyg.wf_cut": "the list of workflows was cut: seen {seen} of {total}",
  "ui.cfg_b_wall": "Wall screens",
  "cfg.f.screens.enabled": "Wall screens",
- "cfg.h.screens.enabled": "Turns the wall screens on. Off: /screen/overview, /screen/now and /screen/sentinels answer 404. They only read what the monitor already holds; they never change anything and never call GitHub.",
+ "cfg.h.screens.enabled": "Turns the wall screens on. Off: /screen/overview, /screen/now and /screen/sentinels answer 404. They only read what the monitor already holds; they never change anything and never call GitHub. Off by default.",
  "cfg.f.screens.default_theme": "Theme of the wall screens",
  "cfg.h.screens.default_theme": "dark, light or contrast (white on black, for a screen seen from far away). The address can change it for one window: ?theme=light.",
  "cfg.f.screens.default_density": "Density of the wall screens",
