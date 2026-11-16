@@ -34,6 +34,7 @@ when this file and `tool_version.py` disagree.
 - **Second look at the default branch** (`sampling.default_branch_probe`, off by default): when the list of runs of a repository is full, one more request asks for the pushes to its default branch with pull requests left out, so the runs that decide red on main are not pushed out by pull requests and schedules. The runs that only the second look found never make a list count as full.
 - **Budget of requests per hour** (`sampling.api_budget_per_hour`, 0 = none): past it the repositories with a red workflow are read first and the rest wait for the next hour, and the page says how many wait. The page also shows the requests per hour that the number of repositories and the intervals ask for (from 3,500 on, or whenever a budget is set), so a large account is warned before it runs out of allowance.
 - **Long lists are read to the end, and a cut is said**: the workflows of a repository (148 or 348 are real cases), the jobs of a run (a matrix of more than 100) and the open issues and pull requests of a repository are now read page by page while the last page was full, up to `pagination.workflow_pages`, `pagination.job_pages` and `pagination.collab_pages` pages of 100. A repository that fits in one page costs the same requests as before. When something is still left out the page says "seen N of M": under the run for its jobs, in the hygiene of the repository for its workflows, and in the footer of the Team tab for repositories with more open items than were read and for the account when the Search API has more than its 1000 results.
+- **A load test with a synthetic account**: 250 repositories and 1,250 workflows, no network, measures the requests of a cycle, the time of the cycle and of the team health, the memory of the held data and how many requests the lookups of A2 need, with wide bounds so that a loaded computer passes.
 
 ### Changed
 
@@ -51,6 +52,10 @@ when this file and `tool_version.py` disagree.
 - **A try after an approval is not "flaky"**: a run that needed a person to approve it (`action_required`) and then passed, and the runs of pull requests that come from forks, no longer count as flaky workflows.
 - The failing job of a run with more than 30 jobs is found: the lists of jobs that the alert for an AI, the assistant and the batch tool read were cut at 30 and are now cut at 100 (the same single request).
 - **A clock set back no longer stops the score, the purge and the scheduled reports**: a saved moment that lies in the future (a computer without a battery clock that starts with an old date, or a clock corrected by hand) is no longer believed; the pass is due at once and writes a good moment, instead of waiting for days until the old clock is reached again.
+
+### Security
+
+- **Every link the page builds from data goes through the address filter**: the links to the last run, the repository, the board, the issue, the unresolved failure and the update notice (12 of 14 did not) only open an `https` address of GitHub or of the configured host; anything else becomes an inert `#`. A test fails if a new link is built without the filter.
 
 ### Security
 
