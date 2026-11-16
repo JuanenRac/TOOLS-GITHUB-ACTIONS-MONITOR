@@ -152,6 +152,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `listen.token_env` (secure) | `"MONITOR_ACCESS_TOKEN"` | advanced | Environment variable with the access token |
 | `listen.trusted_proxies` (secure) | `[]` | advanced | Addresses of the proxy when it is not on this computer |
 | `listen.trusted_proxy` (secure) | `false` | advanced | Trust the reverse proxy in front |
+| `live.sse.enabled` (secure) | `false` | webhook | Stream of live events |
+| `live.sse.max_clients` | `3` | webhook | Live streams at once |
+| `live.sse.max_seconds` | `3600` | webhook | Longest live stream |
 | `logs.failed_step.enabled` (secure) | `false` | ai | Show the log of the failed step |
 | `logs.failed_step.lines` | `12` | ai | Lines of the failed step |
 | `logs.failed_step.max_bytes` | `2000` | ai | Size of the failed step text |

@@ -4,13 +4,13 @@ Ce qui est publié, ce qui vient ensuite et ce qui n'est qu'une idée, dans cet 
 
 ## Où en est le moniteur
 
-Version 1.9.4. L'édition lite montre ce qui tourne et ce qui a échoué. L'édition complète ajoute trois sentinelles (CI, Collab et Security), une liste d'alertes, plusieurs comptes et une équipe avec des rôles, la note de chaque compte, la santé de chaque dépôt et de l'équipe, des rapports programmés, un journal des actions, des notifications (ntfy, Teams, e-mail et Apprise), un assistant d'IA facultatif avec des préréglages de services compatibles, le mode service avec Docker et une page pour toutes les tailles d'écran, du téléphone à la 4K.
+Version 1.9.5. L'édition lite montre ce qui tourne et ce qui a échoué. L'édition complète ajoute trois sentinelles (CI, Collab et Security), une liste d'alertes, plusieurs comptes et une équipe avec des rôles, la note de chaque compte, la santé de chaque dépôt et de l'équipe, des rapports programmés, un journal des actions, des notifications (ntfy, Teams, e-mail et Apprise), un assistant d'IA facultatif avec des préréglages de services compatibles, le mode service avec Docker et une page pour toutes les tailles d'écran, du téléphone à la 4K.
 
 ## Prévu, dans cet ordre
 
 Chaque version ne porte que du contenu réel : une version sans rien de réel à ajouter est sautée et jamais publiée vide. Rien ici n'est tenu pour prouvé sur des services réels sauf si son guide le dit.
 
-### 1.9.5 à 1.9.9 - Clôture de la troisième phase
+### 1.9.6 à 1.9.9 - Clôture de la troisième phase
 
 Ce que les revues de la note, de la sentinelle de sécurité, des vues de santé, des rapports et du journal des actions trouvent encore ; le coût en appels à GitHub avec trois sentinelles actives ; une note qui reste cohérente quand une sentinelle est éteinte.
 
@@ -20,7 +20,11 @@ Une version majeure qui nettoie la dette technique et fige les interfaces publiq
 
 Les workflows du moniteur lui-même respectent ce que la sentinelle d'hygiène demandera aux autres : actions fixées à un commit, permissions minimales et une limite de temps sur chaque job.
 
-## Fait dans la 1.8.2 à la 1.9.4
+## Fait dans la 1.8.2 à la 1.9.5
+
+### 1.9.5 - Flux des événements en direct
+
+Un flux des événements en direct du webhook entrant pour les clients et les écrans muraux qui ne peuvent pas interroger, désactivé par défaut, en lecture seule, avec une limite d'écouteurs et une durée maximale pour chacun.
 
 ### 1.9.4 - Préréglages d'IA
 

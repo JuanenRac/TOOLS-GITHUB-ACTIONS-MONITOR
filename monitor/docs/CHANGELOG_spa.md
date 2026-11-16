@@ -9,6 +9,12 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+## [1.9.5]
+
+### Añadido
+
+- **Los eventos en vivo como flujo (Complete, apagado por defecto)**: con `live.sse.enabled` encendido, `GET /api/live-events/stream` envía los eventos del webhook de entrada según se aceptan, como eventos enviados por el servidor: un marco `hello` (cuántos hay guardados), un marco `live` por evento con un `id` correlativo (se reanuda con `Last-Event-ID` o `?since=`; solo se envía la lista cerrada de campos de `GET /api/live-events`), un comentario de latido y un `bye` final. Es de solo lectura, pide el token de acceso en modo red como cualquier otra petición, admite como máximo `live.sse.max_clients` oyentes (los demás reciben `429`), cada uno durante `live.sse.max_seconds`, y la edición Lite no lo tiene. Los tres ajustes están en la pestaña Ajustes (subpestaña Webhook de entrada) con su ayuda en los ocho idiomas, la guía del webhook de entrada lo explica y las referencias de las dos skills listan el endpoint. Una prueba con un servidor real cubre el apagado por defecto, el límite de oyentes y un evento aceptado que llega al oyente.
+
 ### Cambiado
 
 - **`/api/health` dice más y `?deep=1` pregunta más**: además de `ok`, `version`, `loaded` y `offline`, la respuesta lleva el estado del `cycle` de refresco, del `credential` de GitHub de la cuenta y dónde está escuchando el monitor (`listening`); el supervisor responde las mismas palabras. `/api/health?deep=1` es la comprobación profunda: 503 cuando el ciclo de refresco de una cuenta está atascado o ha desaparecido y, en el supervisor, también cuando su bucle se ha parado, cuando el ciclo de cualquier cuenta está atascado o cuando ninguna cuenta responde tras el arranque. Sin `deep` no falla nada que antes no fallara.

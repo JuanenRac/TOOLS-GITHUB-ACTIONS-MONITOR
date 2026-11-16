@@ -89,6 +89,7 @@ NOTES = {
     "/api/help/topics": ("GET", "the list of documentation topics"),
     "/api/hot-only": ("POST", "read only the hot repositories for one long cycle"),
     "/api/live-events": ("GET", "the newest webhook events"),
+    "/api/live-events/stream": ("GET", "server-sent events of the webhook events as they are accepted (off by default)"),
     "/api/live-status": ("GET", "state of the incoming webhook receiver"),
     "/api/mirror": ("GET", "state of the local mirror of artifacts"),
     "/api/mode": ("GET,POST", "the working mode (normal, fast, turbo, low) and its time left"),

@@ -4,13 +4,13 @@ Ciò che è stato pubblicato, ciò che viene dopo e ciò che è solo un'idea, in
 
 ## A che punto è il monitor
 
-Versione 1.9.4. L'edizione lite mostra ciò che gira e ciò che è fallito. L'edizione completa aggiunge tre sentinelle (CI, Collab e Security), un elenco di avvisi, più account e un team con ruoli, il punteggio di ogni account, la salute di ogni repository e del team, rapporti programmati, un registro delle azioni, notifiche (ntfy, Teams, e-mail e Apprise), un assistente IA facoltativo con preset di servizi compatibili, la modalità servizio con Docker e una pagina per ogni dimensione di schermo, dal telefono al 4K.
+Versione 1.9.5. L'edizione lite mostra ciò che gira e ciò che è fallito. L'edizione completa aggiunge tre sentinelle (CI, Collab e Security), un elenco di avvisi, più account e un team con ruoli, il punteggio di ogni account, la salute di ogni repository e del team, rapporti programmati, un registro delle azioni, notifiche (ntfy, Teams, e-mail e Apprise), un assistente IA facoltativo con preset di servizi compatibili, la modalità servizio con Docker e una pagina per ogni dimensione di schermo, dal telefono al 4K.
 
 ## Previsto, in quest'ordine
 
 Ogni versione porta solo contenuto reale: una versione senza nulla di reale da aggiungere viene saltata e mai pubblicata vuota. Nulla di questo è dato per provato su servizi reali se la sua guida non lo dice.
 
-### Da 1.9.5 a 1.9.9 - Chiusura della terza fase
+### Da 1.9.6 a 1.9.9 - Chiusura della terza fase
 
 Ciò che le revisioni del punteggio, della sentinella di sicurezza, delle viste di salute, dei rapporti e del registro delle azioni trovano ancora; il costo in chiamate a GitHub con tre sentinelle attive; un punteggio che resta coerente quando una sentinella è spenta.
 
@@ -20,7 +20,11 @@ Una versione maggiore che ripulisce il debito tecnico e congela le interfacce pu
 
 I workflow del monitor stesso rispettano ciò che la sentinella di igiene chiederà agli altri: azioni fissate a un commit, permessi minimi e un limite di tempo su ogni job.
 
-## Fatto dalla 1.8.2 alla 1.9.4
+## Fatto dalla 1.8.2 alla 1.9.5
+
+### 1.9.5 - Flusso degli eventi in diretta
+
+Un flusso degli eventi in diretta del webhook in ingresso per client e schermi a parete che non possono interrogare, spento per impostazione predefinita, in sola lettura, con un limite di ascoltatori e un limite di tempo per ciascuno.
 
 ### 1.9.4 - Preset dell'IA
 

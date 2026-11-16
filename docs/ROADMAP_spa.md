@@ -4,13 +4,13 @@ Lo ya publicado, lo que viene y lo que solo es una idea, en ese orden de certeza
 
 ## Dónde está el monitor ahora
 
-Versión 1.9.4. La edición lite muestra lo que se ejecuta y lo que falló. La edición completa añade tres centinelas (CI, Collab y Security), una lista de alertas, varias cuentas y un equipo con roles, la puntuación de cada cuenta, la salud de cada repositorio y del equipo, informes programados, un registro de acciones, notificaciones (ntfy, Teams, correo y Apprise), un asistente de IA opcional con preajustes de servicios compatibles, el modo servicio con Docker y una página para todos los tamaños de pantalla, de un móvil a 4K.
+Versión 1.9.5. La edición lite muestra lo que se ejecuta y lo que falló. La edición completa añade tres centinelas (CI, Collab y Security), una lista de alertas, varias cuentas y un equipo con roles, la puntuación de cada cuenta, la salud de cada repositorio y del equipo, informes programados, un registro de acciones, notificaciones (ntfy, Teams, correo y Apprise), un asistente de IA opcional con preajustes de servicios compatibles, el modo servicio con Docker y una página para todos los tamaños de pantalla, de un móvil a 4K.
 
 ## Previsto, en este orden
 
 Cada versión lleva solo contenido real: una versión sin nada real que añadir se salta y nunca se publica vacía. Nada de esto se da por probado con servicios reales salvo que su guía lo diga.
 
-### 1.9.5 a 1.9.9 - Cierre de la tercera fase
+### 1.9.6 a 1.9.9 - Cierre de la tercera fase
 
 Lo que las revisiones de la puntuación, del centinela de seguridad, de las vistas de salud, de los informes y del registro de acciones aún encuentren; el coste en llamadas a GitHub con tres centinelas en marcha; una puntuación que siga siendo coherente cuando un centinela está apagado.
 
@@ -20,7 +20,11 @@ Una versión mayor que limpia la deuda técnica y congela las interfaces públic
 
 Los workflows del propio monitor cumplen lo que el centinela de higiene pedirá a los demás: acciones fijadas a un commit, los permisos mínimos y un límite de tiempo en cada trabajo.
 
-## Hecho en la 1.8.2 a la 1.9.4
+## Hecho en la 1.8.2 a la 1.9.5
+
+### 1.9.5 - Flujo de eventos en vivo
+
+Un flujo de los eventos en vivo del webhook de entrada para clientes y pantallas de pared que no pueden sondear, apagado por defecto, de solo lectura, con un límite de oyentes y un límite de tiempo para cada uno.
 
 ### 1.9.4 - Preajustes de IA
 

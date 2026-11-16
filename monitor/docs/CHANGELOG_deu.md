@@ -9,6 +9,12 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+## [1.9.5]
+
+### Hinzugefügt
+
+- **Die Live-Ereignisse als Strom (Complete, standardmäßig aus)**: Mit `live.sse.enabled` an sendet `GET /api/live-events/stream` die Ereignisse des eingehenden Webhooks beim Annehmen als Server-Sent Events: ein `hello`-Frame (wie viele gehalten werden), je Ereignis ein `live`-Frame mit laufender `id` (Fortsetzen über `Last-Event-ID` oder `?since=`; gesendet wird nur die geschlossene Feldliste von `GET /api/live-events`), ein Keep-alive-Kommentar und ein abschließendes `bye`. Nur lesend, im Netzwerkmodus wie jede Anfrage mit Zugriffstoken, höchstens `live.sse.max_clients` Zuhörer (weitere erhalten `429`), je `live.sse.max_seconds`; die Lite-Edition hat ihn nicht. Die drei Einstellungen stehen im Reiter Einstellungen (Unterreiter Eingehender Webhook) mit Hilfe in acht Sprachen, die Anleitung des eingehenden Webhooks erklärt ihn, und die Referenzen der beiden Skills führen den Endpunkt auf. Ein Test mit echtem Server deckt Aus-als-Standard, die Zuhörergrenze und ein angenommenes Ereignis ab, das den Zuhörer erreicht.
+
 ### Geändert
 
 - **`/api/health` sagt mehr, und `?deep=1` fragt mehr ab**: Neben `ok`, `version`, `loaded` und `offline` enthält die Antwort den Zustand des Aktualisierungszyklus (`cycle`), des GitHub-Zugangs (`credential`) des Kontos und wo der Monitor lauscht (`listening`); der Supervisor antwortet mit denselben Wörtern. `/api/health?deep=1` ist die tiefe Prüfung: 503, wenn der Aktualisierungszyklus eines Kontos hängt oder fehlt, und im Supervisor auch, wenn seine Schleife stillsteht, der Zyklus irgendeines Kontos hängt oder nach dem Start kein Konto antwortet. Ohne `deep` schlägt nichts fehl, was vorher nicht fehlschlug.

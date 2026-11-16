@@ -9,6 +9,12 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+## [1.9.5]
+
+### Adicionado
+
+- **Os eventos em direto como fluxo (Complete, desligado por predefinição)**: com `live.sse.enabled` ligado, `GET /api/live-events/stream` envia os eventos do webhook de entrada à medida que são aceites, como eventos enviados pelo servidor: um quadro `hello` (quantos estão guardados), um quadro `live` por evento com um `id` sequencial (retoma-se com `Last-Event-ID` ou `?since=`; só se envia a lista fechada de campos de `GET /api/live-events`), um comentário de keep-alive e um `bye` final. É só de leitura, no modo de rede pede o token de acesso como qualquer pedido, admite no máximo `live.sse.max_clients` ouvintes (os restantes recebem `429`), cada um durante `live.sse.max_seconds`, e a edição Lite não o tem. As três definições estão no separador Definições (subseparador Webhook de entrada) com a ajuda nos oito idiomas, o guia do webhook de entrada explica-o e as referências das duas skills listam o endpoint. Um teste com um servidor real cobre o desligado por predefinição, o limite de ouvintes e um evento aceite que chega ao ouvinte.
+
 ### Alterado
 
 - **`/api/health` diz mais e `?deep=1` pergunta mais**: além de `ok`, `version`, `loaded` e `offline`, a resposta traz o estado do ciclo de atualização (`cycle`), do acesso ao GitHub (`credential`) da conta e onde o monitor escuta (`listening`); o supervisor responde com as mesmas palavras. `/api/health?deep=1` é a verificação profunda: 503 quando o ciclo de atualização de uma conta está preso ou desapareceu e, no supervisor, também quando o seu ciclo parou, quando o ciclo de qualquer conta está preso ou quando nenhuma conta responde depois do arranque. Sem `deep`, nada falha que antes não falhasse.
