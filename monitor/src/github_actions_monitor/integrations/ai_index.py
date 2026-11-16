@@ -34,6 +34,7 @@ ENDPOINTS = (
     ("GET", "/api/ai/alerts", "the feed since a moment (`?since=SECONDS`)"),
     ("GET", "/api/ai/state", "every signal of the monitor, versioned"),
     ("GET", "/api/ai/stream", "server-sent events of the alerts (off by default)"),
+    ("GET", "/api/ai/models", "the models of the AI provider kept from its last list, the check of the configured model and the table of data per model (no request to the provider)"),
     ("GET", "/api/ai/presets", "the presets of AI providers (address, name of the variable of the key, example models, privacy); data only, never a key"),
     ("GET", "/api/ai/lessons", "the lessons that apply now, the repeated failures with their trend and the library (`?fmt=md`, `?fmt=brief&repo=NAME` for the brief before a push)"),
     ("GET", "/api/ai/failures", "the book of failures, newest first (`?since=SECONDS&repo=NAME&category=NAME&limit=N`)"),
