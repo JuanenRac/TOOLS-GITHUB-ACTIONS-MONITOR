@@ -7,7 +7,7 @@
 
 # Das Aktionsprotokoll
 
-Nur Complete, standardmäßig an. Neben dem Protokoll der Zugriffe (Anmeldungen, Sperren, Ablehnungen) führt der Monitor ein Protokoll der **Aktionen**: wer was wann und auf welchem Konto geändert hat. Eine Änderung der Einstellungen, eine Stummschaltung oder ihre Aufhebung, eine Änderung von Benutzern, Passwörtern, Benachrichtigungseinstellungen oder Zugangsdaten. Es ist je eine JSON-Zeile in `logs/audit_actions.jsonl`, nie neu geschrieben.
+Nur Complete, standardmäßig an. Neben dem Protokoll der Zugriffe (Anmeldungen, Sperren, Ablehnungen) führt der Monitor ein Protokoll der **Aktionen**: wer was wann und auf welchem Konto geändert hat. Eine Änderung der Einstellungen, eine Stummschaltung oder ihre Aufhebung, eine Änderung von Benutzern, Passwörtern, Benachrichtigungseinstellungen oder Zugangsdaten. Es ist je eine JSON-Zeile in `logs/audit_actions.jsonl`, nie neu geschrieben. Er hält auch fest, was bestätigt wird: eine Aktion auf GitHub (erneut ausführen, abbrechen, auslösen, mergen), ein Lauf mit `act`, das Speichern oder Löschen des gespeicherten Tokens, eine Änderung des Arbeitsmodus, eine durch die Erkennung hinzugefügte Gruppe, eine hinzugefügte Lehre, ein jetzt geschriebener Bericht, die Anmeldung des Kontos und die Aktionen der KI. Die Zeile nennt, was bestätigt wurde, und das Ergebnis, nie den Inhalt der Anfrage. Jede POST-Route wird entweder aufgezeichnet oder mit Begründung als ausgenommen geführt, und ein Test schlägt fehl, wenn eine neue Route keines von beidem ist.
 
 ## Was eine Zeile sagt
 

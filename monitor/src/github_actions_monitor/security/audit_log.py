@@ -25,6 +25,21 @@ STATS = {"write_failures": 0, "last_write_error_at": None}      # a line that co
 TAIL_BYTES = 65536                     # how much of the end of the file is read to find the last hash (the whole file only if no line in that part has one)
 
 
+_NOTE = threading.local()
+
+
+def note(target, details=None):
+    """The handler of a route that knows what it is about (the action, the repository) leaves it here for the line the request will get (see take_note); it lives in the thread of the request."""
+    _NOTE.value = (str(target)[:120], details if isinstance(details, dict) else None)
+
+
+def take_note():
+    """(target, details) left by note() in this thread since the last call, and forgets them; ("", None) when there are none."""
+    value = getattr(_NOTE, "value", None)
+    _NOTE.value = None
+    return value or ("", None)
+
+
 def settings(config):
     """The settings with their defaults; a value of the wrong type or out of range is replaced by the default."""
     user = (config or {}).get("audit_log") if isinstance((config or {}).get("audit_log"), dict) else {}

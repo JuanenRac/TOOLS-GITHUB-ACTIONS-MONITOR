@@ -7,7 +7,7 @@
 
 # Le journal des actions
 
-Complete seulement, activé par défaut. À côté de l'audit des accès (connexions, verrouillages, refus), le moniteur tient un journal des **actions** : qui a changé quoi, quand et sur quel compte. Un changement de réglages, un silence ou sa levée, un changement d'utilisateurs, de mots de passe, de préférences de notification ou d'identifiants. C'est une ligne JSON par action dans `logs/audit_actions.jsonl`, jamais réécrite.
+Complete seulement, activé par défaut. À côté de l'audit des accès (connexions, verrouillages, refus), le moniteur tient un journal des **actions** : qui a changé quoi, quand et sur quel compte. Un changement de réglages, un silence ou sa levée, un changement d'utilisateurs, de mots de passe, de préférences de notification ou d'identifiants. C'est une ligne JSON par action dans `logs/audit_actions.jsonl`, jamais réécrite. Il enregistre aussi ce qui est confirmé : une action sur GitHub (relancer, annuler, déclencher, fusionner), une exécution avec `act`, l'enregistrement ou la suppression du jeton conservé, un changement du mode de travail, un groupe ajouté par la découverte, une leçon ajoutée, un rapport écrit maintenant, la connexion du compte et les actions de l'IA. La ligne dit ce qui a été confirmé et le résultat, jamais le corps de la requête. Chaque route POST est soit enregistrée, soit listée comme exemptée avec sa raison, et un test échoue quand une nouvelle route n'est ni l'un ni l'autre.
 
 ## Ce que dit une ligne
 

@@ -7,7 +7,7 @@
 
 Generated from the code. It reads what the running monitor says (and never writes to GitHub). `--json` prints one JSON document; the exit codes are stable.
 
-Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `install-skill`, `gh-token`.
+Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `install-skill`, `gh-token`, `ai`.
 
 | flag | what |
 | --- | --- |
@@ -40,6 +40,9 @@ Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `
 | `--severity` | team: only the repositories in this state or a worse one |
 | `--compare` | score: also compare with the history of the window |
 | `--lang` | language of the texts (en, es, de, fr, it, ja, zh, pt) |
+| `--provider` | ai models/test/doctor: provider or preset to use instead of the configured one |
+| `--model` | ai models/test/doctor: model to use instead of the configured one |
+| `--refresh` | ai models: read the list from the provider first (one request) |
 | `--version` | print the version |
 
 Other entry points: `bin/mcp_server.py` (MCP over standard input and output; `--allow-ack`, `--allow-lessons`), `bin/ai_hook.py` (gate script of an AI tool), `bin/read_report.py`, `bin/actions_monitor.py --doctor`.

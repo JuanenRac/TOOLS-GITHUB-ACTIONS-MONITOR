@@ -7,7 +7,7 @@
 
 # Il registro delle azioni
 
-Solo Complete, attivo per impostazione predefinita. Accanto all'audit degli accessi (accessi, blocchi, rifiuti), il monitor tiene un registro delle **azioni**: chi ha cambiato cosa, quando e su quale account. Una modifica delle impostazioni, un silenzio o la sua rimozione, una modifica di utenti, password, preferenze di notifica o credenziali. È una riga JSON per azione in `logs/audit_actions.jsonl`, mai riscritta.
+Solo Complete, attivo per impostazione predefinita. Accanto all'audit degli accessi (accessi, blocchi, rifiuti), il monitor tiene un registro delle **azioni**: chi ha cambiato cosa, quando e su quale account. Una modifica delle impostazioni, un silenzio o la sua rimozione, una modifica di utenti, password, preferenze di notifica o credenziali. È una riga JSON per azione in `logs/audit_actions.jsonl`, mai riscritta. Registra anche ciò che viene confermato: un'azione su GitHub (rieseguire, annullare, avviare, unire), un'esecuzione con `act`, il salvataggio o la cancellazione del token conservato, un cambio della modalità di lavoro, un gruppo aggiunto dalla scoperta, una lezione aggiunta, un rapporto scritto ora, l'accesso dell'account e le azioni dell'IA. La riga dice che cosa è stato confermato e il risultato, mai il corpo della richiesta. Ogni rotta POST è registrata oppure elencata come esente con il suo motivo, e un test fallisce quando una nuova rotta non è né l'una né l'altra.
 
 ## Cosa dice una riga
 

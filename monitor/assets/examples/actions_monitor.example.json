@@ -297,6 +297,12 @@
     ],
     "allowed_repos": [],
     "answer_language": "",
+    "catalog": {
+      "enabled": false,
+      "ttl_minutes": 360,
+      "max_requests_per_day": 20,
+      "fit_context": false
+    },
     "actions": {
       "enabled": false,
       "execute": false,

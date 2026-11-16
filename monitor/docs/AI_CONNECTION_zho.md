@@ -35,6 +35,20 @@
 ## 安全与隐私
 一切默认关闭。日志文本在写入前会清除机密和个人路径,并且**它是数据,绝不是指令**:AI 必须把它当作不可信文本。端点只响应本机,或在网络模式下需要访问令牌;监听者和时间有限制;确认需要 `--allow-ack`;所有状态文件以 0600 模式创建。除了你配置的连接,监视器不会为此打开任何互联网连接。 github.com 的 https 地址（运行、仓库、文件）会完整保留，AI 可以直接打开；其他较长的不透明字符串仍会被截断。更准确地说,github.com 的地址只有在具有仓库、运行(含其作业或尝试)、提交、议题、拉取请求或文件的形式时才会完整通过;它在第一个不是字母、数字、点、连字符、下划线或斜杠的字符处被截断,其后的内容与其他文本一样被清理。
 
+## 按工具选择连接方式
+
+监视器不依赖某个助手或某个模型：AI 工具使用五种方式之一。选择你的工具具备的那一种。
+
+| 你的工具能够 | 方式 | 做法 | 需要 |
+|---|---|---|---|
+| 读取文件 | 文件 | 先读 `ai/INDEX.json`，再读 `ai/ALERTS_BRIEF.md`、`ai/ai_alerts.jsonl` 和 `ai/LESSONS.md` | `ai_alerts.enabled` |
+| 发出 HTTP 请求 | HTTP | `GET /api/ai/brief`、`/api/ai/state`、`/api/ai/lessons` | 网络模式下的访问令牌 |
+| 使用 MCP | MCP | `python bin/mcp_server.py`（只读；为它能写入的少量内容提供 `--allow-ack`、`--allow-lessons`） | 指向该命令的工具 MCP 配置 |
+| 保持连接打开 | 流 | `GET /api/ai/stream?only=real` | `ai_alerts.stream.enabled` |
+| 运行命令 | 命令行 | `python bin/monitor_cli.py alerts`、`lessons brief --repo 名称`、`ai doctor`、`ai-hook install` | 同一台电脑上的 Python |
+
+给 AI 的说明是两个 skill。`monitor_cli.py install-skill external --dest 文件夹` 会把它们复制到你的工具读取 skill 或规则的文件夹；任何能读取 Markdown 文件的工具都可以使用，文本中不指名任何助手。skill 随监视器一起发布，版本与监视器相同：`GET /api/skills` 会给出 `monitor_version`，`monitor_cli.py --version` 会打印它。更新监视器后，请重新安装到空文件夹，或删除旧副本（已编辑的文件绝不会被覆盖）。
+
 ## 故障排除
 - *简报太旧*:页面必须在运行(信息流随每次刷新更新);查看状态栏中的心跳。
 - *钩子没有运行*:`ai-hook status` 会说明安装位置;有些工具只读取项目文件夹中的钩子。
@@ -58,6 +72,16 @@ GitHub 配额由监视器、AI 工具和账户下的所有其他工具共享。�
 - **外发命令的变体**:`ai_notify.command` (仅在配置文件中,绝不在“设置”页面中) 以绝对路径指定一个文件;它不经 shell、不带参数启动,并在标准输入上收到同样的脱敏 JSON。
 
 通知由单独的线程发送,因此较慢的提供方不会拖住周期。
+
+## 提供方的模型
+
+模型名称是自由文本，但监视器可以从提供方读取模型列表并据此检查名称。模型和版本经常变化，因此监视器不附带任何模型列表：预设中的示例可能已经过时。
+
+- **列表。** 设置，“外部 AI”选项卡，“模型与各模型数据”区块：“加载提供方的模型”通过一次只读请求读取列表（OpenAI 风格服务器的 `/models`、Anthropic API 的对应列表、Ollama 的 `/api/tags`）。密钥放在请求头中，从其环境变量读取，绝不保存。可在列表中搜索，并用“使用此模型”选择。列表会被保存，并受 `ai.catalog.ttl_minutes` 和 `ai.catalog.max_requests_per_day` 限制。开启 `ai.catalog.enabled`（默认关闭）后，监视器还会在已配置的模型不再出现在列表中（已下线或改名）时发出警告；关闭时只有你主动触发才会读取。
+- **各模型数据。** 上下文窗口、每百万令牌的输入与输出价格以及是否支持工具，仅用提供方返回的内容填写；未给出的保持“未知”（绝不编造数字）。你可以填写自己的值，你的值优先。开启 `ai.catalog.fit_context`（默认关闭）后，在已知上下文窗口时会按其调整输入上限。
+- **测试模型。** “测试此模型”或 `monitor_cli.py ai test --provider 名称 --model 名称` 会就一个合成的故障（绝不使用你仓库的数据）询问模型，并显示延迟、令牌数、估算成本和示例回答。它计为每日上限中的一次调用，结果（“已测试”及本地日期）保存在表中。
+- **命令。** `monitor_cli.py ai models [--refresh]` 显示模型与数据；`ai doctor` 说明 AI 为何没有响应（密钥变量未设置、模型未知、配额、网络），并且绝不输出密钥。
+- **路由。** `GET /api/ai/models`（已保存的列表、检查和表；只读），以及仅限本机的 `POST /api/ai/models/refresh`、`POST /api/ai/models/test`、`POST /api/ai/models/data` 和 `POST /api/ai/doctor`。
 
 ## 兼容的 AI
 

@@ -21,7 +21,7 @@ Einstellungen, Tab Wächter, Block **Geplante Berichte**:
 | `report_schedule.keep` | 12 | wie viele Läufe aufbewahrt werden; ältere werden entfernt |
 | `report_schedule.top` | 10 | wie viele Repositorys und Meldungen jede Liste zeigt, die schlechtesten zuerst |
 
-Der erste Bericht wartet auf die erste geplante Minute nach dem Einschalten. Je geplanter Minute wird ein Bericht geschrieben, auch wenn der Monitor tagelang aus war (dann einer, nicht ein Stapel). Ein fehlgeschlagener Bericht wird in der Gesundheit des Monitors vermerkt, die nächste geplante Minute versucht es erneut.
+Der erste Bericht wartet auf die erste geplante Minute nach dem Einschalten. Je geplanter Minute wird ein Bericht geschrieben, auch wenn der Monitor tagelang aus war (dann einer, nicht ein Stapel). Ein fehlgeschlagener Bericht wird in der Gesundheit des Monitors vermerkt, die nächste geplante Minute versucht es erneut. Ein Zeitplan mit einem Tag im Monat wird nach einem Stillstand von bis zu einem Monat noch nachgeholt (mit einem Monat, bis zu einem Jahr), und die Stunde, die beim Zurückstellen der Uhr im Herbst doppelt vorkommt, wird nicht zweimal gemeldet. Ein Bericht ist alle seine Formate oder keines: lässt sich das zweite Format nicht schreiben, wird die erste Datei entfernt.
 
 ## Was ein Bericht enthält
 

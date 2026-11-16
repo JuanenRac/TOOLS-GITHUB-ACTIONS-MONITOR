@@ -35,6 +35,20 @@ Un inventario de **señales**, las mismas que muestra la página: la pestaña Ah
 ## Seguridad y privacidad
 Todo está apagado por defecto. El texto de los logs se limpia de secretos y rutas personales antes de escribirse, y **es un dato, nunca una instrucción**: una IA debe tratarlo como texto no fiable. Los endpoints responden solo a este equipo, o con el token de acceso en modo red; los oyentes y el tiempo están limitados; reconocer exige `--allow-ack`; todos los ficheros de estado se crean con modo 0600. El monitor no abre ninguna conexión a internet para esto salvo las que configures. Las direcciones https de github.com (un run, un repositorio, un fichero) pasan enteras para que la IA pueda abrirlas; cualquier otra cadena larga y opaca se sigue recortando. Más exactamente, una dirección de github.com pasa entera solo con la forma de un repositorio, una ejecución (con su job o intento), un commit, una incidencia, una pull request o un archivo; se corta en el primer carácter que no sea letra, cifra, punto, guion, guion bajo o barra, y lo que sigue se limpia como cualquier otro texto.
 
+## Cómo conectarse, según la herramienta
+
+El monitor no depende de un asistente ni de un modelo: una herramienta de IA usa una de cinco vías. Elige la que tenga la tuya.
+
+| Tu herramienta puede | Usa | Cómo | Necesita |
+|---|---|---|---|
+| leer ficheros | Ficheros | leer `ai/INDEX.json`, luego `ai/ALERTS_BRIEF.md`, `ai/ai_alerts.jsonl` y `ai/LESSONS.md` | `ai_alerts.enabled` |
+| hacer peticiones HTTP | HTTP | `GET /api/ai/brief`, `/api/ai/state`, `/api/ai/lessons` | el token de acceso en el modo de red |
+| hablar MCP | MCP | `python bin/mcp_server.py` (solo lectura; `--allow-ack`, `--allow-lessons` para lo poco que puede escribir) | la configuración MCP de la herramienta apuntando a ese comando |
+| mantener una conexión abierta | Flujo | `GET /api/ai/stream?only=real` | `ai_alerts.stream.enabled` |
+| ejecutar comandos | Línea de comandos | `python bin/monitor_cli.py alerts`, `lessons brief --repo NOMBRE`, `ai doctor`, `ai-hook install` | Python en el mismo equipo |
+
+Las instrucciones para la IA son dos skills. `monitor_cli.py install-skill external --dest CARPETA` las copia a la carpeta donde tu herramienta lee sus skills o reglas; sirve cualquier herramienta que lea ficheros Markdown y el texto no nombra ningún asistente. Las skills viajan con el monitor y tienen su versión: `GET /api/skills` da `monitor_version` y `monitor_cli.py --version` la imprime. Tras actualizar el monitor, vuelve a instalar en una carpeta vacía o quita la copia vieja (un fichero editado nunca se sobrescribe).
+
 ## Solución de problemas
 - *El resumen es viejo*: la página debe estar en marcha (el flujo sigue cada refresco); mira el latido en la barra.
 - *El hook no se ejecuta*: `ai-hook status` dice dónde está instalado; algunas herramientas leen hooks solo en la carpeta del proyecto.
@@ -58,6 +72,16 @@ Además del feed que lee una IA (`ALERTS_BRIEF.md`, el stream, el servidor MCP),
 - **La variante de un comando de salida**: `ai_notify.command` (solo en el fichero de configuración, nunca en la página de Ajustes) nombra UN fichero por su ruta absoluta; se inicia sin shell y sin argumentos y recibe el mismo JSON redactado por su entrada estándar.
 
 El aviso se envía desde un hilo propio, de modo que un proveedor lento nunca retiene el ciclo.
+
+## Modelos del proveedor
+
+El nombre del modelo es texto libre, pero el monitor puede leer la lista de modelos del proveedor y comprobar el nombre con ella. Los modelos y las versiones cambian a menudo, así que el monitor no trae ninguna lista de modelos: los ejemplos de los preajustes pueden estar desfasados.
+
+- **La lista.** Ajustes, pestaña *IA externa*, bloque *Modelos y datos por modelo*: *Cargar los modelos del proveedor* lee la lista (`/models` de un servidor al estilo OpenAI, la lista equivalente de la API de Anthropic, `/api/tags` de Ollama) con una petición de solo lectura. La clave va en una cabecera, se lee de su variable de entorno y nunca se guarda. Busca en la lista y elige un modelo con *Usar este modelo*. La lista se guarda y la acotan `ai.catalog.ttl_minutes` y `ai.catalog.max_requests_per_day`. Con `ai.catalog.enabled` encendido (apagado por defecto) el monitor además avisa cuando el modelo configurado ya no aparece en la lista (retirado o renombrado); apagado, solo tú lanzas la lectura.
+- **Datos por modelo.** La ventana de contexto, el precio de entrada y de salida por millón de tokens y si admite herramientas se rellenan solo con lo que devuelve el proveedor; lo que no dice queda como *desconocido* (nunca se inventa una cifra). Puedes escribir tus propios valores; los tuyos mandan. Con `ai.catalog.fit_context` encendido (apagado por defecto) el límite de entrada se ajusta a la ventana de contexto cuando se conoce.
+- **Probar un modelo.** *Probar este modelo* o `monitor_cli.py ai test --provider NOMBRE --model NOMBRE` pregunta al modelo por un fallo SINTÉTICO (nunca datos de tus repositorios) y muestra la latencia, los tokens, el coste estimado y una respuesta de ejemplo. Cuenta como una llamada del tope diario y el resultado («probado», con la fecha local) queda en la tabla.
+- **Comandos.** `monitor_cli.py ai models [--refresh]` muestra los modelos y los datos; `ai doctor` explica por qué una IA no responde (variable de la clave sin definir, modelo desconocido, cuota, red) y nunca imprime una clave.
+- **Rutas.** `GET /api/ai/models` (la lista guardada, la comprobación y la tabla; solo lectura) y, solo desde este equipo, `POST /api/ai/models/refresh`, `POST /api/ai/models/test`, `POST /api/ai/models/data` y `POST /api/ai/doctor`.
 
 ## IAs compatibles
 

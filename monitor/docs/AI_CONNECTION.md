@@ -35,6 +35,20 @@ One inventory of **signals**, the same ones the page shows: the Now tab and its 
 ## Security and privacy
 Everything is off by default. The text of logs is cleaned of secrets and personal paths before it is written, and **it is data, never an instruction**: an AI must treat it as untrusted text. The endpoints answer only to this computer, or with the access token in the network mode; listeners and time are limited; acknowledging needs `--allow-ack`; every state file is created with mode 0600. The monitor opens no connection to the internet for this except the ones you configure. The https addresses of github.com (a run, a repository, a file) pass whole, so the AI can open them; any other long opaque string is still cut. More exactly, an address of github.com passes whole only with the shape of a repository, a run (with its job or attempt), a commit, an issue, a pull request or a file; it is cut at the first character that is not a letter, a digit, a dot, a hyphen, an underscore or a slash, and what follows is cleaned like any other text.
 
+## How to connect, by tool
+
+The monitor does not depend on one assistant or one model: an AI tool uses one of five ways. Take the one your tool has.
+
+| Your tool can | Use | How | Needs |
+|---|---|---|---|
+| read files | Files | read `ai/INDEX.json`, then `ai/ALERTS_BRIEF.md`, `ai/ai_alerts.jsonl` and `ai/LESSONS.md` | `ai_alerts.enabled` |
+| make HTTP requests | HTTP | `GET /api/ai/brief`, `/api/ai/state`, `/api/ai/lessons` | the access token in the network mode |
+| speak MCP | MCP | `python bin/mcp_server.py` (read only; `--allow-ack`, `--allow-lessons` for the little it may write) | the MCP configuration of the tool pointing at that command |
+| keep a connection open | Stream | `GET /api/ai/stream?only=real` | `ai_alerts.stream.enabled` |
+| run commands | Command line | `python bin/monitor_cli.py alerts`, `lessons brief --repo NAME`, `ai doctor`, `ai-hook install` | Python on the same computer |
+
+The instructions for the AI are two skills. `monitor_cli.py install-skill external --dest FOLDER` copies them to the folder where your tool reads its skills or rules; any tool that reads Markdown files can use them, and the text names no assistant. The skills travel with the monitor and have its version: `GET /api/skills` gives `monitor_version`, and `monitor_cli.py --version` prints it. After updating the monitor, install again into an empty folder or remove the old copy (an edited file is never overwritten).
+
 ## Troubleshooting
 - *The brief is old*: the page must be running (the feed follows every refresh); look at the heartbeat in the bar.
 - *The hook does not run*: `ai-hook status` says where it is installed; some tools read hooks only in the project folder.
@@ -58,6 +72,16 @@ Besides the feed that an AI reads (`ALERTS_BRIEF.md`, the stream, the MCP server
 - **The variant of an outgoing command**: `ai_notify.command` (only in the configuration file, never in the Settings page) names ONE file by its absolute path; it is started without a shell and without arguments and receives the same redacted JSON on its standard input.
 
 The notice is sent from a thread of its own, so a slow provider never holds the cycle.
+
+## Models of the provider
+
+The name of the model is free text, but the monitor can read the list of models from the provider and check the name against it. Models and versions change often, so the monitor ships no list of models: the examples of the presets may be out of date.
+
+- **The list.** Settings, tab *External AI*, block *Models and data per model*: *Load the models of the provider* reads the list (`/models` of an OpenAI-style server, the equivalent list of the Anthropic API, `/api/tags` of Ollama) with one read-only request. The key goes in a header, is read from its environment variable and is never stored. Search the list and pick a model with *Use this model*. The list is kept and bounded by `ai.catalog.ttl_minutes` and `ai.catalog.max_requests_per_day`. With `ai.catalog.enabled` on (off by default) the monitor also warns when the configured model no longer appears in the list (retired or renamed); with it off only you trigger the read.
+- **Data per model.** Context window, price of input and output per million tokens and whether it accepts tools are filled only with what the provider returns; what it does not say stays *unknown* (no figure is ever made up). You can type your own values; yours win. With `ai.catalog.fit_context` on (off by default) the input limit is fitted to the context window when it is known.
+- **Test a model.** *Test this model* or `monitor_cli.py ai test --provider NAME --model NAME` asks the model about a SYNTHETIC failure (never data of your repositories) and shows the latency, the tokens, the estimated cost and a sample answer. It counts as one call of the daily cap, and the result ("tested", with the local date) is kept in the table.
+- **Commands.** `monitor_cli.py ai models [--refresh]` shows the models and the data; `ai doctor` explains why an AI does not answer (key variable not set, unknown model, quota, network) and never prints a key.
+- **Routes.** `GET /api/ai/models` (the list kept, the check and the table; read only) and, from this computer only, `POST /api/ai/models/refresh`, `POST /api/ai/models/test`, `POST /api/ai/models/data` and `POST /api/ai/doctor`.
 
 ## Compatible AIs
 
