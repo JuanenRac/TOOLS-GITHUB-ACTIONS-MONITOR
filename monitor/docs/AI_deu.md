@@ -21,6 +21,7 @@ Optional und **standardmäßig aus**. Ein Sprachmodell kann den Tagesbericht zus
 ## Was sie sehen darf
 
 - Jede Eingabe wird bereinigt: Steuerzeichen entfernt, Geheimnisse per Muster geschwärzt, Länge begrenzt, der Inhalt zwischen zufällige Trennzeichen gesetzt und als nicht vertrauenswürdig erklärt. Die Antwort wird gekürzt, ihre Links entschärft.
+- Derselbe einzige Bereiniger (Token, Schlüssel, Zugangsdaten in Adressen, E-Mail-Adressen, IP-Adressen, Ihr Home-Ordner) bedient diesen Assistenten, den Feed für KIs, die Endpunkte und den Hook. Er arbeitet nach Mustern: Er senkt das Risiko, er ist keine Garantie. Ein Aufruf an einen Anbieter folgt nie einer Weiterleitung (der Schlüssel ginge an eine andere Adresse) und nutzt die Proxy-Variablen der Umgebung nicht: Ein Server auf diesem Rechner wird direkt aufgerufen, ein entfernter nur mit `network.use_proxy` über den Proxy.
 - Im Reiter Einstellungen wählen Sie die analysierbaren Ereignisarten (`build`, `codeql`, `report`), die sichtbaren Repositorys (leer = die vom Monitor beobachteten), die Sprache der Antworten, das Tageslimit der Aufrufe und die Größenlimits. Eine Schaltfläche testet die Verbindung, die Seite zeigt die heutigen Aufrufe.
 
 

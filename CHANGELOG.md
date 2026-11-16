@@ -10,6 +10,11 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+### Security
+
+- **One cleaner for everything an AI can read**: the text the integrated assistant sends to a provider now goes through the same cleaner as the feed for AIs (before, a password in `DB_PASSWORD=...`, a user and key inside an address, an `sk-` key, a token, an e-mail address, an IP address or the home folder all went out), the repository, workflow, link and conclusion of every alert are cleaned when the alert is built, and `GET /api/ai/state`, `GET /api/ai/alerts`, `GET /api/ai/brief?fmt=json`, the feed file, its state file and the body of the hook come out cleaned too. A test plants a secret of each kind and fails if one shows up in any of those outputs.
+- **The integrated assistant keeps its key and stays on this computer**: a call to a provider no longer follows a redirect (the key would have gone on to the other address; the redirect is now reported as the answer of the provider) and no longer uses the proxy variables of the environment, so a local server such as Ollama is really called directly. A remote provider goes through the proxy only with `network.use_proxy`.
+
 ### Changed
 
 - **The score now penalizes a failure that is not fixed**: the recovery part counts a workflow that is still red at the end of the window with the time it has been red so far (a lower bound that grows while the red lasts), instead of leaving it out. Before, an account that never fixed its red could score better than one that fixed it in a day, and the number could vanish while a workflow was red. Expect lower numbers for accounts that have a workflow in red when you update. `docs/SCORE.md` explains it in the eight languages.

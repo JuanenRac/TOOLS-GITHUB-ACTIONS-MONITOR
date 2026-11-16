@@ -2407,7 +2407,7 @@ class Handler(BaseHTTPRequestHandler):
                 return
             query = self.path.partition("?")[2].split("&")
             lang = next((q[5:] for q in query if q.startswith("lang=") and q[5:] in i18n.LANGS), "en")
-            self.json_reply(ai_state(lang))
+            self.json_reply(__import__("github_actions_monitor.security.redactor", fromlist=["_"]).redact_data(ai_state(lang)))      # the same cleaner as the feed, the brief and the MCP
         elif path == "/api/skills":      # read only: the two skills of the monitor as text (?name=internal|external[&file=references/api.md][&all=1])
             if not self.guard():
                 return
