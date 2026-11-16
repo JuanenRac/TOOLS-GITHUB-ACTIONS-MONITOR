@@ -3068,5 +3068,9 @@
  "lint.reason.over_limit": "più file di lint.api.max_files_per_repo",
  "lint.help_remote": "Legge i file di workflow di un repository da GitHub (senza clone); ripetibile.",
  "lint.remote_failed": "{name}: non è stato possibile leggerlo ({reason}).",
- "lint.remote_bad_name": "Non è un nome di repository (usa PROPRIETARIO/REPO): {name}"
+ "lint.remote_bad_name": "Non è un nome di repository (usa PROPRIETARIO/REPO): {name}",
+ "doctor.t.access": "L'accesso può leggere l'account o l'organizzazione",
+ "doctor.f.access": "Un 403 o un 404 su un'organizzazione di solito ha una di queste cause: il token non è autorizzato per il suo single sign-on SAML (autorizzalo in Configure SSO nella pagina del token), manca lo scope repo o read:org (o, per un token a grana fine, un permesso di lettura), oppure i repository sono privati e l'accesso non li vede. Il dettaglio dice quale.",
+ "doctor.t.estimate": "Le letture all'ora rientrano nella quota",
+ "doctor.f.estimate": "Con tanti repository il monitor userebbe gran parte della quota del token (stima, con le impostazioni attuali). Aumenta cold_refresh_seconds, riduci i repository caldi, attiva la modalità Low o leggi con una GitHub App (vedi QUOTA.md e ORGANIZATIONS.md)."
 }

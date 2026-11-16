@@ -3068,5 +3068,9 @@
  "lint.reason.over_limit": "lint.api.max_files_per_repo を超えるファイル数",
  "lint.help_remote": "リポジトリのワークフローファイルを GitHub から読み取ります(クローン不要)。複数回指定できます。",
  "lint.remote_failed": "{name}:読み取れませんでした({reason})。",
- "lint.remote_bad_name": "リポジトリ名ではありません(OWNER/REPO の形式で指定): {name}"
+ "lint.remote_bad_name": "リポジトリ名ではありません(OWNER/REPO の形式で指定): {name}",
+ "doctor.t.access": "ログインでアカウントまたは組織を読み取れる",
+ "doctor.f.access": "組織に対する 403 や 404 は、通常次のいずれかです。トークンが SAML シングルサインオンに対して承認されていない(トークンのページの Configure SSO で承認)、スコープ repo または read:org(細粒度トークンでは読み取り権限)が足りない、リポジトリが非公開でログインから見えない。詳細にどれかが示されます。",
+ "doctor.t.estimate": "1時間あたりの読み取りが枠に収まる",
+ "doctor.f.estimate": "これだけのリポジトリがあると、モニターはトークンの枠の大部分を使います(現在の設定での推定)。cold_refresh_seconds を大きくする、ホットなリポジトリを減らす、Low モードを有効にする、または GitHub App で読み取ってください(QUOTA.md と ORGANIZATIONS.md を参照)。"
 }
