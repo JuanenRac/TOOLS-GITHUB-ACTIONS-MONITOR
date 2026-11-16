@@ -4,7 +4,9 @@
 import time
 
 LIMITS = ((0, 59), (0, 23), (1, 31), (1, 12), (0, 7))      # day of week: 0 and 7 are Sunday
-MAX_LOOKBACK_MINUTES = 8 * 24 * 60
+MAX_LOOKBACK_MINUTES = 8 * 24 * 60      # a schedule that fires every week or oftener looks back this far
+MONTHLY_LOOKBACK_MINUTES = 32 * 24 * 60      # one that names a day of the month: a month, so a monthly report lost to a long stop is still owed
+YEARLY_LOOKBACK_MINUTES = 367 * 24 * 60      # one that names a month
 
 
 def _field(text, low, high):
@@ -59,17 +61,44 @@ def matches(parsed, moment):
     return day_ok or week_ok
 
 
+def lookback_minutes(parsed):
+    """How far back a missed run is still owed: the period of the schedule, never less than eight days (a monthly report must survive a stop of ten days)."""
+    fields = parsed["fields"]
+    if len(fields[3]) < 12:
+        return YEARLY_LOOKBACK_MINUTES
+    if not parsed["dom_star"]:
+        return MONTHLY_LOOKBACK_MINUTES
+    return MAX_LOOKBACK_MINUTES
+
+
 def last_due(parsed, now, since):
-    """The latest minute in (since, now] that the expression names, as seconds since the epoch, or None. Looks back at most eight days, so a monitor that was off for a month produces ONE report and not a
-    pile of them."""
+    """The latest minute in (since, now] that the expression names, as seconds since the epoch, or None. Looks back as far as the period of the schedule needs (eight days at least), so a monitor that was
+    off for a long time produces ONE report and not a pile of them. A minute whose wall clock is not after the wall clock of `since` is the same minute seen again (the clock went back in autumn): it is not owed twice."""
     top = int(now // 60) * 60
-    bottom = max(int(since // 60) * 60 + 60, top - MAX_LOOKBACK_MINUTES * 60)
+    bottom = max(int(since // 60) * 60 + 60, top - lookback_minutes(parsed) * 60)
+    seen = tuple(time.localtime(since)[:5])
+    hours = parsed["fields"][1]
     stamp = top
     while stamp >= bottom:
-        if matches(parsed, time.localtime(stamp)):
+        moment = time.localtime(stamp)
+        if matches(parsed, moment) and tuple(moment[:5]) > seen:
             return stamp
-        stamp -= 60
+        # jump over what cannot match: the rest of a day whose date does not fit, the rest of an hour that is not named
+        if moment.tm_mon not in parsed["fields"][3] or not _day_fits(parsed, moment):
+            stamp -= moment.tm_hour * 3600 + moment.tm_min * 60 + moment.tm_sec + 60
+        elif moment.tm_hour not in hours:
+            stamp -= moment.tm_min * 60 + moment.tm_sec + 60
+        else:
+            stamp -= 60
     return None
+
+
+def _day_fits(parsed, moment):
+    dom, dow = parsed["fields"][2], parsed["fields"][4]
+    day_ok, week_ok = moment.tm_mday in dom, (moment.tm_wday + 1) % 7 in dow
+    if parsed["dom_star"] or parsed["dow_star"]:
+        return day_ok and week_ok
+    return day_ok or week_ok
 
 
 def due(expression, now, last_run):

@@ -14,6 +14,7 @@ import time
 from datetime import datetime, timezone
 
 from github_actions_monitor.data_pipeline.analytics import BAD
+from github_actions_monitor.app import degraded
 from github_actions_monitor.scoring import collector, drop, engine
 
 LEDGER_DOC = "score_ledger"
@@ -138,7 +139,12 @@ def tick(storage, account_id, config, runs, collab_alerts, now=None, force=False
     cfg = engine.settings(config)
     if not cfg["enabled"]:
         return None
-    ledger = clean_ledger(storage.load_doc(account_id, LEDGER_DOC, None), now)
+    try:
+        stored = storage.load_doc(account_id, LEDGER_DOC, None, strict=True)
+    except OSError as error:        # the ledger exists but cannot be read now: no pass, so the last good ledger is never written over by an empty one
+        degraded.note("score", error)
+        return None
+    ledger = clean_ledger(stored, now)
     if not force and now - ledger["last_tick"] < MIN_INTERVAL:
         return None
     keep_days = min(180, 2 * cfg["window_days"] + 1)

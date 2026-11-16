@@ -12,6 +12,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Fixed
 
+- **A score ledger that cannot be read is never written over**: when the ledger of the score exists but cannot be read after the retries (Windows, a file held by a backup or an antivirus), the hourly pass does nothing and the problem is noted in the health of the monitor; the last good ledger stays and the next pass reads it again. It used to start from an empty ledger and replace the good one.
+- **The report schedule at its edges**: the hour that happens twice when the clock goes back in autumn no longer produces two reports, a monthly report (or a yearly one) that was owed while the monitor was stopped for more than eight days is still written, and a report whose second format cannot be written leaves no file of the first one behind.
 - **A lock file left by a writer that died is taken over at once**: the lock file of the file storage holds the number of its process; when that process no longer exists the next writer takes the lock immediately (it used to wait 30 seconds, longer than its own 10-second limit, and failed), and the takeover is logged. When the process cannot be known the age of the file still decides, and that time can be changed with `MONITOR_LOCK_STALE`. A test kills a writer inside the lock and checks that the feed is writable again.
 ### Changed
 
