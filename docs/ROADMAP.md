@@ -9,7 +9,7 @@ What has shipped, what comes next and what is only an idea, in that order of cer
 
 ## Where the monitor is now
 
-Version 2.0.1. The lite edition shows what runs and what failed. The complete edition adds three sentinels (CI, Collab and Security), one list of alerts, several accounts and a team with roles, the score of each account, the health of each repository and of the team, scheduled reports, a log of actions, notifications (ntfy, Teams, e-mail and Apprise), an optional AI assistant with presets of compatible services, the service mode with Docker, and a page for every size of screen from a phone to 4K.
+Version 2.0.2. The lite edition shows what runs and what failed. The complete edition adds three sentinels (CI, Collab and Security), one list of alerts, several accounts and a team with roles, the score of each account, the health of each repository and of the team, scheduled reports, a log of actions, notifications (ntfy, Teams, e-mail and Apprise), an optional AI assistant with presets of compatible services, the service mode with Docker, and a page for every size of screen from a phone to 4K.
 
 ## Planned, in this order
 
@@ -21,7 +21,11 @@ What only shows with long real use: the migration from 1.8 and 1.9, the growth o
 
 The monitor's own workflows keep to what the hygiene sentinel will ask of others: actions pinned to a commit, the least permissions and a time limit on every job.
 
-## Done in 1.8.2 to 2.0.1
+## Done in 1.8.2 to 2.0.2
+
+### 2.0.2 - Safer logs, cleaner AI text and a fairer score
+
+Everything an AI can read goes through one cleaner that knows more forms of a secret, the integrated assistant keeps its key and no longer follows redirects or proxies, the log of actions is one chain in one file for each account and cannot be read by a viewer, the image and the processes of the accounts no longer carry secrets, the score penalizes a failure that is never fixed and no longer counts an unreadable source as clean, and a long list of fixes for storage, backups, migration, the terminal views and the launcher.
 
 ### 2.0.1 - Packaging and a missing key
 
