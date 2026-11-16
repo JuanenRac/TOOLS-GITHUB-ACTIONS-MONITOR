@@ -854,6 +854,7 @@ function runVisible(r,d){
 /* ONE count for the header, the list "Right now", the status bar and the command line: the totals are the figures of the server (every run in progress or waiting), what the list shows is those runs
    after the filters of the page; when they differ the page says so (tile "3 of 13", line "Showing 3 of 13 (filters active)") instead of showing two numbers that look like one */
 function filtersOn(){return !!(FILTER.eco||FILTER.state||FILTER.q||FILTER.list)}
+function stuckWhy(k){return k&&k!=="build"?" · "+T("ui.stuck_why_"+k):""}      // why a run waits: the queue of runners, an approval, a runner that is down (empty for a build that simply runs long)
 function runCounts(d){
   const F=d.figures||{},run=r=>r.status==="in_progress",vis=d.active.filter(r=>runVisible(r,d)&&r.status!=="waiting");      // a run that waits for an approval is neither running nor queued: it has its own line (ui.n_awaiting)
   const tr=F.active!=null?F.active:d.active.filter(run).length,tq=F.queued!=null?F.queued:d.active.filter(r=>!run(r)&&r.status!=="waiting").length,sr=vis.filter(run).length,sq=vis.length-sr;
@@ -879,14 +880,14 @@ function render(d){
   {const of=$("offline"),o=d.offline||{};of.style.display=o.offline?"block":"none";of.textContent=o.offline?T("ui.offline_banner",{since:clock(o.since)}):""}
   $("g-count").textContent=T("ui.count",{n:d.repos.filter(r=>repoVisible(r,d)).length,m:d.repos.length});
   const nAlert=d.issues.length+d.active.filter(r=>r.stuck).length;$("d-now").hidden=!nAlert;$("d-now").textContent=nAlert;
-  paintTiles(d);alerts(d);now_(d);donut(ok,bad,done.length-ok-bad);rates(last);timeline(last);durations(runs);repos(d,last);filters(d);renderHistory();if(PANEL)renderPanel();tipRows();
+  paintTiles(d);alerts(d);now_(d);{const g=ringFigures(d,done);donut(g.ok,g.bad,g.other,g.sample)}rates(last,d);timeline(last);durations(runs);repos(d,last);filters(d);renderHistory();if(PANEL)renderPanel();tipRows();
 }
 const GH="https://"+(I18N.host||"github.com")+"/";
 function alerts(d){
   const a=[];
   d.issues.filter(i=>repoVisible(i.repo,d)).forEach(i=>a.push(`<div class="alert"><b>${esc(i.labels.join(", "))}</b> · ${esc(i.repo)} #${i.number}: ${esc(i.title)} — <a href="${esc(safeUrl(i.url))}" target="_blank" rel="noopener">${esc(T("ui.a_open"))}</a> <span class="mut">(${hora(i.created)})</span></div>`));
   nowGroups(d.active.filter(r=>r.stuck&&repoVisible(r.repo,d))).forEach(g=>{const r=g.reduce((m,x)=>x.seconds>m.seconds?x:m,g[0]);      // a repository with several stuck runs is ONE alert
-    a.push(`<div class="alert" data-alert-repo="${esc(r.repo)}"><b>${esc(T("ui.a_stuck"))}</b> · ${esc(g.length>1?T("ui.a_stuck_many",{repo:r.repo,n:g.length,dur:fmt(r.seconds),limit:d.stuck_minutes}):T("ui.a_stuck_line",{repo:r.repo,name:r.name,dur:fmt(r.seconds),limit:d.stuck_minutes}))} — <a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">${esc(T("ui.link_run"))}</a></div>`)});
+    a.push(`<div class="alert" data-alert-repo="${esc(r.repo)}"><b>${esc(T("ui.a_stuck"))}</b> · ${esc(g.length>1?T("ui.a_stuck_many",{repo:r.repo,n:g.length,dur:fmt(r.seconds),limit:d.stuck_minutes}):T("ui.a_stuck_line",{repo:r.repo,name:r.name,dur:fmt(r.seconds),limit:r.stuck_limit||d.stuck_minutes})+stuckWhy(r.stuck_reason))} — <a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">${esc(T("ui.link_run"))}</a></div>`)});
   const withIssue=new Set(d.issues.map(i=>i.repo));
   nowGroups(d.failing.filter(r=>repoVisible(r.repo,d)&&!withIssue.has(r.repo))).slice(0,30).forEach(g=>{const r=g[0];      // one line per repository, however many workflows of it fail
     const text=g.length>1?T("ui.a_unresolved_many",{repo:r.repo,n:g.length,names:g.map(x=>x.name).join(", "),since:hora(g.reduce((m,x)=>String(x.started)<String(m)?x.started:m,g[0].started))}):T("ui.a_unresolved_line",{repo:r.repo,name:r.name,conclusion:r.conclusion,since:hora(r.started)});
@@ -969,8 +970,20 @@ function now_(d){
 }
 function box(id){const el=$(id);return {el,w:Math.max(260,el.clientWidth||600),h:Math.max(160,el.clientHeight||260)}}
 function textW(s,px){return [...String(s)].reduce((a,c)=>a+(c.charCodeAt(0)>0x2e80?px:px*0.56),0)}
-function donut(ok,bad,other){
-  const {el,w,h}=box("donut"),tot=ok+bad+other;
+/* The ring and the number in its centre come from ONE source. The server counts every finished run of the 24 hours (ok24, fail24, done24); the list of runs the page receives is only the newest
+   part of them (runs_total says how many there are), so a total counted on the list minus a count of the server went negative. With a server that does not send done24 the three figures are
+   counted on the list and the card says it is a sample */
+function ringFigures(d,done){
+  const F=d.figures||{},n=v=>{v=Math.round(+v);return isFinite(v)&&v>0?v:0},srv=F.done24!=null&&F.ok24!=null&&F.fail24!=null;
+  let ok,bad,tot;
+  if(srv){ok=n(F.ok24);bad=n(F.fail24);tot=Math.max(n(F.done24),ok+bad)}
+  else{ok=done.filter(r=>r.conclusion==="success").length;bad=done.filter(r=>BAD.includes(r.conclusion)).length;tot=done.length}
+  return {ok:ok,bad:bad,other:Math.max(0,tot-ok-bad),sample:!srv&&(d.runs_total||0)>(d.runs||[]).length?(d.runs||[]).length:0}
+}
+function sampleNote(d){const k=(d.runs_total||0)>(d.runs||[]).length?(d.runs||[]).length:0;return k?`<div class="mut" data-sample="1">${esc(T("ui.d_sample",{n:k,total:d.runs_total}))}</div>`:""}
+function donut(ok,bad,other,sample){
+  const {el,w,h}=box("donut"),num=v=>{v=Math.round(+v);return isFinite(v)&&v>0?v:0};      // a figure that is negative or not a number is 0: the ring never draws a false segment
+  ok=num(ok);bad=num(bad);other=num(other);const tot=ok+bad+other;
   if(!tot){el.innerHTML=`<span class="mut">${esc(T("ui.d_none"))}</span>`;return}
   const parts=[[ok,"var(--ok)",T("ui.d_ok")],[bad,"var(--bad)",T("ui.d_fail")],[other,"var(--grey)",T("ui.d_other")]];
   const lw=Math.ceil(Math.max(...parts.map(p=>textW(p[2]+": "+p[0],14))))+26,side=w-lw-20>=100;
@@ -982,14 +995,14 @@ function donut(ok,bad,other){
     svg+=p[0]===tot?`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${p[1]}" stroke-width="${sw}"/>`:`<path d="M${x(a0,r)} ${y(a0,r)} A${r} ${r} 0 ${large} 1 ${x(a1,r)} ${y(a1,r)}" fill="none" stroke="${p[1]}" stroke-width="${sw}"/>`});
   svg+=`<text x="${cx}" y="${cy+8}" text-anchor="middle" data-inside="1" style="font-size:${Math.round(size*0.17)}px;font-weight:600;fill:var(--text)">${tot}</text>`;
   parts.forEach((p,i)=>{const lx=side?size+16:Math.max(8,(w-lw)/2),ly=side?cy-34+i*30:size+8+14+i*22;svg+=`<rect x="${lx}" y="${ly-11}" width="14" height="14" rx="2" fill="${p[1]}"/><text x="${lx+22}" y="${ly}" style="font-size:14px;fill:var(--text)">${esc(p[2])}: <tspan style="font-weight:600">${p[0]}</tspan></text>`});
-  el.innerHTML=svg+"</svg>";
+  el.innerHTML=svg+"</svg>"+(sample?`<div class="mut" data-sample="1">${esc(T("ui.d_sample",{n:sample,total:DATA&&DATA.runs_total||sample}))}</div>`:"");
 }
-function rates(last){
+function rates(last,d){
   const el=$("rates"),by={};
   last.filter(r=>r.status==="completed").forEach(r=>{(by[r.repo]=by[r.repo]||{ok:0,n:0});by[r.repo].n++;if(r.conclusion==="success")by[r.repo].ok++});
   const rows=Object.entries(by).sort((a,b)=>a[1].ok/a[1].n-b[1].ok/b[1].n||b[1].n-a[1].n);
   if(!rows.length){el.innerHTML=`<span class="mut">${esc(T("ui.no_data"))}</span>`;return}
-  el.innerHTML=rows.map(([repo,v])=>{const p=v.ok/v.n,c=p===1?"var(--ok)":p>=.5?"var(--warn)":"var(--bad)";
+  el.innerHTML=(d?sampleNote(d):"")+rows.map(([repo,v])=>{const p=v.ok/v.n,c=p===1?"var(--ok)":p>=.5?"var(--warn)":"var(--bad)";
     return `<div class="rrow" title="${esc(T("ui.rate_title",{repo:repo,ok:v.ok,n:v.n}))}"><span class="rname">${esc(repo)}</span><span class="rbar"><i style="width:${Math.round(p*100)}%;background:${c}"></i></span><span class="rval">${Math.round(p*100)}% <span class="mut">${v.ok}/${v.n}</span></span></div>`}).join("");
 }
 function timeline(last){
@@ -1192,7 +1205,7 @@ function renderSent0(){
   const ai=s.ai||{};$("s-ai-state").textContent=ai.enabled?T("ui.ai_state",{provider:ai.provider,model:ai.model||"",used:ai.used_today||0,limit:ai.daily_limit,unavail:ai.available===false?T("ui.ai_unavailable",{msg:ai.message}):""}):T("ui.ai_off");
   // A1
   const stuck=s.a1.stuck.filter(r=>sVis(r.repo)),iss=s.a1.issues.filter(i=>sVis(i.repo));
-  let a1=stuck.map(r=>`<div class="alert"><b>${esc(T("ui.a1_stuck"))}</b> · ${esc(T("ui.a1_line",{repo:r.repo,name:r.name,dur:fmt(r.seconds),status:r.status}))} — ${link(r.url,T("ui.link_run"))}</div>`).join("")+iss.map(i=>`<div class="alert"><b>${esc(i.labels.join(", "))}</b> · ${esc(i.repo)} #${i.number}: ${esc(i.title)} — ${link(i.url,T("ui.a_open"))}</div>`).join("");
+  let a1=stuck.map(r=>`<div class="alert"><b>${esc(T("ui.a1_stuck"))}</b> · ${esc(T("ui.a1_line",{repo:r.repo,name:r.name,dur:fmt(r.seconds),status:r.status})+stuckWhy(r.reason))} — ${link(r.url,T("ui.link_run"))}</div>`).join("")+iss.map(i=>`<div class="alert"><b>${esc(i.labels.join(", "))}</b> · ${esc(i.repo)} #${i.number}: ${esc(i.title)} — ${link(i.url,T("ui.a_open"))}</div>`).join("");
   // A2
   const red=s.a2.red.filter(r=>sVis(r.repo));
   const rrun=(r)=>{const id=(r.url||"").split("/").pop();return aiBtn("build",`data-repo="${esc(r.repo)}" data-run="${esc(id)}"`)+aiBox("b"+r.repo+id)};
@@ -1288,11 +1301,20 @@ function analyticsBox(){
    +tbl(T("ui.a12_h_flaky"),["ui.th_repo","ui.th_workflow","ui.th_flaky","ui.th_runs","ui.th_rate"],(A.flaky||[]).map(r=>[r.repo,r.workflow,r.flaky,r.total,Math.round(r.rate*100)+" %"]))
    +tbl(T("ui.a12_h_slower"),["ui.th_repo","ui.th_workflow","ui.th_p50","ui.th_usual","ui.th_factor"],(A.slower||[]).map(r=>[r.repo,r.workflow,fmtS(r.p50),fmtS(r.usual),"×"+r.factor]));
 }
+function lintCov(L){
+  const c=L.coverage;if(!c||!(c.api||c.sparse||c.not_evaluable_total||c.waiting))return"";
+  const p=[T("ui.a13_cov",{clone:c.clone,sparse:c.sparse,api:c.api})];
+  if(c.not_evaluable_total)p.push(T("ui.a13_cov_ne",{n:c.not_evaluable_total,reasons:Object.entries(c.by_reason||{}).sort((a,b)=>b[1]-a[1]).map(([r,n])=>T("lint.reason."+r)+" ×"+n).join(", ")}));
+  if(c.waiting)p.push(T("ui.a13_cov_wait",{n:c.waiting}));
+  if(c.partial)p.push(T("ui.a13_cov_partial",{n:c.partial}));
+  if((c.api_cannot||[]).length)p.push(T("ui.a13_cov_cannot"));
+  return mut_(p.join(" "));
+}
 function lintBox(s){
   const L=s.lint;if(!L||!L.enabled)return mut_(T("ui.a13_off"));
   const all=(L.rows||[]).filter(r=>sVis(r.repo)),rows=all.filter(r=>LINTLV.has(r.severity));
   const chips=`<div class="lvl" role="group" aria-label="${esc(T("ui.lvl_filter"))}">`+["info","warn","bad"].map(k=>`<button type="button" class="ib" data-lvl="${k}" aria-pressed="${LINTLV.has(k)}">${esc(T("ui.lvl_"+k))} (${all.filter(r=>r.severity===k).length})</button>`).join("")+"</div>";
-  return all.length?chips+(rows.length?`<table>${thk(["ui.th_repo","ui.th_file","ui.th_line","ui.th_rule","ui.th_severity"])}<tbody>${rows.slice(0,80).map(r=>`<tr><td>${esc(r.repo)}</td><td>${esc(r.file)}</td><td>${r.line}</td><td>${esc(T("lint.rule."+r.rule))}${r.detail&&r.detail!=="missing"?" · "+esc(r.detail):""}</td><td><span class="chip ${r.severity==="bad"?"bad":(r.severity==="warn"?"warn":"")}">${esc(T("ui.lvl_"+r.severity))}</span></td></tr>`).join("")}</tbody></table>`:mut_(T("ui.help_none"))):ok_(T("ui.a13_none"));
+  return lintCov(L)+(all.length?chips+(rows.length?`<table>${thk(["ui.th_repo","ui.th_file","ui.th_line","ui.th_rule","ui.th_severity"])}<tbody>${rows.slice(0,80).map(r=>`<tr><td>${esc(r.repo)}</td><td>${esc(r.file)}</td><td>${r.line}</td><td>${esc(T("lint.rule."+r.rule))}${r.detail&&r.detail!=="missing"?" · "+esc(r.detail):""}</td><td><span class="chip ${r.severity==="bad"?"bad":(r.severity==="warn"?"warn":"")}">${esc(T("ui.lvl_"+r.severity))}</span></td></tr>`).join("")}</tbody></table>`:mut_(T("ui.help_none"))):ok_(T("ui.a13_none")));
 }
 async function copyText(btn){try{await navigator.clipboard.writeText(btn.dataset.copy);btn.textContent=T("ui.copied")}catch(err){btn.textContent=T("ui.copy_manual")}}
 $("t-sent").addEventListener("toggle",e=>{const d=e.target;if(d.tagName==="DETAILS"){d.open?OPEN.add(d.dataset.k):OPEN.delete(d.dataset.k);store.set("am-s-open",[...OPEN].join(","))}},true);
@@ -1678,6 +1700,41 @@ async function cfgExtras(){
         Object.keys(vals).forEach(k=>{const el=document.getElementById("cfg-"+k.replace(/\./g,"-"));if(el){el.value=vals[k];el.dispatchEvent(new Event("input",{bubbles:true}));el.dispatchEvent(new Event("change",{bubbles:true}))}});
         $("ai-preset-info").textContent=T("ui.ai_preset_applied")}) }).catch(()=>{});
     $("ai-unlock").addEventListener("click",async()=>{await fetch("/api/ai/actions/unlock",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});cfgExtras()});
+  }
+  if(ai&&!ai.querySelector(".md-extra")){
+    /* the models of the provider: the list (one read-only request, only when asked), a search, the choice of one, the test with a synthetic text and the table of data per model */
+    const md=document.createElement("div");md.className="cfg-group md-extra";
+    md.innerHTML=`<h3 id="md-h"></h3><div class="inl"><button type="button" id="md-load"></button> <input type="search" id="md-q"> <select id="md-sel"></select> <button type="button" id="md-use"></button> <button type="button" id="md-test"></button></div><div class="help" id="md-state" role="status"></div><div class="help" id="md-test-out" role="status"></div><div class="help" id="md-table-h"></div><div id="md-table" style="overflow-x:auto"></div>`;
+    ai.appendChild(md);
+    $("md-h").textContent=T("ui.ai_models_h");$("md-load").textContent=T("ui.ai_models_load");$("md-use").textContent=T("ui.ai_models_use");$("md-test").textContent=T("ui.ai_model_test");$("md-q").placeholder=T("ui.ai_models_search");$("md-table-h").textContent=T("ui.ai_table_h");
+    let all=[];
+    const post=async(path,body)=>{const r=await fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body||{})});return r.json()};
+    const unknown=()=>T("ui.ai_unknown");
+    const fill=()=>{const q=$("md-q").value.trim().toLowerCase(),sel=$("md-sel");sel.innerHTML="";
+      all.filter(m=>!q||m.id.toLowerCase().includes(q)).slice(0,300).forEach(m=>{const o=document.createElement("option");o.value=m.id;o.textContent=m.id+(m.context?" · "+m.context:"");sel.appendChild(o)})};
+    const rows=(table)=>{const box=$("md-table");box.innerHTML="";if(!table||!table.length)return;
+      const t=document.createElement("table");t.className="tbl";const h=t.createTHead().insertRow();
+      ["ui.ai_col_model","ui.ai_col_context","ui.ai_col_in","ui.ai_col_out","ui.ai_col_tools","ui.ai_col_tested",""].forEach(k=>{const c=document.createElement("th");c.textContent=k?T(k):"";h.appendChild(c)});
+      table.forEach(r=>{const tr=t.insertRow(),cells={};
+        const c0=tr.insertCell();c0.textContent=r.provider+"/"+r.model;
+        const num=(f)=>{const c=tr.insertCell(),i=document.createElement("input");i.type="number";i.min="0";i.step="any";i.style.width="8em";i.value=r[f]==null?"":r[f];i.placeholder=unknown();i.title=r[f+"_source"]||"";c.appendChild(i);cells[f]=i};
+        num("context");num("in_per_mtok");num("out_per_mtok");
+        const ct=tr.insertCell(),sel=document.createElement("select");[["",unknown()],["true","✓"],["false","✗"]].forEach(([v,l])=>{const o=document.createElement("option");o.value=v;o.textContent=l;sel.appendChild(o)});sel.value=r.tools==null?"":String(r.tools);ct.appendChild(sel);
+        const ctd=tr.insertCell();ctd.textContent=r.tested?(r.tested.ok?"✓ ":"✗ ")+(r.tested.at||""):"";
+        const cb=tr.insertCell(),b=document.createElement("button");b.type="button";b.textContent=T("ui.ai_save_row");
+        b.addEventListener("click",async()=>{const v={context:cells.context.value,in_per_mtok:cells.in_per_mtok.value,out_per_mtok:cells.out_per_mtok.value,tools:sel.value===""?"":sel.value==="true"};
+          try{const j=await post("/api/ai/models/data",{label:r.provider,model:r.model,values:v});b.textContent=j.ok?T("ui.ai_saved"):(j.error||"")}catch(e){b.textContent=String(e)}});
+        cb.appendChild(b)});
+      box.appendChild(t)};
+    const show=(j)=>{all=(j&&j.models)||[];fill();rows(j&&j.table);const c=(j&&j.catalog)||{};
+      $("md-state").textContent=(all.length?T("ui.ai_models_count",{n:all.length}):T("ui.ai_models_none"))+((j&&j.check&&j.check.message)?" "+j.check.message:"")};
+    const read=async()=>{try{show(await (await fetch("/api/ai/models",{cache:"no-store"})).json())}catch(e){$("md-state").textContent=String(e)}};
+    $("md-q").addEventListener("input",fill);
+    $("md-load").addEventListener("click",async()=>{$("md-state").textContent="…";try{const j=await post("/api/ai/models/refresh",{});await read();if(!j.ok&&j.message)$("md-state").textContent=j.message+" "+$("md-state").textContent}catch(e){$("md-state").textContent=String(e)}});
+    $("md-use").addEventListener("click",()=>{const id=$("md-sel").value,el=document.getElementById("cfg-ai-model");if(!id||!el)return;el.value=id;el.dispatchEvent(new Event("input",{bubbles:true}));el.dispatchEvent(new Event("change",{bubbles:true}))});
+    $("md-test").addEventListener("click",async()=>{const m=$("md-sel").value,el=document.getElementById("cfg-ai-model");$("md-test-out").textContent="…";
+      try{const j=await post("/api/ai/models/test",{model:m||(el?el.value:"")});$("md-test-out").textContent=j.ok?T("ui.ai_model_test_ok",{ms:j.ms,tin:j.tokens_in,tout:j.tokens_out,est:j.tokens_estimated?T("ui.ai_estimated"):"",cost:j.cost==null?unknown():j.cost,answer:j.answer||""}):(j.error||"");read()}catch(e){$("md-test-out").textContent=String(e)}});
+    read();
   }
   if(ai&&!ai.querySelector(".sk-extra")){
     /* the two skills of the monitor (skills/): copy the core or download the whole skill with its references */

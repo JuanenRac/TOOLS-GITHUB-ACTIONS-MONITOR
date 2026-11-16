@@ -2,7 +2,8 @@
 # GPL-3.0-or-later - see LICENSE
 """`--doctor`: checks what the monitor needs and says, for each failure, the exact command that fixes it (in the language of the interface). Read-only: it changes nothing and prints no secret.
 
-Checks: python, gh (installed), login (session), quota (allowance left), network, folder (write permission), port (which ports are free and which are busy), docker (optional), rich and textual (optional),
+Checks: python, gh (installed), login (session), quota (allowance left), access (why a read of an organization would come back empty: SSO not authorised, a missing scope, private repositories the login
+cannot see), estimate (the reads an hour the account will cost against the allowance), network, folder (write permission), port (which ports are free and which are busy), docker (optional), rich and textual (optional),
 targets (your own targets.json or only the neutral example), token (the one-use token of the page) and exposure (only this computer, or the network mode).
 `--doctor --json` prints the same checks as one JSON document (no secret, no path of a person) for scripts.
 Every check is {"id", "status": ok | warn | fail, "detail", "fix"}; `run()` takes the way of running a command as an argument so the tests need no `gh`.
@@ -18,8 +19,8 @@ from pathlib import Path
 
 from github_actions_monitor.util import paths
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder
-ORDER = ("python", "gh", "login", "quota", "network", "folder", "port", "docker", "rich", "textual", "targets", "token", "exposure", "risks", "backend", "degraded", "credential", "timezone", "github_app", "layout", "storage", "retention")
-FIX = {"python": "https://www.python.org/downloads/", "gh": "winget install --id GitHub.cli   |   brew install gh   |   sudo apt install gh", "login": "gh auth login",
+ORDER = ("python", "gh", "login", "quota", "access", "estimate", "network", "folder", "port", "docker", "rich", "textual", "targets", "token", "exposure", "risks", "backend", "degraded", "credential", "timezone", "github_app", "layout", "storage", "retention")
+FIX = {"access": "gh auth refresh -h github.com -s repo,read:org   |   https://github.com/settings/tokens (Configure SSO)", "estimate": "", "python": "https://www.python.org/downloads/", "gh": "winget install --id GitHub.cli   |   brew install gh   |   sudo apt install gh", "login": "gh auth login",
        "quota": "gh api rate_limit", "network": "gh api rate_limit", "folder": "", "port": "python bin/actions_monitor.py --port 8800", "docker": "", "rich": "pip install rich",
        "textual": "pip install textual", "targets": "python bin/actions_monitor.py --init-catalog", "token": "", "exposure": "", "risks": "", "backend": "", "degraded": "", "credential": "", "timezone": "", "github_app": "", "layout": "python -m github_actions_monitor.util.rootmigrate --apply", "storage": "python tools/migrate_storage.py --from file --to sqlite", "retention": ""}
 
@@ -77,11 +78,16 @@ def run(runner=default_runner, folder=HERE, ports=None, python=None, config=None
             except (ValueError, KeyError, TypeError):
                 out["quota"] = ("warn", "")
             out["network"] = ("ok", "")
+            from github_actions_monitor.integrations import access_diag
+            found = access_diag.probe(runner, config.get("github_owner") if isinstance(config.get("github_owner"), str) else "")
+            out["access"] = access_diag.result(found)
+            out["estimate"] = access_diag.estimate_result(found, config)
         else:
             out["quota"] = ("warn", "")
             out["network"] = ("fail", (stderr or "").strip()[:120])
+            out["access"] = out["estimate"] = ("warn", "network")
     else:
-        for name in ("login", "quota", "network"):
+        for name in ("login", "quota", "access", "estimate", "network"):
             out[name] = ("warn", "gh")
     out["folder"] = ("ok" if _writable(folder) else "fail", str(folder))
     if ports is None:      # the ports of the two editions as the configuration files set them

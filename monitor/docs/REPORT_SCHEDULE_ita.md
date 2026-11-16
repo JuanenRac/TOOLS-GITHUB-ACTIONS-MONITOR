@@ -21,7 +21,7 @@ Impostazioni, scheda Sentinella, blocco **Rapporti pianificati**:
 | `report_schedule.keep` | 12 | quante serie si conservano; le più vecchie vengono rimosse |
 | `report_schedule.top` | 10 | quanti repository e avvisi mostra ogni elenco, i peggiori per primi |
 
-Il primo rapporto aspetta il primo minuto pianificato dopo l'attivazione. Si scrive un rapporto per minuto pianificato, anche se il monitor è rimasto spento per giorni (allora ne scrive uno, non una pila). Un rapporto che fallisce viene annotato nella salute del monitor e il minuto pianificato successivo riprova.
+Il primo rapporto aspetta il primo minuto pianificato dopo l'attivazione. Si scrive un rapporto per minuto pianificato, anche se il monitor è rimasto spento per giorni (allora ne scrive uno, non una pila). Un rapporto che fallisce viene annotato nella salute del monitor e il minuto pianificato successivo riprova. Una pianificazione che indica un giorno del mese è ancora dovuta dopo uno stop fino a un mese (se indica un mese, fino a un anno), e l'ora che si ripete quando l'orologio torna indietro in autunno non viene riportata due volte. Un rapporto è tutti i suoi formati o niente: se il secondo formato non si può scrivere, il primo file viene rimosso.
 
 ## Cosa contiene un rapporto
 

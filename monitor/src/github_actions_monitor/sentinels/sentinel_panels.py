@@ -115,7 +115,10 @@ def _a12(s, owner, t):
 def _a13(s, owner, t):
     rows = [_row(r.get("repo"), f"{r.get('file')}:{r.get('line')} {r.get('rule')}", "", "bad" if r.get("severity") == "bad" else "warn", f"lint:{r.get('rule')}:{r.get('file')}") for r in (s or {}).get("rows") or []][:MAX_ROWS]
     summary = (s or {}).get("summary") or {}
-    return rows, t("ui.sc_a13", n=summary.get("findings", 0), m=summary.get("repos", 0)) if (s or {}).get("enabled") else ""
+    if not (s or {}).get("enabled"):
+        return rows, ""
+    from github_actions_monitor.integrations import remote_workflows
+    return rows, (t("ui.sc_a13", n=summary.get("findings", 0), m=summary.get("repos", 0)) + " " + remote_workflows.coverage_text((s or {}).get("coverage"), t)).strip()
 
 
 def _collab(alerts, owner, t):

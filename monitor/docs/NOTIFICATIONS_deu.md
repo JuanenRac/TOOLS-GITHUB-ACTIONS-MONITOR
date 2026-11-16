@@ -26,7 +26,7 @@ Optional und **standardmäßig aus**. Die Ereignisse des Feeds (ein neues Rot, e
 ## Der Adapter-Vertrag
 
 - Für einen Dienst, der nicht in der Liste steht, starten Sie einen kleinen Empfänger auf diesem Rechner und richten `http_local` darauf. Er erhält einen POST mit `Content-Type: application/json` und diesem Rumpf: `{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`.
-- `kind` ist eines von `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `ai_alert`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `score_dropped`, `security_new`, `security_fixed`. Felder kommen nur hinzu. Antworten Sie mit einem beliebigen 2xx; alles andere zählt als Fehler.
+- `kind` ist eines von `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `ai_alert`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `score_dropped`, `security_new`, `security_fixed`, `alerts_digest`, `silence_review`. Felder kommen nur hinzu. Antworten Sie mit einem beliebigen 2xx; alles andere zählt als Fehler.
 - `mqtt` veröffentlicht dasselbe JSON als Nutzlast einer QoS-0-Nachricht auf `notify.channels.mqtt.topic`.
 
 ## Apprise (optional, standardmäßig aus)
@@ -50,3 +50,12 @@ Die Adresse des Teams-Webhooks und das ntfy-Token verwahrt das System verschlüs
 ### Das Panel jedes Benutzers
 
 Im Teammodus hat das Menü des angemeldeten Benutzers (der Name oben) den Eintrag **Benachrichtigungen**. Das Panel zeigt und speichert dieselben Einstellungen wie `GET/POST /api/auth/me/notify`: ob Sie Benachrichtigungen wollen, die Kanäle (ntfy mit Thema und optionalem Token, Teams mit der Webadresse des Kanals, E-Mail mit einer Adresse), die Wächter (CI, Zusammenarbeit), die niedrigste Stufe, die Systemereignisse (nur für Administratoren) und ob jeder Alarm sofort oder in einer stündlichen oder täglichen Zusammenfassung kommt. Ein bereits gespeichertes Geheimnis wird als gespeichert angezeigt und nie in die Seite zurückgegeben; es wird nur gesendet, wenn Sie ein neues eintippen, ein leeres Feld behält es. **Test senden** schickt eine Nachricht an Ihre Kanäle, **Ich habe meine Alarme gesehen** markiert die offenen als gesehen. Hat der Administrator `notify.users.enabled` nicht eingeschaltet, sagt das Panel es: Sie können Ihre Auswahl speichern, es wird noch nichts gesendet.
+
+## Viele Meldungen oder immer wieder dieselben
+
+Vier optionale Einstellungen des Blocks `alerts` (standardmäßig alle aus oder leer) bestimmen, was die obigen Kanäle erreicht. Die Listen, der Tab Meldungen und das Ereignisprotokoll zeigen weiterhin alles.
+
+- **Dauerhaftes Stummschalten** (`alerts.silences`): ein Eintrag pro Zeile, `Repository:Workflow:Branch;Grund;Prüfdatum`. Alles außer dem Repository ist optional, und `*` passt auf jeden Text. Passende Meldungen gelten als stummgeschaltet, niemand wird benachrichtigt, und am Prüfdatum wird einmal erinnert; das Stummschalten gilt, bis Sie es entfernen.
+- **Dienste und kurze Crons** (`alerts.service`): Ein Workflow, der nur geplant oder von Hand läuft und gelegentlich fehlschlägt, wird erst nach `failures` Fehlschlägen in Folge gemeldet, oder wenn `rate_percent` seiner letzten Runs fehlschlugen; einmal gemeldet und einmal aufgehoben statt in Schleife. `workflows` fügt dieser Klasse weitere Workflows hinzu.
+- **Nach Commit bündeln** (`alerts.group`): Werden `min` oder mehr Workflows eines Repositorys beim selben Commit rot, listet eine Benachrichtigung sie auf.
+- **Zusammenfassung bei vielen** (`alerts.digest`): Nach `threshold` Benachrichtigungen in der letzten Stunde werden die übrigen zurückgehalten und alle `minutes` Minuten als eine Zusammenfassung gemeldet. Die zurückgehaltenen Ereignisse bleiben im Ereignisprotokoll.

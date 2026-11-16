@@ -35,7 +35,7 @@
 
 | 检查 | 检查内容与确切规则 | 配置位置 | 级别与处理方式 |
 |---|---|---|---|
-| **A1** | **构建。** 运行中或排队时间超过限制的 run 视为*卡住*。同时列出带标签 `build-failed` 或 `build-stuck` 的未关闭 issue。事件为 `dynamic`（Dependabot 内部）的 run 会被忽略。 | `stuck_minutes` | 有卡住或未关闭 issue 时为 **bad**。打开该 run，取消或重跑；修复后关闭 issue。 |
+| **A1** | **构建。** 运行中或排队时间超过限制的 run 视为*卡住*。同时列出带标签 `build-failed` 或 `build-stuck` 的未关闭 issue。事件为 `dynamic`（Dependabot 内部）的 run 会被忽略。 每一行都会说明等待原因（运行器、批准、运行器离线或长时间构建）；`ci.stuck.*` 可学习每个工作流的上限，或按工作流或运行器标签固定上限。 | `stuck_minutes` | 有卡住或未关闭 issue 时为 **bad**。打开该 run，取消或重跑；修复后关闭 issue。 |
 | **A2** | **红色 CI。** 对每个工作流文件，取其在**默认分支**上**最后一次已完成**的 run：失败（`failure`、`timed_out`、`startup_failure`）即为红。`cancelled`、`skipped`、`neutral`、`stale` 的 run、进行中的 run 以及其他分支的 run 不代表任何结论，也不会掩盖更早的红。 只有 `push`、`schedule`、`workflow_dispatch` 和 `merge_group` 的 run 起决定作用（`ci.red_events`）：拉取请求、评论和 issue 永远不会，分支同样叫 `main` 的复刻仓库的拉取请求也不会（`ci.count_fork_runs`）。等待批准的 run（`action_required`，或被环境扣留的 job）是 *等待批准*，既不是红色也不在队列中。`ci.inactive_days` 天未运行的工作流是 *不活跃*，而不是永远红色。合并队列中的失败显示为 `(合并队列)`；`ci.extra_branches` 添加维护分支，`ci.automation_counts` 决定分诊和机器人工作流是否计入。*连续*=连续为红的次数。当仓库的 run 列表与所要求的样本一样长时，某个工作流可能被挤到之外：哨兵会向 GitHub 询问每个这类工作流的最后一次 run。 开启 `ci.group.reusable` 后，调用同一可复用工作流的红色工作流会显示为一个共同原因并只通知一次；开启 `ci.failed_jobs` 后，红色运行会按平台分组说明哪些作业失败。 | `runs_per_repo`, `cold_runs_per_repo`, `sentinel.a2_full_sample_unknown`, `sentinel.a2_resolve_max_calls_per_tick`, `sentinel.a2_resolve_ttl_seconds` | 有工作流为红时为 **bad**；仓库没有 run 数据或某个工作流无法解析时为 **unknown**（绝不为绿）。修复工作流或重跑；精简版显示相同数字，但因为要猜测默认分支而标为近似值。 |
 | **A3** | **安全警报。** 每个仓库未关闭的 CodeQL、Dependabot 和密钥扫描警报及其严重程度，以及自历史上一日以来新增的数量。 | `sentinel.alerts_hot_seconds`, `sentinel.alerts_cold_seconds` | 任何密钥警报或 critical/high 警报为 **bad**；其他为 **warn**；加载中为 **unknown**。先轮换泄露的密钥，再更新或忽略其余。 |
 | **A4** | **Dependabot 拉取请求。** Dependabot 未合并的 PR 及其存在时间、*大版本*跳跃和合并冲突；他人的 PR 只计数。Renovate 与 Dependabot 同等对待（`sentinel.dependency_bots`）。 | `sentinel.stale_pr_days` (7), `sentinel.dependency_bots`, `sentinel.bots_apart` | 有大版本跳跃或冲突时为 **warn**；仅有 PR 时为 **info**。合并绿色的；对冲突的变基或关闭。 |
@@ -47,7 +47,7 @@
 | **A10** | **Actions 与发布的表面。** 对克隆仓库进行的二十五项只读检查和少量冷调用，列在下表中。每项都有开关，必要时还有阈值。 | `sentinel.surface.*` | 按检查项，见下文。配额不足时暂停（报告会说明）。 |
 | **A11** | **发布就绪度、生态系统健康度与固定版本。** 每个仓库的就绪度（条目、CI、版本、构建、签名、下一步）；每个生态系统 0-100 的健康分，按权重扣除红、卡住、密钥、高危警报、警报、陈旧 PR、未签名构建和卫生的扣分；以及落后的依赖固定版本。只有当 `min_coverage` 比例的仓库有数据时才显示分数。 完全没有工作流的仓库（克隆中没有工作流文件且没有运行）不适用：它不会拉低覆盖率，并单独列出；低于最低值的组会显示“数据不足”，并说明有数据的仓库数量以及缺少数据的仓库。 | `sentinel.readiness.*` (`warn_below` 70, `min_coverage` 0.5) | 分数低于 `warn_below` 为 **warn**；有落后仓库为 **info**；数据不足为 **unknown**。 |
 | **A12** | **分析。** 每个工作流、其作业排队时间和每个步骤的 p50 / p95；比平时变慢的工作流（`analytics.slow_factor`）；*不稳定（flaky）*的工作流（失败后在同一提交上通过）。只是标签，绝不改变什么算红。 时间按 run 的最新一次尝试计算：重新运行绝不使用第一次尝试（不会出现数天的排队或数百天的时长；未知的等待留空），批准后的重试不算 flaky（`ci.rerun_timing` 还会向 GitHub 查询已完成的重新运行的实际时长）。 | `analytics.*` | 没有自己的信号灯。先看变慢的和 flaky 的。 |
-| **A13** | **工作流 linter。** 对本地克隆的静态规则：`unpinned_uses`、`permissions`、`secrets_in_clear`、`injection`、`pr_target`。每个发现都有级别（信息/警告/错误）；注释 `# monitor-lint: ignore 规则 原因` 或 `lint.ignore` 可将其静音。 | `lint.*` | 取最严重发现的颜色。先修复错误；页面可按级别过滤。 |
+| **A13** | **工作流 linter。** 对本地克隆的静态规则(将 `lint.source` 设为 `auto` 或 `sparse` 时,也检查没有克隆的仓库,文件从 GitHub 读取:每个周期在预算内只用少量调用,SHA 未变的文件不会再次读取;读不到或无法检查的内容会显示为*无法评估*并给出原因,例如 SSO 未授权、缺少权限范围或没有克隆)：`unpinned_uses`、`permissions`、`secrets_in_clear`、`injection`、`pr_target`。每个发现都有级别（信息/警告/错误）；注释 `# monitor-lint: ignore 规则 原因` 或 `lint.ignore` 可将其静音。 | `lint.*` | 取最严重发现的颜色。先修复错误；页面可按级别过滤。 |
 
 ## A10 的各项检查
 

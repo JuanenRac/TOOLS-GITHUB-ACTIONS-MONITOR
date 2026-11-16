@@ -7,7 +7,7 @@
 
 # The log of actions
 
-Complete only, on by default. Next to the audit of the accesses (logins, locks, refusals) the monitor keeps a log of **actions**: who changed what, when and on which account. A change of the settings, a silence or its removal, a change of users, passwords, notification preferences or credentials. It is one JSON line each in `logs/audit_actions.jsonl`, never rewritten.
+Complete only, on by default. Next to the audit of the accesses (logins, locks, refusals) the monitor keeps a log of **actions**: who changed what, when and on which account. A change of the settings, a silence or its removal, a change of users, passwords, notification preferences or credentials. It is one JSON line each in `logs/audit_actions.jsonl`, never rewritten. It also records what is confirmed: an action on GitHub (rerun, cancel, dispatch, merge), a run with `act`, saving or deleting the stored token, a change of the working mode, a group added by discovery, a lesson added, a report written now, the login of the account and the actions of the AI. The line says what was confirmed and the result, never the body of the request. Every POST route is either recorded or listed as exempt with its reason, and a test fails when a new route is neither.
 
 ## What a line says
 

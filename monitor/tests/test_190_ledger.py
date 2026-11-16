@@ -172,5 +172,23 @@ class Truncation(unittest.TestCase):
         self.assertNotIn("truncated", snapshot["data_quality"])
 
 
+class UnreadableLedger(unittest.TestCase):
+    def test_a_ledger_that_cannot_be_read_stops_the_pass_and_is_not_written_over(self):
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as tmp:
+            storage = file_storage.FileStorage(Path(tmp) / "files")
+            try:
+                self.assertIsNotNone(service.tick(storage, "alpha", {}, [run(1, 60)], [], now=NOW))
+                path = storage._path("alpha", storage._doc_rel(service.LEDGER_DOC))
+                good = path.read_bytes()
+                with mock.patch.object(Path, "read_text", side_effect=PermissionError(13, "in use")), mock.patch.object(file_storage.time, "sleep"):
+                    self.assertIsNone(service.tick(storage, "alpha", {}, [run(2, 30)], [], now=NOW + 3600))
+                self.assertEqual(path.read_bytes(), good)
+                self.assertIsNotNone(service.tick(storage, "alpha", {}, [run(2, 30)], [], now=NOW + 3600))
+                self.assertEqual(len(storage.load_doc("alpha", service.LEDGER_DOC)["runs"]), 2)
+            finally:
+                storage.close()
+
+
 if __name__ == "__main__":
     unittest.main()

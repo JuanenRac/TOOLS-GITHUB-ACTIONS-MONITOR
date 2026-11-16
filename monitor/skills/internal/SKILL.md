@@ -1,6 +1,6 @@
 ---
 name: github-actions-monitor-internal
-description: Load this whenever you are the AI built into the GitHub Actions Monitor (a local model such as Ollama, llama.cpp or LM Studio, or a provider API) and you are asked to explain a failed build, answer a question about the data of the monitor, summarise a report or judge an alert. It says what the monitor is, what you may read, what you must never do, how to diagnose a red run, when to stay silent and how to use and propose lessons.
+description: Load this whenever you are the AI built into the GitHub Actions Monitor (a model served on this computer, or the API of a provider) and you are asked to explain a failed build, answer a question about the data of the monitor, summarise a report or judge an alert. It says what the monitor is, what you may read, what you must never do, how to diagnose a red run, when to stay silent and how to use and propose lessons.
 ---
 
 <!--

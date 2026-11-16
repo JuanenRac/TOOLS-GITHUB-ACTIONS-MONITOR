@@ -53,8 +53,10 @@ from github_actions_monitor.util import exclusive
 from github_actions_monitor.util import platform_compat
 from github_actions_monitor.util import ports
 from github_actions_monitor.data_pipeline import causes
+from github_actions_monitor.data_pipeline import alertflow
 from github_actions_monitor.data_pipeline import paging
 from github_actions_monitor.data_pipeline import redrule
+from github_actions_monitor.data_pipeline import stuckrule
 from github_actions_monitor.integrations import runner_model
 from github_actions_monitor.data_pipeline import sampling
 from github_actions_monitor.util import resilience
@@ -85,7 +87,9 @@ DEFAULTS = {
     "discover_limit": 1000,        # the most repositories listed for the account
     "show_unclassified": True,     # repositories that no ecosystem claims are shown in an automatic group "Unclassified" instead of disappearing
     "stuck_minutes": 120,
-    "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "extra_branches": [], "rerun_timing": False, "group": {"reusable": False, "min": 2}, "failed_jobs": {"enabled": False, "max_per_cycle": 4, "group_by": "auto"}},      # which runs may make a branch red (redrule.py)
+    "alerts": {"silences": [], "service": {"enabled": False, "failures": 3, "rate_percent": 0, "workflows": []}, "group": {"by_commit": False, "min": 3}, "digest": {"minutes": 0, "threshold": 10}},      # what reaches the channels when there are many alerts (alertflow.py): all off or empty
+    "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "extra_branches": [], "rerun_timing": False, "group": {"reusable": False, "min": 2}, "failed_jobs": {"enabled": False, "max_per_cycle": 4, "group_by": "auto"},
+           "stuck": {"learned": False, "percentile": 95, "margin": 2.0, "min_samples": 3, "min_minutes": 30, "max_minutes": 720, "queue_minutes": 0, "workflow_minutes": [], "runner_minutes": [], "awaiting_stuck": True}},      # which runs may make a branch red (redrule.py)
     "watchdog_minutes": 10,      # a refresh cycle that runs longer than this is dumped to the log and restarted in a new thread (0 = off)
     "watchdog_max_abandoned": 8,      # calls to GitHub that gave up waiting but never returned: with this many still alive no new call is started and the health check says so (0 = no limit)
     "runs_per_repo": 20,
@@ -196,6 +200,7 @@ WATCH = cycle_watch.CycleWatch()      # the heartbeat of the refresh loop (phase
 SENTINEL = {"obj": None, "error": None, "registry": None}  # the CI sentinel (layer A) and the registry of all of them; a failure of any never stops the monitor
 LOCK = threading.Lock()
 ISSUE_CACHE = {"at": 0.0, "items": [], "busy": False}
+RUNNERS_SEEN = {"payload": None}      # the last answer of /api/runners: the labels that only offline runners carry explain a run that waits for ever (stuckrule.py)
 RUN_CACHE = {}  # repo -> {"runs": [...], "at": float, "error": str|None}
 PRIVATE = set()                           # private repositories of the account (read with the listing): the only ones whose minutes cost anything
 QUOTA_ALERTS = None
@@ -891,7 +896,7 @@ def run_jobs_info(repo, run_id):
         jobs.append({
             "name": job.get("name"), "status": job.get("status"), "conclusion": job.get("conclusion"),
             "steps_total": len(steps), "steps_done": done, "step": current, "runner": job.get("runner_name") or "",
-            "seconds": seconds_between(started, finished) if started else 0, "url": job.get("html_url"),
+            "seconds": seconds_between(started, finished) if started else 0, "url": job.get("html_url"), "labels": [str(x)[:40] for x in (job.get("labels") or [])][:12],
         })
     return jobs, page["seen"], (page["total"] if page["cut"] else None)
 
@@ -933,6 +938,7 @@ def unresolved_failures(runs, default_branches=None):
 def collect(config, publish=None):
     redrule.configure(config)
     causes.configure(config)
+    alertflow.configure(config)
     repos = watched_repos(config)
     started = time.time()
 
@@ -989,7 +995,7 @@ def header_figures(runs, active, issues, now=None, red=None, approx=False):
     done = [r for r in last if r.get("status") == "completed"]
     figures = {"active": sum(1 for r in active if r.get("status") == "in_progress"), "queued": sum(1 for r in active if r.get("status") != "in_progress" and not redrule.is_awaiting(r)),
                "fail24": sum(1 for r in done if r.get("conclusion") in ("failure", "timed_out", "startup_failure")), "ok24": sum(1 for r in done if r.get("conclusion") == "success"),
-               "issues": len(issues), "min24": round(sum(r.get("seconds") or 0 for r in last) / 60)}
+               "done24": len(done), "issues": len(issues), "min24": round(sum(r.get("seconds") or 0 for r in last) / 60)}
     if red is not None:
         figures["red"], figures["red_approx"], figures["red_repos"] = len(red), bool(approx), len({row["repo"] for row in red})
     return figures
@@ -1012,10 +1018,18 @@ def build(config, repos, started, refreshed, loading, progress_text):
         if run["status"] in ("in_progress", "queued", "waiting", "requested", "pending") and run.get("event") != "dynamic" and (run["repo"], run.get("id")) not in seen_active:
             seen_active.add((run["repo"], run.get("id")))
             active.append(run)
+    stuck_cfg = stuckrule.settings(config)
+    learned = stuckrule.learn(runs, stuck_cfg) if stuck_cfg["learned"] else {}
+    offline = stuckrule.offline_labels(RUNNERS_SEEN.get("payload"))
+    ask_queued = [len(stuck_cfg["runner_minutes"]) > 0 or bool(offline), 10]      # queued runs only read their jobs (one call each) when a runner label can change the verdict
     for run in active:
         run["jobs"], seen, total = run_jobs_info(run["repo"], run["id"]) if (run["status"] == "in_progress" and not loading) else ([], 0, None)
         run["jobs_seen"], run["jobs_total"] = seen, total      # total only when the jobs were cut: "seen N of M"
-        run["stuck"] = (run.get("seconds") or 0) > config["stuck_minutes"] * 60
+        if run["status"] in stuckrule.QUEUE_STATES and ask_queued[0] and ask_queued[1] > 0 and not loading:
+            ask_queued[1] -= 1
+            run["jobs"] = run_jobs(run["repo"], run["id"])
+        labels = sorted({label for job in run["jobs"] for label in job.get("labels") or []})
+        run["stuck"], run["stuck_reason"], run["stuck_limit"] = stuckrule.evaluate(run, config["stuck_minutes"], stuck_cfg, learned, labels, offline)
     if not loading and time.time() - ISSUE_CACHE["at"] > config["issues_refresh_seconds"] and not ISSUE_CACHE["busy"]:
         ISSUE_CACHE["busy"] = True  # the issues load in the background so the first page does not wait for them
 
@@ -1364,7 +1378,8 @@ def panel_list(lang=None):
 
 # The POST routes that the monitor accepts only from the computer it runs on (guard + this_computer): from the network they answer 403 `local_only`. The handler reads these two lists and the generated
 # references of the skills for the AIs (tools/make_skill_refs.py) read the same ones, so the table an AI reads cannot disagree with the code.
-THIS_COMPUTER_ACTIONS = ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test")
+AI_MODEL_POST = ("/api/ai/models/refresh", "/api/ai/models/test", "/api/ai/models/data", "/api/ai/doctor")      # the list of models of the provider, the test of one model, the table of data, the doctor
+THIS_COMPUTER_ACTIONS = ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test") + AI_MODEL_POST
 THIS_COMPUTER_ADVANCED = ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures",
                           "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run")
 THIS_COMPUTER_POST = THIS_COMPUTER_ACTIONS + THIS_COMPUTER_ADVANCED
@@ -1432,7 +1447,7 @@ def skills_get(query):
     args = {k: v[0] for k, v in parse_qs(query).items() if v}
     name = args.get("name", "")
     if not name:
-        return "json", {"skills": [{"name": n, "files": skills.files(n)} for n in skills.names()]}
+        return "json", {"skills": [{"name": n, "files": skills.files(n), "version": TOOL_VERSION} for n in skills.names()], "monitor_version": TOOL_VERSION}
     if args.get("all") == "1":
         parts = [skills.read(name, f) for f in skills.files(name)]
         text = "\n\n---\n\n".join(p for p in parts if p)
@@ -2087,7 +2102,24 @@ class Handler(BaseHTTPRequestHandler):
         except CLIENT_GONE:
             DISCONNECTS[0] += 1
 
+    def send_response(self, code, message=None):
+        self.reply_status = code      # the status of the answer, for the log of actions (audit_post)
+        super().send_response(code, message)
+
+    def audit_post(self, path):
+        """One line in the log of actions for a POST that does something (the table of security/audited_posts.py): who, which action, the target the handler noted, the status and the result. The body never goes in."""
+        from github_actions_monitor.security import audit_log, audited_posts
+        target, details = audit_log.take_note()
+        action = audited_posts.action_for(path)
+        if not action:
+            return
+        status = getattr(self, "reply_status", 0)
+        ok = getattr(self, "reply_ok", None)
+        result = "ok" if 200 <= status < 300 and ok is not False else ("denied" if status in (401, 403) else "error")
+        audit_action(self, action, target or path, {"status": status, **(details or {})}, result)
+
     def json_reply(self, payload, code=200):
+        self.reply_ok = payload.get("ok") if isinstance(payload, dict) else None
         body = json.dumps(payload).encode("utf-8")
         self.send_response(code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
@@ -2328,11 +2360,15 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         counted = CountedReader(self.rfile)
         self.rfile = counted
+        self.reply_status, self.reply_ok = 0, None
         try:
             if not self.access_gate() or not auth_http.gate(self, LIVE_CONFIG or DEFAULTS, LITE["on"]):
                 return
+            from github_actions_monitor.security import audit_log
+            audit_log.take_note()
             with i18n.use_language(self.request_language()):
                 self.handle_post()
+            self.audit_post(self.path.split("?")[0])
         finally:
             self.drain_body(counted)
 
@@ -2393,6 +2429,8 @@ class Handler(BaseHTTPRequestHandler):
                 remaining, limit = mode_remaining()
                 config = LIVE_CONFIG or DEFAULTS
                 minutes = request.get("minutes", modes.settings(config)["default_minutes"])
+                from github_actions_monitor.security import audit_log
+                audit_log.note(str(request.get("mode"))[:30])
                 ok, why = MODE.set(request.get("mode"), minutes, config, limit, remaining)
                 if ok:
                     RUN_CACHE_RESET()
@@ -2436,6 +2474,8 @@ class Handler(BaseHTTPRequestHandler):
                 target = toolconfig._data_path("MONITOR_ECOSYSTEMS_FILE", "ecosystems_file", toolconfig.DEFAULT_ECOSYSTEMS_FILE)
                 if target.stem.endswith(".example"):
                     target = paths.place(target.name.replace(".example", ""))   # the neutral template travels in assets/examples; the file of the person goes in config/
+                from github_actions_monitor.security import audit_log
+                audit_log.note(str(chosen[0]["key"])[:60])
                 result = discovery.add_group(target, chosen[0]["key"], chosen[0]["prefix"], example=paths.EXAMPLES / "ecosystems.example.json")
                 if result["ok"]:
                     toolconfig.forget()
@@ -2730,6 +2770,11 @@ class Handler(BaseHTTPRequestHandler):
                 return
             from github_actions_monitor.sentinels import ai_presets
             self.json_reply({"ok": True, "presets": ai_presets.load()})
+        elif path == "/api/ai/models":      # read only: the configured provider, the list of models kept (it never asks the provider), the check of the configured model and the table of data per model
+            if not self.guard():
+                return
+            from github_actions_monitor.sentinels import ai_models, sentinel_ai
+            self.json_reply(ai_models.listing(sentinel_ai.ai_config(toolconfig.raw_config()), ai_store()))
         elif path == "/api/ai/stream":      # server-sent events, read only: the alerts as they open and resolve (ai_alerts.stream, off by default)
             if not self.guard():
                 return
@@ -3216,9 +3261,26 @@ def metrics_extra():
             "notify": dict(notifiers.STATS), "disconnects": DISCONNECTS[0], "score": score_metrics()}
 
 
+def ai_store():
+    """The cache and counters of the AI: the ones of the running sentinel, or (lite, or before it starts) the file itself."""
+    from github_actions_monitor.sentinels import sentinel_ai
+    sentinel = SENTINEL["obj"]
+    if sentinel is not None and getattr(sentinel, "ai_store", None) is not None:
+        return sentinel.ai_store
+    if "store" not in AI_FALLBACK_STORE:
+        AI_FALLBACK_STORE["store"] = sentinel_ai.Store(sentinel_ai.CACHE_FILE)
+    return AI_FALLBACK_STORE["store"]
+
+
+AI_FALLBACK_STORE = {}
+
+
 def handle_action_post(path, request):
     """The endpoints that DO something on request of the page: confirm an action of the AI, unlock the actions, test the AI connection, send a test notification."""
     config = toolconfig.raw_config()
+    if path in AI_MODEL_POST:
+        from github_actions_monitor.sentinels import ai_models, sentinel_ai
+        return ai_models.handle_post(path, request, sentinel_ai.ai_config(config), ai_store())
     if path == "/api/ai/actions/confirm":
         from github_actions_monitor.integrations import ai_actions
         return ai_actions.ACTIONS.run(request.get("id"), request.get("command"), config)
@@ -3289,7 +3351,8 @@ def advanced_get(path, query):
         return {"done": done and not DEMO["on"]}
     if path == "/api/runners":
         from github_actions_monitor.integrations import runners
-        return runners.payload(config, lambda endpoint: gh_read(endpoint, retries=0), toolconfig.github_owner(config), DEMO["on"], list((STATE.get("data") or {}).get("repos") or []))
+        RUNNERS_SEEN["payload"] = runners.payload(config, lambda endpoint: gh_read(endpoint, retries=0), toolconfig.github_owner(config), DEMO["on"], list((STATE.get("data") or {}).get("repos") or []))
+        return RUNNERS_SEEN["payload"]
     if path == "/api/mirror":
         from github_actions_monitor.integrations import mirror
         return mirror.status(config)
@@ -3297,11 +3360,11 @@ def advanced_get(path, query):
     return otlp.status(config)
 
 
-def _audit_plain(action, who, target, details=None):
+def _audit_plain(action, who, target, details=None, result="ok"):
     """The same as audit_action for the places that know the name of the person and not the request."""
     try:
         from github_actions_monitor.security import audit_log
-        audit_log.record(toolconfig.raw_config(), action, who or "", "", CHILD["account"] or "", target, "ok", details)
+        audit_log.record(toolconfig.raw_config(), action, who or "", "", CHILD["account"] or "", target, result, details)
     except Exception as error:   # noqa: BLE001
         degraded.note("audit_log", error)
 
@@ -3313,8 +3376,9 @@ def handle_advanced_post(path, request, who=""):
         from github_actions_monitor.sentinels import alert_center
         scope, value = str(request.get("scope") or ""), str(request.get("value") or "")
         if path.endswith("unmute"):
-            _audit_plain("alert_unmute", who, f"{scope}:{value}"[:120])
-            return {"ok": alert_center.unmute(scope, value)}
+            done = alert_center.unmute(scope, value)
+            _audit_plain("alert_unmute", who, f"{scope}:{value}"[:120], None, "ok" if done else "error")
+            return {"ok": done}
         until_change = None
         if request.get("until_change") is True and scope == "alert":      # "until the item changes": remember the updated_at the alert carries now
             for alert in alert_center.collect(SENTINEL["registry"]):
@@ -3322,7 +3386,7 @@ def handle_advanced_post(path, request, who=""):
                     until_change = (alert.get("details") or {}).get("updated") if isinstance(alert.get("details"), dict) else None
                     break
         entry = alert_center.mute(scope, value, request.get("hours"), config, who=who, until_change=until_change)
-        _audit_plain("alert_mute", who, f"{scope}:{value}"[:120], {"hours": request.get("hours")})
+        _audit_plain("alert_mute", who, f"{scope}:{value}"[:120], {"hours": request.get("hours")}, "ok" if entry is not None else "error")
         return {"ok": entry is not None, "mute": entry}
     if path == "/api/report-files/run":      # write a report now (admin, from this computer); Complete only
         if LITE["on"]:
@@ -3355,11 +3419,15 @@ def handle_advanced_post(path, request, who=""):
         cfg = secretstore.settings(config)
         store = secretstore.Store(cfg["store"])
         if request.get("action") == "delete":
+            from github_actions_monitor.security import audit_log
+            audit_log.note("delete")
             ok = store.delete()
             secretstore.clear_environment()
             return {"ok": ok, **advanced_state(config)["token"]}
         if not cfg["enabled"]:
             return {"ok": False, "status": "off"}
+        from github_actions_monitor.security import audit_log
+        audit_log.note("save")
         done, why = store.save(request.get("token"))
         if done:
             secretstore.apply_to_environment(config, store)

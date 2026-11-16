@@ -31,7 +31,9 @@
         "credential_back",
         "score_dropped",
         "security_new",
-        "security_fixed"
+        "security_fixed",
+        "alerts_digest",
+        "silence_review"
       ]
     },
     "repo": {

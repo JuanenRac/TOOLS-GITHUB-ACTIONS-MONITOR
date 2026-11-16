@@ -76,7 +76,7 @@ class SentinelCI(sentinel_base.BaseSentinel):
 
         for red in (snap.get("a2") or {}).get("red", []):
             alert("ci.red", "error", red.get("repo"), i18n.t("evt.red_new", repo=red.get("repo"), workflow=red.get("workflow")),
-                  {"workflow": red.get("workflow"), "streak": red.get("streak"), "url": red.get("url")}, red.get("since"), f"{red.get('repo')}:{red.get('workflow')}")
+                  {"workflow": red.get("workflow"), "streak": red.get("streak"), "url": red.get("url"), "branch": red.get("branch"), "file": red.get("file")}, red.get("since"), f"{red.get('repo')}:{red.get('workflow')}")
         for stuck in (snap.get("a1") or {}).get("stuck", []):
             alert("ci.stuck", "error", stuck.get("repo"), i18n.t("evt.stuck_new", repo=stuck.get("repo"), name=stuck.get("name")),
                   {"name": stuck.get("name"), "seconds": stuck.get("seconds"), "url": stuck.get("url")}, None, f"{stuck.get('repo')}:{stuck.get('name')}")

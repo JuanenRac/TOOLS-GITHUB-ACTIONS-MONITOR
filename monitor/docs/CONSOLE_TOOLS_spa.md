@@ -11,7 +11,7 @@ Dos herramientas de línea de comandos, opcionales. El monitor no necesita ning�
 
 ## El linter de workflows: `bin/lint_workflows.py`
 
-- `py -3 bin/lint_workflows.py [RUTA ...] [--json] [--fail-on info|warn|bad]` revisa `.github/workflows/*.yml` antes de subir. Sin ruta mira la carpeta actual. Solo abre archivos.
+- `py -3 bin/lint_workflows.py [RUTA ...] [--json] [--fail-on info|warn|bad]` revisa `.github/workflows/*.yml` antes de subir. Sin ruta mira la carpeta actual. Solo abre archivos. `--remote PROPIETARIO/REPO` (repetible) lee los ficheros de workflow de un repositorio desde GitHub con `gh`, sin clon, y dice por qué cuando no puede (SSO sin autorizar, sin acceso).
 - Reglas (cada una se puede apagar y cambiar de gravedad en la pestaña Configuración, subpestaña Linter de workflows): `unpinned_uses` (una acción sin fijar a un SHA de commit completo), `permissions` (sin bloque `permissions:`, o `write-all`), `secrets_in_clear` (algo que parece un token o clave escrito en el archivo), `injection` (texto de un tercero pegado en un script `run:`) y `pr_target` (`pull_request_target` con descarga del código del pull request).
 - Reglas opcionales, desactivadas hasta que las actives: `no_timeout` (un job sin `timeout-minutes`), `secrets_inherit` (`secrets: inherit` en una llamada a un workflow reutilizable) y `own_action_main` (una acción de tu propia cuenta que sigue `@main`). `unpinned_uses` indica si la acción es tuya o de un tercero (`lint.own_owners`), y `lint.unpinned_own` puede rebajar u ocultar las tuyas.
 - El código de salida es 1 cuando un hallazgo alcanza `--fail-on` (por defecto `bad`), así que sirve de hook previo al push. Cuando el monitor ve tus clones, añade además una línea al parte diario.

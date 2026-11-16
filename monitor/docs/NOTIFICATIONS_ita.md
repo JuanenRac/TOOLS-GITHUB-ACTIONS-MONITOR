@@ -26,7 +26,7 @@ Facoltative e **spenta per impostazione predefinita**. Gli eventi del feed (un n
 ## Il contratto degli adattatori
 
 - Per raggiungere un servizio non in elenco, esegui un piccolo ricevitore su questo computer e punta `http_local` verso di esso. Riceve un POST con `Content-Type: application/json` e questo corpo: `{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`.
-- `kind` è uno tra `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `ai_alert`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `score_dropped`, `security_new`, `security_fixed`. I campi si aggiungono soltanto. Rispondi con un 2xx qualsiasi; il resto conta come errore.
+- `kind` è uno tra `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `ai_alert`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `score_dropped`, `security_new`, `security_fixed`, `alerts_digest`, `silence_review`. I campi si aggiungono soltanto. Rispondi con un 2xx qualsiasi; il resto conta come errore.
 - `mqtt` pubblica lo stesso JSON come payload di un messaggio QoS 0 su `notify.channels.mqtt.topic`.
 
 ## Apprise (facoltativo, spento per impostazione predefinita)
@@ -50,3 +50,12 @@ L'indirizzo del webhook di Teams e il token di ntfy sono custoditi cifrati dal s
 ### Il pannello di ogni utente
 
 In modalità team, il menu dell'utente connesso (il nome in alto) ha la voce **Notifiche**. Il pannello mostra e salva le stesse preferenze di `GET/POST /api/auth/me/notify`: se vuoi le notifiche, i canali (ntfy con il suo argomento e un token facoltativo, Teams con l'indirizzo web del canale, e-mail con un indirizzo), le sentinelle (CI, collaborazione), il livello minimo, gli eventi di sistema (solo per un amministratore) e se ogni avviso arriva subito o in un riepilogo orario o giornaliero. Un segreto già salvato è mostrato come salvato e non torna mai nella pagina; viene inviato solo se ne digiti uno nuovo, e una casella vuota lo mantiene. **Invia una prova** manda un messaggio ai tuoi canali e **Ho visto i miei avvisi** segna come visti quelli in attesa. Se l'amministratore non ha attivato `notify.users.enabled`, il pannello lo dice: puoi salvare le tue scelte, ancora non viene inviato nulla.
+
+## Molti avvisi, o sempre gli stessi
+
+Quattro impostazioni facoltative del blocco `alerts` (tutte disattivate o vuote per impostazione predefinita) decidono cosa arriva ai canali sopra. Gli elenchi, la scheda Avvisi e il registro degli eventi continuano a mostrare tutto.
+
+- **Silenzi permanenti** (`alerts.silences`): una voce per riga, `repository:workflow:ramo;motivo;data di revisione`. Tutto tranne il repository è facoltativo e `*` corrisponde a qualsiasi testo. Gli avvisi corrispondenti sono mostrati come silenziati, nessuno viene notificato e alla data di revisione viene annunciato un promemoria; il silenzio resta attivo finché non lo rimuovi.
+- **Servizi e cron brevi** (`alerts.service`): un workflow che gira solo pianificato o a mano e ogni tanto fallisce viene annunciato solo dopo `failures` fallimenti di fila, o quando `rate_percent` degli ultimi run è fallito; annunciato una volta e chiuso una volta invece di avvisare in ciclo. `workflows` aggiunge altri workflow a questa classe.
+- **Raggruppa per commit** (`alerts.group`): quando `min` o più workflow di un repository diventano rossi sullo stesso commit, una notifica li elenca.
+- **Riepilogo quando sono molti** (`alerts.digest`): dopo `threshold` notifiche nell'ultima ora, le altre vengono trattenute e comunicate in un riepilogo ogni `minutes` minuti. Gli eventi trattenuti restano nel registro degli eventi.

@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2584_passing-brightgreen.svg" alt="2584 tests">
+  <img src="https://img.shields.io/badge/Tests-2684_passing-brightgreen.svg" alt="2684 tests">
 </p>
 
 > Surveille les workflows de tous vos dépôts et vous dit, sur une page locale, ce qui est rouge, ce qui est bloqué et ce qui vous attend.
@@ -81,8 +81,8 @@
 | | |
 |---|---|
 | **Maturité** | functional |
-| **Tests** | 2584 méthodes de test (`python -m unittest discover -s monitor/tests`) |
-| **Réglages** | 473 réglages, tous avec aide |
+| **Tests** | 2684 méthodes de test (`python -m unittest discover -s monitor/tests`) |
+| **Réglages** | 502 réglages, tous avec aide |
 | **Langues** | 8 (anglais, espagnol, allemand, français, italien, japonais, chinois et portugais) |
 | **Testé dans le CI sur** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -313,6 +313,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/AI_ALERTS_fra.md`](monitor/docs/AI_ALERTS_fra.md): Alertes pour les IA : le flux, le résumé, le hook et le stream
 - [`monitor/docs/AUDIT_PACKAGE_fra.md`](monitor/docs/AUDIT_PACKAGE_fra.md): Dossier pour l'auditeur
 - [`monitor/docs/LARGE_ACCOUNTS_fra.md`](monitor/docs/LARGE_ACCOUNTS_fra.md): Grands comptes : des centaines de dépôts
+- [`monitor/docs/ORGANIZATIONS_fra.md`](monitor/docs/ORGANIZATIONS_fra.md): Organisations et grands comptes
 
 ## Contribuer
 

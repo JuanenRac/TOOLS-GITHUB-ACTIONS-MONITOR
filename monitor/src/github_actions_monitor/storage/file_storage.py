@@ -169,8 +169,9 @@ class FileStorage(base.Storage):
     def save_sentinel_state(self, account_id, sentinel, data):
         atomic_write(self._path(account_id, self._sentinel_rel(sentinel)), json.dumps(data, ensure_ascii=False))
 
-    def load_doc(self, account_id, name, default=None):
-        return read_json(self._path(account_id, self._doc_rel(name)), dict, default)
+    def load_doc(self, account_id, name, default=None, strict=False):
+        """`strict=True`: a document that exists but cannot be read raises OSError instead of reading as `default` (for whoever reads to change and save)."""
+        return read_json(self._path(account_id, self._doc_rel(name)), dict, default, strict=strict)
 
     def save_doc(self, account_id, name, data):
         atomic_write(self._path(account_id, self._doc_rel(name)), json.dumps(data, ensure_ascii=False))

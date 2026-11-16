@@ -11,3 +11,7 @@ The AI of the monitor is set in the `ai` block. `ai.provider` is `none` (off, th
 - EXTERNAL (the API of a provider, or `gh copilot`). The text that goes out is only what the person asked about, cleaned and cut to `ai.max_input_chars`; a daily cap (`ai.daily_limit`) applies. Tell the person that a provider sees the cleaned text.
 
 The core of this skill (`SKILL.md`) is put in the prompt when `ai.skill` is on, cut to `ai.skill_max_chars`. A small local model: 1500; a provider API: 4000. The references are not loaded automatically: a model with a large context may be given them by the person.
+
+## Which model answers
+
+The person (not you) chooses the model: `ai.model`, a different one for a kind of question (`ai.tasks.<task>.model`) and a chain of fallbacks (`ai.fallback`). When your first model cannot answer, another one may be asked in its place, so do not assume which model you are or how large your context is; use what the prompt gives you. The monitor reads the list of models from the provider, shows what the provider says about each one (a figure it does not say stays unknown) and keeps a budget of calls and estimated cost per model; when a budget is spent nobody asks you more that day. None of this is yours to change.

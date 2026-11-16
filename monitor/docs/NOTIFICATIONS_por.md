@@ -26,7 +26,7 @@ Opcionais e **desligadas por predefinição**. Os eventos do feed (um vermelho n
 ## O contrato dos adaptadores
 
 - Para chegar a um serviço que não está na lista, execute um pequeno recetor neste computador e aponte `http_local` para ele. Recebe um POST com `Content-Type: application/json` e este corpo: `{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`.
-- `kind` é um de `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `ai_alert`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `score_dropped`, `security_new`, `security_fixed`. Os campos só se acrescentam. Responda com qualquer 2xx; o resto conta como falha.
+- `kind` é um de `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `ai_alert`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `score_dropped`, `security_new`, `security_fixed`, `alerts_digest`, `silence_review`. Os campos só se acrescentam. Responda com qualquer 2xx; o resto conta como falha.
 - `mqtt` publica o mesmo JSON como carga de uma mensagem QoS 0 em `notify.channels.mqtt.topic`.
 
 ## Apprise (opcional, desligado por predefinição)
@@ -50,3 +50,12 @@ O endereço do webhook do Teams e o token do ntfy são guardados cifrados pelo s
 ### O painel de cada utilizador
 
 No modo de equipa, o menu do utilizador com sessão iniciada (o nome no topo) tem a entrada **Notificações**. O painel mostra e guarda as mesmas preferências que `GET/POST /api/auth/me/notify`: se quer notificações, os canais (ntfy com o seu tópico e um token opcional, Teams com o endereço web do canal, correio com um endereço), as sentinelas (CI, colaboração), o nível mínimo, os eventos do sistema (só para um administrador) e se cada alerta chega de imediato ou num resumo por hora ou por dia. Um segredo já guardado é mostrado como guardado e nunca volta à página; só é enviado se escrever um novo, e uma caixa vazia mantém-no. **Enviar um teste** manda uma mensagem aos seus canais e **Vi os meus alertas** marca os pendentes como vistos. Se o administrador não ativou `notify.users.enabled`, o painel di-lo: pode guardar as suas escolhas, ainda não é enviado nada.
+
+## Muitos avisos, ou sempre os mesmos
+
+Quatro definições opcionais do bloco `alerts` (todas desligadas ou vazias por defeito) decidem o que chega aos canais acima. As listas, o separador Alertas e o registo de eventos continuam a mostrar tudo.
+
+- **Silenciamentos permanentes** (`alerts.silences`): uma entrada por linha, `repositório:workflow:ramo;motivo;data de revisão`. Tudo exceto o repositório é opcional e `*` corresponde a qualquer texto. Os avisos que correspondem são mostrados como silenciados, ninguém é notificado e na data de revisão é anunciado um lembrete; o silenciamento continua até o remover.
+- **Serviços e crons curtos** (`alerts.service`): um workflow que só corre agendado ou à mão e falha de vez em quando só é anunciado depois de `failures` falhas seguidas, ou quando `rate_percent` dos seus últimos runs falhou; anunciado uma vez e levantado uma vez em vez de avisar em ciclo. `workflows` junta mais workflows a esta classe.
+- **Agrupar por commit** (`alerts.group`): quando `min` ou mais workflows de um repositório ficam a vermelho no mesmo commit, uma notificação lista-os.
+- **Resumo quando há muitos** (`alerts.digest`): depois de `threshold` notificações na última hora, as restantes são retidas e comunicadas num resumo a cada `minutes` minutos. Os eventos retidos ficam no registo de eventos.
