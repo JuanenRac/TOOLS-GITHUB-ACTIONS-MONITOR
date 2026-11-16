@@ -46,3 +46,10 @@ El panel compara los jobs en curso y en cola con el límite de tu plan y avisa a
 ## Lo que no se cubre
 
 No se siguen los precios por minuto extra, los runners grandes, el almacenamiento en uso, Codespaces ni Packages; la tabla de planes es un punto de partida y los límites de macOS cambian. Nada de esto se ha probado todavía contra un informe de facturación real: la lectura de `usageItems` sigue la descripción pública del informe y degrada en silencio.
+
+## Límites conocidos
+
+- **Las listas de ejecuciones son muestras.** El monitor lee las últimas `runs_per_repo` ejecuciones de cada repositorio (20 por defecto), así que un total que GitHub deja de contar (2.500 o 40.000) se muestra como *al menos* y un repositorio cuya muestra llega solo un rato atrás se marca como *cobertura baja*.
+- **El plan puede ser `unknown`.** Los repositorios privados y gratuitos no dicen qué plan tiene la cuenta: con `account.plan` en `unknown` las cuotas, los minutos incluidos y el límite de concurrencia se muestran como *desconocidos* con las cifras que sí se pueden saber (minutos contados), nunca como un error. Elige el plan para ver los porcentajes.
+- **Un propietario por monitor.** Un repositorio se identifica por su nombre; para vigilar otra organización arranca un segundo monitor con su propio `github_owner`.
+- **La cola de fusión** se vigila solo para la rama por defecto (ejecuciones del evento `merge_group` en `gh-readonly-queue/<defecto>/...`), y una ejecución de la cola cuenta minutos como cualquier otra.

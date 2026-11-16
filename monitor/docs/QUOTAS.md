@@ -46,3 +46,10 @@ The panel compares the jobs running and queued with the limit of your plan and w
 ## What is not covered
 
 Prices per extra minute, larger runners, storage in use, Codespaces and Packages are not tracked; the plan table is a starting point and the limits of macOS change. Nothing here has been tried against a live billing report yet: the reading of `usageItems` follows the public description of the report and degrades silently.
+
+## Known limits
+
+- **The lists of runs are samples.** The monitor reads the last `runs_per_repo` runs of each repository (20 by default), so a total that GitHub stops counting (2,500 or 40,000) is shown as *at least* and a repository whose sample reaches back only a short time is marked *low coverage*.
+- **The plan can be `unknown`.** Private and free repositories do not say which plan the account has: with `account.plan` left on `unknown` the quotas, the included minutes and the concurrency limit are shown as *unknown* with the figures that can be known (minutes counted), never as an error. Choose the plan to see the percentages.
+- **One owner for each monitor.** A repository is identified by its name; to watch another organisation start a second monitor with its own `github_owner`.
+- **The merge queue** is watched for the default branch only (runs of the event `merge_group` on `gh-readonly-queue/<default>/...`), and a queue run counts as minutes like any other run.

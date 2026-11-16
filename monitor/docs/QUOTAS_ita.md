@@ -46,3 +46,10 @@ Il pannello confronta i job in corso e in coda con il limite del tuo piano e avv
 ## Cosa non è coperto
 
 Non si seguono i prezzi per minuto extra, i runner più grandi, lo spazio usato, Codespaces e Packages; la tabella dei piani è un punto di partenza e i limiti di macOS cambiano. Nulla di tutto ciò è stato ancora provato con un rapporto di fatturazione reale: la lettura di `usageItems` segue la descrizione pubblica e degrada in silenzio.
+
+## Limiti noti
+
+- **Gli elenchi di esecuzioni sono campioni.** Il monitor legge le ultime `runs_per_repo` esecuzioni di ogni repository (20 per impostazione predefinita); un totale che GitHub smette di contare (2.500 o 40.000) è mostrato come *almeno*, e un repository il cui campione risale solo a poco tempo fa è contrassegnato come *copertura bassa*.
+- **Il piano può essere `unknown`.** I repository privati e gratuiti non dicono quale piano abbia l'account: con `account.plan` su `unknown` le quote, i minuti inclusi e il limite di concorrenza sono mostrati come *sconosciuti* con le cifre che si possono sapere (minuti contati), mai come un errore. Scegli il piano per vedere le percentuali.
+- **Un proprietario per monitor.** Un repository è identificato dal suo nome; per seguire un'altra organizzazione avvia un secondo monitor con il proprio `github_owner`.
+- **La coda di merge** è seguita solo per il ramo predefinito (esecuzioni dell'evento `merge_group` su `gh-readonly-queue/<predefinito>/...`), e un'esecuzione della coda conta minuti come qualsiasi altra.
