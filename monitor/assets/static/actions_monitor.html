@@ -851,6 +851,7 @@ function runVisible(r,d){
 /* ONE count for the header, the list "Right now", the status bar and the command line: the totals are the figures of the server (every run in progress or waiting), what the list shows is those runs
    after the filters of the page; when they differ the page says so (tile "3 of 13", line "Showing 3 of 13 (filters active)") instead of showing two numbers that look like one */
 function filtersOn(){return !!(FILTER.eco||FILTER.state||FILTER.q||FILTER.list)}
+function stuckWhy(k){return k&&k!=="build"?" · "+T("ui.stuck_why_"+k):""}      // why a run waits: the queue of runners, an approval, a runner that is down (empty for a build that simply runs long)
 function runCounts(d){
   const F=d.figures||{},run=r=>r.status==="in_progress",vis=d.active.filter(r=>runVisible(r,d)&&r.status!=="waiting");      // a run that waits for an approval is neither running nor queued: it has its own line (ui.n_awaiting)
   const tr=F.active!=null?F.active:d.active.filter(run).length,tq=F.queued!=null?F.queued:d.active.filter(r=>!run(r)&&r.status!=="waiting").length,sr=vis.filter(run).length,sq=vis.length-sr;
@@ -883,7 +884,7 @@ function alerts(d){
   const a=[];
   d.issues.filter(i=>repoVisible(i.repo,d)).forEach(i=>a.push(`<div class="alert"><b>${esc(i.labels.join(", "))}</b> · ${esc(i.repo)} #${i.number}: ${esc(i.title)} — <a href="${esc(safeUrl(i.url))}" target="_blank" rel="noopener">${esc(T("ui.a_open"))}</a> <span class="mut">(${hora(i.created)})</span></div>`));
   nowGroups(d.active.filter(r=>r.stuck&&repoVisible(r.repo,d))).forEach(g=>{const r=g.reduce((m,x)=>x.seconds>m.seconds?x:m,g[0]);      // a repository with several stuck runs is ONE alert
-    a.push(`<div class="alert" data-alert-repo="${esc(r.repo)}"><b>${esc(T("ui.a_stuck"))}</b> · ${esc(g.length>1?T("ui.a_stuck_many",{repo:r.repo,n:g.length,dur:fmt(r.seconds),limit:d.stuck_minutes}):T("ui.a_stuck_line",{repo:r.repo,name:r.name,dur:fmt(r.seconds),limit:d.stuck_minutes}))} — <a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">${esc(T("ui.link_run"))}</a></div>`)});
+    a.push(`<div class="alert" data-alert-repo="${esc(r.repo)}"><b>${esc(T("ui.a_stuck"))}</b> · ${esc(g.length>1?T("ui.a_stuck_many",{repo:r.repo,n:g.length,dur:fmt(r.seconds),limit:d.stuck_minutes}):T("ui.a_stuck_line",{repo:r.repo,name:r.name,dur:fmt(r.seconds),limit:r.stuck_limit||d.stuck_minutes})+stuckWhy(r.stuck_reason))} — <a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">${esc(T("ui.link_run"))}</a></div>`)});
   const withIssue=new Set(d.issues.map(i=>i.repo));
   nowGroups(d.failing.filter(r=>repoVisible(r.repo,d)&&!withIssue.has(r.repo))).slice(0,30).forEach(g=>{const r=g[0];      // one line per repository, however many workflows of it fail
     const text=g.length>1?T("ui.a_unresolved_many",{repo:r.repo,n:g.length,names:g.map(x=>x.name).join(", "),since:hora(g.reduce((m,x)=>String(x.started)<String(m)?x.started:m,g[0].started))}):T("ui.a_unresolved_line",{repo:r.repo,name:r.name,conclusion:r.conclusion,since:hora(r.started)});
@@ -1189,7 +1190,7 @@ function renderSent0(){
   const ai=s.ai||{};$("s-ai-state").textContent=ai.enabled?T("ui.ai_state",{provider:ai.provider,model:ai.model||"",used:ai.used_today||0,limit:ai.daily_limit,unavail:ai.available===false?T("ui.ai_unavailable",{msg:ai.message}):""}):T("ui.ai_off");
   // A1
   const stuck=s.a1.stuck.filter(r=>sVis(r.repo)),iss=s.a1.issues.filter(i=>sVis(i.repo));
-  let a1=stuck.map(r=>`<div class="alert"><b>${esc(T("ui.a1_stuck"))}</b> · ${esc(T("ui.a1_line",{repo:r.repo,name:r.name,dur:fmt(r.seconds),status:r.status}))} — ${link(r.url,T("ui.link_run"))}</div>`).join("")+iss.map(i=>`<div class="alert"><b>${esc(i.labels.join(", "))}</b> · ${esc(i.repo)} #${i.number}: ${esc(i.title)} — ${link(i.url,T("ui.a_open"))}</div>`).join("");
+  let a1=stuck.map(r=>`<div class="alert"><b>${esc(T("ui.a1_stuck"))}</b> · ${esc(T("ui.a1_line",{repo:r.repo,name:r.name,dur:fmt(r.seconds),status:r.status})+stuckWhy(r.reason))} — ${link(r.url,T("ui.link_run"))}</div>`).join("")+iss.map(i=>`<div class="alert"><b>${esc(i.labels.join(", "))}</b> · ${esc(i.repo)} #${i.number}: ${esc(i.title)} — ${link(i.url,T("ui.a_open"))}</div>`).join("");
   // A2
   const red=s.a2.red.filter(r=>sVis(r.repo));
   const rrun=(r)=>{const id=(r.url||"").split("/").pop();return aiBtn("build",`data-repo="${esc(r.repo)}" data-run="${esc(id)}"`)+aiBox("b"+r.repo+id)};
@@ -1285,11 +1286,20 @@ function analyticsBox(){
    +tbl(T("ui.a12_h_flaky"),["ui.th_repo","ui.th_workflow","ui.th_flaky","ui.th_runs","ui.th_rate"],(A.flaky||[]).map(r=>[r.repo,r.workflow,r.flaky,r.total,Math.round(r.rate*100)+" %"]))
    +tbl(T("ui.a12_h_slower"),["ui.th_repo","ui.th_workflow","ui.th_p50","ui.th_usual","ui.th_factor"],(A.slower||[]).map(r=>[r.repo,r.workflow,fmtS(r.p50),fmtS(r.usual),"×"+r.factor]));
 }
+function lintCov(L){
+  const c=L.coverage;if(!c||!(c.api||c.sparse||c.not_evaluable_total||c.waiting))return"";
+  const p=[T("ui.a13_cov",{clone:c.clone,sparse:c.sparse,api:c.api})];
+  if(c.not_evaluable_total)p.push(T("ui.a13_cov_ne",{n:c.not_evaluable_total,reasons:Object.entries(c.by_reason||{}).sort((a,b)=>b[1]-a[1]).map(([r,n])=>T("lint.reason."+r)+" ×"+n).join(", ")}));
+  if(c.waiting)p.push(T("ui.a13_cov_wait",{n:c.waiting}));
+  if(c.partial)p.push(T("ui.a13_cov_partial",{n:c.partial}));
+  if((c.api_cannot||[]).length)p.push(T("ui.a13_cov_cannot"));
+  return mut_(p.join(" "));
+}
 function lintBox(s){
   const L=s.lint;if(!L||!L.enabled)return mut_(T("ui.a13_off"));
   const all=(L.rows||[]).filter(r=>sVis(r.repo)),rows=all.filter(r=>LINTLV.has(r.severity));
   const chips=`<div class="lvl" role="group" aria-label="${esc(T("ui.lvl_filter"))}">`+["info","warn","bad"].map(k=>`<button type="button" class="ib" data-lvl="${k}" aria-pressed="${LINTLV.has(k)}">${esc(T("ui.lvl_"+k))} (${all.filter(r=>r.severity===k).length})</button>`).join("")+"</div>";
-  return all.length?chips+(rows.length?`<table>${thk(["ui.th_repo","ui.th_file","ui.th_line","ui.th_rule","ui.th_severity"])}<tbody>${rows.slice(0,80).map(r=>`<tr><td>${esc(r.repo)}</td><td>${esc(r.file)}</td><td>${r.line}</td><td>${esc(T("lint.rule."+r.rule))}${r.detail&&r.detail!=="missing"?" · "+esc(r.detail):""}</td><td><span class="chip ${r.severity==="bad"?"bad":(r.severity==="warn"?"warn":"")}">${esc(T("ui.lvl_"+r.severity))}</span></td></tr>`).join("")}</tbody></table>`:mut_(T("ui.help_none"))):ok_(T("ui.a13_none"));
+  return lintCov(L)+(all.length?chips+(rows.length?`<table>${thk(["ui.th_repo","ui.th_file","ui.th_line","ui.th_rule","ui.th_severity"])}<tbody>${rows.slice(0,80).map(r=>`<tr><td>${esc(r.repo)}</td><td>${esc(r.file)}</td><td>${r.line}</td><td>${esc(T("lint.rule."+r.rule))}${r.detail&&r.detail!=="missing"?" · "+esc(r.detail):""}</td><td><span class="chip ${r.severity==="bad"?"bad":(r.severity==="warn"?"warn":"")}">${esc(T("ui.lvl_"+r.severity))}</span></td></tr>`).join("")}</tbody></table>`:mut_(T("ui.help_none"))):ok_(T("ui.a13_none")));
 }
 async function copyText(btn){try{await navigator.clipboard.writeText(btn.dataset.copy);btn.textContent=T("ui.copied")}catch(err){btn.textContent=T("ui.copy_manual")}}
 $("t-sent").addEventListener("toggle",e=>{const d=e.target;if(d.tagName==="DETAILS"){d.open?OPEN.add(d.dataset.k):OPEN.delete(d.dataset.k);store.set("am-s-open",[...OPEN].join(","))}},true);

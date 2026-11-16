@@ -23,6 +23,18 @@
     "automation_counts": false,
     "inactive_days": 90,
     "extra_branches": [],
+    "stuck": {
+      "learned": false,
+      "percentile": 95,
+      "margin": 2,
+      "min_samples": 3,
+      "min_minutes": 30,
+      "max_minutes": 720,
+      "queue_minutes": 0,
+      "awaiting_stuck": true,
+      "workflow_minutes": [],
+      "runner_minutes": []
+    },
     "rerun_timing": false
   },
   "watchdog_minutes": 10,
@@ -345,6 +357,16 @@
     "enabled": true,
     "refresh_seconds": 3600,
     "in_report": true,
+    "source": "clone",
+    "api": {
+      "refresh_seconds": 21600,
+      "max_calls_per_tick": 20,
+      "max_files_per_repo": 40
+    },
+    "sparse": {
+      "refresh_seconds": 21600,
+      "max_repos_per_tick": 2
+    },
     "own_owners": [],
     "unpinned_own": "same",
     "rules": {

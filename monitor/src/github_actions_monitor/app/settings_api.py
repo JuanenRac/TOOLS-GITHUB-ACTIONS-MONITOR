@@ -29,6 +29,7 @@ import time
 from pathlib import Path
 
 from github_actions_monitor import i18n
+from github_actions_monitor.data_pipeline import alertflow
 from github_actions_monitor.app import surface
 from github_actions_monitor.app import toolconfig
 from github_actions_monitor.security import private_io
@@ -45,11 +46,13 @@ MAX_BODY = 16384
 NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}\Z")
 NET_RE = re.compile(r"^[0-9A-Fa-f:.]{2,45}(?:/[0-9]{1,3})?\Z")      # an address or a block of addresses (listen.trusted_proxies)
 LABEL_RE = re.compile(r"^[\w .:/+-]{1,50}\Z")      # a label of GitHub may hold a colon, a space or a slash ("monitor:ignore", "good first issue")
+PAIR_KEYS = ("ci.stuck.workflow_minutes", "ci.stuck.runner_minutes")
 LABEL_KEYS = ("sentinels.collab.rules.issue_critical_labels", "sentinels.collab.rules.ignore_labels")
 GLOB_RE = re.compile(r"^[A-Za-z0-9._*? -]{1,100}\Z")      # a name or a pattern of names (a ruleset may be called "Protect main" or "main-*")
 HYGIENE_SKIP = ("ruleset", "label", "file", "sha", "allowed", "schedule")
 TZ_RE = re.compile(r"^(?:local|utc|UTC|[A-Za-z][A-Za-z0-9_+./-]{1,63})\Z")      # display.timezone: local, utc or an IANA name
 CRON_RE = re.compile(r"^[0-9*/,\- ]{9,60}\Z")      # report_schedule.cron: five fields of numbers, lists, ranges and steps (reporting/report_schedule.py reads it)
+PAIR_RE = re.compile(r"^[A-Za-z0-9._*/-]{1,100}=[0-9]{1,5}\Z")      # ci.stuck.workflow_minutes / ci.stuck.runner_minutes: "pattern=minutes"
 BRANCH_RE = re.compile(r"^[A-Za-z0-9._*/-]{1,100}\Z")      # a branch name or a pattern of branch names (ci.extra_branches)
 from github_actions_monitor.health import fleet as _fleet      # noqa: E402 - the two shapes of the lists of the fleet view are defined next to the code that reads them
 FLEET_LABEL_RE, FLEET_FILTER_RE = _fleet.LABEL_RE, _fleet.FILTER_RE
@@ -239,6 +242,16 @@ _f(_T_SENT, "causes", "ci.failed_jobs.enabled", "bool", restart=False)
 _f(_T_SENT, "causes", "ci.failed_jobs.max_per_cycle", "int", (1, 50), restart=False, unit="calls")
 _f(_T_SENT, "causes", "ci.failed_jobs.group_by", "enum", ("auto", "platform", "matrix", "prefix"), restart=False)
 _f(_T_SENT, "durations", "ci.rerun_timing", "bool", restart=False)
+_f(_T_SENT, "stuck", "ci.stuck.learned", "bool", restart=False)
+_f(_T_SENT, "stuck", "ci.stuck.percentile", "int", (50, 100), restart=False)
+_f(_T_SENT, "stuck", "ci.stuck.margin", "int", (1, 20), restart=False)
+_f(_T_SENT, "stuck", "ci.stuck.min_samples", "int", (2, 100), restart=False)
+_f(_T_SENT, "stuck", "ci.stuck.min_minutes", "int", (1, 10000), unit="min", restart=False)
+_f(_T_SENT, "stuck", "ci.stuck.max_minutes", "int", (1, 100000), unit="min", restart=False)
+_f(_T_SENT, "stuck", "ci.stuck.queue_minutes", "int", (0, 100000), unit="min", restart=False)
+_f(_T_SENT, "stuck", "ci.stuck.awaiting_stuck", "bool", restart=False)
+_f(_T_SENT, "stuck", "ci.stuck.workflow_minutes", "names", restart=False)
+_f(_T_SENT, "stuck", "ci.stuck.runner_minutes", "names", restart=False)
 _f(_T_SENT, "prs", "sentinel.stale_pr_days", "int", (1, 90))
 _f(_T_SENT, "prs", "sentinel.dependency_bots", "names")
 _f(_T_SENT, "prs", "sentinel.bots_apart", "bool")
@@ -281,6 +294,15 @@ _f(_T_SENT, "security", "sentinels.security.signals.branch.enabled", "bool")
 _f(_T_SENT, "security", "sentinels.security.signals.workflow.enabled", "bool")
 _f(_T_SENT, "security", "sentinels.security.signals.codeowners.enabled", "bool")
 _f(_T_SENT, "collab", "alerts.mute_hours", "int", (1, 720), restart=False, unit="h")
+_f(_T_SENT, "flow_silences", "alerts.silences", "names", restart=False)
+_f(_T_SENT, "flow_service", "alerts.service.enabled", "bool", restart=False)
+_f(_T_SENT, "flow_service", "alerts.service.failures", "int", (2, 50), restart=False)
+_f(_T_SENT, "flow_service", "alerts.service.rate_percent", "int", (0, 100), restart=False, unit="%")
+_f(_T_SENT, "flow_service", "alerts.service.workflows", "names", restart=False)
+_f(_T_SENT, "flow_group", "alerts.group.by_commit", "bool", restart=False)
+_f(_T_SENT, "flow_group", "alerts.group.min", "int", (2, 50), restart=False)
+_f(_T_SENT, "flow_digest", "alerts.digest.minutes", "int", (0, 1440), restart=False, unit="min")
+_f(_T_SENT, "flow_digest", "alerts.digest.threshold", "int", (3, 500), restart=False)
 # --- Actions and releases surface (A10)
 _f(_T_SURF, "main", "sentinel.surface.enabled", "bool")
 _f(_T_SURF, "main", "sentinel.surface.refresh_seconds", "int", (600, 604800))
@@ -440,6 +462,12 @@ _f("lint", "main", "lint.enabled", "bool")
 _f("lint", "main", "lint.refresh_seconds", "int", (60, 86400))
 _f("lint", "main", "lint.in_report", "bool")
 _f("lint", "main", "lint.ignore", "patterns")
+_f("lint", "lint_source", "lint.source", "enum", ("clone", "auto", "sparse"))
+_f("lint", "lint_api", "lint.api.refresh_seconds", "int", (600, 604800))
+_f("lint", "lint_api", "lint.api.max_calls_per_tick", "int", (1, 200), unit="calls")
+_f("lint", "lint_api", "lint.api.max_files_per_repo", "int", (1, 100))
+_f("lint", "lint_sparse", "lint.sparse.refresh_seconds", "int", (600, 604800))
+_f("lint", "lint_sparse", "lint.sparse.max_repos_per_tick", "int", (1, 20))
 _f("lint", "own_actions", "lint.own_owners", "names")
 _f("lint", "own_actions", "lint.unpinned_own", "enum", ("same", "info", "ignore"))
 for _rule in ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target", "no_timeout", "secrets_inherit", "own_action_main"):
@@ -646,7 +674,7 @@ def check_value(path, value):
             return False, "path"
         return True, text
     if kind == "names":
-        pattern = FLEET_LABEL_RE if path == "fleet.labels" else FLEET_FILTER_RE if path == "fleet.saved_filters" else RUNNER_LABEL_RE if path in RUNNER_LABEL_KEYS else LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path == "sentinel.hygiene.ruleset_names" else NAME_RE)))
+        pattern = FLEET_LABEL_RE if path == "fleet.labels" else FLEET_FILTER_RE if path == "fleet.saved_filters" else RUNNER_LABEL_RE if path in RUNNER_LABEL_KEYS else LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path == "sentinel.hygiene.ruleset_names" else (alertflow.SILENCE_RE if path == "alerts.silences" else (alertflow.PATTERN_RE if path == "alerts.service.workflows" else (PAIR_RE if path in PAIR_KEYS else NAME_RE))))))
         if not isinstance(value, list) or len(value) > 200 or not all(isinstance(v, str) and pattern.match(v) for v in value):
             return False, "names"
         if path == "sentinel.hygiene.ruleset_names" and not value:

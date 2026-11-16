@@ -66,7 +66,16 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai_notify.max_cost_per_hour_cents` (secure) | `50` | ai | Cost cap per hour (cents) |
 | `ai_notify.timeout_seconds` (secure) | `30` | ai | Seconds to wait for the answer |
 | `airgapped` (secure) | `false` | basic | Air-gapped installation |
+| `alerts.digest.minutes` | `0` | sentinel | Minutes between summaries (0 = off) |
+| `alerts.digest.threshold` | `10` | sentinel | Notifications per hour before summarising |
+| `alerts.group.by_commit` | `false` | sentinel | Group new reds of the same commit |
+| `alerts.group.min` | `3` | sentinel | Workflows needed to group |
 | `alerts.mute_hours` | `-` | sentinel | Hours of a silence |
+| `alerts.service.enabled` | `false` | sentinel | Treat short crons as services |
+| `alerts.service.failures` | `3` | sentinel | Failures in a row before it alerts |
+| `alerts.service.rate_percent` | `0` | sentinel | Or when this share of its last runs failed |
+| `alerts.service.workflows` | `[]` | sentinel | More workflows of the service class |
+| `alerts.silences` | `[]` | sentinel | Permanent silences |
 | `analytics.enabled` | `-` | analytics | Analytics on |
 | `analytics.flaky` | `-` | analytics | Flaky detection |
 | `analytics.jobs_per_cycle` | `-` | analytics | Jobs read per cycle |
@@ -101,6 +110,16 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ci.inactive_days` | `90` | sentinel | Days until a workflow is inactive |
 | `ci.red_events` | `["push", "schedule", "workflow_dispatch", "merge_group"]` | sentinel | Events that can make a branch red |
 | `ci.rerun_timing` | `false` | sentinel | Ask GitHub for the duration of re-runs |
+| `ci.stuck.awaiting_stuck` | `true` | sentinel | A run waiting for approval can be stuck |
+| `ci.stuck.learned` | `false` | sentinel | Learn the limit of each workflow |
+| `ci.stuck.margin` | `2.0` | sentinel | Margin over that duration |
+| `ci.stuck.max_minutes` | `720` | sentinel | Largest learned limit |
+| `ci.stuck.min_minutes` | `30` | sentinel | Smallest learned limit |
+| `ci.stuck.min_samples` | `3` | sentinel | Finished runs needed to learn |
+| `ci.stuck.percentile` | `95` | sentinel | Percentile of the durations |
+| `ci.stuck.queue_minutes` | `0` | sentinel | Limit for a run waiting for a runner |
+| `ci.stuck.runner_minutes` | `[]` | sentinel | Fixed limits per runner label |
+| `ci.stuck.workflow_minutes` | `[]` | sentinel | Fixed limits per workflow |
 | `cold_refresh_seconds` | `600` | polling | Refresh of cold repositories |
 | `cold_runs_per_repo` | `5` | polling | Runs read per cold repository |
 | `discover_limit` | `1000` | polling | Repositories listed |
@@ -149,6 +168,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `lessons.max_entries` | `5000` | ai | Most lines in the book |
 | `lessons.recurring_from` | `2` | ai | A kind of failure repeats from |
 | `lessons.retention_days` | `180` | ai | Keep failures for |
+| `lint.api.max_calls_per_tick` | `-` | lint | API calls per cycle for workflow files |
+| `lint.api.max_files_per_repo` | `-` | lint | Workflow files read per repository |
+| `lint.api.refresh_seconds` | `-` | lint | Read a repository again after |
 | `lint.enabled` | `-` | lint | Linter on |
 | `lint.ignore` | `-` | lint | Ignored findings |
 | `lint.in_report` | `-` | lint | Warn in the report |
@@ -170,6 +192,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `lint.rules.secrets_inherit.severity` | `-` | lint | lint.rules.secrets_inherit.severity |
 | `lint.rules.unpinned_uses.enabled` | `-` | lint | lint.rules.unpinned_uses.enabled |
 | `lint.rules.unpinned_uses.severity` | `-` | lint | lint.rules.unpinned_uses.severity |
+| `lint.source` | `-` | lint | Where the workflow files are read |
+| `lint.sparse.max_repos_per_tick` | `-` | lint | Sparse clones per cycle |
+| `lint.sparse.refresh_seconds` | `-` | lint | Refresh a sparse clone after |
 | `lint.unpinned_own` | `-` | lint | Own actions that are not pinned |
 | `listen.allowed_hosts` (secure) | `[]` | advanced | Names the page may be opened with |
 | `listen.host` (secure) | `"127.0.0.1"` | advanced | Address to listen on |
