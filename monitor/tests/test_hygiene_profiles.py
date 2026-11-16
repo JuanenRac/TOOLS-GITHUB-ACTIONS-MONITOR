@@ -34,27 +34,31 @@ REQ = sl.DEFAULTS["required_files"]
 
 
 class Defaults(unittest.TestCase):
-    def test_the_default_rule_is_the_old_one(self):
-        self.assertEqual(sl.hygiene_settings({}), {"ruleset_mode": "name", "ruleset_names": ["protect-main"], "skip": [], "community_fallback": False})
-        problems, unknown = sl.hygiene_review(info(rulesets=[{"name": "Main protection", "enforcement": "ACTIVE"}]), ADMIN, REQ)
+    def test_the_default_judges_the_rules_in_force_and_the_old_rule_is_the_name_mode(self):
+        self.assertEqual(sl.hygiene_settings({}), {"ruleset_mode": "effective", "ruleset_names": ["protect-main"], "skip": [], "community_fallback": False})
+        problems, unknown = sl.hygiene_review(info(rulesets=[{"name": "Main protection", "enforcement": "ACTIVE"}]), ADMIN, REQ, hyg(ruleset_mode="name"))
         self.assertEqual((codes(problems), unknown), (["ruleset"], []))
+        # by default the name of the ruleset does not matter: a branch protected in any way is protected, and nothing is said before the rules were read
+        self.assertEqual(sl.hygiene_review(info(rulesets=[]), ADMIN, REQ), ([], []))
+        found = {"protected": True, "rules": [], "classic": True}
+        self.assertEqual(sl.hygiene_review(info(rulesets=[]), {**ADMIN, "branch_rules": found}, REQ), ([], []))
 
     def test_a_bad_value_falls_back_to_the_default_of_that_key_only(self):
         got = sl.hygiene_settings({"sentinel": {"hygiene": {"ruleset_mode": "banana", "ruleset_names": [], "skip": ["file", "nonsense"], "community_fallback": "yes"}}})
-        self.assertEqual(got, {"ruleset_mode": "name", "ruleset_names": ["protect-main"], "skip": ["file"], "community_fallback": False})
+        self.assertEqual(got, {"ruleset_mode": "effective", "ruleset_names": ["protect-main"], "skip": ["file"], "community_fallback": False})
 
     def test_sentinel_config_carries_the_block(self):
         self.assertEqual(sl.sentinel_config({"sentinel": {"hygiene": {"ruleset_mode": "effective"}}})["hygiene"]["ruleset_mode"], "effective")
-        self.assertEqual(sl.sentinel_config({})["hygiene"]["ruleset_mode"], "name")
+        self.assertEqual(sl.sentinel_config({})["hygiene"]["ruleset_mode"], "effective")
 
 
 class RulesetByNameOrByRules(unittest.TestCase):
     def test_a_configurable_name_or_pattern(self):
         repo = info(rulesets=[{"name": "Main-Branch Protection", "enforcement": "ACTIVE"}])
-        self.assertEqual(codes(sl.hygiene_problems(repo, ADMIN, REQ, hyg(ruleset_names=["main-*"]))), [])
-        self.assertEqual(codes(sl.hygiene_problems(repo, ADMIN, REQ, hyg(ruleset_names=["release-*"]))), ["ruleset"])
+        self.assertEqual(codes(sl.hygiene_problems(repo, ADMIN, REQ, hyg(ruleset_mode="name", ruleset_names=["main-*"]))), [])
+        self.assertEqual(codes(sl.hygiene_problems(repo, ADMIN, REQ, hyg(ruleset_mode="name", ruleset_names=["release-*"]))), ["ruleset"])
         evaluate = info(rulesets=[{"name": "protect-main", "enforcement": "EVALUATE"}])
-        self.assertEqual(codes(sl.hygiene_problems(evaluate, ADMIN, REQ)), ["ruleset"])      # only an ACTIVE ruleset counts
+        self.assertEqual(codes(sl.hygiene_problems(evaluate, ADMIN, REQ, hyg(ruleset_mode="name"))), ["ruleset"])      # only an ACTIVE ruleset counts
 
     def test_effective_rules_do_not_depend_on_the_name(self):
         repo = info(rulesets=[])
@@ -72,9 +76,9 @@ class RulesetByNameOrByRules(unittest.TestCase):
 
     def test_skip_leaves_a_check_out(self):
         bad = info(rulesets=[], label_dependencies=False, files={})
-        full = codes(sl.hygiene_problems(bad, {"sha_pinning_required": False, "allowed_actions": "all", "wf_disabled": ["Nightly"]}, REQ))
+        full = codes(sl.hygiene_problems(bad, {"sha_pinning_required": False, "allowed_actions": "all", "wf_disabled": ["Nightly"]}, REQ, hyg(ruleset_mode="name")))
         self.assertEqual(full, ["allowed", "file", "label", "ruleset", "schedule", "sha"])
-        left = codes(sl.hygiene_problems(bad, {"sha_pinning_required": False, "allowed_actions": "all", "wf_disabled": ["Nightly"]}, REQ, hyg(skip=["label", "sha", "schedule"])))
+        left = codes(sl.hygiene_problems(bad, {"sha_pinning_required": False, "allowed_actions": "all", "wf_disabled": ["Nightly"]}, REQ, hyg(ruleset_mode="name", skip=["label", "sha", "schedule"])))
         self.assertEqual(left, ["allowed", "file", "ruleset"])
 
 

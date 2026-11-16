@@ -11,12 +11,17 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+### Changed
+
+- **The hygiene check of the default branch judges the rules in force by default (`sentinel.hygiene.ruleset_mode` is now `effective`)**: before, the branch counted as protected only when a ruleset with an exact name (`protect-main`) was active, which no studied account used (none of the studied accounts named its rulesets like that, and 32 of 96 repositories protect the branch in the classic way). By default a branch now counts as protected when GitHub reports a rule or a protection for it, whatever it is called. The check reads the branch and its rules, two more requests for each repository every time the hygiene is renewed. Set `name` to bring back the old rule. A profile that asks for the old rule keeps it.
+
 ### Added
 
 - **Runs queued for days are told apart as a ghost queue (setting `ci.stuck.ghost_enabled`, days in `ci.stuck.ghost_days`, default 7)**: on public repositories GitHub leaves runs in the queue for weeks or months (a closed pull request, a job that asks for a runner that does not exist; 280 days at the worst, in 8 of 10 busy repositories). Those runs inflated the queued count, were reported as stuck builds and fed every limit learned from the queue. A queued run of the first attempt older than the limit is now neither queued nor stuck: it leaves the list "Right now" and the counts, a line says how many there are, and the sentinel lists them apart and gives one information notice per repository (`ci.ghost_queue`), never an error. The switch is on by default; turned off, every queued run is treated as before.
 
 ### Fixed
 
+- **The protection of the default branch is judged from every public source, not only from the rules of the rulesets**: 32 of the 96 public repositories studied have a default branch protected in the classic way, which `rules/branches` does not show, so an empty list of rules was read as "no protection". In `effective` mode the answer of the branch now also gives its classic `protection` (whether it is enabled and how strictly its status checks apply, readable without admin rights) and the three sources are joined; a branch is unprotected only when they answered and none of them protects it, and an answer that did not come (a timeout, a refused read, a missing field) stays "not evaluable". Each row of the hygiene panel says what protects the branch (`protection`: ruleset, classic, both or none).
 - **The workflows GitHub makes for itself are neither red CI nor files**: the entries with a path that starts with `dynamic/` (Dependabot updates, the dependency graph, the default CodeQL, the review and the agent of Copilot) failed for ever in 20 of the 96 public repositories studied, and were counted as workflows of the repository (red, abandoned, "disabled"). The monitor kept only the file name of a run, so the check of the path never matched; now the whole path is remembered when the run is read. Those workflows never decide the colour of a branch, are not counted as workflows to check, and are not listed among the workflows disabled by hand or by inactivity. A failing Dependabot update is listed apart as a warning, and the others (Copilot, CodeQL, the dependency graph) as information, in `a2.services` of the sentinel and in the header figure `services_failing`.
 
 ## [2.0.4]

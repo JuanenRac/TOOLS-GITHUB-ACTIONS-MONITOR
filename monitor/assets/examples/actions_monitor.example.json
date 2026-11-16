@@ -86,7 +86,7 @@
       ]
     ],
     "hygiene": {
-      "ruleset_mode": "name",
+      "ruleset_mode": "effective",
       "ruleset_names": [
         "protect-main"
       ],

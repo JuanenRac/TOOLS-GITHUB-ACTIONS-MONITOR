@@ -9,12 +9,17 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+### Alterado
+
+- **A verificação de higiene do ramo por omissão avalia por omissão as regras em vigor (`sentinel.hygiene.ruleset_mode` é agora `effective`)**: antes o ramo só contava como protegido quando havia um ruleset ativo com um nome exato (`protect-main`), algo que nenhuma conta estudada usava (nenhuma das contas estudadas chamava assim aos seus rulesets, e 32 de 96 repositórios protegem o ramo de forma clássica). Agora, por omissão, um ramo conta como protegido quando o GitHub indica uma regra ou uma proteção para ele, qualquer que seja o nome. A verificação lê o ramo e as suas regras, mais dois pedidos por repositório de cada vez que a higiene é renovada. Põe `name` para repor a regra antiga. Um perfil que pede a regra antiga mantém-na.
+
 ### Adicionado
 
 - **As execuções em fila há dias são distinguidas como fila fantasma (definição `ci.stuck.ghost_enabled`, dias em `ci.stuck.ghost_days`, 7 por omissão)**: em repositórios públicos o GitHub deixa execuções na fila durante semanas ou meses (um pull request fechado, um job que pede um runner que não existe; 280 dias no pior caso, em 8 de 10 repositórios ativos). Essas execuções inflacionavam a contagem de em fila, eram avisadas como compilações bloqueadas e alimentavam todo o limite aprendido da fila. Uma execução em fila da primeira tentativa mais antiga do que o limite já não está nem em fila nem bloqueada: sai da lista «Agora» e das contas, uma linha diz quantas há, e o sentinela lista-as à parte e dá um aviso informativo por repositório (`ci.ghost_queue`), nunca um erro. O interruptor está ativado por omissão; desativado, toda a execução em fila é tratada como antes.
 
 ### Corrigido
 
+- **A proteção do ramo por omissão é avaliada com todas as fontes públicas, não só com as regras dos rulesets**: 32 dos 96 repositórios públicos estudados têm o ramo por omissão protegido de forma clássica, algo que `rules/branches` não mostra, pelo que uma lista de regras vazia era lida como «sem proteção». No modo `effective` a resposta do ramo dá agora também a sua `protection` clássica (se está ativa e com que rigor se aplicam as suas verificações de estado, legível sem permissões de administrador) e as três fontes são juntas; um ramo está sem proteção apenas quando responderam e nenhuma o protege, e uma resposta que não chegou (tempo esgotado, leitura recusada, campo em falta) continua «não avaliável». Cada linha do painel de higiene diz o que protege o ramo (`protection`: ruleset, classic, both ou none).
 - **Os workflows que o GitHub cria para si próprio não são CI a vermelho nem ficheiros**: as entradas com um caminho que começa por `dynamic/` (atualizações do Dependabot, o grafo de dependências, o CodeQL por omissão, a revisão e o agente do Copilot) falhavam para sempre em 20 dos 96 repositórios públicos estudados e eram contadas como workflows do repositório (vermelhos, abandonados, «desativados»). O monitor guardava apenas o nome do ficheiro de uma execução, pelo que a verificação do caminho nunca coincidia; agora o caminho inteiro é memorizado ao ler a execução. Esses workflows nunca decidem a cor de um ramo, não contam como workflows a verificar e não aparecem entre os desativados à mão ou por inatividade. Uma atualização do Dependabot que falha é listada à parte como aviso, e as outras (Copilot, CodeQL, grafo de dependências) como informação, em `a2.services` do sentinela e no número do cabeçalho `services_failing`.
 
 ## [2.0.4]

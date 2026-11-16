@@ -78,11 +78,11 @@ DEFAULTS = {
     "hygiene_seconds": 21600, "max_calls_per_tick": 70, "budget_per_hour": 600, "workers": 8,
     "candidate_days": 2.0, "pending_sign_hours": 24, "notify_command": [], "candidate_min_entries": 1, "stale_pr_days": 7, "hot_hours": 3,
     "required_files": [["README.md"], ["LICENSE", "LICENSE.md", "LICENSE.txt", "LICENSE-APACHE", "LICENSE-MIT", "COPYING"], ["CHANGELOG.md"], ["SECURITY.md"]],
-    # hygiene (A6): how strict it is. ruleset_mode "name" = a ruleset whose name matches ruleset_names (patterns, ACTIVE) must exist (the old rule); "effective" = the default
+    # hygiene (A6): how strict it is. ruleset_mode "name" = a ruleset whose name matches ruleset_names (patterns, ACTIVE) must exist (the old rule); "effective" (the default) = the default
     # branch is protected when GitHub reports an effective rule or a branch protection for it (public endpoints, no admin needed), whatever the ruleset is called; "off" = not checked.
     # skip = checks to leave out (ruleset, label, file, sha, allowed, schedule). community_fallback: a file missing in the repository still counts when the community profile
     # of GitHub or the organisation's `.github` repository provides it. What the token cannot know is shown as "not evaluable", never as green and never as a warning.
-    "hygiene": {"ruleset_mode": "name", "ruleset_names": ["protect-main"], "skip": [], "community_fallback": False},
+    "hygiene": {"ruleset_mode": "effective", "ruleset_names": ["protect-main"], "skip": [], "community_fallback": False},
     "skip_candidate_prefixes": [], "min_rate_remaining": 800,
     # dependency_bots: the accounts whose pull requests are the dependency updates of A4 (a login with `app/` before it or `[bot]` after it counts too).
     "dependency_bots": list(DEPENDENCY_BOTS),
@@ -409,7 +409,7 @@ def pending_sign(green, now, hours):
 
 
 HYGIENE_CODES = ("ruleset", "label", "file", "sha", "allowed", "schedule")
-HYGIENE_DEFAULTS = {"ruleset_mode": "name", "ruleset_names": ["protect-main"], "skip": [], "community_fallback": False}
+HYGIENE_DEFAULTS = {"ruleset_mode": "effective", "ruleset_names": ["protect-main"], "skip": [], "community_fallback": False}
 # the kinds of rule that make a branch "protected": a rule that only names who may push (or nothing) does not
 PROTECTIVE_RULES = ("pull_request", "required_status_checks", "non_fast_forward", "deletion", "required_linear_history", "required_signatures", "update", "merge_queue", "required_deployments")
 COMMUNITY_FILES = {"README": "readme", "LICENSE": "license", "COPYING": "license", "CONTRIBUTING": "contributing", "CODE_OF_CONDUCT": "code_of_conduct"}   # file stem -> key of the community profile
@@ -419,7 +419,7 @@ def hygiene_settings(config):
     """The merged `sentinel.hygiene` block: a bad value falls back to the default of that key only."""
     block = ((config or {}).get("sentinel") or {}).get("hygiene") if isinstance(((config or {}).get("sentinel") or {}), dict) else None
     block = block if isinstance(block, dict) else {}
-    out = {"ruleset_mode": "name", "ruleset_names": list(HYGIENE_DEFAULTS["ruleset_names"]), "skip": [], "community_fallback": False}
+    out = {"ruleset_mode": "effective", "ruleset_names": list(HYGIENE_DEFAULTS["ruleset_names"]), "skip": [], "community_fallback": False}
     if block.get("ruleset_mode") in ("name", "effective", "off"):
         out["ruleset_mode"] = block["ruleset_mode"]
     names = block.get("ruleset_names")
@@ -464,7 +464,7 @@ def _file_state(group, present, license_key, perms, org_files, hyg):
 
 def _ruleset_state(info, perms, hyg):
     """"ok", "missing", "unknown" or "skip" for the protection of the default branch."""
-    mode = hyg.get("ruleset_mode", "name")
+    mode = hyg.get("ruleset_mode", "effective")
     if mode == "off":
         return "skip"
     if mode == "effective":
@@ -472,7 +472,7 @@ def _ruleset_state(info, perms, hyg):
         if not isinstance(found, dict):
             return "skip"      # not read yet: the pending counter says so
         rules, protected = found.get("rules"), found.get("protected")
-        if protected is True or (isinstance(rules, list) and any(r in PROTECTIVE_RULES for r in rules)):
+        if protected is True or found.get("classic") is True or (isinstance(rules, list) and any(r in PROTECTIVE_RULES for r in rules)):
             return "ok"
         return "missing" if (protected is False and isinstance(rules, list)) else "unknown"
     patterns = [p.lower() for p in hyg.get("ruleset_names") or ["protect-main"]]
@@ -480,6 +480,23 @@ def _ruleset_state(info, perms, hyg):
         if str(r.get("enforcement", "")).upper() == "ACTIVE" and any(fnmatch.fnmatchcase(str(r.get("name", "")).lower(), p) for p in patterns):
             return "ok"
     return "missing"
+
+
+def protection_source(found):
+    """What protects the default branch, from the three public sources joined: "ruleset" (a rule of a ruleset that protects), "classic" (the classic protection of the branch), "both", "none" (the sources answered and
+    nothing protects it) or None (they did not answer, or were not read): the rules of the rulesets alone say nothing about a classic protection, so an empty list is never "no protection" by itself."""
+    if not isinstance(found, dict):
+        return None
+    rules, protected, classic = found.get("rules"), found.get("protected"), found.get("classic")
+    by_rules = isinstance(rules, list) and any(r in PROTECTIVE_RULES for r in rules)
+    by_branch = protected is True or classic is True
+    if by_rules and by_branch:
+        return "both"
+    if by_rules:
+        return "ruleset"
+    if by_branch:
+        return "classic"
+    return "none" if (protected is False and isinstance(rules, list)) else None
 
 
 def hygiene_review(info, perms, required_files, hyg=None, org_files=None):
@@ -490,7 +507,7 @@ def hygiene_review(info, perms, required_files, hyg=None, org_files=None):
     problems, unknown = [], []
     state = _ruleset_state(info, perms, hyg) if "ruleset" not in skip else "skip"
     if state == "missing":
-        problems.append(("ruleset", i18n.t("hyg.ruleset", name=" / ".join(hyg.get("ruleset_names") or ["protect-main"])) if hyg.get("ruleset_mode", "name") == "name" else i18n.t("hyg.ruleset_effective")))
+        problems.append(("ruleset", i18n.t("hyg.ruleset", name=" / ".join(hyg.get("ruleset_names") or ["protect-main"])) if hyg.get("ruleset_mode", "effective") == "name" else i18n.t("hyg.ruleset_effective")))
     elif state == "unknown":
         unknown.append(("ruleset", i18n.t("hyg.unknown", name="ruleset")))
     if "label" not in skip and not info.get("label_dependencies"):
@@ -856,7 +873,8 @@ def compute_snapshot(inp):
         if not p:
             pending += 1
         probs, unk = hygiene_review(info[repo], p, cfg["required_files"], cfg.get("hygiene"), inp.get("org_files"))
-        hyg_rows.append({"repo": repo, "problems": [{"code": c, "text": t} for c, t in probs], "unknown": [{"code": c, "text": t} for c, t in unk], "checked": bool(p)})
+        hyg_rows.append({"repo": repo, "problems": [{"code": c, "text": t} for c, t in probs], "unknown": [{"code": c, "text": t} for c, t in unk], "checked": bool(p),
+                         "protection": protection_source((p or {}).get("branch_rules"))})
     mins = minutes(runs_by_repo, now)
     errors = [{"section": k, "message": v["message"], "at": v["at"]} for k, v in sorted(inp["errors"].items())]
     sev_total = {"critical": 0, "high": 0}
@@ -1252,7 +1270,12 @@ class Sentinel:
         out = {"protected": None, "rules": None}
         name = quote(branch, safe="")
         try:
-            out["protected"] = bool((self._gh("api", f"repos/{owner}/{repo}/branches/{name}", retries=1) or {}).get("protected"))
+            body = self._gh("api", f"repos/{owner}/{repo}/branches/{name}", retries=1) or {}
+            out["protected"] = body.get("protected") if isinstance(body.get("protected"), bool) else None      # an answer without the field says nothing
+            classic = body.get("protection") if isinstance(body.get("protection"), dict) else None
+            if classic is not None:      # the public answer carries the classic protection too (no admin rights needed): whether it is enabled and how strictly its status checks apply
+                level = (classic.get("required_status_checks") or {}).get("enforcement_level") if isinstance(classic.get("required_status_checks"), dict) else None
+                out["classic"] = bool(classic.get("enabled")) or (isinstance(level, str) and level not in ("", "off"))
         except Exception:
             pass
         try:
