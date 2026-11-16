@@ -11,7 +11,7 @@ Un número de 0 a 100, una letra de A a E y una tendencia, para cada cuenta, hec
 
 ## De qué está hecha
 
-Una suma ponderada de cuatro partes, cada una de 0 a 100. Una parte vale 100 en su límite **bueno**, 0 en su límite **malo** y es lineal entre ambos. Los pesos y los límites son ajustes.
+Una suma ponderada de cinco partes, cada una de 0 a 100. Una parte vale 100 en su límite **bueno**, 0 en su límite **malo** y es lineal entre ambos. Los pesos y los límites son ajustes.
 
 | Parte | Peso | Qué mide | Bueno | Malo |
 |---|---|---|---|---|
@@ -29,7 +29,7 @@ La puntuación nunca muestra un número que no pueda respaldar. La respuesta sie
 
 - **calibrating** (calibrando): la cuenta lleva vigilada menos de `score.calibrating_hours` (24 por defecto). Sin número ni letra.
 - **insufficient_data** (datos insuficientes): menos de `score.min_runs` ejecuciones terminadas en la ventana (20 por defecto), o las partes con datos pesan menos de `score.min_coverage` del total (la mitad por defecto). Sin número.
-- **scored** (puntuada): un número, una letra y una tendencia. Una parte sin datos se deja fuera y las demás se reescalan; eso baja la `coverage` (por ejemplo 0,8 si el centinela de colaboración está apagado). Nunca cuenta como 0 ni como 100.
+- **scored** (puntuada): un número, una letra y una tendencia. Una parte sin datos se deja fuera y las demás se reescalan; eso baja la `coverage` (por ejemplo 0,85 si el centinela de colaboración está apagado). Nunca cuenta como 0 ni como 100.
 
 La seguridad es una parte como las demás, pero solo tiene datos mientras el centinela de seguridad está activo y ha mirado suficientes repositorios. Sin él, la respuesta dice `complete: false` y lista `security` en `missing_parts`, y las demás partes se reescalan, así que el número nunca se lee como un todo en orden. GitHub no da histórico de los hallazgos, así que la parte de seguridad es la misma en la ventana y en la anterior: la tendencia muestra lo que hicieron la CI y la colaboración. Los pesos son 30, 15, 15, 15 y 25 por defecto. Una ventana con ejecuciones y ningún fallo no tiene nada que recuperar: su parte de recuperación es completa, como un hecho y no como un hueco.
 
@@ -61,4 +61,4 @@ Cuando la puntuación baja `score.alert.drop_points` puntos (10 por defecto) o m
 
 ## Los ajustes
 
-En la página de Ajustes, subpestaña Centinela, bloques Puntuación de la cuenta, Pesos de la puntuación y Letras de la puntuación: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, de `score.grades.A` a `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` y `score.alert.notify_external` (apagado por defecto). Los límites bueno y malo de cada parte se leen del fichero, en `score.limits` (véase el fichero de ejemplo); no se editan en la página.
+En la página de Ajustes, subpestaña Centinela, bloques Puntuación de la cuenta, Pesos de la puntuación y Letras de la puntuación: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.weights.security`, de `score.grades.A` a `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` y `score.alert.notify_external` (apagado por defecto). Los límites bueno y malo de cada parte se leen del fichero, en `score.limits` (véase el fichero de ejemplo); no se editan en la página.

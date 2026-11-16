@@ -11,7 +11,7 @@ Un numero da 0 a 100, una lettera da A a E e una tendenza, per ogni account, cos
 
 ## Di cosa è fatto
 
-Una somma ponderata di quattro parti, ciascuna da 0 a 100. Una parte vale 100 al suo limite **buono**, 0 al suo limite **cattivo** ed è lineare nel mezzo. I pesi e i limiti sono impostazioni.
+Una somma ponderata di cinque parti, ciascuna da 0 a 100. Una parte vale 100 al suo limite **buono**, 0 al suo limite **cattivo** ed è lineare nel mezzo. I pesi e i limiti sono impostazioni.
 
 | Parte | Peso | Cosa misura | Buono | Cattivo |
 |---|---|---|---|---|
@@ -29,7 +29,7 @@ Il punteggio non mostra mai un numero che non può sostenere. La risposta porta 
 
 - **calibrating** (calibrazione): l'account è osservato da meno di `score.calibrating_hours` (24 per impostazione predefinita). Né numero né lettera.
 - **insufficient_data** (dati insufficienti): meno di `score.min_runs` esecuzioni concluse nella finestra (20 per impostazione predefinita), oppure le parti con dati pesano meno di `score.min_coverage` del totale (metà per impostazione predefinita). Nessun numero.
-- **scored** (valutato): un numero, una lettera e una tendenza. Una parte senza dati viene lasciata fuori e le altre vengono riscalate; questo abbassa la `coverage` (per esempio 0,8 con la sentinella di collaborazione spenta). Non conta mai come 0 né come 100.
+- **scored** (valutato): un numero, una lettera e una tendenza. Una parte senza dati viene lasciata fuori e le altre vengono riscalate; questo abbassa la `coverage` (per esempio 0,85 con la sentinella di collaborazione spenta). Non conta mai come 0 né come 100.
 
 La sicurezza è una parte come le altre, ma ha dati solo finché la sentinella di sicurezza è attiva e ha guardato abbastanza repository. Senza di essa la risposta dice `complete: false` ed elenca `security` in `missing_parts`, e le altre parti vengono riscalate: il numero non si legge mai come «tutto a posto». GitHub non dà uno storico dei rilievi, quindi la parte di sicurezza è la stessa nella finestra e in quella precedente: la tendenza mostra ciò che hanno fatto la CI e la collaborazione. I pesi sono 30, 15, 15, 15 e 25 per impostazione predefinita. Una finestra con esecuzioni e nessun errore non ha nulla da ripristinare: la sua parte di ripristino è piena, come un fatto e non come una lacuna.
 
@@ -61,4 +61,4 @@ Quando il punteggio cala di `score.alert.drop_points` punti (10 per impostazione
 
 ## Le impostazioni
 
-Nella pagina Impostazioni, sotto-scheda Sentinella, blocchi Punteggio dell'account, Pesi del punteggio e Lettere del punteggio: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, da `score.grades.A` a `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` e `score.alert.notify_external` (spento per impostazione predefinita). I limiti buono e cattivo di ogni parte si leggono dal file, sotto `score.limits` (vedi il file di esempio); non si modificano nella pagina.
+Nella pagina Impostazioni, sotto-scheda Sentinella, blocchi Punteggio dell'account, Pesi del punteggio e Lettere del punteggio: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.weights.security`, da `score.grades.A` a `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` e `score.alert.notify_external` (spento per impostazione predefinita). I limiti buono e cattivo di ogni parte si leggono dal file, sotto `score.limits` (vedi il file di esempio); non si modificano nella pagina.
