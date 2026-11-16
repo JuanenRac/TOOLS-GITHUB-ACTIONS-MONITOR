@@ -13,7 +13,7 @@ from pathlib import Path
 from unittest import mock
 
 import _testenv  # noqa: F401
-from github_actions_monitor.app import actions_monitor, settings_api
+from github_actions_monitor.app import actions_monitor, settings_api, toolconfig
 from github_actions_monitor.security import localguard
 
 TOKEN = "T" * 24
@@ -240,6 +240,12 @@ class TheSettingsAClientOfTheNetworkCannotChangeAreNotReadByItEither(NetworkCase
 
 class TheWallScreensFollowTheRulesOfTheNetwork(NetworkCase):
     """The wall screens only read: a client of the network needs the access token like for any page, a wrong one is refused and counted, and nothing can be written through them."""
+
+    def setUp(self):
+        super().setUp()
+        patcher = mock.patch.object(toolconfig, "raw_config", return_value={"screens": {"enabled": True}})
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_the_token_decides_and_nothing_can_be_written(self):
         remote = Running(self)

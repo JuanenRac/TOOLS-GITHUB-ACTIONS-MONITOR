@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2714_passing-brightgreen.svg" alt="2714 tests">
+  <img src="https://img.shields.io/badge/Tests-2715_passing-brightgreen.svg" alt="2715 tests">
 </p>
 
 > 监视你所有仓库的工作流，并在一个本地页面上告诉你：哪些是红的、哪些卡住了、哪些在等你处理。
@@ -68,7 +68,7 @@
 
 | | |
 |---|---|
-| **版本** | **2.0.2** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **版本** | **2.0.3** · [所有发布](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **需要** | Python 3.11+ 和 GitHub CLI（`gh auth login`）；不需要其他东西(终端视图使用可选的 `rich` 包) |
 | **打开** | 仅在 `127.0.0.1` 上的页面，支持八种语言 |
 | **写入 GitHub** | 绝不自行写入：只有你用明确的 `--go` 运行的批处理命令才会 |
@@ -76,12 +76,12 @@
 
 <!-- glance:begin -->
 
-**今日实测** (v2.0.2)
+**今日实测** (v2.0.3)
 
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 2714 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **测试** | 2715 个测试方法(`python -m unittest discover -s monitor/tests`) |
 | **设置** | 546 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |

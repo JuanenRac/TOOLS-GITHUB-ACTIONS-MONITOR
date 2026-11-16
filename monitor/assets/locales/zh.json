@@ -3371,7 +3371,7 @@
  "hyg.wf_cut": "工作流列表被截断:{total} 个中看到 {seen} 个",
  "ui.cfg_b_wall": "墙面屏幕",
  "cfg.f.screens.enabled": "墙面屏幕",
- "cfg.h.screens.enabled": "启用墙面屏幕。关闭后 /screen/overview、/screen/now 和 /screen/sentinels 返回 404。它们只读取监视器已有的数据，不会更改任何内容，也不会调用 GitHub。",
+ "cfg.h.screens.enabled": "启用墙面屏幕。关闭后 /screen/overview、/screen/now 和 /screen/sentinels 返回 404。它们只读取监视器已有的数据，不会更改任何内容，也不会调用 GitHub。 默认关闭。",
  "cfg.f.screens.default_theme": "墙面屏幕的主题",
  "cfg.h.screens.default_theme": "dark（深色）、light（浅色）或 contrast（黑底白字，适合远距离观看）。地址可为单个窗口更改：?theme=light。",
  "cfg.f.screens.default_density": "墙面屏幕的密度",

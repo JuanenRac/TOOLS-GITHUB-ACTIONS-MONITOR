@@ -392,7 +392,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `screens.burn_in_protection` | `true` | general | Protect against screen burn-in |
 | `screens.default_density` | `"normal"` | general | Density of the wall screens |
 | `screens.default_theme` | `"dark"` | general | Theme of the wall screens |
-| `screens.enabled` | `true` | general | Wall screens |
+| `screens.enabled` | `false` | general | Wall screens |
 | `screens.night_dim` | `false` | general | Dim at night |
 | `screens.night_dim_from_hour` | `22` | general | Dim from (hour) |
 | `screens.night_dim_to_hour` | `7` | general | Dim until (hour) |

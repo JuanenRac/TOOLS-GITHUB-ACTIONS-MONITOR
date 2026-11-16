@@ -87,7 +87,7 @@
 
 | 設定 | 内容 |
 |---|---|
-| `screens.enabled` | 3つのページを有効にします。オフにするとすべてのアドレスが 404 を返します。 |
+| `screens.enabled` | 3つのページを有効にします。オフにするとすべてのアドレスが 404 を返します。 既定ではオフです。 |
 | `screens.default_theme` | dark（既定）、light、contrast。 |
 | `screens.default_density` | compact、normal（既定）、large。 |
 | `screens.refresh_seconds` | ウィンドウの更新間隔（秒、既定は 10）。ページは GitHub ではなくモニターから読むため、短くしても利用枠は消費しません。 |

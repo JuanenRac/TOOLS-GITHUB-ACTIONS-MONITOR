@@ -55,7 +55,7 @@ class Settings(unittest.TestCase):
     def test_the_defaults_are_the_conservative_ones(self):
         cfg = screens.settings({})
         self.assertEqual(cfg, screens.DEFAULTS)
-        self.assertEqual((cfg["rotate_seconds"], cfg["sound"], cfg["night_dim"], cfg["show_repo_names"]), (0, False, False, "public"))
+        self.assertEqual((cfg["enabled"], cfg["rotate_seconds"], cfg["sound"], cfg["night_dim"], cfg["show_repo_names"]), (False, 0, False, False, "public"))
         self.assertEqual(actions_monitor.DEFAULTS["screens"], screens.DEFAULTS, "the defaults of the monitor and of the module are one and the same")
 
     def test_every_value_stays_inside_its_range(self):
@@ -279,6 +279,9 @@ class ThePage(unittest.TestCase):
         self.assertEqual(words, [], "every visible text comes from the catalogue")
 
 
+ON = {"screens": {"enabled": True}}
+
+
 class Running:
     def __init__(self, case, config):
         patcher = mock.patch.object(toolconfig, "raw_config", return_value=config)
@@ -304,8 +307,13 @@ class Running:
 
 
 class TheRoutes(unittest.TestCase):
-    def test_the_three_pages_and_their_data_answer(self):
+    def test_a_new_installation_has_them_off_and_every_address_is_a_404(self):
         server = Running(self, {})
+        for path in ("/screen/overview", "/screen/now", "/screen/sentinels", "/api/screens/data?screen=now"):
+            self.assertEqual(server.get(path)[0], 404, path)
+
+    def test_the_three_pages_and_their_data_answer(self):
+        server = Running(self, ON)
         for kind in screens.KINDS:
             status, body, kind_header = server.get("/screen/" + kind)
             self.assertEqual(status, 200, kind)
@@ -319,7 +327,7 @@ class TheRoutes(unittest.TestCase):
             self.assertEqual(json.loads(body)["screen"], kind)
 
     def test_the_address_is_taken_into_the_page_and_escaped(self):
-        server = Running(self, {})
+        server = Running(self, ON)
         text = server.get("/screen/now?theme=light&monitor=3&rotate=30&lang=es&blink=off")[1].decode("utf-8")
         data = json.loads(re.search(r"const D=(\{.*\});\n", text).group(1).replace("<\\/", "</"))
         self.assertEqual((data["params"]["theme"], data["params"]["monitor"], data["params"]["rotate"], data["lang"], data["params"]["blink"]), ("light", 3, 30, "es", False))
@@ -334,7 +342,7 @@ class TheRoutes(unittest.TestCase):
         self.assertEqual(server.get("/screen/1")[0], 200, "the screens of one monitor (/screen/N) are another thing and stay")
 
     def test_an_unknown_screen_is_a_404_and_nothing_can_be_written(self):
-        server = Running(self, {})
+        server = Running(self, ON)
         self.assertEqual(server.get("/api/screens/data?screen=admin")[0], 404)
         self.assertEqual(server.get("/api/screens/data")[0], 404)
         self.assertEqual(server.get("/screen/other")[0], 404)
@@ -342,7 +350,7 @@ class TheRoutes(unittest.TestCase):
             self.assertNotEqual(server.get(path, method="POST")[0], 200, path)
 
     def test_the_screens_never_call_github_nor_run_anything(self):
-        server = Running(self, {})
+        server = Running(self, ON)
         boom = AssertionError("a wall screen reached for GitHub or started a program")
         with mock.patch("subprocess.run", side_effect=boom), mock.patch("subprocess.Popen", side_effect=boom), mock.patch.object(actions_monitor, "gh_read", side_effect=boom), \
                 mock.patch("urllib.request.urlopen", side_effect=boom):
@@ -352,13 +360,13 @@ class TheRoutes(unittest.TestCase):
 
     def test_the_names_follow_the_setting_in_the_real_answer(self):
         for mode, hidden in (("public", True), ("all", False), ("none", True)):
-            server = Running(self, {"screens": {"show_repo_names": mode}})
+            server = Running(self, {"screens": {"enabled": True, "show_repo_names": mode}})
             text = server.get("/api/screens/data?screen=overview")[1].decode("utf-8")
             self.assertEqual("priv-c" not in text, hidden, mode)
 
     def test_the_route_is_in_the_edition_without_sentinels_too(self):
         with mock.patch.dict(actions_monitor.LITE, {"on": True}):
-            server = Running(self, {})
+            server = Running(self, ON)
             self.assertEqual(server.get("/api/screens/data?screen=sentinels")[0], 200)
             self.assertFalse(json.loads(server.get("/api/screens/data?screen=sentinels")[1])["enabled"])
 
