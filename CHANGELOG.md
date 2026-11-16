@@ -18,6 +18,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **A re-run of a run is counted as one more execution in the score ledger**: GitHub keeps the id of a run when it is re-run, so the first conclusion stayed for ever; now each attempt is kept, so a failed first attempt and a green second one are both seen and the recovery between them is measured.
 
+- **A repository whose sentinels could not look at it is no longer shown as OK in the health of the team**: when every sentinel is in error, paused or degraded (or all are off and nothing has run for a week), a quiet repository is `unknown` ("Not seen") instead of `ok`, the ranking rows carry `not_fully_seen` with the names of the sentinels that could not read it, the totals count them in `not_fully_seen`, and the Team tab marks the state with an asterisk and a hint. A red workflow or an alert still make it `warn` or `bad`.
+
+- **One damaged byte in the event feed no longer stops the notifications**: past 512 KB the feed was read again as strict UTF-8 to trim it, a single byte that was not valid raised an error that escaped, the feed then grew without a limit and every new event failed before reaching the notification channels. The trim now reads tolerantly and can never stop the channels.
+
 ## [2.0.1]
 
 ### Fixed

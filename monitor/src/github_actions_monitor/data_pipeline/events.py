@@ -215,10 +215,19 @@ class Feed:
                 with private_io.open_append(self.events_file) as handle:
                     for event in events:
                         handle.write(json.dumps({"at": at, **event}, ensure_ascii=False) + "\n")
-                if self.events_file.stat().st_size > MAX_BYTES:
-                    lines = self.events_file.read_text(encoding="utf-8").splitlines()
-                    private_io.write_private(self.events_file, "\n".join(lines[len(lines) // 2:]) + "\n")
+                self._trim()
         except OSError:
+            pass
+
+    def _trim(self):
+        """Keeps the newest half of the feed once it is past MAX_BYTES. Tolerant: a byte that is not UTF-8 (a cut of power, a bad disk) is read as a replacement character and never raises,
+        and a failure here is never allowed to stop the notifications that come after the write."""
+        try:
+            if self.events_file.stat().st_size <= MAX_BYTES:
+                return
+            lines = self.events_file.read_bytes().decode("utf-8", errors="replace").splitlines()
+            private_io.write_private(self.events_file, "\n".join(lines[len(lines) // 2:]) + "\n")
+        except (OSError, ValueError):
             pass
 
 

@@ -70,6 +70,31 @@ class State(unittest.TestCase):
         self.assertEqual((v["ci"]["runs_24h"], v["ci"]["failures_24h"], v["activity"]["runs_7d"], v["activity"]["idle_days"]), (0, 0, 2, 2.0))
         self.assertEqual(v["state"], "ok")
 
+    def test_a_repository_whose_three_sentinels_are_in_error_is_unknown_not_ok(self):
+        sources = {"ci": "error", "collab": "paused", "security": "degraded"}
+        v = repo_view.repo_view("a/b", [run("a/b", 3600)], [], [], [], None, sources, "", NOW)
+        self.assertEqual(v["state"], "unknown")
+        self.assertEqual(v["not_fully_seen"], ["ci", "collab", "security"])
+        team = repo_view.team_view([v])
+        self.assertEqual((team["totals"]["unknown"], team["totals"]["ok"], team["totals"]["not_fully_seen"]), (1, 0, 1))
+        self.assertEqual(team["ranking"][0]["state"], "unknown")
+        self.assertEqual(team["ranking"][0]["not_fully_seen"], ["ci", "collab", "security"])
+
+    def test_all_sentinels_off_and_nothing_ran_for_months_is_unknown_but_a_busy_repository_is_ok(self):
+        off = {"ci": "off", "collab": "off", "security": "off"}
+        idle = repo_view.repo_view("a/b", [run("a/b", 120 * 86400)], [], [], [], None, off, "", NOW)
+        self.assertEqual(idle["state"], "unknown")
+        busy = repo_view.repo_view("a/b", [run("a/b", 3600)], [], [], [], None, off, "", NOW)
+        self.assertEqual(busy["state"], "ok")
+
+    def test_one_sentinel_that_looks_is_enough_for_ok_and_the_others_are_listed(self):
+        v = repo_view.repo_view("a/b", [run("a/b", 3600)], [], [], [], None, {"ci": "healthy", "collab": "error", "security": "off"}, "", NOW)
+        self.assertEqual((v["state"], v["not_fully_seen"]), ("ok", ["collab"]))
+
+    def test_a_red_workflow_is_still_bad_when_the_sentinels_are_blind(self):
+        v = repo_view.repo_view("a/b", [run("a/b", 3600)], [{"repo": "a/b", "workflow": "ci"}], [], [], None, {"ci": "error"}, "", NOW)
+        self.assertEqual(v["state"], "bad")
+
     def test_a_sentinel_that_did_not_look_is_said(self):
         v = view("a/x", [run("a/x")], sources={"ci": "healthy", "collab": "off", "security": "degraded"})
         self.assertEqual(v["not_fully_seen"], ["security"])
@@ -93,7 +118,7 @@ class Team(unittest.TestCase):
     def test_the_ranking_puts_what_needs_a_person_first(self):
         out = repo_view.team_view(self.views())
         self.assertEqual([r["repo"] for r in out["ranking"]], ["a/red", "b/warn", "a/ok", "b/unknown"])
-        self.assertEqual(out["totals"], {"unknown": 1, "ok": 1, "warn": 1, "bad": 1})
+        self.assertEqual(out["totals"], {"unknown": 1, "ok": 1, "warn": 1, "bad": 1, "not_fully_seen": 0})
         self.assertEqual((out["all"], out["shown"], out["truncated"]), (4, 4, False))
 
     def test_the_totals_by_ecosystem_and_by_sentinel(self):
@@ -118,7 +143,7 @@ class Team(unittest.TestCase):
 
     def test_a_filter_that_matches_nothing_is_an_empty_ranking_not_an_error(self):
         out = repo_view.team_view(self.views(), text="zzz")
-        self.assertEqual((out["ranking"], out["shown"], out["totals"]), ([], 0, {"unknown": 0, "ok": 0, "warn": 0, "bad": 0}))
+        self.assertEqual((out["ranking"], out["shown"], out["totals"]), ([], 0, {"unknown": 0, "ok": 0, "warn": 0, "bad": 0, "not_fully_seen": 0}))
 
     def test_the_list_is_cut_at_the_limit_and_says_so(self):
         many = [view(f"a/r{i}", [run(f"a/r{i}")]) for i in range(10)]

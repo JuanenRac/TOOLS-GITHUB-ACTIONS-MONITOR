@@ -8,7 +8,8 @@ What a repository's health is made of, all of it from what the monitor already h
   readiness  the row of the release readiness (entries under [Unreleased], what is next), when the repository has one
   activity   when the last run started and how many runs the monitor holds for the last 7 days
   sources    which sentinels looked (their lifecycle): a repository with no alerts from a sentinel that is off or degraded is NOT healthy, only not seen
-The state is `bad` (a red workflow, or an alert of level critical or error), `warn` (a warning, or a run that is stuck), `ok`, or `unknown` (nothing to judge by). `risk` is the number the ranking sorts
+The state is `bad` (a red workflow, or an alert of level critical or error), `warn` (a warning, or a run that is stuck), `ok`, or `unknown` (nothing to judge by: no run and no alert, or no sentinel
+that could look at it, because they are all in error, paused or degraded, or off with no run in the last seven days: a quiet repository is only `ok` when something really looked at it). `risk` is the number the ranking sorts
 by: every red workflow, stuck run and open alert adds points by its severity (the same weights for every repository, shown in `RISK`), so the repositories that need a person come first.
 """
 from datetime import datetime, timezone
@@ -62,7 +63,7 @@ def activity_part(repo, runs, now):
 
 
 def state_of(ci, alerts, seen):
-    """bad / warn / ok / unknown. `seen` says whether anything could be judged (the monitor holds runs of the repository or a sentinel looked at it)."""
+    """bad / warn / ok / unknown. `seen` says whether anything could be judged (the monitor holds runs of the repository, a sentinel looked at it, and some sentinel is able to look)."""
     levels = alerts["by_level"]
     if ci["red_workflows"] or levels.get("critical") or levels.get("error"):
         return "bad"
@@ -83,8 +84,10 @@ def repo_view(repo, runs, failing, active, alerts, readiness, sources, ecosystem
     ci = ci_part(repo, runs, failing, active, now)
     al = alerts_part(repo, alerts)
     act = activity_part(repo, runs, now)
-    seen = bool(ci["runs_24h"] or act["last_run_at"] or al["total"])
-    blind = sorted(name for name, life in (sources or {}).items() if life not in ("healthy", "off") or False)
+    blind = sorted(name for name, life in (sources or {}).items() if life not in ("healthy", "off"))
+    looked = any(life == "healthy" for life in (sources or {}).values())
+    nobody = bool(sources) and not looked and (bool(blind) or not act["runs_7d"])      # every sentinel is in error, paused or degraded, or all are off and nothing ran this week
+    seen = bool(ci["runs_24h"] or act["last_run_at"] or al["total"]) and not nobody
     return {"repo": repo, "ecosystem": ecosystem, "state": state_of(ci, al, seen), "risk": risk_of(ci, al), "ci": ci, "alerts": al, "readiness": readiness or None, "activity": act,
             "sources": dict(sources or {}), "not_fully_seen": blind}
 
@@ -105,6 +108,7 @@ def team_view(views, ecosystem="", severity="", text="", label="", limit=200):
     chosen = [v for v in views if matches(v, ecosystem, severity, text, label)]
     ranking = sorted(chosen, key=lambda v: (-v["risk"], -STATES.index(v["state"]), v["repo"]))
     totals = {s: sum(1 for v in chosen if v["state"] == s) for s in STATES}
+    totals["not_fully_seen"] = sum(1 for v in chosen if v["not_fully_seen"])      # on top of the states: the repositories that some sentinel could not read
     by_eco = {}
     for v in chosen:
         row = by_eco.setdefault(v["ecosystem"] or "", {"repos": 0, "bad": 0, "warn": 0, "ok": 0, "unknown": 0, "risk": 0})
@@ -118,6 +122,6 @@ def team_view(views, ecosystem="", severity="", text="", label="", limit=200):
         for level, n in v["alerts"]["by_level"].items():
             by_level[level] = by_level.get(level, 0) + n
     slim = [{k: v[k] for k in ("repo", "ecosystem", "state", "risk")} | {"red_workflows": len(v["ci"]["red_workflows"]), "alerts": v["alerts"]["total"], "failures_24h": v["ci"]["failures_24h"],
-            "last_run_at": v["activity"]["last_run_at"], "release_next": (v["readiness"] or {}).get("next")} for v in ranking[:limit]]
+            "last_run_at": v["activity"]["last_run_at"], "release_next": (v["readiness"] or {}).get("next"), "not_fully_seen": v["not_fully_seen"]} for v in ranking[:limit]]
     return {"schema": 1, "all": len(views), "shown": len(chosen), "truncated": len(chosen) > limit, "totals": totals, "by_ecosystem": dict(sorted(by_eco.items())), "alerts": {"by_sentinel": by_sentinel, "by_level": by_level},
             "ranking": slim, "filters": {"ecosystem": ecosystem, "severity": severity, "q": text, "label": label}}

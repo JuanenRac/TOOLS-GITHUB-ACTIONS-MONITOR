@@ -1411,7 +1411,7 @@ $("rs-run").addEventListener("click",async()=>{
   try{const r=await fetch("/api/report-files/run",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});const d=await r.json();msg.textContent=d&&d.ok?T("ui.rs_done"):T("ui.rs_failed")}catch(e){msg.textContent=T("ui.rs_failed")}
   rsLoad()});
 const TEAM_COLS=["ui.team_c_repo","ui.team_c_state","ui.team_c_risk","ui.team_c_red","ui.team_c_alerts","ui.team_c_fail","ui.team_c_last","ui.team_c_next"];
-const stateChip=s=>`<span class="chip ${s==="bad"?"bad":s==="warn"?"warn":s==="ok"?"ok":""}">${esc(T("ui.team_sev_"+s))}</span>`;
+const stateChip=(s,blind)=>{const b=(blind||[]).length?T("ui.rh_unseen",{list:blind.map(k=>T("ui.al_o_"+k)===("ui.al_o_"+k)?k:T("ui.al_o_"+k)).join(", ")}):"";return `<span class="chip ${s==="bad"?"bad":s==="warn"?"warn":s==="ok"?"ok":""}"${b?` title="${esc(b)}"`:""}>${esc(T("ui.team_sev_"+s))}${b?" *":""}</span>`};
 async function teamLoad(){
   if(LITE)return;
   const p=new URLSearchParams();if(TEAM_F.eco)p.set("ecosystem",TEAM_F.eco);if(TEAM_F.sev)p.set("severity",TEAM_F.sev);if(TEAM_F.q)p.set("q",TEAM_F.q);
@@ -1430,7 +1430,7 @@ function teamPaint(){
   if(!TEAM){$("team-sum").textContent="";$("team-rows").innerHTML="";$("team-extra").innerHTML="";return}
   const tt=TEAM.totals||{};
   $("team-sum").textContent=T("ui.team_shown",{shown:TEAM.shown,all:TEAM.all})+" · "+T("ui.team_totals",{bad:tt.bad||0,warn:tt.warn||0,ok:tt.ok||0,unknown:tt.unknown||0});
-  $("team-rows").innerHTML=(TEAM.ranking||[]).length?TEAM.ranking.map(r=>`<tr><td><b class="rl" data-health-open="${esc(r.repo)}" tabindex="0" role="button">${esc(r.repo)}</b></td><td>${stateChip(r.state)}</td><td>${esc(r.risk)}</td><td>${esc(r.red_workflows||0)}</td><td>${esc(r.alerts||0)}</td><td>${esc(r.failures_24h||0)}</td><td>${r.last_run_at?esc(ago(r.last_run_at)):""}</td><td class="wrap">${esc(r.release_next||"")}</td></tr>`).join(""):`<tr><td colspan="8" class="mut">${esc(T("ui.team_none"))}</td></tr>`;
+  $("team-rows").innerHTML=(TEAM.ranking||[]).length?TEAM.ranking.map(r=>`<tr><td><b class="rl" data-health-open="${esc(r.repo)}" tabindex="0" role="button">${esc(r.repo)}</b></td><td>${stateChip(r.state,r.not_fully_seen)}</td><td>${esc(r.risk)}</td><td>${esc(r.red_workflows||0)}</td><td>${esc(r.alerts||0)}</td><td>${esc(r.failures_24h||0)}</td><td>${r.last_run_at?esc(ago(r.last_run_at)):""}</td><td class="wrap">${esc(r.release_next||"")}</td></tr>`).join(""):`<tr><td colspan="8" class="mut">${esc(T("ui.team_none"))}</td></tr>`;
   const eco=Object.entries(TEAM.by_ecosystem||{}),sen=Object.entries((TEAM.alerts||{}).by_sentinel||{});
   $("team-extra").innerHTML=(eco.length?`<h3 style="margin:12px 0 4px;font-size:13px">${esc(T("ui.team_by_eco"))}</h3><div class="mut">${eco.map(([k,v])=>esc((I18N.ecosystems&&I18N.ecosystems[k]||k||"-")+": "+v.repos+" ("+T("ui.team_totals",{bad:v.bad,warn:v.warn,ok:v.ok,unknown:v.unknown})+")")).join("<br>")}</div>`:"")+
    (sen.length?`<h3 style="margin:12px 0 4px;font-size:13px">${esc(T("ui.team_by_sent"))}</h3><div class="mut">${sen.map(([k,n])=>esc((T("ui.al_o_"+k)===("ui.al_o_"+k)?k:T("ui.al_o_"+k))+": "+n)).join(" · ")}</div>`:"")}
