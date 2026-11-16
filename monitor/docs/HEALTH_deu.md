@@ -27,3 +27,9 @@ Der Zustand ist **schlecht** (ein roter Workflow oder eine Meldung der Stufe kri
 - Direktlinks für Wandbildschirme: `?view=team&chrome=0`, `?view=repos&chrome=0` und `?view=repo&repo=owner/name&chrome=0`.
 - Die API: `GET /api/team/health?ecosystem=&severity=&q=&label=` und `GET /api/repos/<owner>/<repo>/health`. Beide brauchen das Recht, das Konto zu sehen; die Antworten tragen `schema: 1`. Ein unbekanntes Repository antwortet 404 mit `code: repo_unknown`.
 - Die Lite-Edition behält ihre einfache Laufansicht und hat weder den Tab noch die Routen.
+
+## Tausende Repositorys und eine zurückgestellte Uhr
+
+Die Teamgesundheit gruppiert Läufe, rote Workflows, laufende Läufe und Meldungen einmal nach Repository, sodass der Aufwand mit der Datenmenge wächst und nicht mit Repositorys mal Läufen; die Abfrage eines einzelnen Repositorys baut nur seine Ansicht.
+
+Ein gespeicherter Zeitpunkt in der Zukunft (ein Rechner ohne Batterieuhr mit altem Datum oder eine von Hand korrigierte Uhr) wird nicht geglaubt: Bewertung, Bereinigung alter Daten und geplante Berichte sind sofort fällig und schreiben einen guten Zeitpunkt, statt zu warten, bis die alte Uhr erreicht ist.

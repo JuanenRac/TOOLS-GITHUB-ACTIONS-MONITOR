@@ -56,3 +56,13 @@ Di ogni repository si leggono solo le prime 100 issue aperte e le prime 100 pull
 ## Lettura con l'API di ricerca
 
 Con `sentinels.collab.search_api` attivo (spento per impostazione predefinita) la sentinella Collab chiede le issue e le pull request aperte di tutto l'account in poche chiamate dell'API di ricerca invece di due liste per repository. L'API di ricerca ha una quota propria (30 chiamate al minuto) che la quota REST non paga. Dopo si leggono solo i conflitti delle pull request cambiate. Gli avvisi sono gli stessi nei due modi, un test li confronta; se l'API di ricerca fallisce, il giro legge ogni repository come prima. Una pull request trovata così non dice se è stata chiesta una revisione, quindi la regola delle revisioni in attesa conta solo ciò che danno le liste.
+
+## Liste lunghe: pagine e ciò che viene tagliato
+
+Una pagina di GitHub ha 100 elementi. Un repository può avere centinaia di issue e pull request aperte, 148 o 348 workflow, o una matrice di più di 100 job; il monitor legge quindi la pagina successiva finché l'ultima era piena e dice quando qualcosa resta fuori:
+
+- **Issue e pull request** (questa scheda): fino a `pagination.collab_pages` pagine da 100 per ogni elenco di un repository (la prima pagina mantiene la lettura condizionale e un repository con meno di 100 non costa altro). Un repository con più di quanto letto è contato nel piè della scheda; con l'API di ricerca (`sentinels.collab.search_api`) il piè dice «visti N su M» quando l'account ha più dei 1000 risultati della ricerca.
+- **Workflow di un repository** (igiene): fino a `pagination.workflow_pages` pagine da 100. Se l'elenco resta tagliato, l'igiene di quel repository dice «visti N su M» invece di sembrare completa.
+- **Job di un'esecuzione** (scheda Adesso): fino a `pagination.job_pages` pagine da 100; una matrice tagliata mostra «job: visti N su M» sotto l'esecuzione.
+
+I valori predefiniti non leggono nulla in più per un repository che sta in una pagina.

@@ -2987,5 +2987,16 @@
  "cfg.f.ci.failed_jobs.max_per_cycle": "1サイクルで読む実行数",
  "cfg.h.ci.failed_jobs.max_per_cycle": "1サイクルでジョブを読む赤い実行の最大数（1件につき1回の呼び出し、既定 4）。実行が変わらない間は結果を保持します。",
  "cfg.f.ci.failed_jobs.group_by": "ジョブのグループ化の基準",
- "cfg.h.ci.failed_jobs.group_by": "auto（既定）：ジョブ名のシステム（ubuntu、windows、macos など）、なければマトリクスの最初のパラメータ、なければスラッシュの前の部分。platform、matrix、prefix はいずれかを強制します。"
+ "cfg.h.ci.failed_jobs.group_by": "auto（既定）：ジョブ名のシステム（ubuntu、windows、macos など）、なければマトリクスの最初のパラメータ、なければスラッシュの前の部分。platform、matrix、prefix はいずれかを強制します。",
+ "cfg.f.pagination.workflow_pages": "リポジトリごとのワークフローのページ数",
+ "cfg.h.pagination.workflow_pages": "リポジトリには数百のワークフローがあることがあります。100件のページが満杯の間は次のページを、このページ数まで読みます。100件未満のリポジトリは追加リクエストなし。それでも残る場合は、存在数のうち何件を見たかをページに表示します。",
+ "cfg.f.pagination.job_pages": "実行ごとのジョブのページ数",
+ "cfg.h.pagination.job_pages": "マトリクスは1回の実行で100を超えるジョブを起動することがあります。100件のページが満杯の間は次のページを、このページ数まで読みます。まだ残る場合、実行に「M 件中 N 件を表示」と出ます。",
+ "cfg.f.pagination.collab_pages": "リポジトリごとの Issue とプルリクエストのページ数",
+ "cfg.h.pagination.collab_pages": "リポジトリには数百の未解決 Issue とプルリクエストがあることがあります。100件のページが満杯の間は次のページを、このページ数まで読みます(最初のページは条件付き読み取りのまま。100件未満のリポジトリは追加コストなし)。それ以上ある場合は「チーム」タブに表示します。",
+ "ui.cfg_b_pagination": "長い一覧のページ",
+ "ui.collab_cut": "{n} 件のリポジトリには、読み取った数より多い未解決項目があります(最大 {p} ページ、各100件)",
+ "ui.collab_cut_search": "検索: {total} 件中 {seen} 件を表示",
+ "ui.jobs_cut": "ジョブ: {total} 件中 {seen} 件を表示",
+ "hyg.wf_cut": "ワークフローの一覧が途中で切れています: {total} 件中 {seen} 件を表示"
 }

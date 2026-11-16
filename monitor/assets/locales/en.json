@@ -2987,5 +2987,16 @@
  "cfg.f.ci.failed_jobs.max_per_cycle": "Runs read per cycle",
  "cfg.h.ci.failed_jobs.max_per_cycle": "The most red runs whose jobs are read in one cycle (one call each, default 4). The answer is kept while the run stays the same.",
  "cfg.f.ci.failed_jobs.group_by": "Group jobs by",
- "cfg.h.ci.failed_jobs.group_by": "auto (default): the system in the name of the job (ubuntu, windows, macos...), else the first parameter of the matrix, else the part before the slash. platform, matrix and prefix force one of those."
+ "cfg.h.ci.failed_jobs.group_by": "auto (default): the system in the name of the job (ubuntu, windows, macos...), else the first parameter of the matrix, else the part before the slash. platform, matrix and prefix force one of those.",
+ "cfg.f.pagination.workflow_pages": "Pages of workflows per repository",
+ "cfg.h.pagination.workflow_pages": "A repository can have hundreds of workflows. While a page of 100 is full, the next one is read, up to this many pages; a repository with fewer than 100 costs no extra request. If something is still left out the page says how many were seen of how many exist.",
+ "cfg.f.pagination.job_pages": "Pages of jobs per run",
+ "cfg.h.pagination.job_pages": "A matrix can start more than 100 jobs in one run. While a page of 100 is full, the next one is read, up to this many pages. If jobs are still left out, the run says \"seen N of M\".",
+ "cfg.f.pagination.collab_pages": "Pages of issues and pull requests per repository",
+ "cfg.h.pagination.collab_pages": "A repository can have hundreds of open issues and pull requests. While a page of 100 is full, the next one is read, up to this many pages (the first page keeps its conditional read; a repository with fewer than 100 costs nothing more). If more exist, the Team tab says so.",
+ "ui.cfg_b_pagination": "Pages of long lists",
+ "ui.collab_cut": "{n} repositories have more open items than were read (up to {p} pages of 100)",
+ "ui.collab_cut_search": "Search: seen {seen} of {total}",
+ "ui.jobs_cut": "jobs: seen {seen} of {total}",
+ "hyg.wf_cut": "the list of workflows was cut: seen {seen} of {total}"
 }
