@@ -1458,6 +1458,7 @@ function scoreChip(a,pts){
   const worst=(a.repos||[]).find(r=>typeof r.score==="number");
   if(worst)tip+="\n"+T("ui.score_worst",{repo:worst.repo,score:worst.score});
   if(a.stale)tip+="\n"+T("ui.score_old");
+  const act=a.activity;if(act&&(act.dormant||act.inactive))tip+="\n"+T("ui.score_activity",{active:act.active||0,dormant:act.dormant||0,inactive:act.inactive||0});
   const why=scoreWhy(a);if(why.length)tip+="\n"+why.join("\n");
   if(a.state!=="scored")return `<span class="rdy-chip scr-chip" title="${esc(tip)}"><i></i>${esc(T("ui.score_title"))}: ${a.state==="calibrating"?scoreCalibrating(a):esc(T("ui.score_state_insufficient"))}</span>`;
   const L=a.letter||"?",cl=(L==="A"||L==="B")?"ok":(L==="C"?"warn":"bad"),tr=a.trend||{},d=typeof tr.delta==="number"?Math.abs(tr.delta):"";

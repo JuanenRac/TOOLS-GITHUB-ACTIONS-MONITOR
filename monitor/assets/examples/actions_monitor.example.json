@@ -22,6 +22,7 @@
     "count_fork_runs": false,
     "automation_counts": false,
     "inactive_days": 90,
+    "dormant_repos": true,
     "extra_branches": [],
     "stuck": {
       "learned": false,
