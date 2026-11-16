@@ -65,14 +65,14 @@ AI が読むフィード(`ALERTS_BRIEF.md`、ストリーム、MCP サーバー)
 
 | 名前 | 種類 | プロバイダー | アドレス | キーの変数 | モデルの例 | プライバシー | 状態 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| OpenAI | ホスト型 | `openai-compatible` | `https://api.openai.com/v1` | `OPENAI_API_KEY` | `gpt-4o-mini`, `gpt-4.1-mini` | インターネット経由で送信 | プロトコル互換で、このツールでは未検証 |
+| OpenAI | ホスト型 | `openai-compatible` | `https://api.openai.com/v1` | `OPENAI_API_KEY` | `gpt-4o-mini`, `gpt-4.1-mini` | インターネット経由で送信 | 公式ドキュメントで確認したアドレス。プロトコル互換で、このツールでは未検証 |
 | Anthropic | ホスト型 | `anthropic` | `既定のアドレス` | `ANTHROPIC_API_KEY` | — | インターネット経由で送信 | プロトコル互換で、このツールでは未検証 |
 | Google Gemini | ホスト型 | `openai-compatible` | `https://generativelanguage.googleapis.com/v1beta/openai` | `GEMINI_API_KEY` | `gemini-2.5-flash` | インターネット経由で送信 | 公式ドキュメントで確認したアドレス。プロトコル互換で、このツールでは未検証 |
-| xAI Grok | ホスト型 | `openai-compatible` | `https://api.x.ai/v1` | `XAI_API_KEY` | `grok-4` | インターネット経由で送信 | プロトコル互換で、このツールでは未検証 |
-| Mistral | ホスト型 | `openai-compatible` | `https://api.mistral.ai/v1` | `MISTRAL_API_KEY` | `mistral-small-latest` | インターネット経由で送信 | プロトコル互換で、このツールでは未検証 |
-| DeepSeek | ホスト型 | `openai-compatible` | `https://api.deepseek.com` | `DEEPSEEK_API_KEY` | `deepseek-chat` | インターネット経由で送信 | プロトコル互換で、このツールでは未検証 |
-| Groq | ホスト型 | `openai-compatible` | `https://api.groq.com/openai/v1` | `GROQ_API_KEY` | `llama-3.3-70b-versatile` | インターネット経由で送信 | プロトコル互換で、このツールでは未検証 |
-| OpenRouter | ホスト型 | `openai-compatible` | `https://openrouter.ai/api/v1` | `OPENROUTER_API_KEY` | `meta-llama/llama-3.3-70b-instruct` | インターネット経由で送信 | プロトコル互換で、このツールでは未検証 |
+| xAI Grok | ホスト型 | `openai-compatible` | `https://api.x.ai/v1` | `XAI_API_KEY` | `grok-4.7` | インターネット経由で送信 | 公式ドキュメントで確認したアドレス。プロトコル互換で、このツールでは未検証 |
+| Mistral | ホスト型 | `openai-compatible` | `https://api.mistral.ai/v1` | `MISTRAL_API_KEY` | `mistral-small-latest` | インターネット経由で送信 | 公式ドキュメントで確認したアドレス。プロトコル互換で、このツールでは未検証 |
+| DeepSeek | ホスト型 | `openai-compatible` | `https://api.deepseek.com` | `DEEPSEEK_API_KEY` | `deepseek-flash` | インターネット経由で送信 | 公式ドキュメントで確認したアドレス。プロトコル互換で、このツールでは未検証 |
+| Groq | ホスト型 | `openai-compatible` | `https://api.groq.com/openai/v1` | `GROQ_API_KEY` | `llama-3.3-70b-versatile` | インターネット経由で送信 | 公式ドキュメントで確認したアドレス。プロトコル互換で、このツールでは未検証 |
+| OpenRouter | ホスト型 | `openai-compatible` | `https://openrouter.ai/api/v1` | `OPENROUTER_API_KEY` | `meta-llama/llama-3.3-70b-instruct` | インターネット経由で送信 | 公式ドキュメントで確認したアドレス。プロトコル互換で、このツールでは未検証 |
 | Together AI | ホスト型 | `openai-compatible` | `https://api.together.ai/v1` | `TOGETHER_API_KEY` | `meta-llama/Llama-3.3-70B-Instruct-Turbo` | インターネット経由で送信 | 公式ドキュメントで確認したアドレス。プロトコル互換で、このツールでは未検証 |
 | Fireworks AI | ホスト型 | `openai-compatible` | `https://api.fireworks.ai/inference/v1` | `FIREWORKS_API_KEY` | `accounts/fireworks/models/llama-v3p1-8b-instruct` | インターネット経由で送信 | 公式ドキュメントで確認したアドレス。プロトコル互換で、このツールでは未検証 |
 | Perplexity | ホスト型 | `openai-compatible` | `https://api.perplexity.ai` | `PERPLEXITY_API_KEY` | `sonar` | インターネット経由で送信 | 公式ドキュメントで確認したアドレス。プロトコル互換で、このツールでは未検証 |

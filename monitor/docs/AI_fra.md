@@ -36,14 +36,14 @@ Services hébergés et serveurs locaux dont le moniteur parle déjà le protocol
 
 | Nom | Type | Fournisseur | Adresse | Variable de la clé | Modèles d'exemple | Confidentialité | État |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| OpenAI | hébergé | `openai-compatible` | `https://api.openai.com/v1` | `OPENAI_API_KEY` | `gpt-4o-mini`, `gpt-4.1-mini` | envoyé par internet | compatible par protocole, non testé avec cet outil |
+| OpenAI | hébergé | `openai-compatible` | `https://api.openai.com/v1` | `OPENAI_API_KEY` | `gpt-4o-mini`, `gpt-4.1-mini` | envoyé par internet | adresse lue dans la documentation publique ; compatible par protocole, non testé avec cet outil |
 | Anthropic | hébergé | `anthropic` | `adresse par défaut` | `ANTHROPIC_API_KEY` | — | envoyé par internet | compatible par protocole, non testé avec cet outil |
 | Google Gemini | hébergé | `openai-compatible` | `https://generativelanguage.googleapis.com/v1beta/openai` | `GEMINI_API_KEY` | `gemini-2.5-flash` | envoyé par internet | adresse lue dans la documentation publique ; compatible par protocole, non testé avec cet outil |
-| xAI Grok | hébergé | `openai-compatible` | `https://api.x.ai/v1` | `XAI_API_KEY` | `grok-4` | envoyé par internet | compatible par protocole, non testé avec cet outil |
-| Mistral | hébergé | `openai-compatible` | `https://api.mistral.ai/v1` | `MISTRAL_API_KEY` | `mistral-small-latest` | envoyé par internet | compatible par protocole, non testé avec cet outil |
-| DeepSeek | hébergé | `openai-compatible` | `https://api.deepseek.com` | `DEEPSEEK_API_KEY` | `deepseek-chat` | envoyé par internet | compatible par protocole, non testé avec cet outil |
-| Groq | hébergé | `openai-compatible` | `https://api.groq.com/openai/v1` | `GROQ_API_KEY` | `llama-3.3-70b-versatile` | envoyé par internet | compatible par protocole, non testé avec cet outil |
-| OpenRouter | hébergé | `openai-compatible` | `https://openrouter.ai/api/v1` | `OPENROUTER_API_KEY` | `meta-llama/llama-3.3-70b-instruct` | envoyé par internet | compatible par protocole, non testé avec cet outil |
+| xAI Grok | hébergé | `openai-compatible` | `https://api.x.ai/v1` | `XAI_API_KEY` | `grok-4.7` | envoyé par internet | adresse lue dans la documentation publique ; compatible par protocole, non testé avec cet outil |
+| Mistral | hébergé | `openai-compatible` | `https://api.mistral.ai/v1` | `MISTRAL_API_KEY` | `mistral-small-latest` | envoyé par internet | adresse lue dans la documentation publique ; compatible par protocole, non testé avec cet outil |
+| DeepSeek | hébergé | `openai-compatible` | `https://api.deepseek.com` | `DEEPSEEK_API_KEY` | `deepseek-flash` | envoyé par internet | adresse lue dans la documentation publique ; compatible par protocole, non testé avec cet outil |
+| Groq | hébergé | `openai-compatible` | `https://api.groq.com/openai/v1` | `GROQ_API_KEY` | `llama-3.3-70b-versatile` | envoyé par internet | adresse lue dans la documentation publique ; compatible par protocole, non testé avec cet outil |
+| OpenRouter | hébergé | `openai-compatible` | `https://openrouter.ai/api/v1` | `OPENROUTER_API_KEY` | `meta-llama/llama-3.3-70b-instruct` | envoyé par internet | adresse lue dans la documentation publique ; compatible par protocole, non testé avec cet outil |
 | Together AI | hébergé | `openai-compatible` | `https://api.together.ai/v1` | `TOGETHER_API_KEY` | `meta-llama/Llama-3.3-70B-Instruct-Turbo` | envoyé par internet | adresse lue dans la documentation publique ; compatible par protocole, non testé avec cet outil |
 | Fireworks AI | hébergé | `openai-compatible` | `https://api.fireworks.ai/inference/v1` | `FIREWORKS_API_KEY` | `accounts/fireworks/models/llama-v3p1-8b-instruct` | envoyé par internet | adresse lue dans la documentation publique ; compatible par protocole, non testé avec cet outil |
 | Perplexity | hébergé | `openai-compatible` | `https://api.perplexity.ai` | `PERPLEXITY_API_KEY` | `sonar` | envoyé par internet | adresse lue dans la documentation publique ; compatible par protocole, non testé avec cet outil |

@@ -45,6 +45,12 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - Der Test eines Kontos, das sofort stirbt, hängt nicht mehr von der Geschwindigkeit des Rechners ab: Die Wartezeit vor dem erneuten Start eines Kontos wird mit einer Uhr geprüft, die der Test selbst gibt, und ein zweiter Test prüft den Plan der Wartezeiten, ohne die echte Zeit zu lesen (der alte scheiterte unter Last in der Schranke eines Releases).
 
+## [1.9.4]
+
+### Hinzugefügt
+
+- **Voreinstellungen für KI-Anbieter und eine Tabelle kompatibler KIs**: Eine versionierte Datendatei (`ai_presets.json`, schreibgeschützt unter `GET /api/ai/presets`) listet zwölf gehostete Dienste (OpenAI, Anthropic, Google Gemini, xAI Grok, Mistral, DeepSeek, Groq, OpenRouter, Together AI, Fireworks AI, Perplexity, Cohere) und sechs lokale Server (Ollama, LM Studio, llama.cpp-Server, vLLM, LocalAI, Jan) mit änderbaren Beispielmodellen (Llama, Mistral, Qwen, DeepSeek, Gemma, Phi, gpt-oss; keine Gewichte, keine Downloads). In den KI-Einstellungen füllt eine Auswahl den Anbieter, die Adresse, den NAMEN der Umgebungsvariable des Schlüssels und ein Modell aus, zeigt den Datenschutz der Wahl (Text über das Internet gesendet oder auf diesem Computer behalten) und sagt „protokollkompatibel, mit diesem Werkzeug nicht getestet“, wo es so ist; keine ist standardmäßig aktiv und der Schlüssel verlässt nie seine Umgebungsvariable. Ein Server auf diesem Computer (`http://127.0.0.1:...`) kann als `ai.base_url` gespeichert werden und ohne Schlüssel arbeiten; eine entfernte Adresse braucht weiterhin https und ihren Schlüssel. Die drei KI-Anleitungen enthalten die Tabelle in den acht Sprachen, und ein falscher Server mit dem OpenAI-Protokoll prüft die Antworten 200, 401, 429 und eine Zeitüberschreitung, wobei der Schlüssel in keiner Ausgabe vorkommt.
+
 ## [1.9.3]
 
 ### Hinzugefügt

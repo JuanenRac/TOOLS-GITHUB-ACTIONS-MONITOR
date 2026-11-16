@@ -67,7 +67,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 
 | | |
 |---|---|
-| **Versão** | **1.9.3** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versão** | **1.9.4** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Requisitos** | Python 3.11+ e a CLI do GitHub (`gh auth login`); mais nada (a vista de consola usa o pacote opcional `rich`) |
 | **Abre** | uma página só em `127.0.0.1`, em oito idiomas |
 | **Escreve no GitHub** | nunca sozinho: apenas os comandos por lotes que lançar com um `--go` explícito |
@@ -75,7 +75,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 
 <!-- glance:begin -->
 
-**Medido hoje** (v1.9.3)
+**Medido hoje** (v1.9.4)
 
 | | |
 |---|---|

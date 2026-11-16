@@ -45,6 +45,12 @@
 
 - 立即退出的账户的测试不再依赖计算机的速度：重新启动账户前的等待由测试自己提供的时钟来检查，第二个测试在不读取真实时间的情况下检查等待的时间表（旧测试曾在发布闸门的高负载下失败）。
 
+## [1.9.4]
+
+### 新增
+
+- **AI 提供方预设和兼容 AI 一览表**:一个带版本的数据文件(`ai_presets.json`,以只读方式通过 `GET /api/ai/presets` 提供)列出 12 个托管服务(OpenAI、Anthropic、Google Gemini、xAI Grok、Mistral、DeepSeek、Groq、OpenRouter、Together AI、Fireworks AI、Perplexity、Cohere)和 6 个本地服务器(Ollama、LM Studio、llama.cpp 服务器、vLLM、LocalAI、Jan),并附可编辑的示例模型(Llama、Mistral、Qwen、DeepSeek、Gemma、Phi、gpt-oss;不含权重,不下载)。在 AI 设置中,选择器会填入提供方、地址、密钥的环境变量名称和一个模型,显示该选择的隐私情况(文本经互联网发送,或保留在本机),并在适用时注明“协议兼容,尚未用本工具测试”;默认均未启用,密钥绝不离开其环境变量。本机上的服务器(`http://127.0.0.1:...`)可保存为 `ai.base_url` 并无需密钥工作;远程地址仍需要 https 及其密钥。三份 AI 指南以八种语言附有该表,一个使用 OpenAI 协议的模拟服务器测试 200、401、429 和超时响应,密钥不出现在任何输出中。
+
 ## [1.9.3]
 
 ### 新增
