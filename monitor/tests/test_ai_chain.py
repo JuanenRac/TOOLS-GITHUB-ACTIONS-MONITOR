@@ -13,6 +13,7 @@ from pathlib import Path
 from unittest import mock
 
 import _testenv  # noqa: F401
+import _timing
 from github_actions_monitor.app import settings_api
 from github_actions_monitor.integrations import ai_alerts, ai_notify
 from github_actions_monitor.sentinels import ai_chain, ai_models, sentinel_ai as ai
@@ -151,7 +152,7 @@ class Fallback(Base):
         result = self.ask(self.chain("m-slow", "m-good", fallback_after_seconds=1))
         self.assertTrue(result["ok"], result)
         self.assertEqual(result["fallback"]["failed"][0]["reason"], "slow")
-        self.assertLess(time.time() - started, 2.4)
+        self.assertLess(time.time() - started, _timing.limit(2.4))
 
     def test_the_chain_is_capped_never_repeats_a_model_and_is_not_a_loop(self):
         cfg = self.chain("m-401", "m-429", "m-404", "m-good", fallback_max_attempts=2)
