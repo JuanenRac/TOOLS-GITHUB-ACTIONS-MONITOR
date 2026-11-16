@@ -6,6 +6,7 @@
  "types": ["bool", "int", "number", "str", "list", "object", "any"],
  "endpoints": [
   {"path": "/api/health", "complete": {"ok": "bool", "lite": "bool", "version": "str", "uptime_seconds": "int", "loaded": "bool", "offline": "bool", "degraded": "int", "cycle": "object", "credential": "object"}, "lite": {"ok": "bool", "lite": "bool", "version": "str", "uptime_seconds": "int", "loaded": "bool", "offline": "bool", "degraded": "int"}},
+  {"path": "/api/data", "complete": {"data": "any", "error": "any", "hint": "any", "loop": "object"}, "lite": "same"},
   {"path": "/api/paths", "complete": {"schema": "str", "edition": "str", "folders": "object", "product_folder": "str", "config_file": "str", "files": "list", "leftovers": "list", "ai_index": "str"}, "lite": "same"},
   {"path": "/api/about", "complete": {"version": "str", "edition": "str", "author": "str", "license": "str", "links": "object", "python": "str", "implementation": "str", "system": "str", "paths": "object", "health": "object", "update": "object", "language": "str", "credits": "list", "support": "str"}, "lite": "same"},
   {"path": "/api/help/topics", "complete": {"topics": "list", "tab_topic": "any", "lang": "str"}, "lite": "same"},
@@ -49,5 +50,24 @@
   {"method": "GET", "path": "/api/help/topic?id=nope", "status": 404, "json_keys": {"error": "str"}, "editions": ["complete", "lite"]},
   {"method": "GET", "path": "/api/repos/o/r/health", "status": 404, "json_keys": {"error": "str", "code": "str"}, "editions": ["complete"]},
   {"method": "GET", "path": "/api/health", "status": 403, "json_keys": {"error": "str"}, "editions": ["complete", "lite"], "host": "other.example"}
+ ],
+ "unfrozen": [
+  {"path": "/api/ai/stream", "reason": "a stream of server-sent events, not a JSON document"},
+  {"path": "/api/github-app/status", "reason": "state of the GitHub App of the account; its keys depend on the setup"},
+  {"path": "/api/github-token", "reason": "state of the credential; its keys depend on the store in use"},
+  {"path": "/api/live-events/stream", "reason": "a stream of server-sent events, not a JSON document"},
+  {"path": "/api/otlp", "reason": "an export format of another standard"},
+  {"path": "/api/outputs/", "reason": "files for Prometheus and Grafana, in the format of those tools"},
+  {"path": "/api/repos/", "reason": "the 200 answer is described in docs/HEALTH.md; only its 404 is frozen above"},
+  {"path": "/api/report-files/file", "reason": "the content of one report file, not a JSON document"},
+  {"path": "/api/run-log", "reason": "text of the log of one run"},
+  {"path": "/api/sentinel", "reason": "answers of the sentinels; their keys grow with every sentinel"},
+  {"path": "/api/sentinel/collab", "reason": "answers of the sentinels; their keys grow with every sentinel"},
+  {"path": "/api/sentinel/historial", "reason": "answers of the sentinels; their keys grow with every sentinel"},
+  {"path": "/api/sentinel/panels", "reason": "answers of the sentinels; their keys grow with every sentinel"},
+  {"path": "/api/sentinel/parte.txt", "reason": "plain text or markdown of the daily report"},
+  {"path": "/api/sentinel/security", "reason": "answers of the sentinels; their keys grow with every sentinel"},
+  {"path": "/metrics", "reason": "the Prometheus text format"},
+  {"path": "/screen/", "reason": "the wall-screen pages, HTML"}
  ]
 }
