@@ -7,7 +7,7 @@
 
 # O registo de ações
 
-Só Complete, ligado por predefinição. Ao lado da auditoria dos acessos (inícios de sessão, bloqueios, recusas), o monitor mantém um registo de **ações**: quem mudou o quê, quando e em que conta. Uma alteração das definições, um silêncio ou a sua retirada, uma alteração de utilizadores, palavras-passe, preferências de notificação ou credenciais. É uma linha JSON por ação em `logs/audit_actions.jsonl`, que nunca é reescrito.
+Só Complete, ligado por predefinição. Ao lado da auditoria dos acessos (inícios de sessão, bloqueios, recusas), o monitor mantém um registo de **ações**: quem mudou o quê, quando e em que conta. Uma alteração das definições, um silêncio ou a sua retirada, uma alteração de utilizadores, palavras-passe, preferências de notificação ou credenciais. É uma linha JSON por ação em `logs/audit_actions.jsonl`, que nunca é reescrito. Regista também o que é confirmado: uma ação no GitHub (reexecutar, cancelar, disparar, integrar), uma execução com `act`, guardar ou apagar o token guardado, uma mudança do modo de trabalho, um grupo acrescentado pela descoberta, uma lição acrescentada, um relatório escrito agora, o acesso da conta e as ações da IA. A linha diz o que foi confirmado e o resultado, nunca o corpo do pedido. Cada rota POST fica registada ou listada como isenta com o seu motivo, e um teste falha quando uma rota nova não é nem uma coisa nem outra.
 
 ## O que diz uma linha
 

@@ -146,8 +146,8 @@ class Storage(ABC):
 
     # -- named documents of an account
     @abstractmethod
-    def load_doc(self, account_id, name, default=None):
-        """A small named document (a dict), or `default` when it is missing or damaged."""
+    def load_doc(self, account_id, name, default=None, strict=False):
+        """A small named document (a dict), or `default` when it is missing or damaged. `strict=True` makes a file that exists but cannot be read raise OSError (files storage only; the database has no such state)."""
 
     @abstractmethod
     def save_doc(self, account_id, name, data):

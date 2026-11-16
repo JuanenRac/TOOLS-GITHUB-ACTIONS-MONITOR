@@ -221,7 +221,7 @@ class SqliteStorage(base.Storage):
             self._touch(conn, account_id)
             conn.execute("INSERT OR REPLACE INTO sentinel_states (account_id, name, data, updated) VALUES (?, ?, ?, ?)", (account_id, sentinel, _dumps(data), time.time()))
 
-    def load_doc(self, account_id, name, default=None):
+    def load_doc(self, account_id, name, default=None, strict=False):
         row = self._conn().execute("SELECT data FROM docs WHERE account_id = ? AND name = ?", (base.check_account(account_id), base.check_name(name))).fetchone()
         return _loads(row[0], dict, default) if row else default
 

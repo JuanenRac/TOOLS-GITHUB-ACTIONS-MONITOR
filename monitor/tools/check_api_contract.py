@@ -38,6 +38,11 @@ def keys_problems(label, body, keys):
     for key, name in keys.items():
         if key not in body:
             problems.append(f"{label}: the key `{key}` is missing")
+        elif isinstance(name, dict):      # a nested object: its own keys and types, one level down
+            if isinstance(body[key], dict):
+                problems += keys_problems(f"{label}.{key}", body[key], name)
+            else:
+                problems.append(f"{label}: the key `{key}` is {type(body[key]).__name__}, the contract says object")
         elif not type_ok(body[key], name):
             problems.append(f"{label}: the key `{key}` is {type(body[key]).__name__}, the contract says {name}")
     return problems
@@ -66,8 +71,26 @@ def check(call, edition, contract=None):
         label = f"{row['method']} {row['path']}" + (f" (Host {row['host']})" if row.get("host") else "")
         if status != row["status"]:
             problems.append(f"{label}: status {status}, the contract says {row['status']}")
-        elif row.get("json_keys"):
-            problems += keys_problems(label, body, row["json_keys"])
+        else:
+            if row.get("json_keys"):
+                problems += keys_problems(label, body, row["json_keys"])
+            for key, value in (row.get("json_values") or {}).items():      # the code of an error is part of the contract, not only its type
+                if not isinstance(body, dict) or body.get(key) != value:
+                    problems.append(f"{label}: `{key}` is {body.get(key) if isinstance(body, dict) else None!r}, the contract says {value!r}")
+    return problems
+
+
+def check_fed(call, owner, contract=None):
+    """The answers that need data to exist (a repository, the sentinel envelope): `call` must talk to a monitor that holds the invented data of the demo. `{owner}` in a path is the account that is watched."""
+    contract = contract or json.loads(CONTRACT.read_text(encoding="utf-8"))
+    problems = []
+    for row in contract.get("fed_endpoints", []):
+        status, body = call("GET", row["path"].replace("{owner}", owner))
+        label = f"GET {row['path']}"
+        if status != row["status"]:
+            problems.append(f"{label}: status {status}, the contract says {row['status']}")
+        else:
+            problems += keys_problems(label, body, row["keys"])
     return problems
 
 

@@ -21,7 +21,7 @@ Ajustes, pestaña Centinela, bloque **Informes programados**:
 | `report_schedule.keep` | 12 | cuántas tandas se conservan; las más antiguas se quitan |
 | `report_schedule.top` | 10 | cuántos repositorios y alertas muestra cada lista, los peores primero |
 
-El primer informe espera al primer minuto programado después de encenderlo. Se escribe un informe por minuto programado, aunque el monitor haya estado apagado días (entonces escribe uno, no un montón). Un informe que falla queda anotado en la salud del monitor y el siguiente minuto programado lo intenta otra vez.
+El primer informe espera al primer minuto programado después de encenderlo. Se escribe un informe por minuto programado, aunque el monitor haya estado apagado días (entonces escribe uno, no un montón). Un informe que falla queda anotado en la salud del monitor y el siguiente minuto programado lo intenta otra vez. Una programación que nombra un día del mes sigue debiéndose tras una parada de hasta un mes (si nombra un mes, hasta un año), y la hora que ocurre dos veces cuando el reloj retrocede en otoño no se informa dos veces. Un informe es todos sus formatos o nada: si el segundo formato no se puede escribir, el primer archivo se elimina.
 
 ## Qué lleva un informe
 

@@ -21,7 +21,7 @@ Réglages, onglet Sentinelle, bloc **Rapports planifiés** :
 | `report_schedule.keep` | 12 | combien de séries sont conservées ; les plus anciennes sont supprimées |
 | `report_schedule.top` | 10 | combien de dépôts et d'alertes chaque liste montre, les pires d'abord |
 
-Le premier rapport attend la première minute planifiée après l'activation. Un rapport est écrit par minute planifiée, même si le moniteur est resté éteint des jours (il en écrit alors un, pas un tas). Un rapport qui échoue est noté dans la santé du moniteur et la minute planifiée suivante réessaie.
+Le premier rapport attend la première minute planifiée après l'activation. Un rapport est écrit par minute planifiée, même si le moniteur est resté éteint des jours (il en écrit alors un, pas un tas). Un rapport qui échoue est noté dans la santé du moniteur et la minute planifiée suivante réessaie. Un calendrier qui nomme un jour du mois reste dû après un arrêt allant jusqu'à un mois (s'il nomme un mois, jusqu'à un an), et l'heure qui se produit deux fois quand l'horloge recule en automne n'est pas rapportée deux fois. Un rapport est tous ses formats ou rien : si le second format ne peut pas être écrit, le premier fichier est supprimé.
 
 ## Ce que contient un rapport
 

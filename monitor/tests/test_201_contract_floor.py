@@ -31,6 +31,8 @@ def contains(current, floor, label):
     for key, kind in floor.items():
         if key not in current:
             problems.append(f"{label}: the key `{key}` was removed")
+        elif kind == "object" and isinstance(current[key], dict):      # the same object, now with the list of its own keys
+            continue
         elif current[key] != kind:
             problems.append(f"{label}: the key `{key}` changed from {kind} to {current[key]}")
     return problems
@@ -65,7 +67,7 @@ class EveryGetRouteIsDecided(unittest.TestCase):
         return sorted(set(re.findall(r'"(/(?:api|metrics|screen)[^"\s]*)"', body)))
 
     def test_each_route_is_frozen_or_listed_as_not_frozen_with_its_reason(self):
-        frozen = {row["path"].split("?")[0] for row in CONTRACT["endpoints"]}
+        frozen = {row["path"].split("?")[0] for row in CONTRACT["endpoints"] + CONTRACT["fed_endpoints"]}
         free = CONTRACT["unfrozen"]
         for row in free:
             self.assertTrue(row["reason"].strip(), row["path"])
