@@ -56,3 +56,13 @@ Only the first 100 open issues and 100 open pull requests of a repository are re
 ## Reading with the Search API
 
 With `sentinels.collab.search_api` on (off by default) the Collab sentinel asks the open issues and pull requests of the whole account in a few calls of the Search API instead of two lists for each repository. The Search API has an allowance of its own (30 calls a minute) that the REST allowance does not pay. Only the conflicts of the pull requests that changed are read afterwards. The alerts are the same in both ways, a test compares them; if the Search API fails, the round reads each repository as before. A pull request found this way does not say whether a review was requested, so the rule of reviews waiting counts only what the lists give.
+
+## Long lists: pages and what is cut
+
+A page of GitHub has 100 items. A repository can have hundreds of open issues and pull requests, 148 or 348 workflows, or a matrix of more than 100 jobs, so the monitor follows the next page while the last one was full and says when something is still left out:
+
+- **Issues and pull requests** (this tab): up to `pagination.collab_pages` pages of 100 for each list of a repository (the first page keeps its conditional read, and a repository with fewer than 100 costs nothing more). A repository with more than was read is counted in the footer of the tab; with the Search API (`sentinels.collab.search_api`) the footer says "seen N of M" when the account has more than the 1000 results that search gives.
+- **Workflows of a repository** (hygiene): up to `pagination.workflow_pages` pages of 100. If the list is still cut, the hygiene of that repository says "seen N of M" instead of looking complete.
+- **Jobs of a run** (Now tab): up to `pagination.job_pages` pages of 100; a matrix that is cut shows "jobs: seen N of M" under the run.
+
+The defaults read nothing more for a repository that fits in one page.

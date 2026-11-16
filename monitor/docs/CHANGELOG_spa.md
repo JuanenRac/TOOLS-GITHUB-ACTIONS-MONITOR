@@ -9,9 +9,6 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
-### Cambiado
-
-- **La higiene (A6) ya no da por hechas las convenciones de un solo dueño**: el nombre del ruleset es un ajuste (`sentinel.hygiene.ruleset_names`, admite patrones); `sentinel.hygiene.ruleset_mode` puede juzgar la rama por defecto por las reglas que GitHub informa como vigentes (endpoints públicos, sin permisos de administrador) se llame como se llame el ruleset; `sentinel.hygiene.skip` deja fuera una comprobación; `sentinel.hygiene.community_fallback` cuenta también el perfil de comunidad y el repositorio `.github` de la cuenta; se acepta una licencia llamada LICENSE-MIT, LICENSE-APACHE, LICENSE.txt, COPYING o reconocida por GitHub; y lo que el token no puede saber (sin permisos de administrador) se muestra como no evaluable, nunca verde y nunca un aviso. Los valores por defecto conservan la regla antigua.
 
 ### Añadido
 
@@ -21,12 +18,17 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 - **Cobertura honesta de la lista de ejecuciones**: la tabla de repositorios tiene una columna nueva, *La muestra llega hasta*, que dice hasta qué momento del pasado llega la lista de ejecuciones de cada repositorio. Una lista llena que remonta menos de `sampling.min_coverage_minutes` (30 por defecto; 0 lo desactiva) se marca como *cobertura baja* en vez de parecer completa, una lista más corta de lo pedido es *completa*, y un total en el que GitHub deja de contar (2.500 o 40.000) se muestra como *al menos*. Un aviso sobre la tabla cuenta los repositorios con cobertura baja; el bloque `sampling` de `GET /api/data` lleva las mismas cifras.
 - **Segunda mirada a la rama por defecto** (`sampling.default_branch_probe`, desactivada por defecto): cuando la lista de ejecuciones de un repositorio está llena, una petición más pide los push a su rama por defecto sin pull requests, para que las ejecuciones que deciden el rojo en main no las desplacen los pull requests ni las programadas. Las ejecuciones que solo encontró la segunda mirada nunca hacen que una lista cuente como llena.
 - **Presupuesto de peticiones por hora** (`sampling.api_budget_per_hour`, 0 = ninguno): al superarlo se leen primero los repositorios con un workflow en rojo y el resto espera a la hora siguiente, y la página dice cuántos esperan. La página muestra también las peticiones por hora que piden el número de repositorios y los intervalos (a partir de 3.500, o siempre que haya presupuesto), para avisar a una cuenta grande antes de que agote su cupo.
+- **Las listas largas se leen hasta el final y un corte se dice**: los workflows de un repositorio (148 o 348 son casos reales), los jobs de una ejecución (una matriz de más de 100) y los issues y pull requests abiertos de un repositorio se leen ahora página a página mientras la última estaba llena, hasta `pagination.workflow_pages`, `pagination.job_pages` y `pagination.collab_pages` páginas de 100. Un repositorio que cabe en una página cuesta las mismas peticiones que antes. Cuando algo sigue fuera la página dice «vistos N de M»: bajo la ejecución para sus jobs, en la higiene del repositorio para sus workflows, y en el pie de la pestaña Equipo para los repositorios con más elementos abiertos de los leídos y para la cuenta cuando la API de búsqueda tiene más de sus 1000 resultados.
 
 ### Cambiado
 
 - **A2 resuelve muchos workflows con una sola petición**: a un repositorio con al menos `sentinel.a2_resolve_batch_min` workflows por consultar (2 por defecto; 0 = de uno en uno) se le piden una sola vez sus ejecuciones completadas más recientes de la rama por defecto, sin pull requests, y se resuelven juntos todos los workflows que aparecen (`sentinel.a2_resolve_batch_pages` páginas de 100 como máximo); lo que la lista no muestra se pregunta de uno en uno como antes, así que un repositorio con 100 o más workflows converge en pocos ciclos en vez de cuatro workflows por ciclo.
 - **A2 resuelve muchos workflows con una sola petición**: a un repositorio con al menos `sentinel.a2_resolve_batch_min` workflows por consultar (2 por defecto; 0 = de uno en uno) se le piden una sola vez sus ejecuciones completadas más recientes de la rama por defecto, sin pull requests, y se resuelven juntos todos los workflows que aparecen (`sentinel.a2_resolve_batch_pages` páginas de 100 como máximo); lo que la lista no muestra se pregunta de uno en uno como antes, así que un repositorio con 100 o más workflows converge en pocos ciclos en vez de cuatro workflows por ciclo.
 - **Los forks y los repositorios archivados se eligen con un ajuste y un fork mantenido nunca se pierde**: `discovery.skip_archived` (activado por defecto) decide si se vigilan los archivados; `discovery.fork_policy` puede dejar fuera los forks (`skip`) o conservar solo los que tienen CI propio (`skip_unless_ci`: un workflow activado y una ejecución dentro de `discovery.fork_ci_days`), y `auto` hace lo mismo con una ventana el doble de larga en una organización, cuyo tipo se lee una vez al día; `discovery.fork_checks_per_pass` limita las peticiones que se gastan en ello. El valor por defecto (`show`) no cambia nada.
+
+### Corregido
+
+- Se encuentra el job que falla de una ejecución con más de 30 jobs: las listas de jobs que leen el aviso para una IA, el asistente y la herramienta por lotes se cortaban en 30 y ahora se cortan en 100 (la misma petición única).
 
 ## [2.0.2]
 

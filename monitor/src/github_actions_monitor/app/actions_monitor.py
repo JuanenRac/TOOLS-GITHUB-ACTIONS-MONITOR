@@ -53,6 +53,7 @@ from github_actions_monitor.util import exclusive
 from github_actions_monitor.util import platform_compat
 from github_actions_monitor.util import ports
 from github_actions_monitor.data_pipeline import causes
+from github_actions_monitor.data_pipeline import paging
 from github_actions_monitor.data_pipeline import redrule
 from github_actions_monitor.data_pipeline import sampling
 from github_actions_monitor.util import resilience
@@ -125,6 +126,7 @@ DEFAULTS = {
     "finops": {"jobs_per_cycle": 0},
     "network": {"use_proxy": False, "etag": True, "graphql_checks": False, "graphql_batch": 20},                                         # OFF: outgoing requests ignore the proxy variables of the environment (netguard.py)
     "ai_notify": {"enabled": False, "confirmed_provider": "", "max_calls_per_hour": 4, "cost_per_call_cents": 5, "max_cost_per_hour_cents": 50, "command": "", "timeout_seconds": 30},      # OFF: tell an external AI of a NEW real alert (ai_notify.py)
+    "pagination": {"workflow_pages": 3, "job_pages": 2, "collab_pages": 3},      # pages of 100 followed when a list is full, and said when something is cut (paging.py)
     "sampling": {"default_branch_probe": False, "min_coverage_minutes": 30, "api_budget_per_hour": 0},      # how much of a repository the list of runs shows, a second look at the default branch, a budget of requests (sampling.py)
     "savings": {"webhook_first": False, "webhook_window_minutes": 60, "webhook_full_minutes": 360, "feeds": {"enabled": False, "method": "atom", "max_age_minutes": 240}},      # read less: OFF (savings.py)
     "logs": {"failed_step": {"enabled": False, "lines": 12, "max_bytes": 2000}},      # the log of the failed step in the page: OFF, one press of a button, steplog.py
@@ -864,12 +866,18 @@ def note_read(repo, runs, error):
 
 
 def run_jobs(repo, run_id):
+    return run_jobs_info(repo, run_id)[0]
+
+
+def run_jobs_info(repo, run_id):
+    """(jobs, seen, total): the jobs of a run read in pages of 100 (up to pagination.job_pages); total is what GitHub says there are, so a matrix that is cut is said ("seen 100 of 240")."""
     try:
-        data = gh("api", f"repos/{toolconfig.github_owner()}/{repo}/actions/runs/{run_id}/jobs?per_page=30", retries=1)
+        pages = paging.settings(toolconfig.raw_config())["job_pages"]
+        page = paging.read_pages(lambda path: gh("api", path, retries=1), f"repos/{toolconfig.github_owner()}/{repo}/actions/runs/{run_id}/jobs", "jobs", 100, pages)
     except Exception:
-        return []
+        return [], 0, None
     jobs = []
-    for job in data.get("jobs", []):
+    for job in page["items"]:
         steps = job.get("steps") or []
         done = sum(1 for step in steps if step.get("status") == "completed")
         current = next((step.get("name") for step in steps if step.get("status") == "in_progress"), "")
@@ -880,7 +888,7 @@ def run_jobs(repo, run_id):
             "steps_total": len(steps), "steps_done": done, "step": current, "runner": job.get("runner_name") or "",
             "seconds": seconds_between(started, finished) if started else 0, "url": job.get("html_url"),
         })
-    return jobs
+    return jobs, page["seen"], (page["total"] if page["cut"] else None)
 
 
 def repo_issues(repo):
@@ -1000,7 +1008,8 @@ def build(config, repos, started, refreshed, loading, progress_text):
             seen_active.add((run["repo"], run.get("id")))
             active.append(run)
     for run in active:
-        run["jobs"] = run_jobs(run["repo"], run["id"]) if (run["status"] == "in_progress" and not loading) else []
+        run["jobs"], seen, total = run_jobs_info(run["repo"], run["id"]) if (run["status"] == "in_progress" and not loading) else ([], 0, None)
+        run["jobs_seen"], run["jobs_total"] = seen, total      # total only when the jobs were cut: "seen N of M"
         run["stuck"] = (run.get("seconds") or 0) > config["stuck_minutes"] * 60
     if not loading and time.time() - ISSUE_CACHE["at"] > config["issues_refresh_seconds"] and not ISSUE_CACHE["busy"]:
         ISSUE_CACHE["busy"] = True  # the issues load in the background so the first page does not wait for them
@@ -1668,7 +1677,7 @@ def maintain(config, data):
             return
         for run in analytics.pending_runs(data.get("runs") or [], store, cfg["jobs_per_cycle"]):
             try:
-                body = gh_read(f"repos/{toolconfig.github_owner()}/{run['repo']}/actions/runs/{run['id']}/jobs?per_page=30", retries=0)
+                body = gh_read(f"repos/{toolconfig.github_owner()}/{run['repo']}/actions/runs/{run['id']}/jobs?per_page=100", retries=0)
             except Exception:   # noqa: BLE001 - a job list that cannot be read is skipped for good
                 store.add_jobs(run["repo"], run["name"], run["id"], [], cfg["steps"])
                 continue

@@ -30,6 +30,7 @@ from pathlib import Path
 
 from github_actions_monitor.data_pipeline import etagcache
 from github_actions_monitor.data_pipeline import events
+from github_actions_monitor.data_pipeline import paging
 from github_actions_monitor import i18n
 from github_actions_monitor.sentinels import sentinel_base
 from github_actions_monitor.app import toolconfig
@@ -181,6 +182,8 @@ class SentinelCollab(sentinel_base.BaseSentinel):
         self.lock = threading.RLock()
         self.state = load_state(STATE_FILE)
         self.calls, self.errors, self.paused = [], {}, False
+        self.pages = paging.settings(config)["collab_pages"]      # pages of 100 followed for the issues and the pull requests of a repository
+        self.search_cut = []      # [{"kind", "seen", "total"}]: what the Search API said there is beyond what was read
         self.feed = events.Feed(events.EVENTS_FILE, events.STATE_FILE)      # the paths of now: an account redirects them before this is built
 
     @property
@@ -221,6 +224,24 @@ class SentinelCollab(sentinel_base.BaseSentinel):
         tag = headers.get("etag", "")
         return 200, (data if isinstance(data, list) else []), (tag if etagcache.ETAG_RE.match(tag) else "")
 
+    def fetch_pages(self, base, etag):
+        """(status, list, etag, cut): the first page is the conditional read (a 304 costs nothing); while a page is full the next ones are read, up to `pagination.collab_pages`.
+        `cut` = the last page read was still full: there may be more than what was read."""
+        status, data, tag = self.fetch_list(f"{base}&per_page={PER_PAGE}", etag)
+        if status != 200 or len(data) < PER_PAGE:
+            return status, data, tag, False
+        cut, page = True, 2
+        while page <= self.pages:
+            more_status, more, _tag = self.fetch_list(f"{base}&per_page={PER_PAGE}&page={page}", "")
+            if more_status != 200:
+                break
+            data = data + more
+            if len(more) < PER_PAGE:
+                cut = False
+                break
+            page += 1
+        return 200, data, tag, cut
+
     def read_one(self, endpoint):
         self._count()
         data = self.ctx["gh"]("api", endpoint, retries=1)
@@ -231,18 +252,24 @@ class SentinelCollab(sentinel_base.BaseSentinel):
         {repo: {"issues": [raw], "prs": [raw]}}, or None when the account name is not plain or any page fails (the round then reads each repository as before)."""
         if not re.fullmatch(r"[A-Za-z0-9-]{1,39}", str(owner or "")):
             return None
-        lists = {}
+        lists, cuts = {}, []
         try:
             for kind, key in (("issue", "issues"), ("pr", "prs")):
+                seen, total = 0, None
                 for page in range(1, SEARCH_PAGES + 1):
                     data = self.read_one(f"search/issues?q=user:{owner}+is:open+is:{kind}&sort=updated&order=desc&per_page={PER_PAGE}&page={page}")
                     items = [i for i in (data.get("items") if isinstance(data.get("items"), list) else []) if isinstance(i, dict)]
+                    total = data.get("total_count") if isinstance(data.get("total_count"), int) and not isinstance(data.get("total_count"), bool) else total
+                    seen += len(items)
                     for item in items:
                         repo = str(item.get("repository_url") or "").rsplit("/", 1)[-1]
                         if repo:
                             lists.setdefault(repo, {"issues": [], "prs": []})[key].append(item)
                     if len(items) < PER_PAGE:
                         break
+                if total is not None and seen < total:
+                    cuts.append({"kind": key, "seen": seen, "total": total})      # the Search API never gives more than 1000 results: the rest is not seen
+            self.search_cut = cuts
         except Exception as error:   # noqa: BLE001 - a way to read less never stops the round: the usual reading takes over
             self.errors["search"] = {"message": str(error)[:80], "at": stamp(time.time())}
             return None
@@ -305,15 +332,16 @@ class SentinelCollab(sentinel_base.BaseSentinel):
             self.details(owner, repo, prs, budget, now)
             self._commit(repo, issues, prs, etag, now)
             return
-        status, data, tag = self.fetch_list(f"repos/{owner}/{repo}/issues?state=open&sort=updated&direction=desc&per_page={PER_PAGE}", etag.get("issues", "") if mine.get("issues") is not None else "")
+        cut = dict(mine.get("cut") or {})
+        status, data, tag, cut_now = self.fetch_pages(f"repos/{owner}/{repo}/issues?state=open&sort=updated&direction=desc", etag.get("issues", "") if mine.get("issues") is not None else "")
         if status == 200:
-            issues, etag["issues"] = [slim_issue(i) for i in data if isinstance(i, dict) and "pull_request" not in i], tag      # the issues list also holds the pull requests: they are the other list
-        status, data, tag = self.fetch_list(f"repos/{owner}/{repo}/pulls?state=open&sort=updated&direction=desc&per_page={PER_PAGE}", etag.get("pulls", "") if mine.get("prs") is not None else "")
+            issues, etag["issues"], cut["issues"] = [slim_issue(i) for i in data if isinstance(i, dict) and "pull_request" not in i], tag, cut_now      # the issues list also holds the pull requests: they are the other list
+        status, data, tag, cut_now = self.fetch_pages(f"repos/{owner}/{repo}/pulls?state=open&sort=updated&direction=desc", etag.get("pulls", "") if mine.get("prs") is not None else "")
         if status == 200:
             before = {p["number"]: p for p in prs}
-            prs, etag["pulls"] = [slim_pull(p, before.get(p.get("number"))) for p in data if isinstance(p, dict)], tag
+            prs, etag["pulls"], cut["prs"] = [slim_pull(p, before.get(p.get("number"))) for p in data if isinstance(p, dict)], tag, cut_now
         self.details(owner, repo, prs, budget, now)
-        self._commit(repo, issues, prs, etag, now)
+        self._commit(repo, issues, prs, etag, now, cut)
 
     def details(self, owner, repo, prs, budget, now):
         """The conflicts of the pull requests that changed (the only calls beyond the lists), at most `budget` in one round."""
@@ -327,7 +355,7 @@ class SentinelCollab(sentinel_base.BaseSentinel):
                 pull["dirty_since"] = (pull.get("dirty_since") or now) if dirty else None
                 pull["checked"], pull["seen"] = now, pull["updated"]
 
-    def _commit(self, repo, issues, prs, etag, now):
+    def _commit(self, repo, issues, prs, etag, now, cut=None):
         """Applies the rules to what is known of one repository, replaces its alerts, and writes the events of what changed (nothing the first time the repository is looked at)."""
         with self.lock:
             before = {k: a for k, a in self.state["alerts"].items() if a["repo"] == repo}
@@ -336,7 +364,7 @@ class SentinelCollab(sentinel_base.BaseSentinel):
             for key in before:
                 self.state["alerts"].pop(key, None)
             self.state["alerts"].update(found)
-            self.state["per_repo"][repo] = {"scanned": now, "etag": etag, "issues": issues, "prs": prs}
+            self.state["per_repo"][repo] = {"scanned": now, "etag": etag, "issues": issues, "prs": prs, "cut": {k: bool(v) for k, v in (cut or {}).items()}}
         if first:
             return
         out = [self._event("collab_new", found[k]) for k in found if k not in before] + [self._event("collab_fixed", before[k]) for k in before if k not in found]
@@ -384,9 +412,11 @@ class SentinelCollab(sentinel_base.BaseSentinel):
             checked = sum(1 for r in repos if (self.state["per_repo"].get(r) or {}).get("scanned"))
             alerts = list(self.state["alerts"].values())
             last = self.state["last_full_scan"]
+            cut = sorted(r for r in repos if any(((self.state["per_repo"].get(r) or {}).get("cut") or {}).values()))
         level = "unknown" if not checked else ("bad" if any(a["level"] == "error" for a in alerts) else ("warn" if alerts else "ok"))
         return {"enabled": True, "level": level, "loading": "" if checked or not repos else "starting", "errors": [{"section": r, "at": e["at"]} for r, e in sorted(self.errors.items())],
-                "refresh_seconds": self.refresh_seconds, "repos_in_scope": len(repos), "repos_checked": checked, "last_full_scan": last, "paused": self.paused}
+                "refresh_seconds": self.refresh_seconds, "repos_in_scope": len(repos), "repos_checked": checked, "last_full_scan": last, "paused": self.paused,
+                "truncated": cut[:20], "truncated_count": len(cut), "pages": self.pages, "search_cut": list(self.search_cut)}
 
     def get_metrics(self):
         if not self.enabled:
