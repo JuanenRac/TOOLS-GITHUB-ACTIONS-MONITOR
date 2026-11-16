@@ -68,6 +68,8 @@ IGNORED = ("cancelled", "skipped", "neutral", "stale")
 BOT_ACTORS = ("dependabot[bot]", "github-actions[bot]")   # plus the owner of the repositories (toolconfig.github_owner())
 RELEASE_WF = re.compile(r"(release|build|publish|package|apk|firmware|exe|dist|site|sign|deploy)", re.I)
 BUMP_RE = re.compile(r"[Bb]ump\s+(?P<pkg>\S+)\s+from\s+(?P<a>\S+)\s+to\s+(?P<b>\S+)")
+RENOVATE_RE = re.compile(r"[Uu]pdate\s+(?:dependency\s+)?(?P<pkg>\S+)(?:\s+(?:action|docker\s+tag|digest|image|orb))?\s+to\s+(?P<b>v?\d\S*)")      # "Update dependency x to v2.1.0", "Update actions/checkout action to v4"
+DEPENDENCY_BOTS = ("dependabot", "renovate")
 DEFAULT_AUDIT_FILES = {"reconciliation": "RECONCILIATION_TOTAL_*.txt", "rounds": "ROUNDS_MAP_2*.txt", "rounds_extra": "ROUNDS_MAP_EXTRA_*.txt"}   # A8: names of the files of the audit folder
 
 DEFAULTS = {
@@ -82,6 +84,10 @@ DEFAULTS = {
     # of GitHub or the organisation's `.github` repository provides it. What the token cannot know is shown as "not evaluable", never as green and never as a warning.
     "hygiene": {"ruleset_mode": "name", "ruleset_names": ["protect-main"], "skip": [], "community_fallback": False},
     "skip_candidate_prefixes": [], "min_rate_remaining": 800,
+    # dependency_bots: the accounts whose pull requests are the dependency updates of A4 (a login with `app/` before it or `[bot]` after it counts too).
+    "dependency_bots": list(DEPENDENCY_BOTS),
+    # bots_apart: pull requests of accounts that GitHub calls bots (type Bot) are not counted as the work of a person: A4 counts them apart and the check of old pull requests waiting for a person leaves them out.
+    "bots_apart": False,
     # minutes_budget: ceiling of Actions minutes per ecosystem, e.g. {"hydra": 600}; empty = no ceiling. The period is "7d" (default) or "24h".
     "minutes_budget": {}, "minutes_budget_period": "7d",
     # ci_red_file: where ci_red.json (repo -> red workflows + pending_sign) is written: "" = next to the monitor, "off" = not written, or a path.
@@ -295,7 +301,22 @@ def ecosystem_summary(s, eco):
 
 def parse_bump(title):
     match = BUMP_RE.search(title or "")
-    return (match.group("pkg"), match.group("a"), match.group("b")) if match else None
+    if match:
+        return match.group("pkg"), match.group("a"), match.group("b")
+    renovate = RENOVATE_RE.search(title or "")      # no "from" version in the title: the jump cannot be told (major stays unknown)
+    return (renovate.group("pkg"), None, renovate.group("b")) if renovate else None
+
+
+def is_dependency_bot(login, bots=DEPENDENCY_BOTS):
+    """True when a pull request author is one of the dependency bots: `renovate`, `app/renovate`, `renovate[bot]`, `renovate-bot` all count as `renovate`."""
+    name = (login or "").lower()
+    if name.startswith("app/"):
+        name = name[4:]
+    if name.endswith("[bot]"):
+        name = name[:-5]
+    if name.endswith("-bot"):
+        name = name[:-4]
+    return bool(name) and name in {b.lower() for b in bots or ()}
 
 
 def major_jump(old, new):
@@ -305,7 +326,7 @@ def major_jump(old, new):
     return int(b.group(1)) > int(a.group(1))
 
 
-def classify_pr(repo, pr, now):
+def classify_pr(repo, pr, now, bots=DEPENDENCY_BOTS):
     author = ((pr.get("author") or {}).get("login") or "").lower()
     files = [f.get("path", "") for f in ((pr.get("files") or {}).get("nodes") or [])]
     workflows = [p for p in files if p.startswith(".github/workflows/")]
@@ -313,7 +334,8 @@ def classify_pr(repo, pr, now):
     created = parse_time(pr.get("createdAt"))
     return {
         "repo": repo, "number": pr.get("number"), "title": (pr.get("title") or "")[:140], "url": pr.get("url"),
-        "dependabot": author in ("dependabot", "app/dependabot", "dependabot[bot]"), "draft": bool(pr.get("isDraft")),
+        "bot": (pr.get("author") or {}).get("__typename") == "Bot",      # the kind of account GitHub says it is, not a guess from the name
+        "dependabot": is_dependency_bot(author, bots), "draft": bool(pr.get("isDraft")),
         "age_days": round((now - created).total_seconds() / 86400, 1) if created else None,
         "conflict": pr.get("mergeable") == "CONFLICTING", "mergeable": pr.get("mergeable") or "UNKNOWN",
         "major": major_jump(bump[1], bump[2]) if bump else None, "pkg": bump[0] if bump else "",
@@ -785,7 +807,9 @@ def compute_snapshot(inp):
     order = {"critical": 0, "high": 1, "error": 2, "medium": 3, "warning": 4, "low": 5}
     codeql_list.sort(key=lambda x: (order.get((x.get("severity") or "").lower(), 9), x["repo"]))
     unavailable = [r for r, a in alerts.items() if a.get("codeql") is None]
-    prs_all = [classify_pr(repo, pr, now) for repo, i in info.items() for pr in i.get("prs", [])]
+    bots = [b for b in (cfg.get("dependency_bots") or DEPENDENCY_BOTS) if isinstance(b, str)]
+    prs_all = [classify_pr(repo, pr, now, bots) for repo, i in info.items() for pr in i.get("prs", [])]
+    bots_apart = cfg.get("bots_apart") is True
     dep_prs = sorted((p for p in prs_all if p["dependabot"]), key=lambda p: -(p["age_days"] or 0))
     releases = {r: i.get("release") for r, i in info.items() if i.get("release")}
     ages = {}
@@ -841,7 +865,8 @@ def compute_snapshot(inp):
                "new": new or {}, "new_total": (sum(new.values()) if new is not None else None), "has_reference": new is not None,
                "codeql": codeql_list[:200], "unavailable": len(unavailable), "alerts_checked": sum(1 for a in alerts.values() if a.get("at")),
                "trend": {k: trend(inp["history"], k) for k in ("codeql", "dependabot", "secret", "prs", "red", "candidates")}},
-        "a4": {"dependabot": dep_prs, "other": sum(1 for p in prs_all if not p["dependabot"]), "stale_days": cfg["stale_pr_days"]},
+        "a4": {"dependabot": dep_prs, "other": sum(1 for p in prs_all if not p["dependabot"] and not (bots_apart and p["bot"])), "other_bots": sum(1 for p in prs_all if not p["dependabot"] and p["bot"]),
+               "stale_days": cfg["stale_pr_days"]},
         "tool_version": TOOL_VERSION,
         "a5": {"candidates": candidates, "green_unreleased": green, "pending_sign": [{**g, "pending_sign_hours": g["hours"]} for g in pending_sign(unsigned, now, cfg["pending_sign_hours"])],
                "pending_sign_hours": cfg["pending_sign_hours"], "states": states, "sign_queue": queue, "signed_unpublished": signed_wait,
@@ -854,7 +879,7 @@ def compute_snapshot(inp):
         "a9": inp.get("roadmaps") or {"boards": [], "level": "unknown"},
     }
     s["a7"]["by_ecosystem"] = minutes_by_ecosystem(mins, eco, cfg)
-    s["a10"] = surface.build({"now": now, "cfg": cfg["surface"], "repos": repos, "eco": eco, "repo_info": info, "alerts": alerts, "perms": perms, "runs": runs_by_repo,
+    s["a10"] = surface.build({"bots_apart": bots_apart, "now": now, "cfg": cfg["surface"], "repos": repos, "eco": eco, "repo_info": info, "alerts": alerts, "perms": perms, "runs": runs_by_repo,
                               "branches": branches, "scans": inp.get("scans"), "raw": inp.get("surface_raw"), "globals": inp.get("surface_glob"), "red": red,
                               "issues": issues, "prs": prs_all, "states": states, "queue": queue, "loading": inp.get("loading")})
     att = (inp.get("surface_glob") or {}).get("attestation") or {}
@@ -895,7 +920,7 @@ def repo_query(file_names):
     return ("query($after:String){rateLimit{remaining cost} repositoryOwner(login:\"%s\"){repositories(first:15,after:$after,ownerAffiliations:OWNER,isArchived:false)"
             "{totalCount pageInfo{hasNextPage endCursor} nodes{name pushedAt hasVulnerabilityAlertsEnabled licenseInfo{key} defaultBranchRef{name} latestRelease{tagName publishedAt isDraft releaseAssets(first:100){nodes{name}}}"
             " vulnerabilityAlerts(states:OPEN,first:50){totalCount nodes{createdAt securityVulnerability{severity}}}"
-            " pullRequests(states:OPEN,first:10){nodes{number title url author{login} createdAt isDraft mergeable reviewDecision commits(last:1){nodes{commit{statusCheckRollup{state}}}} files(first:20){nodes{path}}}}"
+            " pullRequests(states:OPEN,first:10){nodes{number title url author{login __typename} createdAt isDraft mergeable reviewDecision commits(last:1){nodes{commit{statusCheckRollup{state}}}} files(first:20){nodes{path}}}}"
             " rulesets(first:5){nodes{name enforcement}} labels(first:20,query:\"dependencies\"){nodes{name}} %s}}}}") % (toolconfig.github_owner(), aliases)
 
 

@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2594_passing-brightgreen.svg" alt="2594 tests">
+  <img src="https://img.shields.io/badge/Tests-2635_passing-brightgreen.svg" alt="2635 tests">
 </p>
 
 > 所有するすべてのリポジトリのワークフローを監視し、赤いもの・止まっているもの・対応待ちのものを、ローカルの1ページで教えます。
@@ -81,8 +81,8 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **テスト** | テストメソッド 2594 件(`python -m unittest discover -s monitor/tests`) |
-| **設定** | 設定 483 件、すべてヘルプ付き |
+| **テスト** | テストメソッド 2635 件(`python -m unittest discover -s monitor/tests`) |
+| **設定** | 設定 498 件、すべてヘルプ付き |
 | **言語** | 8(英語、スペイン語、ドイツ語、フランス語、イタリア語、日本語、中国語、ポルトガル語) |
 | **CI で検証したシステム** | ubuntu, windows、Python 3.11, 3.13 |
 
@@ -312,6 +312,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ADVANCED_jpn.md`](monitor/docs/ADVANCED_jpn.md): 詳細機能（すべて既定でオフ）
 - [`monitor/docs/AI_ALERTS_jpn.md`](monitor/docs/AI_ALERTS_jpn.md): AI 向けアラート：フィード、ブリーフ、フック、ストリーム
 - [`monitor/docs/AUDIT_PACKAGE_jpn.md`](monitor/docs/AUDIT_PACKAGE_jpn.md): 監査担当者向けパッケージ
+- [`monitor/docs/LARGE_ACCOUNTS_jpn.md`](monitor/docs/LARGE_ACCOUNTS_jpn.md): 大規模アカウント: 数百のリポジトリ
 - [`monitor/docs/ORGANIZATIONS_jpn.md`](monitor/docs/ORGANIZATIONS_jpn.md): 組織と大規模アカウント
 
 ## コントリビュート

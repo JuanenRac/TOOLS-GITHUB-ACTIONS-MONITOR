@@ -253,6 +253,8 @@ _f(_T_SENT, "stuck", "ci.stuck.awaiting_stuck", "bool", restart=False)
 _f(_T_SENT, "stuck", "ci.stuck.workflow_minutes", "names", restart=False)
 _f(_T_SENT, "stuck", "ci.stuck.runner_minutes", "names", restart=False)
 _f(_T_SENT, "prs", "sentinel.stale_pr_days", "int", (1, 90))
+_f(_T_SENT, "prs", "sentinel.dependency_bots", "names")
+_f(_T_SENT, "prs", "sentinel.bots_apart", "bool")
 _f(_T_SENT, "hygiene_files", "sentinel.required_files", "filegroups")
 _f(_T_SENT, "hygiene_rules", "sentinel.hygiene.ruleset_mode", "enum", ("name", "effective", "off"))
 _f(_T_SENT, "hygiene_rules", "sentinel.hygiene.ruleset_names", "names")
@@ -315,6 +317,11 @@ for _check in surface.DEFAULTS["checks"]:
     _f(_T_SURF, "chk_" + _check, f"sentinel.surface.checks.{_check}.enabled", "bool", label=["cfg.p.check_on"], help="cfg.h.check_on")
     for _param, _bounds in CHECK_PARAMS.get(_check, ()):
         _f(_T_SURF, "chk_" + _check, f"sentinel.surface.checks.{_check}.{_param}", "int", _bounds, label=["cfg.p." + _param], help="cfg.h.p." + _param)
+_f(_T_SURF, "chk_release_assets", "sentinel.surface.checks.release_assets.require_sha256", "bool")
+_f(_T_SURF, "chk_release_assets", "sentinel.surface.checks.release_assets.require_signature", "bool")
+_f(_T_SURF, "chk_release_assets", "sentinel.surface.checks.release_assets.allow_empty", "bool")
+_f(_T_SURF, "chk_tag_vs_version", "sentinel.surface.checks.tag_vs_version.prefixes", "names")
+_f(_T_SURF, "chk_tag_vs_version", "sentinel.surface.checks.tag_vs_version.prerelease_ok", "bool")
 # --- Release readiness (A11)
 _f(_T_READY, "main", "sentinel.readiness.enabled", "bool")
 _f(_T_READY, "main", "sentinel.readiness.min_coverage", "float", (0.0, 1.0), unit="x")
@@ -457,7 +464,9 @@ _f("lint", "lint_api", "lint.api.max_calls_per_tick", "int", (1, 200), unit="cal
 _f("lint", "lint_api", "lint.api.max_files_per_repo", "int", (1, 100))
 _f("lint", "lint_sparse", "lint.sparse.refresh_seconds", "int", (600, 604800))
 _f("lint", "lint_sparse", "lint.sparse.max_repos_per_tick", "int", (1, 20))
-for _rule in ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target"):
+_f("lint", "own_actions", "lint.own_owners", "names")
+_f("lint", "own_actions", "lint.unpinned_own", "enum", ("same", "info", "ignore"))
+for _rule in ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target", "no_timeout", "secrets_inherit", "own_action_main"):
     _f("lint", "rule_" + _rule, f"lint.rules.{_rule}.enabled", "bool", label=["cfg.p.rule_on"], help="cfg.h.rule_on")
     _f("lint", "rule_" + _rule, f"lint.rules.{_rule}.severity", "enum", ("info", "warn", "bad"), label=["cfg.p.severity"], help="cfg.h.p.severity")
 # --- Terminal view
@@ -822,7 +831,8 @@ def describe(path=CONFIG_FILE, lite=False, remote=False):
         backups = len(list(BACKUP_DIR.glob("actions_monitor-*.json")))
     except OSError:
         backups = 0
-    return {"groups": groups, "backups": backups}
+    from github_actions_monitor.app import profiles
+    return {"groups": groups, "backups": backups, "presets": profiles.listing(lite=lite)}
 
 
 def _backup(path):

@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2594_passing-brightgreen.svg" alt="2594 tests">
+  <img src="https://img.shields.io/badge/Tests-2635_passing-brightgreen.svg" alt="2635 tests">
 </p>
 
 > Überwacht die Workflows aller deiner Repositories und zeigt dir auf einer lokalen Seite, was rot ist, was hängt und was auf dich wartet.
@@ -81,8 +81,8 @@
 | | |
 |---|---|
 | **Reifegrad** | functional |
-| **Tests** | 2594 Testmethoden (`python -m unittest discover -s monitor/tests`) |
-| **Einstellungen** | 483 Einstellungen, alle mit Hilfe |
+| **Tests** | 2635 Testmethoden (`python -m unittest discover -s monitor/tests`) |
+| **Einstellungen** | 498 Einstellungen, alle mit Hilfe |
 | **Sprachen** | 8 (Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch) |
 | **Im CI getestet auf** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -312,6 +312,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/ADVANCED_deu.md`](monitor/docs/ADVANCED_deu.md): Erweiterte Funktionen (alle standardmäßig aus)
 - [`monitor/docs/AI_ALERTS_deu.md`](monitor/docs/AI_ALERTS_deu.md): Meldungen für KIs: der Feed, die Kurzfassung, der Hook und der Stream
 - [`monitor/docs/AUDIT_PACKAGE_deu.md`](monitor/docs/AUDIT_PACKAGE_deu.md): Paket für den Prüfer
+- [`monitor/docs/LARGE_ACCOUNTS_deu.md`](monitor/docs/LARGE_ACCOUNTS_deu.md): Große Konten: hunderte Repositorys
 - [`monitor/docs/ORGANIZATIONS_deu.md`](monitor/docs/ORGANIZATIONS_deu.md): Organisationen und große Konten
 
 ## Mitwirken
