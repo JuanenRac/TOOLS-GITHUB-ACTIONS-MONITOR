@@ -9,7 +9,6 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
-
 ### Ajouté
 
 - **Renovate compte comme Dependabot, et le linter distingue vos actions de celles de tiers** : les pull requests de `renovate` sont listées dans A4 comme mises à jour de dépendances (`sentinel.dependency_bots` nomme les comptes), et un dépôt avec une configuration Renovate n'est pas signalé comme dépourvu de bot de mise à jour. `lint.own_owners` et `lint.unpinned_own` marquent une action non épinglée comme à vous ou de tiers et peuvent abaisser ou masquer les vôtres ; trois règles optionnelles, désactivées par défaut, trouvent un job sans `timeout-minutes` (`lint.rules.no_timeout`), `secrets: inherit` (`lint.rules.secrets_inherit`) et une action à vous qui suit `@main` (`lint.rules.own_action_main`).

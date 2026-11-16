@@ -9,7 +9,6 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
-
 ### Hinzugefügt
 
 - **Renovate zählt wie Dependabot, und der Linter unterscheidet eigene von fremden Actions**: Die Pull Requests von `renovate` erscheinen in A4 als Abhängigkeits-Updates (`sentinel.dependency_bots` nennt die Konten), und ein Repository mit Renovate-Konfiguration wird nicht als ohne Update-Bot gemeldet. `lint.own_owners` und `lint.unpinned_own` kennzeichnen eine nicht gepinnte Action als eigen oder fremd und können die eigenen herabstufen oder ausblenden; drei optionale, standardmäßig ausgeschaltete Regeln finden einen Job ohne `timeout-minutes` (`lint.rules.no_timeout`), `secrets: inherit` (`lint.rules.secrets_inherit`) und eine eigene Action, die `@main` folgt (`lint.rules.own_action_main`).
