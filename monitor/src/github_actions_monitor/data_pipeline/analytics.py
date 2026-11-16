@@ -58,7 +58,7 @@ def flaky_rows(runs, min_runs=3):
     [{"repo", "workflow", "total", "flaky", "rate"}], the flakiest first. The label never changes what counts as red."""
     by_workflow, by_commit = {}, {}
     for run in runs:
-        if run.get("status") != "completed":
+        if run.get("status") != "completed" or run.get("fork") is True:      # a pull request of a fork is not a build of this repository
             continue
         by_workflow.setdefault((run.get("repo"), run.get("name")), []).append(run)
         by_commit.setdefault((run.get("repo"), run.get("name"), run.get("sha")), []).append(run)
@@ -66,7 +66,8 @@ def flaky_rows(runs, min_runs=3):
     for (repo, name, sha), group in by_commit.items():
         ordered = sorted(group, key=lambda r: r.get("started") or "")
         failed_then_passed = any(r.get("conclusion") in BAD for r in ordered) and ordered[-1].get("conclusion") == "success"
-        retried = any((r.get("attempt") or 1) > 1 and r.get("conclusion") == "success" for r in ordered)
+        approved = any(r.get("conclusion") == "action_required" for r in ordered)      # the second try after an approval is not a retry of a failure
+        retried = any((r.get("attempt") or 1) > 1 and r.get("conclusion") == "success" for r in ordered) and not approved
         if sha and (failed_then_passed or retried):
             flaky_commits[(repo, name)] = flaky_commits.get((repo, name), 0) + 1
     rows = []

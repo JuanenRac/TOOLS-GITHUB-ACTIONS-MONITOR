@@ -204,6 +204,7 @@ _f(_T_SENT, "releases", "sentinel.require_verified_signature", "bool", secure=Tr
 _f(_T_SENT, "resolve", "sentinel.a2_full_sample_unknown", "bool")
 _f(_T_SENT, "resolve", "sentinel.a2_resolve_max_calls_per_tick", "int", (0, 50), unit="calls")
 _f(_T_SENT, "resolve", "sentinel.a2_resolve_ttl_seconds", "int", (60, 86400))
+_f(_T_SENT, "durations", "ci.rerun_timing", "bool", restart=False)
 _f(_T_SENT, "prs", "sentinel.stale_pr_days", "int", (1, 90))
 _f(_T_SENT, "hygiene_files", "sentinel.required_files", "filegroups")
 _f(_T_SENT, "minutes", "sentinel.minutes_budget_period", "enum", ("7d", "24h"))

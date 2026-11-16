@@ -86,6 +86,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `cache.etag.ttl_hours` | `24` | cache | Entry lifetime |
 | `central.max_age_minutes` | `120` | quota | Minutes before the central panel is behind |
 | `central.source` (secure) | `"off"` | quota | Central panel as a base line |
+| `ci.rerun_timing` | `false` | sentinel | Ask GitHub for the duration of re-runs |
 | `cold_refresh_seconds` | `600` | polling | Refresh of cold repositories |
 | `cold_runs_per_repo` | `5` | polling | Runs read per cold repository |
 | `discover_limit` | `1000` | polling | Repositories listed |
