@@ -17,7 +17,23 @@ from pathlib import Path
 
 from github_actions_monitor.util.paths import ROOT as HERE   # the product folder: the data of the person who runs the monitor stays there
 INDEX_FILE = HERE / "docs" / "help_index.json"
-TAB_TOPICS = {"now": "readme", "al": "collab", "rep": "extras", "les": "lessons", "sent": "analytics", "charts": "analytics", "repos": "readme", "hist": "readme", "cfg": "settings", "about": "readme", "first": "first_steps", "lite": "lite"}
+#: THE table of the help of a tab: the id of the tab (the `data-tab` of the side menu, the entries of `TABS` of the page) -> the topic that opens with "Help of this tab". A tab that is not here
+#: opens the first topic, which is a bug the tests catch: a new tab (or a tab split in two) is added HERE, and its topic must exist in docs/help_index.json.
+TAB_TOPICS = {
+    "now": "first_steps",
+    "al": "collab",
+    "rep": "extras",
+    "les": "lessons",
+    "sent": "sentinel",
+    "charts": "analytics",
+    "repos": "health",
+    "team": "complete_team",
+    "hist": "analytics",
+    "cfg": "settings",
+    "about": "readme",
+    "first": "first_steps",
+    "lite": "lite",
+}
 _lock = threading.Lock()
 _cache = {"index": None}
 LINK_RE = re.compile(r"\[([^\]]{1,200})\]\(([^)\s]{1,300})(?:\s+\"[^\"]*\")?\)")

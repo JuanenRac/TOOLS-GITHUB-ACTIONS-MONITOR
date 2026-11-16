@@ -9,6 +9,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+### Behoben
+
+- **„Hilfe zu diesem Reiter“ öffnet in jedem Reiter das Thema des geöffneten Reiters**: In der Zuordnung von Reiter zu Thema fehlten die Reiter Warnungen und Team, und Repositories und Verlauf führten zum ersten Thema der Hilfe („GitHub Actions Monitor“). Es ist jetzt eine einzige Tabelle (`TAB_TOPICS`) mit einem Eintrag für jeden Reiter des Seitenmenüs, und ein Test schlägt fehl, wenn ein Reiter kein oder ein nicht vorhandenes Thema hat. Ein Test im Browser geht alle Reiter durch und drückt die Schaltfläche.
+
 ## [2.0.3]
 
 ### Sicherheit

@@ -9,6 +9,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+### Corrigé
+
+- **« Aide de cet onglet » ouvre dans chaque onglet le sujet de l'onglet ouvert** : la table d'onglet à sujet n'avait pas les onglets Alertes et Équipe et envoyait Dépôts et Historique vers le premier sujet de l'aide (« GitHub Actions Monitor »). C'est maintenant une seule table (`TAB_TOPICS`) avec une entrée pour chaque onglet du menu latéral, et un test échoue si un onglet n'a pas de sujet ou en a un qui n'existe pas. Un test dans un navigateur parcourt tous les onglets et appuie sur le bouton.
+
 ## [2.0.3]
 
 ### Sécurité

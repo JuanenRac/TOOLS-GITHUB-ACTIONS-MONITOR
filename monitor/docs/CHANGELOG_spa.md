@@ -9,6 +9,10 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+### Corregido
+
+- **«Ayuda de esta pestaña» abre en todas las pestañas el tema de la pestaña abierta**: al mapa de pestaña a tema le faltaban las pestañas Alertas y Equipo y mandaba Repositorios e Historial al primer tema de la ayuda («GitHub Actions Monitor»). Ahora es una única tabla (`TAB_TOPICS`) con una entrada por cada pestaña del menú lateral, y una prueba falla si una pestaña no tiene tema o tiene uno que no existe. Una prueba en un navegador recorre todas las pestañas y pulsa el botón.
+
 ## [2.0.3]
 
 ### Seguridad

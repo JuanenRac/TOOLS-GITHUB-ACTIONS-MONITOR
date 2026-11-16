@@ -9,6 +9,10 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+### Corrigido
+
+- **«Ajuda deste separador» abre em todos os separadores o tema do separador aberto**: ao mapa de separador para tema faltavam os separadores Alertas e Equipa, e Repositórios e Histórico iam para o primeiro tema da ajuda («GitHub Actions Monitor»). Agora é uma única tabela (`TAB_TOPICS`) com uma entrada por cada separador do menu lateral, e um teste falha se um separador não tiver tema ou tiver um que não existe. Um teste num navegador percorre todos os separadores e prime o botão.
+
 ## [2.0.3]
 
 ### Segurança

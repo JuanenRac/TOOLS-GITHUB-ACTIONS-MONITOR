@@ -10,6 +10,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+### Fixed
+
+- **"Help of this tab" opens the topic of the tab that is open in every tab**: the map from tab to topic was missing the Alerts and Team tabs and sent Repositories and History to the first topic of the Help ("GitHub Actions Monitor"). It is now one table (`TAB_TOPICS`) with an entry for every tab of the side menu, and a test fails when a tab has no topic or one that does not exist. A test in a browser goes through every tab and presses the button.
+
 ## [2.0.3]
 
 ### Security
