@@ -1345,7 +1345,11 @@ def score_security(registry, config):
     from github_actions_monitor.scoring import engine as score_engine
     status = sentinel.get_status()
     scope, checked = status.get("repos_in_scope") or 0, status.get("repos_checked") or 0
-    if not scope or not checked or checked / scope < score_engine.settings(config)["min_coverage"]:
+    minimum = score_engine.settings(config)["min_coverage"]
+    if not scope or not checked or checked / scope < minimum:
+        return None
+    readable, total = status.get("sources_readable") or 0, status.get("sources_total") or 0
+    if total and readable / total < minimum:      # "could not be read" is not "clean": the part is absent, not a 100
         return None
     return {"penalty": sentinel.get_metrics().get("security_penalty", 0), "repos": checked}
 

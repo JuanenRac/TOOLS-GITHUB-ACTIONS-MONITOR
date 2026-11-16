@@ -22,6 +22,10 @@ when this file and `tool_version.py` disagree.
 
 ### Fixed
 
+- **The Security sentinel no longer passes "could not read" for "clean"**: when most of the sources that weigh in the penalty (Dependabot, code scanning, secrets) answer 403 or 404 for every repository, the sentinel level is `unknown` instead of `ok` and the security part of the score is left out instead of counting as 100 (the status now carries `sources_readable` and `sources_total`). A source that stops answering while an alert is open keeps the alert for a week, marked as unread, and never announces it as fixed; a `gh` that prints nothing is a failed reading, and a default branch with a slash in its name is asked for encoded.
+
+- **A few repositories that always fail no longer starve the Security sentinel**: a repository whose reads fail waits 5 minutes, 30 minutes and then 6 hours before the next try, and the ones that were not tried yet go first, so the rest of the account is looked at.
+
 - **A re-run of a run is counted as one more execution in the score ledger**: GitHub keeps the id of a run when it is re-run, so the first conclusion stayed for ever; now each attempt is kept, so a failed first attempt and a green second one are both seen and the recovery between them is measured.
 
 - **A repository whose sentinels could not look at it is no longer shown as OK in the health of the team**: when every sentinel is in error, paused or degraded (or all are off and nothing has run for a week), a quiet repository is `unknown` ("Not seen") instead of `ok`, the ranking rows carry `not_fully_seen` with the names of the sentinels that could not read it, the totals count them in `not_fully_seen`, and the Team tab marks the state with an asterisk and a hint. A red workflow or an alert still make it `warn` or `bad`.
