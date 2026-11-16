@@ -7,12 +7,14 @@
 
 Generated from the page. The same data is in the endpoints; an AI does not need the page.
 
-- `al`: Alerts (every sentinel in one list, silences, lessons from the failures)
+- `al`: Alerts (every sentinel in one list, silences)
 - `cfg`: Settings (tabs Basic, General ... AI, Quota ...)
 - `charts`: Charts and history
 - `hist`: History of runs
 - `interface`: Interface
+- `les`: Lessons (lessons from the failures; address #lessons)
 - `now`: Right now (runs, one row per repository)
+- `rep`: Reports (the optional reports; address #reports)
 - `repos`: Repositories
 - `sent`: Sentinel (checks A1-A13, Collab)
 - `team`: Team (health of the repositories ranked by risk, with filters and the detail of each)

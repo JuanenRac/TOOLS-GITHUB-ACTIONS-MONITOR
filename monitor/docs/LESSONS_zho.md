@@ -73,7 +73,7 @@ lessons.register_provider("wiki", lambda config: WikiProvider())
 
 ## 设置
 
-`lessons.enabled`、`lessons.allow_write`、`lessons.retention_days`、`lessons.max_entries`、`lessons.brief_max_bytes` 和 `lessons.recurring_from`，位于设置的 AI 标签页。面板**从失败中得到的经验**在警报标签页的底部。
+`lessons.enabled`、`lessons.allow_write`、`lessons.retention_days`、`lessons.max_entries`、`lessons.brief_max_bytes` 和 `lessons.recurring_from`，位于设置的 AI 标签页。面板**从失败中得到的经验**就是左侧菜单的“经验教训”标签页（地址 `#lessons`）。
 
 ## 一轮工作的收尾
 

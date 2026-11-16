@@ -22,7 +22,7 @@ _MAP = {"bad": "act", "warn": "watch"}
 
 # element of the page -> id of the signal that carries it ("decorative" = it shows nothing to act on, with the reason)
 COVERAGE = {
-    "tab:now": "now.runs", "tab:al": "alerts.unresolved", "tab:sent": "sentinel.*", "tab:charts": "decorative: trends are drawn from the same data (see sentinel.a3 and now.runs)",
+    "tab:now": "now.runs", "tab:al": "alerts.unresolved", "tab:rep": "decorative: the optional reports are read from GET /api/reports, not from the signals", "tab:les": "decorative: the lessons are read from GET /api/ai/lessons and travel in GET /api/ai/state as lessons", "tab:sent": "sentinel.*", "tab:charts": "decorative: trends are drawn from the same data (see sentinel.a3 and now.runs)",
     "tab:repos": "repos.errors", "tab:team": "decorative: the ranking of the repositories is drawn from the alerts and the runs (see alerts.unresolved and now.runs)", "tab:hist": "now.fail24", "tab:cfg": "health.doctor",
     "tile:kt-active": "now.runs", "tile:kt-queued": "now.runs", "tile:kp-fail": "now.fail24", "tile:kt-ok": "decorative: successes need nothing",
     "tile:kt-min": "decorative: compute minutes are in sentinel.a7", "tile:kt-issues": "alerts.issues", "tile:kp-red": "alerts.unresolved", "tile:kp-sign": "sentinel.a5",

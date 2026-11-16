@@ -23,7 +23,7 @@ python bin/monitor_cli.py gh-token --read-only
 
 ## Vier optionale Berichte
 
-Alle vier sind standardmäßig aus. Sie erscheinen in einem Block "Optionale Berichte" am Ende des Reiters Alarme und in `GET /api/reports`. Die, die GitHub lesen, verbrauchen höchstens `reports.max_calls_per_cycle` Aufrufe pro Zyklus, lesen jedes Mal einige Repositories und halten das Gelesene einen Tag im Speicher.
+Alle vier sind standardmäßig aus. Sie erscheinen im Reiter **Berichte** (Menüeintrag links, Adresse `#reports`) und in `GET /api/reports`. Die, die GitHub lesen, verbrauchen höchstens `reports.max_calls_per_cycle` Aufrufe pro Zyklus, lesen jedes Mal einige Repositories und halten das Gelesene einen Tag im Speicher.
 
 - `reports.workflow_hygiene.enabled`: liest die Workflow-Dateien der Repositories und listet Schlechtgeschriebenes auf - nicht an einen Commit gebundene Actions, unbegrenzte Berechtigungen, einen Job ohne `timeout-minutes`, keine `concurrency`-Gruppe, `pull_request_target`- und Injection-Risiken, Geheimnisse im Klartext (die Regeln des Linters des Panels A13, das lokale Klone liest, plus die zwei neuen).
 - `reports.queue.enabled`: liest die Jobs einiger beendeter Läufe, die gewartet haben, und sagt für jede Runner-Art (Linux, Windows, macOS, größere, selbst gehostete), wie lange ein Job vor dem Start wartete.

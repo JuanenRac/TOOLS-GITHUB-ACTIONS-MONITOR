@@ -867,11 +867,11 @@
  "cfg.h.ui.orientation": "auto folgt dem Fenster (ein höheres als breites Fenster stapelt die Panels); portrait oder landscape erzwingt sie. Nützlich für einen um 90 Grad gedrehten Monitor oder einen Fernseher. Die Adresse kann sie für ein Fenster erzwingen: ?orient=portrait.",
  "cfg.h.ui.rotate_seconds": "0 = keine Rotation. Bei mehr als einem Tab je Bildschirm wechselt die Seite alle so viele Sekunden von selbst (für einen Bildschirm, den niemand bedient). ?rotate=30 gilt für ein Fenster.",
  "cfg.h.ui.screen1_orientation": "auto = die allgemeine Ausrichtung oben; portrait oder landscape erzwingt sie nur auf /screen/1.",
- "cfg.h.ui.screen1_tabs": "Tabs, die /screen/1 zeigt, durch Kommas getrennt, aus: now, al, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Leer = alle. Öffnen Sie http://dieser-rechner:8765/screen/1 auf diesem Monitor.",
+ "cfg.h.ui.screen1_tabs": "Tabs, die /screen/1 zeigt, durch Kommas getrennt, aus: now, al, rep, les, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Leer = alle. Öffnen Sie http://dieser-rechner:8765/screen/1 auf diesem Monitor.",
  "cfg.h.ui.screen2_orientation": "auto = die allgemeine Ausrichtung oben; portrait oder landscape erzwingt sie nur auf /screen/2.",
- "cfg.h.ui.screen2_tabs": "Tabs, die /screen/2 zeigt, durch Kommas getrennt, aus: now, al, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Leer = alle. Öffnen Sie http://dieser-rechner:8765/screen/2 auf diesem Monitor.",
+ "cfg.h.ui.screen2_tabs": "Tabs, die /screen/2 zeigt, durch Kommas getrennt, aus: now, al, rep, les, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Leer = alle. Öffnen Sie http://dieser-rechner:8765/screen/2 auf diesem Monitor.",
  "cfg.h.ui.screen3_orientation": "auto = die allgemeine Ausrichtung oben; portrait oder landscape erzwingt sie nur auf /screen/3.",
- "cfg.h.ui.screen3_tabs": "Tabs, die /screen/3 zeigt, durch Kommas getrennt, aus: now, al, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Leer = alle. Öffnen Sie http://dieser-rechner:8765/screen/3 auf diesem Monitor.",
+ "cfg.h.ui.screen3_tabs": "Tabs, die /screen/3 zeigt, durch Kommas getrennt, aus: now, al, rep, les, sent, charts, repos, hist, cfg (lite: now, charts, repos, hist, cfg). Leer = alle. Öffnen Sie http://dieser-rechner:8765/screen/3 auf diesem Monitor.",
  "cfg.h.updates.check": "Eine reine Leseanfrage pro Tag an die öffentliche Release-Seite über Ihr eigenes gh. Lädt nie etwas herunter, installiert nichts und sendet nichts über Sie.",
  "cfg.h.watchdog_max_abandoned": "Ein Aufruf an GitHub, der nicht rechtzeitig antwortet, wird aufgegeben, sein Thread kann aber am Leben bleiben. Leben so viele davon noch, startet der Monitor keinen neuen Aufruf an GitHub und seine tiefe Gesundheitsprüfung meldet ihn als eingeschränkt, statt Threads und Verbindungen anzuhäufen. 0 bedeutet keine Grenze.",
  "cfg.h.watchdog_minutes": "Dauert ein Aktualisierungszyklus des Monitors länger, schreibt der Wächter in das Protokoll, wo jeder Thread steht, und startet den Zyklus in einem neuen Thread neu. 0 schaltet den Wächter aus.",
@@ -3370,6 +3370,7 @@
  "ui.jobs_cut": "Jobs: {seen} von {total} gesehen",
  "hyg.wf_cut": "die Workflow-Liste ist abgeschnitten: {seen} von {total} gesehen",
  "ui.cfg_b_wall": "Wandanzeigen",
+ "ui.rep_all_off": "Kein optionaler Bericht ist eingeschaltet. Schalte sie in den Einstellungen, Reiter Wächter, Block Optionale Berichte ein.",
  "cfg.f.screens.enabled": "Wandanzeigen",
  "cfg.h.screens.enabled": "Schaltet die Wandanzeigen ein. Aus: /screen/overview, /screen/now und /screen/sentinels antworten mit 404. Sie lesen nur, was der Monitor schon hat; sie ändern nichts und rufen GitHub nicht auf. Standardmäßig aus.",
  "cfg.f.screens.default_theme": "Design der Wandanzeigen",
@@ -3472,5 +3473,7 @@
  "ui.scr_sev_critical": "Kritisch",
  "ui.scr_sev_error": "Fehler",
  "ui.scr_sev_warning": "Warnung",
- "ui.scr_sev_info": "Info"
+ "ui.scr_sev_info": "Info",
+ "ui.tab_les": "Lektionen",
+ "ui.tab_rep": "Berichte"
 }
