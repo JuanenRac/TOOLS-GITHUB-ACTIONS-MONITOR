@@ -155,6 +155,10 @@ def notify(config, alert, now=None, transport=None, runner=None):
             raw = (runner or _command)(cfg["command"], text, cfg["timeout_seconds"])
         else:
             ai = sentinel_ai.ai_config(config)
+            from github_actions_monitor.sentinels import ai_chain
+            chosen, _ = ai_chain.task_cfg(ai, "alert")      # the task `alert` may change the MODEL (and its limits) but never the provider: the confirmation above is for that provider
+            if chosen["provider"] == ai["provider"] and chosen.get("base_url") == ai.get("base_url"):
+                ai = chosen
             ai["timeout_seconds"] = cfg["timeout_seconds"]
             nonce = os.urandom(6).hex()
             user = f"<<<DATA-{nonce}\n{text}\nDATA-{nonce}>>>"
