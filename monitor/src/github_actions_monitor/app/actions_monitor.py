@@ -49,6 +49,7 @@ from github_actions_monitor.security import auth_http
 from github_actions_monitor.security import envguard
 from github_actions_monitor.security import localguard
 from github_actions_monitor.app import modes
+from github_actions_monitor.app import screens
 from github_actions_monitor.util import exclusive
 from github_actions_monitor.util import platform_compat
 from github_actions_monitor.util import ports
@@ -109,6 +110,7 @@ DEFAULTS = {
     "central": {"source": "off", "max_age_minutes": 120, "git_dir": ""},      # the central panel of the profile repository as a base line that spends no allowance (central_source.py): off | git | http
     "ports": {"complete": 8765, "lite": 8766},      # the port of each edition (util/ports.py); --port wins, then MONITOR_PORT for the complete one
     "ui": {"orientation": "auto", "rotate_seconds": 0, "screen1_tabs": "", "screen1_orientation": "auto", "screen2_tabs": "", "screen2_orientation": "auto", "screen3_tabs": "", "screen3_orientation": "auto", "now_sort": "ecosystem", "alerts_sort": "server"},   # the screens (docs/SCREENS.md): the orientation of the page, and which tabs each /screen/N shows
+    "screens": {"enabled": True, "blink": True, "blink_calm_minutes": 30, "rotate_seconds": 0, "default_theme": "dark", "default_density": "normal", "refresh_seconds": 10, "burn_in_protection": True, "night_dim": False, "night_dim_from_hour": 22, "night_dim_to_hour": 7, "show_repo_names": "public", "sound": False},   # the wall screens /screen/overview, /screen/now and /screen/sentinels (docs/SCREENS.md, screens.py): read only, from what the monitor already holds
     "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
     "updates": {"check": True},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
     "airgapped": False,            # True: nothing is requested from the network except GitHub's data you asked for; the update check is off
@@ -2014,6 +2016,46 @@ def render_page():
     return page.replace("/*I18N_DATA*/null", blob, 1)
 
 
+def render_screen(kind, query):
+    """The page of one wall screen (screens.html): the texts of the language, the settings that matter to it and the parameters of the window, embedded. No menu, nothing that changes anything."""
+    cfg = screens.settings(toolconfig.raw_config())
+    page = (paths.STATIC / "screens.html").read_text(encoding="utf-8")
+    data = screens.page_data(kind, cfg, screens.params(query, cfg))
+    blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
+    return page.replace("/*SCREEN_DATA*/null", blob, 1)
+
+
+def screens_payload(kind, cfg):
+    """GET /api/screens/data: what the screens show, from what the monitor holds. Nothing is read from GitHub here: the last cycle, the snapshot of the sentinel, the alerts and the score are already in memory or in the local files."""
+    with LOCK:
+        state = STATE["data"]
+    sentinel = None if LITE["on"] else SENTINEL["obj"]
+    snapshot = alerts = score = None
+    if sentinel is not None:
+        try:
+            snapshot = sentinel.snapshot()
+        except Exception as error:   # noqa: BLE001 - a screen without the sentinel still shows the rest
+            degraded.note("screens.sentinel", error)
+    if not LITE["on"] and kind in ("overview", "sentinels"):
+        try:
+            alerts = alerts_payload({})
+        except Exception as error:   # noqa: BLE001
+            degraded.note("screens.alerts", error)
+    if not LITE["on"] and kind == "overview":
+        try:
+            if DEMO["on"]:
+                from github_actions_monitor.app import demo_mode
+                score = demo_mode.score_answer()
+            else:
+                from github_actions_monitor.scoring import api as score_api
+                from github_actions_monitor.storage import runtime
+                storage, account = runtime.process_storage(CHILD["account"] or None)
+                score = score_api.latest(storage, account, toolconfig.raw_config())
+        except Exception as error:   # noqa: BLE001
+            degraded.note("screens.score", error)
+    return screens.build(kind, state, snapshot, alerts, score, cfg, "lite" if LITE["on"] else "complete")
+
+
 DISCONNECTS = [0]     # requests whose browser went away before the answer was sent (counted in /metrics, never printed)
 CLIENT_GONE = (ConnectionAbortedError, ConnectionResetError, BrokenPipeError)
 DRAIN_MAX = 1_048_576  # the most of an unread body that is read and dropped after an answer (see Handler.drain_body)
@@ -2607,6 +2649,21 @@ class Handler(BaseHTTPRequestHandler):
                 self.json_reply({"data": collab.snapshot() if collab else None, "error": SENTINEL["error"] or (None if collab else i18n.t("mon.sentinel_not_loaded"))})
             except Exception as error:      # shown as a notice in the tab
                 self.json_reply({"data": None, "error": i18n.t("mon.sentinel_failed", error=error)})
+            return
+        if screens.kind_of(path) or path == "/api/screens/data":      # the wall screens (docs/SCREENS.md): read only; 404 while screens.enabled is off
+            if not self.guard():
+                return
+            from urllib.parse import parse_qs
+            ask = {k: v[0] for k, v in parse_qs(self.path.partition("?")[2]).items() if v}
+            kind = screens.kind_of(path) or ask.get("screen", "")
+            if not screens.enabled(toolconfig.raw_config()) or (path == "/api/screens/data" and kind not in screens.KINDS):
+                self.send_response(404)
+                self.end_headers()
+                return
+            if path == "/api/screens/data":
+                self.json_reply(screens_payload(kind, screens.settings(toolconfig.raw_config())))
+            else:
+                self.reply(render_screen(kind, ask), "text/html; charset=utf-8")
             return
         if path == "/api/sentinel":
             if not self.guard():
