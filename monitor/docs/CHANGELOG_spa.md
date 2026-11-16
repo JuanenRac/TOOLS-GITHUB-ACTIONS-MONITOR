@@ -39,6 +39,10 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - **Los bots, aparte de las personas**: con `sentinel.bots_apart` activado, los pull requests de cuentas que el propio GitHub marca como bots (tipo Bot, no una suposición por el nombre) se cuentan aparte en A4 (`other_bots`) y quedan fuera de la comprobación de pull requests antiguos que esperan a una persona; las ejecuciones llevan ahora `actor_bot`. El valor por defecto no cambia nada.
 
+### Añadido
+
+- **Perfiles**: Ajustes > Básico y el tercer paso de la guía de primer arranque ofrecen tres grupos de ajustes ya preparados (propietario o equipo, organización de código abierto, desarrollador en solitario) que fijan en un clic la comprobación de higiene, los forks y repositorios archivados, el linter, la comprobación de archivos de las releases y el recuento aparte de bots; los valores pasan por el mismo camino comprobado que el botón Guardar, no cambia nada hasta que se elige uno y `GET /api/settings` los lista como `presets`. Una receta para cuentas grandes está en la nueva guía `docs/LARGE_ACCOUNTS.md`.
+
 ## [2.0.2]
 
 ### Seguridad
