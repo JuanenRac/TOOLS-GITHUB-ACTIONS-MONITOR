@@ -753,7 +753,7 @@ def last_batch():
 
 def run_state(name, run_id):
     data = ghj("api", f"repos/{toolconfig.github_owner()}/{name}/actions/runs/{run_id}")
-    jobs = ghj("api", f"repos/{toolconfig.github_owner()}/{name}/actions/runs/{run_id}/jobs?per_page=30") or {}
+    jobs = ghj("api", f"repos/{toolconfig.github_owner()}/{name}/actions/runs/{run_id}/jobs?per_page=100") or {}
     bad = [j["name"] for j in jobs.get("jobs", []) if j.get("conclusion") in ("failure", "timed_out", "cancelled")]
     return data["status"], data.get("conclusion"), data["html_url"], bad
 
