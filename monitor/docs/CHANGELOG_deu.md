@@ -9,6 +9,12 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+### Behoben
+
+- **Eine Gruppe der Bereitschafts-Chips sagt, warum sie keine Zahl hat, und ein Repository ohne jeden Workflow senkt ihre Abdeckung nicht mehr**: Ein Repository, dessen Klon keine Workflow-Datei hat und das keinen Lauf hat, ist „nicht anwendbar“: Es bleibt außerhalb der Abdeckung seiner Gruppe (eine Gruppe aus fünf, von denen zwei neu und leer sind, wird also an den anderen drei gemessen) und wird im Hinweistext und in der Tabelle getrennt aufgeführt. Eine Gruppe unter `sentinel.readiness.min_coverage` zeigt die Worte „zu wenige Daten“ (kein stummes „?“), und ihr Hinweistext nennt, wie viele Repositories Daten haben, das Minimum und welche fehlen. Das Standard-Minimum bleibt unverändert.
+- **Die Kontobewertung sagt, wie lange die Kalibrierung dauert und warum etwas fehlt**: Während der Kalibrierung zeigt der Chip, wie viel von `score.calibrating_hours` noch fehlt, mit einem Balken sowie Tag und Uhrzeit, zu denen die Zahl erscheint (`data_quality.calibrating_hours` ist neu); „zu wenige Daten“ nennt die nicht erfüllte Bedingung (Läufe oder Abdeckung), und `GET /api/score` enthält `missing_detail` mit dem Grund, warum ein Teil nicht zählt (sein Wächter ist aus, er hat seinen ersten Durchlauf nicht beendet und wie viele Repositories er gelesen hat, er hat zu wenige gelesen, seine Quellen sind nicht lesbar oder die Daten sind für den nächsten Durchlauf bereit).
+- **Der Ring der letzten 24 Stunden zählt aus einer einzigen Quelle und zeigt nie eine negative Zahl**: Die Summe in der Mitte und die drei Zahlen der Legende (erfolgreich, fehlgeschlagen, abgebrochen oder andere) kommen vom Server (`figures.done24` ist neu) und ergeben immer die Summe; früher wurde die Summe über die Liste der Läufe gezählt, die die Seite erhält und die nur die neuesten enthält, und „abgebrochen oder andere“ wurde negativ. Eine negative oder keine Zahl wird als 0 gezeichnet, und sendet der Server die Summe nicht, werden die drei Zahlen über die Liste gezählt und die Karte sagt, dass es eine Stichprobe ist. Die Erfolgsquote je Repository sagt dasselbe, wenn ihre Liste eine Stichprobe ist.
+
 
 ### Hinzugefügt
 

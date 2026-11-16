@@ -288,7 +288,7 @@ class Supervisor:
                     data = {}
                 figures = data.get("figures") or {}
                 entry.update({"owner": data.get("owner") or "", "repos": len(data.get("repos") or []), "running": len(data.get("active") or []), "failing": len(data.get("failing") or []),
-                              "fail24": figures.get("fail24", 0), "ok24": figures.get("ok24", 0), "rate": data.get("rate") or {}})
+                              "fail24": figures.get("fail24", 0), "ok24": figures.get("ok24", 0), "done24": figures.get("done24", 0), "rate": data.get("rate") or {}})
             elif child is not None and child.failures:
                 entry["state"] = "down"
             out.append(entry)

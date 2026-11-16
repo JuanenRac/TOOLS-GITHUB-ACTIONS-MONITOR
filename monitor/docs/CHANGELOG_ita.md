@@ -9,6 +9,12 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+### Corretto
+
+- **Un gruppo delle pastiglie di preparazione dice perché non ha un numero, e un repository senza alcun workflow non ne abbassa più la copertura**: un repository il cui clone non ha file di workflow e che non ha esecuzioni è «non applicabile»: resta fuori dalla copertura del suo gruppo (un gruppo di cinque in cui due sono nuovi e vuoti si misura quindi sugli altri tre) ed è elencato a parte nel suggerimento e nella tabella. Un gruppo ancora sotto `sentinel.readiness.min_coverage` mostra le parole «dati insufficienti» (non un «?» muto) e il suo suggerimento dice quanti repository hanno dati rispetto al minimo e quali ne mancano. Il minimo predefinito non cambia.
+- **Il punteggio dell'account dice quanto dura la calibrazione e perché manca qualcosa**: durante la calibrazione la pastiglia dice quanto resta di `score.calibrating_hours` con una barra e il giorno e l'ora in cui comparirà il numero (`data_quality.calibrating_hours` è nuovo); «dati insufficienti» dice quale condizione non è soddisfatta (esecuzioni o copertura), e `GET /api/score` porta `missing_detail` con il motivo per cui una parte non conta (la sua sentinella è spenta, non ha finito la prima scansione e quanti repository ha letto, ne ha letti troppo pochi, le sue fonti non sono leggibili, oppure i dati sono pronti per il prossimo passaggio).
+- **L’anello delle ultime 24 ore conta da un’unica fonte e non mostra mai un numero negativo**: il totale al centro e le tre cifre della legenda (riuscite, fallite, annullate o altre) arrivano dal server (`figures.done24` è nuovo) e la loro somma torna sempre; prima il totale era contato sull’elenco delle esecuzioni ricevuto dalla pagina, che contiene solo le più recenti, e «annullate o altre» diventava negativo. Una cifra negativa o non numerica viene disegnata come 0 e, se il server non invia il totale, le tre cifre sono contate sull’elenco e la scheda dice che è un campione. Anche il tasso di successo per repository lo dice quando il suo elenco è un campione.
+
 
 ### Aggiunto
 
