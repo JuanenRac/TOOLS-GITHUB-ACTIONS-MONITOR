@@ -40,7 +40,7 @@ def data(now):
     runs.sort(key=lambda r: r["started"], reverse=True)
     failing = [r for r in runs if r["status"] == "completed" and r["conclusion"] == "failure"][:3]
     done = [r for r in runs if r["status"] == "completed"]
-    figures = {"active": 1, "queued": 1, "fail24": sum(1 for r in done if r["conclusion"] == "failure"), "ok24": sum(1 for r in done if r["conclusion"] == "success"), "issues": 1, "min24": 42}
+    figures = {"active": 1, "queued": 1, "fail24": sum(1 for r in done if r["conclusion"] == "failure"), "ok24": sum(1 for r in done if r["conclusion"] == "success"), "done24": len(done), "issues": 1, "min24": 42}
     return {"updated": iso(now), "took": 1.0, "repos": REPOS, "ecosystems": {r: "other" for r in REPOS}, "runs": runs, "active": active,
             "issues": [{"repo": "demo-alpha-app", "number": 12, "title": "Build failed: Release build", "created": iso(now - timedelta(days=1)), "labels": ["build-failed"], "url": "#"}],
             "failing": failing, "errors": {}, "rate": {"remaining": 4800, "limit": 5000, "reset": iso(now + timedelta(minutes=40))}, "stuck_minutes": 120, "mode": "demo", "refreshed": 0, "hot": 3,
