@@ -22,7 +22,8 @@
     "count_fork_runs": false,
     "automation_counts": false,
     "inactive_days": 90,
-    "extra_branches": []
+    "extra_branches": [],
+    "rerun_timing": false
   },
   "watchdog_minutes": 10,
   "watchdog_max_abandoned": 8,

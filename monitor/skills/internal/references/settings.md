@@ -91,6 +91,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ci.extra_branches` | `[]` | sentinel | Maintenance branches to watch |
 | `ci.inactive_days` | `90` | sentinel | Days until a workflow is inactive |
 | `ci.red_events` | `["push", "schedule", "workflow_dispatch", "merge_group"]` | sentinel | Events that can make a branch red |
+| `ci.rerun_timing` | `false` | sentinel | Ask GitHub for the duration of re-runs |
 | `cold_refresh_seconds` | `600` | polling | Refresh of cold repositories |
 | `cold_runs_per_repo` | `5` | polling | Runs read per cold repository |
 | `discover_limit` | `1000` | polling | Repositories listed |

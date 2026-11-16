@@ -82,7 +82,7 @@ DEFAULTS = {
     "discover_limit": 1000,        # the most repositories listed for the account
     "show_unclassified": True,     # repositories that no ecosystem claims are shown in an automatic group "Unclassified" instead of disappearing
     "stuck_minutes": 120,
-    "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "extra_branches": []},      # which runs may make a branch red (redrule.py)
+    "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "extra_branches": [], "rerun_timing": False},      # which runs may make a branch red (redrule.py)
     "watchdog_minutes": 10,      # a refresh cycle that runs longer than this is dumped to the log and restarted in a new thread (0 = off)
     "watchdog_max_abandoned": 8,      # calls to GitHub that gave up waiting but never returned: with this many still alive no new call is started and the health check says so (0 = no limit)
     "runs_per_repo": 20,
@@ -500,6 +500,48 @@ def fork_ci_answers(config, rules, items):
     return answers
 
 
+MAX_RUN_SECONDS = 35 * 86400      # GitHub stops a run after 35 days: a longer figure is a wrong clock (a re-run measured from the first attempt), not a long build
+TIMING = {"on": False, "known": {}, "budget": 3}      # ci.rerun_timing: ask GitHub for the real duration of a re-run (runs/ID/timing), a few calls per read of a repository
+
+
+def run_times(run):
+    """(queued, seconds, started) of one run of the API, measured on the LATEST ATTEMPT: `created_at` belongs to the first attempt and stays when somebody re-runs the workflow days or months later, so
+    it is only used for the first attempt; from the second one on the time of the attempt is `run_started_at` and the wait in the queue is unknown (None), never "the days since the first try".
+    A duration longer than a run can last (35 days) is unknown too (None)."""
+    attempt = run.get("run_attempt") if isinstance(run.get("run_attempt"), int) and run.get("run_attempt") >= 1 else 1
+    first = run.get("created_at")
+    begun = run.get("run_started_at") or (first if attempt == 1 else None)
+    started, updated = parse_time(begun), parse_time(run.get("updated_at"))
+    finished = run.get("status") == "completed"
+    queued = seconds_between(parse_time(first), started) if attempt == 1 and first and run.get("run_started_at") else None
+    seconds = seconds_between(started, updated if finished else None) if started else None
+    if seconds is not None and seconds > MAX_RUN_SECONDS:
+        seconds = None
+    return queued, seconds, begun
+
+
+def rerun_seconds(repo, run):
+    """The real duration of a finished re-run from `runs/ID/timing` (wall clock of the attempt), when ci.rerun_timing is on and the budget of this read allows; else None."""
+    key = (repo, run.get("id"), run.get("run_attempt"))
+    if key in TIMING["known"]:
+        return TIMING["known"][key]
+    if not TIMING["on"] or TIMING["budget"] <= 0:
+        return None
+    TIMING["budget"] -= 1
+    try:
+        body = gh_read(f"repos/{toolconfig.github_owner()}/{repo}/actions/runs/{run.get('id')}/timing", retries=0) or {}
+        ms = body.get("run_duration_ms")
+        value = int(ms // 1000) if isinstance(ms, (int, float)) and not isinstance(ms, bool) and 0 <= ms <= MAX_RUN_SECONDS * 1000 else None
+    except AuthError:
+        raise
+    except Exception:   # noqa: BLE001 - the duration of a re-run is a nicety: the page works without it
+        value = None
+    if len(TIMING["known"]) > 5000:
+        TIMING["known"].clear()
+    TIMING["known"][key] = value
+    return value
+
+
 def is_fork_run(run):
     """True when the head of the run lives in ANOTHER repository (a pull request from a fork): its branch name (`main`, `master`, `dev`) says nothing about the branch of this repository."""
     head, base = (run.get("head_repository") or {}).get("full_name"), (run.get("repository") or {}).get("full_name")
@@ -542,17 +584,18 @@ def fetch_sampled(repo, per_page, config):
 
 def parse_runs(repo, data):
     runs = []
+    TIMING["budget"] = 3
     for run in data.get("workflow_runs", []):
-        started = parse_time(run.get("run_started_at") or run.get("created_at"))
-        updated = parse_time(run.get("updated_at"))
-        finished = run.get("status") == "completed"
+        queued, seconds, begun = run_times(run)
+        if (run.get("run_attempt") or 1) > 1 and run.get("status") == "completed":
+            seconds = rerun_seconds(repo, run) if TIMING["on"] else seconds
         runs.append({
             "repo": repo, "id": run["id"], "name": run.get("name") or "", "title": (run.get("display_title") or "")[:90],
             "event": run.get("event"), "branch": run.get("head_branch"), "fork": is_fork_run(run), "path": (run.get("path") or "").split("@")[0].rsplit("/", 1)[-1], "sha": (run.get("head_sha") or "")[:7],
             "actor": (run.get("actor") or {}).get("login", ""), "status": run.get("status"), "number": run.get("run_number"),
-            "queued": seconds_between(parse_time(run.get("created_at")), started) if run.get("created_at") and run.get("run_started_at") else None,
-            "conclusion": run.get("conclusion"), "started": run.get("run_started_at") or run.get("created_at"),
-            "seconds": seconds_between(started, updated if finished else None), "url": run.get("html_url"), "attempt": run.get("run_attempt"),
+            "queued": queued,
+            "conclusion": run.get("conclusion"), "started": begun or run.get("created_at"),
+            "seconds": seconds, "url": run.get("html_url"), "attempt": run.get("run_attempt"),
         })
     return runs
 
@@ -698,6 +741,7 @@ def refresh_runs(repos, config, progress=None):
     if time.time() < RATE_BLOCK["until"]:      # the allowance is still used up: nothing is asked until it renews (the old picture stays)
         RATE_BLOCK["unread"] = len(todo)
         return 0
+    TIMING["on"] = isinstance(config.get("ci"), dict) and config["ci"].get("rerun_timing") is True
     total = len(todo)
     batched = graphql_cold(config, [r for r, _n in todo if r in cold_due])
     if batched:
