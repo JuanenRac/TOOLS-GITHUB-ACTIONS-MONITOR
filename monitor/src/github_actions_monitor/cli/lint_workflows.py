@@ -16,6 +16,15 @@ Rules (each one can be switched off and given another severity in actions_monito
   injection          a text controlled by someone else (`github.event.*.title`, `body`, `head_ref`...) pasted into a `run:` script
   pr_target          `pull_request_target` together with a checkout of the pull request's code (it runs untrusted code with the repository's permissions)
 
+Optional rules (off until `lint.rules.<rule>.enabled` is true):
+
+  no_timeout         a job without `timeout-minutes` (a stuck job runs for six hours; a call of a reusable workflow carries the limit of the called one)
+  secrets_inherit    `secrets: inherit` in a call of a reusable workflow (the called workflow receives every secret of the caller)
+  own_action_main    a `uses:` of an action of your own account that follows a branch (`@main`, `@master`) instead of a tag or a commit
+
+`unpinned_uses` tells an action of your own account (`lint.own_owners`, plus `github_owner`) from one of a third party in the `kind` of the finding; `lint.unpinned_own` can lower the own ones to
+information (`info`) or leave them out (`ignore`); the default (`same`) treats them like the rest.
+
 A finding can be silenced where it is, with a comment on the same line or on the line before: `# monitor-lint: ignore secrets_in_clear because it is a filler for docker compose config`
 (a rule name, or `all`). The monitor also reads `lint.ignore` (patterns `repository:file:rule`, with `*`). The VALUE of a suspected secret is never printed or stored: a finding names the
 line, the variable and the kind of pattern only.
@@ -35,8 +44,12 @@ from github_actions_monitor import i18n  # noqa: E402
 SHA_RE = re.compile(r"^[0-9a-f]{40}\Z")
 USES_RE = re.compile(r"^\s*-?\s*uses:\s*['\"]?([^'\"\s#]+)")
 SEVERITIES = ("info", "warn", "bad")
-RULES = ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target")
-DEFAULT_SEVERITY = {"unpinned_uses": "warn", "permissions": "warn", "secrets_in_clear": "bad", "injection": "warn", "pr_target": "bad"}
+RULES = ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target", "no_timeout", "secrets_inherit", "own_action_main")
+DEFAULT_SEVERITY = {"unpinned_uses": "warn", "permissions": "warn", "secrets_in_clear": "bad", "injection": "warn", "pr_target": "bad", "no_timeout": "warn", "secrets_inherit": "warn", "own_action_main": "info"}
+OPTIONAL = ("no_timeout", "secrets_inherit", "own_action_main")      # off until the person switches them on: a new rule never adds findings by itself
+OWN_MODES = ("same", "info", "ignore")
+OWNER_RE = re.compile(r"^[A-Za-z0-9-]{1,39}\Z")
+MOVING_REFS = ("main", "master", "develop", "dev", "trunk", "head")
 SECRET_PATTERNS = [
     ("github_token", re.compile(r"\bgh[pousr]_[A-Za-z0-9]{30,}\b")), ("github_fine_grained_token", re.compile(r"\bgithub_pat_[A-Za-z0-9_]{40,}\b")), ("aws_access_key", re.compile(r"\bAKIA[0-9A-Z]{16}\b")),
     ("private_key", re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----")), ("slack_token", re.compile(r"\bxox[abprs]-[A-Za-z0-9-]{10,}\b")), ("google_api_key", re.compile(r"\bAIza[0-9A-Za-z_-]{35}\b")),
@@ -74,10 +87,20 @@ UNTRUSTED = re.compile(r"\$\{\{\s*github\.(?:event\.(?:issue|pull_request|commen
 
 def settings(config):
     """`lint` of the configuration: {"enabled", "refresh_seconds", "rules": {rule: {"enabled", "severity"}}}, merged over the defaults."""
-    out = {"enabled": True, "refresh_seconds": 3600, "in_report": True, "ignore": [], "rules": {r: {"enabled": True, "severity": DEFAULT_SEVERITY[r]} for r in RULES}}
+    out = {"enabled": True, "refresh_seconds": 3600, "in_report": True, "ignore": [], "rules": {r: {"enabled": r not in OPTIONAL, "severity": DEFAULT_SEVERITY[r]} for r in RULES}}
+    out["rules"]["_own"] = {"owners": [], "unpinned": "same"}      # not a rule: who counts as "own" and what to do with an own action that is not pinned
+    if config is not None:
+        from github_actions_monitor.app import toolconfig
+        mine = toolconfig.github_owner(config)
+        if mine:
+            out["rules"]["_own"]["owners"].append(mine.lower())
     user = (config or {}).get("lint")
     if not isinstance(user, dict):
         return out
+    if isinstance(user.get("own_owners"), list):
+        out["rules"]["_own"]["owners"] += [x.lower() for x in user["own_owners"] if isinstance(x, str) and OWNER_RE.match(x)]
+    if user.get("unpinned_own") in OWN_MODES:
+        out["rules"]["_own"]["unpinned"] = user["unpinned_own"]
     if isinstance(user.get("ignore"), list):
         out["ignore"] = [x for x in user["ignore"] if isinstance(x, str) and IGNORE_PATTERN_RE.match(x)]
     if isinstance(user.get("enabled"), bool):
@@ -114,12 +137,14 @@ def lint_text(text, name="workflow.yml", rules=None):
 
     def add(rule, line, detail="", severity=None, kind=""):
         cfg = rules.get(rule) or {}
-        if cfg.get("enabled", True) and not silenced(line, rule):
+        if cfg.get("enabled", rule not in OPTIONAL) and not silenced(line, rule):
             base = cfg.get("severity", DEFAULT_SEVERITY[rule])
             if severity and ORDER[severity] < ORDER[base]:
                 base = severity      # a weaker class never gets more serious than the rule says, only less
             found.append({"file": name, "line": line, "rule": rule, "severity": base, "detail": detail, "kind": kind})
 
+    own_info = rules.get("_own") or {}
+    own_owners, own_mode = set(own_info.get("owners") or ()), own_info.get("unpinned", "same")
     has_permissions = any(re.match(r"^permissions\s*:", l) for l in lines)
     has_job_permissions = any(re.match(r"^\s{2,}permissions\s*:", l) for l in lines)
     in_run = False
@@ -134,13 +159,21 @@ def lint_text(text, name="workflow.yml", rules=None):
         if uses:
             spec = uses.group(1)
             if not spec.startswith(("./", "docker://")) and "@" in spec and not SHA_RE.match(spec.split("@", 1)[1]):
-                add("unpinned_uses", number, spec)
+                own = spec.split("/", 1)[0].lower() in own_owners
+                if own and own_mode == "ignore":
+                    pass
+                else:
+                    add("unpinned_uses", number, spec, severity="info" if (own and own_mode == "info") else None, kind="own" if own else "third_party")
+                if own and spec.split("@", 1)[1].lower() in MOVING_REFS:
+                    add("own_action_main", number, spec)
             if spec.startswith("actions/checkout"):
                 window = "\n".join(lines[number:number + 6])
                 if re.search(r"ref:\s*\$\{\{\s*github\.event\.pull_request\.head\.(?:sha|ref)", window) or re.search(r"ref:\s*\$\{\{\s*github\.head_ref", window):
                     checks_out_pr = True
         if re.match(r"^\s*permissions\s*:\s*write-all\s*$", line):
             add("permissions", number, "write-all")
+        if re.match(r"^\s*secrets\s*:\s*inherit\s*(?:#.*)?$", line):
+            add("secrets_inherit", number, "")
         known = next((label for label, pattern in SECRET_PATTERNS if pattern.search(line)), None)
         if known:
             add("secrets_in_clear", number, known, kind="known_pattern")
@@ -170,7 +203,27 @@ def lint_text(text, name="workflow.yml", rules=None):
         add("permissions", 1, "missing")
     if pr_target and checks_out_pr:
         add("pr_target", 1, "")
+    if (rules.get("no_timeout") or {}).get("enabled", False):
+        for start, job in jobs_without_timeout(lines):
+            add("no_timeout", start, job)
     return found
+
+
+def jobs_without_timeout(lines):
+    """[(line, job name)] of the jobs of a workflow that have no `timeout-minutes` (a call of a reusable workflow has no steps of its own and is left out)."""
+    jobs_at = next((i for i, line in enumerate(lines) if re.match(r"jobs\s*:\s*$", line)), None)
+    if jobs_at is None:
+        return []
+    starts = [(i, m.group(1)) for i, line in enumerate(lines[jobs_at + 1:], jobs_at + 1) for m in [re.match(r"^  ([A-Za-z0-9_-]+)\s*:\s*$", line)] if m]
+    out = []
+    for index, (start, job) in enumerate(starts):
+        end = starts[index + 1][0] if index + 1 < len(starts) else len(lines)
+        block = lines[start + 1:end]
+        if any(re.match(r"^    uses\s*:", line) for line in block):
+            continue
+        if not any(re.match(r"^    timeout-minutes\s*:", line) for line in block):
+            out.append((start + 1, job))
+    return out
 
 
 def workflow_files(path):

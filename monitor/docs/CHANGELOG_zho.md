@@ -16,6 +16,9 @@
 
 ### 新增
 
+- **面向数百个仓库的舰队视图**:团队标签页新增一个部分,对仓库分组(按生态、标签、状态或不分组)、排序(按风险、名称、最近运行或状态),并逐页绘制,因此拥有 250 个仓库的账户也能保持页面轻快。标签是仓库名的模式(`fleet.labels`,例如 `team-*=backend`),也可用来区分组织或团队;`fleet.saved_filters` 保存现成的筛选;`fleet.group_by`、`fleet.sort` 和 `fleet.page_size` 设定默认值。它读取 `GET /api/team/fleet`(只读,与团队排名相同的健康数据);上方的排名不变。
+- **运行器类型、其队列与成本、失控工作流以及宕机的自托管运行器**:开启 `runners.model.enabled` 后,作业的标签(`runs-on`)用于区分 GitHub 托管、大型、第三方付费和自托管运行器(通过 `runners.model.thirdparty_labels`、`runners.model.large_labels` 和 `runners.model.self_labels` 自定义分类)。设置 > 高级会显示按类型的队列、按类型的分钟数与成本(第三方的一分钟仅在设置了 `runners.model.thirdparty_usd_per_minute` 时才计价,GitHub 从不对其计费)、过去一小时至少启动 `runners.model.runaway_runs_per_hour` 次的工作流,以及等待自托管运行器达到 `runners.model.queue_warn_minutes` 分钟或更久的作业及原因(没有在线运行器具有其标签、所有匹配的运行器都在忙,或空闲运行器不接取)。两种警告都是警报(`runners.model.alerts`,级别为 `runners.model.alert_level`,默认 `warning`);只读、默认关闭,并通过 `GET /api/runners/model` 每周期读取 `runners.model.jobs_per_cycle` 次运行。开启 `finops.jobs_per_cycle` 时,第三方运行器上的作业不再按 GitHub 托管计价。
+- **在触发任何运行之前列出手动触发工作流的输入**:批量调度器的 `plan --inputs` 会在每个目标下显示其工作流要求的输入(名称、类型、必填或可选、默认值、选择项的选项和说明),从本地克隆 `origin/main` 中的工作流文件读取。不会触发或发送任何内容;`--json` 会为每一行添加 `inputs` 列表(无法读取时为 `null`)。指南新增一节列出已知限制:运行抽样、私有和免费仓库中保持 `unknown` 的套餐、每个监视器一个所有者以及合并队列。
 - **如实的运行列表覆盖范围**:仓库表新增一列“样本回溯范围”,说明每个仓库的运行列表向过去回溯了多久。已满但回溯时间少于 `sampling.min_coverage_minutes`(默认 30,0 为关闭)的列表会标记为“覆盖不足”,而不是看起来完整;比请求数量短的列表为“完整”;GitHub 停止计数的总数(2,500 或 40,000)显示为“至少”。表格上方的提示会统计覆盖不足的仓库数;`GET /api/data` 的 `sampling` 块带有同样的数字。
 - **对默认分支再看一次**(`sampling.default_branch_probe`,默认关闭):当仓库的运行列表已满时,再发出一次请求,获取默认分支的推送(不含拉取请求),使决定 main 是否为红色的运行不会被拉取请求和定时任务挤出。仅由第二次查看找到的运行,不会让列表被视为已满。
 - **每小时请求预算**(`sampling.api_budget_per_hour`,0 = 无):超出后先读取有红色工作流的仓库,其余等待下一小时,页面会说明有多少个在等待。页面还会显示仓库数量和间隔所需的每小时请求数(达到 3,500 或设置了预算时),让大账户在用完额度之前得到提醒。
@@ -30,6 +33,21 @@
 - **A2 用一次请求解决许多工作流**:需要查询的工作流不少于 `sentinel.a2_resolve_batch_min`(默认 2;0 = 逐个)的仓库,只请求一次其默认分支(不含拉取请求)最新已完成的运行,其中出现的工作流一并解决(最多 `sentinel.a2_resolve_batch_pages` 页,每页 100 条);列表中没有的仍像以前一样逐个查询,因此拥有 100 个以上工作流的仓库只需几个周期即可收敛,而不是每个周期四个。
 - **A2 用一次请求解决许多工作流**:需要查询的工作流不少于 `sentinel.a2_resolve_batch_min`(默认 2;0 = 逐个)的仓库,只请求一次其默认分支(不含拉取请求)最新已完成的运行,其中出现的工作流一并解决(最多 `sentinel.a2_resolve_batch_pages` 页,每页 100 条);列表中没有的仍像以前一样逐个查询,因此拥有 100 个以上工作流的仓库只需几个周期即可收敛,而不是每个周期四个。
 - **fork 和已归档仓库可通过设置选择，在维护的 fork 绝不丢失**：`discovery.skip_archived`（默认开启）决定是否监视已归档仓库；`discovery.fork_policy` 可排除 fork（`skip`），或只保留有自己 CI 的 fork（`skip_unless_ci`：已启用的工作流且在 `discovery.fork_ci_days` 内有运行），`auto` 对组织账户把时间窗口加倍，账户类型每天读取一次；`discovery.fork_checks_per_pass` 限制为此花费的请求数。默认值（`show`）不改变任何行为。
+### 新增
+
+- **Renovate 与 Dependabot 同等对待，检查器区分自有 action 与第三方 action**：`renovate` 的拉取请求在 A4 中作为依赖更新列出（`sentinel.dependency_bots` 指定账户），带有 Renovate 配置的仓库不再被报告为缺少更新机器人。`lint.own_owners` 和 `lint.unpinned_own` 会把未固定的 action 标为自有或第三方，并可降低或隐藏自有的；三条默认关闭的可选规则分别发现没有 `timeout-minutes` 的作业（`lint.rules.no_timeout`）、`secrets: inherit`（`lint.rules.secrets_inherit`）和跟随 `@main` 的自有 action（`lint.rules.own_action_main`）。
+
+### 变更
+
+- **发布文件检查可适应项目**：`sentinel.surface.checks.release_assets.require_sha256` 和 `.require_signature` 不再要求校验和或签名文件，`.allow_empty` 接受没有文件的发布（向包注册表发布的项目），`sentinel.surface.checks.tag_vs_version.prefixes` 会把 `cli-v1.2.0` 这样的标签与清单比较，`.prerelease_ok` 把日期版本号同一天的测试版视为同一版本；`sentinel.require_verified_signature` 原本就可关闭。默认值与以前要求相同。
+
+### 新增
+
+- **机器人与人分开统计**：开启 `sentinel.bots_apart` 后，GitHub 自己标为机器人的账户（Bot 类型，而非按名字猜测）的拉取请求在 A4 中单独计数（`other_bots`），并不计入对等待人处理的旧拉取请求的检查；运行记录现在带有 `actor_bot`。默认值不改变任何行为。
+
+### 新增
+
+- **配置档案**：设置 > 基本 以及首次启动向导的第三步提供三组现成的设置（所有者或团队、开源组织、独立开发者），一键设定卫生检查、fork 与已归档仓库、检查器、发布文件检查以及机器人单独统计；这些值与保存按钮走同一条经过校验的路径，选择之前不会有任何变化，`GET /api/settings` 以 `presets` 列出它们。大型账户的做法见新指南 `docs/LARGE_ACCOUNTS.md`。
 - **数千个仓库时团队健康也很快**:运行、红色工作流、进行中的运行和警报只按仓库分组一次,因此团队健康请求不再为每个仓库遍历全部数据(2,000 个仓库曾耗时约八秒);单个仓库的健康只构建它自己的视图。
 
 ### 修复

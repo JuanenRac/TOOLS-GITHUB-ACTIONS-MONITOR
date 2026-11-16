@@ -119,6 +119,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `extra_reader.enabled` (secure) | `false` | quota | Read also with a second account |
 | `extra_reader.file` (secure) | `""` | quota | File with the token of the second account |
 | `finops.jobs_per_cycle` | `0` | advanced | Jobs read per cycle for their system |
+| `fleet.group_by` | `"ecosystem"` | general | Group the fleet by |
+| `fleet.labels` | `[]` | general | Labels by repository name |
+| `fleet.page_size` | `50` | general | Repositories per page |
+| `fleet.saved_filters` | `[]` | general | Saved filters |
+| `fleet.sort` | `"risk"` | general | Order inside a group |
 | `github_actions.allowed` (secure) | `["rerun_failed", "cancel"]` | advanced | Actions that can be planned |
 | `github_actions.enabled` (secure) | `false` | advanced | Allow actions on GitHub |
 | `github_actions.merge_method` (secure) | `"squash"` | advanced | Merge method |
@@ -143,17 +148,25 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `lint.enabled` | `-` | lint | Linter on |
 | `lint.ignore` | `-` | lint | Ignored findings |
 | `lint.in_report` | `-` | lint | Warn in the report |
+| `lint.own_owners` | `-` | lint | Accounts whose actions are your own |
 | `lint.refresh_seconds` | `-` | lint | Scan every |
 | `lint.rules.injection.enabled` | `-` | lint | lint.rules.injection.enabled |
 | `lint.rules.injection.severity` | `-` | lint | lint.rules.injection.severity |
+| `lint.rules.no_timeout.enabled` | `-` | lint | lint.rules.no_timeout.enabled |
+| `lint.rules.no_timeout.severity` | `-` | lint | lint.rules.no_timeout.severity |
+| `lint.rules.own_action_main.enabled` | `-` | lint | lint.rules.own_action_main.enabled |
+| `lint.rules.own_action_main.severity` | `-` | lint | lint.rules.own_action_main.severity |
 | `lint.rules.permissions.enabled` | `-` | lint | lint.rules.permissions.enabled |
 | `lint.rules.permissions.severity` | `-` | lint | lint.rules.permissions.severity |
 | `lint.rules.pr_target.enabled` | `-` | lint | lint.rules.pr_target.enabled |
 | `lint.rules.pr_target.severity` | `-` | lint | lint.rules.pr_target.severity |
 | `lint.rules.secrets_in_clear.enabled` | `-` | lint | lint.rules.secrets_in_clear.enabled |
 | `lint.rules.secrets_in_clear.severity` | `-` | lint | lint.rules.secrets_in_clear.severity |
+| `lint.rules.secrets_inherit.enabled` | `-` | lint | lint.rules.secrets_inherit.enabled |
+| `lint.rules.secrets_inherit.severity` | `-` | lint | lint.rules.secrets_inherit.severity |
 | `lint.rules.unpinned_uses.enabled` | `-` | lint | lint.rules.unpinned_uses.enabled |
 | `lint.rules.unpinned_uses.severity` | `-` | lint | lint.rules.unpinned_uses.severity |
+| `lint.unpinned_own` | `-` | lint | Own actions that are not pinned |
 | `listen.allowed_hosts` (secure) | `[]` | advanced | Names the page may be opened with |
 | `listen.host` (secure) | `"127.0.0.1"` | advanced | Address to listen on |
 | `listen.local_port` (secure) | `0` | advanced | Local-only port for this computer |
@@ -274,6 +287,17 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `retention.mode` (secure) | `-` | paths | What to do with old events |
 | `retention.warn_events_mb` | `-` | paths | Warn when the events are bigger than |
 | `runners.enabled` | `false` | advanced | Watch self-hosted runners |
+| `runners.model.alert_level` | `"warning"` | advanced | Level of those alerts |
+| `runners.model.alerts` | `true` | advanced | Alerts of the runner model |
+| `runners.model.enabled` | `false` | advanced | Model the runners |
+| `runners.model.jobs_per_cycle` | `10` | advanced | Runs whose jobs are read per cycle |
+| `runners.model.large_labels` | `[]` | advanced | Labels of your larger runners |
+| `runners.model.queue_warn_minutes` | `20` | advanced | Minutes a job may wait for a self-hosted runner |
+| `runners.model.runaway_ignore_events` | `["pull_request", "pull_request_target"]` | advanced | Events that do not count as runaway |
+| `runners.model.runaway_runs_per_hour` | `20` | advanced | Runs per hour of a workflow that fires itself |
+| `runners.model.self_labels` | `[]` | advanced | Extra labels of self-hosted runners |
+| `runners.model.thirdparty_labels` | `["blacksmith", "buildjet", "namespace-profile", "depot", "warpbuild", "ubicloud", "runs-on", "actuated", "cirrus-runners"]` | advanced | Labels of paid third-party runners |
+| `runners.model.thirdparty_usd_per_minute` | `0.0` | advanced | Price of a third-party minute |
 | `runners.scope` | `"owner"` | advanced | Where to look |
 | `runs_per_repo` | `20` | polling | Runs read per hot repository |
 | `sampling.api_budget_per_hour` | `0` | polling | Request budget per hour |
@@ -313,11 +337,13 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinel.audit_files.reconciliation` | `-` | sentinel | Reconciliation files |
 | `sentinel.audit_files.rounds` | `-` | sentinel | Rounds files |
 | `sentinel.audit_files.rounds_extra` | `-` | sentinel | Extra rounds files |
+| `sentinel.bots_apart` | `-` | sentinel | Count bots apart from people |
 | `sentinel.budget_per_hour` | `-` | sentinel | API calls per hour |
 | `sentinel.candidate_days` | `-` | sentinel | Days of a release candidate |
 | `sentinel.candidate_min_entries` | `-` | sentinel | Entries to be a candidate |
 | `sentinel.ci_red_audit_copy` | `-` | paths | Copy ci_red.json to the audit folder |
 | `sentinel.ci_red_file` | `-` | paths | File for ci_red.json |
+| `sentinel.dependency_bots` | `-` | sentinel | Accounts that update dependencies |
 | `sentinel.enabled` | `true` | sentinel | Sentinel on |
 | `sentinel.hot_hours` | `-` | sentinel | Hot period |
 | `sentinel.hygiene.community_fallback` | `-` | sentinel | Count the community profile and the .github repository |
@@ -374,8 +400,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinel.surface.checks.pr_human.enabled` | `-` | surface | sentinel.surface.checks.pr_human.enabled |
 | `sentinel.surface.checks.pr_target.enabled` | `-` | surface | sentinel.surface.checks.pr_target.enabled |
 | `sentinel.surface.checks.pr_workflow_touch.enabled` | `-` | surface | sentinel.surface.checks.pr_workflow_touch.enabled |
+| `sentinel.surface.checks.release_assets.allow_empty` | `-` | surface | Allow releases without files |
 | `sentinel.surface.checks.release_assets.enabled` | `-` | surface | sentinel.surface.checks.release_assets.enabled |
 | `sentinel.surface.checks.release_assets.recent_days` | `-` | surface | sentinel.surface.checks.release_assets.recent_days |
+| `sentinel.surface.checks.release_assets.require_sha256` | `-` | surface | Require a checksum file |
+| `sentinel.surface.checks.release_assets.require_signature` | `-` | surface | Require a signature file |
 | `sentinel.surface.checks.required_checks.enabled` | `-` | surface | sentinel.surface.checks.required_checks.enabled |
 | `sentinel.surface.checks.secret_resolved.enabled` | `-` | surface | sentinel.surface.checks.secret_resolved.enabled |
 | `sentinel.surface.checks.security_aged.days` | `-` | surface | sentinel.surface.checks.security_aged.days |
@@ -383,6 +412,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinel.surface.checks.stuck_concurrency.enabled` | `-` | surface | sentinel.surface.checks.stuck_concurrency.enabled |
 | `sentinel.surface.checks.stuck_concurrency.minutes` | `-` | surface | sentinel.surface.checks.stuck_concurrency.minutes |
 | `sentinel.surface.checks.tag_vs_version.enabled` | `-` | surface | sentinel.surface.checks.tag_vs_version.enabled |
+| `sentinel.surface.checks.tag_vs_version.prefixes` | `-` | surface | Prefixes of the tags |
+| `sentinel.surface.checks.tag_vs_version.prerelease_ok` | `-` | surface | Betas of the same version are the same version |
 | `sentinel.surface.checks.unpinned_uses.enabled` | `-` | surface | sentinel.surface.checks.unpinned_uses.enabled |
 | `sentinel.surface.checks.workflows_disabled.enabled` | `-` | surface | sentinel.surface.checks.workflows_disabled.enabled |
 | `sentinel.surface.enabled` | `-` | surface | Surface checks on |

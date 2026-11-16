@@ -49,8 +49,8 @@ DEFAULTS = {
         "matrix_os": {"enabled": True, "max_per_tick": 4},
         "artifacts": {"enabled": True, "max_mb": 500, "retention_days": 30},
         "required_checks": {"enabled": True},
-        "release_assets": {"enabled": True, "recent_days": 30, "required": {"default": ["sha256", "sig"], "apk-build.yml": ["sha256"]}},
-        "tag_vs_version": {"enabled": True},
+        "release_assets": {"enabled": True, "recent_days": 30, "required": {"default": ["sha256", "sig"], "apk-build.yml": ["sha256"]}, "require_sha256": True, "require_signature": True, "allow_empty": False},
+        "tag_vs_version": {"enabled": True, "prefixes": [], "prerelease_ok": False},
         "packages": {"enabled": True},
         "drafts": {"enabled": True, "days": 14},
         "security_aged": {"enabled": True, "days": 30},
@@ -308,8 +308,11 @@ def scan_clone(path):
         match = next((m for m in CHANGELOG_TOP.finditer(changelog) if m.group(1).strip().lower() != "unreleased"), None)
         top = match.group(1).strip() if match else None
     return {"workflows": workflows, "stacks": stacks, "dependabot_yml": any((base / ".github" / n).is_file() for n in ("dependabot.yml", "dependabot.yaml")),
+            "renovate_cfg": any(p.is_file() for p in [base / n for n in RENOVATE_FILES] + [base / ".github" / n for n in RENOVATE_FILES]),
             "codeql_yml": codeql, "manifest": manifest, "changelog_top": top}
 
+
+RENOVATE_FILES = ("renovate.json", "renovate.json5", ".renovaterc", ".renovaterc.json", ".renovaterc.json5")      # where Renovate reads its configuration (root or .github)
 
 # ---------- pure rules (tested without network) ----------
 VERSION_TAG = re.compile(r"^v?\d+\.\d+(?:\.\d+){0,2}(?:[-+][0-9A-Za-z.-]+)?\Z")
@@ -332,6 +335,21 @@ def remote_manifest_version(gh, owner_name, repo, file, branch):
 def version_tuple(text):
     nums = re.findall(r"\d+", str(text or ""))
     return tuple(int(n) for n in nums[:4]) if nums else None
+
+
+def strip_tag_prefix(tag, prefixes):
+    """`cli-v1.2.0` -> `v1.2.0` when `cli-` is one of the prefixes the person named (the first that fits)."""
+    text = str(tag or "")
+    for prefix in prefixes or ():
+        if prefix and text.startswith(prefix):
+            return text[len(prefix):]
+    return text
+
+
+def release_part(text):
+    """The numbers of a version without its pre-release tail: `2026.11.16-beta.2` and `2026.11.16b3` -> `2026.11.16`."""
+    match = re.match(r"^v?(\d+(?:\.\d+){0,3})", str(text or "").strip())
+    return match.group(1) if match else str(text or "")
 
 
 def compare_versions(a, b):
@@ -407,14 +425,20 @@ def required_check_problems(required, check_runs):
 
 
 def asset_template(workflow, cfg):
-    spec = cfg["checks"]["release_assets"]["required"]
-    return list(spec.get(workflow) or spec.get("default") or [])
+    check = cfg["checks"]["release_assets"]
+    spec = check["required"]
+    required = list(spec.get(workflow) or spec.get("default") or [])
+    if not check.get("require_sha256", True):
+        required = [n for n in required if n != "sha256"]      # a project that does not publish checksums
+    if not check.get("require_signature", True):
+        required = [n for n in required if n not in ("sig", "sig2", "imgsig")]      # a project that does not sign its files
+    return required
 
 
-def missing_assets(flags, required):
-    """The required signature companions that the published release does not carry; flags None = the release has no assets at all."""
+def missing_assets(flags, required, allow_empty=False):
+    """The required signature companions that the published release does not carry; flags None = the release has no assets at all (fine when `allow_empty`: the files live in a package registry)."""
     if flags is None:
-        return ["assets"]
+        return [] if (allow_empty or not required) else ["assets"]
     return [name for name in required if not flags.get(name)]
 
 
@@ -635,7 +659,7 @@ def build(inp):
         rel = (info.get(repo) or {}).get("release")
         if not rel or (age_days(rel.get("publishedAt"), now) or 0) > recent:
             continue
-        missing = missing_assets(rel.get("asset_flags"), asset_template(st["workflow"], cfg))
+        missing = missing_assets(rel.get("asset_flags"), asset_template(st["workflow"], cfg), cfg["checks"]["release_assets"].get("allow_empty", False))
         if missing:
             rows.append([repo, rel.get("tagName"), ", ".join(missing)])
             event("release_incomplete", "bad", repo, t("surf.ev_release", repo=repo, tag=rel.get("tagName"), missing=", ".join(missing)), f"{repo}|{rel.get('tagName')}")
@@ -651,11 +675,14 @@ def build(inp):
         if from_branch:      # the manifest of the branch on GitHub, read after this release appeared: the clone may be behind (its CHANGELOG too)
             man = remote["version"]
         notes = []
+        tag_cfg = cfg["checks"]["tag_vs_version"]
+        tag = strip_tag_prefix(tag, tag_cfg.get("prefixes")) if tag else tag
         if tag and not is_version_tag(tag):
             tag = None
-        if tag and man and compare_versions(tag, man) == 1:
+        same_tag, same_man = (release_part(tag), release_part(man)) if tag_cfg.get("prerelease_ok") else (tag, man)      # betas of one day (CalVer) are the same version
+        if tag and man and compare_versions(same_tag, same_man) == 1:
             notes.append(t("surf.tag_after"))
-        elif tag and man and compare_versions(man, tag) == 1:
+        elif tag and man and compare_versions(same_man, same_tag) == 1:
             notes.append(t("surf.tag_before"))
         if man and top and not from_branch and compare_versions(man, top) not in (0, None):
             notes.append(t("surf.tag_changelog"))
@@ -693,8 +720,8 @@ def build(inp):
         if not scan or not scan["stacks"]:
             continue
         missing = []
-        if not scan["dependabot_yml"]:
-            missing.append("Dependabot")
+        if not (scan["dependabot_yml"] or scan.get("renovate_cfg")):
+            missing.append("Dependabot")      # an update bot is configured when Dependabot or Renovate is
         if not scan["codeql_yml"] and (alerts.get(repo) or {}).get("codeql") is None:
             missing.append("CodeQL")
         if missing:
@@ -723,7 +750,7 @@ def build(inp):
     put("milestones", sorted(rows))
     # B5 PRs
     allprs = inp.get("prs") or []
-    humans = [p for p in allprs if not p.get("dependabot") and not p.get("draft")]
+    humans = [p for p in allprs if not p.get("dependabot") and not p.get("draft") and not (inp.get("bots_apart") and p.get("bot"))]
     put("pr_human", [[p["repo"], "#%s" % p["number"], p["title"], f"{p['age_days']} {t('unit.d')}"] for p in sorted(humans, key=lambda p: -(p.get("age_days") or 0))
                      if (p.get("age_days") or 0) > cfg["checks"]["pr_human"]["days"]])
     rows = [[p["repo"], "#%s" % p["number"], p["title"], "CODEOWNERS" if p.get("touches_codeowners") else "workflows"] for p in allprs if p.get("touches_workflows") or p.get("touches_codeowners")]

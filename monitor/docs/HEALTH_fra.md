@@ -33,3 +33,9 @@ L'état est **mauvais** (un workflow rouge, ou une alerte de niveau critique ou 
 La santé de l'équipe regroupe une seule fois par dépôt les exécutions, les workflows rouges, les exécutions en cours et les alertes ; le coût croît donc avec la quantité de données et non avec dépôts fois exécutions ; demander un seul dépôt ne construit que sa vue.
 
 Un instant enregistré qui se trouve dans le futur (un ordinateur sans horloge à pile qui démarre avec une vieille date, ou une horloge corrigée à la main) n'est pas cru : la note, la purge des anciennes données et les rapports programmés sont dus aussitôt et écrivent un bon instant, au lieu d'attendre que la vieille horloge soit atteinte.
+
+## La vue de flotte (des centaines de dépôts)
+
+L'onglet **Équipe** a une seconde section, *Flotte*, pour les comptes de centaines de dépôts. Elle groupe les dépôts (`fleet.group_by` : écosystème, étiquette, état ou aucun), trie chaque groupe (`fleet.sort` : risque, nom, dernière exécution ou état) et dessine `fleet.page_size` lignes à la fois (50 par défaut) avec Précédent et Suivant. La page reçoit toutes les lignes une fois de `GET /api/team/fleet?ecosystem=&severity=&q=&label=&group=&sort=&saved=` (lecture seule, 5 000 lignes au plus ; `truncated` signale une coupure) et ne dessine qu'une page, la taille du compte ne la ralentit donc pas.
+
+Une *étiquette* est un motif de noms de dépôt : `fleet.labels` accepte des lignes comme `team-*=backend` ; le premier motif qui correspond donne l'étiquette, et grouper par étiquette permet de distinguer organisations ou équipes dans un seul moniteur. `fleet.saved_filters` accepte des lignes comme `attention=bad||backend|` (nom, gravité minimale, écosystème, étiquette, texte ; toute partie après le nom peut être vide) et les affiche comme filtres prêts à l'emploi. Le classement au-dessus de la flotte ne change pas.
