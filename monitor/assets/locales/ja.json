@@ -867,11 +867,11 @@
  "cfg.h.ui.orientation": "auto はウィンドウに従います（幅より高さが大きいウィンドウではパネルを縦に積みます）。portrait か landscape で固定できます。90度回転したモニターやテレビに便利です。アドレスで1つのウィンドウだけ固定もできます：?orient=portrait。",
  "cfg.h.ui.rotate_seconds": "0 = 回転なし。1つの画面に複数のタブがある場合、この秒数ごとに自動で切り替えます（誰も操作しない画面向け）。?rotate=30 で1つのウィンドウだけに指定できます。",
  "cfg.h.ui.screen1_orientation": "auto = 上の全体設定に従います。portrait か landscape は /screen/1 だけで固定します。",
- "cfg.h.ui.screen1_tabs": "/screen/1 が表示するタブをカンマ区切りで指定します：now, al, sent, charts, repos, hist, cfg（lite は now, charts, repos, hist, cfg）。空 = すべて。そのモニターで http://このコンピューター:8765/screen/1 を開きます。",
+ "cfg.h.ui.screen1_tabs": "/screen/1 が表示するタブをカンマ区切りで指定します：now, al, rep, les, sent, charts, repos, hist, cfg（lite は now, charts, repos, hist, cfg）。空 = すべて。そのモニターで http://このコンピューター:8765/screen/1 を開きます。",
  "cfg.h.ui.screen2_orientation": "auto = 上の全体設定に従います。portrait か landscape は /screen/2 だけで固定します。",
- "cfg.h.ui.screen2_tabs": "/screen/2 が表示するタブをカンマ区切りで指定します：now, al, sent, charts, repos, hist, cfg（lite は now, charts, repos, hist, cfg）。空 = すべて。そのモニターで http://このコンピューター:8765/screen/2 を開きます。",
+ "cfg.h.ui.screen2_tabs": "/screen/2 が表示するタブをカンマ区切りで指定します：now, al, rep, les, sent, charts, repos, hist, cfg（lite は now, charts, repos, hist, cfg）。空 = すべて。そのモニターで http://このコンピューター:8765/screen/2 を開きます。",
  "cfg.h.ui.screen3_orientation": "auto = 上の全体設定に従います。portrait か landscape は /screen/3 だけで固定します。",
- "cfg.h.ui.screen3_tabs": "/screen/3 が表示するタブをカンマ区切りで指定します：now, al, sent, charts, repos, hist, cfg（lite は now, charts, repos, hist, cfg）。空 = すべて。そのモニターで http://このコンピューター:8765/screen/3 を開きます。",
+ "cfg.h.ui.screen3_tabs": "/screen/3 が表示するタブをカンマ区切りで指定します：now, al, rep, les, sent, charts, repos, hist, cfg（lite は now, charts, repos, hist, cfg）。空 = すべて。そのモニターで http://このコンピューター:8765/screen/3 を開きます。",
  "cfg.h.updates.check": "公開リリースページへ、あなた自身の gh で1日1回の読み取り専用リクエストを送ります。何もダウンロード・インストールせず、あなたに関する情報も送りません。",
  "cfg.h.watchdog_max_abandoned": "時間内に応答しない GitHub 呼び出しは見切られますが、そのスレッドは生き残ることがあります。これだけの数が残っている間、モニターは新しい GitHub 呼び出しを始めず、詳細ヘルスチェックで劣化状態と報告し、スレッドや接続が積み上がるのを防ぎます。0 は上限なしです。",
  "cfg.h.watchdog_minutes": "モニターの更新サイクルがこの時間より長く続くと、ウォッチドッグが各スレッドの状態をログに書き出し、新しいスレッドでサイクルをやり直します。0 でウォッチドッグをオフにします。",
@@ -3370,6 +3370,7 @@
  "ui.jobs_cut": "ジョブ: {total} 件中 {seen} 件を表示",
  "hyg.wf_cut": "ワークフローの一覧が途中で切れています: {total} 件中 {seen} 件を表示",
  "ui.cfg_b_wall": "壁掛け画面",
+ "ui.rep_all_off": "オプションのレポートはオンになっていません。設定の「センチネル」タブ、「オプションのレポート」ブロックでオンにしてください。",
  "cfg.f.screens.enabled": "壁掛け画面",
  "cfg.h.screens.enabled": "壁掛け画面を有効にします。無効にすると /screen/overview、/screen/now、/screen/sentinels は 404 を返します。モニターがすでに持っている情報を読むだけで、何も変更せず、GitHub も呼び出しません。 既定ではオフです。",
  "cfg.f.screens.default_theme": "壁掛け画面のテーマ",
@@ -3472,5 +3473,7 @@
  "ui.scr_sev_critical": "重大",
  "ui.scr_sev_error": "エラー",
  "ui.scr_sev_warning": "警告",
- "ui.scr_sev_info": "情報"
+ "ui.scr_sev_info": "情報",
+ "ui.tab_les": "教訓",
+ "ui.tab_rep": "レポート"
 }

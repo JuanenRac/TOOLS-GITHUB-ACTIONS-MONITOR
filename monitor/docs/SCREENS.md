@@ -21,7 +21,7 @@ The page adapts to the size of its window, from a phone to 4K, upright or turned
 |---|---|
 | `ui.orientation` | auto follows the window; portrait stacks the panels in one column; landscape keeps the side-by-side layout. |
 | `ui.rotate_seconds` | 0 = off. Seconds between the tabs of a screen that has more than one. |
-| `ui.screen1_tabs` | Tabs of /screen/1, comma separated: now, al, sent, charts, repos, hist, cfg. Empty = all. |
+| `ui.screen1_tabs` | Tabs of /screen/1, comma separated: now, al, rep, les, sent, charts, repos, hist, cfg. Empty = all. |
 | `ui.screen1_orientation` | auto, portrait or landscape for /screen/1 only. |
 | `ui.screen2_tabs` | Tabs of /screen/2. |
 | `ui.screen2_orientation` | Orientation of /screen/2. |

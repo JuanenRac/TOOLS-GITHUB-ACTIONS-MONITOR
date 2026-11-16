@@ -73,7 +73,7 @@ Lire est toujours permis. Écrire une leçon demande trois choses : `lessons.all
 
 ## Réglages
 
-`lessons.enabled`, `lessons.allow_write`, `lessons.retention_days`, `lessons.max_entries`, `lessons.brief_max_bytes` et `lessons.recurring_from`, dans l'onglet IA des Réglages. Le panneau **Leçons des échecs** est en bas de l'onglet Alertes.
+`lessons.enabled`, `lessons.allow_write`, `lessons.retention_days`, `lessons.max_entries`, `lessons.brief_max_bytes` et `lessons.recurring_from`, dans l'onglet IA des Réglages. Le panneau **Leçons des échecs** est l'onglet **Leçons** (entrée du menu de gauche, adresse `#lessons`).
 
 ## Clôture d'une ronde
 

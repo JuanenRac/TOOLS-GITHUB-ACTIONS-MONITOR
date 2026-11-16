@@ -23,7 +23,7 @@ python bin/monitor_cli.py gh-token --read-only
 
 ## Quatre rapports facultatifs
 
-Les quatre sont désactivés par défaut. Ils apparaissent dans un bloc « Rapports facultatifs » en bas de l'onglet Alertes et dans `GET /api/reports`. Ceux qui lisent GitHub dépensent au plus `reports.max_calls_per_cycle` appels par cycle, lisent quelques dépôts à chaque fois et gardent ce qu'ils lisent en mémoire pendant un jour.
+Les quatre sont désactivés par défaut. Ils apparaissent dans l'onglet **Rapports** (entrée du menu de gauche, adresse `#reports`) et dans `GET /api/reports`. Ceux qui lisent GitHub dépensent au plus `reports.max_calls_per_cycle` appels par cycle, lisent quelques dépôts à chaque fois et gardent ce qu'ils lisent en mémoire pendant un jour.
 
 - `reports.workflow_hygiene.enabled` : lit les fichiers de workflow des dépôts et liste ce qui est mal écrit - actions non épinglées à un commit, permissions non limitées, un job sans `timeout-minutes`, pas de groupe `concurrency`, risques `pull_request_target` et injection, secrets en clair (les règles du linter du panneau A13, qui lit des clones locaux, plus les deux nouvelles).
 - `reports.queue.enabled` : lit les jobs de quelques exécutions terminées qui ont attendu et dit combien un job a attendu avant de démarrer pour chaque sorte de runner (Linux, Windows, macOS, plus grands, auto-hébergés).

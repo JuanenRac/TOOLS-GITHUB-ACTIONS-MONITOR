@@ -867,11 +867,11 @@
  "cfg.h.ui.orientation": "auto follows the window (a window taller than wide stacks the panels); portrait or landscape forces it. Useful for a monitor turned 90 degrees or a TV. The address can force it for one window: ?orient=portrait.",
  "cfg.h.ui.rotate_seconds": "0 = no rotation. With more than one tab on a screen, the page turns through them by itself every this many seconds (for a screen nobody touches). ?rotate=30 does it for one window.",
  "cfg.h.ui.screen1_orientation": "auto = the general orientation above; portrait or landscape forces it on /screen/1 only.",
- "cfg.h.ui.screen1_tabs": "Tabs that /screen/1 shows, separated by commas, from: now, al, sent, charts, repos, hist, cfg (all, lite: now, charts, repos, hist, cfg). Empty = all tabs. Open http://this-computer:8765/screen/1 on that monitor.",
+ "cfg.h.ui.screen1_tabs": "Tabs that /screen/1 shows, separated by commas, from: now, al, rep, les, sent, charts, repos, hist, cfg (all, lite: now, charts, repos, hist, cfg). Empty = all tabs. Open http://this-computer:8765/screen/1 on that monitor.",
  "cfg.h.ui.screen2_orientation": "auto = the general orientation above; portrait or landscape forces it on /screen/2 only.",
- "cfg.h.ui.screen2_tabs": "Tabs that /screen/2 shows, separated by commas, from: now, al, sent, charts, repos, hist, cfg (all, lite: now, charts, repos, hist, cfg). Empty = all tabs. Open http://this-computer:8765/screen/2 on that monitor.",
+ "cfg.h.ui.screen2_tabs": "Tabs that /screen/2 shows, separated by commas, from: now, al, rep, les, sent, charts, repos, hist, cfg (all, lite: now, charts, repos, hist, cfg). Empty = all tabs. Open http://this-computer:8765/screen/2 on that monitor.",
  "cfg.h.ui.screen3_orientation": "auto = the general orientation above; portrait or landscape forces it on /screen/3 only.",
- "cfg.h.ui.screen3_tabs": "Tabs that /screen/3 shows, separated by commas, from: now, al, sent, charts, repos, hist, cfg (all, lite: now, charts, repos, hist, cfg). Empty = all tabs. Open http://this-computer:8765/screen/3 on that monitor.",
+ "cfg.h.ui.screen3_tabs": "Tabs that /screen/3 shows, separated by commas, from: now, al, rep, les, sent, charts, repos, hist, cfg (all, lite: now, charts, repos, hist, cfg). Empty = all tabs. Open http://this-computer:8765/screen/3 on that monitor.",
  "cfg.h.updates.check": "One read-only request a day to the public releases page, through your own gh. It never downloads or installs anything and sends nothing about you.",
  "cfg.h.watchdog_max_abandoned": "A call to GitHub that does not answer in time is given up on, but its thread can stay alive. With this many of them still alive the monitor starts no new call to GitHub and its deep health check says it is degraded, instead of piling up threads and connections. 0 means no limit.",
  "cfg.h.watchdog_minutes": "If one refresh cycle of the monitor runs longer than this, the watchdog writes where every thread is to the log and starts the cycle again in a new thread. 0 switches the watchdog off.",
@@ -3370,6 +3370,7 @@
  "ui.jobs_cut": "jobs: seen {seen} of {total}",
  "hyg.wf_cut": "the list of workflows was cut: seen {seen} of {total}",
  "ui.cfg_b_wall": "Wall screens",
+ "ui.rep_all_off": "No optional report is turned on. Turn them on in Settings, tab Sentinel, block Optional reports.",
  "cfg.f.screens.enabled": "Wall screens",
  "cfg.h.screens.enabled": "Turns the wall screens on. Off: /screen/overview, /screen/now and /screen/sentinels answer 404. They only read what the monitor already holds; they never change anything and never call GitHub. Off by default.",
  "cfg.f.screens.default_theme": "Theme of the wall screens",
@@ -3472,5 +3473,7 @@
  "ui.scr_sev_critical": "Critical",
  "ui.scr_sev_error": "Error",
  "ui.scr_sev_warning": "Warning",
- "ui.scr_sev_info": "Info"
+ "ui.scr_sev_info": "Info",
+ "ui.tab_les": "Lessons",
+ "ui.tab_rep": "Reports"
 }

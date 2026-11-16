@@ -285,7 +285,7 @@ def roles_md():
 def tabs_md():
     page = (MON / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
     tabs = sorted(set(re.findall(r'data-tab="([a-z]+)"', page)))
-    names = {"now": "Right now (runs, one row per repository)", "al": "Alerts (every sentinel in one list, silences, lessons from the failures)", "sent": "Sentinel (checks A1-A13, Collab)",
+    names = {"now": "Right now (runs, one row per repository)", "al": "Alerts (every sentinel in one list, silences)", "rep": "Reports (the optional reports; address #reports)", "les": "Lessons (lessons from the failures; address #lessons)", "sent": "Sentinel (checks A1-A13, Collab)",
              "charts": "Charts and history", "repos": "Repositories", "team": "Team (health of the repositories ranked by risk, with filters and the detail of each)", "hist": "History of runs", "cfg": "Settings (tabs Basic, General ... AI, Quota ...)", "interface": "Interface"}
     lines = ["# Tabs of the page", "", "Generated from the page. The same data is in the endpoints; an AI does not need the page.", ""]
     lines += [f"- `{t}`: {names.get(t, t)}" for t in tabs]
