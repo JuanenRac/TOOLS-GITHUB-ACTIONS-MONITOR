@@ -111,6 +111,31 @@ def package_data_problems(entries, here=HERE):
     return sorted(problems)
 
 
+#: tracked files of the product folder that do not travel, by exact path relative to it (empty on purpose: the zip IS the folder of the tag; add a line here, with the reason, only for a file that must stay out)
+NOT_SHIPPED = {}
+#: files of the zip that are made by the build and so are not in the repository
+GENERATED = {f"{EXAMPLES_DIR}/{EXAMPLE}"}
+
+
+def tracked_files(here=HERE):
+    """The files the repository versions inside the product folder (`git ls-files`, paths relative to it), or None when this folder is not a git checkout (an extracted zip) or git is not there."""
+    try:
+        done = subprocess.run(["git", "ls-files", "-z", "--", "."], cwd=str(here), capture_output=True, timeout=60)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if done.returncode != 0:
+        return None
+    return {name for name in done.stdout.decode("utf-8", "replace").split(chr(0)) if name}
+
+
+def tracked_problems(entries, tracked, prefix="github_actions_monitor/"):
+    """The zip must be the product folder of the tag: a versioned file that does not travel (whatever its suffix or folder) and a file that travels without being versioned (a stray local file) both fail the gate."""
+    inside = {n[len(prefix):] for n in entries if n.startswith(prefix)}
+    problems = [f"versioned but not in the zip: {name}" for name in sorted(tracked - inside - set(NOT_SHIPPED))]
+    problems += [f"in the zip but not versioned: {name}" for name in sorted(inside - tracked - GENERATED)]
+    return problems
+
+
 def check_entries(names):
     """Names (as they will sit in the zip) that must not be there; empty list = clean."""
     bad = []
@@ -459,6 +484,11 @@ def main():
     crlf_scripts = [n for n, data in entries.items() if data.startswith(b"#!") and b"\r" in data.split(b"\n", 1)[0]]
     if crlf_scripts:
         fail("scripts with a shebang and Windows line endings (they would not run on Linux or macOS): " + ", ".join(crlf_scripts))
+    versioned = tracked_files()
+    if versioned is not None:
+        stray = tracked_problems(entries, versioned)
+        if stray:
+            fail("the zip is not the versioned folder: " + "; ".join(stray[:12]))
     left_out = package_data_problems(entries)
     if left_out:
         fail("data files of the package missing from the zip: " + ", ".join(left_out))
