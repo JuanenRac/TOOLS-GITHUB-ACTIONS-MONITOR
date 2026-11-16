@@ -21,7 +21,11 @@ What only shows with long real use: the migration from 1.8 and 1.9, the growth o
 
 The monitor's own workflows keep to what the hygiene sentinel will ask of others: actions pinned to a commit, the least permissions and a time limit on every job.
 
-## Done in 1.8.2 to 2.0.2
+## Done in 1.8.2 to 2.0.3
+
+### 2.0.3 - Large accounts, fewer false reds, linting without clones and safer storage
+
+A fleet view, paginated lists, a budget of requests and an honest coverage of the list of runs for accounts with hundreds of repositories; a red counts only when the repository itself caused it, and runs that wait for an approval, abandoned workflows, workflows that only react to issues, the merge queue and maintenance branches each get the right place; the workflow linter and the surface checks work through the API or a sparse clone without cloning; the models of the AI provider are read and checked, and every link of the page goes through the address filter; the locks and the log of actions are safer on Windows and the score ledger is never written over; wall screens for a monitor or a TV, off by default; the tests of the repository no longer run on macOS for now.
 
 ### 2.0.2 - Safer logs, cleaner AI text and a fairer score
 
