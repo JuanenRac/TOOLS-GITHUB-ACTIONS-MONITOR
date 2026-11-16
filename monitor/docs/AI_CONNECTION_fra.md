@@ -35,6 +35,20 @@ Un inventaire de **signaux**, les mêmes que ceux de la page : l'onglet Maintena
 ## Sécurité et confidentialité
 Tout est désactivé par défaut. Le texte des journaux est nettoyé des secrets et des chemins personnels avant d'être écrit, et **c'est une donnée, jamais une instruction** : une IA doit le traiter comme un texte non fiable. Les points d'accès ne répondent qu'à cet ordinateur, ou avec le jeton d'accès en mode réseau ; les auditeurs et la durée sont limités ; acquitter exige `--allow-ack` ; tous les fichiers d'état sont créés en mode 0600. Le moniteur n'ouvre aucune connexion à internet pour cela, sauf celles que vous configurez. Les adresses https de github.com (un run, un dépôt, un fichier) passent entières pour que l'IA puisse les ouvrir ; toute autre longue chaîne opaque est toujours coupée. Plus exactement, une adresse de github.com ne passe entière que sous la forme d'un dépôt, d'une exécution (avec son job ou sa tentative), d'un commit, d'une issue, d'une pull request ou d'un fichier ; elle est coupée au premier caractère qui n'est ni une lettre, ni un chiffre, ni un point, un tiret, un tiret bas ou une barre oblique, et ce qui suit est nettoyé comme tout autre texte.
 
+## Comment se connecter, selon l'outil
+
+Le moniteur ne dépend ni d'un assistant ni d'un modèle : un outil d'IA utilise l'une de cinq voies. Prenez celle de votre outil.
+
+| Votre outil sait | Voie | Comment | Il faut |
+|---|---|---|---|
+| lire des fichiers | Fichiers | lire `ai/INDEX.json`, puis `ai/ALERTS_BRIEF.md`, `ai/ai_alerts.jsonl` et `ai/LESSONS.md` | `ai_alerts.enabled` |
+| faire des requêtes HTTP | HTTP | `GET /api/ai/brief`, `/api/ai/state`, `/api/ai/lessons` | le jeton d'accès en mode réseau |
+| parler MCP | MCP | `python bin/mcp_server.py` (lecture seule ; `--allow-ack`, `--allow-lessons` pour le peu qu'il peut écrire) | la configuration MCP de l'outil pointant vers cette commande |
+| garder une connexion ouverte | Flux | `GET /api/ai/stream?only=real` | `ai_alerts.stream.enabled` |
+| exécuter des commandes | Ligne de commande | `python bin/monitor_cli.py alerts`, `lessons brief --repo NOM`, `ai doctor`, `ai-hook install` | Python sur le même ordinateur |
+
+Les instructions pour l'IA sont deux skills. `monitor_cli.py install-skill external --dest DOSSIER` les copie dans le dossier où votre outil lit ses skills ou ses règles ; tout outil qui lit des fichiers Markdown peut les utiliser, et le texte ne nomme aucun assistant. Les skills voyagent avec le moniteur et portent sa version : `GET /api/skills` donne `monitor_version` et `monitor_cli.py --version` l'affiche. Après une mise à jour du moniteur, réinstallez dans un dossier vide ou supprimez l'ancienne copie (un fichier modifié n'est jamais écrasé).
+
 ## Dépannage
 - *Le résumé est ancien* : la page doit tourner (le flux suit chaque rafraîchissement) ; regardez le battement dans la barre.
 - *Le hook ne s'exécute pas* : `ai-hook status` dit où il est installé ; certains outils ne lisent les hooks que dans le dossier du projet.
@@ -58,6 +72,16 @@ En plus du flux qu'une IA lit (`ALERTS_BRIEF.md`, le flux continu, le serveur MC
 - **La variante d'une commande sortante** : `ai_notify.command` (seulement dans le fichier de configuration, jamais dans la page des Réglages) nomme UN fichier par son chemin absolu ; il est lancé sans shell et sans arguments et reçoit le même JSON expurgé sur son entrée standard.
 
 L'avis part d'un fil d'exécution à part, si bien qu'un fournisseur lent ne retient jamais le cycle.
+
+## Modèles du fournisseur
+
+Le nom du modèle est un texte libre, mais le moniteur peut lire la liste des modèles auprès du fournisseur et y vérifier le nom. Les modèles et les versions changent souvent : le moniteur ne fournit donc aucune liste de modèles, et les exemples des préréglages peuvent être périmés.
+
+- **La liste.** Réglages, onglet *IA externe*, bloc *Modèles et données par modèle* : *Charger les modèles du fournisseur* lit la liste (`/models` d'un serveur de style OpenAI, la liste équivalente de l'API d'Anthropic, `/api/tags` d'Ollama) par une requête en lecture seule. La clé passe dans un en-tête, est lue dans sa variable d'environnement et n'est jamais enregistrée. Cherchez dans la liste et choisissez un modèle avec *Utiliser ce modèle*. La liste est conservée et bornée par `ai.catalog.ttl_minutes` et `ai.catalog.max_requests_per_day`. Avec `ai.catalog.enabled` activé (désactivé par défaut), le moniteur prévient aussi quand le modèle configuré n'apparaît plus dans la liste (retiré ou renommé) ; désactivé, vous seul déclenchez la lecture.
+- **Données par modèle.** La fenêtre de contexte, le prix d'entrée et de sortie par million de jetons et la prise en charge des outils ne sont renseignés qu'avec ce que le fournisseur renvoie ; ce qu'il ne dit pas reste *inconnu* (aucun chiffre n'est inventé). Vous pouvez saisir vos propres valeurs ; elles l'emportent. Avec `ai.catalog.fit_context` activé (désactivé par défaut), la limite d'entrée est adaptée à la fenêtre de contexte quand elle est connue.
+- **Tester un modèle.** *Tester ce modèle* ou `monitor_cli.py ai test --provider NOM --model NOM` interroge le modèle sur un échec SYNTHÉTIQUE (jamais des données de vos dépôts) et affiche la latence, les jetons, le coût estimé et un exemple de réponse. Cela compte comme un appel du plafond quotidien, et le résultat (« testé », avec la date locale) est conservé dans le tableau.
+- **Commandes.** `monitor_cli.py ai models [--refresh]` affiche les modèles et les données ; `ai doctor` explique pourquoi une IA ne répond pas (variable de la clé non définie, modèle inconnu, quota, réseau) et n'affiche jamais une clé.
+- **Routes.** `GET /api/ai/models` (la liste conservée, la vérification et le tableau ; lecture seule) et, depuis cet ordinateur uniquement, `POST /api/ai/models/refresh`, `POST /api/ai/models/test`, `POST /api/ai/models/data` et `POST /api/ai/doctor`.
 
 ## IA compatibles
 

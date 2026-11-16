@@ -21,7 +21,7 @@ Definições, separador Sentinela, bloco **Relatórios agendados**:
 | `report_schedule.keep` | 12 | quantas séries se guardam; as mais antigas são removidas |
 | `report_schedule.top` | 10 | quantos repositórios e alertas mostra cada lista, os piores primeiro |
 
-O primeiro relatório espera pelo primeiro minuto agendado depois de ligar. Escreve-se um relatório por minuto agendado, mesmo que o monitor tenha estado desligado dias (então escreve um, não uma pilha). Um relatório que falha fica registado na saúde do monitor e o minuto agendado seguinte tenta outra vez.
+O primeiro relatório espera pelo primeiro minuto agendado depois de ligar. Escreve-se um relatório por minuto agendado, mesmo que o monitor tenha estado desligado dias (então escreve um, não uma pilha). Um relatório que falha fica registado na saúde do monitor e o minuto agendado seguinte tenta outra vez. Um agendamento que indica um dia do mês continua em dívida após uma paragem de até um mês (se indicar um mês, até um ano), e a hora que se repete quando o relógio recua no outono não é comunicada duas vezes. Um relatório é todos os seus formatos ou nada: se o segundo formato não puder ser escrito, o primeiro ficheiro é removido.
 
 ## O que leva um relatório
 

@@ -27,6 +27,8 @@ The monitor watches the GitHub Actions of a person's repositories on their compu
 - MCP: `python bin/mcp_server.py` (read only; `--allow-ack` to acknowledge, `--allow-lessons` to write lessons).
 - Stream: `GET /api/ai/stream` (server-sent events), when `ai_alerts.stream.enabled` is on. Details in `references/protocol.md`.
 
+Which way fits which kind of tool, and how the skill and the monitor stay on the same version: `references/connect.md`. If you cannot tell why an AI of the monitor does not answer: `monitor_cli.py ai doctor` (it never prints a key).
+
 ## What you can do, by direction
 
 - READ: alerts, the brief, signals, lessons that apply now, the book of failures, quota, health, paths.
@@ -44,6 +46,7 @@ Read `GET /api/ai/lessons?fmt=brief&repo=NAME` (or `lessons brief --repo NAME`):
 
 ## More, only when you need it
 
+- `references/connect.md`: how to connect by kind of tool (files, HTTP, MCP, stream, command line) and the version of this skill.
 - `references/protocol.md`: the link between a monitor and your session (arm the stream, relay the brief, act without waiting).
 - `references/learning-cycle.md`: record, classify, repetition, guard, close of a round.
 - `references/scenarios.md`: step by step for a real red, a transient red, low quota, a degraded monitor, a repeated failure, a new lesson, no network, several screens.

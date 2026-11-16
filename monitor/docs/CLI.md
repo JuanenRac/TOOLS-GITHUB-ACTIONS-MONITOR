@@ -21,6 +21,7 @@
 | `score` | the score of the account: number, letter, trend, parts, coverage and the breakdown by repository; `--compare` sets it against the history of the window | no |
 | `team` | the health of the repositories ranked with the ones that need a person first; `--severity warn\|bad` keeps the worse ones and `--repo owner/name` gives the detail of one | no |
 | `live` | the state of the webhook receiver and the last events | no |
+| `ai` | `ai models [--refresh]` lists the models of the AI provider with the data of each one; `ai test --provider NAME --model NAME` tries one with a synthetic text (latency, tokens, estimated cost); `ai doctor` says why an AI does not answer, without printing a key | no |
 
 Options of every command: `--json` (the answer as one JSON document: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (port 8766), `--timeout SECONDS` (1 to 60), `--lang CODE`. In the network mode put the access token in the environment variable `MONITOR_ACCESS_TOKEN`, the one the monitor itself reads (`MONITOR_TOKEN` is accepted as an alias; `--token TOKEN` is the last resort, because a flag shows in the list of processes). The order is: `MONITOR_ACCESS_TOKEN`, then `MONITOR_TOKEN`, then `--token`. It travels in the header `X-Monitor-Access`, never in the address and never on screen. A `--url` with plain `http` to another computer prints a warning on stderr (the token and the answers would travel unencrypted): use `https` outside a network you control.
 

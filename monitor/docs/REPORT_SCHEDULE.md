@@ -21,7 +21,7 @@ Settings, Sentinel tab, block **Scheduled reports**:
 | `report_schedule.keep` | 12 | how many runs are kept; the older ones are removed |
 | `report_schedule.top` | 10 | how many repositories and alerts each list shows, the worst first |
 
-The first report waits for the first scheduled minute after you switch it on. A report is written once for each scheduled minute, even if the monitor was off for days (then it writes one, not a pile). A report that fails is noted in the health of the monitor and the next scheduled minute tries again.
+The first report waits for the first scheduled minute after you switch it on. A report is written once for each scheduled minute, even if the monitor was off for days (then it writes one, not a pile). A report that fails is noted in the health of the monitor and the next scheduled minute tries again. A schedule that names a day of the month is still owed after a stop of up to a month (one that names a month, up to a year), and the hour that happens twice when the clock goes back in autumn is not reported twice. A report is all its formats or nothing: if the second format cannot be written, the first file is removed.
 
 ## What is in a report
 

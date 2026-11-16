@@ -239,7 +239,7 @@ class TheSettingsAClientOfTheNetworkCannotChangeAreNotReadByItEither(NetworkCase
 
 
 #: every route that answers 403 "local_only" to a client of the network (the keys, the actions on GitHub, the tests of channels, the state of the pool and of the App)
-LOCAL_ONLY_POST = ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test", "/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan",
+LOCAL_ONLY_POST = ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/ai/models/refresh", "/api/ai/models/test", "/api/ai/models/data", "/api/ai/doctor", "/api/notify/test", "/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan",
                    "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures", "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run", "/api/credential")
 LOCAL_ONLY_GET = ("/api/quota-pool/status", "/api/github-app/status")
 

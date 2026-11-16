@@ -90,7 +90,9 @@ class TheFileItself(unittest.TestCase):
                 value = row[edition]
                 if isinstance(value, dict):
                     self.assertTrue(value, row["path"])
-                    self.assertLessEqual(set(value.values()), names, row["path"])
+                    for key, kind in value.items():
+                        for inner in (kind.values() if isinstance(kind, dict) else [kind]):
+                            self.assertIn(inner, names, (row["path"], key))
                 else:
                     self.assertTrue(value == 404 or (edition == "lite" and value == "same"), (row["path"], value))
             self.assertIsInstance(row["complete"], dict, "a complete edition answers every endpoint of the contract")

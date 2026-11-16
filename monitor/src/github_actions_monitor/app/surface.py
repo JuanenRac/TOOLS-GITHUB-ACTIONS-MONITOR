@@ -312,6 +312,17 @@ def scan_clone(path):
             "codeql_yml": codeql, "manifest": manifest, "changelog_top": top}
 
 
+def scan_remote(texts, source="api"):
+    """The scan of a repository from the TEXT of its workflow files (read through the API or from a sparse clone), in the shape of `scan_clone`. What only a full clone can say (stacks, dependabot.yml,
+    manifest, CHANGELOG) is left empty and named in `not_evaluable`, so no check guesses: the stacks list is empty, which the checks that need a stack skip."""
+    workflows, codeql = [], False
+    for name in sorted(texts)[:60]:
+        text = str(texts[name])[:262144]
+        codeql = codeql or "github/codeql-action" in text
+        workflows.append(scan_workflow(text, name))
+    return {"workflows": workflows, "stacks": [], "dependabot_yml": False, "codeql_yml": codeql, "manifest": None, "changelog_top": None, "source": source,
+            "not_evaluable": ["stacks", "dependabot_yml", "manifest", "changelog"]}
+
 RENOVATE_FILES = ("renovate.json", "renovate.json5", ".renovaterc", ".renovaterc.json", ".renovaterc.json5")      # where Renovate reads its configuration (root or .github)
 
 # ---------- pure rules (tested without network) ----------
@@ -839,6 +850,7 @@ class Collector:
     def __init__(self, gh, root, cfg, clock=time.time):
         self.gh, self.root, self.cfg, self.clock = gh, Path(root), cfg, clock
         self.raw, self.glob, self.scans = {}, {"jobs": {}, "attestation": {}}, {}
+        self.remote_scans = {}      # repo -> scan_remote(...) of a repository without a clone (see integrations/remote_workflows.py)
         self.scan_at, self.graphql_at, self.packages_at = 0.0, 0.0, 0.0
         self.lock = threading.RLock()
         self.errors = {}
@@ -876,9 +888,21 @@ class Collector:
             if scan:
                 fresh[repo] = scan
         with self.lock:
-            self.scans = fresh
+            self.scans = {**self.remote_scans, **fresh}      # a clone wins over a reading through the API
             self.scan_at = self.clock()
         return True
+
+    def set_remote(self, repo, scan):
+        """Keeps the scan of a repository read without a clone (None forgets it); it feeds A10 and the resolution of A2 until a clone of the repository appears."""
+        with self.lock:
+            if scan is None:
+                self.remote_scans.pop(repo, None)
+                if (self.scans.get(repo) or {}).get("source") in ("api", "sparse"):
+                    self.scans.pop(repo, None)
+                return
+            self.remote_scans[repo] = scan
+            if repo not in self.scans or (self.scans[repo] or {}).get("source") in ("api", "sparse"):
+                self.scans[repo] = scan
 
     # -- cold REST per repository
     def due(self, repos):

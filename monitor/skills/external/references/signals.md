@@ -28,7 +28,7 @@ the repository, a link, how old it is and the next step. `GET /api/sentinel/pane
 | `sentinel.a10` | the panel `a10` of the Sentinel: A10 · Actions and releases surface |
 | `sentinel.a11` | the panel `a11` of the Sentinel: A11 · Release readiness, ecosystem health and pins |
 | `sentinel.a12` | the panel `a12` of the Sentinel: A12 · Analytics: durations, queue time, steps and flaky workflows |
-| `sentinel.a13` | the panel `a13` of the Sentinel: A13 · Workflow linter (local clones) |
+| `sentinel.a13` | the panel `a13` of the Sentinel: A13 · Workflow linter |
 | `sentinel.a2` | the panel `a2` of the Sentinel: A2 · Red CI (last run of each workflow on main) |
 | `sentinel.a3` | the panel `a3` of the Sentinel: A3 · Security alerts |
 | `sentinel.a4` | the panel `a4` of the Sentinel: A4 · Dependabot pull requests |
@@ -55,5 +55,5 @@ the repository, a link, how old it is and the next step. `GET /api/sentinel/pane
 | `a10` | A10 · Actions and releases surface |
 | `a11` | A11 · Release readiness, ecosystem health and pins |
 | `a12` | A12 · Analytics: durations, queue time, steps and flaky workflows |
-| `a13` | A13 · Workflow linter (local clones) |
+| `a13` | A13 · Workflow linter |
 | `collab` | Issues and pull requests |

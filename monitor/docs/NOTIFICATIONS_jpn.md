@@ -26,7 +26,7 @@
 ## アダプターの取り決め
 
 - 一覧にないサービスへは、このコンピューター上に小さな受信プログラムを動かし、`http_local` をそこへ向けます。`Content-Type: application/json` の POST で次の本文を受け取ります:`{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`。
-- `kind` は `red_new`、`red_fixed`、`stuck_new`、`pending_sign`、`release_due`、`rate_low`、`offline`、`online`、`alerts_up`、`workflow_failed`、`ai_alert`、`collab_new`、`collab_fixed`、`credential_blind`、`credential_back`, `score_dropped`, `security_new`, `security_fixed` のいずれか。フィールドは追加のみです。2xx で応答してください。それ以外は失敗として数えます。
+- `kind` は `red_new`、`red_fixed`、`stuck_new`、`pending_sign`、`release_due`、`rate_low`、`offline`、`online`、`alerts_up`、`workflow_failed`、`ai_alert`、`collab_new`、`collab_fixed`、`credential_blind`、`credential_back`, `score_dropped`, `security_new`, `security_fixed`、`alerts_digest`、`silence_review` のいずれか。フィールドは追加のみです。2xx で応答してください。それ以外は失敗として数えます。
 - `mqtt` は同じ JSON を `notify.channels.mqtt.topic` の QoS 0 メッセージのペイロードとして発行します。
 
 ## Apprise（任意、初期状態はオフ）
@@ -50,3 +50,12 @@ TeamsのWebhookアドレスとntfyのトークンはシステムが暗号化し�
 ### ユーザーごとのパネル
 
 チームモードでは、サインイン中のユーザーのメニュー（上部の名前）に **通知** という項目があります。パネルは `GET/POST /api/auth/me/notify` と同じ設定を表示・保存します：通知を受け取るか、チャンネル（トピックと任意のトークンを持つ ntfy、チャンネルの Web アドレスを持つ Teams、アドレスを持つメール）、センチネル（CI、コラボレーション）、最低レベル、システムのイベント（管理者のみ）、各アラートをすぐに受け取るか1時間ごと・1日ごとのまとめで受け取るか。保存済みの秘密情報は「保存済み」と表示され、ページに戻されることはありません。新しく入力したときだけ送信され、空欄なら維持されます。**テストを送信** は自分のチャンネルにメッセージを送り、**アラートを確認した** は保留中のものを確認済みにします。管理者が `notify.users.enabled` を有効にしていない場合はパネルがそう表示します。設定は保存できますが、まだ何も送信されません。
+
+## 通知が多いとき、または同じ通知が繰り返されるとき
+
+ブロック `alerts` の4つの任意設定（既定はすべてオフまたは空）が、上のチャンネルに届く内容を決めます。一覧、「アラート」タブ、イベントフィードは引き続きすべてを表示します。
+
+- **恒久サイレンス**（`alerts.silences`）：1行に1件、`リポジトリ:ワークフロー:ブランチ;理由;見直し日`。リポジトリ以外は省略でき、`*` は任意の文字列に一致します。一致した通知はサイレンス扱いで表示され、誰にも通知されず、見直し日に一度リマインダーが出ます。削除するまでサイレンスは有効です。
+- **サービスと短い cron**（`alerts.service`）：スケジュールまたは手動でのみ実行され時々失敗するワークフローは、`failures` 回連続で失敗したとき、または直近の実行の `rate_percent` が失敗したときだけ通知されます。繰り返さず、通知は一度、解消も一度です。`workflows` でこのクラスに追加できます。
+- **コミットでまとめる**（`alerts.group`）：1つのリポジトリの `min` 件以上のワークフローが同じコミットで赤になると、1件の通知にまとめて列挙します。
+- **多いときの要約**（`alerts.digest`）：直近1時間に `threshold` 件の通知が出た後は、残りを保留し `minutes` 分ごとに1件の要約として通知します。保留されたイベントはイベントフィードに残ります。

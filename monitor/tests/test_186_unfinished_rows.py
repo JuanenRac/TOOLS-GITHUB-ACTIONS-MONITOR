@@ -56,9 +56,9 @@ class RowsWithoutADuration(unittest.TestCase):
             self.assertTrue(report_history.AutoSaver().maybe(Path(tmp), snap, 30))
 
     def test_the_page_stuck_test_survives_a_run_without_duration(self):
-        source = (Path(__file__).resolve().parents[1] / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
-        self.assertIn('run["stuck"] = (run.get("seconds") or 0) >', source)
-        self.assertNotIn('run["stuck"] = run["seconds"] >', source)
+        source = (Path(__file__).resolve().parents[1] / "src" / "github_actions_monitor" / "data_pipeline" / "stuckrule.py").read_text(encoding="utf-8")
+        self.assertIn('(run.get("seconds") or 0) > limit * 60', source)
+        self.assertNotIn('run["seconds"] >', source)
 
 
 if __name__ == "__main__":
