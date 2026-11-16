@@ -29,6 +29,7 @@ import time
 from pathlib import Path
 
 from github_actions_monitor import i18n
+from github_actions_monitor.data_pipeline import alertflow
 from github_actions_monitor.app import surface
 from github_actions_monitor.app import toolconfig
 from github_actions_monitor.security import private_io
@@ -279,6 +280,15 @@ _f(_T_SENT, "security", "sentinels.security.signals.branch.enabled", "bool")
 _f(_T_SENT, "security", "sentinels.security.signals.workflow.enabled", "bool")
 _f(_T_SENT, "security", "sentinels.security.signals.codeowners.enabled", "bool")
 _f(_T_SENT, "collab", "alerts.mute_hours", "int", (1, 720), restart=False, unit="h")
+_f(_T_SENT, "flow_silences", "alerts.silences", "names", restart=False)
+_f(_T_SENT, "flow_service", "alerts.service.enabled", "bool", restart=False)
+_f(_T_SENT, "flow_service", "alerts.service.failures", "int", (2, 50), restart=False)
+_f(_T_SENT, "flow_service", "alerts.service.rate_percent", "int", (0, 100), restart=False, unit="%")
+_f(_T_SENT, "flow_service", "alerts.service.workflows", "names", restart=False)
+_f(_T_SENT, "flow_group", "alerts.group.by_commit", "bool", restart=False)
+_f(_T_SENT, "flow_group", "alerts.group.min", "int", (2, 50), restart=False)
+_f(_T_SENT, "flow_digest", "alerts.digest.minutes", "int", (0, 1440), restart=False, unit="min")
+_f(_T_SENT, "flow_digest", "alerts.digest.threshold", "int", (3, 500), restart=False)
 # --- Actions and releases surface (A10)
 _f(_T_SURF, "main", "sentinel.surface.enabled", "bool")
 _f(_T_SURF, "main", "sentinel.surface.refresh_seconds", "int", (600, 604800))
@@ -622,7 +632,7 @@ def check_value(path, value):
             return False, "path"
         return True, text
     if kind == "names":
-        pattern = LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path == "sentinel.hygiene.ruleset_names" else (PAIR_RE if path in PAIR_KEYS else NAME_RE))))
+        pattern = LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path == "sentinel.hygiene.ruleset_names" else (alertflow.SILENCE_RE if path == "alerts.silences" else (alertflow.PATTERN_RE if path == "alerts.service.workflows" else (PAIR_RE if path in PAIR_KEYS else NAME_RE))))))
         if not isinstance(value, list) or len(value) > 200 or not all(isinstance(v, str) and pattern.match(v) for v in value):
             return False, "names"
         if path == "sentinel.hygiene.ruleset_names" and not value:

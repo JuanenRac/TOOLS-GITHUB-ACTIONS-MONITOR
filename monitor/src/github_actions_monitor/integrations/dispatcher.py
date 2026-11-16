@@ -29,7 +29,7 @@ RANK = {"ok": 0, "info": 1, "warn": 2, "bad": 3, "critical": 3}
 DIGESTS = ("off", "hourly", "daily")
 DIGEST_SECONDS = {"hourly": 3600, "daily": 86400}
 SENTINELS = ("ci", "collab", "security")
-FAMILIES = {"ci": ("red_new", "red_fixed", "stuck_new", "workflow_failed", "alerts_up", "ai_alert", "collab_new", "collab_fixed", "security_new", "security_fixed"),
+FAMILIES = {"ci": ("red_new", "red_fixed", "stuck_new", "workflow_failed", "alerts_up", "ai_alert", "collab_new", "collab_fixed", "security_new", "security_fixed", "alerts_digest", "silence_review"),
             "release": ("pending_sign", "release_due"),
             "system": ("offline", "online", "rate_low", "credential_blind", "credential_back", "quota_warn", "quota_over", "quota_alert")}
 ROLE_FAMILIES = {"viewer": ("ci",), "maintainer": ("ci", "release"), "admin": ("ci", "release", "system")}

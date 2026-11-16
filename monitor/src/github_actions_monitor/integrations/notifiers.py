@@ -33,7 +33,7 @@ from github_actions_monitor.security import netguard, private_io
 from github_actions_monitor.util import tzdisplay
 
 CHANNELS = ("telegram", "discord", "slack", "matrix", "mqtt", "http_local", "apprise")
-KNOWN_EVENTS = ("red_new", "red_fixed", "stuck_new", "pending_sign", "release_due", "rate_low", "offline", "online", "alerts_up", "workflow_failed", "ai_alert", "collab_new", "collab_fixed", "credential_blind", "credential_back", "score_dropped", "security_new", "security_fixed")
+KNOWN_EVENTS = ("red_new", "red_fixed", "stuck_new", "pending_sign", "release_due", "rate_low", "offline", "online", "alerts_up", "workflow_failed", "ai_alert", "collab_new", "collab_fixed", "credential_blind", "credential_back", "score_dropped", "security_new", "security_fixed", "alerts_digest", "silence_review")
 DEFAULT_EVENTS = ["red_new", "stuck_new", "pending_sign", "offline", "credential_blind"]
 LOOPBACK = ("127.0.0.1", "localhost", "::1", "[::1]")
 ENV_RE = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}\Z")
@@ -282,7 +282,7 @@ def notify(config, event, opener=None, connect=None, now=None):
     from github_actions_monitor.integrations import dispatcher      # the users of the team mode who asked for this event (OFF by default, its own switch)
     dispatcher.dispatch(config, event)
     cfg = settings(config)
-    if not cfg["enabled"] or (event.get("kind") not in cfg["events"] and event.get("kind") != "score_dropped") or event.get("owner", "main") != "main":      # score_dropped is only emitted when score.alert.notify_external is on, so it needs no entry in notify.events
+    if not cfg["enabled"] or (event.get("kind") not in cfg["events"] and event.get("kind") != "score_dropped" and not (event.get("kind") == "alerts_digest" and "red_new" in cfg["events"])) or event.get("owner", "main") != "main":      # score_dropped is only emitted when score.alert.notify_external is on, so it needs no entry in notify.events
         return []
     live = [(n, c) for n, c in cfg["channels"].items() if c.get("enabled")]
     if not live:

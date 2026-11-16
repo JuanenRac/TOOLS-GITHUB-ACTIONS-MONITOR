@@ -26,7 +26,7 @@ Optional and **off by default**. The events of the feed (a new red, a stuck buil
 ## The adapter contract
 
 - To reach a service that is not in the list, run a small receiver on this computer and point `http_local` at it. It receives a POST with `Content-Type: application/json` and this body: `{"kind": "red_new", "repo": "demo-repo", "text": "...", "url": "https://.../actions/runs/1"}`.
-- `kind` is one of `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `ai_alert`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `score_dropped`, `security_new`, `security_fixed`. Fields are only ever added. Answer any 2xx; anything else is counted as a failure.
+- `kind` is one of `red_new`, `red_fixed`, `stuck_new`, `pending_sign`, `release_due`, `rate_low`, `offline`, `online`, `alerts_up`, `workflow_failed`, `ai_alert`, `collab_new`, `collab_fixed`, `credential_blind`, `credential_back`, `score_dropped`, `security_new`, `security_fixed`, `alerts_digest`, `silence_review`. Fields are only ever added. Answer any 2xx; anything else is counted as a failure.
 - `mqtt` publishes the same JSON as the payload of a QoS 0 message on `notify.channels.mqtt.topic`.
 
 ## Apprise (optional, off by default)
@@ -50,3 +50,12 @@ The address of the Teams webhook and the token of ntfy are kept encrypted by the
 ### The panel of each user
 
 In the team mode, the menu of the signed-in user (the name at the top) has the entry **Notifications**. The panel shows and saves the same preferences as `GET/POST /api/auth/me/notify`: whether you want notifications, the channels (ntfy with its topic and an optional token, Teams with the web address of the channel, e-mail with an address), the sentinels (CI, collaboration), the lowest level, the events of the system (only for an administrator) and whether each alert comes at once or in an hourly or daily digest. A secret that is already stored is shown as stored and is never put back in the page; it is sent only when you type a new one, and an empty box keeps it. **Send a test** sends a message to your channels and **I have seen my alerts** marks the pending ones as seen. If the administrator has not turned on `notify.users.enabled`, the panel says so: you can save your choices, nothing is sent yet.
+
+## Many alerts, or the same ones again and again
+
+Four optional settings of the block `alerts` (all off or empty by default) decide what reaches the channels above. The lists, the Alerts tab and the events feed keep showing everything.
+
+- **Permanent silences** (`alerts.silences`): one entry per line, `repository:workflow:branch;reason;review date`. Every part but the repository is optional and `*` matches any text. The matching alerts are shown as silenced, nobody is notified, and on the review date one reminder is announced; the silence keeps working until you remove it.
+- **Services and short crons** (`alerts.service`): a workflow that only runs on a schedule or by hand and fails now and then is announced only after `failures` failures in a row, or when `rate_percent` of its last runs failed; it is announced once and cleared once instead of alerting in a loop. `workflows` adds more workflows to this class.
+- **Group by commit** (`alerts.group`): when `min` or more workflows of one repository turn red on the same commit, one notification lists them.
+- **Summary when there are many** (`alerts.digest`): after `threshold` notifications in the last hour, the rest are held back and told as one summary every `minutes` minutes. The held events stay in the events feed.
