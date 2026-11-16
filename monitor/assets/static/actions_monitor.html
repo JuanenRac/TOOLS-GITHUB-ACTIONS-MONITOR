@@ -495,7 +495,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <section class="wide"><h2 data-i18n="ui.c_timeline"></h2><div class="body" id="timeline"></div></section>
 </div>
 <div class="tab" id="t-repos" role="tabpanel" aria-labelledby="n-repos">
-<section><h2 data-i18n="ui.r_title"></h2><div class="body"><div class="tbl-tools" id="repos-tools"></div><table><thead><tr id="repos-head"></tr></thead><tbody id="repo-rows"></tbody></table></div></section>
+<section><h2 data-i18n="ui.r_title"></h2><div class="body"><div class="tbl-tools" id="repos-tools"></div><p class="mut" id="sampling-note" role="status" hidden></p><table><thead><tr id="repos-head"></tr></thead><tbody id="repo-rows"></tbody></table></div></section>
 </div>
 <div class="tab" id="t-team" role="tabpanel" aria-labelledby="n-team">
 <section><h2 data-i18n="ui.team_title"></h2><div class="body"><div class="tbl-tools" id="team-tools"></div><div class="mut" id="team-sum"></div><table><thead><tr id="team-head"></tr></thead><tbody id="team-rows"></tbody></table><div id="team-extra"></div></div></section>
@@ -1065,15 +1065,18 @@ const REPO_TABLE=Table("repos",[
   {id:"branch",label:"ui.th_defbranch",sort:r=>r.meta.branch,cell:r=>r.meta.branch?esc(r.meta.branch):dash_},
   {id:"visibility",label:"ui.th_visibility",sort:r=>r.meta.private?1:0,cell:r=>esc(T(r.meta.private?"ui.vis_private":"ui.vis_public"))},
   {id:"pushed",label:"ui.th_pushed",sort:r=>age_(r.meta.pushed),cell:r=>r.meta.pushed?ago(r.meta.pushed):dash_},
-  {id:"prs",label:"ui.th_prs",sort:r=>r.meta.prs,cell:r=>r.meta.prs!=null?r.meta.prs:dash_}
+  {id:"prs",label:"ui.th_prs",sort:r=>r.meta.prs,cell:r=>r.meta.prs!=null?r.meta.prs:dash_},
+  {id:"coverage",label:"ui.th_coverage",sort:r=>(r.meta.coverage&&r.meta.coverage.window_seconds)||0,cell:r=>coverageCell(r.meta.coverage)}
 ],()=>{if(DATA)render(DATA)});
+function coverageCell(c){if(!c)return dash_;let t=c.complete?T("ui.cov_all"):(c.window_seconds==null?dash_:fmtS(c.window_seconds));if(c.low)t="⚠ "+t+" - "+T("ui.cov_low");if(c.at_least)t+=" ("+T("ui.cov_atleast",{n:c.total})+")";return esc(t)}
+function samplingNote(d){const s=d.sampling,el=$("sampling-note");if(!el)return;if(!s){el.hidden=true;return}const parts=[];if(s.low_count)parts.push(T("ui.sampling_low",{n:s.low_count}));if(s.waiting_count)parts.push(T("ui.sampling_waiting",{n:s.waiting_count}));if(s.estimate_per_hour>=3500||s.budget_per_hour)parts.push(T("ui.sampling_estimate",{est:s.estimate_per_hour,n:d.repos.length,used:s.used_last_hour}));el.textContent=parts.join(" ");el.hidden=!parts.length}
 function repos(d,last){
   const issues={};d.issues.forEach(i=>issues[i.repo]=(issues[i.repo]||0)+1);const meta=d.repo_meta||{};
   const rows=d.repos.filter(repo=>repoVisible(repo,d)).map(repo=>{
     const rs=d.runs.filter(r=>r.repo===repo),mine=last.filter(r=>r.repo===repo),done=mine.filter(r=>r.status==="completed");
     return {repo:repo,l:rs[0],lastOk:rs.find(r=>r.conclusion==="success"),act:d.active.filter(r=>r.repo===repo).length,done24:done.length,ok24:done.filter(r=>r.conclusion==="success").length,
       min24:Math.round(mine.reduce((a,r)=>a+r.seconds,0)/60),issues:issues[repo]||0,eco:d.ecosystems[repo]||"other",meta:meta[repo]||{}}});
-  REPO_TABLE.draw($("repos-head"),$("repos-tools"));
+  samplingNote(d);REPO_TABLE.draw($("repos-head"),$("repos-tools"));
   $("repo-rows").innerHTML=REPO_TABLE.sorted(rows).map(r=>`<tr>${REPO_TABLE.cells(r)}</tr>`).join("");
 }
 function filters(d){const sel=$("f-repo"),cur=sel.value;if(sel.options.length<=1){d.repos.forEach(r=>{const o=document.createElement("option");o.textContent=r;sel.appendChild(o)});sel.value=cur}}

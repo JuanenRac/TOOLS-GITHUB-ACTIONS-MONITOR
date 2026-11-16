@@ -9,6 +9,17 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+
+### Aggiunto
+
+- **Copertura onesta dell'elenco di esecuzioni**: la tabella dei repository ha una nuova colonna, *Il campione risale a*, che dice fin dove nel tempo arriva l'elenco di esecuzioni di ciascun repository. Un elenco pieno che risale per meno di `sampling.min_coverage_minutes` (30 per impostazione predefinita; 0 lo disattiva) è segnato come *copertura bassa* invece di sembrare completo, un elenco più corto di quanto richiesto è *completo*, e un totale in cui GitHub smette di contare (2.500 o 40.000) è mostrato come *almeno*. Un avviso sopra la tabella conta i repository con copertura bassa; il blocco `sampling` di `GET /api/data` porta gli stessi numeri.
+- **Seconda occhiata al ramo predefinito** (`sampling.default_branch_probe`, disattivata per impostazione predefinita): quando l'elenco di esecuzioni di un repository è pieno, una richiesta in più chiede i push sul ramo predefinito senza pull request, così le esecuzioni che decidono il rosso su main non vengono spinte fuori da pull request e pianificazioni. Le esecuzioni trovate solo dalla seconda occhiata non fanno mai contare un elenco come pieno.
+- **Budget di richieste all'ora** (`sampling.api_budget_per_hour`, 0 = nessuno): oltre, si leggono per primi i repository con un workflow rosso e gli altri attendono l'ora successiva, e la pagina dice quanti attendono. La pagina mostra anche le richieste all'ora che richiedono il numero di repository e gli intervalli (da 3.500 in poi, o quando c'è un budget), per avvisare un account grande prima che esaurisca la quota.
+
+### Modificato
+
+- **A2 risolve molti workflow con una sola richiesta**: a un repository con almeno `sentinel.a2_resolve_batch_min` workflow da cercare (2 per impostazione predefinita; 0 = uno alla volta) si chiedono una sola volta le esecuzioni completate più recenti del ramo predefinito, senza pull request, e tutti i workflow che vi compaiono si risolvono insieme (al massimo `sentinel.a2_resolve_batch_pages` pagine da 100); ciò che l'elenco non mostra si chiede uno alla volta come prima, così un repository con 100 o più workflow converge in pochi cicli invece di quattro workflow per ciclo.
+
 ## [2.0.2]
 
 ### Sicurezza

@@ -11,6 +11,17 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+
+### Added
+
+- **Honest coverage of the list of runs**: the Repositories table has a new column, *Sample reaches back*, that says how far back in time the list of runs of each repository goes. A full list that reaches back less than `sampling.min_coverage_minutes` (30 by default; 0 turns it off) is marked *low coverage* instead of looking complete, a list shorter than what was asked for is *complete*, and a total that GitHub stops counting (2,500 or 40,000) is shown as *at least*. A notice above the table counts the repositories with low coverage; the block `sampling` of `GET /api/data` carries the same numbers.
+- **Second look at the default branch** (`sampling.default_branch_probe`, off by default): when the list of runs of a repository is full, one more request asks for the pushes to its default branch with pull requests left out, so the runs that decide red on main are not pushed out by pull requests and schedules. The runs that only the second look found never make a list count as full.
+- **Budget of requests per hour** (`sampling.api_budget_per_hour`, 0 = none): past it the repositories with a red workflow are read first and the rest wait for the next hour, and the page says how many wait. The page also shows the requests per hour that the number of repositories and the intervals ask for (from 3,500 on, or whenever a budget is set), so a large account is warned before it runs out of allowance.
+
+### Changed
+
+- **A2 settles many workflows with one request**: a repository with at least `sentinel.a2_resolve_batch_min` workflows to look up (2 by default; 0 = one by one) is asked once for its newest completed runs of the default branch, pull requests left out, and every workflow found in them is settled together (`sentinel.a2_resolve_batch_pages` pages of 100 at most); what the list does not show is asked one by one as before, so a repository with 100 or more workflows converges in a few cycles instead of four workflows per cycle.
+
 ## [2.0.2]
 
 ### Security
