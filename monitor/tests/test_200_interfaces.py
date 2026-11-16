@@ -35,7 +35,7 @@ STORAGE_METHODS = {
     'list_records': ['kind'],
     'load_analytics': ['account_id'],
     'load_config': ['account_id'],
-    'load_doc': ['account_id', 'name', 'default'],
+    'load_doc': ['account_id', 'name', 'default', 'strict'],
     'load_events': ['account_id', 'since', 'limit'],
     'load_score_snapshots': ['account_id', 'since', 'limit'],
     'load_sentinel_state': ['account_id', 'sentinel'],

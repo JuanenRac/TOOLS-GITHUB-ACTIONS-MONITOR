@@ -2059,7 +2059,24 @@ class Handler(BaseHTTPRequestHandler):
         except CLIENT_GONE:
             DISCONNECTS[0] += 1
 
+    def send_response(self, code, message=None):
+        self.reply_status = code      # the status of the answer, for the log of actions (audit_post)
+        super().send_response(code, message)
+
+    def audit_post(self, path):
+        """One line in the log of actions for a POST that does something (the table of security/audited_posts.py): who, which action, the target the handler noted, the status and the result. The body never goes in."""
+        from github_actions_monitor.security import audit_log, audited_posts
+        target, details = audit_log.take_note()
+        action = audited_posts.action_for(path)
+        if not action:
+            return
+        status = getattr(self, "reply_status", 0)
+        ok = getattr(self, "reply_ok", None)
+        result = "ok" if 200 <= status < 300 and ok is not False else ("denied" if status in (401, 403) else "error")
+        audit_action(self, action, target or path, {"status": status, **(details or {})}, result)
+
     def json_reply(self, payload, code=200):
+        self.reply_ok = payload.get("ok") if isinstance(payload, dict) else None
         body = json.dumps(payload).encode("utf-8")
         self.send_response(code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
@@ -2300,11 +2317,15 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         counted = CountedReader(self.rfile)
         self.rfile = counted
+        self.reply_status, self.reply_ok = 0, None
         try:
             if not self.access_gate() or not auth_http.gate(self, LIVE_CONFIG or DEFAULTS, LITE["on"]):
                 return
+            from github_actions_monitor.security import audit_log
+            audit_log.take_note()
             with i18n.use_language(self.request_language()):
                 self.handle_post()
+            self.audit_post(self.path.split("?")[0])
         finally:
             self.drain_body(counted)
 
@@ -2365,6 +2386,8 @@ class Handler(BaseHTTPRequestHandler):
                 remaining, limit = mode_remaining()
                 config = LIVE_CONFIG or DEFAULTS
                 minutes = request.get("minutes", modes.settings(config)["default_minutes"])
+                from github_actions_monitor.security import audit_log
+                audit_log.note(str(request.get("mode"))[:30])
                 ok, why = MODE.set(request.get("mode"), minutes, config, limit, remaining)
                 if ok:
                     RUN_CACHE_RESET()
@@ -2408,6 +2431,8 @@ class Handler(BaseHTTPRequestHandler):
                 target = toolconfig._data_path("MONITOR_ECOSYSTEMS_FILE", "ecosystems_file", toolconfig.DEFAULT_ECOSYSTEMS_FILE)
                 if target.stem.endswith(".example"):
                     target = paths.place(target.name.replace(".example", ""))   # the neutral template travels in assets/examples; the file of the person goes in config/
+                from github_actions_monitor.security import audit_log
+                audit_log.note(str(chosen[0]["key"])[:60])
                 result = discovery.add_group(target, chosen[0]["key"], chosen[0]["prefix"], example=paths.EXAMPLES / "ecosystems.example.json")
                 if result["ok"]:
                     toolconfig.forget()
@@ -3283,11 +3308,11 @@ def advanced_get(path, query):
     return otlp.status(config)
 
 
-def _audit_plain(action, who, target, details=None):
+def _audit_plain(action, who, target, details=None, result="ok"):
     """The same as audit_action for the places that know the name of the person and not the request."""
     try:
         from github_actions_monitor.security import audit_log
-        audit_log.record(toolconfig.raw_config(), action, who or "", "", CHILD["account"] or "", target, "ok", details)
+        audit_log.record(toolconfig.raw_config(), action, who or "", "", CHILD["account"] or "", target, result, details)
     except Exception as error:   # noqa: BLE001
         degraded.note("audit_log", error)
 
@@ -3299,8 +3324,9 @@ def handle_advanced_post(path, request, who=""):
         from github_actions_monitor.sentinels import alert_center
         scope, value = str(request.get("scope") or ""), str(request.get("value") or "")
         if path.endswith("unmute"):
-            _audit_plain("alert_unmute", who, f"{scope}:{value}"[:120])
-            return {"ok": alert_center.unmute(scope, value)}
+            done = alert_center.unmute(scope, value)
+            _audit_plain("alert_unmute", who, f"{scope}:{value}"[:120], None, "ok" if done else "error")
+            return {"ok": done}
         until_change = None
         if request.get("until_change") is True and scope == "alert":      # "until the item changes": remember the updated_at the alert carries now
             for alert in alert_center.collect(SENTINEL["registry"]):
@@ -3308,7 +3334,7 @@ def handle_advanced_post(path, request, who=""):
                     until_change = (alert.get("details") or {}).get("updated") if isinstance(alert.get("details"), dict) else None
                     break
         entry = alert_center.mute(scope, value, request.get("hours"), config, who=who, until_change=until_change)
-        _audit_plain("alert_mute", who, f"{scope}:{value}"[:120], {"hours": request.get("hours")})
+        _audit_plain("alert_mute", who, f"{scope}:{value}"[:120], {"hours": request.get("hours")}, "ok" if entry is not None else "error")
         return {"ok": entry is not None, "mute": entry}
     if path == "/api/report-files/run":      # write a report now (admin, from this computer); Complete only
         if LITE["on"]:
@@ -3341,11 +3367,15 @@ def handle_advanced_post(path, request, who=""):
         cfg = secretstore.settings(config)
         store = secretstore.Store(cfg["store"])
         if request.get("action") == "delete":
+            from github_actions_monitor.security import audit_log
+            audit_log.note("delete")
             ok = store.delete()
             secretstore.clear_environment()
             return {"ok": ok, **advanced_state(config)["token"]}
         if not cfg["enabled"]:
             return {"ok": False, "status": "off"}
+        from github_actions_monitor.security import audit_log
+        audit_log.note("save")
         done, why = store.save(request.get("token"))
         if done:
             secretstore.apply_to_environment(config, store)

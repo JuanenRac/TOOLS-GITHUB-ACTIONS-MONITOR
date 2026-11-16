@@ -88,11 +88,19 @@ def run(config, account, snapshot, alerts, team, now=None, base=None, lang=None)
     stamp = time.strftime("%Y%m%d-%H%M%S", time.gmtime(now))
     wanted = ("html", "markdown") if cfg["formats"] == "both" else (cfg["formats"],)
     files = []
-    for kind in wanted:
-        text = render.page(doc, language) if kind == "html" else render.markdown(doc, language)
-        name = f"report_{key}_{stamp}.{EXT[kind]}"
-        private_io.write_private(directory / name, text)
-        files.append(name)
+    try:
+        for kind in wanted:
+            text = render.page(doc, language) if kind == "html" else render.markdown(doc, language)
+            name = f"report_{key}_{stamp}.{EXT[kind]}"
+            private_io.write_private(directory / name, text)
+            files.append(name)
+    except BaseException:      # a report is all its formats or nothing: the file already written would be listed as a report that has no pair
+        for name in files:
+            try:
+                (directory / name).unlink()
+            except OSError as error:
+                degraded.note("reports.cleanup", error)
+        raise
     _update_entry(directory, key, memory=builder.memory(doc, alerts), last_run=now, last_files=files)
     prune(directory, key, cfg["keep"])
     return {"files": files, "at": doc["generated_at"]}

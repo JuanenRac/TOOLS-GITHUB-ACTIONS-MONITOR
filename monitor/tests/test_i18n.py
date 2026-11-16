@@ -400,6 +400,29 @@ class AuthorshipAndRelease(unittest.TestCase):
         names.discard("github_actions_monitor/src/github_actions_monitor/sentinels/ai_presets.json")
         self.assertEqual(mr.package_data_problems(names), ["github_actions_monitor/src/github_actions_monitor/sentinels/ai_presets.json"])
 
+    def test_the_gate_notices_a_data_file_left_out_of_the_zip_without_being_named_in_code(self):
+        """A data file under src/ that no module names in quotes is found by the folder rule alone (the first loop of the check)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp) / "src" / "github_actions_monitor" / "reporting"
+            base.mkdir(parents=True)
+            (base / "template.tmpl").write_text("x", encoding="utf-8")
+            (base / "mod.py").write_text("x = 1", encoding="utf-8")
+            self.assertEqual(mr.package_data_problems(set(), here=Path(tmp)), ["github_actions_monitor/src/github_actions_monitor/reporting/template.tmpl"])
+            self.assertEqual(mr.package_data_problems({"github_actions_monitor/src/github_actions_monitor/reporting/template.tmpl"}, here=Path(tmp)), [])
+
+    def test_the_zip_is_the_versioned_folder(self):
+        names = {"github_actions_monitor/" + p.relative_to(mr.HERE).as_posix() for p in mr.members()}
+        names.add("github_actions_monitor/" + mr.EXAMPLES_DIR + "/" + mr.EXAMPLE)
+        tracked = mr.tracked_files()
+        if tracked is None:
+            self.skipTest("not a git checkout")
+        self.assertEqual(mr.tracked_problems(names, tracked), [])
+
+    def test_the_gate_notices_a_versioned_file_that_does_not_travel_and_a_stray_one(self):
+        tracked = {"assets/static/app.css", "LICENSE", "src/x.py"}
+        names = {"github_actions_monitor/LICENSE", "github_actions_monitor/src/x.py", "github_actions_monitor/notes.txt", "github_actions_monitor/" + mr.EXAMPLES_DIR + "/" + mr.EXAMPLE}
+        self.assertEqual(mr.tracked_problems(names, tracked), ["versioned but not in the zip: assets/static/app.css", "in the zip but not versioned: notes.txt"])
+
     def test_the_gate_notices_a_file_without_authorship(self):
         entries = self.entries()
         entries["github_actions_monitor/x.py"] = b"print(1)\n"
