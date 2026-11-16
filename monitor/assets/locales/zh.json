@@ -2971,5 +2971,20 @@
  "ui.cov_atleast": "至少共 {n} 次运行",
  "ui.sampling_low": "{n} 个仓库覆盖不足:其运行列表只回溯几分钟,较早的失败可能看不到。请提高每个仓库的运行数,或开启再看一次。",
  "ui.sampling_estimate": "{n} 个仓库每小时约 {est} 次请求(最近一小时已用 {used} 次);GitHub 的额度为每小时 5,000 次。",
- "ui.sampling_waiting": "请求预算已用完:{n} 个仓库等待下一小时,红色的先读取。"
+ "ui.sampling_waiting": "请求预算已用完:{n} 个仓库等待下一小时,红色的先读取。",
+ "ui.cfg_b_causes": "共同原因与失败的作业",
+ "evt.red_cause": "CI 因共享工作流 {shared} 而变红：{repos} 个仓库中的 {count} 个工作流",
+ "ui.a2_cause": "共同原因",
+ "ui.a2_cause_line": "{shared} 被 {repos} 个仓库中的 {count} 个红色工作流调用",
+ "ui.a2_failed_jobs": "{total} 个作业中 {failed} 个失败",
+ "cfg.f.ci.group.reusable": "按共享工作流合并红色",
+ "cfg.h.ci.group.reusable": "默认关闭。开启后，调用同一个可复用工作流的红色工作流视为同一原因；红色列表会显示一行分组，新红色的通知也只带受影响数量说一次，而不是每个说一次。不会隐藏任何红色行。",
+ "cfg.f.ci.group.min": "判定共同原因所需的工作流数",
+ "cfg.h.ci.group.min": "可复用工作流从这么多个红色工作流起被标为共同原因（默认 2）。",
+ "cfg.f.ci.failed_jobs.enabled": "显示红色运行中哪些作业失败",
+ "cfg.h.ci.failed_jobs.enabled": "默认关闭。开启后，监视器对每个红色运行读取一次其作业（一次调用，每个周期几个运行），红色行会按平台分组说明哪些作业失败，而不只是显示红色。",
+ "cfg.f.ci.failed_jobs.max_per_cycle": "每个周期读取的运行数",
+ "cfg.h.ci.failed_jobs.max_per_cycle": "一个周期内最多读取其作业的红色运行数（每个一次调用，默认 4）。运行不变时保留结果。",
+ "cfg.f.ci.failed_jobs.group_by": "作业分组依据",
+ "cfg.h.ci.failed_jobs.group_by": "auto（默认）：作业名中的系统（ubuntu、windows、macos 等），否则取矩阵的第一个参数，否则取斜杠前的部分。platform、matrix、prefix 可强制使用其中一种。"
 }

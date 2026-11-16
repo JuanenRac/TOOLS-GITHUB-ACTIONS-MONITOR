@@ -204,7 +204,8 @@ def row_of(repo, item):
     last = item["run"]
     where = item["lane"]
     return {"repo": repo, "workflow": (last.get("name") or workflow_key(last)) + lane_label(where), "conclusion": last.get("conclusion"), "since": last.get("started"), "url": last.get("url"), "streak": item["streak"],
-            "sha": last.get("sha", ""), "origin": "merge_queue" if where == "queue" else ("maintenance" if where else "branch"), "branch": last.get("branch"), "kind": item["kind"]}
+            "sha": last.get("sha", ""), "origin": "merge_queue" if where == "queue" else ("maintenance" if where else "branch"), "branch": last.get("branch"), "kind": item["kind"],
+            "run_id": last.get("id"), "reusable": list(last.get("reusable") or [])}
 
 
 def branch_of(repo, runs, default_branches=None, guess=False):
