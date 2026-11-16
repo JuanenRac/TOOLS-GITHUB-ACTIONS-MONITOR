@@ -24,7 +24,7 @@ PATH_RE = re.compile(r"^/screen/(overview|now|sentinels)/?\Z")
 THEMES = ("dark", "light", "contrast")
 DENSITIES = ("compact", "normal", "large")
 NAMES = ("all", "public", "none")
-DEFAULTS = {"enabled": True, "blink": True, "blink_calm_minutes": 30, "rotate_seconds": 0, "default_theme": "dark", "default_density": "normal", "refresh_seconds": 10, "burn_in_protection": True,
+DEFAULTS = {"enabled": False, "blink": True, "blink_calm_minutes": 30, "rotate_seconds": 0, "default_theme": "dark", "default_density": "normal", "refresh_seconds": 10, "burn_in_protection": True,
             "night_dim": False, "night_dim_from_hour": 22, "night_dim_to_hour": 7, "show_repo_names": "public", "sound": False}
 SENTINEL_KEY = re.compile(r"^ui\.a(1[0-2]|[1-9])\Z")
 SENTINELS = tuple("a%d" % n for n in range(1, 13))

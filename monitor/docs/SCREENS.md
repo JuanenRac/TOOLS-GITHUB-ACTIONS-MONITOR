@@ -87,7 +87,7 @@ One address for each monitor. A parameter can make a window quieter or smaller t
 
 | Setting | What it does |
 |---|---|
-| `screens.enabled` | Turns the three pages on. Off: every address answers 404. |
+| `screens.enabled` | Turns the three pages on. Off: every address answers 404. Off by default. |
 | `screens.default_theme` | dark (default), light or contrast. |
 | `screens.default_density` | compact, normal (default) or large. |
 | `screens.refresh_seconds` | Seconds between updates of a window (10 by default). The pages read the monitor, never GitHub, so a short time costs no allowance. |

@@ -3284,7 +3284,7 @@
  "hyg.wf_cut": "l'elenco dei workflow è troncato: visti {seen} su {total}",
  "ui.cfg_b_wall": "Schermi da parete",
  "cfg.f.screens.enabled": "Schermi da parete",
- "cfg.h.screens.enabled": "Attiva gli schermi da parete. Disattivati, /screen/overview, /screen/now e /screen/sentinels rispondono 404. Leggono solo ciò che il monitor ha già; non modificano nulla e non chiamano GitHub.",
+ "cfg.h.screens.enabled": "Attiva gli schermi da parete. Disattivati, /screen/overview, /screen/now e /screen/sentinels rispondono 404. Leggono solo ciò che il monitor ha già; non modificano nulla e non chiamano GitHub. Disattivato per impostazione predefinita.",
  "cfg.f.screens.default_theme": "Tema degli schermi da parete",
  "cfg.h.screens.default_theme": "dark (scuro), light (chiaro) o contrast (bianco su nero, per uno schermo visto da lontano). L'indirizzo può cambiarlo per una finestra: ?theme=light.",
  "cfg.f.screens.default_density": "Densità degli schermi da parete",

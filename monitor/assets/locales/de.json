@@ -3284,7 +3284,7 @@
  "hyg.wf_cut": "die Workflow-Liste ist abgeschnitten: {seen} von {total} gesehen",
  "ui.cfg_b_wall": "Wandanzeigen",
  "cfg.f.screens.enabled": "Wandanzeigen",
- "cfg.h.screens.enabled": "Schaltet die Wandanzeigen ein. Aus: /screen/overview, /screen/now und /screen/sentinels antworten mit 404. Sie lesen nur, was der Monitor schon hat; sie ändern nichts und rufen GitHub nicht auf.",
+ "cfg.h.screens.enabled": "Schaltet die Wandanzeigen ein. Aus: /screen/overview, /screen/now und /screen/sentinels antworten mit 404. Sie lesen nur, was der Monitor schon hat; sie ändern nichts und rufen GitHub nicht auf. Standardmäßig aus.",
  "cfg.f.screens.default_theme": "Design der Wandanzeigen",
  "cfg.h.screens.default_theme": "dark (dunkel), light (hell) oder contrast (weiß auf schwarz, für einen Bildschirm, der aus der Ferne gelesen wird). Die Adresse kann es für ein Fenster ändern: ?theme=light.",
  "cfg.f.screens.default_density": "Dichte der Wandanzeigen",

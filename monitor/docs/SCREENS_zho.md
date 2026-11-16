@@ -87,7 +87,7 @@
 
 | 设置 | 作用 |
 |---|---|
-| `screens.enabled` | 启用三个页面。关闭后所有地址返回 404。 |
+| `screens.enabled` | 启用三个页面。关闭后所有地址返回 404。 默认关闭。 |
 | `screens.default_theme` | dark（默认）、light 或 contrast。 |
 | `screens.default_density` | compact、normal（默认）或 large。 |
 | `screens.refresh_seconds` | 窗口的更新间隔秒数（默认 10）。页面读取的是监视器而不是 GitHub，所以间隔再短也不消耗配额。 |
