@@ -9,6 +9,22 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+## [2.0.0]
+
+### Hinzugefügt
+
+- **Der Vertrag der lesenden API, ab jetzt eingefroren**: `docs/schemas/api_contract.json` listet die 37 lesenden Endpunkte mit den Schlüsseln und Typen ihrer Antworten in jeder Ausgabe (und welche die Lite-Ausgabe mit `404` beantwortet) sowie die Fehlercodes der Tür (`401 access`, `403 forbidden`, `404`). Ein dort aufgeführter Schlüssel behält Namen und Typ für das gesamte 2.x; neue Schlüssel dürfen hinzukommen, nichts wird ohne neue Hauptversion entfernt. Die Suite `test_200_contract.py` prüft ihn gegen einen echten Server jeder Ausgabe sowie die Regeln der Tür: Ein fremder `Host` ist `403`, der Netzwerkmodus verlangt das Token im Header `X-Monitor-Access` und antwortet ohne es mit `401 access`, Wörter einer Abfrage, die niemand liest, werden ignoriert, und jede Antwort ist JSON in UTF-8.
+
+- **Ein Werkzeug, das jeden laufenden Monitor gegen den Vertrag prüft**: `python tools/check_api_contract.py` (`--lite`, `--url`, `--token-file`) liest den Vertrag, fragt den Monitor nur mit `GET`, gibt für jeden fehlenden oder anders getypten Schlüssel eine Zeile aus und endet mit `CONTRACT=PASS` oder `CONTRACT=FAIL` (Exit-Code 0, 1 oder 2, wenn niemand antwortet). Es ist für alle, deren Skripte, Wandbildschirme oder mobile Clients von den Antworten abhängen, nach jedem Upgrade des Monitors oder des Clients. Es ruft GitHub nicht auf.
+
+- **Auch die Schnittstellen von Wächtern und Speichern sind durch einen Test eingefroren**: `test_200_interfaces.py` legt die neun Felder einer `Alert`, die Methoden von `BaseSentinel` und `Storage` mit den Namen ihrer Parameter, die Arten von Datensätzen und fest, dass beide Speicher und die drei Wächter jede Methode umsetzen. Eine Änderung dort ist eine Vertragsänderung.
+
+- **Eine Anleitung für jeden Einsatz, in acht Sprachen**: Vollausgabe für eine Person (`COMPLETE_INDIVIDUAL.md`), als Dienst (`COMPLETE_SERVICE.md`), für ein Team (`COMPLETE_TEAM.md`) und die API für Clients (`API.md`), neben der kurzen Anleitung der Lite-Ausgabe. Sie stehen im Hilfe-Bereich und in der Anleitungsliste des README, und ein Test prüft, dass sie in acht Sprachen existieren, ihre Links auflösbar sind und jede genannte Einstellung und jeder genannte Endpunkt existiert. Ein zweiter Test liest jede Anleitung der Dokumentation in den acht Sprachen und schlägt fehl, wenn eine eine Route nennt, die der Code nicht hat.
+
+### Geändert
+
+- **Version 2.0.0, der Monitor gilt als ausgereift**: Ab jetzt ändern sich die lesenden Endpunkte, `Alert`, `BaseSentinel` und `Storage` nur mit einer neuen Hauptversion (eine Ergänzung, die alte Clients ignorieren können, ist erlaubt und wird hier vermerkt). Die Aussage des Produkts ist im README, in den Anleitungen und in der Hilfe dieselbe: Lite ist die einfache Ausgabe für eine Person an einem Rechner, Complete ist die Kontrollzentrale (mehrere Konten, ein Team, ein Dienst und Clients). Sonst ändert sich am Verhalten des Monitors in dieser Version nichts.
+
 ## [1.9.5]
 
 ### Hinzugefügt

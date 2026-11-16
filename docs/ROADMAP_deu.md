@@ -4,23 +4,23 @@ Was erschienen ist, was als Nächstes kommt und was nur eine Idee ist, in dieser
 
 ## Wo der Monitor jetzt steht
 
-Version 1.9.5. Die Lite-Ausgabe zeigt, was läuft und was fehlgeschlagen ist. Die vollständige Ausgabe fügt drei Wächter (CI, Collab und Security), eine Liste der Warnungen, mehrere Konten und ein Team mit Rollen, die Bewertung jedes Kontos, die Gesundheit jedes Repositorys und des Teams, geplante Berichte, ein Aktionsprotokoll, Benachrichtigungen (ntfy, Teams, E-Mail und Apprise), einen optionalen KI-Assistenten mit Voreinstellungen kompatibler Dienste, den Dienstmodus mit Docker und eine Seite für jede Bildschirmgröße vom Telefon bis 4K hinzu.
+Version 2.0.0. Die Lite-Ausgabe zeigt, was läuft und was fehlgeschlagen ist. Die vollständige Ausgabe fügt drei Wächter (CI, Collab und Security), eine Liste der Warnungen, mehrere Konten und ein Team mit Rollen, die Bewertung jedes Kontos, die Gesundheit jedes Repositorys und des Teams, geplante Berichte, ein Aktionsprotokoll, Benachrichtigungen (ntfy, Teams, E-Mail und Apprise), einen optionalen KI-Assistenten mit Voreinstellungen kompatibler Dienste, den Dienstmodus mit Docker und eine Seite für jede Bildschirmgröße vom Telefon bis 4K hinzu.
 
 ## Geplant, in dieser Reihenfolge
 
 Jede Version enthält nur echten Inhalt: Eine Version ohne echten Inhalt wird übersprungen und nie leer veröffentlicht. Nichts davon gilt als an echten Diensten bewiesen, außer die Anleitung sagt es.
 
-### 1.9.6 bis 1.9.9 - Abschluss der dritten Phase
+### 2.0.1 bis 2.0.9 - Nach dem Einfrieren
 
-Was die Prüfungen von Bewertung, Sicherheitswächter, Gesundheitsansichten, Berichten und Aktionsprotokoll noch finden; die Kosten an GitHub-Aufrufen bei drei laufenden Wächtern; eine Bewertung, die stimmig bleibt, wenn ein Wächter ausgeschaltet ist.
-
-### 2.0.0 - Reife
-
-Eine Hauptversion, die technische Schulden abbaut und die öffentlichen Schnittstellen einfriert: Wächter, Speicher, Alarme, das Ereignisschema und die Lese-API, mit einer Suite von Vertragstests, die Clients gegen jedes Release ausführen können. Eine Anleitung für jede Nutzungsart (Lite, einzeln, Dienst, Team) und eine Referenz für Einstellungen, Ereignisse, Metriken und API. Ab 2.0.1 gibt es ein Polster für das, was erst bei langer echter Nutzung auftaucht.
+Was sich nur im langen echten Einsatz zeigt: die Migration von 1.8 und 1.9, das Wachstum der Ereignisse und der Datenbank über Monate, Sitzungen nach einem Upgrade, Docker-Volumes, viele Konten mit drei Wächtern und dem Teammodus zugleich und alles, was die Vertragssuite findet. Nichts aus der vierten Phase (Plugins, breite Automatisierung, fortgeschrittene KI) kommt in diese Versionen; eine Version ohne echten Inhalt wird übersprungen.
 
 Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
 
-## Erledigt in 1.8.2 bis 1.9.5
+## Erledigt in 1.8.2 bis 2.0.0
+
+### 2.0.0 - Reife
+
+Die lesende API und die öffentlichen Schnittstellen sind eingefroren: eine Vertragsdatei mit den Schlüsseln und Typen jedes lesenden Endpunkts und den Fehlercodes, eine Testsuite und ein Werkzeug, die sie gegen jeden laufenden Monitor prüfen, ein Test, der die Felder einer Meldung und die Methoden eines Wächters und eines Speichers festlegt, und je eine Anleitung für jeden Einsatz (Lite, eine Person, Dienst, Team) und für die Clients der API, in acht Sprachen. Die Versionen 1.9.6 bis 1.9.9 hatten nach den Abschlussprüfungen nichts Echtes mehr hinzuzufügen und wurden übersprungen.
 
 ### 1.9.5 - Strom der Live-Ereignisse
 

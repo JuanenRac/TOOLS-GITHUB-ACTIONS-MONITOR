@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2206_passing-brightgreen.svg" alt="2206 tests">
+  <img src="https://img.shields.io/badge/Tests-2225_passing-brightgreen.svg" alt="2225 tests">
 </p>
 
 > 所有するすべてのリポジトリのワークフローを監視し、赤いもの・止まっているもの・対応待ちのものを、ローカルの1ページで教えます。
@@ -51,6 +51,7 @@
 - **各リポジトリとチームの健全性（Complete のみ）**：CI、3 つのセンチネルのアラート、リリース準備状況、アクティビティを 1 つの状態（不良・警告・OK・未確認）とリスク値にまとめます。チームタブは人の手が必要なリポジトリを先頭に並べ、フィルター、リポジトリごとの詳細、壁掛け画面用のディープリンクを備えます。同じデータは `/api/team/health`、`/api/repos/<owner>/<repo>/health`、`team` コマンドで得られます（`monitor/docs/HEALTH_jpn.md`）。
 - **レポート、操作ログ、Apprise（Complete のみ）**：アカウントのレポート（スコア、変化、人の手が必要なリポジトリ、未解決のアラート）を cron スケジュールまたは依頼に応じて HTML と Markdown で作成します（初期状態はオフ、`monitor/docs/REPORT_SCHEDULE_jpn.md`）。誰が何を変更したかをハッシュの連鎖で記録し、値や秘密は含みません（`monitor/docs/AUDIT_LOG_jpn.md`）。通知用の任意の Apprise チャンネルもあり、初期状態はオフです。
 - **サービスとして**：公式 Docker イメージ（非 root、読み取り専用）、任意のプロキシ付き Compose ファイル、systemd ユニット、詳細なヘルスチェック、最初の管理者を作るコマンド（`monitor/docs/DEPLOYMENT.md`）。
+- **固定された API と用途ごとの案内**：2.0.0 から、すべての読み取りエンドポイントの形とエラーコードが `monitor/docs/schemas/api_contract.json` に固定され、ツールが動作中のモニターをそれに照らして検査します（`monitor/tools/check_api_contract.py`）。簡易版、個人、サービス、チームのそれぞれに短い案内もあります（`monitor/docs/API_jpn.md`）。
 - **複数アカウント、チーム、データの置き場所**：アカウントごとに 1 プロセス、ロールと専用アカウントを持つユーザー、`config/`、`data/`、`logs/`、`ai/` に分けたファイル、保持期間とバックアップ付きの任意の SQLite ストレージ、設定になったポート（`monitor/docs/ACCOUNTS.md`、`monitor/docs/STORAGE.md`、`monitor/docs/LAYOUT.md`）。
 - **並べ替えと折りたたみができる一覧**：「いま起きていること」は 7 通り、アラートタブは 9 通りで並べ替えられ、すべてのリポジトリを折りたたむ／開くボタンがあります。選択はユーザーごとに記憶されます。
 - **ユーザーごとの通知**：チームモードでは、各ユーザーがページのパネルでチャンネル（ntfy、Teams、メール）、最低レベル、まとめ通知を選べます（`monitor/docs/NOTIFICATIONS_jpn.md`）。
@@ -67,7 +68,7 @@
 
 | | |
 |---|---|
-| **バージョン** | **1.9.5** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **バージョン** | **2.0.0** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **必要なもの** | Python 3.11 以上と GitHub CLI（`gh auth login`）。それ以外は不要(ターミナル表示は任意のパッケージ `rich` を使います) |
 | **開く先** | `127.0.0.1` 上のページのみ、8言語対応 |
 | **GitHub への書き込み** | 自動では行いません。明示的な `--go` を付けて実行したバッチコマンドのみ |
@@ -75,12 +76,12 @@
 
 <!-- glance:begin -->
 
-**現時点の実測** (v1.9.5)
+**現時点の実測** (v2.0.0)
 
 | | |
 |---|---|
 | **成熟度** | functional |
-| **テスト** | テストメソッド 2206 件(`python -m unittest discover -s monitor/tests`) |
+| **テスト** | テストメソッド 2225 件(`python -m unittest discover -s monitor/tests`) |
 | **設定** | 設定 415 件、すべてヘルプ付き |
 | **言語** | 8(英語、スペイン語、ドイツ語、フランス語、イタリア語、日本語、中国語、ポルトガル語) |
 | **CI で検証したシステム** | ubuntu, windows、Python 3.11, 3.13 |
@@ -281,6 +282,10 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/CI_RED_BRIDGE_jpn.md`](monitor/docs/CI_RED_BRIDGE_jpn.md): ci_red.json をダッシュボードへ渡す
 - [`monitor/docs/WEBHOOK_jpn.md`](monitor/docs/WEBHOOK_jpn.md): 受信 Webhook
 - [`monitor/docs/LITE_jpn.md`](monitor/docs/LITE_jpn.md): lite 版
+- [`monitor/docs/COMPLETE_INDIVIDUAL_jpn.md`](monitor/docs/COMPLETE_INDIVIDUAL_jpn.md): 一人で使う完全版
+- [`monitor/docs/COMPLETE_SERVICE_jpn.md`](monitor/docs/COMPLETE_SERVICE_jpn.md): サービスとしての完全版
+- [`monitor/docs/COMPLETE_TEAM_jpn.md`](monitor/docs/COMPLETE_TEAM_jpn.md): チームで使う完全版
+- [`monitor/docs/API_jpn.md`](monitor/docs/API_jpn.md): クライアント向け API
 - [`monitor/docs/NOTIFICATIONS_jpn.md`](monitor/docs/NOTIFICATIONS_jpn.md): 通知とアダプターの取り決め
 - [`monitor/docs/AI_jpn.md`](monitor/docs/AI_jpn.md): AI アシスタント:プロバイダー、安全性、アクション
 - [`monitor/docs/ANALYTICS_jpn.md`](monitor/docs/ANALYTICS_jpn.md): 分析、条件付き読み取り、接続の喪失

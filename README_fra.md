@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2206_passing-brightgreen.svg" alt="2206 tests">
+  <img src="https://img.shields.io/badge/Tests-2225_passing-brightgreen.svg" alt="2225 tests">
 </p>
 
 > Surveille les workflows de tous vos dépôts et vous dit, sur une page locale, ce qui est rouge, ce qui est bloqué et ce qui vous attend.
@@ -51,6 +51,7 @@
 - **La santé de chaque dépôt et de l'équipe (Complete seulement)** : CI, alertes des trois sentinelles, préparation des versions et activité en un état (mauvais, avertissement, bon ou non vu) avec un nombre de risque ; l'onglet Équipe classe d'abord les dépôts qui demandent une personne, avec des filtres, un détail pour chacun et des liens directs pour écrans muraux ; les mêmes données sont à `/api/team/health`, `/api/repos/<owner>/<repo>/health` et dans la commande `team` (`monitor/docs/HEALTH_fra.md`).
 - **Rapports, journal des actions et Apprise (Complete seulement)** : un rapport du compte (score, changements, dépôts qui demandent une personne, alertes ouvertes) écrit en HTML et Markdown selon un horaire cron ou à la demande, désactivé par défaut (`monitor/docs/REPORT_SCHEDULE_fra.md`) ; un journal de qui a changé quoi, avec une chaîne de hachages et sans valeur ni secret (`monitor/docs/AUDIT_LOG_fra.md`) ; et un canal Apprise facultatif pour les notifications, désactivé par défaut.
 - **En tant que service** : l'image Docker officielle (sans root, en lecture seule), un fichier Compose avec proxy facultatif, une unité systemd, un contrôle de santé approfondi et la commande qui crée le premier administrateur (`monitor/docs/DEPLOYMENT.md`).
+- **Une API figée et un guide pour chaque usage** : depuis la 2.0.0 la forme de chaque point d'accès en lecture et les codes d'erreur sont fixés dans `monitor/docs/schemas/api_contract.json`, un outil vérifie n'importe quel moniteur en marche contre ce contrat (`monitor/tools/check_api_contract.py`) et un guide court existe pour l'édition lite, pour une personne, pour un service et pour une équipe (`monitor/docs/API_fra.md`).
 - **Plusieurs comptes, une équipe et un endroit pour les données** : un processus par compte, des utilisateurs avec des rôles et leurs propres comptes, les fichiers dans `config/`, `data/`, `logs/` et `ai/`, un stockage SQLite facultatif avec conservation et sauvegarde, et les ports comme réglages (`monitor/docs/ACCOUNTS.md`, `monitor/docs/STORAGE.md`, `monitor/docs/LAYOUT.md`).
 - **Des listes que l'on trie et que l'on plie** : « En cours » de sept façons et l'onglet Alertes de neuf, avec un bouton pour plier ou déplier tous les dépôts ; le choix est retenu pour chaque utilisateur.
 - **Notifications pour chaque utilisateur** : en mode équipe, chaque utilisateur choisit dans un panneau de la page les canaux (ntfy, Teams, e-mail), le niveau minimal et les résumés (`monitor/docs/NOTIFICATIONS_fra.md`).
@@ -67,7 +68,7 @@
 
 | | |
 |---|---|
-| **Version** | **1.9.5** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **2.0.0** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Prérequis** | Python 3.11+ et la CLI GitHub (`gh auth login`) ; rien d'autre (la vue console utilise le paquet optionnel `rich`) |
 | **S'ouvre** | sur une page `127.0.0.1` uniquement, en huit langues |
 | **Écrit sur GitHub** | jamais seul : seulement les commandes par lots que vous lancez avec un `--go` explicite |
@@ -75,12 +76,12 @@
 
 <!-- glance:begin -->
 
-**Mesuré aujourd'hui** (v1.9.5)
+**Mesuré aujourd'hui** (v2.0.0)
 
 | | |
 |---|---|
 | **Maturité** | functional |
-| **Tests** | 2206 méthodes de test (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 2225 méthodes de test (`python -m unittest discover -s monitor/tests`) |
 | **Réglages** | 415 réglages, tous avec aide |
 | **Langues** | 8 (anglais, espagnol, allemand, français, italien, japonais, chinois et portugais) |
 | **Testé dans le CI sur** | ubuntu, windows, Python 3.11, 3.13 |
@@ -281,6 +282,10 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/CI_RED_BRIDGE_fra.md`](monitor/docs/CI_RED_BRIDGE_fra.md): amener ci_red.json vers un tableau de bord
 - [`monitor/docs/WEBHOOK_fra.md`](monitor/docs/WEBHOOK_fra.md): le webhook entrant
 - [`monitor/docs/LITE_fra.md`](monitor/docs/LITE_fra.md): L'édition lite
+- [`monitor/docs/COMPLETE_INDIVIDUAL_fra.md`](monitor/docs/COMPLETE_INDIVIDUAL_fra.md): Édition complète pour une personne
+- [`monitor/docs/COMPLETE_SERVICE_fra.md`](monitor/docs/COMPLETE_SERVICE_fra.md): Édition complète en service
+- [`monitor/docs/COMPLETE_TEAM_fra.md`](monitor/docs/COMPLETE_TEAM_fra.md): Édition complète pour une équipe
+- [`monitor/docs/API_fra.md`](monitor/docs/API_fra.md): L'API pour les clients
 - [`monitor/docs/NOTIFICATIONS_fra.md`](monitor/docs/NOTIFICATIONS_fra.md): notifications et contrat des adaptateurs
 - [`monitor/docs/AI_fra.md`](monitor/docs/AI_fra.md): l'assistant IA : fournisseurs, sécurité et actions
 - [`monitor/docs/ANALYTICS_fra.md`](monitor/docs/ANALYTICS_fra.md): analyses, lectures conditionnelles et connexion perdue

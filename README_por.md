@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2206_passing-brightgreen.svg" alt="2206 tests">
+  <img src="https://img.shields.io/badge/Tests-2225_passing-brightgreen.svg" alt="2225 tests">
 </p>
 
 > Vigia os workflows de todos os seus repositórios e diz-lhe, numa página local, o que está a vermelho, o que está encravado e o que o espera.
@@ -51,6 +51,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 - **A saúde de cada repositório e da equipa (só Complete)**: CI, alertas das três sentinelas, preparação das versões e atividade num estado (mau, aviso, bom ou não visto) com um número de risco; o separador Equipa põe primeiro os repositórios que precisam de uma pessoa, com filtros, um detalhe de cada um e ligações diretas para ecrãs de parede; os mesmos dados estão em `/api/team/health`, `/api/repos/<owner>/<repo>/health` e no comando `team` (`monitor/docs/HEALTH_por.md`).
 - **Relatórios, registo de ações e Apprise (só Complete)**: um relatório da conta (pontuação, mudanças, repositórios que precisam de uma pessoa, alertas abertos) escrito em HTML e Markdown segundo um horário cron ou a pedido, desligado por predefinição (`monitor/docs/REPORT_SCHEDULE_por.md`); um registo de quem mudou o quê, com uma cadeia de hashes e sem valores nem segredos (`monitor/docs/AUDIT_LOG_por.md`); e um canal opcional do Apprise para as notificações, desligado por predefinição.
 - **Como serviço**: a imagem oficial do Docker (sem root, só de leitura), um ficheiro Compose com proxy opcional, uma unidade systemd, uma verificação de saúde profunda e o comando que cria o primeiro administrador (`monitor/docs/DEPLOYMENT.md`).
+- **Uma API congelada e um guia para cada uso**: desde a 2.0.0 a forma de cada endpoint de leitura e os códigos de erro estão fixados em `monitor/docs/schemas/api_contract.json`, uma ferramenta verifica qualquer monitor em execução contra esse contrato (`monitor/tools/check_api_contract.py`) e há um guia curto para a edição lite, para uma pessoa, para um serviço e para uma equipa (`monitor/docs/API_por.md`).
 - **Várias contas, uma equipa e um lugar para os dados**: um processo por conta, utilizadores com papéis e as suas próprias contas, os ficheiros em `config/`, `data/`, `logs/` e `ai/`, um armazenamento SQLite opcional com retenção e cópia de segurança, e as portas como definições (`monitor/docs/ACCOUNTS.md`, `monitor/docs/STORAGE.md`, `monitor/docs/LAYOUT.md`).
 - **Listas que se ordenam e se dobram**: «A acontecer agora» de sete maneiras e o separador de Alertas de nove, com um botão para dobrar ou desdobrar todos os repositórios; a escolha fica guardada por utilizador.
 - **Notificações para cada utilizador**: no modo de equipa, cada utilizador escolhe num painel da página os canais (ntfy, Teams, correio), o nível mínimo e os resumos (`monitor/docs/NOTIFICATIONS_por.md`).
@@ -67,7 +68,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 
 | | |
 |---|---|
-| **Versão** | **1.9.5** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versão** | **2.0.0** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Requisitos** | Python 3.11+ e a CLI do GitHub (`gh auth login`); mais nada (a vista de consola usa o pacote opcional `rich`) |
 | **Abre** | uma página só em `127.0.0.1`, em oito idiomas |
 | **Escreve no GitHub** | nunca sozinho: apenas os comandos por lotes que lançar com um `--go` explícito |
@@ -75,12 +76,12 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 
 <!-- glance:begin -->
 
-**Medido hoje** (v1.9.5)
+**Medido hoje** (v2.0.0)
 
 | | |
 |---|---|
 | **Maturidade** | functional |
-| **Testes** | 2206 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Testes** | 2225 métodos de teste (`python -m unittest discover -s monitor/tests`) |
 | **Definições** | 415 definições, todas com ajuda |
 | **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
 | **Testado no CI em** | ubuntu, windows, Python 3.11, 3.13 |
@@ -281,6 +282,10 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/CI_RED_BRIDGE_por.md`](monitor/docs/CI_RED_BRIDGE_por.md): levar o ci_red.json para um painel
 - [`monitor/docs/WEBHOOK_por.md`](monitor/docs/WEBHOOK_por.md): o webhook de entrada
 - [`monitor/docs/LITE_por.md`](monitor/docs/LITE_por.md): A edição lite
+- [`monitor/docs/COMPLETE_INDIVIDUAL_por.md`](monitor/docs/COMPLETE_INDIVIDUAL_por.md): Edição completa para uma pessoa
+- [`monitor/docs/COMPLETE_SERVICE_por.md`](monitor/docs/COMPLETE_SERVICE_por.md): Edição completa como serviço
+- [`monitor/docs/COMPLETE_TEAM_por.md`](monitor/docs/COMPLETE_TEAM_por.md): Edição completa para uma equipa
+- [`monitor/docs/API_por.md`](monitor/docs/API_por.md): A API para clientes
 - [`monitor/docs/NOTIFICATIONS_por.md`](monitor/docs/NOTIFICATIONS_por.md): notificações e o contrato dos adaptadores
 - [`monitor/docs/AI_por.md`](monitor/docs/AI_por.md): o assistente de IA: fornecedores, segurança e ações
 - [`monitor/docs/ANALYTICS_por.md`](monitor/docs/ANALYTICS_por.md): análises, leituras condicionais e ligação perdida

@@ -11,6 +11,22 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+## [2.0.0]
+
+### Added
+
+- **The contract of the read API, frozen from here on**: `docs/schemas/api_contract.json` lists the 37 read endpoints with the keys and the types of their answers in each edition (and which of them the Lite edition answers with `404`) and the error codes of the door (`401 access`, `403 forbidden`, `404`). A key listed there keeps its name and its type for the whole of 2.x; new keys may appear and nothing is removed without a new major version. The suite `test_200_contract.py` checks it against a real server of each edition and also the rules of the door: a foreign `Host` is `403`, the network mode asks for the token in the header `X-Monitor-Access` and answers `401 access` without it, the words of a query that nobody reads are ignored and every answer is JSON in UTF-8.
+
+- **A tool to check any running monitor against the contract**: `python tools/check_api_contract.py` (`--lite`, `--url`, `--token-file`) reads the contract, asks the monitor with `GET` only, prints one line for each key that is missing or has another type and ends with `CONTRACT=PASS` or `CONTRACT=FAIL` (exit code 0, 1, or 2 when nobody answers). It is for the people whose scripts, wall screens or mobile clients depend on the answers, after each upgrade of the monitor or of the client. It makes no call to GitHub.
+
+- **The interfaces for sentinels and storages are frozen by a test too**: `test_200_interfaces.py` fixes the nine fields of an `Alert`, the methods of `BaseSentinel` and of `Storage` with the names of their parameters, the kinds of record, and that both storages and the three sentinels implement every method. A change there is a change of contract.
+
+- **One guide for each use, in the eight languages**: Complete for one person (`COMPLETE_INDIVIDUAL.md`), Complete as a service (`COMPLETE_SERVICE.md`), Complete for a team (`COMPLETE_TEAM.md`) and the API for clients (`API.md`), next to the short guide of the Lite edition. They are in the Help panel, in the list of guides of the README, and a test checks that they exist in the eight languages, that their links resolve and that every setting and endpoint they name exists. A second test reads every guide of the documentation in the eight languages and fails when one names a route that the code does not have.
+
+### Changed
+
+- **Version 2.0.0, the monitor is declared mature**: from now on the read endpoints, the `Alert`, `BaseSentinel` and `Storage` change only with a new major version (an addition that old clients can ignore is allowed and noted here). The message of the product is the same in the README, the guides and the help: Lite is the simple edition for one person on one computer, Complete is the control centre (several accounts, a team, a service and clients). Nothing else in the behaviour of the monitor changes in this version.
+
 ## [1.9.5]
 
 ### Added
