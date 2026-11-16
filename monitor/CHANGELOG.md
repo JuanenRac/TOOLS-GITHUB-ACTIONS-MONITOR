@@ -23,6 +23,7 @@ when this file and `tool_version.py` disagree.
 
 ### Added
 
+- **Bots apart from people**: with `sentinel.bots_apart` on, pull requests of accounts that GitHub itself marks as bots (type Bot, not a guess from the name) are counted apart in A4 (`other_bots`) and are left out of the check of old pull requests that wait for a person; the runs now carry `actor_bot`. The default changes nothing.
 - **Merge queue**: a failed run of the merge queue of the default branch (`gh-readonly-queue/...`, event `merge_group`) is a red of its own, shown as "(merge queue)" in the red list, the alerts and the team view, and it clears with the next green run of the queue.
 - **Maintenance branches**: `ci.extra_branches` takes patterns (for example `release-*`) of extra branches whose last run also counts; by default only the default branch is watched. A red of such a branch is labelled with its name and never hides, or is hidden by, the default branch.
 

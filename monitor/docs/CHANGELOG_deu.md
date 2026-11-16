@@ -9,6 +9,11 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+
+### Hinzugefügt
+
+- **Bots getrennt von Personen**: Mit `sentinel.bots_apart` an werden Pull Requests von Konten, die GitHub selbst als Bots kennzeichnet (Typ Bot, keine Vermutung nach dem Namen), in A4 getrennt gezählt (`other_bots`) und aus der Prüfung alter, auf eine Person wartender Pull Requests ausgenommen; die Läufe tragen jetzt `actor_bot`. Der Standard ändert nichts.
+
 ## [2.0.2]
 
 ### Sicherheit

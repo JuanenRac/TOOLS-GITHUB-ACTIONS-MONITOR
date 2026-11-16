@@ -495,7 +495,7 @@ def fetch_runs(repo, per_page):
         runs.append({
             "repo": repo, "id": run["id"], "name": run.get("name") or "", "title": (run.get("display_title") or "")[:90],
             "event": run.get("event"), "branch": run.get("head_branch"), "fork": is_fork_run(run), "path": (run.get("path") or "").split("@")[0].rsplit("/", 1)[-1], "sha": (run.get("head_sha") or "")[:7],
-            "actor": (run.get("actor") or {}).get("login", ""), "status": run.get("status"), "number": run.get("run_number"),
+            "actor": (run.get("actor") or {}).get("login", ""), "actor_bot": (run.get("actor") or {}).get("type") == "Bot", "status": run.get("status"), "number": run.get("run_number"),
             "queued": seconds_between(parse_time(run.get("created_at")), started) if run.get("created_at") and run.get("run_started_at") else None,
             "conclusion": run.get("conclusion"), "started": run.get("run_started_at") or run.get("created_at"),
             "seconds": seconds_between(started, updated if finished else None), "url": run.get("html_url"), "attempt": run.get("run_attempt"),

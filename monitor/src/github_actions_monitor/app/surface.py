@@ -723,7 +723,7 @@ def build(inp):
     put("milestones", sorted(rows))
     # B5 PRs
     allprs = inp.get("prs") or []
-    humans = [p for p in allprs if not p.get("dependabot") and not p.get("draft")]
+    humans = [p for p in allprs if not p.get("dependabot") and not p.get("draft") and not (inp.get("bots_apart") and p.get("bot"))]
     put("pr_human", [[p["repo"], "#%s" % p["number"], p["title"], f"{p['age_days']} {t('unit.d')}"] for p in sorted(humans, key=lambda p: -(p.get("age_days") or 0))
                      if (p.get("age_days") or 0) > cfg["checks"]["pr_human"]["days"]])
     rows = [[p["repo"], "#%s" % p["number"], p["title"], "CODEOWNERS" if p.get("touches_codeowners") else "workflows"] for p in allprs if p.get("touches_workflows") or p.get("touches_codeowners")]

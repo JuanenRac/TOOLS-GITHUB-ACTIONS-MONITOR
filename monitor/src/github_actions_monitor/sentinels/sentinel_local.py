@@ -71,6 +71,8 @@ DEFAULTS = {
     "candidate_days": 2.0, "pending_sign_hours": 24, "notify_command": [], "candidate_min_entries": 1, "stale_pr_days": 7, "hot_hours": 3,
     "required_files": [["README.md"], ["LICENSE", "LICENSE.md"], ["CHANGELOG.md"], ["SECURITY.md"]],
     "skip_candidate_prefixes": [], "min_rate_remaining": 800,
+    # bots_apart: pull requests of accounts that GitHub calls bots (type Bot) are not counted as the work of a person: A4 counts them apart and the check of old pull requests waiting for a person leaves them out.
+    "bots_apart": False,
     # minutes_budget: ceiling of Actions minutes per ecosystem, e.g. {"hydra": 600}; empty = no ceiling. The period is "7d" (default) or "24h".
     "minutes_budget": {}, "minutes_budget_period": "7d",
     # ci_red_file: where ci_red.json (repo -> red workflows + pending_sign) is written: "" = next to the monitor, "off" = not written, or a path.
@@ -284,6 +286,7 @@ def classify_pr(repo, pr, now):
     created = parse_time(pr.get("createdAt"))
     return {
         "repo": repo, "number": pr.get("number"), "title": (pr.get("title") or "")[:140], "url": pr.get("url"),
+        "bot": (pr.get("author") or {}).get("__typename") == "Bot",      # the kind of account GitHub says it is, not a guess from the name
         "dependabot": author in ("dependabot", "app/dependabot", "dependabot[bot]"), "draft": bool(pr.get("isDraft")),
         "age_days": round((now - created).total_seconds() / 86400, 1) if created else None,
         "conflict": pr.get("mergeable") == "CONFLICTING", "mergeable": pr.get("mergeable") or "UNKNOWN",
@@ -652,6 +655,7 @@ def compute_snapshot(inp):
     codeql_list.sort(key=lambda x: (order.get((x.get("severity") or "").lower(), 9), x["repo"]))
     unavailable = [r for r, a in alerts.items() if a.get("codeql") is None]
     prs_all = [classify_pr(repo, pr, now) for repo, i in info.items() for pr in i.get("prs", [])]
+    bots_apart = cfg.get("bots_apart") is True
     dep_prs = sorted((p for p in prs_all if p["dependabot"]), key=lambda p: -(p["age_days"] or 0))
     releases = {r: i.get("release") for r, i in info.items() if i.get("release")}
     ages = {}
@@ -707,7 +711,8 @@ def compute_snapshot(inp):
                "new": new or {}, "new_total": (sum(new.values()) if new is not None else None), "has_reference": new is not None,
                "codeql": codeql_list[:200], "unavailable": len(unavailable), "alerts_checked": sum(1 for a in alerts.values() if a.get("at")),
                "trend": {k: trend(inp["history"], k) for k in ("codeql", "dependabot", "secret", "prs", "red", "candidates")}},
-        "a4": {"dependabot": dep_prs, "other": sum(1 for p in prs_all if not p["dependabot"]), "stale_days": cfg["stale_pr_days"]},
+        "a4": {"dependabot": dep_prs, "other": sum(1 for p in prs_all if not p["dependabot"] and not (bots_apart and p["bot"])), "other_bots": sum(1 for p in prs_all if not p["dependabot"] and p["bot"]),
+               "stale_days": cfg["stale_pr_days"]},
         "tool_version": TOOL_VERSION,
         "a5": {"candidates": candidates, "green_unreleased": green, "pending_sign": [{**g, "pending_sign_hours": g["hours"]} for g in pending_sign(unsigned, now, cfg["pending_sign_hours"])],
                "pending_sign_hours": cfg["pending_sign_hours"], "states": states, "sign_queue": queue, "signed_unpublished": signed_wait,
@@ -720,7 +725,7 @@ def compute_snapshot(inp):
         "a9": inp.get("roadmaps") or {"boards": [], "level": "unknown"},
     }
     s["a7"]["by_ecosystem"] = minutes_by_ecosystem(mins, eco, cfg)
-    s["a10"] = surface.build({"now": now, "cfg": cfg["surface"], "repos": repos, "eco": eco, "repo_info": info, "alerts": alerts, "perms": perms, "runs": runs_by_repo,
+    s["a10"] = surface.build({"bots_apart": bots_apart, "now": now, "cfg": cfg["surface"], "repos": repos, "eco": eco, "repo_info": info, "alerts": alerts, "perms": perms, "runs": runs_by_repo,
                               "branches": branches, "scans": inp.get("scans"), "raw": inp.get("surface_raw"), "globals": inp.get("surface_glob"), "red": red,
                               "issues": issues, "prs": prs_all, "states": states, "queue": queue, "loading": inp.get("loading")})
     att = (inp.get("surface_glob") or {}).get("attestation") or {}
@@ -761,7 +766,7 @@ def repo_query(file_names):
     return ("query($after:String){rateLimit{remaining cost} repositoryOwner(login:\"%s\"){repositories(first:15,after:$after,ownerAffiliations:OWNER,isArchived:false)"
             "{totalCount pageInfo{hasNextPage endCursor} nodes{name pushedAt hasVulnerabilityAlertsEnabled defaultBranchRef{name} latestRelease{tagName publishedAt isDraft releaseAssets(first:100){nodes{name}}}"
             " vulnerabilityAlerts(states:OPEN,first:50){totalCount nodes{createdAt securityVulnerability{severity}}}"
-            " pullRequests(states:OPEN,first:10){nodes{number title url author{login} createdAt isDraft mergeable reviewDecision commits(last:1){nodes{commit{statusCheckRollup{state}}}} files(first:20){nodes{path}}}}"
+            " pullRequests(states:OPEN,first:10){nodes{number title url author{login __typename} createdAt isDraft mergeable reviewDecision commits(last:1){nodes{commit{statusCheckRollup{state}}}} files(first:20){nodes{path}}}}"
             " rulesets(first:5){nodes{name enforcement}} labels(first:20,query:\"dependencies\"){nodes{name}} %s}}}}") % (toolconfig.github_owner(), aliases)
 
 

@@ -46,6 +46,7 @@
     "candidate_min_entries": 1,
     "skip_candidate_prefixes": [],
     "stale_pr_days": 7,
+    "bots_apart": false,
     "required_files": [
       [
         "README.md"

@@ -9,6 +9,11 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+
+### Aggiunto
+
+- **I bot a parte dalle persone**: con `sentinel.bots_apart` attivo, le pull request degli account che GitHub stesso segna come bot (tipo Bot, non una supposizione dal nome) si contano a parte in A4 (`other_bots`) e restano fuori dal controllo delle vecchie pull request in attesa di una persona; le esecuzioni ora portano `actor_bot`. Il valore predefinito non cambia nulla.
+
 ## [2.0.2]
 
 ### Sicurezza
