@@ -358,7 +358,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 .hcorner .hbadges{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;max-width:100%}
 .hcorner .hbadges .badge{white-space:normal;text-align:right}
 .hcorner .rdy{justify-content:flex-end;max-width:100%}
-.rdy-chip{max-width:100%;white-space:nowrap}.scr-spark{margin-left:4px;vertical-align:middle}.scr-chip small{opacity:.8}.lite #k-score{display:none}
+.rdy-chip{max-width:100%;white-space:nowrap}.scr-chip,.rdy-chip.nodata{white-space:normal}.scr-bar{display:inline-block;width:46px;height:5px;border-radius:3px;background:var(--line2);overflow:hidden;vertical-align:middle}.scr-bar b{display:block;height:100%;background:var(--run)}.scr-spark{margin-left:4px;vertical-align:middle}.scr-chip small{opacity:.8}.lite #k-score{display:none}
 @media (max-width:1100px){.hgrid{grid-template-columns:minmax(0,1fr)}.hcorner{position:static;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;order:-1}.hcorner .hbadges{justify-content:flex-start}}
 @media (min-width:1900px){:root{--corner-w:268px}header .tile b{font-size:19px}}
 /* text never leaves its box: every box may shrink below its content and long words break */
@@ -831,9 +831,12 @@ function focusSignQueue(){
 function onKpiRed(){setList(T("ui.l_red"),redRepos());if(redRepos().length){OPEN.add("a2");showTab("sent");renderSent();const d=document.querySelector('details[data-k="a2"]');if(d)d.scrollIntoView({block:"nearest"})}}
 function onKpiSign(){const same=FILTER.list&&FILTER.listLabel===T("ui.l_unsigned");setList(T("ui.l_unsigned"),signRepos());if(!same&&signRepos().length)focusSignQueue()}
 [["kp-red",onKpiRed],["kp-sign",onKpiSign]].forEach(([id,fn])=>{$(id).addEventListener("click",fn);$(id).addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fn()}})});
+function readyChips(s){      // one chip per group of the readiness: a number, or the words "not enough data" with the reason in the tooltip
+  {const rd=$("k-ready"),hl=(s.a11&&s.a11.enabled!==false&&s.a11.health)||[];rd.hidden=!hl.length;rd.innerHTML=hl.map(h=>{const lim=(s.a11.warn_below||70),sc=h.score,cl=sc==null?"nodata":(sc>=lim?"ok":(sc>=lim/2?"warn":"bad")),nm=I18N.ecosystems[h.ecosystem]||h.ecosystem;return `<span class="rdy-chip ${cl}" title="${esc(nm+": "+(sc==null?nodataTip(h):sc+" / 100"))}"><i></i>${esc(nm)} ${sc==null?esc(T("ui.rdy_nodata")):sc}</span>`}).join("")}
+}
 function updateKpis(){
   const s=SENT;if(!s||s.enabled===false||!s.a2){kSet("k-red","–");kSet("k-sign","–");if(typeof tileState==="function"){tileState("kp-red","");tileState("kp-sign","")}$("k-budget").hidden=true;$("k-a10").hidden=true;$("k-ready").hidden=true;return}
-  {const rd=$("k-ready"),hl=(s.a11&&s.a11.enabled!==false&&s.a11.health)||[];rd.hidden=!hl.length;rd.innerHTML=hl.map(h=>{const lim=(s.a11.warn_below||70),sc=h.score,cl=sc==null?"":(sc>=lim?"ok":(sc>=lim/2?"warn":"bad")),nm=I18N.ecosystems[h.ecosystem]||h.ecosystem;return `<span class="rdy-chip ${cl}" title="${esc(nm+": "+(sc==null?T("ui.ready_unknown"):sc+" / 100"))}"><i></i>${esc(nm)} ${sc==null?"?":sc}</span>`}).join("")}
+  readyChips(s);
   kSet("k-red",s.a2.red.length);tileState("kp-red",s.a2.red.length?"bad":"");redUnits(s.a2.red.length,new Set(s.a2.red.map(x=>x.repo)).size);
   const n=signRepos().length;kSet("k-sign",n);tileState("kp-sign",(s.a5.pending_sign||[]).length?"warn":(n?"":""));{const w=Object.values(signWait());$("kp-sign").title=T("ui.k_sign_title")+(w.length?" - "+T("ui.k_sign_oldest",{h:Math.round(Math.max(...w))}):"")}
   {const pz=(s.a10||{}).paused,ax=$("k-a10");ax.hidden=!pz;if(pz)ax.textContent=T("ui.k_a10_paused",{remaining:pz.remaining,needed:pz.needed})}
@@ -1411,7 +1414,32 @@ function renderAlerts(){
 $("al-level").addEventListener("change",()=>{ALF.l=$("al-level").value;renderAlerts()});
 $("al-sort").addEventListener("change",()=>{sortSet("alerts",$("al-sort").value);renderAlerts()});
 $("al-muted").addEventListener("change",()=>{ALF.m=$("al-muted").checked;store.set("am-al-m",ALF.m?"1":"0");renderAlerts()});
+/* a group that has no number says why: how many of its repositories have data against the minimum, which ones lack it and which have no workflow at all (those are not counted) */
+function nodataTip(h){
+  if(h.applicable==null)return T("ui.ready_unknown");      // a server older than this page does not send the numbers
+  if(!h.applicable)return T("ui.rdy_nodata_none")+(h.no_ci&&h.no_ci.length?T("ui.rdy_nodata_na",{list:h.no_ci.join(", ")}):"");
+  return T("ui.rdy_nodata_tip",{covered:h.covered,applicable:h.applicable,pct:Math.round((h.coverage||0)*100),min:Math.round((h.min_coverage||0)*100),list:(h.missing||[]).join(", ")||"-"})+(h.no_ci&&h.no_ci.length?T("ui.rdy_nodata_na",{list:h.no_ci.join(", ")}):"")
+}
 function scoreSpark(pts){if(pts.length<2)return"";const v=pts.slice(-60).map(p=>p.score),lo=Math.min(...v),hi=Math.max(...v),w=60,h=16,sp=hi-lo||1;const d=v.map((y,i)=>(i*w/(v.length-1)).toFixed(1)+","+(h-2-(y-lo)*(h-4)/sp).toFixed(1)).join(" ");return `<svg class="scr-spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true" focusable="false"><polyline points="${d}" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>`}
+/* the score of the account says what is missing and when it will come: the time left of the calibration with its end, why there are not enough data, and why a part is not counted */
+function scoreWhy(a){
+  const q=a.data_quality||{},out=[];
+  if(a.state==="calibrating"){
+    const left=q.calibrating_hours>0&&typeof q.watched_hours==="number"?Math.max(0,q.calibrating_hours-q.watched_hours):null;
+    if(left!=null)out.push(T("ui.score_cal_tip",{watched:Math.round(q.watched_hours*10)/10,total:q.calibrating_hours,end:dtime(Date.now()+left*3600e3)}));
+  }else if(a.state==="insufficient_data"){
+    (q.reasons||[]).forEach(r=>{if(r==="few_runs")out.push(T("ui.score_why_few_runs",{runs:q.runs||0,min:q.min_runs}));else if(r==="low_coverage")out.push(T("ui.score_why_low_coverage",{coverage:Math.round((q.coverage||0)*100),min:Math.round((q.min_coverage||0)*100)}));else if(r==="no_data")out.push(T("ui.score_why_no_data"))});
+  }
+  (a.missing_detail||[]).forEach(m=>{const part=T("ui.score_p_"+m.part),k="ui.score_miss_"+m.reason;
+    out.push(T(k,{part:part,checked:m.checked,scope:m.scope,progress:m.scope?T("ui.score_miss_progress",{checked:m.checked,scope:m.scope}):""}))});
+  return out
+}
+function scoreCalibrating(a){
+  const q=a.data_quality||{};
+  if(!(q.calibrating_hours>0)||typeof q.watched_hours!=="number")return esc(T("ui.score_state_calibrating"));
+  const left=Math.max(0,q.calibrating_hours-q.watched_hours),pct=Math.max(0,Math.min(100,Math.round(q.watched_hours/q.calibrating_hours*100)));
+  return esc(T("ui.score_cal_left",{left:fmt(Math.ceil(left*60)*60),total:q.calibrating_hours}))+` <span class="scr-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><b style="width:${pct}%"></b></span>`
+}
 function scoreChip(a,pts){
   const q=a.data_quality||{},cov=Math.round((a.coverage||0)*100);
   let tip=T("ui.score_tip",{coverage:cov,runs:q.runs||0,days:a.window_days||7});
@@ -1422,7 +1450,8 @@ function scoreChip(a,pts){
   const worst=(a.repos||[]).find(r=>typeof r.score==="number");
   if(worst)tip+="\n"+T("ui.score_worst",{repo:worst.repo,score:worst.score});
   if(a.stale)tip+="\n"+T("ui.score_old");
-  if(a.state!=="scored")return `<span class="rdy-chip scr-chip" title="${esc(tip)}"><i></i>${esc(T("ui.score_title"))}: ${esc(T(a.state==="calibrating"?"ui.score_state_calibrating":"ui.score_state_insufficient"))}</span>`;
+  const why=scoreWhy(a);if(why.length)tip+="\n"+why.join("\n");
+  if(a.state!=="scored")return `<span class="rdy-chip scr-chip" title="${esc(tip)}"><i></i>${esc(T("ui.score_title"))}: ${a.state==="calibrating"?scoreCalibrating(a):esc(T("ui.score_state_insufficient"))}</span>`;
   const L=a.letter||"?",cl=(L==="A"||L==="B")?"ok":(L==="C"?"warn":"bad"),tr=a.trend||{},d=typeof tr.delta==="number"?Math.abs(tr.delta):"";
   const tt=tr.direction==="up"?"\u2191 "+T("ui.score_trend_up",{delta:d}):(tr.direction==="down"?"\u2193 "+T("ui.score_trend_down",{delta:d}):(tr.direction==="flat"?"\u2192 "+T("ui.score_trend_flat"):""));
   return `<span class="rdy-chip scr-chip ${cl}" title="${esc(tip)}"><i></i>${esc(T("ui.score_title"))} <b>${esc(a.score)}</b> ${esc(L)}${tt?` <small>${esc(tt)}</small>`:""}${miss.length?` <small aria-hidden="true">*</small>`:""}${scoreSpark(pts)}${a.stale?` <small>${esc(T("ui.score_old"))}</small>`:""}</span>`}

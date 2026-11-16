@@ -266,9 +266,17 @@ def _penalty_text(parts):
     return ", ".join(f"{t('rd.p.' + name)} {n} (-{pen:g})" for name, n, pen in parts) or t("rd.p.none")
 
 
-def health(s, eco, alerts, runs_by_repo, info, cfg):
+def has_no_workflow(repo, runs_by_repo, scans):
+    """True when the clone of the repository was read, holds no workflow file and the repository has no run: there is no CI to measure (a new empty repository, or one that has no CI), so it is
+    "not applicable" and not "without data". Without a clone nobody can tell, and the repository counts as one without data."""
+    scan = (scans or {}).get(repo)
+    return isinstance(scan, dict) and not scan.get("workflows") and not runs_by_repo.get(repo)
+
+
+def health(s, eco, alerts, runs_by_repo, info, cfg, scans=None):
     """One row per ecosystem from the finished snapshot `s` (A1-A6). Score = 100 - sum(weight x count), at least 0, shown only when the share of the
-    ecosystem's repositories that have run data AND alerts read is at least `min_coverage`; otherwise None (unknown). Returns a list of rows."""
+    ecosystem's APPLICABLE repositories that have run data AND alerts read is at least `min_coverage`; otherwise None (unknown). A repository with no workflow at all is not applicable: it does
+    not lower the coverage and is listed apart (`no_ci`); the ones that lack data are listed in `missing`. Returns a list of rows."""
     weights = cfg["health"]["weights"]
     stale = s["a4"]["stale_days"]
     keys = toolconfig.ecosystem_names()
@@ -290,11 +298,15 @@ def health(s, eco, alerts, runs_by_repo, info, cfg):
         }
         total_alerts = sum((r.get("codeql") or 0) + (r.get("dependabot") or 0) for r in s["a3"]["rows"] if r["repo"] in mine)
         counts["alert"] = max(0, total_alerts - counts["high_alert"])   # serious ones are counted once, in their own line
-        covered = sum(1 for r in repos if runs_by_repo.get(r) and (alerts.get(r) or {}).get("at") and r in info)
-        coverage = covered / len(repos)
+        no_ci = [r for r in repos if has_no_workflow(r, runs_by_repo, scans)]
+        applicable = [r for r in repos if r not in no_ci]
+        have = [r for r in applicable if runs_by_repo.get(r) and (alerts.get(r) or {}).get("at") and r in info]
+        covered = len(have)
+        coverage = covered / len(applicable) if applicable else 0.0
         parts = [(name, counts[name], round(weights[name] * counts[name], 2)) for name in ("red", "stuck", "secret", "high_alert", "alert", "stale_pr", "unsigned", "hygiene") if counts[name]]
         score = None if coverage < cfg["min_coverage"] else max(0, round(100 - sum(p for _, _, p in parts)))
-        rows.append({"ecosystem": key, "score": score, "coverage": round(coverage, 2), "repos": len(repos), "parts": [{"name": n, "count": c, "penalty": p} for n, c, p in parts],
+        rows.append({"ecosystem": key, "score": score, "coverage": round(coverage, 2), "repos": len(repos), "applicable": len(applicable), "covered": covered, "min_coverage": cfg["min_coverage"],
+                     "no_ci": no_ci, "missing": [r for r in applicable if r not in have], "parts": [{"name": n, "count": c, "penalty": p} for n, c, p in parts],
                      "external": toolconfig.is_external(key)})
     return rows
 
@@ -310,7 +322,7 @@ def build(inp, s, cfg):
                        "releases": releases, "runs": inp["runs"], "branches": {r: i.get("branch") for r, i in inp["repo_info"].items()}, "red": s["a2"]["red"],
                        "unchecked": s["a2"]["unchecked"], "inconclusive": s["a2"]["inconclusive"], "states": s["a5"]["states"],
                        "local_versions": inp.get("local_versions"), "eco_of": eco_of})
-    hl = health(s, eco, inp["alerts"], inp["runs"], inp["repo_info"], cfg)
+    hl = health(s, eco, inp["alerts"], inp["runs"], inp["repo_info"], cfg, inp.get("scans"))
     pins = inp.get("pins") or {"rows": [], "checked": 0, "sources": [], "no_source": [], "missing": []}
     behind = [p for p in pins["rows"] if p.get("behind")]
 
@@ -327,7 +339,7 @@ def build(inp, s, cfg):
 
     ready_rows = [[r["repo"], r["entries"], cell_ci(r), cell_version(r), t("rd.v." + r["build"]), t("rd.v.sign_" + r["signing"]), t("rd.n." + r["next"])] for r in rr]
     health_rows = [[toolconfig.label_of(h["ecosystem"]) + (" *" if h["external"] else ""), ("?" if h["score"] is None else str(h["score"])),
-                    f"{round(h['coverage'] * 100)}%", _penalty_text([(p["name"], p["count"], p["penalty"]) for p in h["parts"]])] for h in hl]
+                    f"{round(h['coverage'] * 100)}% ({h['covered']}/{h['applicable']})", _penalty_text([(p["name"], p["count"], p["penalty"]) for p in h["parts"]])] for h in hl]
     pin_rows = [[p["repo"], p["provider"], p["pinned"], p["current"], p["where"]] for p in behind]
     weights = ", ".join(f"{k} {v:g}" for k, v in cfg["health"]["weights"].items())
     notes_pins = []
@@ -343,7 +355,7 @@ def build(inp, s, cfg):
         {"key": "readiness", "title": t("rd.t.readiness"), "cols": [t("rd.c." + c) for c in COLUMNS["readiness"]], "rows": ready_rows, "count": len(ready_rows), "copy": [],
          "note": t("rd.note.readiness", min=inp["cfg"]["candidate_min_entries"]), "level": "info" if rr else "ok"},
         {"key": "health", "title": t("rd.t.health"), "cols": [t("rd.c." + c) for c in COLUMNS["health"]], "rows": health_rows, "count": len(health_rows), "copy": [],
-         "note": t("rd.note.health", weights=weights, pct=round(cfg["min_coverage"] * 100)),
+         "note": t("rd.note.health", weights=weights, pct=round(cfg["min_coverage"] * 100)) + "".join(" " + t("rd.note.no_ci", ecosystem=toolconfig.label_of(h["ecosystem"]), list=", ".join(h["no_ci"])) for h in hl if h["no_ci"]),
          "level": "warn" if any(h["score"] is not None and h["score"] < cfg["warn_below"] for h in hl) else ("unknown" if any(h["score"] is None for h in hl) else "ok")},
         {"key": "pins", "title": t("rd.t.pins"), "cols": [t("rd.c." + c) for c in COLUMNS["pins"]], "rows": pin_rows, "count": len(pin_rows), "copy": [],
          "note": " ".join(notes_pins), "level": "info" if behind else "ok"},

@@ -29,7 +29,7 @@ def empty(account, cfg, reason):
     state = "off" if not cfg["enabled"] else "calibrating"
     return {"schema": SCHEMA, "account": account, "enabled": cfg["enabled"], "state": state, "score": None, "letter": None, "trend": None, "coverage": 0.0,
             "complete": False, "missing_parts": list(engine.MISSING_PARTS), "window_days": cfg["window_days"], "parts": [], "repos": [], "at": None, "age_seconds": None, "stale": False,
-            "data_quality": {"runs": 0, "min_runs": cfg["min_runs"], "coverage": 0.0, "min_coverage": cfg["min_coverage"], "watched_hours": None, "reasons": [reason]}}
+            "data_quality": {"runs": 0, "min_runs": cfg["min_runs"], "coverage": 0.0, "min_coverage": cfg["min_coverage"], "watched_hours": None, "calibrating_hours": cfg["calibrating_hours"], "reasons": [reason]}}
 
 
 def latest(storage, account, config, now=None):
