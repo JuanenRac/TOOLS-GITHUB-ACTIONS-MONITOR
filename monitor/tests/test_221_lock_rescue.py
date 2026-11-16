@@ -37,6 +37,8 @@ class LockRescue(unittest.TestCase):
             target = Path(tmp) / "records.json"
             pid = finished_pid()
             Path(str(target) + ".lock").write_text(str(pid), encoding="ascii")
+            old = time.time() - 10
+            os.utime(str(target) + ".lock", (old, old))
             locks.RESCUED.clear()
             started = time.monotonic()
             with locks.process_lock(target, timeout=2.0):
@@ -44,6 +46,33 @@ class LockRescue(unittest.TestCase):
             self.assertLess(time.monotonic() - started, 1.5)
             self.assertEqual(locks.RESCUED[-1], ("records.json.lock", pid))
             self.assertFalse(Path(str(target) + ".lock").exists())
+
+    def test_a_lock_that_is_a_moment_old_is_not_opened_to_read_its_owner(self):
+        from unittest import mock
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+            lock_file = Path(tmp) / "records.json.lock"
+            lock_file.write_text("1", encoding="ascii")
+            with mock.patch.object(Path, "read_text", side_effect=AssertionError("opened")):
+                self.assertIsNone(locks._owner_gone(lock_file))
+
+    def test_the_owner_tries_again_while_windows_refuses_to_delete_its_lock(self):
+        from unittest import mock
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+            lock_file = Path(tmp) / "records.json.lock"
+            lock_file.write_text("1", encoding="ascii")
+            real, calls = Path.unlink, {"n": 0}
+
+            def refuse(path, *args, **kwargs):
+                calls["n"] += 1
+                if calls["n"] <= 30:
+                    raise PermissionError(13, "in use")
+                return real(path, *args, **kwargs)
+            with mock.patch.object(Path, "unlink", refuse), mock.patch.object(locks.time, "sleep"):
+                self.assertTrue(locks.release(lock_file))
+            self.assertEqual(calls["n"], 31)
+            self.assertFalse(lock_file.exists())
+            with mock.patch.object(Path, "unlink", side_effect=PermissionError(13, "in use")), mock.patch.object(locks.time, "sleep"):
+                self.assertFalse(locks.release(lock_file, attempts=5))
 
     def test_a_lock_of_a_live_process_is_respected(self):
         with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
