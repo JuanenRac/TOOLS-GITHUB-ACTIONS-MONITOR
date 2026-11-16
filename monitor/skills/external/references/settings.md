@@ -91,6 +91,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ci.extra_branches` | `[]` | sentinel | Maintenance branches to watch |
 | `ci.inactive_days` | `90` | sentinel | Days until a workflow is inactive |
 | `ci.red_events` | `["push", "schedule", "workflow_dispatch", "merge_group"]` | sentinel | Events that can make a branch red |
+| `ci.rerun_timing` | `false` | sentinel | Ask GitHub for the duration of re-runs |
 | `ci.stuck.awaiting_stuck` | `true` | sentinel | A run waiting for approval can be stuck |
 | `ci.stuck.learned` | `false` | sentinel | Learn the limit of each workflow |
 | `ci.stuck.margin` | `2.0` | sentinel | Margin over that duration |
@@ -107,7 +108,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `discover_refresh_seconds` | `3600` | polling | Search for new repositories |
 | `discovery.auto_frequency` | `false` | basic | Adjust the refresh to the real activity |
 | `discovery.events` | `true` | basic | Tell me about new, vanished and archived repositories |
+| `discovery.fork_checks_per_pass` | `30` | basic | Forks checked per listing |
+| `discovery.fork_ci_days` | `90` | basic | A fork is maintained if its CI ran in the last |
+| `discovery.fork_policy` | `"show"` | basic | Forks |
 | `discovery.hide` | `[]` | basic | Leave out repositories of these kinds |
+| `discovery.skip_archived` | `true` | basic | Leave out archived repositories |
 | `discovery.suggest_groups` | `true` | basic | Suggest groups for unclassified repositories |
 | `dispatch.required_ci` | `["ci.yml"]` | advanced | Workflows that must pass before a build is fired |
 | `display.blink_red_tiles` | `true` | general | Blink red tiles |
@@ -273,6 +278,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `runners.enabled` | `false` | advanced | Watch self-hosted runners |
 | `runners.scope` | `"owner"` | advanced | Where to look |
 | `runs_per_repo` | `20` | polling | Runs read per hot repository |
+| `sampling.api_budget_per_hour` | `0` | polling | Request budget per hour |
+| `sampling.default_branch_probe` | `false` | polling | Second look at the default branch |
+| `sampling.min_coverage_minutes` | `30` | polling | Low coverage below |
 | `savings.feeds.enabled` (secure) | `false` | quota | Ask a free source first |
 | `savings.feeds.max_age_minutes` | `240` | quota | Full read at least every (free sources) |
 | `savings.feeds.method` | `"atom"` | quota | Which free source |
@@ -298,6 +306,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `score.weights.speed` | `-` | sentinel | Weight: speed |
 | `score.window_days` | `-` | sentinel | Score window |
 | `sentinel.a2_full_sample_unknown` | `-` | sentinel | Unknown when sample is full |
+| `sentinel.a2_resolve_batch_min` | `-` | sentinel | A2 lookups in one request from |
+| `sentinel.a2_resolve_batch_pages` | `-` | sentinel | A2 pages per repository |
 | `sentinel.a2_resolve_max_calls_per_tick` | `-` | sentinel | A2 lookups per cycle |
 | `sentinel.a2_resolve_ttl_seconds` | `-` | sentinel | A2 answers kept |
 | `sentinel.alerts_cold_seconds` | `-` | sentinel | Alerts of cold repositories |
@@ -312,6 +322,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinel.ci_red_file` | `-` | paths | File for ci_red.json |
 | `sentinel.enabled` | `true` | sentinel | Sentinel on |
 | `sentinel.hot_hours` | `-` | sentinel | Hot period |
+| `sentinel.hygiene.community_fallback` | `-` | sentinel | Count the community profile and the .github repository |
+| `sentinel.hygiene.ruleset_mode` | `-` | sentinel | Branch protection check |
+| `sentinel.hygiene.ruleset_names` | `-` | sentinel | Ruleset names |
+| `sentinel.hygiene.skip` | `-` | sentinel | Hygiene checks to leave out |
 | `sentinel.hygiene_seconds` | `-` | sentinel | Hygiene checks |
 | `sentinel.max_calls_per_tick` | `-` | sentinel | API calls per cycle |
 | `sentinel.min_rate_remaining` | `-` | sentinel | Sentinel pauses below |

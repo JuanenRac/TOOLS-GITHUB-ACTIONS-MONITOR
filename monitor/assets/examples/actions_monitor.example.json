@@ -34,7 +34,8 @@
       "awaiting_stuck": true,
       "workflow_minutes": [],
       "runner_minutes": []
-    }
+    },
+    "rerun_timing": false
   },
   "watchdog_minutes": 10,
   "watchdog_max_abandoned": 8,
@@ -64,7 +65,11 @@
       ],
       [
         "LICENSE",
-        "LICENSE.md"
+        "LICENSE.md",
+        "LICENSE.txt",
+        "LICENSE-APACHE",
+        "LICENSE-MIT",
+        "COPYING"
       ],
       [
         "CHANGELOG.md"
@@ -73,6 +78,14 @@
         "SECURITY.md"
       ]
     ],
+    "hygiene": {
+      "ruleset_mode": "name",
+      "ruleset_names": [
+        "protect-main"
+      ],
+      "skip": [],
+      "community_fallback": false
+    },
     "pending_sign_hours": 24,
     "notify_command": [],
     "minutes_budget": {},
@@ -84,6 +97,8 @@
     "a2_full_sample_unknown": true,
     "a2_resolve_max_calls_per_tick": 4,
     "a2_resolve_ttl_seconds": 3600,
+    "a2_resolve_batch_min": 2,
+    "a2_resolve_batch_pages": 1,
     "surface": {
       "enabled": true,
       "refresh_seconds": 86400,
@@ -462,7 +477,11 @@
     "events": true,
     "suggest_groups": true,
     "auto_frequency": false,
-    "hide": []
+    "hide": [],
+    "skip_archived": true,
+    "fork_policy": "show",
+    "fork_ci_days": 90,
+    "fork_checks_per_pass": 30
   },
   "auth": {
     "enabled": false,
