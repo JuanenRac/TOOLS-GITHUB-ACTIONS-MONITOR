@@ -64,6 +64,7 @@ a call marked *this computer only* is refused when it comes from the network. Ev
 | `/api/help/topics` | GET | viewer | the list of documentation topics |
 | `/api/hot-only` | POST | maintainer | read only the hot repositories for one long cycle |
 | `/api/live-events` | GET | viewer | the newest webhook events |
+| `/api/live-events/stream` | GET | viewer | server-sent events of the webhook events as they are accepted (off by default) |
 | `/api/live-status` | GET | viewer | state of the incoming webhook receiver |
 | `/api/mirror` | GET | viewer | state of the local mirror of artifacts |
 | `/api/mode` | GET,POST | viewer / maintainer | the working mode (normal, fast, turbo, low) and its time left |

@@ -28,6 +28,7 @@ In `actions_monitor.json`: `"webhook": {"enabled": true, "secret": "<32 or more 
 
 - When `webhook.record_events` is on (the default), a signed `workflow_run` event updates the run list of that repository at once, without reading GitHub: the repository costs no quota until its next scheduled read. A `workflow_job` event also brings the queue time and the time of each step for the analytics.
 - Only short validated fields are kept (workflow, run, status, conclusion, branch, short commit, link to the run, durations); never the commit message or any free text. The newest `webhook.live_events_keep` events can be read at `GET /api/live-events` (this computer only).
+- Optional, off by default: with `live.sse.enabled` on, `GET /api/live-events/stream` sends the same events as they are accepted, as server-sent events (`hello`, then one `live` frame per event, with a running `id` to resume with `Last-Event-ID` or `?since=`, a keep-alive comment and a final `bye`). Read only; in the network mode it asks for the access token like any other request; `live.sse.max_clients` listeners at most, each for `live.sse.max_seconds`. The Lite edition does not have it.
 - A run that ends red also sends the notification `workflow_failed` when notifications are on. With `webhook.record_events` off the webhook goes back to the refresh-only mode above.
 - GitHub cannot reach `127.0.0.1`: use `gh webhook forward` (see the GitHub CLI documentation) or a tunnel you run on purpose, pointing at `http://127.0.0.1:PORT/api/webhook`.
 

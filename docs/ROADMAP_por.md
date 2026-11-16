@@ -4,13 +4,13 @@ O que já foi publicado, o que vem a seguir e o que é apenas uma ideia, por ess
 
 ## Onde está o monitor agora
 
-Versão 1.9.4. A edição lite mostra o que corre e o que falhou. A edição completa acrescenta três sentinelas (CI, Collab e Security), uma lista de alertas, várias contas e uma equipa com funções, a pontuação de cada conta, a saúde de cada repositório e da equipa, relatórios agendados, um registo de ações, notificações (ntfy, Teams, correio eletrónico e Apprise), um assistente de IA opcional com predefinições de serviços compatíveis, o modo de serviço com Docker e uma página para todos os tamanhos de ecrã, do telemóvel ao 4K.
+Versão 1.9.5. A edição lite mostra o que corre e o que falhou. A edição completa acrescenta três sentinelas (CI, Collab e Security), uma lista de alertas, várias contas e uma equipa com funções, a pontuação de cada conta, a saúde de cada repositório e da equipa, relatórios agendados, um registo de ações, notificações (ntfy, Teams, correio eletrónico e Apprise), um assistente de IA opcional com predefinições de serviços compatíveis, o modo de serviço com Docker e uma página para todos os tamanhos de ecrã, do telemóvel ao 4K.
 
 ## Previsto, por esta ordem
 
 Cada versão leva apenas conteúdo real: uma versão sem nada de real a acrescentar é saltada e nunca publicada vazia. Nada disto é dado como provado em serviços reais, salvo se o seu guia o disser.
 
-### 1.9.5 a 1.9.9 - Fecho da terceira fase
+### 1.9.6 a 1.9.9 - Fecho da terceira fase
 
 O que as revisões da pontuação, da sentinela de segurança, das vistas de saúde, dos relatórios e do registo de ações ainda encontrem; o custo em chamadas ao GitHub com três sentinelas ativas; uma pontuação que se mantém coerente quando uma sentinela está desligada.
 
@@ -20,7 +20,11 @@ Uma versão principal que limpa a dívida técnica e congela as interfaces públ
 
 Os workflows do próprio monitor cumprem o que a sentinela de higiene pedirá aos outros: ações fixadas a um commit, as permissões mínimas e um limite de tempo em cada job.
 
-## Feito da 1.8.2 à 1.9.4
+## Feito da 1.8.2 à 1.9.5
+
+### 1.9.5 - Fluxo de eventos em direto
+
+Um fluxo dos eventos em direto do webhook de entrada para clientes e ecrãs de parede que não podem sondar, desligado por predefinição, só de leitura, com um limite de ouvintes e um limite de tempo para cada um.
 
 ### 1.9.4 - Predefinições de IA
 

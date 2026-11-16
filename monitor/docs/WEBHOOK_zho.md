@@ -28,6 +28,7 @@
 
 - 当 `webhook.record_events` 开启(默认)时,已签名的 `workflow_run` 事件会立即更新该仓库的运行列表,而无需读取 GitHub:直到下一次计划读取之前,该仓库不消耗配额。`workflow_job` 事件还会为分析带来排队时间和每个步骤的时间。
 - 只保留经过验证的简短字段(工作流、运行、状态、结论、分支、短提交、运行链接、时长);绝不保留提交信息或任何自由文本。最新的 `webhook.live_events_keep` 个事件可在 `GET /api/live-events` 读取(仅限本机)。
+- 可选，默认关闭：开启 `live.sse.enabled` 后，`GET /api/live-events/stream` 会在事件被接受时以服务器发送事件的形式发送这些事件（先是 `hello`，之后每个事件一个 `live` 帧，带有递增的 `id`，可用 `Last-Event-ID` 或 `?since=` 续传，另有保活注释和最后的 `bye`）。只读；在网络模式下与其他请求一样需要访问令牌；最多 `live.sse.max_clients` 个监听者，每个持续 `live.sse.max_seconds`。Lite 版没有它。
 - 当通知开启时,以红色结束的运行还会发送 `workflow_failed` 通知。关闭 `webhook.record_events` 后,Webhook 恢复为上述仅刷新模式。
 - GitHub 无法访问 `127.0.0.1`:请使用 `gh webhook forward`(见 GitHub CLI 文档)或你有意搭建的隧道,指向 `http://127.0.0.1:端口/api/webhook`。
 

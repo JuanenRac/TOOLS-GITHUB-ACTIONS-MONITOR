@@ -9,6 +9,12 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+## [1.9.5]
+
+### Aggiunto
+
+- **Gli eventi in diretta come flusso (Complete, spento per impostazione predefinita)**: con `live.sse.enabled` attivo, `GET /api/live-events/stream` invia gli eventi del webhook in ingresso appena accettati, come eventi inviati dal server: un frame `hello` (quanti sono conservati), un frame `live` per evento con un `id` progressivo (si riprende con `Last-Event-ID` o `?since=`; si invia solo l'elenco chiuso di campi di `GET /api/live-events`), un commento di keep-alive e un `bye` finale. Sola lettura, in modalità rete chiede il token di accesso come ogni richiesta, ammette al massimo `live.sse.max_clients` ascoltatori (gli altri ricevono `429`), ciascuno per `live.sse.max_seconds`, e l'edizione Lite non lo ha. Le tre impostazioni sono nella scheda Impostazioni (sotto-scheda Webhook in ingresso) con la guida in otto lingue, la guida del webhook in ingresso lo spiega e i riferimenti delle due skill elencano l'endpoint. Un test con un server reale copre lo spento predefinito, il limite di ascoltatori e un evento accettato che raggiunge l'ascoltatore.
+
 ### Modificato
 
 - **`/api/health` dice di più e `?deep=1` chiede di più**: oltre a `ok`, `version`, `loaded` e `offline`, la risposta porta lo stato del ciclo di aggiornamento (`cycle`), dell'accesso GitHub (`credential`) dell'account e dove il monitor ascolta (`listening`); il supervisore risponde con le stesse parole. `/api/health?deep=1` è il controllo approfondito: 503 quando il ciclo di aggiornamento di un account è bloccato o sparito e, nel supervisore, anche quando il suo ciclo si è fermato, quando il ciclo di un account qualsiasi è bloccato o quando nessun account risponde dopo l'avvio. Senza `deep` non fallisce nulla che prima non fallisse.

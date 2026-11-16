@@ -10,6 +10,12 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+## [1.9.5]
+
+### Added
+
+- **The live events as a stream (Complete, off by default)**: with `live.sse.enabled` on, `GET /api/live-events/stream` sends the events of the incoming webhook as they are accepted, as server-sent events: a `hello` frame (how many are held), one `live` frame per event with a running `id` (resume with `Last-Event-ID` or `?since=`; only the closed list of fields of `GET /api/live-events` is ever sent), a keep-alive comment and a final `bye`. It is read only, asks for the access token in the network mode like any other request, keeps at most `live.sse.max_clients` listeners (more get `429`) each for `live.sse.max_seconds`, and the Lite edition does not have it. The three settings are in the Settings tab (sub-tab Incoming webhook) with their help in the eight languages, the guide of the incoming webhook explains it, and the references of the two skills list the endpoint. A test with a real server covers off by default, the limit of listeners and an accepted event reaching the listener.
+
 ## [1.9.4]
 
 ### Added

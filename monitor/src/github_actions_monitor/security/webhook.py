@@ -232,3 +232,64 @@ def as_run(record):
         return None
     return {"repo": record["repo"], "id": record["run_id"], "name": record["workflow"], "title": "", "event": "webhook", "branch": record["branch"], "path": record["path"], "sha": record["sha"],
             "actor": "", "status": record["status"], "conclusion": record["conclusion"], "started": record["started"], "seconds": record["seconds"] or 0, "url": record["url"], "attempt": record.get("attempt")}
+
+
+# --- the live events as a read-only stream (server-sent events), OFF by default -------------------------------------------------------------------------------------------------
+SSE_STREAMS = [0]
+SSE_LOCK = threading.Lock()
+
+
+def sse_settings(config):
+    """{"enabled", "max_seconds", "max_clients"} of `live.sse`: the stream of the live events is OFF until you turn it on; anything out of range falls back to the default."""
+    cfg = (config or {}).get("live")
+    cfg = cfg.get("sse") if isinstance(cfg, dict) else None
+    cfg = cfg if isinstance(cfg, dict) else {}
+
+    def number(key, low, high, default):
+        value = cfg.get(key)
+        return value if isinstance(value, int) and not isinstance(value, bool) and low <= value <= high else default
+    return {"enabled": cfg.get("enabled") is True, "max_seconds": number("max_seconds", 60, 86400, 3600), "max_clients": number("max_clients", 1, 10, 3)}
+
+
+def sse_acquire(config):
+    """True when one more listener may start (`live.sse.max_clients`); call sse_release() when it ends."""
+    with SSE_LOCK:
+        if SSE_STREAMS[0] >= sse_settings(config)["max_clients"]:
+            return False
+        SSE_STREAMS[0] += 1
+        return True
+
+
+def sse_release():
+    with SSE_LOCK:
+        SSE_STREAMS[0] = max(0, SSE_STREAMS[0] - 1)
+
+
+def _sse_frame(name, data, ident=None):
+    return (f"id: {ident}\n" if ident is not None else "") + f"event: {name}\ndata: {json.dumps(data, ensure_ascii=True)}\n\n"
+
+
+def sse_frames(config, snapshot, stop=lambda: False, sleep=time.sleep, clock=time.time, since=None, keepalive=15, poll=1.0):
+    """The frames of the live stream. `snapshot()` returns (total, events): how many events were accepted since the monitor started and the newest ones, newest last. `hello` comes first
+    (how many are held), then one `live` frame per new event (its `id` is the running number, to resume with Last-Event-ID; what is no longer held cannot be sent again), a comment every
+    `keepalive` seconds, and `bye` when `live.sse.max_seconds` is over or `stop()` says so. Only the closed list LIVE_FIELDS (plus the time) is ever sent."""
+    cfg = sse_settings(config)
+    started = clock()
+    total, events = snapshot()
+    seen = total if since is None else max(0, min(int(since), total))
+    yield _sse_frame("hello", {"held": len(events), "total": total})
+    last_beat = started
+    while not stop() and clock() - started < cfg["max_seconds"]:
+        total, events = snapshot()
+        if total > seen:
+            fresh = events[-min(total - seen, len(events)):] if events else []
+            first = total - len(fresh)
+            for number, event in enumerate(fresh, start=first + 1):
+                yield _sse_frame("live", {k: event.get(k) for k in LIVE_FIELDS + ("at",) if k in event}, number)
+            seen = total
+            last_beat = clock()
+        if clock() - last_beat >= keepalive:
+            last_beat = clock()
+            yield ": keepalive\n\n"
+        sleep(poll)
+    yield _sse_frame("bye", {"reason": "stopped" if stop() else "time"})

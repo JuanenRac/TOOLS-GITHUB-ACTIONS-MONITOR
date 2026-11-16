@@ -4,13 +4,13 @@ Was erschienen ist, was als Nächstes kommt und was nur eine Idee ist, in dieser
 
 ## Wo der Monitor jetzt steht
 
-Version 1.9.4. Die Lite-Ausgabe zeigt, was läuft und was fehlgeschlagen ist. Die vollständige Ausgabe fügt drei Wächter (CI, Collab und Security), eine Liste der Warnungen, mehrere Konten und ein Team mit Rollen, die Bewertung jedes Kontos, die Gesundheit jedes Repositorys und des Teams, geplante Berichte, ein Aktionsprotokoll, Benachrichtigungen (ntfy, Teams, E-Mail und Apprise), einen optionalen KI-Assistenten mit Voreinstellungen kompatibler Dienste, den Dienstmodus mit Docker und eine Seite für jede Bildschirmgröße vom Telefon bis 4K hinzu.
+Version 1.9.5. Die Lite-Ausgabe zeigt, was läuft und was fehlgeschlagen ist. Die vollständige Ausgabe fügt drei Wächter (CI, Collab und Security), eine Liste der Warnungen, mehrere Konten und ein Team mit Rollen, die Bewertung jedes Kontos, die Gesundheit jedes Repositorys und des Teams, geplante Berichte, ein Aktionsprotokoll, Benachrichtigungen (ntfy, Teams, E-Mail und Apprise), einen optionalen KI-Assistenten mit Voreinstellungen kompatibler Dienste, den Dienstmodus mit Docker und eine Seite für jede Bildschirmgröße vom Telefon bis 4K hinzu.
 
 ## Geplant, in dieser Reihenfolge
 
 Jede Version enthält nur echten Inhalt: Eine Version ohne echten Inhalt wird übersprungen und nie leer veröffentlicht. Nichts davon gilt als an echten Diensten bewiesen, außer die Anleitung sagt es.
 
-### 1.9.5 bis 1.9.9 - Abschluss der dritten Phase
+### 1.9.6 bis 1.9.9 - Abschluss der dritten Phase
 
 Was die Prüfungen von Bewertung, Sicherheitswächter, Gesundheitsansichten, Berichten und Aktionsprotokoll noch finden; die Kosten an GitHub-Aufrufen bei drei laufenden Wächtern; eine Bewertung, die stimmig bleibt, wenn ein Wächter ausgeschaltet ist.
 
@@ -20,7 +20,11 @@ Eine Hauptversion, die technische Schulden abbaut und die öffentlichen Schnitts
 
 Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
 
-## Erledigt in 1.8.2 bis 1.9.4
+## Erledigt in 1.8.2 bis 1.9.5
+
+### 1.9.5 - Strom der Live-Ereignisse
+
+Ein Strom der Live-Ereignisse des eingehenden Webhooks für Clients und Wandbildschirme, die nicht abfragen können; standardmäßig aus, nur lesend, mit Zuhörergrenze und Zeitlimit je Zuhörer.
 
 ### 1.9.4 - KI-Voreinstellungen
 

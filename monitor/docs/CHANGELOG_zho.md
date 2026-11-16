@@ -9,6 +9,12 @@
 
 ## [Unreleased]
 
+## [1.9.5]
+
+### 新增
+
+- **实时事件流（Complete，默认关闭）**：开启 `live.sse.enabled` 后，`GET /api/live-events/stream` 会在入站 Webhook 的事件被接受时，以服务器发送事件的形式发送：一个 `hello` 帧（保留的数量）、每个事件一个带递增 `id` 的 `live` 帧（可用 `Last-Event-ID` 或 `?since=` 续传；只发送 `GET /api/live-events` 同样的封闭字段列表）、保活注释和最后的 `bye`。只读；在网络模式下与其他请求一样需要访问令牌；最多 `live.sse.max_clients` 个监听者（多出的得到 `429`），每个持续 `live.sse.max_seconds`；Lite 版没有它。三个设置位于设置标签页（子标签“入站 Webhook”），带八种语言的帮助；入站 Webhook 指南对此有说明，两个技能的参考列出了该端点。一个使用真实服务器的测试覆盖默认关闭、监听者上限以及被接受的事件到达监听者。
+
 ### 变更
 
 - **`/api/health` 说得更多，`?deep=1` 问得更多**：除 `ok`、`version`、`loaded` 和 `offline` 外，响应还包含刷新周期（`cycle`）、账户的 GitHub 登录（`credential`）的状态，以及监视器在哪里监听（`listening`）；监督进程使用相同的字段。`/api/health?deep=1` 是深度检查：当某个账户的刷新周期卡住或消失时返回 503；在监督进程中，其循环停止、任意账户的周期卡住，或启动后没有任何账户响应时也返回 503。不带 `deep` 时，不会出现以前不会失败的失败。

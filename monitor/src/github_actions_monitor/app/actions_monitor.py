@@ -125,6 +125,7 @@ DEFAULTS = {
     "logs": {"failed_step": {"enabled": False, "lines": 12, "max_bytes": 2000}},      # the log of the failed step in the page: OFF, one press of a button, steplog.py
     "reports": {"workflow_hygiene": {"enabled": False}, "queue": {"enabled": False}, "release_view": {"enabled": False}, "supply_chain": {"enabled": False}, "max_calls_per_cycle": 4},      # four optional reports, all OFF (reports.py)
     "lessons": {"enabled": True, "allow_write": False, "retention_days": 180, "max_entries": 5000, "brief_max_bytes": 3000, "recurring_from": 2},      # the book of failures and the library of lessons (lessons.py): local, read only; writing a lesson is OFF
+    "live": {"sse": {"enabled": False, "max_seconds": 3600, "max_clients": 3}},      # OFF: GET /api/live-events/stream, the live events as server-sent events (webhook.py)
     "ai_alerts": {"enabled": False, "folder": "", "brief_max_bytes": 2048, "hook": {"enabled": False, "url": "", "max_per_hour": 6},
                   "diagnose": {"enabled": False, "max_per_cycle": 3, "log_lines": 10, "max_bytes": 1500},      # OFF: reads logs of GitHub (the allowance)
                   "cascade": {"enabled": True, "map": {}},
@@ -195,6 +196,7 @@ ETAG = {"cache": None}                    # etagcache.EtagCache (None = plain re
 LINK = resilience.Link()                  # the connection: offline since..., back online
 ANALYTICS = {"store": None, "summary": None, "at": 0.0}
 LIVE_EVENTS = []                          # the newest webhook events (workflow_run / workflow_job), newest last
+LIVE_TOTAL = [0]                          # how many were accepted since the start (the running number of the stream)
 STARTED = time.time()
 
 
@@ -948,6 +950,7 @@ def apply_live_event(record, config):
     keep = webhook.live_settings(config)["live_events_keep"]
     LIVE_EVENTS.append({k: v for k, v in record.items() if k in webhook.LIVE_FIELDS} | {"at": resilience.stamp(time.time())})
     del LIVE_EVENTS[:-keep]
+    LIVE_TOTAL[0] += 1
     run = webhook.as_run(record)
     entry = RUN_CACHE.get(record["repo"])
     HOT_FORCED.add(record["repo"])      # whatever the event said, the repository is read again in the next cycle (the event is the news, the read is the proof)
@@ -1814,6 +1817,38 @@ class Handler(BaseHTTPRequestHandler):
         except (ConnectionError, OSError):
             pass   # the browser or a reader closed the tab mid-answer: nothing to report
 
+    def live_stream(self):
+        """GET /api/live-events/stream: `text/event-stream` with a `hello` frame, then one `live` frame per webhook event accepted from now on (or after `Last-Event-ID` / `?since=` while still held)
+        and a keep-alive comment. Read only, off by default (`live.sse.enabled`); the network mode asks for the access token as for every other request; limited listeners, each for a limited time."""
+        from github_actions_monitor.security import webhook
+        from urllib.parse import parse_qs
+        config = toolconfig.raw_config()
+        if not webhook.sse_settings(config)["enabled"]:
+            self.json_reply({"error": "stream off"}, 404)
+            return
+        if not webhook.sse_acquire(config):
+            self.json_reply({"error": "too many listeners"}, 429)
+            return
+        ask = parse_qs(self.path.partition("?")[2])
+        resume = self.headers.get("Last-Event-ID") or (ask.get("since") or [""])[0]
+        try:
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Accel-Buffering", "no")
+            self.send_header("Connection", "close")
+            self.end_headers()
+            self.close_connection = True
+            for frame in webhook.sse_frames(config, lambda: (LIVE_TOTAL[0], list(LIVE_EVENTS)), since=int(resume) if str(resume).isdigit() else None):
+                self.wfile.write(frame.encode("utf-8"))
+                self.wfile.flush()
+        except (ConnectionError, OSError):
+            DISCONNECTS[0] += 1
+        except (ValueError, TypeError) as error:
+            degraded.note("live.stream", error)
+        finally:
+            webhook.sse_release()
+
     def ai_stream(self):
         """GET /api/ai/stream[?only=real]: `text/event-stream` with a `hello` frame (how many real alerts are open), then one `alert` frame per event of the feed and a keep-alive comment. It resumes
         from the `Last-Event-ID` header or `?since=`. Read only; the network mode asks for the access token as for every other request; a limited number of listeners, each for a limited time."""
@@ -2539,6 +2574,10 @@ class Handler(BaseHTTPRequestHandler):
             if not self.guard():
                 return
             self.json_reply({"events": list(reversed(LIVE_EVENTS))})
+        elif path == "/api/live-events/stream":      # server-sent events, read only: the webhook events as they are accepted (live.sse, off by default)
+            if not self.guard():
+                return
+            self.live_stream()
         elif path == "/api/live-status":      # the receiver of webhooks as the Live view shows it: on or off, never the secret
             if not self.guard():
                 return
