@@ -140,6 +140,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ci.group.min` | `2` | sentinel | Workflows needed for a shared cause |
 | `ci.group.reusable` | `false` | sentinel | Group reds by shared workflow |
 | `ci.inactive_days` | `90` | sentinel | Days until a workflow is inactive |
+| `ci.red_age_days` | `30` | sentinel | Days until a red ages |
+| `ci.red_ages` | `true` | sentinel | A red nobody attends to ages |
 | `ci.red_events` | `["push", "schedule", "workflow_dispatch", "merge_group"]` | sentinel | Events that can make a branch red |
 | `ci.rerun_timing` | `false` | sentinel | Ask GitHub for the duration of re-runs |
 | `ci.stuck.awaiting_stuck` | `true` | sentinel | A run waiting for approval can be stuck |

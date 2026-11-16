@@ -23,6 +23,8 @@
     "automation_counts": false,
     "inactive_days": 90,
     "dormant_repos": true,
+    "red_ages": true,
+    "red_age_days": 30,
     "extra_branches": [],
     "stuck": {
       "learned": false,

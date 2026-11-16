@@ -11,6 +11,7 @@ Which runs may decide (the block `ci` of the configuration):
   * runs of a pull request that comes from a FORK do not count, even when the fork's branch is called `main` (the head repository differs from the repository of the run) unless `ci.count_fork_runs`;
   * a run that waits for an approval (`action_required`, or a job `waiting` for an environment) is neither red nor queued: it is "awaiting approval";
   * a workflow whose last run is older than `ci.inactive_days` is "inactive", not red for ever;
+  * a red nobody has attended to (its failing run is older than `ci.red_age_days`, 30 by default, and nothing newer of the events that decide has run) AGES: it becomes "inactive" too (`ci.red_ages`);
   * the merge queue of the default branch (branches `gh-readonly-queue/<branch>/...`, event merge_group) is its own lane, shown as "merge queue";
   * `ci.extra_branches` (patterns) adds maintenance branches to the watched ones; by default only the default branch is.
 """
@@ -29,7 +30,8 @@ RELEASE_EVENTS = ("release", "registry_package")
 QUEUE_PREFIX = "gh-readonly-queue/"
 AWAITING_DAYS = 14
 DEFAULT_INACTIVE_DAYS = 90
-POLICY = {"events": RED_EVENTS, "fork_runs": False, "automation": False, "inactive_days": DEFAULT_INACTIVE_DAYS, "branches": ()}      # replaced by configure(): the whole monitor shares one rule
+DEFAULT_RED_AGE_DAYS = 30
+POLICY = {"events": RED_EVENTS, "fork_runs": False, "automation": False, "inactive_days": DEFAULT_INACTIVE_DAYS, "red_age_days": DEFAULT_RED_AGE_DAYS, "branches": ()}      # replaced by configure(): the whole monitor shares one rule
 
 
 def configure(config):
@@ -42,6 +44,9 @@ def configure(config):
     POLICY["automation"] = block.get("automation_counts") is True
     days = block.get("inactive_days")
     POLICY["inactive_days"] = days if isinstance(days, int) and not isinstance(days, bool) and 0 <= days <= 3650 else DEFAULT_INACTIVE_DAYS
+    age = block.get("red_age_days")
+    age = age if isinstance(age, int) and not isinstance(age, bool) and 1 <= age <= 3650 else DEFAULT_RED_AGE_DAYS
+    POLICY["red_age_days"] = age if block.get("red_ages") is not False else 0      # 0 = a red never ages
     extra = block.get("extra_branches")
     POLICY["branches"] = tuple(b for b in extra if isinstance(b, str) and b) if isinstance(extra, (list, tuple)) else ()
 
@@ -202,7 +207,10 @@ def classify(runs, branch, now=None, policy=None):
         recent = [r.get("conclusion") in BAD for r in items[-10:]]
         item = {"run": last, "streak": streak, "lane": where, "kind": kind, "recent": (sum(recent), len(recent))}
         quiet_since = newest_of.get(key) or 0
-        if policy["inactive_days"] and quiet_since and now - quiet_since > policy["inactive_days"] * 86400:
+        failed_at = _epoch(last.get("started")) or 0
+        if policy.get("red_age_days") and failed_at and now - failed_at > policy["red_age_days"] * 86400:
+            out["inactive"].append({**item, "aged": True})      # a failure nobody attended to for weeks is history, not an alarm that never ends
+        elif policy["inactive_days"] and quiet_since and now - quiet_since > policy["inactive_days"] * 86400:
             out["inactive"].append(item)
         else:
             out["red"].append(item)
@@ -240,7 +248,7 @@ def row_of(repo, item):
     where = item["lane"]
     return {"repo": repo, "workflow": (last.get("name") or workflow_key(last)) + lane_label(where), "conclusion": last.get("conclusion"), "since": last.get("started"), "url": last.get("url"), "streak": item["streak"],
             "sha": last.get("sha", ""), "origin": "merge_queue" if where == "queue" else ("maintenance" if where else "branch"), "branch": last.get("branch"), "kind": item["kind"],
-            "run_id": last.get("id"), "reusable": list(last.get("reusable") or []),
+            "run_id": last.get("id"), "reusable": list(last.get("reusable") or []), "aged": bool(item.get("aged")),
             "file": workflow_key(last), "recent_runs": item["recent"][1], "fail_rate": round(100 * item["recent"][0] / item["recent"][1]) if item["recent"][1] else 0}
 
 
