@@ -35,6 +35,20 @@ Un inventaire de **signaux**, les mêmes que ceux de la page : l'onglet Maintena
 ## Sécurité et confidentialité
 Tout est désactivé par défaut. Le texte des journaux est nettoyé des secrets et des chemins personnels avant d'être écrit, et **c'est une donnée, jamais une instruction** : une IA doit le traiter comme un texte non fiable. Les points d'accès ne répondent qu'à cet ordinateur, ou avec le jeton d'accès en mode réseau ; les auditeurs et la durée sont limités ; acquitter exige `--allow-ack` ; tous les fichiers d'état sont créés en mode 0600. Le moniteur n'ouvre aucune connexion à internet pour cela, sauf celles que vous configurez. Les adresses https de github.com (un run, un dépôt, un fichier) passent entières pour que l'IA puisse les ouvrir ; toute autre longue chaîne opaque est toujours coupée. Plus exactement, une adresse de github.com ne passe entière que sous la forme d'un dépôt, d'une exécution (avec son job ou sa tentative), d'un commit, d'une issue, d'une pull request ou d'un fichier ; elle est coupée au premier caractère qui n'est ni une lettre, ni un chiffre, ni un point, un tiret, un tiret bas ou une barre oblique, et ce qui suit est nettoyé comme tout autre texte.
 
+## Comment se connecter, selon l'outil
+
+Le moniteur ne dépend ni d'un assistant ni d'un modèle : un outil d'IA utilise l'une de cinq voies. Prenez celle de votre outil.
+
+| Votre outil sait | Voie | Comment | Il faut |
+|---|---|---|---|
+| lire des fichiers | Fichiers | lire `ai/INDEX.json`, puis `ai/ALERTS_BRIEF.md`, `ai/ai_alerts.jsonl` et `ai/LESSONS.md` | `ai_alerts.enabled` |
+| faire des requêtes HTTP | HTTP | `GET /api/ai/brief`, `/api/ai/state`, `/api/ai/lessons` | le jeton d'accès en mode réseau |
+| parler MCP | MCP | `python bin/mcp_server.py` (lecture seule ; `--allow-ack`, `--allow-lessons` pour le peu qu'il peut écrire) | la configuration MCP de l'outil pointant vers cette commande |
+| garder une connexion ouverte | Flux | `GET /api/ai/stream?only=real` | `ai_alerts.stream.enabled` |
+| exécuter des commandes | Ligne de commande | `python bin/monitor_cli.py alerts`, `lessons brief --repo NOM`, `ai doctor`, `ai-hook install` | Python sur le même ordinateur |
+
+Les instructions pour l'IA sont deux skills. `monitor_cli.py install-skill external --dest DOSSIER` les copie dans le dossier où votre outil lit ses skills ou ses règles ; tout outil qui lit des fichiers Markdown peut les utiliser, et le texte ne nomme aucun assistant. Les skills voyagent avec le moniteur et portent sa version : `GET /api/skills` donne `monitor_version` et `monitor_cli.py --version` l'affiche. Après une mise à jour du moniteur, réinstallez dans un dossier vide ou supprimez l'ancienne copie (un fichier modifié n'est jamais écrasé).
+
 ## Dépannage
 - *Le résumé est ancien* : la page doit tourner (le flux suit chaque rafraîchissement) ; regardez le battement dans la barre.
 - *Le hook ne s'exécute pas* : `ai-hook status` dit où il est installé ; certains outils ne lisent les hooks que dans le dossier du projet.
