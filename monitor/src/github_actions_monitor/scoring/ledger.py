@@ -47,6 +47,15 @@ def clean_ledger(data, now):
     return ledger
 
 
+def run_key(run):
+    """The key of a run in the ledger: its id, and `id:attempt` from the second attempt on. GitHub keeps the id when a run is re-run, so each attempt is its own execution:
+    the failed first one and the green second one both count, and the recovery between them is seen."""
+    attempt = run.get("attempt")
+    if isinstance(attempt, int) and not isinstance(attempt, bool) and attempt > 1:
+        return f"{run['id']}:{attempt}"
+    return str(run["id"])
+
+
 def update_ledger(ledger, runs, collab_alerts, now, keep_days, collab_known=True):
     """Adds the finished runs not seen before and follows the collaboration alerts; forgets what is older than `keep_days`. `runs` are the run dicts of the monitor,
     `collab_alerts` the open alerts of the collaboration sentinel ({"id", "created_at"}); `collab_known` is False while that sentinel is off or has not looked yet, so an empty list is not read as "everything was resolved"."""
@@ -57,7 +66,7 @@ def update_ledger(ledger, runs, collab_alerts, now, keep_days, collab_known=True
         if started is None:
             continue
         seconds = run.get("seconds") if isinstance(run.get("seconds"), (int, float)) and not isinstance(run.get("seconds"), bool) else None
-        ledger["runs"].setdefault(str(run["id"]), [started, run["conclusion"], seconds, str(run.get("repo") or "")[:100], str(run.get("name") or "")[:100]])
+        ledger["runs"].setdefault(run_key(run), [started, run["conclusion"], seconds, str(run.get("repo") or "")[:100], str(run.get("name") or "")[:100]])
     open_now = set()
     for alert in (collab_alerts or []) if collab_known else []:
         if not isinstance(alert, dict) or not alert.get("id"):

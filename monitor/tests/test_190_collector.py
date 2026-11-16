@@ -51,12 +51,13 @@ class Runs(unittest.TestCase):
         runs = [run(0, "failure"), run(100, "failure"), run(600, "success"),
                 run(0, "failure", name="other"), run(1200, "success", name="other"), run(5000, "failure", name="third")]
         m = collector.collect_runs(runs, T0, T0 + DAY)
-        self.assertEqual(m["samples"]["recoveries"], 2)
-        self.assertEqual(m["mttr"], 600)          # nearest-rank median of 600 and 1200
+        self.assertEqual((m["samples"]["recoveries"], m["samples"]["recoveries_open"]), (2, 1))
+        self.assertEqual(m["mttr"], 1200)          # median of 600, 1200 and the 81400 s the third workflow has been red so far
+        self.assertEqual(collector.recoveries(collector.runs_in_window(runs, T0, T0 + DAY)), [600, 1200])
 
-    def test_a_still_red_workflow_has_no_recovery(self):
+    def test_a_still_red_workflow_counts_the_time_it_has_been_red(self):
         m = collector.collect_runs([run(0, "failure"), run(50, "failure")], T0, T0 + DAY)
-        self.assertIsNone(m["mttr"])
+        self.assertEqual((m["mttr"], m["samples"]["recoveries"], m["samples"]["recoveries_open"]), (DAY, 0, 1))
 
     def test_throughput_is_runs_per_day(self):
         runs = [run(i * 100) for i in range(14)]
@@ -97,7 +98,7 @@ class Collab(unittest.TestCase):
 class Merge(unittest.TestCase):
     def test_collect_merges_samples_and_window(self):
         m = collector.collect([run(1)], [{"opened": T0, "closed": T0 + 10}], T0, T0 + DAY)
-        self.assertEqual(m["samples"], {"runs": 1, "durations": 1, "recoveries": 0, "collab_closed": 1, "collab_open": 0})
+        self.assertEqual(m["samples"], {"runs": 1, "durations": 1, "recoveries": 0, "recoveries_open": 0, "collab_closed": 1, "collab_open": 0})
         self.assertEqual(m["window"], {"start": T0, "end": T0 + DAY})
 
     def test_by_repo_breaks_down(self):
@@ -111,8 +112,8 @@ class Quiet(unittest.TestCase):
         m = collector.collect_runs([run(1), run(2)], T0, T0 + DAY)
         self.assertEqual((m["mttr"], m["samples"]["recoveries"]), (0.0, 0))
 
-    def test_a_failure_that_has_not_recovered_is_still_unknown_not_zero(self):
-        self.assertIsNone(collector.collect_runs([run(1), run(2, "failure")], T0, T0 + DAY)["mttr"])
+    def test_a_failure_that_has_not_recovered_is_measured_not_unknown_and_not_zero(self):
+        self.assertEqual(collector.collect_runs([run(1), run(2, "failure")], T0, T0 + DAY)["mttr"], DAY - 2)
 
     def test_no_runs_at_all_is_unknown(self):
         self.assertIsNone(collector.collect_runs([], T0, T0 + DAY)["mttr"])
