@@ -4,7 +4,7 @@ Ce qui est publié, ce qui vient ensuite et ce qui n'est qu'une idée, dans cet 
 
 ## Où en est le moniteur
 
-Version 2.0.1. L'édition lite montre ce qui tourne et ce qui a échoué. L'édition complète ajoute trois sentinelles (CI, Collab et Security), une liste d'alertes, plusieurs comptes et une équipe avec des rôles, la note de chaque compte, la santé de chaque dépôt et de l'équipe, des rapports programmés, un journal des actions, des notifications (ntfy, Teams, e-mail et Apprise), un assistant d'IA facultatif avec des préréglages de services compatibles, le mode service avec Docker et une page pour toutes les tailles d'écran, du téléphone à la 4K.
+Version 2.0.2. L'édition lite montre ce qui tourne et ce qui a échoué. L'édition complète ajoute trois sentinelles (CI, Collab et Security), une liste d'alertes, plusieurs comptes et une équipe avec des rôles, la note de chaque compte, la santé de chaque dépôt et de l'équipe, des rapports programmés, un journal des actions, des notifications (ntfy, Teams, e-mail et Apprise), un assistant d'IA facultatif avec des préréglages de services compatibles, le mode service avec Docker et une page pour toutes les tailles d'écran, du téléphone à la 4K.
 
 ## Prévu, dans cet ordre
 
@@ -16,7 +16,11 @@ Ce qui n'apparaît qu'à l'usage réel prolongé : la migration depuis la 1.8 et
 
 Les workflows du moniteur lui-même respectent ce que la sentinelle d'hygiène demandera aux autres : actions fixées à un commit, permissions minimales et une limite de temps sur chaque job.
 
-## Fait dans la 1.8.2 à la 2.0.1
+## Fait dans la 1.8.2 à la 2.0.2
+
+### 2.0.2 - Des journaux plus sûrs, un texte d'IA plus propre et un score plus juste
+
+Tout ce qu'une IA peut lire passe par un seul nettoyeur qui connaît plus de formes de secret, l'assistant intégré garde sa clé et ne suit plus les redirections ni les proxys, le journal des actions est une chaîne dans un fichier par compte et un lecteur ne peut pas le lire, l'image et les processus des comptes ne portent plus de secrets, le score pénalise une panne jamais réparée et ne compte plus une source illisible comme propre, et une longue liste de corrections du stockage, des sauvegardes, de la migration, des vues de terminal et du lanceur.
 
 ### 2.0.1 - Empaquetage et une clé manquante
 

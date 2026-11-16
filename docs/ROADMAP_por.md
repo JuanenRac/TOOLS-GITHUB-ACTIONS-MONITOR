@@ -4,7 +4,7 @@ O que já foi publicado, o que vem a seguir e o que é apenas uma ideia, por ess
 
 ## Onde está o monitor agora
 
-Versão 2.0.1. A edição lite mostra o que corre e o que falhou. A edição completa acrescenta três sentinelas (CI, Collab e Security), uma lista de alertas, várias contas e uma equipa com funções, a pontuação de cada conta, a saúde de cada repositório e da equipa, relatórios agendados, um registo de ações, notificações (ntfy, Teams, correio eletrónico e Apprise), um assistente de IA opcional com predefinições de serviços compatíveis, o modo de serviço com Docker e uma página para todos os tamanhos de ecrã, do telemóvel ao 4K.
+Versão 2.0.2. A edição lite mostra o que corre e o que falhou. A edição completa acrescenta três sentinelas (CI, Collab e Security), uma lista de alertas, várias contas e uma equipa com funções, a pontuação de cada conta, a saúde de cada repositório e da equipa, relatórios agendados, um registo de ações, notificações (ntfy, Teams, correio eletrónico e Apprise), um assistente de IA opcional com predefinições de serviços compatíveis, o modo de serviço com Docker e uma página para todos os tamanhos de ecrã, do telemóvel ao 4K.
 
 ## Previsto, por esta ordem
 
@@ -16,7 +16,11 @@ O que só aparece com uso real prolongado: a migração desde a 1.8 e a 1.9, o c
 
 Os workflows do próprio monitor cumprem o que a sentinela de higiene pedirá aos outros: ações fixadas a um commit, as permissões mínimas e um limite de tempo em cada job.
 
-## Feito da 1.8.2 à 2.0.1
+## Feito da 1.8.2 à 2.0.2
+
+### 2.0.2 - Registos mais seguros, texto para IA mais limpo e uma pontuação mais justa
+
+Tudo o que uma IA pode ler passa por um único limpador que conhece mais formas de segredo, o assistente integrado guarda a sua chave e já não segue redirecionamentos nem proxies, o registo de ações é uma cadeia num ficheiro por conta e um leitor não o pode ler, a imagem e os processos das contas já não levam segredos, a pontuação penaliza uma falha nunca corrigida e já não conta uma fonte ilegível como limpa, e uma longa lista de correções do armazenamento, das cópias de segurança, da migração, das vistas de terminal e do lançador.
 
 ### 2.0.1 - Empacotamento e uma chave em falta
 

@@ -4,7 +4,7 @@ Was erschienen ist, was als Nächstes kommt und was nur eine Idee ist, in dieser
 
 ## Wo der Monitor jetzt steht
 
-Version 2.0.1. Die Lite-Ausgabe zeigt, was läuft und was fehlgeschlagen ist. Die vollständige Ausgabe fügt drei Wächter (CI, Collab und Security), eine Liste der Warnungen, mehrere Konten und ein Team mit Rollen, die Bewertung jedes Kontos, die Gesundheit jedes Repositorys und des Teams, geplante Berichte, ein Aktionsprotokoll, Benachrichtigungen (ntfy, Teams, E-Mail und Apprise), einen optionalen KI-Assistenten mit Voreinstellungen kompatibler Dienste, den Dienstmodus mit Docker und eine Seite für jede Bildschirmgröße vom Telefon bis 4K hinzu.
+Version 2.0.2. Die Lite-Ausgabe zeigt, was läuft und was fehlgeschlagen ist. Die vollständige Ausgabe fügt drei Wächter (CI, Collab und Security), eine Liste der Warnungen, mehrere Konten und ein Team mit Rollen, die Bewertung jedes Kontos, die Gesundheit jedes Repositorys und des Teams, geplante Berichte, ein Aktionsprotokoll, Benachrichtigungen (ntfy, Teams, E-Mail und Apprise), einen optionalen KI-Assistenten mit Voreinstellungen kompatibler Dienste, den Dienstmodus mit Docker und eine Seite für jede Bildschirmgröße vom Telefon bis 4K hinzu.
 
 ## Geplant, in dieser Reihenfolge
 
@@ -16,7 +16,11 @@ Was sich nur im langen echten Einsatz zeigt: die Migration von 1.8 und 1.9, das 
 
 Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
 
-## Erledigt in 1.8.2 bis 2.0.1
+## Erledigt in 1.8.2 bis 2.0.2
+
+### 2.0.2 - Sicherere Protokolle, saubererer KI-Text und eine gerechtere Bewertung
+
+Alles, was eine KI lesen kann, läuft durch einen Bereiniger, der mehr Formen eines Geheimnisses kennt, der integrierte Assistent behält seinen Schlüssel und folgt keinen Weiterleitungen und Proxys mehr, das Aktionsprotokoll ist eine Kette in einer Datei je Konto und für einen Betrachter nicht lesbar, das Image und die Prozesse der Konten tragen keine Geheimnisse mehr, die Bewertung bestraft einen nie behobenen Fehler und zählt eine unlesbare Quelle nicht mehr als sauber, dazu eine lange Liste von Korrekturen bei Speicher, Sicherungen, Migration, Terminalansichten und Starter.
 
 ### 2.0.1 - Paketierung und ein fehlender Schlüssel
 

@@ -4,7 +4,7 @@ Ciò che è stato pubblicato, ciò che viene dopo e ciò che è solo un'idea, in
 
 ## A che punto è il monitor
 
-Versione 2.0.1. L'edizione lite mostra ciò che gira e ciò che è fallito. L'edizione completa aggiunge tre sentinelle (CI, Collab e Security), un elenco di avvisi, più account e un team con ruoli, il punteggio di ogni account, la salute di ogni repository e del team, rapporti programmati, un registro delle azioni, notifiche (ntfy, Teams, e-mail e Apprise), un assistente IA facoltativo con preset di servizi compatibili, la modalità servizio con Docker e una pagina per ogni dimensione di schermo, dal telefono al 4K.
+Versione 2.0.2. L'edizione lite mostra ciò che gira e ciò che è fallito. L'edizione completa aggiunge tre sentinelle (CI, Collab e Security), un elenco di avvisi, più account e un team con ruoli, il punteggio di ogni account, la salute di ogni repository e del team, rapporti programmati, un registro delle azioni, notifiche (ntfy, Teams, e-mail e Apprise), un assistente IA facoltativo con preset di servizi compatibili, la modalità servizio con Docker e una pagina per ogni dimensione di schermo, dal telefono al 4K.
 
 ## Previsto, in quest'ordine
 
@@ -16,7 +16,11 @@ Ciò che emerge solo con un uso reale prolungato: la migrazione dalla 1.8 e dall
 
 I workflow del monitor stesso rispettano ciò che la sentinella di igiene chiederà agli altri: azioni fissate a un commit, permessi minimi e un limite di tempo su ogni job.
 
-## Fatto dalla 1.8.2 alla 2.0.1
+## Fatto dalla 1.8.2 alla 2.0.2
+
+### 2.0.2 - Registri più sicuri, testo per l'IA più pulito e un punteggio più giusto
+
+Tutto ciò che un'IA può leggere passa per un solo pulitore che conosce più forme di segreto, l'assistente integrato conserva la sua chiave e non segue più reindirizzamenti né proxy, il registro delle azioni è una catena in un file per account e un lettore non può leggerlo, l'immagine e i processi degli account non portano più segreti, il punteggio penalizza un errore mai corretto e non conta più una fonte illeggibile come pulita, e un lungo elenco di correzioni di archivio, backup, migrazione, viste da terminale e avviatore.
 
 ### 2.0.1 - Pacchetto e una chiave mancante
 
