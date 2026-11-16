@@ -31,6 +31,10 @@
 
 - **Renovate 与 Dependabot 同等对待，检查器区分自有 action 与第三方 action**：`renovate` 的拉取请求在 A4 中作为依赖更新列出（`sentinel.dependency_bots` 指定账户），带有 Renovate 配置的仓库不再被报告为缺少更新机器人。`lint.own_owners` 和 `lint.unpinned_own` 会把未固定的 action 标为自有或第三方，并可降低或隐藏自有的；三条默认关闭的可选规则分别发现没有 `timeout-minutes` 的作业（`lint.rules.no_timeout`）、`secrets: inherit`（`lint.rules.secrets_inherit`）和跟随 `@main` 的自有 action（`lint.rules.own_action_main`）。
 
+### 变更
+
+- **发布文件检查可适应项目**：`sentinel.surface.checks.release_assets.require_sha256` 和 `.require_signature` 不再要求校验和或签名文件，`.allow_empty` 接受没有文件的发布（向包注册表发布的项目），`sentinel.surface.checks.tag_vs_version.prefixes` 会把 `cli-v1.2.0` 这样的标签与清单比较，`.prerelease_ok` 把日期版本号同一天的测试版视为同一版本；`sentinel.require_verified_signature` 原本就可关闭。默认值与以前要求相同。
+
 ## [2.0.2]
 
 ### 安全

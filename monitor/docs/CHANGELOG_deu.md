@@ -31,6 +31,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **Renovate zählt wie Dependabot, und der Linter unterscheidet eigene von fremden Actions**: Die Pull Requests von `renovate` erscheinen in A4 als Abhängigkeits-Updates (`sentinel.dependency_bots` nennt die Konten), und ein Repository mit Renovate-Konfiguration wird nicht als ohne Update-Bot gemeldet. `lint.own_owners` und `lint.unpinned_own` kennzeichnen eine nicht gepinnte Action als eigen oder fremd und können die eigenen herabstufen oder ausblenden; drei optionale, standardmäßig ausgeschaltete Regeln finden einen Job ohne `timeout-minutes` (`lint.rules.no_timeout`), `secrets: inherit` (`lint.rules.secrets_inherit`) und eine eigene Action, die `@main` folgt (`lint.rules.own_action_main`).
 
+### Geändert
+
+- **Die Prüfung der Release-Dateien passt sich dem Projekt an**: `sentinel.surface.checks.release_assets.require_sha256` und `.require_signature` verlangen keine Prüfsummen- oder Signaturdatei mehr, `.allow_empty` akzeptiert ein Release ohne Dateien (Projekte, die in einer Paketregistry veröffentlichen), `sentinel.surface.checks.tag_vs_version.prefixes` vergleicht Tags wie `cli-v1.2.0` mit dem Manifest, und `.prerelease_ok` behandelt die Betas eines Tages einer Kalenderversion als dieselbe Version; `sentinel.require_verified_signature` war schon abschaltbar. Die Standardwerte verlangen dasselbe wie zuvor.
+
 ## [2.0.2]
 
 ### Sicherheit

@@ -282,6 +282,11 @@ for _check in surface.DEFAULTS["checks"]:
     _f(_T_SURF, "chk_" + _check, f"sentinel.surface.checks.{_check}.enabled", "bool", label=["cfg.p.check_on"], help="cfg.h.check_on")
     for _param, _bounds in CHECK_PARAMS.get(_check, ()):
         _f(_T_SURF, "chk_" + _check, f"sentinel.surface.checks.{_check}.{_param}", "int", _bounds, label=["cfg.p." + _param], help="cfg.h.p." + _param)
+_f(_T_SURF, "chk_release_assets", "sentinel.surface.checks.release_assets.require_sha256", "bool")
+_f(_T_SURF, "chk_release_assets", "sentinel.surface.checks.release_assets.require_signature", "bool")
+_f(_T_SURF, "chk_release_assets", "sentinel.surface.checks.release_assets.allow_empty", "bool")
+_f(_T_SURF, "chk_tag_vs_version", "sentinel.surface.checks.tag_vs_version.prefixes", "names")
+_f(_T_SURF, "chk_tag_vs_version", "sentinel.surface.checks.tag_vs_version.prerelease_ok", "bool")
 # --- Release readiness (A11)
 _f(_T_READY, "main", "sentinel.readiness.enabled", "bool")
 _f(_T_READY, "main", "sentinel.readiness.min_coverage", "float", (0.0, 1.0), unit="x")

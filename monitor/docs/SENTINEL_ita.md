@@ -64,7 +64,8 @@ Sono tutti suggerimenti di sola lettura per una persona; il monitor non chiude m
 | `matrix_os` | Errori solo su un sistema della matrice | on · max_per_tick=4 |
 | `artifacts` | Costo degli artifact | on · max_mb=500, retention_days=30 |
 | `required_checks` | Check obbligatori rossi o assenti | on |
-| `release_assets` | Release pubblicate incomplete | on · recent_days=30, required |
+| `release_assets` | Release pubblicate incomplete | on · recent_days=30, required, require_sha256, require_signature, allow_empty (una release senza file va bene) |
+| `tag_vs_version` | Tag rispetto alla versione del manifesto | on · prefixes (`sentinel.surface.checks.tag_vs_version.prefixes`), prerelease_ok |
 | `tag_vs_version` | Tag di release vs versione del manifest/CHANGELOG | on |
 | `packages` | GitHub Packages | on |
 | `drafts` | Bozze e pre-release dimenticate | on · days=14 |

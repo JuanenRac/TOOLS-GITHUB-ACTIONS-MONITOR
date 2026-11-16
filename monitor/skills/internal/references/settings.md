@@ -380,8 +380,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinel.surface.checks.pr_human.enabled` | `-` | surface | sentinel.surface.checks.pr_human.enabled |
 | `sentinel.surface.checks.pr_target.enabled` | `-` | surface | sentinel.surface.checks.pr_target.enabled |
 | `sentinel.surface.checks.pr_workflow_touch.enabled` | `-` | surface | sentinel.surface.checks.pr_workflow_touch.enabled |
+| `sentinel.surface.checks.release_assets.allow_empty` | `-` | surface | Allow releases without files |
 | `sentinel.surface.checks.release_assets.enabled` | `-` | surface | sentinel.surface.checks.release_assets.enabled |
 | `sentinel.surface.checks.release_assets.recent_days` | `-` | surface | sentinel.surface.checks.release_assets.recent_days |
+| `sentinel.surface.checks.release_assets.require_sha256` | `-` | surface | Require a checksum file |
+| `sentinel.surface.checks.release_assets.require_signature` | `-` | surface | Require a signature file |
 | `sentinel.surface.checks.required_checks.enabled` | `-` | surface | sentinel.surface.checks.required_checks.enabled |
 | `sentinel.surface.checks.secret_resolved.enabled` | `-` | surface | sentinel.surface.checks.secret_resolved.enabled |
 | `sentinel.surface.checks.security_aged.days` | `-` | surface | sentinel.surface.checks.security_aged.days |
@@ -389,6 +392,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinel.surface.checks.stuck_concurrency.enabled` | `-` | surface | sentinel.surface.checks.stuck_concurrency.enabled |
 | `sentinel.surface.checks.stuck_concurrency.minutes` | `-` | surface | sentinel.surface.checks.stuck_concurrency.minutes |
 | `sentinel.surface.checks.tag_vs_version.enabled` | `-` | surface | sentinel.surface.checks.tag_vs_version.enabled |
+| `sentinel.surface.checks.tag_vs_version.prefixes` | `-` | surface | Prefixes of the tags |
+| `sentinel.surface.checks.tag_vs_version.prerelease_ok` | `-` | surface | Betas of the same version are the same version |
 | `sentinel.surface.checks.unpinned_uses.enabled` | `-` | surface | sentinel.surface.checks.unpinned_uses.enabled |
 | `sentinel.surface.checks.workflows_disabled.enabled` | `-` | surface | sentinel.surface.checks.workflows_disabled.enabled |
 | `sentinel.surface.enabled` | `-` | surface | Surface checks on |

@@ -64,7 +64,8 @@
 | `matrix_os` | 仅在矩阵中的一个系统上失败 | on · max_per_tick=4 |
 | `artifacts` | 构建产物（artifact）开销 | on · max_mb=500, retention_days=30 |
 | `required_checks` | 为红色或缺失的必需检查 | on |
-| `release_assets` | 已发布但不完整的 release | on · recent_days=30, required |
+| `release_assets` | 已发布但不完整的 release | on · recent_days=30, required, require_sha256, require_signature, allow_empty（允许没有文件的发布） |
+| `tag_vs_version` | 标签与清单版本对比 | on · prefixes (`sentinel.surface.checks.tag_vs_version.prefixes`), prerelease_ok |
 | `tag_vs_version` | 发布标签与清单/CHANGELOG 版本对比 | on |
 | `packages` | GitHub Packages | on |
 | `drafts` | 被遗忘的草稿与预发布 | on · days=14 |
