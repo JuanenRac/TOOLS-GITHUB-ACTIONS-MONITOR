@@ -159,6 +159,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `lessons.max_entries` | `5000` | ai | Most lines in the book |
 | `lessons.recurring_from` | `2` | ai | A kind of failure repeats from |
 | `lessons.retention_days` | `180` | ai | Keep failures for |
+| `lint.api.max_calls_per_tick` | `-` | lint | API calls per cycle for workflow files |
+| `lint.api.max_files_per_repo` | `-` | lint | Workflow files read per repository |
+| `lint.api.refresh_seconds` | `-` | lint | Read a repository again after |
 | `lint.enabled` | `-` | lint | Linter on |
 | `lint.ignore` | `-` | lint | Ignored findings |
 | `lint.in_report` | `-` | lint | Warn in the report |
@@ -173,6 +176,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `lint.rules.secrets_in_clear.severity` | `-` | lint | lint.rules.secrets_in_clear.severity |
 | `lint.rules.unpinned_uses.enabled` | `-` | lint | lint.rules.unpinned_uses.enabled |
 | `lint.rules.unpinned_uses.severity` | `-` | lint | lint.rules.unpinned_uses.severity |
+| `lint.source` | `-` | lint | Where the workflow files are read |
+| `lint.sparse.max_repos_per_tick` | `-` | lint | Sparse clones per cycle |
+| `lint.sparse.refresh_seconds` | `-` | lint | Refresh a sparse clone after |
 | `listen.allowed_hosts` (secure) | `[]` | advanced | Names the page may be opened with |
 | `listen.host` (secure) | `"127.0.0.1"` | advanced | Address to listen on |
 | `listen.local_port` (secure) | `0` | advanced | Local-only port for this computer |
