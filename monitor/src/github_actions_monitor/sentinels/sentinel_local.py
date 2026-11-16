@@ -183,11 +183,23 @@ def a2_from_listing(items, names):
     for item in items if isinstance(items, list) else []:
         if not isinstance(item, dict):
             continue
-        base = str(item.get("path") or "").split("@")[0].rsplit("/", 1)[-1]
-        if base in names:
-            grouped.setdefault(base, []).append({"databaseId": item.get("id"), "name": item.get("name"), "conclusion": item.get("conclusion"), "status": item.get("status"),
+        raw_path = str(item.get("path") or "").split("@")[0]
+        base = raw_path.rsplit("/", 1)[-1]
+        if base in names and not raw_path.startswith("dynamic/") and a2_origin_counts(item.get("event"), item.get("head_repository"), item.get("repository")):
+            grouped.setdefault(base, []).append({"databaseId": item.get("id"), "name": item.get("name"), "conclusion": item.get("conclusion"), "status": item.get("status"), "event": item.get("event"),
                                                  "createdAt": item.get("created_at"), "startedAt": item.get("run_started_at"), "url": item.get("html_url"), "headSha": item.get("head_sha")})
     return {name: first for name, first in ((n, a2_pick_concluded(runs)) for n, runs in grouped.items()) if first}
+
+
+def a2_origin_counts(event, head=None, base=None):
+    """True when a run found by the lookups of A2 may decide the colour of the default branch: its event is one of `ci.red_events` and, when the listing says where its head lives, it is not
+    the pull request of a fork. `exclude_pull_requests=true` of GitHub does not remove those (a fork's run carries no pull request), so the filter is made here with the same rule as redrule.py.
+    A record with no event (a cache written before) counts, as before."""
+    run = {"event": event or None}
+    head_name, base_name = (head or {}).get("full_name"), (base or {}).get("full_name")
+    if head_name and base_name and str(head_name).lower() != str(base_name).lower():
+        run["fork"] = True
+    return redrule.origin_counts(run)
 
 
 A2_RESOLVE_DEPTH = 10                      # completed runs of one workflow asked for; the first with a real conclusion is the one that counts
@@ -202,6 +214,8 @@ def a2_pick_concluded(answer):
             continue
         conclusion = item.get("conclusion") or None
         if (item.get("status") or "completed") != "completed" or not conclusion or conclusion in A2_IGNORED_CONCLUSIONS:
+            continue
+        if not a2_origin_counts(item.get("event")):      # a comment, an issue or a pull request never decides: the walk goes on to the previous run
             continue
         return item
     return None
@@ -240,7 +254,7 @@ def a2_resolved_runs(resolved, branches, now_ts, ttl):
         repo, _, name = key.partition("|")
         out.setdefault(repo, []).append({"repo": repo, "id": entry.get("id"), "name": entry.get("name") or name, "path": name, "branch": (branches or {}).get(repo) or entry.get("branch") or "main",
                                          "status": entry.get("status") or "completed", "conclusion": entry.get("conclusion"), "started": entry.get("started"), "url": entry.get("url"),
-                                         "sha": entry.get("sha") or "", "seconds": None, "actor": "", "event": None, "title": ""})
+                                         "sha": entry.get("sha") or "", "seconds": None, "actor": "", "event": entry.get("event") or None, "title": ""})
     return out
 
 
@@ -1471,7 +1485,7 @@ class Sentinel:
             branch = branches.get(repo) or "main"
             try:
                 answer = self._gh("run", "list", "-R", f"{toolconfig.github_owner()}/{repo}", "-w", name, "--branch", branch, "--status", "completed", "-L", str(A2_RESOLVE_DEPTH),
-                                  "--json", "databaseId,name,conclusion,status,createdAt,startedAt,url,headSha")
+                                  "--json", "databaseId,name,conclusion,status,createdAt,startedAt,url,headSha,event")
             except Exception as error:   # a failed question stays unresolved; the others go on
                 self.error("a2_resolve", error)
                 continue
@@ -1479,7 +1493,7 @@ class Sentinel:
             if first:
                 entry = {"at": now_ts, "state": "run", "id": first.get("databaseId"), "name": first.get("name") or "", "conclusion": first.get("conclusion") or None,
                          "status": first.get("status") or "completed", "started": first.get("startedAt") or first.get("createdAt"), "url": first.get("url"),
-                         "sha": (first.get("headSha") or "")[:7], "branch": branch}
+                         "sha": (first.get("headSha") or "")[:7], "branch": branch, "event": first.get("event")}
             else:
                 entry = {"at": now_ts, "state": "none", "branch": branch}
             with self.lock:
@@ -1515,7 +1529,7 @@ class Sentinel:
             for name, first in found.items():
                 self.a2_resolved[f"{repo}|{name}"] = {"at": now_ts, "state": "run", "id": first.get("databaseId"), "name": first.get("name") or "", "conclusion": first.get("conclusion") or None,
                                                      "status": first.get("status") or "completed", "started": first.get("startedAt") or first.get("createdAt"), "url": first.get("url"),
-                                                     "sha": (first.get("headSha") or "")[:7], "branch": branch}
+                                                     "sha": (first.get("headSha") or "")[:7], "branch": branch, "event": first.get("event")}
         return spent, len(found)
 
     def refresh_repos(self, repos):
