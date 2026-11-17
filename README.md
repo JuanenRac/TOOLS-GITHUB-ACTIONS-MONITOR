@@ -82,7 +82,7 @@
 |---|---|
 | **Maturity** | functional |
 | **Tests** | 2923 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Settings** | 567 settings, all with help |
+| **Settings** | 579 settings, all with help |
 | **Languages** | 8 (English, Spanish, German, French, Italian, Japanese, Chinese, Portuguese) |
 | **Tested in the CI on** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -293,6 +293,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/SKILLS.md`](monitor/docs/SKILLS.md): the two skills for AIs, how they are made and how to install them
 - [`monitor/docs/EXTRAS.md`](monitor/docs/EXTRAS.md): optional extras - the log of the failed step and a read-only token of the GitHub App
 - [`monitor/docs/SCREENS.md`](monitor/docs/SCREENS.md): sizes, orientation and several screens
+- [`monitor/docs/SOUNDS.md`](monitor/docs/SOUNDS.md): one sound for each kind of event, the themes and the quiet hours
 - [`monitor/docs/LESSONS.md`](monitor/docs/LESSONS.md): the book of failures, the library of lessons and the brief before a push
 - [`monitor/docs/AI.md`](monitor/docs/AI.md): the AI assistant: providers, safety and actions
 - [`monitor/docs/ANALYTICS.md`](monitor/docs/ANALYTICS.md): analytics, conditional reads and the lost connection
