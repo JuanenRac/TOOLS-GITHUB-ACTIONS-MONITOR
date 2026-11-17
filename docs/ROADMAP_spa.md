@@ -16,7 +16,11 @@ Lo que solo aparece con un uso real prolongado: la migración desde la 1.8 y la 
 
 Los workflows del propio monitor cumplen lo que el centinela de higiene pedirá a los demás: acciones fijadas a un commit, los permisos mínimos y un límite de tiempo en cada trabajo.
 
-## Hecho en la 1.8.2 a la 2.0.5
+## Hecho en la 1.8.2 a la 2.0.6
+
+### 2.0.6 - Tres pantallas de pared, dibujadas y desactivadas por defecto
+
+Las tres pantallas de pared están dibujadas: General (puntuación, lámparas de la flota, gráficos, mapa de calor, runners y la cuota), Ahora (ejecuciones en curso, cola, aprobaciones, fallos recientes y una línea en vivo) y Centinelas (una ficha por centinela con un radar animado). La página dibuja cada gráfico ella misma, un fallo nuevo parpadea una vez y se calma, nada se mueve para quien pidió menos movimiento, todo se desplaza un poco cada minuto contra el quemado, la página puede atenuarse de noche, una ventana puede girar entre las tres páginas y una prueba de navegador las comprueba en 1080p, 4K y girada en los ocho idiomas. Las pantallas están desactivadas por defecto (`screens.enabled`), y el README y la guía de las pantallas ya las muestran.
 
 ### 2.0.5 - Menos falsos rojos, repositorios dormidos y preguntas que se ven a pantalla completa
 

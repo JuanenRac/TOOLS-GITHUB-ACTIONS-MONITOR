@@ -21,7 +21,11 @@ What only shows with long real use: the migration from 1.8 and 1.9, the growth o
 
 The monitor's own workflows keep to what the hygiene sentinel will ask of others: actions pinned to a commit, the least permissions and a time limit on every job.
 
-## Done in 1.8.2 to 2.0.5
+## Done in 1.8.2 to 2.0.6
+
+### 2.0.6 - Three wall screens, drawn and off by default
+
+The three wall screens are drawn: Overview (score, fleet lamps, charts, heat map, runners and the allowance), Right now (running runs, queue, approvals, recent failures and a live line) and Sentinels (a card for each sentinel with an animated radar). The page draws every chart itself, a new failure flashes once and calms down, nothing moves for who asked for less motion, everything shifts a little every minute against burn-in, the page can dim at night, one window can turn through the three pages, and a browser test checks them in 1080p, 4K and turned in the eight languages. The screens are off by default (`screens.enabled`), and the README and the guide of the screens now show them.
 
 ### 2.0.5 - Fewer false reds, dormant repositories and questions that show in full screen
 

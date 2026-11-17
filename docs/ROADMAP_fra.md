@@ -16,7 +16,11 @@ Ce qui n'apparaît qu'à l'usage réel prolongé : la migration depuis la 1.8 et
 
 Les workflows du moniteur lui-même respectent ce que la sentinelle d'hygiène demandera aux autres : actions fixées à un commit, permissions minimales et une limite de temps sur chaque job.
 
-## Fait dans la 1.8.2 à la 2.0.5
+## Fait dans la 1.8.2 à la 2.0.6
+
+### 2.0.6 - Trois écrans muraux, dessinés et désactivés par défaut
+
+Les trois écrans muraux sont dessinés : Vue générale (score, lampes de la flotte, graphiques, carte de chaleur, runners et le quota), Maintenant (exécutions en cours, file, approbations, échecs récents et une ligne en direct) et Sentinelles (une carte par sentinelle avec un radar animé). La page dessine elle-même chaque graphique, un nouvel échec clignote une fois puis se calme, rien ne bouge pour qui a demandé moins de mouvement, tout se décale un peu chaque minute contre la rémanence, la page peut s'assombrir la nuit, une fenêtre peut tourner entre les trois pages, et un test de navigateur les vérifie en 1080p, en 4K et pivotées dans les huit langues. Les écrans sont désactivés par défaut (`screens.enabled`), et le README et le guide des écrans les montrent désormais.
 
 ### 2.0.5 - Moins de faux rouges, des dépôts dormants et des questions visibles en plein écran
 
