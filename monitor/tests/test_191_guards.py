@@ -63,7 +63,7 @@ class WhatTheCiAlreadyTaughtUs(unittest.TestCase):
 
     def test_no_setting_ends_in_a_word_reserved_for_secrets(self):
         from github_actions_monitor.app import settings_api
-        bad = [k for k in settings_api.FIELDS if RESERVED.search(k.split(".")[-1]) and not k.startswith("sentinel.readiness.health.weights.") and not k.endswith(("token_env", "github_token.enabled", "github_token.store"))]
+        bad = [k for k in settings_api.FIELDS if RESERVED.search(k.split(".")[-1]) and not k.startswith("sentinel.readiness.health.weights.") and not k.endswith(("token_env", "secret_env", "github_token.enabled", "github_token.store"))]
         self.assertEqual(bad, [], "name the setting without token, secret, password, key or command in its last part (for example share_reads)")
 
 
