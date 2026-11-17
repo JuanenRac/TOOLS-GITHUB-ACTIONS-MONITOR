@@ -64,7 +64,7 @@ def load_json(path):
     """The JSON object kept for `path`. Raises FileNotFoundError when there is none and ValueError when it is damaged, like reading the file."""
     route = routed(path)
     if route is None:
-        return json.loads(Path(path).read_text(encoding="utf-8"))
+        return json.loads(private_io.read_text_with_retry(path))
     storage, account = _BOUND["storage"], _BOUND["account"]
     kind, name = route
     try:
@@ -86,9 +86,16 @@ def save_text(path, text):
     route = routed(path)
     if route is None:
         path = Path(path)
-        tmp = path.with_name(path.name + ".tmp")
-        private_io.write_tmp(tmp, text)
-        os.replace(tmp, path)
+        tmp = private_io.unique_tmp(path)
+        try:
+            private_io.write_tmp(tmp, text)
+        except OSError:
+            try:
+                os.remove(tmp)
+            except OSError:
+                pass
+            raise
+        private_io.replace_with_retry(tmp, path)
         return
     storage, account = _BOUND["storage"], _BOUND["account"]
     kind, name = route

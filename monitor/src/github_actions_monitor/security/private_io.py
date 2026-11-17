@@ -13,12 +13,20 @@ The state of the monitor (silences, events, the feed for AIs, caches, the settin
 On Windows `os.chmod` only knows the read-only flag and the folders inherit the permissions of their parent, so there the mode cannot be enforced from here: the helpers do the same work and
 never fail because of it (use the folder permissions of your account to keep other users out). Nothing in this module reads or sends anything.
 """
+import itertools
 import os
+import threading
+import time
 from pathlib import Path
 
 FILE_MODE = 0o600
 DIR_MODE = 0o700
 _BINARY = getattr(os, "O_BINARY", 0)
+#: how long a replace that the system refuses (another process, or an antivirus, holds the file for a moment on Windows) is tried again, and the first wait between tries (it doubles up to the cap)
+REPLACE_RETRY_SECONDS = 2.0
+REPLACE_FIRST_WAIT = 0.005
+REPLACE_WAIT_CAP = 0.1
+_TMP_COUNTER = itertools.count()
 
 
 def _fix_mode(path, mode):
@@ -45,12 +53,53 @@ def write_tmp(tmp, text):
     _fix_mode(tmp, FILE_MODE)
 
 
+def unique_tmp(path):
+    """A temporary name next to `path` that no other process or thread uses (process id, thread id, a counter): two writers of the same file never share their temporary file."""
+    path = Path(path)
+    return path.with_name(f"{path.name}.{os.getpid()}.{threading.get_ident()}.{next(_TMP_COUNTER)}.tmp")
+
+
+def replace_with_retry(tmp, path):
+    """`os.replace(tmp, path)`; a replace refused with PermissionError or FileNotFoundError (transient on Windows while another process has the file open) is tried again for REPLACE_RETRY_SECONDS.
+    When it still fails the temporary file is removed and the last error is raised (an OSError, like any failed write)."""
+    deadline = time.monotonic() + REPLACE_RETRY_SECONDS
+    wait = REPLACE_FIRST_WAIT
+    while True:
+        try:
+            os.replace(tmp, path)
+            return
+        except (PermissionError, FileNotFoundError):
+            if time.monotonic() >= deadline or not Path(tmp).exists():
+                try:
+                    os.remove(tmp)
+                except OSError:
+                    pass
+                raise
+            time.sleep(wait)
+            wait = min(wait * 2, REPLACE_WAIT_CAP)
+
+
+def read_text_with_retry(path):
+    """The text of `path` (UTF-8). A read refused with PermissionError (on Windows, while another process is replacing the file) is tried again for REPLACE_RETRY_SECONDS, so that a reader never
+    takes the moment of a replace for a file it may not read; a missing file or any other error is raised at once."""
+    deadline = time.monotonic() + REPLACE_RETRY_SECONDS
+    wait = REPLACE_FIRST_WAIT
+    while True:
+        try:
+            return Path(path).read_text(encoding="utf-8")
+        except PermissionError:
+            if time.monotonic() >= deadline:
+                raise
+            time.sleep(wait)
+            wait = min(wait * 2, REPLACE_WAIT_CAP)
+
+
 def write_private(path, text):
     """Replaces `path` with `text` through a temporary file, so a crash never leaves half a file. The result has mode 0600."""
     path = Path(path)
-    tmp = path.with_name(path.name + ".tmp")
+    tmp = unique_tmp(path)
     write_tmp(tmp, text)
-    os.replace(tmp, path)
+    replace_with_retry(tmp, path)
     _fix_mode(path, FILE_MODE)
 
 
