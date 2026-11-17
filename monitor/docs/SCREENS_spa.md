@@ -87,7 +87,7 @@ Una dirección para cada monitor. Un parámetro puede hacer una ventana más tra
 
 | Ajuste | Qué hace |
 |---|---|
-| `screens.enabled` | Activa las tres páginas. Desactivado: todas las direcciones responden 404. Desactivado por defecto. |
+| `screens.enabled` | Activa las tres páginas. Desactivado: `/screen/overview`, `/screen/now`, `/screen/sentinels` y `/api/screens/data` responden 404 (`/screen/1` a `/screen/3` son la propia página y no dependen de esto). La edición lite también sirve las pantallas de pared, con la pantalla de centinelas vacía. Desactivado por defecto. |
 | `screens.default_theme` | dark (por defecto), light o contrast. |
 | `screens.default_density` | compact, normal (por defecto) o large. |
 | `screens.refresh_seconds` | Segundos entre actualizaciones de una ventana (10 por defecto). Las páginas leen del monitor, nunca de GitHub, así que un tiempo corto no gasta cuota. |

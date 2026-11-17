@@ -91,7 +91,7 @@ class TheFileItself(unittest.TestCase):
                 if isinstance(value, dict):
                     self.assertTrue(value, row["path"])
                     for key, kind in value.items():
-                        for inner in (kind.values() if isinstance(kind, dict) else [kind]):
+                        for inner in (kind[0].values() if isinstance(kind, list) else kind.values() if isinstance(kind, dict) else [kind]):
                             self.assertIn(inner, names, (row["path"], key))
                 else:
                     self.assertTrue(value == 404 or (edition == "lite" and value == "same"), (row["path"], value))

@@ -18,7 +18,7 @@ import threading
 import time
 import zlib
 
-NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}\Z")
+NAME_RE = re.compile(r"^(?!\.+\Z)[A-Za-z0-9._-]{1,100}\Z")      # "." and ".." name no repository
 FILE_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}\.ya?ml\Z")
 MAX_BYTES = 262144      # a workflow file bigger than this is skipped (the clone scan reads the same limit)
 NOT_EVALUABLE_BY_API = ("stacks", "dependabot_yml", "manifest", "changelog")      # what a list of workflow files cannot say

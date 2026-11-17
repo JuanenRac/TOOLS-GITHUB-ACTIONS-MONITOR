@@ -105,6 +105,7 @@ NOTES = {
     "/api/live-status": ("GET", "state of the incoming webhook receiver"),
     "/api/mirror": ("GET", "state of the local mirror of artifacts"),
     "/api/mode": ("GET,POST", "the working mode (normal, fast, turbo, low) and its time left"),
+    "/api/auth": ("GET", "who you are in the team mode (`/api/auth/me`: whether the sign-in is on, the mode and whether you are signed in); the complete edition only"),
     "/api/notify": ("GET", "state of the notification channels"),
     "/api/notify/test": ("POST", "send a test notification (this computer only)"),
     "/api/otlp": ("GET", "state of the OpenTelemetry export"),

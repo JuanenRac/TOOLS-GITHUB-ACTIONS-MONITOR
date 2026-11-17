@@ -22,6 +22,9 @@ CONTRACT = Path(__file__).resolve().parent.parent / "docs" / "schemas" / "api_co
 PYTHON_TYPES = {"bool": (bool,), "int": (int,), "number": (int, float), "str": (str,), "list": (list,), "object": (dict,)}
 
 
+ELEMENT_SAMPLE = 3      # how many elements of a list with a described shape are looked at
+
+
 def type_ok(value, name):
     if name == "any":
         return True
@@ -44,6 +47,12 @@ def keys_problems(label, body, keys):
                 problems += keys_problems(f"{label}.{key}", body[key], name)
             else:
                 problems.append(f"{label}: the key `{key}` is {type(body[key]).__name__}, the contract says object")
+        elif isinstance(name, list):      # a list whose elements have this shape (`[{...}]`): the first ELEMENT_SAMPLE elements are checked; an empty list proves nothing and passes
+            if not isinstance(body[key], list):
+                problems.append(f"{label}: the key `{key}` is {type(body[key]).__name__}, the contract says list")
+            else:
+                for index, item in enumerate(body[key][:ELEMENT_SAMPLE]):
+                    problems += keys_problems(f"{label}.{key}[{index}]", item, name[0])
         elif not type_ok(body[key], name):
             problems.append(f"{label}: the key `{key}` is {type(body[key]).__name__}, the contract says {name}")
     return problems

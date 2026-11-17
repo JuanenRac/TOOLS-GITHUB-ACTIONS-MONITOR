@@ -70,7 +70,7 @@ def redirect_state(tmp):
 def score_answer(now=None):
     """The score of the demo account (invented, like everything of --demo): scored, a B, going up, with a part not collected yet and the weakest repository first."""
     now = datetime.now(timezone.utc).timestamp() if now is None else now
-    return {"schema": 1, "account": None, "enabled": True, "state": "scored", "score": 85.0, "letter": "B", "trend": {"direction": "up", "delta": 2.5}, "coverage": 0.85, "complete": True,
+    return {"schema": 1, "account": OWNER, "enabled": True, "state": "scored", "score": 85.0, "letter": "B", "trend": {"direction": "up", "delta": 2.5}, "coverage": 0.85, "complete": True,
             "missing_parts": [], "window_days": 7, "at": now, "age_seconds": 30, "stale": False,
             "parts": [{"part": "reliability", "weight": 30, "value": 0.93, "score": 89.6, "samples": 31, "available": True}, {"part": "speed", "weight": 15, "value": 540, "score": 100.0, "samples": 26, "available": True},
                       {"part": "recovery", "weight": 15, "value": 4300, "score": 70.0, "samples": 3, "available": True}, {"part": "collaboration", "weight": 15, "value": None, "score": None, "samples": 0, "available": False},
@@ -83,7 +83,7 @@ def score_history(ask=None, now=None):
     now = datetime.now(timezone.utc).timestamp() if now is None else now
     points = [{"hour": datetime.fromtimestamp(now - h * 3600, timezone.utc).strftime("%Y-%m-%dT%H"), "at": now - h * 3600, "state": "scored", "score": round(78 + (24 - h) * 0.25 + (h % 5) * 0.6, 1),
                "letter": "B", "coverage": 0.8, "window_days": 7} for h in range(24, -1, -1)]
-    return {"schema": 1, "account": None, "enabled": True, "hours": 168, "points": points}
+    return {"schema": 1, "account": OWNER, "enabled": True, "hours": 168, "points": points}
 
 
 def start(am, port, tmp=None):

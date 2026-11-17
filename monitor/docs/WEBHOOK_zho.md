@@ -61,5 +61,5 @@
 
 1. 在 `webhook.secret_env` 所指的环境变量中放入至少 32 个字符的密钥，并开启 Webhook。
 2. 转发端口（`gh webhook forward`）或打开隧道，并在 GitHub 中使用以 `/api/webhook` 结尾的地址。
-3. 发送 GitHub 的测试事件（Recent deliveries > Redeliver），并在 `?view=live` 中查看。
+3. 运行一个工作流（或向受监视的仓库推送），并在 `?view=live` 中查看该事件。GitHub 的 `ping` 只验证签名：它返回 `200`，不会出现在列表中，而从 GitHub 重新发送会被当作重复而忽略。
 4. 留意页头的配额：使用 Webhook 后，较慢的周期就够了。

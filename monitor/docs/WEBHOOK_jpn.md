@@ -61,5 +61,5 @@
 
 1. `webhook.secret_env` で指定した環境変数に 32 文字以上のシークレットを入れ、Webhook を有効にします。
 2. ポートを転送（`gh webhook forward`）するかトンネルを開き、`/api/webhook` で終わるそのアドレスを GitHub に設定します。
-3. GitHub のテストイベント（Recent deliveries > Redeliver）を送り、`?view=live` に出るか確認します。
+3. ワークフローを実行する（または監視対象リポジトリに push する）と、`?view=live` にそのイベントが出るか確認します。GitHub の `ping` は署名の確認だけで、`200` で応答され、一覧には載りません。GitHub からの再送は重複として無視されます。
 4. ヘッダーの割り当てに注意します。Webhook があれば周期は遅くて十分です。

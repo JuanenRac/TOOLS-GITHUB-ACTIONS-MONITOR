@@ -13,10 +13,10 @@ Un second produit, plus simple, dans le même paquet : la page de ce qui tourne 
 |---|---|---|
 | Démarrage | `MONITOR_GITHUB_ACTIONS` (`.bat` / `.sh` / `.command`) | `MONITOR_LITE_GITHUB_ACTIONS` (les trois mêmes) |
 | Port | 8765 | 8766 |
-| Onglets | Maintenant, Sentinelle, Graphiques, Dépôts, Historique, Réglages | Maintenant, Graphiques, Dépôts, Historique, des Réglages courts |
+| Onglets | Maintenant, Alertes, Rapports, Leçons, Sentinelle, Graphiques, Dépôts, Équipe, Historique, Réglages | Maintenant, Graphiques, Dépôts, Historique, des Réglages courts |
 | En-tête | toutes les tuiles, préparation, signature | en cours, en file, échecs et succès de 24 h, minutes de calcul, issues, rouges sur main, dépôts, quota, connexion |
 | Sentinelle (alertes, releases, file de signature, préparation, linter) | oui | non : elle n'est même pas importée |
-| Analyses, notifications, webhook, IA, sorties Prometheus / Grafana | oui, désactivés tant que vous ne les activez pas | non : ces chemins répondent 404 |
+| Analyses, notifications, webhook, IA, sorties Prometheus / Grafana | oui, désactivés tant que vous ne les activez pas | non : ces chemins répondent 404, sauf les canaux du flux pour un outil d'IA (`/api/ai/state`, `/api/ai/brief`, `/api/ai/alerts`, `/api/ai/stream`, `/api/ai/ack`, `/api/skills`) |
 | Configuration | `actions_monitor.json` | `actions_monitor_lite.json` (créé au premier démarrage ; la sentinelle y est désactivée) |
 | Fichiers d'état | `etag_cache.json`, `analytics_history.json`... | les mêmes noms avec le suffixe `_lite` |
 

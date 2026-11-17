@@ -61,5 +61,5 @@ Eine gültige signierte Anfrage, die jemand abgefangen hat und erneut sendet, wi
 
 1. Lege ein Geheimnis mit mindestens 32 Zeichen in der Umgebungsvariable ab, die `webhook.secret_env` nennt, und schalte den Webhook ein.
 2. Leite den Port weiter (`gh webhook forward`) oder öffne einen Tunnel und trage dessen Adresse mit der Endung `/api/webhook` bei GitHub ein.
-3. Sende das Testereignis von GitHub (Recent deliveries > Redeliver) und suche es in `?view=live`.
+3. Starte einen Workflow (oder pushe in ein beobachtetes Repository) und suche das Ereignis in `?view=live`. Der `ping` von GitHub beweist nur die Signatur: Er wird mit `200` beantwortet und nicht aufgelistet, und eine erneute Zustellung von GitHub wird als Wiederholung ignoriert.
 4. Beobachte das Kontingent in der Kopfzeile: Mit Webhooks genügt ein langsamerer Zyklus.

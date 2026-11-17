@@ -61,5 +61,5 @@ A valid signed request that someone captured and sends again is answered but not
 
 1. Put a secret of at least 32 characters in the environment variable named by `webhook.secret_env` and switch the webhook on.
 2. Forward the port (`gh webhook forward`) or open a tunnel, and use its address ending in `/api/webhook` in GitHub.
-3. Send the test event of GitHub (Recent deliveries > Redeliver) and look for it in `?view=live`.
+3. Run a workflow (or push to a watched repository) and look for the event in `?view=live`. The `ping` of GitHub only proves the signature: it is answered with `200` and is not listed, and re-sending a delivery from GitHub is ignored as a repeat.
 4. Watch the allowance in the header: with webhooks a slower cycle is enough.

@@ -45,6 +45,7 @@ from github_actions_monitor import i18n  # noqa: E402
 SHA_RE = re.compile(r"^[0-9a-f]{40}\Z")
 USES_RE = re.compile(r"^\s*-?\s*uses:\s*['\"]?([^'\"\s#]+)")
 SEVERITIES = ("info", "warn", "bad")
+EXIT_NOT_READ = 2      # `--remote` could not read a repository (or its name is not OWNER/REPO): never "clean"
 RULES = ("unpinned_uses", "permissions", "secrets_in_clear", "injection", "pr_target", "no_timeout", "secrets_inherit", "own_action_main")
 DEFAULT_SEVERITY = {"unpinned_uses": "warn", "permissions": "warn", "secrets_in_clear": "bad", "injection": "warn", "pr_target": "bad", "no_timeout": "warn", "secrets_inherit": "warn", "own_action_main": "info"}
 OPTIONAL = ("no_timeout", "secrets_inherit", "own_action_main")      # off until the person switches them on: a new rule never adds findings by itself
@@ -296,20 +297,34 @@ def lint_remote(reader, repos, rules=None, ignore=None):
     return result
 
 
-def lint_remote_name(name, read=None):
-    """The findings of `OWNER/REPO` read through the API of GitHub (no clone): `[{"file", "line", "rule", "severity", "detail"}]`, file names as `.github/workflows/NAME`. A repository that cannot be
-    read prints why on the standard error (SSO not authorised, no access...) and gives no findings."""
+def lint_remote_status(name, read=None):
+    """`(findings, failure)` for `OWNER/REPO` read through the API of GitHub (no clone). `failure` is None when the repository was read, otherwise the reason why it was not (the name is not OWNER/REPO, the
+    repository does not exist or the token cannot see it, SSO not authorised, no network...). Each failure is printed on the standard error. "Not read" is never the same as "read and clean"."""
     from github_actions_monitor.integrations import remote_workflows
     owner, _, repo = str(name).partition("/")
     if not (remote_workflows.NAME_RE.match(owner) and remote_workflows.NAME_RE.match(repo)):
         print(i18n.t("lint.remote_bad_name", name=str(name)[:80]), file=sys.stderr)
-        return []
-    reader = remote_workflows.Reader(read or remote_workflows.gh_read, lambda: owner)
+        return [], "bad_name"
+    read = read or remote_workflows.gh_read
+    reader = remote_workflows.Reader(read, lambda: owner)
     reader.refresh(repo, 400, 100)
     state = reader.state(repo) or {}
-    if state.get("state") == "not_evaluable":
-        print(i18n.t("lint.remote_failed", name=f"{owner}/{repo}", reason=i18n.t("lint.reason." + state.get("reason", "error"))), file=sys.stderr)
-    return lint_remote(reader, [repo]).get(repo, [])
+    reason = state.get("reason", "error") if state.get("state") == "not_evaluable" else ""
+    if not reason and not (reader.texts(repo) or {}):
+        try:      # no workflow folder: a repository without workflows, or a repository that is not there for this token
+            read(f"repos/{owner}/{repo}")
+        except Exception as error:      # noqa: BLE001 - the answer is the reason, never a traceback
+            reason = remote_workflows.reason_of(error)
+    if reason:
+        print(i18n.t("lint.remote_failed", name=f"{owner}/{repo}", reason=i18n.t("lint.reason." + reason)), file=sys.stderr)
+        return [], reason
+    return lint_remote(reader, [repo]).get(repo, []), None
+
+
+def lint_remote_name(name, read=None):
+    """The findings of `OWNER/REPO` read through the API of GitHub (no clone): `[{"file", "line", "rule", "severity", "detail"}]`, file names as `.github/workflows/NAME`. A repository that cannot be
+    read prints why on the standard error (SSO not authorised, no access...) and gives no findings; `lint_remote_status` also tells whether it was read."""
+    return lint_remote_status(name, read)[0]
 
 
 def summarize(by_repo):
@@ -337,8 +352,11 @@ def main(argv=None):
     findings = []
     for path in args.paths or ([] if args.remote else ["."]):
         findings += lint_path(path)
+    unread = 0
     for name in args.remote or []:
-        findings += lint_remote_name(name)
+        found, failure = lint_remote_status(name)
+        findings += found
+        unread += 1 if failure else 0
     if args.json:
         print(json.dumps(findings, ensure_ascii=False, indent=1))
     else:
@@ -346,7 +364,9 @@ def main(argv=None):
             print(f"{f['file']}:{f['line']}: [{f['severity']}] {i18n.t('lint.rule.' + f['rule'])}" + (f" ({f['detail']}{', ' + f['kind'] if f.get('kind') else ''})" if f["detail"] and f["detail"] != "missing" else ""))
         print(i18n.t("lint.summary", n=len(findings)))
     limit = SEVERITIES.index(args.fail_on)
-    return 1 if any(SEVERITIES.index(f["severity"]) >= limit for f in findings) else 0
+    if any(SEVERITIES.index(f["severity"]) >= limit for f in findings):
+        return 1
+    return EXIT_NOT_READ if unread else 0      # a repository that could not be read is not a clean one
 
 
 if __name__ == "__main__":

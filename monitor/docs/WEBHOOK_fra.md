@@ -61,5 +61,5 @@ Une requête signée valide qu'on a capturée puis renvoyée reçoit une répons
 
 1. Mettez un secret d'au moins 32 caractères dans la variable d'environnement indiquée par `webhook.secret_env` et activez le webhook.
 2. Redirigez le port (`gh webhook forward`) ou ouvrez un tunnel et utilisez son adresse terminée par `/api/webhook` dans GitHub.
-3. Envoyez l'évènement de test de GitHub (Recent deliveries > Redeliver) et cherchez-le dans `?view=live`.
+3. Lancez un workflow (ou faites un push dans un dépôt surveillé) et cherchez l'évènement dans `?view=live`. Le `ping` de GitHub ne prouve que la signature : il reçoit `200` et n'est pas listé, et un renvoi depuis GitHub est ignoré comme une répétition.
 4. Surveillez le quota dans l'en-tête : avec les webhooks, un cycle plus lent suffit.

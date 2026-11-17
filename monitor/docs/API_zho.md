@@ -21,7 +21,7 @@
 
 ## 契约
 
-- `docs/schemas/api_contract.json` 列出每个读取端点在各版本中的键和类型，以及错误码。可以读取但未冻结的路由（数据流、文本、其他工具的导出）在同一文件的 `unfrozen` 中列出，并各附原因；提供运行、仓库和配额的 `/api/data` 已冻结。
+- `docs/schemas/api_contract.json` 列出每个读取端点在各版本中的键和类型，以及错误码。可以读取但未冻结的路由（数据流、文本、其他工具的导出）在同一文件的 `unfrozen` 中列出，并各附原因；提供运行、仓库和配额的 `/api/data` 已冻结。 其键一直深入到列表的元素：文件中写成 `[{...}]` 的列表描述其元素（检查前三个），因此 `/api/data` 的运行、仓库和配额，`/api/alerts` 的警报以及 `/api/auth/me` 在不使检查失败的情况下无法改变。
 - `python tools/check_api_contract.py` 用它检查正在运行的监视器（`--lite`、`--url`、`--token-file`），并输出 `CONTRACT=PASS` 或 `CONTRACT=FAIL`；每次升级监视器或你的客户端后都运行它。
 
 ## 只读 API v1(默认关闭)

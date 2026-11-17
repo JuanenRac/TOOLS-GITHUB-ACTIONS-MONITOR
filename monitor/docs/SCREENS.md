@@ -87,7 +87,7 @@ One address for each monitor. A parameter can make a window quieter or smaller t
 
 | Setting | What it does |
 |---|---|
-| `screens.enabled` | Turns the three pages on. Off: every address answers 404. Off by default. |
+| `screens.enabled` | Turns the three pages on. Off: `/screen/overview`, `/screen/now`, `/screen/sentinels` and `/api/screens/data` answer 404 (`/screen/1` to `/screen/3` are the page itself and do not depend on it). The lite edition serves the wall screens too, with the sentinel screen empty. Off by default. |
 | `screens.default_theme` | dark (default), light or contrast. |
 | `screens.default_density` | compact, normal (default) or large. |
 | `screens.refresh_seconds` | Seconds between updates of a window (10 by default). The pages read the monitor, never GitHub, so a short time costs no allowance. |

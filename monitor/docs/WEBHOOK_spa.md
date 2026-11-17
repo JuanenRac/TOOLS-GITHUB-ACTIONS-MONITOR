@@ -61,5 +61,5 @@ Una petición firmada válida que alguien capturó y vuelve a enviar se responde
 
 1. Pon un secreto de al menos 32 caracteres en la variable de entorno que indica `webhook.secret_env` y activa el webhook.
 2. Redirige el puerto (`gh webhook forward`) o abre un túnel y usa su dirección acabada en `/api/webhook` en GitHub.
-3. Envía el evento de prueba de GitHub (Recent deliveries > Redeliver) y búscalo en `?view=live`.
+3. Lanza un workflow (o haz un push a un repositorio vigilado) y busca el evento en `?view=live`. El `ping` de GitHub solo prueba la firma: recibe `200` y no sale en la lista, y un reenvío desde GitHub se ignora como repetido.
 4. Vigila la cuota en la cabecera: con webhooks basta un ciclo más lento.

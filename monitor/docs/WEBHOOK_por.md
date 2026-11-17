@@ -61,5 +61,5 @@ Um pedido assinado válido que alguém capturou e volta a enviar é respondido m
 
 1. Coloque um segredo com pelo menos 32 carateres na variável de ambiente indicada por `webhook.secret_env` e ative o webhook.
 2. Reencaminhe a porta (`gh webhook forward`) ou abra um túnel e use o seu endereço terminado em `/api/webhook` no GitHub.
-3. Envie o evento de teste do GitHub (Recent deliveries > Redeliver) e procure-o em `?view=live`.
+3. Execute um workflow (ou faça push para um repositório vigiado) e procure o evento em `?view=live`. O `ping` do GitHub só prova a assinatura: recebe `200` e não aparece na lista, e um reenvio a partir do GitHub é ignorado como repetição.
 4. Vigie a quota no cabeçalho: com webhooks basta um ciclo mais lento.

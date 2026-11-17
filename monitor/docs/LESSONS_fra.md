@@ -11,7 +11,7 @@ Le moniteur peut tenir un livre des échecs de votre CI et une bibliothèque de 
 
 ## Le livre
 
-Chaque échec que le flux ouvre devient une ligne de `data/failures.jsonl` (schéma 1) : `schema`, `ts`, `repo`, `workflow`, `job`, `step`, `event`, `branch`, `actor_kind`, `category`, `root_cause`, `avoidable`, `run_id`, `lesson_ref`, `had_lesson`, `sha`, `url`, `source`. Tout texte passe par le même nettoyage que le flux (jetons, clés, adresses et dossier personnel n'arrivent jamais dans le livre). `lessons.retention_days` et `lessons.max_entries` limitent sa taille. Un livre du même schéma venu d'ailleurs peut être importé (`lessons.import_book`).
+Chaque échec que le flux ouvre devient une ligne de `data/failures.jsonl` (schéma 1) : `schema`, `ts`, `repo`, `workflow`, `job`, `step`, `event`, `branch`, `actor_kind`, `category`, `root_cause`, `avoidable`, `run_id`, `lesson_ref`, `had_lesson`, `sha`, `url`, `source`. Tout texte passe par le même nettoyage que le flux (jetons, clés, adresses et dossier personnel n'arrivent jamais dans le livre). `lessons.retention_days` et `lessons.max_entries` limitent sa taille. Un livre du même schéma venu d'ailleurs peut être importé (`POST /api/ai/failures`).
 
 ## Le classeur
 

@@ -167,7 +167,7 @@ def state_dir():
     """Where the small state files of this process live: the folder of the account when this is the monitor of one account, else next to the code, as always."""
     return Path(CHILD["folder"]) if CHILD["folder"] else paths.folder("data")
 LITE_SHARED = ("/api/ai/state", "/api/ai/stream", "/api/ai/brief", "/api/ai/alerts", "/api/ai/ack")      # the channels for an AI tool are the same in both editions
-LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/notify", "/api/score", "/api/report-files", "/api/audit-log", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events")   # they do not exist in lite
+LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/auth", "/api/notify", "/api/score", "/api/report-files", "/api/audit-log", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events")   # they do not exist in lite
 
 
 LITE_INHERIT = ("github_owner", "ecosystems", "ecosystems_file", "targets_file", "profiles_file", "exclude", "repos", "language", "runs_per_repo", "cold_runs_per_repo", "hot_hours", "stuck_minutes", "refresh_seconds", "cold_refresh_seconds")   # what a first lite start copies from actions_monitor.json
@@ -1548,11 +1548,14 @@ def feed_alerts(config, data, diagnose=True):
             degraded.note("lessons.apply", error)
         result = ai_alerts.update(config, red_rows(data), runner=ai_alerts.gh_runner if diagnose else None, owner=toolconfig.github_owner(config), panels=panels, sections=sections, extra_rows=extra,
                                   status=f"running, cycle complete ({len(data.get('repos') or [])} repositories read)")
-    try:
+    try:      # --demo writes nothing: no book and no ai/LESSONS.md in the folder it runs from
         from github_actions_monitor.integrations import lessons
-        if result["opened"]:
+        if DEMO["on"]:
+            pass
+        elif result["opened"]:
             lessons.record(config, result["opened"], {(r.get("repo"), r.get("workflow")): r.get("sha") for r in red_rows(data) if r.get("sha")})      # a failure that opens goes into the book (local file)
-        lessons.write_markdown(config, force=bool(result["opened"] or result["resolved"]))
+        if not DEMO["on"]:
+            lessons.write_markdown(config, force=bool(result["opened"] or result["resolved"]))
     except Exception as error:   # noqa: BLE001 - the book never stops the feed
         degraded.note("lessons.record", error)
     for alert in result["opened"]:
@@ -2722,6 +2725,11 @@ class Handler(BaseHTTPRequestHandler):
 
     def handle_get(self):
         path = self.path.split("?")[0]
+        if path == "/favicon.ico":      # a browser (a kiosk at every start) asks for it: nothing to give, and no error in its console
+            self.send_response(204)
+            self.send_header("Cache-Control", "max-age=86400")
+            self.end_headers()
+            return
         if LITE["on"] and path.startswith(LITE_PATHS) and path not in LITE_SHARED:      # the lite product does not have these endpoints
             self.send_response(404)
             self.end_headers()
@@ -3362,7 +3370,7 @@ def discovery_payload():
         data = STATE.get("data") or {}
     box = discovery.box(toolconfig.github_owner(config), len(data.get("repos") or []), HIDDEN["discovered"], HIDDEN["names"])
     from github_actions_monitor.data_pipeline import orgs
-    organisations = orgs.view(toolconfig.raw_config(), lambda endpoint: gh_read(endpoint, retries=0), state_dir() / ("orgs_state_lite.json" if LITE["on"] else "orgs_state.json"), offline=LINK.state()["offline"]) if not DEMO["on"] else {"enabled": False, "orgs": []}
+    organisations = orgs.view(toolconfig.raw_config(), lambda endpoint: gh_read(endpoint, retries=0), state_dir() / ("orgs_state_lite.json" if LITE["on"] else "orgs_state.json"), offline=LINK.state()["offline"]) if not DEMO["on"] else {"enabled": False, "orgs": [], "checked_at": 0}
     return {**box, "events": list(reversed(DISCOVERY["events"]))[:20], "suggestions": DISCOVERY["suggestions"], "settings": discovery.settings(config), "owner_kind": FORKS["kind"], "forks": {k: FORKS[k] for k in ("checked", "kept", "left", "waiting")}, "demo": DEMO["on"], "organizations": organisations}
 
 

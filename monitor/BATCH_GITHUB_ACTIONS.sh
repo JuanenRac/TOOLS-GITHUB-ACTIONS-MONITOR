@@ -7,7 +7,7 @@
 cd "$(dirname "$0")" || exit 1
 export PYTHONPATH="$(pwd)/src${PYTHONPATH:+:$PYTHONPATH}"
 PY="$(command -v python3 || command -v python)"
-if [ -z "$PY" ]; then echo "Python 3.10+ not found / No se encontro Python 3.10+ / Python 3.10+ nicht gefunden / Python 3.10+ introuvable / Python 3.10+ non trovato / 未找到 Python 3.10+ / Python 3.10+ não encontrado"; exit 1; fi
+if [ -z "$PY" ]; then echo "Python 3.11+ not found / No se encontro Python 3.11+ / Python 3.11+ nicht gefunden / Python 3.11+ introuvable / Python 3.11+ non trovato / 未找到 Python 3.11+ / Python 3.11+ não encontrado / Python 3.11+ が見つかりません"; exit 1; fi
 while true; do
   "$PY" -m github_actions_monitor.cli.launcher_msg menu
   ASK="$("$PY" -m github_actions_monitor.cli.launcher_msg choose)"
