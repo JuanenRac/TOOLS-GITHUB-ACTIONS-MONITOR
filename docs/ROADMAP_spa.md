@@ -16,7 +16,11 @@ Lo que solo aparece con un uso real prolongado: la migración desde la 1.8 y la 
 
 Los workflows del propio monitor cumplen lo que el centinela de higiene pedirá a los demás: acciones fijadas a un commit, los permisos mínimos y un límite de tiempo en cada trabajo.
 
-## Hecho en la 1.8.2 a la 2.0.8
+## Hecho en la 1.8.2 a la 2.0.9
+
+### 2.0.9 - Una auditoría independiente más segura, menús con grupos, un sonido por tipo de evento y comandos de chat de solo lectura
+
+La auditoría independiente endureció el monitor: el token de acceso ya no viaja en la dirección por defecto, una silenciación por patrón ya no silencia lo que no es un workflow, el limpiador de texto atrapa más formas de un log real, una cabecera con un secreto nunca sigue una redirección, una entrega del webhook se comprueba y no se puede repetir, y un proveedor en internet o en una dirección privada necesita su propio interruptor. El menú de la izquierda tiene grupos con título, cada tipo de evento tiene su propio sonido, comandos de solo lectura responden en Slack y Discord (apagados por defecto), las pantallas de pared siguen el idioma de la página principal y la IA integrada tiene un único presupuesto que también cuenta el aviso activo. El registro de acciones puede ser condición de las acciones y guarda el número de ficheros rotados que elijas, un ciclo cuenta una sola vez para todas las etapas del centinela, y un workflow para la auditoría de la imagen del contenedor, con los fallos que encontró en el contenedor, forma parte de la versión.
 
 ### 2.0.8 - Un secreto del webhook más seguro, check runs y una guía para configurar el webhook (la versión que cierra la cuarta fase)
 

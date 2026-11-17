@@ -16,7 +16,11 @@ Was sich nur im langen echten Einsatz zeigt: die Migration von 1.8 und 1.9, das 
 
 Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
 
-## Erledigt in 1.8.2 bis 2.0.8
+## Erledigt in 1.8.2 bis 2.0.9
+
+### 2.0.9 - Eine sicherere unabhängige Prüfung, Menüs mit Gruppen, ein Ton für jede Ereignisart und schreibgeschützte Chat-Befehle
+
+Die unabhängige Prüfung hat den Monitor gehärtet: Das Zugriffstoken reist standardmäßig nicht mehr in der Adresse, eine Stummschaltung per Muster schaltet nichts mehr stumm, was kein Workflow ist, der Textreiniger erfasst mehr Formen eines echten Logs, ein Header mit einem Geheimnis folgt nie einer Weiterleitung, eine Webhook-Zustellung wird geprüft und kann nicht wiederholt werden, und ein Anbieter im Internet oder an einer privaten Adresse braucht seinen eigenen Schalter. Das Menü links hat Gruppen mit Titel, jede Ereignisart hat ihren eigenen Ton, schreibgeschützte Befehle antworten in Slack und Discord (standardmäßig aus), die Wandbildschirme folgen der Sprache der Hauptseite, und die integrierte KI hat ein einziges Budget, das auch die aktive Benachrichtigung zählt. Das Aktionsprotokoll kann zur Bedingung der Aktionen gemacht werden und behält eine wählbare Zahl rotierter Dateien, ein Zyklus zählt einmal für alle Stufen des Sentinels, und ein Workflow für die Prüfung des Container-Images mit den dabei gefundenen Fehlern im Container gehört zur Version.
 
 ### 2.0.8 - Ein sichereres Webhook-Geheimnis, Check-Runs und eine Anleitung zum Einrichten des Webhooks (die abschließende Version der vierten Phase)
 
