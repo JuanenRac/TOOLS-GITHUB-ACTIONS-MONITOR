@@ -35,3 +35,4 @@ Worauf sich ein Skript, ein Wandbildschirm oder ein mobiler Client verlassen kan
 ## Streams
 
 - `GET /api/ai/stream` (die Meldungen) und `GET /api/live-events/stream` (die Ereignisse des Webhooks, `live.sse.enabled`) sind Server-Sent Events, nur lesend und standardmäßig aus; siehe [AI_ALERTS_deu.md](AI_ALERTS_deu.md) und [WEBHOOK_deu.md](WEBHOOK_deu.md).
+- `POST /api/chatops/slack` und `POST /api/chatops/discord` nehmen die nur lesenden Befehle eines Chats an (standardmäßig aus, `chatops.enabled`). Sie nutzen nicht das Zugriffstoken: Der Nachweis ist die Signatur der Plattform, und eine Anfrage ohne gültige Signatur wird abgelehnt, bevor etwas gelesen wird. Siehe [CHATOPS_deu.md](CHATOPS_deu.md).

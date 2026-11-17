@@ -35,3 +35,4 @@
 ## 数据流
 
 - `GET /api/ai/stream`（警报）和 `GET /api/live-events/stream`（webhook 事件，`live.sse.enabled`）是服务器发送事件，只读且默认关闭；参见 [AI_ALERTS_zho.md](AI_ALERTS_zho.md) 和 [WEBHOOK_zho.md](WEBHOOK_zho.md)。
+- `POST /api/chatops/slack` 和 `POST /api/chatops/discord` 接收来自聊天的只读命令(默认关闭,`chatops.enabled`)。它们不使用访问令牌:平台的签名就是凭据,没有有效签名的请求会在读取任何内容之前被拒绝。参见 [CHATOPS_zho.md](CHATOPS_zho.md)。

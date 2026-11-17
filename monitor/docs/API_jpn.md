@@ -35,3 +35,4 @@
 ## ストリーム
 
 - `GET /api/ai/stream`（アラート）と `GET /api/live-events/stream`（Webhook のイベント、`live.sse.enabled`）はサーバー送信イベントで、読み取り専用、初期状態は無効です。[AI_ALERTS_jpn.md](AI_ALERTS_jpn.md) と [WEBHOOK_jpn.md](WEBHOOK_jpn.md) を参照してください。
+- `POST /api/chatops/slack` と `POST /api/chatops/discord` は、チャットからの読み取り専用コマンドを受け取ります(既定ではオフ、`chatops.enabled`)。アクセストークンは使わず、プラットフォームの署名が証明です。有効な署名のないリクエストは、何も読まれる前に拒否されます。[CHATOPS_jpn.md](CHATOPS_jpn.md) を参照。
