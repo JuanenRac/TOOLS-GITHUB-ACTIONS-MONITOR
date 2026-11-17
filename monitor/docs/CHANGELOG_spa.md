@@ -12,33 +12,22 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 ### Seguridad
 
 - **El token de acceso ya no viaja en la dirección por defecto (`listen.query_access` ahora está desactivado)**: en el modo red la dirección `?access=` abría la sesión, pero el token quedaba en el historial, los registros y el `Referer`. El ajuste está desactivado salvo que lo actives (lo dicen el valor por defecto, el fichero de ejemplo y la ayuda de Ajustes); la sesión se abre con `POST /api/access` (el token en el cuerpo) o con la cabecera `X-Monitor-Access`. Una instalación que escribió `listen.query_access` conserva su valor; la que dependía del valor antiguo y abre el monitor desde una dirección con `?access=` tiene que activar el ajuste o usar `POST /api/access`. La variable de entorno `MONITOR_QUERY_ACCESS=1` lo activa para un servicio.
-
-- **Con varias cuentas y el modo equipo, una ruta bajo `/api/v1/` necesita el mismo rol que la misma ruta sin el prefijo**: el supervisor juzgaba la ruta con el prefijo, así que un lector podía leer por la API versionada lo que solo lee un administrador (la exposición del monitor, el estado del token, el registro de acciones). Ahora el prefijo se quita antes de pedir los roles y la respuesta conserva su cabecera `X-API-Version`.
-
-- **Un repositorio cuya visibilidad no se leyó es privado en las pantallas de pared**: con una lista de repositorios escrita a mano, o un `gh` antiguo, todos contaban como públicos y `screens.show_repo_names` mostraba los nombres de los privados. Ahora la visibilidad se lee con un listado de la cuenta cada `discover_refresh_seconds` y lo que no se pudo leer se muestra como privado.
-
-- **Una entrega capturada del webhook no se puede renovar cambiando su id de entrega, y la basura no puede gastar el cupo de las entregas reales**: se recuerda también el cuerpo firmado, y las peticiones cuya firma no se verifica se cuentan aparte (`webhook.max_bad_per_minute`, 120 por minuto y dirección, en todos los modos y por la dirección detrás de un proxy de confianza) de las que sí (120 por minuto).
-
-- **El proceso de una cuenta solo guarda el secreto del webhook que nombra su propia configuración**: los secretos de las demás cuentas y de la configuración principal quedaban en su entorno y en el de `gh` y de todo programa que lanzaba.
-
-- **La variable de un secreto ya no puede ser una variable del sistema ni del acceso a GitHub**: `webhook.secret_env` y `listen.token_env` rechazan nombres como PATH o GH_TOKEN, y el nombre del secreto del webhook se lee una vez, al arrancar el proceso.
-
-- **Con varias cuentas el supervisor protege cada respuesta contra el enmarcado**, igual que el proceso de una cuenta.
-
+- **Con varias cuentas y el modo equipo, una ruta bajo `/api/v1/` necesita el mismo rol que la misma ruta sin el prefijo**: el supervisor juzgaba la ruta con el prefijo, así que un lector podía leer por la API versionada lo que solo lee un administrador (la exposición del monitor, el estado del token, el registro de acciones). Ahora el prefijo se quita antes de pedir los roles y la respuesta conserva su cabecera `X-API-Version`.
+- **Un repositorio cuya visibilidad no se leyó es privado en las pantallas de pared**: con una lista de repositorios escrita a mano, o un `gh` antiguo, todos contaban como públicos y `screens.show_repo_names` mostraba los nombres de los privados. Ahora la visibilidad se lee con un listado de la cuenta cada `discover_refresh_seconds` y lo que no se pudo leer se muestra como privado.
+- **Una entrega capturada del webhook no se puede renovar cambiando su id de entrega, y la basura no puede gastar el cupo de las entregas reales**: se recuerda también el cuerpo firmado, y las peticiones cuya firma no se verifica se cuentan aparte (`webhook.max_bad_per_minute`, 120 por minuto y dirección, en todos los modos y por la dirección detrás de un proxy de confianza) de las que sí (120 por minuto).
+- **El proceso de una cuenta solo guarda el secreto del webhook que nombra su propia configuración**: los secretos de las demás cuentas y de la configuración principal quedaban en su entorno y en el de `gh` y de todo programa que lanzaba.
+- **La variable de un secreto ya no puede ser una variable del sistema ni del acceso a GitHub**: `webhook.secret_env` y `listen.token_env` rechazan nombres como PATH o GH_TOKEN, y el nombre del secreto del webhook se lee una vez, al arrancar el proceso.
+- **Con varias cuentas el supervisor protege cada respuesta contra el enmarcado**, igual que el proceso de una cuenta.
 - **Un cursor con una letra que no es ASCII es un 400 normal, y cualquier otro fallo de la API versionada es el sobre de error de un 500 (`api.server_error`)** en vez de una conexión cortada con una traza en la consola.
+- **La API versionada pide el token de acceso antes de decir si está activa, y un cursor pertenece a quien lo pidió**: un visitante sin credenciales recibía un 404 de `/api/v1/` con el interruptor apagado y un 401 con él encendido, y el mismo cursor valía para cualquier persona y cuenta. Ahora va primero el token, y el cursor de una persona o cuenta se rechaza a otra.
 
 ### Corregido
 
 - **Los forks que GitHub no devuelve ya no bloquean el seguimiento de los repositorios originales**: un fork que volvía vacío (borrado, renombrado o no visible), o una petición que fallaba, era el primero de cada vuelta para siempre. Se anotan como intentados, el panel los cuenta como ilegibles y la vuelta toma los siguientes.
-
 - **La vía por lote de la búsqueda de workflows ocultos lee el listado de un repositorio una vez**: cuando el listado no traía un workflow se volvía a pedir en cada vuelta y nunca se resolvía nada. El listado se lee una vez por repositorio dentro del tiempo que se guardan las respuestas y lo que no trajo va uno a uno en la misma vuelta.
-
 - **Una pregunta del centinela que falló espera antes de repetirse**: los workflows ocultos, los trabajos de un run rojo y los permisos de un repositorio se vuelven a preguntar a los 5 minutos, luego a los 30 y luego a las 6 horas, y un repositorio cuyos permisos no se pueden leer pasa al final de la cola, así que ya no impide que se lean los demás.
-
 - **El presupuesto por hora de listas de runs (`sampling.api_budget_per_hour`) cuenta peticiones**: la segunda mirada a la rama por defecto (`sampling.default_branch_probe`) se cuenta al elegir los repositorios de un ciclo, y la duración de una re-ejecución (`ci.rerun_timing`) es una petición de la hora que no se hace cuando el presupuesto está gastado.
-
 - **Los runners se leen de GitHub una vez cada cinco minutos, no en cada petición a `/api/runners`**.
-
 - **La guía del webhook dice lo que hace el código**: tras un evento el repositorio se vuelve a leer en el ciclo siguiente, los nombres del workflow, la rama y el trabajo se guardan como texto de terceros y los eventos en vivo los lee quien pueda abrir la página.
 
 ## [2.0.8]

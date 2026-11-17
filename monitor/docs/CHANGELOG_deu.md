@@ -12,33 +12,22 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 ### Sicherheit
 
 - **Das Zugriffstoken reist standardmäßig nicht mehr in der Adresse (`listen.query_access` ist jetzt aus)**: Im Netzwerkmodus öffnete die Adresse mit `?access=` die Sitzung, aber das Token blieb im Verlauf, in den Protokollen und im `Referer`. Die Einstellung ist jetzt aus, solange du sie nicht einschaltest (Standardwert, Beispieldatei und Hilfe der Einstellungen sagen es); die Sitzung wird mit `POST /api/access` (Token im Body) oder mit dem Header `X-Monitor-Access` geöffnet. Eine Installation, die `listen.query_access` selbst geschrieben hat, behält ihren Wert; wer sich auf den alten Standard verlassen hat und den Monitor über eine Adresse mit `?access=` öffnet, muss die Einstellung einschalten oder `POST /api/access` verwenden. Die Umgebungsvariable `MONITOR_QUERY_ACCESS=1` schaltet sie für einen Dienst ein.
-
-- **Bei mehreren Konten und im Teammodus braucht eine Route unter `/api/v1/` dieselbe Rolle wie dieselbe Route ohne Präfix**: Der Supervisor beurteilte den Pfad mit Präfix, sodass ein Betrachter über die versionierte API lesen konnte, was nur ein Administrator liest (die Exposition des Monitors, den Zustand des Tokens, das Aktionsprotokoll). Das Präfix wird jetzt entfernt, bevor die Rollen geprüft werden, und die Antwort behält ihren Header `X-API-Version`.
-
-- **Ein Repository, dessen Sichtbarkeit nicht gelesen wurde, ist auf den Wandbildschirmen privat**: Bei einer von Hand geschriebenen Liste oder einem älteren `gh` galt jedes Repository als öffentlich, und `screens.show_repo_names` zeigte die Namen privater. Die Sichtbarkeit wird jetzt alle `discover_refresh_seconds` mit einer Auflistung des Kontos gelesen, und was nicht gelesen werden konnte, wird als privat gezeigt.
-
-- **Eine abgefangene Webhook-Lieferung lässt sich nicht durch Ändern ihrer Lieferkennung erneuern, und Müll kann das Kontingent der echten Lieferungen nicht aufbrauchen**: Neben der Kennung wird auch der signierte Inhalt gemerkt, und Anfragen, deren Signatur nicht stimmt, werden getrennt gezählt (`webhook.max_bad_per_minute`, 120 pro Minute und Adresse, in jedem Modus und nach der Adresse hinter einem vertrauenswürdigen Proxy) von denen, bei denen sie stimmt (120 pro Minute).
-
-- **Ein Prozess eines Kontos hält nur das Webhook-Geheimnis, das seine eigene Konfiguration nennt**: Die Geheimnisse der anderen Konten und der Hauptkonfiguration blieben in seiner Umgebung und in der von `gh` und jedem Programm, das er startete.
-
-- **Die Variable eines Geheimnisses darf keine System- oder GitHub-Anmeldungsvariable mehr sein**: `webhook.secret_env` und `listen.token_env` lehnen Namen wie PATH oder GH_TOKEN ab, und der Name des Webhook-Geheimnisses wird einmal beim Start des Prozesses gelesen.
-
-- **Bei mehreren Konten schützt der Supervisor jede Antwort vor dem Einbetten in einen Frame**, wie es der Prozess eines Kontos tut.
-
+- **Bei mehreren Konten und im Teammodus braucht eine Route unter `/api/v1/` dieselbe Rolle wie dieselbe Route ohne Präfix**: Der Supervisor beurteilte den Pfad mit Präfix, sodass ein Betrachter über die versionierte API lesen konnte, was nur ein Administrator liest (die Exposition des Monitors, den Zustand des Tokens, das Aktionsprotokoll). Das Präfix wird jetzt entfernt, bevor die Rollen geprüft werden, und die Antwort behält ihren Header `X-API-Version`.
+- **Ein Repository, dessen Sichtbarkeit nicht gelesen wurde, ist auf den Wandbildschirmen privat**: Bei einer von Hand geschriebenen Liste oder einem älteren `gh` galt jedes Repository als öffentlich, und `screens.show_repo_names` zeigte die Namen privater. Die Sichtbarkeit wird jetzt alle `discover_refresh_seconds` mit einer Auflistung des Kontos gelesen, und was nicht gelesen werden konnte, wird als privat gezeigt.
+- **Eine abgefangene Webhook-Lieferung lässt sich nicht durch Ändern ihrer Lieferkennung erneuern, und Müll kann das Kontingent der echten Lieferungen nicht aufbrauchen**: Neben der Kennung wird auch der signierte Inhalt gemerkt, und Anfragen, deren Signatur nicht stimmt, werden getrennt gezählt (`webhook.max_bad_per_minute`, 120 pro Minute und Adresse, in jedem Modus und nach der Adresse hinter einem vertrauenswürdigen Proxy) von denen, bei denen sie stimmt (120 pro Minute).
+- **Ein Prozess eines Kontos hält nur das Webhook-Geheimnis, das seine eigene Konfiguration nennt**: Die Geheimnisse der anderen Konten und der Hauptkonfiguration blieben in seiner Umgebung und in der von `gh` und jedem Programm, das er startete.
+- **Die Variable eines Geheimnisses darf keine System- oder GitHub-Anmeldungsvariable mehr sein**: `webhook.secret_env` und `listen.token_env` lehnen Namen wie PATH oder GH_TOKEN ab, und der Name des Webhook-Geheimnisses wird einmal beim Start des Prozesses gelesen.
+- **Bei mehreren Konten schützt der Supervisor jede Antwort vor dem Einbetten in einen Frame**, wie es der Prozess eines Kontos tut.
 - **Ein Cursor mit einem Buchstaben, der nicht ASCII ist, ergibt ein normales 400, und jeder andere Fehler der versionierten API ist der Fehlerumschlag eines 500 (`api.server_error`)** statt einer abgebrochenen Verbindung mit einer Ablaufverfolgung in der Konsole.
+- **Die versionierte API verlangt das Zugriffstoken, bevor sie sagt, ob sie an ist, und ein Cursor gehört dem, der ihn angefordert hat**: Ein Besucher ohne Zugangsdaten bekam von `/api/v1/` ein 404, wenn der Schalter aus war, und ein 401, wenn er an war, und derselbe Cursor galt für jede Person und jedes Konto. Jetzt kommt das Token zuerst, und der Cursor einer Person oder eines Kontos wird einem anderen verweigert.
 
 ### Behoben
 
 - **Forks, die GitHub nicht zurückgibt, halten die Verfolgung der Originalrepositorys nicht mehr auf**: Ein Fork, der leer zurückkam (gelöscht, umbenannt oder nicht sichtbar), oder eine fehlgeschlagene Anfrage war für immer der erste jeder Runde. Sie werden als versucht vermerkt, die Anzeige zählt sie als unlesbar, und die Runde nimmt die nächsten.
-
 - **Der Stapelweg der Suche nach verborgenen Workflows liest die Auflistung eines Repositorys einmal**: Brachte die Auflistung einen Workflow nicht, wurde sie in jeder Runde neu angefragt und nie etwas gelöst. Die Auflistung wird einmal je Repository innerhalb der Zeit gelesen, in der Antworten behalten werden, und was sie nicht brachte, geht in derselben Runde einzeln.
-
 - **Eine fehlgeschlagene Frage des Wächters wartet, bevor sie wiederholt wird**: Die verborgenen Workflows, die Jobs eines roten Runs und die Berechtigungen eines Repositorys werden nach 5 Minuten, dann 30 und dann 6 Stunden erneut gefragt, und ein Repository, dessen Berechtigungen nicht gelesen werden können, kommt ans Ende der Schlange und hält die anderen nicht mehr vom Lesen ab.
-
 - **Das Stundenbudget für Run-Listen (`sampling.api_budget_per_hour`) zählt Anfragen**: Der zweite Blick auf den Standard-Branch (`sampling.default_branch_probe`) wird bei der Auswahl der Repositorys eines Zyklus mitgezählt, und die Dauer einer Wiederholung (`ci.rerun_timing`) ist eine Anfrage der Stunde, die bei verbrauchtem Budget nicht gestellt wird.
-
 - **Die Runner werden alle fünf Minuten von GitHub gelesen, nicht bei jeder Anfrage an `/api/runners`**.
-
 - **Die Webhook-Anleitung sagt, was der Code tut**: Nach einem Ereignis wird das Repository im nächsten Zyklus erneut gelesen, die Namen von Workflow, Branch und Job werden als Text Dritter behalten, und die Live-Ereignisse liest, wer die Seite öffnen darf.
 
 ## [2.0.8]
