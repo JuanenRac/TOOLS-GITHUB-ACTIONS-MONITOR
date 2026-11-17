@@ -70,20 +70,15 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: audit
+          fetch-depth: 0        # every tag and commit, so the version to check and the one before it can be opened as folders of their own
           persist-credentials: false
-      - name: The version to check
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ needs.plan.outputs.ref }}
-          path: target
-          persist-credentials: false
-      - name: The version before it (for the migration)
-        if: ${{ needs.plan.outputs.previous != '' }}
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ needs.plan.outputs.previous }}
-          path: previous
-          persist-credentials: false
+      - name: The version to check, and the one before it (for the migration)
+        env:
+          TARGET_REF: ${{ needs.plan.outputs.ref }}
+          PREVIOUS_REF: ${{ needs.plan.outputs.previous }}
+        run: |
+          git -C audit worktree add --detach ../target "$TARGET_REF"
+          if [ -n "$PREVIOUS_REF" ]; then git -C audit worktree add --detach ../previous "$PREVIOUS_REF"; fi
       - name: ${{ matrix.code }}
         env:
           SCRIPT: ${{ matrix.script }}
