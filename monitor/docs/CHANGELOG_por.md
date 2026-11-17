@@ -11,6 +11,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Corrigido
 
+- **«Ajuda deste separador» abre em todos os separadores o tema do separador aberto**: ao mapa de separador para tema faltavam os separadores Alertas e Equipa, e Repositórios e Histórico iam para o primeiro tema da ajuda («GitHub Actions Monitor»). Agora é uma única tabela (`TAB_TOPICS`) com uma entrada por cada separador do menu lateral, e um teste falha se um separador não tiver tema ou tiver um que não existe. Um teste num navegador percorre todos os separadores e prime o botão.
 - **O separador Histórico já não acumula o seu contador**: «A mostrar 200 de N» era acrescentado às ferramentas da tabela a cada atualização, enquanto as ferramentas só eram redesenhadas quando a ordem ou as colunas mudavam, pelo que milhares de cópias cresciam junto à lista de colunas. O contador é agora um único elemento que é substituído ou retirado. Um teste abre a página num navegador, desenha a tabela muitas vezes (atualização, filtros, todas as colunas, uma ordem) e verifica que há um contador e uma dica.
 
 ## [2.0.3]
