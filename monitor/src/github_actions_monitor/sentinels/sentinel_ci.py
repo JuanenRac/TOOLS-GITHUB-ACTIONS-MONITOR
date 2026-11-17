@@ -6,7 +6,7 @@ Nothing of how it decides changes: `sentinel_local.Sentinel` keeps its rules, it
 loop; this class holds one of them and answers the contract with what it already knows. Whatever the monitor asked of the old object it still can: the attributes that are not part of the
 contract (`snapshot`, `feed`, `refresh_repos`, `ai_explain`...) are those of the held sentinel.
 
-The alerts it gives have stable codes, independent of the language: `ci.red`, `ci.stuck`, `ci.ghost_queue`, `ci.pending_sign`.
+The alerts it gives have stable codes, independent of the language: `ci.red`, `ci.stuck`, `ci.ghost_queue`, `ci.upstream_red`, `ci.upstream_release`, `ci.pending_sign`.
 """
 from github_actions_monitor.sentinels import sentinel_base
 from github_actions_monitor.sentinels import sentinel_local
@@ -87,6 +87,15 @@ class SentinelCI(sentinel_base.BaseSentinel):
             days = (snap.get("a1") or {}).get("ghost_days")
             alert("ci.ghost_queue", "info", repo, i18n.t("evt.ghost_queue", repo=repo, n=len(items), days=days),
                   {"count": len(items), "days": days, "oldest": min((g.get("since") or "" for g in items), default=""), "urls": [g.get("url") for g in items[:5]]}, None, f"{repo}")
+        follow = snap.get("upstream") or {}
+        if follow.get("enabled") and follow.get("notify"):      # only what the person asked to be told: the original is red, or published a release lately; information, never an error
+            for row in follow.get("rows", []):
+                if row.get("red"):
+                    alert("ci.upstream_red", "info", row.get("repo"), i18n.t("evt.upstream_red", repo=row.get("repo"), parent=row.get("parent")),
+                          {"parent": row.get("parent"), "branch": row.get("branch"), "url": row.get("url"), "since": row.get("state_since")}, None, f"{row.get('repo')}")
+                if row.get("news") and row.get("release"):
+                    alert("ci.upstream_release", "info", row.get("repo"), i18n.t("evt.upstream_release", repo=row.get("repo"), parent=row.get("parent"), tag=row["release"].get("tag")),
+                          {"parent": row.get("parent"), "tag": row["release"].get("tag"), "url": row["release"].get("url")}, None, f"{row.get('repo')}:{row['release'].get('tag')}")
         for wait in (snap.get("a5") or {}).get("pending_sign", []):
             alert("ci.pending_sign", "warning", wait.get("repo"), i18n.t("evt.pending_sign", repo=wait.get("repo"), hours=wait.get("hours")),
                   {"workflow": wait.get("workflow"), "hours": wait.get("hours"), "url": wait.get("url")}, wait.get("since"), f"{wait.get('repo')}:{wait.get('workflow')}")
