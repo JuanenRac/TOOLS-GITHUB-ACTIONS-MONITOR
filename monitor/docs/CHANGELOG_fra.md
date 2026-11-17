@@ -9,6 +9,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+### Corrigé
+
+- **Les questions se posent dans la page et s'affichent donc en plein écran** : les cinq confirmations de la page (changement de mode, exécution d'une commande proposée par l'IA, une action GitHub, un lancement de workflow local, suppression d'un utilisateur) utilisaient la boîte de dialogue du navigateur, qui ne s'affiche pas en plein écran (il fallait appuyer sur Échap pour la voir) et bloque la page. Elles utilisent maintenant une seule boîte de dialogue de la page (`askConfirm`) avec Accepter et Annuler, Échap et Tab, le focus sur Annuler pour une action dangereuse et rendu ensuite. Un test échoue si un `confirm`, `alert` ou `prompt` natif revient, et un test dans un navigateur pose la question et répond à la souris et au clavier.
+
 ## [2.0.4]
 
 ### Ajouté

@@ -9,6 +9,10 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+### Corrigido
+
+- **As perguntas fazem-se dentro da página, por isso veem-se em ecrã inteiro**: as cinco confirmações da página (mudança de modo, executar um comando proposto pela IA, uma ação do GitHub, lançar um workflow local, apagar um utilizador) usavam o diálogo do navegador, que não é desenhado em ecrã inteiro (era preciso premir Esc para o ver) e bloqueia a página. Agora usam um único diálogo da página (`askConfirm`) com Aceitar e Cancelar, Esc e Tab, o foco em Cancelar numa ação perigosa e devolvido depois. Um teste falha se voltar um `confirm`, `alert` ou `prompt` nativo, e um teste num navegador pergunta e responde com o rato e o teclado.
+
 ## [2.0.4]
 
 ### Adicionado

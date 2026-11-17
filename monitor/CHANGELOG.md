@@ -11,6 +11,10 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Questions are asked inside the page, so they show in full screen**: the five confirmations of the page (change of mode, run a command proposed by the AI, a GitHub action, a local workflow run, delete a user) used the dialog of the browser, which is not drawn when the page is in full screen (the person had to press Esc to see it) and blocks the page. They use one dialog of the page (`askConfirm`) with Accept and Cancel, Esc and Tab, the focus on Cancel for a dangerous action and back where it was afterwards. A test fails when a native `confirm`, `alert` or `prompt` comes back, and a test in a browser asks and answers with the mouse and the keyboard.
+
 ## [2.0.4]
 
 ### Added

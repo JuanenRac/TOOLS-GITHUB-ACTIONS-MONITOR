@@ -9,6 +9,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+### Behoben
+
+- **Rückfragen erscheinen innerhalb der Seite und sind daher auch im Vollbild sichtbar**: Die fünf Bestätigungen der Seite (Moduswechsel, ein von der KI vorgeschlagener Befehl, eine GitHub-Aktion, ein lokaler Workflow-Lauf, einen Benutzer löschen) nutzten den Dialog des Browsers, der im Vollbild nicht gezeichnet wird (man musste Esc drücken, um ihn zu sehen) und die Seite blockiert. Jetzt gibt es einen Dialog der Seite (`askConfirm`) mit Annehmen und Abbrechen, Esc und Tab, dem Fokus auf Abbrechen bei einer gefährlichen Aktion und der Rückgabe des Fokus danach. Ein Test schlägt fehl, wenn ein natives `confirm`, `alert` oder `prompt` zurückkehrt, und ein Browsertest fragt und antwortet mit Maus und Tastatur.
+
 ## [2.0.4]
 
 ### Hinzugefügt

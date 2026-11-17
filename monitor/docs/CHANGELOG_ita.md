@@ -9,6 +9,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+### Corretto
+
+- **Le domande si fanno dentro la pagina, quindi si vedono a schermo intero**: le cinque conferme della pagina (cambio di modalità, esecuzione di un comando proposto dall'IA, un'azione di GitHub, l'avvio di un workflow locale, l'eliminazione di un utente) usavano la finestra di dialogo del browser, che non viene disegnata a schermo intero (bisognava premere Esc per vederla) e blocca la pagina. Ora usano un'unica finestra della pagina (`askConfirm`) con Accetta e Annulla, Esc e Tab, il focus su Annulla per un'azione pericolosa e restituito dopo. Un test fallisce se ritorna un `confirm`, `alert` o `prompt` nativo, e un test in un browser chiede e risponde con il mouse e la tastiera.
+
 ## [2.0.4]
 
 ### Aggiunto
