@@ -330,6 +330,28 @@
     "replay_seconds": 3600,
     "max_per_minute": 30
   },
+  "chatops": {
+    "enabled": false,
+    "slack": {
+      "enabled": false,
+      "signing_secret_env": "MONITOR_SLACK_SIGNING_SECRET"
+    },
+    "discord": {
+      "enabled": false,
+      "public_key_env": "MONITOR_DISCORD_PUBLIC_KEY"
+    },
+    "allowed_teams": [],
+    "allowed_channels": [],
+    "allowed_users": [],
+    "allowed_words": ["help", "status", "alerts", "red", "queue", "score"],
+    "show_repo_names": "all",
+    "links": true,
+    "max_rows": 8,
+    "max_age_seconds": 300,
+    "rate_per_user_per_minute": 6,
+    "rate_per_channel_per_minute": 20,
+    "rate_per_minute": 60
+  },
   "report_history_days": 30,
   "profiles_file": "profiles.example.json",
   "tools_dir": "",

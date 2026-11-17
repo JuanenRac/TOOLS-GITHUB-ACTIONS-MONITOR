@@ -35,3 +35,4 @@ What a script, a wall screen or a mobile client can rely on. From 2.0.0 the read
 ## Streams
 
 - `GET /api/ai/stream` (the alerts) and `GET /api/live-events/stream` (the events of the webhook, `live.sse.enabled`) are server-sent events, read only and off by default; see [AI_ALERTS.md](AI_ALERTS.md) and [WEBHOOK.md](WEBHOOK.md).
+- `POST /api/chatops/slack` and `POST /api/chatops/discord` receive the read only commands of a chat (off by default, `chatops.enabled`). They do not use the access token: the signature of the platform is the proof, and a request without a valid one is refused before anything is read. See [CHATOPS.md](CHATOPS.md).

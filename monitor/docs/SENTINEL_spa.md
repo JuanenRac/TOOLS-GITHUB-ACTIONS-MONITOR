@@ -89,3 +89,9 @@ Cada umbral de arriba es un ajuste de las pestañas **Centinela**, **Comprobacio
 ## El segundo centinela y la lista de alertas
 
 Además de este centinela (CI), la edición completa tiene el **centinela Collab**, que vigila incidencias y pull requests abiertos con un reloj propio y nunca escribe en GitHub: [COLLAB_spa.md](COLLAB_spa.md). La pestaña **Alertas** reúne las alertas de ambos en una lista, con filtro por origen y nivel y silencios locales que acaban solos (`alerts.mute_hours`); `GET /api/alerts` sirve la misma lista.
+
+## El menú de la izquierda: grupos y centinelas
+
+El menú tiene cinco grupos con título (se pliegan y el monitor recuerda cuáles): *Vigilar* (Ahora, Alertas, Gráficos), *Centinelas* (Resumen, Centinela de CI, Centinela de colaboración, Centinela de seguridad), *Equipo* (Salud del equipo, Flota, Repositorios), *Informes y aprendizaje* (Informes, Informes programados, Lecciones, Historial) y *Sistema* (Configuración). Cada entrada tiene su dirección: `#team-health`, `#fleet`, `#team-reports`, `#reports`, `#lessons`, `#sentinel`, `#sentinel-ci`, `#sentinel-collab` y `#sentinel-security` (también `?view=` con las mismas palabras). Las direcciones antiguas (`#team`, `#sent`, `#alerts/reports`, `#team/fleet`...) abren el panel correcto.
+
+Los tres centinelas se pueden activar o no (`sentinel.enabled`, `sentinels.collab.enabled`, `sentinels.security.enabled`). La entrada de un centinela está en el menú solo mientras está activado, y el grupo *Centinelas* desaparece cuando no hay ninguno; la página sigue el estado en su siguiente actualización. La dirección de un centinela apagado sigue abriendo su panel, que dice que está apagado y tiene un botón que abre su interruptor en Ajustes. Los paneles A1 a A13 son del centinela de CI; el contador de cada entrada cuenta solo las alertas de su centinela.

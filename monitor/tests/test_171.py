@@ -251,7 +251,7 @@ class Shell(unittest.TestCase):
         self.assertIn("ui.brand_sub", side)
         for tab in ("now", "sent", "charts", "repos", "hist", "cfg"):
             self.assertIn(f'id="n-{tab}" data-tab="{tab}"', side)
-        for group in ("watch", "data", "system"):
+        for group in ("watch", "sentinels", "team", "learn", "system"):
             self.assertIn(f'data-group="{group}"', side)
         self.assertIn('id="help-tab"', side)
         self.assertNotIn("<header", side)

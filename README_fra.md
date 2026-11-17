@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-3601_passing-brightgreen.svg" alt="3601 tests">
+  <img src="https://img.shields.io/badge/Tests-3671_passing-brightgreen.svg" alt="3671 tests">
 </p>
 
 > Surveille les workflows de tous vos dépôts et vous dit, sur une page locale, ce qui est rouge, ce qui est bloqué et ce qui vous attend.
@@ -81,8 +81,8 @@
 | | |
 |---|---|
 | **Maturité** | functional |
-| **Tests** | 3601 méthodes de test (`python -m unittest discover -s monitor/tests`) |
-| **Réglages** | 575 réglages, tous avec aide |
+| **Tests** | 3671 méthodes de test (`python -m unittest discover -s monitor/tests`) |
+| **Réglages** | 605 réglages, tous avec aide |
 | **Langues** | 8 (anglais, espagnol, allemand, français, italien, japonais, chinois et portugais) |
 | **Testé dans le CI sur** | ubuntu, windows, Python 3.11, 3.13 |
 

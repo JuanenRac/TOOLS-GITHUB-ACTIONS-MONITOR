@@ -35,3 +35,4 @@ Ce sur quoi un script, un écran mural ou un client mobile peut compter. Depuis 
 ## Flux
 
 - `GET /api/ai/stream` (les alertes) et `GET /api/live-events/stream` (les événements du webhook, `live.sse.enabled`) sont des événements envoyés par le serveur, en lecture seule et éteints par défaut ; voir [AI_ALERTS_fra.md](AI_ALERTS_fra.md) et [WEBHOOK_fra.md](WEBHOOK_fra.md).
+- `POST /api/chatops/slack` et `POST /api/chatops/discord` reçoivent les commandes en lecture seule d'un chat (désactivées par défaut, `chatops.enabled`). Elles n'utilisent pas le jeton d'accès : la preuve est la signature de la plateforme, et une requête sans signature valide est refusée avant que rien ne soit lu. Voir [CHATOPS_fra.md](CHATOPS_fra.md).

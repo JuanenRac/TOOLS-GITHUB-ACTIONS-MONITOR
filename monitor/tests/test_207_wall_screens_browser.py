@@ -34,6 +34,7 @@ REPORT = "screens-report"
 # runs before the scripts of the page: it records what the page does with the network and with the console
 HEAD = b"""<script>
 window.__errs=[];window.__reqs=[];
+try{var __p=new URLSearchParams(location.search).get("pref");if(__p)localStorage.setItem("am-lang",__p)}catch(e){}
 window.addEventListener("error",e=>window.__errs.push("error: "+e.message));
 window.addEventListener("unhandledrejection",e=>window.__errs.push("rejection: "+e.reason));
 const __ce=console.error;console.error=function(){window.__errs.push("console.error: "+[].slice.call(arguments).join(" "));__ce.apply(console,arguments)};
@@ -63,7 +64,7 @@ PROBE = r"""
     const fails=[...document.querySelectorAll(".fail")].filter(shown).map(e=>{const s=getComputedStyle(e);return{name:s.animationName,dur:s.animationDuration,calm:e.classList.contains("calm"),at:where(e)}});
     const title=document.getElementById("h-title").textContent;
     out.textContent=JSON.stringify({ok:true,errors:window.__errs,reqs:window.__reqs,scroll:{w:[de.scrollWidth,de.clientWidth],h:[de.scrollHeight,de.clientHeight]},cut:cut,fails:fails,seq:seq,
-      reduced:matchMedia("(prefers-reduced-motion: reduce)").matches,title:title,cards:document.querySelectorAll(".card:not([hidden]),.sen").length,kind:window.__screens.state.kind,lang:document.documentElement.lang});
+      reduced:matchMedia("(prefers-reduced-motion: reduce)").matches,title:title,search:location.search,text:document.body.innerText,cards:document.querySelectorAll(".card:not([hidden]),.sen").length,kind:window.__screens.state.kind,lang:document.documentElement.lang});
   }catch(e){out.textContent=JSON.stringify({ok:false,error:String(e)})}
   document.title="screens-done";
 })();
@@ -137,6 +138,49 @@ class TheScreensInABrowser(unittest.TestCase):
             with i18n.use_language(lang):
                 self.assertEqual(report["title"], i18n.t("ui.scr_title_" + kind), (kind, lang))
             self.assertEqual(report["lang"], i18n.HTML_LANG[lang])
+
+    def test_the_language_chosen_on_the_main_page_decides_when_the_address_has_none_in_the_eight_languages(self):
+        jobs = [(f"/screen/{kind}?pref={lang}", (1920, 1080)) for lang in i18n.LANGS for kind in KINDS]
+        for (path, size), report in zip(jobs, self.many(jobs)):
+            lang, kind = path.split("pref=")[1], path.split("/")[2].split("?")[0]
+            self.clean(report, (kind, lang))
+            with i18n.use_language(lang):
+                self.assertEqual(report["title"], i18n.t("ui.scr_title_" + kind), (kind, lang))
+            self.assertEqual(report["lang"], i18n.HTML_LANG[lang], (kind, lang))
+            self.assertIn("lang=" + lang, report["search"], (kind, lang))      # the page reloaded once with the language in the address
+            self.assertIn("pref=" + lang, report["search"], (kind, lang))      # and kept the rest of the parameters
+            if lang != "en":
+                self.assert_no_english_left(report["text"], lang, kind)
+
+    def assert_no_english_left(self, text, lang, kind):
+        """No phrase of the English catalogue that the language translates differently is on the screen (the product name and the words that are the same in both are not counted)."""
+        shown = text.lower()
+        english, own = {}, {}
+        for key in (k for k in i18n.catalogue_keys() if k.startswith(("ui.scr_", "ui.lv_"))):
+            with i18n.use_language("en"):
+                english[key] = i18n.t(key)
+            with i18n.use_language(lang):
+                own[key] = i18n.t(key)
+        leaked = [english[k] for k in english if "{" not in english[k] and len(english[k]) >= 6 and english[k].lower() != own[k].lower() and english[k].lower() in shown and english[k].lower() not in own[k].lower()]
+        self.assertEqual(leaked, [], (kind, lang, "English text on a screen in another language"))
+
+    def test_the_address_wins_over_the_language_saved_by_the_main_page(self):
+        jobs = [(f"/screen/{kind}?pref=es&lang=de", (1920, 1080)) for kind in KINDS]
+        for (path, size), report in zip(jobs, self.many(jobs)):
+            kind = path.split("/")[2].split("?")[0]
+            self.clean(report, kind)
+            with i18n.use_language("de"):
+                self.assertEqual(report["title"], i18n.t("ui.scr_title_" + kind), kind)
+            self.assertEqual(report["lang"], "de")
+            self.assertNotIn("lang=es", report["search"])
+
+    def test_a_saved_language_keeps_the_rotation_going(self):
+        report = self.open("/screen/overview?pref=ja&rotate=5")
+        self.assertTrue(report["ok"], report)
+        self.assertIn("rotate=5", report["search"])
+        self.assertIn("lang=ja", report["search"])
+        self.assertEqual(report["lang"], "ja")
+        self.assertGreaterEqual(len(report["seq"]), 2, report["seq"])
 
     def test_the_light_and_the_high_contrast_themes_and_the_large_type_fit_too(self):
         jobs = [(f"/screen/{kind}?lang=en&{query}",) for query in ("theme=light", "theme=contrast", "density=large") for kind in KINDS]

@@ -21,7 +21,7 @@ A página adapta-se ao tamanho da janela, do telemóvel ao 4K, na vertical ou na
 |---|---|
 | `ui.orientation` | auto segue a janela; portrait empilha os painéis numa coluna; landscape mantém a disposição lado a lado. |
 | `ui.rotate_seconds` | 0 = desligado. Segundos entre os separadores de um ecrã que tem mais de um. |
-| `ui.screen1_tabs` | Separadores de /screen/1, separados por vírgulas: now, al, rep, les, sent, charts, repos, hist, cfg. Vazio = todos. |
+| `ui.screen1_tabs` | Separadores de /screen/1, separados por vírgulas: now, al, charts, sent, sci, scol, ssec, team, fleet, repos, rep, trep, les, hist, cfg. Vazio = todos. |
 | `ui.screen1_orientation` | auto, portrait ou landscape só para /screen/1. |
 | `ui.screen2_tabs` | Separadores de /screen/2. |
 | `ui.screen2_orientation` | Orientação de /screen/2. |
@@ -82,6 +82,10 @@ Um endereço para cada monitor. Um parâmetro pode tornar uma janela mais calma 
 | `?rotate=30` | A janela passa sozinha por visão geral, neste momento e sentinelas a cada 30 segundos (mínimo 5; 0 = sem rotação). |
 | `?blink=off` | As falhas mantêm um halo fixo em vez de piscar. Não pode ativar o que `screens.blink` mantém desligado. |
 | `?sound=on` | Um sinal sonoro curto a cada falha nova, só se `screens.sound` o permitir. Desativado por defeito. |
+
+### Idioma dos ecrãs
+
+O idioma de um ecrã decide-se por esta ordem: `?lang=xx` no endereço; depois o idioma escolhido na página principal do mesmo navegador (fica lá guardado, e um ecrã aberto nesse navegador lê-o, pelo que o ecrã acompanha a página sem qualquer parâmetro); depois o idioma do monitor (`MONITOR_LANG`, ou o configurado). Um ecrã cujo idioma guardado difere daquele em que foi servido volta a carregar uma vez, antes de desenhar, com `?lang=` acrescentado e os restantes parâmetros (entre eles `?rotate=`) mantidos. Os oito idiomas (en, es, de, fr, it, ja, zh, pt) são os mesmos da página: títulos, etiquetas, estados, gravidades, unidades e tempos relativos («há 5 min») vêm do catálogo, e a hora, a data e os números escrevem-se com a configuração regional do idioma (en-GB, es-ES, de-DE, fr-FR, it-IT, ja-JP, zh-CN, pt-PT). A ligação «Abrir ecrã» das Definições já leva `?lang=` com o idioma da página. Um computador que não escolhe idioma por si fica em inglês: o idioma do navegador não decide.
 
 ### Definições dos ecrãs de parede
 

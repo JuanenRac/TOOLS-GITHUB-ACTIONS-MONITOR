@@ -29,6 +29,8 @@ EXEMPT = {
     "/api/alerts/unmute": "recorded by its own line (alert_unmute) once the silence is gone",
     "/api/hot-only": "a display switch of this process; it changes no stored state",
     "/api/webhook": "a delivery from GitHub signed with the shared secret, not an action of a person",
+    "/api/chatops/slack": "a signed command of the chat; every command that reaches the monitor leaves its own line (chatops_command) with the ids of the chat, and it only reads",
+    "/api/chatops/discord": "a signed command of the chat; every command that reaches the monitor leaves its own line (chatops_command) with the ids of the chat, and it only reads",
     "/api/refresh-repos": "reads again the repositories that `finalize --execute` names; it writes nothing on GitHub",
     "/api/sentinel/parte/save": "writes a copy of the daily report in the audit folder; no setting, no GitHub",
     "/api/sentinel/ai": "asks the integrated assistant a question about the picture the monitor holds; changes nothing",

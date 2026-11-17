@@ -33,6 +33,6 @@ There is no PDF of its own: open the HTML page and print it to PDF from the brow
 
 ## Where to see and ask for them
 
-- The **Team** tab has a Reports section: the list, a link to each file and the button **Write a report now** (an administrator, from this computer).
+- The **Scheduled reports** tab (menu group *Reports and learning*, address `#team-reports`) has: the list, a link to each file and the button **Write a report now** (an administrator, from this computer).
 - `GET /api/report-files` lists them, `GET /api/report-files/file?name=...` opens one (only a file the service wrote for this account) and `POST /api/report-files/run` writes one now.
 - In the team mode anyone who can see the account can read its reports; writing one now is for an administrator at this computer. The Lite edition has none of this.

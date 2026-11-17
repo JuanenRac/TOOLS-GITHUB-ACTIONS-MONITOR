@@ -56,6 +56,9 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/auth/password` | POST | viewer | change my own password |
 | `/api/auth/users` | GET,POST | admin / admin | list and manage users (administrators) |
 | `/api/chat` | POST | admin | ask the AI of the monitor a question about the data it shows |
+| `/api/chatops` | POST | admin | read only commands from a chat; the paths below are its routes |
+| `/api/chatops/discord` | POST | public | an interaction of Discord, read only (signed with Ed25519, off by default) |
+| `/api/chatops/slack` | POST | public | a slash command of Slack, read only (signed with the v0 HMAC of Slack, off by default) |
 | `/api/credential` | POST | admin | replace the GitHub login without restarting (this computer only) |
 | `/api/data` | GET | viewer | the main picture: repositories, runs, failing, active, rate |
 | `/api/discovery` | GET | viewer | repositories the monitor found and suggestions |

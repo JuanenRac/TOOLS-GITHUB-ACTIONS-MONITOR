@@ -89,3 +89,9 @@ Chaque seuil ci-dessus est un réglage des onglets **Sentinelle**, **Contrôles 
 ## La seconde sentinelle et la liste des alertes
 
 En plus de cette sentinelle (CI), l'édition complète a la **sentinelle Collab**, qui surveille les issues et pull requests ouvertes sur une horloge propre et n'écrit jamais sur GitHub : [COLLAB_fra.md](COLLAB_fra.md). L'onglet **Alertes** réunit les alertes des deux dans une liste, avec un filtre par origine et niveau et des mises en sourdine locales qui se terminent seules (`alerts.mute_hours`) ; `GET /api/alerts` sert la même liste.
+
+## Le menu de gauche : groupes et sentinelles
+
+Le menu a cinq groupes avec un titre chacun (ils se replient et le moniteur s'en souvient) : *Surveiller* (Maintenant, Alertes, Graphiques), *Sentinelles* (Résumé, Sentinelle CI, Sentinelle collab, Sentinelle sécurité), *Équipe* (Santé de l'équipe, Flotte, Dépôts), *Rapports et apprentissage* (Rapports, Rapports planifiés, Leçons, Historique) et *Système* (Réglages). Chaque entrée a sa propre adresse : `#team-health`, `#fleet`, `#team-reports`, `#reports`, `#lessons`, `#sentinel`, `#sentinel-ci`, `#sentinel-collab` et `#sentinel-security` (aussi `?view=` avec les mêmes mots). Les anciennes adresses (`#team`, `#sent`, `#alerts/reports`, `#team/fleet`...) ouvrent le bon panneau.
+
+Les trois sentinelles peuvent être activées ou non (`sentinel.enabled`, `sentinels.collab.enabled`, `sentinels.security.enabled`). L'entrée d'une sentinelle n'est dans le menu que tant qu'elle est activée, et le groupe *Sentinelles* disparaît quand aucune ne l'est ; la page suit l'état à sa prochaine actualisation. L'adresse d'une sentinelle désactivée ouvre toujours son panneau, qui dit qu'elle est désactivée et a un bouton qui ouvre son interrupteur dans les Réglages. Les panneaux A1 à A13 sont ceux de la sentinelle CI ; le badge de chaque entrée ne compte que les alertes de sa sentinelle.

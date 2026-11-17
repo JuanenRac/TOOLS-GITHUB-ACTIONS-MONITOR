@@ -3,7 +3,7 @@
   Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
   GPL-3.0-or-later - see LICENSE
 -->
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -19,6 +19,8 @@ html[data-density=compact]{--d:.9}
 html[data-density=large]{--d:1.12}
 @media (orientation:portrait){html{font-size:calc(var(--k)*var(--d)*min(100vw/62,100vh/108))}}
 body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Sans CJK SC","Noto Sans CJK JP",sans-serif;background:radial-gradient(120% 90% at 50% 0%,var(--bg2),var(--bg));height:100vh;overflow:hidden;font-size:1rem;line-height:1.25;transition:filter 2s,opacity .6s}
+:lang(ja) body{font-family:system-ui,"Yu Gothic UI","Meiryo","Hiragino Sans","Noto Sans CJK JP","Noto Sans JP",sans-serif}
+:lang(zh) body{font-family:system-ui,"Microsoft YaHei UI","PingFang SC","Noto Sans CJK SC","Noto Sans SC",sans-serif}
 body.dim{filter:brightness(.35)}
 body.offline #stage{opacity:.5;filter:grayscale(.7)}
 #wrap{position:absolute;inset:0;overflow:hidden}
@@ -223,7 +225,12 @@ svg{display:block}
 <script>
 "use strict";
 const D=/*SCREEN_DATA*/null;
+/* the language of the screen: ?lang= of the address wins; else the one the person chose on the main page (the same key, `am-lang`, of the same browser store); else the one of the monitor, which is already
+   embedded. A chosen language that is not the embedded one reloads the page ONCE with ?lang= (the other parameters stay, so ?rotate= keeps turning), before anything is drawn: there is no flash of the other language */
+var LANG_RELOAD=false;
+try{const q=new URLSearchParams(location.search);if(!q.has("lang")){const l=localStorage.getItem("am-lang");if(l&&/^[a-z]{2}$/.test(l)&&l!==D.lang){q.set("lang",l);LANG_RELOAD=true;location.replace(location.pathname+"?"+q.toString()+location.hash)}}}catch(e){}
 (function(){
+if(LANG_RELOAD)return;
 const P=D.params,S=D.settings,KINDS=D.kinds,root=document.documentElement,body=document.body;
 const T=(k,v)=>{let s=D.texts[k];if(s===undefined)s=k;if(v)for(const x in v)s=s.split("{"+x+"}").join(String(v[x]));return s};
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -234,7 +241,7 @@ document.documentElement.lang=D.html_lang;
 root.dataset.theme=P.theme;root.dataset.density=P.density;root.style.setProperty("--k",P.scale);
 if(!P.blink)body.classList.add("noblink");
 const RENDER={};
-const STATE={kind:D.screen,data:null,fails:0,timer:0,tickAt:0,got:0,prevRed:new Set(),first:true,redSince:new Map(),lastSound:0};
+const STATE={kind:D.screen,data:null,fails:0,timer:0,tickAt:0,got:0,prevRed:new Set(),first:true,redSince:new Map(),lastSound:{},sq:[],sqAt:0,al:null,offSound:false};
 /* ---------- formatting ---------- */
 function dur(sec){
   if(sec==null||!isFinite(sec))return "–";
@@ -337,9 +344,55 @@ function banner(kind,text){
   b.hidden=false;b.className=kind==="warn"?"warn":"";b.textContent=text;
   body.classList.toggle("offline",kind!=="warn");
 }
-function beep(){
-  if(!P.sound)return;const now=Date.now();if(now-STATE.lastSound<30000)return;STATE.lastSound=now;
-  try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.frequency.value=660;g.gain.value=.05;o.connect(g);g.connect(c.destination);o.start();setTimeout(()=>{o.stop();c.close()},220)}catch(e){}
+/*SOUNDS-BEGIN*/
+/* the sounds of the monitor, one per kind of event, made with the Web Audio API (no audio file): the page and the wall screens carry this same block (a test keeps the two copies equal).
+   A note is [Hz, start (s), length (s), Hz at the end (a slide)]. The themes change the colour (wave, attack, release, pitch), never the rhythm, so a kind is the same pattern in every theme. */
+const SND_PATTERNS={
+  red:{w:"sine",n:[[880,0,.15],[1175,.22,.15]]},
+  sentinel:{w:"triangle",n:[[330,0,.14],[330,.2,.14],[330,.4,.14]]},
+  stuck:{w:"sine",n:[[740,0,.7,370]]},
+  score:{w:"triangle",n:[[784,0,.16],[622,.2,.16],[466,.4,.28]]},
+  conn:{w:"sine",n:[[392,0,.3],[262,.38,.4]]},
+  warning:{w:"triangle",n:[[660,0,.16],[660,.26,.16]]},
+  resolved:{w:"sine",n:[[523,0,.12],[659,.14,.12],[784,.28,.25]]},
+  report:{w:"triangle",n:[[1047,0,.12],[784,.16,.3]]},
+  lesson:{w:"sine",n:[[1319,0,.08],[1568,.1,.08],[1976,.2,.16]]},
+  info:{w:"sine",n:[[988,0,.22]]}
+};
+const SND_THEMES={classic:{w:"",atk:.02,rel:.15,mul:1,gain:1},soft:{w:"sine",atk:.06,rel:.35,mul:.75,gain:.8}};
+let AUDIO=null;
+function audioCtx(){try{if(!AUDIO){const C=window.AudioContext||window.webkitAudioContext;if(C)AUDIO=new C()}if(AUDIO&&AUDIO.state!=="running"&&AUDIO.state!=="closed")AUDIO.resume();return AUDIO}catch(e){return null}}
+/* plays the patterns of the kinds one after the other (a string or a list); false when the browser does not let the page sound yet, so the caller can keep them and try again */
+function playTones(vol,kinds,theme){const c=audioCtx();if(!c||c.state!=="running")return false;
+  const list=Array.isArray(kinds)?kinds:[kinds||"red"],th=SND_THEMES[theme]||SND_THEMES.classic,v=Math.max(0.01,Math.min(1,vol||0.4))*0.5*th.gain;let t=c.currentTime+0.02;
+  list.forEach(k=>{const p=SND_PATTERNS[k]||SND_PATTERNS.red;let end=0;
+    p.n.forEach(([f,d,len,to])=>{const o=c.createOscillator(),g=c.createGain();o.type=th.w||p.w;o.frequency.setValueAtTime(f*th.mul,t+d);if(to)o.frequency.linearRampToValueAtTime(to*th.mul,t+d+len);o.connect(g);g.connect(c.destination);
+      g.gain.setValueAtTime(0.0001,t+d);g.gain.exponentialRampToValueAtTime(v,t+d+th.atk);g.gain.exponentialRampToValueAtTime(0.0001,t+d+len+th.rel);o.start(t+d);o.stop(t+d+len+th.rel+0.02);end=Math.max(end,d+len+th.rel)});
+    t+=end+0.25});
+  return true}
+/*SOUNDS-END*/
+/* the sounds of the wall are the ones of the page (the block above is the same text): one per kind of event, with the volume, the theme, the switches and the quiet hours of the settings, and only in a window that asks for them (?sound=on) in a monitor that allows them (screens.sound) */
+const SC=Object.assign({enabled:true,theme:"classic",volume:40,cooldown_seconds:30,quiet_enabled:false,quiet_from_hour:22,quiet_to_hour:7},D.sound||{});
+const SND_SW={red:"new_red",conn:"connection_lost",score:"score_drop"};
+function sndQuiet(){if(!SC.quiet_enabled||SC.quiet_from_hour===SC.quiet_to_hour)return false;const h=new Date().getHours(),a=SC.quiet_from_hour,b=SC.quiet_to_hour;return a<b?(h>=a&&h<b):(h>=a||h<b)}
+function beep(kinds){
+  if(!P.sound||SC.enabled===false)return;const now=Date.now();
+  for(const k of kinds||["red"]){if(SC["on_"+(SND_SW[k]||k)]===false||!SND_PATTERNS[k])continue;if(STATE.lastSound[k]&&now-STATE.lastSound[k]<SC.cooldown_seconds*1000)continue;if(!STATE.sq.includes(k))STATE.sq.push(k)}
+  sndDrain();
+}
+/* what waits (the browser may not allow sound yet) plays at the next try: a gesture, or the pump every three seconds; at most three patterns in a burst */
+function sndDrain(){
+  if(!STATE.sq.length||sndQuiet())return;const now=Date.now();if(now<STATE.sqAt)return;
+  const batch=STATE.sq.slice(0,3);if(playTones(SC.volume/100,batch,SC.theme)===false)return;
+  STATE.sqAt=now+1500+(batch.length-1)*1200;batch.forEach(k=>{STATE.lastSound[k]=now});STATE.sq=STATE.sq.slice(batch.length);
+}
+["pointerup","click","touchend","keydown"].forEach(ev=>document.addEventListener(ev,()=>{if(P.sound){audioCtx();sndDrain()}},{capture:true}));
+setInterval(()=>{if(P.sound&&STATE.sq.length)sndDrain()},3000);
+/* alerts of the sentinels that rise between two looks sound as their level (a serious one, a warning); the first look only remembers */
+function alertSound(al){
+  if(!al||typeof al.by_level!=="object")return;const bl=al.by_level,sv=num(bl.critical)+num(bl.error),wn=num(bl.warning);
+  if(STATE.al){const k=[];if(sv>STATE.al.sv)k.push("sentinel");if(wn>STATE.al.wn)k.push("warning");if(k.length)beep(k)}
+  STATE.al={sv:sv,wn:wn};
 }
 /* failures: a new one flashes once, an old one blinks until it is calm (screens.blink_calm_minutes) and then keeps a fixed halo */
 function failMark(el,key,seconds){
@@ -482,8 +535,9 @@ function show(kind){
 function paint(d){
   const keys=(RENDER[STATE.kind]||(()=>[]))(d)||[];
   const r=newFails(keys);
-  if(r.isNew){beep();$("stage").classList.remove("fail-new");void $("stage").offsetWidth;if(!reduce&&P.blink)flash($("stage"),"fail-new")}
-  if(r.fixed)flash($("ft-green"),"flash-ok");
+  if(r.isNew){beep(["red"]);$("stage").classList.remove("fail-new");void $("stage").offsetWidth;if(!reduce&&P.blink)flash($("stage"),"fail-new")}
+  if(r.fixed){flash($("ft-green"),"flash-ok");beep(["resolved"])}
+  alertSound(d.alerts);
   const m=d.meta||{};
   if(!m.have_data)banner("warn",T("ui.scr_loading"));
   else if(m.age_seconds!=null&&m.age_seconds>3*num(m.refresh_seconds||60)+60)banner("warn",T("ui.scr_old",{age:dur(m.age_seconds)}));
@@ -498,9 +552,9 @@ async function load(){
   try{
     const r=await fetch("/api/screens/data?screen="+encodeURIComponent(STATE.kind)+"&lang="+encodeURIComponent(D.lang),{cache:"no-store"});
     if(!r.ok)throw new Error(String(r.status));
-    const d=await r.json();STATE.fails=0;STATE.data=d;STATE.got=Date.now();paint(d);
+    const d=await r.json();STATE.fails=0;STATE.offSound=false;STATE.data=d;STATE.got=Date.now();paint(d);
   }catch(e){
-    STATE.fails++;const back=Math.min(60,5*Math.pow(2,STATE.fails-1));wait=back*1000;
+    STATE.fails++;if(!STATE.offSound){STATE.offSound=true;beep(["conn"])}const back=Math.min(60,5*Math.pow(2,STATE.fails-1));wait=back*1000;
     banner("bad",T("ui.scr_offline")+" · "+T("ui.scr_retry",{n:back}));
   }
   STATE.timer=setTimeout(load,wait);
