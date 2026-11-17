@@ -242,7 +242,7 @@ background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 
 
 /* About, Help, the first-start guide and the restart bar */
 .dlg{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:14px}
-.dlg[hidden]{display:none}
+.dlg[hidden]{display:none}.dlg.ask{z-index:60}.ask-text{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}.dlg-bar .sp{flex:1}#ask-ok.danger{border-color:var(--bad)}
 .dlg-box{background:var(--panel);border:1px solid var(--line2);border-radius:14px;box-shadow:var(--shadow);width:min(640px,100%);max-height:calc(100vh - 28px);display:flex;flex-direction:column;overflow:hidden}
 .dlg-box.wide{width:min(1100px,100%);height:calc(100vh - 28px)}
 .dlg-top{display:flex;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)}
@@ -531,6 +531,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 </main>
 </div>
 </div>
+<div id="ask-dlg" class="dlg ask" role="alertdialog" aria-modal="true" aria-labelledby="ask-h" aria-describedby="ask-t" hidden><div class="dlg-box"><div class="dlg-top"><h2 id="ask-h" data-i18n="ui.confirm_title"></h2></div><div class="dlg-body"><p id="ask-t" class="ask-text"></p></div><div class="dlg-bar"><span class="sp"></span><button id="ask-no" type="button" data-i18n="ui.confirm_cancel"></button><button id="ask-ok" type="button" data-i18n="ui.confirm_ok"></button></div></div></div>
 <div id="about-dlg" class="dlg" role="dialog" aria-modal="true" aria-labelledby="about-h" hidden><div class="dlg-box"><div class="dlg-top"><h2 id="about-h" data-i18n="ui.about_title"></h2><span class="sp"></span><button id="about-close" class="ib" type="button" data-i18n-title="ui.close" data-i18n-aria="ui.close"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-close"/></svg></button></div><div class="dlg-body" id="about-body"></div><div class="dlg-bar"><button id="about-copy" type="button"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-copy"/></svg><span data-i18n="ui.about_copy"></span></button><span id="about-msg" class="mut" role="status"></span></div></div></div>
 <div id="help-dlg" class="dlg" role="dialog" aria-modal="true" aria-labelledby="help-h" hidden><div class="dlg-box wide"><div class="dlg-top"><h2 id="help-h" data-i18n="ui.help_title"></h2><input id="help-q" type="search" autocomplete="off" data-i18n-ph="ui.help_search_ph" data-i18n-aria="ui.help_search_ph" style="flex:1;max-width:420px"><span class="sp"></span><button id="help-close" class="ib" type="button" data-i18n-title="ui.close" data-i18n-aria="ui.close"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-close"/></svg></button></div><div class="help-cols"><div id="help-list" role="navigation" data-i18n-aria="ui.help_index"></div><div id="help-body" tabindex="0"></div></div></div></div>
 <div id="wiz-dlg" class="dlg" role="dialog" aria-modal="true" aria-labelledby="wiz-h" hidden><div class="dlg-box"><div class="dlg-top"><h2 id="wiz-h" data-i18n="ui.wiz_title"></h2><span class="sp"></span><span class="mut" id="wiz-step"></span></div><div class="dlg-body" id="wiz-body"></div><div class="dlg-bar"><button id="wiz-back" type="button" data-i18n="ui.wiz_back"></button><button id="wiz-next" type="button" data-i18n="ui.wiz_next"></button><span class="sp" style="flex:1"></span><button id="wiz-skip" type="button" data-i18n="ui.wiz_skip"></button></div></div></div>
@@ -1343,7 +1344,7 @@ $("t-sent").addEventListener("click",async e=>{
     else if(g.dataset.goto==="a5"&&SENT)setList(T("ui.l_pending"),[...new Set((SENT.a5.pending_sign||[]).map(r=>r.repo))]);
     const d=document.querySelector(`details[data-k="${g.dataset.goto}"]`);if(d){d.open=true;d.scrollIntoView({block:"nearest"})}return}
   const run=e.target.closest("button[data-ai-run]");if(run){
-    if(!window.confirm(T("ui.ai_prop_confirm",{cmd:run.dataset.cmd})))return;
+    if(!await askConfirm(T("ui.ai_prop_confirm",{cmd:run.dataset.cmd}),{danger:true}))return;
     try{const r=await fetch("/api/ai/actions/confirm",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:run.dataset.aiRun,command:run.dataset.cmd})});const j=await r.json();
       run.disabled=true;run.textContent=j.ok?T("ui.ai_run_ok"):(j.reason==="failed"?T("ui.ai_run_failed",{code:j.code}):T("ui.ai_run_"+j.reason))}
     catch(err){run.textContent=T("ui.err_monitor",{msg:err})}
@@ -1887,6 +1888,28 @@ document.addEventListener("keyup",e=>{if(e.target.tagName==="BUTTON")e.target.cl
 
 /* About, Help, the first-start guide, the update notice, the restart bar and the level filter of the linter */
 const dlgs={about:$("about-dlg"),help:$("help-dlg"),wiz:$("wiz-dlg"),notes:$("notes-dlg"),rh:$("rh-dlg")};
+/* ONE confirmation for the whole page, inside the page: a native dialog of the browser (confirm, alert, prompt) is not drawn, or drops the page out of full screen, and blocks the thread. askConfirm(text,{danger}) returns a
+   Promise<boolean>: Accept = true, Cancel / Esc = false. With `danger` the focus starts on Cancel; Tab stays inside the two buttons; the focus goes back to where it was; Enter presses the focused button. */
+let ASK=null;
+function askConfirm(text,opt){
+  opt=opt||{};
+  return new Promise(resolve=>{
+    if(ASK)ASK.finish(false);
+    const dlg=$("ask-dlg"),ok=$("ask-ok"),no=$("ask-no"),back=document.activeElement;
+    $("ask-t").textContent=String(text);ok.classList.toggle("danger",!!opt.danger);dlg.dataset.danger=opt.danger?"1":"";
+    const finish=value=>{
+      if(!ASK||ASK.finish!==finish)return;
+      ASK=null;dlg.hidden=true;ok.removeEventListener("click",onOk);no.removeEventListener("click",onNo);document.removeEventListener("keydown",onKey,true);
+      if(back&&back.focus&&document.contains(back))try{back.focus()}catch(e){}
+      resolve(value)};
+    const onOk=()=>finish(true),onNo=()=>finish(false);
+    const onKey=e=>{
+      if(e.key==="Escape"){e.preventDefault();e.stopImmediatePropagation();finish(false)}
+      else if(e.key==="Tab"){e.preventDefault();e.stopImmediatePropagation();(document.activeElement===no?ok:no).focus()}
+      else if(e.key==="Enter"&&document.activeElement!==ok&&document.activeElement!==no){e.preventDefault();e.stopImmediatePropagation();(opt.danger?no:ok).focus()}};
+    ASK={finish:finish};
+    ok.addEventListener("click",onOk);no.addEventListener("click",onNo);document.addEventListener("keydown",onKey,true);
+    dlg.hidden=false;(opt.danger?no:ok).focus()})}
 let LASTFOCUS=null;
 function dlgOpen(k){LASTFOCUS=document.activeElement;dlgs[k].hidden=false}
 function dlgClose(k){dlgs[k].hidden=true;if(LASTFOCUS&&LASTFOCUS.focus)try{LASTFOCUS.focus()}catch(e){}}
@@ -1979,7 +2002,7 @@ async function modeLoad(){
 $("mode-sel").addEventListener("change",async e=>{
   const want=e.target.value;if(!MODEDATA)return;
   if(want!=="normal"){const est=MODEDATA.estimate[want],mins=est.minutes_left;
-    if(!window.confirm(T("ui.mode_confirm",{mode:T("ui.mode_"+want),calls:est.calls_per_hour,cached:est.with_cache_per_hour,minutes:MODEDATA.default_minutes,left:mins==null?"–":fmt(mins*60),floor:MODEDATA.floor}))){e.target.value=MODEDATA.mode;return}}
+    if(!await askConfirm(T("ui.mode_confirm",{mode:T("ui.mode_"+want),calls:est.calls_per_hour,cached:est.with_cache_per_hour,minutes:MODEDATA.default_minutes,left:mins==null?"–":fmt(mins*60),floor:MODEDATA.floor}))){e.target.value=MODEDATA.mode;return}}
   try{const r=await fetch("/api/mode",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({mode:want,minutes:want==="normal"?0:MODEDATA.default_minutes})});const j=await r.json();
     if(!j.ok){$("err").style.display="block";$("err").textContent=T("ui.mode_refused",{why:T("ui.mode_why_"+j.reason)})}}catch(x){}
   modeLoad();tick(true)});
@@ -2043,11 +2066,11 @@ async function advancedExtras(){
   on("adv-token-del",async()=>{await advPost("/api/github-token",{action:"delete"});advancedExtras()});
   on("adv-gh-go",async()=>{const p=await advPost("/api/gh-action/plan",{action:box.querySelector("#adv-gh-action").value,repo:box.querySelector("#adv-gh-repo").value.trim(),number:box.querySelector("#adv-gh-num").value.trim()});
     if(!p.ok){cfgMsg("bad",T("ui.adv_refused",{why:advWhy(p)}));return}
-    if(!window.confirm(T("ui.adv_gh_confirm",{method:p.plan.method,endpoint:p.plan.endpoint})))return;
+    if(!await askConfirm(T("ui.adv_gh_confirm",{method:p.plan.method,endpoint:p.plan.endpoint}),{danger:true}))return;
     const j=await advPost("/api/gh-action/confirm",{plan:p.plan.id});cfgMsg(j.ok?"ok":"bad",j.ok?T("ui.adv_done"):T("ui.adv_refused",{why:advWhy(j)}))});
   on("adv-act-go",async()=>{const [repo,workflow,event]=box.querySelector("#adv-act-sel").value.split(":");const p=await advPost("/api/act/plan",{repo:repo,workflow:workflow,event:event});
     if(!p.ok){cfgMsg("bad",T("ui.adv_refused",{why:advWhy(p)}));return}
-    if(!window.confirm(T("ui.adv_act_confirm",{command:p.plan.command})))return;
+    if(!await askConfirm(T("ui.adv_act_confirm",{command:p.plan.command}),{danger:true}))return;
     const j=await advPost("/api/act/confirm",{plan:p.plan.id});if(!j.ok){cfgMsg("bad",T("ui.adv_refused",{why:advWhy(j)}));return}
     const out=box.querySelector("#adv-act-out");let at=0;out.textContent="";
     const poll=async()=>{const s=await (await fetch("/api/act/status?since="+at,{cache:"no-store"})).json();out.textContent+=s.lines.map(l=>l+"\n").join("");at+=s.lines.length;out.scrollTop=out.scrollHeight;if(s.running)setTimeout(poll,1000);else out.textContent+="\n"+T("ui.adv_act_exit",{code:s.exit})};poll()});
@@ -2127,7 +2150,7 @@ async function authUsers(){const p=authPanel(T("ui.auth_users")),msg=ae("div",{c
       const save=ae("button",{type:"button",class:"authact"},T("ui.auth_pw_save")),rev=ae("button",{type:"button",class:"authact"},T("ui.auth_user_revoke")),del=ae("button",{type:"button",class:"authact"},T("ui.auth_user_delete"));
       save.onclick=()=>act("/api/auth/users/update",{username:u.username,role:rs.value,active:on.checked,accounts:ac.value.split(",").map(s=>s.trim()).filter(Boolean)});
       rev.onclick=()=>act("/api/auth/users/revoke",{username:u.username});
-      del.onclick=()=>{if(confirm(T("ui.auth_confirm_delete",{user:u.username})))act("/api/auth/users/delete",{username:u.username})};
+      del.onclick=async()=>{if(await askConfirm(T("ui.auth_confirm_delete",{user:u.username}),{danger:true}))act("/api/auth/users/delete",{username:u.username})};
       [ae("td",{},u.username),ae("td"),ae("td"),ae("td"),ae("td")].forEach((td,i)=>{if(i===1)td.append(rs);if(i===2)td.append(ac);if(i===3)td.append(on);if(i===4)td.append(save," ",rev," ",del);tr.append(td)});tbl.append(tr)});
     try{const r=await fetch("/api/auth/audit",{cache:"no-store"}),a=await r.json();log.textContent=(a.audit||[]).slice(-30).reverse().map(e=>[e.at,e.user||"-",e.action,e.result,e.code||""].join("  ")).join("\n")||T("ui.auth_audit_empty")}catch(e){log.textContent=T("ui.auth_audit_empty")}};
   const nm=ae("input",{maxlength:"40","aria-label":T("ui.auth_user_name"),placeholder:T("ui.auth_user_name"),autocomplete:"off"}),pw=ae("input",{type:"password",maxlength:"200",autocomplete:"new-password","aria-label":T("ui.auth_pw_new"),placeholder:T("ui.auth_pw_new")}),rl=roleSel("viewer"),ac=ae("input",{maxlength:"300","aria-label":T("ui.auth_user_accounts"),placeholder:T("ui.auth_user_accounts"),value:"default"}),add=ae("button",{type:"button",class:"authact"},T("ui.auth_user_add"));
