@@ -23,6 +23,7 @@ from datetime import datetime, timezone
 from github_actions_monitor import i18n
 from github_actions_monitor.app import toolconfig
 from github_actions_monitor.security import envguard
+from github_actions_monitor.security.redactor import redact
 
 NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}\Z")
 DELIVERY_RE = re.compile(r"^[A-Za-z0-9-]{8,64}\Z")   # X-GitHub-Delivery: a GUID
@@ -244,6 +245,7 @@ def handle(config, body, headers, watched):
 LIVE_FIELDS = ("event", "repo", "run_id", "status", "conclusion", "branch", "sha", "url", "attempt", "workflow", "path", "started", "seconds", "job", "queue")
 
 
+RUN_EVENT_RE = re.compile(r"^[a-z_]{1,30}\Z")
 GITHUB_URL = re.compile(r"^https://[A-Za-z0-9.-]+/[A-Za-z0-9._/-]{1,200}\Z")   # a link to the run on github.com or on a GitHub Enterprise Server host
 
 
@@ -254,8 +256,26 @@ def _time(text):
         return None
 
 
+CONTROL = re.compile("[\x00-\x1f\x7f-\x9f\u2028\u2029]+")
+STATUSES = ("queued", "in_progress", "completed", "waiting", "requested", "pending")
+CONCLUSIONS = ("success", "failure", "neutral", "cancelled", "skipped", "timed_out", "action_required", "startup_failure", "stale")
+
+
 def _name(value, size=100):
-    return value[:size] if isinstance(value, str) and value else ""
+    """A free text of the payload (a workflow, a branch, a job, a step): one line, no control characters, no secret, cut. It reaches the live list, the stream and the notices."""
+    if not isinstance(value, str) or not value:
+        return ""
+    return redact(CONTROL.sub(" ", value).strip())[:size]
+
+
+def _word(value, allowed):
+    """The status or the conclusion only when it is one of the closed list of GitHub, else nothing."""
+    return value if isinstance(value, str) and value in allowed else ""
+
+
+def _stamp(text):
+    """The date of the payload in the one shape the monitor reads, or nothing."""
+    return text if isinstance(text, str) and _time(text) is not None else ""
 
 
 def parse_event(event, body):
@@ -274,13 +294,15 @@ def parse_event(event, body):
     if not isinstance(repo, str) or not NAME_RE.match(repo) or not isinstance(obj, dict) or not isinstance(obj.get("id"), int):
         return None
     url = obj.get("html_url") if isinstance(obj.get("html_url"), str) and GITHUB_URL.match(obj["html_url"]) else None
-    record = {"event": event, "repo": repo, "run_id": obj["run_id"] if event == "workflow_job" and isinstance(obj.get("run_id"), int) else obj["id"], "status": _name(obj.get("status"), 20),
-              "conclusion": _name(obj.get("conclusion"), 20) or None, "branch": _name(obj.get("head_branch")), "sha": _name(obj.get("head_sha"), 40)[:7], "url": url,
+    record = {"event": event, "repo": repo, "run_id": obj["run_id"] if event == "workflow_job" and isinstance(obj.get("run_id"), int) else obj["id"], "status": _word(obj.get("status"), STATUSES),
+              "conclusion": _word(obj.get("conclusion"), CONCLUSIONS) or None, "branch": _name(obj.get("head_branch")), "sha": _name(obj.get("head_sha"), 40)[:7], "url": url,
               "attempt": obj.get("run_attempt") if isinstance(obj.get("run_attempt"), int) else None}
     if event == "workflow_run":
+        kind = obj.get("event")      # push, schedule, pull_request...: the rule of the red counts a run by it, so it is kept (a short word, never free text)
+        record["run_event"] = kind if isinstance(kind, str) and RUN_EVENT_RE.match(kind) else ""
         record["workflow"] = _name(obj.get("name"))
         record["path"] = _name(obj.get("path"), 200).split("@")[0].rsplit("/", 1)[-1]
-        record["started"] = _name(obj.get("run_started_at") or obj.get("created_at"), 25)
+        record["started"] = _stamp(obj.get("run_started_at")) or _stamp(obj.get("created_at"))
         a, b = _time(obj.get("run_started_at") or obj.get("created_at")), _time(obj.get("updated_at"))
         record["seconds"] = max(0, int(b - a)) if a is not None and b is not None and obj.get("status") == "completed" else None
     else:
@@ -302,7 +324,7 @@ def as_run(record):
     """The record of a `workflow_run` in the shape of the run list of the monitor (so a webhook can update a repository without reading it again)."""
     if not record or record.get("event") != "workflow_run":
         return None
-    return {"repo": record["repo"], "id": record["run_id"], "name": record["workflow"], "title": "", "event": "webhook", "branch": record["branch"], "path": record["path"], "sha": record["sha"],
+    return {"repo": record["repo"], "id": record["run_id"], "name": record["workflow"], "title": "", "event": record.get("run_event") or "webhook", "branch": record["branch"], "path": record["path"], "sha": record["sha"],
             "actor": "", "status": record["status"], "conclusion": record["conclusion"], "started": record["started"], "seconds": record["seconds"] or 0, "url": record["url"], "attempt": record.get("attempt")}
 
 

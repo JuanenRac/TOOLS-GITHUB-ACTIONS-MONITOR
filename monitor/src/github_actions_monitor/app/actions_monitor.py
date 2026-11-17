@@ -145,7 +145,7 @@ DEFAULTS = {
     "pagination": {"workflow_pages": 3, "job_pages": 2, "collab_pages": 3},      # pages of 100 followed when a list is full, and said when something is cut (paging.py)
     "sampling": {"default_branch_probe": False, "min_coverage_minutes": 30, "api_budget_per_hour": 0},      # how much of a repository the list of runs shows, a second look at the default branch, a budget of requests (sampling.py)
     "savings": {"webhook_first": False, "webhook_window_minutes": 60, "webhook_full_minutes": 360, "feeds": {"enabled": False, "method": "atom", "max_age_minutes": 240}},      # read less: OFF (savings.py)
-    "logs": {"failed_step": {"enabled": False, "lines": 12, "max_bytes": 2000}},      # the log of the failed step in the page: OFF, one press of a button, steplog.py
+    "logs": {"failed_step": {"enabled": False, "lines": 12, "max_bytes": 2000, "max_per_minute": 10}},      # the log of the failed step in the page: OFF, one press of a button, steplog.py
     "reports": {"workflow_hygiene": {"enabled": False}, "queue": {"enabled": False}, "release_view": {"enabled": False}, "supply_chain": {"enabled": False}, "max_calls_per_cycle": 4},      # four optional reports, all OFF (reports.py)
     "lessons": {"enabled": True, "allow_write": False, "retention_days": 180, "max_entries": 5000, "brief_max_bytes": 3000, "recurring_from": 2},      # the book of failures and the library of lessons (lessons.py): local, read only; writing a lesson is OFF
     "live": {"sse": {"enabled": False, "max_seconds": 3600, "max_clients": 3}},      # OFF: GET /api/live-events/stream, the live events as server-sent events (webhook.py)
@@ -439,8 +439,14 @@ def gh_read(endpoint, retries=2):
     raise RuntimeError(last or "gh failed")
 
 
+MAX_STEP_NAMES = 200      # names of step kept for each workflow in the statistics
+
+
 def parse_time(text):
-    return datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc) if text else None
+    try:
+        return datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc) if text else None
+    except (TypeError, ValueError):      # a date that is not one (a run from an event with a wrong shape) is no date: it never stops a cycle
+        return None
 
 
 def seconds_between(start, end):
@@ -1135,7 +1141,7 @@ def webhook_status(config):
     newest = LIVE_EVENTS[-1] if LIVE_EVENTS else None
     return {"enabled": cfg["enabled"], "active": webhook.active(config), "secret_ok": len(cfg["secret"]) >= webhook.MIN_SECRET, "text": webhook.status_text(config), "stats": dict(WEBHOOK_STATS),
             "keep": webhook.live_settings(config)["live_events_keep"], "held": len(LIVE_EVENTS), "secret_source": webhook.secret_source(config), "coverage": webhook.coverage(config),
-            "last": ({k: newest.get(k) for k in ("repo", "name", "event", "status", "conclusion", "at")} if newest else None)}
+            "last": ({k: newest.get(k) for k in ("repo", "workflow", "event", "status", "conclusion", "at")} if newest else None)}
 
 
 def apply_live_event(record, config):
@@ -1151,6 +1157,12 @@ def apply_live_event(record, config):
     entry = RUN_CACHE.get(record["repo"])
     HOT_FORCED.add(record["repo"])      # whatever the event said, the repository is read again in the next cycle (the event is the news, the read is the proof)
     if run and entry is not None:
+        old = next((r for r in entry["runs"] if r.get("id") == run["id"]), None)
+        if old is not None:      # the run the cycle already read keeps what the event does not say (its kind of event decides the colour; the actor, the title, the fork mark): the event only adds what is new
+            if old.get("status") == "completed" and run.get("status") == "completed" and old.get("conclusion") == run.get("conclusion"):
+                run = old
+            else:
+                run = {**old, **{k: v for k, v in run.items() if v not in ("", None) and not (k == "event" and v == "webhook")}, "conclusion": run.get("conclusion")}
         runs = [r for r in entry["runs"] if r.get("id") != run["id"]]
         entry["runs"] = sorted(runs + [run], key=lambda r: r.get("started") or "", reverse=True)[:max(config.get("runs_per_repo", 20), 5)]
         entry["at"] = time.time()
@@ -1162,6 +1174,8 @@ def apply_live_event(record, config):
         store.data["queue"][key] = (store.data["queue"].get(key, []) + [record["queue"]])[-store.max_samples:]
         for name, seconds in (record.get("steps") or {}).items():
             slot = store.data["steps"].setdefault(key, {})
+            if name not in slot and len(slot) >= MAX_STEP_NAMES:      # a matrix that puts a number in the name of a step must not make the file grow for ever: the oldest name goes
+                slot.pop(next(iter(slot)), None)
             slot[name] = (slot.get(name, []) + [seconds])[-store.max_samples:]
         store.dirty = True
     if record["event"] == "workflow_run" and record.get("status") == "completed" and record.get("conclusion") in ("failure", "timed_out", "startup_failure"):

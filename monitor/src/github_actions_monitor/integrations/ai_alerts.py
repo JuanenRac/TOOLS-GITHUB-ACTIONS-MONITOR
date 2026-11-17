@@ -37,7 +37,8 @@ HEARTBEAT = "ai_heartbeat.json"
 FIELDS = ("id", "severity", "class", "repo", "workflow", "conclusion", "since", "streak", "url", "cause", "action", "state")      # the closed list a hook or an endpoint may carry
 EXTRA = ("diagnosis", "origin", "panel", "account_id")      # what the feed, the stream and the endpoints add to FIELDS (never the hook: its list is the closed one above)
 RUN_RE = re.compile(r"/actions/runs/(\d+)")
-ANSI_RE = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
+ANSI_RE = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)?|\x1b[@-_]")      # colours (CSI), links and titles of a terminal (OSC) and a lone ESC
+CONTROL_RE = re.compile("[\x00-\x08\x0a-\x1f\x7f-\x9f\u2028\u2029]+")      # every control character but the tab: a line break in a name must not start a new line of the brief
 STAMP_RE = re.compile(r"^\d{4}-\d\d-\d\dT[\d:.]+Z\s*")
 RELEVANT_RE = re.compile(r"(?i)\b(error|errors|fail|failed|failure|fatal|exception|traceback|not found|denied|cannot|can't|unable|exit code|assert\w*|no such)\b")
 VIA = ("stream", "mcp", "hook", "endpoint")
@@ -197,7 +198,7 @@ def relevant_lines(log, count=10):
     cleaned = []
     for raw in str(log or "").splitlines():
         parts = raw.split("\t", 2)
-        text = STAMP_RE.sub("", ANSI_RE.sub("", parts[2] if len(parts) == 3 else raw)).strip()
+        text = CONTROL_RE.sub(" ", STAMP_RE.sub("", ANSI_RE.sub("", parts[2] if len(parts) == 3 else raw))).strip()
         if text and not text.startswith(("##[group]", "##[endgroup]")):
             cleaned.append(text)
     hits = [line for line in cleaned if RELEVANT_RE.search(line)]
@@ -224,7 +225,10 @@ def diagnose(owner, repo, url, runner, count=10, max_bytes=1500):
     except (ValueError, OSError, subprocess.SubprocessError, AttributeError):
         return {"run": run, "unavailable": True}
     lines = [redact(line) for line in relevant_lines(log if code == 0 else "", count)]
+    step = " ".join(CONTROL_RE.sub(" ", ANSI_RE.sub("", step)).split())      # the name of a job or a step is text of whoever writes the workflow: one line, no control characters
     result = {"run": run, "step": redact(step, 160), "lines": lines}
+    if code != 0:      # the jobs were read but the log was not (not there yet, expired, a 5xx): an answer without lines that must not be kept as if it were the log
+        result["log_unavailable"] = True
     while lines and len(json.dumps(result, ensure_ascii=False).encode("utf-8")) > max_bytes:
         lines.pop(0)
     return result
@@ -282,7 +286,7 @@ def brief(alerts, limit, now=None, panels=None, sections="", status=""):
         item = f"- [{a['severity']}/{a['class']}] {a['repo']} / {a['workflow']}: {a['conclusion']} x{a['streak']}{mark} - {a['cause']}. Next: {a['action']}. {a.get('url') or ''}".rstrip()
         diagnosis = a.get("diagnosis") or {}
         if diagnosis.get("step"):
-            item += "\n  Failing step: " + str(diagnosis["step"]) + (" | " + str(diagnosis["lines"][-1]) if diagnosis.get("lines") else "")
+            item += "\n  Failing step: " + " ".join(CONTROL_RE.sub(" ", str(diagnosis["step"])).split()) + (" | " + " ".join(CONTROL_RE.sub(" ", str(diagnosis["lines"][-1])).split()) if diagnosis.get("lines") else "")
         if followers.get(a["id"]):
             item += "\n  Also red because of it (fix this one first): " + ", ".join(f"{f['repo']} / {f['workflow']}" for f in followers[a["id"]])
         lines.append(item)
