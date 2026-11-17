@@ -284,6 +284,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/CI_RED_SCHEMA_por.md`](monitor/docs/CI_RED_SCHEMA_por.md): o formato de ci_red.json
 - [`monitor/docs/CI_RED_BRIDGE_por.md`](monitor/docs/CI_RED_BRIDGE_por.md): levar o ci_red.json para um painel
 - [`monitor/docs/WEBHOOK_por.md`](monitor/docs/WEBHOOK_por.md): o webhook de entrada
+- [`monitor/docs/CHATOPS_por.md`](monitor/docs/CHATOPS_por.md): comandos de chat só de leitura para Slack e Discord
+- [`monitor/docs/SOUNDS_por.md`](monitor/docs/SOUNDS_por.md): um som para cada tipo de evento
 - [`monitor/docs/LITE_por.md`](monitor/docs/LITE_por.md): A edição lite
 - [`monitor/docs/COMPLETE_INDIVIDUAL_por.md`](monitor/docs/COMPLETE_INDIVIDUAL_por.md): Edição completa para uma pessoa
 - [`monitor/docs/COMPLETE_SERVICE_por.md`](monitor/docs/COMPLETE_SERVICE_por.md): Edição completa como serviço
