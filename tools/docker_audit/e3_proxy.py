@@ -83,16 +83,29 @@ def body(s):
     s.note("a container of the proxy network that skips Caddy and changes X-Forwarded-For at each try: statuses %s (429 present = the lock still holds; none = it can choose its own address, which the guide says "
            "about the networks listed in trusted_proxies)" % unchecked["statuses"])
 
-    # the proxy is not declared as trusted: the conservative way
+    # the variables are taken out of the environment: the guide says the environment stays the authority for the keys it names
     stack.write(trusted=False)
     ok, out = stack.up()
     s.check("the monitor restarts with MONITOR_TRUSTED_PROXY and MONITOR_TRUSTED_PROXIES empty", ok, out[-800:])
-    stack.prepare_client()
+    monitor, _caddy = stack.prepare_client()
+    s.wait_healthy(stack.container("monitor"), 180)
+    _c, listen = s.python_in(monitor, "import json; print(json.dumps(json.load(open('/config/actions_monitor.json')).get('listen', {})))", label="read listen.* of the configuration file")
+    try:
+        kept = json.loads(listen.strip().splitlines()[-1])
+    except ValueError:
+        kept = {}
+    s.check("taking MONITOR_TRUSTED_PROXY out of the environment (empty) switches listen.trusted_proxy off again", not kept.get("trusted_proxy"), "listen in the file after the restart: %s" % json.dumps(kept))
+    # and switched off explicitly, the conservative behaviour: the lock is counted against the address of Caddy
+    stack.write(trusted="off")
+    ok, out = stack.up()
+    s.check("the monitor restarts with MONITOR_TRUSTED_PROXY=0", ok, out[-800:])
+    monitor, _caddy = stack.prepare_client()
     s.wait_healthy(stack.container("monitor"), 180)
     flood = stack.request(ps.CLIENT_A, [access("wrong-%s" % "z" * 20, repeat=12)])[0]
     shared = stack.request(ps.CLIENT_B, [access(stack.token)])[0]["first"]
-    s.note("proxy NOT declared as trusted: the first visitor's 12 wrong tokens got %s; then another visitor with the right token gets %s (429 = the lock is counted against the address of Caddy, the "
-           "conservative behaviour the setting exists to change)" % (flood["statuses"], shared["status"]))
+    s.note("proxy NOT trusted (MONITOR_TRUSTED_PROXY=0): the first visitor's 12 wrong tokens got %s; then another visitor with the right token gets %s (429 = the lock is counted against the address of "
+           "Caddy: the conservative behaviour that MONITOR_TRUSTED_PROXY exists to change)" % (flood["statuses"], shared["status"]))
+    s.check("without the trusted proxy a lock stays on the address that failed (the first visitor gets 429)", "429" in flood["statuses"], "statuses %s" % flood["statuses"])
 
 
 if __name__ == "__main__":

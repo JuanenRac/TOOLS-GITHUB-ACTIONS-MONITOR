@@ -1,0 +1,59 @@
+DOCKER CHECKS OF THE MONITOR IMAGE (tools/docker_audit/)
+
+WHAT IT IS
+Eight checks that build the image of a version and run it in REAL containers: the basic start and the API contract, the team mode, a trusted proxy (Caddy with its own TLS), the hardening,
+the volumes and the migration from the previous version, the secrets, the shutdown, and the incoming webhook behind the proxy. Each check writes one JSON and one text file with every
+command it ran, what came back, and one verdict per check: PASS, FAIL or NO-APLICA (not applicable, with the reason). The exit code is not 0 when a check fails.
+It publishes nothing, signs in to no registry, uses no secret of the repository and calls GitHub for nothing: the GitHub CLI inside the containers is a stand-in (deploy/test/fake_gh.py)
+and every token, password and secret of a run is made up for that run.
+
+HOW TO START IT IN GITHUB (nothing runs on your computer)
+    gh workflow run docker-audit.yml -f ref=v2.0.8
+    gh workflow run docker-audit.yml -f ref=v2.0.8 -f scenarios=E1,E3 -f previous_ref=v2.0.7
+Inputs: ref = a tag or a commit (empty = the latest tag); scenarios = all, or a list such as E1,E3; previous_ref = the version before it for the migration check (auto = the tag before
+ref, none = skip the migration). The workflow file must be in the default branch before `gh workflow run` can start it.
+Follow it with `gh run list --workflow docker-audit.yml` and `gh run view RUN_ID`. Every check is a job of its own with its own time limit; one that fails does not stop the others.
+
+HOW TO READ THE RESULT
+1. The summary of the run (the "Summary" job, or `gh run view RUN_ID`) has a table: one row per check with its verdict, the checks passed, the seconds, and below the table the evidence of
+   every failed check and the notes. A note never changes a verdict: it records something worth reading (a measurement, a behaviour the guide documents).
+2. The artifact `docker-audit-<version>` (`gh run download RUN_ID -n docker-audit-v2.0.8`) holds E1.json ... E8.json, E1.txt ... E8.txt, summary.md and summary.json. In a .txt file the
+   verdict is on the third line, then the environment (Docker, Compose, the digests of the base images, the Caddy image), the checks and finally every command with its exit code and output.
+3. FAIL means a check of the container did not hold. A line that starts with `the script of this check ran to the end (SCRIPT-ERROR)` is a fault of the script itself, not of the image.
+
+THE EIGHT CHECKS
+E1 e1_basic_start.py   the image starts as a service and becomes healthy by its own health check; without the access token every request is refused; the frozen contract of the API
+                       (monitor/tools/check_api_contract.py) holds on the published port and inside the container.
+E2 e2_team_mode.py     team mode: the first administrator comes from MONITOR_ADMIN_USER and a password file; a second start needs neither; a start with no administrator stops and says how to
+                       make one; wrong passwords lock the account; the session cookie is HttpOnly and SameSite=Strict; a write needs the CSRF token.
+E3 e3_proxy.py         the Compose file of the version with the profile `proxy` (Caddy, `tls internal`): the login written as the guide says is readable in the container; the routes need the
+                       token; Host and Origin; the Secure cookie; X-Forwarded-* sent by the client change nothing; a client that lies in X-Forwarded-For is still locked and does not lock out
+                       another visitor; the same with the proxy not declared as trusted.
+E4 e4_hardening.py     user 10001 (never root), a read-only file system with /tmp and the two volumes the only writable places, no capability at all, no-new-privileges, what the image and
+                       the Compose file declare.
+E5 e5_volumes.py       the mode of every file that holds a secret (0600), a backup that leaves the secrets out, a restore into new volumes, a restart with the data in place, and the volumes of
+                       the previous version taken by the version under check (needs the checkout of the previous version).
+E6 e6_secrets.py       with every secret given as a file: none of their values in `docker inspect`, in the answers of the routes of /api, in the log, in the history or the files of the
+                       image, or in the environment or command line of a process of the container.
+E7 e7_shutdown.py      docker stop (SIGTERM) ends the service by itself and loses nothing; a start after kill -9 finds the data whole; a memory limit of 256 MiB holds under a burst.
+E8 e8_webhook.py       the incoming webhook behind the proxy: valid and invalid signatures, a replayed delivery, a body that is too big, and the rate limit: it must count the visitor, not the proxy.
+
+RUN THE SAME CHECKS ON A LINUX MACHINE WITH DOCKER
+Needs Docker (with the Compose plugin for E3 and E8), Python 3.8 or newer, and nothing else (no package, no account). Ports 80, 443 and 8765 on 127.0.0.1 must be free and the user must be
+allowed to use Docker.
+    git clone https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR.git && cd TOOLS-GITHUB-ACTIONS-MONITOR
+    git worktree add ../v2.0.8 v2.0.8 && git worktree add ../v2.0.7 v2.0.7
+    tools/docker_audit/run_all.sh --target ../v2.0.8 --previous ../v2.0.7 --out docker-audit-out
+    tools/docker_audit/run_all.sh --target ../v2.0.8 --only E4,E6          # only some checks
+or one at a time: python3 tools/docker_audit/e4_hardening.py --target ../v2.0.8 --out docker-audit-out
+The scripts (and fake_gh.py) come from the checkout you run them from; the image and its files come from --target, so a version can be checked with the scripts of a newer one.
+Everything a check starts (containers, volumes, networks, the Compose project) is removed at its end; --keep leaves it in place to look at it. A check takes between two and ten minutes.
+
+WHAT IS PINNED
+The Caddy image is caddy:2.10.2-alpine at the digest written in audit_lib.py (CADDY_IMAGE; set the variable of that name to use another). The Compose file of the version names
+caddy:2.10-alpine; the check replaces it with the pinned one and says so. The Python base image is the one the Dockerfile names (python:3.13-slim): each .txt file records the digest it
+resolved to on that run. The actions of the workflow are pinned by commit.
+
+FILES
+audit_lib.py (the common part), client.py (the HTTP client that runs in a throw-away container with a fixed address on the Docker network), proxy_stack.py (the Compose project with Caddy),
+plan.py (which version, which checks), collect.py (the summary), run_all.sh (all checks on a Linux machine), e1_*.py ... e8_*.py (the checks).

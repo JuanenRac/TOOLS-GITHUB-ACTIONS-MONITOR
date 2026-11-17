@@ -206,3 +206,13 @@ Les lectures conditionnelles (`cache.etag`) font qu'un dépôt inchangé ne coû
 ## Tourner pendant des mois : stockage et conservation
 
 Gardez `accounts/` (ou la base) sur un volume qui survit au conteneur et faites une sauvegarde avec `python tools/backup_storage.py backup FICHIER.zip --backend file` (ou `sqlite`) avant une mise à jour. Par défaut, un court passage supprime les événements de plus de 90 jours et les analyses de plus de 180 jours ; réglez `retention` dans la configuration pour changer cela, et `MONITOR_SERVICE=1` fait traiter le moniteur comme un service par `--doctor` (qui avertit alors s'il n'y a pas de bloc `retention` ou si les événements deviennent gros). Avec SQLite, une base par compte est le défaut ; un fichier partagé est possible et décrit dans [STORAGE_fra.md](STORAGE_fra.md).
+
+## Vérifier l'image dans de vrais conteneurs
+
+Le dépôt contient un workflow, `docker-audit.yml`, qui construit sur GitHub l'image de n'importe quelle version (une étiquette ou un commit) et la vérifie dans de vrais conteneurs : le démarrage et le contrôle de santé, le contrat de l'API, le mode équipe avec son premier administrateur, Caddy comme proxy de confiance avec son propre TLS, le durcissement (pas de root, système de fichiers en lecture seule, aucune capacité), les volumes avec sauvegarde, restauration et passage depuis la version précédente, les secrets, l'arrêt et le webhook entrant derrière le proxy. Il n'exécute rien sur votre ordinateur, ne publie rien et n'utilise aucun secret. Lancez-le à la main et lisez le tableau du résumé de l'exécution et l'artefact `docker-audit-<version>` :
+
+```sh
+gh workflow run docker-audit.yml -f ref=<tag>
+```
+
+Les mêmes scripts s'exécutent sur une machine Linux avec Docker (`tools/docker_audit/run_all.sh`) ; `tools/docker_audit/LEEME.txt` explique comment lire chaque résultat.
