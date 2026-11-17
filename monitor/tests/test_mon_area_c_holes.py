@@ -3,13 +3,16 @@
 """What a delivery of the webhook does to a run the cycle already read (it keeps its kind of event, so it keeps its colour), the shape of what a payload may say, the name of a failing step that
 carries a line break, and the log of the failed step that is kept for a short time when it could not be read."""
 import json
+import threading
 import unittest
+import urllib.error
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from unittest import mock
 
 import _testenv  # noqa: F401
 import _timing  # noqa: F401
 from github_actions_monitor.app import actions_monitor as am
-from github_actions_monitor.integrations import ai_alerts, ai_hook, steplog
+from github_actions_monitor.integrations import ai_alerts, ai_hook, channels, steplog
 from github_actions_monitor.security import webhook
 
 TOKEN = "gh" + "p_abcdefghijklmnopqrstuvwxyz0123456789"
@@ -119,6 +122,51 @@ class TheLineOfACascadeIsNotAnInstruction(unittest.TestCase):
         self.assertIn("ok-repo / Build", joined)
         self.assertEqual(len(closed), 2)
         self.assertLessEqual(max(len(part) for part in closed[1][len(ai_hook.ALSO_PREFIX):].split(", ")), 100)
+
+
+class _Third(BaseHTTPRequestHandler):
+    hits = []
+
+    def do_POST(self):
+        _Third.hits.append(self.headers.get("Authorization"))
+        self.send_response(200)
+        self.end_headers()
+
+    do_GET = do_POST
+
+    def log_message(self, *args):
+        pass
+
+
+class _Redirecting(BaseHTTPRequestHandler):
+    target = ""
+
+    def do_POST(self):
+        self.rfile.read(int(self.headers.get("Content-Length") or 0))
+        self.send_response(302)
+        self.send_header("Location", _Redirecting.target)
+        self.end_headers()
+
+    def log_message(self, *args):
+        pass
+
+
+class TheTokenOfANtfyTopicDoesNotFollowARedirect(unittest.TestCase):
+    def test_the_header_with_the_token_goes_nowhere_else(self):
+        servers = []
+        for handler in (_Third, _Redirecting):
+            server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+            threading.Thread(target=server.serve_forever, daemon=True).start()
+            self.addCleanup(server.shutdown)
+            self.addCleanup(server.server_close)
+            servers.append(server)
+        _Third.hits = []
+        _Redirecting.target = f"http://127.0.0.1:{servers[0].server_address[1]}/robbed"
+        cfg = {"server": f"http://127.0.0.1:{servers[1].server_address[1]}"}
+        with mock.patch.object(channels, "_loopback", return_value=False):      # the branch of a server that is not this computer
+            with self.assertRaises(urllib.error.HTTPError):
+                channels.Ntfy().send(cfg, {"topic": "my-topic"}, "tk_SECRET_OF_THE_TOPIC", {"title": "t", "text": "x", "level": "bad"}, allow_private=True)
+        self.assertEqual(_Third.hits, [])
 
 
 class TheLogOfTheFailedStepIsKeptForALimitedTime(unittest.TestCase):

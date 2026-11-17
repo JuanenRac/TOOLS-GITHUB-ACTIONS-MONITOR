@@ -334,7 +334,7 @@ class Hook:
     def send(self, url, alert, now, opener=None):
         body = json.dumps(redact_data({k: alert.get(k) for k in FIELDS})).encode("utf-8")      # the same cleaner as every other output for an AI
         request = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"}, method="POST")
-        (opener or (lambda r: netguard.local_open(r, timeout=5).read()))(request)
+        (opener or (lambda r: netguard.local_open(r, timeout=5, follow_redirects=False).read()))(request)
         self.sent.append(now)
 
 
