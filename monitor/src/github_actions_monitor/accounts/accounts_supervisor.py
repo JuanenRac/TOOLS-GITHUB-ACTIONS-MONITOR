@@ -382,7 +382,7 @@ SUPERVISOR = {"obj": None}
 #: what the supervisor answers itself; everything else under /api/ goes to the account asked for
 OWN_PATHS = ("/api/accounts", "/api/health", "/api/paths", "/api/score/global")
 MAX_SCORE_ACCOUNTS = 50      # accounts asked for the score of the installation
-NO_FORWARD = ("host", "connection", "content-length", "transfer-encoding", "accept-encoding", "x-account-id", "x-monitor-remote", "x-monitor-supervisor", "x-monitor-peer")
+NO_FORWARD = ("host", "connection", "content-length", "transfer-encoding", "accept-encoding", "x-account-id", "x-monitor-remote", "x-monitor-supervisor", "x-monitor-peer", "x-monitor-context")
 #: the headers of a child's answer that are passed on
 PASS_BACK = ("content-type", "set-cookie", "cache-control", "location", "referrer-policy", "x-api-version")
 
@@ -616,6 +616,7 @@ class Handler(BaseHTTPRequestHandler):
             if context:
                 headers[auth_http.USER_HEADER] = context["user"]
                 headers[auth_http.ACCOUNT_HEADER] = account_id
+                headers[auth_http.CONTEXT_HEADER] = auth_http.sign_context(child.key, context, account_id)
             if remote:
                 headers[REMOTE_HEADER] = "1"
             headers.pop("Origin", None)
@@ -704,7 +705,9 @@ class Handler(BaseHTTPRequestHandler):
         context = getattr(self, "auth_user", None)
         if context:
             headers[auth_http.USER_HEADER] = context["user"]
-            headers[auth_http.ACCOUNT_HEADER] = account_id          # and for which account: the process of that account refuses a user that is not its own        headers["Host"] = f"127.0.0.1:{child.port}"           # the child answers to its own address: the supervisor already checked the one the browser used
+            headers[auth_http.CONTEXT_HEADER] = auth_http.sign_context(child.key, context, account_id)
+            headers[auth_http.ACCOUNT_HEADER] = account_id          # and for which account: the process of that account refuses a user that is not its own
+        headers["Host"] = f"127.0.0.1:{child.port}"           # the child answers to its own address: the supervisor already checked the one the browser used
         if localguard.STATE["network"] and not self.this_computer():
             headers[REMOTE_HEADER] = "1"          # the account then treats the request like a remote one: the keys that decide exposure and the actions on GitHub stay with the computer of the monitor
         if "Origin" in headers:

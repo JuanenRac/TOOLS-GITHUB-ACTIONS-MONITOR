@@ -18,6 +18,7 @@ The gate (`gate`) answers False after it has answered the request; True means "g
 computer works as in the individual mode and everybody else is refused (403) everything that is not public. The access token of the network mode is checked BEFORE this gate (localguard); the one-use token of a
 POST (session_guard) is still checked by the route itself.
 """
+import hashlib
 import hmac
 import json
 import os
@@ -117,7 +118,42 @@ def _address(handler):
 
 USER_HEADER = "X-Monitor-User"       # the supervisor tells the monitor of an account who is acting (the child trusts it only when it is an account child)
 ACCOUNT_HEADER = "X-Monitor-Account"      # ... and for which account it resolved the request: the child refuses a user that was resolved for another account
+CONTEXT_HEADER = "X-Monitor-Context"      # who acts, with which role and for which account, SIGNED by the supervisor with the key it gave to that account process
+CONTEXT_WINDOW = 30                        # seconds a signed context is good for: a copy of one is no use a moment later
 OWN_ACCOUNT = {"id": ""}      # set by accounts/account_child.py: the account this process is the monitor of
+
+
+def _b64(raw):
+    import base64
+    return base64.urlsafe_b64encode(raw).decode("ascii").rstrip("=")
+
+
+def sign_context(key, context, account, now=None):
+    """The value of the header CONTEXT_HEADER for one request: the user, the role and the accounts of a session, for `account`, with the time, signed with `key` (HMAC-SHA256). Never a password or a token."""
+    body = _b64(json.dumps({"u": context["user"], "r": context["role"], "c": context.get("accounts"), "a": account, "t": int(time.time() if now is None else now)}, separators=(",", ":")).encode("utf-8"))
+    return body + "." + _b64(hmac.new(key.encode("utf-8"), body.encode("ascii"), hashlib.sha256).digest())
+
+
+def read_context(key, value, account, now=None):
+    """The session context a header carries ({"user", "role", "accounts", "csrf"}), or None when the key is missing, the signature is not good, it was made for another account, or it is older than
+    CONTEXT_WINDOW seconds (or from the future). Nothing here raises."""
+    import base64
+    if not key or not isinstance(value, str) or value.count(".") != 1 or len(value) > 2000 or not value.isascii():
+        return None
+    body, mac = value.split(".")
+    expected = _b64(hmac.new(key.encode("utf-8"), body.encode("ascii"), hashlib.sha256).digest())
+    if not hmac.compare_digest(mac.encode("ascii"), expected.encode("ascii")):
+        return None
+    try:
+        data = json.loads(base64.urlsafe_b64decode(body + "=" * (-len(body) % 4)))
+        moment, who, role = int(data["t"]), data["u"], data["r"]
+    except (ValueError, KeyError, TypeError):
+        return None
+    now = time.time() if now is None else now
+    accounts_of = data.get("c")
+    if data.get("a") != account or not isinstance(who, str) or role not in auth.RANK or not -5 <= now - moment <= CONTEXT_WINDOW or not (accounts_of is None or isinstance(accounts_of, list)):
+        return None
+    return {"user": who, "role": role, "accounts": accounts_of, "csrf": ""}
 
 
 def acting_user(handler):
@@ -173,6 +209,11 @@ def child_gate(handler):
         resolved = handler.headers.get(ACCOUNT_HEADER) or ""
         if user and OWN_ACCOUNT["id"] and resolved != OWN_ACCOUNT["id"]:      # defence in depth: a user the supervisor resolved for another account never reaches the data of this one
             return fail(handler, "account_scope", 403)
+        context = read_context(key, handler.headers.get(CONTEXT_HEADER), OWN_ACCOUNT["id"] or resolved)
+        if user:      # the supervisor says a person acts: it also says, signed, with which role (the log of actions and /api/v1/me are decided by it). Without a good signed context nobody is believed.
+            if context is None or context["user"] != auth.clean_username(user):
+                return fail(handler, "forbidden_role", 403)
+            handler.auth_user = context
         return True
     return fail(handler, "supervisor_only", 403)
 

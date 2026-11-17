@@ -2717,7 +2717,7 @@ class Handler(BaseHTTPRequestHandler):
                 payload = api_v1.openapi(TOOL_VERSION)
             elif path == "/api/v1/me":
                 context = getattr(self, "auth_user", None)
-                team = auth_http.active(LIVE_CONFIG or DEFAULTS, LITE["on"])
+                team = auth_http.active(LIVE_CONFIG or DEFAULTS, LITE["on"]) or bool(context)      # the process of an account is told by its supervisor, with a signed context, that the team mode is on
                 payload = api_v1.me_payload(version=TOOL_VERSION, edition="complete", mode="team" if team else "individual", authenticated=bool(context), user=auth_http.acting_user(self),
                                             role=context["role"] if context else None, accounts=context["accounts"] if context else None, cfg=cfg)
             else:
