@@ -142,6 +142,7 @@ class Supervisor:
         self.stopping = False
         self.thread = None
         self.key = secrets.token_hex(16)        # given to every account process: the proof that a request to change its login comes from this supervisor
+        self.started_at = time.time()           # for the uptime of /api/health
         self.beat = time.time()                 # when the supervision loop last turned: a loop that stops turning makes the deep health check fail
 
     def sync(self):
@@ -211,6 +212,21 @@ class Supervisor:
     def child(self, account_id):
         with self.lock:
             return self.children.get(account_id)
+
+    def shallow_health(self):
+        """The answer of GET /api/health: the keys the frozen contract lists for the monitor of one account (taken from the default account while it answers) plus the ones of the supervisor."""
+        from github_actions_monitor.tool_version import TOOL_VERSION
+        default = accounts.default_account(self.base)
+        child = self.child(default)
+        inner = child.health if child is not None and isinstance(child.health, dict) else {}
+        cycle = {"phase": "", "running_seconds": 0, "seconds_since_ok": None, "stuck": False, "dead": False, "blocked": False, "abandoned_calls": 0}
+        credential = {"state": "", "reason": "", "since": None, "seconds": 0, "replaced_at": None, "source": None}
+        document = {"ok": True, "lite": False, "version": TOOL_VERSION, "uptime_seconds": int(max(0, time.time() - self.started_at)), "loaded": bool(inner.get("loaded", False)),
+                    "offline": bool(inner.get("offline", False)), "degraded": int(inner.get("degraded") or 0),
+                    "cycle": {**cycle, **(inner.get("cycle") if isinstance(inner.get("cycle"), dict) else {})},
+                    "credential": {**credential, **(inner.get("credential") if isinstance(inner.get("credential"), dict) else {})}}
+        document.update({"supervisor": True, "accounts": len(self.children), "default": default, "listening": localguard.listening()["mode"]})
+        return document
 
     def deep_health(self, now=None):
         """(ok, document) of the deep check: it fails when the supervision loop itself has stopped turning, when the refresh cycle of any account is stuck, or when not one account answers once the start
@@ -408,8 +424,9 @@ class Handler(BaseHTTPRequestHandler):
             self.json({"error": "locked"}, 429)
             return False
         if not localguard.access_ok(self.headers, query_token):
-            localguard.note_failure(peer, localguard.max_failed(config))
-            localguard.note_proxy_failure(self.client_address, self.headers, localguard.max_failed(config))
+            if localguard.presented(self.headers) or query_token:      # a request that carries NO token is not a guess: it is refused but it does not count against its address
+                localguard.note_failure(peer, localguard.max_failed(config))
+                localguard.note_proxy_failure(self.client_address, self.headers, localguard.max_failed(config))
             self.json({"error": "access"}, 401)
             return False
         if query_token and self.command == "GET" and "text/html" in (self.headers.get("Accept") or "text/html"):
@@ -465,7 +482,7 @@ class Handler(BaseHTTPRequestHandler):
     def webhook(self, sup):
         """POST /api/webhook, one address for the whole installation. Like in a single monitor it has no Host check (a tunnel or a proxy changes it) and no access token: its proof is the HMAC of
         GitHub, which the account that receives the event verifies with its own secret. The supervisor only chooses the account by the owner of the repository in the payload."""
-        if localguard.STATE["network"] and localguard.over_rate("webhook", str(self.client_address[0]), 120):
+        if localguard.STATE["network"] and localguard.over_rate("webhook", localguard.client_key(self.client_address, self.headers), 120):
             self.json({"ok": False, "error": "rate"}, 429)
             return
         try:
@@ -524,7 +541,7 @@ class Handler(BaseHTTPRequestHandler):
                 ok, document = sup.deep_health()
                 self.json(document, 200 if ok else 503)
                 return
-            self.json({"ok": True, "supervisor": True, "accounts": len(sup.children), "default": accounts.default_account(sup.base), "listening": localguard.listening()["mode"]})
+            self.json(sup.shallow_health())
             return
         if method == "POST" and route.startswith("/api/accounts/") and route.endswith("/credential"):
             self.credential(sup, route[len("/api/accounts/"):-len("/credential")])

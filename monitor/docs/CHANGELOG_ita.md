@@ -13,6 +13,14 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - **Il token di accesso non viaggia più nell'indirizzo per impostazione predefinita (`listen.query_access` ora è disattivato)**: in modalità di rete l'indirizzo con `?access=` apriva la sessione, ma il token restava nella cronologia, nei registri e nel `Referer`. L'impostazione ora è disattivata a meno che tu non la attivi (lo dicono il valore predefinito, il file di esempio e l'aiuto delle Impostazioni); la sessione si apre con `POST /api/access` (il token nel corpo) o con l'intestazione `X-Monitor-Access`. Un'installazione che ha scritto `listen.query_access` da sé mantiene il suo valore; chi contava sul vecchio valore e apre il monitor da un indirizzo con `?access=` deve attivare l'impostazione o usare `POST /api/access`. La variabile d'ambiente `MONITOR_QUERY_ACCESS=1` la attiva per un servizio.
 
+### Corretto
+
+- **Il webhook in ingresso conta il limite di frequenza per visitatore e non per reverse proxy**: il limite di 120 richieste al minuto veniva contato sull'indirizzo della connessione, che dietro un proxy è sempre quello del proxy, e prima di verificare la firma, quindi un visitatore che inviava richieste non firmate faceva rispondere 429 alle consegne firmate di tutti gli altri. Ora viene contato sull'indirizzo che un proxy di fiducia aggiunge all'intestazione di inoltro (la connessione stessa se nessun proxy è di fiducia).
+- **Togliere una variabile del proxy dall'ambiente di un contenitore spegne di nuovo l'impostazione**: un `MONITOR_TRUSTED_PROXY`, `MONITOR_TRUSTED_PROXIES`, `MONITOR_SECURE_COOKIE`, `MONITOR_PROXY_PUBLIC_HOST` o `MONITOR_ALLOWED_HOSTS` vuoto lasciava nel file di configurazione il valore di un avvio precedente, così un proxy non più dichiarato restava di fiducia. La variabile vuota ora cancella la sua chiave.
+- **Una richiesta senza token di accesso viene rifiutata ma non conta più come tentativo sbagliato**: dieci caricamenti della pagina senza token bloccavano l'indirizzo del visitatore per cinque minuti. Ora conta solo un token presentato e sbagliato.
+- **La guida e il file Compose danno il file di accesso all'utente del contenitore**: un file con modo 600 che appartiene a chi lo ha creato non può essere letto dall'utente 10001 del contenitore, quindi l'account restava cieco con il motivo missing. Il comando ora dà il file anche a quell'utente.
+- **La risposta di salute del supervisore ha le chiavi del contratto congelato e il contratto segna la rotta che può usare solo il computer del monitor**: `/api/health` nel contenitore non aveva versione, tempo di attività, ciclo né credenziale, e lo strumento del contratto falliva contro un contenitore. Lo strumento ora accetta il rifiuto di una rotta segnata come solo locale quando interroga dalla rete.
+
 ## [2.0.8]
 
 ### Sicurezza

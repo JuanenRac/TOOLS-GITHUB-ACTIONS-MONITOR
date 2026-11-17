@@ -2302,8 +2302,9 @@ class Handler(BaseHTTPRequestHandler):
             self.json_reply({"error": "locked"}, 429)
             return False
         if not localguard.access_ok(self.headers, query_token):      # the person at this computer is never locked out of their own monitor; a shared proxy address is told apart with listen.trusted_proxy
-            localguard.note_failure(peer, localguard.max_failed(LIVE_CONFIG or DEFAULTS))
-            localguard.note_proxy_failure(self.client_address, self.headers, localguard.max_failed(LIVE_CONFIG or DEFAULTS))
+            if localguard.presented(self.headers) or query_token:      # a request that carries NO token is not a guess: it is refused but it does not count against its address
+                localguard.note_failure(peer, localguard.max_failed(LIVE_CONFIG or DEFAULTS))
+                localguard.note_proxy_failure(self.client_address, self.headers, localguard.max_failed(LIVE_CONFIG or DEFAULTS))
             self.json_reply({"error": "access"}, 401)
             return False
         self.deprecated_access = bool(query_token) and not localguard.presented(self.headers)      # the token came in the address: every answer says that way is deprecated
@@ -2472,7 +2473,7 @@ class Handler(BaseHTTPRequestHandler):
             return
         if path == "/api/webhook":   # off unless configured; no Host check (a tunnel changes it), but every request must carry a valid HMAC
             from github_actions_monitor.security import webhook
-            if localguard.STATE["network"] and localguard.over_rate("webhook", str(self.client_address[0]), 120):      # one address cannot flood the receiver
+            if localguard.STATE["network"] and localguard.over_rate("webhook", localguard.client_key(self.client_address, self.headers), 120):      # one address cannot flood the receiver
                 self.json_reply({"ok": False, "error": "rate"}, 429)
                 return
             try:

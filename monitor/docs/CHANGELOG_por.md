@@ -13,6 +13,14 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - **O token de acesso já não viaja no endereço por defeito (`listen.query_access` está agora desligado)**: no modo de rede o endereço com `?access=` abria a sessão, mas o token ficava no histórico, nos registos e no `Referer`. A definição está agora desligada, a menos que a ligue (o valor por defeito, o ficheiro de exemplo e a ajuda das Definições dizem-no); a sessão abre-se com `POST /api/access` (o token no corpo) ou com o cabeçalho `X-Monitor-Access`. Uma instalação que escreveu `listen.query_access` mantém o seu valor; a que dependia do valor antigo e abre o monitor a partir de um endereço com `?access=` tem de ligar a definição ou usar `POST /api/access`. A variável de ambiente `MONITOR_QUERY_ACCESS=1` liga-a para um serviço.
 
+### Corrigido
+
+- **O webhook de entrada conta o seu limite de frequência por visitante e não pelo proxy inverso**: o limite de 120 pedidos por minuto era contado pelo endereço da ligação, que atrás de um proxy é sempre o do proxy, e antes de verificar a assinatura, pelo que um visitante que enviasse pedidos sem assinatura fazia com que as entregas assinadas de todos os outros recebessem 429. Agora é contado pelo endereço que um proxy de confiança acrescenta ao cabeçalho de reencaminhamento (a própria ligação se nenhum proxy for de confiança).
+- **Retirar uma variável de proxy do ambiente de um contentor volta a desligar a definição**: um `MONITOR_TRUSTED_PROXY`, `MONITOR_TRUSTED_PROXIES`, `MONITOR_SECURE_COOKIE`, `MONITOR_PROXY_PUBLIC_HOST` ou `MONITOR_ALLOWED_HOSTS` vazio deixava no ficheiro de configuração o valor de um arranque anterior, de modo que um proxy que já não estava declarado continuava a ser de confiança. A variável vazia passa a apagar a sua chave.
+- **Um pedido sem token de acesso é recusado mas deixa de contar como tentativa errada**: dez carregamentos da página sem token bloqueavam o endereço do visitante durante cinco minutos. Agora só conta um token apresentado e incorreto.
+- **O guia e o ficheiro Compose entregam o ficheiro do acesso ao utilizador do contentor**: um ficheiro com modo 600 que pertence a quem o criou não pode ser lido pelo utilizador 10001 do contentor, pelo que a conta ficava cega com o motivo missing. O comando passa também a entregar o ficheiro a esse utilizador.
+- **A resposta de saúde do supervisor tem as chaves do contrato congelado e o contrato marca a rota que só o computador do monitor pode usar**: `/api/health` no contentor não tinha a versão, o tempo de atividade, o ciclo nem a credencial, e a ferramenta do contrato falhava contra um contentor. A ferramenta passa a aceitar a recusa de uma rota marcada como só local quando pergunta a partir da rede.
+
 ## [2.0.8]
 
 ### Segurança

@@ -13,6 +13,14 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **Das Zugriffstoken reist standardmäßig nicht mehr in der Adresse (`listen.query_access` ist jetzt aus)**: Im Netzwerkmodus öffnete die Adresse mit `?access=` die Sitzung, aber das Token blieb im Verlauf, in den Protokollen und im `Referer`. Die Einstellung ist jetzt aus, solange du sie nicht einschaltest (Standardwert, Beispieldatei und Hilfe der Einstellungen sagen es); die Sitzung wird mit `POST /api/access` (Token im Body) oder mit dem Header `X-Monitor-Access` geöffnet. Eine Installation, die `listen.query_access` selbst geschrieben hat, behält ihren Wert; wer sich auf den alten Standard verlassen hat und den Monitor über eine Adresse mit `?access=` öffnet, muss die Einstellung einschalten oder `POST /api/access` verwenden. Die Umgebungsvariable `MONITOR_QUERY_ACCESS=1` schaltet sie für einen Dienst ein.
 
+### Behoben
+
+- **Der eingehende Webhook zählt sein Ratenlimit pro Besucher und nicht pro Reverse-Proxy**: Das Limit von 120 Anfragen pro Minute wurde gegen die Adresse der Verbindung gezählt, hinter einem Proxy also immer gegen den Proxy, und zwar vor der Prüfung der Signatur; ein Besucher mit unsignierten Anfragen sorgte so dafür, dass die signierten Zustellungen aller anderen mit 429 beantwortet wurden. Gezählt wird jetzt gegen die Adresse, die ein vertrauenswürdiger Proxy in den Weiterleitungs-Header einträgt (die Verbindung selbst, wenn kein Proxy vertraut wird).
+- **Wer eine Proxy-Variable aus der Umgebung eines Containers entfernt, schaltet die Einstellung wieder aus**: Ein leeres `MONITOR_TRUSTED_PROXY`, `MONITOR_TRUSTED_PROXIES`, `MONITOR_SECURE_COOKIE`, `MONITOR_PROXY_PUBLIC_HOST` oder `MONITOR_ALLOWED_HOSTS` ließ den Wert eines früheren Starts in der Konfigurationsdatei stehen, sodass ein nicht mehr deklarierter Proxy weiter vertrauenswürdig blieb. Die leere Variable löscht jetzt ihren Schlüssel.
+- **Eine Anfrage ohne Zugriffstoken wird abgelehnt, zählt aber nicht mehr als falscher Versuch**: Zehn Seitenaufrufe ohne Token sperrten die Adresse des Besuchers für fünf Minuten. Nur ein vorgelegtes, falsches Token zählt jetzt.
+- **Die Anleitung und die Compose-Datei übergeben die Zugangsdatei an den Benutzer des Containers**: Eine Datei mit Modus 600, die der Person gehört, die sie angelegt hat, kann der Benutzer 10001 des Containers nicht lesen; das Konto blieb blind mit dem Grund missing. Der Befehl übergibt die Datei jetzt auch an diesen Benutzer.
+- **Die Health-Antwort des Supervisors enthält die Schlüssel des eingefrorenen Vertrags, und der Vertrag kennzeichnet die Route, die nur der Rechner des Monitors nutzen darf**: `/api/health` im Container hatte weder Version noch Laufzeit, Zyklus oder Zugangsdaten, und das Vertragswerkzeug scheiterte an einem Container. Das Werkzeug akzeptiert nun die Ablehnung einer als nur lokal gekennzeichneten Route, wenn es über das Netz fragt.
+
 ## [2.0.8]
 
 ### Sicherheit

@@ -13,6 +13,14 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - **Le jeton d'accès ne voyage plus dans l'adresse par défaut (`listen.query_access` est maintenant désactivé)** : en mode réseau, l'adresse avec `?access=` ouvrait la session, mais le jeton restait dans l'historique, les journaux et le `Referer`. Le réglage est désormais désactivé tant que vous ne l'activez pas (la valeur par défaut, le fichier d'exemple et l'aide des Réglages le disent) ; la session s'ouvre par `POST /api/access` (le jeton dans le corps) ou par l'en-tête `X-Monitor-Access`. Une installation qui a écrit `listen.query_access` elle-même garde sa valeur ; celle qui comptait sur l'ancienne valeur et ouvre le moniteur depuis une adresse avec `?access=` doit activer le réglage ou utiliser `POST /api/access`. La variable d'environnement `MONITOR_QUERY_ACCESS=1` l'active pour un service.
 
+### Corrigé
+
+- **Le webhook entrant compte sa limite de débit par visiteur et non par proxy inverse** : la limite de 120 requêtes par minute était comptée sur l'adresse de la connexion, qui derrière un proxy est toujours celle du proxy, et avant la vérification de la signature ; un visiteur envoyant des requêtes non signées faisait donc répondre 429 aux livraisons signées de tous les autres. Elle est maintenant comptée sur l'adresse qu'un proxy de confiance ajoute à l'en-tête de transfert (la connexion elle-même si aucun proxy n'est de confiance).
+- **Retirer une variable de proxy de l'environnement d'un conteneur éteint de nouveau le réglage** : un `MONITOR_TRUSTED_PROXY`, `MONITOR_TRUSTED_PROXIES`, `MONITOR_SECURE_COOKIE`, `MONITOR_PROXY_PUBLIC_HOST` ou `MONITOR_ALLOWED_HOSTS` vide laissait dans le fichier de configuration la valeur d'un démarrage précédent, si bien qu'un proxy qui n'était plus déclaré restait de confiance. La variable vide efface désormais sa clé.
+- **Une requête sans jeton d'accès est refusée mais ne compte plus comme un essai erroné** : dix chargements de la page sans jeton bloquaient l'adresse du visiteur pendant cinq minutes. Seul un jeton présenté et faux compte maintenant.
+- **Le guide et le fichier Compose donnent le fichier de connexion à l'utilisateur du conteneur** : un fichier de mode 600 qui appartient à la personne qui l'a créé ne peut pas être lu par l'utilisateur 10001 du conteneur, et le compte restait aveugle avec la raison missing. La commande donne maintenant aussi le fichier à cet utilisateur.
+- **La réponse de santé du superviseur contient les clés du contrat figé, et le contrat marque la route que seul l'ordinateur du moniteur peut utiliser** : `/api/health` dans le conteneur n'avait ni la version, ni la durée de fonctionnement, ni le cycle, ni l'identifiant, et l'outil du contrat échouait face à un conteneur. L'outil accepte maintenant le refus d'une route marquée comme locale quand il interroge depuis le réseau.
+
 ## [2.0.8]
 
 ### Sécurité

@@ -62,11 +62,19 @@ def _convert(value, kind):
     return text
 
 
+#: the variables that DECLARE a proxy: set but empty (what a Compose file passes when the line of the .env file is removed or left blank) they switch the key off again, so that taking the line
+#: out of the environment never leaves the proxy declared in the file from an earlier start. The other variables, when empty, change nothing.
+EMPTY_SWITCHES_OFF = {"MONITOR_TRUSTED_PROXY": False, "MONITOR_TRUSTED_PROXIES": [], "MONITOR_SECURE_COOKIE": False, "MONITOR_PROXY_PUBLIC_HOST": "", "MONITOR_ALLOWED_HOSTS": []}
+
+
 def environment_changes(env=None):
     """({"listen": {...}, "auth": {...}}, [names of the variables that could not be read]) from the environment."""
     env = os.environ if env is None else env
     out, bad = {}, []
     for name, (section, key, kind) in LISTEN_ENV.items():
+        if name in env and str(env[name]).strip() == "" and name in EMPTY_SWITCHES_OFF:
+            out.setdefault(section, {})[key] = EMPTY_SWITCHES_OFF[name]
+            continue
         if name not in env or str(env[name]).strip() == "":
             continue
         try:

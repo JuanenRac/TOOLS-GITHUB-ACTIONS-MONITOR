@@ -14,6 +14,14 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **The access token no longer travels in the address by default (`listen.query_access` is now off)**: in the network mode the `?access=` address opened the session, but the token stayed in the history, the logs and the `Referer`. The setting is now off unless you turn it on (the default, the example file and the Settings help say so); the session is opened by `POST /api/access` (the token in the body) or by the header `X-Monitor-Access`. An installation that wrote `listen.query_access` itself keeps its value; one that relied on the old default and opens the monitor from an address with `?access=` has to turn the setting on, or use `POST /api/access`. The environment variable `MONITOR_QUERY_ACCESS=1` turns it on for a service.
 
+### Fixed
+
+- **The incoming webhook counts its rate limit against the visitor, not against the reverse proxy**: the limit of 120 requests a minute was counted against the address of the connection, which behind a proxy is always the proxy, and before the signature was checked, so one visitor sending unsigned requests made the signed deliveries of everybody else answer 429. It is now counted against the address that a trusted proxy adds to the forwarding header (the connection itself when no proxy is trusted).
+- **Taking a proxy variable out of the environment of a container switches the setting off again**: an empty `MONITOR_TRUSTED_PROXY`, `MONITOR_TRUSTED_PROXIES`, `MONITOR_SECURE_COOKIE`, `MONITOR_PROXY_PUBLIC_HOST` or `MONITOR_ALLOWED_HOSTS` left the value of an earlier start in the configuration file, so a proxy that was no longer declared stayed trusted. The empty variable now clears its key.
+- **A request that carries no access token is refused but no longer counts as a wrong guess**: ten page loads without a token locked the address of the visitor for five minutes. Only a token that was presented and is wrong counts now.
+- **The guide and the Compose file give the login file to the user of the container**: a file of mode 600 that belongs to the person who made it cannot be read by the user 10001 of the container, so the account stayed blind with the reason missing. The command now also gives the file to that user.
+- **The health answer of the supervisor has the keys of the frozen contract, and the contract marks the route that only the computer of the monitor may use**: `/api/health` in the container lacked the version, the uptime, the cycle and the credential, and the contract tool failed against a container. The tool now accepts the refusal of a route marked as local only when it asks from the network.
+
 ## [2.0.8]
 
 ### Security
