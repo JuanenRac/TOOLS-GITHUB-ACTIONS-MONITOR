@@ -26,6 +26,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 - **Les mises en sourdine par motif peuvent expirer et un signal liste celles qui demandent une décision** (`alerts.silences_expire_days`, 0 = jamais par défaut) : avec un nombre, une mise en sourdine cesse de fonctionner ce nombre de jours après sa date de revue ; les rappels déjà faits sont gardés dans le fichier d'état, un redémarrage ne les répète donc pas ; et le signal des mises en sourdine liste celles dépassées, expirées ou sans date.
 - **Les rouges vieillis en inactif sont listés dans la vue de ce qui se passe maintenant** : un rouge qu'aucun des événements qui décident n'a touché pendant le nombre de jours de l'âge (30 par défaut) quitte toujours la liste des rouges, mais une ligne indique désormais combien il y en a et leur liste s'ouvre à partir d'elle (dépôt, workflow et date de l'échec) : un échec ne disparaît jamais sans laisser de trace.
 - **Les workflows inactifs sont aussi listés dans la vue de ce qui se passe maintenant** : un workflow qui a échoué et ne s'est pas exécuté pendant les jours de ci.inactive_days (90 par défaut) ne compte plus comme rouge, et une deuxième ligne indique combien il y en a et ouvre leur liste, à côté de celle des rouges vieillis.
+- **La page indique une seule fois que le budget de l'IA a changé** : à la première ouverture de cette version, une barre explique que la limite quotidienne et les limites d'un modèle comptent désormais aussi l'avis actif ; "Compris" la masque et la page s'en souvient.
 
 ### Modifié
 
@@ -82,6 +83,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 - **Aucune route qui répond à un GET ne lit plus GitHub** : les runners, les organisations du compte, l'avis de mise à jour et le quota de chaque source sont lus par le cycle, et les routes montrent ce qui a été lu (`/api/runners` et l'état du quota disent qu'ils sont en attente jusqu'à la première lecture).
 - **La durée d'une ré-exécution a un quota pour chaque lecture de chaque dépôt** : le compte de trois requêtes était partagé par les threads d'un cycle.
 - **Le suivi des originaux des forks garde les requêtes de l'heure après un redémarrage et dit combien dure un tour** : quand c'est plus que le temps entre deux lectures, le panneau dit que le suivi ne se repose jamais.
+- **Les dossiers qu'une exécution précédente a laissés avec les adresses des services Apprise sont supprimés au démarrage du moniteur**, et non au premier envoi, qui pouvait être à des heures.
 
 ## [2.0.8]
 

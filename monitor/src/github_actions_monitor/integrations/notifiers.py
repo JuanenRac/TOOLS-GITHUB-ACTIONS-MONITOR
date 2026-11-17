@@ -231,6 +231,17 @@ def sweep_apprise(tmp=None, now=None, older=60.0):
     return removed
 
 
+def sweep_at_start():
+    """Sweeps the folders `apprise_*` of an earlier run when the monitor STARTS (not at the first send, which may be hours away): they hold the addresses of the services. Never raises."""
+    if _SWEPT:
+        return 0
+    _SWEPT.append(True)
+    try:
+        return sweep_apprise()
+    except Exception:   # noqa: BLE001 - a folder that cannot be removed never stops the start
+        return 0
+
+
 def apprise_send(cfg, text, event, run=None):
     """Hands the message to the `apprise` command. The addresses (they hold the secrets of the services) go in a private temporary file that is removed at once, never in the arguments, and the command
     gets an environment without the keys of the monitor. Returns {"channel", "ok", "reason"}; never raises."""

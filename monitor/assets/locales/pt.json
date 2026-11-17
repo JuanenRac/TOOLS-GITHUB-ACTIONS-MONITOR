@@ -2341,6 +2341,8 @@
  "ui.cfg_range": "de {min} a {max}",
  "ui.cfg_restart": "pede reinício",
  "ui.cfg_restart_banner": "{n} valor(es) guardado(s) só se aplica(m) depois de reiniciar o monitor.",
+ "ui.ai_budget_note": "Novidade: o limite diário da IA (ai.daily_limit) e os limites de um modelo contam agora também as chamadas do aviso ativo, que mantém os seus próprios limites por hora. Se o aviso precisar de mais, aumente o total diário nas Definições.",
+ "ui.ai_budget_note_ok": "Percebi",
  "ui.cfg_save": "Guardar alterações",
  "ui.cfg_saved": "Guardado. {n} valor(es) alterado(s).",
  "ui.cfg_saved_restart": "Guardado. Reinicie o monitor para estes se aplicarem: {keys}",

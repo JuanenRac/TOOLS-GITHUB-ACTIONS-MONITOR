@@ -3953,6 +3953,8 @@ def main():
     if not CHILD["account"]:
         rootmigrate.auto()      # an installation of 1.8.1 or older: its data, logs and AI files move into config/, data/, logs/ and ai/ (undo: python -m github_actions_monitor.util.rootmigrate --undo)
     paths.ensure()      # config/, data/, logs/ and ai/ exist before anything is written
+    from github_actions_monitor.integrations import notifiers as _notifiers
+    _notifiers.sweep_at_start()      # the folders with the addresses of the services that an earlier run left behind go now, not at the first send
     if not CHILD["account"]:
         from github_actions_monitor.integrations import ai_index
         ai_index.write("lite" if lite_requested() else "complete")      # ai/INDEX.json and ai/README.md: the map for the AI tools that read this installation

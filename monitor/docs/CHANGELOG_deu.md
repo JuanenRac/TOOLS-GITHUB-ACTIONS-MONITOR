@@ -26,6 +26,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 - **Stummschaltungen per Muster können ablaufen, und ein Signal listet die auf, die eine Entscheidung brauchen** (`alerts.silences_expire_days`, 0 = standardmäßig nie): Mit einer Zahl wirkt eine Stummschaltung so viele Tage nach ihrem Prüfdatum nicht mehr; bereits ausgesprochene Erinnerungen stehen in der Zustandsdatei, ein Neustart wiederholt sie also nicht; und das Signal der Stummschaltungen listet die über dem Datum liegenden, abgelaufenen oder datumslosen auf.
 - **Die zu inaktiv gealterten Rot werden in der Ansicht des aktuellen Geschehens aufgelistet**: Ein Rot, das seit der Anzahl von Tagen der Altersgrenze (standardmäßig 30) von keinem der entscheidenden Ereignisse berührt wurde, verlässt weiterhin die Rotliste, aber jetzt nennt eine Zeile ihre Anzahl, und daraus öffnet sich ihre Liste (Repository, Workflow und Datum des Fehlers), sodass ein Fehler nie spurlos verschwindet.
 - **Auch die inaktiven Workflows werden in der Ansicht des aktuellen Geschehens aufgelistet**: Ein Workflow, der fehlschlug und die Tage von ci.inactive_days (standardmäßig 90) nicht gelaufen ist, zählt nicht mehr als rot, und eine zweite Zeile nennt ihre Anzahl und öffnet ihre Liste, neben der für die gealterten Rot.
+- **Die Seite weist einmal darauf hin, dass sich das KI-Budget geändert hat**: Beim ersten Öffnen dieser Version erklärt eine Leiste, dass das Tageslimit und die Grenzen eines Modells jetzt auch die aktive Meldung zählen; "Verstanden" blendet sie aus, und die Seite merkt es sich.
 
 ### Geändert
 
@@ -82,6 +83,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 - **Keine Route, die ein GET beantwortet, liest noch GitHub**: Die Runner, die Organisationen des Kontos, der Hinweis auf Aktualisierungen und das Kontingent jeder Quelle werden vom Zyklus gelesen, und die Routen zeigen das Gelesene (`/api/runners` und der Status des Kontingents sagen bis zur ersten Lesung, dass sie ausstehen).
 - **Die Dauer einer Wiederholung hat ein Kontingent für jede Lesung jedes Repositorys**: Die Zählung von drei Anfragen teilten sich die Threads eines Zyklus.
 - **Die Verfolgung der Originale von Forks behält die Anfragen der Stunde über einen Neustart und sagt, wie lange ein Durchgang dauert**: Ist er länger als die Zeit zwischen den Lesungen, sagt die Anzeige, dass die Verfolgung nie ruht.
+- **Die Ordner mit den Adressen der Apprise-Dienste, die ein früherer Lauf hinterließ, werden beim Start des Monitors entfernt**, nicht erst beim ersten Senden, das Stunden entfernt sein konnte.
 
 ## [2.0.8]
 

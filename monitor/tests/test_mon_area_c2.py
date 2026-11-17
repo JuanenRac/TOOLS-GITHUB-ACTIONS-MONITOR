@@ -289,5 +289,40 @@ class TheSummaryReachesTheChannelsThatAskedForWhatItHolds(unittest.TestCase):
             self.assertEqual(sent, [])
 
 
+class AppriseLeftoversGoAtStart(unittest.TestCase):
+    def test_the_sweep_runs_once_at_start_and_the_start_calls_it(self):
+        import inspect
+        import os as _os
+        import time
+        from github_actions_monitor.app import actions_monitor
+        from github_actions_monitor.integrations import notifiers
+        self.assertIn("sweep_at_start()", inspect.getsource(actions_monitor.main))
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / "apprise_left"
+            folder.mkdir()
+            (folder / "apprise.yml").write_text("urls: secret", encoding="utf-8")
+            old = time.time() - 3600
+            _os.utime(folder, (old, old))
+            saved = list(notifiers._SWEPT)
+            notifiers._SWEPT.clear()
+            self.addCleanup(lambda: notifiers._SWEPT.__setitem__(slice(None), saved))
+            from unittest import mock
+            with mock.patch("tempfile.gettempdir", return_value=tmp):
+                self.assertEqual(notifiers.sweep_at_start(), 1)
+                self.assertEqual(notifiers.sweep_at_start(), 0)      # once per process
+            self.assertFalse(folder.exists())
+
+
+class ThePageSaysOnceThatTheBudgetChanged(unittest.TestCase):
+    def test_the_page_has_a_note_that_is_remembered_as_seen_and_its_texts_exist_in_eight_languages(self):
+        page = (Path(__file__).resolve().parent.parent / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
+        self.assertIn('id="budgetnote"', page)
+        self.assertIn("seen.ai_budget_notice", page)
+        locales = Path(__file__).resolve().parent.parent / "assets" / "locales"
+        for lang in ("en", "es", "de", "fr", "it", "ja", "zh", "pt"):
+            data = json.loads((locales / f"{lang}.json").read_text(encoding="utf-8"))
+            self.assertTrue(data.get("ui.ai_budget_note") and data.get("ui.ai_budget_note_ok"), lang)
+
+
 if __name__ == "__main__":
     unittest.main()

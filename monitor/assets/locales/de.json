@@ -2341,6 +2341,8 @@
  "ui.cfg_range": "{min} bis {max}",
  "ui.cfg_restart": "braucht Neustart",
  "ui.cfg_restart_banner": "{n} gespeicherte Wert(e) gelten erst nach einem Neustart des Monitors.",
+ "ui.ai_budget_note": "Neu: Das Tageslimit der KI (ai.daily_limit) und die Grenzen eines Modells zählen jetzt auch die Aufrufe der aktiven Meldung, die ihre eigenen Grenzen pro Stunde behält. Braucht die Meldung mehr, erhöhen Sie die Tagessumme in den Einstellungen.",
+ "ui.ai_budget_note_ok": "Verstanden",
  "ui.cfg_save": "Änderungen speichern",
  "ui.cfg_saved": "Gespeichert. {n} Wert(e) geändert.",
  "ui.cfg_saved_restart": "Gespeichert. Starte den Monitor neu, damit diese gelten: {keys}",

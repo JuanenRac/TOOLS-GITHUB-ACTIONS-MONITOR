@@ -26,6 +26,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 - **Os silêncios por padrão podem caducar e um sinal lista os que precisam de uma decisão** (`alerts.silences_expire_days`, 0 = nunca por predefinição): com um número, um silêncio deixa de funcionar esse número de dias depois da data de revisão; os lembretes já feitos guardam-se no ficheiro de estado, pelo que um reinício não os repete; e o sinal dos silêncios lista os que passaram da data, caducaram ou não têm data.
 - **Os vermelhos que envelheceram até inativo são listados na vista do que acontece agora**: um vermelho em que nenhum dos eventos que decidem tocou durante os dias da idade (30 por defeito) continua a sair da lista de vermelhos, mas agora uma linha diz quantos são e dela abre-se a sua lista (repositório, workflow e data da falha), pelo que uma falha nunca desaparece sem deixar rasto.
 - **Os workflows inativos também são listados na vista do que acontece agora**: um workflow que falhou e não corre durante os dias de ci.inactive_days (90 por defeito) deixa de contar como vermelho, e uma segunda linha diz quantos são e abre a sua lista, ao lado da dos vermelhos envelhecidos.
+- **A página avisa uma só vez que o orçamento da IA mudou**: na primeira vez que esta versão é aberta, uma barra explica que o limite diário e os limites de um modelo contam agora também o aviso ativo; "Percebi" esconde-a e a página lembra-se disso.
 
 ### Alterado
 
@@ -82,6 +83,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 - **Nenhuma rota que responde a um GET lê já o GitHub**: os runners, as organizações da conta, o aviso de atualização e a quota de cada fonte são lidos pelo ciclo, e as rotas mostram o que foi lido (`/api/runners` e o estado da quota dizem que estão pendentes até à primeira leitura).
 - **A duração de uma reexecução tem uma quota para cada leitura de cada repositório**: a contagem de três pedidos era partilhada pelos threads de um ciclo.
 - **O acompanhamento dos originais dos forks guarda os pedidos da hora após um reinício e diz quanto demora uma volta**: quando é mais do que o tempo entre leituras, o painel diz que o acompanhamento nunca descansa.
+- **As pastas que uma execução anterior deixou com os endereços dos serviços Apprise são apagadas quando o monitor arranca**, e não no primeiro envio, que podia estar a horas de distância.
 
 ## [2.0.8]
 

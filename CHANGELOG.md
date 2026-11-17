@@ -27,6 +27,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 - **Silences by pattern can expire, and a signal lists the ones that need a decision** (`alerts.silences_expire_days`, 0 = never by default): with a number, a silence stops working that many days after its review date; the reminders already made are kept in the state file, so a restart does not repeat them; and the signal of the silences lists the ones past their date, expired or without a date.
 - **The reds that aged into inactive are listed in the view of what is happening now**: a red that nothing of the events that decide has touched for the number of days of the age (30 by default) still leaves the red list, but now a line says how many there are and a list of them (repository, workflow and date of the failure) opens from it, so a failure never disappears without a trace.
 - **The inactive workflows are listed in the view of what is happening now as well**: a workflow that failed and has not run for the days of ci.inactive_days (90 by default) no longer counts as red, and a second line says how many there are and opens their list, next to the one for the aged reds.
+- **The page says once that the budget of the AI changed**: the first time this version is opened a bar explains that the daily limit and the limits of a model now also count the active notice; "Understood" hides it and the page remembers it.
 
 ### Changed
 
@@ -83,6 +84,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 - **No route that answers a GET reads GitHub any more**: the runners, the organisations of the account, the update notice and the allowance of every source are read by the cycle, and the routes show what was read (`/api/runners` and the status of the quota say they are pending until the first reading).
 - **The duration of a re-run has an allowance for each reading of each repository**: the count of three requests was shared by the threads of a cycle.
 - **The follow-up of the originals of forks keeps the requests of the hour across a restart and says how long one pass takes**: when it is longer than the time between readings the panel says that the follow-up never rests.
+- **The folders that an earlier run left with the addresses of the Apprise services are removed when the monitor starts**, not at the first send, which could be hours away.
 
 ## [2.0.8]
 

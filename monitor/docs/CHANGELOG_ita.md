@@ -26,6 +26,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 - **I silenziamenti per schema possono scadere e un segnale elenca quelli che richiedono una decisione** (`alerts.silences_expire_days`, 0 = mai per impostazione predefinita): con un numero, un silenziamento smette di funzionare quel numero di giorni dopo la data di revisione; i promemoria già fatti sono conservati nel file di stato, quindi un riavvio non li ripete; e il segnale dei silenziamenti elenca quelli oltre la data, scaduti o senza data.
 - **I rossi invecchiati in inattivo sono elencati nella vista di ciò che accade ora**: un rosso che nessuno degli eventi che decidono ha toccato per i giorni dell'età (30 per impostazione predefinita) esce ancora dall'elenco dei rossi, ma ora una riga dice quanti sono e da essa si apre il loro elenco (repository, workflow e data del guasto), così un guasto non scompare mai senza lasciare traccia.
 - **Anche i workflow inattivi sono elencati nella vista di ciò che accade ora**: un workflow che ha fallito e non viene eseguito per i giorni di ci.inactive_days (90 per impostazione predefinita) non conta più come rosso, e una seconda riga dice quanti sono e apre il loro elenco, accanto a quella dei rossi invecchiati.
+- **La pagina avvisa una sola volta che il budget dell'IA è cambiato**: alla prima apertura di questa versione una barra spiega che il limite giornaliero e i limiti di un modello contano ora anche l'avviso attivo; "Capito" la nasconde e la pagina lo ricorda.
 
 ### Modificato
 
@@ -82,6 +83,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 - **Nessuna route che risponde a un GET legge più GitHub**: i runner, le organizzazioni dell'account, l'avviso di aggiornamento e la quota di ogni fonte sono letti dal ciclo, e le route mostrano ciò che è stato letto (`/api/runners` e lo stato della quota dicono che sono in attesa fino alla prima lettura).
 - **La durata di una riesecuzione ha una quota per ogni lettura di ogni repository**: il conteggio di tre richieste era condiviso dai thread di un ciclo.
 - **Il seguito degli originali dei fork conserva le richieste dell'ora dopo un riavvio e dice quanto dura un giro**: quando è più del tempo tra due letture, il pannello dice che il seguito non riposa mai.
+- **Le cartelle che un'esecuzione precedente ha lasciato con gli indirizzi dei servizi Apprise vengono rimosse all'avvio del monitor**, non al primo invio, che poteva essere a ore di distanza.
 
 ## [2.0.8]
 

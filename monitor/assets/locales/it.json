@@ -2341,6 +2341,8 @@
  "ui.cfg_range": "da {min} a {max}",
  "ui.cfg_restart": "richiede riavvio",
  "ui.cfg_restart_banner": "{n} valore/i salvato/i si applica/applicano solo dopo il riavvio del monitor.",
+ "ui.ai_budget_note": "Novità: il limite giornaliero dell'IA (ai.daily_limit) e i limiti di un modello contano ora anche le chiamate dell'avviso attivo, che mantiene i propri limiti all'ora. Se l'avviso ne ha bisogno di più, alza il totale giornaliero nelle Impostazioni.",
+ "ui.ai_budget_note_ok": "Capito",
  "ui.cfg_save": "Salva le modifiche",
  "ui.cfg_saved": "Salvato. {n} valore/i modificato/i.",
  "ui.cfg_saved_restart": "Salvato. Riavvia il monitor perché si applichino: {keys}",

@@ -2341,6 +2341,8 @@
  "ui.cfg_range": "{min} 至 {max}",
  "ui.cfg_restart": "需要重启",
  "ui.cfg_restart_banner": "已保存的 {n} 项设置在重启监视器后才生效。",
+ "ui.ai_budget_note": "新变化:AI 的每日上限(ai.daily_limit)和模型的上限现在也计入主动通知的调用,主动通知仍保留自己的每小时上限。如果主动通知需要更多,请在设置中调高每日总数。",
+ "ui.ai_budget_note_ok": "知道了",
  "ui.cfg_save": "保存更改",
  "ui.cfg_saved": "已保存。更改了 {n} 项设置。",
  "ui.cfg_saved_restart": "已保存。重启监视器后这些设置才会生效:{keys}",

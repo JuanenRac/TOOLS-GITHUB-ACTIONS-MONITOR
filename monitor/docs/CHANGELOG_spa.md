@@ -26,6 +26,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 - **Los silencios por patrón pueden caducar y una señal lista los que necesitan una decisión** (`alerts.silences_expire_days`, 0 = nunca por defecto): con un número, un silencio deja de funcionar esos días después de su fecha de revisión; los recordatorios ya hechos se guardan en el fichero de estado, así que un reinicio no los repite; y la señal de los silencios lista los pasados de fecha, caducados o sin fecha.
 - **Los rojos que envejecieron hasta inactivo se listan en la vista de lo que ocurre ahora**: un rojo que nada de los eventos que deciden ha tocado durante los días de la edad (30 por defecto) sigue saliendo de la lista de rojos, pero ahora una línea dice cuántos hay y de ella se abre su lista (repositorio, workflow y fecha del fallo), de modo que un fallo nunca desaparece sin dejar rastro.
 - **Los workflows inactivos también se listan en la vista de lo que ocurre ahora**: un workflow que falló y no se ha ejecutado durante los días de ci.inactive_days (90 por defecto) ya no cuenta como rojo, y una segunda línea dice cuántos hay y abre su lista, junto a la de los rojos envejecidos.
+- **La página avisa una sola vez de que cambió el presupuesto de la IA**: la primera vez que se abre esta versión una barra explica que el límite diario y los límites de un modelo cuentan ahora también el aviso activo; "Entendido" la oculta y la página lo recuerda.
 
 ### Cambiado
 
@@ -82,6 +83,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 - **Ninguna ruta que responde a un GET lee ya GitHub**: los runners, las organizaciones de la cuenta, el aviso de actualización y el cupo de cada fuente los lee el ciclo, y las rutas muestran lo leído (`/api/runners` y el estado de la cuota dicen que están pendientes hasta la primera lectura).
 - **La duración de una re-ejecución tiene un cupo para cada lectura de cada repositorio**: la cuenta de tres peticiones la compartían los hilos de un ciclo.
 - **El seguimiento de los originales de los forks conserva las peticiones de la hora tras un reinicio y dice cuánto dura una vuelta**: cuando es más que el tiempo entre lecturas, el panel dice que el seguimiento no descansa nunca.
+- **Las carpetas que una ejecución anterior dejó con las direcciones de los servicios de Apprise se borran al arrancar el monitor**, no en el primer envío, que podía tardar horas.
 
 ## [2.0.8]
 
