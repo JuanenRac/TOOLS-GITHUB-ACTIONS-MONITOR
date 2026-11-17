@@ -175,6 +175,9 @@ class Scenario:
     def build_image(self, src, tag, version):
         code, out = self.docker("build", "-f", str(Path(src) / "deploy" / "Dockerfile"), "--build-arg", "VERSION=" + version, "-t", tag, str(src), timeout=1500, label="docker build " + tag)
         self.check("the image of %s builds" % version, code == 0, out[-800:] if code else "")
+        bases = sorted(set(re.findall(r"FROM (docker\.io/library/python:[\w.-]+@sha256:[0-9a-f]{64})", out)))
+        if bases:
+            self.environment["base image of %s" % version] = ", ".join(bases)
         return code == 0
 
     def image(self):
