@@ -164,7 +164,8 @@ class TheScreensInABrowser(unittest.TestCase):
                 english[key] = i18n.t(key)
             with i18n.use_language(lang):
                 own[key] = i18n.t(key)
-        leaked = [english[k] for k in english if "{" not in english[k] and len(english[k]) >= 6 and english[k].lower() != own[k].lower() and english[k].lower() in shown and english[k].lower() not in own[k].lower()]
+        DATA_WORDS = {"release"}      # a workflow of the demo is called so: it is data on the screen, not text of the interface
+        leaked = [english[k] for k in english if english[k].lower() not in DATA_WORDS and "{" not in english[k] and len(english[k]) >= 6 and english[k].lower() != own[k].lower() and english[k].lower() in shown and english[k].lower() not in own[k].lower()]
         self.assertEqual(leaked, [], (kind, lang, "English text on a screen in another language"))
 
     def test_the_address_wins_over_the_language_saved_by_the_main_page(self):
