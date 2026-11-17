@@ -144,9 +144,9 @@ def request_of(cfg):
     return base + "/models", ({"Authorization": "Bearer " + key, "api-key": key} if key else {})
 
 
-def _get_json(url, headers, timeout, use_proxy=False):
+def _get_json(url, headers, timeout, use_proxy=False, allow_private=False):
     request = urllib.request.Request(url, method="GET", headers=headers)
-    with netguard.open_plain(request, timeout=timeout, use_proxy=use_proxy) as answer:
+    with netguard.open_plain(request, timeout=timeout, use_proxy=use_proxy, allow_private=allow_private) as answer:
         import json
         return json.loads(answer.read(4_000_000).decode("utf-8", "replace"))
 
@@ -208,7 +208,7 @@ def fetch(cfg, store, getter=None, force=True):
         return {**base, "state": "capped", "message": i18n.t("ai.cat_capped", n=catalog_config(cfg)["max_requests_per_day"]),
                 "models": have["models"] if have else [], "at": have["at"] if have else 0}
     try:
-        body = (getter or _get_json)(url, headers, cfg["timeout_seconds"], cfg.get("use_proxy") is True)
+        body = (getter or (lambda u, h, t, p: _get_json(u, h, t, p, allow_private=cfg.get("allow_private_targets") is True)))(url, headers, cfg["timeout_seconds"], cfg.get("use_proxy") is True)
         models = parse(cfg["provider"], body)
     except urllib.error.HTTPError as error:
         return {**base, "message": i18n.t("ai.cat_fail", why=i18n.t("ai.provider_answered", code=error.code)), "code": error.code, "models": have["models"] if have else [], "at": have["at"] if have else 0}

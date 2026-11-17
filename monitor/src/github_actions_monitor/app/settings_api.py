@@ -406,6 +406,7 @@ _f(_T_AI, "provider", "ai.provider", "enum", ("none", "ollama", "openai-compatib
 _f(_T_AI, "provider", "ai.model", "text", MODEL_RE)
 _f(_T_AI, "provider", "ai.ollama_url", "text", OLLAMA_RE)
 _f(_T_AI, "provider", "ai.base_url", "text", AI_URL_RE, secure=True)
+_f(_T_AI, "provider", "ai.allow_private_targets", "bool", secure=True)
 _f(_T_AI, "provider", "ai.api_key_env", "text", AI_ENV_RE)
 _f(_T_AI, "provider", "ai.daily_limit", "int", (0, 500), unit="calls")
 _f(_T_AI, "limits", "ai.max_input_chars", "int", (500, 20000), unit="chars")

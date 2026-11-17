@@ -137,5 +137,30 @@ class TheActiveNoticeSpendsTheSameBudget(unittest.TestCase):
             self.assertEqual((view["calls"], view["models"][0]["calls"]), (1, 1))
 
 
+class TheGroupOfFailedJobsIsCutAndCleaned(unittest.TestCase):
+    def test_the_key_of_a_group_has_a_limit_and_no_secret(self):
+        from github_actions_monitor.data_pipeline import causes
+        token = "gh" + "p_abcdefghijklmnopqrstuvwxyz0123456789"
+        body = {"jobs": [{"name": "x" * 5000 + " " + token, "conclusion": "failure"}, {"name": "ok\nline " + token, "conclusion": "failure"}]}
+        out = causes.summarize_jobs(body)
+        text = json.dumps(out)
+        self.assertNotIn(token, text)
+        self.assertTrue(all(len(g["group"]) <= 80 and "\n" not in g["group"] for g in out["groups"]))
+
+
+class AProviderOnAPrivateAddressNeedsTheSwitch(unittest.TestCase):
+    def test_it_is_refused_unless_the_switch_is_on(self):
+        import urllib.error
+        from github_actions_monitor.security import netguard
+        cfg = sentinel_ai.ai_config({"ai": {}})
+        self.assertFalse(cfg["allow_private_targets"])
+        self.assertTrue(sentinel_ai.ai_config({"ai": {"allow_private_targets": True}})["allow_private_targets"])
+        self.assertFalse(sentinel_ai.ai_config({"ai": {"allow_private_targets": "yes"}})["allow_private_targets"])
+        for url in ("https://10.255.255.1/v1", "https://169.254.169.254/latest"):
+            with self.assertRaises(urllib.error.URLError) as caught:
+                sentinel_ai._post_json(url, {}, {"Authorization": "Bearer x"}, 2)
+            self.assertEqual(netguard.reason_of(caught.exception), "private_target", url)
+
+
 if __name__ == "__main__":
     unittest.main()

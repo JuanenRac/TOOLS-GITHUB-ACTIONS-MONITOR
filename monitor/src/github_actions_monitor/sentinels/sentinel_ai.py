@@ -53,7 +53,7 @@ ANTHROPIC_VERSION = "2023-06-01"
 AI_DEFAULTS = {
     "provider": "none", "model": "", "daily_limit": 30, "max_input_chars": 5000, "max_output_chars": 1500,
     "timeout_seconds": 90, "ollama_url": "http://127.0.0.1:11434",
-    "base_url": "", "api_key_env": "",
+    "base_url": "", "api_key_env": "", "allow_private_targets": False,      # an https provider on a private address (a server of the local network) is refused unless this is on
     # what the model may look at and say (the settings page): the kinds of event it may analyse, the repositories it may see (empty = only the ones the monitor watches), the language of its answers
     "events": ["build", "codeql", "report"], "allowed_repos": [], "answer_language": "",
     "tasks": {}, "fallback": "", "fallback_max_attempts": 3, "fallback_after_seconds": 0,      # a model per kind of question and the chain when one fails (ai_chain.py); empty = only the general model
@@ -93,6 +93,7 @@ def ai_config(config):
         merged["timeout_seconds"] = max(5, min(300, int(merged["timeout_seconds"])))
         merged["skill_max_chars"] = max(300, min(12000, int(merged["skill_max_chars"])))
         merged["skill"] = merged["skill"] is True
+        merged["allow_private_targets"] = merged["allow_private_targets"] is True
         merged["fallback"] = merged["fallback"] if isinstance(merged["fallback"], (str, list)) else ""
         merged["tasks"] = merged["tasks"] if isinstance(merged["tasks"], dict) else {}
         network = (config or {}).get("network")
@@ -283,12 +284,12 @@ def note_usage(body, in_key, out_key):
     _USAGE.value = (number(usage.get(in_key)), number(usage.get(out_key)))
 
 
-def _post_json(url, payload, headers, timeout, use_proxy=False):
+def _post_json(url, payload, headers, timeout, use_proxy=False, allow_private=False):
     """The call to a provider: no redirect is followed (the key would go on to another address) and no proxy of the environment is used for a server on this computer (nor for any other unless
     `network.use_proxy`): netguard.open_plain."""
     request = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), method="POST",
                                      headers={"Content-Type": "application/json", **headers})
-    with netguard.open_plain(request, timeout=timeout, use_proxy=use_proxy) as answer:
+    with netguard.open_plain(request, timeout=timeout, use_proxy=use_proxy, allow_private=allow_private) as answer:
         return json.loads(answer.read(2_000_000).decode("utf-8", "replace"))
 
 
@@ -309,7 +310,7 @@ def ollama_chat(cfg, system, user):
     body = _post_json(cfg["ollama_url"].rstrip("/") + "/api/chat",
                       {"model": model_of(cfg), "stream": False, "options": {"temperature": 0.1},
                        "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]},
-                      {}, cfg["timeout_seconds"], cfg.get("use_proxy") is True)
+                      {}, cfg["timeout_seconds"], cfg.get("use_proxy") is True, allow_private=cfg.get("allow_private_targets") is True)
     note_usage(body, "prompt_eval_count", "eval_count")
     return (body.get("message") or {}).get("content", "")
 
@@ -346,7 +347,7 @@ def openai_compatible_chat(cfg, system, user):
     try:
         body = _post_json(url, {"model": cfg["model"], "temperature": 0.1, "max_tokens": 500,
                                 "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]},
-                          {"Authorization": "Bearer " + key, "api-key": key} if key else {}, cfg["timeout_seconds"], cfg.get("use_proxy") is True)
+                          {"Authorization": "Bearer " + key, "api-key": key} if key else {}, cfg["timeout_seconds"], cfg.get("use_proxy") is True, allow_private=cfg.get("allow_private_targets") is True)
     except urllib.error.HTTPError as error:
         raise ProviderError(i18n.t("ai.provider_answered", code=error.code), error.code) from None
     note_usage(body, "prompt_tokens", "completion_tokens")
@@ -377,7 +378,7 @@ def anthropic_chat(cfg, system, user):
     url = (cfg.get("base_url") or ANTHROPIC_URL).rstrip("/") + "/v1/messages"
     try:
         body = _post_json(url, {"model": cfg["model"], "max_tokens": 600, "temperature": 0.1, "system": system, "messages": [{"role": "user", "content": user}]},
-                          {"x-api-key": key, "anthropic-version": ANTHROPIC_VERSION}, cfg["timeout_seconds"], cfg.get("use_proxy") is True)
+                          {"x-api-key": key, "anthropic-version": ANTHROPIC_VERSION}, cfg["timeout_seconds"], cfg.get("use_proxy") is True, allow_private=cfg.get("allow_private_targets") is True)
     except urllib.error.HTTPError as error:
         raise ProviderError(i18n.t("ai.provider_answered", code=error.code), error.code) from None
     note_usage(body, "input_tokens", "output_tokens")
