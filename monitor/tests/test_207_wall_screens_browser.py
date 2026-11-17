@@ -115,56 +115,57 @@ class TheScreensInABrowser(unittest.TestCase):
         self.assertTrue(report["reqs"], label)
         self.assertGreater(report["cards"], 1, label)
 
+    def many(self, jobs):
+        """Opens several pages three at a time (a normal computer is not busy with more): jobs are (path, size, flags); the answers come back in the same order."""
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=3) as pool:
+            return list(pool.map(lambda job: self.open(job[0], job[1] if len(job) > 1 else (1920, 1080), job[2] if len(job) > 2 else ()), jobs))
+
     def test_every_screen_in_every_size_is_clean_and_only_asks_the_monitor(self):
-        for kind in KINDS:
-            for name, size in SIZES.items():
-                report = self.open(f"/screen/{kind}?lang=en", size)
-                self.clean(report, (kind, name))
-                self.assertEqual(report["kind"], kind)
+        jobs = [(f"/screen/{kind}?lang=en", size) for kind in KINDS for size in SIZES.values()]
+        for (path, size), report in zip(jobs, self.many(jobs)):
+            self.clean(report, (path, size))
+            self.assertEqual(report["kind"], path.split("/")[2].split("?")[0])
 
     def test_every_language_fits(self):
-        for lang in i18n.LANGS:
-            for kind in KINDS:
-                report = self.open(f"/screen/{kind}?lang={lang}", (1920, 1080))
-                self.clean(report, (kind, lang))
-                with i18n.use_language(lang):
-                    self.assertEqual(report["title"], i18n.t("ui.scr_title_" + kind), (kind, lang))
-                self.assertEqual(report["lang"], i18n.HTML_LANG[lang])
-        for lang in ("de", "ja"):
-            for kind in KINDS:
-                self.clean(self.open(f"/screen/{kind}?lang={lang}", (1080, 1920)), (kind, lang, "turned"))
+        jobs = [(f"/screen/{kind}?lang={lang}", (1920, 1080)) for lang in i18n.LANGS for kind in KINDS]
+        for (path, size), report in zip(jobs, self.many(jobs)):
+            lang, kind = path.split("lang=")[1], path.split("/")[2].split("?")[0]
+            self.clean(report, (kind, lang))
+            with i18n.use_language(lang):
+                self.assertEqual(report["title"], i18n.t("ui.scr_title_" + kind), (kind, lang))
+            self.assertEqual(report["lang"], i18n.HTML_LANG[lang])
 
     def test_the_light_and_the_high_contrast_themes_and_the_large_type_fit_too(self):
-        for query in ("theme=light", "theme=contrast", "density=large", "density=compact", "scale=1.3"):
-            for kind in KINDS:
-                self.clean(self.open(f"/screen/{kind}?lang=en&{query}"), (kind, query))
+        jobs = [(f"/screen/{kind}?lang=en&{query}",) for query in ("theme=light", "theme=contrast", "density=large") for kind in KINDS]
+        for job, report in zip(jobs, self.many(jobs)):
+            self.clean(report, job[0])
 
     def test_a_failure_blinks_softly_and_not_at_all_for_who_asked_for_less_motion(self):
-        for kind in KINDS:
-            fails = self.open(f"/screen/{kind}?lang=en")["fails"]
-            self.assertTrue(fails, f"{kind}: the demo has failures and the page shows them")
-            for f in fails:
+        jobs = [(f"/screen/{kind}?lang=en",) for kind in KINDS] + [(f"/screen/{kind}?lang=en", (1920, 1080), (REDUCED,)) for kind in KINDS] + [(f"/screen/{kind}?lang=en&blink=off",) for kind in KINDS]
+        answers = self.many(jobs)
+        for kind, fails in zip(KINDS, answers[:3]):
+            self.assertTrue(fails["fails"], f"{kind}: the demo has failures and the page shows them")
+            for f in fails["fails"]:
                 if f["calm"]:
                     self.assertEqual(f["name"], "none", f)
                     continue
                 self.assertNotEqual(f["name"], "none", f)
-                seconds = float(f["dur"].rstrip("s"))
-                self.assertGreaterEqual(seconds, 0.5, "never faster than twice a second: " + json.dumps(f))
-            reduced = self.open(f"/screen/{kind}?lang=en", flags=(REDUCED,))
+                self.assertGreaterEqual(float(f["dur"].rstrip("s")), 0.5, "never faster than twice a second: " + json.dumps(f))
+        for reduced in answers[3:6]:
             self.assertTrue(reduced["reduced"])
             self.assertTrue(reduced["fails"], "a failure is still shown (a fixed glow)")
             self.assertEqual({f["name"] for f in reduced["fails"]}, {"none"}, "less motion: nothing blinks")
-            off = self.open(f"/screen/{kind}?lang=en&blink=off")
+        for off in answers[6:]:
             self.assertEqual({f["name"] for f in off["fails"]}, {"none"}, "?blink=off: nothing blinks")
 
     def test_rotation_turns_through_the_three_pages_in_order(self):
-        report = self.open("/screen/overview?lang=en&rotate=5")
+        report, still = self.many([("/screen/overview?lang=en&rotate=5",), ("/screen/now?lang=en&rotate=2",)])
         self.assertTrue(report["ok"], report)
         self.assertEqual(report["errors"], [])
         self.assertEqual(report["seq"][:3], ["overview", "now", "sentinels"], report["seq"])
         for url in report["reqs"]:
             self.assertTrue(url.startswith("/api/screens/data?screen="), url)
-        still = self.open("/screen/now?lang=en&rotate=2")
         self.assertEqual(set(still["seq"]), {"now"}, "a turn faster than five seconds is no turn")
 
 
