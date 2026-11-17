@@ -16,7 +16,11 @@ Was sich nur im langen echten Einsatz zeigt: die Migration von 1.8 und 1.9, das 
 
 Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
 
-## Erledigt in 1.8.2 bis 2.0.5
+## Erledigt in 1.8.2 bis 2.0.6
+
+### 2.0.6 - Drei Wandbildschirme, gezeichnet und standardmäßig aus
+
+Die drei Wandbildschirme sind gezeichnet: Übersicht (Bewertung, Flottenlampen, Diagramme, Heatmap, Runner und das Kontingent), Jetzt (laufende Läufe, Warteschlange, Freigaben, jüngste Fehler und eine Live-Linie) und Wächter (eine Karte je Wächter mit animiertem Radar). Die Seite zeichnet jedes Diagramm selbst, ein neuer Fehler blinkt einmal und beruhigt sich, nichts bewegt sich für wen weniger Bewegung wünscht, alles verschiebt sich jede Minute leicht gegen Einbrennen, die Seite kann nachts abdunkeln, ein Fenster kann durch die drei Seiten rotieren, und ein Browsertest prüft sie in 1080p, 4K und gedreht in den acht Sprachen. Die Bildschirme sind standardmäßig aus (`screens.enabled`), und README und Bildschirmanleitung zeigen sie jetzt.
 
 ### 2.0.5 - Weniger falsche Rotmeldungen, ruhende Repositories und Fragen, die im Vollbild sichtbar sind
 

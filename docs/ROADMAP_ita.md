@@ -16,7 +16,11 @@ Ciò che emerge solo con un uso reale prolungato: la migrazione dalla 1.8 e dall
 
 I workflow del monitor stesso rispettano ciò che la sentinella di igiene chiederà agli altri: azioni fissate a un commit, permessi minimi e un limite di tempo su ogni job.
 
-## Fatto dalla 1.8.2 alla 2.0.5
+## Fatto dalla 1.8.2 alla 2.0.6
+
+### 2.0.6 - Tre schermi a parete, disegnati e disattivati di default
+
+I tre schermi a parete sono disegnati: Panoramica (punteggio, lampade della flotta, grafici, mappa di calore, runner e la quota), Adesso (esecuzioni in corso, coda, approvazioni, guasti recenti e una linea dal vivo) e Sentinelle (una scheda per sentinella con un radar animato). La pagina disegna da sola ogni grafico, un nuovo guasto lampeggia una volta e si calma, nulla si muove per chi ha chiesto meno movimento, tutto si sposta un poco ogni minuto contro il burn-in, la pagina può attenuarsi di notte, una finestra può ruotare tra le tre pagine e un test del browser le verifica in 1080p, 4K e ruotate negli otto idiomi. Gli schermi sono disattivati di default (`screens.enabled`), e il README e la guida degli schermi ora li mostrano.
 
 ### 2.0.5 - Meno falsi rossi, repository dormienti e domande visibili a schermo intero
 

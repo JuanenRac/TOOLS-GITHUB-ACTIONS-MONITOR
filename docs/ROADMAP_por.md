@@ -16,7 +16,11 @@ O que só aparece com uso real prolongado: a migração desde a 1.8 e a 1.9, o c
 
 Os workflows do próprio monitor cumprem o que a sentinela de higiene pedirá aos outros: ações fixadas a um commit, as permissões mínimas e um limite de tempo em cada job.
 
-## Feito da 1.8.2 à 2.0.5
+## Feito da 1.8.2 à 2.0.6
+
+### 2.0.6 - Três ecrãs de parede, desenhados e desativados por omissão
+
+Os três ecrãs de parede estão desenhados: Geral (pontuação, lâmpadas da frota, gráficos, mapa de calor, runners e a quota), Agora (execuções em curso, fila, aprovações, falhas recentes e uma linha em direto) e Sentinelas (um cartão por sentinela com um radar animado). A página desenha ela própria cada gráfico, uma falha nova pisca uma vez e acalma, nada se mexe para quem pediu menos movimento, tudo se desloca um pouco a cada minuto contra a retenção de imagem, a página pode escurecer à noite, uma janela pode rodar pelas três páginas e um teste do navegador verifica-as em 1080p, 4K e rodadas nos oito idiomas. Os ecrãs estão desativados por omissão (`screens.enabled`), e o README e o guia dos ecrãs já os mostram.
 
 ### 2.0.5 - Menos falsos vermelhos, repositórios adormecidos e perguntas visíveis em ecrã inteiro
 
