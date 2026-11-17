@@ -230,7 +230,7 @@ def handle(config, body, headers, watched):
         return 400, {"ok": False, "error": text("bad_payload")}, None
     if not isinstance(name, str) or not NAME_RE.match(name) or name not in set(watched):
         return 202, {"ok": True, "ignored": True}, None
-    if full is not None:   # the owner named in the payload must be one this monitor watches
+    if True:   # the owner named in the payload must be one this monitor watches; GitHub always names it, so a payload without it is not believed
         found = FULL_NAME_RE.match(full) if isinstance(full, str) else None
         owners = {o.lower() for o in guard["allowed_owners"]} | {toolconfig.github_owner(config).lower()}
         owners.discard("")
@@ -293,7 +293,12 @@ def parse_event(event, body):
         return None
     if not isinstance(repo, str) or not NAME_RE.match(repo) or not isinstance(obj, dict) or not isinstance(obj.get("id"), int):
         return None
+    full = payload["repository"].get("full_name") if isinstance(payload.get("repository"), dict) else None
     url = obj.get("html_url") if isinstance(obj.get("html_url"), str) and GITHUB_URL.match(obj["html_url"]) else None
+    if url is not None:      # the link goes to the notices and the live list: it must point to the repository the payload names (owner and name), not to any address
+        path = "/" + url.split("/", 3)[3] if url.count("/") >= 3 else ""
+        if not (isinstance(full, str) and FULL_NAME_RE.match(full) and path.lower().startswith(f"/{full}/".lower())):
+            url = None
     record = {"event": event, "repo": repo, "run_id": obj["run_id"] if event == "workflow_job" and isinstance(obj.get("run_id"), int) else obj["id"], "status": _word(obj.get("status"), STATUSES),
               "conclusion": _word(obj.get("conclusion"), CONCLUSIONS) or None, "branch": _name(obj.get("head_branch")), "sha": _name(obj.get("head_sha"), 40)[:7], "url": url,
               "attempt": obj.get("run_attempt") if isinstance(obj.get("run_attempt"), int) else None}

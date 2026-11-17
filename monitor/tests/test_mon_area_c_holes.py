@@ -82,6 +82,37 @@ class WhatAPayloadMaySay(unittest.TestCase):
         self.assertLessEqual(len(store.data["steps"]["demo|CI"]), am.MAX_STEP_NAMES)
 
 
+class TheLinkAndTheOwnerOfAPayloadAreChecked(unittest.TestCase):
+    def payload(self, url, full="o/demo"):
+        run = {"id": 5, "name": "CI", "status": "completed", "conclusion": "failure", "head_branch": "main", "head_sha": "a" * 40, "html_url": url}
+        repository = {"name": "demo"}
+        if full:
+            repository["full_name"] = full
+        return json.dumps({"repository": repository, "workflow_run": run}).encode()
+
+    def test_a_link_that_does_not_point_to_the_repository_of_the_payload_is_dropped(self):
+        good = webhook.parse_event("workflow_run", self.payload("https://github.com/o/demo/actions/runs/5"))
+        self.assertEqual(good["url"], "https://github.com/o/demo/actions/runs/5")
+        for url in ("https://evil.example/JuanenRac/demo/actions/runs/5", "https://github.com/other/demo/actions/runs/5", "https://github.com/o/other/actions/runs/5"):
+            self.assertIsNone(webhook.parse_event("workflow_run", self.payload(url))["url"], url)
+        self.assertIsNone(webhook.parse_event("workflow_run", self.payload("https://github.com/o/demo/actions/runs/5", full=None))["url"])
+
+    def test_a_payload_without_the_full_name_is_not_believed(self):
+        raw = self.payload("https://github.com/o/demo/actions/runs/5", full=None)
+        headers = {"X-GitHub-Event": "workflow_run", "X-Hub-Signature-256": webhook.sign("k" * 40, raw), "X-GitHub-Delivery": "99999999-2222-3333-4444-555555555555"}
+        webhook.reset()
+        with mock.patch.dict("os.environ", {webhook.SECRET_ENV: "k" * 40}):
+            code, answer, name = webhook.handle({"webhook": {"enabled": True}}, raw, headers, ["demo"])
+        self.assertEqual((code, name), (202, None))
+
+
+class TheNameOfAStepGoesThroughTheCleaner(unittest.TestCase):
+    def test_a_secret_in_the_name_of_a_job_or_a_step_does_not_leave(self):
+        jobs = json.dumps({"jobs": [{"name": "deploy " + TOKEN, "steps": [{"name": "push " + TOKEN, "conclusion": "failure"}]}]})
+        found = ai_alerts.diagnose("o", "demo", "https://github.com/o/demo/actions/runs/5", lambda a, t=60: (0, jobs, "") if a[0] == "api" else (0, "Error: x\n", ""))
+        self.assertNotIn(TOKEN, json.dumps(found))
+
+
 class TheLiveStatusNamesTheWorkflowOfTheLastEvent(unittest.TestCase):
     def test_last_carries_the_workflow(self):
         old = list(am.LIVE_EVENTS)
@@ -157,8 +188,8 @@ class TheTokenOfANtfyTopicDoesNotFollowARedirect(unittest.TestCase):
         for handler in (_Third, _Redirecting):
             server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
             threading.Thread(target=server.serve_forever, daemon=True).start()
-            self.addCleanup(server.shutdown)
             self.addCleanup(server.server_close)
+            self.addCleanup(server.shutdown)
             servers.append(server)
         _Third.hits = []
         _Redirecting.target = f"http://127.0.0.1:{servers[0].server_address[1]}/robbed"
