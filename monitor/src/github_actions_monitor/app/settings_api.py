@@ -64,7 +64,7 @@ AI_REF_RE = re.compile(r"^[A-Za-z0-9-]{0,40}\Z")      # a preset (openai, ollama
 AI_FALLBACK_RE = re.compile(r"^[A-Za-z0-9._:/@+=, -]{0,400}\Z")      # provider=model, provider=model
 OLLAMA_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}/?\Z")   # the local service only: nothing leaves this computer
 HTTPS_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250})?\Z")
-AI_URL_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250}|http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/-]{0,100})?)?\Z")   # https, or a server on this computer
+AI_URL_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#!$&()*+,;=%-]{4,250}|http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/-]{0,100})?)?\Z")   # https, or a server on this computer
 PROXY_HOST_RE = re.compile(r"^([A-Za-z0-9]([A-Za-z0-9.-]{0,98}[A-Za-z0-9])?)?\Z")      # the public NAME of an HTTPS proxy: a host name only, no port, path, user or space (empty = none)
 ENV_NAME_RE = re.compile(r"^([A-Z_][A-Z0-9_]{0,63})?\Z")
 AI_ENV_RE = re.compile(r"^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|MONITOR_[A-Z0-9_]*)\Z)([A-Z_][A-Z0-9_]{0,63})?\Z")   # the NAME of the variable of the key of a provider: never a variable of the system or of the monitor   # the NAME of an environment variable, never the key itself
@@ -183,6 +183,7 @@ _f(_T_SENT, "reports", "reports.max_calls_per_cycle", "int", (1, 50), restart=Fa
 _f(_T_AI, "failed_step", "logs.failed_step.enabled", "bool", restart=False, secure=True)
 _f(_T_AI, "failed_step", "logs.failed_step.lines", "int", (3, 40), restart=False, unit="")
 _f(_T_AI, "failed_step", "logs.failed_step.max_bytes", "int", (200, 4000), restart=False, unit="")
+_f(_T_AI, "failed_step", "logs.failed_step.max_per_minute", "int", (1, 60), restart=False, unit="")
 _f("quota", "github_app", "github_app.app_id", "text", re.compile(r"^[0-9]{1,12}\Z"), restart=False, secure=True)
 _f("quota", "github_app", "github_app.key_path", "path", restart=False, secure=True)
 _f("quota", "github_app", "github_app.installation_id", "text", re.compile(r"^[0-9]{0,12}\Z"), restart=False, secure=True)
@@ -318,6 +319,7 @@ _f(_T_SENT, "security", "sentinels.security.signals.workflow.enabled", "bool")
 _f(_T_SENT, "security", "sentinels.security.signals.codeowners.enabled", "bool")
 _f(_T_SENT, "collab", "alerts.mute_hours", "int", (1, 720), restart=False, unit="h")
 _f(_T_SENT, "flow_silences", "alerts.silences", "names", restart=False)
+_f(_T_SENT, "flow_silences", "alerts.silences_expire_days", "int", (0, 3650), restart=False, unit="d")
 _f(_T_SENT, "flow_service", "alerts.service.enabled", "bool", restart=False)
 _f(_T_SENT, "flow_service", "alerts.service.failures", "int", (2, 50), restart=False)
 _f(_T_SENT, "flow_service", "alerts.service.rate_percent", "int", (0, 100), restart=False, unit="%")
@@ -405,6 +407,7 @@ _f(_T_AI, "provider", "ai.provider", "enum", ("none", "ollama", "openai-compatib
 _f(_T_AI, "provider", "ai.model", "text", MODEL_RE)
 _f(_T_AI, "provider", "ai.ollama_url", "text", OLLAMA_RE)
 _f(_T_AI, "provider", "ai.base_url", "text", AI_URL_RE, secure=True)
+_f(_T_AI, "provider", "ai.allow_private_targets", "bool", secure=True)
 _f(_T_AI, "provider", "ai.api_key_env", "text", AI_ENV_RE)
 _f(_T_AI, "provider", "ai.daily_limit", "int", (0, 500), unit="calls")
 _f(_T_AI, "limits", "ai.max_input_chars", "int", (500, 20000), unit="chars")
@@ -424,6 +427,7 @@ for _task in ("build", "codeql", "report", "diagnose", "alert"):      # a model 
     _f(_T_AI, "task_" + _task, f"ai.tasks.{_task}.timeout_seconds", "int", (0, 300))
 _f(_T_AI, "fallback", "ai.fallback", "text", AI_FALLBACK_RE, secure=True)
 _f(_T_AI, "fallback", "ai.fallback_max_attempts", "int", (1, 5), unit="")
+_f(_T_AI, "fallback", "ai.fallback_cloud_allowed", "names", secure=True)
 _f(_T_AI, "fallback", "ai.fallback_after_seconds", "int", (0, 300))
 _f(_T_AI, "budget", "ai.model_daily_limit", "int", (0, 500), unit="calls")
 _f(_T_AI, "budget", "ai.cost_limit_daily", "float", (0.0, 100000.0), unit="")

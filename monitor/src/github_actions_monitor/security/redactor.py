@@ -22,14 +22,56 @@ def _ipv6(match):
     return text
 
 
+_STATE_WORDS = frozenset("blind back none null true false yes no on off ok set unset present absent missing empty enabled disabled expired valid invalid required optional configured unknown masked hidden redacted error failure success".split())
+_NOT_A_SECRET_KEY = re.compile(r"(?i)^(?:(?:max|min|input|output|prompt|completion|total|num)[_.-]?tokens?|tokens(?:[_.-](?:in|out|used|left|count|limit))?|token[_.-](?:count|limit))$|^secrets?[_.-](?:scanning|count|alerts?)$|^(?:cache|sort|primary|foreign|partition|group|order|hot)[_.-]?key$")
+
+
+def _pair(match):
+    """The replacement of a `name=value` rule: the value goes to [secret] unless the NAME is one that counts things or states (max_tokens=500, secret_scanning: disabled, cache-key: linux) or the value is a word of a
+    closed list of states ("present", "blind", "disabled") on a name that is not a password. Everything else is a secret."""
+    key, sep = match.group(1), match.group(2)
+    value = match.group(0)[len(key) + len(sep):].strip("\"'")
+    name = key.split("/")[-1]
+    if _NOT_A_SECRET_KEY.match(name):
+        return match.group(0)
+    if value.lower() in _STATE_WORDS and not re.search(r"(?i)pass|pwd", name):
+        return match.group(0)
+    return key + sep + "[secret]"
+
+
+def _ipv4(match):
+    """`[ip]` for four numbers up to 255, but not for a version of four components ("version 2.0.8.1", "v1.2.3.4")."""
+    text = match.group(0)
+    if any(int(part) > 255 for part in text.split(".")):
+        return text
+    before = match.string[max(0, match.start() - 8):match.start()].lower()
+    if before.endswith("v") or before.endswith("version "):
+        return text
+    return "[ip]"
+
+
 _SECRETS = [
-    (re.compile(r"(?s)-----BEGIN [A-Z ]*PRIVATE KEY(?: BLOCK)?-----.*?(?:-----END [A-Z ]*PRIVATE KEY(?: BLOCK)?-----|$)"), "[pem]"),
-    (re.compile(r"(?i)\b([a-z][a-z0-9+.-]*://)[^/\s:@]+:[^/\s@]+@"), r"\1[credentials]@"),      # user:password@host in an address
+    (re.compile(r"(?s)[-\u2010-\u2015\u2212]{2,}BEGIN [A-Z ]*PRIVATE KEY(?: BLOCK)?[-\u2010-\u2015\u2212]{2,}.*?(?:[-\u2010-\u2015\u2212]{2,}END [A-Z ]*PRIVATE KEY(?: BLOCK)?[-\u2010-\u2015\u2212]{2,}|$)"), "[pem]"),
+    (re.compile(r"(?i)\b([a-z][a-z0-9+.-]*://)[^/\s:@]+:[^/\s?#]+@"), r"\1[credentials]@"),      # user:password@host in an address
     (re.compile(r"(?i)\bhooks\.slack\.com/services/[A-Za-z0-9/_-]+"), "hooks.slack.com/services/[webhook]"),
     (re.compile(r"(?i)\bdiscord(?:app)?\.com/api/webhooks/\d+/[A-Za-z0-9._-]+"), "discord.com/api/webhooks/[webhook]"),
     (re.compile(r"\bbot\d{6,}:[A-Za-z0-9_-]{20,}"), "bot[token]"),
+    (re.compile(r"(?<![\w:])\d{8,10}:[A-Za-z0-9_-]{33,40}(?![\w-])"), "[token]"),      # the token of a Telegram bot without the word "bot"
+    (re.compile(r"(?i)\bntfy\.sh/[A-Za-z0-9._-]+"), "ntfy.sh/[secret]"),      # the topic of ntfy is the secret
+    (re.compile(r"(?i)([?&;](?:sid|jsessionid|phpsessid|session[_-]?id|sessionid)=)[^&\s#]+"), r"\1[secret]"),
+    (re.compile(r"(?i)(\bmachine\s+\S+\s+login\s+\S+\s+password)\s+(?!\[)\S+"), r"\1 [secret]"),      # .netrc
+    (re.compile(r"(?m)^([\w.*-]+:(?:\d+|\*):[\w*-]+:[\w*-]+:)\S+$"), r"\1[secret]"),      # .pgpass
+    (re.compile(r"(?i)(\b(?:docker|podman|buildah|skopeo|helm)\b[^\r\n]*?\blogin\b[^\r\n]*?\s-p[ =]?)(?!\[)\S+"), r"\1[secret]"),
+    (re.compile(r"(?i)(\bsshpass\b[^\r\n]*?\s-p\s+)(?!\[)\S+"), r"\1[secret]"),
+    (re.compile(r"(?i)(\bcurl\b[^\r\n]*?\s(?:-u|--user)[ =]?)(?!\[)\S+"), r"\1[secret]"),
+    (re.compile(r"\b((?:store|key)Password)(\s+)(?![\[\"'])\S+"), r"\1\2[secret]"),
+    (re.compile(r"""(?i)(\b[A-Za-z0-9_.]*password)(\s+)(['"])(?!\[)[^'"\r\n]+\3"""), r"\1\2\3[secret]\3"),      # storePassword 'x' (Gradle)
+    (re.compile(r"""(?i)((?:^|[^A-Za-z0-9])(?:_auth|x-auth[a-z-]*|["']auth["'])["']?\s*[:=]\s*)(?:"[^"\r\n]{0,300}"|'[^'\r\n]{0,300}'|[^\s"',;]+)"""), r"\1[secret]"),      # .npmrc _auth=, X-Auth:, {"auth": "..."}
+    (re.compile(r"(?i)\b((?:otp|totp|(?:2fa|mfa)[_-]?code)\s*[:=]\s*)\d{4,10}"), r"\1[secret]"),
+    (re.compile(r"(?i)((?:secret|token|password|passwd|pwd|api[_-]?key)[ :=]+)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"), r"\1[secret]"),      # the identifier of a client secret
+    (re.compile(r"(?i)[A-Za-z0-9._%+-]+\s?[\[(]at[\])]\s?[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}"), "[email]"),      # victima [at] corp.com
     (re.compile(r"""(?i)(x-monitor-access|monitor_access)(["']?\s*[:=]\s*)(?:"(?:[^"\\\n]|\\.){0,300}"|'(?:[^'\\\n]|\\.){0,300}'|["']?[^\s"',;]+)"""), r"\1\2[secret]"),
-    (re.compile(r"(?<![A-Za-z0-9])(?:glpat-[A-Za-z0-9_-]{10,}|npm_[A-Za-z0-9]{16,}|pypi-[A-Za-z0-9_-]{16,})"), "[token]"),
+    (re.compile(r"(?<![A-Za-z0-9])(?:glpat-[A-Za-z0-9_-]{10,}|npm_[A-Za-z0-9]{16,}|pypi-[A-Za-z0-9_-]{16,}|hf_[A-Za-z0-9]{20,}|dckr_pat_[A-Za-z0-9_-]{16,}|whsec_[A-Za-z0-9]{16,}|GOCSPX-[A-Za-z0-9_-]{16,})"), "[token]"),
     (re.compile(r"\b(gh[pousr]_[A-Za-z0-9]*)[ \t]*\r?\n[ \t]*[A-Za-z0-9]{6,}"), "[token]"),      # a token cut by a line break: the second half goes with the first
     (re.compile(r"\b(?:gh[pousr]_[A-Za-z0-9]{8,}|github_pat_[A-Za-z0-9_]{8,})"), "[token]"),
     (re.compile(r"\b(?:sk-[A-Za-z0-9_-]{16,}|AKIA[0-9A-Z]{12,}|xox[abprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{20,})"), "[key]"),
@@ -38,21 +80,24 @@ _SECRETS = [
     (re.compile(r"(?i)\b(set-cookie|cookie)(\s*:\s*)[^\r\n]+"), r"\1\2[secret]"),
     (re.compile(r"(?i)(--?(?:password|passwd|pwd|passphrase|token|secret|api[_-]?key|access[_-]?key)[ =])\S+"), r"\1[secret]"),      # mysql --password hunter2, curl --token abc
     (re.compile(r"(?i)(\b(?:mysql|mysqldump|mysqladmin|psql|sshpass|redis-cli)\b[^\r\n]*?\s-p)(?!\[)[^\s-]\S*"), r"\1[secret]"),      # mysql -uroot -phunter2
-    (re.compile(r"""(?i)\b([A-Za-z0-9_.-]*[_.-](?:key|dsn|creds|credentials)|dsn|creds|credentials)(["']?\s*[:=]\s*)(?:"(?:[^"\\\n]|\\.){0,300}"|'(?:[^'\\\n]|\\.){0,300}'|["']?[^\s"',;]+)"""), r"\1\2[secret]"),      # ENCRYPTION_KEY=, SENTRY_DSN=, AWS_CREDS=
+    (re.compile(r"""(?i)\b([A-Za-z0-9_.-]*[_.-](?:key|dsn|creds|credentials|pass)|dsn|creds|credentials)(["']?\s*[:=]\s*)(?:"(?:[^"\\\n]|\\.){0,300}"|'(?:[^'\\\n]|\\.){0,300}'|["']?[^\s"',;]+)"""), _pair),      # ENCRYPTION_KEY=, SENTRY_DSN=, AWS_CREDS=
     (re.compile(r"(?i)\b(password|passwd|passphrase)(\s*:\s+)(?![\"'\[])[^\r\n]+"), r"\1\2[secret]"),      # a phrase after "password:" (the value may hold spaces)
     (re.compile(r"\b(?:sk|rk|pk)_(?:live|test)_[A-Za-z0-9]{8,}"), "[key]"),
     (re.compile(r"(?i)\b(bearer|basic)\s+[A-Za-z0-9._~+/=-]{12,}"), r"\1 [secret]"),
-    (re.compile(r"""(?i)([A-Za-z0-9_.-]*(?:password|passwd|pwd|secret|token|api[_-]?key|access[_-]?key|authorization)[A-Za-z0-9_.-]*)(["']?\s*[:=]\s*)(?:"(?:[^"\\\n]|\\.){0,300}"|'(?:[^'\\\n]|\\.){0,300}'|["']?[^\s"',;]+)"""), r"\1\2[secret]"),      # DB_PASSWORD=, AWS_SECRET_ACCESS_KEY=, MYSQL_PWD=
+    (re.compile(r"""(?i)([A-Za-z0-9_.-]*(?:password|passwd|pwd|secret|token|api[_-]?key|access[_-]?key|authorization|contrase[\u00f1n]a|secreto|clave)[A-Za-z0-9_.-]*)(["']?\s*[:=]\s*)(?:"(?:[^"\\\n]|\\.){0,300}"|'(?:[^'\\\n]|\\.){0,300}'|["']?[^\s"',;]+)"""), _pair),      # DB_PASSWORD=, AWS_SECRET_ACCESS_KEY=, MYSQL_PWD=
     (re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"), "[email]"),
-    (re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b"), "[ip]"),
+    (re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b(?!\.\d)"), _ipv4),
+    (re.compile(r"(?i)\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:lan|internal|corp|intranet|private)\b(?::\d{1,5})?|\b[a-z0-9-]+(?:\.[a-z0-9-]+){2,}\.local\b(?::\d{1,5})?"), "[host]"),      # a name that only exists inside a network
     (re.compile(r"\b(?:[0-9A-Fa-f]{1,4}:){4,7}[0-9A-Fa-f]{1,4}\b"), "[ip]"),
     (re.compile(r"(?<![\w:.])(?:[0-9A-Fa-f]{0,4}:){2,7}[0-9A-Fa-f]{0,4}(?![\w])"), _ipv6),
-    (re.compile(r"(?i)[A-Z]:\\Users\\[^\\\s]+"), "~"),
+    (re.compile(r"""(?i)[A-Z]:(?:\\+|/)Users(?:\\+|/)[^\\/\s'"]+"""), "~"),      # also with doubled bars: it is how repr(), JSON and the text of an OSError write it
     (re.compile(r"(?i)\\\\[^\\\s]+\\(?:Users|home)\\[^\\\s]+"), "~"),      # \\server\Users\name
     (re.compile(r"(?<![A-Za-z0-9._-])/root(?=/|\s|$)"), "~"),
     (re.compile(r"(?:/var/lib/jenkins/secrets|/run/secrets|/etc/secrets)(?:/\S*)?"), "[path]"),
-    (re.compile(r"/(?:home|Users)/[^/\s]+"), "~"),
-    (re.compile(r"(?<![0-9A-Fa-f])[0-9A-Fa-f]{32,}(?![0-9A-Fa-f])"), "[hex]"),
+    (re.compile(r"/(?:home|Users)/[^/\s]+|(?<![\w./-])/users/[^/\s]+"), "~"),
+    (re.compile(r"(?<![\w/~])~[A-Za-z_][\w.-]{1,31}(?=/)"), "~"),      # ~victima/project
+    (re.compile(r"(?<![0-9A-Fa-f])[0-9A-Fa-f]{30,}(?![0-9A-Fa-f])"), "[hex]"),
+    (re.compile(r"(?<![A-Za-z0-9+/=])[A-Za-z0-9+/]{12,}={1,2}(?![A-Za-z0-9=])"), "[blob]"),      # base64 with its padding (user:password is 16 characters)
     (re.compile(r"\b[A-Za-z0-9+/_-]{40,}={0,2}"), "[blob]"),
 ]
 
@@ -87,7 +132,7 @@ def _clean(text, limit=None):
     outside [A-Za-z0-9._/-] does."""
     out = str(text or "").replace("\ue000", "").replace("\ue001", "")      # the marks below belong to this function only
     home = str(Path.home())
-    for variant in {home, home.replace("\\", "/")}:
+    for variant in {home, home.replace("\\", "/"), home.replace("\\", "\\\\")}:
         if len(variant) > 3:
             out = out.replace(variant, "~")
     kept = []
@@ -106,29 +151,28 @@ def _clean(text, limit=None):
     return out[:limit] if limit else out
 
 
-_MARK = re.compile(r"\[(?:secret|token|key|jwt|email|ip|credentials|pem|hex|blob|webhook|path)\]")
+_MARK = re.compile(r"\[(?:secret|token|key|jwt|email|ip|credentials|pem|hex|blob|webhook|path|host)\]")
 _INVISIBLE = re.compile("[\u200b-\u200d\u2060\ufeff]")
 
 
 def redact(text, limit=None):
     """`_clean` of the text as it is and, when the text hides itself behind an encoding (full-width letters, zero-width characters, %XX), of its plain form too: the one that finds more wins."""
-    text = str(text or "")
-    out = _clean(text)
-    plain = _INVISIBLE.sub("", unicodedata.normalize("NFKC", text))
+    out = _clean(str(text or ""))
+    plain = _INVISIBLE.sub("", unicodedata.normalize("NFKC", out))
     plain = unquote(plain) if "%" in plain else plain
-    if plain != text:
-        other = _clean(plain)
-        if len(_MARK.findall(other)) > len(_MARK.findall(out)):
-            out = other
+    if plain != out:      # a secret that is only seen once the text is plain: the plain form is cleaned too and is the one that is kept (the zero-width characters and the %XX are not information)
+        out = _clean(plain)
     return out[:limit] if limit else out
 
 
-_SECRET_KEY = re.compile(r"(?i)password|passwd|pwd|passphrase|secret|token|api[_-]?key|authorization|cookie|credential")
+_SECRET_KEY = re.compile(r"(?i)(?:^|[_.\s-])(?:password|passwd|pwd|passphrase|secret|token|cookie|credential|credentials|authorization)$|api[_-]?key$|apikey$")
 
 
 def _secret_pair(key, value):
-    """True for a pair whose KEY says the value is a secret ({'password': 'x'} has nothing the patterns of the text could see); the name of an environment variable (`*_env`) is not a secret."""
-    return isinstance(key, str) and isinstance(value, str) and len(value) > 3 and bool(_SECRET_KEY.search(key)) and not key.lower().endswith(("_env", "_name", "_label")) and not _MARK.fullmatch(value)
+    """True for a pair whose KEY says the value is a secret ({'password': 'x'} has nothing the patterns of the text could see): the whole name, or its last word, is one of the list (`token_state`,
+    `tokens_in` and a repository called `secret-santa` are not); the name of an environment variable (`*_env`) is not a secret, and neither is a word of a closed list of states ({'credential': 'blind'})."""
+    return (isinstance(key, str) and isinstance(value, str) and len(value) > 3 and bool(_SECRET_KEY.search(key.strip())) and not key.lower().endswith(("_env", "_name", "_label"))
+            and not _MARK.fullmatch(value) and not (value.strip().lower() in _STATE_WORDS and not re.search(r"(?i)pass|pwd", key)))
 
 
 def redact_data(value, limit=None):
@@ -137,7 +181,16 @@ def redact_data(value, limit=None):
     if isinstance(value, str):
         return redact(value, limit)
     if isinstance(value, dict):
-        return {(redact(k) if isinstance(k, str) else k): ("[secret]" if _secret_pair(k, v) else redact_data(v)) for k, v in value.items()}
+        out = {}
+        for k, v in value.items():
+            name = redact(k) if isinstance(k, str) else k
+            if name in out:      # two keys that look the same once cleaned ([hex], [email]): numbered, none is lost
+                number = 2
+                while f"{name}#{number}" in out:
+                    number += 1
+                name = f"{name}#{number}"
+            out[name] = "[secret]" if _secret_pair(k, v) else redact_data(v)
+        return out
     if isinstance(value, (list, tuple)):
         return [redact_data(v) for v in value]
     return value

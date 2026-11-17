@@ -19,6 +19,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.actions.execute` (secure) | `-` | ai | Run with confirmation |
 | `ai.actions.max_per_hour` | `-` | ai | Actions per hour |
 | `ai.actions.ttl_seconds` | `-` | ai | Proposal lifetime |
+| `ai.allow_private_targets` (secure) | `-` | ai | Allow an AI provider on a private address |
 | `ai.allowed_repos` | `-` | ai | Repositories it may see |
 | `ai.answer_language` | `-` | ai | Language of the answers |
 | `ai.api_key_env` | `-` | ai | Key variable |
@@ -32,6 +33,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.events` | `-` | ai | Events it may analyse |
 | `ai.fallback` (secure) | `-` | ai | Models to try when the main one fails |
 | `ai.fallback_after_seconds` | `-` | ai | Give up the main model after |
+| `ai.fallback_cloud_allowed` (secure) | `-` | ai | Providers on the internet allowed as a fallback |
 | `ai.fallback_max_attempts` | `-` | ai | Most models tried per question |
 | `ai.max_input_chars` | `-` | ai | Input size |
 | `ai.max_output_chars` | `-` | ai | Answer size |
@@ -107,6 +109,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `alerts.service.rate_percent` | `0` | sentinel | Or when this share of its last runs failed |
 | `alerts.service.workflows` | `[]` | sentinel | More workflows of the service class |
 | `alerts.silences` | `[]` | sentinel | Permanent silences |
+| `alerts.silences_expire_days` | `-` | sentinel | Days after the review date when a silence expires |
 | `analytics.enabled` | `-` | analytics | Analytics on |
 | `analytics.flaky` | `-` | analytics | Flaky detection |
 | `analytics.jobs_per_cycle` | `-` | analytics | Jobs read per cycle |
@@ -259,6 +262,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `logs.failed_step.enabled` (secure) | `false` | ai | Show the log of the failed step |
 | `logs.failed_step.lines` | `12` | ai | Lines of the failed step |
 | `logs.failed_step.max_bytes` | `2000` | ai | Size of the failed step text |
+| `logs.failed_step.max_per_minute` | `10` | ai | Lookups of a failed step per minute |
 | `max_workers` | `20` | polling | Parallel requests |
 | `min_rate_remaining` | `800` | polling | Pause below this allowance |
 | `mirror.enabled` (secure) | `false` | advanced | Keep a local copy of artifacts |

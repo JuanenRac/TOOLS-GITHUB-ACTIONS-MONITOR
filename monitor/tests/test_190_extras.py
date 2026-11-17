@@ -31,6 +31,7 @@ def runner(args, timeout=60):
 class TheLogOfTheFailedStep(unittest.TestCase):
     def setUp(self):
         steplog._CACHE.clear()
+        steplog._ASKED.clear()
 
     def test_it_is_off_by_default_and_reads_nothing(self):
         calls = []

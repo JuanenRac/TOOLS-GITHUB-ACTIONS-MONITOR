@@ -90,7 +90,7 @@ class Ntfy(Channel):
             headers["Authorization"] = "Bearer " + _clean_line(secret, 300)
         request = urllib.request.Request(url, data=_body(message).encode("utf-8"), headers=headers, method="POST")
         local = _loopback(urlparse(url).hostname or "")
-        send = (lambda r, timeout: netguard.local_open(r, timeout=timeout, follow_redirects=False)) if local else (opener or netguard.opener_for(allow_private, use_proxy=use_proxy))
+        send = (lambda r, timeout: netguard.local_open(r, timeout=timeout, follow_redirects=False)) if local else (opener or netguard.opener_for(allow_private, use_proxy=use_proxy, follow_redirects=False))      # the token of the topic is in a header: no redirect
         with send(request, timeout=TIMEOUT):
             pass
 

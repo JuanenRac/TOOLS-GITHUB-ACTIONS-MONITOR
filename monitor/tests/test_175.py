@@ -335,7 +335,7 @@ class WebhookHygiene(unittest.TestCase):
     def test_the_parsed_record_has_only_the_allowed_fields_and_none_of_the_sensitive_text(self):
         record = webhook.parse_event("workflow_run", self.payload())
         self.assertIsNotNone(record)
-        self.assertTrue(set(record) <= set(webhook.LIVE_FIELDS) | {"steps"}, set(record) - set(webhook.LIVE_FIELDS))
+        self.assertTrue(set(record) <= set(webhook.LIVE_FIELDS) | {"steps", "run_event"}, set(record) - set(webhook.LIVE_FIELDS))
         dumped = json.dumps(record)
         for text in self.SENSITIVE:
             self.assertNotIn(text, dumped)

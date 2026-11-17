@@ -3,6 +3,8 @@
 """Locks for the file backend (standard library only).
 
   path_lock(path)       one re-entrant lock per file inside this process: whoever appends to the feed and whoever rewrites it (the purge) take the same one, so a line is never lost
+  os_lock(path)         an exclusion between processes made by the operating system itself (msvcrt.locking on Windows, fcntl.flock elsewhere) on a side file: when the process that holds it dies, the system
+                        lets it go at once, so there is never an orphan to rescue. For the files that are read, changed and written again by several processes (the store of the AI)
   process_lock(path)    a context manager that also excludes OTHER processes through a lock file created exclusively (the global records, read-modify-write); a lock file left by a process that
                         died is taken over at once (the file holds the number of its process) and, when that cannot be known, after STALE seconds (MONITOR_LOCK_STALE overrides it)
 """
@@ -107,6 +109,57 @@ def release(lock_file, attempts=100, pause=0.01):
             if attempt + 1 < attempts:
                 time.sleep(pause)
     return False
+
+
+def _try_lock(fd):
+    """One try to take the lock of the operating system on the first byte of the file; OSError when somebody else holds it."""
+    if os.name == "nt":
+        import msvcrt
+        os.lseek(fd, 0, os.SEEK_SET)
+        msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+    else:
+        import fcntl
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+
+def _unlock(fd):
+    try:
+        if os.name == "nt":
+            import msvcrt
+            os.lseek(fd, 0, os.SEEK_SET)
+            msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(fd, fcntl.LOCK_UN)
+    except OSError:
+        pass      # closing the descriptor lets go of it anyway
+
+
+@contextlib.contextmanager
+def os_lock(path, timeout=10.0):
+    """Excludes other threads and other processes while the block runs, with a lock of the operating system on `<path>.oslock`. Raises TimeoutError when it cannot be taken in `timeout` seconds."""
+    lock_file = Path(str(path) + ".oslock")
+    lock_file.parent.mkdir(parents=True, exist_ok=True)
+    with path_lock(path):
+        fd = os.open(str(lock_file), os.O_CREAT | os.O_RDWR)
+        try:
+            if os.fstat(fd).st_size == 0:
+                os.write(fd, b"0")      # Windows locks a byte that exists
+            deadline = time.monotonic() + timeout
+            while True:
+                try:
+                    _try_lock(fd)
+                    break
+                except OSError:
+                    if time.monotonic() > deadline:
+                        raise TimeoutError(lock_file.name) from None
+                    time.sleep(0.02)
+            try:
+                yield
+            finally:
+                _unlock(fd)
+        finally:
+            os.close(fd)
 
 
 @contextlib.contextmanager

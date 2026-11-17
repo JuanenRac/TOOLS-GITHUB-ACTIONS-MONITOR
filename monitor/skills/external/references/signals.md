@@ -11,6 +11,7 @@ the repository, a link, how old it is and the next step. `GET /api/sentinel/pane
 | signal | what it says |
 | --- | --- |
 | `alerts.issues` | open issues of failed builds |
+| `alerts.silences` | silences by pattern (alerts.silences) past their review date, expired or without a date: each one needs a decision of a person |
 | `alerts.unresolved` | workflows red on the default branch (act when there is one) |
 | `connection` | online or offline since |
 | `health.central` | the central panel read without allowance and whether it is trusted |

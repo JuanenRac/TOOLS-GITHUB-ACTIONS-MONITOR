@@ -134,7 +134,7 @@ class EveryRefusal(unittest.TestCase):
         self.assertEqual(set(webhook.EVENTS), {"workflow_run", "workflow_job", "check_run", "push", "release", "check_suite", "ping"})
 
     def test_check_run_refreshes_the_repository_like_the_other_events_but_keeps_no_text(self):
-        code, _answer, repo = send(event="check_run", delivery="cccccccc-0001", body={"repository": {"name": "R"}, "check_run": {"name": "do not keep", "output": {"summary": "free text"}}})
+        code, _answer, repo = send(event="check_run", delivery="cccccccc-0001", body={"repository": {"name": "R", "full_name": "JuanenRac/R"}, "check_run": {"name": "do not keep", "output": {"summary": "free text"}}})
         self.assertEqual((code, repo), (200, "R"))
         self.assertIsNone(webhook.parse_event("check_run", json.dumps(BODY).encode()), "only workflow_run and workflow_job leave a record")
 

@@ -106,14 +106,16 @@ def _handlers(allow_private, resolver, use_proxy=False):
     return [CheckedProxy(), _handlers(True, resolver)[1], _handlers(True, resolver)[2]]
 
 
-def open_url(request, timeout=8, allow_private=False, resolver=None, use_proxy=False):
-    """urllib's urlopen with the rule above on every connection (the first one and every redirect). A refused destination raises Refused (an OSError)."""
-    return urllib.request.build_opener(*_handlers(allow_private, resolver, use_proxy)).open(request, timeout=timeout)
+def open_url(request, timeout=8, allow_private=False, resolver=None, use_proxy=False, follow_redirects=True):
+    """urllib's urlopen with the rule above on every connection (the first one and every redirect). A refused destination raises Refused (an OSError). With `follow_redirects=False` a redirect is an
+    answer (an HTTPError with its code): use it when the request carries a secret in a header, which urllib would send on to the new address."""
+    extra = [] if follow_redirects else [NoRedirect()]
+    return urllib.request.build_opener(*extra, *_handlers(allow_private, resolver, use_proxy)).open(request, timeout=timeout)
 
 
-def opener_for(allow_private=False, resolver=None, use_proxy=False):
+def opener_for(allow_private=False, resolver=None, use_proxy=False, follow_redirects=True):
     """A function with the shape of urlopen(request, timeout=...) that applies the rule."""
-    return lambda request, timeout=8: open_url(request, timeout, allow_private, resolver, use_proxy)
+    return lambda request, timeout=8: open_url(request, timeout, allow_private, resolver, use_proxy, follow_redirects)
 
 
 def _is_loopback_host(url):
@@ -144,12 +146,12 @@ def local_open(request, timeout=8, follow_redirects=True):
     return urllib.request.build_opener(*handlers).open(request, timeout=timeout)
 
 
-def open_plain(request, timeout=8, use_proxy=False):
+def open_plain(request, timeout=8, use_proxy=False, allow_private=True):
     """A call that carries a secret in its headers (the key of a provider of AI): a redirect is NOT followed (the key would go on to another address) and the proxies of the environment are not
     used unless `use_proxy` (`network.use_proxy`). A call to this computer never goes through a proxy. A redirect ends as an HTTPError with its code."""
     if _is_loopback_host(request.full_url if not isinstance(request, str) else request):
         return local_open(request, timeout=timeout, follow_redirects=False)
-    return urllib.request.build_opener(NoRedirect(), *_handlers(True, None, use_proxy)).open(request, timeout=timeout)
+    return urllib.request.build_opener(NoRedirect(), *_handlers(allow_private, None, use_proxy)).open(request, timeout=timeout)
 
 
 def reason_of(error):
