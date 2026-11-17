@@ -55,7 +55,7 @@
 
 ## 重放与洪泛
 
-被人截获后重新发送的有效签名请求会得到应答但不会被执行：每次投递都需要 `X-GitHub-Delivery` ID，已接受的 ID 以及已签名的请求体本身会在 `webhook.replay_seconds` 内被记住（默认一小时，内存有上限），因此被截获后换一个 ID 重发的请求仍是同一次投递，重复请求得到 `202 {"duplicate": true}`。（在 GitHub 页面手动重新投递会重复同一请求体，因此在此窗口内会被忽略。）一个仓库每分钟最多引发 `webhook.max_per_minute` 个被接受的事件，其余只应答并忽略。若载荷包含 `full_name`，其所有者必须是被监视的账户（或 `webhook.allowed_owners` 中的一个）。一个地址每分钟可发送 120 个签名正确的请求，以及 `webhook.max_bad_per_minute` 个签名无法验证的请求；两者在任何模式下都分开计数，因此垃圾请求永远不会耗尽真实投递的配额（使用 `listen.trusted_proxy` 时，地址为代理所看到的地址）。接受事件后，该仓库已保存的条件读取会被丢弃，并在下个周期重新读取，因此实时事件总会与 GitHub 对账。
+被人截获后重新发送的有效签名请求会得到应答但不会被执行：每次投递都需要 `X-GitHub-Delivery` ID，已接受的 ID 以及已签名的请求体本身会在 `webhook.replay_seconds` 内被记住（默认一小时，内存有上限），因此被截获后换一个 ID 重发的请求仍是同一次投递，重复请求得到 `202 {"duplicate": true}`。（在 GitHub 页面手动重新投递会重复同一请求体，因此在此窗口内会被忽略。）一个仓库每分钟最多引发 `webhook.max_per_minute` 个被接受的事件，其余只应答并忽略。若载荷包含 `full_name`，其所有者必须是被监视的账户（或 `webhook.allowed_owners` 中的一个）。一个地址每分钟可发送 120 个签名正确的请求，以及 `webhook.max_bad_per_minute` 个签名无法验证的请求；两者在任何模式下都分开计数，因此垃圾请求永远不会耗尽真实投递的配额（使用 `listen.trusted_proxy` 时，地址为代理所看到的地址）。接受事件后，该仓库已保存的条件读取会被丢弃，并在下个周期重新读取，因此实时事件总会与 GitHub 对账。 投递记忆保存在数据文件夹中的私有文件里(`webhook.persist_deliveries`,默认开启;有上限,损坏的文件视为空记忆),因此重启不会让被截获的投递重新生效。开启 `webhook.reject_stale`(默认关闭)后,自身时间早于 `webhook.replay_seconds` 的已签名工作流事件只会得到应答而被忽略。一个地址的签名正确请求的配额是 `webhook.max_verified_per_minute`(120)。`webhook.secret_env` 绝不接受系统变量或你的 GitHub 登录变量(PATH、GH_TOKEN 等),也不接受属于其他设置的密钥,且一个名称只能写在一个设置里。
 
 ## 实时视图检查清单
 

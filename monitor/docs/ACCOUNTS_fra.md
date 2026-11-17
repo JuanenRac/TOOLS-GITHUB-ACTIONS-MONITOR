@@ -55,7 +55,7 @@ Pour plusieurs écrans, ouvrez une fenêtre par vue, par exemple `?view=now&chro
 
 ## L'API
 
-`GET /api/accounts` est le résumé, `GET /api/accounts/<id>/status` un compte, et toute autre requête sous `/api/` va au compte nommé par `?account=<id>` ou l'en-tête `X-Account-Id` (le compte par défaut si aucun n'est donné). Un compte inconnu donne un 404. Les règles d'accès sont celles d'un moniteur seul : la même vérification d'hôte et d'origine, et le même jeton d'accès en mode réseau. Le jeton à usage unique d'une modification doit être demandé au même compte que celui auquel la modification est envoyée.
+`GET /api/accounts` est le résumé, `GET /api/accounts/<id>/status` un compte, et toute autre requête sous `/api/` va au compte nommé par `?account=<id>` ou l'en-tête `X-Account-Id` (le compte par défaut si aucun n'est donné). Un compte inconnu donne un 404. Les règles d'accès sont celles d'un moniteur seul : la même vérification d'hôte et d'origine, et le même jeton d'accès en mode réseau. Le jeton à usage unique d'une modification doit être demandé au même compte que celui auquel la modification est envoyée. En mode équipe, le superviseur dit au processus de chaque compte qui agit et avec quel rôle dans un contexte qu'il signe avec la clé donnée à ce processus (valable 30 secondes et pour ce seul compte) : les rôles sont donc décidés de la même façon dans chaque compte, le journal des actions suit `audit_log.maintainers_can_read` et `GET /api/v1/me` dit la vérité. Une route sous `/api/v1/` demande le rôle de la même route sans le préfixe.
 
 ## Un webhook pour tous
 

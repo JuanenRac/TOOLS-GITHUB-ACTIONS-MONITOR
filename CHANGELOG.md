@@ -21,6 +21,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 - **With several accounts the supervisor protects every answer against framing**, like the process of an account does.
 - **A cursor with a letter that is not ASCII is a plain 400, and any other failure of the versioned API is the error envelope of a 500 (`api.server_error`)** instead of a cut connection with a trace in the console.
 - **The versioned API asks for the access token before it says whether it is on, and a cursor belongs to who asked for it**: a visitor without credentials got a 404 from `/api/v1/` when the switch was off and a 401 when it was on, and the same cursor was valid for any person and account. Now the token comes first, and the cursor of one person or account is refused to another.
+- **The supervisor tells the process of each account, signed, who acts and with which role**: with several accounts the roles were not known to the account, so the log of actions ignored `audit_log.maintainers_can_read` and `GET /api/v1/me` said the team mode was off. The context is signed with the key of that process, is good for 30 seconds and for that account only, and without it the name of a user alone is not believed.
+- **Webhook deliveries are remembered after a restart, old events can be refused, and the allowance of good requests is a setting**: the memory is a bounded private file (`webhook.persist_deliveries`, on by default), `webhook.reject_stale` (off by default) answers and ignores a signed workflow event older than `webhook.replay_seconds`, and `webhook.max_verified_per_minute` (120) is the allowance of correctly signed requests of one address.
+- **Every setting that names a variable with a secret names only its own**: the key of the AI, the channels of notices, the webhook and the access token refuse the variables of the system and of the login to GitHub and the secrets that belong to another setting, and a name can be written in one setting only.
+- **The numbers of the hidden names on the wall screens follow an HMAC of the name**: with a key of the installation kept in a private file of the data folder (never in the configuration), only the hidden repositories are numbered, and the number says nothing about where a repository falls among the others.
 
 ### Fixed
 
@@ -28,8 +32,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 - **The batch way of the lookup of hidden workflows reads the listing of a repository once**: when the listing did not bring a workflow it was asked again in every turn and nothing was ever resolved. The listing is read once per repository inside the time the answers are kept, and what it did not bring goes one by one in the same turn.
 - **A question of the sentinel that failed waits before it is asked again**: the hidden workflows, the jobs of a red run and the permissions of a repository are asked again after 5 minutes, then 30, then 6 hours, and a repository whose permissions cannot be read goes to the end of the line, so it no longer keeps the other repositories from being read.
 - **The hourly budget of run lists (`sampling.api_budget_per_hour`) counts requests**: the second look at the default branch (`sampling.default_branch_probe`) is counted when the repositories of a cycle are chosen, and the duration of a re-run (`ci.rerun_timing`) is one request of the hour that is not made when the budget is spent.
-- **The runners are read from GitHub once every five minutes, not on every request to `/api/runners`**.
 - **The webhook guide says what the code does**: the repository is read again in the next cycle after an event, the names of the workflow, branch and job are kept as third-party text, and the live events can be read by whoever may open the page.
+- **No route that answers a GET reads GitHub any more**: the runners, the organisations of the account, the update notice and the allowance of every source are read by the cycle, and the routes show what was read (`/api/runners` and the status of the quota say they are pending until the first reading).
+- **The duration of a re-run has an allowance for each reading of each repository**: the count of three requests was shared by the threads of a cycle.
+- **The follow-up of the originals of forks keeps the requests of the hour across a restart and says how long one pass takes**: when it is longer than the time between readings the panel says that the follow-up never rests.
 
 ## [2.0.8]
 

@@ -20,6 +20,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 - **Con più account il supervisore protegge ogni risposta dall'inserimento in un frame**, come fa il processo di un account.
 - **Un cursore con una lettera non ASCII dà un normale 400, e qualsiasi altro errore dell'API versionata è la busta di errore di un 500 (`api.server_error`)** invece di una connessione interrotta con una traccia nella console.
 - **L'API versionata chiede il token di accesso prima di dire se è attiva, e un cursore appartiene a chi lo ha chiesto**: un visitatore senza credenziali riceveva un 404 da `/api/v1/` con l'interruttore spento e un 401 con l'interruttore acceso, e lo stesso cursore valeva per qualsiasi persona e account. Ora viene prima il token, e il cursore di una persona o di un account viene rifiutato a un altro.
+- **Il supervisore dice al processo di ogni account, con una firma, chi agisce e con quale ruolo**: con più account l'account non conosceva i ruoli, quindi il registro delle azioni ignorava `audit_log.maintainers_can_read` e `GET /api/v1/me` diceva che la modalità team era spenta. Il contesto è firmato con la chiave di quel processo, vale 30 secondi e solo per quell'account, e senza di esso il nome di un utente da solo non è creduto.
+- **Le consegne del webhook si ricordano dopo un riavvio, gli eventi vecchi si possono rifiutare e la quota delle richieste buone è un'impostazione**: la memoria è un file privato limitato (`webhook.persist_deliveries`, attivo di default), `webhook.reject_stale` (spento di default) risponde e ignora un evento di workflow firmato più vecchio di `webhook.replay_seconds`, e `webhook.max_verified_per_minute` (120) è la quota di richieste firmate correttamente di un indirizzo.
+- **Ogni impostazione che nomina una variabile con un segreto nomina solo la propria**: la chiave dell'IA, i canali degli avvisi, il webhook e il token di accesso rifiutano le variabili di sistema e dell'accesso a GitHub e i segreti di un'altra impostazione, e un nome può essere scritto in una sola impostazione.
+- **I numeri dei nomi nascosti sugli schermi a parete seguono un HMAC del nome**: con una chiave dell'installazione conservata in un file privato della cartella dei dati (mai nella configurazione), si numerano solo i repository nascosti e il numero non dice nulla su dove cade un repository tra gli altri.
 
 ### Corretto
 
@@ -27,8 +31,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 - **La via a blocchi della ricerca dei workflow nascosti legge l'elenco di un repository una sola volta**: quando l'elenco non portava un workflow lo si richiedeva a ogni giro e non si risolveva mai nulla. L'elenco si legge una volta per repository entro il tempo di conservazione delle risposte e ciò che non ha portato va uno per uno nello stesso giro.
 - **Una domanda della sentinella fallita aspetta prima di essere ripetuta**: i workflow nascosti, i job di un run rosso e i permessi di un repository si richiedono dopo 5 minuti, poi 30, poi 6 ore, e un repository i cui permessi non si leggono va in fondo alla coda, così non impedisce più la lettura degli altri.
 - **Il budget orario degli elenchi di run (`sampling.api_budget_per_hour`) conta richieste**: il secondo sguardo al branch predefinito (`sampling.default_branch_probe`) si conta quando si scelgono i repository di un ciclo, e la durata di una riesecuzione (`ci.rerun_timing`) è una richiesta dell'ora che non si fa quando il budget è esaurito.
-- **I runner si leggono da GitHub una volta ogni cinque minuti, non a ogni richiesta a `/api/runners`**.
 - **La guida del webhook dice ciò che fa il codice**: dopo un evento il repository viene riletto nel ciclo successivo, i nomi di workflow, branch e job si conservano come testo di terzi, e gli eventi dal vivo li legge chi può aprire la pagina.
+- **Nessuna route che risponde a un GET legge più GitHub**: i runner, le organizzazioni dell'account, l'avviso di aggiornamento e la quota di ogni fonte sono letti dal ciclo, e le route mostrano ciò che è stato letto (`/api/runners` e lo stato della quota dicono che sono in attesa fino alla prima lettura).
+- **La durata di una riesecuzione ha una quota per ogni lettura di ogni repository**: il conteggio di tre richieste era condiviso dai thread di un ciclo.
+- **Il seguito degli originali dei fork conserva le richieste dell'ora dopo un riavvio e dice quanto dura un giro**: quando è più del tempo tra due letture, il pannello dice che il seguito non riposa mai.
 
 ## [2.0.8]
 

@@ -17,3 +17,5 @@ Un account con centinaia di repository, molti fork o più organizzazioni consuma
 6. **Non affogare nel rumore.** Il controllo di igiene (`sentinel.hygiene.ruleset_mode` = `effective`, `sentinel.hygiene.skip`), quelli sui file delle release (`sentinel.surface.checks.release_assets.allow_empty`) e `sentinel.bots_apart` evitano che si accumulino controlli che non riguardano i tuoi repository.
 
 La scheda Quota mostra cosa resta a ogni fonte e quanto spende il monitor stesso.
+
+Il seguito degli originali dei fork (`upstream.enabled`) dice nel suo pannello quanto dura un giro di tutti i fork al ritmo di `upstream.requests_per_hour` e `upstream.forks_per_request`; quando è più di `upstream.refresh_hours` il seguito non riposa mai (727 fork a 8 per richiesta e 6 richieste all'ora richiedono 15,2 ore). Le richieste dell'ultima ora si conservano al riavvio, quindi un riavvio non restituisce la quota.

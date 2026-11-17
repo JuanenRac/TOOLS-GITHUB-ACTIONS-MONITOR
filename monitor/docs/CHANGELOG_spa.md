@@ -20,6 +20,10 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 - **Con varias cuentas el supervisor protege cada respuesta contra el enmarcado**, igual que el proceso de una cuenta.
 - **Un cursor con una letra que no es ASCII es un 400 normal, y cualquier otro fallo de la API versionada es el sobre de error de un 500 (`api.server_error`)** en vez de una conexión cortada con una traza en la consola.
 - **La API versionada pide el token de acceso antes de decir si está activa, y un cursor pertenece a quien lo pidió**: un visitante sin credenciales recibía un 404 de `/api/v1/` con el interruptor apagado y un 401 con él encendido, y el mismo cursor valía para cualquier persona y cuenta. Ahora va primero el token, y el cursor de una persona o cuenta se rechaza a otra.
+- **El supervisor dice al proceso de cada cuenta, firmado, quién actúa y con qué rol**: con varias cuentas la cuenta no conocía los roles, así que el registro de acciones ignoraba `audit_log.maintainers_can_read` y `GET /api/v1/me` decía que el modo equipo estaba apagado. El contexto se firma con la clave de ese proceso, vale 30 segundos y solo para esa cuenta, y sin él no se cree el nombre de un usuario por sí solo.
+- **Las entregas del webhook se recuerdan tras un reinicio, se pueden rechazar los eventos antiguos y el cupo de peticiones buenas es un ajuste**: la memoria es un fichero privado acotado (`webhook.persist_deliveries`, activado por defecto), `webhook.reject_stale` (apagado por defecto) responde e ignora un evento firmado de workflow más antiguo que `webhook.replay_seconds`, y `webhook.max_verified_per_minute` (120) es el cupo de peticiones con firma correcta de una dirección.
+- **Todo ajuste que nombra una variable con un secreto nombra solo la suya**: la clave de la IA, los canales de avisos, el webhook y el token de acceso rechazan las variables del sistema y del acceso a GitHub y los secretos que pertenecen a otro ajuste, y un nombre solo puede escribirse en un ajuste.
+- **Los números de los nombres ocultos en las pantallas de pared siguen un HMAC del nombre**: con una clave de la instalación guardada en un fichero privado de la carpeta de datos (nunca en la configuración), solo se numeran los repositorios ocultos y el número no dice nada de dónde cae un repositorio entre los demás.
 
 ### Corregido
 
@@ -27,8 +31,10 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 - **La vía por lote de la búsqueda de workflows ocultos lee el listado de un repositorio una vez**: cuando el listado no traía un workflow se volvía a pedir en cada vuelta y nunca se resolvía nada. El listado se lee una vez por repositorio dentro del tiempo que se guardan las respuestas y lo que no trajo va uno a uno en la misma vuelta.
 - **Una pregunta del centinela que falló espera antes de repetirse**: los workflows ocultos, los trabajos de un run rojo y los permisos de un repositorio se vuelven a preguntar a los 5 minutos, luego a los 30 y luego a las 6 horas, y un repositorio cuyos permisos no se pueden leer pasa al final de la cola, así que ya no impide que se lean los demás.
 - **El presupuesto por hora de listas de runs (`sampling.api_budget_per_hour`) cuenta peticiones**: la segunda mirada a la rama por defecto (`sampling.default_branch_probe`) se cuenta al elegir los repositorios de un ciclo, y la duración de una re-ejecución (`ci.rerun_timing`) es una petición de la hora que no se hace cuando el presupuesto está gastado.
-- **Los runners se leen de GitHub una vez cada cinco minutos, no en cada petición a `/api/runners`**.
 - **La guía del webhook dice lo que hace el código**: tras un evento el repositorio se vuelve a leer en el ciclo siguiente, los nombres del workflow, la rama y el trabajo se guardan como texto de terceros y los eventos en vivo los lee quien pueda abrir la página.
+- **Ninguna ruta que responde a un GET lee ya GitHub**: los runners, las organizaciones de la cuenta, el aviso de actualización y el cupo de cada fuente los lee el ciclo, y las rutas muestran lo leído (`/api/runners` y el estado de la cuota dicen que están pendientes hasta la primera lectura).
+- **La duración de una re-ejecución tiene un cupo para cada lectura de cada repositorio**: la cuenta de tres peticiones la compartían los hilos de un ciclo.
+- **El seguimiento de los originales de los forks conserva las peticiones de la hora tras un reinicio y dice cuánto dura una vuelta**: cuando es más que el tiempo entre lecturas, el panel dice que el seguimiento no descansa nunca.
 
 ## [2.0.8]
 

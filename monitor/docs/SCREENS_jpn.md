@@ -97,7 +97,7 @@
 | `screens.sound` | 新しい失敗でビープ音を鳴らします（既定でオフ）。 |
 | `screens.burn_in_protection` | 1分ごとに全体を数ピクセル動かします（既定でオン）。 |
 | `screens.night_dim` | `screens.night_dim_from_hour`（22）から `screens.night_dim_to_hour`（7）まで画面を暗くします。既定ではオフです。 |
-| `screens.show_repo_names` | all、public（既定：非公開リポジトリは private-1、private-2... と表示）、none（すべての名前を隠す）。他の人が見られる画面では public か none を使ってください。`repos` に手書きの一覧を使う場合、公開範囲は `discover_refresh_seconds` ごとにアカウントの一覧を 1 回読んで取得します。公開範囲を読めなかったリポジトリは非公開として扱います。 |
+| `screens.show_repo_names` | all、public（既定：非公開リポジトリは private-1、private-2... と表示）、none（すべての名前を隠す）。他の人が見られる画面では public か none を使ってください。`repos` に手書きの一覧を使う場合、公開範囲は `discover_refresh_seconds` ごとにアカウントの一覧を 1 回読んで取得します。公開範囲を読めなかったリポジトリは非公開として扱います。 番号(private-1 など)は非表示のリポジトリにだけ付き、データフォルダー内の非公開ファイルに保存されたインストール固有の鍵による名前の HMAC の順に並びます。そのため、リポジトリが全体のどこにあるかは分かりません。 |
 
 ### 表示するものと隠すもの
 

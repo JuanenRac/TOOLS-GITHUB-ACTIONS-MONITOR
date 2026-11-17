@@ -17,3 +17,5 @@ Una cuenta con cientos de repositorios, muchos forks o varias organizaciones gas
 6. **No te ahogues en ruido.** La comprobación de higiene (`sentinel.hygiene.ruleset_mode` = `effective`, `sentinel.hygiene.skip`), las de archivos de las releases (`sentinel.surface.checks.release_assets.allow_empty`) y `sentinel.bots_apart` evitan que se acumulen las comprobaciones que no se aplican a tus repositorios.
 
 La pestaña Cuota muestra lo que le queda a cada fuente y cuánto gasta el propio monitor.
+
+El seguimiento de los originales de los forks (`upstream.enabled`) dice en su panel cuánto dura una vuelta a todos los forks al ritmo de `upstream.requests_per_hour` y `upstream.forks_per_request`; cuando es más que `upstream.refresh_hours` el seguimiento no descansa nunca (727 forks a 8 por petición y 6 peticiones por hora duran 15,2 horas). Las peticiones de la última hora se conservan al reiniciar, así que un reinicio no devuelve el cupo.
