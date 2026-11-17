@@ -25,7 +25,15 @@ def is_network_error(text):
 
 
 TRANSIENT_RE = re.compile(r"(50[0234]|bad gateway|service unavailable|gateway time-?out|tls|ssl|handshake|unexpected eof|connection (?:reset|closed)|stream error|http2)", re.I)
+RETRY_BACKOFF = (30, 600)      # a repository that failed TRANSIENT_CYCLES times in a row is not read again at once: first after 30 seconds, doubling at each further failure, never later than 600 seconds
 TRANSIENT_CYCLES = 3      # a read that fails for a passing reason is only shown as an error after this many cycles in a row
+
+
+def retry_delay(fails):
+    """Seconds to leave a repository alone after `fails` reads in a row that failed: none for the first ones (a passing hiccup is repeated in the next cycle), then RETRY_BACKOFF doubling."""
+    if fails < TRANSIENT_CYCLES:
+        return 0
+    return min(RETRY_BACKOFF[1], RETRY_BACKOFF[0] * 2 ** (fails - TRANSIENT_CYCLES))
 
 
 def is_transient(text):

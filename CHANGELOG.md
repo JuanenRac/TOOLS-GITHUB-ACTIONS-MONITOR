@@ -25,6 +25,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 - **Webhook deliveries are remembered after a restart, old events can be refused, and the allowance of good requests is a setting**: the memory is a bounded private file (`webhook.persist_deliveries`, on by default), `webhook.reject_stale` (off by default) answers and ignores a signed workflow event older than `webhook.replay_seconds`, and `webhook.max_verified_per_minute` (120) is the allowance of correctly signed requests of one address.
 - **Every setting that names a variable with a secret names only its own**: the key of the AI, the channels of notices, the webhook and the access token refuse the variables of the system and of the login to GitHub and the secrets that belong to another setting, and a name can be written in one setting only.
 - **The numbers of the hidden names on the wall screens follow an HMAC of the name**: with a key of the installation kept in a private file of the data folder (never in the configuration), only the hidden repositories are numbered, and the number says nothing about where a repository falls among the others.
+- **The log of actions can be made a condition of the actions**: with `audit_log.required` on (off by default) an action that has to be recorded is refused with a 503 while the log cannot be written; the settings stay open so that it can be put right.
+- **The log of actions keeps a number of rotated files that you choose**: `audit_log.keep_generations` (5 by default, 1 to 20) keeps the old parts as `.1`, `.2` and so on, and the chain is checked across all of them.
 
 ### Fixed
 
@@ -36,6 +38,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 - **No route that answers a GET reads GitHub any more**: the runners, the organisations of the account, the update notice and the allowance of every source are read by the cycle, and the routes show what was read (`/api/runners` and the status of the quota say they are pending until the first reading).
 - **The duration of a re-run has an allowance for each reading of each repository**: the count of three requests was shared by the threads of a cycle.
 - **The follow-up of the originals of forks keeps the requests of the hour across a restart and says how long one pass takes**: when it is longer than the time between readings the panel says that the follow-up never rests.
+- **The calls of a tick of the Sentinel are one count for all its stages, and a repository whose reads keep failing waits**: the limit of a tick was applied to each stage by itself (150 calls in a tick of 70), and a repository the server answered with an error was read again in every cycle. Now the stages share the count and such a repository is left alone for 30 seconds, doubling up to 10 minutes.
 
 ## [2.0.8]
 

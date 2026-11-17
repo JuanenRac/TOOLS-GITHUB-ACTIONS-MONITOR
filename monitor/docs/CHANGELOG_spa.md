@@ -24,6 +24,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 - **Las entregas del webhook se recuerdan tras un reinicio, se pueden rechazar los eventos antiguos y el cupo de peticiones buenas es un ajuste**: la memoria es un fichero privado acotado (`webhook.persist_deliveries`, activado por defecto), `webhook.reject_stale` (apagado por defecto) responde e ignora un evento firmado de workflow más antiguo que `webhook.replay_seconds`, y `webhook.max_verified_per_minute` (120) es el cupo de peticiones con firma correcta de una dirección.
 - **Todo ajuste que nombra una variable con un secreto nombra solo la suya**: la clave de la IA, los canales de avisos, el webhook y el token de acceso rechazan las variables del sistema y del acceso a GitHub y los secretos que pertenecen a otro ajuste, y un nombre solo puede escribirse en un ajuste.
 - **Los números de los nombres ocultos en las pantallas de pared siguen un HMAC del nombre**: con una clave de la instalación guardada en un fichero privado de la carpeta de datos (nunca en la configuración), solo se numeran los repositorios ocultos y el número no dice nada de dónde cae un repositorio entre los demás.
+- **El registro de acciones puede ser condición de las acciones**: con `audit_log.required` activado (apagado por defecto) una acción que debe quedar registrada se rechaza con un 503 mientras el registro no se pueda escribir; los ajustes siguen abiertos para poder arreglarlo.
+- **El registro de acciones conserva los ficheros rotados que elijas**: `audit_log.keep_generations` (5 por defecto, de 1 a 20) conserva las partes antiguas como `.1`, `.2` y así, y la cadena se comprueba a través de todas.
 
 ### Corregido
 
@@ -35,6 +37,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 - **Ninguna ruta que responde a un GET lee ya GitHub**: los runners, las organizaciones de la cuenta, el aviso de actualización y el cupo de cada fuente los lee el ciclo, y las rutas muestran lo leído (`/api/runners` y el estado de la cuota dicen que están pendientes hasta la primera lectura).
 - **La duración de una re-ejecución tiene un cupo para cada lectura de cada repositorio**: la cuenta de tres peticiones la compartían los hilos de un ciclo.
 - **El seguimiento de los originales de los forks conserva las peticiones de la hora tras un reinicio y dice cuánto dura una vuelta**: cuando es más que el tiempo entre lecturas, el panel dice que el seguimiento no descansa nunca.
+- **Las llamadas de un tick del Centinela son una sola cuenta para todas sus etapas, y un repositorio cuyas lecturas siguen fallando espera**: el límite de un tick se aplicaba a cada etapa por separado (150 llamadas en un tick de 70) y un repositorio al que el servidor respondía con un error se leía de nuevo en cada ciclo. Ahora las etapas comparten la cuenta y ese repositorio se deja en paz 30 segundos, duplicando hasta 10 minutos.
 
 ## [2.0.8]
 

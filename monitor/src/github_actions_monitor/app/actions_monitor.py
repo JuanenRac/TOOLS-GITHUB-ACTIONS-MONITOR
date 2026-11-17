@@ -677,6 +677,7 @@ def parse_runs(repo, data):
     return runs
 
 
+AUDIT_REQUIRED_ROUTES = ("/api/alerts/mute", "/api/alerts/unmute")
 TUNED = {"refresh_seconds": None, "cold_refresh_seconds": None}
 MODE = modes.State()      # the working mode: normal unless you ask (memory only, unless modes.remember is on)
 MODE_SAID = [""]
@@ -798,6 +799,8 @@ def refresh_runs(repos, config, progress=None):
     slow = []             # the cold repositories whose slow turn has come: (name, cached entry)
     for repo in repos:
         entry = RUN_CACHE.get(repo)
+        if entry and entry.get("retry_at", 0) > now:      # it failed several times in a row: it waits (the old picture stays) and the others are read
+            continue
         hot = is_hot(repo, config, now)
         HOT_FORCED.discard(repo)
         if entry is None:
@@ -932,17 +935,18 @@ def note_read(repo, runs, error):
         RUN_CACHE[repo] = {"runs": runs, "at": time.time(), "full_at": time.time(), "error": None, "fails": 0, "head": HEADS_PENDING.pop(repo, "") or (entry or {}).get("head", "")}
         return
     fails = (entry or {}).get("fails", 0) + 1
+    retry_at = time.time() + resilience.retry_delay(fails)      # a repository that keeps failing is left alone for a while instead of being read in every cycle
     if resilience.is_transient(error) and fails < resilience.TRANSIENT_CYCLES:
         if entry:
-            entry.update({"fails": fails, "at": 0})      # the old picture stays and the read is repeated in the next cycle; nothing is shown yet
+            entry.update({"fails": fails, "at": 0, "retry_at": retry_at})      # the old picture stays and the read is repeated in the next cycle; nothing is shown yet
         else:
-            RUN_CACHE[repo] = {"runs": [], "at": 0, "error": None, "fails": fails}
+            RUN_CACHE[repo] = {"runs": [], "at": 0, "error": None, "fails": fails, "retry_at": retry_at}
         return
     error = short_error(error) or "gh failed"      # one line: no legal paragraph, no request id
     if entry:
-        entry.update({"error": error, "fails": fails})      # keep the old runs, report the problem
+        entry.update({"error": error, "fails": fails, "retry_at": retry_at})      # keep the old runs, report the problem
     else:
-        RUN_CACHE[repo] = {"runs": runs, "at": time.time(), "error": error, "fails": fails}
+        RUN_CACHE[repo] = {"runs": runs, "at": time.time(), "error": error, "fails": fails, "retry_at": retry_at}
 
 
 def run_jobs(repo, run_id):
@@ -2507,6 +2511,7 @@ class Handler(BaseHTTPRequestHandler):
         except OSError:
             pass
 
+    #: besides the routes of the table of audited_posts, the silences also leave a line of their own; the settings are not here on purpose: they must stay open to put the log right
     def do_POST(self):
         counted = CountedReader(self.rfile)
         self.rfile = counted
@@ -2514,8 +2519,12 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if not self.access_gate() or not auth_http.gate(self, LIVE_CONFIG or DEFAULTS, LITE["on"]):
                 return
-            from github_actions_monitor.security import audit_log
+            from github_actions_monitor.security import audit_log, audited_posts
             audit_log.take_note()
+            route = self.path.split("?")[0]
+            if (audited_posts.action_for(route) or route in AUDIT_REQUIRED_ROUTES) and not audit_log.writable(toolconfig.raw_config()):      # `audit_log.required`: an action that cannot be recorded is not done
+                self.json_reply({"ok": False, "error": "audit_log_required", "code": "audit_unwritable"}, 503)
+                return
             with i18n.use_language(self.request_language()):
                 self.handle_post()
             self.audit_post(self.path.split("?")[0])

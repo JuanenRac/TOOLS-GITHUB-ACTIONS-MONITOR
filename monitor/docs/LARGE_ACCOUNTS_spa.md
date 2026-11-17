@@ -19,3 +19,5 @@ Una cuenta con cientos de repositorios, muchos forks o varias organizaciones gas
 La pestaña Cuota muestra lo que le queda a cada fuente y cuánto gasta el propio monitor.
 
 El seguimiento de los originales de los forks (`upstream.enabled`) dice en su panel cuánto dura una vuelta a todos los forks al ritmo de `upstream.requests_per_hour` y `upstream.forks_per_request`; cuando es más que `upstream.refresh_hours` el seguimiento no descansa nunca (727 forks a 8 por petición y 6 peticiones por hora duran 15,2 horas). Las peticiones de la última hora se conservan al reiniciar, así que un reinicio no devuelve el cupo.
+
+Las llamadas de un tick del Centinela (`sentinel.max_calls_per_tick`) son una sola cuenta para todas sus etapas, y un repositorio cuyas lecturas fallan tres veces seguidas se deja en paz 30 segundos, duplicando hasta 10 minutos, mientras se leen los demás.

@@ -24,6 +24,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 - **Webhook-Lieferungen werden nach einem Neustart gemerkt, alte Ereignisse lassen sich ablehnen, und das Kontingent guter Anfragen ist eine Einstellung**: Das Gedächtnis ist eine begrenzte private Datei (`webhook.persist_deliveries`, standardmäßig an), `webhook.reject_stale` (standardmäßig aus) beantwortet und ignoriert ein signiertes Workflow-Ereignis, das älter als `webhook.replay_seconds` ist, und `webhook.max_verified_per_minute` (120) ist das Kontingent korrekt signierter Anfragen einer Adresse.
 - **Jede Einstellung, die eine Variable mit einem Geheimnis nennt, nennt nur ihre eigene**: Der Schlüssel der KI, die Kanäle der Hinweise, der Webhook und das Zugriffstoken lehnen Variablen des Systems und der GitHub-Anmeldung sowie Geheimnisse einer anderen Einstellung ab, und ein Name darf nur in einer Einstellung stehen.
 - **Die Nummern der verborgenen Namen auf den Wandbildschirmen folgen einem HMAC des Namens**: Mit einem Schlüssel der Installation in einer privaten Datei im Datenordner (nie in der Konfiguration) werden nur die verborgenen Repositorys nummeriert, und die Nummer sagt nichts darüber, wo ein Repository unter den anderen liegt.
+- **Das Aktionsprotokoll kann zur Bedingung der Aktionen gemacht werden**: Mit eingeschaltetem `audit_log.required` (standardmäßig aus) wird eine Aktion, die protokolliert werden muss, mit 503 abgelehnt, solange das Protokoll nicht geschrieben werden kann; die Einstellungen bleiben offen, damit man es beheben kann.
+- **Das Aktionsprotokoll behält so viele rotierte Dateien, wie Sie wählen**: `audit_log.keep_generations` (standardmäßig 5, 1 bis 20) bewahrt die alten Teile als `.1`, `.2` und so weiter auf, und die Kette wird über alle geprüft.
 
 ### Behoben
 
@@ -35,6 +37,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 - **Keine Route, die ein GET beantwortet, liest noch GitHub**: Die Runner, die Organisationen des Kontos, der Hinweis auf Aktualisierungen und das Kontingent jeder Quelle werden vom Zyklus gelesen, und die Routen zeigen das Gelesene (`/api/runners` und der Status des Kontingents sagen bis zur ersten Lesung, dass sie ausstehen).
 - **Die Dauer einer Wiederholung hat ein Kontingent für jede Lesung jedes Repositorys**: Die Zählung von drei Anfragen teilten sich die Threads eines Zyklus.
 - **Die Verfolgung der Originale von Forks behält die Anfragen der Stunde über einen Neustart und sagt, wie lange ein Durchgang dauert**: Ist er länger als die Zeit zwischen den Lesungen, sagt die Anzeige, dass die Verfolgung nie ruht.
+- **Die Aufrufe eines Ticks des Wächters sind eine Zählung für alle Stufen, und ein Repository, dessen Lesungen weiter fehlschlagen, wartet**: Das Limit eines Ticks galt für jede Stufe einzeln (150 Aufrufe in einem Tick von 70), und ein Repository, auf das der Server mit einem Fehler antwortete, wurde in jedem Zyklus erneut gelesen. Jetzt teilen die Stufen die Zählung, und ein solches Repository wird 30 Sekunden in Ruhe gelassen, bis auf 10 Minuten verdoppelt.
 
 ## [2.0.8]
 

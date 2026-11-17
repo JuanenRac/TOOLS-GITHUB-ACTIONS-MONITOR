@@ -24,6 +24,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 - **Le consegne del webhook si ricordano dopo un riavvio, gli eventi vecchi si possono rifiutare e la quota delle richieste buone è un'impostazione**: la memoria è un file privato limitato (`webhook.persist_deliveries`, attivo di default), `webhook.reject_stale` (spento di default) risponde e ignora un evento di workflow firmato più vecchio di `webhook.replay_seconds`, e `webhook.max_verified_per_minute` (120) è la quota di richieste firmate correttamente di un indirizzo.
 - **Ogni impostazione che nomina una variabile con un segreto nomina solo la propria**: la chiave dell'IA, i canali degli avvisi, il webhook e il token di accesso rifiutano le variabili di sistema e dell'accesso a GitHub e i segreti di un'altra impostazione, e un nome può essere scritto in una sola impostazione.
 - **I numeri dei nomi nascosti sugli schermi a parete seguono un HMAC del nome**: con una chiave dell'installazione conservata in un file privato della cartella dei dati (mai nella configurazione), si numerano solo i repository nascosti e il numero non dice nulla su dove cade un repository tra gli altri.
+- **Il registro delle azioni può diventare una condizione delle azioni**: con `audit_log.required` attivo (spento di default) un'azione che deve essere registrata viene rifiutata con un 503 finché il registro non si può scrivere; le impostazioni restano aperte per poterlo sistemare.
+- **Il registro delle azioni conserva il numero di file ruotati che scegli**: `audit_log.keep_generations` (5 di default, da 1 a 20) conserva le parti vecchie come `.1`, `.2` e così via, e la catena si verifica su tutte.
 
 ### Corretto
 
@@ -35,6 +37,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 - **Nessuna route che risponde a un GET legge più GitHub**: i runner, le organizzazioni dell'account, l'avviso di aggiornamento e la quota di ogni fonte sono letti dal ciclo, e le route mostrano ciò che è stato letto (`/api/runners` e lo stato della quota dicono che sono in attesa fino alla prima lettura).
 - **La durata di una riesecuzione ha una quota per ogni lettura di ogni repository**: il conteggio di tre richieste era condiviso dai thread di un ciclo.
 - **Il seguito degli originali dei fork conserva le richieste dell'ora dopo un riavvio e dice quanto dura un giro**: quando è più del tempo tra due letture, il pannello dice che il seguito non riposa mai.
+- **Le chiamate di un tick della Sentinella sono un solo conteggio per tutte le sue fasi, e un repository le cui letture continuano a fallire aspetta**: il limite di un tick si applicava a ogni fase da sola (150 chiamate in un tick da 70) e un repository a cui il server rispondeva con un errore veniva riletto a ogni ciclo. Ora le fasi condividono il conteggio e quel repository viene lasciato in pace 30 secondi, raddoppiando fino a 10 minuti.
 
 ## [2.0.8]
 

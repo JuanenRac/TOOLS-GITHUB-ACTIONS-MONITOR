@@ -14,7 +14,7 @@ from pathlib import Path
 from github_actions_monitor.security import private_io
 from github_actions_monitor.storage import locks
 
-DEFAULTS = {"enabled": True, "max_mb": 10, "maintainers_can_read": False}
+DEFAULTS = {"enabled": True, "max_mb": 10, "maintainers_can_read": False, "required": False, "keep_generations": 5}
 FILE_NAME = "audit_actions.jsonl"
 SECRET_KEY = re.compile(r"(?i)(token|passw|secret|key|cookie|authorization|credential|bearer|hash|salt|csrf|session)")
 ACTION_RE = re.compile(r"^[a-z][a-z0-9_.-]{1,39}\Z")
@@ -44,9 +44,12 @@ def settings(config):
     """The settings with their defaults; a value of the wrong type or out of range is replaced by the default."""
     user = (config or {}).get("audit_log") if isinstance((config or {}).get("audit_log"), dict) else {}
     out = dict(DEFAULTS)
-    for key in ("enabled", "maintainers_can_read"):
+    for key in ("enabled", "maintainers_can_read", "required"):
         if isinstance(user.get(key), bool):
             out[key] = user[key]
+    value = user.get("keep_generations")
+    if isinstance(value, int) and not isinstance(value, bool) and 1 <= value <= 20:
+        out["keep_generations"] = value
     value = user.get("max_mb")
     if isinstance(value, int) and not isinstance(value, bool) and 1 <= value <= 500:
         out["max_mb"] = value
@@ -117,6 +120,47 @@ def _tail_hash(target):
     return ""
 
 
+def generation(where, number):
+    return where.with_name(where.name + "." + str(number))
+
+
+def rotate(where, keep):
+    """The active file becomes `.1`, the old `.1` becomes `.2` and so on up to `keep` rotated files (`audit_log.keep_generations`); what is older than that goes (also the generations a smaller `keep` leaves behind)."""
+    for number in range(21, keep, -1):
+        try:
+            generation(where, number).unlink()
+        except OSError:
+            pass
+    for number in range(keep - 1, 0, -1):
+        if generation(where, number).exists():
+            os.replace(generation(where, number), generation(where, number + 1))
+    os.replace(where, generation(where, 1))
+
+
+def writable(config):
+    """True when an action may go on: always while `audit_log.required` is off; with it on, only when the log of actions can be written right now (the folder exists, the file opens for appending, the lock
+    between processes can be taken). A failure is counted like a line that could not be written."""
+    cfg = settings(config)
+    if not cfg["required"] or not cfg["enabled"]:
+        return True
+    where = path()
+    try:
+        with _lock:
+            private_io.private_dir(where.parent)
+            with locks.process_lock(where):
+                private_io.open_append(where).close()
+        return True
+    except OSError as error:
+        STATS["write_failures"] += 1
+        STATS["last_write_error_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        try:
+            from github_actions_monitor.app import degraded
+            degraded.note("audit_log", error)
+        except Exception:   # noqa: BLE001
+            pass
+        return False
+
+
 def record(config, action, user="", role="", account="", target="", result="ok", details=None, now=None, force=False):
     """Appends one line. `target` is a short identifier (a setting name, an alert code, a user name), `details` a small structure that is cleaned. Returns the line, or None when it is off or could not be written.
     `force` writes it even when the log is switched off (the change that switches it off is the last thing it records)."""
@@ -134,7 +178,7 @@ def record(config, action, user="", role="", account="", target="", result="ok",
             private_io.private_dir(where.parent)
             with locks.process_lock(where):      # the supervisor and the accounts may append to the same file: one at a time, each one chained to the line that is really last
                 if where.exists() and where.stat().st_size > cfg["max_mb"] * 1_000_000:
-                    os.replace(where, where.with_name(where.name + ".1"))
+                    rotate(where, cfg.get("keep_generations", DEFAULTS["keep_generations"]))
                 entry["prev"] = _tail_hash(where)
                 entry["hash"] = _digest(entry["prev"], {k: v for k, v in entry.items() if k != "hash"})
                 with private_io.open_append(where) as handle:
@@ -206,7 +250,8 @@ def verify(target=None):
     `broken_at` is the 1-based line, inside `segment` ("rotated" or "active"), that does not follow from the one before or does not hash to what it says. `complete` is False when the chain does not begin at its
     first link (the `.1` that came before was replaced by a later rotation, or was deleted): what is there is whole but it is not all the history."""
     where = Path(target) if target else path()
-    parts = [(name, lines) for name, lines in (("rotated", _read_lines(where.with_name(where.name + ".1"))), ("active", _read_lines(where))) if lines]
+    files = [("rotated", _read_lines(generation(where, number))) for number in range(21, 0, -1)] + [("active", _read_lines(where))]      # the oldest first
+    parts = [(name, lines) for name, lines in files if lines]
     previous, total, complete = None, 0, None
     for name, lines in parts:
         broken, count, previous, first = _walk(lines, previous)

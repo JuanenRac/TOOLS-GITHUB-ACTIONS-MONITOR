@@ -24,6 +24,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 - **Les livraisons du webhook sont mémorisées après un redémarrage, les vieux événements peuvent être refusés et le quota de bonnes requêtes est un réglage** : la mémoire est un fichier privé borné (`webhook.persist_deliveries`, actif par défaut), `webhook.reject_stale` (désactivé par défaut) répond et ignore un événement de workflow signé plus ancien que `webhook.replay_seconds`, et `webhook.max_verified_per_minute` (120) est le quota de requêtes correctement signées d'une adresse.
 - **Tout réglage qui nomme une variable avec un secret ne nomme que la sienne** : la clé de l'IA, les canaux d'avis, le webhook et le jeton d'accès refusent les variables du système et de la connexion à GitHub ainsi que les secrets d'un autre réglage, et un nom ne peut être écrit que dans un seul réglage.
 - **Les numéros des noms masqués sur les écrans muraux suivent un HMAC du nom** : avec une clé de l'installation gardée dans un fichier privé du dossier de données (jamais dans la configuration), seuls les dépôts masqués sont numérotés, et le numéro ne dit rien de la place d'un dépôt parmi les autres.
+- **Le journal des actions peut devenir une condition des actions** : avec `audit_log.required` actif (désactivé par défaut), une action qui doit être enregistrée est refusée avec un 503 tant que le journal ne peut pas être écrit ; les réglages restent ouverts pour pouvoir le corriger.
+- **Le journal des actions garde le nombre de fichiers tournés que vous choisissez** : `audit_log.keep_generations` (5 par défaut, de 1 à 20) conserve les anciennes parties comme `.1`, `.2` et ainsi de suite, et la chaîne est vérifiée à travers toutes.
 
 ### Corrigé
 
@@ -35,6 +37,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 - **Aucune route qui répond à un GET ne lit plus GitHub** : les runners, les organisations du compte, l'avis de mise à jour et le quota de chaque source sont lus par le cycle, et les routes montrent ce qui a été lu (`/api/runners` et l'état du quota disent qu'ils sont en attente jusqu'à la première lecture).
 - **La durée d'une ré-exécution a un quota pour chaque lecture de chaque dépôt** : le compte de trois requêtes était partagé par les threads d'un cycle.
 - **Le suivi des originaux des forks garde les requêtes de l'heure après un redémarrage et dit combien dure un tour** : quand c'est plus que le temps entre deux lectures, le panneau dit que le suivi ne se repose jamais.
+- **Les appels d'un tick de la Sentinelle forment un seul décompte pour toutes ses étapes, et un dépôt dont les lectures échouent toujours attend** : la limite d'un tick s'appliquait à chaque étape séparément (150 appels dans un tick de 70), et un dépôt auquel le serveur répondait par une erreur était relu à chaque cycle. Désormais les étapes partagent le décompte et ce dépôt est laissé tranquille 30 secondes, en doublant jusqu'à 10 minutes.
 
 ## [2.0.8]
 

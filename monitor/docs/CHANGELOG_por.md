@@ -24,6 +24,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 - **As entregas do webhook memorizam-se após um reinício, os eventos antigos podem ser recusados e a quota de pedidos bons é uma definição**: a memória é um ficheiro privado limitado (`webhook.persist_deliveries`, ligado por omissão), `webhook.reject_stale` (desligado por omissão) responde e ignora um evento de workflow assinado mais antigo do que `webhook.replay_seconds`, e `webhook.max_verified_per_minute` (120) é a quota de pedidos com assinatura correta de um endereço.
 - **Toda a definição que indica uma variável com um segredo indica só a sua**: a chave da IA, os canais de avisos, o webhook e o token de acesso recusam as variáveis do sistema e do acesso ao GitHub e os segredos de outra definição, e um nome só pode ser escrito numa definição.
 - **Os números dos nomes ocultos nos ecrãs de parede seguem um HMAC do nome**: com uma chave da instalação guardada num ficheiro privado da pasta de dados (nunca na configuração), só se numeram os repositórios ocultos, e o número nada diz sobre onde um repositório cai entre os outros.
+- **O registo de ações pode ser condição das ações**: com `audit_log.required` ligado (desligado por omissão), uma ação que tem de ficar registada é recusada com um 503 enquanto o registo não puder ser escrito; as definições continuam abertas para o poder corrigir.
+- **O registo de ações guarda os ficheiros rodados que escolher**: `audit_log.keep_generations` (5 por omissão, de 1 a 20) guarda as partes antigas como `.1`, `.2` e assim por diante, e a cadeia é verificada através de todas.
 
 ### Corrigido
 
@@ -35,6 +37,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 - **Nenhuma rota que responde a um GET lê já o GitHub**: os runners, as organizações da conta, o aviso de atualização e a quota de cada fonte são lidos pelo ciclo, e as rotas mostram o que foi lido (`/api/runners` e o estado da quota dizem que estão pendentes até à primeira leitura).
 - **A duração de uma reexecução tem uma quota para cada leitura de cada repositório**: a contagem de três pedidos era partilhada pelos threads de um ciclo.
 - **O acompanhamento dos originais dos forks guarda os pedidos da hora após um reinício e diz quanto demora uma volta**: quando é mais do que o tempo entre leituras, o painel diz que o acompanhamento nunca descansa.
+- **As chamadas de um tick do Sentinela são uma única contagem para todas as suas fases, e um repositório cujas leituras continuam a falhar espera**: o limite de um tick aplicava-se a cada fase por si (150 chamadas num tick de 70) e um repositório a que o servidor respondia com um erro era lido de novo a cada ciclo. Agora as fases partilham a contagem e esse repositório é deixado em paz 30 segundos, duplicando até 10 minutos.
 
 ## [2.0.8]
 

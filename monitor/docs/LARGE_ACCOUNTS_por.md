@@ -19,3 +19,5 @@ Uma conta com centenas de repositórios, muitos forks ou várias organizações 
 O separador Quota mostra o que resta a cada fonte e quanto gasta o próprio monitor.
 
 O acompanhamento dos originais dos forks (`upstream.enabled`) diz no seu painel quanto demora uma volta a todos os forks ao ritmo de `upstream.requests_per_hour` e `upstream.forks_per_request`; quando é mais do que `upstream.refresh_hours`, o acompanhamento nunca descansa (727 forks a 8 por pedido e 6 pedidos por hora demoram 15,2 horas). Os pedidos da última hora guardam-se ao reiniciar, pelo que um reinício não devolve a quota.
+
+As chamadas de um tick do Sentinela (`sentinel.max_calls_per_tick`) são uma única contagem para todas as suas fases, e um repositório cujas leituras falham três vezes seguidas é deixado em paz 30 segundos, duplicando até 10 minutos, enquanto se leem os outros.
