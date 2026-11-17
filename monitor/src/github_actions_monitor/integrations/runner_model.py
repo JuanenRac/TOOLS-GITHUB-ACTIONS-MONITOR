@@ -21,7 +21,7 @@ from datetime import datetime, timezone
 from github_actions_monitor import i18n
 
 KINDS = ("hosted", "large", "thirdparty", "selfhosted", "unknown")
-DEFAULT_THIRDPARTY = ["blacksmith", "buildjet", "namespace-profile", "depot", "warpbuild", "ubicloud", "runs-on", "actuated", "cirrus-runners"]
+DEFAULT_THIRDPARTY = ["blacksmith", "buildjet", "namespace-profile", "depot", "warpbuild", "ubicloud", "runs-on", "actuated", "cirrus-runners", "codspeed"]
 LABEL_RE = re.compile(r"^[A-Za-z0-9._*?=/-]{1,60}\Z")
 CORES_RE = re.compile(r"-\d{1,3}-cores?\b")
 OS_RE = re.compile(r"^(ubuntu|windows|macos|linux)")

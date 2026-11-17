@@ -61,6 +61,12 @@ def is_dynamic(run):
     return run.get("event") == "dynamic" or run.get("dynamic") is True or str(run.get("path") or "").startswith("dynamic/")
 
 
+def is_orphan_workflow(item):
+    """A workflow of the list of GitHub whose file was deleted: its history is still there (state `active`) but its `path` is empty. It has no file to read, to lint or to enable, and having no new
+    runs is not a sign of abandon: it is left out of the lists that need a file."""
+    return isinstance(item, dict) and item.get("path") == ""
+
+
 def service_name(path, name=""):
     """Which service of GitHub a `dynamic/...` workflow is: dependabot (the updates), graph (the dependency graph and its submissions), copilot (review and agent), codeql (the default setup) or other."""
     text = (str(path or "") + " " + str(name or "")).lower()

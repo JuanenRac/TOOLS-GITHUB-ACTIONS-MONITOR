@@ -596,7 +596,8 @@
         "ubicloud",
         "runs-on",
         "actuated",
-        "cirrus-runners"
+        "cirrus-runners",
+        "codspeed"
       ],
       "large_labels": [],
       "self_labels": [],
