@@ -176,7 +176,7 @@ def add_model_call(store, cfg):
 
 
 def add_model_usage(store, cfg, tokens_in, tokens_out, cost):
-    with store.lock, LOCK:
+    with store.exclusive(), LOCK:
         usage = _usage(store)
         row = usage["models"].setdefault(label_of(cfg), {"calls": 0, "cost": 0.0, "tokens_in": 0, "tokens_out": 0})
         row["tokens_in"] = row.get("tokens_in", 0) + min(max(int(tokens_in or 0), 0), sentinel_ai.MAX_REPORTED_TOKENS)

@@ -21,8 +21,10 @@ Safety rules (all enforced here, tested in tests/test_sentinel.py):
   - a daily cap of provider calls and a cache per input (same input = no new call);
   - the output is cut, URLs are defused and the verdict is forced into a closed list.
 """
+import contextlib
 import hashlib
 import json
+import logging
 import os
 import re
 import secrets as _secrets
@@ -37,7 +39,7 @@ from urllib.parse import urlparse
 from github_actions_monitor import i18n
 from github_actions_monitor.security import netguard, private_io
 from github_actions_monitor.security.redactor import redact as _redact
-from github_actions_monitor.storage import state_io
+from github_actions_monitor.storage import locks, state_io
 
 from github_actions_monitor.util import paths
 CACHE_FILE = paths.place("sentinel_ai_cache.json")
@@ -168,6 +170,7 @@ class Store:
     def __init__(self, path=CACHE_FILE):
         self.path = Path(path)
         self.lock = threading.RLock()
+        self._depth = 0      # how many `exclusive()` blocks of this thread are open (the lock of the system is taken by the first)
         try:
             self.data = state_io.load_json(self.path)
         except (OSError, ValueError):
@@ -183,6 +186,48 @@ class Store:
     @staticmethod
     def today():
         return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    def sync(self):
+        """Reads the file again: what another process wrote (its calls of the day, its table, its catalogue) is what counts; only the answers kept in memory and not yet written are added to it."""
+        try:
+            fresh = state_io.load_json(self.path)
+        except (OSError, ValueError):
+            return
+        if not isinstance(fresh, dict):
+            return
+        entries = fresh.get("entries") if isinstance(fresh.get("entries"), dict) else {}
+        for key, value in self.data.get("entries", {}).items():
+            entries.setdefault(key, value)
+        fresh["entries"] = entries
+        fresh.setdefault("day", "")
+        fresh.setdefault("count", 0)
+        self.data = fresh
+
+    @contextlib.contextmanager
+    def exclusive(self):
+        """Read, change and write the file as ONE step for every thread and every process that shares it (a lock of the operating system, see storage/locks.py): two processes can no longer each make
+        their own quota. Nested blocks of the same thread only open the outer one. When the lock cannot be taken in time the block runs with the lock of this process only."""
+        with self.lock:
+            if self._depth:
+                yield
+                return
+            self._depth = 1
+            stack = contextlib.ExitStack()
+            try:
+                taken = True
+                try:
+                    stack.enter_context(locks.os_lock(self.path))
+                except TimeoutError:
+                    taken = False
+                    logging.getLogger("github_actions_monitor.sentinel_ai").warning("the store of the AI is held by another process: the block runs without the lock between processes")
+                with stack:
+                    if taken:
+                        self.sync()
+                    yield
+                    if taken:
+                        self.save()
+            finally:
+                self._depth = 0
 
     def used_today(self):
         return self.data["count"] if self.data["day"] == self.today() else 0
@@ -459,7 +504,7 @@ def explain(kind, data, cfg, store, transport=None, task=None):
             continue
         if not last and cfg.get("fallback_after_seconds"):
             ccfg["timeout_seconds"] = min(ccfg["timeout_seconds"], int(cfg["fallback_after_seconds"]))
-        with store.lock:
+        with store.exclusive():      # for the threads and for the other processes that share the file
             if store.used_today() >= cfg["daily_limit"]:
                 failed.append({"model": cand["label"], "reason": "daily_cap"})
                 break
@@ -469,7 +514,6 @@ def explain(kind, data, cfg, store, transport=None, task=None):
                 continue
             store.add_call()  # counted before the call: a failing provider also spends the cap
             ai_chain.add_model_call(store, ccfg)
-            store.save()
         piece = clean if len(clean) <= ccfg["max_input_chars"] else sanitize_text(clean, ccfg["max_input_chars"], keep="tail" if kind == "build" else "head")
         system, user = build_prompt(kind, piece, _secrets.token_hex(6), cfg.get("answer_language") or None, lesson, skill)
         _USAGE.value = None
