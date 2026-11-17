@@ -132,16 +132,23 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `central.source` (secure) | `"off"` | quota | Central panel as a base line |
 | `ci.automation_counts` | `false` | sentinel | Count automation workflows |
 | `ci.count_fork_runs` | `false` | sentinel | Count runs of forks |
+| `ci.dormant_repos` | `true` | sentinel | Count dormant and inactive repositories apart |
 | `ci.extra_branches` | `[]` | sentinel | Maintenance branches to watch |
 | `ci.failed_jobs.enabled` | `false` | sentinel | Show which jobs of a red run failed |
 | `ci.failed_jobs.group_by` | `"auto"` | sentinel | Group jobs by |
 | `ci.failed_jobs.max_per_cycle` | `4` | sentinel | Runs read per cycle |
+| `ci.fork_own_ci_days` | `90` | sentinel | Days of own CI that a fork needs |
+| `ci.forks_need_own_ci` | `true` | sentinel | Judge only the forks that have a CI of their own |
 | `ci.group.min` | `2` | sentinel | Workflows needed for a shared cause |
 | `ci.group.reusable` | `false` | sentinel | Group reds by shared workflow |
 | `ci.inactive_days` | `90` | sentinel | Days until a workflow is inactive |
+| `ci.red_age_days` | `30` | sentinel | Days until a red ages |
+| `ci.red_ages` | `true` | sentinel | A red nobody attends to ages |
 | `ci.red_events` | `["push", "schedule", "workflow_dispatch", "merge_group"]` | sentinel | Events that can make a branch red |
 | `ci.rerun_timing` | `false` | sentinel | Ask GitHub for the duration of re-runs |
 | `ci.stuck.awaiting_stuck` | `true` | sentinel | A run waiting for approval can be stuck |
+| `ci.stuck.ghost_days` | `7` | sentinel | Days in the queue until a run is a ghost |
+| `ci.stuck.ghost_enabled` | `true` | sentinel | Tell apart runs queued for days |
 | `ci.stuck.learned` | `false` | sentinel | Learn the limit of each workflow |
 | `ci.stuck.margin` | `2.0` | sentinel | Margin over that duration |
 | `ci.stuck.max_minutes` | `720` | sentinel | Largest learned limit |

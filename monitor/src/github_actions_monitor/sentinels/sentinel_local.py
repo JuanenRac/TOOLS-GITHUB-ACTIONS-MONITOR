@@ -41,6 +41,7 @@ from github_actions_monitor.integrations import remote_workflows
 from github_actions_monitor.sentinels import readiness
 from github_actions_monitor.data_pipeline import paging
 from github_actions_monitor.data_pipeline import redrule
+from github_actions_monitor.data_pipeline import fork_ci
 from github_actions_monitor.sentinels import roadmap_a9
 from github_actions_monitor.sentinels import sentinel_ai
 import sys as _sys
@@ -78,11 +79,11 @@ DEFAULTS = {
     "hygiene_seconds": 21600, "max_calls_per_tick": 70, "budget_per_hour": 600, "workers": 8,
     "candidate_days": 2.0, "pending_sign_hours": 24, "notify_command": [], "candidate_min_entries": 1, "stale_pr_days": 7, "hot_hours": 3,
     "required_files": [["README.md"], ["LICENSE", "LICENSE.md", "LICENSE.txt", "LICENSE-APACHE", "LICENSE-MIT", "COPYING"], ["CHANGELOG.md"], ["SECURITY.md"]],
-    # hygiene (A6): how strict it is. ruleset_mode "name" = a ruleset whose name matches ruleset_names (patterns, ACTIVE) must exist (the old rule); "effective" = the default
+    # hygiene (A6): how strict it is. ruleset_mode "name" = a ruleset whose name matches ruleset_names (patterns, ACTIVE) must exist (the old rule); "effective" (the default) = the default
     # branch is protected when GitHub reports an effective rule or a branch protection for it (public endpoints, no admin needed), whatever the ruleset is called; "off" = not checked.
     # skip = checks to leave out (ruleset, label, file, sha, allowed, schedule). community_fallback: a file missing in the repository still counts when the community profile
     # of GitHub or the organisation's `.github` repository provides it. What the token cannot know is shown as "not evaluable", never as green and never as a warning.
-    "hygiene": {"ruleset_mode": "name", "ruleset_names": ["protect-main"], "skip": [], "community_fallback": False},
+    "hygiene": {"ruleset_mode": "effective", "ruleset_names": ["protect-main"], "skip": [], "community_fallback": False},
     "skip_candidate_prefixes": [], "min_rate_remaining": 800,
     # dependency_bots: the accounts whose pull requests are the dependency updates of A4 (a login with `app/` before it or `[bot]` after it counts too).
     "dependency_bots": list(DEPENDENCY_BOTS),
@@ -183,11 +184,23 @@ def a2_from_listing(items, names):
     for item in items if isinstance(items, list) else []:
         if not isinstance(item, dict):
             continue
-        base = str(item.get("path") or "").split("@")[0].rsplit("/", 1)[-1]
-        if base in names:
-            grouped.setdefault(base, []).append({"databaseId": item.get("id"), "name": item.get("name"), "conclusion": item.get("conclusion"), "status": item.get("status"),
+        raw_path = str(item.get("path") or "").split("@")[0]
+        base = raw_path.rsplit("/", 1)[-1]
+        if base in names and not raw_path.startswith("dynamic/") and a2_origin_counts(item.get("event"), item.get("head_repository"), item.get("repository")):
+            grouped.setdefault(base, []).append({"databaseId": item.get("id"), "name": item.get("name"), "conclusion": item.get("conclusion"), "status": item.get("status"), "event": item.get("event"),
                                                  "createdAt": item.get("created_at"), "startedAt": item.get("run_started_at"), "url": item.get("html_url"), "headSha": item.get("head_sha")})
     return {name: first for name, first in ((n, a2_pick_concluded(runs)) for n, runs in grouped.items()) if first}
+
+
+def a2_origin_counts(event, head=None, base=None):
+    """True when a run found by the lookups of A2 may decide the colour of the default branch: its event is one of `ci.red_events` and, when the listing says where its head lives, it is not
+    the pull request of a fork. `exclude_pull_requests=true` of GitHub does not remove those (a fork's run carries no pull request), so the filter is made here with the same rule as redrule.py.
+    A record with no event (a cache written before) counts, as before."""
+    run = {"event": event or None}
+    head_name, base_name = (head or {}).get("full_name"), (base or {}).get("full_name")
+    if head_name and base_name and str(head_name).lower() != str(base_name).lower():
+        run["fork"] = True
+    return redrule.origin_counts(run)
 
 
 A2_RESOLVE_DEPTH = 10                      # completed runs of one workflow asked for; the first with a real conclusion is the one that counts
@@ -202,6 +215,8 @@ def a2_pick_concluded(answer):
             continue
         conclusion = item.get("conclusion") or None
         if (item.get("status") or "completed") != "completed" or not conclusion or conclusion in A2_IGNORED_CONCLUSIONS:
+            continue
+        if not a2_origin_counts(item.get("event")):      # a comment, an issue or a pull request never decides: the walk goes on to the previous run
             continue
         return item
     return None
@@ -240,7 +255,7 @@ def a2_resolved_runs(resolved, branches, now_ts, ttl):
         repo, _, name = key.partition("|")
         out.setdefault(repo, []).append({"repo": repo, "id": entry.get("id"), "name": entry.get("name") or name, "path": name, "branch": (branches or {}).get(repo) or entry.get("branch") or "main",
                                          "status": entry.get("status") or "completed", "conclusion": entry.get("conclusion"), "started": entry.get("started"), "url": entry.get("url"),
-                                         "sha": entry.get("sha") or "", "seconds": None, "actor": "", "event": None, "title": ""})
+                                         "sha": entry.get("sha") or "", "seconds": None, "actor": "", "event": entry.get("event") or None, "title": ""})
     return out
 
 
@@ -395,7 +410,7 @@ def pending_sign(green, now, hours):
 
 
 HYGIENE_CODES = ("ruleset", "label", "file", "sha", "allowed", "schedule")
-HYGIENE_DEFAULTS = {"ruleset_mode": "name", "ruleset_names": ["protect-main"], "skip": [], "community_fallback": False}
+HYGIENE_DEFAULTS = {"ruleset_mode": "effective", "ruleset_names": ["protect-main"], "skip": [], "community_fallback": False}
 # the kinds of rule that make a branch "protected": a rule that only names who may push (or nothing) does not
 PROTECTIVE_RULES = ("pull_request", "required_status_checks", "non_fast_forward", "deletion", "required_linear_history", "required_signatures", "update", "merge_queue", "required_deployments")
 COMMUNITY_FILES = {"README": "readme", "LICENSE": "license", "COPYING": "license", "CONTRIBUTING": "contributing", "CODE_OF_CONDUCT": "code_of_conduct"}   # file stem -> key of the community profile
@@ -405,7 +420,7 @@ def hygiene_settings(config):
     """The merged `sentinel.hygiene` block: a bad value falls back to the default of that key only."""
     block = ((config or {}).get("sentinel") or {}).get("hygiene") if isinstance(((config or {}).get("sentinel") or {}), dict) else None
     block = block if isinstance(block, dict) else {}
-    out = {"ruleset_mode": "name", "ruleset_names": list(HYGIENE_DEFAULTS["ruleset_names"]), "skip": [], "community_fallback": False}
+    out = {"ruleset_mode": "effective", "ruleset_names": list(HYGIENE_DEFAULTS["ruleset_names"]), "skip": [], "community_fallback": False}
     if block.get("ruleset_mode") in ("name", "effective", "off"):
         out["ruleset_mode"] = block["ruleset_mode"]
     names = block.get("ruleset_names")
@@ -450,7 +465,7 @@ def _file_state(group, present, license_key, perms, org_files, hyg):
 
 def _ruleset_state(info, perms, hyg):
     """"ok", "missing", "unknown" or "skip" for the protection of the default branch."""
-    mode = hyg.get("ruleset_mode", "name")
+    mode = hyg.get("ruleset_mode", "effective")
     if mode == "off":
         return "skip"
     if mode == "effective":
@@ -458,7 +473,7 @@ def _ruleset_state(info, perms, hyg):
         if not isinstance(found, dict):
             return "skip"      # not read yet: the pending counter says so
         rules, protected = found.get("rules"), found.get("protected")
-        if protected is True or (isinstance(rules, list) and any(r in PROTECTIVE_RULES for r in rules)):
+        if protected is True or found.get("classic") is True or (isinstance(rules, list) and any(r in PROTECTIVE_RULES for r in rules)):
             return "ok"
         return "missing" if (protected is False and isinstance(rules, list)) else "unknown"
     patterns = [p.lower() for p in hyg.get("ruleset_names") or ["protect-main"]]
@@ -466,6 +481,23 @@ def _ruleset_state(info, perms, hyg):
         if str(r.get("enforcement", "")).upper() == "ACTIVE" and any(fnmatch.fnmatchcase(str(r.get("name", "")).lower(), p) for p in patterns):
             return "ok"
     return "missing"
+
+
+def protection_source(found):
+    """What protects the default branch, from the three public sources joined: "ruleset" (a rule of a ruleset that protects), "classic" (the classic protection of the branch), "both", "none" (the sources answered and
+    nothing protects it) or None (they did not answer, or were not read): the rules of the rulesets alone say nothing about a classic protection, so an empty list is never "no protection" by itself."""
+    if not isinstance(found, dict):
+        return None
+    rules, protected, classic = found.get("rules"), found.get("protected"), found.get("classic")
+    by_rules = isinstance(rules, list) and any(r in PROTECTIVE_RULES for r in rules)
+    by_branch = protected is True or classic is True
+    if by_rules and by_branch:
+        return "both"
+    if by_rules:
+        return "ruleset"
+    if by_branch:
+        return "classic"
+    return "none" if (protected is False and isinstance(rules, list)) else None
 
 
 def hygiene_review(info, perms, required_files, hyg=None, org_files=None):
@@ -476,7 +508,7 @@ def hygiene_review(info, perms, required_files, hyg=None, org_files=None):
     problems, unknown = [], []
     state = _ruleset_state(info, perms, hyg) if "ruleset" not in skip else "skip"
     if state == "missing":
-        problems.append(("ruleset", i18n.t("hyg.ruleset", name=" / ".join(hyg.get("ruleset_names") or ["protect-main"])) if hyg.get("ruleset_mode", "name") == "name" else i18n.t("hyg.ruleset_effective")))
+        problems.append(("ruleset", i18n.t("hyg.ruleset", name=" / ".join(hyg.get("ruleset_names") or ["protect-main"])) if hyg.get("ruleset_mode", "effective") == "name" else i18n.t("hyg.ruleset_effective")))
     elif state == "unknown":
         unknown.append(("ruleset", i18n.t("hyg.unknown", name="ruleset")))
     if "label" not in skip and not info.get("label_dependencies"):
@@ -837,12 +869,18 @@ def compute_snapshot(inp):
     if reduced:   # no local workspace: there are no local signing records, so nothing can be said about what is waiting to be signed
         queue, unsigned, signed_wait = [], [], []
     hyg_rows, pending = [], 0
+    forks = [r for r in info if (info.get(r) or {}).get("fork")]      # a fork without a CI of its own is not judged: its files, its licence and its inherited jobs are those of the upstream (fork_ci.py)
+    idle = set(fork_ci.idle_forks(forks, runs_by_repo, set(a2_full_sample(runs_by_repo, caps)), now.timestamp(), dict(fork_ci.POLICY)))
     for repo in sorted(info):
         p = perms.get(repo)
+        if repo in idle:
+            hyg_rows.append({"repo": repo, "problems": [], "unknown": [], "checked": bool(p), "skipped": "fork", "protection": None})
+            continue
         if not p:
             pending += 1
         probs, unk = hygiene_review(info[repo], p, cfg["required_files"], cfg.get("hygiene"), inp.get("org_files"))
-        hyg_rows.append({"repo": repo, "problems": [{"code": c, "text": t} for c, t in probs], "unknown": [{"code": c, "text": t} for c, t in unk], "checked": bool(p)})
+        hyg_rows.append({"repo": repo, "problems": [{"code": c, "text": t} for c, t in probs], "unknown": [{"code": c, "text": t} for c, t in unk], "checked": bool(p),
+                         "protection": protection_source((p or {}).get("branch_rules"))})
     mins = minutes(runs_by_repo, now)
     errors = [{"section": k, "message": v["message"], "at": v["at"]} for k, v in sorted(inp["errors"].items())]
     sev_total = {"critical": 0, "high": 0}
@@ -854,8 +892,10 @@ def compute_snapshot(inp):
         "generated": now.strftime("%Y-%m-%dT%H:%M:%SZ"), "enabled": True, "loading": inp.get("loading", ""),
         "cache_age_seconds": inp.get("cache_age"), "reduced": reduced, "language": i18n.language(), "repos": len(repos), "ecosystems": {r: eco.get(r, "other") for r in repos},
         "rate": rate, "min_rate": cfg["min_rate_remaining"], "errors": errors, "ai": inp.get("ai"),
-        "a1": {"stuck": stuck, "issues": issues, "stuck_minutes": data.get("stuck_minutes")},
-        "a2": {"red": red, "groups": causes.groups(red), "workflows_checked": sum(1 for r in repos for _ in {workflow_key(x) for x in runs_by_repo.get(r, [])}),
+        "a1": {"stuck": stuck, "issues": issues, "stuck_minutes": data.get("stuck_minutes"), "ghosts": list(data.get("ghosts") or [])[:200],
+               "ghost_days": ((data.get("figures") or {}).get("ghost_days"))},
+        "a2": {"red": red, "groups": causes.groups(red), "workflows_checked": sum(1 for r in repos for _ in {workflow_key(x) for x in runs_by_repo.get(r, []) if not redrule.is_dynamic(x)}),
+               "services": redrule.service_rows([x for r in repos for x in runs_by_repo.get(r, [])])[:200],
                "unchecked": a2_unchecked(runs_by_repo), "full_sample": a2_full_sample(runs_by_repo, caps),
                "inconclusive": a2_repos, "inconclusive_workflows": a2_labels(a2_details), "inconclusive_details": a2_details},
         "a3": {"rows": rows, "codeql_total": sum(t["codeql"] or 0 for t in totals.values()), "dependabot_total": sum(t["dependabot"] or 0 for t in totals.values()),
@@ -872,7 +912,7 @@ def compute_snapshot(inp):
                "pending_sign_hours": cfg["pending_sign_hours"], "states": states, "sign_queue": queue, "signed_unpublished": signed_wait,
                "versions": sorted(({"repo": r, "tag": rel.get("tagName"), "published": rel.get("publishedAt")} for r, rel in releases.items()), key=lambda x: x["repo"]),
                "days": cfg["candidate_days"]},
-        "a6": {"rows": hyg_rows, "pending": pending, "unknown": sum(1 for r in hyg_rows if r["unknown"])},
+        "a6": {"rows": hyg_rows, "pending": pending, "unknown": sum(1 for r in hyg_rows if r["unknown"]), "forks_idle": sorted(idle)},
         "a7": {"rows": sorted(({"repo": r, **v} for r, v in mins.items()), key=lambda x: -x["min24"]), "total24": sum(v["min24"] for v in mins.values()),
                "total7d": sum(v["min7d"] for v in mins.values()), "api": inp.get("api"), "budget": minutes_budget(mins, eco, cfg)},
         "a8": inp.get("audits") or {"audits": {}, "rounds": {}, "files": []},
@@ -900,6 +940,9 @@ def compute_snapshot(inp):
     s["a11"] = readiness.build(inp, s, cfg.get("readiness") or readiness.DEFAULTS)
     s["a11"]["level"] = s["a11"].get("level", "unknown")
     lint = inp.get("lint")
+    if lint and idle:      # the workflow files of a fork nobody works on are the ones of the upstream
+        left = {r: items for r, items in lint["by_repo"].items() if r not in idle}
+        lint = {**lint, "by_repo": left, "summary": lint_workflows.summarize(left)}
     s["lint"] = {"enabled": False} if not lint else {"enabled": True, "summary": lint["summary"], "in_report": lint.get("in_report", True), "coverage": lint.get("coverage"),
                                                     "rows": [dict(f, repo=r) for r, items in sorted(lint["by_repo"].items()) for f in items][:200]}
     for key in ("a3", "a4", "a5", "a6"):  # an "ok" with the data still loading would be a false green
@@ -918,7 +961,7 @@ def compute_snapshot(inp):
 def repo_query(file_names):
     aliases = " ".join(f'f{i}:object(expression:"HEAD:{name}"){{id}}' for i, name in enumerate(file_names))
     return ("query($after:String){rateLimit{remaining cost} repositoryOwner(login:\"%s\"){repositories(first:15,after:$after,ownerAffiliations:OWNER,isArchived:false)"
-            "{totalCount pageInfo{hasNextPage endCursor} nodes{name pushedAt hasVulnerabilityAlertsEnabled licenseInfo{key} defaultBranchRef{name} latestRelease{tagName publishedAt isDraft releaseAssets(first:100){nodes{name}}}"
+            "{totalCount pageInfo{hasNextPage endCursor} nodes{name pushedAt isFork hasVulnerabilityAlertsEnabled licenseInfo{key} defaultBranchRef{name} latestRelease{tagName publishedAt isDraft releaseAssets(first:100){nodes{name}}}"
             " vulnerabilityAlerts(states:OPEN,first:50){totalCount nodes{createdAt securityVulnerability{severity}}}"
             " pullRequests(states:OPEN,first:10){nodes{number title url author{login __typename} createdAt isDraft mergeable reviewDecision commits(last:1){nodes{commit{statusCheckRollup{state}}}} files(first:20){nodes{path}}}}"
             " rulesets(first:5){nodes{name enforcement}} labels(first:20,query:\"dependencies\"){nodes{name}} %s}}}}") % (toolconfig.github_owner(), aliases)
@@ -933,7 +976,7 @@ def parse_repo_node(node, file_names):
         if key in ("critical", "high") and len(hi) < 20:
             hi.append({"sev": key, "created": v.get("createdAt")})
     return {
-        "name": node["name"], "pushed": node.get("pushedAt"), "branch": (node.get("defaultBranchRef") or {}).get("name") or "main",
+        "name": node["name"], "pushed": node.get("pushedAt"), "fork": node.get("isFork") is True, "branch": (node.get("defaultBranchRef") or {}).get("name") or "main",
         "release": {"tagName": rel["tagName"], "publishedAt": rel["publishedAt"],
                     "asset_flags": signstate.asset_flags([n.get("name", "") for n in (rel.get("releaseAssets") or {}).get("nodes") or []])} if rel and not rel.get("isDraft") else None,
         "vuln_total": (node.get("vulnerabilityAlerts") or {}).get("totalCount", 0), "vuln_sev": sev,
@@ -1213,8 +1256,9 @@ class Sentinel:
                                          paging.settings(self.config)["workflow_pages"])      # a repository can have hundreds of workflows: the next pages are read, and a cut is said
                 wfs = page["items"]
                 res["wf_seen"], res["wf_total"] = page["seen"], (page["total"] if page["cut"] else None)
-                res["wf_disabled"] = [w.get("name") for w in wfs if w.get("state") == "disabled_inactivity"]
-                res["wf_manual"] = [w.get("name") for w in wfs if w.get("state") == "disabled_manually"]   # same call: no extra request
+                own = [w for w in wfs if not str(w.get("path") or "").startswith("dynamic/")]      # the workflows GitHub makes for itself (Dependabot, the dependency graph, Copilot, the default CodeQL) have no file: they are not the owner's to enable
+                res["wf_disabled"] = [w.get("name") for w in own if w.get("state") == "disabled_inactivity"]
+                res["wf_manual"] = [w.get("name") for w in own if w.get("state") == "disabled_manually"]   # same call: no extra request
             except Exception as error:
                 if not is_denied(error):
                     raise
@@ -1235,7 +1279,12 @@ class Sentinel:
         out = {"protected": None, "rules": None}
         name = quote(branch, safe="")
         try:
-            out["protected"] = bool((self._gh("api", f"repos/{owner}/{repo}/branches/{name}", retries=1) or {}).get("protected"))
+            body = self._gh("api", f"repos/{owner}/{repo}/branches/{name}", retries=1) or {}
+            out["protected"] = body.get("protected") if isinstance(body.get("protected"), bool) else None      # an answer without the field says nothing
+            classic = body.get("protection") if isinstance(body.get("protection"), dict) else None
+            if classic is not None:      # the public answer carries the classic protection too (no admin rights needed): whether it is enabled and how strictly its status checks apply
+                level = (classic.get("required_status_checks") or {}).get("enforcement_level") if isinstance(classic.get("required_status_checks"), dict) else None
+                out["classic"] = bool(classic.get("enabled")) or (isinstance(level, str) and level not in ("", "off"))
         except Exception:
             pass
         try:
@@ -1471,7 +1520,7 @@ class Sentinel:
             branch = branches.get(repo) or "main"
             try:
                 answer = self._gh("run", "list", "-R", f"{toolconfig.github_owner()}/{repo}", "-w", name, "--branch", branch, "--status", "completed", "-L", str(A2_RESOLVE_DEPTH),
-                                  "--json", "databaseId,name,conclusion,status,createdAt,startedAt,url,headSha")
+                                  "--json", "databaseId,name,conclusion,status,createdAt,startedAt,url,headSha,event")
             except Exception as error:   # a failed question stays unresolved; the others go on
                 self.error("a2_resolve", error)
                 continue
@@ -1479,7 +1528,7 @@ class Sentinel:
             if first:
                 entry = {"at": now_ts, "state": "run", "id": first.get("databaseId"), "name": first.get("name") or "", "conclusion": first.get("conclusion") or None,
                          "status": first.get("status") or "completed", "started": first.get("startedAt") or first.get("createdAt"), "url": first.get("url"),
-                         "sha": (first.get("headSha") or "")[:7], "branch": branch}
+                         "sha": (first.get("headSha") or "")[:7], "branch": branch, "event": first.get("event")}
             else:
                 entry = {"at": now_ts, "state": "none", "branch": branch}
             with self.lock:
@@ -1515,7 +1564,7 @@ class Sentinel:
             for name, first in found.items():
                 self.a2_resolved[f"{repo}|{name}"] = {"at": now_ts, "state": "run", "id": first.get("databaseId"), "name": first.get("name") or "", "conclusion": first.get("conclusion") or None,
                                                      "status": first.get("status") or "completed", "started": first.get("startedAt") or first.get("createdAt"), "url": first.get("url"),
-                                                     "sha": (first.get("headSha") or "")[:7], "branch": branch}
+                                                     "sha": (first.get("headSha") or "")[:7], "branch": branch, "event": first.get("event")}
         return spent, len(found)
 
     def refresh_repos(self, repos):

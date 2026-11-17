@@ -118,7 +118,16 @@ def repo_rows(runs, end, cfg):
     return rows[:MAX_REPOS]
 
 
-def make_snapshot(ledger, cfg, now, account=None, security=None):
+def activity_counts(activity):
+    """{"active", "dormant", "inactive", "unknown"} (numbers) out of the activity view of the monitor (data_pipeline/activity.py), or None while it is off or not given: the repositories that never ran or have
+    not run for long are counted apart, they are neither in the number of the score nor a reason for it to be low."""
+    if not isinstance(activity, dict) or not activity.get("enabled") or not isinstance(activity.get("counts"), dict):
+        return None
+    counts = activity["counts"]
+    return {key: int(counts.get(key) or 0) for key in ("active", "dormant", "inactive", "unknown")}
+
+
+def make_snapshot(ledger, cfg, now, account=None, security=None, activity=None):
     """The snapshot of the account for the window that ends at `now`. `security` is {"penalty", "repos"} from the Security sentinel, or None while it is off or has seen too little."""
     runs, collab = ledger_runs(ledger), ledger_collab(ledger)
     watched_hours = max(0.0, (now - ledger["first_seen"]) / 3600.0)
@@ -127,14 +136,18 @@ def make_snapshot(ledger, cfg, now, account=None, security=None):
     if isinstance(cut, (int, float)) and cut > now - cfg["window_days"] * collector.DAY:      # the ledger dropped runs that belong to this window: the figures see only part of it, and it is said
         answer["data_quality"]["truncated"] = True
         answer["data_quality"]["reasons"] = [*answer["data_quality"]["reasons"], "truncated"]
-    return {"schema": SCHEMA, "at": now, "account": account, "window_days": cfg["window_days"], **answer, "repos": repo_rows(runs, now, cfg)}
+    snapshot = {"schema": SCHEMA, "at": now, "account": account, "window_days": cfg["window_days"], **answer, "repos": repo_rows(runs, now, cfg)}
+    counts = activity_counts(activity)
+    if counts is not None:
+        snapshot["activity"] = counts
+    return snapshot
 
 
 def hour_key(now):
     return datetime.fromtimestamp(now, timezone.utc).strftime("%Y-%m-%dT%H")
 
 
-def tick(storage, account_id, config, runs, collab_alerts, now=None, force=False, collab_known=True, security=None):
+def tick(storage, account_id, config, runs, collab_alerts, now=None, force=False, collab_known=True, security=None, activity=None):
     """One pass: updates the ledger, writes the snapshot of the hour and returns it; None when the score is off or the pass is not due. Needs the storage of the account."""
     now = time.time() if now is None else now
     cfg = engine.settings(config)
@@ -151,7 +164,7 @@ def tick(storage, account_id, config, runs, collab_alerts, now=None, force=False
     keep_days = min(180, 2 * cfg["window_days"] + 1)
     update_ledger(ledger, runs, collab_alerts, now, keep_days, collab_known)
     ledger["last_tick"] = now
-    snapshot = make_snapshot(ledger, cfg, now, account_id, security)
+    snapshot = make_snapshot(ledger, cfg, now, account_id, security, activity)
     snapshot["drop"] = drop.detect(snapshot, cfg)
     fresh = bool(snapshot["drop"]) and not ledger.get("drop_open")      # the moment the drop appears: the only time it goes out through the notification channels
     ledger["drop_open"] = bool(snapshot["drop"])

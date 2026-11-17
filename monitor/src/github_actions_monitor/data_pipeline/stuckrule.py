@@ -8,16 +8,20 @@ By default one limit (`stuck_minutes`) decides, as always. Three settings of the
     so a build that lasts six hours is not "stuck" at hour two while a build of two minutes that runs for an hour is.
   * `workflow_minutes` / `runner_minutes` (empty): a fixed limit for a workflow file (`build.yml=420`) or for a runner label (`self-hosted=720`); the workflow wins over the label.
   * `queue_minutes` (0 = same limit as a running build): a longer limit for a run that has not even started because it waits for a runner.
+  * `ghost_enabled` / `ghost_days` (on, 7): a run that has been in the queue for more than `ghost_days` days is not waiting for a runner any more: GitHub never starts it (its pull request was closed, its job
+    asked for a runner that does not exist). It is a "ghost": it is not stuck, not queued and not a reason for any alarm; it is counted and shown apart so that somebody can cancel it.
 
-Every run that waits also says WHY: `queue` (it waits for a runner), `awaiting_approval` (it waits for a person), `runner_down` (it waits and every self-hosted runner with its label is offline)
-or `build` (it is running). Pure functions: no network, no clock.
+Every run that waits also says WHY: `queue` (it waits for a runner), `awaiting_approval` (it waits for a person), `runner_down` (it waits and every self-hosted runner with its label is offline),
+`ghost` (it has waited for days) or `build` (it is running). Pure functions: no network; the clock is given by the caller.
 """
 import fnmatch
 import math
+import time
+from datetime import datetime
 
 DEFAULTS = {"learned": False, "percentile": 95, "margin": 2.0, "min_samples": 3, "min_minutes": 30, "max_minutes": 720, "queue_minutes": 0,
-            "workflow_minutes": [], "runner_minutes": [], "awaiting_stuck": True}
-REASONS = ("queue", "awaiting_approval", "runner_down", "build")
+            "workflow_minutes": [], "runner_minutes": [], "awaiting_stuck": True, "ghost_enabled": True, "ghost_days": 7}
+REASONS = ("queue", "awaiting_approval", "runner_down", "ghost", "build")
 QUEUE_STATES = ("queued", "pending", "requested")
 
 
@@ -46,7 +50,8 @@ def settings(config):
             "margin": float(margin) if isinstance(margin, (int, float)) and not isinstance(margin, bool) and 1.0 <= margin <= 20 else DEFAULTS["margin"],
             "min_samples": _int(block.get("min_samples"), 2, 100, DEFAULTS["min_samples"]), "min_minutes": min(low, high), "max_minutes": max(low, high),
             "queue_minutes": _int(block.get("queue_minutes"), 0, 100000, 0), "workflow_minutes": _pairs(block.get("workflow_minutes")),
-            "runner_minutes": _pairs(block.get("runner_minutes")), "awaiting_stuck": block.get("awaiting_stuck") is not False}
+            "runner_minutes": _pairs(block.get("runner_minutes")), "awaiting_stuck": block.get("awaiting_stuck") is not False,
+            "ghost_enabled": block.get("ghost_enabled") is not False, "ghost_days": _int(block.get("ghost_days"), 1, 3650, DEFAULTS["ghost_days"])}
 
 
 def workflow_key(run):
@@ -91,9 +96,30 @@ def reason_of(run, labels=(), offline_labels=()):
     return "build"
 
 
-def evaluate(run, base_minutes, cfg, learned=None, labels=(), offline_labels=()):
+def queue_age_days(run, now=None):
+    """Days since the run was created, for a run of the FIRST attempt (a re-run keeps the creation date of the first try, so its age is unknown); None when it cannot be told."""
+    if (run.get("attempt") or 1) != 1:
+        return None
+    try:
+        begun = datetime.fromisoformat(str(run.get("started") or "").replace("Z", "+00:00")).timestamp()
+    except ValueError:
+        return None
+    return max(0.0, ((time.time() if now is None else now) - begun) / 86400)
+
+
+def is_ghost(run, cfg, now=None):
+    """True when a run that waits in the queue has waited longer than ghost_days (and the setting is on)."""
+    if not cfg.get("ghost_enabled") or run.get("status") not in QUEUE_STATES:
+        return False
+    age = queue_age_days(run, now)
+    return age is not None and age > cfg["ghost_days"]
+
+
+def evaluate(run, base_minutes, cfg, learned=None, labels=(), offline_labels=(), now=None):
     """(stuck, reason, limit_minutes) of one unfinished run. `base_minutes` is the classic `stuck_minutes`; `learned` is the result of learn(); `labels` the runner labels of its jobs (when known)."""
     reason = reason_of(run, labels, offline_labels)
+    if reason in ("queue", "runner_down") and is_ghost(run, cfg, now):
+        return False, "ghost", base_minutes
     limit = base_minutes
     key = (run.get("repo"), workflow_key(run))
     if cfg["learned"] and learned and key in learned:

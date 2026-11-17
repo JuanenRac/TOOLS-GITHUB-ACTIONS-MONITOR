@@ -11,6 +11,7 @@ Which runs may decide (the block `ci` of the configuration):
   * runs of a pull request that comes from a FORK do not count, even when the fork's branch is called `main` (the head repository differs from the repository of the run) unless `ci.count_fork_runs`;
   * a run that waits for an approval (`action_required`, or a job `waiting` for an environment) is neither red nor queued: it is "awaiting approval";
   * a workflow whose last run is older than `ci.inactive_days` is "inactive", not red for ever;
+  * a red nobody has attended to (its failing run is older than `ci.red_age_days`, 30 by default, and nothing newer of the events that decide has run) AGES: it becomes "inactive" too (`ci.red_ages`);
   * the merge queue of the default branch (branches `gh-readonly-queue/<branch>/...`, event merge_group) is its own lane, shown as "merge queue";
   * `ci.extra_branches` (patterns) adds maintenance branches to the watched ones; by default only the default branch is.
 """
@@ -29,7 +30,8 @@ RELEASE_EVENTS = ("release", "registry_package")
 QUEUE_PREFIX = "gh-readonly-queue/"
 AWAITING_DAYS = 14
 DEFAULT_INACTIVE_DAYS = 90
-POLICY = {"events": RED_EVENTS, "fork_runs": False, "automation": False, "inactive_days": DEFAULT_INACTIVE_DAYS, "branches": ()}      # replaced by configure(): the whole monitor shares one rule
+DEFAULT_RED_AGE_DAYS = 30
+POLICY = {"events": RED_EVENTS, "fork_runs": False, "automation": False, "inactive_days": DEFAULT_INACTIVE_DAYS, "red_age_days": DEFAULT_RED_AGE_DAYS, "branches": ()}      # replaced by configure(): the whole monitor shares one rule
 
 
 def configure(config):
@@ -42,6 +44,9 @@ def configure(config):
     POLICY["automation"] = block.get("automation_counts") is True
     days = block.get("inactive_days")
     POLICY["inactive_days"] = days if isinstance(days, int) and not isinstance(days, bool) and 0 <= days <= 3650 else DEFAULT_INACTIVE_DAYS
+    age = block.get("red_age_days")
+    age = age if isinstance(age, int) and not isinstance(age, bool) and 1 <= age <= 3650 else DEFAULT_RED_AGE_DAYS
+    POLICY["red_age_days"] = age if block.get("red_ages") is not False else 0      # 0 = a red never ages
     extra = block.get("extra_branches")
     POLICY["branches"] = tuple(b for b in extra if isinstance(b, str) and b) if isinstance(extra, (list, tuple)) else ()
 
@@ -51,8 +56,42 @@ def workflow_key(run):
 
 
 def is_dynamic(run):
-    """A run that GitHub creates for dependency updates (event `dynamic`, a `dynamic/...` path): it is not a build of the repository and never decides."""
-    return run.get("event") == "dynamic" or str(run.get("path") or "").startswith("dynamic/")
+    """A run that GitHub creates for itself (event `dynamic`, a `dynamic/...` path: Dependabot updates, the dependency graph, the default CodeQL, the review and the agent of Copilot): it is not a
+    build of the repository and never decides. The monitor keeps only the name of the file of a run, so `dynamic` is also a flag written when the run is read, from the whole path."""
+    return run.get("event") == "dynamic" or run.get("dynamic") is True or str(run.get("path") or "").startswith("dynamic/")
+
+
+def service_name(path, name=""):
+    """Which service of GitHub a `dynamic/...` workflow is: dependabot (the updates), graph (the dependency graph and its submissions), copilot (review and agent), codeql (the default setup) or other."""
+    text = (str(path or "") + " " + str(name or "")).lower()
+    if "graph" in text or "dependency submission" in text:
+        return "graph"
+    if "dependabot" in text:
+        return "dependabot"
+    if "copilot" in text:
+        return "copilot"
+    if "codeql" in text or "code-scanning" in text:
+        return "codeql"
+    return "other"
+
+
+def service_rows(runs, now=None, policy=None):
+    """The services of GitHub whose last finished run failed, one row each: they are not a red of the repository (nothing in it can be fixed by a push) but they are not silent either.
+    A failing Dependabot update is a warning (the dependencies are not being updated); the others are information. A service that has not run for ci.inactive_days is left out."""
+    policy = policy or POLICY
+    now = time.time() if now is None else now
+    last = {}
+    finished = (r for r in runs if is_dynamic(r) and r.get("status") == "completed" and r.get("conclusion") and r.get("conclusion") not in IGNORED and not is_awaiting(r))
+    for run in sorted(finished, key=lambda r: r.get("started") or ""):
+        last[(run.get("repo"), run.get("service") or service_name(run.get("path"), run.get("name")), workflow_key(run))] = run
+    out = []
+    for (repo, service, _key), run in last.items():
+        stamp = _epoch(run.get("started"))
+        if run.get("conclusion") not in BAD or (policy["inactive_days"] and stamp is not None and now - stamp > policy["inactive_days"] * 86400):
+            continue
+        out.append({"repo": repo, "service": service, "workflow": run.get("name") or workflow_key(run), "conclusion": run.get("conclusion"), "since": run.get("started"), "url": run.get("url"),
+                    "level": "warning" if service == "dependabot" else "info"})
+    return sorted(out, key=lambda r: (r["level"] != "warning", str(r["repo"]), r["service"]))
 
 
 def is_awaiting(run):
@@ -168,7 +207,10 @@ def classify(runs, branch, now=None, policy=None):
         recent = [r.get("conclusion") in BAD for r in items[-10:]]
         item = {"run": last, "streak": streak, "lane": where, "kind": kind, "recent": (sum(recent), len(recent))}
         quiet_since = newest_of.get(key) or 0
-        if policy["inactive_days"] and quiet_since and now - quiet_since > policy["inactive_days"] * 86400:
+        failed_at = _epoch(last.get("started")) or 0
+        if policy.get("red_age_days") and failed_at and now - failed_at > policy["red_age_days"] * 86400:
+            out["inactive"].append({**item, "aged": True})      # a failure nobody attended to for weeks is history, not an alarm that never ends
+        elif policy["inactive_days"] and quiet_since and now - quiet_since > policy["inactive_days"] * 86400:
             out["inactive"].append(item)
         else:
             out["red"].append(item)
@@ -206,7 +248,7 @@ def row_of(repo, item):
     where = item["lane"]
     return {"repo": repo, "workflow": (last.get("name") or workflow_key(last)) + lane_label(where), "conclusion": last.get("conclusion"), "since": last.get("started"), "url": last.get("url"), "streak": item["streak"],
             "sha": last.get("sha", ""), "origin": "merge_queue" if where == "queue" else ("maintenance" if where else "branch"), "branch": last.get("branch"), "kind": item["kind"],
-            "run_id": last.get("id"), "reusable": list(last.get("reusable") or []),
+            "run_id": last.get("id"), "reusable": list(last.get("reusable") or []), "aged": bool(item.get("aged")),
             "file": workflow_key(last), "recent_runs": item["recent"][1], "fail_rate": round(100 * item["recent"][0] / item["recent"][1]) if item["recent"][1] else 0}
 
 
@@ -232,10 +274,12 @@ def red_workflows(runs_by_repo, default_branches=None, guess=False, sample=None,
 
 
 def states(runs_by_repo, default_branches=None, guess=False, now=None):
-    """{"inactive": [rows], "awaiting": [rows]} for all repositories: the workflows not red because they were abandoned, and the runs that wait for an approval."""
-    out = {"inactive": [], "awaiting": []}
+    """{"inactive": [rows], "awaiting": [rows], "services": [rows]} for all repositories: the workflows not red because they were abandoned, the runs that wait for an approval and the
+    services of GitHub (dynamic workflows) whose last run failed."""
+    out = {"inactive": [], "awaiting": [], "services": []}
     for repo, runs in runs_by_repo.items():
         branch, _guessed = branch_of(repo, runs, default_branches, guess)
         out["inactive"].extend(row_of(repo, item) for item in classify(runs, branch, now)["inactive"])
         out["awaiting"].extend(awaiting_runs(runs, now))
+        out["services"].extend(service_rows(runs, now))
     return out

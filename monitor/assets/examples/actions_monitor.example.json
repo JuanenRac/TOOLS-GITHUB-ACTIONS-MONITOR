@@ -22,6 +22,11 @@
     "count_fork_runs": false,
     "automation_counts": false,
     "inactive_days": 90,
+    "dormant_repos": true,
+    "red_ages": true,
+    "red_age_days": 30,
+    "forks_need_own_ci": true,
+    "fork_own_ci_days": 90,
     "extra_branches": [],
     "stuck": {
       "learned": false,
@@ -32,6 +37,8 @@
       "max_minutes": 720,
       "queue_minutes": 0,
       "awaiting_stuck": true,
+      "ghost_enabled": true,
+      "ghost_days": 7,
       "workflow_minutes": [],
       "runner_minutes": []
     },
@@ -84,7 +91,7 @@
       ]
     ],
     "hygiene": {
-      "ruleset_mode": "name",
+      "ruleset_mode": "effective",
       "ruleset_names": [
         "protect-main"
       ],

@@ -41,6 +41,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from github_actions_monitor.data_pipeline import analytics
+from github_actions_monitor.data_pipeline import activity
+from github_actions_monitor.data_pipeline import fork_ci
 from github_actions_monitor.data_pipeline import discovery
 from github_actions_monitor.data_pipeline import etagcache
 from github_actions_monitor.data_pipeline import graphql_checks
@@ -89,8 +91,8 @@ DEFAULTS = {
     "show_unclassified": True,     # repositories that no ecosystem claims are shown in an automatic group "Unclassified" instead of disappearing
     "stuck_minutes": 120,
     "alerts": {"silences": [], "service": {"enabled": False, "failures": 3, "rate_percent": 0, "workflows": []}, "group": {"by_commit": False, "min": 3}, "digest": {"minutes": 0, "threshold": 10}},      # what reaches the channels when there are many alerts (alertflow.py): all off or empty
-    "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "extra_branches": [], "rerun_timing": False, "group": {"reusable": False, "min": 2}, "failed_jobs": {"enabled": False, "max_per_cycle": 4, "group_by": "auto"},
-           "stuck": {"learned": False, "percentile": 95, "margin": 2.0, "min_samples": 3, "min_minutes": 30, "max_minutes": 720, "queue_minutes": 0, "workflow_minutes": [], "runner_minutes": [], "awaiting_stuck": True}},      # which runs may make a branch red (redrule.py)
+    "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "dormant_repos": True, "forks_need_own_ci": True, "fork_own_ci_days": 90, "red_ages": True, "red_age_days": 30, "extra_branches": [], "rerun_timing": False, "group": {"reusable": False, "min": 2}, "failed_jobs": {"enabled": False, "max_per_cycle": 4, "group_by": "auto"},
+           "stuck": {"learned": False, "percentile": 95, "margin": 2.0, "min_samples": 3, "min_minutes": 30, "max_minutes": 720, "queue_minutes": 0, "workflow_minutes": [], "runner_minutes": [], "awaiting_stuck": True, "ghost_enabled": True, "ghost_days": 7}},      # which runs may make a branch red (redrule.py)
     "watchdog_minutes": 10,      # a refresh cycle that runs longer than this is dumped to the log and restarted in a new thread (0 = off)
     "watchdog_max_abandoned": 8,      # calls to GitHub that gave up waiting but never returned: with this many still alive no new call is started and the health check says so (0 = no limit)
     "runs_per_repo": 20,
@@ -601,17 +603,21 @@ def parse_runs(repo, data):
     runs = []
     TIMING["budget"] = 3
     for run in data.get("workflow_runs", []):
+        full_path = str(run.get("path") or "").split("@")[0]
         queued, seconds, begun = run_times(run)
         if (run.get("run_attempt") or 1) > 1 and run.get("status") == "completed":
             seconds = rerun_seconds(repo, run) if TIMING["on"] else seconds
         runs.append({
             "repo": repo, "id": run["id"], "name": run.get("name") or "", "title": (run.get("display_title") or "")[:90],
-            "event": run.get("event"), "branch": run.get("head_branch"), "fork": is_fork_run(run), "path": (run.get("path") or "").split("@")[0].rsplit("/", 1)[-1], "sha": (run.get("head_sha") or "")[:7],
+            "event": run.get("event"), "branch": run.get("head_branch"), "fork": is_fork_run(run), "path": full_path.rsplit("/", 1)[-1], "sha": (run.get("head_sha") or "")[:7],
             "actor": (run.get("actor") or {}).get("login", ""), "actor_bot": (run.get("actor") or {}).get("type") == "Bot", "status": run.get("status"), "number": run.get("run_number"),
             "queued": queued,
             "conclusion": run.get("conclusion"), "started": begun or run.get("created_at"),
             "seconds": seconds, "url": run.get("html_url"), "attempt": run.get("run_attempt"), "reusable": causes.reusable_paths(run),
         })
+        if full_path.startswith("dynamic/") or run.get("event") == "dynamic":      # a workflow GitHub makes for itself: it has no file, and the whole path says which service it is
+            runs[-1]["dynamic"] = True
+            runs[-1]["service"] = redrule.service_name(full_path, run.get("name"))
     return runs
 
 
@@ -939,6 +945,7 @@ def unresolved_failures(runs, default_branches=None):
 
 def collect(config, publish=None):
     redrule.configure(config)
+    fork_ci.configure(config)
     causes.configure(config)
     alertflow.configure(config)
     repos = watched_repos(config)
@@ -965,7 +972,7 @@ def repo_meta(repos, config=None):
     for repo in repos:
         item = info.get(repo) if isinstance(info.get(repo), dict) else {}
         prs = item.get("prs")
-        out[repo] = {"private": repo in PRIVATE, "branch": item.get("branch") or None, "pushed": item.get("pushed") or None, "prs": len(prs) if isinstance(prs, list) else None}
+        out[repo] = {"private": repo in PRIVATE, "branch": item.get("branch") or None, "pushed": item.get("pushed") or None, "prs": len(prs) if isinstance(prs, list) else None, "fork": item.get("fork") is True}
         cached = RUN_CACHE.get(repo)
         if cached and cached.get("runs") is not None and cached.get("at"):
             info = SAMPLE_INFO.get(repo) or {}
@@ -1031,7 +1038,10 @@ def build(config, repos, started, refreshed, loading, progress_text):
             ask_queued[1] -= 1
             run["jobs"] = run_jobs(run["repo"], run["id"])
         labels = sorted({label for job in run["jobs"] for label in job.get("labels") or []})
-        run["stuck"], run["stuck_reason"], run["stuck_limit"] = stuckrule.evaluate(run, config["stuck_minutes"], stuck_cfg, learned, labels, offline)
+        run["stuck"], run["stuck_reason"], run["stuck_limit"] = stuckrule.evaluate(run, config["stuck_minutes"], stuck_cfg, learned, labels, offline, now=time.time())
+    ghosts = [run for run in active if run.get("stuck_reason") == "ghost"]      # queued for days: GitHub never starts them; they are neither queued nor stuck, only counted apart
+    if ghosts:
+        active = [run for run in active if run.get("stuck_reason") != "ghost"]
     if not loading and time.time() - ISSUE_CACHE["at"] > config["issues_refresh_seconds"] and not ISSUE_CACHE["busy"]:
         ISSUE_CACHE["busy"] = True  # the issues load in the background so the first page does not wait for them
 
@@ -1068,23 +1078,34 @@ def build(config, repos, started, refreshed, loading, progress_text):
         except Exception as error:   # noqa: BLE001 - a figure of the header never stops a cycle
             degraded.note("loop.extra", error)
     figures = header_figures(runs, active, ISSUE_CACHE["items"], red=red, approx=approx)
+    figures["ghost"], figures["ghost_days"] = len(ghosts), stuck_cfg["ghost_days"]
+    ghost_rows = [{"repo": r["repo"], "name": r.get("name"), "id": r.get("id"), "url": r.get("url"), "branch": r.get("branch"), "event": r.get("event"), "since": r.get("started")} for r in ghosts[:200]]
+    activity_view = None
+    idle_forks = []
     meta = repo_meta(repos, config)
     try:
         held = redrule.states({r: [x for x in runs if x["repo"] == r] for r in repos}, {r: m.get("branch") for r, m in repo_meta(repos).items() if m.get("branch")}, True)
         figures["awaiting"], figures["inactive"] = len(held["awaiting"]), len(held["inactive"])
+        figures["services_failing"] = len(held["services"])
+        activity_view = activity.summarize(repos, {r: [x for x in runs if x["repo"] == r] for r in repos}, {r: (SAMPLE_INFO.get(r) or {}).get("total") for r in repos}, errors, time.time(), activity.settings(config))
+        figures["dormant"], figures["inactive_repos"] = len(activity_view["dormant"]), len(activity_view["inactive"])
+        by_repo_runs = {r: [x for x in runs if x["repo"] == r] for r in repos}
+        full = {r for r in repos if (SAMPLE_INFO.get(r) or {}).get("asked") and len(by_repo_runs[r]) >= SAMPLE_INFO[r]["asked"]}
+        idle_forks = fork_ci.idle_forks([r for r in repos if (meta.get(r) or {}).get("fork")], by_repo_runs, full, time.time(), dict(fork_ci.POLICY))
+        figures["forks_idle"] = len(idle_forks)
     except Exception as error:   # noqa: BLE001 - a figure of the header never stops a cycle
         degraded.note("loop.extra", error)
     return {
         "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "updated_local": tzdisplay.stamp(time.time()), "took": round(time.time() - started, 1),
         "repos": repos, "ecosystems": {repo: ecosystem_of(repo) for repo in repos},
-        "runs": runs[:600], "runs_total": len(runs), "active": active, "issues": ISSUE_CACHE["items"], "failing": unresolved_failures(runs, {r: m.get("branch") for r, m in meta.items() if m.get("branch")}),
+        "runs": runs[:600], "runs_total": len(runs), "active": active, "ghosts": ghost_rows, "issues": ISSUE_CACHE["items"], "failing": unresolved_failures(runs, {r: m.get("branch") for r, m in meta.items() if m.get("branch")}),
         "errors": errors, "rate": rate, "rate_user": rate_user, "rate_sources": rate_sources, "quota_trend": __import__("github_actions_monitor.data_pipeline.quotawatch", fromlist=["_"]).trend(), "stuck_minutes": config["stuck_minutes"],
         "mode": config["mode"], "refreshed": refreshed, "hot": hot, "loading": progress_text if loading else "",
         "quota_block": rate_block_state(rate), "min_rate": config["min_rate_remaining"], "paused_quota": bool(rate and rate["remaining"] < config["min_rate_remaining"]),
         "refresh_seconds": config["refresh_seconds"], "hot_only": hot_only_state(),
         "offline": LINK.state(), "etag": ETAG["cache"].stats() if ETAG["cache"] else None, "graphql": graphql_checks.stats(config),
         "hidden": HIDDEN["hidden"], "discovered": HIDDEN["discovered"], "hidden_names": HIDDEN["names"],
-        "figures": figures, "repo_meta": meta, "sampling": sampling_summary(config, repos, meta),
+        "figures": figures, "repo_meta": meta, "sampling": sampling_summary(config, repos, meta), "activity": activity_view, "forks_idle": idle_forks[:200],
     }
 
 
@@ -1657,7 +1678,8 @@ def score_tick(config, data):
         collab = registry.get("collab") if registry else None
         known = bool(collab is not None and getattr(collab, "enabled", False) and not (collab.get_status() or {}).get("loading"))
         storage, account = runtime.process_storage(CHILD["account"] or None)
-        snapshot = score_service.tick(storage, account, config, data.get("runs") or [], collab.get_alerts() if known else [], collab_known=known, security=score_security(registry, config))
+        idle = set(data.get("forks_idle") or [])      # the runs of a fork without a CI of its own (the cron it inherited) are not the work of the account
+        snapshot = score_service.tick(storage, account, config, [r for r in (data.get("runs") or []) if r.get("repo") not in idle], collab.get_alerts() if known else [], collab_known=known, security=score_security(registry, config), activity=data.get("activity"))
         if snapshot and snapshot.get("drop_new") and snapshot.get("drop"):      # the moment a drop appears; it leaves the panel only when the person asked for it
             from github_actions_monitor.scoring import drop as score_drop, engine as score_engine
             sentinel = SENTINEL["obj"]

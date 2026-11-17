@@ -6,7 +6,7 @@ Nothing of how it decides changes: `sentinel_local.Sentinel` keeps its rules, it
 loop; this class holds one of them and answers the contract with what it already knows. Whatever the monitor asked of the old object it still can: the attributes that are not part of the
 contract (`snapshot`, `feed`, `refresh_repos`, `ai_explain`...) are those of the held sentinel.
 
-The alerts it gives have stable codes, independent of the language: `ci.red`, `ci.stuck`, `ci.pending_sign`.
+The alerts it gives have stable codes, independent of the language: `ci.red`, `ci.stuck`, `ci.ghost_queue`, `ci.pending_sign`.
 """
 from github_actions_monitor.sentinels import sentinel_base
 from github_actions_monitor.sentinels import sentinel_local
@@ -80,6 +80,13 @@ class SentinelCI(sentinel_base.BaseSentinel):
         for stuck in (snap.get("a1") or {}).get("stuck", []):
             alert("ci.stuck", "error", stuck.get("repo"), i18n.t("evt.stuck_new", repo=stuck.get("repo"), name=stuck.get("name")),
                   {"name": stuck.get("name"), "seconds": stuck.get("seconds"), "url": stuck.get("url")}, None, f"{stuck.get('repo')}:{stuck.get('name')}")
+        ghosts = {}
+        for ghost in (snap.get("a1") or {}).get("ghosts", []):
+            ghosts.setdefault(ghost.get("repo"), []).append(ghost)
+        for repo, items in sorted(ghosts.items(), key=lambda kv: str(kv[0])):      # one notice per repository, never an error: GitHub never starts these runs, nobody can fix them with a push
+            days = (snap.get("a1") or {}).get("ghost_days")
+            alert("ci.ghost_queue", "info", repo, i18n.t("evt.ghost_queue", repo=repo, n=len(items), days=days),
+                  {"count": len(items), "days": days, "oldest": min((g.get("since") or "" for g in items), default=""), "urls": [g.get("url") for g in items[:5]]}, None, f"{repo}")
         for wait in (snap.get("a5") or {}).get("pending_sign", []):
             alert("ci.pending_sign", "warning", wait.get("repo"), i18n.t("evt.pending_sign", repo=wait.get("repo"), hours=wait.get("hours")),
                   {"workflow": wait.get("workflow"), "hours": wait.get("hours"), "url": wait.get("url")}, wait.get("since"), f"{wait.get('repo')}:{wait.get('workflow')}")

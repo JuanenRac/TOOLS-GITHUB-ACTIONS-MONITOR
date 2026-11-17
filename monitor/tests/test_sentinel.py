@@ -80,7 +80,7 @@ class Hygiene(unittest.TestCase):
         perms = {"sha_pinning_required": True, "allowed_actions": "selected", "wf_disabled": []}
         self.assertEqual(sl.hygiene_problems(self.GOOD, perms, req), [])
         bad = {**self.GOOD, "rulesets": [], "label_dependencies": False, "files": {"README.md": True}}
-        codes = [c for c, _ in sl.hygiene_problems(bad, {"sha_pinning_required": False, "allowed_actions": "all", "wf_disabled": ["Nightly"]}, req)]
+        codes = [c for c, _ in sl.hygiene_problems(bad, {"sha_pinning_required": False, "allowed_actions": "all", "wf_disabled": ["Nightly"]}, req, {"ruleset_mode": "name", "ruleset_names": ["protect-main"]})]
         for expected in ("ruleset", "label", "file", "sha", "allowed", "schedule"):
             self.assertIn(expected, codes)
 
