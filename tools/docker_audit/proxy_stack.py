@@ -8,6 +8,7 @@ is the stand-in `gh` (the monitor never calls GitHub), and the Caddy image is th
 mode 600), so a guide that does not work shows up here. Clients are throw-away containers with fixed addresses on the network of the Compose project.
 """
 import json
+import os
 import shutil
 import time
 
@@ -48,6 +49,8 @@ class Stack:
         login = self.deploy / "gh_token.txt"
         login.write_text(token, encoding="utf-8", newline="\n")
         login.chmod(0o600)      # exactly what the guide says: the login is a file with mode 600
+        if os.name == "posix":      # and, like the guide, given to the user of the container (10001): a file of mode 600 that belongs to somebody else cannot be read in it
+            s.run(["sudo", "-n", "chown", "10001:10001", str(login)], timeout=60, label="give the login file to the user of the container", record=False)
         self.login_file, self.github_token = login, token
         (self.deploy / "secrets").mkdir(exist_ok=True)
         names = []

@@ -78,7 +78,7 @@ launchd (macOS): `ProgramArguments` = `/usr/bin/python3`, `-m`, `github_actions_
 
 ## Variáveis de ambiente
 
-Só são lidos os nomes desta tabela. No serviço, um valor ilegível é ignorado com um aviso e não altera nada. As que nomeiam uma parte da configuração (`MONITOR_LISTEN_*`, `MONITOR_ALLOWED_HOSTS`, `MONITOR_PROXY_PUBLIC_HOST`, `MONITOR_SECURE_COOKIE`, `MONITOR_TRUSTED_PROXY`, `MONITOR_LOCAL_PORT`, `MONITOR_TLS_*`, `MONITOR_QUERY_ACCESS`, `MONITOR_TEAM_MODE`) são escritas em `listen` e `auth` em cada arranque do serviço, pelo que o ambiente continua a mandar nelas; tudo o resto do ficheiro é seu.
+Só são lidos os nomes desta tabela. No serviço, um valor ilegível é ignorado com um aviso e não altera nada. As que nomeiam uma parte da configuração (`MONITOR_LISTEN_*`, `MONITOR_ALLOWED_HOSTS`, `MONITOR_PROXY_PUBLIC_HOST`, `MONITOR_SECURE_COOKIE`, `MONITOR_TRUSTED_PROXY`, `MONITOR_LOCAL_PORT`, `MONITOR_TLS_*`, `MONITOR_QUERY_ACCESS`, `MONITOR_TEAM_MODE`) são escritas em `listen` e `auth` em cada arranque do serviço, pelo que o ambiente continua a mandar nelas; tudo o resto do ficheiro é seu. Uma variável do proxy definida mas deixada vazia (`MONITOR_TRUSTED_PROXY`, `MONITOR_TRUSTED_PROXIES`, `MONITOR_SECURE_COOKIE`, `MONITOR_PROXY_PUBLIC_HOST`, `MONITOR_ALLOWED_HOSTS`) desliga a sua chave no arranque, pelo que uma linha vazia do ficheiro `.env` nunca mantém viva uma declaração antiga do proxy; uma que não esteja definida não altera nada.
 
 | Variável | O que faz |
 |---|---|
