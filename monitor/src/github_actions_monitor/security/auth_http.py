@@ -30,6 +30,7 @@ from github_actions_monitor.security import auth, envguard, localguard
 MAX_BODY = 4096
 SUPERVISOR_KEY_ENV = "MONITOR_SUPERVISOR_KEY"        # the proof the supervisor gives to the process of each account (the same names as in actions_monitor.py and accounts_supervisor.py)
 SUPERVISOR_KEY_HEADER = "X-Monitor-Supervisor"
+WEBHOOK_PEER_HEADER = "X-Monitor-Peer"      # who really sent a webhook request, said by the supervisor (it proves itself with its key) to the process of an account
 CHILD_ENV = "MONITOR_AUTH_CHILD"      # set by the supervisor for the monitors of each account: they answer to the supervisor on this computer, which is the one that asks for the login
 MESSAGES = {"auth_required": "sign in first", "forbidden_role": "your role cannot do this", "account_scope": "this account is not yours", "csrf": "missing or wrong CSRF token",
             "invalid_credentials": "wrong user name or password", "locked": "too many attempts, try later", "rate": "too many requests", "bootstrap_closed": "the first administrator already exists",

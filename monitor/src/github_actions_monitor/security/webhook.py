@@ -31,6 +31,7 @@ MIN_SECRET = 32
 SECRET_ENV = "MONITOR_WEBHOOK_SECRET"      # the default name of the variable that holds the shared secret
 ENV_NAME_RE = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}\Z")
 MAX_BODY = 262144
+MAX_VERIFIED_PER_MINUTE = 120    # requests that carry a good signature one address (a tunnel is ONE address) may send per minute
 MAX_DELIVERIES = 2000        # the replay memory is bounded: the oldest delivery ids fall out first
 EVENTS = ("workflow_run", "workflow_job", "check_run", "push", "release", "check_suite", "ping")      # the closed list: any other event is answered 202 and dropped
 
@@ -41,11 +42,25 @@ def text(key):
     return i18n.t(TEXT[key])
 
 
+_frozen_name = [None]      # the name the process started with: a change of the setting is read at the next start (it is a `restart` setting), never while the process runs
+
+
 def secret_env_name(config):
-    """The NAME of the environment variable that holds the shared secret (`webhook.secret_env`); a name that is not a plain variable name falls back to MONITOR_WEBHOOK_SECRET."""
+    """The NAME of the environment variable that holds the shared secret (`webhook.secret_env`); a name that is not a plain variable name, or that belongs to the system, to the login to GitHub or
+    to another secret of the monitor (PATH, GH_TOKEN, MONITOR_ACCESS_TOKEN...), falls back to MONITOR_WEBHOOK_SECRET. Once `freeze_secret_name` ran, that name is the one."""
+    if _frozen_name[0]:
+        return _frozen_name[0]
     cfg = (config or {}).get("webhook")
     name = cfg.get("secret_env") if isinstance(cfg, dict) else None
-    return name if isinstance(name, str) and ENV_NAME_RE.match(name) else SECRET_ENV
+    return name if isinstance(name, str) and ENV_NAME_RE.match(name) and not envguard.forbidden_name(name, own=(SECRET_ENV,)) else SECRET_ENV
+
+
+def freeze_secret_name(config):
+    """Remembers the variable named at start, takes it out of the environment and keeps reading that one for the whole life of the process."""
+    _frozen_name[0] = None
+    _frozen_name[0] = secret_env_name(config)
+    envguard.hold(_frozen_name[0])
+    return _frozen_name[0]
 
 
 def read_secret(name):
@@ -89,8 +104,8 @@ def live_settings(config):
 
 
 def guard_settings(config):
-    """{"replay_seconds", "max_per_minute", "allowed_owners"}: how long a delivery id is remembered, how many accepted events one repository may cause per minute, and the owners
-    (besides github_owner) whose repositories may be named in a payload."""
+    """{"replay_seconds", "max_per_minute", "max_bad_per_minute", "allowed_owners"}: how long a delivery is remembered, how many accepted events one repository may cause per minute, how many
+    requests with a signature that does not verify one address may send per minute, and the owners (besides github_owner) whose repositories may be named in a payload."""
     cfg = (config or {}).get("webhook")
     cfg = cfg if isinstance(cfg, dict) else {}
 
@@ -98,7 +113,7 @@ def guard_settings(config):
         value = cfg.get(key)
         return value if isinstance(value, int) and not isinstance(value, bool) and low <= value <= high else default
     owners = [o for o in (cfg.get("allowed_owners") or []) if isinstance(o, str) and re.match(r"^[A-Za-z0-9-]{1,39}$", o)] if isinstance(cfg.get("allowed_owners"), list) else []
-    return {"replay_seconds": number("replay_seconds", 3600, 60, 86400), "max_per_minute": number("max_per_minute", 30, 1, 600), "allowed_owners": owners}
+    return {"replay_seconds": number("replay_seconds", 3600, 60, 86400), "max_per_minute": number("max_per_minute", 30, 1, 600), "max_bad_per_minute": number("max_bad_per_minute", 120, 1, 6000), "allowed_owners": owners}
 
 
 _guard_lock = threading.Lock()
@@ -202,19 +217,27 @@ def verify(secret, body, header):
         return False
 
 
-def handle(config, body, headers, watched):
-    """(http code, answer dict, repo or None). `headers` is any mapping with .get. Never raises."""
+def handle(config, body, headers, watched, address=None):
+    """(http code, answer dict, repo or None). `headers` is any mapping with .get. Never raises. `address` = who sent it (localguard.client_key): the requests whose signature does NOT verify are
+    counted apart (`webhook.max_bad_per_minute`) from the ones that do, so nobody can use up the allowance of the deliveries of GitHub by sending garbage from the same address or tunnel."""
+    from github_actions_monitor.security import localguard
     if not active(config):
         return 404, {"ok": False}, None
     if len(body) > MAX_BODY:
         return 413, {"ok": False, "error": text("too_big")}, None
-    if not verify(settings(config)["secret"], body, headers.get("X-Hub-Signature-256")):
-        return 401, {"ok": False, "error": text("bad_signature")}, None
     guard = guard_settings(config)
+    if not verify(settings(config)["secret"], body, headers.get("X-Hub-Signature-256")):
+        if address is not None and localguard.over_rate("webhook_bad", address, guard["max_bad_per_minute"]):
+            return 429, {"ok": False, "error": "rate"}, None
+        return 401, {"ok": False, "error": text("bad_signature")}, None
+    if address is not None and localguard.over_rate("webhook_ok", address, MAX_VERIFIED_PER_MINUTE):
+        return 429, {"ok": False, "error": "rate"}, None
     delivery = headers.get("X-GitHub-Delivery")
     if not isinstance(delivery, str) or not DELIVERY_RE.match(delivery):
         return 400, {"ok": False, "error": text("bad_delivery")}, None
-    if replay(delivery, guard["replay_seconds"]):     # a valid request captured and sent again: answered, never acted on
+    seen_id = replay(delivery, guard["replay_seconds"])
+    seen_body = replay("body:" + hashlib.sha256(body).hexdigest(), guard["replay_seconds"])      # the delivery id travels outside the signature: what is signed (the body) is remembered too
+    if seen_id or seen_body:     # a valid request captured and sent again: answered, never acted on
         return 202, {"ok": True, "ignored": True, "duplicate": True}, None
     event = headers.get("X-GitHub-Event")
     if event not in EVENTS:

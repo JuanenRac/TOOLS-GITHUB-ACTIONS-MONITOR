@@ -104,7 +104,7 @@ DEFAULTS = {
     "report_history_days": 30,   # (before 1.5.0: parte_history_days, still read)
     "sentinel": {"enabled": True},
     "ai": {"provider": "none"},
-    "webhook": {"enabled": False, "secret_env": "MONITOR_WEBHOOK_SECRET", "replay_seconds": 3600, "max_per_minute": 30},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default; the secret is only in the environment)
+    "webhook": {"enabled": False, "secret_env": "MONITOR_WEBHOOK_SECRET", "replay_seconds": 3600, "max_per_minute": 30, "max_bad_per_minute": 120},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default; the secret is only in the environment)
     "cache": {"etag": {"enabled": True, "ttl_hours": 24}},   # conditional reads: a 304 answer costs no quota (etagcache.py)
     "display": {"timezone": "local", "blink_red_tiles": True},   # blink_red_tiles: the red tiles and red items of the bar blink softly until the cause is solved; zone of the times written for people (log, reports, command line, notifications): local | utc | an IANA name such as Europe/Madrid
     "modes": {"auto_low": True, "auto_low_enter": 1000, "auto_low_exit": 2500, "low": {"refresh_seconds": 240, "cold_refresh_seconds": 1800, "runs_per_repo": 10, "hot_hours": 2}},      # see modes.py: only what is shown in the Quota tab
@@ -2295,6 +2295,15 @@ class Handler(BaseHTTPRequestHandler):
         """True when this request really comes from a person at this computer (see localguard.is_this_computer)."""
         return not self.remote_through_supervisor() and localguard.is_this_computer(self.client_address, self.headers, door=self.local_door)
 
+    def webhook_sender(self):
+        """Who sent a webhook request, for the limits: the process of an account is spoken to by its supervisor, which says who really sent it (and proves it with its key); otherwise the address of the
+        peer, or the last address a trusted proxy appended (localguard.client_key)."""
+        if os.environ.get(auth_http.CHILD_ENV):
+            key, proof, given = envguard.get(SUPERVISOR_KEY_ENV), self.headers.get(auth_http.SUPERVISOR_KEY_HEADER) or "", self.headers.get(auth_http.WEBHOOK_PEER_HEADER) or ""
+            if key and proof and hmac.compare_digest(key.encode(), proof.encode()) and 0 < len(given) <= 80:
+                return "via:" + given
+        return localguard.client_key(self.client_address, self.headers)
+
     def guard(self):
         if self.request_ok():
             return True
@@ -2490,13 +2499,10 @@ class Handler(BaseHTTPRequestHandler):
             return
         if path == "/api/webhook":   # off unless configured; no Host check (a tunnel changes it), but every request must carry a valid HMAC
             from github_actions_monitor.security import webhook
-            if localguard.STATE["network"] and localguard.over_rate("webhook", str(self.client_address[0]), 120):      # one address cannot flood the receiver
-                self.json_reply({"ok": False, "error": "rate"}, 429)
-                return
             try:
                 size = int(self.headers.get("Content-Length") or 0)
                 body = self.rfile.read(size) if 0 <= size <= webhook.MAX_BODY else b"x" * (webhook.MAX_BODY + 1)
-                code, answer, repo = webhook.handle(LIVE_CONFIG or DEFAULTS, body, self.headers, STATE["data"]["repos"] if STATE.get("data") else [])
+                code, answer, repo = webhook.handle(LIVE_CONFIG or DEFAULTS, body, self.headers, STATE["data"]["repos"] if STATE.get("data") else [], self.webhook_sender())      # bad signatures and good ones are counted apart, in every mode
                 webhook_count(code, bool(answer.get("duplicate")) if isinstance(answer, dict) else False)
                 record = webhook.parse_event(self.headers.get("X-GitHub-Event"), body) if (code == 200 and repo) else None
                 if record and webhook.live_settings(LIVE_CONFIG or DEFAULTS)["record_events"]:
@@ -3764,7 +3770,7 @@ def supervisor_main(argv):
     port = ports.from_argv(argv, "complete")
     config = toolconfig.raw_config()
     from github_actions_monitor.security import webhook as _webhook
-    envguard.hold(_webhook.secret_env_name(config))      # the secret of the webhook: held here, given to the account processes explicitly
+    envguard.hold(_webhook.secret_env_name(config), *accounts_supervisor.webhook_names())      # the secrets of the webhook of the installation (the main one and the one of each account): held here, given to each account process explicitly, one to each
     i18n.set_language(i18n.detect(config.get("language")))
     platform_compat.console_utf8()
     try:      # the same listening rules as the monitor of one account: by default only this computer; `listen.*` opens the network mode (access token, optional certificate, declared proxy)
@@ -3869,7 +3875,7 @@ def main():
     config = load_config()
     envguard.hold(localguard.settings_from(config)["token_env"])      # the access token may be under another name: it leaves the environment here too
     from github_actions_monitor.security import webhook as _webhook
-    envguard.hold(_webhook.secret_env_name(config))      # the shared secret of the webhook is read from the environment once and no program the monitor starts inherits it
+    _webhook.freeze_secret_name(config)      # the shared secret of the webhook is read from the environment once, under the name this process started with, and no program the monitor starts inherits it
     if LITE["on"]:
         config["mode"] = "full"                      # the lite edition reads as deep as the complete one: its figures must be the same
         config["sentinel"] = {"enabled": False}      # the lite product has no sentinel, whatever the file says

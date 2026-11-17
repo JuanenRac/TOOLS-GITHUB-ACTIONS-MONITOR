@@ -51,11 +51,11 @@ The Live view says how much of the time the events cover the state: **covered by
 | `413` | The body is over 256 KB. |
 | `400` | No valid `X-GitHub-Delivery` id, or a payload that is not understood. |
 | `202` | Accepted and ignored: a repository that is not watched, an event outside the list, a repeated delivery or a repository over its limit per minute. |
-| `429` | One address sent more than 120 requests in a minute (network mode). |
+| `429` | One address sent more than 120 correctly signed requests in a minute, or more than `webhook.max_bad_per_minute` (120 by default) whose signature does not verify. |
 
 ## Replays and floods
 
-A valid signed request that someone captured and sends again is answered but not acted on: every delivery needs its `X-GitHub-Delivery` id, the ids already accepted are remembered for `webhook.replay_seconds` (one hour by default, bounded memory), and a repeat gets `202 {"duplicate": true}`. (A manual re-delivery from the GitHub page reuses the id, so it is ignored inside that window.) One repository can cause at most `webhook.max_per_minute` accepted events a minute; the rest are answered and ignored. If the payload names `full_name`, its owner must be the watched account (or one listed in `webhook.allowed_owners`). In the network mode one address may send 120 requests a minute. After an accepted event the stored conditional reads of that repository are dropped and the repository is read again in the next cycle, so a live event is always reconciled with GitHub.
+A valid signed request that someone captured and sends again is answered but not acted on: every delivery needs its `X-GitHub-Delivery` id, the ids already accepted, and the signed body itself, are remembered for `webhook.replay_seconds` (one hour by default, bounded memory), so a captured request sent again with another id is the same delivery, and a repeat gets `202 {"duplicate": true}`. (A manual re-delivery from the GitHub page repeats the same body, so it is ignored inside that window.) One repository can cause at most `webhook.max_per_minute` accepted events a minute; the rest are answered and ignored. If the payload names `full_name`, its owner must be the watched account (or one listed in `webhook.allowed_owners`). One address may send 120 correctly signed requests a minute and `webhook.max_bad_per_minute` whose signature does not verify; the two are counted apart, in every mode, so garbage never uses up the allowance of the real deliveries (with `listen.trusted_proxy` the address is the one the proxy saw). After an accepted event the stored conditional reads of that repository are dropped and the repository is read again in the next cycle, so a live event is always reconciled with GitHub.
 
 ## Checklist for the Live view
 
