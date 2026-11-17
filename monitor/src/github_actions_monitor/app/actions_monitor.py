@@ -207,7 +207,8 @@ WATCH = cycle_watch.CycleWatch()      # the heartbeat of the refresh loop (phase
 SENTINEL = {"obj": None, "error": None, "registry": None}  # the CI sentinel (layer A) and the registry of all of them; a failure of any never stops the monitor
 LOCK = threading.Lock()
 ISSUE_CACHE = {"at": 0.0, "items": [], "busy": False}
-RUNNERS_SEEN = {"payload": None}      # the last answer of /api/runners: the labels that only offline runners carry explain a run that waits for ever (stuckrule.py)
+RUNNERS_MEMORY_SECONDS = 300             # how long the answer of /api/runners is kept: the same as the list the model of the runners reads
+RUNNERS_SEEN = {"payload": None, "at": 0.0}      # the last answer of /api/runners: the labels that only offline runners carry explain a run that waits for ever (stuckrule.py)
 RUN_CACHE = {}  # repo -> {"runs": [...], "at": float, "error": str|None}
 PRIVATE = set()                           # private repositories of the account (read with the listing): the only ones whose minutes cost anything
 VISIBILITY = {"known": set(), "at": 0.0}  # the repositories whose visibility (public or private) was READ from GitHub; any other one is of unknown visibility and a screen treats it as private
@@ -566,7 +567,10 @@ def rerun_seconds(repo, run):
         return TIMING["known"][key]
     if not TIMING["on"] or TIMING["budget"] <= 0:
         return None
+    if TIMING.get("limit") and BUDGET.used() >= TIMING["limit"]:      # the request is one of the hour: with the budget spent it is not made (it would be asked again at the next read)
+        return None
     TIMING["budget"] -= 1
+    BUDGET.record(1)
     try:
         body = gh_read(f"repos/{toolconfig.github_owner()}/{repo}/actions/runs/{run.get('id')}/timing", retries=0) or {}
         ms = body.get("run_duration_ms")
@@ -785,6 +789,7 @@ def refresh_runs(repos, config, progress=None):
         RATE_BLOCK["unread"] = len(todo)
         return 0
     TIMING["on"] = isinstance(config.get("ci"), dict) and config["ci"].get("rerun_timing") is True
+    TIMING["limit"] = sampling.settings(config)["api_budget_per_hour"]
     total = len(todo)
     batched = graphql_cold(config, [r for r, _n in todo if r in cold_due])
     if batched:
@@ -793,7 +798,12 @@ def refresh_runs(repos, config, progress=None):
             note_read(repo, runs, None)
         todo = [item for item in todo if item[0] not in batched]
     limit = sampling.settings(config)["api_budget_per_hour"]
-    todo, waiting = sampling.plan(todo, red_repos_of([r for r, _n in todo]) if limit else set(), limit, BUDGET.used())      # a spent budget: the repositories with red first, the others wait
+    probing = sampling.settings(config)["default_branch_probe"]
+
+    def price(item):      # a repository whose last list was full (or never read) also gets the second look at the pushes to its default branch: two requests
+        held = RUN_CACHE.get(item[0])
+        return 2 if probing and (held is None or len(held.get("runs") or []) >= item[1]) else 1
+    todo, waiting = sampling.plan(todo, red_repos_of([r for r, _n in todo]) if limit else set(), limit, BUDGET.used(), price)      # a spent budget: the repositories with red first, the others wait
     SAMPLING_STATE["dropped"] = [item[0] for item in waiting]
     for start in range(0, len(todo), 40):  # chunks, so the page can show the first results while the rest loads
         chunk = todo[start:start + 40]
@@ -3525,7 +3535,9 @@ def advanced_get(path, query):
         return {"done": done and not DEMO["on"]}
     if path == "/api/runners":
         from github_actions_monitor.integrations import runners
-        RUNNERS_SEEN["payload"] = runners.payload(config, lambda endpoint: gh_read(endpoint, retries=0), toolconfig.github_owner(config), DEMO["on"], list((STATE.get("data") or {}).get("repos") or []))
+        if RUNNERS_SEEN["payload"] is None or time.time() - RUNNERS_SEEN["at"] > RUNNERS_MEMORY_SECONDS:      # the reading goes to GitHub: a page that refreshes (or somebody who asks in a loop) is answered from memory
+            RUNNERS_SEEN["payload"] = runners.payload(config, lambda endpoint: gh_read(endpoint, retries=0), toolconfig.github_owner(config), DEMO["on"], list((STATE.get("data") or {}).get("repos") or []))
+            RUNNERS_SEEN["at"] = time.time()
         return RUNNERS_SEEN["payload"]
     if path == "/api/mirror":
         from github_actions_monitor.integrations import mirror
