@@ -208,7 +208,7 @@ def repo_item(view):
             "last_run_at": activity.get("last_run_at")}
 
 
-def repos_payload(views, ask, *, secret, now, cfg):
+def repos_payload(views, ask, *, secret, now, cfg, who=""):
     """The page of repositories asked for. `ask` = the query as a dict of text (state, ecosystem, q, limit, cursor, fields, profile). Raises ApiError for a bad parameter."""
     profile = ask.get("profile") or "full"
     if profile not in PROFILES:
@@ -216,7 +216,7 @@ def repos_payload(views, ask, *, secret, now, cfg):
     fields = parse_fields(ask.get("fields"))
     state, ecosystem, text = (ask.get("state") or "")[:20], (ask.get("ecosystem") or "")[:40], (ask.get("q") or "")[:80].lower()
     items = [repo_item(v) for v in views if v.get("repo") and (not state or v.get("state") == state) and (not ecosystem or v.get("ecosystem") == ecosystem) and (not text or text in v["repo"].lower())]
-    page = paginate(items, key=lambda i: i["repo"], endpoint="repos", filters={"state": state, "ecosystem": ecosystem, "q": text}, secret=secret, now=now, cursor=ask.get("cursor"),
+    page = paginate(items, key=lambda i: i["repo"], endpoint="repos", filters={"state": state, "ecosystem": ecosystem, "q": text, "who": who if who.strip("|") else ""}, secret=secret, now=now, cursor=ask.get("cursor"),
                     limit=ask.get("limit"), default_limit=cfg["default_limit"], max_limit=cfg["max_limit"], ttl=cfg["cursor_ttl_seconds"])
     return {"schema": 1, "api_version": API_VERSION, "total": len(items), "limit": page["limit"], "next_cursor": page["next_cursor"],
             "items": [project(i, "repos", fields, profile) for i in page["items"]]}

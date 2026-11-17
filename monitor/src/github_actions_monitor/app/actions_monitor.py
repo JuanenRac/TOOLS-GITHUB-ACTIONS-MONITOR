@@ -2680,9 +2680,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         self.v1 = False
-        if not self.v1_enter():
+        if not self.access_gate():      # the access token first: the 404 of a switch that is off does not tell a visitor without credentials whether the versioned API exists
             return
-        if not self.access_gate() or not auth_http.gate(self, LIVE_CONFIG or DEFAULTS, LITE["on"]):
+        if not self.v1_enter() or not auth_http.gate(self, LIVE_CONFIG or DEFAULTS, LITE["on"]):
             return
         with i18n.use_language(self.request_language()):
             if self.v1 and self.path.split("?")[0] in api_v1.OWN_ROUTES:
@@ -2721,7 +2721,7 @@ class Handler(BaseHTTPRequestHandler):
                 payload = api_v1.me_payload(version=TOOL_VERSION, edition="complete", mode="team" if team else "individual", authenticated=bool(context), user=auth_http.acting_user(self),
                                             role=context["role"] if context else None, accounts=context["accounts"] if context else None, cfg=cfg)
             else:
-                payload = api_v1.repos_payload(health_views(), ask, secret=V1_SECRET, now=time.time(), cfg=cfg)
+                payload = api_v1.repos_payload(health_views(), ask, secret=V1_SECRET, now=time.time(), cfg=cfg, who=f"{auth_http.acting_user(self) or ''}|{CHILD['account'] or ''}")      # a cursor belongs to who asked for it
         except api_v1.ApiError as error:
             status, body = error.envelope()
             self.json_reply(body, status)
