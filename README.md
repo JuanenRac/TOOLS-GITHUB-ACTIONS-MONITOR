@@ -68,7 +68,7 @@
 
 | | |
 |---|---|
-| **Version** | **2.0.7** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **2.0.8** · [all releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Needs** | Python 3.11+ and the GitHub CLI (`gh auth login`); nothing else (the terminal view uses the optional package `rich`) |
 | **Opens** | a page on `127.0.0.1` only, in eight languages |
 | **Writes to GitHub** | never by itself: only batch commands you run with an explicit `--go` |
@@ -76,7 +76,7 @@
 
 <!-- glance:begin -->
 
-**Measured today** (v2.0.7)
+**Measured today** (v2.0.8)
 
 | | |
 |---|---|
@@ -94,7 +94,7 @@ Each line is one part of this repository and the light says how far it is today:
 
 | Area | State | What it means here |
 |---|---|---|
-| Monitor and page | 🟢 | Runs every day on a real account; the tests run in the CI on three systems. |
+| Monitor and page | 🟢 | Runs every day on a real account; the tests run in the CI on Ubuntu and Windows. |
 | Sentinel (A1..A13) | 🟢 | Runs every day on a real account; its levels and rows are tested with fixtures. |
 | Notifications | 🟡 | Tested against simulated servers; not every channel has been tried against the real service. |
 | Connection with an AI tool and MCP | 🟡 | The feed, the state, the stream, the hook and the MCP tools are tested with a real server and a simulated client; no independent user has run them yet. |
@@ -104,7 +104,7 @@ Each line is one part of this repository and the light says how far it is today:
 | Docker image and service mode | 🟡 | The image is built and tested in the CI (non-root, read-only, a revoked login); little time yet as a long-lived service. |
 | Team mode and several accounts | 🟡 | Tested with real processes and simulated users; a real team has not used it for long. |
 | Storage (files and SQLite) | 🟡 | Tested with both backends and the migrations between them; a database that is months old has not been through an upgrade yet. |
-| Linux and macOS | 🟠 | Tested in the CI only; the daily use is on Windows. |
+| Linux and macOS | 🟠 | Linux is tested in the CI only; macOS is not tested in the CI for now; the daily use is on Windows. |
 
 <!-- glance:end -->
 

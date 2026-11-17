@@ -16,7 +16,11 @@ Ciò che emerge solo con un uso reale prolungato: la migrazione dalla 1.8 e dall
 
 I workflow del monitor stesso rispettano ciò che la sentinella di igiene chiederà agli altri: azioni fissate a un commit, permessi minimi e un limite di tempo su ogni job.
 
-## Fatto dalla 1.8.2 alla 2.0.7
+## Fatto dalla 1.8.2 alla 2.0.8
+
+### 2.0.8 - Un segreto del webhook più sicuro, check run e una guida per configurare il webhook (la versione che chiude la quarta fase)
+
+Il segreto condiviso del webhook in ingresso viaggia solo nell'ambiente (o in un file che l'impostazione nomina), il webhook accetta anche gli eventi di check run, la vista Dal vivo dice quanta parte del tempo coprono gli eventi, e una guida in otto idiomi (`docs/WEBHOOK.md`) configura il webhook in GitHub passo per passo. Gli studi di account reali aggiungono tre righe: un workflow il cui file è stato eliminato non è attivabile, un fork mai spinto non è spinto di recente, e il runner `codspeed` è riconosciuto come runner di terzi a pagamento. I documenti non dicono più che macOS gira nel CI. È la versione che chiude la quarta fase: una versione di stabilizzazione prima dell'audit.
 
 ### 2.0.7 - Un'API di lettura per i client, il repository originale di ogni fork e i workflow disattivati a mano
 

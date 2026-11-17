@@ -68,7 +68,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 
 | | |
 |---|---|
-| **Versão** | **2.0.7** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versão** | **2.0.8** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Requisitos** | Python 3.11+ e a CLI do GitHub (`gh auth login`); mais nada (a vista de consola usa o pacote opcional `rich`) |
 | **Abre** | uma página só em `127.0.0.1`, em oito idiomas |
 | **Escreve no GitHub** | nunca sozinho: apenas os comandos por lotes que lançar com um `--go` explícito |
@@ -76,7 +76,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 
 <!-- glance:begin -->
 
-**Medido hoje** (v2.0.7)
+**Medido hoje** (v2.0.8)
 
 | | |
 |---|---|
@@ -94,7 +94,7 @@ Cada linha é uma parte deste repositório e a luz diz até onde chega hoje: o q
 
 | Área | Estado | O que significa aqui |
 |---|---|---|
-| Monitor e página | 🟢 | Corre todos os dias numa conta real; os testes correm no CI em três sistemas. |
+| Monitor e página | 🟢 | Corre todos os dias numa conta real; os testes correm no CI em Ubuntu e Windows. |
 | Sentinela (A1..A13) | 🟢 | Corre todos os dias numa conta real; os níveis e linhas são testados com fixtures. |
 | Notificações | 🟡 | Testadas contra servidores simulados; nem todos os canais foram experimentados com o serviço real. |
 | Ligação a uma ferramenta de IA e MCP | 🟡 | O feed, o estado, o fluxo, o hook e as ferramentas MCP são testados com um servidor real e um cliente simulado; nenhum utilizador independente os usou ainda. |
@@ -104,7 +104,7 @@ Cada linha é uma parte deste repositório e a luz diz até onde chega hoje: o q
 | Imagem Docker e modo de serviço | 🟡 | A imagem é construída e testada na CI (sem root, só de leitura, com um acesso revogado); ainda pouco tempo como serviço de longa duração. |
 | Modo de equipa e várias contas | 🟡 | Testado com processos reais e utilizadores simulados; uma equipa real ainda não o usou durante muito tempo. |
 | Armazenamento (ficheiros e SQLite) | 🟡 | Testado com os dois suportes e as migrações entre eles; uma base de dados com meses ainda não passou por uma atualização. |
-| Linux e macOS | 🟠 | Testados só no CI; o uso diário é no Windows. |
+| Linux e macOS | 🟠 | O Linux é testado só no CI; o macOS não é testado no CI por agora; o uso diário é no Windows. |
 
 <!-- glance:end -->
 

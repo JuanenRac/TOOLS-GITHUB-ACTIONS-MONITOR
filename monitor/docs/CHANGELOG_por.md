@@ -9,6 +9,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+## [2.0.8]
+
 ### Segurança
 
 - **O segredo partilhado do webhook de entrada só viaja pelo ambiente (`webhook.secret_env`, `MONITOR_WEBHOOK_SECRET` por omissão)**: era um texto em `actions_monitor.json`, onde uma cópia de segurança, uma configuração copiada ou um ecrã partilhado o podiam revelar. O recetor lê-o agora da variável de ambiente indicada por `webhook.secret_env` (ou do ficheiro nomeado por essa variável mais `_FILE`, como um contentor entrega um segredo), o monitor retira-o do seu próprio ambiente depois de o ler para que os programas que lança não o herdem, e um segredo escrito no ficheiro é ignorado. A forma antiga pode manter-se para uma migração com `webhook.allow_config_secret` (só no ficheiro, desligado por omissão) e a vista em direto avisa enquanto for usada. O separador Definições mostra o nome da variável e se o segredo está definido, nunca o segredo.
@@ -24,6 +26,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Corrigido
 
+- **Os documentos já não dizem que o macOS corre no CI**: o README e as suas sete traduções diziam que os testes correm no CI em três sistemas e que o Linux e o macOS são testados no CI; como o CI só testa em Ubuntu e Windows (o macOS será retomado mais tarde), passam a dizê-lo assim.
 - **Um workflow cujo ficheiro foi apagado não conta entre os workflows que se podem ativar**: o GitHub mantém na lista o histórico de um workflow apagado com o caminho vazio (seis dos 96 repositórios públicos estudados têm um), e a verificação de higiene oferecia-o como um workflow desativado à mão. Agora fica fora das listas que precisam de um ficheiro.
 - **Um fork que nunca recebeu um push não está «com push recente»**: um fork herda a data de push do seu upstream ao ser criado (693 dos 722 forks de uma conta medida têm-na anterior à sua própria criação), pelo que a sentinela tomava cada fork novo pelo repositório mais ativo da conta e lia-o como quente. A data de push de um fork é agora ignorada enquanto não for posterior à sua criação.
 

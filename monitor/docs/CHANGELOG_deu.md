@@ -9,6 +9,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+## [2.0.8]
+
 ### Sicherheit
 
 - **Das gemeinsame Geheimnis des eingehenden Webhooks reist nur noch in der Umgebung (`webhook.secret_env`, standardmäßig `MONITOR_WEBHOOK_SECRET`)**: Es war ein Text in `actions_monitor.json`, wo eine Sicherung, eine kopierte Konfiguration oder ein geteilter Bildschirm es preisgeben konnten. Der Empfänger liest es jetzt aus der Umgebungsvariable, die `webhook.secret_env` nennt (oder aus der Datei, die diese Variable plus `_FILE` nennt, so wie ein Container ein Secret übergibt), der Monitor entfernt es nach dem Lesen aus seiner eigenen Umgebung, damit die Programme, die er startet, es nicht erben, und ein in die Datei geschriebenes Geheimnis wird ignoriert. Der alte Weg kann für eine Migration mit `webhook.allow_config_secret` beibehalten werden (nur in der Datei, standardmäßig aus), und die Live-Ansicht warnt, solange er benutzt wird. Der Reiter Einstellungen zeigt den Namen der Variable und ob das Geheimnis definiert ist, nie das Geheimnis.
@@ -24,6 +26,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Behoben
 
+- **Die Dokumente sagen nicht mehr, dass macOS im CI läuft**: die README und ihre sieben Übersetzungen sagten, die Tests liefen im CI auf drei Systemen und Linux und macOS würden im CI getestet; da das CI nur auf Ubuntu und Windows testet (macOS wird später wieder aufgenommen), sagen sie es jetzt so.
 - **Ein Workflow, dessen Datei gelöscht wurde, zählt nicht zu den Workflows, die man aktivieren kann**: GitHub behält den Verlauf eines gelöschten Workflows mit leerem Pfad in der Liste (sechs der 96 untersuchten öffentlichen Repositories haben einen), und die Hygieneprüfung bot ihn als von Hand deaktivierten Workflow an. Er bleibt jetzt aus den Listen heraus, die eine Datei brauchen.
 - **Ein Fork, in den nie gepusht wurde, ist nicht „kürzlich gepusht“**: Ein Fork erbt beim Anlegen das Push-Datum seines Upstreams (693 der 722 Forks eines gemessenen Kontos haben es vor ihrer eigenen Erstellung), sodass der Wächter jeden neuen Fork für das aktivste Repository des Kontos hielt und als heiß las. Das Push-Datum eines Forks wird jetzt ignoriert, solange es nicht neuer als seine Erstellung ist.
 
