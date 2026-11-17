@@ -50,7 +50,7 @@ class WebhookRate(unittest.TestCase):
     def test_the_limit_is_counted_against_the_visitor_behind_a_trusted_proxy(self):
         for name in ("accounts/accounts_supervisor.py", "app/actions_monitor.py"):
             text = (SOURCE / name).read_text(encoding="utf-8")
-            self.assertIn('localguard.over_rate("webhook", localguard.client_key(self.client_address, self.headers), 120)', text, name)
+            self.assertIn("localguard.client_key(self.client_address, self.headers)", text, name)      # the limits of the webhook (counted inside webhook.handle) are told who the visitor is by the key behind a trusted proxy
             self.assertNotIn('over_rate("webhook", str(self.client_address[0])', text, name)
 
     def test_two_visitors_behind_the_proxy_have_two_budgets(self):
