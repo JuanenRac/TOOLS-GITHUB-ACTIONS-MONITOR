@@ -490,6 +490,7 @@ function paint(d){
   else if(m.paused)banner("warn",T("ui.scr_paused"));
   else banner(null);
   $("stage").style.opacity="";
+  setTimeout(()=>document.querySelectorAll(".list,.ticker").forEach(fit),400);      /* the type may arrive after the first layout: fit the rows again */
 }
 async function load(){
   clearTimeout(STATE.timer);

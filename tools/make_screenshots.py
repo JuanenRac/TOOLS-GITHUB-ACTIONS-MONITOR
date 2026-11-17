@@ -74,7 +74,7 @@ def free_port():
         return probe.getsockname()[1]
 
 
-def shot(url, target, size, tries=3):
+def shot(url, target, size, tries=3, flags=()):
     """One headless screenshot with its own temporary profile; tried again when Edge leaves no file (it sometimes does right after another run)."""
     for attempt in range(tries):
         profile = tempfile.mkdtemp(prefix="ghamon_edge_")
@@ -82,7 +82,7 @@ def shot(url, target, size, tries=3):
         try:
             # Popen with its output sent to the null device and an explicit kill on timeout: with capture_output a browser that leaves a helper process alive keeps the pipe open and
             # subprocess.run waited for ever (or raised after the time limit, which ended the whole script without a word).
-            child = subprocess.Popen([edge(), "--headless=new", f"--user-data-dir={profile}", "--disable-gpu", "--hide-scrollbars", "--autoplay-policy=no-user-gesture-required", "--virtual-time-budget=9000", f"--window-size={size[0]},{size[1]}",
+            child = subprocess.Popen([edge(), "--headless=new", f"--user-data-dir={profile}", "--disable-gpu", "--hide-scrollbars", "--autoplay-policy=no-user-gesture-required", *flags, "--virtual-time-budget=9000", f"--window-size={size[0]},{size[1]}",
                                       f"--screenshot={target}", url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
             try:
                 child.wait(timeout=60)
@@ -212,7 +212,7 @@ def main():
         if args.web or both:
             for name, path, size in SCREEN_WEB:
                 if wanted(f"web_{name}"):
-                    shot(f"http://127.0.0.1:{port}{path}", str(OUT / f"web_{name}.png"), size)
+                    shot(f"http://127.0.0.1:{port}{path}", str(OUT / f"web_{name}.png"), size, flags=("--force-prefers-reduced-motion",))      # the entrance of the cards is an animation: the picture is taken with the page at rest
                     print("web", name, flush=True)
         if args.web or both:
             for _ in range(60):
