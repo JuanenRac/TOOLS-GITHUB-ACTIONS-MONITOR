@@ -9,6 +9,13 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+## [2.0.4]
+
+### Adicionado
+
+- **Um modelo para cada tarefa, uma cadeia de reservas e um orçamento para cada modelo, para a IA do monitor** (tudo desativado até ser escrito nas definições, e apenas entre os fornecedores que nomear): `ai.tasks.build.model` (e o mesmo para `codeql`, `report`, `diagnose` e `alert`, cada um com o seu fornecedor e os seus limites) faz outro modelo responder a esse tipo de pergunta; `ai.fallback` enumera os modelos tentados por ordem quando o principal falha (qualquer erro, uma chave recusada, um modelo que não existe, um erro de quota, ou uma resposta lenta se `ai.fallback_after_seconds` estiver definido) ou saiu do catálogo, e `ai.fallback_max_attempts` limita toda a cadeia; as chamadas por dia de cada modelo (`ai.model_daily_limit`) e o custo estimado de cada modelo e no total (`ai.model_cost_limit_daily`, `ai.cost_limit_daily`, só quando os preços são conhecidos) são orçamentos além de `ai.daily_limit`, e um modelo cujo orçamento acabou é saltado, nunca ultrapassado. A primeira falha do modelo principal é escrita no registo e no resumo com o seu motivo. Sem nada definido, responde, como antes, o único modelo geral.
+- **Alertas, Relatórios e Lições são três entradas do menu da esquerda**: os relatórios opcionais e as lições das falhas eram secções no fim do separador Alertas; cada um tem agora a sua própria entrada com o seu ícone, o seu distintivo (relatórios: repositórios com achados e releases bloqueadas; lições: as que se aplicam agora) e o seu endereço (`#reports`, `#lessons`, também `?view=reports` e `?view=lessons`). Nada se perdeu nem se repetiu, os endereços antigos (`#alerts`, `#alerts/reports`, `#al/lessons`) abrem o painel certo, um painel de relatórios sem nenhum ativado di-lo em vez de desaparecer, e os ecrãs podem listar os novos separadores em `ui.screen1_tabs` (`rep`, `les`). Os guias nomeiam as novas entradas do menu nos oito idiomas.
+
 ### Corrigido
 
 - **«Ajuda deste separador» abre em todos os separadores o tema do separador aberto**: ao mapa de separador para tema faltavam os separadores Alertas e Equipa, e Repositórios e Histórico iam para o primeiro tema da ajuda («GitHub Actions Monitor»). Agora é uma única tabela (`TAB_TOPICS`) com uma entrada por cada separador do menu lateral, e um teste falha se um separador não tiver tema ou tiver um que não existe. Um teste num navegador percorre todos os separadores e prime o botão.

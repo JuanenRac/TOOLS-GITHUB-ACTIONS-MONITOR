@@ -9,6 +9,13 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+## [2.0.4]
+
+### Aggiunto
+
+- **Un modello per ogni compito, una catena di riserve e un budget per ogni modello, per l'IA del monitor** (tutto disattivato finché non lo scrivi nelle impostazioni, e solo tra i fornitori che nomini): `ai.tasks.build.model` (e lo stesso per `codeql`, `report`, `diagnose` e `alert`, ciascuno con il proprio fornitore e i propri limiti) fa rispondere un altro modello a quel tipo di domanda; `ai.fallback` elenca i modelli provati in ordine quando il principale fallisce (qualsiasi errore, una chiave rifiutata, un modello inesistente, un errore di quota, o una risposta lenta se è impostato `ai.fallback_after_seconds`) o è uscito dal catalogo, e `ai.fallback_max_attempts` limita l'intera catena; le chiamate al giorno di ogni modello (`ai.model_daily_limit`) e il costo stimato di ogni modello e in totale (`ai.model_cost_limit_daily`, `ai.cost_limit_daily`, solo quando i prezzi sono noti) sono budget in aggiunta a `ai.daily_limit`, e un modello con il budget esaurito viene saltato, mai superato. Il primo errore del modello principale viene scritto nel registro e nel riepilogo con il suo motivo. Senza nulla impostato risponde, come prima, il solo modello generale.
+- **Avvisi, Rapporti e Lezioni sono tre voci del menu a sinistra**: i rapporti facoltativi e le lezioni dai guasti erano sezioni in fondo alla scheda Avvisi; ognuno ha ora la propria voce con la propria icona, il proprio badge (rapporti: repository con rilievi e release bloccate; lezioni: quelle che si applicano adesso) e il proprio indirizzo (`#reports`, `#lessons`, anche `?view=reports` e `?view=lessons`). Nulla è andato perso o ripetuto, i vecchi indirizzi (`#alerts`, `#alerts/reports`, `#al/lessons`) aprono il pannello giusto, un pannello dei rapporti senza nessuno attivato lo dice invece di sparire, e gli schermi possono elencare le nuove schede in `ui.screen1_tabs` (`rep`, `les`). Le guide nominano le nuove voci del menu negli otto idiomi.
+
 ### Corretto
 
 - **«Aiuto di questa scheda» apre in ogni scheda l'argomento della scheda aperta**: nella mappa da scheda ad argomento mancavano le schede Avvisi e Team, e Repository e Cronologia portavano al primo argomento dell'aiuto («GitHub Actions Monitor»). Ora è un'unica tabella (`TAB_TOPICS`) con una voce per ogni scheda del menu laterale, e un test fallisce se una scheda non ha un argomento o ne ha uno inesistente. Un test in un browser percorre tutte le schede e preme il pulsante.

@@ -16,7 +16,11 @@ Lo que solo aparece con un uso real prolongado: la migración desde la 1.8 y la 
 
 Los workflows del propio monitor cumplen lo que el centinela de higiene pedirá a los demás: acciones fijadas a un commit, los permisos mínimos y un límite de tiempo en cada trabajo.
 
-## Hecho en la 1.8.2 a la 2.0.3
+## Hecho en la 1.8.2 a la 2.0.4
+
+### 2.0.4 - Un modelo para cada tarea, menús independientes y una ayuda que abre el tema correcto
+
+La IA del monitor puede usar un modelo para cada tipo de tarea, una cadena de respaldos cuando falla el modelo principal y un presupuesto para cada modelo, todo desactivado hasta escribirlo en los ajustes; Alertas, Informes y Lecciones son tres entradas independientes del menú, cada una con su panel, insignia, tema de ayuda y dirección; la pestaña Historia mantiene un solo contador en vez de acumular copias en cada refresco; el botón «Ayuda de esta pestaña» abre en todas las pestañas el tema de la pestaña abierta; y las pruebas del navegador se omiten limpiamente cuando falta la carpeta de herramientas.
 
 ### 2.0.3 - Cuentas grandes, menos falsos rojos, linter sin clones y un almacenamiento más seguro
 

@@ -21,7 +21,11 @@ What only shows with long real use: the migration from 1.8 and 1.9, the growth o
 
 The monitor's own workflows keep to what the hygiene sentinel will ask of others: actions pinned to a commit, the least permissions and a time limit on every job.
 
-## Done in 1.8.2 to 2.0.3
+## Done in 1.8.2 to 2.0.4
+
+### 2.0.4 - A model for each task, independent menus and a help that opens the right topic
+
+The AI of the monitor can use a model for each kind of task, a chain of fallbacks when the main model fails and a budget for each model, all off until written in the settings; Alerts, Reports and Lessons are three independent entries of the menu, each with its own panel, badge, help topic and address; the History tab keeps one count instead of piling up copies at every refresh; the button "Help of this tab" opens the topic of the open tab in every tab; and the tests of the browser skip cleanly when the tools folder is not there.
 
 ### 2.0.3 - Large accounts, fewer false reds, linting without clones and safer storage
 

@@ -16,7 +16,11 @@ Ce qui n'apparaît qu'à l'usage réel prolongé : la migration depuis la 1.8 et
 
 Les workflows du moniteur lui-même respectent ce que la sentinelle d'hygiène demandera aux autres : actions fixées à un commit, permissions minimales et une limite de temps sur chaque job.
 
-## Fait dans la 1.8.2 à la 2.0.3
+## Fait dans la 1.8.2 à la 2.0.4
+
+### 2.0.4 - Un modèle par tâche, des menus indépendants et une aide qui ouvre le bon sujet
+
+L'IA du moniteur peut utiliser un modèle pour chaque type de tâche, une chaîne de secours quand le modèle principal échoue et un budget pour chaque modèle, le tout désactivé tant que ce n'est pas écrit dans les réglages ; Alertes, Rapports et Leçons sont trois entrées indépendantes du menu, chacune avec son panneau, son badge, son sujet d'aide et son adresse ; l'onglet Historique garde un seul compteur au lieu d'accumuler des copies à chaque rafraîchissement ; le bouton « Aide de cet onglet » ouvre dans chaque onglet le sujet de l'onglet ouvert ; et les tests du navigateur sont ignorés proprement quand le dossier des outils est absent.
 
 ### 2.0.3 - Gros comptes, moins de faux rouges, lint sans clones et stockage plus sûr
 

@@ -9,6 +9,13 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+## [2.0.4]
+
+### Añadido
+
+- **Un modelo para cada tarea, una cadena de respaldos y un presupuesto para cada modelo, para la IA del monitor** (todo desactivado hasta escribirlo en los ajustes, y solo entre los proveedores que tú nombres): `ai.tasks.build.model` (y lo mismo para `codeql`, `report`, `diagnose` y `alert`, cada uno con su proveedor y sus límites) hace que otro modelo conteste esa clase de pregunta; `ai.fallback` enumera los modelos que se prueban en orden cuando falla el principal (cualquier error, una clave rechazada, un modelo que no existe, un error de cuota o una respuesta lenta si se fija `ai.fallback_after_seconds`) o cuando salió del catálogo, y `ai.fallback_max_attempts` limita toda la cadena; las llamadas al día de cada modelo (`ai.model_daily_limit`) y el coste estimado de cada modelo y en total (`ai.model_cost_limit_daily`, `ai.cost_limit_daily`, solo cuando se conocen los precios) son presupuestos añadidos a `ai.daily_limit`, y un modelo cuyo presupuesto se agotó se omite, nunca se salta. El primer fallo del modelo principal se escribe en el registro y en el resumen con su motivo. Sin nada configurado contesta el único modelo general, como antes.
+- **Alertas, Informes y Lecciones son tres entradas del menú de la izquierda**: los informes opcionales y las lecciones de los fallos eran secciones al final de la pestaña Alertas; cada uno tiene ahora su propia entrada con su icono, su insignia (informes: repositorios con hallazgos y releases bloqueadas; lecciones: las que se aplican ahora) y su dirección (`#reports`, `#lessons`, también `?view=reports` y `?view=lessons`). No se perdió ni se repitió nada, las direcciones antiguas (`#alerts`, `#alerts/reports`, `#al/lessons`) abren el panel correcto, un panel de informes sin ninguno activado lo dice en vez de desaparecer, y las pantallas pueden listar las pestañas nuevas en `ui.screen1_tabs` (`rep`, `les`). Las guías nombran las entradas nuevas del menú en los ocho idiomas.
+
 ### Corregido
 
 - **«Ayuda de esta pestaña» abre en todas las pestañas el tema de la pestaña abierta**: al mapa de pestaña a tema le faltaban las pestañas Alertas y Equipo y mandaba Repositorios e Historial al primer tema de la ayuda («GitHub Actions Monitor»). Ahora es una única tabla (`TAB_TOPICS`) con una entrada por cada pestaña del menú lateral, y una prueba falla si una pestaña no tiene tema o tiene uno que no existe. Una prueba en un navegador recorre todas las pestañas y pulsa el botón.
