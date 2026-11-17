@@ -16,7 +16,11 @@ Ce qui n'apparaît qu'à l'usage réel prolongé : la migration depuis la 1.8 et
 
 Les workflows du moniteur lui-même respectent ce que la sentinelle d'hygiène demandera aux autres : actions fixées à un commit, permissions minimales et une limite de temps sur chaque job.
 
-## Fait dans la 1.8.2 à la 2.0.4
+## Fait dans la 1.8.2 à la 2.0.5
+
+### 2.0.5 - Moins de faux rouges, des dépôts dormants et des questions visibles en plein écran
+
+Un rouge compte désormais selon l'origine de l'événement : les workflows que GitHub crée pour lui-même (`dynamic/`) ne sont ni du CI rouge ni des fichiers, la recherche d'un workflow caché suit la même règle d'origine, les exécutions en file pendant des jours sont reconnues comme une file fantôme (7 jours par défaut) et un rouge dont personne ne s'occupe vieillit après 30 jours et devient inactif ; les dépôts dormants et inactifs sont un état à part, ni verts ni rouges ; les forks n'entrent dans l'hygiène, le lint et le score que s'ils ont leur propre CI dans les 90 derniers jours ; la protection de la branche par défaut est jugée par défaut sur ce qui est en vigueur, depuis toutes les sources publiques ; et les cinq confirmations de la page utilisent un dialogue de la page visible en plein écran.
 
 ### 2.0.4 - Un modèle par tâche, des menus indépendants et une aide qui ouvre le bon sujet
 
