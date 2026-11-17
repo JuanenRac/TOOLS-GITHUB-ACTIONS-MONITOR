@@ -116,7 +116,7 @@ def page_data(kind, cfg, prm, lang=None):
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 class Names:
-    """What a repository is called on a screen. `meta` is the repo_meta of the cycle ({repo: {"private": bool}})."""
+    """What a repository is called on a screen. `meta` is the repo_meta of the cycle ({repo: {"private": True, False or None}})."""
 
     def __init__(self, repos, meta, mode):
         self.mode = mode if mode in NAMES else "public"
@@ -129,7 +129,7 @@ class Names:
             return False
         if self.mode == "none":
             return True
-        return bool((self.meta.get(repo) or {}).get("private", True))      # unknown = treated as private
+        return (self.meta.get(repo) or {}).get("private") is not False      # only a visibility that was READ as public shows the name: missing or unknown = private
 
     def name(self, repo):
         if not self.hidden(repo):
