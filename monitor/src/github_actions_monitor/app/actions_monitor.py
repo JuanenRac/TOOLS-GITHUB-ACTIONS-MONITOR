@@ -210,6 +210,7 @@ ISSUE_CACHE = {"at": 0.0, "items": [], "busy": False}
 RUNNERS_SEEN = {"payload": None}      # the last answer of /api/runners: the labels that only offline runners carry explain a run that waits for ever (stuckrule.py)
 RUN_CACHE = {}  # repo -> {"runs": [...], "at": float, "error": str|None}
 PRIVATE = set()                           # private repositories of the account (read with the listing): the only ones whose minutes cost anything
+VISIBILITY = {"known": set(), "at": 0.0}  # the repositories whose visibility (public or private) was READ from GitHub; any other one is of unknown visibility and a screen treats it as private
 QUOTA_ALERTS = None
 DISCOVERED = {"at": 0.0, "names": [], "snapshot": {}}
 FORKS = {"known": {}, "kind": None, "kind_at": 0.0, "checked": 0, "kept": 0, "left": 0, "waiting": 0}      # fork_policy: what is known about the CI of each fork (memory only)
@@ -454,11 +455,27 @@ def ecosystem_of(name):
     return toolconfig.ecosystem_of(name)
 
 
+def read_visibility(config, force=False):
+    """With a list of repositories written by hand nothing tells which ones are private: read it once per `discover_refresh_seconds` with one listing of the account (names and visibility). Whatever fails
+    leaves the visibility unknown, which is the same as private for everything that shows a name to other people; the listing is never retried before the next refresh time."""
+    if not force and time.time() - VISIBILITY["at"] <= config["discover_refresh_seconds"]:
+        return
+    VISIBILITY["at"] = time.time()
+    try:
+        data = gh("repo", "list", toolconfig.github_owner(config), "--limit", str(config.get("discover_limit", 1000)), "--json", "name,isPrivate", retries=0) or []
+    except Exception:   # noqa: BLE001 - a failed reading only leaves the visibility unknown
+        return
+    PRIVATE.clear()
+    PRIVATE.update(item["name"] for item in data if isinstance(item, dict) and item.get("isPrivate"))
+    VISIBILITY["known"] = {item["name"] for item in data if isinstance(item, dict) and isinstance(item.get("name"), str) and "isPrivate" in item}
+
+
 def watched_repos(config, force=False):
     """The list from the config file or, with "repos": "all", the repositories of the account (one call, cached)."""
     wanted = config["repos"]
     if wanted != "all":
         names = list(wanted)
+        read_visibility(config, force)
     else:
         if force or time.time() - DISCOVERED["at"] > config["discover_refresh_seconds"] or not DISCOVERED["names"]:
             limit = str(config.get("discover_limit", 1000))
@@ -471,6 +488,7 @@ def watched_repos(config, force=False):
             rules = discovery.settings(config)
             PRIVATE.clear()
             PRIVATE.update(item["name"] for item in data if item.get("isPrivate"))
+            VISIBILITY["known"] = {item["name"] for item in data if "isPrivate" in item}      # the plain listing of an older gh has no such field: nothing is known then
             snapshot = {item["name"]: {"archived": bool(item.get("isArchived"))} for item in data}
             if rules["events"]:
                 found = discovery.diff(DISCOVERED.get("snapshot"), snapshot)
@@ -964,7 +982,7 @@ def collect(config, publish=None):
 
 
 def repo_meta(repos, config=None):
-    """{repo: {"private": bool, "branch": str or None, "pushed": ISO or None, "prs": int or None}} for the columns of the Repositories table. The visibility comes from the listing the monitor already
+    """{repo: {"private": True, False or None (not read: treated as private), "branch": str or None, "pushed": ISO or None, "prs": int or None}} for the columns of the Repositories table. The visibility comes from the listing the monitor already
     reads; the rest from the CI sentinel when it has looked (the lite edition has none: those fields are None). Nothing new is read from GitHub."""
     info = {}
     sentinel = SENTINEL.get("obj")
@@ -976,7 +994,7 @@ def repo_meta(repos, config=None):
     for repo in repos:
         item = info.get(repo) if isinstance(info.get(repo), dict) else {}
         prs = item.get("prs")
-        out[repo] = {"private": repo in PRIVATE, "branch": item.get("branch") or None, "pushed": item.get("pushed") or None, "prs": len(prs) if isinstance(prs, list) else None, "fork": item.get("fork") is True}
+        out[repo] = {"private": True if repo in PRIVATE else (False if repo in VISIBILITY["known"] else None), "branch": item.get("branch") or None, "pushed": item.get("pushed") or None, "prs": len(prs) if isinstance(prs, list) else None, "fork": item.get("fork") is True}
         cached = RUN_CACHE.get(repo)
         if cached and cached.get("runs") is not None and cached.get("at"):
             info = SAMPLE_INFO.get(repo) or {}
