@@ -13,6 +13,34 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - **O token de acesso já não viaja no endereço por defeito (`listen.query_access` está agora desligado)**: no modo de rede o endereço com `?access=` abria a sessão, mas o token ficava no histórico, nos registos e no `Referer`. A definição está agora desligada, a menos que a ligue (o valor por defeito, o ficheiro de exemplo e a ajuda das Definições dizem-no); a sessão abre-se com `POST /api/access` (o token no corpo) ou com o cabeçalho `X-Monitor-Access`. Uma instalação que escreveu `listen.query_access` mantém o seu valor; a que dependia do valor antigo e abre o monitor a partir de um endereço com `?access=` tem de ligar a definição ou usar `POST /api/access`. A variável de ambiente `MONITOR_QUERY_ACCESS=1` liga-a para um serviço.
 
+### Corrigido
+
+- **O ramo, a marca de fork, o último push e os PR de um repositório chegam a todos os repositórios, não só ao primeiro**: com as execuções já em memória (desde o primeiro ciclo), uma variável reutilizada na tabela das colunas dos repositórios fazia com que todos menos o primeiro perdessem o que a sentinela sabia deles. Os forks sem CI própria não eram reconhecidos como tal, por isso os seus crons herdados entravam na pontuação e o número de forks inativos valia 1; e uma CI vermelha num ramo por defeito que não é main nem master podia ficar fora da lista de falhas abertas e da saúde da equipa. A pontuação deixa agora de fora o conjunto inteiro de forks inativos (não só os 200 que a página mostra).
+
+- **A saúde da equipa e da frota conta todas as execuções do ciclo, não só as 600 mais recentes da conta**: com 250 repositórios ativos, 215 diziam «sem dados» porque as suas execuções não cabiam no corte que a página recebe. As execuções, as falhas das últimas 24 horas e as execuções da semana passam a contar-se por repositório antes do corte, pelo que uma conta com muita atividade mostra como saudáveis os seus repositórios saudáveis.
+
+- **Um vermelho cujo workflow continua a ser executado deixa de envelhecer até «inativo»**: uma falha mais antiga do que a idade (30 dias por defeito) era escondida mesmo quando execuções posteriores do mesmo workflow tinham sido canceladas, estavam em curso ou à espera de aprovação. Agora só envelhece um workflow que não foi executado de todo desde a falha, e um workflow cujo período natural é maior do que a idade (um cron mensal que falha sempre) espera o dobro do seu intervalo habitual antes de o fazer.
+
+- **Restos do armazenamento no Windows e com ficheiros danificados**: o estado dos relatórios deixa de ser escrito de volta depois de uma leitura falhada (perdia as outras contas e a sua memória); um documento que existe e não se entende (um byte danificado, um ficheiro cortado) é guardado como cópia .damaged antes de escrever um novo, em vez de ser apagado; um bloqueio cujo dono continua vivo não é roubado passado pouco tempo e um apagamento recusado deixa de fazer o processo à espera girar sem olhar para o prazo; e o registo de ações e a auditoria de acessos continuam a registar uma ação quando a rotação é recusada porque um leitor tem o ficheiro aberto (as rotações falhadas são contadas).
+
+- **A porta do empacotamento prova que o zip é o commit**: além de comparar os nomes dos ficheiros com os versionados, passa a falhar quando um ficheiro versionado foi editado e não confirmado (viajaria com a edição), quando dois nomes só diferem nas maiúsculas (um sobrescreveria o outro no Windows e no macOS) e quando o git não responde na pasta, em vez de saltar a comparação sem dizer nada (com --allow-no-git constrói-se a partir de um zip extraído; a porta avisa então de que a comparação não foi feita).
+
+- **Quatro regras pequenas fazem agora o que o seu texto diz**: a parte do orçamento de pedidos reservada aos repositórios com CI vermelha pertence à hora e já não é concedida de novo em cada ciclo (um orçamento de 100 por hora com doze repositórios vermelhos gastava cerca de 880); uma execução que espera um runner próprio desligado continua a ser uma avaria em vez de se tornar fantasma ao fim de sete dias; uma lista lida por páginas guarda as páginas já lidas quando uma posterior falha e diz que está cortada (os jobs de uma execução de 240 jobs não apareciam); e um workflow que correu depois de lidas as suas permissões já não é posto de parte como desativado à mão.
+
+- **Uma falha por corrigir continua a contar na taxa de sucesso e a leitura por lotes guarda o que não nomeia**: a nota já não sobe só porque passa mais um dia com um workflow a vermelho (a sua execução falhada saiu da janela mas a falha não), e a leitura opcional por lotes (network.graphql_checks) já não apaga um workflow vermelho que não correu no último commit (um cron, um workflow com filtro de caminhos).
+
+### Alterado
+
+- **Uma falha que ninguém corrige continua a pesar na pontuação, e os alertas de colaboração abertos contam com a sua idade**: um fluxo que ficava vermelho baixava a parte de recuperação durante sete dias e depois a parte voltava a 100 quando a execução falhada saía da janela. Agora mede-se o troço do vermelho que cai dentro da janela (a janela anterior contou o seu, nenhum dia é contado duas vezes) e o registo guarda a última falha de um fluxo por corrigir enquanto a regra do vermelho a mostrar. Um alerta da sentinela de colaboração que continua aberto no fim da janela conta com o tempo que está aberto até agora: deixar alertas por resolver baixa a parte de colaboração em vez de a deixar sem dados. Depois de atualizar, os valores podem ser mais baixos do que antes; o guia da pontuação explica-o.
+
+- **Um despliegue encadeado que falha no ramo por defeito é vermelho**: as execuções dos eventos workflow_run e repository_dispatch contam agora no vermelho de um repositório, mas só no ramo por defeito e nunca se vierem de um fork. Um despliegue encadeado à CI que falhava no main não aparecia em nenhuma lista. A definição que nomeia os eventos (ci.red_events) continua a decidir, e o seu valor por defeito e a sua ajuda em oito idiomas dizem-no.
+
+### Adicionado
+
+- **Os vermelhos que envelheceram até inativo são listados na vista do que acontece agora**: um vermelho em que nenhum dos eventos que decidem tocou durante os dias da idade (30 por defeito) continua a sair da lista de vermelhos, mas agora uma linha diz quantos são e dela abre-se a sua lista (repositório, workflow e data da falha), pelo que uma falha nunca desaparece sem deixar rasto.
+
+- **Os workflows inativos também são listados na vista do que acontece agora**: um workflow que falhou e não corre durante os dias de ci.inactive_days (90 por defeito) deixa de contar como vermelho, e uma segunda linha diz quantos são e abre a sua lista, ao lado da dos vermelhos envelhecidos.
+
 ## [2.0.8]
 
 ### Segurança

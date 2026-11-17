@@ -92,7 +92,7 @@ DEFAULTS = {
     "show_unclassified": True,     # repositories that no ecosystem claims are shown in an automatic group "Unclassified" instead of disappearing
     "stuck_minutes": 120,
     "alerts": {"silences": [], "service": {"enabled": False, "failures": 3, "rate_percent": 0, "workflows": []}, "group": {"by_commit": False, "min": 3}, "digest": {"minutes": 0, "threshold": 10}},      # what reaches the channels when there are many alerts (alertflow.py): all off or empty
-    "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "dormant_repos": True, "forks_need_own_ci": True, "fork_own_ci_days": 90, "red_ages": True, "red_age_days": 30, "disabled_apart": True, "extra_branches": [], "rerun_timing": False, "group": {"reusable": False, "min": 2}, "failed_jobs": {"enabled": False, "max_per_cycle": 4, "group_by": "auto"},
+    "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group", "workflow_run", "repository_dispatch"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "dormant_repos": True, "forks_need_own_ci": True, "fork_own_ci_days": 90, "red_ages": True, "red_age_days": 30, "disabled_apart": True, "extra_branches": [], "rerun_timing": False, "group": {"reusable": False, "min": 2}, "failed_jobs": {"enabled": False, "max_per_cycle": 4, "group_by": "auto"},
            "stuck": {"learned": False, "percentile": 95, "margin": 2.0, "min_samples": 3, "min_minutes": 30, "max_minutes": 720, "queue_minutes": 0, "workflow_minutes": [], "runner_minutes": [], "awaiting_stuck": True, "ghost_enabled": True, "ghost_days": 7}},      # which runs may make a branch red (redrule.py)
     "watchdog_minutes": 10,      # a refresh cycle that runs longer than this is dumped to the log and restarted in a new thread (0 = off)
     "watchdog_max_abandoned": 8,      # calls to GitHub that gave up waiting but never returned: with this many still alive no new call is started and the health check says so (0 = no limit)
@@ -498,6 +498,7 @@ def watched_repos(config, force=False):
     return valid
 
 
+RUN_SUMMARY = {"by_repo": {}}      # repo -> counts over ALL the runs of the last cycle (health/repo_view.summarize_runs): the page only receives the 600 newest ones, the health must not
 SAMPLE_INFO = {}      # repo -> {"asked": runs asked for, "total": total_count of GitHub or None, "probe": runs only the second look found}
 SAMPLING_STATE = {"dropped": []}      # the repositories that waited in the last cycle because the budget of requests was spent
 BUDGET = sampling.Budget()      # requests for run lists in the last hour
@@ -772,7 +773,9 @@ def refresh_runs(repos, config, progress=None):
     if batched:
         BUDGET.record(1)
         for repo, runs in batched.items():
-            note_read(repo, runs, None)
+            named = {redrule.workflow_key(r) for r in runs}
+            kept = [r for r in ((RUN_CACHE.get(repo) or {}).get("runs") or []) if redrule.workflow_key(r) not in named]      # the batch only sees the last commit of the branch: what it does not name (a cron, a workflow with a path filter) is kept
+            note_read(repo, list(runs) + kept, None)
         todo = [item for item in todo if item[0] not in batched]
     limit = sampling.settings(config)["api_budget_per_hour"]
     todo, waiting = sampling.plan(todo, red_repos_of([r for r, _n in todo]) if limit else set(), limit, BUDGET.used())      # a spent budget: the repositories with red first, the others wait
@@ -979,8 +982,8 @@ def repo_meta(repos, config=None):
         out[repo] = {"private": repo in PRIVATE, "branch": item.get("branch") or None, "pushed": item.get("pushed") or None, "prs": len(prs) if isinstance(prs, list) else None, "fork": item.get("fork") is True}
         cached = RUN_CACHE.get(repo)
         if cached and cached.get("runs") is not None and cached.get("at"):
-            info = SAMPLE_INFO.get(repo) or {}
-            out[repo]["coverage"] = sampling.coverage(cached["runs"], info.get("asked"), info.get("total"), sampling.settings(config or {})["min_coverage_minutes"])
+            sample = SAMPLE_INFO.get(repo) or {}      # not `info`: that name holds what the sentinel knows of every repository
+            out[repo]["coverage"] = sampling.coverage(cached["runs"], sample.get("asked"), sample.get("total"), sampling.settings(config or {})["min_coverage_minutes"])
     return out
 
 
@@ -1086,11 +1089,16 @@ def build(config, repos, started, refreshed, loading, progress_text):
     ghost_rows = [{"repo": r["repo"], "name": r.get("name"), "id": r.get("id"), "url": r.get("url"), "branch": r.get("branch"), "event": r.get("event"), "since": r.get("started")} for r in ghosts[:200]]
     activity_view = None
     idle_forks = []
+    aged_rows, quiet_rows = [], []
     meta = repo_meta(repos, config)
     try:
         held = redrule.states({r: [x for x in runs if x["repo"] == r] for r in repos}, {r: m.get("branch") for r, m in repo_meta(repos).items() if m.get("branch")}, True)
         figures["awaiting"], figures["inactive"] = len(held["awaiting"]), len(held["inactive"])
         figures["services_failing"] = len(held["services"])
+        aged_rows = [{k: row.get(k) for k in ("repo", "workflow", "since", "url", "streak", "conclusion")} for row in held["inactive"] if row.get("aged")]      # the reds that aged into "inactive" (ci.red_age_days) do not vanish without a trace
+        figures["aged"], figures["aged_days"] = len(aged_rows), redrule.POLICY.get("red_age_days") or 0
+        quiet_rows = [{k: row.get(k) for k in ("repo", "workflow", "since", "url", "streak", "conclusion")} for row in held["inactive"] if not row.get("aged")]      # abandoned workflows (ci.inactive_days) that failed: not red, but not hidden either
+        figures["quiet"], figures["quiet_days"] = len(quiet_rows), redrule.POLICY.get("inactive_days") or 0
         activity_view = activity.summarize(repos, {r: [x for x in runs if x["repo"] == r] for r in repos}, {r: (SAMPLE_INFO.get(r) or {}).get("total") for r in repos}, errors, time.time(), activity.settings(config))
         figures["dormant"], figures["inactive_repos"] = len(activity_view["dormant"]), len(activity_view["inactive"])
         by_repo_runs = {r: [x for x in runs if x["repo"] == r] for r in repos}
@@ -1099,6 +1107,11 @@ def build(config, repos, started, refreshed, loading, progress_text):
         figures["forks_idle"] = len(idle_forks)
     except Exception as error:   # noqa: BLE001 - a figure of the header never stops a cycle
         degraded.note("loop.extra", error)
+    try:
+        from github_actions_monitor.health import repo_view as health_repo_view
+        RUN_SUMMARY["by_repo"] = health_repo_view.summarize_runs(runs, time.time())
+    except Exception as error:   # noqa: BLE001 - the summary of the health never stops a cycle
+        degraded.note("loop.summary", error)
     return {
         "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "updated_local": tzdisplay.stamp(time.time()), "took": round(time.time() - started, 1),
         "repos": repos, "ecosystems": {repo: ecosystem_of(repo) for repo in repos},
@@ -1109,7 +1122,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
         "refresh_seconds": config["refresh_seconds"], "hot_only": hot_only_state(),
         "offline": LINK.state(), "etag": ETAG["cache"].stats() if ETAG["cache"] else None, "graphql": graphql_checks.stats(config),
         "hidden": HIDDEN["hidden"], "discovered": HIDDEN["discovered"], "hidden_names": HIDDEN["names"],
-        "figures": figures, "repo_meta": meta, "sampling": sampling_summary(config, repos, meta), "activity": activity_view, "forks_idle": idle_forks[:200],
+        "figures": figures, "repo_meta": meta, "sampling": sampling_summary(config, repos, meta), "activity": activity_view, "forks_idle": idle_forks[:200], "forks_idle_all": idle_forks, "aged_reds": aged_rows[:100], "quiet_reds": quiet_rows[:100],
     }
 
 
@@ -1683,7 +1696,7 @@ def score_tick(config, data):
         collab = registry.get("collab") if registry else None
         known = bool(collab is not None and getattr(collab, "enabled", False) and not (collab.get_status() or {}).get("loading"))
         storage, account = runtime.process_storage(CHILD["account"] or None)
-        idle = set(data.get("forks_idle") or [])      # the runs of a fork without a CI of its own (the cron it inherited) are not the work of the account
+        idle = set(data.get("forks_idle_all") or data.get("forks_idle") or [])      # the runs of a fork without a CI of its own (the cron it inherited) are not the work of the account
         snapshot = score_service.tick(storage, account, config, [r for r in (data.get("runs") or []) if r.get("repo") not in idle], collab.get_alerts() if known else [], collab_known=known, security=score_security(registry, config), activity=data.get("activity"))
         if snapshot and snapshot.get("drop_new") and snapshot.get("drop"):      # the moment a drop appears; it leaves the panel only when the person asked for it
             from github_actions_monitor.scoring import drop as score_drop, engine as score_engine
@@ -1770,10 +1783,11 @@ def health_views(now=None, only=None):
     if only is not None:
         names = [n for n in names if n == only]
     runs_by, failing_by, active_by, alerts_by = (repo_view.group_by_repo(x) for x in (runs, failing, active, alerts))
+    summary_by = RUN_SUMMARY["by_repo"] if (data.get("runs_total") or 0) > len(runs) else {}      # the cut was made: count over everything the cycle read
     views = []
     for repo in names:
         eco = toolconfig.ecosystem_of(repo)
-        view = repo_view.repo_view(repo, runs_by.get(repo, []), failing_by.get(repo, []), active_by.get(repo, []), alerts_by.get(repo, []), ready.get(repo), sources, eco, now)
+        view = repo_view.repo_view(repo, runs_by.get(repo, []), failing_by.get(repo, []), active_by.get(repo, []), alerts_by.get(repo, []), ready.get(repo), sources, eco, now, summary_by.get(repo) if summary_by else None)
         view["ecosystem_label"] = toolconfig.label_of(eco)
         views.append(view)
     return views

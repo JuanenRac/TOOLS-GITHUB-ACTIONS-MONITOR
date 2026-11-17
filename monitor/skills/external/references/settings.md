@@ -150,7 +150,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ci.inactive_days` | `90` | sentinel | Days until a workflow is inactive |
 | `ci.red_age_days` | `30` | sentinel | Days until a red ages |
 | `ci.red_ages` | `true` | sentinel | A red nobody attends to ages |
-| `ci.red_events` | `["push", "schedule", "workflow_dispatch", "merge_group"]` | sentinel | Events that can make a branch red |
+| `ci.red_events` | `["push", "schedule", "workflow_dispatch", "merge_group", "workflow_run", "repository_dispatch"]` | sentinel | Events that can make a branch red |
 | `ci.rerun_timing` | `false` | sentinel | Ask GitHub for the duration of re-runs |
 | `ci.stuck.awaiting_stuck` | `true` | sentinel | A run waiting for approval can be stuck |
 | `ci.stuck.ghost_days` | `7` | sentinel | Days in the queue until a run is a ghost |

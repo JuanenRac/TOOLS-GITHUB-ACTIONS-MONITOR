@@ -113,6 +113,8 @@ def _parts(metrics, cfg):
         samples = (metrics.get("samples") or {}).get(SAMPLES[name], 0)
         if name == "recovery":
             samples += (metrics.get("samples") or {}).get("recoveries_open", 0)
+        if name == "collaboration":
+            samples += (metrics.get("samples") or {}).get("collab_open", 0)
         weight_total += weight
         row = {"part": name, "weight": weight, "value": value, "score": sub, "samples": samples, "available": sub is not None}
         if sub is not None:

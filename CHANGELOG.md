@@ -14,6 +14,34 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **The access token no longer travels in the address by default (`listen.query_access` is now off)**: in the network mode the `?access=` address opened the session, but the token stayed in the history, the logs and the `Referer`. The setting is now off unless you turn it on (the default, the example file and the Settings help say so); the session is opened by `POST /api/access` (the token in the body) or by the header `X-Monitor-Access`. An installation that wrote `listen.query_access` itself keeps its value; one that relied on the old default and opens the monitor from an address with `?access=` has to turn the setting on, or use `POST /api/access`. The environment variable `MONITOR_QUERY_ACCESS=1` turns it on for a service.
 
+### Fixed
+
+- **The branch, the fork mark, the last push and the pull requests of a repository reach every repository, not only the first one**: once the runs were in memory (from the first cycle on) a variable reused in the table of the Repositories columns made every repository but the first one lose what the sentinel knew of it. The forks without a CI of their own were not recognised as such, so their inherited crons entered the score and the figure of idle forks said 1; and a red CI on a default branch that is not main or master could miss the list of open failures and the health of the team. The score now leaves out the whole set of idle forks (not only the 200 that the page shows).
+
+- **The health of the team and of the fleet counts every run of the cycle, not only the 600 newest of the account**: with 250 active repositories 215 of them said "no data" because their runs did not fit in the cut that the page receives. The runs, the failures of the last 24 hours and the runs of the week are now counted per repository before the cut, so a busy account shows its healthy repositories as healthy.
+
+- **A red whose workflow is still being run no longer ages into "inactive"**: a failure older than the age (30 days by default) was hidden even when later runs of the same workflow had been cancelled, were in progress or were waiting for an approval. Now only a workflow that has not been run at all since the failure ages, and a workflow whose natural period is longer than the age (a monthly schedule that always fails) waits for twice its usual interval before it does.
+
+- **Leftovers of the storage on Windows and on damaged files**: the state of the reports is no longer written back after a read that failed (it dropped the other accounts and their memory); a document that exists and cannot be understood (a damaged byte, a cut file) is kept as a .damaged copy before a new one is written, instead of being erased; a lock whose owner is still alive is not robbed after a short time and a refused delete no longer makes the process that waits spin without looking at its deadline; and the log of actions and the audit of accesses still record an action when the rotation is refused because a reader has the file open (the failed rotations are counted).
+
+- **The packaging gate proves that the zip is the commit**: besides comparing the names of the files with the versioned ones, it now fails when a versioned file has been edited and not committed (it would travel with the edit), when two names differ only in capitals (one would overwrite the other on Windows and macOS), and when git does not answer in the folder, instead of skipping the comparison without a word (pass --allow-no-git to build from an extracted zip; the gate then says that the comparison was not made).
+
+- **Four small rules now do what their text says**: the share of the request budget kept for repositories with a red CI belongs to the hour and is no longer granted again at every cycle (a budget of 100 per hour with twelve red repositories spent about 880); a run that waits for a runner of your own that is off stays a breakdown instead of turning into a ghost after seven days; a list read in pages keeps the pages already read when a later page fails and says that it is cut (the jobs of a run of 240 jobs showed none); and a workflow that ran after its permissions were read is no longer kept apart as switched off by hand.
+
+- **An unfixed failure keeps counting in the success rate, and the batched read keeps what it does not name**: the score no longer rises just because one more day passes with a workflow in red (its failing run left the window but the failure did not), and the optional read by batches (network.graphql_checks) no longer erases a red workflow that did not run on the last commit (a cron, a workflow with a path filter).
+
+### Changed
+
+- **A failure nobody fixes keeps weighing on the score, and open collaboration alerts count with their age**: a workflow that stayed red lowered the recovery part for seven days and then the part went back to 100 when the failing run left the window. Now the stretch of the red that falls inside the window is measured (the window before counted its own, so no day is counted twice) and the ledger keeps the last failure of a workflow nobody fixed for as long as the rule of the red shows it. An alert of the collaboration sentinel that is still open at the end of the window counts with the time it has been open so far, so leaving alerts unresolved lowers the collaboration part instead of leaving it without data. Scores can be lower than before after the update; the Score guide explains it.
+
+- **A chained deployment that fails on the default branch is red**: runs of the events workflow_run and repository_dispatch now count in the red of a repository, but only on the default branch and never when they come from a fork. A deployment chained to the CI that failed on main used to appear in no list at all. The setting that names the events (ci.red_events) still decides, and its default and its help in eight languages say it.
+
+### Added
+
+- **The reds that aged into inactive are listed in the view of what is happening now**: a red that nothing of the events that decide has touched for the number of days of the age (30 by default) still leaves the red list, but now a line says how many there are and a list of them (repository, workflow and date of the failure) opens from it, so a failure never disappears without a trace.
+
+- **The inactive workflows are listed in the view of what is happening now as well**: a workflow that failed and has not run for the days of ci.inactive_days (90 by default) no longer counts as red, and a second line says how many there are and opens their list, next to the one for the aged reds.
+
 ## [2.0.8]
 
 ### Security

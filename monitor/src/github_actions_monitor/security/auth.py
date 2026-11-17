@@ -474,8 +474,11 @@ def audit(cfg, action, user="", role="", address="", path="", result="ok", code=
     target = audit_path()
     try:
         with _lock:
-            if target.exists() and target.stat().st_size > AUDIT_MAX_BYTES:
-                os.replace(target, target.with_name(target.name + ".1"))
+            try:
+                if target.exists() and target.stat().st_size > AUDIT_MAX_BYTES:
+                    os.replace(target, target.with_name(target.name + ".1"))
+            except OSError:      # a reader keeps the file open (Windows): the event is still appended to the current file and the rotation is tried again at the next one
+                pass
             private_io.private_dir(target.parent)
             with private_io.open_append(target) as handle:
                 handle.write(json.dumps(entry, ensure_ascii=False) + "\n")

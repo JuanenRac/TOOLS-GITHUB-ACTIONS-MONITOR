@@ -76,6 +76,16 @@ def _owner_gone(lock_file):
     return pid if pid_alive(pid) is False else None
 
 
+LIVE_FACTOR = 10      # a lock older than STALE whose owner is still alive is left alone until it is this many times older (a slow owner is not robbed; a pid that was reused by another program does not block for ever)
+
+
+def _owner_alive(lock_file):
+    try:
+        return pid_alive(int(lock_file.read_text(encoding="ascii", errors="ignore").strip())) is True
+    except (OSError, ValueError):
+        return False
+
+
 def path_lock(path):
     key = os.path.normcase(os.path.abspath(str(path)))
     with _GUARD:
@@ -114,15 +124,21 @@ def process_lock(path, timeout=10.0):
             except (FileExistsError, PermissionError):      # Windows answers "access denied" while another process is deleting the lock file: wait and try again
                 try:
                     gone = _owner_gone(lock_file)
-                    if gone is not None or time.time() - lock_file.stat().st_mtime > stale_seconds():
+                    age = time.time() - lock_file.stat().st_mtime
+                    old = age > stale_seconds() and (gone is not None or age > stale_seconds() * LIVE_FACTOR or not _owner_alive(lock_file))
+                    if gone is not None or old:
                         if gone is not None and _owner_gone(lock_file) != gone:      # another process took it over between the two looks: leave its lock alone
                             continue
-                        lock_file.unlink()
-                        if gone is not None:
-                            RESCUED.append((lock_file.name, gone))
-                            del RESCUED[:-50]
-                            _LOG.warning("lock %s taken over: the process %s that held it is gone", lock_file.name, gone)
-                        continue
+                        try:
+                            lock_file.unlink()
+                        except OSError:      # Windows refuses to delete a file its owner has open: the owner is alive, so wait (and respect the deadline) instead of trying again at full speed
+                            pass
+                        else:
+                            if gone is not None:
+                                RESCUED.append((lock_file.name, gone))
+                                del RESCUED[:-50]
+                                _LOG.warning("lock %s taken over: the process %s that held it is gone", lock_file.name, gone)
+                            continue
                 except OSError:
                     continue
                 if time.monotonic() > deadline:

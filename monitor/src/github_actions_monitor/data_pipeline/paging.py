@@ -28,10 +28,17 @@ def _count(value):
 def read_pages(read, path, key, per_page, max_pages):
     """{"items", "seen", "total", "cut", "pages"}: `read(path_with_page)` gives the parsed answer; the list is the value of `key` in an object, or the answer itself when `key` is None.
     Stops at a page that is not full, when `total_count` is reached or after `max_pages`. `cut` = the pages ran out while more was there (or may be there)."""
-    items, total, pages, last_full = [], None, 0, False
+    items, total, pages, last_full, error = [], None, 0, False, None
     joiner = "&" if "?" in path else "?"
     for page in range(1, max(1, int(max_pages)) + 1):
-        data = read(f"{path}{joiner}per_page={per_page}&page={page}")
+        try:
+            data = read(f"{path}{joiner}per_page={per_page}&page={page}")
+        except Exception as failure:      # noqa: BLE001 - a page after the first that fails: what was read is kept and the list is said to be cut
+            if page == 1:
+                raise
+            error = str(failure)[:200]
+            last_full = True
+            break
         pages += 1
         chunk = (data.get(key) if isinstance(data, dict) else None) if key else data
         chunk = chunk if isinstance(chunk, list) else []
@@ -42,4 +49,7 @@ def read_pages(read, path, key, per_page, max_pages):
         if not last_full or (total is not None and len(items) >= total):
             break
     cut = bool(total is not None and len(items) < total) or (total is None and last_full)
-    return {"items": items, "seen": len(items), "total": total, "cut": cut, "pages": pages}
+    out = {"items": items, "seen": len(items), "total": total, "cut": cut, "pages": pages}
+    if error:
+        out["error"] = error
+    return out
