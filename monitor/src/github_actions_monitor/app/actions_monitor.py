@@ -2152,9 +2152,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def end_headers(self):
         """Every answer: the page cannot be put in a frame of another site (clickjacking) and the browser does not guess a type."""
-        self.send_header("X-Frame-Options", "DENY")
-        self.send_header("Content-Security-Policy", "frame-ancestors 'none'")
-        self.send_header("X-Content-Type-Options", "nosniff")
+        for name, value in localguard.SECURITY_HEADERS:
+            self.send_header(name, value)
         if getattr(self, "deprecated_access", False):
             self.send_header("Deprecation", "true")      # the ?access= address is deprecated: POST /api/access keeps the token out of the address bar
         super().end_headers()
@@ -2691,6 +2690,10 @@ class Handler(BaseHTTPRequestHandler):
                 payload = api_v1.repos_payload(health_views(), ask, secret=V1_SECRET, now=time.time(), cfg=cfg)
         except api_v1.ApiError as error:
             status, body = error.envelope()
+            self.json_reply(body, status)
+            return
+        except Exception:   # noqa: BLE001 - whatever else goes wrong is the envelope of a 500, never a cut connection with a trace in the console
+            status, body = api_v1.ApiError(500, "api.server_error").envelope()
             self.json_reply(body, status)
             return
         body, extra = api_v1.maybe_compress(json.dumps(payload).encode("utf-8"), self.headers.get("Accept-Encoding"), cfg["gzip_min_bytes"])

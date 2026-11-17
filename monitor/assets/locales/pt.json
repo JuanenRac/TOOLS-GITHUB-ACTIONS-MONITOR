@@ -3520,6 +3520,7 @@
  "api.bad_limit": "limit tem de ser um número inteiro de 1 a {max}.",
  "api.unknown_field": "O campo {field} não faz parte da resposta; peça apenas campos que o contrato enumera.",
  "api.bad_profile": "profile tem de ser full ou compact.",
+ "api.server_error": "O servidor não conseguiu responder a este pedido; tente novamente mais tarde.",
  "cfg.f.upstream.enabled": "Seguir o repositório original de cada fork",
  "cfg.h.upstream.enabled": "Desativado por predefinição. Para cada fork lê o repositório original (o upstream) de onde foi copiado: o estado das verificações do último commit do seu ramo principal e a sua última release, e mostra-os no painel de higiene da Sentinela. Custa um pedido para vários forks (veja os limites abaixo) e não escreve nada em lado nenhum.",
  "cfg.f.upstream.refresh_hours": "Horas entre duas leituras de um fork",

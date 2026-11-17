@@ -3520,6 +3520,7 @@
  "api.bad_limit": "limit must be a whole number from 1 to {max}.",
  "api.unknown_field": "The field {field} is not part of the answer; ask only for fields the contract lists.",
  "api.bad_profile": "profile must be full or compact.",
+ "api.server_error": "The server could not answer this request; try again later.",
  "cfg.f.upstream.enabled": "Follow the original repository of each fork",
  "cfg.h.upstream.enabled": "Off by default. For every fork it reads the original repository (the upstream) it was copied from: the state of the checks of the last commit of its default branch and its latest release, and shows them in the hygiene panel of the Sentinel. It costs one request for several forks (see the limits below) and writes nothing anywhere.",
  "cfg.f.upstream.refresh_hours": "Hours between two readings of a fork",
