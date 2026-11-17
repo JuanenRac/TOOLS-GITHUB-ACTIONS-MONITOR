@@ -102,11 +102,22 @@ def read(fetch, owner, names, now, store):
     done = 0
     for number, name in enumerate(n for n in names if NAME.match(str(n))):
         node = data.get("r%d" % number)
-        if not isinstance(node, dict):
+        if not isinstance(node, dict):      # a fork that GitHub did not give back (deleted, renamed or not visible): written down as read, or it would be the first of every turn for ever
+            store[name] = dict(merge(store.get(name), None, now), unreadable=True)
             continue
         store[name] = merge(store.get(name), parse_parent(node), now)
         done += 1
     return done
+
+
+def mark_tried(store, names, now):
+    """The request for `names` failed as a whole: write down that they were tried now, so that the next turn takes other forks (the data already read is kept; the ones never read are marked unreadable)."""
+    for name in names:
+        entry = store.get(name)
+        if isinstance(entry, dict):
+            entry["at"] = now
+        elif NAME.match(str(name)):
+            store[name] = {"parent": None, "at": now, "unreadable": True}
 
 
 def build(store, forks, cfg, now, requests_last_hour=0):
@@ -114,13 +125,16 @@ def build(store, forks, cfg, now, requests_last_hour=0):
     if not cfg.get("enabled"):
         return {"enabled": False}
     news = cfg["news_days"] * 86400
-    rows, unread = [], 0
+    rows, unread, unreadable = [], 0, 0
     for fork in followed(forks, cfg):
         entry = store.get(fork)
         if not isinstance(entry, dict) or not entry.get("at"):
             unread += 1
             continue
         if not entry.get("parent"):
+            if entry.get("unreadable") is True:      # tried and not given back (or the request failed): not "unread", and not a row either
+                unreadable += 1
+                continue
             rows.append({"repo": fork, "parent": None, "state": "detached", "release": None, "news": False, "red": False, "at": entry["at"]})
             continue
         fresh_release = bool(entry.get("release_changed")) and now - entry["release_changed"] <= news
@@ -128,5 +142,5 @@ def build(store, forks, cfg, now, requests_last_hour=0):
                      "archived": entry.get("archived", False), "release": entry.get("release"), "news": fresh_release, "red": entry.get("state") == "failure", "committed": entry.get("committed"),
                      "at": entry["at"]})
     rows.sort(key=lambda r: (not r["red"], not r["news"], r["repo"].lower()))
-    return {"enabled": True, "tracked": len(rows), "unread": unread, "red": sum(1 for r in rows if r["red"]), "news": sum(1 for r in rows if r["news"]), "detached": sum(1 for r in rows if r["state"] == "detached"),
+    return {"enabled": True, "tracked": len(rows), "unread": unread, "unreadable": unreadable, "red": sum(1 for r in rows if r["red"]), "news": sum(1 for r in rows if r["news"]), "detached": sum(1 for r in rows if r["state"] == "detached"),
             "requests_last_hour": requests_last_hour, "requests_per_hour": cfg["requests_per_hour"], "notify": cfg["notify"], "rows": rows[:200]}

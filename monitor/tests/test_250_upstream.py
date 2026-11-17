@@ -92,11 +92,11 @@ class TheReading(unittest.TestCase):
         self.assertEqual(store["f"]["state_since"], NOW + 20 * HOUR)
         self.assertEqual(upstream.build(store, ["f"], on(), NOW + 41 * HOUR)["red"], 1)
 
-    def test_an_answer_that_misses_a_fork_leaves_it_unread(self):
+    def test_an_answer_that_misses_a_fork_writes_it_down_as_tried(self):
         store = {}
         self.assertEqual(upstream.read(lambda text: {"r0": node()}, "o", ["a", "b"], NOW, store), 1)
         picture = upstream.build(store, ["a", "b"], on(), NOW)
-        self.assertEqual((picture["tracked"], picture["unread"]), (1, 1))
+        self.assertEqual((picture["tracked"], picture["unread"], picture["unreadable"]), (1, 0, 1))
 
     def test_a_deleted_original_is_shown_as_detached(self):
         store = {}

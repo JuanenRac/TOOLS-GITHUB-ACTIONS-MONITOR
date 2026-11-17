@@ -1361,6 +1361,8 @@ class Sentinel:
                 self.ok("upstream")
             return bool(done)
         except Exception as error:
+            with self.lock:
+                upstream.mark_tried(self.upstream, names, time.time())      # the same forks are not asked again in the next turn: others are
             self.error("upstream", error)
             return False
 
