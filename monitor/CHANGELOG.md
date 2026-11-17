@@ -15,6 +15,14 @@ when this file and `tool_version.py` disagree.
 
 - **The access token no longer travels in the address by default (`listen.query_access` is now off)**: in the network mode the `?access=` address opened the session, but the token stayed in the history, the logs and the `Referer`. The setting is now off unless you turn it on (the default, the example file and the Settings help say so); the session is opened by `POST /api/access` (the token in the body) or by the header `X-Monitor-Access`. An installation that wrote `listen.query_access` itself keeps its value; one that relied on the old default and opens the monitor from an address with `?access=` has to turn the setting on, or use `POST /api/access`. The environment variable `MONITOR_QUERY_ACCESS=1` turns it on for a service.
 
+### Added
+
+- **One sound for each kind of event, with a theme, switches per kind and quiet hours**: a new red, a serious or security alert, a stuck build or queue, a drop of the score, a lost connection, a warning, something solved, a new report, a new lesson and a plain notice each have their own pattern of tones, made with the Web Audio API (no audio files, nothing leaves the browser), so you can tell by ear what happened. The settings `sound.on_warning`, `sound.on_resolved`, `sound.on_report`, `sound.on_lesson`, `sound.on_sentinel`, `sound.on_stuck`, `sound.on_score_drop` and `sound.on_info` join the two that existed (all on by default), `sound.theme` chooses `classic` or `soft` tones, and `sound.quiet_enabled` with `sound.quiet_from_hour` and `sound.quiet_to_hour` set quiet hours (off by default). In Settings, Interface, a button per kind plays it with the volume and theme in use. The wall screens use the same sounds (`screens.sound` and `?sound=on` still decide whether a window sounds). `docs/SOUNDS.md` has the table of sounds in eight languages.
+
+### Fixed
+
+- **The "bing bing" no longer stays silent for most of what happens**: it only looked at the red workflows, so alerts of the other sentinels, reports and lessons never sounded; a sound that the browser blocked was lost for good because the alert was already counted as seen; one pause of thirty seconds for everything swallowed a second kind of event that came a moment after the first; and a window of the wall created a new audio context for every beep, which a browser keeps blocked until someone clicks. Now every alert of the list, every new finding of the reports and every new lesson is watched; what the browser blocks waits (for at most ten minutes) and plays at the first click, when the page comes back to the front or at the next check every two seconds; each kind has its own pause and one burst of at most three sounds, the most serious first, keeps them from piling up; and the wall screens keep one audio context and a small queue.
+
 ## [2.0.8]
 
 ### Security

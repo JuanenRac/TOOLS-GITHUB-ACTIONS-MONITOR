@@ -9,7 +9,8 @@ The page makes its own sound with the Web Audio API (see actions_monitor.html); 
   Linux     `canberra-gtk-play -i bell`, else the bell character of the terminal
 
 It never uses the network or a proxy, never runs a shell, never raises (a missing program is simply not a sound) and keeps one beep apart from the next by `sound.cooldown_seconds`.
-Settings in actions_monitor.json, block `sound`: enabled (true), on_new_red (true), on_connection_lost (true), cooldown_seconds (30), volume (40, for the page), server_beep (false).
+Settings in actions_monitor.json, block `sound`: enabled (true), on_new_red (true), on_connection_lost (true), cooldown_seconds (30), volume (40, for the page), server_beep (false), and for the page only:
+one switch per kind of event (on_warning, on_resolved, on_report, on_lesson, on_sentinel, on_stuck, on_score_drop, on_info; all true), theme ("classic" or "soft") and the quiet hours (quiet_enabled false, quiet_from_hour 22, quiet_to_hour 7).
 """
 import shutil
 import subprocess
@@ -17,7 +18,9 @@ import sys
 import threading
 import time
 
-DEFAULTS = {"enabled": True, "on_new_red": True, "on_connection_lost": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False}
+KINDS = ("new_red", "connection_lost", "warning", "resolved", "report", "lesson", "sentinel", "stuck", "score_drop", "info")      # one switch `on_<kind>` each; the page has one sound for each (see the table in docs/SOUNDS.md)
+THEMES = ("classic", "soft")
+DEFAULTS = {"enabled": True, **{f"on_{kind}": True for kind in KINDS}, "cooldown_seconds": 30, "volume": 40, "server_beep": False, "theme": "classic", "quiet_enabled": False, "quiet_from_hour": 22, "quiet_to_hour": 7}
 _LOCK = threading.Lock()
 _LAST = {"at": 0.0}
 
@@ -26,10 +29,12 @@ def settings(config):
     """The block `sound` with every value in its range (a wrong value falls back to the default)."""
     block = config.get("sound") if isinstance(config, dict) and isinstance(config.get("sound"), dict) else {}
     out = dict(DEFAULTS)
-    for key in ("enabled", "on_new_red", "on_connection_lost", "server_beep"):
+    for key in ("enabled", "server_beep", "quiet_enabled", *[f"on_{kind}" for kind in KINDS]):
         if isinstance(block.get(key), bool):
             out[key] = block[key]
-    for key, low, high in (("cooldown_seconds", 0, 3600), ("volume", 1, 100)):
+    if block.get("theme") in THEMES:
+        out["theme"] = block["theme"]
+    for key, low, high in (("cooldown_seconds", 0, 3600), ("volume", 1, 100), ("quiet_from_hour", 0, 23), ("quiet_to_hour", 0, 23)):
         value = block.get(key)
         if isinstance(value, int) and not isinstance(value, bool) and low <= value <= high:
             out[key] = value

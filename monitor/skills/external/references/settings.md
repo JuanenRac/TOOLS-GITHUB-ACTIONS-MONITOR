@@ -540,8 +540,20 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sound.cooldown_seconds` | `30` | general | Seconds between two sounds |
 | `sound.enabled` | `true` | general | Sound alerts |
 | `sound.on_connection_lost` | `true` | general | Sound when the connection drops |
+| `sound.on_info` | `true` | general | Sound for a notice |
+| `sound.on_lesson` | `true` | general | Sound for a new lesson |
 | `sound.on_new_red` | `true` | general | Sound for a new red |
+| `sound.on_report` | `true` | general | Sound for a new report |
+| `sound.on_resolved` | `true` | general | Sound when it is solved |
+| `sound.on_score_drop` | `true` | general | Sound when the score drops |
+| `sound.on_sentinel` | `true` | general | Sound for a security or serious alert |
+| `sound.on_stuck` | `true` | general | Sound for a stuck build or queue |
+| `sound.on_warning` | `true` | general | Sound for a warning |
+| `sound.quiet_enabled` | `false` | general | Quiet hours |
+| `sound.quiet_from_hour` | `22` | general | Quiet from |
+| `sound.quiet_to_hour` | `7` | general | Quiet until |
 | `sound.server_beep` (secure) | `false` | general | Beep of this computer (page closed) |
+| `sound.theme` | `"classic"` | general | Theme of the sounds |
 | `sound.volume` | `40` | general | Volume of the page |
 | `stuck_minutes` | `120` | polling | A build is stuck after |
 | `targets_file` | `-` | paths | Build targets file |
