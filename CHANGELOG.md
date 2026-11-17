@@ -14,6 +14,46 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **The access token no longer travels in the address by default (`listen.query_access` is now off)**: in the network mode the `?access=` address opened the session, but the token stayed in the history, the logs and the `Referer`. The setting is now off unless you turn it on (the default, the example file and the Settings help say so); the session is opened by `POST /api/access` (the token in the body) or by the header `X-Monitor-Access`. An installation that wrote `listen.query_access` itself keeps its value; one that relied on the old default and opens the monitor from an address with `?access=` has to turn the setting on, or use `POST /api/access`. The environment variable `MONITOR_QUERY_ACCESS=1` turns it on for a service.
 
+- **With several accounts and the team mode, a route under `/api/v1/` needs the same role as the same route without the prefix**: the supervisor judged the path with the prefix, so a viewer could read through the versioned API what only an administrator reads (the exposure of the monitor, the state of the token, the log of actions). The prefix is now taken off before the roles are asked, and the answer keeps its `X-API-Version` header.
+
+
+
+- **A repository whose visibility was not read is private on the wall screens**: with a list of repositories written by hand, or an older `gh`, every repository counted as public and `screens.show_repo_names` showed the names of private ones. The visibility is now read with one listing of the account every `discover_refresh_seconds`, and what could not be read is shown as private.
+
+
+
+- **A captured webhook delivery cannot be renewed by changing its delivery id, and garbage cannot use up the allowance of the real deliveries**: the signed body is remembered as well as the id, and the requests whose signature does not verify are counted apart (`webhook.max_bad_per_minute`, 120 a minute and address, in every mode and by the address behind a trusted proxy) from the ones that do (120 a minute).
+
+
+
+- **A process of an account only holds the webhook secret its own configuration names**: the secrets of the other accounts and of the main configuration stayed in its environment and in the one of `gh` and of every program it started.
+
+
+
+- **The variable of a secret can no longer be a variable of the system or of the login to GitHub**: `webhook.secret_env` and `listen.token_env` refuse names like PATH or GH_TOKEN, and the name of the webhook secret is read once, when the process starts.
+
+
+
+- **With several accounts the supervisor protects every answer against framing**, like the process of an account does.
+
+
+
+- **A cursor with a letter that is not ASCII is a plain 400, and any other failure of the versioned API is the error envelope of a 500 (`api.server_error`)** instead of a cut connection with a trace in the console.
+
+### Fixed
+
+- **The forks that GitHub does not give back no longer hold the follow-up of the original repositories**: a fork that came back empty (deleted, renamed or not visible), or a request that failed, was the first of every turn for ever. They are written down as tried, the panel counts them as unreadable, and the turn takes the next ones.
+
+- **The batch way of the lookup of hidden workflows reads the listing of a repository once**: when the listing did not bring a workflow it was asked again in every turn and nothing was ever resolved. The listing is read once per repository inside the time the answers are kept, and what it did not bring goes one by one in the same turn.
+
+- **A question of the sentinel that failed waits before it is asked again**: the hidden workflows, the jobs of a red run and the permissions of a repository are asked again after 5 minutes, then 30, then 6 hours, and a repository whose permissions cannot be read goes to the end of the line, so it no longer keeps the other repositories from being read.
+
+- **The hourly budget of run lists (`sampling.api_budget_per_hour`) counts requests**: the second look at the default branch (`sampling.default_branch_probe`) is counted when the repositories of a cycle are chosen, and the duration of a re-run (`ci.rerun_timing`) is one request of the hour that is not made when the budget is spent.
+
+- **The runners are read from GitHub once every five minutes, not on every request to `/api/runners`**.
+
+- **The webhook guide says what the code does**: the repository is read again in the next cycle after an event, the names of the workflow, branch and job are kept as third-party text, and the live events can be read by whoever may open the page.
+
 ## [2.0.8]
 
 ### Security

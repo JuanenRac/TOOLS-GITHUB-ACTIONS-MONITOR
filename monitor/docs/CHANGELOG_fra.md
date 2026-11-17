@@ -13,6 +13,34 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - **Le jeton d'accès ne voyage plus dans l'adresse par défaut (`listen.query_access` est maintenant désactivé)** : en mode réseau, l'adresse avec `?access=` ouvrait la session, mais le jeton restait dans l'historique, les journaux et le `Referer`. Le réglage est désormais désactivé tant que vous ne l'activez pas (la valeur par défaut, le fichier d'exemple et l'aide des Réglages le disent) ; la session s'ouvre par `POST /api/access` (le jeton dans le corps) ou par l'en-tête `X-Monitor-Access`. Une installation qui a écrit `listen.query_access` elle-même garde sa valeur ; celle qui comptait sur l'ancienne valeur et ouvre le moniteur depuis une adresse avec `?access=` doit activer le réglage ou utiliser `POST /api/access`. La variable d'environnement `MONITOR_QUERY_ACCESS=1` l'active pour un service.
 
+- **Avec plusieurs comptes et le mode équipe, une route sous `/api/v1/` demande le même rôle que la même route sans le préfixe** : le superviseur jugeait le chemin avec le préfixe, si bien qu'un lecteur pouvait lire par l'API versionnée ce que seul un administrateur lit (l'exposition du moniteur, l'état du jeton, le journal des actions). Le préfixe est maintenant retiré avant de demander les rôles, et la réponse garde son en-tête `X-API-Version`.
+
+- **Un dépôt dont la visibilité n'a pas été lue est privé sur les écrans muraux** : avec une liste de dépôts écrite à la main, ou un `gh` ancien, tous comptaient comme publics et `screens.show_repo_names` montrait les noms des privés. La visibilité est maintenant lue par une liste du compte toutes les `discover_refresh_seconds`, et ce qui n'a pas pu être lu est montré comme privé.
+
+- **Une livraison de webhook capturée ne peut pas être renouvelée en changeant son identifiant de livraison, et les requêtes parasites ne peuvent pas épuiser le quota des vraies livraisons** : le corps signé est mémorisé en plus de l'identifiant, et les requêtes dont la signature ne se vérifie pas sont comptées à part (`webhook.max_bad_per_minute`, 120 par minute et par adresse, dans tous les modes et par l'adresse derrière un proxy de confiance) de celles dont elle se vérifie (120 par minute).
+
+- **Le processus d'un compte ne détient que le secret de webhook que nomme sa propre configuration** : les secrets des autres comptes et de la configuration principale restaient dans son environnement et dans celui de `gh` et de tout programme qu'il lançait.
+
+- **La variable d'un secret ne peut plus être une variable du système ni de la connexion à GitHub** : `webhook.secret_env` et `listen.token_env` refusent des noms comme PATH ou GH_TOKEN, et le nom du secret du webhook est lu une fois, au démarrage du processus.
+
+- **Avec plusieurs comptes, le superviseur protège chaque réponse contre l'intégration dans un cadre**, comme le fait le processus d'un compte.
+
+- **Un curseur contenant une lettre non ASCII donne un 400 ordinaire, et tout autre échec de l'API versionnée est l'enveloppe d'erreur d'un 500 (`api.server_error`)** au lieu d'une connexion coupée avec une trace dans la console.
+
+### Corrigé
+
+- **Les forks que GitHub ne rend pas ne bloquent plus le suivi des dépôts d'origine** : un fork revenu vide (supprimé, renommé ou invisible), ou une requête échouée, était le premier de chaque tour pour toujours. Ils sont notés comme essayés, le panneau les compte comme illisibles et le tour prend les suivants.
+
+- **La voie par lot de la recherche des workflows cachés lit la liste d'un dépôt une seule fois** : quand la liste n'apportait pas un workflow, elle était redemandée à chaque tour et rien n'était jamais résolu. La liste est lue une fois par dépôt pendant la durée de conservation des réponses, et ce qu'elle n'a pas apporté part un par un dans le même tour.
+
+- **Une question de la sentinelle qui a échoué attend avant d'être reposée** : les workflows cachés, les jobs d'un run rouge et les permissions d'un dépôt sont redemandés après 5 minutes, puis 30, puis 6 heures, et un dépôt dont les permissions ne se lisent pas passe en fin de file, si bien qu'il n'empêche plus la lecture des autres.
+
+- **Le budget horaire des listes de runs (`sampling.api_budget_per_hour`) compte des requêtes** : le second regard sur la branche par défaut (`sampling.default_branch_probe`) est compté au choix des dépôts d'un cycle, et la durée d'une ré-exécution (`ci.rerun_timing`) est une requête de l'heure qui n'est pas faite quand le budget est épuisé.
+
+- **Les runners sont lus sur GitHub une fois toutes les cinq minutes, et non à chaque requête vers `/api/runners`**.
+
+- **Le guide du webhook dit ce que fait le code** : après un événement le dépôt est relu au cycle suivant, les noms du workflow, de la branche et du job sont gardés comme texte de tiers, et les événements en direct sont lisibles par qui peut ouvrir la page.
+
 ## [2.0.8]
 
 ### Sécurité

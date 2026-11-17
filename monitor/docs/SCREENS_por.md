@@ -97,7 +97,7 @@ Um endereço para cada monitor. Um parâmetro pode tornar uma janela mais calma 
 | `screens.sound` | Um sinal sonoro a cada falha nova (desativado por defeito). |
 | `screens.burn_in_protection` | Desloca tudo alguns píxeis a cada minuto (ativado por defeito). |
 | `screens.night_dim` | Escurece os ecrãs entre `screens.night_dim_from_hour` (22) e `screens.night_dim_to_hour` (7); desativado por defeito. |
-| `screens.show_repo_names` | all, public (por defeito: os repositórios privados aparecem como private-1, private-2...) ou none (todos os nomes ficam ocultos). Use public ou none num ecrã que outras pessoas possam ver. |
+| `screens.show_repo_names` | all, public (por defeito: os repositórios privados aparecem como private-1, private-2...) ou none (todos os nomes ficam ocultos). Use public ou none num ecrã que outras pessoas possam ver. Com uma lista de repositórios escrita à mão em `repos`, a visibilidade é lida com uma listagem da conta a cada `discover_refresh_seconds`; um repositório cuja visibilidade não pôde ser lida conta como privado. |
 
 ### O que mostram e o que ocultam
 

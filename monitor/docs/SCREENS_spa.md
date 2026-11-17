@@ -97,7 +97,7 @@ Una dirección para cada monitor. Un parámetro puede hacer una ventana más tra
 | `screens.sound` | Un pitido con cada fallo nuevo (desactivado por defecto). |
 | `screens.burn_in_protection` | Desplaza todo unos píxeles cada minuto (activado por defecto). |
 | `screens.night_dim` | Atenúa las pantallas entre `screens.night_dim_from_hour` (22) y `screens.night_dim_to_hour` (7); desactivado por defecto. |
-| `screens.show_repo_names` | all, public (por defecto: los repositorios privados aparecen como private-1, private-2...) o none (se ocultan todos los nombres). Usa public o none en una pantalla que otras personas puedan ver. |
+| `screens.show_repo_names` | all, public (por defecto: los repositorios privados aparecen como private-1, private-2...) o none (se ocultan todos los nombres). Usa public o none en una pantalla que otras personas puedan ver. Con una lista de repositorios escrita a mano en `repos`, la visibilidad se lee con un listado de la cuenta cada `discover_refresh_seconds`; un repositorio cuya visibilidad no se pudo leer cuenta como privado. |
 
 ### Qué muestran y qué ocultan
 

@@ -97,7 +97,7 @@
 | `screens.sound` | 出现新失败时发出提示音（默认关闭）。 |
 | `screens.burn_in_protection` | 每分钟将所有内容移动几个像素（默认开启）。 |
 | `screens.night_dim` | 在 `screens.night_dim_from_hour`（22）和 `screens.night_dim_to_hour`（7）之间调暗屏幕；默认关闭。 |
-| `screens.show_repo_names` | all、public（默认：私有仓库显示为 private-1、private-2...）或 none（隐藏所有名称）。供其他人查看的屏幕请使用 public 或 none。 |
+| `screens.show_repo_names` | all、public（默认：私有仓库显示为 private-1、private-2...）或 none（隐藏所有名称）。供其他人查看的屏幕请使用 public 或 none。在 `repos` 中使用手写列表时,可见性每隔 `discover_refresh_seconds` 通过一次账户列表读取;无法读取可见性的仓库按私有处理。 |
 
 ### 显示什么，隐藏什么
 

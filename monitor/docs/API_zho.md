@@ -30,7 +30,7 @@
 - `/api/v1/me`:谁在请求:`mode`(`individual` 或 `team`)、`authenticated`、`user`,以及团队会话的 `role` 和 `accounts`(没有会话时为 null)、列表的 `limits` 和版本。
 - `/api/v1/repos`:监视器正在监视的仓库,每个一行(`repo`、`ecosystem`、`state`、`risk`、`runs_24h`、`failures_24h`、`red_workflows`、`stuck_runs`、`alerts`、`last_run_at`)。过滤参数 `state`、`ecosystem` 和 `q`;`limit`(默认 `api.default_limit`,最多 `api.max_limit`);`cursor`(上一页的 `next_cursor`,带签名,在 `api.cursor_ttl_seconds` 内有效);`fields=a,b` 或 `profile=compact` 可得到更短的行。客户端接受时,响应用 gzip 压缩。
 - `/api/v1/openapi.json`:这两条路由的轻量 OpenAPI 3 描述。
-- 两条自有路由以 `{"error": "bad_request", "code": "api.bad_cursor", "message": "..."}` 的形式返回错误:`error` 和 `code` 稳定,`message` 跟随 `?lang=` 的语言。代码:api.bad_cursor、api.bad_limit、api.unknown_field、api.bad_profile。一切均为只读:`/api/v1/` 下没有任何写入。其形状已冻结在契约的 `v1_endpoints` 部分,可用 `python tools/check_api_contract.py --v1` 针对开启了 `api.v1_enabled` 的监视器进行检查。
+- 两条自有路由以 `{"error": "bad_request", "code": "api.bad_cursor", "message": "..."}` 的形式返回错误:`error` 和 `code` 稳定,`message` 跟随 `?lang=` 的语言。代码:api.bad_cursor、api.bad_limit、api.unknown_field、api.bad_profile, api.server_error。一切均为只读:`/api/v1/` 下没有任何写入。其形状已冻结在契约的 `v1_endpoints` 部分,可用 `python tools/check_api_contract.py --v1` 针对开启了 `api.v1_enabled` 的监视器进行检查。
 
 ## 数据流
 
