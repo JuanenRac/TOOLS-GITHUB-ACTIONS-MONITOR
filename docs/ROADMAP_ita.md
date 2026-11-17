@@ -16,7 +16,11 @@ Ciò che emerge solo con un uso reale prolungato: la migrazione dalla 1.8 e dall
 
 I workflow del monitor stesso rispettano ciò che la sentinella di igiene chiederà agli altri: azioni fissate a un commit, permessi minimi e un limite di tempo su ogni job.
 
-## Fatto dalla 1.8.2 alla 2.0.3
+## Fatto dalla 1.8.2 alla 2.0.4
+
+### 2.0.4 - Un modello per ogni compito, menu indipendenti e un aiuto che apre l'argomento giusto
+
+L'IA del monitor può usare un modello per ogni tipo di compito, una catena di riserve quando il modello principale fallisce e un budget per ogni modello, il tutto disattivato finché non è scritto nelle impostazioni; Avvisi, Rapporti e Lezioni sono tre voci indipendenti del menu, ciascuna con il proprio pannello, badge, argomento di aiuto e indirizzo; la scheda Cronologia mantiene un solo contatore invece di accumulare copie a ogni aggiornamento; il pulsante «Aiuto di questa scheda» apre in ogni scheda l'argomento della scheda aperta; e i test del browser vengono saltati senza errori quando manca la cartella degli strumenti.
 
 ### 2.0.3 - Account grandi, meno falsi rossi, lint senza cloni e archiviazione più sicura
 

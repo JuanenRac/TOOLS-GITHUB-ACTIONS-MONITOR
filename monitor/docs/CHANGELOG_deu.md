@@ -9,6 +9,13 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+## [2.0.4]
+
+### Hinzugefügt
+
+- **Ein Modell für jede Aufgabe, eine Kette von Ersatzmodellen und ein Budget für jedes Modell, für die KI des Monitors** (alles aus, bis es in den Einstellungen steht, und nur unter den Anbietern, die Sie nennen): `ai.tasks.build.model` (und ebenso für `codeql`, `report`, `diagnose` und `alert`, jeweils mit eigenem Anbieter und eigenen Grenzen) lässt ein anderes Modell diese Art von Frage beantworten; `ai.fallback` listet die Modelle, die der Reihe nach versucht werden, wenn das Hauptmodell fehlschlägt (jeder Fehler, ein abgelehnter Schlüssel, ein nicht vorhandenes Modell, ein Kontingentfehler oder eine langsame Antwort, wenn `ai.fallback_after_seconds` gesetzt ist) oder aus dem Katalog verschwunden ist, und `ai.fallback_max_attempts` begrenzt die ganze Kette; die Aufrufe pro Tag je Modell (`ai.model_daily_limit`) und die geschätzten Kosten je Modell und insgesamt (`ai.model_cost_limit_daily`, `ai.cost_limit_daily`, nur wenn die Preise bekannt sind) sind Budgets zusätzlich zu `ai.daily_limit`, und ein Modell mit aufgebrauchtem Budget wird übersprungen, nie überschritten. Der erste Ausfall des Hauptmodells wird mit seinem Grund ins Protokoll und in den Überblick geschrieben. Ist nichts eingestellt, antwortet wie bisher das eine allgemeine Modell.
+- **Alarme, Berichte und Lektionen sind drei Einträge des Menüs links**: die optionalen Berichte und die Lektionen aus den Fehlern waren Abschnitte am Ende des Tabs Alarme; jeder hat jetzt einen eigenen Eintrag mit eigenem Symbol, eigener Anzeige (Berichte: Repositories mit Befunden und blockierte Releases; Lektionen: die, die jetzt gelten) und eigener Adresse (`#reports`, `#lessons`, auch `?view=reports` und `?view=lessons`). Nichts ging verloren oder wurde doppelt gezeigt, die alten Adressen (`#alerts`, `#alerts/reports`, `#al/lessons`) öffnen das richtige Panel, ein Berichte-Panel ohne eingeschaltete Berichte sagt das, statt zu verschwinden, und die Bildschirme können die neuen Tabs in `ui.screen1_tabs` (`rep`, `les`) auflisten. Die Anleitungen nennen die neuen Menüeinträge in den acht Sprachen.
+
 ### Behoben
 
 - **„Hilfe zu diesem Reiter“ öffnet in jedem Reiter das Thema des geöffneten Reiters**: In der Zuordnung von Reiter zu Thema fehlten die Reiter Warnungen und Team, und Repositories und Verlauf führten zum ersten Thema der Hilfe („GitHub Actions Monitor“). Es ist jetzt eine einzige Tabelle (`TAB_TOPICS`) mit einem Eintrag für jeden Reiter des Seitenmenüs, und ein Test schlägt fehl, wenn ein Reiter kein oder ein nicht vorhandenes Thema hat. Ein Test im Browser geht alle Reiter durch und drückt die Schaltfläche.

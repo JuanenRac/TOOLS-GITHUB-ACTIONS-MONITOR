@@ -9,6 +9,13 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+## [2.0.4]
+
+### Ajouté
+
+- **Un modèle pour chaque tâche, une chaîne de secours et un budget pour chaque modèle, pour l'IA du moniteur** (tout est désactivé tant que ce n'est pas écrit dans les réglages, et seulement parmi les fournisseurs que vous nommez) : `ai.tasks.build.model` (et de même pour `codeql`, `report`, `diagnose` et `alert`, chacun avec son fournisseur et ses limites) fait répondre un autre modèle à ce type de question ; `ai.fallback` liste les modèles essayés dans l'ordre quand le principal échoue (toute erreur, une clé refusée, un modèle inexistant, une erreur de quota, ou une réponse lente si `ai.fallback_after_seconds` est défini) ou a quitté le catalogue, et `ai.fallback_max_attempts` borne toute la chaîne ; les appels par jour de chaque modèle (`ai.model_daily_limit`) et le coût estimé de chaque modèle et au total (`ai.model_cost_limit_daily`, `ai.cost_limit_daily`, seulement quand les prix sont connus) sont des budgets en plus de `ai.daily_limit`, et un modèle dont le budget est épuisé est ignoré, jamais dépassé. Le premier échec du modèle principal est écrit dans le journal et dans le résumé avec sa raison. Sans rien de réglé, le seul modèle général répond comme avant.
+- **Alertes, Rapports et Leçons sont trois entrées du menu de gauche** : les rapports facultatifs et les leçons tirées des échecs étaient des sections au bas de l'onglet Alertes ; chacun a maintenant sa propre entrée avec son icône, son badge (rapports : dépôts avec des constats et releases bloquées ; leçons : celles qui s'appliquent maintenant) et son adresse (`#reports`, `#lessons`, aussi `?view=reports` et `?view=lessons`). Rien n'a été perdu ni répété, les anciennes adresses (`#alerts`, `#alerts/reports`, `#al/lessons`) ouvrent le bon panneau, un panneau de rapports sans aucun activé le dit au lieu de disparaître, et les écrans peuvent lister les nouveaux onglets dans `ui.screen1_tabs` (`rep`, `les`). Les guides nomment les nouvelles entrées du menu dans les huit langues.
+
 ### Corrigé
 
 - **« Aide de cet onglet » ouvre dans chaque onglet le sujet de l'onglet ouvert** : la table d'onglet à sujet n'avait pas les onglets Alertes et Équipe et envoyait Dépôts et Historique vers le premier sujet de l'aide (« GitHub Actions Monitor »). C'est maintenant une seule table (`TAB_TOPICS`) avec une entrée pour chaque onglet du menu latéral, et un test échoue si un onglet n'a pas de sujet ou en a un qui n'existe pas. Un test dans un navigateur parcourt tous les onglets et appuie sur le bouton.
