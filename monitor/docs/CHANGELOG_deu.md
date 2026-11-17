@@ -12,6 +12,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 ### Behoben
 
 - **„Hilfe zu diesem Reiter“ öffnet in jedem Reiter das Thema des geöffneten Reiters**: In der Zuordnung von Reiter zu Thema fehlten die Reiter Warnungen und Team, und Repositories und Verlauf führten zum ersten Thema der Hilfe („GitHub Actions Monitor“). Es ist jetzt eine einzige Tabelle (`TAB_TOPICS`) mit einem Eintrag für jeden Reiter des Seitenmenüs, und ein Test schlägt fehl, wenn ein Reiter kein oder ein nicht vorhandenes Thema hat. Ein Test im Browser geht alle Reiter durch und drückt die Schaltfläche.
+- **Der Reiter Verlauf häuft seinen Zähler nicht mehr an**: „Zeige 200 von N“ wurde bei jeder Aktualisierung an die Werkzeuge der Tabelle angehängt, während die Werkzeuge selbst nur bei einer Änderung der Reihenfolge oder der Spalten neu gezeichnet wurden; so wuchsen tausende Kopien neben der Spaltenliste. Der Zähler ist jetzt ein einziges Element, das ersetzt oder entfernt wird. Ein Test öffnet die Seite in einem Browser, zeichnet die Tabelle viele Male (Aktualisierung, Filter, alle Spalten, eine Reihenfolge) und prüft, dass es einen Zähler und einen Hinweis gibt.
 
 ## [2.0.3]
 

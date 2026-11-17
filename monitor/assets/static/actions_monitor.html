@@ -1124,12 +1124,20 @@ const HIST_TABLE=Table("hist",[
   {id:"file",label:"ui.th_file",sort:r=>r.path,cell:r=>esc(r.path)},
   {id:"eco",label:"ui.th_eco",sort:r=>(DATA&&DATA.ecosystems[r.repo])||"other",cell:r=>esc((DATA&&DATA.ecosystems[r.repo])||"other")}
 ],()=>renderHistory());
+/* the count "Showing N of M" is ONE element that is replaced or removed: the tools of the table are drawn again only when the order or the columns change, so a count that was only appended piled up at every refresh */
+function histCount(tools,text){
+  const old=[...tools.querySelectorAll("#hist-count")];
+  if(!text){old.forEach(n=>n.remove());return}
+  const n=old[0]||document.createElement("span");old.slice(1).forEach(x=>x.remove());
+  n.className="mut";n.id="hist-count";n.setAttribute("role","status");n.textContent=text;
+  if(n.parentNode!==tools||tools.lastElementChild!==n)tools.appendChild(n)
+}
 function renderHistory(){
   if(!DATA)return;const repo=$("f-repo").value,res=$("f-res").value,q=$("f-q").value.toLowerCase();
   const all=DATA.runs.filter(r=>repoVisible(r.repo,DATA)&&(!repo||r.repo===repo)&&(!res||r.conclusion===res)&&(!q||(r.name+" "+r.title).toLowerCase().includes(q))),rows=HIST_TABLE.sorted(all).slice(0,200);
   HIST_TABLE.draw($("hist-head"),$("hist-tools"));
   {const total=!repo&&!res&&!q&&DATA.runs_total>DATA.runs.length?DATA.runs_total:all.length;      // the server keeps the 600 most recent runs: say so when the list is shorter than what the header counted
-   if(rows.length<total){const n=document.createElement("span");n.className="mut";n.id="hist-count";n.setAttribute("role","status");n.textContent=T("ui.n_showing",{n:rows.length,total:total});$("hist-tools").appendChild(n)}}
+   histCount($("hist-tools"),rows.length<total?T("ui.n_showing",{n:rows.length,total:total}):"")}
   $("hist").innerHTML=rows.map(r=>`<tr>${HIST_TABLE.cells(r)}</tr>`).join("")||`<tr><td colspan="${HIST_TABLE.visible().length}" class="mut">${esc(T("ui.h_none"))}</td></tr>`;
 }
 ["f-repo","f-res"].forEach(id=>$(id).addEventListener("change",renderHistory));$("f-q").addEventListener("input",renderHistory);

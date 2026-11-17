@@ -14,6 +14,7 @@ when this file and `tool_version.py` disagree.
 ### Fixed
 
 - **"Help of this tab" opens the topic of the tab that is open in every tab**: the map from tab to topic was missing the Alerts and Team tabs and sent Repositories and History to the first topic of the Help ("GitHub Actions Monitor"). It is now one table (`TAB_TOPICS`) with an entry for every tab of the side menu, and a test fails when a tab has no topic or one that does not exist. A test in a browser goes through every tab and presses the button.
+- **The History tab no longer piles up its count**: "Showing 200 of N" was appended to the tools of the table at every refresh while the tools themselves were drawn again only when the order or the columns changed, so thousands of copies grew next to the list of columns. The count is now one element that is replaced or removed. A test opens the page in a browser, draws the table many times (refresh, filters, all columns, an order) and checks that there is one count and one hint.
 
 ## [2.0.3]
 
