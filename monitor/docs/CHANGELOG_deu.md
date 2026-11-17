@@ -9,6 +9,24 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+### Sicherheit
+
+- **Das gemeinsame Geheimnis des eingehenden Webhooks reist nur noch in der Umgebung (`webhook.secret_env`, standardmäßig `MONITOR_WEBHOOK_SECRET`)**: Es war ein Text in `actions_monitor.json`, wo eine Sicherung, eine kopierte Konfiguration oder ein geteilter Bildschirm es preisgeben konnten. Der Empfänger liest es jetzt aus der Umgebungsvariable, die `webhook.secret_env` nennt (oder aus der Datei, die diese Variable plus `_FILE` nennt, so wie ein Container ein Secret übergibt), der Monitor entfernt es nach dem Lesen aus seiner eigenen Umgebung, damit die Programme, die er startet, es nicht erben, und ein in die Datei geschriebenes Geheimnis wird ignoriert. Der alte Weg kann für eine Migration mit `webhook.allow_config_secret` beibehalten werden (nur in der Datei, standardmäßig aus), und die Live-Ansicht warnt, solange er benutzt wird. Der Reiter Einstellungen zeigt den Namen der Variable und ob das Geheimnis definiert ist, nie das Geheimnis.
+
+### Hinzugefügt
+
+- **Der Webhook nimmt auch `check_run`-Ereignisse an, und die Live-Ansicht sagt, wie viel der Zeit die Ereignisse den Zustand abdecken**: `check_run` kommt in die geschlossene Ereignisliste (`workflow_run`, `workflow_job`, `check_run`, `push`, `release`, `check_suite` und `ping`); wie die anderen markiert es das Repository nur für einen Lesezugriff und behält keinen Text. Die Live-Ansicht und `/api/live-status` (mit den neuen `coverage` und `secret_source`) sagen, ob der Zustand durch Ereignisse abgedeckt ist (das letzte ist neuer als `savings.webhook_window_minutes`), seit einer Weile kein Ereignis hatte (ruhiges Repository oder verlorener Tunnel) oder auf das erste wartet. Die Abfrage bleibt der Rückfall, sodass eine nie angekommene Lieferung beim nächsten Lesen nachgeholt wird.
+- **Eine Anleitung, den Webhook in GitHub einzurichten, in acht Sprachen**: `docs/WEBHOOK.md` beschreibt Schritt für Schritt, wie man das Geheimnis erzeugt, es dem Monitor in PowerShell, einer Shell, einem Dienst oder einem Container übergibt, was auf der Webhook-Seite von GitHub auszufüllen ist (Adresse, Inhaltstyp, Geheimnis, Ereignisse) und was jede Antwort (`404`, `401`, `413`, `400`, `202` und `429`) bedeutet.
+
+### Geändert
+
+- **Die bezahlten Runner einer anderen Firma, die das Modell standardmäßig erkennt, enthalten jetzt `codspeed`** (`runners.model.thirdparty_labels`): öffentliche Repositories nutzen ihn für ihre Benchmarks, und seine Jobs wurden als unbekannter Runner gezählt. Eine selbst geschriebene Liste bleibt unberührt.
+
+### Behoben
+
+- **Ein Workflow, dessen Datei gelöscht wurde, zählt nicht zu den Workflows, die man aktivieren kann**: GitHub behält den Verlauf eines gelöschten Workflows mit leerem Pfad in der Liste (sechs der 96 untersuchten öffentlichen Repositories haben einen), und die Hygieneprüfung bot ihn als von Hand deaktivierten Workflow an. Er bleibt jetzt aus den Listen heraus, die eine Datei brauchen.
+- **Ein Fork, in den nie gepusht wurde, ist nicht „kürzlich gepusht“**: Ein Fork erbt beim Anlegen das Push-Datum seines Upstreams (693 der 722 Forks eines gemessenen Kontos haben es vor ihrer eigenen Erstellung), sodass der Wächter jeden neuen Fork für das aktivste Repository des Kontos hielt und als heiß las. Das Push-Datum eines Forks wird jetzt ignoriert, solange es nicht neuer als seine Erstellung ist.
+
 ## [2.0.7]
 
 ### Hinzugefügt

@@ -369,7 +369,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `runners.model.runaway_ignore_events` | `["pull_request", "pull_request_target"]` | advanced | Events that do not count as runaway |
 | `runners.model.runaway_runs_per_hour` | `20` | advanced | Runs per hour of a workflow that fires itself |
 | `runners.model.self_labels` | `[]` | advanced | Extra labels of self-hosted runners |
-| `runners.model.thirdparty_labels` | `["blacksmith", "buildjet", "namespace-profile", "depot", "warpbuild", "ubicloud", "runs-on", "actuated", "cirrus-runners"]` | advanced | Labels of paid third-party runners |
+| `runners.model.thirdparty_labels` | `["blacksmith", "buildjet", "namespace-profile", "depot", "warpbuild", "ubicloud", "runs-on", "actuated", "cirrus-runners", "codspeed"]` | advanced | Labels of paid third-party runners |
 | `runners.model.thirdparty_usd_per_minute` | `0.0` | advanced | Price of a third-party minute |
 | `runners.scope` | `"owner"` | advanced | Where to look |
 | `runs_per_repo` | `20` | polling | Runs read per hot repository |

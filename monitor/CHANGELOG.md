@@ -11,6 +11,24 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+### Security
+
+- **The shared secret of the incoming webhook only travels in the environment (`webhook.secret_env`, `MONITOR_WEBHOOK_SECRET` by default)**: it was a text in `actions_monitor.json`, where a backup, a copied configuration or a shared screen could leak it. The receiver now reads it from the environment variable named by `webhook.secret_env` (or from the file named by that variable plus `_FILE`, the way a container hands over a secret), the monitor takes it out of its own environment once it has read it so the programs it starts do not inherit it, and a secret written in the file is ignored. The old way can be kept for a migration with `webhook.allow_config_secret` (file only, off by default) and the Live view warns while it is used. The Settings tab shows the name of the variable and whether the secret is defined, never the secret.
+
+### Added
+
+- **The webhook also takes `check_run` events, and the Live view says how much of the time the events cover the state**: `check_run` joins the closed list of events (`workflow_run`, `workflow_job`, `check_run`, `push`, `release`, `check_suite` and `ping`); like the others it only marks the repository for a read and keeps no text. The Live view and `/api/live-status` (new `coverage` and `secret_source`) say whether the state is covered by events (the last one is newer than `savings.webhook_window_minutes`), has had no event for a while (a quiet repository or a lost tunnel) or waits for the first one. The polling stays the fallback, so a delivery that never arrived is caught by the next read.
+- **A guide to set the webhook up in GitHub, in eight languages**: `docs/WEBHOOK.md` lists, step by step, how to make the secret, how to give it to the monitor in PowerShell, a shell, a service or a container, what to fill in on the webhook page of GitHub (address, content type, secret, events) and what each answer (`404`, `401`, `413`, `400`, `202` and `429`) means.
+
+### Changed
+
+- **The paid runners of another company that the model recognises by default include `codspeed`** (`runners.model.thirdparty_labels`): public repositories use it for their benchmarks, and its jobs were counted as a runner nobody knew. A list you wrote yourself is not touched.
+
+### Fixed
+
+- **A workflow whose file was deleted is not one of the workflows you can enable**: GitHub keeps the history of a deleted workflow in the list with an empty path (six of the 96 public repositories studied have one), and the hygiene check offered it as a workflow disabled by hand. It now stays out of the lists that need a file.
+- **A fork that was never pushed is not "recently pushed"**: a fork inherits the push date of its upstream when it is made (693 of the 722 forks of an account measured have it before their own creation), so the sentinel took every new fork for the most active repository of the account and read it as a hot one. The push date of a fork is now ignored while it is not newer than its creation.
+
 ## [2.0.7]
 
 ### Added

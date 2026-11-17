@@ -9,6 +9,24 @@
 
 ## [Unreleased]
 
+### 安全
+
+- **入站 Webhook 的共享密钥只通过环境传递（`webhook.secret_env`，默认 `MONITOR_WEBHOOK_SECRET`）**：它以前是 `actions_monitor.json` 中的一段文本，备份、复制的配置或共享屏幕都可能泄露它。接收器现在从 `webhook.secret_env` 指定的环境变量读取（或从该变量名加 `_FILE` 指定的文件读取，容器就是这样交付 secret 的），监视器读取后会把它从自己的环境中移除，使其启动的程序不会继承它，而写在文件中的密钥会被忽略。旧方式可用 `webhook.allow_config_secret` 临时保留以便迁移（仅限文件，默认关闭），使用期间实时视图会发出警告。设置标签页只显示变量名和密钥是否已定义，绝不显示密钥。
+
+### 新增
+
+- **Webhook 也接受 `check_run` 事件，实时视图会说明事件在多大程度上覆盖了状态**：`check_run` 加入封闭的事件列表（`workflow_run`、`workflow_job`、`check_run`、`push`、`release`、`check_suite` 和 `ping`）；与其他事件一样，它只标记仓库以便读取，不保留任何文本。实时视图和 `/api/live-status`（新增 `coverage` 与 `secret_source`）会说明状态是否由事件覆盖（最近一个事件比 `savings.webhook_window_minutes` 更新）、已有一段时间没有事件（仓库安静或隧道中断）或正在等待第一个事件。轮询仍是后备，因此从未到达的推送会在下一次读取时补上。
+- **用八种语言写成的在 GitHub 中配置 Webhook 的指南**：`docs/WEBHOOK.md` 逐步说明如何生成密钥、如何在 PowerShell、shell、服务或容器中把它交给监视器、在 GitHub 的 Webhook 页面要填什么（地址、内容类型、密钥、事件），以及每个响应（`404`、`401`、`413`、`400`、`202` 和 `429`）的含义。
+
+### 变更
+
+- **模型默认识别的其他公司付费 runner 现在包含 `codspeed`**（`runners.model.thirdparty_labels`）：公开仓库用它做基准测试，其作业以前被当成无人认识的 runner。你自己写的列表不会被改动。
+
+### 修复
+
+- **文件已被删除的 workflow 不再算作可以启用的 workflow**：GitHub 会在列表里保留已删除 workflow 的历史，其路径为空（所研究的 96 个公开仓库中有六个有这样的 workflow），而卫生检查会把它当作手动停用的 workflow 提出来。现在它不再出现在需要文件的列表中。
+- **从未被推送过的 fork 不算“最近推送”**：fork 在创建时会继承上游的推送日期（在被测量的账户中，722 个 fork 里有 693 个的推送日期早于自己的创建时间），所以哨兵把每个新 fork 都当成账户中最活跃的仓库并按热仓库处理。现在只要 fork 的推送日期不晚于其创建时间，就会被忽略。
+
 ## [2.0.7]
 
 ### 新增

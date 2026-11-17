@@ -749,7 +749,7 @@
  "cfg.h.runners.scope": "owner = アカウントまたは組織のランナー、repos = 監視中の各リポジトリのランナー(呼び出しが増えます)。",
  "cfg.h.runners.model.enabled": "オフ=何も読みません。オン=ジョブのラベル(runs-on)でホスト型・大型・サードパーティ有料・セルフホストのランナーを区別します。詳細タブには種類別のキューとコスト、繰り返し自己起動するワークフロー、存在しないセルフホストランナーを待つジョブが表示されます。読み取り専用。",
  "cfg.h.runners.model.jobs_per_cycle": "読み取る実行1件につき1リクエストを使います。0=ジョブは読まず、完了した実行のコスト(FinOps)だけがモデルに入ります。既定は10。",
- "cfg.h.runners.model.thirdparty_labels": "ラベルがこれらの名前のいずれかで始まるジョブは、GitHubが課金しない他社の有料ランナーです(既定:blacksmith、buildjet、namespace-profile、depot、warpbuild、ubicloud、runs-on、actuated、cirrus-runners)。リストを変更すると置き換わります。",
+ "cfg.h.runners.model.thirdparty_labels": "ラベルがこれらの名前のいずれかで始まるジョブは、GitHubが課金しない他社の有料ランナーです(既定:blacksmith、buildjet、namespace-profile、depot、warpbuild、ubicloud、runs-on、actuated、cirrus-runners、codspeed)。リストを変更すると置き換わります。",
  "cfg.h.runners.model.large_labels": "独自の大型ランナーグループのラベルの名前またはパターン(*と?が使えます。例:my-big-*)。GitHubの大型ランナーのラベル(-8-cores、large、xlarge)は常に認識されます。既定は空です。",
  "cfg.h.runners.model.self_labels": "self-hosted のほかに、自分のランナーを意味するラベル(例:自分のランナーグループの名前)。既定は空です。",
  "cfg.h.runners.model.thirdparty_usd_per_minute": "サードパーティ有料ランナーの1分あたりの費用(ドル)。0(既定)=不明:分数は数えますが費用は表示しません。",
