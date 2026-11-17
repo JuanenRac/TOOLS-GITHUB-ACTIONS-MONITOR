@@ -3539,5 +3539,8 @@
  "ui.upstream_state_none": "sin comprobaciones",
  "ui.upstream_state_detached": "original no encontrado",
  "ui.upstream_new": "release nueva",
- "ui.upstream_calls": "{n} de {max} peticiones esta hora"
+ "ui.upstream_calls": "{n} de {max} peticiones esta hora",
+ "cfg.f.ci.disabled_apart": "Un workflow desactivado a mano no es rojo",
+ "cfg.h.ci.disabled_apart": "Activado por defecto. Un workflow que el dueño desactivó a mano (estado disabled_manually) sale de la lista de rojos y se cuenta aparte: desactivarlo es la respuesta a su fallo, y su último run se quedaría fallido para siempre. Un workflow que GitHub desactivó por inactividad no se ve afectado (eso no es una decisión del dueño). Desactivado: un workflow desactivado sigue rojo hasta que se ejecute en verde.",
+ "ui.a2_disabled": " · {n} desactivados a mano (no son rojos)"
 }

@@ -820,6 +820,7 @@ def compute_snapshot(inp):
     resolved = inp.get("a2_resolved") or {}
     extra = a2_resolved_runs(resolved, branches, now.timestamp(), ttl)
     red = red_workflows({r: runs + extra.get(r, []) for r, runs in runs_by_repo.items()}, branches)
+    red, disabled_apart = redrule.split_disabled(red, perms)      # a workflow switched off by hand is not red (ci.disabled_apart)
     jobs_known = inp.get("failed_jobs") or {}
     for row in red:      # which jobs of the run failed, when ci.failed_jobs read them (causes.py)
         found = jobs_known.get(f"{row['repo']}|{row.get('run_id')}")
@@ -896,7 +897,7 @@ def compute_snapshot(inp):
         "rate": rate, "min_rate": cfg["min_rate_remaining"], "errors": errors, "ai": inp.get("ai"),
         "a1": {"stuck": stuck, "issues": issues, "stuck_minutes": data.get("stuck_minutes"), "ghosts": list(data.get("ghosts") or [])[:200],
                "ghost_days": ((data.get("figures") or {}).get("ghost_days"))},
-        "a2": {"red": red, "groups": causes.groups(red), "workflows_checked": sum(1 for r in repos for _ in {workflow_key(x) for x in runs_by_repo.get(r, []) if not redrule.is_dynamic(x)}),
+        "a2": {"red": red, "disabled_by_hand": [{"repo": r["repo"], "workflow": r["workflow"]} for r in disabled_apart][:200], "groups": causes.groups(red), "workflows_checked": sum(1 for r in repos for _ in {workflow_key(x) for x in runs_by_repo.get(r, []) if not redrule.is_dynamic(x)}),
                "services": redrule.service_rows([x for r in repos for x in runs_by_repo.get(r, [])])[:200],
                "unchecked": a2_unchecked(runs_by_repo), "full_sample": a2_full_sample(runs_by_repo, caps),
                "inconclusive": a2_repos, "inconclusive_workflows": a2_labels(a2_details), "inconclusive_details": a2_details},
@@ -1264,6 +1265,7 @@ class Sentinel:
                 own = [w for w in wfs if not str(w.get("path") or "").startswith("dynamic/")]      # the workflows GitHub makes for itself (Dependabot, the dependency graph, Copilot, the default CodeQL) have no file: they are not the owner's to enable
                 res["wf_disabled"] = [w.get("name") for w in own if w.get("state") == "disabled_inactivity"]
                 res["wf_manual"] = [w.get("name") for w in own if w.get("state") == "disabled_manually"]   # same call: no extra request
+                res["wf_manual_files"] = [str(w.get("path") or "").rsplit("/", 1)[-1] for w in own if w.get("state") == "disabled_manually" and w.get("path")]
             except Exception as error:
                 if not is_denied(error):
                     raise

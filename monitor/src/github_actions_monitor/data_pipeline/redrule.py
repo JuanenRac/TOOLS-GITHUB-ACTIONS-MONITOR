@@ -31,7 +31,7 @@ QUEUE_PREFIX = "gh-readonly-queue/"
 AWAITING_DAYS = 14
 DEFAULT_INACTIVE_DAYS = 90
 DEFAULT_RED_AGE_DAYS = 30
-POLICY = {"events": RED_EVENTS, "fork_runs": False, "automation": False, "inactive_days": DEFAULT_INACTIVE_DAYS, "red_age_days": DEFAULT_RED_AGE_DAYS, "branches": ()}      # replaced by configure(): the whole monitor shares one rule
+POLICY = {"events": RED_EVENTS, "fork_runs": False, "automation": False, "inactive_days": DEFAULT_INACTIVE_DAYS, "red_age_days": DEFAULT_RED_AGE_DAYS, "branches": (), "disabled_apart": True}      # replaced by configure(): the whole monitor shares one rule
 
 
 def configure(config):
@@ -47,6 +47,7 @@ def configure(config):
     age = block.get("red_age_days")
     age = age if isinstance(age, int) and not isinstance(age, bool) and 1 <= age <= 3650 else DEFAULT_RED_AGE_DAYS
     POLICY["red_age_days"] = age if block.get("red_ages") is not False else 0      # 0 = a red never ages
+    POLICY["disabled_apart"] = block.get("disabled_apart") is not False
     extra = block.get("extra_branches")
     POLICY["branches"] = tuple(b for b in extra if isinstance(b, str) and b) if isinstance(extra, (list, tuple)) else ()
 
@@ -229,6 +230,18 @@ def awaiting_runs(runs, now=None, days=AWAITING_DAYS):
         seen.add(run.get("id"))
         out.append({"repo": run.get("repo"), "workflow": run.get("name") or workflow_key(run), "branch": run.get("branch"), "event": run.get("event"), "fork": is_fork_run(run), "since": run.get("started"), "url": run.get("url"), "id": run.get("id")})
     return out
+
+
+def split_disabled(red, perms):
+    """(kept, apart): the red rows whose workflow the owner switched off by hand (state `disabled_manually`, read with the permissions of each repository) go apart: switching a workflow off is the answer
+    to its failure, and its last run stays red for ever. A workflow GitHub switched off for inactivity is not here: that one is not a decision of the owner. Rows are matched by the name of the file."""
+    if not POLICY["disabled_apart"]:
+        return list(red), []
+    off = {(repo, name) for repo, p in (perms or {}).items() for name in (p or {}).get("wf_manual_files") or []}
+    kept, apart = [], []
+    for row in red:
+        (apart if (row.get("repo"), str(row.get("file") or "").rsplit("/", 1)[-1]) in off else kept).append(row)
+    return kept, apart
 
 
 def red_runs(runs, branch, now=None):

@@ -3539,5 +3539,8 @@
  "ui.upstream_state_none": "keine Prüfungen",
  "ui.upstream_state_detached": "Original nicht gefunden",
  "ui.upstream_new": "neues Release",
- "ui.upstream_calls": "{n} von {max} Anfragen in dieser Stunde"
+ "ui.upstream_calls": "{n} von {max} Anfragen in dieser Stunde",
+ "cfg.f.ci.disabled_apart": "Ein von Hand abgeschalteter Workflow ist nicht rot",
+ "cfg.h.ci.disabled_apart": "Standardmäßig an. Ein Workflow, den der Eigentümer von Hand abgeschaltet hat (Status disabled_manually), verlässt die Liste der Roten und wird getrennt gezählt: Das Abschalten ist die Antwort auf seinen Fehler, und sein letzter Lauf bliebe für immer fehlgeschlagen. Ein Workflow, den GitHub wegen Inaktivität abgeschaltet hat, ist nicht betroffen (das ist keine Entscheidung des Eigentümers). Aus: Ein abgeschalteter Workflow bleibt rot, bis er grün läuft.",
+ "ui.a2_disabled": " · {n} von Hand abgeschaltet (nicht rot)"
 }
