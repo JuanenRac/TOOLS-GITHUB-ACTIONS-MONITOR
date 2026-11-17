@@ -9,6 +9,8 @@
 
 La pagina si adatta alla dimensione della finestra, dal telefono al 4K, in verticale o in orizzontale, e un solo monitor può servire più schermi, ciascuno con le schede che scegli. Niente viene interrogato due volte: tutti gli schermi leggono lo stesso stato.
 
+
+Per una TV o una parete con testo più grande, un alto contrasto o una rotazione tra poche schede, vedi [KIOSK_ita.md](KIOSK_ita.md).
 ## Indirizzi
 
 - `/` - l'intera pagina.

@@ -22,8 +22,13 @@
 | `team` | 按需要人处理的优先顺序列出仓库的健康状况；`--severity warn\|bad` 只保留较差的，`--repo owner/name` 显示单个仓库的详情 | 否 |
 | `live` | Webhook 接收器的状态和最近的事件 | 不支持 |
 | `ai` | `ai models [--refresh]` 列出 AI 提供方的模型及各模型的数据；`ai test --provider 名称 --model 名称` 用合成文本试用一个模型（延迟、令牌、估算成本）；`ai doctor` 说明 AI 为何没有响应，且不输出密钥 | 不支持 |
+| `watch` | 反复进行同一次读取（`watch status\|alerts`、`--interval`、`--once`、`--exit-on-change`）；参见 [CLI_OPERATOR_zho.md](CLI_OPERATOR_zho.md) | 不支持 |
+| `completions` | `bash`、`zsh`、`fish` 或 `powershell` 的补全脚本，由真实解析器生成（只打印） | 不支持 |
+| `kiosk` | 电视或墙面所用的监控器地址（`ops`、`team`、`release`、`quiet`）；参见 [KIOSK_zho.md](KIOSK_zho.md) | 不支持 |
 
 所有命令的选项：`--json`（以单个 JSON 文档输出：`{"ok", "exit", "data"}`）、`--account ID`、`--url URL`、`--lite`（端口 8766）、`--timeout 秒数`（1 到 60）、`--lang 代码`。在网络模式下,请把访问令牌放在监视器自己读取的环境变量 `MONITOR_ACCESS_TOKEN` 中(`MONITOR_TOKEN` 作为别名也可用;`--token TOKEN` 是最后手段,因为命令行选项会出现在进程列表中)。优先顺序:`MONITOR_ACCESS_TOKEN`、`MONITOR_TOKEN`、`--token`。令牌通过请求头 `X-Monitor-Access` 传送,绝不出现在地址或屏幕上。对其他计算机使用未加密 `http` 的 `--url` 时,会在 stderr 打印警告(令牌和响应将以明文传输):在不受你控制的网络中请使用 `https`。
+
+每个命令还接受 `--format text|table|plain|json|ndjson`（`--json` 即 `--format json`）；参见 [CLI_OPERATOR_zho.md](CLI_OPERATOR_zho.md)。
 
 为人而写的时间（`Last read` 行、静音、日志、报告、通知）使用本机的时区并标明其名称，旁边附上 UTC 时间（`11:43:07 CET (10:43:07 UTC)`）。可用 `display.timezone` 选择其他时区（`local`、`utc` 或如 `Europe/Madrid` 的名称；环境变量 `MONITOR_TIMEZONE` 优先于文件）。`--json` 保持 UTC，并新增 `updated_local`。
 
@@ -37,6 +42,7 @@
 | 3 | 监视器拒绝此客户端，或该账户的 GitHub 登录失败或已过期（凭据问题，而非配额耗尽） |
 | 4 | 监视器有响应但处于降级状态：离线、配额耗尽、尚无数据、没有该端点，或响应不是 JSON |
 | 5 | `alerts --fail-on 级别` 发现了该级别或更严重的未处理警报（已静音的不计） |
+| 6 | `watch --exit-on-change` 发现了变化（仅在给出该选项时）；参见 [CLI_OPERATOR_zho.md](CLI_OPERATOR_zho.md) |
 
 ## 示例
 

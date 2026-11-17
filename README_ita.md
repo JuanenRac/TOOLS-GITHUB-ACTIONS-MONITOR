@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-3695_passing-brightgreen.svg" alt="3695 tests">
+  <img src="https://img.shields.io/badge/Tests-3756_passing-brightgreen.svg" alt="3756 tests">
 </p>
 
 > Controlla i workflow di tutti i tuoi repository e ti dice, su una pagina locale, cosa è rosso, cosa è bloccato e cosa ti aspetta.
@@ -81,8 +81,8 @@
 | | |
 |---|---|
 | **Maturità** | functional |
-| **Test** | 3695 metodi di test (`python -m unittest discover -s monitor/tests`) |
-| **Impostazioni** | 607 impostazioni, tutte con aiuto |
+| **Test** | 3756 metodi di test (`python -m unittest discover -s monitor/tests`) |
+| **Impostazioni** | 615 impostazioni, tutte con aiuto |
 | **Lingue** | 8 (inglese, spagnolo, tedesco, francese, italiano, giapponese, cinese e portoghese) |
 | **Provato nel CI su** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -306,6 +306,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/HEALTH_ita.md`](monitor/docs/HEALTH_ita.md): La salute di un repository e del team: di cosa è fatta, la scheda Team, i link diretti e l'API
 - [`monitor/docs/REPORT_SCHEDULE_ita.md`](monitor/docs/REPORT_SCHEDULE_ita.md): Rapporti pianificati: il punteggio, cosa è cambiato, i repository che richiedono una persona e gli avvisi aperti in HTML e Markdown, la pianificazione e i file
 - [`monitor/docs/CLI_ita.md`](monitor/docs/CLI_ita.md): la riga di comando come client del monitor
+- [`monitor/docs/CLI_OPERATOR_ita.md`](monitor/docs/CLI_OPERATOR_ita.md): la riga di comando per l'operatore: formati, watch, completions e codici di uscita
+- [`monitor/docs/KIOSK_ita.md`](monitor/docs/KIOSK_ita.md): il monitor su una TV o una parete
 - [`monitor/docs/ACCOUNTS_ita.md`](monitor/docs/ACCOUNTS_ita.md): più account, un processo ciascuno
 - [`monitor/docs/QUOTAS_ita.md`](monitor/docs/QUOTAS_ita.md): quote e piani di GitHub
 - [`monitor/docs/MODES_ita.md`](monitor/docs/MODES_ita.md): modalità di lavoro: normale, veloce e turbo

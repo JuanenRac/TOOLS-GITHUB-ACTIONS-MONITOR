@@ -18,12 +18,13 @@
 A monitor on another computer works the same way: --url (or MONITOR_URL) names it; --ca-file (or MONITOR_CA_FILE) trusts the certificate authority of its HTTPS certificate; in the team mode
 --user NAME with --password-file FILE (or MONITOR_USER, MONITOR_PASSWORD_FILE) signs in and the session travels as a Bearer token (`auth.allow_bearer` must be on).
 
-Every command takes --json (the answer as one JSON document), --account ID, --url URL, --timeout SECONDS and --lang CODE. In the network mode the access token is read from MONITOR_ACCESS_TOKEN,
+Every command takes --format text|table|plain|json|ndjson (--json is --format json; `cli.default_format` sets the one used when none is given) and --json (the answer as one JSON document), --account ID, --url URL, --timeout SECONDS and --lang CODE. In the network mode the access token is read from MONITOR_ACCESS_TOKEN,
 then from its alias MONITOR_TOKEN, then from --token-file (a file only you can read) and last from --token (it shows in the list of processes, so it prints a warning on stderr); plain http to another computer prints a warning on stderr. Nothing here writes to GitHub or changes a setting.
 The lite edition answers `status`, `doctor` and `health` (use --lite for its port, 8766 unless `ports.lite` says another); the rest need the complete edition.
 
 Exit codes (stable): 0 all right; 1 wrong use of the command; 2 the monitor cannot be reached; 3 the monitor or GitHub refuses the credential (access token of the network mode, or the login
-of GitHub); 4 the monitor answers but is degraded (offline, allowance exhausted, no data yet) or an answer that cannot be read; 5 `alerts --fail-on LEVEL` found alerts of that level or worse.
+of GitHub); 4 the monitor answers but is degraded (offline, allowance exhausted, no data yet) or an answer that cannot be read; 5 `alerts --fail-on LEVEL` found alerts of that level or worse;
+6 `watch --exit-on-change` saw a change (only when that flag is given).
 """
 import argparse
 import ipaddress
@@ -52,7 +53,13 @@ AI_HOOK_ACTIONS = ("install", "status", "uninstall")
 CREDENTIAL_ACTIONS = ("replace", "reload")
 LITE_COMMANDS = ("status", "doctor", "health", "check")
 LEVELS = ("info", "warning", "error", "critical")
-from github_actions_monitor.cli import monitor_admin      # noqa: E402
+from github_actions_monitor.cli import completions, formats, monitor_admin      # noqa: E402
+from github_actions_monitor.cli import watch as watch_loop      # noqa: E402
+from github_actions_monitor.surfaces import kiosk      # noqa: E402
+COMMANDS = COMMANDS + ("watch", "completions", "kiosk")      # the operator commands (docs/CLI_OPERATOR.md)
+EXIT_CHANGED = watch_loop.EXIT_CHANGED      # 6: `watch --exit-on-change` saw something change (only when the flag is given)
+OPERATOR_WORDS = {"watch": watch_loop.WATCHABLE, "completions": completions.SHELLS, "kiosk": tuple(kiosk.PRESETS)}
+WORDS_BY_COMMAND = {"ai-hook": AI_HOOK_ACTIONS, "credential": CREDENTIAL_ACTIONS, "lessons": LESSONS_ACTIONS, "install-skill": SKILL_ACTIONS, "ai": AI_ACTIONS, **OPERATOR_WORDS}
 CLIENT = monitor_admin.CLIENT      # the session of the team mode and the authority of the certificate: one dict, shared
 PORTS = dict(ports.DEFAULTS)      # the defaults; the port in use is ports.resolve (configuration file, MONITOR_PORT)
 TOKEN_VARIABLES = ("MONITOR_ACCESS_TOKEN", "MONITOR_TOKEN")      # the first is the one the monitor itself reads; the second is an alias
@@ -593,13 +600,71 @@ def cmd_credential(ctx):
     return {"action": action, "ok": ok, **shown}, [line], EXIT_OK if ok else EXIT_DEGRADED
 
 
-HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai}
+def _config():
+    """The configuration of this computer as a dictionary ({} when it cannot be read): the command line works without a monitor, so this is read from the file, never asked of the server."""
+    try:
+        from github_actions_monitor.app import toolconfig
+        raw = toolconfig.raw_config()
+        return raw if isinstance(raw, dict) else {}
+    except Exception:      # noqa: BLE001 - a configuration that cannot be read is the defaults, not a traceback
+        return {}
+
+
+def cmd_completions(ctx):
+    """completions bash|zsh|fish|powershell: prints the script that completes this command line, written from its real parser. Needs no monitor and writes nothing."""
+    shell = ctx["action"]
+    if shell not in completions.SHELLS:
+        raise CliError(EXIT_USAGE, i18n.t("cli.completions_usage"))
+    text = completions.script(shell, build_parser(), WORDS_BY_COMMAND)
+    return {"shell": shell, "script": text}, text.rstrip("\n").split("\n"), EXIT_OK
+
+
+def cmd_kiosk(ctx):
+    """kiosk [ops|team|release|quiet]: prints the address of the monitor for a TV or a wall. Needs no monitor; with `kiosk.enabled` off the page ignores the profile and this says so."""
+    preset = ctx["action"] or "ops"
+    if preset not in kiosk.PRESETS:
+        raise CliError(EXIT_USAGE, i18n.t("cli.kiosk_usage", presets=", ".join(kiosk.PRESETS)))
+    raw = ctx.get("raw") or {}
+    link = kiosk.url(ctx["base"], preset, raw, ctx["account"])
+    config = kiosk.settings(raw)
+    lines = [link]
+    if not config["enabled"]:
+        lines.append(i18n.t("cli.kiosk_off"))
+    return {"preset": preset, "tabs": list(kiosk.PRESETS[preset]), "url": link, "enabled": config["enabled"]}, lines, EXIT_OK
+
+
+def cmd_watch(ctx):
+    """watch status|alerts [--interval S] [--once] [--exit-on-change] [--no-clear]: the same read again and again, from the API of the monitor (never GitHub). Ctrl-C ends it with 0; with
+    --exit-on-change it ends with 6 when something changed; a monitor that cannot be reached is retried with a longer pause each time."""
+    command = ctx["action"]
+    if command not in watch_loop.WATCHABLE:
+        raise CliError(EXIT_USAGE, i18n.t("cli.watch_usage"))
+    handler = HANDLERS[command]
+    interval = watch_loop.interval_for(ctx.get("interval"), ctx.get("raw"))
+
+    def read():
+        try:
+            return handler(ctx)
+        except (AttributeError, TypeError, KeyError, ValueError, IndexError):
+            raise CliError(EXIT_DEGRADED, i18n.t("cli.bad_shape")) from None
+
+    def show(payload, lines, code):
+        print(formats.render(ctx["format"], command, payload, lines, code), flush=True)
+
+    def clear():
+        if ctx.get("clear") and ctx["format"] in ("text", "table") and sys.stdout.isatty():
+            print("\x1b[2J\x1b[H", end="")
+    code = watch_loop.run(command, read, show, interval, once=ctx.get("once", False), exit_on_change=ctx.get("exit_on_change", False), error=lambda text: print(text, file=sys.stderr, flush=True), clear=clear)
+    return None, None, code
+
+
+HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai, "watch": cmd_watch, "completions": cmd_completions, "kiosk": cmd_kiosk}
 
 
 def build_parser():
     ap = argparse.ArgumentParser(prog="monitor_cli.py", description=i18n.t("cli.description"), epilog=i18n.t("cli.epilog"), formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("command", choices=COMMANDS, help=i18n.t("cli.help_command"))
-    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS + SKILL_ACTIONS + AI_ACTIONS, default=None, help=i18n.t("cli.help_ai_action"))
+    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS + SKILL_ACTIONS + AI_ACTIONS + tuple(w for words in OPERATOR_WORDS.values() for w in words), default=None, help=i18n.t("cli.help_ai_action"))
     ap.add_argument("--json", action="store_true", help=i18n.t("cli.help_json"))
     for name in ("assistant", "cursor", "generic"):
         ap.add_argument("--" + name, dest="target", action="store_const", const=name, default="", help=i18n.t("cli.help_" + name))
@@ -630,6 +695,11 @@ def build_parser():
     ap.add_argument("--provider", metavar="NAME", default="", help=i18n.t("cli.help_provider"))
     ap.add_argument("--model", metavar="NAME", default="", help=i18n.t("cli.help_model"))
     ap.add_argument("--refresh", action="store_true", help=i18n.t("cli.help_refresh"))
+    ap.add_argument("--format", choices=formats.FORMATS, default="", help=i18n.t("cli.help_format"))
+    ap.add_argument("--interval", type=float, default=None, metavar="SECONDS", help=i18n.t("cli.help_interval"))
+    ap.add_argument("--once", action="store_true", help=i18n.t("cli.help_once"))
+    ap.add_argument("--exit-on-change", action="store_true", dest="exit_on_change", help=i18n.t("cli.help_exit_on_change"))
+    ap.add_argument("--no-clear", action="store_true", dest="no_clear", help=i18n.t("cli.help_no_clear"))
     ap.add_argument("--version", action="store_true", help=i18n.t("cli.help_version"))
     return ap
 
@@ -656,6 +726,8 @@ def main(argv=None):
                "sentinel": args.sentinel, "level": args.level, "muted": args.muted, "fail_on": args.fail_on, "lite": args.lite, "compare": args.compare, "severity": args.severity,
                "action": args.action or "", "target": args.target, "scope": args.scope, "project_dir": args.project_dir, "dry_run": args.dry_run, "deep": args.deep, "new_token_file": args.new_token_file, "dest": args.dest, "read_only": args.read_only, "repo": args.repo if re.fullmatch(r"[A-Za-z0-9._/-]{0,201}", args.repo) else "",
                "provider": args.provider if re.fullmatch(r"[A-Za-z0-9-]{0,40}", args.provider) else "", "model": args.model if re.fullmatch(r"[A-Za-z0-9._:/@+-]{0,100}", args.model) else "", "refresh": args.refresh}
+        raw = _config() if args.command in ("watch", "kiosk") or not (args.format or args.json) else {}
+        ctx.update({"raw": raw, "format": formats.choose(args.format, args.json, formats.configured_format(raw)), "interval": args.interval, "once": args.once, "exit_on_change": args.exit_on_change, "clear": not args.no_clear})
         CLIENT.update({"session": "", "ca": (args.ca_file or os.environ.get("MONITOR_CA_FILE") or "").strip()})
         if CLIENT["ca"] and not os.path.isfile(CLIENT["ca"]):
             raise CliError(EXIT_USAGE, i18n.t("cli.ca_file_bad", file=CLIENT["ca"]))
@@ -663,7 +735,7 @@ def main(argv=None):
         if insecure:
             print(i18n.t("cli.plain_http", host=insecure), file=sys.stderr)
         who = (args.user or os.environ.get("MONITOR_USER") or "").strip()
-        if who and args.command not in ("doctor", "ai-hook"):
+        if who and args.command not in ("doctor", "ai-hook", "completions", "kiosk"):
             secret_file = (args.password_file or os.environ.get("MONITOR_PASSWORD_FILE") or "").strip()
             password = read_token_file(secret_file) if secret_file else (os.environ.get("MONITOR_PASSWORD") or "")
             if not password:
@@ -674,15 +746,14 @@ def main(argv=None):
         except (AttributeError, TypeError, KeyError, ValueError, IndexError):      # a field of the wrong type in an answer that is an object: degraded, never a traceback
             raise CliError(EXIT_DEGRADED, i18n.t("cli.bad_shape")) from None
     except CliError as error:
-        if args.json:
+        if args.json or args.format in ("json", "ndjson"):
             print(json.dumps({"ok": False, "exit": error.code, "error": error.text}, ensure_ascii=False))
         else:
             print(error.text, file=sys.stderr)
         return error.code
-    if args.json:
-        print(json.dumps({"ok": code == EXIT_OK, "exit": code, "data": payload}, ensure_ascii=args.command == "ai-hook", indent=1))      # ai-hook: plain ASCII, whatever the console
-    else:
-        print("\n".join(lines))
+    if lines is None:      # `watch` wrote its own results while it ran
+        return code
+    print(formats.render(ctx["format"], args.command, payload, lines, code, ascii_only=args.command == "ai-hook"))      # ai-hook: plain ASCII, whatever the console
     return code
 
 

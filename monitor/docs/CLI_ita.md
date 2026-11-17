@@ -22,8 +22,13 @@
 | `team` | la salute dei repository in classifica, prima quelli che richiedono una persona; `--severity warn\|bad` tiene i peggiori e `--repo owner/name` dà il dettaglio di uno | no |
 | `live` | lo stato del ricevitore del webhook e gli ultimi eventi | no |
 | `ai` | `ai models [--refresh]` elenca i modelli del provider IA con i dati di ciascuno; `ai test --provider NOME --model NOME` ne prova uno con un testo sintetico (latenza, token, costo stimato); `ai doctor` dice perché un'IA non risponde, senza stampare una chiave | no |
+| `watch` | la stessa lettura, ancora e ancora (`watch status\|alerts`, `--interval`, `--once`, `--exit-on-change`); vedi [CLI_OPERATOR_ita.md](CLI_OPERATOR_ita.md) | no |
+| `completions` | lo script di completamento per `bash`, `zsh`, `fish` o `powershell`, scritto dal parser reale (si limita a stampare) | no |
+| `kiosk` | l'indirizzo del monitor per una TV o una parete (`ops`, `team`, `release`, `quiet`); vedi [KIOSK_ita.md](KIOSK_ita.md) | no |
 
 Opzioni di tutti i comandi: `--json` (la risposta come un documento JSON: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (porta 8766), `--timeout SECONDI` (da 1 a 60), `--lang CODICE`. In modalità di rete metti il token di accesso nella variabile d'ambiente `MONITOR_ACCESS_TOKEN`, quella che legge il monitor stesso (`MONITOR_TOKEN` è accettata come alias; `--token TOKEN` è l'ultima risorsa, perché un'opzione compare nell'elenco dei processi). L'ordine: `MONITOR_ACCESS_TOKEN`, poi `MONITOR_TOKEN`, poi `--token`. Viaggia nell'intestazione `X-Monitor-Access`, mai nell'indirizzo e mai a schermo. Un `--url` in `http` non cifrato verso un altro computer stampa un avviso su stderr (il token e le risposte viaggerebbero in chiaro): usa `https` fuori da una rete che controlli.
+
+Ogni comando accetta anche `--format text|table|plain|json|ndjson` (`--json` è `--format json`); vedi [CLI_OPERATOR_ita.md](CLI_OPERATOR_ita.md).
 
 Gli orari scritti per le persone (la riga `Last read`, i silenziamenti, il registro, i rapporti, le notifiche) usano il fuso di questo computer e lo nominano, con l'ora UTC accanto (`11:43:07 CET (10:43:07 UTC)`). Un altro fuso si sceglie con `display.timezone` (`local`, `utc` o un nome come `Europe/Madrid`; la variabile d'ambiente `MONITOR_TIMEZONE` prevale sul file). `--json` mantiene UTC e aggiunge `updated_local`.
 
@@ -37,6 +42,7 @@ Gli orari scritti per le persone (la riga `Last read`, i silenziamenti, il regis
 | 3 | il monitor rifiuta questo client, oppure l'accesso GitHub dell'account è fallito o scaduto (un problema di credenziale, non una quota esaurita) |
 | 4 | il monitor risponde ma è degradato: offline, quota esaurita, ancora senza dati, un endpoint che non ha, o una risposta che non è JSON |
 | 5 | `alerts --fail-on LIVELLO` ha trovato un avviso aperto di quel livello o peggiore (uno silenziato non conta) |
+| 6 | `watch --exit-on-change` ha visto un cambiamento (solo quando si dà quell'opzione); vedi [CLI_OPERATOR_ita.md](CLI_OPERATOR_ita.md) |
 
 ## Esempi
 

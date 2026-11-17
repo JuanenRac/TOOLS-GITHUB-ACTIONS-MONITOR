@@ -22,8 +22,13 @@
 | `team` | la salud de los repositorios en orden, primero los que necesitan a una persona; `--severity warn\|bad` deja los peores y `--repo owner/name` da el detalle de uno | no |
 | `live` | el estado del receptor del webhook y los últimos eventos | no |
 | `ai` | `ai models [--refresh]` lista los modelos del proveedor de IA con los datos de cada uno; `ai test --provider NOMBRE --model NOMBRE` prueba uno con un texto sintético (latencia, tokens, coste estimado); `ai doctor` dice por qué una IA no responde, sin imprimir una clave | no |
+| `watch` | la misma lectura una y otra vez (`watch status\|alerts`, `--interval`, `--once`, `--exit-on-change`); véase [CLI_OPERATOR_spa.md](CLI_OPERATOR_spa.md) | no |
+| `completions` | el script de compleción para `bash`, `zsh`, `fish` o `powershell`, escrito desde el analizador real (solo imprime) | no |
+| `kiosk` | la dirección del monitor para una TV o una pared (`ops`, `team`, `release`, `quiet`); véase [KIOSK_spa.md](KIOSK_spa.md) | no |
 
 Opciones de todos los comandos: `--json` (la respuesta como un documento JSON: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (puerto 8766), `--timeout SEGUNDOS` (de 1 a 60), `--lang CÓDIGO`. En el modo red pon el token de acceso en la variable de entorno `MONITOR_ACCESS_TOKEN`, la que lee el propio monitor (`MONITOR_TOKEN` se acepta como alias; `--token TOKEN` es el último recurso, porque una opción se ve en la lista de procesos). El orden es: `MONITOR_ACCESS_TOKEN`, luego `MONITOR_TOKEN`, luego `--token`. Viaja en la cabecera `X-Monitor-Access`, nunca en la dirección ni en pantalla. Un `--url` con `http` sin cifrar hacia otro ordenador imprime un aviso por stderr (el token y las respuestas viajarían sin cifrar): usa `https` fuera de una red que controles.
+
+Todos los comandos aceptan también `--format text|table|plain|json|ndjson` (`--json` es `--format json`); véase [CLI_OPERATOR_spa.md](CLI_OPERATOR_spa.md).
 
 Las horas escritas para las personas (la línea `Last read`, los silencios, el registro, los partes, las notificaciones) usan la zona de este ordenador y la nombran, con la hora UTC al lado (`11:43:07 CET (10:43:07 UTC)`). Elige otra zona con `display.timezone` (`local`, `utc` o un nombre como `Europe/Madrid`; la variable de entorno `MONITOR_TIMEZONE` manda sobre el archivo). `--json` conserva UTC y añade `updated_local`.
 
@@ -37,6 +42,7 @@ Las horas escritas para las personas (la línea `Last read`, los silencios, el r
 | 3 | el monitor rechaza a este cliente, o el acceso de GitHub de la cuenta falló o caducó (un problema de credencial, no una cuota agotada) |
 | 4 | el monitor responde pero está degradado: sin conexión, cuota agotada, aún sin datos, un endpoint que no tiene, o una respuesta que no es JSON |
 | 5 | `alerts --fail-on NIVEL` encontró una alerta abierta de ese nivel o peor (una alerta silenciada no cuenta) |
+| 6 | `watch --exit-on-change` vio un cambio (solo cuando se da esa opción); véase [CLI_OPERATOR_spa.md](CLI_OPERATOR_spa.md) |
 
 ## Ejemplos
 

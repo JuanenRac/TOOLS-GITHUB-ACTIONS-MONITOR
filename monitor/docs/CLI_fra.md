@@ -22,8 +22,13 @@
 | `team` | la santé des dépôts classés, d'abord ceux qui demandent une personne ; `--severity warn\|bad` garde les pires et `--repo owner/name` donne le détail d'un dépôt | non |
 | `live` | l'état du récepteur de webhook et les derniers évènements | non |
 | `ai` | `ai models [--refresh]` liste les modèles du fournisseur d'IA avec les données de chacun ; `ai test --provider NOM --model NOM` en essaie un avec un texte synthétique (latence, jetons, coût estimé) ; `ai doctor` dit pourquoi une IA ne répond pas, sans afficher de clé | non |
+| `watch` | la même lecture, encore et encore (`watch status\|alerts`, `--interval`, `--once`, `--exit-on-change`) ; voir [CLI_OPERATOR_fra.md](CLI_OPERATOR_fra.md) | non |
+| `completions` | le script de complétion pour `bash`, `zsh`, `fish` ou `powershell`, écrit à partir de l'analyseur réel (il se contente d'afficher) | non |
+| `kiosk` | l'adresse du moniteur pour une télévision ou un mur (`ops`, `team`, `release`, `quiet`) ; voir [KIOSK_fra.md](KIOSK_fra.md) | non |
 
 Options de toutes les commandes : `--json` (la réponse comme un document JSON : `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (port 8766), `--timeout SECONDES` (1 à 60), `--lang CODE`. En mode réseau, mettez le jeton d'accès dans la variable d'environnement `MONITOR_ACCESS_TOKEN`, celle que lit le moniteur lui-même (`MONITOR_TOKEN` est accepté comme alias ; `--token JETON` est le dernier recours, car une option apparaît dans la liste des processus). L'ordre : `MONITOR_ACCESS_TOKEN`, puis `MONITOR_TOKEN`, puis `--token`. Il voyage dans l'en-tête `X-Monitor-Access`, jamais dans l'adresse ni à l'écran. Un `--url` en `http` non chiffré vers un autre ordinateur affiche un avertissement sur stderr (le jeton et les réponses circuleraient en clair) : utilisez `https` hors d'un réseau que vous contrôlez.
+
+Chaque commande accepte aussi `--format text|table|plain|json|ndjson` (`--json` est `--format json`) ; voir [CLI_OPERATOR_fra.md](CLI_OPERATOR_fra.md).
 
 Les heures écrites pour les personnes (la ligne `Last read`, les sourdines, le journal, les rapports, les notifications) utilisent le fuseau de cet ordinateur et le nomment, avec l'heure UTC à côté (`11:43:07 CET (10:43:07 UTC)`). Choisissez un autre fuseau avec `display.timezone` (`local`, `utc` ou un nom comme `Europe/Madrid` ; la variable d'environnement `MONITOR_TIMEZONE` l'emporte sur le fichier). `--json` garde l'UTC et ajoute `updated_local`.
 
@@ -37,6 +42,7 @@ Les heures écrites pour les personnes (la ligne `Last read`, les sourdines, le 
 | 3 | le moniteur refuse ce client, ou la connexion GitHub du compte a échoué ou expiré (un problème d'identifiant, pas un quota épuisé) |
 | 4 | le moniteur répond mais est dégradé : hors ligne, quota épuisé, pas encore de données, un point d'accès qu'il n'a pas, ou une réponse qui n'est pas du JSON |
 | 5 | `alerts --fail-on NIVEAU` a trouvé une alerte ouverte de ce niveau ou pire (une alerte en sourdine ne compte pas) |
+| 6 | `watch --exit-on-change` a vu un changement (seulement quand cette option est donnée) ; voir [CLI_OPERATOR_fra.md](CLI_OPERATOR_fra.md) |
 
 ## Exemples
 

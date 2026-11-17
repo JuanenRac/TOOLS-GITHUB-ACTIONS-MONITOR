@@ -9,6 +9,8 @@
 
 La página se adapta al tamaño de su ventana, de un móvil a 4K, en vertical o en horizontal, y un mismo monitor puede servir varias pantallas, cada una con las pestañas que elijas. Nada se consulta dos veces: todas las pantallas leen el mismo estado.
 
+
+Para una TV o una pared con letra más grande, un contraste alto o una rotación por unas pocas pestañas, véase [KIOSK_spa.md](KIOSK_spa.md).
 ## Direcciones
 
 - `/` - la página entera.

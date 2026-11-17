@@ -22,8 +22,13 @@
 | `team` | the health of the repositories ranked with the ones that need a person first; `--severity warn\|bad` keeps the worse ones and `--repo owner/name` gives the detail of one | no |
 | `live` | the state of the webhook receiver and the last events | no |
 | `ai` | `ai models [--refresh]` lists the models of the AI provider with the data of each one; `ai test --provider NAME --model NAME` tries one with a synthetic text (latency, tokens, estimated cost); `ai doctor` says why an AI does not answer, without printing a key | no |
+| `watch` | the same read again and again (`watch status\|alerts`, `--interval`, `--once`, `--exit-on-change`); see [CLI_OPERATOR.md](CLI_OPERATOR.md) | no |
+| `completions` | the completion script for `bash`, `zsh`, `fish` or `powershell`, written from the real parser (it only prints) | no |
+| `kiosk` | the address of the monitor for a TV or a wall (`ops`, `team`, `release`, `quiet`); see [KIOSK.md](KIOSK.md) | no |
 
 Options of every command: `--json` (the answer as one JSON document: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (port 8766), `--timeout SECONDS` (1 to 60), `--lang CODE`. In the network mode put the access token in the environment variable `MONITOR_ACCESS_TOKEN`, the one the monitor itself reads (`MONITOR_TOKEN` is accepted as an alias; `--token TOKEN` is the last resort, because a flag shows in the list of processes). The order is: `MONITOR_ACCESS_TOKEN`, then `MONITOR_TOKEN`, then `--token`. It travels in the header `X-Monitor-Access`, never in the address and never on screen. A `--url` with plain `http` to another computer prints a warning on stderr (the token and the answers would travel unencrypted): use `https` outside a network you control.
+
+Every command also takes `--format text|table|plain|json|ndjson` (`--json` is `--format json`); see [CLI_OPERATOR.md](CLI_OPERATOR.md).
 
 Times written for people (the `Last read` line, the silences, the log, the reports, the notifications) use the zone of this computer and name it, with the UTC time next to it (`11:43:07 CET (10:43:07 UTC)`). Choose another zone with `display.timezone` (`local`, `utc` or a name such as `Europe/Madrid`; the environment variable `MONITOR_TIMEZONE` wins over the file). `--json` keeps UTC and adds `updated_local`.
 
@@ -37,6 +42,7 @@ Times written for people (the `Last read` line, the silences, the log, the repor
 | 3 | the monitor refuses this client, or the GitHub login of the account failed or expired (a credential problem, not an exhausted allowance) |
 | 4 | the monitor answers but is degraded: offline, allowance exhausted, no data yet, an endpoint it does not have, or an answer that is not JSON |
 | 5 | `alerts --fail-on LEVEL` found an open alert of that level or worse (a silenced alert does not count) |
+| 6 | `watch --exit-on-change` saw a change (only when that flag is given); see [CLI_OPERATOR.md](CLI_OPERATOR.md) |
 
 ## Examples
 

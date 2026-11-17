@@ -22,8 +22,13 @@
 | `team` | リポジトリの健全性を、人の手が必要なものから順に表示します。`--severity warn\|bad` で悪いものだけに絞り、`--repo owner/name` で 1 件の詳細を表示します | 不可 |
 | `live` | Webhook 受信の状態と直近のイベント | 不可 |
 | `ai` | `ai models [--refresh]` は AI プロバイダーのモデルを各モデルのデータとともに一覧表示します。`ai test --provider 名前 --model 名前` は合成テキストで 1 つを試します (遅延、トークン、推定コスト)。`ai doctor` は AI が応答しない理由をキーを表示せずに説明します | 不可 |
+| `watch` | 同じ読み取りを繰り返します（`watch status\|alerts`、`--interval`、`--once`、`--exit-on-change`）。[CLI_OPERATOR_jpn.md](CLI_OPERATOR_jpn.md) を参照 | 不可 |
+| `completions` | `bash`、`zsh`、`fish`、`powershell` の補完スクリプト。実際のパーサーから作られ、出力するだけです | 不可 |
+| `kiosk` | テレビや壁面向けのモニターのアドレス（`ops`、`team`、`release`、`quiet`）。[KIOSK_jpn.md](KIOSK_jpn.md) を参照 | 不可 |
 
 全コマンド共通のオプション：`--json`（応答を 1 つの JSON 文書で：`{"ok", "exit", "data"}`）、`--account ID`、`--url URL`、`--lite`（ポート 8766）、`--timeout 秒`（1〜60）、`--lang コード`。ネットワークモードではアクセストークンを、モニター自身が読む環境変数 `MONITOR_ACCESS_TOKEN` に設定します(`MONITOR_TOKEN` は別名として受け付けます。`--token TOKEN` は最後の手段で、オプションはプロセス一覧に表示されるためです)。優先順位は `MONITOR_ACCESS_TOKEN`、`MONITOR_TOKEN`、`--token` の順です。ヘッダー `X-Monitor-Access` で送られ、アドレスや画面には出ません。別のコンピューターへの暗号化されていない `http` の `--url` では stderr に警告を出します(トークンと応答が平文で送られるため)。管理下にないネットワークでは `https` を使ってください。
+
+どのコマンドも `--format text|table|plain|json|ndjson` を受け付けます（`--json` は `--format json`）。[CLI_OPERATOR_jpn.md](CLI_OPERATOR_jpn.md) を参照。
 
 人向けに書かれる時刻（`Last read` 行、ミュート、ログ、レポート、通知）は、このコンピューターのゾーンを使い、その名前と UTC 時刻を併記します（`11:43:07 CET (10:43:07 UTC)`）。別のゾーンは `display.timezone`（`local`、`utc`、または `Europe/Madrid` のような名前）で選びます。環境変数 `MONITOR_TIMEZONE` はファイルより優先されます。`--json` は UTC のままで `updated_local` を追加します。
 
@@ -37,6 +42,7 @@
 | 3 | モニターがこのクライアントを拒否、またはアカウントの GitHub ログインが失敗・期限切れ（資格情報の問題で、割り当て切れではありません） |
 | 4 | モニターは応答するが劣化している：オフライン、割り当て切れ、まだデータなし、そのエンドポイントがない、または JSON でない応答 |
 | 5 | `alerts --fail-on レベル` がそのレベル以上の未解決アラートを見つけた（ミュート中は数えません） |
+| 6 | `watch --exit-on-change` が変化を検出した（このオプションを付けたときだけ）。[CLI_OPERATOR_jpn.md](CLI_OPERATOR_jpn.md) を参照 |
 
 ## 例
 

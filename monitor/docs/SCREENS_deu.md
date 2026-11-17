@@ -9,6 +9,8 @@
 
 Die Seite passt sich der Größe ihres Fensters an, vom Telefon bis 4K, hochkant oder quer, und ein Monitor kann mehrere Bildschirme bedienen, jeder mit den Tabs Ihrer Wahl. Nichts wird doppelt abgefragt: alle Bildschirme lesen denselben Zustand.
 
+
+Für einen Fernseher oder eine Wand mit größerer Schrift, hohem Kontrast oder einem Wechsel durch einige Tabs siehe [KIOSK_deu.md](KIOSK_deu.md).
 ## Adressen
 
 - `/` - die ganze Seite.

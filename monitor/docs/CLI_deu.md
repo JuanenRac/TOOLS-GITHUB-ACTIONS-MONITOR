@@ -22,8 +22,13 @@
 | `team` | die Gesundheit der Repositorys als Rangliste, zuerst die, die einen Menschen brauchen; `--severity warn\|bad` behält die schlechteren und `--repo owner/name` zeigt die Einzelheiten eines Repositorys | nein |
 | `live` | der Zustand des Webhook-Empfängers und die letzten Ereignisse | nein |
 | `ai` | `ai models [--refresh]` listet die Modelle des KI-Anbieters mit den Daten jedes Modells; `ai test --provider NAME --model NAME` testet eines mit einem synthetischen Text (Latenz, Tokens, geschätzte Kosten); `ai doctor` sagt, warum eine KI nicht antwortet, ohne einen Schlüssel auszugeben | nein |
+| `watch` | dieselbe Abfrage immer wieder (`watch status\|alerts`, `--interval`, `--once`, `--exit-on-change`); siehe [CLI_OPERATOR_deu.md](CLI_OPERATOR_deu.md) | nein |
+| `completions` | das Vervollständigungsskript für `bash`, `zsh`, `fish` oder `powershell`, aus dem echten Parser erzeugt (es gibt nur aus) | nein |
+| `kiosk` | die Adresse des Monitors für einen Fernseher oder eine Wand (`ops`, `team`, `release`, `quiet`); siehe [KIOSK_deu.md](KIOSK_deu.md) | nein |
 
 Optionen aller Befehle: `--json` (die Antwort als ein JSON-Dokument: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (Port 8766), `--timeout SEKUNDEN` (1 bis 60), `--lang CODE`. Im Netzwerkmodus gehört das Zugriffstoken in die Umgebungsvariable `MONITOR_ACCESS_TOKEN`, die der Monitor selbst liest (`MONITOR_TOKEN` wird als Alias akzeptiert; `--token TOKEN` ist der letzte Ausweg, weil eine Option in der Prozessliste erscheint). Die Reihenfolge: `MONITOR_ACCESS_TOKEN`, dann `MONITOR_TOKEN`, dann `--token`. Es reist im Header `X-Monitor-Access`, nie in der Adresse und nie auf dem Bildschirm. Ein `--url` mit unverschlüsseltem `http` zu einem anderen Rechner gibt eine Warnung auf stderr aus (Token und Antworten würden unverschlüsselt reisen): Nutze außerhalb eines Netzes, das du kontrollierst, `https`.
+
+Jeder Befehl akzeptiert auch `--format text|table|plain|json|ndjson` (`--json` ist `--format json`); siehe [CLI_OPERATOR_deu.md](CLI_OPERATOR_deu.md).
 
 Für Menschen geschriebene Zeiten (die Zeile `Last read`, die Stummschaltungen, das Protokoll, die Berichte, die Benachrichtigungen) verwenden die Zone dieses Rechners und nennen sie, mit der UTC-Zeit daneben (`11:43:07 CET (10:43:07 UTC)`). Eine andere Zone wählt `display.timezone` (`local`, `utc` oder ein Name wie `Europe/Madrid`; die Umgebungsvariable `MONITOR_TIMEZONE` hat Vorrang vor der Datei). `--json` behält UTC und fügt `updated_local` hinzu.
 
@@ -37,6 +42,7 @@ Für Menschen geschriebene Zeiten (die Zeile `Last read`, die Stummschaltungen, 
 | 3 | der Monitor weist diesen Client ab, oder die GitHub-Anmeldung des Kontos ist fehlgeschlagen oder abgelaufen (ein Zugangsdatenproblem, kein erschöpftes Kontingent) |
 | 4 | der Monitor antwortet, ist aber eingeschränkt: offline, Kontingent erschöpft, noch keine Daten, ein Endpunkt, den er nicht hat, oder eine Antwort, die kein JSON ist |
 | 5 | `alerts --fail-on STUFE` hat einen offenen Alarm dieser Stufe oder schlimmer gefunden (ein stummgeschalteter zählt nicht) |
+| 6 | `watch --exit-on-change` hat eine Änderung gesehen (nur wenn diese Option gegeben ist); siehe [CLI_OPERATOR_deu.md](CLI_OPERATOR_deu.md) |
 
 ## Beispiele
 
