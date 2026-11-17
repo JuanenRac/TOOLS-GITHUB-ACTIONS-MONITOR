@@ -8,6 +8,7 @@ import contextlib
 import hashlib
 import io
 import json
+import os
 import sys
 import tempfile
 import unittest
@@ -392,7 +393,7 @@ class SurfaceInTheSnapshot(_testenv.Spanish, unittest.TestCase):
         del broken["checks"]["pr_human"]["days"]
         broken["checks"]["new_one"] = {}
         self.assertEqual(len(mr.nested_problems(broken, surface.DEFAULTS)), 2)
-        self.assertEqual(webhook.settings(example), {"enabled": False, "secret": ""})
+        self.assertEqual(webhook.settings(example), {"enabled": False, "secret": ""})      # nothing in the file, nothing in the environment
 
     def test_a_pr_is_classified_for_the_new_fields(self):
         pr = {"number": 1, "title": "Bump x from 1.0 to 2.0", "author": {"login": "dependabot"}, "createdAt": stamp(1), "mergeable": "MERGEABLE", "reviewDecision": "APPROVED",
@@ -450,10 +451,13 @@ class Exports(unittest.TestCase):
 
 class Webhook(unittest.TestCase):
     SECRET = "s" * 40
-    CONFIG = {"webhook": {"enabled": True, "secret": SECRET}}
+    CONFIG = {"webhook": {"enabled": True}}
 
     def setUp(self):
         webhook.reset()
+        patch = mock.patch.dict(os.environ, {webhook.SECRET_ENV: self.SECRET})      # the shared secret only travels in the environment
+        patch.start()
+        self.addCleanup(patch.stop)
 
     def call(self, body, signature=True, event="workflow_run", config=None):
         raw = json.dumps(body).encode()
@@ -465,8 +469,9 @@ class Webhook(unittest.TestCase):
 
     def test_off_by_default_and_with_a_short_secret(self):
         self.assertEqual(webhook.handle({}, b"{}", {}, ["R"])[0], 404)
-        self.assertEqual(self.call({}, config={"webhook": {"enabled": True, "secret": "short"}})[0], 404)
-        self.assertFalse(webhook.active({"webhook": {"enabled": "yes", "secret": self.SECRET}}))
+        with mock.patch.dict(os.environ, {webhook.SECRET_ENV: "short"}):
+            self.assertEqual(self.call({}, config={"webhook": {"enabled": True}})[0], 404)
+        self.assertFalse(webhook.active({"webhook": {"enabled": "yes"}}))
 
     def test_signature_required(self):
         self.assertEqual(self.call({"repository": {"name": "R"}}, signature=False)[0], 401)

@@ -131,7 +131,7 @@ class LiteStart(unittest.TestCase):
         for key in ("github_owner", "ecosystems", "ecosystems_file", "targets_file", "profiles_file", "exclude", "language"):
             self.assertEqual(written[key], complete[key], key)
         self.assertEqual(written["sentinel"], {"enabled": False})           # never the sentinel, the AI, the webhook, the outputs or the notifications
-        self.assertEqual(written["webhook"], {"enabled": False, "secret": ""})
+        self.assertEqual(written["webhook"], {"enabled": False})
         self.assertNotEqual(written.get("ai"), complete["ai"])
         self.assertNotEqual(written.get("outputs"), complete["outputs"])
         self.assertNotEqual(written.get("notify"), complete["notify"])

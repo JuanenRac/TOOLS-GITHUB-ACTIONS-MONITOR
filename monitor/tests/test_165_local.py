@@ -294,11 +294,14 @@ class NetworkMode(unittest.TestCase):
 # --- the webhook -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 class WebhookReplay(unittest.TestCase):
     SECRET = "s" * 40
-    CONFIG = {"webhook": {"enabled": True, "secret": SECRET, "replay_seconds": 600, "max_per_minute": 3}}
+    CONFIG = {"webhook": {"enabled": True, "replay_seconds": 600, "max_per_minute": 3}}
 
     def setUp(self):
         webhook.reset()
         self.n = 0
+        patch = mock.patch.dict(os.environ, {webhook.SECRET_ENV: self.SECRET})      # the shared secret only travels in the environment
+        patch.start()
+        self.addCleanup(patch.stop)
 
     def send(self, body=None, delivery="same-delivery-id", config=None, event="workflow_run", signature=None):
         raw = json.dumps(body or {"repository": {"name": "R", "full_name": "JuanenRac/R"}}).encode()

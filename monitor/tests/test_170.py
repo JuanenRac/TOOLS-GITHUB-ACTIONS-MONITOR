@@ -535,17 +535,21 @@ class LiveStatus(unittest.TestCase):
         secret = "S" * 40
         off = self.am.webhook_status({})
         self.assertEqual((off["enabled"], off["active"]), (False, False))
-        short = self.am.webhook_status({"webhook": {"enabled": True, "secret": "short"}})
+        with mock.patch.dict(os.environ, {"MONITOR_WEBHOOK_SECRET": "short"}):
+            short = self.am.webhook_status({"webhook": {"enabled": True}})
         self.assertEqual((short["enabled"], short["active"], short["secret_ok"]), (True, False, False))
-        on = self.am.webhook_status({"webhook": {"enabled": True, "secret": secret, "live_events_keep": 50}})
+        with mock.patch.dict(os.environ, {"MONITOR_WEBHOOK_SECRET": secret}):
+            on = self.am.webhook_status({"webhook": {"enabled": True, "live_events_keep": 50}})
         self.assertEqual((on["active"], on["secret_ok"], on["keep"], on["held"], on["last"]), (True, True, 50, 0, None))
+        self.assertEqual((on["secret_source"], on["coverage"]["state"]), ("env", "waiting"))
         for status in (off, short, on):
             self.assertNotIn(secret, json.dumps(status))
             self.assertNotIn("short", json.dumps({k: v for k, v in status.items() if k != "text"}).replace("secret_ok", ""))
 
     def test_the_newest_event_is_named_with_only_short_fields(self):
         self.am.LIVE_EVENTS.append({"repo": "r", "name": "CI", "event": "workflow_run", "status": "completed", "conclusion": "success", "at": "2030-01-01T10:00:00Z", "title": "do not show", "actor": "x"})
-        last = self.am.webhook_status({"webhook": {"enabled": True, "secret": "S" * 40}})["last"]
+        with mock.patch.dict(os.environ, {"MONITOR_WEBHOOK_SECRET": "S" * 40}):
+            last = self.am.webhook_status({"webhook": {"enabled": True}})["last"]
         self.assertEqual(sorted(last), ["at", "conclusion", "event", "name", "repo", "status"])
 
     def test_the_endpoint_exists_in_the_complete_edition_and_not_in_lite(self):

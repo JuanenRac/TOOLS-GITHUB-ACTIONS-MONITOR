@@ -788,7 +788,15 @@ function liveWebhook(s){
   if(!s||!s.enabled){box.className="livebox off";box.innerHTML=`<b>${esc(T("ui.live_wh_title"))}</b> ${esc(T("ui.live_off"))}`;return}
   const st=s.stats||{},last=s.last&&s.last.repo?T("ui.live_wh_last",{repo:s.last.repo,when:s.last.at?new Date(s.last.at).toLocaleTimeString(LOC(),{timeZone:TZ,timeZoneName:"short"}):"–"}):T("ui.live_wh_none");
   box.className="livebox "+(s.active?"ok":"warn");
-  box.innerHTML=`<b>${esc(T("ui.live_wh_title"))}</b> ${esc(s.text||"")}`+(s.secret_ok?"":` <span>${esc(T("ui.live_wh_short"))}</span>`)+` <span class="mut">${esc(T("ui.live_wh_stats",{accepted:st.accepted||0,bad:st.bad_signature||0,ignored:st.ignored||0,dup:st.duplicates||0,refused:st.refused||0}))}</span> <span class="mut">${esc(last)}</span>`;
+  box.innerHTML=`<b>${esc(T("ui.live_wh_title"))}</b> ${esc(s.text||"")}`+(s.secret_ok?"":` <span>${esc(T("ui.live_wh_short"))}</span>`)+` <span class="mut">${esc(T("ui.live_wh_stats",{accepted:st.accepted||0,bad:st.bad_signature||0,ignored:st.ignored||0,dup:st.duplicates||0,refused:st.refused||0}))}</span> <span class="mut">${esc(last)}</span>`+whCoverage(s);
+}
+function whCoverage(s){
+  const c=s.coverage||{};let out="";
+  if(c.state==="live")out=T("ui.live_wh_cov_live",{age:agoText(c.last_age_seconds),n:c.last_hour||0});
+  else if(c.state==="quiet")out=T("ui.live_wh_cov_quiet",{age:agoText(c.last_age_seconds)});
+  else if(c.state==="waiting")out=T("ui.live_wh_cov_waiting");
+  const warn=s.secret_source==="config"?` <span>${esc(T("ui.live_wh_secret_config"))}</span>`:"";
+  return (out?` <span class="mut" id="live-wh-cov">${esc(out)}</span>`:"")+warn;
 }
 async function liveTick(){
   try{const r=await fetch("/api/live-events",{cache:"no-store"});if(!r.ok)throw new Error(r.status);const j=await r.json(),l=$("live-list");
