@@ -21,7 +21,7 @@ La page s'adapte à la taille de sa fenêtre, du téléphone à la 4K, à la ver
 |---|---|
 | `ui.orientation` | auto suit la fenêtre ; portrait empile les panneaux en une colonne ; landscape garde la disposition côte à côte. |
 | `ui.rotate_seconds` | 0 = désactivé. Secondes entre les onglets d'un écran qui en a plusieurs. |
-| `ui.screen1_tabs` | Onglets de /screen/1, séparés par des virgules : now, al, rep, les, sent, charts, repos, hist, cfg. Vide = tous. |
+| `ui.screen1_tabs` | Onglets de /screen/1, séparés par des virgules : now, al, charts, sent, sci, scol, ssec, team, fleet, repos, rep, trep, les, hist, cfg. Vide = tous. |
 | `ui.screen1_orientation` | auto, portrait ou landscape pour /screen/1 seulement. |
 | `ui.screen2_tabs` | Onglets de /screen/2. |
 | `ui.screen2_orientation` | Orientation de /screen/2. |
@@ -82,6 +82,10 @@ Une adresse par moniteur. Un paramètre peut rendre une fenêtre plus calme ou p
 | `?rotate=30` | La fenêtre passe toute seule par vue d'ensemble, en ce moment et sentinelles toutes les 30 secondes (au moins 5 ; 0 = pas de rotation). |
 | `?blink=off` | Les échecs gardent un halo fixe au lieu de clignoter. Il ne peut pas activer ce que `screens.blink` laisse désactivé. |
 | `?sound=on` | Un bip court pour un nouvel échec, seulement si `screens.sound` l'autorise. Désactivé par défaut. |
+
+### Langue des écrans
+
+La langue d'un écran se décide dans cet ordre : `?lang=xx` dans l'adresse ; puis la langue choisie sur la page principale du même navigateur (elle y est enregistrée, et un écran ouvert dans ce navigateur la lit, si bien que l'écran suit la page sans aucun paramètre) ; puis la langue du moniteur (`MONITOR_LANG`, ou celle configurée). Un écran dont la langue enregistrée diffère de celle dans laquelle il a été servi se recharge une fois, avant de dessiner, avec `?lang=` ajouté et les autres paramètres (dont `?rotate=`) conservés. Les huit langues (en, es, de, fr, it, ja, zh, pt) sont celles de la page : titres, libellés, états, gravités, unités et temps relatifs (« il y a 5 min ») viennent du catalogue, et l'heure, la date et les nombres s'écrivent avec les paramètres régionaux de la langue (en-GB, es-ES, de-DE, fr-FR, it-IT, ja-JP, zh-CN, pt-PT). Le lien « Ouvrir l'écran » des Réglages porte déjà `?lang=` avec la langue de la page. Un ordinateur qui ne choisit pas de langue reste en anglais : la langue du navigateur ne décide pas.
 
 ### Réglages des écrans muraux
 

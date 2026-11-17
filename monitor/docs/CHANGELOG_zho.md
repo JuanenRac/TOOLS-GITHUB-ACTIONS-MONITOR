@@ -9,9 +9,23 @@
 
 ## [Unreleased]
 
+### 修复
+
+- **墙面屏幕跟随主页面所选的语言**：不带 `?lang=` 打开的屏幕会以监视器的语言（英语）显示，即使用户已在主页面选择了其他语言。现在的顺序是地址中的 `?lang=`，然后是主页面在同一浏览器中保存的语言（语言不同的屏幕会在绘制之前重新加载一次，并保留 `?rotate=` 和其他参数），然后是监视器的语言；设置中的“打开屏幕”链接带有页面的 `?lang=`。这适用于八种语言，并带有日文和中文的字体以及每种语言用于时间、日期和数字的区域设置。测试会在保存了偏好的情况下检查八种语言下的三个屏幕、`?lang=` 优先，以及不会残留英文文本；屏幕指南说明了语言如何决定。
+
 ### 安全
 
 - **访问令牌默认不再出现在地址中(`listen.query_access` 现在默认关闭)**:在网络模式下,带 `?access=` 的地址会打开会话,但令牌会留在历史记录、日志和 `Referer` 中。该设置现在默认关闭,除非你开启它(默认值、示例文件和设置帮助都已说明);会话通过 `POST /api/access`(正文中的令牌)或请求头 `X-Monitor-Access` 打开。自己写过 `listen.query_access` 的安装会保留其值;依赖旧默认值并通过带 `?access=` 的地址打开监视器的,需要开启该设置或改用 `POST /api/access`。环境变量 `MONITOR_QUERY_ACCESS=1` 可为服务开启它。
+
+### 新增
+
+- **左侧菜单有了带标题的分组，团队和哨兵各自拆分为独立条目**：五个分组（监视、哨兵、团队、报告与学习、系统；可折叠并会被记住）对每个标签页分类；*团队*变为团队健康（`#team-health`）、车队（`#fleet`）和定时报告（`#team-reports`），*哨兵*标签页变为概览（`#sentinel`）加上 CI 哨兵（`#sentinel-ci`，含面板 A1 至 A13）、协作哨兵（`#sentinel-collab`）和安全哨兵（`#sentinel-security`）各一个条目。某个哨兵的条目只在该哨兵开启时出现在菜单中（`sentinel.enabled`、`sentinels.collab.enabled`、`sentinels.security.enabled`）；其地址仍会打开一个说明它已关闭的面板，并打开设置中的对应开关；每个徽标只统计自己哨兵的警报。旧地址（`#team`、`#sent`、`#team/fleet`、`?view=team`）仍会打开正确的面板，每个标签页打开自己的帮助主题，`ui.screen1_tabs` 列出新的标签页（`fleet`、`trep`、`sci`、`scol`、`ssec`）。
+- **每种事件一种声音,带主题、按类型的开关和静音时段**:新的红色、严重或安全警报、卡住的构建或队列、评分下降、连接丢失、警告、已解决、新报告、新经验和普通通知,各有自己的音型,由 Web Audio API 生成(无音频文件,任何内容都不会离开浏览器),凭听觉就能知道发生了什么。设置 `sound.on_warning`、`sound.on_resolved`、`sound.on_report`、`sound.on_lesson`、`sound.on_sentinel`、`sound.on_stuck`、`sound.on_score_drop` 和 `sound.on_info` 加入原有的两个(默认全部开启),`sound.theme` 选择 `classic` 或 `soft` 音色,`sound.quiet_enabled` 配合 `sound.quiet_from_hour` 和 `sound.quiet_to_hour` 设定静音时段(默认关闭)。在“设置”的“界面”中,每种类型有一个按钮,以当前音量和主题播放。墙面屏幕使用相同的声音(窗口是否发声仍由 `screens.sound` 和 `?sound=on` 决定)。`docs/SOUNDS.md` 提供八种语言的声音表。
+- **来自 Slack 和 Discord 的只读命令(设置 `chatops.enabled`,默认关闭)**:允许的频道中的人可以向监视器询问 `help`、`status`、`alerts`、`red`、`queue` 或 `score`,并得到只有自己能看到、不含提及、且在 `chatops.links` 开启(默认)时除了按原样显示的名称旁的仓库地址外不含链接的简短回复(`chatops.show_repo_names` 默认为 `all`,私有仓库的名称也会到达名单所允许的每个频道和用户;`public` 和 `none` 会隐藏它们)。命令列表是封闭的(`chatops.allowed_words` 只能缩小它),每条命令只读取监视器已经拥有的内容:没有任何命令会向 GitHub 写入、执行操作、更改设置或读取密钥。`POST /api/chatops/slack` 校验 Slack 的 `v0` 签名(时间和正文的 HMAC-SHA256,最多五分钟前,密钥只放在 `chatops.slack.signing_secret_env` 所指的环境变量中);`POST /api/chatops/discord` 用 `chatops.discord.public_key_env` 所指的公钥校验交互的 Ed25519 签名;两者都会应答平台的验证挑战,绝不两次接受同一签名,拒绝超过 16 KB 的正文,并按地址、用户、频道和分钟统计请求。名单 `chatops.allowed_teams`、`chatops.allowed_channels` 和 `chatops.allowed_users` 是必需的(都为空时不会执行任何命令),所有外部文本都会被清理、截断和转义,每条命令都会在操作日志中留下一行,只记录聊天的 ID,绝不记录文本。设置的 Webhook 标签页中的一个区块、八种语言的指南(`docs/CHATOPS.md`),以及使用 RFC 8032 向量的测试。
+
+### 修复
+
+- **“叮叮”不再对大部分事件保持沉默**:以前它只看红色的工作流,因此其他哨兵的警报、报告和经验从不发声;浏览器阻止的声音会永远丢失,因为那条警报已被视为看过;所有事件共用一个三十秒的间隔,会吞掉紧随第一个之后到来的第二种事件;墙面窗口每次蜂鸣都新建一个音频上下文,而浏览器会一直阻止它,直到有人点击。现在会监视列表中的每条警报、报告的每个新发现和每条新经验;浏览器阻止的声音会等待(最多十分钟),并在第一次点击、页面回到前台或每两秒一次的下一次检查时播放;每种类型有自己的间隔,最多三个声音的一轮(最严重的先响)避免堆叠;墙面屏幕则保留一个音频上下文和一个小队列。
 
 ## [2.0.8]
 

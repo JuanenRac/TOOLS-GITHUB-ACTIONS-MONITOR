@@ -24,7 +24,7 @@ class Structure(unittest.TestCase):
 
     def test_every_tab_has_its_button_and_its_panel_and_no_panel_is_left_over(self):
         lite, complete = self.tabs()
-        self.assertEqual(complete[:4], ["now", "al", "rep", "les"])
+        self.assertEqual(complete, ["now", "al", "charts", "sent", "sci", "scol", "ssec", "team", "fleet", "repos", "rep", "trep", "les", "hist", "cfg"])
         buttons = re.findall(r'<button role="tab" id="n-([a-z]+)" data-tab="([a-z]+)"', PAGE)
         panels = re.findall(r'<div class="tab(?: on)?" id="t-([a-z]+)" role="tabpanel" aria-labelledby="n-([a-z]+)"', PAGE)
         self.assertEqual(sorted(t for t, _ in buttons), sorted(complete))
@@ -51,7 +51,7 @@ class Structure(unittest.TestCase):
         self.assertRegex(PAGE, r"d-al.*level===\"error\"")
 
     def test_each_address_and_the_old_ones(self):
-        self.assertIn('TABHASH={rep:"reports",les:"lessons"}', PAGE)
+        self.assertIn('TABHASH={rep:"reports",les:"lessons",team:"team-health",trep:"team-reports",sent:"sentinel"', PAGE)
         self.assertIn('reports:"rep",lessons:"les"', PAGE, "?view=reports and ?view=lessons")
         self.assertIn('window.addEventListener("hashchange"', PAGE)
 
@@ -75,7 +75,7 @@ class Structure(unittest.TestCase):
                 self.assertTrue(str(keys.get(key, "")).strip(), (lang, key))
             self.assertNotEqual(keys["ui.tab_rep"], keys["ui.tab_les"], lang)
             for n in (1, 2, 3):
-                self.assertIn("rep, les", keys[f"cfg.h.ui.screen{n}_tabs"], (lang, n))
+                self.assertIn("team, fleet, repos, rep, trep, les", keys[f"cfg.h.ui.screen{n}_tabs"], (lang, n))
 
 
 @unittest.skipUnless(shutil.which("node"), "node is not installed")

@@ -57,7 +57,7 @@ background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 
 .tile.skel b{color:transparent;border-radius:5px;background:linear-gradient(100deg,var(--line) 30%,var(--line2) 50%,var(--line) 70%);background-size:200% 100%}
 .tile.skel small{opacity:.6}.tile.stale b{opacity:.55}
 .tile[hidden]{display:none}
-.lite #n-team,.lite #t-team,.lite #n-sent,.lite #t-sent,.lite #n-al,.lite #t-al,.lite #n-rep,.lite #t-rep,.lite #n-les,.lite #t-les,.lite #kp-sign,.lite #k-ready,.lite #k-budget,.lite #kt-etag{display:none!important}
+.lite #n-team,.lite #t-team,.lite #n-fleet,.lite #t-fleet,.lite #n-trep,.lite #t-trep,.lite #n-sent,.lite #t-sent,.lite #n-sci,.lite #t-sci,.lite #n-scol,.lite #t-scol,.lite #n-ssec,.lite #t-ssec,.lite #n-al,.lite #t-al,.lite #n-rep,.lite #t-rep,.lite #n-les,.lite #t-les,.lite #kp-sign,.lite #k-ready,.lite #k-budget,.lite #kt-etag{display:none!important}
 /* the complete edition with several accounts: the switcher of the top bar, the page "all accounts" and the views of a screen of its own (?view=&chrome=0) */
 #accbar{display:none;flex-direction:column;align-items:stretch;gap:6px;padding:8px;border:1px solid var(--line);border-radius:var(--radius);background:var(--side-active);color:var(--side-text)}
 .acc #accbar{display:flex}#accbar label{display:flex;flex-direction:column;align-items:stretch;gap:4px;font-weight:600;color:var(--side-hi)}#accbar select{width:100%}
@@ -126,7 +126,7 @@ svg{display:block;max-width:none}svg text{fill:var(--mut);font-size:12px}
 #t-al,#t-rep,#t-les{grid-template-columns:minmax(0,1fr);overflow:auto}#al-filters{align-items:center;gap:10px;margin:0 0 10px}#al-chips button{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:999px;padding:3px 12px;margin:0 4px 0 0;cursor:pointer}#al-chips button[aria-pressed=true]{background:var(--acc);color:var(--on-acc,#fff);border-color:var(--acc)}
 .alrow{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:6px 10px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line)}.alrow.muted{opacity:.6}.alrow .tt{min-width:0;overflow-wrap:anywhere}.alrow .acts{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}.alrow .acts button{font-size:12px;padding:2px 8px}.origin{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:1px 8px;border-radius:6px;border:1px solid var(--line)}.origin.ci{border-color:var(--acc);color:var(--acc)}.origin.collab{border-color:var(--ok);color:var(--ok)}
 @media (max-width:700px){.alrow{grid-template-columns:auto minmax(0,1fr)}.alrow .tt{grid-column:1/-1}.alrow .acts{grid-column:1/-1;justify-content:flex-start}.alrow>.chip,.alrow>.origin{justify-self:start}}
-#t-sent{grid-template-columns:minmax(0,1fr) minmax(0,2.1fr);gap:12px}
+#t-sent,#t-sci,#t-scol,#t-ssec{grid-template-columns:minmax(0,1fr);gap:12px;overflow:auto}
 #t-sent .lcol{display:flex;flex-direction:column;gap:12px;min-height:0;min-width:0}
 #t-sent .lcol section:first-child{flex:1.3 1 0}#t-sent .lcol section:last-child{flex:1 1 0}
 #s-err{display:none;background:var(--bad);color:var(--on-bad);padding:8px 12px;border-radius:8px;margin-bottom:8px;font-weight:600}
@@ -417,7 +417,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="i-report" viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7zM15 3v4h4M10 12h6M10 16h6"/></symbol><symbol id="i-book" viewBox="0 0 24 24"><path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h10"/></symbol><symbol id="i-full" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol><symbol id="i-fullx" viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></symbol><symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol><symbol id="i-chev" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol><symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol><symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c1 3 4 4.5 4 8.5a4 4 0 0 1-8 0c0-1.4.6-2.4 1.4-3.2C9.9 9.2 11 7 12 3z"/><path d="M12 21a3 3 0 0 0 3-3c0-1.5-1.5-2-3-4-1.5 2-3 2.5-3 4a3 3 0 0 0 3 3z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 13.5A8.5 8.5 0 1 1 10.5 3a7 7 0 0 0 10.5 10.5z"/></symbol><symbol id="i-auto" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></symbol><symbol id="i-rows" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></symbol><symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/></symbol><symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol><symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol><symbol id="i-text" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></symbol><symbol id="i-md" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15V9l2.5 3L12 9v6M16 9v6m-2-2 2 2 2-2"/></symbol><symbol id="i-now" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><path d="M8 16v-5M12 16V8M16 16v-8"/></symbol><symbol id="i-repos" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></symbol><symbol id="i-run" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol><symbol id="i-queue" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol><symbol id="i-fail" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></symbol><symbol id="i-okc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></symbol><symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 3h6"/></symbol><symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol><symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></symbol><symbol id="i-repo" viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/></symbol><symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol><symbol id="i-save2" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></symbol><symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-6"/></symbol><symbol id="i-wifi" viewBox="0 0 24 24"><path d="M3 9a14 14 0 0 1 18 0M6 12.5a9 9 0 0 1 12 0M9 16a4.5 4.5 0 0 1 6 0"/><circle cx="12" cy="19" r="1"/></symbol><symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2 6"/><path d="M20 4v7h-7"/></symbol><symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="7.6" r=".8"/></symbol><symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.6 2.6 0 1 1 3.9 2.2c-.9.5-1.4 1-1.4 2"/><circle cx="12" cy="16.8" r=".8"/></symbol><symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol><symbol id="i-spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 9 9"/></symbol></defs></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="i-report" viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7zM15 3v4h4M10 12h6M10 16h6"/></symbol><symbol id="i-book" viewBox="0 0 24 24"><path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h10"/></symbol><symbol id="i-team" viewBox="0 0 24 24"><path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20a6 6 0 0 1 12 0M16 5a3 3 0 0 1 0 6M18 14a6 6 0 0 1 3 6"/></symbol><symbol id="i-fleet" viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></symbol><symbol id="i-sched" viewBox="0 0 24 24"><path d="M5 5h14v15H5zM5 10h14M9 3v4M15 3v4"/></symbol><symbol id="i-ci" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9M12 7v5l3 2M17 3v4h4"/></symbol><symbol id="i-collab" viewBox="0 0 24 24"><path d="M4 5h11v8H9l-3 3v-3H4zM18 9h2v8h-2v3l-3-3h-5"/></symbol><symbol id="i-lock" viewBox="0 0 24 24"><path d="M6 11h12v9H6zM8 11V8a4 4 0 0 1 8 0v3"/></symbol><symbol id="i-full" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol><symbol id="i-fullx" viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></symbol><symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol><symbol id="i-chev" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol><symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol><symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c1 3 4 4.5 4 8.5a4 4 0 0 1-8 0c0-1.4.6-2.4 1.4-3.2C9.9 9.2 11 7 12 3z"/><path d="M12 21a3 3 0 0 0 3-3c0-1.5-1.5-2-3-4-1.5 2-3 2.5-3 4a3 3 0 0 0 3 3z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 13.5A8.5 8.5 0 1 1 10.5 3a7 7 0 0 0 10.5 10.5z"/></symbol><symbol id="i-auto" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></symbol><symbol id="i-rows" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></symbol><symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/></symbol><symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol><symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol><symbol id="i-text" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></symbol><symbol id="i-md" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15V9l2.5 3L12 9v6M16 9v6m-2-2 2 2 2-2"/></symbol><symbol id="i-now" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><path d="M8 16v-5M12 16V8M16 16v-8"/></symbol><symbol id="i-repos" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></symbol><symbol id="i-run" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol><symbol id="i-queue" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol><symbol id="i-fail" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></symbol><symbol id="i-okc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></symbol><symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 3h6"/></symbol><symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol><symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></symbol><symbol id="i-repo" viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/></symbol><symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol><symbol id="i-save2" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></symbol><symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-6"/></symbol><symbol id="i-wifi" viewBox="0 0 24 24"><path d="M3 9a14 14 0 0 1 18 0M6 12.5a9 9 0 0 1 12 0M9 16a4.5 4.5 0 0 1 6 0"/><circle cx="12" cy="19" r="1"/></symbol><symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2 6"/><path d="M20 4v7h-7"/></symbol><symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="7.6" r=".8"/></symbol><symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.6 2.6 0 1 1 3.9 2.2c-.9.5-1.4 1-1.4 2"/><circle cx="12" cy="16.8" r=".8"/></symbol><symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol><symbol id="i-spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 9 9"/></symbol></defs></svg>
 <div id="snd-lock" role="status" hidden><button type="button" id="snd-lock-b"></button></div>
 <div id="err" role="alert"></div>
 <div id="reduced" role="status"></div>
@@ -430,20 +430,29 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <div class="brand"><span class="brand-mark"><svg class="logo" viewBox="0 0 48 48" role="img" focusable="false" data-i18n-aria="ui.logo_aria"><rect class="lg-body" x="3" y="5" width="42" height="31" rx="8"/><path class="lg-stand" d="M17 43h14M24 36v7"/><path class="lg-pulse" d="M8 21h8l4-9 7 17 4-8h9"/><circle class="lg-led" cx="38" cy="11" r="2.4"/></svg></span><div class="brand-copy"><h1>GitHub Actions <small class="mut" id="ver"></small></h1><span class="brand-sub" data-i18n="ui.brand_sub"></span></div><button id="side-toggle" class="ib side-toggle" type="button" aria-expanded="true" data-i18n-aria="ui.side_collapse" data-i18n-title="ui.side_collapse"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-chev"/></svg></button></div>
 <div id="accbar" role="group" data-i18n-aria="ui.acc_title"><label><span data-i18n="ui.acc_label"></span> <select id="acc-sel" data-i18n-title="ui.acc_title"></select></label><span class="mut" id="acc-state"></span><span class="sp"></span><span class="mut" id="acc-view"></span></div>
 <nav role="tablist" aria-orientation="vertical" data-i18n-aria="ui.nav_label">
-<div class="nav-group" data-group="watch"><button type="button" class="nav-group-title" aria-expanded="true"><i aria-hidden="true">&#9662;</i><strong data-i18n="ui.nav_g_watch"></strong></button><div class="nav-items">
+<div class="nav-group" data-group="watch" role="group" aria-labelledby="ng-watch"><button type="button" class="nav-group-title" aria-expanded="true"><i aria-hidden="true">&#9662;</i><strong id="ng-watch" data-i18n="ui.nav_g_watch"></strong></button><div class="nav-items">
 <button role="tab" id="n-now" data-tab="now" aria-selected="true"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-now"/></svg><span class="nl" data-i18n="ui.tab_now"></span> <span class="dot" id="d-now" hidden></span></button>
 <button role="tab" id="n-al" data-tab="al" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-alert"/></svg><span class="nl" data-i18n="ui.tab_al"></span> <span class="dot" id="d-al" hidden></span></button>
-<button role="tab" id="n-rep" data-tab="rep" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-report"/></svg><span class="nl" data-i18n="ui.tab_rep"></span> <span class="dot" id="d-rep" hidden></span></button>
-<button role="tab" id="n-les" data-tab="les" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-book"/></svg><span class="nl" data-i18n="ui.tab_les"></span> <span class="dot" id="d-les" hidden></span></button>
-<button role="tab" id="n-sent" data-tab="sent" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-shield"/></svg><span class="nl" data-i18n="ui.tab_sent"></span> <span class="dot" id="d-sent" hidden></span></button>
 <button role="tab" id="n-charts" data-tab="charts" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-chart"/></svg><span class="nl" data-i18n="ui.tab_charts"></span></button>
 </div></div>
-<div class="nav-group" data-group="data"><button type="button" class="nav-group-title" aria-expanded="true"><i aria-hidden="true">&#9662;</i><strong data-i18n="ui.nav_g_data"></strong></button><div class="nav-items">
+<div class="nav-group" data-group="sentinels" role="group" aria-labelledby="ng-sentinels"><button type="button" class="nav-group-title" aria-expanded="true"><i aria-hidden="true">&#9662;</i><strong id="ng-sentinels" data-i18n="ui.nav_g_sentinels"></strong></button><div class="nav-items">
+<button role="tab" id="n-sent" data-tab="sent" aria-selected="false" hidden><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-shield"/></svg><span class="nl" data-i18n="ui.tab_sent"></span></button>
+<button role="tab" id="n-sci" data-tab="sci" aria-selected="false" hidden><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-ci"/></svg><span class="nl" data-i18n="ui.tab_sci"></span> <span class="dot" id="d-sci" hidden></span></button>
+<button role="tab" id="n-scol" data-tab="scol" aria-selected="false" hidden><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-collab"/></svg><span class="nl" data-i18n="ui.tab_scol"></span> <span class="dot" id="d-scol" hidden></span></button>
+<button role="tab" id="n-ssec" data-tab="ssec" aria-selected="false" hidden><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-lock"/></svg><span class="nl" data-i18n="ui.tab_ssec"></span> <span class="dot" id="d-ssec" hidden></span></button>
+</div></div>
+<div class="nav-group" data-group="team" role="group" aria-labelledby="ng-team"><button type="button" class="nav-group-title" aria-expanded="true"><i aria-hidden="true">&#9662;</i><strong id="ng-team" data-i18n="ui.nav_g_team"></strong></button><div class="nav-items">
+<button role="tab" id="n-team" data-tab="team" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-team"/></svg><span class="nl" data-i18n="ui.tab_team"></span> <span class="dot" id="d-team" hidden></span></button>
+<button role="tab" id="n-fleet" data-tab="fleet" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-fleet"/></svg><span class="nl" data-i18n="ui.tab_fleet"></span> <span class="dot" id="d-fleet" hidden></span></button>
 <button role="tab" id="n-repos" data-tab="repos" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-repos"/></svg><span class="nl" data-i18n="ui.tab_repos"></span></button>
-<button role="tab" id="n-team" data-tab="team" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-repos"/></svg><span class="nl" data-i18n="ui.tab_team"></span></button>
+</div></div>
+<div class="nav-group" data-group="learn" role="group" aria-labelledby="ng-learn"><button type="button" class="nav-group-title" aria-expanded="true"><i aria-hidden="true">&#9662;</i><strong id="ng-learn" data-i18n="ui.nav_g_learn"></strong></button><div class="nav-items">
+<button role="tab" id="n-rep" data-tab="rep" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-report"/></svg><span class="nl" data-i18n="ui.tab_rep"></span> <span class="dot" id="d-rep" hidden></span></button>
+<button role="tab" id="n-trep" data-tab="trep" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-sched"/></svg><span class="nl" data-i18n="ui.tab_trep"></span> <span class="dot" id="d-trep" hidden></span></button>
+<button role="tab" id="n-les" data-tab="les" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-book"/></svg><span class="nl" data-i18n="ui.tab_les"></span> <span class="dot" id="d-les" hidden></span></button>
 <button role="tab" id="n-hist" data-tab="hist" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-history"/></svg><span class="nl" data-i18n="ui.tab_hist"></span></button>
 </div></div>
-<div class="nav-group" data-group="system"><button type="button" class="nav-group-title" aria-expanded="true"><i aria-hidden="true">&#9662;</i><strong data-i18n="ui.nav_g_system"></strong></button><div class="nav-items">
+<div class="nav-group" data-group="system" role="group" aria-labelledby="ng-system"><button type="button" class="nav-group-title" aria-expanded="true"><i aria-hidden="true">&#9662;</i><strong id="ng-system" data-i18n="ui.nav_g_system"></strong></button><div class="nav-items">
 <button role="tab" id="n-cfg" data-tab="cfg" aria-selected="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gear"/></svg><span class="nl" data-i18n="ui.tab_cfg"></span></button>
 </div></div>
 </nav>
@@ -491,8 +500,14 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <section><h2><span data-i18n="ui.s_report"></span> <span class="mut" id="s-stamp" style="font-weight:400"></span> <a id="lnk-txt" href="/api/sentinel/parte.txt" target="_blank" rel="noopener" class="ia" data-i18n-title="ui.ic_text" data-i18n-aria="ui.ic_text"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-text"/></svg></a></h2><div class="body"><div id="s-err" role="alert"></div><div class="sems" id="s-sems"></div><div id="s-parte"><span class="mut" data-i18n="ui.loading"></span></div></div></section>
 <section><h2 data-i18n="ui.s_trend"></h2><div class="body"><div id="s-trend"><span class="mut">–</span></div><h3 style="font-size:13px;margin:10px 0 4px"><span data-i18n="ui.s_yvt"></span> <a id="lnk-md" href="/api/sentinel/parte.txt?fmt=md" target="_blank" rel="noopener" class="ia" data-i18n-title="ui.ic_md" data-i18n-aria="ui.ic_md"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-md"/></svg></a></h3><div id="s-diff"><span class="mut">–</span></div></div></section>
 </div>
+</div>
+<div class="tab" id="t-sci" role="tabpanel" aria-labelledby="n-sci">
 <section><h2><span data-i18n="ui.s_layers"></span> <span class="mut" style="font-weight:400" id="s-ai-state"></span></h2><div class="body" id="s-details"><span class="mut" data-i18n="ui.loading"></span></div></section>
 </div>
+<div class="tab" id="t-scol" role="tabpanel" aria-labelledby="n-scol">
+<section><h2 data-i18n="ui.collab_title"></h2><div class="body" id="s-details-collab"><span class="mut" data-i18n="ui.loading"></span></div></section></div>
+<div class="tab" id="t-ssec" role="tabpanel" aria-labelledby="n-ssec">
+<section><h2 data-i18n="ui.sec_title"></h2><div class="body" id="s-details-sec"><span class="mut" data-i18n="ui.loading"></span></div></section></div>
 <div class="tab" id="t-charts" role="tabpanel" aria-labelledby="n-charts">
 <section><h2 data-i18n="ui.c_result"></h2><div class="body" id="donut"></div></section>
 <section><h2 data-i18n="ui.c_rate"></h2><div class="body" id="rates"></div></section>
@@ -504,7 +519,11 @@ header .tile.wide{min-width:0;grid-column:span 2}
 </div>
 <div class="tab" id="t-team" role="tabpanel" aria-labelledby="n-team">
 <section><h2 data-i18n="ui.team_title"></h2><div class="body"><div class="tbl-tools" id="team-tools"></div><div class="mut" id="team-sum"></div><table><thead><tr id="team-head"></tr></thead><tbody id="team-rows"></tbody></table><div id="team-extra"></div></div></section>
+</div>
+<div class="tab" id="t-fleet" role="tabpanel" aria-labelledby="n-fleet">
 <section id="fleet-sec"><h2 data-i18n="ui.fleet_title"></h2><div class="body"><div class="tbl-tools" id="fleet-tools"></div><div class="mut" id="fleet-sum"></div><table><thead><tr id="fleet-head"></tr></thead><tbody id="fleet-rows"></tbody></table><div class="tbl-tools" id="fleet-pager"></div></div></section>
+</div>
+<div class="tab" id="t-trep" role="tabpanel" aria-labelledby="n-trep">
 <section id="rs-sec"><h2 data-i18n="ui.rs_title"></h2><div class="body"><div class="mut" id="rs-state"></div><ul id="rs-list"></ul><button id="rs-run" type="button" data-i18n="ui.rs_run"></button> <span class="mut" id="rs-msg" role="status"></span></div></section>
 </div>
 <div class="tab" id="t-hist" role="tabpanel" aria-labelledby="n-hist">
@@ -523,7 +542,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <div id="cfg-netwarn" role="alert" hidden></div>
 <div class="cfg-top"><div id="cfg-tabs" role="tablist" aria-orientation="horizontal" data-i18n-aria="ui.cfg_tabs_aria"></div><input id="cfg-search" type="search" autocomplete="off" data-i18n-ph="ui.cfg_search" data-i18n-aria="ui.cfg_search"></div>
 <div id="cfg-panels"><p class="cfg-note" data-i18n="ui.cfg_hint"></p>
-<div id="cfp-interface" role="tabpanel" aria-labelledby="cft-interface" data-tab="interface"><div class="cfg-group"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gear"/></svg><span data-i18n="ui.cfg_g_interface"></span></h3><p class="cfg-note" style="padding:6px 12px 0" data-i18n="ui.cfg_interface_hint"></p><div class="ifrow"><label><span data-i18n="ui.lang_label"></span> <select id="lang" data-i18n-aria="ui.lang_label" data-i18n-title="ui.lang_label"></select></label><label><span data-i18n="ui.theme_label"></span> <select id="theme" data-i18n-aria="ui.theme_aria"></select></label><button id="snd-test" type="button" data-i18n="ui.snd_test"></button><button id="dense" type="button" aria-pressed="false" data-i18n-title="ui.dense_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-rows"/></svg><span class="lbl" id="dense-lbl"></span></button></div></div></div>
+<div id="cfp-interface" role="tabpanel" aria-labelledby="cft-interface" data-tab="interface"><div class="cfg-group"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gear"/></svg><span data-i18n="ui.cfg_g_interface"></span></h3><p class="cfg-note" style="padding:6px 12px 0" data-i18n="ui.cfg_interface_hint"></p><div class="ifrow"><label><span data-i18n="ui.lang_label"></span> <select id="lang" data-i18n-aria="ui.lang_label" data-i18n-title="ui.lang_label"></select></label><label><span data-i18n="ui.theme_label"></span> <select id="theme" data-i18n-aria="ui.theme_aria"></select></label><button id="snd-test" type="button" data-i18n="ui.snd_test"></button><button id="dense" type="button" aria-pressed="false" data-i18n-title="ui.dense_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-rows"/></svg><span class="lbl" id="dense-lbl"></span></button></div><div class="ifrow" id="snd-kinds" role="group"></div></div></div>
 <form id="cfg-form" autocomplete="off" novalidate></form><div id="cfg-none" role="status" data-i18n="ui.cfg_search_none"></div></div>
 <div class="cfg-bar"><button id="cfg-save" type="button" disabled><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-save"/></svg><span data-i18n="ui.cfg_save"></span></button><button id="cfg-discard" type="button" disabled><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-undo"/></svg><span data-i18n="ui.cfg_discard"></span></button><span id="cfg-msg" role="status" aria-live="polite"></span><span class="mut" id="cfg-backups"></span></div>
 </div></section>
@@ -638,7 +657,7 @@ $("dense").addEventListener("click",()=>{DENSE=!DENSE;store.set("am-dense",DENSE
 /* the side panel: the groups fold and the whole panel collapses to its icons; both are remembered in this browser. The group of the section on screen never hides it. */
 var SIDE_OPEN=store.get("am-side")!=="0",NAV_CLOSED=[],CURTAB="now";
 try{NAV_CLOSED=JSON.parse(store.get("am-nav-closed")||"[]")}catch(e){NAV_CLOSED=[]}
-const TABICON={rep:"i-report",les:"i-book",al:"i-alert",now:"i-now",sent:"i-shield",charts:"i-chart",repos:"i-repos",hist:"i-history",cfg:"i-gear"};
+const TABICON={sci:"i-ci",scol:"i-collab",ssec:"i-lock",team:"i-team",fleet:"i-fleet",trep:"i-sched",rep:"i-report",les:"i-book",al:"i-alert",now:"i-now",sent:"i-shield",charts:"i-chart",repos:"i-repos",hist:"i-history",cfg:"i-gear"};
 function applySide(){document.body.classList.toggle("side-collapsed",!SIDE_OPEN);const b=$("side-toggle"),k=SIDE_OPEN?"ui.side_collapse":"ui.side_expand";b.setAttribute("aria-expanded",SIDE_OPEN);b.title=T(k);b.setAttribute("aria-label",T(k))}
 function applyGroups(){document.querySelectorAll(".nav-group").forEach(g=>{const closed=NAV_CLOSED.includes(g.dataset.group)&&!g.querySelector("[aria-selected=true]"),t=g.querySelector(".nav-group-title");g.classList.toggle("folded",closed);t.setAttribute("aria-expanded",!closed);t.title=T(closed?"ui.nav_unfold":"ui.nav_fold");t.querySelector("i").textContent=closed?"\u25B8":"\u25BE"})}
 function setViewTitle(){const e=$("view-title");if(!e)return;const all=document.body.classList.contains("allmode"),live=document.body.classList.contains("v-live");e.textContent=all?T("ui.acc_all"):live?T("ui.live_title"):T("ui.tab_"+CURTAB);const u=$("vt-ico");if(u)u.setAttribute("href","#"+(all?"i-repos":live?"i-run":TABICON[CURTAB]))}
@@ -669,32 +688,108 @@ function refreshLanguage(){
 /* tabs */
 var OPENALERTS=0;
 const nowMs=()=>Date.now();
+/*SOUNDS-BEGIN*/
+/* the sounds of the monitor, one per kind of event, made with the Web Audio API (no audio file): the page and the wall screens carry this same block (a test keeps the two copies equal).
+   A note is [Hz, start (s), length (s), Hz at the end (a slide)]. The themes change the colour (wave, attack, release, pitch), never the rhythm, so a kind is the same pattern in every theme. */
+const SND_PATTERNS={
+  red:{w:"sine",n:[[880,0,.15],[1175,.22,.15]]},
+  sentinel:{w:"triangle",n:[[330,0,.14],[330,.2,.14],[330,.4,.14]]},
+  stuck:{w:"sine",n:[[740,0,.7,370]]},
+  score:{w:"triangle",n:[[784,0,.16],[622,.2,.16],[466,.4,.28]]},
+  conn:{w:"sine",n:[[392,0,.3],[262,.38,.4]]},
+  warning:{w:"triangle",n:[[660,0,.16],[660,.26,.16]]},
+  resolved:{w:"sine",n:[[523,0,.12],[659,.14,.12],[784,.28,.25]]},
+  report:{w:"triangle",n:[[1047,0,.12],[784,.16,.3]]},
+  lesson:{w:"sine",n:[[1319,0,.08],[1568,.1,.08],[1976,.2,.16]]},
+  info:{w:"sine",n:[[988,0,.22]]}
+};
+const SND_THEMES={classic:{w:"",atk:.02,rel:.15,mul:1,gain:1},soft:{w:"sine",atk:.06,rel:.35,mul:.75,gain:.8}};
 let AUDIO=null;
-function audioCtx(){try{if(!AUDIO){const C=window.AudioContext||window.webkitAudioContext;if(C)AUDIO=new C()}if(AUDIO&&AUDIO.state==="suspended")AUDIO.resume();return AUDIO}catch(e){return null}}
-function playTones(vol){const c=audioCtx();if(!c||c.state==="suspended")return false;const t0=c.currentTime+0.02,v=Math.max(0.01,Math.min(1,vol||0.4))*0.5;
-  [[880,0],[1175,0.22]].forEach(([f,d])=>{const o=c.createOscillator(),g=c.createGain();o.type="sine";o.frequency.value=f;o.connect(g);g.connect(c.destination);
-    g.gain.setValueAtTime(0.0001,t0+d);g.gain.exponentialRampToValueAtTime(v,t0+d+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t0+d+0.15);o.start(t0+d);o.stop(t0+d+0.17)});return true}
+function audioCtx(){try{if(!AUDIO){const C=window.AudioContext||window.webkitAudioContext;if(C)AUDIO=new C()}if(AUDIO&&AUDIO.state!=="running"&&AUDIO.state!=="closed")AUDIO.resume();return AUDIO}catch(e){return null}}
+/* plays the patterns of the kinds one after the other (a string or a list); false when the browser does not let the page sound yet, so the caller can keep them and try again */
+function playTones(vol,kinds,theme){const c=audioCtx();if(!c||c.state!=="running")return false;
+  const list=Array.isArray(kinds)?kinds:[kinds||"red"],th=SND_THEMES[theme]||SND_THEMES.classic,v=Math.max(0.01,Math.min(1,vol||0.4))*0.5*th.gain;let t=c.currentTime+0.02;
+  list.forEach(k=>{const p=SND_PATTERNS[k]||SND_PATTERNS.red;let end=0;
+    p.n.forEach(([f,d,len,to])=>{const o=c.createOscillator(),g=c.createGain();o.type=th.w||p.w;o.frequency.setValueAtTime(f*th.mul,t+d);if(to)o.frequency.linearRampToValueAtTime(to*th.mul,t+d+len);o.connect(g);g.connect(c.destination);
+      g.gain.setValueAtTime(0.0001,t+d);g.gain.exponentialRampToValueAtTime(v,t+d+th.atk);g.gain.exponentialRampToValueAtTime(0.0001,t+d+len+th.rel);o.start(t+d);o.stop(t+d+len+th.rel+0.02);end=Math.max(end,d+len+th.rel)});
+    t+=end+0.25});
+  return true}
+/*SOUNDS-END*/
 /*SOUND-BEGIN*/
-const SOUND={muted:false,first:true,known:new Set(),lastAt:0,conn:null,lost:false};
+/* the order in which kinds sound when several come in one look (the most serious first), the burst (at most three patterns at once, the rest wait their turn), the pause between two bursts and how long a kind may wait for the browser to allow sound */
+const SND_PRI=["red","sentinel","stuck","score","conn","warning","resolved","report","lesson","info"],SND_BURST=3,SND_GAP=1500,SND_STALE=6e5;
+const SOUND={muted:false,first:true,known:new Set(),lastAt:0,kindAt:{},queue:[],conn:null,lost:false,al:null,rep:null,les:null};
 try{SOUND.muted=store.get("am-sound")==="off"}catch(e){}
-function soundCfg(){const c=I18N.sound||{};return {enabled:c.enabled!==false,newRed:c.on_new_red!==false,conn:c.on_connection_lost!==false,cool:(c.cooldown_seconds==null?30:c.cooldown_seconds)*1000,vol:(c.volume==null?40:c.volume)/100}}
-/* a bing bing only for something NEW: the alerts that are there at the first look are remembered, not announced; a cooldown keeps one sound from the next; muted means silent */
+function soundCfg(){const c=I18N.sound||{},on=k=>c["on_"+k]!==false;
+  return {enabled:c.enabled!==false,cool:(c.cooldown_seconds==null?30:c.cooldown_seconds)*1000,vol:(c.volume==null?40:c.volume)/100,theme:c.theme==="soft"?"soft":"classic",
+    quiet:c.quiet_enabled===true,qfrom:c.quiet_from_hour==null?22:c.quiet_from_hour,qto:c.quiet_to_hour==null?7:c.quiet_to_hour,
+    types:{red:on("new_red"),conn:on("connection_lost"),warning:on("warning"),resolved:on("resolved"),report:on("report"),lesson:on("lesson"),sentinel:on("sentinel"),stuck:on("stuck"),score:on("score_drop"),info:on("info")}}}
+/* quiet hours (do not disturb, from the settings): nothing sounds between the two hours of this computer; the visual notice is always there */
+function soundQuiet(c,when){if(!c.quiet||c.qfrom===c.qto)return false;const h=new Date(when==null?nowMs():when).getHours();return c.qfrom<c.qto?(h>=c.qfrom&&h<c.qto):(h>=c.qfrom||h<c.qto)}
+function soundOn(k){const c=soundCfg();return c.enabled&&!SOUND.muted&&c.types[k]!==false&&!soundQuiet(c)}
+/* which kind an alert of the list is: the code says it, else the level */
+function soundKindOf(a){const c=String(a.code||""),l=String(a.level||"");
+  if(c==="ci.red")return "red";
+  if(c==="score.dropped")return "score";
+  if(c==="ci.stuck"||c==="ci.ghost_queue"||c.indexOf("runner.")===0)return "stuck";
+  if(c.indexOf("security.")===0||c.indexOf("system.")===0||l==="error"||l==="critical")return "sentinel";
+  return l==="warning"?"warning":"info"}
+/* the kinds seen in one look go to the queue (a kind that sounded a moment ago waits for its pause, one that is switched off or in the quiet hours is not queued) and ONE burst sounds: the most serious kinds first, at most three, the rest in the next burst */
+function soundSay(kinds){const c=soundCfg(),now=nowMs();
+  for(const k of kinds||[]){if(!soundOn(k))continue;if(k in SOUND.kindAt&&now-SOUND.kindAt[k]<c.cool)continue;if(!SOUND.queue.some(q=>q.k===k))SOUND.queue.push({k:k,at:now})}
+  return soundDrain()}
+/* plays what waits: nothing that is old news (SND_STALE), nothing before the pause of the last burst, and when the browser still blocks the sound the queue stays and the next try (a click, the page coming back, the pump every two seconds) plays it */
+function soundDrain(){const c=soundCfg(),now=nowMs();
+  SOUND.queue=SOUND.queue.filter(q=>now-q.at<SND_STALE&&soundOn(q.k));
+  if(!SOUND.queue.length)return false;
+  if(SOUND.lastAt&&now<SOUND.lastAt+SND_GAP)return false;
+  SOUND.queue.sort((a,b)=>SND_PRI.indexOf(a.k)-SND_PRI.indexOf(b.k));
+  const batch=SOUND.queue.slice(0,SND_BURST);
+  if(playTones(c.vol,batch.map(q=>q.k),c.theme)===false)return false;
+  SOUND.lastAt=now+(batch.length-1)*1200;batch.forEach(q=>{SOUND.kindAt[q.k]=now});SOUND.queue=SOUND.queue.slice(batch.length);return true}
+/* a sound only for something NEW: what is there at the first look is remembered, not announced */
 function soundKey(){return "am-sound-known-"+(typeof ACC!=="undefined"&&ACC&&ACC.current?ACC.current:"")}
 function soundLoad(){try{const o=JSON.parse(store.get(soundKey())||"null");if(o&&Array.isArray(o.k)&&nowMs()-o.t<6*36e5)return new Set(o.k)}catch(e){}return null}
 function soundSave(keys){try{store.set(soundKey(),JSON.stringify({t:nowMs(),k:[...keys]}))}catch(e){}}
-/* the connection with the monitor itself is lost: one bing bing per loss (the mute chip, the switch, the cooldown and the audio lock all apply); found again, it can sound at the next loss */
-function soundLost(){if(SOUND.lost)return;SOUND.lost=true;const cfg=soundCfg();if(cfg.conn&&cfg.enabled&&!SOUND.muted&&nowMs()-SOUND.lastAt>=cfg.cool){SOUND.lastAt=nowMs();playTones(cfg.vol)}}
+/* the connection with the monitor itself is lost: one sound per loss (the mute chip, the switches, the pause of the kind and the audio lock all apply); found again, it can sound at the next loss */
+function soundLost(){if(SOUND.lost)return;SOUND.lost=true;soundSay(["conn"])}
 function soundFound(){SOUND.lost=false}
-function soundResync(){SOUND.lastAt=0}      // the page was out of step and is back: the cooldown of before does not hide a new red
+function soundResync(){SOUND.lastAt=0;SOUND.kindAt={}}      // the page was out of step and is back: the pause of before does not hide a new red
 function soundWatch(d){
-  if(!d)return;const cfg=soundCfg(),keys=new Set((d.failing||[]).map(r=>r.repo+"|"+r.name)),off=!!(d.offline&&d.offline.offline);
+  if(!d)return;const keys=new Set((d.failing||[]).map(r=>r.repo+"|"+r.name)),off=!!(d.offline&&d.offline.offline);
   if(SOUND.first){SOUND.first=false;SOUND.conn=off;const prev=soundLoad();if(!prev){SOUND.known=keys;soundSave(keys);return}SOUND.known=prev}      // a reload keeps the baseline of the last look (a few hours at most): a red that came while the page was closed is NEW
-  let fire=false;
-  if(cfg.newRed)for(const k of keys)if(!SOUND.known.has(k))fire=true;
-  if(cfg.conn&&off&&SOUND.conn===false)fire=true;
+  const kinds=[];
+  for(const k of keys)if(!SOUND.known.has(k)){kinds.push("red");break}
+  if(!off)for(const k of SOUND.known)if(!keys.has(k)){kinds.push("resolved");break}      // a red that is gone (not while the monitor is offline: then the list is empty for another reason)
+  if(off&&SOUND.conn===false)kinds.push("conn");
   SOUND.known=keys;SOUND.conn=off;soundSave(keys);
-  if(fire&&cfg.enabled&&!SOUND.muted&&nowMs()-SOUND.lastAt>=cfg.cool){SOUND.lastAt=nowMs();playTones(cfg.vol)}
+  soundSay(kinds);
 }
+/* what is new in a list between two looks: cur is a Map(key -> tag); the first look of the page compares with the last one it saved (a few hours at most) or, with none, only remembers */
+function soundDiff(slot,cur){
+  const key="am-sound-"+slot+"-"+(typeof ACC!=="undefined"&&ACC&&ACC.current?ACC.current:"");let prev=SOUND[slot];
+  const save=()=>{try{store.set(key,JSON.stringify({t:nowMs(),k:[...cur]}))}catch(e){}};
+  if(prev==null){let saved=null;try{const o=JSON.parse(store.get(key)||"null");if(o&&Array.isArray(o.k)&&nowMs()-o.t<6*36e5)saved=new Map(o.k)}catch(e){}
+    if(!saved){SOUND[slot]=cur;save();return {add:[],gone:[]}}prev=saved}
+  const add=[],gone=[];cur.forEach((v,k)=>{if(!prev.has(k))add.push([k,v])});prev.forEach((v,k)=>{if(!cur.has(k))gone.push([k,v])});
+  SOUND[slot]=cur;save();return {add:add,gone:gone}}
+/* the list of alerts of every sentinel (the reds of the CI have their own look above): a new alert sounds as its kind, and one of the serious kinds that is gone sounds as solved; a silenced alert, with muted_until, is there but mute */
+function soundAlerts(A){if(!A||!Array.isArray(A.alerts))return;
+  const cur=new Map();A.alerts.forEach(a=>{if(a&&a.id&&a.code!=="ci.red")cur.set(a.id,soundKindOf(a)+(a.muted_until?"!":""))});
+  const d=soundDiff("al",cur),kinds=d.add.filter(x=>!x[1].endsWith("!")).map(x=>x[1]);
+  if(d.gone.some(x=>["sentinel","stuck","score"].includes(x[1])))kinds.push("resolved");
+  soundSay(kinds)}
+/* the four optional reports: a finding that was not there before is a new report */
+function soundReports(R){if(!R)return;const cur=new Map(),put=k=>cur.set(k,"report");
+  if(R.workflow_hygiene&&R.workflow_hygiene.enabled)(R.workflow_hygiene.repos||[]).forEach(r=>(r.findings||[]).forEach(f=>put("h|"+r.repo+"|"+f.rule)));
+  if(R.release_view&&R.release_view.enabled)(R.release_view.repos||[]).forEach(r=>{if(r.state==="blocked")put("r|"+r.repo)});
+  if(R.supply_chain&&R.supply_chain.enabled)(R.supply_chain.repos||[]).forEach(r=>{if(!(r.sbom&&r.signature))put("s|"+r.repo+"|"+(r.tag||""))});
+  if(R.queue&&R.queue.enabled)Object.keys(R.queue.groups||{}).forEach(g=>put("q|"+g));
+  soundSay(soundDiff("rep",cur).add.length?["report"]:[])}
+/* the lessons: a category that appears, or that starts to repeat, or that now applies, is a new lesson */
+function soundLessons(L){if(!L||!L.enabled)return;const cur=new Map();
+  (L.categories||[]).forEach(c=>cur.set(c.category+"|"+(c.recurring?"r":"n"),"lesson"));(L.apply_now||[]).forEach(x=>cur.set("now|"+x.category,"lesson"));
+  soundSay(soundDiff("les",cur).add.length?["lesson"]:[])}
 /*SOUND-END*/
 /*FRESH-BEGIN*/
 /* is the page in step with the monitor? the time of the last good answer, a retry that shows, a watchdog for an answer that never comes and the data that stopped changing */
@@ -727,16 +822,21 @@ function freshWatch(now){
 /* the browser lets a page sound only after a click: say it, and one click unlocks it with a test tone */
 function soundLocked(){if(SOUND.muted||!soundCfg().enabled)return false;const c=audioCtx();return !c||c.state!=="running"}
 function soundLockPaint(){const b=$("snd-lock");if(!b)return;const on=soundLocked();b.hidden=!on;const x=$("snd-lock-b");if(on&&x&&!x.textContent){x.textContent=T("ui.snd_locked");x.title=T("ui.snd_locked_t")}}
-function soundUnlock(test){const c=audioCtx();if(!c)return;const done=()=>{soundLockPaint();soundChip();if(test)playTones(soundCfg().vol)};try{const p=c.resume();if(p&&p.then)p.then(done,done);else done()}catch(e){done()}}
+function soundUnlock(test){const c=audioCtx();if(!c)return;const done=()=>{soundLockPaint();soundChip();const g=soundCfg();if(test)playTones(g.vol,["red"],g.theme);try{soundDrain()}catch(e){}};try{const p=c.resume();if(p&&p.then)p.then(done,done);else done()}catch(e){done()}}
+/* the button of a kind in Settings > Interface plays that kind with the volume and the theme of the settings (even when it is switched off or in the quiet hours: it is a test) */
+function soundTest(kind){const c=audioCtx();if(!c)return;const go=()=>{const g=soundCfg();playTones(g.vol,[kind],g.theme);soundLockPaint()};try{const p=c.resume();if(p&&p.then)p.then(go,go);else go()}catch(e){go()}}
+function soundKindsPaint(){const box=$("snd-kinds");if(!box||(box.childElementCount&&box.dataset.lang===LANG))return;
+  box.textContent="";box.dataset.lang=LANG;box.setAttribute("aria-label",T("ui.snd_tests"));const h=document.createElement("span");h.className="mut";h.textContent=T("ui.snd_tests")+":";box.appendChild(h);
+  SND_PRI.forEach(k=>{const b=document.createElement("button");b.type="button";b.dataset.sndKind=k;b.textContent=T("ui.snd_k_"+k);b.addEventListener("click",()=>soundTest(k));box.appendChild(b)})}
 function soundChip(){const b=$("sb-sound");if(!b)return;const on=!SOUND.muted&&soundCfg().enabled;b.textContent=T(on?"ui.snd_on":"ui.snd_off");b.title=T("ui.snd_chip_t");b.setAttribute("aria-pressed",on?"true":"false");b.className="sb-item sb-sound"+(on?"":" off")}
 document.documentElement.dataset.blink=I18N.blink===false?"0":"1";
-const TABS=LITE?["now","charts","repos","hist","cfg"]:["now","al","rep","les","sent","charts","repos","team","hist","cfg"];
+const TABS=LITE?["now","charts","repos","hist","cfg"]:["now","al","charts","sent","sci","scol","ssec","team","fleet","repos","rep","trep","les","hist","cfg"];
 /* the address of a tab: #reports and #lessons for the two that used to be sections of the alerts; the old addresses (#alerts, #al, #alerts/reports, #al/lessons, #rep-box, #les-box) still open the right panel */
-const TABHASH={rep:"reports",les:"lessons"},TABALIAS={reports:"rep",lessons:"les","rep-box":"rep","les-box":"les",alerts:"al"};
-function tabOf(h){h=String(h||"").replace(/^#/,"").replace(/\/+$/,"").toLowerCase();if(!h)return"";const p=h.split("/");if((p[0]==="alerts"||p[0]==="al")&&p.length>1)return TABALIAS[p[1]]||"al";return TABALIAS[h]||h}
+const TABHASH={rep:"reports",les:"lessons",team:"team-health",trep:"team-reports",sent:"sentinel",sci:"sentinel-ci",scol:"sentinel-collab",ssec:"sentinel-security"},TABALIAS={sentinel:"sent","sentinel-ci":"sci","sentinel-collab":"scol","sentinel-security":"ssec",reports:"rep",lessons:"les","rep-box":"rep","les-box":"les",alerts:"al","team-health":"team","team-reports":"trep","fleet-sec":"fleet","rs-sec":"trep"};
+function tabOf(h){h=String(h||"").replace(/^#/,"").replace(/\/+$/,"").toLowerCase();if(!h)return"";const p=h.split("/");if((p[0]==="alerts"||p[0]==="al")&&p.length>1)return TABALIAS[p[1]]||"al";if((p[0]==="sentinel"||p[0]==="sent")&&p.length>1)return {ci:"sci",collab:"scol",security:"ssec",sec:"ssec"}[p[1]]||"sent";if(p[0]==="team"&&p.length>1)return p[1]==="fleet"?"fleet":(p[1]==="reports"?"trep":"team");return TABALIAS[h]||h}
 function showTab(t){if(!TABS.includes(t))t="now";TABS.forEach(x=>{$("t-"+x).classList.toggle("on",x===t);$("n-"+x).setAttribute("aria-selected",x===t)});store.set("am-tab",t);CURTAB=t;applyGroups();setViewTitle();if(DATA&&t==="charts")setTimeout(()=>render(DATA),30);try{const hs="#"+(TABHASH[t]||t);if(location.hash!==hs)window.history.replaceState(null,"",hs)}catch(e){}}
 document.querySelector("nav").addEventListener("click",e=>{const b=e.target.closest("button[data-tab]");if(b)showTab(b.dataset.tab)});
-document.querySelector("nav").addEventListener("keydown",e=>{if(!["ArrowRight","ArrowLeft","ArrowDown","ArrowUp"].includes(e.key))return;e.preventDefault();const i=TABS.findIndex(x=>$("n-"+x).getAttribute("aria-selected")==="true"),n=TABS[(i+(e.key==="ArrowRight"||e.key==="ArrowDown"?1:TABS.length-1))%TABS.length];showTab(n);$("n-"+n).focus()});
+document.querySelector("nav").addEventListener("keydown",e=>{if(!["ArrowRight","ArrowLeft","ArrowDown","ArrowUp"].includes(e.key))return;e.preventDefault();const V=TABS.filter(x=>!$("n-"+x).hidden),i=V.findIndex(x=>$("n-"+x).getAttribute("aria-selected")==="true"),n=V[(i+(e.key==="ArrowRight"||e.key==="ArrowDown"?1:V.length-1))%V.length];showTab(n);$("n-"+n).focus()});
 showTab(tabOf(QS.get("tab")||location.hash.slice(1))||store.get("am-tab")||"now");
 window.addEventListener("hashchange",()=>{const t=tabOf(location.hash);if(t&&TABS.includes(t)&&t!==CURTAB)showTab(t)});
 (function(){      // the screens (docs/SCREENS.md): /screen/N or ?screen=N shows the tabs set for that screen; ui.orientation (or ?orient=) forces the layout; ui.rotate_seconds (or ?rotate=) turns through its tabs
@@ -753,7 +853,7 @@ window.addEventListener("hashchange",()=>{const t=tabOf(location.hash);if(t&&TAB
 /* ---------- shell of the complete edition: accounts, views and a screen of its own ---------- */
 /* ?view=now|alerts|charts|repos|settings|live  ?chrome=0 (a kiosk: no header buttons, tabs or filters)  ?account=<id>|all  (several accounts only; the lite edition ignores account=)
    Every window keeps its own view: the choice is read from the address, never from one global setting that another window would overwrite. */
-const VIEWS={now:"now",alerts:"al",reports:"rep",lessons:"les",charts:"charts",repos:"repos",team:"team",repo:"team",settings:"cfg",live:"live"};
+const VIEWS={now:"now",sentinel:"sent","sentinel-ci":"sci","sentinel-collab":"scol","sentinel-security":"ssec",alerts:"al",reports:"rep",lessons:"les",charts:"charts",repos:"repos",team:"team","team-health":"team",fleet:"fleet","team-reports":"trep",repo:"team",settings:"cfg",live:"live"};
 const VIEW=QS.get("view")&&VIEWS[QS.get("view")]?QS.get("view"):"";
 if(QS.get("chrome")==="0")document.body.classList.add("kiosk");
 function accUrl(id){const u=new URL(location.href);if(id)u.searchParams.set("account",id);else u.searchParams.delete("account");return u.pathname+u.search}
@@ -834,10 +934,10 @@ const signWait=()=>{const w={};((SENT&&SENT.a5&&SENT.a5.pending_sign)||[]).forEa
 const signRepos=()=>{if(!SENT||!SENT.a5)return[];const w=signWait();return [...new Set([...(SENT.a5.sign_queue||[]).map(q=>q.repo),...(SENT.a5.pending_sign||[]).map(q=>q.repo)])].sort((a,b)=>(w[b]||0)-(w[a]||0)||(a<b?-1:1))};
 function focusSignQueue(){
   OPEN.add("a5");store.set("am-s-open",[...OPEN].join(","));
-  showTab("sent");renderSent();
+  showTab("sci");renderSent();
   const q=$("sign-queue");if(q){q.scrollIntoView({block:"nearest"});q.focus&&q.focus({preventScroll:true})}
 }
-function onKpiRed(){setList(T("ui.l_red"),redRepos());if(redRepos().length){OPEN.add("a2");showTab("sent");renderSent();const d=document.querySelector('details[data-k="a2"]');if(d)d.scrollIntoView({block:"nearest"})}}
+function onKpiRed(){setList(T("ui.l_red"),redRepos());if(redRepos().length){OPEN.add("a2");showTab("sci");renderSent();const d=document.querySelector('details[data-k="a2"]');if(d)d.scrollIntoView({block:"nearest"})}}
 function onKpiSign(){const same=FILTER.list&&FILTER.listLabel===T("ui.l_unsigned");setList(T("ui.l_unsigned"),signRepos());if(!same&&signRepos().length)focusSignQueue()}
 [["kp-red",onKpiRed],["kp-sign",onKpiSign]].forEach(([id,fn])=>{$(id).addEventListener("click",fn);$(id).addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fn()}})});
 function readyChips(s){      // one chip per group of the readiness: a number, or the words "not enough data" with the reason in the tooltip
@@ -1218,12 +1318,33 @@ const ok_=t=>`<span style="color:var(--ok)">${esc(t)}</span>`,mut_=t=>`<span cla
 const VERK={true:"ui.ver_true",false:"ui.ver_false","unknown":"ui.ver_unknown"};
 let SQT=store.get("am-sqt")||"all";
 document.addEventListener("change",e=>{if(e.target&&e.target.id==="sq-trust"){SQT=e.target.value;store.set("am-sqt",SQT);renderSent()}});
+/* the three sentinels can be switched on or off (sentinel.enabled, sentinels.collab.enabled, sentinels.security.enabled): the menu of each one is there only while it is on, and its panel says it is off otherwise (an old address never breaks) */
+function sentIsOn(k){const o=k==="sci"?SENT:(k==="scol"?COLLAB:SECUR);return !!o&&o.enabled!==false}
+function sentScreenList(){const n=document.documentElement.dataset.screen;if(!n)return null;const c=I18N.screens||{},l=String(QS.get("tabs")||c["screen"+n+"_tabs"]||"").split(",").map(x=>x.trim()).filter(x=>TABS.includes(x));return l.length?l:null}
+function sentMenus(){
+  if(LITE)return;const sl=sentScreenList(),on={sci:sentIsOn("sci"),scol:sentIsOn("scol"),ssec:sentIsOn("ssec")};on.sent=on.sci||on.scol||on.ssec;
+  ["sent","sci","scol","ssec"].forEach(k=>{const b=$("n-"+k);if(b)b.hidden=!on[k]||(sl!==null&&!sl.includes(k))});
+  const g=document.querySelector('.nav-group[data-group="sentinels"]');if(g)g.hidden=!on.sent
+}
+function sentOff(k){
+  const key=k==="sci"?"sentinel.enabled":(k==="scol"?"sentinels.collab.enabled":"sentinels.security.enabled");
+  return `<div class="mut" role="status">${esc(T("ui.sentinel_off"))} <button type="button" data-sent-switch="${key}">${esc(T("ui.sentinel_off_go"))}</button></div>`
+}
+function renderSentOthers(){
+  const col=sentIsOn("scol"),sec=sentIsOn("ssec");
+  $("s-details-collab").innerHTML=COLLAB===null&&!SENT?'<span class="mut">\u2013</span>':(col?section("collab",T("ui.collab_title"),collabLevel(),COLLAB&&COLLAB.enabled!==false?T("ui.collab_count",{n:(COLLAB.alerts||[]).length,m:(COLLAB.status||{}).repos_checked||0}):"",collabBox()):sentOff("scol"));
+  $("s-details-sec").innerHTML=SECUR===null&&!SENT?'<span class="mut">\u2013</span>':(sec?section("security",T("ui.sec_title"),secLevel(),SECUR&&SECUR.enabled!==false?T("ui.sec_count",{n:(SECUR.alerts||[]).length,m:(SECUR.status||{}).repos_checked||0}):"",secBox()):sentOff("ssec"));
+  const bc=$("d-scol"),bs=$("d-ssec"),nc=col?(COLLAB.alerts||[]).filter(a=>a.level==="error").length:0,ns=sec?(SECUR.alerts||[]).filter(a=>a.level==="error").length:0;
+  if(bc){bc.hidden=!nc;bc.textContent=nc}if(bs){bs.hidden=!ns;bs.textContent=ns}
+  sentMenus()
+}
+document.addEventListener("click",e=>{const b=e.target.closest("button[data-sent-switch]");if(!b)return;CFG.tab="sentinel";store.set("am-cfg-tab","sentinel");showTab("cfg");if(CFG.groups.length)cfgShowTab("sentinel");setTimeout(()=>{const f=document.getElementById("cfg-"+b.dataset.sentSwitch.replace(/\./g,"-"));if(f&&f.focus){f.scrollIntoView({block:"center"});f.focus()}},60)});
 function renderSent0(){
   const errs=[];if(SENT_ERR)errs.push(SENT_ERR);if(SENT&&SENT.errors)SENT.errors.forEach(e=>errs.push(`${e.section}: ${e.message} (${e.at})`));
   const eb=$("s-err");eb.style.display=errs.length?"block":"none";eb.textContent=errs.length?T("ui.s_warn")+errs.join(" · "):"";
-  const dot=$("d-sent");
+  const dot=$("d-sci");try{renderSentOthers()}catch(e){}
   const rb=$("reduced");rb.style.display=SENT&&SENT.reduced?"block":"none";rb.textContent=SENT&&SENT.reduced?T("ui.reduced"):"";
-  if(!SENT||SENT.enabled===false){dot.hidden=!errs.length;dot.textContent="!";if(!SENT)return;$("s-parte").innerHTML=SENT.parte.map(p=>`<div class="pline ${p.level}">${esc(p.text)}</div>`).join("");return}
+  if(!SENT||SENT.enabled===false){dot.hidden=!errs.length;dot.textContent="!";if(!SENT)return;$("s-details").innerHTML=sentOff("sci");$("s-parte").innerHTML=SENT.parte.map(p=>`<div class="pline ${p.level}">${esc(p.text)}</div>`).join("");return}
   const s=SENT,t=s.totals,nbad=t.red+t.stuck+(t.secret||0);dot.hidden=!(errs.length||nbad);dot.textContent=errs.length?"!":nbad;
   const loadingText=s.loading==="starting"?T("ui.starting"):s.loading;
   $("s-stamp").textContent=(s.loading?T("ui.s_loading",{n:loadingText})+" ":"")+"· "+clock(s.generated)+(s.cache_age_seconds?" "+T("ui.s_cache",{dur:fmt(s.cache_age_seconds)}):"")+((s.a7&&s.a7.by_ecosystem)?T("ui.s_min24")+s.a7.by_ecosystem.filter(m=>m.min24).map(m=>m.ecosystem+" "+m.min24).join(", "):"");
@@ -1308,9 +1429,7 @@ function renderSent0(){
    +section("a10",T("ui.a10_title"),a10o.level||"unknown",T("ui.sc_a10",{n:(a10o.sections||[]).filter(x=>x.count&&["bad","warn"].includes(x.level)).length,m:(a10o.sections||[]).length}),a10)
    +section("a11",T("ui.a11_title"),a11o.level||"unknown",T("ui.sc_a11",{n:a11o.ready||0,m:a11o.behind||0}),a11)
    +section("a12",T("ui.a12_title"),ANA&&ANA.enabled!==false&&(ANA.slower||[]).length?"warn":(ANA&&(ANA.duration||[]).length?"ok":"unknown"),T("ui.sc_a12",{n:(ANA&&ANA.duration||[]).length,m:(ANA&&ANA.flaky||[]).length}),analyticsBox())
-   +section("a13",T("ui.a13_title"),(s.lint&&s.lint.enabled)?(s.lint.summary.bad?"bad":(s.lint.summary.warn?"warn":"ok")):"unknown",s.lint&&s.lint.enabled?T("ui.sc_a13",{n:s.lint.summary.findings,m:s.lint.summary.repos}):"",lintBox(s))
-   +section("collab",T("ui.collab_title"),collabLevel(),COLLAB&&COLLAB.enabled!==false?T("ui.collab_count",{n:(COLLAB.alerts||[]).length,m:(COLLAB.status||{}).repos_checked||0}):"",collabBox())
-   +section("security",T("ui.sec_title"),secLevel(),SECUR&&SECUR.enabled!==false?T("ui.sec_count",{n:(SECUR.alerts||[]).length,m:(SECUR.status||{}).repos_checked||0}):"",secBox());
+   +section("a13",T("ui.a13_title"),(s.lint&&s.lint.enabled)?(s.lint.summary.bad?"bad":(s.lint.summary.warn?"warn":"ok")):"unknown",s.lint&&s.lint.enabled?T("ui.sc_a13",{n:s.lint.summary.findings,m:s.lint.summary.repos}):"",lintBox(s));
 }
 function secBox(){
   const c=SECUR;if(!c||c.enabled===false)return mut_(T("ui.sec_off"));
@@ -1358,7 +1477,7 @@ $("t-sent").addEventListener("click",async e=>{
   const g=e.target.closest("[data-goto]");if(g){
     if(g.dataset.goto==="a2"&&SENT)setList(T("ui.l_red"),[...new Set(SENT.a2.red.map(r=>r.repo))]);
     else if(g.dataset.goto==="a5"&&SENT)setList(T("ui.l_pending"),[...new Set((SENT.a5.pending_sign||[]).map(r=>r.repo))]);
-    const d=document.querySelector(`details[data-k="${g.dataset.goto}"]`);if(d){d.open=true;d.scrollIntoView({block:"nearest"})}return}
+    const gk=g.dataset.goto;showTab(gk==="collab"?"scol":(gk==="security"?"ssec":"sci"));const d=document.querySelector(`details[data-k="${gk}"]`);if(d){d.open=true;d.scrollIntoView({block:"nearest"})}return}
   const run=e.target.closest("button[data-ai-run]");if(run){
     if(!await askConfirm(T("ui.ai_prop_confirm",{cmd:run.dataset.cmd}),{danger:true}))return;
     try{const r=await fetch("/api/ai/actions/confirm",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:run.dataset.aiRun,command:run.dataset.cmd})});const j=await r.json();
@@ -1374,11 +1493,11 @@ $("t-sent").addEventListener("click",async e=>{
 });
 /* the Alerts tab: the alerts of every sentinel in one list, a filter by origin and level, and local silences with an end (the monitor never writes to GitHub) */
 var ALERTS=null;const ALF={s:QS.get("sentinel")||store.get("am-al-s")||"",l:"",m:store.get("am-al-m")==="1"};
-async function alertsTick(){if(LITE)return;try{const r=await fetch("/api/alerts",{cache:"no-store"});if(r.ok)ALERTS=await r.json()}catch(e){}try{renderAlerts()}catch(e){}lessonsTick()}
+async function alertsTick(){if(LITE)return;try{const r=await fetch("/api/alerts",{cache:"no-store"});if(r.ok)ALERTS=await r.json()}catch(e){}try{renderAlerts()}catch(e){}try{soundAlerts(ALERTS)}catch(e){}lessonsTick()}
 /* the lessons of the failures of this CI (lessons.py): what keeps failing, the trend, what to do and the guard to add; local data, read only */
 /* the four optional reports (reports.py): drawn only when one of them is on */
 var REP=null;
-async function reportsTick(){if(LITE)return;try{const r=await fetch("/api/reports",{cache:"no-store"});if(r.ok)REP=await r.json()}catch(e){}try{renderReports()}catch(e){}}
+async function reportsTick(){if(LITE)return;try{const r=await fetch("/api/reports",{cache:"no-store"});if(r.ok)REP=await r.json()}catch(e){}try{renderReports()}catch(e){}try{soundReports(REP)}catch(e){}}
 function renderReports(){
   const box=$("rep-box"),list=$("rep-list");if(!box||!list||!REP)return;
   const on=["workflow_hygiene","queue","release_view","supply_chain"].filter(k=>REP[k]&&REP[k].enabled);
@@ -1393,7 +1512,7 @@ function renderReports(){
   list.innerHTML=h;
 }
 var LESS=null;
-async function lessonsTick(){reportsTick();if(LITE)return;try{const r=await fetch("/api/ai/lessons",{cache:"no-store"});if(r.ok)LESS=await r.json()}catch(e){}try{renderLessons()}catch(e){}}
+async function lessonsTick(){reportsTick();if(LITE)return;try{const r=await fetch("/api/ai/lessons",{cache:"no-store"});if(r.ok)LESS=await r.json()}catch(e){}try{renderLessons()}catch(e){}try{soundLessons(LESS)}catch(e){}}
 function renderLessons(){
   const box=$("les-list");if(!box)return;const L=LESS;
   if(!L){box.innerHTML='<span class="mut">–</span>';return}
@@ -1555,6 +1674,7 @@ function teamTools(){
   let t=null;$("team-q").addEventListener("input",e=>{clearTimeout(t);t=setTimeout(()=>{TEAM_F.q=e.target.value.trim();teamLoad()},250)})}
 function teamPaint(){
   teamTools();$("team-head").innerHTML=TEAM_COLS.map(c=>`<th>${esc(T(c))}</th>`).join("");
+  const dt=$("d-team");if(dt){const nb=((TEAM&&TEAM.totals)||{}).bad||0;dt.hidden=!nb;dt.textContent=nb}
   if(!TEAM){$("team-sum").textContent="";$("team-rows").innerHTML="";$("team-extra").innerHTML="";return}
   const tt=TEAM.totals||{};
   $("team-sum").textContent=T("ui.team_shown",{shown:TEAM.shown,all:TEAM.all})+" · "+T("ui.team_totals",{bad:tt.bad||0,warn:tt.warn||0,ok:tt.ok||0,unknown:tt.unknown||0});
@@ -1717,7 +1837,7 @@ async function cfgExtras(){
   const gen=document.getElementById("cfp-general");
   if(gen&&!gen.querySelector(".wall-open")){
     const box=document.createElement("div");box.className="cfg-group wall-open";
-    box.innerHTML=`<h3><span>${esc(T("ui.cfg_b_wall"))}</span></h3><div class="inl">`+["overview","now","sentinels"].map(k=>`<a href="/screen/${k}" target="_blank" rel="noopener">${esc(T("ui.scr_open",{name:T("ui.scr_title_"+k)}))}</a>`).join(" · ")+"</div>";
+    box.innerHTML=`<h3><span>${esc(T("ui.cfg_b_wall"))}</span></h3><div class="inl">`+["overview","now","sentinels"].map(k=>`<a href="/screen/${k}?lang=${encodeURIComponent(LANG)}" target="_blank" rel="noopener">${esc(T("ui.scr_open",{name:T("ui.scr_title_"+k)}))}</a>`).join(" · ")+"</div>";
     gen.appendChild(box);
   }
   if(typeof basicExtras==="function")basicExtras();
@@ -2180,7 +2300,7 @@ async function authUsers(){const p=authPanel(T("ui.auth_users")),msg=ae("div",{c
   p.append(msg,tbl,ae("h3",{},T("ui.auth_user_add")),nm," ",pw," ",rl," ",ac," ",add,ae("h3",{},T("ui.auth_audit")),log);await load()}
 applyStatic();fillThemes();applyTheme(theme);applySide();applyGroups();setViewTitle();applyDense(DENSE);cfgLoad();authInit();
 diffTick();setInterval(diffTick,60000);
-sentTick();setInterval(sentTick,15000);scoreTick();setInterval(scoreTick,60000);if(!LITE){teamLoad();setInterval(()=>{if(CURTAB==="team")teamLoad()},30000);if(VIEW==="repo"&&QS.get("repo"))repoHealthOpen(QS.get("repo"))}
+sentTick();setInterval(sentTick,15000);scoreTick();setInterval(scoreTick,60000);if(!LITE){teamLoad();setInterval(()=>{if(["team","fleet","trep"].includes(CURTAB))teamLoad()},30000);if(VIEW==="repo"&&QS.get("repo"))repoHealthOpen(QS.get("repo"))}
 let rz;window.addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{if(DATA)render(DATA)},200)});
 tick();setInterval(tick,10000);
 /* ---------- the bar at the foot: the most important notice (all of them in a window), the connection, the allowance and the facts of this monitor ---------- */
@@ -2234,8 +2354,9 @@ async function sbTick(){try{const r=await fetch("/api/statusbar",{cache:"no-stor
   $("sb-more").addEventListener("click",openNotes);$("sb-open").addEventListener("click",openNotes);$("notes-close").addEventListener("click",()=>dlgClose("notes"));$("notes-level").addEventListener("change",renderNotes);
   $("sb-sound").addEventListener("click",()=>{SOUND.muted=!SOUND.muted;try{store.set("am-sound",SOUND.muted?"off":"on")}catch(e){}soundUnlock(!SOUND.muted);soundLockPaint()});
   {const t=$("snd-test");if(t)t.addEventListener("click",()=>soundUnlock(true))}
-  {const b=$("snd-lock-b");if(b)b.addEventListener("click",()=>soundUnlock(true));["pointerdown","keydown"].forEach(ev=>document.addEventListener(ev,()=>soundUnlock(false),{capture:true}))}
-  soundLockPaint();setInterval(soundLockPaint,2000);
+  {const b=$("snd-lock-b");if(b)b.addEventListener("click",()=>soundUnlock(true));["pointerdown","pointerup","click","touchend","keydown"].forEach(ev=>document.addEventListener(ev,()=>soundUnlock(false),{capture:true}))}
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden){soundUnlock(false);try{soundDrain()}catch(e){}}});
+  soundLockPaint();soundKindsPaint();setInterval(()=>{soundLockPaint();soundKindsPaint();try{soundDrain()}catch(e){}},2000);
   soundChip();renderBar();renderClock();setInterval(renderClock,1000);sbTick();setInterval(sbTick,30000);setInterval(renderBarFacts,15000)}
 /* the full screen: one button in the corner, a second press leaves it; the page keeps working in either state */
 function fsSync(){const b=$("fs");if(!b)return;const on=!!document.fullscreenElement,k=on?"ui.fs_exit":"ui.fs_enter";b.setAttribute("aria-pressed",on);b.title=T(k);b.setAttribute("aria-label",T(k));const u=$("fs-ico");if(u)u.setAttribute("href",on?"#i-fullx":"#i-full")}

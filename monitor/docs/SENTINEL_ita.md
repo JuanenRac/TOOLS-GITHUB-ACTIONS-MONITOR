@@ -89,3 +89,9 @@ Ogni soglia qui sopra è un'impostazione delle schede **Sentinella**, **Controll
 ## La seconda sentinella e l'elenco degli avvisi
 
 Oltre a questa sentinella (CI), l'edizione completa ha la **sentinella Collab**, che osserva issue e pull request aperte con un orologio proprio e non scrive mai su GitHub: [COLLAB_ita.md](COLLAB_ita.md). La scheda **Avvisi** riunisce gli avvisi di entrambe in un elenco, con filtro per origine e livello e silenziamenti locali che finiscono da soli (`alerts.mute_hours`); `GET /api/alerts` serve lo stesso elenco.
+
+## Il menu a sinistra: gruppi e sentinelle
+
+Il menu ha cinque gruppi con un titolo ciascuno (si ripiegano e il monitor ricorda quali): *Sorveglia* (Adesso, Avvisi, Grafici), *Sentinelle* (Riepilogo, Sentinella CI, Sentinella collab, Sentinella sicurezza), *Team* (Salute del team, Flotta, Repository), *Rapporti e apprendimento* (Rapporti, Report pianificati, Lezioni, Cronologia) e *Sistema* (Impostazioni). Ogni voce ha il suo indirizzo: `#team-health`, `#fleet`, `#team-reports`, `#reports`, `#lessons`, `#sentinel`, `#sentinel-ci`, `#sentinel-collab` e `#sentinel-security` (anche `?view=` con le stesse parole). I vecchi indirizzi (`#team`, `#sent`, `#alerts/reports`, `#team/fleet`...) aprono il pannello giusto.
+
+Le tre sentinelle si possono attivare o no (`sentinel.enabled`, `sentinels.collab.enabled`, `sentinels.security.enabled`). La voce di una sentinella è nel menu solo finché è attiva, e il gruppo *Sentinelle* sparisce quando non ce n'è nessuna; la pagina segue lo stato al successivo aggiornamento. L'indirizzo di una sentinella spenta apre comunque il suo pannello, che dice che è spenta e ha un pulsante che apre il suo interruttore nelle Impostazioni. I pannelli da A1 ad A13 sono della sentinella CI; il contatore di ogni voce conta solo gli avvisi della sua sentinella.

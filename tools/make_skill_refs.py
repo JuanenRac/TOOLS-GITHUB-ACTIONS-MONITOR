@@ -129,6 +129,9 @@ NOTES = {
     "/api/statusbar": ("GET", "the data of the status bar of the page"),
     "/api/tags": ("GET", "tags and releases of the repositories"),
     "/api/webhook": ("POST", "the incoming webhook of GitHub (signed with HMAC)"),
+    "/api/chatops": ("POST", "read only commands from a chat; the paths below are its routes"),
+    "/api/chatops/slack": ("POST", "a slash command of Slack, read only (signed with the v0 HMAC of Slack, off by default)"),
+    "/api/chatops/discord": ("POST", "an interaction of Discord, read only (signed with Ed25519, off by default)"),
     "/api/welcome": ("GET,POST", "the first-run welcome flag"),
 }
 #: signal id -> what it says (every id that signals.py makes must be here; the ones of the panels of the Sentinel are `sentinel.<panel>`)
@@ -288,7 +291,7 @@ def roles_md():
 def tabs_md():
     page = (MON / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
     tabs = sorted(set(re.findall(r'data-tab="([a-z]+)"', page)))
-    names = {"now": "Right now (runs, one row per repository)", "al": "Alerts (every sentinel in one list, silences)", "rep": "Reports (the optional reports; address #reports)", "les": "Lessons (lessons from the failures; address #lessons)", "sent": "Sentinel (checks A1-A13, Collab)",
+    names = {"now": "Right now (runs, one row per repository)", "al": "Alerts (every sentinel in one list, silences)", "sci": "CI sentinel (panels A1-A13 and the lint of the workflows; address #sentinel-ci; only while sentinel.enabled is on)", "scol": "Collab sentinel (issues and pull requests; address #sentinel-collab; only while sentinels.collab.enabled is on)", "ssec": "Security sentinel (what GitHub says is open or missing; address #sentinel-security; only while sentinels.security.enabled is on)", "team": "Team health (the repositories that need a person first; address #team-health)", "fleet": "Fleet (hundreds of repositories grouped and paged; address #fleet)", "trep": "Scheduled reports (the files written on a schedule; address #team-reports)", "rep": "Reports (the optional reports; address #reports)", "les": "Lessons (lessons from the failures; address #lessons)", "sent": "Summary of the sentinels (report and trends; address #sentinel; present while any sentinel is on)",
              "charts": "Charts and history", "repos": "Repositories", "team": "Team (health of the repositories ranked by risk, with filters and the detail of each)", "hist": "History of runs", "cfg": "Settings (tabs Basic, General ... AI, Quota ...)", "interface": "Interface"}
     lines = ["# Tabs of the page", "", "Generated from the page. The same data is in the endpoints; an AI does not need the page.", ""]
     lines += [f"- `{t}`: {names.get(t, t)}" for t in tabs]

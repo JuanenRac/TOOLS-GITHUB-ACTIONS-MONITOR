@@ -35,3 +35,4 @@ Lo que puede dar por seguro un script, una pantalla de pared o un cliente móvil
 ## Streams
 
 - `GET /api/ai/stream` (las alertas) y `GET /api/live-events/stream` (los eventos del webhook, `live.sse.enabled`) son eventos enviados por el servidor, de solo lectura y apagados por defecto; mira [AI_ALERTS_spa.md](AI_ALERTS_spa.md) y [WEBHOOK_spa.md](WEBHOOK_spa.md).
+- `POST /api/chatops/slack` y `POST /api/chatops/discord` reciben los comandos de solo lectura de un chat (desactivados por defecto, `chatops.enabled`). No usan el token de acceso: la prueba es la firma de la plataforma, y una petición sin firma válida se rechaza antes de leer nada. Ver [CHATOPS_spa.md](CHATOPS_spa.md).

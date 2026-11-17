@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2912_passing-brightgreen.svg" alt="2912 tests">
+  <img src="https://img.shields.io/badge/Tests-2953_passing-brightgreen.svg" alt="2953 tests">
 </p>
 
 > Vigila los workflows de todos tus repositorios y te dice, en una página local, qué está en rojo, qué está atascado y qué te espera.
@@ -81,8 +81,8 @@
 | | |
 |---|---|
 | **Madurez** | functional |
-| **Tests** | 2912 métodos de test (`python -m unittest discover -s monitor/tests`) |
-| **Ajustes** | 567 ajustes, todos con ayuda |
+| **Tests** | 2953 métodos de test (`python -m unittest discover -s monitor/tests`) |
+| **Ajustes** | 597 ajustes, todos con ayuda |
 | **Idiomas** | 8 (inglés, español, alemán, francés, italiano, japonés, chino y portugués) |
 | **Probado en el CI en** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -284,6 +284,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/CI_RED_SCHEMA_spa.md`](monitor/docs/CI_RED_SCHEMA_spa.md): el formato de ci_red.json
 - [`monitor/docs/CI_RED_BRIDGE_spa.md`](monitor/docs/CI_RED_BRIDGE_spa.md): llevar ci_red.json a un panel
 - [`monitor/docs/WEBHOOK_spa.md`](monitor/docs/WEBHOOK_spa.md): el webhook de entrada
+- [`monitor/docs/CHATOPS_spa.md`](monitor/docs/CHATOPS_spa.md): comandos de chat de solo lectura para Slack y Discord
+- [`monitor/docs/SOUNDS_spa.md`](monitor/docs/SOUNDS_spa.md): un sonido para cada tipo de evento
 - [`monitor/docs/LITE_spa.md`](monitor/docs/LITE_spa.md): La edición lite
 - [`monitor/docs/COMPLETE_INDIVIDUAL_spa.md`](monitor/docs/COMPLETE_INDIVIDUAL_spa.md): Edición completa para una persona
 - [`monitor/docs/COMPLETE_SERVICE_spa.md`](monitor/docs/COMPLETE_SERVICE_spa.md): Edición completa como servicio

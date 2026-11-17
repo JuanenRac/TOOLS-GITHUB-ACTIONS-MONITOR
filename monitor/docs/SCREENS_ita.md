@@ -21,7 +21,7 @@ La pagina si adatta alla dimensione della finestra, dal telefono al 4K, in verti
 |---|---|
 | `ui.orientation` | auto segue la finestra; portrait impila i pannelli in una colonna; landscape mantiene l'affiancamento. |
 | `ui.rotate_seconds` | 0 = spento. Secondi tra le schede di uno schermo che ne ha più di una. |
-| `ui.screen1_tabs` | Schede di /screen/1, separate da virgole: now, al, rep, les, sent, charts, repos, hist, cfg. Vuoto = tutte. |
+| `ui.screen1_tabs` | Schede di /screen/1, separate da virgole: now, al, charts, sent, sci, scol, ssec, team, fleet, repos, rep, trep, les, hist, cfg. Vuoto = tutte. |
 | `ui.screen1_orientation` | auto, portrait o landscape solo per /screen/1. |
 | `ui.screen2_tabs` | Schede di /screen/2. |
 | `ui.screen2_orientation` | Orientamento di /screen/2. |
@@ -82,6 +82,10 @@ Un indirizzo per ogni monitor. Un parametro può rendere una finestra più tranq
 | `?rotate=30` | La finestra passa da sola per panoramica, in questo momento e sentinelle ogni 30 secondi (minimo 5; 0 = nessuna rotazione). |
 | `?blink=off` | I guasti mantengono un alone fisso invece di lampeggiare. Non può attivare ciò che `screens.blink` tiene spento. |
 | `?sound=on` | Un breve segnale acustico per un nuovo guasto, solo se `screens.sound` lo consente. Disattivato per impostazione predefinita. |
+
+### Lingua degli schermi
+
+La lingua di uno schermo si decide in quest'ordine: `?lang=xx` nell'indirizzo; poi la lingua scelta nella pagina principale dello stesso browser (lì viene salvata, e uno schermo aperto in quel browser la legge, così lo schermo segue la pagina senza alcun parametro); poi la lingua del monitor (`MONITOR_LANG`, o quella configurata). Uno schermo la cui lingua salvata differisce da quella in cui è stato servito si ricarica una volta, prima di disegnare, con `?lang=` aggiunto e gli altri parametri (tra cui `?rotate=`) mantenuti. Le otto lingue (en, es, de, fr, it, ja, zh, pt) sono le stesse della pagina: titoli, etichette, stati, gravità, unità e tempi relativi («5 min fa») vengono dal catalogo, e ora, data e numeri si scrivono con le impostazioni regionali della lingua (en-GB, es-ES, de-DE, fr-FR, it-IT, ja-JP, zh-CN, pt-PT). Il collegamento «Apri schermo» delle Impostazioni porta già `?lang=` con la lingua della pagina. Un computer che non sceglie una lingua resta in inglese: la lingua del browser non decide.
 
 ### Impostazioni degli schermi da parete
 

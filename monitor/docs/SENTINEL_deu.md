@@ -89,3 +89,9 @@ Jeder Schwellwert oben ist eine Einstellung der Reiter **Wächter**, **Oberfläc
 ## Der zweite Wächter und die Alarmliste
 
 Neben diesem Wächter (CI) hat die vollständige Ausgabe den **Collab-Wächter**, der offene Issues und Pull Requests mit eigener Uhr beobachtet und nie nach GitHub schreibt: [COLLAB_deu.md](COLLAB_deu.md). Der Reiter **Alarme** führt die Alarme beider in einer Liste zusammen, mit Filter nach Herkunft und Stufe und lokalen Stummschaltungen, die von selbst enden (`alerts.mute_hours`); `GET /api/alerts` liefert dieselbe Liste.
+
+## Das Menü links: Gruppen und Wächter
+
+Das Menü hat fünf Gruppen mit je einem Titel (sie lassen sich einklappen, und der Monitor merkt es sich): *Beobachten* (Jetzt, Alarme, Diagramme), *Wächter* (Übersicht, CI-Wächter, Kollaborations-Wächter, Sicherheits-Wächter), *Team* (Teamzustand, Flotte, Repositories), *Berichte und Lernen* (Berichte, Geplante Berichte, Lektionen, Verlauf) und *System* (Einstellungen). Jeder Eintrag hat eine eigene Adresse: `#team-health`, `#fleet`, `#team-reports`, `#reports`, `#lessons`, `#sentinel`, `#sentinel-ci`, `#sentinel-collab` und `#sentinel-security` (auch `?view=` mit denselben Wörtern). Die alten Adressen (`#team`, `#sent`, `#alerts/reports`, `#team/fleet`...) öffnen das richtige Panel.
+
+Die drei Wächter lassen sich ein- oder ausschalten (`sentinel.enabled`, `sentinels.collab.enabled`, `sentinels.security.enabled`). Der Menüeintrag eines Wächters ist nur da, solange er an ist, und die Gruppe *Wächter* verschwindet, wenn keiner an ist; die Seite folgt dem Zustand bei ihrer nächsten Aktualisierung. Die Adresse eines ausgeschalteten Wächters öffnet weiterhin sein Panel, das sagt, dass er aus ist, und eine Schaltfläche hat, die seinen Schalter in den Einstellungen öffnet. Die Panels A1 bis A13 gehören zum CI-Wächter; die Markierung jedes Eintrags zählt nur die Alarme seines Wächters.

@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2912_passing-brightgreen.svg" alt="2912 tests">
+  <img src="https://img.shields.io/badge/Tests-2953_passing-brightgreen.svg" alt="2953 tests">
 </p>
 
 > Watches the workflows of every repository you own and tells you, on one local page, what is red, what is stuck and what is waiting for you.
@@ -81,8 +81,8 @@
 | | |
 |---|---|
 | **Maturity** | functional |
-| **Tests** | 2912 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Settings** | 567 settings, all with help |
+| **Tests** | 2953 test methods (`python -m unittest discover -s monitor/tests`) |
+| **Settings** | 597 settings, all with help |
 | **Languages** | 8 (English, Spanish, German, French, Italian, Japanese, Chinese, Portuguese) |
 | **Tested in the CI on** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -284,6 +284,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/CI_RED_SCHEMA.md`](monitor/docs/CI_RED_SCHEMA.md): the format of ci_red.json
 - [`monitor/docs/CI_RED_BRIDGE.md`](monitor/docs/CI_RED_BRIDGE.md): carrying ci_red.json to a dashboard
 - [`monitor/docs/WEBHOOK.md`](monitor/docs/WEBHOOK.md): the incoming webhook
+- [`monitor/docs/CHATOPS.md`](monitor/docs/CHATOPS.md): read-only chat commands for Slack and Discord
+- [`monitor/docs/SOUNDS.md`](monitor/docs/SOUNDS.md): one sound for each kind of event
 - [`monitor/docs/LITE.md`](monitor/docs/LITE.md): The lite edition
 - [`monitor/docs/COMPLETE_INDIVIDUAL.md`](monitor/docs/COMPLETE_INDIVIDUAL.md): Complete edition for one person
 - [`monitor/docs/COMPLETE_SERVICE.md`](monitor/docs/COMPLETE_SERVICE.md): Complete edition as a service

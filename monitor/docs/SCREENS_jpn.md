@@ -21,7 +21,7 @@
 |---|---|
 | `ui.orientation` | auto はウィンドウに従い、portrait はパネルを1列に積み、landscape は左右に並べたままにします。 |
 | `ui.rotate_seconds` | 0 = オフ。複数のタブがある画面で、タブを切り替える秒数。 |
-| `ui.screen1_tabs` | /screen/1 のタブ（カンマ区切り）：now, al, rep, les, sent, charts, repos, hist, cfg。空 = すべて。 |
+| `ui.screen1_tabs` | /screen/1 のタブ（カンマ区切り）：now, al, charts, sent, sci, scol, ssec, team, fleet, repos, rep, trep, les, hist, cfg。空 = すべて。 |
 | `ui.screen1_orientation` | /screen/1 だけの auto、portrait、landscape。 |
 | `ui.screen2_tabs` | /screen/2 のタブ。 |
 | `ui.screen2_orientation` | /screen/2 の向き。 |
@@ -82,6 +82,10 @@
 | `?rotate=30` | ウィンドウが30秒ごとに「全体」「いま起きていること」「センチネル」を自動で切り替えます（最小5、0 = 回転なし）。 |
 | `?blink=off` | 失敗は点滅せず、固定の光彩で示されます。`screens.blink` がオフのものをオンにはできません。 |
 | `?sound=on` | 新しい失敗で短いビープ音。`screens.sound` が許可している場合のみ。既定ではオフです。 |
+
+### 画面の言語
+
+画面の言語は次の順序で決まります。アドレスの `?lang=xx`、次に同じブラウザーのメインページで選んだ言語（そこに保存され、そのブラウザーで開いた画面が読み取るため、パラメーターなしで画面がページに従います）、次にモニターの言語（`MONITOR_LANG`、または設定された言語）です。保存された言語が配信された言語と異なる画面は、描画の前に一度だけ `?lang=` を付けて再読み込みし、他のパラメーター（`?rotate=` など）は保持されます。8つの言語（en、es、de、fr、it、ja、zh、pt）はページと同じで、タイトル、ラベル、状態、重大度、単位、相対時間（「5分前」）はカタログから、時刻、日付、数値は言語のロケール（en-GB、es-ES、de-DE、fr-FR、it-IT、ja-JP、zh-CN、pt-PT）で表記されます。設定の「画面を開く」リンクには、ページの言語の `?lang=` がすでに付いています。自分で言語を選ばないコンピューターは英語のままで、ブラウザーの言語では決まりません。
 
 ### 壁掛け画面の設定
 

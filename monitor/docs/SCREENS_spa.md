@@ -21,7 +21,7 @@ La página se adapta al tamaño de su ventana, de un móvil a 4K, en vertical o 
 |---|---|
 | `ui.orientation` | auto sigue a la ventana; portrait apila los paneles en una columna; landscape mantiene la disposición lado a lado. |
 | `ui.rotate_seconds` | 0 = apagado. Segundos entre las pestañas de una pantalla que tiene más de una. |
-| `ui.screen1_tabs` | Pestañas de /screen/1, separadas por comas: now, al, rep, les, sent, charts, repos, hist, cfg. Vacío = todas. |
+| `ui.screen1_tabs` | Pestañas de /screen/1, separadas por comas: now, al, charts, sent, sci, scol, ssec, team, fleet, repos, rep, trep, les, hist, cfg. Vacío = todas. |
 | `ui.screen1_orientation` | auto, portrait o landscape solo para /screen/1. |
 | `ui.screen2_tabs` | Pestañas de /screen/2. |
 | `ui.screen2_orientation` | Orientación de /screen/2. |
@@ -82,6 +82,10 @@ Una dirección para cada monitor. Un parámetro puede hacer una ventana más tra
 | `?rotate=30` | La ventana pasa sola por general, ahora y centinelas cada 30 segundos (mínimo 5; 0 = sin rotación). |
 | `?blink=off` | Los fallos conservan un halo fijo en lugar de parpadear. No puede activar lo que `screens.blink` mantiene apagado. |
 | `?sound=on` | Un pitido corto con cada fallo nuevo, solo si `screens.sound` lo permite. Desactivado por defecto. |
+
+### Idioma de las pantallas
+
+El idioma de una pantalla se decide en este orden: `?lang=xx` en la dirección; después el idioma elegido en la página principal del mismo navegador (allí se guarda, y una pantalla abierta en ese navegador lo lee, de modo que la pantalla sigue a la página sin ningún parámetro); después el idioma del monitor (`MONITOR_LANG`, o el configurado). Una pantalla cuyo idioma guardado difiere del que se le sirvió se recarga una vez, antes de dibujar, con `?lang=` añadido y el resto de parámetros (entre ellos `?rotate=`) conservados. Los ocho idiomas (en, es, de, fr, it, ja, zh, pt) son los mismos de la página: títulos, etiquetas, estados, severidades, unidades y tiempos relativos («hace 5 min») salen del catálogo, y la hora, la fecha y los números se escriben con la configuración regional del idioma (en-GB, es-ES, de-DE, fr-FR, it-IT, ja-JP, zh-CN, pt-PT). El enlace «Abrir pantalla» de Ajustes ya lleva `?lang=` con el idioma de la página. Un equipo que no elige idioma por sí mismo se queda en inglés: el idioma del navegador no decide.
 
 ### Ajustes de las pantallas de pared
 

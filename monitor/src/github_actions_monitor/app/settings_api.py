@@ -196,6 +196,18 @@ _f("quota", "central", "central.source", "enum", ("off", "git", "http"), restart
 _f("quota", "central", "central.max_age_minutes", "int", (5, 10080), unit="min", restart=False)
 _f(_T_GENERAL, "sound", "sound.on_new_red", "bool", restart=False)
 _f(_T_GENERAL, "sound", "sound.on_connection_lost", "bool", restart=False)
+_f(_T_GENERAL, "sound", "sound.on_warning", "bool", restart=False)
+_f(_T_GENERAL, "sound", "sound.on_resolved", "bool", restart=False)
+_f(_T_GENERAL, "sound", "sound.on_report", "bool", restart=False)
+_f(_T_GENERAL, "sound", "sound.on_lesson", "bool", restart=False)
+_f(_T_GENERAL, "sound", "sound.on_sentinel", "bool", restart=False)
+_f(_T_GENERAL, "sound", "sound.on_stuck", "bool", restart=False)
+_f(_T_GENERAL, "sound", "sound.on_score_drop", "bool", restart=False)
+_f(_T_GENERAL, "sound", "sound.on_info", "bool", restart=False)
+_f(_T_GENERAL, "sound", "sound.theme", "enum", ("classic", "soft"), restart=False)
+_f(_T_GENERAL, "sound", "sound.quiet_enabled", "bool", restart=False)
+_f(_T_GENERAL, "sound", "sound.quiet_from_hour", "int", (0, 23), unit="h", restart=False)
+_f(_T_GENERAL, "sound", "sound.quiet_to_hour", "int", (0, 23), unit="h", restart=False)
 _f(_T_GENERAL, "sound", "sound.cooldown_seconds", "int", (0, 3600), unit="s", restart=False)
 _f(_T_GENERAL, "sound", "sound.volume", "int", (1, 100), unit="%", restart=False)
 _f(_T_GENERAL, "sound", "sound.server_beep", "bool", restart=False, secure=True)
@@ -446,6 +458,24 @@ _f(_T_HOOK, "inbound", "live.sse.max_seconds", "int", (60, 86400), restart=False
 _f(_T_HOOK, "inbound", "live.sse.max_clients", "int", (1, 10), restart=False, unit="")
 _f(_T_HOOK, "inbound", "webhook.replay_seconds", "int", (60, 86400))
 _f(_T_HOOK, "inbound", "webhook.max_per_minute", "int", (1, 600), unit="")
+_f(_T_HOOK, "chatops", "chatops.enabled", "bool", restart=False, secure=True)
+_f(_T_HOOK, "chatops", "chatops.slack.enabled", "bool", restart=False, secure=True)
+_f(_T_HOOK, "chatops", "chatops.slack.signing_secret_env", "text", ENV_NAME_RE, secure=True)
+_f(_T_HOOK, "chatops", "chatops.slack.state", "status", restart=False)
+_f(_T_HOOK, "chatops", "chatops.discord.enabled", "bool", restart=False, secure=True)
+_f(_T_HOOK, "chatops", "chatops.discord.public_key_env", "text", ENV_NAME_RE, secure=True)
+_f(_T_HOOK, "chatops", "chatops.discord.state", "status", restart=False)
+_f(_T_HOOK, "chatops", "chatops.allowed_teams", "names", restart=False, secure=True)
+_f(_T_HOOK, "chatops", "chatops.allowed_channels", "names", restart=False, secure=True)
+_f(_T_HOOK, "chatops", "chatops.allowed_users", "names", restart=False, secure=True)
+_f(_T_HOOK, "chatops", "chatops.allowed_words", "names", restart=False, secure=True)
+_f(_T_HOOK, "chatops", "chatops.links", "bool", restart=False, secure=True)
+_f(_T_HOOK, "chatops", "chatops.show_repo_names", "enum", ("all", "public", "none"), restart=False, secure=True)
+_f(_T_HOOK, "chatops", "chatops.max_rows", "int", (1, 25), restart=False, unit="")
+_f(_T_HOOK, "chatops", "chatops.max_age_seconds", "int", (30, 300), restart=False)
+_f(_T_HOOK, "chatops", "chatops.rate_per_user_per_minute", "int", (1, 600), restart=False, unit="")
+_f(_T_HOOK, "chatops", "chatops.rate_per_channel_per_minute", "int", (1, 600), restart=False, unit="")
+_f(_T_HOOK, "chatops", "chatops.rate_per_minute", "int", (1, 6000), restart=False, unit="")
 # --- Reads and cache (conditional reads)
 _f("cache", "etag", "cache.etag.enabled", "bool")
 _f("cache", "etag", "cache.etag.ttl_hours", "int", (1, 168))
@@ -629,7 +659,7 @@ FIELDS = {row[1]: row for row in SCHEMA}
 GROUPS = tuple(dict.fromkeys(row[0] for row in SCHEMA))
 assert set(GROUPS) <= set(TAB_ORDER)
 OUTPUT_DEFAULTS = {"prometheus": {"enabled": False, "per_repo": True}, "json": {"enabled": False}, "dashboard": {"enabled": False}}
-STATUS_KEYS = {"webhook.signing_state"}      # computed, read-only: never written
+STATUS_KEYS = {"webhook.signing_state", "chatops.slack.state", "chatops.discord.state"}      # computed, read-only: never written
 
 
 def label_keys(key):
@@ -729,6 +759,10 @@ def check_value(path, value):
             return False, "names"      # no name at all would flag every repository
         if path == "sentinel.hygiene.skip" and not set(value) <= set(HYGIENE_SKIP):
             return False, "names"
+        if path == "chatops.allowed_words":      # the closed list of the chat can only be narrowed, never widened
+            from github_actions_monitor.chatops import commands as chat_commands
+            if not set(value) <= set(chat_commands.COMMANDS):
+                return False, "names"
         return True, list(value)
     if kind == "patterns":
         if not isinstance(value, list) or len(value) > 100 or not all(isinstance(v, str) and PATTERN_RE.match(v) for v in value):
@@ -822,6 +856,12 @@ def webhook_state(config):
     return "defined" if len(secret) >= webhook.MIN_SECRET else "short"
 
 
+def chatops_state(config, provider):
+    """"defined" | "undefined": the only thing the page may know about the proof of a chat platform (the signing secret of Slack, the public key of Discord), never its value. It is read where the receiver reads it."""
+    from github_actions_monitor.chatops import inbound
+    return inbound.state(config, provider)
+
+
 def _remote_visible():
     from github_actions_monitor.security import localguard
     return localguard.REMOTE_WRITABLE
@@ -858,7 +898,7 @@ def describe(path=CONFIG_FILE, lite=False, remote=False):
                 if key == "repos" and value is None:
                     value = "all"
                 if kind == "status":
-                    value = webhook_state(current)
+                    value = chatops_state(current, key.split(".")[1]) if key.startswith("chatops.") else webhook_state(current)
                 hidden = remote and key not in _remote_visible()
                 if hidden:
                     kind, default = "status", None

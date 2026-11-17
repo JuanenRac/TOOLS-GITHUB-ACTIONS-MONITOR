@@ -105,6 +105,8 @@ DEFAULTS = {
     "sentinel": {"enabled": True},
     "ai": {"provider": "none"},
     "webhook": {"enabled": False, "secret_env": "MONITOR_WEBHOOK_SECRET", "replay_seconds": 3600, "max_per_minute": 30},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default; the secret is only in the environment)
+    "chatops": {"enabled": False, "slack": {"enabled": False, "signing_secret_env": "MONITOR_SLACK_SIGNING_SECRET"}, "discord": {"enabled": False, "public_key_env": "MONITOR_DISCORD_PUBLIC_KEY"}, "allowed_teams": [], "allowed_channels": [], "allowed_users": [],
+                "allowed_words": ["help", "status", "alerts", "red", "queue", "score"], "max_rows": 8, "show_repo_names": "all", "links": True, "max_age_seconds": 300, "rate_per_user_per_minute": 6, "rate_per_channel_per_minute": 20, "rate_per_minute": 60},   # read only commands from Slack and Discord, see chatops/inbound.py (off by default; the proofs are only in the environment)
     "cache": {"etag": {"enabled": True, "ttl_hours": 24}},   # conditional reads: a 304 answer costs no quota (etagcache.py)
     "display": {"timezone": "local", "blink_red_tiles": True},   # blink_red_tiles: the red tiles and red items of the bar blink softly until the cause is solved; zone of the times written for people (log, reports, command line, notifications): local | utc | an IANA name such as Europe/Madrid
     "modes": {"auto_low": True, "auto_low_enter": 1000, "auto_low_exit": 2500, "low": {"refresh_seconds": 240, "cold_refresh_seconds": 1800, "runs_per_repo": 10, "hot_hours": 2}},      # see modes.py: only what is shown in the Quota tab
@@ -114,7 +116,7 @@ DEFAULTS = {
     "ports": {"complete": 8765, "lite": 8766},      # the port of each edition (util/ports.py); --port wins, then MONITOR_PORT for the complete one
     "ui": {"orientation": "auto", "rotate_seconds": 0, "screen1_tabs": "", "screen1_orientation": "auto", "screen2_tabs": "", "screen2_orientation": "auto", "screen3_tabs": "", "screen3_orientation": "auto", "now_sort": "ecosystem", "alerts_sort": "server"},   # the screens (docs/SCREENS.md): the orientation of the page, and which tabs each /screen/N shows
     "screens": {"enabled": False, "blink": True, "blink_calm_minutes": 30, "rotate_seconds": 0, "default_theme": "dark", "default_density": "normal", "refresh_seconds": 10, "burn_in_protection": True, "night_dim": False, "night_dim_from_hour": 22, "night_dim_to_hour": 7, "show_repo_names": "public", "sound": False},   # the wall screens /screen/overview, /screen/now and /screen/sentinels (docs/SCREENS.md, screens.py): read only, from what the monitor already holds
-    "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
+    "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "on_warning": True, "on_resolved": True, "on_report": True, "on_lesson": True, "on_sentinel": True, "on_stuck": True, "on_score_drop": True, "on_info": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False, "theme": "classic", "quiet_enabled": False, "quiet_from_hour": 22, "quiet_to_hour": 7},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
     "updates": {"check": True},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
     "airgapped": False,            # True: nothing is requested from the network except GitHub's data you asked for; the update check is off
     "open_browser": True,
@@ -167,7 +169,7 @@ def state_dir():
     """Where the small state files of this process live: the folder of the account when this is the monitor of one account, else next to the code, as always."""
     return Path(CHILD["folder"]) if CHILD["folder"] else paths.folder("data")
 LITE_SHARED = ("/api/ai/state", "/api/ai/stream", "/api/ai/brief", "/api/ai/alerts", "/api/ai/ack")      # the channels for an AI tool are the same in both editions
-LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/notify", "/api/score", "/api/report-files", "/api/audit-log", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events")   # they do not exist in lite
+LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/notify", "/api/score", "/api/report-files", "/api/audit-log", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/chatops", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events")   # they do not exist in lite
 
 
 LITE_INHERIT = ("github_owner", "ecosystems", "ecosystems_file", "targets_file", "profiles_file", "exclude", "repos", "language", "runs_per_repo", "cold_runs_per_repo", "hot_hours", "stuck_minutes", "refresh_seconds", "cold_refresh_seconds")   # what a first lite start copies from actions_monitor.json
@@ -254,7 +256,7 @@ def load_config():
         try:
             if example.is_file() and LITE["on"]:   # lite: the same template with the sentinel off and the light reading
                 template = json.loads(example.read_text(encoding="utf-8"))
-                template.update({"mode": "lite", "ecosystems": "all", "sentinel": {"enabled": False}, "webhook": {"enabled": False}})
+                template.update({"mode": "lite", "ecosystems": "all", "sentinel": {"enabled": False}, "webhook": {"enabled": False}, "chatops": {"enabled": False}})
                 inherited = lite_inheritance(paths.place("actions_monitor.json", HERE))
                 template.update(inherited)
                 if inherited:
@@ -2077,6 +2079,8 @@ def render_screen(kind, query):
     cfg = screens.settings(toolconfig.raw_config())
     page = (paths.STATIC / "screens.html").read_text(encoding="utf-8")
     data = screens.page_data(kind, cfg, screens.params(query, cfg))
+    from github_actions_monitor.integrations import soundalert
+    data["sound"] = {key: value for key, value in soundalert.settings(toolconfig.raw_config()).items() if key != "server_beep"}      # the same sounds as the page, per kind (the window still needs ?sound=on and screens.sound)
     blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     return page.replace("/*SCREEN_DATA*/null", blob, 1)
 
@@ -2110,6 +2114,31 @@ def screens_payload(kind, cfg):
         except Exception as error:   # noqa: BLE001
             degraded.note("screens.score", error)
     return screens.build(kind, state, snapshot, alerts, score, cfg, "lite" if LITE["on"] else "complete")
+
+
+def chatops_snapshot(config):
+    """What the commands of the chat read (chatops/commands.py), from what the monitor holds and never from GitHub: the counts of the fleet, the red workflows, the queue, the score and the open alerts, with
+    the names of the repositories already hidden the way `chatops.show_repo_names` says (the alias of a private repository, nothing of its workflows)."""
+    from github_actions_monitor.chatops import inbound
+    cfg = inbound.settings(config)
+    with LOCK:
+        state = STATE["data"]
+    if not isinstance(state, dict) or not state:
+        return {"loaded": False}
+    overview = screens_payload("overview", dict(screens.settings(config), show_repo_names=cfg["show_repo_names"]))
+    names = screens.Names(state.get("repos"), state.get("repo_meta"), cfg["show_repo_names"])
+    payload = alerts_payload({"muted": "hide"})
+    code_ok = re.compile(r"^[a-z0-9_.:-]{1,40}\Z")
+    owner, host = toolconfig.github_owner(config), github_host()
+    visible = {r for r in (state.get("repos") or []) if isinstance(r, str) and not names.hidden(r)}
+
+    def link(alias):      # the address of the repository, only when its name is shown as it is and the owner is known
+        return f"https://{host}/{owner}/{alias}" if cfg["links"] and owner and alias in visible else None
+    rows = [{"level": a.get("level") if a.get("level") in ("critical", "error", "warning", "info") else "info", "code": a.get("code") if isinstance(a.get("code"), str) and code_ok.match(a["code"]) else "other",
+             "repo": names.name(a["repo"]) if a.get("repo") else None, "link": link(a["repo"]) if a.get("repo") else None} for a in payload["alerts"] if isinstance(a, dict)]
+    red = [dict(r, link=link(r.get("repo"))) for r in (overview.get("top_red") or []) if isinstance(r, dict)]
+    return {"loaded": True, "version": TOOL_VERSION, "fleet": overview.get("fleet"), "queue": overview.get("queue"), "score": overview.get("score"), "red": red,
+            "alerts": {"total": payload["summary"]["total"], "rows": rows}}
 
 
 DISCONNECTS = [0]     # requests whose browser went away before the answer was sent (counted in /metrics, never printed)
@@ -2286,7 +2315,7 @@ class Handler(BaseHTTPRequestHandler):
     def access_gate(self):
         """Network mode only: every request must prove the access token (cookie, header or `?access=` on the first visit, which sets the cookie and goes to the clean address)."""
         self.deprecated_access = False
-        if not localguard.STATE["network"] or self.path.split("?")[0] == "/api/webhook":      # the webhook has its own proof (the HMAC of GitHub)
+        if not localguard.STATE["network"] or self.path.split("?")[0] in ("/api/webhook", "/api/chatops/slack", "/api/chatops/discord"):      # the webhook and the chat have their own proof (the HMAC of GitHub, the signature of Slack or of Discord)
             return True
         if self.command == "POST" and self.path.split("?")[0] == "/api/access":      # the one-use post that opens the session: it checks the token itself (handle_post)
             return True
@@ -2443,6 +2472,30 @@ class Handler(BaseHTTPRequestHandler):
         finally:
             self.drain_body(counted)
 
+    def chatops_post(self, provider):
+        """POST /api/chatops/slack and /api/chatops/discord: a command of the chat, read only (chatops/inbound.py). The proof is the signature of the platform, checked before anything is read; every command that reaches
+        the monitor leaves one line in the log of actions with the ids of the chat and never the text."""
+        from github_actions_monitor.chatops import inbound
+        from github_actions_monitor.security import audit_log
+        config = LIVE_CONFIG or DEFAULTS
+        if not inbound.active(config, provider):      # closed: nothing to say to anyone
+            self.json_reply({"ok": False}, 404)
+            return
+        if localguard.over_rate("chatops.ip", str(self.client_address[0]), 120):      # one address cannot flood the receiver (each check of a signature costs time)
+            self.json_reply({"ok": False, "error": "rate"}, 429)
+            return
+        try:
+            size = int(self.headers.get("Content-Length") or 0)
+            body = self.rfile.read(size) if 0 <= size <= inbound.MAX_BODY else b"x" * (inbound.MAX_BODY + 1)
+            code, answer, record = inbound.handle(provider, config, body, self.headers, lambda: chatops_snapshot(config))
+            if record:
+                audit_log.record(toolconfig.raw_config(), "chatops_command", provider + ":" + record["user"], "chat", CHILD["account"] or "", provider + ":" + (record["command"] or "none"),
+                                 record["result"], {"channel": record["channel"], "status": code})
+            self.json_reply(answer, code)
+        except Exception as error:   # noqa: BLE001 - the chat gets a plain refusal and nothing of the error
+            degraded.note("chatops", error)
+            self.json_reply({"ok": False}, 400)
+
     def handle_post(self):
         path = self.path.split("?")[0]
         if LITE["on"] and path.startswith(LITE_PATHS) and path not in LITE_SHARED:
@@ -2490,6 +2543,9 @@ class Handler(BaseHTTPRequestHandler):
                 self.json_reply(answer, code)
             except Exception:
                 self.json_reply({"ok": False}, 400)
+            return
+        if path in ("/api/chatops/slack", "/api/chatops/discord"):   # off unless configured; no Host check (the platform comes through a tunnel or a proxy), but every request must carry a valid signature
+            self.chatops_post(path.rsplit("/", 1)[1])
             return
         if path == "/api/mode":      # change the working mode: a local setting, with the one-use token
             if not self.guard() or not self.token_ok():
@@ -3747,6 +3803,8 @@ def supervisor_main(argv):
     config = toolconfig.raw_config()
     from github_actions_monitor.security import webhook as _webhook
     envguard.hold(_webhook.secret_env_name(config))      # the secret of the webhook: held here, given to the account processes explicitly
+    from github_actions_monitor.chatops import inbound as _chat
+    envguard.hold(*_chat.env_names(config))      # the proofs of the chat: no program the monitor starts inherits them
     i18n.set_language(i18n.detect(config.get("language")))
     platform_compat.console_utf8()
     try:      # the same listening rules as the monitor of one account: by default only this computer; `listen.*` opens the network mode (access token, optional certificate, declared proxy)
@@ -3852,10 +3910,13 @@ def main():
     envguard.hold(localguard.settings_from(config)["token_env"])      # the access token may be under another name: it leaves the environment here too
     from github_actions_monitor.security import webhook as _webhook
     envguard.hold(_webhook.secret_env_name(config))      # the shared secret of the webhook is read from the environment once and no program the monitor starts inherits it
+    from github_actions_monitor.chatops import inbound as _chat
+    envguard.hold(*_chat.env_names(config))      # the proofs of the chat (the signing secret of Slack, the public key of Discord) leave the environment here too
     if LITE["on"]:
         config["mode"] = "full"                      # the lite edition reads as deep as the complete one: its figures must be the same
         config["sentinel"] = {"enabled": False}      # the lite product has no sentinel, whatever the file says
         config["webhook"] = {"enabled": False}
+        config["chatops"] = {"enabled": False}
     i18n.set_language(i18n.detect(config.get("language")))
     i18n.cli_language() if "--lang" in " ".join(sys.argv) else None
     from github_actions_monitor.security import secretstore
@@ -4022,6 +4083,9 @@ def main():
     if config.get("webhook", {}).get("enabled") is True:
         from github_actions_monitor.security import webhook
         print(i18n.t("mon.webhook", status=webhook.status_text(config)))
+    if config.get("chatops", {}).get("enabled") is True:
+        from github_actions_monitor.chatops import inbound as chat
+        print(i18n.t("mon.chatops", status=chat.status_text(config)))
     from github_actions_monitor.util import banner
     banner.set_title(banner.window_title(LITE["on"], server.server_address[1], i18n.t))
     print(banner.line(LITE["on"], server.server_address[1], CONFIG_FILE.name, i18n.t, url, sentinel=not LITE["on"] and config.get("sentinel", {}).get("enabled", True) is not False))
