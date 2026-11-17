@@ -11,6 +11,10 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+### Fixed
+
+- **The History tab no longer piles up its count**: "Showing 200 of N" was appended to the tools of the table at every refresh while the tools themselves were drawn again only when the order or the columns changed, so thousands of copies grew next to the list of columns. The count is now one element that is replaced or removed. A test opens the page in a browser, draws the table many times (refresh, filters, all columns, an order) and checks that there is one count and one hint.
+
 ## [2.0.3]
 
 ### Security

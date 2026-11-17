@@ -9,6 +9,10 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+### Corregido
+
+- **La pestaña Historia ya no acumula su contador**: «Mostrando 200 de N» se añadía a las herramientas de la tabla en cada refresco mientras las herramientas solo se redibujaban al cambiar el orden o las columnas, de modo que crecían miles de copias junto a la lista de columnas. Ahora el contador es un único elemento que se reemplaza o se quita. Una prueba abre la página en un navegador, dibuja la tabla muchas veces (refresco, filtros, todas las columnas, un orden) y comprueba que hay un contador y una pista.
+
 ## [2.0.3]
 
 ### Seguridad

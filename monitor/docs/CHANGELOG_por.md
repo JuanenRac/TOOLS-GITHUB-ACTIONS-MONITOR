@@ -9,6 +9,10 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+### Corrigido
+
+- **O separador Histórico já não acumula o seu contador**: «A mostrar 200 de N» era acrescentado às ferramentas da tabela a cada atualização, enquanto as ferramentas só eram redesenhadas quando a ordem ou as colunas mudavam, pelo que milhares de cópias cresciam junto à lista de colunas. O contador é agora um único elemento que é substituído ou retirado. Um teste abre a página num navegador, desenha a tabela muitas vezes (atualização, filtros, todas as colunas, uma ordem) e verifica que há um contador e uma dica.
+
 ## [2.0.3]
 
 ### Segurança
