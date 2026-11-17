@@ -110,5 +110,32 @@ class SeveralProcessesOneQuota(unittest.TestCase):
                 self.assertEqual(one.used_today(), 2)
 
 
+class TheActiveNoticeSpendsTheSameBudget(unittest.TestCase):
+    def test_the_notice_counts_in_the_daily_total_and_stops_at_the_limit(self):
+        from unittest import mock
+        from github_actions_monitor.integrations import ai_notify
+        from github_actions_monitor.sentinels import ai_chain
+        alert = {"id": "abc", "class": "real", "state": "open", "severity": "bad", "repo": "repo-a", "workflow": "CI", "conclusion": "failure", "streak": 2, "cause": "step failed",
+                 "action": "re-run once", "url": "https://github.com/o/repo-a/actions/runs/9", "since": "x"}
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "ai.json"
+            config = {"ai": {"provider": "openai-compatible", "base_url": "http://127.0.0.1:1/v1", "model": "m-ok", "daily_limit": 1, "model_daily_limit": 5},
+                      "ai_alerts": {"enabled": True, "folder": folder}, "ai_notify": {"enabled": True, "confirmed_provider": "openai-compatible", "max_calls_per_hour": 9, "max_cost_per_hour_cents": 500}}
+            seen = []
+
+            def transport(cfg, system, user):
+                seen.append(cfg["model"])
+                return "advice"
+            with mock.patch.object(sentinel_ai, "CACHE_FILE", path):
+                first = ai_notify.notify(config, dict(alert, id="a1"), now=1_800_000_000, transport=transport)
+                second = ai_notify.notify(config, dict(alert, id="a2"), now=1_800_000_100, transport=transport)
+                store = sentinel_ai.Store(path)
+                view = ai_chain.view(sentinel_ai.ai_config(config), store)
+            self.assertTrue(first["sent"], first)
+            self.assertEqual((second["sent"], second["reason"]), (False, "daily_cap"))
+            self.assertEqual(seen, ["m-ok"])
+            self.assertEqual((view["calls"], view["models"][0]["calls"]), (1, 1))
+
+
 if __name__ == "__main__":
     unittest.main()
