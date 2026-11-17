@@ -17,3 +17,5 @@
 6. **别淹没在噪音里。** 卫生检查（`sentinel.hygiene.ruleset_mode` = `effective`、`sentinel.hygiene.skip`）、发布文件检查（`sentinel.surface.checks.release_assets.allow_empty`）和 `sentinel.bots_apart` 可避免不适用于你仓库的检查堆积。
 
 “配额”标签页显示各来源剩余多少，以及监视器自身花费多少。
+
+对 fork 原仓库的跟踪(`upstream.enabled`)会在面板中说明,按 `upstream.requests_per_hour` 和 `upstream.forks_per_request` 的速度遍历所有 fork 需要多久;若超过 `upstream.refresh_hours`,跟踪就永远不会休息(727 个 fork、每次 8 个、每小时 6 次请求需要 15.2 小时)。最近一小时的请求在重启后会保留,因此重启不会归还配额。

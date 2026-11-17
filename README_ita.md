@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-3501_passing-brightgreen.svg" alt="3501 tests">
+  <img src="https://img.shields.io/badge/Tests-3599_passing-brightgreen.svg" alt="3599 tests">
 </p>
 
 > Controlla i workflow di tutti i tuoi repository e ti dice, su una pagina locale, cosa è rosso, cosa è bloccato e cosa ti aspetta.
@@ -81,8 +81,8 @@
 | | |
 |---|---|
 | **Maturità** | functional |
-| **Test** | 3501 metodi di test (`python -m unittest discover -s monitor/tests`) |
-| **Impostazioni** | 571 impostazioni, tutte con aiuto |
+| **Test** | 3599 metodi di test (`python -m unittest discover -s monitor/tests`) |
+| **Impostazioni** | 575 impostazioni, tutte con aiuto |
 | **Lingue** | 8 (inglese, spagnolo, tedesco, francese, italiano, giapponese, cinese e portoghese) |
 | **Provato nel CI su** | ubuntu, windows, Python 3.11, 3.13 |
 

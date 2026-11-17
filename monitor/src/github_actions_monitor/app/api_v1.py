@@ -27,6 +27,7 @@ PROFILES = ("full", "compact")
 FIELD_RE = re.compile(r"^[a-z][a-z0-9_]{0,39}\Z")
 VERSION_RE = re.compile(r"^/api/v(\d{1,3})(?:/|\Z)")
 CURSOR_MAX_LENGTH = 512
+ALPHABET_RE = re.compile(r"^[A-Za-z0-9_-]+\Z")
 ERROR_SLUGS = {400: "bad_request", 401: "unauthorized", 403: "forbidden", 404: "not_found", 429: "rate_limited", 500: "server_error"}
 DEFAULTS = {"v1_enabled": False, "default_limit": 50, "max_limit": 200, "cursor_ttl_seconds": 900, "gzip_min_bytes": 1024}
 BOUNDS = {"default_limit": (1, 1000), "max_limit": (1, 1000), "cursor_ttl_seconds": (30, 86400), "gzip_min_bytes": (0, 10_000_000)}
@@ -118,7 +119,9 @@ def read_cursor(secret, cursor, query_fp, now, ttl):
     if not isinstance(cursor, str) or not cursor or len(cursor) > CURSOR_MAX_LENGTH or cursor.count(".") != 1:
         raise bad
     body, mac = cursor.split(".")
-    if not hmac.compare_digest(mac, _b64(hmac.new(secret, body.encode("ascii", "replace"), hashlib.sha256).digest()[:16])):
+    if not ALPHABET_RE.match(body) or not ALPHABET_RE.match(mac):      # a cursor is text of the url-safe alphabet; anything else (a letter that is not ASCII included) is a plain "no", never an exception
+        raise bad
+    if not hmac.compare_digest(mac.encode("ascii"), _b64(hmac.new(secret, body.encode("ascii"), hashlib.sha256).digest()[:16]).encode("ascii")):
         raise bad
     try:
         data = json.loads(_unb64(body))
@@ -205,7 +208,7 @@ def repo_item(view):
             "last_run_at": activity.get("last_run_at")}
 
 
-def repos_payload(views, ask, *, secret, now, cfg):
+def repos_payload(views, ask, *, secret, now, cfg, who=""):
     """The page of repositories asked for. `ask` = the query as a dict of text (state, ecosystem, q, limit, cursor, fields, profile). Raises ApiError for a bad parameter."""
     profile = ask.get("profile") or "full"
     if profile not in PROFILES:
@@ -213,7 +216,7 @@ def repos_payload(views, ask, *, secret, now, cfg):
     fields = parse_fields(ask.get("fields"))
     state, ecosystem, text = (ask.get("state") or "")[:20], (ask.get("ecosystem") or "")[:40], (ask.get("q") or "")[:80].lower()
     items = [repo_item(v) for v in views if v.get("repo") and (not state or v.get("state") == state) and (not ecosystem or v.get("ecosystem") == ecosystem) and (not text or text in v["repo"].lower())]
-    page = paginate(items, key=lambda i: i["repo"], endpoint="repos", filters={"state": state, "ecosystem": ecosystem, "q": text}, secret=secret, now=now, cursor=ask.get("cursor"),
+    page = paginate(items, key=lambda i: i["repo"], endpoint="repos", filters={"state": state, "ecosystem": ecosystem, "q": text, "who": who if who.strip("|") else ""}, secret=secret, now=now, cursor=ask.get("cursor"),
                     limit=ask.get("limit"), default_limit=cfg["default_limit"], max_limit=cfg["max_limit"], ttl=cfg["cursor_ttl_seconds"])
     return {"schema": 1, "api_version": API_VERSION, "total": len(items), "limit": page["limit"], "next_cursor": page["next_cursor"],
             "items": [project(i, "repos", fields, profile) for i in page["items"]]}

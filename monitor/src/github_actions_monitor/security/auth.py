@@ -142,6 +142,8 @@ PUBLIC = ("/api/auth/login", "/api/auth/me", "/api/auth/bootstrap", "/api/auth/l
 def required_role(method, path):
     """The least role that may do `method` on `path`, or None when the route is public. Unknown writes need an admin."""
     path = path.split("?")[0]
+    from github_actions_monitor.app import api_v1      # a route under the version prefix needs the very role it needs without it
+    path = api_v1.route_of(path)[1]
     if path in PUBLIC:
         return None
     if method in ("GET", "HEAD"):

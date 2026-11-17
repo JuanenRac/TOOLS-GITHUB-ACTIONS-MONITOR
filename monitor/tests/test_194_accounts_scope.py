@@ -80,7 +80,8 @@ class OneAccountPerRequest(test_auth.TeamSupervisor):
         with mock.patch.dict("os.environ", env), mock.patch.dict(auth_http.OWN_ACCOUNT, own):
             answers = []
             with mock.patch.object(auth_http, "fail", lambda handler, code, status, headers=None: answers.append((code, status)) or False):
-                good = {auth_http.SUPERVISOR_KEY_HEADER: key, auth_http.USER_HEADER: "ana", auth_http.ACCOUNT_HEADER: "alpha"}
+                signed = auth_http.sign_context(key, {"user": "ana", "role": "viewer", "accounts": None}, "alpha")
+                good = {auth_http.SUPERVISOR_KEY_HEADER: key, auth_http.USER_HEADER: "ana", auth_http.ACCOUNT_HEADER: "alpha", auth_http.CONTEXT_HEADER: signed}
                 self.assertTrue(auth_http.child_gate(Request(good)))
                 self.assertFalse(auth_http.child_gate(Request({**good, auth_http.ACCOUNT_HEADER: "beta"})))
                 self.assertFalse(auth_http.child_gate(Request({k: v for k, v in good.items() if k != auth_http.ACCOUNT_HEADER})))

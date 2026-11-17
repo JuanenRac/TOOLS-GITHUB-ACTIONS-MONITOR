@@ -130,7 +130,7 @@ class EveryRefusal(unittest.TestCase):
     def test_an_event_outside_the_closed_list_is_ignored_and_the_list_is_closed(self):
         self.assertEqual(send(event="issues")[:2], (202, {"ok": True, "ignored": True}))
         self.assertEqual(send(event="repository_dispatch", delivery="bbbbbbbb-0001")[0], 202)
-        self.assertEqual(send(event="workflow_run", delivery="bbbbbbbb-0002")[0], 200)
+        self.assertEqual(send(event="workflow_run", delivery="bbbbbbbb-0002", body={**BODY, "n": 2})[0], 200)
         self.assertEqual(set(webhook.EVENTS), {"workflow_run", "workflow_job", "check_run", "push", "release", "check_suite", "ping"})
 
     def test_check_run_refreshes_the_repository_like_the_other_events_but_keeps_no_text(self):
@@ -144,7 +144,7 @@ class EveryRefusal(unittest.TestCase):
 
     def test_the_flood_of_one_repository_is_cut(self):
         config = {"webhook": {"enabled": True, "max_per_minute": 2}}
-        codes = [send(config, delivery=f"eeeeeeee-{i:04d}")[1].get("throttled", False) for i in range(4)]
+        codes = [send(config, delivery=f"eeeeeeee-{i:04d}", body={**BODY, "n": i})[1].get("throttled", False) for i in range(4)]
         self.assertEqual(codes, [False, False, True, True])
 
 

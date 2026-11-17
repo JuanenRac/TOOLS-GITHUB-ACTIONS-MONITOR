@@ -17,3 +17,5 @@ Ein Konto mit hunderten Repositorys, vielen Forks oder mehreren Organisationen v
 6. **Nicht im Rauschen ertrinken.** Die Hygieneprüfung (`sentinel.hygiene.ruleset_mode` = `effective`, `sentinel.hygiene.skip`), die Prüfung der Release-Dateien (`sentinel.surface.checks.release_assets.allow_empty`) und `sentinel.bots_apart` verhindern, dass sich Prüfungen häufen, die für Ihre Repositorys nicht gelten.
 
 Der Tab Kontingent zeigt, was jede Quelle noch hat und wie viel der Monitor selbst verbraucht.
+
+Die Verfolgung der Originale von Forks (`upstream.enabled`) sagt in ihrer Anzeige, wie lange ein Durchgang über alle Forks im Tempo von `upstream.requests_per_hour` und `upstream.forks_per_request` dauert; ist das länger als `upstream.refresh_hours`, ruht die Verfolgung nie (727 Forks bei 8 je Anfrage und 6 Anfragen pro Stunde brauchen 15,2 Stunden). Die Anfragen der letzten Stunde bleiben beim Neustart erhalten, ein Neustart gibt das Kontingent also nicht zurück.

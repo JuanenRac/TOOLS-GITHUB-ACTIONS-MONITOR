@@ -55,7 +55,7 @@ Para vários ecrãs, abra uma janela por vista, por exemplo `?view=now&chrome=0`
 
 ## A API
 
-`GET /api/accounts` é o resumo, `GET /api/accounts/<id>/status` uma conta, e qualquer outro pedido sob `/api/` vai para a conta indicada com `?account=<id>` ou o cabeçalho `X-Account-Id` (a conta predefinida se nenhuma for dada). Uma conta desconhecida dá 404. As regras de acesso são as de um monitor isolado: a mesma verificação de anfitrião e origem, e o mesmo token de acesso no modo rede. O token de uso único de uma alteração deve ser pedido à mesma conta a que a alteração é enviada.
+`GET /api/accounts` é o resumo, `GET /api/accounts/<id>/status` uma conta, e qualquer outro pedido sob `/api/` vai para a conta indicada com `?account=<id>` ou o cabeçalho `X-Account-Id` (a conta predefinida se nenhuma for dada). Uma conta desconhecida dá 404. As regras de acesso são as de um monitor isolado: a mesma verificação de anfitrião e origem, e o mesmo token de acesso no modo rede. O token de uso único de uma alteração deve ser pedido à mesma conta a que a alteração é enviada. Com o modo de equipa, o supervisor diz ao processo de cada conta quem age e com que papel num contexto que assina com a chave que deu a esse processo (vale 30 segundos e só para essa conta), pelo que os papéis são decididos da mesma maneira em cada conta: o registo de ações segue `audit_log.maintainers_can_read` e `GET /api/v1/me` diz a verdade. Uma rota sob `/api/v1/` precisa do papel da mesma rota sem o prefixo.
 
 ## Um webhook para todas
 

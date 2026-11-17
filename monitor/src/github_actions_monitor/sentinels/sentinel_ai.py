@@ -37,7 +37,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from github_actions_monitor import i18n
-from github_actions_monitor.security import netguard, private_io
+from github_actions_monitor.security import envguard, netguard, private_io
 from github_actions_monitor.security.redactor import redact as _redact
 from github_actions_monitor.storage import locks, state_io
 
@@ -317,7 +317,7 @@ def ollama_chat(cfg, system, user):
     return (body.get("message") or {}).get("content", "")
 
 
-ENV_NAME = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}\Z")
+ENV_NAME = envguard.NamePattern()      # the NAME of the variable of the key: a plain name that is not a variable of the system or a secret of the monitor
 
 
 def compat_problem(cfg):

@@ -29,14 +29,14 @@ import urllib.error
 import urllib.request
 from urllib.parse import quote, urlparse
 
-from github_actions_monitor.security import netguard, private_io
+from github_actions_monitor.security import envguard, netguard, private_io
 from github_actions_monitor.util import tzdisplay
 
 CHANNELS = ("telegram", "discord", "slack", "matrix", "mqtt", "http_local", "apprise")
 KNOWN_EVENTS = ("red_new", "red_fixed", "stuck_new", "pending_sign", "release_due", "rate_low", "offline", "online", "alerts_up", "workflow_failed", "ai_alert", "collab_new", "collab_fixed", "credential_blind", "credential_back", "score_dropped", "security_new", "security_fixed", "alerts_digest", "silence_review")
 DEFAULT_EVENTS = ["red_new", "stuck_new", "pending_sign", "offline", "credential_blind", "silence_review"]
 LOOPBACK = ("127.0.0.1", "localhost", "::1", "[::1]")
-ENV_RE = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}\Z")
+ENV_RE = envguard.NamePattern()      # the NAME of the variable of a channel: a plain name that is not a variable of the system or a secret of the monitor
 TIMEOUT = 8
 DEFAULTS = {"enabled": False, "allow_private_targets": False, "use_proxy": False, "events": list(DEFAULT_EVENTS), "max_per_hour": 20,
             "channels": {

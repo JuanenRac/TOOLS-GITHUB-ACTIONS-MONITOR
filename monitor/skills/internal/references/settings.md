@@ -574,8 +574,12 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `watchdog_minutes` | `10` | polling | Restart a stuck refresh after |
 | `webhook.enabled` (secure) | `false` | webhook | Receiver on |
 | `webhook.live_events_keep` | `-` | webhook | Events kept |
+| `webhook.max_bad_per_minute` | `120` | webhook | Requests with a bad signature per address |
 | `webhook.max_per_minute` | `30` | webhook | Events accepted per repository |
+| `webhook.max_verified_per_minute` | `120` | webhook | Requests with a good signature per address |
+| `webhook.persist_deliveries` | `true` | webhook | Remember deliveries after a restart |
 | `webhook.record_events` | `-` | webhook | Keep events |
+| `webhook.reject_stale` | `false` | webhook | Refuse old events |
 | `webhook.replay_seconds` | `3600` | webhook | Delivery ids remembered |
 | `webhook.secret_env` (secure) | `"MONITOR_WEBHOOK_SECRET"` | webhook | Environment variable with the shared secret |
 | `webhook.signing_state` | `-` | webhook | Shared secret |

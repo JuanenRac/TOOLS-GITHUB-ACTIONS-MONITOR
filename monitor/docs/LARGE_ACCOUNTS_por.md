@@ -17,3 +17,5 @@ Uma conta com centenas de repositórios, muitos forks ou várias organizações 
 6. **Não se afogue no ruído.** A verificação de higiene (`sentinel.hygiene.ruleset_mode` = `effective`, `sentinel.hygiene.skip`), as dos ficheiros das releases (`sentinel.surface.checks.release_assets.allow_empty`) e `sentinel.bots_apart` evitam que se acumulem verificações que não se aplicam aos seus repositórios.
 
 O separador Quota mostra o que resta a cada fonte e quanto gasta o próprio monitor.
+
+O acompanhamento dos originais dos forks (`upstream.enabled`) diz no seu painel quanto demora uma volta a todos os forks ao ritmo de `upstream.requests_per_hour` e `upstream.forks_per_request`; quando é mais do que `upstream.refresh_hours`, o acompanhamento nunca descansa (727 forks a 8 por pedido e 6 pedidos por hora demoram 15,2 horas). Os pedidos da última hora guardam-se ao reiniciar, pelo que um reinício não devolve a quota.

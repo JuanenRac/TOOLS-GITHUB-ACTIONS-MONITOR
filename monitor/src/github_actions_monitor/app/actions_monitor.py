@@ -104,7 +104,7 @@ DEFAULTS = {
     "report_history_days": 30,   # (before 1.5.0: parte_history_days, still read)
     "sentinel": {"enabled": True},
     "ai": {"provider": "none"},
-    "webhook": {"enabled": False, "secret_env": "MONITOR_WEBHOOK_SECRET", "replay_seconds": 3600, "max_per_minute": 30},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default; the secret is only in the environment)
+    "webhook": {"enabled": False, "secret_env": "MONITOR_WEBHOOK_SECRET", "replay_seconds": 3600, "max_per_minute": 30, "max_bad_per_minute": 120, "max_verified_per_minute": 120, "reject_stale": False, "persist_deliveries": True},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default; the secret is only in the environment)
     "cache": {"etag": {"enabled": True, "ttl_hours": 24}},   # conditional reads: a 304 answer costs no quota (etagcache.py)
     "display": {"timezone": "local", "blink_red_tiles": True},   # blink_red_tiles: the red tiles and red items of the bar blink softly until the cause is solved; zone of the times written for people (log, reports, command line, notifications): local | utc | an IANA name such as Europe/Madrid
     "modes": {"auto_low": True, "auto_low_enter": 1000, "auto_low_exit": 2500, "low": {"refresh_seconds": 240, "cold_refresh_seconds": 1800, "runs_per_repo": 10, "hot_hours": 2}},      # see modes.py: only what is shown in the Quota tab
@@ -207,9 +207,11 @@ WATCH = cycle_watch.CycleWatch()      # the heartbeat of the refresh loop (phase
 SENTINEL = {"obj": None, "error": None, "registry": None}  # the CI sentinel (layer A) and the registry of all of them; a failure of any never stops the monitor
 LOCK = threading.Lock()
 ISSUE_CACHE = {"at": 0.0, "items": [], "busy": False}
-RUNNERS_SEEN = {"payload": None}      # the last answer of /api/runners: the labels that only offline runners carry explain a run that waits for ever (stuckrule.py)
+RUNNERS_MEMORY_SECONDS = 300             # how long the answer of /api/runners is kept: the same as the list the model of the runners reads
+RUNNERS_SEEN = {"payload": None, "at": 0.0}      # the last answer of /api/runners: the labels that only offline runners carry explain a run that waits for ever (stuckrule.py)
 RUN_CACHE = {}  # repo -> {"runs": [...], "at": float, "error": str|None}
 PRIVATE = set()                           # private repositories of the account (read with the listing): the only ones whose minutes cost anything
+VISIBILITY = {"known": set(), "at": 0.0}  # the repositories whose visibility (public or private) was READ from GitHub; any other one is of unknown visibility and a screen treats it as private
 QUOTA_ALERTS = None
 DISCOVERED = {"at": 0.0, "names": [], "snapshot": {}}
 FORKS = {"known": {}, "kind": None, "kind_at": 0.0, "checked": 0, "kept": 0, "left": 0, "waiting": 0}      # fork_policy: what is known about the CI of each fork (memory only)
@@ -271,6 +273,33 @@ def load_config():
     except (OSError, ValueError) as error:
         print(i18n.t("mon.config_unreadable", error=error))
     return config
+
+
+POOL_STATUS = {"payload": None, "at": 0.0}      # the last answer of pool_status(), made by the cycle every five minutes (the Quota tab reads this)
+
+
+def refresh_pool_status():
+    """The cycle reads the allowance of every source (pool_status) at most every five minutes and keeps it for /api/quota-pool/status."""
+    if time.time() - POOL_STATUS["at"] <= RUNNERS_MEMORY_SECONDS:
+        return False
+    POOL_STATUS["at"] = time.time()
+    POOL_STATUS["payload"] = pool_status()
+    return True
+
+
+def pool_status_pending():
+    """The answer of the status of the quota before the cycle has read anything: the same shape, no source yet (nothing is read to make it)."""
+    return {"pending": True, "total": None, "sources": [], "recommended": {"modes.auto_low": True, "network.etag": True}, "trend": __import__("github_actions_monitor.data_pipeline.quotawatch", fromlist=["_"]).trend(),
+            "savings": savings_report(LIVE_CONFIG or toolconfig.raw_config())}
+
+
+def read_extra_lists(config):
+    """The organisations of the account (data_pipeline/orgs.py keeps its own hour): the cycle reads them, /api/discovery only shows what was read."""
+    from github_actions_monitor.data_pipeline import orgs
+    if DEMO["on"] or LINK.state()["offline"]:
+        return False
+    orgs.view(config, lambda endpoint: gh_read(endpoint, retries=0), state_dir() / ("orgs_state_lite.json" if LITE["on"] else "orgs_state.json"), offline=False)
+    return True
 
 
 def pool_status():
@@ -460,11 +489,27 @@ def ecosystem_of(name):
     return toolconfig.ecosystem_of(name)
 
 
+def read_visibility(config, force=False):
+    """With a list of repositories written by hand nothing tells which ones are private: read it once per `discover_refresh_seconds` with one listing of the account (names and visibility). Whatever fails
+    leaves the visibility unknown, which is the same as private for everything that shows a name to other people; the listing is never retried before the next refresh time."""
+    if not force and time.time() - VISIBILITY["at"] <= config["discover_refresh_seconds"]:
+        return
+    VISIBILITY["at"] = time.time()
+    try:
+        data = gh("repo", "list", toolconfig.github_owner(config), "--limit", str(config.get("discover_limit", 1000)), "--json", "name,isPrivate", retries=0) or []
+    except Exception:   # noqa: BLE001 - a failed reading only leaves the visibility unknown
+        return
+    PRIVATE.clear()
+    PRIVATE.update(item["name"] for item in data if isinstance(item, dict) and item.get("isPrivate"))
+    VISIBILITY["known"] = {item["name"] for item in data if isinstance(item, dict) and isinstance(item.get("name"), str) and "isPrivate" in item}
+
+
 def watched_repos(config, force=False):
     """The list from the config file or, with "repos": "all", the repositories of the account (one call, cached)."""
     wanted = config["repos"]
     if wanted != "all":
         names = list(wanted)
+        read_visibility(config, force)
     else:
         if force or time.time() - DISCOVERED["at"] > config["discover_refresh_seconds"] or not DISCOVERED["names"]:
             limit = str(config.get("discover_limit", 1000))
@@ -477,6 +522,7 @@ def watched_repos(config, force=False):
             rules = discovery.settings(config)
             PRIVATE.clear()
             PRIVATE.update(item["name"] for item in data if item.get("isPrivate"))
+            VISIBILITY["known"] = {item["name"] for item in data if "isPrivate" in item}      # the plain listing of an older gh has no such field: nothing is known then
             snapshot = {item["name"]: {"archived": bool(item.get("isArchived"))} for item in data}
             if rules["events"]:
                 found = discovery.diff(DISCOVERED.get("snapshot"), snapshot)
@@ -529,7 +575,8 @@ def fork_ci_answers(config, rules, items):
 
 
 MAX_RUN_SECONDS = 35 * 86400      # GitHub stops a run after 35 days: a longer figure is a wrong clock (a re-run measured from the first attempt), not a long build
-TIMING = {"on": False, "known": {}, "budget": 3}      # ci.rerun_timing: ask GitHub for the real duration of a re-run (runs/ID/timing), a few calls per read of a repository
+TIMING_PER_READ = 3      # requests for the duration of a re-run that one reading of one repository may make
+TIMING = {"on": False, "known": {}}      # ci.rerun_timing: ask GitHub for the real duration of a re-run (runs/ID/timing), a few calls per read of a repository
 
 
 def run_times(run):
@@ -548,14 +595,19 @@ def run_times(run):
     return queued, seconds, begun
 
 
-def rerun_seconds(repo, run):
-    """The real duration of a finished re-run from `runs/ID/timing` (wall clock of the attempt), when ci.rerun_timing is on and the budget of this read allows; else None."""
+def rerun_seconds(repo, run, allowance=None):
+    """The real duration of a finished re-run from `runs/ID/timing` (wall clock of the attempt), when ci.rerun_timing is on and the allowance of this read (`allowance`, a list with the number of
+    requests it may still make, one list for each reading of a repository) allows; else None."""
     key = (repo, run.get("id"), run.get("run_attempt"))
     if key in TIMING["known"]:
         return TIMING["known"][key]
-    if not TIMING["on"] or TIMING["budget"] <= 0:
+    allowance = allowance if allowance is not None else [TIMING_PER_READ]
+    if not TIMING["on"] or allowance[0] <= 0:
         return None
-    TIMING["budget"] -= 1
+    if TIMING.get("limit") and BUDGET.used() >= TIMING["limit"]:      # the request is one of the hour: with the budget spent it is not made (it would be asked again at the next read)
+        return None
+    allowance[0] -= 1
+    BUDGET.record(1)
     try:
         body = gh_read(f"repos/{toolconfig.github_owner()}/{repo}/actions/runs/{run.get('id')}/timing", retries=0) or {}
         ms = body.get("run_duration_ms")
@@ -612,12 +664,12 @@ def fetch_sampled(repo, per_page, config):
 
 def parse_runs(repo, data):
     runs = []
-    TIMING["budget"] = 3
+    allowance = [TIMING_PER_READ]      # the requests for the duration of a re-run this reading of this repository may make: its own count, not one shared with the other threads of the cycle
     for run in data.get("workflow_runs", []):
         full_path = str(run.get("path") or "").split("@")[0]
         queued, seconds, begun = run_times(run)
         if (run.get("run_attempt") or 1) > 1 and run.get("status") == "completed":
-            seconds = rerun_seconds(repo, run) if TIMING["on"] else seconds
+            seconds = rerun_seconds(repo, run, allowance) if TIMING["on"] else seconds
         runs.append({
             "repo": repo, "id": run["id"], "name": run.get("name") or "", "title": (run.get("display_title") or "")[:90],
             "event": run.get("event"), "branch": run.get("head_branch"), "fork": is_fork_run(run), "path": full_path.rsplit("/", 1)[-1], "sha": (run.get("head_sha") or "")[:7],
@@ -774,6 +826,7 @@ def refresh_runs(repos, config, progress=None):
         RATE_BLOCK["unread"] = len(todo)
         return 0
     TIMING["on"] = isinstance(config.get("ci"), dict) and config["ci"].get("rerun_timing") is True
+    TIMING["limit"] = sampling.settings(config)["api_budget_per_hour"]
     total = len(todo)
     batched = graphql_cold(config, [r for r, _n in todo if r in cold_due])
     if batched:
@@ -784,7 +837,12 @@ def refresh_runs(repos, config, progress=None):
             note_read(repo, list(runs) + kept, None)
         todo = [item for item in todo if item[0] not in batched]
     limit = sampling.settings(config)["api_budget_per_hour"]
-    todo, waiting = sampling.plan(todo, red_repos_of([r for r, _n in todo]) if limit else set(), limit, BUDGET.used())      # a spent budget: the repositories with red first, the others wait
+    probing = sampling.settings(config)["default_branch_probe"]
+
+    def price(item):      # a repository whose last list was full (or never read) also gets the second look at the pushes to its default branch: two requests
+        held = RUN_CACHE.get(item[0])
+        return 2 if probing and (held is None or len(held.get("runs") or []) >= item[1]) else 1
+    todo, waiting = sampling.plan(todo, red_repos_of([r for r, _n in todo]) if limit else set(), limit, BUDGET.used(), price)      # a spent budget: the repositories with red first, the others wait
     SAMPLING_STATE["dropped"] = [item[0] for item in waiting]
     for start in range(0, len(todo), 40):  # chunks, so the page can show the first results while the rest loads
         chunk = todo[start:start + 40]
@@ -973,7 +1031,7 @@ def collect(config, publish=None):
 
 
 def repo_meta(repos, config=None):
-    """{repo: {"private": bool, "branch": str or None, "pushed": ISO or None, "prs": int or None}} for the columns of the Repositories table. The visibility comes from the listing the monitor already
+    """{repo: {"private": True, False or None (not read: treated as private), "branch": str or None, "pushed": ISO or None, "prs": int or None}} for the columns of the Repositories table. The visibility comes from the listing the monitor already
     reads; the rest from the CI sentinel when it has looked (the lite edition has none: those fields are None). Nothing new is read from GitHub."""
     info = {}
     sentinel = SENTINEL.get("obj")
@@ -985,7 +1043,7 @@ def repo_meta(repos, config=None):
     for repo in repos:
         item = info.get(repo) if isinstance(info.get(repo), dict) else {}
         prs = item.get("prs")
-        out[repo] = {"private": repo in PRIVATE, "branch": item.get("branch") or None, "pushed": item.get("pushed") or None, "prs": len(prs) if isinstance(prs, list) else None, "fork": item.get("fork") is True}
+        out[repo] = {"private": True if repo in PRIVATE else (False if repo in VISIBILITY["known"] else None), "branch": item.get("branch") or None, "pushed": item.get("pushed") or None, "prs": len(prs) if isinstance(prs, list) else None, "fork": item.get("fork") is True}
         cached = RUN_CACHE.get(repo)
         if cached and cached.get("runs") is not None and cached.get("at"):
             sample = SAMPLE_INFO.get(repo) or {}      # not `info`: that name holds what the sentinel knows of every repository
@@ -1326,19 +1384,29 @@ def read_runner_jobs(config, data):
 
 
 def runner_list(config):
-    """The self-hosted runners (runners.py), read at most every 5 minutes; None when `runners.enabled` is off or the read failed (the model then says the reason is unknown)."""
+    """The self-hosted runners (runners.py) as the last cycle read them (read_runner_list); None when `runners.enabled` is off or the read failed (the model then says the reason is unknown). A request
+    never reads GitHub: it is answered from this."""
     from github_actions_monitor.integrations import runners
     if not runners.settings(config)["enabled"] or DEMO["on"]:
         return None
-    if time.time() - RUNNER_JOBS["list_at"] > 300:
-        RUNNER_JOBS["list_at"] = time.time()
-        try:
-            got = runners.collect(config, lambda endpoint: gh_read(endpoint, retries=0), toolconfig.github_owner(config), list((STATE.get("data") or {}).get("repos") or []))
-            RUNNER_JOBS["list"] = None if got["errors"] and not got["runners"] else got["runners"]
-        except Exception as error:   # noqa: BLE001
-            degraded.note("runners.list", error)
-            RUNNER_JOBS["list"] = None
     return RUNNER_JOBS["list"]
+
+
+def read_runner_list(config, data=None):
+    """The reading of the runners, done by the cycle at most every `RUNNERS_MEMORY_SECONDS`: it keeps the list for the model of the runners and the answer of /api/runners."""
+    from github_actions_monitor.integrations import runners
+    if not runners.settings(config)["enabled"] or DEMO["on"] or time.time() - RUNNER_JOBS["list_at"] <= RUNNERS_MEMORY_SECONDS:
+        return False
+    RUNNER_JOBS["list_at"] = time.time()
+    repos = list(((data if isinstance(data, dict) else STATE.get("data")) or {}).get("repos") or [])
+    try:
+        got = runners.collect(config, lambda endpoint: gh_read(endpoint, retries=0), toolconfig.github_owner(config), repos)
+        RUNNER_JOBS["list"] = None if got["errors"] and not got["runners"] else got["runners"]
+        RUNNERS_SEEN["payload"], RUNNERS_SEEN["at"] = {"enabled": True, **got}, time.time()
+    except Exception as error:   # noqa: BLE001
+        degraded.note("runners.list", error)
+        RUNNER_JOBS["list"] = None
+    return True
 
 
 def runner_model_payload(now=None):
@@ -1612,6 +1680,9 @@ def maintain_extras(config, data):
     for name, job in (("ai_alerts", lambda: feed_alerts(config, data)),
                       ("finops", lambda: spare and read_costs(config, data)),
                       ("runner_model", lambda: spare and read_runner_jobs(config, data)),
+                      ("runners", lambda: spare and read_runner_list(config, data)),
+                      ("orgs", lambda: spare and read_extra_lists(config)),
+                      ("pool", lambda: spare and refresh_pool_status()),
                       ("reports", lambda: spare and __import__("github_actions_monitor.integrations.reports", fromlist=["_"]).cycle(config, toolconfig.github_owner(config), list(data.get("repos") or []), data.get("runs") or [],
                                                                                                                                   lambda endpoint: gh_read(endpoint, retries=0))),
                       ("mirror", lambda: spare and __import__("github_actions_monitor.integrations.mirror", fromlist=["_"]).cycle(config, data.get("runs") or [], toolconfig.github_owner(config), lambda e: gh_read(e, retries=0), download_artifact)),
@@ -2183,9 +2254,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def end_headers(self):
         """Every answer: the page cannot be put in a frame of another site (clickjacking) and the browser does not guess a type."""
-        self.send_header("X-Frame-Options", "DENY")
-        self.send_header("Content-Security-Policy", "frame-ancestors 'none'")
-        self.send_header("X-Content-Type-Options", "nosniff")
+        for name, value in localguard.SECURITY_HEADERS:
+            self.send_header(name, value)
         if getattr(self, "deprecated_access", False):
             self.send_header("Deprecation", "true")      # the ?access= address is deprecated: POST /api/access keeps the token out of the address bar
         super().end_headers()
@@ -2307,6 +2377,15 @@ class Handler(BaseHTTPRequestHandler):
     def is_local(self):
         """True when this request really comes from a person at this computer (see localguard.is_this_computer)."""
         return not self.remote_through_supervisor() and localguard.is_this_computer(self.client_address, self.headers, door=self.local_door)
+
+    def webhook_sender(self):
+        """Who sent a webhook request, for the limits: the process of an account is spoken to by its supervisor, which says who really sent it (and proves it with its key); otherwise the address of the
+        peer, or the last address a trusted proxy appended (localguard.client_key)."""
+        if os.environ.get(auth_http.CHILD_ENV):
+            key, proof, given = envguard.get(SUPERVISOR_KEY_ENV), self.headers.get(auth_http.SUPERVISOR_KEY_HEADER) or "", self.headers.get(auth_http.WEBHOOK_PEER_HEADER) or ""
+            if key and proof and hmac.compare_digest(key.encode(), proof.encode()) and 0 < len(given) <= 80:
+                return "via:" + given
+        return localguard.client_key(self.client_address, self.headers)
 
     def guard(self):
         if self.request_ok():
@@ -2503,13 +2582,10 @@ class Handler(BaseHTTPRequestHandler):
             return
         if path == "/api/webhook":   # off unless configured; no Host check (a tunnel changes it), but every request must carry a valid HMAC
             from github_actions_monitor.security import webhook
-            if localguard.STATE["network"] and localguard.over_rate("webhook", str(self.client_address[0]), 120):      # one address cannot flood the receiver
-                self.json_reply({"ok": False, "error": "rate"}, 429)
-                return
             try:
                 size = int(self.headers.get("Content-Length") or 0)
                 body = self.rfile.read(size) if 0 <= size <= webhook.MAX_BODY else b"x" * (webhook.MAX_BODY + 1)
-                code, answer, repo = webhook.handle(LIVE_CONFIG or DEFAULTS, body, self.headers, STATE["data"]["repos"] if STATE.get("data") else [])
+                code, answer, repo = webhook.handle(LIVE_CONFIG or DEFAULTS, body, self.headers, STATE["data"]["repos"] if STATE.get("data") else [], self.webhook_sender())      # bad signatures and good ones are counted apart, in every mode
                 webhook_count(code, bool(answer.get("duplicate")) if isinstance(answer, dict) else False)
                 record = webhook.parse_event(self.headers.get("X-GitHub-Event"), body) if (code == 200 and repo) else None
                 if record and webhook.live_settings(LIVE_CONFIG or DEFAULTS)["record_events"]:
@@ -2678,9 +2754,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         self.v1 = False
-        if not self.v1_enter():
+        if not self.access_gate():      # the access token first: the 404 of a switch that is off does not tell a visitor without credentials whether the versioned API exists
             return
-        if not self.access_gate() or not auth_http.gate(self, LIVE_CONFIG or DEFAULTS, LITE["on"]):
+        if not self.v1_enter() or not auth_http.gate(self, LIVE_CONFIG or DEFAULTS, LITE["on"]):
             return
         with i18n.use_language(self.request_language()):
             if self.v1 and self.path.split("?")[0] in api_v1.OWN_ROUTES:
@@ -2715,13 +2791,17 @@ class Handler(BaseHTTPRequestHandler):
                 payload = api_v1.openapi(TOOL_VERSION)
             elif path == "/api/v1/me":
                 context = getattr(self, "auth_user", None)
-                team = auth_http.active(LIVE_CONFIG or DEFAULTS, LITE["on"])
+                team = auth_http.active(LIVE_CONFIG or DEFAULTS, LITE["on"]) or bool(context)      # the process of an account is told by its supervisor, with a signed context, that the team mode is on
                 payload = api_v1.me_payload(version=TOOL_VERSION, edition="complete", mode="team" if team else "individual", authenticated=bool(context), user=auth_http.acting_user(self),
                                             role=context["role"] if context else None, accounts=context["accounts"] if context else None, cfg=cfg)
             else:
-                payload = api_v1.repos_payload(health_views(), ask, secret=V1_SECRET, now=time.time(), cfg=cfg)
+                payload = api_v1.repos_payload(health_views(), ask, secret=V1_SECRET, now=time.time(), cfg=cfg, who=f"{auth_http.acting_user(self) or ''}|{CHILD['account'] or ''}")      # a cursor belongs to who asked for it
         except api_v1.ApiError as error:
             status, body = error.envelope()
+            self.json_reply(body, status)
+            return
+        except Exception:   # noqa: BLE001 - whatever else goes wrong is the envelope of a 500, never a cut connection with a trace in the console
+            status, body = api_v1.ApiError(500, "api.server_error").envelope()
             self.json_reply(body, status)
             return
         body, extra = api_v1.maybe_compress(json.dumps(payload).encode("utf-8"), self.headers.get("Accept-Encoding"), cfg["gzip_min_bytes"])
@@ -2893,7 +2973,7 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/api/quota-pool/status":      # this computer only: the allowance of every source of the reads and what the App lacks (never a key or a token)
             if not self.guard() or not self.this_computer():
                 return
-            self.json_reply(pool_status())
+            self.json_reply(POOL_STATUS["payload"] or pool_status_pending())      # what the cycle read: a request never reads GitHub
         elif path == "/api/github-app/status":      # this computer only: asks the App for a token and says its name, installation, permissions and allowance (never the key or the token)
             if not self.guard() or not self.this_computer():
                 return
@@ -3329,13 +3409,14 @@ def reload_on_signal(signum=None, frame=None):
     threading.Thread(target=credential_change, args=("reload",), daemon=True, name="credential-reload").start()
 
 
-def update_info():
-    """The state of the update notice: the cached answer, refreshed (at most every 24 hours) through the conditional GitHub client; silent when it cannot be read."""
+def update_info(read=True):
+    """The state of the update notice: the cached answer, refreshed (at most every 24 hours) through the conditional GitHub client; silent when it cannot be read. `read` False (a request of the page)
+    only gives the cached answer: the loop that looks for updates is the one that reads."""
     config = LIVE_CONFIG or toolconfig.raw_config()
     state_file = state_dir() / ("update_check_lite.json" if LITE["on"] else "update_check.json")
     if DEMO["on"]:
         return updatecheck.view({"updates": {"check": False}}, TOOL_VERSION, {})
-    return updatecheck.check(config, TOOL_VERSION, lambda endpoint: gh_read(endpoint, retries=0), state_file=state_file, offline=LINK.state()["offline"], background=True)      # never a network wait in the path of a page
+    return updatecheck.check(config, TOOL_VERSION, lambda endpoint: gh_read(endpoint, retries=0), state_file=state_file, offline=LINK.state()["offline"] or not read, background=True)      # never a network wait in the path of a page
 
 
 def RUN_CACHE_RESET():
@@ -3373,7 +3454,7 @@ def quota_payload():
 def about_payload():
     from github_actions_monitor.ui import about
     places = {"config": CONFIG_FILE, "log": LOG_FILE, "etag_cache": etagcache.CACHE_FILE, "package_folder": HERE}
-    data = about.info(LITE["on"], health_payload(), places, update_info(), i18n.language())
+    data = about.info(LITE["on"], health_payload(), places, update_info(read=False), i18n.language())
     data["support"] = about.support_text(data)
     return data
 
@@ -3384,7 +3465,7 @@ def discovery_payload():
         data = STATE.get("data") or {}
     box = discovery.box(toolconfig.github_owner(config), len(data.get("repos") or []), HIDDEN["discovered"], HIDDEN["names"])
     from github_actions_monitor.data_pipeline import orgs
-    organisations = orgs.view(toolconfig.raw_config(), lambda endpoint: gh_read(endpoint, retries=0), state_dir() / ("orgs_state_lite.json" if LITE["on"] else "orgs_state.json"), offline=LINK.state()["offline"]) if not DEMO["on"] else {"enabled": False, "orgs": [], "checked_at": 0}
+    organisations = orgs.view(toolconfig.raw_config(), lambda endpoint: gh_read(endpoint, retries=0), state_dir() / ("orgs_state_lite.json" if LITE["on"] else "orgs_state.json"), offline=True) if not DEMO["on"] else {"enabled": False, "orgs": [], "checked_at": 0}      # offline=True: it shows what the cycle read, it never reads
     return {**box, "events": list(reversed(DISCOVERY["events"]))[:20], "suggestions": DISCOVERY["suggestions"], "settings": discovery.settings(config), "owner_kind": FORKS["kind"], "forks": {k: FORKS[k] for k in ("checked", "kept", "left", "waiting")}, "demo": DEMO["on"], "organizations": organisations}
 
 
@@ -3549,8 +3630,9 @@ def advanced_get(path, query):
         return {"done": done and not DEMO["on"]}
     if path == "/api/runners":
         from github_actions_monitor.integrations import runners
-        RUNNERS_SEEN["payload"] = runners.payload(config, lambda endpoint: gh_read(endpoint, retries=0), toolconfig.github_owner(config), DEMO["on"], list((STATE.get("data") or {}).get("repos") or []))
-        return RUNNERS_SEEN["payload"]
+        if DEMO["on"] or not runners.settings(config)["enabled"]:
+            return runners.payload(config, None, toolconfig.github_owner(config), DEMO["on"])
+        return RUNNERS_SEEN["payload"] or {"enabled": True, "pending": True, "runners": [], "counts": {"idle": 0, "busy": 0, "offline": 0}, "errors": 0}      # what the cycle read: a request never reads GitHub
     if path == "/api/mirror":
         from github_actions_monitor.integrations import mirror
         return mirror.status(config)
@@ -3797,7 +3879,7 @@ def supervisor_main(argv):
     port = ports.from_argv(argv, "complete")
     config = toolconfig.raw_config()
     from github_actions_monitor.security import webhook as _webhook
-    envguard.hold(_webhook.secret_env_name(config))      # the secret of the webhook: held here, given to the account processes explicitly
+    envguard.hold(_webhook.secret_env_name(config), *accounts_supervisor.webhook_names())      # the secrets of the webhook of the installation (the main one and the one of each account): held here, given to each account process explicitly, one to each
     i18n.set_language(i18n.detect(config.get("language")))
     platform_compat.console_utf8()
     try:      # the same listening rules as the monitor of one account: by default only this computer; `listen.*` opens the network mode (access token, optional certificate, declared proxy)
@@ -3902,7 +3984,8 @@ def main():
     config = load_config()
     envguard.hold(localguard.settings_from(config)["token_env"])      # the access token may be under another name: it leaves the environment here too
     from github_actions_monitor.security import webhook as _webhook
-    envguard.hold(_webhook.secret_env_name(config))      # the shared secret of the webhook is read from the environment once and no program the monitor starts inherits it
+    _webhook.load_memory(paths.folder("data") / "webhook_deliveries.json") if _webhook.guard_settings(config)["persist_deliveries"] else None      # the memory of deliveries survives a restart
+    _webhook.freeze_secret_name(config)      # the shared secret of the webhook is read from the environment once, under the name this process started with, and no program the monitor starts inherits it
     if LITE["on"]:
         config["mode"] = "full"                      # the lite edition reads as deep as the complete one: its figures must be the same
         config["sentinel"] = {"enabled": False}      # the lite product has no sentinel, whatever the file says

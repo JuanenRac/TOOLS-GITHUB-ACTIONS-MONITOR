@@ -32,6 +32,7 @@ from github_actions_monitor import i18n
 from github_actions_monitor.data_pipeline import alertflow
 from github_actions_monitor.app import surface
 from github_actions_monitor.app import toolconfig
+from github_actions_monitor.security import envguard
 from github_actions_monitor.security import private_io
 from github_actions_monitor.ui import ordering
 from github_actions_monitor.util import ports
@@ -68,6 +69,17 @@ AI_URL_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#!$&()*+,;=%-]{4,250}|http://
 PROXY_HOST_RE = re.compile(r"^([A-Za-z0-9]([A-Za-z0-9.-]{0,98}[A-Za-z0-9])?)?\Z")      # the public NAME of an HTTPS proxy: a host name only, no port, path, user or space (empty = none)
 ENV_NAME_RE = re.compile(r"^([A-Z_][A-Z0-9_]{0,63})?\Z")
 AI_ENV_RE = re.compile(r"^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|MONITOR_[A-Z0-9_]*)\Z)([A-Z_][A-Z0-9_]{0,63})?\Z")   # the NAME of the variable of the key of a provider: never a variable of the system or of the monitor   # the NAME of an environment variable, never the key itself
+
+
+def _env_name_except(own):
+    """The pattern of the NAME of a variable that holds a secret of the monitor: never the system, the login to GitHub or a secret of the monitor that belongs to another setting (`own` = this one's)."""
+    barred = [name for name in envguard.SYSTEM_NAMES + envguard.SECRET_NAMES if name != own]
+    return re.compile(r"^(?!(?:" + "|".join(re.escape(name) for name in barred) + r")\Z)([A-Z_][A-Z0-9_]{0,63})?\Z")
+
+
+WEBHOOK_ENV_RE = _env_name_except(envguard.WEBHOOK_SECRET_ENV)      # webhook.secret_env
+TOKEN_ENV_RE = _env_name_except(envguard.ACCESS_TOKEN_ENV)          # listen.token_env
+NOTIFY_ENV_RE = _env_name_except("")                                # the variable of a channel of notices: no secret of the monitor belongs to it
 LOOP_HOST_RE = re.compile(r"^(127\.0\.0\.1|localhost|\[::1\])\Z")                      # a broker or a service ON THIS COMPUTER
 LOOP_URL_RE = re.compile(r"^(http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/%-]{0,100})?)?\Z")
 CHAT_RE = re.compile(r"^(-?[0-9]{1,20})?\Z")
@@ -441,7 +453,7 @@ _f(_T_AI, "actions", "ai.actions.allowed", "names")
 _f(_T_AI, "actions", "ai.actions.max_per_hour", "int", (1, 60), unit="")
 _f(_T_AI, "actions", "ai.actions.ttl_seconds", "int", (30, 3600))
 _f(_T_HOOK, "inbound", "webhook.enabled", "bool", secure=True)
-_f(_T_HOOK, "inbound", "webhook.secret_env", "text", ENV_NAME_RE, secure=True)
+_f(_T_HOOK, "inbound", "webhook.secret_env", "text", WEBHOOK_ENV_RE, secure=True)
 _f(_T_HOOK, "inbound", "webhook.signing_state", "status", restart=False)
 _f(_T_HOOK, "inbound", "webhook.record_events", "bool")
 _f(_T_HOOK, "inbound", "webhook.live_events_keep", "int", (10, 1000), unit="")
@@ -450,6 +462,10 @@ _f(_T_HOOK, "inbound", "live.sse.max_seconds", "int", (60, 86400), restart=False
 _f(_T_HOOK, "inbound", "live.sse.max_clients", "int", (1, 10), restart=False, unit="")
 _f(_T_HOOK, "inbound", "webhook.replay_seconds", "int", (60, 86400))
 _f(_T_HOOK, "inbound", "webhook.max_per_minute", "int", (1, 600), unit="")
+_f(_T_HOOK, "inbound", "webhook.max_bad_per_minute", "int", (1, 6000), unit="")
+_f(_T_HOOK, "inbound", "webhook.max_verified_per_minute", "int", (1, 6000), unit="")
+_f(_T_HOOK, "inbound", "webhook.reject_stale", "bool")
+_f(_T_HOOK, "inbound", "webhook.persist_deliveries", "bool")
 # --- Reads and cache (conditional reads)
 _f("cache", "etag", "cache.etag.enabled", "bool")
 _f("cache", "etag", "cache.etag.ttl_hours", "int", (1, 168))
@@ -460,18 +476,18 @@ _f("notify", "main", "network.use_proxy", "bool", restart=False, secure=True)
 _f("notify", "main", "notify.events", "names")
 _f("notify", "main", "notify.max_per_hour", "int", (1, 600), unit="")
 _f("notify", "ch_telegram", "notify.channels.telegram.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on")
-_f("notify", "ch_telegram", "notify.channels.telegram.token_env", "text", ENV_NAME_RE, label=["cfg.p.token_env"], help="cfg.h.p.token_env")
+_f("notify", "ch_telegram", "notify.channels.telegram.token_env", "text", NOTIFY_ENV_RE, label=["cfg.p.token_env"], help="cfg.h.p.token_env")
 _f("notify", "ch_telegram", "notify.channels.telegram.chat_id", "text", CHAT_RE, label=["cfg.p.chat_id"], help="cfg.h.p.chat_id")
 _f("notify", "ch_discord", "notify.channels.discord.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on")
-_f("notify", "ch_discord", "notify.channels.discord.url_env", "text", ENV_NAME_RE, label=["cfg.p.url_env"], help="cfg.h.p.url_env")
+_f("notify", "ch_discord", "notify.channels.discord.url_env", "text", NOTIFY_ENV_RE, label=["cfg.p.url_env"], help="cfg.h.p.url_env")
 _f("notify", "ch_slack", "notify.channels.slack.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on")
-_f("notify", "ch_slack", "notify.channels.slack.url_env", "text", ENV_NAME_RE, label=["cfg.p.url_env"], help="cfg.h.p.url_env")
+_f("notify", "ch_slack", "notify.channels.slack.url_env", "text", NOTIFY_ENV_RE, label=["cfg.p.url_env"], help="cfg.h.p.url_env")
 _f("notify", "ch_apprise", "notify.channels.apprise.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on", secure=True)
-_f("notify", "ch_apprise", "notify.channels.apprise.urls_env", "text", ENV_NAME_RE, label=["cfg.p.url_env"], help="cfg.h.p.apprise_env")
+_f("notify", "ch_apprise", "notify.channels.apprise.urls_env", "text", NOTIFY_ENV_RE, label=["cfg.p.url_env"], help="cfg.h.p.apprise_env")
 _f("notify", "ch_matrix", "notify.channels.matrix.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on")
 _f("notify", "ch_matrix", "notify.channels.matrix.homeserver", "text", HTTPS_RE, label=["cfg.p.homeserver"], help="cfg.h.p.homeserver")
 _f("notify", "ch_matrix", "notify.channels.matrix.room", "text", ROOM_RE, label=["cfg.p.room"], help="cfg.h.p.room")
-_f("notify", "ch_matrix", "notify.channels.matrix.token_env", "text", ENV_NAME_RE, label=["cfg.p.token_env"], help="cfg.h.p.token_env")
+_f("notify", "ch_matrix", "notify.channels.matrix.token_env", "text", NOTIFY_ENV_RE, label=["cfg.p.token_env"], help="cfg.h.p.token_env")
 _f("notify", "ch_mqtt", "notify.channels.mqtt.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on")
 _f("notify", "ch_mqtt", "notify.channels.mqtt.host", "text", LOOP_HOST_RE, label=["cfg.p.local_host"], help="cfg.h.p.local_host")
 _f("notify", "ch_mqtt", "notify.channels.mqtt.port", "int", (1, 65535), unit="", label=["cfg.p.port"], help="cfg.h.p.port")
@@ -519,7 +535,7 @@ _f("console", "tui", "tui.refresh_seconds", "int", (2, 300), False)
 # --- Advanced: opt-in features, every one OFF by default (network, own token, actions on GitHub, act, mirror, runners, OTLP, organisations, FinOps)
 _f("advanced", "network", "listen.network", "bool", secure=True)
 _f("advanced", "network", "listen.host", "text", LISTEN_HOST_RE, secure=True)
-_f("advanced", "network", "listen.token_env", "text", ENV_NAME_RE, secure=True)
+_f("advanced", "network", "listen.token_env", "text", TOKEN_ENV_RE, secure=True)
 _f("advanced", "network", "listen.allowed_hosts", "names", secure=True)
 _f("advanced", "network", "listen.tls_cert_file", "path", secure=True)
 _f("advanced", "network", "listen.tls_key_file", "path", secure=True)
@@ -985,6 +1001,13 @@ def _apply_locked(clean, path):
     changed = [key for key, value in clean.items() if _get(current, key, "\0missing") != value]
     if not changed:
         return {"ok": True, "changed": [], "restart": [], "backup": False}
+    merged = json.loads(json.dumps(current))
+    for key in changed:
+        _set(merged, key, clean[key])
+    taken = {key for _name, keys in envguard.shared_names(merged) for key in keys} - {key for _name, keys in envguard.shared_names(current) for key in keys}
+    clashes = {key: "invalid" for key in changed if key in taken and key in envguard.ENV_SETTINGS}      # a variable is named by ONE setting: the second to say it is refused
+    if clashes:
+        return {"ok": False, "errors": clashes}
     for key in changed:
         _set(current, key, clean[key])
     backup = _backup(path)

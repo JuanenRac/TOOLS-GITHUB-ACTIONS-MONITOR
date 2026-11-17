@@ -90,21 +90,25 @@ class Budget:
         return len(self.stamps)
 
 
-def plan(todo, red, limit, used):
+def plan(todo, red, limit, used, cost=None):
     """(kept, dropped) of the reads of a cycle under a budget. todo = [(repo, ...)]; red = set of repositories with a red workflow. limit 0 = no budget: everything is kept.
-    Repositories with red go first; a tenth of the budget is kept for them even when the rest is spent."""
+    Repositories with red go first; a tenth of the budget is kept for them even when the rest is spent. `cost(item)` is how many requests reading that repository will make (1 when it is not given):
+    a second look at the pushes to the default branch costs one more, and the budget counts requests, not repositories."""
     if limit <= 0:
         return list(todo), []
     left = max(0, limit - used)
     reserve = max(1, limit // 10)
     room_red = max(0, limit + reserve - used)      # the reserve of the reds belongs to the HOUR: what the hour has already spent (the reds of the cycles before included) is not given again every cycle
     ordered = [t for t in todo if t[0] in red] + [t for t in todo if t[0] not in red]
-    kept, dropped = [], []
+    kept, dropped, spent = [], [], 0
     for item in ordered:
-        if item[0] in red and len(kept) < room_red:
+        price = max(1, int(cost(item))) if cost else 1
+        if item[0] in red and spent < room_red:
             kept.append(item)
-        elif len(kept) < left:
+            spent += price
+        elif spent < left:
             kept.append(item)
+            spent += price
         else:
             dropped.append(item)
     return kept, dropped

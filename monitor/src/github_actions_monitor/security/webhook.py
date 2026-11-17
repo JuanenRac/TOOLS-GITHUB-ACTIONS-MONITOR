@@ -32,6 +32,8 @@ MIN_SECRET = 32
 SECRET_ENV = "MONITOR_WEBHOOK_SECRET"      # the default name of the variable that holds the shared secret
 ENV_NAME_RE = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}\Z")
 MAX_BODY = 262144
+MAX_VERIFIED_PER_MINUTE = 120    # the default of `webhook.max_verified_per_minute`: requests that carry a good signature one address (a tunnel is ONE address) may send per minute
+SEEN_SAVE_EVERY = 2.0            # seconds: the memory of deliveries is written at most this often
 MAX_DELIVERIES = 2000        # the replay memory is bounded: the oldest delivery ids fall out first
 EVENTS = ("workflow_run", "workflow_job", "check_run", "push", "release", "check_suite", "ping")      # the closed list: any other event is answered 202 and dropped
 
@@ -42,11 +44,25 @@ def text(key):
     return i18n.t(TEXT[key])
 
 
+_frozen_name = [None]      # the name the process started with: a change of the setting is read at the next start (it is a `restart` setting), never while the process runs
+
+
 def secret_env_name(config):
-    """The NAME of the environment variable that holds the shared secret (`webhook.secret_env`); a name that is not a plain variable name falls back to MONITOR_WEBHOOK_SECRET."""
+    """The NAME of the environment variable that holds the shared secret (`webhook.secret_env`); a name that is not a plain variable name, or that belongs to the system, to the login to GitHub or
+    to another secret of the monitor (PATH, GH_TOKEN, MONITOR_ACCESS_TOKEN...), falls back to MONITOR_WEBHOOK_SECRET. Once `freeze_secret_name` ran, that name is the one."""
+    if _frozen_name[0]:
+        return _frozen_name[0]
     cfg = (config or {}).get("webhook")
     name = cfg.get("secret_env") if isinstance(cfg, dict) else None
-    return name if isinstance(name, str) and ENV_NAME_RE.match(name) else SECRET_ENV
+    return name if isinstance(name, str) and ENV_NAME_RE.match(name) and not envguard.forbidden_name(name, own=(SECRET_ENV,)) else SECRET_ENV
+
+
+def freeze_secret_name(config):
+    """Remembers the variable named at start, takes it out of the environment and keeps reading that one for the whole life of the process."""
+    _frozen_name[0] = None
+    _frozen_name[0] = secret_env_name(config)
+    envguard.hold(_frozen_name[0])
+    return _frozen_name[0]
 
 
 def read_secret(name):
@@ -90,8 +106,8 @@ def live_settings(config):
 
 
 def guard_settings(config):
-    """{"replay_seconds", "max_per_minute", "allowed_owners"}: how long a delivery id is remembered, how many accepted events one repository may cause per minute, and the owners
-    (besides github_owner) whose repositories may be named in a payload."""
+    """{"replay_seconds", "max_per_minute", "max_bad_per_minute", "allowed_owners"}: how long a delivery is remembered, how many accepted events one repository may cause per minute, how many
+    requests with a signature that does not verify one address may send per minute, and the owners (besides github_owner) whose repositories may be named in a payload."""
     cfg = (config or {}).get("webhook")
     cfg = cfg if isinstance(cfg, dict) else {}
 
@@ -99,7 +115,9 @@ def guard_settings(config):
         value = cfg.get(key)
         return value if isinstance(value, int) and not isinstance(value, bool) and low <= value <= high else default
     owners = [o for o in (cfg.get("allowed_owners") or []) if isinstance(o, str) and re.match(r"^[A-Za-z0-9-]{1,39}$", o)] if isinstance(cfg.get("allowed_owners"), list) else []
-    return {"replay_seconds": number("replay_seconds", 3600, 60, 86400), "max_per_minute": number("max_per_minute", 30, 1, 600), "allowed_owners": owners}
+    return {"replay_seconds": number("replay_seconds", 3600, 60, 86400), "max_per_minute": number("max_per_minute", 30, 1, 600), "max_bad_per_minute": number("max_bad_per_minute", 120, 1, 6000),
+            "max_verified_per_minute": number("max_verified_per_minute", MAX_VERIFIED_PER_MINUTE, 1, 6000), "reject_stale": cfg.get("reject_stale") is True, "persist_deliveries": cfg.get("persist_deliveries", True) is True,
+            "allowed_owners": owners}
 
 
 _guard_lock = threading.Lock()
@@ -111,8 +129,50 @@ _accepted = collections.deque(maxlen=5000)     # when each event that named a wa
 _started = [time.time()]
 
 
+_store = {"path": None, "dirty": False, "saved": 0.0}      # the file where the memory of deliveries survives a restart (set by load_memory; tests do not set it)
+
+
+def load_memory(path, now=None):
+    """Reads the memory of deliveries kept in `path` (a JSON object {key: time}; a missing, damaged or hand-edited file is an empty memory) and, from now on, keeps it there. Only the newest
+    MAX_DELIVERIES entries are taken, and what is no older than a day. The keys are ids and hashes of signed bodies, never a body or a secret."""
+    from pathlib import Path
+    now = time.time() if now is None else now
+    _store.update(path=Path(path), dirty=False, saved=0.0)
+    try:
+        import json as _json
+        data = _json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError, UnicodeError):
+        return 0
+    if not isinstance(data, dict):
+        return 0
+    good = sorted(((k, float(v)) for k, v in data.items() if isinstance(k, str) and 0 < len(k) <= 80 and isinstance(v, (int, float)) and not isinstance(v, bool) and 0 < v <= now + 60 and now - v <= 86400),
+                  key=lambda kv: kv[1])[-MAX_DELIVERIES:]
+    with _guard_lock:
+        for key, when in good:
+            _seen[key] = when
+    return len(good)
+
+
+def save_memory(force=False, now=None):
+    """Writes the memory of deliveries (mode 0600, atomic) when it changed and the last write is older than SEEN_SAVE_EVERY seconds. Never raises."""
+    now = time.time() if now is None else now
+    path = _store["path"]
+    if path is None or not _store["dirty"] or (not force and now - _store["saved"] < SEEN_SAVE_EVERY):
+        return False
+    with _guard_lock:
+        snapshot = dict(_seen)
+    try:
+        from github_actions_monitor.security import private_io
+        private_io.write_private(path, json.dumps(snapshot, separators=(",", ":")))
+    except (OSError, ValueError):
+        return False
+    _store.update(dirty=False, saved=now)
+    return True
+
+
 def reset():
     """Forgets every remembered delivery and every count (tests, and a changed secret)."""
+    _store["dirty"] = False
     with _guard_lock:
         _seen.clear()
         _per_repo.clear()
@@ -158,6 +218,7 @@ def replay(delivery, window, now=None):
             return True
         _seen[delivery] = now
         _seen.move_to_end(delivery)
+        _store["dirty"] = True
         return False
 
 
@@ -203,20 +264,46 @@ def verify(secret, body, header):
         return False
 
 
-def handle(config, body, headers, watched):
-    """(http code, answer dict, repo or None). `headers` is any mapping with .get. Never raises."""
+def event_is_stale(event, body, window, now=None):
+    """True when a `workflow_run` or `workflow_job` event reports a moment older than `window` seconds (its `updated_at`, or `completed_at` of a job): a captured delivery sent again long afterwards. Whatever
+    cannot be read is not stale (the other guards stay)."""
+    if event not in ("workflow_run", "workflow_job"):
+        return False
+    now = time.time() if now is None else now
+    try:
+        obj = json.loads(body)["workflow_run" if event == "workflow_run" else "workflow_job"]
+        moment = _time(obj.get("updated_at") if event == "workflow_run" else (obj.get("completed_at") or obj.get("started_at")))
+    except (ValueError, KeyError, TypeError, AttributeError):
+        return False
+    return moment is not None and moment < now - window
+
+
+def handle(config, body, headers, watched, address=None):
+    """(http code, answer dict, repo or None). `headers` is any mapping with .get. Never raises. `address` = who sent it (localguard.client_key): the requests whose signature does NOT verify are
+    counted apart (`webhook.max_bad_per_minute`) from the ones that do, so nobody can use up the allowance of the deliveries of GitHub by sending garbage from the same address or tunnel."""
+    from github_actions_monitor.security import localguard
     if not active(config):
         return 404, {"ok": False}, None
     if len(body) > MAX_BODY:
         return 413, {"ok": False, "error": text("too_big")}, None
-    if not verify(settings(config)["secret"], body, headers.get("X-Hub-Signature-256")):
-        return 401, {"ok": False, "error": text("bad_signature")}, None
     guard = guard_settings(config)
+    if not verify(settings(config)["secret"], body, headers.get("X-Hub-Signature-256")):
+        if address is not None and localguard.over_rate("webhook_bad", address, guard["max_bad_per_minute"]):
+            return 429, {"ok": False, "error": "rate"}, None
+        return 401, {"ok": False, "error": text("bad_signature")}, None
+    if address is not None and localguard.over_rate("webhook_ok", address, guard["max_verified_per_minute"]):
+        return 429, {"ok": False, "error": "rate"}, None
     delivery = headers.get("X-GitHub-Delivery")
     if not isinstance(delivery, str) or not DELIVERY_RE.match(delivery):
         return 400, {"ok": False, "error": text("bad_delivery")}, None
-    if replay(delivery, guard["replay_seconds"]):     # a valid request captured and sent again: answered, never acted on
+    seen_id = replay(delivery, guard["replay_seconds"])
+    seen_body = replay("body:" + hashlib.sha256(body).hexdigest(), guard["replay_seconds"])      # the delivery id travels outside the signature: what is signed (the body) is remembered too
+    if guard["persist_deliveries"]:
+        save_memory()      # the memory survives a restart (once load_memory was told where)
+    if seen_id or seen_body:     # a valid request captured and sent again: answered, never acted on
         return 202, {"ok": True, "ignored": True, "duplicate": True}, None
+    if guard["reject_stale"] and event_is_stale(headers.get("X-GitHub-Event"), body, guard["replay_seconds"]):
+        return 202, {"ok": True, "ignored": True, "stale": True}, None
     event = headers.get("X-GitHub-Event")
     if event not in EVENTS:
         return 202, {"ok": True, "ignored": True}, None

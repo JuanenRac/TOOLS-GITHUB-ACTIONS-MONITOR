@@ -55,7 +55,7 @@ For several screens open one window per view, for example `?view=now&chrome=0`, 
 
 ## The API
 
-`GET /api/accounts` is the summary, `GET /api/accounts/<id>/status` one account, and every other request under `/api/` goes to the account named with `?account=<id>` or the header `X-Account-Id` (the default account when none is given). An unknown account is a 404. The access rules are the ones of a single monitor: the same host and origin check, and the same access token in the network mode. The one-use token of a change must be asked for the same account the change is sent to.
+`GET /api/accounts` is the summary, `GET /api/accounts/<id>/status` one account, and every other request under `/api/` goes to the account named with `?account=<id>` or the header `X-Account-Id` (the default account when none is given). An unknown account is a 404. The access rules are the ones of a single monitor: the same host and origin check, and the same access token in the network mode. The one-use token of a change must be asked for the same account the change is sent to. With the team mode the supervisor tells the process of each account who acts and with which role in a context it signs with the key it gave to that process (good for 30 seconds and for that account only), so the roles are decided the same way in every account: the log of actions follows `audit_log.maintainers_can_read` and `GET /api/v1/me` tells the truth. A route under `/api/v1/` needs the role of the same route without the prefix.
 
 ## One webhook for all of them
 
