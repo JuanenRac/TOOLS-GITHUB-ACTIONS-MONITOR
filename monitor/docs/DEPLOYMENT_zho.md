@@ -52,7 +52,7 @@ docker exec github-actions-monitor cat /data/state/access_token      # the acces
 
 ```sh
 cp deploy/.env.example deploy/.env                                   # fill in MONITOR_GITHUB_OWNER
-printf '%s' "ghp_..." > deploy/gh_token.txt && chmod 600 deploy/gh_token.txt
+printf '%s' "ghp_..." > deploy/gh_token.txt && sudo chown 10001:10001 deploy/gh_token.txt && chmod 600 deploy/gh_token.txt
 docker compose -f deploy/compose.yaml up -d                          # on 127.0.0.1:8765
 docker compose -f deploy/compose.yaml --profile proxy up -d          # behind Caddy (deploy/Caddyfile)
 ```
@@ -78,7 +78,7 @@ launchd（macOS）：`ProgramArguments` = `/usr/bin/python3`、`-m`、`github_ac
 
 ## 环境变量
 
-只会读取本表中的名称。在服务中，无法读取的值会带提示被忽略，不改变任何内容。指向配置某一部分的变量（`MONITOR_LISTEN_*`、`MONITOR_ALLOWED_HOSTS`、`MONITOR_PROXY_PUBLIC_HOST`、`MONITOR_SECURE_COOKIE`、`MONITOR_TRUSTED_PROXY`、`MONITOR_LOCAL_PORT`、`MONITOR_TLS_*`、`MONITOR_QUERY_ACCESS`、`MONITOR_TEAM_MODE`）会在服务每次启动时写入 `listen` 和 `auth`，因此这些键以环境变量为准；文件中的其他内容归您所有。
+只会读取本表中的名称。在服务中，无法读取的值会带提示被忽略，不改变任何内容。指向配置某一部分的变量（`MONITOR_LISTEN_*`、`MONITOR_ALLOWED_HOSTS`、`MONITOR_PROXY_PUBLIC_HOST`、`MONITOR_SECURE_COOKIE`、`MONITOR_TRUSTED_PROXY`、`MONITOR_LOCAL_PORT`、`MONITOR_TLS_*`、`MONITOR_QUERY_ACCESS`、`MONITOR_TEAM_MODE`）会在服务每次启动时写入 `listen` 和 `auth`，因此这些键以环境变量为准；文件中的其他内容归您所有。 已设置但留空的代理变量 (`MONITOR_TRUSTED_PROXY`, `MONITOR_TRUSTED_PROXIES`, `MONITOR_SECURE_COOKIE`, `MONITOR_PROXY_PUBLIC_HOST`, `MONITOR_ALLOWED_HOSTS`) 会在启动时关闭对应的键，因此 `.env` 文件中留空的一行不会让旧的代理声明继续生效；完全未设置的变量不会改变任何内容。
 
 | 变量 | 作用 |
 |---|---|

@@ -14,7 +14,7 @@
 - `py -3 bin/lint_workflows.py [路径 ...] [--json] [--fail-on info|warn|bad]` 在推送前检查 `.github/workflows/*.yml`。不带路径时查看当前文件夹。它只打开文件。`--remote OWNER/REPO`(可重复)通过 `gh` 从 GitHub 读取仓库的工作流文件,无需克隆;读不到时会说明原因(SSO 未授权、无访问权限)。
 - 规则(可在设置标签页的“工作流检查器”子标签页中分别关闭或调整严重程度):`unpinned_uses`(未固定到完整提交 SHA 的 Action)、`permissions`(没有 `permissions:` 块或为 `write-all`)、`secrets_in_clear`(看起来像写在文件里的令牌或密钥)、`injection`(第三方文本被粘贴进 `run:` 脚本)和 `pr_target`(检出拉取请求代码的 `pull_request_target`)。
 - 可选规则（开启前默认关闭）：`no_timeout`（没有 `timeout-minutes` 的作业）、`secrets_inherit`（调用可复用工作流时的 `secrets: inherit`）和 `own_action_main`（跟随 `@main` 的自有账户 action）。`unpinned_uses` 会说明该 action 是自有的还是第三方的（`lint.own_owners`），`lint.unpinned_own` 可降低或隐藏自有的。
-- 当某项发现达到 `--fail-on`(默认 `bad`)时退出码为 1,因此可作为推送前钩子。当监视器能看到你的克隆时,还会在每日报告中增加一行。
+- 当某项发现达到 `--fail-on`(默认 `bad`)时退出码为 1,因此可作为推送前钩子。当监视器能看到你的克隆时,还会在每日报告中增加一行。使用 `--remote` 时,如果某个仓库无法读取(不存在或令牌看不到、SSO 未授权、无网络)或其名称不是 `OWNER/REPO`,退出码为 2:未读取的仓库绝不会被当作干净。
 - 看起来像密钥的值会被分类,但绝不会被打印或保存:已知的令牌格式或高熵的长字符串为严重(`bad`);`placeholder`、`dummy`、`changeme`、`ci` 之类可读的占位符只是信息;其他情况为警告;`${{ secrets.X }}`、`${X}` 或空值不算发现。要让某项发现不再出现,在它所在行或上一行写注释:`# monitor-lint: ignore secrets_in_clear 因为这是 docker compose config 的占位符`(规则名或 `all`);或在设置 `lint.ignore` 中列出 `仓库:文件:规则` 模式(可用 `*`)。
 
 

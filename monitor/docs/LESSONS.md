@@ -11,7 +11,7 @@ The monitor can keep a book of the failures of your CI and a library of lessons,
 
 ## The book
 
-Every failure that the feed opens becomes one line of `data/failures.jsonl` (schema 1): `schema`, `ts`, `repo`, `workflow`, `job`, `step`, `event`, `branch`, `actor_kind`, `category`, `root_cause`, `avoidable`, `run_id`, `lesson_ref`, `had_lesson`, `sha`, `url`, `source`. Every text goes through the same cleaning as the feed (tokens, keys, addresses and the home folder never reach the book). `lessons.retention_days` and `lessons.max_entries` limit its size. A book of the same schema from another place can be imported (`lessons.import_book`).
+Every failure that the feed opens becomes one line of `data/failures.jsonl` (schema 1): `schema`, `ts`, `repo`, `workflow`, `job`, `step`, `event`, `branch`, `actor_kind`, `category`, `root_cause`, `avoidable`, `run_id`, `lesson_ref`, `had_lesson`, `sha`, `url`, `source`. Every text goes through the same cleaning as the feed (tokens, keys, addresses and the home folder never reach the book). `lessons.retention_days` and `lessons.max_entries` limit its size. A book of the same schema from another place can be imported (`POST /api/ai/failures`).
 
 ## The classifier
 

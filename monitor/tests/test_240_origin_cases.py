@@ -56,7 +56,7 @@ class SampleOfRuns(unittest.TestCase):
 
     def test_the_runs_that_are_not_a_push_of_the_repository_do_not_make_red_except_the_ones_that_can(self):
         for case in MEASURED:
-            expected = 1 if case[2] in ("schedule", "workflow_dispatch") else 0      # a failing schedule or manual run is a real red of the repository until the owner narrows ci.red_events
+            expected = 1 if case[2] in ("schedule", "workflow_dispatch", "workflow_run", "repository_dispatch") and not case[4] else 0      # a failing schedule or manual run is a real red of the repository until the owner narrows ci.red_events
             self.assertEqual(len(self.red(case)), expected, case)
 
     def test_with_only_push_in_the_events_none_of_them_is_red(self):
@@ -85,7 +85,7 @@ class LookupsOfA2(unittest.TestCase):
         self.assertEqual(found["ci.yml"]["event"], "push")
 
     def test_an_event_that_does_not_decide_is_skipped_also_when_the_head_is_the_same_repository(self):
-        items = [api_item(9, "issue_comment", "failure"), api_item(8, "workflow_run", "failure"), api_item(7, "push", "failure", days=3)]
+        items = [api_item(9, "issue_comment", "failure"), api_item(8, "pull_request_review", "failure"), api_item(7, "push", "failure", days=3)]
         self.assertEqual(sl.a2_from_listing(items, {"ci.yml"})["ci.yml"]["databaseId"], 7)
 
     def test_a_workflow_with_only_runs_that_do_not_decide_stays_unresolved(self):

@@ -112,14 +112,17 @@ class WhatTheAddressMayAsk(unittest.TestCase):
 
 class Names(unittest.TestCase):
     def test_public_hides_the_private_ones_with_a_stable_number(self):
-        names = screens.Names(["a", "b", "c"], {"a": {"private": False}, "b": {"private": True}, "c": {}}, "public")
-        self.assertEqual([names.name(r) for r in ("a", "b", "c")], ["a", "private-2", "private-3"], "a repository that is not known to be public is treated as private")
-        self.assertEqual(names.name("b"), screens.Names(["a", "b", "c"], {"b": {"private": True}}, "public").name("b"), "the same number every time")
+        names = screens.Names(["a", "b", "c"], {"a": {"private": False}, "b": {"private": True}, "c": {}}, "public", key="k" * 32)
+        shown = [names.name(r) for r in ("a", "b", "c")]
+        self.assertEqual((shown[0], sorted(shown[1:])), ("a", ["private-1", "private-2"]), "a repository that is not known to be public is treated as private; only the hidden ones are numbered")
+        again = screens.Names(["a", "b", "c"], {"a": {"private": False}, "b": {"private": True}, "c": {}}, "public", key="k" * 32)
+        self.assertEqual([again.name(r) for r in ("a", "b", "c")], shown, "the same number every time with the same key")
 
     def test_all_and_none(self):
         meta = {"a": {"private": True}}
         self.assertEqual(screens.Names(["a"], meta, "all").name("a"), "a")
-        self.assertEqual(screens.Names(["a", "b"], meta, "none").name("b"), "repo-2")
+        hidden = screens.Names(["a", "b"], meta, "none")      # the numbers follow an HMAC with the key of the installation: which one is first is not fixed, that they are 1 and 2 is
+        self.assertEqual({hidden.name("a"), hidden.name("b")}, {"repo-1", "repo-2"})
         self.assertEqual(screens.Names(["a"], meta, "bogus").mode, "public")
 
 

@@ -6,7 +6,8 @@ advice to read.
 What is guaranteed here (each point has its test, tests/test_ai_notify.py):
   * off by default; nothing is sent until you also write the name of the provider in `ai_notify.confirmed_provider` (the first confirmation per provider; changing the provider needs a new one);
   * only the fields of a CLOSED LIST travel (severity, class, repository, workflow, conclusion, streak, cause, next step, link), each one redacted like the feed for the AI tools;
-  * a cap of calls an hour and a cap of cost an hour (the cost per call is the figure that you declare: the monitor cannot know the price of your plan); a call is counted BEFORE it is made;
+  * the same budget as the explanations of the AI (the daily total, the limit and the cost of the model: `ai.daily_limit`, `ai.model_daily_limit`, `ai.cost_limit_daily`, `ai.model_cost_limit_daily`), on top of
+    its own cap of calls an hour and a cap of cost an hour (the cost per call is the figure that you declare: the monitor cannot know the price of your plan); a call is counted BEFORE it is made;
   * the key is read from an environment variable whose NAME you set in the `ai` block (`ai.api_key_env`); it is never stored, logged or sent anywhere but to the provider;
   * the AI never runs an action: its answer is cut, its links are defused and it is only written to `ai_notify.jsonl` and shown; nothing here reads a command out of it and nothing of ai_actions is imported;
   * the variant of an outgoing command (`ai_notify.command`): ONE file that you name by its absolute path, started without a shell and without arguments, that receives the same redacted JSON on its standard input.
@@ -99,6 +100,45 @@ def _spend(config, now, cfg):
     return None
 
 
+def _chosen(config, cfg):
+    """The configuration of the provider that answers the notice: the general one, or the model of the task `alert` (never another provider: the confirmation is for the provider)."""
+    from github_actions_monitor.sentinels import ai_chain
+    ai = sentinel_ai.ai_config(config)
+    chosen, _ = ai_chain.task_cfg(ai, "alert")
+    if chosen["provider"] == ai["provider"] and chosen.get("base_url") == ai.get("base_url"):
+        ai = chosen
+    ai["timeout_seconds"] = cfg["timeout_seconds"]
+    return ai
+
+
+def _reserve(ai):
+    """The notice spends the SAME budget as the explanations of the AI (one daily total, the limit of the model and the cost): the call is counted before it is made, like theirs.
+    Returns None when it may go, else `daily_cap` or the reason of the budget of the model."""
+    from github_actions_monitor.sentinels import ai_chain
+    store = sentinel_ai.Store(sentinel_ai.CACHE_FILE)
+    with store.exclusive():
+        if store.used_today() >= ai["daily_limit"]:
+            return "daily_cap"
+        blocked = ai_chain.budget_block(ai, store)
+        if blocked:
+            return blocked
+        store.add_call()
+        ai_chain.add_model_call(store, ai)
+    return None
+
+
+def _note_usage(ai, system, user, reply):
+    """Writes down the tokens (as the provider said, or an estimate) and the cost of the notice in the common budget. Never raises."""
+    try:
+        from github_actions_monitor.sentinels import ai_chain, ai_models
+        reported = getattr(sentinel_ai._USAGE, "value", None)
+        tokens_in, tokens_out = reported if reported and reported[0] is not None and reported[1] is not None else (len(system + user) // 4, len(reply) // 4)
+        store = sentinel_ai.Store(sentinel_ai.CACHE_FILE)
+        ai_chain.add_model_usage(store, ai, tokens_in, tokens_out, ai_models.cost_of(store, ai_models.provider_label(ai), sentinel_ai.model_of(ai), tokens_in, tokens_out))
+    except Exception:   # noqa: BLE001 - the figures of the budget never stop a notice
+        pass
+
+
 def _log(config, line):
     _ledger, log = _paths(config)
     try:
@@ -148,22 +188,25 @@ def notify(config, alert, now=None, transport=None, runner=None):
         reason = _spend(config, now, cfg)
         if reason:
             return {"sent": False, "reason": reason, "reply": ""}
+        ai = None
+        if not cfg["command"]:
+            ai = _chosen(config, cfg)
+            reason = _reserve(ai)
+            if reason:
+                return {"sent": False, "reason": "daily_cap" if reason == "daily_cap" else "budget_" + reason, "reply": ""}
         label = label_of(config, cfg)
         data = payload(alert)
         text = json.dumps(data, ensure_ascii=False)
         if cfg["command"]:
             raw = (runner or _command)(cfg["command"], text, cfg["timeout_seconds"])
         else:
-            ai = sentinel_ai.ai_config(config)
-            from github_actions_monitor.sentinels import ai_chain
-            chosen, _ = ai_chain.task_cfg(ai, "alert")      # the task `alert` may change the MODEL (and its limits) but never the provider: the confirmation above is for that provider
-            if chosen["provider"] == ai["provider"] and chosen.get("base_url") == ai.get("base_url"):
-                ai = chosen
-            ai["timeout_seconds"] = cfg["timeout_seconds"]
             nonce = os.urandom(6).hex()
             user = f"<<<DATA-{nonce}\n{text}\nDATA-{nonce}>>>"
+            sentinel_ai._USAGE.value = None
             raw = (transport or sentinel_ai.TRANSPORTS[ai["provider"]])(ai, SYSTEM, user)
         reply = ai_alerts.redact(sentinel_ai.clean_output(raw, 1200))
+        if ai is not None:
+            _note_usage(ai, SYSTEM, user, reply)
         _log(config, {"at": int(now), "provider": label, "alert": str(alert.get("id") or ""), "repo": data["repo"], "workflow": data["workflow"], "reply": reply})
         return {"sent": True, "reason": "ok", "reply": reply}
     except Exception as error:   # noqa: BLE001 - a notice that fails never stops the monitor

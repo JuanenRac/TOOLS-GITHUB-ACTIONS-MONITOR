@@ -17,3 +17,7 @@ An account with hundreds of repositories, many forks or several organisations sp
 6. **Do not drown in noise.** The hygiene check (`sentinel.hygiene.ruleset_mode` = `effective`, `sentinel.hygiene.skip`), the release file checks (`sentinel.surface.checks.release_assets.allow_empty`) and `sentinel.bots_apart` stop the checks that do not apply to your repositories from piling up.
 
 The Quota tab shows what each source has left and how much of it the monitor itself spends.
+
+The follow-up of the originals of forks (`upstream.enabled`) says in its panel how long one pass over all the forks takes at the pace of `upstream.requests_per_hour` and `upstream.forks_per_request`; when that is longer than `upstream.refresh_hours` the follow-up never rests (727 forks at 8 a request and 6 requests an hour take 15.2 hours). The requests of the last hour are kept when the monitor restarts, so a restart does not give the allowance back.
+
+The calls of one tick of the Sentinel (`sentinel.max_calls_per_tick`) are one count for all its stages, and a repository whose reads fail three times in a row is left alone for 30 seconds, doubling up to 10 minutes, while the others are read.

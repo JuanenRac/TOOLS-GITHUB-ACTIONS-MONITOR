@@ -64,6 +64,15 @@ jobs:
           python tools/sync_changelog.py --check
           python tools/make_help_index.py --check
           python tools/make_glance.py --check
+      - name: The demo holds the frozen contract of the read API, complete and lite
+        run: |
+          python tools/demo_monitor.py 18871 &
+          python tools/demo_monitor.py 18872 --lite &
+          for port in 18871 18872; do
+            for i in $(seq 1 60); do curl -fsS "http://127.0.0.1:$port/api/health" >/dev/null 2>&1 && break; sleep 1; done
+          done
+          python monitor/tools/check_api_contract.py --url http://127.0.0.1:18871
+          python monitor/tools/check_api_contract.py --lite --url http://127.0.0.1:18872
 
   browser:
     name: The page in a browser (eight languages, every tab)
@@ -85,7 +94,7 @@ jobs:
   page:
     name: The page works in a browser (every tab, every sub-tab of Settings, no error)
     runs-on: ubuntu-latest      # a failure here turns the CI red
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
@@ -104,6 +113,16 @@ jobs:
           python -m unittest discover -s monitor/tests -p "test_194_sort_now.py" -v
           python -m unittest discover -s monitor/tests -p "test_196_sort_alerts.py" -v
           python -m unittest discover -s monitor/tests -p "test_195_ports.py" -v
+      - name: The wall screens in every language and size, the screens page, the notification page, the AI preset page and the skipped list
+        env:
+          MONITOR_BROWSER_TESTS: "1"
+          MONITOR_REQUIRE_BROWSER: "1"
+        run: |
+          python -m unittest discover -s monitor/tests -p "test_207_wall_screens_browser.py" -v
+          python -m unittest discover -s monitor/tests -p "test_187_screens.py" -v
+          python -m unittest discover -s monitor/tests -p "test_186_skipped.py" -v
+          python -m unittest discover -s monitor/tests -p "test_188_notify_page.py" -v
+          python -m unittest discover -s monitor/tests -p "test_194_ai_preset_page.py" -v
 
   container:
     name: The image builds, runs read-only without root and survives a revoked login

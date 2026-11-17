@@ -55,7 +55,7 @@ python bin/actions_monitor.py --accounts                  # 列出账户
 
 ## API
 
-`GET /api/accounts` 是概览，`GET /api/accounts/<id>/status` 是某个账户，`/api/` 下的其他请求都会发往用 `?account=<id>` 或请求头 `X-Account-Id` 指定的账户（未指定则为默认账户）。未知账户返回 404。访问规则与单个监视器相同：同样的主机和来源检查，以及网络模式下同样的访问令牌。更改的一次性令牌必须向该更改所发往的同一账户申请。
+`GET /api/accounts` 是概览，`GET /api/accounts/<id>/status` 是某个账户，`/api/` 下的其他请求都会发往用 `?account=<id>` 或请求头 `X-Account-Id` 指定的账户（未指定则为默认账户）。未知账户返回 404。访问规则与单个监视器相同：同样的主机和来源检查，以及网络模式下同样的访问令牌。更改的一次性令牌必须向该更改所发往的同一账户申请。 在团队模式下,监督进程会用它交给该进程的密钥签名一个上下文(30 秒内有效,且只对该账户有效),告诉每个账户的进程是谁在以什么角色操作,因此每个账户都以同样方式判断角色:操作日志遵循 `audit_log.maintainers_can_read`,`GET /api/v1/me` 会如实回答。`/api/v1/` 下的路由需要与不带前缀的同一路由相同的角色。
 
 ## 一个 webhook 服务所有账户
 

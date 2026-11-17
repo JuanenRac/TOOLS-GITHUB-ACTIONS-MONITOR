@@ -7,11 +7,13 @@ hidden by them). The sentinel knows the default branch of each repository; the l
 the figure is approximate (`approx`). It is also approximate when the list of runs of a repository is as long as the sample asked for: an older workflow may be hidden beyond it.
 
 Which runs may decide (the block `ci` of the configuration):
-  * only runs of an event in `ci.red_events` (push, schedule, workflow_dispatch, merge_group by default): a pull request, a comment or an issue never makes a branch red;
+  * only runs of an event in `ci.red_events` (push, schedule, workflow_dispatch, merge_group, workflow_run, repository_dispatch by default): a pull request, a comment or an issue never makes a branch red;
   * runs of a pull request that comes from a FORK do not count, even when the fork's branch is called `main` (the head repository differs from the repository of the run) unless `ci.count_fork_runs`;
   * a run that waits for an approval (`action_required`, or a job `waiting` for an environment) is neither red nor queued: it is "awaiting approval";
   * a workflow whose last run is older than `ci.inactive_days` is "inactive", not red for ever;
-  * a red nobody has attended to (its failing run is older than `ci.red_age_days`, 30 by default, and nothing newer of the events that decide has run) AGES: it becomes "inactive" too (`ci.red_ages`);
+  * a red nobody has attended to (its failing run is older than `ci.red_age_days`, 30 by default, and nothing newer of the events that decide has run) AGES: it becomes "inactive" too (`ci.red_ages`).
+    "Has run" includes a run that has no verdict yet or never got one (cancelled, skipped, in progress, queued, waiting for an approval): the workflow is alive, so its red stays red. A workflow whose natural
+    period is longer than the age (a monthly schedule) waits for twice its observed interval before it ages;
   * the merge queue of the default branch (branches `gh-readonly-queue/<branch>/...`, event merge_group) is its own lane, shown as "merge queue";
   * `ci.extra_branches` (patterns) adds maintenance branches to the watched ones; by default only the default branch is.
 """
@@ -23,7 +25,7 @@ from github_actions_monitor import i18n
 
 BAD = ("failure", "timed_out", "startup_failure")      # `action_required` is not a failure: it is a run that waits for a person to approve it (see is_awaiting)
 IGNORED = ("cancelled", "skipped", "neutral", "stale")
-RED_EVENTS = ("push", "schedule", "workflow_dispatch", "merge_group")      # the events whose failure on the branch is a red of the repository itself (setting ci.red_events)
+RED_EVENTS = ("push", "schedule", "workflow_dispatch", "merge_group", "workflow_run", "repository_dispatch")      # the events whose failure on the branch is a red of the repository itself (setting ci.red_events)
 AUTOMATION_EVENTS = ("issues", "issue_comment", "pull_request_target", "pull_request_review", "pull_request_review_comment", "discussion", "discussion_comment", "label", "watch", "fork", "create", "delete")
 SERVICE_EVENTS = ("schedule", "workflow_dispatch", "repository_dispatch", "dynamic")
 RELEASE_EVENTS = ("release", "registry_package")
@@ -177,6 +179,16 @@ def _epoch(value):
         return None
 
 
+def _age_limit(red_age_days, items):
+    """Days a failure waits before it ages: `ci.red_age_days`, or twice the usual interval between the counted runs of the workflow when that is longer (a monthly schedule that always fails is red for as long as
+    it takes to run again, not for 30 days)."""
+    stamps = sorted(t for t in (_epoch(r.get("started")) for r in items) if t)
+    gaps = sorted(stamps[i + 1] - stamps[i] for i in range(len(stamps) - 1) if stamps[i + 1] > stamps[i])
+    if not gaps:
+        return red_age_days
+    return max(red_age_days, 2 * gaps[len(gaps) // 2] / 86400)
+
+
 def classify(runs, branch, now=None, policy=None):
     """{"red": [...], "inactive": [...]} for the runs of ONE repository. red = the last counted run of a workflow (per lane: the branch, its merge queue, a maintenance branch)
     failed; inactive = it failed but the workflow has not run for ci.inactive_days (an abandoned workflow is not red for ever). Each item is {"run", "streak", "lane", "kind"}."""
@@ -189,11 +201,12 @@ def classify(runs, branch, now=None, policy=None):
         key = workflow_key(run)
         events_of.setdefault(key, set()).add(run.get("event"))
         newest_of[key] = max(newest_of.get(key, 0), _epoch(run.get("started")) or 0)
-    series = {}
+    series, alive = {}, {}
     for run in sorted(runs, key=lambda r: r.get("started") or ""):
         where = lane(run, branch, policy)
         if where is None or is_dynamic(run) or not origin_counts(run, policy):
             continue
+        alive.setdefault((where, workflow_key(run)), []).append(_epoch(run.get("started")) or 0)      # every run of an event that decides, whatever its verdict: the workflow is still being run
         if is_awaiting(run) or run.get("status") != "completed" or not run.get("conclusion") or run.get("conclusion") in IGNORED:
             continue
         series.setdefault((where, workflow_key(run)), []).append(run)
@@ -215,7 +228,7 @@ def classify(runs, branch, now=None, policy=None):
         item = {"run": last, "streak": streak, "lane": where, "kind": kind, "recent": (sum(recent), len(recent))}
         quiet_since = newest_of.get(key) or 0
         failed_at = _epoch(last.get("started")) or 0
-        if policy.get("red_age_days") and failed_at and now - failed_at > policy["red_age_days"] * 86400:
+        if policy.get("red_age_days") and failed_at and now - failed_at > _age_limit(policy["red_age_days"], items) * 86400 and not any(t > failed_at for t in alive.get((where, key), ())):
             out["inactive"].append({**item, "aged": True})      # a failure nobody attended to for weeks is history, not an alarm that never ends
         elif policy["inactive_days"] and quiet_since and now - quiet_since > policy["inactive_days"] * 86400:
             out["inactive"].append(item)
@@ -243,10 +256,13 @@ def split_disabled(red, perms):
     to its failure, and its last run stays red for ever. A workflow GitHub switched off for inactivity is not here: that one is not a decision of the owner. Rows are matched by the name of the file."""
     if not POLICY["disabled_apart"]:
         return list(red), []
-    off = {(repo, name) for repo, p in (perms or {}).items() for name in (p or {}).get("wf_manual_files") or []}
+    off = {(repo, name): (p or {}).get("at") for repo, p in (perms or {}).items() for name in (p or {}).get("wf_manual_files") or []}
     kept, apart = [], []
     for row in red:
-        (apart if (row.get("repo"), str(row.get("file") or "").rsplit("/", 1)[-1]) in off else kept).append(row)
+        key = (row.get("repo"), str(row.get("file") or "").rsplit("/", 1)[-1])
+        read_at = off.get(key)
+        ran_after = isinstance(read_at, (int, float)) and (_epoch(row.get("since")) or 0) > read_at      # a switched-off workflow cannot run: a run later than the reading proves it was switched on again
+        (apart if key in off and not ran_after else kept).append(row)
     return kept, apart
 
 

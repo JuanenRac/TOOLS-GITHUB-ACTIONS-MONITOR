@@ -29,14 +29,14 @@ import urllib.error
 import urllib.request
 from urllib.parse import quote, urlparse
 
-from github_actions_monitor.security import netguard, private_io
+from github_actions_monitor.security import envguard, netguard, private_io
 from github_actions_monitor.util import tzdisplay
 
 CHANNELS = ("telegram", "discord", "slack", "matrix", "mqtt", "http_local", "apprise")
 KNOWN_EVENTS = ("red_new", "red_fixed", "stuck_new", "pending_sign", "release_due", "rate_low", "offline", "online", "alerts_up", "workflow_failed", "ai_alert", "collab_new", "collab_fixed", "credential_blind", "credential_back", "score_dropped", "security_new", "security_fixed", "alerts_digest", "silence_review")
-DEFAULT_EVENTS = ["red_new", "stuck_new", "pending_sign", "offline", "credential_blind"]
+DEFAULT_EVENTS = ["red_new", "stuck_new", "pending_sign", "offline", "credential_blind", "silence_review"]
 LOOPBACK = ("127.0.0.1", "localhost", "::1", "[::1]")
-ENV_RE = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}\Z")
+ENV_RE = envguard.NamePattern()      # the NAME of the variable of a channel: a plain name that is not a variable of the system or a secret of the monitor
 TIMEOUT = 8
 DEFAULTS = {"enabled": False, "allow_private_targets": False, "use_proxy": False, "events": list(DEFAULT_EVENTS), "max_per_hour": 20,
             "channels": {
@@ -231,6 +231,17 @@ def sweep_apprise(tmp=None, now=None, older=60.0):
     return removed
 
 
+def sweep_at_start():
+    """Sweeps the folders `apprise_*` of an earlier run when the monitor STARTS (not at the first send, which may be hours away): they hold the addresses of the services. Never raises."""
+    if _SWEPT:
+        return 0
+    _SWEPT.append(True)
+    try:
+        return sweep_apprise()
+    except Exception:   # noqa: BLE001 - a folder that cannot be removed never stops the start
+        return 0
+
+
 def apprise_send(cfg, text, event, run=None):
     """Hands the message to the `apprise` command. The addresses (they hold the secrets of the services) go in a private temporary file that is removed at once, never in the arguments, and the command
     gets an environment without the keys of the monitor. Returns {"channel", "ok", "reason"}; never raises."""
@@ -282,7 +293,7 @@ def notify(config, event, opener=None, connect=None, now=None):
     from github_actions_monitor.integrations import dispatcher      # the users of the team mode who asked for this event (OFF by default, its own switch)
     dispatcher.dispatch(config, event)
     cfg = settings(config)
-    if not cfg["enabled"] or (event.get("kind") not in cfg["events"] and event.get("kind") != "score_dropped" and not (event.get("kind") == "alerts_digest" and "red_new" in cfg["events"])) or event.get("owner", "main") != "main":      # score_dropped is only emitted when score.alert.notify_external is on, so it needs no entry in notify.events
+    if not cfg["enabled"] or (event.get("kind") not in cfg["events"] and event.get("kind") != "score_dropped" and not (event.get("kind") == "alerts_digest" and ("red_new" in cfg["events"] or any(i.get("kind") in cfg["events"] for i in ((event.get("args") or {}).get("items") or []) if isinstance(i, dict))))) or event.get("owner", "main") != "main":      # score_dropped is only emitted when score.alert.notify_external is on, so it needs no entry in notify.events
         return []
     live = [(n, c) for n, c in cfg["channels"].items() if c.get("enabled")]
     if not live:

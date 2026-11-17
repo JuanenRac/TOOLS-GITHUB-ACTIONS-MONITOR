@@ -105,7 +105,7 @@ class Secrets(Base):
 
 class Switch(Base):
     def test_the_defaults_and_the_wrong_values(self):
-        self.assertEqual(audit_log.settings({}), {"enabled": True, "max_mb": 10, "maintainers_can_read": False})
+        self.assertEqual(audit_log.settings({}), {"enabled": True, "max_mb": 10, "maintainers_can_read": False, "required": False, "keep_generations": 5})
         self.assertEqual(audit_log.settings({"audit_log": {"enabled": "no", "max_mb": 0, "maintainers_can_read": 1}}), audit_log.DEFAULTS)
 
     def test_off_writes_nothing(self):
@@ -122,7 +122,7 @@ class Switch(Base):
         example = json.loads((HERE / "assets" / "examples" / "actions_monitor.example.json").read_text(encoding="utf-8"))
         self.assertEqual(example["audit_log"], audit_log.DEFAULTS)
         keys = sorted(k for k in settings_api.FIELDS if k.startswith("audit_log."))
-        self.assertEqual(keys, ["audit_log.enabled", "audit_log.maintainers_can_read", "audit_log.max_mb"])
+        self.assertEqual(keys, ["audit_log.enabled", "audit_log.keep_generations", "audit_log.maintainers_can_read", "audit_log.max_mb", "audit_log.required"])
         for key in keys:
             self.assertTrue(settings_api.check_value(key, audit_log.DEFAULTS[key.split(".")[1]])[0], key)
 

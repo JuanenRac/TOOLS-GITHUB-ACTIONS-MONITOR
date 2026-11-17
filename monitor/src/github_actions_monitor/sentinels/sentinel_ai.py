@@ -21,8 +21,10 @@ Safety rules (all enforced here, tested in tests/test_sentinel.py):
   - a daily cap of provider calls and a cache per input (same input = no new call);
   - the output is cut, URLs are defused and the verdict is forced into a closed list.
 """
+import contextlib
 import hashlib
 import json
+import logging
 import os
 import re
 import secrets as _secrets
@@ -35,9 +37,9 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from github_actions_monitor import i18n
-from github_actions_monitor.security import netguard, private_io
+from github_actions_monitor.security import envguard, netguard, private_io
 from github_actions_monitor.security.redactor import redact as _redact
-from github_actions_monitor.storage import state_io
+from github_actions_monitor.storage import locks, state_io
 
 from github_actions_monitor.util import paths
 CACHE_FILE = paths.place("sentinel_ai_cache.json")
@@ -51,10 +53,10 @@ ANTHROPIC_VERSION = "2023-06-01"
 AI_DEFAULTS = {
     "provider": "none", "model": "", "daily_limit": 30, "max_input_chars": 5000, "max_output_chars": 1500,
     "timeout_seconds": 90, "ollama_url": "http://127.0.0.1:11434",
-    "base_url": "", "api_key_env": "",
+    "base_url": "", "api_key_env": "", "allow_private_targets": False,      # an https provider on a private address (a server of the local network) is refused unless this is on
     # what the model may look at and say (the settings page): the kinds of event it may analyse, the repositories it may see (empty = only the ones the monitor watches), the language of its answers
     "events": ["build", "codeql", "report"], "allowed_repos": [], "answer_language": "",
-    "tasks": {}, "fallback": "", "fallback_max_attempts": 3, "fallback_after_seconds": 0,      # a model per kind of question and the chain when one fails (ai_chain.py); empty = only the general model
+    "tasks": {}, "fallback": "", "fallback_max_attempts": 3, "fallback_after_seconds": 0, "fallback_cloud_allowed": [],      # a model per kind of question and the chain when one fails (ai_chain.py); empty = only the general model
     "model_daily_limit": 0, "cost_limit_daily": 0, "model_cost_limit_daily": 0,      # budgets (0 = no limit): calls per model per day, estimated cost per model and in total
     "catalog": {"enabled": False, "ttl_minutes": 360, "max_requests_per_day": 20, "fit_context": False},      # the live list of models of the provider (ai_models.py): off for background use, a person asking for it is always served
     "skill": True, "skill_max_chars": 3000,      # the core of the skill of the AI of the monitor (skills/internal/SKILL.md) goes into every prompt, cut to this size (a small local model: 1500)
@@ -69,6 +71,10 @@ SECRET_PATTERNS = [
     re.compile(r"""(?i)(password|passwd|secret|api[_-]?key|private[_-]?key)["']?\s*[:=]\s*(?:"[^"\n]*"|'[^'\n]*'|\S+)"""),
     re.compile(r"\b[A-Fa-f0-9]{40,}\b"), re.compile(r"\b[A-Za-z0-9+/]{48,}={0,2}"),
 ]
+MAX_REPORTED_TOKENS = 10_000_000      # what a provider says it spent is believed up to here: a figure above is a mistake of the provider and would shut the AI for the day
+ANSI = re.compile(r"\x1b\[[0-9;?]*[ -/]*[@-~]|\x1b[@-_]")
+ACTIVE_SCHEME = re.compile(r"(?i)\b(?:javascript|vbscript|data|blob):\S*")
+HTML_TAG = re.compile(r"(?i)</?[a-z][^>\n]{0,200}>")
 CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
 
@@ -87,6 +93,9 @@ def ai_config(config):
         merged["timeout_seconds"] = max(5, min(300, int(merged["timeout_seconds"])))
         merged["skill_max_chars"] = max(300, min(12000, int(merged["skill_max_chars"])))
         merged["skill"] = merged["skill"] is True
+        merged["allow_private_targets"] = merged["allow_private_targets"] is True
+        allowed = merged["fallback_cloud_allowed"]
+        merged["fallback_cloud_allowed"] = [str(x).strip()[:60] for x in allowed if isinstance(x, str) and x.strip()][:20] if isinstance(allowed, list) else []
         merged["fallback"] = merged["fallback"] if isinstance(merged["fallback"], (str, list)) else ""
         merged["tasks"] = merged["tasks"] if isinstance(merged["tasks"], dict) else {}
         network = (config or {}).get("network")
@@ -122,8 +131,9 @@ def sanitize_text(text, max_chars, keep="tail"):
 
 def clean_output(text, max_chars=1500):
     """The answer is only TEXT: control characters out, URLs defused, length capped."""
-    text = CONTROL.sub("", str(text or "")).strip()
+    text = CONTROL.sub("", ANSI.sub("", str(text or ""))).strip()
     text = re.sub(r"(?i)\b(?:https?|ftp|file)://\S+", i18n.t("ai.link_removed"), text)
+    text = HTML_TAG.sub("", ACTIVE_SCHEME.sub(i18n.t("ai.link_removed"), text))
     return text[:max_chars] + ("..." if len(text) > max_chars else "")
 
 
@@ -163,6 +173,7 @@ class Store:
     def __init__(self, path=CACHE_FILE):
         self.path = Path(path)
         self.lock = threading.RLock()
+        self._depth = 0      # how many `exclusive()` blocks of this thread are open (the lock of the system is taken by the first)
         try:
             self.data = state_io.load_json(self.path)
         except (OSError, ValueError):
@@ -178,6 +189,48 @@ class Store:
     @staticmethod
     def today():
         return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    def sync(self):
+        """Reads the file again: what another process wrote (its calls of the day, its table, its catalogue) is what counts; only the answers kept in memory and not yet written are added to it."""
+        try:
+            fresh = state_io.load_json(self.path)
+        except (OSError, ValueError):
+            return
+        if not isinstance(fresh, dict):
+            return
+        entries = fresh.get("entries") if isinstance(fresh.get("entries"), dict) else {}
+        for key, value in self.data.get("entries", {}).items():
+            entries.setdefault(key, value)
+        fresh["entries"] = entries
+        fresh.setdefault("day", "")
+        fresh.setdefault("count", 0)
+        self.data = fresh
+
+    @contextlib.contextmanager
+    def exclusive(self):
+        """Read, change and write the file as ONE step for every thread and every process that shares it (a lock of the operating system, see storage/locks.py): two processes can no longer each make
+        their own quota. Nested blocks of the same thread only open the outer one. When the lock cannot be taken in time the block runs with the lock of this process only."""
+        with self.lock:
+            if self._depth:
+                yield
+                return
+            self._depth = 1
+            stack = contextlib.ExitStack()
+            try:
+                taken = True
+                try:
+                    stack.enter_context(locks.os_lock(self.path))
+                except TimeoutError:
+                    taken = False
+                    logging.getLogger("github_actions_monitor.sentinel_ai").warning("the store of the AI is held by another process: the block runs without the lock between processes")
+                with stack:
+                    if taken:
+                        self.sync()
+                    yield
+                    if taken:
+                        self.save()
+            finally:
+                self._depth = 0
 
     def used_today(self):
         return self.data["count"] if self.data["day"] == self.today() else 0
@@ -227,18 +280,18 @@ class ProviderError(RuntimeError):
 def note_usage(body, in_key, out_key):
     """Keeps the tokens a provider reported in its answer (body[in_key], body[out_key]) for the call that is running in this thread."""
     def number(value):
-        return value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else None
+        return min(value, MAX_REPORTED_TOKENS) if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else None
     source = body if isinstance(body, dict) else {}
     usage = source.get("usage") if isinstance(source.get("usage"), dict) else source
     _USAGE.value = (number(usage.get(in_key)), number(usage.get(out_key)))
 
 
-def _post_json(url, payload, headers, timeout, use_proxy=False):
+def _post_json(url, payload, headers, timeout, use_proxy=False, allow_private=False):
     """The call to a provider: no redirect is followed (the key would go on to another address) and no proxy of the environment is used for a server on this computer (nor for any other unless
     `network.use_proxy`): netguard.open_plain."""
     request = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), method="POST",
                                      headers={"Content-Type": "application/json", **headers})
-    with netguard.open_plain(request, timeout=timeout, use_proxy=use_proxy) as answer:
+    with netguard.open_plain(request, timeout=timeout, use_proxy=use_proxy, allow_private=allow_private) as answer:
         return json.loads(answer.read(2_000_000).decode("utf-8", "replace"))
 
 
@@ -259,12 +312,12 @@ def ollama_chat(cfg, system, user):
     body = _post_json(cfg["ollama_url"].rstrip("/") + "/api/chat",
                       {"model": model_of(cfg), "stream": False, "options": {"temperature": 0.1},
                        "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]},
-                      {}, cfg["timeout_seconds"], cfg.get("use_proxy") is True)
+                      {}, cfg["timeout_seconds"], cfg.get("use_proxy") is True, allow_private=cfg.get("allow_private_targets") is True)
     note_usage(body, "prompt_eval_count", "eval_count")
     return (body.get("message") or {}).get("content", "")
 
 
-ENV_NAME = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}\Z")
+ENV_NAME = envguard.NamePattern()      # the NAME of the variable of the key: a plain name that is not a variable of the system or a secret of the monitor
 
 
 def compat_problem(cfg):
@@ -296,7 +349,7 @@ def openai_compatible_chat(cfg, system, user):
     try:
         body = _post_json(url, {"model": cfg["model"], "temperature": 0.1, "max_tokens": 500,
                                 "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]},
-                          {"Authorization": "Bearer " + key, "api-key": key} if key else {}, cfg["timeout_seconds"], cfg.get("use_proxy") is True)
+                          {"Authorization": "Bearer " + key, "api-key": key} if key else {}, cfg["timeout_seconds"], cfg.get("use_proxy") is True, allow_private=cfg.get("allow_private_targets") is True)
     except urllib.error.HTTPError as error:
         raise ProviderError(i18n.t("ai.provider_answered", code=error.code), error.code) from None
     note_usage(body, "prompt_tokens", "completion_tokens")
@@ -327,7 +380,7 @@ def anthropic_chat(cfg, system, user):
     url = (cfg.get("base_url") or ANTHROPIC_URL).rstrip("/") + "/v1/messages"
     try:
         body = _post_json(url, {"model": cfg["model"], "max_tokens": 600, "temperature": 0.1, "system": system, "messages": [{"role": "user", "content": user}]},
-                          {"x-api-key": key, "anthropic-version": ANTHROPIC_VERSION}, cfg["timeout_seconds"], cfg.get("use_proxy") is True)
+                          {"x-api-key": key, "anthropic-version": ANTHROPIC_VERSION}, cfg["timeout_seconds"], cfg.get("use_proxy") is True, allow_private=cfg.get("allow_private_targets") is True)
     except urllib.error.HTTPError as error:
         raise ProviderError(i18n.t("ai.provider_answered", code=error.code), error.code) from None
     note_usage(body, "input_tokens", "output_tokens")
@@ -448,19 +501,22 @@ def explain(kind, data, cfg, store, transport=None, task=None):
     for index, cand in enumerate(chain):
         ccfg = dict(cand["cfg"])
         last = index == len(chain) - 1
-        blocked = ai_chain.budget_block(ccfg, store) or ("retired" if not last and ai_chain.retired(ccfg, store) else None)
+        blocked = cand.get("blocked") or ai_chain.budget_block(ccfg, store) or ("retired" if not last and ai_chain.retired(ccfg, store) else None)
         if blocked:
             failed.append({"model": cand["label"], "reason": blocked})
             continue
         if not last and cfg.get("fallback_after_seconds"):
             ccfg["timeout_seconds"] = min(ccfg["timeout_seconds"], int(cfg["fallback_after_seconds"]))
-        with store.lock:
+        with store.exclusive():      # for the threads and for the other processes that share the file
             if store.used_today() >= cfg["daily_limit"]:
                 failed.append({"model": cand["label"], "reason": "daily_cap"})
                 break
+            again = ai_chain.budget_block(ccfg, store)      # the check and the count are one step: two requests at once cannot both spend the last call of a model
+            if again:
+                failed.append({"model": cand["label"], "reason": again})
+                continue
             store.add_call()  # counted before the call: a failing provider also spends the cap
             ai_chain.add_model_call(store, ccfg)
-            store.save()
         piece = clean if len(clean) <= ccfg["max_input_chars"] else sanitize_text(clean, ccfg["max_input_chars"], keep="tail" if kind == "build" else "head")
         system, user = build_prompt(kind, piece, _secrets.token_hex(6), cfg.get("answer_language") or None, lesson, skill)
         _USAGE.value = None
@@ -480,6 +536,8 @@ def explain(kind, data, cfg, store, transport=None, task=None):
         break
     if failed:
         ai_chain.note_failover(store, ai_chain.task_of(kind, task), failed[0]["model"], failed[0]["reason"], answered[0]["label"] if answered else "")
+    if answered is not None and answered[0].get("role") == "fallback" and ai_chain.is_cloud(answered[1]) and not ai_chain.is_cloud(first):
+        ai_chain.cloud_switch(chain[0]["label"], answered[0]["label"])      # from this computer to the internet: it is written down and told
     note = {"fallback": {"failed": failed, "used": answered[0]["label"] if answered else ""}} if failed else {}
     if answered is None:
         last_failure = failed[-1] if failed else {}

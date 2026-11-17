@@ -17,3 +17,7 @@
 6. **ノイズに埋もれない。** 衛生チェック（`sentinel.hygiene.ruleset_mode` = `effective`、`sentinel.hygiene.skip`）、リリースファイルの確認（`sentinel.surface.checks.release_assets.allow_empty`）、`sentinel.bots_apart` により、リポジトリに当てはまらないチェックが溜まるのを防ぎます。
 
 割り当てタブには、各ソースの残りとモニター自身の消費量が表示されます。
+
+フォークの元リポジトリの追跡(`upstream.enabled`)は、`upstream.requests_per_hour` と `upstream.forks_per_request` のペアですべてのフォークを一巡するのにかかる時間をパネルに表示します。これが `upstream.refresh_hours` より長いと追跡は休むことがありません(727 件のフォークを 1 回 8 件、1 時間 6 回で読むと 15.2 時間かかります)。直近 1 時間のリクエストは再起動後も保持されるため、再起動で割り当てが戻ることはありません。
+
+センチネルの 1 ティック分の呼び出し(`sentinel.max_calls_per_tick`)は、すべての段階で 1 つの数として数えられます。読み取りが 3 回続けて失敗したリポジトリは 30 秒間(最大 10 分まで倍々で)放置され、その間にほかのリポジトリが読み取られます。

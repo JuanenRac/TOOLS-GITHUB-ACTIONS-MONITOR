@@ -23,6 +23,7 @@ from datetime import datetime, timezone
 from github_actions_monitor import i18n
 from github_actions_monitor.app import toolconfig
 from github_actions_monitor.security import envguard
+from github_actions_monitor.security.redactor import redact
 
 NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}\Z")
 DELIVERY_RE = re.compile(r"^[A-Za-z0-9-]{8,64}\Z")   # X-GitHub-Delivery: a GUID
@@ -31,6 +32,8 @@ MIN_SECRET = 32
 SECRET_ENV = "MONITOR_WEBHOOK_SECRET"      # the default name of the variable that holds the shared secret
 ENV_NAME_RE = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}\Z")
 MAX_BODY = 262144
+MAX_VERIFIED_PER_MINUTE = 120    # the default of `webhook.max_verified_per_minute`: requests that carry a good signature one address (a tunnel is ONE address) may send per minute
+SEEN_SAVE_EVERY = 2.0            # seconds: the memory of deliveries is written at most this often
 MAX_DELIVERIES = 2000        # the replay memory is bounded: the oldest delivery ids fall out first
 EVENTS = ("workflow_run", "workflow_job", "check_run", "push", "release", "check_suite", "ping")      # the closed list: any other event is answered 202 and dropped
 
@@ -41,11 +44,25 @@ def text(key):
     return i18n.t(TEXT[key])
 
 
+_frozen_name = [None]      # the name the process started with: a change of the setting is read at the next start (it is a `restart` setting), never while the process runs
+
+
 def secret_env_name(config):
-    """The NAME of the environment variable that holds the shared secret (`webhook.secret_env`); a name that is not a plain variable name falls back to MONITOR_WEBHOOK_SECRET."""
+    """The NAME of the environment variable that holds the shared secret (`webhook.secret_env`); a name that is not a plain variable name, or that belongs to the system, to the login to GitHub or
+    to another secret of the monitor (PATH, GH_TOKEN, MONITOR_ACCESS_TOKEN...), falls back to MONITOR_WEBHOOK_SECRET. Once `freeze_secret_name` ran, that name is the one."""
+    if _frozen_name[0]:
+        return _frozen_name[0]
     cfg = (config or {}).get("webhook")
     name = cfg.get("secret_env") if isinstance(cfg, dict) else None
-    return name if isinstance(name, str) and ENV_NAME_RE.match(name) else SECRET_ENV
+    return name if isinstance(name, str) and ENV_NAME_RE.match(name) and not envguard.forbidden_name(name, own=(SECRET_ENV,)) else SECRET_ENV
+
+
+def freeze_secret_name(config):
+    """Remembers the variable named at start, takes it out of the environment and keeps reading that one for the whole life of the process."""
+    _frozen_name[0] = None
+    _frozen_name[0] = secret_env_name(config)
+    envguard.hold(_frozen_name[0])
+    return _frozen_name[0]
 
 
 def read_secret(name):
@@ -89,8 +106,8 @@ def live_settings(config):
 
 
 def guard_settings(config):
-    """{"replay_seconds", "max_per_minute", "allowed_owners"}: how long a delivery id is remembered, how many accepted events one repository may cause per minute, and the owners
-    (besides github_owner) whose repositories may be named in a payload."""
+    """{"replay_seconds", "max_per_minute", "max_bad_per_minute", "allowed_owners"}: how long a delivery is remembered, how many accepted events one repository may cause per minute, how many
+    requests with a signature that does not verify one address may send per minute, and the owners (besides github_owner) whose repositories may be named in a payload."""
     cfg = (config or {}).get("webhook")
     cfg = cfg if isinstance(cfg, dict) else {}
 
@@ -98,7 +115,9 @@ def guard_settings(config):
         value = cfg.get(key)
         return value if isinstance(value, int) and not isinstance(value, bool) and low <= value <= high else default
     owners = [o for o in (cfg.get("allowed_owners") or []) if isinstance(o, str) and re.match(r"^[A-Za-z0-9-]{1,39}$", o)] if isinstance(cfg.get("allowed_owners"), list) else []
-    return {"replay_seconds": number("replay_seconds", 3600, 60, 86400), "max_per_minute": number("max_per_minute", 30, 1, 600), "allowed_owners": owners}
+    return {"replay_seconds": number("replay_seconds", 3600, 60, 86400), "max_per_minute": number("max_per_minute", 30, 1, 600), "max_bad_per_minute": number("max_bad_per_minute", 120, 1, 6000),
+            "max_verified_per_minute": number("max_verified_per_minute", MAX_VERIFIED_PER_MINUTE, 1, 6000), "reject_stale": cfg.get("reject_stale") is True, "persist_deliveries": cfg.get("persist_deliveries", True) is True,
+            "allowed_owners": owners}
 
 
 _guard_lock = threading.Lock()
@@ -110,8 +129,50 @@ _accepted = collections.deque(maxlen=5000)     # when each event that named a wa
 _started = [time.time()]
 
 
+_store = {"path": None, "dirty": False, "saved": 0.0}      # the file where the memory of deliveries survives a restart (set by load_memory; tests do not set it)
+
+
+def load_memory(path, now=None):
+    """Reads the memory of deliveries kept in `path` (a JSON object {key: time}; a missing, damaged or hand-edited file is an empty memory) and, from now on, keeps it there. Only the newest
+    MAX_DELIVERIES entries are taken, and what is no older than a day. The keys are ids and hashes of signed bodies, never a body or a secret."""
+    from pathlib import Path
+    now = time.time() if now is None else now
+    _store.update(path=Path(path), dirty=False, saved=0.0)
+    try:
+        import json as _json
+        data = _json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError, UnicodeError):
+        return 0
+    if not isinstance(data, dict):
+        return 0
+    good = sorted(((k, float(v)) for k, v in data.items() if isinstance(k, str) and 0 < len(k) <= 80 and isinstance(v, (int, float)) and not isinstance(v, bool) and 0 < v <= now + 60 and now - v <= 86400),
+                  key=lambda kv: kv[1])[-MAX_DELIVERIES:]
+    with _guard_lock:
+        for key, when in good:
+            _seen[key] = when
+    return len(good)
+
+
+def save_memory(force=False, now=None):
+    """Writes the memory of deliveries (mode 0600, atomic) when it changed and the last write is older than SEEN_SAVE_EVERY seconds. Never raises."""
+    now = time.time() if now is None else now
+    path = _store["path"]
+    if path is None or not _store["dirty"] or (not force and now - _store["saved"] < SEEN_SAVE_EVERY):
+        return False
+    with _guard_lock:
+        snapshot = dict(_seen)
+    try:
+        from github_actions_monitor.security import private_io
+        private_io.write_private(path, json.dumps(snapshot, separators=(",", ":")))
+    except (OSError, ValueError):
+        return False
+    _store.update(dirty=False, saved=now)
+    return True
+
+
 def reset():
     """Forgets every remembered delivery and every count (tests, and a changed secret)."""
+    _store["dirty"] = False
     with _guard_lock:
         _seen.clear()
         _per_repo.clear()
@@ -157,6 +218,7 @@ def replay(delivery, window, now=None):
             return True
         _seen[delivery] = now
         _seen.move_to_end(delivery)
+        _store["dirty"] = True
         return False
 
 
@@ -202,20 +264,46 @@ def verify(secret, body, header):
         return False
 
 
-def handle(config, body, headers, watched):
-    """(http code, answer dict, repo or None). `headers` is any mapping with .get. Never raises."""
+def event_is_stale(event, body, window, now=None):
+    """True when a `workflow_run` or `workflow_job` event reports a moment older than `window` seconds (its `updated_at`, or `completed_at` of a job): a captured delivery sent again long afterwards. Whatever
+    cannot be read is not stale (the other guards stay)."""
+    if event not in ("workflow_run", "workflow_job"):
+        return False
+    now = time.time() if now is None else now
+    try:
+        obj = json.loads(body)["workflow_run" if event == "workflow_run" else "workflow_job"]
+        moment = _time(obj.get("updated_at") if event == "workflow_run" else (obj.get("completed_at") or obj.get("started_at")))
+    except (ValueError, KeyError, TypeError, AttributeError):
+        return False
+    return moment is not None and moment < now - window
+
+
+def handle(config, body, headers, watched, address=None):
+    """(http code, answer dict, repo or None). `headers` is any mapping with .get. Never raises. `address` = who sent it (localguard.client_key): the requests whose signature does NOT verify are
+    counted apart (`webhook.max_bad_per_minute`) from the ones that do, so nobody can use up the allowance of the deliveries of GitHub by sending garbage from the same address or tunnel."""
+    from github_actions_monitor.security import localguard
     if not active(config):
         return 404, {"ok": False}, None
     if len(body) > MAX_BODY:
         return 413, {"ok": False, "error": text("too_big")}, None
-    if not verify(settings(config)["secret"], body, headers.get("X-Hub-Signature-256")):
-        return 401, {"ok": False, "error": text("bad_signature")}, None
     guard = guard_settings(config)
+    if not verify(settings(config)["secret"], body, headers.get("X-Hub-Signature-256")):
+        if address is not None and localguard.over_rate("webhook_bad", address, guard["max_bad_per_minute"]):
+            return 429, {"ok": False, "error": "rate"}, None
+        return 401, {"ok": False, "error": text("bad_signature")}, None
+    if address is not None and localguard.over_rate("webhook_ok", address, guard["max_verified_per_minute"]):
+        return 429, {"ok": False, "error": "rate"}, None
     delivery = headers.get("X-GitHub-Delivery")
     if not isinstance(delivery, str) or not DELIVERY_RE.match(delivery):
         return 400, {"ok": False, "error": text("bad_delivery")}, None
-    if replay(delivery, guard["replay_seconds"]):     # a valid request captured and sent again: answered, never acted on
+    seen_id = replay(delivery, guard["replay_seconds"])
+    seen_body = replay("body:" + hashlib.sha256(body).hexdigest(), guard["replay_seconds"])      # the delivery id travels outside the signature: what is signed (the body) is remembered too
+    if guard["persist_deliveries"]:
+        save_memory()      # the memory survives a restart (once load_memory was told where)
+    if seen_id or seen_body:     # a valid request captured and sent again: answered, never acted on
         return 202, {"ok": True, "ignored": True, "duplicate": True}, None
+    if guard["reject_stale"] and event_is_stale(headers.get("X-GitHub-Event"), body, guard["replay_seconds"]):
+        return 202, {"ok": True, "ignored": True, "stale": True}, None
     event = headers.get("X-GitHub-Event")
     if event not in EVENTS:
         return 202, {"ok": True, "ignored": True}, None
@@ -229,7 +317,7 @@ def handle(config, body, headers, watched):
         return 400, {"ok": False, "error": text("bad_payload")}, None
     if not isinstance(name, str) or not NAME_RE.match(name) or name not in set(watched):
         return 202, {"ok": True, "ignored": True}, None
-    if full is not None:   # the owner named in the payload must be one this monitor watches
+    if True:   # the owner named in the payload must be one this monitor watches; GitHub always names it, so a payload without it is not believed
         found = FULL_NAME_RE.match(full) if isinstance(full, str) else None
         owners = {o.lower() for o in guard["allowed_owners"]} | {toolconfig.github_owner(config).lower()}
         owners.discard("")
@@ -244,6 +332,7 @@ def handle(config, body, headers, watched):
 LIVE_FIELDS = ("event", "repo", "run_id", "status", "conclusion", "branch", "sha", "url", "attempt", "workflow", "path", "started", "seconds", "job", "queue")
 
 
+RUN_EVENT_RE = re.compile(r"^[a-z_]{1,30}\Z")
 GITHUB_URL = re.compile(r"^https://[A-Za-z0-9.-]+/[A-Za-z0-9._/-]{1,200}\Z")   # a link to the run on github.com or on a GitHub Enterprise Server host
 
 
@@ -254,8 +343,26 @@ def _time(text):
         return None
 
 
+CONTROL = re.compile("[\x00-\x1f\x7f-\x9f\u2028\u2029]+")
+STATUSES = ("queued", "in_progress", "completed", "waiting", "requested", "pending")
+CONCLUSIONS = ("success", "failure", "neutral", "cancelled", "skipped", "timed_out", "action_required", "startup_failure", "stale")
+
+
 def _name(value, size=100):
-    return value[:size] if isinstance(value, str) and value else ""
+    """A free text of the payload (a workflow, a branch, a job, a step): one line, no control characters, no secret, cut. It reaches the live list, the stream and the notices."""
+    if not isinstance(value, str) or not value:
+        return ""
+    return redact(CONTROL.sub(" ", value).strip())[:size]
+
+
+def _word(value, allowed):
+    """The status or the conclusion only when it is one of the closed list of GitHub, else nothing."""
+    return value if isinstance(value, str) and value in allowed else ""
+
+
+def _stamp(text):
+    """The date of the payload in the one shape the monitor reads, or nothing."""
+    return text if isinstance(text, str) and _time(text) is not None else ""
 
 
 def parse_event(event, body):
@@ -273,14 +380,21 @@ def parse_event(event, body):
         return None
     if not isinstance(repo, str) or not NAME_RE.match(repo) or not isinstance(obj, dict) or not isinstance(obj.get("id"), int):
         return None
+    full = payload["repository"].get("full_name") if isinstance(payload.get("repository"), dict) else None
     url = obj.get("html_url") if isinstance(obj.get("html_url"), str) and GITHUB_URL.match(obj["html_url"]) else None
-    record = {"event": event, "repo": repo, "run_id": obj["run_id"] if event == "workflow_job" and isinstance(obj.get("run_id"), int) else obj["id"], "status": _name(obj.get("status"), 20),
-              "conclusion": _name(obj.get("conclusion"), 20) or None, "branch": _name(obj.get("head_branch")), "sha": _name(obj.get("head_sha"), 40)[:7], "url": url,
+    if url is not None:      # the link goes to the notices and the live list: it must point to the repository the payload names (owner and name), not to any address
+        path = "/" + url.split("/", 3)[3] if url.count("/") >= 3 else ""
+        if not (isinstance(full, str) and FULL_NAME_RE.match(full) and path.lower().startswith(f"/{full}/".lower())):
+            url = None
+    record = {"event": event, "repo": repo, "run_id": obj["run_id"] if event == "workflow_job" and isinstance(obj.get("run_id"), int) else obj["id"], "status": _word(obj.get("status"), STATUSES),
+              "conclusion": _word(obj.get("conclusion"), CONCLUSIONS) or None, "branch": _name(obj.get("head_branch")), "sha": _name(obj.get("head_sha"), 40)[:7], "url": url,
               "attempt": obj.get("run_attempt") if isinstance(obj.get("run_attempt"), int) else None}
     if event == "workflow_run":
+        kind = obj.get("event")      # push, schedule, pull_request...: the rule of the red counts a run by it, so it is kept (a short word, never free text)
+        record["run_event"] = kind if isinstance(kind, str) and RUN_EVENT_RE.match(kind) else ""
         record["workflow"] = _name(obj.get("name"))
         record["path"] = _name(obj.get("path"), 200).split("@")[0].rsplit("/", 1)[-1]
-        record["started"] = _name(obj.get("run_started_at") or obj.get("created_at"), 25)
+        record["started"] = _stamp(obj.get("run_started_at")) or _stamp(obj.get("created_at"))
         a, b = _time(obj.get("run_started_at") or obj.get("created_at")), _time(obj.get("updated_at"))
         record["seconds"] = max(0, int(b - a)) if a is not None and b is not None and obj.get("status") == "completed" else None
     else:
@@ -302,7 +416,7 @@ def as_run(record):
     """The record of a `workflow_run` in the shape of the run list of the monitor (so a webhook can update a repository without reading it again)."""
     if not record or record.get("event") != "workflow_run":
         return None
-    return {"repo": record["repo"], "id": record["run_id"], "name": record["workflow"], "title": "", "event": "webhook", "branch": record["branch"], "path": record["path"], "sha": record["sha"],
+    return {"repo": record["repo"], "id": record["run_id"], "name": record["workflow"], "title": "", "event": record.get("run_event") or "webhook", "branch": record["branch"], "path": record["path"], "sha": record["sha"],
             "actor": "", "status": record["status"], "conclusion": record["conclusion"], "started": record["started"], "seconds": record["seconds"] or 0, "url": record["url"], "attempt": record.get("attempt")}
 
 

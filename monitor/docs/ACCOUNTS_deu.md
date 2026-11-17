@@ -55,7 +55,7 @@ Für mehrere Bildschirme öffne ein Fenster pro Ansicht, zum Beispiel `?view=now
 
 ## Die API
 
-`GET /api/accounts` ist die Übersicht, `GET /api/accounts/<id>/status` ein Konto, und jede andere Anfrage unter `/api/` geht an das Konto, das mit `?account=<id>` oder dem Header `X-Account-Id` genannt wird (das Standardkonto, wenn keines angegeben ist). Ein unbekanntes Konto ergibt 404. Die Zugriffsregeln sind die eines einzelnen Monitors: dieselbe Prüfung von Host und Origin und dasselbe Zugriffstoken im Netzwerkmodus. Das Einmal-Token einer Änderung muss bei demselben Konto angefordert werden, an das die Änderung gesendet wird.
+`GET /api/accounts` ist die Übersicht, `GET /api/accounts/<id>/status` ein Konto, und jede andere Anfrage unter `/api/` geht an das Konto, das mit `?account=<id>` oder dem Header `X-Account-Id` genannt wird (das Standardkonto, wenn keines angegeben ist). Ein unbekanntes Konto ergibt 404. Die Zugriffsregeln sind die eines einzelnen Monitors: dieselbe Prüfung von Host und Origin und dasselbe Zugriffstoken im Netzwerkmodus. Das Einmal-Token einer Änderung muss bei demselben Konto angefordert werden, an das die Änderung gesendet wird. Im Teammodus teilt der Supervisor dem Prozess jedes Kontos in einem Kontext, den er mit dem Schlüssel signiert, den er diesem Prozess gegeben hat (30 Sekunden und nur für dieses Konto gültig), mit, wer handelt und mit welcher Rolle; die Rollen werden so in jedem Konto gleich entschieden: Das Aktionsprotokoll folgt `audit_log.maintainers_can_read`, und `GET /api/v1/me` sagt die Wahrheit. Eine Route unter `/api/v1/` braucht die Rolle derselben Route ohne Präfix.
 
 ## Ein Webhook für alle
 

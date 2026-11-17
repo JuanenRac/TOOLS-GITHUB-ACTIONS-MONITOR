@@ -15,7 +15,7 @@ Choose your language / Elige tu idioma / Sprache wählen / Choisissez votre lang
   Português (PT) . docs/README_pt.txt   docs/QUICKSTART_pt.txt
 
 QUICK START (English)
-  1. Install Python 3.10+ and the GitHub CLI (gh); then run once:  gh auth login
+  1. Install Python 3.11+ and the GitHub CLI (gh); then run once:  gh auth login
   2. Start:  Windows: MONITOR_GITHUB_ACTIONS.bat | Linux: ./MONITOR_GITHUB_ACTIONS.sh | macOS: MONITOR_GITHUB_ACTIONS.command
   3. A page opens at http://127.0.0.1:8765 (only on your computer). Pick your language in the header.
   It does NOT sign or publish anything by itself, writes nothing to GitHub on its own (only `dispatch --go`, `dispatch --real` and `finalize --execute`, which you run, do) and keeps no token unless you switch on the optional one (Settings > Advanced). Everything that reaches beyond this computer or acts on GitHub is OFF by default.

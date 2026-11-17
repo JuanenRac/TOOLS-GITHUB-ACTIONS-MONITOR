@@ -55,7 +55,7 @@ Para varias pantallas abre una ventana por vista, por ejemplo `?view=now&chrome=
 
 ## La API
 
-`GET /api/accounts` es el resumen, `GET /api/accounts/<id>/status` una cuenta, y cualquier otra petición bajo `/api/` va a la cuenta indicada con `?account=<id>` o la cabecera `X-Account-Id` (la cuenta por defecto si no se da ninguna). Una cuenta desconocida es un 404. Las reglas de acceso son las de un monitor suelto: la misma comprobación de host y origen, y el mismo token de acceso en el modo red. El token de un solo uso de un cambio debe pedirse a la misma cuenta a la que se envía el cambio.
+`GET /api/accounts` es el resumen, `GET /api/accounts/<id>/status` una cuenta, y cualquier otra petición bajo `/api/` va a la cuenta indicada con `?account=<id>` o la cabecera `X-Account-Id` (la cuenta por defecto si no se da ninguna). Una cuenta desconocida es un 404. Las reglas de acceso son las de un monitor suelto: la misma comprobación de host y origen, y el mismo token de acceso en el modo red. El token de un solo uso de un cambio debe pedirse a la misma cuenta a la que se envía el cambio. Con el modo equipo el supervisor dice al proceso de cada cuenta quién actúa y con qué rol en un contexto que firma con la clave que dio a ese proceso (vale 30 segundos y solo para esa cuenta), así que los roles se deciden igual en cada cuenta: el registro de acciones sigue `audit_log.maintainers_can_read` y `GET /api/v1/me` dice la verdad. Una ruta bajo `/api/v1/` necesita el rol de la misma ruta sin el prefijo.
 
 ## Un webhook para todas
 

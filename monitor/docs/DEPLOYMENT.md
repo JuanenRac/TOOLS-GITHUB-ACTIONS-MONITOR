@@ -52,7 +52,7 @@ On the first start it makes the configuration, the first account (from `MONITOR_
 
 ```sh
 cp deploy/.env.example deploy/.env                                   # fill in MONITOR_GITHUB_OWNER
-printf '%s' "ghp_..." > deploy/gh_token.txt && chmod 600 deploy/gh_token.txt
+printf '%s' "ghp_..." > deploy/gh_token.txt && sudo chown 10001:10001 deploy/gh_token.txt && chmod 600 deploy/gh_token.txt
 docker compose -f deploy/compose.yaml up -d                          # on 127.0.0.1:8765
 docker compose -f deploy/compose.yaml --profile proxy up -d          # behind Caddy (deploy/Caddyfile)
 ```
@@ -78,7 +78,7 @@ launchd (macOS): `ProgramArguments` = `/usr/bin/python3`, `-m`, `github_actions_
 
 ## Environment variables
 
-Only the names in this table are read. In the service a value that cannot be read is ignored with a notice and changes nothing. The ones that name a part of the configuration (`MONITOR_LISTEN_*`, `MONITOR_ALLOWED_HOSTS`, `MONITOR_PROXY_PUBLIC_HOST`, `MONITOR_SECURE_COOKIE`, `MONITOR_TRUSTED_PROXY`, `MONITOR_LOCAL_PORT`, `MONITOR_TLS_*`, `MONITOR_QUERY_ACCESS`, `MONITOR_TEAM_MODE`) are written into `listen` and `auth` at every start of the service, so the environment stays the authority for them; everything else in the file is yours.
+Only the names in this table are read. In the service a value that cannot be read is ignored with a notice and changes nothing. The ones that name a part of the configuration (`MONITOR_LISTEN_*`, `MONITOR_ALLOWED_HOSTS`, `MONITOR_PROXY_PUBLIC_HOST`, `MONITOR_SECURE_COOKIE`, `MONITOR_TRUSTED_PROXY`, `MONITOR_LOCAL_PORT`, `MONITOR_TLS_*`, `MONITOR_QUERY_ACCESS`, `MONITOR_TEAM_MODE`) are written into `listen` and `auth` at every start of the service, so the environment stays the authority for them; everything else in the file is yours. A variable of the proxy that is set but left empty (`MONITOR_TRUSTED_PROXY`, `MONITOR_TRUSTED_PROXIES`, `MONITOR_SECURE_COOKIE`, `MONITOR_PROXY_PUBLIC_HOST`, `MONITOR_ALLOWED_HOSTS`) switches its key off at the start, so a line of the `.env` file left empty never keeps an old declaration of the proxy alive; one that is not set at all changes nothing.
 
 | Variable | What it does |
 |---|---|

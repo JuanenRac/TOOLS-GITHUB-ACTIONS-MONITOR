@@ -91,7 +91,7 @@ La langue d'un écran se décide dans cet ordre : `?lang=xx` dans l'adresse ; pu
 
 | Réglage | Ce qu'il fait |
 |---|---|
-| `screens.enabled` | Active les trois pages. Désactivé : toutes les adresses répondent 404. Désactivé par défaut. |
+| `screens.enabled` | Active les trois pages. Désactivé : `/screen/overview`, `/screen/now`, `/screen/sentinels` et `/api/screens/data` répondent 404 (`/screen/1` à `/screen/3` sont la page elle-même et n'en dépendent pas). L'édition lite sert aussi les écrans muraux, avec l'écran des sentinelles vide. Désactivé par défaut. |
 | `screens.default_theme` | dark (par défaut), light ou contrast. |
 | `screens.default_density` | compact, normal (par défaut) ou large. |
 | `screens.refresh_seconds` | Secondes entre les mises à jour d'une fenêtre (10 par défaut). Les pages lisent le moniteur, jamais GitHub : un délai court ne consomme pas de quota. |
@@ -101,7 +101,7 @@ La langue d'un écran se décide dans cet ordre : `?lang=xx` dans l'adresse ; pu
 | `screens.sound` | Un bip pour un nouvel échec (désactivé par défaut). |
 | `screens.burn_in_protection` | Déplace tout de quelques pixels chaque minute (activé par défaut). |
 | `screens.night_dim` | Atténue les écrans entre `screens.night_dim_from_hour` (22) et `screens.night_dim_to_hour` (7) ; désactivé par défaut. |
-| `screens.show_repo_names` | all, public (par défaut : les dépôts privés apparaissent comme private-1, private-2...) ou none (tous les noms sont masqués). Utilisez public ou none pour un écran que d'autres personnes peuvent voir. |
+| `screens.show_repo_names` | all, public (par défaut : les dépôts privés apparaissent comme private-1, private-2...) ou none (tous les noms sont masqués). Utilisez public ou none pour un écran que d'autres personnes peuvent voir. Avec une liste de dépôts écrite à la main dans `repos`, la visibilité est lue par une liste du compte toutes les `discover_refresh_seconds` ; un dépôt dont la visibilité n'a pas pu être lue compte comme privé. Les numéros (private-1...) ne vont qu'aux dépôts masqués, dans l'ordre d'un HMAC du nom avec une clé de l'installation gardée dans un fichier privé du dossier de données : ils ne disent rien de la place d'un dépôt parmi les autres. |
 
 ### Ce qu'elles montrent et ce qu'elles cachent
 

@@ -43,6 +43,27 @@ FORWARD_TIMEOUT = 30
 MAX_BODY = 1_048_576
 
 
+def webhook_names(account_id=None, others=False):
+    """The names of the variables that hold the secret of the incoming webhook: with `account_id` and `others` False the one that account's configuration names; with `others` True every other name
+    (the main configuration and the other accounts), which the process of that account must not receive. Without `account_id`, all of them."""
+    from github_actions_monitor.app import toolconfig
+    from github_actions_monitor.security import webhook
+    found = {}
+    try:
+        found[""] = webhook.secret_env_name(toolconfig.raw_config())
+    except Exception:   # noqa: BLE001 - an unreadable configuration names the default
+        found[""] = webhook.SECRET_ENV
+    for other in accounts.list_accounts():
+        try:
+            found[other] = webhook.secret_env_name(json.loads(accounts.config_path(other).read_text(encoding="utf-8")))
+        except (OSError, ValueError):
+            found[other] = webhook.SECRET_ENV
+    if account_id is None:
+        return sorted(set(found.values()))
+    own = found.get(account_id, webhook.SECRET_ENV)
+    return sorted({name for name in found.values() if name != own}) if others else [own]
+
+
 def free_port(start=CHILD_PORT_START, taken=()):
     """A free TCP port on 127.0.0.1, from `start` upwards, never one of `taken`: a child that was given its port but has not started yet has not bound it, so the system alone cannot tell it is spoken for."""
     import socket
@@ -79,7 +100,7 @@ class Child:
     def start(self):
         try:
             own_group = {"start_new_session": True} if sys.platform != "win32" else {}       # a group of its own, so that stopping it reaches everything it started
-            self.proc = subprocess.Popen(self.command, cwd=str(HERE), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, env=envguard.for_account_process({auth_http.CHILD_ENV: "1", SUPERVISOR_KEY_ENV: self.key}), **own_group)
+            self.proc = subprocess.Popen(self.command, cwd=str(HERE), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, env=envguard.for_account_process({auth_http.CHILD_ENV: "1", SUPERVISOR_KEY_ENV: self.key}, other_secrets=webhook_names(self.id, others=True)), **own_group)
             self.started, self.error = time.time(), ""
         except OSError as error:
             self.proc, self.error = None, str(error)[:120]
@@ -142,6 +163,7 @@ class Supervisor:
         self.stopping = False
         self.thread = None
         self.key = secrets.token_hex(16)        # given to every account process: the proof that a request to change its login comes from this supervisor
+        self.started_at = time.time()           # for the uptime of /api/health
         self.beat = time.time()                 # when the supervision loop last turned: a loop that stops turning makes the deep health check fail
 
     def sync(self):
@@ -211,6 +233,21 @@ class Supervisor:
     def child(self, account_id):
         with self.lock:
             return self.children.get(account_id)
+
+    def shallow_health(self):
+        """The answer of GET /api/health: the keys the frozen contract lists for the monitor of one account (taken from the default account while it answers) plus the ones of the supervisor."""
+        from github_actions_monitor.tool_version import TOOL_VERSION
+        default = accounts.default_account(self.base)
+        child = self.child(default)
+        inner = child.health if child is not None and isinstance(child.health, dict) else {}
+        cycle = {"phase": "", "running_seconds": 0, "seconds_since_ok": None, "stuck": False, "dead": False, "blocked": False, "abandoned_calls": 0}
+        credential = {"state": "", "reason": "", "since": None, "seconds": 0, "replaced_at": None, "source": None}
+        document = {"ok": True, "lite": False, "version": TOOL_VERSION, "uptime_seconds": int(max(0, time.time() - self.started_at)), "loaded": bool(inner.get("loaded", False)),
+                    "offline": bool(inner.get("offline", False)), "degraded": int(inner.get("degraded") or 0),
+                    "cycle": {**cycle, **(inner.get("cycle") if isinstance(inner.get("cycle"), dict) else {})},
+                    "credential": {**credential, **(inner.get("credential") if isinstance(inner.get("credential"), dict) else {})}}
+        document.update({"supervisor": True, "accounts": len(self.children), "default": default, "listening": localguard.listening()["mode"]})
+        return document
 
     def deep_health(self, now=None):
         """(ok, document) of the deep check: it fails when the supervision loop itself has stopped turning, when the refresh cycle of any account is stuck, or when not one account answers once the start
@@ -361,9 +398,9 @@ SUPERVISOR = {"obj": None}
 #: what the supervisor answers itself; everything else under /api/ goes to the account asked for
 OWN_PATHS = ("/api/accounts", "/api/health", "/api/paths", "/api/score/global")
 MAX_SCORE_ACCOUNTS = 50      # accounts asked for the score of the installation
-NO_FORWARD = ("host", "connection", "content-length", "transfer-encoding", "accept-encoding", "x-account-id", "x-monitor-remote", "x-monitor-supervisor")
+NO_FORWARD = ("host", "connection", "content-length", "transfer-encoding", "accept-encoding", "x-account-id", "x-monitor-remote", "x-monitor-supervisor", "x-monitor-peer", "x-monitor-context")
 #: the headers of a child's answer that are passed on
-PASS_BACK = ("content-type", "set-cookie", "cache-control", "location", "referrer-policy")
+PASS_BACK = ("content-type", "set-cookie", "cache-control", "location", "referrer-policy", "x-api-version")
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -372,6 +409,14 @@ class Handler(BaseHTTPRequestHandler):
 
     def log_message(self, *args):
         pass
+
+    def end_headers(self):
+        """Every answer of the supervisor carries the same protection against framing as the one of an account (the browser talks to the supervisor when there are several accounts)."""
+        sent = {line.split(b":", 1)[0].decode("latin-1").lower() for line in getattr(self, "_headers_buffer", []) if b":" in line}
+        for name, value in localguard.SECURITY_HEADERS:
+            if name.lower() not in sent:
+                self.send_header(name, value)
+        super().end_headers()
 
     def reply(self, code, body, kind="application/json; charset=utf-8", extra=None):
         payload = body if isinstance(body, bytes) else body.encode("utf-8")
@@ -408,8 +453,9 @@ class Handler(BaseHTTPRequestHandler):
             self.json({"error": "locked"}, 429)
             return False
         if not localguard.access_ok(self.headers, query_token):
-            localguard.note_failure(peer, localguard.max_failed(config))
-            localguard.note_proxy_failure(self.client_address, self.headers, localguard.max_failed(config))
+            if localguard.presented(self.headers) or query_token:      # a request that carries NO token is not a guess: it is refused but it does not count against its address
+                localguard.note_failure(peer, localguard.max_failed(config))
+                localguard.note_proxy_failure(self.client_address, self.headers, localguard.max_failed(config))
             self.json({"error": "access"}, 401)
             return False
         if query_token and self.command == "GET" and "text/html" in (self.headers.get("Accept") or "text/html"):
@@ -465,9 +511,6 @@ class Handler(BaseHTTPRequestHandler):
     def webhook(self, sup):
         """POST /api/webhook, one address for the whole installation. Like in a single monitor it has no Host check (a tunnel or a proxy changes it) and no access token: its proof is the HMAC of
         GitHub, which the account that receives the event verifies with its own secret. The supervisor only chooses the account by the owner of the repository in the payload."""
-        if localguard.STATE["network"] and localguard.over_rate("webhook", str(self.client_address[0]), 120):
-            self.json({"ok": False, "error": "rate"}, 429)
-            return
         try:
             size = int(self.headers.get("Content-Length") or 0)
         except ValueError:
@@ -475,7 +518,7 @@ class Handler(BaseHTTPRequestHandler):
         if not 0 <= size <= MAX_BODY:
             self.json({"ok": False}, 413)
             return
-        body = self.rfile.read(size)
+        body = self.rfile.read(size)      # no limit of requests here: the supervisor cannot tell a good signature from a bad one, the account that owns the secret counts them apart (and is told who sent each one)
         asked, repeated = accounts.asked_account(self.path, self.headers)
         if repeated:
             self.json({"ok": False, "error": "account_repeated"}, 400)
@@ -490,8 +533,23 @@ class Handler(BaseHTTPRequestHandler):
             return
         headers = {k: v for k, v in self.headers.items() if k.lower() in ("content-type", "x-hub-signature-256", "x-github-event", "x-github-delivery", "user-agent")}
         headers["Host"] = f"127.0.0.1:{child.port}"
+        headers[auth_http.WEBHOOK_PEER_HEADER] = localguard.client_key(self.client_address, self.headers)
         status, data, back = fetch(child.url("/api/webhook"), timeout=FORWARD_TIMEOUT, data=body, headers=headers, method="POST")
         self.reply(status or 502, data if status else b'{"ok": false}', back.get("Content-Type", "application/json"))
+
+    def team_gate(self):
+        """The door of the team mode, judging the route WITHOUT its version prefix: `/api/v1/advanced` is the route `/api/advanced` and needs the same role. The account behind takes the prefix off itself
+        (it keeps its own `api.v1_enabled` switch), so the request is forwarded with the prefix and only judged here without it. The three routes of the prefix (me, repos, openapi.json) keep their path."""
+        from github_actions_monitor.app import api_v1
+        real = self.path
+        route = real.split("?")[0]
+        version, rest = api_v1.route_of(route)
+        if version is not None and route not in api_v1.OWN_ROUTES:
+            self.path = rest + real[len(route):]
+        try:
+            return auth_http.gate(self, self.team_config())
+        finally:
+            self.path = real
 
     @staticmethod
     def team_config():
@@ -513,7 +571,7 @@ class Handler(BaseHTTPRequestHandler):
         if state == "repeated":
             self.json({"error": "the account is given more than once", "code": "account_repeated"}, 400)
             return
-        if not auth_http.gate(self, self.team_config()):      # team mode (off by default): the login and the roles are asked here, once, for every account
+        if not self.team_gate():      # team mode (off by default): the login and the roles are asked here, once, for every account
             return
         if sup is None:
             self.json({"error": "not ready"}, 503)
@@ -524,7 +582,7 @@ class Handler(BaseHTTPRequestHandler):
                 ok, document = sup.deep_health()
                 self.json(document, 200 if ok else 503)
                 return
-            self.json({"ok": True, "supervisor": True, "accounts": len(sup.children), "default": accounts.default_account(sup.base), "listening": localguard.listening()["mode"]})
+            self.json(sup.shallow_health())
             return
         if method == "POST" and route.startswith("/api/accounts/") and route.endswith("/credential"):
             self.credential(sup, route[len("/api/accounts/"):-len("/credential")])
@@ -575,6 +633,7 @@ class Handler(BaseHTTPRequestHandler):
             if context:
                 headers[auth_http.USER_HEADER] = context["user"]
                 headers[auth_http.ACCOUNT_HEADER] = account_id
+                headers[auth_http.CONTEXT_HEADER] = auth_http.sign_context(child.key, context, account_id)
             if remote:
                 headers[REMOTE_HEADER] = "1"
             headers.pop("Origin", None)
@@ -663,7 +722,9 @@ class Handler(BaseHTTPRequestHandler):
         context = getattr(self, "auth_user", None)
         if context:
             headers[auth_http.USER_HEADER] = context["user"]
-            headers[auth_http.ACCOUNT_HEADER] = account_id          # and for which account: the process of that account refuses a user that is not its own        headers["Host"] = f"127.0.0.1:{child.port}"           # the child answers to its own address: the supervisor already checked the one the browser used
+            headers[auth_http.CONTEXT_HEADER] = auth_http.sign_context(child.key, context, account_id)
+            headers[auth_http.ACCOUNT_HEADER] = account_id          # and for which account: the process of that account refuses a user that is not its own
+        headers["Host"] = f"127.0.0.1:{child.port}"           # the child answers to its own address: the supervisor already checked the one the browser used
         if localguard.STATE["network"] and not self.this_computer():
             headers[REMOTE_HEADER] = "1"          # the account then treats the request like a remote one: the keys that decide exposure and the actions on GitHub stay with the computer of the monitor
         if "Origin" in headers:

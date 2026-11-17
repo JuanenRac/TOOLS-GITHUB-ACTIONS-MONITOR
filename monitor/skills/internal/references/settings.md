@@ -19,6 +19,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.actions.execute` (secure) | `-` | ai | Run with confirmation |
 | `ai.actions.max_per_hour` | `-` | ai | Actions per hour |
 | `ai.actions.ttl_seconds` | `-` | ai | Proposal lifetime |
+| `ai.allow_private_targets` (secure) | `-` | ai | Allow an AI provider on a private address |
 | `ai.allowed_repos` | `-` | ai | Repositories it may see |
 | `ai.answer_language` | `-` | ai | Language of the answers |
 | `ai.api_key_env` | `-` | ai | Key variable |
@@ -32,6 +33,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.events` | `-` | ai | Events it may analyse |
 | `ai.fallback` (secure) | `-` | ai | Models to try when the main one fails |
 | `ai.fallback_after_seconds` | `-` | ai | Give up the main model after |
+| `ai.fallback_cloud_allowed` (secure) | `-` | ai | Providers on the internet allowed as a fallback |
 | `ai.fallback_max_attempts` | `-` | ai | Most models tried per question |
 | `ai.max_input_chars` | `-` | ai | Input size |
 | `ai.max_output_chars` | `-` | ai | Answer size |
@@ -107,6 +109,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `alerts.service.rate_percent` | `0` | sentinel | Or when this share of its last runs failed |
 | `alerts.service.workflows` | `[]` | sentinel | More workflows of the service class |
 | `alerts.silences` | `[]` | sentinel | Permanent silences |
+| `alerts.silences_expire_days` | `-` | sentinel | Days after the review date when a silence expires |
 | `analytics.enabled` | `-` | analytics | Analytics on |
 | `analytics.flaky` | `-` | analytics | Flaky detection |
 | `analytics.jobs_per_cycle` | `-` | analytics | Jobs read per cycle |
@@ -122,8 +125,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `api.v1_enabled` | `false` | advanced | Read API under /api/v1/ |
 | `audit_dir` | `-` | paths | Folder of audit files |
 | `audit_log.enabled` (secure) | `-` | sentinel | Log of actions on |
+| `audit_log.keep_generations` (secure) | `-` | sentinel | Rotated files kept |
 | `audit_log.maintainers_can_read` (secure) | `-` | sentinel | Maintainers may read it |
 | `audit_log.max_mb` | `-` | sentinel | Size before it is rotated |
+| `audit_log.required` (secure) | `-` | sentinel | No action without the log |
 | `auth.allow_bearer` (secure) | `false` | advanced | Tokens for scripts and apps |
 | `auth.audit` (secure) | `true` | advanced | Audit of the accesses |
 | `auth.enabled` (secure) | `false` | advanced | Team mode: users and roles |
@@ -168,7 +173,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ci.inactive_days` | `90` | sentinel | Days until a workflow is inactive |
 | `ci.red_age_days` | `30` | sentinel | Days until a red ages |
 | `ci.red_ages` | `true` | sentinel | A red nobody attends to ages |
-| `ci.red_events` | `["push", "schedule", "workflow_dispatch", "merge_group"]` | sentinel | Events that can make a branch red |
+| `ci.red_events` | `["push", "schedule", "workflow_dispatch", "merge_group", "workflow_run", "repository_dispatch"]` | sentinel | Events that can make a branch red |
 | `ci.rerun_timing` | `false` | sentinel | Ask GitHub for the duration of re-runs |
 | `ci.stuck.awaiting_stuck` | `true` | sentinel | A run waiting for approval can be stuck |
 | `ci.stuck.ghost_days` | `7` | sentinel | Days in the queue until a run is a ghost |
@@ -277,6 +282,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `logs.failed_step.enabled` (secure) | `false` | ai | Show the log of the failed step |
 | `logs.failed_step.lines` | `12` | ai | Lines of the failed step |
 | `logs.failed_step.max_bytes` | `2000` | ai | Size of the failed step text |
+| `logs.failed_step.max_per_minute` | `10` | ai | Lookups of a failed step per minute |
 | `max_workers` | `20` | polling | Parallel requests |
 | `min_rate_remaining` | `800` | polling | Pause below this allowance |
 | `mirror.enabled` (secure) | `false` | advanced | Keep a local copy of artifacts |
@@ -600,8 +606,12 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `watchdog_minutes` | `10` | polling | Restart a stuck refresh after |
 | `webhook.enabled` (secure) | `false` | webhook | Receiver on |
 | `webhook.live_events_keep` | `-` | webhook | Events kept |
+| `webhook.max_bad_per_minute` | `120` | webhook | Requests with a bad signature per address |
 | `webhook.max_per_minute` | `30` | webhook | Events accepted per repository |
+| `webhook.max_verified_per_minute` | `120` | webhook | Requests with a good signature per address |
+| `webhook.persist_deliveries` | `true` | webhook | Remember deliveries after a restart |
 | `webhook.record_events` | `-` | webhook | Keep events |
+| `webhook.reject_stale` | `false` | webhook | Refuse old events |
 | `webhook.replay_seconds` | `3600` | webhook | Delivery ids remembered |
 | `webhook.secret_env` (secure) | `"MONITOR_WEBHOOK_SECRET"` | webhook | Environment variable with the shared secret |
 | `webhook.signing_state` | `-` | webhook | Shared secret |

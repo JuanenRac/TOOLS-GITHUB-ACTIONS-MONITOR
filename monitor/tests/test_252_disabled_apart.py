@@ -102,10 +102,10 @@ class TheSnapshot(unittest.TestCase):
             redrule.configure({})
 
     def test_the_red_of_a_workflow_switched_off_goes_apart_in_the_panel(self):
-        on = self.snapshot({"fork": {"at": 1, "wf_manual_files": ["publish.yml"], "wf_manual": ["Publish"], "wf_disabled": []}})
+        on = self.snapshot({"fork": {"at": 4102444800, "wf_manual_files": ["publish.yml"], "wf_manual": ["Publish"], "wf_disabled": []}})
         self.assertEqual((on["a2"]["red"], [r["workflow"] for r in on["a2"]["disabled_by_hand"]]), ([], ["Publish"]))
         self.assertEqual(on["a2"]["level"], "ok")
-        off = self.snapshot({"fork": {"at": 1, "wf_manual_files": ["publish.yml"]}}, {"ci": {"disabled_apart": False}})
+        off = self.snapshot({"fork": {"at": 4102444800, "wf_manual_files": ["publish.yml"]}}, {"ci": {"disabled_apart": False}})
         self.assertEqual((len(off["a2"]["red"]), off["a2"]["disabled_by_hand"]), (1, []))
 
     def test_without_the_information_of_the_workflows_the_red_stays(self):

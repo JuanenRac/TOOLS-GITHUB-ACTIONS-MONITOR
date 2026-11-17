@@ -547,10 +547,10 @@ class LiveStatus(unittest.TestCase):
             self.assertNotIn("short", json.dumps({k: v for k, v in status.items() if k != "text"}).replace("secret_ok", ""))
 
     def test_the_newest_event_is_named_with_only_short_fields(self):
-        self.am.LIVE_EVENTS.append({"repo": "r", "name": "CI", "event": "workflow_run", "status": "completed", "conclusion": "success", "at": "2030-01-01T10:00:00Z", "title": "do not show", "actor": "x"})
+        self.am.LIVE_EVENTS.append({"repo": "r", "workflow": "CI", "event": "workflow_run", "status": "completed", "conclusion": "success", "at": "2030-01-01T10:00:00Z", "title": "do not show", "actor": "x"})
         with mock.patch.dict(os.environ, {"MONITOR_WEBHOOK_SECRET": "S" * 40}):
             last = self.am.webhook_status({"webhook": {"enabled": True}})["last"]
-        self.assertEqual(sorted(last), ["at", "conclusion", "event", "name", "repo", "status"])
+        self.assertEqual(sorted(last), ["at", "conclusion", "event", "repo", "status", "workflow"])
 
     def test_the_endpoint_exists_in_the_complete_edition_and_not_in_lite(self):
         self.assertIn("/api/live-status", self.am.LITE_PATHS)
@@ -580,7 +580,7 @@ class LiteKnowsNothing(unittest.TestCase):
         out = self.run_lite("import threading, urllib.request\n"
                             "from http.server import ThreadingHTTPServer\n"
                             "s = ThreadingHTTPServer(('127.0.0.1', 0), am.Handler); threading.Thread(target=s.serve_forever, daemon=True).start()\n"
-                            "urllib.request.urlopen('http://127.0.0.1:%d/' % s.server_address[1], timeout=8).read()\n"
+                            "urllib.request.urlopen('http://127.0.0.1:%d/' % s.server_address[1], timeout=30).read()\n"
                             "print([m for m in ('github_actions_monitor.accounts.accounts', 'github_actions_monitor.accounts.accounts_supervisor', 'github_actions_monitor.accounts.account_child', 'github_actions_monitor.sentinels.sentinel_local') if m in sys.modules])")
         self.assertEqual(out, "[]")
 

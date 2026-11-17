@@ -128,11 +128,13 @@ class TheScreensInABrowser(unittest.TestCase):
             self.clean(report, (path, size))
             self.assertEqual(report["kind"], path.split("/")[2].split("?")[0])
 
-    def test_every_language_fits(self):
-        jobs = [(f"/screen/{kind}?lang={lang}", (1920, 1080)) for lang in i18n.LANGS for kind in KINDS]
+    def test_every_language_fits_in_every_size(self):
+        """All 72 combinations of language, size and screen (8 x 3 x 3): German in 4K or Japanese turned are not left to chance."""
+        jobs = [(f"/screen/{kind}?lang={lang}", size) for lang in i18n.LANGS for size in SIZES.values() for kind in KINDS]
+        self.assertEqual(len(jobs), 72)
         for (path, size), report in zip(jobs, self.many(jobs)):
             lang, kind = path.split("lang=")[1], path.split("/")[2].split("?")[0]
-            self.clean(report, (kind, lang))
+            self.clean(report, (kind, lang, size))
             with i18n.use_language(lang):
                 self.assertEqual(report["title"], i18n.t("ui.scr_title_" + kind), (kind, lang))
             self.assertEqual(report["lang"], i18n.HTML_LANG[lang])
@@ -145,7 +147,10 @@ class TheScreensInABrowser(unittest.TestCase):
             with i18n.use_language(lang):
                 self.assertEqual(report["title"], i18n.t("ui.scr_title_" + kind), (kind, lang))
             self.assertEqual(report["lang"], i18n.HTML_LANG[lang], (kind, lang))
-            self.assertIn("lang=" + lang, report["search"], (kind, lang))      # the page reloaded once with the language in the address
+            if lang != "en":      # the monitor of the test speaks English: a saved English needs no reload, any other language reloads the page once with the language in the address
+                self.assertIn("lang=" + lang, report["search"], (kind, lang))
+            else:
+                self.assertNotIn("lang=", report["search"], (kind, lang))
             self.assertIn("pref=" + lang, report["search"], (kind, lang))      # and kept the rest of the parameters
             if lang != "en":
                 self.assert_no_english_left(report["text"], lang, kind)
@@ -159,7 +164,8 @@ class TheScreensInABrowser(unittest.TestCase):
                 english[key] = i18n.t(key)
             with i18n.use_language(lang):
                 own[key] = i18n.t(key)
-        leaked = [english[k] for k in english if "{" not in english[k] and len(english[k]) >= 6 and english[k].lower() != own[k].lower() and english[k].lower() in shown and english[k].lower() not in own[k].lower()]
+        DATA_WORDS = {"release"}      # a workflow of the demo is called so: it is data on the screen, not text of the interface
+        leaked = [english[k] for k in english if english[k].lower() not in DATA_WORDS and "{" not in english[k] and len(english[k]) >= 6 and english[k].lower() != own[k].lower() and english[k].lower() in shown and english[k].lower() not in own[k].lower()]
         self.assertEqual(leaked, [], (kind, lang, "English text on a screen in another language"))
 
     def test_the_address_wins_over_the_language_saved_by_the_main_page(self):

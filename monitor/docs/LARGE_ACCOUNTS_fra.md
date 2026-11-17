@@ -17,3 +17,7 @@ Un compte avec des centaines de dépôts, beaucoup de forks ou plusieurs organis
 6. **Ne vous noyez pas dans le bruit.** Le contrôle d'hygiène (`sentinel.hygiene.ruleset_mode` = `effective`, `sentinel.hygiene.skip`), ceux des fichiers des releases (`sentinel.surface.checks.release_assets.allow_empty`) et `sentinel.bots_apart` évitent l'accumulation de contrôles qui ne concernent pas vos dépôts.
 
 L'onglet Quota montre ce qu'il reste à chaque source et ce que dépense le moniteur lui-même.
+
+Le suivi des originaux des forks (`upstream.enabled`) indique dans son panneau combien de temps dure un tour de tous les forks au rythme de `upstream.requests_per_hour` et `upstream.forks_per_request` ; quand c'est plus que `upstream.refresh_hours`, le suivi ne se repose jamais (727 forks à 8 par requête et 6 requêtes par heure prennent 15,2 heures). Les requêtes de la dernière heure sont conservées au redémarrage : un redémarrage ne rend donc pas le quota.
+
+Les appels d'un tick de la Sentinelle (`sentinel.max_calls_per_tick`) forment un seul décompte pour toutes ses étapes, et un dépôt dont les lectures échouent trois fois de suite est laissé tranquille 30 secondes, en doublant jusqu'à 10 minutes, pendant que les autres sont lus.

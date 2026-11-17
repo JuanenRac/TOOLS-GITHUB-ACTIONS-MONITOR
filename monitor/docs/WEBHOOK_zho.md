@@ -32,8 +32,10 @@
 
 ## 实时事件
 
-- 当 `webhook.record_events` 开启(默认)时,已签名的 `workflow_run` 事件会立即更新该仓库的运行列表,而无需读取 GitHub:直到下一次计划读取之前,该仓库不消耗配额。`workflow_job` 事件还会为分析带来排队时间和每个步骤的时间。
-- 只保留经过验证的简短字段(工作流、运行、状态、结论、分支、短提交、运行链接、时长);绝不保留提交信息或任何自由文本。最新的 `webhook.live_events_keep` 个事件可在 `GET /api/live-events` 读取(仅限本机)。
+- 当 `webhook.record_events` 开启(默认)时,已签名的 `workflow_run` 事件会立即更新该仓库的运行列表,而无需先读取 GitHub:该运行保留其原有的事件类型,因此颜色不会改变,并且仓库会在下一个周期再次读取以确认(每个被接受的事件读取一次)。`workflow_job` 事件还会为分析带来排队时间和每个步骤的时间。
+- 只保留经过验证的简短字段(工作流、运行、状态、结论、分支、短提交、运行链接、时长);绝不保留提交信息或作者。工作流、分支、作业和步骤的简短名称也会保留,压缩为一行,并像离开监视器的任何文本一样清理。最新的 `webhook.live_events_keep` 个事件可在 `GET /api/live-events` 读取(网络模式下需访问令牌)。
+- 当 `webhook.record_events` 开启(默认)时,已签名的 `workflow_run` 事件会立即更新该仓库的运行列表,而无需读取 GitHub:但该仓库仍会在下一个周期被重新读取(事件是消息,读取才是证据),因此一次投递会立刻显示变化,却不会省下一次读取。`workflow_job` 事件还会为分析带来排队时间和每个步骤的时间。
+- 只保留经过验证的简短字段(工作流、运行、状态、结论、分支、短提交、运行链接、时长);绝不保留提交信息。工作流、分支和作业的名称是第三方编写的最多 100 个字符的文本:它们会被保留并以纯文本显示,步骤名称则进入统计。最新的 `webhook.live_events_keep` 个事件可在 `GET /api/live-events` 读取(能打开页面的人:网络模式下用访问令牌,团队模式下用会话)。
 - 可选，默认关闭：开启 `live.sse.enabled` 后，`GET /api/live-events/stream` 会在事件被接受时以服务器发送事件的形式发送这些事件（先是 `hello`，之后每个事件一个 `live` 帧，带有递增的 `id`，可用 `Last-Event-ID` 或 `?since=` 续传，另有保活注释和最后的 `bye`）。只读；在网络模式下与其他请求一样需要访问令牌；最多 `live.sse.max_clients` 个监听者，每个持续 `live.sse.max_seconds`。Lite 版没有它。
 - 当通知开启时,以红色结束的运行还会发送 `workflow_failed` 通知。关闭 `webhook.record_events` 后,Webhook 恢复为上述仅刷新模式。
 - GitHub 无法访问 `127.0.0.1`:请使用 `gh webhook forward`(见 GitHub CLI 文档)或你有意搭建的隧道,指向 `http://127.0.0.1:端口/api/webhook`。
@@ -51,15 +53,15 @@
 | `413` | 请求体超过 256 KB。 |
 | `400` | 没有有效的 `X-GitHub-Delivery` ID，或内容无法理解。 |
 | `202` | 已接受但被忽略：未监视的仓库、列表之外的事件、重复推送，或超出每分钟限额的仓库。 |
-| `429` | 同一地址一分钟内发送了超过 120 个请求（网络模式）。 |
+| `429` | 同一地址一分钟内发送了超过 120 个签名正确的请求，或超过 `webhook.max_bad_per_minute`（默认 120）个签名无法验证的请求。 |
 
 ## 重放与洪泛
 
-被人截获后重新发送的有效签名请求会得到应答但不会被执行：每次投递都需要 `X-GitHub-Delivery` ID，已接受的 ID 会在 `webhook.replay_seconds` 内被记住（默认一小时，内存有上限），重复请求得到 `202 {"duplicate": true}`。（在 GitHub 页面手动重新投递会复用同一 ID，因此在此窗口内会被忽略。）一个仓库每分钟最多引发 `webhook.max_per_minute` 个被接受的事件，其余只应答并忽略。若载荷包含 `full_name`，其所有者必须是被监视的账户（或 `webhook.allowed_owners` 中的一个）。在网络模式下，一个地址每分钟可发送 120 个请求。接受事件后，该仓库已保存的条件读取会被丢弃，并在下个周期重新读取，因此实时事件总会与 GitHub 对账。
+被人截获后重新发送的有效签名请求会得到应答但不会被执行：每次投递都需要 `X-GitHub-Delivery` ID，已接受的 ID 以及已签名的请求体本身会在 `webhook.replay_seconds` 内被记住（默认一小时，内存有上限），因此被截获后换一个 ID 重发的请求仍是同一次投递，重复请求得到 `202 {"duplicate": true}`。（在 GitHub 页面手动重新投递会重复同一请求体，因此在此窗口内会被忽略。）一个仓库每分钟最多引发 `webhook.max_per_minute` 个被接受的事件，其余只应答并忽略。若载荷包含 `full_name`，其所有者必须是被监视的账户（或 `webhook.allowed_owners` 中的一个）。一个地址每分钟可发送 120 个签名正确的请求，以及 `webhook.max_bad_per_minute` 个签名无法验证的请求；两者在任何模式下都分开计数，因此垃圾请求永远不会耗尽真实投递的配额（使用 `listen.trusted_proxy` 时，地址为代理所看到的地址）。接受事件后，该仓库已保存的条件读取会被丢弃，并在下个周期重新读取，因此实时事件总会与 GitHub 对账。 投递记忆保存在数据文件夹中的私有文件里(`webhook.persist_deliveries`,默认开启;有上限,损坏的文件视为空记忆),因此重启不会让被截获的投递重新生效。开启 `webhook.reject_stale`(默认关闭)后,自身时间早于 `webhook.replay_seconds` 的已签名工作流事件只会得到应答而被忽略。一个地址的签名正确请求的配额是 `webhook.max_verified_per_minute`(120)。`webhook.secret_env` 绝不接受系统变量或你的 GitHub 登录变量(PATH、GH_TOKEN 等),也不接受属于其他设置的密钥,且一个名称只能写在一个设置里。
 
 ## 实时视图检查清单
 
 1. 在 `webhook.secret_env` 所指的环境变量中放入至少 32 个字符的密钥，并开启 Webhook。
 2. 转发端口（`gh webhook forward`）或打开隧道，并在 GitHub 中使用以 `/api/webhook` 结尾的地址。
-3. 发送 GitHub 的测试事件（Recent deliveries > Redeliver），并在 `?view=live` 中查看。
+3. 运行一个工作流（或向受监视的仓库推送），并在 `?view=live` 中查看该事件。GitHub 的 `ping` 只验证签名：它返回 `200`，不会出现在列表中，而从 GitHub 重新发送会被当作重复而忽略。
 4. 留意页头的配额：使用 Webhook 后，较慢的周期就够了。

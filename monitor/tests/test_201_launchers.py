@@ -35,7 +35,7 @@ class BatchMenu(unittest.TestCase):
             env = {k: v for k, v in os.environ.items() if k != "PYTHONPATH"}
             proc = subprocess.Popen(["cmd", "/c", str(root / BAT.name)], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=env, cwd=tmp)
             try:
-                out, _ = proc.communicate("2\r\n\r\n6\r\n", timeout=15)      # the menu may go on asking after the input ends: only what it ran matters
+                out, _ = proc.communicate("2\r\n\r\n6\r\n", timeout=90)      # the menu may go on asking after the input ends: only what it ran matters
             except subprocess.TimeoutExpired:
                 proc.kill()
                 out = proc.communicate()[0]

@@ -4,6 +4,7 @@
 With nothing configured the behaviour is the one of before. No network beyond 127.0.0.1; the key never appears in an answer, a store or the brief."""
 import json
 import os
+import sys
 import tempfile
 import threading
 import time
@@ -276,6 +277,50 @@ class Notice(Base):
                 answer = ai_notify.notify(config, dict(alert, id="a%d" % index), now=1_800_000_000 + index * 4000, transport=transport)
                 self.assertTrue(answer["sent"], answer)
                 self.assertEqual(seen, [("openai-compatible", expected)])
+
+
+class AtTheSameTime(Base):
+    """Several requests at once: the two locks of the chain are always taken in the same order, so nobody waits for ever, and the limit of a model holds."""
+
+    def _storm(self, cfg, threads=8, rounds=4):
+        calls = []
+        done = []
+
+        def transport(c, system, user):
+            calls.append(c["model"])
+            return "answer"
+
+        def worker(number):
+            for step in range(rounds):
+                self.ask(cfg, "log %d %d" % (number, step), transport=transport)
+                if step % 2:
+                    ai_chain.view(cfg, self.store)      # what GET /api/ai/budget does
+            done.append(number)
+
+        workers = [threading.Thread(target=worker, args=(n,), daemon=True) for n in range(threads)]
+        old = sys.getswitchinterval()
+        sys.setswitchinterval(1e-6)
+        try:
+            for w in workers:
+                w.start()
+            deadline = time.time() + _timing.limit(20)
+            for w in workers:
+                w.join(max(0.1, deadline - time.time()))
+        finally:
+            sys.setswitchinterval(old)
+        return calls, done, [w for w in workers if w.is_alive()]
+
+    def test_many_explanations_and_budget_reads_at_once_all_finish(self):
+        calls, done, stuck = self._storm(self.cfg(model="m-storm"))
+        self.assertEqual(stuck, [], "threads still waiting for a lock: %d" % len(stuck))
+        self.assertEqual(len(done), 8)
+        self.assertEqual(len(calls), 8 * 4)
+
+    def test_the_limit_of_a_model_is_not_jumped_by_requests_at_once(self):
+        calls, _, stuck = self._storm(self.cfg(model="m-cap", model_daily_limit=3))
+        self.assertEqual(stuck, [])
+        self.assertEqual(len(calls), 3)
+        self.assertEqual(ai_chain.view(self.cfg(model="m-cap", model_daily_limit=3), self.store)["models"][0]["calls"], 3)
 
 
 if __name__ == "__main__":

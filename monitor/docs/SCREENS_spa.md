@@ -91,7 +91,7 @@ El idioma de una pantalla se decide en este orden: `?lang=xx` en la dirección; 
 
 | Ajuste | Qué hace |
 |---|---|
-| `screens.enabled` | Activa las tres páginas. Desactivado: todas las direcciones responden 404. Desactivado por defecto. |
+| `screens.enabled` | Activa las tres páginas. Desactivado: `/screen/overview`, `/screen/now`, `/screen/sentinels` y `/api/screens/data` responden 404 (`/screen/1` a `/screen/3` son la propia página y no dependen de esto). La edición lite también sirve las pantallas de pared, con la pantalla de centinelas vacía. Desactivado por defecto. |
 | `screens.default_theme` | dark (por defecto), light o contrast. |
 | `screens.default_density` | compact, normal (por defecto) o large. |
 | `screens.refresh_seconds` | Segundos entre actualizaciones de una ventana (10 por defecto). Las páginas leen del monitor, nunca de GitHub, así que un tiempo corto no gasta cuota. |
@@ -101,7 +101,7 @@ El idioma de una pantalla se decide en este orden: `?lang=xx` en la dirección; 
 | `screens.sound` | Un pitido con cada fallo nuevo (desactivado por defecto). |
 | `screens.burn_in_protection` | Desplaza todo unos píxeles cada minuto (activado por defecto). |
 | `screens.night_dim` | Atenúa las pantallas entre `screens.night_dim_from_hour` (22) y `screens.night_dim_to_hour` (7); desactivado por defecto. |
-| `screens.show_repo_names` | all, public (por defecto: los repositorios privados aparecen como private-1, private-2...) o none (se ocultan todos los nombres). Usa public o none en una pantalla que otras personas puedan ver. |
+| `screens.show_repo_names` | all, public (por defecto: los repositorios privados aparecen como private-1, private-2...) o none (se ocultan todos los nombres). Usa public o none en una pantalla que otras personas puedan ver. Con una lista de repositorios escrita a mano en `repos`, la visibilidad se lee con un listado de la cuenta cada `discover_refresh_seconds`; un repositorio cuya visibilidad no se pudo leer cuenta como privado. Los números (private-1...) se dan solo a los repositorios ocultos, en el orden de un HMAC del nombre con una clave de la instalación guardada en un fichero privado de la carpeta de datos, así que no dicen nada de dónde cae un repositorio entre los demás. |
 
 ### Qué muestran y qué ocultan
 

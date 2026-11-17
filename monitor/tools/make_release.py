@@ -71,6 +71,19 @@ def lf_for_scripts(data):
     return data.replace(b"\r\n", b"\n") if data.startswith(b"#!") else data
 
 
+TEXT_SUFFIXES = (".py", ".md", ".json", ".txt", ".html", ".sh", ".command")      # the text the zip carries with one line ending, whatever machine builds it
+CRLF_SUFFIXES = (".bat", ".cmd")      # Windows launchers: CRLF in the zip as in a Windows checkout
+
+
+def line_endings_for_zip(name, data):
+    """The bytes of a file as the zip carries them: LF for the text (the blob of git, so the same commit gives the same zip on Windows, Linux and macOS) and CRLF for the Windows launchers."""
+    if name.endswith(TEXT_SUFFIXES) and b"\0" not in data:
+        return data.replace(b"\r\n", b"\n")
+    if name.endswith(CRLF_SUFFIXES):
+        return data.replace(b"\r\n", b"\n").replace(b"\n", b"\r\n")
+    return data
+
+
 def members():
     names = [p for p in sorted(HERE.glob("*.bat")) + sorted(HERE.glob("*.sh")) + sorted(HERE.glob("*.command")) + sorted((HERE / "bin").glob("*.py"))]   # the launchers of the product folder and the tiny entry points of bin/
     names += sorted(p for p in (HERE / "src").rglob("*.py") if "__pycache__" not in p.parts)                                                      # the importable package
@@ -126,6 +139,25 @@ def tracked_files(here=HERE):
     if done.returncode != 0:
         return None
     return {name for name in done.stdout.decode("utf-8", "replace").split(chr(0)) if name}
+
+
+def dirty_files(here=HERE):
+    """The files of the product folder that differ from the commit (`git status --porcelain`: a versioned file edited and not committed travels with the edit, and the zip would not be the tag), or None when git does not answer."""
+    try:
+        done = subprocess.run(["git", "status", "--porcelain", "-z", "--", "."], cwd=str(here), capture_output=True, timeout=120)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if done.returncode != 0:
+        return None
+    return [line[3:] for line in done.stdout.decode("utf-8", "replace").split(chr(0)) if len(line) > 3]
+
+
+def case_collisions(names):
+    """Groups of member names that differ only in capitals: on Windows and macOS one would overwrite the other when the zip is extracted."""
+    seen = {}
+    for name in names:
+        seen.setdefault(name.lower(), []).append(name)
+    return sorted(group for group in (sorted(g) for g in seen.values()) if len(group) > 1)
 
 
 def tracked_problems(entries, tracked, prefix="github_actions_monitor/"):
@@ -460,6 +492,7 @@ def clean_install_check(archive, entries, python=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--out")
+    parser.add_argument("--allow-no-git", action="store_true", help="build from a folder that is not a git checkout (an extracted zip): the zip is NOT compared with the versioned files, and the gate says so")
     args = parser.parse_args()
     version = gate_static()
     print("gate: example, targets and version ok (tool", version + ")")
@@ -467,7 +500,7 @@ def main():
     out = Path(args.out) if args.out else workspace.signed_dir() / "github_actions_monitor"
     if str(out).upper().startswith("D:"):
         raise SystemExit("never write on D:")
-    entries = {f"github_actions_monitor/{p.relative_to(HERE).as_posix()}": lf_for_scripts(p.read_bytes()) for p in members()}
+    entries = {f"github_actions_monitor/{p.relative_to(HERE).as_posix()}": line_endings_for_zip(p.name, lf_for_scripts(p.read_bytes())) for p in members()}
     entries[f"github_actions_monitor/{EXAMPLES_DIR}/{EXAMPLE}"] = template().encode("utf-8")
     missing_text = authorship_problems(entries)
     if missing_text:
@@ -484,11 +517,23 @@ def main():
     crlf_scripts = [n for n, data in entries.items() if data.startswith(b"#!") and b"\r" in data.split(b"\n", 1)[0]]
     if crlf_scripts:
         fail("scripts with a shebang and Windows line endings (they would not run on Linux or macOS): " + ", ".join(crlf_scripts))
+    clashes = case_collisions(entries)
+    if clashes:
+        fail("names that differ only in capitals (one would overwrite the other on Windows and macOS): " + "; ".join(" / ".join(g) for g in clashes[:6]))
     versioned = tracked_files()
-    if versioned is not None:
+    if versioned is None:
+        if not args.allow_no_git:
+            fail("git does not answer in this folder, so the zip cannot be compared with the versioned files (pass --allow-no-git to build anyway)")
+        print("gate: WARNING - no git here: the zip was NOT compared with the versioned files")
+    else:
         stray = tracked_problems(entries, versioned)
         if stray:
             fail("the zip is not the versioned folder: " + "; ".join(stray[:12]))
+        edited = dirty_files()
+        if edited is None:
+            fail("git status does not answer: the zip cannot be proved to be the commit")
+        if edited:
+            fail("files edited and not committed would travel (the zip must be the commit): " + "; ".join(edited[:12]))
     left_out = package_data_problems(entries)
     if left_out:
         fail("data files of the package missing from the zip: " + ", ".join(left_out))

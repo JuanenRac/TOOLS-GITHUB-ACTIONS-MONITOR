@@ -52,7 +52,7 @@ docker exec github-actions-monitor cat /data/state/access_token      # the acces
 
 ```sh
 cp deploy/.env.example deploy/.env                                   # fill in MONITOR_GITHUB_OWNER
-printf '%s' "ghp_..." > deploy/gh_token.txt && chmod 600 deploy/gh_token.txt
+printf '%s' "ghp_..." > deploy/gh_token.txt && sudo chown 10001:10001 deploy/gh_token.txt && chmod 600 deploy/gh_token.txt
 docker compose -f deploy/compose.yaml up -d                          # on 127.0.0.1:8765
 docker compose -f deploy/compose.yaml --profile proxy up -d          # behind Caddy (deploy/Caddyfile)
 ```
@@ -78,7 +78,7 @@ launchd（macOS）: `ProgramArguments` = `/usr/bin/python3`、`-m`、`github_act
 
 ## 環境変数
 
-この表の名前だけが読み込まれます。サービスでは、読み取れない値は通知とともに無視され、何も変更しません。設定の一部を指す変数（`MONITOR_LISTEN_*`、`MONITOR_ALLOWED_HOSTS`、`MONITOR_PROXY_PUBLIC_HOST`、`MONITOR_SECURE_COOKIE`、`MONITOR_TRUSTED_PROXY`、`MONITOR_LOCAL_PORT`、`MONITOR_TLS_*`、`MONITOR_QUERY_ACCESS`、`MONITOR_TEAM_MODE`）は、サービスの起動のたびに `listen` と `auth` に書き込まれ、これらについては環境変数が優先されます。ファイルのそれ以外はあなたのものです。
+この表の名前だけが読み込まれます。サービスでは、読み取れない値は通知とともに無視され、何も変更しません。設定の一部を指す変数（`MONITOR_LISTEN_*`、`MONITOR_ALLOWED_HOSTS`、`MONITOR_PROXY_PUBLIC_HOST`、`MONITOR_SECURE_COOKIE`、`MONITOR_TRUSTED_PROXY`、`MONITOR_LOCAL_PORT`、`MONITOR_TLS_*`、`MONITOR_QUERY_ACCESS`、`MONITOR_TEAM_MODE`）は、サービスの起動のたびに `listen` と `auth` に書き込まれ、これらについては環境変数が優先されます。ファイルのそれ以外はあなたのものです。 プロキシの変数が設定されているのに空のままの場合 (`MONITOR_TRUSTED_PROXY`, `MONITOR_TRUSTED_PROXIES`, `MONITOR_SECURE_COOKIE`, `MONITOR_PROXY_PUBLIC_HOST`, `MONITOR_ALLOWED_HOSTS`)、起動時にそのキーはオフになります。そのため `.env` ファイルの空の行が古いプロキシ宣言を生かし続けることはありません。まったく設定されていない変数は何も変えません。
 
 | 変数 | 内容 |
 |---|---|

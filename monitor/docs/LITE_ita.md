@@ -13,10 +13,10 @@ Un secondo prodotto, più semplice, nello stesso pacchetto: la pagina di ciò ch
 |---|---|---|
 | Avvio | `MONITOR_GITHUB_ACTIONS` (`.bat` / `.sh` / `.command`) | `MONITOR_LITE_GITHUB_ACTIONS` (gli stessi tre) |
 | Porta | 8765 | 8766 |
-| Schede | Adesso, Sentinella, Grafici, Repository, Cronologia, Impostazioni | Adesso, Grafici, Repository, Cronologia, Impostazioni brevi |
+| Schede | Adesso, Avvisi, Grafici, Riepilogo, Sentinella CI, Sentinella collab, Sentinella sicurezza, Salute del team, Flotta, Repository, Rapporti, Report pianificati, Lezioni, Cronologia, Impostazioni | Adesso, Grafici, Repository, Cronologia, Impostazioni brevi |
 | Intestazione | tutte le tessere, prontezza, firma | in corso, in coda, fallimenti e successi di 24 h, minuti di calcolo, issue, rossi su main, repository, quota, connessione |
 | Sentinella (avvisi, release, coda di firma, prontezza, linter) | sì | no: non viene nemmeno importata |
-| Analisi, notifiche, webhook, IA, uscite Prometheus / Grafana | sì, spente finché non le attivi | no: quei percorsi rispondono 404 |
+| Analisi, notifiche, webhook, IA, uscite Prometheus / Grafana | sì, spente finché non le attivi | no: quei percorsi rispondono 404, tranne i canali del flusso per uno strumento di IA (`/api/ai/state`, `/api/ai/brief`, `/api/ai/alerts`, `/api/ai/stream`, `/api/ai/ack`, `/api/skills`) |
 | Configurazione | `actions_monitor.json` | `actions_monitor_lite.json` (creato al primo avvio; la sentinella vi è spenta) |
 | File di stato | `etag_cache.json`, `analytics_history.json`... | gli stessi nomi con il suffisso `_lite` |
 

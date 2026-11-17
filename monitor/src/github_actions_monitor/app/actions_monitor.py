@@ -92,7 +92,7 @@ DEFAULTS = {
     "show_unclassified": True,     # repositories that no ecosystem claims are shown in an automatic group "Unclassified" instead of disappearing
     "stuck_minutes": 120,
     "alerts": {"silences": [], "service": {"enabled": False, "failures": 3, "rate_percent": 0, "workflows": []}, "group": {"by_commit": False, "min": 3}, "digest": {"minutes": 0, "threshold": 10}},      # what reaches the channels when there are many alerts (alertflow.py): all off or empty
-    "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "dormant_repos": True, "forks_need_own_ci": True, "fork_own_ci_days": 90, "red_ages": True, "red_age_days": 30, "disabled_apart": True, "extra_branches": [], "rerun_timing": False, "group": {"reusable": False, "min": 2}, "failed_jobs": {"enabled": False, "max_per_cycle": 4, "group_by": "auto"},
+    "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group", "workflow_run", "repository_dispatch"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "dormant_repos": True, "forks_need_own_ci": True, "fork_own_ci_days": 90, "red_ages": True, "red_age_days": 30, "disabled_apart": True, "extra_branches": [], "rerun_timing": False, "group": {"reusable": False, "min": 2}, "failed_jobs": {"enabled": False, "max_per_cycle": 4, "group_by": "auto"},
            "stuck": {"learned": False, "percentile": 95, "margin": 2.0, "min_samples": 3, "min_minutes": 30, "max_minutes": 720, "queue_minutes": 0, "workflow_minutes": [], "runner_minutes": [], "awaiting_stuck": True, "ghost_enabled": True, "ghost_days": 7}},      # which runs may make a branch red (redrule.py)
     "watchdog_minutes": 10,      # a refresh cycle that runs longer than this is dumped to the log and restarted in a new thread (0 = off)
     "watchdog_max_abandoned": 8,      # calls to GitHub that gave up waiting but never returned: with this many still alive no new call is started and the health check says so (0 = no limit)
@@ -104,7 +104,7 @@ DEFAULTS = {
     "report_history_days": 30,   # (before 1.5.0: parte_history_days, still read)
     "sentinel": {"enabled": True},
     "ai": {"provider": "none"},
-    "webhook": {"enabled": False, "secret_env": "MONITOR_WEBHOOK_SECRET", "replay_seconds": 3600, "max_per_minute": 30},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default; the secret is only in the environment)
+    "webhook": {"enabled": False, "secret_env": "MONITOR_WEBHOOK_SECRET", "replay_seconds": 3600, "max_per_minute": 30, "max_bad_per_minute": 120, "max_verified_per_minute": 120, "reject_stale": False, "persist_deliveries": True},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default; the secret is only in the environment)
     "chatops": {"enabled": False, "slack": {"enabled": False, "signing_secret_env": "MONITOR_SLACK_SIGNING_SECRET"}, "discord": {"enabled": False, "public_key_env": "MONITOR_DISCORD_PUBLIC_KEY"}, "allowed_teams": [], "allowed_channels": [], "allowed_users": [],
                 "allowed_words": ["help", "status", "alerts", "red", "queue", "score"], "max_rows": 8, "show_repo_names": "all", "links": True, "max_age_seconds": 300, "rate_per_user_per_minute": 6, "rate_per_channel_per_minute": 20, "rate_per_minute": 60},   # read only commands from Slack and Discord, see chatops/inbound.py (off by default; the proofs are only in the environment)
     "cache": {"etag": {"enabled": True, "ttl_hours": 24}},   # conditional reads: a 304 answer costs no quota (etagcache.py)
@@ -147,7 +147,7 @@ DEFAULTS = {
     "pagination": {"workflow_pages": 3, "job_pages": 2, "collab_pages": 3},      # pages of 100 followed when a list is full, and said when something is cut (paging.py)
     "sampling": {"default_branch_probe": False, "min_coverage_minutes": 30, "api_budget_per_hour": 0},      # how much of a repository the list of runs shows, a second look at the default branch, a budget of requests (sampling.py)
     "savings": {"webhook_first": False, "webhook_window_minutes": 60, "webhook_full_minutes": 360, "feeds": {"enabled": False, "method": "atom", "max_age_minutes": 240}},      # read less: OFF (savings.py)
-    "logs": {"failed_step": {"enabled": False, "lines": 12, "max_bytes": 2000}},      # the log of the failed step in the page: OFF, one press of a button, steplog.py
+    "logs": {"failed_step": {"enabled": False, "lines": 12, "max_bytes": 2000, "max_per_minute": 10}},      # the log of the failed step in the page: OFF, one press of a button, steplog.py
     "reports": {"workflow_hygiene": {"enabled": False}, "queue": {"enabled": False}, "release_view": {"enabled": False}, "supply_chain": {"enabled": False}, "max_calls_per_cycle": 4},      # four optional reports, all OFF (reports.py)
     "lessons": {"enabled": True, "allow_write": False, "retention_days": 180, "max_entries": 5000, "brief_max_bytes": 3000, "recurring_from": 2},      # the book of failures and the library of lessons (lessons.py): local, read only; writing a lesson is OFF
     "live": {"sse": {"enabled": False, "max_seconds": 3600, "max_clients": 3}},      # OFF: GET /api/live-events/stream, the live events as server-sent events (webhook.py)
@@ -169,7 +169,7 @@ def state_dir():
     """Where the small state files of this process live: the folder of the account when this is the monitor of one account, else next to the code, as always."""
     return Path(CHILD["folder"]) if CHILD["folder"] else paths.folder("data")
 LITE_SHARED = ("/api/ai/state", "/api/ai/stream", "/api/ai/brief", "/api/ai/alerts", "/api/ai/ack")      # the channels for an AI tool are the same in both editions
-LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/notify", "/api/score", "/api/report-files", "/api/audit-log", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/chatops", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events")   # they do not exist in lite
+LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/auth", "/api/notify", "/api/score", "/api/report-files", "/api/audit-log", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/chatops", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events")   # they do not exist in lite
 
 
 LITE_INHERIT = ("github_owner", "ecosystems", "ecosystems_file", "targets_file", "profiles_file", "exclude", "repos", "language", "runs_per_repo", "cold_runs_per_repo", "hot_hours", "stuck_minutes", "refresh_seconds", "cold_refresh_seconds")   # what a first lite start copies from actions_monitor.json
@@ -209,9 +209,11 @@ WATCH = cycle_watch.CycleWatch()      # the heartbeat of the refresh loop (phase
 SENTINEL = {"obj": None, "error": None, "registry": None}  # the CI sentinel (layer A) and the registry of all of them; a failure of any never stops the monitor
 LOCK = threading.Lock()
 ISSUE_CACHE = {"at": 0.0, "items": [], "busy": False}
-RUNNERS_SEEN = {"payload": None}      # the last answer of /api/runners: the labels that only offline runners carry explain a run that waits for ever (stuckrule.py)
+RUNNERS_MEMORY_SECONDS = 300             # how long the answer of /api/runners is kept: the same as the list the model of the runners reads
+RUNNERS_SEEN = {"payload": None, "at": 0.0}      # the last answer of /api/runners: the labels that only offline runners carry explain a run that waits for ever (stuckrule.py)
 RUN_CACHE = {}  # repo -> {"runs": [...], "at": float, "error": str|None}
 PRIVATE = set()                           # private repositories of the account (read with the listing): the only ones whose minutes cost anything
+VISIBILITY = {"known": set(), "at": 0.0}  # the repositories whose visibility (public or private) was READ from GitHub; any other one is of unknown visibility and a screen treats it as private
 QUOTA_ALERTS = None
 DISCOVERED = {"at": 0.0, "names": [], "snapshot": {}}
 FORKS = {"known": {}, "kind": None, "kind_at": 0.0, "checked": 0, "kept": 0, "left": 0, "waiting": 0}      # fork_policy: what is known about the CI of each fork (memory only)
@@ -273,6 +275,33 @@ def load_config():
     except (OSError, ValueError) as error:
         print(i18n.t("mon.config_unreadable", error=error))
     return config
+
+
+POOL_STATUS = {"payload": None, "at": 0.0}      # the last answer of pool_status(), made by the cycle every five minutes (the Quota tab reads this)
+
+
+def refresh_pool_status():
+    """The cycle reads the allowance of every source (pool_status) at most every five minutes and keeps it for /api/quota-pool/status."""
+    if time.time() - POOL_STATUS["at"] <= RUNNERS_MEMORY_SECONDS:
+        return False
+    POOL_STATUS["at"] = time.time()
+    POOL_STATUS["payload"] = pool_status()
+    return True
+
+
+def pool_status_pending():
+    """The answer of the status of the quota before the cycle has read anything: the same shape, no source yet (nothing is read to make it)."""
+    return {"pending": True, "total": None, "sources": [], "recommended": {"modes.auto_low": True, "network.etag": True}, "trend": __import__("github_actions_monitor.data_pipeline.quotawatch", fromlist=["_"]).trend(),
+            "savings": savings_report(LIVE_CONFIG or toolconfig.raw_config())}
+
+
+def read_extra_lists(config):
+    """The organisations of the account (data_pipeline/orgs.py keeps its own hour): the cycle reads them, /api/discovery only shows what was read."""
+    from github_actions_monitor.data_pipeline import orgs
+    if DEMO["on"] or LINK.state()["offline"]:
+        return False
+    orgs.view(config, lambda endpoint: gh_read(endpoint, retries=0), state_dir() / ("orgs_state_lite.json" if LITE["on"] else "orgs_state.json"), offline=False)
+    return True
 
 
 def pool_status():
@@ -441,8 +470,14 @@ def gh_read(endpoint, retries=2):
     raise RuntimeError(last or "gh failed")
 
 
+MAX_STEP_NAMES = 200      # names of step kept for each workflow in the statistics
+
+
 def parse_time(text):
-    return datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc) if text else None
+    try:
+        return datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc) if text else None
+    except (TypeError, ValueError):      # a date that is not one (a run from an event with a wrong shape) is no date: it never stops a cycle
+        return None
 
 
 def seconds_between(start, end):
@@ -456,11 +491,27 @@ def ecosystem_of(name):
     return toolconfig.ecosystem_of(name)
 
 
+def read_visibility(config, force=False):
+    """With a list of repositories written by hand nothing tells which ones are private: read it once per `discover_refresh_seconds` with one listing of the account (names and visibility). Whatever fails
+    leaves the visibility unknown, which is the same as private for everything that shows a name to other people; the listing is never retried before the next refresh time."""
+    if not force and time.time() - VISIBILITY["at"] <= config["discover_refresh_seconds"]:
+        return
+    VISIBILITY["at"] = time.time()
+    try:
+        data = gh("repo", "list", toolconfig.github_owner(config), "--limit", str(config.get("discover_limit", 1000)), "--json", "name,isPrivate", retries=0) or []
+    except Exception:   # noqa: BLE001 - a failed reading only leaves the visibility unknown
+        return
+    PRIVATE.clear()
+    PRIVATE.update(item["name"] for item in data if isinstance(item, dict) and item.get("isPrivate"))
+    VISIBILITY["known"] = {item["name"] for item in data if isinstance(item, dict) and isinstance(item.get("name"), str) and "isPrivate" in item}
+
+
 def watched_repos(config, force=False):
     """The list from the config file or, with "repos": "all", the repositories of the account (one call, cached)."""
     wanted = config["repos"]
     if wanted != "all":
         names = list(wanted)
+        read_visibility(config, force)
     else:
         if force or time.time() - DISCOVERED["at"] > config["discover_refresh_seconds"] or not DISCOVERED["names"]:
             limit = str(config.get("discover_limit", 1000))
@@ -473,6 +524,7 @@ def watched_repos(config, force=False):
             rules = discovery.settings(config)
             PRIVATE.clear()
             PRIVATE.update(item["name"] for item in data if item.get("isPrivate"))
+            VISIBILITY["known"] = {item["name"] for item in data if "isPrivate" in item}      # the plain listing of an older gh has no such field: nothing is known then
             snapshot = {item["name"]: {"archived": bool(item.get("isArchived"))} for item in data}
             if rules["events"]:
                 found = discovery.diff(DISCOVERED.get("snapshot"), snapshot)
@@ -500,6 +552,7 @@ def watched_repos(config, force=False):
     return valid
 
 
+RUN_SUMMARY = {"by_repo": {}}      # repo -> counts over ALL the runs of the last cycle (health/repo_view.summarize_runs): the page only receives the 600 newest ones, the health must not
 SAMPLE_INFO = {}      # repo -> {"asked": runs asked for, "total": total_count of GitHub or None, "probe": runs only the second look found}
 SAMPLING_STATE = {"dropped": []}      # the repositories that waited in the last cycle because the budget of requests was spent
 BUDGET = sampling.Budget()      # requests for run lists in the last hour
@@ -524,7 +577,8 @@ def fork_ci_answers(config, rules, items):
 
 
 MAX_RUN_SECONDS = 35 * 86400      # GitHub stops a run after 35 days: a longer figure is a wrong clock (a re-run measured from the first attempt), not a long build
-TIMING = {"on": False, "known": {}, "budget": 3}      # ci.rerun_timing: ask GitHub for the real duration of a re-run (runs/ID/timing), a few calls per read of a repository
+TIMING_PER_READ = 3      # requests for the duration of a re-run that one reading of one repository may make
+TIMING = {"on": False, "known": {}}      # ci.rerun_timing: ask GitHub for the real duration of a re-run (runs/ID/timing), a few calls per read of a repository
 
 
 def run_times(run):
@@ -543,14 +597,19 @@ def run_times(run):
     return queued, seconds, begun
 
 
-def rerun_seconds(repo, run):
-    """The real duration of a finished re-run from `runs/ID/timing` (wall clock of the attempt), when ci.rerun_timing is on and the budget of this read allows; else None."""
+def rerun_seconds(repo, run, allowance=None):
+    """The real duration of a finished re-run from `runs/ID/timing` (wall clock of the attempt), when ci.rerun_timing is on and the allowance of this read (`allowance`, a list with the number of
+    requests it may still make, one list for each reading of a repository) allows; else None."""
     key = (repo, run.get("id"), run.get("run_attempt"))
     if key in TIMING["known"]:
         return TIMING["known"][key]
-    if not TIMING["on"] or TIMING["budget"] <= 0:
+    allowance = allowance if allowance is not None else [TIMING_PER_READ]
+    if not TIMING["on"] or allowance[0] <= 0:
         return None
-    TIMING["budget"] -= 1
+    if TIMING.get("limit") and BUDGET.used() >= TIMING["limit"]:      # the request is one of the hour: with the budget spent it is not made (it would be asked again at the next read)
+        return None
+    allowance[0] -= 1
+    BUDGET.record(1)
     try:
         body = gh_read(f"repos/{toolconfig.github_owner()}/{repo}/actions/runs/{run.get('id')}/timing", retries=0) or {}
         ms = body.get("run_duration_ms")
@@ -607,12 +666,12 @@ def fetch_sampled(repo, per_page, config):
 
 def parse_runs(repo, data):
     runs = []
-    TIMING["budget"] = 3
+    allowance = [TIMING_PER_READ]      # the requests for the duration of a re-run this reading of this repository may make: its own count, not one shared with the other threads of the cycle
     for run in data.get("workflow_runs", []):
         full_path = str(run.get("path") or "").split("@")[0]
         queued, seconds, begun = run_times(run)
         if (run.get("run_attempt") or 1) > 1 and run.get("status") == "completed":
-            seconds = rerun_seconds(repo, run) if TIMING["on"] else seconds
+            seconds = rerun_seconds(repo, run, allowance) if TIMING["on"] else seconds
         runs.append({
             "repo": repo, "id": run["id"], "name": run.get("name") or "", "title": (run.get("display_title") or "")[:90],
             "event": run.get("event"), "branch": run.get("head_branch"), "fork": is_fork_run(run), "path": full_path.rsplit("/", 1)[-1], "sha": (run.get("head_sha") or "")[:7],
@@ -627,6 +686,7 @@ def parse_runs(repo, data):
     return runs
 
 
+AUDIT_REQUIRED_ROUTES = ("/api/alerts/mute", "/api/alerts/unmute")
 TUNED = {"refresh_seconds": None, "cold_refresh_seconds": None}
 MODE = modes.State()      # the working mode: normal unless you ask (memory only, unless modes.remember is on)
 MODE_SAID = [""]
@@ -748,6 +808,8 @@ def refresh_runs(repos, config, progress=None):
     slow = []             # the cold repositories whose slow turn has come: (name, cached entry)
     for repo in repos:
         entry = RUN_CACHE.get(repo)
+        if entry and entry.get("retry_at", 0) > now:      # it failed several times in a row: it waits (the old picture stays) and the others are read
+            continue
         hot = is_hot(repo, config, now)
         HOT_FORCED.discard(repo)
         if entry is None:
@@ -769,15 +831,23 @@ def refresh_runs(repos, config, progress=None):
         RATE_BLOCK["unread"] = len(todo)
         return 0
     TIMING["on"] = isinstance(config.get("ci"), dict) and config["ci"].get("rerun_timing") is True
+    TIMING["limit"] = sampling.settings(config)["api_budget_per_hour"]
     total = len(todo)
     batched = graphql_cold(config, [r for r, _n in todo if r in cold_due])
     if batched:
         BUDGET.record(1)
         for repo, runs in batched.items():
-            note_read(repo, runs, None)
+            named = {redrule.workflow_key(r) for r in runs}
+            kept = [r for r in ((RUN_CACHE.get(repo) or {}).get("runs") or []) if redrule.workflow_key(r) not in named]      # the batch only sees the last commit of the branch: what it does not name (a cron, a workflow with a path filter) is kept
+            note_read(repo, list(runs) + kept, None)
         todo = [item for item in todo if item[0] not in batched]
     limit = sampling.settings(config)["api_budget_per_hour"]
-    todo, waiting = sampling.plan(todo, red_repos_of([r for r, _n in todo]) if limit else set(), limit, BUDGET.used())      # a spent budget: the repositories with red first, the others wait
+    probing = sampling.settings(config)["default_branch_probe"]
+
+    def price(item):      # a repository whose last list was full (or never read) also gets the second look at the pushes to its default branch: two requests
+        held = RUN_CACHE.get(item[0])
+        return 2 if probing and (held is None or len(held.get("runs") or []) >= item[1]) else 1
+    todo, waiting = sampling.plan(todo, red_repos_of([r for r, _n in todo]) if limit else set(), limit, BUDGET.used(), price)      # a spent budget: the repositories with red first, the others wait
     SAMPLING_STATE["dropped"] = [item[0] for item in waiting]
     for start in range(0, len(todo), 40):  # chunks, so the page can show the first results while the rest loads
         chunk = todo[start:start + 40]
@@ -876,17 +946,18 @@ def note_read(repo, runs, error):
         RUN_CACHE[repo] = {"runs": runs, "at": time.time(), "full_at": time.time(), "error": None, "fails": 0, "head": HEADS_PENDING.pop(repo, "") or (entry or {}).get("head", "")}
         return
     fails = (entry or {}).get("fails", 0) + 1
+    retry_at = time.time() + resilience.retry_delay(fails)      # a repository that keeps failing is left alone for a while instead of being read in every cycle
     if resilience.is_transient(error) and fails < resilience.TRANSIENT_CYCLES:
         if entry:
-            entry.update({"fails": fails, "at": 0})      # the old picture stays and the read is repeated in the next cycle; nothing is shown yet
+            entry.update({"fails": fails, "at": 0, "retry_at": retry_at})      # the old picture stays and the read is repeated in the next cycle; nothing is shown yet
         else:
-            RUN_CACHE[repo] = {"runs": [], "at": 0, "error": None, "fails": fails}
+            RUN_CACHE[repo] = {"runs": [], "at": 0, "error": None, "fails": fails, "retry_at": retry_at}
         return
     error = short_error(error) or "gh failed"      # one line: no legal paragraph, no request id
     if entry:
-        entry.update({"error": error, "fails": fails})      # keep the old runs, report the problem
+        entry.update({"error": error, "fails": fails, "retry_at": retry_at})      # keep the old runs, report the problem
     else:
-        RUN_CACHE[repo] = {"runs": runs, "at": time.time(), "error": error, "fails": fails}
+        RUN_CACHE[repo] = {"runs": runs, "at": time.time(), "error": error, "fails": fails, "retry_at": retry_at}
 
 
 def run_jobs(repo, run_id):
@@ -966,7 +1037,7 @@ def collect(config, publish=None):
 
 
 def repo_meta(repos, config=None):
-    """{repo: {"private": bool, "branch": str or None, "pushed": ISO or None, "prs": int or None}} for the columns of the Repositories table. The visibility comes from the listing the monitor already
+    """{repo: {"private": True, False or None (not read: treated as private), "branch": str or None, "pushed": ISO or None, "prs": int or None}} for the columns of the Repositories table. The visibility comes from the listing the monitor already
     reads; the rest from the CI sentinel when it has looked (the lite edition has none: those fields are None). Nothing new is read from GitHub."""
     info = {}
     sentinel = SENTINEL.get("obj")
@@ -978,11 +1049,11 @@ def repo_meta(repos, config=None):
     for repo in repos:
         item = info.get(repo) if isinstance(info.get(repo), dict) else {}
         prs = item.get("prs")
-        out[repo] = {"private": repo in PRIVATE, "branch": item.get("branch") or None, "pushed": item.get("pushed") or None, "prs": len(prs) if isinstance(prs, list) else None, "fork": item.get("fork") is True}
+        out[repo] = {"private": True if repo in PRIVATE else (False if repo in VISIBILITY["known"] else None), "branch": item.get("branch") or None, "pushed": item.get("pushed") or None, "prs": len(prs) if isinstance(prs, list) else None, "fork": item.get("fork") is True}
         cached = RUN_CACHE.get(repo)
         if cached and cached.get("runs") is not None and cached.get("at"):
-            info = SAMPLE_INFO.get(repo) or {}
-            out[repo]["coverage"] = sampling.coverage(cached["runs"], info.get("asked"), info.get("total"), sampling.settings(config or {})["min_coverage_minutes"])
+            sample = SAMPLE_INFO.get(repo) or {}      # not `info`: that name holds what the sentinel knows of every repository
+            out[repo]["coverage"] = sampling.coverage(cached["runs"], sample.get("asked"), sample.get("total"), sampling.settings(config or {})["min_coverage_minutes"])
     return out
 
 
@@ -1088,11 +1159,16 @@ def build(config, repos, started, refreshed, loading, progress_text):
     ghost_rows = [{"repo": r["repo"], "name": r.get("name"), "id": r.get("id"), "url": r.get("url"), "branch": r.get("branch"), "event": r.get("event"), "since": r.get("started")} for r in ghosts[:200]]
     activity_view = None
     idle_forks = []
+    aged_rows, quiet_rows = [], []
     meta = repo_meta(repos, config)
     try:
         held = redrule.states({r: [x for x in runs if x["repo"] == r] for r in repos}, {r: m.get("branch") for r, m in repo_meta(repos).items() if m.get("branch")}, True)
         figures["awaiting"], figures["inactive"] = len(held["awaiting"]), len(held["inactive"])
         figures["services_failing"] = len(held["services"])
+        aged_rows = [{k: row.get(k) for k in ("repo", "workflow", "since", "url", "streak", "conclusion")} for row in held["inactive"] if row.get("aged")]      # the reds that aged into "inactive" (ci.red_age_days) do not vanish without a trace
+        figures["aged"], figures["aged_days"] = len(aged_rows), redrule.POLICY.get("red_age_days") or 0
+        quiet_rows = [{k: row.get(k) for k in ("repo", "workflow", "since", "url", "streak", "conclusion")} for row in held["inactive"] if not row.get("aged")]      # abandoned workflows (ci.inactive_days) that failed: not red, but not hidden either
+        figures["quiet"], figures["quiet_days"] = len(quiet_rows), redrule.POLICY.get("inactive_days") or 0
         activity_view = activity.summarize(repos, {r: [x for x in runs if x["repo"] == r] for r in repos}, {r: (SAMPLE_INFO.get(r) or {}).get("total") for r in repos}, errors, time.time(), activity.settings(config))
         figures["dormant"], figures["inactive_repos"] = len(activity_view["dormant"]), len(activity_view["inactive"])
         by_repo_runs = {r: [x for x in runs if x["repo"] == r] for r in repos}
@@ -1101,6 +1177,11 @@ def build(config, repos, started, refreshed, loading, progress_text):
         figures["forks_idle"] = len(idle_forks)
     except Exception as error:   # noqa: BLE001 - a figure of the header never stops a cycle
         degraded.note("loop.extra", error)
+    try:
+        from github_actions_monitor.health import repo_view as health_repo_view
+        RUN_SUMMARY["by_repo"] = health_repo_view.summarize_runs(runs, time.time())
+    except Exception as error:   # noqa: BLE001 - the summary of the health never stops a cycle
+        degraded.note("loop.summary", error)
     return {
         "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "updated_local": tzdisplay.stamp(time.time()), "took": round(time.time() - started, 1),
         "repos": repos, "ecosystems": {repo: ecosystem_of(repo) for repo in repos},
@@ -1111,7 +1192,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
         "refresh_seconds": config["refresh_seconds"], "hot_only": hot_only_state(),
         "offline": LINK.state(), "etag": ETAG["cache"].stats() if ETAG["cache"] else None, "graphql": graphql_checks.stats(config),
         "hidden": HIDDEN["hidden"], "discovered": HIDDEN["discovered"], "hidden_names": HIDDEN["names"],
-        "figures": figures, "repo_meta": meta, "sampling": sampling_summary(config, repos, meta), "activity": activity_view, "forks_idle": idle_forks[:200],
+        "figures": figures, "repo_meta": meta, "sampling": sampling_summary(config, repos, meta), "activity": activity_view, "forks_idle": idle_forks[:200], "forks_idle_all": idle_forks, "aged_reds": aged_rows[:100], "quiet_reds": quiet_rows[:100],
     }
 
 
@@ -1137,7 +1218,7 @@ def webhook_status(config):
     newest = LIVE_EVENTS[-1] if LIVE_EVENTS else None
     return {"enabled": cfg["enabled"], "active": webhook.active(config), "secret_ok": len(cfg["secret"]) >= webhook.MIN_SECRET, "text": webhook.status_text(config), "stats": dict(WEBHOOK_STATS),
             "keep": webhook.live_settings(config)["live_events_keep"], "held": len(LIVE_EVENTS), "secret_source": webhook.secret_source(config), "coverage": webhook.coverage(config),
-            "last": ({k: newest.get(k) for k in ("repo", "name", "event", "status", "conclusion", "at")} if newest else None)}
+            "last": ({k: newest.get(k) for k in ("repo", "workflow", "event", "status", "conclusion", "at")} if newest else None)}
 
 
 def apply_live_event(record, config):
@@ -1153,6 +1234,12 @@ def apply_live_event(record, config):
     entry = RUN_CACHE.get(record["repo"])
     HOT_FORCED.add(record["repo"])      # whatever the event said, the repository is read again in the next cycle (the event is the news, the read is the proof)
     if run and entry is not None:
+        old = next((r for r in entry["runs"] if r.get("id") == run["id"]), None)
+        if old is not None:      # the run the cycle already read keeps what the event does not say (its kind of event decides the colour; the actor, the title, the fork mark): the event only adds what is new
+            if old.get("status") == "completed" and run.get("status") == "completed" and old.get("conclusion") == run.get("conclusion"):
+                run = old
+            else:
+                run = {**old, **{k: v for k, v in run.items() if v not in ("", None) and not (k == "event" and v == "webhook")}, "conclusion": run.get("conclusion")}
         runs = [r for r in entry["runs"] if r.get("id") != run["id"]]
         entry["runs"] = sorted(runs + [run], key=lambda r: r.get("started") or "", reverse=True)[:max(config.get("runs_per_repo", 20), 5)]
         entry["at"] = time.time()
@@ -1164,6 +1251,8 @@ def apply_live_event(record, config):
         store.data["queue"][key] = (store.data["queue"].get(key, []) + [record["queue"]])[-store.max_samples:]
         for name, seconds in (record.get("steps") or {}).items():
             slot = store.data["steps"].setdefault(key, {})
+            if name not in slot and len(slot) >= MAX_STEP_NAMES:      # a matrix that puts a number in the name of a step must not make the file grow for ever: the oldest name goes
+                slot.pop(next(iter(slot)), None)
             slot[name] = (slot.get(name, []) + [seconds])[-store.max_samples:]
         store.dirty = True
     if record["event"] == "workflow_run" and record.get("status") == "completed" and record.get("conclusion") in ("failure", "timed_out", "startup_failure"):
@@ -1301,19 +1390,29 @@ def read_runner_jobs(config, data):
 
 
 def runner_list(config):
-    """The self-hosted runners (runners.py), read at most every 5 minutes; None when `runners.enabled` is off or the read failed (the model then says the reason is unknown)."""
+    """The self-hosted runners (runners.py) as the last cycle read them (read_runner_list); None when `runners.enabled` is off or the read failed (the model then says the reason is unknown). A request
+    never reads GitHub: it is answered from this."""
     from github_actions_monitor.integrations import runners
     if not runners.settings(config)["enabled"] or DEMO["on"]:
         return None
-    if time.time() - RUNNER_JOBS["list_at"] > 300:
-        RUNNER_JOBS["list_at"] = time.time()
-        try:
-            got = runners.collect(config, lambda endpoint: gh_read(endpoint, retries=0), toolconfig.github_owner(config), list((STATE.get("data") or {}).get("repos") or []))
-            RUNNER_JOBS["list"] = None if got["errors"] and not got["runners"] else got["runners"]
-        except Exception as error:   # noqa: BLE001
-            degraded.note("runners.list", error)
-            RUNNER_JOBS["list"] = None
     return RUNNER_JOBS["list"]
+
+
+def read_runner_list(config, data=None):
+    """The reading of the runners, done by the cycle at most every `RUNNERS_MEMORY_SECONDS`: it keeps the list for the model of the runners and the answer of /api/runners."""
+    from github_actions_monitor.integrations import runners
+    if not runners.settings(config)["enabled"] or DEMO["on"] or time.time() - RUNNER_JOBS["list_at"] <= RUNNERS_MEMORY_SECONDS:
+        return False
+    RUNNER_JOBS["list_at"] = time.time()
+    repos = list(((data if isinstance(data, dict) else STATE.get("data")) or {}).get("repos") or [])
+    try:
+        got = runners.collect(config, lambda endpoint: gh_read(endpoint, retries=0), toolconfig.github_owner(config), repos)
+        RUNNER_JOBS["list"] = None if got["errors"] and not got["runners"] else got["runners"]
+        RUNNERS_SEEN["payload"], RUNNERS_SEEN["at"] = {"enabled": True, **got}, time.time()
+    except Exception as error:   # noqa: BLE001
+        degraded.note("runners.list", error)
+        RUNNER_JOBS["list"] = None
+    return True
 
 
 def runner_model_payload(now=None):
@@ -1537,11 +1636,14 @@ def feed_alerts(config, data, diagnose=True):
             degraded.note("lessons.apply", error)
         result = ai_alerts.update(config, red_rows(data), runner=ai_alerts.gh_runner if diagnose else None, owner=toolconfig.github_owner(config), panels=panels, sections=sections, extra_rows=extra,
                                   status=f"running, cycle complete ({len(data.get('repos') or [])} repositories read)")
-    try:
+    try:      # --demo writes nothing: no book and no ai/LESSONS.md in the folder it runs from
         from github_actions_monitor.integrations import lessons
-        if result["opened"]:
+        if DEMO["on"]:
+            pass
+        elif result["opened"]:
             lessons.record(config, result["opened"], {(r.get("repo"), r.get("workflow")): r.get("sha") for r in red_rows(data) if r.get("sha")})      # a failure that opens goes into the book (local file)
-        lessons.write_markdown(config, force=bool(result["opened"] or result["resolved"]))
+        if not DEMO["on"]:
+            lessons.write_markdown(config, force=bool(result["opened"] or result["resolved"]))
     except Exception as error:   # noqa: BLE001 - the book never stops the feed
         degraded.note("lessons.record", error)
     for alert in result["opened"]:
@@ -1584,6 +1686,9 @@ def maintain_extras(config, data):
     for name, job in (("ai_alerts", lambda: feed_alerts(config, data)),
                       ("finops", lambda: spare and read_costs(config, data)),
                       ("runner_model", lambda: spare and read_runner_jobs(config, data)),
+                      ("runners", lambda: spare and read_runner_list(config, data)),
+                      ("orgs", lambda: spare and read_extra_lists(config)),
+                      ("pool", lambda: spare and refresh_pool_status()),
                       ("reports", lambda: spare and __import__("github_actions_monitor.integrations.reports", fromlist=["_"]).cycle(config, toolconfig.github_owner(config), list(data.get("repos") or []), data.get("runs") or [],
                                                                                                                                   lambda endpoint: gh_read(endpoint, retries=0))),
                       ("mirror", lambda: spare and __import__("github_actions_monitor.integrations.mirror", fromlist=["_"]).cycle(config, data.get("runs") or [], toolconfig.github_owner(config), lambda e: gh_read(e, retries=0), download_artifact)),
@@ -1685,7 +1790,7 @@ def score_tick(config, data):
         collab = registry.get("collab") if registry else None
         known = bool(collab is not None and getattr(collab, "enabled", False) and not (collab.get_status() or {}).get("loading"))
         storage, account = runtime.process_storage(CHILD["account"] or None)
-        idle = set(data.get("forks_idle") or [])      # the runs of a fork without a CI of its own (the cron it inherited) are not the work of the account
+        idle = set(data.get("forks_idle_all") or data.get("forks_idle") or [])      # the runs of a fork without a CI of its own (the cron it inherited) are not the work of the account
         snapshot = score_service.tick(storage, account, config, [r for r in (data.get("runs") or []) if r.get("repo") not in idle], collab.get_alerts() if known else [], collab_known=known, security=score_security(registry, config), activity=data.get("activity"))
         if snapshot and snapshot.get("drop_new") and snapshot.get("drop"):      # the moment a drop appears; it leaves the panel only when the person asked for it
             from github_actions_monitor.scoring import drop as score_drop, engine as score_engine
@@ -1772,10 +1877,11 @@ def health_views(now=None, only=None):
     if only is not None:
         names = [n for n in names if n == only]
     runs_by, failing_by, active_by, alerts_by = (repo_view.group_by_repo(x) for x in (runs, failing, active, alerts))
+    summary_by = RUN_SUMMARY["by_repo"] if (data.get("runs_total") or 0) > len(runs) else {}      # the cut was made: count over everything the cycle read
     views = []
     for repo in names:
         eco = toolconfig.ecosystem_of(repo)
-        view = repo_view.repo_view(repo, runs_by.get(repo, []), failing_by.get(repo, []), active_by.get(repo, []), alerts_by.get(repo, []), ready.get(repo), sources, eco, now)
+        view = repo_view.repo_view(repo, runs_by.get(repo, []), failing_by.get(repo, []), active_by.get(repo, []), alerts_by.get(repo, []), ready.get(repo), sources, eco, now, summary_by.get(repo) if summary_by else None)
         view["ecosystem_label"] = toolconfig.label_of(eco)
         views.append(view)
     return views
@@ -2181,9 +2287,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def end_headers(self):
         """Every answer: the page cannot be put in a frame of another site (clickjacking) and the browser does not guess a type."""
-        self.send_header("X-Frame-Options", "DENY")
-        self.send_header("Content-Security-Policy", "frame-ancestors 'none'")
-        self.send_header("X-Content-Type-Options", "nosniff")
+        for name, value in localguard.SECURITY_HEADERS:
+            self.send_header(name, value)
         if getattr(self, "deprecated_access", False):
             self.send_header("Deprecation", "true")      # the ?access= address is deprecated: POST /api/access keeps the token out of the address bar
         super().end_headers()
@@ -2306,6 +2411,15 @@ class Handler(BaseHTTPRequestHandler):
         """True when this request really comes from a person at this computer (see localguard.is_this_computer)."""
         return not self.remote_through_supervisor() and localguard.is_this_computer(self.client_address, self.headers, door=self.local_door)
 
+    def webhook_sender(self):
+        """Who sent a webhook request, for the limits: the process of an account is spoken to by its supervisor, which says who really sent it (and proves it with its key); otherwise the address of the
+        peer, or the last address a trusted proxy appended (localguard.client_key)."""
+        if os.environ.get(auth_http.CHILD_ENV):
+            key, proof, given = envguard.get(SUPERVISOR_KEY_ENV), self.headers.get(auth_http.SUPERVISOR_KEY_HEADER) or "", self.headers.get(auth_http.WEBHOOK_PEER_HEADER) or ""
+            if key and proof and hmac.compare_digest(key.encode(), proof.encode()) and 0 < len(given) <= 80:
+                return "via:" + given
+        return localguard.client_key(self.client_address, self.headers)
+
     def guard(self):
         if self.request_ok():
             return True
@@ -2331,8 +2445,9 @@ class Handler(BaseHTTPRequestHandler):
             self.json_reply({"error": "locked"}, 429)
             return False
         if not localguard.access_ok(self.headers, query_token):      # the person at this computer is never locked out of their own monitor; a shared proxy address is told apart with listen.trusted_proxy
-            localguard.note_failure(peer, localguard.max_failed(LIVE_CONFIG or DEFAULTS))
-            localguard.note_proxy_failure(self.client_address, self.headers, localguard.max_failed(LIVE_CONFIG or DEFAULTS))
+            if localguard.presented(self.headers) or query_token:      # a request that carries NO token is not a guess: it is refused but it does not count against its address
+                localguard.note_failure(peer, localguard.max_failed(LIVE_CONFIG or DEFAULTS))
+                localguard.note_proxy_failure(self.client_address, self.headers, localguard.max_failed(LIVE_CONFIG or DEFAULTS))
             self.json_reply({"error": "access"}, 401)
             return False
         self.deprecated_access = bool(query_token) and not localguard.presented(self.headers)      # the token came in the address: every answer says that way is deprecated
@@ -2457,6 +2572,7 @@ class Handler(BaseHTTPRequestHandler):
         except OSError:
             pass
 
+    #: besides the routes of the table of audited_posts, the silences also leave a line of their own; the settings are not here on purpose: they must stay open to put the log right
     def do_POST(self):
         counted = CountedReader(self.rfile)
         self.rfile = counted
@@ -2464,8 +2580,12 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if not self.access_gate() or not auth_http.gate(self, LIVE_CONFIG or DEFAULTS, LITE["on"]):
                 return
-            from github_actions_monitor.security import audit_log
+            from github_actions_monitor.security import audit_log, audited_posts
             audit_log.take_note()
+            route = self.path.split("?")[0]
+            if (audited_posts.action_for(route) or route in AUDIT_REQUIRED_ROUTES) and not audit_log.writable(toolconfig.raw_config()):      # `audit_log.required`: an action that cannot be recorded is not done
+                self.json_reply({"ok": False, "error": "audit_log_required", "code": "audit_unwritable"}, 503)
+                return
             with i18n.use_language(self.request_language()):
                 self.handle_post()
             self.audit_post(self.path.split("?")[0])
@@ -2525,13 +2645,10 @@ class Handler(BaseHTTPRequestHandler):
             return
         if path == "/api/webhook":   # off unless configured; no Host check (a tunnel changes it), but every request must carry a valid HMAC
             from github_actions_monitor.security import webhook
-            if localguard.STATE["network"] and localguard.over_rate("webhook", str(self.client_address[0]), 120):      # one address cannot flood the receiver
-                self.json_reply({"ok": False, "error": "rate"}, 429)
-                return
             try:
                 size = int(self.headers.get("Content-Length") or 0)
                 body = self.rfile.read(size) if 0 <= size <= webhook.MAX_BODY else b"x" * (webhook.MAX_BODY + 1)
-                code, answer, repo = webhook.handle(LIVE_CONFIG or DEFAULTS, body, self.headers, STATE["data"]["repos"] if STATE.get("data") else [])
+                code, answer, repo = webhook.handle(LIVE_CONFIG or DEFAULTS, body, self.headers, STATE["data"]["repos"] if STATE.get("data") else [], self.webhook_sender())      # bad signatures and good ones are counted apart, in every mode
                 webhook_count(code, bool(answer.get("duplicate")) if isinstance(answer, dict) else False)
                 record = webhook.parse_event(self.headers.get("X-GitHub-Event"), body) if (code == 200 and repo) else None
                 if record and webhook.live_settings(LIVE_CONFIG or DEFAULTS)["record_events"]:
@@ -2703,9 +2820,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         self.v1 = False
-        if not self.v1_enter():
+        if not self.access_gate():      # the access token first: the 404 of a switch that is off does not tell a visitor without credentials whether the versioned API exists
             return
-        if not self.access_gate() or not auth_http.gate(self, LIVE_CONFIG or DEFAULTS, LITE["on"]):
+        if not self.v1_enter() or not auth_http.gate(self, LIVE_CONFIG or DEFAULTS, LITE["on"]):
             return
         with i18n.use_language(self.request_language()):
             if self.v1 and self.path.split("?")[0] in api_v1.OWN_ROUTES:
@@ -2740,13 +2857,17 @@ class Handler(BaseHTTPRequestHandler):
                 payload = api_v1.openapi(TOOL_VERSION)
             elif path == "/api/v1/me":
                 context = getattr(self, "auth_user", None)
-                team = auth_http.active(LIVE_CONFIG or DEFAULTS, LITE["on"])
+                team = auth_http.active(LIVE_CONFIG or DEFAULTS, LITE["on"]) or bool(context)      # the process of an account is told by its supervisor, with a signed context, that the team mode is on
                 payload = api_v1.me_payload(version=TOOL_VERSION, edition="complete", mode="team" if team else "individual", authenticated=bool(context), user=auth_http.acting_user(self),
                                             role=context["role"] if context else None, accounts=context["accounts"] if context else None, cfg=cfg)
             else:
-                payload = api_v1.repos_payload(health_views(), ask, secret=V1_SECRET, now=time.time(), cfg=cfg)
+                payload = api_v1.repos_payload(health_views(), ask, secret=V1_SECRET, now=time.time(), cfg=cfg, who=f"{auth_http.acting_user(self) or ''}|{CHILD['account'] or ''}")      # a cursor belongs to who asked for it
         except api_v1.ApiError as error:
             status, body = error.envelope()
+            self.json_reply(body, status)
+            return
+        except Exception:   # noqa: BLE001 - whatever else goes wrong is the envelope of a 500, never a cut connection with a trace in the console
+            status, body = api_v1.ApiError(500, "api.server_error").envelope()
             self.json_reply(body, status)
             return
         body, extra = api_v1.maybe_compress(json.dumps(payload).encode("utf-8"), self.headers.get("Accept-Encoding"), cfg["gzip_min_bytes"])
@@ -2764,6 +2885,11 @@ class Handler(BaseHTTPRequestHandler):
 
     def handle_get(self):
         path = self.path.split("?")[0]
+        if path == "/favicon.ico":      # a browser (a kiosk at every start) asks for it: nothing to give, and no error in its console
+            self.send_response(204)
+            self.send_header("Cache-Control", "max-age=86400")
+            self.end_headers()
+            return
         if LITE["on"] and path.startswith(LITE_PATHS) and path not in LITE_SHARED:      # the lite product does not have these endpoints
             self.send_response(404)
             self.end_headers()
@@ -2913,7 +3039,7 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/api/quota-pool/status":      # this computer only: the allowance of every source of the reads and what the App lacks (never a key or a token)
             if not self.guard() or not self.this_computer():
                 return
-            self.json_reply(pool_status())
+            self.json_reply(POOL_STATUS["payload"] or pool_status_pending())      # what the cycle read: a request never reads GitHub
         elif path == "/api/github-app/status":      # this computer only: asks the App for a token and says its name, installation, permissions and allowance (never the key or the token)
             if not self.guard() or not self.this_computer():
                 return
@@ -3349,13 +3475,14 @@ def reload_on_signal(signum=None, frame=None):
     threading.Thread(target=credential_change, args=("reload",), daemon=True, name="credential-reload").start()
 
 
-def update_info():
-    """The state of the update notice: the cached answer, refreshed (at most every 24 hours) through the conditional GitHub client; silent when it cannot be read."""
+def update_info(read=True):
+    """The state of the update notice: the cached answer, refreshed (at most every 24 hours) through the conditional GitHub client; silent when it cannot be read. `read` False (a request of the page)
+    only gives the cached answer: the loop that looks for updates is the one that reads."""
     config = LIVE_CONFIG or toolconfig.raw_config()
     state_file = state_dir() / ("update_check_lite.json" if LITE["on"] else "update_check.json")
     if DEMO["on"]:
         return updatecheck.view({"updates": {"check": False}}, TOOL_VERSION, {})
-    return updatecheck.check(config, TOOL_VERSION, lambda endpoint: gh_read(endpoint, retries=0), state_file=state_file, offline=LINK.state()["offline"], background=True)      # never a network wait in the path of a page
+    return updatecheck.check(config, TOOL_VERSION, lambda endpoint: gh_read(endpoint, retries=0), state_file=state_file, offline=LINK.state()["offline"] or not read, background=True)      # never a network wait in the path of a page
 
 
 def RUN_CACHE_RESET():
@@ -3393,7 +3520,7 @@ def quota_payload():
 def about_payload():
     from github_actions_monitor.ui import about
     places = {"config": CONFIG_FILE, "log": LOG_FILE, "etag_cache": etagcache.CACHE_FILE, "package_folder": HERE}
-    data = about.info(LITE["on"], health_payload(), places, update_info(), i18n.language())
+    data = about.info(LITE["on"], health_payload(), places, update_info(read=False), i18n.language())
     data["support"] = about.support_text(data)
     return data
 
@@ -3404,7 +3531,7 @@ def discovery_payload():
         data = STATE.get("data") or {}
     box = discovery.box(toolconfig.github_owner(config), len(data.get("repos") or []), HIDDEN["discovered"], HIDDEN["names"])
     from github_actions_monitor.data_pipeline import orgs
-    organisations = orgs.view(toolconfig.raw_config(), lambda endpoint: gh_read(endpoint, retries=0), state_dir() / ("orgs_state_lite.json" if LITE["on"] else "orgs_state.json"), offline=LINK.state()["offline"]) if not DEMO["on"] else {"enabled": False, "orgs": []}
+    organisations = orgs.view(toolconfig.raw_config(), lambda endpoint: gh_read(endpoint, retries=0), state_dir() / ("orgs_state_lite.json" if LITE["on"] else "orgs_state.json"), offline=True) if not DEMO["on"] else {"enabled": False, "orgs": [], "checked_at": 0}      # offline=True: it shows what the cycle read, it never reads
     return {**box, "events": list(reversed(DISCOVERY["events"]))[:20], "suggestions": DISCOVERY["suggestions"], "settings": discovery.settings(config), "owner_kind": FORKS["kind"], "forks": {k: FORKS[k] for k in ("checked", "kept", "left", "waiting")}, "demo": DEMO["on"], "organizations": organisations}
 
 
@@ -3476,6 +3603,21 @@ def ai_store():
 
 
 AI_FALLBACK_STORE = {}
+
+
+def _tell_cloud_fallback(first, used):
+    """The chain of the AI went from a model on this computer to one on the internet: the notice goes to the channels (the line in the log of actions is written by the chain itself)."""
+    from github_actions_monitor.integrations import notifiers
+    notifiers.notify(LIVE_CONFIG or toolconfig.raw_config(), {"kind": "ai_alert", "owner": "main", "repo": "", "level": "warn", "url": None, "text": i18n.t("evt.ai_cloud_fallback", frm=first, to=used)})
+
+
+def _register_cloud_hook():
+    from github_actions_monitor.sentinels import ai_chain
+    if _tell_cloud_fallback not in ai_chain.CLOUD_HOOKS:
+        ai_chain.CLOUD_HOOKS.append(_tell_cloud_fallback)
+
+
+_register_cloud_hook()
 
 
 def handle_action_post(path, request):
@@ -3554,8 +3696,9 @@ def advanced_get(path, query):
         return {"done": done and not DEMO["on"]}
     if path == "/api/runners":
         from github_actions_monitor.integrations import runners
-        RUNNERS_SEEN["payload"] = runners.payload(config, lambda endpoint: gh_read(endpoint, retries=0), toolconfig.github_owner(config), DEMO["on"], list((STATE.get("data") or {}).get("repos") or []))
-        return RUNNERS_SEEN["payload"]
+        if DEMO["on"] or not runners.settings(config)["enabled"]:
+            return runners.payload(config, None, toolconfig.github_owner(config), DEMO["on"])
+        return RUNNERS_SEEN["payload"] or {"enabled": True, "pending": True, "runners": [], "counts": {"idle": 0, "busy": 0, "offline": 0}, "errors": 0}      # what the cycle read: a request never reads GitHub
     if path == "/api/mirror":
         from github_actions_monitor.integrations import mirror
         return mirror.status(config)
@@ -3802,7 +3945,7 @@ def supervisor_main(argv):
     port = ports.from_argv(argv, "complete")
     config = toolconfig.raw_config()
     from github_actions_monitor.security import webhook as _webhook
-    envguard.hold(_webhook.secret_env_name(config))      # the secret of the webhook: held here, given to the account processes explicitly
+    envguard.hold(_webhook.secret_env_name(config), *accounts_supervisor.webhook_names())      # the secrets of the webhook of the installation (the main one and the one of each account): held here, given to each account process explicitly, one to each
     from github_actions_monitor.chatops import inbound as _chat
     envguard.hold(*_chat.env_names(config))      # the proofs of the chat: no program the monitor starts inherits them
     i18n.set_language(i18n.detect(config.get("language")))
@@ -3878,6 +4021,8 @@ def main():
     if not CHILD["account"]:
         rootmigrate.auto()      # an installation of 1.8.1 or older: its data, logs and AI files move into config/, data/, logs/ and ai/ (undo: python -m github_actions_monitor.util.rootmigrate --undo)
     paths.ensure()      # config/, data/, logs/ and ai/ exist before anything is written
+    from github_actions_monitor.integrations import notifiers as _notifiers
+    _notifiers.sweep_at_start()      # the folders with the addresses of the services that an earlier run left behind go now, not at the first send
     if not CHILD["account"]:
         from github_actions_monitor.integrations import ai_index
         ai_index.write("lite" if lite_requested() else "complete")      # ai/INDEX.json and ai/README.md: the map for the AI tools that read this installation
@@ -3909,7 +4054,8 @@ def main():
     config = load_config()
     envguard.hold(localguard.settings_from(config)["token_env"])      # the access token may be under another name: it leaves the environment here too
     from github_actions_monitor.security import webhook as _webhook
-    envguard.hold(_webhook.secret_env_name(config))      # the shared secret of the webhook is read from the environment once and no program the monitor starts inherits it
+    _webhook.load_memory(paths.folder("data") / "webhook_deliveries.json") if _webhook.guard_settings(config)["persist_deliveries"] else None      # the memory of deliveries survives a restart
+    _webhook.freeze_secret_name(config)      # the shared secret of the webhook is read from the environment once, under the name this process started with, and no program the monitor starts inherits it
     from github_actions_monitor.chatops import inbound as _chat
     envguard.hold(*_chat.env_names(config))      # the proofs of the chat (the signing secret of Slack, the public key of Discord) leave the environment here too
     if LITE["on"]:

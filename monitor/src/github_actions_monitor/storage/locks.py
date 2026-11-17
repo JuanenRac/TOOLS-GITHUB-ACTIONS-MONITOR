@@ -3,6 +3,8 @@
 """Locks for the file backend (standard library only).
 
   path_lock(path)       one re-entrant lock per file inside this process: whoever appends to the feed and whoever rewrites it (the purge) take the same one, so a line is never lost
+  os_lock(path)         an exclusion between processes made by the operating system itself (msvcrt.locking on Windows, fcntl.flock elsewhere) on a side file: when the process that holds it dies, the system
+                        lets it go at once, so there is never an orphan to rescue. For the files that are read, changed and written again by several processes (the store of the AI)
   process_lock(path)    a context manager that also excludes OTHER processes through a lock file created exclusively (the global records, read-modify-write); a lock file left by a process that
                         died is taken over at once (the file holds the number of its process) and, when that cannot be known, after STALE seconds (MONITOR_LOCK_STALE overrides it)
 """
@@ -76,6 +78,16 @@ def _owner_gone(lock_file):
     return pid if pid_alive(pid) is False else None
 
 
+LIVE_FACTOR = 10      # a lock older than STALE whose owner is still alive is left alone until it is this many times older (a slow owner is not robbed; a pid that was reused by another program does not block for ever)
+
+
+def _owner_alive(lock_file):
+    try:
+        return pid_alive(int(lock_file.read_text(encoding="ascii", errors="ignore").strip())) is True
+    except (OSError, ValueError):
+        return False
+
+
 def path_lock(path):
     key = os.path.normcase(os.path.abspath(str(path)))
     with _GUARD:
@@ -99,6 +111,57 @@ def release(lock_file, attempts=100, pause=0.01):
     return False
 
 
+def _try_lock(fd):
+    """One try to take the lock of the operating system on the first byte of the file; OSError when somebody else holds it."""
+    if os.name == "nt":
+        import msvcrt
+        os.lseek(fd, 0, os.SEEK_SET)
+        msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+    else:
+        import fcntl
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+
+def _unlock(fd):
+    try:
+        if os.name == "nt":
+            import msvcrt
+            os.lseek(fd, 0, os.SEEK_SET)
+            msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(fd, fcntl.LOCK_UN)
+    except OSError:
+        pass      # closing the descriptor lets go of it anyway
+
+
+@contextlib.contextmanager
+def os_lock(path, timeout=10.0):
+    """Excludes other threads and other processes while the block runs, with a lock of the operating system on `<path>.oslock`. Raises TimeoutError when it cannot be taken in `timeout` seconds."""
+    lock_file = Path(str(path) + ".oslock")
+    lock_file.parent.mkdir(parents=True, exist_ok=True)
+    with path_lock(path):
+        fd = os.open(str(lock_file), os.O_CREAT | os.O_RDWR)
+        try:
+            if os.fstat(fd).st_size == 0:
+                os.write(fd, b"0")      # Windows locks a byte that exists
+            deadline = time.monotonic() + timeout
+            while True:
+                try:
+                    _try_lock(fd)
+                    break
+                except OSError:
+                    if time.monotonic() > deadline:
+                        raise TimeoutError(lock_file.name) from None
+                    time.sleep(0.02)
+            try:
+                yield
+            finally:
+                _unlock(fd)
+        finally:
+            os.close(fd)
+
+
 @contextlib.contextmanager
 def process_lock(path, timeout=10.0):
     """Excludes other threads and other processes while the block runs. Raises TimeoutError when the lock cannot be taken in `timeout` seconds."""
@@ -114,15 +177,21 @@ def process_lock(path, timeout=10.0):
             except (FileExistsError, PermissionError):      # Windows answers "access denied" while another process is deleting the lock file: wait and try again
                 try:
                     gone = _owner_gone(lock_file)
-                    if gone is not None or time.time() - lock_file.stat().st_mtime > stale_seconds():
+                    age = time.time() - lock_file.stat().st_mtime
+                    old = age > stale_seconds() and (gone is not None or age > stale_seconds() * LIVE_FACTOR or not _owner_alive(lock_file))
+                    if gone is not None or old:
                         if gone is not None and _owner_gone(lock_file) != gone:      # another process took it over between the two looks: leave its lock alone
                             continue
-                        lock_file.unlink()
-                        if gone is not None:
-                            RESCUED.append((lock_file.name, gone))
-                            del RESCUED[:-50]
-                            _LOG.warning("lock %s taken over: the process %s that held it is gone", lock_file.name, gone)
-                        continue
+                        try:
+                            lock_file.unlink()
+                        except OSError:      # Windows refuses to delete a file its owner has open: the owner is alive, so wait (and respect the deadline) instead of trying again at full speed
+                            pass
+                        else:
+                            if gone is not None:
+                                RESCUED.append((lock_file.name, gone))
+                                del RESCUED[:-50]
+                                _LOG.warning("lock %s taken over: the process %s that held it is gone", lock_file.name, gone)
+                            continue
                 except OSError:
                     continue
                 if time.monotonic() > deadline:

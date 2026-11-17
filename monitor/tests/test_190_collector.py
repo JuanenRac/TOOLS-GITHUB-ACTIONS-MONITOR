@@ -87,7 +87,7 @@ class Collab(unittest.TestCase):
         items = [{"opened": T0, "closed": None}, {"opened": T0 + 2 * DAY, "closed": None}, {"opened": T0, "closed": T0 + 2 * DAY}]
         m = collector.collect_collab(items, T0, T0 + DAY)
         self.assertEqual(m["collab_open"], 2)
-        self.assertIsNone(m["collab_resolution_time"])
+        self.assertEqual(m["collab_resolution_time"], DAY)      # nothing closed: the two open ones count with their age so far (a lower bound)
 
     def test_iso_times_are_read(self):
         items = [{"opened": "2023-11-14T22:13:20Z", "closed": "2023-11-14T23:13:20Z"}]

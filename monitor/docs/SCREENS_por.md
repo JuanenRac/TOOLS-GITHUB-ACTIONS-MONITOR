@@ -91,7 +91,7 @@ O idioma de um ecrã decide-se por esta ordem: `?lang=xx` no endereço; depois o
 
 | Definição | O que faz |
 |---|---|
-| `screens.enabled` | Ativa as três páginas. Desativado: todos os endereços respondem 404. Desativado por defeito. |
+| `screens.enabled` | Ativa as três páginas. Desativado: `/screen/overview`, `/screen/now`, `/screen/sentinels` e `/api/screens/data` respondem 404 (`/screen/1` a `/screen/3` são a própria página e não dependem disto). A edição lite também serve os ecrãs de parede, com o ecrã dos sentinelas vazio. Desativado por defeito. |
 | `screens.default_theme` | dark (por defeito), light ou contrast. |
 | `screens.default_density` | compact, normal (por defeito) ou large. |
 | `screens.refresh_seconds` | Segundos entre atualizações de uma janela (10 por defeito). As páginas leem do monitor, nunca do GitHub, por isso um tempo curto não gasta quota. |
@@ -101,7 +101,7 @@ O idioma de um ecrã decide-se por esta ordem: `?lang=xx` no endereço; depois o
 | `screens.sound` | Um sinal sonoro a cada falha nova (desativado por defeito). |
 | `screens.burn_in_protection` | Desloca tudo alguns píxeis a cada minuto (ativado por defeito). |
 | `screens.night_dim` | Escurece os ecrãs entre `screens.night_dim_from_hour` (22) e `screens.night_dim_to_hour` (7); desativado por defeito. |
-| `screens.show_repo_names` | all, public (por defeito: os repositórios privados aparecem como private-1, private-2...) ou none (todos os nomes ficam ocultos). Use public ou none num ecrã que outras pessoas possam ver. |
+| `screens.show_repo_names` | all, public (por defeito: os repositórios privados aparecem como private-1, private-2...) ou none (todos os nomes ficam ocultos). Use public ou none num ecrã que outras pessoas possam ver. Com uma lista de repositórios escrita à mão em `repos`, a visibilidade é lida com uma listagem da conta a cada `discover_refresh_seconds`; um repositório cuja visibilidade não pôde ser lida conta como privado. Os números (private-1...) só se dão aos repositórios ocultos, pela ordem de um HMAC do nome com uma chave da instalação guardada num ficheiro privado da pasta de dados, pelo que nada dizem sobre onde um repositório cai entre os outros. |
 
 ### O que mostram e o que ocultam
 

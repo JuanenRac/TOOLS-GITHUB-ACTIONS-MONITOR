@@ -46,12 +46,10 @@ def _account(name):
     return SAFE_ACCOUNT.sub("_", str(name or "main"))[:60] or "main"
 
 
-def _state(directory):
-    try:
-        raw = json.loads((directory / STATE_FILE).read_text(encoding="utf-8"))
-        return raw if isinstance(raw, dict) else {}
-    except (OSError, ValueError):
-        return {}
+def _state(directory, strict=False):
+    """The state file. With `strict` a file that exists and cannot be read raises OSError (the reader is going to write it back: it must not write an empty one over the accounts of the others)."""
+    from github_actions_monitor.storage import file_storage
+    return file_storage.read_json(directory / STATE_FILE, dict, {}, strict=strict)
 
 
 def _save_state(directory, state):
@@ -62,7 +60,12 @@ def _update_entry(directory, key, **changes):
     """Changes the entry of ONE account in the state file that every account of the installation shares: read, change and write are one step under a lock (of the threads and of the processes), so two
     accounts that finish a report in the same moment never overwrite each other."""
     with locks.process_lock(directory / STATE_FILE, 10.0):
-        state = _state(directory)
+        try:
+            state = _state(directory, strict=True)
+        except OSError as error:      # the file is there but cannot be read now: nothing is written, the next report tries again
+            from github_actions_monitor.app import degraded
+            degraded.note("reports.state", error)
+            return
         state.setdefault("accounts", {}).setdefault(key, {}).update(changes)
         for attempt in range(10):
             try:

@@ -120,9 +120,46 @@ def candidates(cfg, kind, task=None):
         if other is None or other["provider"] == "none":
             continue
         entry = {"cfg": other, "label": label_of(other), "role": "fallback"}
+        if is_cloud(other) and not _allowed_cloud(cfg, ref, other):      # a provider on the internet receives the text of a build only if the person wrote its name
+            entry["blocked"] = "not_allowed"
         if all(entry["label"] != done["label"] for done in chain):
             chain.append(entry)
     return chain
+
+
+def is_cloud(cfg):
+    """True when the provider is not on this computer (anthropic, copilot, and an address that is not 127.0.0.1 / localhost / ::1)."""
+    if cfg.get("provider") in ("anthropic", "copilot"):
+        return True
+    if cfg.get("provider") == "ollama":
+        return not sentinel_ai._loopback(cfg.get("ollama_url") or "")
+    if cfg.get("provider") == "openai-compatible":
+        return not sentinel_ai._loopback(cfg.get("base_url") or "")
+    return False
+
+
+def _allowed_cloud(cfg, ref, other):
+    allowed = cfg.get("fallback_cloud_allowed")
+    names = {str(x).strip().lower() for x in (allowed if isinstance(allowed, list) else [])}
+    return bool(names & {str(ref).strip().lower(), ai_models.provider_label(other).lower(), str(other.get("provider")).lower()})
+
+
+CLOUD_HOOKS = []      # functions (from_label, to_label) called when the chain goes from this computer to the internet: the log of actions and the notice are registered by the monitor
+
+
+def cloud_switch(first, used):
+    """Writes down that the chain went from a model on this computer to one on the internet: log of actions, the log of the program and the hooks (the notice). Never raises."""
+    LOG.warning("ai chain went from %s (this computer) to %s (internet)", first, used)
+    try:
+        from github_actions_monitor.security import audit_log
+        audit_log.record({}, "ai.cloud_fallback", target=used[:100], details={"from": first[:100], "to": used[:100]}, force=True)
+    except Exception:   # noqa: BLE001
+        pass
+    for hook in list(CLOUD_HOOKS):
+        try:
+            hook(first, used)
+        except Exception:   # noqa: BLE001
+            pass
 
 
 # ---------- the budget ----------
@@ -154,7 +191,7 @@ def limits_of(cfg, store):
 
 def budget_block(cfg, store):
     """Why this model may not be called now, or None: `model_calls` (its calls of the day are spent), `model_cost` (its estimated cost) or `cost` (the total estimated cost)."""
-    with LOCK, store.lock:
+    with store.lock, LOCK:
         usage = _usage(store)
         mine = usage["models"].get(label_of(cfg), {})
         calls_limit, cost_limit = limits_of(cfg, store)
@@ -170,17 +207,17 @@ def budget_block(cfg, store):
 
 def add_model_call(store, cfg):
     """Counts one call of this model today (before the call, like the general counter: a failing provider also spends its budget)."""
-    with LOCK, store.lock:
+    with store.lock, LOCK:
         row = _usage(store)["models"].setdefault(label_of(cfg), {"calls": 0, "cost": 0.0, "tokens_in": 0, "tokens_out": 0})
         row["calls"] = row.get("calls", 0) + 1
 
 
 def add_model_usage(store, cfg, tokens_in, tokens_out, cost):
-    with LOCK, store.lock:
+    with store.exclusive(), LOCK:
         usage = _usage(store)
         row = usage["models"].setdefault(label_of(cfg), {"calls": 0, "cost": 0.0, "tokens_in": 0, "tokens_out": 0})
-        row["tokens_in"] = row.get("tokens_in", 0) + int(tokens_in or 0)
-        row["tokens_out"] = row.get("tokens_out", 0) + int(tokens_out or 0)
+        row["tokens_in"] = row.get("tokens_in", 0) + min(max(int(tokens_in or 0), 0), sentinel_ai.MAX_REPORTED_TOKENS)
+        row["tokens_out"] = row.get("tokens_out", 0) + min(max(int(tokens_out or 0), 0), sentinel_ai.MAX_REPORTED_TOKENS)
         if cost is not None:
             row["cost"] = round(row.get("cost", 0.0) + cost, 6)
             usage["cost"] = round(usage.get("cost", 0.0) + cost, 6)
@@ -198,7 +235,7 @@ def retired(cfg, store):
 
 def view(cfg, store):
     """The document of `GET /api/ai/budget`: calls and estimated cost today, in total and for each model, with the limits, and the last failures of a main model. Read only."""
-    with LOCK, store.lock:
+    with store.lock, LOCK:
         usage = _usage(store)
         rows = []
         for label in sorted(usage["models"]):
@@ -219,7 +256,7 @@ def note_failover(store, task, failed, reason, used):
     """Writes down that the main model of a task failed (reason in one word) and which one answered instead (or "" = nobody). Log, page and brief."""
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     entry = {"at": now, "task": task, "failed": failed, "reason": reason, "used": used}
-    with LOCK, store.lock:
+    with store.lock, LOCK:
         rows = store.data.setdefault("failovers", [])
         rows.append(entry)
         del rows[:-MAX_FAILOVERS]
@@ -243,4 +280,4 @@ def brief_lines(now=None):
 
 
 def reason_text(reason):
-    return i18n.t("ai.chain_" + reason) if reason in ("model_calls", "model_cost", "cost", "retired", "auth", "model_not_found", "quota", "slow", "config", "error", "no_text") else reason
+    return i18n.t("ai.chain_" + reason) if reason in ("model_calls", "model_cost", "cost", "retired", "not_allowed", "auth", "model_not_found", "quota", "slow", "config", "error", "no_text") else reason

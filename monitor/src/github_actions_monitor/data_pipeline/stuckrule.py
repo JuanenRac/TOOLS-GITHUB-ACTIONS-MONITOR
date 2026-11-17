@@ -118,7 +118,7 @@ def is_ghost(run, cfg, now=None):
 def evaluate(run, base_minutes, cfg, learned=None, labels=(), offline_labels=(), now=None):
     """(stuck, reason, limit_minutes) of one unfinished run. `base_minutes` is the classic `stuck_minutes`; `learned` is the result of learn(); `labels` the runner labels of its jobs (when known)."""
     reason = reason_of(run, labels, offline_labels)
-    if reason in ("queue", "runner_down") and is_ghost(run, cfg, now):
+    if reason == "queue" and is_ghost(run, cfg, now):      # a run that waits for a runner of its own that is OFF is a breakdown of the owner, not a run that GitHub abandoned
         return False, "ghost", base_minutes
     limit = base_minutes
     key = (run.get("repo"), workflow_key(run))

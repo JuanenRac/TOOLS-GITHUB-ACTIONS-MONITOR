@@ -333,7 +333,7 @@ class WebhookReplay(unittest.TestCase):
         self.assertLessEqual(len(webhook._seen), webhook.MAX_DELIVERIES + 1)
 
     def test_one_repository_cannot_cause_endless_refreshes(self):
-        codes = [self.send(delivery=f"delivery-{i}")[0] for i in range(5)]
+        codes = [self.send({"repository": {"name": "R", "full_name": "JuanenRac/R"}, "n": i}, delivery=f"delivery-{i}")[0] for i in range(5)]
         self.assertEqual(codes[:3], [200, 200, 200])
         self.assertEqual(codes[3:], [202, 202])
 

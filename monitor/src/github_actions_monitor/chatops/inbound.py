@@ -26,6 +26,7 @@ from urllib.parse import parse_qs
 
 from github_actions_monitor import i18n
 from github_actions_monitor.chatops import commands, render
+from github_actions_monitor.security import envguard
 from github_actions_monitor.security import envguard, localguard, sigverify
 
 PROVIDERS = ("slack", "discord")
@@ -82,7 +83,7 @@ def _ids(value, pattern):
 
 def _env_name(block, key, default):
     name = block.get(key) if isinstance(block, dict) else None
-    return name if isinstance(name, str) and ENV_NAME_RE.match(name) else default
+    return name if isinstance(name, str) and ENV_NAME_RE.match(name) and not envguard.forbidden_name(name, (default,)) else default
 
 
 def settings(config):

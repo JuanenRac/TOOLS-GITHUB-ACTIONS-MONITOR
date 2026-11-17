@@ -91,7 +91,7 @@
 
 | 设置 | 作用 |
 |---|---|
-| `screens.enabled` | 启用三个页面。关闭后所有地址返回 404。 默认关闭。 |
+| `screens.enabled` | 启用三个页面。关闭后 `/screen/overview`、`/screen/now`、`/screen/sentinels` 和 `/api/screens/data` 返回 404（`/screen/1` 到 `/screen/3` 就是页面本身，不依赖此设置）。精简版同样提供墙屏页面，其中哨兵屏为空。 默认关闭。 |
 | `screens.default_theme` | dark（默认）、light 或 contrast。 |
 | `screens.default_density` | compact、normal（默认）或 large。 |
 | `screens.refresh_seconds` | 窗口的更新间隔秒数（默认 10）。页面读取的是监视器而不是 GitHub，所以间隔再短也不消耗配额。 |
@@ -101,7 +101,7 @@
 | `screens.sound` | 出现新失败时发出提示音（默认关闭）。 |
 | `screens.burn_in_protection` | 每分钟将所有内容移动几个像素（默认开启）。 |
 | `screens.night_dim` | 在 `screens.night_dim_from_hour`（22）和 `screens.night_dim_to_hour`（7）之间调暗屏幕；默认关闭。 |
-| `screens.show_repo_names` | all、public（默认：私有仓库显示为 private-1、private-2...）或 none（隐藏所有名称）。供其他人查看的屏幕请使用 public 或 none。 |
+| `screens.show_repo_names` | all、public（默认：私有仓库显示为 private-1、private-2...）或 none（隐藏所有名称）。供其他人查看的屏幕请使用 public 或 none。在 `repos` 中使用手写列表时,可见性每隔 `discover_refresh_seconds` 通过一次账户列表读取;无法读取可见性的仓库按私有处理。 编号(private-1 等)只分配给被隐藏的仓库,按名称的 HMAC 顺序排列,所用密钥属于本次安装,保存在数据文件夹的私有文件中,因此无法看出某个仓库在全部仓库中的位置。 |
 
 ### 显示什么，隐藏什么
 

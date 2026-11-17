@@ -91,7 +91,7 @@ La lingua di uno schermo si decide in quest'ordine: `?lang=xx` nell'indirizzo; p
 
 | Impostazione | Cosa fa |
 |---|---|
-| `screens.enabled` | Attiva le tre pagine. Disattivato: ogni indirizzo risponde 404. Disattivato per impostazione predefinita. |
+| `screens.enabled` | Attiva le tre pagine. Disattivato: `/screen/overview`, `/screen/now`, `/screen/sentinels` e `/api/screens/data` rispondono 404 (da `/screen/1` a `/screen/3` sono la pagina stessa e non ne dipendono). Anche l'edizione lite serve gli schermi a parete, con lo schermo delle sentinelle vuoto. Disattivato per impostazione predefinita. |
 | `screens.default_theme` | dark (predefinito), light o contrast. |
 | `screens.default_density` | compact, normal (predefinito) o large. |
 | `screens.refresh_seconds` | Secondi tra gli aggiornamenti di una finestra (10 per impostazione predefinita). Le pagine leggono dal monitor, mai da GitHub, quindi un tempo breve non consuma quota. |
@@ -101,7 +101,7 @@ La lingua di uno schermo si decide in quest'ordine: `?lang=xx` nell'indirizzo; p
 | `screens.sound` | Un segnale acustico per un nuovo guasto (disattivato per impostazione predefinita). |
 | `screens.burn_in_protection` | Sposta tutto di qualche pixel ogni minuto (attivo per impostazione predefinita). |
 | `screens.night_dim` | Attenua gli schermi tra `screens.night_dim_from_hour` (22) e `screens.night_dim_to_hour` (7); disattivato per impostazione predefinita. |
-| `screens.show_repo_names` | all, public (predefinito: i repository privati compaiono come private-1, private-2...) o none (ogni nome è nascosto). Usare public o none per uno schermo che altre persone possono vedere. |
+| `screens.show_repo_names` | all, public (predefinito: i repository privati compaiono come private-1, private-2...) o none (ogni nome è nascosto). Usare public o none per uno schermo che altre persone possono vedere. Con un elenco di repository scritto a mano in `repos`, la visibilità si legge con un elenco dell'account ogni `discover_refresh_seconds`; un repository la cui visibilità non si è potuta leggere conta come privato. I numeri (private-1...) vanno solo ai repository nascosti, nell'ordine di un HMAC del nome con una chiave dell'installazione conservata in un file privato della cartella dei dati: non dicono nulla su dove cade un repository tra gli altri. |
 
 ### Cosa mostrano e cosa nascondono
 

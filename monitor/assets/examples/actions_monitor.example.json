@@ -18,7 +18,7 @@
   "show_unclassified": true,
   "stuck_minutes": 120,
   "ci": {
-    "red_events": ["push", "schedule", "workflow_dispatch", "merge_group"],
+    "red_events": ["push", "schedule", "workflow_dispatch", "merge_group", "workflow_run", "repository_dispatch"],
     "count_fork_runs": false,
     "automation_counts": false,
     "inactive_days": 90,
@@ -699,7 +699,9 @@
   "audit_log": {
     "enabled": true,
     "max_mb": 10,
-    "maintainers_can_read": false
+    "maintainers_can_read": false,
+    "required": false,
+    "keep_generations": 5
   },
   "report_schedule": {
     "enabled": false,

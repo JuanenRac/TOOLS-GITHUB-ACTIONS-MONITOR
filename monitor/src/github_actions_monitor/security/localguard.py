@@ -18,7 +18,11 @@ import ssl
 import threading
 import time
 
+from github_actions_monitor.security import envguard
+
 LOOPBACK_HOSTS = ("127.0.0.1", "localhost")
+#: on EVERY answer, of a monitor of one account and of the supervisor alike: the page cannot be put in a frame of another site (clickjacking) and the browser does not guess a type
+SECURITY_HEADERS = (("X-Frame-Options", "DENY"), ("Content-Security-Policy", "frame-ancestors 'none'"), ("X-Content-Type-Options", "nosniff"))
 STATE = {"network": False, "host": "127.0.0.1", "token": "", "allowed": set(), "secure": False, "proxy_host": "", "trusted_proxy": False, "behind_proxy": False, "proxy_nets": ()}
 #: the public name of an HTTPS proxy that forwards `Host` without a port (the proxy on port 443): a plain host name, never an address with a port, a path or a user
 PROXY_HOST_RE = re.compile(r"^[a-z0-9]([a-z0-9.-]{0,98}[a-z0-9])?\Z")
@@ -372,7 +376,7 @@ def settings_from(config):
     door = cfg.get("local_port")
     door = door if isinstance(door, int) and not isinstance(door, bool) and 1024 <= door <= 65535 else 0
     network = cfg.get("network") is True
-    env = cfg.get("token_env") if isinstance(cfg.get("token_env"), str) else "MONITOR_ACCESS_TOKEN"
+    env = cfg.get("token_env") if isinstance(cfg.get("token_env"), str) and not envguard.forbidden_name(cfg.get("token_env"), own=("MONITOR_ACCESS_TOKEN",)) else "MONITOR_ACCESS_TOKEN"      # PATH, GH_TOKEN or another secret of the monitor are never the home of the access token
     allowed = [h for h in (cfg.get("allowed_hosts") or []) if isinstance(h, str) and 0 < len(h) <= 100]
     return {"network": network, "host": host if network else "127.0.0.1", "token_env": env or "MONITOR_ACCESS_TOKEN", "allowed_hosts": allowed,
             "proxy_public_host": proxy_host_clean(cfg.get("proxy_public_host")), "trusted_proxy": cfg.get("trusted_proxy") is True, "local_port": door,

@@ -91,7 +91,7 @@ The language of a screen is decided in this order: `?lang=xx` in the address; th
 
 | Setting | What it does |
 |---|---|
-| `screens.enabled` | Turns the three pages on. Off: every address answers 404. Off by default. |
+| `screens.enabled` | Turns the three pages on. Off: `/screen/overview`, `/screen/now`, `/screen/sentinels` and `/api/screens/data` answer 404 (`/screen/1` to `/screen/3` are the page itself and do not depend on it). The lite edition serves the wall screens too, with the sentinel screen empty. Off by default. |
 | `screens.default_theme` | dark (default), light or contrast. |
 | `screens.default_density` | compact, normal (default) or large. |
 | `screens.refresh_seconds` | Seconds between updates of a window (10 by default). The pages read the monitor, never GitHub, so a short time costs no allowance. |
@@ -101,7 +101,7 @@ The language of a screen is decided in this order: `?lang=xx` in the address; th
 | `screens.sound` | A beep for a new failure (off by default). |
 | `screens.burn_in_protection` | Moves everything a few pixels every minute (on by default). |
 | `screens.night_dim` | Dims the screens between `screens.night_dim_from_hour` (22) and `screens.night_dim_to_hour` (7); off by default. |
-| `screens.show_repo_names` | all, public (default: private repositories appear as private-1, private-2...) or none (every name is hidden). Use public or none for a screen that other people can see. |
+| `screens.show_repo_names` | all, public (default: private repositories appear as private-1, private-2...) or none (every name is hidden). Use public or none for a screen that other people can see. With a list of repositories written by hand in `repos`, the visibility is read with one listing of the account every `discover_refresh_seconds`; a repository whose visibility could not be read counts as private. The numbers (private-1...) go only to the hidden repositories, in the order of an HMAC of the name with a key of the installation kept in a private file of the data folder, so they say nothing about where a repository falls among the others. |
 
 ### What they show and what they hide
 

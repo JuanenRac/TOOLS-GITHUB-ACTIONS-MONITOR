@@ -32,6 +32,7 @@ from github_actions_monitor import i18n
 from github_actions_monitor.data_pipeline import alertflow
 from github_actions_monitor.app import surface
 from github_actions_monitor.app import toolconfig
+from github_actions_monitor.security import envguard
 from github_actions_monitor.security import private_io
 from github_actions_monitor.ui import ordering
 from github_actions_monitor.util import ports
@@ -64,10 +65,23 @@ AI_REF_RE = re.compile(r"^[A-Za-z0-9-]{0,40}\Z")      # a preset (openai, ollama
 AI_FALLBACK_RE = re.compile(r"^[A-Za-z0-9._:/@+=, -]{0,400}\Z")      # provider=model, provider=model
 OLLAMA_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}/?\Z")   # the local service only: nothing leaves this computer
 HTTPS_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250})?\Z")
-AI_URL_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250}|http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/-]{0,100})?)?\Z")   # https, or a server on this computer
+AI_URL_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#!$&()*+,;=%-]{4,250}|http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/-]{0,100})?)?\Z")   # https, or a server on this computer
 PROXY_HOST_RE = re.compile(r"^([A-Za-z0-9]([A-Za-z0-9.-]{0,98}[A-Za-z0-9])?)?\Z")      # the public NAME of an HTTPS proxy: a host name only, no port, path, user or space (empty = none)
 ENV_NAME_RE = re.compile(r"^([A-Z_][A-Z0-9_]{0,63})?\Z")
 AI_ENV_RE = re.compile(r"^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|MONITOR_[A-Z0-9_]*)\Z)([A-Z_][A-Z0-9_]{0,63})?\Z")   # the NAME of the variable of the key of a provider: never a variable of the system or of the monitor   # the NAME of an environment variable, never the key itself
+
+
+def _env_name_except(own):
+    """The pattern of the NAME of a variable that holds a secret of the monitor: never the system, the login to GitHub or a secret of the monitor that belongs to another setting (`own` = this one's)."""
+    barred = [name for name in envguard.SYSTEM_NAMES + envguard.SECRET_NAMES if name != own]
+    return re.compile(r"^(?!(?:" + "|".join(re.escape(name) for name in barred) + r")\Z)([A-Z_][A-Z0-9_]{0,63})?\Z")
+
+
+WEBHOOK_ENV_RE = _env_name_except(envguard.WEBHOOK_SECRET_ENV)      # webhook.secret_env
+TOKEN_ENV_RE = _env_name_except(envguard.ACCESS_TOKEN_ENV)          # listen.token_env
+SLACK_ENV_RE = _env_name_except(envguard.SLACK_SIGNING_ENV)          # chatops.slack.signing_secret_env
+DISCORD_ENV_RE = _env_name_except(envguard.DISCORD_KEY_ENV)         # chatops.discord.public_key_env
+NOTIFY_ENV_RE = _env_name_except("")                                # the variable of a channel of notices: no secret of the monitor belongs to it
 LOOP_HOST_RE = re.compile(r"^(127\.0\.0\.1|localhost|\[::1\])\Z")                      # a broker or a service ON THIS COMPUTER
 LOOP_URL_RE = re.compile(r"^(http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/%-]{0,100})?)?\Z")
 CHAT_RE = re.compile(r"^(-?[0-9]{1,20})?\Z")
@@ -183,6 +197,7 @@ _f(_T_SENT, "reports", "reports.max_calls_per_cycle", "int", (1, 50), restart=Fa
 _f(_T_AI, "failed_step", "logs.failed_step.enabled", "bool", restart=False, secure=True)
 _f(_T_AI, "failed_step", "logs.failed_step.lines", "int", (3, 40), restart=False, unit="")
 _f(_T_AI, "failed_step", "logs.failed_step.max_bytes", "int", (200, 4000), restart=False, unit="")
+_f(_T_AI, "failed_step", "logs.failed_step.max_per_minute", "int", (1, 60), restart=False, unit="")
 _f("quota", "github_app", "github_app.app_id", "text", re.compile(r"^[0-9]{1,12}\Z"), restart=False, secure=True)
 _f("quota", "github_app", "github_app.key_path", "path", restart=False, secure=True)
 _f("quota", "github_app", "github_app.installation_id", "text", re.compile(r"^[0-9]{0,12}\Z"), restart=False, secure=True)
@@ -330,6 +345,7 @@ _f(_T_SENT, "security", "sentinels.security.signals.workflow.enabled", "bool")
 _f(_T_SENT, "security", "sentinels.security.signals.codeowners.enabled", "bool")
 _f(_T_SENT, "collab", "alerts.mute_hours", "int", (1, 720), restart=False, unit="h")
 _f(_T_SENT, "flow_silences", "alerts.silences", "names", restart=False)
+_f(_T_SENT, "flow_silences", "alerts.silences_expire_days", "int", (0, 3650), restart=False, unit="d")
 _f(_T_SENT, "flow_service", "alerts.service.enabled", "bool", restart=False)
 _f(_T_SENT, "flow_service", "alerts.service.failures", "int", (2, 50), restart=False)
 _f(_T_SENT, "flow_service", "alerts.service.rate_percent", "int", (0, 100), restart=False, unit="%")
@@ -383,6 +399,8 @@ for _g in ("A", "B", "C", "D"):
 # --- The log of actions (Complete only): who changed what, with a chain of hashes; on by default, only names and never values
 _f(_T_SENT, "audit_log", "audit_log.enabled", "bool", restart=False, secure=True)
 _f(_T_SENT, "audit_log", "audit_log.max_mb", "int", (1, 500), restart=False, unit="MB")
+_f(_T_SENT, "audit_log", "audit_log.keep_generations", "int", (1, 20), restart=False, unit="", secure=True)
+_f(_T_SENT, "audit_log", "audit_log.required", "bool", restart=False, secure=True)
 _f(_T_SENT, "audit_log", "audit_log.maintainers_can_read", "bool", restart=False, secure=True)
 # --- Scheduled reports (Complete only): HTML and Markdown on a cron schedule, off by default
 _f(_T_SENT, "report_schedule", "report_schedule.enabled", "bool", restart=False)
@@ -417,6 +435,7 @@ _f(_T_AI, "provider", "ai.provider", "enum", ("none", "ollama", "openai-compatib
 _f(_T_AI, "provider", "ai.model", "text", MODEL_RE)
 _f(_T_AI, "provider", "ai.ollama_url", "text", OLLAMA_RE)
 _f(_T_AI, "provider", "ai.base_url", "text", AI_URL_RE, secure=True)
+_f(_T_AI, "provider", "ai.allow_private_targets", "bool", secure=True)
 _f(_T_AI, "provider", "ai.api_key_env", "text", AI_ENV_RE)
 _f(_T_AI, "provider", "ai.daily_limit", "int", (0, 500), unit="calls")
 _f(_T_AI, "limits", "ai.max_input_chars", "int", (500, 20000), unit="chars")
@@ -436,6 +455,7 @@ for _task in ("build", "codeql", "report", "diagnose", "alert"):      # a model 
     _f(_T_AI, "task_" + _task, f"ai.tasks.{_task}.timeout_seconds", "int", (0, 300))
 _f(_T_AI, "fallback", "ai.fallback", "text", AI_FALLBACK_RE, secure=True)
 _f(_T_AI, "fallback", "ai.fallback_max_attempts", "int", (1, 5), unit="")
+_f(_T_AI, "fallback", "ai.fallback_cloud_allowed", "names", secure=True)
 _f(_T_AI, "fallback", "ai.fallback_after_seconds", "int", (0, 300))
 _f(_T_AI, "budget", "ai.model_daily_limit", "int", (0, 500), unit="calls")
 _f(_T_AI, "budget", "ai.cost_limit_daily", "float", (0.0, 100000.0), unit="")
@@ -449,7 +469,7 @@ _f(_T_AI, "actions", "ai.actions.allowed", "names")
 _f(_T_AI, "actions", "ai.actions.max_per_hour", "int", (1, 60), unit="")
 _f(_T_AI, "actions", "ai.actions.ttl_seconds", "int", (30, 3600))
 _f(_T_HOOK, "inbound", "webhook.enabled", "bool", secure=True)
-_f(_T_HOOK, "inbound", "webhook.secret_env", "text", ENV_NAME_RE, secure=True)
+_f(_T_HOOK, "inbound", "webhook.secret_env", "text", WEBHOOK_ENV_RE, secure=True)
 _f(_T_HOOK, "inbound", "webhook.signing_state", "status", restart=False)
 _f(_T_HOOK, "inbound", "webhook.record_events", "bool")
 _f(_T_HOOK, "inbound", "webhook.live_events_keep", "int", (10, 1000), unit="")
@@ -458,12 +478,16 @@ _f(_T_HOOK, "inbound", "live.sse.max_seconds", "int", (60, 86400), restart=False
 _f(_T_HOOK, "inbound", "live.sse.max_clients", "int", (1, 10), restart=False, unit="")
 _f(_T_HOOK, "inbound", "webhook.replay_seconds", "int", (60, 86400))
 _f(_T_HOOK, "inbound", "webhook.max_per_minute", "int", (1, 600), unit="")
+_f(_T_HOOK, "inbound", "webhook.max_bad_per_minute", "int", (1, 6000), unit="")
+_f(_T_HOOK, "inbound", "webhook.max_verified_per_minute", "int", (1, 6000), unit="")
+_f(_T_HOOK, "inbound", "webhook.reject_stale", "bool")
+_f(_T_HOOK, "inbound", "webhook.persist_deliveries", "bool")
 _f(_T_HOOK, "chatops", "chatops.enabled", "bool", restart=False, secure=True)
 _f(_T_HOOK, "chatops", "chatops.slack.enabled", "bool", restart=False, secure=True)
-_f(_T_HOOK, "chatops", "chatops.slack.signing_secret_env", "text", ENV_NAME_RE, secure=True)
+_f(_T_HOOK, "chatops", "chatops.slack.signing_secret_env", "text", SLACK_ENV_RE, secure=True)
 _f(_T_HOOK, "chatops", "chatops.slack.state", "status", restart=False)
 _f(_T_HOOK, "chatops", "chatops.discord.enabled", "bool", restart=False, secure=True)
-_f(_T_HOOK, "chatops", "chatops.discord.public_key_env", "text", ENV_NAME_RE, secure=True)
+_f(_T_HOOK, "chatops", "chatops.discord.public_key_env", "text", DISCORD_ENV_RE, secure=True)
 _f(_T_HOOK, "chatops", "chatops.discord.state", "status", restart=False)
 _f(_T_HOOK, "chatops", "chatops.allowed_teams", "names", restart=False, secure=True)
 _f(_T_HOOK, "chatops", "chatops.allowed_channels", "names", restart=False, secure=True)
@@ -486,18 +510,18 @@ _f("notify", "main", "network.use_proxy", "bool", restart=False, secure=True)
 _f("notify", "main", "notify.events", "names")
 _f("notify", "main", "notify.max_per_hour", "int", (1, 600), unit="")
 _f("notify", "ch_telegram", "notify.channels.telegram.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on")
-_f("notify", "ch_telegram", "notify.channels.telegram.token_env", "text", ENV_NAME_RE, label=["cfg.p.token_env"], help="cfg.h.p.token_env")
+_f("notify", "ch_telegram", "notify.channels.telegram.token_env", "text", NOTIFY_ENV_RE, label=["cfg.p.token_env"], help="cfg.h.p.token_env")
 _f("notify", "ch_telegram", "notify.channels.telegram.chat_id", "text", CHAT_RE, label=["cfg.p.chat_id"], help="cfg.h.p.chat_id")
 _f("notify", "ch_discord", "notify.channels.discord.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on")
-_f("notify", "ch_discord", "notify.channels.discord.url_env", "text", ENV_NAME_RE, label=["cfg.p.url_env"], help="cfg.h.p.url_env")
+_f("notify", "ch_discord", "notify.channels.discord.url_env", "text", NOTIFY_ENV_RE, label=["cfg.p.url_env"], help="cfg.h.p.url_env")
 _f("notify", "ch_slack", "notify.channels.slack.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on")
-_f("notify", "ch_slack", "notify.channels.slack.url_env", "text", ENV_NAME_RE, label=["cfg.p.url_env"], help="cfg.h.p.url_env")
+_f("notify", "ch_slack", "notify.channels.slack.url_env", "text", NOTIFY_ENV_RE, label=["cfg.p.url_env"], help="cfg.h.p.url_env")
 _f("notify", "ch_apprise", "notify.channels.apprise.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on", secure=True)
-_f("notify", "ch_apprise", "notify.channels.apprise.urls_env", "text", ENV_NAME_RE, label=["cfg.p.url_env"], help="cfg.h.p.apprise_env")
+_f("notify", "ch_apprise", "notify.channels.apprise.urls_env", "text", NOTIFY_ENV_RE, label=["cfg.p.url_env"], help="cfg.h.p.apprise_env")
 _f("notify", "ch_matrix", "notify.channels.matrix.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on")
 _f("notify", "ch_matrix", "notify.channels.matrix.homeserver", "text", HTTPS_RE, label=["cfg.p.homeserver"], help="cfg.h.p.homeserver")
 _f("notify", "ch_matrix", "notify.channels.matrix.room", "text", ROOM_RE, label=["cfg.p.room"], help="cfg.h.p.room")
-_f("notify", "ch_matrix", "notify.channels.matrix.token_env", "text", ENV_NAME_RE, label=["cfg.p.token_env"], help="cfg.h.p.token_env")
+_f("notify", "ch_matrix", "notify.channels.matrix.token_env", "text", NOTIFY_ENV_RE, label=["cfg.p.token_env"], help="cfg.h.p.token_env")
 _f("notify", "ch_mqtt", "notify.channels.mqtt.enabled", "bool", label=["cfg.p.channel_on"], help="cfg.h.channel_on")
 _f("notify", "ch_mqtt", "notify.channels.mqtt.host", "text", LOOP_HOST_RE, label=["cfg.p.local_host"], help="cfg.h.p.local_host")
 _f("notify", "ch_mqtt", "notify.channels.mqtt.port", "int", (1, 65535), unit="", label=["cfg.p.port"], help="cfg.h.p.port")
@@ -545,7 +569,7 @@ _f("console", "tui", "tui.refresh_seconds", "int", (2, 300), False)
 # --- Advanced: opt-in features, every one OFF by default (network, own token, actions on GitHub, act, mirror, runners, OTLP, organisations, FinOps)
 _f("advanced", "network", "listen.network", "bool", secure=True)
 _f("advanced", "network", "listen.host", "text", LISTEN_HOST_RE, secure=True)
-_f("advanced", "network", "listen.token_env", "text", ENV_NAME_RE, secure=True)
+_f("advanced", "network", "listen.token_env", "text", TOKEN_ENV_RE, secure=True)
 _f("advanced", "network", "listen.allowed_hosts", "names", secure=True)
 _f("advanced", "network", "listen.tls_cert_file", "path", secure=True)
 _f("advanced", "network", "listen.tls_key_file", "path", secure=True)
@@ -1021,6 +1045,13 @@ def _apply_locked(clean, path):
     changed = [key for key, value in clean.items() if _get(current, key, "\0missing") != value]
     if not changed:
         return {"ok": True, "changed": [], "restart": [], "backup": False}
+    merged = json.loads(json.dumps(current))
+    for key in changed:
+        _set(merged, key, clean[key])
+    taken = {key for _name, keys in envguard.shared_names(merged) for key in keys} - {key for _name, keys in envguard.shared_names(current) for key in keys}
+    clashes = {key: "invalid" for key in changed if key in taken and key in envguard.ENV_SETTINGS}      # a variable is named by ONE setting: the second to say it is refused
+    if clashes:
+        return {"ok": False, "errors": clashes}
     for key in changed:
         _set(current, key, clean[key])
     backup = _backup(path)

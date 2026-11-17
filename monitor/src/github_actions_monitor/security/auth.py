@@ -142,6 +142,8 @@ PUBLIC = ("/api/auth/login", "/api/auth/me", "/api/auth/bootstrap", "/api/auth/l
 def required_role(method, path):
     """The least role that may do `method` on `path`, or None when the route is public. Unknown writes need an admin."""
     path = path.split("?")[0]
+    from github_actions_monitor.app import api_v1      # a route under the version prefix needs the very role it needs without it
+    path = api_v1.route_of(path)[1]
     if path in PUBLIC:
         return None
     if method in ("GET", "HEAD"):
@@ -474,8 +476,11 @@ def audit(cfg, action, user="", role="", address="", path="", result="ok", code=
     target = audit_path()
     try:
         with _lock:
-            if target.exists() and target.stat().st_size > AUDIT_MAX_BYTES:
-                os.replace(target, target.with_name(target.name + ".1"))
+            try:
+                if target.exists() and target.stat().st_size > AUDIT_MAX_BYTES:
+                    os.replace(target, target.with_name(target.name + ".1"))
+            except OSError:      # a reader keeps the file open (Windows): the event is still appended to the current file and the rotation is tried again at the next one
+                pass
             private_io.private_dir(target.parent)
             with private_io.open_append(target) as handle:
                 handle.write(json.dumps(entry, ensure_ascii=False) + "\n")

@@ -21,7 +21,7 @@
 
 ## 契約
 
-- `docs/schemas/api_contract.json` は、各版の読み取りエンドポイントのキーと型、およびエラーコードを列挙します。読み取れるが固定されていないルート（ストリーム、テキスト、他のツール向けのエクスポート）は同じファイルの `unfrozen` に理由つきで列挙されています。実行・リポジトリ・割り当てを返す `/api/data` は固定されています。
+- `docs/schemas/api_contract.json` は、各版の読み取りエンドポイントのキーと型、およびエラーコードを列挙します。読み取れるが固定されていないルート（ストリーム、テキスト、他のツール向けのエクスポート）は同じファイルの `unfrozen` に理由つきで列挙されています。実行・リポジトリ・割り当てを返す `/api/data` は固定されています。 キーはリストの要素にまで及びます。ファイル内で `[{...}]` と書かれたリストはその要素を記述し(先頭の 3 つを検査)、`/api/data` の実行・リポジトリ・割り当て、`/api/alerts` のアラート、`/api/auth/me` は、検査が失敗せずに変わることはありません。
 - `python tools/check_api_contract.py` は動作中のモニターをこれに照らして検査し（`--lite`、`--url`、`--token-file`）、`CONTRACT=PASS` または `CONTRACT=FAIL` を出力します。モニターやクライアントを更新するたびに実行してください。
 
 ## 読み取りAPI v1(既定はオフ)
@@ -30,7 +30,7 @@
 - `/api/v1/me`:誰が尋ねているか。`mode`(`individual` または `team`)、`authenticated`、`user`、チームセッションの `role` と `accounts`(なければ null)、一覧の `limits`、そしてバージョン。
 - `/api/v1/repos`:モニターが監視しているリポジトリを1行ずつ(`repo`、`ecosystem`、`state`、`risk`、`runs_24h`、`failures_24h`、`red_workflows`、`stuck_runs`、`alerts`、`last_run_at`)。フィルターは `state`、`ecosystem`、`q`。`limit`(既定は `api.default_limit`、最大 `api.max_limit`)、`cursor`(前のページの `next_cursor`。署名付きで `api.cursor_ttl_seconds` のあいだ有効)、短い行にするための `fields=a,b` または `profile=compact`。クライアントが受け入れる場合、応答は gzip で圧縮されます。
 - `/api/v1/openapi.json`:この2つのルートの軽量な OpenAPI 3 の記述。
-- 2つの独自ルートは、エラーを `{"error": "bad_request", "code": "api.bad_cursor", "message": "..."}` の形で返します。`error` と `code` は安定しており、`message` は `?lang=` の言語に従います。コードは api.bad_cursor、api.bad_limit、api.unknown_field、api.bad_profile。すべて読み取り専用で、`/api/v1/` の下に書き込みはありません。形は契約の `v1_endpoints` セクションで固定されており、`api.v1_enabled` をオンにしたモニターに対して `python tools/check_api_contract.py --v1` で確認できます。
+- 2つの独自ルートは、エラーを `{"error": "bad_request", "code": "api.bad_cursor", "message": "..."}` の形で返します。`error` と `code` は安定しており、`message` は `?lang=` の言語に従います。コードは api.bad_cursor、api.bad_limit、api.unknown_field、api.bad_profile, api.server_error。すべて読み取り専用で、`/api/v1/` の下に書き込みはありません。形は契約の `v1_endpoints` セクションで固定されており、`api.v1_enabled` をオンにしたモニターに対して `python tools/check_api_contract.py --v1` で確認できます。
 
 ## ストリーム
 

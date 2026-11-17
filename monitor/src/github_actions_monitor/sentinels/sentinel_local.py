@@ -1045,7 +1045,10 @@ class Sentinel:
         self.surface_paused = None   # {"remaining", "needed"} while A10 waits for the allowance, else None
         self.failed_jobs = {}        # "repo|run id" -> the failed jobs of that red run, grouped (causes.summarize_jobs), see _failed_jobs_tick
         self.a2_resolved = {}        # "repo|workflow file" -> last run on the default branch (or none), see _a2_resolve_tick
+        self.tick_began = None       # when the tick in progress began (None between ticks): the calls of the tick are counted from here
         self.a2_reason = "pending"   # why an unresolved workflow is still unresolved: "pending" (waiting its turn) or "quota"
+        self.a2_listed = {}          # repository -> when the listing of its last runs was read for the batch way: not asked again before the TTL, whatever it brought
+        self.backoff = {}            # question -> (failures in a row, not before): a question that failed is not asked again in the next turn (see _failed_question)
         self.dirty = False
         self.audit_cache = {"at": 0.0, "value": None}
         self.feed = events.Feed(notify_command=self.cfg.get("notify_command"))   # one JSON line per change, for whoever follows events_monitor.jsonl
@@ -1058,6 +1061,8 @@ class Sentinel:
             self.unreleased, self.saved_at = mapping("unreleased"), cached.get("saved")
             self.local_versions = mapping("local_versions")
             self.upstream = mapping("upstream")
+            if isinstance(cached.get("upstream_calls"), list):
+                self.upstream_calls = [float(t) for t in cached["upstream_calls"][:1000] if isinstance(t, (int, float)) and not isinstance(t, bool) and time.time() - 3600 < t <= time.time() + 60]
             if isinstance(cached.get("org_files"), dict) and isinstance(cached["org_files"].get("names"), list):
                 self.org_files = {"at": float(cached["org_files"].get("at") or 0.0), "names": [str(n) for n in cached["org_files"]["names"]][:400]}
             self.surface.load(cached.get("surface"))
@@ -1065,6 +1070,27 @@ class Sentinel:
                 self.a2_resolved = cached["a2_resolved"]
 
     # -- helpers
+    BACKOFF_SECONDS = (300, 1800, 21600)      # after the first failure of a question, after the second, after the third and the following ones
+
+    def _failed_question(self, key, now=None):
+        """Writes down that the question `key` failed: it is not asked again for 5 minutes, then 30, then 6 hours (the others go first)."""
+        now = time.time() if now is None else now
+        with self.lock:
+            tries = (self.backoff.get(key) or (0, 0.0))[0] + 1
+            self.backoff[key] = (tries, now + self.BACKOFF_SECONDS[min(tries, len(self.BACKOFF_SECONDS)) - 1])
+            if len(self.backoff) > 5000:
+                for old in [k for k, (_n, until) in self.backoff.items() if until < now][:2500]:
+                    self.backoff.pop(old, None)
+
+    def _answered_question(self, key):
+        with self.lock:
+            self.backoff.pop(key, None)
+
+    def _waiting_question(self, key, now=None):
+        """True while the question `key` is inside the wait that follows its last failure."""
+        now = time.time() if now is None else now
+        return (self.backoff.get(key) or (0, 0.0))[1] > now
+
     @staticmethod
     def _load(path, default):
         try:
@@ -1253,7 +1279,8 @@ class Sentinel:
 
     def _perms_due(self):
         now = time.time()
-        return [r for r in self.repo_info if now - (self.perms.get(r) or {}).get("at", 0) > self.cfg["hygiene_seconds"]]
+        due = [r for r in self.repo_info if now - (self.perms.get(r) or {}).get("at", 0) > self.cfg["hygiene_seconds"]]
+        return sorted(due, key=lambda r: (self.perms.get(r) or {}).get("at", 0))      # the ones never read first, then the oldest: a repository that fails does not keep its place at the head of the batch
 
     def _fetch_perms(self, repo):
         owner = toolconfig.github_owner()
@@ -1285,9 +1312,7 @@ class Sentinel:
             if hyg["community_fallback"]:
                 res["community"] = self._fetch_community(owner, repo)
         except Exception as error:
-            res = {**(self.perms.get(repo) or {}), "at": time.time() - self.cfg["hygiene_seconds"] + 600, "error": str(error)[:80]}
-            if "allowed_actions" not in res and not res.get("denied"):
-                return repo, None
+            res = {**(self.perms.get(repo) or {}), "at": time.time() - self.cfg["hygiene_seconds"] + 600, "error": str(error)[:80]}      # asked again in ten minutes, after the ones never read
         return repo, res
 
     def _fetch_branch_rules(self, owner, repo, branch):
@@ -1361,17 +1386,43 @@ class Sentinel:
                 self.ok("upstream")
             return bool(done)
         except Exception as error:
+            with self.lock:
+                upstream.mark_tried(self.upstream, names, time.time())      # the same forks are not asked again in the next turn: others are
             self.error("upstream", error)
             return False
+
+    def _tick_spent(self):
+        """The calls made since this tick began (0 outside a tick): the limit of a tick is ONE count for all the stages, not one for each."""
+        began = self.tick_began
+        if began is None:
+            return 0
+        with self.lock:
+            return len([t for t in self.calls if t >= began])
 
     def _budget(self):
         left = self.cfg["budget_per_hour"] - self.calls_last_hour()
         rate = (self.ctx["data_fn"]() or {}).get("rate")
         if rate and rate["remaining"] < self.cfg["min_rate_remaining"]:
             return 0
-        return max(0, min(self.cfg["max_calls_per_tick"], left))
+        return max(0, min(self.cfg["max_calls_per_tick"] - self._tick_spent(), left))
+
+    def _stage_budget(self, share):
+        """What one stage of the tick may start: the rest of the budget, but never more than its `share` of the calls of a tick, so the stages that come later always have room."""
+        return max(0, min(self._budget(), int(self.cfg["max_calls_per_tick"] * share)))
+
+    def _perms_cost(self):
+        """The requests reading the permissions of ONE repository makes: the permissions and the workflows, plus the two of the rules in force and the community profile when those are on."""
+        hyg = self.cfg["hygiene"]
+        return 2 + (2 if hyg["ruleset_mode"] == "effective" else 0) + (1 if hyg["community_fallback"] else 0)
 
     def tick(self):
+        self.tick_began = time.time()
+        try:
+            return self._tick_stages()
+        finally:
+            self.tick_began = None
+
+    def _tick_stages(self):
         did = False
         if time.time() - self.gql_at > self.cfg["refresh_seconds"]:
             try:
@@ -1380,7 +1431,7 @@ class Sentinel:
             except Exception as error:
                 self.error("graphql", error)
                 self.gql_at = time.time() - self.cfg["refresh_seconds"] + 30
-        budget = self._budget()
+        budget = self._stage_budget(0.25)      # two requests for each repository; a quarter of the calls of the tick at most
         todo = self._alerts_due()
         batch = todo[: max(0, budget // 2)]
         if batch:
@@ -1391,13 +1442,13 @@ class Sentinel:
             self.ok("alerts")
             did = True
         did = self._org_files_tick() or did
-        budget = self._budget()
+        budget = self._stage_budget(0.35)
         todo = self._perms_due()
-        batch = todo[: max(0, min(budget // 2, 20))]
+        batch = todo[: max(0, min(budget // self._perms_cost(), 20))]
         if batch:
             with ThreadPoolExecutor(max_workers=self.cfg["workers"]) as pool:
                 for repo, res in pool.map(self._fetch_perms, batch):
-                    if res:
+                    if res:      # always written down, a failure too: the repository goes to the end of the line and the others are read
                         with self.lock:
                             self.perms[repo] = res
             self.ok("hygiene")
@@ -1445,12 +1496,14 @@ class Sentinel:
         if self._budget() <= 0 or (rate and rate["remaining"] < self.cfg["min_rate_remaining"]):
             return False
         did = False
-        for key, row in [(k, r) for k, r in sorted(wanted.items()) if k not in self.failed_jobs][: cfg["max_per_cycle"]]:
+        for key, row in [(k, r) for k, r in sorted(wanted.items()) if k not in self.failed_jobs and not self._waiting_question("jobs|" + k)][: cfg["max_per_cycle"]]:
             try:
                 body = self._gh("api", f"repos/{toolconfig.github_owner()}/{row['repo']}/actions/runs/{row['run_id']}/jobs?filter=latest&per_page=100", retries=1)
-            except Exception as error:      # a failed question is asked again next time; the others go on
+            except Exception as error:      # a failed question waits (5 minutes, 30, 6 hours) and the others go on
+                self._failed_question("jobs|" + key)
                 self.error("failed_jobs", error)
                 continue
+            self._answered_question("jobs|" + key)
             with self.lock:
                 self.failed_jobs[key] = causes.summarize_jobs(body, cfg["group_by"])
             did = True
@@ -1536,7 +1589,7 @@ class Sentinel:
         caps = {"runs_per_repo": self.config.get("runs_per_repo"), "cold_runs_per_repo": self.config.get("cold_runs_per_repo")}
         missing = a2_missing(runs, caps, dict(self.surface.scans))
         now_ts, ttl = time.time(), float(self.cfg.get("a2_resolve_ttl_seconds") or 0)
-        todo = [(repo, name) for repo, files in sorted(missing.items()) for name in files or [] if not a2_fresh(self.a2_resolved.get(f"{repo}|{name}"), now_ts, ttl)]
+        todo = [(repo, name) for repo, files in sorted(missing.items()) for name in files or [] if not a2_fresh(self.a2_resolved.get(f"{repo}|{name}"), now_ts, ttl) and not self._waiting_question(f"a2|{repo}|{name}", now_ts)]
         if not todo:
             self.a2_reason = "pending"
             return False
@@ -1557,20 +1610,22 @@ class Sentinel:
             for repo, name in todo:
                 wanted.setdefault(repo, []).append(name)
             for repo, names in sorted(wanted.items(), key=lambda kv: -len(kv[1])):
-                if len(names) < batch_min or room <= 0:
+                if len(names) < batch_min or room <= 0 or now_ts - self.a2_listed.get(repo, 0.0) < ttl:      # a listing already read is not asked for again before the TTL
                     continue
                 spent, found = self._a2_resolve_batch(repo, names, branches.get(repo) or "main", room, now_ts)
                 room -= spent
                 did = did or spent > 0
-            todo = [(r, n) for r, n in todo if not a2_fresh(self.a2_resolved.get(f"{r}|{n}"), now_ts, ttl)]
+            todo = [(r, n) for r, n in todo if not a2_fresh(self.a2_resolved.get(f"{r}|{n}"), now_ts, ttl)]      # what the listing did not bring goes on one by one, in this very turn
         for repo, name in todo[: max(0, room)]:
             branch = branches.get(repo) or "main"
             try:
                 answer = self._gh("run", "list", "-R", f"{toolconfig.github_owner()}/{repo}", "-w", name, "--branch", branch, "--status", "completed", "-L", str(A2_RESOLVE_DEPTH),
                                   "--json", "databaseId,name,conclusion,status,createdAt,startedAt,url,headSha,event")
-            except Exception as error:   # a failed question stays unresolved; the others go on
+            except Exception as error:   # a failed question stays unresolved and waits (5 minutes, 30, 6 hours); the others go on
+                self._failed_question(f"a2|{repo}|{name}")
                 self.error("a2_resolve", error)
                 continue
+            self._answered_question(f"a2|{repo}|{name}")
             first = a2_pick_concluded(answer)
             if first:
                 entry = {"at": now_ts, "state": "run", "id": first.get("databaseId"), "name": first.get("name") or "", "conclusion": first.get("conclusion") or None,
@@ -1608,6 +1663,8 @@ class Sentinel:
                 break
         found = a2_from_listing(items, set(names))
         with self.lock:
+            if spent:
+                self.a2_listed[repo] = now_ts      # whatever it brought: the same listing is not asked for again before the TTL
             for name, first in found.items():
                 self.a2_resolved[f"{repo}|{name}"] = {"at": now_ts, "state": "run", "id": first.get("databaseId"), "name": first.get("name") or "", "conclusion": first.get("conclusion") or None,
                                                      "status": first.get("status") or "completed", "started": first.get("startedAt") or first.get("createdAt"), "url": first.get("url"),
@@ -1632,7 +1689,8 @@ class Sentinel:
 
     def _persist(self):
         with self.lock:
-            self._save(CACHE_FILE, {"saved": time.time(), "repo_info": self.repo_info, "alerts": self.alerts, "perms": self.perms, "unreleased": self.unreleased, "local_versions": self.local_versions, "surface": self.surface.dump(), "a2_resolved": self.a2_resolved, "org_files": self.org_files, "upstream": self.upstream})
+            self._save(CACHE_FILE, {"saved": time.time(), "repo_info": self.repo_info, "alerts": self.alerts, "perms": self.perms, "unreleased": self.unreleased, "local_versions": self.local_versions, "surface": self.surface.dump(), "a2_resolved": self.a2_resolved, "org_files": self.org_files, "upstream": self.upstream,
+                                    "upstream_calls": [t for t in self.upstream_calls if t > time.time() - 3600]})      # the requests of the last hour survive a restart: it does not give back the hourly allowance
         snap = self.snapshot()
         self.last_snap = snap
         self._export_ci_red(snap)

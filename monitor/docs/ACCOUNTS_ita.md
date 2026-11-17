@@ -55,7 +55,7 @@ Per più schermi apri una finestra per vista, ad esempio `?view=now&chrome=0`, `
 
 ## L'API
 
-`GET /api/accounts` è il riepilogo, `GET /api/accounts/<id>/status` un account, e ogni altra richiesta sotto `/api/` va all'account indicato con `?account=<id>` o l'intestazione `X-Account-Id` (l'account predefinito se non ne è dato nessuno). Un account sconosciuto dà 404. Le regole di accesso sono quelle di un monitor singolo: lo stesso controllo di host e origine, e lo stesso token di accesso in modalità rete. Il token monouso di una modifica va chiesto allo stesso account a cui la modifica è inviata.
+`GET /api/accounts` è il riepilogo, `GET /api/accounts/<id>/status` un account, e ogni altra richiesta sotto `/api/` va all'account indicato con `?account=<id>` o l'intestazione `X-Account-Id` (l'account predefinito se non ne è dato nessuno). Un account sconosciuto dà 404. Le regole di accesso sono quelle di un monitor singolo: lo stesso controllo di host e origine, e lo stesso token di accesso in modalità rete. Il token monouso di una modifica va chiesto allo stesso account a cui la modifica è inviata. Con la modalità team il supervisore dice al processo di ogni account chi agisce e con quale ruolo in un contesto che firma con la chiave data a quel processo (valido 30 secondi e solo per quell'account), così i ruoli si decidono allo stesso modo in ogni account: il registro delle azioni segue `audit_log.maintainers_can_read` e `GET /api/v1/me` dice la verità. Una route sotto `/api/v1/` richiede il ruolo della stessa route senza prefisso.
 
 ## Un webhook per tutti
 

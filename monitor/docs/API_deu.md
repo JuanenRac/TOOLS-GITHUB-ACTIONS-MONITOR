@@ -21,7 +21,7 @@ Worauf sich ein Skript, ein Wandbildschirm oder ein mobiler Client verlassen kan
 
 ## Der Vertrag
 
-- `docs/schemas/api_contract.json` listet jeden lesenden Endpunkt mit seinen Schlüsseln und Typen in jeder Ausgabe sowie die Fehlercodes auf. Die lesbaren, aber nicht eingefrorenen Routen (Datenströme, Text, Exporte anderer Werkzeuge) stehen in derselben Datei unter `unfrozen`, jeweils mit ihrem Grund; `/api/data`, das die Läufe, die Repositories und das Kontingent liefert, ist eingefroren.
+- `docs/schemas/api_contract.json` listet jeden lesenden Endpunkt mit seinen Schlüsseln und Typen in jeder Ausgabe sowie die Fehlercodes auf. Die lesbaren, aber nicht eingefrorenen Routen (Datenströme, Text, Exporte anderer Werkzeuge) stehen in derselben Datei unter `unfrozen`, jeweils mit ihrem Grund; `/api/data`, das die Läufe, die Repositories und das Kontingent liefert, ist eingefroren. Die Schlüssel reichen bis in die Elemente der Listen: Eine Liste, die in der Datei als `[{...}]` steht, beschreibt ihre Elemente (die ersten drei werden geprüft); so können die Läufe, Repositories und das Kontingent von `/api/data`, die Alarme von `/api/alerts` und `/api/auth/me` sich nicht ändern, ohne dass die Prüfung fehlschlägt.
 - `python tools/check_api_contract.py` prüft einen laufenden Monitor dagegen (`--lite`, `--url`, `--token-file`) und gibt `CONTRACT=PASS` oder `CONTRACT=FAIL` aus; führe es nach jedem Upgrade des Monitors oder deines Clients aus.
 
 ## Lese-API v1 (standardmäßig aus)
@@ -30,7 +30,7 @@ Worauf sich ein Skript, ein Wandbildschirm oder ein mobiler Client verlassen kan
 - `/api/v1/me`: wer fragt: `mode` (`individual` oder `team`), `authenticated`, `user`, sowie `role` und `accounts` der Team-Sitzung (null ohne eine), die `limits` der Listen und die Version.
 - `/api/v1/repos`: die Repositories, die der Monitor beobachtet, je eine Zeile (`repo`, `ecosystem`, `state`, `risk`, `runs_24h`, `failures_24h`, `red_workflows`, `stuck_runs`, `alerts`, `last_run_at`). Filter `state`, `ecosystem` und `q`; `limit` (standardmäßig `api.default_limit`, höchstens `api.max_limit`); `cursor` (der `next_cursor` der vorigen Seite, signiert und gültig für `api.cursor_ttl_seconds`); `fields=a,b` oder `profile=compact` für kürzere Zeilen. Die Antwort wird mit gzip komprimiert, wenn der Client es akzeptiert.
 - `/api/v1/openapi.json`: eine leichte OpenAPI-3-Beschreibung dieser beiden Routen.
-- Die beiden eigenen Routen antworten einen Fehler als `{"error": "bad_request", "code": "api.bad_cursor", "message": "..."}`: `error` und `code` sind stabil, `message` folgt der Sprache von `?lang=`. Codes: api.bad_cursor, api.bad_limit, api.unknown_field, api.bad_profile. Alles ist nur lesend: unter `/api/v1/` gibt es kein Schreiben. Die Form ist im Abschnitt `v1_endpoints` des Vertrags eingefroren und wird mit `python tools/check_api_contract.py --v1` gegen einen Monitor mit eingeschaltetem `api.v1_enabled` geprüft.
+- Die beiden eigenen Routen antworten einen Fehler als `{"error": "bad_request", "code": "api.bad_cursor", "message": "..."}`: `error` und `code` sind stabil, `message` folgt der Sprache von `?lang=`. Codes: api.bad_cursor, api.bad_limit, api.unknown_field, api.bad_profile, api.server_error. Alles ist nur lesend: unter `/api/v1/` gibt es kein Schreiben. Die Form ist im Abschnitt `v1_endpoints` des Vertrags eingefroren und wird mit `python tools/check_api_contract.py --v1` gegen einen Monitor mit eingeschaltetem `api.v1_enabled` geprüft.
 
 ## Streams
 

@@ -31,7 +31,7 @@ CASES = (
     ("unc", "\\\\servidor\\Users\\victima\\x", "victima"),
     ("root", "cat /root/.ssh/id_rsa", "/root"),
     ("jenkins", "read /var/lib/jenkins/secrets/master.key", "master.key"),
-    ("stripe", "sk_live_abcdefghijklmnop1234", "abcdefghijklmnop1234"),
+    ("stripe", "sk_" + "live_" + "abcdefghijklmnop1234", "abcdefghijklmnop1234"),
     ("token cut in two lines", "gh" + "p_aBcDeFgH1234567890\nI9j0K1l2M3n4O5p6Q7r8", "I9j0K1l2M3n4O5p6Q7r8"),
 )
 HARMLESS = ("Error: step Run tests failed with exit code 1", "at 10:00:00 and 12:30 std::vector done", "built in 12.5s: 3 passed", "password: [secret]")

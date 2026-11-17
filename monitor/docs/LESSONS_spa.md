@@ -11,7 +11,7 @@ El monitor puede llevar un libro de los fallos de su CI y una biblioteca de lecc
 
 ## El libro
 
-Cada fallo que abre la fuente se convierte en una línea de `data/failures.jsonl` (esquema 1): `schema`, `ts`, `repo`, `workflow`, `job`, `step`, `event`, `branch`, `actor_kind`, `category`, `root_cause`, `avoidable`, `run_id`, `lesson_ref`, `had_lesson`, `sha`, `url`, `source`. Todo texto pasa por la misma limpieza que la fuente (los tokens, las claves, las direcciones y la carpeta personal nunca llegan al libro). `lessons.retention_days` y `lessons.max_entries` limitan su tamaño. Se puede importar un libro del mismo esquema de otro sitio (`lessons.import_book`).
+Cada fallo que abre la fuente se convierte en una línea de `data/failures.jsonl` (esquema 1): `schema`, `ts`, `repo`, `workflow`, `job`, `step`, `event`, `branch`, `actor_kind`, `category`, `root_cause`, `avoidable`, `run_id`, `lesson_ref`, `had_lesson`, `sha`, `url`, `source`. Todo texto pasa por la misma limpieza que la fuente (los tokens, las claves, las direcciones y la carpeta personal nunca llegan al libro). `lessons.retention_days` y `lessons.max_entries` limitan su tamaño. Se puede importar un libro del mismo esquema de otro sitio (`POST /api/ai/failures`).
 
 ## El clasificador
 

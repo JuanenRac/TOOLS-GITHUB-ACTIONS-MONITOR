@@ -91,7 +91,7 @@
 
 | 設定 | 内容 |
 |---|---|
-| `screens.enabled` | 3つのページを有効にします。オフにするとすべてのアドレスが 404 を返します。 既定ではオフです。 |
+| `screens.enabled` | 3つのページを有効にします。オフにすると `/screen/overview`、`/screen/now`、`/screen/sentinels`、`/api/screens/data` が 404 を返します（`/screen/1` から `/screen/3` はページそのもので、この設定には依存しません）。Lite エディションも壁面画面を提供しますが、センチネル画面は空です。 既定ではオフです。 |
 | `screens.default_theme` | dark（既定）、light、contrast。 |
 | `screens.default_density` | compact、normal（既定）、large。 |
 | `screens.refresh_seconds` | ウィンドウの更新間隔（秒、既定は 10）。ページは GitHub ではなくモニターから読むため、短くしても利用枠は消費しません。 |
@@ -101,7 +101,7 @@
 | `screens.sound` | 新しい失敗でビープ音を鳴らします（既定でオフ）。 |
 | `screens.burn_in_protection` | 1分ごとに全体を数ピクセル動かします（既定でオン）。 |
 | `screens.night_dim` | `screens.night_dim_from_hour`（22）から `screens.night_dim_to_hour`（7）まで画面を暗くします。既定ではオフです。 |
-| `screens.show_repo_names` | all、public（既定：非公開リポジトリは private-1、private-2... と表示）、none（すべての名前を隠す）。他の人が見られる画面では public か none を使ってください。 |
+| `screens.show_repo_names` | all、public（既定：非公開リポジトリは private-1、private-2... と表示）、none（すべての名前を隠す）。他の人が見られる画面では public か none を使ってください。`repos` に手書きの一覧を使う場合、公開範囲は `discover_refresh_seconds` ごとにアカウントの一覧を 1 回読んで取得します。公開範囲を読めなかったリポジトリは非公開として扱います。 番号(private-1 など)は非表示のリポジトリにだけ付き、データフォルダー内の非公開ファイルに保存されたインストール固有の鍵による名前の HMAC の順に並びます。そのため、リポジトリが全体のどこにあるかは分かりません。 |
 
 ### 表示するものと隠すもの
 

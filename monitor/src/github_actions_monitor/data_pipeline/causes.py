@@ -12,6 +12,8 @@ Pure functions: no network, no clock.
 """
 import re
 
+from github_actions_monitor.security.redactor import redact
+
 DEFAULTS = {"group": {"reusable": False, "min": 2}, "failed_jobs": {"enabled": False, "max_per_cycle": 4, "group_by": "auto"}}
 GROUP_BY = ("auto", "platform", "matrix", "prefix")
 PLATFORM_RE = re.compile(r"(ubuntu|windows|macos|linux|android|ios|osx|web|wasm|freebsd|arm64|x64|x86)[\w.\-]*", re.IGNORECASE)
@@ -115,11 +117,11 @@ def summarize_jobs(body, mode="auto"):
     jobs = [j for j in (body or {}).get("jobs") or [] if isinstance(j, dict)]
     seen = {}
     for job in jobs:
-        key = platform_of(job.get("name"), mode)
+        key = " ".join(redact(platform_of(job.get("name"), mode)).split())[:80]      # the key of a group is the name of a job when it has no platform: cut and cleaned like the names of the jobs
         slot = seen.setdefault(key, {"group": key, "failed": 0, "total": 0, "jobs": []})
         slot["total"] += 1
         if job.get("conclusion") in BAD:
             slot["failed"] += 1
-            slot["jobs"].append(str(job.get("name"))[:80])
+            slot["jobs"].append(" ".join(redact(str(job.get("name"))).split())[:80])
     shown = sorted((g for g in seen.values() if g["failed"]), key=lambda g: (-g["failed"], g["group"]))
     return {"total": len(jobs), "failed": sum(g["failed"] for g in shown), "groups": [{**g, "jobs": g["jobs"][:8]} for g in shown[:12]]}
