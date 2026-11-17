@@ -363,7 +363,7 @@ OWN_PATHS = ("/api/accounts", "/api/health", "/api/paths", "/api/score/global")
 MAX_SCORE_ACCOUNTS = 50      # accounts asked for the score of the installation
 NO_FORWARD = ("host", "connection", "content-length", "transfer-encoding", "accept-encoding", "x-account-id", "x-monitor-remote", "x-monitor-supervisor")
 #: the headers of a child's answer that are passed on
-PASS_BACK = ("content-type", "set-cookie", "cache-control", "location", "referrer-policy")
+PASS_BACK = ("content-type", "set-cookie", "cache-control", "location", "referrer-policy", "x-api-version")
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -493,6 +493,20 @@ class Handler(BaseHTTPRequestHandler):
         status, data, back = fetch(child.url("/api/webhook"), timeout=FORWARD_TIMEOUT, data=body, headers=headers, method="POST")
         self.reply(status or 502, data if status else b'{"ok": false}', back.get("Content-Type", "application/json"))
 
+    def team_gate(self):
+        """The door of the team mode, judging the route WITHOUT its version prefix: `/api/v1/advanced` is the route `/api/advanced` and needs the same role. The account behind takes the prefix off itself
+        (it keeps its own `api.v1_enabled` switch), so the request is forwarded with the prefix and only judged here without it. The three routes of the prefix (me, repos, openapi.json) keep their path."""
+        from github_actions_monitor.app import api_v1
+        real = self.path
+        route = real.split("?")[0]
+        version, rest = api_v1.route_of(route)
+        if version is not None and route not in api_v1.OWN_ROUTES:
+            self.path = rest + real[len(route):]
+        try:
+            return auth_http.gate(self, self.team_config())
+        finally:
+            self.path = real
+
     @staticmethod
     def team_config():
         from github_actions_monitor.app import toolconfig
@@ -513,7 +527,7 @@ class Handler(BaseHTTPRequestHandler):
         if state == "repeated":
             self.json({"error": "the account is given more than once", "code": "account_repeated"}, 400)
             return
-        if not auth_http.gate(self, self.team_config()):      # team mode (off by default): the login and the roles are asked here, once, for every account
+        if not self.team_gate():      # team mode (off by default): the login and the roles are asked here, once, for every account
             return
         if sup is None:
             self.json({"error": "not ready"}, 503)
