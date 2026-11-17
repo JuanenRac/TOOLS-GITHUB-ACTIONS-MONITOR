@@ -11,7 +11,10 @@ nobody touches, with no menu and no buttons that change anything. This module is
                               Nothing here reads GitHub, runs a command, opens a link or returns a title, a commit message, a URL, a job name or a user name.
 
 Names of repositories follow `screens.show_repo_names`: `all`, `public` (a private repository is called private-N) or `none` (every repository is repo-N). Standard library only."""
+import hashlib
+import hmac
 import re
+import secrets
 import time
 from datetime import datetime, timezone
 
@@ -115,14 +118,51 @@ def page_data(kind, cfg, prm, lang=None):
 # names
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-class Names:
-    """What a repository is called on a screen. `meta` is the repo_meta of the cycle ({repo: {"private": True, False or None}})."""
+KEY_FILE = "screens.key"
+_KEY = [None]
 
-    def __init__(self, repos, meta, mode):
+
+def installation_key():
+    """The secret of this installation that orders the hidden names (private-1, private-2...): made once, kept in a file of the data folder with mode 0600 (never in the configuration, never shown),
+    and read again at every start. Where the file cannot be kept (a read-only folder) the key lives in memory for this run."""
+    if _KEY[0]:
+        return _KEY[0]
+    try:
+        from github_actions_monitor.security import private_io
+        from github_actions_monitor.util import paths
+        path = paths.folder("data") / KEY_FILE
+        try:
+            value = path.read_text(encoding="utf-8").strip()
+        except (OSError, UnicodeError):
+            value = ""
+        if len(value) < 32 or not re.fullmatch(r"[0-9a-f]+", value):
+            value = secrets.token_hex(32)
+            private_io.write_private(path, value + "\n")
+        _KEY[0] = value
+    except Exception:   # noqa: BLE001 - without a place to keep it the key only lasts this run
+        _KEY[0] = secrets.token_hex(32)
+    return _KEY[0]
+
+
+class Names:
+    """What a repository is called on a screen. `meta` is the repo_meta of the cycle ({repo: {"private": True, False or None}}). The numbers of the hidden names are given to the hidden repositories
+    ONLY, in the order of an HMAC of the name with the key of the installation: nobody who looks at the screen can tell where a hidden repository falls among the public ones, how many repositories
+    there are, or what a hidden name starts with."""
+
+    def __init__(self, repos, meta, mode, key=None):
         self.mode = mode if mode in NAMES else "public"
         self.meta = meta or {}
-        order = sorted(set(repos or []) | set(self.meta))
-        self.index = {repo: i + 1 for i, repo in enumerate(order)}
+        self.key = key
+        self.repos = sorted(set(repos or []) | set(self.meta))
+        self._index = None
+
+    @property
+    def index(self):
+        if self._index is None:
+            key = (self.key or installation_key()).encode("utf-8")
+            hidden = sorted((r for r in self.repos if self.hidden(r)), key=lambda r: hmac.new(key, r.encode("utf-8"), hashlib.sha256).digest())
+            self._index = {repo: i + 1 for i, repo in enumerate(hidden)}
+        return self._index
 
     def hidden(self, repo):
         if self.mode == "all":
