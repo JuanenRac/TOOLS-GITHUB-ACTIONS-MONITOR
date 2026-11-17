@@ -126,3 +126,17 @@
 ![旋转 1080x1920](../../docs/screenshots/web_size_portrait_light.png)
 
 ![手机 390x844](../../docs/screenshots/web_size_phone_light.png)
+
+三个墙面屏幕（4K 和竖屏显示器，使用虚构数据）：
+
+![总览 4K 3840x2160](../../docs/screenshots/web_screen_overview_4k.png)
+
+![总览 1080x1920](../../docs/screenshots/web_screen_overview_portrait.png)
+
+![此刻 4K 3840x2160](../../docs/screenshots/web_screen_now_4k.png)
+
+![此刻 1080x1920](../../docs/screenshots/web_screen_now_portrait.png)
+
+![哨兵 4K 3840x2160](../../docs/screenshots/web_screen_sentinels_4k.png)
+
+![哨兵 1080x1920](../../docs/screenshots/web_screen_sentinels_portrait.png)

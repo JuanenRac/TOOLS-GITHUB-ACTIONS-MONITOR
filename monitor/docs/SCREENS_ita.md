@@ -126,3 +126,17 @@ La scheda Adesso in quattro dimensioni, con dati inventati (4K, un monitor 21:9,
 ![ruotato 1080x1920](../../docs/screenshots/web_size_portrait_light.png)
 
 ![telefono 390x844](../../docs/screenshots/web_size_phone_light.png)
+
+I tre schermi da parete in 4K e su un monitor ruotato, con dati inventati:
+
+![Panoramica 4K 3840x2160](../../docs/screenshots/web_screen_overview_4k.png)
+
+![Panoramica 1080x1920](../../docs/screenshots/web_screen_overview_portrait.png)
+
+![In questo momento 4K 3840x2160](../../docs/screenshots/web_screen_now_4k.png)
+
+![In questo momento 1080x1920](../../docs/screenshots/web_screen_now_portrait.png)
+
+![Sentinelle 4K 3840x2160](../../docs/screenshots/web_screen_sentinels_4k.png)
+
+![Sentinelle 1080x1920](../../docs/screenshots/web_screen_sentinels_portrait.png)

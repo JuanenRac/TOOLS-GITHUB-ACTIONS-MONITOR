@@ -48,6 +48,9 @@ NETWORK_WEB = [("network_now", "tab=now", (1400, 820)), ("network_notices", "tab
 ACCOUNTS_WEB = [("accounts_all", "account=all", (1400, 420)), ("accounts_one", "account=org-acme", (1400, 820)), ("accounts_live", "view=live&chrome=0", (1100, 700))]      # the complete edition with several accounts (tools/demo_accounts.py)
 
 
+SCREEN_WEB = [(f"screen_{kind}_{tag}", f"/screen/{kind}?lang=en&theme=dark&monitor=1", size) for kind in ("overview", "now", "sentinels") for tag, size in (("1080p", (1920, 1080)), ("4k", (3840, 2160)), ("portrait", (1080, 1920)))]      # the wall screens (docs/SCREENS.md): dark only, one picture per resolution
+
+
 FAILED = []      # the pictures that were not made: the exit code says so
 
 
@@ -206,6 +209,11 @@ def main():
                     if wanted(f"web_{name}"):
                         shot(f"http://127.0.0.1:{port}/?{query}&theme={theme}&lang=en&nowizard=1", str(OUT / f"web_{name}_{theme}.png"), size)
                         print("web", name, theme, flush=True)
+        if args.web or both:
+            for name, path, size in SCREEN_WEB:
+                if wanted(f"web_{name}"):
+                    shot(f"http://127.0.0.1:{port}{path}", str(OUT / f"web_{name}.png"), size)
+                    print("web", name, flush=True)
         if args.web or both:
             for _ in range(60):
                 try:

@@ -3497,5 +3497,6 @@
  "ui.scr_sev_warning": "Aviso",
  "ui.scr_sev_info": "Informação",
  "ui.tab_les": "Lições",
- "ui.tab_rep": "Relatórios"
+ "ui.tab_rep": "Relatórios",
+ "ui.scr_open": "Abrir o ecrã de parede: {name}"
 }

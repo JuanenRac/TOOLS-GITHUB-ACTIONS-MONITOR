@@ -126,3 +126,17 @@ La pestaña Ahora en cuatro tamaños, con datos inventados (4K, un monitor 21:9,
 ![girado 1080x1920](../../docs/screenshots/web_size_portrait_light.png)
 
 ![móvil 390x844](../../docs/screenshots/web_size_phone_light.png)
+
+Las tres pantallas de pared en 4K y en un monitor girado, con datos inventados:
+
+![General 4K 3840x2160](../../docs/screenshots/web_screen_overview_4k.png)
+
+![General 1080x1920](../../docs/screenshots/web_screen_overview_portrait.png)
+
+![Ahora 4K 3840x2160](../../docs/screenshots/web_screen_now_4k.png)
+
+![Ahora 1080x1920](../../docs/screenshots/web_screen_now_portrait.png)
+
+![Centinelas 4K 3840x2160](../../docs/screenshots/web_screen_sentinels_4k.png)
+
+![Centinelas 1080x1920](../../docs/screenshots/web_screen_sentinels_portrait.png)

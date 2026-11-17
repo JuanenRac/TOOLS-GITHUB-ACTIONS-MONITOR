@@ -3497,5 +3497,6 @@
  "ui.scr_sev_warning": "警告",
  "ui.scr_sev_info": "情報",
  "ui.tab_les": "教訓",
- "ui.tab_rep": "レポート"
+ "ui.tab_rep": "レポート",
+ "ui.scr_open": "壁掛け画面を開く：{name}"
 }
