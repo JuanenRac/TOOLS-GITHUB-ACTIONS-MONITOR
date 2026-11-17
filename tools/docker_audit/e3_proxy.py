@@ -43,11 +43,13 @@ def body(s):
     # the routes of the contract, with no token, through the proxy: none may answer
     contract = json.loads((s.target / "monitor" / "docs" / "schemas" / "api_contract.json").read_text(encoding="utf-8"))
     paths = [row["path"] for row in contract["endpoints"]]
-    results = stack.request(ps.CLIENT_A, [{"url": "https://%s%s" % (ps.SITE, p), "ca": "/root.crt", "headers": {"Origin": "https://%s" % ps.SITE}} for p in paths], timeout=300)
-    open_paths = [p for p, r in zip(paths, results) if r["first"]["status"] not in (401, 403)]
-    s.check("none of the %d read routes of the contract answers without the access token (401/403)" % len(paths), not open_paths, "answered: " + ", ".join("%s=%s" % (p, results[paths.index(p)]["first"]["status"]) for p in open_paths))
-    page = stack.request(ps.CLIENT_A, [{"url": "https://%s/" % ps.SITE, "ca": "/root.crt"}, {"url": "https://%s/api/ai/stream" % ps.SITE, "ca": "/root.crt", "timeout": 8}])
-    s.check("the page and the stream of the AI tools need the token too", page[0]["first"]["status"] in (401, 403) and page[1]["first"]["status"] in (401, 403), "page %s, stream %s" % (page[0]["first"]["status"], page[1]["first"]["status"]))
+    results = stack.request(ps.CLIENT_D, [{"url": "https://%s%s" % (ps.SITE, p), "ca": "/root.crt", "headers": {"Origin": "https://%s" % ps.SITE}} for p in paths], timeout=300)
+    open_paths = [p for p, r in zip(paths, results) if r["first"]["status"] not in (401, 403, 429)]
+    s.check("none of the %d read routes of the contract answers without the access token (401/403; 429 once the address is locked)" % len(paths), not open_paths and results[0]["first"]["status"] in (401, 403),
+            "answered: " + ", ".join("%s=%s" % (p, results[paths.index(p)]["first"]["status"]) for p in open_paths))
+    s.note("requests without any token from one address: %s (a missing token counts as a failed attempt, so the address is locked after a few)" % {k: sum(r["statuses"].get(k, 0) for r in results) for k in ("401", "403", "429")})
+    page = stack.request(ps.CLIENT_D, [{"url": "https://%s/" % ps.SITE, "ca": "/root.crt"}, {"url": "https://%s/api/ai/stream" % ps.SITE, "ca": "/root.crt", "timeout": 8}])
+    s.check("the page and the stream of the AI tools need the token too", page[0]["first"]["status"] in (401, 403, 429) and page[1]["first"]["status"] in (401, 403, 429), "page %s, stream %s" % (page[0]["first"]["status"], page[1]["first"]["status"]))
 
     # Host, Origin and the Secure cookie
     good = stack.request(ps.CLIENT_A, [access(stack.token)])[0]["first"]
@@ -87,10 +89,10 @@ def body(s):
     s.check("the monitor restarts with MONITOR_TRUSTED_PROXY and MONITOR_TRUSTED_PROXIES empty", ok, out[-800:])
     stack.prepare_client()
     s.wait_healthy(stack.container("monitor"), 180)
-    stack.request(ps.CLIENT_A, [access("wrong-%s" % "z" * 20, repeat=12)])
+    flood = stack.request(ps.CLIENT_A, [access("wrong-%s" % "z" * 20, repeat=12)])[0]
     shared = stack.request(ps.CLIENT_B, [access(stack.token)])[0]["first"]
-    s.note("proxy NOT declared as trusted: after 12 wrong tokens from one visitor, another visitor with the right token gets %s (429 = the lock is counted against the address of Caddy, the "
-           "conservative behaviour the setting exists to change)" % shared["status"])
+    s.note("proxy NOT declared as trusted: the first visitor's 12 wrong tokens got %s; then another visitor with the right token gets %s (429 = the lock is counted against the address of Caddy, the "
+           "conservative behaviour the setting exists to change)" % (flood["statuses"], shared["status"]))
 
 
 if __name__ == "__main__":

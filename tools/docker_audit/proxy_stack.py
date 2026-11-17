@@ -14,7 +14,7 @@ import time
 import audit_lib as lib
 
 SUBNET = "172.29.77.0/24"
-CLIENT_A, CLIENT_B, CLIENT_C = "172.29.77.50", "172.29.77.51", "172.29.77.52"
+CLIENT_A, CLIENT_B, CLIENT_C, CLIENT_D = "172.29.77.50", "172.29.77.51", "172.29.77.52", "172.29.77.53"
 SITE = "audit.test"
 
 

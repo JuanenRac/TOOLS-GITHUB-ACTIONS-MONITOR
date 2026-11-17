@@ -140,6 +140,20 @@ class Scenario:
             self.steps.append({"label": label or shown[:80], "command": shown, "exit": code, "seconds": round(time.time() - started, 1), "output": clip(self.scrub(output))})
         return code, output
 
+    def run_to_file(self, cmd, path, timeout=180, label=""):
+        """Runs a command whose standard output is binary (a tar archive) and keeps it in a file. Returns the exit code."""
+        started = time.time()
+        try:
+            with open(path, "wb") as handle:
+                done = subprocess.run([str(c) for c in cmd], stdout=handle, stderr=subprocess.PIPE, timeout=timeout, check=False)
+            code, err = done.returncode, done.stderr.decode("utf-8", "replace")
+        except (subprocess.TimeoutExpired, OSError) as error:
+            code, err = 124, str(error)
+        size = Path(path).stat().st_size if Path(path).exists() else 0
+        self.steps.append({"label": label or "to file", "command": shlex.join(str(c) for c in cmd) + " > " + Path(path).name, "exit": code, "seconds": round(time.time() - started, 1), "output": "%d bytes %s" % (size, clip(err, 500))})
+        Path(path).chmod(0o644)
+        return code
+
     def docker(self, *args, **kw):
         return self.run(["docker", *args], **kw)
 

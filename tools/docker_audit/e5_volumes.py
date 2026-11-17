@@ -97,10 +97,9 @@ def body(s):
         s.check("the backup file could be copied out of the container", False, "")
 
     # 3. a copy of the two volumes, restored into two new ones
-    s.docker("exec", name, "sh", "-c", "tar czf /tmp/vol-data.tgz -C /data . && tar czf /tmp/vol-config.tgz -C /config .")
-    for part in ("data", "config"):
-        s.docker("cp", "%s:/tmp/vol-%s.tgz" % (name, part), str(s.work / ("vol-%s.tgz" % part)))
-        (s.work / ("vol-%s.tgz" % part)).chmod(0o644)
+    for part, source in (("data", "/data"), ("config", "/config")):
+        code = s.run_to_file(["docker", "exec", name, "tar", "czf", "-", "-C", source, "."], s.work / ("vol-%s.tgz" % part), label="tar of the %s volume" % part)
+        s.check("a copy of the %s volume is made with tar" % part, code == 0, "")
     config2, data2 = s.volume("config2"), s.volume("data2")
     for volume, part, target in ((data2, "data", "/data"), (config2, "config", "/config")):
         code, out = s.docker("run", "--rm", "--label", lib.LABEL, "-v", "%s:%s" % (volume, target), "-v", "%s:/backup:ro" % s.work, "--entrypoint", "tar", image, "xzf", "/backup/vol-%s.tgz" % part, "-C", target,
