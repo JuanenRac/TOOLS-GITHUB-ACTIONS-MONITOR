@@ -21,7 +21,11 @@ What only shows with long real use: the migration from 1.8 and 1.9, the growth o
 
 The monitor's own workflows keep to what the hygiene sentinel will ask of others: actions pinned to a commit, the least permissions and a time limit on every job.
 
-## Done in 1.8.2 to 2.0.6
+## Done in 1.8.2 to 2.0.7
+
+### 2.0.7 - A read API for clients, the original repository of each fork and workflows switched off by hand
+
+A read API under `/api/v1/` for clients (`me`, `repos` and `openapi`, off by default, with a frozen contract); an optional follow of the original repository of each fork (`upstream.enabled`, off by default, with a limit of requests an hour); and a workflow that the owner switched off by hand is no longer a red but is told apart (`ci.disabled_apart`).
 
 ### 2.0.6 - Three wall screens, drawn and off by default
 
