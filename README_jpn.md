@@ -284,6 +284,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/CI_RED_SCHEMA_jpn.md`](monitor/docs/CI_RED_SCHEMA_jpn.md): ci_red.json の形式
 - [`monitor/docs/CI_RED_BRIDGE_jpn.md`](monitor/docs/CI_RED_BRIDGE_jpn.md): ci_red.json をダッシュボードへ渡す
 - [`monitor/docs/WEBHOOK_jpn.md`](monitor/docs/WEBHOOK_jpn.md): 受信 Webhook
+- [`monitor/docs/CHATOPS_jpn.md`](monitor/docs/CHATOPS_jpn.md): Slack と Discord の読み取り専用チャットコマンド
+- [`monitor/docs/SOUNDS_jpn.md`](monitor/docs/SOUNDS_jpn.md): イベントの種類ごとの音
 - [`monitor/docs/LITE_jpn.md`](monitor/docs/LITE_jpn.md): lite 版
 - [`monitor/docs/COMPLETE_INDIVIDUAL_jpn.md`](monitor/docs/COMPLETE_INDIVIDUAL_jpn.md): 一人で使う完全版
 - [`monitor/docs/COMPLETE_SERVICE_jpn.md`](monitor/docs/COMPLETE_SERVICE_jpn.md): サービスとしての完全版

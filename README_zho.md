@@ -284,6 +284,8 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/CI_RED_SCHEMA_zho.md`](monitor/docs/CI_RED_SCHEMA_zho.md): ci_red.json 的格式
 - [`monitor/docs/CI_RED_BRIDGE_zho.md`](monitor/docs/CI_RED_BRIDGE_zho.md): 把 ci_red.json 带到仪表板
 - [`monitor/docs/WEBHOOK_zho.md`](monitor/docs/WEBHOOK_zho.md): 入站 Webhook
+- [`monitor/docs/CHATOPS_zho.md`](monitor/docs/CHATOPS_zho.md): Slack 和 Discord 的只读聊天命令
+- [`monitor/docs/SOUNDS_zho.md`](monitor/docs/SOUNDS_zho.md): 每种事件一种声音
 - [`monitor/docs/LITE_zho.md`](monitor/docs/LITE_zho.md): lite 版
 - [`monitor/docs/COMPLETE_INDIVIDUAL_zho.md`](monitor/docs/COMPLETE_INDIVIDUAL_zho.md): 面向个人的完整版
 - [`monitor/docs/COMPLETE_SERVICE_zho.md`](monitor/docs/COMPLETE_SERVICE_zho.md): 作为服务运行的完整版
