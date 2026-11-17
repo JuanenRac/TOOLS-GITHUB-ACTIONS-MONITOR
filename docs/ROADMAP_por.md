@@ -16,7 +16,11 @@ O que só aparece com uso real prolongado: a migração desde a 1.8 e a 1.9, o c
 
 Os workflows do próprio monitor cumprem o que a sentinela de higiene pedirá aos outros: ações fixadas a um commit, as permissões mínimas e um limite de tempo em cada job.
 
-## Feito da 1.8.2 à 2.0.4
+## Feito da 1.8.2 à 2.0.5
+
+### 2.0.5 - Menos falsos vermelhos, repositórios adormecidos e perguntas visíveis em ecrã inteiro
+
+Um vermelho conta agora pela origem do evento: os workflows que o GitHub cria para si (`dynamic/`) não são CI vermelha nem ficheiros, a procura de um workflow oculto segue a mesma regra de origem, as execuções em fila durante dias são reconhecidas como uma fila fantasma (7 dias por omissão) e um vermelho de que ninguém trata envelhece aos 30 dias e passa a inativo; os repositórios adormecidos e inativos são um estado próprio, nem verdes nem vermelhos; os forks só entram na higiene, no lint e na pontuação quando têm CI própria nos últimos 90 dias; a proteção do ramo por omissão é avaliada por omissão pelo que está em vigor, a partir de todas as fontes públicas; e as cinco confirmações da página usam um diálogo da página visível em ecrã inteiro.
 
 ### 2.0.4 - Um modelo para cada tarefa, menus independentes e uma ajuda que abre o tema certo
 

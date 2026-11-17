@@ -21,7 +21,11 @@ What only shows with long real use: the migration from 1.8 and 1.9, the growth o
 
 The monitor's own workflows keep to what the hygiene sentinel will ask of others: actions pinned to a commit, the least permissions and a time limit on every job.
 
-## Done in 1.8.2 to 2.0.4
+## Done in 1.8.2 to 2.0.5
+
+### 2.0.5 - Fewer false reds, dormant repositories and questions that show in full screen
+
+A red now counts by where the event came from: the workflows GitHub makes for itself (`dynamic/`) are neither red CI nor files, the lookup of a hidden workflow obeys the same origin rule, runs queued for days are told apart as a ghost queue (7 days by default), and a red nobody attends to ages after 30 days and becomes inactive; dormant and inactive repositories are a state of their own, neither green nor red; forks enter the hygiene, the lint and the score only when they have a CI of their own in the last 90 days; the protection of the default branch is judged by what is in force by default, from every public source; and the five confirmations of the page use a dialog of the page that shows in full screen.
 
 ### 2.0.4 - A model for each task, independent menus and a help that opens the right topic
 

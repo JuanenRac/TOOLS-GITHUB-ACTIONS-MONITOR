@@ -16,7 +16,11 @@ Was sich nur im langen echten Einsatz zeigt: die Migration von 1.8 und 1.9, das 
 
 Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
 
-## Erledigt in 1.8.2 bis 2.0.4
+## Erledigt in 1.8.2 bis 2.0.5
+
+### 2.0.5 - Weniger falsche Rotmeldungen, ruhende Repositories und Fragen, die im Vollbild sichtbar sind
+
+Ein Rot zählt jetzt nach der Herkunft des Ereignisses: die Workflows, die GitHub für sich selbst anlegt (`dynamic/`), sind weder rotes CI noch Dateien, die Suche nach einem verborgenen Workflow folgt derselben Herkunftsregel, tagelang wartende Läufe werden als Geisterwarteschlange erkannt (standardmäßig 7 Tage), und ein Rot, um das sich niemand kümmert, altert nach 30 Tagen und wird inaktiv; ruhende und inaktive Repositories sind ein eigener Zustand, weder grün noch rot; Forks gehen nur dann in Hygiene, Lint und Bewertung ein, wenn sie in den letzten 90 Tagen eine eigene CI hatten; der Schutz des Standardbranches wird standardmäßig nach dem Geltenden aus allen öffentlichen Quellen beurteilt; und die fünf Bestätigungen der Seite nutzen einen Dialog der Seite, der auch im Vollbild sichtbar ist.
 
 ### 2.0.4 - Ein Modell für jede Aufgabe, eigenständige Menüs und eine Hilfe, die das richtige Thema öffnet
 
