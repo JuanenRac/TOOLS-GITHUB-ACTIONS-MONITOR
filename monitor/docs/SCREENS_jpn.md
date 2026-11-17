@@ -87,7 +87,7 @@
 
 | 設定 | 内容 |
 |---|---|
-| `screens.enabled` | 3つのページを有効にします。オフにするとすべてのアドレスが 404 を返します。 既定ではオフです。 |
+| `screens.enabled` | 3つのページを有効にします。オフにすると `/screen/overview`、`/screen/now`、`/screen/sentinels`、`/api/screens/data` が 404 を返します（`/screen/1` から `/screen/3` はページそのもので、この設定には依存しません）。Lite エディションも壁面画面を提供しますが、センチネル画面は空です。 既定ではオフです。 |
 | `screens.default_theme` | dark（既定）、light、contrast。 |
 | `screens.default_density` | compact、normal（既定）、large。 |
 | `screens.refresh_seconds` | ウィンドウの更新間隔（秒、既定は 10）。ページは GitHub ではなくモニターから読むため、短くしても利用枠は消費しません。 |

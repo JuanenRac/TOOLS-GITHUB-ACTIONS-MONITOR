@@ -87,7 +87,7 @@ Eine Adresse je Monitor. Ein Parameter kann ein Fenster ruhiger oder kleiner mac
 
 | Einstellung | Was sie bewirkt |
 |---|---|
-| `screens.enabled` | Schaltet die drei Seiten ein. Aus: Jede Adresse antwortet mit 404. Standardmäßig aus. |
+| `screens.enabled` | Schaltet die drei Seiten ein. Aus: `/screen/overview`, `/screen/now`, `/screen/sentinels` und `/api/screens/data` antworten mit 404 (`/screen/1` bis `/screen/3` sind die Seite selbst und hängen nicht davon ab). Die Lite-Edition liefert die Wandbildschirme ebenfalls, mit leerem Wächter-Bildschirm. Standardmäßig aus. |
 | `screens.default_theme` | dark (Standard), light oder contrast. |
 | `screens.default_density` | compact, normal (Standard) oder large. |
 | `screens.refresh_seconds` | Sekunden zwischen den Aktualisierungen eines Fensters (standardmäßig 10). Die Seiten lesen vom Monitor, nie von GitHub, eine kurze Zeit kostet also kein Kontingent. |

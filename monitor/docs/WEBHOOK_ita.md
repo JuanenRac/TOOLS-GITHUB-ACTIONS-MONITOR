@@ -61,5 +61,5 @@ Una richiesta firmata valida che qualcuno ha catturato e rinvia riceve risposta 
 
 1. Metti un segreto di almeno 32 caratteri nella variabile d'ambiente indicata da `webhook.secret_env` e attiva il webhook.
 2. Inoltra la porta (`gh webhook forward`) o apri un tunnel e usa il suo indirizzo che termina con `/api/webhook` in GitHub.
-3. Invia l'evento di prova di GitHub (Recent deliveries > Redeliver) e cercalo in `?view=live`.
+3. Avvia un workflow (o fai un push in un repository osservato) e cerca l'evento in `?view=live`. Il `ping` di GitHub prova solo la firma: riceve `200` e non compare nell'elenco, e un nuovo invio da GitHub viene ignorato come ripetizione.
 4. Tieni d'occhio la quota nell'intestazione: con i webhook basta un ciclo più lento.

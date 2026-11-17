@@ -87,7 +87,7 @@ Um endereço para cada monitor. Um parâmetro pode tornar uma janela mais calma 
 
 | Definição | O que faz |
 |---|---|
-| `screens.enabled` | Ativa as três páginas. Desativado: todos os endereços respondem 404. Desativado por defeito. |
+| `screens.enabled` | Ativa as três páginas. Desativado: `/screen/overview`, `/screen/now`, `/screen/sentinels` e `/api/screens/data` respondem 404 (`/screen/1` a `/screen/3` são a própria página e não dependem disto). A edição lite também serve os ecrãs de parede, com o ecrã dos sentinelas vazio. Desativado por defeito. |
 | `screens.default_theme` | dark (por defeito), light ou contrast. |
 | `screens.default_density` | compact, normal (por defeito) ou large. |
 | `screens.refresh_seconds` | Segundos entre atualizações de uma janela (10 por defeito). As páginas leem do monitor, nunca do GitHub, por isso um tempo curto não gasta quota. |

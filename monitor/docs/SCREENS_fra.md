@@ -87,7 +87,7 @@ Une adresse par moniteur. Un paramètre peut rendre une fenêtre plus calme ou p
 
 | Réglage | Ce qu'il fait |
 |---|---|
-| `screens.enabled` | Active les trois pages. Désactivé : toutes les adresses répondent 404. Désactivé par défaut. |
+| `screens.enabled` | Active les trois pages. Désactivé : `/screen/overview`, `/screen/now`, `/screen/sentinels` et `/api/screens/data` répondent 404 (`/screen/1` à `/screen/3` sont la page elle-même et n'en dépendent pas). L'édition lite sert aussi les écrans muraux, avec l'écran des sentinelles vide. Désactivé par défaut. |
 | `screens.default_theme` | dark (par défaut), light ou contrast. |
 | `screens.default_density` | compact, normal (par défaut) ou large. |
 | `screens.refresh_seconds` | Secondes entre les mises à jour d'une fenêtre (10 par défaut). Les pages lisent le moniteur, jamais GitHub : un délai court ne consomme pas de quota. |

@@ -87,7 +87,7 @@ Un indirizzo per ogni monitor. Un parametro può rendere una finestra più tranq
 
 | Impostazione | Cosa fa |
 |---|---|
-| `screens.enabled` | Attiva le tre pagine. Disattivato: ogni indirizzo risponde 404. Disattivato per impostazione predefinita. |
+| `screens.enabled` | Attiva le tre pagine. Disattivato: `/screen/overview`, `/screen/now`, `/screen/sentinels` e `/api/screens/data` rispondono 404 (da `/screen/1` a `/screen/3` sono la pagina stessa e non ne dipendono). Anche l'edizione lite serve gli schermi a parete, con lo schermo delle sentinelle vuoto. Disattivato per impostazione predefinita. |
 | `screens.default_theme` | dark (predefinito), light o contrast. |
 | `screens.default_density` | compact, normal (predefinito) o large. |
 | `screens.refresh_seconds` | Secondi tra gli aggiornamenti di una finestra (10 per impostazione predefinita). Le pagine leggono dal monitor, mai da GitHub, quindi un tempo breve non consuma quota. |

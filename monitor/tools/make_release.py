@@ -71,6 +71,19 @@ def lf_for_scripts(data):
     return data.replace(b"\r\n", b"\n") if data.startswith(b"#!") else data
 
 
+TEXT_SUFFIXES = (".py", ".md", ".json", ".txt", ".html", ".sh", ".command")      # the text the zip carries with one line ending, whatever machine builds it
+CRLF_SUFFIXES = (".bat", ".cmd")      # Windows launchers: CRLF in the zip as in a Windows checkout
+
+
+def line_endings_for_zip(name, data):
+    """The bytes of a file as the zip carries them: LF for the text (the blob of git, so the same commit gives the same zip on Windows, Linux and macOS) and CRLF for the Windows launchers."""
+    if name.endswith(TEXT_SUFFIXES) and b"\0" not in data:
+        return data.replace(b"\r\n", b"\n")
+    if name.endswith(CRLF_SUFFIXES):
+        return data.replace(b"\r\n", b"\n").replace(b"\n", b"\r\n")
+    return data
+
+
 def members():
     names = [p for p in sorted(HERE.glob("*.bat")) + sorted(HERE.glob("*.sh")) + sorted(HERE.glob("*.command")) + sorted((HERE / "bin").glob("*.py"))]   # the launchers of the product folder and the tiny entry points of bin/
     names += sorted(p for p in (HERE / "src").rglob("*.py") if "__pycache__" not in p.parts)                                                      # the importable package
@@ -467,7 +480,7 @@ def main():
     out = Path(args.out) if args.out else workspace.signed_dir() / "github_actions_monitor"
     if str(out).upper().startswith("D:"):
         raise SystemExit("never write on D:")
-    entries = {f"github_actions_monitor/{p.relative_to(HERE).as_posix()}": lf_for_scripts(p.read_bytes()) for p in members()}
+    entries = {f"github_actions_monitor/{p.relative_to(HERE).as_posix()}": line_endings_for_zip(p.name, lf_for_scripts(p.read_bytes())) for p in members()}
     entries[f"github_actions_monitor/{EXAMPLES_DIR}/{EXAMPLE}"] = template().encode("utf-8")
     missing_text = authorship_problems(entries)
     if missing_text:
