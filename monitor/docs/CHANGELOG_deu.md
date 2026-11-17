@@ -16,6 +16,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 ### Behoben
 
 - **`lint_workflows.py --remote` meldet ein Repository, das nicht gelesen werden konnte, nicht mehr als sauber**: Ein Repository, das es nicht gibt (oder das das Token nicht sieht), eine Organisation mit nicht autorisiertem SSO, fehlendes Netz oder ein Name, der nicht `OWNER/REPO` ist, endeten mit `0 finding(s)` und Exit-Code 0; ein damit geschriebener Schritt vor dem Push lief also durch, ohne einen einzigen Workflow angesehen zu haben. Der Exit-Code ist in diesen Fällen jetzt 2 (ein Fund ergibt weiterhin 1), der Grund steht auf der Fehlerausgabe (ein nicht vorhandenes Repository wird von einem ohne Workflows unterschieden), und `.` und `..` werden nicht mehr als Eigentümer- oder Repository-Name angenommen. `--json` behält seine Form. `docs/CONSOLE_TOOLS.md` und die Übersetzungen sagen es.
+- **Ein alterndes Rot und ein inaktiver Workflow sind nicht mehr unsichtbar**: Lief ein fehlgeschlagener Workflow seit `ci.inactive_days` nicht mehr oder war sein Fehler älter als `ci.red_age_days`, verschwand er aus der Liste der Roten, und nichts auf der Seite sagte es, obwohl die Hilfe beider Einstellungen verspricht, dass er als inaktiv angezeigt wird. Der Tab Jetzt hat nun eine Zeile mit der Zahl der fehlgeschlagenen Workflows, die nicht mehr als rot zählen, und eine mit den ruhenden und inaktiven Repositories, in acht Sprachen.
 
 ## [2.0.8]
 

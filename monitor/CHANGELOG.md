@@ -18,6 +18,7 @@ when this file and `tool_version.py` disagree.
 ### Fixed
 
 - **`lint_workflows.py --remote` no longer reports a repository it could not read as clean**: a repository that does not exist (or that the token cannot see), an organization whose SSO is not authorised, no network, or a name that is not `OWNER/REPO` ended with `0 finding(s)` and exit code 0, so a pre-push step written with it passed without having looked at a single workflow. The exit code is now 2 in those cases (a finding still gives 1), the reason is printed on the standard error (a repository that is not there is told apart from one that simply has no workflows) and `.` and `..` are no longer accepted as an owner or repository name. `--json` keeps its shape. `docs/CONSOLE_TOOLS.md` and its translations say so.
+- **A red that ages out and an inactive workflow are no longer invisible**: when a failing workflow had not run for `ci.inactive_days`, or its failure was older than `ci.red_age_days`, it left the list of reds and nothing on the page said so, although the help of both settings promises that it is shown as inactive. The Now tab now has a line with how many failed workflows no longer count as red and another with the dormant and inactive repositories, in the eight languages.
 
 ## [2.0.8]
 

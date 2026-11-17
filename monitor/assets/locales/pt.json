@@ -3276,6 +3276,8 @@
  "ui.stuck_why_runner_down": "o seu runner está offline",
  "ui.stuck_why_ghost": "em fila há dias; o GitHub não a inicia",
  "ui.n_ghost": "{n} em fila há mais de {days} dias (provavelmente nunca arrancam; nem bloqueadas, nem em fila)",
+ "ui.n_inactive": "{n} workflows falhados já não contam como vermelhos (inativos, ou com uma falha mais antiga do que a idade do vermelho)",
+ "ui.n_dormant": "{n} repositórios adormecidos e {m} inativos (sem atividade recente)",
  "evt.red_group": "CI a vermelho em {repo} no commit {sha}: {count} workflows ({list})",
  "evt.alerts_digest": "{n} avisos retidos nos últimos {minutes} minutos: {red} a vermelho, {stuck} presos, {other} outros",
  "evt.silence_review": "Um silenciamento deve ser revisto: {pattern} ({reason}, rever até {date})",

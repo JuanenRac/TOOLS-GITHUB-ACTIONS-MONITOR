@@ -16,6 +16,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 ### Corregido
 
 - **`lint_workflows.py --remote` ya no da por limpio un repositorio que no pudo leer**: un repositorio que no existe (o que el token no ve), una organización con SSO sin autorizar, la falta de red o un nombre que no es `OWNER/REPO` terminaban con `0 finding(s)` y código de salida 0, de modo que un paso previo al push escrito con él pasaba sin haber mirado ningún workflow. Ahora el código de salida es 2 en esos casos (un hallazgo sigue dando 1), el motivo sale por la salida de error (un repositorio que no está se distingue de uno que simplemente no tiene workflows) y `.` y `..` ya no se aceptan como propietario ni como nombre de repositorio. `--json` conserva su forma. `docs/CONSOLE_TOOLS.md` y sus traducciones lo dicen.
+- **Un rojo que envejece y un workflow inactivo ya no son invisibles**: cuando un workflow fallido llevaba `ci.inactive_days` sin ejecutarse, o su fallo era más antiguo que `ci.red_age_days`, salía de la lista de rojos y nada en la página lo decía, aunque la ayuda de los dos ajustes promete que se muestra como inactivo. La pestaña Ahora tiene ahora una línea con cuántos workflows fallidos ya no cuentan como rojo y otra con los repositorios dormidos e inactivos, en los ocho idiomas.
 
 ## [2.0.8]
 

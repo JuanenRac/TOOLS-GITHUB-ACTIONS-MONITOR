@@ -3276,6 +3276,8 @@
  "ui.stuck_why_runner_down": "su runner está desconectado",
  "ui.stuck_why_ghost": "en cola desde hace días; GitHub no la arranca",
  "ui.n_ghost": "{n} en cola desde hace más de {days} días (probablemente no arrancarán; ni atascadas ni en cola)",
+ "ui.n_inactive": "{n} workflows fallidos ya no cuentan como rojo (inactivos, o con un fallo más antiguo que la edad del rojo)",
+ "ui.n_dormant": "{n} repositorios dormidos y {m} inactivos (sin actividad reciente)",
  "evt.red_group": "CI en rojo en {repo} en el commit {sha}: {count} workflows ({list})",
  "evt.alerts_digest": "{n} avisos retenidos en los últimos {minutes} minutos: {red} en rojo, {stuck} atascados, {other} otros",
  "evt.silence_review": "Un silencio toca revisarlo: {pattern} ({reason}, revisar antes de {date})",

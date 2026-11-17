@@ -3276,6 +3276,8 @@
  "ui.stuck_why_runner_down": "其运行器已离线",
  "ui.stuck_why_ghost": "排队多日；GitHub 不会启动它",
  "ui.n_ghost": "{n} 个排队超过 {days} 天（很可能永远不会启动；不算卡住，也不算排队）",
+ "ui.n_inactive": "{n} 个失败的工作流不再计为红色（已不活跃，或失败时间超过红色期限）",
+ "ui.n_dormant": "{n} 个休眠仓库和 {m} 个不活跃仓库（近期无活动）",
  "evt.red_group": "{repo} 在提交 {sha} 上 CI 变红：{count} 个工作流（{list}）",
  "evt.alerts_digest": "最近 {minutes} 分钟内暂存了 {n} 条警报：红色 {red}、卡住 {stuck}、其他 {other}",
  "evt.silence_review": "有一条静默需要复查：{pattern}（{reason}，复查日期 {date}）",
