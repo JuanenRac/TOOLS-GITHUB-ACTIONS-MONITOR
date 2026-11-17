@@ -3522,6 +3522,7 @@
  "api.bad_limit": "limit muss eine ganze Zahl von 1 bis {max} sein.",
  "api.unknown_field": "Das Feld {field} gehört nicht zur Antwort; frage nur Felder ab, die der Vertrag aufführt.",
  "api.bad_profile": "profile muss full oder compact sein.",
+ "api.server_error": "Der Server konnte diese Anfrage nicht beantworten; versuchen Sie es später erneut.",
  "cfg.f.upstream.enabled": "Das Original-Repository jedes Forks verfolgen",
  "cfg.h.upstream.enabled": "Standardmäßig aus. Für jeden Fork wird das Original-Repository (der Upstream) gelesen, aus dem er kopiert wurde: der Stand der Prüfungen des letzten Commits seines Standard-Branches und sein letztes Release; beides erscheint im Hygiene-Panel des Wächters. Es kostet eine Anfrage für mehrere Forks (siehe die Grenzen unten) und schreibt nirgendwo etwas.",
  "cfg.f.upstream.refresh_hours": "Stunden zwischen zwei Lesungen eines Forks",

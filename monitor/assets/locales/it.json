@@ -3522,6 +3522,7 @@
  "api.bad_limit": "limit deve essere un numero intero da 1 a {max}.",
  "api.unknown_field": "Il campo {field} non fa parte della risposta; chiedi solo i campi che il contratto elenca.",
  "api.bad_profile": "profile deve essere full o compact.",
+ "api.server_error": "Il server non ha potuto rispondere a questa richiesta; riprova più tardi.",
  "cfg.f.upstream.enabled": "Seguire il repository originale di ogni fork",
  "cfg.h.upstream.enabled": "Disattivato per impostazione predefinita. Per ogni fork legge il repository originale (l'upstream) da cui è stato copiato: lo stato dei controlli dell'ultimo commit del suo ramo predefinito e la sua ultima release, e li mostra nel pannello di igiene della Sentinella. Costa una richiesta per più fork (vedi i limiti qui sotto) e non scrive nulla da nessuna parte.",
  "cfg.f.upstream.refresh_hours": "Ore tra due letture di un fork",

@@ -394,6 +394,14 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, *args):
         pass
 
+    def end_headers(self):
+        """Every answer of the supervisor carries the same protection against framing as the one of an account (the browser talks to the supervisor when there are several accounts)."""
+        sent = {line.split(b":", 1)[0].decode("latin-1").lower() for line in getattr(self, "_headers_buffer", []) if b":" in line}
+        for name, value in localguard.SECURITY_HEADERS:
+            if name.lower() not in sent:
+                self.send_header(name, value)
+        super().end_headers()
+
     def reply(self, code, body, kind="application/json; charset=utf-8", extra=None):
         payload = body if isinstance(body, bytes) else body.encode("utf-8")
         try:

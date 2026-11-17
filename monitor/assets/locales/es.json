@@ -3522,6 +3522,7 @@
  "api.bad_limit": "limit debe ser un número entero de 1 a {max}.",
  "api.unknown_field": "El campo {field} no forma parte de la respuesta; pide solo campos que el contrato enumera.",
  "api.bad_profile": "profile debe ser full o compact.",
+ "api.server_error": "El servidor no pudo responder a esta petición; inténtelo de nuevo más tarde.",
  "cfg.f.upstream.enabled": "Seguir el repositorio original de cada fork",
  "cfg.h.upstream.enabled": "Desactivado por defecto. Para cada fork lee el repositorio original (el upstream) del que se copió: el estado de las comprobaciones del último commit de su rama principal y su última release, y los muestra en el panel de higiene del Centinela. Cuesta una petición por varios forks (mira los límites de abajo) y no escribe nada en ningún sitio.",
  "cfg.f.upstream.refresh_hours": "Horas entre dos lecturas de un fork",

@@ -3522,6 +3522,7 @@
  "api.bad_limit": "limit 必须是 1 到 {max} 的整数。",
  "api.unknown_field": "字段 {field} 不属于响应;只请求契约中列出的字段。",
  "api.bad_profile": "profile 必须是 full 或 compact。",
+ "api.server_error": "服务器无法响应此请求，请稍后再试。",
  "cfg.f.upstream.enabled": "跟踪每个 fork 的原始仓库",
  "cfg.h.upstream.enabled": "默认关闭。对每个 fork,读取它所复制自的原始仓库(upstream):其默认分支最新提交的检查状态和最新发布,并显示在哨兵的卫生面板中。多个 fork 共用一次请求(见下面的限制),并且不会在任何地方写入内容。",
  "cfg.f.upstream.refresh_hours": "两次读取同一 fork 的间隔(小时)",
