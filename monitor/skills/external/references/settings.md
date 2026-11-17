@@ -115,6 +115,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `analytics.min_samples` | `-` | analytics | Least samples |
 | `analytics.slow_factor` | `-` | analytics | Slower than usual |
 | `analytics.steps` | `-` | analytics | Time per step |
+| `api.cursor_ttl_seconds` | `900` | advanced | Seconds a page cursor lives |
+| `api.default_limit` | `50` | advanced | Items per page |
+| `api.gzip_min_bytes` | `1024` | advanced | Smallest answer to compress (bytes) |
+| `api.max_limit` | `200` | advanced | Most items per page |
+| `api.v1_enabled` | `false` | advanced | Read API under /api/v1/ |
 | `audit_dir` | `-` | paths | Folder of audit files |
 | `audit_log.enabled` (secure) | `-` | sentinel | Log of actions on |
 | `audit_log.maintainers_can_read` (secure) | `-` | sentinel | Maintainers may read it |

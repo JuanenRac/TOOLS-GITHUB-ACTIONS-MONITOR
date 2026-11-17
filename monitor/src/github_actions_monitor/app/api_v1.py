@@ -1,0 +1,237 @@
+# Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+# GPL-3.0-or-later - see LICENSE
+"""The read API for clients, version 1, as pure functions. Off by default (`api.v1_enabled`); read only; nothing here talks to the network, the disk or the clock.
+
+  /api/v1/<route>     every read route that already exists, under the prefix `/api/v1/` (the same answer, the same roles, plus the header `X-API-Version: 1`)
+  /api/v1/me          who is asking: the mode (individual or team), the user, the role and the accounts the session may see
+  /api/v1/repos       the repositories the monitor watches, one line each, in pages (keyset cursor), with `fields=` and `profile=compact`
+  /api/v1/openapi.json  a light OpenAPI 3 description of the two routes above
+
+The two new routes answer errors in one envelope: {"error": slug, "code": "api.something", "message": text in the language asked}. The codes are stable and never translated; the message is.
+A cursor is signed, carries the fingerprint of the query it was made for and a time to live: a cursor of another query, a forged one or an old one is refused (400 `api.bad_cursor`).
+The shape of the answers is part of the contract (docs/schemas/api_contract.json, section `v1_endpoints`): a field may be added, never removed or renamed."""
+import base64
+import gzip
+import hashlib
+import hmac
+import json
+import re
+
+from github_actions_monitor import i18n
+
+API_VERSION = "1"
+PREFIX = "/api/v1"
+VERSION_HEADER = "X-API-Version"
+OWN_ROUTES = ("/api/v1/me", "/api/v1/repos", "/api/v1/openapi.json")
+PROFILES = ("full", "compact")
+FIELD_RE = re.compile(r"^[a-z][a-z0-9_]{0,39}\Z")
+VERSION_RE = re.compile(r"^/api/v(\d{1,3})(?:/|\Z)")
+CURSOR_MAX_LENGTH = 512
+ERROR_SLUGS = {400: "bad_request", 401: "unauthorized", 403: "forbidden", 404: "not_found", 429: "rate_limited", 500: "server_error"}
+DEFAULTS = {"v1_enabled": False, "default_limit": 50, "max_limit": 200, "cursor_ttl_seconds": 900, "gzip_min_bytes": 1024}
+BOUNDS = {"default_limit": (1, 1000), "max_limit": (1, 1000), "cursor_ttl_seconds": (30, 86400), "gzip_min_bytes": (0, 10_000_000)}
+
+#: what each own route promises. `required` is in every item of the full answer; `compact` is the short list of `profile=compact` (always a subset of `required`).
+CONTRACT = {
+    "me": {"path": "/api/v1/me", "kind": "object", "required": ["schema", "api_version", "version", "edition", "mode", "authenticated", "user", "role", "accounts", "limits"],
+           "compact": ["mode", "authenticated", "user", "role"]},
+    "repos": {"path": "/api/v1/repos", "kind": "list", "item": ["repo", "ecosystem", "state", "risk", "runs_24h", "failures_24h", "red_workflows", "stuck_runs", "alerts", "last_run_at"],
+              "compact": ["repo", "state", "risk"], "filters": ["state", "ecosystem", "q"]},
+}
+for _name, _spec in CONTRACT.items():
+    assert set(_spec["compact"]) <= set(_spec.get("item") or _spec["required"]), _name
+
+
+def settings(config):
+    """The `api` block of the configuration over DEFAULTS; a value of the wrong type or out of its bounds keeps the default (v1_enabled is read from `api.v1_enabled`)."""
+    block = (config or {}).get("api")
+    block = block if isinstance(block, dict) else {}
+    out = dict(DEFAULTS)
+    if isinstance(block.get("v1_enabled"), bool):
+        out["v1_enabled"] = block["v1_enabled"]
+    for key, (low, high) in BOUNDS.items():
+        value = block.get(key)
+        if isinstance(value, int) and not isinstance(value, bool) and low <= value <= high:
+            out[key] = value
+    if out["default_limit"] > out["max_limit"]:
+        out["default_limit"] = out["max_limit"]
+    return out
+
+
+# ---- the error envelope ---------------------------------------------------------------------------------------------------------------------
+
+class ApiError(Exception):
+    def __init__(self, status, code, **values):
+        super().__init__(code)
+        self.status, self.code, self.values = status, code, values
+
+    def envelope(self):
+        """(status, body) with the message in the language in use; a status that is not in the table becomes a 500."""
+        status = self.status if self.status in ERROR_SLUGS else 500
+        return status, {"error": ERROR_SLUGS[status], "code": self.code, "message": i18n.t(self.code, **self.values)}
+
+
+def route_of(path):
+    """(version, rest) for a path under `/api/v<N>/`, else (None, path). `rest` is the old route (`/api/v1/alerts` -> `/api/alerts`)."""
+    match = VERSION_RE.match(path or "")
+    if not match:
+        return None, path
+    return match.group(1), "/api/" + path[match.end():]
+
+
+# ---- paging ---------------------------------------------------------------------------------------------------------------------------------
+
+def _b64(raw):
+    return base64.urlsafe_b64encode(raw).decode("ascii").rstrip("=")
+
+
+def _unb64(text):
+    return base64.urlsafe_b64decode(text + "=" * (-len(text) % 4))
+
+
+def fingerprint(endpoint, filters):
+    """A short, stable text for a query (endpoint and filters, without the paging): a cursor made for one query is refused for another."""
+    raw = json.dumps([endpoint, sorted((str(k), str(v)) for k, v in (filters or {}).items() if v not in (None, ""))], separators=(",", ":"))
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
+
+
+def parse_limit(value, default, maximum):
+    if value in (None, ""):
+        return default
+    try:
+        number = int(str(value))
+    except ValueError:
+        raise ApiError(400, "api.bad_limit", max=maximum) from None
+    if not 1 <= number <= maximum:
+        raise ApiError(400, "api.bad_limit", max=maximum)
+    return number
+
+
+def make_cursor(secret, query_fp, last_key, now):
+    body = _b64(json.dumps({"f": query_fp, "k": last_key, "t": int(now)}, separators=(",", ":")).encode("utf-8"))
+    return body + "." + _b64(hmac.new(secret, body.encode("ascii"), hashlib.sha256).digest()[:16])
+
+
+def read_cursor(secret, cursor, query_fp, now, ttl):
+    """The key a cursor points after; anything wrong (shape, signature, another query, too old, from the future) raises ApiError(400, api.bad_cursor)."""
+    bad = ApiError(400, "api.bad_cursor")
+    if not isinstance(cursor, str) or not cursor or len(cursor) > CURSOR_MAX_LENGTH or cursor.count(".") != 1:
+        raise bad
+    body, mac = cursor.split(".")
+    if not hmac.compare_digest(mac, _b64(hmac.new(secret, body.encode("ascii", "replace"), hashlib.sha256).digest()[:16])):
+        raise bad
+    try:
+        data = json.loads(_unb64(body))
+    except (ValueError, UnicodeDecodeError):
+        raise bad from None
+    if not isinstance(data, dict) or data.get("f") != query_fp or not isinstance(data.get("t"), int) or now - data["t"] > ttl or data["t"] > now + 60:
+        raise bad
+    return data.get("k")
+
+
+def paginate(items, *, key, endpoint, filters, secret, now, cursor=None, limit=None, default_limit=50, max_limit=200, ttl=900):
+    """One page of `items` in ascending order of `key(item)` (unique): {"items", "next_cursor", "limit"}. Keyset paging: an item added between two requests never repeats or shifts a page."""
+    size = parse_limit(limit, default_limit, max_limit)
+    fp = fingerprint(endpoint, filters)
+    ordered = sorted(items, key=key)
+    if cursor:
+        after = read_cursor(secret, cursor, fp, now, ttl)
+        ordered = [item for item in ordered if key(item) > after] if after is not None else ordered
+    page = ordered[:size]
+    more = len(ordered) > size
+    return {"items": page, "next_cursor": make_cursor(secret, fp, key(page[-1]), now) if more and page else None, "limit": size}
+
+
+# ---- compact answers ------------------------------------------------------------------------------------------------------------------------
+
+def parse_fields(value):
+    """`a,b,c` -> ["a","b","c"]; a field that is not a plain lower-case name raises ApiError(400, api.unknown_field)."""
+    if value in (None, ""):
+        return None
+    out = []
+    for field in str(value).split(","):
+        field = field.strip()
+        if not FIELD_RE.match(field):
+            raise ApiError(400, "api.unknown_field", field=field[:40])
+        if field not in out:
+            out.append(field)
+    return out
+
+
+def project(item, name, fields=None, profile="full"):
+    """`item` cut to `fields` (checked against the promised list of the route) or to the compact list; a field outside the contract is refused rather than ignored."""
+    spec = CONTRACT[name]
+    promised = spec.get("item") or spec["required"]
+    if fields:
+        for field in fields:
+            if field not in promised:
+                raise ApiError(400, "api.unknown_field", field=field)
+        keep = fields
+    elif profile == "compact":
+        keep = spec["compact"]
+    else:
+        return item
+    return {k: item[k] for k in keep if k in item}
+
+
+def maybe_compress(body, accept_encoding, min_bytes=1024):
+    """(body, headers): gzip when the client accepts it (and does not refuse it with q=0) and the body has at least `min_bytes` (0 = never); `mtime=0` keeps the output reproducible."""
+    accepted = False
+    for part in str(accept_encoding or "").split(","):
+        name, _, params = part.strip().partition(";")
+        if name.strip().lower() in ("gzip", "x-gzip"):
+            quality = re.search(r"q\s*=\s*([0-9.]+)", params)
+            accepted = not quality or quality.group(1) not in ("0", "0.0", "0.00", "0.000")
+    headers = {"Vary": "Accept-Encoding"}
+    if not accepted or not min_bytes or len(body) < min_bytes:
+        return body, headers
+    headers["Content-Encoding"] = "gzip"
+    return gzip.compress(body, compresslevel=6, mtime=0), headers
+
+
+# ---- the two routes -------------------------------------------------------------------------------------------------------------------------
+
+def me_payload(*, version, edition, mode, authenticated, user, role, accounts, cfg):
+    """Who is asking. `role` and `accounts` are None when there is no team session (the individual mode has no roles: the person at the computer or holding the access token can do what the page does)."""
+    return {"schema": 1, "api_version": API_VERSION, "version": version, "edition": edition, "mode": mode, "authenticated": bool(authenticated), "user": user or None, "role": role,
+            "accounts": list(accounts) if accounts is not None else None, "limits": {"default_limit": cfg["default_limit"], "max_limit": cfg["max_limit"]}}
+
+
+def repo_item(view):
+    """One line of /api/v1/repos from a health view (health/repo_view.py): only what the contract promises."""
+    ci, alerts, activity = view.get("ci") or {}, view.get("alerts") or {}, view.get("activity") or {}
+    return {"repo": view.get("repo"), "ecosystem": view.get("ecosystem") or "", "state": view.get("state") or "unknown", "risk": view.get("risk") or 0, "runs_24h": ci.get("runs_24h") or 0,
+            "failures_24h": ci.get("failures_24h") or 0, "red_workflows": len(ci.get("red_workflows") or []), "stuck_runs": ci.get("stuck_runs") or 0, "alerts": alerts.get("total") or 0,
+            "last_run_at": activity.get("last_run_at")}
+
+
+def repos_payload(views, ask, *, secret, now, cfg):
+    """The page of repositories asked for. `ask` = the query as a dict of text (state, ecosystem, q, limit, cursor, fields, profile). Raises ApiError for a bad parameter."""
+    profile = ask.get("profile") or "full"
+    if profile not in PROFILES:
+        raise ApiError(400, "api.bad_profile")
+    fields = parse_fields(ask.get("fields"))
+    state, ecosystem, text = (ask.get("state") or "")[:20], (ask.get("ecosystem") or "")[:40], (ask.get("q") or "")[:80].lower()
+    items = [repo_item(v) for v in views if v.get("repo") and (not state or v.get("state") == state) and (not ecosystem or v.get("ecosystem") == ecosystem) and (not text or text in v["repo"].lower())]
+    page = paginate(items, key=lambda i: i["repo"], endpoint="repos", filters={"state": state, "ecosystem": ecosystem, "q": text}, secret=secret, now=now, cursor=ask.get("cursor"),
+                    limit=ask.get("limit"), default_limit=cfg["default_limit"], max_limit=cfg["max_limit"], ttl=cfg["cursor_ttl_seconds"])
+    return {"schema": 1, "api_version": API_VERSION, "total": len(items), "limit": page["limit"], "next_cursor": page["next_cursor"],
+            "items": [project(i, "repos", fields, profile) for i in page["items"]]}
+
+
+def openapi(version="1.0.0"):
+    """A light OpenAPI 3.0 description of the own routes: paths, the shared error envelope and the paging parameters."""
+    error = {"description": "error", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+    paths = {
+        "/api/v1/me": {"get": {"operationId": "me", "security": [{"cookie": []}, {"access": []}],
+                               "responses": {"200": {"description": "ok", "content": {"application/json": {"schema": {"type": "object", "required": CONTRACT["me"]["required"]}}}}, "default": error}}},
+        "/api/v1/repos": {"get": {"operationId": "repos", "security": [{"cookie": []}, {"access": []}],
+                                  "parameters": [{"name": n, "in": "query", "schema": {"type": "string"}} for n in CONTRACT["repos"]["filters"] + ["fields", "cursor"]]
+                                  + [{"name": "limit", "in": "query", "schema": {"type": "integer", "minimum": 1}}, {"name": "profile", "in": "query", "schema": {"enum": list(PROFILES)}}],
+                                  "responses": {"200": {"description": "ok", "content": {"application/json": {"schema": {"type": "object", "required": ["items", "next_cursor", "limit", "total"],
+                                                                                                                         "properties": {"items": {"type": "array", "items": {"type": "object", "required": CONTRACT["repos"]["item"]}}}}}}},
+                                                "default": error}}},
+    }
+    return {"openapi": "3.0.3", "info": {"title": "GitHub Actions Monitor read API", "version": version}, "paths": paths,
+            "components": {"securitySchemes": {"cookie": {"type": "apiKey", "in": "cookie", "name": "session"}, "access": {"type": "apiKey", "in": "header", "name": "X-Monitor-Access"}},
+                           "schemas": {"Error": {"type": "object", "required": ["error", "code", "message"], "properties": {"error": {"type": "string"}, "code": {"type": "string"}, "message": {"type": "string"}}}}}}

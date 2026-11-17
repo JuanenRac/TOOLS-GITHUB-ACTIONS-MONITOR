@@ -3498,5 +3498,20 @@
  "ui.scr_sev_info": "Info",
  "ui.tab_les": "Lektionen",
  "ui.tab_rep": "Berichte",
- "ui.scr_open": "Wandanzeige öffnen: {name}"
+ "ui.scr_open": "Wandanzeige öffnen: {name}",
+ "cfg.f.api.v1_enabled": "Lese-API unter /api/v1/",
+ "cfg.h.api.v1_enabled": "Standardmäßig aus. An: Jede Leseroute wird auch unter /api/v1/ ausgeliefert (dieselbe Antwort, dieselben Rollen, dazu der Header X-API-Version), und drei Routen kommen hinzu: /api/v1/me (wer fragt, mit Rolle und Konten der Sitzung), /api/v1/repos (die Repositories seitenweise) und /api/v1/openapi.json. Nur lesend: darüber lässt sich nichts ändern. Aus: Das ganze Präfix antwortet mit 404.",
+ "cfg.f.api.default_limit": "Einträge pro Seite",
+ "cfg.h.api.default_limit": "Standard 50. Wie viele Einträge eine Liste der API liefert, wenn der Client mit limit= keine Zahl verlangt. Darf das Maximum unten nicht übersteigen.",
+ "cfg.f.api.max_limit": "Höchstzahl Einträge pro Seite",
+ "cfg.h.api.max_limit": "Standard 200. Die größte Zahl, die ein Client mit limit= verlangen darf; eine größere wird mit dem Fehler api.bad_limit abgelehnt.",
+ "cfg.f.api.cursor_ttl_seconds": "Lebensdauer des Seiten-Cursors in Sekunden",
+ "cfg.h.api.cursor_ttl_seconds": "Standard 900. Der Cursor, der jede Seite begleitet (next_cursor), ist signiert und gilt nach so vielen Sekunden nicht mehr; der Client beginnt die Liste dann von vorn.",
+ "cfg.f.api.gzip_min_bytes": "Kleinste komprimierte Antwort (Bytes)",
+ "cfg.h.api.gzip_min_bytes": "Standard 1024. Eine Antwort der eigenen Routen der API (me, repos) wird mit gzip komprimiert, wenn der Client es akzeptiert und die Antwort mindestens so viele Bytes hat. 0 komprimiert nie.",
+ "ui.cfg_b_api_v1": "Lese-API v1",
+ "api.bad_cursor": "Der Seiten-Cursor ist ungültig, gehört zu einer anderen Abfrage oder ist abgelaufen; beginne die Liste von vorn.",
+ "api.bad_limit": "limit muss eine ganze Zahl von 1 bis {max} sein.",
+ "api.unknown_field": "Das Feld {field} gehört nicht zur Antwort; frage nur Felder ab, die der Vertrag aufführt.",
+ "api.bad_profile": "profile muss full oder compact sein."
 }

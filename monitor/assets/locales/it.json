@@ -3498,5 +3498,20 @@
  "ui.scr_sev_info": "Info",
  "ui.tab_les": "Lezioni",
  "ui.tab_rep": "Rapporti",
- "ui.scr_open": "Apri lo schermo da parete: {name}"
+ "ui.scr_open": "Apri lo schermo da parete: {name}",
+ "cfg.f.api.v1_enabled": "API di lettura su /api/v1/",
+ "cfg.h.api.v1_enabled": "Disattivato per impostazione predefinita. Attivo: ogni rotta di lettura è servita anche su /api/v1/ (stessa risposta, stessi ruoli, più l'intestazione X-API-Version) e si aggiungono tre rotte: /api/v1/me (chi chiede, con il ruolo e gli account della sessione), /api/v1/repos (i repository a pagine) e /api/v1/openapi.json. Sola lettura: da lì non si può cambiare nulla. Disattivo: tutto il prefisso risponde 404.",
+ "cfg.f.api.default_limit": "Elementi per pagina",
+ "cfg.h.api.default_limit": "Predefinito 50. Quanti elementi restituisce una lista dell'API quando il client non chiede un numero con limit=. Non può superare il massimo qui sotto.",
+ "cfg.f.api.max_limit": "Massimo di elementi per pagina",
+ "cfg.h.api.max_limit": "Predefinito 200. Il numero più grande che un client può chiedere con limit=; uno maggiore viene rifiutato con l'errore api.bad_limit.",
+ "cfg.f.api.cursor_ttl_seconds": "Secondi di vita del cursore di pagina",
+ "cfg.h.api.cursor_ttl_seconds": "Predefinito 900. Il cursore che accompagna ogni pagina (next_cursor) è firmato e smette di valere dopo questi secondi; il client riparte allora dall'inizio della lista.",
+ "cfg.f.api.gzip_min_bytes": "Risposta più piccola da comprimere (byte)",
+ "cfg.h.api.gzip_min_bytes": "Predefinito 1024. Una risposta delle rotte proprie dell'API (me, repos) viene compressa con gzip quando il client lo accetta e la risposta ha almeno questi byte. 0 non comprime mai.",
+ "ui.cfg_b_api_v1": "API di lettura v1",
+ "api.bad_cursor": "Il cursore di pagina non è valido, appartiene a un'altra richiesta o è scaduto; riparti dall'inizio della lista.",
+ "api.bad_limit": "limit deve essere un numero intero da 1 a {max}.",
+ "api.unknown_field": "Il campo {field} non fa parte della risposta; chiedi solo i campi che il contratto elenca.",
+ "api.bad_profile": "profile deve essere full o compact."
 }
