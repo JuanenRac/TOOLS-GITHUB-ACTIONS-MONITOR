@@ -3548,6 +3548,7 @@
  "evt.upstream_release": "{repo} の元({parent})が {tag} を公開しました",
  "ui.upstream_title": "フォークの元",
  "ui.upstream_summary": "追跡中のフォーク {n} 件:元がレッド {red} 件、新リリース {news} 件、未読 {unread} 件",
+ "ui.upstream_round": "{n} 件のフォークを一巡するのにこのペースでは {hours} 時間かかり、読み取り間隔の {refresh} 時間より長いため、追跡は休むことがありません。",
  "ui.upstream_state_success": "グリーン",
  "ui.upstream_state_failure": "レッド",
  "ui.upstream_state_pending": "実行中",

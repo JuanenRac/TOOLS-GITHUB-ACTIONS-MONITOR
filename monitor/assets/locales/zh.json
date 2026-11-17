@@ -3548,6 +3548,7 @@
  "evt.upstream_release": "{repo} 的原始仓库({parent})发布了 {tag}",
  "ui.upstream_title": "fork 的原始仓库",
  "ui.upstream_summary": "已跟踪 {n} 个 fork:{red} 个原始仓库为红色,{news} 个有新发布,{unread} 个尚未读取",
+ "ui.upstream_round": "按此速度遍历 {n} 个 fork 需要 {hours} 小时，比两次读取之间的 {refresh} 小时更长：跟踪永远不会休息。",
  "ui.upstream_state_success": "绿色",
  "ui.upstream_state_failure": "红色",
  "ui.upstream_state_pending": "运行中",

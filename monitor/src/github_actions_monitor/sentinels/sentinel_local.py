@@ -1060,6 +1060,8 @@ class Sentinel:
             self.unreleased, self.saved_at = mapping("unreleased"), cached.get("saved")
             self.local_versions = mapping("local_versions")
             self.upstream = mapping("upstream")
+            if isinstance(cached.get("upstream_calls"), list):
+                self.upstream_calls = [float(t) for t in cached["upstream_calls"][:1000] if isinstance(t, (int, float)) and not isinstance(t, bool) and time.time() - 3600 < t <= time.time() + 60]
             if isinstance(cached.get("org_files"), dict) and isinstance(cached["org_files"].get("names"), list):
                 self.org_files = {"at": float(cached["org_files"].get("at") or 0.0), "names": [str(n) for n in cached["org_files"]["names"]][:400]}
             self.surface.load(cached.get("surface"))
@@ -1662,7 +1664,8 @@ class Sentinel:
 
     def _persist(self):
         with self.lock:
-            self._save(CACHE_FILE, {"saved": time.time(), "repo_info": self.repo_info, "alerts": self.alerts, "perms": self.perms, "unreleased": self.unreleased, "local_versions": self.local_versions, "surface": self.surface.dump(), "a2_resolved": self.a2_resolved, "org_files": self.org_files, "upstream": self.upstream})
+            self._save(CACHE_FILE, {"saved": time.time(), "repo_info": self.repo_info, "alerts": self.alerts, "perms": self.perms, "unreleased": self.unreleased, "local_versions": self.local_versions, "surface": self.surface.dump(), "a2_resolved": self.a2_resolved, "org_files": self.org_files, "upstream": self.upstream,
+                                    "upstream_calls": [t for t in self.upstream_calls if t > time.time() - 3600]})      # the requests of the last hour survive a restart: it does not give back the hourly allowance
         snap = self.snapshot()
         self.last_snap = snap
         self._export_ci_red(snap)

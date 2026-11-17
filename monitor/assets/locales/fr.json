@@ -3548,6 +3548,7 @@
  "evt.upstream_release": "L'original de {repo} ({parent}) a publié {tag}",
  "ui.upstream_title": "Originaux des forks",
  "ui.upstream_summary": "{n} forks suivis : {red} avec un original rouge, {news} avec une nouvelle release, {unread} pas encore lus",
+ "ui.upstream_round": "Un tour des {n} forks dure {hours} h à ce rythme, plus que les {refresh} h entre deux lectures : le suivi ne se repose jamais.",
  "ui.upstream_state_success": "vert",
  "ui.upstream_state_failure": "rouge",
  "ui.upstream_state_pending": "en cours",

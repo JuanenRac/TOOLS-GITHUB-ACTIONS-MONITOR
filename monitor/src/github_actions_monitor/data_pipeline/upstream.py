@@ -8,6 +8,7 @@ fork knows its parent, so the answer is one GraphQL read: the status of the last
 Nothing here is on unless `upstream.enabled` is on. The cost is bounded by the settings: at most `upstream.requests_per_hour` requests an hour, each one with at most `upstream.forks_per_request`
 forks, and a fork is read again only after `upstream.refresh_hours`. The forks are taken in turn (the least recently read first), so a very large account is covered slowly instead of at once.
 `upstream.repos` limits the follow to the forks named there (empty: every fork). Pure functions: no network and no clock of their own; the caller gives the reader and the time."""
+import math
 import re
 
 NAME = re.compile(r"^[A-Za-z0-9._-]{1,100}\Z")
@@ -142,5 +143,7 @@ def build(store, forks, cfg, now, requests_last_hour=0):
                      "archived": entry.get("archived", False), "release": entry.get("release"), "news": fresh_release, "red": entry.get("state") == "failure", "committed": entry.get("committed"),
                      "at": entry["at"]})
     rows.sort(key=lambda r: (not r["red"], not r["news"], r["repo"].lower()))
-    return {"enabled": True, "tracked": len(rows), "unread": unread, "unreadable": unreadable, "red": sum(1 for r in rows if r["red"]), "news": sum(1 for r in rows if r["news"]), "detached": sum(1 for r in rows if r["state"] == "detached"),
+    per_request = max(1, cfg["forks_per_request"])
+    round_hours = math.ceil(len(followed(forks, cfg)) / per_request / max(1, cfg["requests_per_hour"]) * 10) / 10      # how long one pass over all the followed forks takes at the pace the settings allow
+    return {"enabled": True, "followed": len(followed(forks, cfg)), "round_hours": round_hours, "refresh_hours": cfg["refresh_hours"], "continuous": round_hours > cfg["refresh_hours"], "tracked": len(rows), "unread": unread, "unreadable": unreadable, "red": sum(1 for r in rows if r["red"]), "news": sum(1 for r in rows if r["news"]), "detached": sum(1 for r in rows if r["state"] == "detached"),
             "requests_last_hour": requests_last_hour, "requests_per_hour": cfg["requests_per_hour"], "notify": cfg["notify"], "rows": rows[:200]}
