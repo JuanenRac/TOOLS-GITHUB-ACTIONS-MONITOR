@@ -128,6 +128,25 @@ def tracked_files(here=HERE):
     return {name for name in done.stdout.decode("utf-8", "replace").split(chr(0)) if name}
 
 
+def dirty_files(here=HERE):
+    """The files of the product folder that differ from the commit (`git status --porcelain`: a versioned file edited and not committed travels with the edit, and the zip would not be the tag), or None when git does not answer."""
+    try:
+        done = subprocess.run(["git", "status", "--porcelain", "-z", "--", "."], cwd=str(here), capture_output=True, timeout=120)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if done.returncode != 0:
+        return None
+    return [line[3:] for line in done.stdout.decode("utf-8", "replace").split(chr(0)) if len(line) > 3]
+
+
+def case_collisions(names):
+    """Groups of member names that differ only in capitals: on Windows and macOS one would overwrite the other when the zip is extracted."""
+    seen = {}
+    for name in names:
+        seen.setdefault(name.lower(), []).append(name)
+    return sorted(group for group in (sorted(g) for g in seen.values()) if len(group) > 1)
+
+
 def tracked_problems(entries, tracked, prefix="github_actions_monitor/"):
     """The zip must be the product folder of the tag: a versioned file that does not travel (whatever its suffix or folder) and a file that travels without being versioned (a stray local file) both fail the gate."""
     inside = {n[len(prefix):] for n in entries if n.startswith(prefix)}
@@ -460,6 +479,7 @@ def clean_install_check(archive, entries, python=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--out")
+    parser.add_argument("--allow-no-git", action="store_true", help="build from a folder that is not a git checkout (an extracted zip): the zip is NOT compared with the versioned files, and the gate says so")
     args = parser.parse_args()
     version = gate_static()
     print("gate: example, targets and version ok (tool", version + ")")
@@ -484,11 +504,23 @@ def main():
     crlf_scripts = [n for n, data in entries.items() if data.startswith(b"#!") and b"\r" in data.split(b"\n", 1)[0]]
     if crlf_scripts:
         fail("scripts with a shebang and Windows line endings (they would not run on Linux or macOS): " + ", ".join(crlf_scripts))
+    clashes = case_collisions(entries)
+    if clashes:
+        fail("names that differ only in capitals (one would overwrite the other on Windows and macOS): " + "; ".join(" / ".join(g) for g in clashes[:6]))
     versioned = tracked_files()
-    if versioned is not None:
+    if versioned is None:
+        if not args.allow_no_git:
+            fail("git does not answer in this folder, so the zip cannot be compared with the versioned files (pass --allow-no-git to build anyway)")
+        print("gate: WARNING - no git here: the zip was NOT compared with the versioned files")
+    else:
         stray = tracked_problems(entries, versioned)
         if stray:
             fail("the zip is not the versioned folder: " + "; ".join(stray[:12]))
+        edited = dirty_files()
+        if edited is None:
+            fail("git status does not answer: the zip cannot be proved to be the commit")
+        if edited:
+            fail("files edited and not committed would travel (the zip must be the commit): " + "; ".join(edited[:12]))
     left_out = package_data_problems(entries)
     if left_out:
         fail("data files of the package missing from the zip: " + ", ".join(left_out))
