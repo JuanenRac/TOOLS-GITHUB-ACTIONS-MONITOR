@@ -32,6 +32,12 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **A failure nobody fixes keeps weighing on the score, and open collaboration alerts count with their age**: a workflow that stayed red lowered the recovery part for seven days and then the part went back to 100 when the failing run left the window. Now the stretch of the red that falls inside the window is measured (the window before counted its own, so no day is counted twice) and the ledger keeps the last failure of a workflow nobody fixed for as long as the rule of the red shows it. An alert of the collaboration sentinel that is still open at the end of the window counts with the time it has been open so far, so leaving alerts unresolved lowers the collaboration part instead of leaving it without data. Scores can be lower than before after the update; the Score guide explains it.
 
+- **A chained deployment that fails on the default branch is red**: runs of the events workflow_run and repository_dispatch now count in the red of a repository, but only on the default branch and never when they come from a fork. A deployment chained to the CI that failed on main used to appear in no list at all. The setting that names the events (ci.red_events) still decides, and its default and its help in eight languages say it.
+
+### Added
+
+- **The reds that aged into inactive are listed in the view of what is happening now**: a red that nothing of the events that decide has touched for the number of days of the age (30 by default) still leaves the red list, but now a line says how many there are and a list of them (repository, workflow and date of the failure) opens from it, so a failure never disappears without a trace.
+
 ## [2.0.8]
 
 ### Security

@@ -7,7 +7,7 @@ hidden by them). The sentinel knows the default branch of each repository; the l
 the figure is approximate (`approx`). It is also approximate when the list of runs of a repository is as long as the sample asked for: an older workflow may be hidden beyond it.
 
 Which runs may decide (the block `ci` of the configuration):
-  * only runs of an event in `ci.red_events` (push, schedule, workflow_dispatch, merge_group by default): a pull request, a comment or an issue never makes a branch red;
+  * only runs of an event in `ci.red_events` (push, schedule, workflow_dispatch, merge_group, workflow_run, repository_dispatch by default): a pull request, a comment or an issue never makes a branch red;
   * runs of a pull request that comes from a FORK do not count, even when the fork's branch is called `main` (the head repository differs from the repository of the run) unless `ci.count_fork_runs`;
   * a run that waits for an approval (`action_required`, or a job `waiting` for an environment) is neither red nor queued: it is "awaiting approval";
   * a workflow whose last run is older than `ci.inactive_days` is "inactive", not red for ever;
@@ -25,7 +25,7 @@ from github_actions_monitor import i18n
 
 BAD = ("failure", "timed_out", "startup_failure")      # `action_required` is not a failure: it is a run that waits for a person to approve it (see is_awaiting)
 IGNORED = ("cancelled", "skipped", "neutral", "stale")
-RED_EVENTS = ("push", "schedule", "workflow_dispatch", "merge_group")      # the events whose failure on the branch is a red of the repository itself (setting ci.red_events)
+RED_EVENTS = ("push", "schedule", "workflow_dispatch", "merge_group", "workflow_run", "repository_dispatch")      # the events whose failure on the branch is a red of the repository itself (setting ci.red_events)
 AUTOMATION_EVENTS = ("issues", "issue_comment", "pull_request_target", "pull_request_review", "pull_request_review_comment", "discussion", "discussion_comment", "label", "watch", "fork", "create", "delete")
 SERVICE_EVENTS = ("schedule", "workflow_dispatch", "repository_dispatch", "dynamic")
 RELEASE_EVENTS = ("release", "registry_package")

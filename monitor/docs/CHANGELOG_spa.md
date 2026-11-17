@@ -31,6 +31,12 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - **Un fallo que nadie arregla sigue pesando en la puntuación y los avisos de colaboración abiertos cuentan con su edad**: un workflow que seguía en rojo bajaba la parte de recuperación durante siete días y luego la parte volvía a 100 cuando el run fallido salía de la ventana. Ahora se mide el tramo del rojo que cae dentro de la ventana (la ventana anterior contó el suyo, así que ningún día se cuenta dos veces) y el libro guarda el último fallo de un workflow que nadie arregló mientras la regla del rojo lo muestre. Un aviso del centinela de colaboración que sigue abierto al final de la ventana cuenta con el tiempo que lleva abierto, de modo que dejar avisos sin resolver baja la parte de colaboración en vez de dejarla sin datos. Tras actualizar, las notas pueden ser más bajas que antes; la guía de la puntuación lo explica.
 
+- **Un despliegue encadenado que falla en la rama por defecto es rojo**: los runs de los eventos workflow_run y repository_dispatch cuentan ahora en el rojo de un repositorio, pero solo en la rama por defecto y nunca si vienen de un fork. Un despliegue encadenado al CI que fallaba en main no salía en ninguna lista. El ajuste que nombra los eventos (ci.red_events) sigue decidiendo, y su valor por defecto y su ayuda en ocho idiomas lo dicen.
+
+### Añadido
+
+- **Los rojos que envejecieron hasta inactivo se listan en la vista de lo que ocurre ahora**: un rojo que nada de los eventos que deciden ha tocado durante los días de la edad (30 por defecto) sigue saliendo de la lista de rojos, pero ahora una línea dice cuántos hay y de ella se abre su lista (repositorio, workflow y fecha del fallo), de modo que un fallo nunca desaparece sin dejar rastro.
+
 ## [2.0.8]
 
 ### Seguridad

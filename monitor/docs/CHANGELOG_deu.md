@@ -31,6 +31,12 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **Ein Fehler, den niemand behebt, belastet die Bewertung weiter, und offene Zusammenarbeitsmeldungen zählen mit ihrem Alter**: Ein Workflow, der rot blieb, senkte den Teil Wiederherstellung sieben Tage lang, und dann sprang der Teil auf 100 zurück, sobald der fehlgeschlagene Lauf das Fenster verließ. Jetzt wird das Stück des Rots gemessen, das im Fenster liegt (das Fenster davor zählte sein eigenes, kein Tag wird doppelt gezählt), und das Hauptbuch behält den letzten Fehler eines unbehobenen Workflows, solange die Rot-Regel ihn zeigt. Eine Meldung des Zusammenarbeits-Wächters, die am Ende des Fensters noch offen ist, zählt mit der bisherigen Offenzeit; unbearbeitete Meldungen senken also den Teil Zusammenarbeit, statt ihn ohne Daten zu lassen. Nach dem Update können die Werte niedriger sein als zuvor; die Bewertungsanleitung erklärt es.
 
+- **Ein verketteter Deploy, der auf dem Standard-Branch fehlschlägt, ist rot**: Läufe der Ereignisse workflow_run und repository_dispatch zählen jetzt zum Rot eines Repositorys, aber nur auf dem Standard-Branch und nie, wenn sie aus einem Fork stammen. Ein an die CI gekoppelter Deploy, der auf main fehlschlug, stand bisher in keiner Liste. Die Einstellung, die die Ereignisse nennt (ci.red_events), entscheidet weiterhin, und ihr Standardwert und ihre Hilfe in acht Sprachen sagen es.
+
+### Hinzugefügt
+
+- **Die zu inaktiv gealterten Rot werden in der Ansicht des aktuellen Geschehens aufgelistet**: Ein Rot, das seit der Anzahl von Tagen der Altersgrenze (standardmäßig 30) von keinem der entscheidenden Ereignisse berührt wurde, verlässt weiterhin die Rotliste, aber jetzt nennt eine Zeile ihre Anzahl, und daraus öffnet sich ihre Liste (Repository, Workflow und Datum des Fehlers), sodass ein Fehler nie spurlos verschwindet.
+
 ## [2.0.8]
 
 ### Sicherheit

@@ -31,6 +31,12 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - **Un guasto che nessuno ripara continua a pesare sul punteggio, e gli avvisi di collaborazione aperti contano con la loro età**: un workflow rimasto rosso abbassava la parte di recupero per sette giorni, poi la parte tornava a 100 quando l'esecuzione fallita usciva dalla finestra. Ora si misura il tratto del rosso che cade nella finestra (la finestra precedente ha contato il proprio, nessun giorno è contato due volte) e il registro conserva l'ultimo guasto di un workflow non riparato finché la regola del rosso lo mostra. Un avviso della sentinella di collaborazione ancora aperto alla fine della finestra conta con il tempo trascorso da quando è aperto: lasciare avvisi irrisolti abbassa la parte collaborazione invece di lasciarla senza dati. Dopo l'aggiornamento i punteggi possono essere più bassi di prima; la guida del punteggio lo spiega.
 
+- **Un deploy concatenato che fallisce sul branch predefinito è rosso**: le esecuzioni degli eventi workflow_run e repository_dispatch ora contano nel rosso di un repository, ma solo sul branch predefinito e mai se provengono da un fork. Un deploy concatenato alla CI che falliva su main non compariva in nessun elenco. L'impostazione che nomina gli eventi (ci.red_events) decide ancora, e il suo valore predefinito e la sua guida in otto lingue lo dicono.
+
+### Aggiunto
+
+- **I rossi invecchiati in inattivo sono elencati nella vista di ciò che accade ora**: un rosso che nessuno degli eventi che decidono ha toccato per i giorni dell'età (30 per impostazione predefinita) esce ancora dall'elenco dei rossi, ma ora una riga dice quanti sono e da essa si apre il loro elenco (repository, workflow e data del guasto), così un guasto non scompare mai senza lasciare traccia.
+
 ## [2.0.8]
 
 ### Sicurezza

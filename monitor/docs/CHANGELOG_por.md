@@ -31,6 +31,12 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - **Uma falha que ninguém corrige continua a pesar na pontuação, e os alertas de colaboração abertos contam com a sua idade**: um fluxo que ficava vermelho baixava a parte de recuperação durante sete dias e depois a parte voltava a 100 quando a execução falhada saía da janela. Agora mede-se o troço do vermelho que cai dentro da janela (a janela anterior contou o seu, nenhum dia é contado duas vezes) e o registo guarda a última falha de um fluxo por corrigir enquanto a regra do vermelho a mostrar. Um alerta da sentinela de colaboração que continua aberto no fim da janela conta com o tempo que está aberto até agora: deixar alertas por resolver baixa a parte de colaboração em vez de a deixar sem dados. Depois de atualizar, os valores podem ser mais baixos do que antes; o guia da pontuação explica-o.
 
+- **Um despliegue encadeado que falha no ramo por defeito é vermelho**: as execuções dos eventos workflow_run e repository_dispatch contam agora no vermelho de um repositório, mas só no ramo por defeito e nunca se vierem de um fork. Um despliegue encadeado à CI que falhava no main não aparecia em nenhuma lista. A definição que nomeia os eventos (ci.red_events) continua a decidir, e o seu valor por defeito e a sua ajuda em oito idiomas dizem-no.
+
+### Adicionado
+
+- **Os vermelhos que envelheceram até inativo são listados na vista do que acontece agora**: um vermelho em que nenhum dos eventos que decidem tocou durante os dias da idade (30 por defeito) continua a sair da lista de vermelhos, mas agora uma linha diz quantos são e dela abre-se a sua lista (repositório, workflow e data da falha), pelo que uma falha nunca desaparece sem deixar rasto.
+
 ## [2.0.8]
 
 ### Segurança

@@ -31,6 +31,12 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - **Un échec que personne ne répare continue de peser sur la note, et les alertes de collaboration ouvertes comptent avec leur âge** : un workflow resté rouge baissait la part de récupération pendant sept jours, puis la part revenait à 100 quand l'exécution en échec sortait de la fenêtre. On mesure désormais le tronçon du rouge situé dans la fenêtre (la fenêtre précédente a compté le sien, aucun jour n'est compté deux fois) et le registre garde le dernier échec d'un workflow non réparé tant que la règle du rouge le montre. Une alerte de la sentinelle de collaboration encore ouverte à la fin de la fenêtre compte avec le temps écoulé depuis son ouverture : laisser des alertes sans réponse baisse la part collaboration au lieu de la laisser sans données. Après la mise à jour, les notes peuvent être plus basses qu'avant ; le guide de la note l'explique.
 
+- **Un déploiement enchaîné qui échoue sur la branche par défaut est rouge** : les exécutions des événements workflow_run et repository_dispatch comptent désormais dans le rouge d'un dépôt, mais seulement sur la branche par défaut et jamais quand elles viennent d'un fork. Un déploiement enchaîné à la CI qui échouait sur main n'apparaissait dans aucune liste. Le réglage qui nomme les événements (ci.red_events) décide toujours, et sa valeur par défaut et son aide en huit langues le disent.
+
+### Ajouté
+
+- **Les rouges vieillis en inactif sont listés dans la vue de ce qui se passe maintenant** : un rouge qu'aucun des événements qui décident n'a touché pendant le nombre de jours de l'âge (30 par défaut) quitte toujours la liste des rouges, mais une ligne indique désormais combien il y en a et leur liste s'ouvre à partir d'elle (dépôt, workflow et date de l'échec) : un échec ne disparaît jamais sans laisser de trace.
+
 ## [2.0.8]
 
 ### Sécurité
