@@ -39,6 +39,8 @@ when this file and `tool_version.py` disagree.
 
 - **The reds that aged into inactive are listed in the view of what is happening now**: a red that nothing of the events that decide has touched for the number of days of the age (30 by default) still leaves the red list, but now a line says how many there are and a list of them (repository, workflow and date of the failure) opens from it, so a failure never disappears without a trace.
 
+- **The inactive workflows are listed in the view of what is happening now as well**: a workflow that failed and has not run for the days of ci.inactive_days (90 by default) no longer counts as red, and a second line says how many there are and opens their list, next to the one for the aged reds.
+
 ## [2.0.8]
 
 ### Security

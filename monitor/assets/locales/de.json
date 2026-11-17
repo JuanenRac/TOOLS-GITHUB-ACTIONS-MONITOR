@@ -2605,6 +2605,7 @@
  "ui.n_showing": "Zeige {n} von {total}",
  "ui.n_awaiting": "{n} warten auf Freigabe (weder rot noch in der Warteschlange)",
  "ui.n_aged": "{n} Rot(s) zu inaktiv gealtert: seit {days} Tagen lief nichts von den entscheidenden Ereignissen",
+ "ui.n_quiet": "{n} Workflow(s) inaktiv: sie schlugen fehl und liefen seit {days} Tagen nicht mehr, zählen also nicht mehr als rot",
  "ui.n_showing_filters": "Zeige {n} von {total} (Filter aktiv)",
  "ui.n_with_filters": " mit diesen Filtern",
  "ui.na": "k. A.",

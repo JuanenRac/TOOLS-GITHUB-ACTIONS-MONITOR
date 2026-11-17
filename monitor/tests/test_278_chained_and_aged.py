@@ -70,10 +70,10 @@ class AChainedDeploymentThatFails(unittest.TestCase):
 
 
 class TheAgedRedsAreListed(unittest.TestCase):
-    def build(self, runs):
+    def build(self, runs, ci=None):
         saved = (dict(am.RUN_CACHE), am.LITE["on"], dict(am.ISSUE_CACHE), dict(am.SAMPLE_INFO), am.SENTINEL.get("obj"))
         self.addCleanup(redrule.configure, {})
-        redrule.configure({"ci": {"red_age_days": 30}})
+        redrule.configure({"ci": ci or {"red_age_days": 30}})
 
         def restore():
             am.RUN_CACHE.clear()
@@ -101,6 +101,12 @@ class TheAgedRedsAreListed(unittest.TestCase):
         self.assertEqual(data["figures"]["aged_days"], 30)
         self.assertEqual([(r["repo"], r["workflow"]) for r in data["aged_reds"]], [("demo", "release.yml")])
 
+    def test_an_abandoned_workflow_that_failed_is_counted_and_listed_apart(self):
+        data = self.build([run(1, 100 * DAY, "failure", "push", "old.yml"), run(2, DAY, "success", "push", "ci.yml")], {"red_ages": False, "inactive_days": 90})
+        self.assertEqual(data["failing"], [])
+        self.assertEqual((data["figures"]["quiet"], data["figures"]["quiet_days"], data["figures"]["aged"]), (1, 90, 0))
+        self.assertEqual([(r["repo"], r["workflow"]) for r in data["quiet_reds"]], [("demo", "old.yml")])
+
     def test_a_fresh_red_is_not_listed_as_aged(self):
         data = self.build([run(1, 2 * DAY, "failure")])
         self.assertEqual(data["figures"]["aged"], 0)
@@ -111,10 +117,12 @@ class TheAgedRedsAreListed(unittest.TestCase):
         page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         self.assertIn("ui.n_aged", page)
         self.assertIn("now-aged", page)
+        self.assertIn("ui.n_quiet", page)
         for lang in LANGS:
             text = json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))["ui.n_aged"]
             self.assertIn("{n}", text, lang)
             self.assertIn("{days}", text, lang)
+            self.assertIn("{days}", json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))["ui.n_quiet"], lang)
 
 
 if __name__ == "__main__":

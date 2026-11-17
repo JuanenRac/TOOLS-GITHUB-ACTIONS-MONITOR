@@ -37,6 +37,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - **Les rouges vieillis en inactif sont listés dans la vue de ce qui se passe maintenant** : un rouge qu'aucun des événements qui décident n'a touché pendant le nombre de jours de l'âge (30 par défaut) quitte toujours la liste des rouges, mais une ligne indique désormais combien il y en a et leur liste s'ouvre à partir d'elle (dépôt, workflow et date de l'échec) : un échec ne disparaît jamais sans laisser de trace.
 
+- **Les workflows inactifs sont aussi listés dans la vue de ce qui se passe maintenant** : un workflow qui a échoué et ne s'est pas exécuté pendant les jours de ci.inactive_days (90 par défaut) ne compte plus comme rouge, et une deuxième ligne indique combien il y en a et ouvre leur liste, à côté de celle des rouges vieillis.
+
 ## [2.0.8]
 
 ### Sécurité

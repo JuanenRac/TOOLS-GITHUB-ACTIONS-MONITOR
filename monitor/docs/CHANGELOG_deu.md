@@ -37,6 +37,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **Die zu inaktiv gealterten Rot werden in der Ansicht des aktuellen Geschehens aufgelistet**: Ein Rot, das seit der Anzahl von Tagen der Altersgrenze (standardmäßig 30) von keinem der entscheidenden Ereignisse berührt wurde, verlässt weiterhin die Rotliste, aber jetzt nennt eine Zeile ihre Anzahl, und daraus öffnet sich ihre Liste (Repository, Workflow und Datum des Fehlers), sodass ein Fehler nie spurlos verschwindet.
 
+- **Auch die inaktiven Workflows werden in der Ansicht des aktuellen Geschehens aufgelistet**: Ein Workflow, der fehlschlug und die Tage von ci.inactive_days (standardmäßig 90) nicht gelaufen ist, zählt nicht mehr als rot, und eine zweite Zeile nennt ihre Anzahl und öffnet ihre Liste, neben der für die gealterten Rot.
+
 ## [2.0.8]
 
 ### Sicherheit

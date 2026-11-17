@@ -2605,6 +2605,7 @@
  "ui.n_showing": "Showing {n} of {total}",
  "ui.n_awaiting": "{n} waiting for approval (not red, not queued)",
  "ui.n_aged": "{n} red(s) aged into inactive: nothing of the events that decide has run for {days} days",
+ "ui.n_quiet": "{n} workflow(s) inactive: they failed and have not run for {days} days, so they no longer count as red",
  "ui.n_showing_filters": "Showing {n} of {total} (filters active)",
  "ui.n_with_filters": " with these filters",
  "ui.na": "n/a",

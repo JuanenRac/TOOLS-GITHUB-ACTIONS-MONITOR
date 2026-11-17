@@ -2605,6 +2605,7 @@
  "ui.n_showing": "显示 {total} 个中的 {n} 个",
  "ui.n_awaiting": "{n} 个等待批准（不是红色，也不在队列中）",
  "ui.n_aged": "{n} 个红色已老化为不活跃(决定性事件已 {days} 天未运行)",
+ "ui.n_quiet": "{n} 个工作流不活跃(失败后已 {days} 天未运行,因此不再计为红色)",
  "ui.n_showing_filters": "显示 {total} 个中的 {n} 个(筛选已启用)",
  "ui.n_with_filters": "（在当前筛选条件下）",
  "ui.na": "无",

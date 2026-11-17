@@ -37,6 +37,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - **I rossi invecchiati in inattivo sono elencati nella vista di ciò che accade ora**: un rosso che nessuno degli eventi che decidono ha toccato per i giorni dell'età (30 per impostazione predefinita) esce ancora dall'elenco dei rossi, ma ora una riga dice quanti sono e da essa si apre il loro elenco (repository, workflow e data del guasto), così un guasto non scompare mai senza lasciare traccia.
 
+- **Anche i workflow inattivi sono elencati nella vista di ciò che accade ora**: un workflow che ha fallito e non viene eseguito per i giorni di ci.inactive_days (90 per impostazione predefinita) non conta più come rosso, e una seconda riga dice quanti sono e apre il loro elenco, accanto a quella dei rossi invecchiati.
+
 ## [2.0.8]
 
 ### Sicurezza

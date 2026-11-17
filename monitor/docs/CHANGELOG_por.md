@@ -37,6 +37,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - **Os vermelhos que envelheceram até inativo são listados na vista do que acontece agora**: um vermelho em que nenhum dos eventos que decidem tocou durante os dias da idade (30 por defeito) continua a sair da lista de vermelhos, mas agora uma linha diz quantos são e dela abre-se a sua lista (repositório, workflow e data da falha), pelo que uma falha nunca desaparece sem deixar rasto.
 
+- **Os workflows inativos também são listados na vista do que acontece agora**: um workflow que falhou e não corre durante os dias de ci.inactive_days (90 por defeito) deixa de contar como vermelho, e uma segunda linha diz quantos são e abre a sua lista, ao lado da dos vermelhos envelhecidos.
+
 ## [2.0.8]
 
 ### Segurança

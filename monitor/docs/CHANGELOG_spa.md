@@ -37,6 +37,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - **Los rojos que envejecieron hasta inactivo se listan en la vista de lo que ocurre ahora**: un rojo que nada de los eventos que deciden ha tocado durante los días de la edad (30 por defecto) sigue saliendo de la lista de rojos, pero ahora una línea dice cuántos hay y de ella se abre su lista (repositorio, workflow y fecha del fallo), de modo que un fallo nunca desaparece sin dejar rastro.
 
+- **Los workflows inactivos también se listan en la vista de lo que ocurre ahora**: un workflow que falló y no se ha ejecutado durante los días de ci.inactive_days (90 por defecto) ya no cuenta como rojo, y una segunda línea dice cuántos hay y abre su lista, junto a la de los rojos envejecidos.
+
 ## [2.0.8]
 
 ### Seguridad

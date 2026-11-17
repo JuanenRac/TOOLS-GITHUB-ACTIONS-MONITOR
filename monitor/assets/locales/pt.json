@@ -2605,6 +2605,7 @@
  "ui.n_showing": "A mostrar {n} de {total}",
  "ui.n_awaiting": "{n} à espera de aprovação (nem vermelho, nem em fila)",
  "ui.n_aged": "{n} vermelho(s) envelhecido(s) para inativo: nada dos eventos que decidem correu há {days} dias",
+ "ui.n_quiet": "{n} workflow(s) inativo(s): falharam e não correm há {days} dias, por isso já não contam como vermelho",
  "ui.n_showing_filters": "A mostrar {n} de {total} (filtros ativos)",
  "ui.n_with_filters": " com estes filtros",
  "ui.na": "n/d",
