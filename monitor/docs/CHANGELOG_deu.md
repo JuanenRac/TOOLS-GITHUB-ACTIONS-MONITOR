@@ -17,6 +17,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **Der Branch, die Fork-Markierung, der letzte Push und die Pull Requests eines Repositorys kommen bei allen Repositorys an, nicht nur beim ersten**: Sobald die Läufe im Speicher waren (ab dem ersten Zyklus), ließ eine wiederverwendete Variable in der Tabelle der Repository-Spalten alle außer dem ersten Repository verlieren, was der Wächter über sie wusste. Forks ohne eigene CI wurden nicht als solche erkannt, ihre geerbten Crons gingen in die Bewertung ein und die Zahl der ruhenden Forks lautete 1; und eine rote CI auf einem Standard-Branch, der nicht main oder master ist, konnte in der Liste der offenen Fehler und in der Teamgesundheit fehlen. Die Bewertung lässt jetzt die gesamte Menge ruhender Forks weg (nicht nur die 200, die die Seite zeigt).
 
+- **Die Gesundheit des Teams und der Flotte zählt alle Läufe des Zyklus, nicht nur die 600 neuesten des Kontos**: Bei 250 aktiven Repositorys meldeten 215 „keine Daten“, weil ihre Läufe nicht in den Ausschnitt passten, den die Seite erhält. Die Läufe, die Fehler der letzten 24 Stunden und die Läufe der Woche werden jetzt je Repository vor dem Ausschnitt gezählt, sodass ein aktives Konto seine gesunden Repositorys auch als gesund zeigt.
+
 ## [2.0.8]
 
 ### Sicherheit

@@ -498,6 +498,7 @@ def watched_repos(config, force=False):
     return valid
 
 
+RUN_SUMMARY = {"by_repo": {}}      # repo -> counts over ALL the runs of the last cycle (health/repo_view.summarize_runs): the page only receives the 600 newest ones, the health must not
 SAMPLE_INFO = {}      # repo -> {"asked": runs asked for, "total": total_count of GitHub or None, "probe": runs only the second look found}
 SAMPLING_STATE = {"dropped": []}      # the repositories that waited in the last cycle because the budget of requests was spent
 BUDGET = sampling.Budget()      # requests for run lists in the last hour
@@ -1099,6 +1100,11 @@ def build(config, repos, started, refreshed, loading, progress_text):
         figures["forks_idle"] = len(idle_forks)
     except Exception as error:   # noqa: BLE001 - a figure of the header never stops a cycle
         degraded.note("loop.extra", error)
+    try:
+        from github_actions_monitor.health import repo_view as health_repo_view
+        RUN_SUMMARY["by_repo"] = health_repo_view.summarize_runs(runs, time.time())
+    except Exception as error:   # noqa: BLE001 - the summary of the health never stops a cycle
+        degraded.note("loop.summary", error)
     return {
         "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "updated_local": tzdisplay.stamp(time.time()), "took": round(time.time() - started, 1),
         "repos": repos, "ecosystems": {repo: ecosystem_of(repo) for repo in repos},
@@ -1770,10 +1776,11 @@ def health_views(now=None, only=None):
     if only is not None:
         names = [n for n in names if n == only]
     runs_by, failing_by, active_by, alerts_by = (repo_view.group_by_repo(x) for x in (runs, failing, active, alerts))
+    summary_by = RUN_SUMMARY["by_repo"] if (data.get("runs_total") or 0) > len(runs) else {}      # the cut was made: count over everything the cycle read
     views = []
     for repo in names:
         eco = toolconfig.ecosystem_of(repo)
-        view = repo_view.repo_view(repo, runs_by.get(repo, []), failing_by.get(repo, []), active_by.get(repo, []), alerts_by.get(repo, []), ready.get(repo), sources, eco, now)
+        view = repo_view.repo_view(repo, runs_by.get(repo, []), failing_by.get(repo, []), active_by.get(repo, []), alerts_by.get(repo, []), ready.get(repo), sources, eco, now, summary_by.get(repo) if summary_by else None)
         view["ecosystem_label"] = toolconfig.label_of(eco)
         views.append(view)
     return views

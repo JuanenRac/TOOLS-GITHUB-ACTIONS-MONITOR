@@ -17,6 +17,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - **La branche, la marque de fork, le dernier push et les PR d'un dépôt parviennent à tous les dépôts, pas seulement au premier** : une fois les exécutions en mémoire (dès le premier cycle), une variable réutilisée dans le tableau des colonnes des dépôts faisait perdre à tous les dépôts sauf le premier ce que la sentinelle savait d'eux. Les forks sans CI propre n'étaient pas reconnus comme tels, leurs crons hérités entraient donc dans la note et le chiffre des forks inactifs valait 1 ; et une CI rouge sur une branche par défaut autre que main ou master pouvait manquer dans la liste des échecs ouverts et dans la santé de l'équipe. La note écarte désormais l'ensemble des forks inactifs (pas seulement les 200 que montre la page).
 
+- **La santé de l'équipe et de la flotte compte toutes les exécutions du cycle, pas seulement les 600 plus récentes du compte** : avec 250 dépôts actifs, 215 affichaient « pas de données » parce que leurs exécutions ne tenaient pas dans la coupe reçue par la page. Les exécutions, les échecs des dernières 24 heures et les exécutions de la semaine sont désormais comptés par dépôt avant la coupe : un compte très actif montre ses dépôts sains comme sains.
+
 ## [2.0.8]
 
 ### Sécurité

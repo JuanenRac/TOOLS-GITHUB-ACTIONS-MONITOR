@@ -40,16 +40,44 @@ def group_by_repo(items):
     return out
 
 
-def ci_part(repo, runs, failing, active, now):
+def summarize_runs(runs, now):
+    """{repo: {"last": newest start, "runs_24h", "successes_24h", "failures_24h", "runs_7d"}} in one pass over ALL the runs the monitor holds. The page only receives the 600 newest runs of the whole account; the health of
+    a repository must not depend on that cut, so it is counted here, before the cut."""
+    out = {}
+    for run in runs or []:
+        if not isinstance(run, dict) or not run.get("repo"):
+            continue
+        t = _ts(run.get("started"))
+        row = out.setdefault(run["repo"], {"last": None, "runs_24h": 0, "successes_24h": 0, "failures_24h": 0, "runs_7d": 0})
+        if t is None:
+            continue
+        if row["last"] is None or t > row["last"]:
+            row["last"] = t
+        if t >= now - 7 * DAY:
+            row["runs_7d"] += 1
+        if t >= now - DAY and run.get("status") == "completed":
+            row["runs_24h"] += 1
+            if run.get("conclusion") == "success":
+                row["successes_24h"] += 1
+            elif run.get("conclusion") in ("failure", "timed_out", "startup_failure"):
+                row["failures_24h"] += 1
+    return out
+
+
+def ci_part(repo, runs, failing, active, now, summary=None):
     """The CI of the repository: runs of the last 24 hours and the red and stuck ones. `failing` are the red workflows ({"repo", "workflow"...}), `active` the runs in progress or waiting."""
-    mine = [r for r in runs if isinstance(r, dict) and r.get("repo") == repo]
-    recent = [r for r in mine if (_ts(r.get("started")) or 0) >= now - DAY and r.get("status") == "completed"]
-    ok = sum(1 for r in recent if r.get("conclusion") == "success")
-    bad = sum(1 for r in recent if r.get("conclusion") in ("failure", "timed_out", "startup_failure"))
+    if summary is not None:      # counted over every run of the account, not over the cut the page receives
+        recent_n, ok, bad = summary["runs_24h"], summary["successes_24h"], summary["failures_24h"]
+    else:
+        mine = [r for r in runs if isinstance(r, dict) and r.get("repo") == repo]
+        recent = [r for r in mine if (_ts(r.get("started")) or 0) >= now - DAY and r.get("status") == "completed"]
+        ok = sum(1 for r in recent if r.get("conclusion") == "success")
+        bad = sum(1 for r in recent if r.get("conclusion") in ("failure", "timed_out", "startup_failure"))
+        recent_n = len(recent)
     red = sorted({str(f.get("workflow") or f.get("name") or "") for f in failing if isinstance(f, dict) and f.get("repo") == repo})
     stuck = sum(1 for a in active if isinstance(a, dict) and a.get("repo") == repo and a.get("stuck"))
     judged = ok + bad
-    return {"runs_24h": len(recent), "successes_24h": ok, "failures_24h": bad, "success_rate_24h": round(ok / judged, 3) if judged else None, "red_workflows": red, "stuck_runs": stuck}
+    return {"runs_24h": recent_n, "successes_24h": ok, "failures_24h": bad, "success_rate_24h": round(ok / judged, 3) if judged else None, "red_workflows": red, "stuck_runs": stuck}
 
 
 def alerts_part(repo, alerts):
@@ -64,7 +92,11 @@ def alerts_part(repo, alerts):
     return {"total": len(mine), "by_sentinel": by_sentinel, "by_level": by_level, "items": items}
 
 
-def activity_part(repo, runs, now):
+def activity_part(repo, runs, now, summary=None):
+    if summary is not None:
+        last = summary["last"]
+        return {"last_run_at": datetime.fromtimestamp(last, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ") if last else None, "runs_7d": summary["runs_7d"],
+                "idle_days": round((now - last) / DAY, 1) if last else None}
     stamps = [t for t in (_ts(r.get("started")) for r in runs if isinstance(r, dict) and r.get("repo") == repo) if t is not None]
     last = max(stamps) if stamps else None
     return {"last_run_at": datetime.fromtimestamp(last, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ") if last else None, "runs_7d": sum(1 for t in stamps if t >= now - 7 * DAY),
@@ -88,11 +120,11 @@ def risk_of(ci, alerts):
     return points
 
 
-def repo_view(repo, runs, failing, active, alerts, readiness, sources, ecosystem="", now=0.0):
+def repo_view(repo, runs, failing, active, alerts, readiness, sources, ecosystem="", now=0.0, summary=None):
     """The whole health of one repository. `readiness` is the row of the readiness of the releases for this repository ({"entries", "next"...}) or None; `sources` {sentinel: lifecycle}."""
-    ci = ci_part(repo, runs, failing, active, now)
+    ci = ci_part(repo, runs, failing, active, now, summary)
     al = alerts_part(repo, alerts)
-    act = activity_part(repo, runs, now)
+    act = activity_part(repo, runs, now, summary)
     blind = sorted(name for name, life in (sources or {}).items() if life not in ("healthy", "off"))
     looked = any(life == "healthy" for life in (sources or {}).values())
     nobody = bool(sources) and not looked and (bool(blind) or not act["runs_7d"])      # every sentinel is in error, paused or degraded, or all are off and nothing ran this week

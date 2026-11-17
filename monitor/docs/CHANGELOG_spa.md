@@ -17,6 +17,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - **La rama, la marca de fork, el último push y las PR de un repositorio llegan a todos los repositorios, no solo al primero**: con los runs ya en memoria (desde el primer ciclo) una variable reutilizada en la tabla de columnas de Repositorios hacía que todos menos el primero perdieran lo que el centinela sabía de ellos. Los forks sin CI propia no se reconocían como tales, así que sus crones heredados entraban en la puntuación y la cifra de forks inactivos decía 1; y un CI en rojo en una rama por defecto que no es main ni master podía quedar fuera de la lista de fallos abiertos y de la salud del equipo. La puntuación deja ahora fuera el conjunto entero de forks inactivos (no solo los 200 que enseña la página).
 
+- **La salud del equipo y de la flota cuenta todos los runs del ciclo, no solo los 600 más recientes de la cuenta**: con 250 repositorios activos, 215 decían «sin datos» porque sus runs no cabían en el recorte que recibe la página. Los runs, los fallos de las últimas 24 horas y los runs de la semana se cuentan ahora por repositorio antes del recorte, de modo que una cuenta con mucha actividad muestra como sanos sus repositorios sanos.
+
 ## [2.0.8]
 
 ### Seguridad

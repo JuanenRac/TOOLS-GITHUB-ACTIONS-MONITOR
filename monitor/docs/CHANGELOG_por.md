@@ -17,6 +17,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - **O ramo, a marca de fork, o último push e os PR de um repositório chegam a todos os repositórios, não só ao primeiro**: com as execuções já em memória (desde o primeiro ciclo), uma variável reutilizada na tabela das colunas dos repositórios fazia com que todos menos o primeiro perdessem o que a sentinela sabia deles. Os forks sem CI própria não eram reconhecidos como tal, por isso os seus crons herdados entravam na pontuação e o número de forks inativos valia 1; e uma CI vermelha num ramo por defeito que não é main nem master podia ficar fora da lista de falhas abertas e da saúde da equipa. A pontuação deixa agora de fora o conjunto inteiro de forks inativos (não só os 200 que a página mostra).
 
+- **A saúde da equipa e da frota conta todas as execuções do ciclo, não só as 600 mais recentes da conta**: com 250 repositórios ativos, 215 diziam «sem dados» porque as suas execuções não cabiam no corte que a página recebe. As execuções, as falhas das últimas 24 horas e as execuções da semana passam a contar-se por repositório antes do corte, pelo que uma conta com muita atividade mostra como saudáveis os seus repositórios saudáveis.
+
 ## [2.0.8]
 
 ### Segurança

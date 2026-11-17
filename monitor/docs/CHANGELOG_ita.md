@@ -17,6 +17,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - **Il ramo, il contrassegno di fork, l'ultimo push e le PR di un repository arrivano a tutti i repository, non solo al primo**: con le esecuzioni già in memoria (dal primo ciclo) una variabile riusata nella tabella delle colonne dei repository faceva perdere a tutti tranne il primo ciò che la sentinella sapeva di loro. I fork senza CI propria non venivano riconosciuti come tali, quindi i loro cron ereditati entravano nel punteggio e la cifra dei fork inattivi valeva 1; e una CI rossa su un ramo predefinito diverso da main o master poteva mancare nell'elenco dei guasti aperti e nella salute del team. Il punteggio ora esclude l'intero insieme dei fork inattivi (non solo i 200 che mostra la pagina).
 
+- **La salute del team e della flotta conta tutte le esecuzioni del ciclo, non solo le 600 più recenti dell'account**: con 250 repository attivi, 215 dicevano «nessun dato» perché le loro esecuzioni non entravano nel taglio ricevuto dalla pagina. Le esecuzioni, i guasti delle ultime 24 ore e le esecuzioni della settimana vengono ora contati per repository prima del taglio, così un account molto attivo mostra come sani i suoi repository sani.
+
 ## [2.0.8]
 
 ### Sicurezza

@@ -19,6 +19,8 @@ when this file and `tool_version.py` disagree.
 
 - **The branch, the fork mark, the last push and the pull requests of a repository reach every repository, not only the first one**: once the runs were in memory (from the first cycle on) a variable reused in the table of the Repositories columns made every repository but the first one lose what the sentinel knew of it. The forks without a CI of their own were not recognised as such, so their inherited crons entered the score and the figure of idle forks said 1; and a red CI on a default branch that is not main or master could miss the list of open failures and the health of the team. The score now leaves out the whole set of idle forks (not only the 200 that the page shows).
 
+- **The health of the team and of the fleet counts every run of the cycle, not only the 600 newest of the account**: with 250 active repositories 215 of them said "no data" because their runs did not fit in the cut that the page receives. The runs, the failures of the last 24 hours and the runs of the week are now counted per repository before the cut, so a busy account shows its healthy repositories as healthy.
+
 ## [2.0.8]
 
 ### Security
