@@ -68,7 +68,7 @@
 
 | | |
 |---|---|
-| **バージョン** | **2.0.6** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **バージョン** | **2.0.7** · [すべてのリリース](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **必要なもの** | Python 3.11 以上と GitHub CLI（`gh auth login`）。それ以外は不要(ターミナル表示は任意のパッケージ `rich` を使います) |
 | **開く先** | `127.0.0.1` 上のページのみ、8言語対応 |
 | **GitHub への書き込み** | 自動では行いません。明示的な `--go` を付けて実行したバッチコマンドのみ |
@@ -76,7 +76,7 @@
 
 <!-- glance:begin -->
 
-**現時点の実測** (v2.0.6)
+**現時点の実測** (v2.0.7)
 
 | | |
 |---|---|

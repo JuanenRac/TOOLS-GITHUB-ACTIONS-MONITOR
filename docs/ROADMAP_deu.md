@@ -16,7 +16,11 @@ Was sich nur im langen echten Einsatz zeigt: die Migration von 1.8 und 1.9, das 
 
 Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
 
-## Erledigt in 1.8.2 bis 2.0.6
+## Erledigt in 1.8.2 bis 2.0.7
+
+### 2.0.7 - Eine Lese-API für Clients, das Original-Repository jedes Forks und von Hand abgeschaltete Workflows
+
+Eine Lese-API unter `/api/v1/` für Clients (`me`, `repos` und `openapi`, standardmäßig aus, mit eingefrorenem Vertrag); eine optionale Verfolgung des Original-Repositorys jedes Forks (`upstream.enabled`, standardmäßig aus, mit einem Anfragelimit pro Stunde); und ein Workflow, den der Eigentümer von Hand abgeschaltet hat, ist kein Rot mehr, sondern wird getrennt ausgewiesen (`ci.disabled_apart`).
 
 ### 2.0.6 - Drei Wandbildschirme, gezeichnet und standardmäßig aus
 

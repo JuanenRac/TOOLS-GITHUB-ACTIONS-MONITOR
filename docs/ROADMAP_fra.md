@@ -16,7 +16,11 @@ Ce qui n'apparaît qu'à l'usage réel prolongé : la migration depuis la 1.8 et
 
 Les workflows du moniteur lui-même respectent ce que la sentinelle d'hygiène demandera aux autres : actions fixées à un commit, permissions minimales et une limite de temps sur chaque job.
 
-## Fait dans la 1.8.2 à la 2.0.6
+## Fait dans la 1.8.2 à la 2.0.7
+
+### 2.0.7 - Une API de lecture pour les clients, le dépôt d'origine de chaque fork et les workflows désactivés à la main
+
+Une API de lecture sous `/api/v1/` pour les clients (`me`, `repos` et `openapi`, désactivée par défaut, avec un contrat figé) ; un suivi facultatif du dépôt d'origine de chaque fork (`upstream.enabled`, désactivé par défaut, avec une limite de requêtes par heure) ; et un workflow que le propriétaire a désactivé à la main n'est plus un rouge mais est présenté à part (`ci.disabled_apart`).
 
 ### 2.0.6 - Trois écrans muraux, dessinés et désactivés par défaut
 
