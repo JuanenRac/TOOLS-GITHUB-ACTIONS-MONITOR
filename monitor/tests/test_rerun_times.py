@@ -64,7 +64,7 @@ class RunTimes(unittest.TestCase):
 
 class RerunTiming(unittest.TestCase):
     def setUp(self):
-        am.TIMING["on"], am.TIMING["budget"] = True, 3
+        am.TIMING["on"] = True
         am.TIMING["known"].clear()
 
     def tearDown(self):
@@ -84,11 +84,10 @@ class RerunTiming(unittest.TestCase):
         with mock.patch.object(am, "gh_read") as read:
             self.assertIsNone(am.rerun_seconds("demo", api_run(id=10, run_attempt=2)))
         read.assert_not_called()
-        am.TIMING["on"], am.TIMING["budget"] = True, 0
+        am.TIMING["on"] = True
         with mock.patch.object(am, "gh_read") as read:
-            self.assertIsNone(am.rerun_seconds("demo", api_run(id=11, run_attempt=2)))
+            self.assertIsNone(am.rerun_seconds("demo", api_run(id=11, run_attempt=2), [0]), "the allowance of this reading is spent")
         read.assert_not_called()
-        am.TIMING["budget"] = 3
         with mock.patch.object(am, "gh_read", return_value={"run_duration_ms": 10 ** 12}):
             self.assertIsNone(am.rerun_seconds("demo", api_run(id=12, run_attempt=2)))
         with mock.patch.object(am, "gh_read", side_effect=RuntimeError("boom")):

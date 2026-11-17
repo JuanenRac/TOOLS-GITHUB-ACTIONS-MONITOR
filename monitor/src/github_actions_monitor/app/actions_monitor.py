@@ -275,6 +275,33 @@ def load_config():
     return config
 
 
+POOL_STATUS = {"payload": None, "at": 0.0}      # the last answer of pool_status(), made by the cycle every five minutes (the Quota tab reads this)
+
+
+def refresh_pool_status():
+    """The cycle reads the allowance of every source (pool_status) at most every five minutes and keeps it for /api/quota-pool/status."""
+    if time.time() - POOL_STATUS["at"] <= RUNNERS_MEMORY_SECONDS:
+        return False
+    POOL_STATUS["at"] = time.time()
+    POOL_STATUS["payload"] = pool_status()
+    return True
+
+
+def pool_status_pending():
+    """The answer of the status of the quota before the cycle has read anything: the same shape, no source yet (nothing is read to make it)."""
+    return {"pending": True, "total": None, "sources": [], "recommended": {"modes.auto_low": True, "network.etag": True}, "trend": __import__("github_actions_monitor.data_pipeline.quotawatch", fromlist=["_"]).trend(),
+            "savings": savings_report(LIVE_CONFIG or toolconfig.raw_config())}
+
+
+def read_extra_lists(config):
+    """The organisations of the account (data_pipeline/orgs.py keeps its own hour): the cycle reads them, /api/discovery only shows what was read."""
+    from github_actions_monitor.data_pipeline import orgs
+    if DEMO["on"] or LINK.state()["offline"]:
+        return False
+    orgs.view(config, lambda endpoint: gh_read(endpoint, retries=0), state_dir() / ("orgs_state_lite.json" if LITE["on"] else "orgs_state.json"), offline=False)
+    return True
+
+
 def pool_status():
     """What the Quota tab shows (never a token, never a path): every source with its allowance, the permissions the App was granted and the warning about a key or token file that others can read."""
     from github_actions_monitor.integrations import github_app
@@ -541,7 +568,8 @@ def fork_ci_answers(config, rules, items):
 
 
 MAX_RUN_SECONDS = 35 * 86400      # GitHub stops a run after 35 days: a longer figure is a wrong clock (a re-run measured from the first attempt), not a long build
-TIMING = {"on": False, "known": {}, "budget": 3}      # ci.rerun_timing: ask GitHub for the real duration of a re-run (runs/ID/timing), a few calls per read of a repository
+TIMING_PER_READ = 3      # requests for the duration of a re-run that one reading of one repository may make
+TIMING = {"on": False, "known": {}}      # ci.rerun_timing: ask GitHub for the real duration of a re-run (runs/ID/timing), a few calls per read of a repository
 
 
 def run_times(run):
@@ -560,16 +588,18 @@ def run_times(run):
     return queued, seconds, begun
 
 
-def rerun_seconds(repo, run):
-    """The real duration of a finished re-run from `runs/ID/timing` (wall clock of the attempt), when ci.rerun_timing is on and the budget of this read allows; else None."""
+def rerun_seconds(repo, run, allowance=None):
+    """The real duration of a finished re-run from `runs/ID/timing` (wall clock of the attempt), when ci.rerun_timing is on and the allowance of this read (`allowance`, a list with the number of
+    requests it may still make, one list for each reading of a repository) allows; else None."""
     key = (repo, run.get("id"), run.get("run_attempt"))
     if key in TIMING["known"]:
         return TIMING["known"][key]
-    if not TIMING["on"] or TIMING["budget"] <= 0:
+    allowance = allowance if allowance is not None else [TIMING_PER_READ]
+    if not TIMING["on"] or allowance[0] <= 0:
         return None
     if TIMING.get("limit") and BUDGET.used() >= TIMING["limit"]:      # the request is one of the hour: with the budget spent it is not made (it would be asked again at the next read)
         return None
-    TIMING["budget"] -= 1
+    allowance[0] -= 1
     BUDGET.record(1)
     try:
         body = gh_read(f"repos/{toolconfig.github_owner()}/{repo}/actions/runs/{run.get('id')}/timing", retries=0) or {}
@@ -627,12 +657,12 @@ def fetch_sampled(repo, per_page, config):
 
 def parse_runs(repo, data):
     runs = []
-    TIMING["budget"] = 3
+    allowance = [TIMING_PER_READ]      # the requests for the duration of a re-run this reading of this repository may make: its own count, not one shared with the other threads of the cycle
     for run in data.get("workflow_runs", []):
         full_path = str(run.get("path") or "").split("@")[0]
         queued, seconds, begun = run_times(run)
         if (run.get("run_attempt") or 1) > 1 and run.get("status") == "completed":
-            seconds = rerun_seconds(repo, run) if TIMING["on"] else seconds
+            seconds = rerun_seconds(repo, run, allowance) if TIMING["on"] else seconds
         runs.append({
             "repo": repo, "id": run["id"], "name": run.get("name") or "", "title": (run.get("display_title") or "")[:90],
             "event": run.get("event"), "branch": run.get("head_branch"), "fork": is_fork_run(run), "path": full_path.rsplit("/", 1)[-1], "sha": (run.get("head_sha") or "")[:7],
@@ -1327,19 +1357,29 @@ def read_runner_jobs(config, data):
 
 
 def runner_list(config):
-    """The self-hosted runners (runners.py), read at most every 5 minutes; None when `runners.enabled` is off or the read failed (the model then says the reason is unknown)."""
+    """The self-hosted runners (runners.py) as the last cycle read them (read_runner_list); None when `runners.enabled` is off or the read failed (the model then says the reason is unknown). A request
+    never reads GitHub: it is answered from this."""
     from github_actions_monitor.integrations import runners
     if not runners.settings(config)["enabled"] or DEMO["on"]:
         return None
-    if time.time() - RUNNER_JOBS["list_at"] > 300:
-        RUNNER_JOBS["list_at"] = time.time()
-        try:
-            got = runners.collect(config, lambda endpoint: gh_read(endpoint, retries=0), toolconfig.github_owner(config), list((STATE.get("data") or {}).get("repos") or []))
-            RUNNER_JOBS["list"] = None if got["errors"] and not got["runners"] else got["runners"]
-        except Exception as error:   # noqa: BLE001
-            degraded.note("runners.list", error)
-            RUNNER_JOBS["list"] = None
     return RUNNER_JOBS["list"]
+
+
+def read_runner_list(config, data=None):
+    """The reading of the runners, done by the cycle at most every `RUNNERS_MEMORY_SECONDS`: it keeps the list for the model of the runners and the answer of /api/runners."""
+    from github_actions_monitor.integrations import runners
+    if not runners.settings(config)["enabled"] or DEMO["on"] or time.time() - RUNNER_JOBS["list_at"] <= RUNNERS_MEMORY_SECONDS:
+        return False
+    RUNNER_JOBS["list_at"] = time.time()
+    repos = list(((data if isinstance(data, dict) else STATE.get("data")) or {}).get("repos") or [])
+    try:
+        got = runners.collect(config, lambda endpoint: gh_read(endpoint, retries=0), toolconfig.github_owner(config), repos)
+        RUNNER_JOBS["list"] = None if got["errors"] and not got["runners"] else got["runners"]
+        RUNNERS_SEEN["payload"], RUNNERS_SEEN["at"] = {"enabled": True, **got}, time.time()
+    except Exception as error:   # noqa: BLE001
+        degraded.note("runners.list", error)
+        RUNNER_JOBS["list"] = None
+    return True
 
 
 def runner_model_payload(now=None):
@@ -1610,6 +1650,9 @@ def maintain_extras(config, data):
     for name, job in (("ai_alerts", lambda: feed_alerts(config, data)),
                       ("finops", lambda: spare and read_costs(config, data)),
                       ("runner_model", lambda: spare and read_runner_jobs(config, data)),
+                      ("runners", lambda: spare and read_runner_list(config, data)),
+                      ("orgs", lambda: spare and read_extra_lists(config)),
+                      ("pool", lambda: spare and refresh_pool_status()),
                       ("reports", lambda: spare and __import__("github_actions_monitor.integrations.reports", fromlist=["_"]).cycle(config, toolconfig.github_owner(config), list(data.get("repos") or []), data.get("runs") or [],
                                                                                                                                   lambda endpoint: gh_read(endpoint, retries=0))),
                       ("mirror", lambda: spare and __import__("github_actions_monitor.integrations.mirror", fromlist=["_"]).cycle(config, data.get("runs") or [], toolconfig.github_owner(config), lambda e: gh_read(e, retries=0), download_artifact)),
@@ -2894,7 +2937,7 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/api/quota-pool/status":      # this computer only: the allowance of every source of the reads and what the App lacks (never a key or a token)
             if not self.guard() or not self.this_computer():
                 return
-            self.json_reply(pool_status())
+            self.json_reply(POOL_STATUS["payload"] or pool_status_pending())      # what the cycle read: a request never reads GitHub
         elif path == "/api/github-app/status":      # this computer only: asks the App for a token and says its name, installation, permissions and allowance (never the key or the token)
             if not self.guard() or not self.this_computer():
                 return
@@ -3330,13 +3373,14 @@ def reload_on_signal(signum=None, frame=None):
     threading.Thread(target=credential_change, args=("reload",), daemon=True, name="credential-reload").start()
 
 
-def update_info():
-    """The state of the update notice: the cached answer, refreshed (at most every 24 hours) through the conditional GitHub client; silent when it cannot be read."""
+def update_info(read=True):
+    """The state of the update notice: the cached answer, refreshed (at most every 24 hours) through the conditional GitHub client; silent when it cannot be read. `read` False (a request of the page)
+    only gives the cached answer: the loop that looks for updates is the one that reads."""
     config = LIVE_CONFIG or toolconfig.raw_config()
     state_file = state_dir() / ("update_check_lite.json" if LITE["on"] else "update_check.json")
     if DEMO["on"]:
         return updatecheck.view({"updates": {"check": False}}, TOOL_VERSION, {})
-    return updatecheck.check(config, TOOL_VERSION, lambda endpoint: gh_read(endpoint, retries=0), state_file=state_file, offline=LINK.state()["offline"], background=True)      # never a network wait in the path of a page
+    return updatecheck.check(config, TOOL_VERSION, lambda endpoint: gh_read(endpoint, retries=0), state_file=state_file, offline=LINK.state()["offline"] or not read, background=True)      # never a network wait in the path of a page
 
 
 def RUN_CACHE_RESET():
@@ -3374,7 +3418,7 @@ def quota_payload():
 def about_payload():
     from github_actions_monitor.ui import about
     places = {"config": CONFIG_FILE, "log": LOG_FILE, "etag_cache": etagcache.CACHE_FILE, "package_folder": HERE}
-    data = about.info(LITE["on"], health_payload(), places, update_info(), i18n.language())
+    data = about.info(LITE["on"], health_payload(), places, update_info(read=False), i18n.language())
     data["support"] = about.support_text(data)
     return data
 
@@ -3385,7 +3429,7 @@ def discovery_payload():
         data = STATE.get("data") or {}
     box = discovery.box(toolconfig.github_owner(config), len(data.get("repos") or []), HIDDEN["discovered"], HIDDEN["names"])
     from github_actions_monitor.data_pipeline import orgs
-    organisations = orgs.view(toolconfig.raw_config(), lambda endpoint: gh_read(endpoint, retries=0), state_dir() / ("orgs_state_lite.json" if LITE["on"] else "orgs_state.json"), offline=LINK.state()["offline"]) if not DEMO["on"] else {"enabled": False, "orgs": []}
+    organisations = orgs.view(toolconfig.raw_config(), lambda endpoint: gh_read(endpoint, retries=0), state_dir() / ("orgs_state_lite.json" if LITE["on"] else "orgs_state.json"), offline=True) if not DEMO["on"] else {"enabled": False, "orgs": []}      # offline=True: it shows what the cycle read, it never reads
     return {**box, "events": list(reversed(DISCOVERY["events"]))[:20], "suggestions": DISCOVERY["suggestions"], "settings": discovery.settings(config), "owner_kind": FORKS["kind"], "forks": {k: FORKS[k] for k in ("checked", "kept", "left", "waiting")}, "demo": DEMO["on"], "organizations": organisations}
 
 
@@ -3535,10 +3579,9 @@ def advanced_get(path, query):
         return {"done": done and not DEMO["on"]}
     if path == "/api/runners":
         from github_actions_monitor.integrations import runners
-        if RUNNERS_SEEN["payload"] is None or time.time() - RUNNERS_SEEN["at"] > RUNNERS_MEMORY_SECONDS:      # the reading goes to GitHub: a page that refreshes (or somebody who asks in a loop) is answered from memory
-            RUNNERS_SEEN["payload"] = runners.payload(config, lambda endpoint: gh_read(endpoint, retries=0), toolconfig.github_owner(config), DEMO["on"], list((STATE.get("data") or {}).get("repos") or []))
-            RUNNERS_SEEN["at"] = time.time()
-        return RUNNERS_SEEN["payload"]
+        if DEMO["on"] or not runners.settings(config)["enabled"]:
+            return runners.payload(config, None, toolconfig.github_owner(config), DEMO["on"])
+        return RUNNERS_SEEN["payload"] or {"enabled": True, "pending": True, "runners": [], "counts": {"idle": 0, "busy": 0, "offline": 0}, "errors": 0}      # what the cycle read: a request never reads GitHub
     if path == "/api/mirror":
         from github_actions_monitor.integrations import mirror
         return mirror.status(config)

@@ -61,21 +61,18 @@ class TheCycleStaysInsideTheBudget(unittest.TestCase):
         self.assertEqual(len(reads), 2)
 
 
-class TheRunnersAreReadOncePerFiveMinutes(unittest.TestCase):
-    def test_twenty_requests_cost_one_reading(self):
+class TheRunnersAreReadByTheCycle(unittest.TestCase):
+    def test_twenty_requests_cost_no_reading_and_show_what_the_cycle_read(self):
         served = Served(self, lite=False)
-        seen = {"payload": None, "at": 0.0}
-        patcher = mock.patch.object(am, "RUNNERS_SEEN", seen)
-        patcher.start()
-        self.addCleanup(patcher.stop)
+        seen = {"payload": {"enabled": True, "runners": [], "counts": {"idle": 0, "busy": 0, "offline": 0}, "errors": 0}, "at": 0.0}
+        for patcher in (mock.patch.object(am, "RUNNERS_SEEN", seen), mock.patch.object(am.toolconfig, "raw_config", return_value={"runners": {"enabled": True}})):
+            patcher.start()
+            self.addCleanup(patcher.stop)
         from github_actions_monitor.integrations import runners
-        with mock.patch.object(runners, "payload", return_value={"enabled": True, "runners": []}) as read:
+        with mock.patch.object(runners, "payload", side_effect=AssertionError("read")) as read, mock.patch.object(am, "gh_read", side_effect=AssertionError("read")):
             codes = [served.raw("GET", "/api/runners")[0] for _ in range(20)]
-            self.assertEqual(set(codes), {200})
-            self.assertEqual(read.call_count, 1)
-            seen["at"] -= am.RUNNERS_MEMORY_SECONDS + 1
-            served.raw("GET", "/api/runners")
-            self.assertEqual(read.call_count, 2, "after five minutes it reads again")
+        self.assertEqual(set(codes), {200})
+        self.assertEqual(read.call_count, 0)
 
 
 if __name__ == "__main__":
