@@ -56,7 +56,7 @@ def body(s):
     token = s.read_token(name)
     s.run(["docker", "exec", "-i", "-e", "MONITOR_ACCESS_TOKEN=" + token, name, "python", "/app/bin/monitor_cli.py", "credential", "replace", "--account", "default", "--new-token-file", "-"],
           input_text=good + "\n", timeout=120, label="credential replace")
-    s.docker("exec", name, "sh", "-c", "echo audit-marker > /data/state/audit_marker")
+    s.docker("exec", name, "sh", "-c", "umask 077; echo audit-marker > /data/state/audit_marker")
     head = {"Host": "127.0.0.1:8765", "X-Monitor-Access": token}
     statuses = {}
     for path in ("/api/data", "/api/alerts", "/api/score", "/api/quota", "/api/help/topics", "/api/settings", "/api/health?deep=1") * 12:

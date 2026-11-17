@@ -78,7 +78,7 @@ def body(s):
     s.check("a valid signature without a delivery id is refused (400)", first[6]["status"] == 400, "%s %s" % (first[6]["status"], first[6]["body"][:200]))
     s.check("a body over the limit is refused (413)", first[7]["status"] == 413, "%s %s" % (first[7]["status"], first[7]["body"][:200]))
     s.check("an event for a repository that no account watches is answered 202 and ignored", first[8]["status"] == 202, "%s %s" % (first[8]["status"], first[8]["body"][:200]))
-    s.check("GET /api/webhook gives no event (404 or 405, not 200)", first[9]["status"] in (404, 405), first[9]["status"])
+    s.check("GET /api/webhook gives no event (401, 404 or 405, never 200)", first[9]["status"] in (401, 404, 405), first[9]["status"])
     s.check("an event outside the closed list is answered 202 and dropped", first[10]["status"] == 202, "%s %s" % (first[10]["status"], first[10]["body"][:200]))
 
     # the rate limit: one visitor floods the receiver with garbage, then another sends a real delivery

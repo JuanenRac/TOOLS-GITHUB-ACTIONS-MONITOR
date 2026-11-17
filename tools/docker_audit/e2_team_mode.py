@@ -43,11 +43,11 @@ def body(s):
     session = cookie.split(";")[0]
     me = lib.http_request(8765, "GET", "/api/auth/me", dict(JSON, **{"Cookie": session, "X-Monitor-Access": token}))
     s.check("the cookie identifies the administrator", me["status"] == 200 and "ops" in me["body"], "%s %s" % (me["status"], me["body"][:200]))
-    without = lib.http_request(8765, "POST", "/api/welcome", dict(JSON, **{"Cookie": session, "X-Monitor-Access": token}), "{}")
-    s.check("a write with the cookie and no CSRF token is refused (403)", without["status"] == 403, "%s %s" % (without["status"], without["body"][:200]))
+    without = lib.http_request(8765, "POST", "/api/alerts/unmute", dict(JSON, **{"Cookie": session, "X-Monitor-Access": token}), "{}")
+    s.check("a write with the cookie and no CSRF token is refused as a CSRF failure (403 csrf)", without["status"] == 403 and "csrf" in without["body"], "%s %s" % (without["status"], without["body"][:200]))
     csrf = parsed.get("csrf") or ""
-    withit = lib.http_request(8765, "POST", "/api/welcome", dict(JSON, **{"Cookie": session, "X-Monitor-Access": token, "X-CSRF-Token": csrf}), "{}")
-    s.check("the same write with the CSRF token is not refused for it", withit["status"] != 403, "%s %s" % (withit["status"], withit["body"][:200]))
+    withit = lib.http_request(8765, "POST", "/api/alerts/unmute", dict(JSON, **{"Cookie": session, "X-Monitor-Access": token, "X-CSRF-Token": csrf}), "{}")
+    s.check("the same write with the CSRF token is not refused as a CSRF failure", "csrf" not in withit["body"], "%s %s" % (withit["status"], withit["body"][:200]))
     anonymous = lib.http_request(8765, "GET", "/api/alerts", dict(JSON, **{"X-Monitor-Access": token}))
     s.check("a route that is not public needs a session even with the access token (401)", anonymous["status"] == 401, "%s %s" % (anonymous["status"], anonymous["body"][:200]))
     s.docker("rm", "-f", name)

@@ -87,6 +87,7 @@ class Scenario:
         self.out = Path(self.args.out).resolve()
         self.ref = self.args.ref or self.target.name
         self.work = Path(tempfile.mkdtemp(prefix="docker-audit-%s-" % code.lower()))
+        self.work.chmod(0o755)      # bind-mounted files are read by the user 10001 of the containers
         self.suffix = secrets.token_hex(3)
         self.steps, self.checks, self.notes, self.environment = [], [], [], {}
         self.skipped = ""

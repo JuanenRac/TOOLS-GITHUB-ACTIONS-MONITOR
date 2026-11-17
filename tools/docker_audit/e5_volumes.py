@@ -57,7 +57,7 @@ def body(s):
     token = s.read_token(name)
     code, out = cli(s, name, token, "credential", "replace", "--account", "default", "--new-token-file", "-", stdin=good + "\n")
     s.check("a replacement of the login is kept (credential replace)", code == 0, out[-400:])
-    s.docker("exec", name, "sh", "-c", "echo audit-marker-1 > /data/state/audit_marker")
+    s.docker("exec", name, "sh", "-c", "umask 077; echo audit-marker-1 > /data/state/audit_marker")
 
     # 1. the modes
     code, out = s.python_in(name, MODES, label="list the files of the volumes with their modes")
@@ -100,6 +100,7 @@ def body(s):
     s.docker("exec", name, "sh", "-c", "tar czf /tmp/vol-data.tgz -C /data . && tar czf /tmp/vol-config.tgz -C /config .")
     for part in ("data", "config"):
         s.docker("cp", "%s:/tmp/vol-%s.tgz" % (name, part), str(s.work / ("vol-%s.tgz" % part)))
+        (s.work / ("vol-%s.tgz" % part)).chmod(0o644)
     config2, data2 = s.volume("config2"), s.volume("data2")
     for volume, part, target in ((data2, "data", "/data"), (config2, "config", "/config")):
         code, out = s.docker("run", "--rm", "--label", lib.LABEL, "-v", "%s:%s" % (volume, target), "-v", "%s:/backup:ro" % s.work, "--entrypoint", "tar", image, "xzf", "/backup/vol-%s.tgz" % part, "-C", target,
@@ -130,7 +131,7 @@ def body(s):
     old, healthy, out = start(s, "old", old_image, config3, data3, mounts, env)
     s.check("the PREVIOUS image starts on new volumes", healthy, s.logs(old)[-800:])
     old_token = s.read_token(old)
-    s.docker("exec", old, "sh", "-c", "echo audit-marker-2 > /data/state/audit_marker")
+    s.docker("exec", old, "sh", "-c", "umask 077; echo audit-marker-2 > /data/state/audit_marker")
     cli(s, old, old_token, "credential", "replace", "--account", "default", "--new-token-file", "-", stdin=good + "\n")
     s.docker("stop", "-t", "30", old)
     s.docker("rm", old)

@@ -93,9 +93,9 @@ class Stack:
         self.root.chmod(0o644) if self.root.exists() else None
         return monitor, caddy
 
-    def request(self, ip, specs):
+    def request(self, ip, specs, timeout=240):
         """Requests from the client container with address `ip`; the root certificate of Caddy is mounted at /root.crt."""
-        return self.s.client(self.network, ip, self.image, specs, extra_mounts=["%s:/root.crt:ro" % self.root])
+        return self.s.client(self.network, ip, self.image, specs, timeout=timeout, extra_mounts=["%s:/root.crt:ro" % self.root])
 
     def wait_proxy(self, limit=90):
         end = time.time() + limit

@@ -2,7 +2,6 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 # GPL-3.0-or-later - see LICENSE
 """E1 - the basic start: the image starts as a service, becomes healthy by its own health check, and the API inside the container keeps its contract on the published port."""
-import json
 import sys
 
 import audit_lib as lib
@@ -35,7 +34,9 @@ def body(s):
     s.check("the deep health check answers 200", deep["status"] == 200, "%s %s" % (deep["status"], deep["body"][:300]))
     alien = lib.http_request(8765, "GET", "/api/health", {"Host": "other.example", "X-Monitor-Access": token})
     s.check("a request with a Host that is not the monitor's own is refused (403)", alien["status"] == 403, "%s %s" % (alien["status"], alien["body"][:200]))
-    s.note("version the container reports: %s" % answer.get("version"))
+    s.note("GET /api/health in the container answers: %s" % ok["body"][:300])
+    about = lib.http_request(8765, "GET", "/api/about", auth)
+    s.note("version the container reports in /api/about: %s" % (lib.jbody(about) or {}).get("version"))
 
     # the frozen contract of the read endpoints, from this machine against the published port, with the script of the version under check
     script = s.target / "monitor" / "tools" / "check_api_contract.py"
@@ -54,7 +55,6 @@ def body(s):
     s.check("the log has no traceback", "Traceback" not in logs, logs[-1500:])
     s.check("the token is not in the log", token not in logs, "")
     s.check("the container is still healthy at the end", s.health(name) == "healthy", s.health(name))
-    json.dumps(s.environment)
 
 
 if __name__ == "__main__":

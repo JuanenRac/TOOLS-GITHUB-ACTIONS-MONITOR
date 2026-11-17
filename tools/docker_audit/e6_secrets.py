@@ -16,7 +16,7 @@ PATHS_EXTRA = ["/api/accounts", "/api/settings", "/api/advanced", "/api/github-t
 
 ENVIRON = r'''
 import json, os, sys
-secrets = json.loads(sys.argv[1])
+secrets = json.loads(sys.stdin.read())
 found = []
 for pid in os.listdir("/proc"):
     if not pid.isdigit():
@@ -108,7 +108,7 @@ def body(s):
     s.check("the log (after the start, wrong passwords, wrong tokens, a bad webhook and SIGHUP) has no secret and no password that was typed", not leaked, "found: %s" % leaked)
 
     # the environment and the command line of every process
-    code, out = s.docker("exec", name, "python", "-c", ENVIRON, json.dumps(values), label="look for the secrets in /proc/*/environ and /proc/*/cmdline")
+    code, out = s.run(["docker", "exec", "-i", name, "python", "-c", ENVIRON], input_text=json.dumps(values), timeout=60, label="look for the secrets in /proc/*/environ and /proc/*/cmdline (the values come on the standard input)")
     match = re.search(r"AUDIT-JSON (\[.*\])", out)
     found = json.loads(match.group(1)) if match else None
     s.check("the scan of the processes ran", found is not None, out[-300:])
