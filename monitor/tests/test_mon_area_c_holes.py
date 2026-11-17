@@ -169,6 +169,39 @@ class TheTokenOfANtfyTopicDoesNotFollowARedirect(unittest.TestCase):
         self.assertEqual(_Third.hits, [])
 
 
+class TheSummaryByVolumeDoesNotKeepARedForADay(unittest.TestCase):
+    def setUp(self):
+        from github_actions_monitor.data_pipeline import alertflow
+        self.alertflow = alertflow
+        alertflow.configure({"alerts": {"digest": {"minutes": 1440, "threshold": 3}}})
+        self.addCleanup(alertflow.configure, {})
+
+    def event(self, kind, repo, level="bad"):
+        return {"kind": kind, "code": kind, "level": level, "repo": repo, "owner": "main", "text": repo, "url": None, "args": {"repo": repo, "workflow": "CI"}}
+
+    def test_what_is_held_is_told_when_the_hour_has_room_and_with_the_level_of_the_worst(self):
+        flow = self.alertflow.Flow()
+        now = 1_800_000_000.0
+        flow.shape([self.event("red_new", "r%d" % n) for n in range(3)], now)
+        told, _ = flow.shape([self.event("red_new", "late")], now + 60)
+        self.assertEqual(told, [])
+        told, _ = flow.shape([], now + 3700)
+        self.assertEqual([(e["kind"], e["level"]) for e in told], [("alerts_digest", "bad")])
+
+
+class TheValueOfAnAiAddressIsNotACredential(unittest.TestCase):
+    def test_an_address_with_a_user_or_an_at_before_the_host_is_refused(self):
+        from github_actions_monitor.app import settings_api
+        for bad in ("https://user:clave@api.example.com/v1", "https://api.openai.com@evil.example/v1"):
+            self.assertIsNone(settings_api.AI_URL_RE.match(bad), bad)
+        for good in ("https://api.openai.com/v1", "http://127.0.0.1:11434", ""):
+            self.assertIsNotNone(settings_api.AI_URL_RE.match(good), good)
+
+    def test_the_reminder_of_a_review_date_is_in_the_events_of_a_new_install(self):
+        from github_actions_monitor.integrations import notifiers
+        self.assertIn("silence_review", notifiers.DEFAULT_EVENTS)
+
+
 class TheLogOfTheFailedStepIsKeptForALimitedTime(unittest.TestCase):
     ON = {"logs": {"failed_step": {"enabled": True, "max_per_minute": 3}}}
 

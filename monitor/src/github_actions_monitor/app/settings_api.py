@@ -64,7 +64,7 @@ AI_REF_RE = re.compile(r"^[A-Za-z0-9-]{0,40}\Z")      # a preset (openai, ollama
 AI_FALLBACK_RE = re.compile(r"^[A-Za-z0-9._:/@+=, -]{0,400}\Z")      # provider=model, provider=model
 OLLAMA_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}/?\Z")   # the local service only: nothing leaves this computer
 HTTPS_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250})?\Z")
-AI_URL_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250}|http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/-]{0,100})?)?\Z")   # https, or a server on this computer
+AI_URL_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#!$&()*+,;=%-]{4,250}|http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/-]{0,100})?)?\Z")   # https, or a server on this computer
 PROXY_HOST_RE = re.compile(r"^([A-Za-z0-9]([A-Za-z0-9.-]{0,98}[A-Za-z0-9])?)?\Z")      # the public NAME of an HTTPS proxy: a host name only, no port, path, user or space (empty = none)
 ENV_NAME_RE = re.compile(r"^([A-Z_][A-Z0-9_]{0,63})?\Z")
 AI_ENV_RE = re.compile(r"^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|MONITOR_[A-Z0-9_]*)\Z)([A-Z_][A-Z0-9_]{0,63})?\Z")   # the NAME of the variable of the key of a provider: never a variable of the system or of the monitor   # the NAME of an environment variable, never the key itself

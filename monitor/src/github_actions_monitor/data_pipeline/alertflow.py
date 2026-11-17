@@ -189,9 +189,10 @@ class Flow:
                 event["held"] = True
                 self.held.append(event)
                 self.held_since = self.held_since or now
-        if self.held and now - self.held_since >= cfg["minutes"] * 60:
+        if self.held and (now - self.held_since >= cfg["minutes"] * 60 or len(self.sent) < cfg["threshold"]):      # told when the time is up, or as soon as the last hour has room again (never a day later)
             kinds = [e.get("kind") for e in self.held]
-            made = _made("alerts_digest", "warn", "", n=len(self.held), red=kinds.count("red_new"), stuck=kinds.count("stuck_new"), other=len(kinds) - kinds.count("red_new") - kinds.count("stuck_new"),
+            level = "bad" if any(e.get("level") == "bad" for e in self.held) else "warn"      # the summary has the level of the worst thing it holds
+            made = _made("alerts_digest", level, "", n=len(self.held), red=kinds.count("red_new"), stuck=kinds.count("stuck_new"), other=len(kinds) - kinds.count("red_new") - kinds.count("stuck_new"),
                          minutes=cfg["minutes"])
             made["args"]["items"] = [{"kind": e.get("kind"), "repo": e.get("repo"), "text": e.get("text")} for e in self.held[:50]]
             record.append(made)
