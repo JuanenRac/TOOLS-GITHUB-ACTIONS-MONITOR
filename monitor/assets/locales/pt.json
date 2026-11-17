@@ -3497,5 +3497,8 @@
  "ui.scr_sev_warning": "Aviso",
  "ui.scr_sev_info": "Informação",
  "ui.tab_les": "Lições",
- "ui.tab_rep": "Relatórios"
+ "ui.tab_rep": "Relatórios",
+ "cfg.f.ci.disabled_apart": "Um workflow desativado à mão não é vermelho",
+ "cfg.h.ci.disabled_apart": "Ativado por predefinição. Um workflow que o dono desativou à mão (estado disabled_manually) sai da lista de vermelhos e é contado à parte: desativá-lo é a resposta à sua falha, e a sua última execução ficaria falhada para sempre. Um workflow que o GitHub desativou por inatividade não é afetado (não é uma decisão do dono). Desativado: um workflow desativado continua vermelho até correr em verde.",
+ "ui.a2_disabled": " · {n} desativados à mão (não são vermelhos)"
 }

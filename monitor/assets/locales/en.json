@@ -3497,5 +3497,8 @@
  "ui.scr_sev_warning": "Warning",
  "ui.scr_sev_info": "Info",
  "ui.tab_les": "Lessons",
- "ui.tab_rep": "Reports"
+ "ui.tab_rep": "Reports",
+ "cfg.f.ci.disabled_apart": "A workflow switched off by hand is not red",
+ "cfg.h.ci.disabled_apart": "On by default. A workflow that the owner switched off by hand (state disabled_manually) leaves the list of reds and is counted apart: switching it off is the answer to its failure, and its last run would stay failed for ever. A workflow that GitHub switched off for inactivity is not affected (that is not a decision of the owner). Off: a switched-off workflow stays red until it runs green.",
+ "ui.a2_disabled": " · {n} switched off by hand (not red)"
 }

@@ -3497,5 +3497,8 @@
  "ui.scr_sev_warning": "警告",
  "ui.scr_sev_info": "信息",
  "ui.tab_les": "经验教训",
- "ui.tab_rep": "报告"
+ "ui.tab_rep": "报告",
+ "cfg.f.ci.disabled_apart": "手动停用的工作流不算红色",
+ "cfg.h.ci.disabled_apart": "默认开启。所有者手动停用的工作流(状态 disabled_manually)会从红色列表中移出并单独计数:停用就是对其失败的处理,而它最后一次运行会永远保持失败。因不活动而被 GitHub 停用的工作流不受影响(那不是所有者的决定)。关闭:被停用的工作流在以绿色运行之前一直为红色。",
+ "ui.a2_disabled": " · {n} 个被手动停用(不算红色)"
 }

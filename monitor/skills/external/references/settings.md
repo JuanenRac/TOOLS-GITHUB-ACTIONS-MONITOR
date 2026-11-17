@@ -132,6 +132,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `central.source` (secure) | `"off"` | quota | Central panel as a base line |
 | `ci.automation_counts` | `false` | sentinel | Count automation workflows |
 | `ci.count_fork_runs` | `false` | sentinel | Count runs of forks |
+| `ci.disabled_apart` | `true` | sentinel | A workflow switched off by hand is not red |
 | `ci.dormant_repos` | `true` | sentinel | Count dormant and inactive repositories apart |
 | `ci.extra_branches` | `[]` | sentinel | Maintenance branches to watch |
 | `ci.failed_jobs.enabled` | `false` | sentinel | Show which jobs of a red run failed |
