@@ -21,7 +21,7 @@ Ciò su cui può contare uno script, uno schermo a parete o un client mobile. Da
 
 ## Il contratto
 
-- `docs/schemas/api_contract.json` elenca ogni endpoint di lettura con chiavi e tipi in ogni edizione e i codici di errore. Le rotte leggibili ma non congelate (flussi, testo, esportazioni di altri strumenti) sono elencate sotto `unfrozen` nello stesso file, ciascuna con il suo motivo; `/api/data`, che fornisce le esecuzioni, i repository e la quota, è congelata.
+- `docs/schemas/api_contract.json` elenca ogni endpoint di lettura con chiavi e tipi in ogni edizione e i codici di errore. Le rotte leggibili ma non congelate (flussi, testo, esportazioni di altri strumenti) sono elencate sotto `unfrozen` nello stesso file, ciascuna con il suo motivo; `/api/data`, che fornisce le esecuzioni, i repository e la quota, è congelata. Le sue chiavi arrivano fino agli elementi delle liste: una lista scritta `[{...}]` nel file descrive i suoi elementi (i primi tre vengono controllati), così le esecuzioni, i repository e la quota di `/api/data`, gli avvisi di `/api/alerts` e `/api/auth/me` non possono cambiare senza che il controllo fallisca.
 - `python tools/check_api_contract.py` verifica un monitor in esecuzione (`--lite`, `--url`, `--token-file`) e stampa `CONTRACT=PASS` o `CONTRACT=FAIL`; eseguilo dopo ogni aggiornamento del monitor o del tuo client.
 
 ## API di lettura v1 (disattivata per impostazione predefinita)

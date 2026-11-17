@@ -31,7 +31,7 @@ def contains(current, floor, label):
     for key, kind in floor.items():
         if key not in current:
             problems.append(f"{label}: the key `{key}` was removed")
-        elif kind == "object" and isinstance(current[key], dict):      # the same object, now with the list of its own keys
+        elif (kind == "object" and isinstance(current[key], dict)) or (kind == "list" and isinstance(current[key], list)):      # the same object, now with the list of its own keys
             continue
         elif current[key] != kind:
             problems.append(f"{label}: the key `{key}` changed from {kind} to {current[key]}")

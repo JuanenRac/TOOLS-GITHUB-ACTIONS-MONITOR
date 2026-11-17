@@ -21,7 +21,7 @@ What a script, a wall screen or a mobile client can rely on. From 2.0.0 the read
 
 ## The contract
 
-- `docs/schemas/api_contract.json` lists every read endpoint with its keys and types in each edition and the error codes. The routes that can be read but are not frozen (streams, text, exports of other tools) are listed under `unfrozen` in the same file, each with its reason; `/api/data`, which gives the runs, the repositories and the allowance, is frozen.
+- `docs/schemas/api_contract.json` lists every read endpoint with its keys and types in each edition and the error codes. The routes that can be read but are not frozen (streams, text, exports of other tools) are listed under `unfrozen` in the same file, each with its reason; `/api/data`, which gives the runs, the repositories and the allowance, is frozen. Its keys go down to the elements of the lists: a list written as `[{...}]` in the file describes its elements (the first three are checked), so the runs, the repositories and the allowance of `/api/data`, the alerts of `/api/alerts` and `/api/auth/me` cannot change without the check failing.
 - `python tools/check_api_contract.py` checks a running monitor against it (`--lite`, `--url`, `--token-file`) and prints `CONTRACT=PASS` or `CONTRACT=FAIL`; run it after each upgrade of the monitor or of your client.
 
 ## Read API v1 (off by default)

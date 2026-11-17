@@ -21,7 +21,7 @@ Ce sur quoi un script, un écran mural ou un client mobile peut compter. Depuis 
 
 ## Le contrat
 
-- `docs/schemas/api_contract.json` liste chaque point d'accès en lecture avec ses clés et types dans chaque édition, et les codes d'erreur. Les routes lisibles mais non figées (flux, texte, exports d'autres outils) sont listées sous `unfrozen` dans le même fichier, chacune avec sa raison ; `/api/data`, qui donne les exécutions, les dépôts et le quota, est figée.
+- `docs/schemas/api_contract.json` liste chaque point d'accès en lecture avec ses clés et types dans chaque édition, et les codes d'erreur. Les routes lisibles mais non figées (flux, texte, exports d'autres outils) sont listées sous `unfrozen` dans le même fichier, chacune avec sa raison ; `/api/data`, qui donne les exécutions, les dépôts et le quota, est figée. Ses clés descendent jusqu'aux éléments des listes : une liste écrite `[{...}]` dans le fichier décrit ses éléments (les trois premiers sont vérifiés), de sorte que les exécutions, les dépôts et le quota de `/api/data`, les alertes de `/api/alerts` et `/api/auth/me` ne peuvent pas changer sans que la vérification échoue.
 - `python tools/check_api_contract.py` vérifie un moniteur en marche (`--lite`, `--url`, `--token-file`) et affiche `CONTRACT=PASS` ou `CONTRACT=FAIL` ; lancez-le après chaque mise à jour du moniteur ou de votre client.
 
 ## API de lecture v1 (désactivée par défaut)
