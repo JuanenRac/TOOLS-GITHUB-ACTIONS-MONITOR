@@ -274,5 +274,20 @@ class ASilenceCanExpire(unittest.TestCase):
         self.assertNotIn("alerts.silences", [s["id"] for s in signals.inventory({}, now=self.NOW)])
 
 
+class TheSummaryReachesTheChannelsThatAskedForWhatItHolds(unittest.TestCase):
+    def test_a_summary_of_stuck_builds_goes_to_a_channel_that_asked_only_for_stuck(self):
+        from unittest import mock
+        from github_actions_monitor.integrations import notifiers
+        config = {"notify": {"enabled": True, "events": ["stuck_new"], "channels": {"http_local": {"enabled": True, "url": "http://127.0.0.1:1/x"}}}}
+        digest = {"kind": "alerts_digest", "owner": "main", "level": "warn", "repo": "", "text": "2 held", "args": {"items": [{"kind": "stuck_new", "repo": "a"}, {"kind": "stuck_new", "repo": "b"}]}}
+        sent = []
+        with mock.patch.object(notifiers, "send_channel", side_effect=lambda *a, **k: sent.append(a[0]) or {"ok": True}), mock.patch.object(notifiers, "check_channel", return_value=None):
+            notifiers.notify(config, digest)
+            self.assertEqual(sent, ["http_local"])
+            sent.clear()
+            notifiers.notify(config, dict(digest, args={"items": [{"kind": "prs_up"}]}))
+            self.assertEqual(sent, [])
+
+
 if __name__ == "__main__":
     unittest.main()

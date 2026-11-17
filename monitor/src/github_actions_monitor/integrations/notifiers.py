@@ -282,7 +282,7 @@ def notify(config, event, opener=None, connect=None, now=None):
     from github_actions_monitor.integrations import dispatcher      # the users of the team mode who asked for this event (OFF by default, its own switch)
     dispatcher.dispatch(config, event)
     cfg = settings(config)
-    if not cfg["enabled"] or (event.get("kind") not in cfg["events"] and event.get("kind") != "score_dropped" and not (event.get("kind") == "alerts_digest" and "red_new" in cfg["events"])) or event.get("owner", "main") != "main":      # score_dropped is only emitted when score.alert.notify_external is on, so it needs no entry in notify.events
+    if not cfg["enabled"] or (event.get("kind") not in cfg["events"] and event.get("kind") != "score_dropped" and not (event.get("kind") == "alerts_digest" and ("red_new" in cfg["events"] or any(i.get("kind") in cfg["events"] for i in ((event.get("args") or {}).get("items") or []) if isinstance(i, dict))))) or event.get("owner", "main") != "main":      # score_dropped is only emitted when score.alert.notify_external is on, so it needs no entry in notify.events
         return []
     live = [(n, c) for n, c in cfg["channels"].items() if c.get("enabled")]
     if not live:
