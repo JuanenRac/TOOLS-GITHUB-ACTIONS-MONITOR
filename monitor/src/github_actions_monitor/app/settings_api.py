@@ -437,6 +437,7 @@ _f(_T_AI, "actions", "ai.actions.allowed", "names")
 _f(_T_AI, "actions", "ai.actions.max_per_hour", "int", (1, 60), unit="")
 _f(_T_AI, "actions", "ai.actions.ttl_seconds", "int", (30, 3600))
 _f(_T_HOOK, "inbound", "webhook.enabled", "bool", secure=True)
+_f(_T_HOOK, "inbound", "webhook.secret_env", "text", ENV_NAME_RE, secure=True)
 _f(_T_HOOK, "inbound", "webhook.signing_state", "status", restart=False)
 _f(_T_HOOK, "inbound", "webhook.record_events", "bool")
 _f(_T_HOOK, "inbound", "webhook.live_events_keep", "int", (10, 1000), unit="")
@@ -813,11 +814,12 @@ def _read_file(path):
 
 
 def webhook_state(config):
-    """"defined" | "short" | "undefined": the only thing the page may know about the webhook secret (never the secret, nor its length)."""
-    secret = ((config or {}).get("webhook") or {}).get("secret") if isinstance((config or {}).get("webhook"), dict) else ""
-    if not isinstance(secret, str) or not secret:
+    """"defined" | "short" | "undefined": the only thing the page may know about the webhook secret (never the secret, nor its length). It is read where the receiver reads it: the environment."""
+    from github_actions_monitor.security import webhook
+    secret = webhook.settings(config)["secret"]
+    if not secret:
         return "undefined"
-    return "defined" if len(secret) >= 32 else "short"
+    return "defined" if len(secret) >= webhook.MIN_SECRET else "short"
 
 
 def _remote_visible():

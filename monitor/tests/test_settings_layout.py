@@ -2,10 +2,12 @@
 # GPL-3.0-or-later - see LICENSE
 """The order and structure of the settings menu: every setting in exactly one tab and block, texts in the eight languages, nothing forbidden, the page built with accessible tabs."""
 import json
+import os
 import re
 import sys
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import _testenv  # noqa: F401
 
@@ -110,7 +112,9 @@ class Layout(unittest.TestCase):
 
     def test_the_webhook_state_never_leaks_the_secret(self):
         for secret, state in (("", "undefined"), ("short", "short"), ("x" * 40, "defined")):
-            self.assertEqual(sa.webhook_state({"webhook": {"secret": secret}}), state)
+            with mock.patch.dict(os.environ, {"MONITOR_WEBHOOK_SECRET": secret}):
+                self.assertEqual(sa.webhook_state({"webhook": {}}), state)
+            self.assertEqual(sa.webhook_state({"webhook": {"secret": secret}}), "undefined", "a secret written in the file is not read unless it is allowed")
         self.assertEqual(sa.webhook_state({}), "undefined")
         text = json.dumps(sa.describe(HERE / "nonexistent.json"))
         self.assertNotIn("xxxxxxxx", text)

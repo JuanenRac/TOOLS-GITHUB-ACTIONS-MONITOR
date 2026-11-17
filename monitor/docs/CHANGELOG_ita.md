@@ -9,6 +9,24 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+### Sicurezza
+
+- **Il segreto condiviso del webhook in ingresso viaggia solo nell'ambiente (`webhook.secret_env`, `MONITOR_WEBHOOK_SECRET` per impostazione predefinita)**: era un testo in `actions_monitor.json`, dove una copia di sicurezza, una configurazione copiata o uno schermo condiviso potevano rivelarlo. Il ricevitore ora lo legge dalla variabile d'ambiente indicata da `webhook.secret_env` (o dal file nominato da quella variabile più `_FILE`, come un container consegna un segreto), il monitor lo toglie dal proprio ambiente una volta letto perché i programmi che avvia non lo ereditino, e un segreto scritto nel file viene ignorato. Il vecchio modo può restare per una migrazione con `webhook.allow_config_secret` (solo nel file, spento per impostazione predefinita) e la vista Dal vivo avvisa finché lo si usa. La scheda Impostazioni mostra il nome della variabile e se il segreto è definito, mai il segreto.
+
+### Aggiunto
+
+- **Il webhook accetta anche gli eventi `check_run` e la vista Dal vivo dice quanta parte del tempo gli eventi coprono lo stato**: `check_run` entra nella lista chiusa degli eventi (`workflow_run`, `workflow_job`, `check_run`, `push`, `release`, `check_suite` e `ping`); come gli altri, segna solo il repository per una lettura e non conserva testo. La vista Dal vivo e `/api/live-status` (con i nuovi `coverage` e `secret_source`) dicono se lo stato è coperto da eventi (l'ultimo è più recente di `savings.webhook_window_minutes`), è da un po' senza eventi (repository tranquillo o tunnel perso) o attende il primo. Il polling resta il ripiego, quindi un invio mai arrivato viene recuperato alla lettura successiva.
+- **Una guida per configurare il webhook in GitHub, in otto lingue**: `docs/WEBHOOK.md` spiega passo per passo come creare il segreto, come darlo al monitor in PowerShell, in una shell, in un servizio o in un container, cosa compilare nella pagina dei webhook di GitHub (indirizzo, tipo di contenuto, segreto, eventi) e cosa significa ogni risposta (`404`, `401`, `413`, `400`, `202` e `429`).
+
+### Modificato
+
+- **I runner a pagamento di un'altra azienda che il modello riconosce per impostazione predefinita includono `codspeed`** (`runners.model.thirdparty_labels`): i repository pubblici lo usano per i benchmark e i suoi job venivano contati come un runner che nessuno conosceva. Una lista scritta da te non viene toccata.
+
+### Corretto
+
+- **Un workflow il cui file è stato eliminato non è tra i workflow che si possono attivare**: GitHub conserva nell'elenco la cronologia di un workflow eliminato con il percorso vuoto (sei dei 96 repository pubblici studiati ne hanno uno), e il controllo di igiene lo proponeva come workflow disattivato a mano. Ora resta fuori dagli elenchi che richiedono un file.
+- **Un fork a cui non è mai stato fatto push non è «spinto di recente»**: un fork eredita la data di push del suo upstream alla creazione (693 dei 722 fork di un account misurato ce l'hanno precedente alla propria creazione), quindi la sentinella prendeva ogni fork nuovo per il repository più attivo dell'account e lo leggeva come caldo. La data di push di un fork ora viene ignorata finché non è successiva alla sua creazione.
+
 ## [2.0.7]
 
 ### Aggiunto

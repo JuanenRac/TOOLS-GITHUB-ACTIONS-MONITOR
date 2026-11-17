@@ -11,18 +11,24 @@ Facoltativo e **spento per impostazione predefinita**. Permette a GitHub di avvi
 
 ## Cosa fa (solo aggiornare)
 
-Un evento accettato segna soltanto il repository indicato per un aggiornamento nel ciclo successivo. Non si scrive nulla su GitHub né su disco, nessun testo dell'evento viene conservato o mostrato, e si accettano solo i repository già osservati dal monitor. Eventi compresi: `workflow_run`, `workflow_job`, `push`, `release`, `check_suite` e `ping`; ogni altro riceve `202` ed è ignorato.
+Un evento accettato segna soltanto il repository indicato per un aggiornamento nel ciclo successivo. Non si scrive nulla su GitHub né su disco, nessun testo dell'evento viene conservato o mostrato, e si accettano solo i repository già osservati dal monitor. Eventi compresi: `workflow_run`, `workflow_job`, `push`, `release`, `check_run`, `check_suite` e `ping`; ogni altro riceve `202` ed è ignorato.
 
 ## Sicurezza
 
-- Il monitor ascolta ancora solo su `127.0.0.1`. GitHub lo raggiunge solo attraverso un tunnel che crei tu di proposito; lo strumento non ne apre mai uno.
-- Spento finché `webhook.enabled` non è attivo **e** il segreto condiviso in `actions_monitor.json` non ha almeno 32 caratteri (altrimenti l'endpoint resta chiuso).
-- Ogni richiesta deve portare `X-Hub-Signature-256: sha256=<hmac>`, calcolato con quel segreto; il resto riceve `401`. Il segreto non viene mai mostrato: la scheda Impostazioni dice solo se è definito.
-- Un corpo oltre 256 KB riceve `413`.
+- Il monitor continua ad ascoltare solo su `127.0.0.1`. GitHub può raggiungerlo solo tramite un tunnel che crei di proposito; lo strumento non ne apre mai uno.
+- Spento finché `webhook.enabled` non è attivo **e** il segreto condiviso (32 caratteri o più) non è nella variabile d'ambiente indicata da `webhook.secret_env` (`MONITOR_WEBHOOK_SECRET` per impostazione predefinita; `MONITOR_WEBHOOK_SECRET_FILE` può indicare un file la cui prima riga è il segreto, come i segreti di un container). Il segreto non viene mai scritto in `actions_monitor.json`, mostrato, registrato né ereditato dai programmi che il monitor avvia; la scheda Impostazioni dice solo se è definito. Il vecchio modo (un `secret` nel file) viene letto solo se `webhook.allow_config_secret` è vero, e la vista Dal vivo avvisa finché lo si usa.
+- Ogni richiesta deve portare `X-Hub-Signature-256: sha256=<hmac>`, calcolato con quel segreto e confrontato in tempo costante; ogni altra riceve `401` e nulla del contenuto viene guardato prima di verificare la firma.
+- Un corpo oltre 256 KB riceve `413`, prima di calcolare qualsiasi cosa.
+- Le liste sono chiuse: si agisce solo su `workflow_run`, `workflow_job`, `check_run`, `push`, `release`, `check_suite` e `ping`, di un evento si conservano solo campi brevi e validati (mai un messaggio di commit né testo libero), e tutto il resto riceve `202` ed è scartato.
 
 ## Come attivarlo
 
-In `actions_monitor.json`: `"webhook": {"enabled": true, "secret": "<32 o più caratteri casuali>"}`; l'interruttore è anche nella scheda Impostazioni (sotto-scheda Webhook in ingresso), il segreto solo nel file. Riavvia il monitor. Nelle impostazioni del webhook di GitHub usa il tipo `application/json`, lo stesso segreto e l'URL del tuo tunnel terminante in `/api/webhook`.
+1. Crea un segreto di 32 o più caratteri casuali, per esempio `python -c "import secrets; print(secrets.token_hex(32))"`.
+2. Dallo al monitor tramite il suo ambiente, mai tramite il file: `$env:MONITOR_WEBHOOK_SECRET = "<il segreto>"` in PowerShell prima di avviare il monitor, `export MONITOR_WEBHOOK_SECRET=...` in una shell, `Environment=` o `EnvironmentFile=` (un file leggibile solo da te) in un servizio, `-e` o un file di segreto indicato da `MONITOR_WEBHOOK_SECRET_FILE` in un container.
+3. Attiva il ricevitore (Impostazioni > Webhook in ingresso > Ricevitore attivo, o `"webhook": {"enabled": true}` in `actions_monitor.json`) e riavvia il monitor.
+4. Rendi raggiungibile l'indirizzo: GitHub non raggiunge `127.0.0.1`. Usa un tunnel che crei di proposito (un indirizzo HTTPS che termina con `/api/webhook`) oppure, su questo computer, `gh webhook forward` verso `http://127.0.0.1:PORTA/api/webhook` (vedi la documentazione della CLI di GitHub per dargli lo stesso segreto senza scriverlo sulla riga di comando).
+5. In GitHub apri il repository (o l'organizzazione) > Settings > Webhooks > Add webhook. **Payload URL**: l'indirizzo del tuo tunnel che termina con `/api/webhook`. **Content type**: `application/json`. **Secret**: lo stesso segreto. **SSL verification**: attiva. **Events**: «Let me select individual events», poi Workflow runs e Workflow jobs, e facoltativamente Check runs, Pushes e Releases. **Active**: attivo. Un webhook di un'organizzazione copre tutti i suoi repository; il monitor ignora quelli che non sorveglia.
+6. Verifica: in GitHub, Recent deliveries deve mostrare `200` per il primo `ping`; nel monitor la vista Dal vivo mostra il ricevitore attivo, i contatori e la copertura.
 
 ## Eventi in tempo reale
 
@@ -32,13 +38,28 @@ In `actions_monitor.json`: `"webhook": {"enabled": true, "secret": "<32 o più c
 - Un run che termina in rosso invia anche la notifica `workflow_failed` se le notifiche sono attive. Con `webhook.record_events` spento il webhook torna alla modalità di solo aggiornamento descritta sopra.
 - GitHub non può raggiungere `127.0.0.1`: usa `gh webhook forward` (vedi la documentazione della CLI di GitHub) o un tunnel che crei di proposito, verso `http://127.0.0.1:PORTA/api/webhook`.
 
+## Copertura nel tempo
+
+La vista Dal vivo dice quanta parte del tempo gli eventi coprono lo stato: **coperto da eventi** (l'ultimo evento è più recente di `savings.webhook_window_minutes`, 60 minuti per impostazione predefinita), **nessun evento da ...** (più vecchio: un repository tranquillo o un tunnel perso) oppure **in attesa del primo evento**. Il polling è sempre il ripiego: un invio che non è mai arrivato (monitor spento, tunnel caduto) viene recuperato dalla lettura successiva del repository, quindi gli eventi riducono le letture ma non le sostituiscono mai. Le stesse cifre sono in `GET /api/live-status`, sotto `coverage` e `secret_source` (`env`, `config` o `none`; mai il segreto).
+
+## Se non funziona
+
+| Risposta | Significato |
+|---|---|
+| `404` | Il ricevitore è spento, oppure il segreto manca o ha meno di 32 caratteri nella variabile d'ambiente. |
+| `401` | La firma non corrisponde: stesso segreto da entrambe le parti e tipo di contenuto `application/json`. |
+| `413` | Il corpo supera 256 KB. |
+| `400` | Nessun id `X-GitHub-Delivery` valido, o contenuto non compreso. |
+| `202` | Accettato e ignorato: un repository non sorvegliato, un evento fuori lista, un invio ripetuto o un repository oltre il limite al minuto. |
+| `429` | Un indirizzo ha inviato più di 120 richieste in un minuto (modalità rete). |
+
 ## Replay e inondazioni
 
 Una richiesta firmata valida che qualcuno ha catturato e rinvia riceve risposta ma non viene eseguita: ogni consegna richiede il proprio id `X-GitHub-Delivery`, gli id già accettati sono ricordati per `webhook.replay_seconds` (un'ora di default, memoria limitata) e una ripetizione riceve `202 {"duplicate": true}`. (Una riconsegna manuale dalla pagina di GitHub riusa l'id, quindi viene ignorata in questa finestra.) Un repository può causare al massimo `webhook.max_per_minute` eventi accettati al minuto; gli altri ricevono risposta e vengono ignorati. Se il payload indica `full_name`, il suo proprietario deve essere l'account osservato (o uno di `webhook.allowed_owners`). In modalità rete un indirizzo può inviare 120 richieste al minuto. Dopo un evento accettato le letture condizionali salvate di quel repository vengono eliminate e il repository viene riletto al ciclo successivo, così un evento dal vivo è sempre riconciliato con GitHub.
 
 ## Lista di controllo della vista dal vivo
 
-1. Definisci `webhook.secret` con almeno 32 caratteri e attiva il webhook.
+1. Metti un segreto di almeno 32 caratteri nella variabile d'ambiente indicata da `webhook.secret_env` e attiva il webhook.
 2. Inoltra la porta (`gh webhook forward`) o apri un tunnel e usa il suo indirizzo che termina con `/api/webhook` in GitHub.
 3. Invia l'evento di prova di GitHub (Recent deliveries > Redeliver) e cercalo in `?view=live`.
 4. Tieni d'occhio la quota nell'intestazione: con i webhook basta un ciclo più lento.

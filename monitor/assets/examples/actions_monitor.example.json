@@ -324,7 +324,7 @@
   },
   "webhook": {
     "enabled": false,
-    "secret": "",
+    "secret_env": "MONITOR_WEBHOOK_SECRET",
     "record_events": true,
     "live_events_keep": 100,
     "replay_seconds": 3600,
@@ -597,7 +597,8 @@
         "ubicloud",
         "runs-on",
         "actuated",
-        "cirrus-runners"
+        "cirrus-runners",
+        "codspeed"
       ],
       "large_labels": [],
       "self_labels": [],

@@ -965,10 +965,19 @@ def compute_snapshot(inp):
 def repo_query(file_names):
     aliases = " ".join(f'f{i}:object(expression:"HEAD:{name}"){{id}}' for i, name in enumerate(file_names))
     return ("query($after:String){rateLimit{remaining cost} repositoryOwner(login:\"%s\"){repositories(first:15,after:$after,ownerAffiliations:OWNER,isArchived:false)"
-            "{totalCount pageInfo{hasNextPage endCursor} nodes{name pushedAt isFork hasVulnerabilityAlertsEnabled licenseInfo{key} defaultBranchRef{name} latestRelease{tagName publishedAt isDraft releaseAssets(first:100){nodes{name}}}"
+            "{totalCount pageInfo{hasNextPage endCursor} nodes{name pushedAt createdAt isFork hasVulnerabilityAlertsEnabled licenseInfo{key} defaultBranchRef{name} latestRelease{tagName publishedAt isDraft releaseAssets(first:100){nodes{name}}}"
             " vulnerabilityAlerts(states:OPEN,first:50){totalCount nodes{createdAt securityVulnerability{severity}}}"
             " pullRequests(states:OPEN,first:10){nodes{number title url author{login __typename} createdAt isDraft mergeable reviewDecision commits(last:1){nodes{commit{statusCheckRollup{state}}}} files(first:20){nodes{path}}}}"
             " rulesets(first:5){nodes{name enforcement}} labels(first:20,query:\"dependencies\"){nodes{name}} %s}}}}") % (toolconfig.github_owner(), aliases)
+
+
+def fork_pushed(node):
+    """The time of the last push of a repository, except for a fork that has not been pushed since it was made: a fork inherits the `pushedAt` of its upstream when it is created (693 of 722 forks of a
+    measured account have it before their own creation), so that date says nothing about the work of the owner and a new fork would look like the most active repository of the account."""
+    pushed, created = node.get("pushedAt"), node.get("createdAt")
+    if node.get("isFork") is True and isinstance(pushed, str) and isinstance(created, str) and pushed <= created:
+        return None
+    return pushed
 
 
 def parse_repo_node(node, file_names):
@@ -980,7 +989,7 @@ def parse_repo_node(node, file_names):
         if key in ("critical", "high") and len(hi) < 20:
             hi.append({"sev": key, "created": v.get("createdAt")})
     return {
-        "name": node["name"], "pushed": node.get("pushedAt"), "fork": node.get("isFork") is True, "branch": (node.get("defaultBranchRef") or {}).get("name") or "main",
+        "name": node["name"], "pushed": fork_pushed(node), "fork": node.get("isFork") is True, "branch": (node.get("defaultBranchRef") or {}).get("name") or "main",
         "release": {"tagName": rel["tagName"], "publishedAt": rel["publishedAt"],
                     "asset_flags": signstate.asset_flags([n.get("name", "") for n in (rel.get("releaseAssets") or {}).get("nodes") or []])} if rel and not rel.get("isDraft") else None,
         "vuln_total": (node.get("vulnerabilityAlerts") or {}).get("totalCount", 0), "vuln_sev": sev,
@@ -1262,7 +1271,7 @@ class Sentinel:
                                          paging.settings(self.config)["workflow_pages"])      # a repository can have hundreds of workflows: the next pages are read, and a cut is said
                 wfs = page["items"]
                 res["wf_seen"], res["wf_total"] = page["seen"], (page["total"] if page["cut"] else None)
-                own = [w for w in wfs if not str(w.get("path") or "").startswith("dynamic/")]      # the workflows GitHub makes for itself (Dependabot, the dependency graph, Copilot, the default CodeQL) have no file: they are not the owner's to enable
+                own = [w for w in wfs if not str(w.get("path") or "").startswith("dynamic/") and not redrule.is_orphan_workflow(w)]      # the workflows GitHub makes for itself (Dependabot, the dependency graph, Copilot, the default CodeQL) have no file: they are not the owner's to enable
                 res["wf_disabled"] = [w.get("name") for w in own if w.get("state") == "disabled_inactivity"]
                 res["wf_manual"] = [w.get("name") for w in own if w.get("state") == "disabled_manually"]   # same call: no extra request
                 res["wf_manual_files"] = [str(w.get("path") or "").rsplit("/", 1)[-1] for w in own if w.get("state") == "disabled_manually" and w.get("path")]

@@ -104,7 +104,7 @@ DEFAULTS = {
     "report_history_days": 30,   # (before 1.5.0: parte_history_days, still read)
     "sentinel": {"enabled": True},
     "ai": {"provider": "none"},
-    "webhook": {"enabled": False, "secret": "", "replay_seconds": 3600, "max_per_minute": 30},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default)
+    "webhook": {"enabled": False, "secret_env": "MONITOR_WEBHOOK_SECRET", "replay_seconds": 3600, "max_per_minute": 30},   # optional signed webhook receiver on 127.0.0.1, see webhook.py (off by default; the secret is only in the environment)
     "cache": {"etag": {"enabled": True, "ttl_hours": 24}},   # conditional reads: a 304 answer costs no quota (etagcache.py)
     "display": {"timezone": "local", "blink_red_tiles": True},   # blink_red_tiles: the red tiles and red items of the bar blink softly until the cause is solved; zone of the times written for people (log, reports, command line, notifications): local | utc | an IANA name such as Europe/Madrid
     "modes": {"auto_low": True, "auto_low_enter": 1000, "auto_low_exit": 2500, "low": {"refresh_seconds": 240, "cold_refresh_seconds": 1800, "runs_per_repo": 10, "hot_hours": 2}},      # see modes.py: only what is shown in the Quota tab
@@ -131,7 +131,7 @@ DEFAULTS = {
     "dispatch": {"required_ci": ["ci.yml"]},                                 # the workflow files that must have passed on a commit before a batch is fired (gha_dispatch_all.py)         # OFF: run a workflow here with `act`, each run confirmed on its own (actlocal.py)
     "mirror": {"enabled": False, "folder": "", "max_mb": 500, "keep_days": 14, "max_per_cycle": 3},     # OFF: a local copy of the artifacts of the runs (mirror.py)
     "runners": {"enabled": False, "scope": "owner",                         # OFF: the self-hosted runners of the account (runners.py)
-                "model": {"enabled": False, "jobs_per_cycle": 10, "thirdparty_labels": ["blacksmith", "buildjet", "namespace-profile", "depot", "warpbuild", "ubicloud", "runs-on", "actuated", "cirrus-runners"],
+                "model": {"enabled": False, "jobs_per_cycle": 10, "thirdparty_labels": ["blacksmith", "buildjet", "namespace-profile", "depot", "warpbuild", "ubicloud", "runs-on", "actuated", "cirrus-runners", "codspeed"],
                           "large_labels": [], "self_labels": [], "queue_warn_minutes": 20, "runaway_runs_per_hour": 20, "runaway_ignore_events": ["pull_request", "pull_request_target"],
                           "thirdparty_usd_per_minute": 0.0, "alerts": True, "alert_level": "warning"}},      # OFF: kinds of runner, queue and cost by kind, runaway workflows, self-hosted queues (runner_model.py)
     "upstream": {"enabled": False, "refresh_hours": 12, "requests_per_hour": 6, "forks_per_request": 8, "news_days": 7, "notify": False, "repos": []},      # OFF: follow the original repository of each fork, its CI and its latest release (data_pipeline/upstream.py)
@@ -254,7 +254,7 @@ def load_config():
         try:
             if example.is_file() and LITE["on"]:   # lite: the same template with the sentinel off and the light reading
                 template = json.loads(example.read_text(encoding="utf-8"))
-                template.update({"mode": "lite", "ecosystems": "all", "sentinel": {"enabled": False}, "webhook": {"enabled": False, "secret": ""}})
+                template.update({"mode": "lite", "ecosystems": "all", "sentinel": {"enabled": False}, "webhook": {"enabled": False}})
                 inherited = lite_inheritance(paths.place("actions_monitor.json", HERE))
                 template.update(inherited)
                 if inherited:
@@ -1127,13 +1127,14 @@ def webhook_count(code, duplicate=False):
         WEBHOOK_STATS["last_at"] = resilience.stamp(time.time())
 
 
+
 def webhook_status(config):
     """What the Live view says about the receiver: whether it is on, whether the secret is long enough (never the secret itself), the counters and the newest event. Read only."""
     from github_actions_monitor.security import webhook
     cfg = webhook.settings(config)
     newest = LIVE_EVENTS[-1] if LIVE_EVENTS else None
     return {"enabled": cfg["enabled"], "active": webhook.active(config), "secret_ok": len(cfg["secret"]) >= webhook.MIN_SECRET, "text": webhook.status_text(config), "stats": dict(WEBHOOK_STATS),
-            "keep": webhook.live_settings(config)["live_events_keep"], "held": len(LIVE_EVENTS),
+            "keep": webhook.live_settings(config)["live_events_keep"], "held": len(LIVE_EVENTS), "secret_source": webhook.secret_source(config), "coverage": webhook.coverage(config),
             "last": ({k: newest.get(k) for k in ("repo", "name", "event", "status", "conclusion", "at")} if newest else None)}
 
 
@@ -2483,6 +2484,7 @@ class Handler(BaseHTTPRequestHandler):
                 if record and webhook.live_settings(LIVE_CONFIG or DEFAULTS)["record_events"]:
                     apply_live_event(record, LIVE_CONFIG or DEFAULTS)
                 if repo:
+                    webhook.note_accepted()      # the coverage indicator counts it
                     __import__("github_actions_monitor.data_pipeline.savings", fromlist=["_"]).note_webhook()      # the webhook is alive: savings.webhook_first may stretch the slow turn of the cold repositories
                     webhook_settle(repo)
                 self.json_reply(answer, code)
@@ -3743,6 +3745,8 @@ def supervisor_main(argv):
     from github_actions_monitor.accounts import accounts_supervisor
     port = ports.from_argv(argv, "complete")
     config = toolconfig.raw_config()
+    from github_actions_monitor.security import webhook as _webhook
+    envguard.hold(_webhook.secret_env_name(config))      # the secret of the webhook: held here, given to the account processes explicitly
     i18n.set_language(i18n.detect(config.get("language")))
     platform_compat.console_utf8()
     try:      # the same listening rules as the monitor of one account: by default only this computer; `listen.*` opens the network mode (access token, optional certificate, declared proxy)
@@ -3846,10 +3850,12 @@ def main():
         enable_lite()
     config = load_config()
     envguard.hold(localguard.settings_from(config)["token_env"])      # the access token may be under another name: it leaves the environment here too
+    from github_actions_monitor.security import webhook as _webhook
+    envguard.hold(_webhook.secret_env_name(config))      # the shared secret of the webhook is read from the environment once and no program the monitor starts inherits it
     if LITE["on"]:
         config["mode"] = "full"                      # the lite edition reads as deep as the complete one: its figures must be the same
         config["sentinel"] = {"enabled": False}      # the lite product has no sentinel, whatever the file says
-        config["webhook"] = {"enabled": False, "secret": ""}
+        config["webhook"] = {"enabled": False}
     i18n.set_language(i18n.detect(config.get("language")))
     i18n.cli_language() if "--lang" in " ".join(sys.argv) else None
     from github_actions_monitor.security import secretstore
