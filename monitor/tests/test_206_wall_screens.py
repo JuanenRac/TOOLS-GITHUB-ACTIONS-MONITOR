@@ -121,7 +121,8 @@ class Names(unittest.TestCase):
     def test_all_and_none(self):
         meta = {"a": {"private": True}}
         self.assertEqual(screens.Names(["a"], meta, "all").name("a"), "a")
-        self.assertEqual(screens.Names(["a", "b"], meta, "none").name("b"), "repo-2")
+        hidden = screens.Names(["a", "b"], meta, "none")      # the numbers follow an HMAC with the key of the installation: which one is first is not fixed, that they are 1 and 2 is
+        self.assertEqual({hidden.name("a"), hidden.name("b")}, {"repo-1", "repo-2"})
         self.assertEqual(screens.Names(["a"], meta, "bogus").mode, "public")
 
 
