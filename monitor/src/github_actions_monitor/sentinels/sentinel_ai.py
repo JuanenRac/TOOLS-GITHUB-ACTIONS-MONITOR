@@ -56,7 +56,7 @@ AI_DEFAULTS = {
     "base_url": "", "api_key_env": "", "allow_private_targets": False,      # an https provider on a private address (a server of the local network) is refused unless this is on
     # what the model may look at and say (the settings page): the kinds of event it may analyse, the repositories it may see (empty = only the ones the monitor watches), the language of its answers
     "events": ["build", "codeql", "report"], "allowed_repos": [], "answer_language": "",
-    "tasks": {}, "fallback": "", "fallback_max_attempts": 3, "fallback_after_seconds": 0,      # a model per kind of question and the chain when one fails (ai_chain.py); empty = only the general model
+    "tasks": {}, "fallback": "", "fallback_max_attempts": 3, "fallback_after_seconds": 0, "fallback_cloud_allowed": [],      # a model per kind of question and the chain when one fails (ai_chain.py); empty = only the general model
     "model_daily_limit": 0, "cost_limit_daily": 0, "model_cost_limit_daily": 0,      # budgets (0 = no limit): calls per model per day, estimated cost per model and in total
     "catalog": {"enabled": False, "ttl_minutes": 360, "max_requests_per_day": 20, "fit_context": False},      # the live list of models of the provider (ai_models.py): off for background use, a person asking for it is always served
     "skill": True, "skill_max_chars": 3000,      # the core of the skill of the AI of the monitor (skills/internal/SKILL.md) goes into every prompt, cut to this size (a small local model: 1500)
@@ -94,6 +94,8 @@ def ai_config(config):
         merged["skill_max_chars"] = max(300, min(12000, int(merged["skill_max_chars"])))
         merged["skill"] = merged["skill"] is True
         merged["allow_private_targets"] = merged["allow_private_targets"] is True
+        allowed = merged["fallback_cloud_allowed"]
+        merged["fallback_cloud_allowed"] = [str(x).strip()[:60] for x in allowed if isinstance(x, str) and x.strip()][:20] if isinstance(allowed, list) else []
         merged["fallback"] = merged["fallback"] if isinstance(merged["fallback"], (str, list)) else ""
         merged["tasks"] = merged["tasks"] if isinstance(merged["tasks"], dict) else {}
         network = (config or {}).get("network")
@@ -499,7 +501,7 @@ def explain(kind, data, cfg, store, transport=None, task=None):
     for index, cand in enumerate(chain):
         ccfg = dict(cand["cfg"])
         last = index == len(chain) - 1
-        blocked = ai_chain.budget_block(ccfg, store) or ("retired" if not last and ai_chain.retired(ccfg, store) else None)
+        blocked = cand.get("blocked") or ai_chain.budget_block(ccfg, store) or ("retired" if not last and ai_chain.retired(ccfg, store) else None)
         if blocked:
             failed.append({"model": cand["label"], "reason": blocked})
             continue
@@ -534,6 +536,8 @@ def explain(kind, data, cfg, store, transport=None, task=None):
         break
     if failed:
         ai_chain.note_failover(store, ai_chain.task_of(kind, task), failed[0]["model"], failed[0]["reason"], answered[0]["label"] if answered else "")
+    if answered is not None and answered[0].get("role") == "fallback" and ai_chain.is_cloud(answered[1]) and not ai_chain.is_cloud(first):
+        ai_chain.cloud_switch(chain[0]["label"], answered[0]["label"])      # from this computer to the internet: it is written down and told
     note = {"fallback": {"failed": failed, "used": answered[0]["label"] if answered else ""}} if failed else {}
     if answered is None:
         last_failure = failed[-1] if failed else {}

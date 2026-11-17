@@ -3436,6 +3436,21 @@ def ai_store():
 AI_FALLBACK_STORE = {}
 
 
+def _tell_cloud_fallback(first, used):
+    """The chain of the AI went from a model on this computer to one on the internet: the notice goes to the channels (the line in the log of actions is written by the chain itself)."""
+    from github_actions_monitor.integrations import notifiers
+    notifiers.notify(LIVE_CONFIG or toolconfig.raw_config(), {"kind": "ai_alert", "owner": "main", "repo": "", "level": "warn", "url": None, "text": i18n.t("evt.ai_cloud_fallback", frm=first, to=used)})
+
+
+def _register_cloud_hook():
+    from github_actions_monitor.sentinels import ai_chain
+    if _tell_cloud_fallback not in ai_chain.CLOUD_HOOKS:
+        ai_chain.CLOUD_HOOKS.append(_tell_cloud_fallback)
+
+
+_register_cloud_hook()
+
+
 def handle_action_post(path, request):
     """The endpoints that DO something on request of the page: confirm an action of the AI, unlock the actions, test the AI connection, send a test notification."""
     config = toolconfig.raw_config()

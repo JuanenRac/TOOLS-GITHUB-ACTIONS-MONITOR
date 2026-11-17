@@ -426,6 +426,7 @@ for _task in ("build", "codeql", "report", "diagnose", "alert"):      # a model 
     _f(_T_AI, "task_" + _task, f"ai.tasks.{_task}.timeout_seconds", "int", (0, 300))
 _f(_T_AI, "fallback", "ai.fallback", "text", AI_FALLBACK_RE, secure=True)
 _f(_T_AI, "fallback", "ai.fallback_max_attempts", "int", (1, 5), unit="")
+_f(_T_AI, "fallback", "ai.fallback_cloud_allowed", "names", secure=True)
 _f(_T_AI, "fallback", "ai.fallback_after_seconds", "int", (0, 300))
 _f(_T_AI, "budget", "ai.model_daily_limit", "int", (0, 500), unit="calls")
 _f(_T_AI, "budget", "ai.cost_limit_daily", "float", (0.0, 100000.0), unit="")

@@ -162,5 +162,42 @@ class AProviderOnAPrivateAddressNeedsTheSwitch(unittest.TestCase):
             self.assertEqual(netguard.reason_of(caught.exception), "private_target", url)
 
 
+class ACloudFallbackNeedsAPermission(unittest.TestCase):
+    def run_chain(self, allowed):
+        import tempfile
+        from github_actions_monitor.sentinels import ai_chain
+        calls = []
+
+        def transport(cfg, system, user):
+            calls.append(cfg["provider"])
+            if cfg["provider"] == "ollama":
+                raise RuntimeError("down")
+            return "answer from the internet"
+        cfg = sentinel_ai.ai_config({"ai": {"provider": "ollama", "model": "llama", "fallback": "anthropic=claude-x", "fallback_cloud_allowed": allowed, "skill": False}})
+        seen = []
+        hook = lambda first, used: seen.append((first, used))      # noqa: E731
+        ai_chain.CLOUD_HOOKS.append(hook)
+        self.addCleanup(ai_chain.CLOUD_HOOKS.remove, hook)
+        with tempfile.TemporaryDirectory() as folder:
+            result = sentinel_ai.explain("build", "log one", cfg, sentinel_ai.Store(Path(folder) / "c.json"), transport=transport)
+        return result, calls, seen
+
+    def test_without_the_permission_the_text_never_goes_to_the_internet(self):
+        result, calls, seen = self.run_chain([])
+        self.assertFalse(result["ok"])
+        self.assertEqual(calls, ["ollama"])
+        self.assertEqual(seen, [])
+        self.assertEqual(result["fallback"]["failed"][-1]["reason"], "not_allowed")
+
+    def test_with_the_permission_it_goes_and_it_is_written_down_and_told(self):
+        from unittest import mock
+        with mock.patch("github_actions_monitor.security.audit_log.record") as record:
+            result, calls, seen = self.run_chain(["anthropic"])
+        self.assertTrue(result["ok"], result)
+        self.assertEqual(calls, ["ollama", "anthropic"])
+        self.assertEqual(len(seen), 1)
+        self.assertEqual(record.call_args[0][1], "ai.cloud_fallback")
+
+
 if __name__ == "__main__":
     unittest.main()

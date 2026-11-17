@@ -120,9 +120,46 @@ def candidates(cfg, kind, task=None):
         if other is None or other["provider"] == "none":
             continue
         entry = {"cfg": other, "label": label_of(other), "role": "fallback"}
+        if is_cloud(other) and not _allowed_cloud(cfg, ref, other):      # a provider on the internet receives the text of a build only if the person wrote its name
+            entry["blocked"] = "not_allowed"
         if all(entry["label"] != done["label"] for done in chain):
             chain.append(entry)
     return chain
+
+
+def is_cloud(cfg):
+    """True when the provider is not on this computer (anthropic, copilot, and an address that is not 127.0.0.1 / localhost / ::1)."""
+    if cfg.get("provider") in ("anthropic", "copilot"):
+        return True
+    if cfg.get("provider") == "ollama":
+        return not sentinel_ai._loopback(cfg.get("ollama_url") or "")
+    if cfg.get("provider") == "openai-compatible":
+        return not sentinel_ai._loopback(cfg.get("base_url") or "")
+    return False
+
+
+def _allowed_cloud(cfg, ref, other):
+    allowed = cfg.get("fallback_cloud_allowed")
+    names = {str(x).strip().lower() for x in (allowed if isinstance(allowed, list) else [])}
+    return bool(names & {str(ref).strip().lower(), ai_models.provider_label(other).lower(), str(other.get("provider")).lower()})
+
+
+CLOUD_HOOKS = []      # functions (from_label, to_label) called when the chain goes from this computer to the internet: the log of actions and the notice are registered by the monitor
+
+
+def cloud_switch(first, used):
+    """Writes down that the chain went from a model on this computer to one on the internet: log of actions, the log of the program and the hooks (the notice). Never raises."""
+    LOG.warning("ai chain went from %s (this computer) to %s (internet)", first, used)
+    try:
+        from github_actions_monitor.security import audit_log
+        audit_log.record({}, "ai.cloud_fallback", target=used[:100], details={"from": first[:100], "to": used[:100]}, force=True)
+    except Exception:   # noqa: BLE001
+        pass
+    for hook in list(CLOUD_HOOKS):
+        try:
+            hook(first, used)
+        except Exception:   # noqa: BLE001
+            pass
 
 
 # ---------- the budget ----------
@@ -243,4 +280,4 @@ def brief_lines(now=None):
 
 
 def reason_text(reason):
-    return i18n.t("ai.chain_" + reason) if reason in ("model_calls", "model_cost", "cost", "retired", "auth", "model_not_found", "quota", "slow", "config", "error", "no_text") else reason
+    return i18n.t("ai.chain_" + reason) if reason in ("model_calls", "model_cost", "cost", "retired", "not_allowed", "auth", "model_not_found", "quota", "slow", "config", "error", "no_text") else reason
