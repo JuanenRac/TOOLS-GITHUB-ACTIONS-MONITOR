@@ -168,7 +168,9 @@ class Fetching(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             owner = sl.toolconfig.github_owner()
             s, _ = self.make(tmp, {f"repos/{owner}/R/actions/permissions": RuntimeError("connection reset")}, {})
-            self.assertEqual(s._fetch_perms("R"), ("R", None))
+            repo, res = s._fetch_perms("R")      # a failure is written down too (asked again in ten minutes, after the repositories never read), not forgotten
+            self.assertEqual((repo, res["error"], "allowed_actions" in res), ("R", "connection reset", False))
+            self.assertLess(res["at"], __import__("time").time() - s.cfg["hygiene_seconds"] + 700)
 
     def test_effective_rules_are_read_from_the_public_endpoints_with_the_branch_quoted(self):
         with tempfile.TemporaryDirectory() as tmp:
