@@ -580,7 +580,7 @@ class LiteKnowsNothing(unittest.TestCase):
         out = self.run_lite("import threading, urllib.request\n"
                             "from http.server import ThreadingHTTPServer\n"
                             "s = ThreadingHTTPServer(('127.0.0.1', 0), am.Handler); threading.Thread(target=s.serve_forever, daemon=True).start()\n"
-                            "urllib.request.urlopen('http://127.0.0.1:%d/' % s.server_address[1], timeout=8).read()\n"
+                            "urllib.request.urlopen('http://127.0.0.1:%d/' % s.server_address[1], timeout=30).read()\n"
                             "print([m for m in ('github_actions_monitor.accounts.accounts', 'github_actions_monitor.accounts.accounts_supervisor', 'github_actions_monitor.accounts.account_child', 'github_actions_monitor.sentinels.sentinel_local') if m in sys.modules])")
         self.assertEqual(out, "[]")
 

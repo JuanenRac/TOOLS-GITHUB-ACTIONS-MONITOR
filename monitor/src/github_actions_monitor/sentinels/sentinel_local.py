@@ -1045,6 +1045,7 @@ class Sentinel:
         self.surface_paused = None   # {"remaining", "needed"} while A10 waits for the allowance, else None
         self.failed_jobs = {}        # "repo|run id" -> the failed jobs of that red run, grouped (causes.summarize_jobs), see _failed_jobs_tick
         self.a2_resolved = {}        # "repo|workflow file" -> last run on the default branch (or none), see _a2_resolve_tick
+        self.tick_began = None       # when the tick in progress began (None between ticks): the calls of the tick are counted from here
         self.a2_reason = "pending"   # why an unresolved workflow is still unresolved: "pending" (waiting its turn) or "quota"
         self.a2_listed = {}          # repository -> when the listing of its last runs was read for the batch way: not asked again before the TTL, whatever it brought
         self.backoff = {}            # question -> (failures in a row, not before): a question that failed is not asked again in the next turn (see _failed_question)
@@ -1390,14 +1391,38 @@ class Sentinel:
             self.error("upstream", error)
             return False
 
+    def _tick_spent(self):
+        """The calls made since this tick began (0 outside a tick): the limit of a tick is ONE count for all the stages, not one for each."""
+        began = self.tick_began
+        if began is None:
+            return 0
+        with self.lock:
+            return len([t for t in self.calls if t >= began])
+
     def _budget(self):
         left = self.cfg["budget_per_hour"] - self.calls_last_hour()
         rate = (self.ctx["data_fn"]() or {}).get("rate")
         if rate and rate["remaining"] < self.cfg["min_rate_remaining"]:
             return 0
-        return max(0, min(self.cfg["max_calls_per_tick"], left))
+        return max(0, min(self.cfg["max_calls_per_tick"] - self._tick_spent(), left))
+
+    def _stage_budget(self, share):
+        """What one stage of the tick may start: the rest of the budget, but never more than its `share` of the calls of a tick, so the stages that come later always have room."""
+        return max(0, min(self._budget(), int(self.cfg["max_calls_per_tick"] * share)))
+
+    def _perms_cost(self):
+        """The requests reading the permissions of ONE repository makes: the permissions and the workflows, plus the two of the rules in force and the community profile when those are on."""
+        hyg = self.cfg["hygiene"]
+        return 2 + (2 if hyg["ruleset_mode"] == "effective" else 0) + (1 if hyg["community_fallback"] else 0)
 
     def tick(self):
+        self.tick_began = time.time()
+        try:
+            return self._tick_stages()
+        finally:
+            self.tick_began = None
+
+    def _tick_stages(self):
         did = False
         if time.time() - self.gql_at > self.cfg["refresh_seconds"]:
             try:
@@ -1406,7 +1431,7 @@ class Sentinel:
             except Exception as error:
                 self.error("graphql", error)
                 self.gql_at = time.time() - self.cfg["refresh_seconds"] + 30
-        budget = self._budget()
+        budget = self._stage_budget(0.25)      # two requests for each repository; a quarter of the calls of the tick at most
         todo = self._alerts_due()
         batch = todo[: max(0, budget // 2)]
         if batch:
@@ -1417,9 +1442,9 @@ class Sentinel:
             self.ok("alerts")
             did = True
         did = self._org_files_tick() or did
-        budget = self._budget()
+        budget = self._stage_budget(0.35)
         todo = self._perms_due()
-        batch = todo[: max(0, min(budget // 2, 20))]
+        batch = todo[: max(0, min(budget // self._perms_cost(), 20))]
         if batch:
             with ThreadPoolExecutor(max_workers=self.cfg["workers"]) as pool:
                 for repo, res in pool.map(self._fetch_perms, batch):

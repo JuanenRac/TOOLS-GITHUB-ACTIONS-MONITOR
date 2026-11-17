@@ -399,6 +399,8 @@ for _g in ("A", "B", "C", "D"):
 # --- The log of actions (Complete only): who changed what, with a chain of hashes; on by default, only names and never values
 _f(_T_SENT, "audit_log", "audit_log.enabled", "bool", restart=False, secure=True)
 _f(_T_SENT, "audit_log", "audit_log.max_mb", "int", (1, 500), restart=False, unit="MB")
+_f(_T_SENT, "audit_log", "audit_log.keep_generations", "int", (1, 20), restart=False, unit="", secure=True)
+_f(_T_SENT, "audit_log", "audit_log.required", "bool", restart=False, secure=True)
 _f(_T_SENT, "audit_log", "audit_log.maintainers_can_read", "bool", restart=False, secure=True)
 # --- Scheduled reports (Complete only): HTML and Markdown on a cron schedule, off by default
 _f(_T_SENT, "report_schedule", "report_schedule.enabled", "bool", restart=False)

@@ -125,8 +125,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `api.v1_enabled` | `false` | advanced | Read API under /api/v1/ |
 | `audit_dir` | `-` | paths | Folder of audit files |
 | `audit_log.enabled` (secure) | `-` | sentinel | Log of actions on |
+| `audit_log.keep_generations` (secure) | `-` | sentinel | Rotated files kept |
 | `audit_log.maintainers_can_read` (secure) | `-` | sentinel | Maintainers may read it |
 | `audit_log.max_mb` | `-` | sentinel | Size before it is rotated |
+| `audit_log.required` (secure) | `-` | sentinel | No action without the log |
 | `auth.allow_bearer` (secure) | `false` | advanced | Tokens for scripts and apps |
 | `auth.audit` (secure) | `true` | advanced | Audit of the accesses |
 | `auth.enabled` (secure) | `false` | advanced | Team mode: users and roles |

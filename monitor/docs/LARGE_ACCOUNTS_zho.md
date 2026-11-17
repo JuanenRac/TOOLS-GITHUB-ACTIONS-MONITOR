@@ -19,3 +19,5 @@
 “配额”标签页显示各来源剩余多少，以及监视器自身花费多少。
 
 对 fork 原仓库的跟踪(`upstream.enabled`)会在面板中说明,按 `upstream.requests_per_hour` 和 `upstream.forks_per_request` 的速度遍历所有 fork 需要多久;若超过 `upstream.refresh_hours`,跟踪就永远不会休息(727 个 fork、每次 8 个、每小时 6 次请求需要 15.2 小时)。最近一小时的请求在重启后会保留,因此重启不会归还配额。
+
+哨兵一次 tick 的调用(`sentinel.max_calls_per_tick`)对其所有阶段是同一个计数;读取连续失败三次的仓库会被搁置 30 秒(翻倍,最多 10 分钟),期间读取其他仓库。
