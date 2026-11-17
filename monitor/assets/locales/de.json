@@ -1120,6 +1120,7 @@
  "cli.token_file_open": "Warnung: {file} ist für andere Benutzer lesbar; beschränke es auf dich selbst (chmod 600).",
  "cli.token_flag_warn": "Warnung: --token erscheint in der Prozessliste; nimm besser die Variable MONITOR_ACCESS_TOKEN oder --token-file mit einer nur für dich lesbaren Datei.",
  "cli.unreachable": "Der Monitor unter {url} ist nicht erreichbar: Läuft er?",
+ "cli.cert_bad": "Der Monitor unter {url} hat geantwortet, aber sein HTTPS-Zertifikat wird nicht als vertrauenswürdig angesehen: Geben Sie die ausstellende Stelle mit --ca-file (oder MONITOR_CA_FILE) an.",
  "col.age": "Alter",
  "col.artifacts": "Artifacts",
  "col.changelog": "CHANGELOG",

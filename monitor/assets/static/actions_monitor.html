@@ -1938,7 +1938,7 @@ function dlgClose(k){dlgs[k].hidden=true;if(LASTFOCUS&&LASTFOCUS.focus)try{LASTF
 function dl(rows){return "<dl class=\"dl\">"+rows.map(r=>`<dt>${esc(r[0])}</dt><dd>${r[2]?r[1]:esc(r[1])}</dd>`).join("")+"</dl>"}
 function aLink(u,t){return `<a href="${esc(safeUrl(u))}" target="_blank" rel="noopener noreferrer">${esc(t||u)}</a>`}
 let ABOUT=null;
-function updLine(u){if(!u)return "";if(u.newer)return T("ui.update_available",{version:u.latest})+" · "+aLink(u.url,T("ui.update_open"))+" · "+aLink(u.changelog,T("ui.update_changelog"));
+function updLine(u){if(!u)return "";if(u.newer)return esc(T("ui.update_available",{version:u.latest}))+" · "+aLink(u.url,T("ui.update_open"))+" · "+aLink(u.changelog,T("ui.update_changelog"));
   if(!u.enabled)return T("ui.update_off");return u.latest?T("ui.update_latest"):T("ui.update_unknown")}
 async function aboutLoad(){try{const r=await fetch("/api/about?"+qlang(),{cache:"no-store"});ABOUT=await r.json()}catch(e){ABOUT=null}return ABOUT}
 async function openAbout(){

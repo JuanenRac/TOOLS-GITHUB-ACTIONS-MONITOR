@@ -1120,6 +1120,7 @@
  "cli.token_file_open": "警告: {file} 其他用户可读取; 请仅限自己访问 (chmod 600)。",
  "cli.token_flag_warn": "警告: --token 会出现在进程列表中; 建议使用环境变量 MONITOR_ACCESS_TOKEN, 或用只有你能读取的文件配合 --token-file。",
  "cli.unreachable": "无法连接 {url} 上的监视器：它在运行吗？",
+ "cli.cert_bad": "{url} 上的监视器已响应，但其 HTTPS 证书不受信任：请用 --ca-file（或 MONITOR_CA_FILE）指定签发它的证书颁发机构。",
  "col.age": "存续时间",
  "col.artifacts": "构建产物",
  "col.changelog": "CHANGELOG",

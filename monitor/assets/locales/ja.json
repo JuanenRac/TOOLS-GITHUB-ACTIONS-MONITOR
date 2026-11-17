@@ -1120,6 +1120,7 @@
  "cli.token_file_open": "警告: {file} は他のユーザーも読み取れます。自分だけに制限してください (chmod 600)。",
  "cli.token_flag_warn": "警告: --token はプロセス一覧に表示されます。環境変数 MONITOR_ACCESS_TOKEN か、自分だけが読めるファイルを指定する --token-file を使ってください。",
  "cli.unreachable": "{url} のモニターに接続できません。起動していますか？",
+ "cli.cert_bad": "{url} のモニターは応答しましたが、HTTPS 証明書が信頼されていません。署名した認証局を --ca-file（または MONITOR_CA_FILE）で指定してください。",
  "col.age": "経過日数",
  "col.artifacts": "アーティファクト",
  "col.changelog": "CHANGELOG",

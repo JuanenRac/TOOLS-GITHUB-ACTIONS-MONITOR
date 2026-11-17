@@ -126,10 +126,13 @@ request_headers = monitor_admin.request_headers
 open_url = monitor_admin.open_url
 
 
-def post_json(base, path, payload, timeout=8, token=""):
-    """(status, document) of the one request with a body this command line makes (see monitor_admin); CliError(2) when nothing answers."""
+def post_json(base, path, payload, timeout=8, token="", guarded=False):
+    """(status, document) of the one request with a body this command line makes (see monitor_admin); CliError(2) when nothing answers or its certificate is not trusted. `guarded`: with the one-use
+    token the monitor asks for before a write."""
     try:
-        return monitor_admin.send_json(base, path, payload, timeout, token)
+        return monitor_admin.send_json(base, path, payload, timeout, token, guarded)
+    except monitor_admin.BadCertificate:
+        raise CliError(EXIT_DOWN, i18n.t("cli.cert_bad", url=base)) from None
     except monitor_admin.Unreachable:
         raise CliError(EXIT_DOWN, i18n.t("cli.unreachable", url=base)) from None
 
@@ -155,7 +158,9 @@ def fetch(base, path, query=None, timeout=8, token=""):
         if error.code == 404:
             raise CliError(EXIT_DEGRADED, i18n.t("cli.not_here", path=path)) from None
         raise CliError(EXIT_DEGRADED, i18n.t("cli.http_error", code=error.code)) from None
-    except (urllib.error.URLError, OSError, ValueError):
+    except (urllib.error.URLError, OSError, ValueError) as error:
+        if monitor_admin.certificate_problem(error):
+            raise CliError(EXIT_DOWN, i18n.t("cli.cert_bad", url=base)) from None
         raise CliError(EXIT_DOWN, i18n.t("cli.unreachable", url=base)) from None
     try:
         data = json.loads(body.decode("utf-8"))
@@ -548,7 +553,8 @@ def read_new_token(path):
     """The token for `credential replace`: the first line of a file, or of the standard input for `-`. Never a command line flag (it would show in the list of processes). CliError(1) if there is none."""
     try:
         if path == "-":
-            line = sys.stdin.readline()
+            buffer = getattr(sys.stdin, "buffer", None)      # the bytes, so the BOM that PowerShell puts in front of a piped text is dropped whatever the code page of the console is
+            line = buffer.readline().decode("utf-8-sig", "replace") if buffer is not None else sys.stdin.readline().lstrip(chr(0xFEFF))
         else:
             with open(path, "r", encoding="utf-8-sig") as handle:
                 line = handle.readline()
@@ -575,7 +581,7 @@ def cmd_credential(ctx):
     path = accounts_path if health.get("supervisor") and accounts_path else ("/api/credential" if not health.get("supervisor") else None)
     if path is None:
         raise CliError(EXIT_USAGE, i18n.t("cli.credential_needs_account"))
-    status, answer = post_json(ctx["base"], path, payload, max(ctx["timeout"], 30.0), ctx["token"])
+    status, answer = post_json(ctx["base"], path, payload, max(ctx["timeout"], 30.0), ctx["token"], guarded=True)
     shown = {k: v for k, v in answer.items() if k != "token"}      # an answer never carries the token, and this command does not print one in any case
     if status in (401, 403):
         raise CliError(EXIT_AUTH, i18n.t("cli.credential_refused", code=answer.get("code") or answer.get("status") or status))
@@ -653,6 +659,9 @@ def main(argv=None):
         CLIENT.update({"session": "", "ca": (args.ca_file or os.environ.get("MONITOR_CA_FILE") or "").strip()})
         if CLIENT["ca"] and not os.path.isfile(CLIENT["ca"]):
             raise CliError(EXIT_USAGE, i18n.t("cli.ca_file_bad", file=CLIENT["ca"]))
+        insecure = plain_http_to_network(ctx["base"])
+        if insecure:
+            print(i18n.t("cli.plain_http", host=insecure), file=sys.stderr)
         who = (args.user or os.environ.get("MONITOR_USER") or "").strip()
         if who and args.command not in ("doctor", "ai-hook"):
             secret_file = (args.password_file or os.environ.get("MONITOR_PASSWORD_FILE") or "").strip()
@@ -660,9 +669,6 @@ def main(argv=None):
             if not password:
                 raise CliError(EXIT_USAGE, i18n.t("cli.password_missing"))
             sign_in(ctx["base"], who, password, ctx["timeout"], ctx["token"])
-        insecure = plain_http_to_network(ctx["base"])
-        if insecure:
-            print(i18n.t("cli.plain_http", host=insecure), file=sys.stderr)
         try:
             payload, lines, code = HANDLERS[args.command](ctx)
         except (AttributeError, TypeError, KeyError, ValueError, IndexError):      # a field of the wrong type in an answer that is an object: degraded, never a traceback
