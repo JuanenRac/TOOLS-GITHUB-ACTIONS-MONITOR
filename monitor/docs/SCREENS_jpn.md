@@ -21,7 +21,7 @@
 |---|---|
 | `ui.orientation` | auto はウィンドウに従い、portrait はパネルを1列に積み、landscape は左右に並べたままにします。 |
 | `ui.rotate_seconds` | 0 = オフ。複数のタブがある画面で、タブを切り替える秒数。 |
-| `ui.screen1_tabs` | /screen/1 のタブ（カンマ区切り）：now, al, rep, les, sent, charts, repos, hist, cfg。空 = すべて。 |
+| `ui.screen1_tabs` | /screen/1 のタブ（カンマ区切り）：now, al, charts, sent, sci, scol, ssec, team, fleet, repos, rep, trep, les, hist, cfg。空 = すべて。 |
 | `ui.screen1_orientation` | /screen/1 だけの auto、portrait、landscape。 |
 | `ui.screen2_tabs` | /screen/2 のタブ。 |
 | `ui.screen2_orientation` | /screen/2 の向き。 |

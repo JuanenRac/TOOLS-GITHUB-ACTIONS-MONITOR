@@ -89,3 +89,9 @@ Every threshold above is a setting of the **Sentinel**, **Surface checks (A10)**
 ## The second sentinel and the list of alerts
 
 Besides this sentinel (CI), the complete edition has the **Collab sentinel**, which watches open issues and pull requests on a clock of its own and never writes to GitHub: [COLLAB.md](COLLAB.md). The **Alerts** tab puts the alerts of both in one list, with a filter by origin and level and local silences that end by themselves (`alerts.mute_hours`); `GET /api/alerts` serves the same list.
+
+## The menu on the left: groups and sentinels
+
+The menu has five groups with a title each (they fold, and the monitor remembers which): *Watch* (Now, Alerts, Charts), *Sentinels* (Summary, CI sentinel, Collab sentinel, Security sentinel), *Team* (Team health, Fleet, Repositories), *Reports and learning* (Reports, Scheduled reports, Lessons, History) and *System* (Settings). Every entry has its own address: `#team-health`, `#fleet`, `#team-reports`, `#reports`, `#lessons`, `#sentinel`, `#sentinel-ci`, `#sentinel-collab` and `#sentinel-security` (also `?view=` with the same words). The old addresses (`#team`, `#sent`, `#alerts/reports`, `#team/fleet`...) open the right panel.
+
+The three sentinels can be switched on or off (`sentinel.enabled`, `sentinels.collab.enabled`, `sentinels.security.enabled`). The menu entry of a sentinel is there only while it is on, and the group *Sentinels* disappears when none is; the page follows the state at its next refresh. An address of a sentinel that is off still opens its panel, which says it is off and has a button that opens its switch in Settings. The panels A1 to A13 belong to the CI sentinel; the badge of each entry counts only the alerts of its own sentinel.

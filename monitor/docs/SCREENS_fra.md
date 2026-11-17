@@ -21,7 +21,7 @@ La page s'adapte à la taille de sa fenêtre, du téléphone à la 4K, à la ver
 |---|---|
 | `ui.orientation` | auto suit la fenêtre ; portrait empile les panneaux en une colonne ; landscape garde la disposition côte à côte. |
 | `ui.rotate_seconds` | 0 = désactivé. Secondes entre les onglets d'un écran qui en a plusieurs. |
-| `ui.screen1_tabs` | Onglets de /screen/1, séparés par des virgules : now, al, rep, les, sent, charts, repos, hist, cfg. Vide = tous. |
+| `ui.screen1_tabs` | Onglets de /screen/1, séparés par des virgules : now, al, charts, sent, sci, scol, ssec, team, fleet, repos, rep, trep, les, hist, cfg. Vide = tous. |
 | `ui.screen1_orientation` | auto, portrait ou landscape pour /screen/1 seulement. |
 | `ui.screen2_tabs` | Onglets de /screen/2. |
 | `ui.screen2_orientation` | Orientation de /screen/2. |

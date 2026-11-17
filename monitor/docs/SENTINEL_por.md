@@ -89,3 +89,9 @@ Cada limiar acima é uma definição dos separadores **Sentinela**, **Verificaç
 ## A segunda sentinela e a lista de alertas
 
 Além desta sentinela (CI), a edição completa tem a **sentinela Collab**, que vigia issues e pull requests abertas com um relógio próprio e nunca escreve no GitHub: [COLLAB_por.md](COLLAB_por.md). O separador **Alertas** reúne os alertas de ambas numa lista, com filtro por origem e nível e silêncios locais que acabam sozinhos (`alerts.mute_hours`); `GET /api/alerts` serve a mesma lista.
+
+## O menu da esquerda: grupos e sentinelas
+
+O menu tem cinco grupos, cada um com um título (dobram-se e o monitor lembra-se de quais): *Vigiar* (Agora, Alertas, Gráficos), *Sentinelas* (Resumo, Sentinela de CI, Sentinela de colaboração, Sentinela de segurança), *Equipa* (Saúde da equipa, Frota, Repositórios), *Relatórios e aprendizagem* (Relatórios, Relatórios agendados, Lições, Histórico) e *Sistema* (Definições). Cada entrada tem o seu endereço: `#team-health`, `#fleet`, `#team-reports`, `#reports`, `#lessons`, `#sentinel`, `#sentinel-ci`, `#sentinel-collab` e `#sentinel-security` (também `?view=` com as mesmas palavras). Os endereços antigos (`#team`, `#sent`, `#alerts/reports`, `#team/fleet`...) abrem o painel certo.
+
+As três sentinelas podem ser ligadas ou desligadas (`sentinel.enabled`, `sentinels.collab.enabled`, `sentinels.security.enabled`). A entrada de uma sentinela só está no menu enquanto estiver ligada, e o grupo *Sentinelas* desaparece quando nenhuma está; a página acompanha o estado na atualização seguinte. O endereço de uma sentinela desligada continua a abrir o seu painel, que diz que está desligada e tem um botão que abre o seu interruptor nas Definições. Os painéis A1 a A13 são da sentinela de CI; o indicador de cada entrada conta só os alertas da sua sentinela.
