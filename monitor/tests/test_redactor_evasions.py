@@ -22,7 +22,7 @@ KNOWN = [
     # (nombre, texto, subcadena que NO debe quedar)
     ("ghp clasico", f"token {T}", T),
     ("ghp pegado a guion bajo", f"x_{T}", T),
-    ("ghp corto 20", "ghp_ABCDEFGHIJKLMNOPQRST", "ghp_ABCDEFGHIJKLMNOPQRST"),
+    ("ghp corto 20", "ghp_" + "ABCDEFGHIJKLMNOPQRST", "ghp_" + "ABCDEFGHIJKLMNOPQRST"),
     ("ghp con ancho cero dentro", T[:10] + "\u200b" + T[10:], T[10:]),
     ("ghp codificado % (gh%70_)", "gh%70_" + T[4:], T[4:]),
     ("ghp fullwidth prefijo", "\uff47\uff48\uff50_" + T[4:], T[4:]),
