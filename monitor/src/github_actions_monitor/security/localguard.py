@@ -353,10 +353,10 @@ def is_this_computer(client_address, headers=None, door=False):
 
 
 def query_access_allowed(config):
-    """True while the deprecated `?access=` address may open the session (`listen.query_access`, default on so that nothing already set up breaks). The token in an address ends up in the
+    """True while the deprecated `?access=` address may open the session (`listen.query_access`, default off since 2.0.9: the token does not travel in an address unless you turn it on). The token in an address ends up in the
     history, the logs and the Referer: turn it off and the session is opened by `POST /api/access` (the token in the body) or by the header."""
     cfg = config.get("listen") if isinstance(config, dict) and isinstance(config.get("listen"), dict) else {}
-    return cfg.get("query_access") is not False
+    return cfg.get("query_access") is True
 
 
 def query_token_counts(command, path, config):

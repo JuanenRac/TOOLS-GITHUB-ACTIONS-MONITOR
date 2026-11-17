@@ -640,7 +640,7 @@
  "cfg.h.listen.max_failed_attempts": "一分钟内出现这么多次错误令牌后，该地址将被拒绝五分钟。",
  "cfg.h.listen.network": "关闭 = 仅 127.0.0.1。开启 = 同时监听下面的地址,每个请求都需要访问令牌,页面会显示警告。需要重启。 警告:没有 HTTPS 时,令牌和数据以明文传输;使用前请设置证书(listen.tls_cert_file)或 HTTPS 代理。 第一步: 关闭 listen.query_access, 并使用 HTTPS 或 VPN。",
  "cfg.h.listen.proxy_public_host": "适用于默认端口（443）上的 HTTPS 代理，它转发的 Host 和 Origin 不带端口：这是唯一按原样接受的主机名。留空 = 无。仅在 HTTPS 启用时生效（直接 HTTPS，或访问 Cookie 已标记为 Secure）。不能是带端口、路径或用户名的地址。",
- "cfg.h.listen.query_access": "已弃用。?access= 地址会打开一次会话,但令牌会留在历史记录、日志和 Referer 中。关闭后,只能通过 POST /api/access(正文中的令牌)或请求头打开会话。",
+ "cfg.h.listen.query_access": "已弃用,默认关闭。开启后,?access= 地址会打开一次会话,但令牌会留在历史记录、日志和 Referer 中。关闭后,只能通过 POST /api/access(正文中的令牌)或请求头打开会话。",
  "cfg.h.listen.secure_cookie": "当监视器前面有 HTTPS 代理时开启（直接 HTTPS 时会自动标记）。令牌不能代替加密：在你无法控制的网络中请使用 HTTPS。",
  "cfg.h.listen.tls_cert_file": "可选。与下方密钥一起，监视器使用你的证书自行提供 HTTPS（TLS 1.2 或更高）。文件无法使用时监视器不会启动。需要重启。",
  "cfg.h.listen.tls_key_file": "与证书配套的密钥。请保存在监视器文件夹之外；不会被显示或复制。",

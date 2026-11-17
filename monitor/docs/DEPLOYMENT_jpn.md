@@ -109,7 +109,7 @@ launchd（macOS）: `ProgramArguments` = `/usr/bin/python3`、`-m`、`github_act
 | `MONITOR_LOCAL_PORT` | プロキシ宣言時にコンピューターの前にいる人のための、ループバック専用の 2 つ目のポート（`listen.local_port`。イメージでは 8766）。 |
 | `MONITOR_TLS_CERT_FILE` | HTTPS を直接提供するための証明書（PEM、`listen.tls_cert_file`）。鍵とともに指定します。使えない場合、モニターは平文 HTTP では起動しません。 |
 | `MONITOR_TLS_KEY_FILE` | その証明書の秘密鍵（`listen.tls_key_file`）。 |
-| `MONITOR_QUERY_ACCESS` | `0` = `?access=` 付きのアドレスではセッションを開きません（`listen.query_access`）。`POST /api/access` を使ってください。 |
+| `MONITOR_QUERY_ACCESS` | `1` = `?access=` 付きのアドレスでセッションを開けるようにします（`listen.query_access`、既定はオフ）。安全なのは `POST /api/access` です。 |
 | `MONITOR_TEAM_MODE` | `1` = チームモード（`auth.enabled`）: ユーザー、ロール、セッション。 |
 | `MONITOR_ADMIN_USER` | `MONITOR_ADMIN_PASSWORD_FILE` と併用: チームモードがオンでユーザーがまだいないときにサービスが作成する最初の管理者。 |
 | `MONITOR_ADMIN_PASSWORD_FILE` | `MONITOR_ADMIN_USER` のパスワードを 1 行目に書いたファイル(たとえば Docker シークレット)。 |

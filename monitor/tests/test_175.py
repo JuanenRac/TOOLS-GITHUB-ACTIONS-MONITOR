@@ -197,21 +197,26 @@ class StatusBarAddress(unittest.TestCase):
 
 
 class QueryAccess(unittest.TestCase):
-    def test_the_address_works_by_default_but_only_on_a_get(self):
-        self.assertTrue(localguard.query_access_allowed({}))
-        self.assertTrue(localguard.query_token_counts("GET", "/?access=x", {}))
-        self.assertFalse(localguard.query_token_counts("POST", "/api/settings?access=x", {}))
+    def test_the_address_is_refused_by_default_and_only_counts_on_a_get_when_turned_on(self):
+        self.assertFalse(localguard.query_access_allowed({}))
+        self.assertFalse(localguard.query_token_counts("GET", "/?access=x", {}))
+        on = {"listen": {"query_access": True}}
+        self.assertTrue(localguard.query_token_counts("GET", "/?access=x", on))
+        self.assertFalse(localguard.query_token_counts("POST", "/api/settings?access=x", on))
 
-    def test_the_switch_turns_it_off(self):
+    def test_the_switch_turns_it_on(self):
         config = {"listen": {"query_access": False}}
         self.assertFalse(localguard.query_access_allowed(config))
         self.assertFalse(localguard.query_token_counts("GET", "/?access=x", config))
-        self.assertTrue(localguard.query_access_allowed({"listen": {"query_access": "no"}}))        # only a real false turns it off
+        self.assertFalse(localguard.query_access_allowed({"listen": {"query_access": "yes"}}))        # only a real true turns it on
+        self.assertTrue(localguard.query_access_allowed({"listen": {"query_access": True}}))
 
     def test_a_real_server_follows_the_switch_and_the_post_keeps_working(self):
         access = "T" * 24
-        with LiveServer({}, network=access) as server:
+        with LiveServer({"listen": {"query_access": True}}, network=access) as server:
             self.assertEqual(server.call("/api/about?access=" + access, headers=JSON)[0], 200)
+        with LiveServer({}, network=access) as server:
+            self.assertEqual(server.call("/api/about?access=" + access, headers=JSON)[0], 401)
         with LiveServer({"listen": {"query_access": False}}, network=access) as server:
             self.assertEqual(server.call("/api/about?access=" + access, headers=JSON)[0], 401)
             status, _ = server.call("/api/access", {"token": access})
@@ -220,12 +225,12 @@ class QueryAccess(unittest.TestCase):
     def test_the_redirect_marks_the_address_as_deprecated(self):
         text = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         self.assertIn('self.send_header("Deprecation", "true")', text)
-        self.assertTrue(am.DEFAULTS["listen"]["query_access"])
+        self.assertIs(am.DEFAULTS["listen"]["query_access"], False)
 
     def test_the_setting_is_in_the_schema_the_example_and_the_eight_languages(self):
         from github_actions_monitor.app import settings_api
         self.assertIn("listen.query_access", settings_api.META)
-        self.assertIs(json.loads((HERE / "assets" / "examples" / "actions_monitor.example.json").read_text(encoding="utf-8"))["listen"]["query_access"], True)
+        self.assertIs(json.loads((HERE / "assets" / "examples" / "actions_monitor.example.json").read_text(encoding="utf-8"))["listen"]["query_access"], False)
         for lang in LANGS:
             for key in ("cfg.f.listen.query_access", "cfg.h.listen.query_access", "mon.network_token_deprecated", "mon.network_token_post"):
                 self.assertNotEqual(i18n.tl(lang, key), key, (lang, key))

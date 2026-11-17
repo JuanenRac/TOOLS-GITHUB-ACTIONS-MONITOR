@@ -109,7 +109,7 @@ Gelesen werden nur die Namen dieser Tabelle. Im Dienst wird ein nicht lesbarer W
 | `MONITOR_LOCAL_PORT` | Ein zweiter Port, nur Loopback, für die Person am Rechner, wenn ein Proxy angemeldet ist (`listen.local_port`; im Image 8766). |
 | `MONITOR_TLS_CERT_FILE` | Ein Zertifikat (PEM), um HTTPS direkt auszuliefern (`listen.tls_cert_file`); mit Schlüssel. Ist es unbrauchbar, startet der Monitor nicht mit reinem HTTP. |
 | `MONITOR_TLS_KEY_FILE` | Der private Schlüssel dieses Zertifikats (`listen.tls_key_file`). |
-| `MONITOR_QUERY_ACCESS` | `0` = die Adresse mit `?access=` öffnet keine Sitzung mehr (`listen.query_access`); verwenden Sie `POST /api/access`. |
+| `MONITOR_QUERY_ACCESS` | `1` = die Adresse mit `?access=` darf eine Sitzung öffnen (`listen.query_access`, standardmäßig aus); sicher ist `POST /api/access`. |
 | `MONITOR_TEAM_MODE` | `1` = der Teammodus (`auth.enabled`): Benutzer, Rollen und Sitzungen. |
 | `MONITOR_ADMIN_USER` | Zusammen mit `MONITOR_ADMIN_PASSWORD_FILE`: der erste Administrator, den der Dienst anlegt, wenn der Teammodus an ist und es noch keinen Benutzer gibt. |
 | `MONITOR_ADMIN_PASSWORD_FILE` | Die Datei (zum Beispiel ein Docker-Secret) mit dem Passwort von `MONITOR_ADMIN_USER` in der ersten Zeile. |

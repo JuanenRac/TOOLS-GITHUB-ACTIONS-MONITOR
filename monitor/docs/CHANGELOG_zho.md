@@ -9,6 +9,10 @@
 
 ## [Unreleased]
 
+### 安全
+
+- **访问令牌默认不再出现在地址中(`listen.query_access` 现在默认关闭)**:在网络模式下,带 `?access=` 的地址会打开会话,但令牌会留在历史记录、日志和 `Referer` 中。该设置现在默认关闭,除非你开启它(默认值、示例文件和设置帮助都已说明);会话通过 `POST /api/access`(正文中的令牌)或请求头 `X-Monitor-Access` 打开。自己写过 `listen.query_access` 的安装会保留其值;依赖旧默认值并通过带 `?access=` 的地址打开监视器的,需要开启该设置或改用 `POST /api/access`。环境变量 `MONITOR_QUERY_ACCESS=1` 可为服务开启它。
+
 ## [2.0.8]
 
 ### 安全

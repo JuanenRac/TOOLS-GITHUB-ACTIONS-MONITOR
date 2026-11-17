@@ -596,7 +596,7 @@ class NetworkMode(unittest.TestCase):
 
     def test_a_first_visit_with_the_token_in_the_address_sets_the_cookie_and_cleans_the_address(self):
         access = "T" * 24
-        with LiveServer({}, network=access) as server:
+        with LiveServer({"listen": {"query_access": True}}, network=access) as server:
             class NoFollow(urllib.request.HTTPRedirectHandler):
                 def redirect_request(self, *args, **kwargs):
                     return None
