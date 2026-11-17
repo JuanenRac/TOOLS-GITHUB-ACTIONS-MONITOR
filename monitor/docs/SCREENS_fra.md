@@ -126,3 +126,17 @@ L'onglet Maintenant en quatre tailles, avec des données inventées (4K, un moni
 ![tourné 1080x1920](../../docs/screenshots/web_size_portrait_light.png)
 
 ![téléphone 390x844](../../docs/screenshots/web_size_phone_light.png)
+
+Les trois écrans muraux en 4K et sur un moniteur tourné, avec des données inventées :
+
+![Vue d'ensemble 4K 3840x2160](../../docs/screenshots/web_screen_overview_4k.png)
+
+![Vue d'ensemble 1080x1920](../../docs/screenshots/web_screen_overview_portrait.png)
+
+![En ce moment 4K 3840x2160](../../docs/screenshots/web_screen_now_4k.png)
+
+![En ce moment 1080x1920](../../docs/screenshots/web_screen_now_portrait.png)
+
+![Sentinelles 4K 3840x2160](../../docs/screenshots/web_screen_sentinels_4k.png)
+
+![Sentinelles 1080x1920](../../docs/screenshots/web_screen_sentinels_portrait.png)

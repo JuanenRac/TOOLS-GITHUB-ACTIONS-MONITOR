@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2819_passing-brightgreen.svg" alt="2819 tests">
+  <img src="https://img.shields.io/badge/Tests-2824_passing-brightgreen.svg" alt="2824 tests">
 </p>
 
 > Überwacht die Workflows aller deiner Repositories und zeigt dir auf einer lokalen Seite, was rot ist, was hängt und was auf dich wartet.
@@ -81,7 +81,7 @@
 | | |
 |---|---|
 | **Reifegrad** | functional |
-| **Tests** | 2819 Testmethoden (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 2824 Testmethoden (`python -m unittest discover -s monitor/tests`) |
 | **Einstellungen** | 553 Einstellungen, alle mit Hilfe |
 | **Sprachen** | 8 (Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch) |
 | **Im CI getestet auf** | ubuntu, windows, Python 3.11, 3.13 |
@@ -153,6 +153,9 @@ Ein zweites, einfacheres Produkt im selben Paket: die Seite dessen, was läuft u
 ### Die Seite
 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="Jetzt" width="92%"></picture></p>
+<p align="center"><img src="docs/screenshots/web_screen_overview_1080p.png" alt="Wandanzeige: Übersicht" width="92%"></p>
+<p align="center"><img src="docs/screenshots/web_screen_now_1080p.png" alt="Wandanzeige: Gerade jetzt" width="92%"></p>
+<p align="center"><img src="docs/screenshots/web_screen_sentinels_1080p.png" alt="Wandanzeige: Wächter" width="92%"></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_alerts_light.png"><img src="docs/screenshots/web_alerts_dark.png" alt="Alarme: alle Wächter in einer Liste, mit lokalen Stummschaltungen" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_light.png"><img src="docs/screenshots/web_sentinel_dark.png" alt="Wächter" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_queue_light.png"><img src="docs/screenshots/web_sentinel_queue_dark.png" alt="Signatur-Warteschlange (Dringendstes zuerst)" width="92%"></picture></p>

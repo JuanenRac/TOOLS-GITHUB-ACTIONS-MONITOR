@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2819_passing-brightgreen.svg" alt="2819 tests">
+  <img src="https://img.shields.io/badge/Tests-2824_passing-brightgreen.svg" alt="2824 tests">
 </p>
 
 > Controlla i workflow di tutti i tuoi repository e ti dice, su una pagina locale, cosa è rosso, cosa è bloccato e cosa ti aspetta.
@@ -81,7 +81,7 @@
 | | |
 |---|---|
 | **Maturità** | functional |
-| **Test** | 2819 metodi di test (`python -m unittest discover -s monitor/tests`) |
+| **Test** | 2824 metodi di test (`python -m unittest discover -s monitor/tests`) |
 | **Impostazioni** | 553 impostazioni, tutte con aiuto |
 | **Lingue** | 8 (inglese, spagnolo, tedesco, francese, italiano, giapponese, cinese e portoghese) |
 | **Provato nel CI su** | ubuntu, windows, Python 3.11, 3.13 |
@@ -153,6 +153,9 @@ Un secondo prodotto, più semplice, nello stesso pacchetto: la pagina di ciò ch
 ### La pagina
 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="Adesso" width="92%"></picture></p>
+<p align="center"><img src="docs/screenshots/web_screen_overview_1080p.png" alt="Schermo da parete: panoramica" width="92%"></p>
+<p align="center"><img src="docs/screenshots/web_screen_now_1080p.png" alt="Schermo da parete: in questo momento" width="92%"></p>
+<p align="center"><img src="docs/screenshots/web_screen_sentinels_1080p.png" alt="Schermo da parete: sentinelle" width="92%"></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_alerts_light.png"><img src="docs/screenshots/web_alerts_dark.png" alt="Avvisi: tutte le sentinelle in un elenco, con silenziamenti locali" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_light.png"><img src="docs/screenshots/web_sentinel_dark.png" alt="Sentinella" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_queue_light.png"><img src="docs/screenshots/web_sentinel_queue_dark.png" alt="Coda di firma (prima il più urgente)" width="92%"></picture></p>

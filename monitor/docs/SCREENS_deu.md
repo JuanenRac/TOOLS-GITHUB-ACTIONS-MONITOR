@@ -126,3 +126,17 @@ Der Reiter Jetzt in vier Größen, mit erfundenen Daten (4K, ein 21:9-Monitor, e
 ![gedreht 1080x1920](../../docs/screenshots/web_size_portrait_light.png)
 
 ![Smartphone 390x844](../../docs/screenshots/web_size_phone_light.png)
+
+Die drei Wandanzeigen in 4K und auf einem gedrehten Monitor, mit erfundenen Daten:
+
+![Übersicht 4K 3840x2160](../../docs/screenshots/web_screen_overview_4k.png)
+
+![Übersicht 1080x1920](../../docs/screenshots/web_screen_overview_portrait.png)
+
+![Gerade jetzt 4K 3840x2160](../../docs/screenshots/web_screen_now_4k.png)
+
+![Gerade jetzt 1080x1920](../../docs/screenshots/web_screen_now_portrait.png)
+
+![Wächter 4K 3840x2160](../../docs/screenshots/web_screen_sentinels_4k.png)
+
+![Wächter 1080x1920](../../docs/screenshots/web_screen_sentinels_portrait.png)

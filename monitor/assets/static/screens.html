@@ -21,7 +21,8 @@ html[data-density=large]{--d:1.12}
 body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Sans CJK SC","Noto Sans CJK JP",sans-serif;background:radial-gradient(120% 90% at 50% 0%,var(--bg2),var(--bg));height:100vh;overflow:hidden;font-size:1rem;line-height:1.25;transition:filter 2s,opacity .6s}
 body.dim{filter:brightness(.35)}
 body.offline #stage{opacity:.5;filter:grayscale(.7)}
-#stage{position:absolute;inset:0;display:flex;flex-direction:column;padding:1rem 1.2rem .8rem;gap:.7rem;transition:transform 30s linear,opacity .6s,filter .6s}
+#wrap{position:absolute;inset:0;overflow:hidden}
+#stage{position:absolute;inset:0;transform:translate(calc(var(--sx,0)*.3rem),calc(var(--sy,0)*.3rem));display:flex;flex-direction:column;padding:1rem 1.2rem .8rem;gap:.7rem;transition:transform 30s linear,opacity .6s,filter .6s}
 header{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex:0 0 auto}
 .brand{display:flex;align-items:center;gap:.7rem;min-width:0}
 .brand b{font-size:1.5rem;letter-spacing:.02em;white-space:nowrap}
@@ -186,17 +187,38 @@ svg{display:block}
 </style>
 </head>
 <body>
-<div id="stage">
+<div id="wrap"><div id="stage">
 <header>
  <div class="brand"><span class="pulse" aria-hidden="true"></span><b id="h-title"></b><span class="tag" id="h-tag"></span></div>
  <div class="mid"><div class="dots" id="h-dots" aria-hidden="true"></div></div>
  <div class="clock" id="clock" aria-live="off"></div>
 </header>
 <div id="banner" role="status" hidden></div>
+<main class="screen" id="s-overview" aria-labelledby="h-title">
+ <section class="card" id="a-score" style="--i:0"><h2 id="a-score-h"></h2><div class="body"><div class="scorebox"><div class="ring" id="r-score"></div><div><div class="letter" id="score-letter"></div><div class="mut" id="score-trend"></div></div></div></div></section>
+ <section class="card" id="a-fleet" style="--i:1"><h2 id="a-fleet-h"></h2><div class="body"><div class="fleet" id="fleet"></div></div></section>
+ <section class="card" id="a-trend" style="--i:2"><h2 id="a-trend-h"></h2><div class="body" style="display:grid;grid-template-columns:1.7fr 1fr;gap:.9rem"><div style="display:flex;flex-direction:column;min-height:0;gap:.3rem"><div class="legend" id="trend-leg"></div><div class="chart" id="ch24"></div></div><div style="display:flex;flex-direction:column;min-height:0;gap:.3rem"><div class="mut" id="ch7-h"></div><div class="chart" id="ch7"></div></div></div></section>
+ <section class="card" id="a-heat" style="--i:3"><h2 id="a-heat-h"></h2><div class="body"><div class="heat" id="heat"></div></div></section>
+ <section class="card" id="a-top" style="--i:4"><h2 id="a-top-h"></h2><div class="body"><div class="list" id="top-red"></div></div></section>
+ <section class="card" id="a-queue" style="--i:5"><h2 id="a-queue-h"></h2><div class="body"><div class="list" id="queue"></div></div></section>
+ <section class="card" id="a-events" style="--i:6"><h2 id="a-events-h"></h2><div class="body"><div class="ticker" id="events"></div></div></section>
+ <section class="card" id="a-api" style="--i:7"><h2 id="a-api-h"></h2><div class="body"><div class="gauge" id="gauge"></div><div class="mut" id="api-note" style="text-align:center"></div></div></section>
+</main>
+<main class="screen" id="s-now" aria-labelledby="h-title" hidden>
+ <section class="card" id="n-run" style="--i:0"><h2 id="n-run-h"></h2><div class="body"><div class="list" id="n-run-l"></div></div></section>
+ <section class="card" id="n-queue" style="--i:1"><h2 id="n-queue-h"></h2><div class="body"><div class="list" id="n-queue-l"></div></div></section>
+ <section class="card" id="n-fail" style="--i:2"><h2 id="n-fail-h"></h2><div class="body"><div class="list" id="n-fail-l"></div></div></section>
+ <section class="card" id="n-appr" style="--i:3"><h2 id="n-appr-h"></h2><div class="body"><div class="list" id="n-appr-l"></div></div></section>
+ <section class="card" id="n-merge" style="--i:4"><h2 id="n-merge-h"></h2><div class="body"><div class="list" id="n-merge-l"></div></div></section>
+ <section class="card" id="n-tl" style="--i:5"><h2 id="n-tl-h"></h2><div class="body"><div class="timeline" id="timeline"></div></div></section>
+</main>
+<main class="screen" id="s-sentinels" aria-labelledby="h-title" hidden>
+ <div id="c-side"><section class="card" id="c-radar" style="--i:0"><h2 id="c-radar-h"></h2><div class="body"><div class="radar" id="radar"></div></div></section><section class="card" id="c-alerts" style="--i:1"><h2 id="c-alerts-h"></h2><div class="body"><div class="bars" id="c-bars"></div></div></section></div>
+ <div class="sen-grid" id="c-cards"></div>
+</main>
 
-<main class="screen" id="s-shell" aria-labelledby="h-title"></main>
 <div class="foot"><span id="f-left"></span><span id="f-right"></span></div>
-</div>
+</div></div>
 <button type="button" class="kiosk" id="fs"></button>
 <script>
 "use strict";
@@ -238,6 +260,49 @@ function tween(el,to,fmt){
   const step=now=>{const k=Math.min(1,(now-t0)/span),e=1-Math.pow(1-k,3);el.textContent=fmt(from+(to-from)*e);if(k<1)el._raf=requestAnimationFrame(step);else el.textContent=fmt(to)};
   el._raf=requestAnimationFrame(step);
 }
+/* ---------- own charts: ring, gauge, area, bars, heat, radar (SVG, no library) ---------- */
+const CIRC=2*Math.PI*42;
+function ring(el,value,color,mid,sub){
+  if(!el.firstChild){el.innerHTML='<svg viewBox="0 0 100 100" aria-hidden="true"><circle class="trk" cx="50" cy="50" r="42"/><circle class="arc" cx="50" cy="50" r="42" stroke-dasharray="'+CIRC+'" stroke-dashoffset="'+CIRC+'"/></svg><div class="mid2"><b></b><span></span></div>'}
+  const arc=el.querySelector(".arc");arc.style.stroke=color;
+  const set=()=>{arc.style.strokeDashoffset=String(CIRC*(1-(value==null?0:value)))};
+  if(el._drawn)set();else{el._drawn=true;requestAnimationFrame(()=>requestAnimationFrame(set))}
+  const b=el.querySelector("b");if(typeof mid==="number")tween(b,mid);else b.textContent=mid==null?"–":mid;
+  el.querySelector("span").textContent=sub||"";
+}
+function areaSvg(series,keys,colors,w,h){
+  /* stacked area of the keys (the first is at the bottom); viewBox is 0..w, 0..h and stretches to the box */
+  const n=series.length;if(n<2)return "";
+  const tot=series.map(p=>keys.reduce((a,k)=>a+num(p[k]),0)),max=Math.max(1,...tot);
+  const x=i=>(i/(n-1)*w).toFixed(2),y=v=>(h-4-(v/max)*(h-10)).toFixed(2);
+  let out='<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" role="img" aria-label="'+esc(T("ui.scr_chart_aria",{n:n}))+'">';
+  for(let g=1;g<4;g++)out+='<line x1="0" x2="'+w+'" y1="'+(h*g/4).toFixed(1)+'" y2="'+(h*g/4).toFixed(1)+'" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>';
+  const base=series.map(()=>0);
+  keys.forEach((k,ki)=>{
+    const top=series.map((p,i)=>base[i]+num(p[k]));
+    const up=top.map((v,i)=>x(i)+","+y(v)).join(" L"),dn=base.map((v,i)=>x(n-1-i)+","+y(base[n-1-i])).join(" L");
+    out+='<path d="M'+up+" L"+dn+' Z" fill="'+colors[ki]+'" fill-opacity=".28" stroke="none"/>';
+    if(ki===0)out+='<path class="line area" d="M'+up+'" fill="none" stroke="'+colors[ki]+'" stroke-width="2.4" stroke-linejoin="round" vector-effect="non-scaling-stroke" style="--len:'+(w*4)+'"/>';
+    top.forEach((v,i)=>{base[i]=v});
+  });
+  return out+"</svg>";
+}
+function gaugeSvg(el,frac,color,text,sub){
+  if(!el.firstChild){el.innerHTML='<svg viewBox="0 0 100 58" aria-hidden="true"><path class="trk" d="M10 52 A40 40 0 0 1 90 52"/><path class="arc" d="M10 52 A40 40 0 0 1 90 52" stroke-dasharray="126" stroke-dashoffset="126"/></svg><div class="mid2"><b></b><div class="mut"></div></div>'}
+  const arc=el.querySelector(".arc");arc.style.stroke=color;
+  const set=()=>{arc.style.strokeDashoffset=String(126*(1-(frac==null?0:frac)))};
+  if(el._drawn)set();else{el._drawn=true;requestAnimationFrame(()=>requestAnimationFrame(set))}
+  const b=el.querySelector("b");if(typeof text==="number")tween(b,text,v=>Math.round(v).toLocaleString(D.locale));else b.textContent=text;
+  el.querySelector(".mid2 .mut").textContent=sub||"";
+}
+function fit(list){
+  /* a list shows only the rows that fit its box: nothing is cut in half and nothing scrolls */
+  if(!list)return;[...list.children].forEach(c=>{c.hidden=false});
+  let guard=list.children.length;
+  while(guard-->0&&list.scrollHeight>list.clientHeight+1){let last=null;for(let i=list.children.length-1;i>=0;i--){if(!list.children[i].hidden){last=list.children[i];break}}if(!last)break;last.hidden=true}
+}
+const lampHtml=l=>'<span class="ico lamp l-'+esc(l)+' '+esc(l)+'" aria-hidden="true"></span>';
+const levelWord=l=>T("ui.lv_"+l);
 /* ---------- the common frame ---------- */
 const titles={overview:"ui.scr_title_overview",now:"ui.scr_title_now",sentinels:"ui.scr_title_sentinels"};
 function frame(){
@@ -262,8 +327,8 @@ function nightDim(d){
 }
 function burnIn(){
   if(!S.burn_in_protection)return;
-  const r=()=>Math.round((Math.random()*2-1)*6);
-  const move=()=>{$("stage").style.transform="translate("+r()+"px,"+r()+"px)"};
+  const r=()=>(Math.random()*2-1).toFixed(2);
+  const move=()=>{$("stage").style.setProperty("--sx",r());$("stage").style.setProperty("--sy",r())};
   move();setInterval(move,60000);
 }
 function banner(kind,text){
@@ -292,6 +357,122 @@ function newFails(keys){
   return {isNew,fixed};
 }
 function flash(el,cls){if(!el||reduce)return;el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls)}
+/* ---------- overview ---------- */
+function renderOverview(d){
+  $("a-score-h").textContent=T("ui.scr_score");$("a-fleet-h").textContent=T("ui.scr_fleet");$("a-trend-h").textContent=T("ui.scr_trend");$("a-heat-h").textContent=T("ui.scr_heat");
+  $("a-top-h").textContent=T("ui.scr_top_red");$("a-queue-h").textContent=T("ui.scr_queue");$("a-events-h").textContent=T("ui.scr_events");$("a-api-h").textContent=T("ui.scr_api");
+  const sc=d.score||{},f=d.fleet||{};
+  const has=sc.state==="scored"&&sc.value!=null;
+  const col=!has?"var(--mut)":sc.value>=80?"var(--ok)":sc.value>=60?"var(--warn)":"var(--bad)";
+  ring($("r-score"),has?sc.value/100:0,col,has?Math.round(sc.value):"–",has?"/ 100":T(sc.state==="off"?"ui.scr_score_off":"ui.scr_score_calibrating"));
+  $("score-letter").textContent=has&&sc.letter?sc.letter:"";$("score-letter").style.color=col;
+  $("score-trend").textContent=has&&sc.trend!=null?(sc.trend>0?"▲ +":sc.trend<0?"▼ ":"= ")+sc.trend:"";
+  /* fleet */
+  const tiles=[["green","t-ok",f.green],["red","t-bad",f.red],["stuck","t-warn",f.stuck],["waiting","t-info",f.waiting]];
+  const fl=$("fleet");
+  if(!fl.firstChild){fl.innerHTML=tiles.map(([k,c])=>'<div class="tile '+c+'" id="ft-'+k+'"><div class="big"></div><div class="lab"><span class="ico lamp l-'+(k==="green"?"ok":k==="red"?"bad":k==="stuck"?"warn":"info")+'" aria-hidden="true"></span><span></span></div></div>').join("")}
+  tiles.forEach(([k,c,v])=>{const t=$("ft-"+k);tween(t.querySelector(".big"),num(v));t.querySelector(".lab span:last-child").textContent=T("ui.scr_"+k)+(k==="green"?" · "+T("ui.scr_of",{n:num(f.total)}):"");});
+  const redTile=$("ft-red");if(num(f.red)>0)failMark(redTile,"fleet-red",null);else{redTile.classList.remove("fail","calm")}
+  /* trend */
+  const lg=$("trend-leg");lg.innerHTML='<span><i style="background:var(--ok)"></i>'+esc(T("ui.scr_runs_ok"))+'</span><span><i style="background:var(--bad)"></i>'+esc(T("ui.scr_runs_bad"))+"</span><span>"+esc(T("ui.scr_h24"))+"</span>";
+  const a24=areaSvg(d.trend24||[],["ok","bad"],["var(--ok)","var(--bad)"],240,80);
+  $("ch24").innerHTML=a24+'<div class="axis"><span>'+esc(T("ui.scr_ago",{dur:"24 "+T("ui.scr_u_h")}))+"</span><span>"+esc(T("ui.scr_now"))+"</span></div>";
+  $("ch7-h").textContent=T("ui.scr_d7");
+  $("ch7").innerHTML=areaSvg(d.trend7d||[],["ok","bad"],["var(--ok)","var(--bad)"],120,80)+'<div class="axis"><span>'+esc(T("ui.scr_ago",{dur:"7 "+T("ui.scr_u_d")}))+"</span><span>"+esc(T("ui.scr_now"))+"</span></div>";
+  /* heat */
+  const heat=$("heat");
+  heat.innerHTML=(d.heat||[]).map(r=>'<div class="hr'+(r.red?" red":"")+'"><div class="hn" title="'+esc(r.repo)+'">'+(r.red?'<span class="ico lamp l-bad" aria-hidden="true"></span>':"")+esc(r.repo)+"</div>"+r.cells.map(c=>'<div class="c c'+c+'"></div>').join("")+"</div>").join("")||'<div class="empty">'+esc(T("ui.scr_none"))+"</div>";
+  /* top red */
+  const tr=$("top-red"),top=d.top_red||[];
+  tr.innerHTML=top.length?top.map((r,i)=>'<div class="failrow" id="tr-'+i+'"><span class="ico lamp l-bad bad" aria-hidden="true"></span><span class="nm" title="'+esc(r.repo+" "+r.workflow)+'"><b>'+esc(r.repo)+"</b> "+esc(r.workflow)+'</span><span class="v">'+esc(r.seconds==null?"–":dur(r.seconds))+"</span></div>").join(""):'<div class="empty"><span class="ico lamp l-ok ok" aria-hidden="true"></span>'+esc(T("ui.scr_nothing_red"))+"</div>";
+  top.forEach((r,i)=>failMark($("tr-"+i),"top:"+r.repo+":"+r.workflow,r.seconds));
+  fit(tr);
+  /* queue */
+  const q=d.queue||{};
+  $("queue").innerHTML=[["ui.scr_running",q.running,"info"],["ui.scr_queued",q.queued,"warn"],["ui.scr_approval",q.approval,"warn"],["ui.scr_min24",q.minutes24,"ok"],["ui.scr_min7",q.minutes7d,"mut"]].map(([k,v,c])=>'<div class="row"><span class="nm">'+esc(T(k))+'</span><b class="'+c+'" style="font-size:1.6rem;font-variant-numeric:tabular-nums">'+esc(num(v).toLocaleString(D.locale))+"</b></div>").join("");
+  fit($("queue"));
+  /* events */
+  const ev=d.events||[];
+  $("events").innerHTML=ev.length?ev.map(e=>'<div class="ev">'+lampHtml(e.kind==="ok"?"ok":e.kind==="bad"?"bad":e.kind==="skip"?"unknown":"info")+'<span class="nm" title="'+esc(e.repo+" "+e.workflow)+'"><b>'+esc(e.repo)+"</b> "+esc(e.workflow)+'</span><span class="'+(e.kind==="bad"?"bad":"mut")+'">'+esc(T("ui.scr_ev_"+e.kind))+'</span><span class="v">'+esc(ago(e.ago))+"</span></div>").join(""):'<div class="empty">'+esc(T("ui.scr_none"))+"</div>";
+  fit($("events"));
+  /* api */
+  const api=(d.meta||{}).api||{};
+  const frac=api.limit>0&&api.remaining!=null?api.remaining/api.limit:null;
+  gaugeSvg($("gauge"),frac,api.low?"var(--bad)":frac!=null&&frac<.3?"var(--warn)":"var(--cy)",api.remaining==null?"–":num(api.remaining),api.limit?"/ "+num(api.limit).toLocaleString(D.locale):"");
+  $("api-note").textContent=api.reset_seconds!=null?T("ui.scr_api_reset",{dur:dur(api.reset_seconds)}):"";
+  const al=d.alerts||{};
+  $("f-right").textContent=T("ui.scr_alerts_open",{n:num(al.total)});
+  return [...(top.map(r=>"top:"+r.repo+":"+r.workflow)),...(num(f.red)>0?["fleet-red"]:[])];
+}
+/* ---------- now ---------- */
+function runRow(r){
+  const prog=r.progress!=null?'<div class="bar"><i style="width:0" data-w="'+Math.round(r.progress*100)+'"></i></div>':'<div class="bar ind"><i></i></div>';
+  return '<div class="rowbar'+(r.stuck?" stuck":"")+'"><div class="top"><span class="nm" title="'+esc(r.repo+" "+r.workflow)+'">'+esc(r.repo)+" "+'<span class="mut" style="font-weight:400">'+esc(r.workflow)+'</span></span>'+(r.stuck?'<span class="chip warn">'+esc(T("ui.scr_stuck_tag"))+"</span>":"")+(r.event?'<span class="chip">'+esc(r.event)+"</span>":"")+'<span class="v">'+esc(dur(r.seconds))+(r.progress!=null?" · "+Math.round(r.progress*100)+" %":"")+"</span></div>"+prog+"</div>";
+}
+function setBars(root){requestAnimationFrame(()=>requestAnimationFrame(()=>root.querySelectorAll(".bar i[data-w]").forEach(i=>{i.style.width=i.dataset.w+"%"})))}
+function listOrEmpty(el,rows,html,emptyKey){el.innerHTML=rows.length?rows.map(html).join(""):'<div class="empty">'+esc(T(emptyKey))+"</div>";fit(el)}
+function renderNow(d){
+  const t=d.totals||{};
+  $("n-run-h").textContent=T("ui.scr_now_running")+" · "+num(t.running);$("n-queue-h").textContent=T("ui.scr_now_queue")+" · "+num(t.queued);$("n-fail-h").textContent=T("ui.scr_now_failures")+" · "+num(t.failures);
+  $("n-appr-h").textContent=T("ui.scr_now_approval")+" · "+num(t.approval);$("n-merge-h").textContent=T("ui.scr_now_merges");$("n-tl-h").textContent=T("ui.scr_now_timeline");
+  const run=$("n-run-l");listOrEmpty(run,d.running||[],runRow,"ui.scr_idle_now");setBars(run);
+  listOrEmpty($("n-queue-l"),d.queued||[],r=>'<div class="row">'+lampHtml("warn")+'<span class="nm" title="'+esc(r.repo+" "+r.workflow)+'"><b>'+esc(r.repo)+"</b> "+esc(r.workflow)+'</span><span class="v">'+esc(dur(r.seconds))+"</span></div>","ui.scr_none");
+  listOrEmpty($("n-appr-l"),d.approval||[],r=>'<div class="row">'+lampHtml("warn")+'<span class="nm"><b>'+esc(r.repo)+'</b></span><span class="v">'+esc(r.ago==null?"":ago(r.ago))+"</span></div>","ui.scr_none");
+  const fl=d.failures||[];
+  listOrEmpty($("n-fail-l"),fl,(r,i)=>'<div class="failrow" id="nf-'+i+'"><span class="ico lamp l-bad bad" aria-hidden="true"></span><span class="nm" title="'+esc(r.repo+" "+r.workflow)+'"><b>'+esc(r.repo)+"</b> "+esc(r.workflow)+(r.attempt>1?' <span class="chip">'+esc(T("ui.scr_attempt",{n:r.attempt}))+"</span>":"")+'</span><span class="v">'+esc(ago(r.ago))+"</span></div>","ui.scr_nothing_red");
+  fl.forEach((r,i)=>failMark($("nf-"+i),"fail:"+r.repo+":"+r.workflow+":"+Math.floor(r.ago/60),r.ago));
+  /* merges, releases and what comes next */
+  const mg=d.merges||[],nx=d.next_releases||[],pd=d.pending_sign||[];
+  const rows=[...mg.map(m=>'<div class="row">'+lampHtml("ok")+'<span class="nm"><b>'+esc(m.repo)+'</b></span><span class="chip'+(m.release?" ok":"")+'">'+esc(T(m.release?"ui.scr_release":"ui.scr_merge"))+'</span><span class="v">'+esc(m.ago==null?"":ago(m.ago))+"</span></div>"),
+    ...nx.map(m=>'<div class="row">'+lampHtml("info")+'<span class="nm"><b>'+esc(m.repo)+'</b> <span class="mut">'+esc(T("ui.scr_next"))+'</span></span><span class="v">'+esc(T("ui.scr_entries",{n:m.entries}))+"</span></div>"),
+    ...pd.map(m=>'<div class="row">'+lampHtml("warn")+'<span class="nm"><b>'+esc(m.repo)+'</b> <span class="mut">'+esc(T("ui.scr_sign"))+'</span></span><span class="v">'+esc(dur(m.hours*3600))+"</span></div>")];
+  const ml=$("n-merge-l");ml.innerHTML=rows.length?rows.join(""):'<div class="empty">'+esc(T("ui.scr_none"))+"</div>";fit(ml);
+  drawTimeline(d.timeline||[]);
+  $("f-right").textContent="";
+  return fl.map(r=>"fail:"+r.repo+":"+r.workflow+":"+Math.floor(r.ago/60));
+}
+const WINDOW=7200;
+function drawTimeline(items){
+  const tl=$("timeline");
+  let html='<div class="track"></div><div class="now"></div>';
+  [0,1800,3600,5400,7200].forEach(s=>{html+='<div class="tick'+(s===0?" last":"")+'" style="left:'+((1-s/WINDOW)*100)+'%">'+esc(s===0?T("ui.scr_now"):dur(s))+"</div>"});
+  const lane=[0,0,0];
+  items.forEach((e,i)=>{if(e.ago>WINDOW)return;html+='<div class="pt '+esc(e.kind)+'" data-ago="'+e.ago+'" style="left:'+((1-e.ago/WINDOW)*100)+'%;top:'+(18+((i%3)*10))+'%" title="'+esc(e.repo+" "+e.workflow+" "+T("ui.scr_ev_"+e.kind))+'"></div>'});
+  tl.innerHTML=html;STATE.tlAt=Date.now();
+}
+function slideTimeline(){
+  const el=$("timeline");if(!el||STATE.kind!=="now")return;
+  const dt=(Date.now()-(STATE.tlAt||Date.now()))/1000;
+  el.querySelectorAll(".pt").forEach(p=>{const a=num(+p.dataset.ago)+dt;p.style.left=((1-a/WINDOW)*100)+"%";p.hidden=a>WINDOW});
+}
+/* ---------- sentinels ---------- */
+const BLIPS=12;
+function radar(cards,sweepFx){
+  const rg=[16,28,40].map(r=>'<circle class="rg" cx="50" cy="50" r="'+r+'"/>').join("")+'<line class="rg" x1="50" x2="50" y1="6" y2="94"/><line class="rg" x1="6" x2="94" y1="50" y2="50"/>';
+  const wedge='<defs><linearGradient id="swg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="var(--cy)" stop-opacity="0"/><stop offset="1" stop-color="var(--cy)" stop-opacity=".55"/></linearGradient></defs><g class="sweep"><path d="M50 50 L50 6 A44 44 0 0 1 81 19 Z" fill="url(#swg)" transform="rotate(-48 50 50)"/><line x1="50" y1="50" x2="50" y2="6" stroke="var(--cy)" stroke-width=".8" transform="rotate(-3 50 50)"/></g>';
+  let blips="";
+  cards.forEach((c,i)=>{if(c.level!=="bad"&&c.level!=="warn")return;const ang=(i/BLIPS)*360,rad=c.level==="bad"?16+((i*7)%12):28+((i*5)%12),x=50+Math.sin(ang*Math.PI/180)*rad,y=50-Math.cos(ang*Math.PI/180)*rad;blips+='<circle class="blip hot" cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="2.6" fill="'+(c.level==="bad"?"var(--bad)":"var(--warn)")+'" style="--a:'+ang.toFixed(0)+'"/>'});
+  return '<svg viewBox="0 0 100 100" role="img" aria-label="'+esc(T("ui.scr_sen_radar"))+'">'+rg+wedge+blips+"</svg>";
+}
+function renderSentinels(d){
+  $("c-radar-h").textContent=T("ui.scr_sen_radar");$("c-alerts-h").textContent=T("ui.scr_sen_alerts");
+  const host=$("c-cards");
+  if(!d.enabled){host.innerHTML='<div class="card" style="grid-column:1/-1"><div class="empty">'+esc(T(d.meta&&d.meta.edition==="lite"?"ui.scr_sen_lite":"ui.scr_sen_off"))+"</div></div>";$("radar").innerHTML=radar([]);$("c-bars").innerHTML="";return []}
+  const sw=d.sweep||{},prog=d.loading?0.07:(sw.progress==null?0:sw.progress);
+  const cards=d.cards||[];
+  host.innerHTML=cards.map((c,i)=>{
+    const nm=T("ui."+c.id),dash=2*Math.PI*45;
+    return '<section class="sen s-'+esc(c.level)+'" id="sc-'+esc(c.id)+'" style="--i:'+(i+2)+'" aria-label="'+esc(nm)+'"><div class="hd">'+lampHtml(c.level)+'<b title="'+esc(nm)+'">'+esc(nm)+'</b><span class="mini" aria-hidden="true"><svg viewBox="0 0 100 100"><circle class="trk" cx="50" cy="50" r="45"/><circle class="arc" cx="50" cy="50" r="45" stroke-dasharray="'+dash.toFixed(1)+'" stroke-dashoffset="'+(dash*(1-prog)).toFixed(1)+'"/></svg></span></div>'+
+      '<div class="num '+esc(c.level)+'">'+(c.open==null?"–":esc(num(c.open)))+'</div><div class="mut">'+esc(c.open==null?levelWord(c.level):T("ui.scr_sen_open",{n:c.open}))+'</div><div class="mut" style="font-size:.9rem">'+esc(sw.age_seconds==null?"":T("ui.scr_sen_swept",{ago:ago(sw.age_seconds)}))+'</div><div class="meta"><span class="chip '+(c.readable?"ok":"warn")+'">'+esc(T(c.readable?"ui.scr_sen_readable":"ui.scr_sen_unreadable"))+'</span><span class="chip '+esc(c.level)+'">'+esc(levelWord(c.level))+"</span></div></section>";
+  }).join("");
+  cards.forEach(c=>{if(c.level==="bad")failMark($("sc-"+c.id),"sen:"+c.id,null)});
+  $("radar").innerHTML=radar(cards);
+  const al=(d.alerts||{}),bl=al.by_level||{},mx=Math.max(1,...["critical","error","warning","info"].map(k=>num(bl[k])));
+  $("c-bars").innerHTML=["critical","error","warning","info"].map(k=>'<div class="br '+k+'"><span class="nm">'+esc(T("ui.scr_sev_"+k))+'</span><div class="bar"><i style="width:'+Math.round(num(bl[k])/mx*100)+'%"></i></div><span class="v">'+num(bl[k])+"</span></div>").join("");
+  $("f-right").textContent=sw.age_seconds==null?"":T("ui.scr_sen_swept",{ago:ago(sw.age_seconds)});
+  return cards.filter(c=>c.level==="bad").map(c=>"sen:"+c.id);
+}
+RENDER.overview=renderOverview;RENDER.now=renderNow;RENDER.sentinels=renderSentinels;
 /* ---------- loop ---------- */
 function show(kind){
   KINDS.forEach(k=>{const e=$("s-"+k);if(e)e.hidden=k!==kind});
@@ -309,6 +490,7 @@ function paint(d){
   else if(m.paused)banner("warn",T("ui.scr_paused"));
   else banner(null);
   $("stage").style.opacity="";
+  setTimeout(()=>document.querySelectorAll(".list,.ticker").forEach(fit),400);      /* the type may arrive after the first layout: fit the rows again */
 }
 async function load(){
   clearTimeout(STATE.timer);
@@ -323,9 +505,17 @@ async function load(){
   }
   STATE.timer=setTimeout(load,wait);
 }
-
+function rotate(){
+  if(P.rotate<=0)return;
+  setInterval(()=>{
+    const i=(KINDS.indexOf(STATE.kind)+1)%KINDS.length,next=KINDS[i],cur=$("s-"+STATE.kind);
+    if(history.replaceState)try{history.replaceState(null,"","/screen/"+next+location.search)}catch(e){}
+    const go=()=>{show(next);load();const n=$("s-"+next);n.classList.remove("out")};
+    if(reduce){go()}else{cur.classList.add("out");setTimeout(go,500)}
+  },P.rotate*1000);
+}
 $("fs").addEventListener("click",()=>{try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen()}catch(e){}});
-show(STATE.kind);clock();setInterval(clock,1000);burnIn();load();
+show(STATE.kind);clock();setInterval(clock,1000);setInterval(slideTimeline,1000);burnIn();rotate();load();
 window.__screens={state:STATE,show:show,paint:paint};
 })();
 </script>

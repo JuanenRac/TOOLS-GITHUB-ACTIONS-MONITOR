@@ -3497,5 +3497,6 @@
  "ui.scr_sev_warning": "Warnung",
  "ui.scr_sev_info": "Info",
  "ui.tab_les": "Lektionen",
- "ui.tab_rep": "Berichte"
+ "ui.tab_rep": "Berichte",
+ "ui.scr_open": "Wandanzeige öffnen: {name}"
 }

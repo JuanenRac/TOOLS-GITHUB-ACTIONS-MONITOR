@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2819_passing-brightgreen.svg" alt="2819 tests">
+  <img src="https://img.shields.io/badge/Tests-2824_passing-brightgreen.svg" alt="2824 tests">
 </p>
 
 > 所有するすべてのリポジトリのワークフローを監視し、赤いもの・止まっているもの・対応待ちのものを、ローカルの1ページで教えます。
@@ -81,7 +81,7 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **テスト** | テストメソッド 2819 件(`python -m unittest discover -s monitor/tests`) |
+| **テスト** | テストメソッド 2824 件(`python -m unittest discover -s monitor/tests`) |
 | **設定** | 設定 553 件、すべてヘルプ付き |
 | **言語** | 8(英語、スペイン語、ドイツ語、フランス語、イタリア語、日本語、中国語、ポルトガル語) |
 | **CI で検証したシステム** | ubuntu, windows、Python 3.11, 3.13 |
@@ -153,6 +153,9 @@
 ### ページ
 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="現在" width="92%"></picture></p>
+<p align="center"><img src="docs/screenshots/web_screen_overview_1080p.png" alt="壁掛け画面：全体" width="92%"></p>
+<p align="center"><img src="docs/screenshots/web_screen_now_1080p.png" alt="壁掛け画面：いま起きていること" width="92%"></p>
+<p align="center"><img src="docs/screenshots/web_screen_sentinels_1080p.png" alt="壁掛け画面：センチネル" width="92%"></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_alerts_light.png"><img src="docs/screenshots/web_alerts_dark.png" alt="アラート：すべての番人を 1 つの一覧に、ローカルのミュート付き" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_light.png"><img src="docs/screenshots/web_sentinel_dark.png" alt="センチネル" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_queue_light.png"><img src="docs/screenshots/web_sentinel_queue_dark.png" alt="署名キュー（緊急度の高い順）" width="92%"></picture></p>

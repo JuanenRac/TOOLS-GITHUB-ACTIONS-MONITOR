@@ -126,3 +126,17 @@ O separador Agora em quatro tamanhos, com dados inventados (4K, um monitor 21:9,
 ![rodado 1080x1920](../../docs/screenshots/web_size_portrait_light.png)
 
 ![telemóvel 390x844](../../docs/screenshots/web_size_phone_light.png)
+
+Os três ecrãs de parede em 4K e num monitor na vertical, com dados inventados:
+
+![Visão geral 4K 3840x2160](../../docs/screenshots/web_screen_overview_4k.png)
+
+![Visão geral 1080x1920](../../docs/screenshots/web_screen_overview_portrait.png)
+
+![Neste momento 4K 3840x2160](../../docs/screenshots/web_screen_now_4k.png)
+
+![Neste momento 1080x1920](../../docs/screenshots/web_screen_now_portrait.png)
+
+![Sentinelas 4K 3840x2160](../../docs/screenshots/web_screen_sentinels_4k.png)
+
+![Sentinelas 1080x1920](../../docs/screenshots/web_screen_sentinels_portrait.png)

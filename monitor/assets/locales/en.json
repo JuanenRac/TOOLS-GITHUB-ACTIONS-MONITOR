@@ -3497,5 +3497,6 @@
  "ui.scr_sev_warning": "Warning",
  "ui.scr_sev_info": "Info",
  "ui.tab_les": "Lessons",
- "ui.tab_rep": "Reports"
+ "ui.tab_rep": "Reports",
+ "ui.scr_open": "Open the wall screen: {name}"
 }

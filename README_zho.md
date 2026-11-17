@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2819_passing-brightgreen.svg" alt="2819 tests">
+  <img src="https://img.shields.io/badge/Tests-2824_passing-brightgreen.svg" alt="2824 tests">
 </p>
 
 > 监视你所有仓库的工作流，并在一个本地页面上告诉你：哪些是红的、哪些卡住了、哪些在等你处理。
@@ -81,7 +81,7 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 2819 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **测试** | 2824 个测试方法(`python -m unittest discover -s monitor/tests`) |
 | **设置** | 553 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
@@ -153,6 +153,9 @@
 ### 页面
 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="当前" width="92%"></picture></p>
+<p align="center"><img src="docs/screenshots/web_screen_overview_1080p.png" alt="墙面屏幕：总览" width="92%"></p>
+<p align="center"><img src="docs/screenshots/web_screen_now_1080p.png" alt="墙面屏幕：此刻" width="92%"></p>
+<p align="center"><img src="docs/screenshots/web_screen_sentinels_1080p.png" alt="墙面屏幕：哨兵" width="92%"></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_alerts_light.png"><img src="docs/screenshots/web_alerts_dark.png" alt="警报：所有哨兵合在一个列表，带本地静音" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_light.png"><img src="docs/screenshots/web_sentinel_dark.png" alt="哨兵" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_queue_light.png"><img src="docs/screenshots/web_sentinel_queue_dark.png" alt="签名队列（最紧急的在前）" width="92%"></picture></p>

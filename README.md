@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-2819_passing-brightgreen.svg" alt="2819 tests">
+  <img src="https://img.shields.io/badge/Tests-2824_passing-brightgreen.svg" alt="2824 tests">
 </p>
 
 > Watches the workflows of every repository you own and tells you, on one local page, what is red, what is stuck and what is waiting for you.
@@ -81,7 +81,7 @@
 | | |
 |---|---|
 | **Maturity** | functional |
-| **Tests** | 2819 test methods (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 2824 test methods (`python -m unittest discover -s monitor/tests`) |
 | **Settings** | 553 settings, all with help |
 | **Languages** | 8 (English, Spanish, German, French, Italian, Japanese, Chinese, Portuguese) |
 | **Tested in the CI on** | ubuntu, windows, Python 3.11, 3.13 |
@@ -153,6 +153,9 @@ A second, simpler product in the same package: the page of what is running and w
 ### The page
 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="Now" width="92%"></picture></p>
+<p align="center"><img src="docs/screenshots/web_screen_overview_1080p.png" alt="Wall screen: overview" width="92%"></p>
+<p align="center"><img src="docs/screenshots/web_screen_now_1080p.png" alt="Wall screen: right now" width="92%"></p>
+<p align="center"><img src="docs/screenshots/web_screen_sentinels_1080p.png" alt="Wall screen: sentinels" width="92%"></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_alerts_light.png"><img src="docs/screenshots/web_alerts_dark.png" alt="Alerts: every sentinel in one list, with local silences" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_light.png"><img src="docs/screenshots/web_sentinel_dark.png" alt="Sentinel" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_queue_light.png"><img src="docs/screenshots/web_sentinel_queue_dark.png" alt="Signing queue (most urgent first)" width="92%"></picture></p>

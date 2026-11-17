@@ -126,3 +126,17 @@ The tab Now in four sizes, with invented data (4K, a 21:9 monitor, a turned moni
 ![turned 1080x1920](../../docs/screenshots/web_size_portrait_light.png)
 
 ![phone 390x844](../../docs/screenshots/web_size_phone_light.png)
+
+The three wall screens in 4K and on a turned monitor, with invented data:
+
+![Overview 4K 3840x2160](../../docs/screenshots/web_screen_overview_4k.png)
+
+![Overview 1080x1920](../../docs/screenshots/web_screen_overview_portrait.png)
+
+![Right now 4K 3840x2160](../../docs/screenshots/web_screen_now_4k.png)
+
+![Right now 1080x1920](../../docs/screenshots/web_screen_now_portrait.png)
+
+![Sentinels 4K 3840x2160](../../docs/screenshots/web_screen_sentinels_4k.png)
+
+![Sentinels 1080x1920](../../docs/screenshots/web_screen_sentinels_portrait.png)

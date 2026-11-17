@@ -40,7 +40,7 @@ REPOS = ["demo-alpha-core", "demo-alpha-app", "demo-beta-fw", "demo-beta-docs", 
 def setup(now):
     tmp = Path(tempfile.mkdtemp(prefix="ghamon_demo_"))
     cfg = json.loads((ROOT / "assets" / "examples" / "actions_monitor.example.json").read_text(encoding="utf-8"))
-    cfg.update({"github_owner": OWNER, "workspace_root": "", "signed_dir": "", "audit_dir": ""})
+    cfg.update({"github_owner": OWNER, "workspace_root": "", "signed_dir": "", "audit_dir": "", "screens": {**cfg.get("screens", {}), "enabled": True}})      # the wall screens are off by default; the demo shows them
     (tmp / "actions_monitor.json").write_text(json.dumps(cfg), encoding="utf-8")
     am.CONFIG_FILE = settings_api.CONFIG_FILE = toolconfig.CONFIG_FILE = tmp / "actions_monitor.json"
     settings_api.BACKUP_DIR = tmp / "backups"

@@ -126,3 +126,17 @@
 ![回転 1080x1920](../../docs/screenshots/web_size_portrait_light.png)
 
 ![スマートフォン 390x844](../../docs/screenshots/web_size_phone_light.png)
+
+3つの壁掛け画面（4K と縦向きのモニター、架空のデータ）：
+
+![全体 4K 3840x2160](../../docs/screenshots/web_screen_overview_4k.png)
+
+![全体 1080x1920](../../docs/screenshots/web_screen_overview_portrait.png)
+
+![いま起きていること 4K 3840x2160](../../docs/screenshots/web_screen_now_4k.png)
+
+![いま起きていること 1080x1920](../../docs/screenshots/web_screen_now_portrait.png)
+
+![センチネル 4K 3840x2160](../../docs/screenshots/web_screen_sentinels_4k.png)
+
+![センチネル 1080x1920](../../docs/screenshots/web_screen_sentinels_portrait.png)
