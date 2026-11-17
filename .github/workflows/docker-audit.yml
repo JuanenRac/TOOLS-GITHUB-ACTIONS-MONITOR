@@ -1,0 +1,140 @@
+name: Docker audit
+
+# Builds the image of a version (a tag or a commit) and checks it in REAL containers, one job per check (tools/docker_audit/): the basic start and the API contract, the team mode, a trusted
+# proxy (Caddy with its own TLS), the hardening, the volumes and the migration from the previous version, the secrets, the shutdown, and the incoming webhook behind the proxy.
+# Started by hand only. It publishes nothing, signs in to no registry, uses no secret of this repository and calls GitHub for nothing (the GitHub CLI inside the container is a stand-in).
+#   gh workflow run docker-audit.yml -f ref=v2.0.8
+# The result is the summary of the run and the artifact `docker-audit-<version>` (one JSON and one text file per check, with every command and its output).
+on:
+  push:
+    branches: [mon70-docker-audit]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Tag or commit to check (empty = the latest tag)"
+        type: string
+        default: ""
+      scenarios:
+        description: "`all` or a list of checks such as E1,E3"
+        type: string
+        default: "all"
+      previous_ref:
+        description: "Version before it, for the migration check (auto = the tag before ref, none = skip)"
+        type: string
+        default: "auto"
+
+permissions: {}
+
+concurrency:
+  group: docker-audit-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    name: Plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read        # the checkout
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      ref: ${{ steps.plan.outputs.ref }}
+      ref_safe: ${{ steps.plan.outputs.ref_safe }}
+      previous: ${{ steps.plan.outputs.previous }}
+      codes: ${{ steps.plan.outputs.codes }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Which version, which checks, which version came before
+        id: plan
+        env:
+          REF: ${{ inputs.ref }}
+          SCENARIOS: ${{ inputs.scenarios }}
+          PREVIOUS: ${{ inputs.previous_ref }}
+        run: python3 tools/docker_audit/plan.py --repo . --ref "$REF" --scenarios "${SCENARIOS:-all}" --previous "${PREVIOUS:-auto}"
+
+  check:
+    name: ${{ matrix.code }} - ${{ matrix.title }}
+    needs: plan
+    runs-on: ubuntu-24.04      # the runner image is fixed: the checks start containers and read their logs
+    timeout-minutes: ${{ matrix.minutes }}
+    permissions:
+      contents: read        # the checkouts
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      REF: ${{ needs.plan.outputs.ref }}
+      PREVIOUS: ${{ needs.plan.outputs.previous }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: audit
+          persist-credentials: false
+      - name: The version to check
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.plan.outputs.ref }}
+          path: target
+          persist-credentials: false
+      - name: The version before it (for the migration)
+        if: ${{ needs.plan.outputs.previous != '' }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.plan.outputs.previous }}
+          path: previous
+          persist-credentials: false
+      - name: ${{ matrix.code }}
+        env:
+          SCRIPT: ${{ matrix.script }}
+        run: |
+          extra=()
+          if [ -d previous ]; then extra=(--previous previous); fi
+          python3 "audit/tools/docker_audit/${SCRIPT}" --target target --out results --ref "$REF" "${extra[@]}"
+      - name: The result files
+        if: ${{ always() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: docker-audit-part-${{ matrix.code }}
+          path: results/
+          if-no-files-found: warn
+          retention-days: 14
+
+  report:
+    name: Summary
+    needs: [plan, check]
+    if: ${{ always() && needs.plan.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read        # the checkout
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: docker-audit-part-*
+          path: results
+          merge-multiple: true
+        continue-on-error: true
+      - name: Join the results
+        env:
+          REF: ${{ needs.plan.outputs.ref }}
+          CODES: ${{ needs.plan.outputs.codes }}
+        run: |
+          mkdir -p results
+          status=0
+          python3 tools/docker_audit/collect.py --dir results --ref "$REF" --expected "$CODES" > summary.out || status=$?
+          cat summary.out >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
+      - name: The artifact of the whole run
+        if: ${{ always() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: docker-audit-${{ needs.plan.outputs.ref_safe }}
+          path: results/
+          if-no-files-found: warn
+          retention-days: 30
