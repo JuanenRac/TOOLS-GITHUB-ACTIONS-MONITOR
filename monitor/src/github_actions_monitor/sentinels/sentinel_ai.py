@@ -458,6 +458,10 @@ def explain(kind, data, cfg, store, transport=None, task=None):
             if store.used_today() >= cfg["daily_limit"]:
                 failed.append({"model": cand["label"], "reason": "daily_cap"})
                 break
+            again = ai_chain.budget_block(ccfg, store)      # the check and the count are one step: two requests at once cannot both spend the last call of a model
+            if again:
+                failed.append({"model": cand["label"], "reason": again})
+                continue
             store.add_call()  # counted before the call: a failing provider also spends the cap
             ai_chain.add_model_call(store, ccfg)
             store.save()

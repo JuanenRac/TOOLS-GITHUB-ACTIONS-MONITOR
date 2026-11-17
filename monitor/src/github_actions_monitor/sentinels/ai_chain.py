@@ -154,7 +154,7 @@ def limits_of(cfg, store):
 
 def budget_block(cfg, store):
     """Why this model may not be called now, or None: `model_calls` (its calls of the day are spent), `model_cost` (its estimated cost) or `cost` (the total estimated cost)."""
-    with LOCK, store.lock:
+    with store.lock, LOCK:
         usage = _usage(store)
         mine = usage["models"].get(label_of(cfg), {})
         calls_limit, cost_limit = limits_of(cfg, store)
@@ -170,13 +170,13 @@ def budget_block(cfg, store):
 
 def add_model_call(store, cfg):
     """Counts one call of this model today (before the call, like the general counter: a failing provider also spends its budget)."""
-    with LOCK, store.lock:
+    with store.lock, LOCK:
         row = _usage(store)["models"].setdefault(label_of(cfg), {"calls": 0, "cost": 0.0, "tokens_in": 0, "tokens_out": 0})
         row["calls"] = row.get("calls", 0) + 1
 
 
 def add_model_usage(store, cfg, tokens_in, tokens_out, cost):
-    with LOCK, store.lock:
+    with store.lock, LOCK:
         usage = _usage(store)
         row = usage["models"].setdefault(label_of(cfg), {"calls": 0, "cost": 0.0, "tokens_in": 0, "tokens_out": 0})
         row["tokens_in"] = row.get("tokens_in", 0) + int(tokens_in or 0)
@@ -198,7 +198,7 @@ def retired(cfg, store):
 
 def view(cfg, store):
     """The document of `GET /api/ai/budget`: calls and estimated cost today, in total and for each model, with the limits, and the last failures of a main model. Read only."""
-    with LOCK, store.lock:
+    with store.lock, LOCK:
         usage = _usage(store)
         rows = []
         for label in sorted(usage["models"]):
@@ -219,7 +219,7 @@ def note_failover(store, task, failed, reason, used):
     """Writes down that the main model of a task failed (reason in one word) and which one answered instead (or "" = nobody). Log, page and brief."""
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     entry = {"at": now, "task": task, "failed": failed, "reason": reason, "used": used}
-    with LOCK, store.lock:
+    with store.lock, LOCK:
         rows = store.data.setdefault("failovers", [])
         rows.append(entry)
         del rows[:-MAX_FAILOVERS]
