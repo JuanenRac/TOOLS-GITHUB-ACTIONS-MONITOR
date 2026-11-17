@@ -53,7 +53,7 @@ from github_actions_monitor.security import auth_http
 from github_actions_monitor.security import envguard
 from github_actions_monitor.security import localguard
 from github_actions_monitor.app import modes
-from github_actions_monitor.app import screens
+from github_actions_monitor.app import orglogo, screens
 from github_actions_monitor.util import exclusive
 from github_actions_monitor.util import platform_compat
 from github_actions_monitor.util import ports
@@ -115,8 +115,10 @@ DEFAULTS = {
     "github_app": {"enabled": False, "app_id": "", "key_path": "", "installation_id": "", "share_reads": False},      # an optional GitHub App for the READS (its own allowance); only the PATH of the key is kept here (github_app.py)
     "central": {"source": "off", "max_age_minutes": 120, "git_dir": ""},      # the central panel of the profile repository as a base line that spends no allowance (central_source.py): off | git | http
     "ports": {"complete": 8765, "lite": 8766},      # the port of each edition (util/ports.py); --port wins, then MONITOR_PORT for the complete one
-    "ui": {"orientation": "auto", "rotate_seconds": 0, "screen1_tabs": "", "screen1_orientation": "auto", "screen2_tabs": "", "screen2_orientation": "auto", "screen3_tabs": "", "screen3_orientation": "auto", "now_sort": "ecosystem", "alerts_sort": "server"},   # the screens (docs/SCREENS.md): the orientation of the page, and which tabs each /screen/N shows
-    "screens": {"enabled": False, "blink": True, "blink_calm_minutes": 30, "rotate_seconds": 0, "default_theme": "dark", "default_density": "normal", "refresh_seconds": 10, "burn_in_protection": True, "night_dim": False, "night_dim_from_hour": 22, "night_dim_to_hour": 7, "show_repo_names": "public", "sound": False},   # the wall screens /screen/overview, /screen/now and /screen/sentinels (docs/SCREENS.md, screens.py): read only, from what the monitor already holds
+    "ui": {"orientation": "auto", "rotate_seconds": 0, "screen1_tabs": "", "screen1_orientation": "auto", "screen2_tabs": "", "screen2_orientation": "auto", "screen3_tabs": "", "screen3_orientation": "auto", "now_sort": "ecosystem", "alerts_sort": "server", "theme": "auto"},   # the screens (docs/SCREENS.md): the orientation of the page, and which tabs each /screen/N shows
+    "screens": {"enabled": False, "blink": True, "blink_calm_minutes": 30, "rotate_seconds": 0, "default_theme": "inherit", "default_density": "normal", "refresh_seconds": 10, "burn_in_protection": True, "night_dim": False, "night_dim_from_hour": 22, "night_dim_to_hour": 7, "show_repo_names": "public", "sound": False,
+                "theme_overview": "inherit", "theme_now": "inherit", "theme_sentinels": "inherit", "mode": "three", "rotate_every_seconds": 20, "alert_hold_seconds": 30, "logo_overview": True, "logo_now": False, "logo_sentinels": False,
+                "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64},   # the wall screens /screen/overview, /screen/now and /screen/sentinels (docs/SCREENS.md, screens.py): read only, from what the monitor already holds
     "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "on_warning": True, "on_resolved": True, "on_report": True, "on_lesson": True, "on_sentinel": True, "on_stuck": True, "on_score_drop": True, "on_info": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False, "theme": "classic", "quiet_enabled": False, "quiet_from_hour": 22, "quiet_to_hour": 7},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
     "updates": {"check": True},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
     "airgapped": False,            # True: nothing is requested from the network except GitHub's data you asked for; the update check is off
@@ -2176,16 +2178,18 @@ def render_page():
     """actions_monitor.html with the catalogues of the interface (keys "ui.*") for the 8 languages and the default language inlined."""
     page = (paths.STATIC / "actions_monitor.html").read_text(encoding="utf-8")
     data = {"default": i18n.language(), "langs": list(i18n.LANGS), "names": i18n.NATIVE_NAMES, "html": i18n.HTML_LANG, "locale": i18n.BROWSER_LOCALE, "catalogues": i18n.ui_catalogues(),
-            "ecosystems": {**{"other": i18n.t("ui.eco_other")}, **{key: item["label"] for key, item in toolconfig.ecosystems().items()}}, "owner": toolconfig.github_owner(), "tz": tzdisplay.setting(), "screens": {k: v for k, v in (toolconfig.raw_config().get("ui") or {}).items() if k in DEFAULTS["ui"]}, "blink": (toolconfig.raw_config().get("display") or {}).get("blink_red_tiles", True) is not False, "sound": {k: v for k, v in __import__("github_actions_monitor.integrations.soundalert", fromlist=["_"]).settings(toolconfig.raw_config()).items() if k != "server_beep"}, "host": github_host(), "lite": LITE["on"], "network": localguard.public_state(), "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
+            "ecosystems": {**{"other": i18n.t("ui.eco_other")}, **{key: item["label"] for key, item in toolconfig.ecosystems().items()}}, "owner": toolconfig.github_owner(), "tz": tzdisplay.setting(), "screens": {k: v for k, v in (toolconfig.raw_config().get("ui") or {}).items() if k in DEFAULTS["ui"] and k != "theme"}, "theme": screens.global_theme(toolconfig.raw_config()), "blink": (toolconfig.raw_config().get("display") or {}).get("blink_red_tiles", True) is not False, "sound": {k: v for k, v in __import__("github_actions_monitor.integrations.soundalert", fromlist=["_"]).settings(toolconfig.raw_config()).items() if k != "server_beep"}, "host": github_host(), "lite": LITE["on"], "network": localguard.public_state(), "version": TOOL_VERSION, "author": AUTHOR, "license": LICENSE_ID}
     blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     return page.replace("/*I18N_DATA*/null", blob, 1)
 
 
 def render_screen(kind, query):
     """The page of one wall screen (screens.html): the texts of the language, the settings that matter to it and the parameters of the window, embedded. No menu, nothing that changes anything."""
-    cfg = screens.settings(toolconfig.raw_config())
-    page = (paths.STATIC / "screens.html").read_text(encoding="utf-8")
-    data = screens.page_data(kind, cfg, screens.params(query, cfg))
+    config = toolconfig.raw_config()
+    cfg = screens.settings(config)
+    chosen = screens.global_theme(config)
+    page = (paths.STATIC / "screens.html").read_text(encoding="utf-8").replace("/*THEME_CSS*/", screens.theme_css(), 1)
+    data = screens.page_data(kind, cfg, screens.params(query, cfg, kind, chosen), logo=orglogo.info(), global_name=chosen)
     from github_actions_monitor.integrations import soundalert
     data["sound"] = {key: value for key, value in soundalert.settings(toolconfig.raw_config()).items() if key != "server_beep"}      # the same sounds as the page, per kind (the window still needs ?sound=on and screens.sound)
     blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
@@ -2631,6 +2635,29 @@ class Handler(BaseHTTPRequestHandler):
                 return
             self.credential_post()
             return
+        if path in ("/api/screens/logo", "/api/screens/logo/remove"):      # the logo of the organization: the image is the body of the request (at most 1 MB, checked by its first bytes)
+            if not self.guard() or not self.token_ok():
+                return
+            from github_actions_monitor.security import audit_log
+            try:
+                if path.endswith("/remove"):
+                    audit_log.note("remove")
+                    self.json_reply({"ok": True, "removed": orglogo.remove(), "logo": orglogo.info()})
+                    return
+                size = int(self.headers.get("Content-Length") or 0)
+                if size <= 0 or size > orglogo.MAX_BYTES:
+                    self.json_reply({"ok": False, "error": "too_big" if size > 0 else "empty"}, 413 if size > 0 else 400)
+                    return
+                data = self.rfile.read(size)
+                kind, reason = orglogo.validate(data)
+                if kind is None:
+                    self.json_reply({"ok": False, "error": reason}, 400)
+                    return
+                audit_log.note("upload", {"kind": kind, "bytes": len(data)})
+                self.json_reply({"ok": True, "logo": orglogo.save(data)})
+            except (ValueError, OSError):
+                self.json_reply({"ok": False, "error": "request"}, 400)
+            return
         if path == "/api/hot-only":   # "only hot" switch: local request only, tiny body {"on": true|false}
             if not self.guard():
                 return
@@ -2946,6 +2973,32 @@ class Handler(BaseHTTPRequestHandler):
                 self.json_reply({"data": collab.snapshot() if collab else None, "error": SENTINEL["error"] or (None if collab else i18n.t("mon.sentinel_not_loaded"))})
             except Exception as error:      # shown as a notice in the tab
                 self.json_reply({"data": None, "error": i18n.t("mon.sentinel_failed", error=error)})
+            return
+        if path == "/api/screens/logo":      # the logo of the organization (docs/SCREENS.md): the image itself, with its real type; it is also what Settings shows as a preview
+            if not self.guard():
+                return
+            found = orglogo.load()
+            if not found:
+                self.send_response(404)
+                self.end_headers()
+                return
+            data, ctype, tag = found
+            self.send_response(200)
+            self.send_header("Content-Type", ctype)
+            self.send_header("Content-Length", str(len(data)))
+            self.send_header("ETag", '"' + tag + '"')
+            self.send_header("Cache-Control", "private, max-age=3600")      # the address carries the tag of the file (?v=): a new logo has a new address
+            self.send_header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; sandbox")
+            try:
+                self.end_headers()
+                self.wfile.write(data)
+            except CLIENT_GONE:
+                DISCONNECTS[0] += 1
+            return
+        if path == "/api/screens/logo/info":
+            if not self.guard():
+                return
+            self.json_reply(orglogo.info())
             return
         if screens.kind_of(path) or path == "/api/screens/data":      # the wall screens (docs/SCREENS.md): read only; 404 while screens.enabled is off
             if not self.guard():

@@ -285,7 +285,7 @@ def _endpoint(handler, config, cfg, method, path):
             return fail(handler, "not_found", 404)
         if not localguard.local_request_ok(handler.headers, handler.server.server_address[1]):
             return fail(handler, "forbidden", 403)
-        _send(handler, None, 200, {"Referrer-Policy": "no-referrer", "X-Frame-Options": "DENY"}, text=login_page(), kind="text/html; charset=utf-8")
+        _send(handler, None, 200, {"Referrer-Policy": "no-referrer", "X-Frame-Options": "DENY"}, text=login_page(config), kind="text/html; charset=utf-8")
         return False
     if path == "/api/auth/me" and method == "GET":
         _me(handler, config, cfg)
@@ -487,24 +487,33 @@ def _users(handler, storage, cfg, context, body, path, address):
     return False
 
 
-def login_page():
-    """The sign-in page: plain HTML and a few lines of script, texts in the language of the page (the eight languages of the product)."""
+def login_page(config=None):
+    """The sign-in page: plain HTML and a few lines of script, texts in the language of the page (the eight languages of the product). It wears the theme chosen in Settings (`ui.theme`): light or dark
+    when one of them is chosen, one of the sixteen themes of the main page, or the one of the computer (auto)."""
+    from github_actions_monitor.app import screens
+    chosen = screens.global_theme(config)
+    studio = chosen in screens.STUDIO_THEMES
+    root_attr = ' data-theme="%s"%s' % (chosen, ' data-studio="1"' if studio else "") if chosen != "auto" else ""
+    theme_css = screens.theme_css() + "\n:root[data-studio]{--fg:var(--text);--card:var(--panel)}" if studio else ""
     t = i18n.t
     texts = {k: t("auth." + k) for k in ("title", "user", "password", "sign_in", "bootstrap_note", "create_admin", "wrong", "locked", "failed", "rate")}
     from html import escape
     e = {k: escape(v, quote=True) for k, v in texts.items()}
     texts_json = json.dumps(texts).replace("</", "<\\/")
     return f"""<!doctype html>
-<html lang="{escape(i18n.language())}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="{escape(i18n.language())}"{root_attr}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{e['title']}</title>
 <style>
 :root{{--bg:#0f1720;--fg:#e6edf3;--card:#17212b;--line:#2c3b4a;--acc:#3fb950;--bad:#f85149}}
-@media (prefers-color-scheme:light){{:root{{--bg:#f4f6f8;--fg:#1b2733;--card:#fff;--line:#c9d3dc;--acc:#1a7f37;--bad:#cf222e}}}}
+@media (prefers-color-scheme:light){{:root:not([data-theme]){{--bg:#f4f6f8;--fg:#1b2733;--card:#fff;--line:#c9d3dc;--acc:#1a7f37;--bad:#cf222e}}}}
+:root[data-theme=light]{{--bg:#f4f6f8;--fg:#1b2733;--card:#fff;--line:#c9d3dc;--acc:#1a7f37;--bad:#cf222e}}
+:root[data-theme=dark]{{--bg:#0f1720;--fg:#e6edf3;--card:#17212b;--line:#2c3b4a;--acc:#3fb950;--bad:#f85149}}
+{theme_css}
 body{{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--fg);font:16px system-ui,sans-serif}}
 form{{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:24px;width:min(340px,86vw);display:grid;gap:12px}}
 h1{{font-size:18px;margin:0}}label{{display:grid;gap:4px;font-size:14px}}
 input{{padding:9px;border:1px solid var(--line);border-radius:6px;background:transparent;color:inherit;font:inherit}}
-button{{padding:10px;border:0;border-radius:6px;background:var(--acc);color:#fff;font:inherit;cursor:pointer}}
+button{{padding:10px;border:0;border-radius:6px;background:var(--acc);color:var(--on,#fff);font:inherit;cursor:pointer}}
 #msg{{min-height:1.2em;font-size:14px;color:var(--bad)}}#note{{font-size:13px;opacity:.8}}
 </style></head><body>
 <form id="f" autocomplete="on"><h1>{e['title']}</h1><div id="note" hidden>{e['bootstrap_note']}</div>

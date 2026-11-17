@@ -75,11 +75,12 @@
 | 参数 | 作用 |
 |---|---|
 | `?monitor=1` 到 `9` | 显示在标题旁的编号。 |
-| `?theme=dark`、`light` 或 `contrast` | 配色；contrast 为黑底白字，适合远距离观看。 |
+| `?theme=light`（或 `dark`、`auto`、`contrast`，或十六种主题之一的名称） | 整个窗口的配色，优先于设置。contrast 为黑底白字，适合远距离观看。 |
 | `?density=compact`、`normal` 或 `large` | 文字大小。`?scale=1.5` 放大全部内容（0.5 到 3）。 |
 | `?refresh=10` | 更新间隔秒数（5 到 120）。 |
 | `?lang=de` | 语言（en、es、de、fr、it、ja、zh、pt）。 |
-| `?rotate=30` | 窗口每 30 秒自动在总览、此刻和哨兵之间切换（最少 5；0 = 不轮换）。 |
+| `?rotate=30` | 窗口每 30 秒自动在总览、此刻和哨兵之间切换（最少 5；0 = 停留在一个屏幕）。在 `screens.mode` = rotate 时本来就会轮换；这用于改变单个窗口的节奏。 |
+| `?jump=off` | 仅在 `screens.mode` = rotate 时：窗口会轮换，但不会跳转到新的红色。 |
 | `?blink=off` | 失败保持固定光晕而不闪烁。它不能开启 `screens.blink` 关闭的功能。 |
 | `?sound=on` | 出现新失败时发出短促提示音，仅在 `screens.sound` 允许时有效。默认关闭。 |
 
@@ -92,16 +93,41 @@
 | 设置 | 作用 |
 |---|---|
 | `screens.enabled` | 启用三个页面。关闭后 `/screen/overview`、`/screen/now`、`/screen/sentinels` 和 `/api/screens/data` 返回 404（`/screen/1` 到 `/screen/3` 就是页面本身，不依赖此设置）。精简版同样提供墙屏页面，其中哨兵屏为空。 默认关闭。 |
-| `screens.default_theme` | dark（默认）、light 或 contrast。 |
+| `screens.default_theme` | inherit（默认：整个产品选定的主题，见下文）、auto、light、dark、十六种主题之一或 contrast。 |
 | `screens.default_density` | compact、normal（默认）或 large。 |
 | `screens.refresh_seconds` | 窗口的更新间隔秒数（默认 10）。页面读取的是监视器而不是 GitHub，所以间隔再短也不消耗配额。 |
-| `screens.rotate_seconds` | 0（默认）= 不轮换；5 及以上时窗口在三个页面之间轮换。 |
+| `screens.rotate_seconds` | 仅在 `screens.mode` = three 时。0（默认）= 不轮换；5 及以上时窗口在三个页面之间轮换。 |
 | `screens.blink` | 失败柔和闪烁（默认开启）。 |
 | `screens.blink_calm_minutes` | 无人处理的失败在多少分钟后停止闪烁并保持固定光晕（默认 30；0 = 一直闪烁到解决）。 |
 | `screens.sound` | 出现新失败时发出提示音（默认关闭）。 |
 | `screens.burn_in_protection` | 每分钟将所有内容移动几个像素（默认开启）。 |
 | `screens.night_dim` | 在 `screens.night_dim_from_hour`（22）和 `screens.night_dim_to_hour`（7）之间调暗屏幕；默认关闭。 |
 | `screens.show_repo_names` | all、public（默认：私有仓库显示为 private-1、private-2...）或 none（隐藏所有名称）。供其他人查看的屏幕请使用 public 或 none。在 `repos` 中使用手写列表时,可见性每隔 `discover_refresh_seconds` 通过一次账户列表读取;无法读取可见性的仓库按私有处理。 编号(private-1 等)只分配给被隐藏的仓库,按名称的 HMAC 顺序排列,所用密钥属于本次安装,保存在数据文件夹的私有文件中,因此无法看出某个仓库在全部仓库中的位置。 |
+| `screens.theme_overview`、`screens.theme_now`、`screens.theme_sentinels` | 单个屏幕的主题：inherit（默认：与 `screens.default_theme` 相同）或上述任一主题。 |
+| `screens.mode` | three（默认：三个页面分开，每个窗口一个）或 rotate（单个页面在三者之间轮换，并跳转到新的红色）。 |
+| `screens.rotate_every_seconds` | 在 rotate 模式下每个屏幕停留的秒数（默认 20；5 到 300）。 |
+| `screens.alert_hold_seconds` | 在 rotate 模式下，新的红色让窗口停留在其屏幕的秒数（默认 30；5 到 600），或直到红色消失。 |
+| `screens.logo_overview`、`screens.logo_now`、`screens.logo_sentinels` | 标志显示在哪些屏幕上（默认仅总览）。 |
+| `screens.logo_corner` | top-right（默认）、top-left、bottom-right 或 bottom-left。 |
+| `screens.logo_max_width`、`screens.logo_max_height` | 标志在 1920 x 1080 下的最大尺寸，单位为像素（默认 160 x 64；随屏幕放大）。 |
+
+### 屏幕主题
+
+监视器显示的一切都使用在设置中选定的主题（`ui.theme`：auto、light、dark 或十六种主题之一）：页面、墙面屏幕和登录页面。在「此浏览器」标签页的选择器中选择主题时，也会将其保存为 `ui.theme`，因此从未自选过的浏览器会采用监视器的主题。写入磁盘的 HTML 报告遵循打开它的电脑的浅色或深色设置。
+
+墙面屏幕继承它：`screens.default_theme` 默认为 `inherit`。将其设为其他主题可为所有屏幕固定同一个主题；设置 `screens.theme_overview`、`screens.theme_now` 或 `screens.theme_sentinels` 可为单个屏幕指定专属主题。地址仍可用 `?theme=` 固定单个窗口。任何屏幕都不会写入自己的颜色：它们都使用主题的调色板，因此添加到页面的主题也会出现在屏幕上。
+
+### 屏幕模式：三屏或轮换
+
+`screens.mode` = three（默认）使三个页面保持分开，每个窗口一个。`screens.mode` = rotate 使每个窗口成为单个屏幕，每隔 `screens.rotate_every_seconds` 秒（默认 20；5 到 300）在总览、此刻和哨兵之间轮换。
+
+红色故障会让窗口跳转到显示它的屏幕：失败的工作流跳到 **此刻**，变红的哨兵面板跳到 **哨兵**。窗口会在那里停留 `screens.alert_hold_seconds` 秒（默认 30；5 到 600），或直到该红色消失，以先到者为准，然后继续轮换。已经显示过的红色在发生变化或再次出现之前不会再让窗口跳转。窗口打开时已经是红色的内容只是起点，不会触发跳转。如果窗口正在停留于第一个红色时又来了第二个，它会等待轮到自己。为了得知这些，窗口用同样的只读调用在后台读取另外两个屏幕（绝不访问 GitHub）。`?rotate=0` 让单个窗口停留在其屏幕，`?jump=off` 保持轮换但不跳转。每个屏幕在出现时会应用自己的主题和自己的标志。
+
+### 组织标志
+
+设置的「此浏览器」标签页有一个用于上传组织标志的块：PNG、JPEG、WebP 或 SVG，最大 1 MB。监视器根据文件的前几个字节检查真实类型（名称和随附的标签不算数），拒绝含有脚本、事件处理程序、指向其他文件或地址的链接或文档类型的 SVG，并把图片以 `org_logo` 加扩展名保存在这台电脑的 `data/` 文件夹中，绝不写入配置。只存在一个标志：上传新的会替换旧的。操作日志会记录上传和移除，但绝不记录文件本身。
+
+`screens.logo_overview`、`screens.logo_now` 和 `screens.logo_sentinels` 选择它显示在哪些墙面屏幕上（默认仅总览），`screens.logo_corner` 选择角落（默认右上角），`screens.logo_max_width` 和 `screens.logo_max_height` 选择在 1920 x 1080 下的最大尺寸，单位为像素（默认 160 x 64；标志随屏幕放大）。图片会按比例缩放到该尺寸内，并在页眉或页脚中有专属位置，因此绝不会遮挡内容。背景保持透明：背景透明的标志在浅色和深色主题中都显示得当。
 
 ### 显示什么，隐藏什么
 

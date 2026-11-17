@@ -424,19 +424,31 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `score.weights.security` | `-` | sentinel | Weight: security |
 | `score.weights.speed` | `-` | sentinel | Weight: speed |
 | `score.window_days` | `-` | sentinel | Score window |
+| `screens.alert_hold_seconds` | `30` | general | Seconds on the screen of a new red |
 | `screens.blink` | `true` | general | Blink failures |
 | `screens.blink_calm_minutes` | `30` | general | Minutes until a failure stops blinking |
 | `screens.burn_in_protection` | `true` | general | Protect against screen burn-in |
 | `screens.default_density` | `"normal"` | general | Density of the wall screens |
-| `screens.default_theme` | `"dark"` | general | Theme of the wall screens |
+| `screens.default_theme` | `"inherit"` | general | Theme of the wall screens |
 | `screens.enabled` | `false` | general | Wall screens |
+| `screens.logo_corner` | `"top-right"` | general | Corner of the logo |
+| `screens.logo_max_height` | `64` | general | Largest height of the logo |
+| `screens.logo_max_width` | `160` | general | Largest width of the logo |
+| `screens.logo_now` | `false` | general | Logo on the screen: Right now |
+| `screens.logo_overview` | `true` | general | Logo on the screen: Overview |
+| `screens.logo_sentinels` | `false` | general | Logo on the screen: Sentinels |
+| `screens.mode` | `"three"` | general | Wall screens mode |
 | `screens.night_dim` | `false` | general | Dim at night |
 | `screens.night_dim_from_hour` | `22` | general | Dim from (hour) |
 | `screens.night_dim_to_hour` | `7` | general | Dim until (hour) |
 | `screens.refresh_seconds` | `10` | general | Seconds between updates of a wall screen |
+| `screens.rotate_every_seconds` | `20` | general | Seconds per screen when they rotate |
 | `screens.rotate_seconds` | `0` | general | Seconds between wall screens |
 | `screens.show_repo_names` (secure) | `"public"` | general | Repository names on wall screens |
 | `screens.sound` | `false` | general | Sound on wall screens |
+| `screens.theme_now` | `"inherit"` | general | Theme of the screen: Right now |
+| `screens.theme_overview` | `"inherit"` | general | Theme of the screen: Overview |
+| `screens.theme_sentinels` | `"inherit"` | general | Theme of the screen: Sentinels |
 | `sentinel.a2_full_sample_unknown` | `-` | sentinel | Unknown when sample is full |
 | `sentinel.a2_resolve_batch_min` | `-` | sentinel | A2 lookups in one request from |
 | `sentinel.a2_resolve_batch_pages` | `-` | sentinel | A2 pages per repository |
@@ -594,6 +606,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ui.screen2_tabs` | `""` | general | Tabs of screen 2 |
 | `ui.screen3_orientation` | `"auto"` | general | Orientation of screen 3 |
 | `ui.screen3_tabs` | `""` | general | Tabs of screen 3 |
+| `ui.theme` | `"auto"` | general | Colour theme |
 | `updates.check` | `true` | basic | Tell me when a newer version is published |
 | `upstream.enabled` | `false` | advanced | Follow the original repository of each fork |
 | `upstream.forks_per_request` | `8` | advanced | Forks per request |

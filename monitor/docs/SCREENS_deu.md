@@ -75,11 +75,12 @@ Eine Adresse je Monitor. Ein Parameter kann ein Fenster ruhiger oder kleiner mac
 | Parameter | Wirkung |
 |---|---|
 | `?monitor=1` bis `9` | Die Nummer, die neben dem Titel steht. |
-| `?theme=dark`, `light` oder `contrast` | Farben; contrast ist weiß auf schwarz, für einen Bildschirm, der aus der Ferne gelesen wird. |
+| `?theme=light` (oder `dark`, `auto`, `contrast` oder der Name eines der sechzehn Designs) | Farben des ganzen Fensters, vor dem, was die Einstellungen sagen. `contrast` ist weiß auf schwarz, für einen Bildschirm, den man von weitem sieht. |
 | `?density=compact`, `normal` oder `large` | Schriftgröße. `?scale=1.5` vergrößert alles (0,5 bis 3). |
 | `?refresh=10` | Sekunden zwischen den Aktualisierungen (5 bis 120). |
 | `?lang=de` | Sprache (en, es, de, fr, it, ja, zh, pt). |
-| `?rotate=30` | Das Fenster wechselt alle 30 Sekunden von selbst zwischen Übersicht, Gerade jetzt und Wächtern (mindestens 5; 0 = keine Rotation). |
+| `?rotate=30` | Das Fenster wechselt alle 30 Sekunden von selbst zwischen Übersicht, Gerade jetzt und Wächtern (mindestens 5; 0 = bleibt auf einer Anzeige). Mit `screens.mode` = rotate wechselt es ohnehin; dies ändert das Tempo eines Fensters. |
+| `?jump=off` | Nur mit `screens.mode` = rotate: Das Fenster wechselt, springt aber nie zu einem neuen Rot. |
 | `?blink=off` | Fehler behalten einen festen Schein statt zu blinken. Es kann nicht einschalten, was `screens.blink` ausgeschaltet lässt. |
 | `?sound=on` | Ein kurzer Signalton bei einem neuen Fehler, nur wenn `screens.sound` es erlaubt. Standardmäßig aus. |
 
@@ -92,16 +93,41 @@ Die Sprache einer Anzeige wird in dieser Reihenfolge bestimmt: `?lang=xx` in der
 | Einstellung | Was sie bewirkt |
 |---|---|
 | `screens.enabled` | Schaltet die drei Seiten ein. Aus: `/screen/overview`, `/screen/now`, `/screen/sentinels` und `/api/screens/data` antworten mit 404 (`/screen/1` bis `/screen/3` sind die Seite selbst und hängen nicht davon ab). Die Lite-Edition liefert die Wandbildschirme ebenfalls, mit leerem Wächter-Bildschirm. Standardmäßig aus. |
-| `screens.default_theme` | dark (Standard), light oder contrast. |
+| `screens.default_theme` | inherit (Standard: das für das ganze Produkt gewählte Design, siehe unten), auto, light, dark, eines der sechzehn Designs oder contrast. |
 | `screens.default_density` | compact, normal (Standard) oder large. |
 | `screens.refresh_seconds` | Sekunden zwischen den Aktualisierungen eines Fensters (standardmäßig 10). Die Seiten lesen vom Monitor, nie von GitHub, eine kurze Zeit kostet also kein Kontingent. |
-| `screens.rotate_seconds` | 0 (Standard) = keine Rotation; ab 5 wechselt ein Fenster durch die drei Seiten. |
+| `screens.rotate_seconds` | Nur mit `screens.mode` = three. 0 (Standard) = keine Rotation; ab 5 wechselt ein Fenster durch die drei Seiten. |
 | `screens.blink` | Fehler blinken sanft (standardmäßig an). |
 | `screens.blink_calm_minutes` | Minuten, nach denen ein Fehler, um den sich niemand gekümmert hat, einen festen Schein behält statt zu blinken (standardmäßig 30; 0 = blinkt bis zur Lösung). |
 | `screens.sound` | Ein Signalton bei einem neuen Fehler (standardmäßig aus). |
 | `screens.burn_in_protection` | Verschiebt alles jede Minute um einige Pixel (standardmäßig an). |
 | `screens.night_dim` | Dunkelt die Anzeigen zwischen `screens.night_dim_from_hour` (22) und `screens.night_dim_to_hour` (7) ab; standardmäßig aus. |
 | `screens.show_repo_names` | all, public (Standard: private Repositories erscheinen als private-1, private-2...) oder none (jeder Name wird ausgeblendet). Für einen Bildschirm, den andere sehen können, public oder none verwenden. Bei einer von Hand geschriebenen Liste in `repos` wird die Sichtbarkeit alle `discover_refresh_seconds` mit einer Auflistung des Kontos gelesen; ein Repository, dessen Sichtbarkeit nicht gelesen werden konnte, gilt als privat. Die Nummern (private-1...) erhalten nur die verborgenen Repositorys, in der Reihenfolge eines HMAC des Namens mit einem Schlüssel der Installation, der in einer privaten Datei im Datenordner liegt; sie sagen also nichts darüber, wo ein Repository unter den anderen liegt. |
+| `screens.theme_overview`, `screens.theme_now`, `screens.theme_sentinels` | Das Design einer Anzeige: inherit (Standard: das von `screens.default_theme`) oder eines der obigen Designs. |
+| `screens.mode` | three (Standard: die drei Seiten getrennt, eine pro Fenster) oder rotate (eine einzige Seite, die durch die drei wechselt und zu einem neuen Rot springt). |
+| `screens.rotate_every_seconds` | Im Modus rotate die Sekunden pro Anzeige (Standard 20; 5 bis 300). |
+| `screens.alert_hold_seconds` | Im Modus rotate die Sekunden, die ein neues Rot das Fenster auf seiner Anzeige hält (Standard 30; 5 bis 600), oder bis das Rot verschwindet. |
+| `screens.logo_overview`, `screens.logo_now`, `screens.logo_sentinels` | Auf welchen Anzeigen das Logo erscheint (standardmäßig nur auf der Übersicht). |
+| `screens.logo_corner` | top-right (Standard), top-left, bottom-right oder bottom-left. |
+| `screens.logo_max_width`, `screens.logo_max_height` | Größte Größe des Logos in Pixeln bei 1920 x 1080 (Standard 160 x 64; es wächst mit dem Bildschirm). |
+
+### Design der Anzeigen
+
+Alles, was der Monitor zeigt, trägt das in den Einstellungen gewählte Design (`ui.theme`: auto, light, dark oder eines der sechzehn Designs): die Seite, die Wandanzeigen und die Anmeldeseite. Wer im Reiter Dieser Browser ein Design wählt, speichert es zugleich als `ui.theme`; ein Browser, der nie gewählt hat, übernimmt das des Monitors. Die auf die Festplatte geschriebenen HTML-Berichte folgen der hellen oder dunklen Einstellung des Computers, der sie öffnet.
+
+Die Wandanzeigen erben es: `screens.default_theme` ist standardmäßig `inherit`. Setze es auf ein anderes Design, um allen Anzeigen dasselbe zu geben, und `screens.theme_overview`, `screens.theme_now` oder `screens.theme_sentinels`, um einer Anzeige ein eigenes zu geben. Die Adresse kann ein Fenster weiterhin mit `?theme=` festlegen. Keine Anzeige schreibt eine eigene Farbe: alle nutzen die Paletten des Designs, daher erscheint ein der Seite hinzugefügtes Design auch auf den Anzeigen.
+
+### Modus der Anzeigen: drei oder rotierend
+
+`screens.mode` = three (Standard) hält die drei Seiten getrennt, eine pro Fenster. `screens.mode` = rotate macht jedes Fenster zu einer einzigen Anzeige, die alle `screens.rotate_every_seconds` Sekunden (Standard 20; 5 bis 300) durch Übersicht, Gerade jetzt und Wächter wechselt.
+
+Ein rotes Problem lässt das Fenster zu der Anzeige springen, die es zeigt: **Gerade jetzt** für einen fehlgeschlagenen Workflow, **Wächter** für ein Wächterfeld, das rot wird. Das Fenster bleibt dort `screens.alert_hold_seconds` Sekunden (Standard 30; 5 bis 600) oder bis dieses Rot verschwunden ist, was zuerst eintritt, und wechselt dann weiter. Ein bereits gezeigtes Rot lässt das Fenster nicht erneut springen, bis es sich ändert oder wiederkehrt. Was beim Öffnen des Fensters rot ist, ist nur der Ausgangspunkt und lässt es nicht springen. Kommt ein zweites Rot, während das Fenster das erste hält, wartet es, bis es dran ist. Um das zu wissen, liest ein Fenster die beiden anderen Anzeigen im Hintergrund mit demselben schreibgeschützten Aufruf (nie GitHub). `?rotate=0` lässt ein Fenster auf seiner Anzeige und `?jump=off` behält das Wechseln ohne die Sprünge. Jede Anzeige legt beim Erscheinen ihr eigenes Design und ihr eigenes Logo an.
+
+### Logo der Organisation
+
+Der Reiter Dieser Browser der Einstellungen hat einen Block zum Hochladen des Logos deiner Organisation: PNG, JPEG, WebP oder SVG, höchstens 1 MB. Der Monitor prüft den echten Typ an den ersten Bytes der Datei (Name und mitgeschicktes Etikett zählen nicht), lehnt ein SVG mit Skripten, Ereignis-Handlern, Verweisen auf andere Dateien oder Adressen oder einem Dokumenttyp ab und speichert das Bild im Ordner `data/` dieses Computers als `org_logo` mit seiner Endung, nie in der Konfiguration. Es gibt nur ein Logo: ein neues ersetzt das alte. Das Aktionsprotokoll vermerkt das Hochladen und das Entfernen, nie die Datei.
+
+`screens.logo_overview`, `screens.logo_now` und `screens.logo_sentinels` wählen, auf welchen Wandanzeigen es erscheint (standardmäßig nur auf der Übersicht), `screens.logo_corner` die Ecke (standardmäßig oben rechts) und `screens.logo_max_width` und `screens.logo_max_height` die größte Größe in Pixeln bei 1920 x 1080 (Standard 160 x 64; das Logo wächst mit dem Bildschirm). Das Bild wird in diese Größe eingepasst, ohne seine Form zu ändern, und hat einen eigenen Platz in der Kopf- oder Fußzeile, sodass es den Inhalt nie verdeckt. Der Hintergrund bleibt transparent: Ein Logo mit transparentem Hintergrund sieht in hellen wie in dunklen Designs richtig aus.
 
 ### Was sie zeigen und was sie verbergen
 

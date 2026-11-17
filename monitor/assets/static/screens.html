@@ -12,6 +12,9 @@
 <style>
 :root{--bg:#070d14;--bg2:#0c1622;--card:#101c2b;--card2:#0d1724;--line:#1d3047;--tx:#e6f1fb;--mut:#7f98b3;--cy:#22d3ee;--cy2:#0e7490;--ok:#34d399;--warn:#fbbf24;--bad:#fb4b4b;--info:#60a5fa;--glow:rgba(34,211,238,.18);--halo:rgba(251,75,75,.55)}
 :root[data-theme=light]{--bg:#eef3f8;--bg2:#e3ebf3;--card:#ffffff;--card2:#f6f9fc;--line:#c9d6e3;--tx:#0b1b2b;--mut:#4d6580;--cy:#0891b2;--cy2:#155e75;--ok:#047857;--warn:#a16207;--bad:#c81e1e;--info:#1d4ed8;--glow:rgba(8,145,178,.14);--halo:rgba(200,30,30,.45)}
+/* the sixteen themes of the main page (read from the page itself by the server) and the names the wall screens give to their colours */
+/*THEME_CSS*/
+:root[data-studio]{--bg2:var(--panel2);--card:var(--panel);--card2:var(--panel2);--tx:var(--text);--cy:var(--acc);--cy2:var(--acc2);--info:var(--run);--glow:color-mix(in srgb,var(--acc) 22%,transparent);--halo:color-mix(in srgb,var(--bad) 55%,transparent)}
 :root[data-theme=contrast]{--bg:#000;--bg2:#000;--card:#000;--card2:#000;--line:#ffffff;--tx:#fff;--mut:#e0e0e0;--cy:#00e5ff;--cy2:#00e5ff;--ok:#00ff7f;--warn:#ffd700;--bad:#ff4040;--info:#7ab8ff;--glow:rgba(255,255,255,.12);--halo:rgba(255,64,64,.8)}
 *{box-sizing:border-box;margin:0;padding:0}
 html{--k:1;--d:1;font-size:calc(var(--k)*var(--d)*min(100vw/120,100vh/67.5));background:var(--bg);color:var(--tx)}
@@ -21,6 +24,7 @@ html[data-density=large]{--d:1.12}
 body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Sans CJK SC","Noto Sans CJK JP",sans-serif;background:radial-gradient(120% 90% at 50% 0%,var(--bg2),var(--bg));height:100vh;overflow:hidden;font-size:1rem;line-height:1.25;transition:filter 2s,opacity .6s}
 :lang(ja) body{font-family:system-ui,"Yu Gothic UI","Meiryo","Hiragino Sans","Noto Sans CJK JP","Noto Sans JP",sans-serif}
 :lang(zh) body{font-family:system-ui,"Microsoft YaHei UI","PingFang SC","Noto Sans CJK SC","Noto Sans SC",sans-serif}
+:root[data-studio] body{background:var(--page,var(--bg))}
 body.dim{filter:brightness(.35)}
 body.offline #stage{opacity:.5;filter:grayscale(.7)}
 #wrap{position:absolute;inset:0;overflow:hidden}
@@ -139,7 +143,11 @@ svg{display:block}
 .bars .br.critical i,.bars .br.error i{background:var(--bad)}.bars .br.warning i{background:var(--warn)}.bars .br.info i{background:var(--info)}
 .kiosk{position:fixed;left:50%;transform:translateX(-50%);bottom:.3rem;opacity:.25;background:none;border:1px solid var(--line);color:var(--mut);border-radius:.4rem;padding:.1rem .5rem;font-size:.8rem;cursor:pointer}
 .kiosk:hover,.kiosk:focus{opacity:1}
-.foot{display:flex;justify-content:space-between;color:var(--mut);font-size:.8rem;flex:0 0 auto}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:1rem;color:var(--mut);font-size:.8rem;flex:0 0 auto}
+/* the logo of the organization: a box of its own in the header or the footer, so it never covers the content; its largest size is in pixels at 1920 x 1080 and grows with the screen; the picture keeps its shape */
+.orglogo{display:block;flex:0 0 auto;width:auto;height:auto;object-fit:contain;max-width:calc(var(--lw,160)*.0625rem);max-height:calc(var(--lh,64)*.0625rem)}
+.orglogo[hidden]{display:none}
+header>.orglogo:first-child{margin-right:1rem}header>.orglogo:last-child{margin-left:1rem}
 /* overview */
 #s-overview{grid-template-columns:1.05fr 1.2fr 1.6fr 1.15fr;grid-template-rows:1.1fr 1.25fr .8fr;grid-template-areas:"score fleet trend trend" "heat heat top queue" "events events events api"}
 #a-score{grid-area:score}#a-fleet{grid-area:fleet}#a-trend{grid-area:trend}#a-heat{grid-area:heat}#a-top{grid-area:top}#a-queue{grid-area:queue}#a-events{grid-area:events}#a-api{grid-area:api}
@@ -191,9 +199,11 @@ svg{display:block}
 <body>
 <div id="wrap"><div id="stage">
 <header>
+ <img class="orglogo" id="lg-tl" alt="" hidden>
  <div class="brand"><span class="pulse" aria-hidden="true"></span><b id="h-title"></b><span class="tag" id="h-tag"></span></div>
  <div class="mid"><div class="dots" id="h-dots" aria-hidden="true"></div></div>
  <div class="clock" id="clock" aria-live="off"></div>
+ <img class="orglogo" id="lg-tr" alt="" hidden>
 </header>
 <div id="banner" role="status" hidden></div>
 <main class="screen" id="s-overview" aria-labelledby="h-title">
@@ -219,7 +229,7 @@ svg{display:block}
  <div class="sen-grid" id="c-cards"></div>
 </main>
 
-<div class="foot"><span id="f-left"></span><span id="f-right"></span></div>
+<div class="foot"><img class="orglogo" id="lg-bl" alt="" hidden><span id="f-left"></span><span id="f-right"></span><img class="orglogo" id="lg-br" alt="" hidden></div>
 </div></div>
 <button type="button" class="kiosk" id="fs"></button>
 <script>
@@ -238,7 +248,25 @@ const $=id=>document.getElementById(id);
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
 const num=v=>typeof v==="number"&&isFinite(v)?v:0;
 document.documentElement.lang=D.html_lang;
-root.dataset.theme=P.theme;root.dataset.density=P.density;root.style.setProperty("--k",P.scale);
+/* the theme: ?theme= for the whole window, else the one the settings give to each screen (its own, the one of all the screens, the one chosen for the whole product); `auto` follows the computer */
+const THEME_OF=k=>P.theme_locked?P.theme:((D.themes||{})[k]||P.theme);
+function applyTheme(name){
+  let t=name||"dark";
+  if(t==="auto")t=matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";
+  root.dataset.theme=t;
+  if(t==="light"||t==="dark"||t==="contrast")delete root.dataset.studio;else root.dataset.studio="1";
+}
+applyTheme(THEME_OF(D.screen));
+root.dataset.density=P.density;root.style.setProperty("--k",P.scale);
+/* the logo of the organization: one image, in the corner and on the screens the settings say */
+const LG=D.logo,LG_IDS={"top-left":"lg-tl","top-right":"lg-tr","bottom-left":"lg-bl","bottom-right":"lg-br"};
+function logoPaint(kind){
+  document.querySelectorAll(".orglogo").forEach(e=>{e.hidden=true});
+  if(!LG||!LG.show||!LG.show[kind])return;
+  const img=$(LG_IDS[LG.corner]||"lg-tr");if(!img)return;
+  if(!img.getAttribute("src")){img.addEventListener("error",()=>{img.hidden=true});img.setAttribute("src",LG.url)}
+  img.style.setProperty("--lw",LG.max_width);img.style.setProperty("--lh",LG.max_height);img.hidden=false;
+}
 if(!P.blink)body.classList.add("noblink");
 const RENDER={};
 const STATE={kind:D.screen,data:null,fails:0,timer:0,tickAt:0,got:0,prevRed:new Set(),first:true,redSince:new Map(),lastSound:{},sq:[],sqAt:0,al:null,offSound:false};
@@ -530,10 +558,12 @@ RENDER.overview=renderOverview;RENDER.now=renderNow;RENDER.sentinels=renderSenti
 function show(kind){
   KINDS.forEach(k=>{const e=$("s-"+k);if(e)e.hidden=k!==kind});
   STATE.kind=kind;STATE.first=true;STATE.prevRed=new Set();body.className=body.className.replace(/\bk-\w+/g,"").trim()+" k-"+kind;
+  applyTheme(THEME_OF(kind));logoPaint(kind);
   frame();
 }
 function paint(d){
   const keys=(RENDER[STATE.kind]||(()=>[]))(d)||[];
+  observe(STATE.kind,d);
   const r=newFails(keys);
   if(r.isNew){beep(["red"]);$("stage").classList.remove("fail-new");void $("stage").offsetWidth;if(!reduce&&P.blink)flash($("stage"),"fail-new")}
   if(r.fixed){flash($("ft-green"),"flash-ok");beep(["resolved"])}
@@ -550,27 +580,73 @@ async function load(){
   clearTimeout(STATE.timer);
   let wait=P.refresh*1000;
   try{
-    const r=await fetch("/api/screens/data?screen="+encodeURIComponent(STATE.kind)+"&lang="+encodeURIComponent(D.lang),{cache:"no-store"});
+    const r=await getData(STATE.kind);
     if(!r.ok)throw new Error(String(r.status));
     const d=await r.json();STATE.fails=0;STATE.offSound=false;STATE.data=d;STATE.got=Date.now();paint(d);
+    if(P.jump)JUMP_KINDS.forEach(k=>{if(k!==STATE.kind)peek(k)});
   }catch(e){
     STATE.fails++;if(!STATE.offSound){STATE.offSound=true;beep(["conn"])}const back=Math.min(60,5*Math.pow(2,STATE.fails-1));wait=back*1000;
     banner("bad",T("ui.scr_offline")+" · "+T("ui.scr_retry",{n:back}));
   }
   STATE.timer=setTimeout(load,wait);
 }
-function rotate(){
+/* ---------- turning and jumping ----------
+   With screens.mode = rotate this one window turns through the screens every `rotate` seconds. A red that was not there before makes it jump to the screen that shows it ('now' for the workflows that failed,
+   'sentinels' for the panels in red) and stay there `hold` seconds, or until that red is gone if that comes first, and then it goes on turning. A red that was already shown does not make it jump again until it
+   changes or comes back. The first data of a screen is the starting point: what is red when the window opens does not make it jump. */
+const JUMP_KINDS=["now","sentinels"];
+const R={timer:0,holdTimer:0,hold:null,pending:[],shown:{now:new Set(),sentinels:new Set()},seen:{},cur:{now:new Set(),sentinels:new Set()}};
+const nextKind=()=>KINDS[(KINDS.indexOf(STATE.kind)+1)%KINDS.length];
+function goTo(next){
+  if(STATE.moving){setTimeout(()=>goTo(next),600);return}
+  if(next===STATE.kind)return;
+  const cur=$("s-"+STATE.kind);STATE.moving=true;
+  if(history.replaceState)try{history.replaceState(null,"","/screen/"+next+location.search)}catch(e){}
+  const go=()=>{show(next);load();$("s-"+next).classList.remove("out");STATE.moving=false};
+  if(reduce){go()}else{cur.classList.add("out");setTimeout(go,500)}
+}
+function schedule(){
+  clearTimeout(R.timer);
   if(P.rotate<=0)return;
-  setInterval(()=>{
-    const i=(KINDS.indexOf(STATE.kind)+1)%KINDS.length,next=KINDS[i],cur=$("s-"+STATE.kind);
-    if(history.replaceState)try{history.replaceState(null,"","/screen/"+next+location.search)}catch(e){}
-    const go=()=>{show(next);load();const n=$("s-"+next);n.classList.remove("out")};
-    if(reduce){go()}else{cur.classList.add("out");setTimeout(go,500)}
-  },P.rotate*1000);
+  R.timer=setTimeout(()=>{if(!R.hold)goTo(nextKind());schedule()},P.rotate*1000);
+}
+function redKeys(kind,d){
+  if(kind==="now")return (d.failures||[]).map(r=>"f:"+r.repo+":"+r.workflow);
+  if(kind==="sentinels"&&d.enabled)return (d.cards||[]).filter(c=>c.level==="bad").map(c=>"s:"+c.id);
+  return [];
+}
+function startHold(kind,keys){
+  R.hold={kind:kind,keys:new Set(keys)};clearTimeout(R.holdTimer);clearTimeout(R.timer);
+  goTo(kind);
+  R.holdTimer=setTimeout(endHold,P.hold*1000);
+}
+function endHold(){
+  clearTimeout(R.holdTimer);R.hold=null;
+  while(R.pending.length){const p=R.pending.shift();if([...p.keys].some(k=>R.cur[p.kind].has(k))){startHold(p.kind,p.keys);return}}
+  schedule();
+}
+function jump(kind,keys){
+  if(!R.hold){startHold(kind,keys);return}
+  if(R.hold.kind===kind){keys.forEach(k=>R.hold.keys.add(k));clearTimeout(R.holdTimer);R.holdTimer=setTimeout(endHold,P.hold*1000)}
+  else R.pending.push({kind:kind,keys:new Set(keys)});
+}
+function observe(kind,d){
+  if(!P.jump||JUMP_KINDS.indexOf(kind)<0)return;
+  const cur=new Set(redKeys(kind,d)),shown=R.shown[kind];
+  R.cur[kind]=cur;
+  shown.forEach(k=>{if(!cur.has(k))shown.delete(k)});
+  const fresh=[...cur].filter(k=>!shown.has(k));
+  if(!R.seen[kind]){R.seen[kind]=true;cur.forEach(k=>shown.add(k));return}
+  if(fresh.length){fresh.forEach(k=>shown.add(k));jump(kind,fresh)}
+  if(R.hold&&R.hold.kind===kind&&![...R.hold.keys].some(k=>cur.has(k)))endHold();
+}
+function getData(kind){return fetch("/api/screens/data?screen="+encodeURIComponent(kind)+"&lang="+encodeURIComponent(D.lang),{cache:"no-store"})}
+async function peek(kind){
+  try{const r=await getData(kind);if(r.ok)observe(kind,await r.json())}catch(e){}
 }
 $("fs").addEventListener("click",()=>{try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen()}catch(e){}});
-show(STATE.kind);clock();setInterval(clock,1000);setInterval(slideTimeline,1000);burnIn();rotate();load();
-window.__screens={state:STATE,show:show,paint:paint};
+show(STATE.kind);clock();setInterval(clock,1000);setInterval(slideTimeline,1000);burnIn();schedule();load();
+window.__screens={state:STATE,show:show,paint:paint,observe:observe,turn:R,params:P,theme:applyTheme,schedule:schedule};
 })();
 </script>
 </body>

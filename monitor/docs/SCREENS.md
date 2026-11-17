@@ -75,11 +75,12 @@ One address for each monitor. A parameter can make a window quieter or smaller t
 | Parameter | Effect |
 |---|---|
 | `?monitor=1` to `9` | The number shown next to the title. |
-| `?theme=dark`, `light` or `contrast` | Colours; contrast is white on black, for a screen seen from far away. |
+| `?theme=light` (or `dark`, `auto`, `contrast`, or the name of one of the sixteen themes) | Colours of the whole window, over what the settings say. `contrast` is white on black, for a screen seen from far away. |
 | `?density=compact`, `normal` or `large` | Size of the type. `?scale=1.5` enlarges everything (0.5 to 3). |
 | `?refresh=10` | Seconds between updates (5 to 120). |
 | `?lang=de` | Language (en, es, de, fr, it, ja, zh, pt). |
-| `?rotate=30` | The window turns by itself through overview, right now and sentinels every 30 seconds (at least 5; 0 = no rotation). |
+| `?rotate=30` | The window turns by itself through overview, right now and sentinels every 30 seconds (at least 5; 0 = it stays on one screen). With `screens.mode` = rotate it already turns; this changes the pace of one window. |
+| `?jump=off` | Only with `screens.mode` = rotate: the window turns but never jumps to a new red. |
 | `?blink=off` | Failures keep a fixed glow instead of blinking. It cannot turn on what `screens.blink` keeps off. |
 | `?sound=on` | A short beep for a new failure, only if `screens.sound` allows it. Off by default. |
 
@@ -92,16 +93,41 @@ The language of a screen is decided in this order: `?lang=xx` in the address; th
 | Setting | What it does |
 |---|---|
 | `screens.enabled` | Turns the three pages on. Off: `/screen/overview`, `/screen/now`, `/screen/sentinels` and `/api/screens/data` answer 404 (`/screen/1` to `/screen/3` are the page itself and do not depend on it). The lite edition serves the wall screens too, with the sentinel screen empty. Off by default. |
-| `screens.default_theme` | dark (default), light or contrast. |
+| `screens.default_theme` | inherit (default: the theme chosen for the whole product, see below), auto, light, dark, one of the sixteen themes or contrast. |
 | `screens.default_density` | compact, normal (default) or large. |
 | `screens.refresh_seconds` | Seconds between updates of a window (10 by default). The pages read the monitor, never GitHub, so a short time costs no allowance. |
-| `screens.rotate_seconds` | 0 (default) = no rotation; above 5, one window turns through the three pages. |
+| `screens.rotate_seconds` | Only with `screens.mode` = three. 0 (default) = no rotation; above 5, one window turns through the three pages. |
 | `screens.blink` | Failures blink softly (on by default). |
 | `screens.blink_calm_minutes` | Minutes after which a failure that nobody attended to keeps a fixed glow instead of blinking (30 by default; 0 = it blinks until solved). |
 | `screens.sound` | A beep for a new failure (off by default). |
 | `screens.burn_in_protection` | Moves everything a few pixels every minute (on by default). |
 | `screens.night_dim` | Dims the screens between `screens.night_dim_from_hour` (22) and `screens.night_dim_to_hour` (7); off by default. |
 | `screens.show_repo_names` | all, public (default: private repositories appear as private-1, private-2...) or none (every name is hidden). Use public or none for a screen that other people can see. With a list of repositories written by hand in `repos`, the visibility is read with one listing of the account every `discover_refresh_seconds`; a repository whose visibility could not be read counts as private. The numbers (private-1...) go only to the hidden repositories, in the order of an HMAC of the name with a key of the installation kept in a private file of the data folder, so they say nothing about where a repository falls among the others. |
+| `screens.theme_overview`, `screens.theme_now`, `screens.theme_sentinels` | The theme of one screen: inherit (default: the one of `screens.default_theme`) or any of the themes above. |
+| `screens.mode` | three (default: the three pages apart, one for each window) or rotate (one single page that turns through the three and jumps to a new red). |
+| `screens.rotate_every_seconds` | In rotate mode, seconds on each screen (20 by default; 5 to 300). |
+| `screens.alert_hold_seconds` | In rotate mode, seconds that a new red keeps the window on its screen (30 by default; 5 to 600), or until the red is gone. |
+| `screens.logo_overview`, `screens.logo_now`, `screens.logo_sentinels` | On which screens the logo shows (only the overview by default). |
+| `screens.logo_corner` | top-right (default), top-left, bottom-right or bottom-left. |
+| `screens.logo_max_width`, `screens.logo_max_height` | Largest size of the logo in pixels at 1920 x 1080 (160 x 64 by default; it grows with the screen). |
+
+### Theme of the screens
+
+Everything the monitor shows wears the theme chosen in Settings (`ui.theme`: auto, light, dark or one of the sixteen themes): the page, the wall screens and the sign-in page. Choosing a theme in the selector of the tab This browser also saves it as `ui.theme`, so a browser that never chose takes the one of the monitor. The HTML reports written to disk follow the light or dark setting of the computer that opens them.
+
+The wall screens inherit it: `screens.default_theme` is `inherit` by default. Set it to another theme to fix the same one for all the screens, and `screens.theme_overview`, `screens.theme_now` or `screens.theme_sentinels` to give one screen its own. The address can still fix one window with `?theme=`. No screen writes a colour of its own: they all use the palettes of the theme, so a theme added to the page appears on the screens as well.
+
+### Mode of the screens: three or rotate
+
+`screens.mode` = three (default) keeps the three pages apart, one for each window. `screens.mode` = rotate makes every window one single screen that turns through overview, right now and sentinels every `screens.rotate_every_seconds` seconds (20 by default; 5 to 300).
+
+A red failure makes the window jump to the screen that shows it: **Right now** for a workflow that failed, **Sentinels** for a sentinel panel that turns red. The window stays there `screens.alert_hold_seconds` seconds (30 by default; 5 to 600) or until that red is gone, whichever comes first, and then goes on turning. A red that was already shown does not make the window jump again until it changes or comes back. What is red when the window opens is only the starting point and does not make it jump. If a second red arrives while the window holds the first, it waits for its turn. To know, a window reads the other two screens in the background with the same read-only call (never GitHub). `?rotate=0` keeps one window on its screen and `?jump=off` keeps the turning without the jumps. Each screen puts on its own theme and its own logo as it comes up.
+
+### Logo of the organization
+
+The tab This browser of Settings has a block to upload the logo of your organization: PNG, JPEG, WebP or SVG, at most 1 MB. The monitor checks the real type by the first bytes of the file (the name and the label that came with it do not count), refuses an SVG with scripts, event handlers, links to other files or addresses or a document type, and keeps the picture in the `data/` folder of this computer as `org_logo` with its extension, never in the configuration. Only one logo exists: uploading another replaces it. The log of actions records the upload and the removal, never the file.
+
+`screens.logo_overview`, `screens.logo_now` and `screens.logo_sentinels` choose on which wall screens it shows (only the overview by default), `screens.logo_corner` the corner (top-right by default) and `screens.logo_max_width` and `screens.logo_max_height` the largest size in pixels at 1920 x 1080 (160 x 64 by default; the logo grows with the screen). The picture is fitted inside that size without changing its shape and has a place of its own in the header or the footer, so it never covers the content. Its background stays transparent: a logo with a transparent background looks right in the light and in the dark themes.
 
 ### What they show and what they hide
 
