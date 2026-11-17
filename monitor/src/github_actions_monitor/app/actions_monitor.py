@@ -1535,11 +1535,14 @@ def feed_alerts(config, data, diagnose=True):
             degraded.note("lessons.apply", error)
         result = ai_alerts.update(config, red_rows(data), runner=ai_alerts.gh_runner if diagnose else None, owner=toolconfig.github_owner(config), panels=panels, sections=sections, extra_rows=extra,
                                   status=f"running, cycle complete ({len(data.get('repos') or [])} repositories read)")
-    try:
+    try:      # --demo writes nothing: no book and no ai/LESSONS.md in the folder it runs from
         from github_actions_monitor.integrations import lessons
-        if result["opened"]:
+        if DEMO["on"]:
+            pass
+        elif result["opened"]:
             lessons.record(config, result["opened"], {(r.get("repo"), r.get("workflow")): r.get("sha") for r in red_rows(data) if r.get("sha")})      # a failure that opens goes into the book (local file)
-        lessons.write_markdown(config, force=bool(result["opened"] or result["resolved"]))
+        if not DEMO["on"]:
+            lessons.write_markdown(config, force=bool(result["opened"] or result["resolved"]))
     except Exception as error:   # noqa: BLE001 - the book never stops the feed
         degraded.note("lessons.record", error)
     for alert in result["opened"]:
@@ -3348,7 +3351,7 @@ def discovery_payload():
         data = STATE.get("data") or {}
     box = discovery.box(toolconfig.github_owner(config), len(data.get("repos") or []), HIDDEN["discovered"], HIDDEN["names"])
     from github_actions_monitor.data_pipeline import orgs
-    organisations = orgs.view(toolconfig.raw_config(), lambda endpoint: gh_read(endpoint, retries=0), state_dir() / ("orgs_state_lite.json" if LITE["on"] else "orgs_state.json"), offline=LINK.state()["offline"]) if not DEMO["on"] else {"enabled": False, "orgs": []}
+    organisations = orgs.view(toolconfig.raw_config(), lambda endpoint: gh_read(endpoint, retries=0), state_dir() / ("orgs_state_lite.json" if LITE["on"] else "orgs_state.json"), offline=LINK.state()["offline"]) if not DEMO["on"] else {"enabled": False, "orgs": [], "checked_at": 0}
     return {**box, "events": list(reversed(DISCOVERY["events"]))[:20], "suggestions": DISCOVERY["suggestions"], "settings": discovery.settings(config), "owner_kind": FORKS["kind"], "forks": {k: FORKS[k] for k in ("checked", "kept", "left", "waiting")}, "demo": DEMO["on"], "organizations": organisations}
 
 
