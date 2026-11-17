@@ -109,7 +109,7 @@ Seuls les noms de ce tableau sont lus. Dans le service, une valeur illisible est
 | `MONITOR_LOCAL_PORT` | Un second port, loopback seulement, pour la personne devant la machine quand un proxy est déclaré (`listen.local_port` ; 8766 dans l'image). |
 | `MONITOR_TLS_CERT_FILE` | Un certificat (PEM) pour servir directement en HTTPS (`listen.tls_cert_file`) ; avec sa clé. S'il est inutilisable, le moniteur ne démarre pas en HTTP simple. |
 | `MONITOR_TLS_KEY_FILE` | La clé privée de ce certificat (`listen.tls_key_file`). |
-| `MONITOR_QUERY_ACCESS` | `0` = l'adresse avec `?access=` n'ouvre plus de session (`listen.query_access`) ; utilisez `POST /api/access`. |
+| `MONITOR_QUERY_ACCESS` | `1` = l'adresse avec `?access=` peut ouvrir une session (`listen.query_access`, désactivé par défaut) ; la voie sûre est `POST /api/access`. |
 | `MONITOR_TEAM_MODE` | `1` = le mode équipe (`auth.enabled`) : utilisateurs, rôles et sessions. |
 | `MONITOR_ADMIN_USER` | Avec `MONITOR_ADMIN_PASSWORD_FILE` : le premier administrateur que le service crée quand le mode équipe est actif et qu'il n'y a pas encore d'utilisateur. |
 | `MONITOR_ADMIN_PASSWORD_FILE` | Le fichier (par exemple un secret Docker) avec le mot de passe de `MONITOR_ADMIN_USER` sur sa première ligne. |

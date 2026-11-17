@@ -109,7 +109,7 @@ launchd（macOS）：`ProgramArguments` = `/usr/bin/python3`、`-m`、`github_ac
 | `MONITOR_LOCAL_PORT` | 声明了代理时，供本机操作者使用的第二个端口，仅限回环（`listen.local_port`；镜像中为 8766）。 |
 | `MONITOR_TLS_CERT_FILE` | 直接提供 HTTPS 的证书（PEM，`listen.tls_cert_file`），需配合密钥。若无法使用，监视器不会退回明文 HTTP 启动。 |
 | `MONITOR_TLS_KEY_FILE` | 该证书的私钥（`listen.tls_key_file`）。 |
-| `MONITOR_QUERY_ACCESS` | `0` = 带 `?access=` 的地址不再打开会话（`listen.query_access`）；请使用 `POST /api/access`。 |
+| `MONITOR_QUERY_ACCESS` | `1` = 带 `?access=` 的地址可以打开会话（`listen.query_access`，默认关闭）；安全的方式是 `POST /api/access`。 |
 | `MONITOR_TEAM_MODE` | `1` = 团队模式（`auth.enabled`）：用户、角色和会话。 |
 | `MONITOR_ADMIN_USER` | 与 `MONITOR_ADMIN_PASSWORD_FILE` 一起使用:团队模式开启且还没有用户时,服务创建的第一个管理员。 |
 | `MONITOR_ADMIN_PASSWORD_FILE` | 文件(例如 Docker 机密),第一行是 `MONITOR_ADMIN_USER` 的密码。 |

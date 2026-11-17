@@ -420,9 +420,9 @@ class OpenSessionByPost(unittest.TestCase):
         with LiveServer({}, network=access) as server:
             self.assertEqual(self.post(server, {"token": access}, {"Origin": "http://evil.example"})[0], 403)
 
-    def test_the_old_redirect_still_works(self):
+    def test_the_old_redirect_still_works_when_it_is_turned_on(self):
         access = "T" * 24
-        with LiveServer({}, network=access) as server:
+        with LiveServer({"listen": {"query_access": True}}, network=access) as server:
             self.assertEqual(server.call("/api/about?access=" + access, headers={"Accept": "application/json"})[0], 200)
 
 

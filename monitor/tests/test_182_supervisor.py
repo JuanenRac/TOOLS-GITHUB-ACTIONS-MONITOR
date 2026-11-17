@@ -246,8 +246,9 @@ class Network(Running):
                 return None
         opener = urllib.request.build_opener(NoRedirect)
         request = urllib.request.Request(self.url + "/?access=" + "T" * 32, headers={"Accept": "text/html"})
-        with self.assertRaises(urllib.error.HTTPError) as caught:
-            opener.open(request, timeout=10)
+        with mock.patch.object(self.handler, "team_config", staticmethod(lambda: {"listen": {"query_access": True}})):      # off by default
+            with self.assertRaises(urllib.error.HTTPError) as caught:
+                opener.open(request, timeout=10)
         self.assertEqual(caught.exception.code, 302)
         self.assertEqual(caught.exception.headers["Location"], "/")
         self.assertIn("monitor_access=", caught.exception.headers["Set-Cookie"])

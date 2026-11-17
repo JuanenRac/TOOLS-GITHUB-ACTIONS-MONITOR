@@ -549,7 +549,7 @@
     "tls_key_file": "",
     "secure_cookie": false,
     "max_failed_attempts": 10,
-    "query_access": true,
+    "query_access": false,
     "local_port": 0
   },
   "github_token": {

@@ -246,7 +246,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `listen.max_failed_attempts` (secure) | `10` | advanced | Wrong access tokens allowed |
 | `listen.network` (secure) | `false` | advanced | Listen beyond this computer |
 | `listen.proxy_public_host` (secure) | `""` | advanced | Public name of the HTTPS proxy (without a port) |
-| `listen.query_access` (secure) | `true` | advanced | Accept the access token in the address (deprecated) |
+| `listen.query_access` (secure) | `false` | advanced | Accept the access token in the address (deprecated) |
 | `listen.secure_cookie` (secure) | `false` | advanced | Mark the access cookie as Secure |
 | `listen.tls_cert_file` (secure) | `""` | advanced | Certificate file for HTTPS (PEM) |
 | `listen.tls_key_file` (secure) | `""` | advanced | Private key file for HTTPS (PEM) |
