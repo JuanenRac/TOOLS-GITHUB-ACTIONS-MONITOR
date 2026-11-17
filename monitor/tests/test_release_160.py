@@ -204,7 +204,7 @@ class Analytics(unittest.TestCase):
 
 class WebhookEvents(unittest.TestCase):
     def payload(self, event, **over):
-        body = {"repository": {"name": "demo-repo"}}
+        body = {"repository": {"name": "demo-repo", "full_name": "o/demo-repo"}}
         if event == "workflow_run":
             body["workflow_run"] = {"id": 77, "name": "CI", "path": ".github/workflows/ci.yml@refs/heads/main", "status": "completed", "conclusion": "failure", "head_branch": "main", "head_sha": "abcdef123456",
                                     "run_attempt": 2, "html_url": "https://github.com/o/demo-repo/actions/runs/77", "run_started_at": "2026-11-01T00:00:00Z", "updated_at": "2026-11-01T00:02:00Z",

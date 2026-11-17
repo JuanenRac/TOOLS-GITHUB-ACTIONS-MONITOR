@@ -451,7 +451,7 @@ class Exports(unittest.TestCase):
 
 class Webhook(unittest.TestCase):
     SECRET = "s" * 40
-    CONFIG = {"webhook": {"enabled": True}}
+    CONFIG = {"webhook": {"enabled": True, "allowed_owners": ["o"]}}
 
     def setUp(self):
         webhook.reset()
@@ -474,12 +474,12 @@ class Webhook(unittest.TestCase):
         self.assertFalse(webhook.active({"webhook": {"enabled": "yes"}}))
 
     def test_signature_required(self):
-        self.assertEqual(self.call({"repository": {"name": "R"}}, signature=False)[0], 401)
-        raw = b'{"repository": {"name": "R"}}'
+        self.assertEqual(self.call({"repository": {"name": "R", "full_name": "o/R"}}, signature=False)[0], 401)
+        raw = b'{"repository": {"name": "R", "full_name": "o/R"}}'
         self.assertEqual(webhook.handle(self.CONFIG, raw, {"X-Hub-Signature-256": "sha256=" + "0" * 64, "X-GitHub-Event": "push"}, ["R"])[0], 401)
 
     def test_accepted_events(self):
-        code, answer, repo = self.call({"repository": {"name": "R"}})
+        code, answer, repo = self.call({"repository": {"name": "R", "full_name": "o/R"}})
         self.assertEqual((code, repo), (200, "R"))
         self.assertEqual(self.call({"repository": {"name": "Other"}})[2], None)
         self.assertEqual(self.call({"repository": {"name": "../x"}})[2], None)
