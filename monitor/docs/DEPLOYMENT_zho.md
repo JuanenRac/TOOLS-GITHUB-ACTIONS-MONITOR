@@ -52,7 +52,7 @@ docker exec github-actions-monitor cat /data/state/access_token      # the acces
 
 ```sh
 cp deploy/.env.example deploy/.env                                   # fill in MONITOR_GITHUB_OWNER
-printf '%s' "ghp_..." > deploy/gh_token.txt && chmod 600 deploy/gh_token.txt
+printf '%s' "ghp_..." > deploy/gh_token.txt && sudo chown 10001:10001 deploy/gh_token.txt && chmod 600 deploy/gh_token.txt
 docker compose -f deploy/compose.yaml up -d                          # on 127.0.0.1:8765
 docker compose -f deploy/compose.yaml --profile proxy up -d          # behind Caddy (deploy/Caddyfile)
 ```

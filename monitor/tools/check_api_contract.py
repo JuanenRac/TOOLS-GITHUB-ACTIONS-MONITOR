@@ -66,6 +66,8 @@ def check(call, edition, contract=None):
         want = row["complete"] if edition == "complete" else (row["complete"] if row["lite"] == "same" else row["lite"])
         status, body = call("GET", row["path"])
         label = f"GET {row['path']}"
+        if row.get("local_only") and status == 403:      # a route for the computer of the monitor only: from the network the right answer is the refusal
+            continue
         if isinstance(want, int):
             if status != want:
                 problems.append(f"{label}: status {status}, the contract says {want}")
