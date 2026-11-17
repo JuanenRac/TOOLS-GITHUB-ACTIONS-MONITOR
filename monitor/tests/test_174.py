@@ -227,7 +227,7 @@ class Page(unittest.TestCase):
         self.assertTrue(callable(am.repo_meta))
         meta = am.repo_meta(["x", "y"])
         self.assertEqual(set(meta), {"x", "y"})
-        self.assertEqual(set(meta["x"]), {"private", "branch", "pushed", "prs"})
+        self.assertEqual(set(meta["x"]), {"private", "branch", "pushed", "prs", "fork"})
         text = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
         self.assertIn('"number": run.get("run_number")', text)
         self.assertIn('"queued":', text)
