@@ -573,5 +573,6 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `webhook.max_per_minute` | `30` | webhook | Events accepted per repository |
 | `webhook.record_events` | `-` | webhook | Keep events |
 | `webhook.replay_seconds` | `3600` | webhook | Delivery ids remembered |
+| `webhook.secret_env` (secure) | `"MONITOR_WEBHOOK_SECRET"` | webhook | Environment variable with the shared secret |
 | `webhook.signing_state` | `-` | webhook | Shared secret |
 | `workspace_root` | `-` | paths | Folder with your clones |

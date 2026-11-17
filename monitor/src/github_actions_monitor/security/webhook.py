@@ -2,7 +2,9 @@
 # GPL-3.0-or-later - see LICENSE
 """Optional local webhook receiver (OFF by default).
 
-It only exists when actions_monitor.json says  "webhook": {"enabled": true, "secret": "<at least 32 random characters>"}.  The monitor still listens
+It only exists when actions_monitor.json says  "webhook": {"enabled": true}  AND the shared secret (at least 32 random characters) is in the environment variable named by
+`webhook.secret_env` (MONITOR_WEBHOOK_SECRET by default) or in the file named by that variable plus `_FILE`: the secret is never written in the configuration, shown or logged (a secret in the
+configuration file is read only when `webhook.allow_config_secret` is true, a way to migrate that is off by default). The monitor still listens
 on 127.0.0.1 only, so GitHub can reach it only through a tunnel YOU run on purpose (the tool never opens one). Every request must carry the standard
 GitHub signature header `X-Hub-Signature-256: sha256=<hmac>` made with the shared secret from the config (never a GitHub token); anything else is
 refused. What an accepted event does is small: it marks the repository named in the payload for a refresh on the next cycle (nothing is written
@@ -12,6 +14,7 @@ import collections
 import hashlib
 import hmac
 import json
+import os
 import re
 import threading
 import time
@@ -19,14 +22,17 @@ from datetime import datetime, timezone
 
 from github_actions_monitor import i18n
 from github_actions_monitor.app import toolconfig
+from github_actions_monitor.security import envguard
 
 NAME_RE = re.compile(r"^[A-Za-z0-9._-]{1,100}\Z")
 DELIVERY_RE = re.compile(r"^[A-Za-z0-9-]{8,64}\Z")   # X-GitHub-Delivery: a GUID
 FULL_NAME_RE = re.compile(r"^([A-Za-z0-9-]{1,39})/([A-Za-z0-9._-]{1,100})\Z")
 MIN_SECRET = 32
+SECRET_ENV = "MONITOR_WEBHOOK_SECRET"      # the default name of the variable that holds the shared secret
+ENV_NAME_RE = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}\Z")
 MAX_BODY = 262144
 MAX_DELIVERIES = 2000        # the replay memory is bounded: the oldest delivery ids fall out first
-EVENTS = ("workflow_run", "workflow_job", "push", "release", "check_suite", "ping")
+EVENTS = ("workflow_run", "workflow_job", "check_run", "push", "release", "check_suite", "ping")      # the closed list: any other event is answered 202 and dropped
 
 TEXT = {key: "wh." + key for key in ("off", "bad_secret", "too_big", "bad_signature", "bad_event", "bad_payload", "unknown_repo", "on", "bad_delivery")}   # keys of the messages (locales/*.json); use text(key)
 
@@ -35,10 +41,42 @@ def text(key):
     return i18n.t(TEXT[key])
 
 
+def secret_env_name(config):
+    """The NAME of the environment variable that holds the shared secret (`webhook.secret_env`); a name that is not a plain variable name falls back to MONITOR_WEBHOOK_SECRET."""
+    cfg = (config or {}).get("webhook")
+    name = cfg.get("secret_env") if isinstance(cfg, dict) else None
+    return name if isinstance(name, str) and ENV_NAME_RE.match(name) else SECRET_ENV
+
+
+def read_secret(name):
+    """The value of the environment variable `name` (held by envguard once the process started), else the first line of the file named by `name + "_FILE"`, else ''. Never printed."""
+    value = envguard.get(name).strip()
+    if value:
+        return value
+    path = os.environ.get(name + "_FILE", "").strip()
+    if path:
+        try:
+            with open(path, "r", encoding="utf-8-sig") as handle:
+                return handle.readline().strip()
+        except (OSError, UnicodeError):
+            return ""
+    return ""
+
+
+def secret_source(config):
+    """"env" | "config" | "none": where the shared secret comes from, never the secret. "config" only when `webhook.allow_config_secret` is true and the variable is empty."""
+    cfg = (config or {}).get("webhook")
+    cfg = cfg if isinstance(cfg, dict) else {}
+    if read_secret(secret_env_name(config)):
+        return "env"
+    return "config" if cfg.get("allow_config_secret") is True and isinstance(cfg.get("secret"), str) and cfg["secret"] else "none"
+
+
 def settings(config):
     cfg = (config or {}).get("webhook")
     cfg = cfg if isinstance(cfg, dict) else {}
-    secret = cfg.get("secret") if isinstance(cfg.get("secret"), str) else ""
+    source = secret_source(config)
+    secret = read_secret(secret_env_name(config)) if source == "env" else cfg["secret"] if source == "config" else ""
     return {"enabled": cfg.get("enabled") is True, "secret": secret}
 
 
@@ -68,11 +106,45 @@ _seen = collections.OrderedDict()     # delivery id -> time it was accepted (sig
 _per_repo = {}                        # repository -> times of the events accepted in the last minute
 
 
+_accepted = collections.deque(maxlen=5000)     # when each event that named a watched repository was accepted (bounded)
+_started = [time.time()]
+
+
 def reset():
     """Forgets every remembered delivery and every count (tests, and a changed secret)."""
     with _guard_lock:
         _seen.clear()
         _per_repo.clear()
+        _accepted.clear()
+        _started[0] = time.time()
+
+
+def note_accepted(now=None):
+    """One event for a watched repository was accepted: the coverage indicator counts it."""
+    with _guard_lock:
+        _accepted.append(time.time() if now is None else now)
+
+
+def coverage(config, now=None):
+    """How much of the time the events cover the state, as a small read-only record: {"state": "off" | "waiting" | "live" | "quiet", "last_age_seconds", "last_hour", "window_minutes", "watching_seconds",
+    "fallback": "poll"}. `live` = the last event is newer than `savings.webhook_window_minutes`; `quiet` = it is older (nothing arrived for a while, which is also what a lost tunnel looks like); `waiting` =
+    switched on and nothing yet. The polling is always the fallback: it reads whatever the events did not tell, so a missed delivery never leaves the state wrong for longer than one slow turn."""
+    from github_actions_monitor.data_pipeline import savings
+    now = time.time() if now is None else now
+    window = savings.settings(config or {})["webhook_window_minutes"]
+    with _guard_lock:
+        times = list(_accepted)
+        since = _started[0]
+    out = {"state": "off", "last_age_seconds": None, "last_hour": sum(1 for t in times if t > now - 3600), "window_minutes": window, "watching_seconds": max(0, int(now - since)), "fallback": "poll"}
+    if not active(config):
+        return out
+    if not times:
+        out["state"] = "waiting"
+        return out
+    age = max(0, int(now - times[-1]))
+    out["last_age_seconds"] = age
+    out["state"] = "live" if age <= window * 60 else "quiet"
+    return out
 
 
 def replay(delivery, window, now=None):

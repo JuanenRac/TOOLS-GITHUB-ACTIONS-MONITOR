@@ -263,6 +263,58 @@ class TheWallScreensFollowTheRulesOfTheNetwork(NetworkCase):
         self.assertEqual(Running(self, peer_ip="127.0.0.1").call("GET", "/api/screens/data?screen=sentinels")[0], 200)
 
 
+class TheWebhookHasItsOwnProofInTheNetworkMode(NetworkCase):
+    """GitHub arrives from outside with no access token: the only proof is the HMAC made with the secret of the environment. Off, wrong, replayed and flooding deliveries never get further."""
+    SECRET = "w" * 40
+
+    def setUp(self):
+        super().setUp()
+        for patcher in (mock.patch.dict("os.environ", {"MONITOR_WEBHOOK_SECRET": self.SECRET}), mock.patch.object(actions_monitor, "LIVE_CONFIG", {"webhook": {"enabled": True}})):
+            patcher.start()
+            self.addCleanup(patcher.stop)
+        from github_actions_monitor.security import webhook
+        webhook.reset()
+        self.webhook = webhook
+
+    def post(self, remote, delivery, signature=None, body=b'{"zen": "x"}', event="ping"):
+        headers = {"Host": f"127.0.0.1:{remote.port}", "Content-Type": "application/json", "X-GitHub-Event": event, "X-GitHub-Delivery": delivery,
+                   "X-Hub-Signature-256": signature or self.webhook.sign(self.SECRET, body)}
+        connection = http.client.HTTPConnection("127.0.0.1", remote.port, timeout=15)
+        try:
+            connection.request("POST", "/api/webhook", body, headers)
+            answer = connection.getresponse()
+            return answer.status, answer.read()
+        finally:
+            connection.close()
+
+    def test_a_signed_delivery_needs_no_token_and_a_wrong_signature_never_passes(self):
+        remote = Running(self)
+        self.assertEqual(self.post(remote, "aaaaaaaa-0001")[0], 200)
+        status, raw = self.post(remote, "aaaaaaaa-0002", signature="sha256=" + "0" * 64)
+        self.assertEqual(status, 401)
+        self.assertNotIn(self.SECRET.encode(), raw)
+
+    def test_a_captured_delivery_sent_again_is_answered_and_not_acted_on(self):
+        remote = Running(self)
+        self.assertEqual(self.post(remote, "bbbbbbbb-0001", event="push", body=b'{"repository": {"name": "none-watched"}}')[0], 202)
+        status, raw = self.post(remote, "bbbbbbbb-0001", event="push", body=b'{"repository": {"name": "none-watched"}}')
+        self.assertEqual(status, 202)
+        self.assertIn(b"duplicate", raw)
+
+    def test_it_is_closed_without_the_secret_and_the_body_has_a_ceiling(self):
+        remote = Running(self)
+        with mock.patch.dict("os.environ", {"MONITOR_WEBHOOK_SECRET": ""}):
+            self.assertEqual(self.post(remote, "cccccccc-0001")[0], 404)
+        status, _raw = self.post(remote, "cccccccc-0002", body=b"{" + b" " * (self.webhook.MAX_BODY + 10) + b"}")
+        self.assertEqual(status, 413)
+
+    def test_one_address_cannot_flood_it(self):
+        remote = Running(self)
+        codes = [self.post(remote, f"dddddddd-{i:04d}", signature="sha256=" + "0" * 64)[0] for i in range(125)]
+        self.assertEqual(codes[:120], [401] * 120)
+        self.assertEqual(codes[120:], [429] * 5)
+
+
 #: every route that answers 403 "local_only" to a client of the network (the keys, the actions on GitHub, the tests of channels, the state of the pool and of the App)
 LOCAL_ONLY_POST = ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/ai/models/refresh", "/api/ai/models/test", "/api/ai/models/data", "/api/ai/doctor", "/api/notify/test", "/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan",
                    "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures", "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run", "/api/credential")
