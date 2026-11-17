@@ -11,6 +11,10 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+### Fixed
+
+- **The wall screens follow the language chosen on the main page**: a screen opened without `?lang=` came out in the language of the monitor (English) even when the person had chosen another one on the main page. The order is now `?lang=` of the address, then the language saved by the main page in the same browser (a screen with another language reloads once, before it draws, keeping `?rotate=` and the other parameters), then the language of the monitor; the link "Open screen" of Settings carries `?lang=` of the page. It holds in the eight languages, with the font of Japanese and Chinese and the locale of each language for the time, the date and the numbers. Tests check the three screens in the eight languages with the preference saved, that `?lang=` wins and that no English text is left; the guide of the screens explains how the language is decided.
+
 ### Security
 
 - **The access token no longer travels in the address by default (`listen.query_access` is now off)**: in the network mode the `?access=` address opened the session, but the token stayed in the history, the logs and the `Referer`. The setting is now off unless you turn it on (the default, the example file and the Settings help say so); the session is opened by `POST /api/access` (the token in the body) or by the header `X-Monitor-Access`. An installation that wrote `listen.query_access` itself keeps its value; one that relied on the old default and opens the monitor from an address with `?access=` has to turn the setting on, or use `POST /api/access`. The environment variable `MONITOR_QUERY_ACCESS=1` turns it on for a service.

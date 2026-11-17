@@ -83,6 +83,10 @@ Eine Adresse je Monitor. Ein Parameter kann ein Fenster ruhiger oder kleiner mac
 | `?blink=off` | Fehler behalten einen festen Schein statt zu blinken. Es kann nicht einschalten, was `screens.blink` ausgeschaltet lässt. |
 | `?sound=on` | Ein kurzer Signalton bei einem neuen Fehler, nur wenn `screens.sound` es erlaubt. Standardmäßig aus. |
 
+### Sprache der Anzeigen
+
+Die Sprache einer Anzeige wird in dieser Reihenfolge bestimmt: `?lang=xx` in der Adresse; dann die auf der Hauptseite desselben Browsers gewählte Sprache (sie wird dort gespeichert, und eine in diesem Browser geöffnete Anzeige liest sie, sodass die Anzeige der Seite ohne Parameter folgt); dann die Sprache des Monitors (`MONITOR_LANG` oder die konfigurierte). Unterscheidet sich die gespeicherte Sprache einer Anzeige von der, in der sie ausgeliefert wurde, lädt sie einmal vor dem Zeichnen neu, mit angehängtem `?lang=` und erhaltenen übrigen Parametern (darunter `?rotate=`). Die acht Sprachen (en, es, de, fr, it, ja, zh, pt) sind dieselben wie auf der Seite: Titel, Beschriftungen, Zustände, Schweregrade, Einheiten und relative Zeiten („vor 5 Min.“) stammen aus dem Katalog, und Uhrzeit, Datum und Zahlen werden mit dem Gebietsschema der Sprache geschrieben (en-GB, es-ES, de-DE, fr-FR, it-IT, ja-JP, zh-CN, pt-PT). Der Link „Anzeige öffnen“ in den Einstellungen trägt bereits `?lang=` mit der Sprache der Seite. Ein Rechner, der keine Sprache wählt, bleibt bei Englisch: Die Sprache des Browsers entscheidet nicht.
+
 ### Einstellungen der Wandanzeigen
 
 | Einstellung | Was sie bewirkt |

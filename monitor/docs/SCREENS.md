@@ -83,6 +83,10 @@ One address for each monitor. A parameter can make a window quieter or smaller t
 | `?blink=off` | Failures keep a fixed glow instead of blinking. It cannot turn on what `screens.blink` keeps off. |
 | `?sound=on` | A short beep for a new failure, only if `screens.sound` allows it. Off by default. |
 
+### Language of the screens
+
+The language of a screen is decided in this order: `?lang=xx` in the address; then the language chosen on the main page of the same browser (it is saved there, and a screen opened in that browser reads it, so a screen follows the page without any parameter); then the language of the monitor (`MONITOR_LANG`, or the configured one). A screen whose saved language differs from the one it was served in reloads once, before it draws, with `?lang=` added and the other parameters (`?rotate=` among them) kept. The eight languages (en, es, de, fr, it, ja, zh, pt) are the same ones of the page: titles, labels, states, severities, units and the relative times ("5 min ago") come from the catalogue, and the time, the date and the numbers are written with the locale of the language (en-GB, es-ES, de-DE, fr-FR, it-IT, ja-JP, zh-CN, pt-PT). The link "Open screen" of Settings already carries `?lang=` with the language of the page. A computer that does not choose a language by itself keeps English: the language of the browser does not decide.
+
 ### Settings of the wall screens
 
 | Setting | What it does |

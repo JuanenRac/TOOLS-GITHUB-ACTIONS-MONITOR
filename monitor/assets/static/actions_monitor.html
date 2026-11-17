@@ -1756,7 +1756,7 @@ async function cfgExtras(){
   const gen=document.getElementById("cfp-general");
   if(gen&&!gen.querySelector(".wall-open")){
     const box=document.createElement("div");box.className="cfg-group wall-open";
-    box.innerHTML=`<h3><span>${esc(T("ui.cfg_b_wall"))}</span></h3><div class="inl">`+["overview","now","sentinels"].map(k=>`<a href="/screen/${k}" target="_blank" rel="noopener">${esc(T("ui.scr_open",{name:T("ui.scr_title_"+k)}))}</a>`).join(" · ")+"</div>";
+    box.innerHTML=`<h3><span>${esc(T("ui.cfg_b_wall"))}</span></h3><div class="inl">`+["overview","now","sentinels"].map(k=>`<a href="/screen/${k}?lang=${encodeURIComponent(LANG)}" target="_blank" rel="noopener">${esc(T("ui.scr_open",{name:T("ui.scr_title_"+k)}))}</a>`).join(" · ")+"</div>";
     gen.appendChild(box);
   }
   if(typeof basicExtras==="function")basicExtras();

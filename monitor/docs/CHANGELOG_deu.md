@@ -9,6 +9,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+### Behoben
+
+- **Die Wandanzeigen folgen der auf der Hauptseite gewählten Sprache**: Eine ohne `?lang=` geöffnete Anzeige erschien in der Sprache des Monitors (Englisch), auch wenn auf der Hauptseite eine andere gewählt war. Jetzt gilt die Reihenfolge `?lang=` der Adresse, dann die von der Hauptseite im selben Browser gespeicherte Sprache (eine Anzeige mit anderer Sprache lädt vor dem Zeichnen einmal neu und behält `?rotate=` und die übrigen Parameter), dann die Sprache des Monitors; der Link „Anzeige öffnen“ in den Einstellungen trägt das `?lang=` der Seite. Das gilt für die acht Sprachen, mit der Schrift für Japanisch und Chinesisch und dem Gebietsschema jeder Sprache für Uhrzeit, Datum und Zahlen. Tests prüfen die drei Anzeigen in den acht Sprachen mit gespeicherter Einstellung, dass `?lang=` gewinnt und dass kein englischer Text übrig bleibt; die Anleitung der Anzeigen erklärt, wie die Sprache bestimmt wird.
+
 ### Sicherheit
 
 - **Das Zugriffstoken reist standardmäßig nicht mehr in der Adresse (`listen.query_access` ist jetzt aus)**: Im Netzwerkmodus öffnete die Adresse mit `?access=` die Sitzung, aber das Token blieb im Verlauf, in den Protokollen und im `Referer`. Die Einstellung ist jetzt aus, solange du sie nicht einschaltest (Standardwert, Beispieldatei und Hilfe der Einstellungen sagen es); die Sitzung wird mit `POST /api/access` (Token im Body) oder mit dem Header `X-Monitor-Access` geöffnet. Eine Installation, die `listen.query_access` selbst geschrieben hat, behält ihren Wert; wer sich auf den alten Standard verlassen hat und den Monitor über eine Adresse mit `?access=` öffnet, muss die Einstellung einschalten oder `POST /api/access` verwenden. Die Umgebungsvariable `MONITOR_QUERY_ACCESS=1` schaltet sie für einen Dienst ein.

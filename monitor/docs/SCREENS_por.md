@@ -83,6 +83,10 @@ Um endereço para cada monitor. Um parâmetro pode tornar uma janela mais calma 
 | `?blink=off` | As falhas mantêm um halo fixo em vez de piscar. Não pode ativar o que `screens.blink` mantém desligado. |
 | `?sound=on` | Um sinal sonoro curto a cada falha nova, só se `screens.sound` o permitir. Desativado por defeito. |
 
+### Idioma dos ecrãs
+
+O idioma de um ecrã decide-se por esta ordem: `?lang=xx` no endereço; depois o idioma escolhido na página principal do mesmo navegador (fica lá guardado, e um ecrã aberto nesse navegador lê-o, pelo que o ecrã acompanha a página sem qualquer parâmetro); depois o idioma do monitor (`MONITOR_LANG`, ou o configurado). Um ecrã cujo idioma guardado difere daquele em que foi servido volta a carregar uma vez, antes de desenhar, com `?lang=` acrescentado e os restantes parâmetros (entre eles `?rotate=`) mantidos. Os oito idiomas (en, es, de, fr, it, ja, zh, pt) são os mesmos da página: títulos, etiquetas, estados, gravidades, unidades e tempos relativos («há 5 min») vêm do catálogo, e a hora, a data e os números escrevem-se com a configuração regional do idioma (en-GB, es-ES, de-DE, fr-FR, it-IT, ja-JP, zh-CN, pt-PT). A ligação «Abrir ecrã» das Definições já leva `?lang=` com o idioma da página. Um computador que não escolhe idioma por si fica em inglês: o idioma do navegador não decide.
+
 ### Definições dos ecrãs de parede
 
 | Definição | O que faz |
