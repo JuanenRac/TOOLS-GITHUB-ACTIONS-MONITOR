@@ -229,7 +229,7 @@ class Wiring(Base):
         self.assertFalse(block["service"]["enabled"])
         self.assertFalse(block["group"]["by_commit"])
         self.assertEqual(block["digest"]["minutes"], 0)
-        self.assertEqual(alertflow.settings({}), {"silences": [], "service": {"enabled": False, "failures": 3, "rate_percent": 0, "workflows": []}, "group": {"by_commit": False, "min": 3}, "digest": {"minutes": 0, "threshold": 10}})
+        self.assertEqual(alertflow.settings({}), {"silences_expire_days": 0, "silences": [], "service": {"enabled": False, "failures": 3, "rate_percent": 0, "workflows": []}, "group": {"by_commit": False, "min": 3}, "digest": {"minutes": 0, "threshold": 10, "kinds": None}})
 
 
 if __name__ == "__main__":

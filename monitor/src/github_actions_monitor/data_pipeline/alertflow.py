@@ -18,8 +18,8 @@ from datetime import datetime, timezone
 
 SILENCE_RE = re.compile(r"^[\w.*-]{1,100}(:[\w .()*/@+-]{1,120}){0,2}(;[^;\x00-\x1f]{0,200}(;\d{4}-\d{2}-\d{2})?)?\Z")
 PATTERN_RE = re.compile(r"^[\w.*-]{1,100}(:[\w .()*/@+-]{1,120}){0,2}\Z")
-DEFAULTS = {"silences": [], "service": {"enabled": False, "failures": 3, "rate_percent": 0, "workflows": []}, "group": {"by_commit": False, "min": 3}, "digest": {"minutes": 0, "threshold": 10}}
-POLICY = {"silences": [], "service": dict(DEFAULTS["service"]), "group": dict(DEFAULTS["group"]), "digest": dict(DEFAULTS["digest"])}      # replaced by configure(): the whole monitor shares it
+DEFAULTS = {"silences_expire_days": 0, "silences": [], "service": {"enabled": False, "failures": 3, "rate_percent": 0, "workflows": []}, "group": {"by_commit": False, "min": 3}, "digest": {"minutes": 0, "threshold": 10}}
+POLICY = {"silences_expire_days": 0, "silences": [], "service": dict(DEFAULTS["service"]), "group": dict(DEFAULTS["group"]), "digest": dict(DEFAULTS["digest"])}      # replaced by configure(): the whole monitor shares it
 FOREVER = "9999-12-31T23:59:59Z"
 # What a silence by pattern may silence: the notices and alerts of a workflow that is red or stuck. The one list for the channels (shape) and for the Alerts tab (alert_center.permanent): a new security alert,
 # a required check in red, a pending signature or a release notice of a silenced repository is still announced, and the tab never shows it as silenced.
@@ -55,17 +55,28 @@ def _patterns(items):
     return out
 
 
+def _sendable_kinds(config):
+    """The kinds of event that some channel would send (the global channels, when they are on): only those count for the threshold of the summary by volume. None = not known, everything counts."""
+    try:
+        from github_actions_monitor.integrations import notifiers
+        cfg = notifiers.settings(config)
+        return frozenset(cfg["events"]) | {"alerts_digest"} if cfg["enabled"] else None      # with the channels off the users of the team mode may still be told: then everything counts
+    except Exception:   # noqa: BLE001 - without the notifiers every event counts, as before
+        return None
+
+
 def settings(config):
     block = (config or {}).get("alerts")
     block = block if isinstance(block, dict) else {}
     service = block.get("service") if isinstance(block.get("service"), dict) else {}
     group = block.get("group") if isinstance(block.get("group"), dict) else {}
     digest = block.get("digest") if isinstance(block.get("digest"), dict) else {}
-    return {"silences": [s for s in (parse_silence(x) for x in (block.get("silences") if isinstance(block.get("silences"), list) else [])) if s],
+    return {"silences_expire_days": _int(block.get("silences_expire_days"), 0, 3650, 0),
+            "silences": [s for s in (parse_silence(x) for x in (block.get("silences") if isinstance(block.get("silences"), list) else [])) if s],
             "service": {"enabled": service.get("enabled") is True, "failures": _int(service.get("failures"), 2, 50, 3), "rate_percent": _int(service.get("rate_percent"), 0, 100, 0),
                         "workflows": _patterns(service.get("workflows"))},
             "group": {"by_commit": group.get("by_commit") is True, "min": _int(group.get("min"), 2, 50, 3)},
-            "digest": {"minutes": _int(digest.get("minutes"), 0, 1440, 0), "threshold": _int(digest.get("threshold"), 3, 500, 10)}}
+            "digest": {"minutes": _int(digest.get("minutes"), 0, 1440, 0), "threshold": _int(digest.get("threshold"), 3, 500, 10), "kinds": _sendable_kinds(config)}}
 
 
 def configure(config):
@@ -86,12 +97,35 @@ def matches(entry, repo, names=(), branch=None):
     return entry["branch"] == "*" or bool(branch and _glob(entry["branch"], branch))
 
 
-def silence_of(repo, names=(), branch=None, policy=None):
-    """The first permanent silence that covers this finding (a dict), else None."""
-    for entry in (policy or POLICY)["silences"]:
-        if matches(entry, repo, names, branch):
+def expired(entry, policy=None, now=None):
+    """True when `alerts.silences_expire_days` is set and the silence is that many days past its review date (a silence without a date never expires: the setting says so)."""
+    days = (policy or POLICY).get("silences_expire_days") or 0
+    if not days or not entry["review_by"]:
+        return False
+    now = time.time() if now is None else now
+    try:
+        due = datetime.strptime(entry["review_by"], "%Y-%m-%d").replace(tzinfo=timezone.utc).timestamp()
+    except ValueError:
+        return False
+    return now >= due + days * 86400
+
+
+def silence_of(repo, names=(), branch=None, policy=None, now=None):
+    """The first permanent silence that covers this finding (a dict), else None. A silence that expired no longer covers anything."""
+    policy = policy or POLICY
+    for entry in policy["silences"]:
+        if matches(entry, repo, names, branch) and not expired(entry, policy, now):
             return entry
     return None
+
+
+def silences_report(policy=None, now=None):
+    """{"total", "due", "undated", "expired"}: how many silences by pattern there are, how many are past their review date, have no date, or no longer work."""
+    policy = policy or POLICY
+    now = time.time() if now is None else now
+    entries = policy["silences"]
+    return {"total": len(entries), "due": [e["text"].partition(";")[0] for e in entries if e["review_by"] and review_due(e, now) and not expired(e, policy, now)],
+            "undated": [e["text"].partition(";")[0] for e in entries if not e["review_by"]], "expired": [e["text"].partition(";")[0] for e in entries if expired(e, policy, now)]}
 
 
 def review_due(entry, now):
@@ -127,13 +161,32 @@ class Flow:
     def __init__(self):
         self.sent, self.held, self.held_since, self.reminded = [], [], 0.0, set()
 
+    def dump(self):
+        """What must survive a restart (it goes in events_state.json): the reminders already made, what is held for the summary and the moments of the last hour."""
+        if not (self.held or self.reminded or self.sent):
+            return None
+        return {"reminded": sorted(self.reminded), "held": [e for e in self.held if isinstance(e, dict)][-200:], "held_since": self.held_since, "sent": [t for t in self.sent if isinstance(t, (int, float))][-600:]}
+
+    def restore(self, saved):
+        """The reverse of dump(); anything that is not of the right shape is ignored."""
+        if not isinstance(saved, dict):
+            return
+        if isinstance(saved.get("reminded"), list):
+            self.reminded = {t for t in saved["reminded"] if isinstance(t, str)}
+        if isinstance(saved.get("held"), list):
+            self.held = [e for e in saved["held"] if isinstance(e, dict)]
+        if isinstance(saved.get("held_since"), (int, float)):
+            self.held_since = float(saved["held_since"])
+        if isinstance(saved.get("sent"), list):
+            self.sent = [t for t in saved["sent"] if isinstance(t, (int, float))]
+
     def shape(self, events, now=None, policy=None):
         """(notify, record): `notify` is what the channels get, `record` everything that is written in the feed (the silenced, held and grouped events marked as such, plus the events made here)."""
         policy = policy or POLICY
         now = time.time() if now is None else now
         record, notify = list(events), []
         for event in events:
-            hit = silence_of(event.get("repo"), event_names(event), event.get("branch"), policy) if event.get("repo") and event.get("kind") in SILENCE_EVENTS else None
+            hit = silence_of(event.get("repo"), event_names(event), event.get("branch"), policy, now) if event.get("repo") and event.get("kind") in SILENCE_EVENTS else None
             if hit:
                 event["silenced"], event["silence_reason"] = True, hit["reason"]
             else:
@@ -181,8 +234,11 @@ class Flow:
             return notify
         self.sent = [t for t in self.sent if now - t < 3600]
         out = []
+        kinds = cfg.get("kinds")
         for event in notify:
-            if len(self.sent) < cfg["threshold"]:
+            if kinds is not None and event.get("kind") not in kinds:      # nobody would be told about it: it does not count for the threshold and it is never held
+                out.append(event)
+            elif len(self.sent) < cfg["threshold"]:
                 self.sent.append(now)
                 out.append(event)
             else:

@@ -68,6 +68,14 @@ def inventory(data, panels=None, health=None, now=None):
     issues = data.get("issues") or []
     out.append(_signal("alerts.issues", "alerts", "act" if issues else "info", f"{len(issues)} open issue(s) of failed builds",
                        [_row(i.get("repo"), f"#{i.get('number')} {i.get('title')}", i.get("url"), _age(i.get("created"), now), "read the issue and the run it names") for i in issues]))
+    from github_actions_monitor.data_pipeline import alertflow
+    report = alertflow.silences_report(now=now)
+    if report["total"]:
+        attention = report["due"] + report["expired"] + report["undated"]
+        out.append(_signal("alerts.silences", "alerts", "watch" if attention else "info",
+                           f"{report['total']} silence(s) by pattern: {len(report['due'])} past their review date, {len(report['expired'])} expired, {len(report['undated'])} without a review date",
+                           [_row(p, "silence by pattern past its review date" if p in report["due"] else ("expired silence" if p in report["expired"] else "silence without a review date"), "", None,
+                                 "decide: keep it with a new date, or remove it from alerts.silences") for p in attention]))
     out.append(_signal("now.fail24", "now", "info", f"{figures.get('fail24', 0)} failure(s) and {figures.get('ok24', 0)} success(es) in the last 24 h"))
     errors = data.get("errors") or {}
     out.append(_signal("repos.errors", "repos", "watch" if errors else "info", f"{len(errors)} repositor(ies) without data", [_row(k, v, "", None, "wait: reads are repeated by themselves") for k, v in list(errors.items())[:20]], transient=True))

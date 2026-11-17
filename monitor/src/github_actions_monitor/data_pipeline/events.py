@@ -153,6 +153,8 @@ class Feed:
             self.state = None
         self.was_loading = True
         self.flow = alertflow.Flow()
+        if isinstance(self.state, dict) and "flow" in self.state:
+            self.flow.restore(self.state.pop("flow"))      # the reminders made and what was held for the summary survive a restart
         self.listeners = []   # functions called with the list of new events (the notifications hang here); a failing one never stops the feed
 
     def feed(self, snapshot):
@@ -169,6 +171,7 @@ class Feed:
         self.state = new
         self._write_state()
         told, events = self.flow.shape(events, clock())      # silences by pattern, grouping by commit and the summary when there are many (alertflow.py): nothing changes while they are off
+        self._write_state()
         self._append(events)
         self._notify(told)
         for listener in self.listeners:
@@ -206,7 +209,8 @@ class Feed:
 
     def _write_state(self):
         try:
-            state_io.save_text(self.state_file, json.dumps(self.state, ensure_ascii=False))
+            saved = self.flow.dump()
+            state_io.save_text(self.state_file, json.dumps({**self.state, "flow": saved} if saved and isinstance(self.state, dict) else self.state, ensure_ascii=False))
         except OSError:
             pass
 

@@ -199,5 +199,80 @@ class ACloudFallbackNeedsAPermission(unittest.TestCase):
         self.assertEqual(record.call_args[0][1], "ai.cloud_fallback")
 
 
+class TheFlowSurvivesARestartAndCountsWhatIsSent(unittest.TestCase):
+    NOW = 1_800_000_000.0
+
+    def setUp(self):
+        from github_actions_monitor.data_pipeline import alertflow
+        self.alertflow = alertflow
+        self.addCleanup(alertflow.configure, {})
+
+    def event(self, kind, repo="r", level="bad"):
+        return {"kind": kind, "code": kind, "level": level, "repo": repo, "owner": "main", "text": repo, "url": None, "args": {"repo": repo, "workflow": "CI"}}
+
+    def test_only_what_a_channel_sends_counts_for_the_threshold(self):
+        self.alertflow.configure({"alerts": {"digest": {"minutes": 60, "threshold": 3}}, "notify": {"enabled": True, "events": ["red_new"]}})
+        flow = self.alertflow.Flow()
+        told, _ = flow.shape([self.event("prs_up", "p%d" % n, "info") for n in range(10)] + [self.event("red_new", "x")], self.NOW)
+        self.assertEqual(len(told), 11)      # nothing was held: ten events nobody sends do not count
+        self.assertEqual(flow.held, [])
+
+    def test_what_is_held_and_the_reminders_survive_a_restart(self):
+        import tempfile
+        from github_actions_monitor.data_pipeline import events
+        self.alertflow.configure({"alerts": {"digest": {"minutes": 1440, "threshold": 3}, "silences": ["demo;why;2020-01-01"]}})
+        with tempfile.TemporaryDirectory() as folder:
+            feed = events.Feed(Path(folder) / "e.jsonl", Path(folder) / "state.json")
+            feed.state = {"reds": {}, "stuck": {}}
+            feed.flow.shape([self.event("red_new", "r%d" % n) for n in range(5)], self.NOW)
+            feed._write_state()
+            again = events.Feed(Path(folder) / "e.jsonl", Path(folder) / "state.json")
+            self.assertEqual(len(again.flow.held), 3)      # five reds and the reminder: three go out, three are held
+            self.assertEqual(again.flow.reminded, feed.flow.reminded)
+            self.assertEqual(len(again.flow.sent), 3)
+
+    def test_the_reminder_of_a_review_is_not_repeated_after_a_restart(self):
+        self.alertflow.configure({"alerts": {"silences": ["demo;why;2020-01-01"]}})
+        flow = self.alertflow.Flow()
+        first, _ = flow.shape([], self.NOW)
+        self.assertEqual([e["kind"] for e in first], ["silence_review"])
+        other = self.alertflow.Flow()
+        other.restore(json.loads(json.dumps(flow.dump())))
+        second, _ = other.shape([], self.NOW + 60)
+        self.assertEqual(second, [])
+
+
+class ASilenceCanExpire(unittest.TestCase):
+    NOW = 1_800_000_000.0      # 2027-01-15
+
+    def setUp(self):
+        from github_actions_monitor.data_pipeline import alertflow
+        self.alertflow = alertflow
+        self.addCleanup(alertflow.configure, {})
+
+    def event(self):
+        return {"kind": "red_new", "code": "red_new", "level": "bad", "repo": "demo", "owner": "main", "text": "t", "url": None, "args": {"repo": "demo", "workflow": "CI"}, "branch": "main"}
+
+    def test_it_works_for_ever_by_default_and_expires_when_asked(self):
+        self.alertflow.configure({"alerts": {"silences": ["demo;why;2026-12-01"]}})
+        told, _ = self.alertflow.Flow().shape([self.event()], self.NOW)
+        self.assertEqual([e["kind"] for e in told], ["silence_review"])      # silenced, with the reminder
+        self.alertflow.configure({"alerts": {"silences": ["demo;why;2026-12-01"], "silences_expire_days": 30}})
+        told, _ = self.alertflow.Flow().shape([self.event()], self.NOW)
+        self.assertIn("red_new", [e["kind"] for e in told])      # 45 days past the date: it no longer silences
+        self.alertflow.configure({"alerts": {"silences": ["demo;why"], "silences_expire_days": 30}})
+        told, _ = self.alertflow.Flow().shape([self.event()], self.NOW)
+        self.assertEqual(told, [])      # without a date it never expires
+
+    def test_the_signal_lists_the_silences_that_need_a_decision(self):
+        from github_actions_monitor.data_pipeline import signals
+        self.alertflow.configure({"alerts": {"silences": ["demo;why;2026-12-01", "other;why", "fine;why;2099-01-01"]}})
+        doc = signals.inventory({}, now=self.NOW)
+        row = next(s for s in doc if s["id"] == "alerts.silences")
+        self.assertEqual((row["level"], sorted(r["repo"] for r in row["rows"])), ("watch", ["demo", "other"]))
+        self.alertflow.configure({})
+        self.assertNotIn("alerts.silences", [s["id"] for s in signals.inventory({}, now=self.NOW)])
+
+
 if __name__ == "__main__":
     unittest.main()
