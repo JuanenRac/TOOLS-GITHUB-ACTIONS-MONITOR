@@ -11,7 +11,7 @@ Der Monitor kann ein Buch der Fehler Ihrer CI und eine Bibliothek von Lehren fü
 
 ## Das Buch
 
-Jeder Fehler, den der Feed öffnet, wird zu einer Zeile in `data/failures.jsonl` (Schema 1): `schema`, `ts`, `repo`, `workflow`, `job`, `step`, `event`, `branch`, `actor_kind`, `category`, `root_cause`, `avoidable`, `run_id`, `lesson_ref`, `had_lesson`, `sha`, `url`, `source`. Jeder Text durchläuft dieselbe Bereinigung wie der Feed (Tokens, Schlüssel, Adressen und der Heimordner gelangen nie ins Buch). `lessons.retention_days` und `lessons.max_entries` begrenzen die Größe. Ein Buch desselben Schemas von anderswo lässt sich importieren (`lessons.import_book`).
+Jeder Fehler, den der Feed öffnet, wird zu einer Zeile in `data/failures.jsonl` (Schema 1): `schema`, `ts`, `repo`, `workflow`, `job`, `step`, `event`, `branch`, `actor_kind`, `category`, `root_cause`, `avoidable`, `run_id`, `lesson_ref`, `had_lesson`, `sha`, `url`, `source`. Jeder Text durchläuft dieselbe Bereinigung wie der Feed (Tokens, Schlüssel, Adressen und der Heimordner gelangen nie ins Buch). `lessons.retention_days` und `lessons.max_entries` begrenzen die Größe. Ein Buch desselben Schemas von anderswo lässt sich importieren (`POST /api/ai/failures`).
 
 ## Der Klassifizierer
 

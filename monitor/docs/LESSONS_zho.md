@@ -11,7 +11,7 @@
 
 ## 记录簿
 
-警报源打开的每个失败都会成为 `data/failures.jsonl` 中的一行(模式 1)：`schema`, `ts`, `repo`, `workflow`, `job`, `step`, `event`, `branch`, `actor_kind`, `category`, `root_cause`, `avoidable`, `run_id`, `lesson_ref`, `had_lesson`, `sha`, `url`, `source`。所有文本都经过与警报源相同的清理(令牌、密钥、地址和主目录绝不会进入记录簿)。`lessons.retention_days` 和 `lessons.max_entries` 限制其大小。可以导入来自别处的同模式记录簿(`lessons.import_book`)。
+警报源打开的每个失败都会成为 `data/failures.jsonl` 中的一行(模式 1)：`schema`, `ts`, `repo`, `workflow`, `job`, `step`, `event`, `branch`, `actor_kind`, `category`, `root_cause`, `avoidable`, `run_id`, `lesson_ref`, `had_lesson`, `sha`, `url`, `source`。所有文本都经过与警报源相同的清理(令牌、密钥、地址和主目录绝不会进入记录簿)。`lessons.retention_days` 和 `lessons.max_entries` 限制其大小。可以导入来自别处的同模式记录簿(`POST /api/ai/failures`)。
 
 ## 分类器
 

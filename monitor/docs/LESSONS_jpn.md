@@ -11,7 +11,7 @@
 
 ## ブック
 
-フィードが開いた失敗は、`data/failures.jsonl`(スキーマ 1)の1行になります:`schema`, `ts`, `repo`, `workflow`, `job`, `step`, `event`, `branch`, `actor_kind`, `category`, `root_cause`, `avoidable`, `run_id`, `lesson_ref`, `had_lesson`, `sha`, `url`, `source`。すべてのテキストはフィードと同じクリーニングを通ります(トークン、キー、アドレス、ホームフォルダーはブックに入りません)。`lessons.retention_days` と `lessons.max_entries` でサイズを制限できます。同じスキーマのブックを他から取り込めます(`lessons.import_book`)。
+フィードが開いた失敗は、`data/failures.jsonl`(スキーマ 1)の1行になります:`schema`, `ts`, `repo`, `workflow`, `job`, `step`, `event`, `branch`, `actor_kind`, `category`, `root_cause`, `avoidable`, `run_id`, `lesson_ref`, `had_lesson`, `sha`, `url`, `source`。すべてのテキストはフィードと同じクリーニングを通ります(トークン、キー、アドレス、ホームフォルダーはブックに入りません)。`lessons.retention_days` と `lessons.max_entries` でサイズを制限できます。同じスキーマのブックを他から取り込めます(`POST /api/ai/failures`)。
 
 ## 分類器
 

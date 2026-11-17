@@ -11,7 +11,7 @@ Il monitor può tenere un registro dei fallimenti della tua CI e una libreria di
 
 ## Il registro
 
-Ogni fallimento che il feed apre diventa una riga di `data/failures.jsonl` (schema 1): `schema`, `ts`, `repo`, `workflow`, `job`, `step`, `event`, `branch`, `actor_kind`, `category`, `root_cause`, `avoidable`, `run_id`, `lesson_ref`, `had_lesson`, `sha`, `url`, `source`. Ogni testo passa per la stessa pulizia del feed (token, chiavi, indirizzi e cartella personale non arrivano mai nel registro). `lessons.retention_days` e `lessons.max_entries` ne limitano la dimensione. Si può importare un registro dello stesso schema da un altro posto (`lessons.import_book`).
+Ogni fallimento che il feed apre diventa una riga di `data/failures.jsonl` (schema 1): `schema`, `ts`, `repo`, `workflow`, `job`, `step`, `event`, `branch`, `actor_kind`, `category`, `root_cause`, `avoidable`, `run_id`, `lesson_ref`, `had_lesson`, `sha`, `url`, `source`. Ogni testo passa per la stessa pulizia del feed (token, chiavi, indirizzi e cartella personale non arrivano mai nel registro). `lessons.retention_days` e `lessons.max_entries` ne limitano la dimensione. Si può importare un registro dello stesso schema da un altro posto (`POST /api/ai/failures`).
 
 ## Il classificatore
 

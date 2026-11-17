@@ -28,12 +28,12 @@ BEGIN, END = "<!-- glance:begin -->", "<!-- glance:end -->"
 
 def facts():
     version = re.search(r'TOOL_VERSION\s*=\s*"([^"]+)"', (MON / "src" / "github_actions_monitor" / "tool_version.py").read_text(encoding="utf-8")).group(1)
-    tests = 0
+    tests = 0      # every `test*` method of every class of the test files (a class that inherits from a base of its own counts as well); the run prints a higher number because each subclass runs the methods it inherits too
     for path in sorted((MON / "tests").glob("test_*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8-sig"))
         for node in ast.walk(tree):
-            if isinstance(node, ast.ClassDef) and any((isinstance(b, ast.Attribute) and b.attr == "TestCase") or (isinstance(b, ast.Name) and b.id.endswith("TestCase")) for b in node.bases):
-                tests += sum(1 for f in node.body if isinstance(f, ast.FunctionDef) and f.name.startswith("test"))
+            if isinstance(node, ast.ClassDef):
+                tests += sum(1 for f in node.body if isinstance(f, (ast.FunctionDef, ast.AsyncFunctionDef)) and f.name.startswith("test"))
     from github_actions_monitor.app import settings_api
     ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
     systems = re.search(r"os:\s*\[([^\]]+)\]", ci).group(1)

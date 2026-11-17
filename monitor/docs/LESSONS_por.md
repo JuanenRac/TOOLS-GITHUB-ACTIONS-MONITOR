@@ -11,7 +11,7 @@ O monitor pode manter um livro das falhas da sua CI e uma biblioteca de lições
 
 ## O livro
 
-Cada falha que o feed abre torna-se uma linha de `data/failures.jsonl` (esquema 1): `schema`, `ts`, `repo`, `workflow`, `job`, `step`, `event`, `branch`, `actor_kind`, `category`, `root_cause`, `avoidable`, `run_id`, `lesson_ref`, `had_lesson`, `sha`, `url`, `source`. Todo o texto passa pela mesma limpeza do feed (tokens, chaves, endereços e a pasta pessoal nunca chegam ao livro). `lessons.retention_days` e `lessons.max_entries` limitam o tamanho. Pode importar-se um livro do mesmo esquema vindo de outro sítio (`lessons.import_book`).
+Cada falha que o feed abre torna-se uma linha de `data/failures.jsonl` (esquema 1): `schema`, `ts`, `repo`, `workflow`, `job`, `step`, `event`, `branch`, `actor_kind`, `category`, `root_cause`, `avoidable`, `run_id`, `lesson_ref`, `had_lesson`, `sha`, `url`, `source`. Todo o texto passa pela mesma limpeza do feed (tokens, chaves, endereços e a pasta pessoal nunca chegam ao livro). `lessons.retention_days` e `lessons.max_entries` limitam o tamanho. Pode importar-se um livro do mesmo esquema vindo de outro sítio (`POST /api/ai/failures`).
 
 ## O classificador
 
