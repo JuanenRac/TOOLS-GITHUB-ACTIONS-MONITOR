@@ -16,7 +16,11 @@ Was sich nur im langen echten Einsatz zeigt: die Migration von 1.8 und 1.9, das 
 
 Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
 
-## Erledigt in 1.8.2 bis 2.0.3
+## Erledigt in 1.8.2 bis 2.0.4
+
+### 2.0.4 - Ein Modell für jede Aufgabe, eigenständige Menüs und eine Hilfe, die das richtige Thema öffnet
+
+Die KI des Monitors kann für jede Art von Aufgabe ein Modell, eine Kette von Ersatzmodellen bei Ausfall des Hauptmodells und ein Budget je Modell nutzen, alles aus, bis es in den Einstellungen steht; Alarme, Berichte und Lektionen sind drei eigenständige Menüeinträge, jeweils mit eigenem Panel, eigener Anzeige, eigenem Hilfethema und eigener Adresse; der Tab Verlauf hält einen einzigen Zähler, statt bei jeder Aktualisierung Kopien anzuhäufen; die Schaltfläche „Hilfe zu diesem Tab“ öffnet in jedem Tab das Thema des geöffneten Tabs; und die Browsertests werden sauber übersprungen, wenn der Werkzeugordner fehlt.
 
 ### 2.0.3 - Große Konten, weniger falsche Rotmeldungen, Linting ohne Klone und sichereres Speichern
 
