@@ -11,7 +11,9 @@ Which runs may decide (the block `ci` of the configuration):
   * runs of a pull request that comes from a FORK do not count, even when the fork's branch is called `main` (the head repository differs from the repository of the run) unless `ci.count_fork_runs`;
   * a run that waits for an approval (`action_required`, or a job `waiting` for an environment) is neither red nor queued: it is "awaiting approval";
   * a workflow whose last run is older than `ci.inactive_days` is "inactive", not red for ever;
-  * a red nobody has attended to (its failing run is older than `ci.red_age_days`, 30 by default, and nothing newer of the events that decide has run) AGES: it becomes "inactive" too (`ci.red_ages`);
+  * a red nobody has attended to (its failing run is older than `ci.red_age_days`, 30 by default, and nothing newer of the events that decide has run) AGES: it becomes "inactive" too (`ci.red_ages`).
+    "Has run" includes a run that has no verdict yet or never got one (cancelled, skipped, in progress, queued, waiting for an approval): the workflow is alive, so its red stays red. A workflow whose natural
+    period is longer than the age (a monthly schedule) waits for twice its observed interval before it ages;
   * the merge queue of the default branch (branches `gh-readonly-queue/<branch>/...`, event merge_group) is its own lane, shown as "merge queue";
   * `ci.extra_branches` (patterns) adds maintenance branches to the watched ones; by default only the default branch is.
 """
@@ -177,6 +179,16 @@ def _epoch(value):
         return None
 
 
+def _age_limit(red_age_days, items):
+    """Days a failure waits before it ages: `ci.red_age_days`, or twice the usual interval between the counted runs of the workflow when that is longer (a monthly schedule that always fails is red for as long as
+    it takes to run again, not for 30 days)."""
+    stamps = sorted(t for t in (_epoch(r.get("started")) for r in items) if t)
+    gaps = sorted(stamps[i + 1] - stamps[i] for i in range(len(stamps) - 1) if stamps[i + 1] > stamps[i])
+    if not gaps:
+        return red_age_days
+    return max(red_age_days, 2 * gaps[len(gaps) // 2] / 86400)
+
+
 def classify(runs, branch, now=None, policy=None):
     """{"red": [...], "inactive": [...]} for the runs of ONE repository. red = the last counted run of a workflow (per lane: the branch, its merge queue, a maintenance branch)
     failed; inactive = it failed but the workflow has not run for ci.inactive_days (an abandoned workflow is not red for ever). Each item is {"run", "streak", "lane", "kind"}."""
@@ -189,11 +201,12 @@ def classify(runs, branch, now=None, policy=None):
         key = workflow_key(run)
         events_of.setdefault(key, set()).add(run.get("event"))
         newest_of[key] = max(newest_of.get(key, 0), _epoch(run.get("started")) or 0)
-    series = {}
+    series, alive = {}, {}
     for run in sorted(runs, key=lambda r: r.get("started") or ""):
         where = lane(run, branch, policy)
         if where is None or is_dynamic(run) or not origin_counts(run, policy):
             continue
+        alive.setdefault((where, workflow_key(run)), []).append(_epoch(run.get("started")) or 0)      # every run of an event that decides, whatever its verdict: the workflow is still being run
         if is_awaiting(run) or run.get("status") != "completed" or not run.get("conclusion") or run.get("conclusion") in IGNORED:
             continue
         series.setdefault((where, workflow_key(run)), []).append(run)
@@ -215,7 +228,7 @@ def classify(runs, branch, now=None, policy=None):
         item = {"run": last, "streak": streak, "lane": where, "kind": kind, "recent": (sum(recent), len(recent))}
         quiet_since = newest_of.get(key) or 0
         failed_at = _epoch(last.get("started")) or 0
-        if policy.get("red_age_days") and failed_at and now - failed_at > policy["red_age_days"] * 86400:
+        if policy.get("red_age_days") and failed_at and now - failed_at > _age_limit(policy["red_age_days"], items) * 86400 and not any(t > failed_at for t in alive.get((where, key), ())):
             out["inactive"].append({**item, "aged": True})      # a failure nobody attended to for weeks is history, not an alarm that never ends
         elif policy["inactive_days"] and quiet_since and now - quiet_since > policy["inactive_days"] * 86400:
             out["inactive"].append(item)

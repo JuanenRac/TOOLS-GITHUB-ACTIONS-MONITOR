@@ -20,6 +20,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **The health of the team and of the fleet counts every run of the cycle, not only the 600 newest of the account**: with 250 active repositories 215 of them said "no data" because their runs did not fit in the cut that the page receives. The runs, the failures of the last 24 hours and the runs of the week are now counted per repository before the cut, so a busy account shows its healthy repositories as healthy.
 
+- **A red whose workflow is still being run no longer ages into "inactive"**: a failure older than the age (30 days by default) was hidden even when later runs of the same workflow had been cancelled, were in progress or were waiting for an approval. Now only a workflow that has not been run at all since the failure ages, and a workflow whose natural period is longer than the age (a monthly schedule that always fails) waits for twice its usual interval before it does.
+
 ## [2.0.8]
 
 ### Security

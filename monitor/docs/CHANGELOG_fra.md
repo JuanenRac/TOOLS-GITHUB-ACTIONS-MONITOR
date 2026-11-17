@@ -19,6 +19,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - **La santé de l'équipe et de la flotte compte toutes les exécutions du cycle, pas seulement les 600 plus récentes du compte** : avec 250 dépôts actifs, 215 affichaient « pas de données » parce que leurs exécutions ne tenaient pas dans la coupe reçue par la page. Les exécutions, les échecs des dernières 24 heures et les exécutions de la semaine sont désormais comptés par dépôt avant la coupe : un compte très actif montre ses dépôts sains comme sains.
 
+- **Un rouge dont le workflow continue de s'exécuter ne vieillit plus jusqu'à « inactif »** : un échec plus ancien que l'âge (30 jours par défaut) était masqué même si des exécutions ultérieures du même workflow avaient été annulées, étaient en cours ou attendaient une approbation. Désormais seul vieillit un workflow qui ne s'est plus du tout exécuté depuis l'échec, et un workflow dont la période naturelle dépasse l'âge (un cron mensuel qui échoue toujours) attend le double de son intervalle habituel avant de le faire.
+
 ## [2.0.8]
 
 ### Sécurité

@@ -19,6 +19,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - **A saúde da equipa e da frota conta todas as execuções do ciclo, não só as 600 mais recentes da conta**: com 250 repositórios ativos, 215 diziam «sem dados» porque as suas execuções não cabiam no corte que a página recebe. As execuções, as falhas das últimas 24 horas e as execuções da semana passam a contar-se por repositório antes do corte, pelo que uma conta com muita atividade mostra como saudáveis os seus repositórios saudáveis.
 
+- **Um vermelho cujo workflow continua a ser executado deixa de envelhecer até «inativo»**: uma falha mais antiga do que a idade (30 dias por defeito) era escondida mesmo quando execuções posteriores do mesmo workflow tinham sido canceladas, estavam em curso ou à espera de aprovação. Agora só envelhece um workflow que não foi executado de todo desde a falha, e um workflow cujo período natural é maior do que a idade (um cron mensal que falha sempre) espera o dobro do seu intervalo habitual antes de o fazer.
+
 ## [2.0.8]
 
 ### Segurança

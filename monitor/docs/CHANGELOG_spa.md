@@ -19,6 +19,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - **La salud del equipo y de la flota cuenta todos los runs del ciclo, no solo los 600 más recientes de la cuenta**: con 250 repositorios activos, 215 decían «sin datos» porque sus runs no cabían en el recorte que recibe la página. Los runs, los fallos de las últimas 24 horas y los runs de la semana se cuentan ahora por repositorio antes del recorte, de modo que una cuenta con mucha actividad muestra como sanos sus repositorios sanos.
 
+- **Un rojo cuyo workflow sigue ejecutándose ya no envejece hasta «inactivo»**: un fallo más antiguo que la edad (30 días por defecto) se ocultaba aunque después hubiera runs del mismo workflow cancelados, en curso o esperando aprobación. Ahora solo envejece un workflow que no se ha ejecutado en absoluto desde el fallo, y un workflow cuyo periodo natural es mayor que la edad (un cron mensual que siempre falla) espera el doble de su intervalo habitual antes de hacerlo.
+
 ## [2.0.8]
 
 ### Seguridad

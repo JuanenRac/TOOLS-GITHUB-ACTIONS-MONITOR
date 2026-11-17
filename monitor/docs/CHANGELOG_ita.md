@@ -19,6 +19,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - **La salute del team e della flotta conta tutte le esecuzioni del ciclo, non solo le 600 più recenti dell'account**: con 250 repository attivi, 215 dicevano «nessun dato» perché le loro esecuzioni non entravano nel taglio ricevuto dalla pagina. Le esecuzioni, i guasti delle ultime 24 ore e le esecuzioni della settimana vengono ora contati per repository prima del taglio, così un account molto attivo mostra come sani i suoi repository sani.
 
+- **Un rosso il cui workflow continua a essere eseguito non invecchia più fino a «inattivo»**: un guasto più vecchio dell'età (30 giorni per impostazione predefinita) veniva nascosto anche quando esecuzioni successive dello stesso workflow erano state annullate, erano in corso o attendevano un'approvazione. Ora invecchia solo un workflow che non è stato eseguito affatto dopo il guasto, e un workflow il cui periodo naturale supera l'età (un cron mensile che fallisce sempre) attende il doppio del suo intervallo abituale prima di farlo.
+
 ## [2.0.8]
 
 ### Sicurezza

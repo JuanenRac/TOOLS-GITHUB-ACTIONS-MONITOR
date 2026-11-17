@@ -19,6 +19,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **Die Gesundheit des Teams und der Flotte zählt alle Läufe des Zyklus, nicht nur die 600 neuesten des Kontos**: Bei 250 aktiven Repositorys meldeten 215 „keine Daten“, weil ihre Läufe nicht in den Ausschnitt passten, den die Seite erhält. Die Läufe, die Fehler der letzten 24 Stunden und die Läufe der Woche werden jetzt je Repository vor dem Ausschnitt gezählt, sodass ein aktives Konto seine gesunden Repositorys auch als gesund zeigt.
 
+- **Ein Rot, dessen Workflow weiter ausgeführt wird, altert nicht mehr zu „inaktiv“**: Ein Fehler, der älter als die Altersgrenze war (standardmäßig 30 Tage), wurde auch dann ausgeblendet, wenn spätere Läufe desselben Workflows abgebrochen waren, liefen oder auf eine Freigabe warteten. Jetzt altert nur ein Workflow, der seit dem Fehler gar nicht mehr gelaufen ist, und ein Workflow, dessen natürliche Periode länger als die Altersgrenze ist (ein monatlicher Zeitplan, der immer fehlschlägt), wartet davor das Doppelte seines üblichen Abstands.
+
 ## [2.0.8]
 
 ### Sicherheit
