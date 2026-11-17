@@ -4,6 +4,7 @@
 stuck and not a red; they are counted and listed apart, and give one information notice per repository. The ages are the ones measured on public repositories."""
 import sys
 import tempfile
+import threading
 import time
 import unittest
 from pathlib import Path
@@ -88,12 +89,16 @@ class TheMonitor(unittest.TestCase):
         am.RUN_CACHE.clear()
         am.RUN_CACHE.update(cache)
         am.LITE["on"] = False
-        am.ISSUE_CACHE.update({"items": [], "at": time.time(), "busy": False})
+        am.ISSUE_CACHE.update({"items": [], "at": NOW, "busy": False})      # the clock of the build is NOW: with the real time, a NOW ahead of the real clock makes the issues look stale and a background reading of "demo" leaks into later tests
         config = {"stuck_minutes": 60, "issues_refresh_seconds": 10 ** 6, "mode": "normal", "min_rate_remaining": 100, "refresh_seconds": 60, "max_workers": 1, "runs_per_repo": 30,
                   "ci": {"stuck": {"ghost_enabled": ghost_enabled}}}
         try:
             with mock.patch.object(am, "gh", side_effect=RuntimeError("offline")), mock.patch.object(am, "run_jobs", return_value=[]), mock.patch("time.time", return_value=NOW):
-                return am.build(config, ["demo"], NOW, 0, False, "")
+                reached = threading.Event()      # the clock of the build is NOW, ahead of the real one: the issues must not look stale, or a thread that reads "demo" escapes into later tests
+                with mock.patch.object(am, "open_issues", side_effect=lambda *a, **k: reached.set() or []):
+                    data = am.build(config, ["demo"], NOW, 0, False, "")
+                    self.assertFalse(reached.wait(0.3), "a thread that reads the issues was started")
+                return data
         finally:
             am.RUN_CACHE.clear()
             am.RUN_CACHE.update(saved[0])
