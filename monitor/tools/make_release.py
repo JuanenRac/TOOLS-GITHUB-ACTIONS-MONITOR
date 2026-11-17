@@ -370,8 +370,52 @@ def run_tests(timeout=None):
         fail(f"the unit tests did not finish in {timeout} s")
     tail = (result.stderr or result.stdout).strip().splitlines()[-1:] or ["(no output)"]
     if result.returncode != 0:
-        fail("the unit tests do not pass:\nstdout:\n" + result.stdout[-1000:] + "\nstderr:\n" + result.stderr[-1500:])
+        fail("the unit tests do not pass: " + suite_failure("suite", result))
     return tail[0]
+
+
+def failing_tests(output):
+    """The names of the tests that failed or broke, read from the report of unittest (`FAIL: name (module.Class.name)` and `ERROR: ...`)."""
+    names = []
+    for line in str(output).splitlines():
+        found = re.match(r"^(?:FAIL|ERROR): (\S+) \(([^)]*)\)", line)
+        if found:
+            names.append(found.group(2) or found.group(1))
+    return names
+
+
+def suite_failure(stage, result, env=None):
+    """What the gate says when a suite fails: the names of the failing tests first (not the last lines, which are usually warnings) and the place where the WHOLE output was saved
+    (`MONITOR_RELEASE_LOG_DIR`, else the temporary folder), so that nobody has to run the suite again to see what failed."""
+    folder = Path(str((os.environ if env is None else env).get("MONITOR_RELEASE_LOG_DIR") or tempfile.gettempdir()))
+    saved = folder / f"make_release_{stage}.log"
+    both = "--- stdout ---\n" + str(result.stdout or "") + "\n--- stderr ---\n" + str(result.stderr or "")
+    try:
+        folder.mkdir(parents=True, exist_ok=True)
+        saved.write_text(both, encoding="utf-8", errors="replace")
+        where = f"full output: {saved}"
+    except OSError:
+        where = "the full output could not be saved"
+    names = failing_tests(both)
+    head = ("failing: " + "; ".join(names[:12]) + (f" (and {len(names) - 12} more)" if len(names) > 12 else "")) if names else "no failing test is named in the output (it may have been cut short)"
+    return head + f" - {where}\nstdout (end):\n" + str(result.stdout or "")[-600:] + "\nstderr (end):\n" + str(result.stderr or "")[-600:]
+
+
+def green_run(path, commit):
+    """A run of the whole suite that somebody saw pass (the file `--json` of tools like the visible gate) is accepted instead of repeating stage 1 ONLY when it is complete,
+    has no failure and no error, and names the very commit that is being released. Returns a one-line summary; fails the release otherwise."""
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError) as error:
+        fail(f"the green run {path} cannot be read: {error}")
+    if not isinstance(data, dict) or not commit:
+        fail("a green run is accepted only with the commit it was made on (--commit)")
+    sha = str(data.get("sha") or "")
+    if len(commit) < 7 or not sha or not (sha.startswith(commit) or commit.startswith(sha)):
+        fail(f"the green run is not of this commit (run: {sha[:12] or 'unknown'}, release: {commit[:12]})")
+    if not data.get("finished") or data.get("exit_code") != 0 or data.get("fail") or data.get("error") or not data.get("total") or data.get("done") != data.get("total"):
+        fail("the green run is not complete and clean (it must have finished, exit 0, no failure, no error, every test run)")
+    return f"{data.get('ok')} ok, {data.get('skipped', 0)} skipped of {data.get('total')} (accepted from {Path(path).name}, commit {sha[:12]})"
 
 
 VERSION_CELL = re.compile(r"^\| \*\*[^*|\n]+\*\* \| \*\*(\d+(?:\.\d+)+)\*\* · \[", re.M)      # | **Version** | **1.9.0** · [all releases](...) of "At a glance"
@@ -445,7 +489,7 @@ def write_zip(target, entries):
             z.writestr(info, entries[name])
 
 
-def clean_install_check(archive, entries, python=None):
+def clean_install_check(archive, entries, python=None, skip_suite=False):
     """Extracts `archive` into a NEW EMPTY temporary directory and checks, from there and with `python -I`, that it works on its own: all members present,
     every module compiles, `read_report.py --version` runs and the whole suite passes. Returns a one-line summary; fails the release otherwise."""
     python = python or sys.executable
@@ -478,13 +522,15 @@ def clean_install_check(archive, entries, python=None):
                               encoding="utf-8", errors="replace", env=env, timeout=120)
         if lite.returncode != 0 or "--port" not in lite.stdout:
             fail("clean install: python -m github_actions_monitor.lite does not start:\n" + (lite.stderr or lite.stdout)[-800:])
+        if skip_suite:
+            return f"{len(found)} files, version {smoke.stdout.strip().splitlines()[0][:40]}, suite from the zip: SKIPPED on purpose (a green run of this commit was accepted)"
         try:
             suite = subprocess.run([python, "-I", "-m", "unittest", "discover", "-s", "tests"], cwd=str(base), capture_output=True, text=True, encoding="utf-8", errors="replace",
                                    env=env, timeout=clean_install_timeout())
         except subprocess.TimeoutExpired:
             fail(f"clean install: the suite from the extracted zip did not finish in {clean_install_timeout()} s")
         if suite.returncode != 0:
-            fail("clean install: the suite fails from the extracted zip:\nstdout:\n" + suite.stdout[-1000:] + "\nstderr:\n" + suite.stderr[-1500:])
+            fail("clean install: the suite fails from the extracted zip: " + suite_failure("clean", suite))
         tail = (suite.stderr or suite.stdout).strip().splitlines()[-3:]
         return f"{len(found)} files, version {smoke.stdout.strip().splitlines()[0][:40]}, suite: {' '.join(tail)}"
 
@@ -493,10 +539,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--out")
     parser.add_argument("--allow-no-git", action="store_true", help="build from a folder that is not a git checkout (an extracted zip): the zip is NOT compared with the versioned files, and the gate says so")
+    parser.add_argument("--accept-green-suite", metavar="JSON", help="instead of running stage 1 again, accept this record of a complete green run (needs --commit and a record of that commit)")
+    parser.add_argument("--commit", help="the commit that is being released, to check the record of --accept-green-suite against")
+    parser.add_argument("--skip-clean-suite", action="store_true", help="with --accept-green-suite: do not repeat the suite from the extracted zip either (the smoke checks of the clean install still run); say so in the release notes")
     args = parser.parse_args()
+    if args.skip_clean_suite and not args.accept_green_suite:
+        parser.error("--skip-clean-suite needs --accept-green-suite")
     version = gate_static()
     print("gate: example, targets and version ok (tool", version + ")")
-    print("gate: unit tests:", run_tests())
+    print("gate: unit tests:", green_run(args.accept_green_suite, args.commit) if args.accept_green_suite else run_tests())
     out = Path(args.out) if args.out else workspace.signed_dir() / "github_actions_monitor"
     if str(out).upper().startswith("D:"):
         raise SystemExit("never write on D:")
@@ -545,7 +596,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix="monitor_install_") as scratch:   # the install gate runs BEFORE anything is left in the output folder
         trial = Path(scratch) / "github_actions_monitor.zip"
         write_zip(trial, entries)
-        print("gate: clean install:", clean_install_check(trial, entries))
+        print("gate: clean install:", clean_install_check(trial, entries, skip_suite=args.skip_clean_suite))
     write_zip(target, entries)
     with zipfile.ZipFile(target) as z:   # open it again: what is on disk is what is checked
         if z.testzip() is not None:
