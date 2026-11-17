@@ -171,7 +171,7 @@ def collect(registry, now=None, extra=()):
 
 def permanent(alert):
     """The silence by pattern (alerts.silences) that covers this alert, else None. Only the alerts of a workflow (red, stuck) have something to match."""
-    if not alert.get("repo") or alert.get("code") not in ("ci.red", "ci.stuck"):
+    if not alert.get("repo") or alert.get("code") not in alertflow.SILENCE_ALERT_CODES:
         return None
     details = alert.get("details") if isinstance(alert.get("details"), dict) else {}
     return alertflow.silence_of(alert["repo"], (details.get("workflow"), details.get("name"), details.get("file")), details.get("branch"))

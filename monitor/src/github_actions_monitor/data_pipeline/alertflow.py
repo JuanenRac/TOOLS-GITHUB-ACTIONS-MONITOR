@@ -3,7 +3,7 @@
 """What reaches the notification channels when there are many alerts, or the same ones again and again. Everything is OFF or empty by default: with no setting the events pass as they always did.
 
   * `alerts.silences`: permanent silences by pattern, one text each: `repo:workflow:branch;reason;review-date` (every part but the repo may be left out or be `*`; `*` stands for any text; the
-    reason and the date of review are optional). A silenced event is still written in the feed (marked) but nobody is told. When the date of review comes, ONE reminder event is announced and the
+    reason and the date of review are optional). A silenced event (only the red, fixed, stuck and failed notices of a workflow can be silenced: never a security alert, a required check or a signature) is still written in the feed (marked) but nobody is told. When the date of review comes, ONE reminder event is announced and the
     silence keeps working until somebody removes it. The Alerts tab shows the alerts that match as silenced.
   * `alerts.service`: a workflow that only runs on a schedule or by hand (a short cron, a service) and fails now and then must not alert in a loop. With `enabled`, its red is announced only after
     `failures` failures in a row, or when `rate_percent` (0 = off) of its last runs failed; it is announced once and cleared once. `workflows` adds more `repo:workflow` patterns to the class.
@@ -21,6 +21,10 @@ PATTERN_RE = re.compile(r"^[\w.*-]{1,100}(:[\w .()*/@+-]{1,120}){0,2}\Z")
 DEFAULTS = {"silences": [], "service": {"enabled": False, "failures": 3, "rate_percent": 0, "workflows": []}, "group": {"by_commit": False, "min": 3}, "digest": {"minutes": 0, "threshold": 10}}
 POLICY = {"silences": [], "service": dict(DEFAULTS["service"]), "group": dict(DEFAULTS["group"]), "digest": dict(DEFAULTS["digest"])}      # replaced by configure(): the whole monitor shares it
 FOREVER = "9999-12-31T23:59:59Z"
+# What a silence by pattern may silence: the notices and alerts of a workflow that is red or stuck. The one list for the channels (shape) and for the Alerts tab (alert_center.permanent): a new security alert,
+# a required check in red, a pending signature or a release notice of a silenced repository is still announced, and the tab never shows it as silenced.
+SILENCE_EVENTS = ("red_new", "red_fixed", "stuck_new", "workflow_failed")
+SILENCE_ALERT_CODES = ("ci.red", "ci.stuck")
 
 
 def _int(value, low, high, default):
@@ -129,7 +133,7 @@ class Flow:
         now = time.time() if now is None else now
         record, notify = list(events), []
         for event in events:
-            hit = silence_of(event.get("repo"), event_names(event), event.get("branch"), policy) if event.get("repo") else None
+            hit = silence_of(event.get("repo"), event_names(event), event.get("branch"), policy) if event.get("repo") and event.get("kind") in SILENCE_EVENTS else None
             if hit:
                 event["silenced"], event["silence_reason"] = True, hit["reason"]
             else:

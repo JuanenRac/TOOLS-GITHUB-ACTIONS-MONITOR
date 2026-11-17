@@ -79,6 +79,21 @@ class Silences(Base):
         again, _ = flow.shape([event()], before + 41 * 86400)
         self.assertEqual(again, [])      # silenced, and the reminder is not repeated
 
+    def test_a_silence_of_only_the_repository_never_silences_what_is_not_a_workflow(self):
+        self.cfg(silences=["demo;noisy test"])
+        kinds = ("red_new", "red_fixed", "stuck_new", "workflow_failed", "alerts_up", "required_check_red", "security_aged", "security_new", "pending_sign", "release_due", "release_incomplete", "collab_new")
+        told, record = alertflow.Flow().shape([event(kind=k) for k in kinds], NOW)
+        self.assertEqual(sorted(e["kind"] for e in told), sorted(set(kinds) - set(alertflow.SILENCE_EVENTS)))
+        self.assertEqual(sorted(e["kind"] for e in record if e.get("silenced")), sorted(alertflow.SILENCE_EVENTS))
+        elsewhere, _ = alertflow.Flow().shape([event(kind="red_new", repo="other")], NOW)
+        self.assertEqual(len(elsewhere), 1)
+
+    def test_the_tab_and_the_channels_share_the_list_of_what_a_silence_covers(self):
+        self.cfg(silences=["demo;noisy test"])
+        for code in ("ci.red", "ci.stuck", "security.secret", "security.codeql", "ci.required_check", "collab.issue"):
+            hit = alert_center.permanent({"id": code, "code": code, "repo": "demo", "details": {}})
+            self.assertEqual(bool(hit), code in alertflow.SILENCE_ALERT_CODES, code)
+
     def test_the_alerts_tab_shows_them_as_silenced(self):
         self.cfg(silences=["demo:nightly*;known flaky;2027-03-01"])
         alert = {"id": "ci.red:demo:nightly", "code": "ci.red", "repo": "demo", "details": {"workflow": "nightly", "file": "nightly.yml", "branch": "main"}}

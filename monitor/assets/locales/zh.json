@@ -3284,7 +3284,7 @@
  "ui.cfg_b_flow_group": "按提交合并警报",
  "ui.cfg_b_flow_digest": "数量多时的摘要",
  "cfg.f.alerts.silences": "永久静默",
- "cfg.h.alerts.silences": "每行一条：仓库:工作流:分支;原因;复查日期（例如 demo-repo:nightly.yml:*;已知不稳定测试;2027-03-01）。除仓库外都可省略或写成 *，* 匹配任意文本。匹配的警报显示为已静默且不通知任何人；到复查日期会提醒一次，静默会一直有效直到你删除。默认为空。",
+ "cfg.h.alerts.silences": "每行一条：仓库:工作流:分支;原因;复查日期（例如 demo-repo:nightly.yml:*;已知不稳定测试;2027-03-01）。除仓库外都可省略或写成 *，* 匹配任意文本。匹配的警报显示为已静默且不通知任何人；到复查日期会提醒一次，静默会一直有效直到你删除。默认为空。 只会静音红色或卡住的工作流通知：该仓库新的安全警报（secret scanning、CodeQL、Dependabot）、红色的必需检查、待签名或发布提醒始终会被通知，警报标签页也不会将其显示为已静音。",
  "cfg.f.alerts.service.enabled": "将短周期 cron 视为服务",
  "cfg.h.alerts.service.enabled": "默认关闭。开启后，只按计划或手动运行、偶尔失败的工作流，只有连续多次失败（或失败过于频繁）才会通知一次，恢复时也只通知一次，而不是循环告警。它在列表中仍显示为红色。",
  "cfg.f.alerts.service.failures": "告警前的连续失败次数",
