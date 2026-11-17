@@ -3,7 +3,7 @@
   Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
   GPL-3.0-or-later - see LICENSE
 -->
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -19,6 +19,8 @@ html[data-density=compact]{--d:.9}
 html[data-density=large]{--d:1.12}
 @media (orientation:portrait){html{font-size:calc(var(--k)*var(--d)*min(100vw/62,100vh/108))}}
 body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Sans CJK SC","Noto Sans CJK JP",sans-serif;background:radial-gradient(120% 90% at 50% 0%,var(--bg2),var(--bg));height:100vh;overflow:hidden;font-size:1rem;line-height:1.25;transition:filter 2s,opacity .6s}
+:lang(ja) body{font-family:system-ui,"Yu Gothic UI","Meiryo","Hiragino Sans","Noto Sans CJK JP","Noto Sans JP",sans-serif}
+:lang(zh) body{font-family:system-ui,"Microsoft YaHei UI","PingFang SC","Noto Sans CJK SC","Noto Sans SC",sans-serif}
 body.dim{filter:brightness(.35)}
 body.offline #stage{opacity:.5;filter:grayscale(.7)}
 #wrap{position:absolute;inset:0;overflow:hidden}
@@ -223,7 +225,12 @@ svg{display:block}
 <script>
 "use strict";
 const D=/*SCREEN_DATA*/null;
+/* the language of the screen: ?lang= of the address wins; else the one the person chose on the main page (the same key, `am-lang`, of the same browser store); else the one of the monitor, which is already
+   embedded. A chosen language that is not the embedded one reloads the page ONCE with ?lang= (the other parameters stay, so ?rotate= keeps turning), before anything is drawn: there is no flash of the other language */
+var LANG_RELOAD=false;
+try{const q=new URLSearchParams(location.search);if(!q.has("lang")){const l=localStorage.getItem("am-lang");if(l&&/^[a-z]{2}$/.test(l)&&l!==D.lang){q.set("lang",l);LANG_RELOAD=true;location.replace(location.pathname+"?"+q.toString()+location.hash)}}}catch(e){}
 (function(){
+if(LANG_RELOAD)return;
 const P=D.params,S=D.settings,KINDS=D.kinds,root=document.documentElement,body=document.body;
 const T=(k,v)=>{let s=D.texts[k];if(s===undefined)s=k;if(v)for(const x in v)s=s.split("{"+x+"}").join(String(v[x]));return s};
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));

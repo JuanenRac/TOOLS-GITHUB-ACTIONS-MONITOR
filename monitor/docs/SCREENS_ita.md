@@ -83,6 +83,10 @@ Un indirizzo per ogni monitor. Un parametro può rendere una finestra più tranq
 | `?blink=off` | I guasti mantengono un alone fisso invece di lampeggiare. Non può attivare ciò che `screens.blink` tiene spento. |
 | `?sound=on` | Un breve segnale acustico per un nuovo guasto, solo se `screens.sound` lo consente. Disattivato per impostazione predefinita. |
 
+### Lingua degli schermi
+
+La lingua di uno schermo si decide in quest'ordine: `?lang=xx` nell'indirizzo; poi la lingua scelta nella pagina principale dello stesso browser (lì viene salvata, e uno schermo aperto in quel browser la legge, così lo schermo segue la pagina senza alcun parametro); poi la lingua del monitor (`MONITOR_LANG`, o quella configurata). Uno schermo la cui lingua salvata differisce da quella in cui è stato servito si ricarica una volta, prima di disegnare, con `?lang=` aggiunto e gli altri parametri (tra cui `?rotate=`) mantenuti. Le otto lingue (en, es, de, fr, it, ja, zh, pt) sono le stesse della pagina: titoli, etichette, stati, gravità, unità e tempi relativi («5 min fa») vengono dal catalogo, e ora, data e numeri si scrivono con le impostazioni regionali della lingua (en-GB, es-ES, de-DE, fr-FR, it-IT, ja-JP, zh-CN, pt-PT). Il collegamento «Apri schermo» delle Impostazioni porta già `?lang=` con la lingua della pagina. Un computer che non sceglie una lingua resta in inglese: la lingua del browser non decide.
+
 ### Impostazioni degli schermi da parete
 
 | Impostazione | Cosa fa |

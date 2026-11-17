@@ -9,6 +9,10 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+### Corrigido
+
+- **Os ecrãs de parede seguem o idioma escolhido na página principal**: um ecrã aberto sem `?lang=` saía no idioma do monitor (inglês), mesmo que a pessoa tivesse escolhido outro na página principal. Agora a ordem é `?lang=` do endereço, depois o idioma guardado pela página principal no mesmo navegador (um ecrã com outro idioma volta a carregar uma vez, antes de desenhar, mantendo `?rotate=` e os restantes parâmetros), depois o idioma do monitor; a ligação «Abrir ecrã» das Definições leva o `?lang=` da página. Vale para os oito idiomas, com o tipo de letra do japonês e do chinês e a configuração regional de cada idioma para a hora, a data e os números. Os testes verificam os três ecrãs nos oito idiomas com a preferência guardada, que `?lang=` ganha e que não fica texto em inglês; o guia dos ecrãs explica como o idioma é decidido.
+
 ### Segurança
 
 - **O token de acesso já não viaja no endereço por defeito (`listen.query_access` está agora desligado)**: no modo de rede o endereço com `?access=` abria a sessão, mas o token ficava no histórico, nos registos e no `Referer`. A definição está agora desligada, a menos que a ligue (o valor por defeito, o ficheiro de exemplo e a ajuda das Definições dizem-no); a sessão abre-se com `POST /api/access` (o token no corpo) ou com o cabeçalho `X-Monitor-Access`. Uma instalação que escreveu `listen.query_access` mantém o seu valor; a que dependia do valor antigo e abre o monitor a partir de um endereço com `?access=` tem de ligar a definição ou usar `POST /api/access`. A variável de ambiente `MONITOR_QUERY_ACCESS=1` liga-a para um serviço.
