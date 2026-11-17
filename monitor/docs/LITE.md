@@ -13,7 +13,7 @@ A second, simpler product in the same package: the page of what is running and w
 |---|---|---|
 | Start | `MONITOR_GITHUB_ACTIONS` (`.bat` / `.sh` / `.command`) | `MONITOR_LITE_GITHUB_ACTIONS` (same three) |
 | Port | 8765 | 8766 |
-| Tabs | Now, Alerts, Reports, Lessons, Sentinel, Charts, Repositories, Team, History, Settings | Now, Charts, Repositories, History, a short Settings |
+| Tabs | Now, Alerts, Charts, Summary, CI sentinel, Collab sentinel, Security sentinel, Team health, Fleet, Repositories, Reports, Scheduled reports, Lessons, History, Settings | Now, Charts, Repositories, History, a short Settings |
 | Header | all the tiles, readiness, signing | running, queued, failures and successes of 24 h, compute minutes, issues, red on main, repositories, allowance, connection |
 | Sentinel (alerts, releases, signing queue, readiness, linter) | yes | no: it is not even imported |
 | Analytics, notifications, webhook, AI, Prometheus / Grafana outputs | yes, off until you switch them on | no: those paths answer 404, except the channels of the feed for an AI tool (`/api/ai/state`, `/api/ai/brief`, `/api/ai/alerts`, `/api/ai/stream`, `/api/ai/ack`, `/api/skills`) |

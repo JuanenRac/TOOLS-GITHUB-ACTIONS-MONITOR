@@ -79,6 +79,8 @@ def _env_name_except(own):
 
 WEBHOOK_ENV_RE = _env_name_except(envguard.WEBHOOK_SECRET_ENV)      # webhook.secret_env
 TOKEN_ENV_RE = _env_name_except(envguard.ACCESS_TOKEN_ENV)          # listen.token_env
+SLACK_ENV_RE = _env_name_except(envguard.SLACK_SIGNING_ENV)          # chatops.slack.signing_secret_env
+DISCORD_ENV_RE = _env_name_except(envguard.DISCORD_KEY_ENV)         # chatops.discord.public_key_env
 NOTIFY_ENV_RE = _env_name_except("")                                # the variable of a channel of notices: no secret of the monitor belongs to it
 LOOP_HOST_RE = re.compile(r"^(127\.0\.0\.1|localhost|\[::1\])\Z")                      # a broker or a service ON THIS COMPUTER
 LOOP_URL_RE = re.compile(r"^(http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/%-]{0,100})?)?\Z")
@@ -480,10 +482,10 @@ _f(_T_HOOK, "inbound", "webhook.reject_stale", "bool")
 _f(_T_HOOK, "inbound", "webhook.persist_deliveries", "bool")
 _f(_T_HOOK, "chatops", "chatops.enabled", "bool", restart=False, secure=True)
 _f(_T_HOOK, "chatops", "chatops.slack.enabled", "bool", restart=False, secure=True)
-_f(_T_HOOK, "chatops", "chatops.slack.signing_secret_env", "text", ENV_NAME_RE, secure=True)
+_f(_T_HOOK, "chatops", "chatops.slack.signing_secret_env", "text", SLACK_ENV_RE, secure=True)
 _f(_T_HOOK, "chatops", "chatops.slack.state", "status", restart=False)
 _f(_T_HOOK, "chatops", "chatops.discord.enabled", "bool", restart=False, secure=True)
-_f(_T_HOOK, "chatops", "chatops.discord.public_key_env", "text", ENV_NAME_RE, secure=True)
+_f(_T_HOOK, "chatops", "chatops.discord.public_key_env", "text", DISCORD_ENV_RE, secure=True)
 _f(_T_HOOK, "chatops", "chatops.discord.state", "status", restart=False)
 _f(_T_HOOK, "chatops", "chatops.allowed_teams", "names", restart=False, secure=True)
 _f(_T_HOOK, "chatops", "chatops.allowed_channels", "names", restart=False, secure=True)

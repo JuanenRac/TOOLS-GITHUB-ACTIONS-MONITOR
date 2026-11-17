@@ -13,7 +13,7 @@ from github_actions_monitor.app import actions_monitor
 HERE = Path(__file__).resolve().parent.parent
 DOCS = HERE / "docs"
 SUFFIX = {"en": "", "es": "_spa", "de": "_deu", "fr": "_fra", "it": "_ita", "ja": "_jpn", "zh": "_zho", "pt": "_por"}
-TABS = ("now", "al", "rep", "les", "sent", "charts", "repos", "team", "hist", "cfg")
+TABS = ("now", "al", "charts", "sent", "sci", "scol", "ssec", "team", "fleet", "repos", "rep", "trep", "les", "hist", "cfg")
 
 
 def guide(name, lang):
@@ -55,7 +55,7 @@ class ScreensOff(unittest.TestCase):
 
 
 class LiteGuide(unittest.TestCase):
-    def test_the_complete_column_lists_the_ten_tabs_of_the_page(self):
+    def test_the_complete_column_lists_every_tab_of_the_page(self):
         page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         tabs = re.search(r'const TABS=LITE\?\[([^\]]*)\]:\[([^\]]*)\]', page)
         lite = re.findall(r'"(\w+)"', tabs.group(1))
