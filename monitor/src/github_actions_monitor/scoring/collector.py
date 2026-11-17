@@ -97,13 +97,16 @@ def collect_runs(runs, start, end):
     good = [r for _, r in timed if r.get("conclusion") == "success"]
     bad = [r for _, r in timed if r.get("conclusion") in BAD]
     seconds = [r["seconds"] for r in good if isinstance(r.get("seconds"), (int, float)) and not isinstance(r.get("seconds"), bool) and r["seconds"] > 0]
-    spans, unrecovered = red_spans(timed, end, carried_red(runs, start))
+    carried = carried_red(runs, start)
+    spans, unrecovered = red_spans(timed, end, carried)
     measured = spans + unrecovered
+    mended = {(r.get("repo"), r.get("name")) for _, r in timed if r.get("conclusion") == "success"}
+    still_red = sum(1 for key in carried if key not in mended)      # a workflow that entered the window red and nobody fixed keeps counting as a failed run: its failing run left the window, the failure did not
     judged = len(good) + len(bad)
-    quiet = judged > 0 and not bad
+    quiet = judged > 0 and not bad and not still_red
     days = max((end - start) / DAY, 1e-9)
     return {
-        "success_rate": (len(good) / judged) if judged else None,
+        "success_rate": (len(good) / (judged + still_red)) if judged else None,
         "duration_p50": percentile(seconds, 50), "duration_p95": percentile(seconds, 95),
         "mttr": percentile(measured, 50) if measured else (0.0 if quiet else None),
         "throughput": (judged / days) if judged else None,

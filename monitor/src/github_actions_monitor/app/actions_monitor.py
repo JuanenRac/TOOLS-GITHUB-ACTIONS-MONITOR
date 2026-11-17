@@ -773,7 +773,9 @@ def refresh_runs(repos, config, progress=None):
     if batched:
         BUDGET.record(1)
         for repo, runs in batched.items():
-            note_read(repo, runs, None)
+            named = {redrule.workflow_key(r) for r in runs}
+            kept = [r for r in ((RUN_CACHE.get(repo) or {}).get("runs") or []) if redrule.workflow_key(r) not in named]      # the batch only sees the last commit of the branch: what it does not name (a cron, a workflow with a path filter) is kept
+            note_read(repo, list(runs) + kept, None)
         todo = [item for item in todo if item[0] not in batched]
     limit = sampling.settings(config)["api_budget_per_hour"]
     todo, waiting = sampling.plan(todo, red_repos_of([r for r, _n in todo]) if limit else set(), limit, BUDGET.used())      # a spent budget: the repositories with red first, the others wait

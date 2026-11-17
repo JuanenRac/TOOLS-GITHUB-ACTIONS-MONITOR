@@ -58,6 +58,15 @@ class TheOpenRedKeepsWeighing(unittest.TestCase):
         self.assertLess(answer(history(8), FAST_ITEM)["score"], answer(history(0), FAST_ITEM)["score"] - 1)
         self.assertLess(answer(history(20), FAST_ITEM)["score"], answer(history(0), FAST_ITEM)["score"] - 1)
 
+    def test_the_score_never_rises_because_one_more_day_passed_in_red(self):
+        scores = [answer(history(d), FAST_ITEM)["score"] for d in (1, 3, 6, 7, 8, 10, 14, 20)]
+        self.assertTrue(all(scores[i] >= scores[i + 1] for i in range(len(scores) - 1)), scores)
+
+    def test_the_success_rate_counts_the_unfixed_failure_that_entered_the_window(self):
+        metrics = collector.collect(history(8), [], NOW - 7 * DAY, NOW)
+        self.assertLess(metrics["success_rate"], 1.0)
+        self.assertEqual(collector.collect(history(8, 1), [], NOW - 7 * DAY, NOW)["success_rate"], 1.0)      # fixed inside the window: nothing to count
+
     def test_a_workflow_that_recovered_before_the_window_is_not_carried(self):
         runs = [run(1, "r", "deploy", 9, "failure"), run(2, "r", "deploy", 8, "success"), run(3, "r", "ci", 1, "success")]
         self.assertEqual(collector.carried_red(runs, NOW - 7 * DAY), {})
@@ -94,7 +103,7 @@ class TheOpenRedKeepsWeighing(unittest.TestCase):
 
     def test_without_a_pin_the_behaviour_is_the_old_one(self):
         data = ledger.empty_ledger(NOW - 40 * DAY)
-        ledger.update_ledger(data, history(20), [], NOW, 15)
+        ledger.update_ledger(data, history(20), [], NOW, 15, pin_days=0)
         self.assertNotIn("deploy", {row[4] for row in data["runs"].values()})
 
 

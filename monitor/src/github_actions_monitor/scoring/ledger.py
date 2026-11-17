@@ -70,7 +70,7 @@ def open_reds(ledger):
     return {rid for _, rid, conclusion in newest.values() if conclusion in BAD}
 
 
-def update_ledger(ledger, runs, collab_alerts, now, keep_days, collab_known=True, pin_days=0):
+def update_ledger(ledger, runs, collab_alerts, now, keep_days, collab_known=True, pin_days=None):
     """Adds the finished runs not seen before and follows the collaboration alerts; forgets what is older than `keep_days`. `runs` are the run dicts of the monitor,
     `collab_alerts` the open alerts of the collaboration sentinel ({"id", "created_at"}); `collab_known` is False while that sentinel is off or has not looked yet, so an empty list is not read as "everything was resolved"."""
     for run in runs or []:
@@ -93,6 +93,7 @@ def update_ledger(ledger, runs, collab_alerts, now, keep_days, collab_known=True
         if row[1] is None and key not in open_now:
             row[1] = now
     horizon = now - keep_days * collector.DAY
+    pin_days = open_red_days() if pin_days is None else pin_days
     pinned = open_reds(ledger) if pin_days > keep_days else set()
     pin_horizon = now - pin_days * collector.DAY
     ledger["runs"] = {k: v for k, v in ledger["runs"].items() if v[0] >= horizon or (k in pinned and v[0] >= pin_horizon)}      # the last failure of a workflow nobody fixed stays while it counts as red
@@ -181,7 +182,7 @@ def tick(storage, account_id, config, runs, collab_alerts, now=None, force=False
     if not force and now - ledger["last_tick"] < MIN_INTERVAL:
         return None
     keep_days = min(180, 2 * cfg["window_days"] + 1)
-    update_ledger(ledger, runs, collab_alerts, now, keep_days, collab_known, pin_days=open_red_days())
+    update_ledger(ledger, runs, collab_alerts, now, keep_days, collab_known)
     ledger["last_tick"] = now
     snapshot = make_snapshot(ledger, cfg, now, account_id, security, activity)
     snapshot["drop"] = drop.detect(snapshot, cfg)
