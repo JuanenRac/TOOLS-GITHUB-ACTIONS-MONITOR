@@ -206,3 +206,13 @@ location / {
 ## 连续运行数月:存储与保留
 
 把 `accounts/`(或数据库)放在容器重建后仍能保留的卷上,更新前用 `python tools/backup_storage.py backup FILE.zip --backend file`(或 `sqlite`)备份。默认情况下,一次快速清理会删除超过 90 天的事件和超过 180 天的分析;要更改请在配置中设置 `retention`,而 `MONITOR_SERVICE=1` 会让 `--doctor` 把监视器当作服务(此时若没有 `retention` 区块或事件变得很大就会警告)。使用 SQLite 时默认每个账户一个数据库;也可以使用一个共享文件,详见 [STORAGE_zho.md](STORAGE_zho.md)。
+
+## 在真实容器中检查镜像
+
+仓库中有一个工作流 `docker-audit.yml`，它在 GitHub 上构建任意版本（标签或提交）的镜像，并在真实容器中检查：启动与健康检查、API 契约、带首个管理员的团队模式、使用自带 TLS 的 Caddy 作为受信任代理、加固（非 root、只读文件系统、无任何能力）、包含备份、恢复以及从上一版本迁移的卷、机密、关闭流程，以及代理之后的传入 Webhook。它不会在您的电脑上运行任何东西，不发布任何内容，也不使用任何机密。请手动启动，并查看运行摘要中的表格和制品 `docker-audit-<版本>`：
+
+```sh
+gh workflow run docker-audit.yml -f ref=<tag>
+```
+
+同样的脚本也可以在装有 Docker 的 Linux 机器上运行（`tools/docker_audit/run_all.sh`）；`tools/docker_audit/LEEME.txt` 说明如何阅读每个结果。
