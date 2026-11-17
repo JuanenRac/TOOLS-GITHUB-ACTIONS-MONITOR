@@ -179,8 +179,8 @@ def add_model_usage(store, cfg, tokens_in, tokens_out, cost):
     with store.lock, LOCK:
         usage = _usage(store)
         row = usage["models"].setdefault(label_of(cfg), {"calls": 0, "cost": 0.0, "tokens_in": 0, "tokens_out": 0})
-        row["tokens_in"] = row.get("tokens_in", 0) + int(tokens_in or 0)
-        row["tokens_out"] = row.get("tokens_out", 0) + int(tokens_out or 0)
+        row["tokens_in"] = row.get("tokens_in", 0) + min(max(int(tokens_in or 0), 0), sentinel_ai.MAX_REPORTED_TOKENS)
+        row["tokens_out"] = row.get("tokens_out", 0) + min(max(int(tokens_out or 0), 0), sentinel_ai.MAX_REPORTED_TOKENS)
         if cost is not None:
             row["cost"] = round(row.get("cost", 0.0) + cost, 6)
             usage["cost"] = round(usage.get("cost", 0.0) + cost, 6)

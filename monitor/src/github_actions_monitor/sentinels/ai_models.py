@@ -24,6 +24,8 @@ CONTEXT_KEYS = ("context_window", "context_length", "max_context_length", "max_i
 FIELDS = ("context", "in_per_mtok", "out_per_mtok", "tools")
 LIMIT_FIELDS = ("daily_limit", "cost_limit")
 MODEL_ID = re.compile(r"^[A-Za-z0-9._:/@+-]{1,100}\Z")
+PROVIDER_LABEL = re.compile(r"^[A-Za-z0-9._:-]{1,100}\Z")      # what provider_label() makes: a host name or the name of a preset
+MAX_TABLE_ROWS = 500      # the rows of the table of data per model (the ones with figures typed by hand or a test are kept first)
 
 # A SYNTHETIC failure for the test of a model: invented repository, invented log. Never data of a real repository.
 SYNTHETIC = ("repository: example/demo-app\nworkflow: CI\njob: unit-tests\nstep: Run tests\n"
@@ -267,6 +269,16 @@ def _table(store):
     return table
 
 
+def _trim(store):
+    """At most MAX_TABLE_ROWS rows: the ones that only hold what a provider said go first (they are read again from the list)."""
+    table = _table(store)
+    if len(table) <= MAX_TABLE_ROWS:
+        return
+    spare = sorted(key for key, row in table.items() if not row.get("manual") and not row.get("tested"))
+    for key in spare[:len(table) - MAX_TABLE_ROWS]:
+        table.pop(key, None)
+
+
 def remember_provider_data(store, cfg, entry):
     """Writes into the table what the provider said about a model; a field the person wrote by hand is never overwritten, and a field the provider does not say stays as it was (unknown)."""
     with store.lock:
@@ -278,6 +290,7 @@ def remember_provider_data(store, cfg, entry):
                 provided[field] = entry[field]
         if not provided and not manual and len(row) <= 2 and not row.get("tested"):
             _table(store).pop(f"{provider_label(cfg)}/{entry['id']}", None)
+        _trim(store)
 
 
 def data_of(store, provider, model):      # `provider` is the label of provider_label()
@@ -297,7 +310,7 @@ def data_of(store, provider, model):      # `provider` is the label of provider_
 
 def set_manual(store, provider, model, values):
     """Saves what the person typed for a model. A field set to None/"" goes back to unknown. Returns (ok, error_text)."""
-    if not MODEL_ID.match(str(model or "")):
+    if not MODEL_ID.match(str(model or "")) or not PROVIDER_LABEL.match(str(provider or "")):
         return False, i18n.t("err.bad_value")
     clean = {}
     for field, raw in (values or {}).items():
@@ -323,6 +336,9 @@ def set_manual(store, provider, model, values):
                 return False, i18n.t("err.bad_value")
             clean[field] = number
     with store.lock:
+        _trim(store)
+        if f"{provider}/{model}" not in _table(store) and len(_table(store)) >= MAX_TABLE_ROWS:
+            return False, i18n.t("err.bad_value")
         row = _table(store).setdefault(f"{provider}/{model}", {})
         manual = row.setdefault("manual", {})
         for field, value in clean.items():

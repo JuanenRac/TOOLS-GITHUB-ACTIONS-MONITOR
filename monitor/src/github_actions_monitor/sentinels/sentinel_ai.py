@@ -69,6 +69,10 @@ SECRET_PATTERNS = [
     re.compile(r"""(?i)(password|passwd|secret|api[_-]?key|private[_-]?key)["']?\s*[:=]\s*(?:"[^"\n]*"|'[^'\n]*'|\S+)"""),
     re.compile(r"\b[A-Fa-f0-9]{40,}\b"), re.compile(r"\b[A-Za-z0-9+/]{48,}={0,2}"),
 ]
+MAX_REPORTED_TOKENS = 10_000_000      # what a provider says it spent is believed up to here: a figure above is a mistake of the provider and would shut the AI for the day
+ANSI = re.compile(r"\x1b\[[0-9;?]*[ -/]*[@-~]|\x1b[@-_]")
+ACTIVE_SCHEME = re.compile(r"(?i)\b(?:javascript|vbscript|data|blob):\S*")
+HTML_TAG = re.compile(r"(?i)</?[a-z][^>\n]{0,200}>")
 CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
 
@@ -122,8 +126,9 @@ def sanitize_text(text, max_chars, keep="tail"):
 
 def clean_output(text, max_chars=1500):
     """The answer is only TEXT: control characters out, URLs defused, length capped."""
-    text = CONTROL.sub("", str(text or "")).strip()
+    text = CONTROL.sub("", ANSI.sub("", str(text or ""))).strip()
     text = re.sub(r"(?i)\b(?:https?|ftp|file)://\S+", i18n.t("ai.link_removed"), text)
+    text = HTML_TAG.sub("", ACTIVE_SCHEME.sub(i18n.t("ai.link_removed"), text))
     return text[:max_chars] + ("..." if len(text) > max_chars else "")
 
 
@@ -227,7 +232,7 @@ class ProviderError(RuntimeError):
 def note_usage(body, in_key, out_key):
     """Keeps the tokens a provider reported in its answer (body[in_key], body[out_key]) for the call that is running in this thread."""
     def number(value):
-        return value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else None
+        return min(value, MAX_REPORTED_TOKENS) if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else None
     source = body if isinstance(body, dict) else {}
     usage = source.get("usage") if isinstance(source.get("usage"), dict) else source
     _USAGE.value = (number(usage.get(in_key)), number(usage.get(out_key)))
