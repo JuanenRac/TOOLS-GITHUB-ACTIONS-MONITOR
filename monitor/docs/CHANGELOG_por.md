@@ -21,6 +21,10 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - **Um vermelho cujo workflow continua a ser executado deixa de envelhecer até «inativo»**: uma falha mais antiga do que a idade (30 dias por defeito) era escondida mesmo quando execuções posteriores do mesmo workflow tinham sido canceladas, estavam em curso ou à espera de aprovação. Agora só envelhece um workflow que não foi executado de todo desde a falha, e um workflow cujo período natural é maior do que a idade (um cron mensal que falha sempre) espera o dobro do seu intervalo habitual antes de o fazer.
 
+### Alterado
+
+- **Uma falha que ninguém corrige continua a pesar na pontuação, e os alertas de colaboração abertos contam com a sua idade**: um fluxo que ficava vermelho baixava a parte de recuperação durante sete dias e depois a parte voltava a 100 quando a execução falhada saía da janela. Agora mede-se o troço do vermelho que cai dentro da janela (a janela anterior contou o seu, nenhum dia é contado duas vezes) e o registo guarda a última falha de um fluxo por corrigir enquanto a regra do vermelho a mostrar. Um alerta da sentinela de colaboração que continua aberto no fim da janela conta com o tempo que está aberto até agora: deixar alertas por resolver baixa a parte de colaboração em vez de a deixar sem dados. Depois de atualizar, os valores podem ser mais baixos do que antes; o guia da pontuação explica-o.
+
 ## [2.0.8]
 
 ### Segurança

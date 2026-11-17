@@ -22,6 +22,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **A red whose workflow is still being run no longer ages into "inactive"**: a failure older than the age (30 days by default) was hidden even when later runs of the same workflow had been cancelled, were in progress or were waiting for an approval. Now only a workflow that has not been run at all since the failure ages, and a workflow whose natural period is longer than the age (a monthly schedule that always fails) waits for twice its usual interval before it does.
 
+### Changed
+
+- **A failure nobody fixes keeps weighing on the score, and open collaboration alerts count with their age**: a workflow that stayed red lowered the recovery part for seven days and then the part went back to 100 when the failing run left the window. Now the stretch of the red that falls inside the window is measured (the window before counted its own, so no day is counted twice) and the ledger keeps the last failure of a workflow nobody fixed for as long as the rule of the red shows it. An alert of the collaboration sentinel that is still open at the end of the window counts with the time it has been open so far, so leaving alerts unresolved lowers the collaboration part instead of leaving it without data. Scores can be lower than before after the update; the Score guide explains it.
+
 ## [2.0.8]
 
 ### Security

@@ -21,6 +21,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - **Un rouge dont le workflow continue de s'exécuter ne vieillit plus jusqu'à « inactif »** : un échec plus ancien que l'âge (30 jours par défaut) était masqué même si des exécutions ultérieures du même workflow avaient été annulées, étaient en cours ou attendaient une approbation. Désormais seul vieillit un workflow qui ne s'est plus du tout exécuté depuis l'échec, et un workflow dont la période naturelle dépasse l'âge (un cron mensuel qui échoue toujours) attend le double de son intervalle habituel avant de le faire.
 
+### Modifié
+
+- **Un échec que personne ne répare continue de peser sur la note, et les alertes de collaboration ouvertes comptent avec leur âge** : un workflow resté rouge baissait la part de récupération pendant sept jours, puis la part revenait à 100 quand l'exécution en échec sortait de la fenêtre. On mesure désormais le tronçon du rouge situé dans la fenêtre (la fenêtre précédente a compté le sien, aucun jour n'est compté deux fois) et le registre garde le dernier échec d'un workflow non réparé tant que la règle du rouge le montre. Une alerte de la sentinelle de collaboration encore ouverte à la fin de la fenêtre compte avec le temps écoulé depuis son ouverture : laisser des alertes sans réponse baisse la part collaboration au lieu de la laisser sans données. Après la mise à jour, les notes peuvent être plus basses qu'avant ; le guide de la note l'explique.
+
 ## [2.0.8]
 
 ### Sécurité

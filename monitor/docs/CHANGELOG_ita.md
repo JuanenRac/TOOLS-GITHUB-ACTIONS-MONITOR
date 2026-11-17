@@ -21,6 +21,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - **Un rosso il cui workflow continua a essere eseguito non invecchia più fino a «inattivo»**: un guasto più vecchio dell'età (30 giorni per impostazione predefinita) veniva nascosto anche quando esecuzioni successive dello stesso workflow erano state annullate, erano in corso o attendevano un'approvazione. Ora invecchia solo un workflow che non è stato eseguito affatto dopo il guasto, e un workflow il cui periodo naturale supera l'età (un cron mensile che fallisce sempre) attende il doppio del suo intervallo abituale prima di farlo.
 
+### Modificato
+
+- **Un guasto che nessuno ripara continua a pesare sul punteggio, e gli avvisi di collaborazione aperti contano con la loro età**: un workflow rimasto rosso abbassava la parte di recupero per sette giorni, poi la parte tornava a 100 quando l'esecuzione fallita usciva dalla finestra. Ora si misura il tratto del rosso che cade nella finestra (la finestra precedente ha contato il proprio, nessun giorno è contato due volte) e il registro conserva l'ultimo guasto di un workflow non riparato finché la regola del rosso lo mostra. Un avviso della sentinella di collaborazione ancora aperto alla fine della finestra conta con il tempo trascorso da quando è aperto: lasciare avvisi irrisolti abbassa la parte collaborazione invece di lasciarla senza dati. Dopo l'aggiornamento i punteggi possono essere più bassi di prima; la guida del punteggio lo spiega.
+
 ## [2.0.8]
 
 ### Sicurezza

@@ -21,6 +21,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **Ein Rot, dessen Workflow weiter ausgeführt wird, altert nicht mehr zu „inaktiv“**: Ein Fehler, der älter als die Altersgrenze war (standardmäßig 30 Tage), wurde auch dann ausgeblendet, wenn spätere Läufe desselben Workflows abgebrochen waren, liefen oder auf eine Freigabe warteten. Jetzt altert nur ein Workflow, der seit dem Fehler gar nicht mehr gelaufen ist, und ein Workflow, dessen natürliche Periode länger als die Altersgrenze ist (ein monatlicher Zeitplan, der immer fehlschlägt), wartet davor das Doppelte seines üblichen Abstands.
 
+### Geändert
+
+- **Ein Fehler, den niemand behebt, belastet die Bewertung weiter, und offene Zusammenarbeitsmeldungen zählen mit ihrem Alter**: Ein Workflow, der rot blieb, senkte den Teil Wiederherstellung sieben Tage lang, und dann sprang der Teil auf 100 zurück, sobald der fehlgeschlagene Lauf das Fenster verließ. Jetzt wird das Stück des Rots gemessen, das im Fenster liegt (das Fenster davor zählte sein eigenes, kein Tag wird doppelt gezählt), und das Hauptbuch behält den letzten Fehler eines unbehobenen Workflows, solange die Rot-Regel ihn zeigt. Eine Meldung des Zusammenarbeits-Wächters, die am Ende des Fensters noch offen ist, zählt mit der bisherigen Offenzeit; unbearbeitete Meldungen senken also den Teil Zusammenarbeit, statt ihn ohne Daten zu lassen. Nach dem Update können die Werte niedriger sein als zuvor; die Bewertungsanleitung erklärt es.
+
 ## [2.0.8]
 
 ### Sicherheit

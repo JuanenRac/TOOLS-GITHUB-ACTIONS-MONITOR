@@ -9,7 +9,7 @@ For one window of time [start, end) it computes, from the runs that STARTED insi
   mttr                       median seconds from the first failure of a workflow to its next success (a workflow that is still red at the end of the window counts too, with the time it has been red so far, a lower bound that grows while the red lasts);
                              0 when the window has runs and no failure at all (nothing had to recover: that is data, not a gap), None only when there is no failure to measure
   throughput                 finished runs per day
-  collab_resolution_time     median seconds an item of the collaboration sentinel stayed open (only items closed inside the window)
+  collab_resolution_time     median seconds an item of the collaboration sentinel stayed open (items closed inside the window, plus the age so far of every item still open at its end: a censored time, a lower bound)
   collab_open                items still open at the end of the window
 
 and the amount of data behind every number (`samples`), which the engine needs to say "not enough data" instead of inventing a value. A metric with nothing behind it is None, never 0.
@@ -51,10 +51,30 @@ def runs_in_window(runs, start, end):
     return out
 
 
-def red_spans(timed_runs, end=None):
+def carried_red(runs, start):
+    """{(repo, workflow): moment} of the workflows that ENTER the window [start, ...) red: the last verdict before it is a failure and nothing has recovered it. The moment is the START OF THE WINDOW: only the
+    stretch that falls inside the window is measured (the window before already counted its own stretch, so the same day is never counted twice). Without this a failure nobody fixes weighs more every
+    hour only until it crosses the edge of the window, and then recovery goes back to 100."""
+    last, since = {}, {}
+    ordered = sorted(((to_ts(r.get("started")), r) for r in runs or [] if isinstance(r, dict) and r.get("status") == "completed"), key=lambda pair: (pair[0] is None, pair[0] or 0.0))
+    for t, run in ordered:
+        if t is None or t >= start:
+            continue
+        key = (run.get("repo"), run.get("name"))
+        conclusion = run.get("conclusion")
+        if conclusion in BAD:
+            since.setdefault(key, t)
+            last[key] = True
+        elif conclusion == "success":
+            since.pop(key, None)
+            last[key] = False
+    return {key: start for key, red in last.items() if red and key in since}
+
+
+def red_spans(timed_runs, end=None, carried=None):
     """(closed, still_open): the seconds each workflow stayed red from its first failure to the next success of the same repository and workflow, and, when `end` is given,
     the seconds the workflows that are still red at `end` have been red so far (censored times: the real time is at least that long)."""
-    open_since, spans = {}, []
+    open_since, spans = dict(carried or {}), []
     for t, run in timed_runs:
         key = (run.get("repo"), run.get("name"))
         conclusion = run.get("conclusion")
@@ -77,7 +97,7 @@ def collect_runs(runs, start, end):
     good = [r for _, r in timed if r.get("conclusion") == "success"]
     bad = [r for _, r in timed if r.get("conclusion") in BAD]
     seconds = [r["seconds"] for r in good if isinstance(r.get("seconds"), (int, float)) and not isinstance(r.get("seconds"), bool) and r["seconds"] > 0]
-    spans, unrecovered = red_spans(timed, end)
+    spans, unrecovered = red_spans(timed, end, carried_red(runs, start))
     measured = spans + unrecovered
     judged = len(good) + len(bad)
     quiet = judged > 0 and not bad
@@ -93,7 +113,7 @@ def collect_runs(runs, start, end):
 
 def collect_collab(items, start, end):
     """The metrics of the collaboration items ({"opened", "closed"} as ISO times or numbers; `closed` is None while open) for one window."""
-    spans, still_open = [], 0
+    spans, censored, still_open = [], [], 0
     for item in items or []:
         if not isinstance(item, dict):
             continue
@@ -102,9 +122,11 @@ def collect_collab(items, start, end):
             continue
         if closed is None or closed >= end:
             still_open += 1
+            censored.append(max(0.0, end - opened))      # still open at the end of the window: it has taken at least this long (a lower bound that grows while it stays open)
         elif closed >= start:
             spans.append(max(0.0, closed - opened))
-    return {"collab_resolution_time": percentile(spans, 50) if spans else None, "collab_open": still_open,
+    measured = spans + censored
+    return {"collab_resolution_time": percentile(measured, 50) if measured else None, "collab_open": still_open,
             "samples": {"collab_closed": len(spans), "collab_open": still_open}}
 
 

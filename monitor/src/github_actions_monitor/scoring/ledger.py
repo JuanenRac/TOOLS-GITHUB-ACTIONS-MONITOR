@@ -60,7 +60,17 @@ def run_key(run):
     return str(run["id"])
 
 
-def update_ledger(ledger, runs, collab_alerts, now, keep_days, collab_known=True):
+def open_reds(ledger):
+    """The ids of the rows that are the last verdict of their workflow and a failure: a red nobody has fixed. They are kept past the usual horizon (see `update_ledger`)."""
+    newest = {}
+    for rid, row in ledger["runs"].items():
+        key = (row[3], row[4])
+        if key not in newest or row[0] > newest[key][0]:
+            newest[key] = (row[0], rid, row[1])
+    return {rid for _, rid, conclusion in newest.values() if conclusion in BAD}
+
+
+def update_ledger(ledger, runs, collab_alerts, now, keep_days, collab_known=True, pin_days=0):
     """Adds the finished runs not seen before and follows the collaboration alerts; forgets what is older than `keep_days`. `runs` are the run dicts of the monitor,
     `collab_alerts` the open alerts of the collaboration sentinel ({"id", "created_at"}); `collab_known` is False while that sentinel is off or has not looked yet, so an empty list is not read as "everything was resolved"."""
     for run in runs or []:
@@ -83,7 +93,9 @@ def update_ledger(ledger, runs, collab_alerts, now, keep_days, collab_known=True
         if row[1] is None and key not in open_now:
             row[1] = now
     horizon = now - keep_days * collector.DAY
-    ledger["runs"] = {k: v for k, v in ledger["runs"].items() if v[0] >= horizon}
+    pinned = open_reds(ledger) if pin_days > keep_days else set()
+    pin_horizon = now - pin_days * collector.DAY
+    ledger["runs"] = {k: v for k, v in ledger["runs"].items() if v[0] >= horizon or (k in pinned and v[0] >= pin_horizon)}      # the last failure of a workflow nobody fixed stays while it counts as red
     ledger["collab"] = {k: v for k, v in ledger["collab"].items() if v[1] is None or v[1] >= horizon}
     if len(ledger["runs"]) > MAX_RUNS:
         newest = sorted(ledger["runs"].items(), key=lambda kv: kv[1][0], reverse=True)[:MAX_RUNS]
@@ -143,6 +155,13 @@ def make_snapshot(ledger, cfg, now, account=None, security=None, activity=None):
     return snapshot
 
 
+def open_red_days():
+    """How long the last failure of a workflow nobody fixed stays in the ledger: as long as the rule of the red keeps it red (ci.red_age_days, 30 by default; never ages = 180 days at most)."""
+    from github_actions_monitor.data_pipeline import redrule
+    age = redrule.POLICY.get("red_age_days") or 0
+    return age if age else 180
+
+
 def hour_key(now):
     return datetime.fromtimestamp(now, timezone.utc).strftime("%Y-%m-%dT%H")
 
@@ -162,7 +181,7 @@ def tick(storage, account_id, config, runs, collab_alerts, now=None, force=False
     if not force and now - ledger["last_tick"] < MIN_INTERVAL:
         return None
     keep_days = min(180, 2 * cfg["window_days"] + 1)
-    update_ledger(ledger, runs, collab_alerts, now, keep_days, collab_known)
+    update_ledger(ledger, runs, collab_alerts, now, keep_days, collab_known, pin_days=open_red_days())
     ledger["last_tick"] = now
     snapshot = make_snapshot(ledger, cfg, now, account_id, security, activity)
     snapshot["drop"] = drop.detect(snapshot, cfg)
