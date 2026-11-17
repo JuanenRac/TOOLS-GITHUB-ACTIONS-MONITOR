@@ -547,10 +547,10 @@ class LiveStatus(unittest.TestCase):
             self.assertNotIn("short", json.dumps({k: v for k, v in status.items() if k != "text"}).replace("secret_ok", ""))
 
     def test_the_newest_event_is_named_with_only_short_fields(self):
-        self.am.LIVE_EVENTS.append({"repo": "r", "name": "CI", "event": "workflow_run", "status": "completed", "conclusion": "success", "at": "2030-01-01T10:00:00Z", "title": "do not show", "actor": "x"})
+        self.am.LIVE_EVENTS.append({"repo": "r", "workflow": "CI", "event": "workflow_run", "status": "completed", "conclusion": "success", "at": "2030-01-01T10:00:00Z", "title": "do not show", "actor": "x"})
         with mock.patch.dict(os.environ, {"MONITOR_WEBHOOK_SECRET": "S" * 40}):
             last = self.am.webhook_status({"webhook": {"enabled": True}})["last"]
-        self.assertEqual(sorted(last), ["at", "conclusion", "event", "name", "repo", "status"])
+        self.assertEqual(sorted(last), ["at", "conclusion", "event", "repo", "status", "workflow"])
 
     def test_the_endpoint_exists_in_the_complete_edition_and_not_in_lite(self):
         self.assertIn("/api/live-status", self.am.LITE_PATHS)

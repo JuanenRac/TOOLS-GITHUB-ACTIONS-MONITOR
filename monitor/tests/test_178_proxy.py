@@ -84,7 +84,7 @@ class TrustedProxy(unittest.TestCase):
                 self.assertNotEqual(i18n.tl(lang, prefix + "listen.trusted_proxy"), prefix + "listen.trusted_proxy", lang)
             self.assertIn("X-Forwarded-For", i18n.tl(lang, "cfg.h.listen.trusted_proxy"), lang)
         source = (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8")
-        self.assertEqual(source.count("localguard.client_key(self.client_address, self.headers)"), 2)
+        self.assertEqual(source.count("localguard.client_key(self.client_address, self.headers)"), 3)
         self.assertIn('"trusted_proxy": False', source)
 
 

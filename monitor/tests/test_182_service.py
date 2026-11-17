@@ -237,7 +237,7 @@ class RemoteCommandLine(unittest.TestCase):
         secret.write_text(token + "\n", encoding="utf-8")
         sent = []
         with mock.patch.object(monitor_cli, "fetch", return_value={"ok": True, "supervisor": True}), \
-                mock.patch.object(monitor_cli, "post_json", side_effect=lambda base, path, payload, *a: sent.append((path, payload)) or (200, {"ok": True, "status": "saved", "token": token})):
+                mock.patch.object(monitor_cli, "post_json", side_effect=lambda base, path, payload, *a, **kw: sent.append((path, payload)) or (200, {"ok": True, "status": "saved", "token": token})):
             code, out, err = self.run_cli(["credential", "replace", "--account", "alpha", "--new-token-file", str(secret), "--url", "http://127.0.0.1:8765", "--json"])
         self.assertEqual(code, 0)
         self.assertEqual(sent, [("/api/accounts/alpha/credential", {"action": "replace", "token": token})])
