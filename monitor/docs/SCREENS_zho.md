@@ -21,7 +21,7 @@
 |---|---|
 | `ui.orientation` | auto 跟随窗口；portrait 把面板堆成一列；landscape 保持并排布局。 |
 | `ui.rotate_seconds` | 0 = 关闭。有多个标签页的屏幕在标签页之间切换的秒数。 |
-| `ui.screen1_tabs` | /screen/1 的标签页，逗号分隔：now, al, rep, les, sent, charts, repos, hist, cfg。留空 = 全部。 |
+| `ui.screen1_tabs` | /screen/1 的标签页，逗号分隔：now, al, charts, sent, sci, scol, ssec, team, fleet, repos, rep, trep, les, hist, cfg。留空 = 全部。 |
 | `ui.screen1_orientation` | 仅 /screen/1 的 auto、portrait 或 landscape。 |
 | `ui.screen2_tabs` | /screen/2 的标签页。 |
 | `ui.screen2_orientation` | /screen/2 的方向。 |

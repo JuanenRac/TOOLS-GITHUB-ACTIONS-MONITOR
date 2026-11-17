@@ -21,7 +21,7 @@ La pagina si adatta alla dimensione della finestra, dal telefono al 4K, in verti
 |---|---|
 | `ui.orientation` | auto segue la finestra; portrait impila i pannelli in una colonna; landscape mantiene l'affiancamento. |
 | `ui.rotate_seconds` | 0 = spento. Secondi tra le schede di uno schermo che ne ha più di una. |
-| `ui.screen1_tabs` | Schede di /screen/1, separate da virgole: now, al, rep, les, sent, charts, repos, hist, cfg. Vuoto = tutte. |
+| `ui.screen1_tabs` | Schede di /screen/1, separate da virgole: now, al, charts, sent, sci, scol, ssec, team, fleet, repos, rep, trep, les, hist, cfg. Vuoto = tutte. |
 | `ui.screen1_orientation` | auto, portrait o landscape solo per /screen/1. |
 | `ui.screen2_tabs` | Schede di /screen/2. |
 | `ui.screen2_orientation` | Orientamento di /screen/2. |

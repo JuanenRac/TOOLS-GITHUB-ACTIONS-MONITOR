@@ -21,7 +21,7 @@ Die Seite passt sich der Größe ihres Fensters an, vom Telefon bis 4K, hochkant
 |---|---|
 | `ui.orientation` | auto folgt dem Fenster; portrait stapelt die Panels in einer Spalte; landscape behält das Nebeneinander. |
 | `ui.rotate_seconds` | 0 = aus. Sekunden zwischen den Tabs eines Bildschirms mit mehr als einem. |
-| `ui.screen1_tabs` | Tabs von /screen/1, durch Kommas getrennt: now, al, rep, les, sent, charts, repos, hist, cfg. Leer = alle. |
+| `ui.screen1_tabs` | Tabs von /screen/1, durch Kommas getrennt: now, al, charts, sent, sci, scol, ssec, team, fleet, repos, rep, trep, les, hist, cfg. Leer = alle. |
 | `ui.screen1_orientation` | auto, portrait oder landscape nur für /screen/1. |
 | `ui.screen2_tabs` | Tabs von /screen/2. |
 | `ui.screen2_orientation` | Ausrichtung von /screen/2. |

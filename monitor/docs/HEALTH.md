@@ -23,7 +23,7 @@ The state is **bad** (a red workflow, or an alert of level critical or error), *
 
 ## Where to see it
 
-- The **Team** tab: the ranking (the repositories that need a person first), the totals, the numbers by ecosystem and by sentinel, and three filters: ecosystem, least severity and a piece of the name. Click a repository for its detail.
+- The **Team health** tab (menu group *Team*, address `#team-health`): the ranking (the repositories that need a person first), the totals, the numbers by ecosystem and by sentinel, and three filters: ecosystem, least severity and a piece of the name. Click a repository for its detail.
 - Deep links for wall screens: `?view=team&chrome=0`, `?view=repos&chrome=0` and `?view=repo&repo=owner/name&chrome=0`.
 - The API: `GET /api/team/health?ecosystem=&severity=&q=&label=` and `GET /api/repos/<owner>/<repo>/health`. Both need the permission to see the account; the answers carry `schema: 1`. An unknown repository answers 404 with `code: repo_unknown`.
 - The Lite edition keeps its simple view of runs and has neither the tab nor the routes.
@@ -36,6 +36,6 @@ A saved moment that lies in the future (a computer without a battery clock that 
 
 ## The fleet view (hundreds of repositories)
 
-The **Team** tab has a second section, *Fleet*, for accounts with hundreds of repositories. It groups the repositories (`fleet.group_by`: ecosystem, label, state or none), orders each group (`fleet.sort`: risk, name, last run or state) and draws `fleet.page_size` rows at a time (50 by default) with Previous and Next. The page gets every row once from `GET /api/team/fleet?ecosystem=&severity=&q=&label=&group=&sort=&saved=` (read only, at most 5,000 rows, `truncated` says when it was cut) and only draws one page, so the size of the account does not slow it down.
+The **Fleet** tab (menu group *Team*, address `#fleet`) is for accounts with hundreds of repositories. It groups the repositories (`fleet.group_by`: ecosystem, label, state or none), orders each group (`fleet.sort`: risk, name, last run or state) and draws `fleet.page_size` rows at a time (50 by default) with Previous and Next. The page gets every row once from `GET /api/team/fleet?ecosystem=&severity=&q=&label=&group=&sort=&saved=` (read only, at most 5,000 rows, `truncated` says when it was cut) and only draws one page, so the size of the account does not slow it down.
 
 A *label* is a pattern of repository names: `fleet.labels` takes lines such as `team-*=backend`; the first pattern that fits gives the label, and grouping by label is how organisations or teams are told apart in one monitor. `fleet.saved_filters` takes lines such as `attention=bad||backend|` (name, least severity, ecosystem, label, text; any part after the name may be empty) and shows them as ready-made filters. The ranking above the fleet is unchanged.
