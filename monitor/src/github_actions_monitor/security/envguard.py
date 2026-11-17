@@ -9,8 +9,17 @@ import os
 
 SUPERVISOR_KEY_ENV = "MONITOR_SUPERVISOR_KEY"
 ACCESS_TOKEN_ENV = "MONITOR_ACCESS_TOKEN"
+WEBHOOK_SECRET_ENV = "MONITOR_WEBHOOK_SECRET"
+#: names of environment variables that can NEVER be named as the home of a secret of the monitor (the setting would turn the secret into a value that is not secret, or take a variable the programs need out of the environment)
+SYSTEM_NAMES = ("GH_TOKEN", "GITHUB_TOKEN", "GITHUB_PAT", "PATH", "PATHEXT", "COMSPEC", "HOME", "USERPROFILE", "SYSTEMROOT", "TEMP", "TMP", "APPDATA", "LOCALAPPDATA", "PYTHONPATH", "SSH_AUTH_SOCK")
+SECRET_NAMES = (SUPERVISOR_KEY_ENV, ACCESS_TOKEN_ENV, WEBHOOK_SECRET_ENV)      # the secrets the monitor itself defines: each setting may name only its own
 HELD = {}            # name -> value, taken out of the environment
 NAMES = {SUPERVISOR_KEY_ENV, ACCESS_TOKEN_ENV}      # the names that never go to a program of the user (the variable that holds the access token can be renamed: see hold)
+
+
+def forbidden_name(name, own=()):
+    """True when `name` cannot be the variable of a secret: a variable of the system or of the login to GitHub, or a secret of the monitor that belongs to another setting (`own` = the one of this setting)."""
+    return name in SYSTEM_NAMES or (name in SECRET_NAMES and name not in own)
 
 
 def hold(*names):
@@ -35,6 +44,10 @@ def clean_environment(env=None):
     return out
 
 
-def for_account_process(extra=None):
-    """The environment of the process of an account: the real one plus what was taken out (it needs both) plus `extra`."""
-    return {**os.environ, **HELD, **(extra or {})}
+def for_account_process(extra=None, other_secrets=()):
+    """The environment of the process of an account: the real one plus what was taken out (it needs both) plus `extra`, WITHOUT the variables in `other_secrets` (the secrets of the webhook of the
+    other accounts and of the main configuration: the process of an account, and every program it starts, only holds the secret its own configuration names)."""
+    env = {**os.environ, **HELD, **(extra or {})}
+    for name in other_secrets:
+        env.pop(name, None)
+    return env
