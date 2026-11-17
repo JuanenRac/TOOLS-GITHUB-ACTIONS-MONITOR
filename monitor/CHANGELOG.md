@@ -11,6 +11,12 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+### Added
+
+- **A read API under `/api/v1/` for clients (setting `api.v1_enabled`, off by default)**: every read route is also served under the prefix (the same answer and roles, plus the header `X-API-Version: 1`), and three routes are new: `/api/v1/me` (who is asking: the mode, the user, the role and the accounts of the team session), `/api/v1/repos` (the watched repositories, one line each, in pages with a signed cursor, `fields=` and `profile=compact`, gzip when the client accepts it) and `/api/v1/openapi.json`. The new routes answer errors in one envelope (`error`, a stable `code` such as `api.bad_cursor` and a `message` in the language asked). Everything is read only, from what the monitor already holds. The shape is frozen in the new section `v1_endpoints` of the contract (`python tools/check_api_contract.py --v1`); the limits are the settings `api.default_limit`, `api.max_limit`, `api.cursor_ttl_seconds` and `api.gzip_min_bytes`. Texts in eight languages, the guide of the API updated in all of them and a test with the real server.
+- **A workflow the owner switched off by hand is no longer a red (setting `ci.disabled_apart`, on by default)**: a fork copies the nightly job of the project it follows, the job fails for lack of the secrets, the owner switches the workflow off, and its last run stayed "failure" for ever (two accounts of the study showed it). Now a workflow in the state `disabled_manually` leaves the list of reds and is counted apart in the panel ("switched off by hand"). A workflow GitHub switched off for inactivity is not touched, because that is not a decision of the owner. Text in eight languages and a test.
+- **The original repository of each fork can be followed (setting `upstream.enabled`, off by default)**: for an account that collects forks the useful question is what happens in the projects it follows, not whether its own CI is green. With the switch on, the monitor reads the original of each fork (the status of the checks of the last commit of its default branch and its latest release) and shows them in the hygiene panel of the Sentinel; with `upstream.notify` it also gives an information notice when the original is red or published a release. The cost is bounded by settings in the configuration file: `upstream.requests_per_hour` (6), `upstream.forks_per_request` (8), `upstream.refresh_hours` (12), `upstream.news_days` (7) and `upstream.repos` (the forks to follow; empty means all). One request reads several forks, the least recently read go first, and nothing is written anywhere. Texts in eight languages and a test with the cases of the study.
+
 ## [2.0.6]
 
 ### Added
@@ -29,6 +35,12 @@ when this file and `tool_version.py` disagree.
 
 - **A red nobody attends to ages after 30 days and becomes inactive (settings `ci.red_ages` and `ci.red_age_days`)**: a fork copies the nightly job of the project it follows, the job fails every night for lack of the secrets, the owner switches the workflow off, and the last run stays "failure" for ever, so the repository was red for ever (41 of 42 runs and 26 of 27 in the two cases measured, the last one nearly a year old). Until now only a workflow that had not run at all for `ci.inactive_days` (90) days stopped being red, and a workflow that went on running pull requests never did. Now a failing run older than `ci.red_age_days` days (30 by default) with nothing newer of the events that decide leaves the red list and is listed as inactive; the rows say it aged. The switch is on by default; turned off, a red stays red until the workflow runs green again.
 - **The hygiene check of the default branch judges the rules in force by default (`sentinel.hygiene.ruleset_mode` is now `effective`)**: before, the branch counted as protected only when a ruleset with an exact name (`protect-main`) was active, which no studied account used (none of the studied accounts named its rulesets like that, and 32 of 96 repositories protect the branch in the classic way). By default a branch now counts as protected when GitHub reports a rule or a protection for it, whatever it is called. The check reads the branch and its rules, two more requests for each repository every time the hygiene is renewed. Set `name` to bring back the old rule. A profile that asks for the old rule keeps it.
+
+### Added
+
+- **Forks enter the hygiene, the lint of workflows and the score only when they have a CI of their own (settings `ci.forks_need_own_ci` and `ci.fork_own_ci_days`, default 90 days)**: a fork copies the files, the rulesets, the releases and the workflows of a project somebody else owns, so judging its hygiene (no ruleset, no release, the licence of the upstream) or its workflow files is judging the upstream, and an account that collects forks (722 of 727 repositories in the one measured, none with a ruleset, a protection or a release) showed hundreds of warnings and a score made of noise. A fork now counts when it ran a push, pull request, manual or merge queue run of its own in the window; a schedule it inherited does not count, nor does the pull request of another fork, nor the runs GitHub makes for itself. When the list of its runs is full and does not reach back to the start of the window the fork stays in, because a run of its own may hide further back. The forks left out are counted apart (`a6.forks_idle` of the sentinel, the header figure `forks_idle`, a chip in the hygiene panel), their runs are not part of the score, and with the switch off every fork is judged as before.
+- **Dormant and inactive repositories are a state of their own, neither green nor red (setting `ci.dormant_repos`)**: an account that collects forks has hundreds of repositories that have never run anything (724 of 727 in the account measured), and a repository whose newest run is months old is not healthy either. Each watched repository is now active, dormant (it has never run anything of its own, its list of runs is complete and empty), inactive (its newest run is older than `ci.inactive_days`) or unknown (the read failed or the list is cut). They are counted apart in the figures of the header (`dormant`, `inactive_repos`), in the data of the monitor and in the snapshot of the score (`activity`), and the tooltip of the score chip says how many there are. The score is calculated only from what runs. The workflows GitHub makes for itself are not runs of the repository.
+- **Runs queued for days are told apart as a ghost queue (setting `ci.stuck.ghost_enabled`, days in `ci.stuck.ghost_days`, default 7)**: on public repositories GitHub leaves runs in the queue for weeks or months (a closed pull request, a job that asks for a runner that does not exist; 280 days at the worst, in 8 of 10 busy repositories). Those runs inflated the queued count, were reported as stuck builds and fed every limit learned from the queue. A queued run of the first attempt older than the limit is now neither queued nor stuck: it leaves the list "Right now" and the counts, a line says how many there are, and the sentinel lists them apart and gives one information notice per repository (`ci.ghost_queue`), never an error. The switch is on by default; turned off, every queued run is treated as before.
 
 ### Fixed
 
@@ -607,7 +619,6 @@ The connection between the monitor and an AI tool: the feed always agrees with t
 - **Starting the network mode** while `listen.query_access` is still on now prints the first steps (turn it off; use HTTPS or a VPN), and the help of `listen.network` and the advanced guide say the same in the eight languages.
 - **The feed of alerts for AIs is off by default** (`ai_alerts.enabled`, it was on): a new installation writes no feed until you turn it on. An installation that already has a feed in its folder keeps it on, and the console says so once at start, so nobody who was using it on purpose is switched off.
 
-
 ### Security
 
 - **Outgoing notifications ignore the proxy variables of the environment** (`http_proxy`, `https_proxy`): a proxy made the check judge the address of the proxy and not the one of the destination, and a proxy that answered with a redirect could send the request to the local network (the metadata address of a cloud included). The new setting `network.use_proxy` (off by default, in the Settings tab, in the eight languages) uses them again, and then the destination and the target of every redirect are checked before the proxy gets anything. Tested with a proxy that redirects to the metadata address.
@@ -779,7 +790,6 @@ Several accounts in the complete edition, each one a monitor of its own, and a p
 
 - The Live view of 1.6.8 had no state of the receiver: with the webhook off or with a secret shorter than 32 characters it said nothing, and now it says which.
 
-
 ## [1.6.8]
 
 The HTTPS proxy of 1.6.7 is now checked against a real proxy, the pictures are taken again, and the history of changes is translated back to 1.6.3.
@@ -800,7 +810,6 @@ The HTTPS proxy of 1.6.7 is now checked against a real proxy, the pictures are t
 
 - The changelog of 1.6.7 said that only 1.6.7 and 1.6.5 were translated and that the proxy was checked only with the guard; this version translates the rest back to 1.6.3 and checks the proxy end to end, as above.
 
-
 ## [1.6.7]
 
 An HTTPS proxy on the default port 443 now works with the network mode, and more of the history of changes is translated.
@@ -818,7 +827,6 @@ An HTTPS proxy on the default port 443 now works with the network mode, and more
 
 - The history of changes (Help > Changelog) is translated in the other seven languages for 1.6.7 and 1.6.5 (1.6.6 already was); the older entries keep the English text under a translated notice and will follow, newest first.
 - `docs/ADVANCED.md` (eight languages) explains the proxy on the default port instead of saying it is not supported, `docs/MIGRATING.md` has a block from 1.6.6 to 1.6.7, and the guide of the settings and the index of the Help are regenerated.
-
 
 ## [1.6.6]
 

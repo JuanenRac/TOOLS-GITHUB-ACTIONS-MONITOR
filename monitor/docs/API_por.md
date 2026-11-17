@@ -24,6 +24,14 @@ Aquilo em que um script, um ecrã de parede ou um cliente móvel pode confiar. D
 - `docs/schemas/api_contract.json` lista cada endpoint de leitura com as suas chaves e tipos em cada edição e os códigos de erro. As rotas que se podem ler mas não estão congeladas (fluxos, texto, exportações de outras ferramentas) estão listadas em `unfrozen` no mesmo ficheiro, cada uma com o seu motivo; `/api/data`, que dá as execuções, os repositórios e a quota, está congelada.
 - `python tools/check_api_contract.py` verifica um monitor em execução contra ele (`--lite`, `--url`, `--token-file`) e imprime `CONTRACT=PASS` ou `CONTRACT=FAIL`; execute-o após cada atualização do monitor ou do seu cliente.
 
+## API de leitura v1 (desativada por predefinição)
+
+- Ative `api.v1_enabled` (Definições, Avançado, API de leitura v1). Cada rota de leitura é então servida também em `/api/v1/` (por exemplo `/api/v1/alerts`): a mesma resposta e os mesmos papéis, mais o cabeçalho `X-API-Version: 1`. Enquanto está desativada, na edição lite e para qualquer outro número de versão, o prefixo responde 404.
+- `/api/v1/me`: quem pergunta: `mode` (`individual` ou `team`), `authenticated`, `user`, e o `role` e as `accounts` da sessão de equipa (null sem ela), os `limits` das listas e a versão.
+- `/api/v1/repos`: os repositórios que o monitor vigia, uma linha cada um (`repo`, `ecosystem`, `state`, `risk`, `runs_24h`, `failures_24h`, `red_workflows`, `stuck_runs`, `alerts`, `last_run_at`). Filtros `state`, `ecosystem` e `q`; `limit` (por predefinição `api.default_limit`, no máximo `api.max_limit`); `cursor` (o `next_cursor` da página anterior, assinado e válido durante `api.cursor_ttl_seconds`); `fields=a,b` ou `profile=compact` para linhas mais curtas. A resposta é comprimida com gzip quando o cliente o aceita.
+- `/api/v1/openapi.json`: uma descrição OpenAPI 3 leve dessas duas rotas.
+- As duas rotas próprias respondem um erro como `{"error": "bad_request", "code": "api.bad_cursor", "message": "..."}`: `error` e `code` são estáveis, `message` segue o idioma de `?lang=`. Códigos: api.bad_cursor, api.bad_limit, api.unknown_field, api.bad_profile. Tudo é só de leitura: não há nenhuma escrita sob `/api/v1/`. A forma está congelada na secção `v1_endpoints` do contrato e verifica-se com `python tools/check_api_contract.py --v1` contra um monitor com `api.v1_enabled` ativado.
+
 ## Streams
 
 - `GET /api/ai/stream` (os alertas) e `GET /api/live-events/stream` (os eventos do webhook, `live.sse.enabled`) são eventos enviados pelo servidor, só de leitura e desligados por predefinição; veja [AI_ALERTS_por.md](AI_ALERTS_por.md) e [WEBHOOK_por.md](WEBHOOK_por.md).

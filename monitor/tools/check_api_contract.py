@@ -6,6 +6,7 @@
     python tools/check_api_contract.py                       the complete edition on 127.0.0.1:8765
     python tools/check_api_contract.py --lite                the lite edition on 127.0.0.1:8766
     python tools/check_api_contract.py --url http://host:8765 --token-file token.txt
+    python tools/check_api_contract.py --v1                   the routes under /api/v1/ (the monitor must have api.v1_enabled on)
 
 It only reads (GET, plus one POST to a path that does not exist), asks GitHub for nothing and prints one line per failure and a last line `CONTRACT=PASS` or `CONTRACT=FAIL`.
 The exit code is 0 when it passes. A key the contract does not list is allowed (an answer may grow); a key it lists must be there with its type.
@@ -94,6 +95,20 @@ def check_fed(call, owner, contract=None):
     return problems
 
 
+def check_v1(call, contract=None):
+    """The routes of the read API under /api/v1/ (they answer only while `api.v1_enabled` is on): the status and the keys of each one, as `check_fed` does for the routes that need data."""
+    contract = contract or json.loads(CONTRACT.read_text(encoding="utf-8"))
+    problems = []
+    for row in contract.get("v1_endpoints", []):
+        status, body = call("GET", row["path"])
+        label = f"GET {row['path']}"
+        if status != row["status"]:
+            problems.append(f"{label}: status {status}, the contract says {row['status']}")
+        else:
+            problems += keys_problems(label, body, row["keys"])
+    return problems
+
+
 def make_caller(url, token=""):
     parts = urlsplit(url)
     name, port = parts.hostname, parts.port or (443 if parts.scheme == "https" else 80)
@@ -123,12 +138,13 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description="Check a running monitor against the frozen contract of its read endpoints.")
     parser.add_argument("--url", help="address of the monitor (default http://127.0.0.1:8765, or :8766 with --lite)")
     parser.add_argument("--lite", action="store_true", help="the lite edition")
+    parser.add_argument("--v1", action="store_true", help="check the routes under /api/v1/ instead (the monitor must have api.v1_enabled on)")
     parser.add_argument("--token-file", help="a file with the access token of the network mode (never a token on the command line)")
     args = parser.parse_args(argv)
     url = args.url or ("http://127.0.0.1:8766" if args.lite else "http://127.0.0.1:8765")
     token = Path(args.token_file).read_text(encoding="utf-8").strip() if args.token_file else ""
     try:
-        problems = check(make_caller(url, token), "lite" if args.lite else "complete")
+        problems = check_v1(make_caller(url, token)) if args.v1 else check(make_caller(url, token), "lite" if args.lite else "complete")
     except OSError as error:
         print(f"no answer from {url}: {error}")
         print("CONTRACT=FAIL")

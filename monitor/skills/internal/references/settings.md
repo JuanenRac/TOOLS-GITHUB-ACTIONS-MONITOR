@@ -115,6 +115,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `analytics.min_samples` | `-` | analytics | Least samples |
 | `analytics.slow_factor` | `-` | analytics | Slower than usual |
 | `analytics.steps` | `-` | analytics | Time per step |
+| `api.cursor_ttl_seconds` | `900` | advanced | Seconds a page cursor lives |
+| `api.default_limit` | `50` | advanced | Items per page |
+| `api.gzip_min_bytes` | `1024` | advanced | Smallest answer to compress (bytes) |
+| `api.max_limit` | `200` | advanced | Most items per page |
+| `api.v1_enabled` | `false` | advanced | Read API under /api/v1/ |
 | `audit_dir` | `-` | paths | Folder of audit files |
 | `audit_log.enabled` (secure) | `-` | sentinel | Log of actions on |
 | `audit_log.maintainers_can_read` (secure) | `-` | sentinel | Maintainers may read it |
@@ -132,6 +137,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `central.source` (secure) | `"off"` | quota | Central panel as a base line |
 | `ci.automation_counts` | `false` | sentinel | Count automation workflows |
 | `ci.count_fork_runs` | `false` | sentinel | Count runs of forks |
+| `ci.disabled_apart` | `true` | sentinel | A workflow switched off by hand is not red |
 | `ci.dormant_repos` | `true` | sentinel | Count dormant and inactive repositories apart |
 | `ci.extra_branches` | `[]` | sentinel | Maintenance branches to watch |
 | `ci.failed_jobs.enabled` | `false` | sentinel | Show which jobs of a red run failed |
@@ -553,6 +559,13 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ui.screen3_orientation` | `"auto"` | general | Orientation of screen 3 |
 | `ui.screen3_tabs` | `""` | general | Tabs of screen 3 |
 | `updates.check` | `true` | basic | Tell me when a newer version is published |
+| `upstream.enabled` | `false` | advanced | Follow the original repository of each fork |
+| `upstream.forks_per_request` | `8` | advanced | Forks per request |
+| `upstream.news_days` | `7` | advanced | Days a new release counts as news |
+| `upstream.notify` | `false` | advanced | Tell me when the original is red or has a new release |
+| `upstream.refresh_hours` | `12` | advanced | Hours between two readings of a fork |
+| `upstream.repos` | `[]` | advanced | Forks to follow |
+| `upstream.requests_per_hour` | `6` | advanced | Requests an hour |
 | `watchdog_max_abandoned` | `8` | polling | Most calls to GitHub left hanging |
 | `watchdog_minutes` | `10` | polling | Restart a stuck refresh after |
 | `webhook.enabled` (secure) | `false` | webhook | Receiver on |

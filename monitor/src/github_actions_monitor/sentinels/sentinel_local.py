@@ -42,6 +42,7 @@ from github_actions_monitor.sentinels import readiness
 from github_actions_monitor.data_pipeline import paging
 from github_actions_monitor.data_pipeline import redrule
 from github_actions_monitor.data_pipeline import fork_ci
+from github_actions_monitor.data_pipeline import upstream
 from github_actions_monitor.sentinels import roadmap_a9
 from github_actions_monitor.sentinels import sentinel_ai
 import sys as _sys
@@ -122,6 +123,7 @@ def sentinel_config(config):
     merged["surface"] = surface.settings(config)   # merged key by key: a partial block keeps the defaults of the rest
     merged["hygiene"] = hygiene_settings(config)
     merged["readiness"] = readiness.settings(config)
+    merged["upstream"] = upstream.settings(config)      # follow the original repository of each fork (off by default)
     return merged
 
 
@@ -818,6 +820,7 @@ def compute_snapshot(inp):
     resolved = inp.get("a2_resolved") or {}
     extra = a2_resolved_runs(resolved, branches, now.timestamp(), ttl)
     red = red_workflows({r: runs + extra.get(r, []) for r, runs in runs_by_repo.items()}, branches)
+    red, disabled_apart = redrule.split_disabled(red, perms)      # a workflow switched off by hand is not red (ci.disabled_apart)
     jobs_known = inp.get("failed_jobs") or {}
     for row in red:      # which jobs of the run failed, when ci.failed_jobs read them (causes.py)
         found = jobs_known.get(f"{row['repo']}|{row.get('run_id')}")
@@ -894,7 +897,7 @@ def compute_snapshot(inp):
         "rate": rate, "min_rate": cfg["min_rate_remaining"], "errors": errors, "ai": inp.get("ai"),
         "a1": {"stuck": stuck, "issues": issues, "stuck_minutes": data.get("stuck_minutes"), "ghosts": list(data.get("ghosts") or [])[:200],
                "ghost_days": ((data.get("figures") or {}).get("ghost_days"))},
-        "a2": {"red": red, "groups": causes.groups(red), "workflows_checked": sum(1 for r in repos for _ in {workflow_key(x) for x in runs_by_repo.get(r, []) if not redrule.is_dynamic(x)}),
+        "a2": {"red": red, "disabled_by_hand": [{"repo": r["repo"], "workflow": r["workflow"]} for r in disabled_apart][:200], "groups": causes.groups(red), "workflows_checked": sum(1 for r in repos for _ in {workflow_key(x) for x in runs_by_repo.get(r, []) if not redrule.is_dynamic(x)}),
                "services": redrule.service_rows([x for r in repos for x in runs_by_repo.get(r, [])])[:200],
                "unchecked": a2_unchecked(runs_by_repo), "full_sample": a2_full_sample(runs_by_repo, caps),
                "inconclusive": a2_repos, "inconclusive_workflows": a2_labels(a2_details), "inconclusive_details": a2_details},
@@ -931,6 +934,7 @@ def compute_snapshot(inp):
     s["a3"]["level"] = "bad" if (s["a3"]["secret_total"] or s["a3"]["high_repos"]) else ("warn" if (s["a3"]["codeql_total"] or s["a3"]["dependabot_total"]) else "ok")
     s["a4"]["level"] = "warn" if any(p["major"] or p["conflict"] for p in dep_prs) else ("info" if dep_prs else "ok")
     s["a5"]["level"] = "warn" if (candidates or s["a5"]["pending_sign"]) else ("info" if green else "ok")
+    s["upstream"] = upstream.build(inp.get("upstream") or {}, forks, cfg.get("upstream") or upstream.settings({}), now.timestamp(), inp.get("upstream_calls") or 0)
     s["a6"]["level"] = "warn" if any(r["problems"] for r in hyg_rows) else ("info" if pending else ("unknown" if any(r["unknown"] for r in hyg_rows) else "ok"))
     s["a7"]["level"] = "warn" if ((rate and rate["remaining"] < cfg["min_rate_remaining"]) or any(b["level"] != "ok" for b in s["a7"]["budget"])) else "ok"
     s["a8"]["level"] = "info"
@@ -1007,6 +1011,7 @@ class Sentinel:
         self.ai_store = sentinel_ai.Store()
         self.lock = threading.RLock()
         self.repo_info, self.alerts, self.perms, self.unreleased = {}, {}, {}, {}
+        self.upstream, self.upstream_calls = {}, []      # fork -> what its original repository shows (data_pipeline/upstream.py); the times of the requests of the last hour
         self.org_files = {"at": 0.0, "names": None}      # root files of the `.github` repository of the owner (the defaults of the organisation); None = not read
         self.local_versions = {}
         self.pins_cache = {"at": 0.0, "value": None}
@@ -1043,6 +1048,7 @@ class Sentinel:
             self.repo_info, self.alerts, self.perms = mapping("repo_info"), mapping("alerts"), mapping("perms")
             self.unreleased, self.saved_at = mapping("unreleased"), cached.get("saved")
             self.local_versions = mapping("local_versions")
+            self.upstream = mapping("upstream")
             if isinstance(cached.get("org_files"), dict) and isinstance(cached["org_files"].get("names"), list):
                 self.org_files = {"at": float(cached["org_files"].get("at") or 0.0), "names": [str(n) for n in cached["org_files"]["names"]][:400]}
             self.surface.load(cached.get("surface"))
@@ -1259,6 +1265,7 @@ class Sentinel:
                 own = [w for w in wfs if not str(w.get("path") or "").startswith("dynamic/")]      # the workflows GitHub makes for itself (Dependabot, the dependency graph, Copilot, the default CodeQL) have no file: they are not the owner's to enable
                 res["wf_disabled"] = [w.get("name") for w in own if w.get("state") == "disabled_inactivity"]
                 res["wf_manual"] = [w.get("name") for w in own if w.get("state") == "disabled_manually"]   # same call: no extra request
+                res["wf_manual_files"] = [str(w.get("path") or "").rsplit("/", 1)[-1] for w in own if w.get("state") == "disabled_manually" and w.get("path")]
             except Exception as error:
                 if not is_denied(error):
                     raise
@@ -1318,6 +1325,36 @@ class Sentinel:
                 self.org_files = {**self.org_files, "at": time.time() - self.cfg["hygiene_seconds"] + 600}
         return True
 
+    def _upstream_requests(self):
+        with self.lock:
+            self.upstream_calls = [t for t in self.upstream_calls if t > time.time() - 3600]
+            return len(self.upstream_calls)
+
+    def _upstream_tick(self):
+        """Follow the original repository of the forks (upstream.enabled, off by default): one GraphQL request for a few forks, at most `upstream.requests_per_hour` an hour, the least recently read first."""
+        cfg = self.cfg["upstream"]
+        if not cfg["enabled"] or not self.repo_info or self._budget() <= 0:
+            return False
+        with self.lock:
+            forks = [r for r, i in self.repo_info.items() if (i or {}).get("fork")]
+        names = upstream.pick_due(forks, self.upstream, time.time(), cfg, self._upstream_requests())
+        if not names:
+            return False
+        with self.lock:
+            self.upstream_calls.append(time.time())
+        try:
+            with self.lock:
+                work = dict(self.upstream)
+            done = upstream.read(lambda text: self._gh("api", "graphql", "-f", "query=" + text, retries=1)["data"], toolconfig.github_owner(), names, time.time(), work)
+            with self.lock:
+                self.upstream.update(work)
+            if done:
+                self.ok("upstream")
+            return bool(done)
+        except Exception as error:
+            self.error("upstream", error)
+            return False
+
     def _budget(self):
         left = self.cfg["budget_per_hour"] - self.calls_last_hour()
         rate = (self.ctx["data_fn"]() or {}).get("rate")
@@ -1359,6 +1396,7 @@ class Sentinel:
         did = self._surface_tick() or did
         did = self._lint_remote_tick() or did
         did = self._a2_resolve_tick() or did
+        did = self._upstream_tick() or did
         did = self._failed_jobs_tick() or did
         if did or self.dirty:
             self.dirty = False
@@ -1585,7 +1623,7 @@ class Sentinel:
 
     def _persist(self):
         with self.lock:
-            self._save(CACHE_FILE, {"saved": time.time(), "repo_info": self.repo_info, "alerts": self.alerts, "perms": self.perms, "unreleased": self.unreleased, "local_versions": self.local_versions, "surface": self.surface.dump(), "a2_resolved": self.a2_resolved, "org_files": self.org_files})
+            self._save(CACHE_FILE, {"saved": time.time(), "repo_info": self.repo_info, "alerts": self.alerts, "perms": self.perms, "unreleased": self.unreleased, "local_versions": self.local_versions, "surface": self.surface.dump(), "a2_resolved": self.a2_resolved, "org_files": self.org_files, "upstream": self.upstream})
         snap = self.snapshot()
         self.last_snap = snap
         self._export_ci_red(snap)
@@ -1642,7 +1680,7 @@ class Sentinel:
                 "api": {"calls_last_hour": len([t for t in self.calls if t > time.time() - 3600]), "budget_per_hour": self.cfg["budget_per_hour"]},
                 "sample_caps": {"runs_per_repo": self.config.get("runs_per_repo"), "cold_runs_per_repo": self.config.get("cold_runs_per_repo")},
                 "surface_paused": self.surface_paused, "a2_resolved": dict(self.a2_resolved), "a2_pending_reason": self.a2_reason, "failed_jobs": dict(self.failed_jobs), "local_versions": dict(self.local_versions), "pins": pins,
-                "lint": self._lint(repos), "org_files": self.org_files["names"] if self.cfg["hygiene"]["community_fallback"] else None,
+                "upstream": dict(self.upstream), "upstream_calls": self._upstream_requests(), "lint": self._lint(repos), "org_files": self.org_files["names"] if self.cfg["hygiene"]["community_fallback"] else None,
             }
         return compute_snapshot(inp)
 
