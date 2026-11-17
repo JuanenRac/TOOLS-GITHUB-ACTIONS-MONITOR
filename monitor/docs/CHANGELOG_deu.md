@@ -13,6 +13,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **Das Zugriffstoken reist standardmäßig nicht mehr in der Adresse (`listen.query_access` ist jetzt aus)**: Im Netzwerkmodus öffnete die Adresse mit `?access=` die Sitzung, aber das Token blieb im Verlauf, in den Protokollen und im `Referer`. Die Einstellung ist jetzt aus, solange du sie nicht einschaltest (Standardwert, Beispieldatei und Hilfe der Einstellungen sagen es); die Sitzung wird mit `POST /api/access` (Token im Body) oder mit dem Header `X-Monitor-Access` geöffnet. Eine Installation, die `listen.query_access` selbst geschrieben hat, behält ihren Wert; wer sich auf den alten Standard verlassen hat und den Monitor über eine Adresse mit `?access=` öffnet, muss die Einstellung einschalten oder `POST /api/access` verwenden. Die Umgebungsvariable `MONITOR_QUERY_ACCESS=1` schaltet sie für einen Dienst ein.
 
+### Behoben
+
+- **`lint_workflows.py --remote` meldet ein Repository, das nicht gelesen werden konnte, nicht mehr als sauber**: Ein Repository, das es nicht gibt (oder das das Token nicht sieht), eine Organisation mit nicht autorisiertem SSO, fehlendes Netz oder ein Name, der nicht `OWNER/REPO` ist, endeten mit `0 finding(s)` und Exit-Code 0; ein damit geschriebener Schritt vor dem Push lief also durch, ohne einen einzigen Workflow angesehen zu haben. Der Exit-Code ist in diesen Fällen jetzt 2 (ein Fund ergibt weiterhin 1), der Grund steht auf der Fehlerausgabe (ein nicht vorhandenes Repository wird von einem ohne Workflows unterschieden), und `.` und `..` werden nicht mehr als Eigentümer- oder Repository-Name angenommen. `--json` behält seine Form. `docs/CONSOLE_TOOLS.md` und die Übersetzungen sagen es.
+
 ## [2.0.8]
 
 ### Sicherheit

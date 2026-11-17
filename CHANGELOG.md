@@ -14,6 +14,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **The access token no longer travels in the address by default (`listen.query_access` is now off)**: in the network mode the `?access=` address opened the session, but the token stayed in the history, the logs and the `Referer`. The setting is now off unless you turn it on (the default, the example file and the Settings help say so); the session is opened by `POST /api/access` (the token in the body) or by the header `X-Monitor-Access`. An installation that wrote `listen.query_access` itself keeps its value; one that relied on the old default and opens the monitor from an address with `?access=` has to turn the setting on, or use `POST /api/access`. The environment variable `MONITOR_QUERY_ACCESS=1` turns it on for a service.
 
+### Fixed
+
+- **`lint_workflows.py --remote` no longer reports a repository it could not read as clean**: a repository that does not exist (or that the token cannot see), an organization whose SSO is not authorised, no network, or a name that is not `OWNER/REPO` ended with `0 finding(s)` and exit code 0, so a pre-push step written with it passed without having looked at a single workflow. The exit code is now 2 in those cases (a finding still gives 1), the reason is printed on the standard error (a repository that is not there is told apart from one that simply has no workflows) and `.` and `..` are no longer accepted as an owner or repository name. `--json` keeps its shape. `docs/CONSOLE_TOOLS.md` and its translations say so.
+
 ## [2.0.8]
 
 ### Security

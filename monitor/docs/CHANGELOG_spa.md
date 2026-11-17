@@ -13,6 +13,10 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - **El token de acceso ya no viaja en la dirección por defecto (`listen.query_access` ahora está desactivado)**: en el modo red la dirección `?access=` abría la sesión, pero el token quedaba en el historial, los registros y el `Referer`. El ajuste está desactivado salvo que lo actives (lo dicen el valor por defecto, el fichero de ejemplo y la ayuda de Ajustes); la sesión se abre con `POST /api/access` (el token en el cuerpo) o con la cabecera `X-Monitor-Access`. Una instalación que escribió `listen.query_access` conserva su valor; la que dependía del valor antiguo y abre el monitor desde una dirección con `?access=` tiene que activar el ajuste o usar `POST /api/access`. La variable de entorno `MONITOR_QUERY_ACCESS=1` lo activa para un servicio.
 
+### Corregido
+
+- **`lint_workflows.py --remote` ya no da por limpio un repositorio que no pudo leer**: un repositorio que no existe (o que el token no ve), una organización con SSO sin autorizar, la falta de red o un nombre que no es `OWNER/REPO` terminaban con `0 finding(s)` y código de salida 0, de modo que un paso previo al push escrito con él pasaba sin haber mirado ningún workflow. Ahora el código de salida es 2 en esos casos (un hallazgo sigue dando 1), el motivo sale por la salida de error (un repositorio que no está se distingue de uno que simplemente no tiene workflows) y `.` y `..` ya no se aceptan como propietario ni como nombre de repositorio. `--json` conserva su forma. `docs/CONSOLE_TOOLS.md` y sus traducciones lo dicen.
+
 ## [2.0.8]
 
 ### Seguridad
