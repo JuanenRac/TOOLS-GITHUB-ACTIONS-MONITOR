@@ -13,6 +13,10 @@
 
 - **访问令牌默认不再出现在地址中(`listen.query_access` 现在默认关闭)**:在网络模式下,带 `?access=` 的地址会打开会话,但令牌会留在历史记录、日志和 `Referer` 中。该设置现在默认关闭,除非你开启它(默认值、示例文件和设置帮助都已说明);会话通过 `POST /api/access`(正文中的令牌)或请求头 `X-Monitor-Access` 打开。自己写过 `listen.query_access` 的安装会保留其值;依赖旧默认值并通过带 `?access=` 的地址打开监视器的,需要开启该设置或改用 `POST /api/access`。环境变量 `MONITOR_QUERY_ACCESS=1` 可为服务开启它。
 
+### 新增
+
+- **来自 Slack 和 Discord 的只读命令(设置 `chatops.enabled`,默认关闭)**:允许的频道中的人可以向监视器询问 `help`、`status`、`alerts`、`red`、`queue` 或 `score`,并得到只有自己能看到、不含提及、且在 `chatops.links` 开启(默认)时除了按原样显示的名称旁的仓库地址外不含链接的简短回复(`chatops.show_repo_names` 默认为 `all`,私有仓库的名称也会到达名单所允许的每个频道和用户;`public` 和 `none` 会隐藏它们)。命令列表是封闭的(`chatops.allowed_words` 只能缩小它),每条命令只读取监视器已经拥有的内容:没有任何命令会向 GitHub 写入、执行操作、更改设置或读取密钥。`POST /api/chatops/slack` 校验 Slack 的 `v0` 签名(时间和正文的 HMAC-SHA256,最多五分钟前,密钥只放在 `chatops.slack.signing_secret_env` 所指的环境变量中);`POST /api/chatops/discord` 用 `chatops.discord.public_key_env` 所指的公钥校验交互的 Ed25519 签名;两者都会应答平台的验证挑战,绝不两次接受同一签名,拒绝超过 16 KB 的正文,并按地址、用户、频道和分钟统计请求。名单 `chatops.allowed_teams`、`chatops.allowed_channels` 和 `chatops.allowed_users` 是必需的(都为空时不会执行任何命令),所有外部文本都会被清理、截断和转义,每条命令都会在操作日志中留下一行,只记录聊天的 ID,绝不记录文本。设置的 Webhook 标签页中的一个区块、八种语言的指南(`docs/CHATOPS.md`),以及使用 RFC 8032 向量的测试。
+
 ## [2.0.8]
 
 ### 安全

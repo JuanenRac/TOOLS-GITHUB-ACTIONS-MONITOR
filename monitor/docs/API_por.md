@@ -35,3 +35,4 @@ Aquilo em que um script, um ecrã de parede ou um cliente móvel pode confiar. D
 ## Streams
 
 - `GET /api/ai/stream` (os alertas) e `GET /api/live-events/stream` (os eventos do webhook, `live.sse.enabled`) são eventos enviados pelo servidor, só de leitura e desligados por predefinição; veja [AI_ALERTS_por.md](AI_ALERTS_por.md) e [WEBHOOK_por.md](WEBHOOK_por.md).
+- `POST /api/chatops/slack` e `POST /api/chatops/discord` recebem os comandos só de leitura de um chat (desligados por defeito, `chatops.enabled`). Não usam o token de acesso: a prova é a assinatura da plataforma, e um pedido sem assinatura válida é recusado antes de se ler o que quer que seja. Ver [CHATOPS_por.md](CHATOPS_por.md).

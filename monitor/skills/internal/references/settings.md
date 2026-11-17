@@ -135,6 +135,24 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `cache.etag.ttl_hours` | `24` | cache | Entry lifetime |
 | `central.max_age_minutes` | `120` | quota | Minutes before the central panel is behind |
 | `central.source` (secure) | `"off"` | quota | Central panel as a base line |
+| `chatops.allowed_channels` (secure) | `[]` | webhook | Allowed channels |
+| `chatops.allowed_teams` (secure) | `[]` | webhook | Allowed teams or servers |
+| `chatops.allowed_users` (secure) | `[]` | webhook | Allowed users |
+| `chatops.allowed_words` (secure) | `["help", "status", "alerts", "red", "queue", "score"]` | webhook | Commands the chat may run |
+| `chatops.discord.enabled` (secure) | `false` | webhook | Discord on |
+| `chatops.discord.public_key_env` (secure) | `"MONITOR_DISCORD_PUBLIC_KEY"` | webhook | Environment variable with the Discord public key |
+| `chatops.discord.state` | `-` | webhook | Discord public key |
+| `chatops.enabled` (secure) | `false` | webhook | Chat commands (Slack and Discord) |
+| `chatops.links` (secure) | `true` | webhook | Link to the repository |
+| `chatops.max_age_seconds` | `300` | webhook | Oldest request accepted |
+| `chatops.max_rows` | `8` | webhook | Rows per answer |
+| `chatops.rate_per_channel_per_minute` | `20` | webhook | Commands per channel per minute |
+| `chatops.rate_per_minute` | `60` | webhook | Commands per minute (whole chat) |
+| `chatops.rate_per_user_per_minute` | `6` | webhook | Commands per user per minute |
+| `chatops.show_repo_names` (secure) | `"all"` | webhook | Repository names in the chat |
+| `chatops.slack.enabled` (secure) | `false` | webhook | Slack on |
+| `chatops.slack.signing_secret_env` (secure) | `"MONITOR_SLACK_SIGNING_SECRET"` | webhook | Environment variable with the Slack signing secret |
+| `chatops.slack.state` | `-` | webhook | Slack signing secret |
 | `ci.automation_counts` | `false` | sentinel | Count automation workflows |
 | `ci.count_fork_runs` | `false` | sentinel | Count runs of forks |
 | `ci.disabled_apart` | `true` | sentinel | A workflow switched off by hand is not red |

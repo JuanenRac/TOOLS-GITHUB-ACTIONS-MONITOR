@@ -13,6 +13,10 @@
 
 - **アクセストークンは既定でアドレスに載らなくなりました(`listen.query_access` は既定でオフ)**: ネットワークモードでは `?access=` 付きのアドレスでセッションが開きましたが、トークンが履歴・ログ・`Referer` に残っていました。この設定は、オンにしない限りオフです(既定値、サンプルファイル、設定のヘルプにも明記)。セッションは `POST /api/access`(本文のトークン)またはヘッダー `X-Monitor-Access` で開きます。`listen.query_access` を自分で書いた環境ではその値が保たれます。以前の既定値に頼って `?access=` 付きのアドレスからモニターを開いていた場合は、設定をオンにするか `POST /api/access` を使ってください。環境変数 `MONITOR_QUERY_ACCESS=1` でサービス向けにオンにできます。
 
+### 追加
+
+- **Slack と Discord からの読み取り専用コマンド(設定 `chatops.enabled`、既定ではオフ)**: 許可されたチャンネルの人は、モニターに `help`、`status`、`alerts`、`red`、`queue`、`score` を尋ね、本人だけに見える、メンションがなく、`chatops.links` がオン(既定)のときは名前がそのまま表示されたリポジトリのアドレス以外のリンクもない短い返答(`chatops.show_repo_names` の既定は `all` で、非公開リポジトリの名前も、リストで許可したすべてのチャンネルとユーザーに届きます。`public` と `none` は隠します)を受け取れます。コマンドのリストは固定で(`chatops.allowed_words` は狭めることしかできません)、どのコマンドもモニターがすでに持っているものを読むだけです。GitHub への書き込み、アクションの実行、設定の変更、シークレットの読み取りを行うものはありません。`POST /api/chatops/slack` は Slack の署名 `v0`(時刻と本文の HMAC-SHA256、最大 5 分前まで、シークレットは `chatops.slack.signing_secret_env` が指す環境変数にのみ置く)を検証し、`POST /api/chatops/discord` は `chatops.discord.public_key_env` が指す公開鍵でインタラクションの Ed25519 署名を検証します。どちらもプラットフォームのチャレンジに応答し、同じ署名を二度受け付けず、16 KB を超える本文を拒否し、アドレス・ユーザー・チャンネル・分ごとにリクエストを数えます。リスト `chatops.allowed_teams`、`chatops.allowed_channels`、`chatops.allowed_users` は必須で(どれもなければコマンドは実行されません)、外部由来のテキストはすべて整形・短縮・エスケープされ、各コマンドはチャットの ID だけを(本文は残さず)アクションの記録に 1 行残します。設定の Webhook タブのブロック、8 言語のガイド(`docs/CHATOPS.md`)、RFC 8032 のベクトルを使ったテストを追加しました。
+
 ## [2.0.8]
 
 ### セキュリティ

@@ -129,6 +129,9 @@ NOTES = {
     "/api/statusbar": ("GET", "the data of the status bar of the page"),
     "/api/tags": ("GET", "tags and releases of the repositories"),
     "/api/webhook": ("POST", "the incoming webhook of GitHub (signed with HMAC)"),
+    "/api/chatops": ("POST", "read only commands from a chat; the paths below are its routes"),
+    "/api/chatops/slack": ("POST", "a slash command of Slack, read only (signed with the v0 HMAC of Slack, off by default)"),
+    "/api/chatops/discord": ("POST", "an interaction of Discord, read only (signed with Ed25519, off by default)"),
     "/api/welcome": ("GET,POST", "the first-run welcome flag"),
 }
 #: signal id -> what it says (every id that signals.py makes must be here; the ones of the panels of the Sentinel are `sentinel.<panel>`)
