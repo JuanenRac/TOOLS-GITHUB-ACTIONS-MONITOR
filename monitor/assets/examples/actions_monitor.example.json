@@ -611,6 +611,15 @@
       "alert_level": "warning"
     }
   },
+  "upstream": {
+    "enabled": false,
+    "refresh_hours": 12,
+    "requests_per_hour": 6,
+    "forks_per_request": 8,
+    "news_days": 7,
+    "notify": false,
+    "repos": []
+  },
   "otlp": {
     "enabled": false,
     "endpoint": "",

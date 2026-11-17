@@ -553,6 +553,13 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ui.screen3_orientation` | `"auto"` | general | Orientation of screen 3 |
 | `ui.screen3_tabs` | `""` | general | Tabs of screen 3 |
 | `updates.check` | `true` | basic | Tell me when a newer version is published |
+| `upstream.enabled` | `false` | advanced | Follow the original repository of each fork |
+| `upstream.forks_per_request` | `8` | advanced | Forks per request |
+| `upstream.news_days` | `7` | advanced | Days a new release counts as news |
+| `upstream.notify` | `false` | advanced | Tell me when the original is red or has a new release |
+| `upstream.refresh_hours` | `12` | advanced | Hours between two readings of a fork |
+| `upstream.repos` | `[]` | advanced | Forks to follow |
+| `upstream.requests_per_hour` | `6` | advanced | Requests an hour |
 | `watchdog_max_abandoned` | `8` | polling | Most calls to GitHub left hanging |
 | `watchdog_minutes` | `10` | polling | Restart a stuck refresh after |
 | `webhook.enabled` (secure) | `false` | webhook | Receiver on |
