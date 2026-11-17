@@ -147,7 +147,10 @@ class TheScreensInABrowser(unittest.TestCase):
             with i18n.use_language(lang):
                 self.assertEqual(report["title"], i18n.t("ui.scr_title_" + kind), (kind, lang))
             self.assertEqual(report["lang"], i18n.HTML_LANG[lang], (kind, lang))
-            self.assertIn("lang=" + lang, report["search"], (kind, lang))      # the page reloaded once with the language in the address
+            if lang != "en":      # the monitor of the test speaks English: a saved English needs no reload, any other language reloads the page once with the language in the address
+                self.assertIn("lang=" + lang, report["search"], (kind, lang))
+            else:
+                self.assertNotIn("lang=", report["search"], (kind, lang))
             self.assertIn("pref=" + lang, report["search"], (kind, lang))      # and kept the rest of the parameters
             if lang != "en":
                 self.assert_no_english_left(report["text"], lang, kind)
