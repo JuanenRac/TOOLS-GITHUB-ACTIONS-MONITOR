@@ -134,6 +134,7 @@ DEFAULTS = {
                 "model": {"enabled": False, "jobs_per_cycle": 10, "thirdparty_labels": ["blacksmith", "buildjet", "namespace-profile", "depot", "warpbuild", "ubicloud", "runs-on", "actuated", "cirrus-runners"],
                           "large_labels": [], "self_labels": [], "queue_warn_minutes": 20, "runaway_runs_per_hour": 20, "runaway_ignore_events": ["pull_request", "pull_request_target"],
                           "thirdparty_usd_per_minute": 0.0, "alerts": True, "alert_level": "warning"}},      # OFF: kinds of runner, queue and cost by kind, runaway workflows, self-hosted queues (runner_model.py)
+    "upstream": {"enabled": False, "refresh_hours": 12, "requests_per_hour": 6, "forks_per_request": 8, "news_days": 7, "notify": False, "repos": []},      # OFF: follow the original repository of each fork, its CI and its latest release (data_pipeline/upstream.py)
     "api": {"v1_enabled": False, "default_limit": 50, "max_limit": 200, "cursor_ttl_seconds": 900, "gzip_min_bytes": 1024},      # OFF: the read API under /api/v1/ (app/api_v1.py)
     "otlp": {"enabled": False, "endpoint": "", "interval_seconds": 60},       # OFF: OpenTelemetry export to a collector you name (otlp.py)
     "organizations": {"discover": False},                                    # OFF: list the organisations of the login (orgs.py)
