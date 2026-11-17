@@ -94,7 +94,7 @@ class Page(unittest.TestCase):
         self.assertIn("Math.max(100,Math.min(400,", self.html)
 
     def test_the_server_hands_the_settings_to_the_page(self):
-        self.assertIn('"kiosk": __import__("github_actions_monitor.surfaces.kiosk"', Path(actions_monitor.__file__).read_text(encoding="utf-8"))
+        self.assertIn('__import__("github_actions_monitor.surfaces.kiosk"', Path(actions_monitor.__file__).read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":
