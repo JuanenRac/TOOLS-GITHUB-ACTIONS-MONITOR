@@ -97,10 +97,11 @@ def plan(todo, red, limit, used):
         return list(todo), []
     left = max(0, limit - used)
     reserve = max(1, limit // 10)
+    room_red = max(0, limit + reserve - used)      # the reserve of the reds belongs to the HOUR: what the hour has already spent (the reds of the cycles before included) is not given again every cycle
     ordered = [t for t in todo if t[0] in red] + [t for t in todo if t[0] not in red]
     kept, dropped = [], []
     for item in ordered:
-        if item[0] in red and len(kept) < left + reserve:
+        if item[0] in red and len(kept) < room_red:
             kept.append(item)
         elif len(kept) < left:
             kept.append(item)

@@ -256,10 +256,13 @@ def split_disabled(red, perms):
     to its failure, and its last run stays red for ever. A workflow GitHub switched off for inactivity is not here: that one is not a decision of the owner. Rows are matched by the name of the file."""
     if not POLICY["disabled_apart"]:
         return list(red), []
-    off = {(repo, name) for repo, p in (perms or {}).items() for name in (p or {}).get("wf_manual_files") or []}
+    off = {(repo, name): (p or {}).get("at") for repo, p in (perms or {}).items() for name in (p or {}).get("wf_manual_files") or []}
     kept, apart = [], []
     for row in red:
-        (apart if (row.get("repo"), str(row.get("file") or "").rsplit("/", 1)[-1]) in off else kept).append(row)
+        key = (row.get("repo"), str(row.get("file") or "").rsplit("/", 1)[-1])
+        read_at = off.get(key)
+        ran_after = isinstance(read_at, (int, float)) and (_epoch(row.get("since")) or 0) > read_at      # a switched-off workflow cannot run: a run later than the reading proves it was switched on again
+        (apart if key in off and not ran_after else kept).append(row)
     return kept, apart
 
 
