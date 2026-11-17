@@ -6,8 +6,6 @@ name: Docker audit
 #   gh workflow run docker-audit.yml -f ref=v2.0.8
 # The result is the summary of the run and the artifact `docker-audit-<version>` (one JSON and one text file per check, with every command and its output).
 on:
-  push:
-    branches: [mon70-docker-audit]
   workflow_dispatch:
     inputs:
       ref:
