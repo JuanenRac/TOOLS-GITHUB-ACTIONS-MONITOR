@@ -127,11 +127,13 @@ class TheScreensInABrowser(unittest.TestCase):
             self.clean(report, (path, size))
             self.assertEqual(report["kind"], path.split("/")[2].split("?")[0])
 
-    def test_every_language_fits(self):
-        jobs = [(f"/screen/{kind}?lang={lang}", (1920, 1080)) for lang in i18n.LANGS for kind in KINDS]
+    def test_every_language_fits_in_every_size(self):
+        """All 72 combinations of language, size and screen (8 x 3 x 3): German in 4K or Japanese turned are not left to chance."""
+        jobs = [(f"/screen/{kind}?lang={lang}", size) for lang in i18n.LANGS for size in SIZES.values() for kind in KINDS]
+        self.assertEqual(len(jobs), 72)
         for (path, size), report in zip(jobs, self.many(jobs)):
             lang, kind = path.split("lang=")[1], path.split("/")[2].split("?")[0]
-            self.clean(report, (kind, lang))
+            self.clean(report, (kind, lang, size))
             with i18n.use_language(lang):
                 self.assertEqual(report["title"], i18n.t("ui.scr_title_" + kind), (kind, lang))
             self.assertEqual(report["lang"], i18n.HTML_LANG[lang])
