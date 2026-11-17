@@ -117,7 +117,9 @@ def human_age(seconds):
 ITEM_RE = re.compile(r"^- \[(?P<kind>[A-Za-z]{1,12}/[A-Za-z]{1,12})\] (?P<name>[^\r\n]{1,200}?): (?P<result>[A-Za-z_]{1,24}(?: x\d{1,4})?(?: \(acknowledged\))?)(?= - )")
 REPO_RE = re.compile(r"[A-Za-z0-9._-]{1,100}")
 WORKFLOW_KEEP = re.compile(r"[^\w .()/+-]")
-WORKFLOW_MAX = 60
+WORKFLOW_MAX = 40
+ALSO_PREFIX = "  Also red because of it (fix this one first): "
+ALSO_MAX = 10
 LINK_RE = re.compile(r"(https://(?:api\.)?github\.com/[A-Za-z0-9._/-]{1,200})\s*$")
 
 
@@ -134,8 +136,14 @@ def closed_lines(lines):
                 continue      # a name that is not a repository name is not copied
             workflow = WORKFLOW_KEEP.sub("", workflow)[:WORKFLOW_MAX].strip()      # the name of a workflow is text that anybody with write access wrote: short, plain, no links, no quotes
             out.append(f"- [{item.group('kind')}] {repo} / {workflow}: {item.group('result')}" + (" " + link.group(1) if link else ""))
-        elif line.startswith("  Also red because of it"):
-            out.append(line)
+        elif line.startswith(ALSO_PREFIX):      # the followers of a cascade: rebuilt field by field like an alert of its own (their names are third-party text too)
+            kept = []
+            for part in line[len(ALSO_PREFIX):].split(", ")[:ALSO_MAX]:
+                repo, sep, workflow = part.strip().partition(" / ")
+                if sep and REPO_RE.fullmatch(repo):
+                    kept.append(f"{repo} / {WORKFLOW_KEEP.sub('', workflow)[:WORKFLOW_MAX].strip()}")
+            if kept:
+                out.append(ALSO_PREFIX + ", ".join(kept))
     return out
 
 
