@@ -3497,5 +3497,20 @@
  "ui.scr_sev_warning": "Aviso",
  "ui.scr_sev_info": "Informação",
  "ui.tab_les": "Lições",
- "ui.tab_rep": "Relatórios"
+ "ui.tab_rep": "Relatórios",
+ "cfg.f.api.v1_enabled": "API de leitura em /api/v1/",
+ "cfg.h.api.v1_enabled": "Desativado por predefinição. Ativado: cada rota de leitura é servida também em /api/v1/ (a mesma resposta, os mesmos papéis e ainda o cabeçalho X-API-Version) e acrescentam-se três rotas: /api/v1/me (quem pergunta, com o papel e as contas da sessão), /api/v1/repos (os repositórios em páginas) e /api/v1/openapi.json. Só leitura: por aí não se pode alterar nada. Desativado: todo o prefixo responde 404.",
+ "cfg.f.api.default_limit": "Itens por página",
+ "cfg.h.api.default_limit": "Predefinição 50. Quantos itens devolve uma lista da API quando o cliente não pede um número com limit=. Não pode ultrapassar o máximo abaixo.",
+ "cfg.f.api.max_limit": "Máximo de itens por página",
+ "cfg.h.api.max_limit": "Predefinição 200. O maior número que um cliente pode pedir com limit=; um maior é recusado com o erro api.bad_limit.",
+ "cfg.f.api.cursor_ttl_seconds": "Segundos de vida do cursor de página",
+ "cfg.h.api.cursor_ttl_seconds": "Predefinição 900. O cursor que acompanha cada página (next_cursor) vai assinado e deixa de valer passados estes segundos; o cliente recomeça então a lista.",
+ "cfg.f.api.gzip_min_bytes": "Menor resposta a comprimir (bytes)",
+ "cfg.h.api.gzip_min_bytes": "Predefinição 1024. Uma resposta das rotas próprias da API (me, repos) é comprimida com gzip quando o cliente o aceita e a resposta tem pelo menos estes bytes. 0 nunca comprime.",
+ "ui.cfg_b_api_v1": "API de leitura v1",
+ "api.bad_cursor": "O cursor de página não é válido, pertence a outra consulta ou expirou; recomece a lista.",
+ "api.bad_limit": "limit tem de ser um número inteiro de 1 a {max}.",
+ "api.unknown_field": "O campo {field} não faz parte da resposta; peça apenas campos que o contrato enumera.",
+ "api.bad_profile": "profile tem de ser full ou compact."
 }

@@ -3497,5 +3497,20 @@
  "ui.scr_sev_warning": "Warning",
  "ui.scr_sev_info": "Info",
  "ui.tab_les": "Lessons",
- "ui.tab_rep": "Reports"
+ "ui.tab_rep": "Reports",
+ "cfg.f.api.v1_enabled": "Read API under /api/v1/",
+ "cfg.h.api.v1_enabled": "Off by default. On: every read route is also served under /api/v1/ (the same answer, the same roles, plus the header X-API-Version), and three routes are added: /api/v1/me (who is asking, with the role and the accounts of the session), /api/v1/repos (the repositories in pages) and /api/v1/openapi.json. Read only: nothing can be changed through it. Off: the whole prefix answers 404.",
+ "cfg.f.api.default_limit": "Items per page",
+ "cfg.h.api.default_limit": "Default 50. How many items a list of the API returns when the client does not ask for a number with limit=. It cannot be above the maximum below.",
+ "cfg.f.api.max_limit": "Most items per page",
+ "cfg.h.api.max_limit": "Default 200. The largest number a client may ask for with limit=; a larger number is refused with the error api.bad_limit.",
+ "cfg.f.api.cursor_ttl_seconds": "Seconds a page cursor lives",
+ "cfg.h.api.cursor_ttl_seconds": "Default 900. The cursor that comes with each page (next_cursor) is signed and stops working after this many seconds; the client then starts the list again.",
+ "cfg.f.api.gzip_min_bytes": "Smallest answer to compress (bytes)",
+ "cfg.h.api.gzip_min_bytes": "Default 1024. An answer of the own routes of the API (me, repos) is compressed with gzip when the client accepts it and the answer has at least this many bytes. 0 never compresses.",
+ "ui.cfg_b_api_v1": "Read API v1",
+ "api.bad_cursor": "The page cursor is not valid, belongs to another query or has expired; start the list again.",
+ "api.bad_limit": "limit must be a whole number from 1 to {max}.",
+ "api.unknown_field": "The field {field} is not part of the answer; ask only for fields the contract lists.",
+ "api.bad_profile": "profile must be full or compact."
 }

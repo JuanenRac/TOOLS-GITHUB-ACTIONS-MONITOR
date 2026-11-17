@@ -24,6 +24,14 @@ What a script, a wall screen or a mobile client can rely on. From 2.0.0 the read
 - `docs/schemas/api_contract.json` lists every read endpoint with its keys and types in each edition and the error codes. The routes that can be read but are not frozen (streams, text, exports of other tools) are listed under `unfrozen` in the same file, each with its reason; `/api/data`, which gives the runs, the repositories and the allowance, is frozen.
 - `python tools/check_api_contract.py` checks a running monitor against it (`--lite`, `--url`, `--token-file`) and prints `CONTRACT=PASS` or `CONTRACT=FAIL`; run it after each upgrade of the monitor or of your client.
 
+## Read API v1 (off by default)
+
+- Turn on `api.v1_enabled` (Settings, Advanced, Read API v1). Every read route is then also served under `/api/v1/` (for example `/api/v1/alerts`): the same answer and the same roles, plus the header `X-API-Version: 1`. While it is off, in the lite edition and for any other version number the prefix answers 404.
+- `/api/v1/me`: who is asking: `mode` (`individual` or `team`), `authenticated`, `user`, and the `role` and `accounts` of the team session (null without one), the `limits` of the lists and the version.
+- `/api/v1/repos`: the repositories the monitor watches, one line each (`repo`, `ecosystem`, `state`, `risk`, `runs_24h`, `failures_24h`, `red_workflows`, `stuck_runs`, `alerts`, `last_run_at`). Filters `state`, `ecosystem` and `q`; `limit` (by default `api.default_limit`, at most `api.max_limit`); `cursor` (the `next_cursor` of the previous page, signed and valid for `api.cursor_ttl_seconds`); `fields=a,b` or `profile=compact` for shorter lines. The answer is compressed with gzip when the client accepts it.
+- `/api/v1/openapi.json`: a light OpenAPI 3 description of those two routes.
+- The two own routes answer an error as `{"error": "bad_request", "code": "api.bad_cursor", "message": "..."}`: `error` and `code` are stable, `message` follows the language of `?lang=`. Codes: api.bad_cursor, api.bad_limit, api.unknown_field, api.bad_profile. Everything is read only: there is no write under `/api/v1/`. The shape is frozen in the section `v1_endpoints` of the contract and is checked with `python tools/check_api_contract.py --v1` against a monitor that has `api.v1_enabled` on.
+
 ## Streams
 
 - `GET /api/ai/stream` (the alerts) and `GET /api/live-events/stream` (the events of the webhook, `live.sse.enabled`) are server-sent events, read only and off by default; see [AI_ALERTS.md](AI_ALERTS.md) and [WEBHOOK.md](WEBHOOK.md).

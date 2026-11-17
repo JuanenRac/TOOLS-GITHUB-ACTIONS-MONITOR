@@ -3497,5 +3497,20 @@
  "ui.scr_sev_warning": "警告",
  "ui.scr_sev_info": "信息",
  "ui.tab_les": "经验教训",
- "ui.tab_rep": "报告"
+ "ui.tab_rep": "报告",
+ "cfg.f.api.v1_enabled": "/api/v1/ 下的只读 API",
+ "cfg.h.api.v1_enabled": "默认关闭。开启后,每条读取路由也会在 /api/v1/ 下提供(相同的响应和角色,另加 X-API-Version 头),并新增三条路由:/api/v1/me(谁在请求,含会话的角色和账户)、/api/v1/repos(分页的仓库列表)和 /api/v1/openapi.json。只读:无法通过它修改任何内容。关闭时整个前缀返回 404。",
+ "cfg.f.api.default_limit": "每页条目数",
+ "cfg.h.api.default_limit": "默认 50。客户端没有用 limit= 指定数量时,API 列表返回的条目数。不能超过下面的最大值。",
+ "cfg.f.api.max_limit": "每页最多条目数",
+ "cfg.h.api.max_limit": "默认 200。客户端可用 limit= 请求的最大数量;更大的数量会被错误 api.bad_limit 拒绝。",
+ "cfg.f.api.cursor_ttl_seconds": "页面游标的有效秒数",
+ "cfg.h.api.cursor_ttl_seconds": "默认 900。随每页附带的游标(next_cursor)带有签名,超过这些秒数后失效;客户端需从头重新读取列表。",
+ "cfg.f.api.gzip_min_bytes": "压缩的最小响应(字节)",
+ "cfg.h.api.gzip_min_bytes": "默认 1024。API 自有路由(me、repos)的响应在客户端接受且响应至少有这么多字节时用 gzip 压缩。0 表示从不压缩。",
+ "ui.cfg_b_api_v1": "只读 API v1",
+ "api.bad_cursor": "页面游标无效、属于另一个查询或已过期;请从头重新读取列表。",
+ "api.bad_limit": "limit 必须是 1 到 {max} 的整数。",
+ "api.unknown_field": "字段 {field} 不属于响应;只请求契约中列出的字段。",
+ "api.bad_profile": "profile 必须是 full 或 compact。"
 }

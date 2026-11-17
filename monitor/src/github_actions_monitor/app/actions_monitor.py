@@ -20,6 +20,7 @@ Repositories with something running, a recent push or a failing last run are ref
 cycle ("hot"); the others only every cold_refresh_seconds with fewer runs, so ~130 repositories
 do not use up the GitHub allowance shared with the agents.
 """
+from github_actions_monitor.app import api_v1
 from github_actions_monitor.app import degraded
 from github_actions_monitor.app import cycle_watch
 import argparse
@@ -133,6 +134,7 @@ DEFAULTS = {
                 "model": {"enabled": False, "jobs_per_cycle": 10, "thirdparty_labels": ["blacksmith", "buildjet", "namespace-profile", "depot", "warpbuild", "ubicloud", "runs-on", "actuated", "cirrus-runners"],
                           "large_labels": [], "self_labels": [], "queue_warn_minutes": 20, "runaway_runs_per_hour": 20, "runaway_ignore_events": ["pull_request", "pull_request_target"],
                           "thirdparty_usd_per_minute": 0.0, "alerts": True, "alert_level": "warning"}},      # OFF: kinds of runner, queue and cost by kind, runaway workflows, self-hosted queues (runner_model.py)
+    "api": {"v1_enabled": False, "default_limit": 50, "max_limit": 200, "cursor_ttl_seconds": 900, "gzip_min_bytes": 1024},      # OFF: the read API under /api/v1/ (app/api_v1.py)
     "otlp": {"enabled": False, "endpoint": "", "interval_seconds": 60},       # OFF: OpenTelemetry export to a collector you name (otlp.py)
     "organizations": {"discover": False},                                    # OFF: list the organisations of the login (orgs.py)
     "finops": {"jobs_per_cycle": 0},
@@ -212,6 +214,7 @@ DISCOVERED = {"at": 0.0, "names": [], "snapshot": {}}
 FORKS = {"known": {}, "kind": None, "kind_at": 0.0, "checked": 0, "kept": 0, "left": 0, "waiting": 0}      # fork_policy: what is known about the CI of each fork (memory only)
 DISCOVERY = {"events": [], "suggestions": []}   # what the last listing of the account brought (memory only)
 HOT_ONLY = {"on": False, "until": 0.0}   # "only hot" switch (memory only): cold repositories are not refreshed until `until` (one long cycle)
+V1_SECRET = os.urandom(32)                # signs the cursors of /api/v1/repos; a new one at every start (a cursor lives minutes)
 LIVE_CONFIG = {}                          # the config the loop runs with, for the HTTP handler
 AUTOSAVE = None                           # report_history.AutoSaver, created in main()
 ETAG = {"cache": None}                    # etagcache.EtagCache (None = plain reads)
@@ -2189,6 +2192,8 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
+        if getattr(self, "v1", False):      # an answer under /api/v1/ says which version of the API it is
+            self.send_header(api_v1.VERSION_HEADER, api_v1.API_VERSION)
         try:
             self.end_headers()
             self.wfile.write(body)
@@ -2638,10 +2643,65 @@ class Handler(BaseHTTPRequestHandler):
             self.json_reply({"ok": False, "error": str(error)[:200]})
 
     def do_GET(self):
+        self.v1 = False
+        if not self.v1_enter():
+            return
         if not self.access_gate() or not auth_http.gate(self, LIVE_CONFIG or DEFAULTS, LITE["on"]):
             return
         with i18n.use_language(self.request_language()):
-            self.handle_get()
+            if self.v1 and self.path.split("?")[0] in api_v1.OWN_ROUTES:
+                self.handle_v1()
+            else:
+                self.handle_get()
+
+    def v1_enter(self):
+        """The prefix `/api/v1/` (app/api_v1.py): 404 while `api.v1_enabled` is off, in the lite edition and for any other version. A route that already exists is served under its old path (so the
+        same roles and the same gate apply to it); the three own routes (me, repos, openapi.json) keep theirs and are answered by `handle_v1`."""
+        path = self.path.split("?")[0]
+        version, rest = api_v1.route_of(path)
+        if version is None:
+            return True
+        if LITE["on"] or version != api_v1.API_VERSION or not api_v1.settings(toolconfig.raw_config())["v1_enabled"]:
+            self.send_response(404)
+            self.end_headers()
+            return False
+        self.v1 = True
+        if path not in api_v1.OWN_ROUTES:
+            self.path = rest + self.path[len(path):]
+        return True
+
+    def handle_v1(self):
+        """GET /api/v1/me, /api/v1/repos and /api/v1/openapi.json: read only, from what the monitor already holds (no call to GitHub). Errors use the envelope of api_v1."""
+        from urllib.parse import parse_qs
+        path = self.path.split("?")[0]
+        cfg = api_v1.settings(toolconfig.raw_config())
+        ask = {k: v[0] for k, v in parse_qs(self.path.partition("?")[2]).items() if v}
+        try:
+            if path == "/api/v1/openapi.json":
+                payload = api_v1.openapi(TOOL_VERSION)
+            elif path == "/api/v1/me":
+                context = getattr(self, "auth_user", None)
+                team = auth_http.active(LIVE_CONFIG or DEFAULTS, LITE["on"])
+                payload = api_v1.me_payload(version=TOOL_VERSION, edition="complete", mode="team" if team else "individual", authenticated=bool(context), user=auth_http.acting_user(self),
+                                            role=context["role"] if context else None, accounts=context["accounts"] if context else None, cfg=cfg)
+            else:
+                payload = api_v1.repos_payload(health_views(), ask, secret=V1_SECRET, now=time.time(), cfg=cfg)
+        except api_v1.ApiError as error:
+            status, body = error.envelope()
+            self.json_reply(body, status)
+            return
+        body, extra = api_v1.maybe_compress(json.dumps(payload).encode("utf-8"), self.headers.get("Accept-Encoding"), cfg["gzip_min_bytes"])
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        for key, value in extra.items():
+            self.send_header(key, value)
+        try:
+            self.end_headers()
+            self.wfile.write(body)
+        except (ConnectionError, OSError):
+            pass
 
     def handle_get(self):
         path = self.path.split("?")[0]

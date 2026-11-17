@@ -611,6 +611,13 @@
       "alert_level": "warning"
     }
   },
+  "api": {
+    "v1_enabled": false,
+    "default_limit": 50,
+    "max_limit": 200,
+    "cursor_ttl_seconds": 900,
+    "gzip_min_bytes": 1024
+  },
   "otlp": {
     "enabled": false,
     "endpoint": "",

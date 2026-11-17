@@ -61,6 +61,12 @@
   {"path": "/api/sentinel/panels", "status": 200, "keys": {"data": {"panels": "list", "act": "number", "watch": "number"}, "error": "any"}},
   {"path": "/api/sentinel/security", "status": 200, "keys": {"data": "any", "error": "any"}}
  ],
+ "v1_endpoints": [
+  {"path": "/api/v1/me", "status": 200, "keys": {"schema": "int", "api_version": "str", "version": "str", "edition": "str", "mode": "str", "authenticated": "bool", "user": "any", "role": "any", "accounts": "any", "limits": {"default_limit": "int", "max_limit": "int"}}},
+  {"path": "/api/v1/repos", "status": 200, "keys": {"schema": "int", "api_version": "str", "total": "int", "limit": "int", "next_cursor": "any", "items": "list"}},
+  {"path": "/api/v1/openapi.json", "status": 200, "keys": {"openapi": "str", "info": "object", "paths": "object", "components": "object"}},
+  {"path": "/api/v1/repos?limit=0", "status": 400, "keys": {"error": "str", "code": "str", "message": "str"}}
+ ],
  "unfrozen": [
   {"path": "/api/ai/stream", "reason": "a stream of server-sent events, not a JSON document"},
   {"path": "/api/screens/data", "reason": "what the wall screens draw: a closed list of fields that follows the screen asked for (?screen=overview|now|sentinels) and is made for those pages, not for other readers"},

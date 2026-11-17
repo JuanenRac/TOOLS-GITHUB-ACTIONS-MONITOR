@@ -3497,5 +3497,20 @@
  "ui.scr_sev_warning": "Avertissement",
  "ui.scr_sev_info": "Info",
  "ui.tab_les": "Leçons",
- "ui.tab_rep": "Rapports"
+ "ui.tab_rep": "Rapports",
+ "cfg.f.api.v1_enabled": "API de lecture sous /api/v1/",
+ "cfg.h.api.v1_enabled": "Désactivé par défaut. Activé : chaque route de lecture est aussi servie sous /api/v1/ (même réponse, mêmes rôles, plus l'en-tête X-API-Version) et trois routes s'ajoutent : /api/v1/me (qui interroge, avec le rôle et les comptes de la session), /api/v1/repos (les dépôts par pages) et /api/v1/openapi.json. Lecture seule : rien ne peut être modifié par là. Désactivé : tout le préfixe répond 404.",
+ "cfg.f.api.default_limit": "Éléments par page",
+ "cfg.h.api.default_limit": "Par défaut 50. Combien d'éléments renvoie une liste de l'API quand le client ne demande pas de nombre avec limit=. Ne peut pas dépasser le maximum ci-dessous.",
+ "cfg.f.api.max_limit": "Maximum d'éléments par page",
+ "cfg.h.api.max_limit": "Par défaut 200. Le plus grand nombre qu'un client peut demander avec limit= ; un nombre supérieur est refusé avec l'erreur api.bad_limit.",
+ "cfg.f.api.cursor_ttl_seconds": "Durée de vie du curseur de page en secondes",
+ "cfg.h.api.cursor_ttl_seconds": "Par défaut 900. Le curseur qui accompagne chaque page (next_cursor) est signé et cesse de valoir après ce nombre de secondes ; le client recommence alors la liste.",
+ "cfg.f.api.gzip_min_bytes": "Plus petite réponse compressée (octets)",
+ "cfg.h.api.gzip_min_bytes": "Par défaut 1024. Une réponse des routes propres de l'API (me, repos) est compressée en gzip quand le client l'accepte et que la réponse fait au moins ce nombre d'octets. 0 ne compresse jamais.",
+ "ui.cfg_b_api_v1": "API de lecture v1",
+ "api.bad_cursor": "Le curseur de page n'est pas valide, appartient à une autre requête ou a expiré ; recommencez la liste.",
+ "api.bad_limit": "limit doit être un nombre entier de 1 à {max}.",
+ "api.unknown_field": "Le champ {field} ne fait pas partie de la réponse ; ne demandez que les champs que le contrat énumère.",
+ "api.bad_profile": "profile doit être full ou compact."
 }
