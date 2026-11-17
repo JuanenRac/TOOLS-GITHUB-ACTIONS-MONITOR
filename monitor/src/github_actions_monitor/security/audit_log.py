@@ -21,7 +21,7 @@ ACTION_RE = re.compile(r"^[a-z][a-z0-9_.-]{1,39}\Z")
 FILE = None                       # tests point this to a temporary file; None = audit_actions.jsonl in the logs folder
 _lock = threading.RLock()
 _last = {"path": None, "hash": ""}      # the hash of the last line this process wrote (information only: the file, read under the lock, decides what the next line follows)
-STATS = {"write_failures": 0, "last_write_error_at": None}      # a line that could not be written is counted and shown (GET /api/audit-log), not silent
+STATS = {"write_failures": 0, "last_write_error_at": None, "rotation_failures": 0}      # a line that could not be written is counted and shown (GET /api/audit-log), not silent
 TAIL_BYTES = 65536                     # how much of the end of the file is read to find the last hash (the whole file only if no line in that part has one)
 
 
@@ -117,6 +117,14 @@ def _tail_hash(target):
     return ""
 
 
+def degraded_note(where, error):
+    try:
+        from github_actions_monitor.app import degraded
+        degraded.note(where, error)
+    except Exception:   # noqa: BLE001 - noting the failure must not fail either
+        pass
+
+
 def record(config, action, user="", role="", account="", target="", result="ok", details=None, now=None, force=False):
     """Appends one line. `target` is a short identifier (a setting name, an alert code, a user name), `details` a small structure that is cleaned. Returns the line, or None when it is off or could not be written.
     `force` writes it even when the log is switched off (the change that switches it off is the last thing it records)."""
@@ -133,8 +141,12 @@ def record(config, action, user="", role="", account="", target="", result="ok",
         with _lock:
             private_io.private_dir(where.parent)
             with locks.process_lock(where):      # the supervisor and the accounts may append to the same file: one at a time, each one chained to the line that is really last
-                if where.exists() and where.stat().st_size > cfg["max_mb"] * 1_000_000:
-                    os.replace(where, where.with_name(where.name + ".1"))
+                try:
+                    if where.exists() and where.stat().st_size > cfg["max_mb"] * 1_000_000:
+                        os.replace(where, where.with_name(where.name + ".1"))
+                except OSError as error:      # a reader keeps the file open (Windows): the action is still written to the current file and the rotation is tried again at the next one
+                    STATS["rotation_failures"] += 1
+                    degraded_note("audit_log.rotation", error)
                 entry["prev"] = _tail_hash(where)
                 entry["hash"] = _digest(entry["prev"], {k: v for k, v in entry.items() if k != "hash"})
                 with private_io.open_append(where) as handle:

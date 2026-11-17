@@ -76,6 +76,27 @@ def atomic_write(path, text):
     private_io._fix_mode(path, private_io.FILE_MODE)
 
 
+DAMAGED_NOTES = []      # the names of the files that were set aside as damaged since this process started
+
+
+def _set_aside(path):
+    """Moves a file that exists, is not empty and cannot be understood to `<name>.damaged` (the newest one wins) so that the next save does not erase it; the move is noted in the degraded list."""
+    path = Path(path)
+    try:
+        if not path.is_file() or path.stat().st_size == 0:
+            return
+        os.replace(path, path.with_name(path.name + ".damaged"))
+    except OSError:
+        return
+    DAMAGED_NOTES.append(path.name)
+    del DAMAGED_NOTES[:-50]
+    try:
+        from github_actions_monitor.app import degraded
+        degraded.note("storage.damaged", OSError(f"{path.name} could not be read and was kept as {path.name}.damaged"))
+    except Exception:   # noqa: BLE001 - noting it must not fail either
+        pass
+
+
 def read_json(path, kind=dict, default=None, strict=False):
     """The JSON of a file when it is a `kind` (dict / list), else `default` (a missing, empty, damaged or wrong-shaped file reads as nothing).
     A file that exists and cannot be read for a moment (Windows keeps files that a backup, an antivirus or an editor has open) is read again a few times; if it still cannot be read it is `default`,
@@ -88,6 +109,8 @@ def read_json(path, kind=dict, default=None, strict=False):
         except FileNotFoundError:
             return default
         except ValueError:
+            if strict:
+                _set_aside(path)      # whoever reads to change and save must not write a new document over one it could not understand: the damaged one is kept apart
             return default
         except OSError as error:
             last = error
