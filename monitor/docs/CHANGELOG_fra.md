@@ -9,6 +9,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+### Corrigé
+
+- **Les questions se posent dans la page et s'affichent donc en plein écran** : les cinq confirmations de la page (changement de mode, exécution d'une commande proposée par l'IA, une action GitHub, un lancement de workflow local, suppression d'un utilisateur) utilisaient la boîte de dialogue du navigateur, qui ne s'affiche pas en plein écran (il fallait appuyer sur Échap pour la voir) et bloque la page. Elles utilisent maintenant une seule boîte de dialogue de la page (`askConfirm`) avec Accepter et Annuler, Échap et Tab, le focus sur Annuler pour une action dangereuse et rendu ensuite. Un test échoue si un `confirm`, `alert` ou `prompt` natif revient, et un test dans un navigateur pose la question et répond à la souris et au clavier.
+
 ## [2.0.4]
 
 ### Ajouté
@@ -18,7 +22,6 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Corrigé
 
-- **Les questions se posent dans la page et s'affichent donc en plein écran** : les cinq confirmations de la page (changement de mode, exécution d'une commande proposée par l'IA, une action GitHub, un lancement de workflow local, suppression d'un utilisateur) utilisaient la boîte de dialogue du navigateur, qui ne s'affiche pas en plein écran (il fallait appuyer sur Échap pour la voir) et bloque la page. Elles utilisent maintenant une seule boîte de dialogue de la page (`askConfirm`) avec Accepter et Annuler, Échap et Tab, le focus sur Annuler pour une action dangereuse et rendu ensuite. Un test échoue si un `confirm`, `alert` ou `prompt` natif revient, et un test dans un navigateur pose la question et répond à la souris et au clavier.
 - **« Aide de cet onglet » ouvre dans chaque onglet le sujet de l'onglet ouvert** : la table d'onglet à sujet n'avait pas les onglets Alertes et Équipe et envoyait Dépôts et Historique vers le premier sujet de l'aide (« GitHub Actions Monitor »). C'est maintenant une seule table (`TAB_TOPICS`) avec une entrée pour chaque onglet du menu latéral, et un test échoue si un onglet n'a pas de sujet ou en a un qui n'existe pas. Un test dans un navigateur parcourt tous les onglets et appuie sur le bouton.
 - **L'onglet Historique n'accumule plus son compteur** : « Affichage de 200 sur N » s'ajoutait aux outils du tableau à chaque rafraîchissement alors que les outils n'étaient redessinés que lorsque l'ordre ou les colonnes changeaient, si bien que des milliers de copies s'accumulaient à côté de la liste des colonnes. Le compteur est maintenant un seul élément qui est remplacé ou retiré. Un test ouvre la page dans un navigateur, dessine le tableau de nombreuses fois (rafraîchissement, filtres, toutes les colonnes, un ordre) et vérifie qu'il y a un compteur et une indication.
 

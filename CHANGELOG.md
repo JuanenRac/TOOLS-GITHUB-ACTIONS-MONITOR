@@ -10,6 +10,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+### Fixed
+
+- **Questions are asked inside the page, so they show in full screen**: the five confirmations of the page (change of mode, run a command proposed by the AI, a GitHub action, a local workflow run, delete a user) used the dialog of the browser, which is not drawn when the page is in full screen (the person had to press Esc to see it) and blocks the page. They use one dialog of the page (`askConfirm`) with Accept and Cancel, Esc and Tab, the focus on Cancel for a dangerous action and back where it was afterwards. A test fails when a native `confirm`, `alert` or `prompt` comes back, and a test in a browser asks and answers with the mouse and the keyboard.
+
 ## [2.0.4]
 
 ### Added
@@ -19,7 +23,6 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Fixed
 
-- **Questions are asked inside the page, so they show in full screen**: the five confirmations of the page (change of mode, run a command proposed by the AI, a GitHub action, a local workflow run, delete a user) used the dialog of the browser, which is not drawn when the page is in full screen (the person had to press Esc to see it) and blocks the page. They use one dialog of the page (`askConfirm`) with Accept and Cancel, Esc and Tab, the focus on Cancel for a dangerous action and back where it was afterwards. A test fails when a native `confirm`, `alert` or `prompt` comes back, and a test in a browser asks and answers with the mouse and the keyboard.
 - **"Help of this tab" opens the topic of the tab that is open in every tab**: the map from tab to topic was missing the Alerts and Team tabs and sent Repositories and History to the first topic of the Help ("GitHub Actions Monitor"). It is now one table (`TAB_TOPICS`) with an entry for every tab of the side menu, and a test fails when a tab has no topic or one that does not exist. A test in a browser goes through every tab and presses the button.
 - **The History tab no longer piles up its count**: "Showing 200 of N" was appended to the tools of the table at every refresh while the tools themselves were drawn again only when the order or the columns changed, so thousands of copies grew next to the list of columns. The count is now one element that is replaced or removed. A test opens the page in a browser, draws the table many times (refresh, filters, all columns, an order) and checks that there is one count and one hint.
 
