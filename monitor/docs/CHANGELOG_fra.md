@@ -13,6 +13,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - **Le jeton d'accès ne voyage plus dans l'adresse par défaut (`listen.query_access` est maintenant désactivé)** : en mode réseau, l'adresse avec `?access=` ouvrait la session, mais le jeton restait dans l'historique, les journaux et le `Referer`. Le réglage est désormais désactivé tant que vous ne l'activez pas (la valeur par défaut, le fichier d'exemple et l'aide des Réglages le disent) ; la session s'ouvre par `POST /api/access` (le jeton dans le corps) ou par l'en-tête `X-Monitor-Access`. Une installation qui a écrit `listen.query_access` elle-même garde sa valeur ; celle qui comptait sur l'ancienne valeur et ouvre le moniteur depuis une adresse avec `?access=` doit activer le réglage ou utiliser `POST /api/access`. La variable d'environnement `MONITOR_QUERY_ACCESS=1` l'active pour un service.
 
+### Corrigé
+
+- **La branche, la marque de fork, le dernier push et les PR d'un dépôt parviennent à tous les dépôts, pas seulement au premier** : une fois les exécutions en mémoire (dès le premier cycle), une variable réutilisée dans le tableau des colonnes des dépôts faisait perdre à tous les dépôts sauf le premier ce que la sentinelle savait d'eux. Les forks sans CI propre n'étaient pas reconnus comme tels, leurs crons hérités entraient donc dans la note et le chiffre des forks inactifs valait 1 ; et une CI rouge sur une branche par défaut autre que main ou master pouvait manquer dans la liste des échecs ouverts et dans la santé de l'équipe. La note écarte désormais l'ensemble des forks inactifs (pas seulement les 200 que montre la page).
+
 ## [2.0.8]
 
 ### Sécurité

@@ -979,8 +979,8 @@ def repo_meta(repos, config=None):
         out[repo] = {"private": repo in PRIVATE, "branch": item.get("branch") or None, "pushed": item.get("pushed") or None, "prs": len(prs) if isinstance(prs, list) else None, "fork": item.get("fork") is True}
         cached = RUN_CACHE.get(repo)
         if cached and cached.get("runs") is not None and cached.get("at"):
-            info = SAMPLE_INFO.get(repo) or {}
-            out[repo]["coverage"] = sampling.coverage(cached["runs"], info.get("asked"), info.get("total"), sampling.settings(config or {})["min_coverage_minutes"])
+            sample = SAMPLE_INFO.get(repo) or {}      # not `info`: that name holds what the sentinel knows of every repository
+            out[repo]["coverage"] = sampling.coverage(cached["runs"], sample.get("asked"), sample.get("total"), sampling.settings(config or {})["min_coverage_minutes"])
     return out
 
 
@@ -1109,7 +1109,7 @@ def build(config, repos, started, refreshed, loading, progress_text):
         "refresh_seconds": config["refresh_seconds"], "hot_only": hot_only_state(),
         "offline": LINK.state(), "etag": ETAG["cache"].stats() if ETAG["cache"] else None, "graphql": graphql_checks.stats(config),
         "hidden": HIDDEN["hidden"], "discovered": HIDDEN["discovered"], "hidden_names": HIDDEN["names"],
-        "figures": figures, "repo_meta": meta, "sampling": sampling_summary(config, repos, meta), "activity": activity_view, "forks_idle": idle_forks[:200],
+        "figures": figures, "repo_meta": meta, "sampling": sampling_summary(config, repos, meta), "activity": activity_view, "forks_idle": idle_forks[:200], "forks_idle_all": idle_forks,
     }
 
 
@@ -1683,7 +1683,7 @@ def score_tick(config, data):
         collab = registry.get("collab") if registry else None
         known = bool(collab is not None and getattr(collab, "enabled", False) and not (collab.get_status() or {}).get("loading"))
         storage, account = runtime.process_storage(CHILD["account"] or None)
-        idle = set(data.get("forks_idle") or [])      # the runs of a fork without a CI of its own (the cron it inherited) are not the work of the account
+        idle = set(data.get("forks_idle_all") or data.get("forks_idle") or [])      # the runs of a fork without a CI of its own (the cron it inherited) are not the work of the account
         snapshot = score_service.tick(storage, account, config, [r for r in (data.get("runs") or []) if r.get("repo") not in idle], collab.get_alerts() if known else [], collab_known=known, security=score_security(registry, config), activity=data.get("activity"))
         if snapshot and snapshot.get("drop_new") and snapshot.get("drop"):      # the moment a drop appears; it leaves the panel only when the person asked for it
             from github_actions_monitor.scoring import drop as score_drop, engine as score_engine

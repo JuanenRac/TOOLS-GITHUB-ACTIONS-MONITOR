@@ -13,6 +13,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - **Il token di accesso non viaggia più nell'indirizzo per impostazione predefinita (`listen.query_access` ora è disattivato)**: in modalità di rete l'indirizzo con `?access=` apriva la sessione, ma il token restava nella cronologia, nei registri e nel `Referer`. L'impostazione ora è disattivata a meno che tu non la attivi (lo dicono il valore predefinito, il file di esempio e l'aiuto delle Impostazioni); la sessione si apre con `POST /api/access` (il token nel corpo) o con l'intestazione `X-Monitor-Access`. Un'installazione che ha scritto `listen.query_access` da sé mantiene il suo valore; chi contava sul vecchio valore e apre il monitor da un indirizzo con `?access=` deve attivare l'impostazione o usare `POST /api/access`. La variabile d'ambiente `MONITOR_QUERY_ACCESS=1` la attiva per un servizio.
 
+### Corretto
+
+- **Il ramo, il contrassegno di fork, l'ultimo push e le PR di un repository arrivano a tutti i repository, non solo al primo**: con le esecuzioni già in memoria (dal primo ciclo) una variabile riusata nella tabella delle colonne dei repository faceva perdere a tutti tranne il primo ciò che la sentinella sapeva di loro. I fork senza CI propria non venivano riconosciuti come tali, quindi i loro cron ereditati entravano nel punteggio e la cifra dei fork inattivi valeva 1; e una CI rossa su un ramo predefinito diverso da main o master poteva mancare nell'elenco dei guasti aperti e nella salute del team. Il punteggio ora esclude l'intero insieme dei fork inattivi (non solo i 200 che mostra la pagina).
+
 ## [2.0.8]
 
 ### Sicurezza

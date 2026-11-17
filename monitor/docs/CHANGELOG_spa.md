@@ -13,6 +13,10 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - **El token de acceso ya no viaja en la dirección por defecto (`listen.query_access` ahora está desactivado)**: en el modo red la dirección `?access=` abría la sesión, pero el token quedaba en el historial, los registros y el `Referer`. El ajuste está desactivado salvo que lo actives (lo dicen el valor por defecto, el fichero de ejemplo y la ayuda de Ajustes); la sesión se abre con `POST /api/access` (el token en el cuerpo) o con la cabecera `X-Monitor-Access`. Una instalación que escribió `listen.query_access` conserva su valor; la que dependía del valor antiguo y abre el monitor desde una dirección con `?access=` tiene que activar el ajuste o usar `POST /api/access`. La variable de entorno `MONITOR_QUERY_ACCESS=1` lo activa para un servicio.
 
+### Corregido
+
+- **La rama, la marca de fork, el último push y las PR de un repositorio llegan a todos los repositorios, no solo al primero**: con los runs ya en memoria (desde el primer ciclo) una variable reutilizada en la tabla de columnas de Repositorios hacía que todos menos el primero perdieran lo que el centinela sabía de ellos. Los forks sin CI propia no se reconocían como tales, así que sus crones heredados entraban en la puntuación y la cifra de forks inactivos decía 1; y un CI en rojo en una rama por defecto que no es main ni master podía quedar fuera de la lista de fallos abiertos y de la salud del equipo. La puntuación deja ahora fuera el conjunto entero de forks inactivos (no solo los 200 que enseña la página).
+
 ## [2.0.8]
 
 ### Seguridad

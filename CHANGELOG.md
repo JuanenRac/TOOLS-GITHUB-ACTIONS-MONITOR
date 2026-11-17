@@ -14,6 +14,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **The access token no longer travels in the address by default (`listen.query_access` is now off)**: in the network mode the `?access=` address opened the session, but the token stayed in the history, the logs and the `Referer`. The setting is now off unless you turn it on (the default, the example file and the Settings help say so); the session is opened by `POST /api/access` (the token in the body) or by the header `X-Monitor-Access`. An installation that wrote `listen.query_access` itself keeps its value; one that relied on the old default and opens the monitor from an address with `?access=` has to turn the setting on, or use `POST /api/access`. The environment variable `MONITOR_QUERY_ACCESS=1` turns it on for a service.
 
+### Fixed
+
+- **The branch, the fork mark, the last push and the pull requests of a repository reach every repository, not only the first one**: once the runs were in memory (from the first cycle on) a variable reused in the table of the Repositories columns made every repository but the first one lose what the sentinel knew of it. The forks without a CI of their own were not recognised as such, so their inherited crons entered the score and the figure of idle forks said 1; and a red CI on a default branch that is not main or master could miss the list of open failures and the health of the team. The score now leaves out the whole set of idle forks (not only the 200 that the page shows).
+
 ## [2.0.8]
 
 ### Security

@@ -13,6 +13,10 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - **O token de acesso já não viaja no endereço por defeito (`listen.query_access` está agora desligado)**: no modo de rede o endereço com `?access=` abria a sessão, mas o token ficava no histórico, nos registos e no `Referer`. A definição está agora desligada, a menos que a ligue (o valor por defeito, o ficheiro de exemplo e a ajuda das Definições dizem-no); a sessão abre-se com `POST /api/access` (o token no corpo) ou com o cabeçalho `X-Monitor-Access`. Uma instalação que escreveu `listen.query_access` mantém o seu valor; a que dependia do valor antigo e abre o monitor a partir de um endereço com `?access=` tem de ligar a definição ou usar `POST /api/access`. A variável de ambiente `MONITOR_QUERY_ACCESS=1` liga-a para um serviço.
 
+### Corrigido
+
+- **O ramo, a marca de fork, o último push e os PR de um repositório chegam a todos os repositórios, não só ao primeiro**: com as execuções já em memória (desde o primeiro ciclo), uma variável reutilizada na tabela das colunas dos repositórios fazia com que todos menos o primeiro perdessem o que a sentinela sabia deles. Os forks sem CI própria não eram reconhecidos como tal, por isso os seus crons herdados entravam na pontuação e o número de forks inativos valia 1; e uma CI vermelha num ramo por defeito que não é main nem master podia ficar fora da lista de falhas abertas e da saúde da equipa. A pontuação deixa agora de fora o conjunto inteiro de forks inativos (não só os 200 que a página mostra).
+
 ## [2.0.8]
 
 ### Segurança

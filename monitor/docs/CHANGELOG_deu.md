@@ -13,6 +13,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **Das Zugriffstoken reist standardmäßig nicht mehr in der Adresse (`listen.query_access` ist jetzt aus)**: Im Netzwerkmodus öffnete die Adresse mit `?access=` die Sitzung, aber das Token blieb im Verlauf, in den Protokollen und im `Referer`. Die Einstellung ist jetzt aus, solange du sie nicht einschaltest (Standardwert, Beispieldatei und Hilfe der Einstellungen sagen es); die Sitzung wird mit `POST /api/access` (Token im Body) oder mit dem Header `X-Monitor-Access` geöffnet. Eine Installation, die `listen.query_access` selbst geschrieben hat, behält ihren Wert; wer sich auf den alten Standard verlassen hat und den Monitor über eine Adresse mit `?access=` öffnet, muss die Einstellung einschalten oder `POST /api/access` verwenden. Die Umgebungsvariable `MONITOR_QUERY_ACCESS=1` schaltet sie für einen Dienst ein.
 
+### Behoben
+
+- **Der Branch, die Fork-Markierung, der letzte Push und die Pull Requests eines Repositorys kommen bei allen Repositorys an, nicht nur beim ersten**: Sobald die Läufe im Speicher waren (ab dem ersten Zyklus), ließ eine wiederverwendete Variable in der Tabelle der Repository-Spalten alle außer dem ersten Repository verlieren, was der Wächter über sie wusste. Forks ohne eigene CI wurden nicht als solche erkannt, ihre geerbten Crons gingen in die Bewertung ein und die Zahl der ruhenden Forks lautete 1; und eine rote CI auf einem Standard-Branch, der nicht main oder master ist, konnte in der Liste der offenen Fehler und in der Teamgesundheit fehlen. Die Bewertung lässt jetzt die gesamte Menge ruhender Forks weg (nicht nur die 200, die die Seite zeigt).
+
 ## [2.0.8]
 
 ### Sicherheit
