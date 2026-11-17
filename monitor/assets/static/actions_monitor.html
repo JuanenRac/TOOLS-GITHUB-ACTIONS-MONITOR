@@ -773,7 +773,7 @@ function soundDiff(slot,cur){
     if(!saved){SOUND[slot]=cur;save();return {add:[],gone:[]}}prev=saved}
   const add=[],gone=[];cur.forEach((v,k)=>{if(!prev.has(k))add.push([k,v])});prev.forEach((v,k)=>{if(!cur.has(k))gone.push([k,v])});
   SOUND[slot]=cur;save();return {add:add,gone:gone}}
-/* the list of alerts of every sentinel (the reds of the CI have their own look above): a new alert sounds as its kind, and one of the serious kinds that is gone sounds as solved; a silenced alert (muted_until) is there but mute */
+/* the list of alerts of every sentinel (the reds of the CI have their own look above): a new alert sounds as its kind, and one of the serious kinds that is gone sounds as solved; a silenced alert, with muted_until, is there but mute */
 function soundAlerts(A){if(!A||!Array.isArray(A.alerts))return;
   const cur=new Map();A.alerts.forEach(a=>{if(a&&a.id&&a.code!=="ci.red")cur.set(a.id,soundKindOf(a)+(a.muted_until?"!":""))});
   const d=soundDiff("al",cur),kinds=d.add.filter(x=>!x[1].endsWith("!")).map(x=>x[1]);

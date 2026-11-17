@@ -429,6 +429,9 @@ class Route(unittest.TestCase):
                 return error.code, {}
 
     def test_the_route_is_closed_when_off_and_signed_requests_work_when_on(self):
+        saved = am.STATE["data"]
+        am.STATE["data"] = None        # another test may have left a state behind: this one is about a monitor that has read nothing yet
+        self.addCleanup(am.STATE.__setitem__, "data", saved)
         now = int(time.time())
         body = slack_body("status")
         with LiveServer({}) as server:
