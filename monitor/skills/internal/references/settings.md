@@ -259,6 +259,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `logs.failed_step.enabled` (secure) | `false` | ai | Show the log of the failed step |
 | `logs.failed_step.lines` | `12` | ai | Lines of the failed step |
 | `logs.failed_step.max_bytes` | `2000` | ai | Size of the failed step text |
+| `logs.failed_step.max_per_minute` | `10` | ai | Lookups of a failed step per minute |
 | `max_workers` | `20` | polling | Parallel requests |
 | `min_rate_remaining` | `800` | polling | Pause below this allowance |
 | `mirror.enabled` (secure) | `false` | advanced | Keep a local copy of artifacts |
