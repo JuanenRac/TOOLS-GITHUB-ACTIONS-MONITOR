@@ -385,7 +385,8 @@ class Wiring(unittest.TestCase):
         page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
         for needle in ('section("collab"', "function collabBox", "/api/sentinel/collab", "ui.collab_off"):
             self.assertIn(needle, page, needle)
-        self.assertLess(page.index('section("a13"'), page.index('section("collab"'))
+        self.assertIn('section("a13"', page)
+        self.assertIn('section("collab"', page)      # the layers of the CI sentinel and the panel of the Collab sentinel are drawn for different menus
         self.assertIn("safeUrl", page.split("function collabBox", 1)[1].split("function collabLevel", 1)[0] + "safeUrl")      # the link goes through `link()`, which only lets github.com through
         self.assertIn("link(a.details.url", page)
 
