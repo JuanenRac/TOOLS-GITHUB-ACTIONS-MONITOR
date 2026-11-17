@@ -2332,6 +2332,8 @@
  "ui.cfg_range": "{min} to {max}",
  "ui.cfg_restart": "needs a restart",
  "ui.cfg_restart_banner": "{n} saved setting(s) apply only after you restart the monitor.",
+ "ui.ai_budget_note": "New: the daily limit of the AI (ai.daily_limit) and the limits of a model now also count the calls of the active notice, which keeps its own limits per hour. If the notice needs more, raise the daily total in Settings.",
+ "ui.ai_budget_note_ok": "Understood",
  "ui.cfg_save": "Save changes",
  "ui.cfg_saved": "Saved. {n} setting(s) changed.",
  "ui.cfg_saved_restart": "Saved. Restart the monitor for these to apply: {keys}",

@@ -24,6 +24,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - **`logs.failed_step.max_per_minute` limita quante esecuzioni diverse il log del passaggio fallito legge da GitHub in un minuto** (10 per impostazione predefinita): chiedere molte esecuzioni di seguito non spende più la tua quota per tutte.
 - **I silenziamenti per schema possono scadere e un segnale elenca quelli che richiedono una decisione** (`alerts.silences_expire_days`, 0 = mai per impostazione predefinita): con un numero, un silenziamento smette di funzionare quel numero di giorni dopo la data di revisione; i promemoria già fatti sono conservati nel file di stato, quindi un riavvio non li ripete; e il segnale dei silenziamenti elenca quelli oltre la data, scaduti o senza data.
+- **La pagina avvisa una sola volta che il budget dell'IA è cambiato**: alla prima apertura di questa versione una barra spiega che il limite giornaliero e i limiti di un modello contano ora anche l'avviso attivo; "Capito" la nasconde e la pagina lo ricorda.
 
 ### Modificato
 
@@ -43,6 +44,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 - **La vista In tempo reale nomina il workflow dell'ultimo evento**: l'ultimo evento mostrava sempre un nome vuoto.
 - **Più processi possono condividere l'archivio dell'IA senza superarne i limiti**: l'archivio viene ora letto, modificato e scritto sotto un lock del sistema operativo (Windows e Linux), che il sistema stesso rilascia quando un processo muore, così due processi non fanno più ciascuno la propria quota; il recupero esistente dei file di lock non cambia.
 - **La chiave di un gruppo di job falliti viene tagliata e ripulita**: quando un job non ha piattaforma né parentesi, l'intero nome del job era la chiave del suo gruppo, senza limite e senza pulizia; ora è una riga di al massimo 80 caratteri, ripulita come il resto.
+- **Le cartelle che un'esecuzione precedente ha lasciato con gli indirizzi dei servizi Apprise vengono rimosse all'avvio del monitor**, non al primo invio, che poteva essere a ore di distanza.
 
 ## [2.0.8]
 

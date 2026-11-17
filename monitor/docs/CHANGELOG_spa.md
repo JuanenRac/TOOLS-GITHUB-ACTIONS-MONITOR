@@ -24,6 +24,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - **`logs.failed_step.max_per_minute` limita cuántas ejecuciones distintas lee en un minuto el log del paso fallido en GitHub** (10 por defecto): pedir muchas ejecuciones seguidas ya no gasta tu cuota en todas.
 - **Los silencios por patrón pueden caducar y una señal lista los que necesitan una decisión** (`alerts.silences_expire_days`, 0 = nunca por defecto): con un número, un silencio deja de funcionar esos días después de su fecha de revisión; los recordatorios ya hechos se guardan en el fichero de estado, así que un reinicio no los repite; y la señal de los silencios lista los pasados de fecha, caducados o sin fecha.
+- **La página avisa una sola vez de que cambió el presupuesto de la IA**: la primera vez que se abre esta versión una barra explica que el límite diario y los límites de un modelo cuentan ahora también el aviso activo; "Entendido" la oculta y la página lo recuerda.
 
 ### Cambiado
 
@@ -43,6 +44,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 - **La vista En vivo nombra el workflow del último evento**: el último evento mostraba siempre un nombre vacío.
 - **Varios procesos pueden compartir el almacén de la IA sin pasarse de sus límites**: el almacén se lee, cambia y escribe ahora bajo un candado del sistema operativo (Windows y Linux), que el propio sistema libera cuando un proceso muere, de modo que dos procesos ya no hacen cada uno su cuota; el rescate existente de ficheros de candado no cambia.
 - **La clave de un grupo de trabajos fallidos se corta y se limpia**: cuando un trabajo no tiene plataforma ni paréntesis, el nombre entero del trabajo era la clave de su grupo, sin límite y sin limpiar; ahora es una línea de 80 caracteres como mucho, limpiada como el resto.
+- **Las carpetas que una ejecución anterior dejó con las direcciones de los servicios de Apprise se borran al arrancar el monitor**, no en el primer envío, que podía tardar horas.
 
 ## [2.0.8]
 

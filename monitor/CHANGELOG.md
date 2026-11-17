@@ -26,6 +26,7 @@ when this file and `tool_version.py` disagree.
 
 - **`logs.failed_step.max_per_minute` limits how many different runs the log of the failed step reads from GitHub in a minute** (10 by default): asking for many runs one after another no longer spends your allowance on all of them.
 - **Silences by pattern can expire, and a signal lists the ones that need a decision** (`alerts.silences_expire_days`, 0 = never by default): with a number, a silence stops working that many days after its review date; the reminders already made are kept in the state file, so a restart does not repeat them; and the signal of the silences lists the ones past their date, expired or without a date.
+- **The page says once that the budget of the AI changed**: the first time this version is opened a bar explains that the daily limit and the limits of a model now also count the active notice; "Understood" hides it and the page remembers it.
 
 ### Changed
 
@@ -45,6 +46,7 @@ when this file and `tool_version.py` disagree.
 - **The Live view names the workflow of the last event**: the last event always showed an empty name.
 - **Several processes can share the store of the AI without passing its limits**: the store is now read, changed and written under a lock of the operating system (Windows and Linux), which the system itself releases when a process dies, so two processes can no longer each make their own quota; the existing rescue of lock files is untouched.
 - **The key of a group of failed jobs is cut and cleaned**: when a job has no platform or parenthesis, the whole name of the job was the key of its group, without a limit and without cleaning; it is now one line of 80 characters at most, cleaned like the rest.
+- **The folders that an earlier run left with the addresses of the Apprise services are removed when the monitor starts**, not at the first send, which could be hours away.
 
 ## [2.0.8]
 

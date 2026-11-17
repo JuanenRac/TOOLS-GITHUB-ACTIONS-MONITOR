@@ -24,6 +24,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - **`logs.failed_step.max_per_minute` limita quantas execuções diferentes o registo do passo falhado lê no GitHub por minuto** (10 por predefinição): pedir muitas execuções seguidas já não gasta a sua quota em todas.
 - **Os silêncios por padrão podem caducar e um sinal lista os que precisam de uma decisão** (`alerts.silences_expire_days`, 0 = nunca por predefinição): com um número, um silêncio deixa de funcionar esse número de dias depois da data de revisão; os lembretes já feitos guardam-se no ficheiro de estado, pelo que um reinício não os repete; e o sinal dos silêncios lista os que passaram da data, caducaram ou não têm data.
+- **A página avisa uma só vez que o orçamento da IA mudou**: na primeira vez que esta versão é aberta, uma barra explica que o limite diário e os limites de um modelo contam agora também o aviso ativo; "Percebi" esconde-a e a página lembra-se disso.
 
 ### Alterado
 
@@ -43,6 +44,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 - **A vista Em direto nomeia o workflow do último evento**: o último evento mostrava sempre um nome vazio.
 - **Vários processos podem partilhar o armazém da IA sem ultrapassar os seus limites**: o armazém é agora lido, alterado e escrito sob um cadeado do sistema operativo (Windows e Linux), que o próprio sistema liberta quando um processo morre, pelo que dois processos já não fazem cada um a sua quota; o resgate existente dos ficheiros de cadeado não muda.
 - **A chave de um grupo de trabalhos falhados é cortada e limpa**: quando um trabalho não tem plataforma nem parênteses, o nome inteiro do trabalho era a chave do seu grupo, sem limite e sem limpeza; agora é uma linha de 80 caracteres no máximo, limpa como o resto.
+- **As pastas que uma execução anterior deixou com os endereços dos serviços Apprise são apagadas quando o monitor arranca**, e não no primeiro envio, que podia estar a horas de distância.
 
 ## [2.0.8]
 

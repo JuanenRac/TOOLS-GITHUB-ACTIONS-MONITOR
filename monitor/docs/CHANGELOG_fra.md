@@ -24,6 +24,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - **`logs.failed_step.max_per_minute` limite le nombre d'exécutions différentes que le journal de l'étape en échec lit sur GitHub en une minute** (10 par défaut) : demander beaucoup d'exécutions à la suite ne dépense plus votre quota pour toutes.
 - **Les mises en sourdine par motif peuvent expirer et un signal liste celles qui demandent une décision** (`alerts.silences_expire_days`, 0 = jamais par défaut) : avec un nombre, une mise en sourdine cesse de fonctionner ce nombre de jours après sa date de revue ; les rappels déjà faits sont gardés dans le fichier d'état, un redémarrage ne les répète donc pas ; et le signal des mises en sourdine liste celles dépassées, expirées ou sans date.
+- **La page indique une seule fois que le budget de l'IA a changé** : à la première ouverture de cette version, une barre explique que la limite quotidienne et les limites d'un modèle comptent désormais aussi l'avis actif ; "Compris" la masque et la page s'en souvient.
 
 ### Modifié
 
@@ -43,6 +44,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 - **La vue En direct nomme le workflow du dernier événement** : le dernier événement montrait toujours un nom vide.
 - **Plusieurs processus peuvent partager le magasin de l'IA sans dépasser ses limites** : le magasin est désormais lu, modifié et écrit sous un verrou du système d'exploitation (Windows et Linux), que le système libère lui-même quand un processus meurt, si bien que deux processus ne font plus chacun leur quota ; le sauvetage existant des fichiers de verrou n'est pas modifié.
 - **La clé d'un groupe de jobs en échec est coupée et nettoyée** : quand un job n'a ni plateforme ni parenthèse, le nom entier du job était la clé de son groupe, sans limite et sans nettoyage ; c'est maintenant une ligne de 80 caractères au plus, nettoyée comme le reste.
+- **Les dossiers qu'une exécution précédente a laissés avec les adresses des services Apprise sont supprimés au démarrage du moniteur**, et non au premier envoi, qui pouvait être à des heures.
 
 ## [2.0.8]
 

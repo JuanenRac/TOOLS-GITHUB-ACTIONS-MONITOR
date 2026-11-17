@@ -24,6 +24,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **`logs.failed_step.max_per_minute` begrenzt, wie viele verschiedene Läufe das Log des fehlgeschlagenen Schritts pro Minute von GitHub liest** (standardmäßig 10): Wer viele Läufe hintereinander anfragt, verbraucht Ihr Kontingent nicht mehr für alle.
 - **Stummschaltungen per Muster können ablaufen, und ein Signal listet die auf, die eine Entscheidung brauchen** (`alerts.silences_expire_days`, 0 = standardmäßig nie): Mit einer Zahl wirkt eine Stummschaltung so viele Tage nach ihrem Prüfdatum nicht mehr; bereits ausgesprochene Erinnerungen stehen in der Zustandsdatei, ein Neustart wiederholt sie also nicht; und das Signal der Stummschaltungen listet die über dem Datum liegenden, abgelaufenen oder datumslosen auf.
+- **Die Seite weist einmal darauf hin, dass sich das KI-Budget geändert hat**: Beim ersten Öffnen dieser Version erklärt eine Leiste, dass das Tageslimit und die Grenzen eines Modells jetzt auch die aktive Meldung zählen; "Verstanden" blendet sie aus, und die Seite merkt es sich.
 
 ### Geändert
 
@@ -43,6 +44,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 - **Die Live-Ansicht nennt den Workflow des letzten Ereignisses**: Das letzte Ereignis zeigte immer einen leeren Namen.
 - **Mehrere Prozesse können den Speicher der KI teilen, ohne ihre Grenzen zu überschreiten**: Der Speicher wird jetzt unter einer Sperre des Betriebssystems (Windows und Linux) gelesen, geändert und geschrieben, die das System selbst freigibt, wenn ein Prozess stirbt, sodass zwei Prozesse nicht mehr jeder ihre eigene Quote bilden; die bestehende Rettung von Sperrdateien bleibt unverändert.
 - **Der Schlüssel einer Gruppe fehlgeschlagener Jobs wird gekürzt und bereinigt**: Hat ein Job weder Plattform noch Klammer, war der ganze Jobname der Schlüssel seiner Gruppe, ohne Grenze und ohne Bereinigung; jetzt ist er eine Zeile von höchstens 80 Zeichen und wie der Rest bereinigt.
+- **Die Ordner mit den Adressen der Apprise-Dienste, die ein früherer Lauf hinterließ, werden beim Start des Monitors entfernt**, nicht erst beim ersten Senden, das Stunden entfernt sein konnte.
 
 ## [2.0.8]
 

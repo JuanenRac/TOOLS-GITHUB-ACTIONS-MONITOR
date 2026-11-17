@@ -255,6 +255,7 @@ background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 
 #netbar{background:var(--bad);color:var(--on-bad);padding:6px 18px;font-weight:700}#netbar[hidden]{display:none}#cfg-netwarn{background:var(--bad);color:var(--on-bad);padding:8px 14px;margin:0 0 10px;font-weight:700;border-radius:4px}#cfg-netwarn[hidden]{display:none}
 .adv-live h3{margin:.4em 0}.adv-live .inl{margin:4px 0;display:flex;gap:6px;flex-wrap:wrap;align-items:center}.adv-live pre{max-height:240px;overflow:auto;background:var(--card);padding:6px;border-radius:6px}
 #restartbar{display:none;background:var(--warn);color:var(--on-warn);padding:6px 18px;font-weight:600}
+#budgetnote{background:var(--warn);color:var(--on-warn);padding:6px 18px;font-weight:600}#budgetnote[hidden]{display:none}#budgetnote button{margin-left:10px;font:inherit;cursor:pointer}
 .help-cols{display:grid;grid-template-columns:260px minmax(0,1fr);flex:1;min-height:0}
 #help-list{border-right:1px solid var(--line);overflow:auto;padding:8px}
 #help-list h4{margin:10px 6px 4px;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
@@ -424,6 +425,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <div id="offline" role="status"></div>
 <div id="hidden" role="status"></div>
 <div id="restartbar" role="status"></div>
+<div id="budgetnote" role="status" hidden><span id="budgetnote-t"></span> <button type="button" id="budgetnote-b"></button></div>
 <div id="netbar" role="alert" hidden></div>
 <div class="shell">
 <aside class="sidebar" id="side">
@@ -1988,6 +1990,10 @@ document.addEventListener("keydown",e=>{
   const t=e.target,typing=t&&(t.tagName==="INPUT"||t.tagName==="TEXTAREA"||t.tagName==="SELECT"||t.isContentEditable);
   if(e.key==="?"&&!typing&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();dlgs.help.hidden?openHelp(document.querySelector("nav [aria-selected=true]").dataset.tab,null):dlgClose("help")}});
 /* the restart bar: shown on every tab while a saved setting waits for a restart */
+/* the single budget of the AI (the active notice now counts in it): said once, the first time this version is opened; "understood" is remembered in this browser */
+(function(){const k="seen.ai_budget_notice",b=$("budgetnote");if(!b||store.get(k))return;
+  $("budgetnote-t").textContent=T("ui.ai_budget_note");const ok=$("budgetnote-b");ok.textContent=T("ui.ai_budget_note_ok");
+  ok.addEventListener("click",()=>{store.set(k,"1");b.hidden=true});b.hidden=false})();
 function restartBar(n){const b=$("restartbar");b.style.display=n?"block":"none";b.textContent=n?T("ui.cfg_restart_banner",{n:n}):""}
 /* first start: three short steps */
 const WIZ={n:1};
