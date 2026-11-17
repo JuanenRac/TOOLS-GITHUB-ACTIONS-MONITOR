@@ -9,6 +9,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+## [2.0.8]
+
 ### Seguridad
 
 - **El secreto compartido del webhook de entrada solo viaja por el entorno (`webhook.secret_env`, `MONITOR_WEBHOOK_SECRET` por defecto)**: era un texto en `actions_monitor.json`, donde una copia de seguridad, una configuración copiada o una pantalla compartida podían filtrarlo. El receptor lo lee ahora de la variable de entorno que indica `webhook.secret_env` (o del fichero que nombra esa variable más `_FILE`, como entrega un secreto un contenedor), el monitor lo saca de su propio entorno una vez leído para que los programas que lanza no lo hereden, y un secreto escrito en el fichero se ignora. La forma antigua puede mantenerse para una migración con `webhook.allow_config_secret` (solo en el fichero, apagado por defecto) y la vista En vivo avisa mientras se usa. La pestaña Ajustes muestra el nombre de la variable y si el secreto está definido, nunca el secreto.
@@ -24,6 +26,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Corregido
 
+- **Los documentos ya no dicen que macOS se prueba en el CI**: el README y sus siete traducciones decían que los tests corren en el CI en tres sistemas y que Linux y macOS se prueban en el CI; como el CI solo prueba en Ubuntu y Windows (macOS se retomará más adelante), ahora lo dicen así.
 - **Un workflow cuyo fichero se borró no cuenta entre los workflows que se pueden activar**: GitHub conserva en la lista el historial de un workflow borrado con la ruta vacía (seis de los 96 repositorios públicos estudiados tienen uno), y la comprobación de higiene lo ofrecía como un workflow desactivado a mano. Ahora queda fuera de las listas que necesitan un fichero.
 - **Un fork al que nunca se ha empujado no está «empujado hace poco»**: un fork hereda la fecha de push de su upstream al crearse (693 de los 722 forks de una cuenta medida la tienen anterior a su propia creación), así que el centinela tomaba cada fork nuevo por el repositorio más activo de la cuenta y lo leía como caliente. La fecha de push de un fork se ignora ahora mientras no sea posterior a su creación.
 

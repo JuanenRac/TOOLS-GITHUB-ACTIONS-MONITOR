@@ -68,7 +68,7 @@
 
 | | |
 |---|---|
-| **Versione** | **2.0.7** · [tutte le release](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versione** | **2.0.8** · [tutte le release](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Richiede** | Python 3.11+ e la CLI di GitHub (`gh auth login`); nient'altro (la vista console usa il pacchetto facoltativo `rich`) |
 | **Si apre** | su una pagina di `127.0.0.1` soltanto, in otto lingue |
 | **Scrive su GitHub** | mai da solo: solo i comandi a lotti che avvii con un `--go` esplicito |
@@ -76,7 +76,7 @@
 
 <!-- glance:begin -->
 
-**Misurato oggi** (v2.0.7)
+**Misurato oggi** (v2.0.8)
 
 | | |
 |---|---|
@@ -94,7 +94,7 @@ Ogni riga è una parte di questo repository e il semaforo dice a che punto è og
 
 | Area | Stato | Cosa significa qui |
 |---|---|---|
-| Monitor e pagina | 🟢 | Gira ogni giorno su un account reale; i test girano nel CI su tre sistemi. |
+| Monitor e pagina | 🟢 | Gira ogni giorno su un account reale; i test girano nel CI su Ubuntu e Windows. |
 | Sentinella (A1..A13) | 🟢 | Gira ogni giorno su un account reale; livelli e righe sono testati con fixture. |
 | Notifiche | 🟡 | Provate contro server simulati; non tutti i canali sono stati provati con il servizio reale. |
 | Connessione a uno strumento di IA e MCP | 🟡 | Feed, stato, flusso, hook e strumenti MCP sono testati con un server reale e un client simulato; nessun utente indipendente li ha ancora usati. |
@@ -104,7 +104,7 @@ Ogni riga è una parte di questo repository e il semaforo dice a che punto è og
 | Immagine Docker e modalità servizio | 🟡 | L'immagine è costruita e provata nella CI (senza root, in sola lettura, con un accesso revocato); ancora poco tempo come servizio di lunga durata. |
 | Modalità squadra e più account | 🟡 | Provata con processi reali e utenti simulati; un vero team non l'ha usata a lungo. |
 | Archiviazione (file e SQLite) | 🟡 | Provata con i due archivi e le migrazioni tra loro; un database vecchio di mesi non ha ancora attraversato un aggiornamento. |
-| Linux e macOS | 🟠 | Provati solo nel CI; l'uso quotidiano è su Windows. |
+| Linux e macOS | 🟠 | Linux è provato solo nel CI; macOS per ora non è provato nel CI; l'uso quotidiano è su Windows. |
 
 <!-- glance:end -->
 

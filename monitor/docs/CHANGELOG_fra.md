@@ -9,6 +9,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+## [2.0.8]
+
 ### Sécurité
 
 - **Le secret partagé du webhook entrant ne circule que par l'environnement (`webhook.secret_env`, `MONITOR_WEBHOOK_SECRET` par défaut)** : c'était un texte dans `actions_monitor.json`, où une sauvegarde, une configuration copiée ou un écran partagé pouvaient le divulguer. Le récepteur le lit maintenant dans la variable d'environnement indiquée par `webhook.secret_env` (ou dans le fichier nommé par cette variable plus `_FILE`, comme un conteneur remet un secret), le moniteur le retire de son propre environnement une fois lu pour que les programmes qu'il lance ne l'héritent pas, et un secret écrit dans le fichier est ignoré. L'ancienne méthode peut être gardée pour une migration avec `webhook.allow_config_secret` (dans le fichier seulement, éteint par défaut) et la vue En direct avertit tant qu'elle sert. L'onglet Réglages montre le nom de la variable et si le secret est défini, jamais le secret.
@@ -24,6 +26,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Corrigé
 
+- **Les documents ne disent plus que macOS tourne dans le CI** : le README et ses sept traductions disaient que les tests tournent dans le CI sur trois systèmes et que Linux et macOS sont testés dans le CI ; comme le CI ne teste que sous Ubuntu et Windows (macOS sera repris plus tard), ils le disent désormais ainsi.
 - **Un workflow dont le fichier a été supprimé ne compte pas parmi les workflows que l'on peut activer** : GitHub garde dans la liste l'historique d'un workflow supprimé avec un chemin vide (six des 96 dépôts publics étudiés en ont un), et la vérification d'hygiène le proposait comme un workflow désactivé à la main. Il reste maintenant hors des listes qui ont besoin d'un fichier.
 - **Un fork qui n'a jamais reçu de push n'est pas « poussé récemment »** : un fork hérite de la date de push de son amont à sa création (693 des 722 forks d'un compte mesuré l'ont antérieure à leur propre création), si bien que la sentinelle prenait chaque nouveau fork pour le dépôt le plus actif du compte et le lisait comme chaud. La date de push d'un fork est maintenant ignorée tant qu'elle n'est pas postérieure à sa création.
 

@@ -21,7 +21,11 @@ What only shows with long real use: the migration from 1.8 and 1.9, the growth o
 
 The monitor's own workflows keep to what the hygiene sentinel will ask of others: actions pinned to a commit, the least permissions and a time limit on every job.
 
-## Done in 1.8.2 to 2.0.7
+## Done in 1.8.2 to 2.0.8
+
+### 2.0.8 - A safer webhook secret, check runs and a guide to set the webhook up (the closing version of the fourth phase)
+
+The shared secret of the incoming webhook only travels in the environment (or in a file the setting names), the webhook also takes check run events, the Live view says how much of the time the events cover, and a guide in eight languages (`docs/WEBHOOK.md`) sets the webhook up in GitHub step by step. The studies of real accounts add three rows: a workflow whose file was deleted is not one you can enable, a fork that was never pushed is not recently pushed, and the runner `codspeed` is recognised as a paid third-party runner. The documents no longer say that macOS runs in the CI. This is the version that closes the fourth phase: a stabilization version that comes before the audit.
 
 ### 2.0.7 - A read API for clients, the original repository of each fork and workflows switched off by hand
 

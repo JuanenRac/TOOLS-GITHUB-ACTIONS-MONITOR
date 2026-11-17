@@ -68,7 +68,7 @@
 
 | | |
 |---|---|
-| **Version** | **2.0.7** · [alle Releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **2.0.8** · [alle Releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Voraussetzung** | Python 3.11+ und die GitHub-CLI (`gh auth login`); sonst nichts (die Konsolenansicht nutzt das optionale Paket `rich`) |
 | **Öffnet** | eine Seite nur auf `127.0.0.1`, in acht Sprachen |
 | **Schreibt auf GitHub** | nie von selbst: nur Stapelbefehle, die du mit ausdrücklichem `--go` startest |
@@ -76,7 +76,7 @@
 
 <!-- glance:begin -->
 
-**Heute gemessen** (v2.0.7)
+**Heute gemessen** (v2.0.8)
 
 | | |
 |---|---|
@@ -94,7 +94,7 @@ Jede Zeile ist ein Teil dieses Repositories, und die Ampel sagt, wie weit er heu
 
 | Bereich | Stand | Was das hier bedeutet |
 |---|---|---|
-| Monitor und Seite | 🟢 | Läuft täglich mit einem echten Konto; die Tests laufen im CI auf drei Systemen. |
+| Monitor und Seite | 🟢 | Läuft täglich mit einem echten Konto; die Tests laufen im CI auf Ubuntu und Windows. |
 | Sentinel (A1..A13) | 🟢 | Läuft täglich mit einem echten Konto; Stufen und Zeilen werden mit Fixtures getestet. |
 | Benachrichtigungen | 🟡 | Gegen simulierte Server getestet; nicht jeder Kanal wurde am echten Dienst probiert. |
 | Verbindung zu einem KI-Werkzeug und MCP | 🟡 | Feed, Zustand, Stream, Hook und MCP-Werkzeuge sind mit einem echten Server und einem simulierten Client getestet; noch kein unabhängiger Nutzer hat sie benutzt. |
@@ -104,7 +104,7 @@ Jede Zeile ist ein Teil dieses Repositories, und die Ampel sagt, wie weit er heu
 | Docker-Image und Dienstmodus | 🟡 | Das Image wird in der CI gebaut und geprüft (ohne Root, schreibgeschützt, mit widerrufener Anmeldung); noch wenig Zeit als Langzeitdienst. |
 | Teammodus und mehrere Konten | 🟡 | Mit echten Prozessen und simulierten Benutzern geprüft; ein echtes Team hat ihn noch nicht lange genutzt. |
 | Speicherung (Dateien und SQLite) | 🟡 | Mit beiden Speichern und den Migrationen dazwischen geprüft; eine monatealte Datenbank hat noch kein Update durchlaufen. |
-| Linux und macOS | 🟠 | Nur im CI getestet; der tägliche Einsatz ist unter Windows. |
+| Linux und macOS | 🟠 | Linux wird nur im CI getestet; macOS wird vorerst nicht im CI getestet; der tägliche Einsatz ist unter Windows. |
 
 <!-- glance:end -->
 

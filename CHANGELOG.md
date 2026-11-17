@@ -10,6 +10,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+## [2.0.8]
+
 ### Security
 
 - **The shared secret of the incoming webhook only travels in the environment (`webhook.secret_env`, `MONITOR_WEBHOOK_SECRET` by default)**: it was a text in `actions_monitor.json`, where a backup, a copied configuration or a shared screen could leak it. The receiver now reads it from the environment variable named by `webhook.secret_env` (or from the file named by that variable plus `_FILE`, the way a container hands over a secret), the monitor takes it out of its own environment once it has read it so the programs it starts do not inherit it, and a secret written in the file is ignored. The old way can be kept for a migration with `webhook.allow_config_secret` (file only, off by default) and the Live view warns while it is used. The Settings tab shows the name of the variable and whether the secret is defined, never the secret.
@@ -25,6 +27,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Fixed
 
+- **The documents no longer say that macOS runs in the CI**: the README and its seven translations said that the tests run in the CI on three systems and that Linux and macOS are tested in the CI; since the CI tests on Ubuntu and Windows only (macOS will be taken up again later), they now say so.
 - **A workflow whose file was deleted is not one of the workflows you can enable**: GitHub keeps the history of a deleted workflow in the list with an empty path (six of the 96 public repositories studied have one), and the hygiene check offered it as a workflow disabled by hand. It now stays out of the lists that need a file.
 - **A fork that was never pushed is not "recently pushed"**: a fork inherits the push date of its upstream when it is made (693 of the 722 forks of an account measured have it before their own creation), so the sentinel took every new fork for the most active repository of the account and read it as a hot one. The push date of a fork is now ignored while it is not newer than its creation.
 

@@ -68,7 +68,7 @@
 
 | | |
 |---|---|
-| **Versión** | **2.0.7** · [todas las versiones](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versión** | **2.0.8** · [todas las versiones](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Necesita** | Python 3.11+ y la CLI de GitHub (`gh auth login`); nada más (la vista de consola usa el paquete opcional `rich`) |
 | **Se abre** | en una página de `127.0.0.1` solamente, en ocho idiomas |
 | **Escribe en GitHub** | nunca por sí solo: solo las órdenes por lotes que lances con un `--go` explícito |
@@ -76,7 +76,7 @@
 
 <!-- glance:begin -->
 
-**Medido hoy** (v2.0.7)
+**Medido hoy** (v2.0.8)
 
 | | |
 |---|---|
@@ -94,7 +94,7 @@ Cada línea es una parte de este repositorio y la luz dice hasta dónde llega ho
 
 | Área | Estado | Qué significa aquí |
 |---|---|---|
-| Monitor y página | 🟢 | Funciona cada día con una cuenta real; los tests corren en el CI en tres sistemas. |
+| Monitor y página | 🟢 | Funciona cada día con una cuenta real; los tests corren en el CI en Ubuntu y Windows. |
 | Centinela (A1..A13) | 🟢 | Funciona cada día con una cuenta real; sus niveles y filas se prueban con fixtures. |
 | Notificaciones | 🟡 | Probadas contra servidores simulados; no todos los canales se han probado con el servicio real. |
 | Conexión con una IA y MCP | 🟡 | El flujo, el estado, el flujo en directo, el hook y las herramientas MCP se prueban con un servidor real y un cliente simulado; ningún usuario independiente los ha usado todavía. |
@@ -104,7 +104,7 @@ Cada línea es una parte de este repositorio y la luz dice hasta dónde llega ho
 | Imagen de Docker y modo servicio | 🟡 | La imagen se construye y se prueba en la CI (sin root, de solo lectura, con un acceso revocado); aún poco tiempo como servicio de larga duración. |
 | Modo equipo y varias cuentas | 🟡 | Probado con procesos reales y usuarios simulados; un equipo real no lo ha usado durante mucho tiempo. |
 | Almacenamiento (ficheros y SQLite) | 🟡 | Probado con los dos soportes y las migraciones entre ellos; una base de datos de meses todavía no ha pasado por una actualización. |
-| Linux y macOS | 🟠 | Probados solo en el CI; el uso diario es en Windows. |
+| Linux y macOS | 🟠 | Linux se prueba solo en el CI; macOS no se prueba en el CI por ahora; el uso diario es en Windows. |
 
 <!-- glance:end -->
 

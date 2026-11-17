@@ -68,7 +68,7 @@
 
 | | |
 |---|---|
-| **Version** | **2.0.7** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **2.0.8** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Prérequis** | Python 3.11+ et la CLI GitHub (`gh auth login`) ; rien d'autre (la vue console utilise le paquet optionnel `rich`) |
 | **S'ouvre** | sur une page `127.0.0.1` uniquement, en huit langues |
 | **Écrit sur GitHub** | jamais seul : seulement les commandes par lots que vous lancez avec un `--go` explicite |
@@ -76,7 +76,7 @@
 
 <!-- glance:begin -->
 
-**Mesuré aujourd'hui** (v2.0.7)
+**Mesuré aujourd'hui** (v2.0.8)
 
 | | |
 |---|---|
@@ -94,7 +94,7 @@ Chaque ligne est une partie de ce dépôt et le voyant dit où elle en est aujou
 
 | Domaine | État | Ce que cela veut dire ici |
 |---|---|---|
-| Moniteur et page | 🟢 | Tourne chaque jour sur un vrai compte ; les tests tournent dans le CI sur trois systèmes. |
+| Moniteur et page | 🟢 | Tourne chaque jour sur un vrai compte ; les tests tournent dans le CI sous Ubuntu et Windows. |
 | Sentinelle (A1..A13) | 🟢 | Tourne chaque jour sur un vrai compte ; ses niveaux et lignes sont testés avec des fixtures. |
 | Notifications | 🟡 | Testées contre des serveurs simulés ; tous les canaux n'ont pas été essayés avec le vrai service. |
 | Connexion à un outil d'IA et MCP | 🟡 | Le flux, l'état, le flux en direct, le hook et les outils MCP sont testés avec un vrai serveur et un client simulé ; aucun utilisateur indépendant ne les a encore utilisés. |
@@ -104,7 +104,7 @@ Chaque ligne est une partie de ce dépôt et le voyant dit où elle en est aujou
 | Image Docker et mode service | 🟡 | L'image est construite et testée dans la CI (sans root, en lecture seule, avec une connexion révoquée) ; encore peu de temps comme service de longue durée. |
 | Mode équipe et plusieurs comptes | 🟡 | Testé avec de vrais processus et des utilisateurs simulés ; une vraie équipe ne l'a pas utilisé longtemps. |
 | Stockage (fichiers et SQLite) | 🟡 | Testé avec les deux supports et les migrations entre eux ; une base de données de plusieurs mois n'a pas encore connu de mise à jour. |
-| Linux et macOS | 🟠 | Testés seulement dans le CI ; l'usage quotidien est sous Windows. |
+| Linux et macOS | 🟠 | Linux n'est testé que dans le CI ; macOS n'est pas testé dans le CI pour l'instant ; l'usage quotidien est sous Windows. |
 
 <!-- glance:end -->
 
