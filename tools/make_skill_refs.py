@@ -137,6 +137,7 @@ SIGNAL_NOTES = {
     "now.fail24": "failures and successes of the last 24 hours",
     "alerts.unresolved": "workflows red on the default branch (act when there is one)",
     "alerts.issues": "open issues of failed builds",
+    "alerts.silences": "silences by pattern (alerts.silences) past their review date, expired or without a date: each one needs a decision of a person",
     "repos.errors": "repositories read without data",
     "quota": "the allowance of the API: low, used up or fine",
     "quota.trend": "who spends the allowance (the monitor or other tools)",
