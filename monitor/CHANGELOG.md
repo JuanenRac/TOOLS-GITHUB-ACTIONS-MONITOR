@@ -11,6 +11,10 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+### Fixed
+
+- **The webhook through the supervisor of the accounts answered 400 to every delivery**: the process of an account, when the supervisor forwards a delivery to it, could not tell who sent it because a standard module was used without being imported, so a valid signature, a wrong one, a missing one, a repeated delivery and a large body all got the same generic answer. The sender is read again as before (a valid key of the supervisor gives the address it reports, any other falls back to the peer), and a test now looks through the whole package for a standard module used in a function without being imported.
+
 ## [2.0.9]
 
 ### Security
