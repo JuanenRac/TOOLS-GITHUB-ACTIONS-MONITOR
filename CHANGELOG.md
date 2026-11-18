@@ -14,6 +14,11 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **One card per signal in the panels of Collaboration, Security, Delivery and Supply chain**: the same container as the CI sentinel (state lamp, counter, list, filter by repository and a line of help) for each of the 6, 6, 6 and 5 signals the sentinels raise; Delivery and Supply chain also have a table by code and filters by repository and level. A test compares the cards with the codes the sentinels really raise, in the eight languages.
 - **A much richer Daily trend**: 18 series (stuck builds, share of green workflows, repositories with CI up to date, critical and high alerts, old Dependabot PRs, open issues, unsigned waiting, ready to release, average health, API allowance used, Actions minutes and the six that existed) from the history the sentinel already keeps, with no call to GitHub. Each card shows the value now, the change against yesterday and 7 days ago and a sparkline; the large chart has a range of 7, 30 or 60 days, a threshold, marks of monitor updates and incidents, a tooltip that also answers to the arrow keys, a second series to compare, a legend that switches the lines and CSV/JSON download. A day saved before a series existed is a gap, never a zero. Drawn in SVG, with dashes besides colour, for the light, dark and high-contrast themes and for phones.
+- **The briefs for the AI tools reach the command line and the MCP server**: `monitor_cli.py briefs index` lists the catalogued briefs, `briefs show TAB` prints the signals of one tab and `briefs all` every brief in one document; the MCP server has the read-only tools `briefs_index` and `brief_tab` (a tab name or `all`). A test checks that the page, the HTTP routes, the command and the tools list the same tabs; nothing is written and the texts go through the same cleaner.
+
+### Fixed
+
+- **The cleaner of text no longer slows down with long texts**: five thousand characters of letters, dots, digits or dashes took between two and six seconds because several patterns tried to match from every position; the prefixes and addresses now have the length that real names have, the time grows with the size of the text and a test bounds it. Secrets after a long run are still found.
 
 ## [2.1.3]
 

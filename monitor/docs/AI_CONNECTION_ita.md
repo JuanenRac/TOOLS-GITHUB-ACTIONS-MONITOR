@@ -43,9 +43,9 @@ Il monitor non dipende da un assistente né da un modello: uno strumento di IA u
 |---|---|---|---|
 | leggere file | File | leggere `ai/INDEX.json`, poi `ai/ALERTS_BRIEF.md`, `ai/ai_alerts.jsonl` e `ai/LESSONS.md` | `ai_alerts.enabled` |
 | fare richieste HTTP | HTTP | `GET /api/ai/brief`, `/api/ai/state`, `/api/ai/lessons` | il token di accesso in modalità di rete |
-| parlare MCP | MCP | `python bin/mcp_server.py` (sola lettura; `--allow-ack`, `--allow-lessons` per il poco che può scrivere) | la configurazione MCP dello strumento che punta a quel comando |
+| parlare MCP | MCP | `python bin/mcp_server.py` [`briefs_index`, `brief_tab`] (sola lettura; `--allow-ack`, `--allow-lessons` per il poco che può scrivere) | la configurazione MCP dello strumento che punta a quel comando |
 | tenere aperta una connessione | Flusso | `GET /api/ai/stream?only=real` | `ai_alerts.stream.enabled` |
-| eseguire comandi | Riga di comando | `python bin/monitor_cli.py alerts`, `lessons brief --repo NOME`, `ai doctor`, `ai-hook install` | Python sullo stesso computer |
+| eseguire comandi | Riga di comando | `python bin/monitor_cli.py alerts`, `lessons brief --repo NOME`, `briefs show TAB`, `ai doctor`, `ai-hook install` | Python sullo stesso computer |
 
 Le istruzioni per l'IA sono due skill. `monitor_cli.py install-skill external --dest CARTELLA` le copia nella cartella da cui il tuo strumento legge skill o regole; va bene qualsiasi strumento che legga file Markdown e il testo non nomina alcun assistente. Le skill viaggiano con il monitor e ne hanno la versione: `GET /api/skills` restituisce `monitor_version` e `monitor_cli.py --version` la stampa. Dopo aver aggiornato il monitor, reinstalla in una cartella vuota o rimuovi la vecchia copia (un file modificato non viene mai sovrascritto).
 

@@ -43,9 +43,9 @@ Le moniteur ne dépend ni d'un assistant ni d'un modèle : un outil d'IA utilise
 |---|---|---|---|
 | lire des fichiers | Fichiers | lire `ai/INDEX.json`, puis `ai/ALERTS_BRIEF.md`, `ai/ai_alerts.jsonl` et `ai/LESSONS.md` | `ai_alerts.enabled` |
 | faire des requêtes HTTP | HTTP | `GET /api/ai/brief`, `/api/ai/state`, `/api/ai/lessons` | le jeton d'accès en mode réseau |
-| parler MCP | MCP | `python bin/mcp_server.py` (lecture seule ; `--allow-ack`, `--allow-lessons` pour le peu qu'il peut écrire) | la configuration MCP de l'outil pointant vers cette commande |
+| parler MCP | MCP | `python bin/mcp_server.py` [`briefs_index`, `brief_tab`] (lecture seule ; `--allow-ack`, `--allow-lessons` pour le peu qu'il peut écrire) | la configuration MCP de l'outil pointant vers cette commande |
 | garder une connexion ouverte | Flux | `GET /api/ai/stream?only=real` | `ai_alerts.stream.enabled` |
-| exécuter des commandes | Ligne de commande | `python bin/monitor_cli.py alerts`, `lessons brief --repo NOM`, `ai doctor`, `ai-hook install` | Python sur le même ordinateur |
+| exécuter des commandes | Ligne de commande | `python bin/monitor_cli.py alerts`, `lessons brief --repo NOM`, `briefs show TAB`, `ai doctor`, `ai-hook install` | Python sur le même ordinateur |
 
 Les instructions pour l'IA sont deux skills. `monitor_cli.py install-skill external --dest DOSSIER` les copie dans le dossier où votre outil lit ses skills ou ses règles ; tout outil qui lit des fichiers Markdown peut les utiliser, et le texte ne nomme aucun assistant. Les skills voyagent avec le moniteur et portent sa version : `GET /api/skills` donne `monitor_version` et `monitor_cli.py --version` l'affiche. Après une mise à jour du moniteur, réinstallez dans un dossier vide ou supprimez l'ancienne copie (un fichier modifié n'est jamais écrasé).
 

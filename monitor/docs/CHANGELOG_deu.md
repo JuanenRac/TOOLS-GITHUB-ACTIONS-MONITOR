@@ -9,6 +9,14 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+### Hinzugefügt
+
+- **Die Briefs für die KI-Werkzeuge erreichen die Kommandozeile und den MCP-Server**: `monitor_cli.py briefs index` listet die katalogisierten Briefs, `briefs show TAB` gibt die Signale eines Tabs aus und `briefs all` alle Briefs in einem Dokument; der MCP-Server hat die nur lesenden Werkzeuge `briefs_index` und `brief_tab` (ein Tab-Name oder `all`). Ein Test prüft, dass Seite, HTTP-Routen, Befehl und Werkzeuge dieselben Tabs auflisten; es wird nichts geschrieben und die Texte laufen durch denselben Reiniger.
+
+### Behoben
+
+- **Der Textreiniger wird bei langen Texten nicht mehr langsam**: fünftausend Zeichen aus Buchstaben, Punkten, Ziffern oder Strichen brauchten zwei bis sechs Sekunden, weil mehrere Muster von jeder Position aus zu passen versuchten; Präfixe und Adressen haben jetzt die Länge echter Namen, die Zeit wächst mit der Textgröße und ein Test begrenzt sie. Geheimnisse nach einer langen Folge werden weiterhin gefunden.
+
 ## [2.1.3]
 
 ### Geändert

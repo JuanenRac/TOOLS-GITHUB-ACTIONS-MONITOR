@@ -43,9 +43,9 @@ Der Monitor hängt nicht von einem Assistenten oder einem Modell ab: Ein KI-Werk
 |---|---|---|---|
 | Dateien lesen | Dateien | `ai/INDEX.json` lesen, dann `ai/ALERTS_BRIEF.md`, `ai/ai_alerts.jsonl` und `ai/LESSONS.md` | `ai_alerts.enabled` |
 | HTTP-Anfragen stellen | HTTP | `GET /api/ai/brief`, `/api/ai/state`, `/api/ai/lessons` | das Zugriffstoken im Netzwerkmodus |
-| MCP sprechen | MCP | `python bin/mcp_server.py` (nur lesend; `--allow-ack`, `--allow-lessons` für das Wenige, das geschrieben werden darf) | die MCP-Konfiguration des Werkzeugs, die auf diesen Befehl zeigt |
+| MCP sprechen | MCP | `python bin/mcp_server.py` [`briefs_index`, `brief_tab`] (nur lesend; `--allow-ack`, `--allow-lessons` für das Wenige, das geschrieben werden darf) | die MCP-Konfiguration des Werkzeugs, die auf diesen Befehl zeigt |
 | eine Verbindung offen halten | Stream | `GET /api/ai/stream?only=real` | `ai_alerts.stream.enabled` |
-| Befehle ausführen | Kommandozeile | `python bin/monitor_cli.py alerts`, `lessons brief --repo NAME`, `ai doctor`, `ai-hook install` | Python auf demselben Rechner |
+| Befehle ausführen | Kommandozeile | `python bin/monitor_cli.py alerts`, `lessons brief --repo NAME`, `briefs show TAB`, `ai doctor`, `ai-hook install` | Python auf demselben Rechner |
 
 Die Anweisungen für die KI sind zwei Skills. `monitor_cli.py install-skill external --dest ORDNER` kopiert sie in den Ordner, aus dem dein Werkzeug seine Skills oder Regeln liest; jedes Werkzeug, das Markdown-Dateien liest, kann sie nutzen, und der Text nennt keinen Assistenten. Die Skills reisen mit dem Monitor und haben dessen Version: `GET /api/skills` liefert `monitor_version`, und `monitor_cli.py --version` gibt sie aus. Installiere nach einem Update des Monitors erneut in einen leeren Ordner oder entferne die alte Kopie (eine bearbeitete Datei wird nie überschrieben).
 
