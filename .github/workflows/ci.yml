@@ -113,6 +113,7 @@ jobs:
           python -m unittest discover -s monitor/tests -p "test_194_sort_now.py" -v
           python -m unittest discover -s monitor/tests -p "test_196_sort_alerts.py" -v
           python -m unittest discover -s monitor/tests -p "test_195_ports.py" -v
+          python -m unittest discover -s monitor/tests -p "test_mon102_page_5xx.py" -v
       - name: The wall screens in every language and size, the screens page, the notification page, the AI preset page and the skipped list
         env:
           MONITOR_BROWSER_TESTS: "1"
