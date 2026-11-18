@@ -122,7 +122,10 @@ class _Third(BaseHTTPRequestHandler):
 
     def do_GET(self):
         _Third.hits.append((self.path, dict(self.headers)))
+        self.rfile.read(int(self.headers.get("Content-Length") or 0))      # the whole request is read before the answer: closing on unread data makes Windows reset the connection under the client
         self.send_response(200)
+        self.send_header("Content-Length", "0")
+        self.send_header("Connection", "close")
         self.end_headers()
 
     do_POST = do_GET
@@ -183,8 +186,8 @@ class TheIntegratedAIKeepsTheKeyAndStaysLocal(unittest.TestCase):
             cfg = sentinel_ai.ai_config({"ai": {"provider": "ollama", "ollama_url": f"http://localhost:{local.server_address[1]}"}})
             try:
                 sentinel_ai._post_json(cfg["ollama_url"] + "/api/chat", {}, {}, 5)
-            except ValueError:
-                pass      # the double answers with an empty body: only the route matters
+            except (ValueError, ConnectionError):
+                pass      # the double answers with an empty body: only the route matters (a connection that the system drops after the request arrived does not change where it went)
         self.assertEqual([h for h in _Third.hits], [(("/api/chat"), _Third.hits[0][1])])
         self.assertIn("localhost", _Third.hits[0][1].get("Host", ""))
         self.assertEqual(len(_Third.hits), 1, "the request arrived once, at the local server, not at the proxy")
