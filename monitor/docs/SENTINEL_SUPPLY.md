@@ -9,6 +9,8 @@
 
 The fourth sentinel, next to the CI one, Collab and Security. It reads, without writing anything to GitHub, the workflow files of each repository (`.github/workflows`, through the API, no clone needed) and flags what lets a moved tag or an outsider act with the repository's token and code. It turns them into alerts of the Alerts tab (origin Supply chain). It is in the Complete edition, off by default (`sentinels.supply.enabled`); Lite has no sentinels.
 
+It has its own entry in the Sentinel group of the menu, **Supply chain sentinel** (address `#sentinel-supply`), shown while the sentinel is on: one panel with the open findings of each repository, the state of its cycle and what could not be read; the badge of the entry counts the errors.
+
 ## What it flags
 
 | Signal | Alert | Level | On by default |

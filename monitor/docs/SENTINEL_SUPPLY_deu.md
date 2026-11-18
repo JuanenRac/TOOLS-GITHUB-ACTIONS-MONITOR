@@ -9,6 +9,8 @@
 
 Der vierte Wächter, neben CI, Collab und Sicherheit. Er liest, ohne etwas auf GitHub zu schreiben, die Workflow-Dateien jedes Repositorys (`.github/workflows`, über die API, ohne Klon) und meldet, was einem verschobenen Tag oder einem Außenstehenden erlaubt, mit Token und Code des Repositorys zu handeln. Daraus macht er Meldungen des Tabs Meldungen (Herkunft Lieferkette). Er gehört zur Complete-Edition und ist standardmäßig aus (`sentinels.supply.enabled`); Lite hat keine Wächter.
 
+Er hat einen eigenen Eintrag in der Gruppe Sentinel des Menüs, **Lieferketten-Sentinel** (Adresse `#sentinel-supply`), sichtbar, solange der Sentinel an ist: ein Panel mit den offenen Befunden jedes Repositorys, dem Stand seines Zyklus und dem, was nicht gelesen werden konnte; das Zeichen des Eintrags zählt die Fehler.
+
 ## Was er meldet
 
 | Signal | Meldung | Stufe | Standardmäßig an |

@@ -9,6 +9,8 @@
 
 La cinquième sentinelle, à côté de celles de la CI, de Collab, de Sécurité et de Chaîne d'approvisionnement. Elle lit, sans rien écrire sur GitHub, les dernières versions publiées, les dernières étiquettes, le CHANGELOG et les fichiers de version que vous indiquez pour chaque dépôt (par l'API, sans clone) et signale ce qui a été construit mais pas livré. Elle en fait des alertes de l'onglet Alertes (origine Livraison). Elle est dans l'édition Complete, désactivée par défaut (`sentinels.delivery.enabled`) ; Lite n'a pas de sentinelles.
 
+Elle a sa propre entrée dans le groupe Sentinelle du menu, **Sentinelle de livraison** (adresse `#sentinel-delivery`), visible tant que la sentinelle est activée : un panneau avec les constats ouverts de chaque dépôt, l'état de son cycle et ce qui n'a pas pu être lu ; le badge de l'entrée compte les erreurs.
+
 ## Ce qu'elle signale
 
 | Signal | Alerte | Niveau | Activé par défaut |

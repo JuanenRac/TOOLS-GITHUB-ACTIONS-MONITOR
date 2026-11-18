@@ -16,7 +16,11 @@ L'outil de mise à jour fait passer une installation de n'importe quelle version
 - `py -3 monitor_updater.py --console` est un menu texte pour les serveurs, SSH et conteneurs.
 - `py -3 bin/monitor_cli.py update` est le même fichier lancé depuis le produit ; `update plan`, `update apply` et les autres commandes ci-dessous acceptent les options du tableau.
 
-## Ce qu'il fait, étape par étape
+## Le menu Mises à jour dans le moniteur
+
+L'édition Complète a le même outil de mise à jour dans sa page : **Système > Mises à jour**. Il montre la version installée et celle que la recherche a trouvée (réglage `updates.check` ; rien n'est demandé à GitHub tant qu'elle est désactivée ou que le moniteur est hors ligne), les notes de chaque version et, avec le bouton « Chercher des versions », la liste des versions publiées. Rien n'est téléchargé ni appliqué sans que vous appuyiez sur un bouton. Appliquer exige un administrateur sur l'ordinateur où tourne le moniteur (les routes `/api/updates/*` répondent 403 depuis le réseau) et une confirmation qui dit ce qui va se passer : le SHA-256 du zip comparé à SHA256SUMS, la copie faite d'abord (avec son dossier), la migration de la configuration et le redémarrage. La mise à jour tourne dans un processus à part : le moniteur s'arrête de lui-même, la mise à jour est appliquée, le moniteur redémarre avec la nouvelle version et la page se reconnecte ; si la nouvelle version ne démarre pas, la précédente est remise en place et démarrée. « Revenir à la version précédente » fait la même chose à l'envers. Les étapes, l'historique et le résultat s'affichent sur la page et sont notés dans le journal des actions. Elle n'est pas proposée dans l'édition Lite, dans un conteneur ni sous un gestionnaire de services (ils relancent le processus eux-mêmes : utilisez la ligne de commande), et une seule mise à jour tourne à la fois. Votre configuration, vos données, vos clés et vos journaux ne sont pas remplacés. Le fichier autonome reste le chemin de retour quand le moniteur ne démarre pas.
+
+## Ce qu'il fait, étape par étape Les routes qui le soutiennent sont `/api/updates/status`, `/api/updates/progress`, `/api/updates/history` (lecture seule) et `/api/updates/check`, `/api/updates/plan`, `/api/updates/apply`, `/api/updates/rollback` (administrateur, depuis cet ordinateur seulement).
 
 1. Détecte l'installation : dossier, version, édition (Complète ou Lite), configuration, données, ports, moniteur en marche ou non, conteneur ou service.
 2. Liste toutes les versions publiées sur GitHub (sans jeton) avec leur date et leurs notes, et repère l'installée et la dernière. Sans connexion, donnez-lui un zip avec `--zip`.
@@ -56,6 +60,8 @@ Sans commande, la page s'ouvre. Les commandes répondent une fois (ajoutez `--js
 | `--keep-old-defaults` | écrit l'ancienne valeur par défaut de chaque réglage jamais défini, pour que le comportement ne change pas |
 | `--adopt-new-defaults` | déplace aussi vers la nouvelle valeur les réglages qui ont encore l'ancienne |
 | `--start` | démarrer ensuite le moniteur et le vérifier |
+| `--handover` | le moniteur qui a lancé ce processus s'arrête de lui-même : l'attendre, appliquer, le redémarrer (si le démarrage échoue, la version précédente revient) |
+| `--status-file` | écrit la progression dans ce fichier JSON (le menu Mises à jour le lit) |
 | `--edition` | complete ou lite, si on ne peut pas la déduire |
 | `--allow-downgrade` | autoriser une version plus basse |
 | `--allow-container` | travailler quand même dans un conteneur (l'image n'est pas remplacée) |

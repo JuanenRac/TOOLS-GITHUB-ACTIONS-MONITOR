@@ -9,6 +9,8 @@
 
 El cuarto centinela, junto al de CI, Collab y Seguridad. Lee, sin escribir nada en GitHub, los ficheros de flujo de cada repositorio (`.github/workflows`, por la API, sin clonar) y avisa de lo que permite que una etiqueta movida o un extraño actúe con el token y el código del repositorio. Lo convierte en alertas de la pestaña Alertas (origen Cadena de suministro). Está en la edición Completa, apagado por defecto (`sentinels.supply.enabled`); Lite no tiene centinelas.
 
+Tiene su propia entrada en el grupo Centinela del menú, **Centinela de cadena de suministro** (dirección `#sentinel-supply`), visible mientras el centinela está encendido: un panel con los hallazgos abiertos de cada repositorio, el estado de su ciclo y lo que no se pudo leer; el distintivo de la entrada cuenta los errores.
+
 ## Qué señala
 
 | Señal | Alerta | Nivel | Activa por defecto |

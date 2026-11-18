@@ -26,7 +26,7 @@ DETACHED = 0x00000008
 
 class TheSource(unittest.TestCase):
     def test_the_three_sentinel_tabs_let_the_single_unfolded_panel_grow(self):
-        for part in ("#t-sci section>.body", "#t-scol section>.body", "#t-ssec section>.body", "flex-direction:column", "flex:1 1 auto", "max-height:none", "::details-content"):
+        for part in ("#t-sci section>.body", "#t-scol section>.body", "#t-ssec section>.body", "#t-sdel section>.body", "#t-ssup section>.body", "flex-direction:column", "flex:1 1 auto", "max-height:none", "::details-content"):
             self.assertIn(part, PAGE)
 
     def test_the_limit_of_the_unfolded_body_stays_everywhere_else(self):

@@ -9,6 +9,8 @@
 
 La quinta sentinella, accanto a quelle di CI, Collab, Sicurezza e Catena di fornitura. Legge, senza scrivere nulla su GitHub, le ultime release pubblicate, gli ultimi tag, il CHANGELOG e i file di versione indicati di ogni repository (tramite l'API, senza clone) e segnala ciò che è stato costruito ma non consegnato. Ne fa avvisi della scheda Avvisi (origine Consegna). È nell'edizione Complete, spenta per impostazione predefinita (`sentinels.delivery.enabled`); Lite non ha sentinelle.
 
+Ha una voce propria nel gruppo Sentinella del menu, **Sentinella di consegna** (indirizzo `#sentinel-delivery`), visibile finché la sentinella è accesa: un pannello con i rilievi aperti di ogni repository, lo stato del suo ciclo e ciò che non si è potuto leggere; il badge della voce conta gli errori.
+
 ## Cosa segnala
 
 | Segnale | Avviso | Livello | Attivo per impostazione predefinita |

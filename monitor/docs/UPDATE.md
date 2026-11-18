@@ -16,7 +16,11 @@ The updater moves an installation from any published version to any other (up or
 - `py -3 monitor_updater.py --console` is a text menu for servers, SSH and containers.
 - `py -3 bin/monitor_cli.py update` is the same file run from the product; `update plan`, `update apply` and the other commands below take the options of the table.
 
-## What it does, step by step
+## The Updates menu inside the monitor
+
+The Complete edition has the same updater inside its page: **System > Updates**. It shows the installed version and the one the check found (setting `updates.check`; nothing is asked of GitHub while it is off or the monitor is offline), the notes of each release and, with the button "Look for versions", the list of published ones. Nothing is downloaded or applied unless you press a button. Applying needs an administrator at the computer where the monitor runs (the routes `/api/updates/*` answer 403 from the network) and a confirmation that says what will happen: the SHA-256 of the zip against SHA256SUMS, the copy made first (with its folder), the migration of the configuration and the restart. The update runs in a process of its own: the monitor stops by itself, the update is applied, the monitor starts again with the new version and the page reconnects; if the new version does not start, the previous one is put back and started. "Go back to the version before" does the same in reverse. The steps, the history and the result are shown on the page and written in the log of actions. It is not offered in the Lite edition, in a container or under a service manager (they restart the process on their own: use the command line), and only one update runs at a time. Your configuration, data, keys and logs are not replaced. The stand-alone file stays as the way back when the monitor does not start.
+
+## What it does, step by step The routes behind it are `/api/updates/status`, `/api/updates/progress`, `/api/updates/history` (read only) and `/api/updates/check`, `/api/updates/plan`, `/api/updates/apply`, `/api/updates/rollback` (administrator, this computer only).
 
 1. Detects the installation: folder, version, edition (Complete or Lite), configuration, data, ports, whether the monitor is running, container or service.
 2. Lists every version published on GitHub (no token needed) with its date and notes, and marks the installed one and the latest. Without a connection, give it a zip with `--zip`.
@@ -56,6 +60,8 @@ Without a command the page opens. The commands answer once (add `--json` for a d
 | `--keep-old-defaults` | write the old default of every setting you never set, so the behaviour does not change |
 | `--adopt-new-defaults` | also move the settings that still hold the old default to the new one |
 | `--start` | start the monitor afterwards and check it |
+| `--handover` | the monitor that started this process stops by itself: wait for it, apply, start it again (a failed start brings the previous version back) |
+| `--status-file` | write the progress to this JSON file (the Updates menu reads it) |
 | `--edition` | complete or lite, when it cannot be told |
 | `--allow-downgrade` | permit a lower version |
 | `--allow-container` | work inside a container anyway (the image is not replaced) |

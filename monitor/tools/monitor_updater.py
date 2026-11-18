@@ -152,6 +152,7 @@ _add("sev.info", "info", "info", "Info", "info", "info", "情報", "信息", "in
 _add("dir.upgrade", "update", "actualización", "Aktualisierung", "mise à jour", "aggiornamento", "更新", "升级", "atualização")
 _add("dir.downgrade", "DOWNGRADE", "VUELTA A UNA VERSIÓN ANTERIOR", "DOWNGRADE", "RETOUR À UNE VERSION ANTÉRIEURE", "RITORNO A UNA VERSIONE PRECEDENTE", "ダウングレード", "降级", "REGRESSO A UMA VERSÃO ANTERIOR")
 _add("dir.same", "same version (reinstall)", "misma versión (reinstalar)", "gleiche Version (neu installieren)", "même version (réinstaller)", "stessa versione (reinstalla)", "同じバージョン（再インストール）", "相同版本（重新安装）", "mesma versão (reinstalar)")
+_add("c.handover", "The monitor on port {port} stops by itself, the update is applied and it starts again; if it does not start, the previous version comes back.", "El monitor del puerto {port} se detiene solo, se aplica la actualización y vuelve a arrancar; si no arranca, vuelve la versión anterior.", "Der Monitor auf Port {port} beendet sich selbst, das Update wird eingespielt und er startet neu; startet er nicht, kommt die vorherige Version zurück.", "Le moniteur du port {port} s'arrête de lui-même, la mise à jour est appliquée et il redémarre ; s'il ne démarre pas, la version précédente revient.", "Il monitor sulla porta {port} si ferma da solo, l'aggiornamento viene applicato e riparte; se non parte, torna la versione precedente.", "ポート {port} のモニターは自動的に停止し、更新が適用されて再起動します。起動しない場合は以前のバージョンに戻ります。", "端口 {port} 上的监视器会自行停止，应用更新后重新启动；若无法启动，则恢复到之前的版本。", "O monitor da porta {port} para sozinho, a atualização é aplicada e volta a arrancar; se não arrancar, regressa a versão anterior.")
 _add("c.running", "The monitor is running on port {port}: stop it before updating.", "El monitor está en marcha en el puerto {port}: páralo antes de actualizar.", "Der Monitor läuft auf Port {port}: beende ihn vor dem Update.", "Le moniteur tourne sur le port {port} : arrêtez-le avant de mettre à jour.", "Il monitor è in esecuzione sulla porta {port}: fermalo prima di aggiornare.", "モニターがポート {port} で稼働中です。更新前に停止してください。", "监视器正在端口 {port} 运行：更新前请先停止。", "O monitor está em execução na porta {port}: pare-o antes de atualizar.")
 _add("c.sha", "The SHA-256 of the zip does not match the published one: nothing was changed.", "El SHA-256 del zip no coincide con el publicado: no se cambió nada.", "Der SHA-256 des Zips stimmt nicht mit dem veröffentlichten überein: nichts wurde geändert.", "Le SHA-256 du zip ne correspond pas à celui publié : rien n'a été modifié.", "Lo SHA-256 dello zip non corrisponde a quello pubblicato: nulla è stato modificato.", "zipのSHA-256が公開値と一致しません。何も変更していません。", "zip 的 SHA-256 与发布值不符：未做任何更改。", "O SHA-256 do zip não coincide com o publicado: nada foi alterado.")
 _add("c.unverified", "This zip cannot be checked against a published SHA-256 (local file without SHA256SUMS).", "Este zip no se puede comprobar con un SHA-256 publicado (fichero local sin SHA256SUMS).", "Dieses Zip lässt sich nicht gegen einen veröffentlichten SHA-256 prüfen (lokale Datei ohne SHA256SUMS).", "Ce zip ne peut pas être vérifié avec un SHA-256 publié (fichier local sans SHA256SUMS).", "Questo zip non si può verificare con uno SHA-256 pubblicato (file locale senza SHA256SUMS).", "このzipは公開SHA-256で検証できません（SHA256SUMSのないローカルファイル）。", "无法用已发布的 SHA-256 校验此 zip（本地文件没有 SHA256SUMS）。", "Este zip não pode ser verificado com um SHA-256 publicado (ficheiro local sem SHA256SUMS).")
@@ -1322,7 +1323,10 @@ class Updater:
         for edition, state in inst["running"].items():
             if state.get("open"):
                 if state.get("ours"):
-                    add("running", "block", port=state["port"])
+                    if opts.get("handover"):
+                        add("handover", "info", port=state["port"])       # the monitor that asks for the update stops by itself (see handover_wait)
+                    else:
+                        add("running", "block", port=state["port"])
                 else:
                     add("port", "warn", port=state["port"])
         if direction == "downgrade":
@@ -1414,7 +1418,21 @@ class Updater:
         if confirm is not None and not confirm(plan):
             report.update(code=NOT_CONFIRMED, error="not confirmed")
             return report
+        if opts.get("handover") and not self.handover_wait(opts):
+            report.update(code=BLOCKED, error=tr("c.running", port=next((s["port"] for s in self.detect()["running"].values() if s.get("open") and s.get("ours")), 0)))
+            return report
         return self._execute(plan, opts, report)
+
+    def handover_wait(self, opts):
+        """Waits (up to handover_timeout seconds, 90 by default) until no monitor of this installation answers: the monitor that asked for the update stops itself right after it started this process."""
+        deadline = time.time() + float(opts.get("handover_timeout", 90))
+        while time.time() < deadline or float(opts.get("handover_timeout", 90)) <= 0:
+            if not any(s.get("open") and s.get("ours") for s in self.detect()["running"].values()):
+                return True
+            if float(opts.get("handover_timeout", 90)) <= 0:
+                return False
+            time.sleep(0.5)
+        return not any(s.get("open") and s.get("ours") for s in self.detect()["running"].values())
 
     def _step(self, report, journal, name, func):
         self.emit(name, "start")
@@ -1491,6 +1509,9 @@ class Updater:
                         started_process["proc"].terminate()
                         started_process["proc"].wait(timeout=10)
                 self.restore(bk, restore_data=bool(journal.get("monitor_started")) or "start" in journal["steps"])
+                if opts.get("handover"):
+                    with contextlib.suppress(BaseException):      # the monitor that was stopped for the update comes back in the version it had
+                        self._start(plan, installed, journal, {"proc": None}, dict(opts, start_timeout=60))
                 journal["status"] = "rolled_back"
                 self._write_journal(journal)
                 report.update(rolled_back=True, code=ROLLED_BACK)
@@ -1676,12 +1697,14 @@ class Updater:
                 return entry
         return None
 
-    def go_back(self, restore_data=None, confirm=None):
+    def go_back(self, restore_data=None, confirm=None, handover=False):
         report = {"ok": False, "code": OK, "error": None}
         entry = self.previous()
         if not entry:
             report.update(code=USAGE, error=tr("r.no_previous"))
             return report
+        if handover:
+            self.handover_wait({})
         inst = self.detect()
         for edition, state in inst["running"].items():
             if state.get("open") and state.get("ours"):
@@ -1699,6 +1722,9 @@ class Updater:
         self.restore(bk, restore_data=restore_data)
         self._history({"result": "manual_rollback", "from": entry["to"], "to": entry["from"], "undid": entry["backup"], "backup": entry["backup"]}, folders)
         report.update(ok=True, to=entry["from"], backup=str(bk), data=restore_data)
+        if handover:
+            with contextlib.suppress(BaseException):      # the monitor that was stopped for the return comes back in the version that was restored
+                self._start({"editions": self.detect(probing=False)["editions"]}, entry["from"], {"steps": {}}, {"proc": None}, {"start_timeout": 60})
         return report
 
     # --- the configuration alone (containers, volumes)
@@ -2236,6 +2262,32 @@ def run_tk(updater):
 COMMANDS = ("status", "releases", "plan", "apply", "migrate", "rollback", "history", "web", "tk", "console")
 
 
+class StatusFile:
+    """The progress of an update that the monitor started: a small JSON file the page of the monitor reads (also after the monitor restarted). One writer, replaced atomically."""
+
+    def __init__(self, path, kind):
+        self.path = Path(path) if path else None
+        self.doc = {"kind": kind, "running": True, "started": iso_now(), "events": [], "text": "", "report": None, "pid": os.getpid()}
+        self.write()
+
+    def event(self, event):
+        self.doc["events"].append(event)
+        self.write()
+
+    def finish(self, text, report):
+        self.doc.update(running=False, finished=iso_now(), text=text, report=report)
+        self.write()
+
+    def write(self):
+        if self.path is None:
+            return
+        with contextlib.suppress(OSError):
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            tmp = self.path.with_suffix(".tmp")
+            tmp.write_text(json.dumps(self.doc, default=str), encoding="utf-8")
+            os.replace(tmp, self.path)
+
+
 def build_parser():
     parser = argparse.ArgumentParser(prog="monitor_updater.py", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("command", nargs="?", choices=COMMANDS, help="default: web (the page in the browser)")
@@ -2252,6 +2304,8 @@ def build_parser():
     parser.add_argument("--keep-old-defaults", action="store_true")
     parser.add_argument("--adopt-new-defaults", action="store_true")
     parser.add_argument("--start", action="store_true")
+    parser.add_argument("--handover", action="store_true", help="the monitor that started this process stops by itself: wait for it, apply, start it again (a failed start brings the previous version back)")
+    parser.add_argument("--status-file", help="write the progress of apply/rollback to this JSON file (the page of the monitor reads it)")
     parser.add_argument("--edition", choices=("complete", "lite"))
     parser.add_argument("--allow-downgrade", action="store_true")
     parser.add_argument("--allow-container", action="store_true", help="work inside a container anyway (the image is not replaced by this)")
@@ -2268,7 +2322,7 @@ def build_parser():
 
 def options_of(args):
     policy = "keep_old" if args.keep_old_defaults else ("adopt_new" if args.adopt_new_defaults else "conservative")
-    return {"policy": policy, "dry_run": args.dry_run, "start": args.start, "edition": args.edition, "allow_downgrade": args.allow_downgrade, "allow_container": args.allow_container}
+    return {"policy": policy, "dry_run": args.dry_run, "start": args.start, "handover": args.handover, "edition": args.edition, "allow_downgrade": args.allow_downgrade, "allow_container": args.allow_container}
 
 
 def default_root(args):
@@ -2343,9 +2397,14 @@ def main(argv=None, out=None, inp=input):
                     return True
                 say(render_plan(plan))
                 return inp(tr("p.confirm")).strip().lower() in ("yes", "y", "si", "sí", "ja", "oui", "sì", "sim", "是", "はい")
-            if not args.json:
+            status = StatusFile(args.status_file, "apply") if args.status_file else None
+            if status is not None:
+                updater.emit_cb = status.event
+            elif not args.json:
                 updater.emit_cb = lambda e: say(f"  {tr('st.' + e['step'])}: {e['status']}")
             report = updater.apply(args.to, options_of(args), confirm)
+            if status is not None:
+                status.finish(render_result(report) or str(report.get("error") or ""), {k: v for k, v in report.items() if k != "plan"})
             if args.json:
                 say(json.dumps({k: v for k, v in report.items() if k != "plan"}, indent=1, default=str))
             else:
@@ -2379,7 +2438,10 @@ def main(argv=None, out=None, inp=input):
             return OK
         if command == "rollback":
             restore = {"yes": True, "no": False, "auto": None}[args.restore_data]
-            report = updater.go_back(restore, None if args.yes else (lambda entry: inp(tr("btn.rollback") + f" ({entry['to']} -> {entry['from']})? " + tr("p.confirm")).strip().lower() in ("yes", "y", "si", "sí", "ja", "oui", "sì", "sim", "是", "はい")))
+            status = StatusFile(args.status_file, "rollback") if args.status_file else None
+            report = updater.go_back(restore, None if args.yes else (lambda entry: inp(tr("btn.rollback") + f" ({entry['to']} -> {entry['from']})? " + tr("p.confirm")).strip().lower() in ("yes", "y", "si", "sí", "ja", "oui", "sì", "sim", "是", "はい")), handover=args.handover)
+            if status is not None:
+                status.finish(tr("r.back_ok", to=report.get("to"), backup=report.get("backup")) if report.get("ok") else str(report.get("error")), report)
             if args.json:
                 say(json.dumps(report, indent=1, default=str))
             else:

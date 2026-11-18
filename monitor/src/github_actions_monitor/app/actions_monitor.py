@@ -173,7 +173,7 @@ def state_dir():
     """Where the small state files of this process live: the folder of the account when this is the monitor of one account, else next to the code, as always."""
     return Path(CHILD["folder"]) if CHILD["folder"] else paths.folder("data")
 LITE_SHARED = ("/api/ai/state", "/api/ai/stream", "/api/ai/brief", "/api/ai/alerts", "/api/ai/ack")      # the channels for an AI tool are the same in both editions
-LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/auth", "/api/notify", "/api/score", "/api/compare", "/api/report-files", "/api/ops", "/api/audit-log", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/chatops", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events")   # they do not exist in lite
+LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/auth", "/api/notify", "/api/score", "/api/compare", "/api/report-files", "/api/ops", "/api/audit-log", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/chatops", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events", "/api/updates")   # they do not exist in lite
 
 
 LITE_INHERIT = ("github_owner", "ecosystems", "ecosystems_file", "targets_file", "profiles_file", "exclude", "repos", "language", "runs_per_repo", "cold_runs_per_repo", "hot_hours", "stuck_minutes", "refresh_seconds", "cold_refresh_seconds")   # what a first lite start copies from actions_monitor.json
@@ -1514,7 +1514,8 @@ def panel_list(lang=None):
 AI_MODEL_POST = ("/api/ai/models/refresh", "/api/ai/models/test", "/api/ai/models/data", "/api/ai/doctor")      # the list of models of the provider, the test of one model, the table of data, the doctor
 THIS_COMPUTER_ACTIONS = ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test") + AI_MODEL_POST
 THIS_COMPUTER_ADVANCED = ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures",
-                          "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run", "/api/ops/backup", "/api/ops/purge")
+                          "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run", "/api/ops/backup", "/api/ops/purge",
+                          "/api/updates/check", "/api/updates/plan", "/api/updates/apply", "/api/updates/rollback")
 THIS_COMPUTER_POST = THIS_COMPUTER_ACTIONS + THIS_COMPUTER_ADVANCED
 
 
@@ -2863,7 +2864,11 @@ class Handler(BaseHTTPRequestHandler):
             try:
                 size = int(self.headers.get("Content-Length") or 0)
                 request = json.loads(self.rfile.read(size) if 0 < size <= 2048 else b"{}")
-                self.json_reply(handle_advanced_post(path, request if isinstance(request, dict) else {}, auth_http.acting_user(self)))
+                answer = handle_advanced_post(path, request if isinstance(request, dict) else {}, auth_http.acting_user(self))
+                self.json_reply(answer)
+                if path in ("/api/updates/apply", "/api/updates/rollback") and isinstance(answer, dict) and answer.get("started"):      # the process of the update is waiting for this one to stop
+                    from github_actions_monitor.ops import updates
+                    updates.stop_soon(self.server)
             except Exception:   # noqa: BLE001 - the answer never repeats the request: it could hold a token
                 self.json_reply({"ok": False, "status": "request"}, 400)
             return
@@ -3395,6 +3400,16 @@ class Handler(BaseHTTPRequestHandler):
                 return
             self.json_reply({"schema": 1, "account": CHILD["account"] or "", "enabled": audit_log.settings(config)["enabled"], "chain": audit_log.verify(), "entries": audit_log.read(200, CHILD["account"] or None),
                              "write_failures": audit_log.STATS["write_failures"], "last_write_error_at": audit_log.STATS["last_write_error_at"]})
+        elif path in ("/api/updates/status", "/api/updates/progress", "/api/updates/history"):      # the Updates menu: what is installed, what is new, the progress of an update, the updates done (Complete only; no path, no secret)
+            if not self.guard():
+                return
+            from github_actions_monitor.ops import updates
+            if path.endswith("progress"):
+                self.json_reply(updates.progress())
+            elif path.endswith("history"):
+                self.json_reply({"entries": updates.history()})
+            else:
+                self.json_reply(updates.status(toolconfig.raw_config(), TOOL_VERSION, update_info(read=False), lite=LITE["on"], demo=DEMO["on"]))
         elif path == "/api/ops/status":      # the operation of the installation: the last copy, the schedule, the purge switch and the retention in force (Complete only; no path, no secret)
             if not self.guard():
                 return
@@ -3917,6 +3932,40 @@ def ops_purge_on():
     return opsconf.settings(toolconfig.raw_config())["purge"]["enabled"]
 
 
+def handle_updates_post(path, request, who, config):
+    """check / plan / apply / rollback of the Updates menu. Nothing is downloaded or applied without the person pressing the button; apply and rollback need `confirm: true`; every answer is a short code."""
+    from github_actions_monitor.ops import updates
+    if LITE["on"] or CHILD["account"]:
+        return {"ok": False, "status": "lite" if LITE["on"] else "account"}
+    target = str(request.get("target") or "latest")[:40]
+    policy = str(request.get("policy") or "conservative")
+    lang = i18n.language()
+    edition = "lite" if LITE["on"] else "complete"
+    try:
+        if path.endswith("/check"):
+            notice = updatecheck.settings(config)
+            versions = updates.check(notice, LINK.state()["offline"])
+            _audit_plain("update_check", who, "releases", {"n": len(versions)}, "ok")
+            return {"ok": True, "versions": versions}
+        if path.endswith("/plan"):
+            return {"ok": True, "plan": updates.plan(target, policy)}
+        if path.endswith("/apply"):
+            answer = updates.apply(target, policy, request.get("confirm"), edition, lang, lite=LITE["on"], demo=DEMO["on"])
+            _audit_plain("update_apply", who, target, {"from": answer.get("from")}, "ok")
+            return {"ok": True, **answer}
+        if path.endswith("/rollback"):
+            answer = updates.rollback(request.get("confirm"), edition, lang, lite=LITE["on"], demo=DEMO["on"])
+            _audit_plain("update_rollback", who, "previous", None, "ok")
+            return {"ok": True, **answer}
+    except updates.UpdatesError as error:
+        _audit_plain("update_" + path.rsplit("/", 1)[-1], who, target, {"status": error.code}, "error")
+        return {"ok": False, "status": error.code}
+    except Exception as error:   # noqa: BLE001 - the updater may fail in many ways; the page gets a code, the log gets the line
+        degraded.note("updates", error)
+        return {"ok": False, "status": "failed"}
+    return {"ok": False, "status": "unknown"}
+
+
 def handle_advanced_post(path, request, who=""):
     """The plan / confirm pairs of the actions on GitHub and of `act`, the token of GitHub and the welcome flag. Answers never contain the request."""
     config = toolconfig.raw_config()
@@ -3936,6 +3985,8 @@ def handle_advanced_post(path, request, who=""):
         entry = alert_center.mute(scope, value, request.get("hours"), config, who=who, until_change=until_change)
         _audit_plain("alert_mute", who, f"{scope}:{value}"[:120], {"hours": request.get("hours")}, "ok" if entry is not None else "error")
         return {"ok": entry is not None, "mute": entry}
+    if path.startswith("/api/updates/"):      # the Updates menu (admin, from this computer, with the one-use token); Complete only
+        return handle_updates_post(path, request, who, config)
     if path == "/api/ops/backup":      # make a copy now (admin, from this computer); Complete only. The answer says whether it worked, never a path of the person or a secret
         if LITE["on"]:
             return {"ok": False, "status": "lite"}

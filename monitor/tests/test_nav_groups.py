@@ -65,7 +65,7 @@ class Groups(unittest.TestCase):
 
 @unittest.skipUnless(shutil.which("node"), "node is not installed")
 class SentinelMenus(unittest.TestCase):
-    def run_case(self, state):
+    def run_case(self, state, extra=(None, None)):
         start = PAGE.index("function sentIsOn(")
         end = PAGE.index("function sentOff(")
         script = """
@@ -73,11 +73,11 @@ const LITE=false, QS=new URLSearchParams(""), I18N={screens:{}}, TABS=%s;
 const els={};const mk=id=>els[id]||(els[id]={id,hidden:true});
 const $=id=>mk("x"+id);
 global.document={documentElement:{dataset:{}},querySelector:()=>mk("group")};
-let SENT=%s, COLLAB=%s, SECUR=%s;
+let SENT=%s, COLLAB=%s, SECUR=%s, SDEL=%s, SSUP=%s;
 %s
 sentMenus();
-console.log(JSON.stringify(["sent","sci","scol","ssec"].filter(k=>!els["xn-"+k].hidden).concat(els.group.hidden?["GROUP-HIDDEN"]:[])));
-""" % (json.dumps(tabs()), *[json.dumps(v) for v in state], PAGE[start:end].replace("$(\"n-\"+k)", "$(\"n-\"+k)"))
+console.log(JSON.stringify(["sent","sci","scol","ssec","sdel","ssup"].filter(k=>!els["xn-"+k].hidden).concat(els.group.hidden?["GROUP-HIDDEN"]:[])));
+""" % (json.dumps(tabs()), *[json.dumps(v) for v in (*state, *extra)], PAGE[start:end].replace("$(\"n-\"+k)", "$(\"n-\"+k)"))
         done = subprocess.run(["node", "-e", script], capture_output=True, text=True, timeout=60, **({"creationflags": 0x08000000} if os.name == "nt" else {}))
         self.assertEqual(done.returncode, 0, done.stderr)
         return json.loads(done.stdout.strip())
@@ -91,8 +91,15 @@ console.log(JSON.stringify(["sent","sci","scol","ssec"].filter(k=>!els["xn-"+k].
         self.assertEqual(self.run_case([off, off, off]), ["GROUP-HIDDEN"])
         self.assertEqual(self.run_case([None, None, None]), ["GROUP-HIDDEN"])
 
+    def test_the_delivery_and_supply_chain_sentinels_have_their_own_menu_like_the_other_three(self):
+        on, off = {"enabled": True}, {"enabled": False}
+        self.assertEqual(self.run_case([off, off, off], (on, None)), ["sent", "sdel"])
+        self.assertEqual(self.run_case([off, off, off], (None, on)), ["sent", "ssup"])
+        self.assertEqual(self.run_case([on, on, on], (on, on)), ["sent", "sci", "scol", "ssec", "sdel", "ssup"])
+        self.assertEqual(self.run_case([off, off, off], (off, off)), ["GROUP-HIDDEN"])
+
     def test_an_off_sentinel_says_so_and_points_to_its_switch(self):
-        for key in ("sentinel.enabled", "sentinels.collab.enabled", "sentinels.security.enabled"):
+        for key in ("sentinel.enabled", "sentinels.collab.enabled", "sentinels.security.enabled", "sentinels.delivery.enabled", "sentinels.supply.enabled"):
             self.assertIn(f'"{key}"', PAGE)
         self.assertIn("data-sent-switch", PAGE)
         self.assertIn("ui.sentinel_off_go", PAGE)

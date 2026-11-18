@@ -9,6 +9,8 @@
 
 El quinto centinela, junto al de CI, Collab, Seguridad y Cadena de suministro. Lee, sin escribir nada en GitHub, las últimas versiones publicadas, las últimas etiquetas, el CHANGELOG y los ficheros de versión que indiques de cada repositorio (por la API, sin clonar) y avisa de lo que se construyó pero no se entregó. Lo convierte en alertas de la pestaña Alertas (origen Entrega). Está en la edición Complete, apagado por defecto (`sentinels.delivery.enabled`); Lite no tiene centinelas.
 
+Tiene su propia entrada en el grupo Centinela del menú, **Centinela de entrega** (dirección `#sentinel-delivery`), visible mientras el centinela está encendido: un panel con los hallazgos abiertos de cada repositorio, el estado de su ciclo y lo que no se pudo leer; el distintivo de la entrada cuenta los errores.
+
 ## Qué señala
 
 | Señal | Alerta | Nivel | Activa por defecto |
