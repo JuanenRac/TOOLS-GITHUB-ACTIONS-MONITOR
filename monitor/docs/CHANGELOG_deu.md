@@ -29,6 +29,14 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **`tools/backup_storage.py` schreibt das Paket des Produkts**: Seine Sicherungen sind jetzt das Paket von `backup create` (Format 2, die Daten der Konten mit von Geheimnissen bereinigten Einstellungen) und es nimmt `--account` an; Sicherungen des ersten Formats lassen sich damit weiter prüfen und wiederherstellen.
 
+### Behoben
+
+- **Das Statusetikett eines Detailbereichs bleibt in einer Zeile**: Im Reiter Wächter wurde das Etikett (zum Beispiel das, das sagt, dass gehandelt werden muss) in der Überschrift jedes Bereichs von Detail je Ebene auf einen Buchstaben pro Zeile gequetscht, in allen Sprachen und vor allem auf dem Handy. Es schrumpft nicht mehr und bricht nicht mehr mitten im Wort um, und ein Test in einem echten Browser misst es in den acht Sprachen, breit und schmal.
+
+### Sicherheit
+
+- **Die Links, die die Seite aus Daten baut, werden durch Lesen der Adresse geprüft, nicht an den ersten Buchstaben**: Nur eine https-Adresse von GitHub (oder des Hosts, den Sie für GitHub Enterprise angeben und der auch http sein darf) ohne Benutzername und Passwort geht durch; eine Skript-Adresse, ein ähnlich aussehender Host, ein Leerzeichen, ein Steuerzeichen oder ein Backslash werden zu einem leeren Link.
+
 ## [2.0.9]
 
 ### Sicherheit

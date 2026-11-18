@@ -14,6 +14,7 @@ when this file and `tool_version.py` disagree.
 ### Fixed
 
 - **The webhook through the supervisor of the accounts answered 400 to every delivery**: the process of an account, when the supervisor forwards a delivery to it, could not tell who sent it because a standard module was used without being imported, so a valid signature, a wrong one, a missing one, a repeated delivery and a large body all got the same generic answer. The sender is read again as before (a valid key of the supervisor gives the address it reports, any other falls back to the peer), and a test now looks through the whole package for a standard module used in a function without being imported.
+- **The status label of a detail panel stays on one line**: in the Sentinel tab the label (for example the one that says something must be done) in the heading of each panel of Detail by layer was squeezed to one letter per line, in every language and especially on a phone. It no longer shrinks or breaks inside a word, and a test in a real browser measures it in the eight languages, wide and narrow.
 
 ### Added
 
@@ -35,6 +36,10 @@ when this file and `tool_version.py` disagree.
 
 - **`tools/backup_storage.py` writes the package of the product**: its backups are now the package of `backup create` (format 2, the data of the accounts with their settings cleaned of secrets) and it takes `--account`; the backups of the first format still verify and restore with it.
 - **The release gate says WHICH test failed, keeps the whole output and can accept a green run it has already seen**: a failed suite (the ordinary one or the one of the extracted zip) now names the failing tests and saves its complete output (`MONITOR_RELEASE_LOG_DIR`, else the temporary folder) instead of showing only the last lines, which were usually warnings. `tools/make_release.py --accept-green-suite RECORD --commit SHA` takes the record of a complete green run of that very commit (finished, no failure, no error, every test run) in place of running the ordinary suite again, and `--skip-clean-suite` also skips the suite of the extracted zip while the smoke checks of the clean install still run and the gate says so; a record of another commit, an unfinished one or one with a failure is refused.
+
+### Security
+
+- **The links the page builds from data are checked by reading the address, not by its first letters**: only an https address of GitHub (or of the host you set for GitHub Enterprise, which may also be http) with no user name or password passes; a script address, a look-alike host, a blank, a control character or a backslash turns into an empty link.
 
 ## [2.0.9]
 

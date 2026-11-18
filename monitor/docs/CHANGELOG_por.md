@@ -29,6 +29,14 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - **`tools/backup_storage.py` escreve o pacote do produto**: as suas cópias são agora o pacote de `backup create` (formato 2, os dados das contas com as definições limpas de segredos) e aceita `--account`; as cópias do primeiro formato continuam a verificar-se e a restaurar-se com ele.
 
+### Corrigido
+
+- **A etiqueta de estado de um painel de detalhe fica numa só linha**: no separador do Sentinela, a etiqueta (por exemplo a que diz que é preciso agir) no cabeçalho de cada painel de Detalhe por camada era comprimida para uma letra por linha, em todos os idiomas e sobretudo no telemóvel. Já não encolhe nem se parte no meio de uma palavra, e um teste num navegador real mede-a nos oito idiomas, largo e estreito.
+
+### Segurança
+
+- **As ligações que a página constrói a partir de dados verificam-se lendo o endereço, não pelas primeiras letras**: só passa um endereço https do GitHub (ou do servidor que indicar para o GitHub Enterprise, que também pode ser http) sem utilizador nem palavra-passe; um endereço de script, um servidor parecido, um espaço, um carácter de controlo ou uma barra invertida passam a ser uma ligação vazia.
+
 ## [2.0.9]
 
 ### Segurança

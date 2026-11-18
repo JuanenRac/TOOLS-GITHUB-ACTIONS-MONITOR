@@ -29,6 +29,14 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - **`tools/backup_storage.py` escribe el paquete del producto**: sus copias son ahora el paquete de `backup create` (formato 2, los datos de las cuentas con sus ajustes limpios de secretos) y admite `--account`; las copias del primer formato se siguen verificando y restaurando con él.
 
+### Corregido
+
+- **La etiqueta de estado de un panel de detalle se queda en una línea**: en la pestaña del Centinela, la etiqueta (por ejemplo la que dice que hay que actuar) del encabezado de cada panel de Detalle por capa se partía en una letra por línea, en todos los idiomas y sobre todo en el móvil. Ya no se encoge ni se parte dentro de una palabra, y una prueba en un navegador real la mide en los ocho idiomas, ancho y estrecho.
+
+### Seguridad
+
+- **Los enlaces que la página construye con datos se comprueban leyendo la dirección, no por sus primeras letras**: solo pasa una dirección https de GitHub (o del servidor que indiques para GitHub Enterprise, que también puede ser http) sin usuario ni contraseña; una dirección de script, un servidor parecido, un espacio, un carácter de control o una barra invertida se convierten en un enlace vacío.
+
 ## [2.0.9]
 
 ### Seguridad
