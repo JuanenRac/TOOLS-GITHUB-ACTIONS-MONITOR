@@ -4139,5 +4139,6 @@
  "ui.sdel_none": "Nulla di ciò che viene costruito manca dalla consegna nei repository controllati.",
  "ui.ssup_none": "Nessun rilievo aperto sulla catena di fornitura nei file di workflow controllati.",
  "ui.tab_strend": "Andamento giornaliero",
+ "ui.tab_syvt": "Ieri vs oggi",
  "ui.trend_open": "Apri l'andamento giornaliero"
 }

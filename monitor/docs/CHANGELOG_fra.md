@@ -12,6 +12,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 ### Modifié
 
 - **Les captures du README sont prises en 1080p et montrent les onglets les plus récents** : `tools/make_screenshots.py` photographie chaque page en 1920x1080 par défaut (`--viewport LARGEURxHAUTEUR` le change ; les captures en 4K, ultralarge, portrait, téléphone et écran mural gardent leur taille), `tools/demo_monitor.py --rich` donne à la démo des constats pour les sentinelles de livraison et de chaîne d'approvisionnement, une tendance quotidienne et une comparaison de périodes, et le README (dans les huit langues) montre les pages Livraison, Chaîne d'approvisionnement, Tendance quotidienne, Comparer les périodes et Mises à jour.
+- **Hier vs aujourd'hui a sa propre entrée de menu**: la comparaison avec le dernier rapport enregistré de la Sentinelle quitte le résumé pour son propre onglet (adresse `#sentinel-yesterday`, à côté de la Tendance quotidienne), si bien que le rapport de la Sentinelle occupe toute la page ; l'entrée suit la sentinelle CI, a son aide, son texte dans les huit langues et le même aspect que les autres onglets de la Sentinelle.
 
 ### Sécurité
 

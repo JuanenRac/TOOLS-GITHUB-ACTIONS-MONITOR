@@ -13,6 +13,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 ### Changed
 
 - **The pictures of the README are taken at 1080p and show the newest tabs**: `tools/make_screenshots.py` photographs every page at 1920x1080 by default (`--viewport WIDTHxHEIGHT` changes it; the 4K, ultrawide, portrait, phone and wall-screen pictures keep their own size), `tools/demo_monitor.py --rich` gives the demo findings for the Delivery and Supply chain sentinels, a daily trend and a comparison of periods, and the README (in the eight languages) shows the Delivery, Supply chain, Daily trend, Compare periods and Updates pages.
+- **Yesterday vs today has a menu entry of its own**: the comparison with the last saved report of the Sentinel moved out of the summary into its own tab (address `#sentinel-yesterday`, next to the Daily trend), so the report of the Sentinel takes the whole page; the entry follows the CI sentinel, has its help, its text in the eight languages and the same look as the other tabs of the Sentinel.
 
 ### Security
 

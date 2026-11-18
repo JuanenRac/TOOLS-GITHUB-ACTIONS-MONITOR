@@ -4139,5 +4139,6 @@
  "ui.sdel_none": "Rien de ce qui est construit ne manque à sa livraison dans les dépôts contrôlés.",
  "ui.ssup_none": "Aucune alerte ouverte de chaîne d'approvisionnement dans les fichiers de workflow contrôlés.",
  "ui.tab_strend": "Tendance quotidienne",
+ "ui.tab_syvt": "Hier vs aujourd'hui",
  "ui.trend_open": "Ouvrir la tendance quotidienne"
 }

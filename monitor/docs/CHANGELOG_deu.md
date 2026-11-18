@@ -12,6 +12,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 ### Geändert
 
 - **Die Bilder der README entstehen in 1080p und zeigen die neuesten Reiter**: `tools/make_screenshots.py` fotografiert jede Seite standardmäßig mit 1920x1080 (`--viewport BREITExHÖHE` ändert das; die Bilder in 4K, Ultrabreit, Hochformat, Telefon und Wandanzeige behalten ihre Größe), `tools/demo_monitor.py --rich` gibt der Demo Befunde für die Wächter Auslieferung und Lieferkette, einen Tagestrend und einen Zeitraumvergleich, und die README (in den acht Sprachen) zeigt die Seiten Auslieferung, Lieferkette, Tagestrend, Zeiträume vergleichen und Aktualisierungen.
+- **Gestern vs. heute hat einen eigenen Menüeintrag**: der Vergleich mit dem zuletzt gespeicherten Bericht des Wächters wanderte aus der Übersicht in einen eigenen Reiter (Adresse `#sentinel-yesterday`, neben dem Tagestrend), sodass der Bericht des Wächters die ganze Seite einnimmt; der Eintrag folgt dem CI-Wächter, hat seine Hilfe, seinen Text in den acht Sprachen und dasselbe Aussehen wie die anderen Reiter des Wächters.
 
 ### Sicherheit
 

@@ -13,6 +13,8 @@ A **sentinela** é a segunda metade da edição completa. O *monitor* mostra o q
 
 A **Tendência diária** (endereço `#sentinel-trend`) tem a sua própria entrada de menu: uma curva pequena por cada sinal (análise de código, Dependabot, segredos, pull requests, vermelho, candidatas) com o seu último valor. O resumo do sentinela fica só com o que é seu e um botão que a abre.
 
+**Ontem vs hoje** (endereço `#sentinel-yesterday`) também tem a sua própria entrada de menu, pelo que o relatório da sentinela ocupa a página toda: o que apareceu desde o último relatório guardado, o que foi resolvido e o que continua, para os workflows vermelhos e as assinaturas pendentes.
+
 ## Como arranca e quanto custa
 
 Arranca com o monitor completo e corre no mesmo processo, num fio próprio, com o seu orçamento de chamadas ao GitHub (`sentinel.budget_per_hour`, 600 por defeito, e `sentinel.max_calls_per_tick`). Quando a quota do GitHub desce abaixo de `sentinel.min_rate_remaining` deixa de perguntar e a página indica a pausa por quota. Nada do que faz escreve no GitHub.

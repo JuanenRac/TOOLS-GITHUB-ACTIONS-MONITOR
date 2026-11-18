@@ -4139,5 +4139,6 @@
  "ui.sdel_none": "Nada do que é construído falta na entrega nos repositórios verificados.",
  "ui.ssup_none": "Nenhum achado aberto da cadeia de fornecimento nos ficheiros de workflow verificados.",
  "ui.tab_strend": "Tendência diária",
+ "ui.tab_syvt": "Ontem vs hoje",
  "ui.trend_open": "Abrir a tendência diária"
 }

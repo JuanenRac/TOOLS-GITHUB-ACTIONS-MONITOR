@@ -12,6 +12,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 ### Cambiado
 
 - **Las capturas del README se hacen a 1080p y muestran las pestañas más nuevas**: `tools/make_screenshots.py` fotografía cada página a 1920x1080 por defecto (`--viewport ANCHOxALTO` lo cambia; las capturas de 4K, ultraancha, vertical, móvil y pantallas de pared conservan su tamaño), `tools/demo_monitor.py --rich` da a la demo hallazgos para los centinelas de entrega y de cadena de suministro, una tendencia diaria y una comparación de periodos, y el README (en los ocho idiomas) muestra las páginas de Entrega, Cadena de suministro, Tendencia diaria, Comparar periodos y Actualizaciones.
+- **Ayer vs hoy tiene entrada de menú propia**: la comparación con el último parte guardado del Centinela sale del resumen a su propia pestaña (dirección `#sentinel-yesterday`, junto a la Tendencia diaria), de modo que el parte del Centinela ocupa toda la página; la entrada sigue al centinela de CI, tiene su ayuda, su texto en los ocho idiomas y el mismo aspecto que las demás pestañas del Centinela.
 
 ### Seguridad
 

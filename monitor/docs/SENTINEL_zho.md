@@ -13,6 +13,8 @@
 
 **每日趋势**（地址 `#sentinel-trend`）有自己的菜单入口：每个信号（代码扫描、Dependabot、密钥、拉取请求、红色、候选）一条小曲线及其最新值。哨兵的摘要只保留它自己的面板和一个打开它的按钮。
 
+**昨天与今天**（地址 `#sentinel-yesterday`）也有了自己的菜单项，因此哨兵报告占满整个页面：自上次保存的报告以来新出现的、已解决的和仍然存在的内容，针对红色工作流和待签名项。
+
 ## 如何启动及其开销
 
 它随完整版监视器启动，在同一进程的独立线程中运行，拥有自己的 GitHub 调用预算（`sentinel.budget_per_hour`，默认 600，以及 `sentinel.max_calls_per_tick`）。当 GitHub 剩余配额低于 `sentinel.min_rate_remaining` 时它停止请求，页面会显示因配额而暂停。它做的任何事都不会写入 GitHub。
