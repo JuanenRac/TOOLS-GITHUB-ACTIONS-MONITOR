@@ -1,0 +1,1803 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "1.8.1",
+ "previous": null,
+ "digest": "ff7876a01b67b2981646a5e10419260fce5198ac65f204f96bf5470bd681f084",
+ "data_schema": 1,
+ "snapshot": {
+  "account.plan": {
+   "kind": "enum",
+   "bounds": [
+    "unknown",
+    "free",
+    "pro",
+    "team",
+    "enterprise"
+   ],
+   "default": "unknown"
+  },
+  "act.allow_symlinks": {
+   "kind": "bool",
+   "default": false
+  },
+  "act.allowed": {
+   "kind": "acts",
+   "default": []
+  },
+  "act.enabled": {
+   "kind": "bool",
+   "default": false
+  },
+  "act.timeout_seconds": {
+   "kind": "int",
+   "bounds": [
+    30,
+    7200
+   ],
+   "default": 900
+  },
+  "ai.actions.allowed": {
+   "kind": "names"
+  },
+  "ai.actions.enabled": {
+   "kind": "bool"
+  },
+  "ai.actions.execute": {
+   "kind": "bool"
+  },
+  "ai.actions.max_per_hour": {
+   "kind": "int",
+   "bounds": [
+    1,
+    60
+   ]
+  },
+  "ai.actions.ttl_seconds": {
+   "kind": "int",
+   "bounds": [
+    30,
+    3600
+   ]
+  },
+  "ai.allowed_repos": {
+   "kind": "names"
+  },
+  "ai.answer_language": {
+   "kind": "enum",
+   "bounds": [
+    "",
+    "en",
+    "es",
+    "de",
+    "fr",
+    "it",
+    "ja",
+    "zh",
+    "pt"
+   ]
+  },
+  "ai.api_key_env": {
+   "kind": "text",
+   "bounds": {
+    "re": "^([A-Z_][A-Z0-9_]{0,63})?$"
+   }
+  },
+  "ai.base_url": {
+   "kind": "text",
+   "bounds": {
+    "re": "^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250})?$"
+   }
+  },
+  "ai.daily_limit": {
+   "kind": "int",
+   "bounds": [
+    0,
+    500
+   ]
+  },
+  "ai.events": {
+   "kind": "names"
+  },
+  "ai.max_input_chars": {
+   "kind": "int",
+   "bounds": [
+    500,
+    20000
+   ]
+  },
+  "ai.max_output_chars": {
+   "kind": "int",
+   "bounds": [
+    200,
+    8000
+   ]
+  },
+  "ai.model": {
+   "kind": "text",
+   "bounds": {
+    "re": "^[A-Za-z0-9._:/@-]{0,100}$"
+   }
+  },
+  "ai.ollama_url": {
+   "kind": "text",
+   "bounds": {
+    "re": "^http://(127\\.0\\.0\\.1|localhost|\\[::1\\]):[0-9]{2,5}/?$"
+   }
+  },
+  "ai.provider": {
+   "kind": "enum",
+   "bounds": [
+    "none",
+    "ollama",
+    "openai-compatible",
+    "anthropic",
+    "copilot"
+   ],
+   "default": "none"
+  },
+  "ai.timeout_seconds": {
+   "kind": "int",
+   "bounds": [
+    5,
+    300
+   ]
+  },
+  "ai_alerts.brief_max_bytes": {
+   "kind": "int",
+   "bounds": [
+    512,
+    20000
+   ],
+   "default": 2048
+  },
+  "ai_alerts.cascade.enabled": {
+   "kind": "bool",
+   "default": true
+  },
+  "ai_alerts.cascade.map": {
+   "default": {}
+  },
+  "ai_alerts.client_hook.block_on_stop": {
+   "kind": "bool",
+   "default": false
+  },
+  "ai_alerts.client_hook.cooldown_minutes": {
+   "kind": "int",
+   "bounds": [
+    1,
+    1440
+   ],
+   "default": 20
+  },
+  "ai_alerts.client_hook.enabled": {
+   "kind": "bool",
+   "default": true
+  },
+  "ai_alerts.client_hook.max_chars": {
+   "kind": "int",
+   "bounds": [
+    400,
+    8000
+   ],
+   "default": 2400
+  },
+  "ai_alerts.client_hook.max_lines": {
+   "kind": "int",
+   "bounds": [
+    1,
+    40
+   ],
+   "default": 12
+  },
+  "ai_alerts.client_hook.stale_hours": {
+   "kind": "int",
+   "bounds": [
+    1,
+    168
+   ],
+   "default": 3
+  },
+  "ai_alerts.diagnose.enabled": {
+   "kind": "bool",
+   "default": false
+  },
+  "ai_alerts.diagnose.log_lines": {
+   "kind": "int",
+   "bounds": [
+    3,
+    40
+   ],
+   "default": 10
+  },
+  "ai_alerts.diagnose.max_bytes": {
+   "kind": "int",
+   "bounds": [
+    200,
+    4000
+   ],
+   "default": 1500
+  },
+  "ai_alerts.diagnose.max_per_cycle": {
+   "kind": "int",
+   "bounds": [
+    1,
+    10
+   ],
+   "default": 3
+  },
+  "ai_alerts.enabled": {
+   "kind": "bool",
+   "default": false
+  },
+  "ai_alerts.folder": {
+   "kind": "path",
+   "default": ""
+  },
+  "ai_alerts.heartbeat.enabled": {
+   "kind": "bool",
+   "default": true
+  },
+  "ai_alerts.heartbeat.window_minutes": {
+   "kind": "int",
+   "bounds": [
+    1,
+    1440
+   ],
+   "default": 15
+  },
+  "ai_alerts.hook.enabled": {
+   "kind": "bool",
+   "default": false
+  },
+  "ai_alerts.hook.max_per_hour": {
+   "kind": "int",
+   "bounds": [
+    1,
+    60
+   ],
+   "default": 6
+  },
+  "ai_alerts.hook.url": {
+   "kind": "text",
+   "bounds": {
+    "re": "^(http://(127\\.0\\.0\\.1|localhost|\\[::1\\]):[0-9]{2,5}(/[A-Za-z0-9._~/%-]{0,100})?)?$"
+   },
+   "default": ""
+  },
+  "ai_alerts.stream.enabled": {
+   "kind": "bool",
+   "default": false
+  },
+  "ai_alerts.stream.max_clients": {
+   "kind": "int",
+   "bounds": [
+    1,
+    10
+   ],
+   "default": 3
+  },
+  "ai_alerts.stream.max_seconds": {
+   "kind": "int",
+   "bounds": [
+    60,
+    86400
+   ],
+   "default": 3600
+  },
+  "ai_notify.command": {
+   "default": ""
+  },
+  "ai_notify.confirmed_provider": {
+   "kind": "text",
+   "bounds": {
+    "re": "^[a-z0-9-]{0,40}$"
+   },
+   "default": ""
+  },
+  "ai_notify.cost_per_call_cents": {
+   "kind": "int",
+   "bounds": [
+    0,
+    10000
+   ],
+   "default": 5
+  },
+  "ai_notify.enabled": {
+   "kind": "bool",
+   "default": false
+  },
+  "ai_notify.max_calls_per_hour": {
+   "kind": "int",
+   "bounds": [
+    1,
+    60
+   ],
+   "default": 4
+  },
+  "ai_notify.max_cost_per_hour_cents": {
+   "kind": "int",
+   "bounds": [
+    0,
+    100000
+   ],
+   "default": 50
+  },
+  "ai_notify.timeout_seconds": {
+   "kind": "int",
+   "bounds": [
+    5,
+    120
+   ],
+   "default": 30
+  },
+  "airgapped": {
+   "kind": "bool",
+   "default": false
+  },
+  "alerts.mute_hours": {
+   "kind": "int",
+   "bounds": [
+    1,
+    720
+   ]
+  },
+  "analytics.enabled": {
+   "kind": "bool"
+  },
+  "analytics.flaky": {
+   "kind": "bool"
+  },
+  "analytics.jobs_per_cycle": {
+   "kind": "int",
+   "bounds": [
+    0,
+    20
+   ]
+  },
+  "analytics.keep_days": {
+   "kind": "int",
+   "bounds": [
+    1,
+    365
+   ]
+  },
+  "analytics.max_samples": {
+   "kind": "int",
+   "bounds": [
+    20,
+    1000
+   ]
+  },
+  "analytics.min_samples": {
+   "kind": "int",
+   "bounds": [
+    1,
+    100
+   ]
+  },
+  "analytics.slow_factor": {
+   "kind": "float",
+   "bounds": [
+    1.1,
+    10.0
+   ]
+  },
+  "analytics.steps": {
+   "kind": "bool"
+  },
+  "audit_dir": {
+   "kind": "path"
+  },
+  "auth.allow_bearer": {
+   "kind": "bool",
+   "default": true
+  },
+  "auth.audit": {
+   "kind": "bool",
+   "default": true
+  },
+  "auth.enabled": {
+   "kind": "bool",
+   "default": false
+  },
+  "auth.lockout_minutes": {
+   "kind": "int",
+   "bounds": [
+    1,
+    1440
+   ],
+   "default": 15
+  },
+  "auth.max_failed_logins": {
+   "kind": "int",
+   "bounds": [
+    3,
+    20
+   ],
+   "default": 5
+  },
+  "auth.min_length": {
+   "kind": "int",
+   "bounds": [
+    8,
+    64
+   ],
+   "default": 10
+  },
+  "auth.session_hours": {
+   "kind": "int",
+   "bounds": [
+    1,
+    720
+   ],
+   "default": 12
+  },
+  "cache.etag.enabled": {
+   "kind": "bool",
+   "default": true
+  },
+  "cache.etag.ttl_hours": {
+   "kind": "int",
+   "bounds": [
+    1,
+    168
+   ],
+   "default": 24
+  },
+  "central.git_dir": {
+   "default": ""
+  },
+  "central.max_age_minutes": {
+   "kind": "int",
+   "bounds": [
+    5,
+    10080
+   ],
+   "default": 120
+  },
+  "central.source": {
+   "kind": "enum",
+   "bounds": [
+    "off",
+    "git",
+    "http"
+   ],
+   "default": "off"
+  },
+  "cold_refresh_seconds": {
+   "kind": "int",
+   "bounds": [
+    60,
+    86400
+   ],
+   "default": 600
+  },
+  "cold_runs_per_repo": {
+   "kind": "int",
+   "bounds": [
+    1,
+    100
+   ],
+   "default": 5
+  },
+  "discover_limit": {
+   "kind": "int",
+   "bounds": [
+    10,
+    5000
+   ],
+   "default": 1000
+  },
+  "discover_refresh_seconds": {
+   "kind": "int",
+   "bounds": [
+    300,
+    86400
+   ],
+   "default": 3600
+  },
+  "discovery.auto_frequency": {
+   "kind": "bool",
+   "default": false
+  },
+  "discovery.events": {
+   "kind": "bool",
+   "default": true
+  },
+  "discovery.hide": {
+   "kind": "names",
+   "default": []
+  },
+  "discovery.suggest_groups": {
+   "kind": "bool",
+   "default": true
+  },
+  "dispatch.required_ci": {
+   "kind": "names",
+   "default": [
+    "ci.yml"
+   ]
+  },
+  "display.blink_red_tiles": {
+   "kind": "bool",
+   "default": true
+  },
+  "display.timezone": {
+   "kind": "text",
+   "bounds": {
+    "re": "^(?:local|utc|UTC|[A-Za-z][A-Za-z0-9_+./-]{1,63})$"
+   },
+   "default": "local"
+  },
+  "ecosystems": {
+   "kind": "eco",
+   "default": "all"
+  },
+  "ecosystems_file": {
+   "kind": "path"
+  },
+  "exclude": {
+   "kind": "names",
+   "default": []
+  },
+  "extra_reader.any_folder": {
+   "kind": "bool",
+   "default": false
+  },
+  "extra_reader.enabled": {
+   "kind": "bool",
+   "default": false
+  },
+  "extra_reader.file": {
+   "kind": "path",
+   "default": ""
+  },
+  "finops.jobs_per_cycle": {
+   "kind": "int",
+   "bounds": [
+    0,
+    50
+   ],
+   "default": 0
+  },
+  "github_actions.allowed": {
+   "kind": "names",
+   "default": [
+    "rerun_failed",
+    "cancel"
+   ]
+  },
+  "github_actions.enabled": {
+   "kind": "bool",
+   "default": false
+  },
+  "github_actions.merge_method": {
+   "kind": "enum",
+   "bounds": [
+    "squash",
+    "merge",
+    "rebase"
+   ],
+   "default": "squash"
+  },
+  "github_app.app_id": {
+   "kind": "text",
+   "bounds": {
+    "re": "^[0-9]{1,12}$"
+   },
+   "default": ""
+  },
+  "github_app.enabled": {
+   "kind": "bool",
+   "default": false
+  },
+  "github_app.installation_id": {
+   "kind": "text",
+   "bounds": {
+    "re": "^[0-9]{0,12}$"
+   },
+   "default": ""
+  },
+  "github_app.key_path": {
+   "kind": "path",
+   "default": ""
+  },
+  "github_owner": {
+   "kind": "text",
+   "bounds": {
+    "re": "^[A-Za-z0-9-]{0,39}$"
+   },
+   "default": ""
+  },
+  "github_token.enabled": {
+   "kind": "bool",
+   "default": false
+  },
+  "github_token.store": {
+   "kind": "enum",
+   "bounds": [
+    "auto",
+    "system",
+    "file"
+   ],
+   "default": "auto"
+  },
+  "hot_hours": {
+   "kind": "int",
+   "bounds": [
+    1,
+    48
+   ],
+   "default": 3
+  },
+  "issues_refresh_seconds": {
+   "kind": "int",
+   "bounds": [
+    30,
+    86400
+   ],
+   "default": 180
+  },
+  "language": {
+   "kind": "enum",
+   "bounds": [
+    "",
+    "en",
+    "es",
+    "de",
+    "fr",
+    "it",
+    "ja",
+    "zh",
+    "pt"
+   ],
+   "default": ""
+  },
+  "lint.enabled": {
+   "kind": "bool"
+  },
+  "lint.ignore": {
+   "kind": "patterns"
+  },
+  "lint.in_report": {
+   "kind": "bool"
+  },
+  "lint.refresh_seconds": {
+   "kind": "int",
+   "bounds": [
+    60,
+    86400
+   ]
+  },
+  "lint.rules.injection.enabled": {
+   "kind": "bool"
+  },
+  "lint.rules.injection.severity": {
+   "kind": "enum",
+   "bounds": [
+    "info",
+    "warn",
+    "bad"
+   ]
+  },
+  "lint.rules.permissions.enabled": {
+   "kind": "bool"
+  },
+  "lint.rules.permissions.severity": {
+   "kind": "enum",
+   "bounds": [
+    "info",
+    "warn",
+    "bad"
+   ]
+  },
+  "lint.rules.pr_target.enabled": {
+   "kind": "bool"
+  },
+  "lint.rules.pr_target.severity": {
+   "kind": "enum",
+   "bounds": [
+    "info",
+    "warn",
+    "bad"
+   ]
+  },
+  "lint.rules.secrets_in_clear.enabled": {
+   "kind": "bool"
+  },
+  "lint.rules.secrets_in_clear.severity": {
+   "kind": "enum",
+   "bounds": [
+    "info",
+    "warn",
+    "bad"
+   ]
+  },
+  "lint.rules.unpinned_uses.enabled": {
+   "kind": "bool"
+  },
+  "lint.rules.unpinned_uses.severity": {
+   "kind": "enum",
+   "bounds": [
+    "info",
+    "warn",
+    "bad"
+   ]
+  },
+  "listen.allowed_hosts": {
+   "kind": "names",
+   "default": []
+  },
+  "listen.host": {
+   "kind": "text",
+   "bounds": {
+    "re": "^(127\\.0\\.0\\.1|localhost|0\\.0\\.0\\.0|10\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}|192\\.168\\.[0-9]{1,3}\\.[0-9]{1,3}|172\\.(1[6-9]|2[0-9]|3[01])\\.[0-9]{1,3}\\.[0-9]{1,3})$"
+   },
+   "default": "127.0.0.1"
+  },
+  "listen.local_port": {
+   "kind": "int",
+   "bounds": [
+    0,
+    65535
+   ],
+   "default": 0
+  },
+  "listen.max_failed_attempts": {
+   "kind": "int",
+   "bounds": [
+    3,
+    100
+   ],
+   "default": 10
+  },
+  "listen.network": {
+   "kind": "bool",
+   "default": false
+  },
+  "listen.proxy_public_host": {
+   "kind": "text",
+   "bounds": {
+    "re": "^([A-Za-z0-9]([A-Za-z0-9.-]{0,98}[A-Za-z0-9])?)?$"
+   },
+   "default": ""
+  },
+  "listen.query_access": {
+   "kind": "bool",
+   "default": true
+  },
+  "listen.secure_cookie": {
+   "kind": "bool",
+   "default": false
+  },
+  "listen.tls_cert_file": {
+   "kind": "path",
+   "default": ""
+  },
+  "listen.tls_key_file": {
+   "kind": "path",
+   "default": ""
+  },
+  "listen.token_env": {
+   "kind": "text",
+   "bounds": {
+    "re": "^([A-Z_][A-Z0-9_]{0,63})?$"
+   },
+   "default": "MONITOR_ACCESS_TOKEN"
+  },
+  "listen.trusted_proxy": {
+   "kind": "bool",
+   "default": false
+  },
+  "max_workers": {
+   "kind": "int",
+   "bounds": [
+    1,
+    32
+   ],
+   "default": 20
+  },
+  "min_rate_remaining": {
+   "kind": "int",
+   "bounds": [
+    100,
+    5000
+   ],
+   "default": 800
+  },
+  "mirror.enabled": {
+   "kind": "bool",
+   "default": false
+  },
+  "mirror.folder": {
+   "kind": "path",
+   "default": ""
+  },
+  "mirror.keep_days": {
+   "kind": "int",
+   "bounds": [
+    1,
+    365
+   ],
+   "default": 14
+  },
+  "mirror.max_mb": {
+   "kind": "int",
+   "bounds": [
+    10,
+    100000
+   ],
+   "default": 500
+  },
+  "mirror.max_per_cycle": {
+   "kind": "int",
+   "bounds": [
+    1,
+    20
+   ],
+   "default": 3
+  },
+  "mode": {
+   "kind": "enum",
+   "bounds": [
+    "full",
+    "lite"
+   ],
+   "default": "full"
+  },
+  "modes.auto_low": {
+   "kind": "bool"
+  },
+  "modes.auto_low_enter": {
+   "kind": "int",
+   "bounds": [
+    50,
+    4000
+   ]
+  },
+  "modes.auto_low_exit": {
+   "kind": "int",
+   "bounds": [
+    100,
+    5000
+   ]
+  },
+  "modes.default_minutes": {
+   "default": 60
+  },
+  "modes.low.cold_refresh_seconds": {
+   "kind": "int",
+   "bounds": [
+    30,
+    86400
+   ]
+  },
+  "modes.low.hot_hours": {
+   "kind": "int",
+   "bounds": [
+    1,
+    48
+   ]
+  },
+  "modes.low.refresh_seconds": {
+   "kind": "int",
+   "bounds": [
+    10,
+    3600
+   ]
+  },
+  "modes.low.runs_per_repo": {
+   "kind": "int",
+   "bounds": [
+    5,
+    100
+   ]
+  },
+  "modes.start": {
+   "default": "normal"
+  },
+  "network.etag": {
+   "kind": "bool",
+   "default": true
+  },
+  "network.graphql_batch": {
+   "kind": "int",
+   "bounds": [
+    1,
+    30
+   ],
+   "default": 20
+  },
+  "network.graphql_checks": {
+   "kind": "bool",
+   "default": false
+  },
+  "network.use_proxy": {
+   "kind": "bool",
+   "default": false
+  },
+  "notify.allow_private_targets": {
+   "kind": "bool"
+  },
+  "notify.channels.discord.enabled": {
+   "kind": "bool"
+  },
+  "notify.channels.discord.url_env": {
+   "kind": "text",
+   "bounds": {
+    "re": "^([A-Z_][A-Z0-9_]{0,63})?$"
+   }
+  },
+  "notify.channels.http_local.enabled": {
+   "kind": "bool"
+  },
+  "notify.channels.http_local.url": {
+   "kind": "text",
+   "bounds": {
+    "re": "^(http://(127\\.0\\.0\\.1|localhost|\\[::1\\]):[0-9]{2,5}(/[A-Za-z0-9._~/%-]{0,100})?)?$"
+   }
+  },
+  "notify.channels.matrix.enabled": {
+   "kind": "bool"
+  },
+  "notify.channels.matrix.homeserver": {
+   "kind": "text",
+   "bounds": {
+    "re": "^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250})?$"
+   }
+  },
+  "notify.channels.matrix.room": {
+   "kind": "text",
+   "bounds": {
+    "re": "^(![A-Za-z0-9:._-]{3,120})?$"
+   }
+  },
+  "notify.channels.matrix.token_env": {
+   "kind": "text",
+   "bounds": {
+    "re": "^([A-Z_][A-Z0-9_]{0,63})?$"
+   }
+  },
+  "notify.channels.mqtt.enabled": {
+   "kind": "bool"
+  },
+  "notify.channels.mqtt.host": {
+   "kind": "text",
+   "bounds": {
+    "re": "^(127\\.0\\.0\\.1|localhost|\\[::1\\])$"
+   }
+  },
+  "notify.channels.mqtt.port": {
+   "kind": "int",
+   "bounds": [
+    1,
+    65535
+   ]
+  },
+  "notify.channels.mqtt.topic": {
+   "kind": "text",
+   "bounds": {
+    "re": "^[A-Za-z0-9/_.-]{1,100}$"
+   }
+  },
+  "notify.channels.slack.enabled": {
+   "kind": "bool"
+  },
+  "notify.channels.slack.url_env": {
+   "kind": "text",
+   "bounds": {
+    "re": "^([A-Z_][A-Z0-9_]{0,63})?$"
+   }
+  },
+  "notify.channels.telegram.chat_id": {
+   "kind": "text",
+   "bounds": {
+    "re": "^(-?[0-9]{1,20})?$"
+   }
+  },
+  "notify.channels.telegram.enabled": {
+   "kind": "bool"
+  },
+  "notify.channels.telegram.token_env": {
+   "kind": "text",
+   "bounds": {
+    "re": "^([A-Z_][A-Z0-9_]{0,63})?$"
+   }
+  },
+  "notify.enabled": {
+   "kind": "bool"
+  },
+  "notify.events": {
+   "kind": "names"
+  },
+  "notify.max_per_hour": {
+   "kind": "int",
+   "bounds": [
+    1,
+    600
+   ]
+  },
+  "open_browser": {
+   "kind": "bool",
+   "default": true
+  },
+  "organizations.discover": {
+   "kind": "bool",
+   "default": false
+  },
+  "otlp.enabled": {
+   "kind": "bool",
+   "default": false
+  },
+  "otlp.endpoint": {
+   "kind": "text",
+   "bounds": {
+    "re": "^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250}|http://(127\\.0\\.0\\.1|localhost|\\[::1\\]):[0-9]{2,5}(/[A-Za-z0-9._~/%-]{0,100})?)?$"
+   },
+   "default": ""
+  },
+  "otlp.interval_seconds": {
+   "kind": "int",
+   "bounds": [
+    15,
+    3600
+   ],
+   "default": 60
+  },
+  "outputs.dashboard.enabled": {
+   "kind": "bool"
+  },
+  "outputs.json.enabled": {
+   "kind": "bool"
+  },
+  "outputs.prometheus.enabled": {
+   "kind": "bool"
+  },
+  "outputs.prometheus.per_repo": {
+   "kind": "bool"
+  },
+  "profiles_file": {
+   "kind": "path"
+  },
+  "quota.alert_percent": {
+   "kind": "int",
+   "bounds": [
+    1,
+    100
+   ],
+   "default": 90
+  },
+  "quota.billing_api": {
+   "kind": "bool",
+   "default": false
+  },
+  "quota.default_runner": {
+   "kind": "enum",
+   "bounds": [
+    "linux",
+    "windows",
+    "macos"
+   ],
+   "default": "linux"
+  },
+  "quota.warn_percent": {
+   "kind": "int",
+   "bounds": [
+    1,
+    100
+   ],
+   "default": 75
+  },
+  "refresh_seconds": {
+   "kind": "int",
+   "bounds": [
+    10,
+    3600
+   ],
+   "default": 45
+  },
+  "report_history_days": {
+   "kind": "int",
+   "bounds": [
+    1,
+    365
+   ],
+   "default": 30
+  },
+  "repos": {
+   "kind": "repos",
+   "default": "all"
+  },
+  "retention.analytics_days": {
+   "kind": "int",
+   "bounds": [
+    1,
+    3650
+   ]
+  },
+  "retention.enabled": {
+   "kind": "bool"
+  },
+  "retention.events_days": {
+   "kind": "int",
+   "bounds": [
+    1,
+    3650
+   ]
+  },
+  "retention.events_max_kb": {
+   "kind": "int",
+   "bounds": [
+    64,
+    1048576
+   ]
+  },
+  "retention.interval_hours": {
+   "kind": "int",
+   "bounds": [
+    1,
+    168
+   ]
+  },
+  "retention.mode": {
+   "kind": "enum",
+   "bounds": [
+    "delete",
+    "archive"
+   ]
+  },
+  "retention.warn_events_mb": {
+   "kind": "int",
+   "bounds": [
+    1,
+    100000
+   ]
+  },
+  "runners.enabled": {
+   "kind": "bool",
+   "default": false
+  },
+  "runners.scope": {
+   "kind": "enum",
+   "bounds": [
+    "owner",
+    "repos"
+   ],
+   "default": "owner"
+  },
+  "runs_per_repo": {
+   "kind": "int",
+   "bounds": [
+    5,
+    100
+   ],
+   "default": 20
+  },
+  "sentinel.a2_full_sample_unknown": {
+   "kind": "bool"
+  },
+  "sentinel.a2_resolve_max_calls_per_tick": {
+   "kind": "int",
+   "bounds": [
+    0,
+    50
+   ]
+  },
+  "sentinel.a2_resolve_ttl_seconds": {
+   "kind": "int",
+   "bounds": [
+    60,
+    86400
+   ]
+  },
+  "sentinel.alerts_cold_seconds": {
+   "kind": "int",
+   "bounds": [
+    60,
+    86400
+   ]
+  },
+  "sentinel.alerts_hot_seconds": {
+   "kind": "int",
+   "bounds": [
+    60,
+    86400
+   ]
+  },
+  "sentinel.audit_files.reconciliation": {
+   "kind": "text",
+   "bounds": {
+    "re": "^[A-Za-z0-9._*?-]{1,80}$"
+   }
+  },
+  "sentinel.audit_files.rounds": {
+   "kind": "text",
+   "bounds": {
+    "re": "^[A-Za-z0-9._*?-]{1,80}$"
+   }
+  },
+  "sentinel.audit_files.rounds_extra": {
+   "kind": "text",
+   "bounds": {
+    "re": "^[A-Za-z0-9._*?-]{1,80}$"
+   }
+  },
+  "sentinel.budget_per_hour": {
+   "kind": "int",
+   "bounds": [
+    50,
+    5000
+   ]
+  },
+  "sentinel.candidate_days": {
+   "kind": "int",
+   "bounds": [
+    0,
+    60
+   ]
+  },
+  "sentinel.candidate_min_entries": {
+   "kind": "int",
+   "bounds": [
+    1,
+    100
+   ]
+  },
+  "sentinel.ci_red_audit_copy": {
+   "kind": "bool"
+  },
+  "sentinel.ci_red_file": {
+   "kind": "path"
+  },
+  "sentinel.enabled": {
+   "kind": "bool",
+   "default": true
+  },
+  "sentinel.hot_hours": {
+   "kind": "int",
+   "bounds": [
+    1,
+    48
+   ]
+  },
+  "sentinel.hygiene_seconds": {
+   "kind": "int",
+   "bounds": [
+    300,
+    604800
+   ]
+  },
+  "sentinel.max_calls_per_tick": {
+   "kind": "int",
+   "bounds": [
+    10,
+    500
+   ]
+  },
+  "sentinel.min_rate_remaining": {
+   "kind": "int",
+   "bounds": [
+    100,
+    5000
+   ]
+  },
+  "sentinel.minutes_budget": {
+   "kind": "intmap",
+   "bounds": [
+    0,
+    1000000
+   ]
+  },
+  "sentinel.minutes_budget_period": {
+   "kind": "enum",
+   "bounds": [
+    "7d",
+    "24h"
+   ]
+  },
+  "sentinel.pending_sign_hours": {
+   "kind": "int",
+   "bounds": [
+    1,
+    720
+   ]
+  },
+  "sentinel.readiness.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.readiness.health.weights.alert": {
+   "kind": "int",
+   "bounds": [
+    0,
+    1000
+   ]
+  },
+  "sentinel.readiness.health.weights.high_alert": {
+   "kind": "int",
+   "bounds": [
+    0,
+    1000
+   ]
+  },
+  "sentinel.readiness.health.weights.hygiene": {
+   "kind": "int",
+   "bounds": [
+    0,
+    1000
+   ]
+  },
+  "sentinel.readiness.health.weights.red": {
+   "kind": "int",
+   "bounds": [
+    0,
+    1000
+   ]
+  },
+  "sentinel.readiness.health.weights.secret": {
+   "kind": "int",
+   "bounds": [
+    0,
+    1000
+   ]
+  },
+  "sentinel.readiness.health.weights.stale_pr": {
+   "kind": "int",
+   "bounds": [
+    0,
+    1000
+   ]
+  },
+  "sentinel.readiness.health.weights.stuck": {
+   "kind": "int",
+   "bounds": [
+    0,
+    1000
+   ]
+  },
+  "sentinel.readiness.health.weights.unsigned": {
+   "kind": "int",
+   "bounds": [
+    0,
+    1000
+   ]
+  },
+  "sentinel.readiness.min_coverage": {
+   "kind": "float",
+   "bounds": [
+    0.0,
+    1.0
+   ]
+  },
+  "sentinel.readiness.pins.max_depth": {
+   "kind": "int",
+   "bounds": [
+    1,
+    12
+   ]
+  },
+  "sentinel.readiness.pins.refresh_seconds": {
+   "kind": "int",
+   "bounds": [
+    60,
+    86400
+   ]
+  },
+  "sentinel.readiness.pins.sources": {
+   "kind": "sources"
+  },
+  "sentinel.readiness.warn_below": {
+   "kind": "int",
+   "bounds": [
+    0,
+    100
+   ]
+  },
+  "sentinel.refresh_seconds": {
+   "kind": "int",
+   "bounds": [
+    60,
+    86400
+   ]
+  },
+  "sentinel.require_verified_signature": {
+   "kind": "bool"
+  },
+  "sentinel.required_files": {
+   "kind": "filegroups"
+  },
+  "sentinel.skip_candidate_prefixes": {
+   "kind": "names"
+  },
+  "sentinel.stale_pr_days": {
+   "kind": "int",
+   "bounds": [
+    1,
+    90
+   ]
+  },
+  "sentinel.surface.budget_share": {
+   "kind": "float",
+   "bounds": [
+    0.1,
+    1.0
+   ]
+  },
+  "sentinel.surface.checks.artifacts.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.artifacts.max_mb": {
+   "kind": "int",
+   "bounds": [
+    1,
+    100000
+   ]
+  },
+  "sentinel.surface.checks.artifacts.retention_days": {
+   "kind": "int",
+   "bounds": [
+    1,
+    400
+   ]
+  },
+  "sentinel.surface.checks.attestation.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.attestation.max_per_tick": {
+   "kind": "int",
+   "bounds": [
+    1,
+    20
+   ]
+  },
+  "sentinel.surface.checks.broad_permissions.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.coverage.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.dead_schedule.days": {
+   "kind": "int",
+   "bounds": [
+    1,
+    365
+   ]
+  },
+  "sentinel.surface.checks.dead_schedule.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.dependabot_priority.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.drafts.days": {
+   "kind": "int",
+   "bounds": [
+    1,
+    365
+   ]
+  },
+  "sentinel.surface.checks.drafts.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.issue_close.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.matrix_os.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.matrix_os.max_per_tick": {
+   "kind": "int",
+   "bounds": [
+    1,
+    20
+   ]
+  },
+  "sentinel.surface.checks.maturity.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.merge_queue.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.milestones.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.packages.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.parity.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.pr_human.days": {
+   "kind": "int",
+   "bounds": [
+    1,
+    365
+   ]
+  },
+  "sentinel.surface.checks.pr_human.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.pr_target.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.pr_workflow_touch.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.release_assets.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.release_assets.recent_days": {
+   "kind": "int",
+   "bounds": [
+    1,
+    365
+   ]
+  },
+  "sentinel.surface.checks.required_checks.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.secret_resolved.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.security_aged.days": {
+   "kind": "int",
+   "bounds": [
+    1,
+    365
+   ]
+  },
+  "sentinel.surface.checks.security_aged.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.stuck_concurrency.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.stuck_concurrency.minutes": {
+   "kind": "int",
+   "bounds": [
+    5,
+    1440
+   ]
+  },
+  "sentinel.surface.checks.tag_vs_version.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.unpinned_uses.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.checks.workflows_disabled.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.enabled": {
+   "kind": "bool"
+  },
+  "sentinel.surface.local_seconds": {
+   "kind": "int",
+   "bounds": [
+    60,
+    86400
+   ]
+  },
+  "sentinel.surface.max_repos_per_tick": {
+   "kind": "int",
+   "bounds": [
+    1,
+    50
+   ]
+  },
+  "sentinel.surface.min_rate_factor": {
+   "kind": "float",
+   "bounds": [
+    1.0,
+    10.0
+   ]
+  },
+  "sentinel.surface.refresh_seconds": {
+   "kind": "int",
+   "bounds": [
+    600,
+    604800
+   ]
+  },
+  "sentinel.workers": {
+   "kind": "int",
+   "bounds": [
+    1,
+    32
+   ]
+  },
+  "sentinels.collab.enabled": {
+   "kind": "bool"
+  },
+  "sentinels.collab.max_repos_per_tick": {
+   "kind": "int",
+   "bounds": [
+    1,
+    100
+   ]
+  },
+  "sentinels.collab.min_rate_remaining": {
+   "kind": "int",
+   "bounds": [
+    100,
+    5000
+   ]
+  },
+  "sentinels.collab.refresh_seconds": {
+   "kind": "int",
+   "bounds": [
+    60,
+    86400
+   ]
+  },
+  "sentinels.collab.repos": {
+   "kind": "repos"
+  },
+  "sentinels.collab.rules.ignore_labels": {
+   "kind": "names"
+  },
+  "sentinels.collab.rules.issue_critical_labels": {
+   "kind": "names"
+  },
+  "sentinels.collab.rules.issue_stale_days": {
+   "kind": "int",
+   "bounds": [
+    1,
+    365
+   ]
+  },
+  "sentinels.collab.rules.pr_conflict_days": {
+   "kind": "int",
+   "bounds": [
+    1,
+    90
+   ]
+  },
+  "sentinels.collab.rules.pr_draft_max_days": {
+   "kind": "int",
+   "bounds": [
+    1,
+    365
+   ]
+  },
+  "sentinels.collab.rules.pr_review_pending_days": {
+   "kind": "int",
+   "bounds": [
+    1,
+    90
+   ]
+  },
+  "sentinels.collab.rules.watch_external_comments": {
+   "kind": "bool"
+  },
+  "session_guard": {
+   "kind": "bool",
+   "default": true
+  },
+  "show_unclassified": {
+   "kind": "bool",
+   "default": true
+  },
+  "signed_dir": {
+   "kind": "path"
+  },
+  "sound.cooldown_seconds": {
+   "kind": "int",
+   "bounds": [
+    0,
+    3600
+   ],
+   "default": 30
+  },
+  "sound.enabled": {
+   "kind": "bool",
+   "default": true
+  },
+  "sound.on_connection_lost": {
+   "kind": "bool",
+   "default": true
+  },
+  "sound.on_new_red": {
+   "kind": "bool",
+   "default": true
+  },
+  "sound.server_beep": {
+   "kind": "bool",
+   "default": false
+  },
+  "sound.volume": {
+   "kind": "int",
+   "bounds": [
+    1,
+    100
+   ],
+   "default": 40
+  },
+  "stuck_minutes": {
+   "kind": "int",
+   "bounds": [
+    10,
+    1440
+   ],
+   "default": 120
+  },
+  "targets_file": {
+   "kind": "path"
+  },
+  "tools_dir": {
+   "kind": "path"
+  },
+  "tui.refresh_seconds": {
+   "kind": "int",
+   "bounds": [
+    2,
+    300
+   ]
+  },
+  "tui.theme": {
+   "kind": "enum",
+   "bounds": [
+    "dark",
+    "light"
+   ]
+  },
+  "updates.check": {
+   "kind": "bool",
+   "default": true
+  },
+  "watchdog_minutes": {
+   "kind": "int",
+   "bounds": [
+    0,
+    1440
+   ],
+   "default": 10
+  },
+  "webhook.enabled": {
+   "kind": "bool",
+   "default": false
+  },
+  "webhook.live_events_keep": {
+   "kind": "int",
+   "bounds": [
+    10,
+    1000
+   ]
+  },
+  "webhook.max_per_minute": {
+   "kind": "int",
+   "bounds": [
+    1,
+    600
+   ],
+   "default": 30
+  },
+  "webhook.record_events": {
+   "kind": "bool"
+  },
+  "webhook.replay_seconds": {
+   "kind": "int",
+   "bounds": [
+    60,
+    86400
+   ],
+   "default": 3600
+  },
+  "webhook.secret": {
+   "default": ""
+  },
+  "webhook.signing_state": {
+   "kind": "status"
+  },
+  "workspace_root": {
+   "kind": "path"
+  }
+ },
+ "settings": {
+  "added": [],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {}
+}

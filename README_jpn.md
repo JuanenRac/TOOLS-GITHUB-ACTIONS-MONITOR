@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-3867_passing-brightgreen.svg" alt="3867 tests">
+  <img src="https://img.shields.io/badge/Tests-3961_passing-brightgreen.svg" alt="3961 tests">
 </p>
 
 > 所有するすべてのリポジトリのワークフローを監視し、赤いもの・止まっているもの・対応待ちのものを、ローカルの1ページで教えます。
@@ -81,7 +81,7 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **テスト** | テストメソッド 3867 件(`python -m unittest discover -s monitor/tests`) |
+| **テスト** | テストメソッド 3961 件(`python -m unittest discover -s monitor/tests`) |
 | **設定** | 設定 640 件、すべてヘルプ付き |
 | **言語** | 8(英語、スペイン語、ドイツ語、フランス語、イタリア語、日本語、中国語、ポルトガル語) |
 | **CI で検証したシステム** | ubuntu, windows、Python 3.11, 3.13 |
@@ -286,6 +286,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/WEBHOOK_jpn.md`](monitor/docs/WEBHOOK_jpn.md): 受信 Webhook
 - [`monitor/docs/CHATOPS_jpn.md`](monitor/docs/CHATOPS_jpn.md): Slack と Discord の読み取り専用チャットコマンド
 - [`monitor/docs/SOUNDS_jpn.md`](monitor/docs/SOUNDS_jpn.md): イベントの種類ごとの音
+- [`monitor/docs/UPDATE_jpn.md`](monitor/docs/UPDATE_jpn.md): アップデーター：別のバージョンへ移行し、設定を移行する
 - [`monitor/docs/OPS_jpn.md`](monitor/docs/OPS_jpn.md): インストールの運用：完全バックアップ、復元、定期バックアップ、オンデマンドの削除、doctor とその終了コード、systemd と Docker のアプライアンス
 - [`monitor/docs/LITE_jpn.md`](monitor/docs/LITE_jpn.md): lite 版
 - [`monitor/docs/COMPLETE_INDIVIDUAL_jpn.md`](monitor/docs/COMPLETE_INDIVIDUAL_jpn.md): 一人で使う完全版

@@ -44,7 +44,7 @@ _RULES = (
     ("logs", r"actions_monitor_log\.txt|ai_actions_log\.jsonl|github_actions_log\.jsonl|auth_audit\.jsonl|loop\.log"),
     ("data", r"etag_cache\.json|events_monitor\.jsonl|events_state\.json|eventos_monitor\.jsonl|eventos_estado\.json|analytics_history\.json|sentinel_cache\.json|sentinel_history\.json|"
              r"sentinel_ai_cache\.json|collab_state\.json|security_state\.json|alert_mutes\.json|failures\.jsonl|update_check\.json|welcome_state\.json|orgs_state\.json|degraded\.json|targets\.candidates\.json|"
-             r"storage\.sqlite3|org_logo\.(?:png|jpg|webp|svg|tmp)|access_token|credential|accounts|state|secrets|_global|_no_workspace"),
+             r"storage\.sqlite3|org_logo\.(?:png|jpg|webp|svg|tmp)|access_token|credential|accounts|state|secrets|_global|_no_workspace|update_history\.jsonl"),
 )
 _COMPILED = tuple((kind, re.compile(r"^(?:" + body + r")\Z")) for kind, body in _RULES)
 _VARIANT = re.compile(r"_(lite|demo)(?=\.|$)")

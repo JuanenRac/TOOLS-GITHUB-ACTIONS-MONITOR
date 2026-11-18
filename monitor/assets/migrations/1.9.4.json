@@ -1,0 +1,29 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "1.9.4",
+ "previous": "1.9.3",
+ "digest": "85983c0a5d6c5f9fd038d3377da76e3799e50ca7dd368b1d576d9b7443adeba8",
+ "data_schema": 2,
+ "settings": {
+  "added": [],
+  "removed": [],
+  "changed": [
+   {
+    "key": "ai.base_url",
+    "old": {
+     "bounds": {
+      "re": "^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250})?\\Z"
+     }
+    },
+    "new": {
+     "bounds": {
+      "re": "^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250}|http://(127\\.0\\.0\\.1|localhost|\\[::1\\]):[0-9]{2,5}(/[A-Za-z0-9._~/-]{0,100})?)?\\Z"
+     }
+    }
+   }
+  ]
+ },
+ "manual": {}
+}

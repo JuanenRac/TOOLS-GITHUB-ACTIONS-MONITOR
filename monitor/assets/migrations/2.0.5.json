@@ -1,0 +1,148 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "2.0.5",
+ "previous": "2.0.4",
+ "digest": "a04612657c0d52993c56e878eaea3e763e1efe94e2515710984825e9d98a5d9d",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "ci.dormant_repos",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "ci.fork_own_ci_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     365
+    ],
+    "default": 90
+   },
+   {
+    "key": "ci.forks_need_own_ci",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "ci.red_age_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     3650
+    ],
+    "default": 30
+   },
+   {
+    "key": "ci.red_ages",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "ci.stuck.ghost_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     3650
+    ],
+    "default": 7
+   },
+   {
+    "key": "ci.stuck.ghost_enabled",
+    "kind": "bool",
+    "default": true
+   }
+  ],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {
+  "notices": [
+   {
+    "id": "ruleset_effective",
+    "level": "behavior",
+    "keys": [
+     "sentinel.hygiene.ruleset_mode"
+    ],
+    "text": {
+     "en": "The hygiene check now judges the rules GitHub reports as in force (ruleset_mode effective) instead of a ruleset with an exact name; it costs two more requests per repository. Set name to bring the old rule back.",
+     "es": "La comprobación de higiene ahora juzga las reglas que GitHub da como vigentes (ruleset_mode effective) en vez de un ruleset con nombre exacto; cuesta dos peticiones más por repositorio. Pon name para recuperar la regla antigua.",
+     "de": "Die Hygieneprüfung beurteilt jetzt die von GitHub gemeldeten geltenden Regeln (ruleset_mode effective) statt eines Rulesets mit exaktem Namen; das kostet zwei Anfragen mehr pro Repository. Mit name kommt die alte Regel zurück.",
+     "fr": "Le contrôle d'hygiène juge désormais les règles que GitHub signale comme en vigueur (ruleset_mode effective) au lieu d'un ruleset au nom exact ; cela coûte deux requêtes de plus par dépôt. Mettez name pour retrouver l'ancienne règle.",
+     "it": "Il controllo di igiene ora giudica le regole che GitHub segnala in vigore (ruleset_mode effective) invece di un ruleset con nome esatto; costa due richieste in più per repository. Imposta name per riavere la vecchia regola.",
+     "ja": "衛生チェックは、正確な名前のルールセットではなく、GitHub が有効と報告するルール（ruleset_mode effective）で判定するようになりました。リポジトリごとにリクエストが2回増えます。name にすると以前の規則に戻ります。",
+     "zh": "卫生检查现在按 GitHub 报告的生效规则（ruleset_mode effective）判断，而不是按名称完全匹配的规则集；每个仓库多两次请求。设为 name 可恢复旧规则。",
+     "pt": "A verificação de higiene passa a avaliar as regras que o GitHub indica como em vigor (ruleset_mode effective) em vez de um ruleset com nome exato; custa mais dois pedidos por repositório. Defina name para recuperar a regra antiga."
+    },
+    "when": {
+     "absent_or_null": "sentinel.hygiene.ruleset_mode"
+    },
+    "old_value": "name",
+    "new_value": "effective"
+   },
+   {
+    "id": "ghost_queue",
+    "level": "behavior",
+    "keys": [
+     "ci.stuck.ghost_enabled",
+     "ci.stuck.ghost_days"
+    ],
+    "text": {
+     "en": "Runs queued for 7 days or more are told apart as a ghost queue and no longer count as stuck.",
+     "es": "Las ejecuciones en cola durante 7 días o más se distinguen como cola fantasma y ya no cuentan como atascadas.",
+     "de": "Läufe, die 7 Tage oder länger in der Warteschlange stehen, gelten als Geisterwarteschlange und zählen nicht mehr als hängend.",
+     "fr": "Les exécutions en file depuis 7 jours ou plus sont distinguées comme file fantôme et ne comptent plus comme bloquées.",
+     "it": "Le esecuzioni in coda da 7 giorni o più sono distinte come coda fantasma e non contano più come bloccate.",
+     "ja": "7日以上キューに留まる実行は「幽霊キュー」として区別され、停滞には数えられなくなりました。",
+     "zh": "排队 7 天或更久的运行被识别为幽灵队列，不再算作卡住。",
+     "pt": "As execuções em fila há 7 dias ou mais são distinguidas como fila fantasma e deixam de contar como bloqueadas."
+    },
+    "old_value": false,
+    "new_value": true
+   },
+   {
+    "id": "red_ages",
+    "level": "behavior",
+    "keys": [
+     "ci.red_ages",
+     "ci.red_age_days"
+    ],
+    "text": {
+     "en": "A red nobody attends to becomes inactive after 30 days and leaves the red list.",
+     "es": "Un rojo que nadie atiende pasa a inactivo a los 30 días y sale de la lista de rojos.",
+     "de": "Ein Rot, um das sich niemand kümmert, wird nach 30 Tagen inaktiv und verlässt die Rotliste.",
+     "fr": "Un rouge dont personne ne s'occupe devient inactif après 30 jours et quitte la liste des rouges.",
+     "it": "Un rosso di cui nessuno si occupa diventa inattivo dopo 30 giorni ed esce dall'elenco dei rossi.",
+     "ja": "誰も対応しない赤は30日後に非アクティブとなり、赤の一覧から外れます。",
+     "zh": "无人处理的红色在 30 天后变为不活跃并从红色列表中移除。",
+     "pt": "Um vermelho de que ninguém cuida passa a inativo ao fim de 30 dias e sai da lista de vermelhos."
+    },
+    "old_value": false,
+    "new_value": true
+   },
+   {
+    "id": "forks_own_ci",
+    "level": "behavior",
+    "keys": [
+     "ci.forks_need_own_ci",
+     "ci.fork_own_ci_days"
+    ],
+    "text": {
+     "en": "Forks enter the hygiene, the workflow lint and the score only when they have a CI of their own (last 90 days).",
+     "es": "Los forks entran en la higiene, el lint de workflows y la puntuación solo si tienen un CI propio (últimos 90 días).",
+     "de": "Forks fließen nur dann in Hygiene, Workflow-Lint und Bewertung ein, wenn sie eine eigene CI haben (letzte 90 Tage).",
+     "fr": "Les forks n'entrent dans l'hygiène, le lint des workflows et le score que s'ils ont une CI propre (90 derniers jours).",
+     "it": "I fork entrano in igiene, lint dei workflow e punteggio solo se hanno una CI propria (ultimi 90 giorni).",
+     "ja": "フォークは、独自の CI（直近90日）がある場合にのみ、衛生・ワークフロー lint・スコアの対象になります。",
+     "zh": "只有拥有自己 CI（最近 90 天）的 fork 才会计入卫生检查、工作流 lint 和评分。",
+     "pt": "Os forks só entram na higiene, no lint de workflows e na pontuação se tiverem CI própria (últimos 90 dias)."
+    },
+    "old_value": false,
+    "new_value": true
+   }
+  ]
+ }
+}

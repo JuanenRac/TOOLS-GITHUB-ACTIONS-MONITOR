@@ -1,0 +1,471 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "1.8.2",
+ "previous": "1.8.1",
+ "digest": "f2a677f4b192126f97707da63740c6e7e2ea9b06aeefaf2f1e9d49809c488c76",
+ "data_schema": 1,
+ "settings": {
+  "added": [
+   {
+    "key": "ai.skill",
+    "kind": "bool"
+   },
+   {
+    "key": "ai.skill_max_chars",
+    "kind": "int",
+    "bounds": [
+     300,
+     12000
+    ]
+   },
+   {
+    "key": "github_app.openssl_path",
+    "kind": "path"
+   },
+   {
+    "key": "github_app.share_reads",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "lessons.allow_write",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "lessons.brief_max_bytes",
+    "kind": "int",
+    "bounds": [
+     500,
+     20000
+    ],
+    "default": 3000
+   },
+   {
+    "key": "lessons.enabled",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "lessons.max_entries",
+    "kind": "int",
+    "bounds": [
+     100,
+     100000
+    ],
+    "default": 5000
+   },
+   {
+    "key": "lessons.recurring_from",
+    "kind": "int",
+    "bounds": [
+     2,
+     20
+    ],
+    "default": 2
+   },
+   {
+    "key": "lessons.retention_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     3650
+    ],
+    "default": 180
+   },
+   {
+    "key": "logs.failed_step.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "logs.failed_step.lines",
+    "kind": "int",
+    "bounds": [
+     3,
+     40
+    ],
+    "default": 12
+   },
+   {
+    "key": "logs.failed_step.max_bytes",
+    "kind": "int",
+    "bounds": [
+     200,
+     4000
+    ],
+    "default": 2000
+   },
+   {
+    "key": "notify.channels.email.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "notify.channels.email.host",
+    "kind": "text",
+    "bounds": {
+     "re": "^(127\\.0\\.0\\.1|localhost|\\[::1\\])\\Z"
+    }
+   },
+   {
+    "key": "notify.channels.email.port",
+    "kind": "int",
+    "bounds": [
+     1,
+     65535
+    ]
+   },
+   {
+    "key": "notify.channels.email.sender",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,200}\\Z"
+    }
+   },
+   {
+    "key": "notify.channels.ntfy.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "notify.channels.ntfy.server",
+    "kind": "text",
+    "bounds": {
+     "re": "^(https://[A-Za-z0-9._~:/-]{4,200}|http://(127\\.0\\.0\\.1|localhost)(:[0-9]{1,5})?)\\Z"
+    }
+   },
+   {
+    "key": "notify.channels.teams.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "notify.digest.max_items",
+    "kind": "int",
+    "bounds": [
+     5,
+     200
+    ]
+   },
+   {
+    "key": "notify.users.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "notify.users.max_per_hour",
+    "kind": "int",
+    "bounds": [
+     1,
+     600
+    ]
+   },
+   {
+    "key": "readpool.prefer.discovery",
+    "kind": "enum",
+    "bounds": [
+     "auto",
+     "user",
+     "app",
+     "extra"
+    ]
+   },
+   {
+    "key": "readpool.prefer.history",
+    "kind": "enum",
+    "bounds": [
+     "auto",
+     "user",
+     "app",
+     "extra"
+    ]
+   },
+   {
+    "key": "readpool.prefer.issues",
+    "kind": "enum",
+    "bounds": [
+     "auto",
+     "user",
+     "app",
+     "extra"
+    ]
+   },
+   {
+    "key": "readpool.prefer.other",
+    "kind": "enum",
+    "bounds": [
+     "auto",
+     "user",
+     "app",
+     "extra"
+    ]
+   },
+   {
+    "key": "readpool.prefer.runs",
+    "kind": "enum",
+    "bounds": [
+     "auto",
+     "user",
+     "app",
+     "extra"
+    ]
+   },
+   {
+    "key": "readpool.prefer.security",
+    "kind": "enum",
+    "bounds": [
+     "auto",
+     "user",
+     "app",
+     "extra"
+    ]
+   },
+   {
+    "key": "readpool.reserve.app",
+    "kind": "int",
+    "bounds": [
+     0,
+     4000
+    ]
+   },
+   {
+    "key": "readpool.reserve.extra",
+    "kind": "int",
+    "bounds": [
+     0,
+     4000
+    ]
+   },
+   {
+    "key": "readpool.reserve.user",
+    "kind": "int",
+    "bounds": [
+     0,
+     4000
+    ]
+   },
+   {
+    "key": "reports.max_calls_per_cycle",
+    "kind": "int",
+    "bounds": [
+     1,
+     50
+    ],
+    "default": 4
+   },
+   {
+    "key": "reports.queue.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "reports.release_view.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "reports.supply_chain.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "reports.workflow_hygiene.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "savings.feeds.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "savings.feeds.max_age_minutes",
+    "kind": "int",
+    "bounds": [
+     15,
+     10080
+    ],
+    "default": 240
+   },
+   {
+    "key": "savings.feeds.method",
+    "kind": "enum",
+    "bounds": [
+     "atom",
+     "git",
+     "auto"
+    ],
+    "default": "atom"
+   },
+   {
+    "key": "savings.webhook_first",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "savings.webhook_full_minutes",
+    "kind": "int",
+    "bounds": [
+     30,
+     10080
+    ],
+    "default": 360
+   },
+   {
+    "key": "savings.webhook_window_minutes",
+    "kind": "int",
+    "bounds": [
+     5,
+     1440
+    ],
+    "default": 60
+   },
+   {
+    "key": "sentinels.collab.search_api",
+    "kind": "bool"
+   },
+   {
+    "key": "ui.orientation",
+    "kind": "enum",
+    "bounds": [
+     "auto",
+     "portrait",
+     "landscape"
+    ],
+    "default": "auto"
+   },
+   {
+    "key": "ui.rotate_seconds",
+    "kind": "int",
+    "bounds": [
+     0,
+     3600
+    ],
+    "default": 0
+   },
+   {
+    "key": "ui.screen1_orientation",
+    "kind": "enum",
+    "bounds": [
+     "auto",
+     "portrait",
+     "landscape"
+    ],
+    "default": "auto"
+   },
+   {
+    "key": "ui.screen1_tabs",
+    "kind": "text",
+    "bounds": {
+     "re": "^[a-z,]{0,60}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "ui.screen2_orientation",
+    "kind": "enum",
+    "bounds": [
+     "auto",
+     "portrait",
+     "landscape"
+    ],
+    "default": "auto"
+   },
+   {
+    "key": "ui.screen2_tabs",
+    "kind": "text",
+    "bounds": {
+     "re": "^[a-z,]{0,60}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "ui.screen3_orientation",
+    "kind": "enum",
+    "bounds": [
+     "auto",
+     "portrait",
+     "landscape"
+    ],
+    "default": "auto"
+   },
+   {
+    "key": "ui.screen3_tabs",
+    "kind": "text",
+    "bounds": {
+     "re": "^[a-z,]{0,60}\\Z"
+    },
+    "default": ""
+   },
+   {
+    "key": "watchdog_max_abandoned",
+    "kind": "int",
+    "bounds": [
+     0,
+     100
+    ],
+    "default": 8
+   }
+  ],
+  "removed": [],
+  "changed": [
+   {
+    "key": "auth.allow_bearer",
+    "old": {
+     "default": true
+    },
+    "new": {
+     "default": false
+    }
+   }
+  ]
+ },
+ "manual": {
+  "moved": [
+   {
+    "from": "actions_monitor.json",
+    "to": "config/actions_monitor.json"
+   },
+   {
+    "from": "actions_monitor_lite.json",
+    "to": "config/actions_monitor_lite.json"
+   },
+   {
+    "from": "targets.json",
+    "to": "config/targets.json"
+   },
+   {
+    "from": "ecosystems.json",
+    "to": "config/ecosystems.json"
+   },
+   {
+    "from": "profiles.json",
+    "to": "config/profiles.json"
+   },
+   {
+    "from": "quotas.json",
+    "to": "config/quotas.json"
+   }
+  ],
+  "notices": [
+   {
+    "id": "auth_bearer_off",
+    "level": "behavior",
+    "keys": [
+     "auth.allow_bearer"
+    ],
+    "text": {
+     "en": "Sessions of scripts and apps (the Authorization: Bearer header) are no longer accepted unless auth.allow_bearer is on.",
+     "es": "Las sesiones de scripts y apps (la cabecera Authorization: Bearer) ya no se aceptan salvo que auth.allow_bearer esté activo.",
+     "de": "Sitzungen von Skripten und Apps (der Header Authorization: Bearer) werden nur noch akzeptiert, wenn auth.allow_bearer eingeschaltet ist.",
+     "fr": "Les sessions de scripts et d'applications (l'en-tête Authorization: Bearer) ne sont plus acceptées sauf si auth.allow_bearer est activé.",
+     "it": "Le sessioni di script e app (l'intestazione Authorization: Bearer) non sono più accettate se auth.allow_bearer non è attivo.",
+     "ja": "スクリプトやアプリのセッション（Authorization: Bearer ヘッダー）は、auth.allow_bearer をオンにしない限り受け付けられなくなりました。",
+     "zh": "除非开启 auth.allow_bearer，否则不再接受脚本和应用的会话（Authorization: Bearer 头）。",
+     "pt": "As sessões de scripts e aplicações (o cabeçalho Authorization: Bearer) já não são aceites, a menos que auth.allow_bearer esteja ativo."
+    },
+    "old_value": true,
+    "new_value": false
+   }
+  ]
+ }
+}

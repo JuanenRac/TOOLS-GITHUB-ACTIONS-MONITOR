@@ -1,0 +1,69 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "1.8.4",
+ "previous": "1.8.3",
+ "digest": "b3205f1c4ff596f96c4b54ba661a943b9005de11ec88e3ab724766f4d1ca865d",
+ "data_schema": 1,
+ "settings": {
+  "added": [
+   {
+    "key": "listen.trusted_proxies",
+    "kind": "names",
+    "default": []
+   },
+   {
+    "key": "ports.complete",
+    "kind": "int",
+    "bounds": [
+     1024,
+     65535
+    ],
+    "default": 8765
+   },
+   {
+    "key": "ports.lite",
+    "kind": "int",
+    "bounds": [
+     1024,
+     65535
+    ],
+    "default": 8766
+   },
+   {
+    "key": "ui.alerts_sort",
+    "kind": "enum",
+    "bounds": [
+     "server",
+     "severity",
+     "streak",
+     "class",
+     "age",
+     "newest",
+     "repo",
+     "origin",
+     "state"
+    ],
+    "default": "server"
+   },
+   {
+    "key": "ui.now_sort",
+    "kind": "enum",
+    "bounds": [
+     "ecosystem",
+     "severity",
+     "age",
+     "newest",
+     "repo",
+     "event",
+     "state"
+    ],
+    "default": "ecosystem"
+   }
+  ],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {}
+}

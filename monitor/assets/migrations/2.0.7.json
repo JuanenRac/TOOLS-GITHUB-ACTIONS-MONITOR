@@ -1,0 +1,135 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "2.0.7",
+ "previous": "2.0.6",
+ "digest": "c7c89e62c3ceacc32d6acacb44ee2272c435799642d747e638fcdb60a10f4851",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "api.cursor_ttl_seconds",
+    "kind": "int",
+    "bounds": [
+     30,
+     86400
+    ],
+    "default": 900
+   },
+   {
+    "key": "api.default_limit",
+    "kind": "int",
+    "bounds": [
+     1,
+     1000
+    ],
+    "default": 50
+   },
+   {
+    "key": "api.gzip_min_bytes",
+    "kind": "int",
+    "bounds": [
+     0,
+     10000000
+    ],
+    "default": 1024
+   },
+   {
+    "key": "api.max_limit",
+    "kind": "int",
+    "bounds": [
+     1,
+     1000
+    ],
+    "default": 200
+   },
+   {
+    "key": "api.v1_enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "ci.disabled_apart",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "upstream.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "upstream.forks_per_request",
+    "kind": "int",
+    "bounds": [
+     1,
+     25
+    ],
+    "default": 8
+   },
+   {
+    "key": "upstream.news_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     90
+    ],
+    "default": 7
+   },
+   {
+    "key": "upstream.notify",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "upstream.refresh_hours",
+    "kind": "int",
+    "bounds": [
+     1,
+     720
+    ],
+    "default": 12
+   },
+   {
+    "key": "upstream.repos",
+    "kind": "names",
+    "default": []
+   },
+   {
+    "key": "upstream.requests_per_hour",
+    "kind": "int",
+    "bounds": [
+     1,
+     120
+    ],
+    "default": 6
+   }
+  ],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {
+  "notices": [
+   {
+    "id": "disabled_apart",
+    "level": "info",
+    "keys": [
+     "ci.disabled_apart"
+    ],
+    "text": {
+     "en": "A workflow switched off by hand on GitHub is no longer a red (ci.disabled_apart, on by default).",
+     "es": "Un workflow desactivado a mano en GitHub ya no es un rojo (ci.disabled_apart, activo por defecto).",
+     "de": "Ein auf GitHub von Hand abgeschalteter Workflow ist kein Rot mehr (ci.disabled_apart, standardmäßig an).",
+     "fr": "Un workflow désactivé à la main sur GitHub n'est plus un rouge (ci.disabled_apart, activé par défaut).",
+     "it": "Un workflow disattivato a mano su GitHub non è più un rosso (ci.disabled_apart, attivo di default).",
+     "ja": "GitHub 上で手動で無効にしたワークフローは赤として扱われなくなりました（ci.disabled_apart、既定でオン）。",
+     "zh": "在 GitHub 上手动关闭的工作流不再算红色（ci.disabled_apart，默认开启）。",
+     "pt": "Um workflow desativado à mão no GitHub deixa de ser um vermelho (ci.disabled_apart, ativo por defeito)."
+    },
+    "old_value": false,
+    "new_value": true
+   }
+  ]
+ }
+}

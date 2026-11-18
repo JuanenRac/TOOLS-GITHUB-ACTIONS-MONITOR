@@ -1,0 +1,414 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "2.0.9",
+ "previous": "2.0.8",
+ "digest": "017668aed95ddd69d0851680b7e4414eb19bcf750175c39d701fb64915fec842",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "ai.allow_private_targets",
+    "kind": "bool"
+   },
+   {
+    "key": "ai.fallback_cloud_allowed",
+    "kind": "names"
+   },
+   {
+    "key": "alerts.silences_expire_days",
+    "kind": "int",
+    "bounds": [
+     0,
+     3650
+    ]
+   },
+   {
+    "key": "audit_log.keep_generations",
+    "kind": "int",
+    "bounds": [
+     1,
+     20
+    ]
+   },
+   {
+    "key": "audit_log.required",
+    "kind": "bool"
+   },
+   {
+    "key": "chatops.allowed_channels",
+    "kind": "names",
+    "default": []
+   },
+   {
+    "key": "chatops.allowed_teams",
+    "kind": "names",
+    "default": []
+   },
+   {
+    "key": "chatops.allowed_users",
+    "kind": "names",
+    "default": []
+   },
+   {
+    "key": "chatops.allowed_words",
+    "kind": "names",
+    "default": [
+     "help",
+     "status",
+     "alerts",
+     "red",
+     "queue",
+     "score"
+    ]
+   },
+   {
+    "key": "chatops.discord.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "chatops.discord.public_key_env",
+    "kind": "text",
+    "bounds": {
+     "re": "^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|PATHEXT|COMSPEC|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|SSH_AUTH_SOCK|MONITOR_SUPERVISOR_KEY|MONITOR_ACCESS_TOKEN|MONITOR_WEBHOOK_SECRET|MONITOR_SLACK_SIGNING_SECRET)\\Z)([A-Z_][A-Z0-9_]{0,63})?\\Z"
+    },
+    "default": "MONITOR_DISCORD_PUBLIC_KEY"
+   },
+   {
+    "key": "chatops.discord.state",
+    "kind": "status"
+   },
+   {
+    "key": "chatops.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "chatops.links",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "chatops.max_age_seconds",
+    "kind": "int",
+    "bounds": [
+     30,
+     300
+    ],
+    "default": 300
+   },
+   {
+    "key": "chatops.max_rows",
+    "kind": "int",
+    "bounds": [
+     1,
+     25
+    ],
+    "default": 8
+   },
+   {
+    "key": "chatops.rate_per_channel_per_minute",
+    "kind": "int",
+    "bounds": [
+     1,
+     600
+    ],
+    "default": 20
+   },
+   {
+    "key": "chatops.rate_per_minute",
+    "kind": "int",
+    "bounds": [
+     1,
+     6000
+    ],
+    "default": 60
+   },
+   {
+    "key": "chatops.rate_per_user_per_minute",
+    "kind": "int",
+    "bounds": [
+     1,
+     600
+    ],
+    "default": 6
+   },
+   {
+    "key": "chatops.show_repo_names",
+    "kind": "enum",
+    "bounds": [
+     "all",
+     "public",
+     "none"
+    ],
+    "default": "all"
+   },
+   {
+    "key": "chatops.slack.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "chatops.slack.signing_secret_env",
+    "kind": "text",
+    "bounds": {
+     "re": "^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|PATHEXT|COMSPEC|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|SSH_AUTH_SOCK|MONITOR_SUPERVISOR_KEY|MONITOR_ACCESS_TOKEN|MONITOR_WEBHOOK_SECRET|MONITOR_DISCORD_PUBLIC_KEY)\\Z)([A-Z_][A-Z0-9_]{0,63})?\\Z"
+    },
+    "default": "MONITOR_SLACK_SIGNING_SECRET"
+   },
+   {
+    "key": "chatops.slack.state",
+    "kind": "status"
+   },
+   {
+    "key": "logs.failed_step.max_per_minute",
+    "kind": "int",
+    "bounds": [
+     1,
+     60
+    ],
+    "default": 10
+   },
+   {
+    "key": "sound.on_info",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "sound.on_lesson",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "sound.on_report",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "sound.on_resolved",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "sound.on_score_drop",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "sound.on_sentinel",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "sound.on_stuck",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "sound.on_warning",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "sound.quiet_enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "sound.quiet_from_hour",
+    "kind": "int",
+    "bounds": [
+     0,
+     23
+    ],
+    "default": 22
+   },
+   {
+    "key": "sound.quiet_to_hour",
+    "kind": "int",
+    "bounds": [
+     0,
+     23
+    ],
+    "default": 7
+   },
+   {
+    "key": "sound.theme",
+    "kind": "enum",
+    "bounds": [
+     "classic",
+     "soft"
+    ],
+    "default": "classic"
+   },
+   {
+    "key": "webhook.max_bad_per_minute",
+    "kind": "int",
+    "bounds": [
+     1,
+     6000
+    ],
+    "default": 120
+   },
+   {
+    "key": "webhook.max_verified_per_minute",
+    "kind": "int",
+    "bounds": [
+     1,
+     6000
+    ],
+    "default": 120
+   },
+   {
+    "key": "webhook.persist_deliveries",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "webhook.reject_stale",
+    "kind": "bool",
+    "default": false
+   }
+  ],
+  "removed": [],
+  "changed": [
+   {
+    "key": "ai.base_url",
+    "old": {
+     "bounds": {
+      "re": "^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250}|http://(127\\.0\\.0\\.1|localhost|\\[::1\\]):[0-9]{2,5}(/[A-Za-z0-9._~/-]{0,100})?)?\\Z"
+     }
+    },
+    "new": {
+     "bounds": {
+      "re": "^(https://[A-Za-z0-9._~:/?#!$&()*+,;=%-]{4,250}|http://(127\\.0\\.0\\.1|localhost|\\[::1\\]):[0-9]{2,5}(/[A-Za-z0-9._~/-]{0,100})?)?\\Z"
+     }
+    }
+   },
+   {
+    "key": "ci.red_events",
+    "old": {
+     "default": [
+      "push",
+      "schedule",
+      "workflow_dispatch",
+      "merge_group"
+     ]
+    },
+    "new": {
+     "default": [
+      "push",
+      "schedule",
+      "workflow_dispatch",
+      "merge_group",
+      "workflow_run",
+      "repository_dispatch"
+     ]
+    }
+   },
+   {
+    "key": "listen.query_access",
+    "old": {
+     "default": true
+    },
+    "new": {
+     "default": false
+    }
+   },
+   {
+    "key": "listen.token_env",
+    "old": {
+     "bounds": {
+      "re": "^([A-Z_][A-Z0-9_]{0,63})?\\Z"
+     }
+    },
+    "new": {
+     "bounds": {
+      "re": "^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|PATHEXT|COMSPEC|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|SSH_AUTH_SOCK|MONITOR_SUPERVISOR_KEY|MONITOR_WEBHOOK_SECRET|MONITOR_SLACK_SIGNING_SECRET|MONITOR_DISCORD_PUBLIC_KEY)\\Z)([A-Z_][A-Z0-9_]{0,63})?\\Z"
+     }
+    }
+   },
+   {
+    "key": "notify.channels.apprise.urls_env",
+    "old": {
+     "bounds": {
+      "re": "^([A-Z_][A-Z0-9_]{0,63})?\\Z"
+     }
+    },
+    "new": {
+     "bounds": {
+      "re": "^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|PATHEXT|COMSPEC|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|SSH_AUTH_SOCK|MONITOR_SUPERVISOR_KEY|MONITOR_ACCESS_TOKEN|MONITOR_WEBHOOK_SECRET|MONITOR_SLACK_SIGNING_SECRET|MONITOR_DISCORD_PUBLIC_KEY)\\Z)([A-Z_][A-Z0-9_]{0,63})?\\Z"
+     }
+    }
+   },
+   {
+    "key": "notify.channels.discord.url_env",
+    "old": {
+     "bounds": {
+      "re": "^([A-Z_][A-Z0-9_]{0,63})?\\Z"
+     }
+    },
+    "new": {
+     "bounds": {
+      "re": "^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|PATHEXT|COMSPEC|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|SSH_AUTH_SOCK|MONITOR_SUPERVISOR_KEY|MONITOR_ACCESS_TOKEN|MONITOR_WEBHOOK_SECRET|MONITOR_SLACK_SIGNING_SECRET|MONITOR_DISCORD_PUBLIC_KEY)\\Z)([A-Z_][A-Z0-9_]{0,63})?\\Z"
+     }
+    }
+   },
+   {
+    "key": "notify.channels.matrix.token_env",
+    "old": {
+     "bounds": {
+      "re": "^([A-Z_][A-Z0-9_]{0,63})?\\Z"
+     }
+    },
+    "new": {
+     "bounds": {
+      "re": "^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|PATHEXT|COMSPEC|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|SSH_AUTH_SOCK|MONITOR_SUPERVISOR_KEY|MONITOR_ACCESS_TOKEN|MONITOR_WEBHOOK_SECRET|MONITOR_SLACK_SIGNING_SECRET|MONITOR_DISCORD_PUBLIC_KEY)\\Z)([A-Z_][A-Z0-9_]{0,63})?\\Z"
+     }
+    }
+   },
+   {
+    "key": "notify.channels.slack.url_env",
+    "old": {
+     "bounds": {
+      "re": "^([A-Z_][A-Z0-9_]{0,63})?\\Z"
+     }
+    },
+    "new": {
+     "bounds": {
+      "re": "^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|PATHEXT|COMSPEC|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|SSH_AUTH_SOCK|MONITOR_SUPERVISOR_KEY|MONITOR_ACCESS_TOKEN|MONITOR_WEBHOOK_SECRET|MONITOR_SLACK_SIGNING_SECRET|MONITOR_DISCORD_PUBLIC_KEY)\\Z)([A-Z_][A-Z0-9_]{0,63})?\\Z"
+     }
+    }
+   },
+   {
+    "key": "notify.channels.telegram.token_env",
+    "old": {
+     "bounds": {
+      "re": "^([A-Z_][A-Z0-9_]{0,63})?\\Z"
+     }
+    },
+    "new": {
+     "bounds": {
+      "re": "^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|PATHEXT|COMSPEC|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|SSH_AUTH_SOCK|MONITOR_SUPERVISOR_KEY|MONITOR_ACCESS_TOKEN|MONITOR_WEBHOOK_SECRET|MONITOR_SLACK_SIGNING_SECRET|MONITOR_DISCORD_PUBLIC_KEY)\\Z)([A-Z_][A-Z0-9_]{0,63})?\\Z"
+     }
+    }
+   },
+   {
+    "key": "webhook.secret_env",
+    "old": {
+     "bounds": {
+      "re": "^([A-Z_][A-Z0-9_]{0,63})?\\Z"
+     }
+    },
+    "new": {
+     "bounds": {
+      "re": "^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|PATHEXT|COMSPEC|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|SSH_AUTH_SOCK|MONITOR_SUPERVISOR_KEY|MONITOR_ACCESS_TOKEN|MONITOR_SLACK_SIGNING_SECRET|MONITOR_DISCORD_PUBLIC_KEY)\\Z)([A-Z_][A-Z0-9_]{0,63})?\\Z"
+     }
+    }
+   }
+  ]
+ },
+ "manual": {}
+}

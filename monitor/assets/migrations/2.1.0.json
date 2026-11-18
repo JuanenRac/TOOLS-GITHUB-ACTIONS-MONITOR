@@ -1,0 +1,381 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "2.1.0",
+ "previous": "2.0.9",
+ "digest": "2c6fa994133b5d8d00b2608b416b93377d9e4e56e93cb0f8eb45660e726e7dd7",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "ci.copilot_alerts",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "ci.dependabot_alerts",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "ops.backup.compress_level",
+    "kind": "int",
+    "bounds": [
+     0,
+     9
+    ]
+   },
+   {
+    "key": "ops.backup.dir",
+    "kind": "path"
+   },
+   {
+    "key": "ops.backup.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "ops.backup.encrypt",
+    "kind": "bool"
+   },
+   {
+    "key": "ops.backup.include_config",
+    "kind": "bool"
+   },
+   {
+    "key": "ops.backup.interval_hours",
+    "kind": "int",
+    "bounds": [
+     1,
+     720
+    ]
+   },
+   {
+    "key": "ops.backup.keep",
+    "kind": "int",
+    "bounds": [
+     1,
+     365
+    ]
+   },
+   {
+    "key": "ops.backup.key_env",
+    "kind": "text",
+    "bounds": {
+     "re": "^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|MONITOR_[A-Z0-9_]*)\\Z)([A-Z_][A-Z0-9_]{0,63})?\\Z"
+    }
+   },
+   {
+    "key": "ops.doctor.backup_max_age_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     365
+    ]
+   },
+   {
+    "key": "ops.doctor.min_free_mb",
+    "kind": "int",
+    "bounds": [
+     50,
+     10000000
+    ]
+   },
+   {
+    "key": "ops.doctor.sqlite_check",
+    "kind": "enum",
+    "bounds": [
+     "quick",
+     "deep",
+     "off"
+    ]
+   },
+   {
+    "key": "ops.doctor.sqlite_timeout_s",
+    "kind": "int",
+    "bounds": [
+     1,
+     600
+    ]
+   },
+   {
+    "key": "ops.doctor.strict_exit",
+    "kind": "bool"
+   },
+   {
+    "key": "ops.doctor.webhook_min_length",
+    "kind": "int",
+    "bounds": [
+     8,
+     128
+    ]
+   },
+   {
+    "key": "ops.purge.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "ops.purge.require_backup_hours",
+    "kind": "int",
+    "bounds": [
+     0,
+     720
+    ]
+   },
+   {
+    "key": "screens.alert_hold_seconds",
+    "kind": "int",
+    "bounds": [
+     5,
+     600
+    ],
+    "default": 30
+   },
+   {
+    "key": "screens.group_map",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "screens.logo_corner",
+    "kind": "enum",
+    "bounds": [
+     "top-right",
+     "top-left",
+     "bottom-right",
+     "bottom-left"
+    ],
+    "default": "top-right"
+   },
+   {
+    "key": "screens.logo_max_height",
+    "kind": "int",
+    "bounds": [
+     16,
+     320
+    ],
+    "default": 64
+   },
+   {
+    "key": "screens.logo_max_width",
+    "kind": "int",
+    "bounds": [
+     16,
+     640
+    ],
+    "default": 160
+   },
+   {
+    "key": "screens.logo_now",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "screens.logo_overview",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "screens.logo_sentinels",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "screens.mode",
+    "kind": "enum",
+    "bounds": [
+     "three",
+     "rotate"
+    ],
+    "default": "three"
+   },
+   {
+    "key": "screens.rotate_every_seconds",
+    "kind": "int",
+    "bounds": [
+     5,
+     300
+    ],
+    "default": 20
+   },
+   {
+    "key": "screens.theme_now",
+    "kind": "enum",
+    "bounds": [
+     "inherit",
+     "auto",
+     "light",
+     "dark",
+     "Armor",
+     "Aqua",
+     "Midnight",
+     "Ember",
+     "Forest",
+     "Violet",
+     "Solar",
+     "Ice",
+     "Crimson",
+     "Mono",
+     "High contrast",
+     "Metallic",
+     "Professional",
+     "Videogame",
+     "Terminal",
+     "Blueprint",
+     "contrast"
+    ],
+    "default": "inherit"
+   },
+   {
+    "key": "screens.theme_overview",
+    "kind": "enum",
+    "bounds": [
+     "inherit",
+     "auto",
+     "light",
+     "dark",
+     "Armor",
+     "Aqua",
+     "Midnight",
+     "Ember",
+     "Forest",
+     "Violet",
+     "Solar",
+     "Ice",
+     "Crimson",
+     "Mono",
+     "High contrast",
+     "Metallic",
+     "Professional",
+     "Videogame",
+     "Terminal",
+     "Blueprint",
+     "contrast"
+    ],
+    "default": "inherit"
+   },
+   {
+    "key": "screens.theme_sentinels",
+    "kind": "enum",
+    "bounds": [
+     "inherit",
+     "auto",
+     "light",
+     "dark",
+     "Armor",
+     "Aqua",
+     "Midnight",
+     "Ember",
+     "Forest",
+     "Violet",
+     "Solar",
+     "Ice",
+     "Crimson",
+     "Mono",
+     "High contrast",
+     "Metallic",
+     "Professional",
+     "Videogame",
+     "Terminal",
+     "Blueprint",
+     "contrast"
+    ],
+    "default": "inherit"
+   },
+   {
+    "key": "sound.on_live_recovered",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "ui.theme",
+    "kind": "enum",
+    "bounds": [
+     "auto",
+     "light",
+     "dark",
+     "Armor",
+     "Aqua",
+     "Midnight",
+     "Ember",
+     "Forest",
+     "Violet",
+     "Solar",
+     "Ice",
+     "Crimson",
+     "Mono",
+     "High contrast",
+     "Metallic",
+     "Professional",
+     "Videogame",
+     "Terminal",
+     "Blueprint"
+    ],
+    "default": "auto"
+   }
+  ],
+  "removed": [],
+  "changed": [
+   {
+    "key": "screens.default_theme",
+    "old": {
+     "bounds": [
+      "dark",
+      "light",
+      "contrast"
+     ],
+     "default": "dark"
+    },
+    "new": {
+     "bounds": [
+      "inherit",
+      "auto",
+      "light",
+      "dark",
+      "Armor",
+      "Aqua",
+      "Midnight",
+      "Ember",
+      "Forest",
+      "Violet",
+      "Solar",
+      "Ice",
+      "Crimson",
+      "Mono",
+      "High contrast",
+      "Metallic",
+      "Professional",
+      "Videogame",
+      "Terminal",
+      "Blueprint",
+      "contrast"
+     ],
+     "default": "inherit"
+    }
+   }
+  ]
+ },
+ "manual": {
+  "notices": [
+   {
+    "id": "query_access_off",
+    "level": "behavior",
+    "keys": [
+     "listen.query_access"
+    ],
+    "text": {
+     "en": "The access token no longer opens the session from the address (?access=): listen.query_access is off. Open the monitor with POST /api/access or the X-Monitor-Access header, or switch the setting on.",
+     "es": "El token de acceso ya no abre la sesión desde la dirección (?access=): listen.query_access está apagado. Abre el monitor con POST /api/access o la cabecera X-Monitor-Access, o activa el ajuste.",
+     "de": "Das Zugriffstoken öffnet die Sitzung nicht mehr über die Adresse (?access=): listen.query_access ist aus. Öffne den Monitor mit POST /api/access oder dem Header X-Monitor-Access oder schalte die Einstellung ein.",
+     "fr": "Le jeton d'accès n'ouvre plus la session depuis l'adresse (?access=) : listen.query_access est désactivé. Ouvrez le moniteur avec POST /api/access ou l'en-tête X-Monitor-Access, ou activez le réglage.",
+     "it": "Il token di accesso non apre più la sessione dall'indirizzo (?access=): listen.query_access è spento. Apri il monitor con POST /api/access o l'intestazione X-Monitor-Access, oppure attiva l'impostazione.",
+     "ja": "アクセストークンはアドレス（?access=）からセッションを開かなくなりました。listen.query_access はオフです。POST /api/access か X-Monitor-Access ヘッダーで開くか、設定をオンにしてください。",
+     "zh": "访问令牌不再通过地址（?access=）打开会话：listen.query_access 已关闭。请使用 POST /api/access 或 X-Monitor-Access 头打开监视器，或开启该设置。",
+     "pt": "O token de acesso já não abre a sessão a partir do endereço (?access=): listen.query_access está desligado. Abra o monitor com POST /api/access ou o cabeçalho X-Monitor-Access, ou ative a definição."
+    },
+    "old_value": true,
+    "new_value": false
+   }
+  ]
+ }
+}

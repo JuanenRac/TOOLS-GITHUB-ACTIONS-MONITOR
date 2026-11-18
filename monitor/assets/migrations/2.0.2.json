@@ -1,0 +1,29 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "2.0.2",
+ "previous": "2.0.1",
+ "digest": "72fcf91defde1f0b430295bb94883df1d9aaf808da57429450bf0c69a107ce0b",
+ "data_schema": 2,
+ "settings": {
+  "added": [],
+  "removed": [],
+  "changed": [
+   {
+    "key": "ai.api_key_env",
+    "old": {
+     "bounds": {
+      "re": "^([A-Z_][A-Z0-9_]{0,63})?\\Z"
+     }
+    },
+    "new": {
+     "bounds": {
+      "re": "^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|MONITOR_[A-Z0-9_]*)\\Z)([A-Z_][A-Z0-9_]{0,63})?\\Z"
+     }
+    }
+   }
+  ]
+ },
+ "manual": {}
+}

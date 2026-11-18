@@ -14,6 +14,8 @@
             running monitor and writes only the settings file of that tool (merged, with a backup), never anything on GitHub
   health    a quick check before reading anything heavy: is the monitor reachable, does it accept this client, does the GitHub credential of the account answer (a limit of the
             allowance is told apart from a credential that failed). Alias: check. With --deep it also asks whether the supervisor and the refresh cycle of every account are alive
+  update    the updater of the monitor (tools/monitor_updater.py, the same engine as the page, the window and the text menu): `update` opens the page in your browser; `update status|releases|plan|apply|migrate|rollback|history`
+            take the options of the updater (--to, --zip, --dry-run, --json ...); it needs no running monitor and never updates by itself. Its exit codes are its own (see docs/UPDATE.md)
   credential  replace | reload: put another login of GitHub in place of the one of an account that GitHub revoked (or let expire) without restarting anything; the token is read from a
             file (--new-token-file, or - for the standard input), never from a flag, and it is checked against GitHub before it is kept. Needs an administrator in the team mode, or this computer
 
@@ -46,7 +48,7 @@ from github_actions_monitor.tool_version import TOOL_VERSION
 from github_actions_monitor.security import netguard
 
 EXIT_OK, EXIT_USAGE, EXIT_DOWN, EXIT_AUTH, EXIT_DEGRADED, EXIT_ALERTS = 0, 1, 2, 3, 4, 5
-COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "score", "team", "ai-hook", "credential", "lessons", "install-skill", "gh-token", "ai", "backup")
+COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "score", "team", "ai-hook", "credential", "lessons", "install-skill", "gh-token", "ai", "backup", "update")
 BACKUP_ACTIONS = ("create", "verify", "restore", "status", "list")
 SKILL_ACTIONS = ("internal", "external")
 AI_ACTIONS = ("models", "doctor", "test")
@@ -660,6 +662,21 @@ def cmd_credential(ctx):
 HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "backup": cmd_backup, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai}
 
 
+def cmd_update(rest):
+    """`update [...]`: hands everything after the word to tools/monitor_updater.py (one file, standard library only) and returns its exit code; the word is not parsed here because the updater has its own options."""
+    import importlib.util
+    here = Path(__file__).resolve().parents[3]
+    tool = here / "tools" / "monitor_updater.py"
+    if not tool.is_file():
+        print(i18n.t("cli.update_missing", file=str(tool)), file=sys.stderr)
+        return EXIT_USAGE
+    spec = importlib.util.spec_from_file_location("monitor_updater", tool)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["monitor_updater"] = module
+    spec.loader.exec_module(module)
+    return int(module.main(rest))
+
+
 def build_parser():
     ap = argparse.ArgumentParser(prog="monitor_cli.py", description=i18n.t("cli.description"), epilog=i18n.t("cli.epilog"), formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("command", choices=COMMANDS, help=i18n.t("cli.help_command"))
@@ -708,9 +725,11 @@ def main(argv=None):
     i18n.cli_language(argv)
     platform_compat.console_utf8()
     args_list = list(sys.argv[1:] if argv is None else argv)
-    if "--version" in args_list:
+    if "--version" in args_list and args_list[:1] != ["update"]:
         print(f"monitor_cli {TOOL_VERSION}")
         return EXIT_OK
+    if args_list[:1] == ["update"]:      # the updater parses its own options (and has its own exit codes)
+        return cmd_update(args_list[1:])
     parser = build_parser()
     try:
         args = parser.parse_args(args_list)

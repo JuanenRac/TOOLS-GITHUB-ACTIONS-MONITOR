@@ -1,0 +1,84 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "2.0.8",
+ "previous": "2.0.7",
+ "digest": "e8c372f4e49b8b8622a2377febb9adadc45b5ffb3ab460d6a6a3749067e306a9",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "webhook.secret_env",
+    "kind": "text",
+    "bounds": {
+     "re": "^([A-Z_][A-Z0-9_]{0,63})?\\Z"
+    },
+    "default": "MONITOR_WEBHOOK_SECRET"
+   }
+  ],
+  "removed": [
+   {
+    "key": "webhook.secret",
+    "default": ""
+   }
+  ],
+  "changed": [
+   {
+    "key": "runners.model.thirdparty_labels",
+    "old": {
+     "default": [
+      "blacksmith",
+      "buildjet",
+      "namespace-profile",
+      "depot",
+      "warpbuild",
+      "ubicloud",
+      "runs-on",
+      "actuated",
+      "cirrus-runners"
+     ]
+    },
+    "new": {
+     "default": [
+      "blacksmith",
+      "buildjet",
+      "namespace-profile",
+      "depot",
+      "warpbuild",
+      "ubicloud",
+      "runs-on",
+      "actuated",
+      "cirrus-runners",
+      "codspeed"
+     ]
+    }
+   }
+  ]
+ },
+ "manual": {
+  "notices": [
+   {
+    "id": "webhook_secret_env",
+    "level": "warning",
+    "keys": [
+     "webhook.secret",
+     "webhook.secret_env"
+    ],
+    "text": {
+     "en": "The shared secret of the incoming webhook is no longer read from the configuration file: put it in the environment variable MONITOR_WEBHOOK_SECRET (or the name in webhook.secret_env). The value in your file is ignored and was taken out.",
+     "es": "El secreto compartido del webhook de entrada ya no se lee del fichero de configuración: ponlo en la variable de entorno MONITOR_WEBHOOK_SECRET (o el nombre de webhook.secret_env). El valor de tu fichero se ignora y se ha quitado.",
+     "de": "Das gemeinsame Geheimnis des eingehenden Webhooks wird nicht mehr aus der Konfigurationsdatei gelesen: lege es in die Umgebungsvariable MONITOR_WEBHOOK_SECRET (oder den Namen in webhook.secret_env). Der Wert in deiner Datei wird ignoriert und wurde entfernt.",
+     "fr": "Le secret partagé du webhook entrant n'est plus lu dans le fichier de configuration : mettez-le dans la variable d'environnement MONITOR_WEBHOOK_SECRET (ou le nom de webhook.secret_env). La valeur de votre fichier est ignorée et a été retirée.",
+     "it": "Il segreto condiviso del webhook in ingresso non viene più letto dal file di configurazione: mettilo nella variabile d'ambiente MONITOR_WEBHOOK_SECRET (o nel nome di webhook.secret_env). Il valore nel tuo file è ignorato ed è stato rimosso.",
+     "ja": "受信 Webhook の共有シークレットは設定ファイルから読まれなくなりました。環境変数 MONITOR_WEBHOOK_SECRET（または webhook.secret_env の名前）に設定してください。ファイル内の値は無視され、取り除かれました。",
+     "zh": "传入 Webhook 的共享密钥不再从配置文件读取：请放入环境变量 MONITOR_WEBHOOK_SECRET（或 webhook.secret_env 指定的名称）。文件中的值被忽略并已移除。",
+     "pt": "O segredo partilhado do webhook de entrada deixa de ser lido do ficheiro de configuração: coloque-o na variável de ambiente MONITOR_WEBHOOK_SECRET (ou no nome de webhook.secret_env). O valor do seu ficheiro é ignorado e foi retirado."
+    },
+    "when": {
+     "present": "webhook.secret"
+    }
+   }
+  ]
+ }
+}

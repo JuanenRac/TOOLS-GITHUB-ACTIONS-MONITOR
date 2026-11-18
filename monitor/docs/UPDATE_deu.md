@@ -1,0 +1,99 @@
+<!--
+  Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
+  GPL-3.0-or-later - see LICENSE
+-->
+
+# Den Monitor aktualisieren (der Updater)
+
+[English](UPDATE.md) · [Español](UPDATE_spa.md) · [Français](UPDATE_fra.md) · [Italiano](UPDATE_ita.md) · **Deutsch** · [简体中文](UPDATE_zho.md) · [日本語](UPDATE_jpn.md) · [Português](UPDATE_por.md)
+
+Der Updater bringt eine Installation von jeder veröffentlichten Version auf jede andere (aufwärts oder abwärts), migriert Ihre Konfiguration und lässt einen Rückweg offen. Er besteht aus EINER Datei, `monitor_updater.py`, die nur Python braucht und mit jeder installierten Version funktioniert; er liegt auch im Produkt (`tools/monitor_updater.py`) und als Befehl `monitor_cli.py update`. Er aktualisiert nie von selbst: nur auf Ihren Wunsch, und er löscht nichts (Ersetztes landet im Ordner der Kopien).
+
+## Drei Wege, ihn zu öffnen
+
+- `py -3 monitor_updater.py` öffnet eine Seite im Browser. Sie wird nur auf 127.0.0.1 und nur solange der Updater läuft ausgeliefert, mit einem einmaligen Token in der Adresse; sonst kann sie niemand nutzen.
+- `py -3 monitor_updater.py --tk` öffnet dasselbe in einem Fenster (braucht Tkinter).
+- `py -3 monitor_updater.py --console` ist ein Textmenü für Server, SSH und Container.
+- `py -3 bin/monitor_cli.py update` ist dieselbe Datei, aus dem Produkt gestartet; `update plan`, `update apply` und die anderen Befehle unten nehmen die Optionen der Tabelle an.
+
+## Was er tut, Schritt für Schritt
+
+1. Erkennt die Installation: Ordner, Version, Ausgabe (Vollständig oder Lite), Konfiguration, Daten, Ports, ob der Monitor läuft, Container oder Dienst.
+2. Listet alle auf GitHub veröffentlichten Versionen (ohne Token) mit Datum und Hinweisen auf und markiert die installierte und die neueste. Ohne Verbindung geben Sie ihm mit `--zip` ein Zip.
+3. Sie wählen die Zielversion. Eine niedrigere ist ein Downgrade: dafür braucht es `--allow-downgrade`.
+4. Zeigt den PLAN als Probelauf: die Kette der Schritte zwischen beiden Versionen (aus dem Register der Migrationen gelesen), was sich in IHRER Konfiguration ändert, die Verhaltensänderungen, die Sie bemerken werden, und jede gefundene Unstimmigkeit.
+5. Wendet ihn an: vorherige Kopie, SHA-256 gegen SHA256SUMS geprüft, Zip in einen neuen Ordner entpackt und untersucht (Pfade mit `..`, Links, Größe), Produkt kopiert, Ihre eigenen Zeilen in den Startskripten zurückgesetzt, Konfiguration migriert, Ordnerstruktur migriert und auf Wunsch der Monitor gestartet und `/api/health` geprüft.
+6. Schlägt etwas fehl, kehrt er selbst zum vorherigen Zustand zurück und schreibt einen Bericht. Jede Aktualisierung kommt in den Verlauf (`update_history.jsonl`), und die letzte lässt sich mit dem Befehl `rollback` rückgängig machen.
+
+## Befehle
+
+Ohne Befehl öffnet sich die Seite. Die Befehle antworten einmal (mit `--json` als Dokument):
+
+| Befehl | Bedeutung |
+|---|---|
+| `status` | was installiert ist und was die Prüfungen finden |
+| `releases` | alle veröffentlichten Versionen |
+| `plan` | der Probelauf für ein Ziel |
+| `apply` | ausführen (`--dry-run` zeigt nur den Plan) |
+| `migrate` | nur eine Konfigurationsdatei migrieren, siehe unten |
+| `rollback` | zur Version vor der letzten Aktualisierung zurück |
+| `history` | die auf dieser Installation gemachten Aktualisierungen |
+
+## Optionen
+
+| Option | Bedeutung |
+|---|---|
+| `--dir` | die Installation (Standard: dort, wo die Datei liegt, aufwärts suchend) |
+| `--to` | Zielversion (Standard: die neueste) |
+| `--from` | migrate: die Version, aus der die Datei stammt |
+| `--config` | migrate: eine Konfigurationsdatei |
+| `--zip` | dieses Zip statt GitHub verwenden |
+| `--sha256` | erwartetes SHA-256 des Zips |
+| `--dry-run` | nur den Plan zeigen |
+| `--apply` | migrate: das Ergebnis schreiben |
+| `--yes` | nicht nach Bestätigung fragen |
+| `--json` | die Antwort als ein JSON-Dokument |
+| `--keep-old-defaults` | schreibt den alten Standardwert jeder nie gesetzten Einstellung, damit sich das Verhalten nicht ändert |
+| `--adopt-new-defaults` | setzt auch Einstellungen, die noch den alten Standard haben, auf den neuen |
+| `--start` | danach den Monitor starten und prüfen |
+| `--edition` | complete oder lite, wenn sie sich nicht ableiten lässt |
+| `--allow-downgrade` | eine niedrigere Version erlauben |
+| `--allow-container` | trotzdem in einem Container arbeiten (das Image wird nicht ersetzt) |
+| `--no-gh` | das Programm `gh` nicht verwenden, nur die öffentliche API |
+| `--backups` | Ordner der Kopien (Standard: update_backups in der Installation) |
+| `--restore-data` | yes, no oder auto: was der Rückweg mit den Daten macht |
+| `--port` | Port der Seite |
+| `--no-browser` | den Browser nicht öffnen |
+| `--tk` | das Fenster |
+| `--console` | das Textmenü |
+| `--lang` | Sprache: en es de fr it ja zh pt |
+
+## Ihre Konfiguration und die geänderten Standardwerte
+
+- Das Register der Migrationen (JSON-Dateien, mit jeder Release versioniert, `assets/migrations/`) sagt zu jeder Version, was sich geändert hat: umbenannte, entfernte oder neue Einstellungen, neue Standardwerte, verschobene Dateien, Verhaltensänderungen. Der Updater wendet die Kette der übersprungenen Versionen an.
+- Standardmäßig behält er, was Sie ausdrücklich gesetzt haben, und übernimmt einen neuen Standard nur dort, wo Sie die Einstellung nie definiert hatten. Eine Verhaltensänderung (zum Beispiel eine Funktion, die nun standardmäßig aus ist) steht im Bericht; `--keep-old-defaults` hält das alte Verhalten fest, `--adopt-new-defaults` setzt alles auf das neue.
+- `migrate` arbeitet an einer einzelnen Datei: `monitor_updater.py migrate --from 2.0.1 --to 2.0.8 --config meine.json` zeigt das Ergebnis, `--apply` schreibt es (nach einer Kopie). Geheimnisse sind in jedem Bericht maskiert.
+
+## Prüfungen vor dem Anwenden
+
+- Blockierend: der Monitor läuft, das SHA-256 stimmt nicht, das Zip ist unsicher, zu wenig Speicherplatz, Daten eines neueren Schemas als das Ziel, ein Container, eine andere Aktualisierung steht aus.
+- Warnungen: Einstellungen, die es nicht mehr gibt oder deren Typ oder Bereich sich geändert hat, Werte außerhalb des Bereichs, doppelte Schlüssel, ein von einem anderen Programm belegter Port, ein von Ihnen geändertes Startskript, ein Schritt, der einen anderen voraussetzt. Jede Warnung nennt eine empfohlene Maßnahme.
+
+## Sicherheit und der Rückweg
+
+- Er lauscht nur auf 127.0.0.1 mit einem flüchtigen Token, weist Anfragen von anderen Seiten ab, führt nichts aus dem Zip aus, nutzt keine Shell und schreibt nur in die Installation und den Ordner der Kopien.
+- Vor jeder Änderung kopiert er Paket, Konfiguration und Daten; schlägt ein Schritt fehl, wird die Kopie zurückgespielt und ein Bericht geschrieben. Scheitert sogar der Rückweg, bleibt die Kopie unversehrt und der Bericht erklärt, wie man sie von Hand wiederherstellt.
+- Offline: `--zip DATEI` mit `--sha256` (oder einer SHA256SUMS daneben). Docker: das Volume wird aktualisiert, das Image von innen nicht ersetzt (`--allow-container` erzwingt es).
+
+## Exit-Codes
+
+| Code | Bedeutung |
+|---|---|
+| 0 | erledigt, oder nichts zu tun |
+| 2 | falsche Verwendung |
+| 3 | von einer Prüfung blockiert, nichts geändert |
+| 4 | Download, SHA-256 oder Zip fehlgeschlagen, nichts geändert |
+| 5 | fehlgeschlagen und der vorherige Zustand wiederhergestellt |
+| 6 | fehlgeschlagen und der Rückweg ebenfalls: Kopie von Hand wiederherstellen |
+| 7 | keine Verbindung zu GitHub und kein Zip |
+| 8 | nicht bestätigt |
