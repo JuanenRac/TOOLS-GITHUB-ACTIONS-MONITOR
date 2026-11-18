@@ -9,6 +9,27 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+## [2.1.4]
+
+### Adicionado
+
+- **Um resumo por separador para as ferramentas de IA**: `GET /api/ai/index` lista um resumo de cada separador da página e `GET /api/ai/briefs?tab=sent` devolve os sinais que esse separador desenha e onde estão os seus dados em bruto (sem `tab`, todos os resumos num só documento). Só de leitura, sem segredos, marcado como texto não fiável, disponível também na edição Lite e em `/api/v1/`. Um teste falha se um separador não tiver resumo.
+- **Uma barra comum no fundo da página**: guarda o separador aberto como resumo (JSON), imprime-o sem o menu nem as caixas de diálogo e duas luzes indicam se a IA integrada no monitor está configurada e se uma ferramenta de IA externa o está a ler. O registo de separadores passa a exigir a barra em cada separador.
+- **Um registo dos resumos lidos, desligado por omissão**: `ai_alerts.briefs.access_log` guarda um pequeno ficheiro local com quando um resumo foi lido e por que cliente, nunca um sinal nem um segredo.
+- **Testes que contam os pedidos ao GitHub**: prova-se que a comparação, o índice e os resumos fazem zero pedidos; um corpus de textos hostis (instruções, marcação, caracteres de controlo, segredos) continua a ser dado nos resumos.
+
+### Alterado
+
+- **A janela Acerca de é 35 % mais larga**, nunca mais larga do que o ecrã.
+
+### Corrigido
+
+- **Os testes das contas já não disputam portas**: o intervalo de portas é escolhido abaixo do que o sistema dá às ligações de saída e verificado por inteiro.
+
+### Segurança
+
+- **As rotas que só este computador pode chamar continuam fechadas atrás de um proxy na mesma máquina**: os testes cobrem cada cabeçalho de reencaminhamento, um proxy declarado e uma mutação do tratador.
+
 ## [2.1.3]
 
 ### Alterado

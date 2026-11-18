@@ -16,7 +16,11 @@ Lo que solo aparece con un uso real prolongado: la migración desde la 1.8 y la 
 
 Los workflows del propio monitor cumplen lo que el centinela de higiene pedirá a los demás: acciones fijadas a un commit, los permisos mínimos y un límite de tiempo en cada trabajo.
 
-## Hecho en la 1.8.2 a la 2.1.3
+## Hecho en la 1.8.2 a la 2.1.4
+
+### 2.1.4 - Un resumen por pestaña, una barra común y una ventana Acerca de más ancha
+
+Las herramientas de IA pueden leer todo lo que muestra la página: `GET /api/ai/index` lista un resumen de cada pestaña y `GET /api/ai/briefs` devuelve las señales de una pestaña o de todas, solo lectura y sin secretos, también en la edición Lite. Una barra en la fila del título guarda o imprime la pestaña abierta y muestra si la IA integrada y una externa están conectadas, un registro opcional guarda qué resumen se leyó y la ventana Acerca de es un 35 % más ancha. Contadores prueban que la comparación y los resúmenes no hacen ninguna petición a GitHub, y los tests de las cuentas ya no se pelean por los puertos.
 
 ### 2.1.3 - Ayuda en cada ajuste, una pestaña para Ayer vs hoy, un menú de Actualizaciones más difícil de abusar y paneles que ya no se solapan
 

@@ -16,7 +16,11 @@ Ciò che emerge solo con un uso reale prolungato: la migrazione dalla 1.8 e dall
 
 I workflow del monitor stesso rispettano ciò che la sentinella di igiene chiederà agli altri: azioni fissate a un commit, permessi minimi e un limite di tempo su ogni job.
 
-## Fatto dalla 1.8.2 alla 2.1.3
+## Fatto dalla 1.8.2 alla 2.1.4
+
+### 2.1.4 - Un riepilogo per scheda, una barra comune e una finestra Informazioni più larga
+
+Gli strumenti IA possono leggere tutto ciò che mostra la pagina: `GET /api/ai/index` elenca un riepilogo per ogni scheda e `GET /api/ai/briefs` restituisce i segnali di una scheda o di tutte, in sola lettura e senza segreti, anche nell'edizione Lite. Una barra nella riga del titolo salva o stampa la scheda aperta e mostra se l'IA integrata e una esterna sono collegate, un registro facoltativo tiene quale riepilogo è stato letto, e la finestra Informazioni è più larga del 35%. Dei contatori provano che il confronto e i riepiloghi non fanno richieste a GitHub, e i test degli account non si contendono più le porte.
 
 ### 2.1.3 - Aiuto su ogni impostazione, una scheda per Ieri vs oggi, un menu Aggiornamenti più difficile da abusare e pannelli che non si sovrappongono più
 

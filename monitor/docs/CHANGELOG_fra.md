@@ -9,6 +9,27 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+## [2.1.4]
+
+### Ajouté
+
+- **Un résumé par onglet pour les outils d'IA** : `GET /api/ai/index` liste un résumé pour chaque onglet de la page et `GET /api/ai/briefs?tab=sent` renvoie les signaux que cet onglet dessine et où se trouvent ses données brutes (sans `tab`, tous les résumés dans un seul document). Lecture seule, sans secret, signalé comme texte non fiable, disponible aussi dans l'édition Lite et sous `/api/v1/`. Un test échoue si un onglet n'a pas de résumé.
+- **Une barre commune en bas de page** : enregistre l'onglet ouvert comme résumé (JSON), l'imprime sans le menu ni les dialogues, et deux voyants indiquent si l'IA intégrée au moniteur est configurée et si un outil d'IA externe le lit. Le registre des onglets exige désormais la barre pour chaque onglet.
+- **Un registre des résumés lus, désactivé par défaut** : `ai_alerts.briefs.access_log` garde un court fichier local avec le moment et le client de chaque lecture, jamais un signal ni un secret.
+- **Des tests qui comptent les requêtes vers GitHub** : la comparaison, l'index et les résumés font zéro requête ; un corpus de textes hostiles (instructions, balisage, caractères de contrôle, secrets) reste une donnée dans les résumés.
+
+### Modifié
+
+- **La fenêtre À propos est 35 % plus large**, jamais plus large que l'écran.
+
+### Corrigé
+
+- **Les tests des comptes ne se disputent plus les ports** : la plage de ports est choisie sous celle que le système donne aux connexions sortantes et vérifiée en entier.
+
+### Sécurité
+
+- **Les routes que seul cet ordinateur peut appeler restent fermées derrière un proxy sur la même machine** : des tests couvrent chaque en-tête de transfert, un proxy déclaré et une mutation du gestionnaire.
+
 ## [2.1.3]
 
 ### Modifié

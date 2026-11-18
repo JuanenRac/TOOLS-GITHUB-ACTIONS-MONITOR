@@ -16,7 +16,11 @@ Was sich nur im langen echten Einsatz zeigt: die Migration von 1.8 und 1.9, das 
 
 Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
 
-## Erledigt in 1.8.2 bis 2.1.3
+## Erledigt in 1.8.2 bis 2.1.4
+
+### 2.1.4 - Ein Kurzbericht je Tab, eine gemeinsame Leiste und ein breiteres Fenster Über
+
+KI-Werkzeuge können alles lesen, was die Seite zeigt: `GET /api/ai/index` listet für jeden Tab einen Kurzbericht, `GET /api/ai/briefs` liefert die Signale eines Tabs oder aller, nur lesend und ohne Geheimnisse, auch in der Lite-Ausgabe. Eine Leiste in der Titelzeile speichert oder druckt den offenen Tab und zeigt, ob die eingebaute und eine externe KI verbunden sind, ein optionales Protokoll hält fest, welcher Kurzbericht gelesen wurde, und das Fenster Über ist 35 % breiter. Zähler belegen, dass Vergleich und Kurzberichte keine Anfrage an GitHub stellen, und die Tests der Konten streiten nicht mehr um Ports.
 
 ### 2.1.3 - Hilfe an jeder Einstellung, ein Reiter für Gestern vs. heute, ein schwerer zu missbrauchendes Menü Aktualisierungen und Panels, die sich nicht mehr überdecken
 

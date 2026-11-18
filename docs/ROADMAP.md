@@ -21,7 +21,11 @@ What only shows with long real use: the migration from 1.8 and 1.9, the growth o
 
 The monitor's own workflows keep to what the hygiene sentinel will ask of others: actions pinned to a commit, the least permissions and a time limit on every job.
 
-## Done in 1.8.2 to 2.1.3
+## Done in 1.8.2 to 2.1.4
+
+### 2.1.4 - One brief for every tab, a common bar and a wider About window
+
+AI tools can read everything the page shows: `GET /api/ai/index` lists a brief for every tab and `GET /api/ai/briefs` returns the signals of one tab or of all of them, read only and without secrets, also in the Lite edition. A bar in the title row saves or prints the open tab and shows whether the built-in and an external AI are connected, an optional record keeps which brief was read, and the About window is 35% wider. Counters prove that the comparison and the briefs make no request to GitHub, and the tests of the accounts no longer fight for ports.
 
 ### 2.1.3 - Help on every setting, a tab for Yesterday vs today, a harder Updates menu and panels that no longer overlap
 

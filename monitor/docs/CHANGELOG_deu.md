@@ -9,6 +9,27 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+## [2.1.4]
+
+### Hinzugefügt
+
+- **Ein Kurzbericht je Tab für KI-Werkzeuge**: `GET /api/ai/index` listet für jeden Tab der Seite einen Kurzbericht, `GET /api/ai/briefs?tab=sent` liefert die Signale, die der Tab zeichnet, und wo seine Rohdaten liegen (ohne `tab` alle Kurzberichte in einem Dokument). Nur lesend, ohne Geheimnisse, als nicht vertrauenswürdiger Text gekennzeichnet, auch in der Lite-Ausgabe und unter `/api/v1/`. Ein Test schlägt fehl, wenn ein Tab keinen Kurzbericht hat.
+- **Eine gemeinsame Leiste am Seitenende**: speichert den offenen Tab als Kurzbericht (JSON), druckt ihn ohne Menü und Dialoge und zeigt mit zwei Lampen, ob die im Monitor eingebaute KI eingerichtet ist und ob ein externes KI-Werkzeug ihn liest. Das Register der Tabs verlangt die Leiste nun für jeden Tab.
+- **Ein Protokoll der gelesenen Kurzberichte, standardmäßig aus**: `ai_alerts.briefs.access_log` führt eine kurze lokale Datei mit dem Zeitpunkt und dem Client eines Lesezugriffs, nie ein Signal oder ein Geheimnis.
+- **Tests, die Anfragen an GitHub zählen**: Vergleich, Index und Kurzberichte stellen nachweislich null Anfragen; ein Korpus feindlicher Texte (Anweisungen, Markup, Steuerzeichen, Geheimnisse) bleibt nachweislich Daten.
+
+### Geändert
+
+- **Das Fenster Über ist 35 % breiter**, nie breiter als der Bildschirm.
+
+### Behoben
+
+- **Die Tests der Konten streiten nicht mehr um Ports**: Der Portbereich wird unterhalb des Bereichs gewählt, den das System ausgehenden Verbindungen gibt, und als Ganzes geprüft.
+
+### Sicherheit
+
+- **Die Routen, die nur dieser Rechner aufrufen darf, bleiben hinter einem Proxy auf derselben Maschine geschlossen**: Tests decken jede Weiterleitungs-Kopfzeile, einen deklarierten Proxy und eine Mutation des Handlers ab.
+
 ## [2.1.3]
 
 ### Geändert

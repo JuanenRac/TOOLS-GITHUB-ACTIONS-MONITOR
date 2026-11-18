@@ -11,6 +11,27 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+## [2.1.4]
+
+### Added
+
+- **One brief per tab for AI tools**: `GET /api/ai/index` lists a brief for every tab of the page and `GET /api/ai/briefs?tab=sent` returns the signals that tab draws and where its raw data live (without `tab`, every brief in one document). Read only, cleaned of secrets, marked as untrusted text, served in the Lite edition too and also under `/api/v1/`. A test fails when a tab has no brief.
+- **A common bar at the foot of the page**: save the open tab as a brief (JSON), print it with the menu and the dialogs hidden, and two lamps that say whether the AI built into the monitor is configured and whether an external AI tool is reading it. The register of tabs now requires the bar for every tab.
+- **A record of the briefs read, off by default**: `ai_alerts.briefs.access_log` keeps a short local file with when a brief was read and by which client, never a signal or a secret.
+- **Tests that count requests to GitHub**: the comparison, the index and the briefs are proved to make zero requests; a corpus of hostile texts (instructions, markup, control characters, secrets) is proved to stay data in the briefs.
+
+### Changed
+
+- **The About window is 35% wider**, never wider than the screen.
+
+### Fixed
+
+- **The tests of the accounts no longer fight for ports**: the stretch of ports is chosen below the range the system gives to outgoing connections and checked as a whole.
+
+### Security
+
+- **The routes that only this computer may call stay closed behind a proxy on the same machine**: tests cover every forwarding header, a declared proxy and a mutation of the handler.
+
 ## [2.1.3]
 
 ### Changed

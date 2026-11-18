@@ -16,7 +16,11 @@ O que só aparece com uso real prolongado: a migração desde a 1.8 e a 1.9, o c
 
 Os workflows do próprio monitor cumprem o que a sentinela de higiene pedirá aos outros: ações fixadas a um commit, as permissões mínimas e um limite de tempo em cada job.
 
-## Feito da 1.8.2 à 2.1.3
+## Feito da 1.8.2 à 2.1.4
+
+### 2.1.4 - Um resumo por separador, uma barra comum e uma janela Acerca de mais larga
+
+As ferramentas de IA podem ler tudo o que a página mostra: `GET /api/ai/index` lista um resumo de cada separador e `GET /api/ai/briefs` devolve os sinais de um separador ou de todos, só de leitura e sem segredos, também na edição Lite. Uma barra na linha do título guarda ou imprime o separador aberto e mostra se a IA integrada e uma externa estão ligadas, um registo opcional guarda que resumo foi lido e a janela Acerca de é 35 % mais larga. Contadores provam que a comparação e os resumos não fazem nenhum pedido ao GitHub, e os testes das contas já não disputam portas.
 
 ### 2.1.3 - Ajuda em cada definição, um separador para Ontem vs hoje, um menu Atualizações mais difícil de abusar e painéis que já não se sobrepõem
 

@@ -9,6 +9,27 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+## [2.1.4]
+
+### Añadido
+
+- **Un resumen por pestaña para las herramientas de IA**: `GET /api/ai/index` lista un resumen de cada pestaña de la página y `GET /api/ai/briefs?tab=sent` devuelve las señales que dibuja esa pestaña y dónde están sus datos en bruto (sin `tab`, todos los resúmenes en un documento). Solo lectura, sin secretos, marcado como texto no fiable, disponible también en la edición Lite y bajo `/api/v1/`. Un test falla si una pestaña no tiene resumen.
+- **Una barra común al pie de la página**: guarda la pestaña abierta como resumen (JSON), la imprime sin el menú ni los diálogos y dos lámparas que dicen si la IA integrada en el monitor está configurada y si una herramienta de IA externa lo está leyendo. El registro de pestañas exige ahora la barra en cada pestaña.
+- **Un registro de los resúmenes leídos, apagado por defecto**: `ai_alerts.briefs.access_log` guarda un fichero local breve con cuándo se leyó un resumen y con qué cliente, nunca una señal ni un secreto.
+- **Tests que cuentan las peticiones a GitHub**: se prueba que la comparación, el índice y los resúmenes hacen cero peticiones; un corpus de textos hostiles (instrucciones, marcado, caracteres de control, secretos) se prueba que sigue siendo dato en los resúmenes.
+
+### Cambiado
+
+- **La ventana Acerca de es un 35 % más ancha**, nunca más ancha que la pantalla.
+
+### Corregido
+
+- **Los tests de las cuentas ya no se pelean por los puertos**: el tramo de puertos se elige por debajo del rango que el sistema da a las conexiones salientes y se comprueba entero.
+
+### Seguridad
+
+- **Las rutas que solo puede llamar este ordenador siguen cerradas tras un proxy en la misma máquina**: los tests cubren cada cabecera de reenvío, un proxy declarado y una mutación del manejador.
+
 ## [2.1.3]
 
 ### Cambiado

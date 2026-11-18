@@ -16,7 +16,11 @@ Ce qui n'apparaît qu'à l'usage réel prolongé : la migration depuis la 1.8 et
 
 Les workflows du moniteur lui-même respectent ce que la sentinelle d'hygiène demandera aux autres : actions fixées à un commit, permissions minimales et une limite de temps sur chaque job.
 
-## Fait dans la 1.8.2 à la 2.1.3
+## Fait dans la 1.8.2 à la 2.1.4
+
+### 2.1.4 - Un résumé par onglet, une barre commune et une fenêtre À propos plus large
+
+Les outils d'IA peuvent lire tout ce que montre la page : `GET /api/ai/index` liste un résumé pour chaque onglet et `GET /api/ai/briefs` renvoie les signaux d'un onglet ou de tous, en lecture seule et sans secret, aussi dans l'édition Lite. Une barre dans la ligne du titre enregistre ou imprime l'onglet ouvert et montre si l'IA intégrée et une IA externe sont connectées, un registre facultatif garde quel résumé a été lu, et la fenêtre À propos est 35 % plus large. Des compteurs prouvent que la comparaison et les résumés ne font aucune requête vers GitHub, et les tests des comptes ne se disputent plus les ports.
 
 ### 2.1.3 - De l'aide sur chaque réglage, un onglet pour Hier vs aujourd'hui, un menu Mises à jour plus difficile à détourner et des panneaux qui ne se chevauchent plus
 

@@ -9,6 +9,27 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+## [2.1.4]
+
+### Aggiunto
+
+- **Un riepilogo per scheda per gli strumenti IA**: `GET /api/ai/index` elenca un riepilogo per ogni scheda della pagina e `GET /api/ai/briefs?tab=sent` restituisce i segnali che quella scheda disegna e dove sono i suoi dati grezzi (senza `tab`, tutti i riepiloghi in un documento). Sola lettura, senza segreti, segnalato come testo non attendibile, disponibile anche nell'edizione Lite e sotto `/api/v1/`. Un test fallisce se una scheda non ha un riepilogo.
+- **Una barra comune a piè di pagina**: salva la scheda aperta come riepilogo (JSON), la stampa senza menu né finestre di dialogo e due spie dicono se l'IA integrata nel monitor è configurata e se uno strumento IA esterno lo sta leggendo. Il registro delle schede ora richiede la barra per ogni scheda.
+- **Un registro dei riepiloghi letti, spento per impostazione predefinita**: `ai_alerts.briefs.access_log` tiene un breve file locale con quando è stato letto un riepilogo e da quale client, mai un segnale né un segreto.
+- **Test che contano le richieste a GitHub**: confronto, indice e riepiloghi fanno zero richieste; un corpus di testi ostili (istruzioni, marcatura, caratteri di controllo, segreti) resta dato nei riepiloghi.
+
+### Modificato
+
+- **La finestra Informazioni è più larga del 35%**, mai più larga dello schermo.
+
+### Corretto
+
+- **I test degli account non si contendono più le porte**: l'intervallo di porte è scelto sotto quello che il sistema dà alle connessioni in uscita e verificato per intero.
+
+### Sicurezza
+
+- **Le rotte che solo questo computer può chiamare restano chiuse dietro un proxy sulla stessa macchina**: i test coprono ogni intestazione di inoltro, un proxy dichiarato e una mutazione del gestore.
+
 ## [2.1.3]
 
 ### Modificato
