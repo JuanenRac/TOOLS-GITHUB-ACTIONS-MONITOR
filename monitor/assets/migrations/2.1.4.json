@@ -1,0 +1,21 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "2.1.4",
+ "previous": "2.1.3",
+ "digest": "3e3c3f8c9c039a24e65073bd5cdb08aa061081f2603207bb0c1a8b6ed1cf2fe8",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "ai_alerts.briefs.access_log",
+    "kind": "bool",
+    "default": false
+   }
+  ],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {}
+}

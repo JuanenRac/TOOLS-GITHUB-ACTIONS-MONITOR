@@ -16,7 +16,7 @@ A second, simpler product in the same package: the page of what is running and w
 | Tabs | Now, Alerts, Charts, Summary, CI sentinel, Collab sentinel, Security sentinel, Delivery sentinel, Supply chain sentinel, Daily trend, Yesterday vs today, Team health, Fleet, Repositories, Reports, Scheduled reports, Lessons, History, Updates, Settings | Now, Charts, Repositories, History, a short Settings |
 | Header | all the tiles, readiness, signing | running, queued, failures and successes of 24 h, compute minutes, issues, red on main, repositories, allowance, connection |
 | Sentinel (alerts, releases, signing queue, readiness, linter) | yes | no: it is not even imported |
-| Analytics, notifications, webhook, AI, Prometheus / Grafana outputs | yes, off until you switch them on | no: those paths answer 404, except the channels of the feed for an AI tool (`/api/ai/state`, `/api/ai/brief`, `/api/ai/alerts`, `/api/ai/stream`, `/api/ai/ack`, `/api/skills`) |
+| Analytics, notifications, webhook, AI, Prometheus / Grafana outputs | yes, off until you switch them on | no: those paths answer 404, except the channels of the feed for an AI tool (`/api/ai/state`, `/api/ai/index`, `/api/ai/briefs`, `/api/ai/brief`, `/api/ai/alerts`, `/api/ai/stream`, `/api/ai/ack`, `/api/skills`) |
 | Configuration | `actions_monitor.json` | `actions_monitor_lite.json` (created on the first start; the sentinel is off in it) |
 | State files | `etag_cache.json`, `analytics_history.json`... | the same names with the suffix `_lite` |
 
