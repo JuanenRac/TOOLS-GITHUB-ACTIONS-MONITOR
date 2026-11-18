@@ -30,6 +30,8 @@
   {"path": "/api/audit-log", "complete": {"schema": "int", "account": "str", "enabled": "bool", "chain": {"ok": "bool", "entries": "number", "broken_at": "any", "segments": "number", "complete": "bool"}, "entries": "list"}, "lite": 404},
   {"path": "/api/ops/status", "complete": {"schema": "int", "mode": "str", "backup": "object", "purge": "object", "retention": "object", "restore": "object"}, "lite": 404},
   {"path": "/api/report-files", "complete": {"schema": "int", "account": "str", "enabled": "bool", "cron": "str", "formats": "str", "reports": "list"}, "lite": 404},
+  {"path": "/api/ai/index", "complete": {"schema": "int", "kind": "str", "edition": "str", "version": "str", "generated_epoch": "int", "briefs": "list", "channels": "list", "read_only": "bool", "note": "str"}, "lite": "same"},
+  {"path": "/api/ai/briefs", "complete": {"schema": "int", "kind": "str", "edition": "str", "version": "str", "generated_epoch": "int", "count": "int", "briefs": "list"}, "lite": "same"},
   {"path": "/api/ai/state", "complete": {"schema": "int", "edition": "str", "version": "str", "generated_epoch": "int", "signals": "list", "act": "int", "watch": "int", "panels_not_in_this_edition": "list", "note": "str", "lessons": "list"}, "lite": "same"},
   {"path": "/api/ai/brief?fmt=json", "complete": {"brief": "str", "updated": "any", "updated_local": "any", "age_seconds": "any", "alerts": "list"}, "lite": "same"},
   {"path": "/api/ai/alerts", "complete": {"alerts": "list"}, "lite": "same"},

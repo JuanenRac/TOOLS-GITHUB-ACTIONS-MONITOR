@@ -71,6 +71,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ai.tasks.report.timeout_seconds` | `-` | ai | Time limit (0 = the general one) |
 | `ai.timeout_seconds` | `-` | ai | Time limit |
 | `ai_alerts.brief_max_bytes` | `2048` | ai | Size of the brief |
+| `ai_alerts.briefs.access_log` | `false` | ai | Record of the briefs read |
 | `ai_alerts.cascade.enabled` | `true` | ai | Group alerts that fall together |
 | `ai_alerts.client_hook.block_on_stop` (secure) | `false` | ai | Ask the AI to look before it ends a turn |
 | `ai_alerts.client_hook.cooldown_minutes` | `20` | ai | Minutes between requests |
