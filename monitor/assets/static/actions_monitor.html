@@ -293,6 +293,8 @@ th.sortable{cursor:pointer;user-select:none;white-space:nowrap}th.sortable:hover
 #statusbar .sb-right{display:flex;flex-wrap:nowrap;align-items:center;justify-content:flex-end;gap:5px 6px;margin-left:auto;min-width:0;flex:1 1 0}
 #statusbar .sb-item{display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:100%;padding:2px 10px;border:1px solid var(--line2);border-radius:999px;background:var(--bg);color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.5}
 #statusbar .sb-item:empty{display:none}
+#statusbar .sb-bar{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}#statusbar .sb-bar .ib{width:26px;height:26px}#statusbar .sb-item.sb-on{color:var(--text);border-style:solid}
+@media print{#statusbar,nav[role=tablist],#accbar,.dlg,.cfg-tip{display:none!important}}
 #statusbar .sb-sound{cursor:pointer;font:inherit;font-weight:600}#statusbar .sb-sound.off{color:var(--mut);border-style:dashed}
 #statusbar .sb-item.sb-opt{color:var(--mut);background:transparent;border-style:dashed}
 #statusbar .sb-clock{order:99;flex:none;display:inline-flex;flex-wrap:nowrap;align-items:baseline;justify-content:center;gap:0 8px;padding:3px 14px;margin-left:6px;border:2px solid var(--acc);border-radius:12px;background:var(--bg);box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo);overflow:visible;line-height:1.15}
@@ -588,6 +590,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <span class="sb-item" id="sb-mode"></span>
 <span class="sb-item sb-opt" id="sb-sent"></span>
 <span class="sb-item sb-opt" id="sb-ai"></span>
+<span class="sb-bar" id="sb-bar" role="group" data-i18n-aria="ui.bar_aria"><button type="button" class="ib" id="bar-save" data-i18n-title="ui.bar_save" data-i18n-aria="ui.bar_save"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-save"/></svg></button><button type="button" class="ib" id="bar-print" data-i18n-title="ui.bar_print" data-i18n-aria="ui.bar_print"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-report"/></svg></button><span class="sb-item sb-opt" id="bar-ai-int" role="status"></span><span class="sb-item sb-opt" id="bar-ai-ext" role="status"></span></span>
 <span class="sb-item sb-opt" id="sb-acc"></span>
 <span class="sb-item sb-opt" id="sb-ver"></span>
 <span class="sb-item sb-opt" id="sb-addr"></span>
@@ -2555,6 +2558,8 @@ function renderBarFacts(){
   const sents=SBINFO&&!LITE?SBINFO.sentinels||[]:[];
   set("sb-sent",LITE?"":T("ui.sb_sentinels",{n:sents.filter(s=>s.enabled).length,m:sents.length}),sents.map(s=>(T("ui.al_o_"+s.name)===("ui.al_o_"+s.name)?s.name:T("ui.al_o_"+s.name))+": "+T(s.enabled?"ui.sb_on":"ui.sb_off")).join(" · "));
   {const ai=SBINFO&&!LITE?SBINFO.ai:null;set("sb-ai",!ai||!ai.enabled?"":(ai.streams>0?T("ui.sb_ai_stream"):ai.connected?T("ui.sb_ai_on",{via:ai.via||"-",ago:agoText(ai.age_seconds)}):T("ui.sb_ai_off")),T("ui.sb_ai_t"))}
+  {const ex=SBINFO&&!LITE?SBINFO.ai:null,inn=SBINFO&&SBINFO.ai_internal,paint=(id,label,on,tip)=>{const e=$(id);if(!e)return;e.textContent=label+": "+T(on?"ui.bar_on":"ui.bar_off");e.title=tip;e.classList.toggle("sb-on",!!on)};
+    paint("bar-ai-int",T("ui.bar_ai_int"),!!(inn&&inn.enabled),T("ui.bar_ai_int_t"));paint("bar-ai-ext",T("ui.bar_ai_ext"),!!(ex&&ex.enabled&&(ex.connected||ex.streams>0)),T("ui.bar_ai_ext_t"))}
   set("sb-acc",T("ui.sb_account",{name:(ACC&&ACC.current)||OWNER||"-"}),T("ui.sb_account_t"));
   set("sb-ver","v"+(I18N.version||"")+" · "+T(LITE?"ui.sb_lite":"ui.sb_complete"),T("ui.sb_version_t"));
   if(SBINFO)set("sb-addr",(SBINFO.bind==="0.0.0.0"&&SBINFO.lan_address?SBINFO.lan_address:"127.0.0.1")+":"+SBINFO.port+" · "+T("ui.listen_short_"+LISTEN),T("ui.sb_addr_t",{local:"127.0.0.1:"+SBINFO.port,lan:(SBINFO.lan_address||"-")+":"+SBINFO.port})+" · "+T("ui.listen_long_"+LISTEN));
@@ -2568,6 +2573,8 @@ async function sbTick(){try{const r=await fetch("/api/statusbar",{cache:"no-stor
 {const watch=new MutationObserver(()=>{if(!watch.q){watch.q=requestAnimationFrame(()=>{watch.q=0;renderBar()})}});
   NOTE_SRC.forEach(([id])=>{const el=$(id);if(el)watch.observe(el,{attributes:true,childList:true,characterData:true,subtree:true})});
   $("sb-more").addEventListener("click",openNotes);$("sb-open").addEventListener("click",openNotes);$("notes-close").addEventListener("click",()=>dlgClose("notes"));$("notes-level").addEventListener("change",renderNotes);
+  $("bar-print").addEventListener("click",()=>window.print());
+  $("bar-save").addEventListener("click",async()=>{try{const r=await fetch("/api/ai/briefs?tab="+encodeURIComponent(CURTAB||"now")+"&lang="+encodeURIComponent(LANG),{cache:"no-store"});if(!r.ok)throw new Error(r.status);const b=new Blob([JSON.stringify(await r.json(),null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="monitor-"+(CURTAB||"now")+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}catch(e){const b=$("bar-save");b.classList.add("bad");b.title=T("ui.bar_save_fail");setTimeout(()=>{b.classList.remove("bad");b.title=T("ui.bar_save")},4000)}});
   $("sb-sound").addEventListener("click",()=>{SOUND.muted=!SOUND.muted;try{store.set("am-sound",SOUND.muted?"off":"on")}catch(e){}soundUnlock(!SOUND.muted);soundLockPaint()});
   {const t=$("snd-test");if(t)t.addEventListener("click",()=>soundUnlock(true))}
   {const b=$("snd-lock-b");if(b)b.addEventListener("click",()=>soundUnlock(true));["pointerdown","pointerup","click","touchend","keydown"].forEach(ev=>document.addEventListener(ev,()=>soundUnlock(false),{capture:true}))}

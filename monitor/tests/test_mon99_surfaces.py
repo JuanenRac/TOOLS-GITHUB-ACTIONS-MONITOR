@@ -25,7 +25,6 @@ SURFACES = ("now", "al", "charts", "sent", "sci", "scol", "ssec", "sdel", "ssup"
 
 # Things that do not exist yet for ANY surface (the shared mechanisms still to build) and the version that closes them. When the mechanism exists, its check below turns true and the line must go.
 PENDING_FOR_ALL = {
-    "save_print": "2.1.4",           # the SAVE and PRINT buttons of the common bar cover the tab
     "wall_screen": "2.2.0",          # the decision about the four wall screens, tab by tab
     "demo_rich": "2.1.4",            # the demo with data for the tab (python tools/demo_monitor.py --rich)
 }
@@ -58,14 +57,18 @@ def has_brief(tab):
     return f'"{tab}": {{"prefixes"' in BRIEFS and f"`{tab}`" in TABS_FOR_AI
 
 
+def covered_by_the_common_bar(tab):
+    """The common bar (save, print and the two AI indicators) saves the brief of the tab that is open: the tab must have a brief, and the bar must be in the page."""
+    return has_brief(tab) and all(x in PAGE for x in ('id="bar-save"', 'id="bar-print"', 'id="bar-ai-int"', 'id="bar-ai-ext"', "/api/ai/briefs?tab="))
+
+
 def lite_knows_it(tab):
     lite_tabs = re.search(r'LITE\?\[([^\]]*)\]', PAGE).group(1)
     return f".lite #n-{tab}," in PAGE or f".lite #n-{tab}{{" in PAGE or f'"{tab}"' in lite_tabs
 
 
-CHECKS = {"button": has_button, "name_x8": named_in_eight_languages, "help_topic": has_help_topic, "ai_guide": in_the_guide_of_the_ais, "signal_row": has_signal_row, "brief": has_brief, "lite": lite_knows_it}
+CHECKS = {"button": has_button, "name_x8": named_in_eight_languages, "help_topic": has_help_topic, "ai_guide": in_the_guide_of_the_ais, "signal_row": has_signal_row, "brief": has_brief, "common_bar": covered_by_the_common_bar, "lite": lite_knows_it}
 MECHANISMS = {      # the shared mechanisms: true the day they exist
-    "save_print": lambda: 'id="bar-save"' in PAGE and 'id="bar-print"' in PAGE,
     "wall_screen": lambda: False,
     "demo_rich": lambda: False,
 }

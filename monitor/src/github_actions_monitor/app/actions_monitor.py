@@ -3566,6 +3566,7 @@ def statusbar_payload(port, client_local=True):
     answer = {"schema": 1, "version": TOOL_VERSION, "edition": "lite" if LITE["on"] else "complete", "port": port, "bind": state.get("host") or "127.0.0.1", "network": bool(state.get("network")),
               "lan_address": lan_address(), "account": CHILD["account"] or None, "uptime_seconds": int(time.time() - STARTED), "demo": bool(DEMO["on"]),
               "runs": {"active": figures.get("active"), "queued": figures.get("queued")},      # the same two figures as the header tiles and `monitor_cli status` (null until the first read)
+              "ai_internal": {"enabled": str(((LIVE_CONFIG or toolconfig.raw_config()).get("ai") or {}).get("provider") or "none").lower() not in ("", "none")},      # the AI built into the monitor is configured (never its key)
               "sentinels": sentinels, "workers": ((LIVE_CONFIG or {}).get("sentinel") or {}).get("workers") if not LITE["on"] else None,
               "ai": None if LITE["on"] else __import__("github_actions_monitor.integrations.ai_alerts", fromlist=["_"]).presence(LIVE_CONFIG or toolconfig.raw_config())}      # was the feed read lately, and by what way (ai_alerts.heartbeat)
     if answer["network"] and not client_local:
