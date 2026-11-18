@@ -54,5 +54,13 @@ class Bar(unittest.TestCase):
         self.assertNotIn("base_url", block)
 
 
+class AboutDialog(unittest.TestCase):
+    def test_about_is_35_percent_wider_than_the_other_dialogs_and_never_wider_than_the_screen(self):
+        base = int(re.search(r"\.dlg-box\{[^}]*width:min\((\d+)px,100%\)", PAGE).group(1))
+        about = re.search(r"#about-dlg \.dlg-box\{width:min\((\d+)px,94vw\)\}", PAGE)
+        self.assertIsNotNone(about)
+        self.assertEqual(int(about.group(1)), round(base * 1.35))
+
+
 if __name__ == "__main__":
     unittest.main()
