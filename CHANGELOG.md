@@ -10,6 +10,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+## [2.1.3]
+
 ### Changed
 
 - **The pictures of the README are taken at 1080p and show the newest tabs**: `tools/make_screenshots.py` photographs every page at 1920x1080 by default (`--viewport WIDTHxHEIGHT` changes it; the 4K, ultrawide, portrait, phone and wall-screen pictures keep their own size), `tools/demo_monitor.py --rich` gives the demo findings for the Delivery and Supply chain sentinels, a daily trend and a comparison of periods, and the README (in the eight languages) shows the Delivery, Supply chain, Daily trend, Compare periods and Updates pages.
@@ -22,6 +24,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 ### Added
 
 - **A tooltip on every setting**: pointing at a setting, giving it the keyboard focus or pressing and holding on a touch screen shows what it does, its range or values and its default, what happens when a switch is turned on and off, and whether it applies at once or after a restart; the settings that cost quota or add a page (the comparison of periods, the check for updates, the wall screens) also say what you will see and what it costs. The help text of every setting is checked in the eight languages and an entry for a setting that does not exist is refused.
+- **Two guards so that nothing grows alone**: the guides must have the same headings and blocks of code in the eight languages, and a single register of the tabs of the page checks for each one its button, its name in the eight languages, its help topic, its line in the guide of the AIs, its row in the table of signals and its place in the lite edition; a new tab that is not registered, or a missing piece without a version that closes it, fails the test.
 
 ### Fixed
 

@@ -9,6 +9,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+## [2.1.3]
+
 ### Modifié
 
 - **Les captures du README sont prises en 1080p et montrent les onglets les plus récents** : `tools/make_screenshots.py` photographie chaque page en 1920x1080 par défaut (`--viewport LARGEURxHAUTEUR` le change ; les captures en 4K, ultralarge, portrait, téléphone et écran mural gardent leur taille), `tools/demo_monitor.py --rich` donne à la démo des constats pour les sentinelles de livraison et de chaîne d'approvisionnement, une tendance quotidienne et une comparaison de périodes, et le README (dans les huit langues) montre les pages Livraison, Chaîne d'approvisionnement, Tendance quotidienne, Comparer les périodes et Mises à jour.
@@ -21,6 +23,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 ### Ajouté
 
 - **Une info-bulle sur chaque réglage**: pointer un réglage, lui donner le focus au clavier ou appuyer longuement sur un écran tactile montre ce qu'il fait, sa plage ou ses valeurs et sa valeur par défaut, ce qui se passe quand un interrupteur est activé ou désactivé et s'il s'applique tout de suite ou après un redémarrage ; les réglages qui consomment du quota ou ajoutent une page (la comparaison de périodes, la recherche de mises à jour, les écrans muraux) disent aussi ce que tu verras et ce que cela coûte. Le texte d'aide de chaque réglage est vérifié dans les huit langues et une entrée pour un réglage inexistant est refusée.
+- **Deux garde-fous pour que rien ne grandisse seul**: les guides doivent avoir les mêmes titres et blocs de code dans les huit langues, et un registre unique des onglets de la page vérifie pour chacun son bouton, son nom dans les huit langues, son sujet d'aide, sa ligne dans le guide des IA, sa ligne dans la table des signaux et sa place dans l'édition lite ; un nouvel onglet non enregistré, ou une pièce manquante sans version qui la ferme, fait échouer le test.
 
 ### Corrigé
 

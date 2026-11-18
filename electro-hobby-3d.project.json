@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "ecosystem": "ELECTRO-HOBBY-3D",
   "name": "TOOLS-GITHUB-ACTIONS-MONITOR",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "role": "tool",
   "stack": "python",
   "technologies": [

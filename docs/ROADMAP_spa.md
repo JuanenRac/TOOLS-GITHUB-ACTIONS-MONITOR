@@ -16,7 +16,11 @@ Lo que solo aparece con un uso real prolongado: la migración desde la 1.8 y la 
 
 Los workflows del propio monitor cumplen lo que el centinela de higiene pedirá a los demás: acciones fijadas a un commit, los permisos mínimos y un límite de tiempo en cada trabajo.
 
-## Hecho en la 1.8.2 a la 2.1.2
+## Hecho en la 1.8.2 a la 2.1.3
+
+### 2.1.3 - Ayuda en cada ajuste, una pestaña para Ayer vs hoy, un menú de Actualizaciones más difícil de abusar y paneles que ya no se solapan
+
+La pestaña Ajustes muestra un globo en cada ajuste con lo que hace, su rango o valores, su valor por defecto y qué hace un interruptor al activarse y desactivarse. Ayer vs hoy tiene su propia entrada de menú. El menú de Actualizaciones se pausa tras una serie de intentos fallidos, dice por qué una actualización está bloqueada y lee su fichero de progreso solo si es un fichero normal y pequeño; el analizador de workflows corta los ficheros hostiles, se comprueba que las guías tengan la misma estructura en los ocho idiomas y los paneles plegables de las pestañas del Centinela ya no se pintan unos sobre otros.
 
 ### 2.1.2 - El monitor se actualiza desde un menú, compara un periodo con el anterior y los paneles desplegados llegan hasta abajo
 
