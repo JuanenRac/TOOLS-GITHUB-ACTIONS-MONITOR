@@ -9,6 +9,8 @@
 
 La quarta sentinella, accanto a quelle di CI, Collab e Sicurezza. Legge, senza scrivere nulla su GitHub, i file di workflow di ogni repository (`.github/workflows`, tramite API, senza clone) e segnala ciò che permette a un tag spostato o a un estraneo di agire con il token e il codice del repository. Li trasforma in avvisi della scheda Avvisi (origine Catena di fornitura). È nell'edizione Completa, spenta per impostazione predefinita (`sentinels.supply.enabled`); Lite non ha sentinelle.
 
+Ha una voce propria nel gruppo Sentinella del menu, **Sentinella della catena di fornitura** (indirizzo `#sentinel-supply`), visibile finché la sentinella è accesa: un pannello con i rilievi aperti di ogni repository, lo stato del suo ciclo e ciò che non si è potuto leggere; il badge della voce conta gli errori.
+
 ## Cosa segnala
 
 | Segnale | Avviso | Livello | Attivo di default |

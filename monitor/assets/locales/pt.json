@@ -4038,5 +4038,13 @@
  "ui.upd_step_layout": "A verificar a estrutura",
  "ui.upd_step_verify": "A verificar a versão nova",
  "ui.upd_step_start": "A arrancar o monitor",
- "ui.upd_step_rollback": "A repor a versão anterior"
+ "ui.upd_step_rollback": "A repor a versão anterior",
+ "ui.tab_sdel": "Sentinela de entrega",
+ "ui.tab_ssup": "Sentinela da cadeia de fornecimento",
+ "ui.sdel_title": "Entrega",
+ "ui.ssup_title": "Cadeia de fornecimento",
+ "ui.sdel_off": "O sentinela de entrega está desligado (Definições > Sentinela > Entrega).",
+ "ui.ssup_off": "O sentinela da cadeia de fornecimento está desligado (Definições > Sentinela > Cadeia de fornecimento).",
+ "ui.sdel_none": "Nada do que é construído falta na entrega nos repositórios verificados.",
+ "ui.ssup_none": "Nenhum achado aberto da cadeia de fornecimento nos ficheiros de workflow verificados."
 }

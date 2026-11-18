@@ -9,6 +9,8 @@
 
 Der fünfte Wächter, neben CI, Collab, Sicherheit und Lieferkette. Er liest, ohne etwas in GitHub zu schreiben, die neuesten Releases, die neuesten Tags, das CHANGELOG und die genannten Versionsdateien jedes Repositorys (über die API, ohne Klon) und meldet, was gebaut, aber nicht ausgeliefert wurde. Daraus macht er Alarme im Reiter Alarme (Herkunft Auslieferung). Er gehört zur Edition Complete und ist standardmäßig aus (`sentinels.delivery.enabled`); Lite hat keine Wächter.
 
+Er hat einen eigenen Eintrag in der Gruppe Sentinel des Menüs, **Delivery-Sentinel** (Adresse `#sentinel-delivery`), sichtbar, solange der Sentinel an ist: ein Panel mit den offenen Befunden jedes Repositorys, dem Stand seines Zyklus und dem, was nicht gelesen werden konnte; das Zeichen des Eintrags zählt die Fehler.
+
 ## Was er meldet
 
 | Signal | Alarm | Stufe | Standardmäßig an |

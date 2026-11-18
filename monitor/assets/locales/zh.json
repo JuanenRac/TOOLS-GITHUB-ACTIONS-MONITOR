@@ -4038,5 +4038,13 @@
  "ui.upd_step_layout": "检查结构",
  "ui.upd_step_verify": "检查新版本",
  "ui.upd_step_start": "启动监视器",
- "ui.upd_step_rollback": "恢复之前的版本"
+ "ui.upd_step_rollback": "恢复之前的版本",
+ "ui.tab_sdel": "交付哨兵",
+ "ui.tab_ssup": "供应链哨兵",
+ "ui.sdel_title": "交付",
+ "ui.ssup_title": "供应链",
+ "ui.sdel_off": "交付哨兵已关闭（设置 > 哨兵 > 交付）。",
+ "ui.ssup_off": "供应链哨兵已关闭（设置 > 哨兵 > 供应链）。",
+ "ui.sdel_none": "在已检查的仓库中，构建出的内容在交付中没有缺失。",
+ "ui.ssup_none": "在已检查的工作流文件中没有未解决的供应链发现。"
 }

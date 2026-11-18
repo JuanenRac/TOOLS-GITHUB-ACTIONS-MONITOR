@@ -9,6 +9,8 @@
 
 La quatrième sentinelle, à côté de celles de CI, de Collab et de Sécurité. Elle lit, sans rien écrire sur GitHub, les fichiers de workflow de chaque dépôt (`.github/workflows`, par l'API, sans clone) et signale ce qui permet à une étiquette déplacée ou à un tiers d'agir avec le jeton et le code du dépôt. Elle en fait des alertes de l'onglet Alertes (origine Chaîne d'approvisionnement). Elle fait partie de l'édition Complète, désactivée par défaut (`sentinels.supply.enabled`) ; Lite n'a pas de sentinelles.
 
+Elle a sa propre entrée dans le groupe Sentinelle du menu, **Sentinelle de chaîne d'approvisionnement** (adresse `#sentinel-supply`), visible tant que la sentinelle est activée : un panneau avec les constats ouverts de chaque dépôt, l'état de son cycle et ce qui n'a pas pu être lu ; le badge de l'entrée compte les erreurs.
+
 ## Ce qu'elle signale
 
 | Signal | Alerte | Niveau | Active par défaut |

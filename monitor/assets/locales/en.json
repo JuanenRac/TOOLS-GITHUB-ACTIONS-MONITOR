@@ -4038,5 +4038,13 @@
  "ui.upd_step_layout": "Checking the layout",
  "ui.upd_step_verify": "Checking the new version",
  "ui.upd_step_start": "Starting the monitor",
- "ui.upd_step_rollback": "Putting the previous version back"
+ "ui.upd_step_rollback": "Putting the previous version back",
+ "ui.tab_sdel": "Delivery sentinel",
+ "ui.tab_ssup": "Supply chain sentinel",
+ "ui.sdel_title": "Delivery",
+ "ui.ssup_title": "Supply chain",
+ "ui.sdel_off": "The Delivery sentinel is off (Settings > Sentinel > Delivery).",
+ "ui.ssup_off": "The Supply chain sentinel is off (Settings > Sentinel > Supply chain).",
+ "ui.sdel_none": "Nothing built is missing from its delivery in the repositories that were checked.",
+ "ui.ssup_none": "No open supply chain finding in the workflow files that were checked."
 }

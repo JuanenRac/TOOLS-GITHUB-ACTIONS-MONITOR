@@ -4038,5 +4038,13 @@
  "ui.upd_step_layout": "Contrôle de la structure",
  "ui.upd_step_verify": "Contrôle de la nouvelle version",
  "ui.upd_step_start": "Démarrage du moniteur",
- "ui.upd_step_rollback": "Remise de la version précédente"
+ "ui.upd_step_rollback": "Remise de la version précédente",
+ "ui.tab_sdel": "Sentinelle de livraison",
+ "ui.tab_ssup": "Sentinelle de chaîne d'approvisionnement",
+ "ui.sdel_title": "Livraison",
+ "ui.ssup_title": "Chaîne d'approvisionnement",
+ "ui.sdel_off": "La sentinelle de livraison est désactivée (Réglages > Sentinelle > Livraison).",
+ "ui.ssup_off": "La sentinelle de chaîne d'approvisionnement est désactivée (Réglages > Sentinelle > Chaîne d'approvisionnement).",
+ "ui.sdel_none": "Rien de ce qui est construit ne manque à sa livraison dans les dépôts contrôlés.",
+ "ui.ssup_none": "Aucune alerte ouverte de chaîne d'approvisionnement dans les fichiers de workflow contrôlés."
 }

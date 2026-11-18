@@ -4038,5 +4038,13 @@
  "ui.upd_step_layout": "Controllo della struttura",
  "ui.upd_step_verify": "Controllo della nuova versione",
  "ui.upd_step_start": "Avvio del monitor",
- "ui.upd_step_rollback": "Ripristino della versione precedente"
+ "ui.upd_step_rollback": "Ripristino della versione precedente",
+ "ui.tab_sdel": "Sentinella di consegna",
+ "ui.tab_ssup": "Sentinella della catena di fornitura",
+ "ui.sdel_title": "Consegna",
+ "ui.ssup_title": "Catena di fornitura",
+ "ui.sdel_off": "La sentinella di consegna è spenta (Impostazioni > Sentinella > Consegna).",
+ "ui.ssup_off": "La sentinella della catena di fornitura è spenta (Impostazioni > Sentinella > Catena di fornitura).",
+ "ui.sdel_none": "Nulla di ciò che viene costruito manca dalla consegna nei repository controllati.",
+ "ui.ssup_none": "Nessun rilievo aperto sulla catena di fornitura nei file di workflow controllati."
 }

@@ -4038,5 +4038,13 @@
  "ui.upd_step_layout": "Comprobando la estructura",
  "ui.upd_step_verify": "Comprobando la versión nueva",
  "ui.upd_step_start": "Arrancando el monitor",
- "ui.upd_step_rollback": "Reponiendo la versión anterior"
+ "ui.upd_step_rollback": "Reponiendo la versión anterior",
+ "ui.tab_sdel": "Centinela de entrega",
+ "ui.tab_ssup": "Centinela de cadena de suministro",
+ "ui.sdel_title": "Entrega",
+ "ui.ssup_title": "Cadena de suministro",
+ "ui.sdel_off": "El centinela de entrega está apagado (Ajustes > Centinela > Entrega).",
+ "ui.ssup_off": "El centinela de cadena de suministro está apagado (Ajustes > Centinela > Cadena de suministro).",
+ "ui.sdel_none": "Nada de lo que se construye falta en su entrega en los repositorios revisados.",
+ "ui.ssup_none": "Ningún hallazgo abierto de cadena de suministro en los ficheros de workflow revisados."
 }

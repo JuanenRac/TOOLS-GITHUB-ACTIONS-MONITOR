@@ -4038,5 +4038,13 @@
  "ui.upd_step_layout": "Struktur prüfen",
  "ui.upd_step_verify": "Neue Version prüfen",
  "ui.upd_step_start": "Monitor starten",
- "ui.upd_step_rollback": "Vorherige Version zurückspielen"
+ "ui.upd_step_rollback": "Vorherige Version zurückspielen",
+ "ui.tab_sdel": "Delivery-Sentinel",
+ "ui.tab_ssup": "Lieferketten-Sentinel",
+ "ui.sdel_title": "Auslieferung",
+ "ui.ssup_title": "Lieferkette",
+ "ui.sdel_off": "Der Delivery-Sentinel ist aus (Einstellungen > Sentinel > Auslieferung).",
+ "ui.ssup_off": "Der Lieferketten-Sentinel ist aus (Einstellungen > Sentinel > Lieferkette).",
+ "ui.sdel_none": "In den geprüften Repositories fehlt nichts von dem, was gebaut wird, in der Auslieferung.",
+ "ui.ssup_none": "Kein offener Lieferketten-Befund in den geprüften Workflow-Dateien."
 }

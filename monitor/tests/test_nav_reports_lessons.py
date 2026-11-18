@@ -24,7 +24,7 @@ class Structure(unittest.TestCase):
 
     def test_every_tab_has_its_button_and_its_panel_and_no_panel_is_left_over(self):
         lite, complete = self.tabs()
-        self.assertEqual(complete, ["now", "al", "charts", "sent", "sci", "scol", "ssec", "team", "fleet", "repos", "rep", "trep", "les", "hist", "upd", "cfg"])
+        self.assertEqual(complete, ["now", "al", "charts", "sent", "sci", "scol", "ssec", "sdel", "ssup", "team", "fleet", "repos", "rep", "trep", "les", "hist", "upd", "cfg"])
         buttons = re.findall(r'<button role="tab" id="n-([a-z]+)" data-tab="([a-z]+)"', PAGE)
         panels = re.findall(r'<div class="tab(?: on)?" id="t-([a-z]+)" role="tabpanel" aria-labelledby="n-([a-z]+)"', PAGE)
         self.assertEqual(sorted(t for t, _ in buttons), sorted(complete))

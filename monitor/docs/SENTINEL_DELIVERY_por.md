@@ -9,6 +9,8 @@
 
 O quinto sentinela, a par dos de CI, Collab, Segurança e Cadeia de abastecimento. Lê, sem escrever nada no GitHub, as últimas versões publicadas, as últimas etiquetas, o CHANGELOG e os ficheiros de versão que indicar de cada repositório (pela API, sem clonar) e avisa do que foi construído mas não entregue. Transforma isso em alertas do separador Alertas (origem Entrega). Está na edição Complete, desligado por predefinição (`sentinels.delivery.enabled`); o Lite não tem sentinelas.
 
+Tem a sua própria entrada no grupo Sentinela do menu, **Sentinela de entrega** (endereço `#sentinel-delivery`), visível enquanto o sentinela está ligado: um painel com os achados abertos de cada repositório, o estado do seu ciclo e o que não foi possível ler; o distintivo da entrada conta os erros.
+
 ## O que assinala
 
 | Sinal | Alerta | Nível | Ativo por predefinição |

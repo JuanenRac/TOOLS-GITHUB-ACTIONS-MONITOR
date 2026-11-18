@@ -9,6 +9,8 @@
 
 O quarto sentinela, ao lado dos de CI, Collab e Segurança. Lê, sem escrever nada no GitHub, os ficheiros de fluxo de cada repositório (`.github/workflows`, pela API, sem clonar) e assinala o que permite que uma etiqueta movida ou um estranho atue com o token e o código do repositório. Transforma isso em alertas do separador Alertas (origem Cadeia de abastecimento). Está na edição Completa, desligado por predefinição (`sentinels.supply.enabled`); o Lite não tem sentinelas.
 
+Tem a sua própria entrada no grupo Sentinela do menu, **Sentinela da cadeia de fornecimento** (endereço `#sentinel-supply`), visível enquanto o sentinela está ligado: um painel com os achados abertos de cada repositório, o estado do seu ciclo e o que não foi possível ler; o distintivo da entrada conta os erros.
+
 ## O que assinala
 
 | Sinal | Alerta | Nível | Ativo por predefinição |

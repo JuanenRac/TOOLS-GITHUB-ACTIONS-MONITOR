@@ -13,7 +13,7 @@ from github_actions_monitor.app import actions_monitor
 HERE = Path(__file__).resolve().parent.parent
 DOCS = HERE / "docs"
 SUFFIX = {"en": "", "es": "_spa", "de": "_deu", "fr": "_fra", "it": "_ita", "ja": "_jpn", "zh": "_zho", "pt": "_por"}
-TABS = ("now", "al", "charts", "sent", "sci", "scol", "ssec", "team", "fleet", "repos", "rep", "trep", "les", "hist", "cfg")
+TABS = ("now", "al", "charts", "sent", "sci", "scol", "ssec", "sdel", "ssup", "team", "fleet", "repos", "rep", "trep", "les", "hist", "upd", "cfg")
 
 
 def guide(name, lang):

@@ -9,6 +9,8 @@
 
 The fifth sentinel, next to the CI one, Collab, Security and Supply chain. It reads, without writing anything to GitHub, the latest releases, the latest tags, the CHANGELOG and the version files you name of each repository (through the API, no clone needed) and flags what was built but not delivered. It turns them into alerts of the Alerts tab (origin Delivery). It is in the Complete edition, off by default (`sentinels.delivery.enabled`); Lite has no sentinels.
 
+It has its own entry in the Sentinel group of the menu, **Delivery sentinel** (address `#sentinel-delivery`), shown while the sentinel is on: one panel with the open findings of each repository, the state of its cycle and what could not be read; the badge of the entry counts the errors.
+
 ## What it flags
 
 | Signal | Alert | Level | On by default |

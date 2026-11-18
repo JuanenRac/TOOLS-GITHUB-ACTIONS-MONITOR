@@ -4038,5 +4038,13 @@
  "ui.upd_step_layout": "構成を確認",
  "ui.upd_step_verify": "新バージョンを確認",
  "ui.upd_step_start": "モニターを起動",
- "ui.upd_step_rollback": "以前のバージョンを復元"
+ "ui.upd_step_rollback": "以前のバージョンを復元",
+ "ui.tab_sdel": "配信センチネル",
+ "ui.tab_ssup": "サプライチェーンセンチネル",
+ "ui.sdel_title": "配信",
+ "ui.ssup_title": "サプライチェーン",
+ "ui.sdel_off": "配信センチネルはオフです (設定 > センチネル > 配信)。",
+ "ui.ssup_off": "サプライチェーンセンチネルはオフです (設定 > センチネル > サプライチェーン)。",
+ "ui.sdel_none": "確認したリポジトリでは、ビルドされたものに配信の漏れはありません。",
+ "ui.ssup_none": "確認したワークフローファイルに、未解決のサプライチェーンの指摘はありません。"
 }
