@@ -132,7 +132,7 @@ class TheMonitor(unittest.TestCase):
         am.SAMPLE_INFO.clear()
         am.LITE["on"] = False
         am.SENTINEL["obj"] = Held()
-        am.ISSUE_CACHE.update({"items": [], "at": time.time(), "busy": False})
+        am.ISSUE_CACHE.update({"items": [], "at": NOW, "busy": False})      # the clock of the build is NOW: with the real time, a NOW ahead of the real clock makes the issues look stale and a background reading of "demo" leaks into later tests
         config = {"stuck_minutes": 60, "issues_refresh_seconds": 10 ** 6, "mode": "normal", "min_rate_remaining": 100, "refresh_seconds": 60, "max_workers": 1, "runs_per_repo": 30, "hot_hours": 24}
         try:
             with mock.patch.object(am, "gh", side_effect=RuntimeError("offline")), mock.patch.object(am, "run_jobs", return_value=[]), mock.patch("time.time", return_value=NOW):

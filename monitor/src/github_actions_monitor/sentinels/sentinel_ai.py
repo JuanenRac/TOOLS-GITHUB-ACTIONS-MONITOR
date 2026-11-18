@@ -167,6 +167,10 @@ def build_prompt(kind, data, nonce, language=None, lesson="", skill=""):
     return system, user
 
 
+READ_RETRY_SECONDS = 1.0      # how long a store that knew its file waits for it to come back while another process replaces it
+READ_RETRY_PAUSE = 0.01
+
+
 class Store:
     """Cache per input plus the daily counter of provider calls (one JSON file, only sanitised text)."""
 
@@ -174,8 +178,10 @@ class Store:
         self.path = Path(path)
         self.lock = threading.RLock()
         self._depth = 0      # how many `exclusive()` blocks of this thread are open (the lock of the system is taken by the first)
+        self._existed = False      # the file has been read or written by this store: if it is gone for a moment later, another process is replacing it
         try:
             self.data = state_io.load_json(self.path)
+            self._existed = True
         except (OSError, ValueError):
             self.data = {}   # missing or corrupt file: start empty
         if not isinstance(self.data, dict):
@@ -190,12 +196,26 @@ class Store:
     def today():
         return datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
+    def _read_shared(self):
+        """The file as another process left it, or None. On Windows `os.replace` leaves the file missing for a moment for a reader: when this store has seen the file before, a missing file is looked
+        for again for READ_RETRY_SECONDS before it is believed (reading the old count instead would let two processes spend the same call)."""
+        deadline = time.monotonic() + READ_RETRY_SECONDS
+        while True:
+            try:
+                return state_io.load_json(self.path)
+            except FileNotFoundError:
+                if not self._existed or time.monotonic() >= deadline:
+                    return None
+                time.sleep(READ_RETRY_PAUSE)
+            except (OSError, ValueError):
+                return None
+
     def sync(self):
         """Reads the file again: what another process wrote (its calls of the day, its table, its catalogue) is what counts; only the answers kept in memory and not yet written are added to it."""
-        try:
-            fresh = state_io.load_json(self.path)
-        except (OSError, ValueError):
+        fresh = self._read_shared()
+        if fresh is None:
             return
+        self._existed = True
         if not isinstance(fresh, dict):
             return
         entries = fresh.get("entries") if isinstance(fresh.get("entries"), dict) else {}
@@ -227,8 +247,7 @@ class Store:
                     if taken:
                         self.sync()
                     yield
-                    if taken:
-                        self.save()
+                    self.save()
             finally:
                 self._depth = 0
 
@@ -255,8 +274,8 @@ class Store:
         try:
             with self.lock:
                 state_io.save_text(self.path, json.dumps(self.data, indent=1, ensure_ascii=False))   # atomic: a crash never leaves half a file
-        except OSError:
-            pass
+        except OSError as error:      # self.data stays in memory: the next save carries it
+            logging.getLogger("github_actions_monitor.sentinel_ai").warning("the store of the AI could not be saved (%s): it is tried again at the next save", error)
 
 
 # ---------- providers (injectable for tests) ----------
@@ -551,9 +570,8 @@ def explain(kind, data, cfg, store, transport=None, task=None):
         return {**base, "error": why or i18n.t("ai.no_text"), **note}
     cand, ccfg, text = answered
     verdict = parse_verdict(text) if kind == "codeql" else ""
-    with store.lock:
+    with store.exclusive():      # read again, add the answer and write as one step: a save with the count this process read before the call would erase what the other processes counted meanwhile
         store.put(key, {"text": text, "verdict": verdict, "model": model_of(ccfg), "at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")})
-        store.save()
     return {**base, "ok": True, "text": text, "verdict": verdict, "provider": ccfg["provider"], "model": model_of(ccfg), **note}
 
 
@@ -562,7 +580,7 @@ def run_call(cfg, store, kind, data, transport=None, language=None):
     or, if it did not, estimated at four characters per token) and the estimated cost when the table has the prices. Never raises."""
     import time as _time
     from github_actions_monitor.sentinels import ai_chain
-    with store.lock:
+    with store.exclusive():
         if cfg["provider"] == "none":
             return {"ok": False, "error": i18n.t("ai.is_off")}
         if store.used_today() >= cfg["daily_limit"]:
@@ -572,7 +590,6 @@ def run_call(cfg, store, kind, data, transport=None, language=None):
             return {"ok": False, "error": i18n.t("ai.budget_spent", model=ai_chain.label_of(cfg), why=ai_chain.reason_text(spent))}
         store.add_call()
         ai_chain.add_model_call(store, cfg)
-        store.save()
     system, user = build_prompt(kind, sanitize_text(data, cfg["max_input_chars"], keep="tail"), _secrets.token_hex(6), language)
     _USAGE.value = None
     started = _time.time()
@@ -595,13 +612,12 @@ def run_call(cfg, store, kind, data, transport=None, language=None):
 def test_connection(cfg, store, transport=None):
     """The smallest call the provider can answer ("reply with ok"), to check the address, the model and the key. It counts against the daily cap like any call. Never raises."""
     import time as _time
-    with store.lock:
+    with store.exclusive():
         if cfg["provider"] == "none":
             return {"ok": False, "error": i18n.t("ai.is_off")}
         if store.used_today() >= cfg["daily_limit"]:
             return {"ok": False, "error": i18n.t("ai.daily_cap", n=cfg["daily_limit"])}
         store.add_call()
-        store.save()
     started = _time.time()
     try:
         answer = (transport or TRANSPORTS[cfg["provider"]])(cfg, "Reply with the single word: ok", "ping")

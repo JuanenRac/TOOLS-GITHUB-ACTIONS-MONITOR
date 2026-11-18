@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-3695_passing-brightgreen.svg" alt="3695 tests">
+  <img src="https://img.shields.io/badge/Tests-3702_passing-brightgreen.svg" alt="3702 tests">
 </p>
 
 > Vigila los workflows de todos tus repositorios y te dice, en una página local, qué está en rojo, qué está atascado y qué te espera.
@@ -68,7 +68,7 @@
 
 | | |
 |---|---|
-| **Versión** | **2.0.8** · [todas las versiones](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versión** | **2.0.9** · [todas las versiones](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Necesita** | Python 3.11+ y la CLI de GitHub (`gh auth login`); nada más (la vista de consola usa el paquete opcional `rich`) |
 | **Se abre** | en una página de `127.0.0.1` solamente, en ocho idiomas |
 | **Escribe en GitHub** | nunca por sí solo: solo las órdenes por lotes que lances con un `--go` explícito |
@@ -76,12 +76,12 @@
 
 <!-- glance:begin -->
 
-**Medido hoy** (v2.0.8)
+**Medido hoy** (v2.0.9)
 
 | | |
 |---|---|
 | **Madurez** | functional |
-| **Tests** | 3695 métodos de test (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 3702 métodos de test (`python -m unittest discover -s monitor/tests`) |
 | **Ajustes** | 607 ajustes, todos con ayuda |
 | **Idiomas** | 8 (inglés, español, alemán, francés, italiano, japonés, chino y portugués) |
 | **Probado en el CI en** | ubuntu, windows, Python 3.11, 3.13 |

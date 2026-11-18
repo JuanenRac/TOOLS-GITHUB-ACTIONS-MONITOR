@@ -9,6 +9,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+## [2.0.9]
+
 ### Sicurezza
 
 - **Il token di accesso non viaggia più nell'indirizzo per impostazione predefinita (`listen.query_access` ora è disattivato)**: in modalità di rete l'indirizzo con `?access=` apriva la sessione, ma il token restava nella cronologia, nei registri e nel `Referer`. L'impostazione ora è disattivata a meno che tu non la attivi (lo dicono il valore predefinito, il file di esempio e l'aiuto delle Impostazioni); la sessione si apre con `POST /api/access` (il token nel corpo) o con l'intestazione `X-Monitor-Access`. Un'installazione che ha scritto `listen.query_access` da sé mantiene il suo valore; chi contava sul vecchio valore e apre il monitor da un indirizzo con `?access=` deve attivare l'impostazione o usare `POST /api/access`. La variabile d'ambiente `MONITOR_QUERY_ACCESS=1` la attiva per un servizio.
@@ -45,6 +47,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Corretto
 
+- **I file condivisi del monitor vengono di nuovo salvati quando due processi scrivono nello stesso momento su Windows**: il file temporaneo ha un nome proprio e una sostituzione rifiutata viene ritentata, così il conteggio della quota dell'IA non va più perso.
 - **Gli schermi da parete seguono la lingua scelta nella pagina principale**: uno schermo aperto senza `?lang=` usciva nella lingua del monitor (inglese) anche se la persona ne aveva scelta un'altra nella pagina principale. Ora l'ordine è `?lang=` dell'indirizzo, poi la lingua salvata dalla pagina principale nello stesso browser (uno schermo con un'altra lingua si ricarica una volta, prima di disegnare, mantenendo `?rotate=` e gli altri parametri), poi la lingua del monitor; il collegamento «Apri schermo» delle Impostazioni porta il `?lang=` della pagina. Vale per le otto lingue, con il carattere del giapponese e del cinese e le impostazioni regionali di ogni lingua per ora, data e numeri. I test verificano i tre schermi nelle otto lingue con la preferenza salvata, che `?lang=` vince e che non resta testo in inglese; la guida degli schermi spiega come si decide la lingua.
 - **L'IA integrata non si blocca più quando arrivano due richieste insieme**: due spiegazioni simultanee, o una spiegazione mentre si legge il budget, prendevano i due lock della catena in ordine inverso e si aspettavano fino al riavvio del monitor. Ora i lock si prendono sempre nello stesso ordine, e la verifica del budget di un modello e il conteggio della sua chiamata sono un solo passo, così richieste simultanee non possono superare il limite di un modello.
 - **Una consegna tardiva del webhook non rende più verde un run rosso né rosso uno verde**: la consegna sostituiva il run già letto dal ciclo con uno il cui tipo di evento era "webhook", che la regola del rosso non conta, così il colore si invertiva per un ciclo e i canali annunciavano un falso risolto e un falso nuovo rosso. Ora il run mantiene il tipo di evento inviato da GitHub, la consegna di un run già concluso con lo stesso risultato non cambia nulla, e quella che cambia il suo stato si aggiunge al run invece di sostituirlo.

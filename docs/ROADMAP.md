@@ -21,7 +21,11 @@ What only shows with long real use: the migration from 1.8 and 1.9, the growth o
 
 The monitor's own workflows keep to what the hygiene sentinel will ask of others: actions pinned to a commit, the least permissions and a time limit on every job.
 
-## Done in 1.8.2 to 2.0.8
+## Done in 1.8.2 to 2.0.9
+
+### 2.0.9 - A safer independent audit, menus with groups, a sound for each kind of event and read-only chat commands
+
+The independent audit hardened the monitor: the access token no longer travels in the address by default, a silence by pattern no longer silences what is not a workflow, the cleaner of text catches more forms of a real log, a header with a secret never follows a redirect, a webhook delivery is checked and cannot be replayed, and a provider on the internet or on a private address needs its own switch. The menu on the left has titled groups, each kind of event has its own sound, read-only commands answer in Slack and Discord (off by default), the wall screens follow the language of the main page, and the integrated AI has one budget that also counts the active notice. The log of actions can be made a condition of the actions and keeps a number of rotated files you choose, a cycle counts once for all the stages of the sentinel, and a workflow for the audit of the container image, with the faults it found in the container, is part of the version.
 
 ### 2.0.8 - A safer webhook secret, check runs and a guide to set the webhook up (the closing version of the fourth phase)
 

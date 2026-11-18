@@ -47,7 +47,7 @@ class Cycle:
         am.SAMPLE_INFO.clear()
         am.LITE["on"] = False
         am.SENTINEL["obj"] = Held(self.info)
-        am.ISSUE_CACHE.update({"items": [], "at": time.time(), "busy": False})
+        am.ISSUE_CACHE.update({"items": [], "at": NOW, "busy": False})      # the clock of the build is NOW: with the real time, a NOW ahead of the real clock makes the issues look stale and a background reading of "demo" leaks into later tests
         return self
 
     def __exit__(self, *exc):

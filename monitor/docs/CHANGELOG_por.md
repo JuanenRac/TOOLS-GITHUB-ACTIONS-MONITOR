@@ -9,6 +9,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+## [2.0.9]
+
 ### Segurança
 
 - **O token de acesso já não viaja no endereço por defeito (`listen.query_access` está agora desligado)**: no modo de rede o endereço com `?access=` abria a sessão, mas o token ficava no histórico, nos registos e no `Referer`. A definição está agora desligada, a menos que a ligue (o valor por defeito, o ficheiro de exemplo e a ajuda das Definições dizem-no); a sessão abre-se com `POST /api/access` (o token no corpo) ou com o cabeçalho `X-Monitor-Access`. Uma instalação que escreveu `listen.query_access` mantém o seu valor; a que dependia do valor antigo e abre o monitor a partir de um endereço com `?access=` tem de ligar a definição ou usar `POST /api/access`. A variável de ambiente `MONITOR_QUERY_ACCESS=1` liga-a para um serviço.
@@ -45,6 +47,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Corrigido
 
+- **Os ficheiros partilhados do monitor voltam a ser guardados quando dois processos escrevem ao mesmo tempo no Windows**: o ficheiro temporário tem um nome próprio e uma substituição recusada é tentada de novo, pelo que a contagem da quota da IA já não se perde.
 - **Os ecrãs de parede seguem o idioma escolhido na página principal**: um ecrã aberto sem `?lang=` saía no idioma do monitor (inglês), mesmo que a pessoa tivesse escolhido outro na página principal. Agora a ordem é `?lang=` do endereço, depois o idioma guardado pela página principal no mesmo navegador (um ecrã com outro idioma volta a carregar uma vez, antes de desenhar, mantendo `?rotate=` e os restantes parâmetros), depois o idioma do monitor; a ligação «Abrir ecrã» das Definições leva o `?lang=` da página. Vale para os oito idiomas, com o tipo de letra do japonês e do chinês e a configuração regional de cada idioma para a hora, a data e os números. Os testes verificam os três ecrãs nos oito idiomas com a preferência guardada, que `?lang=` ganha e que não fica texto em inglês; o guia dos ecrãs explica como o idioma é decidido.
 - **A IA integrada já não bloqueia quando chegam dois pedidos ao mesmo tempo**: duas explicações em simultâneo, ou uma explicação enquanto se lê o orçamento, tomavam os dois cadeados da cadeia por ordem inversa e esperavam-se até reiniciar o monitor. Agora os cadeados tomam-se sempre pela mesma ordem, e a verificação do orçamento de um modelo e a contagem da sua chamada são um só passo, pelo que pedidos em simultâneo não podem saltar o limite de um modelo.
 - **Uma entrega tardia do webhook já não torna verde um run vermelho nem vermelho um verde**: a entrega substituía o run que o ciclo já tinha lido por um cujo tipo de evento era "webhook", que a regra do vermelho não conta, pelo que a cor virava durante um ciclo e os canais anunciavam um corrigido falso e um novo vermelho falso. Agora o run mantém o tipo de evento que o GitHub envia, a entrega de um run já terminado com o mesmo resultado não muda nada, e a que muda o seu estado junta-se ao run em vez de o substituir.

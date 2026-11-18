@@ -148,7 +148,7 @@ class NothingNextToTheCode(unittest.TestCase):
         remove = _testenv.guard(case)
         script = "import sys; sys.path.insert(0, %r); sys.argv = ['x', '--lite']; from github_actions_monitor.app import actions_monitor as am; am.enable_lite(); am.load_config(); print('ran')" % str(HERE / "src")
         done = subprocess.run([sys.executable, "-I", "-c", script], capture_output=True, text=True, timeout=60)
-        self.assertEqual(done.stdout.strip(), "ran", done.stderr)
+        self.assertEqual((done.stdout.strip().splitlines() or [""])[-1], "ran", done.stderr)      # the first start of the lite edition may say first what it copied: what counts is that the process ran
         remove()
         self.assertEqual({n for n in _testenv.WATCHED if paths.place(n).exists()}, before)
         self.assertEqual([n for n in _testenv.WATCHED if (HERE / n).exists()], [], "and nothing at all next to the launchers")

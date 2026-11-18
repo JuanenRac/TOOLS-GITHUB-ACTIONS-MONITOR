@@ -16,7 +16,11 @@ Ce qui n'apparaît qu'à l'usage réel prolongé : la migration depuis la 1.8 et
 
 Les workflows du moniteur lui-même respectent ce que la sentinelle d'hygiène demandera aux autres : actions fixées à un commit, permissions minimales et une limite de temps sur chaque job.
 
-## Fait dans la 1.8.2 à la 2.0.8
+## Fait dans la 1.8.2 à la 2.0.9
+
+### 2.0.9 - Un audit indépendant plus sûr, des menus avec groupes, un son par type d'événement et des commandes de chat en lecture seule
+
+L'audit indépendant a durci le moniteur : le jeton d'accès ne circule plus dans l'adresse par défaut, une mise en silence par motif ne fait plus taire ce qui n'est pas un workflow, le nettoyeur de texte attrape plus de formes d'un vrai log, un en-tête avec un secret ne suit jamais une redirection, une livraison du webhook est vérifiée et ne peut pas être rejouée, et un fournisseur sur internet ou à une adresse privée a besoin de son propre interrupteur. Le menu de gauche a des groupes titrés, chaque type d'événement a son propre son, des commandes en lecture seule répondent dans Slack et Discord (désactivées par défaut), les écrans muraux suivent la langue de la page principale et l'IA intégrée a un seul budget qui compte aussi l'avis actif. Le journal des actions peut devenir une condition des actions et garde le nombre de fichiers tournants que vous choisissez, un cycle compte une seule fois pour toutes les étapes de la sentinelle, et un workflow pour l'audit de l'image du conteneur, avec les défauts qu'il a trouvés dans le conteneur, fait partie de la version.
 
 ### 2.0.8 - Un secret de webhook plus sûr, des check runs et un guide pour configurer le webhook (la version qui clôt la quatrième phase)
 

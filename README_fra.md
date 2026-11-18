@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-3695_passing-brightgreen.svg" alt="3695 tests">
+  <img src="https://img.shields.io/badge/Tests-3702_passing-brightgreen.svg" alt="3702 tests">
 </p>
 
 > Surveille les workflows de tous vos dépôts et vous dit, sur une page locale, ce qui est rouge, ce qui est bloqué et ce qui vous attend.
@@ -68,7 +68,7 @@
 
 | | |
 |---|---|
-| **Version** | **2.0.8** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **2.0.9** · [toutes les versions](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Prérequis** | Python 3.11+ et la CLI GitHub (`gh auth login`) ; rien d'autre (la vue console utilise le paquet optionnel `rich`) |
 | **S'ouvre** | sur une page `127.0.0.1` uniquement, en huit langues |
 | **Écrit sur GitHub** | jamais seul : seulement les commandes par lots que vous lancez avec un `--go` explicite |
@@ -76,12 +76,12 @@
 
 <!-- glance:begin -->
 
-**Mesuré aujourd'hui** (v2.0.8)
+**Mesuré aujourd'hui** (v2.0.9)
 
 | | |
 |---|---|
 | **Maturité** | functional |
-| **Tests** | 3695 méthodes de test (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 3702 méthodes de test (`python -m unittest discover -s monitor/tests`) |
 | **Réglages** | 607 réglages, tous avec aide |
 | **Langues** | 8 (anglais, espagnol, allemand, français, italien, japonais, chinois et portugais) |
 | **Testé dans le CI sur** | ubuntu, windows, Python 3.11, 3.13 |
