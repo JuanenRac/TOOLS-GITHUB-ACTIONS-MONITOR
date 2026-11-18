@@ -244,7 +244,7 @@ class FileStorage(base.Storage):
         path = self.events_path(account_id)
         lines = "".join(json.dumps(e, ensure_ascii=False) + "\n" for e in events)
         path.parent.mkdir(parents=True, exist_ok=True)
-        with locks.process_lock(path):      # other processes append to the same file: on Windows "append" is not one step, so two writers would lose or cut lines
+        with locks.os_lock(path):      # other processes append to the same file: on Windows "append" is not one step, so two writers would lose or cut lines
             fd = os.open(str(path), os.O_WRONLY | os.O_CREAT | os.O_APPEND | getattr(os, "O_BINARY", 0), private_io.FILE_MODE)
             try:
                 os.write(fd, lines.encode("utf-8"))      # one write for the whole batch: a line is never cut in two by another writer
@@ -333,7 +333,7 @@ class FileStorage(base.Storage):
         base.check_key(key)
         if not isinstance(data, dict):
             raise base.StorageError("record data")
-        with locks.process_lock(self._records_path(kind)):
+        with locks.os_lock(self._records_path(kind)):
             rows = self._read_records(kind, strict=True)
             rows[key] = {"data": data, "expires": expires}
             self._write_records(kind, rows)
@@ -343,7 +343,7 @@ class FileStorage(base.Storage):
         return row.get("data") if isinstance(row, dict) else None
 
     def delete_record(self, kind, key):
-        with locks.process_lock(self._records_path(kind)):
+        with locks.os_lock(self._records_path(kind)):
             rows = self._read_records(kind, strict=True)
             if base.check_key(key) not in rows:
                 return False
@@ -355,7 +355,7 @@ class FileStorage(base.Storage):
         return {k: v.get("data") for k, v in self._read_records(kind).items() if isinstance(v, dict) and isinstance(v.get("data"), dict)}
 
     def purge_records(self, kind, expired_before):
-        with locks.process_lock(self._records_path(kind)):
+        with locks.os_lock(self._records_path(kind)):
             rows = self._read_records(kind, strict=True)
             old = [k for k, v in rows.items() if isinstance(v, dict) and isinstance(v.get("expires"), (int, float)) and v["expires"] < expired_before]
             for key in old:
@@ -373,7 +373,7 @@ class FileStorage(base.Storage):
             incoming = (records or {}).get(kind) or {}
             if not incoming:
                 continue
-            with locks.process_lock(self._records_path(kind)):
+            with locks.os_lock(self._records_path(kind)):
                 rows = self._read_records(kind, strict=True)
                 for key, row in incoming.items():
                     rows[base.check_key(key)] = {"data": row["data"], "expires": row.get("expires")}

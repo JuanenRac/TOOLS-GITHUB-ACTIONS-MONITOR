@@ -204,7 +204,7 @@ def register(config, request, confirm=False, admin=False):
         return {"ok": False, "status": "confirm", "lesson": item}
     path = library_path()
     try:
-        with locks.process_lock(path, 10.0):
+        with locks.os_lock(path, 10.0):
             doc = _read_json(path, {})
             lessons = [x for x in (doc.get("lessons") if isinstance(doc.get("lessons"), list) else []) if isinstance(x, dict) and x.get("id") != item["id"] and x.get("category") != item["category"]]
             lessons.append(item)
@@ -293,7 +293,7 @@ def record(config, alerts, shas=None, now=None):
     rules, library, path = load_rules(), load_library(), book_path()
     written = []
     try:
-        with locks.process_lock(path, 5.0):
+        with locks.os_lock(path, 5.0):
             known = {(e["repo"], e["workflow"], e["run_id"], e["ts"] // DAY) for e in read_book(path)}
             handle = None
             for alert in alerts:
@@ -324,7 +324,7 @@ def import_book(config, lines, now=None):
         return 0
     path, added = book_path(), 0
     try:
-        with locks.process_lock(path, 5.0):
+        with locks.os_lock(path, 5.0):
             known = {json.dumps(e, sort_keys=True) for e in read_book(path)}
             with private_io.open_append(path) as handle:
                 for line in str(lines).splitlines()[:cfg["max_entries"]]:

@@ -117,7 +117,7 @@ def tick(config, folder=None, now=None, env=None):
     if not due(config, folder, now) or not RUNNING.acquire(blocking=False):
         return None
     try:
-        with locks.process_lock(opsconf.ops_dir(folder) / "backup", timeout=1.0):
+        with locks.os_lock(opsconf.ops_dir(folder) / "backup", timeout=1.0):
             if not due(config, folder, now):      # another process of the installation did it while this one waited
                 return None
             return run(config, folder, now=now, env=env)
@@ -132,7 +132,7 @@ def run_locked(config, folder=None, **options):
     if not RUNNING.acquire(blocking=False):
         return {**read_status(folder), "ok": False, "error": "busy"}
     try:
-        with locks.process_lock(opsconf.ops_dir(folder) / "backup", timeout=1.0):
+        with locks.os_lock(opsconf.ops_dir(folder) / "backup", timeout=1.0):
             return run(config, folder, **options)
     except (TimeoutError, OSError):
         return {**read_status(folder), "ok": False, "error": "busy"}

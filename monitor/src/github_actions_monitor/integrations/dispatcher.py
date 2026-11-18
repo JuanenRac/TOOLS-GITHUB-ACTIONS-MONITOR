@@ -262,7 +262,7 @@ def queue(storage, account_id, user, event, max_items, now=None):
     """Puts an event in the digest of a user (the oldest are dropped past `max_items`)."""
     now = time.time() if now is None else now
     item = {"at": int(now), "kind": event.get("kind"), "level": event.get("level", "info"), "repo": event.get("repo", ""), "text": str(event.get("text") or "")[:300], "url": event.get("url")}
-    with locks.process_lock(_lock_path(account_id), LOCK_WAIT):
+    with locks.os_lock(_lock_path(account_id), LOCK_WAIT):
         doc = storage.load_doc(account_id, DOC, {}) or {}
         mine = doc.setdefault("items", {}).setdefault(user, [])
         mine.append(item)
@@ -281,7 +281,7 @@ def mark_seen(storage, user, account_ids=None):
     dropped = 0
     for account_id in (account_ids if account_ids is not None else storage.list_accounts()):
         storage_base.check_account(account_id)
-        with locks.process_lock(_lock_path(account_id), LOCK_WAIT):
+        with locks.os_lock(_lock_path(account_id), LOCK_WAIT):
             doc = storage.load_doc(account_id, DOC, {}) or {}
             mine = (doc.get("items") or {}).get(user) or []
             if mine:
@@ -312,7 +312,7 @@ def run_digests(config, storage=None, account_id=None, title="{n} alerts you hav
         allow = notify.get("allow_private_targets") is True
         proxy = ((config or {}).get("network") or {}).get("use_proxy") is True if isinstance((config or {}).get("network"), dict) else False
         server = channels.server_settings(config)
-        with locks.process_lock(_lock_path(account_id), LOCK_WAIT):
+        with locks.os_lock(_lock_path(account_id), LOCK_WAIT):
             doc = storage.load_doc(account_id, DOC, {}) or {}
             due = []
             for user, items in sorted((doc.get("items") or {}).items()):
