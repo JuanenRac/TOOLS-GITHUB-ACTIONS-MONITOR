@@ -64,7 +64,7 @@ Drei Seiten für einen Monitor oder Fernseher, den niemand bedient. Sie haben ke
 
 | Adresse | Was sie zeigt |
 |---|---|
-| `/screen/overview` | Ring und Buchstabe der Bewertung; die Flotte (grün, rot, hängend, wartend); die letzten 24 Stunden und 7 Tage als Flächendiagramme; eine Heatmap der Repositories nach Stunde; was am längsten rot ist; Runner und Minuten; die letzten Ereignisse; das GitHub-Kontingent als Anzeige. |
+| `/screen/overview` | Ring und Buchstabe der Bewertung; die Flotte (grün, rot, hängend, wartend); die letzten 24 Stunden und 7 Tage als Flächendiagramme; eine Heatmap der Repositories nach Stunde; was am längsten rot ist; Runner und Minuten; die letzten Ereignisse; das GitHub-Kontingent als Anzeige. Die Flottenkarte zeigt außerdem die Karte nach Gruppen: ein Balken je Gruppe der Flottenansicht (dieselbe Gruppierung, `fleet.group_by`) mit ihren Repositorys, die rot sind, Aufmerksamkeit brauchen, in Ordnung sind oder keine Daten haben; nur der Gruppenname und Zahlen. |
 | `/screen/now` | Was in dieser Minute geschieht: laufende Läufe mit Fortschritt und Dauer, die Warteschlange, Läufe, die auf Freigabe warten, aktuelle Fehlschläge, Merges und Releases, fällige Releases und eine Live-Linie der letzten zwei Stunden. |
 | `/screen/sentinels` | Eine Karte je Wächter (A1 bis A12) mit Stufe, offenen Befunden, ob seine Quellen lesbar sind, dem letzten Durchlauf und einem Ring, der dem Durchlauf folgt; ein animiertes Radar, das markiert, was nicht stimmt, und die Warnungen nach Schweregrad. |
 
@@ -110,6 +110,7 @@ Die Sprache einer Anzeige wird in dieser Reihenfolge bestimmt: `?lang=xx` in der
 | `screens.logo_overview`, `screens.logo_now`, `screens.logo_sentinels` | Auf welchen Anzeigen das Logo erscheint (standardmäßig nur auf der Übersicht). |
 | `screens.logo_corner` | top-right (Standard), top-left, bottom-right oder bottom-left. |
 | `screens.logo_max_width`, `screens.logo_max_height` | Größte Größe des Logos in Pixeln bei 1920 x 1080 (Standard 160 x 64; es wächst mit dem Bildschirm). |
+| `screens.group_map` | Standardmäßig an. Zeigt auf dem Übersichtsbildschirm die Karte der Flotte nach Gruppen (die Gruppierung der Flottenansicht). Aus: nur die vier Kacheln. |
 
 ### Design der Anzeigen
 

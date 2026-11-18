@@ -93,7 +93,7 @@ DEFAULTS = {
     "show_unclassified": True,     # repositories that no ecosystem claims are shown in an automatic group "Unclassified" instead of disappearing
     "stuck_minutes": 120,
     "alerts": {"silences": [], "service": {"enabled": False, "failures": 3, "rate_percent": 0, "workflows": []}, "group": {"by_commit": False, "min": 3}, "digest": {"minutes": 0, "threshold": 10}},      # what reaches the channels when there are many alerts (alertflow.py): all off or empty
-    "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group", "workflow_run", "repository_dispatch"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "dormant_repos": True, "forks_need_own_ci": True, "fork_own_ci_days": 90, "red_ages": True, "red_age_days": 30, "disabled_apart": True, "extra_branches": [], "rerun_timing": False, "group": {"reusable": False, "min": 2}, "failed_jobs": {"enabled": False, "max_per_cycle": 4, "group_by": "auto"},
+    "ci": {"red_events": ["push", "schedule", "workflow_dispatch", "merge_group", "workflow_run", "repository_dispatch"], "count_fork_runs": False, "automation_counts": False, "inactive_days": 90, "dormant_repos": True, "forks_need_own_ci": True, "fork_own_ci_days": 90, "red_ages": True, "red_age_days": 30, "disabled_apart": True, "dependabot_alerts": True, "copilot_alerts": False, "extra_branches": [], "rerun_timing": False, "group": {"reusable": False, "min": 2}, "failed_jobs": {"enabled": False, "max_per_cycle": 4, "group_by": "auto"},
            "stuck": {"learned": False, "percentile": 95, "margin": 2.0, "min_samples": 3, "min_minutes": 30, "max_minutes": 720, "queue_minutes": 0, "workflow_minutes": [], "runner_minutes": [], "awaiting_stuck": True, "ghost_enabled": True, "ghost_days": 7}},      # which runs may make a branch red (redrule.py)
     "watchdog_minutes": 10,      # a refresh cycle that runs longer than this is dumped to the log and restarted in a new thread (0 = off)
     "watchdog_max_abandoned": 8,      # calls to GitHub that gave up waiting but never returned: with this many still alive no new call is started and the health check says so (0 = no limit)
@@ -118,8 +118,8 @@ DEFAULTS = {
     "ui": {"orientation": "auto", "rotate_seconds": 0, "screen1_tabs": "", "screen1_orientation": "auto", "screen2_tabs": "", "screen2_orientation": "auto", "screen3_tabs": "", "screen3_orientation": "auto", "now_sort": "ecosystem", "alerts_sort": "server", "theme": "auto"},   # the screens (docs/SCREENS.md): the orientation of the page, and which tabs each /screen/N shows
     "screens": {"enabled": False, "blink": True, "blink_calm_minutes": 30, "rotate_seconds": 0, "default_theme": "inherit", "default_density": "normal", "refresh_seconds": 10, "burn_in_protection": True, "night_dim": False, "night_dim_from_hour": 22, "night_dim_to_hour": 7, "show_repo_names": "public", "sound": False,
                 "theme_overview": "inherit", "theme_now": "inherit", "theme_sentinels": "inherit", "mode": "three", "rotate_every_seconds": 20, "alert_hold_seconds": 30, "logo_overview": True, "logo_now": False, "logo_sentinels": False,
-                "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64},   # the wall screens /screen/overview, /screen/now and /screen/sentinels (docs/SCREENS.md, screens.py): read only, from what the monitor already holds
-    "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "on_warning": True, "on_resolved": True, "on_report": True, "on_lesson": True, "on_sentinel": True, "on_stuck": True, "on_score_drop": True, "on_info": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False, "theme": "classic", "quiet_enabled": False, "quiet_from_hour": 22, "quiet_to_hour": 7},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
+                "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64, "group_map": True},   # the wall screens /screen/overview, /screen/now and /screen/sentinels (docs/SCREENS.md, screens.py): read only, from what the monitor already holds
+    "sound": {"enabled": True, "on_new_red": True, "on_connection_lost": True, "on_warning": True, "on_resolved": True, "on_report": True, "on_lesson": True, "on_sentinel": True, "on_stuck": True, "on_score_drop": True, "on_info": True, "on_live_recovered": True, "cooldown_seconds": 30, "volume": 40, "server_beep": False, "theme": "classic", "quiet_enabled": False, "quiet_from_hour": 22, "quiet_to_hour": 7},   # the "bing bing" of the page (soundalert.py: server_beep is the one for when the page is closed, off)
     "updates": {"check": True},    # tell when a newer version is published (read only, updatecheck.py); never installs anything
     "airgapped": False,            # True: nothing is requested from the network except GitHub's data you asked for; the update check is off
     "open_browser": True,
@@ -1649,6 +1649,12 @@ def feed_alerts(config, data, diagnose=True):
             lessons.write_markdown(config, force=bool(result["opened"] or result["resolved"]))
     except Exception as error:   # noqa: BLE001 - the book never stops the feed
         degraded.note("lessons.record", error)
+    if not result["opened"] and any(a.get("class") == "real" for a in result["resolved"] if isinstance(a, dict)):
+        try:
+            from github_actions_monitor.integrations import soundalert
+            soundalert.beep(config, "resolved")      # a red turned green (the sound of this computer, only with sound.server_beep)
+        except Exception as error:   # noqa: BLE001
+            degraded.note("loop.extra2", error)
     for alert in result["opened"]:
         if alert["class"] == "real":
             try:
@@ -1720,6 +1726,8 @@ def brief_status(config, status):
 
 EXTRAS_WARNED = []
 CONNECTION_WAS = {"lost": False}
+REPORT_WATCH, LESSON_WATCH = (__import__("github_actions_monitor.integrations.soundalert", fromlist=["_"]).KeyWatch(kind) for kind in ("report", "lesson"))
+SOUND_WATCH = __import__("github_actions_monitor.integrations.soundalert", fromlist=["_"]).Watch()      # what is new in the list of alerts between two cycles, for the sound of this computer
 
 
 def retention_tick(config):
@@ -1948,9 +1956,27 @@ def maintain(config, data):
     try:      # the connection that goes down is announced once, by the same switch as a new red
         from github_actions_monitor.integrations import soundalert
         lost = bool((data.get("offline") or {}).get("offline"))
+        kinds = []
         if lost and not CONNECTION_WAS["lost"]:
-            soundalert.beep(toolconfig.raw_config(), "connection_lost")
+            kinds.append("connection_lost")
+        if not lost and CONNECTION_WAS["lost"]:
+            kinds.append("live_recovered")      # the live connection is back after a loss: its own sound, by its own switch
         CONNECTION_WAS["lost"] = lost
+        sound_config = toolconfig.raw_config()
+        sound_cfg = soundalert.settings(sound_config)
+        if sound_cfg["enabled"] and sound_cfg["server_beep"] and not LITE["on"]:      # the other kinds of the page, seen from the list of alerts (only when the beep of this computer is on)
+            try:
+                kinds += SOUND_WATCH.look(alerts_payload({}).get("alerts"))
+            except Exception as error:   # noqa: BLE001
+                degraded.note("sound.watch", error)
+            try:      # the reports and the lessons that show something new (the same keys as the page)
+                from github_actions_monitor.integrations import lessons, reports
+                kinds += REPORT_WATCH.look(soundalert.report_keys(reports.payload(sound_config, None)))
+                kinds += LESSON_WATCH.look(soundalert.lesson_keys(lessons.document(sound_config, "") if lessons.settings(sound_config)["enabled"] else None))
+            except Exception as error:   # noqa: BLE001
+                degraded.note("sound.watch", error)
+        if kinds:
+            soundalert.beep_kinds(sound_config, kinds)
     except Exception as error:   # noqa: BLE001 - a sound never stops a cycle
         degraded.note("loop.extra2", error)
     maintain_extras(toolconfig.raw_config() if not LITE["on"] else config, data)
@@ -2246,7 +2272,26 @@ def screens_payload(kind, cfg):
                 score = score_api.latest(storage, account, toolconfig.raw_config())
         except Exception as error:   # noqa: BLE001
             degraded.note("screens.score", error)
-    return screens.build(kind, state, snapshot, alerts, score, cfg, "lite" if LITE["on"] else "complete")
+    view = labels = None
+    if not LITE["on"] and kind == "overview" and cfg.get("group_map", True):
+        view, labels = screens_groups()
+    return screens.build(kind, state, snapshot, alerts, score, cfg, "lite" if LITE["on"] else "complete", fleet_view=view, labels=labels)
+
+
+GROUPS_CACHE = {"at": 0.0, "view": None, "labels": None}
+
+
+def screens_groups():
+    """The groups of the fleet view for the overview wall screen, the same ones as the Fleet tab (fleet.group_by). The view is built at most once every 30 seconds: a screen asks every few seconds."""
+    now = time.time()
+    if GROUPS_CACHE["view"] is None or now - GROUPS_CACHE["at"] > 30:
+        try:
+            from github_actions_monitor.health import fleet
+            GROUPS_CACHE.update(at=now, view=fleet.fleet_view(health_views(), toolconfig.raw_config()), labels={**{"other": i18n.t("ui.eco_other")}, **{key: item["label"] for key, item in toolconfig.ecosystems().items()}})
+        except Exception as error:   # noqa: BLE001 - a screen without the map still shows the rest
+            degraded.note("screens.groups", error)
+            return None, None
+    return GROUPS_CACHE["view"], GROUPS_CACHE["labels"]
 
 
 def chatops_snapshot(config):
@@ -2258,7 +2303,7 @@ def chatops_snapshot(config):
         state = STATE["data"]
     if not isinstance(state, dict) or not state:
         return {"loaded": False}
-    overview = screens_payload("overview", dict(screens.settings(config), show_repo_names=cfg["show_repo_names"]))
+    overview = screens_payload("overview", dict(screens.settings(config), show_repo_names=cfg["show_repo_names"], group_map=False))
     names = screens.Names(state.get("repos"), state.get("repo_meta"), cfg["show_repo_names"])
     payload = alerts_payload({"muted": "hide"})
     code_ok = re.compile(r"^[a-z0-9_.:-]{1,40}\Z")

@@ -64,7 +64,7 @@ Três páginas para um monitor ou uma televisão em que ninguém toca. Não têm
 
 | Endereço | O que mostra |
 |---|---|
-| `/screen/overview` | Anel e letra da pontuação; a frota (verdes, vermelhos, bloqueados, em espera); as últimas 24 horas e 7 dias em gráficos de área; um mapa de calor dos repositórios por hora; o que está a vermelho há mais tempo; runners e minutos; os últimos eventos; a quota do GitHub como indicador. |
+| `/screen/overview` | Anel e letra da pontuação; a frota (verdes, vermelhos, bloqueados, em espera); as últimas 24 horas e 7 dias em gráficos de área; um mapa de calor dos repositórios por hora; o que está a vermelho há mais tempo; runners e minutos; os últimos eventos; a quota do GitHub como indicador. O cartão da frota mostra também o mapa por grupos: uma barra por cada grupo da vista de frota (o mesmo agrupamento, `fleet.group_by`) com os seus repositórios a vermelho, que precisam de atenção, em ordem ou sem dados; apenas o nome do grupo e números. |
 | `/screen/now` | O que acontece neste minuto: execuções em curso com progresso e duração, a fila, execuções à espera de aprovação, falhas recentes, fusões e versões publicadas, versões por publicar e uma linha em direto das últimas duas horas. |
 | `/screen/sentinels` | Um cartão por cada sentinela (A1 a A12) com o seu nível, os achados em aberto, se as suas fontes são legíveis, a última varredura e um anel que acompanha a varredura; um radar animado que assinala o que está mal e os alertas por gravidade. |
 
@@ -110,6 +110,7 @@ O idioma de um ecrã decide-se por esta ordem: `?lang=xx` no endereço; depois o
 | `screens.logo_overview`, `screens.logo_now`, `screens.logo_sentinels` | Em que ecrãs aparece o logótipo (por omissão, só na visão geral). |
 | `screens.logo_corner` | top-right (por omissão), top-left, bottom-right ou bottom-left. |
 | `screens.logo_max_width`, `screens.logo_max_height` | Tamanho máximo do logótipo em píxeis a 1920 x 1080 (160 x 64 por omissão; cresce com o ecrã). |
+| `screens.group_map` | Ativado por predefinição. Mostra o mapa da frota por grupos no ecrã geral (o agrupamento da vista de frota). Desativado: só os quatro mosaicos. |
 
 ### Tema dos ecrãs
 

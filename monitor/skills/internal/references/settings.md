@@ -159,7 +159,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `chatops.slack.signing_secret_env` (secure) | `"MONITOR_SLACK_SIGNING_SECRET"` | webhook | Environment variable with the Slack signing secret |
 | `chatops.slack.state` | `-` | webhook | Slack signing secret |
 | `ci.automation_counts` | `false` | sentinel | Count automation workflows |
+| `ci.copilot_alerts` | `false` | sentinel | Notice when Copilot workflows fail |
 | `ci.count_fork_runs` | `false` | sentinel | Count runs of forks |
+| `ci.dependabot_alerts` | `true` | sentinel | Alert when the Dependabot updates fail |
 | `ci.disabled_apart` | `true` | sentinel | A workflow switched off by hand is not red |
 | `ci.dormant_repos` | `true` | sentinel | Count dormant and inactive repositories apart |
 | `ci.extra_branches` | `[]` | sentinel | Maintenance branches to watch |
@@ -447,6 +449,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `screens.default_density` | `"normal"` | general | Density of the wall screens |
 | `screens.default_theme` | `"inherit"` | general | Theme of the wall screens |
 | `screens.enabled` | `false` | general | Wall screens |
+| `screens.group_map` | `true` | general | Group map on the overview screen |
 | `screens.logo_corner` | `"top-right"` | general | Corner of the logo |
 | `screens.logo_max_height` | `64` | general | Largest height of the logo |
 | `screens.logo_max_width` | `160` | general | Largest width of the logo |
@@ -594,6 +597,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sound.on_connection_lost` | `true` | general | Sound when the connection drops |
 | `sound.on_info` | `true` | general | Sound for a notice |
 | `sound.on_lesson` | `true` | general | Sound for a new lesson |
+| `sound.on_live_recovered` | `true` | general | Sound when the live view comes back |
 | `sound.on_new_red` | `true` | general | Sound for a new red |
 | `sound.on_report` | `true` | general | Sound for a new report |
 | `sound.on_resolved` | `true` | general | Sound when it is solved |

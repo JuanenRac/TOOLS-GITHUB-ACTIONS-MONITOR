@@ -64,7 +64,7 @@ Three pages for a monitor or a TV that nobody touches. They have no side menu an
 
 | Address | What it shows |
 |---|---|
-| `/screen/overview` | Score ring and letter; the fleet (green, red, stuck, waiting); the last 24 hours and 7 days as area charts; a heat map of repositories by hour; what has been red the longest; runners and minutes; the latest events; the GitHub allowance as a gauge. |
+| `/screen/overview` | Score ring and letter; the fleet (green, red, stuck, waiting); the last 24 hours and 7 days as area charts; a heat map of repositories by hour; what has been red the longest; runners and minutes; the latest events; the GitHub allowance as a gauge. The fleet card also shows the map by groups: one bar for each group of the Fleet view (the same grouping, `fleet.group_by`) with its repositories that are red, need attention, are in order or have no data; only the name of the group and numbers. |
 | `/screen/now` | What is happening this minute: running runs with progress and duration, the queue, runs waiting for approval, recent failures, merges and releases, releases due and a live line of the last two hours. |
 | `/screen/sentinels` | One card for each sentinel (A1 to A12) with its level, open findings, whether its sources can be read, the last sweep and a ring that follows the sweep; an animated radar that marks what is wrong and the alerts by severity. |
 
@@ -110,6 +110,7 @@ The language of a screen is decided in this order: `?lang=xx` in the address; th
 | `screens.logo_overview`, `screens.logo_now`, `screens.logo_sentinels` | On which screens the logo shows (only the overview by default). |
 | `screens.logo_corner` | top-right (default), top-left, bottom-right or bottom-left. |
 | `screens.logo_max_width`, `screens.logo_max_height` | Largest size of the logo in pixels at 1920 x 1080 (160 x 64 by default; it grows with the screen). |
+| `screens.group_map` | On by default. Shows the map of the fleet by groups on the overview screen (the grouping of the Fleet view). Off: only the four tiles. |
 
 ### Theme of the screens
 

@@ -21,6 +21,7 @@ La página hace sus propios sonidos con la API Web Audio, uno por cada tipo de e
 | Informe | Uno de los informes opcionales muestra un hallazgo que no estaba antes. | Dos campanadas suaves, aguda y luego más grave. |
 | Lección | Las lecciones de los fallos muestran una categoría nueva, o una que empieza a repetirse o a aplicarse. | Tres notas agudas rápidas. |
 | Noticia | Una alerta nueva de nivel informativo (la release del original de un fork, por ejemplo). | Un pitido suave. |
+| De nuevo en línea | Vuelve la conexión con GitHub, o de esta página con el monitor, tras una caída. | Cuatro notas ascendentes. |
 
 ## Por qué un navegador puede quedarse en silencio y qué hace la página
 
@@ -42,12 +43,12 @@ Todos están en el fichero de configuración y en la pestaña Ajustes; el volume
 | Ajuste | Qué hace |
 |---|---|
 | `sound.enabled` | Interruptor general de todos los sonidos de la página. |
-| `sound.on_new_red`, `sound.on_connection_lost`, `sound.on_warning`, `sound.on_resolved`, `sound.on_report`, `sound.on_lesson`, `sound.on_sentinel`, `sound.on_stuck`, `sound.on_score_drop`, `sound.on_info` | Un interruptor por tipo (todos activados por defecto). |
+| `sound.on_new_red`, `sound.on_connection_lost`, `sound.on_warning`, `sound.on_resolved`, `sound.on_report`, `sound.on_lesson`, `sound.on_sentinel`, `sound.on_stuck`, `sound.on_score_drop`, `sound.on_info`, `sound.on_live_recovered` | Un interruptor por tipo (todos activados por defecto). |
 | `sound.theme` | `classic` (tonos claros) o `soft` (tonos más graves, redondos y lentos). Cada tipo conserva su ritmo en ambos. |
 | `sound.volume` | De 1 a 100, moderado por defecto. |
 | `sound.cooldown_seconds` | Pausa entre dos sonidos del mismo tipo. |
 | `sound.quiet_enabled`, `sound.quiet_from_hour`, `sound.quiet_to_hour` | Horario silencioso (desactivado por defecto): entre las dos horas de este ordenador no suena nada; puede cruzar la medianoche. |
-| `sound.server_beep` | Desactivado por defecto. Un pitido de este ordenador para un rojo nuevo cuando no hay ninguna página abierta (solo local). |
+| `sound.server_beep` | Apagado por defecto. El propio monitor suena en este equipo cuando no hay ninguna página abierta o el navegador bloquea el sonido: un patrón para cada tipo de evento de la tabla anterior (tonos de Windows, sonidos del sistema de macOS, eventos de canberra en Linux), con los mismos interruptores y horario silencioso que la página, en una ráfaga de como máximo tres tipos a la vez; solo local. |
 
 ## Probar cada sonido
 

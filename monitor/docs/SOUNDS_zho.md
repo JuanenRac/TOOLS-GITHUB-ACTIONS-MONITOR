@@ -21,6 +21,7 @@
 | 报告 | 某个可选报告出现了之前没有的发现。 | 两声轻柔的钟声,先高后低。 |
 | 经验 | 失败经验出现新的类别,或某类别开始重复或开始适用。 | 三个快速的高音。 |
 | 通知 | 出现新的信息级别警报(例如分叉原仓库的发布)。 | 一个柔和的提示音。 |
+| 已恢复 | 与 GitHub 的连接,或本页面与监视器的连接,在中断后恢复。 | 四个上升的音符。 |
 
 ## 浏览器为什么可能静音,以及页面如何处理
 
@@ -42,12 +43,12 @@
 | 设置 | 作用 |
 |---|---|
 | `sound.enabled` | 页面所有声音的总开关。 |
-| `sound.on_new_red`, `sound.on_connection_lost`, `sound.on_warning`, `sound.on_resolved`, `sound.on_report`, `sound.on_lesson`, `sound.on_sentinel`, `sound.on_stuck`, `sound.on_score_drop`, `sound.on_info` | 每种类型一个开关(默认全部开启)。 |
+| `sound.on_new_red`, `sound.on_connection_lost`, `sound.on_warning`, `sound.on_resolved`, `sound.on_report`, `sound.on_lesson`, `sound.on_sentinel`, `sound.on_stuck`, `sound.on_score_drop`, `sound.on_info`, `sound.on_live_recovered` | 每种类型一个开关(默认全部开启)。 |
 | `sound.theme` | `classic`(清晰的音色)或 `soft`(更低、更圆润、更慢的音色)。两种主题下每种类型的节奏不变。 |
 | `sound.volume` | 1 到 100,默认适中。 |
 | `sound.cooldown_seconds` | 同一类型两次声音之间的间隔。 |
 | `sound.quiet_enabled`, `sound.quiet_from_hour`, `sound.quiet_to_hour` | 静音时段(默认关闭):在本机的两个时刻之间不发声;可以跨过午夜。 |
-| `sound.server_beep` | 默认关闭。没有打开任何页面时,本机为新的红色发出蜂鸣(仅限本地)。 |
+| `sound.server_beep` | 默认关闭。没有打开页面或浏览器阻止声音时,监视器本身会在本机发声:上表中每种事件类型各有一种模式(Windows 音调、macOS 系统声音、Linux 的 canberra 事件),使用与页面相同的开关和静音时段,每次最多合并三种类型为一串;仅限本地。 |
 
 ## 试听每种声音
 

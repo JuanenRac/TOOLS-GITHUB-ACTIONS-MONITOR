@@ -23,8 +23,8 @@ from github_actions_monitor.integrations import soundalert  # noqa: E402
 PAGE = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
 WALL = (HERE / "assets" / "static" / "screens.html").read_text(encoding="utf-8")
 NODE = shutil.which("node")
-KINDS = ["red", "sentinel", "stuck", "score", "conn", "warning", "resolved", "report", "lesson", "info"]
-SWITCH = {"red": "new_red", "conn": "connection_lost", "score": "score_drop"}
+KINDS = ["red", "sentinel", "stuck", "score", "conn", "warning", "resolved", "report", "lesson", "info", "live"]
+SWITCH = {"red": "new_red", "conn": "connection_lost", "score": "score_drop", "live": "live_recovered"}
 
 
 def block(text, name):
@@ -118,6 +118,7 @@ const first=(f)=>{reset();f(0);NOW+=60000;f(1);return played()};
 res.red=first(i=>soundWatch({failing:i?[{repo:'a',name:'ci'}]:[],offline:{offline:false}}));
 res.resolved=first(i=>soundWatch({failing:i?[]:[{repo:'a',name:'ci'}],offline:{offline:false}}));
 res.conn=first(i=>soundWatch({failing:[],offline:{offline:!!i}}));
+res.live=first(i=>soundWatch({failing:[],offline:{offline:!i}}));
 res.sentinel=first(i=>soundAlerts(alertsOf(...(i?[['s1','security.secret','error']]:[]))));
 res.stuck=first(i=>soundAlerts(alertsOf(...(i?[['t1','ci.stuck','error']]:[]))));
 res.score=first(i=>soundAlerts(alertsOf(...(i?[['sc','score.dropped','warning']]:[]))));

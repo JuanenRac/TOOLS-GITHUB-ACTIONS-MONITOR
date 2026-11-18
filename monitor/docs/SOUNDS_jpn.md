@@ -21,6 +21,7 @@
 | レポート | 任意のレポートに、以前はなかった指摘が出る。 | やわらかい二つのチャイム(高い音の後に低い音)。 |
 | 教訓 | 失敗の教訓に新しい分類が出る、または繰り返し始める、適用が必要になる。 | 速い高音が三つ。 |
 | お知らせ | レベルが情報の新しいアラート(フォーク元のリリースなど)。 | やわらかい一つの音。 |
+| 復旧 | GitHub との接続、またはこのページとモニターの接続が、途切れたあとに戻ったとき。 | 上昇する 4 つの音。 |
 
 ## ブラウザが無音になる理由と、ページの対応
 
@@ -42,12 +43,12 @@
 | 設定 | 内容 |
 |---|---|
 | `sound.enabled` | ページのすべての音の主スイッチ。 |
-| `sound.on_new_red`, `sound.on_connection_lost`, `sound.on_warning`, `sound.on_resolved`, `sound.on_report`, `sound.on_lesson`, `sound.on_sentinel`, `sound.on_stuck`, `sound.on_score_drop`, `sound.on_info` | 種類ごとのスイッチ(既定はすべてオン)。 |
+| `sound.on_new_red`, `sound.on_connection_lost`, `sound.on_warning`, `sound.on_resolved`, `sound.on_report`, `sound.on_lesson`, `sound.on_sentinel`, `sound.on_stuck`, `sound.on_score_drop`, `sound.on_info`, `sound.on_live_recovered` | 種類ごとのスイッチ(既定はすべてオン)。 |
 | `sound.theme` | `classic`(明瞭な音)または `soft`(低く丸くゆっくりした音)。どちらでも種類ごとのリズムは変わりません。 |
 | `sound.volume` | 1〜100。既定は控えめ。 |
 | `sound.cooldown_seconds` | 同じ種類の音の間隔。 |
 | `sound.quiet_enabled`, `sound.quiet_from_hour`, `sound.quiet_to_hour` | サイレント時間(既定はオフ)。このコンピューターの二つの時刻の間は何も鳴りません。真夜中をまたげます。 |
-| `sound.server_beep` | 既定はオフ。ページが開いていないときに、新しい赤をこのコンピューターのビープ音で知らせます(ローカルのみ)。 |
+| `sound.server_beep` | 既定でオフ。ページが開かれていないとき、またはブラウザーが音をブロックしているとき、モニター自身がこのコンピューターで音を鳴らします。上の表のイベントの種類ごとに別のパターン(Windows のトーン、macOS のシステムサウンド、Linux の canberra イベント)で、ページと同じスイッチと静音時間帯に従い、一度に最大 3 種類までを 1 回にまとめて鳴らします。ローカルのみ。 |
 
 ## 音を試す
 

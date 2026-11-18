@@ -16,6 +16,8 @@ DOCS = HERE / "docs"
 # dotted names in the guides that are not settings of the page: a key of the data, a name of a mode, a setting that lives only in the configuration file or of another tool
 NOT_SETTINGS = {
     "ai_alerts.transient_patterns": "only in the file",
+    "ci.copilot_activity": "an alert code",
+    "ci.dependabot_failed": "an alert code",
     "ci.ghost_queue": "a key of the data and the sentinel",
     "ci.upstream_red": "an alert code",
     "ci.upstream_release": "an alert code",
