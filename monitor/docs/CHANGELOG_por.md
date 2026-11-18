@@ -9,6 +9,14 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+### Corrigido
+
+- **A porta de release aceita uma execução verde pela contagem que o próprio unittest indicou**: o registo de uma execução verde completa leva o número de testes que o unittest diz ter executado (as linhas do relatório podem ser menos quando um teste escreve a meio da sua linha), e a porta compara agora esse número com o total em vez do número de linhas que conseguiu ler, de modo que uma execução completa já não é recusada por algumas linhas por contar.
+
+### Adicionado
+
+- **`make_release.py --progress` mostra o andamento das suites**: com a opção, tanto a suite normal como a da instalação limpa escrevem uma linha a cada 250 testes, de modo que a porta já não fica em silêncio durante quase uma hora.
+
 ## [2.1.0]
 
 ### Adicionado

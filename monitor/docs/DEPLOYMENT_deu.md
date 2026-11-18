@@ -122,6 +122,7 @@ Gelesen werden nur die Namen dieser Tabelle. Im Dienst wird ein nicht lesbarer W
 | `MONITOR_RELEASE_CLEAN_TIMEOUT` | `tools/make_release.py`: Sekunden, die die Suite des entpackten Zips brauchen darf (Standard 3600; 60 bis 86400). |
 | `MONITOR_RELEASE_LOG_DIR` | `tools/make_release.py`: Ordner, in dem die GESAMTE Ausgabe einer fehlgeschlagenen Suite gespeichert wird (Standard: der temporäre Ordner); die Meldung des Gates nennt die fehlgeschlagenen Tests und diese Datei. |
 | `--accept-green-suite JSON --commit SHA [--skip-clean-suite]` | `tools/make_release.py`: statt die gewöhnliche Suite erneut auszuführen, wird die Aufzeichnung eines vollständigen grünen Laufs genau dieses Commits akzeptiert (beendet, ohne Fehlschlag und Fehler, alle Tests ausgeführt); `--skip-clean-suite` wiederholt auch die Suite des entpackten Zips nicht (die Schnellprüfungen laufen weiter) und sagt das. |
+| `--progress` | `tools/make_release.py`: zeigt den Fortschritt der Suiten, eine Zeile alle 250 Tests, auch in der Suite der sauberen Installation. |
 
 ## Wenn GitHub den Zugang widerruft oder er abläuft
 

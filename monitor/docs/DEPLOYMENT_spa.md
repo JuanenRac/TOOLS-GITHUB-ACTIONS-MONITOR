@@ -122,6 +122,7 @@ Solo se leen los nombres de esta tabla. En el servicio un valor que no se puede 
 | `MONITOR_RELEASE_CLEAN_TIMEOUT` | `tools/make_release.py`: segundos que puede tardar la suite del zip extraído (por defecto 3600; de 60 a 86400). |
 | `MONITOR_RELEASE_LOG_DIR` | `tools/make_release.py`: carpeta donde se guarda TODA la salida de una suite que falla (por defecto, la carpeta temporal); el mensaje de la puerta nombra los tests que fallan y este fichero. |
 | `--accept-green-suite JSON --commit SHA [--skip-clean-suite]` | `tools/make_release.py`: en lugar de repetir la suite ordinaria, acepta el registro de una pasada verde completa de ese mismo commit (terminada, sin fallos ni errores, todos los tests ejecutados); `--skip-clean-suite` tampoco repite la suite del zip extraído (sus comprobaciones rápidas sí se hacen) y lo dice. |
+| `--progress` | `tools/make_release.py`: dice cómo van las suites, una línea cada 250 pruebas, también en la suite de la instalación limpia. |
 
 ## Cuando GitHub revoca o caduca el acceso
 

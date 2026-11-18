@@ -57,6 +57,37 @@ class NamesAndLog(unittest.TestCase):
             self.assertIn("no failing test is named", text)
 
 
+class SuiteProgress(unittest.TestCase):
+    def suite(self, folder, count):
+        (Path(folder) / "tests").mkdir()
+        body = "import unittest" + chr(10) + "class T(unittest.TestCase):" + chr(10) + "".join(f"    def test_{i}(self):" + chr(10) + "        pass" + chr(10) for i in range(count))
+        (Path(folder) / "tests" / "test_many.py").write_text(body, encoding="utf-8")
+        return [sys.executable, "-I", "-m", "unittest", "discover", "-s", "tests"]
+
+    def test_without_progress_it_is_a_plain_run(self):
+        with tempfile.TemporaryDirectory() as folder:
+            result = make_release.run_suite("x", self.suite(folder, 3), folder, dict(), 120)
+            self.assertEqual(result.returncode, 0)
+            self.assertIn("Ran 3 tests", result.stderr)
+
+    def test_with_progress_a_line_says_how_far_it_is_and_the_result_is_the_same(self):
+        import contextlib
+        import io
+        old = (make_release.SHOW_PROGRESS, make_release.PROGRESS_EVERY)
+        make_release.SHOW_PROGRESS, make_release.PROGRESS_EVERY = True, 2
+        self.addCleanup(lambda: setattr(make_release, "SHOW_PROGRESS", old[0]) or setattr(make_release, "PROGRESS_EVERY", old[1]))
+        with tempfile.TemporaryDirectory() as folder, contextlib.redirect_stdout(io.StringIO()) as shown:
+            result = make_release.run_suite("suite", self.suite(folder, 5), folder, dict(), 120)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("Ran 5 tests", result.stderr)
+        self.assertIn("gate: suite: 2 tests run", shown.getvalue())
+        self.assertIn("gate: suite: 4 tests run", shown.getvalue())
+
+    def test_the_flag_is_in_the_help(self):
+        result = subprocess.run([sys.executable, "-I", str(HERE / "tools" / "make_release.py"), "--help"], capture_output=True, text=True, timeout=120)
+        self.assertIn("--progress", result.stdout)
+
+
 class AcceptedGreenRun(unittest.TestCase):
     def write(self, data):
         folder = tempfile.TemporaryDirectory()
@@ -84,6 +115,13 @@ class AcceptedGreenRun(unittest.TestCase):
     def test_an_unfinished_or_dirty_run_is_refused(self):
         for change in ({"finished": False}, {"exit_code": 1}, {"fail": 1}, {"error": 2}, {"total": 0}, {"done": 9}):
             self.refused(record(**change))
+
+    def test_the_count_unittest_gave_wins_over_the_lines_that_were_read(self):
+        text = make_release.green_run(self.write(record(total=10, done=7, ran=10)), SHA)
+        self.assertIn("of 10", text)
+        self.refused(record(total=10, done=10, ran=9))
+        self.refused(record(total=10, done=10, ran=0, finished=False))
+        self.assertIn("accepted", make_release.green_run(self.write(record(total=10, done=10, ran=0)), SHA))
 
     def test_a_file_that_is_not_a_record_is_refused(self):
         with tempfile.TemporaryDirectory() as folder:

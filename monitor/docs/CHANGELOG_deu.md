@@ -9,6 +9,14 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+### Behoben
+
+- **Das Release-Gate akzeptiert einen grünen Lauf nach der Zahl, die unittest selbst angab**: Die Aufzeichnung eines vollständigen grünen Laufs enthält die Anzahl der Tests, die unittest als ausgeführt meldet (die Zeilen des Berichts können weniger sein, wenn ein Test mitten in seiner Zeile schreibt), und das Gate vergleicht nun diese Zahl mit der Gesamtzahl statt mit der Zahl der lesbaren Zeilen, sodass ein vollständiger Lauf nicht mehr wegen einiger ungezählter Zeilen abgelehnt wird.
+
+### Hinzugefügt
+
+- **`make_release.py --progress` zeigt den Fortschritt der Suiten**: Mit der Option geben sowohl die gewöhnliche Suite als auch die der sauberen Installation alle 250 Tests eine Zeile aus, sodass das Gate nicht mehr fast eine Stunde lang schweigt.
+
 ## [2.1.0]
 
 ### Hinzugefügt
