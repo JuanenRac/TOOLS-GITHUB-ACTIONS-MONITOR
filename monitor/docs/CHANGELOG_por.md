@@ -9,6 +9,14 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+### Adicionado
+
+- **Os briefs para as ferramentas de IA chegam à linha de comandos e ao servidor MCP**: `monitor_cli.py briefs index` lista os briefs catalogados, `briefs show SEPARADOR` imprime os sinais de um separador e `briefs all` todos os briefs num documento; o servidor MCP tem as ferramentas só de leitura `briefs_index` e `brief_tab` (o nome de um separador ou `all`). Um teste verifica que a página, as rotas HTTP, o comando e as ferramentas listam os mesmos separadores; não se escreve nada e os textos passam pelo mesmo limpador.
+
+### Corrigido
+
+- **O limpador de texto deixa de abrandar com textos longos**: cinco mil carateres de letras, pontos, dígitos ou hífenes demoravam entre dois e seis segundos porque vários padrões tentavam casar a partir de cada posição; os prefixos e os endereços têm agora o comprimento dos nomes reais, o tempo cresce com o tamanho do texto e um teste limita-o. Os segredos depois de uma sequência longa continuam a ser encontrados.
+
 ## [2.1.3]
 
 ### Alterado

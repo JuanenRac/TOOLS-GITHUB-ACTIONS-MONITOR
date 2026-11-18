@@ -45,7 +45,7 @@
 | 发出 HTTP 请求 | HTTP | `GET /api/ai/brief`、`/api/ai/state`、`/api/ai/lessons` | 网络模式下的访问令牌 |
 | 使用 MCP | MCP | `python bin/mcp_server.py`（只读；为它能写入的少量内容提供 `--allow-ack`、`--allow-lessons`） | 指向该命令的工具 MCP 配置 |
 | 保持连接打开 | 流 | `GET /api/ai/stream?only=real` | `ai_alerts.stream.enabled` |
-| 运行命令 | 命令行 | `python bin/monitor_cli.py alerts`、`lessons brief --repo 名称`、`ai doctor`、`ai-hook install` | 同一台电脑上的 Python |
+| 运行命令 | 命令行 | `python bin/monitor_cli.py alerts`、`lessons brief --repo 名称`、 `briefs show TAB`、`ai doctor`、`ai-hook install` | 同一台电脑上的 Python |
 
 给 AI 的说明是两个 skill。`monitor_cli.py install-skill external --dest 文件夹` 会把它们复制到你的工具读取 skill 或规则的文件夹；任何能读取 Markdown 文件的工具都可以使用，文本中不指名任何助手。skill 随监视器一起发布，版本与监视器相同：`GET /api/skills` 会给出 `monitor_version`，`monitor_cli.py --version` 会打印它。更新监视器后，请重新安装到空文件夹，或删除旧副本（已编辑的文件绝不会被覆盖）。
 

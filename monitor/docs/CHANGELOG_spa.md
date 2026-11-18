@@ -9,6 +9,14 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+### Añadido
+
+- **Los briefs para las herramientas de IA llegan a la línea de comandos y al servidor MCP**: `monitor_cli.py briefs index` lista los briefs catalogados, `briefs show PESTAÑA` imprime las señales de una pestaña y `briefs all` todos los briefs en un documento; el servidor MCP tiene las herramientas de solo lectura `briefs_index` y `brief_tab` (el nombre de una pestaña o `all`). Un test comprueba que la página, las rutas HTTP, el comando y las herramientas listan las mismas pestañas; no se escribe nada y los textos pasan por el mismo limpiador.
+
+### Corregido
+
+- **El limpiador de texto ya no se ralentiza con textos largos**: cinco mil caracteres de letras, puntos, dígitos o guiones tardaban entre dos y seis segundos porque varios patrones intentaban casar desde cada posición; los prefijos y las direcciones tienen ahora la longitud que tienen los nombres reales, el tiempo crece con el tamaño del texto y un test lo acota. Los secretos tras una racha larga se siguen encontrando.
+
 ## [2.1.3]
 
 ### Cambiado
