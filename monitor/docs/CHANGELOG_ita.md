@@ -9,6 +9,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+### Modificato
+
+- **Le immagini del README sono scattate in 1080p e mostrano le schede più nuove**: `tools/make_screenshots.py` fotografa ogni pagina a 1920x1080 per impostazione predefinita (`--viewport LARGHEZZAxALTEZZA` lo cambia; le immagini in 4K, ultralarga, verticale, telefono e schermo a parete mantengono la propria dimensione), `tools/demo_monitor.py --rich` dà alla demo rilevamenti per le sentinelle di consegna e di catena di fornitura, un andamento giornaliero e un confronto di periodi, e il README (nelle otto lingue) mostra le pagine Consegna, Catena di fornitura, Andamento giornaliero, Confronta periodi e Aggiornamenti.
+
 ## [2.1.2]
 
 ### Corretto
