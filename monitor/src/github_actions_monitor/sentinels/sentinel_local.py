@@ -592,6 +592,44 @@ def trend(history, key):
     return {"dates": days, "values": [history["days"][d].get(key, 0) for d in days]}
 
 
+# the series of the daily trend that arrived with the rich trend: they come from the snapshot that is already in memory (no call to GitHub); a day saved before they existed has no value (None), not a zero
+EXTRA_SERIES = ("stuck", "ci_green_pct", "ci_repos_ok", "issues_open", "prs_old", "unsigned", "health", "ready", "quota_used_pct", "minutes24", "sev_critical", "sev_high")
+
+
+def _num(value):
+    return value if isinstance(value, (int, float)) and not isinstance(value, bool) else None
+
+
+def daily_extras(snap):
+    """The figures of one day for EXTRA_SERIES, from a finished snapshot of the sentinel. A figure that cannot be told is None."""
+    a1, a2, a3, a4, a5 = (snap.get(k) or {} for k in ("a1", "a2", "a3", "a4", "a5"))
+    a7, a11, rate = snap.get("a7") or {}, snap.get("a11") or {}, snap.get("rate") or {}
+    checked = _num(a2.get("workflows_checked")) or 0
+    red = len(a2.get("red") or [])
+    bad_repos = {r.get("repo") for r in (a2.get("red") or [])} | {r.get("repo") for r in (a1.get("stuck") or [])}
+    stale = a4.get("stale_days")
+    scores = [h["score"] for h in (a11.get("health") or []) if isinstance(h, dict) and _num(h.get("score")) is not None]
+    limit, left = _num(rate.get("limit")), _num(rate.get("remaining"))
+    sev = a3.get("severity") or {}
+    return {"stuck": len(a1.get("stuck") or []),
+            "ci_green_pct": round(100.0 * (1 - red / checked), 1) if checked else None,
+            "ci_repos_ok": max(0, int(snap.get("repos") or 0) - len(bad_repos)),
+            "issues_open": len(a1.get("issues") or []),
+            "prs_old": sum(1 for p in (a4.get("dependabot") or []) if stale is not None and (_num(p.get("age_days")) or 0) > stale),
+            "unsigned": len(a5.get("pending_sign") or []),
+            "health": round(sum(scores) / len(scores), 1) if scores else None,
+            "ready": _num(a11.get("ready")),
+            "quota_used_pct": round(100.0 * (1 - left / limit), 1) if limit and left is not None else None,
+            "minutes24": _num(a7.get("total24")),
+            "sev_critical": _num(sev.get("critical")), "sev_high": _num(sev.get("high")),
+            "version": TOOL_VERSION}
+
+
+def trend_gaps(history, key):
+    days = sorted((history.get("days") or {}))
+    return {"dates": days, "values": [_num(history["days"][d].get(key)) for d in days]}
+
+
 def parse_audit_files(audit_dir, patterns=None):
     """A8: counts from the latest files of the audit folder named by `sentinel.audit_files` (file name patterns; the defaults are neutral and a project sets its own).
     Files only, no generation."""
@@ -907,7 +945,7 @@ def compute_snapshot(inp):
                "high_repos": [r for r, t in sorted(totals.items()) if sev_high(t["sev"])], "severity": sev_total,
                "new": new or {}, "new_total": (sum(new.values()) if new is not None else None), "has_reference": new is not None,
                "codeql": codeql_list[:200], "unavailable": len(unavailable), "alerts_checked": sum(1 for a in alerts.values() if a.get("at")),
-               "trend": {k: trend(inp["history"], k) for k in ("codeql", "dependabot", "secret", "prs", "red", "candidates")}},
+               "trend": {**{k: trend(inp["history"], k) for k in ("codeql", "dependabot", "secret", "prs", "red", "candidates")}, **{k: trend_gaps(inp["history"], k) for k in EXTRA_SERIES}, "versions": [(inp["history"].get("days") or {}).get(d, {}).get("version") for d in sorted(inp["history"].get("days") or {})]}},
         "a4": {"dependabot": dep_prs, "other": sum(1 for p in prs_all if not p["dependabot"] and not (bots_apart and p["bot"])), "other_bots": sum(1 for p in prs_all if not p["dependabot"] and p["bot"]),
                "stale_days": cfg["stale_pr_days"]},
         "tool_version": TOOL_VERSION,
@@ -1700,7 +1738,7 @@ class Sentinel:
         if snap["a3"]["alerts_checked"] >= len(self.repo_info) > 0:  # only a complete picture goes into the daily history
             with self.lock:
                 update_history(self.history, today, {"codeql": t["codeql"], "dependabot": t["dependabot"], "secret": t["secret"], "prs": t["prs"],
-                                                      "red": t["red"], "candidates": t["candidates"]}, per_repo)
+                                                      "red": t["red"], "candidates": t["candidates"], **daily_extras(snap)}, per_repo)
                 self._save(HISTORY_FILE, self.history)
 
     def loop(self):

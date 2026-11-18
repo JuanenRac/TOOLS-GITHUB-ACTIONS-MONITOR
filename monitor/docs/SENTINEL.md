@@ -13,6 +13,8 @@ The **sentinel** is the second half of the complete edition. The *monitor* shows
 
 The **Daily trend** (address `#sentinel-trend`) has a menu entry of its own: one small curve for each signal (code scanning, Dependabot, secrets, pull requests, red, candidates) with its last value. The summary of the sentinel keeps only its own panels and a button that opens it.
 
+The panels of **Collaboration**, **Security**, **Delivery** and **Supply chain** show one card per signal (6, 6, 6 and 5), each with its counter, its list, a filter by repository and a line of help; Delivery and Supply chain add a table by code and a filter by repository and level. The **Daily trend** shows 18 series from the history the sentinel already keeps (no call to GitHub): each card gives the value now, the change against yesterday and 7 days ago and a small curve; press one to see it large, choose 7, 30 or 60 days, compare it with a second series, switch the lines in the legend, read the value of a day in the tooltip (also with the arrow keys), see the threshold and the marks of updates and incidents, and download the range as CSV or JSON. A day saved before a series existed shows a gap, never a zero.
+
 The **Daily trend** (address `#sentinel-trend`) has a menu entry of its own: one small curve for each signal (code scanning, Dependabot, secrets, pull requests, red, candidates) with its last value. The summary of the sentinel keeps only its own panels and a button that opens it.
 
 **Yesterday vs today** (address `#sentinel-yesterday`) has a menu entry of its own too, so the report of the sentinel takes the whole page: what appeared since the last saved report, what was solved and what stays, for the red workflows and the pending signatures.

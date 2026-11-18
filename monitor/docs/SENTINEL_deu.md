@@ -13,6 +13,8 @@ Der **Wächter** ist die zweite Hälfte der vollständigen Ausgabe. Der *Monitor
 
 Der **Tagestrend** (Adresse `#sentinel-trend`) hat einen eigenen Menüeintrag: eine kleine Kurve je Signal (Code-Scanning, Dependabot, Geheimnisse, Pull Requests, Rot, Kandidaten) mit ihrem letzten Wert. Die Übersicht des Sentinels behält nur ihre eigenen Panels und eine Schaltfläche, die ihn öffnet.
 
+Die Bereiche **Zusammenarbeit**, **Sicherheit**, **Auslieferung** und **Lieferkette** zeigen eine Karte je Signal (6, 6, 6 und 5), jeweils mit Zähler, Liste, Filter nach Repository und einer Hilfezeile; Auslieferung und Lieferkette ergänzen eine Tabelle nach Code sowie einen Filter nach Repository und Stufe. Der **Tagestrend** zeigt 18 Reihen aus dem Verlauf, den der Wächter ohnehin führt (keine Aufrufe an GitHub): Jede Karte nennt den aktuellen Wert, die Änderung gegenüber gestern und vor 7 Tagen sowie eine kleine Kurve; eine Karte anklicken zeigt sie groß, dazu 7, 30 oder 60 Tage wählen, mit einer zweiten Reihe vergleichen, Linien in der Legende ein- und ausblenden, den Wert eines Tages im Tooltip lesen (auch mit den Pfeiltasten), Schwelle sowie Marken für Aktualisierungen und Vorfälle sehen und den Zeitraum als CSV oder JSON herunterladen. Ein Tag, der vor dem Bestehen einer Reihe gespeichert wurde, zeigt eine Lücke, nie eine Null.
+
 **Gestern vs. heute** (Adresse `#sentinel-yesterday`) hat ebenfalls einen eigenen Menüeintrag, sodass der Bericht des Wächters die ganze Seite einnimmt: was seit dem letzten gespeicherten Bericht neu ist, was gelöst wurde und was bleibt, für die roten Workflows und die ausstehenden Signaturen.
 
 ## Start und Kosten
