@@ -4123,5 +4123,7 @@
  "ui.sdel_off": "Der Delivery-Sentinel ist aus (Einstellungen > Sentinel > Auslieferung).",
  "ui.ssup_off": "Der Lieferketten-Sentinel ist aus (Einstellungen > Sentinel > Lieferkette).",
  "ui.sdel_none": "In den geprüften Repositories fehlt nichts von dem, was gebaut wird, in der Auslieferung.",
- "ui.ssup_none": "Kein offener Lieferketten-Befund in den geprüften Workflow-Dateien."
+ "ui.ssup_none": "Kein offener Lieferketten-Befund in den geprüften Workflow-Dateien.",
+ "ui.tab_strend": "Tagestrend",
+ "ui.trend_open": "Tagestrend öffnen"
 }

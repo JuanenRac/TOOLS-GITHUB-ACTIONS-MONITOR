@@ -11,6 +11,10 @@ The **sentinel** is the second half of the complete edition. The *monitor* shows
 
 **The lite edition does not include it.** `MONITOR_LITE_GITHUB_ACTIONS` (port 8766) has no sentinel: the module is not even imported and its endpoints answer 404. The complete edition (`MONITOR_GITHUB_ACTIONS`, port 8765) starts it by itself; switch it off with `sentinel.enabled` (Settings > Sentinel). Both editions use the same rule for "red on main" (A2), so their figures agree.
 
+The **Daily trend** (address `#sentinel-trend`) has a menu entry of its own: one small curve for each signal (code scanning, Dependabot, secrets, pull requests, red, candidates) with its last value. The summary of the sentinel keeps only its own panels and a button that opens it.
+
+The **Daily trend** (address `#sentinel-trend`) has a menu entry of its own: one small curve for each signal (code scanning, Dependabot, secrets, pull requests, red, candidates) with its last value. The summary of the sentinel keeps only its own panels and a button that opens it.
+
 ## How it starts and what it costs
 
 It starts with the complete monitor and runs in the same process, in its own thread, with its own budget of GitHub calls (`sentinel.budget_per_hour`, 600 by default, and `sentinel.max_calls_per_tick`). When the allowance of GitHub is below `sentinel.min_rate_remaining` it stops asking and the page says it is paused for quota. Nothing it does writes to GitHub.

@@ -4123,5 +4123,7 @@
  "ui.sdel_off": "La sentinella di consegna è spenta (Impostazioni > Sentinella > Consegna).",
  "ui.ssup_off": "La sentinella della catena di fornitura è spenta (Impostazioni > Sentinella > Catena di fornitura).",
  "ui.sdel_none": "Nulla di ciò che viene costruito manca dalla consegna nei repository controllati.",
- "ui.ssup_none": "Nessun rilievo aperto sulla catena di fornitura nei file di workflow controllati."
+ "ui.ssup_none": "Nessun rilievo aperto sulla catena di fornitura nei file di workflow controllati.",
+ "ui.tab_strend": "Andamento giornaliero",
+ "ui.trend_open": "Apri l'andamento giornaliero"
 }

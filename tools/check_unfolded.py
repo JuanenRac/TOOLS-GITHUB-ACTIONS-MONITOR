@@ -54,6 +54,16 @@ PROBE = r"""
       if(!scrolls&&body.getBoundingClientRect().height<1)found.push({kind:"empty_body",at:tab,detail:"the unfolded body has no height"});
       if(document.documentElement.scrollWidth>document.documentElement.clientWidth+1)found.push({kind:"page_wider_than_window",at:tab,detail:document.documentElement.scrollWidth+">"+document.documentElement.clientWidth});
     }
+    /* the daily trend has its own tab and every curve and figure fits the width of its frame */
+    try{showTab("strend")}catch(e){}
+    await wait(500);
+    {const box=document.querySelector("#t-strend .body"),b=box&&box.getBoundingClientRect(),rows=[...document.querySelectorAll("#s-trend .spk")];
+     if(!rows.length)found.push({kind:"no_trend",at:"strend",detail:"the daily trend has no rows in its tab"});
+     else seen.push("strend");
+     if(box&&box.scrollWidth>box.clientWidth+1)found.push({kind:"trend_overflows",at:"strend",detail:box.scrollWidth+">"+box.clientWidth});
+     for(const r of rows){const q=r.getBoundingClientRect();if(b&&(q.right>b.right+1||q.left<b.left-1))found.push({kind:"trend_row_outside",at:"strend",detail:Math.round(q.right-b.right)+"px"});
+       const v=r.querySelector("svg");if(v){const w=v.getBoundingClientRect().width;if(w<40)found.push({kind:"trend_curve_squeezed",at:"strend",detail:Math.round(w)+"px wide"})}}
+     if(document.querySelector("#t-sent #s-trend"))found.push({kind:"trend_still_in_summary",at:"sent",detail:"the summary still holds the daily trend"})}
     out.textContent=JSON.stringify({ok:true,found:found,count:seen.length});
   }catch(e){out.textContent=JSON.stringify({ok:false,error:String(e),found:found})}
 })();

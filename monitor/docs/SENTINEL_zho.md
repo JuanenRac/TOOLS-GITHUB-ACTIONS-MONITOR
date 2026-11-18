@@ -11,6 +11,8 @@
 
 **精简版不包含它。** `MONITOR_LITE_GITHUB_ACTIONS`（端口 8766）没有哨兵：该模块甚至不会被导入，相关接口返回 404。完整版（`MONITOR_GITHUB_ACTIONS`，端口 8765）会自动启动它；可用 `sentinel.enabled`（设置 > 哨兵）关闭。两个版本对“main 上为红”（A2）使用同一条规则，所以数字一致。
 
+**每日趋势**（地址 `#sentinel-trend`）有自己的菜单入口：每个信号（代码扫描、Dependabot、密钥、拉取请求、红色、候选）一条小曲线及其最新值。哨兵的摘要只保留它自己的面板和一个打开它的按钮。
+
 ## 如何启动及其开销
 
 它随完整版监视器启动，在同一进程的独立线程中运行，拥有自己的 GitHub 调用预算（`sentinel.budget_per_hour`，默认 600，以及 `sentinel.max_calls_per_tick`）。当 GitHub 剩余配额低于 `sentinel.min_rate_remaining` 时它停止请求，页面会显示因配额而暂停。它做的任何事都不会写入 GitHub。

@@ -23,6 +23,7 @@ Generated from the page. The same data is in the endpoints; an AI does not need 
 - `sent`: Summary of the sentinels (report and trends; address #sentinel; present while any sentinel is on)
 - `ssec`: Security sentinel (what GitHub says is open or missing; address #sentinel-security; only while sentinels.security.enabled is on)
 - `ssup`: Supply chain sentinel (unpinned actions, moving branches and wide permissions of the workflow files; address #sentinel-supply; only while sentinels.supply.enabled is on)
+- `strend`: Daily trend (the history of the CI sentinel as small curves, one per signal; address #sentinel-trend; opened from the Sentinel summary)
 - `team`: Team (health of the repositories ranked by risk, with filters and the detail of each)
 - `trep`: Scheduled reports (the files written on a schedule; address #team-reports)
 - `upd`: Updates (the updater of the monitor: versions, notes, update with a copy first, restart and the way back; address #updates; Complete only)

@@ -11,6 +11,8 @@ Der **Wächter** ist die zweite Hälfte der vollständigen Ausgabe. Der *Monitor
 
 **Die Lite-Ausgabe enthält ihn nicht.** `MONITOR_LITE_GITHUB_ACTIONS` (Port 8766) hat keinen Wächter: das Modul wird nicht einmal importiert, seine Endpunkte antworten mit 404. Die vollständige Ausgabe (`MONITOR_GITHUB_ACTIONS`, Port 8765) startet ihn selbst; abschalten mit `sentinel.enabled` (Einstellungen > Wächter). Beide Ausgaben nutzen dieselbe Regel für „rot auf main“ (A2), ihre Zahlen stimmen also überein.
 
+Der **Tagestrend** (Adresse `#sentinel-trend`) hat einen eigenen Menüeintrag: eine kleine Kurve je Signal (Code-Scanning, Dependabot, Geheimnisse, Pull Requests, Rot, Kandidaten) mit ihrem letzten Wert. Die Übersicht des Sentinels behält nur ihre eigenen Panels und eine Schaltfläche, die ihn öffnet.
+
 ## Start und Kosten
 
 Er startet mit dem vollständigen Monitor und läuft im selben Prozess in einem eigenen Thread mit eigenem Budget an GitHub-Aufrufen (`sentinel.budget_per_hour`, standardmäßig 600, und `sentinel.max_calls_per_tick`). Liegt das GitHub-Kontingent unter `sentinel.min_rate_remaining`, fragt er nicht mehr und die Seite meldet die Pause wegen Kontingent. Nichts davon schreibt auf GitHub.

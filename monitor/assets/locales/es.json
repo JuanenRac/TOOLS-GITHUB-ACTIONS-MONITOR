@@ -4123,5 +4123,7 @@
  "ui.sdel_off": "El centinela de entrega está apagado (Ajustes > Centinela > Entrega).",
  "ui.ssup_off": "El centinela de cadena de suministro está apagado (Ajustes > Centinela > Cadena de suministro).",
  "ui.sdel_none": "Nada de lo que se construye falta en su entrega en los repositorios revisados.",
- "ui.ssup_none": "Ningún hallazgo abierto de cadena de suministro en los ficheros de workflow revisados."
+ "ui.ssup_none": "Ningún hallazgo abierto de cadena de suministro en los ficheros de workflow revisados.",
+ "ui.tab_strend": "Tendencia diaria",
+ "ui.trend_open": "Abrir la tendencia diaria"
 }

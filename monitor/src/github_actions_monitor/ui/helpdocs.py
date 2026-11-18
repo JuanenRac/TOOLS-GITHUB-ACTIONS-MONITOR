@@ -28,6 +28,7 @@ TAB_TOPICS = {
     "sci": "sentinel",
     "scol": "collab",
     "ssec": "sentinel_security",
+    "strend": "sentinel",
     "sdel": "sentinel_delivery",
     "ssup": "sentinel_supply",
     "charts": "analytics",
