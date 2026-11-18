@@ -343,7 +343,7 @@ class Wiring(unittest.TestCase):
 
     def test_the_cli_filter_and_the_contract_know_the_new_sentinel(self):
         text = (HERE / "src" / "github_actions_monitor" / "cli" / "monitor_cli.py").read_text(encoding="utf-8")
-        self.assertIn('"security", "supply", "system"', text)
+        self.assertIn('"supply", "delivery", "system"', text)
         contract = json.loads((HERE / "docs" / "schemas" / "api_contract.json").read_text(encoding="utf-8"))
         self.assertIn("/api/sentinel/supply", [e["path"] for e in contract["fed_endpoints"]])
 

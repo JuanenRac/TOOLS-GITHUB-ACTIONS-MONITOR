@@ -1,6 +1,6 @@
 # Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>
 # GPL-3.0-or-later - see LICENSE
-"""The sentinels of the complete edition, by name (1.7.1): `ci` and, since 1.7.3, `collab` (off until `sentinels.collab.enabled` is true), `security` and, since 2.1.1, `supply` (both off until their `enabled` is true). The next ones are added to `_registry()` and nothing else of the monitor changes.
+"""The sentinels of the complete edition, by name (1.7.1): `ci` and, since 1.7.3, `collab` (off until `sentinels.collab.enabled` is true), `security` and, since 2.1.1, `supply` and `delivery` (all off until their `enabled` is true). The next ones are added to `_registry()` and nothing else of the monitor changes.
 
 `config["sentinels"][name]["enabled"]` switches one on or off. Without it the old setting decides: the CI sentinel follows `sentinel.enabled` exactly as before. The options of
 `config["sentinels"]["ci"]` are the same ones as `sentinel.*` (the old block keeps working; where both say something, the new block wins).
@@ -17,9 +17,11 @@ def _registry():
     from github_actions_monitor.sentinels import sentinel_collab
     from github_actions_monitor.sentinels import sentinel_security
     from github_actions_monitor.sentinels import sentinel_supply
+    from github_actions_monitor.sentinels import sentinel_delivery
     return {sentinel_ci.SentinelCI.name: sentinel_ci.SentinelCI, sentinel_collab.SentinelCollab.name: sentinel_collab.SentinelCollab,
             sentinel_security.SentinelSecurity.name: sentinel_security.SentinelSecurity,
-            sentinel_supply.SentinelSupply.name: sentinel_supply.SentinelSupply}
+            sentinel_supply.SentinelSupply.name: sentinel_supply.SentinelSupply,
+            sentinel_delivery.SentinelDelivery.name: sentinel_delivery.SentinelDelivery}
 
 
 def section(config, name):

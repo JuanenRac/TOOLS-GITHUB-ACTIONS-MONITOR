@@ -18,7 +18,7 @@
 | `doctor` | as verificações de `--doctor` para esta instalação (o monitor não tem de estar em execução) | sim |
 | `backup` | a cópia de segurança completa da instalação (o monitor não tem de estar em execução): `backup create [FICHEIRO] [--account ID]`, `verify FICHEIRO [--deep]`, `restore FICHEIRO [--account ID] [--to-dir PASTA] [--force]`, `status`, `list`; `--encrypt` com `--key-env NOME` cifra-a (biblioteca opcional); veja [OPS_por.md](OPS_por.md) | não |
 | `accounts` | as contas do supervisor (só com várias contas) | não |
-| `alerts` | os alertas de todas as sentinelas numa lista: `--sentinel ci\|collab`, `--level info\|warning\|error`, `--muted show\|hide\|only` | não |
+| `alerts` | os alertas de todas as sentinelas numa lista: `--sentinel ci\|collab\|security\|supply\|delivery`, `--level info\|warning\|error`, `--muted show\|hide\|only` | não |
 | `score` | a pontuação da conta: número, letra, tendência, partes, cobertura e a decomposição por repositório; `--compare` compara-a com o histórico da janela | não |
 | `team` | a saúde dos repositórios por ordem, primeiro os que precisam de uma pessoa; `--severity warn\|bad` fica com os piores e `--repo owner/name` dá o detalhe de um | não |
 | `live` | o estado do recetor do webhook e os últimos eventos | não |

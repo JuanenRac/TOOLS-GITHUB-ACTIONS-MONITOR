@@ -30,7 +30,7 @@ DIGESTS = ("off", "hourly", "daily")
 DIGEST_SECONDS = {"hourly": 3600, "daily": 86400}
 SENTINELS = ("ci", "collab", "security")
 FAMILIES = {"ci": ("red_new", "red_fixed", "stuck_new", "workflow_failed", "alerts_up", "ai_alert", "collab_new", "collab_fixed", "security_new", "security_fixed", "alerts_digest", "silence_review"),
-            "release": ("pending_sign", "release_due"),
+            "release": ("pending_sign", "release_due", "delivery_new", "delivery_fixed"),
             "system": ("offline", "online", "rate_low", "credential_blind", "credential_back", "quota_warn", "quota_over", "quota_alert")}
 ROLE_FAMILIES = {"viewer": ("ci",), "maintainer": ("ci", "release"), "admin": ("ci", "release", "system")}
 DEFAULTS = {"users": {"enabled": False, "max_per_hour": 10}, "digest": {"max_items": 50}}
@@ -63,7 +63,7 @@ def family_of(kind):
 
 
 def sentinel_of(kind):
-    return "collab" if str(kind).startswith("collab_") else ("security" if str(kind).startswith("security_") else "ci")      # the supply chain sentinel announces as `security_*` events
+    return "collab" if str(kind).startswith("collab_") else ("security" if str(kind).startswith("security_") else "ci")      # the supply chain sentinel announces as `security_*` events; the delivery one as `delivery_*` (family release, preferences of the CI sentinel)
 
 
 def secret_name(user, channel):

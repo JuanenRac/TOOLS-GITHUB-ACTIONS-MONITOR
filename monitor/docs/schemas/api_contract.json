@@ -63,6 +63,7 @@
   {"path": "/api/sentinel/panels", "status": 200, "keys": {"data": {"panels": "list", "act": "number", "watch": "number"}, "error": "any"}},
   {"path": "/api/sentinel/security", "status": 200, "keys": {"data": "any", "error": "any"}},
   {"path": "/api/sentinel/supply", "status": 200, "keys": {"data": "any", "error": "any"}},
+  {"path": "/api/sentinel/delivery", "status": 200, "keys": {"data": "any", "error": "any"}},
   {"path": "/api/data", "status": 200, "keys": {"data": {"updated": "str", "repos": "list", "runs": [{"repo": "str", "id": "int", "name": "str", "event": "str", "branch": "str", "sha": "str", "status": "str", "conclusion": "any", "started": "str", "url": "str"}], "active": [{"repo": "str", "id": "int", "name": "str", "event": "str", "branch": "str", "sha": "str", "status": "str", "conclusion": "any", "started": "str", "url": "str"}], "failing": [{"repo": "str", "id": "int", "name": "str", "event": "str", "branch": "str", "sha": "str", "status": "str", "conclusion": "any", "started": "str", "url": "str"}], "issues": [{"repo": "str", "number": "int", "title": "str", "url": "str"}], "errors": "object", "rate": {"remaining": "int", "limit": "int", "reset": "str"}, "figures": "object", "mode": "str"}}}
  ],
  "v1_endpoints": [

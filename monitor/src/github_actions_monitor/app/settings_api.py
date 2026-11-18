@@ -49,6 +49,8 @@ NET_RE = re.compile(r"^[0-9A-Fa-f:.]{2,45}(?:/[0-9]{1,3})?\Z")      # an address
 LABEL_RE = re.compile(r"^[\w .:/+-]{1,50}\Z")      # a label of GitHub may hold a colon, a space or a slash ("monitor:ignore", "good first issue")
 PAIR_KEYS = ("ci.stuck.workflow_minutes", "ci.stuck.runner_minutes")
 LABEL_KEYS = ("sentinels.collab.rules.issue_critical_labels", "sentinels.collab.rules.ignore_labels")
+PATH_RE = re.compile(r"^(?!/)(?!.*\.\.)[A-Za-z0-9._/-]{1,120}\Z")      # sentinels.delivery.changelog_paths / version_files: a path inside the repository (no leading slash, no ..)
+PATH_KEYS = ("sentinels.delivery.changelog_paths", "sentinels.delivery.version_files")
 GLOB_RE = re.compile(r"^[A-Za-z0-9._*? -]{1,100}\Z")      # a name or a pattern of names (a ruleset may be called "Protect main" or "main-*")
 HYGIENE_SKIP = ("ruleset", "label", "file", "sha", "allowed", "schedule")
 TZ_RE = re.compile(r"^(?:local|utc|UTC|[A-Za-z][A-Za-z0-9_+./-]{1,63})\Z")      # display.timezone: local, utc or an IANA name
@@ -379,6 +381,30 @@ _f(_T_SENT, "supply", "sentinels.supply.signals.permissions_missing.enabled", "b
 _f(_T_SENT, "supply", "sentinels.supply.signals.permissions_missing.level", "enum", ("info", "warning", "error", "critical"))
 _f(_T_SENT, "supply", "sentinels.supply.signals.pr_target_checkout.enabled", "bool")
 _f(_T_SENT, "supply", "sentinels.supply.signals.pr_target_checkout.level", "enum", ("info", "warning", "error", "critical"))
+# --- Delivery sentinel (2.1.1; off by default; read only)
+_f(_T_SENT, "delivery", "sentinels.delivery.enabled", "bool")
+_f(_T_SENT, "delivery", "sentinels.delivery.refresh_seconds", "int", (600, 86400))
+_f(_T_SENT, "delivery", "sentinels.delivery.max_repos_per_tick", "int", (1, 200), unit="calls")
+_f(_T_SENT, "delivery", "sentinels.delivery.max_calls_per_tick", "int", (1, 600), unit="calls")
+_f(_T_SENT, "delivery", "sentinels.delivery.min_rate_remaining", "int", (100, 5000), unit="calls")
+_f(_T_SENT, "delivery", "sentinels.delivery.repos", "repos")
+_f(_T_SENT, "delivery", "sentinels.delivery.unreleased_days", "int", (1, 365), unit="d")
+_f(_T_SENT, "delivery", "sentinels.delivery.unreleased_min_entries", "int", (1, 100))
+_f(_T_SENT, "delivery", "sentinels.delivery.changelog_paths", "names")
+_f(_T_SENT, "delivery", "sentinels.delivery.version_files", "names")
+_f(_T_SENT, "delivery", "sentinels.delivery.expected_assets", "names")
+_f(_T_SENT, "delivery", "sentinels.delivery.signals.unreleased_pending.enabled", "bool")
+_f(_T_SENT, "delivery", "sentinels.delivery.signals.unreleased_pending.level", "enum", ("info", "warning", "error", "critical"))
+_f(_T_SENT, "delivery", "sentinels.delivery.signals.tag_without_release.enabled", "bool")
+_f(_T_SENT, "delivery", "sentinels.delivery.signals.tag_without_release.level", "enum", ("info", "warning", "error", "critical"))
+_f(_T_SENT, "delivery", "sentinels.delivery.signals.release_without_notes.enabled", "bool")
+_f(_T_SENT, "delivery", "sentinels.delivery.signals.release_without_notes.level", "enum", ("info", "warning", "error", "critical"))
+_f(_T_SENT, "delivery", "sentinels.delivery.signals.version_mismatch.enabled", "bool")
+_f(_T_SENT, "delivery", "sentinels.delivery.signals.version_mismatch.level", "enum", ("info", "warning", "error", "critical"))
+_f(_T_SENT, "delivery", "sentinels.delivery.signals.ecosystem_drift.enabled", "bool")
+_f(_T_SENT, "delivery", "sentinels.delivery.signals.ecosystem_drift.level", "enum", ("info", "warning", "error", "critical"))
+_f(_T_SENT, "delivery", "sentinels.delivery.signals.assets_missing.enabled", "bool")
+_f(_T_SENT, "delivery", "sentinels.delivery.signals.assets_missing.level", "enum", ("info", "warning", "error", "critical"))
 _f(_T_SENT, "collab", "alerts.mute_hours", "int", (1, 720), restart=False, unit="h")
 _f(_T_SENT, "flow_silences", "alerts.silences", "names", restart=False)
 _f(_T_SENT, "flow_silences", "alerts.silences_expire_days", "int", (0, 3650), restart=False, unit="d")
@@ -830,7 +856,7 @@ def check_value(path, value):
             return False, "path"      # the folder of the copies: never empty and a relative one never climbs out of the data folder
         return True, text
     if kind == "names":
-        pattern = FLEET_LABEL_RE if path == "fleet.labels" else FLEET_FILTER_RE if path == "fleet.saved_filters" else RUNNER_LABEL_RE if path in RUNNER_LABEL_KEYS else LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path == "sentinel.hygiene.ruleset_names" else (alertflow.SILENCE_RE if path == "alerts.silences" else (alertflow.PATTERN_RE if path == "alerts.service.workflows" else (PAIR_RE if path in PAIR_KEYS else NAME_RE))))))
+        pattern = FLEET_LABEL_RE if path == "fleet.labels" else FLEET_FILTER_RE if path == "fleet.saved_filters" else RUNNER_LABEL_RE if path in RUNNER_LABEL_KEYS else LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path in ("sentinel.hygiene.ruleset_names", "sentinels.delivery.expected_assets") else (PATH_RE if path in PATH_KEYS else (alertflow.SILENCE_RE if path == "alerts.silences" else (alertflow.PATTERN_RE if path == "alerts.service.workflows" else (PAIR_RE if path in PAIR_KEYS else NAME_RE)))))))
         if not isinstance(value, list) or len(value) > 200 or not all(isinstance(v, str) and pattern.match(v) for v in value):
             return False, "names"
         if path == "sentinel.hygiene.ruleset_names" and not value:
