@@ -27,9 +27,11 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/ai/actions/unlock` | POST | admin | a person unlocks the actions of the AI for a short time (this computer only) |
 | `/api/ai/alerts` | GET | viewer | the feed of alerts since a moment (`?since=SECONDS`) |
 | `/api/ai/brief` | GET | viewer | the short brief of the real open alerts (Markdown, or `?fmt=json`) |
+| `/api/ai/briefs` | GET | viewer | the brief of one tab (`?tab=sent`, `&lang=xx`): the signals the tab draws and where its raw data live; read only, no secret |
 | `/api/ai/budget` | GET | viewer | the calls and the estimated cost of today for each AI model, the limits and the last failures of a main model (no request to a provider) |
 | `/api/ai/doctor` | POST | admin | why the AI does not answer: provider, address, key (only whether the variable is set), model, catalog, quota; never prints a key (this computer only) |
 | `/api/ai/failures` | GET,POST | viewer / admin | the book of failures, newest first (`?since=&repo=&category=&limit=`) (POST: this computer only) |
+| `/api/ai/index` | GET | viewer | the master index of the briefs: one entry per tab with its signals and the routes of its raw data (machine readable, no secret) |
 | `/api/ai/lessons` | GET,POST | viewer / admin | GET: the lessons that apply now, the repeated failures and the library (`?fmt=md|brief&repo=`); POST: write a lesson (switch, administrator, confirmation) (POST: this computer only) |
 | `/api/ai/models` | GET | viewer | the models of the AI provider kept from its last list (no request to the provider), the check of the configured model and the table of data per model |
 | `/api/ai/models/data` | POST | admin | write by hand the context window, the prices or the tools of one model in the table (this computer only) |

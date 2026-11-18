@@ -16,7 +16,7 @@ Ein zweites, einfacheres Produkt im selben Paket: die Seite dessen, was läuft u
 | Reiter | Jetzt, Alarme, Diagramme, Übersicht, CI-Wächter, Kollaborations-Wächter, Sicherheits-Wächter, Delivery-Sentinel, Lieferketten-Sentinel, Tagestrend, Gestern vs. heute, Teamzustand, Flotte, Repositories, Berichte, Geplante Berichte, Lektionen, Verlauf, Updates, Einstellungen | Jetzt, Diagramme, Repositorys, Verlauf, kurze Einstellungen |
 | Kopfzeile | alle Kacheln, Bereitschaft, Signatur | laufend, wartend, Fehler und Erfolge der 24 h, Rechenminuten, Issues, Rot auf main, Repositorys, Kontingent, Verbindung |
 | Wächter (Warnungen, Releases, Signatur-Warteschlange, Bereitschaft, Linter) | ja | nein: er wird nicht einmal importiert |
-| Analytik, Benachrichtigungen, Webhook, KI, Prometheus-/Grafana-Ausgaben | ja, aus bis Sie sie einschalten | nein: diese Pfade antworten mit 404, außer den Kanälen des Feeds für ein KI-Werkzeug (`/api/ai/state`, `/api/ai/brief`, `/api/ai/alerts`, `/api/ai/stream`, `/api/ai/ack`, `/api/skills`) |
+| Analytik, Benachrichtigungen, Webhook, KI, Prometheus-/Grafana-Ausgaben | ja, aus bis Sie sie einschalten | nein: diese Pfade antworten mit 404, außer den Kanälen des Feeds für ein KI-Werkzeug (`/api/ai/state`, `/api/ai/index`, `/api/ai/briefs`, `/api/ai/brief`, `/api/ai/alerts`, `/api/ai/stream`, `/api/ai/ack`, `/api/skills`) |
 | Konfiguration | `actions_monitor.json` | `actions_monitor_lite.json` (beim ersten Start angelegt; der Wächter ist darin aus) |
 | Zustandsdateien | `etag_cache.json`, `analytics_history.json`... | dieselben Namen mit der Endung `_lite` |
 

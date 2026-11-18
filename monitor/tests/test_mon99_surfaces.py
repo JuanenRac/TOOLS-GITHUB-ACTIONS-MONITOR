@@ -17,6 +17,7 @@ LANGS = ("en", "es", "de", "fr", "it", "ja", "zh", "pt")
 LOCALES = {lang: json.loads((HERE / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8")) for lang in LANGS}
 HELPDOCS = (HERE / "src" / "github_actions_monitor" / "ui" / "helpdocs.py").read_text(encoding="utf-8")
 SIGNALS = (HERE / "src" / "github_actions_monitor" / "data_pipeline" / "signals.py").read_text(encoding="utf-8")
+BRIEFS = (HERE / "src" / "github_actions_monitor" / "data_pipeline" / "briefs.py").read_text(encoding="utf-8")
 TABS_FOR_AI = (HERE / "skills" / "external" / "references" / "tabs.md").read_text(encoding="utf-8")
 
 # The single register: every tab of the page. A tab is registered here when it is created.
@@ -24,10 +25,8 @@ SURFACES = ("now", "al", "charts", "sent", "sci", "scol", "ssec", "sdel", "ssup"
 
 # Things that do not exist yet for ANY surface (the shared mechanisms still to build) and the version that closes them. When the mechanism exists, its check below turns true and the line must go.
 PENDING_FOR_ALL = {
-    "brief_and_index": "2.1.4",      # one catalogued brief per tab, a master index and the equivalent route /api/v1, command and MCP
-    "save_print": "2.1.4",           # the SAVE and PRINT buttons of the common bar cover the tab
-    "wall_screen": "2.2.0",          # the decision about the four wall screens, tab by tab
-    "demo_rich": "2.1.4",            # the demo with data for the tab (python tools/demo_monitor.py --rich)
+    "wall_screen": "2.1.5",          # the decision about the four wall screens, tab by tab
+    "demo_rich": "2.1.5",            # the demo with data for the tab (python tools/demo_monitor.py --rich)
 }
 # Exceptions of one surface: {surface: {check: version}}. Nothing here is silent: each line names the version that closes it.
 EXCEPTIONS = {}
@@ -53,15 +52,23 @@ def has_signal_row(tab):
     return f'"tab:{tab}"' in SIGNALS
 
 
+def has_brief(tab):
+    """The catalogued brief of the tab (data_pipeline/briefs.py) and its place in the master index of the AIs."""
+    return f'"{tab}": {{"prefixes"' in BRIEFS and f"`{tab}`" in TABS_FOR_AI
+
+
+def covered_by_the_common_bar(tab):
+    """The common bar (save, print and the two AI indicators) saves the brief of the tab that is open: the tab must have a brief, and the bar must be in the page."""
+    return has_brief(tab) and all(x in PAGE for x in ('id="bar-save"', 'id="bar-print"', 'id="bar-ai-int"', 'id="bar-ai-ext"', "/api/ai/briefs?tab="))
+
+
 def lite_knows_it(tab):
     lite_tabs = re.search(r'LITE\?\[([^\]]*)\]', PAGE).group(1)
     return f".lite #n-{tab}," in PAGE or f".lite #n-{tab}{{" in PAGE or f'"{tab}"' in lite_tabs
 
 
-CHECKS = {"button": has_button, "name_x8": named_in_eight_languages, "help_topic": has_help_topic, "ai_guide": in_the_guide_of_the_ais, "signal_row": has_signal_row, "lite": lite_knows_it}
+CHECKS = {"button": has_button, "name_x8": named_in_eight_languages, "help_topic": has_help_topic, "ai_guide": in_the_guide_of_the_ais, "signal_row": has_signal_row, "brief": has_brief, "common_bar": covered_by_the_common_bar, "lite": lite_knows_it}
 MECHANISMS = {      # the shared mechanisms: true the day they exist
-    "brief_and_index": lambda: "/api/ai/index" in (HERE / "src" / "github_actions_monitor" / "app" / "actions_monitor.py").read_text(encoding="utf-8"),
-    "save_print": lambda: 'id="bar-save"' in PAGE and 'id="bar-print"' in PAGE,
     "wall_screen": lambda: False,
     "demo_rich": lambda: False,
 }

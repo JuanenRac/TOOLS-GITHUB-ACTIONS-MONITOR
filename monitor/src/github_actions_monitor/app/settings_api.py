@@ -748,6 +748,7 @@ _f(_T_AI, "alerts", "ai_alerts.stream.max_seconds", "int", (60, 86400), restart=
 _f(_T_AI, "alerts", "ai_alerts.stream.max_clients", "int", (1, 10), restart=False, unit="")
 _f(_T_AI, "alerts", "ai_alerts.heartbeat.enabled", "bool", restart=False)
 _f(_T_AI, "alerts", "ai_alerts.heartbeat.window_minutes", "int", (1, 1440), restart=False)
+_f(_T_AI, "alerts", "ai_alerts.briefs.access_log", "bool", restart=False)
 _f(_T_AI, "alerts", "ai_alerts.client_hook.enabled", "bool", restart=False)
 _f(_T_AI, "alerts", "ai_alerts.client_hook.block_on_stop", "bool", restart=False, secure=True)
 _f(_T_AI, "alerts", "ai_alerts.client_hook.cooldown_minutes", "int", (1, 1440), restart=False)

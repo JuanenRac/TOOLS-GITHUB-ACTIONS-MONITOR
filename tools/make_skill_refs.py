@@ -51,6 +51,8 @@ NOTES = {
     "/api/ai/models/test": ("POST", "try one model with a synthetic text: latency, tokens, estimated cost and a sample answer (this computer only)"),
     "/api/ai/presets": ("GET", "the presets of AI providers (address, name of the variable of the key, example models, privacy); data only, never a key"),
     "/api/ai/lessons": ("GET,POST", "GET: the lessons that apply now, the repeated failures and the library (`?fmt=md|brief&repo=`); POST: write a lesson (switch, administrator, confirmation)"),
+    "/api/ai/index": ("GET", "the master index of the briefs: one entry per tab with its signals and the routes of its raw data (machine readable, no secret)"),
+    "/api/ai/briefs": ("GET", "the brief of one tab (`?tab=sent`, `&lang=xx`): the signals the tab draws and where its raw data live; read only, no secret"),
     "/api/ai/state": ("GET", "every signal of the monitor, versioned, plus the lessons that apply now"),
     "/api/ai/stream": ("GET", "server-sent events of the alerts as they open and resolve (off by default)"),
     "/api/ai/test": ("POST", "test the connection to the AI provider (this computer only)"),

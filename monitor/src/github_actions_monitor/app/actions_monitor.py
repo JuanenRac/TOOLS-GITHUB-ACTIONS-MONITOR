@@ -159,6 +159,7 @@ DEFAULTS = {
                   "diagnose": {"enabled": False, "max_per_cycle": 3, "log_lines": 10, "max_bytes": 1500},      # OFF: reads logs of GitHub (the allowance)
                   "cascade": {"enabled": True, "map": {}},
                   "stream": {"enabled": False, "max_seconds": 3600, "max_clients": 3},      # OFF: GET /api/ai/stream
+                  "briefs": {"access_log": False},      # OFF: a record of which brief of a tab was read and by whom (GET /api/ai/briefs), no secret and no text
                   "heartbeat": {"enabled": True, "window_minutes": 15},
                   "client_hook": {"enabled": True, "block_on_stop": False, "cooldown_minutes": 20, "stale_hours": 3, "max_lines": 12, "max_chars": 2400}},     # a local, read-only feed of alerts for AIs (ai_alerts.py); the hook is OFF                                          # 0: the system of each job is not read (quota.default_runner is assumed)
 }
@@ -172,7 +173,7 @@ CHILD = {"account": "", "folder": ""}      # set by account_child.py: this proce
 def state_dir():
     """Where the small state files of this process live: the folder of the account when this is the monitor of one account, else next to the code, as always."""
     return Path(CHILD["folder"]) if CHILD["folder"] else paths.folder("data")
-LITE_SHARED = ("/api/ai/state", "/api/ai/stream", "/api/ai/brief", "/api/ai/alerts", "/api/ai/ack")      # the channels for an AI tool are the same in both editions
+LITE_SHARED = ("/api/ai/state", "/api/ai/index", "/api/ai/briefs", "/api/ai/stream", "/api/ai/brief", "/api/ai/alerts", "/api/ai/ack")      # the channels for an AI tool are the same in both editions
 LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/auth", "/api/notify", "/api/score", "/api/compare", "/api/report-files", "/api/ops", "/api/audit-log", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/chatops", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events", "/api/updates")   # they do not exist in lite
 
 
@@ -1572,6 +1573,33 @@ def ai_state(lang=None, data=None, panels=None):
     except Exception as error:   # noqa: BLE001 - the lessons never stop the state
         degraded.note("lessons.apply", error)
     return doc
+
+
+def briefs_get(path, query, client=""):
+    """(document, status) for GET /api/ai/index and GET /api/ai/briefs?tab=X[&lang=xx]: the catalogue of briefs and the brief of one tab, cleaned by the redactor. The record of who read what is kept only when
+    `ai_alerts.briefs.access_log` is on (off by default)."""
+    from urllib.parse import parse_qs
+    from github_actions_monitor.data_pipeline import briefs
+    from github_actions_monitor.security import redactor
+    args = {k: v[0] for k, v in parse_qs(query).items() if v}
+    lang = args.get("lang") if args.get("lang") in i18n.LANGS else "en"
+    state = ai_state(lang)
+    if path == "/api/ai/index":
+        return redactor.redact_data(briefs.index(state, lang, i18n.tl)), 200
+    if not args.get("tab") or args.get("tab") == "all":      # no tab: every brief in one document (the whole of what the page shows, for a tool that wants it all)
+        every = [briefs.brief(tab, state, lang, i18n.tl) for tab in briefs.tabs()]
+        return redactor.redact_data({"schema": briefs.SCHEMA, "kind": "ai-briefs", "edition": state.get("edition", "complete"), "version": state.get("version", ""), "generated_epoch": state.get("generated_epoch", 0),
+                                     "count": len(every), "briefs": every}), 200
+    document = briefs.brief(args.get("tab", ""), state, lang, i18n.tl)
+    if document is None:
+        return {"ok": False, "error": "tab", "tabs": list(briefs.tabs())}, 404
+    try:
+        config = toolconfig.raw_config()
+        if ((config.get("ai_alerts") or {}).get("briefs") or {}).get("access_log") is True:
+            briefs.note_access(state_dir(), args["tab"], client)
+    except Exception as error:   # noqa: BLE001 - the record never stops the brief
+        degraded.note("briefs.access", error)
+    return redactor.redact_data(document), 200
 
 
 def skills_get(query):
@@ -3214,6 +3242,10 @@ class Handler(BaseHTTPRequestHandler):
             query = self.path.partition("?")[2].split("&")
             lang = next((q[5:] for q in query if q.startswith("lang=") and q[5:] in i18n.LANGS), "en")
             self.json_reply(__import__("github_actions_monitor.security.redactor", fromlist=["_"]).redact_data(ai_state(lang)))      # the same cleaner as the feed, the brief and the MCP
+        elif path in ("/api/ai/index", "/api/ai/briefs"):      # read only: the master index of the briefs and the brief of one tab (briefs.py); the same in both editions, cleaned like the state
+            if not self.guard():
+                return
+            self.json_reply(*briefs_get(path, self.path.partition("?")[2], self.headers.get("User-Agent") or ""))
         elif path == "/api/skills":      # read only: the two skills of the monitor as text (?name=internal|external[&file=references/api.md][&all=1])
             if not self.guard():
                 return
@@ -3534,6 +3566,7 @@ def statusbar_payload(port, client_local=True):
     answer = {"schema": 1, "version": TOOL_VERSION, "edition": "lite" if LITE["on"] else "complete", "port": port, "bind": state.get("host") or "127.0.0.1", "network": bool(state.get("network")),
               "lan_address": lan_address(), "account": CHILD["account"] or None, "uptime_seconds": int(time.time() - STARTED), "demo": bool(DEMO["on"]),
               "runs": {"active": figures.get("active"), "queued": figures.get("queued")},      # the same two figures as the header tiles and `monitor_cli status` (null until the first read)
+              "ai_internal": {"enabled": str(((LIVE_CONFIG or toolconfig.raw_config()).get("ai") or {}).get("provider") or "none").lower() not in ("", "none")},      # the AI built into the monitor is configured (never its key)
               "sentinels": sentinels, "workers": ((LIVE_CONFIG or {}).get("sentinel") or {}).get("workers") if not LITE["on"] else None,
               "ai": None if LITE["on"] else __import__("github_actions_monitor.integrations.ai_alerts", fromlist=["_"]).presence(LIVE_CONFIG or toolconfig.raw_config())}      # was the feed read lately, and by what way (ai_alerts.heartbeat)
     if answer["network"] and not client_local:

@@ -16,7 +16,7 @@ Un second produit, plus simple, dans le même paquet : la page de ce qui tourne 
 | Onglets | Maintenant, Alertes, Graphiques, Résumé, Sentinelle CI, Sentinelle collab, Sentinelle sécurité, Sentinelle de livraison, Sentinelle de chaîne d'approvisionnement, Tendance quotidienne, Hier vs aujourd'hui, Santé de l'équipe, Flotte, Dépôts, Rapports, Rapports planifiés, Leçons, Historique, Mises à jour, Réglages | Maintenant, Graphiques, Dépôts, Historique, des Réglages courts |
 | En-tête | toutes les tuiles, préparation, signature | en cours, en file, échecs et succès de 24 h, minutes de calcul, issues, rouges sur main, dépôts, quota, connexion |
 | Sentinelle (alertes, releases, file de signature, préparation, linter) | oui | non : elle n'est même pas importée |
-| Analyses, notifications, webhook, IA, sorties Prometheus / Grafana | oui, désactivés tant que vous ne les activez pas | non : ces chemins répondent 404, sauf les canaux du flux pour un outil d'IA (`/api/ai/state`, `/api/ai/brief`, `/api/ai/alerts`, `/api/ai/stream`, `/api/ai/ack`, `/api/skills`) |
+| Analyses, notifications, webhook, IA, sorties Prometheus / Grafana | oui, désactivés tant que vous ne les activez pas | non : ces chemins répondent 404, sauf les canaux du flux pour un outil d'IA (`/api/ai/state`, `/api/ai/index`, `/api/ai/briefs`, `/api/ai/brief`, `/api/ai/alerts`, `/api/ai/stream`, `/api/ai/ack`, `/api/skills`) |
 | Configuration | `actions_monitor.json` | `actions_monitor_lite.json` (créé au premier démarrage ; la sentinelle y est désactivée) |
 | Fichiers d'état | `etag_cache.json`, `analytics_history.json`... | les mêmes noms avec le suffixe `_lite` |
 
