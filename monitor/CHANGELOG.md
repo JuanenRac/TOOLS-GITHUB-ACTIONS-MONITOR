@@ -24,6 +24,10 @@ when this file and `tool_version.py` disagree.
 
 - **A tooltip on every setting**: pointing at a setting, giving it the keyboard focus or pressing and holding on a touch screen shows what it does, its range or values and its default, what happens when a switch is turned on and off, and whether it applies at once or after a restart; the settings that cost quota or add a page (the comparison of periods, the check for updates, the wall screens) also say what you will see and what it costs. The help text of every setting is checked in the eight languages and an entry for a setting that does not exist is refused.
 
+### Fixed
+
+- **Folding panels of the Sentinel tabs no longer paint one over another**: when the panels that stay folded filled the box, the one panel unfolded on its own was squeezed to a few pixels and its body was drawn over the panels below it. It now keeps a minimum height and the box scrolls instead, for all the Sentinel tabs. The browser test unfolds every panel of every Sentinel tab one by one, all together, by hand and in turns, wide and narrow, and compares their rectangles.
+
 ## [2.1.2]
 
 ### Fixed

@@ -22,6 +22,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - **Une info-bulle sur chaque réglage**: pointer un réglage, lui donner le focus au clavier ou appuyer longuement sur un écran tactile montre ce qu'il fait, sa plage ou ses valeurs et sa valeur par défaut, ce qui se passe quand un interrupteur est activé ou désactivé et s'il s'applique tout de suite ou après un redémarrage ; les réglages qui consomment du quota ou ajoutent une page (la comparaison de périodes, la recherche de mises à jour, les écrans muraux) disent aussi ce que tu verras et ce que cela coûte. Le texte d'aide de chaque réglage est vérifié dans les huit langues et une entrée pour un réglage inexistant est refusée.
 
+### Corrigé
+
+- **Les panneaux repliables des onglets de la Sentinelle ne se dessinent plus les uns sur les autres**: quand les panneaux repliés remplissaient la boîte, l'unique panneau déplié était écrasé à quelques pixels et son corps était dessiné par-dessus les panneaux du dessous. Il garde maintenant une hauteur minimale et la boîte défile à la place, dans tous les onglets de la Sentinelle. Le test de navigateur déplie chaque panneau de chaque onglet un par un, tous ensemble, à la main et à tour de rôle, en large et en étroit, et compare leurs rectangles.
+
 ## [2.1.2]
 
 ### Corrigé

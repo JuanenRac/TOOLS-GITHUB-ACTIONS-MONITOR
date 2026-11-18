@@ -22,6 +22,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - **Un suggerimento su ogni impostazione**: passando il puntatore su un'impostazione, dandole il focus da tastiera o tenendo premuto su uno schermo tattile si vede cosa fa, il suo intervallo o i suoi valori e il valore predefinito, cosa succede quando un interruttore viene attivato o disattivato e se si applica subito o dopo un riavvio; le impostazioni che consumano quota o aggiungono una pagina (il confronto dei periodi, la ricerca di aggiornamenti, gli schermi a muro) dicono anche cosa vedrai e quanto costa. Il testo di aiuto di ogni impostazione è verificato nelle otto lingue e una voce per un'impostazione inesistente viene rifiutata.
 
+### Corretto
+
+- **I pannelli richiudibili delle schede della Sentinella non si disegnano più uno sull'altro**: quando i pannelli chiusi riempivano il riquadro, l'unico pannello aperto veniva schiacciato a pochi pixel e il suo corpo veniva disegnato sopra i pannelli sottostanti. Ora mantiene un'altezza minima e il riquadro scorre al suo posto, in tutte le schede della Sentinella. Il test del browser apre ogni pannello di ogni scheda uno a uno, tutti insieme, a mano e a turno, in largo e in stretto, e confronta i loro rettangoli.
+
 ## [2.1.2]
 
 ### Corretto

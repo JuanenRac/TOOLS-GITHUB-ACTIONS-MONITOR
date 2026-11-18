@@ -22,6 +22,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **Ein Tooltip an jeder Einstellung**: Zeigt man auf eine Einstellung, gibt ihr den Tastaturfokus oder hält auf einem Touchscreen gedrückt, erscheint, was sie tut, ihr Bereich oder ihre Werte und ihr Standard, was beim Ein- und Ausschalten eines Schalters geschieht und ob sie sofort oder nach einem Neustart gilt; Einstellungen, die Kontingent kosten oder eine Seite hinzufügen (der Zeitraumvergleich, die Suche nach Aktualisierungen, die Wandanzeigen), nennen auch, was du sehen wirst und was es kostet. Der Hilfetext jeder Einstellung wird in den acht Sprachen geprüft, und ein Eintrag für eine nicht vorhandene Einstellung wird abgelehnt.
 
+### Behoben
+
+- **Die Klappfelder der Sentinel-Reiter überdecken sich nicht mehr**: Füllten die eingeklappten Felder den Kasten, wurde das einzige aufgeklappte Feld auf wenige Pixel zusammengedrückt und sein Inhalt über die Felder darunter gezeichnet. Es behält jetzt eine Mindesthöhe und der Kasten scrollt stattdessen, in allen Sentinel-Reitern. Der Browsertest klappt jedes Feld jedes Sentinel-Reiters einzeln, alle zusammen, von Hand und abwechselnd auf, breit und schmal, und vergleicht ihre Rechtecke.
+
 ## [2.1.2]
 
 ### Behoben

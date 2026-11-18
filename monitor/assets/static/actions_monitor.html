@@ -146,7 +146,7 @@ details>.dbody{padding:4px 10px 10px;overflow:auto;max-height:46vh}
 /* the Sentinel tabs: the one panel that is unfolded takes the rest of the height of its box (the others keep the limit above) */
 #t-sci section>.body,#t-scol section>.body,#t-ssec section>.body,#t-sdel section>.body,#t-ssup section>.body{display:flex;flex-direction:column}
 #t-sci .body>details,#t-scol .body>details,#t-ssec .body>details,#t-sdel .body>details,#t-ssup .body>details{flex:0 0 auto}
-:is(#t-sci,#t-scol,#t-ssec,#t-sdel,#t-ssup) .body>details[open]:not(details[open]~details):not(:has(~details[open])){flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+:is(#t-sci,#t-scol,#t-ssec,#t-sdel,#t-ssup) .body>details[open]:not(details[open]~details):not(:has(~details[open])){flex:1 1 auto;min-height:10rem;display:flex;flex-direction:column}      /* never squeezed to nothing by the folded ones: the box scrolls instead, so a body can not be painted over the next panel */
 :is(#t-sci,#t-scol,#t-ssec,#t-sdel,#t-ssup) .body>details[open]:not(details[open]~details):not(:has(~details[open]))::details-content{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
 :is(#t-sci,#t-scol,#t-ssec,#t-sdel,#t-ssup) .body>details[open]:not(details[open]~details):not(:has(~details[open]))>.dbody{flex:1 1 auto;max-height:none;min-height:0}
 .spk>span{min-width:0;overflow-wrap:anywhere}.spk svg{display:block;width:100%;height:28px;max-width:100%}.spk b{overflow:hidden;text-overflow:ellipsis}

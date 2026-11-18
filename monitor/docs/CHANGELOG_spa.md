@@ -22,6 +22,10 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - **Un globo de ayuda en cada ajuste**: al poner el puntero sobre un ajuste, darle el foco con el teclado o mantener pulsado en una pantalla táctil se muestra qué hace, su rango o valores y su valor por defecto, qué ocurre al activar y desactivar un interruptor y si se aplica al instante o tras reiniciar; los ajustes que gastan cuota o añaden una página (la comparación de períodos, la búsqueda de actualizaciones, las pantallas de pared) dicen además qué verás y qué cuestan. El texto de ayuda de cada ajuste se comprueba en los ocho idiomas y se rechaza una entrada de un ajuste que no existe.
 
+### Corregido
+
+- **Los paneles plegables de las pestañas del Centinela ya no se pintan unos sobre otros**: cuando los paneles plegados llenaban la caja, el único panel desplegado quedaba aplastado a unos pocos píxeles y su cuerpo se dibujaba encima de los paneles de debajo. Ahora conserva una altura mínima y la caja se desplaza en su lugar, en todas las pestañas del Centinela. La prueba de navegador despliega cada panel de cada pestaña del Centinela uno a uno, todos juntos, a mano y por turnos, en ancho y estrecho, y compara sus rectángulos.
+
 ## [2.1.2]
 
 ### Corregido

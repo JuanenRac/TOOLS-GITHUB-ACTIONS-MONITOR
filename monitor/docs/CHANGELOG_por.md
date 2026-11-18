@@ -22,6 +22,10 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - **Uma dica em cada definição**: ao passar o ponteiro por uma definição, dar-lhe o foco com o teclado ou manter premido num ecrã tátil mostra o que faz, o seu intervalo ou valores e a predefinição, o que acontece ao ativar e desativar um interruptor e se se aplica de imediato ou depois de reiniciar; as definições que gastam quota ou acrescentam uma página (a comparação de períodos, a procura de atualizações, os ecrãs de parede) dizem também o que vai ver e o que custam. O texto de ajuda de cada definição é verificado nos oito idiomas e uma entrada para uma definição inexistente é recusada.
 
+### Corrigido
+
+- **Os painéis dobráveis dos separadores da Sentinela deixam de se desenhar uns por cima dos outros**: quando os painéis dobrados enchiam a caixa, o único painel aberto ficava esmagado a uns poucos píxeis e o seu corpo era desenhado por cima dos painéis de baixo. Agora mantém uma altura mínima e a caixa desloca-se em vez disso, em todos os separadores da Sentinela. O teste de navegador abre cada painel de cada separador um a um, todos juntos, à mão e por turnos, em largo e em estreito, e compara os seus retângulos.
+
 ## [2.1.2]
 
 ### Corrigido

@@ -162,7 +162,7 @@ def measure_once(browser, url, size, report="overflow-report", flags=()):
     """Opens the page once and returns the list of overflows the script found (or raises when the browser gave no answer). With another `report` it returns the whole document the script wrote."""
     profile = tempfile.mkdtemp(prefix="ghamon_ovf_")
     try:
-        child = subprocess.Popen([browser, "--headless=new", f"--user-data-dir={profile}", "--disable-gpu", *(["--no-sandbox", "--disable-dev-shm-usage"] if sys.platform.startswith("linux") else []), "--hide-scrollbars", *flags, "--virtual-time-budget=20000", f"--window-size={size[0]},{size[1]}",
+        child = subprocess.Popen([browser, "--headless=new", f"--user-data-dir={profile}", "--disable-gpu", *(["--no-sandbox", "--disable-dev-shm-usage"] if sys.platform.startswith("linux") else []), "--hide-scrollbars", *flags, f"--virtual-time-budget={int(os.environ.get('MONITOR_VT_BUDGET') or 20000)}", f"--window-size={size[0]},{size[1]}",
                                   "--dump-dom", url], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
         try:
             dom = child.communicate(timeout=120)[0].decode("utf-8", "replace")
