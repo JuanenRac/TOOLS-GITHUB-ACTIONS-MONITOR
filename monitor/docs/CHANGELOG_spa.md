@@ -9,13 +9,20 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+### Cambiado
+
+- **El recorrido de la página también avisa de un monitor que falla**: además de los errores de script y de consola, una respuesta con estado 5xx a una llamada de la página es ahora un problema del recorrido (con su dirección, sin la consulta), y el recorrido puede hacerse en tamaño de escritorio y de móvil (`--size desktop mobile`).
+
 ### Añadido
 
 - **Los briefs para las herramientas de IA llegan a la línea de comandos y al servidor MCP**: `monitor_cli.py briefs index` lista los briefs catalogados, `briefs show PESTAÑA` imprime las señales de una pestaña y `briefs all` todos los briefs en un documento; el servidor MCP tiene las herramientas de solo lectura `briefs_index` y `brief_tab` (el nombre de una pestaña o `all`). Un test comprueba que la página, las rutas HTTP, el comando y las herramientas listan las mismas pestañas; no se escribe nada y los textos pasan por el mismo limpiador.
+- **Un workflow propio que guarda la evidencia que un lector externo no puede producir**: la página recorrida en un navegador en los ocho idiomas en tamaño de escritorio y de móvil (errores de script, de consola y respuestas con estado 5xx), el actualizador desde la descarga hasta la vuelta atrás contra un servidor de versiones falso en este equipo (zip íntegro, hash incorrecto, rutas que salen de la carpeta, descargas cortadas o demasiado grandes, redirección a otro host, dos actualizadores a la vez y un fallo inyectado en cada fase), un doble de GitHub con 250 y 727 repositorios (403, 429 y listas que no caben en una página), notas de versión hostiles, cuatro procesos escribiendo el mismo fichero y el contenedor tras un proxy de confianza. Cada trabajo guarda su salida como artefacto.
 
 ### Corregido
 
 - **El limpiador de texto ya no se ralentiza con textos largos**: cinco mil caracteres de letras, puntos, dígitos o guiones tardaban entre dos y seis segundos porque varios patrones intentaban casar desde cada posición; los prefijos y las direcciones tienen ahora la longitud que tienen los nombres reales, el tiempo crece con el tamaño del texto y un test lo acota. Los secretos tras una racha larga se siguen encontrando.
+- **Dos actualizadores iniciados a la vez ya no acaban en un error**: el bloqueo de la actualización se escribe entero y se coloca en un solo paso, de modo que al segundo se le dice que la actualización está bloqueada en lugar de fallar con una excepción, y un bloqueo que aún se estaba escribiendo ya no se toma por uno viejo.
+- **Una actualización que falla antes de tocar nada se comunica como tal**: una descarga cortada, un disco lleno o un zip dañado mientras se hace el plan es ahora una respuesta (código 4) y no una excepción, y un fallo en el paso que copia la instalación ya no acaba como una vuelta atrás fallida cuando no había nada que devolver.
 
 ## [2.1.3]
 

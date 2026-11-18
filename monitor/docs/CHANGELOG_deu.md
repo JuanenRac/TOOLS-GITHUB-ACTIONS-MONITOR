@@ -9,13 +9,20 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+### Geändert
+
+- **Der Seitendurchlauf meldet auch einen Monitor, der ausfällt**: Neben Skript- und Konsolenfehlern ist jetzt auch eine Antwort mit 5xx-Status auf einen Aufruf der Seite ein Problem des Durchlaufs (mit Adresse, ohne Abfrage), und der Durchlauf kann in Desktop- und Telefongröße erfolgen (`--size desktop mobile`).
+
 ### Hinzugefügt
 
 - **Die Briefs für die KI-Werkzeuge erreichen die Kommandozeile und den MCP-Server**: `monitor_cli.py briefs index` listet die katalogisierten Briefs, `briefs show TAB` gibt die Signale eines Tabs aus und `briefs all` alle Briefs in einem Dokument; der MCP-Server hat die nur lesenden Werkzeuge `briefs_index` und `brief_tab` (ein Tab-Name oder `all`). Ein Test prüft, dass Seite, HTTP-Routen, Befehl und Werkzeuge dieselben Tabs auflisten; es wird nichts geschrieben und die Texte laufen durch denselben Reiniger.
+- **Ein eigener Workflow, der die Belege aufbewahrt, die ein externer Leser nicht erzeugen kann**: die Seite im Browser in den acht Sprachen in Desktop- und Telefongröße durchlaufen (Skript- und Konsolenfehler und Antworten mit 5xx-Status), der Updater vom Download bis zum Zurückgehen gegen einen falschen Release-Server auf diesem Rechner (heiles Zip, falscher Hash, Pfade aus dem Ordner heraus, abgebrochene oder zu große Downloads, Weiterleitung auf einen anderen Host, zwei Updater gleichzeitig und ein eingespielter Fehler in jeder Phase), ein GitHub-Double mit 250 und 727 Repositories (403, 429 und Listen, die nicht auf eine Seite passen), feindliche Release-Notizen, vier Prozesse, die dieselbe Datei schreiben, und der Container hinter einem vertrauten Proxy. Jeder Job bewahrt seine Ausgabe als Artefakt auf.
 
 ### Behoben
 
 - **Der Textreiniger wird bei langen Texten nicht mehr langsam**: fünftausend Zeichen aus Buchstaben, Punkten, Ziffern oder Strichen brauchten zwei bis sechs Sekunden, weil mehrere Muster von jeder Position aus zu passen versuchten; Präfixe und Adressen haben jetzt die Länge echter Namen, die Zeit wächst mit der Textgröße und ein Test begrenzt sie. Geheimnisse nach einer langen Folge werden weiterhin gefunden.
+- **Zwei gleichzeitig gestartete Updater enden nicht mehr in einem Fehler**: die Sperre des Updates wird jetzt ganz geschrieben und in einem Schritt an ihren Platz gelegt, sodass dem zweiten Updater gesagt wird, das Update sei gesperrt, statt mit einer Ausnahme zu scheitern, und eine Sperre, die noch geschrieben wurde, gilt nicht mehr als alte.
+- **Ein Update, das scheitert, bevor etwas angetastet wurde, wird als solches gemeldet**: ein abgebrochener Download, ein voller Datenträger oder ein beschädigtes Zip bei der Planerstellung ist jetzt eine Antwort (Code 4) und keine Ausnahme, und ein Fehler im Schritt, der die Installation kopiert, endet nicht mehr als fehlgeschlagene Rücknahme, wenn nichts zurückzulegen war.
 
 ## [2.1.3]
 

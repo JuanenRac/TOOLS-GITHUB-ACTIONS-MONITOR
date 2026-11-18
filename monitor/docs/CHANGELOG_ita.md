@@ -9,13 +9,20 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+### Modificato
+
+- **Il percorso della pagina segnala anche un monitor che fallisce**: oltre agli errori di script e di console, una risposta con stato 5xx a una chiamata della pagina è ora un problema del percorso (con il suo indirizzo, senza la query), e il percorso può farsi in formato desktop e telefono (`--size desktop mobile`).
+
 ### Aggiunto
 
 - **I brief per gli strumenti di IA arrivano alla riga di comando e al server MCP**: `monitor_cli.py briefs index` elenca i brief catalogati, `briefs show SCHEDA` stampa i segnali di una scheda e `briefs all` tutti i brief in un documento; il server MCP ha gli strumenti di sola lettura `briefs_index` e `brief_tab` (il nome di una scheda o `all`). Un test verifica che la pagina, le rotte HTTP, il comando e gli strumenti elenchino le stesse schede; non si scrive nulla e i testi passano dallo stesso depuratore.
+- **Un workflow tutto suo che conserva le prove che un lettore esterno non può produrre**: la pagina percorsa in un browser nelle otto lingue in formato desktop e telefono (errori di script, di console e risposte con stato 5xx), l'aggiornatore dal download al ritorno indietro contro un falso server di versioni su questo computer (zip integro, hash errato, percorsi che escono dalla cartella, download interrotti o troppo grandi, reindirizzamento a un altro host, due aggiornatori insieme e un guasto iniettato in ogni fase), un doppio di GitHub con 250 e 727 repository (403, 429 ed elenchi che non stanno in una pagina), note di versione ostili, quattro processi che scrivono lo stesso file e il container dietro un proxy fidato. Ogni lavoro conserva il suo output come artefatto.
 
 ### Corretto
 
 - **Il depuratore di testo non rallenta più con i testi lunghi**: cinquemila caratteri di lettere, punti, cifre o trattini richiedevano da due a sei secondi perché diversi modelli provavano a corrispondere da ogni posizione; i prefissi e gli indirizzi hanno ora la lunghezza dei nomi reali, il tempo cresce con la dimensione del testo e un test lo limita. I segreti dopo una lunga sequenza vengono ancora trovati.
+- **Due aggiornatori avviati nello stesso momento non finiscono più in un errore**: il blocco dell'aggiornamento viene ora scritto per intero e messo a posto in un solo passo, così al secondo viene detto che l'aggiornamento è bloccato invece di fallire con un'eccezione, e un blocco ancora in scrittura non viene più scambiato per uno vecchio.
+- **Un aggiornamento che fallisce prima di toccare qualcosa viene segnalato come tale**: un download interrotto, un disco pieno o uno zip danneggiato mentre si fa il piano è ora una risposta (codice 4) e non un'eccezione, e un errore nel passo che copia l'installazione non finisce più come un ritorno indietro fallito quando non c'era nulla da rimettere.
 
 ## [2.1.3]
 

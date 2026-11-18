@@ -9,13 +9,20 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+### Alterado
+
+- **O percurso da página também avisa de um monitor que falha**: além dos erros de script e de consola, uma resposta com estado 5xx a uma chamada da página é agora um problema do percurso (com o seu endereço, sem a consulta), e o percurso pode fazer-se em tamanho de secretária e de telemóvel (`--size desktop mobile`).
+
 ### Adicionado
 
 - **Os briefs para as ferramentas de IA chegam à linha de comandos e ao servidor MCP**: `monitor_cli.py briefs index` lista os briefs catalogados, `briefs show SEPARADOR` imprime os sinais de um separador e `briefs all` todos os briefs num documento; o servidor MCP tem as ferramentas só de leitura `briefs_index` e `brief_tab` (o nome de um separador ou `all`). Um teste verifica que a página, as rotas HTTP, o comando e as ferramentas listam os mesmos separadores; não se escreve nada e os textos passam pelo mesmo limpador.
+- **Um workflow próprio que guarda a evidência que um leitor externo não consegue produzir**: a página percorrida num navegador nos oito idiomas em tamanho de secretária e de telemóvel (erros de script, de consola e respostas com estado 5xx), o atualizador desde a transferência até à reversão contra um servidor de versões falso neste computador (zip íntegro, hash errado, caminhos que saem da pasta, transferências cortadas ou grandes demais, redirecionamento para outro anfitrião, dois atualizadores ao mesmo tempo e uma falha injetada em cada fase), um duplo do GitHub com 250 e 727 repositórios (403, 429 e listas que não cabem numa página), notas de versão hostis, quatro processos a escrever o mesmo ficheiro e o contentor atrás de um proxy de confiança. Cada tarefa guarda a sua saída como artefacto.
 
 ### Corrigido
 
 - **O limpador de texto deixa de abrandar com textos longos**: cinco mil carateres de letras, pontos, dígitos ou hífenes demoravam entre dois e seis segundos porque vários padrões tentavam casar a partir de cada posição; os prefixos e os endereços têm agora o comprimento dos nomes reais, o tempo cresce com o tamanho do texto e um teste limita-o. Os segredos depois de uma sequência longa continuam a ser encontrados.
+- **Dois atualizadores iniciados ao mesmo tempo já não acabam num erro**: o bloqueio da atualização é agora escrito por inteiro e posto no lugar num só passo, pelo que o segundo é informado de que a atualização está bloqueada em vez de falhar com uma exceção, e um bloqueio que ainda estava a ser escrito já não é tomado por um antigo.
+- **Uma atualização que falha antes de tocar em alguma coisa é comunicada como tal**: uma transferência cortada, um disco cheio ou um zip danificado enquanto se faz o plano é agora uma resposta (código 4) e não uma exceção, e uma falha no passo que copia a instalação já não acaba como uma reversão falhada quando não havia nada para repor.
 
 ## [2.1.3]
 

@@ -6,10 +6,10 @@
 # =============================================================================
 """Smoke test of the page of the monitor in a real browser: it must open, draw every tab and every sub-tab of Settings with a minimum of fields and raise no error.
 
-    python tools/check_page.py [--lang en ...] [--json]
+    python tools/check_page.py [--lang en ...] [--size desktop mobile] [--json]
 
 The demo monitor (tools/demo_monitor.py, invented data) is started on a free port and a small relay in front of it adds two scripts to the page: one right after <head>, so that it runs before
-any script of the page and records every `error` event, every unhandled promise rejection and every `console.error`; one before </body> that goes through every tab, every sub-tab of
+any script of the page and records every `error` event, every unhandled promise rejection, every `console.error` and every answer of the monitor with a 5xx status; one before </body> that goes through every tab, every sub-tab of
 Settings and the three windows, and counts what each one drew. Edge, Chrome or Chromium opens it in headless mode. Exit code 0 when everything is drawn and nothing failed; 1 otherwise; 0 with
 a message when there is no browser (the CI has one and the test that wraps this script fails there if it is missing).
 """
@@ -37,6 +37,7 @@ HEAD = r"""<script>
 window.__smoke={errors:[]};
 window.addEventListener("error",function(e){window.__smoke.errors.push("error: "+String(e.message||"").slice(0,200)+" ("+String(e.filename||"").split("/").pop()+":"+e.lineno+")")});
 window.addEventListener("unhandledrejection",function(e){var r=e.reason;window.__smoke.errors.push("unhandledrejection: "+String(r&&r.message||r).slice(0,200))});
+(function(){var original=window.fetch;if(!original)return;window.fetch=function(){var args=arguments;return original.apply(this,args).then(function(reply){if(reply.status>=500)window.__smoke.errors.push("http "+reply.status+": "+String(args[0]&&args[0].url||args[0]).split("?")[0].slice(0,120));return reply})}})();
 (function(){var original=console.error;console.error=function(){window.__smoke.errors.push("console.error: "+Array.prototype.map.call(arguments,String).join(" ").slice(0,200));return original.apply(console,arguments)}})();
 </script>"""
 
@@ -100,8 +101,9 @@ def problems(report):
     return found
 
 
-def run(langs=("en",), change=None, quiet=True):
-    """{lang: [problem, ...]} for the page of the demo monitor (possibly edited by `change(bytes) -> bytes`); None when there is no browser."""
+def run(langs=("en",), change=None, quiet=True, sizes=("desktop",), fail=()):
+    """{lang: [problem, ...]} for the page of the demo monitor (possibly edited by `change(bytes) -> bytes`); None when there is no browser. With more than one size the key is `lang@size` for the sizes after
+    the first (so that the answer for one size keeps its shape)."""
     browser = co.edge()
     if not browser:
         return None
@@ -119,13 +121,15 @@ def run(langs=("en",), change=None, quiet=True):
                 time.sleep(0.5)
         else:
             raise RuntimeError("the demo monitor did not start")
-        server = co.relay(port, probe=DRIVER, head=HEAD.encode("utf-8"), change=change)
+        server = co.relay(port, probe=DRIVER, head=HEAD.encode("utf-8"), change=change, fail=fail)
         base = f"http://127.0.0.1:{server.server_address[1]}/"
         for lang in langs:
-            report = co.measure(browser, f"{base}?lang={lang}&nowizard=1", co.SIZES["desktop"], report=REPORT)
-            results[lang] = problems(report)
-            if not quiet:
-                print(lang, "fields:", report.get("total_fields"), "problems:", len(results[lang]), flush=True)
+            for index, size in enumerate(sizes):
+                report = co.measure(browser, f"{base}?lang={lang}&nowizard=1", co.SIZES[size], report=REPORT)
+                key = lang if index == 0 else f"{lang}@{size}"
+                results[key] = problems(report)
+                if not quiet:
+                    print(key, "fields:", report.get("total_fields"), "problems:", len(results[key]), flush=True)
     finally:
         if server:
             server.shutdown()
@@ -141,9 +145,10 @@ def run(langs=("en",), change=None, quiet=True):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--lang", nargs="*", default=["en"])
+    ap.add_argument("--size", nargs="*", default=["desktop"], choices=list(co.SIZES))
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
-    results = run(args.lang, quiet=False)
+    results = run(args.lang, quiet=False, sizes=tuple(args.size))
     if results is None:
         print("No browser found (Edge, Chrome or Chromium): nothing was checked.")
         return 0

@@ -11,13 +11,20 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+### Changed
+
+- **The walk through the page also tells a monitor that fails**: besides script and console errors, an answer with a 5xx status to a call of the page is now a problem of the walk (with its address, without the query), and the walk can be made at the size of a desktop and of a phone (`--size desktop mobile`).
+
 ### Added
 
 - **The briefs for the AI tools reach the command line and the MCP server**: `monitor_cli.py briefs index` lists the catalogued briefs, `briefs show TAB` prints the signals of one tab and `briefs all` every brief in one document; the MCP server has the read-only tools `briefs_index` and `brief_tab` (a tab name or `all`). A test checks that the page, the HTTP routes, the command and the tools list the same tabs; nothing is written and the texts go through the same cleaner.
+- **A workflow of its own that keeps the evidence an outside reader cannot produce**: the page walked in a browser in the eight languages at desktop and phone size (script errors, console errors and answers with a 5xx status), the updater from the download to the rollback against a false release server on this computer (intact zip, wrong hash, paths that leave the folder, cut or oversize downloads, a redirect to another host, two updaters at once and a failure injected in every phase), a double of GitHub with 250 and 727 repositories (403, 429 and lists that do not fit a page), hostile release notes, four processes writing the same file, and the container behind a trusted proxy. Each job keeps its output as an artifact.
 
 ### Fixed
 
 - **The cleaner of text no longer slows down with long texts**: five thousand characters of letters, dots, digits or dashes took between two and six seconds because several patterns tried to match from every position; the prefixes and addresses now have the length that real names have, the time grows with the size of the text and a test bounds it. Secrets after a long run are still found.
+- **Two updaters started at the same moment no longer end in an error**: the lock of the update is now written whole and put in place in one step, so the second updater is told the update is locked instead of failing with an exception, and a lock that was still being written is no longer taken for an old one.
+- **An update that fails before anything was touched is reported as such**: a download that is cut, a full disk or a damaged zip while the plan is made is now an answer (code 4) and not an exception, and a failure in the step that copies the installation no longer ends as a failed rollback when there was nothing to put back.
 
 ## [2.1.3]
 

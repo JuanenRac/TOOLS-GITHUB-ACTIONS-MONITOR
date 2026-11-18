@@ -9,13 +9,20 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+### Modifié
+
+- **Le parcours de la page signale aussi un moniteur qui échoue**: en plus des erreurs de script et de console, une réponse de statut 5xx à un appel de la page est maintenant un problème du parcours (avec son adresse, sans la requête), et le parcours peut se faire en taille bureau et téléphone (`--size desktop mobile`).
+
 ### Ajouté
 
 - **Les briefs pour les outils d'IA arrivent à la ligne de commande et au serveur MCP**: `monitor_cli.py briefs index` liste les briefs catalogués, `briefs show ONGLET` affiche les signaux d'un onglet et `briefs all` tous les briefs dans un document; le serveur MCP a les outils en lecture seule `briefs_index` et `brief_tab` (un nom d'onglet ou `all`). Un test vérifie que la page, les routes HTTP, la commande et les outils listent les mêmes onglets; rien n'est écrit et les textes passent par le même nettoyeur.
+- **Un workflow à lui qui garde les preuves qu'un lecteur extérieur ne peut pas produire**: la page parcourue dans un navigateur dans les huit langues en taille bureau et téléphone (erreurs de script, de console et réponses de statut 5xx), le programme de mise à jour du téléchargement au retour en arrière contre un faux serveur de versions sur cet ordinateur (zip intact, mauvais hachage, chemins qui sortent du dossier, téléchargements coupés ou trop gros, redirection vers un autre hôte, deux mises à jour à la fois et une panne injectée à chaque phase), un double de GitHub avec 250 et 727 dépôts (403, 429 et listes qui ne tiennent pas dans une page), des notes de version hostiles, quatre processus qui écrivent le même fichier et le conteneur derrière un proxy de confiance. Chaque tâche garde sa sortie comme artefact.
 
 ### Corrigé
 
 - **Le nettoyeur de texte ne ralentit plus avec les longs textes**: cinq mille caractères de lettres, de points, de chiffres ou de tirets prenaient de deux à six secondes parce que plusieurs motifs essayaient de correspondre depuis chaque position; les préfixes et les adresses ont maintenant la longueur des vrais noms, le temps croît avec la taille du texte et un test le borne. Les secrets après une longue suite sont toujours trouvés.
+- **Deux mises à jour lancées au même moment ne finissent plus en erreur**: le verrou de la mise à jour est maintenant écrit en entier et mis en place en une seule étape, de sorte que la seconde est informée que la mise à jour est verrouillée au lieu d'échouer avec une exception, et un verrou encore en cours d'écriture n'est plus pris pour un ancien.
+- **Une mise à jour qui échoue avant d'avoir touché à quoi que ce soit est signalée comme telle**: un téléchargement coupé, un disque plein ou un zip endommagé pendant le plan est maintenant une réponse (code 4) et non une exception, et un échec à l'étape qui copie l'installation ne finit plus en retour arrière raté quand il n'y avait rien à remettre.
 
 ## [2.1.3]
 

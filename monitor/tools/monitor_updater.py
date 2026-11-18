@@ -30,6 +30,7 @@ import contextlib
 import difflib
 import hashlib
 import hmac
+import http.client
 import io
 import json
 import os
@@ -1405,6 +1406,10 @@ class Updater:
         except UpdaterError as error:
             report.update(code=error.code, error=str(error))
             return report
+        except (OSError, http.client.HTTPException, zipfile.BadZipFile, ValueError) as error:      # a download that is cut, a full disk, a damaged zip: nothing was touched, and it is an answer, not an exception
+            self.cleanup()
+            report.update(code=FETCH_FAILED, error=str(error)[:200] or type(error).__name__)
+            return report
         report.update(installed=plan["installed"], target=plan["target"], plan=plan)
         if plan["blocked"]:
             report.update(code=BLOCKED, error=tr("r.blocked", n=sum(1 for c in plan["checks"] if c["severity"] == "block")))
@@ -1508,7 +1513,8 @@ class Updater:
                     with contextlib.suppress(OSError):
                         started_process["proc"].terminate()
                         started_process["proc"].wait(timeout=10)
-                self.restore(bk, restore_data=bool(journal.get("monitor_started")) or "start" in journal["steps"])
+                if journal.get("manifest"):      # before the copy of the installation is finished nothing was changed: there is nothing to put back (and no manifest to put it back from)
+                    self.restore(bk, restore_data=bool(journal.get("monitor_started")) or "start" in journal["steps"])
                 if opts.get("handover"):
                     with contextlib.suppress(BaseException):      # the monitor that was stopped for the update comes back in the version it had
                         self._start(plan, installed, journal, {"proc": None}, dict(opts, start_timeout=60))
@@ -1533,14 +1539,32 @@ class Updater:
         return report
 
     def _take_lock(self, lock):
+        """Takes the lock of the update in one atomic step: the file is written whole under a temporary name and linked into place, so another updater never sees it empty (an empty lock used to read as an old one)
+        and never takes the same one; whoever loses the race is told the update is locked, not given an exception."""
         private_dir(self.backups)
+        existed = lock.is_file()
         if self.lock_state():
             raise UpdaterError(BLOCKED, tr("c.locked"))
-        if lock.exists():
-            lock.unlink()
-        fd = os.open(str(lock), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-        with os.fdopen(fd, "w", encoding="utf-8") as handle:
-            json.dump({"pid": os.getpid(), "time": time.time()}, handle)
+        temp = lock.with_name(f".lock.{secrets.token_hex(4)}")
+        temp.write_text(json.dumps({"pid": os.getpid(), "time": time.time()}), encoding="utf-8")
+        try:
+            if existed:
+                with contextlib.suppress(FileNotFoundError):
+                    lock.unlink()      # the one that was there is an old one (lock_state said so)
+            try:
+                os.link(str(temp), str(lock))
+            except FileExistsError:
+                raise UpdaterError(BLOCKED, tr("c.locked")) from None
+            except OSError:      # a file system without hard links: the exclusive creation, with the content written right after
+                try:
+                    fd = os.open(str(lock), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+                except FileExistsError:
+                    raise UpdaterError(BLOCKED, tr("c.locked")) from None
+                with os.fdopen(fd, "w", encoding="utf-8") as handle:
+                    json.dump({"pid": os.getpid(), "time": time.time()}, handle)
+        finally:
+            with contextlib.suppress(OSError):
+                temp.unlink()
 
     def _snapshot(self, bk, folders):
         manifest = {"format": 1, "files": {}, "folders": {k: str(v) for k, v in folders.items()}, "root": str(self.root)}
