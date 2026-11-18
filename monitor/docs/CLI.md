@@ -20,6 +20,7 @@
 | `accounts` | the accounts of the supervisor (several accounts only) | no |
 | `alerts` | the alerts of every sentinel in one list: `--sentinel ci\|collab\|security\|supply\|delivery`, `--level info\|warning\|error`, `--muted show\|hide\|only` | no |
 | `score` | the score of the account: number, letter, trend, parts, coverage and the breakdown by repository; `--compare` sets it against the history of the window | no |
+| `compare` | this period against the one before: the figures with their change and direction, who got worse or better; `--window 7\|30d`, `--days all\|workdays\|weekend`, `--baseline previous\|year_ago`, `--format table\|json\|ndjson\|csv`; exit 4 when a figure has too little data, 5 with `--fail-on` when one got worse | no |
 | `team` | the health of the repositories ranked with the ones that need a person first; `--severity warn\|bad` keeps the worse ones and `--repo owner/name` gives the detail of one | no |
 | `live` | the state of the webhook receiver and the last events | no |
 | `ai` | `ai models [--refresh]` lists the models of the AI provider with the data of each one; `ai test --provider NAME --model NAME` tries one with a synthetic text (latency, tokens, estimated cost); `ai doctor` says why an AI does not answer, without printing a key | no |

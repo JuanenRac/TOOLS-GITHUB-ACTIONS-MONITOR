@@ -11,6 +11,12 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+### Added
+
+- **Comparison of periods (setting `compare.enabled`, off by default)**: this period against the one before (7 or 30 days or any range, the same dates a year ago or a baseline of your own) with a filter for workdays or weekends in the time zone of the monitor. It sets the share of failed runs, the median duration, the time to resolve alerts, the mean score and its coverage, each with its change and its direction; a figure without enough data or without a baseline says `insufficient_data` or `baseline_unavailable` instead of showing a 0 or a 100. It is read only, made from the ledger and the snapshots of the score, and asks nothing of GitHub. While it is on, the ledger of the score keeps two periods of `compare.default_window_days`. Guide COMPARE.md.
+- **What changed between the two periods**: the repositories that got worse or better, the workflows that started or stopped failing and the alerts opened, in `GET /api/compare` (with `format=ndjson` and `format=csv`), in `monitor_cli.py compare` (exit 4 when a figure cannot be compared, 5 with `--fail-on` when one got worse) and in a section of the Charts tab.
+- **A short comparison in the scheduled report (setting `compare.include_in_report`, off by default)**: one line per figure against the period before, in both formats and the eight languages.
+
 ## [2.1.1]
 
 ### Fixed

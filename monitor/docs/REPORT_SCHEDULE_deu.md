@@ -36,3 +36,7 @@ Es gibt kein eigenes PDF: Die HTML-Seite öffnen und im Browser als PDF drucken.
 - Der Tab **Team** hat einen Bereich Berichte: die Liste, einen Link zu jeder Datei und die Schaltfläche **Jetzt einen Bericht schreiben** (ein Administrator, an diesem Rechner).
 - `GET /api/report-files` listet sie auf, `GET /api/report-files/file?name=...` öffnet einen (nur eine Datei, die der Dienst für dieses Konto geschrieben hat) und `POST /api/report-files/run` schreibt jetzt einen.
 - Im Teammodus kann jeder, der das Konto sehen darf, dessen Berichte lesen; jetzt einen zu schreiben ist Sache eines Administrators an diesem Rechner. Die Lite-Edition hat nichts davon.
+
+## Vergleich mit dem Zeitraum davor
+
+Ist `compare.include_in_report` an (standardmäßig aus und nur, solange `compare.enabled` an ist), enthält der Bericht zusätzlich einen kurzen Abschnitt, der diesen Zeitraum dem davor gegenüberstellt, eine Zeile je Kennzahl. Siehe [COMPARE_deu.md](COMPARE_deu.md).

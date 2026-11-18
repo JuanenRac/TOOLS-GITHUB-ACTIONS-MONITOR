@@ -9,6 +9,12 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+### Aggiunto
+
+- **Confronto tra periodi (impostazione `compare.enabled`, disattivata per impostazione predefinita)**: questo periodo rispetto al precedente (7 o 30 giorni o qualsiasi intervallo, le stesse date di un anno fa o un riferimento tuo) con un filtro per giorni lavorativi o fine settimana nel fuso del monitor. Mette a confronto la quota di esecuzioni fallite, la durata mediana, il tempo di risoluzione degli avvisi, il punteggio medio e la sua copertura, ogni cifra con la sua variazione e direzione; una cifra senza dati sufficienti o senza riferimento dice `insufficient_data` o `baseline_unavailable` invece di mostrare uno 0 o un 100. È di sola lettura, fatto con il registro e le istantanee del punteggio, e non chiede nulla a GitHub. Finché è attivo, il registro del punteggio conserva due periodi di `compare.default_window_days`. Guida COMPARE.md.
+- **Cosa è cambiato tra i due periodi**: i repository che peggiorano o migliorano, i workflow che iniziano o smettono di fallire e gli avvisi aperti, in `GET /api/compare` (con `format=ndjson` e `format=csv`), in `monitor_cli.py compare` (uscita 4 se una cifra non si può confrontare, 5 con `--fail-on` se una peggiora) e in una sezione della scheda Grafici.
+- **Un breve confronto nel rapporto pianificato (impostazione `compare.include_in_report`, disattivata per impostazione predefinita)**: una riga per cifra rispetto al periodo precedente, nei due formati e nelle otto lingue.
+
 ## [2.1.1]
 
 ### Corretto

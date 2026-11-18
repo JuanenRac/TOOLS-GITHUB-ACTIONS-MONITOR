@@ -9,6 +9,12 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+### Ajouté
+
+- **Comparaison de périodes (réglage `compare.enabled`, désactivé par défaut)** : cette période contre la précédente (7 ou 30 jours ou toute plage, les mêmes dates un an plus tôt ou une référence à vous) avec un filtre jours ouvrés ou week-ends dans le fuseau du moniteur. Elle met en regard la part d'exécutions en échec, la durée médiane, le temps de résolution des alertes, le score moyen et sa couverture, chaque chiffre avec sa variation et son sens ; un chiffre sans assez de données ou sans référence indique `insufficient_data` ou `baseline_unavailable` au lieu d'afficher un 0 ou un 100. Elle est en lecture seule, faite à partir du registre et des relevés du score, et ne demande rien à GitHub. Tant qu'elle est active, le registre du score conserve deux périodes de `compare.default_window_days`. Guide COMPARE.md.
+- **Ce qui a changé entre les deux périodes** : les dépôts qui se dégradent ou s'améliorent, les workflows qui se mettent à échouer ou cessent de le faire et les alertes ouvertes, dans `GET /api/compare` (avec `format=ndjson` et `format=csv`), dans `monitor_cli.py compare` (sortie 4 si un chiffre ne peut être comparé, 5 avec `--fail-on` si l'un se dégrade) et dans une section de l'onglet Graphiques.
+- **Une courte comparaison dans le rapport planifié (réglage `compare.include_in_report`, désactivé par défaut)** : une ligne par chiffre face à la période précédente, dans les deux formats et les huit langues.
+
 ## [2.1.1]
 
 ### Corrigé

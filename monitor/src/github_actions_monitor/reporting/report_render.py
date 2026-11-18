@@ -5,6 +5,7 @@ import html
 import re
 
 from github_actions_monitor import i18n
+from github_actions_monitor.compare import metrics as compare_metrics
 
 CSS = ("body{font:14px/1.5 system-ui,Segoe UI,sans-serif;margin:24px auto;max-width:860px;padding:0 16px;color:#1b1f24;background:#fff}h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:22px 0 6px;border-bottom:1px solid #d0d7de}"
        "table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:4px 8px;border-bottom:1px solid #e5e8eb;vertical-align:top}.mut{color:#57606a}.big{font-size:34px;font-weight:700}"
@@ -48,12 +49,33 @@ def changes_lines(doc, t):
     return lines
 
 
+def compare_lines(doc, t, lang):
+    """The lines of the section "comparison with the period before": one per figure, or the reason there is none."""
+    part = doc.get("compare")
+    if not part:
+        return []
+    lines = []
+    if part["state"] in ("calibrating", "baseline_unavailable", "off"):
+        reason = part.get("reason") or part["state"]
+        lines.append(t("compare_none", reason=i18n.tl(lang, "ui.cmp_reason_" + reason) if reason in ("no_history", "watched_briefly", "history_too_short", "before_history") else reason))
+    for row in part["rows"]:
+        name = i18n.tl(lang, "ui.cmp_m_" + row["metric"]) if row["metric"] in ("red_rate", "duration_p50", "resolution", "score_mean", "score_coverage") else row["metric"]
+        if row["state"] == "ok":
+            lines.append(t("compare_line", metric=name, now=compare_metrics.humanize(row["metric"], row["now"]), base=compare_metrics.humanize(row["metric"], row["base"]),
+                           direction=i18n.tl(lang, "ui.cmp_dir_" + str(row["direction"]))))
+        else:
+            lines.append(f"{name}: " + i18n.tl(lang, "ui.cmp_insufficient" if row["state"] == "insufficient_data" else "ui.cmp_unavailable"))
+    return lines
+
+
 def markdown(doc, lang="en"):
     t = _texts(lang)
     out = [f"# {_md(t('title', account=doc['account']))}", "", f"{_md(t('generated', when=doc['generated_at']))}", "", f"## {t('h_score')}", "", _md(score_line(doc, t))]
     if doc["score"]["missing_parts"]:
         out += ["", _md(t("missing", parts=", ".join(doc["score"]["missing_parts"])))]
     out += ["", f"## {t('h_changes')}", ""] + [f"- {_md(x)}" for x in changes_lines(doc, t)]
+    if doc.get("compare"):
+        out += ["", f"## {t('h_compare')}", ""] + [f"- {_md(x)}" for x in compare_lines(doc, t, lang)]
     team = doc["team"]
     tot = team["totals"]
     out += ["", f"## {t('h_team')}", "", _md(t("team_totals", bad=tot.get("bad", 0), warn=tot.get("warn", 0), ok=tot.get("ok", 0), unknown=tot.get("unknown", 0), all=team["all"])), ""]
@@ -78,7 +100,10 @@ def page(doc, lang="en"):
             f"<h2>{e(t('h_score'))}</h2>", f"<div class=\"big\">{e(_num(s['score']) if s['state'] == 'scored' else '-')}</div>", f"<div>{e(score_line(doc, t))}</div>"]
     if s["missing_parts"]:
         body.append(f"<div class=\"mut\">{e(t('missing', parts=', '.join(s['missing_parts'])))}</div>")
-    body += [f"<h2>{e(t('h_changes'))}</h2>", "<ul>" + "".join(f"<li>{e(x)}</li>" for x in changes_lines(doc, t)) + "</ul>",
+    body += [f"<h2>{e(t('h_changes'))}</h2>", "<ul>" + "".join(f"<li>{e(x)}</li>" for x in changes_lines(doc, t)) + "</ul>"]
+    if doc.get("compare"):
+        body += [f"<h2>{e(t('h_compare'))}</h2>", "<ul>" + "".join(f"<li>{e(x)}</li>" for x in compare_lines(doc, t, lang)) + "</ul>"]
+    body += [
              f"<h2>{e(t('h_team'))}</h2>", f"<div>{e(t('team_totals', bad=tot.get('bad', 0), warn=tot.get('warn', 0), ok=tot.get('ok', 0), unknown=tot.get('unknown', 0), all=team['all']))}</div>"]
     if team["ranking"]:
         body.append(f"<table><thead><tr><th>{e(t('c_repo'))}</th><th>{e(t('c_state'))}</th><th>{e(t('c_risk'))}</th><th>{e(t('c_alerts'))}</th></tr></thead><tbody>" + "".join(

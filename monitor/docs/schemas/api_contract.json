@@ -80,6 +80,7 @@
   {"path": "/api/github-app/status", "reason": "state of the GitHub App of the account; its keys depend on the setup"},
   {"path": "/api/github-token", "reason": "state of the credential; its keys depend on the store in use"},
   {"path": "/api/live-events/stream", "reason": "a stream of server-sent events, not a JSON document"},
+  {"path": "/api/compare", "reason": "the comparison of periods, off by default: the keys of the answer follow its state (off, calibrating, baseline unavailable, compared); it is frozen with the next widening of the contract"},
   {"path": "/api/otlp", "reason": "an export format of another standard"},
  {"path": "/api/team/fleet", "reason": "the fleet view whose rows depend on the settings of the grouping; it is frozen with the next widening of the contract"},
  {"path": "/api/runners/model", "reason": "an opt-in model of the runners whose keys depend on the settings; it is frozen with the next widening of the contract"},

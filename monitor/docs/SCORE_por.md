@@ -66,3 +66,7 @@ Quando a pontuação desce `score.alert.drop_points` pontos (10 por predefiniç�
 ## As definições
 
 Na página de Definições, subseparador Sentinela, blocos Pontuação da conta, Pesos da pontuação e Letras da pontuação: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.weights.security`, de `score.grades.A` a `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` e `score.alert.notify_external` (desligado por predefinição). Os limites bom e mau de cada parte são lidos do ficheiro, em `score.limits` (veja-se o ficheiro de exemplo); não se editam na página.
+
+## Face ao período anterior
+
+A comparação de períodos (`GET /api/compare`, `monitor_cli.py compare`) coloca a pontuação média, a proporção de execuções falhadas, as durações e o tempo de resolução de alertas de um período face ao anterior, com o mesmo registo e os mesmos registos horários da pontuação. Está desativada por predefinição (`compare.enabled`) e diz `insufficient_data` ou `baseline_unavailable` em vez de inventar um número. Ver [COMPARE_por.md](COMPARE_por.md).

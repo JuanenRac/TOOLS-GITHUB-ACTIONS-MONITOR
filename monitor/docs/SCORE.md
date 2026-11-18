@@ -66,3 +66,7 @@ When the score falls by `score.alert.drop_points` points (10 by default) or more
 ## The settings
 
 In the Settings page, Sentinel sub-tab, blocks Account score, Score weights and Score letters: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.weights.security`, `score.grades.A` to `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` and `score.alert.notify_external` (off by default). The good and bad limits of every part are read from the file, under `score.limits` (see the example file); they are not edited in the page.
+
+## Against the period before
+
+The comparison of periods (`GET /api/compare`, `monitor_cli.py compare`) sets the mean score, the share of failed runs, the durations and the time to resolve alerts of one period against the one before, from the same ledger and the same hourly snapshots as the score. It is off by default (`compare.enabled`) and says `insufficient_data` or `baseline_unavailable` instead of inventing a number. See [COMPARE.md](COMPARE.md).
