@@ -6,7 +6,7 @@
 # =============================================================================
 """Photographs the monitor with invented data (tools/demo_monitor.py), in the light and the dark theme, for docs/screenshots/.
 
-    python tools/make_screenshots.py [--only NAME ...] [--console] [--web]
+    python tools/make_screenshots.py [--only NAME ...] [--console] [--web] [--viewport 1920x1080]
 
 The page: Microsoft Edge in headless mode with a temporary profile (it never touches a browser that is open). The console tools (read_report.py, migrate_state.py,
 gha_dispatch_all.py plan, lint_workflows.py, tui.py) run against the demo with the invented catalogue and their text is drawn as a terminal page, also in two themes. Local paths are
@@ -33,26 +33,34 @@ OUT = ROOT / "docs" / "screenshots"
 EDGES = (r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe", r"C:\Program Files\Microsoft\Edge\Application\msedge.exe", r"C:\Program Files\Google\Chrome\Application\chrome.exe",
          r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe", "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge", "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
          "/usr/bin/microsoft-edge", "/usr/bin/chromium", "/usr/bin/google-chrome")
+VIEWPORT = [1920, 1080]      # the window of every picture of a page that is not a device size (1080p; --viewport WxH changes it): the size entries below keep their own
+V = None      # in the lists: "the viewport"
 TABS = ("interface", "basic", "general", "polling", "cache", "quota", "sentinel", "surface", "readiness", "paths", "outputs", "ai", "webhook", "notify", "analytics", "lint", "advanced", "console")
-WEB = [("about", "tab=now&dlg=about", (1400, 1500)), ("help", "tab=cfg&dlg=help&topic=sentinel", (1400, 900)), ("now", "tab=now", (1400, 820)), ("alerts", "tab=al", (1400, 820)), ("sentinel", "tab=sci&open=a2", (1400, 1000)), ("sentinel_queue", "tab=sci&open=a5", (1400, 1050)), ("sentinel_analytics", "tab=sci&open=a12,a13", (1400, 1500)),
+WEB = [("about", "tab=now&dlg=about", V), ("help", "tab=cfg&dlg=help&topic=sentinel", V), ("now", "tab=now", V), ("alerts", "tab=al", V), ("sentinel", "tab=sci&open=a2", V), ("sentinel_queue", "tab=sci&open=a5", V), ("sentinel_analytics", "tab=sci&open=a12,a13", V),
        ("size_4k", "tab=now", (3840, 2160)), ("size_ultrawide", "tab=now", (3440, 1440)), ("size_portrait", "tab=now", (1080, 1920)), ("size_phone", "tab=now", (390, 844)),
-       ("charts", "tab=charts", (1400, 820)), ("repositories", "tab=repos", (1400, 820)), ("team", "tab=team", (1400, 820)), ("history", "tab=hist", (1400, 820)),
-       ("menu_groups", "tab=sent", (1400, 1000)), ("sentinel_ci", "tab=sci", (1400, 900)), ("sentinel_collab", "tab=scol", (1400, 900)), ("fleet", "tab=fleet", (1400, 820)), ("reports", "tab=rep", (1400, 820))] + [(f"settings_{t}", f"tab=cfg&cfgtab={t}", (1400, 820)) for t in TABS]
+       ("charts", "tab=charts", V), ("repositories", "tab=repos", V), ("team", "tab=team", V), ("history", "tab=hist", V),
+       ("menu_groups", "tab=sent", V), ("sentinel_ci", "tab=sci", V), ("sentinel_collab", "tab=scol", V), ("fleet", "tab=fleet", V), ("reports", "tab=rep", V)] + [(f"settings_{t}", f"tab=cfg&cfgtab={t}", V) for t in TABS]
 
 
-LITE_WEB = [("lite_about", "tab=now&dlg=about", (1400, 900)), ("lite_basic", "tab=cfg&cfgtab=basic", (1400, 900)), ("lite_now", "tab=now", (1400, 820)), ("lite_charts", "tab=charts", (1400, 820)), ("lite_history", "tab=hist", (1400, 820)), ("lite_settings", "tab=cfg&cfgtab=general", (1400, 700))]
+FOLD = 'NAV_CLOSED=["watch","sentinels","team","learn"];applyGroups()'      # the menu with only the System group open (Updates, Settings): at 1080p the long menu hides it
+SCROLL_CMP = ('document.querySelectorAll("#t-charts>section").forEach(function(s){if(s.id!=="cmp-sec")s.hidden=true})')      # the section is at the foot of Charts, below the first screen: the other charts step aside so that it fills the picture
+RICH_WEB = [("sentinel_delivery", "tab=sdel&open=delivery", V, ""), ("sentinel_supply", "tab=ssup&open=supply", V, ""), ("sentinel_trend", "tab=strend", V, ""),
+            ("compare", "tab=charts", V, SCROLL_CMP), ("updates", "tab=upd", V, FOLD)]      # the newest tabs, against tools/demo_monitor.py --rich; a little script scrolls or folds the page
 
 
-NETWORK_WEB = [("network_now", "tab=now", (1400, 820)), ("network_notices", "tab=now&dlg=notes", (1400, 820)), ("network_settings", "tab=cfg&cfgtab=advanced", (1400, 1180))]      # the page of the network mode: the red bar and the warning for every interface
+LITE_WEB = [("lite_about", "tab=now&dlg=about", V), ("lite_basic", "tab=cfg&cfgtab=basic", V), ("lite_now", "tab=now", V), ("lite_charts", "tab=charts", V), ("lite_history", "tab=hist", V), ("lite_settings", "tab=cfg&cfgtab=general", V)]
 
 
-ACCOUNTS_WEB = [("accounts_all", "account=all", (1400, 420)), ("accounts_one", "account=org-acme", (1400, 820)), ("accounts_live", "view=live&chrome=0", (1100, 700))]      # the complete edition with several accounts (tools/demo_accounts.py)
+NETWORK_WEB = [("network_now", "tab=now", V), ("network_notices", "tab=now&dlg=notes", V), ("network_settings", "tab=cfg&cfgtab=advanced", V)]      # the page of the network mode: the red bar and the warning for every interface
+
+
+ACCOUNTS_WEB = [("accounts_all", "account=all", V), ("accounts_one", "account=org-acme", V), ("accounts_live", "view=live&chrome=0", V)]      # the complete edition with several accounts (tools/demo_accounts.py)
 
 
 SCREEN_WEB = [(f"screen_{kind}_{tag}", f"/screen/{kind}?lang=en&theme=dark&monitor=1", size) for kind in ("overview", "now", "sentinels") for tag, size in (("1080p", (1920, 1080)), ("4k", (3840, 2160)), ("portrait", (1080, 1920)))]      # the wall screens (docs/SCREENS.md): dark only, one picture per resolution
 
 
-THEME_WEB = [("theme_midnight", "tab=now&theme=Midnight", (1400, 1000))]      # the whole product wears the theme of Settings
+THEME_WEB = [("theme_midnight", "tab=now&theme=Midnight", V)]      # the whole product wears the theme of Settings
 
 
 SCREEN_EXTRA = [("screen_overview_light", "/screen/overview?lang=en&theme=light&monitor=1", (1920, 1080)), ("screen_overview_midnight", "/screen/overview?lang=en&theme=Midnight&monitor=1", (1920, 1080)), ("screen_sentinels_contrast", "/screen/sentinels?lang=en&theme=contrast&monitor=1", (1920, 1080)),
@@ -79,7 +87,7 @@ def edge():
     raise SystemExit("No browser was found: install Microsoft Edge, Chrome or Chromium, or set MONITOR_BROWSER to the full path of its program")
 
 
-def updater_shot(target, size=(1200, 1500)):
+def updater_shot(target, size=V):
     """The page of the updater (monitor_updater.py web) over this very folder. Its first card holds the folders of this computer, so the picture is cut: the header and the list of versions of GitHub."""
     from PIL import Image
     port = free_port()
@@ -113,7 +121,8 @@ def free_port():
 
 
 def shot(url, target, size, tries=3, flags=()):
-    """One headless screenshot with its own temporary profile; tried again when Edge leaves no file (it sometimes does right after another run)."""
+    """One headless screenshot with its own temporary profile; tried again when Edge leaves no file (it sometimes does right after another run). size None = the viewport (1920x1080)."""
+    size = tuple(size or VIEWPORT)
     for attempt in range(tries):
         profile = tempfile.mkdtemp(prefix="ghamon_edge_")
         Path(target).unlink(missing_ok=True)
@@ -139,6 +148,72 @@ def shot(url, target, size, tries=3, flags=()):
     print("FAILED:", target, flush=True)
     FAILED.append(str(target))
     return False
+
+
+def cdp_shot(url, target, size, script="", wait=10.0):
+    """A screenshot through the DevTools protocol (the optional package `websockets`): the page is loaded at exactly `size`, a small script runs (scroll to a section, fold the menu) and the picture is taken.
+    Only the browser started here is ended."""
+    import asyncio
+    import base64
+    import urllib.request
+    import websockets
+    size = tuple(size or VIEWPORT)
+    port = free_port()
+    profile = tempfile.mkdtemp(prefix="ghamon_edge_")
+    child = subprocess.Popen([edge(), "--headless=new", f"--user-data-dir={profile}", f"--remote-debugging-port={port}", "--remote-allow-origins=*", "--disable-gpu", "--hide-scrollbars", "--autoplay-policy=no-user-gesture-required",
+                              f"--window-size={size[0]},{size[1]}", "about:blank"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
+
+    async def go(ws_url):
+        async with websockets.connect(ws_url, max_size=None) as ws:
+            counter = [0]
+
+            async def call(method, **params):
+                counter[0] += 1
+                await ws.send(json.dumps({"id": counter[0], "method": method, "params": params}))
+                while True:
+                    reply = json.loads(await ws.recv())
+                    if reply.get("id") == counter[0]:
+                        return reply.get("result", {})
+            await call("Emulation.setDeviceMetricsOverride", width=size[0], height=size[1], deviceScaleFactor=1, mobile=False)
+            await call("Page.navigate", url=url)
+            await asyncio.sleep(wait)
+            if script:
+                await call("Runtime.evaluate", expression=script)
+                await asyncio.sleep(3.0)
+            return base64.b64decode((await call("Page.captureScreenshot", format="png")).get("data", ""))
+    try:
+        ws_url = ""
+        for _ in range(60):
+            try:
+                pages = [t for t in json.loads(urllib.request.urlopen(f"http://127.0.0.1:{port}/json", timeout=2).read()) if t.get("type") == "page"]
+                if pages:
+                    ws_url = pages[0]["webSocketDebuggerUrl"]
+                    break
+            except OSError:
+                pass
+            time.sleep(0.5)
+        data = asyncio.run(go(ws_url)) if ws_url else b""
+        if len(data) > 2000:
+            Path(target).write_bytes(data)
+            return True
+        print("FAILED:", target, flush=True)
+        FAILED.append(str(target))
+        return False
+    finally:
+        child.kill()
+        shutil.rmtree(profile, ignore_errors=True)
+
+
+def paletize():
+    """docs/screenshots stays small: every picture is saved with 256 colours (Pillow); without Pillow they are left as taken."""
+    try:
+        from PIL import Image
+    except ImportError:
+        return
+    for path in OUT.glob("*.png"):
+        picture = Image.open(path)
+        if picture.mode != "P":
+            picture.convert("RGB").quantize(256, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).save(path, optimize=True)
 
 
 def clean(text):
@@ -213,10 +288,16 @@ def tui_html(port, theme):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--only", nargs="*", help="names of the pictures to redo (web_<name> or console_<name>)")
+    ap.add_argument("--viewport", default="1920x1080", help="the window of the pictures of a page, WIDTHxHEIGHT (default 1920x1080 = 1080p); the device sizes (4K, ultrawide, portrait, phone, wall screens) keep their own")
     ap.add_argument("--web", action="store_true")
     ap.add_argument("--console", action="store_true")
     args = ap.parse_args()
     both = not (args.web or args.console)
+    try:
+        VIEWPORT[:] = [int(n) for n in args.viewport.lower().split("x")]
+        assert len(VIEWPORT) == 2 and min(VIEWPORT) > 0
+    except (ValueError, AssertionError):
+        raise SystemExit("--viewport wants WIDTHxHEIGHT, for example 1920x1080")
     OUT.mkdir(parents=True, exist_ok=True)
     FAILED.clear()
     print("browser:", edge(), "| output:", OUT, flush=True)
@@ -228,6 +309,8 @@ def main():
     lite = subprocess.Popen([sys.executable, "-I", str(ROOT / "tools" / "demo_monitor.py"), str(lite_port), "--lite"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     net_port = free_port()
     net = subprocess.Popen([sys.executable, "-I", str(ROOT / "tools" / "demo_monitor.py"), str(net_port), "--network"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    rich_port = free_port()
+    rich = subprocess.Popen([sys.executable, "-I", str(ROOT / "tools" / "demo_monitor.py"), str(rich_port), "--rich"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     acc_port = free_port()
     acc = subprocess.Popen([sys.executable, "-I", str(ROOT / "tools" / "demo_accounts.py"), str(acc_port)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:
@@ -269,6 +352,18 @@ def main():
                 if wanted(f"web_{name}"):
                     shot(f"http://127.0.0.1:{port}{path}", str(OUT / f"web_{name}.png"), size, flags=("--force-prefers-reduced-motion",))      # the entrance of the cards is an animation: the picture is taken with the page at rest
                     print("web", name, flush=True)
+        if args.web or both:
+            for _ in range(60):
+                try:
+                    socket.create_connection(("127.0.0.1", rich_port), 0.5).close()
+                    break
+                except OSError:
+                    time.sleep(0.5)
+            for name, query, size, script in RICH_WEB:
+                for theme in ("light", "dark"):
+                    if wanted(f"web_{name}"):
+                        cdp_shot(f"http://127.0.0.1:{rich_port}/?{query}&theme={theme}&lang=en&nowizard=1", str(OUT / f"web_{name}_{theme}.png"), size, script)
+                        print("web", name, theme, flush=True)
         if args.web or both:
             for _ in range(60):
                 try:
@@ -328,11 +423,13 @@ def main():
         demo.terminate()
         lite.terminate()
         net.terminate()
+        rich.terminate()
         if sys.platform == "win32":      # the supervisor started three monitors of its own: its whole tree ends, and only that tree
             subprocess.run(["taskkill", "/PID", str(acc.pid), "/T", "/F"], capture_output=True)
         else:
             acc.terminate()
         shutil.rmtree(work, ignore_errors=True)
+        paletize()
     if FAILED:
         print("%d picture(s) were not made; take them by hand (see docs/CONTRIBUTING: start --demo, open the page, save one capture per tab)." % len(FAILED), flush=True)
         return 1

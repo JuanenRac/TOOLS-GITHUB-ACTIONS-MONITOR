@@ -10,6 +10,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+### Changed
+
+- **The pictures of the README are taken at 1080p and show the newest tabs**: `tools/make_screenshots.py` photographs every page at 1920x1080 by default (`--viewport WIDTHxHEIGHT` changes it; the 4K, ultrawide, portrait, phone and wall-screen pictures keep their own size), `tools/demo_monitor.py --rich` gives the demo findings for the Delivery and Supply chain sentinels, a daily trend and a comparison of periods, and the README (in the eight languages) shows the Delivery, Supply chain, Daily trend, Compare periods and Updates pages.
+
 ## [2.1.2]
 
 ### Fixed

@@ -157,6 +157,9 @@
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_menu_groups_light.png"><img src="docs/screenshots/web_menu_groups_dark.png" alt="分组菜单：监视、哨兵、团队、报告与学习" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_ci_light.png"><img src="docs/screenshots/web_sentinel_ci_dark.png" alt="哨兵：CI" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_collab_light.png"><img src="docs/screenshots/web_sentinel_collab_dark.png" alt="哨兵：协作" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_delivery_light.png"><img src="docs/screenshots/web_sentinel_delivery_dark.png" alt="交付哨兵：已构建但尚未交付的内容" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_supply_light.png"><img src="docs/screenshots/web_sentinel_supply_dark.png" alt="供应链哨兵：未固定的 Action 和过宽的权限" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_trend_light.png"><img src="docs/screenshots/web_sentinel_trend_dark.png" alt="每日趋势：每项数据一条线" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_fleet_light.png"><img src="docs/screenshots/web_fleet_dark.png" alt="车队：所有仓库一览" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_reports_light.png"><img src="docs/screenshots/web_reports_dark.png" alt="报告" width="92%"></picture></p>
 <p align="center"><img src="docs/screenshots/web_theme_midnight.png" alt="整个页面使用另一个主题（Midnight）" width="92%"></p>
@@ -170,12 +173,14 @@
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_queue_light.png"><img src="docs/screenshots/web_sentinel_queue_dark.png" alt="签名队列（最紧急的在前）" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_analytics_light.png"><img src="docs/screenshots/web_sentinel_analytics_dark.png" alt="A12 · 分析:时长、排队时间、步骤与不稳定的工作流" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_charts_light.png"><img src="docs/screenshots/web_charts_dark.png" alt="图表" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_compare_light.png"><img src="docs/screenshots/web_compare_dark.png" alt="比较时间段：本时间段与上一时间段" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_repositories_light.png"><img src="docs/screenshots/web_repositories_dark.png" alt="仓库" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_team_light.png"><img src="docs/screenshots/web_team_dark.png" alt="团队：仓库健康状况排名" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_history_light.png"><img src="docs/screenshots/web_history_dark.png" alt="历史" width="92%"></picture></p>
 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_about_light.png"><img src="docs/screenshots/web_about_dark.png" alt="关于" width="92%"></picture></p>
 <p align="center"><img src="docs/screenshots/web_updater.png" alt="更新器：所有已发布的版本，可切换到其中任何一个" width="92%"></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_updates_light.png"><img src="docs/screenshots/web_updates_dark.png" alt="系统菜单中的更新：已安装和可用的版本" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_help_light.png"><img src="docs/screenshots/web_help_dark.png" alt="帮助，可搜索且可离线使用" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_basic_light.png"><img src="docs/screenshots/web_settings_basic_dark.png" alt="设置 · 基本：套餐、配额与发现" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_network_now_light.png"><img src="docs/screenshots/web_network_now_dark.png" alt="网络模式:持久的红色横幅" width="92%"></picture></p>

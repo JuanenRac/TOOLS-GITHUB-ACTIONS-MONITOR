@@ -9,6 +9,10 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+### Alterado
+
+- **As capturas do README são feitas em 1080p e mostram os separadores mais recentes**: `tools/make_screenshots.py` fotografa cada página a 1920x1080 por predefinição (`--viewport LARGURAxALTURA` altera-o; as capturas de 4K, ultralarga, vertical, telemóvel e ecrã de parede mantêm o seu tamanho), `tools/demo_monitor.py --rich` dá à demonstração deteções para as sentinelas de entrega e de cadeia de fornecimento, uma tendência diária e uma comparação de períodos, e o README (nas oito línguas) mostra as páginas Entrega, Cadeia de fornecimento, Tendência diária, Comparar períodos e Atualizações.
+
 ## [2.1.2]
 
 ### Corrigido

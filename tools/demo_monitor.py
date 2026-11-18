@@ -146,8 +146,44 @@ def demo_analytics(runs):
     return summary
 
 
+def rich_alerts(now, iso):
+    """Invented findings of the Delivery sentinel (release.*) and of the Supply chain sentinel (actions.supply.*)."""
+    def one(code, level, repo, title, hours):
+        return {"id": f"{code}:{repo}", "code": code, "level": level, "sentinel": "delivery" if code.startswith("release.") else "supply", "account_id": "", "repo": repo, "title": title, "details": {"url": "#"},
+                "created_at": iso(now - timedelta(hours=hours))}
+    return [one("release.unreleased_pending", "info", "demo-beta-docs", "demo-beta-docs: 4 changelog entries wait for a release (18 days)", 430),
+            one("release.tag_without_release", "warning", "demo-alpha-app", "demo-alpha-app: tag v2.4.0 has no release", 52),
+            one("release.version_mismatch", "warning", "demo-gamma-api", "demo-gamma-api: the version file says 1.3.1 and the latest tag is v1.3.0", 120),
+            one("release.assets_missing", "warning", "demo-beta-fw", "demo-beta-fw: the release v0.9.0 lacks the checksum file", 75),
+            one("release.ecosystem_drift", "warning", "demo-gamma-ui", "demo-gamma-ui pins demo-alpha-core 0.7.0; the provider is at 0.8.2", 200),
+            one("actions.supply.unpinned", "warning", "demo-alpha-app", "demo-alpha-app: 3 actions are not pinned to a commit", 90),
+            one("actions.supply.mutable_ref", "info", "demo-gamma-ui", "demo-gamma-ui: an action uses a branch as its reference", 300),
+            one("actions.supply.permissions_wide", "error", "demo-gamma-api", "demo-gamma-api: a workflow grants write-all to the token", 60),
+            one("actions.supply.pr_target_checkout", "error", "demo-beta-docs", "demo-beta-docs: pull_request_target checks out code of the pull request", 40)]
+
+
+def rich_setup(snap, now):
+    """--rich: the history of the daily trend and the answer of the comparison of periods, both invented, and the comparison switched on."""
+    days = [(now - timedelta(days=13 - i)).strftime("%Y-%m-%d") for i in range(14)]
+    series = {"codeql": [5, 5, 4, 4, 4, 3, 3, 3, 2, 2, 2, 2, 1, 1], "dependabot": [9, 9, 8, 10, 10, 9, 7, 7, 6, 6, 5, 5, 4, 4], "secret": [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+              "prs": [3, 4, 4, 5, 3, 2, 3, 6, 5, 4, 3, 3, 2, 2], "red": [4, 3, 5, 2, 2, 3, 1, 2, 4, 3, 2, 2, 1, 3], "candidates": [1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5]}
+    snap["a3"]["trend"] = {k: {"dates": days, "values": v} for k, v in series.items()}
+    from github_actions_monitor.compare import compare_service
+    cmp_answer = {"schema": compare_service.SCHEMA, "account": OWNER, "enabled": True, "state": "compared", "windows": None, "days": "all", "baseline": "previous", "coverage": 0.92,
+                  "metrics": {"red_rate": {"state": "ok", "now": 0.12, "base": 0.21, "direction": "better"}, "duration_p50": {"state": "ok", "now": 196, "base": 171, "direction": "worse"},
+                              "resolution": {"state": "ok", "now": 7200, "base": 14400, "direction": "better"}, "score_mean": {"state": "ok", "now": 82.5, "base": 80.0, "direction": "better"},
+                              "score_coverage": {"state": "ok", "now": 0.92, "base": 0.92, "direction": "same"}},
+                  "alerts": {"opened_now": 9, "open_at_end_now": 4},
+                  "changes": {"worse": [{"repo": "demo-alpha-app", "red_rate_base": 0.1, "red_rate_now": 0.4}], "better": [{"repo": "demo-gamma-api", "red_rate_base": 0.5, "red_rate_now": 0.1}],
+                              "new_failures": [{"repo": "demo-alpha-app", "workflow": "Release build", "failures": 3}], "resolved_failures": [{"repo": "demo-gamma-api", "workflow": "CI", "failures_before": 4}], "reason": ""},
+                  "data_quality": {"runs_now": 212, "runs_base": 198, "min_runs": 20, "truncated": False, "reasons": []}}
+    compare_service.build = lambda *a, **k: cmp_answer
+    am.LIVE_CONFIG.setdefault("compare", {})["enabled"] = True
+
+
 def main():
     lite = "--lite" in sys.argv
+    rich = "--rich" in sys.argv      # the pictures of the newest tabs: findings for the Delivery and Supply chain sentinels, a daily trend and a comparison of periods
     numbers = [a for a in sys.argv[1:] if a.isdigit()]
     port = int(numbers[0]) if numbers else 18765
     now = datetime.now(timezone.utc).replace(microsecond=0)
@@ -155,6 +191,8 @@ def main():
     am.LITE["on"] = lite       # the lite edition: no sentinel, no analytics, a short settings page
     data, runs, iso = build(now)
     snap = snapshot(now, data, runs, iso)
+    if rich:
+        rich_setup(snap, now)
 
     class Demo:
         ai_cfg = {"provider": "none"}
@@ -173,14 +211,25 @@ def main():
         def snapshot(self):
             return {"enabled": True, "level": "warn", "status": {"enabled": True, "level": "warn", "repos_in_scope": 6, "repos_checked": 6, "refresh_seconds": 600, "errors": []}, "alerts": []}
 
+    class DemoRelease:
+        """--rich: the Delivery and the Supply chain sentinels with invented findings (the plain demo leaves them with none, so no test that counts alerts moves)."""
+        def __init__(self, items):
+            self.items = items
+
+        def snapshot(self):
+            return {"enabled": True, "level": "warn", "status": {"enabled": True, "level": "warn", "lifecycle": "healthy", "repos_in_scope": 6, "repos_checked": 6, "refresh_seconds": 3600, "errors": []},
+                    "alerts": [a for a in rich_alerts(now, iso) if a["code"].startswith(self.items)]}
+
     class DemoRegistry:
         def alerts(self):
-            return demo_alerts(now, iso)
+            return demo_alerts(now, iso) + (rich_alerts(now, iso) if rich else [])
 
         def names(self):
             return ["ci", "collab", "security", "delivery", "supply"]
 
         def get(self, name):
+            if rich and name in ("delivery", "supply"):
+                return DemoRelease("release." if name == "delivery" else "actions.supply.")
             return DemoCollab() if name == "collab" else (DemoSecurity() if name in ("security", "delivery", "supply") else None)
     if not lite:
         am.SENTINEL["registry"] = DemoRegistry()
