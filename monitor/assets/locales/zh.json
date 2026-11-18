@@ -4101,6 +4101,7 @@
  "ui.upd_err_same": "该版本已安装。",
  "ui.upd_err_not_confirmed": "未确认。",
  "ui.upd_err_no_previous": "没有可回到的更早版本。",
+ "ui.upd_err_cooldown": "失败次数过多：请等待几分钟后再试。",
  "ui.upd_err_failed": "更新工具失败。",
  "ui.upd_err_network": "监视器没有响应。",
  "ui.upd_err_local_only": "仅可在运行监视器的计算机上进行。",

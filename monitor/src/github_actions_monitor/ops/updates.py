@@ -31,10 +31,16 @@ from github_actions_monitor.util.paths import ROOT
 TOOL = ROOT / "tools" / "monitor_updater.py"
 STATUS_NAME = "update_status.json"
 LOG_NAME = "updater_handover.log"
+MAX_FAILURES = 5             # refused or failed attempts to apply / go back inside WINDOW before the cooldown starts
+WINDOW = 600                  # seconds in which the failures are counted
+COOLDOWN = 600                # seconds the menu refuses a new apply or way back after MAX_FAILURES (a stolen token cannot hammer the updater)
+MAX_STATUS_BYTES = 262144     # a progress file larger than this is not read (it is never that big: events of one update)
 START_GRACE = 180            # seconds a "starting" mark is believed while the process that applies the update has not yet written its own
 NO_WINDOW = 0x08000000        # CREATE_NO_WINDOW: a hidden console that the git and gh calls of the monitor inherit
 NEW_GROUP = 0x00000200        # CREATE_NEW_PROCESS_GROUP; never the flag that detaches from the console (a process without a console makes every child open a window)
 _lock = threading.Lock()
+_failures = []                # monotonic times of the recent failed attempts
+_cooldown = {"until": 0.0}
 _module = {"obj": None}
 
 
@@ -74,6 +80,26 @@ def status_file(up):
     return up.backups / STATUS_NAME
 
 
+def cooldown_left(now=None):
+    """Seconds still to wait before a new apply or way back is accepted (0 when none)."""
+    now = time.monotonic() if now is None else now
+    return max(0, int(_cooldown["until"] - now + 0.999)) if _cooldown["until"] > now else 0
+
+
+def note_failure(now=None):
+    """A refused or failed attempt. MAX_FAILURES inside WINDOW start the cooldown."""
+    now = time.monotonic() if now is None else now
+    _failures[:] = [t for t in _failures if now - t < WINDOW] + [now]
+    if len(_failures) >= MAX_FAILURES:
+        _cooldown["until"] = now + COOLDOWN
+        del _failures[:]
+
+
+def note_success():
+    del _failures[:]
+    _cooldown["until"] = 0.0
+
+
 def reason_blocked(lite=False, demo=False, env=None):
     """Why this installation cannot be updated from the page ('' when it can). A service manager or a container owns the process: the update is made the way their documents say."""
     mod = module()
@@ -110,6 +136,8 @@ def progress():
         return {"running": False}
     path = status_file(mod.Updater(ROOT, mod.GitHubSource(prefer_gh=False)))
     try:
+        if path.is_symlink() or not path.is_file() or path.stat().st_size > MAX_STATUS_BYTES:      # a link or a huge file is not the file the updater wrote
+            return {"running": False}
         doc = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return {"running": False}
@@ -131,7 +159,7 @@ def status(config, tool_version, notice, lite=False, demo=False, env=None):
     blocked = reason_blocked(lite, demo, env)
     out = {"installed": tool_version, "available": (notice or {}).get("latest") if (notice or {}).get("newer") else "", "newer": bool((notice or {}).get("newer")),
            "check": bool((notice or {}).get("enabled", True)), "offline": bool((notice or {}).get("offline")), "airgapped": bool((notice or {}).get("airgapped")),
-           "can_apply": not blocked, "blocked_by": blocked, "progress": progress(), "last": None, "can_go_back": False, "updater": getattr(mod, "UPDATER_VERSION", "") if mod else ""}
+           "can_apply": not blocked, "blocked_by": blocked, "blocked_reason": blocked or ("cooldown" if cooldown_left() else ""), "cooldown_seconds": cooldown_left(), "progress": progress(), "last": None, "can_go_back": False, "updater": getattr(mod, "UPDATER_VERSION", "") if mod else ""}
     if mod is not None:
         up = mod.Updater(ROOT, mod.GitHubSource(prefer_gh=False))
         history = up.history()
@@ -173,9 +201,9 @@ def _spawn(args, up):
     up.backups.mkdir(parents=True, exist_ok=True)
     logs = up.folders()["logs"]
     logs.mkdir(parents=True, exist_ok=True)
-    log = open(logs / LOG_NAME, "ab")
     kwargs = {"creationflags": NEW_GROUP | NO_WINDOW} if os.name == "nt" else {"start_new_session": True}
-    return subprocess.Popen([sys.executable, "-I", str(TOOL), *args], cwd=str(ROOT), stdout=log, stderr=log, stdin=subprocess.DEVNULL, **kwargs)
+    with open(logs / LOG_NAME, "ab") as log:      # the child keeps its own copy of the handle; ours is closed here (no ResourceWarning, no handle left open)
+        return subprocess.Popen([sys.executable, "-I", str(TOOL), *args], cwd=str(ROOT), stdout=log, stderr=log, stdin=subprocess.DEVNULL, **kwargs)
 
 
 def _first_status(up, kind):
@@ -191,19 +219,26 @@ def apply(target, policy, confirm, edition, lang, lite=False, demo=False, env=No
     blocked = reason_blocked(lite, demo, env)
     if blocked:
         raise UpdatesError(blocked)
+    if cooldown_left():
+        raise UpdatesError("cooldown")
     with _lock:
         if running():
             raise UpdatesError("busy")
-        mod, up = updater()
-        done = plan(target, policy)
-        if done["blocked"]:
-            raise UpdatesError("blocked")
-        if done["direction"] == "same":
-            raise UpdatesError("same")
+        try:
+            mod, up = updater()
+            done = plan(target, policy)
+            if done["blocked"]:
+                raise UpdatesError("blocked")
+            if done["direction"] == "same":
+                raise UpdatesError("same")
+        except Exception:
+            note_failure()
+            raise
         _first_status(up, "apply")
         args = ["apply", "--dir", str(ROOT), "--to", done["target"], "--yes", "--start", "--handover", "--status-file", str(status_file(up)), "--edition", "lite" if edition == "lite" else "complete",
                 "--lang", lang or "en"] + {"keep_old": ["--keep-old-defaults"], "adopt_new": ["--adopt-new-defaults"]}.get(policy, [])
         _spawn(args, up)
+        note_success()
         return {"started": True, "from": done["installed"], "to": done["target"], "backups": str(up.backups)}
 
 
@@ -214,14 +249,18 @@ def rollback(confirm, edition, lang, lite=False, demo=False, env=None):
     blocked = reason_blocked(lite, demo, env)
     if blocked:
         raise UpdatesError(blocked)
+    if cooldown_left():
+        raise UpdatesError("cooldown")
     with _lock:
         if running():
             raise UpdatesError("busy")
         mod, up = updater()
         if not up.previous():
+            note_failure()
             raise UpdatesError("no_previous")
         _first_status(up, "rollback")
         _spawn(["rollback", "--dir", str(ROOT), "--yes", "--handover", "--status-file", str(status_file(up)), "--lang", lang or "en"], up)
+        note_success()
         return {"started": True}
 
 

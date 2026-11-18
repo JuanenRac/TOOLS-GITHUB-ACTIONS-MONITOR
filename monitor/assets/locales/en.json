@@ -4101,6 +4101,7 @@
  "ui.upd_err_same": "That version is already installed.",
  "ui.upd_err_not_confirmed": "Not confirmed.",
  "ui.upd_err_no_previous": "There is no earlier version to go back to.",
+ "ui.upd_err_cooldown": "Too many failed attempts: wait a few minutes before trying again.",
  "ui.upd_err_failed": "The updater failed.",
  "ui.upd_err_network": "The monitor did not answer.",
  "ui.upd_err_local_only": "Only from the computer where the monitor runs.",

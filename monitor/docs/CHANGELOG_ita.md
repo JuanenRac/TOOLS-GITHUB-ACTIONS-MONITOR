@@ -13,6 +13,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - **Le immagini del README sono scattate in 1080p e mostrano le schede più nuove**: `tools/make_screenshots.py` fotografa ogni pagina a 1920x1080 per impostazione predefinita (`--viewport LARGHEZZAxALTEZZA` lo cambia; le immagini in 4K, ultralarga, verticale, telefono e schermo a parete mantengono la propria dimensione), `tools/demo_monitor.py --rich` dà alla demo rilevamenti per le sentinelle di consegna e di catena di fornitura, un andamento giornaliero e un confronto di periodi, e il README (nelle otto lingue) mostra le pagine Consegna, Catena di fornitura, Andamento giornaliero, Confronta periodi e Aggiornamenti.
 
+### Sicurezza
+
+- **Il menu Aggiornamenti è più difficile da abusare**: cinque tentativi rifiutati o falliti di aggiornare o tornare indietro in dieci minuti mettono in pausa i pulsanti per dieci minuti (la risposta è `cooldown`, con il suo testo nelle otto lingue), lo stato dice perché un aggiornamento è bloccato (`blocked_reason`, `cooldown_seconds`), il file di avanzamento dell'aggiornatore viene letto solo se è un file normale di dimensione ragionevole (un collegamento, un file enorme, troncato od ostile conta come nessun aggiornamento in corso), il registro dell'aggiornatore viene chiuso dopo l'avvio del processo, e l'analizzatore di workflow che alimenta le sentinelle Catena di fornitura e Consegna taglia un file a 1 MiB, 20000 righe e 4000 caratteri per riga, così una riga infinita o un milione di righe non possono bloccare il ciclo. I test rifiutano un Host o un Origin estraneo su ogni percorso del menu.
+
 ## [2.1.2]
 
 ### Corretto
