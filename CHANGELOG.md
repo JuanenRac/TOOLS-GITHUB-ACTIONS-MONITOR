@@ -13,10 +13,19 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 ### Changed
 
 - **The pictures of the README are taken at 1080p and show the newest tabs**: `tools/make_screenshots.py` photographs every page at 1920x1080 by default (`--viewport WIDTHxHEIGHT` changes it; the 4K, ultrawide, portrait, phone and wall-screen pictures keep their own size), `tools/demo_monitor.py --rich` gives the demo findings for the Delivery and Supply chain sentinels, a daily trend and a comparison of periods, and the README (in the eight languages) shows the Delivery, Supply chain, Daily trend, Compare periods and Updates pages.
+- **Yesterday vs today has a menu entry of its own**: the comparison with the last saved report of the Sentinel moved out of the summary into its own tab (address `#sentinel-yesterday`, next to the Daily trend), so the report of the Sentinel takes the whole page; the entry follows the CI sentinel, has its help, its text in the eight languages and the same look as the other tabs of the Sentinel.
 
 ### Security
 
 - **The Updates menu is harder to abuse**: five refused or failed attempts to update or go back inside ten minutes pause the buttons for ten minutes (the answer is `cooldown`, with its text in the eight languages), the status says why an update is blocked (`blocked_reason`, `cooldown_seconds`), the progress file of the updater is read only when it is a plain file of a reasonable size (a link, a huge file or a truncated or hostile one counts as no update running), the log of the updater is closed once the process has started, and the workflow linter that feeds the Supply chain and Delivery sentinels cuts a file at 1 MiB, 20000 lines and 4000 characters a line, so an endless line or a million lines cannot hold the cycle. Tests refuse a foreign Host or Origin on every route of the menu.
+
+### Added
+
+- **A tooltip on every setting**: pointing at a setting, giving it the keyboard focus or pressing and holding on a touch screen shows what it does, its range or values and its default, what happens when a switch is turned on and off, and whether it applies at once or after a restart; the settings that cost quota or add a page (the comparison of periods, the check for updates, the wall screens) also say what you will see and what it costs. The help text of every setting is checked in the eight languages and an entry for a setting that does not exist is refused.
+
+### Fixed
+
+- **Folding panels of the Sentinel tabs no longer paint one over another**: when the panels that stay folded filled the box, the one panel unfolded on its own was squeezed to a few pixels and its body was drawn over the panels below it. It now keeps a minimum height and the box scrolls instead, for all the Sentinel tabs. The browser test unfolds every panel of every Sentinel tab one by one, all together, by hand and in turns, wide and narrow, and compares their rectangles.
 
 ## [2.1.2]
 

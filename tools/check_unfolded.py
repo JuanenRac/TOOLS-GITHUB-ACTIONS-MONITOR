@@ -55,6 +55,30 @@ PROBE = r"""
       if(!scrolls&&body.getBoundingClientRect().height<1)found.push({kind:"empty_body",at:tab,detail:"the unfolded body has no height"});
       if(document.documentElement.scrollWidth>document.documentElement.clientWidth+1)found.push({kind:"page_wider_than_window",at:tab,detail:document.documentElement.scrollWidth+">"+document.documentElement.clientWidth});
     }
+    /* panels that are unfolded together, one by one, all at once and by hand (no new render): their boxes never overlap and each body ends inside its panel */
+    {const holders=[["sci","s-details"],["scol","s-details-collab"],["ssec","s-details-sec"],["sdel","s-details-del"],["ssup","s-details-sup"]];
+     const check=(tab,holder,label)=>{
+       const ds=[...holder.querySelectorAll(":scope>details")];
+       for(let i=0;i<ds.length;i++){
+         const r=ds[i].getBoundingClientRect();
+         if(i+1<ds.length){const n=ds[i+1].getBoundingClientRect();if(n.top<r.bottom-1)found.push({kind:"panels_overlap",at:tab,detail:label+": panel "+(ds[i].dataset.k||i)+" ends "+Math.round(r.bottom-n.top)+"px below the start of the next"})}
+         const b=ds[i].querySelector(":scope>.dbody");
+         if(ds[i].open&&b){const q=b.getBoundingClientRect();if(q.bottom>r.bottom+1)found.push({kind:"body_outside_panel",at:tab,detail:label+": the body of "+(ds[i].dataset.k||i)+" ends "+Math.round(q.bottom-r.bottom)+"px below its panel"});
+           if(q.height<1&&b.textContent.trim())found.push({kind:"body_without_height",at:tab,detail:label+": "+(ds[i].dataset.k||i)})}}};
+     for(const [tab,box] of holders){
+       try{showTab(tab)}catch(e){continue}
+       await wait(150);
+       const holder=document.getElementById(box);if(!holder)continue;
+       const all=[...holder.querySelectorAll(":scope>details")];
+       if(!all.length)continue;
+       for(const d of all)d.open=false;await wait(30);check(tab,holder,"folded");
+       for(const d of all){d.open=true;await wait(15);check(tab,holder,"one more unfolded: "+(d.dataset.k||""))}
+       await wait(30);check(tab,holder,"all unfolded");
+       for(const d of all){d.open=false;await wait(15);check(tab,holder,"one folded: "+(d.dataset.k||""))}
+       for(let i=0;i<all.length;i++){for(const d of all)d.open=false;all[i].open=true;await wait(15);check(tab,holder,"only "+(all[i].dataset.k||""))}
+       for(const d of all)d.open=false;
+       all.forEach((d,i)=>{if((i&1)===0)d.open=true});await wait(30);check(tab,holder,"alternate");
+       seen.push(tab+"-overlap")}}
     /* the daily trend has its own tab and every curve and figure fits the width of its frame */
     try{showTab("strend")}catch(e){}
     await wait(500);
@@ -88,6 +112,7 @@ def run(langs=LANGS, sizes=("desktop", "mobile"), quiet=False):
     browser = co.edge()
     if not browser:
         return None
+    os.environ.setdefault("MONITOR_VT_BUDGET", "60000")      # the walk through the panels takes virtual time
     port = co.free_port()
     demo = subprocess.Popen([sys.executable, "-I", str(ROOT / "tools" / "demo_monitor.py"), str(port)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                             env={**os.environ, "MONITOR_TIMEZONE": "Europe/Madrid"})

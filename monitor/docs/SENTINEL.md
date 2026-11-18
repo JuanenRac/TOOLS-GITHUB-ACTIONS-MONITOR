@@ -15,6 +15,8 @@ The **Daily trend** (address `#sentinel-trend`) has a menu entry of its own: one
 
 The **Daily trend** (address `#sentinel-trend`) has a menu entry of its own: one small curve for each signal (code scanning, Dependabot, secrets, pull requests, red, candidates) with its last value. The summary of the sentinel keeps only its own panels and a button that opens it.
 
+**Yesterday vs today** (address `#sentinel-yesterday`) has a menu entry of its own too, so the report of the sentinel takes the whole page: what appeared since the last saved report, what was solved and what stays, for the red workflows and the pending signatures.
+
 ## How it starts and what it costs
 
 It starts with the complete monitor and runs in the same process, in its own thread, with its own budget of GitHub calls (`sentinel.budget_per_hour`, 600 by default, and `sentinel.max_calls_per_tick`). When the allowance of GitHub is below `sentinel.min_rate_remaining` it stops asking and the page says it is paused for quota. Nothing it does writes to GitHub.

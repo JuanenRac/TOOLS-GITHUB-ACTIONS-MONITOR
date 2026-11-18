@@ -15,6 +15,8 @@ La **Tendencia diaria** (dirección `#sentinel-trend`) tiene su propia entrada d
 
 La **Tendencia diaria** (dirección `#sentinel-trend`) tiene su propia entrada de menú: una curva pequeña por cada señal (escaneo de código, Dependabot, secretos, pull requests, rojo, candidatas) con su último valor. El resumen del centinela deja solo lo suyo y un botón que la abre.
 
+**Ayer vs hoy** (dirección `#sentinel-yesterday`) también tiene su propia entrada de menú, así que el parte del centinela ocupa toda la página: lo que apareció desde el último parte guardado, lo que se resolvió y lo que sigue, para los workflows en rojo y las firmas pendientes.
+
 ## Cómo arranca y qué cuesta
 
 Arranca con el monitor completo y corre en el mismo proceso, en su propio hilo, con su propio presupuesto de llamadas a GitHub (`sentinel.budget_per_hour`, 600 por defecto, y `sentinel.max_calls_per_tick`). Cuando la cuota de GitHub baja de `sentinel.min_rate_remaining` deja de preguntar y la página dice que está en pausa por cuota. Nada de lo que hace escribe en GitHub.

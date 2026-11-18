@@ -10,6 +10,8 @@
 L'onglet Paramètres (l'entrée Paramètres du panneau latéral) modifie depuis la page les valeurs de `actions_monitor.json`, afin que personne n'ait à éditer le fichier à la main.
 Il est rédigé dans les huit langues de la page et suit l'apparence du reste.
 
+Pointe n'importe quel réglage (ou donne-lui le focus au clavier, ou appuie longuement sur un écran tactile) et une info-bulle indique ce qu'il fait, sa plage ou ses valeurs et sa valeur par défaut, ce qui se passe quand un interrupteur est activé ou désactivé et s'il s'applique tout de suite ou après un redémarrage. Certains réglages ajoutent ce que tu verras et ce que cela coûte. Appuie sur Échap pour la fermer.
+
 <!-- settings:begin -->
 ## Ce qui peut être modifié
 

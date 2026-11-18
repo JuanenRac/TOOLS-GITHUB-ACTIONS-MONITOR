@@ -12,10 +12,19 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 ### Cambiado
 
 - **Las capturas del README se hacen a 1080p y muestran las pestañas más nuevas**: `tools/make_screenshots.py` fotografía cada página a 1920x1080 por defecto (`--viewport ANCHOxALTO` lo cambia; las capturas de 4K, ultraancha, vertical, móvil y pantallas de pared conservan su tamaño), `tools/demo_monitor.py --rich` da a la demo hallazgos para los centinelas de entrega y de cadena de suministro, una tendencia diaria y una comparación de periodos, y el README (en los ocho idiomas) muestra las páginas de Entrega, Cadena de suministro, Tendencia diaria, Comparar periodos y Actualizaciones.
+- **Ayer vs hoy tiene entrada de menú propia**: la comparación con el último parte guardado del Centinela sale del resumen a su propia pestaña (dirección `#sentinel-yesterday`, junto a la Tendencia diaria), de modo que el parte del Centinela ocupa toda la página; la entrada sigue al centinela de CI, tiene su ayuda, su texto en los ocho idiomas y el mismo aspecto que las demás pestañas del Centinela.
 
 ### Seguridad
 
 - **El menú de Actualizaciones es más difícil de abusar**: cinco intentos rechazados o fallidos de actualizar o volver atrás en diez minutos pausan los botones durante diez minutos (la respuesta es `cooldown`, con su texto en los ocho idiomas), el estado dice por qué una actualización está bloqueada (`blocked_reason`, `cooldown_seconds`), el fichero de progreso del actualizador solo se lee si es un fichero normal de tamaño razonable (un enlace, un fichero enorme o uno truncado u hostil cuenta como ninguna actualización en marcha), el registro del actualizador se cierra una vez iniciado el proceso, y el analizador de workflows que alimenta los centinelas de Cadena de suministro y Entrega corta un fichero a 1 MiB, 20000 líneas y 4000 caracteres por línea, de modo que una línea sin fin o un millón de líneas no pueden retener el ciclo. Las pruebas rechazan un Host u Origin ajeno en todas las rutas del menú.
+
+### Añadido
+
+- **Un globo de ayuda en cada ajuste**: al poner el puntero sobre un ajuste, darle el foco con el teclado o mantener pulsado en una pantalla táctil se muestra qué hace, su rango o valores y su valor por defecto, qué ocurre al activar y desactivar un interruptor y si se aplica al instante o tras reiniciar; los ajustes que gastan cuota o añaden una página (la comparación de períodos, la búsqueda de actualizaciones, las pantallas de pared) dicen además qué verás y qué cuestan. El texto de ayuda de cada ajuste se comprueba en los ocho idiomas y se rechaza una entrada de un ajuste que no existe.
+
+### Corregido
+
+- **Los paneles plegables de las pestañas del Centinela ya no se pintan unos sobre otros**: cuando los paneles plegados llenaban la caja, el único panel desplegado quedaba aplastado a unos pocos píxeles y su cuerpo se dibujaba encima de los paneles de debajo. Ahora conserva una altura mínima y la caja se desplaza en su lugar, en todas las pestañas del Centinela. La prueba de navegador despliega cada panel de cada pestaña del Centinela uno a uno, todos juntos, a mano y por turnos, en ancho y estrecho, y compara sus rectángulos.
 
 ## [2.1.2]
 

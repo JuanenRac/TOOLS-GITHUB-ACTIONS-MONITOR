@@ -13,6 +13,8 @@ Der **Wächter** ist die zweite Hälfte der vollständigen Ausgabe. Der *Monitor
 
 Der **Tagestrend** (Adresse `#sentinel-trend`) hat einen eigenen Menüeintrag: eine kleine Kurve je Signal (Code-Scanning, Dependabot, Geheimnisse, Pull Requests, Rot, Kandidaten) mit ihrem letzten Wert. Die Übersicht des Sentinels behält nur ihre eigenen Panels und eine Schaltfläche, die ihn öffnet.
 
+**Gestern vs. heute** (Adresse `#sentinel-yesterday`) hat ebenfalls einen eigenen Menüeintrag, sodass der Bericht des Wächters die ganze Seite einnimmt: was seit dem letzten gespeicherten Bericht neu ist, was gelöst wurde und was bleibt, für die roten Workflows und die ausstehenden Signaturen.
+
 ## Start und Kosten
 
 Er startet mit dem vollständigen Monitor und läuft im selben Prozess in einem eigenen Thread mit eigenem Budget an GitHub-Aufrufen (`sentinel.budget_per_hour`, standardmäßig 600, und `sentinel.max_calls_per_tick`). Liegt das GitHub-Kontingent unter `sentinel.min_rate_remaining`, fragt er nicht mehr und die Seite meldet die Pause wegen Kontingent. Nichts davon schreibt auf GitHub.

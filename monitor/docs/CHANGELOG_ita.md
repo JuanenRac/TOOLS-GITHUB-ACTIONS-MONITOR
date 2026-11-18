@@ -12,10 +12,19 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 ### Modificato
 
 - **Le immagini del README sono scattate in 1080p e mostrano le schede più nuove**: `tools/make_screenshots.py` fotografa ogni pagina a 1920x1080 per impostazione predefinita (`--viewport LARGHEZZAxALTEZZA` lo cambia; le immagini in 4K, ultralarga, verticale, telefono e schermo a parete mantengono la propria dimensione), `tools/demo_monitor.py --rich` dà alla demo rilevamenti per le sentinelle di consegna e di catena di fornitura, un andamento giornaliero e un confronto di periodi, e il README (nelle otto lingue) mostra le pagine Consegna, Catena di fornitura, Andamento giornaliero, Confronta periodi e Aggiornamenti.
+- **Ieri vs oggi ha una voce di menu propria**: il confronto con l'ultimo rapporto salvato della Sentinella esce dal riepilogo e passa a una propria scheda (indirizzo `#sentinel-yesterday`, accanto al Trend giornaliero), così il rapporto della Sentinella occupa tutta la pagina; la voce segue la sentinella CI, ha il suo aiuto, il suo testo nelle otto lingue e lo stesso aspetto delle altre schede della Sentinella.
 
 ### Sicurezza
 
 - **Il menu Aggiornamenti è più difficile da abusare**: cinque tentativi rifiutati o falliti di aggiornare o tornare indietro in dieci minuti mettono in pausa i pulsanti per dieci minuti (la risposta è `cooldown`, con il suo testo nelle otto lingue), lo stato dice perché un aggiornamento è bloccato (`blocked_reason`, `cooldown_seconds`), il file di avanzamento dell'aggiornatore viene letto solo se è un file normale di dimensione ragionevole (un collegamento, un file enorme, troncato od ostile conta come nessun aggiornamento in corso), il registro dell'aggiornatore viene chiuso dopo l'avvio del processo, e l'analizzatore di workflow che alimenta le sentinelle Catena di fornitura e Consegna taglia un file a 1 MiB, 20000 righe e 4000 caratteri per riga, così una riga infinita o un milione di righe non possono bloccare il ciclo. I test rifiutano un Host o un Origin estraneo su ogni percorso del menu.
+
+### Aggiunto
+
+- **Un suggerimento su ogni impostazione**: passando il puntatore su un'impostazione, dandole il focus da tastiera o tenendo premuto su uno schermo tattile si vede cosa fa, il suo intervallo o i suoi valori e il valore predefinito, cosa succede quando un interruttore viene attivato o disattivato e se si applica subito o dopo un riavvio; le impostazioni che consumano quota o aggiungono una pagina (il confronto dei periodi, la ricerca di aggiornamenti, gli schermi a muro) dicono anche cosa vedrai e quanto costa. Il testo di aiuto di ogni impostazione è verificato nelle otto lingue e una voce per un'impostazione inesistente viene rifiutata.
+
+### Corretto
+
+- **I pannelli richiudibili delle schede della Sentinella non si disegnano più uno sull'altro**: quando i pannelli chiusi riempivano il riquadro, l'unico pannello aperto veniva schiacciato a pochi pixel e il suo corpo veniva disegnato sopra i pannelli sottostanti. Ora mantiene un'altezza minima e il riquadro scorre al suo posto, in tutte le schede della Sentinella. Il test del browser apre ogni pannello di ogni scheda uno a uno, tutti insieme, a mano e a turno, in largo e in stretto, e confronta i loro rettangoli.
 
 ## [2.1.2]
 

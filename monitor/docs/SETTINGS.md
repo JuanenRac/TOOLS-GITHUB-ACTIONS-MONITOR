@@ -10,6 +10,8 @@
 The Settings tab (the Settings entry of the side panel) changes the values of `actions_monitor.json` from the page, so nobody has to edit the file by hand.
 It is written in the eight languages of the page and follows the look of the rest of it.
 
+Point at any setting (or give it the keyboard focus, or press and hold on a touch screen) and a tooltip appears with what it does, its range or values and its default, what happens when a switch is turned on and off, and whether it applies at once or after a restart. Some settings add what you will see and what it costs. Press Escape to close it.
+
 <!-- settings:begin -->
 ## What can be changed
 
