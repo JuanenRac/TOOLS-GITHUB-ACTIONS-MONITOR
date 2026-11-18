@@ -113,7 +113,9 @@ class TheChecks(unittest.TestCase):
         status, detail = checks.limits(config, self.base, secret_reader=lambda name: "short")
         self.assertEqual(status, "warn")
         self.assertIn("5 < 16", detail)
-        self.assertEqual(checks.limits(config, self.base, secret_reader=lambda name: "")[0], "warn")
+        status, detail = checks.limits(config, self.base, secret_reader=lambda name: "")
+        self.assertEqual(status, "fail", "a receiver that is on and has no secret refuses every delivery: red, not a warning")
+        self.assertIn("webhook secret not set", detail)
         self.assertEqual(checks.limits({"ops": {"doctor": {"webhook_min_length": 40}}, "webhook": {"enabled": True}}, self.base, secret_reader=lambda name: SECRET)[0], "warn")
         self.assertEqual(checks.limits({}, self.base, secret_reader=lambda name: SECRET)[0], "ok", "a webhook that is off has nothing to compare")
         with mock.patch.dict(os.environ, {"MONITOR_WEBHOOK_SECRET": SECRET}):

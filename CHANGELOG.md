@@ -13,6 +13,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 ### Fixed
 
 - **The release gate accepts a green run by the count unittest itself gave**: the record of a complete green run carries the number of tests that unittest says it ran (the lines of the report can be fewer when a test prints in the middle of its line), and the gate now compares that number with the total instead of the number of lines it could read, so a complete run is no longer refused for a few uncounted lines.
+- **A clock set back no longer keeps the webhook coverage live**: an event marked ahead of the clock is not believed, so the indicator goes back to waiting instead of showing live until the clock catches up, and the savings that depend on a live webhook are not kept on by it.
 
 ### Added
 
@@ -25,6 +26,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **The screenshots of the README show the current version**: every picture of the page, the wall screens and the console tools was taken again with invented data. New ones show the menu in titled groups, the sentinels of CI and collaboration, the fleet, the reports, the whole page in another theme and the wall screens with the logo of an organization, in other themes and turning by itself; the About panel is taller so that the operation and backup card is visible.
 - **An address that asks for no first-run wizard also hides the one-time notice about the budget of the AI**, so that a picture taken from a clean browser shows the page at rest.
+- **The doctor says in red that the incoming webhook has no secret**: with the receiver on and no shared secret set, every delivery is refused with `401` and the doctor now reports a failure instead of a warning; the webhook guide says that the secret is the only barrier.
+- **The release gate compares the content of each file of the zip with the commit**: besides the names and a clean tree, every member is compared with the file the commit versions (line endings aside), so a file that differs from the commit cannot travel.
 
 ## [2.1.0]
 

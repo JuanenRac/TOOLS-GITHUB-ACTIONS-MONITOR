@@ -12,6 +12,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 ### Corretto
 
 - **Il gate di release accetta un'esecuzione verde in base al conteggio dato da unittest stesso**: la registrazione di un'esecuzione verde completa contiene il numero di test che unittest dichiara di aver eseguito (le righe del rapporto possono essere meno quando un test scrive a metà della sua riga), e il gate ora confronta quel numero con il totale invece del numero di righe che ha potuto leggere, così un'esecuzione completa non viene più rifiutata per qualche riga non contata.
+- **Un orologio portato indietro non mantiene più viva la copertura del webhook**: un evento segnato in anticipo rispetto all'orologio non viene creduto, così l'indicatore torna in attesa invece di mostrare live finché l'orologio non lo raggiunge, e i risparmi che dipendono da un webhook vivo non ne restano attivi.
 
 ### Aggiunto
 
@@ -24,6 +25,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - **Le schermate del README mostrano la versione attuale**: tutte le immagini della pagina, degli schermi da parete e degli strumenti da console sono state rifatte con dati inventati. Le nuove mostrano il menu a gruppi, le sentinelle di CI e di collaborazione, la flotta, i report, l'intera pagina in un altro tema e gli schermi da parete con il logo di un'organizzazione, in altri temi e che ruotano da soli; il pannello Informazioni è più alto per mostrare la scheda di esercizio e copie.
 - **Un indirizzo che chiede di non mostrare la procedura guidata del primo avvio nasconde anche l'avviso unico sul budget dell'IA**, così un'immagine presa da un browser pulito mostra la pagina a riposo.
+- **Il doctor segnala in rosso che il webhook in ingresso non ha un segreto**: con il ricevitore attivo e senza segreto condiviso, ogni consegna viene rifiutata con `401` e il doctor ora riporta un errore invece di un avviso; la guida del webhook dice che il segreto è l'unica barriera.
+- **Il gate di release confronta il contenuto di ogni file dello zip con il commit**: oltre ai nomi e a un albero pulito, ogni membro viene confrontato con il file versionato dal commit (a parte le fini riga), così un file diverso dal commit non può viaggiare.
 
 ## [2.1.0]
 

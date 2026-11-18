@@ -17,6 +17,7 @@
 
 - 监视器仍然只监听 `127.0.0.1`。GitHub 只能通过你有意搭建的隧道到达它；本工具从不自己开启隧道。
 - 在 `webhook.enabled` 开启**并且**共享密钥（32 个字符或更多）位于 `webhook.secret_env` 所指的环境变量中之前，接收器保持关闭（默认变量为 `MONITOR_WEBHOOK_SECRET`；`MONITOR_WEBHOOK_SECRET_FILE` 可指向一个首行为密钥的文件，容器的 secret 就是这样提供的）。密钥绝不会写入 `actions_monitor.json`、被显示、被记录到日志，也不会被监视器启动的程序继承；设置标签页只说明它是否已定义。旧方式（文件中的 `secret`）仅在 `webhook.allow_config_secret` 为 true 时才会读取，使用期间实时视图会发出警告。
+- 共享密钥是唯一的屏障:GitHub 无法发送访问令牌,因此接收端不要求令牌,只信任签名。接收端已开启但未设置密钥时,它会以 `401` 拒绝每一次投递,doctor 会以红色提示。请把地址放在你自己控制的隧道或代理之后。
 - 每个请求都必须带有 `X-Hub-Signature-256: sha256=<hmac>`，用该密钥生成并以恒定时间比较；其他一律返回 `401`，在验证签名之前不会查看任何内容。
 - 超过 256 KB 的请求体返回 `413`，且在任何计算之前就拒绝。
 - 列表是封闭的：只处理 `workflow_run`、`workflow_job`、`check_run`、`push`、`release`、`check_suite` 和 `ping`，事件中只保留经过验证的短字段（绝不保留提交信息或任何自由文本），其余一律返回 `202` 并丢弃。

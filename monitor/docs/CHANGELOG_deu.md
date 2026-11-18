@@ -12,6 +12,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 ### Behoben
 
 - **Das Release-Gate akzeptiert einen grünen Lauf nach der Zahl, die unittest selbst angab**: Die Aufzeichnung eines vollständigen grünen Laufs enthält die Anzahl der Tests, die unittest als ausgeführt meldet (die Zeilen des Berichts können weniger sein, wenn ein Test mitten in seiner Zeile schreibt), und das Gate vergleicht nun diese Zahl mit der Gesamtzahl statt mit der Zahl der lesbaren Zeilen, sodass ein vollständiger Lauf nicht mehr wegen einiger ungezählter Zeilen abgelehnt wird.
+- **Eine zurückgestellte Uhr hält die Webhook-Abdeckung nicht mehr am Leben**: Ein Ereignis mit einer Marke vor der Uhr wird nicht geglaubt, sodass die Anzeige wieder auf Warten geht, statt bis zum Aufholen der Uhr live zu zeigen, und die vom lebenden Webhook abhängigen Einsparungen dadurch nicht aufrechterhalten werden.
 
 ### Hinzugefügt
 
@@ -24,6 +25,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **Die Screenshots der README zeigen die aktuelle Version**: alle Bilder der Seite, der Wandanzeigen und der Konsolenwerkzeuge wurden mit erfundenen Daten neu aufgenommen. Neue Bilder zeigen das Menü in Gruppen, die Wächter für CI und Zusammenarbeit, die Flotte, die Berichte, die ganze Seite in einem anderen Thema und die Wandanzeigen mit dem Logo einer Organisation, in anderen Themen und von selbst drehend; das Fenster Info ist höher, damit die Karte für Betrieb und Sicherung sichtbar ist.
 - **Eine Adresse, die den Assistenten beim ersten Start abschaltet, blendet auch den einmaligen Hinweis zum Budget der KI aus**, sodass ein Bild aus einem sauberen Browser die Seite im Ruhezustand zeigt.
+- **Der Doctor meldet in Rot, dass dem eingehenden Webhook das Geheimnis fehlt**: Bei eingeschaltetem Empfänger ohne gemeinsames Geheimnis wird jede Lieferung mit `401` abgewiesen, und der Doctor meldet nun einen Fehler statt einer Warnung; die Webhook-Anleitung sagt, dass das Geheimnis die einzige Schranke ist.
+- **Das Release-Gate vergleicht den Inhalt jeder Datei des Zips mit dem Commit**: Neben den Namen und einem sauberen Arbeitsbaum wird jedes Mitglied mit der vom Commit versionierten Datei verglichen (Zeilenenden ausgenommen), sodass keine vom Commit abweichende Datei mitreisen kann.
 
 ## [2.1.0]
 

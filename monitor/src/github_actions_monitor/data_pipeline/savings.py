@@ -53,7 +53,8 @@ def note_webhook(now=None):
 def webhook_alive(config, now=None):
     cfg = settings(config)
     now = time.time() if now is None else now
-    return cfg["webhook_first"] and LAST_WEBHOOK["at"] > 0 and now - LAST_WEBHOOK["at"] <= cfg["webhook_window_minutes"] * 60
+    from github_actions_monitor.util import clock
+    return cfg["webhook_first"] and LAST_WEBHOOK["at"] > 0 and not clock.in_future(LAST_WEBHOOK["at"], now) and now - LAST_WEBHOOK["at"] <= cfg["webhook_window_minutes"] * 60
 
 
 def quiet_by_webhook(config, entry, now=None):

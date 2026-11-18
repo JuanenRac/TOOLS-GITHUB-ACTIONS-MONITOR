@@ -12,6 +12,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 ### Corrigé
 
 - **La porte de release accepte une exécution verte d'après le nombre donné par unittest lui-même** : l'enregistrement d'une exécution verte complète contient le nombre de tests que unittest dit avoir exécutés (les lignes du rapport peuvent être moins nombreuses quand un test écrit au milieu de sa ligne), et la porte compare désormais ce nombre au total au lieu du nombre de lignes qu'elle a pu lire, de sorte qu'une exécution complète n'est plus refusée pour quelques lignes non comptées.
+- **Une horloge reculée ne maintient plus la couverture du webhook en direct** : un événement marqué en avance sur l'horloge n'est pas cru, de sorte que l'indicateur repasse en attente au lieu d'afficher en direct jusqu'à ce que l'horloge le rattrape, et les économies qui dépendent d'un webhook vivant n'en sont pas maintenues.
 
 ### Ajouté
 
@@ -24,6 +25,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - **Les captures du README montrent la version actuelle** : toutes les images de la page, des écrans muraux et des outils de console ont été refaites avec des données inventées. Les nouvelles montrent le menu en groupes, les sentinelles de CI et de collaboration, la flotte, les rapports, toute la page dans un autre thème et les écrans muraux avec le logo d'une organisation, dans d'autres thèmes et tournant tout seuls ; le panneau À propos est plus haut pour que la carte d'exploitation et de sauvegarde soit visible.
 - **Une adresse qui demande de ne pas afficher l'assistant du premier démarrage masque aussi l'avis unique sur le budget de l'IA**, de sorte qu'une image prise depuis un navigateur propre montre la page au repos.
+- **Le doctor signale en rouge que le webhook entrant n'a pas de secret** : avec le récepteur activé et sans secret partagé, toute livraison est refusée avec `401` et le doctor signale désormais un échec au lieu d'un avertissement ; le guide du webhook dit que le secret est la seule barrière.
+- **La porte de release compare le contenu de chaque fichier du zip avec le commit** : en plus des noms et d'un arbre propre, chaque membre est comparé au fichier versionné par le commit (fins de ligne mises à part), si bien qu'un fichier différent du commit ne peut pas voyager.
 
 ## [2.1.0]
 
