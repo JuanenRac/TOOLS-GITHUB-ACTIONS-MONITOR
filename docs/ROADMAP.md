@@ -21,7 +21,11 @@ What only shows with long real use: the migration from 1.8 and 1.9, the growth o
 
 The monitor's own workflows keep to what the hygiene sentinel will ask of others: actions pinned to a commit, the least permissions and a time limit on every job.
 
-## Done in 1.8.2 to 2.0.9
+## Done in 1.8.2 to 2.1.0
+
+### 2.1.0 - Wall screens with a theme, a logo and a rotating mode, a backup you can restore, and an updater
+
+The wall screens wear the theme of the product and can carry the logo of the organization; one window can turn through the three screens and jump to a new red; the overview shows the map of the fleet by groups; a failing Dependabot update is an alert of its own; and every kind of event has its sound on this computer too. The installation can be copied whole, verified and restored, on a schedule if you wish, the doctor checks the operation with exit codes that do not change and a purge can be run on demand. The updater moves an installation to any published version, copies it first and goes back if something fails. The release gate names the tests that fail and accepts a green run it has already seen, the status labels of the detail panels stay on one line, the links of the page are checked by reading the address, and the guide of the container says how to open the first session.
 
 ### 2.0.9 - A safer independent audit, menus with groups, a sound for each kind of event and read-only chat commands
 

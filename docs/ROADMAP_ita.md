@@ -16,7 +16,11 @@ Ciò che emerge solo con un uso reale prolungato: la migrazione dalla 1.8 e dall
 
 I workflow del monitor stesso rispettano ciò che la sentinella di igiene chiederà agli altri: azioni fissate a un commit, permessi minimi e un limite di tempo su ogni job.
 
-## Fatto dalla 1.8.2 alla 2.0.9
+## Fatto dalla 1.8.2 alla 2.1.0
+
+### 2.1.0 - Schermi a muro con tema, logo e modalità a rotazione, una copia ripristinabile e un aggiornatore
+
+Gli schermi a muro portano il tema del prodotto e possono mostrare il logo dell'organizzazione; una finestra può scorrere tra i tre schermi e saltare a un nuovo rosso; il quadro generale mostra la mappa della flotta per gruppi; un aggiornamento Dependabot fallito è un avviso a sé; e ogni tipo di evento ha il suo suono anche su questo computer. L'installazione si può copiare per intero, verificare e ripristinare, con una pianificazione se si vuole, il doctor controlla il funzionamento con codici di uscita che non cambiano e si può eseguire una pulizia su richiesta. L'aggiornatore porta un'installazione a qualsiasi versione pubblicata, la copia prima e torna indietro se qualcosa fallisce. Il cancello di rilascio nomina i test che falliscono e accetta una passata verde già vista, le etichette di stato dei pannelli di dettaglio restano su una riga, i link della pagina si verificano leggendo l'indirizzo e la guida del container spiega come aprire la prima sessione.
 
 ### 2.0.9 - Un audit indipendente più sicuro, menu con gruppi, un suono per ogni tipo di evento e comandi chat di sola lettura
 

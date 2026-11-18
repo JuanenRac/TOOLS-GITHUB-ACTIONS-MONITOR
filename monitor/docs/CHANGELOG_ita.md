@@ -9,6 +9,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+## [2.1.0]
+
 ### Aggiunto
 
 - **Un backup completo dell'installazione, verificato e facoltativamente cifrato (`backup create`)**: `monitor_cli.py backup create` scrive un pacchetto (formato 2) con il dump di ogni account, le impostazioni e gli elenchi ripuliti dell'installazione e un manifest con la dimensione e lo SHA-256 di ogni membro; viene verificato prima di essere messo a posto e un pacchetto del primo formato si verifica e si ripristina ancora. Token, chiavi, password, il valore di qualunque variabile `*_env`, il segreto del webhook, le sessioni e il contenuto dell'archivio dei segreti non viaggiano mai: le impostazioni passano da una lista bianca e poi da una pulizia di tutto ciò che sembra un segreto. Con `ops.backup.encrypt` (o `--encrypt`) il pacchetto viene cifrato con AES-256-GCM usando una chiave dalla variabile indicata da `ops.backup.key_env`; serve la libreria facoltativa `cryptography` e, senza di essa o senza una chiave di 12 caratteri o più, il backup viene rifiutato con un messaggio chiaro e non si scrive nulla. `backup verify` (con `--deep` ripristina in una cartella temporanea), `backup list` e `backup status` lo completano.
@@ -32,6 +34,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 ### Corretto
 
 - **L'etichetta di stato di un pannello di dettaglio resta su una riga**: nella scheda Sentinella l'etichetta (per esempio quella che dice che bisogna intervenire) nell'intestazione di ogni pannello di Dettaglio per livello veniva schiacciata a una lettera per riga, in tutte le lingue e soprattutto sul telefono. Non si restringe più e non si spezza dentro una parola, e un test in un browser reale la misura nelle otto lingue, largo e stretto.
+- **Il webhook che passa dal supervisore degli account rispondeva 400 a ogni consegna**: il processo di un account, quando il supervisore gli inoltra una consegna, non poteva sapere chi l'avesse inviata perché si usava un modulo standard senza importarlo; una firma valida, una errata, una assente, una consegna ripetuta e un corpo grande ricevevano la stessa risposta generica. Il mittente si legge di nuovo come prima (una chiave valida del supervisore dà l'indirizzo che comunica, ogni altra ricade sul peer) e un test ora cerca in tutto il pacchetto un modulo standard usato in una funzione senza importarlo.
 
 ### Sicurezza
 

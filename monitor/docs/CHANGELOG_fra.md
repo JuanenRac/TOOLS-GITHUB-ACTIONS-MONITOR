@@ -9,6 +9,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+## [2.1.0]
+
 ### Ajouté
 
 - **Une sauvegarde complète de l'installation, vérifiée et éventuellement chiffrée (`backup create`)** : `monitor_cli.py backup create` écrit un paquet (format 2) avec le dump de chaque compte, les réglages et listes nettoyés de l'installation et un manifeste avec la taille et le SHA-256 de chaque membre ; il est vérifié avant d'être mis en place et un paquet du premier format se vérifie et se restaure toujours. Les jetons, clés, mots de passe, la valeur de toute variable `*_env`, le secret du webhook, les sessions et le contenu du magasin de secrets ne voyagent jamais : les réglages passent par une liste blanche puis par un nettoyage de tout ce qui ressemble à un secret. Avec `ops.backup.encrypt` (ou `--encrypt`) le paquet est chiffré en AES-256-GCM avec une clé issue de la variable que désigne `ops.backup.key_env` ; il faut la bibliothèque facultative `cryptography` et, sans elle ou sans clé de 12 caractères ou plus, la sauvegarde est refusée avec un message clair et rien n'est écrit. `backup verify` (avec `--deep` il restaure dans un dossier temporaire), `backup list` et `backup status` la complètent.
@@ -32,6 +34,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 ### Corrigé
 
 - **L'étiquette d'état d'un panneau de détail reste sur une ligne** : dans l'onglet Sentinelle, l'étiquette (par exemple celle qui dit qu'il faut agir) de l'en-tête de chaque panneau de Détail par couche était écrasée à une lettre par ligne, dans toutes les langues et surtout sur un téléphone. Elle ne rétrécit plus et ne se coupe plus au milieu d'un mot, et un test dans un vrai navigateur la mesure dans les huit langues, large et étroit.
+- **Le webhook passant par le superviseur des comptes répondait 400 à chaque livraison** : le processus d'un compte, quand le superviseur lui transmet une livraison, ne pouvait pas savoir qui l'avait envoyée parce qu'un module standard était utilisé sans être importé ; une signature valide, une fausse, une absente, une livraison répétée et un gros corps recevaient la même réponse générique. L'expéditeur est de nouveau lu comme avant (une clé valide du superviseur donne l'adresse qu'il indique, toute autre retombe sur le pair), et un test parcourt maintenant tout le paquet à la recherche d'un module standard utilisé dans une fonction sans être importé.
 
 ### Sécurité
 
