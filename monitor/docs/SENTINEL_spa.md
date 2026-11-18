@@ -11,6 +11,10 @@ El **centinela** es la segunda mitad de la edición completa. El *monitor* muest
 
 **La edición lite no lo incluye.** `MONITOR_LITE_GITHUB_ACTIONS` (puerto 8766) no tiene centinela: ni siquiera se importa el módulo y sus endpoints responden 404. La edición completa (`MONITOR_GITHUB_ACTIONS`, puerto 8765) lo arranca sola; se apaga con `sentinel.enabled` (Ajustes > Centinela). Las dos ediciones usan la misma regla de «rojo en main» (A2), así que sus cifras coinciden.
 
+La **Tendencia diaria** (dirección `#sentinel-trend`) tiene su propia entrada de menú: una curva pequeña por cada señal (escaneo de código, Dependabot, secretos, pull requests, rojo, candidatas) con su último valor. El resumen del centinela deja solo lo suyo y un botón que la abre.
+
+La **Tendencia diaria** (dirección `#sentinel-trend`) tiene su propia entrada de menú: una curva pequeña por cada señal (escaneo de código, Dependabot, secretos, pull requests, rojo, candidatas) con su último valor. El resumen del centinela deja solo lo suyo y un botón que la abre.
+
 ## Cómo arranca y qué cuesta
 
 Arranca con el monitor completo y corre en el mismo proceso, en su propio hilo, con su propio presupuesto de llamadas a GitHub (`sentinel.budget_per_hour`, 600 por defecto, y `sentinel.max_calls_per_tick`). Cuando la cuota de GitHub baja de `sentinel.min_rate_remaining` deja de preguntar y la página dice que está en pausa por cuota. Nada de lo que hace escribe en GitHub.

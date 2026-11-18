@@ -16,7 +16,11 @@ Lo que solo aparece con un uso real prolongado: la migración desde la 1.8 y la 
 
 Los workflows del propio monitor cumplen lo que el centinela de higiene pedirá a los demás: acciones fijadas a un commit, los permisos mínimos y un límite de tiempo en cada trabajo.
 
-## Hecho en la 1.8.2 a la 2.1.1
+## Hecho en la 1.8.2 a la 2.1.2
+
+### 2.1.2 - El monitor se actualiza desde un menú, compara un periodo con el anterior y los paneles desplegados llegan hasta abajo
+
+El menú Actualizaciones (edición Completa) muestra la versión instalada y las publicadas con sus notas, aplica una actualización con copia previa, comprobación del zip frente a SHA256SUMS, migración de la configuración y reinicio, y vuelve atrás con un clic si la versión nueva no arranca; el actualizador independiente sigue como camino de vuelta. La comparación pone un periodo junto al anterior, con estados honestos cuando una cifra no se puede decir, un informe de qué cambió, una ruta, un comando, una sección de la pestaña de gráficos y una sección opcional del informe programado. Los ficheros que escriben varios procesos usan el candado del sistema operativo, el panel desplegado de una pestaña del Centinela llega al fondo de su caja, arrancar el monitor desde el actualizador ya no abre una ventana de consola por cada llamada a git y gh, y la imagen de la arquitectura muestra en qué se ha convertido el monitor.
 
 ### 2.1.1 - Dos centinelas nuevos, uno de cadena de suministro y otro de entrega, y una puerta de release más estricta
 

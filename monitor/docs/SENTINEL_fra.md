@@ -11,6 +11,8 @@ La **sentinelle** est la seconde moitié de l'édition complète. Le *moniteur* 
 
 **L'édition lite ne l'inclut pas.** `MONITOR_LITE_GITHUB_ACTIONS` (port 8766) n'a pas de sentinelle : le module n'est même pas importé et ses points d'accès répondent 404. L'édition complète (`MONITOR_GITHUB_ACTIONS`, port 8765) la démarre seule ; on la coupe avec `sentinel.enabled` (Réglages > Sentinelle). Les deux éditions utilisent la même règle de « rouge sur main » (A2), leurs chiffres coïncident donc.
 
+La **Tendance quotidienne** (adresse `#sentinel-trend`) a sa propre entrée de menu : une petite courbe par signal (analyse de code, Dependabot, secrets, pull requests, rouge, candidates) avec sa dernière valeur. Le résumé de la sentinelle ne garde que ses propres panneaux et un bouton qui l'ouvre.
+
 ## Comment elle démarre et ce qu'elle coûte
 
 Elle démarre avec le moniteur complet et tourne dans le même processus, dans son propre fil, avec son propre budget d'appels à GitHub (`sentinel.budget_per_hour`, 600 par défaut, et `sentinel.max_calls_per_tick`). Quand le quota de GitHub passe sous `sentinel.min_rate_remaining`, elle cesse de demander et la page indique la pause pour quota. Rien de ce qu'elle fait n'écrit sur GitHub.

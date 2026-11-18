@@ -16,7 +16,11 @@ Ce qui n'apparaît qu'à l'usage réel prolongé : la migration depuis la 1.8 et
 
 Les workflows du moniteur lui-même respectent ce que la sentinelle d'hygiène demandera aux autres : actions fixées à un commit, permissions minimales et une limite de temps sur chaque job.
 
-## Fait dans la 1.8.2 à la 2.1.1
+## Fait dans la 1.8.2 à la 2.1.2
+
+### 2.1.2 - Le moniteur se met à jour depuis un menu, compare une période à la précédente, et les panneaux dépliés atteignent le bas
+
+Le menu Mises à jour (édition Complète) montre la version installée et les versions publiées avec leurs notes, applique une mise à jour avec copie préalable, contrôle du zip par rapport à SHA256SUMS, migration de la configuration et redémarrage, et revient en arrière d'un clic si la nouvelle version ne démarre pas ; l'outil autonome reste le chemin de retour. La comparaison place une période à côté de la précédente, avec des états honnêtes quand un chiffre ne peut pas être dit, un rapport de ce qui a changé, une route, une commande, une section de l'onglet Graphiques et une section facultative du rapport planifié. Les fichiers qu'écrivent plusieurs processus utilisent le verrou du système d'exploitation, le panneau déplié d'un onglet du Sentinelle atteint le bas de sa boîte, démarrer le moniteur depuis l'outil de mise à jour n'ouvre plus une fenêtre de console pour chaque appel à git et gh, et l'image de l'architecture montre ce que le moniteur est devenu.
 
 ### 2.1.1 - Deux nouvelles sentinelles, l'une pour la chaîne d'approvisionnement et l'autre pour la livraison, et une porte de release plus stricte
 

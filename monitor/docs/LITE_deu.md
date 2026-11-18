@@ -13,7 +13,7 @@ Ein zweites, einfacheres Produkt im selben Paket: die Seite dessen, was läuft u
 |---|---|---|
 | Start | `MONITOR_GITHUB_ACTIONS` (`.bat` / `.sh` / `.command`) | `MONITOR_LITE_GITHUB_ACTIONS` (dieselben drei) |
 | Port | 8765 | 8766 |
-| Reiter | Jetzt, Alarme, Diagramme, Übersicht, CI-Wächter, Kollaborations-Wächter, Sicherheits-Wächter, Delivery-Sentinel, Lieferketten-Sentinel, Teamzustand, Flotte, Repositories, Berichte, Geplante Berichte, Lektionen, Verlauf, Updates, Einstellungen | Jetzt, Diagramme, Repositorys, Verlauf, kurze Einstellungen |
+| Reiter | Jetzt, Alarme, Diagramme, Übersicht, CI-Wächter, Kollaborations-Wächter, Sicherheits-Wächter, Delivery-Sentinel, Lieferketten-Sentinel, Tagestrend, Teamzustand, Flotte, Repositories, Berichte, Geplante Berichte, Lektionen, Verlauf, Updates, Einstellungen | Jetzt, Diagramme, Repositorys, Verlauf, kurze Einstellungen |
 | Kopfzeile | alle Kacheln, Bereitschaft, Signatur | laufend, wartend, Fehler und Erfolge der 24 h, Rechenminuten, Issues, Rot auf main, Repositorys, Kontingent, Verbindung |
 | Wächter (Warnungen, Releases, Signatur-Warteschlange, Bereitschaft, Linter) | ja | nein: er wird nicht einmal importiert |
 | Analytik, Benachrichtigungen, Webhook, KI, Prometheus-/Grafana-Ausgaben | ja, aus bis Sie sie einschalten | nein: diese Pfade antworten mit 404, außer den Kanälen des Feeds für ein KI-Werkzeug (`/api/ai/state`, `/api/ai/brief`, `/api/ai/alerts`, `/api/ai/stream`, `/api/ai/ack`, `/api/skills`) |

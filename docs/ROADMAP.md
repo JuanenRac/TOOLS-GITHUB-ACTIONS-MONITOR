@@ -21,7 +21,11 @@ What only shows with long real use: the migration from 1.8 and 1.9, the growth o
 
 The monitor's own workflows keep to what the hygiene sentinel will ask of others: actions pinned to a commit, the least permissions and a time limit on every job.
 
-## Done in 1.8.2 to 2.1.1
+## Done in 1.8.2 to 2.1.2
+
+### 2.1.2 - The monitor updates itself from a menu, compares a period with the one before, and the unfolded panels reach the bottom
+
+The Updates menu (Complete edition) shows the installed version and the published ones with their notes, applies an update with a copy first, a check of the zip against SHA256SUMS, the migration of the configuration and a restart, and goes back with one click when the new version does not start; the stand-alone updater stays as the way back. The comparison puts a period next to the one before it, with honest states when a figure cannot be told, a what-changed report, a route, a command, a section of the Charts tab and an optional section of the scheduled report. The files that several processes write use the lock of the operating system, the unfolded panel of a Sentinel tab reaches the bottom of its box, starting the monitor from the updater no longer opens a console window for every git and gh call, and the architecture picture shows what the monitor has become.
 
 ### 2.1.1 - Two new sentinels, one for the supply chain and one for delivery, and a stricter release gate
 

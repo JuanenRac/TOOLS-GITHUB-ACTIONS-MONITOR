@@ -4123,5 +4123,7 @@
  "ui.sdel_off": "The Delivery sentinel is off (Settings > Sentinel > Delivery).",
  "ui.ssup_off": "The Supply chain sentinel is off (Settings > Sentinel > Supply chain).",
  "ui.sdel_none": "Nothing built is missing from its delivery in the repositories that were checked.",
- "ui.ssup_none": "No open supply chain finding in the workflow files that were checked."
+ "ui.ssup_none": "No open supply chain finding in the workflow files that were checked.",
+ "ui.tab_strend": "Daily trend",
+ "ui.trend_open": "Open the daily trend"
 }
