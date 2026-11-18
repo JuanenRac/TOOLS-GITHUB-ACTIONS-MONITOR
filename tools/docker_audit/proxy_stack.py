@@ -32,6 +32,13 @@ class Stack:
     def compose_cmd(self):
         return ["docker", "compose", "-p", self.project, "-f", str(self.deploy / "compose.yaml"), "-f", str(self.deploy / "audit.override.yaml"), "--profile", "proxy"]
 
+    def login_mode(self, mode):
+        """Changes the mode of the login file. After the chown to 10001 the host user may not do it, so root does."""
+        if os.name == "posix":
+            self.s.run(["sudo", "-n", "chmod", "%o" % mode, str(self.login_file)], timeout=60, label="change the mode of the login file", record=False)
+        else:
+            self.login_file.chmod(mode)
+
     def write(self, extra_env=None, extra_secrets=None, trusted=True):
         """Copies deploy/ of the target, writes .env, the override and the secret files. `extra_env` goes to the monitor container, `extra_secrets` is {name: value} (files mounted in /run/secrets)."""
         s = self.s
@@ -47,6 +54,8 @@ class Stack:
         (self.deploy / "fake" / "good").write_text(token + "\n", encoding="utf-8", newline="\n")
         (self.deploy / "fake" / "good").chmod(0o644)
         login = self.deploy / "gh_token.txt"
+        if os.name == "posix" and login.exists():      # a second call: the file of the first one belongs to the user of the container (10001), so the host user can neither rewrite nor chmod it
+            s.run(["sudo", "-n", "rm", "-f", str(login)], timeout=60, label="remove the login file of the previous start", record=False)
         login.write_text(token, encoding="utf-8", newline="\n")
         login.chmod(0o600)      # exactly what the guide says: the login is a file with mode 600
         if os.name == "posix":      # and, like the guide, given to the user of the container (10001): a file of mode 600 that belongs to somebody else cannot be read in it
