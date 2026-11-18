@@ -43,8 +43,8 @@ class Bar(unittest.TestCase):
         self.assertIn('a.download="monitor-"+(CURTAB||"now")+".json"', PAGE)
 
     def test_print_hides_the_menu_the_bar_and_the_dialogs(self):
-        rule = re.search(r"@media print\{([^}]*)\}", PAGE[PAGE.index("#statusbar .sb-bar"):]).group(1)
-        for hidden in ("#statusbar", "nav[role=tablist]", ".dlg"):
+        rule = re.search(r"@media print\{([^}]*)\}", PAGE[PAGE.index(".sb-bar{display:inline-flex"):]).group(1)
+        for hidden in (".sb-bar", "#statusbar", "nav[role=tablist]", ".dlg"):
             self.assertIn(hidden, rule)
 
     def test_the_status_bar_says_if_the_built_in_ai_is_configured_and_never_its_key(self):
