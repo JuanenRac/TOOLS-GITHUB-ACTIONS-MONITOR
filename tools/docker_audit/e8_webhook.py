@@ -85,7 +85,8 @@ def body(s):
     flood = stack.request(ps.CLIENT_A, [hook(secret, sign=False, headers={"X-Hub-Signature-256": "sha256=" + "2" * 64, "X-Forwarded-For": "203.0.113.{i}"}, repeat=140)])[0]
     s.check("the flood of one visitor meets a limit of its own (429)", "429" in flood["statuses"], "statuses %s, first 429 at request %s" % (flood["statuses"], flood["first_index"].get("429")))
     s.note("the flood by the first visitor: %s" % flood["statuses"])
-    victim = stack.request(ps.CLIENT_B, [hook(secret, delivery="visitor-b-{rand}-{i}")])[0]["first"]      # its own delivery id: with the default one the delivery repeats the first valid ping of this run and is answered as a duplicate
+    victim_body = json.dumps({"zen": "the delivery of another visitor", "repository": {"name": "audit-repo", "full_name": "audit-owner/audit-repo"}})      # its own delivery id AND its own body: the monitor also remembers what was signed, so the body of the first ping would be answered as a duplicate
+    victim = stack.request(ps.CLIENT_B, [hook(secret, body=victim_body, delivery="visitor-b-{rand}-{i}")])[0]["first"]
     s.check("a real, signed delivery from ANOTHER visitor behind the same proxy is still accepted while the first one is limited (200)", victim["status"] == 200,
             "%s %s -- the limit is counted against the address of the proxy, not against the visitor" % (victim["status"], victim["body"][:200]))
     direct = stack.request(ps.CLIENT_C, [{"method": "POST", "url": "http://monitor:8765/api/webhook", "headers": {"Content-Type": "application/json", "X-GitHub-Event": "ping", "X-GitHub-Delivery": "direct-{rand}-{i}",
