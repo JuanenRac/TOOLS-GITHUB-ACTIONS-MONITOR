@@ -4,8 +4,11 @@
 nobody touches, with no menu and no buttons that change anything. This module is the server side of them and holds no state:
 
   settings(config)            the block `screens` of the configuration, every value clamped to its range
-  params(query, cfg)          what the address may change for one window (?monitor ?theme ?density ?refresh ?scale ?rotate ?blink ?sound): it can only make a window quieter or smaller than the settings
-                              allow, never switch on what the settings keep off
+  params(query, cfg, kind, global_theme)  what the address may change for one window (?monitor ?theme ?density ?refresh ?scale ?rotate ?jump ?blink ?sound): it can only make a window quieter or smaller than
+                              the settings allow, never switch on what the settings keep off
+  resolve_theme(cfg, kind, global_theme)  the theme of one screen: its own setting, else the one of all the screens, else the theme chosen in Settings for the whole product
+  theme_css()                 the palettes of the sixteen themes of the main page, read from the page itself so that the two never differ
+  logo_block(cfg, info)       what the page needs to show the logo of the organization (docs/SCREENS.md), or None
   page_data(kind, ...)        what is embedded in the page (language, texts, settings, parameters)
   build(kind, ...)            the payload of /api/screens/data: a closed list of fields made only from what the monitor already holds (the last cycle, the sentinel snapshot, the alerts, the score).
                               Nothing here reads GitHub, runs a command, opens a link or returns a title, a commit message, a URL, a job name or a user name.
@@ -20,15 +23,25 @@ from datetime import datetime, timezone
 
 from github_actions_monitor import i18n
 from github_actions_monitor.tool_version import TOOL_VERSION
+from github_actions_monitor.util import paths
 
 SCHEMA = 1
 KINDS = ("overview", "now", "sentinels")
 PATH_RE = re.compile(r"^/screen/(overview|now|sentinels)/?\Z")
 THEMES = ("dark", "light", "contrast")
+#: the themes of the main page (the same names, in the same order as its list): `auto` follows the computer, the rest are fixed. A wall screen may also use `contrast`, white on black for a screen seen from far away.
+STUDIO_THEMES = ("Armor", "Aqua", "Midnight", "Ember", "Forest", "Violet", "Solar", "Ice", "Crimson", "Mono", "High contrast", "Metallic", "Professional", "Videogame", "Terminal", "Blueprint")
+GLOBAL_THEMES = ("auto", "light", "dark") + STUDIO_THEMES
+SCREEN_THEMES = GLOBAL_THEMES + ("contrast",)
+THEME_CHOICES = ("inherit",) + SCREEN_THEMES
+MODES = ("three", "rotate")
+CORNERS = ("top-right", "top-left", "bottom-right", "bottom-left")
 DENSITIES = ("compact", "normal", "large")
 NAMES = ("all", "public", "none")
-DEFAULTS = {"enabled": False, "blink": True, "blink_calm_minutes": 30, "rotate_seconds": 0, "default_theme": "dark", "default_density": "normal", "refresh_seconds": 10, "burn_in_protection": True,
-            "night_dim": False, "night_dim_from_hour": 22, "night_dim_to_hour": 7, "show_repo_names": "public", "sound": False}
+DEFAULTS = {"enabled": False, "blink": True, "blink_calm_minutes": 30, "rotate_seconds": 0, "default_theme": "inherit", "default_density": "normal", "refresh_seconds": 10, "burn_in_protection": True,
+            "night_dim": False, "night_dim_from_hour": 22, "night_dim_to_hour": 7, "show_repo_names": "public", "sound": False,
+            "theme_overview": "inherit", "theme_now": "inherit", "theme_sentinels": "inherit", "mode": "three", "rotate_every_seconds": 20, "alert_hold_seconds": 30,
+            "logo_overview": True, "logo_now": False, "logo_sentinels": False, "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64}
 SENTINEL_KEY = re.compile(r"^ui\.a(1[0-2]|[1-9])\Z")
 SENTINELS = tuple("a%d" % n for n in range(1, 13))
 LEVELS = ("ok", "warn", "bad", "info", "unknown")
@@ -63,17 +76,46 @@ def _choice(value, allowed, default):
     return text if text in allowed else default
 
 
+def _theme(value, allowed, default):
+    """A theme name from `allowed`, matched without regard to case (`high contrast` is `High contrast`); else the default."""
+    text = str(value).strip().lower() if value is not None else ""
+    for name in allowed:
+        if name.lower() == text:
+            return name
+    return default
+
+
 def settings(config):
     """The settings of the wall screens from the configuration, each one inside its range (a value that is not valid is the default)."""
     block = (config or {}).get("screens")
     block = block if isinstance(block, dict) else {}
     d = DEFAULTS
     return {"enabled": _flag(block.get("enabled"), d["enabled"]), "blink": _flag(block.get("blink"), d["blink"]), "blink_calm_minutes": _int(block.get("blink_calm_minutes"), 0, 1440, d["blink_calm_minutes"]),
-            "rotate_seconds": _int(block.get("rotate_seconds"), 0, 3600, d["rotate_seconds"]), "default_theme": _choice(block.get("default_theme"), THEMES, d["default_theme"]),
+            "rotate_seconds": _int(block.get("rotate_seconds"), 0, 3600, d["rotate_seconds"]), "default_theme": _theme(block.get("default_theme"), THEME_CHOICES, d["default_theme"]),
             "default_density": _choice(block.get("default_density"), DENSITIES, d["default_density"]), "refresh_seconds": _int(block.get("refresh_seconds"), 5, 120, d["refresh_seconds"]),
             "burn_in_protection": _flag(block.get("burn_in_protection"), d["burn_in_protection"]), "night_dim": _flag(block.get("night_dim"), d["night_dim"]),
             "night_dim_from_hour": _int(block.get("night_dim_from_hour"), 0, 23, d["night_dim_from_hour"]), "night_dim_to_hour": _int(block.get("night_dim_to_hour"), 0, 23, d["night_dim_to_hour"]),
-            "show_repo_names": _choice(block.get("show_repo_names"), NAMES, d["show_repo_names"]), "sound": _flag(block.get("sound"), d["sound"])}
+            "show_repo_names": _choice(block.get("show_repo_names"), NAMES, d["show_repo_names"]), "sound": _flag(block.get("sound"), d["sound"]),
+            "theme_overview": _theme(block.get("theme_overview"), THEME_CHOICES, d["theme_overview"]), "theme_now": _theme(block.get("theme_now"), THEME_CHOICES, d["theme_now"]),
+            "theme_sentinels": _theme(block.get("theme_sentinels"), THEME_CHOICES, d["theme_sentinels"]), "mode": _choice(block.get("mode"), MODES, d["mode"]),
+            "rotate_every_seconds": _int(block.get("rotate_every_seconds"), 5, 300, d["rotate_every_seconds"]), "alert_hold_seconds": _int(block.get("alert_hold_seconds"), 5, 600, d["alert_hold_seconds"]),
+            "logo_overview": _flag(block.get("logo_overview"), d["logo_overview"]), "logo_now": _flag(block.get("logo_now"), d["logo_now"]), "logo_sentinels": _flag(block.get("logo_sentinels"), d["logo_sentinels"]),
+            "logo_corner": _choice(block.get("logo_corner"), CORNERS, d["logo_corner"]), "logo_max_width": _int(block.get("logo_max_width"), 16, 640, d["logo_max_width"]),
+            "logo_max_height": _int(block.get("logo_max_height"), 16, 320, d["logo_max_height"])}
+
+
+def global_theme(config):
+    """The theme chosen in Settings for the whole product (`ui.theme`): auto, light, dark or one of the sixteen; auto when it is missing or not one of them."""
+    ui = (config or {}).get("ui")
+    return _theme(ui.get("theme") if isinstance(ui, dict) else None, GLOBAL_THEMES, "auto")
+
+
+def resolve_theme(cfg, kind=None, global_name="auto"):
+    """The theme of one screen: its own setting; when that is `inherit`, the one of all the screens; when that is `inherit` too, the theme of the whole product."""
+    for choice in (cfg.get("theme_" + kind) if kind in KINDS else None, cfg.get("default_theme")):
+        if choice in SCREEN_THEMES:
+            return choice
+    return global_name if global_name in GLOBAL_THEMES else "auto"
 
 
 def enabled(config):
@@ -86,20 +128,54 @@ def kind_of(path):
     return found.group(1) if found else None
 
 
-def params(query, cfg):
+def params(query, cfg, kind=None, global_name="auto"):
     """What the address of one window asks for, checked. `query` is {name: first value}. A window may blink less, sound less and rotate on its own; it can never turn on blinking or sound that the
-    settings turned off, and the refresh stays between 5 and 120 seconds."""
+    settings turned off, and the refresh stays between 5 and 120 seconds. With `screens.mode` = rotate the window turns through the three screens every `rotate_every_seconds` and jumps to the screen
+    of a new red (`jump`); ?rotate= changes the pace of one window (0 = this window stays where it is) and ?jump=off keeps the turning without the jumps. A ?theme= is kept for every screen of the
+    window (`theme_locked`); without it each screen has the theme the settings give it (see resolve_theme)."""
     monitor = _int(query.get("monitor"), 1, 9, 1)
-    rotate = _int(query.get("rotate"), 0, 3600, cfg["rotate_seconds"])
+    turning = cfg.get("mode") == "rotate"
+    rotate = _int(query.get("rotate"), 0, 3600, cfg["rotate_every_seconds"] if turning else cfg["rotate_seconds"])
     rotate = 0 if rotate < 5 else rotate      # a turn every second would be a strobe: below 5 seconds is no rotation
     scale = 1.0
     try:
         scale = max(0.5, min(3.0, float(str(query.get("scale", "1")).replace(",", "."))))
     except ValueError:
         pass
-    return {"monitor": monitor, "theme": _choice(query.get("theme"), THEMES, cfg["default_theme"]), "density": _choice(query.get("density"), DENSITIES, cfg["default_density"]),
-            "refresh": _int(query.get("refresh"), 5, 120, cfg["refresh_seconds"]), "scale": scale, "rotate": rotate,
+    asked = _theme(query.get("theme"), SCREEN_THEMES, None)
+    return {"monitor": monitor, "theme": asked or resolve_theme(cfg, kind, global_name), "theme_locked": asked is not None, "density": _choice(query.get("density"), DENSITIES, cfg["default_density"]),
+            "refresh": _int(query.get("refresh"), 5, 120, cfg["refresh_seconds"]), "scale": scale, "rotate": rotate, "mode": cfg.get("mode", "three"),
+            "jump": turning and rotate > 0 and _flag(query.get("jump"), True), "hold": cfg["alert_hold_seconds"],
             "blink": cfg["blink"] and _flag(query.get("blink"), True), "sound": cfg["sound"] and _flag(query.get("sound"), False)}
+
+
+_THEME_RULE = re.compile(r'(:root\[data-theme="(?:' + "|".join(re.escape(n) for n in STUDIO_THEMES) + r')"\]\{[^{}]*\})')
+_theme_cache = {}
+
+
+def theme_css():
+    """The palettes of the sixteen themes of the main page, as CSS: they are read from the page itself (assets/static/actions_monitor.html), so a colour changed there changes on the screens too."""
+    path = paths.STATIC / "actions_monitor.html"
+    try:
+        stamp = path.stat().st_mtime_ns
+    except OSError:
+        return ""
+    if _theme_cache.get("stamp") != stamp:
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError:
+            return ""
+        _theme_cache.update(stamp=stamp, css="\n".join(_THEME_RULE.findall(text)))
+    return _theme_cache.get("css", "")
+
+
+def logo_block(cfg, info):
+    """What the page needs for the logo: the address of the image (it carries the tag of the file, so a new logo is never shown from the cache), the corner, the largest size in pixels at 1920 x 1080
+    (the page scales it with the screen) and on which screens it shows. None when no logo was uploaded."""
+    if not isinstance(info, dict) or not info.get("present"):
+        return None
+    return {"url": "/api/screens/logo?v=" + str(info.get("tag") or "")[:16], "corner": cfg["logo_corner"], "max_width": cfg["logo_max_width"], "max_height": cfg["logo_max_height"],
+            "show": {k: bool(cfg["logo_" + k]) for k in KINDS}}
 
 
 def page_keys():
@@ -107,11 +183,12 @@ def page_keys():
     return sorted({k for k in i18n.catalogue_keys() if k.startswith(("ui.scr_", "ui.lv_")) or SENTINEL_KEY.match(k)})
 
 
-def page_data(kind, cfg, prm, lang=None):
-    """The object embedded in the page: language, texts of this language, the settings that matter to the page and the parameters of the window."""
+def page_data(kind, cfg, prm, lang=None, logo=None, global_name="auto"):
+    """The object embedded in the page: language, texts of this language, the settings that matter to the page, the parameters of the window, the theme of each screen and the logo."""
     return {"screen": kind, "kinds": list(KINDS), "lang": lang or i18n.language(), "html_lang": i18n.HTML_LANG.get(lang or i18n.language(), "en"), "locale": i18n.BROWSER_LOCALE.get(lang or i18n.language(), "en-GB"),
             "texts": {k: i18n.t(k) for k in page_keys()}, "version": TOOL_VERSION,
-            "settings": {k: cfg[k] for k in ("blink", "blink_calm_minutes", "burn_in_protection", "night_dim", "night_dim_from_hour", "night_dim_to_hour")}, "params": prm}
+            "settings": {k: cfg[k] for k in ("blink", "blink_calm_minutes", "burn_in_protection", "night_dim", "night_dim_from_hour", "night_dim_to_hour")}, "params": prm,
+            "themes": {k: resolve_theme(cfg, k, global_name) for k in KINDS}, "logo": logo_block(cfg, logo)}
 
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------

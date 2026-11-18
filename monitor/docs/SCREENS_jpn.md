@@ -75,11 +75,12 @@
 | パラメーター | 効果 |
 |---|---|
 | `?monitor=1`〜`9` | タイトルの横に表示される番号。 |
-| `?theme=dark`、`light`、`contrast` | 配色。contrast は黒地に白で、遠くから見る画面向けです。 |
+| `?theme=light`（または `dark`、`auto`、`contrast`、16種類のテーマ名のいずれか） | ウィンドウ全体の配色（設定より優先）。contrast は黒地に白で、遠くから見る画面向けです。 |
 | `?density=compact`、`normal`、`large` | 文字サイズ。`?scale=1.5` で全体を拡大します（0.5〜3）。 |
 | `?refresh=10` | 更新間隔（秒、5〜120）。 |
 | `?lang=de` | 言語（en、es、de、fr、it、ja、zh、pt）。 |
-| `?rotate=30` | ウィンドウが30秒ごとに「全体」「いま起きていること」「センチネル」を自動で切り替えます（最小5、0 = 回転なし）。 |
+| `?rotate=30` | ウィンドウが30秒ごとに「全体」「いま起きていること」「センチネル」を自動で切り替えます（最小5、0 = 1つの画面に留まる）。`screens.mode` = rotate ではすでに回転します。これは1つのウィンドウの速さを変えます。 |
+| `?jump=off` | `screens.mode` = rotate のときのみ: ウィンドウは回転しますが、新しい赤へは移動しません。 |
 | `?blink=off` | 失敗は点滅せず、固定の光彩で示されます。`screens.blink` がオフのものをオンにはできません。 |
 | `?sound=on` | 新しい失敗で短いビープ音。`screens.sound` が許可している場合のみ。既定ではオフです。 |
 
@@ -92,16 +93,41 @@
 | 設定 | 内容 |
 |---|---|
 | `screens.enabled` | 3つのページを有効にします。オフにすると `/screen/overview`、`/screen/now`、`/screen/sentinels`、`/api/screens/data` が 404 を返します（`/screen/1` から `/screen/3` はページそのもので、この設定には依存しません）。Lite エディションも壁面画面を提供しますが、センチネル画面は空です。 既定ではオフです。 |
-| `screens.default_theme` | dark（既定）、light、contrast。 |
+| `screens.default_theme` | inherit（既定：製品全体で選んだテーマ。下記参照）、auto、light、dark、16種類のテーマのいずれか、contrast。 |
 | `screens.default_density` | compact、normal（既定）、large。 |
 | `screens.refresh_seconds` | ウィンドウの更新間隔（秒、既定は 10）。ページは GitHub ではなくモニターから読むため、短くしても利用枠は消費しません。 |
-| `screens.rotate_seconds` | 0（既定）= 回転なし。5以上にすると1つのウィンドウが3つのページを巡回します。 |
+| `screens.rotate_seconds` | `screens.mode` = three のときのみ。0（既定）= 回転なし。5以上にすると1つのウィンドウが3つのページを巡回します。 |
 | `screens.blink` | 失敗をやわらかく点滅させます（既定でオン）。 |
 | `screens.blink_calm_minutes` | だれも対応していない失敗が点滅をやめて固定の光彩になるまでの分数（既定 30、0 = 解決するまで点滅）。 |
 | `screens.sound` | 新しい失敗でビープ音を鳴らします（既定でオフ）。 |
 | `screens.burn_in_protection` | 1分ごとに全体を数ピクセル動かします（既定でオン）。 |
 | `screens.night_dim` | `screens.night_dim_from_hour`（22）から `screens.night_dim_to_hour`（7）まで画面を暗くします。既定ではオフです。 |
 | `screens.show_repo_names` | all、public（既定：非公開リポジトリは private-1、private-2... と表示）、none（すべての名前を隠す）。他の人が見られる画面では public か none を使ってください。`repos` に手書きの一覧を使う場合、公開範囲は `discover_refresh_seconds` ごとにアカウントの一覧を 1 回読んで取得します。公開範囲を読めなかったリポジトリは非公開として扱います。 番号(private-1 など)は非表示のリポジトリにだけ付き、データフォルダー内の非公開ファイルに保存されたインストール固有の鍵による名前の HMAC の順に並びます。そのため、リポジトリが全体のどこにあるかは分かりません。 |
+| `screens.theme_overview`、`screens.theme_now`、`screens.theme_sentinels` | 1つの画面のテーマ：inherit（既定：`screens.default_theme` のもの）または上記のいずれか。 |
+| `screens.mode` | three（既定：3つのページを別々に、ウィンドウごとに1つ）または rotate（3つを巡回し、新しい赤へ移る1つのページ）。 |
+| `screens.rotate_every_seconds` | rotate モードで各画面に留まる秒数（既定20、5～300）。 |
+| `screens.alert_hold_seconds` | rotate モードで、新しい赤がウィンドウをその画面に留める秒数（既定30、5～600）。赤が消えた時点で終わります。 |
+| `screens.logo_overview`、`screens.logo_now`、`screens.logo_sentinels` | ロゴを表示する画面（既定では「全体」のみ）。 |
+| `screens.logo_corner` | top-right（既定）、top-left、bottom-right、bottom-left。 |
+| `screens.logo_max_width`、`screens.logo_max_height` | 1920 x 1080 でのロゴの最大サイズ（ピクセル、既定 160 x 64。画面に合わせて拡大）。 |
+
+### 画面のテーマ
+
+モニターが表示するすべてが、設定で選んだテーマ（`ui.theme`：auto、light、dark、または16種類のテーマ）を使います。ページ、壁掛け画面、サインインページです。「このブラウザー」タブのセレクターでテーマを選ぶと `ui.theme` としても保存されるので、まだ選んでいないブラウザーはモニターのテーマを使います。ディスクに書き出される HTML レポートは、開くコンピューターのライト／ダーク設定に従います。
+
+壁掛け画面はこれを継承します。`screens.default_theme` の既定は `inherit` です。すべての画面に同じテーマを固定するには別のテーマを設定し、1つの画面だけに専用のテーマを与えるには `screens.theme_overview`、`screens.theme_now`、`screens.theme_sentinels` を設定します。アドレスの `?theme=` で1つのウィンドウを固定することもできます。どの画面も独自の色を書き込まず、すべてテーマのパレットを使うので、ページに追加されたテーマは画面にも現れます。
+
+### 画面のモード：3画面またはローテーション
+
+`screens.mode` = three（既定）は3つのページをウィンドウごとに別々に保ちます。`screens.mode` = rotate では、各ウィンドウが1つの画面になり、`screens.rotate_every_seconds` 秒（既定20、5～300）ごとに「全体」「いま起きていること」「センチネル」を巡回します。
+
+赤の障害が出ると、ウィンドウはそれを表示する画面へ移ります。失敗したワークフローは **いま起きていること**、赤くなったセンチネルのパネルは **センチネル** です。ウィンドウは `screens.alert_hold_seconds` 秒（既定30、5～600）か、その赤が消えるまでのどちらか早いほうまで留まり、その後また巡回します。すでに表示した赤は、内容が変わるか再発するまで再びウィンドウを移動させません。ウィンドウを開いたときにすでに赤いものは出発点にすぎず、移動のきっかけにはなりません。ウィンドウが最初の赤を保持している間に2つ目の赤が来た場合は、順番を待ちます。把握するために、ウィンドウは他の2つの画面を同じ読み取り専用の呼び出しでバックグラウンドから読み取ります（GitHub には接続しません）。`?rotate=0` で1つのウィンドウを1つの画面に留め、`?jump=off` で移動なしの巡回にできます。各画面は表示されるときに自分のテーマとロゴを適用します。
+
+### 組織のロゴ
+
+設定の「このブラウザー」タブには、組織のロゴをアップロードするブロックがあります。PNG、JPEG、WebP、または SVG で、最大 1 MB です。モニターはファイルの先頭バイトから実際の種類を確認し（名前や添付されたラベルは無視）、スクリプト、イベントハンドラー、他のファイルやアドレスへのリンク、ドキュメント型を含む SVG を拒否し、画像をこのコンピューターの `data/` フォルダーに拡張子付きの `org_logo` として保存します。設定には保存しません。ロゴは1つだけで、別のものをアップロードすると置き換わります。操作ログにはアップロードと削除が記録され、ファイルは記録されません。
+
+`screens.logo_overview`、`screens.logo_now`、`screens.logo_sentinels` でどの壁掛け画面に表示するか（既定では「全体」のみ）、`screens.logo_corner` で隅（既定は右上）、`screens.logo_max_width` と `screens.logo_max_height` で 1920 x 1080 での最大サイズをピクセルで決めます（既定 160 x 64。ロゴは画面に合わせて拡大します）。画像は形を変えずにそのサイズに収まり、ヘッダーまたはフッターに専用の場所があるので、内容に重なることはありません。背景は透明のままです。背景が透明のロゴは、ライトテーマでもダークテーマでも適切に見えます。
 
 ### 表示するものと隠すもの
 

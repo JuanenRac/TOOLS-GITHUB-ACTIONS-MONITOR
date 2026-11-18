@@ -75,11 +75,12 @@ Un indirizzo per ogni monitor. Un parametro può rendere una finestra più tranq
 | Parametro | Effetto |
 |---|---|
 | `?monitor=1` a `9` | Il numero mostrato accanto al titolo. |
-| `?theme=dark`, `light` o `contrast` | Colori; contrast è bianco su nero, per uno schermo visto da lontano. |
+| `?theme=light` (o `dark`, `auto`, `contrast`, o il nome di uno dei sedici temi) | Colori dell'intera finestra, sopra ciò che dicono le impostazioni. `contrast` è bianco su nero, per uno schermo visto da lontano. |
 | `?density=compact`, `normal` o `large` | Dimensione del testo. `?scale=1.5` ingrandisce tutto (da 0,5 a 3). |
 | `?refresh=10` | Secondi tra gli aggiornamenti (da 5 a 120). |
 | `?lang=de` | Lingua (en, es, de, fr, it, ja, zh, pt). |
-| `?rotate=30` | La finestra passa da sola per panoramica, in questo momento e sentinelle ogni 30 secondi (minimo 5; 0 = nessuna rotazione). |
+| `?rotate=30` | La finestra passa da sola per panoramica, in questo momento e sentinelle ogni 30 secondi (minimo 5; 0 = resta su uno schermo). Con `screens.mode` = rotate ruota già; questo cambia il ritmo di una finestra. |
+| `?jump=off` | Solo con `screens.mode` = rotate: la finestra ruota ma non salta mai a un nuovo rosso. |
 | `?blink=off` | I guasti mantengono un alone fisso invece di lampeggiare. Non può attivare ciò che `screens.blink` tiene spento. |
 | `?sound=on` | Un breve segnale acustico per un nuovo guasto, solo se `screens.sound` lo consente. Disattivato per impostazione predefinita. |
 
@@ -92,16 +93,41 @@ La lingua di uno schermo si decide in quest'ordine: `?lang=xx` nell'indirizzo; p
 | Impostazione | Cosa fa |
 |---|---|
 | `screens.enabled` | Attiva le tre pagine. Disattivato: `/screen/overview`, `/screen/now`, `/screen/sentinels` e `/api/screens/data` rispondono 404 (da `/screen/1` a `/screen/3` sono la pagina stessa e non ne dipendono). Anche l'edizione lite serve gli schermi a parete, con lo schermo delle sentinelle vuoto. Disattivato per impostazione predefinita. |
-| `screens.default_theme` | dark (predefinito), light o contrast. |
+| `screens.default_theme` | inherit (predefinito: il tema scelto per tutto il prodotto, vedi sotto), auto, light, dark, uno dei sedici temi o contrast. |
 | `screens.default_density` | compact, normal (predefinito) o large. |
 | `screens.refresh_seconds` | Secondi tra gli aggiornamenti di una finestra (10 per impostazione predefinita). Le pagine leggono dal monitor, mai da GitHub, quindi un tempo breve non consuma quota. |
-| `screens.rotate_seconds` | 0 (predefinito) = nessuna rotazione; da 5 in su, una finestra passa per le tre pagine. |
+| `screens.rotate_seconds` | Solo con `screens.mode` = three. 0 (predefinito) = nessuna rotazione; da 5 in su, una finestra passa per le tre pagine. |
 | `screens.blink` | I guasti lampeggiano dolcemente (attivo per impostazione predefinita). |
 | `screens.blink_calm_minutes` | Minuti dopo i quali un guasto di cui nessuno si occupa mantiene un alone fisso invece di lampeggiare (30 per impostazione predefinita; 0 = lampeggia finché non è risolto). |
 | `screens.sound` | Un segnale acustico per un nuovo guasto (disattivato per impostazione predefinita). |
 | `screens.burn_in_protection` | Sposta tutto di qualche pixel ogni minuto (attivo per impostazione predefinita). |
 | `screens.night_dim` | Attenua gli schermi tra `screens.night_dim_from_hour` (22) e `screens.night_dim_to_hour` (7); disattivato per impostazione predefinita. |
 | `screens.show_repo_names` | all, public (predefinito: i repository privati compaiono come private-1, private-2...) o none (ogni nome è nascosto). Usare public o none per uno schermo che altre persone possono vedere. Con un elenco di repository scritto a mano in `repos`, la visibilità si legge con un elenco dell'account ogni `discover_refresh_seconds`; un repository la cui visibilità non si è potuta leggere conta come privato. I numeri (private-1...) vanno solo ai repository nascosti, nell'ordine di un HMAC del nome con una chiave dell'installazione conservata in un file privato della cartella dei dati: non dicono nulla su dove cade un repository tra gli altri. |
+| `screens.theme_overview`, `screens.theme_now`, `screens.theme_sentinels` | Il tema di uno schermo: inherit (predefinito: quello di `screens.default_theme`) o uno dei temi sopra. |
+| `screens.mode` | three (predefinito: le tre pagine separate, una per finestra) o rotate (una sola pagina che passa per le tre e salta a un nuovo rosso). |
+| `screens.rotate_every_seconds` | In modalità rotate, secondi su ogni schermo (20 per impostazione predefinita; da 5 a 300). |
+| `screens.alert_hold_seconds` | In modalità rotate, secondi in cui un nuovo rosso tiene la finestra sul suo schermo (30 per impostazione predefinita; da 5 a 600), o finché il rosso sparisce. |
+| `screens.logo_overview`, `screens.logo_now`, `screens.logo_sentinels` | Su quali schermi compare il logo (di default solo la panoramica). |
+| `screens.logo_corner` | top-right (predefinito), top-left, bottom-right o bottom-left. |
+| `screens.logo_max_width`, `screens.logo_max_height` | Dimensione massima del logo in pixel a 1920 x 1080 (160 x 64 per impostazione predefinita; cresce con lo schermo). |
+
+### Tema degli schermi
+
+Tutto ciò che mostra il monitor porta il tema scelto nelle Impostazioni (`ui.theme`: auto, light, dark o uno dei sedici temi): la pagina, gli schermi da parete e la pagina di accesso. Scegliere un tema nel selettore della scheda Questo browser lo salva anche come `ui.theme`, così un browser che non ha mai scelto prende quello del monitor. I rapporti HTML scritti su disco seguono l'impostazione chiara o scura del computer che li apre.
+
+Gli schermi da parete lo ereditano: `screens.default_theme` è `inherit` per impostazione predefinita. Impostalo su un altro tema per fissare lo stesso su tutti gli schermi, e `screens.theme_overview`, `screens.theme_now` o `screens.theme_sentinels` per dare a uno schermo il suo. L'indirizzo può ancora fissare una finestra con `?theme=`. Nessuno schermo scrive un colore suo: tutti usano le palette del tema, quindi un tema aggiunto alla pagina compare anche sugli schermi.
+
+### Modalità degli schermi: tre o rotazione
+
+`screens.mode` = three (predefinito) mantiene le tre pagine separate, una per finestra. `screens.mode` = rotate fa di ogni finestra un solo schermo che passa per panoramica, in questo momento e sentinelle ogni `screens.rotate_every_seconds` secondi (20 per impostazione predefinita; da 5 a 300).
+
+Un guasto in rosso fa saltare la finestra allo schermo che lo mostra: **In questo momento** per un workflow fallito, **Sentinelle** per un pannello di sentinella che diventa rosso. La finestra vi resta `screens.alert_hold_seconds` secondi (30 per impostazione predefinita; da 5 a 600) o finché quel rosso sparisce, quale delle due cose accada prima, e poi continua a ruotare. Un rosso già mostrato non fa saltare di nuovo la finestra finché non cambia o ritorna. Ciò che è rosso all'apertura della finestra è solo il punto di partenza e non la fa saltare. Se arriva un secondo rosso mentre la finestra tiene il primo, aspetta il suo turno. Per saperlo, una finestra legge gli altri due schermi in background con la stessa chiamata di sola lettura (mai GitHub). `?rotate=0` tiene una finestra sul suo schermo e `?jump=off` mantiene la rotazione senza i salti. Ogni schermo applica il suo tema e il suo logo quando compare.
+
+### Logo dell'organizzazione
+
+La scheda Questo browser delle Impostazioni ha un blocco per caricare il logo della tua organizzazione: PNG, JPEG, WebP o SVG, al massimo 1 MB. Il monitor controlla il tipo reale dai primi byte del file (non contano il nome né l'etichetta che lo accompagna), rifiuta un SVG con script, gestori di eventi, collegamenti ad altri file o indirizzi o un tipo di documento, e conserva l'immagine nella cartella `data/` di questo computer come `org_logo` con la sua estensione, mai nella configurazione. Esiste un solo logo: caricarne un altro lo sostituisce. Il registro delle azioni annota il caricamento e la rimozione, mai il file.
+
+`screens.logo_overview`, `screens.logo_now` e `screens.logo_sentinels` scelgono su quali schermi da parete compare (di default solo la panoramica), `screens.logo_corner` l'angolo (in alto a destra per impostazione predefinita) e `screens.logo_max_width` e `screens.logo_max_height` la dimensione massima in pixel a 1920 x 1080 (160 x 64 per impostazione predefinita; il logo cresce con lo schermo). L'immagine si adatta a quella dimensione senza deformarsi e ha un posto suo nell'intestazione o nel piè di pagina, così non copre mai il contenuto. Lo sfondo resta trasparente: un logo con sfondo trasparente si vede bene nei temi chiari e in quelli scuri.
 
 ### Cosa mostrano e cosa nascondono
 

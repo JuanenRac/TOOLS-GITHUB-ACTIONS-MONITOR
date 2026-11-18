@@ -75,11 +75,12 @@ Une adresse par moniteur. Un paramètre peut rendre une fenêtre plus calme ou p
 | Paramètre | Effet |
 |---|---|
 | `?monitor=1` à `9` | Le numéro affiché à côté du titre. |
-| `?theme=dark`, `light` ou `contrast` | Couleurs ; contrast est blanc sur noir, pour un écran vu de loin. |
+| `?theme=light` (ou `dark`, `auto`, `contrast`, ou le nom de l'un des seize thèmes) | Couleurs de toute la fenêtre, au-dessus de ce que disent les réglages. `contrast` est blanc sur noir, pour un écran vu de loin. |
 | `?density=compact`, `normal` ou `large` | Taille du texte. `?scale=1.5` agrandit tout (de 0,5 à 3). |
 | `?refresh=10` | Secondes entre les mises à jour (de 5 à 120). |
 | `?lang=de` | Langue (en, es, de, fr, it, ja, zh, pt). |
-| `?rotate=30` | La fenêtre passe toute seule par vue d'ensemble, en ce moment et sentinelles toutes les 30 secondes (au moins 5 ; 0 = pas de rotation). |
+| `?rotate=30` | La fenêtre passe toute seule par vue d'ensemble, en ce moment et sentinelles toutes les 30 secondes (au moins 5 ; 0 = elle reste sur un écran). Avec `screens.mode` = rotate elle tourne déjà ; ceci change le rythme d'une fenêtre. |
+| `?jump=off` | Seulement avec `screens.mode` = rotate : la fenêtre tourne mais ne saute jamais vers un nouveau rouge. |
 | `?blink=off` | Les échecs gardent un halo fixe au lieu de clignoter. Il ne peut pas activer ce que `screens.blink` laisse désactivé. |
 | `?sound=on` | Un bip court pour un nouvel échec, seulement si `screens.sound` l'autorise. Désactivé par défaut. |
 
@@ -92,16 +93,41 @@ La langue d'un écran se décide dans cet ordre : `?lang=xx` dans l'adresse ; pu
 | Réglage | Ce qu'il fait |
 |---|---|
 | `screens.enabled` | Active les trois pages. Désactivé : `/screen/overview`, `/screen/now`, `/screen/sentinels` et `/api/screens/data` répondent 404 (`/screen/1` à `/screen/3` sont la page elle-même et n'en dépendent pas). L'édition lite sert aussi les écrans muraux, avec l'écran des sentinelles vide. Désactivé par défaut. |
-| `screens.default_theme` | dark (par défaut), light ou contrast. |
+| `screens.default_theme` | inherit (par défaut : le thème choisi pour tout le produit, voir plus bas), auto, light, dark, l'un des seize thèmes ou contrast. |
 | `screens.default_density` | compact, normal (par défaut) ou large. |
 | `screens.refresh_seconds` | Secondes entre les mises à jour d'une fenêtre (10 par défaut). Les pages lisent le moniteur, jamais GitHub : un délai court ne consomme pas de quota. |
-| `screens.rotate_seconds` | 0 (par défaut) = pas de rotation ; à partir de 5, une fenêtre parcourt les trois pages. |
+| `screens.rotate_seconds` | Seulement avec `screens.mode` = three. 0 (par défaut) = pas de rotation ; à partir de 5, une fenêtre passe par les trois pages. |
 | `screens.blink` | Les échecs clignotent doucement (activé par défaut). |
 | `screens.blink_calm_minutes` | Minutes après lesquelles un échec dont personne ne s'est occupé garde un halo fixe au lieu de clignoter (30 par défaut ; 0 = il clignote jusqu'à sa résolution). |
 | `screens.sound` | Un bip pour un nouvel échec (désactivé par défaut). |
 | `screens.burn_in_protection` | Déplace tout de quelques pixels chaque minute (activé par défaut). |
 | `screens.night_dim` | Atténue les écrans entre `screens.night_dim_from_hour` (22) et `screens.night_dim_to_hour` (7) ; désactivé par défaut. |
 | `screens.show_repo_names` | all, public (par défaut : les dépôts privés apparaissent comme private-1, private-2...) ou none (tous les noms sont masqués). Utilisez public ou none pour un écran que d'autres personnes peuvent voir. Avec une liste de dépôts écrite à la main dans `repos`, la visibilité est lue par une liste du compte toutes les `discover_refresh_seconds` ; un dépôt dont la visibilité n'a pas pu être lue compte comme privé. Les numéros (private-1...) ne vont qu'aux dépôts masqués, dans l'ordre d'un HMAC du nom avec une clé de l'installation gardée dans un fichier privé du dossier de données : ils ne disent rien de la place d'un dépôt parmi les autres. |
+| `screens.theme_overview`, `screens.theme_now`, `screens.theme_sentinels` | Le thème d'un écran : inherit (par défaut : celui de `screens.default_theme`) ou l'un des thèmes ci-dessus. |
+| `screens.mode` | three (par défaut : les trois pages séparées, une par fenêtre) ou rotate (une seule page qui passe par les trois et saute vers un nouveau rouge). |
+| `screens.rotate_every_seconds` | En mode rotate, secondes sur chaque écran (20 par défaut ; de 5 à 300). |
+| `screens.alert_hold_seconds` | En mode rotate, secondes pendant lesquelles un nouveau rouge garde la fenêtre sur son écran (30 par défaut ; de 5 à 600), ou jusqu'à ce que le rouge disparaisse. |
+| `screens.logo_overview`, `screens.logo_now`, `screens.logo_sentinels` | Sur quels écrans le logo apparaît (seulement la vue d'ensemble par défaut). |
+| `screens.logo_corner` | top-right (par défaut), top-left, bottom-right ou bottom-left. |
+| `screens.logo_max_width`, `screens.logo_max_height` | Taille maximale du logo en pixels à 1920 x 1080 (160 x 64 par défaut ; il grandit avec l'écran). |
+
+### Thème des écrans
+
+Tout ce que montre le moniteur porte le thème choisi dans les Réglages (`ui.theme` : auto, light, dark ou l'un des seize thèmes) : la page, les écrans muraux et la page de connexion. Choisir un thème dans le sélecteur de l'onglet Ce navigateur l'enregistre aussi comme `ui.theme`, si bien qu'un navigateur qui n'a jamais choisi prend celui du moniteur. Les rapports HTML écrits sur disque suivent le réglage clair ou sombre de l'ordinateur qui les ouvre.
+
+Les écrans muraux en héritent : `screens.default_theme` vaut `inherit` par défaut. Mettez-le sur un autre thème pour fixer le même sur tous les écrans, et `screens.theme_overview`, `screens.theme_now` ou `screens.theme_sentinels` pour donner son propre thème à un écran. L'adresse peut toujours fixer une fenêtre avec `?theme=`. Aucun écran n'écrit de couleur à lui : tous utilisent les palettes du thème, donc un thème ajouté à la page apparaît aussi sur les écrans.
+
+### Mode des écrans : trois ou rotation
+
+`screens.mode` = three (par défaut) garde les trois pages séparées, une par fenêtre. `screens.mode` = rotate fait de chaque fenêtre un seul écran qui passe par vue d'ensemble, en ce moment et sentinelles toutes les `screens.rotate_every_seconds` secondes (20 par défaut ; de 5 à 300).
+
+Un échec en rouge fait sauter la fenêtre vers l'écran qui le montre : **En ce moment** pour un workflow en échec, **Sentinelles** pour un panneau de sentinelle qui passe au rouge. La fenêtre y reste `screens.alert_hold_seconds` secondes (30 par défaut ; de 5 à 600) ou jusqu'à ce que ce rouge disparaisse, selon ce qui arrive en premier, puis continue de tourner. Un rouge déjà montré ne refait pas sauter la fenêtre tant qu'il ne change pas ou ne revient pas. Ce qui est rouge à l'ouverture de la fenêtre n'est que le point de départ et ne la fait pas sauter. Si un second rouge arrive pendant que la fenêtre tient le premier, il attend son tour. Pour le savoir, une fenêtre lit les deux autres écrans en arrière-plan avec le même appel en lecture seule (jamais GitHub). `?rotate=0` garde une fenêtre sur son écran et `?jump=off` garde la rotation sans les sauts. Chaque écran met son propre thème et son propre logo en arrivant.
+
+### Logo de l'organisation
+
+L'onglet Ce navigateur des Réglages a un bloc pour envoyer le logo de votre organisation : PNG, JPEG, WebP ou SVG, 1 Mo au maximum. Le moniteur vérifie le vrai type d'après les premiers octets du fichier (le nom et l'étiquette qui l'accompagne ne comptent pas), refuse un SVG avec des scripts, des gestionnaires d'événements, des liens vers d'autres fichiers ou adresses ou un type de document, et garde l'image dans le dossier `data/` de cet ordinateur sous le nom `org_logo` avec son extension, jamais dans la configuration. Un seul logo existe : en envoyer un autre le remplace. Le journal des actions note l'envoi et le retrait, jamais le fichier.
+
+`screens.logo_overview`, `screens.logo_now` et `screens.logo_sentinels` choisissent sur quels écrans muraux il apparaît (seulement la vue d'ensemble par défaut), `screens.logo_corner` le coin (en haut à droite par défaut) et `screens.logo_max_width` et `screens.logo_max_height` la taille maximale en pixels à 1920 x 1080 (160 x 64 par défaut ; le logo grandit avec l'écran). L'image est ajustée dans cette taille sans être déformée et a sa place dans l'en-tête ou le pied de page, si bien qu'elle ne cache jamais le contenu. Son fond reste transparent : un logo à fond transparent rend bien dans les thèmes clairs comme dans les sombres.
 
 ### Ce qu'elles montrent et ce qu'elles cachent
 

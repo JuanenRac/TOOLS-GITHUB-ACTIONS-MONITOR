@@ -61,7 +61,7 @@ class Settings(unittest.TestCase):
     def test_every_value_stays_inside_its_range(self):
         cfg = screens.settings({"screens": {"refresh_seconds": 1, "rotate_seconds": 99999, "blink_calm_minutes": -4, "night_dim_from_hour": 40, "default_theme": "pink", "show_repo_names": "everyone", "blink": "off", "enabled": "no"}})
         self.assertEqual((cfg["refresh_seconds"], cfg["rotate_seconds"], cfg["blink_calm_minutes"], cfg["night_dim_from_hour"]), (5, 3600, 0, 23))
-        self.assertEqual((cfg["default_theme"], cfg["show_repo_names"], cfg["blink"], cfg["enabled"]), ("dark", "public", False, False))
+        self.assertEqual((cfg["default_theme"], cfg["show_repo_names"], cfg["blink"], cfg["enabled"]), ("inherit", "public", False, False))
         self.assertEqual(screens.settings({"screens": "nonsense"}), screens.DEFAULTS)
         self.assertEqual(screens.settings({"screens": {"refresh_seconds": True}})["refresh_seconds"], 10, "a boolean is not a number")
 
@@ -82,7 +82,7 @@ class Settings(unittest.TestCase):
 class WhatTheAddressMayAsk(unittest.TestCase):
     def test_the_defaults_come_from_the_settings(self):
         prm = screens.params({}, screens.settings({}))
-        self.assertEqual((prm["theme"], prm["density"], prm["refresh"], prm["rotate"], prm["blink"], prm["sound"], prm["monitor"], prm["scale"]), ("dark", "normal", 10, 0, True, False, 1, 1.0))
+        self.assertEqual((prm["theme"], prm["density"], prm["refresh"], prm["rotate"], prm["blink"], prm["sound"], prm["monitor"], prm["scale"]), ("auto", "normal", 10, 0, True, False, 1, 1.0))
 
     def test_a_window_can_make_things_quieter_but_never_louder(self):
         on = screens.settings({"screens": {"blink": True, "sound": True}})

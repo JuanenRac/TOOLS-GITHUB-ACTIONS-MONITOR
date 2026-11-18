@@ -99,6 +99,9 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/score/global` | GET | viewer | the score of the whole installation, for information only (supervisor): the mean of the scored accounts the asker may see, weighted by their repositories with a number, with who is in it (Complete only) |
 | `/api/score/history` | GET | viewer | the points of the score over time (`?hours=`, `?limit=`), oldest first (Complete only) |
 | `/api/screens/data` | GET | viewer | what the wall screens show, from what the monitor already holds and never from GitHub: `?screen=overview|now|sentinels`, a closed list of fields (no link, title, job or user name), the names of private repositories hidden unless `screens.show_repo_names` says all (read only; 404 while `screens.enabled` is off) |
+| `/api/screens/logo` | GET, POST | viewer | the logo of the organization for the wall screens: GET returns the image itself with its real type; POST uploads it as the body of the request (PNG, JPEG, WebP or SVG, at most 1 MB, the type is checked by the first bytes and an SVG with scripts or links is refused; it is kept in the data folder, never in the configuration; an administrator, a session token) |
+| `/api/screens/logo/info` | GET | viewer | whether a logo was uploaded: `present`, `kind`, `bytes` and the `tag` that goes in the address of the image |
+| `/api/screens/logo/remove` | POST | admin | removes the logo of the organization (an administrator) |
 | `/api/sentinel` | GET | viewer | the snapshot of the Sentinel (checks A1-A13) |
 | `/api/sentinel/ai` | GET | viewer | the AI explanation of a failed build or a CodeQL alert (a person asks; cached) |
 | `/api/sentinel/collab` | GET | viewer | issues and pull requests that need a person |

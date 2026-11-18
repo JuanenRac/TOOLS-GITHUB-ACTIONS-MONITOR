@@ -30,7 +30,7 @@ from pathlib import Path
 
 from github_actions_monitor import i18n
 from github_actions_monitor.data_pipeline import alertflow
-from github_actions_monitor.app import surface
+from github_actions_monitor.app import screens, surface
 from github_actions_monitor.app import toolconfig
 from github_actions_monitor.security import envguard
 from github_actions_monitor.security import private_io
@@ -152,7 +152,14 @@ _f(_T_GENERAL, "screens", "ui.screen2_orientation", "enum", ("auto", "portrait",
 _f(_T_GENERAL, "screens", "ui.screen3_tabs", "text", re.compile(r"^[a-z,]{0,60}\Z"), restart=False)
 _f(_T_GENERAL, "screens", "ui.screen3_orientation", "enum", ("auto", "portrait", "landscape"), restart=False)
 _f(_T_GENERAL, "wall", "screens.enabled", "bool", restart=False)
-_f(_T_GENERAL, "wall", "screens.default_theme", "enum", ("dark", "light", "contrast"), restart=False)
+_f(_T_GENERAL, "look", "ui.theme", "enum", screens.GLOBAL_THEMES, restart=False)
+_f(_T_GENERAL, "wall", "screens.default_theme", "enum", screens.THEME_CHOICES, restart=False)
+_f(_T_GENERAL, "wall", "screens.theme_overview", "enum", screens.THEME_CHOICES, restart=False)
+_f(_T_GENERAL, "wall", "screens.theme_now", "enum", screens.THEME_CHOICES, restart=False)
+_f(_T_GENERAL, "wall", "screens.theme_sentinels", "enum", screens.THEME_CHOICES, restart=False)
+_f(_T_GENERAL, "wall", "screens.mode", "enum", screens.MODES, restart=False)
+_f(_T_GENERAL, "wall", "screens.rotate_every_seconds", "int", (5, 300), unit="s", restart=False)
+_f(_T_GENERAL, "wall", "screens.alert_hold_seconds", "int", (5, 600), unit="s", restart=False)
 _f(_T_GENERAL, "wall", "screens.default_density", "enum", ("compact", "normal", "large"), restart=False)
 _f(_T_GENERAL, "wall", "screens.refresh_seconds", "int", (5, 120), unit="s", restart=False)
 _f(_T_GENERAL, "wall", "screens.rotate_seconds", "int", (0, 3600), unit="s", restart=False)
@@ -164,6 +171,12 @@ _f(_T_GENERAL, "wall", "screens.night_dim", "bool", restart=False)
 _f(_T_GENERAL, "wall", "screens.night_dim_from_hour", "int", (0, 23), unit="h", restart=False)
 _f(_T_GENERAL, "wall", "screens.night_dim_to_hour", "int", (0, 23), unit="h", restart=False)
 _f(_T_GENERAL, "wall", "screens.show_repo_names", "enum", ("all", "public", "none"), secure=True, restart=False)
+_f(_T_GENERAL, "logo", "screens.logo_overview", "bool", restart=False)
+_f(_T_GENERAL, "logo", "screens.logo_now", "bool", restart=False)
+_f(_T_GENERAL, "logo", "screens.logo_sentinels", "bool", restart=False)
+_f(_T_GENERAL, "logo", "screens.logo_corner", "enum", screens.CORNERS, restart=False)
+_f(_T_GENERAL, "logo", "screens.logo_max_width", "int", (16, 640), unit="px", restart=False)
+_f(_T_GENERAL, "logo", "screens.logo_max_height", "int", (16, 320), unit="px", restart=False)
 _f(_T_GENERAL, "order", "ui.now_sort", "enum", ordering.KINDS["now"], restart=False)
 _f(_T_GENERAL, "order", "ui.alerts_sort", "enum", ordering.KINDS["alerts"], restart=False)
 _f(_T_GENERAL, "ports", "ports.complete", "int", (ports.LOW, ports.HIGH), restart=True)

@@ -123,6 +123,7 @@ jobs:
           python -m unittest discover -s monitor/tests -p "test_186_skipped.py" -v
           python -m unittest discover -s monitor/tests -p "test_188_notify_page.py" -v
           python -m unittest discover -s monitor/tests -p "test_194_ai_preset_page.py" -v
+          python -m unittest discover -s monitor/tests -p "test_screens_rotation_browser.py" -v
 
   container:
     name: The image builds, runs read-only without root and survives a revoked login

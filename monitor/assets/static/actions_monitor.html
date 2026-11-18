@@ -544,7 +544,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <div id="cfg-netwarn" role="alert" hidden></div>
 <div class="cfg-top"><div id="cfg-tabs" role="tablist" aria-orientation="horizontal" data-i18n-aria="ui.cfg_tabs_aria"></div><input id="cfg-search" type="search" autocomplete="off" data-i18n-ph="ui.cfg_search" data-i18n-aria="ui.cfg_search"></div>
 <div id="cfg-panels"><p class="cfg-note" data-i18n="ui.cfg_hint"></p>
-<div id="cfp-interface" role="tabpanel" aria-labelledby="cft-interface" data-tab="interface"><div class="cfg-group"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gear"/></svg><span data-i18n="ui.cfg_g_interface"></span></h3><p class="cfg-note" style="padding:6px 12px 0" data-i18n="ui.cfg_interface_hint"></p><div class="ifrow"><label><span data-i18n="ui.lang_label"></span> <select id="lang" data-i18n-aria="ui.lang_label" data-i18n-title="ui.lang_label"></select></label><label><span data-i18n="ui.theme_label"></span> <select id="theme" data-i18n-aria="ui.theme_aria"></select></label><button id="snd-test" type="button" data-i18n="ui.snd_test"></button><button id="dense" type="button" aria-pressed="false" data-i18n-title="ui.dense_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-rows"/></svg><span class="lbl" id="dense-lbl"></span></button></div><div class="ifrow" id="snd-kinds" role="group"></div></div></div>
+<div id="cfp-interface" role="tabpanel" aria-labelledby="cft-interface" data-tab="interface"><div class="cfg-group"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gear"/></svg><span data-i18n="ui.cfg_g_interface"></span></h3><p class="cfg-note" style="padding:6px 12px 0" data-i18n="ui.cfg_interface_hint"></p><div class="ifrow"><label><span data-i18n="ui.lang_label"></span> <select id="lang" data-i18n-aria="ui.lang_label" data-i18n-title="ui.lang_label"></select></label><label><span data-i18n="ui.theme_label"></span> <select id="theme" data-i18n-aria="ui.theme_aria"></select></label><button id="snd-test" type="button" data-i18n="ui.snd_test"></button><button id="dense" type="button" aria-pressed="false" data-i18n-title="ui.dense_title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-rows"/></svg><span class="lbl" id="dense-lbl"></span></button></div><div class="ifrow" id="snd-kinds" role="group"></div><div class="ifrow" id="logo-box" role="group" aria-labelledby="logo-h"><strong id="logo-h" data-i18n="ui.logo_h"></strong><img id="logo-prev" alt="" hidden style="max-width:160px;max-height:64px;object-fit:contain"><button id="logo-pick" type="button" data-i18n="ui.logo_choose"></button><input id="logo-file" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden><button id="logo-remove" type="button" data-i18n="ui.logo_remove" hidden></button><span id="logo-msg" class="mut" role="status"></span></div><p class="cfg-note" style="padding:0 12px" data-i18n="ui.logo_hint"></p></div></div>
 <form id="cfg-form" autocomplete="off" novalidate></form><div id="cfg-none" role="status" data-i18n="ui.cfg_search_none"></div></div>
 <div class="cfg-bar"><button id="cfg-save" type="button" disabled><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-save"/></svg><span data-i18n="ui.cfg_save"></span></button><button id="cfg-discard" type="button" disabled><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-undo"/></svg><span data-i18n="ui.cfg_discard"></span></button><span id="cfg-msg" role="status" aria-live="polite"></span><span class="mut" id="cfg-backups"></span></div>
 </div></section>
@@ -575,7 +575,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <div class="authpanel" id="auth-panel" role="dialog" aria-modal="true" hidden></div>
 <script>
 "use strict";
-(function(){const raw=window.fetch.bind(window),need=/^\/api\/(alerts\/(mute|unmute)|settings|ai\/actions\/confirm|ai\/actions\/unlock|ai\/test|notify\/test|discovery\/group|mode|gh-action\/confirm|act\/confirm|act\/stop|github-token)/;
+(function(){const raw=window.fetch.bind(window),need=/^\/api\/(alerts\/(mute|unmute)|settings|screens\/logo|ai\/actions\/confirm|ai\/actions\/unlock|ai\/test|notify\/test|discovery\/group|mode|gh-action\/confirm|act\/confirm|act\/stop|github-token)/;
   /* team mode (security/auth_http.py): who is signed in is asked once and kept for 30 s; in the individual mode and in the lite edition the answer is "individual" and nothing below adds a header or a request */
   const A={me:null,at:0};
   const me=async(fresh)=>{if(!fresh&&A.me&&Date.now()-A.at<30000)return A.me;let j=null;try{const r=await raw("/api/auth/me",{cache:"no-store"});if(r.ok)j=await r.json()}catch(e){}A.me=j&&typeof j==="object"?j:{enabled:false,mode:"individual",authenticated:false};A.at=Date.now();return A.me};
@@ -670,8 +670,13 @@ const BASIC_THEMES=["auto","light","dark"],STUDIO_THEMES=["Armor","Aqua","Midnig
 function fillThemes(){const s=$("theme");if(!s)return;s.innerHTML="";const g1=document.createElement("optgroup");g1.label=T("ui.theme_g_basic");BASIC_THEMES.forEach(t=>{const o=document.createElement("option");o.value=t;o.textContent=T("ui.theme_"+t);g1.appendChild(o)});const g2=document.createElement("optgroup");g2.label=T("ui.theme_g_studio");STUDIO_THEMES.forEach(t=>{const o=document.createElement("option");o.value=t;o.textContent=t;g2.appendChild(o)});s.appendChild(g1);s.appendChild(g2);s.value=theme}
 function applyTheme(t){if(t==="auto")document.documentElement.removeAttribute("data-theme");else document.documentElement.setAttribute("data-theme",t);const s=$("theme");if(s)s.value=t}
 const asked=new URLSearchParams(location.search).get("theme");
-let theme=THEMES.includes(asked)?asked:(THEMES.includes(store.get("am-theme"))?store.get("am-theme"):"auto");
-$("theme").addEventListener("change",()=>{theme=$("theme").value;store.set("am-theme",theme);applyTheme(theme);if(DATA)render(DATA)});
+/* the theme chosen in Settings is also kept by the monitor (`ui.theme`), so the wall screens and the sign-in page can wear it: a browser that never chose takes the one of the monitor, and a change of the monitor reaches
+   a browser once (it remembers which one it had adopted; the first time it keeps what the person had chosen) */
+const SRV_THEME=THEMES.includes(I18N.theme)?I18N.theme:"auto";
+{const seen=store.get("am-theme-srv");if(seen!==null&&seen!==SRV_THEME)store.set("am-theme",SRV_THEME);store.set("am-theme-srv",SRV_THEME)}
+let theme=THEMES.includes(asked)?asked:(THEMES.includes(store.get("am-theme"))?store.get("am-theme"):SRV_THEME);
+$("theme").addEventListener("change",()=>{theme=$("theme").value;store.set("am-theme",theme);store.set("am-theme-srv",theme);applyTheme(theme);if(DATA)render(DATA);
+  try{fetch("/api/settings",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({changes:{"ui.theme":theme}})}).catch(()=>{})}catch(e){}});
 /* language selector: saved in the browser, the whole page and the server texts are refreshed */
 I18N.langs.forEach(l=>{const o=document.createElement("option");o.value=l;o.textContent=I18N.names[l]||l;$("lang").appendChild(o)});
 $("lang").value=LANG;
@@ -2364,6 +2369,17 @@ async function sbTick(){try{const r=await fetch("/api/statusbar",{cache:"no-stor
   document.addEventListener("visibilitychange",()=>{if(!document.hidden){soundUnlock(false);try{soundDrain()}catch(e){}}});
   soundLockPaint();soundKindsPaint();setInterval(()=>{soundLockPaint();soundKindsPaint();try{soundDrain()}catch(e){}},2000);
   soundChip();renderBar();renderClock();setInterval(renderClock,1000);sbTick();setInterval(sbTick,30000);setInterval(renderBarFacts,15000)}
+/* the logo of the organization (Settings > Interface): one image for the wall screens, checked by the monitor by its first bytes (PNG, JPEG, WebP or SVG without scripts, at most 1 MB) and kept in its data folder */
+function logoMsg(code){const m=$("logo-msg");if(m)m.textContent=code?T("ui.logo_m_"+code):""}
+function logoShow(j){const img=$("logo-prev"),has=!!(j&&j.present);if(!img)return;img.hidden=!has;if(has)img.src="/api/screens/logo?v="+encodeURIComponent(j.tag||"");$("logo-remove").hidden=!has}
+async function logoLoad(){try{const r=await fetch("/api/screens/logo/info",{cache:"no-store"});if(r.ok)logoShow(await r.json())}catch(e){}}
+{const pick=$("logo-pick"),file=$("logo-file"),rm=$("logo-remove");
+  if(pick&&file&&rm){
+    pick.addEventListener("click",()=>file.click());
+    file.addEventListener("change",async()=>{const f=file.files&&file.files[0];file.value="";if(!f)return;if(f.size>1048576){logoMsg("too_big");return}
+      try{const r=await fetch("/api/screens/logo",{method:"POST",headers:{"Content-Type":f.type||"application/octet-stream"},body:f}),j=await r.json();if(j.ok){logoShow(j.logo);logoMsg("saved")}else logoMsg(j.error||"request")}catch(e){logoMsg("request")}});
+    rm.addEventListener("click",async()=>{try{const r=await fetch("/api/screens/logo/remove",{method:"POST"}),j=await r.json();if(j.ok){logoShow(j.logo);logoMsg("removed")}else logoMsg("request")}catch(e){logoMsg("request")}});
+    logoLoad()}}
 /* the full screen: one button in the corner, a second press leaves it; the page keeps working in either state */
 function fsSync(){const b=$("fs");if(!b)return;const on=!!document.fullscreenElement,k=on?"ui.fs_exit":"ui.fs_enter";b.setAttribute("aria-pressed",on);b.title=T(k);b.setAttribute("aria-label",T(k));const u=$("fs-ico");if(u)u.setAttribute("href",on?"#i-fullx":"#i-full")}
 {const b=$("fs");if(b){if(!document.fullscreenEnabled)b.hidden=true;else{b.addEventListener("click",()=>{const r=document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();if(r&&r.catch)r.catch(()=>{})});document.addEventListener("fullscreenchange",fsSync);fsSync()}}}
