@@ -30,7 +30,7 @@ def body(s):
     if state != "ok":
         s.check("the login written as the guide says (a file with mode 600, a Docker secret) is readable by the monitor in the container", False,
                 "state of the account: %s; %s %s (the container runs as user 10001, the file belongs to the user of the host)" % (state, answer["status"], answer["body"][:200]))
-        stack.login_file.chmod(0o644)
+        stack.login_mode(0o644)
         s.run(stack.compose_cmd() + ["restart", "monitor"], timeout=240)
         s.wait_healthy(monitor, 180)
     else:

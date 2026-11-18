@@ -43,7 +43,7 @@ def body(s):
     monitor, _caddy = stack.prepare_client()
     code, out = s.python_in(monitor, PATCH)
     s.check("the webhook is switched on in the configuration of the account", code == 0, out)
-    stack.login_file.chmod(0o644)
+    stack.login_mode(0o644)
     s.run(stack.compose_cmd() + ["restart", "monitor"], timeout=240, label="restart the monitor")
     s.check("the monitor is healthy again", s.wait_healthy(monitor, 180), s.logs(monitor)[-800:])
     ready, _first = stack.wait_proxy()

@@ -311,6 +311,8 @@ class Scenario:
             self.run(["docker", "network", "rm", name], timeout=60, record=False)
         for name in self.volumes:
             self.run(["docker", "volume", "rm", "-f", name], timeout=60, record=False)
+        if os.name == "posix":      # the container leaves files of its own user (10001) in the folder: give them back before deleting
+            self.run(["sudo", "-n", "chown", "-R", "%d:%d" % (os.getuid(), os.getgid()), str(self.work)], timeout=60, record=False)
         shutil.rmtree(self.work, ignore_errors=True)
 
     def verdict(self):
