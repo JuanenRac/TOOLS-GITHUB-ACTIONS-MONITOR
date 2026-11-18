@@ -4101,6 +4101,7 @@
  "ui.upd_err_same": "そのバージョンは既にインストール済みです。",
  "ui.upd_err_not_confirmed": "確認されていません。",
  "ui.upd_err_no_previous": "戻れる以前のバージョンがありません。",
+ "ui.upd_err_cooldown": "失敗した試行が多すぎます。数分待ってからもう一度お試しください。",
  "ui.upd_err_failed": "更新ツールが失敗しました。",
  "ui.upd_err_network": "モニターが応答しませんでした。",
  "ui.upd_err_local_only": "モニターが動作しているコンピューターからのみ可能です。",

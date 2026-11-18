@@ -13,6 +13,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **Die Bilder der README entstehen in 1080p und zeigen die neuesten Reiter**: `tools/make_screenshots.py` fotografiert jede Seite standardmäßig mit 1920x1080 (`--viewport BREITExHÖHE` ändert das; die Bilder in 4K, Ultrabreit, Hochformat, Telefon und Wandanzeige behalten ihre Größe), `tools/demo_monitor.py --rich` gibt der Demo Befunde für die Wächter Auslieferung und Lieferkette, einen Tagestrend und einen Zeitraumvergleich, und die README (in den acht Sprachen) zeigt die Seiten Auslieferung, Lieferkette, Tagestrend, Zeiträume vergleichen und Aktualisierungen.
 
+### Sicherheit
+
+- **Das Menü Aktualisierungen ist schwerer zu missbrauchen**: fünf abgelehnte oder fehlgeschlagene Versuche, zu aktualisieren oder zurückzugehen, innerhalb von zehn Minuten sperren die Schaltflächen für zehn Minuten (die Antwort lautet `cooldown`, mit ihrem Text in den acht Sprachen), der Status sagt, warum eine Aktualisierung blockiert ist (`blocked_reason`, `cooldown_seconds`), die Fortschrittsdatei des Updaters wird nur gelesen, wenn sie eine einfache Datei vernünftiger Größe ist (ein Link, eine riesige, abgeschnittene oder feindliche Datei gilt als keine laufende Aktualisierung), das Protokoll des Updaters wird nach dem Start des Prozesses geschlossen, und der Workflow-Linter, der die Wächter für Lieferkette und Auslieferung speist, schneidet eine Datei bei 1 MiB, 20000 Zeilen und 4000 Zeichen pro Zeile ab, sodass eine endlose Zeile oder eine Million Zeilen den Zyklus nicht aufhalten können. Tests lehnen einen fremden Host oder Origin auf jeder Route des Menüs ab.
+
 ## [2.1.2]
 
 ### Behoben

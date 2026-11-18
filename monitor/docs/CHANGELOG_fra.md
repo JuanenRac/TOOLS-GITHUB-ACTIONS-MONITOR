@@ -13,6 +13,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - **Les captures du README sont prises en 1080p et montrent les onglets les plus récents** : `tools/make_screenshots.py` photographie chaque page en 1920x1080 par défaut (`--viewport LARGEURxHAUTEUR` le change ; les captures en 4K, ultralarge, portrait, téléphone et écran mural gardent leur taille), `tools/demo_monitor.py --rich` donne à la démo des constats pour les sentinelles de livraison et de chaîne d'approvisionnement, une tendance quotidienne et une comparaison de périodes, et le README (dans les huit langues) montre les pages Livraison, Chaîne d'approvisionnement, Tendance quotidienne, Comparer les périodes et Mises à jour.
 
+### Sécurité
+
+- **Le menu Mises à jour est plus difficile à détourner**: cinq tentatives refusées ou échouées de mise à jour ou de retour en arrière en dix minutes mettent les boutons en pause pendant dix minutes (la réponse est `cooldown`, avec son texte dans les huit langues), l'état dit pourquoi une mise à jour est bloquée (`blocked_reason`, `cooldown_seconds`), le fichier de progression de l'outil de mise à jour n'est lu que s'il s'agit d'un fichier ordinaire de taille raisonnable (un lien, un fichier énorme, tronqué ou hostile compte comme aucune mise à jour en cours), le journal de l'outil est fermé une fois le processus démarré, et l'analyseur de workflows qui alimente les sentinelles Chaîne d'approvisionnement et Livraison coupe un fichier à 1 Mio, 20000 lignes et 4000 caractères par ligne, si bien qu'une ligne sans fin ou un million de lignes ne peuvent pas retenir le cycle. Des tests refusent un Host ou un Origin étranger sur chaque route du menu.
+
 ## [2.1.2]
 
 ### Corrigé

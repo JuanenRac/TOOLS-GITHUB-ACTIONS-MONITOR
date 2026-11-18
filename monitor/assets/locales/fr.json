@@ -4101,6 +4101,7 @@
  "ui.upd_err_same": "Cette version est déjà installée.",
  "ui.upd_err_not_confirmed": "Non confirmé.",
  "ui.upd_err_no_previous": "Il n'y a pas de version antérieure à restaurer.",
+ "ui.upd_err_cooldown": "Trop de tentatives échouées : attends quelques minutes avant de réessayer.",
  "ui.upd_err_failed": "L'outil de mise à jour a échoué.",
  "ui.upd_err_network": "Le moniteur n'a pas répondu.",
  "ui.upd_err_local_only": "Seulement depuis l'ordinateur où tourne le moniteur.",

@@ -4101,6 +4101,7 @@
  "ui.upd_err_same": "Essa versão já está instalada.",
  "ui.upd_err_not_confirmed": "Sem confirmação.",
  "ui.upd_err_no_previous": "Não há versão anterior para onde voltar.",
+ "ui.upd_err_cooldown": "Demasiadas tentativas falhadas: aguarde alguns minutos antes de tentar novamente.",
  "ui.upd_err_failed": "O atualizador falhou.",
  "ui.upd_err_network": "O monitor não respondeu.",
  "ui.upd_err_local_only": "Só a partir do computador onde o monitor corre.",

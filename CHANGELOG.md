@@ -14,6 +14,10 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **The pictures of the README are taken at 1080p and show the newest tabs**: `tools/make_screenshots.py` photographs every page at 1920x1080 by default (`--viewport WIDTHxHEIGHT` changes it; the 4K, ultrawide, portrait, phone and wall-screen pictures keep their own size), `tools/demo_monitor.py --rich` gives the demo findings for the Delivery and Supply chain sentinels, a daily trend and a comparison of periods, and the README (in the eight languages) shows the Delivery, Supply chain, Daily trend, Compare periods and Updates pages.
 
+### Security
+
+- **The Updates menu is harder to abuse**: five refused or failed attempts to update or go back inside ten minutes pause the buttons for ten minutes (the answer is `cooldown`, with its text in the eight languages), the status says why an update is blocked (`blocked_reason`, `cooldown_seconds`), the progress file of the updater is read only when it is a plain file of a reasonable size (a link, a huge file or a truncated or hostile one counts as no update running), the log of the updater is closed once the process has started, and the workflow linter that feeds the Supply chain and Delivery sentinels cuts a file at 1 MiB, 20000 lines and 4000 characters a line, so an endless line or a million lines cannot hold the cycle. Tests refuse a foreign Host or Origin on every route of the menu.
+
 ## [2.1.2]
 
 ### Fixed

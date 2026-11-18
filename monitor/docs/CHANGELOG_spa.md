@@ -13,6 +13,10 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - **Las capturas del README se hacen a 1080p y muestran las pestañas más nuevas**: `tools/make_screenshots.py` fotografía cada página a 1920x1080 por defecto (`--viewport ANCHOxALTO` lo cambia; las capturas de 4K, ultraancha, vertical, móvil y pantallas de pared conservan su tamaño), `tools/demo_monitor.py --rich` da a la demo hallazgos para los centinelas de entrega y de cadena de suministro, una tendencia diaria y una comparación de periodos, y el README (en los ocho idiomas) muestra las páginas de Entrega, Cadena de suministro, Tendencia diaria, Comparar periodos y Actualizaciones.
 
+### Seguridad
+
+- **El menú de Actualizaciones es más difícil de abusar**: cinco intentos rechazados o fallidos de actualizar o volver atrás en diez minutos pausan los botones durante diez minutos (la respuesta es `cooldown`, con su texto en los ocho idiomas), el estado dice por qué una actualización está bloqueada (`blocked_reason`, `cooldown_seconds`), el fichero de progreso del actualizador solo se lee si es un fichero normal de tamaño razonable (un enlace, un fichero enorme o uno truncado u hostil cuenta como ninguna actualización en marcha), el registro del actualizador se cierra una vez iniciado el proceso, y el analizador de workflows que alimenta los centinelas de Cadena de suministro y Entrega corta un fichero a 1 MiB, 20000 líneas y 4000 caracteres por línea, de modo que una línea sin fin o un millón de líneas no pueden retener el ciclo. Las pruebas rechazan un Host u Origin ajeno en todas las rutas del menú.
+
 ## [2.1.2]
 
 ### Corregido

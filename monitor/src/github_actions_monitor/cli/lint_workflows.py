@@ -137,10 +137,21 @@ def settings(config):
     return out
 
 
+MAX_TEXT = 1_048_576      # characters of one workflow file that are read (a real one is a few kilobytes; a hostile one with anchors that expand or one endless line is cut here, never expanded)
+MAX_LINES = 20000
+MAX_LINE = 4000
+
+
+def bounded(text):
+    """The lines of a workflow file within the limits above. The linter never parses YAML (so an anchor or an alias is just text and nothing expands); the limits also keep the regular expressions short."""
+    lines = str(text)[:MAX_TEXT].replace("\r\n", "\n").split("\n")[:MAX_LINES]
+    return [line[:MAX_LINE] for line in lines]
+
+
 def lint_text(text, name="workflow.yml", rules=None):
     """The findings of one workflow file: [{"file", "line", "rule", "severity", "detail"}]. `rules` = settings()["rules"] (all on when None)."""
     rules = rules or settings(None)["rules"]
-    lines = text.replace("\r\n", "\n").split("\n")
+    lines = bounded(text)
     found = []
 
     def silenced(number, rule):
@@ -258,7 +269,8 @@ def lint_path(path, rules=None, root=None):
     out = []
     for file in workflow_files(path):
         try:
-            text = file.read_text(encoding="utf-8", errors="replace")
+            with open(file, "r", encoding="utf-8", errors="replace") as handle:
+                text = handle.read(MAX_TEXT)
         except OSError:
             continue
         label = str(file.relative_to(root)).replace("\\", "/") if root and Path(root) in file.parents else file.name

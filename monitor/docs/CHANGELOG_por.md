@@ -13,6 +13,10 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - **As capturas do README são feitas em 1080p e mostram os separadores mais recentes**: `tools/make_screenshots.py` fotografa cada página a 1920x1080 por predefinição (`--viewport LARGURAxALTURA` altera-o; as capturas de 4K, ultralarga, vertical, telemóvel e ecrã de parede mantêm o seu tamanho), `tools/demo_monitor.py --rich` dá à demonstração deteções para as sentinelas de entrega e de cadeia de fornecimento, uma tendência diária e uma comparação de períodos, e o README (nas oito línguas) mostra as páginas Entrega, Cadeia de fornecimento, Tendência diária, Comparar períodos e Atualizações.
 
+### Segurança
+
+- **O menu Atualizações é mais difícil de abusar**: cinco tentativas recusadas ou falhadas de atualizar ou voltar atrás em dez minutos põem os botões em pausa durante dez minutos (a resposta é `cooldown`, com o seu texto nos oito idiomas), o estado diz porque uma atualização está bloqueada (`blocked_reason`, `cooldown_seconds`), o ficheiro de progresso do atualizador só é lido se for um ficheiro normal de tamanho razoável (uma ligação, um ficheiro enorme, truncado ou hostil conta como nenhuma atualização em curso), o registo do atualizador é fechado depois de o processo arrancar, e o analisador de workflows que alimenta as sentinelas de Cadeia de fornecimento e Entrega corta um ficheiro a 1 MiB, 20000 linhas e 4000 carateres por linha, pelo que uma linha sem fim ou um milhão de linhas não podem reter o ciclo. Os testes recusam um Host ou Origin alheio em todas as rotas do menu.
+
 ## [2.1.2]
 
 ### Corrigido
