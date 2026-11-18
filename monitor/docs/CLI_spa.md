@@ -18,7 +18,7 @@
 | `doctor` | las comprobaciones de `--doctor` de esta instalación (el monitor no tiene que estar en marcha) | sí |
 | `backup` | la copia de seguridad completa de la instalación (el monitor no tiene que estar en marcha): `backup create [ARCHIVO] [--account ID]`, `verify ARCHIVO [--deep]`, `restore ARCHIVO [--account ID] [--to-dir CARPETA] [--force]`, `status`, `list`; `--encrypt` con `--key-env NOMBRE` la cifra (biblioteca opcional); mira [OPS_spa.md](OPS_spa.md) | no |
 | `accounts` | las cuentas del supervisor (solo con varias cuentas) | no |
-| `alerts` | las alertas de todos los centinelas en una lista: `--sentinel ci\|collab`, `--level info\|warning\|error`, `--muted show\|hide\|only` | no |
+| `alerts` | las alertas de todos los centinelas en una lista: `--sentinel ci\|collab\|security\|supply\|delivery`, `--level info\|warning\|error`, `--muted show\|hide\|only` | no |
 | `score` | la puntuación de la cuenta: número, letra, tendencia, partes, cobertura y el desglose por repositorio; `--compare` la compara con el histórico de la ventana | no |
 | `team` | la salud de los repositorios en orden, primero los que necesitan a una persona; `--severity warn\|bad` deja los peores y `--repo owner/name` da el detalle de uno | no |
 | `live` | el estado del receptor del webhook y los últimos eventos | no |

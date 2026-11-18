@@ -18,7 +18,7 @@
 | `doctor` | the checks of `--doctor` for this installation (the monitor need not be running) | yes |
 | `backup` | the complete backup of the installation (the monitor need not be running): `backup create [FILE] [--account ID]`, `verify FILE [--deep]`, `restore FILE [--account ID] [--to-dir DIR] [--force]`, `status`, `list`; `--encrypt` with `--key-env NAME` seals it (optional library); see [OPS.md](OPS.md) | no |
 | `accounts` | the accounts of the supervisor (several accounts only) | no |
-| `alerts` | the alerts of every sentinel in one list: `--sentinel ci\|collab`, `--level info\|warning\|error`, `--muted show\|hide\|only` | no |
+| `alerts` | the alerts of every sentinel in one list: `--sentinel ci\|collab\|security\|supply\|delivery`, `--level info\|warning\|error`, `--muted show\|hide\|only` | no |
 | `score` | the score of the account: number, letter, trend, parts, coverage and the breakdown by repository; `--compare` sets it against the history of the window | no |
 | `team` | the health of the repositories ranked with the ones that need a person first; `--severity warn\|bad` keeps the worse ones and `--repo owner/name` gives the detail of one | no |
 | `live` | the state of the webhook receiver and the last events | no |

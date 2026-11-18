@@ -18,7 +18,7 @@
 | `doctor` | この環境に対する `--doctor` の検査（モニターが動いていなくても可） | 可 |
 | `backup` | インストール全体の完全バックアップ（モニターが動いていなくても可）：`backup create [FILE] [--account ID]`、`verify FILE [--deep]`、`restore FILE [--account ID] [--to-dir DIR] [--force]`、`status`、`list`。`--encrypt` と `--key-env NAME` で暗号化（任意のライブラリ）。[OPS_jpn.md](OPS_jpn.md) を参照 | 不可 |
 | `accounts` | スーパーバイザーのアカウント一覧（複数アカウント時のみ） | 不可 |
-| `alerts` | すべての番人のアラートを 1 つの一覧で：`--sentinel ci\|collab`、`--level info\|warning\|error`、`--muted show\|hide\|only` | 不可 |
+| `alerts` | すべての番人のアラートを 1 つの一覧で：`--sentinel ci\|collab\|security\|supply\|delivery`、`--level info\|warning\|error`、`--muted show\|hide\|only` | 不可 |
 | `score` | アカウントのスコア：数値、文字評価、傾向、要素、カバレッジ、リポジトリ別の内訳。`--compare` で期間の履歴と比較します | 不可 |
 | `team` | リポジトリの健全性を、人の手が必要なものから順に表示します。`--severity warn\|bad` で悪いものだけに絞り、`--repo owner/name` で 1 件の詳細を表示します | 不可 |
 | `live` | Webhook 受信の状態と直近のイベント | 不可 |

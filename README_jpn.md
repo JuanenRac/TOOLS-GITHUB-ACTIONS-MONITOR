@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4005_passing-brightgreen.svg" alt="4005 tests">
+  <img src="https://img.shields.io/badge/Tests-4043_passing-brightgreen.svg" alt="4043 tests">
 </p>
 
 > 所有するすべてのリポジトリのワークフローを監視し、赤いもの・止まっているもの・対応待ちのものを、ローカルの1ページで教えます。
@@ -82,8 +82,8 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **テスト** | テストメソッド 4005 件(`python -m unittest discover -s monitor/tests`) |
-| **設定** | 設定 658 件、すべてヘルプ付き |
+| **テスト** | テストメソッド 4043 件(`python -m unittest discover -s monitor/tests`) |
+| **設定** | 設定 681 件、すべてヘルプ付き |
 | **言語** | 8(英語、スペイン語、ドイツ語、フランス語、イタリア語、日本語、中国語、ポルトガル語) |
 | **CI で検証したシステム** | ubuntu, windows、Python 3.11, 3.13 |
 
@@ -316,6 +316,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/COLLAB_jpn.md`](monitor/docs/COLLAB_jpn.md): Collab 番人、アラートタブ、ミュート
 - [`monitor/docs/SENTINEL_SECURITY_jpn.md`](monitor/docs/SENTINEL_SECURITY_jpn.md): セキュリティセンチネル：Dependabot、コードスキャン、シークレット、ブランチ保護、ワークフローの権限、CODEOWNERS、確認できなかったこと
 - [`monitor/docs/SENTINEL_SUPPLY_jpn.md`](monitor/docs/SENTINEL_SUPPLY_jpn.md): サプライチェーンセンチネル：固定されていないアクション、移動するブランチ、広すぎる・欠けているワークフロー権限、チェックアウト付き pull_request_target、読み取れなかったこと
+- [`monitor/docs/SENTINEL_DELIVERY_jpn.md`](monitor/docs/SENTINEL_DELIVERY_jpn.md): 配信センチネル：未リリースの項目、リリースのないタグ、説明やファイルのないリリース、食い違うバージョン、共有契約より遅れた固定、そして読めなかったもの
 - [`monitor/docs/AUDIT_LOG_jpn.md`](monitor/docs/AUDIT_LOG_jpn.md): 操作ログ：誰が何を変更したか、ハッシュの連鎖、読める人、設定
 - [`monitor/docs/HEALTH_jpn.md`](monitor/docs/HEALTH_jpn.md): リポジトリとチームの健全性：構成、チームタブ、ディープリンク、API
 - [`monitor/docs/REPORT_SCHEDULE_jpn.md`](monitor/docs/REPORT_SCHEDULE_jpn.md): 定期レポート：スコア、変化、人の手が必要なリポジトリ、未解決のアラートを HTML と Markdown で、スケジュールとファイル

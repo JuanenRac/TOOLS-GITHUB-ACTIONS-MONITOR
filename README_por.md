@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4005_passing-brightgreen.svg" alt="4005 tests">
+  <img src="https://img.shields.io/badge/Tests-4043_passing-brightgreen.svg" alt="4043 tests">
 </p>
 
 > Vigia os workflows de todos os seus repositórios e diz-lhe, numa página local, o que está a vermelho, o que está encravado e o que o espera.
@@ -82,8 +82,8 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 | | |
 |---|---|
 | **Maturidade** | functional |
-| **Testes** | 4005 métodos de teste (`python -m unittest discover -s monitor/tests`) |
-| **Definições** | 658 definições, todas com ajuda |
+| **Testes** | 4043 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Definições** | 681 definições, todas com ajuda |
 | **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
 | **Testado no CI em** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -316,6 +316,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/COLLAB_por.md`](monitor/docs/COLLAB_por.md): a sentinela Collab, o separador Alertas e os silêncios
 - [`monitor/docs/SENTINEL_SECURITY_por.md`](monitor/docs/SENTINEL_SECURITY_por.md): O sentinela de segurança: Dependabot, análise de código, segredos, proteção de ramos, permissões dos fluxos e CODEOWNERS, e o que não conseguiu verificar
 - [`monitor/docs/SENTINEL_SUPPLY_por.md`](monitor/docs/SENTINEL_SUPPLY_por.md): O sentinela da cadeia de abastecimento: ações não fixadas, ramos móveis, permissões de fluxo amplas ou em falta e pull_request_target com checkout, e o que não conseguiu ler
+- [`monitor/docs/SENTINEL_DELIVERY_por.md`](monitor/docs/SENTINEL_DELIVERY_por.md): O sentinela de entrega: entradas por publicar, etiquetas sem versão, versões sem notas nem ficheiros, versões que não coincidem e fixações atrás de um contrato partilhado, e o que não conseguiu ler
 - [`monitor/docs/AUDIT_LOG_por.md`](monitor/docs/AUDIT_LOG_por.md): O registo de ações: quem mudou o quê, a cadeia de hashes, quem o lê e as definições
 - [`monitor/docs/HEALTH_por.md`](monitor/docs/HEALTH_por.md): A saúde de um repositório e da equipa: de que é feita, o separador Equipa, as ligações diretas e a API
 - [`monitor/docs/REPORT_SCHEDULE_por.md`](monitor/docs/REPORT_SCHEDULE_por.md): Relatórios agendados: a pontuação, o que mudou, os repositórios que precisam de uma pessoa e os alertas abertos em HTML e Markdown, o horário e os ficheiros

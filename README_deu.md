@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4005_passing-brightgreen.svg" alt="4005 tests">
+  <img src="https://img.shields.io/badge/Tests-4043_passing-brightgreen.svg" alt="4043 tests">
 </p>
 
 > Überwacht die Workflows aller deiner Repositories und zeigt dir auf einer lokalen Seite, was rot ist, was hängt und was auf dich wartet.
@@ -82,8 +82,8 @@
 | | |
 |---|---|
 | **Reifegrad** | functional |
-| **Tests** | 4005 Testmethoden (`python -m unittest discover -s monitor/tests`) |
-| **Einstellungen** | 658 Einstellungen, alle mit Hilfe |
+| **Tests** | 4043 Testmethoden (`python -m unittest discover -s monitor/tests`) |
+| **Einstellungen** | 681 Einstellungen, alle mit Hilfe |
 | **Sprachen** | 8 (Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch) |
 | **Im CI getestet auf** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -316,6 +316,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/COLLAB_deu.md`](monitor/docs/COLLAB_deu.md): der Collab-Wächter, der Reiter Alarme und die Stummschaltungen
 - [`monitor/docs/SENTINEL_SECURITY_deu.md`](monitor/docs/SENTINEL_SECURITY_deu.md): Der Sicherheitswächter: Dependabot, Code-Scanning, Geheimnisse, Branch-Schutz, Workflow-Berechtigungen und CODEOWNERS, und was er nicht prüfen konnte
 - [`monitor/docs/SENTINEL_SUPPLY_deu.md`](monitor/docs/SENTINEL_SUPPLY_deu.md): Der Lieferketten-Wächter: nicht gebundene Actions, bewegliche Branches, weite oder fehlende Workflow-Berechtigungen und pull_request_target mit Checkout, und was er nicht lesen konnte
+- [`monitor/docs/SENTINEL_DELIVERY_deu.md`](monitor/docs/SENTINEL_DELIVERY_deu.md): Der Auslieferungs-Wächter: unveröffentlichte Einträge, Tags ohne Release, Releases ohne Notizen oder Dateien, uneinheitliche Versionen und Pins hinter einem gemeinsamen Vertrag, und was er nicht lesen konnte
 - [`monitor/docs/AUDIT_LOG_deu.md`](monitor/docs/AUDIT_LOG_deu.md): Das Aktionsprotokoll: wer was geändert hat, die Hash-Kette, wer es liest und die Einstellungen
 - [`monitor/docs/HEALTH_deu.md`](monitor/docs/HEALTH_deu.md): Die Gesundheit eines Repositorys und des Teams: woraus sie besteht, der Tab Team, die Direktlinks und die API
 - [`monitor/docs/REPORT_SCHEDULE_deu.md`](monitor/docs/REPORT_SCHEDULE_deu.md): Geplante Berichte: die Punktzahl, was sich geändert hat, die Repositorys, die einen Menschen brauchen, und die offenen Meldungen als HTML und Markdown, der Zeitplan und die Dateien

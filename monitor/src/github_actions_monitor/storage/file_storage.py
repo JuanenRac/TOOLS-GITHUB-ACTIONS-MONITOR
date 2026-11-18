@@ -35,7 +35,7 @@ SENTINEL_DIR = "sentinel_state"
 DOC_PATHS = {"events_state": "events/events_state.json", "alert_mutes": "alert_mutes.json", "update_check": "update_check.json", "welcome_state": "welcome_state.json",
              "orgs_state": "orgs_state.json", "degraded": "degraded.json"}
 #: the sentinel states that exist in the flat installation
-FLAT_SENTINELS = ("sentinel_cache", "sentinel_history", "sentinel_ai_cache", "collab_state", "security_state", "supply_state")
+FLAT_SENTINELS = ("sentinel_cache", "sentinel_history", "sentinel_ai_cache", "collab_state", "security_state", "supply_state", "delivery_state")
 FLAT_ACCOUNT = "default"
 GLOBAL_DIR = "_global"      # not a valid account id (it starts with an underscore), so it can never be the folder of an account
 _FLAT_NAMES = {new: old for old, new in accounts_module.LEGACY}

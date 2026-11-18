@@ -109,6 +109,7 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/sentinel` | GET | viewer | the snapshot of the Sentinel (checks A1-A13) |
 | `/api/sentinel/ai` | GET | viewer | the AI explanation of a failed build or a CodeQL alert (a person asks; cached) |
 | `/api/sentinel/collab` | GET | viewer | issues and pull requests that need a person |
+| `/api/sentinel/delivery` | GET | viewer | whether what is built is also delivered: releases older than the CHANGELOG, version tags without a release, releases without notes or assets, versions that disagree and pins behind a shared contract, with the lifecycle of the sentinel and the repositories it cannot read |
 | `/api/sentinel/historial` | GET | viewer | the history of the daily report |
 | `/api/sentinel/panels` | GET | viewer | the panels A1-A13 as data (level, one line, rows to act on) |
 | `/api/sentinel/parte/save` | POST | maintainer | save the daily report |

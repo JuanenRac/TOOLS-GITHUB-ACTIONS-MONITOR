@@ -18,7 +18,7 @@
 | `doctor` | 此安装的 `--doctor` 检查（监视器无需运行） | 支持 |
 | `backup` | 安装的完整备份（监视器无需运行）：`backup create [文件] [--account ID]`、`verify 文件 [--deep]`、`restore 文件 [--account ID] [--to-dir 文件夹] [--force]`、`status`、`list`；`--encrypt` 配合 `--key-env 名称` 进行加密（可选库）；见 [OPS_zho.md](OPS_zho.md) | 不支持 |
 | `accounts` | 监督进程的账户（仅多账户时） | 不支持 |
-| `alerts` | 所有哨兵的警报合成一个列表：`--sentinel ci\|collab`、`--level info\|warning\|error`、`--muted show\|hide\|only` | 不支持 |
+| `alerts` | 所有哨兵的警报合成一个列表：`--sentinel ci\|collab\|security\|supply\|delivery`、`--level info\|warning\|error`、`--muted show\|hide\|only` | 不支持 |
 | `score` | 账户评分：数值、等级、趋势、各部分、覆盖率以及按仓库的细分；`--compare` 将其与窗口内的历史记录比较 | 不支持 |
 | `team` | 按需要人处理的优先顺序列出仓库的健康状况；`--severity warn\|bad` 只保留较差的，`--repo owner/name` 显示单个仓库的详情 | 否 |
 | `live` | Webhook 接收器的状态和最近的事件 | 不支持 |

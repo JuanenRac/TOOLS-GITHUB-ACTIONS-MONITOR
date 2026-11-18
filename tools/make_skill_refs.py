@@ -126,6 +126,7 @@ NOTES = {
     "/api/sentinel/ai": ("GET", "the AI explanation of a failed build or a CodeQL alert (a person asks; cached)"),
     "/api/sentinel/collab": ("GET", "issues and pull requests that need a person"),
     "/api/sentinel/security": ("GET", "what GitHub says is open or missing about security (Dependabot, code scanning, secrets, branch protection, workflow permissions, CODEOWNERS), with the lifecycle of the sentinel and what it cannot read"),
+    "/api/sentinel/delivery": ("GET", "whether what is built is also delivered: releases older than the CHANGELOG, version tags without a release, releases without notes or assets, versions that disagree and pins behind a shared contract, with the lifecycle of the sentinel and the repositories it cannot read"),
     "/api/sentinel/supply": ("GET", "what the workflow files of each repository let a moved tag or an outsider do (unpinned actions, moving branches, wide or missing permissions, pull_request_target with a checkout), with the lifecycle of the sentinel and the repositories it cannot read"),
     "/api/sentinel/historial": ("GET", "the history of the daily report"),
     "/api/sentinel/panels": ("GET", "the panels A1-A13 as data (level, one line, rows to act on)"),
