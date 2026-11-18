@@ -11,6 +11,11 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+### Fixed
+
+- **The unfolded panel of a Sentinel tab reaches the bottom of its box**: in the CI, collaboration and security tabs the one panel that is unfolded was cut at 46% of the height of the window and left an empty strip below it; it now takes the rest of the box and scrolls inside when its content is taller. The rule is measured in a headless browser in the eight languages, wide and narrow (`tools/check_unfolded.py`).
+- **Starting the monitor from the updater no longer opens a console window for every git and gh call**: the process started after an update had no console at all, so each command it ran opened a visible one. It now starts with a hidden console that its children share, and so do the processes of the account supervisor; a test reads every place that starts a process and refuses the detached flag.
+
 ## [2.1.1]
 
 ### Fixed
