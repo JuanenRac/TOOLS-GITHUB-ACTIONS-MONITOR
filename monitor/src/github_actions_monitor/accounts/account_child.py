@@ -44,6 +44,7 @@ def redirect(account_id, base=None):
     from github_actions_monitor.sentinels import sentinel_collab  # and so are the files of the second one
     from github_actions_monitor.sentinels import sentinel_security  # and the files of the third one
     from github_actions_monitor.sentinels import sentinel_supply  # and of the fourth
+    from github_actions_monitor.sentinels import sentinel_delivery  # and of the fifth
     from github_actions_monitor.sentinels import alert_center  # and the silences of the alerts
     for module, attribute, relative in accounts.STATE_FILES:
         loaded = sys.modules.get(module)

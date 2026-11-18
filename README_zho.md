@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4005_passing-brightgreen.svg" alt="4005 tests">
+  <img src="https://img.shields.io/badge/Tests-4047_passing-brightgreen.svg" alt="4047 tests">
 </p>
 
 > 监视你所有仓库的工作流，并在一个本地页面上告诉你：哪些是红的、哪些卡住了、哪些在等你处理。
@@ -82,8 +82,8 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 4005 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **设置** | 658 个设置,均有帮助 |
+| **测试** | 4047 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **设置** | 681 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
 
@@ -316,6 +316,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/COLLAB_zho.md`](monitor/docs/COLLAB_zho.md)：Collab 哨兵、警报标签页与静音
 - [`monitor/docs/SENTINEL_SECURITY_zho.md`](monitor/docs/SENTINEL_SECURITY_zho.md): 安全哨兵：Dependabot、代码扫描、密钥、分支保护、工作流权限和 CODEOWNERS，以及它无法检查的内容
 - [`monitor/docs/SENTINEL_SUPPLY_zho.md`](monitor/docs/SENTINEL_SUPPLY_zho.md): 供应链哨兵：未固定的 Action、移动分支、过宽或缺失的工作流权限、带检出的 pull_request_target，以及它无法读取的内容
+- [`monitor/docs/SENTINEL_DELIVERY_zho.md`](monitor/docs/SENTINEL_DELIVERY_zho.md): 交付哨兵：未发布的条目、没有发布的标签、没有说明或文件的发布、不一致的版本、落后于共享契约的固定，以及无法读取的内容
 - [`monitor/docs/AUDIT_LOG_zho.md`](monitor/docs/AUDIT_LOG_zho.md): 操作日志：谁修改了什么、哈希链、谁能读取以及设置
 - [`monitor/docs/HEALTH_zho.md`](monitor/docs/HEALTH_zho.md): 仓库与团队的健康状况：组成、团队标签页、深度链接和 API
 - [`monitor/docs/REPORT_SCHEDULE_zho.md`](monitor/docs/REPORT_SCHEDULE_zho.md): 定时报告：评分、变化、需要人处理的仓库和未处理的警报，以 HTML 和 Markdown 呈现，以及计划和文件

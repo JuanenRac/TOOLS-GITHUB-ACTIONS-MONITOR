@@ -576,6 +576,29 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinels.collab.rules.pr_review_pending_days` | `-` | sentinel | Days waiting for review |
 | `sentinels.collab.rules.watch_external_comments` | `-` | sentinel | Watch outsiders |
 | `sentinels.collab.search_api` | `-` | sentinel | Read issues and pull requests with the Search API |
+| `sentinels.delivery.changelog_paths` | `-` | sentinel | CHANGELOG files |
+| `sentinels.delivery.enabled` | `-` | sentinel | Delivery sentinel on |
+| `sentinels.delivery.expected_assets` | `-` | sentinel | Expected release files |
+| `sentinels.delivery.max_calls_per_tick` | `-` | sentinel | Calls per round |
+| `sentinels.delivery.max_repos_per_tick` | `-` | sentinel | Repositories per round |
+| `sentinels.delivery.min_rate_remaining` | `-` | sentinel | Allowance kept free |
+| `sentinels.delivery.refresh_seconds` | `-` | sentinel | Delivery cycle |
+| `sentinels.delivery.repos` | `-` | sentinel | Repositories watched for delivery |
+| `sentinels.delivery.signals.assets_missing.enabled` | `-` | sentinel | Release without its files |
+| `sentinels.delivery.signals.assets_missing.level` | `-` | sentinel | Release without its files: level |
+| `sentinels.delivery.signals.ecosystem_drift.enabled` | `-` | sentinel | Behind a shared contract |
+| `sentinels.delivery.signals.ecosystem_drift.level` | `-` | sentinel | Behind a shared contract: level |
+| `sentinels.delivery.signals.release_without_notes.enabled` | `-` | sentinel | Release without notes |
+| `sentinels.delivery.signals.release_without_notes.level` | `-` | sentinel | Release without notes: level |
+| `sentinels.delivery.signals.tag_without_release.enabled` | `-` | sentinel | Tag without a release |
+| `sentinels.delivery.signals.tag_without_release.level` | `-` | sentinel | Tag without a release: level |
+| `sentinels.delivery.signals.unreleased_pending.enabled` | `-` | sentinel | Unreleased entries waiting |
+| `sentinels.delivery.signals.unreleased_pending.level` | `-` | sentinel | Unreleased entries waiting: level |
+| `sentinels.delivery.signals.version_mismatch.enabled` | `-` | sentinel | Versions that disagree |
+| `sentinels.delivery.signals.version_mismatch.level` | `-` | sentinel | Versions that disagree: level |
+| `sentinels.delivery.unreleased_days` | `-` | sentinel | Days before unreleased entries count |
+| `sentinels.delivery.unreleased_min_entries` | `-` | sentinel | Least entries under Unreleased |
+| `sentinels.delivery.version_files` | `-` | sentinel | Version files |
 | `sentinels.security.enabled` | `-` | sentinel | Security sentinel on |
 | `sentinels.security.max_repos_per_tick` | `-` | sentinel | Repositories per round |
 | `sentinels.security.min_rate_remaining` | `-` | sentinel | Allowance kept free |

@@ -18,7 +18,7 @@
 | `doctor` | die Prüfungen von `--doctor` für diese Installation (der Monitor muss nicht laufen) | ja |
 | `backup` | die vollständige Sicherung der Installation (der Monitor muss nicht laufen): `backup create [DATEI] [--account ID]`, `verify DATEI [--deep]`, `restore DATEI [--account ID] [--to-dir ORDNER] [--force]`, `status`, `list`; `--encrypt` mit `--key-env NAME` verschlüsselt sie (optionale Bibliothek); siehe [OPS_deu.md](OPS_deu.md) | nein |
 | `accounts` | die Konten des Supervisors (nur bei mehreren Konten) | nein |
-| `alerts` | die Alarme aller Wächter in einer Liste: `--sentinel ci\|collab`, `--level info\|warning\|error`, `--muted show\|hide\|only` | nein |
+| `alerts` | die Alarme aller Wächter in einer Liste: `--sentinel ci\|collab\|security\|supply\|delivery`, `--level info\|warning\|error`, `--muted show\|hide\|only` | nein |
 | `score` | die Punktzahl des Kontos: Zahl, Buchstabe, Trend, Teile, Abdeckung und die Aufteilung nach Repository; `--compare` vergleicht sie mit dem Verlauf des Fensters | nein |
 | `team` | die Gesundheit der Repositorys als Rangliste, zuerst die, die einen Menschen brauchen; `--severity warn\|bad` behält die schlechteren und `--repo owner/name` zeigt die Einzelheiten eines Repositorys | nein |
 | `live` | der Zustand des Webhook-Empfängers und die letzten Ereignisse | nein |

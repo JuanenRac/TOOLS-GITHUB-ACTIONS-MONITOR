@@ -42,7 +42,7 @@ EXAMPLES_DIR = "assets/examples"          # where the neutral examples live insi
 # session state and local configuration: they must never travel
 FORBIDDEN_NAMES = {"actions_monitor.json", "sentinel_cache.json", "sentinel_history.json", "events_monitor.jsonl", "events_state.json",
                    "ci_red.json", "actions_monitor_log.txt", "ai_cache.json", "targets.candidates.json", "targets.json", "ecosystems.json", "profiles.json",
-                   "eventos_monitor.jsonl", "eventos_estado.json", "events_monitor.jsonl", "events_state.json", "etag_cache.json", "analytics_history.json", "ai_actions_log.jsonl", "sentinel_ai_cache.json", "collab_state.json", "security_state.json", "supply_state.json", "alert_mutes.json", "ai_alerts_state.json", "ALERTS_BRIEF.md", "ai_alerts.jsonl", "ai_heartbeat.json", "ai_hook_state.json"}
+                   "eventos_monitor.jsonl", "eventos_estado.json", "events_monitor.jsonl", "events_state.json", "etag_cache.json", "analytics_history.json", "ai_actions_log.jsonl", "sentinel_ai_cache.json", "collab_state.json", "security_state.json", "supply_state.json", "delivery_state.json", "alert_mutes.json", "ai_alerts_state.json", "ALERTS_BRIEF.md", "ai_alerts.jsonl", "ai_heartbeat.json", "ai_hook_state.json"}
 FORBIDDEN_SUFFIXES = (".pyc", ".pyo", ".log", ".tmp", ".jsonl")
 LANGS = ("en", "es", "de", "fr", "it", "ja", "zh", "pt")
 BRAND = "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>"
@@ -151,6 +151,41 @@ def dirty_files(here=HERE):
     if done.returncode != 0:
         return None
     return [line[3:] for line in done.stdout.decode("utf-8", "replace").split(chr(0)) if len(line) > 3]
+
+
+def member_hash_problems(entries, here=HERE, prefix="github_actions_monitor/"):
+    """The content of every member of the zip against the file the commit versions (the blob of `git ls-files -s`, read with `git cat-file --batch`), once the line endings are made alike (the build turns scripts
+    to LF and launchers to CRLF on purpose). A tree that is clean by `git status` can still ship a different file (an ignored or assume-unchanged edit, a generated copy): this finds it by content, not by name.
+    Returns the names that differ, or None when git does not answer (the other checks already refuse that case)."""
+    try:
+        listed = subprocess.run(["git", "ls-files", "-s", "-z", "--", "."], cwd=str(here), capture_output=True, timeout=60)
+        if listed.returncode != 0:
+            return None
+        blobs = {}
+        for record in listed.stdout.decode("utf-8", "replace").split(chr(0)):
+            meta, _, name = record.partition(chr(9))
+            parts = meta.split()
+            if name and len(parts) == 3 and parts[2] == "0":
+                blobs[name] = parts[1]
+        wanted = [(name[len(prefix):], data) for name, data in sorted(entries.items()) if name.startswith(prefix) and name[len(prefix):] in blobs and name[len(prefix):] not in GENERATED]
+        shas = "".join(blobs[name] + chr(10) for name, _ in wanted).encode("ascii")
+        done = subprocess.run(["git", "cat-file", "--batch"], cwd=str(here), input=shas, capture_output=True, timeout=300)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if done.returncode != 0:
+        return None
+    out, at, different = done.stdout, 0, []
+    for name, data in wanted:
+        end = out.index(bytes([10]), at)
+        header = out[at:end].split()
+        if len(header) != 3 or header[1] != b"blob":
+            return None
+        size = int(header[2])
+        blob = out[end + 1:end + 1 + size]
+        at = end + 1 + size + 1
+        if blob.replace(bytes([13, 10]), bytes([10])) != bytes(data).replace(bytes([13, 10]), bytes([10])):
+            different.append(name)
+    return different
 
 
 def case_collisions(names):
@@ -645,6 +680,11 @@ def main():
             fail("git status does not answer: the zip cannot be proved to be the commit")
         if edited:
             fail("files edited and not committed would travel (the zip must be the commit): " + "; ".join(edited[:12]))
+        changed = member_hash_problems(entries)
+        if changed is None:
+            fail("git does not give the content of the versioned files: the zip cannot be proved to be the commit")
+        if changed:
+            fail("members of the zip whose content is not the one of the commit: " + "; ".join(changed[:12]))
     left_out = package_data_problems(entries)
     if left_out:
         fail("data files of the package missing from the zip: " + ", ".join(left_out))

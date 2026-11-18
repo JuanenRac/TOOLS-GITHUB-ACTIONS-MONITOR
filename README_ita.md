@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4005_passing-brightgreen.svg" alt="4005 tests">
+  <img src="https://img.shields.io/badge/Tests-4047_passing-brightgreen.svg" alt="4047 tests">
 </p>
 
 > Controlla i workflow di tutti i tuoi repository e ti dice, su una pagina locale, cosa è rosso, cosa è bloccato e cosa ti aspetta.
@@ -82,8 +82,8 @@
 | | |
 |---|---|
 | **Maturità** | functional |
-| **Test** | 4005 metodi di test (`python -m unittest discover -s monitor/tests`) |
-| **Impostazioni** | 658 impostazioni, tutte con aiuto |
+| **Test** | 4047 metodi di test (`python -m unittest discover -s monitor/tests`) |
+| **Impostazioni** | 681 impostazioni, tutte con aiuto |
 | **Lingue** | 8 (inglese, spagnolo, tedesco, francese, italiano, giapponese, cinese e portoghese) |
 | **Provato nel CI su** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -316,6 +316,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/COLLAB_ita.md`](monitor/docs/COLLAB_ita.md): la sentinella Collab, la scheda Avvisi e i silenziamenti
 - [`monitor/docs/SENTINEL_SECURITY_ita.md`](monitor/docs/SENTINEL_SECURITY_ita.md): La sentinella di sicurezza: Dependabot, analisi del codice, segreti, protezione dei branch, permessi dei workflow e CODEOWNERS, e ciò che non ha potuto controllare
 - [`monitor/docs/SENTINEL_SUPPLY_ita.md`](monitor/docs/SENTINEL_SUPPLY_ita.md): La sentinella della catena di fornitura: action non fissate, branch mobili, permessi dei workflow ampi o assenti e pull_request_target con checkout, e ciò che non ha potuto leggere
+- [`monitor/docs/SENTINEL_DELIVERY_ita.md`](monitor/docs/SENTINEL_DELIVERY_ita.md): La sentinella di consegna: voci non rilasciate, tag senza release, release senza note o file, versioni che non coincidono e fissaggi indietro rispetto a un contratto condiviso, e ciò che non ha potuto leggere
 - [`monitor/docs/AUDIT_LOG_ita.md`](monitor/docs/AUDIT_LOG_ita.md): Il registro delle azioni: chi ha cambiato cosa, la catena di hash, chi lo legge e le impostazioni
 - [`monitor/docs/HEALTH_ita.md`](monitor/docs/HEALTH_ita.md): La salute di un repository e del team: di cosa è fatta, la scheda Team, i link diretti e l'API
 - [`monitor/docs/REPORT_SCHEDULE_ita.md`](monitor/docs/REPORT_SCHEDULE_ita.md): Rapporti pianificati: il punteggio, cosa è cambiato, i repository che richiedono una persona e gli avvisi aperti in HTML e Markdown, la pianificazione e i file

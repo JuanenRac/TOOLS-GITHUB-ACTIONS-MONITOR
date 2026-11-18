@@ -18,7 +18,7 @@
 | `doctor` | les contrôles de `--doctor` pour cette installation (le moniteur n'a pas besoin de tourner) | oui |
 | `backup` | la sauvegarde complète de l'installation (le moniteur n'a pas besoin de tourner) : `backup create [FICHIER] [--account ID]`, `verify FICHIER [--deep]`, `restore FICHIER [--account ID] [--to-dir DOSSIER] [--force]`, `status`, `list` ; `--encrypt` avec `--key-env NOM` la chiffre (bibliothèque facultative) ; voir [OPS_fra.md](OPS_fra.md) | non |
 | `accounts` | les comptes du superviseur (plusieurs comptes seulement) | non |
-| `alerts` | les alertes de toutes les sentinelles dans une liste : `--sentinel ci\|collab`, `--level info\|warning\|error`, `--muted show\|hide\|only` | non |
+| `alerts` | les alertes de toutes les sentinelles dans une liste : `--sentinel ci\|collab\|security\|supply\|delivery`, `--level info\|warning\|error`, `--muted show\|hide\|only` | non |
 | `score` | le score du compte : nombre, lettre, tendance, parties, couverture et ventilation par dépôt ; `--compare` le compare à l'historique de la fenêtre | non |
 | `team` | la santé des dépôts classés, d'abord ceux qui demandent une personne ; `--severity warn\|bad` garde les pires et `--repo owner/name` donne le détail d'un dépôt | non |
 | `live` | l'état du récepteur de webhook et les derniers évènements | non |

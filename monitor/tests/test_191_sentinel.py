@@ -269,7 +269,7 @@ class Scanning(unittest.TestCase):
 class Contract(unittest.TestCase):
     def test_it_is_registered_off_by_default_and_the_others_are_unchanged(self):
         registry = sentinel_registry.SentinelRegistry.build({"gh": lambda *a, **k: {}, "repos_fn": lambda: [], "eco_fn": lambda r: "x"}, {})
-        self.assertEqual(registry.names(), ["ci", "collab", "security", "supply"])
+        self.assertEqual(registry.names(), ["ci", "collab", "delivery", "security", "supply"])
         self.assertFalse(registry.get("security").enabled)
         self.assertFalse(sentinel_registry.is_enabled({}, "security"))
         self.assertTrue(sentinel_registry.is_enabled({"sentinels": {"security": {"enabled": True}}}, "security"))

@@ -44,6 +44,7 @@ STATE_FILES = (
     ("github_actions_monitor.sentinels.sentinel_collab", "STATE_FILE", "sentinel_state/collab_state.json"),
     ("github_actions_monitor.sentinels.sentinel_security", "STATE_FILE", "sentinel_state/security_state.json"),
     ("github_actions_monitor.sentinels.sentinel_supply", "STATE_FILE", "sentinel_state/supply_state.json"),
+    ("github_actions_monitor.sentinels.sentinel_delivery", "STATE_FILE", "sentinel_state/delivery_state.json"),
     ("github_actions_monitor.sentinels.alert_center", "STATE_FILE", "alert_mutes.json"),
     ("github_actions_monitor.app.updatecheck", "STATE_FILE", "update_check.json"),
     ("github_actions_monitor.security.audit_log", "FILE", "audit_actions.jsonl"),      # the log of actions of an account is its own file: one account never reads the lines of another
@@ -53,7 +54,7 @@ LEGACY = (
     ("actions_monitor.json", CONFIG_NAME), ("actions_monitor_log.txt", "actions_monitor_log.txt"), ("etag_cache.json", "cache/etag_cache.json"),
     ("events_monitor.jsonl", "events/events_monitor.jsonl"), ("events_state.json", "events/events_state.json"), ("analytics_history.json", "analytics/analytics_history.json"),
     ("ai_actions_log.jsonl", "ai_actions_log.jsonl"), ("github_actions_log.jsonl", "github_actions_log.jsonl"), ("sentinel_cache.json", "sentinel_state/sentinel_cache.json"),
-    ("sentinel_history.json", "sentinel_state/sentinel_history.json"), ("sentinel_ai_cache.json", "sentinel_state/sentinel_ai_cache.json"), ("collab_state.json", "sentinel_state/collab_state.json"), ("security_state.json", "sentinel_state/security_state.json"), ("supply_state.json", "sentinel_state/supply_state.json"), ("alert_mutes.json", "alert_mutes.json"), ("update_check.json", "update_check.json"),
+    ("sentinel_history.json", "sentinel_state/sentinel_history.json"), ("sentinel_ai_cache.json", "sentinel_state/sentinel_ai_cache.json"), ("collab_state.json", "sentinel_state/collab_state.json"), ("security_state.json", "sentinel_state/security_state.json"), ("supply_state.json", "sentinel_state/supply_state.json"), ("delivery_state.json", "sentinel_state/delivery_state.json"), ("alert_mutes.json", "alert_mutes.json"), ("update_check.json", "update_check.json"),
     ("degraded.json", "degraded.json"), ("welcome_state.json", "welcome_state.json"), ("orgs_state.json", "orgs_state.json"), ("config_backups", "config_backups"),
 )
 

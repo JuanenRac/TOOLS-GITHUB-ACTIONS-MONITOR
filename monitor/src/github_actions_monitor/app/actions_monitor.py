@@ -3045,6 +3045,15 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as error:      # shown as a notice in the tab
                 self.json_reply({"data": None, "error": i18n.t("mon.sentinel_failed", error=error)})
             return
+        if path == "/api/sentinel/delivery":      # whether what is built is also delivered (the Delivery sentinel; off by default; read only)
+            if not self.guard():
+                return
+            delivery = (SENTINEL["registry"].get("delivery") if SENTINEL["registry"] else None)
+            try:
+                self.json_reply({"data": delivery.snapshot() if delivery else None, "error": SENTINEL["error"] or (None if delivery else i18n.t("mon.sentinel_not_loaded"))})
+            except Exception as error:      # shown as a notice in the tab
+                self.json_reply({"data": None, "error": i18n.t("mon.sentinel_failed", error=error)})
+            return
         if path == "/api/sentinel/collab":      # the issues and pull requests that need a person (the Collab sentinel; off by default; read only)
             if not self.guard():
                 return
@@ -4007,6 +4016,9 @@ def start_sentinel(config):
         supply = SENTINEL["registry"].get("supply")
         if supply is not None:
             supply.feed.listeners.append(notifiers.make_listener(toolconfig.raw_config))
+        delivery = SENTINEL["registry"].get("delivery")
+        if delivery is not None:
+            delivery.feed.listeners.append(notifiers.make_listener(toolconfig.raw_config))
         SENTINEL["registry"].start()
     except Exception as error:
         SENTINEL["error"] = i18n.t("mon.sentinel_start_failed", error=error)

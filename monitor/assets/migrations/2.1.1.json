@@ -4,10 +4,162 @@
  "format": 1,
  "version": "2.1.1",
  "previous": "2.1.0",
- "digest": "8f3c19e1644c994493306a0ee415cbbf4a3544c057e5668dcc79fbc51f041068",
+ "digest": "bccfe8fcce2be21d8c2c98d1bd495c4ae28eacf7a2c4210d01a275540a78037e",
  "data_schema": 2,
  "settings": {
   "added": [
+   {
+    "key": "sentinels.delivery.changelog_paths",
+    "kind": "names"
+   },
+   {
+    "key": "sentinels.delivery.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinels.delivery.expected_assets",
+    "kind": "names"
+   },
+   {
+    "key": "sentinels.delivery.max_calls_per_tick",
+    "kind": "int",
+    "bounds": [
+     1,
+     600
+    ]
+   },
+   {
+    "key": "sentinels.delivery.max_repos_per_tick",
+    "kind": "int",
+    "bounds": [
+     1,
+     200
+    ]
+   },
+   {
+    "key": "sentinels.delivery.min_rate_remaining",
+    "kind": "int",
+    "bounds": [
+     100,
+     5000
+    ]
+   },
+   {
+    "key": "sentinels.delivery.refresh_seconds",
+    "kind": "int",
+    "bounds": [
+     600,
+     86400
+    ]
+   },
+   {
+    "key": "sentinels.delivery.repos",
+    "kind": "repos"
+   },
+   {
+    "key": "sentinels.delivery.signals.assets_missing.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinels.delivery.signals.assets_missing.level",
+    "kind": "enum",
+    "bounds": [
+     "info",
+     "warning",
+     "error",
+     "critical"
+    ]
+   },
+   {
+    "key": "sentinels.delivery.signals.ecosystem_drift.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinels.delivery.signals.ecosystem_drift.level",
+    "kind": "enum",
+    "bounds": [
+     "info",
+     "warning",
+     "error",
+     "critical"
+    ]
+   },
+   {
+    "key": "sentinels.delivery.signals.release_without_notes.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinels.delivery.signals.release_without_notes.level",
+    "kind": "enum",
+    "bounds": [
+     "info",
+     "warning",
+     "error",
+     "critical"
+    ]
+   },
+   {
+    "key": "sentinels.delivery.signals.tag_without_release.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinels.delivery.signals.tag_without_release.level",
+    "kind": "enum",
+    "bounds": [
+     "info",
+     "warning",
+     "error",
+     "critical"
+    ]
+   },
+   {
+    "key": "sentinels.delivery.signals.unreleased_pending.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinels.delivery.signals.unreleased_pending.level",
+    "kind": "enum",
+    "bounds": [
+     "info",
+     "warning",
+     "error",
+     "critical"
+    ]
+   },
+   {
+    "key": "sentinels.delivery.signals.version_mismatch.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinels.delivery.signals.version_mismatch.level",
+    "kind": "enum",
+    "bounds": [
+     "info",
+     "warning",
+     "error",
+     "critical"
+    ]
+   },
+   {
+    "key": "sentinels.delivery.unreleased_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     365
+    ]
+   },
+   {
+    "key": "sentinels.delivery.unreleased_min_entries",
+    "kind": "int",
+    "bounds": [
+     1,
+     100
+    ]
+   },
+   {
+    "key": "sentinels.delivery.version_files",
+    "kind": "names"
+   },
    {
     "key": "sentinels.supply.enabled",
     "kind": "bool"

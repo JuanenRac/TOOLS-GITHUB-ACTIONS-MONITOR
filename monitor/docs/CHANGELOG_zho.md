@@ -12,16 +12,21 @@
 ### 修复
 
 - **发布关卡按 unittest 自己给出的数量接受绿色运行**:一次完整绿色运行的记录包含 unittest 报告已运行的测试数量(当某个测试在一行中间输出时,报告的行数可能更少),关卡现在把这个数字与总数比较,而不是与它能读到的行数比较,因此完整的运行不会再因为几行未计数而被拒绝。
+- **时钟被调回后,webhook 覆盖状态不再一直显示为在线**:标记时间超前于时钟的事件不被采信,因此指示器会回到等待状态,而不是在时钟追上之前一直显示在线,依赖在线 webhook 的节省机制也不会因此保持开启。
 
 ### 新增
 
 - **`make_release.py --progress` 显示测试套件的进度**:使用该选项后,常规套件和干净安装的套件每运行 250 个测试就输出一行,因此关卡不再沉默将近一个小时。
 - **供应链哨兵（仅 Complete，默认关闭）**：第四个哨兵不向 GitHub 写入任何内容，通过 API（无需克隆）读取每个仓库的工作流文件（SHA 未变的文件不会再次读取），并为每个仓库和每种信号生成一条警报：`actions.supply.unpinned`（未固定到完整提交的 `uses:`）、`actions.supply.mutable_ref`（跟随 `@main` 或 `@master`）、`actions.supply.permissions_wide`（`write-all`）、`actions.supply.permissions_missing`（没有 `permissions:` 块）和 `actions.supply.pr_target_checkout`（检出拉取请求的 `pull_request_target`）。发现来自工作流检查器（没有自己的规则；查找密钥的规则保持关闭，因此密钥的值从不被读取），每个信号都有开关和级别，工作流无法读取的仓库会列在 `unavailable` 下且绝不算作干净，重启或首次查看不会通知任何内容。成本由 `max_repos_per_tick`、`max_calls_per_tick` 和 `min_rate_remaining` 限定。新增：“哨兵”子标签中的 `sentinels.supply.*` 设置、`GET /api/sentinel/supply`、`alerts --sentinel supply`、`supply_*` 指标，以及 8 种语言的 `docs/SENTINEL_SUPPLY.md`。
 
+- **交付哨兵（仅 Complete，默认关闭）**：第五个哨兵不向 GitHub 写入任何内容，通过 API（无需克隆）读取每个仓库最新的发布、最新的标签、CHANGELOG 以及你指定的版本文件，并按仓库和信号各发出一条警报：`release.unreleased_pending`（`[Unreleased]` 下有条目等待，而最新已发布版本已超过 `unreleased_days` 天）、`release.tag_without_release`（比最新发布更新的版本标签没有自己的发布）、`release.release_without_notes`（最新发布的说明为空）、`release.version_mismatch`（你列出的版本文件与 CHANGELOG 声明的版本不一致）、`release.ecosystem_drift`（仓库固定的版本低于共享契约提供方的最新发布，从就绪度设置的固定表中读取）以及 `release.assets_missing`（最新发布缺少 `expected_assets` 某个模式对应的文件）。每个信号都有自己的开关和级别，关闭的信号不会被读取，无法读取的仓库列在 `unavailable` 下而绝不算作正常，重启或首次查看不会宣告任何内容，评分也不使用它。成本由 `max_repos_per_tick`、`max_calls_per_tick` 和 `min_rate_remaining` 限定。新增：哨兵子页签中的 `sentinels.delivery.*` 设置、事件 `delivery_new` 和 `delivery_fixed`（发布类别，不在任何默认列表中）、`GET /api/sentinel/delivery`、`alerts --sentinel delivery`、指标 `delivery_*`，以及 8 种语言的 `docs/SENTINEL_DELIVERY.md`。
+
 ### 变更
 
 - **README 的截图显示当前版本**：页面、墙面屏幕和控制台工具的所有图片都用虚构数据重新拍摄。新图片展示分组菜单、CI 与协作哨兵、车队、报告、使用另一个主题的整个页面，以及带有组织标志、使用其他主题并可自动轮换的墙面屏幕；“关于”面板更高，以便看到运行与备份卡片。
 - **要求不显示首次启动向导的地址也会隐藏关于 AI 预算的一次性提示**，因此在干净浏览器中拍摄的图片能显示处于静止状态的页面。
+- **doctor 会以红色提示传入 webhook 没有密钥**:接收端已开启但未设置共享密钥时,每次投递都会以 `401` 被拒绝,doctor 现在报告失败而不是警告;webhook 指南说明密钥是唯一的屏障。
+- **发布关卡会把 zip 中每个文件的内容与提交比较**:除了名称和干净的工作树之外,每个成员还会与提交所版本化的文件比较(换行符除外),因此与提交不同的文件无法被打包。
 
 ## [2.1.0]
 

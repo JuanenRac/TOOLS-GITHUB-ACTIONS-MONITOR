@@ -32,6 +32,8 @@
         "score_dropped",
         "security_new",
         "security_fixed",
+        "delivery_new",
+        "delivery_fixed",
         "alerts_digest",
         "silence_review"
       ]

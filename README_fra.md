@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4005_passing-brightgreen.svg" alt="4005 tests">
+  <img src="https://img.shields.io/badge/Tests-4047_passing-brightgreen.svg" alt="4047 tests">
 </p>
 
 > Surveille les workflows de tous vos dépôts et vous dit, sur une page locale, ce qui est rouge, ce qui est bloqué et ce qui vous attend.
@@ -82,8 +82,8 @@
 | | |
 |---|---|
 | **Maturité** | functional |
-| **Tests** | 4005 méthodes de test (`python -m unittest discover -s monitor/tests`) |
-| **Réglages** | 658 réglages, tous avec aide |
+| **Tests** | 4047 méthodes de test (`python -m unittest discover -s monitor/tests`) |
+| **Réglages** | 681 réglages, tous avec aide |
 | **Langues** | 8 (anglais, espagnol, allemand, français, italien, japonais, chinois et portugais) |
 | **Testé dans le CI sur** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -316,6 +316,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/COLLAB_fra.md`](monitor/docs/COLLAB_fra.md) : la sentinelle Collab, l'onglet Alertes et les sourdines
 - [`monitor/docs/SENTINEL_SECURITY_fra.md`](monitor/docs/SENTINEL_SECURITY_fra.md): La sentinelle de sécurité : Dependabot, analyse de code, secrets, protection des branches, permissions des workflows et CODEOWNERS, et ce qu'elle n'a pas pu vérifier
 - [`monitor/docs/SENTINEL_SUPPLY_fra.md`](monitor/docs/SENTINEL_SUPPLY_fra.md): La sentinelle de chaîne d'approvisionnement : actions non épinglées, branches mobiles, permissions de workflow larges ou absentes et pull_request_target avec récupération, et ce qu'elle n'a pas pu lire
+- [`monitor/docs/SENTINEL_DELIVERY_fra.md`](monitor/docs/SENTINEL_DELIVERY_fra.md): La sentinelle de livraison : entrées non publiées, étiquettes sans version, versions sans notes ni fichiers, versions qui ne concordent pas et épinglages en retard sur un contrat partagé, et ce qu'elle n'a pas pu lire
 - [`monitor/docs/AUDIT_LOG_fra.md`](monitor/docs/AUDIT_LOG_fra.md): Le journal des actions : qui a changé quoi, la chaîne de hachages, qui le lit et les réglages
 - [`monitor/docs/HEALTH_fra.md`](monitor/docs/HEALTH_fra.md): La santé d'un dépôt et de l'équipe : de quoi elle est faite, l'onglet Équipe, les liens directs et l'API
 - [`monitor/docs/REPORT_SCHEDULE_fra.md`](monitor/docs/REPORT_SCHEDULE_fra.md): Rapports planifiés : le score, ce qui a changé, les dépôts qui demandent une personne et les alertes ouvertes en HTML et Markdown, l'horaire et les fichiers
