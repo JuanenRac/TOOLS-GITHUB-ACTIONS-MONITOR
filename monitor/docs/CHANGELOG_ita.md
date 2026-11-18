@@ -17,6 +17,10 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - **Il menu Aggiornamenti è più difficile da abusare**: cinque tentativi rifiutati o falliti di aggiornare o tornare indietro in dieci minuti mettono in pausa i pulsanti per dieci minuti (la risposta è `cooldown`, con il suo testo nelle otto lingue), lo stato dice perché un aggiornamento è bloccato (`blocked_reason`, `cooldown_seconds`), il file di avanzamento dell'aggiornatore viene letto solo se è un file normale di dimensione ragionevole (un collegamento, un file enorme, troncato od ostile conta come nessun aggiornamento in corso), il registro dell'aggiornatore viene chiuso dopo l'avvio del processo, e l'analizzatore di workflow che alimenta le sentinelle Catena di fornitura e Consegna taglia un file a 1 MiB, 20000 righe e 4000 caratteri per riga, così una riga infinita o un milione di righe non possono bloccare il ciclo. I test rifiutano un Host o un Origin estraneo su ogni percorso del menu.
 
+### Aggiunto
+
+- **Un suggerimento su ogni impostazione**: passando il puntatore su un'impostazione, dandole il focus da tastiera o tenendo premuto su uno schermo tattile si vede cosa fa, il suo intervallo o i suoi valori e il valore predefinito, cosa succede quando un interruttore viene attivato o disattivato e se si applica subito o dopo un riavvio; le impostazioni che consumano quota o aggiungono una pagina (il confronto dei periodi, la ricerca di aggiornamenti, gli schermi a muro) dicono anche cosa vedrai e quanto costa. Il testo di aiuto di ogni impostazione è verificato nelle otto lingue e una voce per un'impostazione inesistente viene rifiutata.
+
 ## [2.1.2]
 
 ### Corretto

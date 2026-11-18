@@ -10,6 +10,8 @@
 O separador Definições (a entrada Definições do painel lateral) altera, a partir da página, os valores de `actions_monitor.json`, para que ninguém tenha de editar o ficheiro à mão.
 Está escrito nas oito línguas da página e segue o aspeto do resto.
 
+Passe o ponteiro por qualquer definição (ou dê-lhe o foco com o teclado, ou mantenha premido num ecrã tátil) e aparece uma dica com o que faz, o seu intervalo ou valores e a predefinição, o que acontece ao ativar e desativar um interruptor e se se aplica de imediato ou depois de reiniciar. Algumas definições acrescentam o que vai ver e o que custam. Prima Esc para a fechar.
+
 <!-- settings:begin -->
 ## O que se pode alterar
 

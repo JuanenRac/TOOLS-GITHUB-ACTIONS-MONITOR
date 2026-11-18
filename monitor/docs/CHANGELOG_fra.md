@@ -17,6 +17,10 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - **Le menu Mises à jour est plus difficile à détourner**: cinq tentatives refusées ou échouées de mise à jour ou de retour en arrière en dix minutes mettent les boutons en pause pendant dix minutes (la réponse est `cooldown`, avec son texte dans les huit langues), l'état dit pourquoi une mise à jour est bloquée (`blocked_reason`, `cooldown_seconds`), le fichier de progression de l'outil de mise à jour n'est lu que s'il s'agit d'un fichier ordinaire de taille raisonnable (un lien, un fichier énorme, tronqué ou hostile compte comme aucune mise à jour en cours), le journal de l'outil est fermé une fois le processus démarré, et l'analyseur de workflows qui alimente les sentinelles Chaîne d'approvisionnement et Livraison coupe un fichier à 1 Mio, 20000 lignes et 4000 caractères par ligne, si bien qu'une ligne sans fin ou un million de lignes ne peuvent pas retenir le cycle. Des tests refusent un Host ou un Origin étranger sur chaque route du menu.
 
+### Ajouté
+
+- **Une info-bulle sur chaque réglage**: pointer un réglage, lui donner le focus au clavier ou appuyer longuement sur un écran tactile montre ce qu'il fait, sa plage ou ses valeurs et sa valeur par défaut, ce qui se passe quand un interrupteur est activé ou désactivé et s'il s'applique tout de suite ou après un redémarrage ; les réglages qui consomment du quota ou ajoutent une page (la comparaison de périodes, la recherche de mises à jour, les écrans muraux) disent aussi ce que tu verras et ce que cela coûte. Le texte d'aide de chaque réglage est vérifié dans les huit langues et une entrée pour un réglage inexistant est refusée.
+
 ## [2.1.2]
 
 ### Corrigé

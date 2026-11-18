@@ -10,6 +10,8 @@
 Der Reiter Einstellungen (der Eintrag Einstellungen der Seitenleiste) ändert die Werte von `actions_monitor.json` direkt auf der Seite, sodass niemand die Datei von Hand bearbeiten muss.
 Er ist in den acht Sprachen der Seite verfasst und folgt dem Erscheinungsbild des Rests.
 
+Zeige auf eine beliebige Einstellung (oder gib ihr den Tastaturfokus, oder halte auf einem Touchscreen gedrückt), und ein Tooltip zeigt, was sie tut, ihren Bereich oder ihre Werte und den Standardwert, was beim Ein- und Ausschalten eines Schalters geschieht und ob sie sofort oder nach einem Neustart gilt. Manche Einstellungen nennen zusätzlich, was du sehen wirst und was es kostet. Mit Escape schließt du ihn.
+
 <!-- settings:begin -->
 ## Was sich ändern lässt
 

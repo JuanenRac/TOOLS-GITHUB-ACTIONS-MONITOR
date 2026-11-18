@@ -10,6 +10,8 @@
 La pestaña Ajustes (la entrada Ajustes del panel lateral) cambia desde la página los valores de `actions_monitor.json`, de modo que nadie tenga que editar el fichero a mano.
 Está escrita en los ocho idiomas de la página y sigue el aspecto del resto.
 
+Pon el puntero sobre cualquier ajuste (o dale el foco con el teclado, o mantén pulsado en una pantalla táctil) y aparece un globo con lo que hace, su rango o valores y su valor por defecto, qué ocurre al activar y desactivar un interruptor y si se aplica al instante o tras reiniciar. Algunos ajustes añaden lo que verás y lo que cuestan. Pulsa Escape para cerrarlo.
+
 <!-- settings:begin -->
 ## Qué se puede cambiar
 

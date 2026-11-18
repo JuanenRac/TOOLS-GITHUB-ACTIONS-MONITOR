@@ -17,6 +17,10 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **Das Menü Aktualisierungen ist schwerer zu missbrauchen**: fünf abgelehnte oder fehlgeschlagene Versuche, zu aktualisieren oder zurückzugehen, innerhalb von zehn Minuten sperren die Schaltflächen für zehn Minuten (die Antwort lautet `cooldown`, mit ihrem Text in den acht Sprachen), der Status sagt, warum eine Aktualisierung blockiert ist (`blocked_reason`, `cooldown_seconds`), die Fortschrittsdatei des Updaters wird nur gelesen, wenn sie eine einfache Datei vernünftiger Größe ist (ein Link, eine riesige, abgeschnittene oder feindliche Datei gilt als keine laufende Aktualisierung), das Protokoll des Updaters wird nach dem Start des Prozesses geschlossen, und der Workflow-Linter, der die Wächter für Lieferkette und Auslieferung speist, schneidet eine Datei bei 1 MiB, 20000 Zeilen und 4000 Zeichen pro Zeile ab, sodass eine endlose Zeile oder eine Million Zeilen den Zyklus nicht aufhalten können. Tests lehnen einen fremden Host oder Origin auf jeder Route des Menüs ab.
 
+### Hinzugefügt
+
+- **Ein Tooltip an jeder Einstellung**: Zeigt man auf eine Einstellung, gibt ihr den Tastaturfokus oder hält auf einem Touchscreen gedrückt, erscheint, was sie tut, ihr Bereich oder ihre Werte und ihr Standard, was beim Ein- und Ausschalten eines Schalters geschieht und ob sie sofort oder nach einem Neustart gilt; Einstellungen, die Kontingent kosten oder eine Seite hinzufügen (der Zeitraumvergleich, die Suche nach Aktualisierungen, die Wandanzeigen), nennen auch, was du sehen wirst und was es kostet. Der Hilfetext jeder Einstellung wird in den acht Sprachen geprüft, und ein Eintrag für eine nicht vorhandene Einstellung wird abgelehnt.
+
 ## [2.1.2]
 
 ### Behoben

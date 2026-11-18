@@ -17,6 +17,10 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - **O menu Atualizações é mais difícil de abusar**: cinco tentativas recusadas ou falhadas de atualizar ou voltar atrás em dez minutos põem os botões em pausa durante dez minutos (a resposta é `cooldown`, com o seu texto nos oito idiomas), o estado diz porque uma atualização está bloqueada (`blocked_reason`, `cooldown_seconds`), o ficheiro de progresso do atualizador só é lido se for um ficheiro normal de tamanho razoável (uma ligação, um ficheiro enorme, truncado ou hostil conta como nenhuma atualização em curso), o registo do atualizador é fechado depois de o processo arrancar, e o analisador de workflows que alimenta as sentinelas de Cadeia de fornecimento e Entrega corta um ficheiro a 1 MiB, 20000 linhas e 4000 carateres por linha, pelo que uma linha sem fim ou um milhão de linhas não podem reter o ciclo. Os testes recusam um Host ou Origin alheio em todas as rotas do menu.
 
+### Adicionado
+
+- **Uma dica em cada definição**: ao passar o ponteiro por uma definição, dar-lhe o foco com o teclado ou manter premido num ecrã tátil mostra o que faz, o seu intervalo ou valores e a predefinição, o que acontece ao ativar e desativar um interruptor e se se aplica de imediato ou depois de reiniciar; as definições que gastam quota ou acrescentam uma página (a comparação de períodos, a procura de atualizações, os ecrãs de parede) dizem também o que vai ver e o que custam. O texto de ajuda de cada definição é verificado nos oito idiomas e uma entrada para uma definição inexistente é recusada.
+
 ## [2.1.2]
 
 ### Corrigido

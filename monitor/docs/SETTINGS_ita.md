@@ -10,6 +10,8 @@
 La scheda Impostazioni (la voce Impostazioni del pannello laterale) modifica dalla pagina i valori di `actions_monitor.json`, così nessuno deve modificare il file a mano.
 È scritta negli otto lingue della pagina e segue l'aspetto del resto.
 
+Passa il puntatore su qualsiasi impostazione (o dalle il focus da tastiera, o tieni premuto su uno schermo tattile) e compare un suggerimento con ciò che fa, il suo intervallo o i suoi valori e il valore predefinito, cosa succede quando un interruttore viene attivato o disattivato e se si applica subito o dopo un riavvio. Alcune impostazioni aggiungono cosa vedrai e quanto costa. Premi Esc per chiuderlo.
+
 <!-- settings:begin -->
 ## Cosa si può modificare
 
