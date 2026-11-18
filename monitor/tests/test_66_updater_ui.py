@@ -4,6 +4,7 @@
 import http.client
 import io
 import json
+import os
 import shutil
 import sys
 import tempfile
@@ -192,6 +193,9 @@ class TextMenu(Fixture):
 class CommandLine(Fixture):
     def setUp(self):
         super().setUp()
+        patcher = mock.patch.dict(os.environ, {"MONITOR_CONFIG_DIR": "", "MONITOR_DATA_DIR": "", "MONITOR_LOGS_DIR": "", "MONITOR_AI_DIR": ""})      # the folders of the test install, not those of the test run
+        patcher.start()
+        self.addCleanup(patcher.stop)
         patcher = mock.patch.object(mu, "probe_port", NO_MONITOR)
         patcher.start()
         self.addCleanup(patcher.stop)

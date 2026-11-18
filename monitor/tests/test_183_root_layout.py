@@ -80,15 +80,15 @@ class TheTableOfPlaces(unittest.TestCase):
     def test_a_folder_can_be_moved_by_the_environment_or_by_the_file_of_paths(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp = Path(tmp)
-            with mock.patch.dict(os.environ, {"MONITOR_DATA_DIR": str(tmp / "vol-data")}, clear=False):
+            with mock.patch.dict(os.environ, {"MONITOR_DATA_DIR": str(tmp / "vol-data"), "MONITOR_LOGS_DIR": "", "MONITOR_AI_DIR": "", "MONITOR_CONFIG_DIR": ""}, clear=False):
                 self.assertEqual(paths.folder("data"), tmp / "vol-data")
                 self.assertEqual(paths.folder("logs"), tmp / "vol-data" / "logs", "with the data volume alone, logs and ai follow it")
                 self.assertEqual(paths.folder("ai"), tmp / "vol-data" / "ai")
                 self.assertEqual(paths.folder("config"), paths.ROOT / "config", "the configuration has its own variable")
-            with mock.patch.dict(os.environ, {"MONITOR_DATA_DIR": str(tmp / "vol-data"), "MONITOR_LOGS_DIR": str(tmp / "elsewhere")}):
+            with mock.patch.dict(os.environ, {"MONITOR_DATA_DIR": str(tmp / "vol-data"), "MONITOR_LOGS_DIR": str(tmp / "elsewhere"), "MONITOR_AI_DIR": ""}):
                 self.assertEqual(paths.folder("logs"), tmp / "elsewhere")
             (tmp / "p.json").write_text(json.dumps({"ai": str(tmp / "for-the-ais"), "data": "relative-data", "nonsense": "x", "logs": 5}), encoding="utf-8")
-            with mock.patch.dict(os.environ, {"MONITOR_PATHS_FILE": str(tmp / "p.json")}):
+            with mock.patch.dict(os.environ, {"MONITOR_PATHS_FILE": str(tmp / "p.json"), "MONITOR_LOGS_DIR": "", "MONITOR_AI_DIR": "", "MONITOR_CONFIG_DIR": "", "MONITOR_DATA_DIR": ""}):
                 self.assertEqual(paths.folder("ai"), tmp / "for-the-ais")
                 self.assertEqual(paths.folder("data"), paths.ROOT / "relative-data", "a relative path starts at the product folder")
                 self.assertEqual(paths.folder("logs"), paths.ROOT / "logs", "a value that is not text is ignored")
@@ -96,7 +96,7 @@ class TheTableOfPlaces(unittest.TestCase):
     def test_a_damaged_file_of_paths_changes_nothing(self):
         with tempfile.TemporaryDirectory() as tmp:
             (Path(tmp) / "p.json").write_text("{not json", encoding="utf-8")
-            with mock.patch.dict(os.environ, {"MONITOR_PATHS_FILE": str(Path(tmp) / "p.json")}):
+            with mock.patch.dict(os.environ, {"MONITOR_PATHS_FILE": str(Path(tmp) / "p.json"), "MONITOR_LOGS_DIR": "", "MONITOR_AI_DIR": "", "MONITOR_CONFIG_DIR": "", "MONITOR_DATA_DIR": ""}):
                 self.assertEqual(paths.folder("data"), paths.ROOT / "data")
 
     def test_ensure_makes_the_four_folders(self):
@@ -114,7 +114,7 @@ class TheWritersMakeTheFoldersOfTheMonitor(unittest.TestCase):
         from github_actions_monitor.security import private_io
         with tempfile.TemporaryDirectory() as tmp:
             tmp = Path(tmp)
-            with mock.patch.dict(os.environ, {"MONITOR_DATA_DIR": str(tmp / "vol")}):
+            with mock.patch.dict(os.environ, {"MONITOR_DATA_DIR": str(tmp / "vol"), "MONITOR_LOGS_DIR": "", "MONITOR_AI_DIR": "", "MONITOR_CONFIG_DIR": ""}):
                 private_io.write_private(paths.place("etag_cache.json"), "{}")
                 self.assertTrue((tmp / "vol" / "etag_cache.json").is_file())
                 with private_io.open_append(paths.place("ai_actions_log.jsonl")) as log:

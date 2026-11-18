@@ -213,7 +213,7 @@ class LiteKnowsNoSentinelContract(unittest.TestCase):
                   "s = ThreadingHTTPServer(('127.0.0.1', 0), am.Handler); threading.Thread(target=s.serve_forever, daemon=True).start()\n"
                   "urllib.request.urlopen('http://127.0.0.1:%%d/' %% s.server_address[1], timeout=8).read()\n"
                   "print([m for m in ('github_actions_monitor.sentinels.sentinel_base', 'github_actions_monitor.sentinels.sentinel_registry', 'github_actions_monitor.sentinels.sentinel_ci', 'github_actions_monitor.sentinels.sentinel_local') if m in sys.modules])" % str(HERE / "src"))
-        done = subprocess.run([sys.executable, "-I", "-c", script], capture_output=True, text=True, timeout=60)
+        done = subprocess.run([sys.executable, "-I", "-c", script], capture_output=True, text=True, timeout=60, env=_testenv.isolated_env(self))
         self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
         self.assertEqual(done.stdout.strip(), "[]")
 
