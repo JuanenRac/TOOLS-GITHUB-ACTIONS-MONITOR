@@ -21,7 +21,7 @@ class PageLinks(unittest.TestCase):
         self.assertEqual(bad, [], "href built from data without the URL filter")
 
     def test_filter_accepts_the_configured_host(self):
-        self.assertIn("u.startsWith(GH)", PAGE)
+        self.assertIn("own=new URL(GH).hostname", PAGE)      # the host of the configuration is compared once the address is parsed (the behaviour is in test_288_safe_url)
 
 
 if __name__ == "__main__":

@@ -29,6 +29,14 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 - **`tools/backup_storage.py` écrit le paquet du produit** : ses sauvegardes sont désormais le paquet de `backup create` (format 2, les données des comptes avec leurs réglages débarrassés des secrets) et il accepte `--account` ; les sauvegardes du premier format se vérifient et se restaurent toujours avec lui.
 
+### Corrigé
+
+- **L'étiquette d'état d'un panneau de détail reste sur une ligne** : dans l'onglet Sentinelle, l'étiquette (par exemple celle qui dit qu'il faut agir) de l'en-tête de chaque panneau de Détail par couche était écrasée à une lettre par ligne, dans toutes les langues et surtout sur un téléphone. Elle ne rétrécit plus et ne se coupe plus au milieu d'un mot, et un test dans un vrai navigateur la mesure dans les huit langues, large et étroit.
+
+### Sécurité
+
+- **Les liens que la page construit à partir de données sont vérifiés en lisant l'adresse, pas à ses premières lettres** : seule passe une adresse https de GitHub (ou de l'hôte que vous indiquez pour GitHub Enterprise, qui peut aussi être en http) sans nom d'utilisateur ni mot de passe ; une adresse de script, un hôte qui lui ressemble, un blanc, un caractère de contrôle ou une barre oblique inverse deviennent un lien vide.
+
 ## [2.0.9]
 
 ### Sécurité

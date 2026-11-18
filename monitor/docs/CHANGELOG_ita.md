@@ -29,6 +29,14 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 - **`tools/backup_storage.py` scrive il pacchetto del prodotto**: i suoi backup sono ora il pacchetto di `backup create` (formato 2, i dati degli account con le impostazioni ripulite dai segreti) e accetta `--account`; i backup del primo formato si verificano e si ripristinano ancora con esso.
 
+### Corretto
+
+- **L'etichetta di stato di un pannello di dettaglio resta su una riga**: nella scheda Sentinella l'etichetta (per esempio quella che dice che bisogna intervenire) nell'intestazione di ogni pannello di Dettaglio per livello veniva schiacciata a una lettera per riga, in tutte le lingue e soprattutto sul telefono. Non si restringe più e non si spezza dentro una parola, e un test in un browser reale la misura nelle otto lingue, largo e stretto.
+
+### Sicurezza
+
+- **I link che la pagina costruisce con i dati si verificano leggendo l'indirizzo, non dalle prime lettere**: passa solo un indirizzo https di GitHub (o dell'host che indichi per GitHub Enterprise, che può essere anche http) senza nome utente né password; un indirizzo di script, un host simile, uno spazio, un carattere di controllo o una barra rovesciata diventano un link vuoto.
+
 ## [2.0.9]
 
 ### Sicurezza

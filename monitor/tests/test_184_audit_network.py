@@ -132,7 +132,7 @@ class PageEscaping(unittest.TestCase):
 
     def test_the_helpers_that_make_markup_escape_or_check(self):
         self.assertIn('const esc=s=>String(s==null?"":s).replace(/[&<>"\']/g', PAGE)
-        self.assertIn('const safeUrl=u=>typeof u==="string"&&(u.startsWith("https://github.com/")||u.startsWith(GH))?u:"#";', PAGE)
+        self.assertIn('const safeUrl=u=>{if(typeof u!=="string"', PAGE)      # the address is parsed (see test_288_safe_url), not matched by its first letters
         self.assertIn("const link=(u,t)=>`<a href=\"${esc(safeUrl(u))}\" target=\"_blank\" rel=\"noopener\">${esc(t)}</a>`;", PAGE)
 
     def test_every_blank_target_has_noopener(self):

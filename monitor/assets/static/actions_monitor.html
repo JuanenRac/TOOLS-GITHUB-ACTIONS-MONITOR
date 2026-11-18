@@ -141,6 +141,7 @@ svg{display:block;max-width:none}svg text{fill:var(--mut);font-size:12px}
 details{border:1px solid var(--line);border-radius:8px;margin-bottom:6px;background:var(--bg)}
 summary{cursor:pointer;padding:6px 10px;display:flex;gap:8px;align-items:center;font-weight:600;list-style:none}
 summary::-webkit-details-marker{display:none}summary::before{content:"\25B8";color:var(--mut)}details[open]>summary::before{content:"\25BE"}
+summary>.sem{flex:0 0 auto;white-space:nowrap;overflow-wrap:normal;word-break:normal}
 details>.dbody{padding:4px 10px 10px;overflow:auto;max-height:46vh}
 .chip{display:inline-block;padding:0 7px;border-radius:999px;font-size:12px;border:1px solid var(--line);margin:1px 2px}
 .chip.bad{border-color:var(--bad);color:var(--bad)}.chip.warn{border-color:var(--warn);color:var(--warn)}.chip.ok{border-color:var(--ok);color:var(--ok)}
@@ -1296,7 +1297,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden)tick(true)
 var SENT=null,SENT_ERR=null,ANA=null,COLLAB=null,SECUR=null;const AIRES={};
 const OPEN=new Set((QS.get("open")||store.get("am-s-open")||"a1,a2,a3").split(",").filter(Boolean));
 const LVN=l=>T("ui.lv_"+l)===("ui.lv_"+l)?l:T("ui.lv_"+l);
-const safeUrl=u=>typeof u==="string"&&(u.startsWith("https://github.com/")||u.startsWith(GH))?u:"#";
+const safeUrl=u=>{if(typeof u!=="string"||/[\u0000-\u0020\u007f\\]/.test(u))return"#";try{const p=new URL(u),h=p.hostname.toLowerCase(),own=new URL(GH).hostname.toLowerCase();return !p.username&&!p.password&&((p.protocol==="https:"&&(h==="github.com"||h===own))||(p.protocol==="http:"&&h===own&&own!=="github.com"))?u:"#"}catch(e){return"#"}};
 const link=(u,t)=>`<a href="${esc(safeUrl(u))}" target="_blank" rel="noopener">${esc(t)}</a>`;
 function sVis(repo){if(FILTER.list&&!FILTER.list.includes(repo))return false;const eco=(SENT.ecosystems||{})[repo]||"other";if(FILTER.eco&&eco!==FILTER.eco)return false;if(FILTER.q&&!repo.toLowerCase().includes(FILTER.q.toLowerCase()))return false;return true}
 function spark(v,color){
