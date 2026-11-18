@@ -10,6 +10,11 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+### Fixed
+
+- **The unfolded panel of a Sentinel tab reaches the bottom of its box**: in the CI, collaboration and security tabs the one panel that is unfolded was cut at 46% of the height of the window and left an empty strip below it; it now takes the rest of the box and scrolls inside when its content is taller. The rule is measured in a headless browser in the eight languages, wide and narrow (`tools/check_unfolded.py`).
+- **Starting the monitor from the updater no longer opens a console window for every git and gh call**: the process started after an update had no console at all, so each command it ran opened a visible one. It now starts with a hidden console that its children share, and so do the processes of the account supervisor; a test reads every place that starts a process and refuses the detached flag.
+
 ### Added
 
 - **Comparison of periods (setting `compare.enabled`, off by default)**: this period against the one before (7 or 30 days or any range, the same dates a year ago or a baseline of your own) with a filter for workdays or weekends in the time zone of the monitor. It sets the share of failed runs, the median duration, the time to resolve alerts, the mean score and its coverage, each with its change and its direction; a figure without enough data or without a baseline says `insufficient_data` or `baseline_unavailable` instead of showing a 0 or a 100. It is read only, made from the ledger and the snapshots of the score, and asks nothing of GitHub. While it is on, the ledger of the score keeps two periods of `compare.default_window_days`. Guide COMPARE.md.

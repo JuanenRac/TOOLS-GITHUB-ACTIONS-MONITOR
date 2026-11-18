@@ -143,6 +143,12 @@ summary{cursor:pointer;padding:6px 10px;display:flex;gap:8px;align-items:center;
 summary::-webkit-details-marker{display:none}summary::before{content:"\25B8";color:var(--mut)}details[open]>summary::before{content:"\25BE"}
 summary>.sem{flex:0 0 auto;white-space:nowrap;overflow-wrap:normal;word-break:normal}
 details>.dbody{padding:4px 10px 10px;overflow:auto;max-height:46vh}
+/* the Sentinel tabs: the one panel that is unfolded takes the rest of the height of its box (the others keep the limit above) */
+#t-sci section>.body,#t-scol section>.body,#t-ssec section>.body{display:flex;flex-direction:column}
+#t-sci .body>details,#t-scol .body>details,#t-ssec .body>details{flex:0 0 auto}
+:is(#t-sci,#t-scol,#t-ssec) .body>details[open]:not(details[open]~details):not(:has(~details[open])){flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+:is(#t-sci,#t-scol,#t-ssec) .body>details[open]:not(details[open]~details):not(:has(~details[open]))::details-content{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+:is(#t-sci,#t-scol,#t-ssec) .body>details[open]:not(details[open]~details):not(:has(~details[open]))>.dbody{flex:1 1 auto;max-height:none;min-height:0}
 .chip{display:inline-block;padding:0 7px;border-radius:999px;font-size:12px;border:1px solid var(--line);margin:1px 2px}
 .chip.bad{border-color:var(--bad);color:var(--bad)}.chip.warn{border-color:var(--warn);color:var(--warn)}.chip.ok{border-color:var(--ok);color:var(--ok)}
 .ai{margin:4px 0 8px;padding:6px 10px;border:1px dashed var(--warn);border-radius:6px;white-space:pre-wrap;font-size:13px}
