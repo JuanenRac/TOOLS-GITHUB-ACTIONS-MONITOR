@@ -126,6 +126,8 @@ svg{display:block;max-width:none}svg text{fill:var(--mut);font-size:12px}
 #t-al,#t-rep,#t-les{grid-template-columns:minmax(0,1fr);overflow:auto}#al-filters{align-items:center;gap:10px;margin:0 0 10px}#al-chips button{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:999px;padding:3px 12px;margin:0 4px 0 0;cursor:pointer}#al-chips button[aria-pressed=true]{background:var(--acc);color:var(--on-acc,#fff);border-color:var(--acc)}
 .alrow{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:6px 10px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line)}.alrow.muted{opacity:.6}.alrow .tt{min-width:0;overflow-wrap:anywhere}.alrow .acts{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}.alrow .acts button{font-size:12px;padding:2px 8px}.origin{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:1px 8px;border-radius:6px;border:1px solid var(--line)}.origin.ci{border-color:var(--acc);color:var(--acc)}.origin.collab{border-color:var(--ok);color:var(--ok)}
 @media (max-width:700px){.alrow{grid-template-columns:auto minmax(0,1fr)}.alrow .tt{grid-column:1/-1}.alrow .acts{grid-column:1/-1;justify-content:flex-start}.alrow>.chip,.alrow>.origin{justify-self:start}}
+.trbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-bottom:8px}.trbar select{max-width:100%}.trbig{margin-bottom:10px}.trlegend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}.trleg{display:inline-flex;align-items:center;gap:4px}.trleg.off{opacity:.45;text-decoration:line-through}.trwrap{position:relative}.trsvg{display:block;width:100%;height:auto;max-height:46vh;background:var(--panel2);border:1px solid var(--line);border-radius:6px}.trtip{position:absolute;top:4px;left:0;z-index:2;background:var(--panel);border:1px solid var(--line2);border-radius:4px;padding:3px 7px;font-size:12px;pointer-events:none;max-width:90%}.trax{font-size:10px;fill:var(--mut)}.trthr{stroke:var(--warn);stroke-width:1;stroke-dasharray:3 3}.trgrid0{stroke:var(--line2);stroke-width:1}.trev{stroke:var(--mut);stroke-width:1;stroke-dasharray:1 3}.trev.incident{stroke:var(--bad)}.trevm{font-size:10px;fill:var(--mut)}.trevm.incident{fill:var(--bad)}.trcur{stroke:var(--text);stroke-width:1}.trgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}.trcard.spk{display:block;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);cursor:pointer}.trcard.sel{border-color:var(--run);box-shadow:0 0 0 1px var(--run)}.trcard .trh{display:flex;justify-content:space-between;gap:6px}.trcard .trdl{font-size:11px;display:flex;flex-wrap:wrap;gap:2px 8px;margin:2px 0}.trd.good{color:var(--ok)}.trd.bad{color:var(--bad)}.trcard svg{height:34px}
+.spbar{display:flex;flex-wrap:wrap;gap:8px 14px;margin:6px 0;align-items:center}.spbar input,.spbar select{max-width:100%}.sphelp{margin-bottom:6px}.sptable{margin-bottom:10px}
 #t-sent,#t-sci,#t-scol,#t-ssec,#t-sdel,#t-ssup,#t-strend,#t-syvt{grid-template-columns:minmax(0,1fr);gap:12px;overflow:auto}
 #t-sent .lcol{display:flex;flex-direction:column;gap:12px;min-height:0;min-width:0}
 #t-sent .lcol section:first-child{flex:1.3 1 0}#t-sent .lcol section:last-child{flex:1 1 0}
@@ -1350,6 +1352,89 @@ function upstreamBox(s){
       +(r.release?` <span class="chip${r.news?" warn":""}" title="${esc(r.release.published||"")}">${esc(r.release.tag)}${r.news?" · "+esc(T("ui.upstream_new")):""}</span>`:"")+`</div>`;
   return `<h3 style="font-size:13px;margin:10px 0 4px">${esc(T("ui.upstream_title"))}</h3><div class="mut" style="margin-bottom:4px">${esc(T("ui.upstream_summary",{n:u.tracked,red:u.red,news:u.news,unread:u.unread}))} · ${esc(T("ui.upstream_calls",{n:u.requests_last_hour,max:u.requests_per_hour}))}</div>`+(u.continuous?`<div class="mut warn" style="margin-bottom:4px">${esc(T("ui.upstream_round",{n:u.followed,hours:u.round_hours,refresh:u.refresh_hours}))}</div>`:"")+shown.map(line).join("");
 }
+/* the daily trend: a card per series (value now, change against yesterday and 7 days ago, sparkline), one large chart with a range of 7/30/60 days, a threshold, marks of events, a tooltip, a second series to compare, a legend that switches the lines and CSV/JSON export; all from the history the sentinel already keeps (no call to GitHub), drawn in SVG without a library */
+const TRS=[["red","ui.tr_red","var(--bad)","",1,null],["stuck","ui.tr_stuck","var(--warn)","",1,null],["ci_green_pct","ui.tr_ci_green_pct","var(--ok)","%",0,{v:90,low:1}],["ci_repos_ok","ui.tr_ci_repos_ok","var(--ok)","",0,null],
+ ["codeql","ui.tr_codeql","var(--warn)","",1,null],["dependabot","ui.tr_dependabot","var(--warn)","",1,null],["secret","ui.tr_secret","var(--bad)","",1,null],["sev_critical","ui.tr_sev_critical","var(--bad)","",1,null],["sev_high","ui.tr_sev_high","var(--warn)","",1,null],
+ ["prs","ui.tr_prs","var(--run)","",null,null],["prs_old","ui.tr_prs_old","var(--warn)","",1,null],["issues_open","ui.tr_issues_open","var(--run)","",1,null],["unsigned","ui.tr_unsigned","var(--warn)","",1,null],["candidates","ui.tr_cands","var(--ok)","",null,null],
+ ["ready","ui.tr_ready","var(--ok)","",null,null],["health","ui.tr_health","var(--ok)","",0,{v:70,low:1}],["quota_used_pct","ui.tr_quota_used_pct","var(--run)","%",1,{v:80,low:0}],["minutes24","ui.tr_minutes24","var(--run)"," min",1,null]];
+let TRR=[7,30,60].includes(parseInt(store.get("am-tr-range")))?parseInt(store.get("am-tr-range")):30,TRSEL=store.get("am-tr-sel")||"red",TRCMP=store.get("am-tr-cmp")||"",TRHIDE=new Set(),TRLAST=null,TRCUR=-1;
+const trDef=k=>TRS.find(x=>x[0]===k),trNum=x=>typeof x==="number"&&isFinite(x),trFmt=(x,u)=>trNum(x)?(Math.round(x*10)/10)+u:"\u2013";
+function trData(tr,k){const g=tr&&tr[k]||{},v=g.values||[],d=(tr&&tr.red&&tr.red.dates)||g.dates||[];return {v:v.slice(-TRR),d:d.slice(-TRR),all:v}}
+function trDelta(v,back){const n=v.length;if(n<=back)return null;const a=v[n-1],b=v[n-1-back];return trNum(a)&&trNum(b)?a-b:null}
+function trDeltaHtml(def,d,key){
+  if(d===null)return `<span class="mut">${esc(T(key))}: \u2013</span>`;const bad=def[4]===null?"":(d===0?"":((d>0)===!!def[4]?"bad":"good"));
+  return `<span class="trd ${bad}">${d>0?"\u2191 +":(d<0?"\u2193 ":"\u2192 ")}${Math.round(d*10)/10}${esc(def[3])} <span class="mut">${esc(T(key))}</span></span>`}
+function trEvents(tr){
+  const d=(tr&&tr.red&&tr.red.dates)||[],ver=(tr&&tr.versions)||[],red=trVals0(tr,"red"),off=Math.max(0,d.length-TRR),out=[];
+  for(let i=Math.max(1,off);i<d.length;i++){
+    if(ver[i]&&ver[i-1]&&ver[i]!==ver[i-1])out.push({i:i-off,kind:"update",text:T("ui.tr_ev_update",{v:ver[i]})});
+    if((red[i]||0)>0&&(red[i-1]||0)===0)out.push({i:i-off,kind:"incident",text:T("ui.tr_ev_incident")})}
+  return out}
+const trVals0=(tr,k)=>(tr&&tr[k]&&tr[k].values)||[];
+function trPath(v,x,y){let segs=[],cur=[];v.forEach((val,i)=>{if(trNum(val))cur.push([x(i),y(val)]);else if(cur.length){segs.push(cur);cur=[]}});if(cur.length)segs.push(cur);return segs}
+function trChart(items,dates,events,o){
+  const big=!!o.big,W=o.w,H=o.h,L=big?42:3,R=big?(items.length>1?42:10):3,Tp=big?12:3,B=big?22:3,n=dates.length,uid=o.id;
+  const x=i=>n<2?L+(W-L-R)/2:L+i/(n-1)*(W-L-R);
+  let g="",defs="",k=0;
+  items.forEach((it,idx)=>{
+    const nums=it.v.filter(trNum);if(!nums.length)return;
+    let lo=Math.min(...nums),hi=Math.max(...nums);if(it.thr&&idx===0){lo=Math.min(lo,it.thr.v);hi=Math.max(hi,it.thr.v)}if(hi===lo){hi=lo+1}if(lo>0&&lo<hi*0.5)lo=0;
+    const y=val=>Tp+(1-(val-lo)/(hi-lo))*(H-Tp-B),segs=trPath(it.v,x,y),dash=idx?' stroke-dasharray="6 4"':"";
+    if(idx===0&&items.length===1){defs+=`<linearGradient id="trg-${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:${it.color};stop-opacity:.35"/><stop offset="1" style="stop-color:${it.color};stop-opacity:0"/></linearGradient>`;
+      g+=segs.map(sg=>`<path d="M${sg[0][0].toFixed(1)},${(H-B).toFixed(1)} ${sg.map(p=>"L"+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")} L${sg[sg.length-1][0].toFixed(1)},${(H-B).toFixed(1)}Z" fill="url(#trg-${uid})" stroke="none"/>`).join("")}
+    g+=segs.map(sg=>sg.length===1?`<circle cx="${sg[0][0].toFixed(1)}" cy="${sg[0][1].toFixed(1)}" r="3" fill="${it.color}"/>`:`<polyline points="${sg.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")}" fill="none" stroke="${it.color}" stroke-width="2" stroke-linejoin="round"${dash}/>`).join("");
+    const last=segs.length?segs[segs.length-1][segs[segs.length-1].length-1]:null;
+    if(big){it.v.forEach((val,i)=>{if(trNum(val))g+=idx?`<rect x="${(x(i)-2.5).toFixed(1)}" y="${(y(val)-2.5).toFixed(1)}" width="5" height="5" fill="${it.color}"/>`:`<circle cx="${x(i).toFixed(1)}" cy="${y(val).toFixed(1)}" r="2.5" fill="${it.color}"/>`});
+      const ax=idx?W-R+4:L-4;g+=`<text x="${ax}" y="${Tp+8}" text-anchor="${idx?"start":"end"}" class="trax" style="fill:${it.color}">${esc(trFmt(hi,""))}</text><text x="${ax}" y="${H-B}" text-anchor="${idx?"start":"end"}" class="trax" style="fill:${it.color}">${esc(trFmt(lo,""))}</text>`}
+    else if(last)g+=`<circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="3" fill="${it.color}"/>`;
+    if(it.thr&&idx===0&&it.thr.v>=lo&&it.thr.v<=hi){const ty=y(it.thr.v);g+=`<line x1="${L}" x2="${W-R}" y1="${ty.toFixed(1)}" y2="${ty.toFixed(1)}" class="trthr"/>`+(big?`<text x="${L+4}" y="${(ty-3).toFixed(1)}" class="trax">${esc(T("ui.tr_thr",{v:it.thr.v+(it.unit||"")}))}</text>`:"")}
+    k++});
+  if(big){g+=`<line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" class="trgrid0"/>`;if(n){g+=`<text x="${L}" y="${H-5}" class="trax">${esc(dates[0])}</text><text x="${W-R}" y="${H-5}" text-anchor="end" class="trax">${esc(dates[n-1])}</text>`}
+    events.forEach(e=>{const ex=x(e.i);g+=`<line x1="${ex.toFixed(1)}" x2="${ex.toFixed(1)}" y1="${Tp}" y2="${H-B}" class="trev ${e.kind}"/><text x="${ex.toFixed(1)}" y="${Tp-1}" text-anchor="middle" class="trevm ${e.kind}">${e.kind==="update"?"\u25B2":"!"}<title>${esc(dates[e.i]+": "+e.text)}</title></text>`});
+    g+=`<line class="trcur" x1="0" x2="0" y1="${Tp}" y2="${H-B}" visibility="hidden"/>`}
+  if(!k)g+=`<text x="${L}" y="${H/2}" class="trax">${esc(T("ui.tr_nodata"))}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" ${big?'class="trsvg" tabindex="0"':'preserveAspectRatio="none"'} width="100%" height="${big?"":H}" role="img" aria-label="${esc(o.label)}" data-n="${n}" data-l="${L}" data-r="${R}" data-w="${W}"><defs>${defs}</defs>${g}</svg>`}
+function renderTrend(){
+  const box=$("s-trend"),tr=TRLAST;if(!box||!tr||!tr.red)return;
+  const dates=trData(tr,"red").d,ev=trEvents(tr),defs=TRS.filter(d=>tr[d[0]]),sel=trDef(TRSEL)&&tr[TRSEL]?TRSEL:"red",cmp=TRCMP&&TRCMP!==sel&&tr[TRCMP]?TRCMP:"";
+  const item=(k)=>{const d=trDef(k);return {k,v:trData(tr,k).v,color:d[2],thr:d[5],unit:d[3],name:T(d[1])}};
+  const plotted=[item(sel)].concat(cmp?[item(cmp)]:[]),shown=plotted.filter(p=>!TRHIDE.has(p.k));
+  const legend=plotted.map((p,i)=>`<button type="button" class="trleg${TRHIDE.has(p.k)?" off":""}" data-trleg="${esc(p.k)}" aria-pressed="${!TRHIDE.has(p.k)}"><svg width="26" height="10" aria-hidden="true"><line x1="1" x2="25" y1="5" y2="5" stroke="${p.color}" stroke-width="3"${i?' stroke-dasharray="6 4"':""}/></svg> ${esc(p.name)}</button>`).join("");
+  const opts=(cur,none)=>(none?`<option value="">${esc(T("ui.tr_none"))}</option>`:"")+defs.map(d=>`<option value="${d[0]}"${cur===d[0]?" selected":""}>${esc(T(d[1]))}</option>`).join("");
+  const bar=`<div class="trbar"><label>${esc(T("ui.tr_range"))} <select id="tr-range" aria-label="${esc(T("ui.tr_range"))}">${[7,30,60].map(n=>`<option value="${n}"${TRR===n?" selected":""}>${esc(T("ui.tr_days",{n}))}</option>`).join("")}</select></label>`
+    +`<label>${esc(T("ui.tr_series"))} <select id="tr-sel" aria-label="${esc(T("ui.tr_series"))}">${opts(sel,false)}</select></label><label>${esc(T("ui.tr_compare"))} <select id="tr-cmp" aria-label="${esc(T("ui.tr_compare"))}">${opts(cmp,true)}</select></label>`
+    +`<button type="button" data-trexp="csv" title="${esc(T("ui.tr_export_csv"))}">CSV</button><button type="button" data-trexp="json" title="${esc(T("ui.tr_export_json"))}">JSON</button></div>`;
+  const big=`<div class="trbig"><div class="trlegend" role="group" aria-label="${esc(T("ui.tr_legend"))}">${legend}</div><div class="trwrap">${trChart(shown,dates,ev,{big:1,w:720,h:230,id:"big",label:T("ui.tr_big",{name:plotted.map(p=>p.name).join(" / ")})})}<div class="trtip" role="status" hidden></div></div></div>`;
+  const cards=defs.map(d=>{const dd=trData(tr,d[0]),v=dd.v,cur=[...dd.all].reverse().find(trNum);
+    return `<div class="spk trcard${d[0]===sel?" sel":""}" data-trs="${d[0]}" role="button" tabindex="0" aria-pressed="${d[0]===sel}"><div class="trh"><span>${esc(T(d[1]))}</span><b>${esc(trFmt(cur,d[3]))}</b></div>`
+      +`<div class="trdl">${trDeltaHtml(d,trDelta(dd.all,1),"ui.tr_d1")} ${trDeltaHtml(d,trDelta(dd.all,7),"ui.tr_d7")}</div>${trChart([{k:d[0],v,color:d[2],thr:d[5],unit:d[3]}],dd.d,[],{w:160,h:34,id:"s"+d[0],label:T(d[1])})}</div>`}).join("");
+  box.innerHTML=bar+big+`<div class="trgrid">${cards}</div><div class="mut" style="font-size:12px;margin-top:6px">${esc(T("ui.tr_note"))} ${dates.length<2?esc(T("ui.tr_fill")):""} ${esc(T("ui.tr_pick"))}</div>`
+}
+function trExport(kind){
+  const tr=TRLAST;if(!tr||!tr.red)return;const dates=trData(tr,"red").d,defs=TRS.filter(d=>tr[d[0]]);let text,type;
+  if(kind==="json"){const o={dates,series:{}};defs.forEach(d=>{o.series[d[0]]=trData(tr,d[0]).v});text=JSON.stringify(o,null,1);type="application/json"}
+  else{text=["date"].concat(defs.map(d=>d[0])).join(",")+"\n"+dates.map((dt,i)=>[dt].concat(defs.map(d=>{const v=trData(tr,d[0]).v[i];return trNum(v)?v:""})).join(",")).join("\n")+"\n";type="text/csv"}
+  try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type:type+";charset=utf-8"}));a.download="daily-trend-"+(dates[dates.length-1]||"empty")+"."+kind;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}catch(e){}
+}
+function trCursor(svg,i){
+  const n=+svg.dataset.n,L=+svg.dataset.l,R=+svg.dataset.r,W=+svg.dataset.w,tip=svg.parentNode.querySelector(".trtip"),cur=svg.querySelector(".trcur");if(!n||!tip||!cur)return;
+  i=Math.max(0,Math.min(n-1,i));TRCUR=i;const tr=TRLAST,sel=trDef(TRSEL)&&tr[TRSEL]?TRSEL:"red",ks=[sel].concat(TRCMP&&TRCMP!==sel&&tr[TRCMP]?[TRCMP]:[]).filter(k=>!TRHIDE.has(k));
+  const cx=n<2?L+(W-L-R)/2:L+i/(n-1)*(W-L-R);cur.setAttribute("x1",cx);cur.setAttribute("x2",cx);cur.setAttribute("visibility","visible");
+  const dts=trData(tr,"red").d;tip.hidden=false;tip.textContent=(dts[i]||"")+" \u2014 "+ks.map(k=>{const d=trDef(k);return T(d[1])+": "+trFmt(trData(tr,k).v[i],d[3])}).join(" \u00b7 ");
+  const w=svg.getBoundingClientRect().width,px=cx/W*w;tip.style.left=Math.max(0,Math.min(w-tip.offsetWidth,px+8))+"px"
+}
+(function(){
+  const root=$("s-trend");if(!root)return;
+  root.addEventListener("change",e=>{const t=e.target;if(t.id==="tr-range"){TRR=parseInt(t.value)||30;store.set("am-tr-range",String(TRR))}else if(t.id==="tr-sel"){TRSEL=t.value;store.set("am-tr-sel",TRSEL)}else if(t.id==="tr-cmp"){TRCMP=t.value;store.set("am-tr-cmp",TRCMP)}else return;TRHIDE.clear();renderTrend()});
+  root.addEventListener("click",e=>{const x=e.target.closest&&e.target.closest("[data-trexp],[data-trleg],[data-trs]");if(!x)return;
+    if(x.dataset.trexp){trExport(x.dataset.trexp);return}
+    if(x.dataset.trleg){const k=x.dataset.trleg;TRHIDE.has(k)?TRHIDE.delete(k):TRHIDE.add(k);renderTrend();return}
+    if(x.dataset.trs){TRSEL=x.dataset.trs;store.set("am-tr-sel",TRSEL);TRHIDE.clear();renderTrend()}});
+  root.addEventListener("keydown",e=>{const c=e.target.closest&&e.target.closest(".trcard");if(c&&(e.key==="Enter"||e.key===" ")){e.preventDefault();c.click();return}
+    const sv=e.target.closest&&e.target.closest(".trsvg");if(sv&&(e.key==="ArrowLeft"||e.key==="ArrowRight")){e.preventDefault();trCursor(sv,(TRCUR<0?+sv.dataset.n-1:TRCUR)+(e.key==="ArrowLeft"?-1:1))}});
+  root.addEventListener("pointermove",e=>{const sv=e.target.closest&&e.target.closest(".trsvg");if(!sv)return;const r=sv.getBoundingClientRect(),W=+sv.dataset.w,L=+sv.dataset.l,R=+sv.dataset.r,n=+sv.dataset.n;if(n<1)return;const xv=(e.clientX-r.left)/r.width*W;trCursor(sv,n<2?0:Math.round((xv-L)/(W-L-R)*(n-1)))});
+  root.addEventListener("pointerleave",()=>{const tip=root.querySelector(".trtip"),cur=root.querySelector(".trcur");if(tip)tip.hidden=true;if(cur)cur.setAttribute("visibility","hidden")},true)
+})();
 function section(k,title,level,count,body){
   return `<details data-k="${k}" ${OPEN.has(k)?"open":""}><summary><span class="sem ${level}" style="cursor:inherit"><i></i>${esc(LVN(level))}</span> ${esc(title)} <span class="mut" style="font-weight:400">${esc(count)}</span></summary><div class="dbody">${body}</div></details>`;
 }
@@ -1372,11 +1457,11 @@ function sentOff(k){
 }
 function renderSentOthers(){
   const col=sentIsOn("scol"),sec=sentIsOn("ssec");
-  $("s-details-collab").innerHTML=COLLAB===null&&!SENT?'<span class="mut">\u2013</span>':(col?section("collab",T("ui.collab_title"),collabLevel(),COLLAB&&COLLAB.enabled!==false?T("ui.collab_count",{n:(COLLAB.alerts||[]).length,m:(COLLAB.status||{}).repos_checked||0}):"",collabBox()):sentOff("scol"));
-  $("s-details-sec").innerHTML=SECUR===null&&!SENT?'<span class="mut">\u2013</span>':(sec?section("security",T("ui.sec_title"),secLevel(),SECUR&&SECUR.enabled!==false?T("ui.sec_count",{n:(SECUR.alerts||[]).length,m:(SECUR.status||{}).repos_checked||0}):"",secBox()):sentOff("ssec"));
+  $("s-details-collab").innerHTML=COLLAB===null&&!SENT?'<span class="mut">\u2013</span>':(col?spPanel("scol",COLLAB,"ui.collab_off","ui.collab_none"):sentOff("scol"));
+  $("s-details-sec").innerHTML=SECUR===null&&!SENT?'<span class="mut">\u2013</span>':(sec?spPanel("ssec",SECUR,"ui.sec_off","ui.sec_none"):sentOff("ssec"));
   const dl=sentIsOn("sdel"),sp=sentIsOn("ssup");
-  $("s-details-del").innerHTML=SDEL===null&&!SENT?'<span class="mut">\u2013</span>':(dl?section("delivery",T("ui.sdel_title"),listLevel(SDEL),SDEL&&SDEL.enabled!==false?T("ui.sec_count",{n:(SDEL.alerts||[]).length,m:(SDEL.status||{}).repos_checked||0}):"",listBox(SDEL,"ui.sdel_off","ui.sdel_none")):sentOff("sdel"));
-  $("s-details-sup").innerHTML=SSUP===null&&!SENT?'<span class="mut">\u2013</span>':(sp?section("supply",T("ui.ssup_title"),listLevel(SSUP),SSUP&&SSUP.enabled!==false?T("ui.sec_count",{n:(SSUP.alerts||[]).length,m:(SSUP.status||{}).repos_checked||0}):"",listBox(SSUP,"ui.ssup_off","ui.ssup_none")):sentOff("ssup"));
+  $("s-details-del").innerHTML=SDEL===null&&!SENT?'<span class="mut">\u2013</span>':(dl?spPanel("sdel",SDEL,"ui.sdel_off","ui.sdel_none"):sentOff("sdel"));
+  $("s-details-sup").innerHTML=SSUP===null&&!SENT?'<span class="mut">\u2013</span>':(sp?spPanel("ssup",SSUP,"ui.ssup_off","ui.ssup_none"):sentOff("ssup"));
   for(const [id,box,on] of [["d-sdel",SDEL,dl],["d-ssup",SSUP,sp]]){const el=$(id),n=on?(box.alerts||[]).filter(a=>a.level==="error").length:0;if(el){el.hidden=!n;el.textContent=n}}
   const bc=$("d-scol"),bs=$("d-ssec"),nc=col?(COLLAB.alerts||[]).filter(a=>a.level==="error").length:0,ns=sec?(SECUR.alerts||[]).filter(a=>a.level==="error").length:0;
   if(bc){bc.hidden=!nc;bc.textContent=nc}if(bs){bs.hidden=!ns;bs.textContent=ns}
@@ -1399,8 +1484,7 @@ function renderSent0(){
   const ecoLabel=k=>I18N.ecosystems[k]||k;
   $("s-parte").innerHTML=s.parte.map(p=>`<div class="pline ${p.level} ${p.head?"head":""}">${esc(p.text)}</div>`).join("")
    +(s.by_ecosystem?`<table style="margin-top:8px"><thead><tr>${["ui.be_eco","ui.be_repos","ui.be_red","ui.be_stuck","ui.be_alerts","ui.be_prs","ui.be_cands","ui.be_unsigned","ui.be_hyg","ui.be_depoff"].map(h=>`<th>${esc(T(h))}</th>`).join("")}</tr></thead><tbody>${Object.keys(s.by_ecosystem).map(k=>{const r=s.by_ecosystem[k]||{};const c=(v,bad)=>`<td${v&&bad?' style="color:var(--bad);font-weight:600"':""}>${v||0}</td>`;return `<tr><td><b>${esc(ecoLabel(k))}</b></td><td>${r.repos||0}</td>${c(r.red,1)}${c(r.stuck,1)}${c(r.alerts,1)}${c(r.prs)}${c(r.candidates)}${c(r.pending_sign,1)}${c(r.hygiene)}${c(r.dep_off,1)}</tr>`}).join("")}</tbody></table>`:"");
-  const tr=s.a3.trend,series=[["codeql","ui.tr_codeql","var(--warn)"],["dependabot","ui.tr_dependabot","var(--warn)"],["secret","ui.tr_secret","var(--bad)"],["prs","ui.tr_prs","var(--run)"],["red","ui.tr_red","var(--bad)"],["candidates","ui.tr_cands","var(--ok)"]];
-  $("s-trend").innerHTML=series.map(([k,n,c])=>{const v=tr[k].values;return `<div class="spk"><span>${esc(T(n))}</span><span title="${esc(tr[k].dates.join(", "))}">${spark(v,c)}</span><b style="text-align:right">${v.length?v[v.length-1]:"–"}</b></div>`}).join("")+`<div class="mut" style="font-size:12px;margin-top:4px">${esc(T("ui.tr_note"))} ${tr.codeql.dates.length<2?esc(T("ui.tr_fill")):""}</div>`;
+  TRLAST=s.a3.trend;renderTrend();
   const ai=s.ai||{};$("s-ai-state").textContent=ai.enabled?T("ui.ai_state",{provider:ai.provider,model:ai.model||"",used:ai.used_today||0,limit:ai.daily_limit,unavail:ai.available===false?T("ui.ai_unavailable",{msg:ai.message}):""}):T("ui.ai_off");
   // A1
   const stuck=s.a1.stuck.filter(r=>sVis(r.repo)),iss=s.a1.issues.filter(i=>sVis(i.repo));
@@ -1494,6 +1578,51 @@ function collabBox(){
   const cut=(st.truncated_count?" · "+esc(T("ui.collab_cut",{n:st.truncated_count,p:st.pages||1})):"")+(st.search_cut||[]).map(s=>" · "+esc(T("ui.collab_cut_search",{seen:s.seen,total:s.total}))).join("");
   return tbl+`<div class="mut" style="margin-top:8px">${esc(T("ui.collab_foot",{c:st.repos_checked||0,r:st.repos_in_scope||0,s:st.refresh_seconds||0}))}${(st.errors||[]).length?" · "+esc(st.errors.map(e=>e.section).slice(0,4).join(", ")):""}${cut}</div>`}
 function collabLevel(){const c=COLLAB;return !c||c.enabled===false?"unknown":(c.level||"unknown")}
+/* one card per signal in the panels of Collaboration, Security, Delivery and Supply chain: the same container as the cards of the CI sentinel (counter, list, filter by repository, help); Delivery and Supply chain add a table by code and filters of their own */
+const SPDEF={scol:["collab.issue.critical","collab.issue.external","collab.issue.stale","collab.pr.conflict","collab.pr.draft_old","collab.pr.review_pending"],
+ ssec:["security.secret","security.code_scanning","security.dependabot","security.branch_unprotected","security.codeowners_missing","security.workflow_write"],
+ sdel:["release.unreleased_pending","release.tag_without_release","release.release_without_notes","release.version_mismatch","release.ecosystem_drift","release.assets_missing"],
+ ssup:["actions.supply.unpinned","actions.supply.mutable_ref","actions.supply.permissions_wide","actions.supply.permissions_missing","actions.supply.pr_target_checkout"]};
+const SPKEY={"security.secret":"secret","security.code_scanning":"code_scanning","security.dependabot":"dependabot","security.branch_unprotected":"branch","security.codeowners_missing":"codeowners","security.workflow_write":"workflow"};
+const SPF={},SPR={},SPTOUCH=new Set();
+function spf(scope){return SPF[scope]||(SPF[scope]={level:"",repo:""})}
+function spLevel(a){return a.level==="critical"||a.level==="error"?"bad":(a.level==="warning"?"warn":"ok")}
+function spWorst(list){return list.some(a=>spLevel(a)==="bad")?"bad":(list.some(a=>spLevel(a)==="warn")?"warn":"ok")}
+function spRows(rows,withLink){
+  return `<table>${thk(withLink?["ui.th_repo","ui.th_alert","ui.th_age","ui.th_link"]:["ui.th_repo","ui.th_alert","ui.th_age"])}<tbody>${rows.map(a=>{const d=a.details||{};return `<tr><td><b class="rl" data-repo-open="${esc(a.repo)}">${esc(a.repo)}</b></td><td class="wrap"><span class="chip ${spLevel(a)==="bad"?"bad":(a.level==="info"?"":"warn")}">${esc(a.level)}</span> ${esc(a.title)}</td><td>${esc(ago(a.created_at))}</td>${withLink?`<td>${d.url?link(d.url,"#"+(d.number||"")):""}</td>`:""}</tr>`}).join("")}</tbody></table>`
+}
+function spPanel(scope,c,offKey,noneKey){
+  if(!c||c.enabled===false)return mut_(T(offKey));
+  const st=c.status||{},codes=SPDEF[scope],fl=spf(scope),scoped=scope==="sdel"||scope==="ssup";
+  const all=(c.alerts||[]).filter(a=>sVis(a.repo)&&(!fl.repo||String(a.repo).toLowerCase().includes(fl.repo))&&(!fl.level||spLevel(a)===fl.level));
+  const healthy=st.lifecycle===undefined||st.lifecycle==="healthy";
+  let h=scope==="scol"?"":`<div class="mut" style="margin-bottom:6px">${esc(T("ui.life_"+(st.lifecycle||"off")))}</div>`;
+  if(scoped){
+    const byCode=codes.map(code=>{const l=all.filter(a=>a.code===code);return `<tr><td>${esc(T("ui.sp."+code))}</td><td><span class="sem ${l.length?spWorst(l):"ok"}" style="cursor:inherit"><i></i>${esc(LVN(l.length?spWorst(l):"ok"))}</span></td><td>${l.length}</td><td>${new Set(l.map(a=>a.repo)).size}</td></tr>`}).join("");
+    h+=`<div class="spbar"><label>${esc(T("ui.sp_f_repo"))} <input type="search" data-spscope="${scope}" data-spk="repo" value="${esc(fl.repo)}" aria-label="${esc(T("ui.sp_f_repo"))}"></label> <label>${esc(T("ui.sp_f_level"))} <select data-spscope="${scope}" data-spk="level" aria-label="${esc(T("ui.sp_f_level"))}">${[["","ui.sp_all"],["bad","ui.sp_l_bad"],["warn","ui.sp_l_warn"],["ok","ui.sp_l_info"]].map(([v,k])=>`<option value="${v}"${fl.level===v?" selected":""}>${esc(T(k))}</option>`).join("")}</select></label></div>`
+      +`<table class="sptable">${thk(["ui.sp_th_signal","ui.sp_th_level","ui.sp_th_n","ui.sp_th_repos"])}<tbody>${byCode}</tbody></table>`
+  }
+  const anyOpen=codes.some(x=>OPEN.has(scope+":"+x)),firstAlert=codes.find(x=>all.some(a=>a.code===x));
+  h+=codes.map(code=>{
+    const k=SPKEY[code],un=k&&st.unavailable&&st.unavailable[k],rf=String(SPR[code]||"").toLowerCase();
+    const mine=all.filter(a=>a.code===code),rows=mine.filter(a=>!rf||String(a.repo).toLowerCase().includes(rf));
+    const level=un?"unknown":(mine.length?spWorst(mine):(healthy?"ok":"unknown"));
+    const dk=scope+":"+code,isOpen=OPEN.has(dk)||(!anyOpen&&!SPTOUCH.has(scope)&&code===firstAlert);
+    const body=`<div class="mut sphelp">${esc(T("ui.sph."+code))}</div>`
+      +`<div class="spbar"><label>${esc(T("ui.sp_f_repo"))} <input type="search" data-sprepo="${esc(code)}" value="${esc(SPR[code]||"")}" aria-label="${esc(T("ui.sp_f_repo"))}: ${esc(T("ui.sp."+code))}"></label></div>`
+      +(un?`<div class="mut">${esc(T("ui.sp_unavailable",{why:String(un)}))}</div>`:(rows.length?spRows(rows,scope==="scol"):(mine.length?mut_(T("ui.sp_nomatch")):ok_(T("ui.sp_none")))));
+    return `<details data-k="${esc(dk)}" data-sp="1" ${isOpen?"open":""}><summary><span class="sem ${level}" style="cursor:inherit"><i></i>${esc(LVN(level))}</span> ${esc(T("ui.sp."+code))} <span class="mut" style="font-weight:400">${esc(T("ui.sp_count",{n:mine.length}))}</span></summary><div class="dbody">${body}</div></details>`
+  }).join("");
+  const unl=Object.keys(st.unavailable||{});
+  const cut=scope==="scol"?(st.truncated_count?" \u00b7 "+esc(T("ui.collab_cut",{n:st.truncated_count,p:st.pages||1})):"")+(st.search_cut||[]).map(x=>" \u00b7 "+esc(T("ui.collab_cut_search",{seen:x.seen,total:x.total}))).join(""):"";
+  if(scope==="ssec"&&unl.length)h+=`<div class="mut" style="margin-top:8px">${esc(T("ui.sec_unavailable",{list:unl.map(k=>T("ui.sec_sig_"+k)+" ("+st.unavailable[k]+")").join(", ")}))}</div>`;
+  h+=`<div class="mut" style="margin-top:8px">${esc(T(scope==="scol"?"ui.collab_foot":"ui.sec_foot",{c:st.repos_checked||0,r:st.repos_in_scope||0,s:st.refresh_seconds||0}))}${(st.errors||[]).length?" \u00b7 "+esc(st.errors.map(e=>e.section).slice(0,4).join(", ")):""}${cut}</div>`;
+  return h
+}
+document.addEventListener("change",e=>{const t=e.target;if(!t||!t.dataset)return;
+  if(t.dataset.sprepo!==undefined){SPR[t.dataset.sprepo]=String(t.value||"").trim();renderSentOthers();return}
+  if(t.dataset.spscope!==undefined){spf(t.dataset.spscope)[t.dataset.spk]=t.dataset.spk==="repo"?String(t.value||"").trim().toLowerCase():t.value;renderSentOthers()}});
+["t-scol","t-ssec","t-sdel","t-ssup"].forEach(id=>{const el=$(id);if(el)el.addEventListener("toggle",e=>{const d=e.target;if(d.tagName==="DETAILS"&&d.dataset.sp){SPTOUCH.add(d.dataset.k.split(":")[0]);d.open?OPEN.add(d.dataset.k):OPEN.delete(d.dataset.k);store.set("am-s-open",[...OPEN].join(","))}},true)});
 const fmtS=x=>x==null?"–":(x>=3600?(x/3600).toFixed(1)+" h":(x>=120?Math.round(x/60)+" min":Math.round(x)+" s"));
 function analyticsBox(){
   const A=ANA;if(!A||A.enabled===false)return mut_(T("ui.a12_off"));

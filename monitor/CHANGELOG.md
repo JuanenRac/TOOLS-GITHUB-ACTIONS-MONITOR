@@ -11,6 +11,11 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+### Added
+
+- **One card per signal in the panels of Collaboration, Security, Delivery and Supply chain**: the same container as the CI sentinel (state lamp, counter, list, filter by repository and a line of help) for each of the 6, 6, 6 and 5 signals the sentinels raise; Delivery and Supply chain also have a table by code and filters by repository and level. A test compares the cards with the codes the sentinels really raise, in the eight languages.
+- **A much richer Daily trend**: 18 series (stuck builds, share of green workflows, repositories with CI up to date, critical and high alerts, old Dependabot PRs, open issues, unsigned waiting, ready to release, average health, API allowance used, Actions minutes and the six that existed) from the history the sentinel already keeps, with no call to GitHub. Each card shows the value now, the change against yesterday and 7 days ago and a sparkline; the large chart has a range of 7, 30 or 60 days, a threshold, marks of monitor updates and incidents, a tooltip that also answers to the arrow keys, a second series to compare, a legend that switches the lines and CSV/JSON download. A day saved before a series existed is a gap, never a zero. Drawn in SVG, with dashes besides colour, for the light, dark and high-contrast themes and for phones.
+
 ## [2.1.3]
 
 ### Changed

@@ -13,6 +13,8 @@ A **sentinela** é a segunda metade da edição completa. O *monitor* mostra o q
 
 A **Tendência diária** (endereço `#sentinel-trend`) tem a sua própria entrada de menu: uma curva pequena por cada sinal (análise de código, Dependabot, segredos, pull requests, vermelho, candidatas) com o seu último valor. O resumo do sentinela fica só com o que é seu e um botão que a abre.
 
+Os painéis de **Colaboração**, **Segurança**, **Entrega** e **Cadeia de fornecimento** mostram um cartão por sinal (6, 6, 6 e 5), cada um com o seu contador, a sua lista, um filtro por repositório e uma linha de ajuda; a Entrega e a Cadeia de fornecimento acrescentam uma tabela por código e um filtro por repositório e nível. A **Tendência diária** mostra 18 séries do histórico que o sentinela já guarda (sem chamadas ao GitHub): cada cartão dá o valor atual, a variação face a ontem e há 7 dias e uma pequena curva; prima um para o ver grande, escolha 7, 30 ou 60 dias, compare-o com uma segunda série, ative ou desative as linhas na legenda, leia o valor de um dia na dica (também com as setas do teclado), veja o limiar e as marcas de atualizações e incidentes e descarregue o intervalo em CSV ou JSON. Um dia guardado antes de existir uma série mostra uma lacuna, nunca um zero.
+
 **Ontem vs hoje** (endereço `#sentinel-yesterday`) também tem a sua própria entrada de menu, pelo que o relatório da sentinela ocupa a página toda: o que apareceu desde o último relatório guardado, o que foi resolvido e o que continua, para os workflows vermelhos e as assinaturas pendentes.
 
 ## Como arranca e quanto custa

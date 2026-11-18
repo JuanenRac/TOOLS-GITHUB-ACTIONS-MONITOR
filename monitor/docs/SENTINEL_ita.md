@@ -13,6 +13,8 @@ La **sentinella** è la seconda metà dell'edizione completa. Il *monitor* mostr
 
 L'**Andamento giornaliero** (indirizzo `#sentinel-trend`) ha una voce di menu propria: una piccola curva per ogni segnale (scansione del codice, Dependabot, segreti, pull request, rosso, candidate) con il suo ultimo valore. Il riepilogo della sentinella tiene solo i suoi pannelli e un pulsante che lo apre.
 
+I pannelli **Collaborazione**, **Sicurezza**, **Consegna** e **Catena di fornitura** mostrano una scheda per segnale (6, 6, 6 e 5), ciascuna con contatore, elenco, filtro per repository e una riga di aiuto; Consegna e Catena di fornitura aggiungono una tabella per codice e un filtro per repository e livello. L'**Andamento giornaliero** mostra 18 serie dallo storico che la sentinella già conserva (nessuna chiamata a GitHub): ogni scheda dà il valore attuale, la variazione rispetto a ieri e a 7 giorni fa e una piccola curva; premi una per vederla grande, scegli 7, 30 o 60 giorni, confrontala con una seconda serie, attiva o disattiva le linee nella legenda, leggi il valore di un giorno nel tooltip (anche con le frecce della tastiera), guarda la soglia e i segni di aggiornamenti e incidenti e scarica l'intervallo in CSV o JSON. Un giorno salvato prima che una serie esistesse mostra un vuoto, mai uno zero.
+
 **Ieri vs oggi** (indirizzo `#sentinel-yesterday`) ha anch'esso una propria voce di menu, così il rapporto della sentinella occupa tutta la pagina: cosa è comparso dall'ultimo rapporto salvato, cosa è stato risolto e cosa resta, per i workflow rossi e le firme in sospeso.
 
 ## Come parte e quanto costa
