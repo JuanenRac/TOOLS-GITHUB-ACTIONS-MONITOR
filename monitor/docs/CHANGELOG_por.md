@@ -9,11 +9,26 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+## [2.1.2]
+
+### Corrigido
+
+- **O painel desdobrado de um separador do Sentinela chega ao fundo da sua caixa**: nos separadores de CI, colaboração e segurança, o único painel desdobrado era cortado a 46 % da altura da janela e deixava uma faixa vazia por baixo; agora ocupa o resto da caixa e desloca-se por dentro se o conteúdo for mais alto. A regra é medida num navegador sem janela nos oito idiomas, largo e estreito (`tools/check_unfolded.py`).
+- **Arrancar o monitor a partir do atualizador já não abre uma janela de consola por cada chamada a git e gh**: o processo arrancado depois de uma atualização não tinha consola, por isso cada comando que lançava abria uma visível. Agora arranca com uma consola oculta que os filhos partilham, tal como os processos do supervisor de contas; um teste lê todos os sítios que arrancam um processo e recusa a bandeira de desassociação.
+
 ### Adicionado
 
+- **O atualizador é agora um menu do monitor (Sistema > Atualizações, edição Completa)**: a página mostra a versão instalada e a que a verificação encontrou (definição `updates.check`: com ela desligada, ou com o monitor offline, nada é pedido ao GitHub), lista as versões publicadas com as suas notas ao carregar em «Procurar versões» e atualiza para a última ou para uma escolhida depois de uma confirmação que diz o que vai acontecer: o SHA-256 do zip comparado com o SHA256SUMS, a cópia feita antes (com a sua pasta), a migração da configuração e o reinício. A atualização corre num processo próprio: o monitor para sozinho, a atualização é aplicada, o monitor arranca de novo e a página volta a ligar-se; se a versão nova não arrancar, a anterior é reposta e arrancada. «Voltar à versão anterior» faz o mesmo ao contrário. Só um administrador no computador onde o monitor corre pode aplicar; uma atualização de cada vez; cada passo vai para o registo de ações; não é oferecido na edição Lite, num contentor nem sob um gestor de serviços. As rotas são `/api/updates/status`, `progress`, `history`, `check`, `plan`, `apply` e `rollback`; o `tools/monitor_updater.py` autónomo continua como caminho de volta quando o monitor não arranca e partilha o mesmo código.
+- **O atualizador tem duas opções novas**: `--handover` espera que o monitor que o lançou pare, aplica a atualização e arranca o monitor de novo (se o arranque falhar, volta a versão anterior e é arrancada), e `--status-file` escreve o progresso num ficheiro JSON que a página lê, também depois do reinício.
+- **Os sentinelas de Entrega e de Cadeia de fornecimento têm um separador próprio**: como os de CI, colaboração e segurança, cada um tem a sua entrada no grupo Sentinela do menu (`#sentinel-delivery` e `#sentinel-supply`), um painel com os achados abertos de cada repositório, o estado do seu ciclo e o que não foi possível ler, um distintivo com os erros, o seu tema de ajuda e os seus textos nos oito idiomas.
 - **Comparação de períodos (definição `compare.enabled`, desativada por predefinição)**: este período face ao anterior (7 ou 30 dias ou qualquer intervalo, as mesmas datas de há um ano ou uma referência própria) com um filtro de dias úteis ou fins de semana no fuso horário do monitor. Põe lado a lado a proporção de execuções falhadas, a duração mediana, o tempo de resolução de alertas, a pontuação média e a sua cobertura, cada número com a sua variação e sentido; um número sem dados suficientes ou sem referência diz `insufficient_data` ou `baseline_unavailable` em vez de mostrar um 0 ou um 100. É só de leitura, feita com o registo e os registos horários da pontuação, e não pede nada ao GitHub. Enquanto está ativa, o registo da pontuação conserva dois períodos de `compare.default_window_days`. Guia COMPARE.md.
 - **O que mudou entre os dois períodos**: os repositórios que pioram ou melhoram, os workflows que começam ou deixam de falhar e os alertas abertos, em `GET /api/compare` (com `format=ndjson` e `format=csv`), em `monitor_cli.py compare` (saída 4 se um número não se pode comparar, 5 com `--fail-on` se algum piora) e numa secção do separador Gráficos.
 - **Uma comparação breve no relatório agendado (definição `compare.include_in_report`, desativada por predefinição)**: uma linha por número face ao período anterior, nos dois formatos e nas oito línguas.
+
+### Alterado
+
+- **Os ficheiros em que escrevem vários processos são protegidos pelo bloqueio do sistema operativo**: o registo de ações, o estado e o feed do canal de IA, o livro de avisos, o despachante, as lições, a agenda, o estado dos relatórios e o armazenamento das contas usam um bloqueio que o sistema liberta quando o dono morre; um processo morto já não pode deixar um deles bloqueado até o ficheiro marcador envelhecer; os ficheiros marcadores antigos, se restarem, são inertes.
+- **A imagem da arquitetura mostra os cinco sentinelas, a comparação de períodos e o menu Atualizações.**
 
 ## [2.1.1]
 

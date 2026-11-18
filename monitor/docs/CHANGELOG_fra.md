@@ -9,11 +9,26 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+## [2.1.2]
+
+### Corrigé
+
+- **Le panneau déplié d'un onglet du Sentinelle atteint le bas de sa boîte** : dans les onglets CI, collaboration et sécurité, le seul panneau déplié était coupé à 46 % de la hauteur de la fenêtre et laissait une bande vide dessous ; il occupe maintenant le reste de la boîte et défile à l'intérieur si son contenu est plus haut. La règle est mesurée dans un navigateur sans fenêtre dans les huit langues, large et étroit (`tools/check_unfolded.py`).
+- **Démarrer le moniteur depuis l'outil de mise à jour n'ouvre plus une fenêtre de console pour chaque appel à git et gh** : le processus lancé après une mise à jour n'avait aucune console, donc chaque commande qu'il lançait en ouvrait une visible. Il démarre maintenant avec une console cachée que ses enfants partagent, comme les processus du superviseur de comptes ; un test lit tous les endroits qui lancent un processus et refuse l'indicateur de détachement.
+
 ### Ajouté
 
+- **L'outil de mise à jour est maintenant un menu du moniteur (Système > Mises à jour, édition Complète)** : la page montre la version installée et celle que la recherche a trouvée (réglage `updates.check` : désactivé, ou moniteur hors ligne, rien n'est demandé à GitHub), liste les versions publiées avec leurs notes quand on appuie sur « Chercher des versions » et met à jour vers la dernière ou une version choisie après une confirmation qui dit ce qui va se passer : le SHA-256 du zip comparé à SHA256SUMS, la copie faite d'abord (avec son dossier), la migration de la configuration et le redémarrage. La mise à jour tourne dans un processus à part : le moniteur s'arrête de lui-même, elle est appliquée, le moniteur redémarre et la page se reconnecte ; si la nouvelle version ne démarre pas, la précédente est remise en place et démarrée. « Revenir à la version précédente » fait la même chose à l'envers. Seul un administrateur sur l'ordinateur où tourne le moniteur peut appliquer ; une mise à jour à la fois ; chaque étape va au journal des actions ; elle n'est pas proposée dans l'édition Lite, dans un conteneur ni sous un gestionnaire de services. Les routes sont `/api/updates/status`, `progress`, `history`, `check`, `plan`, `apply` et `rollback` ; le `tools/monitor_updater.py` autonome reste le chemin de retour quand le moniteur ne démarre pas et partage le même code.
+- **L'outil de mise à jour a deux nouvelles options** : `--handover` attend que le moniteur qui l'a lancé s'arrête, applique la mise à jour et redémarre le moniteur (si le démarrage échoue, la version précédente revient et est démarrée), et `--status-file` écrit la progression dans un fichier JSON que la page lit, même après le redémarrage.
+- **Les sentinelles de Livraison et de Chaîne d'approvisionnement ont leur propre onglet** : comme celles de CI, de collaboration et de sécurité, chacune a son entrée dans le groupe Sentinelle du menu (`#sentinel-delivery` et `#sentinel-supply`), un panneau avec les constats ouverts de chaque dépôt, l'état de son cycle et ce qui n'a pas pu être lu, un badge avec les erreurs, son sujet d'aide et ses textes dans les huit langues.
 - **Comparaison de périodes (réglage `compare.enabled`, désactivé par défaut)** : cette période contre la précédente (7 ou 30 jours ou toute plage, les mêmes dates un an plus tôt ou une référence à vous) avec un filtre jours ouvrés ou week-ends dans le fuseau du moniteur. Elle met en regard la part d'exécutions en échec, la durée médiane, le temps de résolution des alertes, le score moyen et sa couverture, chaque chiffre avec sa variation et son sens ; un chiffre sans assez de données ou sans référence indique `insufficient_data` ou `baseline_unavailable` au lieu d'afficher un 0 ou un 100. Elle est en lecture seule, faite à partir du registre et des relevés du score, et ne demande rien à GitHub. Tant qu'elle est active, le registre du score conserve deux périodes de `compare.default_window_days`. Guide COMPARE.md.
 - **Ce qui a changé entre les deux périodes** : les dépôts qui se dégradent ou s'améliorent, les workflows qui se mettent à échouer ou cessent de le faire et les alertes ouvertes, dans `GET /api/compare` (avec `format=ndjson` et `format=csv`), dans `monitor_cli.py compare` (sortie 4 si un chiffre ne peut être comparé, 5 avec `--fail-on` si l'un se dégrade) et dans une section de l'onglet Graphiques.
 - **Une courte comparaison dans le rapport planifié (réglage `compare.include_in_report`, désactivé par défaut)** : une ligne par chiffre face à la période précédente, dans les deux formats et les huit langues.
+
+### Modifié
+
+- **Les fichiers qu'écrivent plusieurs processus sont protégés par le verrou du système d'exploitation** : le journal des actions, l'état et le flux du canal d'IA, le registre des avis, le répartiteur, les leçons, la planification, l'état des rapports et le stockage des comptes prennent un verrou que le système libère quand son propriétaire meurt ; un processus tué ne peut donc plus en laisser un bloqué jusqu'à ce que le fichier témoin vieillisse ; les anciens fichiers témoins, s'il en reste, sont inertes.
+- **L'image de l'architecture montre les cinq sentinelles, la comparaison de périodes et le menu Mises à jour.**
 
 ## [2.1.1]
 

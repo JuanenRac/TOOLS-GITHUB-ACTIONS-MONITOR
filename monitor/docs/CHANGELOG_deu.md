@@ -9,11 +9,26 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+## [2.1.2]
+
+### Behoben
+
+- **Das aufgeklappte Panel eines Sentinel-Tabs reicht bis zum unteren Rand seines Kastens**: In den Tabs für CI, Zusammenarbeit und Sicherheit wurde das einzige aufgeklappte Panel bei 46 % der Fensterhöhe abgeschnitten und ließ darunter einen leeren Streifen; jetzt füllt es den Rest des Kastens und scrollt innen, wenn sein Inhalt höher ist. Die Regel wird in einem Browser ohne Fenster in den acht Sprachen, breit und schmal, gemessen (`tools/check_unfolded.py`).
+- **Der Start des Monitors aus dem Updater öffnet kein Konsolenfenster mehr für jeden git- und gh-Aufruf**: Der nach einem Update gestartete Prozess hatte gar keine Konsole, daher öffnete jeder seiner Befehle eine sichtbare. Er startet jetzt mit einer versteckten Konsole, die seine Kinder teilen, ebenso die Prozesse des Konto-Supervisors; ein Test liest alle Stellen, die einen Prozess starten, und lehnt das Flag zum Ablösen ab.
+
 ### Hinzugefügt
 
+- **Der Updater ist jetzt ein Menü des Monitors (System > Updates, Komplett-Ausgabe)**: Die Seite zeigt die installierte Version und die, die die Prüfung gefunden hat (Einstellung `updates.check`: ist sie aus oder der Monitor offline, wird GitHub nichts gefragt), listet auf Druck auf „Versionen suchen“ die veröffentlichten Versionen mit ihren Hinweisen auf und aktualisiert auf die neueste oder eine gewählte nach einer Bestätigung, die sagt, was passiert: das SHA-256 des ZIPs gegen SHA256SUMS, die zuerst angelegte Kopie (mit ihrem Ordner), die Migration der Konfiguration und der Neustart. Das Update läuft in einem eigenen Prozess: Der Monitor beendet sich selbst, es wird eingespielt, der Monitor startet neu und die Seite verbindet sich wieder; startet die neue Version nicht, wird die vorherige zurückgespielt und gestartet. „Zur vorherigen Version zurückkehren“ macht dasselbe rückwärts. Nur ein Administrator an dem Rechner, auf dem der Monitor läuft, kann einspielen; ein Update zur Zeit; jeder Schritt geht ins Aktionslog; in der Lite-Ausgabe, in einem Container und unter einem Dienstmanager wird es nicht angeboten. Die Routen sind `/api/updates/status`, `progress`, `history`, `check`, `plan`, `apply` und `rollback`; das eigenständige `tools/monitor_updater.py` bleibt der Weg zurück, wenn der Monitor nicht startet, und teilt denselben Code.
+- **Der Updater hat zwei neue Optionen**: `--handover` wartet, bis der Monitor, der ihn gestartet hat, beendet ist, spielt das Update ein und startet den Monitor neu (scheitert der Start, kommt die vorherige Version zurück und wird gestartet), und `--status-file` schreibt den Fortschritt in eine JSON-Datei, die die Seite liest, auch nach dem Neustart.
+- **Die Sentinels für Auslieferung und Lieferkette haben einen eigenen Tab**: wie die für CI, Zusammenarbeit und Sicherheit hat jeder seinen Eintrag in der Gruppe Sentinel des Menüs (`#sentinel-delivery` und `#sentinel-supply`), ein Panel mit den offenen Befunden jedes Repositorys, dem Stand seines Zyklus und dem, was nicht gelesen werden konnte, ein Zeichen mit den Fehlern, sein Hilfethema und seine Texte in den acht Sprachen.
 - **Vergleich von Zeiträumen (Einstellung `compare.enabled`, standardmäßig aus)**: dieser Zeitraum gegen den davor (7 oder 30 Tage oder ein beliebiger Bereich, dieselben Daten ein Jahr früher oder eine eigene Basis) mit einem Filter für Werktage oder Wochenenden in der Zeitzone des Monitors. Er stellt Anteil fehlgeschlagener Läufe, mittlere Dauer, Lösungszeit der Meldungen, mittlere Punktzahl und ihre Abdeckung gegenüber, jede Kennzahl mit Änderung und Richtung; eine Kennzahl ohne genug Daten oder ohne Basis meldet `insufficient_data` oder `baseline_unavailable`, statt eine 0 oder eine 100 zu zeigen. Er ist nur lesend, entsteht aus dem Buch und den Momentaufnahmen der Punktzahl und fragt GitHub nichts. Solange er an ist, behält das Buch der Punktzahl zwei Zeiträume von `compare.default_window_days`. Anleitung COMPARE.md.
 - **Was sich zwischen den beiden Zeiträumen geändert hat**: die Repositories, die schlechter oder besser wurden, die Workflows, die zu scheitern begannen oder aufhörten, und die geöffneten Meldungen, in `GET /api/compare` (mit `format=ndjson` und `format=csv`), in `monitor_cli.py compare` (Exit 4, wenn eine Kennzahl nicht verglichen werden kann, 5 mit `--fail-on`, wenn eine schlechter wurde) und in einem Abschnitt des Reiters Diagramme.
 - **Ein kurzer Vergleich im geplanten Bericht (Einstellung `compare.include_in_report`, standardmäßig aus)**: eine Zeile je Kennzahl gegen den Zeitraum davor, in beiden Formaten und den acht Sprachen.
+
+### Geändert
+
+- **Dateien, in die mehrere Prozesse schreiben, werden mit der Sperre des Betriebssystems geschützt**: das Aktionslog, Zustand und Feed des KI-Kanals, das Benachrichtigungsbuch, der Dispatcher, die Lektionen, der Zeitplan, der Zustand der Berichte und der Speicher der Konten nehmen eine Sperre, die das System freigibt, wenn ihr Besitzer stirbt; ein beendeter Prozess kann so keine mehr blockieren, bis die Markierungsdatei veraltet; alte Markierungsdateien, falls vorhanden, sind wirkungslos.
+- **Das Architekturbild zeigt die fünf Sentinels, den Periodenvergleich und das Menü Updates.**
 
 ## [2.1.1]
 

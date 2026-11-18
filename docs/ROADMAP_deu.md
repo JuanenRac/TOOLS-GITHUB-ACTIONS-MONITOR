@@ -16,7 +16,11 @@ Was sich nur im langen echten Einsatz zeigt: die Migration von 1.8 und 1.9, das 
 
 Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
 
-## Erledigt in 1.8.2 bis 2.1.1
+## Erledigt in 1.8.2 bis 2.1.2
+
+### 2.1.2 - Der Monitor aktualisiert sich über ein Menü, vergleicht einen Zeitraum mit dem davor, und aufgeklappte Panels reichen bis nach unten
+
+Das Menü Updates (Komplett-Ausgabe) zeigt die installierte Version und die veröffentlichten mit ihren Hinweisen, spielt ein Update mit vorheriger Kopie, Prüfung des ZIPs gegen SHA256SUMS, Migration der Konfiguration und Neustart ein und geht mit einem Klick zurück, wenn die neue Version nicht startet; der eigenständige Updater bleibt der Weg zurück. Der Vergleich stellt einen Zeitraum neben den davor, mit ehrlichen Zuständen, wenn eine Zahl sich nicht sagen lässt, einem Bericht, was sich geändert hat, einer Route, einem Befehl, einem Abschnitt des Tabs Diagramme und einem optionalen Abschnitt des geplanten Berichts. Dateien, in die mehrere Prozesse schreiben, nutzen die Sperre des Betriebssystems, das aufgeklappte Panel eines Sentinel-Tabs reicht bis zum unteren Rand seines Kastens, der Start des Monitors aus dem Updater öffnet kein Konsolenfenster mehr für jeden git- und gh-Aufruf, und das Architekturbild zeigt, was der Monitor geworden ist.
 
 ### 2.1.1 - Zwei neue Wächter, einer für die Lieferkette und einer für die Auslieferung, und ein strengeres Release-Gate
 

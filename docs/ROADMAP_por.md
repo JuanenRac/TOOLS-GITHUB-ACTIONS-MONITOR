@@ -16,7 +16,11 @@ O que só aparece com uso real prolongado: a migração desde a 1.8 e a 1.9, o c
 
 Os workflows do próprio monitor cumprem o que a sentinela de higiene pedirá aos outros: ações fixadas a um commit, as permissões mínimas e um limite de tempo em cada job.
 
-## Feito da 1.8.2 à 2.1.1
+## Feito da 1.8.2 à 2.1.2
+
+### 2.1.2 - O monitor atualiza-se a partir de um menu, compara um período com o anterior e os painéis desdobrados chegam ao fundo
+
+O menu Atualizações (edição Completa) mostra a versão instalada e as publicadas com as suas notas, aplica uma atualização com cópia prévia, verificação do zip face ao SHA256SUMS, migração da configuração e reinício, e volta atrás com um clique se a versão nova não arrancar; o atualizador autónomo continua como caminho de volta. A comparação põe um período junto ao anterior, com estados honestos quando um valor não se pode dizer, um relatório do que mudou, uma rota, um comando, uma secção do separador de gráficos e uma secção opcional do relatório agendado. Os ficheiros em que escrevem vários processos usam o bloqueio do sistema operativo, o painel desdobrado de um separador do Sentinela chega ao fundo da sua caixa, arrancar o monitor a partir do atualizador já não abre uma janela de consola por cada chamada a git e gh, e a imagem da arquitetura mostra no que o monitor se tornou.
 
 ### 2.1.1 - Dois sentinelas novos, um da cadeia de abastecimento e outro da entrega, e uma porta de release mais exigente
 
