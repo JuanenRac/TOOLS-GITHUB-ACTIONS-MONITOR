@@ -267,7 +267,7 @@ class FileLayout(unittest.TestCase):
         s.save_doc("alpha", "update_check", {"a": 1})
         s.save_analytics("alpha", {"daily": {}})
         s.append_event("alpha", {"kind": "k"})
-        found = {p.relative_to(self.root / "alpha").as_posix() for p in (self.root / "alpha").rglob("*") if p.is_file()}
+        found = {p.relative_to(self.root / "alpha").as_posix() for p in (self.root / "alpha").rglob("*") if p.is_file() and not p.name.endswith(".oslock")}
         self.assertEqual(found, {"actions_monitor.json", "sentinel_state/sentinel_cache.json", "sentinel_state/collab_state.json", "events/events_state.json", "alert_mutes.json",
                                  "update_check.json", "analytics/analytics_history.json", "events/events_monitor.jsonl"})
 
@@ -280,7 +280,7 @@ class FileLayout(unittest.TestCase):
         s.save_doc("default", "alert_mutes", {"a": 1})
         s.save_analytics("default", {"daily": {}})
         s.append_event("default", {"kind": "k"})
-        found = {p.relative_to(self.root).as_posix() for p in self.root.rglob("*") if p.is_file()}
+        found = {p.relative_to(self.root).as_posix() for p in self.root.rglob("*") if p.is_file() and not p.name.endswith(".oslock")}
         self.assertEqual(found, {"config/actions_monitor.json", "data/sentinel_cache.json", "data/collab_state.json", "data/events_state.json", "data/alert_mutes.json", "data/analytics_history.json", "data/events_monitor.jsonl"})
         self.assertEqual(s.list_accounts(), ["default"])
         self.assertEqual(s.verify(), [])
