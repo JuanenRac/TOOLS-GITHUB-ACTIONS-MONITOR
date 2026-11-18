@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4153_passing-brightgreen.svg" alt="4153 tests">
+  <img src="https://img.shields.io/badge/Tests-4167_passing-brightgreen.svg" alt="4167 tests">
 </p>
 
 > 监视你所有仓库的工作流，并在一个本地页面上告诉你：哪些是红的、哪些卡住了、哪些在等你处理。
@@ -82,7 +82,7 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 4153 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **测试** | 4167 个测试方法(`python -m unittest discover -s monitor/tests`) |
 | **设置** | 693 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
@@ -325,6 +325,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/QUOTAS_zho.md`](monitor/docs/QUOTAS_zho.md)：GitHub 的配额与套餐
 - [`monitor/docs/MODES_zho.md`](monitor/docs/MODES_zho.md)：工作模式：普通、快速和极速
 - [`monitor/docs/AI_CONNECTION_zho.md`](monitor/docs/AI_CONNECTION_zho.md): 连接 AI 工具:监视器说的一切,以信号形式出现在简报、端点、MCP 工具和钩子中
+- [`monitor/docs/AI_SETUP_PROMPT_zho.md`](monitor/docs/AI_SETUP_PROMPT_zho.md): 用 AI 设置监视器:粘贴到你的 AI 助手中,它会安装监视器、询问你的需求并写好配置的提示词
 - [`monitor/docs/QUOTA_zho.md`](monitor/docs/QUOTA_zho.md): 更多配额,更少消耗:节省模式、中央面板、GitHub App 以及如何共享配额
 - [`monitor/docs/EXTRAS_zho.md`](monitor/docs/EXTRAS_zho.md): 可选附加功能：失败步骤的日志和 GitHub App 的只读令牌
 - [`monitor/docs/SCORE_zho.md`](monitor/docs/SCORE_zho.md): 账户评分：各部分、状态、API、页眉中的标签、告警和设置
