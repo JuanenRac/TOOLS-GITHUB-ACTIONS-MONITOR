@@ -153,9 +153,17 @@ Un secondo prodotto, più semplice, nello stesso pacchetto: la pagina di ciò ch
 ### La pagina
 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="Adesso" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_menu_groups_light.png"><img src="docs/screenshots/web_menu_groups_dark.png" alt="Il menu a gruppi: Osservare, Sentinelle, Team, Report e apprendimento" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_ci_light.png"><img src="docs/screenshots/web_sentinel_ci_dark.png" alt="Sentinella: CI" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_collab_light.png"><img src="docs/screenshots/web_sentinel_collab_dark.png" alt="Sentinella: collaborazione" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_fleet_light.png"><img src="docs/screenshots/web_fleet_dark.png" alt="Flotta: tutti i repository a colpo d'occhio" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_reports_light.png"><img src="docs/screenshots/web_reports_dark.png" alt="Report" width="92%"></picture></p>
+<p align="center"><img src="docs/screenshots/web_theme_midnight.png" alt="L'intera pagina in un altro tema (Midnight)" width="92%"></p>
 <p align="center"><img src="docs/screenshots/web_screen_overview_1080p.png" alt="Schermo da parete: panoramica" width="92%"></p>
 <p align="center"><img src="docs/screenshots/web_screen_now_1080p.png" alt="Schermo da parete: in questo momento" width="92%"></p>
 <p align="center"><img src="docs/screenshots/web_screen_sentinels_1080p.png" alt="Schermo da parete: sentinelle" width="92%"></p>
+<p align="center"><img src="docs/screenshots/web_screen_rotate.png" alt="Schermo da parete che ruota da solo tra i tre schermi" width="92%"></p>
+<p align="center"><img src="docs/screenshots/web_screen_overview_midnight.png" alt="Schermo da parete con il logo dell'organizzazione e un tema proprio" width="92%"></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_alerts_light.png"><img src="docs/screenshots/web_alerts_dark.png" alt="Avvisi: tutte le sentinelle in un elenco, con silenziamenti locali" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_light.png"><img src="docs/screenshots/web_sentinel_dark.png" alt="Sentinella" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_queue_light.png"><img src="docs/screenshots/web_sentinel_queue_dark.png" alt="Coda di firma (prima il più urgente)" width="92%"></picture></p>
@@ -166,6 +174,7 @@ Un secondo prodotto, più semplice, nello stesso pacchetto: la pagina di ciò ch
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_history_light.png"><img src="docs/screenshots/web_history_dark.png" alt="Cronologia" width="92%"></picture></p>
 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_about_light.png"><img src="docs/screenshots/web_about_dark.png" alt="Informazioni" width="92%"></picture></p>
+<p align="center"><img src="docs/screenshots/web_updater.png" alt="L'aggiornatore: tutte le versioni pubblicate, per passare a una qualsiasi" width="92%"></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_help_light.png"><img src="docs/screenshots/web_help_dark.png" alt="Guida, con ricerca e offline" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_basic_light.png"><img src="docs/screenshots/web_settings_basic_dark.png" alt="Impostazioni · Di base: piano, quote e rilevamento" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_network_now_light.png"><img src="docs/screenshots/web_network_now_dark.png" alt="La modalità rete: la barra rossa persistente" width="92%"></picture></p>
@@ -181,6 +190,7 @@ Un secondo prodotto, più semplice, nello stesso pacchetto: la pagina di ciò ch
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_general_light.png"><img src="docs/screenshots/web_settings_general_dark.png" alt="Impostazioni · Generale" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_polling_light.png"><img src="docs/screenshots/web_settings_polling_dark.png" alt="Impostazioni · Aggiornamento e limiti" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_cache_light.png"><img src="docs/screenshots/web_settings_cache_dark.png" alt="Impostazioni · Letture e cache" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_quota_light.png"><img src="docs/screenshots/web_settings_quota_dark.png" alt="Impostazioni · Quota" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_sentinel_light.png"><img src="docs/screenshots/web_settings_sentinel_dark.png" alt="Impostazioni · Sentinella" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_surface_light.png"><img src="docs/screenshots/web_settings_surface_dark.png" alt="Impostazioni · Controlli di superficie (A10)" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_readiness_light.png"><img src="docs/screenshots/web_settings_readiness_dark.png" alt="Impostazioni · Preparazione (A11)" width="92%"></picture></p>

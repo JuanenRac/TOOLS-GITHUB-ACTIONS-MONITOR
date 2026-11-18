@@ -9,6 +9,11 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+### Modificato
+
+- **Le schermate del README mostrano la versione attuale**: tutte le immagini della pagina, degli schermi da parete e degli strumenti da console sono state rifatte con dati inventati. Le nuove mostrano il menu a gruppi, le sentinelle di CI e di collaborazione, la flotta, i report, l'intera pagina in un altro tema e gli schermi da parete con il logo di un'organizzazione, in altri temi e che ruotano da soli; il pannello Informazioni è più alto per mostrare la scheda di esercizio e copie.
+- **Un indirizzo che chiede di non mostrare la procedura guidata del primo avvio nasconde anche l'avviso unico sul budget dell'IA**, così un'immagine presa da un browser pulito mostra la pagina a riposo.
+
 ## [2.1.0]
 
 ### Aggiunto

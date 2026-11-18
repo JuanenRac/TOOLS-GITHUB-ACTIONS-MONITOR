@@ -10,6 +10,11 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+### Changed
+
+- **The screenshots of the README show the current version**: every picture of the page, the wall screens and the console tools was taken again with invented data. New ones show the menu in titled groups, the sentinels of CI and collaboration, the fleet, the reports, the whole page in another theme and the wall screens with the logo of an organization, in other themes and turning by itself; the About panel is taller so that the operation and backup card is visible.
+- **An address that asks for no first-run wizard also hides the one-time notice about the budget of the AI**, so that a picture taken from a clean browser shows the page at rest.
+
 ## [2.1.0]
 
 ### Fixed

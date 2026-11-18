@@ -9,6 +9,11 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+### Modifié
+
+- **Les captures du README montrent la version actuelle** : toutes les images de la page, des écrans muraux et des outils de console ont été refaites avec des données inventées. Les nouvelles montrent le menu en groupes, les sentinelles de CI et de collaboration, la flotte, les rapports, toute la page dans un autre thème et les écrans muraux avec le logo d'une organisation, dans d'autres thèmes et tournant tout seuls ; le panneau À propos est plus haut pour que la carte d'exploitation et de sauvegarde soit visible.
+- **Une adresse qui demande de ne pas afficher l'assistant du premier démarrage masque aussi l'avis unique sur le budget de l'IA**, de sorte qu'une image prise depuis un navigateur propre montre la page au repos.
+
 ## [2.1.0]
 
 ### Ajouté

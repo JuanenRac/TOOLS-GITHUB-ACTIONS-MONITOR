@@ -9,6 +9,11 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+### Geändert
+
+- **Die Screenshots der README zeigen die aktuelle Version**: alle Bilder der Seite, der Wandanzeigen und der Konsolenwerkzeuge wurden mit erfundenen Daten neu aufgenommen. Neue Bilder zeigen das Menü in Gruppen, die Wächter für CI und Zusammenarbeit, die Flotte, die Berichte, die ganze Seite in einem anderen Thema und die Wandanzeigen mit dem Logo einer Organisation, in anderen Themen und von selbst drehend; das Fenster Info ist höher, damit die Karte für Betrieb und Sicherung sichtbar ist.
+- **Eine Adresse, die den Assistenten beim ersten Start abschaltet, blendet auch den einmaligen Hinweis zum Budget der KI aus**, sodass ein Bild aus einem sauberen Browser die Seite im Ruhezustand zeigt.
+
 ## [2.1.0]
 
 ### Hinzugefügt

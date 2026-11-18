@@ -171,3 +171,13 @@ Les trois écrans muraux en 4K et sur un moniteur tourné, avec des données inv
 ![Sentinelles 4K 3840x2160](../../docs/screenshots/web_screen_sentinels_4k.png)
 
 ![Sentinelles 1080x1920](../../docs/screenshots/web_screen_sentinels_portrait.png)
+
+Les écrans muraux dans d'autres thèmes, avec le logo d'une organisation et la fenêtre qui tourne toute seule, avec des données inventées :
+
+![Vue d'ensemble, thème clair](../../docs/screenshots/web_screen_overview_light.png)
+
+![Vue d'ensemble avec le logo et le thème Midnight](../../docs/screenshots/web_screen_overview_midnight.png)
+
+![Sentinelles, contraste élevé](../../docs/screenshots/web_screen_sentinels_contrast.png)
+
+![La fenêtre qui tourne entre les trois écrans](../../docs/screenshots/web_screen_rotate.png)

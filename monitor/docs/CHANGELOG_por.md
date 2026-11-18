@@ -9,6 +9,11 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+### Alterado
+
+- **As capturas do README mostram a versão atual**: todas as imagens da página, dos ecrãs de parede e das ferramentas de consola foram feitas de novo com dados inventados. As novas mostram o menu em grupos, as sentinelas de CI e de colaboração, a frota, os relatórios, a página inteira noutro tema e os ecrãs de parede com o logótipo de uma organização, com outros temas e a rodar sozinhos; o painel Acerca de é mais alto para que o cartão de operação e cópias fique visível.
+- **Um endereço que pede para não mostrar o assistente do primeiro arranque também esconde o aviso único sobre o orçamento da IA**, de modo que uma imagem tirada de um navegador limpo mostra a página em repouso.
+
 ## [2.1.0]
 
 ### Adicionado

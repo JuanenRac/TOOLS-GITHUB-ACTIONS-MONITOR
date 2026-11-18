@@ -171,3 +171,13 @@ Die drei Wandanzeigen in 4K und auf einem gedrehten Monitor, mit erfundenen Date
 ![Wächter 4K 3840x2160](../../docs/screenshots/web_screen_sentinels_4k.png)
 
 ![Wächter 1080x1920](../../docs/screenshots/web_screen_sentinels_portrait.png)
+
+Die Wandanzeigen in anderen Themen, mit dem Logo einer Organisation und das Fenster, das sich von selbst dreht, mit erfundenen Daten:
+
+![Übersicht, helles Thema](../../docs/screenshots/web_screen_overview_light.png)
+
+![Übersicht mit Logo und dem Thema Midnight](../../docs/screenshots/web_screen_overview_midnight.png)
+
+![Wächter, hoher Kontrast](../../docs/screenshots/web_screen_sentinels_contrast.png)
+
+![Das Fenster, das durch die drei Bildschirme dreht](../../docs/screenshots/web_screen_rotate.png)
