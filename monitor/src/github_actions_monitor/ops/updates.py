@@ -25,6 +25,7 @@ import threading
 import time
 from pathlib import Path
 
+from github_actions_monitor.security import private_io
 from github_actions_monitor.util.paths import ROOT
 
 TOOL = ROOT / "tools" / "monitor_updater.py"
@@ -176,7 +177,7 @@ def _spawn(args, up):
 def _first_status(up, kind):
     path = status_file(up)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps({"kind": kind, "running": True, "starting": True, "t": time.time(), "events": [], "text": "", "report": None, "pid": os.getpid()}), encoding="utf-8")
+    private_io.write_private(path, json.dumps({"kind": kind, "running": True, "starting": True, "t": time.time(), "events": [], "text": "", "report": None, "pid": os.getpid()}))
 
 
 def apply(target, policy, confirm, edition, lang, lite=False, demo=False, env=None):

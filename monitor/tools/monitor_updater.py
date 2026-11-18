@@ -1426,12 +1426,13 @@ class Updater:
     def handover_wait(self, opts):
         """Waits (up to handover_timeout seconds, 90 by default) until no monitor of this installation answers: the monitor that asked for the update stops itself right after it started this process."""
         deadline = time.time() + float(opts.get("handover_timeout", 90))
-        while True:
+        while time.time() < deadline or float(opts.get("handover_timeout", 90)) <= 0:
             if not any(s.get("open") and s.get("ours") for s in self.detect()["running"].values()):
                 return True
-            if time.time() >= deadline:
+            if float(opts.get("handover_timeout", 90)) <= 0:
                 return False
             time.sleep(0.5)
+        return not any(s.get("open") and s.get("ours") for s in self.detect()["running"].values())
 
     def _step(self, report, journal, name, func):
         self.emit(name, "start")

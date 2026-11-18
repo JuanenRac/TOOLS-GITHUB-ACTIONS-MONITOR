@@ -18,6 +18,9 @@ AUDITED = {
     "/api/ai/failures": "failures_import",              # lines of a book of failures from elsewhere
     "/api/report-files/run": "report_run",              # a report is written now
     "/api/ops/backup": "backup_run",                    # a complete backup package is written now (the file, never its content)
+    "/api/updates/check": "update_check",                # the published versions are read from GitHub on request
+    "/api/updates/apply": "update_apply",                # an update of the monitor is started (the target, never a path)
+    "/api/updates/rollback": "update_rollback",          # the way back to the version before the last update is started
     "/api/ops/purge": "purge_run",                      # the retention purge is run (or only planned) on demand
     "/api/ai/actions/confirm": "ai_action",             # an action proposed by the AI is run
     "/api/ai/actions/unlock": "ai_unlock",              # the actions of the AI are unlocked for a while
@@ -27,6 +30,7 @@ AUDITED = {
 
 #: route -> why it is not in this table
 EXEMPT = {
+    "/api/updates/plan": "only reads: it downloads and checks the zip and says what an update would do; nothing is applied (the apply that follows is recorded)",
     "/api/access": "opens a session; the logins and refusals are in the audit of the accesses (auth.audit)",
     "/api/settings": "recorded by its own line (settings_change) with the names of the settings",
     "/api/alerts/mute": "recorded by its own line (alert_mute) once the silence exists",
