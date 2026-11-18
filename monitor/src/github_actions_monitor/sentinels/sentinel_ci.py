@@ -6,11 +6,12 @@ Nothing of how it decides changes: `sentinel_local.Sentinel` keeps its rules, it
 loop; this class holds one of them and answers the contract with what it already knows. Whatever the monitor asked of the old object it still can: the attributes that are not part of the
 contract (`snapshot`, `feed`, `refresh_repos`, `ai_explain`...) are those of the held sentinel.
 
-The alerts it gives have stable codes, independent of the language: `ci.red`, `ci.stuck`, `ci.ghost_queue`, `ci.upstream_red`, `ci.upstream_release`, `ci.pending_sign`.
+The alerts it gives have stable codes, independent of the language: `ci.red`, `ci.stuck`, `ci.ghost_queue`, `ci.upstream_red`, `ci.upstream_release`, `ci.pending_sign`, `ci.dependabot_failed` (medium: the dependency updates of GitHub failed) and `ci.copilot_activity` (information: a workflow of Copilot failed; off by default).
 """
 from github_actions_monitor.sentinels import sentinel_base
 from github_actions_monitor.sentinels import sentinel_local
 from github_actions_monitor import i18n
+from github_actions_monitor.data_pipeline import redrule
 
 
 def _type_name(value):
@@ -99,6 +100,13 @@ class SentinelCI(sentinel_base.BaseSentinel):
         for wait in (snap.get("a5") or {}).get("pending_sign", []):
             alert("ci.pending_sign", "warning", wait.get("repo"), i18n.t("evt.pending_sign", repo=wait.get("repo"), hours=wait.get("hours")),
                   {"workflow": wait.get("workflow"), "hours": wait.get("hours"), "url": wait.get("url")}, wait.get("since"), f"{wait.get('repo')}:{wait.get('workflow')}")
+        for row in (snap.get("a2") or {}).get("services", []):      # the workflows GitHub makes for itself are never a red: a failing update of Dependabot is a medium alert, the activity of Copilot a notice
+            if row.get("service") == "dependabot" and redrule.POLICY["dependabot_alerts"]:
+                alert("ci.dependabot_failed", "warning", row.get("repo"), i18n.t("evt.dependabot_failed", repo=row.get("repo")),
+                      {"workflow": row.get("workflow"), "conclusion": row.get("conclusion"), "url": row.get("url")}, row.get("since"), f"{row.get('repo')}")
+            elif row.get("service") == "copilot" and redrule.POLICY["copilot_alerts"]:
+                alert("ci.copilot_activity", "info", row.get("repo"), i18n.t("evt.copilot_activity", repo=row.get("repo"), workflow=row.get("workflow")),
+                      {"workflow": row.get("workflow"), "conclusion": row.get("conclusion"), "url": row.get("url")}, row.get("since"), f"{row.get('repo')}:{row.get('workflow')}")
         return out
 
     def get_metrics(self):

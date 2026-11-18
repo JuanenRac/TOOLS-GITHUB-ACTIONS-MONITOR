@@ -26,6 +26,8 @@
     "red_ages": true,
     "red_age_days": 30,
     "disabled_apart": true,
+    "dependabot_alerts": true,
+    "copilot_alerts": false,
     "forks_need_own_ci": true,
     "fork_own_ci_days": 90,
     "extra_branches": [],

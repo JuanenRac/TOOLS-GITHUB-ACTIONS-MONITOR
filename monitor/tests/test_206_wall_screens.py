@@ -225,7 +225,7 @@ class ThePayload(unittest.TestCase):
             screens.build("other", None, None, None, None, screens.settings({}))
 
     def test_the_closed_list_of_keys(self):
-        self.assertEqual(sorted(self.build("overview")), sorted(["schema", "screen", "version", "epoch", "names", "meta", "score", "fleet", "trend24", "trend7d", "heat", "top_red", "queue", "events", "alerts"]))
+        self.assertEqual(sorted(self.build("overview")), sorted(["schema", "screen", "version", "epoch", "names", "meta", "score", "fleet", "trend24", "trend7d", "heat", "top_red", "queue", "events", "alerts", "groups"]))
         self.assertEqual(sorted(self.build("now")), sorted(["schema", "screen", "version", "epoch", "names", "meta", "running", "queued", "approval", "failures", "merges", "next_releases", "pending_sign", "timeline", "totals"]))
         self.assertEqual(sorted(self.build("sentinels")), sorted(["schema", "screen", "version", "epoch", "names", "meta", "enabled", "level", "loading", "sweep", "cards", "totals", "alerts"]))
 

@@ -64,7 +64,7 @@ Tre pagine per un monitor o una TV che nessuno tocca. Non hanno menu laterale n�
 
 | Indirizzo | Cosa mostra |
 |---|---|
-| `/screen/overview` | Anello e lettera del punteggio; la flotta (verdi, rossi, bloccati, in attesa); le ultime 24 ore e 7 giorni in grafici ad area; una mappa di calore dei repository per ora; ciò che è rosso da più tempo; runner e minuti; gli ultimi eventi; la quota di GitHub come indicatore. |
+| `/screen/overview` | Anello e lettera del punteggio; la flotta (verdi, rossi, bloccati, in attesa); le ultime 24 ore e 7 giorni in grafici ad area; una mappa di calore dei repository per ora; ciò che è rosso da più tempo; runner e minuti; gli ultimi eventi; la quota di GitHub come indicatore. La scheda della flotta mostra anche la mappa per gruppi: una barra per ogni gruppo della vista flotta (lo stesso raggruppamento, `fleet.group_by`) con i suoi repository in rosso, che richiedono attenzione, in ordine o senza dati; solo il nome del gruppo e i numeri. |
 | `/screen/now` | Ciò che accade in questo minuto: esecuzioni in corso con avanzamento e durata, la coda, esecuzioni in attesa di approvazione, errori recenti, merge e release, release in arrivo e una linea in diretta delle ultime due ore. |
 | `/screen/sentinels` | Una scheda per ogni sentinella (da A1 ad A12) con il suo livello, i rilievi aperti, se le sue fonti sono leggibili, l'ultima scansione e un anello che segue la scansione; un radar animato che segna ciò che non va e gli avvisi per gravità. |
 
@@ -110,6 +110,7 @@ La lingua di uno schermo si decide in quest'ordine: `?lang=xx` nell'indirizzo; p
 | `screens.logo_overview`, `screens.logo_now`, `screens.logo_sentinels` | Su quali schermi compare il logo (di default solo la panoramica). |
 | `screens.logo_corner` | top-right (predefinito), top-left, bottom-right o bottom-left. |
 | `screens.logo_max_width`, `screens.logo_max_height` | Dimensione massima del logo in pixel a 1920 x 1080 (160 x 64 per impostazione predefinita; cresce con lo schermo). |
+| `screens.group_map` | Attivo per impostazione predefinita. Mostra la mappa della flotta per gruppi nella schermata generale (il raggruppamento della vista flotta). Disattivato: solo i quattro riquadri. |
 
 ### Tema degli schermi
 

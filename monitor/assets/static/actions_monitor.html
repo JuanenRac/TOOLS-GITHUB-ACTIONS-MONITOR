@@ -708,7 +708,8 @@ const SND_PATTERNS={
   resolved:{w:"sine",n:[[523,0,.12],[659,.14,.12],[784,.28,.25]]},
   report:{w:"triangle",n:[[1047,0,.12],[784,.16,.3]]},
   lesson:{w:"sine",n:[[1319,0,.08],[1568,.1,.08],[1976,.2,.16]]},
-  info:{w:"sine",n:[[988,0,.22]]}
+  info:{w:"sine",n:[[988,0,.22]]},
+  live:{w:"sine",n:[[392,0,.12],[523,.14,.12],[659,.28,.12],[880,.42,.22]]}
 };
 const SND_THEMES={classic:{w:"",atk:.02,rel:.15,mul:1,gain:1},soft:{w:"sine",atk:.06,rel:.35,mul:.75,gain:.8}};
 let AUDIO=null;
@@ -724,13 +725,13 @@ function playTones(vol,kinds,theme){const c=audioCtx();if(!c||c.state!=="running
 /*SOUNDS-END*/
 /*SOUND-BEGIN*/
 /* the order in which kinds sound when several come in one look (the most serious first), the burst (at most three patterns at once, the rest wait their turn), the pause between two bursts and how long a kind may wait for the browser to allow sound */
-const SND_PRI=["red","sentinel","stuck","score","conn","warning","resolved","report","lesson","info"],SND_BURST=3,SND_GAP=1500,SND_STALE=6e5;
+const SND_PRI=["red","sentinel","stuck","score","conn","warning","resolved","report","lesson","info","live"],SND_BURST=3,SND_GAP=1500,SND_STALE=6e5;
 const SOUND={muted:false,first:true,known:new Set(),lastAt:0,kindAt:{},queue:[],conn:null,lost:false,al:null,rep:null,les:null};
 try{SOUND.muted=store.get("am-sound")==="off"}catch(e){}
 function soundCfg(){const c=I18N.sound||{},on=k=>c["on_"+k]!==false;
   return {enabled:c.enabled!==false,cool:(c.cooldown_seconds==null?30:c.cooldown_seconds)*1000,vol:(c.volume==null?40:c.volume)/100,theme:c.theme==="soft"?"soft":"classic",
     quiet:c.quiet_enabled===true,qfrom:c.quiet_from_hour==null?22:c.quiet_from_hour,qto:c.quiet_to_hour==null?7:c.quiet_to_hour,
-    types:{red:on("new_red"),conn:on("connection_lost"),warning:on("warning"),resolved:on("resolved"),report:on("report"),lesson:on("lesson"),sentinel:on("sentinel"),stuck:on("stuck"),score:on("score_drop"),info:on("info")}}}
+    types:{red:on("new_red"),conn:on("connection_lost"),warning:on("warning"),resolved:on("resolved"),report:on("report"),lesson:on("lesson"),sentinel:on("sentinel"),stuck:on("stuck"),score:on("score_drop"),info:on("info"),live:on("live_recovered")}}}
 /* quiet hours (do not disturb, from the settings): nothing sounds between the two hours of this computer; the visual notice is always there */
 function soundQuiet(c,when){if(!c.quiet||c.qfrom===c.qto)return false;const h=new Date(when==null?nowMs():when).getHours();return c.qfrom<c.qto?(h>=c.qfrom&&h<c.qto):(h>=c.qfrom||h<c.qto)}
 function soundOn(k){const c=soundCfg();return c.enabled&&!SOUND.muted&&c.types[k]!==false&&!soundQuiet(c)}
@@ -760,7 +761,7 @@ function soundLoad(){try{const o=JSON.parse(store.get(soundKey())||"null");if(o&
 function soundSave(keys){try{store.set(soundKey(),JSON.stringify({t:nowMs(),k:[...keys]}))}catch(e){}}
 /* the connection with the monitor itself is lost: one sound per loss (the mute chip, the switches, the pause of the kind and the audio lock all apply); found again, it can sound at the next loss */
 function soundLost(){if(SOUND.lost)return;SOUND.lost=true;soundSay(["conn"])}
-function soundFound(){SOUND.lost=false}
+function soundFound(){if(SOUND.lost){SOUND.lost=false;soundSay(["live"])}}
 function soundResync(){SOUND.lastAt=0;SOUND.kindAt={}}      // the page was out of step and is back: the pause of before does not hide a new red
 function soundWatch(d){
   if(!d)return;const keys=new Set((d.failing||[]).map(r=>r.repo+"|"+r.name)),off=!!(d.offline&&d.offline.offline);
@@ -769,6 +770,7 @@ function soundWatch(d){
   for(const k of keys)if(!SOUND.known.has(k)){kinds.push("red");break}
   if(!off)for(const k of SOUND.known)if(!keys.has(k)){kinds.push("resolved");break}      // a red that is gone (not while the monitor is offline: then the list is empty for another reason)
   if(off&&SOUND.conn===false)kinds.push("conn");
+  if(!off&&SOUND.conn===true)kinds.push("live");      // the connection to GitHub is back
   SOUND.known=keys;SOUND.conn=off;soundSave(keys);
   soundSay(kinds);
 }

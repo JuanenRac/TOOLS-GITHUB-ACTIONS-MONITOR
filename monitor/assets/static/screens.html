@@ -76,6 +76,17 @@ svg{display:block}
 .tile .big{font-size:2.6rem}
 .tile .lab{font-size:.9rem;color:var(--mut);display:flex;gap:.4rem;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tile.t-ok .big{color:var(--ok)}.tile.t-bad .big{color:var(--bad)}.tile.t-warn .big{color:var(--warn)}.tile.t-info .big{color:var(--info)}
+/* the map of the fleet by groups (the grouping of the Fleet view): one bar per group, the bad ones first; it takes the rows that fit and no more */
+#a-fleet.hasmap .fleet{flex:0 0 auto}
+#a-fleet.hasmap .tile{padding:.15rem .5rem}#a-fleet.hasmap .tile .big{font-size:1.7rem;line-height:1.1}#a-fleet.hasmap .tile .lab{font-size:.8rem}
+.gmap{display:flex;flex-direction:column;gap:.22rem;min-height:0;overflow:hidden;flex:1}
+.gmap[hidden]{display:none}
+.gmap .gh{font-size:.78rem;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 0 auto}
+.gmap .g{display:grid;grid-template-columns:minmax(3rem,32%) 1fr 2.4rem;gap:.4rem;align-items:center;font-size:.85rem;min-height:0}
+.gmap .g .gn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gmap .g .gb{display:flex;height:.7rem;border-radius:.35rem;overflow:hidden;background:var(--line)}
+.gmap .g .gb i{display:block;height:100%}.gmap .g .gb .s-bad{background:var(--bad)}.gmap .g .gb .s-warn{background:var(--warn)}.gmap .g .gb .s-ok{background:var(--ok)}.gmap .g .gb .s-unknown{background:var(--mut);opacity:.5}
+.gmap .g .gv{text-align:right;font-variant-numeric:tabular-nums;color:var(--mut)}
 .flash-ok{animation:flashok 1.4s ease-out 1}
 .chart{flex:1;min-height:0;position:relative}
 .chart svg{position:absolute;inset:0;width:100%;height:100%}
@@ -208,7 +219,7 @@ header>.orglogo:first-child{margin-right:1rem}header>.orglogo:last-child{margin-
 <div id="banner" role="status" hidden></div>
 <main class="screen" id="s-overview" aria-labelledby="h-title">
  <section class="card" id="a-score" style="--i:0"><h2 id="a-score-h"></h2><div class="body"><div class="scorebox"><div class="ring" id="r-score"></div><div><div class="letter" id="score-letter"></div><div class="mut" id="score-trend"></div></div></div></div></section>
- <section class="card" id="a-fleet" style="--i:1"><h2 id="a-fleet-h"></h2><div class="body"><div class="fleet" id="fleet"></div></div></section>
+ <section class="card" id="a-fleet" style="--i:1"><h2 id="a-fleet-h"></h2><div class="body"><div class="fleet" id="fleet"></div><div class="gmap" id="gmap" hidden></div></div></section>
  <section class="card" id="a-trend" style="--i:2"><h2 id="a-trend-h"></h2><div class="body" style="display:grid;grid-template-columns:1.7fr 1fr;gap:.9rem"><div style="display:flex;flex-direction:column;min-height:0;gap:.3rem"><div class="legend" id="trend-leg"></div><div class="chart" id="ch24"></div></div><div style="display:flex;flex-direction:column;min-height:0;gap:.3rem"><div class="mut" id="ch7-h"></div><div class="chart" id="ch7"></div></div></div></section>
  <section class="card" id="a-heat" style="--i:3"><h2 id="a-heat-h"></h2><div class="body"><div class="heat" id="heat"></div></div></section>
  <section class="card" id="a-top" style="--i:4"><h2 id="a-top-h"></h2><div class="body"><div class="list" id="top-red"></div></div></section>
@@ -385,7 +396,8 @@ const SND_PATTERNS={
   resolved:{w:"sine",n:[[523,0,.12],[659,.14,.12],[784,.28,.25]]},
   report:{w:"triangle",n:[[1047,0,.12],[784,.16,.3]]},
   lesson:{w:"sine",n:[[1319,0,.08],[1568,.1,.08],[1976,.2,.16]]},
-  info:{w:"sine",n:[[988,0,.22]]}
+  info:{w:"sine",n:[[988,0,.22]]},
+  live:{w:"sine",n:[[392,0,.12],[523,.14,.12],[659,.28,.12],[880,.42,.22]]}
 };
 const SND_THEMES={classic:{w:"",atk:.02,rel:.15,mul:1,gain:1},soft:{w:"sine",atk:.06,rel:.35,mul:.75,gain:.8}};
 let AUDIO=null;
@@ -401,7 +413,7 @@ function playTones(vol,kinds,theme){const c=audioCtx();if(!c||c.state!=="running
 /*SOUNDS-END*/
 /* the sounds of the wall are the ones of the page (the block above is the same text): one per kind of event, with the volume, the theme, the switches and the quiet hours of the settings, and only in a window that asks for them (?sound=on) in a monitor that allows them (screens.sound) */
 const SC=Object.assign({enabled:true,theme:"classic",volume:40,cooldown_seconds:30,quiet_enabled:false,quiet_from_hour:22,quiet_to_hour:7},D.sound||{});
-const SND_SW={red:"new_red",conn:"connection_lost",score:"score_drop"};
+const SND_SW={red:"new_red",conn:"connection_lost",score:"score_drop",live:"live_recovered"};
 function sndQuiet(){if(!SC.quiet_enabled||SC.quiet_from_hour===SC.quiet_to_hour)return false;const h=new Date().getHours(),a=SC.quiet_from_hour,b=SC.quiet_to_hour;return a<b?(h>=a&&h<b):(h>=a||h<b)}
 function beep(kinds){
   if(!P.sound||SC.enabled===false)return;const now=Date.now();
@@ -454,6 +466,17 @@ function renderOverview(d){
   if(!fl.firstChild){fl.innerHTML=tiles.map(([k,c])=>'<div class="tile '+c+'" id="ft-'+k+'"><div class="big"></div><div class="lab"><span class="ico lamp l-'+(k==="green"?"ok":k==="red"?"bad":k==="stuck"?"warn":"info")+'" aria-hidden="true"></span><span></span></div></div>').join("")}
   tiles.forEach(([k,c,v])=>{const t=$("ft-"+k);tween(t.querySelector(".big"),num(v));t.querySelector(".lab span:last-child").textContent=T("ui.scr_"+k)+(k==="green"?" · "+T("ui.scr_of",{n:num(f.total)}):"");});
   const redTile=$("ft-red");if(num(f.red)>0)failMark(redTile,"fleet-red",null);else{redTile.classList.remove("fail","calm")}
+  /* the map of the fleet by groups: the grouping of the Fleet view; only the name of a group and numbers */
+  const gm=$("gmap"),gr=d.groups;
+  $("a-fleet").classList.toggle("hasmap",!!(gr&&gr.groups&&gr.groups.length));
+  if(gr&&gr.groups&&gr.groups.length){
+    gm.hidden=false;
+    const gname=g=>gr.by==="state"?T("ui.lv_"+g.key):(g.label||(gr.by==="none"?T("ui.scr_grp_all"):T("ui.scr_grp_nogroup")));
+    gm.innerHTML='<div class="gh">'+esc(T("ui.scr_grp_head",{by:T("ui.scr_grp_"+gr.by)}))+(gr.more?" · "+esc(T("ui.scr_grp_more",{n:gr.more})):"")+"</div>"+gr.groups.map(g=>{
+      const n=Math.max(1,num(g.repos)),seg=["bad","warn","ok","unknown"].map(s=>'<i class="s-'+s+'" style="width:'+(100*num(g[s])/n)+'%" title="'+esc(T("ui.lv_"+s)+": "+num(g[s]))+'"></i>').join("");
+      return '<div class="g"><span class="gn" title="'+esc(gname(g))+'">'+esc(gname(g))+'</span><span class="gb">'+seg+'</span><span class="gv">'+num(g.repos)+"</span></div>"}).join("");
+    (function(){let guard=gm.children.length;while(guard-->0&&gm.scrollHeight>gm.clientHeight+1){let last=null;for(let i=gm.children.length-1;i>0;i--){if(!gm.children[i].hidden){last=gm.children[i];break}}if(!last)break;last.hidden=true}})();
+  }else{gm.hidden=true;gm.textContent=""}
   /* trend */
   const lg=$("trend-leg");lg.innerHTML='<span><i style="background:var(--ok)"></i>'+esc(T("ui.scr_runs_ok"))+'</span><span><i style="background:var(--bad)"></i>'+esc(T("ui.scr_runs_bad"))+"</span><span>"+esc(T("ui.scr_h24"))+"</span>";
   const a24=areaSvg(d.trend24||[],["ok","bad"],["var(--ok)","var(--bad)"],240,80);
@@ -582,7 +605,7 @@ async function load(){
   try{
     const r=await getData(STATE.kind);
     if(!r.ok)throw new Error(String(r.status));
-    const d=await r.json();STATE.fails=0;STATE.offSound=false;STATE.data=d;STATE.got=Date.now();paint(d);
+    const d=await r.json();const wasOff=STATE.offSound;STATE.fails=0;STATE.offSound=false;if(wasOff)beep(["live"]);STATE.data=d;STATE.got=Date.now();paint(d);
     if(P.jump)JUMP_KINDS.forEach(k=>{if(k!==STATE.kind)peek(k)});
   }catch(e){
     STATE.fails++;if(!STATE.offSound){STATE.offSound=true;beep(["conn"])}const back=Math.min(60,5*Math.pow(2,STATE.fails-1));wait=back*1000;

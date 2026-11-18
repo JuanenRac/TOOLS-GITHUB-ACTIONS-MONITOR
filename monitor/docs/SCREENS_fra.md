@@ -64,7 +64,7 @@ Trois pages pour un moniteur ou un téléviseur que personne ne touche. Elles n'
 
 | Adresse | Ce qu'elle montre |
 |---|---|
-| `/screen/overview` | Anneau et lettre du score ; le parc (verts, rouges, bloqués, en attente) ; les dernières 24 heures et 7 jours en graphiques en aires ; une carte thermique des dépôts par heure ; ce qui est rouge depuis le plus longtemps ; runners et minutes ; les derniers événements ; le quota GitHub sous forme de jauge. |
+| `/screen/overview` | Anneau et lettre du score ; le parc (verts, rouges, bloqués, en attente) ; les dernières 24 heures et 7 jours en graphiques en aires ; une carte thermique des dépôts par heure ; ce qui est rouge depuis le plus longtemps ; runners et minutes ; les derniers événements ; le quota GitHub sous forme de jauge. La carte de la flotte affiche aussi la carte par groupes : une barre par groupe de la vue de flotte (le même regroupement, `fleet.group_by`) avec ses dépôts rouges, à surveiller, en ordre ou sans données ; seulement le nom du groupe et des chiffres. |
 | `/screen/now` | Ce qui se passe cette minute : exécutions en cours avec progression et durée, la file, les exécutions en attente d'approbation, les échecs récents, les fusions et versions publiées, les versions à venir et une ligne en direct des deux dernières heures. |
 | `/screen/sentinels` | Une carte par sentinelle (A1 à A12) avec son niveau, les constats ouverts, si ses sources sont lisibles, le dernier balayage et un anneau qui suit le balayage ; un radar animé qui marque ce qui ne va pas et les alertes par gravité. |
 
@@ -110,6 +110,7 @@ La langue d'un écran se décide dans cet ordre : `?lang=xx` dans l'adresse ; pu
 | `screens.logo_overview`, `screens.logo_now`, `screens.logo_sentinels` | Sur quels écrans le logo apparaît (seulement la vue d'ensemble par défaut). |
 | `screens.logo_corner` | top-right (par défaut), top-left, bottom-right ou bottom-left. |
 | `screens.logo_max_width`, `screens.logo_max_height` | Taille maximale du logo en pixels à 1920 x 1080 (160 x 64 par défaut ; il grandit avec l'écran). |
+| `screens.group_map` | Activé par défaut. Affiche la carte de la flotte par groupes sur l’écran général (le regroupement de la vue de flotte). Désactivé : seulement les quatre tuiles. |
 
 ### Thème des écrans
 

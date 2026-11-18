@@ -143,7 +143,7 @@ console.log(JSON.stringify(r));""")
 
     def test_losing_the_monitor_sounds_once_per_loss_and_respects_mute_cooldown_and_the_switch(self):
         out = run_js("""
-const r=[];
+const r=[];I18N.sound.on_live_recovered=false;      // the sound of the return has its own test (test_762)
 soundLost();r.push(TONES);                         // lost: sounds
 NOW+=5000;soundLost();r.push(TONES);               // still lost: silent
 soundFound();NOW+=1000;soundLost();r.push(TONES);  // found and lost again inside the cooldown: silent

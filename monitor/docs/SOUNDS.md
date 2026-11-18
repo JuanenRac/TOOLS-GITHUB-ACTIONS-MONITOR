@@ -21,6 +21,7 @@ The page makes its own sounds with the Web Audio API, one for each kind of event
 | Report | One of the optional reports shows a finding that was not there before. | Two soft chimes, high then lower. |
 | Lesson | The lessons of the failures show a new category, or one that starts to repeat or to apply. | Three quick high notes. |
 | Notice | A new alert of level info (the release of the original of a fork, for instance). | One soft ping. |
+| Back online | The connection to GitHub, or of this page with the monitor, comes back after a loss. | Four rising notes. |
 
 ## Why a browser may stay silent, and what the page does
 
@@ -42,12 +43,12 @@ All of them are in the configuration file and in the Settings tab; the volume, t
 | Setting | What it does |
 |---|---|
 | `sound.enabled` | Main switch of all the sounds of the page. |
-| `sound.on_new_red`, `sound.on_connection_lost`, `sound.on_warning`, `sound.on_resolved`, `sound.on_report`, `sound.on_lesson`, `sound.on_sentinel`, `sound.on_stuck`, `sound.on_score_drop`, `sound.on_info` | One switch per kind (all on by default). |
+| `sound.on_new_red`, `sound.on_connection_lost`, `sound.on_warning`, `sound.on_resolved`, `sound.on_report`, `sound.on_lesson`, `sound.on_sentinel`, `sound.on_stuck`, `sound.on_score_drop`, `sound.on_info`, `sound.on_live_recovered` | One switch per kind (all on by default). |
 | `sound.theme` | `classic` (clear tones) or `soft` (lower, rounder, slower tones). Each kind keeps its rhythm in both. |
 | `sound.volume` | 1 to 100, moderate by default. |
 | `sound.cooldown_seconds` | Pause between two sounds of the same kind. |
 | `sound.quiet_enabled`, `sound.quiet_from_hour`, `sound.quiet_to_hour` | Quiet hours (off by default): between the two hours of this computer nothing sounds; they may cross midnight. |
-| `sound.server_beep` | Off by default. A beep of this computer for a new red when no page is open (local only). |
+| `sound.server_beep` | Off by default. The monitor itself sounds on this computer when no page is open or the browser blocks sound: one pattern for each kind of event in the table above (tones of Windows, system sounds of macOS, events of canberra on Linux), by the same switches and quiet hours as the page, one burst of at most three kinds at a time; local only. |
 
 ## Try each sound
 

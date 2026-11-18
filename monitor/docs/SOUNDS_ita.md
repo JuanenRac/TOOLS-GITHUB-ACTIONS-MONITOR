@@ -21,6 +21,7 @@ La pagina produce i propri suoni con l'API Web Audio, uno per ogni tipo di event
 | Rapporto | Uno dei rapporti facoltativi mostra un rilievo che prima non c'era. | Due rintocchi dolci, acuto poi più grave. |
 | Lezione | Le lezioni dei fallimenti mostrano una categoria nuova, o una che inizia a ripetersi o ad applicarsi. | Tre note acute veloci. |
 | Notizia | Un nuovo avviso di livello info (la release dell'originale di un fork, per esempio). | Un segnale dolce. |
+| Di nuovo online | Torna la connessione a GitHub, o di questa pagina con il monitor, dopo un’interruzione. | Quattro note ascendenti. |
 
 ## Perché un browser può restare muto e cosa fa la pagina
 
@@ -42,12 +43,12 @@ Sono tutte nel file di configurazione e nella scheda Impostazioni; volume, tema 
 | Impostazione | Cosa fa |
 |---|---|
 | `sound.enabled` | Interruttore generale di tutti i suoni della pagina. |
-| `sound.on_new_red`, `sound.on_connection_lost`, `sound.on_warning`, `sound.on_resolved`, `sound.on_report`, `sound.on_lesson`, `sound.on_sentinel`, `sound.on_stuck`, `sound.on_score_drop`, `sound.on_info` | Un interruttore per tipo (tutti attivi per impostazione predefinita). |
+| `sound.on_new_red`, `sound.on_connection_lost`, `sound.on_warning`, `sound.on_resolved`, `sound.on_report`, `sound.on_lesson`, `sound.on_sentinel`, `sound.on_stuck`, `sound.on_score_drop`, `sound.on_info`, `sound.on_live_recovered` | Un interruttore per tipo (tutti attivi per impostazione predefinita). |
 | `sound.theme` | `classic` (toni chiari) o `soft` (toni più gravi, rotondi e lenti). Ogni tipo mantiene il suo ritmo in entrambi. |
 | `sound.volume` | Da 1 a 100, moderato per impostazione predefinita. |
 | `sound.cooldown_seconds` | Pausa tra due suoni dello stesso tipo. |
 | `sound.quiet_enabled`, `sound.quiet_from_hour`, `sound.quiet_to_hour` | Ore di silenzio (disattivate per impostazione predefinita): tra le due ore di questo computer non suona nulla; possono attraversare la mezzanotte. |
-| `sound.server_beep` | Disattivato per impostazione predefinita. Un bip di questo computer per un nuovo rosso quando non c'è nessuna pagina aperta (solo locale). |
+| `sound.server_beep` | Disattivato per impostazione predefinita. Il monitor stesso suona su questo computer quando nessuna pagina è aperta o il browser blocca l’audio: un motivo per ogni tipo di evento della tabella qui sopra (toni di Windows, suoni di sistema di macOS, eventi canberra su Linux), con gli stessi interruttori e le stesse ore di silenzio della pagina, in una raffica di al massimo tre tipi alla volta; solo locale. |
 
 ## Prova ogni suono
 

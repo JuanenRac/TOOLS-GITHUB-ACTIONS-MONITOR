@@ -41,7 +41,7 @@ NAMES = ("all", "public", "none")
 DEFAULTS = {"enabled": False, "blink": True, "blink_calm_minutes": 30, "rotate_seconds": 0, "default_theme": "inherit", "default_density": "normal", "refresh_seconds": 10, "burn_in_protection": True,
             "night_dim": False, "night_dim_from_hour": 22, "night_dim_to_hour": 7, "show_repo_names": "public", "sound": False,
             "theme_overview": "inherit", "theme_now": "inherit", "theme_sentinels": "inherit", "mode": "three", "rotate_every_seconds": 20, "alert_hold_seconds": 30,
-            "logo_overview": True, "logo_now": False, "logo_sentinels": False, "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64}
+            "logo_overview": True, "logo_now": False, "logo_sentinels": False, "logo_corner": "top-right", "logo_max_width": 160, "logo_max_height": 64, "group_map": True}
 SENTINEL_KEY = re.compile(r"^ui\.a(1[0-2]|[1-9])\Z")
 SENTINELS = tuple("a%d" % n for n in range(1, 13))
 LEVELS = ("ok", "warn", "bad", "info", "unknown")
@@ -101,7 +101,7 @@ def settings(config):
             "rotate_every_seconds": _int(block.get("rotate_every_seconds"), 5, 300, d["rotate_every_seconds"]), "alert_hold_seconds": _int(block.get("alert_hold_seconds"), 5, 600, d["alert_hold_seconds"]),
             "logo_overview": _flag(block.get("logo_overview"), d["logo_overview"]), "logo_now": _flag(block.get("logo_now"), d["logo_now"]), "logo_sentinels": _flag(block.get("logo_sentinels"), d["logo_sentinels"]),
             "logo_corner": _choice(block.get("logo_corner"), CORNERS, d["logo_corner"]), "logo_max_width": _int(block.get("logo_max_width"), 16, 640, d["logo_max_width"]),
-            "logo_max_height": _int(block.get("logo_max_height"), 16, 320, d["logo_max_height"])}
+            "logo_max_height": _int(block.get("logo_max_height"), 16, 320, d["logo_max_height"]), "group_map": _flag(block.get("group_map"), d["group_map"])}
 
 
 def global_theme(config):
@@ -459,10 +459,31 @@ def _alert_summary(alerts):
     return {"total": _int(summary.get("total"), 0, 10 ** 6, 0), "by_level": {k: _int(by_level.get(k), 0, 10 ** 6, 0) for k in ("critical", "error", "warning", "info")}}
 
 
-def build_overview(state, snapshot, alerts, score, names, now):
+GROUPS_SHOWN = 12
+GROUP_BY = ("ecosystem", "label", "state", "none")
+
+
+def group_map(view, labels=None):
+    """The map of the fleet by groups for the overview: the groups of the fleet view (`health/fleet.py`, the same grouping and the same order: the riskiest first) with how many of their repositories are
+    bad, warn, ok or unknown. Only the name of a group and numbers: no repository is named here, so `screens.show_repo_names` has nothing to hide. None when there is no view."""
+    if not isinstance(view, dict) or not isinstance(view.get("groups"), list):
+        return None
+    labels = labels if isinstance(labels, dict) else {}
+    by = view.get("group_by") if view.get("group_by") in GROUP_BY else "ecosystem"
+    rows = []
+    for group in view["groups"]:
+        if not isinstance(group, dict):
+            continue
+        key = str(group.get("key") or "")[:40]
+        rows.append({"key": key, "label": str(labels.get(key, key) if by == "ecosystem" else key)[:40], "repos": _int(group.get("repos"), 0, 10 ** 6, 0), "bad": _int(group.get("bad"), 0, 10 ** 6, 0),
+                     "warn": _int(group.get("warn"), 0, 10 ** 6, 0), "ok": _int(group.get("ok"), 0, 10 ** 6, 0), "unknown": _int(group.get("unknown"), 0, 10 ** 6, 0)})
+    return {"by": by, "groups": rows[:GROUPS_SHOWN], "more": max(0, len(rows) - GROUPS_SHOWN)}
+
+
+def build_overview(state, snapshot, alerts, score, names, now, groups=None):
     runs = [r for r in (state.get("runs") or []) if isinstance(r, dict)]
     red = _red_repos(state, snapshot)
-    return {"score": _score(score), "fleet": _fleet(state, snapshot), "trend24": _series(runs, now, 24, 3600), "trend7d": _series(runs, now, 7, 86400), "heat": _heat(runs, now, names, set(red)),
+    return {"groups": groups, "score": _score(score), "fleet": _fleet(state, snapshot), "trend24": _series(runs, now, 24, 3600), "trend7d": _series(runs, now, 7, 86400), "heat": _heat(runs, now, names, set(red)),
             "top_red": _top_red(state, snapshot, names, now), "queue": _queue(state, snapshot), "events": _events(state, names, now), "alerts": _alert_summary(alerts)}
 
 
@@ -570,9 +591,9 @@ def build_sentinels(state, snapshot, alerts, score, names, now, refresh):
 # the payload
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def build(kind, state, snapshot, alerts, score, cfg, edition="complete", now=None):
+def build(kind, state, snapshot, alerts, score, cfg, edition="complete", now=None, fleet_view=None, labels=None):
     """The answer of /api/screens/data for one screen, from what the monitor holds. `state` is the last cycle (STATE["data"], or None before the first), `snapshot` the sentinel snapshot (or None),
-    `alerts` the alerts payload, `score` the latest score. Never raises for missing parts: a part that is not there is empty and `meta.have_data` says so."""
+    `alerts` the alerts payload, `score` the latest score, `fleet_view` the answer of the fleet view for the map of groups of the overview (and `labels` the names of the ecosystems). Never raises for missing parts: a part that is not there is empty and `meta.have_data` says so."""
     if kind not in KINDS:
         raise ValueError("unknown screen")
     now = time.time() if now is None else now
@@ -580,7 +601,7 @@ def build(kind, state, snapshot, alerts, score, cfg, edition="complete", now=Non
     names = Names(data.get("repos"), data.get("repo_meta"), cfg["show_repo_names"])
     out = {"schema": SCHEMA, "screen": kind, "version": TOOL_VERSION, "epoch": int(now), "names": cfg["show_repo_names"], "meta": _meta(state, now, cfg["refresh_seconds"], edition)}
     if kind == "overview":
-        out.update(build_overview(data, snapshot, alerts, score, names, now))
+        out.update(build_overview(data, snapshot, alerts, score, names, now, group_map(fleet_view, labels) if cfg.get("group_map", True) else None))
     elif kind == "now":
         out.update(build_now(data, snapshot, alerts, score, names, now))
     else:

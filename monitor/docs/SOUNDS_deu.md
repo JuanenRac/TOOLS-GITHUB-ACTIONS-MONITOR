@@ -21,6 +21,7 @@ Die Seite macht ihre Töne selbst mit der Web-Audio-API, einen für jede Ereigni
 | Bericht | Einer der optionalen Berichte zeigt einen Befund, der vorher nicht da war. | Zwei sanfte Glockentöne, hoch und dann tiefer. |
 | Lektion | Die Lektionen aus den Fehlern zeigen eine neue Kategorie oder eine, die sich zu wiederholen oder zu gelten beginnt. | Drei schnelle hohe Töne. |
 | Hinweis | Ein neuer Alarm der Stufe Info (zum Beispiel das Release des Originals eines Forks). | Ein sanfter Ping. |
+| Wieder online | Die Verbindung zu GitHub oder dieser Seite mit dem Monitor kehrt nach einem Ausfall zurück. | Vier aufsteigende Töne. |
 
 ## Warum ein Browser stumm bleiben kann und was die Seite tut
 
@@ -42,12 +43,12 @@ Alle stehen in der Konfigurationsdatei und im Tab Einstellungen; Lautstärke, Th
 | Einstellung | Was sie tut |
 |---|---|
 | `sound.enabled` | Hauptschalter aller Töne der Seite. |
-| `sound.on_new_red`, `sound.on_connection_lost`, `sound.on_warning`, `sound.on_resolved`, `sound.on_report`, `sound.on_lesson`, `sound.on_sentinel`, `sound.on_stuck`, `sound.on_score_drop`, `sound.on_info` | Ein Schalter je Art (standardmäßig alle an). |
+| `sound.on_new_red`, `sound.on_connection_lost`, `sound.on_warning`, `sound.on_resolved`, `sound.on_report`, `sound.on_lesson`, `sound.on_sentinel`, `sound.on_stuck`, `sound.on_score_drop`, `sound.on_info`, `sound.on_live_recovered` | Ein Schalter je Art (standardmäßig alle an). |
 | `sound.theme` | `classic` (klare Töne) oder `soft` (tiefere, rundere, langsamere Töne). Jede Art behält in beiden ihren Rhythmus. |
 | `sound.volume` | 1 bis 100, standardmäßig mäßig. |
 | `sound.cooldown_seconds` | Pause zwischen zwei Tönen derselben Art. |
 | `sound.quiet_enabled`, `sound.quiet_from_hour`, `sound.quiet_to_hour` | Ruhezeiten (standardmäßig aus): zwischen den beiden Uhrzeiten dieses Rechners ertönt nichts; sie dürfen über Mitternacht gehen. |
-| `sound.server_beep` | Standardmäßig aus. Ein Piepton dieses Rechners bei neuem Rot, wenn keine Seite offen ist (nur lokal). |
+| `sound.server_beep` | Standardmäßig aus. Der Monitor selbst ertönt auf diesem Rechner, wenn keine Seite geöffnet ist oder der Browser den Ton sperrt: ein Muster für jede Ereignisart der Tabelle oben (Windows-Töne, macOS-Systemklänge, canberra-Ereignisse unter Linux), mit denselben Schaltern und Ruhezeiten wie die Seite, in einem Schub von höchstens drei Arten; nur lokal. |
 
 ## Jeden Ton testen
 

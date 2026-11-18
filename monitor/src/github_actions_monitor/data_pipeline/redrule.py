@@ -33,7 +33,7 @@ QUEUE_PREFIX = "gh-readonly-queue/"
 AWAITING_DAYS = 14
 DEFAULT_INACTIVE_DAYS = 90
 DEFAULT_RED_AGE_DAYS = 30
-POLICY = {"events": RED_EVENTS, "fork_runs": False, "automation": False, "inactive_days": DEFAULT_INACTIVE_DAYS, "red_age_days": DEFAULT_RED_AGE_DAYS, "branches": (), "disabled_apart": True}      # replaced by configure(): the whole monitor shares one rule
+POLICY = {"events": RED_EVENTS, "fork_runs": False, "automation": False, "inactive_days": DEFAULT_INACTIVE_DAYS, "red_age_days": DEFAULT_RED_AGE_DAYS, "branches": (), "disabled_apart": True, "dependabot_alerts": True, "copilot_alerts": False}      # replaced by configure(): the whole monitor shares one rule
 
 
 def configure(config):
@@ -50,6 +50,8 @@ def configure(config):
     age = age if isinstance(age, int) and not isinstance(age, bool) and 1 <= age <= 3650 else DEFAULT_RED_AGE_DAYS
     POLICY["red_age_days"] = age if block.get("red_ages") is not False else 0      # 0 = a red never ages
     POLICY["disabled_apart"] = block.get("disabled_apart") is not False
+    POLICY["dependabot_alerts"] = block.get("dependabot_alerts") is not False      # a failing Dependabot update is an alert of its own (medium)
+    POLICY["copilot_alerts"] = block.get("copilot_alerts") is True      # the activity of Copilot that failed is a notice (information) only when asked for
     extra = block.get("extra_branches")
     POLICY["branches"] = tuple(b for b in extra if isinstance(b, str) and b) if isinstance(extra, (list, tuple)) else ()
 

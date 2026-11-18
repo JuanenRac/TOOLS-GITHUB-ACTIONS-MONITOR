@@ -64,7 +64,7 @@ Tres páginas para un monitor o una tele que nadie toca. No tienen menú lateral
 
 | Dirección | Qué muestra |
 |---|---|
-| `/screen/overview` | Anillo y letra de la puntuación; la flota (verdes, rojos, atascados, esperando); las últimas 24 horas y 7 días en gráficos de área; un mapa de calor de repositorios por hora; lo que lleva más tiempo en rojo; runners y minutos; los últimos eventos; la cuota de GitHub como medidor. |
+| `/screen/overview` | Anillo y letra de la puntuación; la flota (verdes, rojos, atascados, esperando); las últimas 24 horas y 7 días en gráficos de área; un mapa de calor de repositorios por hora; lo que lleva más tiempo en rojo; runners y minutos; los últimos eventos; la cuota de GitHub como medidor. La tarjeta de la flota muestra además el mapa por grupos: una barra por cada grupo de la vista de flota (la misma agrupación, `fleet.group_by`) con sus repositorios en rojo, que requieren atención, en orden o sin datos; solo el nombre del grupo y cifras. |
 | `/screen/now` | Lo que ocurre este minuto: ejecuciones en curso con progreso y duración, la cola, ejecuciones esperando aprobación, fallos recientes, fusiones y versiones publicadas, versiones pendientes y una línea en directo de las últimas dos horas. |
 | `/screen/sentinels` | Una tarjeta por cada centinela (A1 a A12) con su nivel, los hallazgos abiertos, si sus fuentes se pueden leer, el último barrido y un anillo que sigue el barrido; un radar animado que marca lo que va mal y las alertas por gravedad. |
 
@@ -110,6 +110,7 @@ El idioma de una pantalla se decide en este orden: `?lang=xx` en la dirección; 
 | `screens.logo_overview`, `screens.logo_now`, `screens.logo_sentinels` | En qué pantallas aparece el logo (por defecto solo en general). |
 | `screens.logo_corner` | top-right (por defecto), top-left, bottom-right o bottom-left. |
 | `screens.logo_max_width`, `screens.logo_max_height` | Tamaño máximo del logo en píxeles a 1920 x 1080 (160 x 64 por defecto; crece con la pantalla). |
+| `screens.group_map` | Activado por defecto. Muestra el mapa de la flota por grupos en la pantalla general (la agrupación de la vista de flota). Desactivado: solo las cuatro casillas. |
 
 ### Tema de las pantallas
 

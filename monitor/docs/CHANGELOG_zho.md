@@ -20,6 +20,9 @@
 - **整个产品使用在设置中选定的主题,每个墙面屏幕也可以有自己的主题**:主题(`ui.theme`:自动、浅色、深色或十六种之一)也由监视器保存,因此墙面屏幕和登录页面都会使用它。屏幕默认继承它(`screens.default_theme` 现在是 `inherit`),并可用 `screens.default_theme`、`screens.theme_overview`、`screens.theme_now` 和 `screens.theme_sentinels` 为所有屏幕或单个屏幕固定另一个主题。墙面屏幕不再写入自己的颜色:它们使用页面的调色板,因此十六种主题在那里同样可用。
 - **在墙面屏幕上显示组织标志**:在设置中上传(PNG、JPEG、WebP 或 SVG,最大 1 MB;根据文件的前几个字节检查类型,含有脚本、事件处理程序或指向其他文件的链接的 SVG 会被拒绝),保存在数据文件夹中,绝不写入配置。`screens.logo_overview`、`screens.logo_now` 和 `screens.logo_sentinels` 选择显示的屏幕(默认仅总览),`screens.logo_corner` 选择角落(默认右上角),`screens.logo_max_width` 和 `screens.logo_max_height` 选择最大尺寸(默认 160 x 64 像素)。图片按比例缩放且有专属位置,因此绝不会遮挡内容。
 - **一个会轮换并跳转到新红色的墙面屏幕(`screens.mode` = rotate)**:不再是三个分开的屏幕,而是一个窗口每隔 `screens.rotate_every_seconds` 秒(默认 20,5 到 300)在总览、此刻和哨兵之间轮换。新的红色会跳到显示它的屏幕(失败的工作流跳到此刻,红色面板跳到哨兵),并停留 `screens.alert_hold_seconds` 秒(默认 30,5 到 600)或直到红色消失,以先到者为准,然后继续轮换;已经显示过的红色在变化或再次出现之前不会再触发跳转。`?jump=off` 和 `?rotate=0` 可让单个窗口安静下来。默认仍是三个分开的屏幕。
+- **总览墙屏显示按分组的车队地图**:在车队的四个方块下方,为车队视图的每个分组(相同的分组方式:按 `fleet.group_by` 的生态系统、标签或状态)显示一条横条,标出其中红色、需要关注、正常和无数据的仓库数量。只显示组名和数字,绝不显示仓库名称,并遵循屏幕的主题和语言。设置 `screens.group_map`(默认开启)。
+- **失败的“Dependabot Updates”成为独立警报,Copilot 的活动属于信息**:GitHub 自行执行的依赖更新运行失败时,为每个仓库生成一条中等严重度警报(`ci.dependabot_failed`,开关 `ci.dependabot_alerts`,默认开启);失败的 Copilot 工作流可以成为一条通知(`ci.copilot_activity`,开关 `ci.copilot_alerts`,默认关闭)。两者都不会算作仓库的红灯,并且都可以像其他警报一样静音。
+- **本机蜂鸣覆盖页面的各种事件类型,实时连接恢复有了专属提示音**:开启 `sound.server_beep` 后,监视器会为每种类型(新的红灯、连接中断、警告、已解决、安全警报、卡住的运行、评分下降、通知、报告和经验教训)播放各自的模式,使用与页面相同的开关和静音时段,每次最多合并三种。新的提示音(四个上升的音符)会在连接中断后恢复时在页面、墙屏和本机上提醒。设置 `sound.on_live_recovered`(默认开启)。
 
 ### 变更
 
