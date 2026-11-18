@@ -9,6 +9,14 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+### Corregido
+
+- **La puerta de release acepta una pasada verde por el recuento que dio el propio unittest**: el registro de una pasada verde completa lleva el número de pruebas que unittest dice haber ejecutado (las líneas del informe pueden ser menos cuando una prueba escribe en mitad de su línea), y la puerta compara ahora ese número con el total en lugar del número de líneas que pudo leer, de modo que una pasada completa ya no se rechaza por unas líneas sin contar.
+
+### Añadido
+
+- **`make_release.py --progress` dice cómo van las suites**: con la opción, tanto la suite ordinaria como la de la instalación limpia escriben una línea cada 250 pruebas, de modo que la puerta ya no se queda en silencio durante casi una hora.
+
 ## [2.1.0]
 
 ### Añadido

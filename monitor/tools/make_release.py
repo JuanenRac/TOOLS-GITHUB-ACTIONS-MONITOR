@@ -378,14 +378,50 @@ def clean_install_timeout(env=None):
     return limit("MONITOR_RELEASE_CLEAN_TIMEOUT", CLEAN_INSTALL_TIMEOUT, env)
 
 
+PROGRESS_EVERY = 250
+SHOW_PROGRESS = False      # --progress: the suites say how far they are (one line every PROGRESS_EVERY tests) instead of staying silent for the better part of an hour
+
+
+def run_suite(label, command, cwd, env, timeout):
+    """subprocess.run for a suite. Without --progress it is exactly that. With it the suite runs verbose and one line says how many tests have run every PROGRESS_EVERY tests, so a person
+    (or a tool that watches this output) sees the stage move. Returns a CompletedProcess; raises subprocess.TimeoutExpired like subprocess.run does."""
+    if not SHOW_PROGRESS:
+        return subprocess.run(command, cwd=cwd, capture_output=True, text=True, encoding="utf-8", errors="replace", env=env, timeout=timeout)
+    import threading
+    proc = subprocess.Popen(command + ["-v"], cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="replace", env=env)
+    out, err, count = [], [], [0]
+
+    def drain(stream, into, counting):
+        for line in stream:
+            into.append(line)
+            if counting and " ... " in line:
+                count[0] += 1
+                if count[0] % PROGRESS_EVERY == 0:
+                    print(f"gate: {label}: {count[0]} tests run", flush=True)
+
+    readers = [threading.Thread(target=drain, args=(proc.stdout, out, False), daemon=True), threading.Thread(target=drain, args=(proc.stderr, err, True), daemon=True)]
+    for reader in readers:
+        reader.start()
+    try:
+        proc.wait(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        proc.wait()
+        raise
+    for reader in readers:
+        reader.join(30)
+    proc.stdout.close()
+    proc.stderr.close()
+    return subprocess.CompletedProcess(command, proc.returncode, "".join(out), "".join(err))
+
+
 def run_tests(timeout=None):
     """Stage 1 of the gate: the ordinary suite, ONCE, with a time limit. The nested "clean folder" test is switched off here (MONITOR_NO_NESTED): the clean install is its own stage
     (clean_install_check), so the suite never runs twice inside one command."""
     env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", MONITOR_NO_NESTED="1")
     timeout = test_timeout() if timeout is None else timeout      # read when called, so a variable set after the import still counts
     try:
-        result = subprocess.run([sys.executable, "-I", "-m", "unittest", "discover", "-s", "tests"], cwd=str(HERE), capture_output=True, text=True,
-                                encoding="utf-8", errors="replace", env=env, timeout=timeout)
+        result = run_suite("unit tests", [sys.executable, "-I", "-m", "unittest", "discover", "-s", "tests"], str(HERE), env, timeout)
     except subprocess.TimeoutExpired:
         fail(f"the unit tests did not finish in {timeout} s")
     tail = (result.stderr or result.stdout).strip().splitlines()[-1:] or ["(no output)"]
@@ -433,7 +469,9 @@ def green_run(path, commit):
     sha = str(data.get("sha") or "")
     if len(commit) < 7 or not sha or not (sha.startswith(commit) or commit.startswith(sha)):
         fail(f"the green run is not of this commit (run: {sha[:12] or 'unknown'}, release: {commit[:12]})")
-    if not data.get("finished") or data.get("exit_code") != 0 or data.get("fail") or data.get("error") or not data.get("total") or data.get("done") != data.get("total"):
+    ran = data.get("ran")
+    counted = ran if isinstance(ran, int) and not isinstance(ran, bool) and ran > 0 else data.get("done")      # what unittest itself said it ran wins over the lines the reader could match (a test that prints in the middle of its line hides one)
+    if not data.get("finished") or data.get("exit_code") != 0 or data.get("fail") or data.get("error") or not data.get("total") or counted != data.get("total"):
         fail("the green run is not complete and clean (it must have finished, exit 0, no failure, no error, every test run)")
     return f"{data.get('ok')} ok, {data.get('skipped', 0)} skipped of {data.get('total')} (accepted from {Path(path).name}, commit {sha[:12]})"
 
@@ -545,8 +583,7 @@ def clean_install_check(archive, entries, python=None, skip_suite=False):
         if skip_suite:
             return f"{len(found)} files, version {smoke.stdout.strip().splitlines()[0][:40]}, suite from the zip: SKIPPED on purpose (a green run of this commit was accepted)"
         try:
-            suite = subprocess.run([python, "-I", "-m", "unittest", "discover", "-s", "tests"], cwd=str(base), capture_output=True, text=True, encoding="utf-8", errors="replace",
-                                   env=env, timeout=clean_install_timeout())
+            suite = run_suite("clean install suite", [python, "-I", "-m", "unittest", "discover", "-s", "tests"], str(base), env, clean_install_timeout())
         except subprocess.TimeoutExpired:
             fail(f"clean install: the suite from the extracted zip did not finish in {clean_install_timeout()} s")
         if suite.returncode != 0:
@@ -562,7 +599,10 @@ def main():
     parser.add_argument("--accept-green-suite", metavar="JSON", help="instead of running stage 1 again, accept this record of a complete green run (needs --commit and a record of that commit)")
     parser.add_argument("--commit", help="the commit that is being released, to check the record of --accept-green-suite against")
     parser.add_argument("--skip-clean-suite", action="store_true", help="with --accept-green-suite: do not repeat the suite from the extracted zip either (the smoke checks of the clean install still run); say so in the release notes")
+    parser.add_argument("--progress", action="store_true", help="say how far the suites are (one line every 250 tests), also the suite of the clean install")
     args = parser.parse_args()
+    global SHOW_PROGRESS
+    SHOW_PROGRESS = args.progress
     if args.skip_clean_suite and not args.accept_green_suite:
         parser.error("--skip-clean-suite needs --accept-green-suite")
     version = gate_static()
