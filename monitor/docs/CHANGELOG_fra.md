@@ -9,6 +9,14 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+### Ajouté
+
+- **Les briefs pour les outils d'IA arrivent à la ligne de commande et au serveur MCP**: `monitor_cli.py briefs index` liste les briefs catalogués, `briefs show ONGLET` affiche les signaux d'un onglet et `briefs all` tous les briefs dans un document; le serveur MCP a les outils en lecture seule `briefs_index` et `brief_tab` (un nom d'onglet ou `all`). Un test vérifie que la page, les routes HTTP, la commande et les outils listent les mêmes onglets; rien n'est écrit et les textes passent par le même nettoyeur.
+
+### Corrigé
+
+- **Le nettoyeur de texte ne ralentit plus avec les longs textes**: cinq mille caractères de lettres, de points, de chiffres ou de tirets prenaient de deux à six secondes parce que plusieurs motifs essayaient de correspondre depuis chaque position; les préfixes et les adresses ont maintenant la longueur des vrais noms, le temps croît avec la taille du texte et un test le borne. Les secrets après une longue suite sont toujours trouvés.
+
 ## [2.1.3]
 
 ### Modifié

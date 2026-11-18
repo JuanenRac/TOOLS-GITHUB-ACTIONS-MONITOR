@@ -43,9 +43,9 @@ O monitor não depende de um assistente nem de um modelo: uma ferramenta de IA u
 |---|---|---|---|
 | ler ficheiros | Ficheiros | ler `ai/INDEX.json`, depois `ai/ALERTS_BRIEF.md`, `ai/ai_alerts.jsonl` e `ai/LESSONS.md` | `ai_alerts.enabled` |
 | fazer pedidos HTTP | HTTP | `GET /api/ai/brief`, `/api/ai/state`, `/api/ai/lessons` | o token de acesso no modo de rede |
-| falar MCP | MCP | `python bin/mcp_server.py` (só leitura; `--allow-ack`, `--allow-lessons` para o pouco que pode escrever) | a configuração MCP da ferramenta a apontar para esse comando |
+| falar MCP | MCP | `python bin/mcp_server.py` [`briefs_index`, `brief_tab`] (só leitura; `--allow-ack`, `--allow-lessons` para o pouco que pode escrever) | a configuração MCP da ferramenta a apontar para esse comando |
 | manter uma ligação aberta | Fluxo | `GET /api/ai/stream?only=real` | `ai_alerts.stream.enabled` |
-| executar comandos | Linha de comandos | `python bin/monitor_cli.py alerts`, `lessons brief --repo NOME`, `ai doctor`, `ai-hook install` | Python no mesmo computador |
+| executar comandos | Linha de comandos | `python bin/monitor_cli.py alerts`, `lessons brief --repo NOME`, `briefs show TAB`, `ai doctor`, `ai-hook install` | Python no mesmo computador |
 
 As instruções para a IA são duas skills. `monitor_cli.py install-skill external --dest PASTA` copia-as para a pasta onde a sua ferramenta lê as skills ou regras; serve qualquer ferramenta que leia ficheiros Markdown e o texto não nomeia nenhum assistente. As skills viajam com o monitor e têm a sua versão: `GET /api/skills` devolve `monitor_version` e `monitor_cli.py --version` imprime-a. Depois de atualizar o monitor, volte a instalar numa pasta vazia ou remova a cópia antiga (um ficheiro editado nunca é substituído).
 

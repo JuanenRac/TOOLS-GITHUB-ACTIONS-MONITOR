@@ -51,8 +51,8 @@ def _ipv4(match):
 
 
 _SECRETS = [
-    (re.compile(r"(?s)[-\u2010-\u2015\u2212]{2,}BEGIN [A-Z ]*PRIVATE KEY(?: BLOCK)?[-\u2010-\u2015\u2212]{2,}.*?(?:[-\u2010-\u2015\u2212]{2,}END [A-Z ]*PRIVATE KEY(?: BLOCK)?[-\u2010-\u2015\u2212]{2,}|$)"), "[pem]"),
-    (re.compile(r"(?i)\b([a-z][a-z0-9+.-]*://)[^/\s:@]+:[^/\s?#]+@"), r"\1[credentials]@"),      # user:password@host in an address
+    (re.compile(r"(?s)[-\u2010-\u2015\u2212]{2,80}BEGIN [A-Z ]*PRIVATE KEY(?: BLOCK)?[-\u2010-\u2015\u2212]{2,80}.*?(?:[-\u2010-\u2015\u2212]{2,80}END [A-Z ]*PRIVATE KEY(?: BLOCK)?[-\u2010-\u2015\u2212]{2,80}|$)"), "[pem]"),
+    (re.compile(r"(?i)\b([a-z][a-z0-9+.-]{0,30}://)[^/\s:@]{1,300}:[^/\s?#]{1,300}@"), r"\1[credentials]@"),      # user:password@host in an address
     (re.compile(r"(?i)\bhooks\.slack\.com/services/[A-Za-z0-9/_-]+"), "hooks.slack.com/services/[webhook]"),
     (re.compile(r"(?i)\bdiscord(?:app)?\.com/api/webhooks/\d+/[A-Za-z0-9._-]+"), "discord.com/api/webhooks/[webhook]"),
     (re.compile(r"\bbot\d{6,}:[A-Za-z0-9_-]{20,}"), "bot[token]"),
@@ -65,11 +65,11 @@ _SECRETS = [
     (re.compile(r"(?i)(\bsshpass\b[^\r\n]*?\s-p\s+)(?!\[)\S+"), r"\1[secret]"),
     (re.compile(r"(?i)(\bcurl\b[^\r\n]*?\s(?:-u|--user)[ =]?)(?!\[)\S+"), r"\1[secret]"),
     (re.compile(r"\b((?:store|key)Password)(\s+)(?![\[\"'])\S+"), r"\1\2[secret]"),
-    (re.compile(r"""(?i)(\b[A-Za-z0-9_.]*password)(\s+)(['"])(?!\[)[^'"\r\n]+\3"""), r"\1\2\3[secret]\3"),      # storePassword 'x' (Gradle)
+    (re.compile(r"""(?i)(\b[A-Za-z0-9_.]{0,100}password)(\s+)(['"])(?!\[)[^'"\r\n]+\3"""), r"\1\2\3[secret]\3"),      # storePassword 'x' (Gradle)
     (re.compile(r"""(?i)((?:^|[^A-Za-z0-9])(?:_auth|x-auth[a-z-]*|["']auth["'])["']?\s*[:=]\s*)(?:"[^"\r\n]{0,300}"|'[^'\r\n]{0,300}'|[^\s"',;]+)"""), r"\1[secret]"),      # .npmrc _auth=, X-Auth:, {"auth": "..."}
     (re.compile(r"(?i)\b((?:otp|totp|(?:2fa|mfa)[_-]?code)\s*[:=]\s*)\d{4,10}"), r"\1[secret]"),
     (re.compile(r"(?i)((?:secret|token|password|passwd|pwd|api[_-]?key)[ :=]+)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"), r"\1[secret]"),      # the identifier of a client secret
-    (re.compile(r"(?i)[A-Za-z0-9._%+-]+\s?[\[(]at[\])]\s?[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}"), "[email]"),      # victima [at] corp.com
+    (re.compile(r"(?i)[A-Za-z0-9._%+-]{1,100}\s?[\[(]at[\])]\s?[A-Za-z0-9-]{1,63}(?:\.[A-Za-z0-9-]{1,63}){0,10}\.[A-Za-z]{2,}"), "[email]"),      # victima [at] corp.com
     (re.compile(r"""(?i)(x-monitor-access|monitor_access)(["']?\s*[:=]\s*)(?:"(?:[^"\\\n]|\\.){0,300}"|'(?:[^'\\\n]|\\.){0,300}'|["']?[^\s"',;]+)"""), r"\1\2[secret]"),
     (re.compile(r"(?<![A-Za-z0-9])(?:glpat-[A-Za-z0-9_-]{10,}|npm_[A-Za-z0-9]{16,}|pypi-[A-Za-z0-9_-]{16,}|hf_[A-Za-z0-9]{20,}|dckr_pat_[A-Za-z0-9_-]{16,}|whsec_[A-Za-z0-9]{16,}|GOCSPX-[A-Za-z0-9_-]{16,})"), "[token]"),
     (re.compile(r"\b(gh[pousr]_[A-Za-z0-9]*)[ \t]*\r?\n[ \t]*[A-Za-z0-9]{6,}"), "[token]"),      # a token cut by a line break: the second half goes with the first
@@ -80,14 +80,14 @@ _SECRETS = [
     (re.compile(r"(?i)\b(set-cookie|cookie)(\s*:\s*)[^\r\n]+"), r"\1\2[secret]"),
     (re.compile(r"(?i)(--?(?:password|passwd|pwd|passphrase|token|secret|api[_-]?key|access[_-]?key)[ =])\S+"), r"\1[secret]"),      # mysql --password hunter2, curl --token abc
     (re.compile(r"(?i)(\b(?:mysql|mysqldump|mysqladmin|psql|sshpass|redis-cli)\b[^\r\n]*?\s-p)(?!\[)[^\s-]\S*"), r"\1[secret]"),      # mysql -uroot -phunter2
-    (re.compile(r"""(?i)\b([A-Za-z0-9_.-]*[_.-](?:key|dsn|creds|credentials|pass)|dsn|creds|credentials)(["']?\s*[:=]\s*)(?:"(?:[^"\\\n]|\\.){0,300}"|'(?:[^'\\\n]|\\.){0,300}'|["']?[^\s"',;]+)"""), _pair),      # ENCRYPTION_KEY=, SENTRY_DSN=, AWS_CREDS=
+    (re.compile(r"""(?i)\b([A-Za-z0-9_.-]{0,100}[_.-](?:key|dsn|creds|credentials|pass)|dsn|creds|credentials)(["']?\s*[:=]\s*)(?:"(?:[^"\\\n]|\\.){0,300}"|'(?:[^'\\\n]|\\.){0,300}'|["']?[^\s"',;]+)"""), _pair),      # ENCRYPTION_KEY=, SENTRY_DSN=, AWS_CREDS=
     (re.compile(r"(?i)\b(password|passwd|passphrase)(\s*:\s+)(?![\"'\[])[^\r\n]+"), r"\1\2[secret]"),      # a phrase after "password:" (the value may hold spaces)
     (re.compile(r"\b(?:sk|rk|pk)_(?:live|test)_[A-Za-z0-9]{8,}"), "[key]"),
     (re.compile(r"(?i)\b(bearer|basic)\s+[A-Za-z0-9._~+/=-]{12,}"), r"\1 [secret]"),
-    (re.compile(r"""(?i)([A-Za-z0-9_.-]*(?:password|passwd|pwd|secret|token|api[_-]?key|access[_-]?key|authorization|contrase[\u00f1n]a|secreto|clave)[A-Za-z0-9_.-]*)(["']?\s*[:=]\s*)(?:"(?:[^"\\\n]|\\.){0,300}"|'(?:[^'\\\n]|\\.){0,300}'|["']?[^\s"',;]+)"""), _pair),      # DB_PASSWORD=, AWS_SECRET_ACCESS_KEY=, MYSQL_PWD=
-    (re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"), "[email]"),
+    (re.compile(r"""(?i)([A-Za-z0-9_.-]{0,100}(?:password|passwd|pwd|secret|token|api[_-]?key|access[_-]?key|authorization|contrase[\u00f1n]a|secreto|clave)[A-Za-z0-9_.-]{0,100})(["']?\s*[:=]\s*)(?:"(?:[^"\\\n]|\\.){0,300}"|'(?:[^'\\\n]|\\.){0,300}'|["']?[^\s"',;]+)"""), _pair),      # DB_PASSWORD=, AWS_SECRET_ACCESS_KEY=, MYSQL_PWD=
+    (re.compile(r"[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,253}\.[A-Za-z]{2,}"), "[email]"),
     (re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b(?!\.\d)"), _ipv4),
-    (re.compile(r"(?i)\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:lan|internal|corp|intranet|private)\b(?::\d{1,5})?|\b[a-z0-9-]+(?:\.[a-z0-9-]+){2,}\.local\b(?::\d{1,5})?"), "[host]"),      # a name that only exists inside a network
+    (re.compile(r"(?i)\b[a-z0-9-]{1,63}(?:\.[a-z0-9-]{1,63}){0,10}\.(?:lan|internal|corp|intranet|private)\b(?::\d{1,5})?|\b[a-z0-9-]{1,63}(?:\.[a-z0-9-]{1,63}){2,10}\.local\b(?::\d{1,5})?"), "[host]"),      # a name that only exists inside a network
     (re.compile(r"\b(?:[0-9A-Fa-f]{1,4}:){4,7}[0-9A-Fa-f]{1,4}\b"), "[ip]"),
     (re.compile(r"(?<![\w:.])(?:[0-9A-Fa-f]{0,4}:){2,7}[0-9A-Fa-f]{0,4}(?![\w])"), _ipv6),
     (re.compile(r"""(?i)[A-Z]:(?:\\+|/)Users(?:\\+|/)[^\\/\s'"]+"""), "~"),      # also with doubled bars: it is how repr(), JSON and the text of an OSError write it

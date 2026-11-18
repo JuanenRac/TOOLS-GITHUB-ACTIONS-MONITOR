@@ -43,9 +43,9 @@ The monitor does not depend on one assistant or one model: an AI tool uses one o
 |---|---|---|---|
 | read files | Files | read `ai/INDEX.json`, then `ai/ALERTS_BRIEF.md`, `ai/ai_alerts.jsonl` and `ai/LESSONS.md` | `ai_alerts.enabled` |
 | make HTTP requests | HTTP | `GET /api/ai/brief`, `/api/ai/state`, `/api/ai/lessons` | the access token in the network mode |
-| speak MCP | MCP | `python bin/mcp_server.py` (read only; `--allow-ack`, `--allow-lessons` for the little it may write) | the MCP configuration of the tool pointing at that command |
+| speak MCP | MCP | `python bin/mcp_server.py` [`briefs_index`, `brief_tab`] (read only; `--allow-ack`, `--allow-lessons` for the little it may write) | the MCP configuration of the tool pointing at that command |
 | keep a connection open | Stream | `GET /api/ai/stream?only=real` | `ai_alerts.stream.enabled` |
-| run commands | Command line | `python bin/monitor_cli.py alerts`, `lessons brief --repo NAME`, `ai doctor`, `ai-hook install` | Python on the same computer |
+| run commands | Command line | `python bin/monitor_cli.py alerts`, `lessons brief --repo NAME`, `briefs show TAB`, `ai doctor`, `ai-hook install` | Python on the same computer |
 
 The instructions for the AI are two skills. `monitor_cli.py install-skill external --dest FOLDER` copies them to the folder where your tool reads its skills or rules; any tool that reads Markdown files can use them, and the text names no assistant. The skills travel with the monitor and have its version: `GET /api/skills` gives `monitor_version`, and `monitor_cli.py --version` prints it. After updating the monitor, install again into an empty folder or remove the old copy (an edited file is never overwritten).
 

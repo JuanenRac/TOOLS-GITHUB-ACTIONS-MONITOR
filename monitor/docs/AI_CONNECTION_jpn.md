@@ -43,9 +43,9 @@
 |---|---|---|---|
 | ファイルを読む | ファイル | `ai/INDEX.json` を読み、続けて `ai/ALERTS_BRIEF.md`、`ai/ai_alerts.jsonl`、`ai/LESSONS.md` を読みます | `ai_alerts.enabled` |
 | HTTP リクエストを送る | HTTP | `GET /api/ai/brief`、`/api/ai/state`、`/api/ai/lessons` | ネットワークモードではアクセストークン |
-| MCP を話す | MCP | `python bin/mcp_server.py` (読み取り専用。書き込める少量のために `--allow-ack`、`--allow-lessons`) | そのコマンドを指すツールの MCP 設定 |
+| MCP を話す | MCP | `python bin/mcp_server.py` [`briefs_index`, `brief_tab`] (読み取り専用。書き込める少量のために `--allow-ack`、`--allow-lessons`) | そのコマンドを指すツールの MCP 設定 |
 | 接続を開いたままにする | ストリーム | `GET /api/ai/stream?only=real` | `ai_alerts.stream.enabled` |
-| コマンドを実行する | コマンドライン | `python bin/monitor_cli.py alerts`、`lessons brief --repo 名前`、`ai doctor`、`ai-hook install` | 同じコンピューター上の Python |
+| コマンドを実行する | コマンドライン | `python bin/monitor_cli.py alerts`、`lessons brief --repo 名前`、 `briefs show TAB`、`ai doctor`、`ai-hook install` | 同じコンピューター上の Python |
 
 AI 向けの指示は 2 つのスキルです。`monitor_cli.py install-skill external --dest フォルダー` は、ツールがスキルやルールを読み込むフォルダーにコピーします。Markdown ファイルを読めるツールなら使え、本文は特定のアシスタント名を挙げません。スキルはモニターに同梱され、同じバージョンです。`GET /api/skills` は `monitor_version` を返し、`monitor_cli.py --version` が表示します。モニターを更新したら、空のフォルダーに再インストールするか、古いコピーを削除してください (編集したファイルは上書きされません)。
 

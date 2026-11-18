@@ -9,6 +9,14 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+### Aggiunto
+
+- **I brief per gli strumenti di IA arrivano alla riga di comando e al server MCP**: `monitor_cli.py briefs index` elenca i brief catalogati, `briefs show SCHEDA` stampa i segnali di una scheda e `briefs all` tutti i brief in un documento; il server MCP ha gli strumenti di sola lettura `briefs_index` e `brief_tab` (il nome di una scheda o `all`). Un test verifica che la pagina, le rotte HTTP, il comando e gli strumenti elenchino le stesse schede; non si scrive nulla e i testi passano dallo stesso depuratore.
+
+### Corretto
+
+- **Il depuratore di testo non rallenta più con i testi lunghi**: cinquemila caratteri di lettere, punti, cifre o trattini richiedevano da due a sei secondi perché diversi modelli provavano a corrispondere da ogni posizione; i prefissi e gli indirizzi hanno ora la lunghezza dei nomi reali, il tempo cresce con la dimensione del testo e un test lo limita. I segreti dopo una lunga sequenza vengono ancora trovati.
+
 ## [2.1.3]
 
 ### Modificato

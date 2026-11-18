@@ -10,6 +10,14 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ## [Unreleased]
 
+### Added
+
+- **The briefs for the AI tools reach the command line and the MCP server**: `monitor_cli.py briefs index` lists the catalogued briefs, `briefs show TAB` prints the signals of one tab and `briefs all` every brief in one document; the MCP server has the read-only tools `briefs_index` and `brief_tab` (a tab name or `all`). A test checks that the page, the HTTP routes, the command and the tools list the same tabs; nothing is written and the texts go through the same cleaner.
+
+### Fixed
+
+- **The cleaner of text no longer slows down with long texts**: five thousand characters of letters, dots, digits or dashes took between two and six seconds because several patterns tried to match from every position; the prefixes and addresses now have the length that real names have, the time grows with the size of the text and a test bounds it. Secrets after a long run are still found.
+
 ## [2.1.3]
 
 ### Changed

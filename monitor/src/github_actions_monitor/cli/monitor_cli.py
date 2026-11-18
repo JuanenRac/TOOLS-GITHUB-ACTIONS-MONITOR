@@ -48,14 +48,15 @@ from github_actions_monitor.tool_version import TOOL_VERSION
 from github_actions_monitor.security import netguard
 
 EXIT_OK, EXIT_USAGE, EXIT_DOWN, EXIT_AUTH, EXIT_DEGRADED, EXIT_ALERTS = 0, 1, 2, 3, 4, 5
-COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "score", "team", "ai-hook", "credential", "lessons", "install-skill", "gh-token", "ai", "backup", "update", "compare")
+COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "score", "team", "ai-hook", "credential", "lessons", "briefs", "install-skill", "gh-token", "ai", "backup", "update", "compare")
 BACKUP_ACTIONS = ("create", "verify", "restore", "status", "list")
 SKILL_ACTIONS = ("internal", "external")
 AI_ACTIONS = ("models", "doctor", "test")
 LESSONS_ACTIONS = ("list", "brief", "failures", "close")
+BRIEFS_ACTIONS = ("index", "show", "all")
 AI_HOOK_ACTIONS = ("install", "status", "uninstall")
 CREDENTIAL_ACTIONS = ("replace", "reload")
-LITE_COMMANDS = ("status", "doctor", "health", "check")
+LITE_COMMANDS = ("status", "doctor", "health", "check", "briefs")
 LEVELS = ("info", "warning", "error", "critical")
 from github_actions_monitor.cli import monitor_admin      # noqa: E402
 CLIENT = monitor_admin.CLIENT      # the session of the team mode and the authority of the certificate: one dict, shared
@@ -396,6 +397,41 @@ def cmd_lessons(ctx):
     return answer, lines, EXIT_OK
 
 
+def cmd_briefs(ctx):
+    """briefs [index | show TAB | all]: the catalogued briefs the AI tools read, one per tab of the page (`/api/ai/index` and `/api/ai/briefs`). Read only, the same in both editions; the monitor cleans
+    every text and a brief carries no secret. `index` lists them, `show TAB` prints the signals of one tab, `all` prints every brief in one document."""
+    action = ctx["action"] or "index"
+    if action not in BRIEFS_ACTIONS:
+        raise CliError(EXIT_USAGE, i18n.t("cli.briefs_action"))
+    lang = i18n.language()
+    if action == "index":
+        answer = fetch(ctx["base"], "/api/ai/index", {"lang": lang}, ctx["timeout"], ctx["token"])
+        rows = answer.get("briefs") or []
+        lines = [i18n.t("cli.briefs_head", n=len(rows), edition=answer.get("edition") or "-")]
+        for row in rows:
+            lines.append(f"  {row.get('tab', '?'):<12} {'' if row.get('available', True) else '(-) '}{row.get('title', '')}  [{row.get('kind', '')}]")
+        return answer, lines, EXIT_OK
+    if action == "all":
+        answer = fetch(ctx["base"], "/api/ai/briefs", {"tab": "all", "lang": lang}, ctx["timeout"], ctx["token"])
+        rows = answer.get("briefs") or []
+        return answer, [i18n.t("cli.briefs_head", n=len(rows), edition=answer.get("edition") or "-")] + [f"  {r.get('tab', '?'):<12} {len(r.get('signals') or [])} {i18n.t('cli.briefs_signals')}" for r in rows], EXIT_OK
+    tab = (ctx.get("file") or "").strip()
+    if not re.fullmatch(r"[a-z0-9_-]{1,32}", tab):
+        raise CliError(EXIT_USAGE, i18n.t("cli.briefs_tab_needed"))
+    try:
+        answer = fetch(ctx["base"], "/api/ai/briefs", {"tab": tab, "lang": lang}, ctx["timeout"], ctx["token"])
+    except CliError as error:
+        if error.code == EXIT_DEGRADED:      # the monitor answers 404 for a tab that does not exist
+            raise CliError(EXIT_USAGE, i18n.t("cli.briefs_unknown_tab", tab=tab)) from None
+        raise
+    lines = [f"{answer.get('title', tab)} [{answer.get('tab_kind', '')}]"]
+    for signal in answer.get("signals") or []:
+        lines.append(f"  {str(signal.get('level', '')):<6} {signal.get('id', '?')}  {signal.get('summary') or ''}")
+    if not answer.get("signals"):
+        lines.append("  " + i18n.t("cli.briefs_none"))
+    return answer, lines, EXIT_OK
+
+
 def _post_ai(ctx, path, payload):
     """One local-only POST of the AI models family; 403 = the monitor refuses (not this computer or no token), 404 = this monitor has no such route."""
     status, answer = post_json(ctx["base"], path, payload, max(ctx["timeout"], 30.0), ctx["token"])
@@ -708,7 +744,7 @@ def cmd_credential(ctx):
     return {"action": action, "ok": ok, **shown}, [line], EXIT_OK if ok else EXIT_DEGRADED
 
 
-HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "compare": cmd_compare, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "backup": cmd_backup, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai}
+HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "compare": cmd_compare, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "backup": cmd_backup, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "briefs": cmd_briefs, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai}
 
 
 def cmd_update(rest):
@@ -729,7 +765,7 @@ def cmd_update(rest):
 def build_parser():
     ap = argparse.ArgumentParser(prog="monitor_cli.py", description=i18n.t("cli.description"), epilog=i18n.t("cli.epilog"), formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("command", choices=COMMANDS, help=i18n.t("cli.help_command"))
-    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS + SKILL_ACTIONS + AI_ACTIONS + BACKUP_ACTIONS, default=None, help=i18n.t("cli.help_ai_action"))
+    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS + BRIEFS_ACTIONS + SKILL_ACTIONS + AI_ACTIONS + BACKUP_ACTIONS, default=None, help=i18n.t("cli.help_ai_action"))
     ap.add_argument("file", nargs="?", default="", help=i18n.t("cli.help_file"))
     ap.add_argument("--json", action="store_true", help=i18n.t("cli.help_json"))
     for name in ("assistant", "cursor", "generic"):
