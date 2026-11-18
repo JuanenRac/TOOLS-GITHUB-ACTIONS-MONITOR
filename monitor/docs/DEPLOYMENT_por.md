@@ -120,6 +120,8 @@ Só são lidos os nomes desta tabela. No serviço, um valor ilegível é ignorad
 | `MONITOR_PASSWORD_FILE` | Para o `bin/monitor_cli.py`: um ficheiro com a palavra-passe de `MONITOR_USER` na primeira linha. |
 | `MONITOR_RELEASE_TEST_TIMEOUT` | `tools/make_release.py`: segundos que a suite normal pode demorar antes de a porta falhar (por defeito 3600; de 60 a 86400). |
 | `MONITOR_RELEASE_CLEAN_TIMEOUT` | `tools/make_release.py`: segundos que a suite do zip extraído pode demorar (por defeito 3600; de 60 a 86400). |
+| `MONITOR_RELEASE_LOG_DIR` | `tools/make_release.py`: pasta onde se guarda TODA a saída de uma suite que falha (por omissão, a pasta temporária); a mensagem da porta indica os testes que falham e este ficheiro. |
+| `--accept-green-suite JSON --commit SHA [--skip-clean-suite]` | `tools/make_release.py`: em vez de repetir a suite ordinária, aceita o registo de uma execução verde completa desse mesmo commit (terminada, sem falhas nem erros, todos os testes executados); `--skip-clean-suite` também não repete a suite do zip extraído (as verificações rápidas continuam) e di-lo. |
 
 ## Quando o GitHub revoga ou deixa caducar o acesso
 

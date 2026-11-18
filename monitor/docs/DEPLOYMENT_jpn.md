@@ -120,6 +120,8 @@ launchd（macOS）: `ProgramArguments` = `/usr/bin/python3`、`-m`、`github_act
 | `MONITOR_PASSWORD_FILE` | `bin/monitor_cli.py` 用: 1 行目に `MONITOR_USER` のパスワードを書いたファイル。 |
 | `MONITOR_RELEASE_TEST_TIMEOUT` | `tools/make_release.py`: ゲートが失敗するまでに通常のスイートが使える秒数（既定 3600、60〜86400）。 |
 | `MONITOR_RELEASE_CLEAN_TIMEOUT` | `tools/make_release.py`: 展開した zip のスイートが使える秒数（既定 3600、60〜86400）。 |
+| `MONITOR_RELEASE_LOG_DIR` | `tools/make_release.py`: 失敗したスイートの出力全体を保存するフォルダー（既定は一時フォルダー）。ゲートのメッセージは失敗したテストとこのファイルを示します。 |
+| `--accept-green-suite JSON --commit SHA [--skip-clean-suite]` | `tools/make_release.py`: 通常のスイートを再実行する代わりに、まさにそのコミットの完全な成功実行の記録（完了、失敗・エラーなし、全テスト実行）を受け入れます。`--skip-clean-suite` は展開した zip のスイートも省略します（簡易チェックは実行）。その旨が表示されます。 |
 
 ## GitHub がログインを失効させたとき
 

@@ -120,6 +120,8 @@ Vengono lette solo i nomi di questa tabella. Nel servizio un valore illeggibile 
 | `MONITOR_PASSWORD_FILE` | Per `bin/monitor_cli.py`: un file con la password di `MONITOR_USER` nella prima riga. |
 | `MONITOR_RELEASE_TEST_TIMEOUT` | `tools/make_release.py`: secondi che la suite ordinaria può impiegare prima che la porta fallisca (predefinito 3600; da 60 a 86400). |
 | `MONITOR_RELEASE_CLEAN_TIMEOUT` | `tools/make_release.py`: secondi che può impiegare la suite dello zip estratto (predefinito 3600; da 60 a 86400). |
+| `MONITOR_RELEASE_LOG_DIR` | `tools/make_release.py`: cartella dove viene salvato TUTTO l'output di una suite che fallisce (predefinita: la cartella temporanea); il messaggio del gate nomina i test falliti e questo file. |
+| `--accept-green-suite JSON --commit SHA [--skip-clean-suite]` | `tools/make_release.py`: invece di rieseguire la suite ordinaria, accetta la registrazione di un'esecuzione verde completa di quello stesso commit (terminata, senza fallimenti né errori, tutti i test eseguiti); `--skip-clean-suite` non ripete nemmeno la suite dello zip estratto (i controlli rapidi restano) e lo dichiara. |
 
 ## Quando GitHub revoca o fa scadere l'accesso
 

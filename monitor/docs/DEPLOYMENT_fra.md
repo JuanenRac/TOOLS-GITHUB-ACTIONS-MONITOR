@@ -120,6 +120,8 @@ Seuls les noms de ce tableau sont lus. Dans le service, une valeur illisible est
 | `MONITOR_PASSWORD_FILE` | Pour `bin/monitor_cli.py` : un fichier avec le mot de passe de `MONITOR_USER` sur sa première ligne. |
 | `MONITOR_RELEASE_TEST_TIMEOUT` | `tools/make_release.py` : secondes dont la suite ordinaire dispose avant que la porte échoue (par défaut 3600 ; de 60 à 86400). |
 | `MONITOR_RELEASE_CLEAN_TIMEOUT` | `tools/make_release.py` : secondes dont dispose la suite du zip extrait (par défaut 3600 ; de 60 à 86400). |
+| `MONITOR_RELEASE_LOG_DIR` | `tools/make_release.py` : dossier où est enregistrée TOUTE la sortie d'une suite en échec (par défaut, le dossier temporaire) ; le message de la porte nomme les tests en échec et ce fichier. |
+| `--accept-green-suite JSON --commit SHA [--skip-clean-suite]` | `tools/make_release.py` : au lieu de relancer la suite ordinaire, accepte l'enregistrement d'une exécution verte complète de ce même commit (terminée, sans échec ni erreur, tous les tests exécutés) ; `--skip-clean-suite` ne relance pas non plus la suite du zip extrait (ses contrôles rapides restent faits) et le dit. |
 
 ## Quand GitHub révoque l'accès ou qu'il expire
 
