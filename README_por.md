@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-3758_passing-brightgreen.svg" alt="3758 tests">
+  <img src="https://img.shields.io/badge/Tests-3827_passing-brightgreen.svg" alt="3827 tests">
 </p>
 
 > Vigia os workflows de todos os seus repositórios e diz-lhe, numa página local, o que está a vermelho, o que está encravado e o que o espera.
@@ -81,8 +81,8 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 | | |
 |---|---|
 | **Maturidade** | functional |
-| **Testes** | 3758 métodos de teste (`python -m unittest discover -s monitor/tests`) |
-| **Definições** | 620 definições, todas com ajuda |
+| **Testes** | 3827 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Definições** | 636 definições, todas com ajuda |
 | **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
 | **Testado no CI em** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -286,6 +286,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/WEBHOOK_por.md`](monitor/docs/WEBHOOK_por.md): o webhook de entrada
 - [`monitor/docs/CHATOPS_por.md`](monitor/docs/CHATOPS_por.md): comandos de chat só de leitura para Slack e Discord
 - [`monitor/docs/SOUNDS_por.md`](monitor/docs/SOUNDS_por.md): um som para cada tipo de evento
+- [`monitor/docs/OPS_por.md`](monitor/docs/OPS_por.md): Operar a instalação: cópia de segurança completa, restauro, cópia agendada, purga a pedido, o doctor e os seus códigos de saída, appliance com systemd e Docker
 - [`monitor/docs/LITE_por.md`](monitor/docs/LITE_por.md): A edição lite
 - [`monitor/docs/COMPLETE_INDIVIDUAL_por.md`](monitor/docs/COMPLETE_INDIVIDUAL_por.md): Edição completa para uma pessoa
 - [`monitor/docs/COMPLETE_SERVICE_por.md`](monitor/docs/COMPLETE_SERVICE_por.md): Edição completa como serviço

@@ -81,6 +81,10 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/mode` | GET,POST | viewer / maintainer | the working mode (normal, fast, turbo, low) and its time left |
 | `/api/notify` | GET | viewer | state of the notification channels |
 | `/api/notify/test` | POST | admin | send a test notification (this computer only) |
+| `/api/ops` | GET | viewer | the prefix of the routes of the operation of the installation (see /api/ops/status, /api/ops/backup and /api/ops/purge); Complete only |
+| `/api/ops/backup` | POST | admin | makes a complete backup package now (administrator, from this computer only); answers whether it worked (`status` is `ok` or the code: `busy`, `library_missing`, `key_missing`, `key_weak`, `failed`), the file name and the counts (Complete only) |
+| `/api/ops/purge` | POST | admin | the retention purge on demand (administrator, from this computer only, and only while `ops.purge.enabled` is on: otherwise the route does not exist, 404); a dry run that returns the policy and how many events would go unless the body says `dry_run` false; a real purge is refused (`purge_no_backup`) without a good backup newer than `ops.purge.require_backup_hours` (Complete only) |
+| `/api/ops/status` | GET | viewer | the operation of the installation: the mode (service or local), the last backup (when, how old, ok or the stable code of the failure, size, sealed or not), the schedule, the purge switch, the retention policy in force and the report of the last restore; no path and no secret (Complete only) |
 | `/api/otlp` | GET | viewer | state of the OpenTelemetry export |
 | `/api/outputs` | GET | viewer | Prometheus, Grafana JSON and dashboard outputs |
 | `/api/paths` | GET | viewer | the folders and files of this monitor in use and what is left in the old places |

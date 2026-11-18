@@ -7,7 +7,9 @@
   accounts  the accounts the supervisor watches (the complete edition with an `accounts/` folder)
   alerts    the alerts of every sentinel in one list (--sentinel ci|collab, --level, --muted)
   live      the last events that arrived through the webhook and the state of the receiver
-  doctor    the checks of --doctor for this installation (no monitor needed)
+  doctor    the checks of --doctor for this installation (no monitor needed); --strict makes a warning exit 3
+  backup    create | verify | restore | status | list: the complete backup package of this installation (no monitor needed); --key-env NAME with --encrypt seals it (optional library), --deep on
+            verify restores it into a temporary folder, restore takes --account ID, --to-dir DIR and --force
   ai-hook   install | status | uninstall the gate script that tells an AI tool what the monitor sees (--assistant, --cursor or --generic; --scope project|user); it needs no
             running monitor and writes only the settings file of that tool (merged, with a backup), never anything on GitHub
   health    a quick check before reading anything heavy: is the monitor reachable, does it accept this client, does the GitHub credential of the account answer (a limit of the
@@ -44,7 +46,8 @@ from github_actions_monitor.tool_version import TOOL_VERSION
 from github_actions_monitor.security import netguard
 
 EXIT_OK, EXIT_USAGE, EXIT_DOWN, EXIT_AUTH, EXIT_DEGRADED, EXIT_ALERTS = 0, 1, 2, 3, 4, 5
-COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "score", "team", "ai-hook", "credential", "lessons", "install-skill", "gh-token", "ai")
+COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "score", "team", "ai-hook", "credential", "lessons", "install-skill", "gh-token", "ai", "backup")
+BACKUP_ACTIONS = ("create", "verify", "restore", "status", "list")
 SKILL_ACTIONS = ("internal", "external")
 AI_ACTIONS = ("models", "doctor", "test")
 LESSONS_ACTIONS = ("list", "brief", "failures", "close")
@@ -436,9 +439,70 @@ def cmd_live(ctx):
 def cmd_doctor(ctx):
     from github_actions_monitor.cli import doctor
     from github_actions_monitor.app import toolconfig
-    checks = doctor.run(config=toolconfig.raw_config())
     edition = "lite" if ctx.get("lite") else "complete"
-    return doctor.as_json(checks, edition), doctor.text(checks, i18n.t, edition).rstrip("\n").split("\n"), doctor.exit_code(checks)
+    config = toolconfig.raw_config()
+    try:
+        checks = doctor.run(config=config, edition=edition)
+    except Exception:      # noqa: BLE001 - the doctor itself could not run: its own exit code, not a traceback
+        return {"ok": False, "exit": doctor.EXIT_DOCTOR_ERROR}, [i18n.t("doctor.broken")], doctor.EXIT_DOCTOR_ERROR
+    strict = bool(ctx.get("strict")) or doctor.strict_from(config)
+    return doctor.as_json(checks, edition, strict), doctor.text(checks, i18n.t, edition).rstrip("\n").split("\n"), doctor.exit_code(checks, strict)
+
+
+def cmd_backup(ctx):
+    """backup create [FILE] [--account ID] | verify FILE [--deep] | restore FILE [--account ID] [--to-dir DIR] [--force] | status | list: the complete package of this installation. They work on the folder, so no monitor is needed
+    (and a monitor that is running is not touched; restore asks for it to be stopped). Exit 0 when it is done, 1 when it is refused or the package does not verify."""
+    from github_actions_monitor.app import toolconfig
+    from github_actions_monitor.ops import bundle, opsconf, restore, schedule
+    action, config = ctx["action"], toolconfig.raw_config()
+    if action not in BACKUP_ACTIONS:
+        raise CliError(EXIT_USAGE, i18n.t("cli.backup_action"))
+    if action in ("verify", "restore") and not ctx["file"]:
+        raise CliError(EXIT_USAGE, i18n.t("cli.backup_file"))
+    env_name = ctx["key_env"] or None
+    try:
+        if action == "create":
+            state = schedule.run_locked(config, dest=ctx["file"] or None, encrypt=True if ctx["encrypt"] else None, key_env=env_name, account=ctx["account"] or None)
+            if not state["ok"]:
+                return {"ok": False, "error": state["error"]}, [i18n.t("ops.err." + state["error"], detail=state.get("detail", ""))], EXIT_USAGE
+            where = (Path(ctx["file"]) if ctx["file"] else opsconf.backup_dir(config) / state["file"]).as_posix()
+            return {"ok": True, **state}, [i18n.t("ops.created_sealed" if state["sealed"] else "ops.created", file=where, accounts=state["accounts"], events=state["events"], size=_size(state["bytes"]))], EXIT_OK
+        if action == "verify":
+            problems = bundle.verify(ctx["file"], env_name, config=config)
+            if not problems and ctx["deep"]:
+                problems = restore.deep_verify(ctx["file"], config, env_name)
+            if problems:
+                return {"ok": False, "problems": problems}, [i18n.t("ops.verify_bad", why="; ".join(problems[:3]))], EXIT_USAGE
+            return {"ok": True, "deep": ctx["deep"]}, [i18n.t("ops.deep_ok" if ctx["deep"] else "ops.verify_ok")], EXIT_OK
+        if action == "restore":
+            report = restore.restore(ctx["file"], config, account=ctx["account"] or None, to_dir=ctx["to_dir"] or None, force=ctx["force"], key_env=env_name)
+            lines = [i18n.t("ops.restored", accounts=report["accounts"], events=report["events"], written=len(report["files"]["written"]), skipped=len(report["files"]["skipped"]))]
+            if report["verify"]:
+                lines.append(i18n.t("ops.verify_bad", why="; ".join(report["verify"][:3])))
+            lines.append(i18n.t("ops.todo_head"))
+            lines += ["  - " + i18n.t("ops.todo." + code, n=report["config_omitted"], names=", ".join(report["files"]["skipped"])) for code in report["todo"]]
+            return {"ok": not report["verify"], **report}, lines, EXIT_OK if not report["verify"] else EXIT_USAGE
+        if action == "status":
+            state, cfg = schedule.read_status(), opsconf.settings(config)["backup"]
+            age = schedule.age_days()
+            schedule_text = i18n.t("ops.sched_on", hours=cfg["interval_hours"], keep=cfg["keep"]) if cfg["enabled"] else i18n.t("ops.sched_off")
+            if not state["last_ok"]:
+                lines = [i18n.t("ops.status_none")]
+            else:
+                lines = [i18n.t("ops.status_line", at=state["last_ok"], age=i18n.t("ops.age_days", n="%.1f" % age), file=state["file"], size=_size(state["bytes"]), schedule=schedule_text)]
+            if state["ok"] is False:
+                lines.append(i18n.t("ops.status_failed", at=state["last_attempt"], why=i18n.t("ops.err." + (state["error"] or "failed"), detail="")))
+            return {"schedule": cfg, **state, "age_days": age}, lines, EXIT_OK
+        rows = schedule.list_backups(config)
+        folder = opsconf.backup_dir(config).as_posix()
+        lines = [i18n.t("ops.list_head", n=len(rows), dir=folder)] + [f"  {row['name']}  {_size(row['bytes'])}  {row['at']}" for row in rows] if rows else [i18n.t("ops.list_none", dir=folder)]
+        return {"dir": folder, "backups": rows}, lines, EXIT_OK
+    except bundle.OpsError as error:
+        return {"ok": False, "error": error.code}, [i18n.t("ops.err." + error.code, detail=error.detail)], EXIT_USAGE
+
+
+def _size(count):
+    return "%.1f MB" % (count / 1048576) if count >= 1048576 else "%d KB" % max(1, count // 1024)
 
 
 def deep_health(ctx):
@@ -593,13 +657,14 @@ def cmd_credential(ctx):
     return {"action": action, "ok": ok, **shown}, [line], EXIT_OK if ok else EXIT_DEGRADED
 
 
-HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai}
+HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "backup": cmd_backup, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai}
 
 
 def build_parser():
     ap = argparse.ArgumentParser(prog="monitor_cli.py", description=i18n.t("cli.description"), epilog=i18n.t("cli.epilog"), formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("command", choices=COMMANDS, help=i18n.t("cli.help_command"))
-    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS + SKILL_ACTIONS + AI_ACTIONS, default=None, help=i18n.t("cli.help_ai_action"))
+    ap.add_argument("action", nargs="?", choices=AI_HOOK_ACTIONS + CREDENTIAL_ACTIONS + LESSONS_ACTIONS + SKILL_ACTIONS + AI_ACTIONS + BACKUP_ACTIONS, default=None, help=i18n.t("cli.help_ai_action"))
+    ap.add_argument("file", nargs="?", default="", help=i18n.t("cli.help_file"))
     ap.add_argument("--json", action="store_true", help=i18n.t("cli.help_json"))
     for name in ("assistant", "cursor", "generic"):
         ap.add_argument("--" + name, dest="target", action="store_const", const=name, default="", help=i18n.t("cli.help_" + name))
@@ -621,6 +686,11 @@ def build_parser():
     ap.add_argument("--level", choices=LEVELS, default="", help=i18n.t("cli.help_level"))
     ap.add_argument("--muted", choices=("show", "hide", "only"), default="hide", help=i18n.t("cli.help_muted"))
     ap.add_argument("--fail-on", choices=LEVELS, default="", dest="fail_on", help=i18n.t("cli.help_fail_on"))
+    ap.add_argument("--strict", action="store_true", help=i18n.t("cli.help_strict"))
+    ap.add_argument("--force", action="store_true", help=i18n.t("cli.help_force"))
+    ap.add_argument("--encrypt", action="store_true", help=i18n.t("cli.help_encrypt"))
+    ap.add_argument("--key-env", metavar="NAME", default="", dest="key_env", help=i18n.t("cli.help_key_env"))
+    ap.add_argument("--to-dir", metavar="DIR", default="", dest="to_dir", help=i18n.t("cli.help_to_dir"))
     ap.add_argument("--dest", metavar="FOLDER", default="", help=i18n.t("cli.help_dest"))
     ap.add_argument("--read-only", action="store_true", dest="read_only", help=i18n.t("cli.help_read_only"))
     ap.add_argument("--repo", metavar="NAME", default="", help=i18n.t("cli.help_repo"))
@@ -654,7 +724,7 @@ def main(argv=None):
     try:
         ctx = {"base": base_url(args.url, args.lite), "account": args.account, "timeout": max(1.0, min(60.0, args.timeout)), "token": resolve_token(flag=args.token, token_file=args.token_file),
                "sentinel": args.sentinel, "level": args.level, "muted": args.muted, "fail_on": args.fail_on, "lite": args.lite, "compare": args.compare, "severity": args.severity,
-               "action": args.action or "", "target": args.target, "scope": args.scope, "project_dir": args.project_dir, "dry_run": args.dry_run, "deep": args.deep, "new_token_file": args.new_token_file, "dest": args.dest, "read_only": args.read_only, "repo": args.repo if re.fullmatch(r"[A-Za-z0-9._/-]{0,201}", args.repo) else "",
+               "action": args.action or "", "target": args.target, "scope": args.scope, "project_dir": args.project_dir, "dry_run": args.dry_run, "deep": args.deep, "file": args.file, "strict": args.strict, "force": args.force, "encrypt": args.encrypt, "key_env": args.key_env if re.fullmatch(r"[A-Z_][A-Z0-9_]{0,63}", args.key_env) else "", "to_dir": args.to_dir, "new_token_file": args.new_token_file, "dest": args.dest, "read_only": args.read_only, "repo": args.repo if re.fullmatch(r"[A-Za-z0-9._/-]{0,201}", args.repo) else "",
                "provider": args.provider if re.fullmatch(r"[A-Za-z0-9-]{0,40}", args.provider) else "", "model": args.model if re.fullmatch(r"[A-Za-z0-9._:/@+-]{0,100}", args.model) else "", "refresh": args.refresh}
         CLIENT.update({"session": "", "ca": (args.ca_file or os.environ.get("MONITOR_CA_FILE") or "").strip()})
         if CLIENT["ca"] and not os.path.isfile(CLIENT["ca"]):

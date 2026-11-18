@@ -19,6 +19,7 @@ HERE = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(HERE / "src"))            # works also under `py -3 -I`
 from github_actions_monitor import i18n  # noqa: E402
 from github_actions_monitor.accounts import accounts  # noqa: E402
+from github_actions_monitor.ops import bundle  # noqa: E402
 from github_actions_monitor.storage import backup, base, installation  # noqa: E402
 
 
@@ -36,6 +37,7 @@ def main(argv=None):
     parser.add_argument("--db", help=i18n.t("mst.help_db"))
     parser.add_argument("--flat", action="store_true", help=i18n.t("mst.help_flat"))
     parser.add_argument("--force", action="store_true", help=i18n.t("bst.help_force"))
+    parser.add_argument("--account", metavar="ID", default="", help=i18n.t("cli.help_account"))
     parser.add_argument("--lang", metavar="CODE", help=i18n.t("cli.help_lang"))
     args = parser.parse_args(argv)
     if args.lang:
@@ -53,7 +55,11 @@ def main(argv=None):
     store = open_target(args)
     try:
         if args.action == "backup":
-            manifest = backup.make_backup(store, args.file)
+            try:      # the product's own package (format 2, the data of the accounts only: this tool knows no settings file)
+                manifest = bundle.create(store, args.file, include_files=False, account=args.account or None)["manifest"]
+            except bundle.OpsError as error:
+                print(i18n.t("bst.refused", why=error.code))
+                return 1
             print(i18n.t("bst.made", file=args.file, accounts=manifest["accounts"], events=manifest["events"], sha=manifest["dump_sha256"][:16]))
             return 0
         try:

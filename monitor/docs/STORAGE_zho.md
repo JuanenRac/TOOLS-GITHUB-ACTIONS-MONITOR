@@ -63,3 +63,7 @@ python tools/backup_storage.py restore backup.zip --backend file     # 恢复到
 清理只处理超过期限的事件和分析日期;它绝不会改动配置、哨兵状态、静音设置,也不会删除没有时间的事件。每次清理都会在审计文档中留下一行(时间、删除和保留的事件数、归档文件、分析天数、错误)。`--doctor` 会警告事件的大小;对作为服务运行的监视器(网络模式、没有浏览器、容器或 `MONITOR_SERVICE=1`),如果配置里没有 `retention` 区块,也会警告。缩短期限之前请先备份。
 
 默认的 `archive` 会把移除的内容保存在可再次读取的压缩文件中;`delete` 则永久删除。
+
+## 完整备份包
+
+`python bin/monitor_cli.py backup create` 写出整个安装的备份包（格式 2）：每个账户和全局记录的转储，加上已清理的设置和列表，并带有每个成员的大小和 SHA-256。可以用环境变量中的密钥加密（可选库）、验证（`backup verify`，`--deep` 会恢复到临时文件夹）、列出、按账户或恢复到文件夹，并可按计划生成（`ops.backup.enabled`）。`tools/backup_storage.py` 会为账户文件夹生成同样的备份包（只备份一个账户用 `--account`），并且仍可验证和恢复第一种格式的简单备份。详见指南 [OPS_zho.md](OPS_zho.md)。

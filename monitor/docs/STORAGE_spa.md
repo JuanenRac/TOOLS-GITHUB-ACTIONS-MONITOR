@@ -63,3 +63,7 @@ Un monitor que funciona durante meses crecería sin techo, así que una pasada c
 La purga solo toca eventos y días de analíticas más antiguos que su límite; nunca toca la configuración, el estado de los centinelas, los silencios ni un evento sin hora. Cada pasada deja una línea en el documento de auditoría (cuándo, cuántos eventos eliminados y conservados, el archivo, cuántos días de analíticas, el error si lo hubo). `--doctor` avisa del tamaño de los eventos y, en un monitor que funciona como servicio (modo red, sin navegador, un contenedor o `MONITOR_SERVICE=1`), cuando su configuración no tiene bloque `retention`. Haz una copia antes de acortar los límites.
 
 Por defecto (`archive`) lo que se quita queda en archivos comprimidos que puedes volver a leer; `delete` lo elimina definitivamente.
+
+## El paquete de copia completo
+
+`python bin/monitor_cli.py backup create` escribe el paquete de toda la instalación (formato 2): el volcado de cada cuenta y de los registros globales más los ajustes y las listas limpios, con el tamaño y el SHA-256 de cada miembro. Se puede cifrar con una clave de una variable de entorno (biblioteca opcional), verificar (`backup verify`, `--deep` lo restaura en una carpeta temporal), listar y restaurar por cuenta o en una carpeta, y hacerse de forma programada (`ops.backup.enabled`). `tools/backup_storage.py` hace el mismo paquete para una carpeta de cuentas (`--account` para una sola cuenta) y sigue verificando y restaurando las copias sencillas del primer formato. La guía [OPS_spa.md](OPS_spa.md) lo explica todo.

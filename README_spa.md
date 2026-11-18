@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-3758_passing-brightgreen.svg" alt="3758 tests">
+  <img src="https://img.shields.io/badge/Tests-3827_passing-brightgreen.svg" alt="3827 tests">
 </p>
 
 > Vigila los workflows de todos tus repositorios y te dice, en una página local, qué está en rojo, qué está atascado y qué te espera.
@@ -81,8 +81,8 @@
 | | |
 |---|---|
 | **Madurez** | functional |
-| **Tests** | 3758 métodos de test (`python -m unittest discover -s monitor/tests`) |
-| **Ajustes** | 620 ajustes, todos con ayuda |
+| **Tests** | 3827 métodos de test (`python -m unittest discover -s monitor/tests`) |
+| **Ajustes** | 636 ajustes, todos con ayuda |
 | **Idiomas** | 8 (inglés, español, alemán, francés, italiano, japonés, chino y portugués) |
 | **Probado en el CI en** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -286,6 +286,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/WEBHOOK_spa.md`](monitor/docs/WEBHOOK_spa.md): el webhook de entrada
 - [`monitor/docs/CHATOPS_spa.md`](monitor/docs/CHATOPS_spa.md): comandos de chat de solo lectura para Slack y Discord
 - [`monitor/docs/SOUNDS_spa.md`](monitor/docs/SOUNDS_spa.md): un sonido para cada tipo de evento
+- [`monitor/docs/OPS_spa.md`](monitor/docs/OPS_spa.md): Operar la instalación: copia de seguridad completa, restauración, copia programada, purga bajo demanda, el doctor y sus códigos de salida, appliance con systemd y Docker
 - [`monitor/docs/LITE_spa.md`](monitor/docs/LITE_spa.md): La edición lite
 - [`monitor/docs/COMPLETE_INDIVIDUAL_spa.md`](monitor/docs/COMPLETE_INDIVIDUAL_spa.md): Edición completa para una persona
 - [`monitor/docs/COMPLETE_SERVICE_spa.md`](monitor/docs/COMPLETE_SERVICE_spa.md): Edición completa como servicio

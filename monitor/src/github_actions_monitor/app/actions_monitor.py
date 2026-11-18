@@ -172,7 +172,7 @@ def state_dir():
     """Where the small state files of this process live: the folder of the account when this is the monitor of one account, else next to the code, as always."""
     return Path(CHILD["folder"]) if CHILD["folder"] else paths.folder("data")
 LITE_SHARED = ("/api/ai/state", "/api/ai/stream", "/api/ai/brief", "/api/ai/alerts", "/api/ai/ack")      # the channels for an AI tool are the same in both editions
-LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/auth", "/api/notify", "/api/score", "/api/report-files", "/api/audit-log", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/chatops", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events")   # they do not exist in lite
+LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/auth", "/api/notify", "/api/score", "/api/report-files", "/api/ops", "/api/audit-log", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/chatops", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events")   # they do not exist in lite
 
 
 LITE_INHERIT = ("github_owner", "ecosystems", "ecosystems_file", "targets_file", "profiles_file", "exclude", "repos", "language", "runs_per_repo", "cold_runs_per_repo", "hot_hours", "stuck_minutes", "refresh_seconds", "cold_refresh_seconds")   # what a first lite start copies from actions_monitor.json
@@ -1513,7 +1513,7 @@ def panel_list(lang=None):
 AI_MODEL_POST = ("/api/ai/models/refresh", "/api/ai/models/test", "/api/ai/models/data", "/api/ai/doctor")      # the list of models of the provider, the test of one model, the table of data, the doctor
 THIS_COMPUTER_ACTIONS = ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test") + AI_MODEL_POST
 THIS_COMPUTER_ADVANCED = ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures",
-                          "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run")
+                          "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run", "/api/ops/backup", "/api/ops/purge")
 THIS_COMPUTER_POST = THIS_COMPUTER_ACTIONS + THIS_COMPUTER_ADVANCED
 
 
@@ -1735,6 +1735,27 @@ def retention_tick(config):
         degraded.note("retention", error)
 
 
+def backup_job(config):
+    """The scheduled copy, in a thread of its own so that a big installation never delays a refresh cycle. A failure is counted and never raised."""
+    try:
+        from github_actions_monitor.ops import schedule
+        schedule.tick(config)
+    except Exception as error:   # noqa: BLE001 - a copy that cannot be made is in its state file; the monitor goes on
+        degraded.note("ops_backup", error)
+
+
+def backup_tick(config):
+    """The tick of the scheduled copy (`ops.backup.enabled`, off by default): when a copy is due it starts in a thread. The lite edition has no such job. Cheap while the switch is off."""
+    if LITE["on"]:
+        return
+    try:
+        from github_actions_monitor.ops import schedule
+        if schedule.due(config):
+            threading.Thread(target=backup_job, args=(config,), name="ops-backup", daemon=True).start()
+    except Exception as error:   # noqa: BLE001
+        degraded.note("ops_backup", error)
+
+
 def score_security(registry, config):
     """{"penalty", "repos"} from the Security sentinel for the security part of the score, or None while the sentinel is off or has looked at fewer repositories than the score asks for (min_coverage)."""
     sentinel = registry.get("security") if registry else None
@@ -1934,6 +1955,7 @@ def maintain(config, data):
         degraded.note("loop.extra2", error)
     maintain_extras(toolconfig.raw_config() if not LITE["on"] else config, data)
     retention_tick(toolconfig.raw_config() if not LITE["on"] else config)
+    backup_tick(toolconfig.raw_config() if not LITE["on"] else config)
     score_tick(toolconfig.raw_config() if not LITE["on"] else config, data)
     report_tick(toolconfig.raw_config() if not LITE["on"] else config)
     try:
@@ -2772,6 +2794,10 @@ class Handler(BaseHTTPRequestHandler):
         if path in THIS_COMPUTER_ADVANCED:
             if not self.guard() or not self.this_computer():
                 return
+            if path == "/api/ops/purge" and not ops_purge_on():      # the purge on demand does not exist (for this computer) until an administrator switches it on
+                self.send_response(404)
+                self.end_headers()
+                return
             if path != "/api/welcome" and path != "/api/gh-action/plan" and path != "/api/act/plan" and not self.token_ok():
                 return
             try:
@@ -3260,6 +3286,11 @@ class Handler(BaseHTTPRequestHandler):
                 return
             self.json_reply({"schema": 1, "account": CHILD["account"] or "", "enabled": audit_log.settings(config)["enabled"], "chain": audit_log.verify(), "entries": audit_log.read(200, CHILD["account"] or None),
                              "write_failures": audit_log.STATS["write_failures"], "last_write_error_at": audit_log.STATS["last_write_error_at"]})
+        elif path == "/api/ops/status":      # the operation of the installation: the last copy, the schedule, the purge switch and the retention in force (Complete only; no path, no secret)
+            if not self.guard():
+                return
+            from github_actions_monitor.ops import schedule
+            self.json_reply(schedule.overview(toolconfig.raw_config()))
         elif path in ("/api/report-files", "/api/report-files/file"):      # the scheduled reports: the list and one file, read only, of the account of this process (Complete only)
             if not self.guard():
                 return
@@ -3769,6 +3800,14 @@ def _audit_plain(action, who, target, details=None, result="ok"):
         degraded.note("audit_log", error)
 
 
+def ops_purge_on():
+    """True when the purge on demand is switched on (`ops.purge.enabled`) in the complete edition."""
+    if LITE["on"]:
+        return False
+    from github_actions_monitor.ops import opsconf
+    return opsconf.settings(toolconfig.raw_config())["purge"]["enabled"]
+
+
 def handle_advanced_post(path, request, who=""):
     """The plan / confirm pairs of the actions on GitHub and of `act`, the token of GitHub and the welcome flag. Answers never contain the request."""
     config = toolconfig.raw_config()
@@ -3788,6 +3827,24 @@ def handle_advanced_post(path, request, who=""):
         entry = alert_center.mute(scope, value, request.get("hours"), config, who=who, until_change=until_change)
         _audit_plain("alert_mute", who, f"{scope}:{value}"[:120], {"hours": request.get("hours")}, "ok" if entry is not None else "error")
         return {"ok": entry is not None, "mute": entry}
+    if path == "/api/ops/backup":      # make a copy now (admin, from this computer); Complete only. The answer says whether it worked, never a path of the person or a secret
+        if LITE["on"]:
+            return {"ok": False, "status": "lite"}
+        from github_actions_monitor.ops import schedule
+        state = schedule.run_locked(config)
+        return {"ok": state["ok"] is True, "status": state["error"] or "ok", "file": state["file"], "bytes": state["bytes"], "sealed": state["sealed"], "accounts": state["accounts"], "events": state["events"]}
+    if path == "/api/ops/purge":      # the retention purge now (admin, from this computer, switched on, after a good copy); a dry run unless the request says "dry_run": false
+        from github_actions_monitor.ops import purge
+        from github_actions_monitor.ops.bundle import OpsError
+        from github_actions_monitor.storage import runtime
+        storage, account = runtime.process_storage(CHILD["account"] or None)
+        try:
+            done = purge.run(config, storage, account, dry_run=request.get("dry_run") is not False)
+        except OpsError as error:
+            return {"ok": False, "status": error.code}
+        from github_actions_monitor.security import audit_log
+        audit_log.note(account + (":dry" if done["dry_run"] else ":purge"), {"removed": (done.get("line") or {}).get("events_removed", 0)})
+        return {"ok": True, **done}
     if path == "/api/report-files/run":      # write a report now (admin, from this computer); Complete only
         if LITE["on"]:
             return {"ok": False, "status": "lite"}
@@ -4157,12 +4214,17 @@ def main():
         return code
     if args.doctor:
         from github_actions_monitor.cli import doctor
-        checks = doctor.run(config=config)
+        try:
+            checks = doctor.run(config=config, edition="lite" if LITE["on"] else "complete")
+        except Exception:   # noqa: BLE001 - the doctor itself could not run: its own exit code, not a traceback
+            print(i18n.t("doctor.broken"))
+            return doctor.EXIT_DOCTOR_ERROR
+        strict = False if LITE["on"] else doctor.strict_from(config)
         if args.json:
-            print(json.dumps(doctor.as_json(checks, "lite" if LITE["on"] else "full"), ensure_ascii=False, indent=1))
+            print(json.dumps(doctor.as_json(checks, "lite" if LITE["on"] else "full", strict), ensure_ascii=False, indent=1))
         else:
             print(doctor.text(checks, i18n.t, "lite" if LITE["on"] else "full"), end="")
-        return doctor.exit_code(checks)
+        return doctor.exit_code(checks, strict)
     if args.init_catalog:
         for name, created in toolconfig.init_catalog():
             print(i18n.t("mon.catalog_created" if created else "mon.catalog_kept", name=name))

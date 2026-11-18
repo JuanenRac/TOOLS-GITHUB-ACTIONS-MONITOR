@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-3758_passing-brightgreen.svg" alt="3758 tests">
+  <img src="https://img.shields.io/badge/Tests-3827_passing-brightgreen.svg" alt="3827 tests">
 </p>
 
 > Surveille les workflows de tous vos dépôts et vous dit, sur une page locale, ce qui est rouge, ce qui est bloqué et ce qui vous attend.
@@ -81,8 +81,8 @@
 | | |
 |---|---|
 | **Maturité** | functional |
-| **Tests** | 3758 méthodes de test (`python -m unittest discover -s monitor/tests`) |
-| **Réglages** | 620 réglages, tous avec aide |
+| **Tests** | 3827 méthodes de test (`python -m unittest discover -s monitor/tests`) |
+| **Réglages** | 636 réglages, tous avec aide |
 | **Langues** | 8 (anglais, espagnol, allemand, français, italien, japonais, chinois et portugais) |
 | **Testé dans le CI sur** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -286,6 +286,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/WEBHOOK_fra.md`](monitor/docs/WEBHOOK_fra.md): le webhook entrant
 - [`monitor/docs/CHATOPS_fra.md`](monitor/docs/CHATOPS_fra.md): commandes de chat en lecture seule pour Slack et Discord
 - [`monitor/docs/SOUNDS_fra.md`](monitor/docs/SOUNDS_fra.md): un son pour chaque type d'événement
+- [`monitor/docs/OPS_fra.md`](monitor/docs/OPS_fra.md): Exploiter l'installation : sauvegarde complète, restauration, sauvegarde planifiée, purge à la demande, le doctor et ses codes de sortie, appliance avec systemd et Docker
 - [`monitor/docs/LITE_fra.md`](monitor/docs/LITE_fra.md): L'édition lite
 - [`monitor/docs/COMPLETE_INDIVIDUAL_fra.md`](monitor/docs/COMPLETE_INDIVIDUAL_fra.md): Édition complète pour une personne
 - [`monitor/docs/COMPLETE_SERVICE_fra.md`](monitor/docs/COMPLETE_SERVICE_fra.md): Édition complète en service

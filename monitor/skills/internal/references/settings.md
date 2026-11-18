@@ -336,6 +336,22 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `notify.users.enabled` (secure) | `-` | notify | Notifications for each user |
 | `notify.users.max_per_hour` | `-` | notify | Messages per user per hour |
 | `open_browser` | `true` | basic | Open the browser at start |
+| `ops.backup.compress_level` | `-` | paths | Compression level |
+| `ops.backup.dir` | `-` | paths | Folder of the copies |
+| `ops.backup.enabled` (secure) | `-` | paths | Make a backup on a schedule |
+| `ops.backup.encrypt` (secure) | `-` | paths | Seal the copies with a key |
+| `ops.backup.include_config` (secure) | `-` | paths | Include the settings (without secrets) |
+| `ops.backup.interval_hours` | `-` | paths | Make a copy every |
+| `ops.backup.keep` | `-` | paths | Copies to keep |
+| `ops.backup.key_env` (secure) | `-` | paths | Variable that holds the key |
+| `ops.doctor.backup_max_age_days` | `-` | paths | Warn when the last copy is older than |
+| `ops.doctor.min_free_mb` | `-` | paths | Warn when the free disk is below |
+| `ops.doctor.sqlite_check` | `-` | paths | Integrity check of SQLite |
+| `ops.doctor.sqlite_timeout_s` | `-` | paths | Time limit of that check |
+| `ops.doctor.strict_exit` | `-` | paths | Warnings make the doctor exit 3 |
+| `ops.doctor.webhook_min_length` | `-` | paths | Shortest webhook secret accepted |
+| `ops.purge.enabled` (secure) | `-` | paths | Allow "purge now" |
+| `ops.purge.require_backup_hours` (secure) | `-` | paths | Require a good copy newer than |
 | `organizations.discover` | `false` | advanced | List the organisations of the login |
 | `otlp.enabled` (secure) | `false` | advanced | Export OpenTelemetry (OTLP) |
 | `otlp.endpoint` (secure) | `""` | advanced | OTLP collector address |

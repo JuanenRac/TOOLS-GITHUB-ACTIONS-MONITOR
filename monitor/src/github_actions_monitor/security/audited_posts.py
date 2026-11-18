@@ -17,6 +17,8 @@ AUDITED = {
     "/api/ai/lessons": "lesson_add",                    # a lesson is added to the library an AI reads
     "/api/ai/failures": "failures_import",              # lines of a book of failures from elsewhere
     "/api/report-files/run": "report_run",              # a report is written now
+    "/api/ops/backup": "backup_run",                    # a complete backup package is written now (the file, never its content)
+    "/api/ops/purge": "purge_run",                      # the retention purge is run (or only planned) on demand
     "/api/ai/actions/confirm": "ai_action",             # an action proposed by the AI is run
     "/api/ai/actions/unlock": "ai_unlock",              # the actions of the AI are unlocked for a while
     "/api/screens/logo": "screens_logo_upload",                # the logo of the organization is uploaded (its kind and size go in, never its content)

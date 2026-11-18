@@ -242,13 +242,36 @@ class BackupTool(unittest.TestCase):
 
     def test_a_damaged_backup_is_not_restored(self):
         self.assertEqual(run_cli(backup_storage, ["backup", self.zip, "--backend", "file", "--accounts-dir", str(self.root)])[0], 0)
+        import zipfile
+        with zipfile.ZipFile(self.zip) as package:
+            info = package.getinfo(backup.DUMP)
+            where = info.header_offset + 30 + len(info.filename.encode()) + len(info.extra) + info.compress_size // 2      # the middle of the compressed dump
         data = bytearray(Path(self.zip).read_bytes())
-        data[len(data) // 2] ^= 0xFF
+        data[where] ^= 0xFF
         Path(self.zip).write_bytes(bytes(data))
         self.assertEqual(run_cli(backup_storage, ["verify", self.zip])[0], 1)
         fresh = Path(self.tmp.name) / "fresh"
         self.assertEqual(run_cli(backup_storage, ["restore", self.zip, "--backend", "file", "--accounts-dir", str(fresh)])[0], 1)
         self.assertFalse(fresh.exists() and list(fresh.iterdir()))
+
+    def test_the_tool_writes_the_package_of_the_product_and_one_account_alone(self):
+        code, _text = run_cli(backup_storage, ["backup", self.zip, "--backend", "file", "--accounts-dir", str(self.root)])
+        self.assertEqual(code, 0)
+        manifest = backup.read_manifest(self.zip)
+        self.assertEqual((manifest["format"], sorted(manifest["members"])), (2, ["dump.jsonl", "files.json"]))
+        one = str(Path(self.tmp.name) / "one.zip")
+        self.assertEqual(run_cli(backup_storage, ["backup", one, "--backend", "file", "--accounts-dir", str(self.root), "--account", "alpha"])[0], 0)
+        self.assertEqual((backup.read_manifest(one)["scope"], backup.read_manifest(one)["accounts"]), ("account", 1))
+        self.assertEqual(run_cli(backup_storage, ["backup", str(Path(self.tmp.name) / "no.zip"), "--backend", "file", "--accounts-dir", str(self.root), "--account", "zzz"])[0], 1)
+
+    def test_a_backup_of_the_first_format_still_verifies_and_restores_with_the_tool(self):
+        old = Path(self.tmp.name) / "old.zip"
+        backup.make_backup(installation.open_installation("file", self.root), old)
+        self.assertEqual(backup.read_manifest(old)["format"], 1)
+        self.assertEqual(run_cli(backup_storage, ["verify", str(old)])[0], 0)
+        fresh = Path(self.tmp.name) / "fresh-old"
+        self.assertEqual(run_cli(backup_storage, ["restore", str(old), "--backend", "file", "--accounts-dir", str(fresh)])[0], 0)
+        self.assertEqual(FileStorage(fresh, "accounts").export_account("alpha"), self.files.export_account("alpha"))
 
     def test_restore_needs_to_know_the_backend(self):
         self.assertEqual(run_cli(backup_storage, ["backup", self.zip, "--backend", "file", "--accounts-dir", str(self.root)])[0], 0)
@@ -308,17 +331,21 @@ class HandMadeBackup(unittest.TestCase):
             with zipfile.ZipFile(good) as bundle:
                 manifest = json.loads(bundle.read(backup.MANIFEST))
                 lines = bundle.read(backup.DUMP).decode("utf-8").splitlines()
+                others = {name: bundle.read(name) for name in bundle.namelist() if name not in (backup.DUMP, backup.MANIFEST)}
             data = [json.loads(line) for line in lines]
             second = next(i for i, d in enumerate(data) if d.get("account") == "beta")
             data[second]["account"] = "../escaped"
             dump = "".join(json.dumps(d) + "\n" for d in data).encode("utf-8")
             import hashlib
             manifest.update(dump_bytes=len(dump), dump_sha256=hashlib.sha256(dump).hexdigest())
+            manifest["members"][backup.DUMP] = {"bytes": len(dump), "sha256": hashlib.sha256(dump).hexdigest()}      # a package of the product lists its members: only the id is wrong
             bad = Path(tmp) / "bad.zip"
             with zipfile.ZipFile(bad, "w") as bundle:
                 bundle.writestr(backup.DUMP, dump)
+                for name, content in others.items():
+                    bundle.writestr(name, content)
                 bundle.writestr(backup.MANIFEST, json.dumps(manifest))
-            self.assertTrue(backup.verify_backup(bad))
+            self.assertIn("an account id or a name in the dump is not valid", backup.verify_backup(bad))
             fresh = Path(tmp) / "fresh"
             code, _text = run_cli(backup_storage, ["restore", str(bad), "--backend", "file", "--accounts-dir", str(fresh)])
             self.assertEqual(code, 1)

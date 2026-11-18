@@ -24,3 +24,5 @@ Ein Administrator (und die Person am Rechner, wenn es keinen Teammodus gibt). Ei
 ## Einstellungen
 
 Einstellungen, Tab Wächter, Block **Aktionsprotokoll**: `audit_log.enabled` (an), `audit_log.max_mb` (10) und `audit_log.maintainers_can_read` (aus). `audit_log.keep_generations` (5) ist die Zahl der aufbewahrten rotierten Dateien. `audit_log.required` (aus) lehnt die Aktionen, die protokolliert werden müssen (die Bestätigungen von Aktionen auf GitHub, der Modus, die Stummschaltungen, die Zugangsdaten...), mit 503 ab, solange das Protokoll nicht geschrieben werden kann; die Einstellungen bleiben offen, damit man es beheben kann.
+
+Eine jetzt erstellte Sicherung (`POST /api/ops/backup`) und die Bereinigung auf Anforderung (`POST /api/ops/purge`, auch ein Probelauf) werden als `backup_run` und `purge_run` protokolliert: Die Zeile nennt, wer sie verlangt hat, und das Ergebnis, nie den Inhalt der Sicherung.

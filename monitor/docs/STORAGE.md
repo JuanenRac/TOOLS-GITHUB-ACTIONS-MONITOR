@@ -63,3 +63,7 @@ A monitor left running for months would grow without a ceiling, so a short pass 
 The purge only touches events and analytics days that are older than their limit; it never touches the configuration, the state of the sentinels, the silences or an event with no time. Each pass leaves a line in the audit document (when, how many events removed and kept, the archive file, how many analytics days, any error). `--doctor` warns about the size of the events and, for a monitor that runs as a service (network mode, no browser, a container or `MONITOR_SERVICE=1`), when its configuration has no `retention` block. Make a backup before you shorten the limits.
 
 The default `archive` keeps what it removes in compressed files you can read back; `delete` removes it for good.
+
+## The complete backup package
+
+`python bin/monitor_cli.py backup create` writes the package of the whole installation (format 2): the dump of every account and of the global records plus the cleaned settings and lists, with the size and the SHA-256 of every member. It can be sealed with a key from an environment variable (optional library), verified (`backup verify`, `--deep` restores it into a temporary folder), listed and restored by account or into a folder, and made on a schedule (`ops.backup.enabled`). `tools/backup_storage.py` makes the same package for a folder of accounts (`--account` for one account alone) and still verifies and restores the plain backups of the first format. The guide [OPS.md](OPS.md) has everything.

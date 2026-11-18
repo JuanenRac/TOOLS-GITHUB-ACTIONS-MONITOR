@@ -16,6 +16,7 @@
 | `status` | versione, edizione, account, repository, cosa gira e cosa fallisce, la quota | sì |
 | `health` (o `check`) | un controllo rapido prima di leggere qualcosa di pesante: il monitor è raggiungibile, accetta questo client, l'accesso GitHub dell'account risponde? | sì |
 | `doctor` | i controlli di `--doctor` per questa installazione (il monitor non deve essere in esecuzione) | sì |
+| `backup` | il backup completo dell'installazione (il monitor non deve essere in esecuzione): `backup create [FILE] [--account ID]`, `verify FILE [--deep]`, `restore FILE [--account ID] [--to-dir CARTELLA] [--force]`, `status`, `list`; `--encrypt` con `--key-env NOME` lo cifra (libreria opzionale); vedi [OPS_ita.md](OPS_ita.md) | no |
 | `accounts` | gli account del supervisore (solo con più account) | no |
 | `alerts` | gli avvisi di tutte le sentinelle in un elenco: `--sentinel ci\|collab`, `--level info\|warning\|error`, `--muted show\|hide\|only` | no |
 | `score` | il punteggio dell'account: numero, lettera, tendenza, parti, copertura e scomposizione per repository; `--compare` lo confronta con lo storico della finestra | no |
@@ -68,3 +69,7 @@ In modalità di rete il token si legge da `MONITOR_ACCESS_TOKEN`, poi `MONITOR_T
 ## Il dispatcher a lotti: gli input di un workflow
 
 `python bin/gha_dispatch_all.py plan --inputs` elenca inoltre, sotto ogni obiettivo, gli input che il suo workflow richiede quando viene avviato a mano (nome, tipo, obbligatorio o facoltativo, valore predefinito, opzioni di una scelta e descrizione). Sono letti dal file del workflow in `origin/main` del clone con `git show`: non si avvia nulla, non si invia nulla e `gh` non viene chiamato. `--json` aggiunge a ogni riga un elenco `inputs`; vale `null` quando il file non è in `origin/main` o usa una forma che il lettore non conosce (lo stile a flusso `inputs: {…}`), e `[]` quando il workflow non richiede input.
+
+## Backup e il doctor
+
+`backup` e `doctor` lavorano sulle cartelle dell'installazione, quindi non richiedono un monitor in esecuzione. `doctor` esce con `0` quando tutto va bene (anche con avvisi), `1` quando un controllo è fallito, `3` quando ci sono solo avvisi e `--strict` (o `ops.doctor.strict_exit`) è attivo, e `4` quando il doctor stesso non è riuscito a partire; sono i codici del doctor, gli altri comandi mantengono i codici di uscita qui sopra. `backup` esce con `0` quando ha finito e `1` quando viene rifiutato o il pacchetto non supera la verifica. La guida [OPS_ita.md](OPS_ita.md) contiene i controlli, il ripristino e il backup pianificato.

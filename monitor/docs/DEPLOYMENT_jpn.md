@@ -209,6 +209,10 @@ location / {
 
 `accounts/`(またはデータベース)はコンテナがなくなっても残るボリュームに置き、更新の前に `python tools/backup_storage.py backup FILE.zip --backend file`(または `sqlite`)でバックアップを取ってください。初期状態では、短い処理が90日より古いイベントと180日より古い分析を削除します。変更するには設定の `retention` を使い、`MONITOR_SERVICE=1` を付けると `--doctor` がモニターをサービスとして扱います(その場合、`retention` ブロックがない、またはイベントが大きくなっていると警告します)。SQLiteでは1アカウント1データベースが既定で、共有ファイル1つも可能です([STORAGE_jpn.md](STORAGE_jpn.md) を参照)。
 
+## バックアップ、ボリューム、アップグレード
+
+サービスでは、`deploy/github-actions-monitor-backup.service` と `deploy/github-actions-monitor-backup.timer` が毎日完全バックアップ (`monitor_cli.py backup create`) を作成し、`deploy/compose.yaml` は専用のボリューム (`monitor-backups`) にバックアップを保存します。アップグレードの前にバックアップを作って検証し、後に doctor を実行してください。手順、復元、doctor の終了コードは [OPS_jpn.md](OPS_jpn.md) にあります。
+
 ## 実際のコンテナーでイメージを検証する
 
 リポジトリにはワークフロー `docker-audit.yml` があり、GitHub 上で任意のバージョン（タグまたはコミット）のイメージをビルドし、実際のコンテナーで検証します。対象は、起動とヘルスチェック、API の契約、最初の管理者を含むチームモード、独自の TLS を持つ Caddy を信頼済みプロキシとした構成、堅牢化（root なし、読み取り専用ファイルシステム、ケイパビリティなし）、バックアップ・リストア・前バージョンからの移行を含むボリューム、シークレット、シャットダウン、プロキシの背後にある受信 Webhook です。お使いのコンピューターでは何も実行せず、何も公開せず、シークレットも使いません。手動で起動し、実行のサマリーの表とアーティファクト `docker-audit-<バージョン>` を読みます。
