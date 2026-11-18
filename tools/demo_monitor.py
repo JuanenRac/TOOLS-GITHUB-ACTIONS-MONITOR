@@ -178,10 +178,10 @@ def main():
             return demo_alerts(now, iso)
 
         def names(self):
-            return ["ci", "collab", "security"]
+            return ["ci", "collab", "security", "delivery", "supply"]
 
         def get(self, name):
-            return DemoCollab() if name == "collab" else (DemoSecurity() if name == "security" else None)
+            return DemoCollab() if name == "collab" else (DemoSecurity() if name in ("security", "delivery", "supply") else None)
     if not lite:
         am.SENTINEL["registry"] = DemoRegistry()
         am.SENTINEL["obj"] = Demo()

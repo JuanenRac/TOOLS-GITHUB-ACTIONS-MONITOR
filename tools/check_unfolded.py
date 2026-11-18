@@ -37,9 +37,9 @@ PROBE = r"""
     await wait(1200);
     for(let i=0;i<60;i++){      /* wait for the condition (the data of the sentinels has arrived), not for a fixed time */
       await wait(250);
-      if(typeof SENT!=="undefined"&&SENT&&typeof COLLAB!=="undefined"&&COLLAB&&typeof SECUR!=="undefined"&&SECUR)break;
+      if(typeof SENT!=="undefined"&&SENT&&typeof COLLAB!=="undefined"&&COLLAB&&typeof SECUR!=="undefined"&&SECUR&&typeof SDEL!=="undefined"&&SDEL&&typeof SSUP!=="undefined"&&SSUP)break;
     }
-    const cases=[["sci","a1","s-details"],["scol","collab","s-details-collab"],["ssec","security","s-details-sec"]];
+    const cases=[["sci","a1","s-details"],["scol","collab","s-details-collab"],["ssec","security","s-details-sec"],["sdel","delivery","s-details-del"],["ssup","supply","s-details-sup"]];
     for(const [tab,key,box] of cases){
       OPEN.clear();OPEN.add(key);
       try{renderSent();showTab(tab)}catch(e){}
