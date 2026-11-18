@@ -1613,7 +1613,7 @@ class Updater:
         logs = self.folders()["logs"]
         logs.mkdir(parents=True, exist_ok=True)
         log = open(logs / "updater_start.log", "ab")
-        # CREATE_NEW_PROCESS_GROUP | CREATE_NO_WINDOW: a hidden console that the git and gh calls of the monitor inherit (DETACHED_PROCESS would give each one a window)
+        # CREATE_NEW_PROCESS_GROUP | CREATE_NO_WINDOW: a hidden console that the git and gh calls of the monitor inherit (a process without a console would give each of them a window of its own)
         kwargs = {"creationflags": 0x00000200 | 0x08000000} if os.name == "nt" else {"start_new_session": True}
         holder["proc"] = subprocess.Popen([sys.executable, "-m", module, "--no-browser", "--port", str(port)], cwd=str(self.root), env=env, stdout=log, stderr=log, stdin=subprocess.DEVNULL, **kwargs)
         journal["monitor_started"] = True
