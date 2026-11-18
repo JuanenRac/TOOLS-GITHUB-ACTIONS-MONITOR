@@ -36,6 +36,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 ### Sicurezza
 
 - **I link che la pagina costruisce con i dati si verificano leggendo l'indirizzo, non dalle prime lettere**: passa solo un indirizzo https di GitHub (o dell'host che indichi per GitHub Enterprise, che può essere anche http) senza nome utente né password; un indirizzo di script, un host simile, uno spazio, un carattere di controllo o una barra rovesciata diventano un link vuoto.
+- **La guida del container dice come aprire la prima sessione e quali etichette di immagine esistono**: chiedeva di aprire l'indirizzo con il token di accesso, cosa che il monitor rifiuta per impostazione predefinita da quando il token non viaggia più nell'indirizzo. Ora dice di inviare il token con un POST o con l'intestazione di accesso (o di attivare l'indirizzo per una visita e poi spegnerlo), e le etichette citate sono quelle di questa versione.
 
 ## [2.0.9]
 

@@ -36,6 +36,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 ### Sicherheit
 
 - **Die Links, die die Seite aus Daten baut, werden durch Lesen der Adresse geprüft, nicht an den ersten Buchstaben**: Nur eine https-Adresse von GitHub (oder des Hosts, den Sie für GitHub Enterprise angeben und der auch http sein darf) ohne Benutzername und Passwort geht durch; eine Skript-Adresse, ein ähnlich aussehender Host, ein Leerzeichen, ein Steuerzeichen oder ein Backslash werden zu einem leeren Link.
+- **Die Container-Anleitung sagt, wie die erste Sitzung geöffnet wird und welche Image-Tags es gibt**: Sie verlangte, die Adresse mit dem Zugriffstoken zu öffnen, was der Monitor standardmäßig ablehnt, seit das Token nicht mehr in der Adresse reist. Jetzt steht dort, das Token per POST oder mit dem Zugriffs-Header zu senden (oder die Adresse für einen Besuch einzuschalten und wieder auszuschalten), und die genannten Tags sind die dieser Version.
 
 ## [2.0.9]
 

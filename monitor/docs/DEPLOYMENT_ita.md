@@ -30,7 +30,7 @@ L'edizione completa ascolta sulla porta 8765 e la lite sulla 8766, salvo che il 
 
 ## L'immagine ufficiale
 
-`ghcr.io/juanenrac/tools-github-actions-monitor` per `linux/amd64` e `linux/arm64`, con i tag `1.8.2`, `1.8` e `latest`, costruita dal workflow di rilascio con un'attestazione della sua provenienza. È fatta in tre fasi (`deploy/Dockerfile`) e contiene solo Python, la CLI di GitHub, i certificati delle CA e il codice, in sola lettura e di proprietà di root. Gira come utente 10001 (mai root) e scrive solo in due volumi: `/config` (`actions_monitor.json`, creato al primo avvio e mai sovrascritto) e `/data` (`accounts/`, `state/` con il token di accesso, `secrets/`, l'accesso di `gh`). Ascolta in modalità rete sulla porta 8765 del contenitore, quindi ogni richiesta richiede il token di accesso, e non pubblica alcuna porta da sola.
+`ghcr.io/juanenrac/tools-github-actions-monitor` per `linux/amd64` e `linux/arm64`, con i tag `2.1.0`, `2.1` e `latest`, costruita dal workflow di rilascio con un'attestazione della sua provenienza. È fatta in tre fasi (`deploy/Dockerfile`) e contiene solo Python, la CLI di GitHub, i certificati delle CA e il codice, in sola lettura e di proprietà di root. Gira come utente 10001 (mai root) e scrive solo in due volumi: `/config` (`actions_monitor.json`, creato al primo avvio e mai sovrascritto) e `/data` (`accounts/`, `state/` con il token di accesso, `secrets/`, l'accesso di `gh`). Ascolta in modalità rete sulla porta 8765 del contenitore, quindi ogni richiesta richiede il token di accesso, e non pubblica alcuna porta da sola.
 
 ```sh
 docker run -d --name github-actions-monitor --restart unless-stopped \
@@ -44,7 +44,7 @@ docker run -d --name github-actions-monitor --restart unless-stopped \
 docker exec github-actions-monitor cat /data/state/access_token      # the access token, made on the first start
 ```
 
-Al primo avvio crea la configurazione, il primo account (da `MONITOR_GITHUB_OWNER`; più account con `MONITOR_ACCOUNTS=personale:io,lavoro:mia-org`) e, se `MONITOR_ACCESS_TOKEN` non è dato, un token di accesso che conserva in `/data/state/access_token` (modo 600) e non stampa mai. Apri una volta `http://127.0.0.1:8765/?access=TOKEN`: il cookie viene impostato e l'indirizzo ripulito. Con un bind mount invece di un volume con nome, dai la cartella all'utente 10001 (`chown -R 10001:10001`). L'edizione lite non è nell'immagine.
+Al primo avvio crea la configurazione, il primo account (da `MONITOR_GITHUB_OWNER`; più account con `MONITOR_ACCOUNTS=personale:io,lavoro:mia-org`) e, se `MONITOR_ACCESS_TOKEN` non è dato, un token di accesso che conserva in `/data/state/access_token` (modo 600) e non stampa mai. Apri la sessione senza mettere il token nell'indirizzo: invia `POST /api/access` con `{"token": "..."}` (il cookie torna nella risposta) o l'intestazione `X-Monitor-Access`. Per aprirla una volta dalla barra degli indirizzi di un browser, avvia il container con `MONITOR_QUERY_ACCESS=1`, apri `http://127.0.0.1:8765/?access=TOKEN` e spegni di nuovo la variabile. Con un bind mount invece di un volume con nome, dai la cartella all'utente 10001 (`chown -R 10001:10001`). L'edizione lite non è nell'immagine.
 
 ## Docker Compose, con proxy e TLS facoltativi
 
@@ -168,11 +168,11 @@ docker cp github-actions-monitor:/data/state/backup.zip .
 docker run --rm -v monitor-data:/data -v "$PWD":/backup alpine tar czf /backup/monitor-data.tgz -C /data .
 ```
 
-Aggiornamento: i dati sopravvivono perché stanno nei volumi. Fissa una versione (`:1.8.2`) in produzione, scarica, ricrea e verifica l'attestazione dell'immagine. Un monitor più vecchio non apre mai un'archiviazione più recente (vedi `STORAGE.md`): tieni il backup finché la nuova versione non ha girato.
+Aggiornamento: i dati sopravvivono perché stanno nei volumi. Fissa una versione (`:2.1.0`) in produzione, scarica, ricrea e verifica l'attestazione dell'immagine. Un monitor più vecchio non apre mai un'archiviazione più recente (vedi `STORAGE.md`): tieni il backup finché la nuova versione non ha girato.
 
 ```sh
 docker compose pull && docker compose up -d
-gh attestation verify oci://ghcr.io/juanenrac/tools-github-actions-monitor:1.8.2 --owner JuanenRac
+gh attestation verify oci://ghcr.io/juanenrac/tools-github-actions-monitor:2.1.0 --owner JuanenRac
 ```
 
 ## Dietro un reverse proxy

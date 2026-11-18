@@ -36,6 +36,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 ### Seguridad
 
 - **Los enlaces que la página construye con datos se comprueban leyendo la dirección, no por sus primeras letras**: solo pasa una dirección https de GitHub (o del servidor que indiques para GitHub Enterprise, que también puede ser http) sin usuario ni contraseña; una dirección de script, un servidor parecido, un espacio, un carácter de control o una barra invertida se convierten en un enlace vacío.
+- **La guía del contenedor dice cómo abrir la primera sesión y qué etiquetas de imagen existen**: pedía abrir la dirección con el token de acceso, algo que el monitor rechaza por defecto desde que el token dejó de viajar en la dirección. Ahora dice que se envíe el token con un POST o con la cabecera de acceso (o que se active la dirección para una visita y se vuelva a apagar), y las etiquetas que cita son las de esta versión.
 
 ## [2.0.9]
 

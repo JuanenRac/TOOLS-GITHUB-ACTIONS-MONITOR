@@ -14,6 +14,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 - **The webhook through the supervisor of the accounts answered 400 to every delivery**: the process of an account, when the supervisor forwards a delivery to it, could not tell who sent it because a standard module was used without being imported, so a valid signature, a wrong one, a missing one, a repeated delivery and a large body all got the same generic answer. The sender is read again as before (a valid key of the supervisor gives the address it reports, any other falls back to the peer), and a test now looks through the whole package for a standard module used in a function without being imported.
 - **The status label of a detail panel stays on one line**: in the Sentinel tab the label (for example the one that says something must be done) in the heading of each panel of Detail by layer was squeezed to one letter per line, in every language and especially on a phone. It no longer shrinks or breaks inside a word, and a test in a real browser measures it in the eight languages, wide and narrow.
+- **The container guide tells how to open the first session and which image tags exist**: it asked to open the address with the access token, which the monitor has refused by default since the access token stopped travelling in the address. It now says to send the token with a POST or the access header (or to turn the address on for one visit and off again), and the tags it quotes are those of this version.
 
 ### Added
 
