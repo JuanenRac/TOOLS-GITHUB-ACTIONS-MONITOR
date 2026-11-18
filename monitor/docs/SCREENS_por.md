@@ -171,3 +171,13 @@ Os três ecrãs de parede em 4K e num monitor na vertical, com dados inventados:
 ![Sentinelas 4K 3840x2160](../../docs/screenshots/web_screen_sentinels_4k.png)
 
 ![Sentinelas 1080x1920](../../docs/screenshots/web_screen_sentinels_portrait.png)
+
+Os ecrãs de parede com outros temas, com o logótipo de uma organização e a janela que roda sozinha, com dados inventados:
+
+![Visão geral, tema claro](../../docs/screenshots/web_screen_overview_light.png)
+
+![Visão geral com o logótipo e o tema Midnight](../../docs/screenshots/web_screen_overview_midnight.png)
+
+![Sentinelas, contraste elevado](../../docs/screenshots/web_screen_sentinels_contrast.png)
+
+![A janela que roda pelos três ecrãs](../../docs/screenshots/web_screen_rotate.png)

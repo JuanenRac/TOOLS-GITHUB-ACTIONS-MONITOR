@@ -171,3 +171,13 @@
 ![哨兵 4K 3840x2160](../../docs/screenshots/web_screen_sentinels_4k.png)
 
 ![哨兵 1080x1920](../../docs/screenshots/web_screen_sentinels_portrait.png)
+
+使用其他主题、组织标志以及自动轮换窗口的墙面屏幕（虚构数据）：
+
+![总览，浅色主题](../../docs/screenshots/web_screen_overview_light.png)
+
+![带标志和 Midnight 主题的总览](../../docs/screenshots/web_screen_overview_midnight.png)
+
+![哨兵，高对比度](../../docs/screenshots/web_screen_sentinels_contrast.png)
+
+![在三个屏幕之间轮换的窗口](../../docs/screenshots/web_screen_rotate.png)

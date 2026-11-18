@@ -171,3 +171,13 @@ I tre schermi da parete in 4K e su un monitor ruotato, con dati inventati:
 ![Sentinelle 4K 3840x2160](../../docs/screenshots/web_screen_sentinels_4k.png)
 
 ![Sentinelle 1080x1920](../../docs/screenshots/web_screen_sentinels_portrait.png)
+
+Gli schermi da parete in altri temi, con il logo di un'organizzazione e la finestra che ruota da sola, con dati inventati:
+
+![Panoramica, tema chiaro](../../docs/screenshots/web_screen_overview_light.png)
+
+![Panoramica con il logo e il tema Midnight](../../docs/screenshots/web_screen_overview_midnight.png)
+
+![Sentinelle, contrasto elevato](../../docs/screenshots/web_screen_sentinels_contrast.png)
+
+![La finestra che ruota tra i tre schermi](../../docs/screenshots/web_screen_rotate.png)

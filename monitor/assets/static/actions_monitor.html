@@ -2135,7 +2135,7 @@ document.addEventListener("keydown",e=>{
   if(e.key==="?"&&!typing&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();dlgs.help.hidden?openHelp(document.querySelector("nav [aria-selected=true]").dataset.tab,null):dlgClose("help")}});
 /* the restart bar: shown on every tab while a saved setting waits for a restart */
 /* the single budget of the AI (the active notice now counts in it): said once, the first time this version is opened; "understood" is remembered in this browser */
-(function(){const k="seen.ai_budget_notice",b=$("budgetnote");if(!b||store.get(k))return;
+(function(){const k="seen.ai_budget_notice",b=$("budgetnote");if(!b||store.get(k)||QS.get("nowizard")==="1")return;
   $("budgetnote-t").textContent=T("ui.ai_budget_note");const ok=$("budgetnote-b");ok.textContent=T("ui.ai_budget_note_ok");
   ok.addEventListener("click",()=>{store.set(k,"1");b.hidden=true});b.hidden=false})();
 function restartBar(n){const b=$("restartbar");b.style.display=n?"block":"none";b.textContent=n?T("ui.cfg_restart_banner",{n:n}):""}

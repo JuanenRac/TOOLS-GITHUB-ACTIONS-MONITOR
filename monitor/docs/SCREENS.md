@@ -171,3 +171,13 @@ The three wall screens in 4K and on a turned monitor, with invented data:
 ![Sentinels 4K 3840x2160](../../docs/screenshots/web_screen_sentinels_4k.png)
 
 ![Sentinels 1080x1920](../../docs/screenshots/web_screen_sentinels_portrait.png)
+
+The wall screens in other themes, with the logo of an organization and the window that turns by itself, with invented data:
+
+![Overview, light theme](../../docs/screenshots/web_screen_overview_light.png)
+
+![Overview with the logo and the theme Midnight](../../docs/screenshots/web_screen_overview_midnight.png)
+
+![Sentinels, high contrast](../../docs/screenshots/web_screen_sentinels_contrast.png)
+
+![The window that turns through the three screens](../../docs/screenshots/web_screen_rotate.png)

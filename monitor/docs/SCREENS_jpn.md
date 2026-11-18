@@ -171,3 +171,13 @@
 ![センチネル 4K 3840x2160](../../docs/screenshots/web_screen_sentinels_4k.png)
 
 ![センチネル 1080x1920](../../docs/screenshots/web_screen_sentinels_portrait.png)
+
+他のテーマ、組織のロゴ、自動で切り替わるウィンドウを使った壁掛け画面（架空のデータ）：
+
+![概要、ライトテーマ](../../docs/screenshots/web_screen_overview_light.png)
+
+![ロゴとMidnightテーマの概要](../../docs/screenshots/web_screen_overview_midnight.png)
+
+![センチネル、高コントラスト](../../docs/screenshots/web_screen_sentinels_contrast.png)
+
+![3つの画面を順に切り替えるウィンドウ](../../docs/screenshots/web_screen_rotate.png)

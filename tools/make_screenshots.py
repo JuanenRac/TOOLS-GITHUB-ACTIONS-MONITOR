@@ -33,10 +33,11 @@ OUT = ROOT / "docs" / "screenshots"
 EDGES = (r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe", r"C:\Program Files\Microsoft\Edge\Application\msedge.exe", r"C:\Program Files\Google\Chrome\Application\chrome.exe",
          r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe", "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge", "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
          "/usr/bin/microsoft-edge", "/usr/bin/chromium", "/usr/bin/google-chrome")
-TABS = ("interface", "basic", "general", "polling", "cache", "sentinel", "surface", "readiness", "paths", "outputs", "ai", "webhook", "notify", "analytics", "lint", "advanced", "console")
-WEB = [("about", "tab=now&dlg=about", (1400, 900)), ("help", "tab=cfg&dlg=help&topic=sentinel", (1400, 900)), ("now", "tab=now", (1400, 820)), ("alerts", "tab=al", (1400, 820)), ("sentinel", "tab=sent&open=a2", (1400, 1000)), ("sentinel_queue", "tab=sent&open=a5", (1400, 900)), ("sentinel_analytics", "tab=sent&open=a12,a13", (1400, 1200)),
+TABS = ("interface", "basic", "general", "polling", "cache", "quota", "sentinel", "surface", "readiness", "paths", "outputs", "ai", "webhook", "notify", "analytics", "lint", "advanced", "console")
+WEB = [("about", "tab=now&dlg=about", (1400, 1500)), ("help", "tab=cfg&dlg=help&topic=sentinel", (1400, 900)), ("now", "tab=now", (1400, 820)), ("alerts", "tab=al", (1400, 820)), ("sentinel", "tab=sci&open=a2", (1400, 1000)), ("sentinel_queue", "tab=sci&open=a5", (1400, 1050)), ("sentinel_analytics", "tab=sci&open=a12,a13", (1400, 1500)),
        ("size_4k", "tab=now", (3840, 2160)), ("size_ultrawide", "tab=now", (3440, 1440)), ("size_portrait", "tab=now", (1080, 1920)), ("size_phone", "tab=now", (390, 844)),
-       ("charts", "tab=charts", (1400, 820)), ("repositories", "tab=repos", (1400, 820)), ("team", "tab=team", (1400, 820)), ("history", "tab=hist", (1400, 820))] + [(f"settings_{t}", f"tab=cfg&cfgtab={t}", (1400, 820)) for t in TABS]
+       ("charts", "tab=charts", (1400, 820)), ("repositories", "tab=repos", (1400, 820)), ("team", "tab=team", (1400, 820)), ("history", "tab=hist", (1400, 820)),
+       ("menu_groups", "tab=sent", (1400, 1000)), ("sentinel_ci", "tab=sci", (1400, 900)), ("sentinel_collab", "tab=scol", (1400, 900)), ("fleet", "tab=fleet", (1400, 820)), ("reports", "tab=rep", (1400, 820))] + [(f"settings_{t}", f"tab=cfg&cfgtab={t}", (1400, 820)) for t in TABS]
 
 
 LITE_WEB = [("lite_about", "tab=now&dlg=about", (1400, 900)), ("lite_basic", "tab=cfg&cfgtab=basic", (1400, 900)), ("lite_now", "tab=now", (1400, 820)), ("lite_charts", "tab=charts", (1400, 820)), ("lite_history", "tab=hist", (1400, 820)), ("lite_settings", "tab=cfg&cfgtab=general", (1400, 700))]
@@ -49,6 +50,16 @@ ACCOUNTS_WEB = [("accounts_all", "account=all", (1400, 420)), ("accounts_one", "
 
 
 SCREEN_WEB = [(f"screen_{kind}_{tag}", f"/screen/{kind}?lang=en&theme=dark&monitor=1", size) for kind in ("overview", "now", "sentinels") for tag, size in (("1080p", (1920, 1080)), ("4k", (3840, 2160)), ("portrait", (1080, 1920)))]      # the wall screens (docs/SCREENS.md): dark only, one picture per resolution
+
+
+THEME_WEB = [("theme_midnight", "tab=now&theme=Midnight", (1400, 1000))]      # the whole product wears the theme of Settings
+
+
+SCREEN_EXTRA = [("screen_overview_light", "/screen/overview?lang=en&theme=light&monitor=1", (1920, 1080)), ("screen_overview_midnight", "/screen/overview?lang=en&theme=Midnight&monitor=1", (1920, 1080)), ("screen_sentinels_contrast", "/screen/sentinels?lang=en&theme=contrast&monitor=1", (1920, 1080)),
+                ("screen_rotate", "/screen/overview?lang=en&theme=dark&monitor=1&rotate=20", (1920, 1080))]      # the 2.1 wall screens: other themes and the window that turns by itself
+
+
+LOGO_SVG = b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 64"><rect x="2" y="12" width="40" height="40" rx="8" fill="#2563eb"/><path d="M12 38l8-10 8 6 8-12" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text x="50" y="42" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#e2e8f0">Acme Corp</text></svg>'      # an invented organization: the logo of the wall screens
 
 
 FAILED = []      # the pictures that were not made: the exit code says so
@@ -66,6 +77,33 @@ def edge():
     if found:
         return found
     raise SystemExit("No browser was found: install Microsoft Edge, Chrome or Chromium, or set MONITOR_BROWSER to the full path of its program")
+
+
+def updater_shot(target, size=(1200, 1500)):
+    """The page of the updater (monitor_updater.py web) over this very folder. Its first card holds the folders of this computer, so the picture is cut: the header and the list of versions of GitHub."""
+    from PIL import Image
+    port = free_port()
+    child = subprocess.Popen([sys.executable, "-u", "-I", str(MON / "tools" / "monitor_updater.py"), "web", "--no-browser", "--port", str(port), "--dir", str(MON), "--lang", "en", "--no-gh"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    full = Path(tempfile.mkdtemp(prefix="ghamon_upd_")) / "full.png"
+    try:
+        found = re.search(r"http://\S+", child.stdout.readline() or "")
+        if not found:
+            print("the updater did not print its address", flush=True)
+            FAILED.append(str(target))
+            return False
+        time.sleep(3)      # the list of the versions is read from GitHub: a moment to arrive
+        if not shot(found.group(0), str(full), size):
+            return False
+        picture = Image.open(full).convert("RGB")
+        top, cut = picture.crop((0, 0, picture.width, 66)), 370      # the header, then the card of the versions
+        out = Image.new("RGB", (picture.width, 66 + picture.height - cut), (228, 231, 236))
+        out.paste(top, (0, 0))
+        out.paste(picture.crop((0, cut, picture.width, picture.height)), (0, 66))
+        out.crop((0, 0, out.width, min(out.height, 1126))).save(target, optimize=True)      # ends on the line of a version, not in the middle of one
+        return True
+    finally:
+        child.terminate()
+        shutil.rmtree(full.parent, ignore_errors=True)
 
 
 def free_port():
@@ -105,9 +143,9 @@ def shot(url, target, size, tries=3, flags=()):
 
 def clean(text):
     """No local path in a picture: the folder of the repository becomes ~/github_actions_monitor."""
-    for variant in {str(ROOT), str(ROOT).replace("\\", "/"), str(MON), str(MON).replace("\\", "/")}:
+    for variant in {str(ROOT), str(ROOT).replace("\\", "/"), str(ROOT).replace("\\", "\\\\"), str(MON), str(MON).replace("\\", "/"), str(MON).replace("\\", "\\\\")}:
         text = text.replace(variant, "~/github_actions_monitor" + ("/monitor" if variant.endswith("monitor") else ""))
-    return re.sub(r"[A-Za-z]:\\Users\\[^\\\s]+", "~", text)
+    return re.sub(r"[A-Za-z]:(?:\\){1,2}Users(?:\\){1,2}[^\\\s']+", "~", text)      # also the form with doubled bars that an error message writes
 
 
 TERMINAL = """<!doctype html><meta charset="utf-8"><style>
@@ -134,16 +172,15 @@ def console_texts(port, work):
     """{name: (title, command, text)} produced by the real tools against the demo."""
     py = [sys.executable, "-I"]
     out = {}
-    out["read_report"] = ("read_report.py", "py -3 read_report.py --lang en", run(py + [str(MON / "read_report.py"), "--port", str(port), "--lang", "en"]))
+    out["read_report"] = ("read_report.py", "py -3 read_report.py --lang en", run(py + [str(MON / "bin" / "read_report.py"), "--port", str(port), "--lang", "en"]))
     legacy = Path(work) / "legacy"
     shutil.copytree(MON, legacy, ignore=shutil.ignore_patterns("tests", "__pycache__", "docs", "*.json", "actions_monitor_log.txt"))
     shutil.copytree(MON / "assets" / "locales", legacy / "assets" / "locales", dirs_exist_ok=True)
     for name in ("eventos_monitor.jsonl", "eventos_estado.json", "PARTE_CENTINELA_DIA_2000-01-01.txt"):
         (legacy / name).write_text("{}\n", encoding="utf-8")
-    out["about"] = ("tui.py --about", "py -3 tui.py --about --lang en", run(py + [str(MON / "tui.py"), "--about", "--lang", "en"]))
-    out["help_topics"] = ("tui.py --help-topics", "py -3 tui.py --help-topics --lang en", run(py + [str(MON / "tui.py"), "--help-topics", "--lang", "en"]))
-    out["doctor"] = ("--doctor", "py -3 actions_monitor.py --doctor --lang en", run(py + ["-c", "import sys; sys.path.insert(0, sys.argv[1]); from github_actions_monitor.cli import doctor; from github_actions_monitor import i18n; i18n.set_language('en'); print(doctor.text(doctor.run(), i18n.t, 'lite'))", str(MON / "src")]))
-    out["migrate_state"] = ("migrate_state.py", "py -3 migrate_state.py --lang en", run(py + [str(legacy / "migrate_state.py"), "--lang", "en"], cwd=legacy))
+    out["about"] = ("tui.py --about", "py -3 tui.py --about --lang en", run(py + [str(MON / "bin" / "tui.py"), "--about", "--lang", "en"]))
+    out["help_topics"] = ("tui.py --help-topics", "py -3 tui.py --help-topics --lang en", run(py + [str(MON / "bin" / "tui.py"), "--help-topics", "--lang", "en"]))
+    out["migrate_state"] = ("migrate_state.py", "py -3 migrate_state.py --lang en", run(py + [str(legacy / "bin" / "migrate_state.py"), "--lang", "en"], cwd=legacy))
     catalog = Path(work) / "catalog"
     catalog.mkdir()
     (catalog / "ecosystems.json").write_text(json.dumps({"ecosystems": {"alpha": {"label": "Alpha", "prefixes": ["demo-alpha-"], "tool": "demo_fetch_and_sign.py"}, "beta": {"label": "Beta", "prefixes": ["demo-beta-"], "tool": "demo_fetch_and_sign.py"}}}), encoding="utf-8")
@@ -151,12 +188,12 @@ def console_texts(port, work):
                                                       "demo-alpha-app": {"workflow": "package-build.yml", "tool": "demo_fetch_and_sign.py", "extra": []}}), encoding="utf-8")
     (catalog / "profiles.json").write_text(json.dumps({"min_rate_remaining": 1500, "canary_wait_seconds": 1800, "profiles": {"release": {"description": "Every signed target of the demo ecosystems.", "workflows": ["firmware-build.yml", "package-build.yml"],
                                                                                                                                        "ecosystems": ["alpha", "beta"], "canary": True}}}), encoding="utf-8")
-    env = {"MONITOR_ECOSYSTEMS_FILE": str(catalog / "ecosystems.json"), "MONITOR_TARGETS_FILE": str(catalog / "targets.json"), "MONITOR_PROFILES_FILE": str(catalog / "profiles.json")}
-    out["plan"] = ("gha_dispatch_all.py plan", "py -3 gha_dispatch_all.py --lang en plan --profile release", run(py + [str(MON / "gha_dispatch_all.py"), "--lang", "en", "plan", "--profile", "release"], env=env))
+    env = {"MONITOR_ECOSYSTEMS_FILE": str(catalog / "ecosystems.json"), "MONITOR_TARGETS_FILE": str(catalog / "targets.json"), "MONITOR_PROFILES_FILE": str(catalog / "profiles.json"), "MONITOR_ROOT": str(work)}
+    out["plan"] = ("gha_dispatch_all.py plan", "py -3 gha_dispatch_all.py --lang en plan --profile release", run(py + [str(MON / "bin" / "gha_dispatch_all.py"), "--lang", "en", "plan", "--profile", "release"], env=env))
     repo = Path(work) / "demo-alpha-app" / ".github" / "workflows"
     repo.mkdir(parents=True)
     (repo / "ci.yml").write_text("name: CI\non: [push]\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-python@v5\n      - run: echo \"${{ github.event.issue.title }}\"\n", encoding="utf-8")
-    out["lint"] = ("lint_workflows.py", "py -3 lint_workflows.py demo-alpha-app --lang en", run(py + [str(MON / "lint_workflows.py"), str(repo.parent.parent), "--lang", "en"]).replace(str(Path(work)), "."))
+    out["lint"] = ("lint_workflows.py", "py -3 lint_workflows.py demo-alpha-app --lang en", run(py + [str(MON / "bin" / "lint_workflows.py"), str(repo.parent.parent), "--lang", "en"]).replace(str(Path(work)), "."))
     return out
 
 
@@ -183,6 +220,7 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     FAILED.clear()
     print("browser:", edge(), "| output:", OUT, flush=True)
+    os.environ["MONITOR_DATA_DIR"] = tempfile.mkdtemp(prefix="ghamon_data_")      # the logo, the backups and the rest of the demo live here and nowhere else
     port = free_port()
     demo = subprocess.Popen([sys.executable, "-I", str(ROOT / "tools" / "demo_monitor.py"), str(port)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     work = tempfile.mkdtemp(prefix="ghamon_shots_")
@@ -204,12 +242,29 @@ def main():
             return 1
         wanted = lambda name: not args.only or name in args.only   # noqa: E731
         if args.web or both:
+            import urllib.request
+            try:
+                urllib.request.urlopen(urllib.request.Request(f"http://127.0.0.1:{port}/api/screens/logo", data=LOGO_SVG, method="POST", headers={"Content-Type": "image/svg+xml"}), timeout=10).read()
+            except OSError as error:
+                print("the logo of the demo organization was not uploaded:", error, flush=True)
+        if args.web or both:
             for name, query, size in WEB:
                 for theme in ("light", "dark"):
                     if wanted(f"web_{name}"):
                         shot(f"http://127.0.0.1:{port}/?{query}&theme={theme}&lang=en&nowizard=1", str(OUT / f"web_{name}_{theme}.png"), size)
                         print("web", name, theme, flush=True)
         if args.web or both:
+            if wanted("web_updater"):
+                updater_shot(OUT / "web_updater.png")
+                print("web updater", flush=True)
+            for name, query, size in THEME_WEB:
+                if wanted(f"web_{name}"):
+                    shot(f"http://127.0.0.1:{port}/?{query}&lang=en&nowizard=1", str(OUT / f"web_{name}.png"), size)
+                    print("web", name, flush=True)
+            for name, path, size in SCREEN_EXTRA:
+                if wanted(f"web_{name}"):
+                    shot(f"http://127.0.0.1:{port}{path}", str(OUT / f"web_{name}.png"), size, flags=("--force-prefers-reduced-motion",))
+                    print("web", name, flush=True)
             for name, path, size in SCREEN_WEB:
                 if wanted(f"web_{name}"):
                     shot(f"http://127.0.0.1:{port}{path}", str(OUT / f"web_{name}.png"), size, flags=("--force-prefers-reduced-motion",))      # the entrance of the cards is an animation: the picture is taken with the page at rest
@@ -258,7 +313,7 @@ def main():
                     if wanted(f"console_{name}"):
                         page = Path(work) / f"{name}_{theme}.html"
                         page.write_text(console_page(title, command, text, theme), encoding="utf-8")
-                        shot(page.as_uri(), str(OUT / f"console_{name}_{theme}.png"), (1100, 40 + 22 * (len(text.splitlines()) + 4)))
+                        shot(page.as_uri(), str(OUT / f"console_{name}_{theme}.png"), (1100, 40 + 22 * (sum(1 + len(line) // 118 for line in clean(text).splitlines()) + 4)))      # a long line wraps: it takes more than one row
                         print("console", name, theme, flush=True)
             try:
                 for theme in ("light", "dark"):

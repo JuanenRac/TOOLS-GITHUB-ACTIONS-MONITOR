@@ -153,9 +153,17 @@ Ein zweites, einfacheres Produkt im selben Paket: die Seite dessen, was läuft u
 ### Die Seite
 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_now_light.png"><img src="docs/screenshots/web_now_dark.png" alt="Jetzt" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_menu_groups_light.png"><img src="docs/screenshots/web_menu_groups_dark.png" alt="Das Menü in Gruppen: Beobachten, Wächter, Team, Berichte und Lernen" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_ci_light.png"><img src="docs/screenshots/web_sentinel_ci_dark.png" alt="Wächter: CI" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_collab_light.png"><img src="docs/screenshots/web_sentinel_collab_dark.png" alt="Wächter: Zusammenarbeit" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_fleet_light.png"><img src="docs/screenshots/web_fleet_dark.png" alt="Flotte: alle Repositorys auf einen Blick" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_reports_light.png"><img src="docs/screenshots/web_reports_dark.png" alt="Berichte" width="92%"></picture></p>
+<p align="center"><img src="docs/screenshots/web_theme_midnight.png" alt="Die ganze Seite in einem anderen Thema (Midnight)" width="92%"></p>
 <p align="center"><img src="docs/screenshots/web_screen_overview_1080p.png" alt="Wandanzeige: Übersicht" width="92%"></p>
 <p align="center"><img src="docs/screenshots/web_screen_now_1080p.png" alt="Wandanzeige: Gerade jetzt" width="92%"></p>
 <p align="center"><img src="docs/screenshots/web_screen_sentinels_1080p.png" alt="Wandanzeige: Wächter" width="92%"></p>
+<p align="center"><img src="docs/screenshots/web_screen_rotate.png" alt="Wandanzeige, die sich von selbst durch die drei Bildschirme dreht" width="92%"></p>
+<p align="center"><img src="docs/screenshots/web_screen_overview_midnight.png" alt="Wandanzeige mit dem Logo der Organisation und eigenem Thema" width="92%"></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_alerts_light.png"><img src="docs/screenshots/web_alerts_dark.png" alt="Alarme: alle Wächter in einer Liste, mit lokalen Stummschaltungen" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_light.png"><img src="docs/screenshots/web_sentinel_dark.png" alt="Wächter" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_sentinel_queue_light.png"><img src="docs/screenshots/web_sentinel_queue_dark.png" alt="Signatur-Warteschlange (Dringendstes zuerst)" width="92%"></picture></p>
@@ -166,6 +174,7 @@ Ein zweites, einfacheres Produkt im selben Paket: die Seite dessen, was läuft u
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_history_light.png"><img src="docs/screenshots/web_history_dark.png" alt="Verlauf" width="92%"></picture></p>
 
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_about_light.png"><img src="docs/screenshots/web_about_dark.png" alt="Über" width="92%"></picture></p>
+<p align="center"><img src="docs/screenshots/web_updater.png" alt="Der Updater: alle veröffentlichten Versionen, um auf jede davon zu wechseln" width="92%"></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_help_light.png"><img src="docs/screenshots/web_help_dark.png" alt="Hilfe, durchsuchbar und offline" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_basic_light.png"><img src="docs/screenshots/web_settings_basic_dark.png" alt="Einstellungen · Grundlagen: Tarif, Kontingente und Erkennung" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_network_now_light.png"><img src="docs/screenshots/web_network_now_dark.png" alt="Der Netzwerkmodus: die dauerhafte rote Leiste" width="92%"></picture></p>
@@ -181,6 +190,7 @@ Ein zweites, einfacheres Produkt im selben Paket: die Seite dessen, was läuft u
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_general_light.png"><img src="docs/screenshots/web_settings_general_dark.png" alt="Einstellungen · Allgemein" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_polling_light.png"><img src="docs/screenshots/web_settings_polling_dark.png" alt="Einstellungen · Aktualisierung und Grenzen" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_cache_light.png"><img src="docs/screenshots/web_settings_cache_dark.png" alt="Einstellungen · Lesen und Cache" width="92%"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_quota_light.png"><img src="docs/screenshots/web_settings_quota_dark.png" alt="Einstellungen · Kontingent" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_sentinel_light.png"><img src="docs/screenshots/web_settings_sentinel_dark.png" alt="Einstellungen · Wächter" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_surface_light.png"><img src="docs/screenshots/web_settings_surface_dark.png" alt="Einstellungen · Oberflächenprüfungen (A10)" width="92%"></picture></p>
 <p align="center"><picture><source media="(prefers-color-scheme: light)" srcset="docs/screenshots/web_settings_readiness_light.png"><img src="docs/screenshots/web_settings_readiness_dark.png" alt="Einstellungen · Bereitschaft (A11)" width="92%"></picture></p>

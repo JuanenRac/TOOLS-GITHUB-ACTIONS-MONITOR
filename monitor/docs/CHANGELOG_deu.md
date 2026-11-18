@@ -17,6 +17,11 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 - **`make_release.py --progress` zeigt den Fortschritt der Suiten**: Mit der Option geben sowohl die gewöhnliche Suite als auch die der sauberen Installation alle 250 Tests eine Zeile aus, sodass das Gate nicht mehr fast eine Stunde lang schweigt.
 
+### Geändert
+
+- **Die Screenshots der README zeigen die aktuelle Version**: alle Bilder der Seite, der Wandanzeigen und der Konsolenwerkzeuge wurden mit erfundenen Daten neu aufgenommen. Neue Bilder zeigen das Menü in Gruppen, die Wächter für CI und Zusammenarbeit, die Flotte, die Berichte, die ganze Seite in einem anderen Thema und die Wandanzeigen mit dem Logo einer Organisation, in anderen Themen und von selbst drehend; das Fenster Info ist höher, damit die Karte für Betrieb und Sicherung sichtbar ist.
+- **Eine Adresse, die den Assistenten beim ersten Start abschaltet, blendet auch den einmaligen Hinweis zum Budget der KI aus**, sodass ein Bild aus einem sauberen Browser die Seite im Ruhezustand zeigt.
+
 ## [2.1.0]
 
 ### Hinzugefügt

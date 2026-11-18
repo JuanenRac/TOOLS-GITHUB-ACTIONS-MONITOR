@@ -171,3 +171,13 @@ Las tres pantallas de pared en 4K y en un monitor girado, con datos inventados:
 ![Centinelas 4K 3840x2160](../../docs/screenshots/web_screen_sentinels_4k.png)
 
 ![Centinelas 1080x1920](../../docs/screenshots/web_screen_sentinels_portrait.png)
+
+Las pantallas de pared con otros temas, con el logo de una organización y la ventana que gira sola, con datos inventados:
+
+![General, tema claro](../../docs/screenshots/web_screen_overview_light.png)
+
+![General con el logo y el tema Midnight](../../docs/screenshots/web_screen_overview_midnight.png)
+
+![Centinelas, alto contraste](../../docs/screenshots/web_screen_sentinels_contrast.png)
+
+![La ventana que gira por las tres pantallas](../../docs/screenshots/web_screen_rotate.png)
