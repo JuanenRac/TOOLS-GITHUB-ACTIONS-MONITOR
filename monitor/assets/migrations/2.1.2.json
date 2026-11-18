@@ -1,0 +1,119 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "2.1.2",
+ "previous": "2.1.1",
+ "digest": "d7731445c73d83d4567bb6763f7136af1b2e91dd9e2094016036812b0034a22c",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "compare.cache_seconds",
+    "kind": "int",
+    "bounds": [
+     0,
+     3600
+    ],
+    "default": 60
+   },
+   {
+    "key": "compare.default_days_filter",
+    "kind": "enum",
+    "bounds": [
+     "all",
+     "workdays",
+     "weekend"
+    ],
+    "default": "all"
+   },
+   {
+    "key": "compare.default_window_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     90
+    ],
+    "default": 7
+   },
+   {
+    "key": "compare.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "compare.include_in_report",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "compare.min_days_of_history",
+    "kind": "int",
+    "bounds": [
+     1,
+     3650
+    ],
+    "default": 14
+   },
+   {
+    "key": "compare.min_repo_runs",
+    "kind": "int",
+    "bounds": [
+     1,
+     1000
+    ],
+    "default": 3
+   },
+   {
+    "key": "compare.min_resolved",
+    "kind": "int",
+    "bounds": [
+     1,
+     1000
+    ],
+    "default": 3
+   },
+   {
+    "key": "compare.min_runs_per_window",
+    "kind": "int",
+    "bounds": [
+     1,
+     10000
+    ],
+    "default": 20
+   },
+   {
+    "key": "compare.min_snapshots",
+    "kind": "int",
+    "bounds": [
+     1,
+     10000
+    ],
+    "default": 12
+   },
+   {
+    "key": "compare.top_changes",
+    "kind": "int",
+    "bounds": [
+     3,
+     50
+    ],
+    "default": 10
+   },
+   {
+    "key": "compare.workdays",
+    "kind": "names",
+    "default": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5"
+    ]
+   }
+  ],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {}
+}

@@ -61,7 +61,7 @@ def changes(score, alert_ids, previous):
 
 
 def compare_part(answer):
-    """A short summary of the comparison with the period before (`compare.service.build`): its state and one line per figure. None while the comparison was not asked for."""
+    """A short summary of the comparison with the period before (`compare.compare_service.build`): its state and one line per figure. None while the comparison was not asked for."""
     if not isinstance(answer, dict) or not answer.get("enabled"):
         return None
     rows = [{"metric": _cut(name, 30), "now": e.get("now"), "base": e.get("base"), "direction": e.get("direction"), "state": e.get("state")} for name, e in (answer.get("metrics") or {}).items() if isinstance(e, dict)]

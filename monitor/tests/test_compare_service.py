@@ -16,7 +16,8 @@ sys.path.insert(0, str(HERE / "src"))
 sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
-from github_actions_monitor.compare import changes, config, metrics, resolution, service, windows  # noqa: E402
+from github_actions_monitor.compare import changes, config, metrics, resolution, windows  # noqa
+from github_actions_monitor.compare import compare_service as service  # noqa: E402
 from github_actions_monitor.scoring import ledger as score_ledger  # noqa: E402
 from github_actions_monitor.storage import file_storage  # noqa: E402
 

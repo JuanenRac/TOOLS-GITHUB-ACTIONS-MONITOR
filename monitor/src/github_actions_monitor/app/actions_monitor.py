@@ -1865,7 +1865,7 @@ def report_gather():
         alerts = []
     gathered = (snapshot, alerts, repo_view.team_view(health_views()))
     try:
-        from github_actions_monitor.compare import config as compare_config, service as compare_service
+        from github_actions_monitor.compare import config as compare_config, compare_service
         if compare_config.settings(config)["include_in_report"]:      # the comparison with the period before, only when the person asked for it
             gathered += (compare_service.build(storage, account, config),)
     except Exception as error:   # noqa: BLE001 - the report still has the rest
@@ -3357,7 +3357,7 @@ class Handler(BaseHTTPRequestHandler):
             if not self.guard():
                 return
             from urllib.parse import parse_qs
-            from github_actions_monitor.compare import service as compare_service, windows as compare_windows
+            from github_actions_monitor.compare import compare_service, windows as compare_windows
             from github_actions_monitor.storage import runtime
             ask = {k: v[0][:80] for k, v in parse_qs(self.path.partition("?")[2]).items() if v}
             fmt = ask.pop("format", "json")

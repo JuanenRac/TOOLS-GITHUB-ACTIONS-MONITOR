@@ -19,7 +19,7 @@ sys.path.insert(0, str(HERE / "tests"))
 
 import _testenv  # noqa: F401,E402
 from github_actions_monitor.app import actions_monitor  # noqa: E402
-from github_actions_monitor.compare import metrics, service  # noqa: E402
+from github_actions_monitor.compare import compare_service as service, metrics  # noqa: E402
 from github_actions_monitor.scoring import ledger as score_ledger  # noqa: E402
 from github_actions_monitor.storage import file_storage, runtime  # noqa: E402
 from test_compare_service import NOW, make_ledger  # noqa: E402

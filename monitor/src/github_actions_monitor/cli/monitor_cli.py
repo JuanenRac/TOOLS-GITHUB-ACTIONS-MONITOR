@@ -310,7 +310,7 @@ def cmd_compare(ctx):
         code = EXIT_ALERTS
     from github_actions_monitor.compare import metrics as compare_metrics
     if fmt in ("ndjson", "csv"):
-        from github_actions_monitor.compare import service as compare_service
+        from github_actions_monitor.compare import compare_service
         return answer, compare_service.render(answer, fmt)[1].splitlines(), code
     now = wins.get("now") or {}
     end = tzdisplay.stamp(now["to"]) if isinstance(now.get("to"), (int, float)) else "-"
