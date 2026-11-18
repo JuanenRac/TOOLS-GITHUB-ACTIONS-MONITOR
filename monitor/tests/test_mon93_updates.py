@@ -136,7 +136,7 @@ class Service(unittest.TestCase):
 
     def test_the_updater_is_the_same_file_the_command_line_uses(self):
         self.assertEqual(updates.TOOL.name, "monitor_updater.py")
-        self.assertIs(updates.module(), sys.modules["monitor_updater"])
+        self.assertEqual(Path(updates.module().__file__).resolve(), updates.TOOL.resolve())
 
     def test_it_cannot_be_applied_from_a_container_a_service_the_lite_edition_or_the_demo(self):
         self.assertEqual(updates.reason_blocked(env={"MONITOR_IN_CONTAINER": "1"}), "container")

@@ -51,6 +51,10 @@ def module():
     if _module["obj"] is None:
         if not TOOL.is_file():
             return None
+        known = sys.modules.get("monitor_updater")
+        if known is not None and Path(getattr(known, "__file__", "") or "").resolve() == TOOL.resolve():
+            _module["obj"] = known      # already loaded from this very file (the command line, a test): one copy, not two
+            return known
         spec = importlib.util.spec_from_file_location("monitor_updater", TOOL)
         loaded = importlib.util.module_from_spec(spec)
         sys.modules["monitor_updater"] = loaded
