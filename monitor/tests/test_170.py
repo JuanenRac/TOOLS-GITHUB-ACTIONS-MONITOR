@@ -560,7 +560,7 @@ class LiveStatus(unittest.TestCase):
                   "try:\n    urllib.request.urlopen('http://127.0.0.1:%d/api/live-status' % s.server_address[1], timeout=5); print('200')\n"
                   "except urllib.error.HTTPError as e:\n    print(e.code)\n")
         done = subprocess.run([sys.executable, "-I", "-c", "import sys; sys.path.insert(0, %r); sys.argv = ['x', '--lite']; from github_actions_monitor.app import actions_monitor as am; am.enable_lite(); am.gh_read = am.gh = (lambda *a, **k: (_ for _ in ()).throw(RuntimeError('no network in this test'))); %s" % (str(HERE / "src"), script)],
-                              capture_output=True, text=True, timeout=60)
+                              capture_output=True, text=True, timeout=60, env=_testenv.isolated_env(self))
         self.assertEqual(done.stdout.strip(), "404", done.stdout + done.stderr)
 
 
@@ -572,7 +572,7 @@ class LiteKnowsNothing(unittest.TestCase):
 
     def run_lite(self, code):
         script = "import sys; sys.path.insert(0, %r); sys.argv = ['x', '--lite']; from github_actions_monitor.app import actions_monitor as am; am.enable_lite(); am.gh_read = am.gh = (lambda *a, **k: (_ for _ in ()).throw(RuntimeError('no network in this test'))); %s" % (str(HERE / "src"), code)
-        done = subprocess.run([sys.executable, "-I", "-c", script], capture_output=True, text=True, timeout=60)
+        done = subprocess.run([sys.executable, "-I", "-c", script], capture_output=True, text=True, timeout=60, env=_testenv.isolated_env(self))
         self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
         return done.stdout.strip()
 
@@ -585,14 +585,14 @@ class LiteKnowsNothing(unittest.TestCase):
         self.assertEqual(out, "[]")
 
     def test_the_options_of_the_accounts_are_not_in_the_help_of_lite(self):
-        done = subprocess.run([sys.executable, str(HERE / "bin" / "actions_monitor.py"), "--lite", "--help"], capture_output=True, text=True, timeout=60, cwd=str(HERE))
+        done = subprocess.run([sys.executable, str(HERE / "bin" / "actions_monitor.py"), "--lite", "--help"], capture_output=True, text=True, timeout=60, cwd=str(HERE), env=_testenv.isolated_env(self))
         self.assertEqual(done.returncode, 0, done.stderr)
         for option in ("--account", "--accounts", "--migrate-accounts", "--apply"):
             self.assertNotIn(option, done.stdout, option)
 
     def test_the_complete_edition_has_the_options_of_the_accounts_in_its_help(self):
         done = subprocess.run([sys.executable, str(HERE / "bin" / "actions_monitor.py"), "--help"], capture_output=True, text=True, timeout=60, cwd=str(HERE),
-                              env=dict(os.environ, MONITOR_ACCOUNTS_DIR=str(Path(tempfile.gettempdir()) / "no_such_accounts_dir")))
+                              env=_testenv.isolated_env(self, MONITOR_ACCOUNTS_DIR=str(Path(tempfile.gettempdir()) / "no_such_accounts_dir")))
         self.assertEqual(done.returncode, 0, done.stderr)
         for option in ("--account", "--accounts", "--migrate-accounts"):
             self.assertIn(option, done.stdout, option)
@@ -604,7 +604,7 @@ class LiteKnowsNothing(unittest.TestCase):
         self.assertIn("const ACC=/*ACCOUNTS_DATA*/null;", page, "only the supervisor fills it in")
 
     def test_without_an_accounts_folder_the_complete_monitor_is_the_old_single_one(self):
-        with tempfile.TemporaryDirectory() as tmp, mock.patch.dict(os.environ, {"MONITOR_ACCOUNTS_DIR": str(Path(tmp) / "accounts")}):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.dict(os.environ, {"MONITOR_ACCOUNTS_DIR": str(Path(tmp) / "accounts"), "MONITOR_DATA_DIR": ""}):
             self.assertEqual(accounts.layout(), "single")
             from github_actions_monitor.app import actions_monitor as am
             self.assertEqual((am.CHILD["account"], am.state_dir()), ("", am.HERE / "data"))

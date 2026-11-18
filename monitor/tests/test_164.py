@@ -127,7 +127,7 @@ class LiteIsolation(unittest.TestCase):
 
     def run_lite(self, code):
         script = "import sys; sys.path.insert(0, %r); sys.argv = ['x', '--lite']; from github_actions_monitor.app import actions_monitor as am; am.enable_lite(); %s" % (str(HERE / "src"), code)
-        done = subprocess.run([sys.executable, "-I", "-c", script], capture_output=True, text=True, timeout=90)
+        done = subprocess.run([sys.executable, "-I", "-c", script], capture_output=True, text=True, timeout=90, env=_testenv.isolated_env(self))
         self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
         return done.stdout.strip()
 

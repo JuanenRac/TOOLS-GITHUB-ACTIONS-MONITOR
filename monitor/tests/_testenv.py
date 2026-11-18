@@ -12,6 +12,19 @@ os.environ["MONITOR_TARGETS_FILE"] = str(Path(__file__).resolve().parent / "fixt
 os.environ["MONITOR_ECOSYSTEMS_FILE"] = str(Path(__file__).resolve().parent / "fixtures" / "fixture_ecosystems.json")
 os.environ["MONITOR_PROFILES_FILE"] = str(Path(__file__).resolve().parent / "fixtures" / "fixture_profiles.json")
 os.environ["MONITOR_TIMEZONE"] = "utc"      # texts for people in UTC unless a test asks for another zone (tests/test_timezone.py)
+# The four folders of the whole run (configuration, data, logs and AI) are a temporary folder: a test that writes the log of actions, the lessons of the AI, the key of a screen or the settings (the real paths) leaves nothing next to the code. A test that wants a place of its own
+# sets its own variable (tests/test_183_root_layout.py).
+import atexit  # noqa: E402
+import shutil  # noqa: E402
+import tempfile  # noqa: E402
+
+if not any(os.environ.get(name) for name in ("MONITOR_LOGS_DIR", "MONITOR_AI_DIR", "MONITOR_DATA_DIR", "MONITOR_CONFIG_DIR")):
+    _SUITE_DIR = tempfile.mkdtemp(prefix="ghamon_suite_")
+    atexit.register(shutil.rmtree, _SUITE_DIR, True)
+    os.environ["MONITOR_LOGS_DIR"] = os.path.join(_SUITE_DIR, "logs")
+    os.environ["MONITOR_AI_DIR"] = os.path.join(_SUITE_DIR, "ai")
+    os.environ["MONITOR_DATA_DIR"] = os.path.join(_SUITE_DIR, "data")
+    os.environ["MONITOR_CONFIG_DIR"] = os.path.join(_SUITE_DIR, "config")
 from github_actions_monitor import i18n  # noqa: E402
 from github_actions_monitor.app import toolconfig  # noqa: E402
 
@@ -63,6 +76,33 @@ def guard(case):
                     pass
     case.addCleanup(remove_new)
     return remove_new
+
+
+def isolated_env(case, **extra):
+    """The environment for a process a test starts: its configuration, data, logs and AI folders are a temporary folder of its own (removed when the test is over), so that the process neither reads what an
+    earlier run or a person left next to the code (a first start that says what it copied) nor writes anything there. `extra` adds or replaces variables."""
+    import tempfile
+    tmp = tempfile.TemporaryDirectory(prefix="ghamon_env_")
+    case.addCleanup(tmp.cleanup)
+    base = Path(tmp.name)
+    env = dict(os.environ)
+    for name in ("MONITOR_CONFIG", "MONITOR_PATHS_FILE"):
+        env.pop(name, None)
+    env.update({"MONITOR_CONFIG_DIR": str(base / "config"), "MONITOR_DATA_DIR": str(base / "data"), "MONITOR_LOGS_DIR": str(base / "logs"), "MONITOR_AI_DIR": str(base / "ai")})
+    env.update(extra)
+    return env
+
+
+def files_next_to_the_code():
+    """Every file under the product folder (the folders of bytecode and of git left out): what the suite must not add to."""
+    found = set()
+    for folder, dirs, names in os.walk(Path(__file__).resolve().parent.parent):
+        dirs[:] = [d for d in dirs if d not in ("__pycache__", ".git")]
+        found.update(os.path.relpath(os.path.join(folder, n), Path(__file__).resolve().parent.parent) for n in names if not n.endswith(".pyc"))
+    return found
+
+
+FILES_AT_START = files_next_to_the_code()      # taken when the first test module is imported: the files that were there before any test ran
 
 
 import unittest  # noqa: E402
