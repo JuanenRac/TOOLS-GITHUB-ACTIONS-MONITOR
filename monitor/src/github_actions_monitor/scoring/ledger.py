@@ -167,7 +167,7 @@ def hour_key(now):
     return datetime.fromtimestamp(now, timezone.utc).strftime("%Y-%m-%dT%H")
 
 
-def tick(storage, account_id, config, runs, collab_alerts, now=None, force=False, collab_known=True, security=None, activity=None):
+def tick(storage, account_id, config, runs, collab_alerts, now=None, force=False, collab_known=True, security=None, activity=None, keep_days_min=0):
     """One pass: updates the ledger, writes the snapshot of the hour and returns it; None when the score is off or the pass is not due. Needs the storage of the account."""
     now = time.time() if now is None else now
     cfg = engine.settings(config)
@@ -181,7 +181,7 @@ def tick(storage, account_id, config, runs, collab_alerts, now=None, force=False
     ledger = clean_ledger(stored, now)
     if not force and now - ledger["last_tick"] < MIN_INTERVAL:
         return None
-    keep_days = min(180, 2 * cfg["window_days"] + 1)
+    keep_days = min(180, max(2 * cfg["window_days"] + 1, keep_days_min))      # the comparison (compare/) asks to keep two of its windows when it is on
     update_ledger(ledger, runs, collab_alerts, now, keep_days, collab_known)
     ledger["last_tick"] = now
     snapshot = make_snapshot(ledger, cfg, now, account_id, security, activity)

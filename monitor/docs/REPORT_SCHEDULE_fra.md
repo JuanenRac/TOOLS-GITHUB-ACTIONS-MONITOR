@@ -36,3 +36,7 @@ Il n'y a pas de PDF propre : ouvrez la page HTML et imprimez-la en PDF depuis le
 - L'onglet **Équipe** a une section Rapports : la liste, un lien vers chaque fichier et le bouton **Écrire un rapport maintenant** (un administrateur, depuis cet ordinateur).
 - `GET /api/report-files` les liste, `GET /api/report-files/file?name=...` en ouvre un (seulement un fichier que le service a écrit pour ce compte) et `POST /api/report-files/run` en écrit un maintenant.
 - En mode équipe, quiconque peut voir le compte peut lire ses rapports ; en écrire un maintenant est réservé à un administrateur sur cet ordinateur. L'édition Lite n'a rien de tout cela.
+
+## Comparaison avec la période précédente
+
+Avec `compare.include_in_report` activé (désactivé par défaut, et seulement tant que `compare.enabled` est actif), le rapport comporte aussi une courte section qui met cette période face à la précédente, une ligne par chiffre. Voir [COMPARE_fra.md](COMPARE_fra.md).

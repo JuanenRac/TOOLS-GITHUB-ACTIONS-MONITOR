@@ -522,6 +522,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <section><h2 data-i18n="ui.c_rate"></h2><div class="body" id="rates"></div></section>
 <section><h2 data-i18n="ui.c_dur"></h2><div class="body" id="durations"></div></section>
 <section class="wide"><h2 data-i18n="ui.c_timeline"></h2><div class="body" id="timeline"></div></section>
+<section class="wide" id="cmp-sec" hidden><h2 data-i18n="ui.cmp_title"></h2><div class="body"><div class="tbl-tools" id="cmp-tools"><label><span data-i18n="ui.cmp_window"></span> <select id="cmp-window"><option value="7" data-i18n="ui.cmp_w7"></option><option value="30" data-i18n="ui.cmp_w30"></option></select></label> <label><span data-i18n="ui.cmp_days"></span> <select id="cmp-days"><option value="all" data-i18n="ui.cmp_d_all"></option><option value="workdays" data-i18n="ui.cmp_d_workdays"></option><option value="weekend" data-i18n="ui.cmp_d_weekend"></option></select></label> <label><span data-i18n="ui.cmp_baseline"></span> <select id="cmp-base"><option value="previous" data-i18n="ui.cmp_b_previous"></option><option value="year_ago" data-i18n="ui.cmp_b_year_ago"></option></select></label></div><div class="mut" id="cmp-state" role="status"></div><table><thead><tr id="cmp-head"></tr></thead><tbody id="cmp-rows"></tbody></table><div class="mut" id="cmp-alerts"></div><div id="cmp-changes"></div></div></section>
 </div>
 <div class="tab" id="t-repos" role="tabpanel" aria-labelledby="n-repos">
 <section><h2 data-i18n="ui.r_title"></h2><div class="body"><div class="tbl-tools" id="repos-tools"></div><p class="mut" id="sampling-note" role="status" hidden></p><table><thead><tr id="repos-head"></tr></thead><tbody id="repo-rows"></tbody></table></div></section>
@@ -850,7 +851,7 @@ const TABS=LITE?["now","charts","repos","hist","cfg"]:["now","al","charts","sent
 /* the address of a tab: #reports and #lessons for the two that used to be sections of the alerts; the old addresses (#alerts, #al, #alerts/reports, #al/lessons, #rep-box, #les-box) still open the right panel */
 const TABHASH={rep:"reports",les:"lessons",team:"team-health",trep:"team-reports",sent:"sentinel",sci:"sentinel-ci",scol:"sentinel-collab",ssec:"sentinel-security"},TABALIAS={sentinel:"sent","sentinel-ci":"sci","sentinel-collab":"scol","sentinel-security":"ssec",reports:"rep",lessons:"les","rep-box":"rep","les-box":"les",alerts:"al","team-health":"team","team-reports":"trep","fleet-sec":"fleet","rs-sec":"trep"};
 function tabOf(h){h=String(h||"").replace(/^#/,"").replace(/\/+$/,"").toLowerCase();if(!h)return"";const p=h.split("/");if((p[0]==="alerts"||p[0]==="al")&&p.length>1)return TABALIAS[p[1]]||"al";if((p[0]==="sentinel"||p[0]==="sent")&&p.length>1)return {ci:"sci",collab:"scol",security:"ssec",sec:"ssec"}[p[1]]||"sent";if(p[0]==="team"&&p.length>1)return p[1]==="fleet"?"fleet":(p[1]==="reports"?"trep":"team");return TABALIAS[h]||h}
-function showTab(t){if(!TABS.includes(t))t="now";TABS.forEach(x=>{$("t-"+x).classList.toggle("on",x===t);$("n-"+x).setAttribute("aria-selected",x===t)});store.set("am-tab",t);CURTAB=t;applyGroups();setViewTitle();if(DATA&&t==="charts")setTimeout(()=>render(DATA),30);try{const hs="#"+(TABHASH[t]||t);if(location.hash!==hs)window.history.replaceState(null,"",hs)}catch(e){}}
+function showTab(t){if(!TABS.includes(t))t="now";TABS.forEach(x=>{$("t-"+x).classList.toggle("on",x===t);$("n-"+x).setAttribute("aria-selected",x===t)});store.set("am-tab",t);CURTAB=t;applyGroups();setViewTitle();if(DATA&&t==="charts")setTimeout(()=>render(DATA),30);if(t==="charts")cmpLoad();try{const hs="#"+(TABHASH[t]||t);if(location.hash!==hs)window.history.replaceState(null,"",hs)}catch(e){}}
 document.querySelector("nav").addEventListener("click",e=>{const b=e.target.closest("button[data-tab]");if(b)showTab(b.dataset.tab)});
 document.querySelector("nav").addEventListener("keydown",e=>{if(!["ArrowRight","ArrowLeft","ArrowDown","ArrowUp"].includes(e.key))return;e.preventDefault();const V=TABS.filter(x=>!$("n-"+x).hidden),i=V.findIndex(x=>$("n-"+x).getAttribute("aria-selected")==="true"),n=V[(i+(e.key==="ArrowRight"||e.key==="ArrowDown"?1:V.length-1))%V.length];showTab(n);$("n-"+n).focus()});
 showTab(tabOf(QS.get("tab")||location.hash.slice(1))||store.get("am-tab")||"now");
@@ -1627,6 +1628,34 @@ async function scoreTick(){
 }
 /* the health of the team (1.9.2): GET /api/team/health with the filters of the tab, and GET /api/repos/<owner>/<repo>/health in a dialog; ?view=team and ?view=repo&repo=owner/name are the deep links */
 let TEAM=null,TEAM_F={eco:"",sev:"",q:""};
+/* the comparison of periods (2.1.2): GET /api/compare, read only, from the ledger and the snapshots of the score; the section stays hidden in Lite and while compare.enabled is off */
+const CMP_FMT={red_rate:x=>(x*100).toFixed(1)+"%",score_coverage:x=>(x*100).toFixed(1)+"%",duration_p50:x=>fmtS(x),resolution:x=>fmtS(x),score_mean:x=>String(x)};
+async function cmpLoad(){
+  const sec=$("cmp-sec");if(!sec||LITE)return;
+  let a=null;
+  try{const r=await fetch("/api/compare?window="+encodeURIComponent($("cmp-window").value)+"&days="+encodeURIComponent($("cmp-days").value)+"&baseline="+encodeURIComponent($("cmp-base").value),{cache:"no-store"});if(r.ok)a=await r.json()}catch(e){}
+  if(!a||a.state===undefined){sec.hidden=true;return}
+  sec.hidden=false;
+  const st=$("cmp-state"),rows=$("cmp-rows"),ch=$("cmp-changes");
+  $("cmp-head").innerHTML=["ui.cmp_metric","ui.cmp_now","ui.cmp_base","ui.cmp_change"].map(k=>`<th>${esc(T(k))}</th>`).join("");
+  rows.innerHTML="";ch.innerHTML="";$("cmp-alerts").textContent="";
+  if(a.state==="off"){st.textContent=T("ui.cmp_off");return}
+  const reason=((a.data_quality||{}).reasons||[])[0]||"";
+  const why=T("ui.cmp_reason_"+reason)===("ui.cmp_reason_"+reason)?reason:T("ui.cmp_reason_"+reason);
+  st.textContent=(a.state==="calibrating"||a.state==="baseline_unavailable")?T("ui.cmp_state_"+a.state,{reason:why}):T("ui.cmp_quality",{now:(a.data_quality||{}).runs_now,base:(a.data_quality||{}).runs_base});
+  if(a.state==="calibrating")return;
+  rows.innerHTML=Object.keys(a.metrics||{}).map(k=>{const m=a.metrics[k],f=CMP_FMT[k]||String,ok=m.state==="ok",cls=m.direction==="better"?"ok":m.direction==="worse"?"bad":"";
+    const val=v=>typeof v==="number"?esc(f(v)):"–";
+    const last=ok?`<span class="chip ${cls}">${esc(T("ui.cmp_dir_"+m.direction))}</span>`:esc(T(m.state==="insufficient_data"?"ui.cmp_insufficient":"ui.cmp_unavailable"));
+    return `<tr><td>${esc(T("ui.cmp_m_"+k))}</td><td>${val(m.now)}</td><td>${val(m.base)}</td><td>${last}</td></tr>`}).join("");
+  const al=a.alerts||{};if(typeof al.opened_now==="number")$("cmp-alerts").textContent=T("ui.cmp_alerts",{opened:al.opened_now,open:al.open_at_end_now});
+  const c=a.changes||{},parts=[];
+  if(c.reason==="no_data")parts.push(`<p class="mut">${esc(T("ui.cmp_ch_nodata"))}</p>`);
+  [["worse","ui.cmp_ch_worse"],["better","ui.cmp_ch_better"]].forEach(([k,t])=>{if((c[k]||[]).length)parts.push(`<h3>${esc(T(t))}</h3><ul>${c[k].map(r=>`<li>${esc(r.repo)} <span class="mut">${esc((r.red_rate_base*100).toFixed(0))}% → ${esc((r.red_rate_now*100).toFixed(0))}%</span></li>`).join("")}</ul>`)});
+  [["new_failures","ui.cmp_ch_new","failures"],["resolved_failures","ui.cmp_ch_resolved","failures_before"]].forEach(([k,t,n])=>{if((c[k]||[]).length)parts.push(`<h3>${esc(T(t))}</h3><ul>${c[k].map(r=>`<li>${esc(r.repo)} / ${esc(r.workflow)} <span class="mut">${esc(r[n])}</span></li>`).join("")}</ul>`)});
+  if(a.state==="compared"&&!parts.length)parts.push(`<p class="mut">${esc(T("ui.cmp_ch_none"))}</p>`);
+  ch.innerHTML=parts.join("")}
+["cmp-window","cmp-days","cmp-base"].forEach(id=>{const el=$(id);if(el)el.addEventListener("change",cmpLoad)});
 /* the scheduled reports (1.9.3): GET /api/report-files lists them, GET /api/report-files/file?name= opens one, POST /api/report-files/run writes one now (from this computer) */
 let RS=null;
 async function rsLoad(){

@@ -60,13 +60,26 @@ def changes(score, alert_ids, previous):
     return {"first": False, "score_delta": delta, "new_alerts": new[:50], "gone_alerts": len(old - set(alert_ids))}
 
 
-def build(account, snapshot, alerts, team, now, previous=None, top=10):
+def compare_part(answer):
+    """A short summary of the comparison with the period before (`compare.compare_service.build`): its state and one line per figure. None while the comparison was not asked for."""
+    if not isinstance(answer, dict) or not answer.get("enabled"):
+        return None
+    rows = [{"metric": _cut(name, 30), "now": e.get("now"), "base": e.get("base"), "direction": e.get("direction"), "state": e.get("state")} for name, e in (answer.get("metrics") or {}).items() if isinstance(e, dict)]
+    reasons = (answer.get("data_quality") or {}).get("reasons") or []
+    return {"state": answer.get("state"), "reason": _cut(reasons[0], 40) if reasons else "", "days": (answer.get("windows") or {}).get("days"), "rows": rows}
+
+
+def build(account, snapshot, alerts, team, now, previous=None, top=10, compare=None):
     """The whole document. `previous` is the small memory the service keeps of the last report ({"score", "alert_ids"})."""
     top = max(1, min(50, int(top)))
     score = score_part(snapshot)
     alert = alerts_part(alerts, top)
     ids = [_cut(a.get("id"), 120) for a in alerts if isinstance(a, dict) and not a.get("muted_until")]
-    return {"schema": 1, "generated_at": _iso(now), "account": _cut(account, 60), "score": score, "team": team_part(team, top), "alerts": alert, "changes": changes(score, ids, previous)}
+    doc = {"schema": 1, "generated_at": _iso(now), "account": _cut(account, 60), "score": score, "team": team_part(team, top), "alerts": alert, "changes": changes(score, ids, previous)}
+    part = compare_part(compare)
+    if part is not None:      # only when the person asked for it (compare.include_in_report): a report without it is the same as before
+        doc["compare"] = part
+    return doc
 
 
 def memory(doc, alerts):

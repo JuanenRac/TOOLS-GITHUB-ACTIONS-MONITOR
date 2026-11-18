@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4056_passing-brightgreen.svg" alt="4056 tests">
+  <img src="https://img.shields.io/badge/Tests-4122_passing-brightgreen.svg" alt="4122 tests">
 </p>
 
 > Vigila los workflows de todos tus repositorios y te dice, en una página local, qué está en rojo, qué está atascado y qué te espera.
@@ -82,8 +82,8 @@
 | | |
 |---|---|
 | **Madurez** | functional |
-| **Tests** | 4056 métodos de test (`python -m unittest discover -s monitor/tests`) |
-| **Ajustes** | 681 ajustes, todos con ayuda |
+| **Tests** | 4122 métodos de test (`python -m unittest discover -s monitor/tests`) |
+| **Ajustes** | 693 ajustes, todos con ayuda |
 | **Idiomas** | 8 (inglés, español, alemán, francés, italiano, japonés, chino y portugués) |
 | **Probado en el CI en** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -328,6 +328,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/QUOTA_spa.md`](monitor/docs/QUOTA_spa.md): Más cuota, menos gasto: modo Bajo, el panel central, una GitHub App y cómo compartir la cuota
 - [`monitor/docs/EXTRAS_spa.md`](monitor/docs/EXTRAS_spa.md): Extras opcionales: el registro del paso fallido y un token de solo lectura de la GitHub App
 - [`monitor/docs/SCORE_spa.md`](monitor/docs/SCORE_spa.md): La puntuación de una cuenta: partes, estados, API, la ficha de la cabecera, la alerta y los ajustes
+- [`monitor/docs/COMPARE_spa.md`](monitor/docs/COMPARE_spa.md): Comparar periodos: este periodo frente al anterior, las cifras, el filtro de calendario, los estados sin número, la API, el comando y los ajustes
 - [`monitor/docs/STORAGE_spa.md`](monitor/docs/STORAGE_spa.md): Almacenamiento y retención: ficheros o SQLite, copia de seguridad, migración y qué se conserva
 - [`monitor/docs/ADVANCED_spa.md`](monitor/docs/ADVANCED_spa.md): Funciones avanzadas (todas apagadas por defecto)
 - [`monitor/docs/AI_ALERTS_spa.md`](monitor/docs/AI_ALERTS_spa.md): Avisos para IAs: el feed, el resumen, el hook y el stream

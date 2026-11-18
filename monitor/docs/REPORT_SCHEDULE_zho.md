@@ -36,3 +36,7 @@
 - **团队**标签页有一个报告区：列表、每个文件的链接和**立即生成报告**按钮（需要这台电脑上的管理员）。
 - `GET /api/report-files` 列出报告，`GET /api/report-files/file?name=...` 打开其中一份（只限服务为此账户写入的文件），`POST /api/report-files/run` 立即生成一份。
 - 在团队模式下，能看到该账户的人都可以读取它的报告；立即生成报告需要这台电脑上的管理员。Lite 版没有这些功能。
+
+## 与上一时段的对比
+
+开启 `compare.include_in_report` 后（默认关闭，且仅在 `compare.enabled` 开启时有效），报告还会增加一个简短的部分，把当前时段与上一时段逐项对比，每个数值一行。参见 [COMPARE_zho.md](COMPARE_zho.md)。

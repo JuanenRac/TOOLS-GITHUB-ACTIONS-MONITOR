@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4056_passing-brightgreen.svg" alt="4056 tests">
+  <img src="https://img.shields.io/badge/Tests-4122_passing-brightgreen.svg" alt="4122 tests">
 </p>
 
 > Surveille les workflows de tous vos dépôts et vous dit, sur une page locale, ce qui est rouge, ce qui est bloqué et ce qui vous attend.
@@ -82,8 +82,8 @@
 | | |
 |---|---|
 | **Maturité** | functional |
-| **Tests** | 4056 méthodes de test (`python -m unittest discover -s monitor/tests`) |
-| **Réglages** | 681 réglages, tous avec aide |
+| **Tests** | 4122 méthodes de test (`python -m unittest discover -s monitor/tests`) |
+| **Réglages** | 693 réglages, tous avec aide |
 | **Langues** | 8 (anglais, espagnol, allemand, français, italien, japonais, chinois et portugais) |
 | **Testé dans le CI sur** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -328,6 +328,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/QUOTA_fra.md`](monitor/docs/QUOTA_fra.md): Plus de quota, moins de dépense : mode économe, le panneau central, une GitHub App et comment partager le quota
 - [`monitor/docs/EXTRAS_fra.md`](monitor/docs/EXTRAS_fra.md): Extras facultatifs : le journal de l'étape en échec et un jeton en lecture seule de la GitHub App
 - [`monitor/docs/SCORE_fra.md`](monitor/docs/SCORE_fra.md): Le score d'un compte : parties, états, API, la pastille de l'en-tête, l'alerte et les réglages
+- [`monitor/docs/COMPARE_fra.md`](monitor/docs/COMPARE_fra.md): Comparer les périodes : cette période contre la précédente, les chiffres, le filtre de calendrier, les états sans nombre, l'API, la commande et les réglages
 - [`monitor/docs/STORAGE_fra.md`](monitor/docs/STORAGE_fra.md): Stockage et conservation : fichiers ou SQLite, sauvegarde, migration et ce qui est gardé
 - [`monitor/docs/ADVANCED_fra.md`](monitor/docs/ADVANCED_fra.md): Fonctions avancées (toutes désactivées par défaut)
 - [`monitor/docs/AI_ALERTS_fra.md`](monitor/docs/AI_ALERTS_fra.md): Alertes pour les IA : le flux, le résumé, le hook et le stream

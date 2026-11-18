@@ -66,3 +66,7 @@ Cuando la puntuación baja `score.alert.drop_points` puntos (10 por defecto) o m
 ## Los ajustes
 
 En la página de Ajustes, subpestaña Centinela, bloques Puntuación de la cuenta, Pesos de la puntuación y Letras de la puntuación: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.weights.security`, de `score.grades.A` a `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` y `score.alert.notify_external` (apagado por defecto). Los límites bueno y malo de cada parte se leen del fichero, en `score.limits` (véase el fichero de ejemplo); no se editan en la página.
+
+## Frente al periodo anterior
+
+La comparación de periodos (`GET /api/compare`, `monitor_cli.py compare`) pone la puntuación media, la proporción de ejecuciones fallidas, las duraciones y el tiempo de resolución de alertas de un periodo frente al anterior, con el mismo libro y las mismas fotos horarias que la puntuación. Está apagada por defecto (`compare.enabled`) y dice `insufficient_data` o `baseline_unavailable` en lugar de inventar un número. Véase [COMPARE_spa.md](COMPARE_spa.md).

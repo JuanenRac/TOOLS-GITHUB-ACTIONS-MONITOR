@@ -36,3 +36,7 @@ Non c'è un PDF proprio: apri la pagina HTML e stampala in PDF dal browser. La p
 - La scheda **Team** ha una sezione Rapporti: l'elenco, un link a ogni file e il pulsante **Scrivi un rapporto ora** (un amministratore, da questo computer).
 - `GET /api/report-files` li elenca, `GET /api/report-files/file?name=...` ne apre uno (solo un file che il servizio ha scritto per questo account) e `POST /api/report-files/run` ne scrive uno ora.
 - In modalità team chi può vedere l'account può leggerne i rapporti; scriverne uno ora spetta a un amministratore su questo computer. L'edizione Lite non ha nulla di tutto ciò.
+
+## Confronto con il periodo precedente
+
+Con `compare.include_in_report` attivo (disattivato per impostazione predefinita, e solo mentre `compare.enabled` è attivo) il rapporto contiene anche una breve sezione che mette questo periodo a confronto con il precedente, una riga per cifra. Vedi [COMPARE_ita.md](COMPARE_ita.md).

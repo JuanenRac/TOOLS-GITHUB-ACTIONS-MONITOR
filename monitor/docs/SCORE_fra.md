@@ -66,3 +66,7 @@ Quand le score baisse de `score.alert.drop_points` points (10 par défaut) ou pl
 ## Les réglages
 
 Dans la page des réglages, sous-onglet Sentinelle, blocs Score du compte, Poids du score et Lettres du score : `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.weights.security`, de `score.grades.A` à `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` et `score.alert.notify_external` (désactivé par défaut). Les limites bonne et mauvaise de chaque partie sont lues dans le fichier, sous `score.limits` (voir le fichier d'exemple) ; elles ne s'éditent pas dans la page.
+
+## Par rapport à la période précédente
+
+La comparaison de périodes (`GET /api/compare`, `monitor_cli.py compare`) met le score moyen, la part d'exécutions en échec, les durées et le temps de résolution des alertes d'une période face à la précédente, avec le même registre et les mêmes relevés horaires que le score. Elle est désactivée par défaut (`compare.enabled`) et indique `insufficient_data` ou `baseline_unavailable` au lieu d'inventer un nombre. Voir [COMPARE_fra.md](COMPARE_fra.md).

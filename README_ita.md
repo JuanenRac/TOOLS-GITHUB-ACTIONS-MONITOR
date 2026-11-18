@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4056_passing-brightgreen.svg" alt="4056 tests">
+  <img src="https://img.shields.io/badge/Tests-4122_passing-brightgreen.svg" alt="4122 tests">
 </p>
 
 > Controlla i workflow di tutti i tuoi repository e ti dice, su una pagina locale, cosa è rosso, cosa è bloccato e cosa ti aspetta.
@@ -82,8 +82,8 @@
 | | |
 |---|---|
 | **Maturità** | functional |
-| **Test** | 4056 metodi di test (`python -m unittest discover -s monitor/tests`) |
-| **Impostazioni** | 681 impostazioni, tutte con aiuto |
+| **Test** | 4122 metodi di test (`python -m unittest discover -s monitor/tests`) |
+| **Impostazioni** | 693 impostazioni, tutte con aiuto |
 | **Lingue** | 8 (inglese, spagnolo, tedesco, francese, italiano, giapponese, cinese e portoghese) |
 | **Provato nel CI su** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -328,6 +328,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/QUOTA_ita.md`](monitor/docs/QUOTA_ita.md): Più quota, meno spesa: modalità risparmio, il pannello centrale, una GitHub App e come condividere la quota
 - [`monitor/docs/EXTRAS_ita.md`](monitor/docs/EXTRAS_ita.md): Extra facoltativi: il registro del passo fallito e un token di sola lettura della GitHub App
 - [`monitor/docs/SCORE_ita.md`](monitor/docs/SCORE_ita.md): Il punteggio di un account: parti, stati, API, la pastiglia dell'intestazione, l'avviso e le impostazioni
+- [`monitor/docs/COMPARE_ita.md`](monitor/docs/COMPARE_ita.md): Confrontare i periodi: questo periodo rispetto al precedente, le cifre, il filtro del calendario, gli stati senza numero, l'API, il comando e le impostazioni
 - [`monitor/docs/STORAGE_ita.md`](monitor/docs/STORAGE_ita.md): Archiviazione e conservazione: file o SQLite, backup, migrazione e cosa si conserva
 - [`monitor/docs/ADVANCED_ita.md`](monitor/docs/ADVANCED_ita.md): Funzioni avanzate (tutte spente di default)
 - [`monitor/docs/AI_ALERTS_ita.md`](monitor/docs/AI_ALERTS_ita.md): Avvisi per le IA: il flusso, il riepilogo, l'hook e lo stream

@@ -9,6 +9,12 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+### Hinzugefügt
+
+- **Vergleich von Zeiträumen (Einstellung `compare.enabled`, standardmäßig aus)**: dieser Zeitraum gegen den davor (7 oder 30 Tage oder ein beliebiger Bereich, dieselben Daten ein Jahr früher oder eine eigene Basis) mit einem Filter für Werktage oder Wochenenden in der Zeitzone des Monitors. Er stellt Anteil fehlgeschlagener Läufe, mittlere Dauer, Lösungszeit der Meldungen, mittlere Punktzahl und ihre Abdeckung gegenüber, jede Kennzahl mit Änderung und Richtung; eine Kennzahl ohne genug Daten oder ohne Basis meldet `insufficient_data` oder `baseline_unavailable`, statt eine 0 oder eine 100 zu zeigen. Er ist nur lesend, entsteht aus dem Buch und den Momentaufnahmen der Punktzahl und fragt GitHub nichts. Solange er an ist, behält das Buch der Punktzahl zwei Zeiträume von `compare.default_window_days`. Anleitung COMPARE.md.
+- **Was sich zwischen den beiden Zeiträumen geändert hat**: die Repositories, die schlechter oder besser wurden, die Workflows, die zu scheitern begannen oder aufhörten, und die geöffneten Meldungen, in `GET /api/compare` (mit `format=ndjson` und `format=csv`), in `monitor_cli.py compare` (Exit 4, wenn eine Kennzahl nicht verglichen werden kann, 5 mit `--fail-on`, wenn eine schlechter wurde) und in einem Abschnitt des Reiters Diagramme.
+- **Ein kurzer Vergleich im geplanten Bericht (Einstellung `compare.include_in_report`, standardmäßig aus)**: eine Zeile je Kennzahl gegen den Zeitraum davor, in beiden Formaten und den acht Sprachen.
+
 ## [2.1.1]
 
 ### Behoben

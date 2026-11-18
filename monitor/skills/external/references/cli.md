@@ -7,7 +7,7 @@
 
 Generated from the code. It reads what the running monitor says (and never writes to GitHub). `--json` prints one JSON document; the exit codes are stable.
 
-Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `install-skill`, `gh-token`, `ai`, `backup`, `update`.
+Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `install-skill`, `gh-token`, `ai`, `backup`, `update`, `compare`.
 
 | flag | what |
 | --- | --- |
@@ -44,6 +44,10 @@ Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `
 | `--repo` | lessons: only this repository |
 | `--severity` | team: only the repositories in this state or a worse one |
 | `--compare` | score: also compare with the history of the window |
+| `--window` | compare: length of the period, in days (7, 30d...) |
+| `--days` | compare: which days count (all, workdays or weekend) |
+| `--baseline` | compare: what to compare against (previous or year_ago) |
+| `--format` | compare: output format (table, json, ndjson or csv) |
 | `--lang` | language of the texts (en, es, de, fr, it, ja, zh, pt) |
 | `--provider` | ai models/test/doctor: provider or preset to use instead of the configured one |
 | `--model` | ai models/test/doctor: model to use instead of the configured one |
