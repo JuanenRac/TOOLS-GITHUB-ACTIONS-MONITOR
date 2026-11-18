@@ -155,7 +155,7 @@ def writable(config):
     try:
         with _lock:
             private_io.private_dir(where.parent)
-            with locks.process_lock(where):
+            with locks.os_lock(where):
                 private_io.open_append(where).close()
         return True
     except OSError as error:
@@ -180,7 +180,7 @@ def record(config, action, user="", role="", account="", target="", result="ok",
     try:
         with _lock:
             private_io.private_dir(where.parent)
-            with locks.process_lock(where):      # the supervisor and the accounts may append to the same file: one at a time, each one chained to the line that is really last
+            with locks.os_lock(where):      # the supervisor and the accounts may append to the same file: one at a time, each one chained to the line that is really last
                 try:
                     if where.exists() and where.stat().st_size > cfg["max_mb"] * 1_000_000:
                         rotate(where, cfg.get("keep_generations", DEFAULTS["keep_generations"]))

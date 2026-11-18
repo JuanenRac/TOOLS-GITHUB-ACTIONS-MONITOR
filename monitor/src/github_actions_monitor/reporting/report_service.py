@@ -59,7 +59,7 @@ def _save_state(directory, state):
 def _update_entry(directory, key, **changes):
     """Changes the entry of ONE account in the state file that every account of the installation shares: read, change and write are one step under a lock (of the threads and of the processes), so two
     accounts that finish a report in the same moment never overwrite each other."""
-    with locks.process_lock(directory / STATE_FILE, 10.0):
+    with locks.os_lock(directory / STATE_FILE, 10.0):
         try:
             state = _state(directory, strict=True)
         except OSError as error:      # the file is there but cannot be read now: nothing is written, the next report tries again
@@ -77,7 +77,7 @@ def _update_entry(directory, key, **changes):
                 time.sleep(0.02 * (attempt + 1))
 
 
-def run(config, account, snapshot, alerts, team, now=None, base=None, lang=None):
+def run(config, account, snapshot, alerts, team, now=None, base=None, lang=None, compare=None):
     """Writes one report now (the formats of the settings) and returns {"files": [names], "at": iso}. The memory of what was in it goes to the state file so the next one can say what changed."""
     now = time.time() if now is None else now
     cfg = settings(config)
@@ -86,7 +86,7 @@ def run(config, account, snapshot, alerts, team, now=None, base=None, lang=None)
     key = _account(account)
     state = _state(directory)
     previous = (state.get("accounts") or {}).get(key, {}).get("memory")
-    doc = builder.build(account, snapshot, alerts, team, now, previous, cfg["top"])
+    doc = builder.build(account, snapshot, alerts, team, now, previous, cfg["top"], compare)
     language = lang or i18n.language()
     stamp = time.strftime("%Y%m%d-%H%M%S", time.gmtime(now))
     wanted = ("html", "markdown") if cfg["formats"] == "both" else (cfg["formats"],)
@@ -143,8 +143,9 @@ def tick(config, account, gather, now=None, base=None):
     if not schedule.due(cfg["cron"], now, last):
         return None
     try:
-        snapshot, alerts, team = gather()
-        return run(config, account, snapshot, alerts, team, now, base)
+        gathered = gather()
+        snapshot, alerts, team = gathered[:3]
+        return run(config, account, snapshot, alerts, team, now, base, compare=gathered[3] if len(gathered) > 3 else None)
     except Exception as error:   # noqa: BLE001 - a report never stops the monitor
         degraded.note("reports.run", error)
         try:

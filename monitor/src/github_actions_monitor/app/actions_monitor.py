@@ -141,6 +141,7 @@ DEFAULTS = {
                           "thirdparty_usd_per_minute": 0.0, "alerts": True, "alert_level": "warning"}},      # OFF: kinds of runner, queue and cost by kind, runaway workflows, self-hosted queues (runner_model.py)
     "upstream": {"enabled": False, "refresh_hours": 12, "requests_per_hour": 6, "forks_per_request": 8, "news_days": 7, "notify": False, "repos": []},      # OFF: follow the original repository of each fork, its CI and its latest release (data_pipeline/upstream.py)
     "api": {"v1_enabled": False, "default_limit": 50, "max_limit": 200, "cursor_ttl_seconds": 900, "gzip_min_bytes": 1024},      # OFF: the read API under /api/v1/ (app/api_v1.py)
+    "compare": {"enabled": False, "default_window_days": 7, "default_days_filter": "all", "workdays": ["1", "2", "3", "4", "5"], "min_runs_per_window": 20, "min_days_of_history": 14, "min_resolved": 3, "min_snapshots": 12, "min_repo_runs": 3, "top_changes": 10, "include_in_report": False, "cache_seconds": 60},      # OFF: this period against the one before (compare/): read only, from the ledger and the snapshots of the score
     "otlp": {"enabled": False, "endpoint": "", "interval_seconds": 60},       # OFF: OpenTelemetry export to a collector you name (otlp.py)
     "organizations": {"discover": False},                                    # OFF: list the organisations of the login (orgs.py)
     "finops": {"jobs_per_cycle": 0},
@@ -172,7 +173,7 @@ def state_dir():
     """Where the small state files of this process live: the folder of the account when this is the monitor of one account, else next to the code, as always."""
     return Path(CHILD["folder"]) if CHILD["folder"] else paths.folder("data")
 LITE_SHARED = ("/api/ai/state", "/api/ai/stream", "/api/ai/brief", "/api/ai/alerts", "/api/ai/ack")      # the channels for an AI tool are the same in both editions
-LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/auth", "/api/notify", "/api/score", "/api/report-files", "/api/ops", "/api/audit-log", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/chatops", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events", "/api/updates")   # they do not exist in lite
+LITE_PATHS = ("/api/gh-action", "/api/act", "/api/credential", "/api/github-token", "/api/runners", "/api/mirror", "/api/otlp", "/api/sentinel", "/api/ai", "/api/auth", "/api/notify", "/api/score", "/api/compare", "/api/report-files", "/api/ops", "/api/audit-log", "/api/team", "/api/repos", "/api/analytics", "/api/live-events", "/api/live-status", "/api/outputs", "/api/webhook", "/api/chatops", "/api/refresh-repos", "/metrics", "/api/alerts", "/api/events", "/api/updates")   # they do not exist in lite
 
 
 LITE_INHERIT = ("github_owner", "ecosystems", "ecosystems_file", "targets_file", "profiles_file", "exclude", "repos", "language", "runs_per_repo", "cold_runs_per_repo", "hot_hours", "stuck_minutes", "refresh_seconds", "cold_refresh_seconds")   # what a first lite start copies from actions_monitor.json
@@ -1811,6 +1812,13 @@ def score_missing_detail(registry, config, answer):
     return out
 
 
+def compare_keep_days(config):
+    """How many days the ledger of the score must keep for the comparison: two of its windows and a day, or 0 while it is off (then the ledger keeps what the score needs)."""
+    from github_actions_monitor.compare import config as compare_config
+    cfg = compare_config.settings(config)
+    return 2 * max(cfg["default_window_days"], 7) + 1 if cfg["enabled"] else 0
+
+
 def score_tick(config, data):
     """The pass of the score (once every few minutes at most): the runs and the alerts of the collaboration sentinel go to the ledger and the snapshot of the hour is written. Complete only; a
     failure is counted and never stops the cycle."""
@@ -1824,7 +1832,7 @@ def score_tick(config, data):
         known = bool(collab is not None and getattr(collab, "enabled", False) and not (collab.get_status() or {}).get("loading"))
         storage, account = runtime.process_storage(CHILD["account"] or None)
         idle = set(data.get("forks_idle_all") or data.get("forks_idle") or [])      # the runs of a fork without a CI of its own (the cron it inherited) are not the work of the account
-        snapshot = score_service.tick(storage, account, config, [r for r in (data.get("runs") or []) if r.get("repo") not in idle], collab.get_alerts() if known else [], collab_known=known, security=score_security(registry, config), activity=data.get("activity"))
+        snapshot = score_service.tick(storage, account, config, [r for r in (data.get("runs") or []) if r.get("repo") not in idle], collab.get_alerts() if known else [], collab_known=known, security=score_security(registry, config), activity=data.get("activity"), keep_days_min=compare_keep_days(config))
         if snapshot and snapshot.get("drop_new") and snapshot.get("drop"):      # the moment a drop appears; it leaves the panel only when the person asked for it
             from github_actions_monitor.scoring import drop as score_drop, engine as score_engine
             sentinel = SENTINEL["obj"]
@@ -1856,7 +1864,14 @@ def report_gather():
     except Exception as error:   # noqa: BLE001 - the report still has the rest
         degraded.note("reports.alerts", error)
         alerts = []
-    return snapshot, alerts, repo_view.team_view(health_views())
+    gathered = (snapshot, alerts, repo_view.team_view(health_views()))
+    try:
+        from github_actions_monitor.compare import config as compare_config, compare_service
+        if compare_config.settings(config)["include_in_report"]:      # the comparison with the period before, only when the person asked for it
+            gathered += (compare_service.build(storage, account, config),)
+    except Exception as error:   # noqa: BLE001 - the report still has the rest
+        degraded.note("reports.compare", error)
+    return gathered
 
 
 def report_account():
@@ -3343,6 +3358,37 @@ class Handler(BaseHTTPRequestHandler):
             except Exception:   # noqa: BLE001 - the reason is a help: the answer is given without it
                 answer["missing_detail"] = []
             self.json_reply(answer)
+        elif path == "/api/compare":      # this period against the one before, from the ledger and the snapshots of the score (read only; Complete only)
+            if not self.guard():
+                return
+            from urllib.parse import parse_qs
+            from github_actions_monitor.compare import compare_service, windows as compare_windows
+            from github_actions_monitor.storage import runtime
+            ask = {k: v[0][:80] for k, v in parse_qs(self.path.partition("?")[2]).items() if v}
+            fmt = ask.pop("format", "json")
+            if fmt not in compare_service.FORMATS:
+                self.json_reply({"error": "bad format", "code": "bad_format"}, 400)
+                return
+            if DEMO["on"]:      # --demo writes nothing and holds no history: the answer says the comparison is off
+                self.json_reply(compare_service.off_answer(CHILD["account"] or ""))
+                return
+            storage, account = runtime.process_storage(CHILD["account"] or None)
+            try:
+                answer = compare_service.build(storage, account, toolconfig.raw_config(), ask)
+            except compare_windows.WindowError as error:
+                self.json_reply({"error": "bad request", "code": error.code}, 400)
+                return
+            if fmt == "json":
+                self.json_reply(answer)
+            else:
+                kind, text = compare_service.render(answer, fmt)
+                body = text.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", kind + "; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Cache-Control", "no-store")
+                self.end_headers()
+                self.wfile.write(body)
         elif path == "/api/audit-log":      # the log of actions of this account: an administrator, or a maintainer when the setting says so (Complete only)
             if not self.guard():
                 return

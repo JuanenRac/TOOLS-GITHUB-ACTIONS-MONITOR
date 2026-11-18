@@ -66,3 +66,7 @@ Fällt die Punktzahl gegenüber dem vorherigen Fenster um `score.alert.drop_poin
 ## Die Einstellungen
 
 Auf der Einstellungsseite, Unterreiter Wächter, Blöcke Punktzahl des Kontos, Gewichte der Punktzahl und Buchstaben der Punktzahl: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.weights.security`, `score.grades.A` bis `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` und `score.alert.notify_external` (standardmäßig aus). Die guten und schlechten Grenzen jedes Teils werden aus der Datei gelesen, unter `score.limits` (siehe die Beispieldatei); sie werden nicht auf der Seite bearbeitet.
+
+## Gegenüber dem Zeitraum davor
+
+Der Vergleich von Zeiträumen (`GET /api/compare`, `monitor_cli.py compare`) stellt mittlere Punktzahl, Anteil fehlgeschlagener Läufe, Dauern und Lösungszeit der Meldungen eines Zeitraums dem davor gegenüber, aus demselben Buch und denselben stündlichen Momentaufnahmen wie die Punktzahl. Er ist standardmäßig aus (`compare.enabled`) und meldet `insufficient_data` oder `baseline_unavailable`, statt eine Zahl zu erfinden. Siehe [COMPARE_deu.md](COMPARE_deu.md).

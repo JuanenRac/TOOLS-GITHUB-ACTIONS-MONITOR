@@ -66,3 +66,7 @@ Quando il punteggio cala di `score.alert.drop_points` punti (10 per impostazione
 ## Le impostazioni
 
 Nella pagina Impostazioni, sotto-scheda Sentinella, blocchi Punteggio dell'account, Pesi del punteggio e Lettere del punteggio: `score.enabled`, `score.window_days`, `score.calibrating_hours`, `score.min_runs`, `score.min_coverage`, `score.trend_flat`, `score.weights.reliability`, `score.weights.speed`, `score.weights.recovery`, `score.weights.collaboration`, `score.weights.security`, da `score.grades.A` a `score.grades.D`, `score.alert.enabled`, `score.alert.drop_points` e `score.alert.notify_external` (spento per impostazione predefinita). I limiti buono e cattivo di ogni parte si leggono dal file, sotto `score.limits` (vedi il file di esempio); non si modificano nella pagina.
+
+## Rispetto al periodo precedente
+
+Il confronto tra periodi (`GET /api/compare`, `monitor_cli.py compare`) mette il punteggio medio, la quota di esecuzioni fallite, le durate e il tempo di risoluzione degli avvisi di un periodo a confronto con il precedente, con lo stesso registro e le stesse istantanee orarie del punteggio. È disattivato per impostazione predefinita (`compare.enabled`) e dice `insufficient_data` o `baseline_unavailable` invece di inventare un numero. Vedi [COMPARE_ita.md](COMPARE_ita.md).

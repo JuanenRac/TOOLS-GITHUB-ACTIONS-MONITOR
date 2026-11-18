@@ -191,6 +191,18 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ci.stuck.workflow_minutes` | `[]` | sentinel | Fixed limits per workflow |
 | `cold_refresh_seconds` | `600` | polling | Refresh of cold repositories |
 | `cold_runs_per_repo` | `5` | polling | Runs read per cold repository |
+| `compare.cache_seconds` | `60` | sentinel | Keep the answer (seconds) |
+| `compare.default_days_filter` | `"all"` | sentinel | Days counted |
+| `compare.default_window_days` | `7` | sentinel | Default period (days) |
+| `compare.enabled` | `false` | sentinel | Compare periods |
+| `compare.include_in_report` | `false` | sentinel | Add to the scheduled report |
+| `compare.min_days_of_history` | `14` | sentinel | Least days watched |
+| `compare.min_repo_runs` | `3` | sentinel | Least runs per repository |
+| `compare.min_resolved` | `3` | sentinel | Least resolved alerts |
+| `compare.min_runs_per_window` | `20` | sentinel | Least finished runs per period |
+| `compare.min_snapshots` | `12` | sentinel | Least hourly snapshots |
+| `compare.top_changes` | `10` | sentinel | Rows in the changes |
+| `compare.workdays` | `["1", "2", "3", "4", "5"]` | sentinel | Workdays |
 | `discover_limit` | `1000` | polling | Repositories listed |
 | `discover_refresh_seconds` | `3600` | polling | Search for new repositories |
 | `discovery.auto_frequency` | `false` | basic | Adjust the refresh to the real activity |

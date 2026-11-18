@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4083_passing-brightgreen.svg" alt="4083 tests">
+  <img src="https://img.shields.io/badge/Tests-4152_passing-brightgreen.svg" alt="4152 tests">
 </p>
 
 > 监视你所有仓库的工作流，并在一个本地页面上告诉你：哪些是红的、哪些卡住了、哪些在等你处理。
@@ -82,8 +82,8 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 4083 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **设置** | 681 个设置,均有帮助 |
+| **测试** | 4152 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **设置** | 693 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
 
@@ -328,6 +328,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/QUOTA_zho.md`](monitor/docs/QUOTA_zho.md): 更多配额,更少消耗:节省模式、中央面板、GitHub App 以及如何共享配额
 - [`monitor/docs/EXTRAS_zho.md`](monitor/docs/EXTRAS_zho.md): 可选附加功能：失败步骤的日志和 GitHub App 的只读令牌
 - [`monitor/docs/SCORE_zho.md`](monitor/docs/SCORE_zho.md): 账户评分：各部分、状态、API、页眉中的标签、告警和设置
+- [`monitor/docs/COMPARE_zho.md`](monitor/docs/COMPARE_zho.md): 对比时段：当前时段与上一时段、数值、日历过滤器、无数值的状态、API、命令和设置
 - [`monitor/docs/STORAGE_zho.md`](monitor/docs/STORAGE_zho.md): 存储与保留：文件或 SQLite、备份、迁移以及保留的内容
 - [`monitor/docs/ADVANCED_zho.md`](monitor/docs/ADVANCED_zho.md): 高级功能（默认全部关闭）
 - [`monitor/docs/AI_ALERTS_zho.md`](monitor/docs/AI_ALERTS_zho.md): 给 AI 的警报：事件流、简报、钩子和数据流

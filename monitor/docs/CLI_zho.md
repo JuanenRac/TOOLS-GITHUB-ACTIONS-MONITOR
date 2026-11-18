@@ -20,6 +20,7 @@
 | `accounts` | 监督进程的账户（仅多账户时） | 不支持 |
 | `alerts` | 所有哨兵的警报合成一个列表：`--sentinel ci\|collab\|security\|supply\|delivery`、`--level info\|warning\|error`、`--muted show\|hide\|only` | 不支持 |
 | `score` | 账户评分：数值、等级、趋势、各部分、覆盖率以及按仓库的细分；`--compare` 将其与窗口内的历史记录比较 | 不支持 |
+| `compare` | 将当前时段与上一时段对比：各项数值及其变化与方向，哪些变差或变好；`--window 7\|30d`、`--days all\|workdays\|weekend`、`--baseline previous\|year_ago`、`--format table\|json\|ndjson\|csv`；某项数据不足时退出码为 4，使用 `--fail-on` 且有数值变差时为 5 | 不支持 |
 | `team` | 按需要人处理的优先顺序列出仓库的健康状况；`--severity warn\|bad` 只保留较差的，`--repo owner/name` 显示单个仓库的详情 | 否 |
 | `live` | Webhook 接收器的状态和最近的事件 | 不支持 |
 | `ai` | `ai models [--refresh]` 列出 AI 提供方的模型及各模型的数据；`ai test --provider 名称 --model 名称` 用合成文本试用一个模型（延迟、令牌、估算成本）；`ai doctor` 说明 AI 为何没有响应，且不输出密钥 | 不支持 |

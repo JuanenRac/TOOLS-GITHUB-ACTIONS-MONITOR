@@ -66,3 +66,7 @@
 ## 設定
 
 設定ページの「番人」サブタブにある「アカウントのスコア」「スコアの重み」「スコアの文字評価」の各ブロック：`score.enabled`、`score.window_days`、`score.calibrating_hours`、`score.min_runs`、`score.min_coverage`、`score.trend_flat`、`score.weights.reliability`、`score.weights.speed`、`score.weights.recovery`、`score.weights.collaboration`、`score.weights.security`、`score.grades.A` から `score.grades.D`、`score.alert.enabled`、`score.alert.drop_points`、`score.alert.notify_external`（既定はオフ）。各要素の良好と不良の限度はファイルの `score.limits` から読み込まれます（サンプルファイルを参照）。ページでは編集しません。
+
+## 直前の期間との比較
+
+期間の比較（`GET /api/compare`、`monitor_cli.py compare`）は、スコアと同じ台帳と1時間ごとのスナップショットから、ある期間の平均スコア、失敗した実行の割合、所要時間、アラートの解決時間を直前の期間と並べて示します。初期状態ではオフ（`compare.enabled`）で、数値を作り上げる代わりに `insufficient_data` または `baseline_unavailable` を返します。[COMPARE_jpn.md](COMPARE_jpn.md) を参照してください。

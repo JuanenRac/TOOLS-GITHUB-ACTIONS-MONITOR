@@ -36,3 +36,7 @@ Não há um PDF próprio: abra a página HTML e imprima-a para PDF a partir do n
 - O separador **Equipa** tem uma secção Relatórios: a lista, uma ligação para cada ficheiro e o botão **Escrever um relatório agora** (um administrador, a partir deste computador).
 - `GET /api/report-files` lista-os, `GET /api/report-files/file?name=...` abre um (só um ficheiro que o serviço escreveu para esta conta) e `POST /api/report-files/run` escreve um agora.
 - No modo equipa, quem pode ver a conta pode ler os seus relatórios; escrever um agora é para um administrador neste computador. A edição Lite não tem nada disto.
+
+## Comparação com o período anterior
+
+Com `compare.include_in_report` ativado (desativado por predefinição, e só enquanto `compare.enabled` estiver ativo) o relatório leva ainda uma secção breve que coloca este período face ao anterior, uma linha por número. Ver [COMPARE_por.md](COMPARE_por.md).

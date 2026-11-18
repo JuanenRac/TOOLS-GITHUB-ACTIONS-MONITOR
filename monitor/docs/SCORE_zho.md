@@ -66,3 +66,7 @@
 ## 设置
 
 在设置页面的“哨兵”子标签中，“账户评分”“评分权重”和“评分等级”三个区块：`score.enabled`、`score.window_days`、`score.calibrating_hours`、`score.min_runs`、`score.min_coverage`、`score.trend_flat`、`score.weights.reliability`、`score.weights.speed`、`score.weights.recovery`、`score.weights.collaboration`, `score.weights.security`、`score.grades.A` 至 `score.grades.D`、`score.alert.enabled`、`score.alert.drop_points` 和 `score.alert.notify_external`（默认关闭）。每个部分的良好和较差界限从文件中读取，位于 `score.limits` 之下（见示例文件）；不在页面中编辑。
+
+## 与上一时段对比
+
+时段对比（`GET /api/compare`、`monitor_cli.py compare`）使用与评分相同的台账和每小时快照，把一个时段的平均评分、失败运行占比、耗时和告警解决时间与上一时段并列比较。默认关闭（`compare.enabled`），数据不足时返回 `insufficient_data` 或 `baseline_unavailable`，而不是编造数字。参见 [COMPARE_zho.md](COMPARE_zho.md)。
