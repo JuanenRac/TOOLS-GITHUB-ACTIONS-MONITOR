@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-3974_passing-brightgreen.svg" alt="3974 tests">
+  <img src="https://img.shields.io/badge/Tests-4005_passing-brightgreen.svg" alt="4005 tests">
 </p>
 
 > 监视你所有仓库的工作流，并在一个本地页面上告诉你：哪些是红的、哪些卡住了、哪些在等你处理。
@@ -48,6 +48,7 @@
 - **各种屏幕尺寸与多块屏幕**：页面可适应从手机到 4K 的窗口，竖放或旋转均可，一台监视器最多可提供三块屏幕（`/screen/1` 到 `/screen/3`），每块都有自己的标签页和方向（`monitor/docs/SCREENS_zho.md`）。
 - **每个账户一个评分**：由 CI 的可靠性、速度、恢复时间以及协作告警被关闭的快慢得出的 0 到 100 的数值、A 到 E 的等级和趋势；无法支撑数值时显示“校准中”或“数据不足”，并说明尚未涵盖的内容，显示在页面页眉，有 `score` 命令，下降时会提醒，并出现在指标和 MCP 服务器中（`monitor/docs/SCORE.md`）。
 - **安全哨兵（仅 Complete，默认关闭）**：它不向 GitHub 写入任何内容，只读取 Dependabot、代码扫描和密钥扫描的未处理警报、默认分支是否受保护、工作流的默认权限，以及（如有需要）代码所有者；每个仓库和每种信号生成一条警报，把发现计入评分的第五部分，并说明哪些内容无法读取（`monitor/docs/SENTINEL_SECURITY_zho.md`）。
+- **供应链哨兵（仅 Complete，默认关闭）**：它不向 GitHub 写入任何内容，通过 API（无需克隆）读取每个仓库的工作流文件，当某个 Action 未固定到提交或跟随移动分支、某个工作流给令牌 `write-all` 或未声明权限、或 `pull_request_target` 检出拉取请求的代码时，每个仓库和每种信号生成一条警报；发现来自工作流检查器，密钥的值从不被读取，无法读取的仓库会被列出而不是算作干净（`monitor/docs/SENTINEL_SUPPLY_zho.md`）。
 - **每个仓库和团队的健康状况（仅 Complete）**：把 CI、三个哨兵的警报、发布就绪情况和活跃度汇总为一个状态（差、警告、正常或未查看）和一个风险值；团队标签页把最需要人处理的仓库排在前面，提供筛选、每个仓库的详情以及用于墙面屏幕的深度链接；同样的数据也可通过 `/api/team/health`、`/api/repos/<owner>/<repo>/health` 和 `team` 命令获得（`monitor/docs/HEALTH_zho.md`）。
 - **报告、操作日志和 Apprise（仅 Complete）**：按 cron 计划或按需生成账户报告（评分、变化、需要人处理的仓库、未处理的警报），格式为 HTML 和 Markdown，默认关闭（`monitor/docs/REPORT_SCHEDULE_zho.md`）；记录谁修改了什么的日志，带哈希链，不含任何值或机密（`monitor/docs/AUDIT_LOG_zho.md`）；以及可选的 Apprise 通知渠道，默认关闭。
 - **作为服务运行**：官方 Docker 镜像（非 root、只读）、带可选代理的 Compose 文件、systemd 单元、深度健康检查，以及创建第一个管理员的命令（`monitor/docs/DEPLOYMENT.md`）。
@@ -81,8 +82,8 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 3974 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **设置** | 640 个设置,均有帮助 |
+| **测试** | 4005 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **设置** | 658 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
 
@@ -314,6 +315,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/SENTINEL_zho.md`](monitor/docs/SENTINEL_zho.md)：哨兵及其检查 A1-A13
 - [`monitor/docs/COLLAB_zho.md`](monitor/docs/COLLAB_zho.md)：Collab 哨兵、警报标签页与静音
 - [`monitor/docs/SENTINEL_SECURITY_zho.md`](monitor/docs/SENTINEL_SECURITY_zho.md): 安全哨兵：Dependabot、代码扫描、密钥、分支保护、工作流权限和 CODEOWNERS，以及它无法检查的内容
+- [`monitor/docs/SENTINEL_SUPPLY_zho.md`](monitor/docs/SENTINEL_SUPPLY_zho.md): 供应链哨兵：未固定的 Action、移动分支、过宽或缺失的工作流权限、带检出的 pull_request_target，以及它无法读取的内容
 - [`monitor/docs/AUDIT_LOG_zho.md`](monitor/docs/AUDIT_LOG_zho.md): 操作日志：谁修改了什么、哈希链、谁能读取以及设置
 - [`monitor/docs/HEALTH_zho.md`](monitor/docs/HEALTH_zho.md): 仓库与团队的健康状况：组成、团队标签页、深度链接和 API
 - [`monitor/docs/REPORT_SCHEDULE_zho.md`](monitor/docs/REPORT_SCHEDULE_zho.md): 定时报告：评分、变化、需要人处理的仓库和未处理的警报，以 HTML 和 Markdown 呈现，以及计划和文件

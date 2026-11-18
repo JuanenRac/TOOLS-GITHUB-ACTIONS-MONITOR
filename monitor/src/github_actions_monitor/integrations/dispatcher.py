@@ -63,7 +63,7 @@ def family_of(kind):
 
 
 def sentinel_of(kind):
-    return "collab" if str(kind).startswith("collab_") else ("security" if str(kind).startswith("security_") else "ci")
+    return "collab" if str(kind).startswith("collab_") else ("security" if str(kind).startswith("security_") else "ci")      # the supply chain sentinel announces as `security_*` events
 
 
 def secret_name(user, channel):

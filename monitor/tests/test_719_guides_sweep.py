@@ -29,6 +29,8 @@ NOT_SETTINGS = {
     "score.dropped": "a key of the data",
     "score.limits": "a key of the data",
     "sentinels.security.penalty": "a key of the data",
+    "sentinels.supply.penalty.cap_per_repo": "only in the file, like the weights of the security penalty",
+    "sentinels.supply.penalty.per_finding": "only in the file, like the weights of the security penalty",
     "webhook.allow_config_secret": "only in the file, on purpose",
     "webhook.allowed_owners": "only in the file",
 }

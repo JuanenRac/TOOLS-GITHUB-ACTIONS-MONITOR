@@ -36,7 +36,7 @@ A round reads at most `sentinels.security.max_repos_per_tick` repositories (5 by
 
 ## One owner for each finding
 
-The panels of the Sentinel tab that already showed security figures (alerts by repository, aged alerts, coverage of Dependabot and CodeQL, Dependabot pull requests) stay as panels. The alerts of the Alerts tab about these signals come only from this sentinel, so nothing is raised twice.
+The panels of the Sentinel tab that already showed security figures (alerts by repository, aged alerts, coverage of Dependabot and CodeQL, Dependabot pull requests) stay as panels. The alerts of the Alerts tab about these signals come only from this sentinel, so nothing is raised twice. The content of each workflow file (actions not pinned to a commit, `write-all`, no permissions block, `pull_request_target` with a checkout) belongs to the [Supply chain sentinel](SENTINEL_SUPPLY.md); `security.workflow_write` stays here because it is a setting of the repository.
 
 ## Events and notifications
 

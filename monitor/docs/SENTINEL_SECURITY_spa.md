@@ -36,7 +36,7 @@ Una ronda lee como máximo `sentinels.security.max_repos_per_tick` repositorios 
 
 ## Un solo propietario por hallazgo
 
-Los paneles de la pestaña Centinela que ya mostraban cifras de seguridad (alertas por repositorio, alertas antiguas, cobertura de Dependabot y CodeQL, pull requests de Dependabot) siguen siendo paneles. Las alertas de la pestaña de Alertas sobre estas señales vienen solo de este centinela, así que nada se genera dos veces.
+Los paneles de la pestaña Centinela que ya mostraban cifras de seguridad (alertas por repositorio, alertas antiguas, cobertura de Dependabot y CodeQL, pull requests de Dependabot) siguen siendo paneles. Las alertas de la pestaña de Alertas sobre estas señales vienen solo de este centinela, así que nada se genera dos veces. El contenido de cada fichero de flujo (acciones sin fijar a un commit, `write-all`, sin bloque de permisos, `pull_request_target` con descarga) corresponde al [centinela de cadena de suministro](SENTINEL_SUPPLY_spa.md); `security.workflow_write` se queda aquí porque es un ajuste del repositorio.
 
 ## Eventos y notificaciones
 

@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-3974_passing-brightgreen.svg" alt="3974 tests">
+  <img src="https://img.shields.io/badge/Tests-4005_passing-brightgreen.svg" alt="4005 tests">
 </p>
 
 > Controlla i workflow di tutti i tuoi repository e ti dice, su una pagina locale, cosa è rosso, cosa è bloccato e cosa ti aspetta.
@@ -48,6 +48,7 @@
 - **Ogni dimensione di schermo e più schermi**: la pagina si adatta a una finestra dal telefono al 4K, dritta o ruotata, e un monitor può servire fino a tre schermi (da `/screen/1` a `/screen/3`), ciascuno con le sue schede e il suo orientamento (`monitor/docs/SCREENS_ita.md`).
 - **Un punteggio per ogni account**: un numero da 0 a 100, una lettera da A a E e una tendenza, costruiti con l'affidabilità della CI, la sua velocità, il tempo di ripristino e la rapidità con cui si chiudono gli avvisi di collaborazione; dice «calibrazione» o «dati insufficienti» al posto di un numero che non può sostenere, mostra ciò che non copre ancora, sta nell'intestazione della pagina, ha un comando `score`, avvisa quando cala ed è nelle metriche e nel server MCP (`monitor/docs/SCORE.md`).
 - **Una sentinella di sicurezza (solo Complete, spenta per impostazione predefinita)**: legge, senza scrivere nulla su GitHub, gli avvisi aperti di Dependabot, dell'analisi del codice e della scansione dei segreti, se il branch predefinito è protetto, il permesso predefinito dei workflow e, su richiesta, i proprietari del codice; genera un avviso per repository e segnale, conta i risultati come quinta parte del punteggio e dice ciò che non ha potuto leggere (`monitor/docs/SENTINEL_SECURITY_ita.md`).
+- **Una sentinella della catena di fornitura (solo Complete, spenta per impostazione predefinita)**: legge, senza scrivere nulla su GitHub, i file di workflow di ogni repository tramite API (senza clone) e genera un avviso per repository e segnale quando un'action non è fissata a un commit o segue un branch mobile, un workflow dà `write-all` al token o non dichiara permessi, oppure `pull_request_target` scarica il codice di una pull request; i rilievi vengono dal linter dei workflow, il valore di un segreto non viene mai letto e un repository non leggibile viene elencato invece di essere contato come pulito (`monitor/docs/SENTINEL_SUPPLY_ita.md`).
 - **La salute di ogni repository e del team (solo Complete)**: CI, avvisi delle tre sentinelle, preparazione delle versioni e attività in uno stato (cattivo, avvertimento, buono o non visto) con un numero di rischio; la scheda Team mette per primi i repository che richiedono una persona, con filtri, un dettaglio per ciascuno e link diretti per schermi a parete; gli stessi dati sono in `/api/team/health`, `/api/repos/<owner>/<repo>/health` e nel comando `team` (`monitor/docs/HEALTH_ita.md`).
 - **Rapporti, registro delle azioni e Apprise (solo Complete)**: un rapporto dell'account (punteggio, cambiamenti, repository che richiedono una persona, avvisi aperti) scritto in HTML e Markdown secondo una pianificazione cron o su richiesta, spento per impostazione predefinita (`monitor/docs/REPORT_SCHEDULE_ita.md`); un registro di chi ha cambiato cosa, con una catena di hash e senza valori né segreti (`monitor/docs/AUDIT_LOG_ita.md`); e un canale Apprise facoltativo per le notifiche, spento per impostazione predefinita.
 - **Come servizio**: l'immagine Docker ufficiale (senza root, in sola lettura), un file Compose con proxy facoltativo, un'unità systemd, un controllo di salute approfondito e il comando che crea il primo amministratore (`monitor/docs/DEPLOYMENT.md`).
@@ -81,8 +82,8 @@
 | | |
 |---|---|
 | **Maturità** | functional |
-| **Test** | 3974 metodi di test (`python -m unittest discover -s monitor/tests`) |
-| **Impostazioni** | 640 impostazioni, tutte con aiuto |
+| **Test** | 4005 metodi di test (`python -m unittest discover -s monitor/tests`) |
+| **Impostazioni** | 658 impostazioni, tutte con aiuto |
 | **Lingue** | 8 (inglese, spagnolo, tedesco, francese, italiano, giapponese, cinese e portoghese) |
 | **Provato nel CI su** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -314,6 +315,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/SENTINEL_ita.md`](monitor/docs/SENTINEL_ita.md): la sentinella e i suoi controlli A1-A13
 - [`monitor/docs/COLLAB_ita.md`](monitor/docs/COLLAB_ita.md): la sentinella Collab, la scheda Avvisi e i silenziamenti
 - [`monitor/docs/SENTINEL_SECURITY_ita.md`](monitor/docs/SENTINEL_SECURITY_ita.md): La sentinella di sicurezza: Dependabot, analisi del codice, segreti, protezione dei branch, permessi dei workflow e CODEOWNERS, e ciò che non ha potuto controllare
+- [`monitor/docs/SENTINEL_SUPPLY_ita.md`](monitor/docs/SENTINEL_SUPPLY_ita.md): La sentinella della catena di fornitura: action non fissate, branch mobili, permessi dei workflow ampi o assenti e pull_request_target con checkout, e ciò che non ha potuto leggere
 - [`monitor/docs/AUDIT_LOG_ita.md`](monitor/docs/AUDIT_LOG_ita.md): Il registro delle azioni: chi ha cambiato cosa, la catena di hash, chi lo legge e le impostazioni
 - [`monitor/docs/HEALTH_ita.md`](monitor/docs/HEALTH_ita.md): La salute di un repository e del team: di cosa è fatta, la scheda Team, i link diretti e l'API
 - [`monitor/docs/REPORT_SCHEDULE_ita.md`](monitor/docs/REPORT_SCHEDULE_ita.md): Rapporti pianificati: il punteggio, cosa è cambiato, i repository che richiedono una persona e gli avvisi aperti in HTML e Markdown, la pianificazione e i file

@@ -1,0 +1,138 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "2.1.1",
+ "previous": "2.1.0",
+ "digest": "8f3c19e1644c994493306a0ee415cbbf4a3544c057e5668dcc79fbc51f041068",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "sentinels.supply.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinels.supply.ignore",
+    "kind": "patterns"
+   },
+   {
+    "key": "sentinels.supply.max_calls_per_tick",
+    "kind": "int",
+    "bounds": [
+     1,
+     600
+    ]
+   },
+   {
+    "key": "sentinels.supply.max_files_per_repo",
+    "kind": "int",
+    "bounds": [
+     1,
+     100
+    ]
+   },
+   {
+    "key": "sentinels.supply.max_repos_per_tick",
+    "kind": "int",
+    "bounds": [
+     1,
+     200
+    ]
+   },
+   {
+    "key": "sentinels.supply.min_rate_remaining",
+    "kind": "int",
+    "bounds": [
+     100,
+     5000
+    ]
+   },
+   {
+    "key": "sentinels.supply.refresh_seconds",
+    "kind": "int",
+    "bounds": [
+     600,
+     86400
+    ]
+   },
+   {
+    "key": "sentinels.supply.repos",
+    "kind": "repos"
+   },
+   {
+    "key": "sentinels.supply.signals.mutable_ref.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinels.supply.signals.mutable_ref.level",
+    "kind": "enum",
+    "bounds": [
+     "info",
+     "warning",
+     "error",
+     "critical"
+    ]
+   },
+   {
+    "key": "sentinels.supply.signals.permissions_missing.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinels.supply.signals.permissions_missing.level",
+    "kind": "enum",
+    "bounds": [
+     "info",
+     "warning",
+     "error",
+     "critical"
+    ]
+   },
+   {
+    "key": "sentinels.supply.signals.permissions_wide.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinels.supply.signals.permissions_wide.level",
+    "kind": "enum",
+    "bounds": [
+     "info",
+     "warning",
+     "error",
+     "critical"
+    ]
+   },
+   {
+    "key": "sentinels.supply.signals.pr_target_checkout.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinels.supply.signals.pr_target_checkout.level",
+    "kind": "enum",
+    "bounds": [
+     "info",
+     "warning",
+     "error",
+     "critical"
+    ]
+   },
+   {
+    "key": "sentinels.supply.signals.unpinned.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinels.supply.signals.unpinned.level",
+    "kind": "enum",
+    "bounds": [
+     "info",
+     "warning",
+     "error",
+     "critical"
+    ]
+   }
+  ],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {}
+}

@@ -699,7 +699,7 @@ def build_parser():
     ap.add_argument("--ca-file", metavar="FILE", default="", dest="ca_file", help=i18n.t("cli.help_ca_file"))
     ap.add_argument("--new-token-file", metavar="FILE", default="", dest="new_token_file", help=i18n.t("cli.help_new_token_file"))
     ap.add_argument("--timeout", type=float, default=8.0, metavar="SECONDS", help=i18n.t("cli.help_timeout"))
-    ap.add_argument("--sentinel", choices=("ci", "collab", "security", "system"), default="", help=i18n.t("cli.help_sentinel"))
+    ap.add_argument("--sentinel", choices=("ci", "collab", "security", "supply", "system"), default="", help=i18n.t("cli.help_sentinel"))
     ap.add_argument("--level", choices=LEVELS, default="", help=i18n.t("cli.help_level"))
     ap.add_argument("--muted", choices=("show", "hide", "only"), default="hide", help=i18n.t("cli.help_muted"))
     ap.add_argument("--fail-on", choices=LEVELS, default="", dest="fail_on", help=i18n.t("cli.help_fail_on"))

@@ -113,6 +113,7 @@ From 2.0.0 the shape of every read endpoint and the error codes are frozen in `d
 | `/api/sentinel/panels` | GET | viewer | the panels A1-A13 as data (level, one line, rows to act on) |
 | `/api/sentinel/parte/save` | POST | maintainer | save the daily report |
 | `/api/sentinel/security` | GET | viewer | what GitHub says is open or missing about security (Dependabot, code scanning, secrets, branch protection, workflow permissions, CODEOWNERS), with the lifecycle of the sentinel and what it cannot read |
+| `/api/sentinel/supply` | GET | viewer | what the workflow files of each repository let a moved tag or an outsider do (unpinned actions, moving branches, wide or missing permissions, pull_request_target with a checkout), with the lifecycle of the sentinel and the repositories it cannot read |
 | `/api/session-token` | GET | viewer | a one-use token that the next change of a setting needs |
 | `/api/settings` | GET,POST | viewer / admin | read and change the settings (a fixed list of keys, validated, with a backup) |
 | `/api/skills` | GET | viewer | the two skills of the monitor (`?name=internal|external[&file=NAME]`) as text |

@@ -589,6 +589,24 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinels.security.signals.dependabot.min_severity` | `-` | sentinel | Dependabot: least severity |
 | `sentinels.security.signals.secret.enabled` | `-` | sentinel | Secret scanning alerts |
 | `sentinels.security.signals.workflow.enabled` | `-` | sentinel | Workflow permissions |
+| `sentinels.supply.enabled` | `-` | sentinel | Supply chain sentinel on |
+| `sentinels.supply.ignore` | `-` | sentinel | Workflow findings to ignore |
+| `sentinels.supply.max_calls_per_tick` | `-` | sentinel | Calls per round |
+| `sentinels.supply.max_files_per_repo` | `-` | sentinel | Workflow files per repository |
+| `sentinels.supply.max_repos_per_tick` | `-` | sentinel | Repositories per round |
+| `sentinels.supply.min_rate_remaining` | `-` | sentinel | Allowance kept free |
+| `sentinels.supply.refresh_seconds` | `-` | sentinel | Supply chain cycle |
+| `sentinels.supply.repos` | `-` | sentinel | Repositories watched for supply chain |
+| `sentinels.supply.signals.mutable_ref.enabled` | `-` | sentinel | Actions on a moving branch |
+| `sentinels.supply.signals.mutable_ref.level` | `-` | sentinel | Actions on a moving branch: level |
+| `sentinels.supply.signals.permissions_missing.enabled` | `-` | sentinel | Workflow without permissions |
+| `sentinels.supply.signals.permissions_missing.level` | `-` | sentinel | Workflow without permissions: level |
+| `sentinels.supply.signals.permissions_wide.enabled` | `-` | sentinel | Workflow with write-all |
+| `sentinels.supply.signals.permissions_wide.level` | `-` | sentinel | Workflow with write-all: level |
+| `sentinels.supply.signals.pr_target_checkout.enabled` | `-` | sentinel | pull_request_target with checkout |
+| `sentinels.supply.signals.pr_target_checkout.level` | `-` | sentinel | pull_request_target with checkout: level |
+| `sentinels.supply.signals.unpinned.enabled` | `-` | sentinel | Actions not pinned to a commit |
+| `sentinels.supply.signals.unpinned.level` | `-` | sentinel | Actions not pinned to a commit: level |
 | `session_guard` (secure) | `true` | basic | One-use token for changes |
 | `show_unclassified` | `true` | general | Show unclassified repositories |
 | `signed_dir` | `-` | paths | Folder of signature records |

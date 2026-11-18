@@ -36,7 +36,7 @@ Un tour lit au plus `sentinels.security.max_repos_per_tick` dépôts (5 par déf
 
 ## Un seul propriétaire par constat
 
-Les panneaux de l'onglet Sentinelle qui montraient déjà des chiffres de sécurité (alertes par dépôt, alertes anciennes, couverture de Dependabot et CodeQL, pull requests Dependabot) restent des panneaux. Les alertes de l'onglet Alertes sur ces signaux viennent uniquement de cette sentinelle : rien n'est levé deux fois.
+Les panneaux de l'onglet Sentinelle qui montraient déjà des chiffres de sécurité (alertes par dépôt, alertes anciennes, couverture de Dependabot et CodeQL, pull requests Dependabot) restent des panneaux. Les alertes de l'onglet Alertes sur ces signaux viennent uniquement de cette sentinelle : rien n'est levé deux fois. Le contenu de chaque fichier de workflow (actions non épinglées à un commit, `write-all`, pas de bloc de permissions, `pull_request_target` avec récupération) relève de la [sentinelle de chaîne d'approvisionnement](SENTINEL_SUPPLY_fra.md) ; `security.workflow_write` reste ici car c'est un réglage du dépôt.
 
 ## Évènements et notifications
 

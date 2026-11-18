@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-3974_passing-brightgreen.svg" alt="3974 tests">
+  <img src="https://img.shields.io/badge/Tests-4005_passing-brightgreen.svg" alt="4005 tests">
 </p>
 
 > Watches the workflows of every repository you own and tells you, on one local page, what is red, what is stuck and what is waiting for you.
@@ -48,6 +48,7 @@
 - **Every screen size and several screens**: the page fits a window from a phone to 4K, upright or turned, and one monitor can serve up to three screens (`/screen/1` to `/screen/3`), each with its own tabs and orientation (`monitor/docs/SCREENS.md`).
 - **A score for each account**: a number from 0 to 100, a letter from A to E and a trend, from the reliability of the CI, its speed, the time to recover and how fast the collaboration alerts are closed; it says "calibrating" or "not enough data" instead of a number it cannot stand behind, shows what it does not cover yet, sits in the header of the page, has a `score` command, warns when it drops and is in the metrics and the MCP server (`monitor/docs/SCORE.md`).
 - **A security sentinel (Complete only, off by default)**: it reads, without writing anything to GitHub, the open Dependabot, code scanning and secret scanning alerts, whether the default branch is protected, the default permission of the workflows and, if you ask, the code owners; it raises one alert for each repository and signal, counts the findings as the fifth part of the score and says what it could not read (`monitor/docs/SENTINEL_SECURITY.md`).
+- **A supply chain sentinel (Complete only, off by default)**: it reads, without writing anything to GitHub, the workflow files of each repository through the API (no clone) and raises one alert for each repository and signal when an action is not pinned to a commit or follows a moving branch, a workflow gives the token `write-all` or declares no permissions, or `pull_request_target` checks out the code of a pull request; the findings come from the workflow linter, the value of a secret is never read, and a repository it could not read is listed instead of counted as clean (`monitor/docs/SENTINEL_SUPPLY.md`).
 - **The health of each repository and of the team (Complete only)**: CI, alerts of the three sentinels, release readiness and activity in one state (bad, warning, OK or not seen) with a risk number; the Team tab ranks the repositories that need a person first, with filters, a detail for each one and deep links for wall screens; the same data are at `/api/team/health`, `/api/repos/<owner>/<repo>/health` and the `team` command (`monitor/docs/HEALTH.md`).
 - **Reports, a log of actions and Apprise (Complete only)**: a report of the account (score, what changed, repositories that need a person, open alerts) written as HTML and Markdown on a cron schedule or on demand, off by default (`monitor/docs/REPORT_SCHEDULE.md`); a log of who changed what, with a chain of hashes and no value or secret in it (`monitor/docs/AUDIT_LOG.md`); and an optional Apprise channel for notifications, off by default.
 - **As a service**: the official Docker image (non-root, read-only), a Compose file with an optional proxy, a systemd unit, a deep health check and the command that creates the first administrator (`monitor/docs/DEPLOYMENT.md`).
@@ -81,8 +82,8 @@
 | | |
 |---|---|
 | **Maturity** | functional |
-| **Tests** | 3974 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Settings** | 640 settings, all with help |
+| **Tests** | 4005 test methods (`python -m unittest discover -s monitor/tests`) |
+| **Settings** | 658 settings, all with help |
 | **Languages** | 8 (English, Spanish, German, French, Italian, Japanese, Chinese, Portuguese) |
 | **Tested in the CI on** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -318,6 +319,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/SENTINEL.md`](monitor/docs/SENTINEL.md): the sentinel and its checks A1-A13
 - [`monitor/docs/COLLAB.md`](monitor/docs/COLLAB.md): the Collab sentinel, the Alerts tab and the silences
 - [`monitor/docs/SENTINEL_SECURITY.md`](monitor/docs/SENTINEL_SECURITY.md): The Security sentinel: Dependabot, code scanning, secrets, branch protection, workflow permissions and CODEOWNERS, and what it could not check
+- [`monitor/docs/SENTINEL_SUPPLY.md`](monitor/docs/SENTINEL_SUPPLY.md): The Supply chain sentinel: unpinned actions, moving branches, wide or missing workflow permissions and pull_request_target with a checkout, and what it could not read
 - [`monitor/docs/AUDIT_LOG.md`](monitor/docs/AUDIT_LOG.md): The log of actions: who changed what, the chain of hashes, who reads it and the settings
 - [`monitor/docs/HEALTH.md`](monitor/docs/HEALTH.md): The health of a repository and of the team: what it is made of, the Team tab, the deep links and the API
 - [`monitor/docs/REPORT_SCHEDULE.md`](monitor/docs/REPORT_SCHEDULE.md): Scheduled reports: the score, what changed, the repositories that need a person and the open alerts as HTML and Markdown, the schedule and the files

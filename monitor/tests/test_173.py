@@ -302,7 +302,7 @@ class Registry(unittest.TestCase):
     def test_collab_is_registered_off_by_default_and_ci_is_unchanged(self):
         ctx = {"gh": lambda *a, **k: [], "repos_fn": lambda: [], "eco_fn": lambda r: "other", "data_fn": lambda: None, "account_id": "main"}
         registry = sentinel_registry.SentinelRegistry.build(ctx, {})
-        self.assertEqual(registry.names(), ["ci", "collab", "security"])
+        self.assertEqual(registry.names(), ["ci", "collab", "security", "supply"])
         self.assertFalse(registry.get("collab").enabled)
         self.assertTrue(registry.get("ci").enabled)
         self.assertEqual(sentinel_registry.is_enabled({}, "collab"), False)
