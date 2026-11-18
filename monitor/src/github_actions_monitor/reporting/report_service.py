@@ -59,7 +59,7 @@ def _save_state(directory, state):
 def _update_entry(directory, key, **changes):
     """Changes the entry of ONE account in the state file that every account of the installation shares: read, change and write are one step under a lock (of the threads and of the processes), so two
     accounts that finish a report in the same moment never overwrite each other."""
-    with locks.process_lock(directory / STATE_FILE, 10.0):
+    with locks.os_lock(directory / STATE_FILE, 10.0):
         try:
             state = _state(directory, strict=True)
         except OSError as error:      # the file is there but cannot be read now: nothing is written, the next report tries again

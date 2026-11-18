@@ -44,7 +44,7 @@ class TheGenerations(unittest.TestCase):
             self.assertIsNotNone(audit_log.record(config, "settings_change", "root", "admin", "", "t%d" % self.counter, details={"a": "x" * 190, "b": "y" * 190, "c": "z" * 190}))
 
     def files(self):
-        return sorted(p.name for p in Path(self.tmp.name).glob("audit_actions.jsonl*") if not p.name.endswith(".lock"))
+        return sorted(p.name for p in Path(self.tmp.name).glob("audit_actions.jsonl*") if not p.name.endswith((".lock", ".oslock")))
 
     def test_the_default_keeps_five_and_the_range_is_one_to_twenty(self):
         self.assertEqual(audit_log.settings({})["keep_generations"], 5)

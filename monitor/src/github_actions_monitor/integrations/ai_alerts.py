@@ -374,7 +374,7 @@ def update(config, red_rows, now=None, texts=None, opener=None, runner=None, own
                 except Exception as error:   # noqa: BLE001 - a diagnosis that fails never stops the feed
                     degraded.note("ai_alerts.diagnose", error)
     try:
-        with locks.process_lock(folder / STATE, LOCK_WAIT):      # read -> change -> write of the state is ONE step for every thread and process that touches this folder (update, ack, status)
+        with locks.os_lock(folder / STATE, LOCK_WAIT):      # read -> change -> write of the state is ONE step for every thread and process that touches this folder (update, ack, status)
             result = _update_locked(cfg, folder, account, red_rows, now, texts, fresh, panels, sections, status)
     except TimeoutError as error:
         degraded.note("ai_alerts.lock", error)      # another process keeps the feed for too long: this refresh is skipped, nothing is lost (the next one brings it up to date)
@@ -439,7 +439,7 @@ def monitor_status(config, status, now=None):
     folder = folder_of(cfg)
     try:
         private_io.private_dir(folder)
-        with locks.process_lock(folder / STATE, LOCK_WAIT):
+        with locks.os_lock(folder / STATE, LOCK_WAIT):
             state = _read(folder / STATE, {})
             alerts = sorted(state.values(), key=lambda a: (a["repo"], a["workflow"]))
             _write(folder / BRIEF, brief(alerts, cfg["brief_max_bytes"], now, None, "", status))
@@ -453,7 +453,7 @@ def ack(config, alert_id_, now=None):
     cfg = settings(config)
     folder = folder_of(cfg)
     try:
-        with locks.process_lock(folder / STATE, LOCK_WAIT):      # the same lock as update(): an acknowledgement is never undone by a refresh that read the state before it
+        with locks.os_lock(folder / STATE, LOCK_WAIT):      # the same lock as update(): an acknowledgement is never undone by a refresh that read the state before it
             state = _read(folder / STATE, {})
             item = state.get(str(alert_id_))
             if not item or item.get("state") != "open":

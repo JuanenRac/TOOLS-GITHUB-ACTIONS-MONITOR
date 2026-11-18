@@ -141,7 +141,7 @@ def os_lock(path, timeout=10.0):
     lock_file = Path(str(path) + ".oslock")
     lock_file.parent.mkdir(parents=True, exist_ok=True)
     with path_lock(path):
-        fd = os.open(str(lock_file), os.O_CREAT | os.O_RDWR)
+        fd = os.open(str(lock_file), os.O_CREAT | os.O_RDWR, 0o600)      # private like every state file
         try:
             if os.fstat(fd).st_size == 0:
                 os.write(fd, b"0")      # Windows locks a byte that exists

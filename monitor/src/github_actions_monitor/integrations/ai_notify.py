@@ -83,7 +83,7 @@ def _spend(config, now, cfg):
     Returns None when it may go, else the reason it may not."""
     ledger, _log = _paths(config)
     try:
-        with locks.process_lock(ledger, LOCK_WAIT):
+        with locks.os_lock(ledger, LOCK_WAIT):
             state = _read(ledger)
             state["calls"] = [c for c in state["calls"] if now - c[0] < 3600]
             if len(state["calls"]) >= cfg["max_calls_per_hour"]:

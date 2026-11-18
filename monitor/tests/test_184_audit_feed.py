@@ -174,7 +174,7 @@ class OneStepAtATime(Feed):
     def test_another_process_that_holds_the_state_makes_this_one_wait_and_then_go_on(self):
         ident = self.open_one()
         script = ("import sys, time; sys.path.insert(0, sys.argv[1]); from github_actions_monitor.storage import locks; from pathlib import Path\n"
-                  "with locks.process_lock(Path(sys.argv[2]), 20):\n    print('held', flush=True); time.sleep(1.5)\n")
+                  "with locks.os_lock(Path(sys.argv[2]), 20):\n    print('held', flush=True); time.sleep(1.5)\n")
         holder = subprocess.Popen([sys.executable, "-I", "-c", script, str(HERE / "src"), str(self.folder / ai_alerts.STATE)], stdout=subprocess.PIPE, text=True)
         self.addCleanup(holder.stdout.close)      # runs after the wait below: no pipe is left open
         self.addCleanup(holder.wait, 20)
@@ -190,7 +190,7 @@ class OneStepAtATime(Feed):
 
     def test_the_status_note_takes_the_same_step(self):
         self.open_one()
-        with locks.process_lock(self.folder / ai_alerts.STATE, 5), mock.patch.object(ai_alerts, "LOCK_WAIT", 0.2):
+        with locks.os_lock(self.folder / ai_alerts.STATE, 5), mock.patch.object(ai_alerts, "LOCK_WAIT", 0.2):
             self.assertFalse(ai_alerts.monitor_status(self.config, "refreshing", now=NOW + 1))
         self.assertTrue(ai_alerts.monitor_status(self.config, "refreshing", now=NOW + 2))
 
@@ -235,7 +235,7 @@ class CapOfTheNotices(unittest.TestCase):
         self.assertIsNone(ai_notify._spend(self.config, NOW + 3601, self.CFG), "and it is forgotten after the hour, with nothing to clean up")
 
     def test_a_ledger_that_is_locked_for_too_long_sends_nothing(self):
-        with locks.process_lock(self.ledger, 5), mock.patch.object(ai_notify, "LOCK_WAIT", 0.2):
+        with locks.os_lock(self.ledger, 5), mock.patch.object(ai_notify, "LOCK_WAIT", 0.2):
             self.assertEqual(ai_notify._spend(self.config, NOW, self.CFG), "no_ledger")
 
     def test_a_notice_whose_sending_fails_still_spent_its_call(self):
