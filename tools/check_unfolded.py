@@ -40,7 +40,7 @@ PROBE = r"""
       await wait(250);
       if(typeof SENT!=="undefined"&&SENT&&typeof COLLAB!=="undefined"&&COLLAB&&typeof SECUR!=="undefined"&&SECUR&&typeof SDEL!=="undefined"&&SDEL&&typeof SSUP!=="undefined"&&SSUP)break;
     }
-    const cases=[["sci","a1","s-details"],["scol","collab","s-details-collab"],["ssec","security","s-details-sec"],["sdel","delivery","s-details-del"],["ssup","supply","s-details-sup"]];
+    const cases=[["sci","a1","s-details"],["scol","scol:collab.issue.critical","s-details-collab"],["ssec","ssec:security.secret","s-details-sec"],["sdel","sdel:release.unreleased_pending","s-details-del"],["ssup","ssup:actions.supply.unpinned","s-details-sup"]];
     for(const [tab,key,box] of cases){
       OPEN.clear();OPEN.add(key);
       try{renderSent();showTab(tab)}catch(e){}
@@ -89,6 +89,29 @@ PROBE = r"""
      for(const r of rows){const q=r.getBoundingClientRect();if(b&&(q.right>b.right+1||q.left<b.left-1))found.push({kind:"trend_row_outside",at:"strend",detail:Math.round(q.right-b.right)+"px"});
        const v=r.querySelector("svg");if(v){const w=v.getBoundingClientRect().width;if(w<40)found.push({kind:"trend_curve_squeezed",at:"strend",detail:Math.round(w)+"px wide"})}}
      if(document.querySelector("#t-sent #s-trend"))found.push({kind:"trend_still_in_summary",at:"sent",detail:"the summary still holds the daily trend"})}
+    /* one card per signal in the panels of Collaboration, Security, Delivery and Supply chain; Delivery and Supply chain also have a table by code and filters */
+    for(const [tab,box,n,tbl] of [["scol","s-details-collab",6,false],["ssec","s-details-sec",6,false],["sdel","s-details-del",6,true],["ssup","s-details-sup",5,true]]){
+      try{showTab(tab)}catch(e){}await wait(200);
+      const holder=document.getElementById(box),cards=holder?holder.querySelectorAll(":scope>details[data-sp]"):[];
+      if(cards.length!==n)found.push({kind:"sub_cards",at:tab,detail:cards.length+" cards instead of "+n});
+      for(const c of cards){if(!c.querySelector(".sphelp")||!c.querySelector("[data-sprepo]"))found.push({kind:"sub_card_parts",at:tab,detail:"a card without help or filter: "+c.dataset.k})}
+      if(tbl&&(!holder.querySelector(".sptable")||!holder.querySelector('[data-spk="level"]')))found.push({kind:"sub_table",at:tab,detail:"no table by code or no filter"});
+      seen.push(tab+"-cards")}
+    /* the rich daily trend: cards, range, compare, legend, tooltip and the export */
+    {try{showTab("strend")}catch(e){}await wait(300);
+     {const ds=[],tr={versions:[]};for(let i=0;i<12;i++){ds.push("2026-02-"+String(i+1).padStart(2,"0"));tr.versions.push(i<6?"1.0.0":"1.0.1")}
+      for(const d of TRS)tr[d[0]]={dates:ds,values:ds.map((x,i)=>d[0]==="red"?(i===3||i===9?2:0):(i<2?null:Math.round(Math.abs(Math.sin(i+d[0].length))*17)))};TRLAST=tr;renderTrend()}
+     const q=s=>document.querySelector("#s-trend "+s),fire=(el,v)=>{el.value=v;el.dispatchEvent(new Event("change",{bubbles:true}))};
+     if(document.querySelectorAll("#s-trend .trcard").length<16)found.push({kind:"trend_cards",at:"strend",detail:"fewer than 16 cards"});
+     const rng=q("#tr-range");
+     if(!rng)found.push({kind:"trend_range",at:"strend",detail:"no range selector"});
+     else{for(const n of ["7","60","30"]){fire(q("#tr-range"),n);await wait(80);const sv=q(".trsvg");if(!sv||+sv.dataset.n>+n)found.push({kind:"trend_range",at:"strend",detail:"range "+n+" shows "+(sv&&sv.dataset.n)+" points"})}}
+     if(q("#tr-cmp")){fire(q("#tr-cmp"),"health");await wait(80);const legs=document.querySelectorAll("#s-trend .trleg");if(legs.length!==2)found.push({kind:"trend_legend",at:"strend",detail:legs.length+" legend entries"});
+       else{legs[0].click();await wait(60);if(q(".trleg").getAttribute("aria-pressed")!=="false")found.push({kind:"trend_legend",at:"strend",detail:"the legend does not switch the line"});fire(q("#tr-cmp"),"")}}
+     const sv=q(".trsvg");if(sv){trCursor(sv,0);const tip=q(".trtip");if(!tip||tip.hidden||!tip.textContent.trim())found.push({kind:"trend_tooltip",at:"strend",detail:"no tooltip"})}else found.push({kind:"trend_tooltip",at:"strend",detail:"no large chart"});
+     const cs=[...document.querySelectorAll("#s-trend .trcard")];if(cs.length>2){cs[2].click();await wait(60);if(!q(".trcard.sel")||q(".trcard.sel").dataset.trs!==cs[2].dataset.trs)found.push({kind:"trend_pick",at:"strend",detail:"a card does not become the large chart"})}
+     if(typeof trExport!=="function"||!q('[data-trexp="csv"]')||!q('[data-trexp="json"]'))found.push({kind:"trend_export",at:"strend",detail:"no export"});
+     seen.push("strend-rich")}
     /* the counters of the header jump to a tab (some of them with a filter of repositories): back on Now, the list and the alerts are the same as before and no filter is left behind */
     {const count=()=>document.querySelectorAll("#t-now .card,#t-now tr,#t-now .alrow").length;
      for(const id of ["kp-red","kp-sign","kt-active","kt-queued","kt-ok","kt-min","kt-issues","kt-repos","kt-hot"]){

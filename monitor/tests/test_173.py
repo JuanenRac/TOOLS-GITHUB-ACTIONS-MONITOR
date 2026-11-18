@@ -383,12 +383,12 @@ class Wiring(unittest.TestCase):
         self.assertIn('path == "/api/sentinel/collab"', text)
         self.assertNotIn("sentinel_collab", (HERE / "actions_monitor_lite.py").read_text(encoding="utf-8") if (HERE / "actions_monitor_lite.py").exists() else "")
         page = (HERE / "assets" / "static" / "actions_monitor.html").read_text(encoding="utf-8")
-        for needle in ('section("collab"', "function collabBox", "/api/sentinel/collab", "ui.collab_off"):
+        for needle in ('spPanel("scol"', "function spPanel", "/api/sentinel/collab", "ui.collab_off"):
             self.assertIn(needle, page, needle)
         self.assertIn('section("a13"', page)
-        self.assertIn('section("collab"', page)      # the layers of the CI sentinel and the panel of the Collab sentinel are drawn for different menus
-        self.assertIn("safeUrl", page.split("function collabBox", 1)[1].split("function collabLevel", 1)[0] + "safeUrl")      # the link goes through `link()`, which only lets github.com through
-        self.assertIn("link(a.details.url", page)
+        self.assertIn('spPanel("scol"', page)      # the layers of the CI sentinel and the panel of the Collab sentinel are drawn for different menus
+        self.assertIn("safeUrl", page.split("function spRows", 1)[1].split("function spPanel", 1)[0] + "safeUrl")      # the link goes through `link()`, which only lets github.com through
+        self.assertIn("link(d.url", page)
 
 
 if __name__ == "__main__":
