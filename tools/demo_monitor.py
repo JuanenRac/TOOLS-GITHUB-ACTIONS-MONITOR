@@ -169,15 +169,19 @@ def main():
             alerts = [a for a in demo_alerts(now, iso) if a["sentinel"] == "collab"]
             return {"enabled": True, "level": "bad", "status": {"enabled": True, "level": "bad", "repos_in_scope": 6, "repos_checked": 6, "refresh_seconds": 600, "errors": []}, "alerts": alerts}
 
+    class DemoSecurity:
+        def snapshot(self):
+            return {"enabled": True, "level": "warn", "status": {"enabled": True, "level": "warn", "repos_in_scope": 6, "repos_checked": 6, "refresh_seconds": 600, "errors": []}, "alerts": []}
+
     class DemoRegistry:
         def alerts(self):
             return demo_alerts(now, iso)
 
         def names(self):
-            return ["ci", "collab"]
+            return ["ci", "collab", "security"]
 
         def get(self, name):
-            return DemoCollab() if name == "collab" else None
+            return DemoCollab() if name == "collab" else (DemoSecurity() if name == "security" else None)
     if not lite:
         am.SENTINEL["registry"] = DemoRegistry()
         am.SENTINEL["obj"] = Demo()

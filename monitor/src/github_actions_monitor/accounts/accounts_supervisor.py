@@ -99,7 +99,7 @@ class Child:
 
     def start(self):
         try:
-            own_group = {"start_new_session": True} if sys.platform != "win32" else {}       # a group of its own, so that stopping it reaches everything it started
+            own_group = {"start_new_session": True} if sys.platform != "win32" else {"creationflags": 0x08000000}       # a group of its own, so that stopping it reaches everything it started
             self.proc = subprocess.Popen(self.command, cwd=str(HERE), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, env=envguard.for_account_process({auth_http.CHILD_ENV: "1", SUPERVISOR_KEY_ENV: self.key}, other_secrets=webhook_names(self.id, others=True)), **own_group)
             self.started, self.error = time.time(), ""
         except OSError as error:
