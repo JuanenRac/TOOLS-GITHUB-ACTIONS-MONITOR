@@ -25,8 +25,8 @@ SURFACES = ("now", "al", "charts", "sent", "sci", "scol", "ssec", "sdel", "ssup"
 
 # Things that do not exist yet for ANY surface (the shared mechanisms still to build) and the version that closes them. When the mechanism exists, its check below turns true and the line must go.
 PENDING_FOR_ALL = {
-    "wall_screen": "2.2.0",          # the decision about the four wall screens, tab by tab
-    "demo_rich": "2.1.4",            # the demo with data for the tab (python tools/demo_monitor.py --rich)
+    "wall_screen": "2.1.5",          # the decision about the four wall screens, tab by tab
+    "demo_rich": "2.1.5",            # the demo with data for the tab (python tools/demo_monitor.py --rich)
 }
 # Exceptions of one surface: {surface: {check: version}}. Nothing here is silent: each line names the version that closes it.
 EXCEPTIONS = {}
