@@ -11,6 +11,8 @@ when this file and `tool_version.py` disagree.
 
 ## [Unreleased]
 
+## [2.1.1]
+
 ### Fixed
 
 - **The release gate accepts a green run by the count unittest itself gave**: the record of a complete green run carries the number of tests that unittest says it ran (the lines of the report can be fewer when a test prints in the middle of its line), and the gate now compares that number with the total instead of the number of lines it could read, so a complete run is no longer refused for a few uncounted lines.

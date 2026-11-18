@@ -16,7 +16,11 @@ O que só aparece com uso real prolongado: a migração desde a 1.8 e a 1.9, o c
 
 Os workflows do próprio monitor cumprem o que a sentinela de higiene pedirá aos outros: ações fixadas a um commit, as permissões mínimas e um limite de tempo em cada job.
 
-## Feito da 1.8.2 à 2.1.0
+## Feito da 1.8.2 à 2.1.1
+
+### 2.1.1 - Dois sentinelas novos, um da cadeia de abastecimento e outro da entrega, e uma porta de release mais exigente
+
+Dois sentinelas novos, desligados por predefinição e só na edição Complete, leem o que um repositório constrói e o que entrega sem escrever nada no GitHub: o da cadeia de abastecimento verifica nos ficheiros de workflow as ações não fixadas, os ramos móveis e as permissões demasiado largas ou em falta, e o da entrega compara releases, etiquetas, o changelog, os ficheiros de versão e as versões fixadas. O doctor mostra agora a vermelho um webhook de entrada sem segredo, a cobertura do webhook já não fica ativa quando o relógio é atrasado, e a porta de release compara o conteúdo de cada ficheiro do zip com o commit, aceita uma execução verde completa pela contagem que o unittest indicou e pode mostrar o andamento das suas suites.
 
 ### 2.1.0 - Ecrãs de parede com tema, logótipo e modo rotativo, uma cópia que se pode restaurar e um atualizador
 

@@ -9,6 +9,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+## [2.1.1]
+
 ### Corregido
 
 - **La puerta de release acepta una pasada verde por el recuento que dio el propio unittest**: el registro de una pasada verde completa lleva el número de pruebas que unittest dice haber ejecutado (las líneas del informe pueden ser menos cuando una prueba escribe en mitad de su línea), y la puerta compara ahora ese número con el total en lugar del número de líneas que pudo leer, de modo que una pasada completa ya no se rechaza por unas líneas sin contar.
