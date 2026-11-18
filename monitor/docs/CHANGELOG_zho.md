@@ -16,6 +16,7 @@
 ### 新增
 
 - **`make_release.py --progress` 显示测试套件的进度**:使用该选项后,常规套件和干净安装的套件每运行 250 个测试就输出一行,因此关卡不再沉默将近一个小时。
+- **供应链哨兵（仅 Complete，默认关闭）**：第四个哨兵不向 GitHub 写入任何内容，通过 API（无需克隆）读取每个仓库的工作流文件（SHA 未变的文件不会再次读取），并为每个仓库和每种信号生成一条警报：`actions.supply.unpinned`（未固定到完整提交的 `uses:`）、`actions.supply.mutable_ref`（跟随 `@main` 或 `@master`）、`actions.supply.permissions_wide`（`write-all`）、`actions.supply.permissions_missing`（没有 `permissions:` 块）和 `actions.supply.pr_target_checkout`（检出拉取请求的 `pull_request_target`）。发现来自工作流检查器（没有自己的规则；查找密钥的规则保持关闭，因此密钥的值从不被读取），每个信号都有开关和级别，工作流无法读取的仓库会列在 `unavailable` 下且绝不算作干净，重启或首次查看不会通知任何内容。成本由 `max_repos_per_tick`、`max_calls_per_tick` 和 `min_rate_remaining` 限定。新增：“哨兵”子标签中的 `sentinels.supply.*` 设置、`GET /api/sentinel/supply`、`alerts --sentinel supply`、`supply_*` 指标，以及 8 种语言的 `docs/SENTINEL_SUPPLY.md`。
 
 ### 变更
 

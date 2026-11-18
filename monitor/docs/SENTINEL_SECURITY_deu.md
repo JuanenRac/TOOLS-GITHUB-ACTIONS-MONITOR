@@ -36,7 +36,7 @@ Ein Durchlauf liest höchstens `sentinels.security.max_repos_per_tick` Repositor
 
 ## Ein Besitzer je Befund
 
-Die Panels des Reiters Wächter, die schon Sicherheitszahlen zeigten (Warnungen je Repository, alte Warnungen, Abdeckung von Dependabot und CodeQL, Dependabot-Pull-Requests), bleiben Panels. Die Warnungen des Reiters Warnungen zu diesen Signalen kommen nur von diesem Wächter, damit nichts doppelt ausgelöst wird.
+Die Panels des Reiters Wächter, die schon Sicherheitszahlen zeigten (Warnungen je Repository, alte Warnungen, Abdeckung von Dependabot und CodeQL, Dependabot-Pull-Requests), bleiben Panels. Die Warnungen des Reiters Warnungen zu diesen Signalen kommen nur von diesem Wächter, damit nichts doppelt ausgelöst wird. Der Inhalt jeder Workflow-Datei (nicht an einen Commit gebundene Actions, `write-all`, kein Berechtigungsblock, `pull_request_target` mit Checkout) gehört zum [Lieferketten-Wächter](SENTINEL_SUPPLY_deu.md); `security.workflow_write` bleibt hier, weil es eine Einstellung des Repositorys ist.
 
 ## Ereignisse und Benachrichtigungen
 

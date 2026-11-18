@@ -36,7 +36,7 @@ Un giro legge al massimo `sentinels.security.max_repos_per_tick` repository (5 p
 
 ## Un solo proprietario per rilievo
 
-I pannelli della scheda Sentinella che già mostravano cifre di sicurezza (avvisi per repository, avvisi vecchi, copertura di Dependabot e CodeQL, pull request di Dependabot) restano pannelli. Gli avvisi della scheda Avvisi su questi segnali vengono solo da questa sentinella, quindi nulla è sollevato due volte.
+I pannelli della scheda Sentinella che già mostravano cifre di sicurezza (avvisi per repository, avvisi vecchi, copertura di Dependabot e CodeQL, pull request di Dependabot) restano pannelli. Gli avvisi della scheda Avvisi su questi segnali vengono solo da questa sentinella, quindi nulla è sollevato due volte. Il contenuto di ogni file di workflow (action non fissate a un commit, `write-all`, nessun blocco di permessi, `pull_request_target` con checkout) spetta alla [sentinella della catena di fornitura](SENTINEL_SUPPLY_ita.md); `security.workflow_write` resta qui perché è un'impostazione del repository.
 
 ## Eventi e notifiche
 

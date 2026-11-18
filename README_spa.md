@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-3974_passing-brightgreen.svg" alt="3974 tests">
+  <img src="https://img.shields.io/badge/Tests-4005_passing-brightgreen.svg" alt="4005 tests">
 </p>
 
 > Vigila los workflows de todos tus repositorios y te dice, en una página local, qué está en rojo, qué está atascado y qué te espera.
@@ -48,6 +48,7 @@
 - **Todos los tamaños de pantalla y varias pantallas**: la página se ajusta a una ventana desde un móvil hasta 4K, vertical o girada, y un monitor puede servir hasta tres pantallas (`/screen/1` a `/screen/3`), cada una con sus pestañas y su orientación (`monitor/docs/SCREENS_spa.md`).
 - **Una puntuación por cuenta**: un número de 0 a 100, una letra de A a E y una tendencia, hechos con la fiabilidad de la CI, su velocidad, el tiempo de recuperación y lo rápido que se cierran las alertas de colaboración; dice «calibrando» o «datos insuficientes» en vez de un número que no puede respaldar, muestra lo que todavía no cubre, está en la cabecera de la página, tiene una orden `score`, avisa cuando baja y está en las métricas y en el servidor MCP (`monitor/docs/SCORE.md`).
 - **Un centinela de seguridad (solo Complete, apagado por defecto)**: lee, sin escribir nada en GitHub, las alertas abiertas de Dependabot, del análisis de código y del análisis de secretos, si la rama por defecto está protegida, el permiso por defecto de los flujos y, si se pide, los propietarios del código; genera una alerta por repositorio y señal, cuenta los hallazgos como quinta parte de la puntuación y dice lo que no pudo leer (`monitor/docs/SENTINEL_SECURITY.md`).
+- **Un centinela de cadena de suministro (solo Complete, apagado por defecto)**: lee, sin escribir nada en GitHub, los ficheros de flujo de cada repositorio por la API (sin clonar) y genera una alerta por repositorio y señal cuando una acción no está fijada a un commit o sigue una rama móvil, un flujo da al token `write-all` o no declara permisos, o `pull_request_target` descarga el código de una pull request; los hallazgos salen del linter de flujos, el valor de un secreto nunca se lee y un repositorio que no pudo leer se lista en vez de contarse como limpio (`monitor/docs/SENTINEL_SUPPLY_spa.md`).
 - **La salud de cada repositorio y del equipo (solo Complete)**: CI, alertas de los tres centinelas, preparación de versiones y actividad en un estado (malo, aviso, bien o sin ver) con un número de riesgo; la pestaña Equipo ordena primero los repositorios que necesitan a una persona, con filtros, un detalle de cada uno y enlaces directos para pantallas de pared; los mismos datos están en `/api/team/health`, `/api/repos/<owner>/<repo>/health` y la orden `team` (`monitor/docs/HEALTH_spa.md`).
 - **Informes, registro de acciones y Apprise (solo Complete)**: un informe de la cuenta (puntuación, cambios, repositorios que necesitan a una persona, alertas abiertas) escrito en HTML y Markdown según un horario cron o a petición, apagado por defecto (`monitor/docs/REPORT_SCHEDULE_spa.md`); un registro de quién cambió qué, con una cadena de hashes y sin valores ni secretos (`monitor/docs/AUDIT_LOG_spa.md`); y un canal opcional de Apprise para las notificaciones, apagado por defecto.
 - **Como servicio**: la imagen oficial de Docker (sin root, de solo lectura), un fichero Compose con proxy opcional, una unidad de systemd, una comprobación de salud profunda y la orden que crea el primer administrador (`monitor/docs/DEPLOYMENT.md`).
@@ -81,8 +82,8 @@
 | | |
 |---|---|
 | **Madurez** | functional |
-| **Tests** | 3974 métodos de test (`python -m unittest discover -s monitor/tests`) |
-| **Ajustes** | 640 ajustes, todos con ayuda |
+| **Tests** | 4005 métodos de test (`python -m unittest discover -s monitor/tests`) |
+| **Ajustes** | 658 ajustes, todos con ayuda |
 | **Idiomas** | 8 (inglés, español, alemán, francés, italiano, japonés, chino y portugués) |
 | **Probado en el CI en** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -314,6 +315,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/SENTINEL_spa.md`](monitor/docs/SENTINEL_spa.md): el centinela y sus comprobaciones A1-A13
 - [`monitor/docs/COLLAB_spa.md`](monitor/docs/COLLAB_spa.md): el centinela Collab, la pestaña Alertas y los silencios
 - [`monitor/docs/SENTINEL_SECURITY_spa.md`](monitor/docs/SENTINEL_SECURITY_spa.md): El centinela de seguridad: Dependabot, análisis de código, secretos, protección de ramas, permisos de los flujos y CODEOWNERS, y lo que no pudo comprobar
+- [`monitor/docs/SENTINEL_SUPPLY_spa.md`](monitor/docs/SENTINEL_SUPPLY_spa.md): El centinela de cadena de suministro: acciones sin fijar, ramas móviles, permisos de flujo amplios o ausentes y pull_request_target con descarga, y lo que no pudo leer
 - [`monitor/docs/AUDIT_LOG_spa.md`](monitor/docs/AUDIT_LOG_spa.md): El registro de acciones: quién cambió qué, la cadena de hashes, quién lo lee y los ajustes
 - [`monitor/docs/HEALTH_spa.md`](monitor/docs/HEALTH_spa.md): La salud de un repositorio y del equipo: de qué se compone, la pestaña Equipo, los enlaces directos y la API
 - [`monitor/docs/REPORT_SCHEDULE_spa.md`](monitor/docs/REPORT_SCHEDULE_spa.md): Informes programados: la puntuación, lo que ha cambiado, los repositorios que necesitan a una persona y las alertas abiertas en HTML y Markdown, el horario y los ficheros

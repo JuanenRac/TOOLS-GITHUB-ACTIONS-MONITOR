@@ -16,6 +16,7 @@
 ### 追加
 
 - **`make_release.py --progress` でスイートの進み具合が分かります**: このオプションを付けると、通常のスイートもクリーンインストールのスイートも 250 テストごとに 1 行を出力するため、ゲートが1時間近く無言のままになることはありません。
+- **サプライチェーン監視（Complete のみ、既定ではオフ）**：4つ目の監視は、GitHub には何も書き込まず、API で（クローンなしに）各リポジトリのワークフローファイルを読み取り（SHA が変わらないファイルは再読込しません）、リポジトリとシグナルごとに1件のアラートを出します：`actions.supply.unpinned`（完全なコミットに固定されていない `uses:`）、`actions.supply.mutable_ref`（`@main` や `@master` を指す）、`actions.supply.permissions_wide`（`write-all`）、`actions.supply.permissions_missing`（`permissions:` ブロックなし）、`actions.supply.pr_target_checkout`（プルリクエストをチェックアウトする `pull_request_target`）。指摘はワークフローのリンターから来て（独自ルールなし、秘密情報を探すルールはオフのままなので値は読み取られません）、各シグナルにスイッチとレベルがあり、ワークフローが読めないリポジトリは `unavailable` に載ってクリーン扱いにならず、再起動や最初の確認では何も通知しません。コストは `max_repos_per_tick`、`max_calls_per_tick`、`min_rate_remaining` で制限されます。新規：「監視」サブタブの `sentinels.supply.*` 設定、`GET /api/sentinel/supply`、`alerts --sentinel supply`、`supply_*` メトリクス、8言語の `docs/SENTINEL_SUPPLY.md`。
 
 ### 変更
 

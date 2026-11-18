@@ -3036,6 +3036,15 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as error:      # shown as a notice in the tab
                 self.json_reply({"data": None, "error": i18n.t("mon.sentinel_failed", error=error)})
             return
+        if path == "/api/sentinel/supply":      # what the workflow files let a moved tag or an outsider do (the Supply chain sentinel; off by default; read only)
+            if not self.guard():
+                return
+            supply = (SENTINEL["registry"].get("supply") if SENTINEL["registry"] else None)
+            try:
+                self.json_reply({"data": supply.snapshot() if supply else None, "error": SENTINEL["error"] or (None if supply else i18n.t("mon.sentinel_not_loaded"))})
+            except Exception as error:      # shown as a notice in the tab
+                self.json_reply({"data": None, "error": i18n.t("mon.sentinel_failed", error=error)})
+            return
         if path == "/api/sentinel/collab":      # the issues and pull requests that need a person (the Collab sentinel; off by default; read only)
             if not self.guard():
                 return
@@ -3995,6 +4004,9 @@ def start_sentinel(config):
         security = SENTINEL["registry"].get("security")
         if security is not None:
             security.feed.listeners.append(notifiers.make_listener(toolconfig.raw_config))
+        supply = SENTINEL["registry"].get("supply")
+        if supply is not None:
+            supply.feed.listeners.append(notifiers.make_listener(toolconfig.raw_config))
         SENTINEL["registry"].start()
     except Exception as error:
         SENTINEL["error"] = i18n.t("mon.sentinel_start_failed", error=error)

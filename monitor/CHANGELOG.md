@@ -18,6 +18,7 @@ when this file and `tool_version.py` disagree.
 ### Added
 
 - **`make_release.py --progress` says how far the suites are**: with the flag, both the ordinary suite and the suite of the clean install print one line every 250 tests, so the gate no longer stays silent for the better part of an hour.
+- **The Supply chain sentinel (Complete only, off by default)**: the fourth sentinel reads, without writing anything to GitHub, the workflow files of each repository through the API (no clone; a file whose SHA did not change is not read again) and raises one alert per repository and signal: `actions.supply.unpinned` (a `uses:` not pinned to a full commit), `actions.supply.mutable_ref` (it follows `@main` or `@master`), `actions.supply.permissions_wide` (`write-all`), `actions.supply.permissions_missing` (no `permissions:` block) and `actions.supply.pr_target_checkout` (`pull_request_target` with a checkout of the pull request). The findings come from the workflow linter (no rules of its own, the rule that looks for secrets stays off so the value of a secret is never read), each signal has its own switch and level, a repository whose workflows cannot be read is listed under `unavailable` and never counted as clean, and a restart or the first look announces nothing. The cost is bounded by `max_repos_per_tick`, `max_calls_per_tick` and `min_rate_remaining`. New: `sentinels.supply.*` settings in the Sentinel sub-tab, `GET /api/sentinel/supply`, `alerts --sentinel supply`, the metrics `supply_*`, and `docs/SENTINEL_SUPPLY.md` in the 8 languages.
 
 ### Changed
 

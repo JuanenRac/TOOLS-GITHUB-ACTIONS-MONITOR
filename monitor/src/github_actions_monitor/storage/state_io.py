@@ -26,6 +26,7 @@ ROUTES = (
     ("github_actions_monitor.sentinels.sentinel_ai", "CACHE_FILE", "sentinel", "sentinel_ai_cache"),
     ("github_actions_monitor.sentinels.sentinel_collab", "STATE_FILE", "sentinel", "collab_state"),
     ("github_actions_monitor.sentinels.sentinel_security", "STATE_FILE", "sentinel", "security_state"),
+    ("github_actions_monitor.sentinels.sentinel_supply", "STATE_FILE", "sentinel", "supply_state"),
     ("github_actions_monitor.sentinels.alert_center", "STATE_FILE", "doc", "alert_mutes"),
     ("github_actions_monitor.app.updatecheck", "STATE_FILE", "doc", "update_check"),
 )

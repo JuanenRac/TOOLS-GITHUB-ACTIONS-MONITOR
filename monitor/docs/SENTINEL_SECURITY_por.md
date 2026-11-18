@@ -36,7 +36,7 @@ Uma ronda lê no máximo `sentinels.security.max_repos_per_tick` repositórios (
 
 ## Um só dono por constatação
 
-Os painéis do separador Sentinela que já mostravam números de segurança (alertas por repositório, alertas antigos, cobertura do Dependabot e do CodeQL, pull requests do Dependabot) continuam a ser painéis. Os alertas do separador de Alertas sobre estes sinais vêm apenas deste sentinela, pelo que nada é levantado duas vezes.
+Os painéis do separador Sentinela que já mostravam números de segurança (alertas por repositório, alertas antigos, cobertura do Dependabot e do CodeQL, pull requests do Dependabot) continuam a ser painéis. Os alertas do separador de Alertas sobre estes sinais vêm apenas deste sentinela, pelo que nada é levantado duas vezes. O conteúdo de cada ficheiro de fluxo (ações não fixadas a um commit, `write-all`, sem bloco de permissões, `pull_request_target` com checkout) pertence ao [sentinela da cadeia de abastecimento](SENTINEL_SUPPLY_por.md); `security.workflow_write` fica aqui porque é uma definição do repositório.
 
 ## Eventos e notificações
 

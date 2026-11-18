@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-3974_passing-brightgreen.svg" alt="3974 tests">
+  <img src="https://img.shields.io/badge/Tests-4005_passing-brightgreen.svg" alt="4005 tests">
 </p>
 
 > 所有するすべてのリポジトリのワークフローを監視し、赤いもの・止まっているもの・対応待ちのものを、ローカルの1ページで教えます。
@@ -48,6 +48,7 @@
 - **あらゆる画面サイズと複数の画面**：ページはスマートフォンから4Kまでのウィンドウに、縦でも横でも適応し、1台のモニターで最大3つの画面（`/screen/1` から `/screen/3`）を提供できます。各画面に独自のタブと向きを設定できます（`monitor/docs/SCREENS_jpn.md`）。
 - **アカウントごとのスコア**：CI の信頼性、速度、復旧にかかる時間、コラボレーションのアラートがどれだけ早く閉じられるかから作られる 0〜100 の数値、A〜E の文字評価、傾向。裏付けのない数値の代わりに「較正中」「データ不足」と表示し、まだカバーしていないものを示し、ページのヘッダーに表示され、`score` コマンドがあり、低下すると警告し、メトリクスと MCP サーバーにも含まれます（`monitor/docs/SCORE.md`）。
 - **セキュリティセンチネル（Complete のみ、初期状態はオフ）**：GitHub には何も書き込まず、Dependabot・コードスキャン・シークレットスキャンの未解決アラート、既定ブランチが保護されているか、ワークフローの既定の権限、依頼があればコードオーナーを読み取ります。リポジトリとシグナルごとに 1 件のアラートを出し、検出結果をスコアの 5 番目の要素として数え、読み取れなかったものを伝えます（`monitor/docs/SENTINEL_SECURITY_jpn.md`）。
+- **サプライチェーンセンチネル（Complete のみ、初期状態はオフ）**：GitHub には何も書き込まず、API で（クローンなしに）各リポジトリのワークフローファイルを読み取り、アクションがコミットに固定されていない・移動するブランチを指している、ワークフローがトークンに `write-all` を与えている・権限を宣言していない、または `pull_request_target` がプルリクエストのコードをチェックアウトしている場合に、リポジトリとシグナルごとに 1 件のアラートを出します。指摘はワークフローのリンターから来て、秘密情報の値は読み取られず、読めなかったリポジトリはクリーン扱いにせず一覧に載せます（`monitor/docs/SENTINEL_SUPPLY_jpn.md`）。
 - **各リポジトリとチームの健全性（Complete のみ）**：CI、3 つのセンチネルのアラート、リリース準備状況、アクティビティを 1 つの状態（不良・警告・OK・未確認）とリスク値にまとめます。チームタブは人の手が必要なリポジトリを先頭に並べ、フィルター、リポジトリごとの詳細、壁掛け画面用のディープリンクを備えます。同じデータは `/api/team/health`、`/api/repos/<owner>/<repo>/health`、`team` コマンドで得られます（`monitor/docs/HEALTH_jpn.md`）。
 - **レポート、操作ログ、Apprise（Complete のみ）**：アカウントのレポート（スコア、変化、人の手が必要なリポジトリ、未解決のアラート）を cron スケジュールまたは依頼に応じて HTML と Markdown で作成します（初期状態はオフ、`monitor/docs/REPORT_SCHEDULE_jpn.md`）。誰が何を変更したかをハッシュの連鎖で記録し、値や秘密は含みません（`monitor/docs/AUDIT_LOG_jpn.md`）。通知用の任意の Apprise チャンネルもあり、初期状態はオフです。
 - **サービスとして**：公式 Docker イメージ（非 root、読み取り専用）、任意のプロキシ付き Compose ファイル、systemd ユニット、詳細なヘルスチェック、最初の管理者を作るコマンド（`monitor/docs/DEPLOYMENT.md`）。
@@ -81,8 +82,8 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **テスト** | テストメソッド 3974 件(`python -m unittest discover -s monitor/tests`) |
-| **設定** | 設定 640 件、すべてヘルプ付き |
+| **テスト** | テストメソッド 4005 件(`python -m unittest discover -s monitor/tests`) |
+| **設定** | 設定 658 件、すべてヘルプ付き |
 | **言語** | 8(英語、スペイン語、ドイツ語、フランス語、イタリア語、日本語、中国語、ポルトガル語) |
 | **CI で検証したシステム** | ubuntu, windows、Python 3.11, 3.13 |
 
@@ -314,6 +315,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/SENTINEL_jpn.md`](monitor/docs/SENTINEL_jpn.md): センチネルとチェック A1〜A13
 - [`monitor/docs/COLLAB_jpn.md`](monitor/docs/COLLAB_jpn.md): Collab 番人、アラートタブ、ミュート
 - [`monitor/docs/SENTINEL_SECURITY_jpn.md`](monitor/docs/SENTINEL_SECURITY_jpn.md): セキュリティセンチネル：Dependabot、コードスキャン、シークレット、ブランチ保護、ワークフローの権限、CODEOWNERS、確認できなかったこと
+- [`monitor/docs/SENTINEL_SUPPLY_jpn.md`](monitor/docs/SENTINEL_SUPPLY_jpn.md): サプライチェーンセンチネル：固定されていないアクション、移動するブランチ、広すぎる・欠けているワークフロー権限、チェックアウト付き pull_request_target、読み取れなかったこと
 - [`monitor/docs/AUDIT_LOG_jpn.md`](monitor/docs/AUDIT_LOG_jpn.md): 操作ログ：誰が何を変更したか、ハッシュの連鎖、読める人、設定
 - [`monitor/docs/HEALTH_jpn.md`](monitor/docs/HEALTH_jpn.md): リポジトリとチームの健全性：構成、チームタブ、ディープリンク、API
 - [`monitor/docs/REPORT_SCHEDULE_jpn.md`](monitor/docs/REPORT_SCHEDULE_jpn.md): 定期レポート：スコア、変化、人の手が必要なリポジトリ、未解決のアラートを HTML と Markdown で、スケジュールとファイル

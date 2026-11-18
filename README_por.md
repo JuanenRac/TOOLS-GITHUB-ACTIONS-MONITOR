@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-3974_passing-brightgreen.svg" alt="3974 tests">
+  <img src="https://img.shields.io/badge/Tests-4005_passing-brightgreen.svg" alt="4005 tests">
 </p>
 
 > Vigia os workflows de todos os seus repositórios e diz-lhe, numa página local, o que está a vermelho, o que está encravado e o que o espera.
@@ -48,6 +48,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 - **Todos os tamanhos de ecrã e vários ecrãs**: a página ajusta-se a uma janela desde um telemóvel até 4K, na vertical ou rodada, e um monitor pode servir até três ecrãs (`/screen/1` a `/screen/3`), cada um com os seus separadores e a sua orientação (`monitor/docs/SCREENS_por.md`).
 - **Uma pontuação por conta**: um número de 0 a 100, uma letra de A a E e uma tendência, feitos com a fiabilidade da CI, a sua velocidade, o tempo de recuperação e a rapidez com que se fecham os alertas de colaboração; diz «a calibrar» ou «dados insuficientes» em vez de um número que não consegue sustentar, mostra o que ainda não cobre, está no cabeçalho da página, tem um comando `score`, avisa quando desce e está nas métricas e no servidor MCP (`monitor/docs/SCORE.md`).
 - **Um sentinela de segurança (só Complete, desligado por predefinição)**: lê, sem escrever nada no GitHub, os alertas abertos do Dependabot, da análise de código e da análise de segredos, se o ramo predefinido está protegido, a permissão predefinida dos fluxos e, se pedir, os proprietários do código; gera um alerta por repositório e sinal, conta os achados como quinta parte da pontuação e diz o que não conseguiu ler (`monitor/docs/SENTINEL_SECURITY_por.md`).
+- **Um sentinela da cadeia de abastecimento (só Complete, desligado por predefinição)**: lê, sem escrever nada no GitHub, os ficheiros de fluxo de cada repositório pela API (sem clonar) e gera um alerta por repositório e sinal quando uma ação não está fixada a um commit ou segue um ramo móvel, um fluxo dá `write-all` ao token ou não declara permissões, ou `pull_request_target` obtém o código de um pull request; as deteções vêm do linter de fluxos, o valor de um segredo nunca é lido e um repositório que não conseguiu ler fica listado em vez de contado como limpo (`monitor/docs/SENTINEL_SUPPLY_por.md`).
 - **A saúde de cada repositório e da equipa (só Complete)**: CI, alertas das três sentinelas, preparação das versões e atividade num estado (mau, aviso, bom ou não visto) com um número de risco; o separador Equipa põe primeiro os repositórios que precisam de uma pessoa, com filtros, um detalhe de cada um e ligações diretas para ecrãs de parede; os mesmos dados estão em `/api/team/health`, `/api/repos/<owner>/<repo>/health` e no comando `team` (`monitor/docs/HEALTH_por.md`).
 - **Relatórios, registo de ações e Apprise (só Complete)**: um relatório da conta (pontuação, mudanças, repositórios que precisam de uma pessoa, alertas abertos) escrito em HTML e Markdown segundo um horário cron ou a pedido, desligado por predefinição (`monitor/docs/REPORT_SCHEDULE_por.md`); um registo de quem mudou o quê, com uma cadeia de hashes e sem valores nem segredos (`monitor/docs/AUDIT_LOG_por.md`); e um canal opcional do Apprise para as notificações, desligado por predefinição.
 - **Como serviço**: a imagem oficial do Docker (sem root, só de leitura), um ficheiro Compose com proxy opcional, uma unidade systemd, uma verificação de saúde profunda e o comando que cria o primeiro administrador (`monitor/docs/DEPLOYMENT.md`).
@@ -81,8 +82,8 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 | | |
 |---|---|
 | **Maturidade** | functional |
-| **Testes** | 3974 métodos de teste (`python -m unittest discover -s monitor/tests`) |
-| **Definições** | 640 definições, todas com ajuda |
+| **Testes** | 4005 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Definições** | 658 definições, todas com ajuda |
 | **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
 | **Testado no CI em** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -314,6 +315,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/SENTINEL_por.md`](monitor/docs/SENTINEL_por.md): a sentinela e as suas verificações A1-A13
 - [`monitor/docs/COLLAB_por.md`](monitor/docs/COLLAB_por.md): a sentinela Collab, o separador Alertas e os silêncios
 - [`monitor/docs/SENTINEL_SECURITY_por.md`](monitor/docs/SENTINEL_SECURITY_por.md): O sentinela de segurança: Dependabot, análise de código, segredos, proteção de ramos, permissões dos fluxos e CODEOWNERS, e o que não conseguiu verificar
+- [`monitor/docs/SENTINEL_SUPPLY_por.md`](monitor/docs/SENTINEL_SUPPLY_por.md): O sentinela da cadeia de abastecimento: ações não fixadas, ramos móveis, permissões de fluxo amplas ou em falta e pull_request_target com checkout, e o que não conseguiu ler
 - [`monitor/docs/AUDIT_LOG_por.md`](monitor/docs/AUDIT_LOG_por.md): O registo de ações: quem mudou o quê, a cadeia de hashes, quem o lê e as definições
 - [`monitor/docs/HEALTH_por.md`](monitor/docs/HEALTH_por.md): A saúde de um repositório e da equipa: de que é feita, o separador Equipa, as ligações diretas e a API
 - [`monitor/docs/REPORT_SCHEDULE_por.md`](monitor/docs/REPORT_SCHEDULE_por.md): Relatórios agendados: a pontuação, o que mudou, os repositórios que precisam de uma pessoa e os alertas abertos em HTML e Markdown, o horário e os ficheiros
