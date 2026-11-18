@@ -9,6 +9,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+## [2.1.3]
+
 ### Modificato
 
 - **Le immagini del README sono scattate in 1080p e mostrano le schede più nuove**: `tools/make_screenshots.py` fotografa ogni pagina a 1920x1080 per impostazione predefinita (`--viewport LARGHEZZAxALTEZZA` lo cambia; le immagini in 4K, ultralarga, verticale, telefono e schermo a parete mantengono la propria dimensione), `tools/demo_monitor.py --rich` dà alla demo rilevamenti per le sentinelle di consegna e di catena di fornitura, un andamento giornaliero e un confronto di periodi, e il README (nelle otto lingue) mostra le pagine Consegna, Catena di fornitura, Andamento giornaliero, Confronta periodi e Aggiornamenti.
@@ -21,6 +23,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 ### Aggiunto
 
 - **Un suggerimento su ogni impostazione**: passando il puntatore su un'impostazione, dandole il focus da tastiera o tenendo premuto su uno schermo tattile si vede cosa fa, il suo intervallo o i suoi valori e il valore predefinito, cosa succede quando un interruttore viene attivato o disattivato e se si applica subito o dopo un riavvio; le impostazioni che consumano quota o aggiungono una pagina (il confronto dei periodi, la ricerca di aggiornamenti, gli schermi a muro) dicono anche cosa vedrai e quanto costa. Il testo di aiuto di ogni impostazione è verificato nelle otto lingue e una voce per un'impostazione inesistente viene rifiutata.
+- **Due guardie perché nulla cresca da solo**: le guide devono avere gli stessi titoli e blocchi di codice nelle otto lingue, e un registro unico delle schede della pagina controlla per ciascuna il suo pulsante, il suo nome nelle otto lingue, il suo argomento di aiuto, la sua riga nella guida delle IA, la sua riga nella tabella dei segnali e il suo posto nell'edizione lite; una scheda nuova non registrata, o un pezzo mancante senza una versione che lo chiuda, fa fallire il test.
 
 ### Corretto
 

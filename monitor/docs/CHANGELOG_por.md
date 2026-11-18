@@ -9,6 +9,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+## [2.1.3]
+
 ### Alterado
 
 - **As capturas do README são feitas em 1080p e mostram os separadores mais recentes**: `tools/make_screenshots.py` fotografa cada página a 1920x1080 por predefinição (`--viewport LARGURAxALTURA` altera-o; as capturas de 4K, ultralarga, vertical, telemóvel e ecrã de parede mantêm o seu tamanho), `tools/demo_monitor.py --rich` dá à demonstração deteções para as sentinelas de entrega e de cadeia de fornecimento, uma tendência diária e uma comparação de períodos, e o README (nas oito línguas) mostra as páginas Entrega, Cadeia de fornecimento, Tendência diária, Comparar períodos e Atualizações.
@@ -21,6 +23,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 ### Adicionado
 
 - **Uma dica em cada definição**: ao passar o ponteiro por uma definição, dar-lhe o foco com o teclado ou manter premido num ecrã tátil mostra o que faz, o seu intervalo ou valores e a predefinição, o que acontece ao ativar e desativar um interruptor e se se aplica de imediato ou depois de reiniciar; as definições que gastam quota ou acrescentam uma página (a comparação de períodos, a procura de atualizações, os ecrãs de parede) dizem também o que vai ver e o que custam. O texto de ajuda de cada definição é verificado nos oito idiomas e uma entrada para uma definição inexistente é recusada.
+- **Duas guardas para que nada cresça sozinho**: os guias têm de ter os mesmos títulos e blocos de código nos oito idiomas, e um registo único dos separadores da página verifica de cada um o seu botão, o seu nome nos oito idiomas, o seu tema de ajuda, a sua linha no guia das IA, a sua linha na tabela de sinais e o seu lugar na edição lite; um separador novo sem registo, ou uma peça em falta sem uma versão que a feche, faz falhar o teste.
 
 ### Corrigido
 

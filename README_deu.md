@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4202_passing-brightgreen.svg" alt="4202 tests">
+  <img src="https://img.shields.io/badge/Tests-4207_passing-brightgreen.svg" alt="4207 tests">
 </p>
 
 > Überwacht die Workflows aller deiner Repositories und zeigt dir auf einer lokalen Seite, was rot ist, was hängt und was auf dich wartet.
@@ -69,7 +69,7 @@
 
 | | |
 |---|---|
-| **Version** | **2.1.2** · [alle Releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Version** | **2.1.3** · [alle Releases](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Voraussetzung** | Python 3.11+ und die GitHub-CLI (`gh auth login`); sonst nichts (die Konsolenansicht nutzt das optionale Paket `rich`) |
 | **Öffnet** | eine Seite nur auf `127.0.0.1`, in acht Sprachen |
 | **Schreibt auf GitHub** | nie von selbst: nur Stapelbefehle, die du mit ausdrücklichem `--go` startest |
@@ -77,12 +77,12 @@
 
 <!-- glance:begin -->
 
-**Heute gemessen** (v2.1.2)
+**Heute gemessen** (v2.1.3)
 
 | | |
 |---|---|
 | **Reifegrad** | functional |
-| **Tests** | 4202 Testmethoden (`python -m unittest discover -s monitor/tests`) |
+| **Tests** | 4207 Testmethoden (`python -m unittest discover -s monitor/tests`) |
 | **Einstellungen** | 693 Einstellungen, alle mit Hilfe |
 | **Sprachen** | 8 (Englisch, Spanisch, Deutsch, Französisch, Italienisch, Japanisch, Chinesisch und Portugiesisch) |
 | **Im CI getestet auf** | ubuntu, windows, Python 3.11, 3.13 |

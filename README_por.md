@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4202_passing-brightgreen.svg" alt="4202 tests">
+  <img src="https://img.shields.io/badge/Tests-4207_passing-brightgreen.svg" alt="4207 tests">
 </p>
 
 > Vigia os workflows de todos os seus repositórios e diz-lhe, numa página local, o que está a vermelho, o que está encravado e o que o espera.
@@ -69,7 +69,7 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 
 | | |
 |---|---|
-| **Versão** | **2.1.2** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
+| **Versão** | **2.1.3** · [todas as versões](https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR/releases) |
 | **Requisitos** | Python 3.11+ e a CLI do GitHub (`gh auth login`); mais nada (a vista de consola usa o pacote opcional `rich`) |
 | **Abre** | uma página só em `127.0.0.1`, em oito idiomas |
 | **Escreve no GitHub** | nunca sozinho: apenas os comandos por lotes que lançar com um `--go` explícito |
@@ -77,12 +77,12 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 
 <!-- glance:begin -->
 
-**Medido hoje** (v2.1.2)
+**Medido hoje** (v2.1.3)
 
 | | |
 |---|---|
 | **Maturidade** | functional |
-| **Testes** | 4202 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Testes** | 4207 métodos de teste (`python -m unittest discover -s monitor/tests`) |
 | **Definições** | 693 definições, todas com ajuda |
 | **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
 | **Testado no CI em** | ubuntu, windows, Python 3.11, 3.13 |

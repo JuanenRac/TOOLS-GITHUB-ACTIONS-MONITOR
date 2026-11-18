@@ -16,7 +16,11 @@ Ciò che emerge solo con un uso reale prolungato: la migrazione dalla 1.8 e dall
 
 I workflow del monitor stesso rispettano ciò che la sentinella di igiene chiederà agli altri: azioni fissate a un commit, permessi minimi e un limite di tempo su ogni job.
 
-## Fatto dalla 1.8.2 alla 2.1.2
+## Fatto dalla 1.8.2 alla 2.1.3
+
+### 2.1.3 - Aiuto su ogni impostazione, una scheda per Ieri vs oggi, un menu Aggiornamenti più difficile da abusare e pannelli che non si sovrappongono più
+
+La scheda Impostazioni mostra un suggerimento su ogni impostazione con cosa fa, il suo intervallo o i suoi valori, il valore predefinito e cosa fa un interruttore attivato o disattivato. Ieri vs oggi ha una propria voce di menu. Il menu Aggiornamenti si mette in pausa dopo una serie di tentativi falliti, dice perché un aggiornamento è bloccato e legge il suo file di avanzamento solo se è un file normale e piccolo; l'analizzatore di workflow taglia i file ostili, le guide vengono controllate per avere la stessa struttura nelle otto lingue e i pannelli richiudibili delle schede della Sentinella non si disegnano più uno sull'altro.
 
 ### 2.1.2 - Il monitor si aggiorna da un menu, confronta un periodo con il precedente e i pannelli aperti arrivano in fondo
 

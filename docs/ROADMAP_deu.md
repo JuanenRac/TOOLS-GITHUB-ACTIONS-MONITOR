@@ -16,7 +16,11 @@ Was sich nur im langen echten Einsatz zeigt: die Migration von 1.8 und 1.9, das 
 
 Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
 
-## Erledigt in 1.8.2 bis 2.1.2
+## Erledigt in 1.8.2 bis 2.1.3
+
+### 2.1.3 - Hilfe an jeder Einstellung, ein Reiter für Gestern vs. heute, ein schwerer zu missbrauchendes Menü Aktualisierungen und Panels, die sich nicht mehr überdecken
+
+Der Reiter Einstellungen zeigt an jeder Einstellung einen Tooltip mit ihrer Wirkung, ihrem Bereich oder ihren Werten, ihrem Standard und dem, was ein Schalter beim Ein- und Ausschalten tut. Gestern vs. heute hat einen eigenen Menüeintrag. Das Menü Aktualisierungen pausiert nach einer Serie fehlgeschlagener Versuche, sagt, warum eine Aktualisierung blockiert ist, und liest seine Fortschrittsdatei nur, wenn sie eine einfache kleine Datei ist; der Workflow-Linter schneidet feindliche Dateien ab, die Anleitungen werden auf gleiche Struktur in den acht Sprachen geprüft, und die Klappfelder der Sentinel-Reiter überdecken sich nicht mehr.
 
 ### 2.1.2 - Der Monitor aktualisiert sich über ein Menü, vergleicht einen Zeitraum mit dem davor, und aufgeklappte Panels reichen bis nach unten
 

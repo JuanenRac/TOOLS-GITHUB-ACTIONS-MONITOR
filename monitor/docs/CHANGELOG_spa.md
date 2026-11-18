@@ -9,6 +9,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+## [2.1.3]
+
 ### Cambiado
 
 - **Las capturas del README se hacen a 1080p y muestran las pestañas más nuevas**: `tools/make_screenshots.py` fotografía cada página a 1920x1080 por defecto (`--viewport ANCHOxALTO` lo cambia; las capturas de 4K, ultraancha, vertical, móvil y pantallas de pared conservan su tamaño), `tools/demo_monitor.py --rich` da a la demo hallazgos para los centinelas de entrega y de cadena de suministro, una tendencia diaria y una comparación de periodos, y el README (en los ocho idiomas) muestra las páginas de Entrega, Cadena de suministro, Tendencia diaria, Comparar periodos y Actualizaciones.
@@ -21,6 +23,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 ### Añadido
 
 - **Un globo de ayuda en cada ajuste**: al poner el puntero sobre un ajuste, darle el foco con el teclado o mantener pulsado en una pantalla táctil se muestra qué hace, su rango o valores y su valor por defecto, qué ocurre al activar y desactivar un interruptor y si se aplica al instante o tras reiniciar; los ajustes que gastan cuota o añaden una página (la comparación de períodos, la búsqueda de actualizaciones, las pantallas de pared) dicen además qué verás y qué cuestan. El texto de ayuda de cada ajuste se comprueba en los ocho idiomas y se rechaza una entrada de un ajuste que no existe.
+- **Dos guardias para que nada crezca solo**: las guías deben tener los mismos encabezados y bloques de código en los ocho idiomas, y un registro único de las pestañas de la página comprueba de cada una su botón, su nombre en los ocho idiomas, su tema de ayuda, su línea en la guía de las IA, su fila en la tabla de señales y su lugar en la edición lite; una pestaña nueva sin registrar, o una pieza que falta sin una versión que la cierre, hace fallar la prueba.
 
 ### Corregido
 

@@ -16,7 +16,11 @@ O que só aparece com uso real prolongado: a migração desde a 1.8 e a 1.9, o c
 
 Os workflows do próprio monitor cumprem o que a sentinela de higiene pedirá aos outros: ações fixadas a um commit, as permissões mínimas e um limite de tempo em cada job.
 
-## Feito da 1.8.2 à 2.1.2
+## Feito da 1.8.2 à 2.1.3
+
+### 2.1.3 - Ajuda em cada definição, um separador para Ontem vs hoje, um menu Atualizações mais difícil de abusar e painéis que já não se sobrepõem
+
+O separador Definições mostra uma dica em cada definição com o que faz, o seu intervalo ou valores, a predefinição e o que faz um interruptor ao ativar e desativar. Ontem vs hoje tem a sua própria entrada de menu. O menu Atualizações faz uma pausa depois de uma série de tentativas falhadas, diz porque uma atualização está bloqueada e só lê o seu ficheiro de progresso se for um ficheiro normal e pequeno; o analisador de workflows corta os ficheiros hostis, verifica-se que os guias têm a mesma estrutura nos oito idiomas e os painéis dobráveis dos separadores da Sentinela deixam de se desenhar uns por cima dos outros.
 
 ### 2.1.2 - O monitor atualiza-se a partir de um menu, compara um período com o anterior e os painéis desdobrados chegam ao fundo
 

@@ -21,7 +21,11 @@ What only shows with long real use: the migration from 1.8 and 1.9, the growth o
 
 The monitor's own workflows keep to what the hygiene sentinel will ask of others: actions pinned to a commit, the least permissions and a time limit on every job.
 
-## Done in 1.8.2 to 2.1.2
+## Done in 1.8.2 to 2.1.3
+
+### 2.1.3 - Help on every setting, a tab for Yesterday vs today, a harder Updates menu and panels that no longer overlap
+
+The Settings tab shows a tooltip on every setting with what it does, its range or values, its default and what a switch does on and off. Yesterday vs today has a menu entry of its own. The Updates menu pauses after a run of failed attempts, says why an update is blocked and reads its progress file only when it is a plain small file, the workflow linter cuts hostile files, the guides are checked for the same structure in the eight languages, and the folding panels of the Sentinel tabs no longer paint one over another.
 
 ### 2.1.2 - The monitor updates itself from a menu, compares a period with the one before, and the unfolded panels reach the bottom
 

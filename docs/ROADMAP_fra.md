@@ -16,7 +16,11 @@ Ce qui n'apparaît qu'à l'usage réel prolongé : la migration depuis la 1.8 et
 
 Les workflows du moniteur lui-même respectent ce que la sentinelle d'hygiène demandera aux autres : actions fixées à un commit, permissions minimales et une limite de temps sur chaque job.
 
-## Fait dans la 1.8.2 à la 2.1.2
+## Fait dans la 1.8.2 à la 2.1.3
+
+### 2.1.3 - De l'aide sur chaque réglage, un onglet pour Hier vs aujourd'hui, un menu Mises à jour plus difficile à détourner et des panneaux qui ne se chevauchent plus
+
+L'onglet Réglages affiche une info-bulle sur chaque réglage avec ce qu'il fait, sa plage ou ses valeurs, sa valeur par défaut et ce que fait un interrupteur activé ou désactivé. Hier vs aujourd'hui a sa propre entrée de menu. Le menu Mises à jour se met en pause après une série de tentatives échouées, dit pourquoi une mise à jour est bloquée et ne lit son fichier de progression que si c'est un petit fichier ordinaire ; l'analyseur de workflows coupe les fichiers hostiles, les guides sont vérifiés pour avoir la même structure dans les huit langues et les panneaux repliables des onglets de la Sentinelle ne se dessinent plus les uns sur les autres.
 
 ### 2.1.2 - Le moniteur se met à jour depuis un menu, compare une période à la précédente, et les panneaux dépliés atteignent le bas
 

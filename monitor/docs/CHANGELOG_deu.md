@@ -9,6 +9,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+## [2.1.3]
+
 ### Geändert
 
 - **Die Bilder der README entstehen in 1080p und zeigen die neuesten Reiter**: `tools/make_screenshots.py` fotografiert jede Seite standardmäßig mit 1920x1080 (`--viewport BREITExHÖHE` ändert das; die Bilder in 4K, Ultrabreit, Hochformat, Telefon und Wandanzeige behalten ihre Größe), `tools/demo_monitor.py --rich` gibt der Demo Befunde für die Wächter Auslieferung und Lieferkette, einen Tagestrend und einen Zeitraumvergleich, und die README (in den acht Sprachen) zeigt die Seiten Auslieferung, Lieferkette, Tagestrend, Zeiträume vergleichen und Aktualisierungen.
@@ -21,6 +23,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 ### Hinzugefügt
 
 - **Ein Tooltip an jeder Einstellung**: Zeigt man auf eine Einstellung, gibt ihr den Tastaturfokus oder hält auf einem Touchscreen gedrückt, erscheint, was sie tut, ihr Bereich oder ihre Werte und ihr Standard, was beim Ein- und Ausschalten eines Schalters geschieht und ob sie sofort oder nach einem Neustart gilt; Einstellungen, die Kontingent kosten oder eine Seite hinzufügen (der Zeitraumvergleich, die Suche nach Aktualisierungen, die Wandanzeigen), nennen auch, was du sehen wirst und was es kostet. Der Hilfetext jeder Einstellung wird in den acht Sprachen geprüft, und ein Eintrag für eine nicht vorhandene Einstellung wird abgelehnt.
+- **Zwei Wächter, damit nichts allein wächst**: die Anleitungen müssen in den acht Sprachen dieselben Überschriften und Codeblöcke haben, und ein einziges Register der Reiter der Seite prüft für jeden seine Schaltfläche, seinen Namen in den acht Sprachen, sein Hilfethema, seine Zeile in der Anleitung der KIs, seine Zeile in der Signaltabelle und seinen Platz in der Lite-Ausgabe; ein neuer, nicht registrierter Reiter oder ein fehlendes Teil ohne Version, die es schließt, lässt den Test scheitern.
 
 ### Behoben
 
