@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4152_passing-brightgreen.svg" alt="4152 tests">
+  <img src="https://img.shields.io/badge/Tests-4166_passing-brightgreen.svg" alt="4166 tests">
 </p>
 
 > 所有するすべてのリポジトリのワークフローを監視し、赤いもの・止まっているもの・対応待ちのものを、ローカルの1ページで教えます。
@@ -82,7 +82,7 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **テスト** | テストメソッド 4152 件(`python -m unittest discover -s monitor/tests`) |
+| **テスト** | テストメソッド 4166 件(`python -m unittest discover -s monitor/tests`) |
 | **設定** | 設定 693 件、すべてヘルプ付き |
 | **言語** | 8(英語、スペイン語、ドイツ語、フランス語、イタリア語、日本語、中国語、ポルトガル語) |
 | **CI で検証したシステム** | ubuntu, windows、Python 3.11, 3.13 |
@@ -325,6 +325,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/QUOTAS_jpn.md`](monitor/docs/QUOTAS_jpn.md): GitHub のクォータとプラン
 - [`monitor/docs/MODES_jpn.md`](monitor/docs/MODES_jpn.md): 動作モード: 通常・高速・ターボ
 - [`monitor/docs/AI_CONNECTION_jpn.md`](monitor/docs/AI_CONNECTION_jpn.md): AI ツールを接続する:モニターが伝えるすべてをシグナルとして、ブリーフ、エンドポイント、MCP ツール、フックで提供
+- [`monitor/docs/AI_SETUP_PROMPT_jpn.md`](monitor/docs/AI_SETUP_PROMPT_jpn.md): AI でモニターをセットアップする:AI アシスタントに貼り付けると、インストールし、希望を尋ね、設定を書き込むプロンプト
 - [`monitor/docs/QUOTA_jpn.md`](monitor/docs/QUOTA_jpn.md): クォータを増やし、消費を減らす:節約モード、中央パネル、GitHub App、クォータの共有方法
 - [`monitor/docs/EXTRAS_jpn.md`](monitor/docs/EXTRAS_jpn.md): 任意の追加機能：失敗したステップのログと GitHub App の読み取り専用トークン
 - [`monitor/docs/SCORE_jpn.md`](monitor/docs/SCORE_jpn.md): アカウントのスコア：要素、状態、API、ヘッダーのチップ、アラート、設定
