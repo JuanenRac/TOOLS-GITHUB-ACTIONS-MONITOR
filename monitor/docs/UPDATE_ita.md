@@ -16,6 +16,10 @@ L'updater porta un'installazione da qualsiasi versione pubblicata a qualsiasi al
 - `py -3 monitor_updater.py --console` è un menu di testo per server, SSH e container.
 - `py -3 bin/monitor_cli.py update` è lo stesso file avviato dal prodotto; `update plan`, `update apply` e gli altri comandi sotto accettano le opzioni della tabella.
 
+## Il menu Aggiornamenti dentro il monitor
+
+L'edizione Completa ha lo stesso aggiornatore dentro la sua pagina: **Sistema > Aggiornamenti**. Mostra la versione installata e quella trovata dal controllo (impostazione `updates.check`; non si chiede nulla a GitHub finché è spento o il monitor è offline), le note di ogni release e, con il pulsante «Cerca versioni», l'elenco di quelle pubblicate. Nulla viene scaricato o applicato se non premi un pulsante. Applicare richiede un amministratore sul computer dove gira il monitor (le rotte `/api/updates/*` rispondono 403 dalla rete) e una conferma che dice cosa succederà: lo SHA-256 dello zip confrontato con SHA256SUMS, la copia fatta prima (con la sua cartella), la migrazione della configurazione e il riavvio. L'aggiornamento gira in un processo a parte: il monitor si ferma da solo, l'aggiornamento viene applicato, il monitor riparte con la nuova versione e la pagina si riconnette; se la nuova versione non parte, quella precedente viene rimessa e avviata. «Torna alla versione precedente» fa lo stesso al contrario. I passi, la cronologia e il risultato si vedono nella pagina e vengono annotati nel registro delle azioni. Non è offerto nell'edizione Lite, in un container né sotto un gestore di servizi (riavviano il processo da soli: usa la riga di comando), e gira un solo aggiornamento alla volta. Configurazione, dati, chiavi e log non vengono sostituiti. Il file autonomo resta la via di ritorno quando il monitor non parte.
+
 ## Cosa fa, passo per passo
 
 1. Rileva l'installazione: cartella, versione, edizione (Completa o Lite), configurazione, dati, porte, se il monitor è in esecuzione, container o servizio.
@@ -56,6 +60,8 @@ Senza comando si apre la pagina. I comandi rispondono una volta (aggiungi `--jso
 | `--keep-old-defaults` | scrive il vecchio valore predefinito di ogni impostazione mai definita, così il comportamento non cambia |
 | `--adopt-new-defaults` | sposta al nuovo valore anche le impostazioni che hanno ancora il vecchio |
 | `--start` | avviare poi il monitor e verificarlo |
+| `--handover` | il monitor che ha avviato questo processo si ferma da solo: aspettarlo, applicare, riavviarlo (se l'avvio fallisce, torna la versione precedente) |
+| `--status-file` | scrive l'avanzamento in questo file JSON (lo legge il menu Aggiornamenti) |
 | `--edition` | complete o lite, se non si può dedurre |
 | `--allow-downgrade` | consentire una versione inferiore |
 | `--allow-container` | lavorare comunque in un container (l'immagine non viene sostituita) |

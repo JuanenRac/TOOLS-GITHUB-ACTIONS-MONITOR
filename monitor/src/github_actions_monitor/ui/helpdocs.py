@@ -33,6 +33,7 @@ TAB_TOPICS = {
     "team": "complete_team",
     "fleet": "large_accounts",
     "trep": "report_schedule",
+    "upd": "update",
     "hist": "analytics",
     "cfg": "settings",
     "about": "readme",

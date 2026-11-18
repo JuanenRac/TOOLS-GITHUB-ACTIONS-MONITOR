@@ -16,6 +16,10 @@ O atualizador leva uma instalação de qualquer versão publicada para qualquer 
 - `py -3 monitor_updater.py --console` é um menu de texto para servidores, SSH e contentores.
 - `py -3 bin/monitor_cli.py update` é o mesmo ficheiro lançado a partir do produto; `update plan`, `update apply` e os restantes comandos abaixo aceitam as opções da tabela.
 
+## O menu Atualizações dentro do monitor
+
+A edição Completa tem o mesmo atualizador dentro da sua página: **Sistema > Atualizações**. Mostra a versão instalada e a que a verificação encontrou (definição `updates.check`; nada é pedido ao GitHub enquanto estiver desligada ou o monitor estiver offline), as notas de cada versão e, com o botão «Procurar versões», a lista das publicadas. Nada é descarregado nem aplicado se não carregar num botão. Aplicar exige um administrador no computador onde o monitor corre (as rotas `/api/updates/*` respondem 403 a partir da rede) e uma confirmação que diz o que vai acontecer: o SHA-256 do zip comparado com o SHA256SUMS, a cópia feita antes (com a sua pasta), a migração da configuração e o reinício. A atualização corre num processo próprio: o monitor para sozinho, a atualização é aplicada, o monitor arranca de novo com a versão nova e a página volta a ligar-se; se a versão nova não arrancar, a anterior é reposta e arrancada. «Voltar à versão anterior» faz o mesmo ao contrário. Os passos, o histórico e o resultado vêem-se na página e ficam anotados no registo de ações. Não é oferecido na edição Lite, num contentor nem sob um gestor de serviços (reiniciam o processo por conta própria: use a linha de comandos), e só corre uma atualização de cada vez. A sua configuração, os dados, as chaves e os registos não são substituídos. O ficheiro autónomo continua a ser o caminho de volta quando o monitor não arranca.
+
 ## O que faz, passo a passo
 
 1. Deteta a instalação: pasta, versão, edição (Completa ou Lite), configuração, dados, portas, se o monitor está em execução, contentor ou serviço.
@@ -56,6 +60,8 @@ Sem comando abre-se a página. Os comandos respondem uma vez (acrescente `--json
 | `--keep-old-defaults` | escreve o valor por omissão antigo de cada definição que nunca definiu, para o comportamento não mudar |
 | `--adopt-new-defaults` | move também para o novo valor as definições que ainda têm o antigo |
 | `--start` | iniciar o monitor depois e verificá-lo |
+| `--handover` | o monitor que iniciou este processo para sozinho: esperar por ele, aplicar, arrancá-lo de novo (se o arranque falhar, volta a versão anterior) |
+| `--status-file` | escreve o progresso neste ficheiro JSON (o menu Atualizações lê-o) |
 | `--edition` | complete ou lite, se não se puder deduzir |
 | `--allow-downgrade` | permitir uma versão inferior |
 | `--allow-container` | trabalhar mesmo assim dentro de um contentor (a imagem não é substituída) |

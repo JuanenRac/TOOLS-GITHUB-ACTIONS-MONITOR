@@ -23,5 +23,6 @@ Generated from the page. The same data is in the endpoints; an AI does not need 
 - `ssec`: Security sentinel (what GitHub says is open or missing; address #sentinel-security; only while sentinels.security.enabled is on)
 - `team`: Team (health of the repositories ranked by risk, with filters and the detail of each)
 - `trep`: Scheduled reports (the files written on a schedule; address #team-reports)
+- `upd`: Updates (the updater of the monitor: versions, notes, update with a copy first, restart and the way back; address #updates; Complete only)
 
 Screens: `/screen/1` to `/screen/3` show the tabs chosen in `ui.screenN_tabs`.

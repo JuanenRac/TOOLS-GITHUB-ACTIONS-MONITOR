@@ -16,6 +16,10 @@ Der Updater bringt eine Installation von jeder veröffentlichten Version auf jed
 - `py -3 monitor_updater.py --console` ist ein Textmenü für Server, SSH und Container.
 - `py -3 bin/monitor_cli.py update` ist dieselbe Datei, aus dem Produkt gestartet; `update plan`, `update apply` und die anderen Befehle unten nehmen die Optionen der Tabelle an.
 
+## Das Menü Updates im Monitor
+
+Die Komplett-Ausgabe hat denselben Updater in ihrer Seite: **System > Updates**. Es zeigt die installierte Version und die, die die Prüfung gefunden hat (Einstellung `updates.check`; GitHub wird nicht gefragt, solange sie aus ist oder der Monitor offline ist), die Hinweise jeder Version und mit der Schaltfläche „Versionen suchen“ die Liste der veröffentlichten. Nichts wird geladen oder eingespielt, ohne dass du eine Schaltfläche drückst. Das Einspielen braucht einen Administrator an dem Rechner, auf dem der Monitor läuft (die Routen `/api/updates/*` antworten aus dem Netz mit 403), und eine Bestätigung, die sagt, was passiert: das SHA-256 des ZIPs gegen SHA256SUMS, die zuerst angelegte Kopie (mit ihrem Ordner), die Migration der Konfiguration und der Neustart. Das Update läuft in einem eigenen Prozess: Der Monitor beendet sich selbst, das Update wird eingespielt, der Monitor startet mit der neuen Version neu und die Seite verbindet sich wieder; startet die neue Version nicht, wird die vorherige zurückgespielt und gestartet. „Zur vorherigen Version zurückkehren“ macht dasselbe rückwärts. Schritte, Verlauf und Ergebnis erscheinen auf der Seite und im Aktionslog. Es wird nicht in der Lite-Ausgabe, nicht in einem Container und nicht unter einem Dienstmanager angeboten (sie starten den Prozess selbst neu: nutze die Kommandozeile), und es läuft immer nur ein Update. Konfiguration, Daten, Schlüssel und Logs werden nicht ersetzt. Die eigenständige Datei bleibt der Weg zurück, wenn der Monitor nicht startet.
+
 ## Was er tut, Schritt für Schritt
 
 1. Erkennt die Installation: Ordner, Version, Ausgabe (Vollständig oder Lite), Konfiguration, Daten, Ports, ob der Monitor läuft, Container oder Dienst.
@@ -56,6 +60,8 @@ Ohne Befehl öffnet sich die Seite. Die Befehle antworten einmal (mit `--json` a
 | `--keep-old-defaults` | schreibt den alten Standardwert jeder nie gesetzten Einstellung, damit sich das Verhalten nicht ändert |
 | `--adopt-new-defaults` | setzt auch Einstellungen, die noch den alten Standard haben, auf den neuen |
 | `--start` | danach den Monitor starten und prüfen |
+| `--handover` | der Monitor, der diesen Prozess gestartet hat, beendet sich selbst: auf ihn warten, einspielen, ihn neu starten (scheitert der Start, kommt die vorherige Version zurück) |
+| `--status-file` | schreibt den Fortschritt in diese JSON-Datei (das Menü Updates liest sie) |
 | `--edition` | complete oder lite, wenn sie sich nicht ableiten lässt |
 | `--allow-downgrade` | eine niedrigere Version erlauben |
 | `--allow-container` | trotzdem in einem Container arbeiten (das Image wird nicht ersetzt) |
