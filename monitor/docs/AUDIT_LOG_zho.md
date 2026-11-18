@@ -24,3 +24,5 @@
 ## 设置
 
 设置，哨兵标签页，**操作日志**区块：`audit_log.enabled`（开启）、`audit_log.max_mb`（10）和 `audit_log.maintainers_can_read`（关闭）。 `audit_log.keep_generations`(5)是保留的轮转文件数。`audit_log.required`(关闭)开启后,需要记录的操作(对 GitHub 操作的确认、模式、静音、凭据等)在无法写入日志期间会被以 503 拒绝;设置保持开放,以便修复。
+
+立即生成的备份（`POST /api/ops/backup`）和按需清理（`POST /api/ops/purge`，试运行也算）会记录为 `backup_run` 和 `purge_run`：记录行写明谁发起以及结果，绝不包含备份的内容。

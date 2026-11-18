@@ -16,6 +16,7 @@
 | `status` | Version, Ausgabe, Konto, Repositories, was läuft und fehlschlägt, das Kontingent | ja |
 | `health` (oder `check`) | eine Schnellprüfung, bevor etwas Schweres gelesen wird: Ist der Monitor erreichbar, akzeptiert er diesen Client, antwortet die GitHub-Anmeldung des Kontos? | ja |
 | `doctor` | die Prüfungen von `--doctor` für diese Installation (der Monitor muss nicht laufen) | ja |
+| `backup` | die vollständige Sicherung der Installation (der Monitor muss nicht laufen): `backup create [DATEI] [--account ID]`, `verify DATEI [--deep]`, `restore DATEI [--account ID] [--to-dir ORDNER] [--force]`, `status`, `list`; `--encrypt` mit `--key-env NAME` verschlüsselt sie (optionale Bibliothek); siehe [OPS_deu.md](OPS_deu.md) | nein |
 | `accounts` | die Konten des Supervisors (nur bei mehreren Konten) | nein |
 | `alerts` | die Alarme aller Wächter in einer Liste: `--sentinel ci\|collab`, `--level info\|warning\|error`, `--muted show\|hide\|only` | nein |
 | `score` | die Punktzahl des Kontos: Zahl, Buchstabe, Trend, Teile, Abdeckung und die Aufteilung nach Repository; `--compare` vergleicht sie mit dem Verlauf des Fensters | nein |
@@ -68,3 +69,7 @@ Im Netzwerkmodus wird das Token aus `MONITOR_ACCESS_TOKEN`, dann `MONITOR_TOKEN`
 ## Der Batch-Dispatcher: die Eingaben eines Workflows
 
 `python bin/gha_dispatch_all.py plan --inputs` listet zusätzlich unter jedem Ziel die Eingaben auf, die sein Workflow beim manuellen Start verlangt (Name, Typ, erforderlich oder optional, Standardwert, Optionen einer Auswahl und Beschreibung). Sie werden mit `git show` aus der Workflow-Datei in `origin/main` des lokalen Klons gelesen: nichts wird ausgelöst oder gesendet und `gh` wird nicht aufgerufen. `--json` fügt jeder Zeile eine Liste `inputs` hinzu; sie ist `null`, wenn die Datei nicht in `origin/main` liegt oder eine dem Leser unbekannte Form nutzt (der Flussstil `inputs: {…}`), und `[]`, wenn der Workflow keine Eingabe verlangt.
+
+## Sicherung und der Doctor
+
+`backup` und `doctor` arbeiten auf den Ordnern der Installation und brauchen daher keinen laufenden Monitor. `doctor` endet mit `0`, wenn alles in Ordnung ist (auch mit Warnungen), mit `1`, wenn eine Prüfung fehlschlug, mit `3`, wenn es nur Warnungen gibt und `--strict` (oder `ops.doctor.strict_exit`) aktiv ist, und mit `4`, wenn der Doctor selbst nicht laufen konnte; das sind die Codes des Doctors, die anderen Befehle behalten die oben genannten Exit-Codes. `backup` endet mit `0`, wenn es erledigt ist, und mit `1`, wenn es abgelehnt wird oder das Paket die Prüfung nicht besteht. Die Anleitung [OPS_deu.md](OPS_deu.md) enthält die Prüfungen, die Wiederherstellung und die geplante Sicherung.

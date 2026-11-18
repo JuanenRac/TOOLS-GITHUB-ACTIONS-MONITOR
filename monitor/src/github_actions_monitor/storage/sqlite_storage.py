@@ -444,10 +444,15 @@ class SqliteStorage(base.Storage):
         return dest.stat().st_size
 
 
-def inspect(path):
-    """Looks at a database WITHOUT changing it (opened read only, no migration, nothing created): {"exists", "schema_version", "target", "problems": [...], "bytes"}. For the doctor."""
+CHECK_MODES = ("integrity", "quick", "off")
+
+
+def inspect(path, mode="integrity", timeout_s=None, clock=time.monotonic):
+    """Looks at a database WITHOUT changing it (opened read only, no migration, nothing created): {"exists", "schema_version", "target", "problems": [...], "bytes", "timed_out"}. For the doctor.
+    `mode` is the check of SQLite: "integrity" (PRAGMA integrity_check, the thorough one and the default), "quick" (PRAGMA quick_check, fast) or "off" (only the schema). With `timeout_s` the check
+    is interrupted once `clock()` passes that many seconds, so a big file can never hold the caller for long; `timed_out` says so."""
     path = Path(path)
-    info = {"exists": path.is_file(), "schema_version": 0, "target": SCHEMA_VERSION, "problems": [], "bytes": 0}
+    info = {"exists": path.is_file(), "schema_version": 0, "target": SCHEMA_VERSION, "problems": [], "bytes": 0, "timed_out": False}
     if not info["exists"]:
         return info
     info["bytes"] = path.stat().st_size
@@ -459,9 +464,20 @@ def inspect(path):
     try:
         row = conn.execute("SELECT value FROM meta WHERE key = 'schema_version'").fetchone()
         info["schema_version"] = int(row[0]) if row else 0
-        result = [r[0] for r in conn.execute("PRAGMA integrity_check").fetchall()]
-        if result != ["ok"]:
-            info["problems"].append("integrity check: " + "; ".join(result[:2]))
+        if mode != "off":
+            if timeout_s:
+                deadline = clock() + timeout_s
+                conn.set_progress_handler(lambda: 1 if clock() > deadline else 0, 1000)
+            try:
+                result = [r[0] for r in conn.execute("PRAGMA quick_check" if mode == "quick" else "PRAGMA integrity_check").fetchall()]
+            except sqlite3.OperationalError as error:
+                if "interrupt" not in str(error).lower():
+                    raise
+                info["timed_out"] = True
+                result = ["ok"]
+            conn.set_progress_handler(None, 0)
+            if result != ["ok"]:
+                info["problems"].append("integrity check: " + "; ".join(result[:2]))
         if info["schema_version"] > SCHEMA_VERSION:
             info["problems"].append(f"schema {info['schema_version']} is newer than this version understands ({SCHEMA_VERSION})")
     except sqlite3.Error as error:

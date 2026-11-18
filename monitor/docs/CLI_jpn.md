@@ -16,6 +16,7 @@
 | `status` | バージョン、エディション、アカウント、リポジトリ、実行中と失敗、割り当て | 可 |
 | `health`（または `check`） | 重い読み取りの前の簡易確認：モニターに接続できるか、このクライアントを受け付けるか、アカウントの GitHub ログインが応答するか | 可 |
 | `doctor` | この環境に対する `--doctor` の検査（モニターが動いていなくても可） | 可 |
+| `backup` | インストール全体の完全バックアップ（モニターが動いていなくても可）：`backup create [FILE] [--account ID]`、`verify FILE [--deep]`、`restore FILE [--account ID] [--to-dir DIR] [--force]`、`status`、`list`。`--encrypt` と `--key-env NAME` で暗号化（任意のライブラリ）。[OPS_jpn.md](OPS_jpn.md) を参照 | 不可 |
 | `accounts` | スーパーバイザーのアカウント一覧（複数アカウント時のみ） | 不可 |
 | `alerts` | すべての番人のアラートを 1 つの一覧で：`--sentinel ci\|collab`、`--level info\|warning\|error`、`--muted show\|hide\|only` | 不可 |
 | `score` | アカウントのスコア：数値、文字評価、傾向、要素、カバレッジ、リポジトリ別の内訳。`--compare` で期間の履歴と比較します | 不可 |
@@ -68,3 +69,7 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python bin/monitor
 ## バッチディスパッチャー:ワークフローの入力
 
 `python bin/gha_dispatch_all.py plan --inputs` は、各ターゲットの下に、手動で起動するときにそのワークフローが要求する入力(名前、型、必須か任意か、既定値、選択肢、説明)も一覧表示します。入力はローカルクローンの `origin/main` にあるワークフローファイルから `git show` で読み取ります。何も起動せず、何も送信せず、`gh` も呼び出しません。`--json` は各行に `inputs` リストを追加します。ファイルが `origin/main` にない場合や、リーダーが知らない書式(フロースタイルの `inputs: {…}`)の場合は `null`、ワークフローが入力を要求しない場合は `[]` です。
+
+## バックアップと doctor
+
+`backup` と `doctor` はインストールのフォルダを対象に動作するため、モニターが動いている必要はありません。`doctor` は、すべて正常なら (警告があっても) `0`、チェックが失敗したら `1`、警告のみで `--strict` (または `ops.doctor.strict_exit`) がオンなら `3`、doctor 自体を実行できなければ `4` で終了します。これは doctor のコードで、他のコマンドは上の終了コードのままです。`backup` は完了すれば `0`、拒否された場合やパッケージの検証に失敗した場合は `1` で終了します。チェック、復元、定期バックアップは [OPS_jpn.md](OPS_jpn.md) のガイドにあります。

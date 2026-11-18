@@ -575,7 +575,7 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <div class="authpanel" id="auth-panel" role="dialog" aria-modal="true" hidden></div>
 <script>
 "use strict";
-(function(){const raw=window.fetch.bind(window),need=/^\/api\/(alerts\/(mute|unmute)|settings|screens\/logo|ai\/actions\/confirm|ai\/actions\/unlock|ai\/test|notify\/test|discovery\/group|mode|gh-action\/confirm|act\/confirm|act\/stop|github-token)/;
+(function(){const raw=window.fetch.bind(window),need=/^\/api\/(alerts\/(mute|unmute)|settings|screens\/logo|ai\/actions\/confirm|ai\/actions\/unlock|ai\/test|notify\/test|discovery\/group|mode|gh-action\/confirm|act\/confirm|act\/stop|github-token|ops\/(backup|purge))/;
   /* team mode (security/auth_http.py): who is signed in is asked once and kept for 30 s; in the individual mode and in the lite edition the answer is "individual" and nothing below adds a header or a request */
   const A={me:null,at:0};
   const me=async(fresh)=>{if(!fresh&&A.me&&Date.now()-A.at<30000)return A.me;let j=null;try{const r=await raw("/api/auth/me",{cache:"no-store"});if(r.ok)j=await r.json()}catch(e){}A.me=j&&typeof j==="object"?j:{enabled:false,mode:"individual",authenticated:false};A.at=Date.now();return A.me};
@@ -2068,6 +2068,21 @@ let ABOUT=null;
 function updLine(u){if(!u)return "";if(u.newer)return esc(T("ui.update_available",{version:u.latest}))+" · "+aLink(u.url,T("ui.update_open"))+" · "+aLink(u.changelog,T("ui.update_changelog"));
   if(!u.enabled)return T("ui.update_off");return u.latest?T("ui.update_latest"):T("ui.update_unknown")}
 async function aboutLoad(){try{const r=await fetch("/api/about?"+qlang(),{cache:"no-store"});ABOUT=await r.json()}catch(e){ABOUT=null}return ABOUT}
+/* the operation of the installation (2.1.0): the last backup, the schedule, the retention in force, and the two buttons (the second only while ops.purge.enabled is on); Complete only */
+async function opsLoad(){try{const r=await fetch("/api/ops/status",{cache:"no-store"});return r.ok?await r.json():null}catch(e){return null}}
+function opsErr(code){const k="ui.ops_err_"+code;return T(k)===k?T("ui.ops_err_failed"):T(k)}
+function opsCard(ops){const b=ops.backup||{},p=ops.purge||{},r=ops.retention||{};
+  const rows=[[T("ui.ops_mode"),T(ops.mode==="service"?"ui.ops_mode_service":"ui.ops_mode_local")],[T("ui.ops_last"),b.last_ok?b.last_ok+" ("+T("ui.ops_age",{n:(b.age_days||0).toFixed(1)})+")":T("ui.ops_none")],[T("ui.ops_schedule"),b.enabled?T("ui.ops_sched_on",{h:b.interval_hours,keep:b.keep}):T("ui.ops_sched_off")],[T("ui.ops_retention"),r.enabled?T("ui.ops_ret_on",{d:r.events_days,mode:r.mode}):T("ui.ops_ret_off")]];
+  if(b.ok===false)rows.push([T("ui.ops_failed"),opsErr(b.error)]);
+  return `<h3>${esc(T("ui.ops_title"))}</h3>`+dl(rows)+`<p><button id="ops-backup" type="button">${esc(T("ui.ops_backup_now"))}</button>`+(p.enabled?` <button id="ops-purge" type="button">${esc(T("ui.ops_purge_now"))}</button>`:"")+`</p><p id="ops-out" role="status"></p>`}
+function opsWire(){const out=$("ops-out"),bk=$("ops-backup"),pg=$("ops-purge");if(!out||!bk)return;
+  bk.addEventListener("click",async()=>{bk.disabled=true;out.textContent=T("ui.loading");try{const j=await advPost("/api/ops/backup",{});out.textContent=j.ok?T("ui.ops_backup_ok",{n:j.accounts||0}):T("ui.ops_backup_bad",{why:opsErr(j.status)})}catch(e){out.textContent=T("ui.ops_backup_bad",{why:opsErr("failed")})}bk.disabled=false});
+  if(pg){let armed=false;pg.addEventListener("click",async()=>{pg.disabled=true;try{
+    if(!armed){const plan=await advPost("/api/ops/purge",{dry_run:true});if(!plan.ok){out.textContent=T("ui.ops_purge_bad",{why:opsErr(plan.status)})}
+      else if(!plan.backup_ok){out.textContent=T("ui.ops_purge_bad",{why:opsErr("purge_no_backup")})}
+      else{out.textContent=T("ui.ops_purge_ask",{n:plan.would_remove===null?"?":plan.would_remove,d:plan.policy.events_days,mode:plan.policy.mode});pg.textContent=T("ui.ops_purge_confirm");armed=true}}
+    else{const j=await advPost("/api/ops/purge",{dry_run:false});out.textContent=j.ok?T("ui.ops_purge_done",{n:(j.line&&j.line.events_removed)||0}):T("ui.ops_purge_bad",{why:opsErr(j.status)});pg.textContent=T("ui.ops_purge_now");armed=false}
+  }catch(e){out.textContent=T("ui.ops_purge_bad",{why:opsErr("failed")})}pg.disabled=false})}}
 async function openAbout(){
   dlgOpen("about");$("about-msg").textContent="";const body=$("about-body");body.innerHTML=`<span class="mut">${esc(T("ui.loading"))}</span>`;
   const a=await aboutLoad();if(!a){body.textContent=T("ui.err_monitor",{msg:"/api/about"});return}
@@ -2077,7 +2092,8 @@ async function openAbout(){
   html+=`<h3>${esc(T("ui.about_paths"))}</h3>`+dl(Object.keys(a.paths||{}).map(k=>[T("ui.path_"+k),a.paths[k]]));
   html+=`<h3>${esc(T("ui.about_health"))}</h3>`+dl([[T("ui.health_ok"),yn(h.ok)],[T("ui.health_loaded"),yn(h.loaded)],[T("ui.health_offline"),yn(h.offline)],[T("ui.health_uptime"),fmt(h.uptime_seconds||0)],[T("ui.health_degraded"),String(h.degraded||0)]]);
   html+=`<h3>${esc(T("ui.about_credits"))}</h3>`+dl((a.credits||[]).map(c=>[c.name+" ("+c.license+")",T("ui.credit_"+c.id)+" · "+T(c.installed?"ui.about_installed":"ui.about_not_installed")]));
-  body.innerHTML=html;
+  const ops=a.edition==="lite"?null:await opsLoad();if(ops)html+=opsCard(ops);
+  body.innerHTML=html;opsWire();
 }
 $("about-open").addEventListener("click",openAbout);$("about-close").addEventListener("click",()=>dlgClose("about"));
 $("about-copy").addEventListener("click",async()=>{const t=ABOUT&&ABOUT.support?ABOUT.support:"";try{await navigator.clipboard.writeText(t);$("about-msg").textContent=T("ui.about_copied")}catch(e){$("about-msg").textContent=T("ui.copy_manual")}});

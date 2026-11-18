@@ -16,6 +16,7 @@
 | `status` | 版本、版本类型、账户、仓库、运行与失败情况、配额 | 支持 |
 | `health`（或 `check`） | 在读取任何重内容之前的快速检查：监视器能否连接、是否接受此客户端、该账户的 GitHub 登录是否有响应 | 支持 |
 | `doctor` | 此安装的 `--doctor` 检查（监视器无需运行） | 支持 |
+| `backup` | 安装的完整备份（监视器无需运行）：`backup create [文件] [--account ID]`、`verify 文件 [--deep]`、`restore 文件 [--account ID] [--to-dir 文件夹] [--force]`、`status`、`list`；`--encrypt` 配合 `--key-env 名称` 进行加密（可选库）；见 [OPS_zho.md](OPS_zho.md) | 不支持 |
 | `accounts` | 监督进程的账户（仅多账户时） | 不支持 |
 | `alerts` | 所有哨兵的警报合成一个列表：`--sentinel ci\|collab`、`--level info\|warning\|error`、`--muted show\|hide\|only` | 不支持 |
 | `score` | 账户评分：数值、等级、趋势、各部分、覆盖率以及按仓库的细分；`--compare` 将其与窗口内的历史记录比较 | 不支持 |
@@ -68,3 +69,7 @@ MONITOR_URL=http://192.168.0.20:8765 MONITOR_ACCESS_TOKEN=... python bin/monitor
 ## 批量调度器:工作流的输入
 
 `python bin/gha_dispatch_all.py plan --inputs` 还会在每个目标下列出其工作流在手动触发时要求的输入(名称、类型、必填或可选、默认值、选择项的选项以及说明)。它们通过 `git show` 从本地克隆 `origin/main` 中的工作流文件读取:不会触发任何运行、不会发送任何内容,也不会调用 `gh`。`--json` 会为每一行添加 `inputs` 列表;当文件不在 `origin/main` 中或使用读取器不认识的写法(流式 `inputs: {…}`)时为 `null`,工作流不需要输入时为 `[]`。
+
+## 备份与 doctor
+
+`backup` 和 `doctor` 直接作用于安装的文件夹，因此不需要监视器在运行。`doctor` 在一切正常时（含警告）以 `0` 退出，检查失败时为 `1`，只有警告且 `--strict`（或 `ops.doctor.strict_exit`）开启时为 `3`，doctor 本身无法运行时为 `4`；这些是 doctor 的退出码，其他命令保持上文的退出码。`backup` 完成时以 `0` 退出，被拒绝或备份包未通过验证时为 `1`。检查项、恢复和计划备份见指南 [OPS_zho.md](OPS_zho.md)。

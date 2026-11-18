@@ -209,6 +209,10 @@ Conditional reads (`cache.etag`) make an unchanged repository cost no quota; `mo
 
 Keep `accounts/` (or the database) on a volume that survives the container, and make a backup with `python tools/backup_storage.py backup FILE.zip --backend file` (or `sqlite`) before an update. Out of the box a short pass removes events older than 90 days and analytics older than 180 days; set `retention` in the configuration to change that, and `MONITOR_SERVICE=1` makes `--doctor` treat the monitor as a service (it then warns when there is no `retention` block or the events grow large). With SQLite, one database per account is the default; one shared file is possible and documented in [STORAGE.md](STORAGE.md).
 
+## Backups, volumes and upgrades
+
+For a service, `deploy/github-actions-monitor-backup.service` and `deploy/github-actions-monitor-backup.timer` make a complete backup every day (`monitor_cli.py backup create`); `deploy/compose.yaml` keeps the copies in a volume of their own (`monitor-backups`). Before an upgrade make a copy and verify it, after it run the doctor. The steps, the restore and the exit codes of the doctor are in [OPS.md](OPS.md).
+
 ## Checking the image in real containers
 
 The repository holds a workflow, `docker-audit.yml`, that builds the image of any version (a tag or a commit) on GitHub and checks it in real containers: the start and the health check, the contract of the API, the team mode with its first administrator, Caddy as a trusted proxy with its own TLS, the hardening (no root, read-only file system, no capabilities), the volumes with a backup, a restore and the move from the previous version, the secrets, the shutdown and the incoming webhook behind the proxy. It runs nothing on your computer, publishes nothing and uses no secret. Start it by hand and read the table of the summary of the run and the artifact `docker-audit-<version>`:

@@ -63,3 +63,7 @@ Um monitor deixado a correr durante meses cresceria sem teto, por isso uma passa
 A limpeza só toca em eventos e dias de análises mais antigos do que o respetivo limite; nunca toca na configuração, no estado das sentinelas, nos silenciamentos nem num evento sem hora. Cada passagem deixa uma linha no documento de auditoria (quando, quantos eventos removidos e mantidos, o ficheiro de arquivo, quantos dias de análises, o erro se houver). O `--doctor` avisa do tamanho dos eventos e, num monitor que corre como serviço (modo de rede, sem navegador, um contentor ou `MONITOR_SERVICE=1`), quando a sua configuração não tem bloco `retention`. Faça uma cópia antes de encurtar os limites.
 
 O predefinido `archive` guarda o que é removido em ficheiros comprimidos que pode voltar a ler; `delete` remove-o definitivamente.
+
+## O pacote de cópia completo
+
+`python bin/monitor_cli.py backup create` escreve o pacote de toda a instalação (formato 2): o despejo de cada conta e dos registos globais mais as definições e as listas limpas, com o tamanho e o SHA-256 de cada membro. Pode ser cifrado com uma chave de uma variável de ambiente (biblioteca opcional), verificado (`backup verify`, `--deep` restaura-o numa pasta temporária), listado, restaurado por conta ou numa pasta e feito de forma agendada (`ops.backup.enabled`). `tools/backup_storage.py` faz o mesmo pacote para uma pasta de contas (`--account` para uma só conta) e continua a verificar e a restaurar as cópias simples do primeiro formato. O guia [OPS_por.md](OPS_por.md) explica tudo.

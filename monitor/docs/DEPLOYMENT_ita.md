@@ -209,6 +209,10 @@ Le letture condizionali (`cache.etag`) fanno sì che un repository invariato non
 
 Tieni `accounts/` (o il database) su un volume che sopravvive al container e fai una copia con `python tools/backup_storage.py backup FILE.zip --backend file` (o `sqlite`) prima di un aggiornamento. Di serie un breve passaggio rimuove gli eventi più vecchi di 90 giorni e le analisi più vecchie di 180; imposta `retention` nella configurazione per cambiarlo, e `MONITOR_SERVICE=1` fa trattare il monitor come un servizio a `--doctor` (che poi avvisa se manca il blocco `retention` o se gli eventi diventano grandi). Con SQLite il predefinito è un database per account; un file condiviso è possibile ed è descritto in [STORAGE_ita.md](STORAGE_ita.md).
 
+## Backup, volumi e aggiornamenti
+
+Per un servizio, `deploy/github-actions-monitor-backup.service` e `deploy/github-actions-monitor-backup.timer` fanno ogni giorno un backup completo (`monitor_cli.py backup create`); `deploy/compose.yaml` tiene i backup in un volume a parte (`monitor-backups`). Prima di un aggiornamento fai un backup e verificalo, dopo esegui il doctor. I passi, il ripristino e i codici di uscita del doctor sono in [OPS_ita.md](OPS_ita.md).
+
 ## Verificare l'immagine in contenitori reali
 
 Il repository contiene un workflow, `docker-audit.yml`, che costruisce su GitHub l'immagine di qualsiasi versione (un tag o un commit) e la verifica in contenitori reali: l'avvio e il controllo di salute, il contratto dell'API, la modalità team con il suo primo amministratore, Caddy come proxy di fiducia con il proprio TLS, l'indurimento (niente root, file system in sola lettura, nessuna capability), i volumi con backup, ripristino e passaggio dalla versione precedente, i segreti, lo spegnimento e il webhook in ingresso dietro il proxy. Non esegue nulla sul tuo computer, non pubblica nulla e non usa alcun segreto. Avvialo a mano e leggi la tabella del riepilogo dell'esecuzione e l'artefatto `docker-audit-<versione>`:

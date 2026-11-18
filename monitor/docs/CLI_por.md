@@ -16,6 +16,7 @@
 | `status` | versão, edição, conta, repositórios, o que corre e o que falha, a quota | sim |
 | `health` (ou `check`) | uma verificação rápida antes de ler algo pesado: o monitor está acessível, aceita este cliente, o acesso GitHub da conta responde? | sim |
 | `doctor` | as verificações de `--doctor` para esta instalação (o monitor não tem de estar em execução) | sim |
+| `backup` | a cópia de segurança completa da instalação (o monitor não tem de estar em execução): `backup create [FICHEIRO] [--account ID]`, `verify FICHEIRO [--deep]`, `restore FICHEIRO [--account ID] [--to-dir PASTA] [--force]`, `status`, `list`; `--encrypt` com `--key-env NOME` cifra-a (biblioteca opcional); veja [OPS_por.md](OPS_por.md) | não |
 | `accounts` | as contas do supervisor (só com várias contas) | não |
 | `alerts` | os alertas de todas as sentinelas numa lista: `--sentinel ci\|collab`, `--level info\|warning\|error`, `--muted show\|hide\|only` | não |
 | `score` | a pontuação da conta: número, letra, tendência, partes, cobertura e a decomposição por repositório; `--compare` compara-a com o histórico da janela | não |
@@ -68,3 +69,7 @@ No modo de rede o token é lido de `MONITOR_ACCESS_TOKEN`, depois de `MONITOR_TO
 ## O despachante por lotes: as entradas de um workflow
 
 `python bin/gha_dispatch_all.py plan --inputs` lista também, sob cada alvo, as entradas que o seu workflow pede quando é disparado à mão (nome, tipo, obrigatória ou opcional, valor por defeito, opções de uma escolha e descrição). São lidas do ficheiro do workflow em `origin/main` do clone com `git show`: nada é disparado, nada é enviado e o `gh` não é chamado. `--json` acrescenta uma lista `inputs` a cada linha; é `null` quando o ficheiro não está em `origin/main` ou usa uma forma que o leitor não conhece (o estilo de fluxo `inputs: {…}`), e `[]` quando o workflow não pede nenhuma entrada.
+
+## Cópia de segurança e o doctor
+
+`backup` e `doctor` trabalham sobre as pastas da instalação, por isso não precisam de um monitor em execução. `doctor` sai com `0` quando tudo está bem (também com avisos), `1` quando uma verificação falhou, `3` quando só há avisos e `--strict` (ou `ops.doctor.strict_exit`) está ativo, e `4` quando o próprio doctor não conseguiu executar-se; são os códigos do doctor, os outros comandos mantêm os códigos de saída acima. `backup` sai com `0` quando termina e `1` quando é recusado ou o pacote não passa a verificação. O guia [OPS_por.md](OPS_por.md) tem as verificações, o restauro e a cópia agendada.

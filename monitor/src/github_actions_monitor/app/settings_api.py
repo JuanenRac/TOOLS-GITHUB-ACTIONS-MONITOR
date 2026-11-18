@@ -438,6 +438,22 @@ _f(_T_PATHS, "retention", "retention.mode", "enum", ("delete", "archive"), resta
 _f(_T_PATHS, "retention", "retention.events_max_kb", "int", (64, 1048576), unit="KB")
 _f(_T_PATHS, "retention", "retention.interval_hours", "int", (1, 168), restart=False)
 _f(_T_PATHS, "retention", "retention.warn_events_mb", "int", (1, 100000), restart=False, unit="MB")
+_f(_T_PATHS, "ops_backup", "ops.backup.enabled", "bool", restart=False, secure=True)
+_f(_T_PATHS, "ops_backup", "ops.backup.dir", "path", restart=False)
+_f(_T_PATHS, "ops_backup", "ops.backup.interval_hours", "int", (1, 720), restart=False)
+_f(_T_PATHS, "ops_backup", "ops.backup.keep", "int", (1, 365), restart=False, unit="")
+_f(_T_PATHS, "ops_backup", "ops.backup.include_config", "bool", restart=False, secure=True)
+_f(_T_PATHS, "ops_backup", "ops.backup.compress_level", "int", (0, 9), restart=False, unit="")
+_f(_T_PATHS, "ops_backup", "ops.backup.encrypt", "bool", restart=False, secure=True)
+_f(_T_PATHS, "ops_backup", "ops.backup.key_env", "text", AI_ENV_RE, restart=False, secure=True)
+_f(_T_PATHS, "ops_purge", "ops.purge.enabled", "bool", restart=False, secure=True)
+_f(_T_PATHS, "ops_purge", "ops.purge.require_backup_hours", "int", (0, 720), restart=False, secure=True, unit="h")
+_f(_T_PATHS, "ops_doctor", "ops.doctor.strict_exit", "bool", restart=False)
+_f(_T_PATHS, "ops_doctor", "ops.doctor.backup_max_age_days", "int", (1, 365), restart=False)
+_f(_T_PATHS, "ops_doctor", "ops.doctor.min_free_mb", "int", (50, 10000000), restart=False, unit="MB")
+_f(_T_PATHS, "ops_doctor", "ops.doctor.sqlite_check", "enum", ("quick", "deep", "off"), restart=False)
+_f(_T_PATHS, "ops_doctor", "ops.doctor.sqlite_timeout_s", "int", (1, 600), restart=False, unit="s")
+_f(_T_PATHS, "ops_doctor", "ops.doctor.webhook_min_length", "int", (8, 128), restart=False, unit="")
 # --- Outputs and exports
 _f(_T_OUT, "prometheus", "outputs.prometheus.enabled", "bool", restart=False, secure=True)
 _f(_T_OUT, "prometheus", "outputs.prometheus.per_repo", "bool", restart=False)
@@ -787,6 +803,8 @@ def check_value(path, value):
         text = value.strip()
         if len(text) > 260 or any(ord(c) < 32 for c in text) or text.startswith(("\\\\", "//")) or _FOREIGN.match(text):
             return False, "path"
+        if path == "ops.backup.dir" and (not text or not (text.startswith("/") or re.match(r"^[A-Za-z]:", text)) and ".." in re.split(r"[\\/]+", text)):
+            return False, "path"      # the folder of the copies: never empty and a relative one never climbs out of the data folder
         return True, text
     if kind == "names":
         pattern = FLEET_LABEL_RE if path == "fleet.labels" else FLEET_FILTER_RE if path == "fleet.saved_filters" else RUNNER_LABEL_RE if path in RUNNER_LABEL_KEYS else LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path == "sentinel.hygiene.ruleset_names" else (alertflow.SILENCE_RE if path == "alerts.silences" else (alertflow.PATTERN_RE if path == "alerts.service.workflows" else (PAIR_RE if path in PAIR_KEYS else NAME_RE))))))

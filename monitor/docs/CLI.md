@@ -16,6 +16,7 @@
 | `status` | version, edition, account, repositories, what runs and fails, the allowance | yes |
 | `health` (or `check`) | a quick check before reading anything heavy: is the monitor reachable, does it accept this client, does the GitHub login of the account answer | yes |
 | `doctor` | the checks of `--doctor` for this installation (the monitor need not be running) | yes |
+| `backup` | the complete backup of the installation (the monitor need not be running): `backup create [FILE] [--account ID]`, `verify FILE [--deep]`, `restore FILE [--account ID] [--to-dir DIR] [--force]`, `status`, `list`; `--encrypt` with `--key-env NAME` seals it (optional library); see [OPS.md](OPS.md) | no |
 | `accounts` | the accounts of the supervisor (several accounts only) | no |
 | `alerts` | the alerts of every sentinel in one list: `--sentinel ci\|collab`, `--level info\|warning\|error`, `--muted show\|hide\|only` | no |
 | `score` | the score of the account: number, letter, trend, parts, coverage and the breakdown by repository; `--compare` sets it against the history of the window | no |
@@ -68,3 +69,7 @@ In the network mode the token is read from `MONITOR_ACCESS_TOKEN`, then `MONITOR
 ## The batch dispatcher: the inputs of a workflow
 
 `python bin/gha_dispatch_all.py plan --inputs` also lists, under each target, the inputs its workflow asks for when it is fired by hand (name, type, required or optional, default, options of a choice and description). They are read from the workflow file at `origin/main` of the local clone with `git show`: nothing is fired, nothing is sent and `gh` is not called. `--json` adds an `inputs` list to every row; it is `null` when the file is not in `origin/main` or uses a form the reader does not know (the flow style `inputs: {…}`), and `[]` when the workflow takes no input.
+
+## Backup and the doctor
+
+`backup` and `doctor` work on the folders of the installation, so they need no running monitor. `doctor` exits `0` when all is well (warnings too), `1` when a check failed, `3` when there are only warnings and `--strict` (or `ops.doctor.strict_exit`) is on, and `4` when the doctor itself could not run; these are the codes of the doctor, the other commands keep the exit codes above. `backup` exits `0` when it is done and `1` when it is refused or the package does not verify. The guide [OPS.md](OPS.md) has the checks, the restore and the scheduled copy.

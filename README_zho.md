@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-3758_passing-brightgreen.svg" alt="3758 tests">
+  <img src="https://img.shields.io/badge/Tests-3827_passing-brightgreen.svg" alt="3827 tests">
 </p>
 
 > 监视你所有仓库的工作流，并在一个本地页面上告诉你：哪些是红的、哪些卡住了、哪些在等你处理。
@@ -81,8 +81,8 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 3758 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **设置** | 620 个设置,均有帮助 |
+| **测试** | 3827 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **设置** | 636 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
 
@@ -286,6 +286,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/WEBHOOK_zho.md`](monitor/docs/WEBHOOK_zho.md): 入站 Webhook
 - [`monitor/docs/CHATOPS_zho.md`](monitor/docs/CHATOPS_zho.md): Slack 和 Discord 的只读聊天命令
 - [`monitor/docs/SOUNDS_zho.md`](monitor/docs/SOUNDS_zho.md): 每种事件一种声音
+- [`monitor/docs/OPS_zho.md`](monitor/docs/OPS_zho.md): 运维安装：完整备份、恢复、计划备份、按需清理、doctor 及其退出码、systemd 与 Docker 设备化部署
 - [`monitor/docs/LITE_zho.md`](monitor/docs/LITE_zho.md): lite 版
 - [`monitor/docs/COMPLETE_INDIVIDUAL_zho.md`](monitor/docs/COMPLETE_INDIVIDUAL_zho.md): 面向个人的完整版
 - [`monitor/docs/COMPLETE_SERVICE_zho.md`](monitor/docs/COMPLETE_SERVICE_zho.md): 作为服务运行的完整版

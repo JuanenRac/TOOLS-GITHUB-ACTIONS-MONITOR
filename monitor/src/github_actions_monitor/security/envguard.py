@@ -17,7 +17,7 @@ SYSTEM_NAMES = ("GH_TOKEN", "GITHUB_TOKEN", "GITHUB_PAT", "PATH", "PATHEXT", "CO
 SECRET_NAMES = (SUPERVISOR_KEY_ENV, ACCESS_TOKEN_ENV, WEBHOOK_SECRET_ENV, SLACK_SIGNING_ENV, DISCORD_KEY_ENV)      # the secrets the monitor itself defines: each setting may name only its own
 #: every setting that NAMES an environment variable with a secret (key of the setting -> the variable that belongs to it by default, '' = none). A name can be written in one setting only, and none of
 #: them may name a variable of the system or a secret that belongs to another setting.
-ENV_SETTINGS = {"webhook.secret_env": WEBHOOK_SECRET_ENV, "listen.token_env": ACCESS_TOKEN_ENV, "ai.api_key_env": "", "notify.channels.telegram.token_env": "", "notify.channels.discord.url_env": "",
+ENV_SETTINGS = {"webhook.secret_env": WEBHOOK_SECRET_ENV, "listen.token_env": ACCESS_TOKEN_ENV, "ai.api_key_env": "", "ops.backup.key_env": "", "notify.channels.telegram.token_env": "", "notify.channels.discord.url_env": "",
                 "notify.channels.slack.url_env": "", "notify.channels.apprise.urls_env": "", "notify.channels.matrix.token_env": "",
                 "chatops.slack.signing_secret_env": SLACK_SIGNING_ENV, "chatops.discord.public_key_env": DISCORD_KEY_ENV}
 HELD = {}            # name -> value, taken out of the environment

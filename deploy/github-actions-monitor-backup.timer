@@ -1,0 +1,13 @@
+# Starts github-actions-monitor-backup.service every day (see the comments of that file). Change OnCalendar for another rhythm: `weekly`, `*-*-* 03:30:00`, `Mon,Thu 02:00`.
+# Persistent=true makes a copy that was missed because the machine was off run at the next start.
+[Unit]
+Description=GitHub Actions monitor: backup every day
+Documentation=https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR
+
+[Timer]
+OnCalendar=daily
+RandomizedDelaySec=15min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

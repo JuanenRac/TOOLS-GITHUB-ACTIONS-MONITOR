@@ -1,0 +1,41 @@
+# A complete backup of the monitor, made by systemd (the timer of github-actions-monitor-backup.timer starts it). Install it next to the unit of the monitor, as root:
+#
+#   install -m 644 deploy/github-actions-monitor-backup.service deploy/github-actions-monitor-backup.timer /etc/systemd/system/
+#   systemctl daemon-reload && systemctl enable --now github-actions-monitor-backup.timer
+#
+# It runs as the user of the monitor with the same environment file, so it finds the same folders and, for a sealed copy (ops.backup.encrypt), the variable named by ops.backup.key_env.
+# The copies go to the folder `backups` of the data folder (ops.backup.dir) and the newest ops.backup.keep are kept. `monitor_cli.py backup status` after it says whether it worked; the exit code
+# of this unit is 1 when the copy could not be made, so `systemctl status` and your monitoring see the failure. The scheduled copy inside the monitor (ops.backup.enabled) is a second way to do the
+# same; use one of the two.
+[Unit]
+Description=GitHub Actions monitor: backup
+Documentation=https://github.com/JuanenRac/TOOLS-GITHUB-ACTIONS-MONITOR
+After=github-actions-monitor.service
+
+[Service]
+Type=oneshot
+User=monitor
+Group=monitor
+WorkingDirectory=/opt/github_actions_monitor
+EnvironmentFile=/etc/github-actions-monitor/env
+Environment=PYTHONPATH=/opt/github_actions_monitor/src PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
+ExecStart=/usr/bin/python3 -m github_actions_monitor.cli.monitor_cli backup create
+ExecStartPost=/usr/bin/python3 -m github_actions_monitor.cli.monitor_cli backup status
+TimeoutStartSec=1800
+Nice=10
+IOSchedulingClass=idle
+# hardening: nothing but its own folder is writable
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+LockPersonality=true
+SystemCallArchitectures=native
+CapabilityBoundingSet=
+ReadWritePaths=/var/lib/github-actions-monitor

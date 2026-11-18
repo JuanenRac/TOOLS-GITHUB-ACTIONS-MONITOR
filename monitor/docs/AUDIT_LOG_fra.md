@@ -24,3 +24,5 @@ Un administrateur (et la personne devant l'ordinateur quand il n'y a pas de mode
 ## Réglages
 
 Réglages, onglet Sentinelle, bloc **Journal des actions** : `audit_log.enabled` (activé), `audit_log.max_mb` (10) et `audit_log.maintainers_can_read` (désactivé). `audit_log.keep_generations` (5) est le nombre de fichiers tournés conservés. `audit_log.required` (désactivé) refuse avec un 503 les actions qui doivent être enregistrées (les confirmations d'actions sur GitHub, le mode, les silences, les identifiants...) tant que le journal ne peut pas être écrit ; les réglages restent ouverts pour pouvoir le corriger.
+
+Une sauvegarde faite maintenant (`POST /api/ops/backup`) et la purge à la demande (`POST /api/ops/purge`, même un essai) sont enregistrées comme `backup_run` et `purge_run` : la ligne dit qui l'a demandée et le résultat, jamais le contenu de la sauvegarde.

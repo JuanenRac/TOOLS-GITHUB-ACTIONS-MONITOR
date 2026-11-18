@@ -7,7 +7,7 @@
 
 Generated from the code. It reads what the running monitor says (and never writes to GitHub). `--json` prints one JSON document; the exit codes are stable.
 
-Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `install-skill`, `gh-token`, `ai`.
+Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `score`, `team`, `ai-hook`, `credential`, `lessons`, `install-skill`, `gh-token`, `ai`, `backup`.
 
 | flag | what |
 | --- | --- |
@@ -34,6 +34,11 @@ Commands: `status`, `accounts`, `alerts`, `live`, `doctor`, `health`, `check`, `
 | `--level` | alerts: only this level |
 | `--muted` | alerts: show, hide (default) or list only the silenced ones |
 | `--fail-on` | alerts: exit with 5 when an alert of this level or worse is open |
+| `--strict` | doctor: a warning also makes the exit code 3 (without it, warnings still exit 0) |
+| `--force` | backup restore: write over accounts and files that already exist (without it a storage that holds accounts is refused) |
+| `--encrypt` | backup create: seal the copy with the key of the variable named by --key-env or ops.backup.key_env (needs the optional library cryptography; refused without it) |
+| `--key-env` | backup: the NAME of the environment variable that holds the key of a sealed copy (the key itself is never given on the command line) |
+| `--to-dir` | backup restore: restore into this empty folder (files backend) instead of the installation |
 | `--dest` | install-skill: the folder the skill is copied into (a subfolder github-actions-monitor-<name> is made) |
 | `--read-only` | gh-token: required, prints a one-hour read-only token of the GitHub App (only with github_app.share_reads on) |
 | `--repo` | lessons: only this repository |

@@ -203,7 +203,7 @@ class Contract:
         self.assertEqual(backup_module.verify_backup(zip_path), [])
         target = self.make()
         self.addCleanup(target.close)
-        self.assertEqual(backup_module.restore_backup(zip_path, target), {"accounts": 2, "events": 4})
+        self.assertEqual(backup_module.restore_backup(zip_path, target), {"accounts": 2, "events": 4, "ids": ["alpha", "beta"]})
         self.assertEqual(target.list_accounts(), ["alpha", "beta"])
         for name in ("alpha", "beta"):
             self.assertEqual(target.export_account(name), self.storage.export_account(name))

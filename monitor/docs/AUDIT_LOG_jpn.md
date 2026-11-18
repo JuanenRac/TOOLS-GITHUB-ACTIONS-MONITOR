@@ -24,3 +24,5 @@ Complete のみ、初期状態はオンです。アクセスの監査（ログ�
 ## 設定
 
 設定、センチネルタブ、ブロック **操作ログ**：`audit_log.enabled`（オン）、`audit_log.max_mb`（10）、`audit_log.maintainers_can_read`（オフ）。 `audit_log.keep_generations`(5)は保持する回転済みファイルの数です。`audit_log.required`(オフ)をオンにすると、記録が必要な操作(GitHub 上の操作の確認、モード、ミュート、認証情報など)は、ログに書き込めない間 503 で拒否されます。直せるように設定は開いたままです。
+
+今すぐ作成したバックアップ (`POST /api/ops/backup`) とオンデマンドの削除 (`POST /api/ops/purge`、ドライランも) は `backup_run` と `purge_run` として記録されます。行には要求した人と結果が残り、バックアップの内容は残りません。

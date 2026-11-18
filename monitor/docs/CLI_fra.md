@@ -16,6 +16,7 @@
 | `status` | version, édition, compte, dépôts, ce qui tourne et échoue, le quota | oui |
 | `health` (ou `check`) | un contrôle rapide avant de lire quoi que ce soit de lourd : le moniteur est-il joignable, accepte-t-il ce client, la connexion GitHub du compte répond-elle ? | oui |
 | `doctor` | les contrôles de `--doctor` pour cette installation (le moniteur n'a pas besoin de tourner) | oui |
+| `backup` | la sauvegarde complète de l'installation (le moniteur n'a pas besoin de tourner) : `backup create [FICHIER] [--account ID]`, `verify FICHIER [--deep]`, `restore FICHIER [--account ID] [--to-dir DOSSIER] [--force]`, `status`, `list` ; `--encrypt` avec `--key-env NOM` la chiffre (bibliothèque facultative) ; voir [OPS_fra.md](OPS_fra.md) | non |
 | `accounts` | les comptes du superviseur (plusieurs comptes seulement) | non |
 | `alerts` | les alertes de toutes les sentinelles dans une liste : `--sentinel ci\|collab`, `--level info\|warning\|error`, `--muted show\|hide\|only` | non |
 | `score` | le score du compte : nombre, lettre, tendance, parties, couverture et ventilation par dépôt ; `--compare` le compare à l'historique de la fenêtre | non |
@@ -68,3 +69,7 @@ En mode réseau le jeton est lu dans `MONITOR_ACCESS_TOKEN`, puis `MONITOR_TOKEN
 ## Le répartiteur par lots : les entrées d'un workflow
 
 `python bin/gha_dispatch_all.py plan --inputs` liste aussi, sous chaque cible, les entrées que son workflow demande quand il est lancé à la main (nom, type, obligatoire ou facultative, valeur par défaut, options d'un choix et description). Elles sont lues dans le fichier du workflow à `origin/main` du clone avec `git show` : rien n'est déclenché, rien n'est envoyé et `gh` n'est pas appelé. `--json` ajoute une liste `inputs` à chaque ligne ; elle vaut `null` quand le fichier n'est pas dans `origin/main` ou utilise une forme que le lecteur ne connaît pas (le style en flux `inputs: {…}`), et `[]` quand le workflow ne demande aucune entrée.
+
+## Sauvegarde et le doctor
+
+`backup` et `doctor` travaillent sur les dossiers de l'installation, ils n'ont donc pas besoin d'un moniteur en marche. `doctor` sort avec `0` quand tout va bien (avertissements compris), `1` quand un contrôle a échoué, `3` quand il n'y a que des avertissements et que `--strict` (ou `ops.doctor.strict_exit`) est actif, et `4` quand le doctor lui-même n'a pas pu s'exécuter ; ce sont les codes du doctor, les autres commandes gardent les codes de sortie ci-dessus. `backup` sort avec `0` quand c'est fait et `1` quand il est refusé ou que le paquet ne se vérifie pas. Le guide [OPS_fra.md](OPS_fra.md) donne les contrôles, la restauration et la sauvegarde planifiée.

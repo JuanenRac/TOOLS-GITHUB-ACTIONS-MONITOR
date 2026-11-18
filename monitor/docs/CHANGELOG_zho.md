@@ -9,6 +9,22 @@
 
 ## [Unreleased]
 
+### 新增
+
+- **安装的完整备份，经过验证并可选加密（`backup create`）**：`monitor_cli.py backup create` 写出一个备份包（格式 2），包含每个账户的转储、已清理的设置和列表，以及带有每个成员大小和 SHA-256 的清单；放到位之前会先验证，第一种格式的备份包仍可验证和恢复。令牌、密钥、密码、任何 `*_env` 变量的值、webhook 密钥、会话以及密钥库的内容绝不会带上：设置先经过白名单，再清除一切看起来像密钥的内容。使用 `ops.backup.encrypt`（或 `--encrypt`）时，备份包用 `ops.backup.key_env` 所指变量中的密钥以 AES-256-GCM 加密；它需要可选库 `cryptography`，没有该库或密钥不足 12 个字符时，备份会被明确拒绝且不写入任何内容。`backup verify`（加 `--deep` 会恢复到临时文件夹）、`backup list` 和 `backup status` 与之配套。
+- **按账户或恢复到文件夹，并附清单（`backup restore`）**：恢复会先验证备份包；只要有监视器在其端口上应答就会被拒绝，对已有账户的存储除非加 `--force` 也会被拒绝；设置会被合并（备份包中没有的键绝不会被删除）；可以只恢复一个账户（`--account`）或恢复到空文件夹（`--to-dir`），并写出报告，说明还需要做的事（GitHub 登录、被排除的设置、重启、doctor）。
+- **计划备份、状态以及“关于”面板中的卡片（`ops.backup.enabled`）**：默认关闭；开启后，监视器每隔 `ops.backup.interval_hours` 在独立线程中生成一份备份，保留最新的 `ops.backup.keep` 份并记录结果；失败只会被记录，绝不会让监视器停止。`GET /api/ops/status` 和 `POST /api/ops/backup`（管理员，从本机）以及“关于”面板的**运维**卡片用于查看和运行它。`deploy/github-actions-monitor-backup.service` 及其定时器在 systemd 下生成同样的备份，`deploy/compose.yaml` 把备份放在独立的卷中。指南 `docs/OPS.md` 以八种语言说明了全部内容。
+- **doctor 检查运维状态，并以不变的退出码退出（`doctor --strict`）**：完整版会检查数据、日志和备份文件夹是否真的能接受文件，正在运行的监视器及其监督进程是否健康，webhook 密钥（只看长度），每个 SQLite 数据库的完整性（只读且有时间上限，默认 `quick_check`），最近一次备份的时间，可用磁盘空间以及 `/metrics`。一切正常时以 `0` 退出，检查失败为 `1`，只有警告且使用 `--strict`（或 `ops.doctor.strict_exit`）为 `3`，无法运行为 `4`。精简版不会运行也不会加载其中任何内容。
+- **在你开启之前并不存在的按需清理（`ops.purge.enabled`）**：`POST /api/ops/purge` 和“关于”面板的按钮会立即运行保留期清理；除非另有要求，否则是试运行，并且在没有比 `ops.purge.require_backup_hours` 更新的有效备份时会被拒绝；记录会写入保留期审计和操作日志。
+- **单个账户的备份包（`backup create --account`）**：只包含该账户，没有用户、会话，也没有安装的设置或列表；`backup verify` 会检查它只包含该账户，`backup restore` 恢复它时不会触碰目标处的其他账户、用户或文件，仅当该账户在目标处已存在且没有 `--force` 时才会被拒绝。
+- **整个产品使用在设置中选定的主题,每个墙面屏幕也可以有自己的主题**:主题(`ui.theme`:自动、浅色、深色或十六种之一)也由监视器保存,因此墙面屏幕和登录页面都会使用它。屏幕默认继承它(`screens.default_theme` 现在是 `inherit`),并可用 `screens.default_theme`、`screens.theme_overview`、`screens.theme_now` 和 `screens.theme_sentinels` 为所有屏幕或单个屏幕固定另一个主题。墙面屏幕不再写入自己的颜色:它们使用页面的调色板,因此十六种主题在那里同样可用。
+- **在墙面屏幕上显示组织标志**:在设置中上传(PNG、JPEG、WebP 或 SVG,最大 1 MB;根据文件的前几个字节检查类型,含有脚本、事件处理程序或指向其他文件的链接的 SVG 会被拒绝),保存在数据文件夹中,绝不写入配置。`screens.logo_overview`、`screens.logo_now` 和 `screens.logo_sentinels` 选择显示的屏幕(默认仅总览),`screens.logo_corner` 选择角落(默认右上角),`screens.logo_max_width` 和 `screens.logo_max_height` 选择最大尺寸(默认 160 x 64 像素)。图片按比例缩放且有专属位置,因此绝不会遮挡内容。
+- **一个会轮换并跳转到新红色的墙面屏幕(`screens.mode` = rotate)**:不再是三个分开的屏幕,而是一个窗口每隔 `screens.rotate_every_seconds` 秒(默认 20,5 到 300)在总览、此刻和哨兵之间轮换。新的红色会跳到显示它的屏幕(失败的工作流跳到此刻,红色面板跳到哨兵),并停留 `screens.alert_hold_seconds` 秒(默认 30,5 到 600)或直到红色消失,以先到者为准,然后继续轮换;已经显示过的红色在变化或再次出现之前不会再触发跳转。`?jump=off` 和 `?rotate=0` 可让单个窗口安静下来。默认仍是三个分开的屏幕。
+
+### 变更
+
+- **`tools/backup_storage.py` 写出产品的备份包**：其备份现在就是 `backup create` 的备份包（格式 2，账户数据及已清除机密的设置），并支持 `--account`；第一种格式的备份仍可用它验证和恢复。
+
 ## [2.0.9]
 
 ### 安全
@@ -32,9 +48,6 @@
 - **左侧菜单有了带标题的分组，团队和哨兵各自拆分为独立条目**：五个分组（监视、哨兵、团队、报告与学习、系统；可折叠并会被记住）对每个标签页分类；*团队*变为团队健康（`#team-health`）、车队（`#fleet`）和定时报告（`#team-reports`），*哨兵*标签页变为概览（`#sentinel`）加上 CI 哨兵（`#sentinel-ci`，含面板 A1 至 A13）、协作哨兵（`#sentinel-collab`）和安全哨兵（`#sentinel-security`）各一个条目。某个哨兵的条目只在该哨兵开启时出现在菜单中（`sentinel.enabled`、`sentinels.collab.enabled`、`sentinels.security.enabled`）；其地址仍会打开一个说明它已关闭的面板，并打开设置中的对应开关；每个徽标只统计自己哨兵的警报。旧地址（`#team`、`#sent`、`#team/fleet`、`?view=team`）仍会打开正确的面板，每个标签页打开自己的帮助主题，`ui.screen1_tabs` 列出新的标签页（`fleet`、`trep`、`sci`、`scol`、`ssec`）。
 - **每种事件一种声音,带主题、按类型的开关和静音时段**:新的红色、严重或安全警报、卡住的构建或队列、评分下降、连接丢失、警告、已解决、新报告、新经验和普通通知,各有自己的音型,由 Web Audio API 生成(无音频文件,任何内容都不会离开浏览器),凭听觉就能知道发生了什么。设置 `sound.on_warning`、`sound.on_resolved`、`sound.on_report`、`sound.on_lesson`、`sound.on_sentinel`、`sound.on_stuck`、`sound.on_score_drop` 和 `sound.on_info` 加入原有的两个(默认全部开启),`sound.theme` 选择 `classic` 或 `soft` 音色,`sound.quiet_enabled` 配合 `sound.quiet_from_hour` 和 `sound.quiet_to_hour` 设定静音时段(默认关闭)。在“设置”的“界面”中,每种类型有一个按钮,以当前音量和主题播放。墙面屏幕使用相同的声音(窗口是否发声仍由 `screens.sound` 和 `?sound=on` 决定)。`docs/SOUNDS.md` 提供八种语言的声音表。
 - **来自 Slack 和 Discord 的只读命令(设置 `chatops.enabled`,默认关闭)**:允许的频道中的人可以向监视器询问 `help`、`status`、`alerts`、`red`、`queue` 或 `score`,并得到只有自己能看到、不含提及、且在 `chatops.links` 开启(默认)时除了按原样显示的名称旁的仓库地址外不含链接的简短回复(`chatops.show_repo_names` 默认为 `all`,私有仓库的名称也会到达名单所允许的每个频道和用户;`public` 和 `none` 会隐藏它们)。命令列表是封闭的(`chatops.allowed_words` 只能缩小它),每条命令只读取监视器已经拥有的内容:没有任何命令会向 GitHub 写入、执行操作、更改设置或读取密钥。`POST /api/chatops/slack` 校验 Slack 的 `v0` 签名(时间和正文的 HMAC-SHA256,最多五分钟前,密钥只放在 `chatops.slack.signing_secret_env` 所指的环境变量中);`POST /api/chatops/discord` 用 `chatops.discord.public_key_env` 所指的公钥校验交互的 Ed25519 签名;两者都会应答平台的验证挑战,绝不两次接受同一签名,拒绝超过 16 KB 的正文,并按地址、用户、频道和分钟统计请求。名单 `chatops.allowed_teams`、`chatops.allowed_channels` 和 `chatops.allowed_users` 是必需的(都为空时不会执行任何命令),所有外部文本都会被清理、截断和转义,每条命令都会在操作日志中留下一行,只记录聊天的 ID,绝不记录文本。设置的 Webhook 标签页中的一个区块、八种语言的指南(`docs/CHATOPS.md`),以及使用 RFC 8032 向量的测试。
-- **整个产品使用在设置中选定的主题,每个墙面屏幕也可以有自己的主题**:主题(`ui.theme`:自动、浅色、深色或十六种之一)也由监视器保存,因此墙面屏幕和登录页面都会使用它。屏幕默认继承它(`screens.default_theme` 现在是 `inherit`),并可用 `screens.default_theme`、`screens.theme_overview`、`screens.theme_now` 和 `screens.theme_sentinels` 为所有屏幕或单个屏幕固定另一个主题。墙面屏幕不再写入自己的颜色:它们使用页面的调色板,因此十六种主题在那里同样可用。
-- **在墙面屏幕上显示组织标志**:在设置中上传(PNG、JPEG、WebP 或 SVG,最大 1 MB;根据文件的前几个字节检查类型,含有脚本、事件处理程序或指向其他文件的链接的 SVG 会被拒绝),保存在数据文件夹中,绝不写入配置。`screens.logo_overview`、`screens.logo_now` 和 `screens.logo_sentinels` 选择显示的屏幕(默认仅总览),`screens.logo_corner` 选择角落(默认右上角),`screens.logo_max_width` 和 `screens.logo_max_height` 选择最大尺寸(默认 160 x 64 像素)。图片按比例缩放且有专属位置,因此绝不会遮挡内容。
-- **一个会轮换并跳转到新红色的墙面屏幕(`screens.mode` = rotate)**:不再是三个分开的屏幕,而是一个窗口每隔 `screens.rotate_every_seconds` 秒(默认 20,5 到 300)在总览、此刻和哨兵之间轮换。新的红色会跳到显示它的屏幕(失败的工作流跳到此刻,红色面板跳到哨兵),并停留 `screens.alert_hold_seconds` 秒(默认 30,5 到 600)或直到红色消失,以先到者为准,然后继续轮换;已经显示过的红色在变化或再次出现之前不会再触发跳转。`?jump=off` 和 `?rotate=0` 可让单个窗口安静下来。默认仍是三个分开的屏幕。
 
 ### 变更
 

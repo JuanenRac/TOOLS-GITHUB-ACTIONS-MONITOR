@@ -209,6 +209,10 @@ Bedingte Lesungen (`cache.etag`) lassen ein unverändertes Repository kein Konti
 
 Legen Sie `accounts/` (oder die Datenbank) auf ein Volume, das den Container überlebt, und sichern Sie vor einem Update mit `python tools/backup_storage.py backup DATEI.zip --backend file` (oder `sqlite`). Werkseitig entfernt ein kurzer Durchlauf Ereignisse älter als 90 Tage und Analysen älter als 180 Tage; ändern Sie das mit `retention` in der Konfiguration, und `MONITOR_SERVICE=1` lässt `--doctor` den Monitor als Dienst behandeln (dann warnt es, wenn der `retention`-Block fehlt oder die Ereignisse groß werden). Bei SQLite ist eine Datenbank pro Konto der Standard; eine gemeinsame Datei ist möglich und in [STORAGE_deu.md](STORAGE_deu.md) beschrieben.
 
+## Sicherungen, Volumes und Aktualisierungen
+
+Für einen Dienst erstellen `deploy/github-actions-monitor-backup.service` und `deploy/github-actions-monitor-backup.timer` jeden Tag eine vollständige Sicherung (`monitor_cli.py backup create`); `deploy/compose.yaml` legt die Sicherungen in ein eigenes Volume (`monitor-backups`). Erstellen und prüfen Sie vor einer Aktualisierung eine Sicherung und führen Sie danach den Doctor aus. Die Schritte, die Wiederherstellung und die Exit-Codes des Doctors stehen in [OPS_deu.md](OPS_deu.md).
+
 ## Das Image in echten Containern prüfen
 
 Das Repository enthält einen Workflow, `docker-audit.yml`, der auf GitHub das Image jeder Version (ein Tag oder ein Commit) baut und in echten Containern prüft: Start und Gesundheitsprüfung, den Vertrag der API, den Teammodus mit seinem ersten Administrator, Caddy als vertrauenswürdigen Proxy mit eigenem TLS, die Härtung (kein Root, schreibgeschütztes Dateisystem, keine Capabilities), die Volumes mit Sicherung, Wiederherstellung und dem Wechsel von der Vorgängerversion, die Geheimnisse, das Herunterfahren und den eingehenden Webhook hinter dem Proxy. Er führt nichts auf Ihrem Rechner aus, veröffentlicht nichts und verwendet kein Geheimnis. Starten Sie ihn von Hand und lesen Sie die Tabelle der Zusammenfassung des Laufs und das Artefakt `docker-audit-<Version>`:

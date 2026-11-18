@@ -43,6 +43,7 @@ services:
     volumes:
       - monitor-config:/config
       - monitor-data:/data
+      - monitor-backups:/data/backups   # the copies of `monitor_cli.py backup` in a volume of their own: losing the data volume must not lose the copies (monitor/docs/OPS.md)
     ports:
       - "127.0.0.1:${MONITOR_PORT:-8765}:8765"                          # only this machine; remove it when the proxy is the only way in
     healthcheck:
@@ -82,5 +83,6 @@ networks:
 volumes:
   monitor-config:
   monitor-data:
+  monitor-backups:
   caddy-data:
   caddy-config:

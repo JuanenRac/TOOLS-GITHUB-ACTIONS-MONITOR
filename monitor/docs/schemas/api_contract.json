@@ -28,6 +28,7 @@
   {"path": "/api/score/history", "complete": {"schema": "int", "account": "str", "enabled": "bool", "hours": "int", "points": "list"}, "lite": 404},
   {"path": "/api/team/health", "complete": {"schema": "int", "all": "int", "shown": "int", "truncated": "bool", "totals": {"unknown": "number", "ok": "number", "warn": "number", "bad": "number", "not_fully_seen": "number"}, "by_ecosystem": "object", "alerts": {"by_sentinel": "object", "by_level": "object"}, "ranking": "list", "filters": {"ecosystem": "str", "severity": "str", "q": "str", "label": "str"}}, "lite": 404},
   {"path": "/api/audit-log", "complete": {"schema": "int", "account": "str", "enabled": "bool", "chain": {"ok": "bool", "entries": "number", "broken_at": "any", "segments": "number", "complete": "bool"}, "entries": "list"}, "lite": 404},
+  {"path": "/api/ops/status", "complete": {"schema": "int", "mode": "str", "backup": "object", "purge": "object", "retention": "object", "restore": "object"}, "lite": 404},
   {"path": "/api/report-files", "complete": {"schema": "int", "account": "str", "enabled": "bool", "cron": "str", "formats": "str", "reports": "list"}, "lite": 404},
   {"path": "/api/ai/state", "complete": {"schema": "int", "edition": "str", "version": "str", "generated_epoch": "int", "signals": "list", "act": "int", "watch": "int", "panels_not_in_this_edition": "list", "note": "str", "lessons": "list"}, "lite": "same"},
   {"path": "/api/ai/brief?fmt=json", "complete": {"brief": "str", "updated": "any", "updated_local": "any", "age_seconds": "any", "alerts": "list"}, "lite": "same"},

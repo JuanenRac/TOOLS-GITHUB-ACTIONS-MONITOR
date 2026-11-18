@@ -7,6 +7,9 @@ cannot see), estimate (the reads an hour the account will cost against the allow
 targets (your own targets.json or only the neutral example), token (the one-use token of the page) and exposure (only this computer, or the network mode).
 `--doctor --json` prints the same checks as one JSON document (no secret, no path of a person) for scripts.
 Every check is {"id", "status": ok | warn | fail, "detail", "fix"}; `run()` takes the way of running a command as an argument so the tests need no `gh`.
+
+The complete edition adds the checks of the operation (ORDER_OPS: volumes, supervisor, limits, sqlite_hot, backup_age, disk, metrics; `ops/checks.py`, read only). The lite edition never runs them.
+Exit codes (stable, for cron): 0 all right; 1 at least one check failed; 3 only warnings and `--strict` (or `ops.doctor.strict_exit`); 4 the doctor itself could not run. Without --strict a warning is still 0.
 """
 import json
 import os
@@ -22,7 +25,10 @@ from github_actions_monitor.util.paths import ROOT as HERE   # the product folde
 ORDER = ("python", "gh", "login", "quota", "access", "estimate", "network", "folder", "port", "docker", "rich", "textual", "targets", "token", "exposure", "risks", "backend", "degraded", "credential", "timezone", "github_app", "layout", "storage", "retention")
 FIX = {"access": "gh auth refresh -h github.com -s repo,read:org   |   https://github.com/settings/tokens (Configure SSO)", "estimate": "", "python": "https://www.python.org/downloads/", "gh": "winget install --id GitHub.cli   |   brew install gh   |   sudo apt install gh", "login": "gh auth login",
        "quota": "gh api rate_limit", "network": "gh api rate_limit", "folder": "", "port": "python bin/actions_monitor.py --port 8800", "docker": "", "rich": "pip install rich",
-       "textual": "pip install textual", "targets": "python bin/actions_monitor.py --init-catalog", "token": "", "exposure": "", "risks": "", "backend": "", "degraded": "", "credential": "", "timezone": "", "github_app": "", "layout": "python -m github_actions_monitor.util.rootmigrate --apply", "storage": "python tools/migrate_storage.py --from file --to sqlite", "retention": ""}
+       "textual": "pip install textual", "targets": "python bin/actions_monitor.py --init-catalog", "token": "", "exposure": "", "risks": "", "backend": "", "degraded": "", "credential": "", "timezone": "", "github_app": "", "layout": "python -m github_actions_monitor.util.rootmigrate --apply", "storage": "python tools/migrate_storage.py --from file --to sqlite", "retention": "",
+       "volumes": "", "supervisor": "python bin/monitor_cli.py health --deep", "limits": "", "sqlite_hot": "python tools/backup_storage.py backup FILE.zip --backend sqlite", "backup_age": "python bin/monitor_cli.py backup create", "disk": "", "metrics": ""}
+ORDER_OPS = ("volumes", "supervisor", "limits", "sqlite_hot", "backup_age", "disk", "metrics")
+EXIT_OK, EXIT_FAIL, EXIT_WARN, EXIT_DOCTOR_ERROR = 0, 1, 3, 4
 
 
 def default_runner(args, timeout=20):
@@ -59,8 +65,8 @@ def _writable(folder):
         return False
 
 
-def run(runner=default_runner, folder=HERE, ports=None, python=None, config=None):
-    """The list of checks, in ORDER. `config` is the content of the configuration file ({} when there is none)."""
+def run(runner=default_runner, folder=HERE, ports=None, python=None, config=None, edition=None):
+    """The list of checks, in ORDER (and, for edition="complete", ORDER_OPS after them). `config` is the content of the configuration file ({} when there is none)."""
     config = config if isinstance(config, dict) else {}
     version = python or sys.version_info[:3]
     out = {}
@@ -115,9 +121,14 @@ def run(runner=default_runner, folder=HERE, ports=None, python=None, config=None
     out["timezone"] = time_zone(config)
     out["github_app"] = github_app_check(config)
     out["layout"] = layout_check(folder)
-    out["storage"] = storage_check(config, folder)
+    out["storage"] = storage_check(config, folder, "off" if edition == "complete" else "integrity")
     out["retention"] = retention_check(config, folder)
-    return [{"id": name, "status": out[name][0], "detail": out[name][1], "fix": FIX[name] if out[name][0] != "ok" else ""} for name in ORDER]
+    order = ORDER
+    if edition == "complete":
+        from github_actions_monitor.ops import checks as ops_checks
+        out.update(ops_checks.run_all(config, folder))
+        order = ORDER + ORDER_OPS
+    return [{"id": name, "status": out[name][0], "detail": out[name][1], "fix": FIX[name] if out[name][0] != "ok" else ""} for name in order]
 
 
 def time_zone(config):
@@ -156,9 +167,9 @@ def _account_configs(config, folder):
     return out or [("", config)]
 
 
-def storage_check(config, folder=HERE):
+def storage_check(config, folder=HERE, check="integrity"):
     """("ok" | "warn", detail): the backend of the state. Files = ok. SQLite = the database exists, passes SQLite's integrity check and has a schema this version understands (read only: nothing is
-    created or migrated here)."""
+    created or migrated here). `check` is how thorough the look at the database is ("integrity", the default, or "off" when the complete edition does it apart, with a time limit, in the `sqlite_hot` check)."""
     from github_actions_monitor.accounts import accounts
     from github_actions_monitor.storage import factory
     problems, backends = [], set()
@@ -169,7 +180,7 @@ def storage_check(config, folder=HERE):
             continue
         from github_actions_monitor.storage import sqlite_storage
         path = Path(settings["path"]) if settings["path"] else (accounts.account_dir(account_id, folder) / factory.DB_NAME if account_id else paths.place(factory.DB_NAME, folder))
-        info = sqlite_storage.inspect(path)
+        info = sqlite_storage.inspect(path, mode=check)
         label = account_id or "default"
         if not info["exists"]:
             problems.append(f"{label}: no database yet")
@@ -336,13 +347,26 @@ def text(checks, translate, banner_for=None):
     return "\n".join(lines) + "\n"
 
 
-def as_json(checks, edition="complete"):
-    """The checks as one JSON-ready dictionary: {"version", "edition", "ok", "checks": [{"id", "status", "detail", "fix"}]}. No secret and no path of a person."""
+def as_json(checks, edition="complete", strict=False):
+    """The checks as one JSON-ready dictionary: {"version", "edition", "ok", "checks": [{"id", "status", "detail", "fix"}]} and, in the complete edition, "exit" (the code `exit_code` gives) and "warnings". No secret and no path of a person."""
     from github_actions_monitor.tool_version import TOOL_VERSION
     from github_actions_monitor.ui import about
-    return {"version": TOOL_VERSION, "edition": "lite" if edition == "lite" else "complete", "ok": not any(c["status"] == "fail" for c in checks),
-            "checks": [{**c, "detail": about.home_free(c["detail"])} for c in checks]}
+    document = {"version": TOOL_VERSION, "edition": "lite" if edition == "lite" else "complete", "ok": not any(c["status"] == "fail" for c in checks),
+                "checks": [{**c, "detail": about.home_free(c["detail"])} for c in checks]}
+    if edition != "lite":      # the lite document stays exactly what it was
+        document.update(exit=exit_code(checks, strict), warnings=sum(1 for c in checks if c["status"] == "warn"))
+    return document
 
 
-def exit_code(checks):
-    return 1 if any(c["status"] == "fail" for c in checks) else 0
+def strict_from(config):
+    """True when the configuration makes a warning exit 3 (`ops.doctor.strict_exit`)."""
+    block = config.get("ops") if isinstance(config, dict) and isinstance(config.get("ops"), dict) else {}
+    doctor_block = block.get("doctor") if isinstance(block.get("doctor"), dict) else {}
+    return doctor_block.get("strict_exit") is True
+
+
+def exit_code(checks, strict=False):
+    """0 all right; 1 a check failed; 3 only warnings and `strict`. (4, the doctor could not run, is returned by the caller that catches the failure.)"""
+    if any(c["status"] == "fail" for c in checks):
+        return EXIT_FAIL
+    return EXIT_WARN if strict and any(c["status"] == "warn" for c in checks) else EXIT_OK
