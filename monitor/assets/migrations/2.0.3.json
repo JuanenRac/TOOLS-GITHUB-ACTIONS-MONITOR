@@ -1,0 +1,757 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "2.0.3",
+ "previous": "2.0.2",
+ "digest": "948f5134b5cecb49eaf03fcba0b36641f63d3a34e83ba2430f05e3cd15cc0490",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "ai.catalog.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "ai.catalog.fit_context",
+    "kind": "bool"
+   },
+   {
+    "key": "ai.catalog.max_requests_per_day",
+    "kind": "int",
+    "bounds": [
+     1,
+     200
+    ]
+   },
+   {
+    "key": "ai.catalog.ttl_minutes",
+    "kind": "int",
+    "bounds": [
+     5,
+     10080
+    ]
+   },
+   {
+    "key": "alerts.digest.minutes",
+    "kind": "int",
+    "bounds": [
+     0,
+     1440
+    ],
+    "default": 0
+   },
+   {
+    "key": "alerts.digest.threshold",
+    "kind": "int",
+    "bounds": [
+     3,
+     500
+    ],
+    "default": 10
+   },
+   {
+    "key": "alerts.group.by_commit",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "alerts.group.min",
+    "kind": "int",
+    "bounds": [
+     2,
+     50
+    ],
+    "default": 3
+   },
+   {
+    "key": "alerts.service.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "alerts.service.failures",
+    "kind": "int",
+    "bounds": [
+     2,
+     50
+    ],
+    "default": 3
+   },
+   {
+    "key": "alerts.service.rate_percent",
+    "kind": "int",
+    "bounds": [
+     0,
+     100
+    ],
+    "default": 0
+   },
+   {
+    "key": "alerts.service.workflows",
+    "kind": "names",
+    "default": []
+   },
+   {
+    "key": "alerts.silences",
+    "kind": "names",
+    "default": []
+   },
+   {
+    "key": "ci.automation_counts",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "ci.count_fork_runs",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "ci.extra_branches",
+    "kind": "names",
+    "default": []
+   },
+   {
+    "key": "ci.failed_jobs.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "ci.failed_jobs.group_by",
+    "kind": "enum",
+    "bounds": [
+     "auto",
+     "platform",
+     "matrix",
+     "prefix"
+    ],
+    "default": "auto"
+   },
+   {
+    "key": "ci.failed_jobs.max_per_cycle",
+    "kind": "int",
+    "bounds": [
+     1,
+     50
+    ],
+    "default": 4
+   },
+   {
+    "key": "ci.group.min",
+    "kind": "int",
+    "bounds": [
+     2,
+     50
+    ],
+    "default": 2
+   },
+   {
+    "key": "ci.group.reusable",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "ci.inactive_days",
+    "kind": "int",
+    "bounds": [
+     0,
+     3650
+    ],
+    "default": 90
+   },
+   {
+    "key": "ci.red_events",
+    "kind": "names",
+    "default": [
+     "push",
+     "schedule",
+     "workflow_dispatch",
+     "merge_group"
+    ]
+   },
+   {
+    "key": "ci.rerun_timing",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "ci.stuck.awaiting_stuck",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "ci.stuck.learned",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "ci.stuck.margin",
+    "kind": "int",
+    "bounds": [
+     1,
+     20
+    ],
+    "default": 2.0
+   },
+   {
+    "key": "ci.stuck.max_minutes",
+    "kind": "int",
+    "bounds": [
+     1,
+     100000
+    ],
+    "default": 720
+   },
+   {
+    "key": "ci.stuck.min_minutes",
+    "kind": "int",
+    "bounds": [
+     1,
+     10000
+    ],
+    "default": 30
+   },
+   {
+    "key": "ci.stuck.min_samples",
+    "kind": "int",
+    "bounds": [
+     2,
+     100
+    ],
+    "default": 3
+   },
+   {
+    "key": "ci.stuck.percentile",
+    "kind": "int",
+    "bounds": [
+     50,
+     100
+    ],
+    "default": 95
+   },
+   {
+    "key": "ci.stuck.queue_minutes",
+    "kind": "int",
+    "bounds": [
+     0,
+     100000
+    ],
+    "default": 0
+   },
+   {
+    "key": "ci.stuck.runner_minutes",
+    "kind": "names",
+    "default": []
+   },
+   {
+    "key": "ci.stuck.workflow_minutes",
+    "kind": "names",
+    "default": []
+   },
+   {
+    "key": "discovery.fork_checks_per_pass",
+    "kind": "int",
+    "bounds": [
+     1,
+     500
+    ],
+    "default": 30
+   },
+   {
+    "key": "discovery.fork_ci_days",
+    "kind": "int",
+    "bounds": [
+     0,
+     365
+    ],
+    "default": 90
+   },
+   {
+    "key": "discovery.fork_policy",
+    "kind": "enum",
+    "bounds": [
+     "show",
+     "skip",
+     "skip_unless_ci",
+     "auto"
+    ],
+    "default": "show"
+   },
+   {
+    "key": "discovery.skip_archived",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "fleet.group_by",
+    "kind": "enum",
+    "bounds": [
+     "ecosystem",
+     "label",
+     "state",
+     "none"
+    ],
+    "default": "ecosystem"
+   },
+   {
+    "key": "fleet.labels",
+    "kind": "names",
+    "default": []
+   },
+   {
+    "key": "fleet.page_size",
+    "kind": "int",
+    "bounds": [
+     10,
+     500
+    ],
+    "default": 50
+   },
+   {
+    "key": "fleet.saved_filters",
+    "kind": "names",
+    "default": []
+   },
+   {
+    "key": "fleet.sort",
+    "kind": "enum",
+    "bounds": [
+     "risk",
+     "name",
+     "last_run",
+     "state"
+    ],
+    "default": "risk"
+   },
+   {
+    "key": "lint.api.max_calls_per_tick",
+    "kind": "int",
+    "bounds": [
+     1,
+     200
+    ]
+   },
+   {
+    "key": "lint.api.max_files_per_repo",
+    "kind": "int",
+    "bounds": [
+     1,
+     100
+    ]
+   },
+   {
+    "key": "lint.api.refresh_seconds",
+    "kind": "int",
+    "bounds": [
+     600,
+     604800
+    ]
+   },
+   {
+    "key": "lint.own_owners",
+    "kind": "names"
+   },
+   {
+    "key": "lint.rules.no_timeout.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "lint.rules.no_timeout.severity",
+    "kind": "enum",
+    "bounds": [
+     "info",
+     "warn",
+     "bad"
+    ]
+   },
+   {
+    "key": "lint.rules.own_action_main.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "lint.rules.own_action_main.severity",
+    "kind": "enum",
+    "bounds": [
+     "info",
+     "warn",
+     "bad"
+    ]
+   },
+   {
+    "key": "lint.rules.secrets_inherit.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "lint.rules.secrets_inherit.severity",
+    "kind": "enum",
+    "bounds": [
+     "info",
+     "warn",
+     "bad"
+    ]
+   },
+   {
+    "key": "lint.source",
+    "kind": "enum",
+    "bounds": [
+     "clone",
+     "auto",
+     "sparse"
+    ]
+   },
+   {
+    "key": "lint.sparse.max_repos_per_tick",
+    "kind": "int",
+    "bounds": [
+     1,
+     20
+    ]
+   },
+   {
+    "key": "lint.sparse.refresh_seconds",
+    "kind": "int",
+    "bounds": [
+     600,
+     604800
+    ]
+   },
+   {
+    "key": "lint.unpinned_own",
+    "kind": "enum",
+    "bounds": [
+     "same",
+     "info",
+     "ignore"
+    ]
+   },
+   {
+    "key": "pagination.collab_pages",
+    "kind": "int",
+    "bounds": [
+     1,
+     20
+    ],
+    "default": 3
+   },
+   {
+    "key": "pagination.job_pages",
+    "kind": "int",
+    "bounds": [
+     1,
+     20
+    ],
+    "default": 2
+   },
+   {
+    "key": "pagination.workflow_pages",
+    "kind": "int",
+    "bounds": [
+     1,
+     20
+    ],
+    "default": 3
+   },
+   {
+    "key": "runners.model.alert_level",
+    "kind": "enum",
+    "bounds": [
+     "info",
+     "warning",
+     "error"
+    ],
+    "default": "warning"
+   },
+   {
+    "key": "runners.model.alerts",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "runners.model.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "runners.model.jobs_per_cycle",
+    "kind": "int",
+    "bounds": [
+     0,
+     100
+    ],
+    "default": 10
+   },
+   {
+    "key": "runners.model.large_labels",
+    "kind": "names",
+    "default": []
+   },
+   {
+    "key": "runners.model.queue_warn_minutes",
+    "kind": "int",
+    "bounds": [
+     1,
+     10080
+    ],
+    "default": 20
+   },
+   {
+    "key": "runners.model.runaway_ignore_events",
+    "kind": "names",
+    "default": [
+     "pull_request",
+     "pull_request_target"
+    ]
+   },
+   {
+    "key": "runners.model.runaway_runs_per_hour",
+    "kind": "int",
+    "bounds": [
+     0,
+     1000
+    ],
+    "default": 20
+   },
+   {
+    "key": "runners.model.self_labels",
+    "kind": "names",
+    "default": []
+   },
+   {
+    "key": "runners.model.thirdparty_labels",
+    "kind": "names",
+    "default": [
+     "blacksmith",
+     "buildjet",
+     "namespace-profile",
+     "depot",
+     "warpbuild",
+     "ubicloud",
+     "runs-on",
+     "actuated",
+     "cirrus-runners"
+    ]
+   },
+   {
+    "key": "runners.model.thirdparty_usd_per_minute",
+    "kind": "float",
+    "bounds": [
+     0,
+     10
+    ],
+    "default": 0.0
+   },
+   {
+    "key": "sampling.api_budget_per_hour",
+    "kind": "int",
+    "bounds": [
+     0,
+     100000
+    ],
+    "default": 0
+   },
+   {
+    "key": "sampling.default_branch_probe",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "sampling.min_coverage_minutes",
+    "kind": "int",
+    "bounds": [
+     0,
+     10080
+    ],
+    "default": 30
+   },
+   {
+    "key": "screens.blink",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "screens.blink_calm_minutes",
+    "kind": "int",
+    "bounds": [
+     0,
+     1440
+    ],
+    "default": 30
+   },
+   {
+    "key": "screens.burn_in_protection",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "screens.default_density",
+    "kind": "enum",
+    "bounds": [
+     "compact",
+     "normal",
+     "large"
+    ],
+    "default": "normal"
+   },
+   {
+    "key": "screens.default_theme",
+    "kind": "enum",
+    "bounds": [
+     "dark",
+     "light",
+     "contrast"
+    ],
+    "default": "dark"
+   },
+   {
+    "key": "screens.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "screens.night_dim",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "screens.night_dim_from_hour",
+    "kind": "int",
+    "bounds": [
+     0,
+     23
+    ],
+    "default": 22
+   },
+   {
+    "key": "screens.night_dim_to_hour",
+    "kind": "int",
+    "bounds": [
+     0,
+     23
+    ],
+    "default": 7
+   },
+   {
+    "key": "screens.refresh_seconds",
+    "kind": "int",
+    "bounds": [
+     5,
+     120
+    ],
+    "default": 10
+   },
+   {
+    "key": "screens.rotate_seconds",
+    "kind": "int",
+    "bounds": [
+     0,
+     3600
+    ],
+    "default": 0
+   },
+   {
+    "key": "screens.show_repo_names",
+    "kind": "enum",
+    "bounds": [
+     "all",
+     "public",
+     "none"
+    ],
+    "default": "public"
+   },
+   {
+    "key": "screens.sound",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "sentinel.a2_resolve_batch_min",
+    "kind": "int",
+    "bounds": [
+     0,
+     50
+    ]
+   },
+   {
+    "key": "sentinel.a2_resolve_batch_pages",
+    "kind": "int",
+    "bounds": [
+     1,
+     10
+    ]
+   },
+   {
+    "key": "sentinel.bots_apart",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinel.dependency_bots",
+    "kind": "names"
+   },
+   {
+    "key": "sentinel.hygiene.community_fallback",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinel.hygiene.ruleset_mode",
+    "kind": "enum",
+    "bounds": [
+     "name",
+     "effective",
+     "off"
+    ]
+   },
+   {
+    "key": "sentinel.hygiene.ruleset_names",
+    "kind": "names"
+   },
+   {
+    "key": "sentinel.hygiene.skip",
+    "kind": "names"
+   },
+   {
+    "key": "sentinel.surface.checks.release_assets.allow_empty",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinel.surface.checks.release_assets.require_sha256",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinel.surface.checks.release_assets.require_signature",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinel.surface.checks.tag_vs_version.prefixes",
+    "kind": "names"
+   },
+   {
+    "key": "sentinel.surface.checks.tag_vs_version.prerelease_ok",
+    "kind": "bool"
+   }
+  ],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {
+  "notices": [
+   {
+    "id": "screens_off",
+    "level": "behavior",
+    "keys": [
+     "screens.enabled"
+    ],
+    "text": {
+     "en": "The wall screens (/screen/...) are off by default; switch screens.enabled on in Settings to use them.",
+     "es": "Las pantallas de pared (/screen/...) están apagadas por defecto; activa screens.enabled en Ajustes para usarlas.",
+     "de": "Die Wandbildschirme (/screen/...) sind standardmäßig aus; schalte screens.enabled in den Einstellungen ein, um sie zu nutzen.",
+     "fr": "Les écrans muraux (/screen/...) sont désactivés par défaut ; activez screens.enabled dans les réglages pour les utiliser.",
+     "it": "Le schermate a parete (/screen/...) sono spente di default; attiva screens.enabled nelle impostazioni per usarle.",
+     "ja": "壁面スクリーン（/screen/...）は既定でオフです。使うには設定で screens.enabled をオンにしてください。",
+     "zh": "墙面屏幕（/screen/...）默认关闭；请在设置中开启 screens.enabled 以使用。",
+     "pt": "Os ecrãs de parede (/screen/...) estão desligados por defeito; ative screens.enabled nas definições para os usar."
+    }
+   }
+  ]
+ }
+}

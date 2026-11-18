@@ -1,0 +1,100 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "1.9.1",
+ "previous": "1.9.0",
+ "digest": "669963c3df95310c11c1e075b293e4d1c7647c7ed188b99463dd8cba25520f41",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "score.weights.security",
+    "kind": "int",
+    "bounds": [
+     0,
+     1000
+    ]
+   },
+   {
+    "key": "sentinels.security.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinels.security.max_repos_per_tick",
+    "kind": "int",
+    "bounds": [
+     1,
+     100
+    ]
+   },
+   {
+    "key": "sentinels.security.min_rate_remaining",
+    "kind": "int",
+    "bounds": [
+     100,
+     5000
+    ]
+   },
+   {
+    "key": "sentinels.security.refresh_seconds",
+    "kind": "int",
+    "bounds": [
+     300,
+     86400
+    ]
+   },
+   {
+    "key": "sentinels.security.repos",
+    "kind": "repos"
+   },
+   {
+    "key": "sentinels.security.signals.branch.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinels.security.signals.code_scanning.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinels.security.signals.code_scanning.min_severity",
+    "kind": "enum",
+    "bounds": [
+     "low",
+     "medium",
+     "high",
+     "critical"
+    ]
+   },
+   {
+    "key": "sentinels.security.signals.codeowners.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinels.security.signals.dependabot.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinels.security.signals.dependabot.min_severity",
+    "kind": "enum",
+    "bounds": [
+     "low",
+     "medium",
+     "high",
+     "critical"
+    ]
+   },
+   {
+    "key": "sentinels.security.signals.secret.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinels.security.signals.workflow.enabled",
+    "kind": "bool"
+   }
+  ],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {}
+}

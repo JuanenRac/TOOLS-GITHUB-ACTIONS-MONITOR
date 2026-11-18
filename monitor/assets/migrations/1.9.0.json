@@ -1,0 +1,140 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "1.9.0",
+ "previous": "1.8.4",
+ "digest": "1b802b4811b3607b63becd203821f3446dd1731c25d42b822dce70b78d103c27",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "score.alert.drop_points",
+    "kind": "int",
+    "bounds": [
+     1,
+     100
+    ]
+   },
+   {
+    "key": "score.alert.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "score.alert.notify_external",
+    "kind": "bool"
+   },
+   {
+    "key": "score.calibrating_hours",
+    "kind": "int",
+    "bounds": [
+     0,
+     720
+    ]
+   },
+   {
+    "key": "score.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "score.grades.A",
+    "kind": "int",
+    "bounds": [
+     0,
+     100
+    ]
+   },
+   {
+    "key": "score.grades.B",
+    "kind": "int",
+    "bounds": [
+     0,
+     100
+    ]
+   },
+   {
+    "key": "score.grades.C",
+    "kind": "int",
+    "bounds": [
+     0,
+     100
+    ]
+   },
+   {
+    "key": "score.grades.D",
+    "kind": "int",
+    "bounds": [
+     0,
+     100
+    ]
+   },
+   {
+    "key": "score.min_coverage",
+    "kind": "float",
+    "bounds": [
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "key": "score.min_runs",
+    "kind": "int",
+    "bounds": [
+     1,
+     100000
+    ]
+   },
+   {
+    "key": "score.trend_flat",
+    "kind": "int",
+    "bounds": [
+     0,
+     100
+    ]
+   },
+   {
+    "key": "score.weights.collaboration",
+    "kind": "int",
+    "bounds": [
+     0,
+     1000
+    ]
+   },
+   {
+    "key": "score.weights.recovery",
+    "kind": "int",
+    "bounds": [
+     0,
+     1000
+    ]
+   },
+   {
+    "key": "score.weights.reliability",
+    "kind": "int",
+    "bounds": [
+     0,
+     1000
+    ]
+   },
+   {
+    "key": "score.weights.speed",
+    "kind": "int",
+    "bounds": [
+     0,
+     1000
+    ]
+   },
+   {
+    "key": "score.window_days",
+    "kind": "int",
+    "bounds": [
+     1,
+     90
+    ]
+   }
+  ],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {}
+}

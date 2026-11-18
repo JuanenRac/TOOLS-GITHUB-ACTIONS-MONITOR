@@ -1,0 +1,39 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "1.9.5",
+ "previous": "1.9.4",
+ "digest": "1ebecd03e58b6612ad1a615b69b7f8ce21915109157835c7c83cd750cbcdeed0",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "live.sse.enabled",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "live.sse.max_clients",
+    "kind": "int",
+    "bounds": [
+     1,
+     10
+    ],
+    "default": 3
+   },
+   {
+    "key": "live.sse.max_seconds",
+    "kind": "int",
+    "bounds": [
+     60,
+     86400
+    ],
+    "default": 3600
+   }
+  ],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {}
+}

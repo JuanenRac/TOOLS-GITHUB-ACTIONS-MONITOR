@@ -89,6 +89,7 @@ def members():
     names += sorted(p for p in (HERE / "src").rglob("*.py") if "__pycache__" not in p.parts)                                                      # the importable package
     names += sorted(p for p in (HERE / "src").rglob("*") if p.is_file() and p.suffix in DATA_SUFFIXES and "__pycache__" not in p.parts)      # the data files the package loads (ai_presets.json): without them the product starts with empty presets
     names += sorted((HERE / "tools").glob("*.py"))
+    names += sorted((HERE / "assets" / "migrations").glob("*.json"))      # the registry of migrations the updater reads
     names += [HERE / "assets" / "examples" / n for n in DATA_JSON] + [HERE / "assets" / "static" / "actions_monitor.html", HERE / "assets" / "static" / "screens.html"]
     names += [HERE / n for n in LEGAL] + [HERE / "CHANGELOG.md", HERE / "README.txt"]
     names += sorted((HERE / "docs").glob("README_*.txt")) + sorted((HERE / "docs").glob("QUICKSTART_*.txt")) + sorted((HERE / "assets" / "locales").glob("*.json")) + sorted((HERE / "assets" / "ai").glob("*.md"))
@@ -166,6 +167,25 @@ def tracked_problems(entries, tracked, prefix="github_actions_monitor/"):
     problems = [f"versioned but not in the zip: {name}" for name in sorted(tracked - inside - set(NOT_SHIPPED))]
     problems += [f"in the zip but not versioned: {name}" for name in sorted(inside - tracked - GENERATED)]
     return problems
+
+
+def standalone_updater():
+    """The text of tools/monitor_updater.py with the registry of migrations written into it (the loose copy published next to the zip works on any installed version, with no other file)."""
+    text = (HERE / "tools" / "monitor_updater.py").read_text(encoding="utf-8")
+    docs, launchers = {}, None
+    for path in sorted((HERE / "assets" / "migrations").glob("*.json")):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if path.name == "launchers.json":
+            launchers = data
+        elif isinstance(data, dict) and data.get("version") == path.stem:
+            docs[path.stem] = data
+    if not docs or not launchers:
+        fail("the registry of migrations is missing: run tools/make_migrations.py")
+    literal = json.dumps({"docs": docs, "launchers": launchers}, sort_keys=True, ensure_ascii=True, separators=(",", ":"))
+    marker = "EMBEDDED_REGISTRY = None"
+    if text.count(marker) != 1:
+        fail("tools/monitor_updater.py has no single place for the embedded registry")
+    return text.replace(marker, "EMBEDDED_REGISTRY = json.loads(r\"\"\"" + literal + "\"\"\")", 1).replace(chr(13) + chr(10), chr(10))
 
 
 def check_entries(names):
@@ -420,7 +440,7 @@ def green_run(path, commit):
 
 VERSION_CELL = re.compile(r"^\| \*\*[^*|\n]+\*\* \| \*\*(\d+(?:\.\d+)+)\*\* · \[", re.M)      # | **Version** | **1.9.0** · [all releases](...) of "At a glance"
 VERSION_WORDS = re.compile(r"(?i)(?:version|versión|versione|versão|バージョン|版本)\s*(\d+\.\d+\.\d+)")
-HELP_HISTORY = ("CHANGELOG", "ROADMAP", "MIGRATING", "LAYOUT")      # topics that talk about other versions on purpose
+HELP_HISTORY = ("CHANGELOG", "ROADMAP", "MIGRATING", "LAYOUT", "UPDATE")      # topics that talk about other versions on purpose
 HELP_VERSION_OTHER = {"0.0.4"}      # the version of the text format of Prometheus, not ours
 
 

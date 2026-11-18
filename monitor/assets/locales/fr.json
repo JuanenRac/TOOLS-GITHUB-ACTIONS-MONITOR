@@ -1138,6 +1138,7 @@
  "cli.token_file_open": "Attention : {file} est lisible par d'autres utilisateurs ; réserve-le à toi seul (chmod 600).",
  "cli.token_flag_warn": "Attention : --token apparait dans la liste des processus ; prefere la variable MONITOR_ACCESS_TOKEN ou --token-file avec un fichier que toi seul peux lire.",
  "cli.unreachable": "Le moniteur à {url} est injoignable : est-il lancé ?",
+ "cli.update_missing": "L'outil de mise à jour n'est pas dans cette installation : {file} est absent (téléchargez monitor_updater.py depuis les releases).",
  "cli.cert_bad": "Le moniteur à {url} a répondu, mais son certificat HTTPS n'est pas approuvé : indiquez l'autorité qui l'a signé avec --ca-file (ou MONITOR_CA_FILE).",
  "col.age": "Âge",
  "col.artifacts": "Artifacts",

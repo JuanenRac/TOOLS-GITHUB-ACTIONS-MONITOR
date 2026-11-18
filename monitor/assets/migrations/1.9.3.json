@@ -1,0 +1,79 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "1.9.3",
+ "previous": "1.9.2",
+ "digest": "7161fa59d2acae024ee816d9c3b96a303d2e744ba30b5c9db1899e84f514e7be",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "audit_log.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "audit_log.maintainers_can_read",
+    "kind": "bool"
+   },
+   {
+    "key": "audit_log.max_mb",
+    "kind": "int",
+    "bounds": [
+     1,
+     500
+    ]
+   },
+   {
+    "key": "notify.channels.apprise.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "notify.channels.apprise.urls_env",
+    "kind": "text",
+    "bounds": {
+     "re": "^([A-Z_][A-Z0-9_]{0,63})?\\Z"
+    }
+   },
+   {
+    "key": "report_schedule.cron",
+    "kind": "text",
+    "bounds": {
+     "re": "^[0-9*/,\\- ]{9,60}\\Z"
+    }
+   },
+   {
+    "key": "report_schedule.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "report_schedule.formats",
+    "kind": "enum",
+    "bounds": [
+     "html",
+     "markdown",
+     "both"
+    ]
+   },
+   {
+    "key": "report_schedule.keep",
+    "kind": "int",
+    "bounds": [
+     1,
+     500
+    ]
+   },
+   {
+    "key": "report_schedule.top",
+    "kind": "int",
+    "bounds": [
+     1,
+     50
+    ]
+   }
+  ],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {}
+}

@@ -1,0 +1,15 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "2.0.6",
+ "previous": "2.0.5",
+ "digest": "a04612657c0d52993c56e878eaea3e763e1efe94e2515710984825e9d98a5d9d",
+ "data_schema": 2,
+ "settings": {
+  "added": [],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {}
+}

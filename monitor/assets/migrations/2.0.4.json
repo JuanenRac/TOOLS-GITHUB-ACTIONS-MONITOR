@@ -1,0 +1,253 @@
+{
+ "_author": "Copyright (C) 2026 JuanenRac (Electro Hobby 3D) <electrohobby3d@gmail.com>",
+ "_license": "GPL-3.0-or-later - see LICENSE",
+ "format": 1,
+ "version": "2.0.4",
+ "previous": "2.0.3",
+ "digest": "2449ca0b98fd1c4656abe1e4f795917726cef94b66bf9cc7181527fe55f7d26b",
+ "data_schema": 2,
+ "settings": {
+  "added": [
+   {
+    "key": "ai.cost_limit_daily",
+    "kind": "float",
+    "bounds": [
+     0.0,
+     100000.0
+    ]
+   },
+   {
+    "key": "ai.fallback",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9._:/@+=, -]{0,400}\\Z"
+    }
+   },
+   {
+    "key": "ai.fallback_after_seconds",
+    "kind": "int",
+    "bounds": [
+     0,
+     300
+    ]
+   },
+   {
+    "key": "ai.fallback_max_attempts",
+    "kind": "int",
+    "bounds": [
+     1,
+     5
+    ]
+   },
+   {
+    "key": "ai.model_cost_limit_daily",
+    "kind": "float",
+    "bounds": [
+     0.0,
+     100000.0
+    ]
+   },
+   {
+    "key": "ai.model_daily_limit",
+    "kind": "int",
+    "bounds": [
+     0,
+     500
+    ]
+   },
+   {
+    "key": "ai.tasks.alert.max_input_chars",
+    "kind": "int",
+    "bounds": [
+     0,
+     20000
+    ]
+   },
+   {
+    "key": "ai.tasks.alert.max_output_chars",
+    "kind": "int",
+    "bounds": [
+     0,
+     8000
+    ]
+   },
+   {
+    "key": "ai.tasks.alert.model",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9._:/@-]{0,100}\\Z"
+    }
+   },
+   {
+    "key": "ai.tasks.alert.provider",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9-]{0,40}\\Z"
+    }
+   },
+   {
+    "key": "ai.tasks.alert.timeout_seconds",
+    "kind": "int",
+    "bounds": [
+     0,
+     300
+    ]
+   },
+   {
+    "key": "ai.tasks.build.max_input_chars",
+    "kind": "int",
+    "bounds": [
+     0,
+     20000
+    ]
+   },
+   {
+    "key": "ai.tasks.build.max_output_chars",
+    "kind": "int",
+    "bounds": [
+     0,
+     8000
+    ]
+   },
+   {
+    "key": "ai.tasks.build.model",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9._:/@-]{0,100}\\Z"
+    }
+   },
+   {
+    "key": "ai.tasks.build.provider",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9-]{0,40}\\Z"
+    }
+   },
+   {
+    "key": "ai.tasks.build.timeout_seconds",
+    "kind": "int",
+    "bounds": [
+     0,
+     300
+    ]
+   },
+   {
+    "key": "ai.tasks.codeql.max_input_chars",
+    "kind": "int",
+    "bounds": [
+     0,
+     20000
+    ]
+   },
+   {
+    "key": "ai.tasks.codeql.max_output_chars",
+    "kind": "int",
+    "bounds": [
+     0,
+     8000
+    ]
+   },
+   {
+    "key": "ai.tasks.codeql.model",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9._:/@-]{0,100}\\Z"
+    }
+   },
+   {
+    "key": "ai.tasks.codeql.provider",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9-]{0,40}\\Z"
+    }
+   },
+   {
+    "key": "ai.tasks.codeql.timeout_seconds",
+    "kind": "int",
+    "bounds": [
+     0,
+     300
+    ]
+   },
+   {
+    "key": "ai.tasks.diagnose.max_input_chars",
+    "kind": "int",
+    "bounds": [
+     0,
+     20000
+    ]
+   },
+   {
+    "key": "ai.tasks.diagnose.max_output_chars",
+    "kind": "int",
+    "bounds": [
+     0,
+     8000
+    ]
+   },
+   {
+    "key": "ai.tasks.diagnose.model",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9._:/@-]{0,100}\\Z"
+    }
+   },
+   {
+    "key": "ai.tasks.diagnose.provider",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9-]{0,40}\\Z"
+    }
+   },
+   {
+    "key": "ai.tasks.diagnose.timeout_seconds",
+    "kind": "int",
+    "bounds": [
+     0,
+     300
+    ]
+   },
+   {
+    "key": "ai.tasks.report.max_input_chars",
+    "kind": "int",
+    "bounds": [
+     0,
+     20000
+    ]
+   },
+   {
+    "key": "ai.tasks.report.max_output_chars",
+    "kind": "int",
+    "bounds": [
+     0,
+     8000
+    ]
+   },
+   {
+    "key": "ai.tasks.report.model",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9._:/@-]{0,100}\\Z"
+    }
+   },
+   {
+    "key": "ai.tasks.report.provider",
+    "kind": "text",
+    "bounds": {
+     "re": "^[A-Za-z0-9-]{0,40}\\Z"
+    }
+   },
+   {
+    "key": "ai.tasks.report.timeout_seconds",
+    "kind": "int",
+    "bounds": [
+     0,
+     300
+    ]
+   }
+  ],
+  "removed": [],
+  "changed": []
+ },
+ "manual": {}
+}
