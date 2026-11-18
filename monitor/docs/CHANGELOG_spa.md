@@ -12,6 +12,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 ### Corregido
 
 - **La puerta de release acepta una pasada verde por el recuento que dio el propio unittest**: el registro de una pasada verde completa lleva el número de pruebas que unittest dice haber ejecutado (las líneas del informe pueden ser menos cuando una prueba escribe en mitad de su línea), y la puerta compara ahora ese número con el total en lugar del número de líneas que pudo leer, de modo que una pasada completa ya no se rechaza por unas líneas sin contar.
+- **Un reloj atrasado ya no mantiene viva la cobertura del webhook**: un evento marcado por delante del reloj no se cree, de modo que el indicador vuelve a esperar en lugar de mostrar vivo hasta que el reloj lo alcance, y el ahorro que depende de un webhook vivo no se mantiene por él.
 
 ### Añadido
 
@@ -24,6 +25,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 - **Las capturas del README muestran la versión actual**: todas las imágenes de la página, las pantallas de pared y las herramientas de consola se hicieron de nuevo con datos inventados. Las nuevas muestran el menú con grupos, los centinelas de CI y de colaboración, la flota, los informes, toda la página con otro tema y las pantallas de pared con el logo de una organización, con otros temas y girando solas; el panel Acerca de es más alto para que se vea la tarjeta de operación y copias.
 - **Una dirección que pide no mostrar el asistente de primer arranque también oculta el aviso único sobre el presupuesto de la IA**, de modo que una captura hecha desde un navegador limpio muestra la página en reposo.
+- **El doctor avisa en rojo de que el webhook entrante no tiene secreto**: con el receptor activado y sin secreto compartido, toda entrega se rechaza con `401` y el doctor da ahora un fallo en lugar de un aviso; la guía del webhook dice que el secreto es la única barrera.
+- **La puerta de release compara el contenido de cada fichero del zip con el commit**: además de los nombres y un árbol limpio, cada miembro se compara con el fichero que versiona el commit (salvo los finales de línea), de modo que no puede viajar un fichero distinto del commit.
 
 ## [2.1.0]
 

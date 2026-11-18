@@ -164,6 +164,19 @@ class Coverage(unittest.TestCase):
         quiet = webhook.coverage(CONFIG, now=1000 + 2 * 3600)
         self.assertEqual((quiet["state"], quiet["last_hour"]), ("quiet", 0))
 
+    def test_a_clock_set_back_does_not_keep_the_state_live(self):
+        from github_actions_monitor.data_pipeline import savings
+        webhook.note_accepted(now=1000 + 3 * 86400)
+        self.assertEqual(webhook.coverage(CONFIG, now=1000)["state"], "waiting", "an event marked three days ahead of the clock is not believed")
+        webhook.note_accepted(now=1000 - 60)
+        self.assertEqual(webhook.coverage(CONFIG, now=1000)["state"], "live", "the real one still counts")
+        config = {"savings": {"webhook_first": True}}
+        savings.LAST_WEBHOOK["at"] = 1000 + 3 * 86400
+        self.addCleanup(lambda: savings.LAST_WEBHOOK.update(at=0))
+        self.assertFalse(savings.webhook_alive(config, now=1000))
+        savings.LAST_WEBHOOK["at"] = 1000 - 60
+        self.assertTrue(savings.webhook_alive(config, now=1000))
+
     def test_the_window_is_the_one_of_the_savings_block_and_the_memory_is_bounded(self):
         config = {"webhook": {"enabled": True}, "savings": {"webhook_window_minutes": 5}}
         webhook.note_accepted(now=1000)

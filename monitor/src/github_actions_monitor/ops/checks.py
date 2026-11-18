@@ -75,8 +75,10 @@ def limits(config, folder=None, secret_reader=None):
     hook = (config or {}).get("webhook") if isinstance((config or {}).get("webhook"), dict) else {}
     if hook.get("enabled") is True:
         value = (secret_reader or webhook.read_secret)(webhook.secret_env_name(config))
+        if not value and secret_reader is None:
+            value = webhook.settings(config)["secret"]      # a secret kept in the file, where webhook.allow_config_secret still allows it
         if not value:
-            status = "warn"
+            status = "fail"      # the receiver is on and has no secret: it refuses every delivery, so nothing GitHub sends is ever read
             notes.append("webhook secret not set")
         elif len(value) < cfg["webhook_min_length"]:
             status = "warn"

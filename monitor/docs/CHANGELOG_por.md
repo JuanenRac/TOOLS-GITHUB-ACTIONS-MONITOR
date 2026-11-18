@@ -12,6 +12,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 ### Corrigido
 
 - **A porta de release aceita uma execução verde pela contagem que o próprio unittest indicou**: o registo de uma execução verde completa leva o número de testes que o unittest diz ter executado (as linhas do relatório podem ser menos quando um teste escreve a meio da sua linha), e a porta compara agora esse número com o total em vez do número de linhas que conseguiu ler, de modo que uma execução completa já não é recusada por algumas linhas por contar.
+- **Um relógio atrasado já não mantém viva a cobertura do webhook**: um evento marcado à frente do relógio não é acreditado, pelo que o indicador volta a esperar em vez de mostrar ativo até o relógio o alcançar, e a poupança que depende de um webhook vivo não se mantém por causa dele.
 
 ### Adicionado
 
@@ -24,6 +25,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 - **As capturas do README mostram a versão atual**: todas as imagens da página, dos ecrãs de parede e das ferramentas de consola foram feitas de novo com dados inventados. As novas mostram o menu em grupos, as sentinelas de CI e de colaboração, a frota, os relatórios, a página inteira noutro tema e os ecrãs de parede com o logótipo de uma organização, com outros temas e a rodar sozinhos; o painel Acerca de é mais alto para que o cartão de operação e cópias fique visível.
 - **Um endereço que pede para não mostrar o assistente do primeiro arranque também esconde o aviso único sobre o orçamento da IA**, de modo que uma imagem tirada de um navegador limpo mostra a página em repouso.
+- **O doctor avisa a vermelho que o webhook de entrada não tem segredo**: com o recetor ligado e sem segredo partilhado, toda a entrega é recusada com `401` e o doctor passa a indicar uma falha em vez de um aviso; o guia do webhook diz que o segredo é a única barreira.
+- **A porta de release compara o conteúdo de cada ficheiro do zip com o commit**: além dos nomes e de uma árvore limpa, cada membro é comparado com o ficheiro que o commit versiona (exceto os fins de linha), pelo que não pode viajar um ficheiro diferente do commit.
 
 ## [2.1.0]
 

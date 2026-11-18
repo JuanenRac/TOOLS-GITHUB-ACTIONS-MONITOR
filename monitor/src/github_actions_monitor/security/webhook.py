@@ -191,10 +191,11 @@ def coverage(config, now=None):
     "fallback": "poll"}. `live` = the last event is newer than `savings.webhook_window_minutes`; `quiet` = it is older (nothing arrived for a while, which is also what a lost tunnel looks like); `waiting` =
     switched on and nothing yet. The polling is always the fallback: it reads whatever the events did not tell, so a missed delivery never leaves the state wrong for longer than one slow turn."""
     from github_actions_monitor.data_pipeline import savings
+    from github_actions_monitor.util import clock
     now = time.time() if now is None else now
     window = savings.settings(config or {})["webhook_window_minutes"]
     with _guard_lock:
-        times = list(_accepted)
+        times = [t for t in _accepted if not clock.in_future(t, now)]      # a mark ahead of the clock (the clock was set back) is not believed: it would keep the state "live" until the clock caught up
         since = _started[0]
     out = {"state": "off", "last_age_seconds": None, "last_hour": sum(1 for t in times if t > now - 3600), "window_minutes": window, "watching_seconds": max(0, int(now - since)), "fallback": "poll"}
     if not active(config):
