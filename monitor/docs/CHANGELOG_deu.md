@@ -9,6 +9,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+## [2.1.0]
+
 ### Hinzugefügt
 
 - **Eine vollständige Sicherung der Installation, geprüft und auf Wunsch verschlüsselt (`backup create`)**: `monitor_cli.py backup create` schreibt ein Paket (Format 2) mit dem Dump jedes Kontos, den bereinigten Einstellungen und Listen der Installation und einem Manifest mit Größe und SHA-256 jedes Mitglieds; es wird geprüft, bevor es an seinen Platz kommt, und ein Paket des ersten Formats lässt sich weiter prüfen und wiederherstellen. Tokens, Schlüssel, Passwörter, der Wert jeder `*_env`-Variablen, das Webhook-Geheimnis, die Sitzungen und der Inhalt des Geheimnisspeichers reisen nie mit: Die Einstellungen laufen durch eine Whitelist und dann durch eine Bereinigung von allem, was wie ein Geheimnis aussieht. Mit `ops.backup.encrypt` (oder `--encrypt`) wird das Paket mit AES-256-GCM und einem Schlüssel aus der von `ops.backup.key_env` genannten Variablen verschlüsselt; dafür braucht es die optionale Bibliothek `cryptography`, und ohne sie oder ohne einen Schlüssel mit 12 oder mehr Zeichen wird die Sicherung mit klarer Meldung abgelehnt und nichts geschrieben. `backup verify` (mit `--deep` stellt es in einem temporären Ordner wieder her), `backup list` und `backup status` ergänzen es.
@@ -32,6 +34,7 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 ### Behoben
 
 - **Das Statusetikett eines Detailbereichs bleibt in einer Zeile**: Im Reiter Wächter wurde das Etikett (zum Beispiel das, das sagt, dass gehandelt werden muss) in der Überschrift jedes Bereichs von Detail je Ebene auf einen Buchstaben pro Zeile gequetscht, in allen Sprachen und vor allem auf dem Handy. Es schrumpft nicht mehr und bricht nicht mehr mitten im Wort um, und ein Test in einem echten Browser misst es in den acht Sprachen, breit und schmal.
+- **Der Webhook über den Supervisor der Konten beantwortete jede Zustellung mit 400**: Der Prozess eines Kontos konnte, wenn der Supervisor ihm eine Zustellung weiterleitet, nicht erkennen, wer sie gesendet hatte, weil ein Standardmodul ohne Import verwendet wurde; eine gültige Signatur, eine falsche, eine fehlende, eine wiederholte Zustellung und ein großer Inhalt bekamen dieselbe allgemeine Antwort. Der Absender wird wieder wie zuvor gelesen (ein gültiger Schlüssel des Supervisors ergibt die gemeldete Adresse, jeder andere fällt auf die Gegenstelle zurück), und ein Test sucht nun im ganzen Paket nach einem Standardmodul, das in einer Funktion ohne Import verwendet wird.
 
 ### Sicherheit
 

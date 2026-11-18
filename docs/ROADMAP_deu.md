@@ -16,7 +16,11 @@ Was sich nur im langen echten Einsatz zeigt: die Migration von 1.8 und 1.9, das 
 
 Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
 
-## Erledigt in 1.8.2 bis 2.0.9
+## Erledigt in 1.8.2 bis 2.1.0
+
+### 2.1.0 - Wandbildschirme mit Design, Logo und Wechselmodus, eine wiederherstellbare Sicherung und ein Updater
+
+Die Wandbildschirme tragen das Design des Produkts und können das Logo der Organisation zeigen; ein Fenster kann durch die drei Bildschirme wechseln und zu einem neuen Rot springen; die Übersicht zeigt die Karte der Flotte nach Gruppen; ein fehlgeschlagenes Dependabot-Update ist eine eigene Warnung; und jede Ereignisart hat ihren Ton auch auf diesem Rechner. Die Installation lässt sich ganz kopieren, prüfen und wiederherstellen, auf Wunsch nach Zeitplan, der Doctor prüft den Betrieb mit Exit-Codes, die sich nicht ändern, und eine Bereinigung kann auf Anforderung laufen. Der Updater bringt eine Installation auf jede veröffentlichte Version, kopiert sie vorher und geht zurück, wenn etwas schiefgeht. Das Freigabe-Tor nennt die fehlgeschlagenen Tests und akzeptiert einen schon gesehenen grünen Lauf, die Statusetiketten der Detailbereiche bleiben in einer Zeile, die Links der Seite werden durch Lesen der Adresse geprüft, und die Container-Anleitung sagt, wie die erste Sitzung geöffnet wird.
 
 ### 2.0.9 - Eine sicherere unabhängige Prüfung, Menüs mit Gruppen, ein Ton für jede Ereignisart und schreibgeschützte Chat-Befehle
 

@@ -9,6 +9,8 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+## [2.1.0]
+
 ### Adicionado
 
 - **Uma cópia completa da instalação, verificada e opcionalmente cifrada (`backup create`)**: `monitor_cli.py backup create` escreve um pacote (formato 2) com o despejo de cada conta, as definições e as listas limpas da instalação e um manifesto com o tamanho e o SHA-256 de cada membro; é verificado antes de ser posto no sítio e um pacote do primeiro formato continua a verificar-se e a restaurar-se. Os tokens, as chaves, as palavras-passe, o valor de qualquer variável `*_env`, o segredo do webhook, as sessões e o conteúdo do armazém de segredos nunca viajam: as definições passam por uma lista branca e depois por uma limpeza de tudo o que pareça um segredo. Com `ops.backup.encrypt` (ou `--encrypt`) o pacote é cifrado com AES-256-GCM usando uma chave da variável que `ops.backup.key_env` indica; precisa da biblioteca opcional `cryptography` e, sem ela ou sem uma chave de 12 caracteres ou mais, a cópia é recusada com uma mensagem clara e não se escreve nada. `backup verify` (com `--deep` restaura numa pasta temporária), `backup list` e `backup status` completam-na.
@@ -32,6 +34,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 ### Corrigido
 
 - **A etiqueta de estado de um painel de detalhe fica numa só linha**: no separador do Sentinela, a etiqueta (por exemplo a que diz que é preciso agir) no cabeçalho de cada painel de Detalhe por camada era comprimida para uma letra por linha, em todos os idiomas e sobretudo no telemóvel. Já não encolhe nem se parte no meio de uma palavra, e um teste num navegador real mede-a nos oito idiomas, largo e estreito.
+- **O webhook que passa pelo supervisor das contas respondia 400 a cada entrega**: o processo de uma conta, quando o supervisor lhe reencaminha uma entrega, não conseguia saber quem a enviou porque se usava um módulo padrão sem o importar; uma assinatura válida, uma errada, uma ausente, uma entrega repetida e um corpo grande recebiam a mesma resposta genérica. O remetente volta a ler-se como antes (uma chave válida do supervisor dá o endereço que comunica, qualquer outra cai no par) e um teste percorre agora todo o pacote à procura de um módulo padrão usado numa função sem ser importado.
 
 ### Segurança
 

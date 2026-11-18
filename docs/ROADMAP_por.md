@@ -16,7 +16,11 @@ O que só aparece com uso real prolongado: a migração desde a 1.8 e a 1.9, o c
 
 Os workflows do próprio monitor cumprem o que a sentinela de higiene pedirá aos outros: ações fixadas a um commit, as permissões mínimas e um limite de tempo em cada job.
 
-## Feito da 1.8.2 à 2.0.9
+## Feito da 1.8.2 à 2.1.0
+
+### 2.1.0 - Ecrãs de parede com tema, logótipo e modo rotativo, uma cópia que se pode restaurar e um atualizador
+
+Os ecrãs de parede usam o tema do produto e podem mostrar o logótipo da organização; uma janela pode percorrer os três ecrãs e saltar para um vermelho novo; o resumo mostra o mapa da frota por grupos; uma atualização do Dependabot que falha é um alerta próprio; e cada tipo de evento tem também o seu som neste computador. A instalação pode ser copiada por inteiro, verificada e restaurada, com agendamento se quiser, o doctor verifica o funcionamento com códigos de saída que não mudam e pode lançar-se uma purga a pedido. O atualizador leva uma instalação para qualquer versão publicada, copia-a primeiro e volta atrás se algo falhar. A porta de publicação nomeia os testes que falham e aceita uma passagem verde já vista, as etiquetas de estado dos painéis de detalhe ficam numa só linha, as ligações da página verificam-se lendo o endereço e o guia do contentor explica como abrir a primeira sessão.
 
 ### 2.0.9 - Uma auditoria independente mais segura, menus com grupos, um som por tipo de evento e comandos de chat só de leitura
 

@@ -16,7 +16,11 @@ Ce qui n'apparaît qu'à l'usage réel prolongé : la migration depuis la 1.8 et
 
 Les workflows du moniteur lui-même respectent ce que la sentinelle d'hygiène demandera aux autres : actions fixées à un commit, permissions minimales et une limite de temps sur chaque job.
 
-## Fait dans la 1.8.2 à la 2.0.9
+## Fait dans la 1.8.2 à la 2.1.0
+
+### 2.1.0 - Écrans muraux avec thème, logo et mode tournant, une sauvegarde restaurable et un outil de mise à jour
+
+Les écrans muraux portent le thème du produit et peuvent afficher le logo de l'organisation ; une fenêtre peut tourner entre les trois écrans et sauter vers un nouveau rouge ; la vue d'ensemble montre la carte de la flotte par groupes ; une mise à jour Dependabot en échec est une alerte à part ; et chaque type d'événement a aussi son son sur cet ordinateur. L'installation peut être copiée entièrement, vérifiée et restaurée, selon un calendrier si vous le souhaitez, le doctor contrôle le fonctionnement avec des codes de sortie qui ne changent pas et une purge peut être lancée à la demande. L'outil de mise à jour amène une installation à n'importe quelle version publiée, la copie d'abord et revient en arrière si quelque chose échoue. La porte de publication nomme les tests en échec et accepte un passage vert déjà vu, les étiquettes d'état des panneaux de détail restent sur une ligne, les liens de la page sont vérifiés en lisant l'adresse et le guide du conteneur explique comment ouvrir la première session.
 
 ### 2.0.9 - Un audit indépendant plus sûr, des menus avec groupes, un son par type d'événement et des commandes de chat en lecture seule
 
