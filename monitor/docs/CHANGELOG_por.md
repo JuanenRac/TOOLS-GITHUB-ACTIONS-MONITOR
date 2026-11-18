@@ -14,6 +14,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 ### Corrigido
 
 - **O painel desdobrado de um separador do Sentinela chega ao fundo da sua caixa**: nos separadores de CI, colaboração e segurança, o único painel desdobrado era cortado a 46 % da altura da janela e deixava uma faixa vazia por baixo; agora ocupa o resto da caixa e desloca-se por dentro se o conteúdo for mais alto. A regra é medida num navegador sem janela nos oito idiomas, largo e estreito (`tools/check_unfolded.py`).
+- **Carregar num contador do cabeçalho já não deixa Agora, os alertas e os outros menus cortados até recarregar a página**: os contadores de workflows a vermelho e de compilações por assinar saltam para o sentinela juntamente com um filtro de repositórios, e esse filtro ficava ligado em todos os separadores; ao sair do separador de destino é agora retirado (a etiqueta do filtro continua a retirá-lo à mão), e o teste de navegador carrega em cada contador, volta a Agora e percorre todos os separadores à procura de uma lista cortada, de um separador vazio ou de um erro da página.
 - **Arrancar o monitor a partir do atualizador já não abre uma janela de consola por cada chamada a git e gh**: o processo arrancado depois de uma atualização não tinha consola, por isso cada comando que lançava abria uma visível. Agora arranca com uma consola oculta que os filhos partilham, tal como os processos do supervisor de contas; um teste lê todos os sítios que arrancam um processo e recusa a bandeira de desassociação.
 
 ### Adicionado

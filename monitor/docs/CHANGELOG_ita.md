@@ -14,6 +14,7 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 ### Corretto
 
 - **Il pannello aperto di una scheda del Sentinella arriva in fondo alla sua casella**: nelle schede CI, collaborazione e sicurezza l'unico pannello aperto veniva tagliato al 46 % dell'altezza della finestra e lasciava una fascia vuota sotto; ora occupa il resto della casella e scorre all'interno se il contenuto è più alto. La regola è misurata in un browser senza finestra nelle otto lingue, largo e stretto (`tools/check_unfolded.py`).
+- **Premere un contatore dell'intestazione non lascia più Adesso, gli avvisi e gli altri menu ridotti finché non si ricarica la pagina**: i contatori dei workflow in rosso e delle build non firmate saltano alla sentinella insieme a un filtro dei repository, e quel filtro restava attivo per tutte le schede; uscendo dalla scheda di destinazione ora viene tolto (l'etichetta del filtro continua a toglierlo a mano), e il test del browser preme ogni contatore, torna ad Adesso e scorre tutte le schede cercando un elenco ridotto, una scheda vuota o un errore della pagina.
 - **Avviare il monitor dall'aggiornatore non apre più una finestra di console per ogni chiamata a git e gh**: il processo avviato dopo un aggiornamento non aveva alcuna console, quindi ogni comando che lanciava ne apriva una visibile. Ora parte con una console nascosta condivisa dai suoi figli, come i processi del supervisore degli account; un test legge tutti i punti che avviano un processo e rifiuta il flag di distacco.
 
 ### Aggiunto

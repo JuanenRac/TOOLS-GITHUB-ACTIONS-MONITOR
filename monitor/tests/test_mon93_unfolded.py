@@ -33,6 +33,14 @@ class TheSource(unittest.TestCase):
         self.assertRegex(PAGE, r"details>\.dbody\{[^}]*overflow:auto;max-height:46vh\}")
 
 
+class TheCountersOfTheHeader(unittest.TestCase):
+    def test_a_filter_set_by_a_counter_goes_when_the_tab_it_jumped_to_is_left(self):
+        self.assertIn('let KPI_TAB="";', PAGE)
+        self.assertIn('if(KPI_TAB&&t!==KPI_TAB){KPI_TAB="";if(typeof FILTER!=="undefined"&&FILTER.list)setList(FILTER.listLabel,[])}', PAGE)
+        for call in ('showTab("sci");KPI_TAB="sci";renderSent();',):
+            self.assertGreaterEqual(PAGE.count(call), 2, "the red and the unsigned counters both remember where they jumped")
+
+
 class NoProcessIsDetached(unittest.TestCase):
     """DETACHED_PROCESS leaves a process without a console, and then every git or gh it starts opens a console window of its own."""
 

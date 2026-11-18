@@ -15,6 +15,7 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 ### Fixed
 
 - **The unfolded panel of a Sentinel tab reaches the bottom of its box**: in the CI, collaboration and security tabs the one panel that is unfolded was cut at 46% of the height of the window and left an empty strip below it; it now takes the rest of the box and scrolls inside when its content is taller. The rule is measured in a headless browser in the eight languages, wide and narrow (`tools/check_unfolded.py`).
+- **Pressing a counter of the header no longer leaves Now, the alerts and the other menus cut down until the page is reloaded**: the counters of red workflows and of unsigned builds jump to the sentinel together with a filter of repositories, and that filter stayed on for every tab; leaving the tab they jumped to now takes it away (the chip of the filter still clears it by hand), and the browser test presses every counter, goes back to Now and walks through all the tabs looking for a cut list, an empty tab or an error of the page.
 - **Starting the monitor from the updater no longer opens a console window for every git and gh call**: the process started after an update had no console at all, so each command it ran opened a visible one. It now starts with a hidden console that its children share, and so do the processes of the account supervisor; a test reads every place that starts a process and refuses the detached flag.
 
 ### Added

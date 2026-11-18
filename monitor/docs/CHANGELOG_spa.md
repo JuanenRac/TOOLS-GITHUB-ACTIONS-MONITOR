@@ -14,6 +14,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 ### Corregido
 
 - **El panel desplegado de una pestaña del Centinela llega hasta el fondo de su caja**: en las pestañas de CI, colaboración y seguridad, el único panel desplegado se cortaba al 46 % del alto de la ventana y dejaba una franja vacía debajo; ahora ocupa el resto de la caja y se desplaza por dentro si su contenido es más alto. La regla se mide en un navegador sin ventana en los ocho idiomas, ancho y estrecho (`tools/check_unfolded.py`).
+- **Pulsar un contador de la cabecera ya no deja Ahora, las alertas y los demás menús recortados hasta recargar la página**: los contadores de workflows en rojo y de compilaciones sin firmar saltan al centinela junto con un filtro de repositorios, y ese filtro se quedaba puesto en todas las pestañas; al salir de la pestaña a la que saltaron ahora se quita (la etiqueta del filtro sigue quitándolo a mano), y la prueba de navegador pulsa cada contador, vuelve a Ahora y recorre todas las pestañas buscando una lista recortada, una pestaña vacía o un error de la página.
 - **Arrancar el monitor desde el actualizador ya no abre una ventana de consola por cada llamada a git y gh**: el proceso que se arrancaba tras una actualización no tenía consola, así que cada orden que lanzaba abría una visible. Ahora arranca con una consola oculta que comparten sus hijos, igual que los procesos del supervisor de cuentas; una prueba lee todos los sitios que arrancan un proceso y rechaza la bandera de desprendido.
 
 ### Añadido

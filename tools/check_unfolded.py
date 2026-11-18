@@ -33,6 +33,7 @@ PROBE = r"""
 (async function(){
   const wait=ms=>new Promise(r=>setTimeout(r,ms)),found=[],seen=[];
   const out=document.createElement("pre");out.id="unfolded-report";document.body.appendChild(out);
+  const errs=[];window.addEventListener("error",e=>errs.push(String(e.message||e).slice(0,120)));window.addEventListener("unhandledrejection",e=>errs.push(String(e.reason).slice(0,120)));
   try{
     await wait(1200);
     for(let i=0;i<60;i++){      /* wait for the condition (the data of the sentinels has arrived), not for a fixed time */
@@ -64,6 +65,17 @@ PROBE = r"""
      for(const r of rows){const q=r.getBoundingClientRect();if(b&&(q.right>b.right+1||q.left<b.left-1))found.push({kind:"trend_row_outside",at:"strend",detail:Math.round(q.right-b.right)+"px"});
        const v=r.querySelector("svg");if(v){const w=v.getBoundingClientRect().width;if(w<40)found.push({kind:"trend_curve_squeezed",at:"strend",detail:Math.round(w)+"px wide"})}}
      if(document.querySelector("#t-sent #s-trend"))found.push({kind:"trend_still_in_summary",at:"sent",detail:"the summary still holds the daily trend"})}
+    /* the counters of the header jump to a tab (some of them with a filter of repositories): back on Now, the list and the alerts are the same as before and no filter is left behind */
+    {const count=()=>document.querySelectorAll("#t-now .card,#t-now tr,#t-now .alrow").length;
+     for(const id of ["kp-red","kp-sign","kt-active","kt-queued","kt-ok","kt-min","kt-issues","kt-repos","kt-hot"]){
+       try{showTab("now")}catch(e){}await wait(250);const n0=count(),el=document.getElementById(id);if(!el){found.push({kind:"no_counter",at:id,detail:"the counter is not in the page"});continue}
+       el.click();await wait(300);try{showTab("now")}catch(e){}await wait(300);
+       if(typeof FILTER!=="undefined"&&FILTER.list)found.push({kind:"filter_left_behind",at:id,detail:"the filter '"+FILTER.listLabel+"' stays on Now"});
+       if(count()!==n0)found.push({kind:"now_lost_rows",at:id,detail:n0+" before, "+count()+" after"})}
+     for(const t of TABS){try{showTab(t)}catch(e){errs.push("showTab "+t+": "+e)}await wait(150);const el=document.getElementById("t-"+t);if(!el||!el.textContent.trim())found.push({kind:"blind_tab",at:t,detail:"the tab is empty after the counters were pressed"})}
+     try{showTab("now")}catch(e){}
+     for(const m of errs)found.push({kind:"js_error",at:"console",detail:m});
+     seen.push("counters")}
     out.textContent=JSON.stringify({ok:true,found:found,count:seen.length});
   }catch(e){out.textContent=JSON.stringify({ok:false,error:String(e),found:found})}
 })();
