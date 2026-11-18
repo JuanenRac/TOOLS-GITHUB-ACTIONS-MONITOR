@@ -9,6 +9,14 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+### Corretto
+
+- **Il gate di release accetta un'esecuzione verde in base al conteggio dato da unittest stesso**: la registrazione di un'esecuzione verde completa contiene il numero di test che unittest dichiara di aver eseguito (le righe del rapporto possono essere meno quando un test scrive a metà della sua riga), e il gate ora confronta quel numero con il totale invece del numero di righe che ha potuto leggere, così un'esecuzione completa non viene più rifiutata per qualche riga non contata.
+
+### Aggiunto
+
+- **`make_release.py --progress` mostra l'avanzamento delle suite**: con l'opzione, sia la suite ordinaria sia quella dell'installazione pulita scrivono una riga ogni 250 test, così il gate non resta più muto per quasi un'ora.
+
 ### Modificato
 
 - **Le schermate del README mostrano la versione attuale**: tutte le immagini della pagina, degli schermi da parete e degli strumenti da console sono state rifatte con dati inventati. Le nuove mostrano il menu a gruppi, le sentinelle di CI e di collaborazione, la flotta, i report, l'intera pagina in un altro tema e gli schermi da parete con il logo di un'organizzazione, in altri temi e che ruotano da soli; il pannello Informazioni è più alto per mostrare la scheda di esercizio e copie.

@@ -9,6 +9,14 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ## [Unreleased]
 
+### Corregido
+
+- **La puerta de release acepta una pasada verde por el recuento que dio el propio unittest**: el registro de una pasada verde completa lleva el número de pruebas que unittest dice haber ejecutado (las líneas del informe pueden ser menos cuando una prueba escribe en mitad de su línea), y la puerta compara ahora ese número con el total en lugar del número de líneas que pudo leer, de modo que una pasada completa ya no se rechaza por unas líneas sin contar.
+
+### Añadido
+
+- **`make_release.py --progress` dice cómo van las suites**: con la opción, tanto la suite ordinaria como la de la instalación limpia escriben una línea cada 250 pruebas, de modo que la puerta ya no se queda en silencio durante casi una hora.
+
 ### Cambiado
 
 - **Las capturas del README muestran la versión actual**: todas las imágenes de la página, las pantallas de pared y las herramientas de consola se hicieron de nuevo con datos inventados. Las nuevas muestran el menú con grupos, los centinelas de CI y de colaboración, la flota, los informes, toda la página con otro tema y las pantallas de pared con el logo de una organización, con otros temas y girando solas; el panel Acerca de es más alto para que se vea la tarjeta de operación y copias.

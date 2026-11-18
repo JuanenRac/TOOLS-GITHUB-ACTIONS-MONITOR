@@ -9,6 +9,14 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+### Corrigé
+
+- **La porte de release accepte une exécution verte d'après le nombre donné par unittest lui-même** : l'enregistrement d'une exécution verte complète contient le nombre de tests que unittest dit avoir exécutés (les lignes du rapport peuvent être moins nombreuses quand un test écrit au milieu de sa ligne), et la porte compare désormais ce nombre au total au lieu du nombre de lignes qu'elle a pu lire, de sorte qu'une exécution complète n'est plus refusée pour quelques lignes non comptées.
+
+### Ajouté
+
+- **`make_release.py --progress` indique l'avancement des suites** : avec l'option, la suite ordinaire comme celle de l'installation propre écrivent une ligne tous les 250 tests, si bien que la porte ne reste plus muette pendant près d'une heure.
+
 ### Modifié
 
 - **Les captures du README montrent la version actuelle** : toutes les images de la page, des écrans muraux et des outils de console ont été refaites avec des données inventées. Les nouvelles montrent le menu en groupes, les sentinelles de CI et de collaboration, la flotte, les rapports, toute la page dans un autre thème et les écrans muraux avec le logo d'une organisation, dans d'autres thèmes et tournant tout seuls ; le panneau À propos est plus haut pour que la carte d'exploitation et de sauvegarde soit visible.

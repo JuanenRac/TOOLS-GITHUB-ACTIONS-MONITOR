@@ -122,6 +122,7 @@ Only the names in this table are read. In the service a value that cannot be rea
 | `MONITOR_RELEASE_CLEAN_TIMEOUT` | `tools/make_release.py`: seconds the suite of the extracted zip may take (default 3600; 60 to 86400). |
 | `MONITOR_RELEASE_LOG_DIR` | `tools/make_release.py`: folder where the WHOLE output of a failed suite is saved (default: the temporary folder); the message of the gate names the failing tests and this file. |
 | `--accept-green-suite JSON --commit SHA [--skip-clean-suite]` | `tools/make_release.py`: instead of running the ordinary suite again, accept the record of a complete green run of that very commit (finished, no failure, no error, every test run); `--skip-clean-suite` also skips the suite of the extracted zip (its smoke checks still run) and says so. |
+| `--progress` | `tools/make_release.py`: says how far the suites are, one line every 250 tests, also in the suite of the clean install. |
 
 ## When GitHub revokes or expires the login
 
