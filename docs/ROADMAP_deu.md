@@ -16,7 +16,11 @@ Was sich nur im langen echten Einsatz zeigt: die Migration von 1.8 und 1.9, das 
 
 Die Workflows des Monitors selbst halten ein, was der Hygiene-Wächter von anderen verlangen wird: an einen Commit gebundene Actions, minimale Berechtigungen und ein Zeitlimit für jeden Job.
 
-## Erledigt in 1.8.2 bis 2.1.0
+## Erledigt in 1.8.2 bis 2.1.1
+
+### 2.1.1 - Zwei neue Wächter, einer für die Lieferkette und einer für die Auslieferung, und ein strengeres Release-Gate
+
+Zwei neue Wächter, standardmäßig aus und nur in der Complete-Edition, lesen, was ein Repository baut und was es ausliefert, ohne etwas in GitHub zu schreiben: Der Lieferketten-Wächter prüft die Workflow-Dateien auf nicht festgelegte Actions, bewegliche Branches und zu weite oder fehlende Berechtigungen, der Auslieferungs-Wächter vergleicht Releases, Tags, das Changelog, die Versionsdateien und die festgelegten Versionen. Der Doctor zeigt einen eingehenden Webhook ohne Geheimnis nun in Rot, die Webhook-Abdeckung bleibt bei zurückgestellter Uhr nicht mehr live, und das Release-Gate vergleicht den Inhalt jeder Datei des Zips mit dem Commit, akzeptiert einen vollständigen grünen Lauf nach der von unittest genannten Zahl und kann den Fortschritt seiner Suiten anzeigen.
 
 ### 2.1.0 - Wandbildschirme mit Design, Logo und Wechselmodus, eine wiederherstellbare Sicherung und ein Updater
 

@@ -9,6 +9,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ## [Unreleased]
 
+## [2.1.1]
+
 ### Corretto
 
 - **Il gate di release accetta un'esecuzione verde in base al conteggio dato da unittest stesso**: la registrazione di un'esecuzione verde completa contiene il numero di test che unittest dichiara di aver eseguito (le righe del rapporto possono essere meno quando un test scrive a metà della sua riga), e il gate ora confronta quel numero con il totale invece del numero di righe che ha potuto leggere, così un'esecuzione completa non viene più rifiutata per qualche riga non contata.

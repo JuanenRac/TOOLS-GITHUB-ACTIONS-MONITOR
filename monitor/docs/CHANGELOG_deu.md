@@ -9,6 +9,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ## [Unreleased]
 
+## [2.1.1]
+
 ### Behoben
 
 - **Das Release-Gate akzeptiert einen grünen Lauf nach der Zahl, die unittest selbst angab**: Die Aufzeichnung eines vollständigen grünen Laufs enthält die Anzahl der Tests, die unittest als ausgeführt meldet (die Zeilen des Berichts können weniger sein, wenn ein Test mitten in seiner Zeile schreibt), und das Gate vergleicht nun diese Zahl mit der Gesamtzahl statt mit der Zahl der lesbaren Zeilen, sodass ein vollständiger Lauf nicht mehr wegen einiger ungezählter Zeilen abgelehnt wird.
