@@ -34,6 +34,12 @@ class TheWalkSeesAFailingMonitor(unittest.TestCase):
         self.assertIn("reply.status>=500", head)
         self.assertIn("split(\"?\")[0]", head)      # the address without its query: it may hold a name or a filter
 
+    def test_a_tab_in_japanese_or_chinese_needs_fewer_characters_than_in_the_other_languages(self):
+        report = {"ok": True, "tabs": {"scol": {"on": True, "text": 24}}, "cfg": {"basic": {"fields": 12, "shown": True}}, "total_fields": 300, "windows": {"about": {"open": True, "text": 100}}, "errors": []}
+        self.assertTrue(any("almost nothing" in p for p in check_page.problems(report)))
+        self.assertEqual(check_page.problems(report, check_page.MIN_TEXT_COMPACT), [])
+        self.assertEqual(check_page.COMPACT, ("ja", "zh"))
+
     def test_the_walk_can_be_made_at_the_two_sizes(self):
         self.assertEqual(sorted(check_overflow.SIZES), ["desktop", "mobile"])
         import inspect

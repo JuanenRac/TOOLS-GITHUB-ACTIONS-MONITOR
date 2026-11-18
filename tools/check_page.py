@@ -32,6 +32,8 @@ MIN_FIELDS = {"interface": 3, "basic": 9, "general": 11, "polling": 7, "cache": 
               "notify": 15, "analytics": 5, "lint": 9, "advanced": 22, "console": 2}      # "interface" is kept in the browser: its controls are counted, not the fields of the file
 MIN_TOTAL = 200
 MIN_TEXT = 40      # characters a tab must show once it is open
+MIN_TEXT_COMPACT = 15      # the same in Japanese and Chinese, where a line says in a third of the characters what a line of the other languages says
+COMPACT = ("ja", "zh")
 
 HEAD = r"""<script>
 window.__smoke={errors:[]};
@@ -74,7 +76,7 @@ DRIVER = r"""<script>
 </script>"""
 
 
-def problems(report):
+def problems(report, min_text=MIN_TEXT):
     """The list of what is wrong in the document the page wrote (empty = the page is fine)."""
     found = []
     if not report.get("ok"):
@@ -82,7 +84,7 @@ def problems(report):
     for tab, info in sorted((report.get("tabs") or {}).items()):
         if not info.get("on"):
             found.append(f"the tab {tab} did not open")
-        elif info.get("text", 0) < MIN_TEXT:
+        elif info.get("text", 0) < min_text:
             found.append(f"the tab {tab} drew almost nothing ({info.get('text')} characters)")
     if not report.get("cfg"):
         found.append("Settings drew no sub-tab")
@@ -127,7 +129,7 @@ def run(langs=("en",), change=None, quiet=True, sizes=("desktop",), fail=()):
             for index, size in enumerate(sizes):
                 report = co.measure(browser, f"{base}?lang={lang}&nowizard=1", co.SIZES[size], report=REPORT)
                 key = lang if index == 0 else f"{lang}@{size}"
-                results[key] = problems(report)
+                results[key] = problems(report, MIN_TEXT_COMPACT if lang in COMPACT else MIN_TEXT)
                 if not quiet:
                     print(key, "fields:", report.get("total_fields"), "problems:", len(results[key]), flush=True)
     finally:
