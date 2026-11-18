@@ -21,7 +21,11 @@ What only shows with long real use: the migration from 1.8 and 1.9, the growth o
 
 The monitor's own workflows keep to what the hygiene sentinel will ask of others: actions pinned to a commit, the least permissions and a time limit on every job.
 
-## Done in 1.8.2 to 2.1.0
+## Done in 1.8.2 to 2.1.1
+
+### 2.1.1 - Two new sentinels, one for the supply chain and one for delivery, and a stricter release gate
+
+Two new sentinels, off by default and in the Complete edition only, read what a repository builds and what it delivers without writing anything to GitHub: the supply chain one checks the workflow files for unpinned actions, moving branches and wide or missing permissions, and the delivery one compares releases, tags, the changelog, the version files and the pinned versions. The doctor now shows in red an incoming webhook that has no secret, the webhook coverage no longer stays live when the clock is set back, and the release gate compares the content of every file of the zip with the commit, accepts a complete green run by the count that unittest gave and can say how far its suites are.
 
 ### 2.1.0 - Wall screens with a theme, a logo and a rotating mode, a backup you can restore, and an updater
 

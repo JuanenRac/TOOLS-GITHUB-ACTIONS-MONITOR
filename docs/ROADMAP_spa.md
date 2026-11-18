@@ -16,7 +16,11 @@ Lo que solo aparece con un uso real prolongado: la migración desde la 1.8 y la 
 
 Los workflows del propio monitor cumplen lo que el centinela de higiene pedirá a los demás: acciones fijadas a un commit, los permisos mínimos y un límite de tiempo en cada trabajo.
 
-## Hecho en la 1.8.2 a la 2.1.0
+## Hecho en la 1.8.2 a la 2.1.1
+
+### 2.1.1 - Dos centinelas nuevos, uno de cadena de suministro y otro de entrega, y una puerta de release más estricta
+
+Dos centinelas nuevos, apagados de fábrica y solo en la edición Complete, leen lo que un repositorio construye y lo que entrega sin escribir nada en GitHub: el de cadena de suministro revisa los ficheros de workflow en busca de acciones sin fijar, ramas móviles y permisos amplios o ausentes, y el de entrega compara releases, etiquetas, el changelog, los ficheros de versión y las versiones fijadas. El doctor muestra ahora en rojo un webhook entrante sin secreto, la cobertura del webhook ya no se queda viva cuando se atrasa el reloj, y la puerta de release compara el contenido de cada fichero del zip con el commit, acepta una pasada verde completa por el recuento que dio unittest y puede decir cómo van sus suites.
 
 ### 2.1.0 - Pantallas de pared con tema, logo y modo rotativo, una copia que se puede restaurar y un actualizador
 

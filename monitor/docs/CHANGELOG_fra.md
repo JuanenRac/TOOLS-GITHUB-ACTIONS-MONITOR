@@ -9,6 +9,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ## [Unreleased]
 
+## [2.1.1]
+
 ### Corrigé
 
 - **La porte de release accepte une exécution verte d'après le nombre donné par unittest lui-même** : l'enregistrement d'une exécution verte complète contient le nombre de tests que unittest dit avoir exécutés (les lignes du rapport peuvent être moins nombreuses quand un test écrit au milieu de sa ligne), et la porte compare désormais ce nombre au total au lieu du nombre de lignes qu'elle a pu lire, de sorte qu'une exécution complète n'est plus refusée pour quelques lignes non comptées.

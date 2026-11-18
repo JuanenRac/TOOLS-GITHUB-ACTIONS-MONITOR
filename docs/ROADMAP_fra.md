@@ -16,7 +16,11 @@ Ce qui n'apparaît qu'à l'usage réel prolongé : la migration depuis la 1.8 et
 
 Les workflows du moniteur lui-même respectent ce que la sentinelle d'hygiène demandera aux autres : actions fixées à un commit, permissions minimales et une limite de temps sur chaque job.
 
-## Fait dans la 1.8.2 à la 2.1.0
+## Fait dans la 1.8.2 à la 2.1.1
+
+### 2.1.1 - Deux nouvelles sentinelles, l'une pour la chaîne d'approvisionnement et l'autre pour la livraison, et une porte de release plus stricte
+
+Deux nouvelles sentinelles, désactivées par défaut et seulement dans l'édition Complete, lisent ce qu'un dépôt construit et ce qu'il livre sans rien écrire sur GitHub : celle de la chaîne d'approvisionnement vérifie dans les fichiers de workflow les actions non épinglées, les branches mobiles et les permissions trop larges ou absentes, et celle de la livraison compare les releases, les étiquettes, le changelog, les fichiers de version et les versions épinglées. Le doctor signale désormais en rouge un webhook entrant sans secret, la couverture du webhook ne reste plus en direct quand l'horloge est reculée, et la porte de release compare le contenu de chaque fichier du zip avec le commit, accepte une exécution verte complète d'après le nombre donné par unittest et peut indiquer l'avancement de ses suites.
 
 ### 2.1.0 - Écrans muraux avec thème, logo et mode tournant, une sauvegarde restaurable et un outil de mise à jour
 
