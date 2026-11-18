@@ -1559,24 +1559,8 @@ function renderSent0(){
    +section("a12",T("ui.a12_title"),ANA&&ANA.enabled!==false&&(ANA.slower||[]).length?"warn":(ANA&&(ANA.duration||[]).length?"ok":"unknown"),T("ui.sc_a12",{n:(ANA&&ANA.duration||[]).length,m:(ANA&&ANA.flaky||[]).length}),analyticsBox())
    +section("a13",T("ui.a13_title"),(s.lint&&s.lint.enabled)?(s.lint.summary.bad?"bad":(s.lint.summary.warn?"warn":"ok")):"unknown",s.lint&&s.lint.enabled?T("ui.sc_a13",{n:s.lint.summary.findings,m:s.lint.summary.repos}):"",lintBox(s));
 }
-function secBox(){
-  const c=SECUR;if(!c||c.enabled===false)return mut_(T("ui.sec_off"));
-  const rows=(c.alerts||[]).filter(a=>sVis(a.repo)),st=c.status||{},un=Object.keys(st.unavailable||{});
-  const tbl=rows.length?`<table>${thk(["ui.th_repo","ui.th_alert","ui.th_age"])}<tbody>${rows.map(a=>`<tr><td><b class="rl" data-repo-open="${esc(a.repo)}">${esc(a.repo)}</b></td><td class="wrap"><span class="chip ${a.level==="critical"||a.level==="error"?"bad":a.level==="info"?"":"warn"}" title="${esc(a.code)}">${esc(T("ui.sec_sig_"+(a.details||{}).signal))}</span> ${esc(a.title)}</td><td>${esc(ago(a.created_at))}</td></tr>`).join("")}</tbody></table>`:(st.lifecycle==="healthy"?ok_(T("ui.sec_none")):"");
-  return `<div class="mut" style="margin-bottom:6px">${esc(T("ui.life_"+(st.lifecycle||"off")))}</div>`+tbl+(un.length?`<div class="mut" style="margin-top:8px">${esc(T("ui.sec_unavailable",{list:un.map(k=>T("ui.sec_sig_"+k)+" ("+st.unavailable[k]+")").join(", ")}))}</div>`:"")+`<div class="mut" style="margin-top:8px">${esc(T("ui.sec_foot",{c:st.repos_checked||0,r:st.repos_in_scope||0,s:st.refresh_seconds||0}))}${(st.errors||[]).length?" · "+esc(st.errors.map(e=>e.section).slice(0,4).join(", ")):""}</div>`}
 function listLevel(c){return !c||c.enabled===false?"unknown":(c.level||"unknown")}
-function listBox(c,offKey,noneKey){
-  if(!c||c.enabled===false)return mut_(T(offKey));
-  const rows=(c.alerts||[]).filter(a=>sVis(a.repo)),st=c.status||{};
-  const tbl=rows.length?`<table>${thk(["ui.th_repo","ui.th_alert","ui.th_age"])}<tbody>${rows.map(a=>`<tr><td><b class="rl" data-repo-open="${esc(a.repo)}">${esc(a.repo)}</b></td><td class="wrap"><span class="chip ${a.level==="critical"||a.level==="error"?"bad":a.level==="info"?"":"warn"}">${esc(a.code)}</span> ${esc(a.title)}</td><td>${esc(ago(a.created_at))}</td></tr>`).join("")}</tbody></table>`:(st.lifecycle==="healthy"?ok_(T(noneKey)):"");
-  return `<div class="mut" style="margin-bottom:6px">${esc(T("ui.life_"+(st.lifecycle||"off")))}</div>`+tbl+`<div class="mut" style="margin-top:8px">${esc(T("ui.sec_foot",{c:st.repos_checked||0,r:st.repos_in_scope||0,s:st.refresh_seconds||0}))}${(st.errors||[]).length?" \u00b7 "+esc(st.errors.map(e=>e.section).slice(0,4).join(", ")):""}</div>`}
 function secLevel(){const c=SECUR;return !c||c.enabled===false?"unknown":(c.level||"unknown")}
-function collabBox(){
-  const c=COLLAB;if(!c||c.enabled===false)return mut_(T("ui.collab_off"));
-  const rows=(c.alerts||[]).filter(a=>sVis(a.repo)),st=c.status||{};
-  const tbl=rows.length?`<table>${thk(["ui.th_repo","ui.th_alert","ui.th_age","ui.th_link"])}<tbody>${rows.map(a=>`<tr><td><b class="rl" data-repo-open="${esc(a.repo)}">${esc(a.repo)}</b></td><td class="wrap"><span class="chip ${a.level==="error"?"bad":a.level==="info"?"":"warn"}" title="${esc(a.code)}">collab</span> ${esc(a.title)}</td><td>${esc(ago(a.created_at))}</td><td>${link(a.details.url,"#"+a.details.number)}</td></tr>`).join("")}</tbody></table>`:ok_(T("ui.collab_none"));
-  const cut=(st.truncated_count?" · "+esc(T("ui.collab_cut",{n:st.truncated_count,p:st.pages||1})):"")+(st.search_cut||[]).map(s=>" · "+esc(T("ui.collab_cut_search",{seen:s.seen,total:s.total}))).join("");
-  return tbl+`<div class="mut" style="margin-top:8px">${esc(T("ui.collab_foot",{c:st.repos_checked||0,r:st.repos_in_scope||0,s:st.refresh_seconds||0}))}${(st.errors||[]).length?" · "+esc(st.errors.map(e=>e.section).slice(0,4).join(", ")):""}${cut}</div>`}
 function collabLevel(){const c=COLLAB;return !c||c.enabled===false?"unknown":(c.level||"unknown")}
 /* one card per signal in the panels of Collaboration, Security, Delivery and Supply chain: the same container as the cards of the CI sentinel (counter, list, filter by repository, help); Delivery and Supply chain add a table by code and filters of their own */
 const SPDEF={scol:["collab.issue.critical","collab.issue.external","collab.issue.stale","collab.pr.conflict","collab.pr.draft_old","collab.pr.review_pending"],
