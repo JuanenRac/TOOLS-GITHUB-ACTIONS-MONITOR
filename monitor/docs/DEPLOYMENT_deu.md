@@ -30,7 +30,7 @@ Die komplette Edition lauscht auf Port 8765 und die Lite-Edition auf 8766, sofer
 
 ## Das offizielle Image
 
-`ghcr.io/juanenrac/tools-github-actions-monitor` für `linux/amd64` und `linux/arm64`, mit den Tags `1.8.2`, `1.8` und `latest`, vom Release-Workflow mit einer Attestierung seiner Herkunft gebaut. Es entsteht in drei Stufen (`deploy/Dockerfile`) und enthält nur Python, die GitHub-CLI, die CA-Zertifikate und den Code, schreibgeschützt und im Besitz von root. Es läuft als Benutzer 10001 (nie als root) und schreibt nur in zwei Volumes: `/config` (`actions_monitor.json`, beim ersten Start angelegt und nie überschrieben) und `/data` (`accounts/`, `state/` mit dem Zugriffstoken, `secrets/`, der Zugang von `gh`). Es lauscht im Netzwerkmodus auf Port 8765 des Containers, jede Anfrage braucht also das Zugriffstoken, und es veröffentlicht von sich aus keinen Port.
+`ghcr.io/juanenrac/tools-github-actions-monitor` für `linux/amd64` und `linux/arm64`, mit den Tags `2.1.0`, `2.1` und `latest`, vom Release-Workflow mit einer Attestierung seiner Herkunft gebaut. Es entsteht in drei Stufen (`deploy/Dockerfile`) und enthält nur Python, die GitHub-CLI, die CA-Zertifikate und den Code, schreibgeschützt und im Besitz von root. Es läuft als Benutzer 10001 (nie als root) und schreibt nur in zwei Volumes: `/config` (`actions_monitor.json`, beim ersten Start angelegt und nie überschrieben) und `/data` (`accounts/`, `state/` mit dem Zugriffstoken, `secrets/`, der Zugang von `gh`). Es lauscht im Netzwerkmodus auf Port 8765 des Containers, jede Anfrage braucht also das Zugriffstoken, und es veröffentlicht von sich aus keinen Port.
 
 ```sh
 docker run -d --name github-actions-monitor --restart unless-stopped \
@@ -44,7 +44,7 @@ docker run -d --name github-actions-monitor --restart unless-stopped \
 docker exec github-actions-monitor cat /data/state/access_token      # the access token, made on the first start
 ```
 
-Beim ersten Start legt es die Konfiguration an, das erste Konto (aus `MONITOR_GITHUB_OWNER`; mehrere mit `MONITOR_ACCOUNTS=privat:ich,arbeit:meine-org`) und, wenn `MONITOR_ACCESS_TOKEN` fehlt, ein Zugriffstoken, das es in `/data/state/access_token` (Modus 600) verwahrt und nie ausgibt. Öffnen Sie einmal `http://127.0.0.1:8765/?access=TOKEN`: Das Cookie wird gesetzt und die Adresse bereinigt. Bei einem Bind-Mount statt eines benannten Volumes übergeben Sie den Ordner dem Benutzer 10001 (`chown -R 10001:10001`). Die Lite-Edition ist nicht im Image.
+Beim ersten Start legt es die Konfiguration an, das erste Konto (aus `MONITOR_GITHUB_OWNER`; mehrere mit `MONITOR_ACCOUNTS=privat:ich,arbeit:meine-org`) und, wenn `MONITOR_ACCESS_TOKEN` fehlt, ein Zugriffstoken, das es in `/data/state/access_token` (Modus 600) verwahrt und nie ausgibt. Öffnen Sie die Sitzung, ohne den Token in die Adresse zu schreiben: Senden Sie `POST /api/access` mit `{"token": "..."}` (das Cookie kommt in der Antwort zurück) oder den Header `X-Monitor-Access`. Um sie einmal über die Adressleiste eines Browsers zu öffnen, starten Sie den Container mit `MONITOR_QUERY_ACCESS=1`, öffnen Sie `http://127.0.0.1:8765/?access=TOKEN` und schalten Sie die Variable wieder aus. Bei einem Bind-Mount statt eines benannten Volumes übergeben Sie den Ordner dem Benutzer 10001 (`chown -R 10001:10001`). Die Lite-Edition ist nicht im Image.
 
 ## Docker Compose, mit optionalem Proxy und TLS
 
@@ -168,11 +168,11 @@ docker cp github-actions-monitor:/data/state/backup.zip .
 docker run --rm -v monitor-data:/data -v "$PWD":/backup alpine tar czf /backup/monitor-data.tgz -C /data .
 ```
 
-Aktualisierung: Die Daten überleben, weil sie in den Volumes liegen. Legen Sie in der Produktion eine Version fest (`:1.8.2`), laden Sie, erstellen Sie neu und prüfen Sie die Attestierung des Images. Ein neuerer Speicher wird von einem älteren Monitor nie geöffnet (siehe `STORAGE.md`); behalten Sie die Sicherung, bis die neue Version gelaufen ist.
+Aktualisierung: Die Daten überleben, weil sie in den Volumes liegen. Legen Sie in der Produktion eine Version fest (`:2.1.0`), laden Sie, erstellen Sie neu und prüfen Sie die Attestierung des Images. Ein neuerer Speicher wird von einem älteren Monitor nie geöffnet (siehe `STORAGE.md`); behalten Sie die Sicherung, bis die neue Version gelaufen ist.
 
 ```sh
 docker compose pull && docker compose up -d
-gh attestation verify oci://ghcr.io/juanenrac/tools-github-actions-monitor:1.8.2 --owner JuanenRac
+gh attestation verify oci://ghcr.io/juanenrac/tools-github-actions-monitor:2.1.0 --owner JuanenRac
 ```
 
 ## Hinter einem Reverse-Proxy

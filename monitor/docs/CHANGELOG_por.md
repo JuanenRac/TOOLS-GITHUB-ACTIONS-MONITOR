@@ -36,6 +36,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 ### Segurança
 
 - **As ligações que a página constrói a partir de dados verificam-se lendo o endereço, não pelas primeiras letras**: só passa um endereço https do GitHub (ou do servidor que indicar para o GitHub Enterprise, que também pode ser http) sem utilizador nem palavra-passe; um endereço de script, um servidor parecido, um espaço, um carácter de controlo ou uma barra invertida passam a ser uma ligação vazia.
+- **O guia do contentor diz como abrir a primeira sessão e que etiquetas de imagem existem**: pedia para abrir o endereço com o token de acesso, algo que o monitor recusa por omissão desde que o token deixou de viajar no endereço. Agora diz para enviar o token com um POST ou com o cabeçalho de acesso (ou ligar o endereço para uma visita e desligá-lo de novo), e as etiquetas que cita são as desta versão.
 
 ## [2.0.9]
 

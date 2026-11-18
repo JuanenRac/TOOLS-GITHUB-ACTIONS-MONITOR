@@ -30,7 +30,7 @@
 
 ## 公式イメージ
 
-`ghcr.io/juanenrac/tools-github-actions-monitor`（`linux/amd64` と `linux/arm64`）。タグは `1.8.2`、`1.8`、`latest` で、リリースのワークフローが出所の証明（attestation）付きでビルドします。3 段階で作られ（`deploy/Dockerfile`）、Python、GitHub CLI、CA 証明書、コードだけを含み、読み取り専用で root の所有です。ユーザー 10001（root ではない）で動き、書き込むのは 2 つのボリュームだけです: `/config`（`actions_monitor.json`。最初の起動で作られ、上書きされません）と `/data`（`accounts/`、アクセストークンを含む `state/`、`secrets/`、`gh` のログイン）。ネットワークモードでコンテナーのポート 8765 を待ち受けるので、すべてのリクエストにアクセストークンが必要で、ポートは自分では公開しません。
+`ghcr.io/juanenrac/tools-github-actions-monitor`（`linux/amd64` と `linux/arm64`）。タグは `2.1.0`、`2.1`、`latest` で、リリースのワークフローが出所の証明（attestation）付きでビルドします。3 段階で作られ（`deploy/Dockerfile`）、Python、GitHub CLI、CA 証明書、コードだけを含み、読み取り専用で root の所有です。ユーザー 10001（root ではない）で動き、書き込むのは 2 つのボリュームだけです: `/config`（`actions_monitor.json`。最初の起動で作られ、上書きされません）と `/data`（`accounts/`、アクセストークンを含む `state/`、`secrets/`、`gh` のログイン）。ネットワークモードでコンテナーのポート 8765 を待ち受けるので、すべてのリクエストにアクセストークンが必要で、ポートは自分では公開しません。
 
 ```sh
 docker run -d --name github-actions-monitor --restart unless-stopped \
@@ -44,7 +44,7 @@ docker run -d --name github-actions-monitor --restart unless-stopped \
 docker exec github-actions-monitor cat /data/state/access_token      # the access token, made on the first start
 ```
 
-最初の起動では、設定、最初のアカウント（`MONITOR_GITHUB_OWNER` から。複数は `MONITOR_ACCOUNTS=personal:me,work:my-org`）、そして `MONITOR_ACCESS_TOKEN` がなければアクセストークンを作り、`/data/state/access_token`（モード 600）に保存して表示しません。`http://127.0.0.1:8765/?access=TOKEN` を一度開くと、Cookie が設定されてアドレスが整理されます。名前付きボリュームの代わりにバインドマウントを使う場合は、フォルダーをユーザー 10001 に渡してください（`chown -R 10001:10001`）。Lite エディションはイメージに含まれません。
+最初の起動では、設定、最初のアカウント（`MONITOR_GITHUB_OWNER` から。複数は `MONITOR_ACCOUNTS=personal:me,work:my-org`）、そして `MONITOR_ACCESS_TOKEN` がなければアクセストークンを作り、`/data/state/access_token`（モード 600）に保存して表示しません。トークンをアドレスに入れずにセッションを開きます。`POST /api/access` に `{"token": "..."}` を送るか(Cookie は応答で返ります)、ヘッダー `X-Monitor-Access` を送ってください。ブラウザーのアドレスバーから一度だけ開くには、`MONITOR_QUERY_ACCESS=1` でコンテナーを起動し、`http://127.0.0.1:8765/?access=TOKEN` を開いてから、その変数を再びオフにします。名前付きボリュームの代わりにバインドマウントを使う場合は、フォルダーをユーザー 10001 に渡してください（`chown -R 10001:10001`）。Lite エディションはイメージに含まれません。
 
 ## Docker Compose（任意のプロキシと TLS 付き）
 
@@ -168,11 +168,11 @@ docker cp github-actions-monitor:/data/state/backup.zip .
 docker run --rm -v monitor-data:/data -v "$PWD":/backup alpine tar czf /backup/monitor-data.tgz -C /data .
 ```
 
-アップグレード: データはボリュームにあるので残ります。本番ではバージョンを固定し（`:1.8.2`）、pull して再作成し、イメージの attestation を確認します。古いモニターが新しいストレージを開くことはない（`STORAGE.md` を参照）ので、新しいバージョンが動くまでバックアップを残してください。
+アップグレード: データはボリュームにあるので残ります。本番ではバージョンを固定し（`:2.1.0`）、pull して再作成し、イメージの attestation を確認します。古いモニターが新しいストレージを開くことはない（`STORAGE.md` を参照）ので、新しいバージョンが動くまでバックアップを残してください。
 
 ```sh
 docker compose pull && docker compose up -d
-gh attestation verify oci://ghcr.io/juanenrac/tools-github-actions-monitor:1.8.2 --owner JuanenRac
+gh attestation verify oci://ghcr.io/juanenrac/tools-github-actions-monitor:2.1.0 --owner JuanenRac
 ```
 
 ## リバースプロキシの背後で

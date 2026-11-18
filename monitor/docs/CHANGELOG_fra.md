@@ -36,6 +36,7 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 ### Sécurité
 
 - **Les liens que la page construit à partir de données sont vérifiés en lisant l'adresse, pas à ses premières lettres** : seule passe une adresse https de GitHub (ou de l'hôte que vous indiquez pour GitHub Enterprise, qui peut aussi être en http) sans nom d'utilisateur ni mot de passe ; une adresse de script, un hôte qui lui ressemble, un blanc, un caractère de contrôle ou une barre oblique inverse deviennent un lien vide.
+- **Le guide du conteneur dit comment ouvrir la première session et quelles étiquettes d'image existent** : il demandait d'ouvrir l'adresse avec le jeton d'accès, ce que le moniteur refuse par défaut depuis que le jeton ne voyage plus dans l'adresse. Il dit maintenant d'envoyer le jeton par un POST ou par l'en-tête d'accès (ou d'activer l'adresse pour une visite puis de la désactiver), et les étiquettes citées sont celles de cette version.
 
 ## [2.0.9]
 

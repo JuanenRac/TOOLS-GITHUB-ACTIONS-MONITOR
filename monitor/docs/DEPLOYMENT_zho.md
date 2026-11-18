@@ -30,7 +30,7 @@
 
 ## 官方镜像
 
-`ghcr.io/juanenrac/tools-github-actions-monitor`，支持 `linux/amd64` 和 `linux/arm64`，标签为 `1.8.2`、`1.8` 和 `latest`，由发布工作流构建并附带来源证明（attestation）。它分三个阶段构建（`deploy/Dockerfile`），只包含 Python、GitHub CLI、CA 证书和代码，只读且属于 root。它以用户 10001（从不以 root）运行，只写入两个卷：`/config`（`actions_monitor.json`，首次启动时创建，不会被覆盖）和 `/data`（`accounts/`、含访问令牌的 `state/`、`secrets/`、`gh` 的登录）。它在网络模式下监听容器的 8765 端口，因此每个请求都需要访问令牌，并且自身不会发布任何端口。
+`ghcr.io/juanenrac/tools-github-actions-monitor`，支持 `linux/amd64` 和 `linux/arm64`，标签为 `2.1.0`、`2.1` 和 `latest`，由发布工作流构建并附带来源证明（attestation）。它分三个阶段构建（`deploy/Dockerfile`），只包含 Python、GitHub CLI、CA 证书和代码，只读且属于 root。它以用户 10001（从不以 root）运行，只写入两个卷：`/config`（`actions_monitor.json`，首次启动时创建，不会被覆盖）和 `/data`（`accounts/`、含访问令牌的 `state/`、`secrets/`、`gh` 的登录）。它在网络模式下监听容器的 8765 端口，因此每个请求都需要访问令牌，并且自身不会发布任何端口。
 
 ```sh
 docker run -d --name github-actions-monitor --restart unless-stopped \
@@ -44,7 +44,7 @@ docker run -d --name github-actions-monitor --restart unless-stopped \
 docker exec github-actions-monitor cat /data/state/access_token      # the access token, made on the first start
 ```
 
-首次启动时，它会创建配置、第一个账户（来自 `MONITOR_GITHUB_OWNER`；多个账户用 `MONITOR_ACCOUNTS=personal:me,work:my-org`），并在未提供 `MONITOR_ACCESS_TOKEN` 时生成访问令牌，保存到 `/data/state/access_token`（权限 600），从不打印。打开一次 `http://127.0.0.1:8765/?access=TOKEN`：Cookie 会被设置并清理地址。若使用绑定挂载而非命名卷，请把文件夹交给用户 10001（`chown -R 10001:10001`）。lite 版不在镜像中。
+首次启动时，它会创建配置、第一个账户（来自 `MONITOR_GITHUB_OWNER`；多个账户用 `MONITOR_ACCOUNTS=personal:me,work:my-org`），并在未提供 `MONITOR_ACCESS_TOKEN` 时生成访问令牌，保存到 `/data/state/access_token`（权限 600），从不打印。不要把令牌放进地址来打开会话：发送带有 `{"token": "..."}` 的 `POST /api/access`（Cookie 会在响应中返回），或发送请求头 `X-Monitor-Access`。若要在浏览器地址栏中打开一次，请用 `MONITOR_QUERY_ACCESS=1` 启动容器，打开 `http://127.0.0.1:8765/?access=TOKEN`，然后再把该变量关掉。若使用绑定挂载而非命名卷，请把文件夹交给用户 10001（`chown -R 10001:10001`）。lite 版不在镜像中。
 
 ## Docker Compose，可选代理与 TLS
 
@@ -168,11 +168,11 @@ docker cp github-actions-monitor:/data/state/backup.zip .
 docker run --rm -v monitor-data:/data -v "$PWD":/backup alpine tar czf /backup/monitor-data.tgz -C /data .
 ```
 
-升级：数据保存在卷中，所以不会丢失。生产环境请固定版本（`:1.8.2`），拉取、重建，并校验镜像的来源证明。较旧的监视器绝不会打开较新的存储（见 `STORAGE.md`），所以请在新版本运行稳定之前保留备份。
+升级：数据保存在卷中，所以不会丢失。生产环境请固定版本（`:2.1.0`），拉取、重建，并校验镜像的来源证明。较旧的监视器绝不会打开较新的存储（见 `STORAGE.md`），所以请在新版本运行稳定之前保留备份。
 
 ```sh
 docker compose pull && docker compose up -d
-gh attestation verify oci://ghcr.io/juanenrac/tools-github-actions-monitor:1.8.2 --owner JuanenRac
+gh attestation verify oci://ghcr.io/juanenrac/tools-github-actions-monitor:2.1.0 --owner JuanenRac
 ```
 
 ## 置于反向代理之后
