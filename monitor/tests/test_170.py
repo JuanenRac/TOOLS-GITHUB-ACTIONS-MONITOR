@@ -197,11 +197,25 @@ def get(url, headers=None, data=None, method=None):
 
 
 def unused_stretch():
-    """The first port of a stretch that nobody uses, asked of the system (an ephemeral port): two suites that run at once, or a program of the computer, no longer fight for the same fixed ports."""
+    """The first port of a stretch of 80 ports that nobody uses, below the range the system hands out to outgoing connections (the test client and the children would otherwise take ports of the stretch while it is being chosen): two suites that run at once, or a program of the computer, no longer fight for the same fixed ports."""
+    import random
     import socket
-    with socket.socket() as probe:
-        probe.bind(("127.0.0.1", 0))
-        return max(1024, min(probe.getsockname()[1], 65000) - 100)
+    rng = random.Random(os.getpid() ^ int(time.time() * 1000))
+    for _ in range(200):
+        start = rng.randrange(12000, 30000 - 90)
+        probes = []
+        try:
+            for port in range(start, start + 80):
+                probe = socket.socket()
+                probes.append(probe)
+                probe.bind(("127.0.0.1", port))
+        except OSError:
+            continue
+        finally:
+            for probe in probes:
+                probe.close()
+        return start
+    raise OSError("no free stretch of ports")
 
 
 class Running(unittest.TestCase):
