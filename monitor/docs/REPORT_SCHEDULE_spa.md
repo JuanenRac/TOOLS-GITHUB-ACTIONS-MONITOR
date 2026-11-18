@@ -36,3 +36,7 @@ No hay un PDF propio: abre la página HTML e imprímela a PDF desde el navegador
 - La pestaña **Equipo** tiene una sección Informes: la lista, un enlace a cada fichero y el botón **Escribir un informe ahora** (un administrador, desde este equipo).
 - `GET /api/report-files` los lista, `GET /api/report-files/file?name=...` abre uno (solo un fichero que el servicio escribió para esta cuenta) y `POST /api/report-files/run` escribe uno ahora.
 - En el modo equipo, quien puede ver la cuenta puede leer sus informes; escribir uno ahora es para un administrador en este equipo. La edición Lite no tiene nada de esto.
+
+## Comparación con el periodo anterior
+
+Con `compare.include_in_report` activado (apagado por defecto, y solo mientras `compare.enabled` esté activo) el informe lleva además una sección breve que pone este periodo frente al anterior, una línea por cifra. Véase [COMPARE_spa.md](COMPARE_spa.md).

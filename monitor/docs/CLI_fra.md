@@ -20,6 +20,7 @@
 | `accounts` | les comptes du superviseur (plusieurs comptes seulement) | non |
 | `alerts` | les alertes de toutes les sentinelles dans une liste : `--sentinel ci\|collab\|security\|supply\|delivery`, `--level info\|warning\|error`, `--muted show\|hide\|only` | non |
 | `score` | le score du compte : nombre, lettre, tendance, parties, couverture et ventilation par dépôt ; `--compare` le compare à l'historique de la fenêtre | non |
+| `compare` | cette période contre la précédente : les chiffres avec leur variation et leur sens, qui se dégrade ou s'améliore ; `--window 7\|30d`, `--days all\|workdays\|weekend`, `--baseline previous\|year_ago`, `--format table\|json\|ndjson\|csv` ; sortie 4 si un chiffre manque de données, 5 avec `--fail-on` si l'un se dégrade | non |
 | `team` | la santé des dépôts classés, d'abord ceux qui demandent une personne ; `--severity warn\|bad` garde les pires et `--repo owner/name` donne le détail d'un dépôt | non |
 | `live` | l'état du récepteur de webhook et les derniers évènements | non |
 | `ai` | `ai models [--refresh]` liste les modèles du fournisseur d'IA avec les données de chacun ; `ai test --provider NOM --model NOM` en essaie un avec un texte synthétique (latence, jetons, coût estimé) ; `ai doctor` dit pourquoi une IA ne répond pas, sans afficher de clé | non |

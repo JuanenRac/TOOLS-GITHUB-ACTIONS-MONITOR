@@ -69,6 +69,7 @@ OLLAMA_RE = re.compile(r"^http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}/?\Z
 HTTPS_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]{4,250})?\Z")
 AI_URL_RE = re.compile(r"^(https://[A-Za-z0-9._~:/?#!$&()*+,;=%-]{4,250}|http://(127\.0\.0\.1|localhost|\[::1\]):[0-9]{2,5}(/[A-Za-z0-9._~/-]{0,100})?)?\Z")   # https, or a server on this computer
 PROXY_HOST_RE = re.compile(r"^([A-Za-z0-9]([A-Za-z0-9.-]{0,98}[A-Za-z0-9])?)?\Z")      # the public NAME of an HTTPS proxy: a host name only, no port, path, user or space (empty = none)
+WORKDAY_RE = re.compile(r"^[1-7]\Z")      # compare.workdays: one day of the week, Monday = 1
 ENV_NAME_RE = re.compile(r"^([A-Z_][A-Z0-9_]{0,63})?\Z")
 AI_ENV_RE = re.compile(r"^(?!(?:GH_TOKEN|GITHUB_TOKEN|GITHUB_PAT|PATH|HOME|USERPROFILE|SYSTEMROOT|TEMP|TMP|APPDATA|LOCALAPPDATA|PYTHONPATH|MONITOR_[A-Z0-9_]*)\Z)([A-Z_][A-Z0-9_]{0,63})?\Z")   # the NAME of the variable of the key of a provider: never a variable of the system or of the monitor   # the NAME of an environment variable, never the key itself
 
@@ -458,6 +459,19 @@ for _w in ("reliability", "speed", "recovery", "collaboration", "security"):
     _f(_T_SENT, "score_weights", f"score.weights.{_w}", "int", (0, 1000), restart=False, unit="pts")
 for _g in ("A", "B", "C", "D"):
     _f(_T_SENT, "score_grades", f"score.grades.{_g}", "int", (0, 100), restart=False, unit="pts")
+# --- Memory and comparison (Complete only): this period against the one before, from the ledger and the snapshots of the score
+_f(_T_SENT, "compare", "compare.enabled", "bool", restart=False)
+_f(_T_SENT, "compare", "compare.default_window_days", "int", (1, 90), restart=False)
+_f(_T_SENT, "compare", "compare.default_days_filter", "enum", ("all", "workdays", "weekend"), restart=False)
+_f(_T_SENT, "compare", "compare.workdays", "names", restart=False)
+_f(_T_SENT, "compare", "compare.min_runs_per_window", "int", (1, 10000), restart=False, unit="")
+_f(_T_SENT, "compare", "compare.min_days_of_history", "int", (1, 3650), restart=False, unit="d")
+_f(_T_SENT, "compare", "compare.min_resolved", "int", (1, 1000), restart=False, unit="")
+_f(_T_SENT, "compare", "compare.min_snapshots", "int", (1, 10000), restart=False, unit="")
+_f(_T_SENT, "compare", "compare.min_repo_runs", "int", (1, 1000), restart=False, unit="")
+_f(_T_SENT, "compare", "compare.top_changes", "int", (3, 50), restart=False, unit="")
+_f(_T_SENT, "compare", "compare.include_in_report", "bool", restart=False)
+_f(_T_SENT, "compare", "compare.cache_seconds", "int", (0, 3600), restart=False)
 # --- The log of actions (Complete only): who changed what, with a chain of hashes; on by default, only names and never values
 _f(_T_SENT, "audit_log", "audit_log.enabled", "bool", restart=False, secure=True)
 _f(_T_SENT, "audit_log", "audit_log.max_mb", "int", (1, 500), restart=False, unit="MB")
@@ -856,7 +870,7 @@ def check_value(path, value):
             return False, "path"      # the folder of the copies: never empty and a relative one never climbs out of the data folder
         return True, text
     if kind == "names":
-        pattern = FLEET_LABEL_RE if path == "fleet.labels" else FLEET_FILTER_RE if path == "fleet.saved_filters" else RUNNER_LABEL_RE if path in RUNNER_LABEL_KEYS else LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path in ("sentinel.hygiene.ruleset_names", "sentinels.delivery.expected_assets") else (PATH_RE if path in PATH_KEYS else (alertflow.SILENCE_RE if path == "alerts.silences" else (alertflow.PATTERN_RE if path == "alerts.service.workflows" else (PAIR_RE if path in PAIR_KEYS else NAME_RE)))))))
+        pattern = WORKDAY_RE if path == "compare.workdays" else FLEET_LABEL_RE if path == "fleet.labels" else FLEET_FILTER_RE if path == "fleet.saved_filters" else RUNNER_LABEL_RE if path in RUNNER_LABEL_KEYS else LABEL_RE if path in LABEL_KEYS else (NET_RE if path == "listen.trusted_proxies" else (BRANCH_RE if path == "ci.extra_branches" else (GLOB_RE if path in ("sentinel.hygiene.ruleset_names", "sentinels.delivery.expected_assets") else (PATH_RE if path in PATH_KEYS else (alertflow.SILENCE_RE if path == "alerts.silences" else (alertflow.PATTERN_RE if path == "alerts.service.workflows" else (PAIR_RE if path in PAIR_KEYS else NAME_RE)))))))
         if not isinstance(value, list) or len(value) > 200 or not all(isinstance(v, str) and pattern.match(v) for v in value):
             return False, "names"
         if path == "sentinel.hygiene.ruleset_names" and not value:

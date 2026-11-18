@@ -9,6 +9,12 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ## [Unreleased]
 
+### Adicionado
+
+- **Comparação de períodos (definição `compare.enabled`, desativada por predefinição)**: este período face ao anterior (7 ou 30 dias ou qualquer intervalo, as mesmas datas de há um ano ou uma referência própria) com um filtro de dias úteis ou fins de semana no fuso horário do monitor. Põe lado a lado a proporção de execuções falhadas, a duração mediana, o tempo de resolução de alertas, a pontuação média e a sua cobertura, cada número com a sua variação e sentido; um número sem dados suficientes ou sem referência diz `insufficient_data` ou `baseline_unavailable` em vez de mostrar um 0 ou um 100. É só de leitura, feita com o registo e os registos horários da pontuação, e não pede nada ao GitHub. Enquanto está ativa, o registo da pontuação conserva dois períodos de `compare.default_window_days`. Guia COMPARE.md.
+- **O que mudou entre os dois períodos**: os repositórios que pioram ou melhoram, os workflows que começam ou deixam de falhar e os alertas abertos, em `GET /api/compare` (com `format=ndjson` e `format=csv`), em `monitor_cli.py compare` (saída 4 se um número não se pode comparar, 5 com `--fail-on` se algum piora) e numa secção do separador Gráficos.
+- **Uma comparação breve no relatório agendado (definição `compare.include_in_report`, desativada por predefinição)**: uma linha por número face ao período anterior, nos dois formatos e nas oito línguas.
+
 ## [2.1.1]
 
 ### Corrigido

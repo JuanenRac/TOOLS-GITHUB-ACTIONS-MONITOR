@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4053_passing-brightgreen.svg" alt="4053 tests">
+  <img src="https://img.shields.io/badge/Tests-4119_passing-brightgreen.svg" alt="4119 tests">
 </p>
 
 > Vigia os workflows de todos os seus repositórios e diz-lhe, numa página local, o que está a vermelho, o que está encravado e o que o espera.
@@ -82,8 +82,8 @@ O **GitHub Actions Monitor** é um pequeno programa que corre no seu próprio co
 | | |
 |---|---|
 | **Maturidade** | functional |
-| **Testes** | 4053 métodos de teste (`python -m unittest discover -s monitor/tests`) |
-| **Definições** | 681 definições, todas com ajuda |
+| **Testes** | 4119 métodos de teste (`python -m unittest discover -s monitor/tests`) |
+| **Definições** | 693 definições, todas com ajuda |
 | **Idiomas** | 8 (inglês, espanhol, alemão, francês, italiano, japonês, chinês e português) |
 | **Testado no CI em** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -328,6 +328,7 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/QUOTA_por.md`](monitor/docs/QUOTA_por.md): Mais quota, menos gasto: modo poupança, o painel central, uma GitHub App e como partilhar a quota
 - [`monitor/docs/EXTRAS_por.md`](monitor/docs/EXTRAS_por.md): Extras opcionais: o registo do passo falhado e um token só de leitura da GitHub App
 - [`monitor/docs/SCORE_por.md`](monitor/docs/SCORE_por.md): A pontuação de uma conta: partes, estados, API, a ficha do cabeçalho, o alerta e as definições
+- [`monitor/docs/COMPARE_por.md`](monitor/docs/COMPARE_por.md): Comparar períodos: este período face ao anterior, os números, o filtro de calendário, os estados sem número, a API, o comando e as definições
 - [`monitor/docs/STORAGE_por.md`](monitor/docs/STORAGE_por.md): Armazenamento e retenção: ficheiros ou SQLite, cópia de segurança, migração e o que se guarda
 - [`monitor/docs/ADVANCED_por.md`](monitor/docs/ADVANCED_por.md): Funções avançadas (todas desligadas por defeito)
 - [`monitor/docs/AI_ALERTS_por.md`](monitor/docs/AI_ALERTS_por.md): Avisos para IAs: o feed, o resumo, o hook e o stream

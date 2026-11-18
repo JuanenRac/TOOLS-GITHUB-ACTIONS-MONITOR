@@ -48,7 +48,7 @@ from github_actions_monitor.tool_version import TOOL_VERSION
 from github_actions_monitor.security import netguard
 
 EXIT_OK, EXIT_USAGE, EXIT_DOWN, EXIT_AUTH, EXIT_DEGRADED, EXIT_ALERTS = 0, 1, 2, 3, 4, 5
-COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "score", "team", "ai-hook", "credential", "lessons", "install-skill", "gh-token", "ai", "backup", "update")
+COMMANDS = ("status", "accounts", "alerts", "live", "doctor", "health", "check", "score", "team", "ai-hook", "credential", "lessons", "install-skill", "gh-token", "ai", "backup", "update", "compare")
 BACKUP_ACTIONS = ("create", "verify", "restore", "status", "list")
 SKILL_ACTIONS = ("internal", "external")
 AI_ACTIONS = ("models", "doctor", "test")
@@ -291,6 +291,55 @@ def cmd_score(ctx):
             payload["compare"] = None
             lines.append(i18n.t("cli.score_compare_none"))
     return payload, lines, EXIT_OK
+
+
+COMPARE_FORMATS = ("table", "json", "ndjson", "csv")
+
+
+def cmd_compare(ctx):
+    """compare [--window 7|30d] [--days all|workdays|weekend] [--baseline previous|year_ago] [--format table|json|ndjson|csv]: this period against the one before (`/api/compare`). Read only, from what
+    the monitor holds. Exit 0 when every figure could be compared, 4 when a figure has too little data, there is no baseline or the comparison is off, 5 with --fail-on when a figure got worse."""
+    fmt = ctx.get("format") or "table"
+    answer = fetch(ctx["base"], "/api/compare", {"account": ctx["account"], "window": ctx.get("window"), "days": ctx.get("days"), "baseline": ctx.get("baseline")}, ctx["timeout"], ctx["token"])
+    if answer.get("enabled") is False:
+        return answer, [i18n.t("cli.compare_off")], EXIT_DEGRADED
+    wins = answer.get("windows") or {}
+    metrics = answer.get("metrics") or {}
+    code = EXIT_OK if answer.get("state") == "compared" and all(m.get("state") == "ok" for m in metrics.values()) else EXIT_DEGRADED
+    if ctx.get("fail_on") and any(m.get("direction") == "worse" for m in metrics.values()):
+        code = EXIT_ALERTS
+    from github_actions_monitor.compare import metrics as compare_metrics
+    if fmt in ("ndjson", "csv"):
+        from github_actions_monitor.compare import compare_service
+        return answer, compare_service.render(answer, fmt)[1].splitlines(), code
+    now = wins.get("now") or {}
+    end = tzdisplay.stamp(now["to"]) if isinstance(now.get("to"), (int, float)) else "-"
+    lines = [i18n.t("cli.compare_head", account=answer.get("account") or ctx["account"] or "-", days=wins.get("days", "-"), end=end, baseline=i18n.t("ui.cmp_b_" + str(answer.get("baseline")))
+                    if answer.get("baseline") in ("previous", "year_ago") else str(answer.get("baseline")))]
+    if answer.get("state") in ("calibrating", "baseline_unavailable"):
+        reason = ((answer.get("data_quality") or {}).get("reasons") or ["no_history"])[0]
+        lines.append(i18n.t("ui.cmp_state_" + answer["state"], reason=i18n.t("ui.cmp_reason_" + reason) if reason in ("no_history", "watched_briefly", "history_too_short", "before_history") else reason))
+    for name, entry in metrics.items():
+        label = i18n.t("ui.cmp_m_" + name) if name in ("red_rate", "duration_p50", "resolution", "score_mean", "score_coverage") else name
+        if entry.get("state") == "ok":
+            delta = entry.get("delta")
+            lines.append(i18n.t("cli.compare_row", metric=label, now=compare_metrics.humanize(name, entry.get("now")), base=compare_metrics.humanize(name, entry.get("base")),
+                                delta=_signed(round(delta * 100, 1)) + " pts" if name in ("red_rate", "score_coverage") else (_signed(round(delta)) + " s" if name in ("duration_p50", "resolution") else _signed(delta)),
+                                direction=i18n.t("ui.cmp_dir_" + str(entry.get("direction")))))
+        else:
+            lines.append(i18n.t("cli.compare_row_none", metric=label, state=i18n.t("ui.cmp_insufficient" if entry.get("state") == "insufficient_data" else "ui.cmp_unavailable")))
+    changes = answer.get("changes") or {}
+    for key, title in (("worse", "ui.cmp_ch_worse"), ("better", "ui.cmp_ch_better")):
+        if changes.get(key):
+            lines.append(i18n.t(title))
+            lines.extend(i18n.t("cli.compare_change", repo=row["repo"], a=f"{row['red_rate_base'] * 100:.0f}%", b=f"{row['red_rate_now'] * 100:.0f}%") for row in changes[key])
+    for key, title, field in (("new_failures", "ui.cmp_ch_new", "failures"), ("resolved_failures", "ui.cmp_ch_resolved", "failures_before")):
+        if changes.get(key):
+            lines.append(i18n.t(title))
+            lines.extend(i18n.t("cli.compare_row_none", metric=f"{row['repo']} / {row['workflow']}", state=str(row.get(field, 0))) for row in changes[key])
+    if changes.get("reason") == "no_data":
+        lines.append(i18n.t("ui.cmp_ch_nodata"))
+    return answer, lines, code
 
 
 def cmd_team(ctx):
@@ -659,7 +708,7 @@ def cmd_credential(ctx):
     return {"action": action, "ok": ok, **shown}, [line], EXIT_OK if ok else EXIT_DEGRADED
 
 
-HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "backup": cmd_backup, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai}
+HANDLERS = {"credential": cmd_credential, "ai-hook": cmd_ai_hook, "status": cmd_status, "accounts": cmd_accounts, "alerts": cmd_alerts, "score": cmd_score, "compare": cmd_compare, "team": cmd_team, "live": cmd_live, "doctor": cmd_doctor, "backup": cmd_backup, "health": cmd_health, "check": cmd_health, "lessons": cmd_lessons, "gh-token": cmd_gh_token, "install-skill": cmd_install_skill, "ai": cmd_ai}
 
 
 def cmd_update(rest):
@@ -713,6 +762,10 @@ def build_parser():
     ap.add_argument("--repo", metavar="NAME", default="", help=i18n.t("cli.help_repo"))
     ap.add_argument("--severity", choices=("warn", "bad"), default="", help=i18n.t("cli.help_severity"))
     ap.add_argument("--compare", action="store_true", help=i18n.t("cli.help_compare"))
+    ap.add_argument("--window", metavar="DAYS", default="", help=i18n.t("cli.help_window"))
+    ap.add_argument("--days", choices=("all", "workdays", "weekend"), default="", help=i18n.t("cli.help_days"))
+    ap.add_argument("--baseline", choices=("previous", "year_ago"), default="", help=i18n.t("cli.help_baseline"))
+    ap.add_argument("--format", choices=COMPARE_FORMATS, default="", help=i18n.t("cli.help_format"))
     ap.add_argument("--lang", metavar="CODE", help=i18n.t("cli.help_lang"))
     ap.add_argument("--provider", metavar="NAME", default="", help=i18n.t("cli.help_provider"))
     ap.add_argument("--model", metavar="NAME", default="", help=i18n.t("cli.help_model"))
@@ -735,6 +788,8 @@ def main(argv=None):
         args = parser.parse_args(args_list)
     except SystemExit as exit_:
         return EXIT_OK if exit_.code in (0, None) else EXIT_USAGE
+    if args.format == "json":
+        args.json = True
     if args.lang:
         i18n.set_language(args.lang)
     if args.lite and args.command not in LITE_COMMANDS:
@@ -742,7 +797,7 @@ def main(argv=None):
         return EXIT_USAGE
     try:
         ctx = {"base": base_url(args.url, args.lite), "account": args.account, "timeout": max(1.0, min(60.0, args.timeout)), "token": resolve_token(flag=args.token, token_file=args.token_file),
-               "sentinel": args.sentinel, "level": args.level, "muted": args.muted, "fail_on": args.fail_on, "lite": args.lite, "compare": args.compare, "severity": args.severity,
+               "sentinel": args.sentinel, "level": args.level, "muted": args.muted, "fail_on": args.fail_on, "lite": args.lite, "compare": args.compare, "severity": args.severity, "window": args.window if re.fullmatch(r"[0-9]{1,3}d?", args.window) else "", "days": args.days, "baseline": args.baseline, "format": args.format,
                "action": args.action or "", "target": args.target, "scope": args.scope, "project_dir": args.project_dir, "dry_run": args.dry_run, "deep": args.deep, "file": args.file, "strict": args.strict, "force": args.force, "encrypt": args.encrypt, "key_env": args.key_env if re.fullmatch(r"[A-Z_][A-Z0-9_]{0,63}", args.key_env) else "", "to_dir": args.to_dir, "new_token_file": args.new_token_file, "dest": args.dest, "read_only": args.read_only, "repo": args.repo if re.fullmatch(r"[A-Za-z0-9._/-]{0,201}", args.repo) else "",
                "provider": args.provider if re.fullmatch(r"[A-Za-z0-9-]{0,40}", args.provider) else "", "model": args.model if re.fullmatch(r"[A-Za-z0-9._:/@+-]{0,100}", args.model) else "", "refresh": args.refresh}
         CLIENT.update({"session": "", "ca": (args.ca_file or os.environ.get("MONITOR_CA_FILE") or "").strip()})
