@@ -132,7 +132,7 @@ DEFAULTS = {
     "open_browser": True,
     "modes": {"start": "normal", "default_minutes": 60},     # normal | fast | turbo: see modes.py; the presets can be edited under modes.fast / modes.turbo
     "account": {"plan": "unknown"},     # free | pro | team | enterprise: the quotas of the plan come from quotas.json (quota.py)
-    "quota": {"billing_api": False, "warn_percent": 75, "alert_percent": 90, "default_runner": "linux"},
+    "quota": {"billing_api": False, "warn_percent": 75, "alert_percent": 90, "default_runner": "linux", "failover": False, "failover_max_age_minutes": 60},
     "session_guard": True,         # the page asks for a one-use token before it changes a setting or confirms an action
     "discovery": {"events": True, "suggest_groups": True, "auto_frequency": False, "hide": [], "skip_archived": True, "fork_policy": "show", "fork_ci_days": 90, "fork_checks_per_pass": 30},
     "auth": {"enabled": False, "session_hours": 12, "max_failed_logins": 5, "lockout_minutes": 15, "min_length": 10, "allow_bearer": False, "audit": True},     # OFF: one person, no login. On: users with roles once the first administrator exists (security/auth.py)
@@ -328,6 +328,7 @@ def pool_status():
         out["sources"].append({"name": "user", "ok": True, "remaining": core["remaining"], "limit": core["limit"], "reset": core["reset"]})
     except Exception as error:   # noqa: BLE001
         out["sources"].append({"name": "user", "ok": False, "error": github_app.clean(str(error))[:120]})
+    out["failover"] = __import__("github_actions_monitor.data_pipeline.failover", fromlist=["_"]).snapshot(config)
     app = github_app.status(config)
     if app.get("enabled"):
         rate = app.get("rate") or {}
@@ -403,11 +404,53 @@ def read_source(args, source=None):
         return "user", {}
 
 
+def failover_wanted():
+    try:
+        from github_actions_monitor.data_pipeline import failover
+        return failover.settings(LIVE_CONFIG or toolconfig.raw_config())["failover"]
+    except Exception:   # noqa: BLE001 - the switch never stops a read
+        return False
+
+
+def remember_good(args, data):
+    """With quota.failover on, keeps the last good answer of a read of the API (memory only) so that it can be served when every source is spent."""
+    if args and args[0] == "api" and failover_wanted():
+        from github_actions_monitor.data_pipeline import failover
+        failover.remember("|".join(str(a) for a in args), data)
+
+
+def failover_step(args, name, error, tried):
+    """quota.failover (off by default): a READ that failed because the allowance of its source is over is made once more with another source that can read ({"name", "via"}); when every source is spent
+    the last good copy no older than quota.failover_max_age_minutes is served ({"data"}). None = nothing to do and the usual handling goes on. A limit is never taken for a refusal."""
+    try:
+        from github_actions_monitor.data_pipeline import failover, readpool
+        from github_actions_monitor.integrations import github_app
+        config = LIVE_CONFIG or toolconfig.raw_config()
+        if not failover.settings(config)["failover"] or not failover.is_limit(error) or not github_app.is_read(args):
+            return None
+        readpool.note_spent(name)
+        for other in failover.others(readpool.available(config), tried):
+            via = readpool.env_for(config, other)
+            if other == "user" or via:
+                tried.add(other)
+                failover.switched(name, other)
+                return {"name": other, "via": via}
+        key = "|".join(str(a) for a in args)
+        copy = failover.recall(key, config) if args and args[0] == "api" else None
+        if copy:
+            failover.served(copy, key)
+            return {"data": copy[0]}
+    except Exception as problem:   # noqa: BLE001 - the switch never stops a read
+        degraded.note("quota.failover", problem)
+    return None
+
+
 def gh(*args, timeout=40, retries=2, as_user=False, source=None):
     """Runs `gh` with a fixed argument list (no shell). Retries slow or flaky answers, not auth errors. The READS are spread over the sources of the pool (user, GitHub App, second read-only account); a source
     that is refused is left out for a while and the same read is made with the next one, the user last."""
     last = ""
     name, via = ("user", {}) if as_user else read_source(args, source)
+    tried = {name}
     attempt, attempts = -1, retries + 1
     while attempt + 1 < attempts:
         attempt += 1
@@ -420,8 +463,19 @@ def gh(*args, timeout=40, retries=2, as_user=False, source=None):
             time.sleep(resilience.backoff(attempt))
             continue
         if result.returncode == 0:
-            return json.loads(result.stdout) if result.stdout.strip() else None
+            data = json.loads(result.stdout) if result.stdout.strip() else None
+            if data is not None and not as_user and not source:
+                remember_good(args, data)
+            return data
         last = (result.stderr or result.stdout).strip()[:300]
+        if not as_user and not source:
+            moved = failover_step(args, name, last, tried)      # the allowance of this source is over: another one, then the last good copy
+            if moved is not None:
+                if "data" in moved:
+                    return moved["data"]
+                name, via = moved["name"], moved["via"]
+                attempts += 1
+                continue
         if via:
             from github_actions_monitor.integrations import github_app
             from github_actions_monitor.data_pipeline import readpool
@@ -486,6 +540,33 @@ def credential_fingerprint():
     return etagcache.fingerprint(((secretstore.gh_kwargs().get("env") or {}).get("GH_TOKEN")) or "")
 
 
+def failover_read(endpoint, error):
+    """The conditional read met the end of the allowance of the user (quota.failover on): the same read with another source, else the stored answer with its age. {"data"} or None."""
+    try:
+        from github_actions_monitor.data_pipeline import failover, readpool
+        config = LIVE_CONFIG or toolconfig.raw_config()
+        if not failover.settings(config)["failover"] or not failover.is_limit(error):
+            return None
+        readpool.note_spent("user")
+        for other in failover.others(readpool.available(config), {"user"}):
+            if not readpool.env_for(config, other):
+                continue
+            try:
+                data = gh("api", endpoint, retries=0, source=other)
+            except Exception:   # noqa: BLE001 - this source failed too: the next one, then the copy
+                readpool.note_spent(other)
+                continue
+            failover.switched("user", other)
+            return {"data": data}
+        held = ETAG["cache"].last_copy(endpoint) if ETAG["cache"] is not None else None
+        if held and held[1] <= failover.settings(config)["failover_max_age_minutes"] * 60:
+            failover.served(held, endpoint)
+            return {"data": held[0]}
+    except Exception as problem:   # noqa: BLE001 - the switch never stops a read
+        degraded.note("quota.failover", problem)
+    return None
+
+
 def gh_read(endpoint, retries=2):
     """A GET read of the API: conditional (ETag) when the cache is on, else a plain `gh api`. Raises like gh()."""
     cache = ETAG["cache"]
@@ -502,6 +583,9 @@ def gh_read(endpoint, retries=2):
                 raise AuthError(last) from None
             if "404" in last:
                 break
+            moved = failover_read(endpoint, last)
+            if moved is not None:
+                return moved["data"]
             if attempt < retries:
                 time.sleep(resilience.backoff(attempt) if resilience.is_transient(last) else secondary_wait(last, attempt, random.random()))
     raise RuntimeError(last or "gh failed")

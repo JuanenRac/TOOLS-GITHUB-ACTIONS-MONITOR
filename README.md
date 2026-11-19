@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4908_passing-brightgreen.svg" alt="4908 tests">
+  <img src="https://img.shields.io/badge/Tests-4918_passing-brightgreen.svg" alt="4918 tests">
 </p>
 
 > Watches the workflows of every repository you own and tells you, on one local page, what is red, what is stuck and what is waiting for you.
@@ -96,8 +96,8 @@ Method, assumptions and how to measure it in your own use: [`monitor/docs/PRODUC
 | | |
 |---|---|
 | **Maturity** | functional |
-| **Tests** | 4908 test methods (`python -m unittest discover -s monitor/tests`) |
-| **Settings** | 756 settings, all with help |
+| **Tests** | 4918 test methods (`python -m unittest discover -s monitor/tests`) |
+| **Settings** | 758 settings, all with help |
 | **Languages** | 8 (English, Spanish, German, French, Italian, Japanese, Chinese, Portuguese) |
 | **Tested in the CI on** | ubuntu, windows, Python 3.11, 3.13 |
 
@@ -346,8 +346,6 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/HEALTH.md`](monitor/docs/HEALTH.md): The health of a repository and of the team: what it is made of, the Team tab, the deep links and the API
 - [`monitor/docs/REPORT_SCHEDULE.md`](monitor/docs/REPORT_SCHEDULE.md): Scheduled reports: the score, what changed, the repositories that need a person and the open alerts as HTML and Markdown, the schedule and the files
 - [`monitor/docs/CLI.md`](monitor/docs/CLI.md): the command line as a client of the monitor
-- [`monitor/docs/CLI_OPERATOR.md`](monitor/docs/CLI_OPERATOR.md): the command line for the operator: formats, watch, completions and exit codes
-- [`monitor/docs/KIOSK.md`](monitor/docs/KIOSK.md): the monitor on a TV or a wall
 - [`monitor/docs/ACCOUNTS.md`](monitor/docs/ACCOUNTS.md): several accounts, one process each
 - [`monitor/docs/QUOTAS.md`](monitor/docs/QUOTAS.md): quotas and plans of GitHub
 - [`monitor/docs/MODES.md`](monitor/docs/MODES.md): working modes: normal, fast and turbo

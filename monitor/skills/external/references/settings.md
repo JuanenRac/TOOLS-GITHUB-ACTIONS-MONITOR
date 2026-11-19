@@ -418,6 +418,8 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `quota.alert_percent` | `90` | basic | Alert at this share of the included minutes |
 | `quota.billing_api` (secure) | `false` | basic | Read the real usage from the billing report of GitHub |
 | `quota.default_runner` | `"linux"` | basic | System assumed for the minute estimate |
+| `quota.failover` | `false` | quota | When an allowance runs out, read with another source |
+| `quota.failover_max_age_minutes` | `60` | quota | Oldest copy that may be shown |
 | `quota.warn_percent` | `75` | basic | Warn at this share of the included minutes |
 | `readpool.prefer.discovery` | `-` | quota | readpool.prefer.discovery |
 | `readpool.prefer.history` | `-` | quota | readpool.prefer.history |

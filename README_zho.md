@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Dependencies-none-2EE6A6.svg" alt="No dependencies">
   <img src="https://img.shields.io/badge/Languages-8-FFB300.svg" alt="8 languages">
-  <img src="https://img.shields.io/badge/Tests-4908_passing-brightgreen.svg" alt="4908 tests">
+  <img src="https://img.shields.io/badge/Tests-4918_passing-brightgreen.svg" alt="4918 tests">
 </p>
 
 > 监视你所有仓库的工作流，并在一个本地页面上告诉你：哪些是红的、哪些卡住了、哪些在等你处理。
@@ -96,8 +96,8 @@
 | | |
 |---|---|
 | **成熟度** | functional |
-| **测试** | 4908 个测试方法(`python -m unittest discover -s monitor/tests`) |
-| **设置** | 756 个设置,均有帮助 |
+| **测试** | 4918 个测试方法(`python -m unittest discover -s monitor/tests`) |
+| **设置** | 758 个设置,均有帮助 |
 | **语言** | 8 种(英语、西班牙语、德语、法语、意大利语、日语、中文和葡萄牙语) |
 | **CI 测试平台** | ubuntu, windows,Python 3.11, 3.13 |
 
@@ -342,8 +342,6 @@ TOOLS-GITHUB-ACTIONS-MONITOR/
 - [`monitor/docs/HEALTH_zho.md`](monitor/docs/HEALTH_zho.md): 仓库与团队的健康状况：组成、团队标签页、深度链接和 API
 - [`monitor/docs/REPORT_SCHEDULE_zho.md`](monitor/docs/REPORT_SCHEDULE_zho.md): 定时报告：评分、变化、需要人处理的仓库和未处理的警报，以 HTML 和 Markdown 呈现，以及计划和文件
 - [`monitor/docs/CLI_zho.md`](monitor/docs/CLI_zho.md)：作为监视器客户端的命令行
-- [`monitor/docs/CLI_OPERATOR_zho.md`](monitor/docs/CLI_OPERATOR_zho.md)：面向运维人员的命令行：格式、watch、completions 和退出码
-- [`monitor/docs/KIOSK_zho.md`](monitor/docs/KIOSK_zho.md)：电视或墙面上的监控器
 - [`monitor/docs/ACCOUNTS_zho.md`](monitor/docs/ACCOUNTS_zho.md)：多个账户，每个账户一个进程
 - [`monitor/docs/QUOTAS_zho.md`](monitor/docs/QUOTAS_zho.md)：GitHub 的配额与套餐
 - [`monitor/docs/MODES_zho.md`](monitor/docs/MODES_zho.md)：工作模式：普通、快速和极速
