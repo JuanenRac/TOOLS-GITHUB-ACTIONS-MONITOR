@@ -1087,7 +1087,7 @@
  "cli.help_assistant": "ai-hook: 默认的助手工具 (默认)",
  "cli.help_baseline": "compare：对比基准（previous 或 year_ago）",
  "cli.help_ca_file": "HTTPS：信任此证书颁发机构（PEM 文件），适用于使用自有证书的监视器",
- "cli.help_command": "status, accounts, alerts, live, doctor, health（或 check）, score, ai-hook, lessons, briefs, api, install-skill, gh-token, backup (create | verify | restore | status | list)",
+ "cli.help_command": "status, accounts, alerts, live, doctor, health（或 check）, score, team, compare, ai-hook, credential, lessons, briefs, api, install-skill, gh-token, backup (create | verify | restore | status | list), update",
  "cli.help_compare": "score：同时与窗口内的历史记录比较",
  "cli.help_cursor": "ai-hook: Cursor (尽力而为)",
  "cli.help_days": "compare：统计哪些日期（all、workdays 或 weekend）",

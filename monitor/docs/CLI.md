@@ -25,6 +25,11 @@
 | `team` | the health of the repositories ranked with the ones that need a person first; `--severity warn\|bad` keeps the worse ones and `--repo owner/name` gives the detail of one | no |
 | `live` | the state of the webhook receiver and the last events | no |
 | `ai` | `ai models [--refresh]` lists the models of the AI provider with the data of each one; `ai test --provider NAME --model NAME` tries one with a synthetic text (latency, tokens, estimated cost); `ai doctor` says why an AI does not answer, without printing a key | no |
+| `lessons` | what the failures of this CI have taught: `lessons list`, `lessons brief --repo NAME` (read it before a push), `lessons failures`, `lessons close` | no |
+| `briefs` | the briefs of the tabs that AI tools read: `briefs index`, `briefs show TAB`, `briefs all` | yes |
+| `credential` | another GitHub login for one account while everything runs: `credential replace\|reload [--account ID] [--new-token-file FILE\|-]`; it never prints a token | no |
+| `install-skill` | copies a skill of the monitor (`internal` or `external`) to the folder an AI tool reads its skills from: `install-skill external --dest FOLDER`; the monitor need not be running | no |
+| `gh-token` | prints a one-hour installation token of the GitHub App so that the reads of a tool spend the allowance of the App (only with `github_app.share_reads` on); run it without `--json` | no |
 
 Options of every command: `--json` (the answer as one JSON document: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (port 8766), `--timeout SECONDS` (1 to 60), `--lang CODE`. In the network mode put the access token in the environment variable `MONITOR_ACCESS_TOKEN`, the one the monitor itself reads (`MONITOR_TOKEN` is accepted as an alias; `--token TOKEN` is the last resort, because a flag shows in the list of processes). The order is: `MONITOR_ACCESS_TOKEN`, then `MONITOR_TOKEN`, then `--token`. It travels in the header `X-Monitor-Access`, never in the address and never on screen. A `--url` with plain `http` to another computer prints a warning on stderr (the token and the answers would travel unencrypted): use `https` outside a network you control.
 
