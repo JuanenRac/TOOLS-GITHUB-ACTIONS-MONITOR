@@ -244,6 +244,7 @@
     "security": {
       "enabled": false,
       "refresh_seconds": 1800,
+      "deadline_s": 30,
       "max_repos_per_tick": 5,
       "min_rate_remaining": 1500,
       "repos": "all",
@@ -301,6 +302,7 @@
       "enabled": false,
       "expected_assets": [],
       "max_calls_per_tick": 60,
+      "deadline_s": 30,
       "max_repos_per_tick": 10,
       "min_rate_remaining": 1000,
       "refresh_seconds": 3600,
@@ -340,6 +342,7 @@
       "ignore": [],
       "max_calls_per_tick": 60,
       "max_files_per_repo": 40,
+      "deadline_s": 30,
       "max_repos_per_tick": 10,
       "min_rate_remaining": 1000,
       "refresh_seconds": 3600,
@@ -384,7 +387,8 @@
       "rate_percent": 0,
       "workflows": []
     },
-    "silences": []
+    "silences": [],
+    "silences_expire_days": 0
   },
   "ai": {
     "provider": "none",
@@ -412,28 +416,74 @@
     "assistant": {
       "max_context": 6000,
       "max_tool_calls": 4,
-      "tools": ["status", "alerts", "runs", "score"]
+      "tools": ["status", "alerts", "runs", "score"],
+      "enabled": false
     },
     "prompt_log": {
-      "keep": 200
+      "keep": 200,
+      "enabled": false
     },
     "tasks": {
       "alert": {
-        "timeout_seconds": 30
+        "timeout_seconds": 0,
+        "max_input_chars": 0,
+        "max_output_chars": 0,
+        "model": "",
+        "provider": ""
       },
       "build": {
-        "timeout_seconds": 30
+        "timeout_seconds": 0,
+        "max_input_chars": 0,
+        "max_output_chars": 0,
+        "model": "",
+        "provider": ""
       },
       "codeql": {
-        "timeout_seconds": 30
+        "timeout_seconds": 0,
+        "max_input_chars": 0,
+        "max_output_chars": 0,
+        "model": "",
+        "provider": ""
       },
       "diagnose": {
-        "timeout_seconds": 30
+        "timeout_seconds": 0,
+        "max_input_chars": 0,
+        "max_output_chars": 0,
+        "model": "",
+        "provider": ""
       },
       "report": {
-        "timeout_seconds": 30
+        "timeout_seconds": 0,
+        "max_input_chars": 0,
+        "max_output_chars": 0,
+        "model": "",
+        "provider": ""
       }
-    }
+    },
+    "airgap_hosts": [],
+    "airgapped": false,
+    "allow_private_targets": false,
+    "api_key_env": "",
+    "base_url": "",
+    "cost_limit_daily": 0.0,
+    "fallback": "",
+    "fallback_after_seconds": 0,
+    "fallback_cloud_allowed": [],
+    "fallback_max_attempts": 3,
+    "model_cost_limit_daily": 0.0,
+    "model_daily_limit": 0,
+    "ollama_url": "http://127.0.0.1:11434",
+    "redact": {
+      "extra_patterns": [],
+      "extra_terms": []
+    },
+    "similar": {
+      "enabled": false,
+      "max": 5
+    },
+    "skill": true,
+    "skill_max_chars": 3000,
+    "untrusted_text_max": 2000
   },
   "webhook": {
     "enabled": false,
@@ -487,8 +537,11 @@
   "cache": {
     "etag": {
       "enabled": true,
-      "ttl_hours": 24
-    }
+      "ttl_hours": 24,
+      "skip_stateful": true,
+      "revalidate_active": true
+    },
+    "negative_ttl_s": 300
   },
   "analytics": {
     "enabled": true,
@@ -553,7 +606,8 @@
         "enabled": false,
         "severity": "info"
       }
-    }
+    },
+    "ignore": []
   },
   "notify": {
     "enabled": false,
@@ -616,7 +670,8 @@
     },
     "digest": {
       "max_items": 50
-    }
+    },
+    "allow_private_targets": false
   },
   "display": {
     "timezone": "local",
@@ -648,6 +703,9 @@
   },
   "airgapped": false,
   "open_browser": true,
+  "config_check": {
+    "strict": false
+  },
   "modes": {
     "start": "normal",
     "default_minutes": 60,
@@ -691,7 +749,8 @@
     "skip_archived": true,
     "fork_policy": "show",
     "fork_ci_days": 90,
-    "fork_checks_per_pass": 30
+    "fork_checks_per_pass": 30,
+    "min_keep_pct": 50
   },
   "auth": {
     "enabled": false,
@@ -951,6 +1010,7 @@
     "file": ""
   },
   "github_app": {
+    "app_id": "",
     "enabled": false,
     "installation_id": "",
     "key_path": "",
@@ -1004,6 +1064,7 @@
   },
   "pagination": {
     "collab_pages": 3,
+    "cursor_pages": 3,
     "job_pages": 2,
     "workflow_pages": 3
   },
@@ -1042,6 +1103,11 @@
     "webhook_window_minutes": 60
   },
   "screens": {
+    "menu": true,
+    "menu_target": "new",
+    "menu_max_windows": 4,
+    "menu_rotate_seconds": 20,
+    "menu_tv_scale": 1.5,
     "alert_hold_seconds": 30,
     "blink": true,
     "blink_calm_minutes": 30,
@@ -1081,5 +1147,23 @@
     "screen3_orientation": "auto",
     "screen3_tabs": "",
     "theme": "auto"
-  }
+  },
+  "audit_dir": "",
+  "readpool": {
+    "prefer": {
+      "discovery": "auto",
+      "history": "auto",
+      "issues": "auto",
+      "other": "auto",
+      "runs": "auto",
+      "security": "auto"
+    },
+    "reserve": {
+      "app": 0,
+      "extra": 0,
+      "user": 0
+    }
+  },
+  "signed_dir": "",
+  "workspace_root": ""
 }

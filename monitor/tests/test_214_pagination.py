@@ -55,7 +55,7 @@ class Helper(unittest.TestCase):
         self.assertEqual(seen, ["x/y?state=open&per_page=100&page=1"])
 
     def test_the_settings_keep_the_defaults_for_nonsense(self):
-        self.assertEqual(paging.settings({}), {"workflow_pages": 3, "job_pages": 2, "collab_pages": 3})
+        self.assertEqual(paging.settings({}), {"workflow_pages": 3, "job_pages": 2, "collab_pages": 3, "cursor_pages": 3})
         self.assertEqual(paging.settings({"pagination": {"workflow_pages": 0, "job_pages": "9", "collab_pages": 21}}), paging.DEFAULTS)
         self.assertEqual(paging.settings({"pagination": {"job_pages": 5}})["job_pages"], 5)
 

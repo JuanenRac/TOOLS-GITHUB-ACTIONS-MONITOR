@@ -23,7 +23,8 @@
 
 ## 条件读取(ETag)
 
-- 每次读取运行列表都会发送 `If-None-Match`;没有变化时 GitHub 返回 `304 Not Modified`,该响应不消耗配额。页眉显示节省了多少次读取,`ghamon_etag_saved_total` 对其计数。`cache.etag.enabled` 和 `cache.etag.ttl_hours` 在设置标签页中。
+- 每次读取运行列表都会发送 `If-None-Match`;没有变化时 GitHub 返回 `304 Not Modified`,该响应不消耗配额。页眉显示节省了多少次读取,`ghamon_etag_saved_total` 对其计数。`cache.etag.enabled` 和 `cache.etag.ttl_hours` 在设置标签页中。 每个条目都属于读取它的凭据(键中包含令牌的简短指纹,绝不是令牌本身),因此 `304` 永远不会返回另一个身份的内容。仍在变化的状态始终完整读取:运行的作业、单个运行、检查套件和检查运行(`cache.etag.skip_stateful`),以及上次回答中仍有排队或进行中运行的运行列表(`cache.etag.revalidate_active`)。拒绝(非速率限制的 404 或 403)会被记住 `cache.negative_ttl_s` 秒。`/metrics` 还会统计没有 ETag 的回答、有意完整读取的次数和未重复的拒绝,面向 AI 工具的简报中有信号 quota.etag。
+- 当 GitHub 发来监视器不认识的状态或结论,或没有可用编号的运行时,面向 AI 工具的简报会出现 schema.drift:未知值按原样显示,绝不会被计为红色或绿色。
 - 缓存是本地文件 `etag_cache.json`(从不发布);损坏的文件只会变成空缓存。
 
 

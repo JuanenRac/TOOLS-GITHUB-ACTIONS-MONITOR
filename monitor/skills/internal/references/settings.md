@@ -123,7 +123,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `alerts.service.rate_percent` | `0` | sentinel | Or when this share of its last runs failed |
 | `alerts.service.workflows` | `[]` | sentinel | More workflows of the service class |
 | `alerts.silences` | `[]` | sentinel | Permanent silences |
-| `alerts.silences_expire_days` | `-` | sentinel | Days after the review date when a silence expires |
+| `alerts.silences_expire_days` | `0` | sentinel | Days after the review date when a silence expires |
 | `analytics.enabled` | `-` | analytics | Analytics on |
 | `analytics.flaky` | `-` | analytics | Flaky detection |
 | `analytics.jobs_per_cycle` | `-` | analytics | Jobs read per cycle |
@@ -138,7 +138,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `api.gzip_min_bytes` | `1024` | advanced | Smallest answer to compress (bytes) |
 | `api.max_limit` | `200` | advanced | Most items per page |
 | `api.v1_enabled` | `"auto"` | advanced | Read API under /api/v1/ |
-| `audit_dir` | `-` | paths | Folder of audit files |
+| `audit_dir` | `""` | paths | Folder of audit files |
 | `audit_log.enabled` (secure) | `-` | sentinel | Log of actions on |
 | `audit_log.keep_generations` (secure) | `-` | sentinel | Rotated files kept |
 | `audit_log.maintainers_can_read` (secure) | `-` | sentinel | Maintainers may read it |
@@ -152,7 +152,10 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `auth.min_length` (secure) | `10` | advanced | Shortest password |
 | `auth.session_hours` (secure) | `12` | advanced | Session length |
 | `cache.etag.enabled` | `true` | cache | Conditional reads on |
+| `cache.etag.revalidate_active` | `true` | cache | Read lists with running work in full |
+| `cache.etag.skip_stateful` | `true` | cache | Always read live state in full |
 | `cache.etag.ttl_hours` | `24` | cache | Entry lifetime |
+| `cache.negative_ttl_s` | `300` | cache | Remember a refusal for |
 | `central.max_age_minutes` | `120` | quota | Minutes before the central panel is behind |
 | `central.source` (secure) | `"off"` | quota | Central panel as a base line |
 | `chatops.allowed_channels` (secure) | `[]` | webhook | Allowed channels |
@@ -219,6 +222,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `compare.min_snapshots` | `12` | sentinel | Least hourly snapshots |
 | `compare.top_changes` | `10` | sentinel | Rows in the changes |
 | `compare.workdays` | `["1", "2", "3", "4", "5"]` | sentinel | Workdays |
+| `config_check.strict` | `false` | basic | Refuse to start with a bad configuration |
 | `discover_limit` | `1000` | polling | Repositories listed |
 | `discover_refresh_seconds` | `3600` | polling | Search for new repositories |
 | `discovery.auto_frequency` | `false` | basic | Adjust the refresh to the real activity |
@@ -227,6 +231,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `discovery.fork_ci_days` | `90` | basic | A fork is maintained if its CI ran in the last |
 | `discovery.fork_policy` | `"show"` | basic | Forks |
 | `discovery.hide` | `[]` | basic | Leave out repositories of these kinds |
+| `discovery.min_keep_pct` | `-` | basic | Smallest listing believed (%) |
 | `discovery.skip_archived` | `true` | basic | Leave out archived repositories |
 | `discovery.suggest_groups` | `true` | basic | Suggest groups for unclassified repositories |
 | `dispatch.required_ci` | `["ci.yml"]` | advanced | Workflows that must pass before a build is fired |
@@ -393,6 +398,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `outputs.prometheus.enabled` (secure) | `-` | outputs | Prometheus: /metrics |
 | `outputs.prometheus.per_repo` | `-` | outputs | Prometheus: series per repository |
 | `pagination.collab_pages` | `3` | polling | Pages of issues and pull requests per repository |
+| `pagination.cursor_pages` | `3` | polling | Pages followed by cursor (alerts) |
 | `pagination.job_pages` | `2` | polling | Pages of jobs per run |
 | `pagination.workflow_pages` | `3` | polling | Pages of workflows per repository |
 | `ports.complete` | `8765` | general | Port of the complete edition |
@@ -486,6 +492,11 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `screens.logo_now` | `false` | general | Logo on the screen: Right now |
 | `screens.logo_overview` | `true` | general | Logo on the screen: Overview |
 | `screens.logo_sentinels` | `false` | general | Logo on the screen: Sentinels |
+| `screens.menu` | `true` | general | Screens menu in the top bar |
+| `screens.menu_max_windows` | `4` | general | Most windows of a multi-monitor set |
+| `screens.menu_rotate_seconds` | `20` | general | Seconds per screen in the turning presets |
+| `screens.menu_target` | `"new"` | general | Where the Screens menu opens a screen |
+| `screens.menu_tv_scale` | `1.5` | general | Size of the TV preset |
 | `screens.mode` | `"three"` | general | Wall screens mode |
 | `screens.night_dim` | `false` | general | Dim at night |
 | `screens.night_dim_from_hour` | `22` | general | Dim from (hour) |
@@ -610,6 +621,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinels.collab.rules.watch_external_comments` | `-` | sentinel | Watch outsiders |
 | `sentinels.collab.search_api` | `-` | sentinel | Read issues and pull requests with the Search API |
 | `sentinels.delivery.changelog_paths` | `-` | sentinel | CHANGELOG files |
+| `sentinels.delivery.deadline_s` | `-` | sentinel | Time ceiling per round |
 | `sentinels.delivery.enabled` | `-` | sentinel | Delivery sentinel on |
 | `sentinels.delivery.expected_assets` | `-` | sentinel | Expected release files |
 | `sentinels.delivery.max_calls_per_tick` | `-` | sentinel | Calls per round |
@@ -632,6 +644,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinels.delivery.unreleased_days` | `-` | sentinel | Days before unreleased entries count |
 | `sentinels.delivery.unreleased_min_entries` | `-` | sentinel | Least entries under Unreleased |
 | `sentinels.delivery.version_files` | `-` | sentinel | Version files |
+| `sentinels.security.deadline_s` | `-` | sentinel | Time ceiling per round |
 | `sentinels.security.enabled` | `-` | sentinel | Security sentinel on |
 | `sentinels.security.max_repos_per_tick` | `-` | sentinel | Repositories per round |
 | `sentinels.security.min_rate_remaining` | `-` | sentinel | Allowance kept free |
@@ -645,6 +658,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinels.security.signals.dependabot.min_severity` | `-` | sentinel | Dependabot: least severity |
 | `sentinels.security.signals.secret.enabled` | `-` | sentinel | Secret scanning alerts |
 | `sentinels.security.signals.workflow.enabled` | `-` | sentinel | Workflow permissions |
+| `sentinels.supply.deadline_s` | `-` | sentinel | Time ceiling per round |
 | `sentinels.supply.enabled` | `-` | sentinel | Supply chain sentinel on |
 | `sentinels.supply.ignore` | `-` | sentinel | Workflow findings to ignore |
 | `sentinels.supply.max_calls_per_tick` | `-` | sentinel | Calls per round |
@@ -665,7 +679,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinels.supply.signals.unpinned.level` | `-` | sentinel | Actions not pinned to a commit: level |
 | `session_guard` (secure) | `true` | basic | One-use token for changes |
 | `show_unclassified` | `true` | general | Show unclassified repositories |
-| `signed_dir` | `-` | paths | Folder of signature records |
+| `signed_dir` | `""` | paths | Folder of signature records |
 | `sound.cooldown_seconds` | `30` | general | Seconds between two sounds |
 | `sound.enabled` | `true` | general | Sound alerts |
 | `sound.on_connection_lost` | `true` | general | Sound when the connection drops |
@@ -722,4 +736,4 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `webhook.replay_seconds` | `3600` | webhook | Delivery ids remembered |
 | `webhook.secret_env` (secure) | `"MONITOR_WEBHOOK_SECRET"` | webhook | Environment variable with the shared secret |
 | `webhook.signing_state` | `-` | webhook | Shared secret |
-| `workspace_root` | `-` | paths | Folder with your clones |
+| `workspace_root` | `""` | paths | Folder with your clones |

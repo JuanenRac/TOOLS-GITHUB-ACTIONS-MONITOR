@@ -347,7 +347,7 @@ class Agreement(unittest.TestCase):
     def test_the_page_has_every_setting_that_is_not_a_weight(self):
         from github_actions_monitor.app import settings_api
         keys = {k for k in settings_api.FIELDS if k.startswith("sentinels.security.")}
-        expected = {"sentinels.security." + k for k in ("enabled", "refresh_seconds", "max_repos_per_tick", "min_rate_remaining", "repos")}
+        expected = {"sentinels.security." + k for k in ("enabled", "refresh_seconds", "max_repos_per_tick", "deadline_s", "min_rate_remaining", "repos")}
         expected |= {f"sentinels.security.signals.{s}.enabled" for s in ss.SIGNALS} | {"sentinels.security.signals.dependabot.min_severity", "sentinels.security.signals.code_scanning.min_severity"}
         self.assertEqual(keys, expected)
 

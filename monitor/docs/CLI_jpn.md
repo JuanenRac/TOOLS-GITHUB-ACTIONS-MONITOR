@@ -27,6 +27,7 @@
 | `ai` | `ai models [--refresh]` は AI プロバイダーのモデルを各モデルのデータとともに一覧表示します。`ai test --provider 名前 --model 名前` は合成テキストで 1 つを試します (遅延、トークン、推定コスト)。`ai doctor` は AI が応答しない理由をキーを表示せずに説明します | 不可 |
 | `lessons` | この CI の失敗が教えたこと:`lessons list`、`lessons brief --repo NAME`(push の前に読む)、`lessons failures`、`lessons close` | 不可 |
 | `briefs` | AI ツールが読むタブごとのブリーフ:`briefs index`、`briefs show TAB`、`briefs all` | 可 |
+| `screens` | ページの「画面」メニュー:`screens list`(画面の種類と開けるかどうか)と `screens urls`(キオスクのコマンドにそのまま使える完全なアドレス) | 不可 |
 | `credential` | すべてが動いたまま、1つのアカウントの GitHub ログインを差し替える:`credential replace\|reload [--account ID] [--new-token-file FILE\|-]`。トークンは表示しません | 不可 |
 | `install-skill` | モニターのスキル(`internal` または `external`)を、AI ツールがスキルを読むフォルダーにコピーします:`install-skill external --dest FOLDER`。モニターが動いている必要はありません | 不可 |
 | `gh-token` | ツールの読み取りが GitHub App の割り当てを使うよう、1時間有効な GitHub App のインストールトークンを出力します(`github_app.share_reads` がオンのときのみ)。`--json` なしで実行してください | 不可 |

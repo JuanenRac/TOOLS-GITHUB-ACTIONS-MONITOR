@@ -111,6 +111,11 @@ La langue d'un écran se décide dans cet ordre : `?lang=xx` dans l'adresse ; pu
 | `screens.logo_corner` | top-right (par défaut), top-left, bottom-right ou bottom-left. |
 | `screens.logo_max_width`, `screens.logo_max_height` | Taille maximale du logo en pixels à 1920 x 1080 (160 x 64 par défaut ; il grandit avec l'écran). |
 | `screens.group_map` | Activé par défaut. Affiche la carte de la flotte par groupes sur l’écran général (le regroupement de la vue de flotte). Désactivé : seulement les quatre tuiles. |
+| `screens.menu` | Activé par défaut. Le bouton Écrans de la barre du haut. Désactivé : le bouton disparaît ; les écrans continuent de fonctionner à leurs propres adresses. |
+| `screens.menu_target` | new (par défaut) : un écran s'ouvre dans une nouvelle fenêtre ou un nouvel onglet ; same : dans l'onglet actuel. |
+| `screens.menu_max_windows` | Nombre maximal de fenêtres qu'un ensemble multi-écrans ouvre d'un coup (4 par défaut ; de 1 à 9). |
+| `screens.menu_rotate_seconds` | Secondes par écran dans les préréglages tournants du menu (20 par défaut ; de 5 à 300). |
+| `screens.menu_tv_scale` | Le `?scale=` du préréglage télé (1,5 par défaut ; de 0,5 à 3). |
 
 ### Thème des écrans
 
@@ -145,6 +150,29 @@ Les données viennent de `/api/screens/data?screen=overview` (ou `now`, `sentine
 1. Choisissez une adresse par moniteur, par exemple `/screen/overview?monitor=1`, `/screen/now?monitor=2` et `/screen/sentinels?monitor=3` ; ou ouvrez une seule fenêtre avec `?rotate=20`.
 2. Ouvrez chacune dans Chrome ou Edge en mode kiosque : `msedge --kiosk "http://cet-ordinateur:8765/screen/now?monitor=2" --edge-kiosk-type=fullscreen` ou `chrome --kiosk "http://cet-ordinateur:8765/screen/now?monitor=2"` ; avec `--app=ADRESSE` au lieu de `--kiosk`, la fenêtre n'a pas de barres. Sans mode kiosque, le bouton discret en bas de page demande le plein écran.
 3. Depuis un autre ordinateur, utilisez le mode réseau : le jeton d'accès d'un lecteur suffit, car ces pages n'écrivent jamais.
+
+## Menu Écrans
+
+Le bouton **Écrans** de la barre du haut (l'icône de deux moniteurs) ouvre un menu avec chaque type d'écran du moniteur, pour que personne n'ait à retenir les adresses. Il ne fait que naviguer : il ouvre des adresses, n'écrit rien et ne lit rien sur GitHub. Il est activé par défaut et `screens.menu` le désactive.
+
+| Écran | Adresse | De quoi s'agit-il |
+|---|---|---|
+| Tableau de bord | `/` | La page entière, pour une personne à son bureau. `?repo=` filtre les dépôts. |
+| Borne | `/?chrome=0&view=now` | Une vue sans en-tête, onglets ni filtres, pour un moniteur que personne ne touche. La vue est un paramètre. |
+| Vue d'équipe | `/?chrome=0&view=team` | La vue d'équipe en borne (édition complète). |
+| Écrans d'onglets 1 à 3 | `/screen/1`, `/screen/2`, `/screen/3` | Les onglets définis pour chaque moniteur d'un bureau ; `?tabs=`, `?orient=` et `?rotate=` les changent pour une fenêtre. |
+| Écrans muraux | `/screen/overview`, `/screen/now`, `/screen/sentinels` | Les trois écrans muraux ci-dessus. |
+| Mur tournant | `/screen/overview?rotate=20` | Une fenêtre qui tourne entre les trois et saute sur un nouveau rouge. |
+| Télé | `/screen/overview?theme=contrast&density=large&scale=1.5&rotate=20` | Le mur tournant pour un écran vu de loin. |
+| Plusieurs moniteurs | une adresse par fenêtre | Un ensemble de fenêtres, une par moniteur (voir ci-dessous). |
+
+Chaque carte montre les paramètres que cette adresse accepte (thème, densité, actualisation, échelle, langue, rotation, filtre de dépôts...), chacun avec son propre texte d'aide, et l'adresse obtenue. **Ouvrir** l'ouvre dans une nouvelle fenêtre ou un nouvel onglet, ou dans l'onglet actuel, selon `screens.menu_target` ; **Copier l'adresse** place l'adresse complète dans le presse-papiers pour l'ouvrir sur un autre ordinateur (jamais de jeton : en mode réseau, cet ordinateur se connecte comme d'habitude). Les écrans muraux répondent 404 tant que `screens.enabled` est désactivé ; leur carte le dit au lieu d'ouvrir une page vide ; la vue d'équipe n'est pas dans l'édition lite.
+
+### Plusieurs moniteurs
+
+Choisissez le nombre de fenêtres (au plus `screens.menu_max_windows`), la disposition (en ligne, en colonne ou en grille) et ce que montre chaque fenêtre (les trois écrans muraux à tour de rôle, des murs qui tournent seuls ou les écrans d'onglets). **Ouvrir toutes les fenêtres** ouvre une fenêtre par moniteur. Dans un navigateur doté de l'API de gestion des fenêtres (Chrome et Edge demandent l'autorisation *gestion des fenêtres*), chaque fenêtre est placée sur son propre moniteur, ordonnés comme l'indique la disposition ; avec plus de fenêtres que de moniteurs, elles se partagent un moniteur en mosaïque. Sans elle, les fenêtres s'ouvrent là où le navigateur les met et la carte liste une commande de borne par fenêtre (`msedge --kiosk ADRESSE --window-position=X,Y`) pour les lancer à la main. Le navigateur doit autoriser les fenêtres contextuelles pour l'adresse du moniteur.
+
+Le même catalogue est lu par les outils : `GET /api/screens/menu`, `monitor_cli.py screens [list|urls]` et l'outil MCP `screens_menu`. Les trois sont en lecture seule.
 
 ## Images
 
