@@ -15,6 +15,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- **Les verrous entre processus sont vérifiés dans le conteneur** : les contrôles du conteneur gagnent E9, qui démarre plusieurs processus de l'image sur un même volume partagé et compte ce qu'ils écrivent sous le verrou du système d'exploitation et sous le fichier verrou, de sorte qu'une mise à jour perdue apparaîtrait dans la preuve du workflow ; le test du fichier verrou s'exécute désormais aussi sous Windows.
+
 - **Un guide à part pour l'assistant, `ASSISTANT.md`, en huit langues** : comment l'activer, ses cinq questions fixes, les quatre outils avec lesquels il lit, ce qu'il ne fait jamais (il n'écrit rien, ne touche à rien sur GitHub, remet comme donnée ce qu'un dépôt a écrit) et comment le vérifier avec les deux routes et le journal des prompts. La section de `AI_CONNECTION.md` reste la référence des réglages.
 
 - **Aide avec coût et effet sur cinq interrupteurs de plus** : l'infobulle de `ai.assistant.enabled`, `ai.prompt_log.enabled`, `ai.similar.enabled`, `ai.airgapped` et `api.v1_enabled` dit maintenant ce que vous verrez et ce que cela coûte, dans les huit langues, à côté de la ligne générique que chaque réglage avait déjà.

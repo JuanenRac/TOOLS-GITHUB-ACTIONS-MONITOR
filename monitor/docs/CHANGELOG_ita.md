@@ -15,6 +15,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Aggiunto
 
+- **I blocchi tra processi vengono verificati dentro il container**: i controlli del container ottengono E9, che avvia più processi dell'immagine contro un unico volume condiviso e conta ciò che scrivono sotto il blocco del sistema operativo e sotto il file di blocco, così un aggiornamento perso si vedrebbe nell'evidenza del workflow; il test del file di blocco ora gira anche su Windows.
+
 - **Una guida a parte per l'assistente, `ASSISTANT.md`, in otto lingue**: come accenderlo, le sue cinque domande fisse, i quattro strumenti con cui legge, ciò che non fa mai (non scrive nulla, non tocca nulla su GitHub, consegna come dato ciò che un repository ha scritto) e come verificarlo con le due route e il registro dei prompt. La sezione di `AI_CONNECTION.md` resta il riferimento delle impostazioni.
 
 - **Aiuto con costo ed effetto su altri cinque interruttori**: il tooltip di `ai.assistant.enabled`, `ai.prompt_log.enabled`, `ai.similar.enabled`, `ai.airgapped` e `api.v1_enabled` dice ora cosa vedrai e quanto costa, nelle otto lingue, accanto alla riga generica che ogni impostazione aveva già.

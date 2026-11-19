@@ -178,9 +178,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: E3 (Caddy with its own TLS in front of the monitor) and E6 (secrets) of the container checks, on this commit
+      - name: E3 (Caddy with its own TLS in front of the monitor), E6 (secrets) and E9 (the locks between processes inside the container) of the container checks, on this commit
         shell: bash
-        run: bash tools/docker_audit/run_all.sh --target . --out evidence --only E3,E6
+        run: bash tools/docker_audit/run_all.sh --target . --out evidence --only E3,E6,E9
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ always() }}
         with:
