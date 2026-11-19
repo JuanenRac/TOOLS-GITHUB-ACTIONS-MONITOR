@@ -36,7 +36,7 @@ Os bots ficam de fora. Os valores por omissão são lentos de propósito: um ras
 
 ## Quanto custa
 
-Uma ronda lê no máximo `max_repos_per_tick` repositórios, com dois pedidos condicionais cada (um repositório que não mudou não gasta quota) e até seis detalhes de pull request por ronda. Pára enquanto a quota estiver abaixo de `min_rate_remaining`. O estado fica em `collab_state.json` (dentro da pasta da conta quando há várias), por isso um reinício não anuncia nada duas vezes.
+Uma ronda lê no máximo `max_repos_per_tick` repositórios, com dois pedidos condicionais cada (um repositório que não mudou não gasta quota) e até seis detalhes de pull request por ronda. Pára enquanto a quota estiver abaixo de `min_rate_remaining`. O estado fica em `collab_state.json` (dentro da pasta da conta quando há várias), por isso um reinício não anuncia nada duas vezes. Uma ronda também deixa de começar repositórios novos passados `sentinels.collab.deadline_s` segundos (30 por predefinição; 0 = sem teto): os que não foram alcançados esperam pela ronda seguinte e o estado lista-os por nome como `unchecked` (com `round_cut`) em vez de os contar como zero alertas.
 
 ## Menos ruído: ignorar e silenciar
 

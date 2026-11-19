@@ -17,6 +17,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Añadido
 
+- **Una ronda del centinela de Colaboración también tiene un tope de tiempo**: `sentinels.collab.deadline_s` (30 segundos por defecto; 0 = ninguno), como los centinelas de Seguridad, Cadena de suministro y Entrega. Al pasarlo, la ronda no empieza ningún repositorio nuevo, los que no se alcanzan esperan a la ronda siguiente (el leído hace más tiempo va primero) y el estado los lista por nombre como `unchecked` con `round_cut`, en lugar de contarlos como cero alertas.
+
 - **Una sección sobre lo que ahorra el monitor y una guía para medirlo**: el README, en los ocho idiomas, dice ahora, como estimación y no como medición, que usar el monitor ahorra cerca del 85-95 % del tiempo de vigilar el CI y clasificar fallos y cerca del 15-25 % de la productividad global de un equipo, con una tabla por tarea, los supuestos en que se apoya y los casos en que el ahorro es menor; la guía PRODUCTIVITY da el método del cálculo y cómo medir el ahorro en tu propio uso.
 
 - **Cuando GitHub rechaza una acción de la página, ahora dice por qué**: la respuesta de `/api/gh-action/confirm` lleva `reason` (`forbidden`: el token no tiene permiso de escritura en Actions; `not_found`: no existe o es un repositorio privado que el token no ve, GitHub responde 404 en ambos casos; `method`, `conflict`, `invalid`) y la página lo muestra en los ocho idiomas junto al rechazo, en lugar de un escueto «GitHub lo rechazó».

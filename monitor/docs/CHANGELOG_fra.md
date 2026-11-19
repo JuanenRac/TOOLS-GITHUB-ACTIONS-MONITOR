@@ -17,6 +17,8 @@ Version de l'outil lui-même (moniteur + sentinelle + outils par lots), avec son
 
 ### Ajouté
 
+- **Un tour de la sentinelle Collaboration a aussi un plafond de temps** : `sentinels.collab.deadline_s` (30 secondes par défaut ; 0 = aucun), comme les sentinelles Sécurité, Chaîne d'approvisionnement et Livraison. Une fois dépassé, le tour ne commence aucun nouveau dépôt, ceux qui n'ont pas été atteints attendent le tour suivant (le plus anciennement lu passe en premier) et l'état les liste par nom comme `unchecked` avec `round_cut`, au lieu de les compter comme zéro alerte.
+
 - **Une section sur ce que le moniteur fait gagner et un guide pour le mesurer** : le README, dans les huit langues, dit désormais, comme une estimation et non une mesure, que le moniteur fait gagner environ 85-95 % du temps de surveillance de la CI et de tri des échecs et environ 15-25 % de la productivité globale d'une équipe, avec un tableau par tâche, les hypothèses qui le fondent et les cas où le gain est plus faible ; le guide PRODUCTIVITY donne la méthode du calcul et comment mesurer le gain dans votre propre usage.
 
 - **Quand GitHub refuse une action de la page, elle dit maintenant pourquoi** : la réponse de `/api/gh-action/confirm` porte `reason` (`forbidden` : le jeton n'a pas la permission d'écriture sur Actions ; `not_found` : inexistant ou dépôt privé que le jeton ne voit pas, GitHub répond 404 dans les deux cas ; `method`, `conflict`, `invalid`) et la page l'affiche dans les huit langues à côté du refus, au lieu d'un simple « GitHub l'a refusé ».

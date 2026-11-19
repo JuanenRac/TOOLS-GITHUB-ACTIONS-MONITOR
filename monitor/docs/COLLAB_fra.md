@@ -36,7 +36,7 @@ Les robots sont exclus. Les valeurs par défaut sont lentes à dessein : un brou
 
 ## Ce que cela coûte
 
-Un tour lit au plus `max_repos_per_tick` dépôts, avec deux requêtes conditionnelles chacun (un dépôt inchangé ne coûte pas de quota) et jusqu'à six détails de pull request par tour. Elle s'arrête tant que le quota est sous `min_rate_remaining`. L'état est gardé dans `collab_state.json` (dans le dossier du compte s'il y en a plusieurs) : un redémarrage n'annonce rien deux fois.
+Un tour lit au plus `max_repos_per_tick` dépôts, avec deux requêtes conditionnelles chacun (un dépôt inchangé ne coûte pas de quota) et jusqu'à six détails de pull request par tour. Elle s'arrête tant que le quota est sous `min_rate_remaining`. L'état est gardé dans `collab_state.json` (dans le dossier du compte s'il y en a plusieurs) : un redémarrage n'annonce rien deux fois. Un tour cesse aussi de commencer de nouveaux dépôts après `sentinels.collab.deadline_s` secondes (30 par défaut ; 0 = aucun plafond) : ceux qui n'ont pas été atteints attendent le tour suivant et l'état les liste par nom comme `unchecked` (avec `round_cut`) au lieu de les compter comme zéro alerte.
 
 ## Moins de bruit : ignorer et mettre en sourdine
 

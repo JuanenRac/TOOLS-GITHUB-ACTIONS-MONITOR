@@ -45,10 +45,10 @@ DETAILS_PER_TICK = 6                 # pull request details read in one round (t
 DETAIL_EVERY = 6 * 3600              # a pull request is looked at again for conflicts at most this often
 OUTSIDE = ("NONE", "FIRST_TIMER", "FIRST_TIME_CONTRIBUTOR", "CONTRIBUTOR", "MANNEQUIN")      # author_association of someone who is not part of the team
 DEFAULTS = {
-    "enabled": False, "refresh_seconds": 600, "max_repos_per_tick": 10, "min_rate_remaining": 1000, "repos": "all", "search_api": False,
+    "enabled": False, "refresh_seconds": 600, "max_repos_per_tick": 10, "deadline_s": 30, "min_rate_remaining": 1000, "repos": "all", "search_api": False,
     "rules": {"issue_stale_days": 14, "issue_critical_labels": ["security", "critical"], "pr_review_pending_days": 3, "pr_draft_max_days": 30, "pr_conflict_days": 7, "watch_external_comments": False, "ignore_labels": ["monitor:ignore"]},
 }
-BOUNDS = {"refresh_seconds": (60, 86400), "max_repos_per_tick": (1, 100), "min_rate_remaining": (100, 5000), "issue_stale_days": (1, 365), "pr_review_pending_days": (1, 90),
+BOUNDS = {"refresh_seconds": (60, 86400), "max_repos_per_tick": (1, 100), "deadline_s": (0, 600), "min_rate_remaining": (100, 5000), "issue_stale_days": (1, 365), "pr_review_pending_days": (1, 90),
           "pr_draft_max_days": (1, 365), "pr_conflict_days": (1, 90)}
 TITLE_KEYS = {"collab.issue.stale": "collab.t.issue_stale", "collab.issue.critical": "collab.t.issue_critical", "collab.issue.external": "collab.t.issue_external",
               "collab.pr.review_pending": "collab.t.pr_review", "collab.pr.draft_old": "collab.t.pr_draft", "collab.pr.conflict": "collab.t.pr_conflict"}
@@ -71,7 +71,7 @@ def settings(config):
         merged["enabled"] = block["enabled"]
     if isinstance(block.get("search_api"), bool):
         merged["search_api"] = block["search_api"]
-    for key in ("refresh_seconds", "max_repos_per_tick", "min_rate_remaining"):
+    for key in ("refresh_seconds", "max_repos_per_tick", "deadline_s", "min_rate_remaining"):
         if number(block.get(key), key) is not None:
             merged[key] = block[key]
     repos = block.get("repos")
@@ -174,6 +174,7 @@ def evaluate(repo, issues, prs, rules, now, known=None):
 
 
 class SentinelCollab(sentinel_base.BaseSentinel):
+    round_cut = False      # the last round stopped for lack of time (deadline_s) and left repositories for the next one
     name = "collab"
 
     def __init__(self, ctx, config):
@@ -301,7 +302,11 @@ class SentinelCollab(sentinel_base.BaseSentinel):
         repos = self.scope()
         budget = [DETAILS_PER_TICK]
         found = self.search_lists(toolconfig.github_owner()) if self.cfg["search_api"] else None
+        deadline, self.round_cut = sentinel_base.round_deadline(self.cfg["deadline_s"]), False
         for repo in self._order(repos)[:(len(repos) if found is not None else self.cfg["max_repos_per_tick"])]:
+            if sentinel_base.expired(deadline):      # the round ran out of time: the rest waits for the next one and is named as not checked
+                self.round_cut = True
+                break
             try:
                 self.scan(repo, now, budget, found)
                 self.errors.pop(repo, None)
@@ -416,7 +421,8 @@ class SentinelCollab(sentinel_base.BaseSentinel):
         level = "unknown" if not checked else ("bad" if any(a["level"] == "error" for a in alerts) else ("warn" if alerts else "ok"))
         return {"enabled": True, "level": level, "loading": "" if checked or not repos else "starting", "errors": [{"section": r, "at": e["at"]} for r, e in sorted(self.errors.items())],
                 "refresh_seconds": self.refresh_seconds, "repos_in_scope": len(repos), "repos_checked": checked, "last_full_scan": last, "paused": self.paused,
-                "truncated": cut[:20], "truncated_count": len(cut), "pages": self.pages, "search_cut": list(self.search_cut)}
+                "truncated": cut[:20], "truncated_count": len(cut), "pages": self.pages, "search_cut": list(self.search_cut),
+                "unchecked": sentinel_base.unchecked(repos, self.state["per_repo"]), "round_cut": self.round_cut}
 
     def get_metrics(self):
         if not self.enabled:

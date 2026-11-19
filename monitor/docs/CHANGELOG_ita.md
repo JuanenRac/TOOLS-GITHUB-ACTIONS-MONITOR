@@ -17,6 +17,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Aggiunto
 
+- **Anche un giro della sentinella Collaborazione ha un tetto di tempo**: `sentinels.collab.deadline_s` (30 secondi per impostazione predefinita; 0 = nessuno), come le sentinelle Sicurezza, Catena di fornitura e Consegna. Superato, il giro non inizia nessun nuovo repository, quelli non raggiunti aspettano il giro successivo (il letto meno di recente va per primo) e lo stato li elenca per nome come `unchecked` con `round_cut`, invece di contarli come zero avvisi.
+
 - **Una sezione su cosa fa risparmiare il monitor e una guida per misurarlo**: il README, nelle otto lingue, dice ora, come stima e non come misura, che il monitor fa risparmiare circa l'85-95 % del tempo di sorveglianza della CI e di smistamento dei guasti e circa il 15-25 % della produttività complessiva di un team, con una tabella per attività, le ipotesi su cui si basa e i casi in cui il risparmio è minore; la guida PRODUCTIVITY descrive il metodo del calcolo e come misurare il risparmio nel proprio uso.
 
 - **Quando GitHub rifiuta un'azione della pagina, ora dice perché**: la risposta di `/api/gh-action/confirm` porta `reason` (`forbidden`: il token non ha il permesso di scrittura su Actions; `not_found`: inesistente o repository privato che il token non vede, GitHub risponde 404 in entrambi i casi; `method`, `conflict`, `invalid`) e la pagina lo mostra nelle otto lingue accanto al rifiuto, invece di un semplice «GitHub l'ha rifiutato».

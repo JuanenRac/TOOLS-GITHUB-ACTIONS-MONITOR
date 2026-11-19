@@ -17,6 +17,8 @@ Version des Werkzeugs selbst (Monitor + Wächter + Stapelwerkzeuge) mit eigenem 
 
 ### Hinzugefügt
 
+- **Auch eine Runde des Collab-Wächters hat ein Zeitlimit**: `sentinels.collab.deadline_s` (standardmäßig 30 Sekunden; 0 = keines), wie bei den Wächtern für Sicherheit, Lieferkette und Auslieferung. Danach beginnt die Runde kein neues Repository mehr, die nicht erreichten warten auf die nächste Runde (das am längsten nicht gelesene kommt zuerst), und der Status führt sie namentlich als `unchecked` mit `round_cut` auf, statt sie als null Alarme zu zählen.
+
 - **Ein Abschnitt darüber, was der Monitor spart, und eine Anleitung zum Messen**: Das README sagt nun in den acht Sprachen, als Schätzung und nicht als Messung, dass der Monitor etwa 85-95 % der Zeit für Beobachtung der CI und Sichtung von Fehlern und etwa 15-25 % der Gesamtproduktivität eines Teams spart, mit einer Tabelle nach Aufgaben, den zugrunde liegenden Annahmen und den Fällen, in denen die Ersparnis kleiner ist; die Anleitung PRODUCTIVITY beschreibt die Rechenmethode und wie man die Ersparnis in der eigenen Nutzung misst.
 
 - **Lehnt GitHub eine Aktion der Seite ab, nennt sie jetzt den Grund**: Die Antwort von `/api/gh-action/confirm` enthält `reason` (`forbidden`: das Token hat keine Schreibberechtigung für Actions; `not_found`: nicht vorhanden oder ein privates Repository, das das Token nicht sieht, GitHub antwortet in beiden Fällen mit 404; `method`, `conflict`, `invalid`), und die Seite zeigt ihn in den acht Sprachen neben der Ablehnung statt eines nackten „GitHub hat abgelehnt“.
