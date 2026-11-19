@@ -8,6 +8,10 @@ A module that keeps state calls `state_io.load_json(path)` / `state_io.save_text
 the other paths (the cache of conditional reads, the logs, the AI action log) stay files: they are caches and logs, not state worth a database.
 
 `load_json` raises the same errors a missing or damaged file raised (OSError, ValueError), so the callers' `except` clauses stay as they are.
+
+Every record written here carries `schema_version` (RECORD_SCHEMA) at the top of the object; the callers never see it (`load_json` removes it). A record without the mark is version 0 and reads as always.
+A record of a NEWER version than this program understands is not read half way: it reads as a damaged file (ValueError, so the callers start from their defaults) and its name goes to `NEWER`
+and to the degraded list, so the person is told which file was left aside and why.
 """
 import json
 import os
@@ -32,6 +36,46 @@ ROUTES = (
     ("github_actions_monitor.app.updatecheck", "STATE_FILE", "doc", "update_check"),
 )
 _BOUND = {"storage": None, "account": None, "routes": {}}
+RECORD_SCHEMA = 1
+NEWER = {}      # name of a record left aside because it is of a newer version -> that version
+
+
+def _name(path):
+    return Path(str(path)).name
+
+
+def mark(text):
+    """`text` (a JSON object) with `schema_version` as its first member; anything that is not an object, or already says its version, is returned as it came."""
+    stripped = text.lstrip() if isinstance(text, str) else ""
+    if not stripped.startswith("{"):
+        return text
+    try:
+        document = json.loads(text)
+    except ValueError:
+        return text
+    if not isinstance(document, dict) or "schema_version" in document:
+        return text
+    start = text.index("{") + 1
+    rest = text[start:]
+    return text[:start] + '"schema_version":%d%s' % (RECORD_SCHEMA, "," if rest.strip() != "}" else "") + rest
+
+
+def unmark(data, path):
+    """The object without its `schema_version`; raises ValueError (and remembers the name) when the record is newer than RECORD_SCHEMA."""
+    if not isinstance(data, dict) or "schema_version" not in data:
+        NEWER.pop(_name(path), None)
+        return data
+    version = data["schema_version"]
+    if not isinstance(version, int) or isinstance(version, bool) or version < 0 or version > RECORD_SCHEMA:
+        NEWER[_name(path)] = version
+        try:
+            from github_actions_monitor.app import degraded
+            degraded.note("records.newer", ValueError(f"{_name(path)} is of version {version}, this program reads up to {RECORD_SCHEMA}: left aside"))
+        except Exception:   # noqa: BLE001 - naming it is best effort; leaving it aside is what matters
+            pass
+        raise ValueError(f"record {_name(path)} has schema_version {version}, newer than {RECORD_SCHEMA}")
+    NEWER.pop(_name(path), None)
+    return {key: value for key, value in data.items() if key != "schema_version"}
 
 
 def _key(path):
@@ -66,7 +110,7 @@ def load_json(path):
     """The JSON object kept for `path`. Raises FileNotFoundError when there is none and ValueError when it is damaged, like reading the file."""
     route = routed(path)
     if route is None:
-        return json.loads(private_io.read_text_with_retry(path))
+        return unmark(json.loads(private_io.read_text_with_retry(path)), path)
     storage, account = _BOUND["storage"], _BOUND["account"]
     kind, name = route
     try:
@@ -80,13 +124,14 @@ def load_json(path):
         raise OSError(str(error)) from error
     if data is None:
         raise FileNotFoundError(str(path))
-    return data
+    return unmark(data, path)
 
 
 def save_text(path, text):
     """Keeps `text` (a JSON object) for `path`: replaces the file through a temporary file (a name of its own) or, when the path is routed, stores it. Raises OSError like a failed write."""
     route = routed(path)
     if route is None:
+        text = mark(text)
         path = Path(path)
         tmp = private_io.unique_tmp(path)
         try:
@@ -102,7 +147,7 @@ def save_text(path, text):
     storage, account = _BOUND["storage"], _BOUND["account"]
     kind, name = route
     try:
-        data = json.loads(text)
+        data = json.loads(mark(text))
         if kind == "sentinel":
             storage.save_sentinel_state(account, name, data)
         elif kind == "analytics":
