@@ -30,7 +30,19 @@ Ciò su cui può contare uno script, uno schermo a parete o un client mobile. Da
 - `/api/v1/me`: chi chiede: `mode` (`individual` o `team`), `authenticated`, `user`, e il `role` e gli `accounts` della sessione di squadra (null senza), ciò che la sessione può fare (`capabilities`: `read`, `write`, `admin` e `v1_write`, sempre falso perché il prefisso è in sola lettura), i `limits` delle liste, la versione del monitor e la versione del contratto (`contract`, `1.0`: cresce a ogni chiave aggiunta e non ne perde mai una).
 - `/api/v1/repos`: i repository che il monitor controlla, una riga ciascuno (`repo`, `ecosystem`, `state`, `risk`, `runs_24h`, `failures_24h`, `red_workflows`, `stuck_runs`, `alerts`, `last_run_at`). Filtri `state`, `ecosystem` e `q`; `limit` (per impostazione predefinita `api.default_limit`, al massimo `api.max_limit`); `cursor` (il `next_cursor` della pagina precedente, firmato e valido per `api.cursor_ttl_seconds`); `fields=a,b` o `profile=compact` per righe più corte. La risposta è compressa con gzip quando il client lo accetta.
 - `/api/v1/openapi.json`: la descrizione OpenAPI 3 di tutta l'API di lettura congelata, costruita dal contratto (`docs/schemas/api_contract.json`) e mai scritta a mano: ogni rotta congelata con le chiavi e i tipi che promette, `x-lite` (cosa risponde l'edizione lite) e `x-local-only`. Le rotte che il contratto non congela sono sperimentali: rispondono 404 su `/api/v1/` e non sono nel documento, a meno che `api.experimental_routes` sia attivo (allora sono elencate con `x-experimental`). Le vecchie rotte su `/api/` non cambiano mai. Scaricalo con `python bin/monitor_cli.py api openapi`.
+- `python tools/api_contract_suite.py` è la suite di contratto per i client esterni (solo la libreria standard, solo lettura): dalle l'indirizzo di un server (`--url`) e un token di lettura (`--token-file`) e prende il documento che il server serve come descrizione di cosa verificare: la forma di ogni rotta senza parametri, l'intestazione `X-API-Version`, la busta di errore e i suoi codici stabili, le pagine e i loro cursori, `fields` e `profile=compact`, gzip e che nulla si possa scrivere sotto il prefisso. Stampa una riga per verifica e `API_CONTRACT=PASS` o `API_CONTRACT=FAIL` (`--json` per un documento); il codice di uscita è 0, 1 o 2 (nulla risponde). `python bin/monitor_cli.py api contract-check` la lancia contro il monitor della riga di comando.
 - Le due rotte proprie rispondono un errore come `{"error": "bad_request", "code": "api.bad_cursor", "message": "..."}`: `error` e `code` sono stabili, `message` segue la lingua di `?lang=`. Codici: api.bad_cursor, api.bad_limit, api.unknown_field, api.bad_profile, api.server_error. Tutto è di sola lettura: sotto `/api/v1/` non c'è nessuna scrittura. La forma è congelata nella sezione `v1_endpoints` del contratto e si verifica con `python tools/check_api_contract.py --v1` su un monitor con `api.v1_enabled` attivo.
+
+### Esempi con curl
+
+Il token è il token di accesso della modalità di rete (oppure usa una sessione della modalità team); senza modalità di rete non serve alcun token dallo stesso computer. Un client segue `next_cursor` finché è `null` e legge prima `/api/v1/me` per conoscere la versione del contratto e ciò che la sessione può fare.
+
+```
+curl -s -H "X-Monitor-Access: $(cat token.txt)" http://127.0.0.1:8765/api/v1/me
+curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/repos?state=bad&limit=20&profile=compact"
+curl -s -H "X-Monitor-Access: $(cat token.txt)" http://127.0.0.1:8765/api/v1/openapi.json -o openapi.json
+curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/repos?limit=50&cursor=THE_NEXT_CURSOR"
+```
 
 ## Stream
 

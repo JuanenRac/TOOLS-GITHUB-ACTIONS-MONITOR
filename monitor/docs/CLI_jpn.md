@@ -21,12 +21,14 @@
 | `alerts` | すべての番人のアラートを 1 つの一覧で：`--sentinel ci\|collab\|security\|supply\|delivery`、`--level info\|warning\|error`、`--muted show\|hide\|only` | 不可 |
 | `score` | アカウントのスコア：数値、文字評価、傾向、要素、カバレッジ、リポジトリ別の内訳。`--compare` で期間の履歴と比較します | 不可 |
 | `compare` | 今の期間と直前の期間の比較：数値とその変化・方向、悪化または改善したもの。`--window 7\|30d`、`--days all\|workdays\|weekend`、`--baseline previous\|year_ago`、`--format table\|json\|ndjson\|csv`。数値のデータが少ないと終了コード 4、`--fail-on` 指定で悪化があれば 5 | 不可 |
-| `api` | クライアント向けの読み取りAPI:`api openapi` は固定された各ルートの OpenAPI 文書を出力し(ファイルにリダイレクトできます)、`api me` はモニターがこのクライアントを何者と見ているか(モード、ユーザー、ロール、セッションができること、契約のバージョン)を示します。`api.v1_enabled` が閉じているモニターはそう伝えます | 不可 |
+| `api` | クライアント向けの読み取りAPI:`api openapi` は固定された各ルートの OpenAPI 文書を出力し(ファイルにリダイレクトできます)、`api me` はモニターがこのクライアントを何者と見ているか(モード、ユーザー、ロール、セッションができること、契約のバージョン)を示します。`api.v1_enabled` が閉じているモニターはそう伝えます。`api contract-check` はクライアント向けの契約スイートをそれに対して実行します(検査が失敗すると終了コード4) | 不可 |
 | `team` | リポジトリの健全性を、人の手が必要なものから順に表示します。`--severity warn\|bad` で悪いものだけに絞り、`--repo owner/name` で 1 件の詳細を表示します | 不可 |
 | `live` | Webhook 受信の状態と直近のイベント | 不可 |
 | `ai` | `ai models [--refresh]` は AI プロバイダーのモデルを各モデルのデータとともに一覧表示します。`ai test --provider 名前 --model 名前` は合成テキストで 1 つを試します (遅延、トークン、推定コスト)。`ai doctor` は AI が応答しない理由をキーを表示せずに説明します | 不可 |
 
 全コマンド共通のオプション：`--json`（応答を 1 つの JSON 文書で：`{"ok", "exit", "data"}`）、`--account ID`、`--url URL`、`--lite`（ポート 8766）、`--timeout 秒`（1〜60）、`--lang コード`。ネットワークモードではアクセストークンを、モニター自身が読む環境変数 `MONITOR_ACCESS_TOKEN` に設定します(`MONITOR_TOKEN` は別名として受け付けます。`--token TOKEN` は最後の手段で、オプションはプロセス一覧に表示されるためです)。優先順位は `MONITOR_ACCESS_TOKEN`、`MONITOR_TOKEN`、`--token` の順です。ヘッダー `X-Monitor-Access` で送られ、アドレスや画面には出ません。別のコンピューターへの暗号化されていない `http` の `--url` では stderr に警告を出します(トークンと応答が平文で送られるため)。管理下にないネットワークでは `https` を使ってください。
+
+コマンドラインは、クライアント向け読み取りAPIのクライアントです。契約で固定されたルート(`docs/schemas/api_contract.json`)はまず `/api/v1/` に問い合わせ、モニターがそこで404を返した場合(APIが閉じている。`api.v1_enabled`)は従来のルートに問い合わせ、以後プレフィックスを試しません。どちらの経路でも文書は同じなので、どのコマンドの出力も変わりません。`cli.prefer_v1`(既定でオン)で無効にでき、環境変数 `MONITOR_CLI_PREFER_V1`(`0` または `1`)が優先されます。契約で固定されていないルートは常に従来の方法で問い合わせます。
 
 人向けに書かれる時刻（`Last read` 行、ミュート、ログ、レポート、通知）は、このコンピューターのゾーンを使い、その名前と UTC 時刻を併記します（`11:43:07 CET (10:43:07 UTC)`）。別のゾーンは `display.timezone`（`local`、`utc`、または `Europe/Madrid` のような名前）で選びます。環境変数 `MONITOR_TIMEZONE` はファイルより優先されます。`--json` は UTC のままで `updated_local` を追加します。
 

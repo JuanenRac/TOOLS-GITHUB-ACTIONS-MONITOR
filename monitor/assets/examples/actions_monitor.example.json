@@ -646,6 +646,9 @@
     "notify": false,
     "repos": []
   },
+  "cli": {
+    "prefer_v1": true
+  },
   "api": {
     "v1_enabled": "auto",
     "experimental_routes": false,

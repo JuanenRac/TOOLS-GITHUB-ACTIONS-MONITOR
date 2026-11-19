@@ -201,6 +201,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ci.stuck.queue_minutes` | `0` | sentinel | Limit for a run waiting for a runner |
 | `ci.stuck.runner_minutes` | `[]` | sentinel | Fixed limits per runner label |
 | `ci.stuck.workflow_minutes` | `[]` | sentinel | Fixed limits per workflow |
+| `cli.prefer_v1` | `true` | advanced | The command line asks /api/v1/ first |
 | `cold_refresh_seconds` | `600` | polling | Refresh of cold repositories |
 | `cold_runs_per_repo` | `5` | polling | Runs read per cold repository |
 | `compare.cache_seconds` | `60` | sentinel | Keep the answer (seconds) |

@@ -11,7 +11,7 @@ This skill does not depend on one assistant or one model. A tool that talks to t
 | --- | --- | --- | --- |
 | read files | files | read `ai/INDEX.json` first (it says where everything is), then `ai/ALERTS_BRIEF.md`, `ai/ai_alerts.jsonl` and `ai/LESSONS.md` | `ai_alerts.enabled` |
 | make HTTP requests | HTTP | `GET /api/ai/brief`, `/api/ai/state`, `/api/ai/lessons?fmt=brief&repo=NAME` | the access token in the network mode |
-| write a typed client | HTTP | `GET /api/v1/me`, `GET /api/v1/openapi.json` (every frozen route with its keys and types; the same data as `monitor_cli.py api openapi`) | `api.v1_enabled` (`auto` answers when the monitor runs as a service) |
+| write a typed client | HTTP | `GET /api/v1/me`, `GET /api/v1/openapi.json` (every frozen route with its keys and types; the same data as `monitor_cli.py api openapi`; `monitor_cli.py api contract-check` verifies the server) | `api.v1_enabled` (`auto` answers when the monitor runs as a service) |
 | speak MCP | MCP | `python bin/mcp_server.py` (read only; `--allow-ack` and `--allow-lessons` for the little it may write) | the MCP configuration of the tool pointing at that command |
 | keep a connection open | stream | `GET /api/ai/stream?only=real` (server-sent events; it ends after `ai_alerts.stream.max_seconds`, arm it again) | `ai_alerts.stream.enabled` |
 | run commands | command line | `python bin/monitor_cli.py alerts`, `lessons brief --repo NAME`, `ai models`, `ai doctor`, and `ai-hook install` to be told at the start of a session | Python on the same computer as the monitor |
