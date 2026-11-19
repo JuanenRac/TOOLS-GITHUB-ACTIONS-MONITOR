@@ -72,6 +72,7 @@ All of them are read-only suggestions for a person; the monitor never closes an 
 | `matrix_os` | Failures on only one system of the matrix | on · max_per_tick=4 |
 | `artifacts` | Artifact cost | on · max_mb=500, retention_days=30 |
 | `required_checks` | Required checks that are red or missing | on |
+| `commit_state` | State of the last commit: every check and status, from every app | off · include_other_apps, include_statuses |
 | `release_assets` | Incomplete published releases | on · recent_days=30, required, require_sha256, require_signature, allow_empty (a release without files is fine) |
 | `tag_vs_version` | Tag against the version of the manifest | on · prefixes (`sentinel.surface.checks.tag_vs_version.prefixes`), prerelease_ok |
 | `tag_vs_version` | Release tag vs manifest/CHANGELOG version | on |

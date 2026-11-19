@@ -452,6 +452,8 @@ for _check in surface.DEFAULTS["checks"]:
 _f(_T_SURF, "chk_release_assets", "sentinel.surface.checks.release_assets.require_sha256", "bool")
 _f(_T_SURF, "chk_release_assets", "sentinel.surface.checks.release_assets.require_signature", "bool")
 _f(_T_SURF, "chk_release_assets", "sentinel.surface.checks.release_assets.allow_empty", "bool")
+_f(_T_SURF, "chk_commit_state", "sentinel.surface.checks.commit_state.include_other_apps", "bool")
+_f(_T_SURF, "chk_commit_state", "sentinel.surface.checks.commit_state.include_statuses", "bool")
 _f(_T_SURF, "chk_tag_vs_version", "sentinel.surface.checks.tag_vs_version.prefixes", "names")
 _f(_T_SURF, "chk_tag_vs_version", "sentinel.surface.checks.tag_vs_version.prerelease_ok", "bool")
 # --- Release readiness (A11)

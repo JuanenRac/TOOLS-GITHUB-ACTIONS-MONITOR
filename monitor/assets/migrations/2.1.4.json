@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "39316ef5f0c30c7302333f407d94f13fae3304675e1c87bae66bd25bfaad56ee",
+ "digest": "ffa09ea4cb94292161f155d4c87eb2a88c38c9372828c6b5a94b517735134701",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -208,6 +208,18 @@
      3.0
     ],
     "default": 1.5
+   },
+   {
+    "key": "sentinel.surface.checks.commit_state.enabled",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinel.surface.checks.commit_state.include_other_apps",
+    "kind": "bool"
+   },
+   {
+    "key": "sentinel.surface.checks.commit_state.include_statuses",
+    "kind": "bool"
    },
    {
     "key": "sentinel.trend_green_pct",

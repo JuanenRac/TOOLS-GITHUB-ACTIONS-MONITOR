@@ -49,6 +49,7 @@ DEFAULTS = {
         "matrix_os": {"enabled": True, "max_per_tick": 4},
         "artifacts": {"enabled": True, "max_mb": 500, "retention_days": 30},
         "required_checks": {"enabled": True},
+        "commit_state": {"enabled": False, "include_other_apps": True, "include_statuses": False},
         "release_assets": {"enabled": True, "recent_days": 30, "required": {"default": ["sha256", "sig"], "apk-build.yml": ["sha256"]}, "require_sha256": True, "require_signature": True, "allow_empty": False},
         "tag_vs_version": {"enabled": True, "prefixes": [], "prerelease_ok": False},
         "packages": {"enabled": True},
@@ -80,6 +81,7 @@ SECTIONS = (
     ("matrix_os", ("repo", "run", "fails_on", "passes_on")),
     ("artifacts", ("repo", "artifacts", "size", "detail")),
     ("required_checks", ("repo", "check", "state")),
+    ("commit_state", ("repo", "state", "detail")),
     ("release_assets", ("repo", "release", "missing")),
     ("tag_vs_version", ("repo", "tag", "manifest", "changelog", "notice")),
     ("packages", ("package", "type", "repo")),
@@ -435,6 +437,70 @@ def required_check_problems(required, check_runs):
     return out
 
 
+ACTIONS_APP = "github-actions"
+OK_CONCLUSIONS = ("success", "neutral", "skipped")
+
+
+def commit_state(check_runs, statuses=(), include_other_apps=True, include_statuses=False):
+    """The combined state of a commit as GitHub shows it on a pull request: {"total", "passed", "failed": [name], "pending": [name], "superseded"}.
+    The identity of a check run is (name, app), not the name alone (two Apps can publish a check with the same name), and of each identity only the MOST RECENT run counts (the ones a re-run
+    replaced do not). With `include_other_apps` off only the runs of GitHub Actions are looked at; with `include_statuses` on, the commit statuses (the old API that Codecov and other services use)
+    count too, one per context, the latest."""
+    latest, superseded = {}, 0
+    for run in check_runs or []:
+        name = run.get("name")
+        if not name:
+            continue
+        app = str(run.get("app") or "")
+        if not include_other_apps and app and app != ACTIONS_APP:
+            continue
+        key, stamp = (name, app), (str(run.get("started_at") or ""), int(run.get("id") or 0))
+        if key in latest:
+            superseded += 1
+            if stamp <= latest[key][0]:
+                continue
+        latest[key] = (stamp, run)
+    verdicts = {}
+    for (name, app), (_, run) in latest.items():
+        label = f"{name} ({app})" if app and app != ACTIONS_APP and sum(1 for k in latest if k[0] == name) > 1 else name
+        if run.get("status") != "completed":
+            verdicts[label] = "pending"
+        elif run.get("conclusion") in OK_CONCLUSIONS:
+            verdicts[label] = "passed"
+        else:
+            verdicts[label] = "failed"
+    if include_statuses:
+        newest = {}
+        for item in statuses or []:
+            context = item.get("context")
+            if not context:
+                continue
+            stamp = (str(item.get("updated_at") or item.get("created_at") or ""), int(item.get("id") or 0))
+            if context not in newest or stamp > newest[context][0]:
+                newest[context] = (stamp, item.get("state"))
+        for context, (_, state) in newest.items():
+            verdicts[f"{context} (status)"] = "passed" if state == "success" else ("pending" if state == "pending" else "failed")
+    return {"total": len(verdicts), "passed": sum(1 for v in verdicts.values() if v == "passed"), "failed": sorted(k for k, v in verdicts.items() if v == "failed"),
+            "pending": sorted(k for k, v in verdicts.items() if v == "pending"), "superseded": superseded}
+
+
+def commit_state_rows(raw, repos, cfg):
+    """([[repo, 'N of M passed', 'failed: ...; pending: ...']], any_failed) for the repositories whose last commit of the default branch is not all green."""
+    options = cfg["checks"]["commit_state"]
+    rows, bad = [], False
+    for repo in sorted(repos):
+        data = raw.get(repo) or {}
+        if "check_runs_full" not in data:
+            continue
+        state = commit_state(data.get("check_runs_full"), data.get("commit_statuses"), options["include_other_apps"], options["include_statuses"])
+        if not state["total"] or (not state["failed"] and not state["pending"]):
+            continue
+        parts = ([t("surf.cs_failed", list=", ".join(state["failed"][:6]))] if state["failed"] else []) + ([t("surf.cs_pending", list=", ".join(state["pending"][:6]))] if state["pending"] else [])
+        rows.append([repo, t("surf.cs_summary", passed=state["passed"], total=state["total"]), "; ".join(parts)])
+        bad = bad or bool(state["failed"])
+    return rows, bad
+
+
 def asset_template(workflow, cfg):
     check = cfg["checks"]["release_assets"]
     spec = check["required"]
@@ -658,6 +724,8 @@ def build(inp):
             if state == "red":
                 event("required_check_red", "bad", repo, t("surf.ev_check_red", repo=repo, context=context), f"{repo}|{context}")
     put("required_checks", rows, level="bad" if reds else ("warn" if rows else "ok"))
+    rows, bad = commit_state_rows(raw, repos, cfg)
+    put("commit_state", rows, level="bad" if bad else ("warn" if rows else "ok"))
     # B2 releases
     rows = []
     recent = cfg["checks"]["release_assets"]["recent_days"]
@@ -926,11 +994,20 @@ class Collector:
                 out["secret_resolved"] = len(self.gh("api", f"repos/{owner()}/{repo}/secret-scanning/alerts?state=resolved&per_page=100", retries=1) or [])
             except Exception:
                 out["secret_resolved"] = None
-        if on(self.cfg, "required_checks") and out.get("required"):
+        if (on(self.cfg, "required_checks") and out.get("required")) or on(self.cfg, "commit_state"):
             try:
                 calls += 1
                 data = self.gh("api", f"repos/{owner()}/{repo}/commits/{branch}/check-runs?per_page=100", retries=1) or {}
-                out["check_runs"] = [{"name": c.get("name"), "status": c.get("status"), "conclusion": c.get("conclusion")} for c in data.get("check_runs") or []]
+                out["check_runs_full"] = [{"name": c.get("name"), "status": c.get("status"), "conclusion": c.get("conclusion"), "id": c.get("id"), "started_at": c.get("started_at"),
+                                          "app": (c.get("app") or {}).get("slug")} for c in data.get("check_runs") or []]
+                out["check_runs"] = [{"name": c["name"], "status": c["status"], "conclusion": c["conclusion"]} for c in out["check_runs_full"]]
+            except Exception as error:
+                out["check_error"] = str(error)[:80]
+        if on(self.cfg, "commit_state") and self.cfg["checks"]["commit_state"]["include_statuses"] and "check_runs_full" in out:
+            try:
+                calls += 1      # one more call per commit, only with include_statuses on
+                out["commit_statuses"] = [{"context": s.get("context"), "state": s.get("state"), "id": s.get("id"), "updated_at": s.get("updated_at")}
+                                          for s in (self.gh("api", f"repos/{owner()}/{repo}/commits/{branch}/statuses?per_page=100", retries=1) or [])]
             except Exception as error:
                 out["check_error"] = str(error)[:80]
         return out, calls

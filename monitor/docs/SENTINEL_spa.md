@@ -72,6 +72,7 @@ Todas son sugerencias de solo lectura para una persona; el monitor nunca cierra 
 | `matrix_os` | Fallos solo en un sistema de la matriz | on · max_per_tick=4 |
 | `artifacts` | Coste de artifacts | on · max_mb=500, retention_days=30 |
 | `required_checks` | Checks obligatorios rojos o ausentes | on |
+| `commit_state` | Estado del último commit: todas las comprobaciones y estados, de todas las apps | off · include_other_apps, include_statuses |
 | `release_assets` | Releases publicadas incompletas | on · recent_days=30, required, require_sha256, require_signature, allow_empty (una release sin archivos es válida) |
 | `tag_vs_version` | Etiqueta frente a la versión del manifiesto | on · prefixes (`sentinel.surface.checks.tag_vs_version.prefixes`), prerelease_ok |
 | `tag_vs_version` | Etiqueta de release vs versión del manifiesto/CHANGELOG | on |

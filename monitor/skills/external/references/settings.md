@@ -567,6 +567,9 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinel.surface.checks.attestation.enabled` | `-` | surface | sentinel.surface.checks.attestation.enabled |
 | `sentinel.surface.checks.attestation.max_per_tick` | `-` | surface | sentinel.surface.checks.attestation.max_per_tick |
 | `sentinel.surface.checks.broad_permissions.enabled` | `-` | surface | sentinel.surface.checks.broad_permissions.enabled |
+| `sentinel.surface.checks.commit_state.enabled` | `-` | surface | sentinel.surface.checks.commit_state.enabled |
+| `sentinel.surface.checks.commit_state.include_other_apps` | `-` | surface | Count the checks of other apps |
+| `sentinel.surface.checks.commit_state.include_statuses` | `-` | surface | Count the commit statuses |
 | `sentinel.surface.checks.coverage.enabled` | `-` | surface | sentinel.surface.checks.coverage.enabled |
 | `sentinel.surface.checks.dead_schedule.days` | `-` | surface | sentinel.surface.checks.dead_schedule.days |
 | `sentinel.surface.checks.dead_schedule.enabled` | `-` | surface | sentinel.surface.checks.dead_schedule.enabled |
