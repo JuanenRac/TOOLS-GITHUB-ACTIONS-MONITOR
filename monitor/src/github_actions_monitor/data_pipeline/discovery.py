@@ -10,7 +10,8 @@
 Settings (all in the `discovery` block of the configuration): events (on), suggest_groups (on), auto_frequency (off), hide (a list of fork, empty, private: repositories of that kind are left out),
 skip_archived (on: archived repositories are left out), fork_policy (what to do with forks: show = all of them, skip = none, skip_unless_ci = only the ones that have a CI of their own,
 auto = skip_unless_ci with a window that depends on the kind of account), fork_ci_days (a fork counts as maintained when its CI ran this many days ago; 0 = an enabled workflow is enough),
-fork_checks_per_pass (how many forks are asked about in one listing).
+fork_checks_per_pass (how many forks are asked about in one listing), min_keep_pct (a listing that comes back empty, or with fewer than this percentage of the repositories of the last good one,
+is not believed: see listing_verdict; 0 = every listing is believed).
 
 A fork has "a CI of its own" when it has an enabled workflow (a fork starts with its workflows disabled, so an enabled one was switched on by someone) and, if fork_ci_days is not 0, a run in that window.
 """
@@ -19,7 +20,7 @@ import time
 from datetime import datetime, timezone
 from github_actions_monitor.security import private_io
 
-DEFAULTS = {"events": True, "suggest_groups": True, "auto_frequency": False, "hide": [], "skip_archived": True, "fork_policy": "show", "fork_ci_days": 90, "fork_checks_per_pass": 30}
+DEFAULTS = {"events": True, "suggest_groups": True, "auto_frequency": False, "hide": [], "skip_archived": True, "fork_policy": "show", "fork_ci_days": 90, "fork_checks_per_pass": 30, "min_keep_pct": 50}
 EVENT_CODES = ("repo_new", "repo_gone", "repo_archived", "repo_unarchived")
 FORK_POLICIES = ("show", "skip", "skip_unless_ci", "auto")
 FORK_TTL = 7 * 86400      # how long the answer about one fork is kept
@@ -32,12 +33,22 @@ def settings(config):
     hide = block.get("hide")
     out["hide"] = [w for w in hide if w in ("fork", "empty", "private")] if isinstance(hide, list) else []
     out["fork_policy"] = block.get("fork_policy") if block.get("fork_policy") in FORK_POLICIES else DEFAULTS["fork_policy"]
-    for key, low, high in (("fork_ci_days", 0, 365), ("fork_checks_per_pass", 1, 500)):
+    for key, low, high in (("fork_ci_days", 0, 365), ("fork_checks_per_pass", 1, 500), ("min_keep_pct", 0, 100)):
         value = block.get(key)
         out[key] = value if isinstance(value, int) and not isinstance(value, bool) and low <= value <= high else DEFAULTS[key]
     if "fork" in out["hide"]:
         out["fork_policy"] = "skip"      # the older way of leaving every fork out
     return out
+
+
+def listing_verdict(before, now, min_keep_pct):
+    """"ok", "empty" or "dropped": whether a new listing of the account may replace the last good one. An empty listing is never a success (it would read as "everything is green" with nothing watched) and, with
+    `min_keep_pct` above 0, neither is one that keeps fewer than that share of the repositories of the last good listing. With no earlier listing a listing with names is believed."""
+    if now <= 0 and min_keep_pct > 0:
+        return "empty"
+    if min_keep_pct > 0 and before > 0 and now * 100 < before * min_keep_pct:
+        return "dropped"
+    return "ok"
 
 
 def diff(previous, current):

@@ -371,15 +371,15 @@ class EtagFile(unittest.TestCase):
     def test_a_damaged_cache_file_is_a_miss_not_a_stale_answer(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "e.json"
-            path.write_text(json.dumps({"entries": {"a": {"etag": '"ok"', "at": 1, "data": "text"}, "b": {"etag": "bad etag", "at": 1, "data": {}}, "c": {"etag": '"c"', "at": 1, "data": {}}}}), encoding="utf-8")
-            self.assertEqual(list(etagcache.EtagCache(path=path).entries), ["c"])
+            path.write_text(json.dumps({"entries": {"00000000|a": {"etag": '"ok"', "at": 1, "data": "text"}, "00000000|b": {"etag": "bad etag", "at": 1, "data": {}}, "00000000|c": {"etag": '"c"', "at": 1, "data": {}}, "old-key-without-identity": {"etag": '"d"', "at": 1, "data": {}}}}), encoding="utf-8")
+            self.assertEqual(list(etagcache.EtagCache(path=path).entries), ["00000000|c"])
             path.write_text("{ not json", encoding="utf-8")
             self.assertEqual(etagcache.EtagCache(path=path).entries, {})
 
     def test_a_304_on_an_entry_without_a_body_is_read_again_in_full_and_counted(self):
         with tempfile.TemporaryDirectory() as tmp:
             cache = etagcache.EtagCache(path=Path(tmp) / "e.json")
-            cache.entries["x"] = {"etag": '"t"', "at": time.time(), "data": None}
+            cache.entries[cache.key_of("x")] = {"etag": '"t"', "at": time.time(), "data": None}
             answers = iter([(0, "HTTP/2.0 304 Not Modified\n\n", ""), (0, 'HTTP/2.0 200 OK\netag: "n"\n\n{"a": 1}', "")])
             data, status = cache.fetch("x", lambda args: next(answers))
             self.assertEqual((data, status, cache.stats()["invalid"]), ({"a": 1}, "200", 1))
