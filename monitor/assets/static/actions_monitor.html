@@ -1068,7 +1068,9 @@ function alerts(d){
     const text=g.length>1?T("ui.a_unresolved_many",{repo:r.repo,n:g.length,names:g.map(x=>x.name).join(", "),since:hora(g.reduce((m,x)=>String(x.started)<String(m)?x.started:m,g[0].started))}):T("ui.a_unresolved_line",{repo:r.repo,name:r.name,conclusion:r.conclusion,since:hora(r.started)});
     a.push(`<div class="alert warn" data-alert-repo="${esc(r.repo)}"><b>${esc(T("ui.a_unresolved"))}</b> · ${esc(text)} — <a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">${esc(T("ui.link_run"))}</a> <span class="mut">${esc(T("ui.a_no_issue"))}</span></div>`)});
   {const qb=d.quota_block;if(qb&&qb.blocked)a.push(`<div class="alert warn" id="quota-alert"><b>${esc(T("ui.a_quota_out",{time:qb.until?clock(qb.until,{hour:"2-digit",minute:"2-digit"}):"?",n:qb.unread||0}))}</b></div>`)}
-  {const errs=Object.entries(d.errors||{});if(errs.length>3)a.push(`<div class="alert warn"><b>${esc(T("ui.a_nodata_many",{n:errs.length}))}</b>: ${esc(errs[0][1])}</div>`);else errs.forEach(([k,v])=>a.push(`<div class="alert warn"><b>${esc(T("ui.a_nodata",{key:k}))}</b>: ${esc(v)}</div>`))}
+  {const errs=Object.entries(d.errors||{});const by=new Map();errs.forEach(([k,v])=>{const m=String(v);if(!by.has(m))by.set(m,[]);by.get(m).push(k)});      // the same error in many repositories is ONE alert with the names behind a fold
+    const group=(m,ks)=>ks.length>1?`<details class="alert warn"><summary><b>${esc(T("ui.a_nodata_group",{n:ks.length}))}</b>: ${esc(m)}</summary><div class="mut">${esc(ks.join(", "))}</div></details>`:`<div class="alert warn"><b>${esc(T("ui.a_nodata",{key:ks[0]}))}</b>: ${esc(m)}</div>`;
+    if(by.size>3)a.push(`<details class="alert warn"><summary><b>${esc(T("ui.a_nodata_many",{n:errs.length}))}</b>: ${esc(errs[0][1])}</summary>${[...by.entries()].map(([m,ks])=>`<div class="mut">${esc(ks.length>1?T("ui.a_nodata_group",{n:ks.length}):ks[0])}: ${esc(m)}</div>`).join("")}</details>`);else by.forEach((ks,m)=>a.push(group(m,ks)))}
   OPENALERTS=a.length;try{renderBar()}catch(e){}      // the bar at the foot says the same as this list: it is never "no notices" while alerts are open
   $("alerts").innerHTML=a.length?a.join(""):`<span style="color:var(--ok)">${esc(T("ui.a_none"))}</span>`;
 }
@@ -2580,7 +2582,7 @@ async function quotaBox(host){
   }catch(e){}}
 /* Settings > Advanced: the live state of the opt-in features and the buttons that need a confirmation of their own */
 async function advPost(path,body){const r=await fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body||{})});try{return await r.json()}catch(e){return{ok:false,status:"error"}}}
-function advWhy(j){return T("ui.adv_why_"+(j.status||"error"))}
+function advWhy(j){const base=T("ui.adv_why_"+(j.status||"error"));return j.reason?base+": "+T("ui.adv_reason_"+j.reason):base}      // a refusal of GitHub says why: no permission, no access to a private repository, nothing to do in that state, invalid inputs
 async function advancedExtras(){
   const host=document.getElementById("cfp-advanced");if(!host)return;
   let box=host.querySelector(".adv-live");if(!box){box=document.createElement("div");box.className="cfg-group adv-live";host.appendChild(box)}

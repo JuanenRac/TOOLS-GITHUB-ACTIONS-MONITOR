@@ -79,7 +79,7 @@ class RateLimit(unittest.TestCase):
         self.assertNotIn("second line", str(am.RUN_CACHE["repo-y"].get("error") or ""))
         self.assertIn('T("ui.a_quota_out"', PAGE)
         self.assertIn('T("ui.a_nodata_many"', PAGE)
-        self.assertIn("errs.length>3", PAGE)
+        self.assertIn("by.size>3", PAGE)
         for lang in i18n.LANGS:
             self.assertIn("{time}", i18n.tl(lang, "ui.a_quota_out"), lang)
             self.assertIn("{n}", i18n.tl(lang, "ui.a_quota_out"), lang)
