@@ -86,7 +86,8 @@ class Hook(unittest.TestCase):
 
 STUB = """import http.server, json, os, sys
 from pathlib import Path
-from github_actions_monitor.tool_version import TOOL_VERSION
+import re
+TOOL_VERSION = re.search(r'TOOL_VERSION = "([^"]+)"', (Path(__file__).parent / "tool_version.py").read_text()).group(1)
 port = int(sys.argv[sys.argv.index("--port") + 1])
 
 
@@ -162,7 +163,7 @@ class Restart(unittest.TestCase):
         self.root = base.make_install(Path(self.tmp.name) / "inst", "2.0.8", cfg=self.cfg)
         base.write_tree(self.root, stub_files())
         self.zip = base.build_zip(Path(self.tmp.name) / "m.zip", "2.9.9", extra=stub_files())
-        self.env = dict(clean_env(), STUB_PID_FILE=str(self.pid_file))
+        self.env = dict(clean_env(), STUB_PID_FILE=str(self.pid_file), PYTHONDONTWRITEBYTECODE="1")
 
     def spawn(self, *more):
         return subprocess.Popen([sys.executable, "-I", str(TOOL), "apply", "--dir", str(self.root), "--to", "2.9.9", "--zip", str(self.zip), "--yes", "--backups", str(Path(self.tmp.name) / "backups"), "--json", *more],
