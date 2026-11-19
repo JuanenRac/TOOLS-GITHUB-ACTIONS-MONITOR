@@ -62,7 +62,7 @@ def shape(value):
 
 def stable(value):
     if isinstance(value, dict):
-        return {k: stable(v) for k, v in value.items() if k not in VOLATILE}
+        return {k: stable(v) for k, v in value.items() if k not in VOLATILE and not k.endswith("_epoch")}
     if isinstance(value, list):
         return [stable(v) for v in value]
     return value
