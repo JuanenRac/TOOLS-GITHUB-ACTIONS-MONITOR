@@ -4315,5 +4315,7 @@
  "cfg.h.ai.prompt_log.enabled": "Apagado. Encendido = cada pregunta enviada a la IA y su respuesta se escriben, ya limpias de secretos y de tus palabras ocultas, en ai_prompts.jsonl de la carpeta de registros, para que un administrador las lea o las vacíe. No va en la copia de seguridad ni en el zip. Una respuesta de la caché no se escribe.",
  "cfg.f.ai.prompt_log.keep": "Prompts guardados",
  "cfg.h.ai.prompt_log.keep": "Cuántas de las líneas más recientes conserva el registro; las más antiguas se descartan.",
- "ui.cfg_u_lines": "líneas"
+ "ui.cfg_u_lines": "líneas",
+ "ai.doc_model_retired": "El modelo {model} está en tu lista de modelos retirados (config/ai_models.json): se salta y responde el siguiente de la cadena.",
+ "ai.doc_model_use": "Usa {use} en su lugar."
 }

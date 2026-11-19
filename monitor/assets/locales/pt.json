@@ -4315,5 +4315,7 @@
  "cfg.h.ai.prompt_log.enabled": "Desligado. Ligado = cada pergunta enviada à IA e a sua resposta são escritas, já limpas de segredos e das suas palavras ocultas, em ai_prompts.jsonl na pasta dos registos, para um administrador as ler ou esvaziar. Não vai na cópia de segurança nem no zip. Uma resposta da cache não é escrita.",
  "cfg.f.ai.prompt_log.keep": "Prompts guardados",
  "cfg.h.ai.prompt_log.keep": "Quantas das linhas mais recentes o registo guarda; as mais antigas são descartadas.",
- "ui.cfg_u_lines": "linhas"
+ "ui.cfg_u_lines": "linhas",
+ "ai.doc_model_retired": "O modelo {model} está na sua lista de modelos retirados (config/ai_models.json): é ignorado e responde o seguinte da cadeia.",
+ "ai.doc_model_use": "Use {use} em vez dele."
 }

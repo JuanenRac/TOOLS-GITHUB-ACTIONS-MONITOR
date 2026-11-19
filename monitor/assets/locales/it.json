@@ -4315,5 +4315,7 @@
  "cfg.h.ai.prompt_log.enabled": "Spento. Acceso = ogni domanda inviata all'IA e la sua risposta vengono scritte, già ripulite da segreti e dalle tue parole nascoste, in ai_prompts.jsonl nella cartella dei registri, perché un amministratore le legga o le svuoti. Non è nel backup né nello zip. Una risposta dalla cache non viene scritta.",
  "cfg.f.ai.prompt_log.keep": "Prompt conservati",
  "cfg.h.ai.prompt_log.keep": "Quante delle righe più recenti conserva il registro; le più vecchie vengono scartate.",
- "ui.cfg_u_lines": "righe"
+ "ui.cfg_u_lines": "righe",
+ "ai.doc_model_retired": "Il modello {model} è nel tuo elenco di modelli ritirati (config/ai_models.json): viene saltato e risponde il successivo della catena.",
+ "ai.doc_model_use": "Usa {use} al suo posto."
 }

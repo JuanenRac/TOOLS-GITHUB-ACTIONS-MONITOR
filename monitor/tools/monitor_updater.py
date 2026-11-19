@@ -72,7 +72,7 @@ PRODUCT_ROOT_SUFFIXES = (".bat", ".sh", ".command", ".txt", ".md")
 PRODUCT_ROOT_NAMES = ("LICENSE", "NOTICE", "AUTHORS", "CHANGELOG.md", "README.txt")
 #: the same table as util/paths.py (kind of file by name): config, ai, logs, data. A test keeps both in step.
 USER_RULES = (
-    ("config", r"actions_monitor\.json|targets\.json|ecosystems\.json|profiles\.json|quotas\.json|lessons\.json|lessons_rules\.json|config_backups|paths\.json"),
+    ("config", r"actions_monitor\.json|targets\.json|ecosystems\.json|profiles\.json|quotas\.json|lessons\.json|lessons_rules\.json|ai_models\.json|config_backups|paths\.json"),
     ("ai", r"ALERTS_BRIEF\.md|ai_alerts\.jsonl|ai_alerts_state\.json|ai_heartbeat\.json|ai_hook_state\.json|ai_notify\.jsonl|ai_notify_state\.json|ci_red\.json|INDEX\.json|LESSONS\.md"),
     ("logs", r"actions_monitor_log\.txt|ai_actions_log\.jsonl|github_actions_log\.jsonl|auth_audit\.jsonl|ai_prompts\.jsonl|loop\.log"),
     ("data", r"etag_cache\.json|events_monitor\.jsonl|events_state\.json|eventos_monitor\.jsonl|eventos_estado\.json|analytics_history\.json|sentinel_cache\.json|sentinel_history\.json|"

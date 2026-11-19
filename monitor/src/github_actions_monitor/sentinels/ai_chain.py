@@ -227,6 +227,8 @@ def add_model_usage(store, cfg, tokens_in, tokens_out, cost):
 
 def retired(cfg, store):
     """True when the list kept for this provider (never fetched here) says the model is not there. Only with `ai.catalog.enabled`."""
+    if ai_models.retired_in_file(sentinel_ai.model_of(cfg)):      # the person wrote it in config/ai_models.json: no need for the live list
+        return True
     if not ai_models.catalog_config(cfg)["enabled"]:
         return False
     have = ai_models.cached(cfg, store)

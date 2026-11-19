@@ -4315,5 +4315,7 @@
  "cfg.h.ai.prompt_log.enabled": "オフ。オン = AIに送ったすべての質問とその回答を、秘密や隠す単語を除去した状態でログフォルダーの ai_prompts.jsonl に書き込み、管理者が読んだり空にしたりできます。バックアップにもzipにも含まれません。キャッシュからの回答は書き込まれません。",
  "cfg.f.ai.prompt_log.keep": "保持するプロンプト数",
  "cfg.h.ai.prompt_log.keep": "記録が保持する最新の行数。古いものは破棄されます。",
- "ui.cfg_u_lines": "行"
+ "ui.cfg_u_lines": "行",
+ "ai.doc_model_retired": "モデル {model} は廃止モデルの一覧(config/ai_models.json)に載っています。スキップされ、チェーンの次のモデルが応答します。",
+ "ai.doc_model_use": "代わりに {use} を使ってください。"
 }

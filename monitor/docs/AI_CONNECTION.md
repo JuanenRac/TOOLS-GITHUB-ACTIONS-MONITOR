@@ -87,6 +87,8 @@ With `ai.airgapped` on, the AI only talks to a model on this computer or on a pr
 
 `ai.prompt_log.enabled` (off) keeps a local record of what the AI was asked: with it on, every question sent to the model and its answer, already cleaned of secrets and of your hidden words and cut to a fixed size, are appended to `ai_prompts.jsonl` in the folder of the logs (`GET /api/ai/prompts` shows them to an administrator and `POST /api/ai/prompts/clear` empties them). The system prompt is not kept, an answer from the cache is not written, a failed call is written without a reply, the newest `ai.prompt_log.keep` lines are kept, and the file is not part of the backup, of the zip or of the files that AI tools read.
 
+`config/ai_models.json` is a table you can keep by hand (it does not exist until you write it): `models` is a list of rows `{provider, model, context, in_per_mtok, out_per_mtok, tools, daily_limit}` with the figures your provider does not tell, and `retired` is a list of models that no longer exist (a name, or `{model, use, note}`). A figure from this file counts above what the provider said and below what you typed on the page, and the page shows it as coming from the file. A model listed as retired is skipped by the chain of fallbacks even when the live list of models is off, and the AI doctor adds the check `model_retired` with the model to use instead. A wrong row or figure is left out and nothing else changes.
+
 ## Models of the provider
 
 The name of the model is free text, but the monitor can read the list of models from the provider and check the name against it. Models and versions change often, so the monitor ships no list of models: the examples of the presets may be out of date.

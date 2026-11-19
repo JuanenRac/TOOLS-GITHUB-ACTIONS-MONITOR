@@ -4315,5 +4315,7 @@
  "cfg.h.ai.prompt_log.enabled": "Off. On = every question sent to the AI and its answer are written, already cleaned of secrets and of your hidden words, to ai_prompts.jsonl in the folder of the logs, for an administrator to read or empty. It is not in the backup or in the zip. A cached answer is not written.",
  "cfg.f.ai.prompt_log.keep": "Prompts kept",
  "cfg.h.ai.prompt_log.keep": "How many of the newest lines the record keeps; older ones are dropped.",
- "ui.cfg_u_lines": "lines"
+ "ui.cfg_u_lines": "lines",
+ "ai.doc_model_retired": "The model {model} is in your list of retired models (config/ai_models.json): it is skipped and the next of the chain answers.",
+ "ai.doc_model_use": "Use {use} instead."
 }

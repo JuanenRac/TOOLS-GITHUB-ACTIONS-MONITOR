@@ -87,6 +87,8 @@ GitHub 配额由监视器、AI 工具和账户下的所有其他工具共享。�
 
 `ai.prompt_log.enabled`(关闭)保留向 AI 提问内容的本地记录:开启后,发送给模型的每个问题及其回答(已去除机密和您隐藏的词,并截断到固定大小)会追加到日志文件夹中的 `ai_prompts.jsonl`(`GET /api/ai/prompts` 向管理员显示,`POST /api/ai/prompts/clear` 清空)。系统提示词不保存,来自缓存的回答不写入,失败的调用只写入无回答的记录,保留最新的 `ai.prompt_log.keep` 行,该文件不属于备份、zip 或 AI 工具读取的文件。
 
+`config/ai_models.json` 是您可以手工维护的表(写入之前不存在):`models` 是行 `{provider, model, context, in_per_mtok, out_per_mtok, tools, daily_limit}` 的列表,放入提供方不告诉您的数值;`retired` 是已不存在的模型列表(名称,或 `{model, use, note}`)。此文件中的数值优先于提供方给出的值,但低于您在页面上输入的值,页面会标明它来自该文件。被列为已退役的模型即使在线模型列表关闭,也会被后备链跳过,AI 医生会添加检查 `model_retired` 并给出应改用的模型。错误的行或数值会被忽略,其余不受影响。
+
 ## 提供方的模型
 
 模型名称是自由文本，但监视器可以从提供方读取模型列表并据此检查名称。模型和版本经常变化，因此监视器不附带任何模型列表：预设中的示例可能已经过时。

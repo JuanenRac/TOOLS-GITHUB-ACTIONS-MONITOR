@@ -4315,5 +4315,7 @@
  "cfg.h.ai.prompt_log.enabled": "关闭。开启 = 发送给 AI 的每个问题及其回答(已去除机密和您隐藏的词)会写入日志文件夹中的 ai_prompts.jsonl,供管理员查看或清空。它不在备份和 zip 中。来自缓存的回答不会写入。",
  "cfg.f.ai.prompt_log.keep": "保留的提示词数",
  "cfg.h.ai.prompt_log.keep": "记录保留的最新行数;更早的会被丢弃。",
- "ui.cfg_u_lines": "行"
+ "ui.cfg_u_lines": "行",
+ "ai.doc_model_retired": "模型 {model} 在您的已退役模型列表(config/ai_models.json)中:它会被跳过,由链中的下一个模型回答。",
+ "ai.doc_model_use": "请改用 {use}。"
 }

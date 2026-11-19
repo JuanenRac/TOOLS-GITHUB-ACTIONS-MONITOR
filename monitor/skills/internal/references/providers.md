@@ -14,7 +14,7 @@ The core of this skill (`SKILL.md`) is put in the prompt when `ai.skill` is on, 
 
 ## Which model answers
 
-The person (not you) chooses the model: `ai.model`, a different one for a kind of question (`ai.tasks.<task>.model`) and a chain of fallbacks (`ai.fallback`). When your first model cannot answer, another one may be asked in its place, so do not assume which model you are or how large your context is; use what the prompt gives you. The monitor reads the list of models from the provider, shows what the provider says about each one (a figure it does not say stays unknown) and keeps a budget of calls and estimated cost per model; when a budget is spent nobody asks you more that day. None of this is yours to change.
+The person keeps a table of figures and a list of retired models by hand in `config/ai_models.json`; a model listed there as retired is skipped and the next of the chain answers in its place. The person (not you) chooses the model: `ai.model`, a different one for a kind of question (`ai.tasks.<task>.model`) and a chain of fallbacks (`ai.fallback`). When your first model cannot answer, another one may be asked in its place, so do not assume which model you are or how large your context is; use what the prompt gives you. The monitor reads the list of models from the provider, shows what the provider says about each one (a figure it does not say stays unknown) and keeps a budget of calls and estimated cost per model; when a budget is spent nobody asks you more that day. None of this is yours to change.
 
 ## Air-gapped mode
 

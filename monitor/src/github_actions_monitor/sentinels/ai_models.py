@@ -8,6 +8,8 @@ never stored or printed), the test sends a SYNTHETIC text (never data of a repos
 person asking for it (the button, the command `ai models`) is always allowed, inside a cap of requests per day.
 """
 import difflib
+import json
+import os
 import re
 import time
 import urllib.error
@@ -18,6 +20,7 @@ from urllib.parse import urlparse
 from github_actions_monitor import i18n
 from github_actions_monitor.security import netguard
 from github_actions_monitor.sentinels import ai_airgap, sentinel_ai
+from github_actions_monitor.util import paths
 
 CATALOG_DEFAULTS = {"enabled": False, "ttl_minutes": 360, "max_requests_per_day": 20, "fit_context": False}
 MAX_MODELS = 2000
@@ -297,13 +300,87 @@ def remember_provider_data(store, cfg, entry):
         _trim(store)
 
 
+FILE_NAME = "ai_models.json"
+FILE_MAX_BYTES = 200_000
+_FILE_CACHE = {"key": None, "data": None}
+
+
+def file_path():
+    return paths.place(FILE_NAME)
+
+
+def file_data():
+    """What the person wrote by hand in `config/ai_models.json` (a table of models and a list of retired ones), cleaned: {rows: {"<provider>/<model>": {field: value}}, retired: {model: {use, note}}, problems: [..]}.
+    A row or a figure that is not valid is left out and named in `problems`; a missing or damaged file gives an empty answer. The file is read again only when it changes."""
+    path = file_path()
+    try:
+        stat = os.stat(path)
+        key = (str(path), stat.st_mtime_ns, stat.st_size)
+    except OSError:
+        return {"rows": {}, "retired": {}, "problems": []}
+    if _FILE_CACHE["key"] == key:
+        return _FILE_CACHE["data"]
+    out = {"rows": {}, "retired": {}, "problems": []}
+    try:
+        if stat.st_size > FILE_MAX_BYTES:
+            raise ValueError("too large")
+        with open(path, encoding="utf-8") as handle:
+            doc = json.loads(handle.read())
+        if not isinstance(doc, dict):
+            raise ValueError("not an object")
+    except (OSError, ValueError) as error:
+        out["problems"].append(f"{FILE_NAME}: {error}")
+        _FILE_CACHE.update(key=key, data=out)
+        return out
+    for number, row in enumerate((doc.get("models") if isinstance(doc.get("models"), list) else [])[:MAX_TABLE_ROWS], 1):
+        provider, model = (row.get("provider"), row.get("model")) if isinstance(row, dict) else (None, None)
+        if not (isinstance(provider, str) and isinstance(model, str) and PROVIDER_LABEL.match(provider) and MODEL_ID.match(model)):
+            out["problems"].append(f"models[{number}]")
+            continue
+        values = {}
+        for field in FIELDS + LIMIT_FIELDS:
+            raw = row.get(field)
+            if raw in (None, ""):
+                continue
+            if field == "tools":
+                good = raw if isinstance(raw, bool) else None
+            elif field in ("context", "daily_limit"):
+                good = _positive_int(raw, 100_000_000)
+            else:
+                good = float(raw) if isinstance(raw, (int, float)) and not isinstance(raw, bool) and 0 <= raw <= 1_000_000 else None
+            if good is None:
+                out["problems"].append(f"models[{number}].{field}")
+            else:
+                values[field] = good
+        out["rows"][f"{provider}/{model}"] = values
+    for number, row in enumerate((doc.get("retired") if isinstance(doc.get("retired"), list) else [])[:MAX_TABLE_ROWS], 1):
+        row = {"model": row} if isinstance(row, str) else row
+        model = row.get("model") if isinstance(row, dict) else None
+        if not (isinstance(model, str) and MODEL_ID.match(model)):
+            out["problems"].append(f"retired[{number}]")
+            continue
+        use, note = row.get("use"), row.get("note")
+        out["retired"][model.lower()] = {"use": use if isinstance(use, str) and MODEL_ID.match(use) else "", "note": sentinel_ai.sanitize_text(note, 200, keep="head") if isinstance(note, str) else ""}
+    _FILE_CACHE.update(key=key, data=out)
+    return out
+
+
+def retired_in_file(model):
+    """{use, note} when the person listed this model as retired in `config/ai_models.json`, else None. It does not need the live list of models."""
+    return file_data()["retired"].get(str(model or "").lower())
+
+
 def data_of(store, provider, model):      # `provider` is the label of provider_label()
     """The row of the table for a model: each field with its value (or None = unknown) and where it came from: `manual`, `provider` or `unknown`."""
     row = _table(store).get(f"{provider}/{_normal(model, provider)}") or _table(store).get(f"{provider}/{model}") or {}
+    rows = file_data()["rows"]
+    written = rows.get(f"{provider}/{_normal(model, provider)}") or rows.get(f"{provider}/{model}") or {}
     out = {}
     for field in FIELDS + LIMIT_FIELDS:
         if field in (row.get("manual") or {}):
             out[field], out[field + "_source"] = row["manual"][field], "manual"
+        elif field in written:
+            out[field], out[field + "_source"] = written[field], "file"      # the table the person keeps by hand in config/ai_models.json: above the provider, below what was typed on the page
         elif field in (row.get("provider") or {}) and field in FIELDS:
             out[field], out[field + "_source"] = row["provider"][field], "provider"
         else:
@@ -357,7 +434,7 @@ def set_manual(store, provider, model, values):
 def table(store):
     """Every model that has a row, with its data and where each figure came from (for the page and for `ai models`)."""
     rows = []
-    for key in sorted(_table(store)):
+    for key in sorted(set(_table(store)) | set(file_data()["rows"])):
         provider, _, model = key.partition("/")
         rows.append({"provider": provider, "model": model, **data_of(store, provider, model)})
     return rows
@@ -470,6 +547,10 @@ def doctor(cfg, store, getter=None, transport=None, live=True):
             add("exists", check["state"] != "missing", describe(cfg, check))
             if check["state"] == "missing":
                 stop = "exists"
+    gone = retired_in_file(model) if model else None
+    if gone:      # only while the file of the person lists the model as retired
+        add("model_retired", False, i18n.t("ai.doc_model_retired", model=model) + (" " + i18n.t("ai.doc_model_use", use=gone["use"]) if gone["use"] else "") + (" " + gone["note"] if gone["note"] else ""))
+        stop = stop or "model_retired"
     used = store.used_today()
     add("budget", used < cfg["daily_limit"], i18n.t("ai.doc_budget", used=used, limit=cfg["daily_limit"]))
     if stop is None and used >= cfg["daily_limit"]:

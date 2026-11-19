@@ -4315,5 +4315,7 @@
  "cfg.h.ai.prompt_log.enabled": "Aus. An = jede an die KI gesendete Frage und ihre Antwort werden, bereits von Geheimnissen und Ihren verborgenen Wörtern bereinigt, in ai_prompts.jsonl im Ordner der Protokolle gespeichert, damit ein Administrator sie lesen oder leeren kann. Nicht in der Sicherung und nicht im Zip. Eine Antwort aus dem Zwischenspeicher wird nicht geschrieben.",
  "cfg.f.ai.prompt_log.keep": "Gespeicherte Prompts",
  "cfg.h.ai.prompt_log.keep": "Wie viele der neuesten Zeilen das Protokoll behält; ältere entfallen.",
- "ui.cfg_u_lines": "Zeilen"
+ "ui.cfg_u_lines": "Zeilen",
+ "ai.doc_model_retired": "Das Modell {model} steht in Ihrer Liste zurückgezogener Modelle (config/ai_models.json): es wird übersprungen und das nächste der Kette antwortet.",
+ "ai.doc_model_use": "Verwenden Sie stattdessen {use}."
 }
