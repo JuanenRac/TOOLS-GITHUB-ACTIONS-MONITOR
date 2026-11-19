@@ -12,6 +12,7 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 ### Adicionado
 
 - **Os briefs para as ferramentas de IA chegam à linha de comandos e ao servidor MCP**: `monitor_cli.py briefs index` lista os briefs catalogados, `briefs show SEPARADOR` imprime os sinais de um separador e `briefs all` todos os briefs num documento; o servidor MCP tem as ferramentas só de leitura `briefs_index` e `brief_tab` (o nome de um separador ou `all`). Um teste verifica que a página, as rotas HTTP, o comando e as ferramentas listam os mesmos separadores; não se escreve nada e os textos passam pelo mesmo limpador.
+- **A API de leitura para clientes liga-se sozinha no modo serviço**: `api.v1_enabled` passa a ser `auto` (predefinição), `on` ou `off`. Com `auto` o prefixo `/api/v1/` responde quando o monitor corre como serviço (uma conta do modo equipa, a imagem Docker, a unidade systemd) e fica fechado para uma pessoa num só computador; os antigos true e false mantêm o significado. `/api/v1/me` diz ainda a versão do contrato (`contract`) e o que a sessão pode fazer (`capabilities`).
 
 ### Corrigido
 

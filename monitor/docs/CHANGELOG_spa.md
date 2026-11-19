@@ -12,6 +12,7 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 ### Añadido
 
 - **Los briefs para las herramientas de IA llegan a la línea de comandos y al servidor MCP**: `monitor_cli.py briefs index` lista los briefs catalogados, `briefs show PESTAÑA` imprime las señales de una pestaña y `briefs all` todos los briefs en un documento; el servidor MCP tiene las herramientas de solo lectura `briefs_index` y `brief_tab` (el nombre de una pestaña o `all`). Un test comprueba que la página, las rutas HTTP, el comando y las herramientas listan las mismas pestañas; no se escribe nada y los textos pasan por el mismo limpiador.
+- **La API de lectura para clientes se activa sola en el modo servicio**: `api.v1_enabled` pasa a ser `auto` (por defecto), `on` u `off`. Con `auto` el prefijo `/api/v1/` responde cuando el monitor corre como servicio (una cuenta del modo equipo, la imagen de Docker, la unidad de systemd) y queda cerrado para una persona en un solo equipo; los antiguos true y false conservan su significado. `/api/v1/me` dice además la versión del contrato (`contract`) y lo que puede hacer la sesión (`capabilities`).
 
 ### Corregido
 

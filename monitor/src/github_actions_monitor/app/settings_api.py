@@ -715,7 +715,7 @@ _f("advanced", "upstream", "upstream.forks_per_request", "int", (1, 25), restart
 _f("advanced", "upstream", "upstream.news_days", "int", (1, 90), unit="d", restart=False)
 _f("advanced", "upstream", "upstream.notify", "bool", restart=False)
 _f("advanced", "upstream", "upstream.repos", "names", restart=False)
-_f("advanced", "api_v1", "api.v1_enabled", "bool", restart=False)
+_f("advanced", "api_v1", "api.v1_enabled", "enum", ("auto", "on", "off"), restart=False)
 _f("advanced", "api_v1", "api.default_limit", "int", (1, 1000), restart=False)
 _f("advanced", "api_v1", "api.max_limit", "int", (1, 1000), restart=False)
 _f("advanced", "api_v1", "api.cursor_ttl_seconds", "int", (30, 86400), unit="s", restart=False)

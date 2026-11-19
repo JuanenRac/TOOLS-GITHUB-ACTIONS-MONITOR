@@ -647,7 +647,7 @@
     "repos": []
   },
   "api": {
-    "v1_enabled": false,
+    "v1_enabled": "auto",
     "default_limit": 50,
     "max_limit": 200,
     "cursor_ttl_seconds": 900,
