@@ -26,6 +26,7 @@ If your tool can do several, prefer the cheapest for the quota: files or the bri
 - State: `monitor_state` and `signals` (everything the monitor says, as signals), `sentinel_panels` (the panels of the Sentinel tab as data), `get_quota` (the allowance and the minutes), `get_score` (the score with its parts).
 - Lessons: `lessons_brief` (read it before a push), `lessons_apply`, `lessons_recurring`, `lesson_propose` (checks a lesson and writes nothing; it is written only with `--allow-lessons` and `lessons.allow_write`).
 - Briefs: `briefs_index` (one catalogued brief per tab) and `brief_tab` (the brief of one tab, or `all`).
+- The Screens menu of the page: `screens_menu` (every kind of screen with its address and parameters; the same as `GET /api/screens/menu` and `monitor_cli.py screens`).
 - The read API for clients: `api_me` (who the monitor takes you for), `api_openapi` (the document of every frozen route, or one with `path`) and `api_contract_check` (the contract suite).
 
 ## Installing the instructions

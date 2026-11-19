@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "94af4b665165f39700112f587bc43cbedca42d16b6ddbaa042dbe56c4e04f4fb",
+ "digest": "7c9b7a9ce588ac67259cf3f3fca113397b582f9a0d6d23cff34e2233a478876c",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -148,6 +148,47 @@
      20
     ],
     "default": 3
+   },
+   {
+    "key": "screens.menu",
+    "kind": "bool",
+    "default": true
+   },
+   {
+    "key": "screens.menu_max_windows",
+    "kind": "int",
+    "bounds": [
+     1,
+     9
+    ],
+    "default": 4
+   },
+   {
+    "key": "screens.menu_rotate_seconds",
+    "kind": "int",
+    "bounds": [
+     5,
+     300
+    ],
+    "default": 20
+   },
+   {
+    "key": "screens.menu_target",
+    "kind": "enum",
+    "bounds": [
+     "new",
+     "same"
+    ],
+    "default": "new"
+   },
+   {
+    "key": "screens.menu_tv_scale",
+    "kind": "float",
+    "bounds": [
+     0.5,
+     3.0
+    ],
+    "default": 1.5
    },
    {
     "key": "sentinel.trend_green_pct",

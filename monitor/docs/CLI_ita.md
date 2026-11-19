@@ -27,6 +27,7 @@
 | `ai` | `ai models [--refresh]` elenca i modelli del provider IA con i dati di ciascuno; `ai test --provider NOME --model NOME` ne prova uno con un testo sintetico (latenza, token, costo stimato); `ai doctor` dice perché un'IA non risponde, senza stampare una chiave | no |
 | `lessons` | ciò che gli errori di questa CI hanno insegnato: `lessons list`, `lessons brief --repo NOME` (da leggere prima di un push), `lessons failures`, `lessons close` | no |
 | `briefs` | i brief delle schede che leggono gli strumenti di IA: `briefs index`, `briefs show SCHEDA`, `briefs all` | sì |
+| `screens` | il menu Schermi della pagina: `screens list` (ogni tipo di schermo e se può essere aperto) e `screens urls` (gli indirizzi completi, pronti per un comando chiosco) | no |
 | `credential` | un altro accesso a GitHub per un account mentre tutto gira: `credential replace\|reload [--account ID] [--new-token-file FILE\|-]`; non stampa mai un token | no |
 | `install-skill` | copia una skill del monitor (`internal` o `external`) nella cartella da cui uno strumento di IA legge le sue skill: `install-skill external --dest CARTELLA`; il monitor non deve essere in esecuzione | no |
 | `gh-token` | stampa un token di installazione di un'ora della GitHub App perché le letture di uno strumento consumino la quota dell'App (solo con `github_app.share_reads` attivo); eseguilo senza `--json` | no |

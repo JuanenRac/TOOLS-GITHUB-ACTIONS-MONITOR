@@ -111,6 +111,11 @@ La lingua di uno schermo si decide in quest'ordine: `?lang=xx` nell'indirizzo; p
 | `screens.logo_corner` | top-right (predefinito), top-left, bottom-right o bottom-left. |
 | `screens.logo_max_width`, `screens.logo_max_height` | Dimensione massima del logo in pixel a 1920 x 1080 (160 x 64 per impostazione predefinita; cresce con lo schermo). |
 | `screens.group_map` | Attivo per impostazione predefinita. Mostra la mappa della flotta per gruppi nella schermata generale (il raggruppamento della vista flotta). Disattivato: solo i quattro riquadri. |
+| `screens.menu` | Attivo per impostazione predefinita. Il pulsante Schermi nella barra superiore. Disattivato: il pulsante scompare; gli schermi continuano a funzionare ai loro indirizzi. |
+| `screens.menu_target` | new (predefinito): uno schermo si apre in una nuova finestra o scheda; same: nella scheda corrente. |
+| `screens.menu_max_windows` | Massimo di finestre che un insieme multischermo apre in una volta (4 per impostazione predefinita; da 1 a 9). |
+| `screens.menu_rotate_seconds` | Secondi per schermo nei preset a rotazione del menu (20 per impostazione predefinita; da 5 a 300). |
+| `screens.menu_tv_scale` | Il `?scale=` del preset TV (1,5 per impostazione predefinita; da 0,5 a 3). |
 
 ### Tema degli schermi
 
@@ -145,6 +150,29 @@ I dati arrivano da `/api/screens/data?screen=overview` (oppure `now`, `sentinels
 1. Scegliere un indirizzo per ogni monitor, per esempio `/screen/overview?monitor=1`, `/screen/now?monitor=2` e `/screen/sentinels?monitor=3`; oppure aprire una sola finestra con `?rotate=20`.
 2. Aprire ciascuna in Chrome o Edge in modalità chiosco: `msedge --kiosk "http://questo-computer:8765/screen/now?monitor=2" --edge-kiosk-type=fullscreen` oppure `chrome --kiosk "http://questo-computer:8765/screen/now?monitor=2"`; con `--app=INDIRIZZO` al posto di `--kiosk` la finestra non ha barre. Senza modalità chiosco, il pulsante discreto a piè di pagina chiede lo schermo intero.
 3. Da un altro computer usare la modalità di rete: basta il token di accesso di un visualizzatore, perché queste pagine non scrivono mai.
+
+## Menu Schermi
+
+Il pulsante **Schermi** nella barra superiore (l'icona di due monitor) apre un menu con ogni tipo di schermo del monitor, così nessuno deve ricordare gli indirizzi. Fa solo da navigazione: apre indirizzi, non scrive nulla e non legge nulla da GitHub. È attivo per impostazione predefinita e `screens.menu` lo disattiva.
+
+| Schermo | Indirizzo | Che cos'è |
+|---|---|---|
+| Dashboard | `/` | L'intera pagina, per una persona alla scrivania. `?repo=` filtra i repository. |
+| Chiosco | `/?chrome=0&view=now` | Una vista senza intestazione, schede né filtri, per un monitor che nessuno tocca. La vista è un parametro. |
+| Vista del team | `/?chrome=0&view=team` | La vista del team come chiosco (edizione completa). |
+| Schermi di schede da 1 a 3 | `/screen/1`, `/screen/2`, `/screen/3` | Le schede impostate per ogni monitor di una scrivania; `?tabs=`, `?orient=` e `?rotate=` le cambiano per una finestra. |
+| Schermi a parete | `/screen/overview`, `/screen/now`, `/screen/sentinels` | I tre schermi a parete descritti sopra. |
+| Parete a rotazione | `/screen/overview?rotate=20` | Una finestra che ruota tra i tre e salta a un nuovo rosso. |
+| TV | `/screen/overview?theme=contrast&density=large&scale=1.5&rotate=20` | La parete a rotazione per uno schermo visto da lontano. |
+| Più monitor | un indirizzo per finestra | Un insieme di finestre, una per monitor (vedi sotto). |
+
+Ogni scheda mostra i parametri che quell'indirizzo accetta (tema, densità, aggiornamento, scala, lingua, rotazione, filtro dei repository...), ciascuno con il proprio testo di aiuto, e l'indirizzo risultante. **Apri** lo apre in una nuova finestra o scheda, o nella scheda corrente, come dice `screens.menu_target`; **Copia indirizzo** mette l'indirizzo completo negli appunti per aprirlo su un altro computer (mai con un token: in modalità rete quel computer accede come al solito). Gli schermi a parete rispondono 404 finché `screens.enabled` è disattivato, quindi la loro scheda lo dice invece di aprire una pagina vuota; la vista del team non c'è nell'edizione lite.
+
+### Più monitor
+
+Scegli quante finestre (al massimo `screens.menu_max_windows`), la disposizione (in fila, in colonna o in griglia) e cosa mostra ogni finestra (i tre schermi a parete a turno, pareti che ruotano da sole o gli schermi di schede). **Apri tutte le finestre** apre una finestra per monitor. In un browser con l'API di gestione delle finestre (Chrome ed Edge chiedono il permesso *gestione finestre*) ogni finestra è collocata sul suo monitor, ordinati come dice la disposizione; con più finestre che monitor condividono un monitor a riquadri. Senza di essa le finestre si aprono dove le mette il browser e la scheda elenca un comando chiosco per finestra (`msedge --kiosk INDIRIZZO --window-position=X,Y`) per avviarle a mano. Il browser deve consentire i pop-up per l'indirizzo del monitor.
+
+Lo stesso catalogo è letto dagli strumenti: `GET /api/screens/menu`, `monitor_cli.py screens [list|urls]` e lo strumento MCP `screens_menu`. Tutti e tre sono di sola lettura.
 
 ## Immagini
 

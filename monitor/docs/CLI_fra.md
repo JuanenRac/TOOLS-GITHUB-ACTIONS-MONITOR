@@ -27,6 +27,7 @@
 | `ai` | `ai models [--refresh]` liste les modèles du fournisseur d'IA avec les données de chacun ; `ai test --provider NOM --model NOM` en essaie un avec un texte synthétique (latence, jetons, coût estimé) ; `ai doctor` dit pourquoi une IA ne répond pas, sans afficher de clé | non |
 | `lessons` | ce que les échecs de cette CI ont appris : `lessons list`, `lessons brief --repo NOM` (à lire avant un push), `lessons failures`, `lessons close` | non |
 | `briefs` | les briefs des onglets que lisent les outils d'IA : `briefs index`, `briefs show ONGLET`, `briefs all` | oui |
+| `screens` | le menu Écrans de la page : `screens list` (chaque type d'écran et s'il peut être ouvert) et `screens urls` (les adresses complètes, prêtes pour une commande de borne) | non |
 | `credential` | une autre connexion GitHub pour un compte pendant que tout tourne : `credential replace\|reload [--account ID] [--new-token-file FICHIER\|-]` ; n'affiche jamais de jeton | non |
 | `install-skill` | copie une skill du moniteur (`internal` ou `external`) dans le dossier où un outil d'IA lit ses skills : `install-skill external --dest DOSSIER` ; le moniteur n'a pas besoin de tourner | non |
 | `gh-token` | affiche un jeton d'installation d'une heure de la GitHub App pour que les lectures d'un outil consomment le quota de l'App (seulement avec `github_app.share_reads` activé) ; à lancer sans `--json` | non |
