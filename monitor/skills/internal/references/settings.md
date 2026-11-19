@@ -719,6 +719,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `ui.screen3_tabs` | `""` | general | Tabs of screen 3 |
 | `ui.theme` | `"auto"` | general | Colour theme |
 | `updates.check` | `true` | basic | Tell me when a newer version is published |
+| `updates.systemd_helper` | `false` | basic | Update from the page under a systemd user service |
 | `upstream.enabled` | `false` | advanced | Follow the original repository of each fork |
 | `upstream.forks_per_request` | `8` | advanced | Forks per request |
 | `upstream.news_days` | `7` | advanced | Days a new release counts as news |

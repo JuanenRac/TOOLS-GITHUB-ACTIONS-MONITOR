@@ -699,7 +699,8 @@
     "theme": "classic"
   },
   "updates": {
-    "check": true
+    "check": true,
+    "systemd_helper": false
   },
   "airgapped": false,
   "open_browser": true,
