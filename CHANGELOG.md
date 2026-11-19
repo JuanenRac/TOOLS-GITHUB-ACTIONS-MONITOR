@@ -16,6 +16,8 @@ The history of GitHub Actions Monitor, from the first version to the latest. Eac
 
 ### Added
 
+- **An optional helper so that a monitor under a systemd user service can be updated from the page**: with `updates.systemd_helper` on (off by default), a monitor that runs as a systemd USER service (`systemctl --user`) is offered the update; the process that applies it stops that service, applies the update and starts the service again, and when the new version does not come up the previous one is put back and the service started again. It only ever runs `systemctl --user stop`, `start` or `is-active` on a plain unit name, never `sudo`, and a system service, a container, the demo and the Lite edition stay as they were. The command line does the same with `--systemd-unit` for `apply` and `rollback`. The status of the updates says whether the switch is on and which user service the monitor runs under. Label, help, tip and guide in the eight languages.
+
 - **The locks between processes are checked inside the container**: the container checks gain E9, which starts several processes of the image against one shared volume and counts what they write under the lock of the operating system and under the lock file, so a lost update would show in the evidence of the workflow; the test of the lock file now runs on Windows too.
 
 - **A guide of its own for the assistant, `ASSISTANT.md`, in eight languages**: how to switch it on, its five fixed questions, the four tools it reads with, what it never does (it writes nothing, reaches nothing on GitHub, hands what a repository wrote over as data) and how to check it with the two routes and the record of prompts. The section of `AI_CONNECTION.md` stays as the reference of the settings.

@@ -100,8 +100,15 @@ def note_success():
     _cooldown["until"] = 0.0
 
 
-def reason_blocked(lite=False, demo=False, env=None):
-    """Why this installation cannot be updated from the page ('' when it can). A service manager or a container owns the process: the update is made the way their documents say."""
+def helper_on(config):
+    """`updates.systemd_helper` (off by default): a monitor that runs as a systemd USER service may be updated from the page; the update stops and starts that service with `systemctl --user`."""
+    block = (config or {}).get("updates") if isinstance((config or {}).get("updates"), dict) else {}
+    return block.get("systemd_helper") is True
+
+
+def reason_blocked(lite=False, demo=False, env=None, helper=False):
+    """Why this installation cannot be updated from the page ('' when it can). A service manager or a container owns the process: the update is made the way their documents say, unless `helper`
+    (updates.systemd_helper) is on and the service is a systemd USER service the helper can stop and start."""
     mod = module()
     if mod is None:
         return "tool_missing"
@@ -112,7 +119,7 @@ def reason_blocked(lite=False, demo=False, env=None):
     if mod.in_container(env):
         return "container"
     if mod.under_service(env):
-        return "service"
+        return "" if (helper and mod.user_unit(env)) else "service"
     return ""
 
 
@@ -206,7 +213,8 @@ def stream_frames(read=None, sleep=time.sleep, clock=time.monotonic, poll=0.5, k
 def status(config, tool_version, notice, lite=False, demo=False, env=None):
     """The state for the page without any request to GitHub. `notice` is the view of the update notice the monitor already keeps."""
     mod = module()
-    blocked = reason_blocked(lite, demo, env)
+    helper = helper_on(config)
+    blocked = reason_blocked(lite, demo, env, helper)
     out = {"installed": tool_version, "available": (notice or {}).get("latest") if (notice or {}).get("newer") else "", "newer": bool((notice or {}).get("newer")),
            "check": bool((notice or {}).get("enabled", True)), "offline": bool((notice or {}).get("offline")), "airgapped": bool((notice or {}).get("airgapped")),
            "can_apply": not blocked, "blocked_by": blocked, "blocked_reason": blocked or ("cooldown" if cooldown_left() else ""), "cooldown_seconds": cooldown_left(), "progress": progress(), "last": None, "can_go_back": False, "updater": getattr(mod, "UPDATER_VERSION", "") if mod else ""}
@@ -215,6 +223,7 @@ def status(config, tool_version, notice, lite=False, demo=False, env=None):
         history = up.history()
         out["last"] = history[-1] if history else None
         out["can_go_back"] = bool(up.previous())
+        out["systemd"] = {"helper": helper, "unit": (mod.user_unit(env) if mod.under_service(env) else "")}      # the switch, and the user service this monitor runs under ('' = none): why a service can or cannot be updated here
     return out
 
 
@@ -262,11 +271,11 @@ def _first_status(up, kind):
     private_io.write_private(path, json.dumps({"kind": kind, "running": True, "starting": True, "t": time.time(), "events": [], "text": "", "report": None, "pid": os.getpid()}))
 
 
-def apply(target, policy, confirm, edition, lang, lite=False, demo=False, env=None):
+def apply(target, policy, confirm, edition, lang, lite=False, demo=False, env=None, helper=False):
     """Starts the update. Needs the explicit confirmation of the person, one update at a time, and a plan that is not blocked. Returns what the page shows while the monitor stops."""
     if confirm is not True:
         raise UpdatesError("not_confirmed")
-    blocked = reason_blocked(lite, demo, env)
+    blocked = reason_blocked(lite, demo, env, helper)
     if blocked:
         raise UpdatesError(blocked)
     if cooldown_left():
@@ -287,16 +296,23 @@ def apply(target, policy, confirm, edition, lang, lite=False, demo=False, env=No
         _first_status(up, "apply")
         args = ["apply", "--dir", str(ROOT), "--to", done["target"], "--yes", "--start", "--handover", "--status-file", str(status_file(up)), "--edition", "lite" if edition == "lite" else "complete",
                 "--lang", lang or "en"] + {"keep_old": ["--keep-old-defaults"], "adopt_new": ["--adopt-new-defaults"]}.get(policy, [])
+        args += unit_args(mod, helper, env)
         _spawn(args, up)
         note_success()
         return {"started": True, "from": done["installed"], "to": done["target"], "backups": str(up.backups)}
 
 
-def rollback(confirm, edition, lang, lite=False, demo=False, env=None):
+def unit_args(mod, helper, env=None):
+    """['--systemd-unit', UNIT] when the helper is on and this monitor runs as a systemd user service (the process that applies the update then stops and starts that service itself), else []."""
+    unit = mod.user_unit(env) if (helper and mod.under_service(env)) else ""
+    return ["--systemd-unit", unit] if unit else []
+
+
+def rollback(confirm, edition, lang, lite=False, demo=False, env=None, helper=False):
     """The way back to the version before the last update, with the data when the schema asks for it; the same process, the same restart."""
     if confirm is not True:
         raise UpdatesError("not_confirmed")
-    blocked = reason_blocked(lite, demo, env)
+    blocked = reason_blocked(lite, demo, env, helper)
     if blocked:
         raise UpdatesError(blocked)
     if cooldown_left():
@@ -309,7 +325,7 @@ def rollback(confirm, edition, lang, lite=False, demo=False, env=None):
             note_failure()
             raise UpdatesError("no_previous")
         _first_status(up, "rollback")
-        _spawn(["rollback", "--dir", str(ROOT), "--yes", "--handover", "--status-file", str(status_file(up)), "--lang", lang or "en"], up)
+        _spawn(["rollback", "--dir", str(ROOT), "--yes", "--handover", "--status-file", str(status_file(up)), "--lang", lang or "en"] + unit_args(mod, helper, env), up)
         note_success()
         return {"started": True}
 

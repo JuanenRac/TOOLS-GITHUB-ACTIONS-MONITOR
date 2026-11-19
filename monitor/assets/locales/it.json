@@ -4370,5 +4370,8 @@
  "cfg.t.ai.prompt_log.enabled": "Vedrai: in Impostazioni, una scheda con gli ultimi prompt inviati all'IA e le loro risposte, ripuliti dai segreti. Costo: un piccolo file locale; solo un amministratore può leggerlo o svuotarlo.",
  "cfg.t.ai.similar.enabled": "Vedrai: «spiega questo avviso» elenca anche avvisi simili, trovati confrontando parole. Costo: nessuno per l'IA né per GitHub; legge solo ciò che il monitor ha già.",
  "cfg.t.ai.airgapped": "Vedrai: l'IA rifiuta ogni indirizzo che non sia questo computer o un indirizzo privato che elenchi, prima di aprire una connessione. Costo: nessuno; un modello nel cloud smette di funzionare finché è attivo.",
- "cfg.t.api.v1_enabled": "Vedrai: l'API di lettura per i client sotto /api/v1/ (auto la apre quando il monitor gira come servizio). Costo: nessuno; legge soltanto e segue gli stessi ruoli della pagina."
+ "cfg.t.api.v1_enabled": "Vedrai: l'API di lettura per i client sotto /api/v1/ (auto la apre quando il monitor gira come servizio). Costo: nessuno; legge soltanto e segue gli stessi ruoli della pagina.",
+ "cfg.f.updates.systemd_helper": "Aggiornare dalla pagina sotto un servizio utente systemd",
+ "cfg.h.updates.systemd_helper": "Quando il monitor gira come servizio UTENTE di systemd, il menu Aggiornamenti può applicare un aggiornamento: l'aggiornamento ferma quel servizio, sostituisce i file e lo riavvia con systemctl --user. Non usa mai sudo e non tocca mai un servizio di sistema. Spento: sotto un gestore di servizi l'aggiornamento si fa dalla riga di comando.",
+ "cfg.t.updates.systemd_helper": "Vedrai: il menu Aggiornamenti offre Applica e Torna indietro quando il monitor gira come servizio utente systemd. Costo: nessuno; il monitor si ferma per la durata dell'aggiornamento e il servizio torna da solo, con la versione precedente se la nuova non si avvia."
 }

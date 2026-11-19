@@ -126,6 +126,7 @@ _G_GENERAL, _G_POLL, _G_SENT, _G_SURF, _G_READY, _G_PATHS, _G_OUT, _G_AI = _T_GE
 # --- Basic: what a new user may want to change first
 _f("basic", "start", "open_browser", "bool")
 _f("basic", "updates", "updates.check", "bool", restart=False)
+_f("basic", "updates", "updates.systemd_helper", "bool", restart=False)
 _f("basic", "network", "airgapped", "bool", restart=False, secure=True)
 _f("basic", "plan", "account.plan", "enum", ("unknown", "free", "pro", "team", "enterprise"), restart=False)
 _f("basic", "plan", "quota.default_runner", "enum", ("linux", "windows", "macos"), restart=False)

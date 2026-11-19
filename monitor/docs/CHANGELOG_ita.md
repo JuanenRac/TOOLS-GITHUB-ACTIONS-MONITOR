@@ -15,6 +15,8 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Aggiunto
 
+- **Un aiuto opzionale per aggiornare dalla pagina un monitor sotto un servizio utente systemd**: con `updates.systemd_helper` attivo (spento di default), a un monitor che gira come servizio UTENTE di systemd (`systemctl --user`) viene offerto l'aggiornamento; il processo che lo applica ferma quel servizio, applica l'aggiornamento e riavvia il servizio, e se la nuova versione non si avvia viene rimessa la precedente e il servizio riavviato. Esegue solo `systemctl --user stop`, `start` o `is-active` su un nome di unità semplice, mai `sudo`; un servizio di sistema, un container, la demo e l'edizione Lite restano come prima. La riga di comando fa lo stesso con `--systemd-unit` per `apply` e `rollback`. Lo stato degli aggiornamenti dice se l'interruttore è attivo e sotto quale servizio utente gira il monitor. Etichetta, aiuto, suggerimento e guida in otto lingue.
+
 - **I blocchi tra processi vengono verificati dentro il container**: i controlli del container ottengono E9, che avvia più processi dell'immagine contro un unico volume condiviso e conta ciò che scrivono sotto il blocco del sistema operativo e sotto il file di blocco, così un aggiornamento perso si vedrebbe nell'evidenza del workflow; il test del file di blocco ora gira anche su Windows.
 
 - **Una guida a parte per l'assistente, `ASSISTANT.md`, in otto lingue**: come accenderlo, le sue cinque domande fisse, i quattro strumenti con cui legge, ciò che non fa mai (non scrive nulla, non tocca nulla su GitHub, consegna come dato ciò che un repository ha scritto) e come verificarlo con le due route e il registro dei prompt. La sezione di `AI_CONNECTION.md` resta il riferimento delle impostazioni.

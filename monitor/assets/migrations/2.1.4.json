@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "aa2bd148cf32e22f3699921f049680c687b3125c278c9b755346e87d9791fd83",
+ "digest": "5b5a8ee1eeccd0d4d8dc3b67118adb9381b55739db593567447863951eb7e2ab",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -118,6 +118,11 @@
      1,
      100
     ]
+   },
+   {
+    "key": "updates.systemd_helper",
+    "kind": "bool",
+    "default": false
    }
   ],
   "removed": [],

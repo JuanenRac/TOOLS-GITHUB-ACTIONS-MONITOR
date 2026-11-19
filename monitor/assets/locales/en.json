@@ -4370,5 +4370,8 @@
  "cfg.t.ai.prompt_log.enabled": "You will see: in Settings, a card that lists the last prompts sent to the AI and their answers, cleaned of secrets. Cost: a small local file; only an administrator can read or empty it.",
  "cfg.t.ai.similar.enabled": "You will see: \"explain this alert\" also lists alerts that look like it, found by comparing words. Cost: none from the AI and none from GitHub; it only reads what the monitor already holds.",
  "cfg.t.ai.airgapped": "You will see: the AI refuses every address that is not this computer or a private address you list, before any connection is opened. Cost: none; a cloud model stops working while it is on.",
- "cfg.t.api.v1_enabled": "You will see: the read API for clients under /api/v1/ (auto opens it when the monitor runs as a service). Cost: none; it only reads and follows the same roles as the page."
+ "cfg.t.api.v1_enabled": "You will see: the read API for clients under /api/v1/ (auto opens it when the monitor runs as a service). Cost: none; it only reads and follows the same roles as the page.",
+ "cfg.f.updates.systemd_helper": "Update from the page under a systemd user service",
+ "cfg.h.updates.systemd_helper": "When the monitor runs as a systemd USER service, the Updates menu may apply an update: the update stops that service, replaces the files and starts it again with systemctl --user. It never uses sudo and never touches a system service. Off: under a service manager the update is made from the command line.",
+ "cfg.t.updates.systemd_helper": "You will see: the Updates menu offers Apply and Go back when the monitor runs as a systemd user service. Cost: none; the monitor stops for the length of the update and the service comes back by itself, in the previous version if the new one does not start."
 }

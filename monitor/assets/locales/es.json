@@ -4370,5 +4370,8 @@
  "cfg.t.ai.prompt_log.enabled": "Verás: en Ajustes, una tarjeta con los últimos prompts enviados a la IA y sus respuestas, limpios de secretos. Coste: un pequeño fichero local; solo un administrador puede leerlo o vaciarlo.",
  "cfg.t.ai.similar.enabled": "Verás: «explica esta alerta» también lista alertas parecidas, halladas comparando palabras. Coste: ninguno de la IA ni de GitHub; solo lee lo que el monitor ya tiene.",
  "cfg.t.ai.airgapped": "Verás: la IA rechaza toda dirección que no sea este equipo o una dirección privada que listes, antes de abrir ninguna conexión. Coste: ninguno; un modelo en la nube deja de funcionar mientras está activo.",
- "cfg.t.api.v1_enabled": "Verás: la API de lectura para clientes bajo /api/v1/ (auto la abre cuando el monitor funciona como servicio). Coste: ninguno; solo lee y sigue los mismos roles que la página."
+ "cfg.t.api.v1_enabled": "Verás: la API de lectura para clientes bajo /api/v1/ (auto la abre cuando el monitor funciona como servicio). Coste: ninguno; solo lee y sigue los mismos roles que la página.",
+ "cfg.f.updates.systemd_helper": "Actualizar desde la página bajo un servicio de usuario de systemd",
+ "cfg.h.updates.systemd_helper": "Cuando el monitor corre como servicio de USUARIO de systemd, el menú Actualizaciones puede aplicar una actualización: la actualización detiene ese servicio, reemplaza los ficheros y lo vuelve a arrancar con systemctl --user. Nunca usa sudo ni toca un servicio del sistema. Apagado: bajo un gestor de servicios la actualización se hace desde la línea de comandos.",
+ "cfg.t.updates.systemd_helper": "Verás: el menú Actualizaciones ofrece Aplicar y Volver atrás cuando el monitor corre como servicio de usuario de systemd. Coste: ninguno; el monitor se detiene lo que dure la actualización y el servicio vuelve solo, con la versión anterior si la nueva no arranca."
 }

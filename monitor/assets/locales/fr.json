@@ -4370,5 +4370,8 @@
  "cfg.t.ai.prompt_log.enabled": "Vous verrez : dans les Réglages, une carte avec les derniers prompts envoyés à l'IA et leurs réponses, nettoyés des secrets. Coût : un petit fichier local ; seul un administrateur peut le lire ou le vider.",
  "cfg.t.ai.similar.enabled": "Vous verrez : « expliquer cette alerte » liste aussi des alertes semblables, trouvées en comparant des mots. Coût : aucun côté IA ni côté GitHub ; cela ne lit que ce que le moniteur a déjà.",
  "cfg.t.ai.airgapped": "Vous verrez : l'IA refuse toute adresse qui n'est pas cet ordinateur ou une adresse privée que vous listez, avant d'ouvrir une connexion. Coût : aucun ; un modèle dans le cloud cesse de fonctionner tant qu'il est activé.",
- "cfg.t.api.v1_enabled": "Vous verrez : l'API de lecture pour les clients sous /api/v1/ (auto l'ouvre quand le moniteur tourne comme service). Coût : aucun ; elle ne fait que lire et suit les mêmes rôles que la page."
+ "cfg.t.api.v1_enabled": "Vous verrez : l'API de lecture pour les clients sous /api/v1/ (auto l'ouvre quand le moniteur tourne comme service). Coût : aucun ; elle ne fait que lire et suit les mêmes rôles que la page.",
+ "cfg.f.updates.systemd_helper": "Mettre à jour depuis la page sous un service utilisateur systemd",
+ "cfg.h.updates.systemd_helper": "Quand le moniteur tourne comme service UTILISATEUR systemd, le menu Mises à jour peut appliquer une mise à jour : elle arrête ce service, remplace les fichiers et le redémarre avec systemctl --user. Elle n'utilise jamais sudo et ne touche jamais un service système. Désactivé : sous un gestionnaire de services, la mise à jour se fait en ligne de commande.",
+ "cfg.t.updates.systemd_helper": "Vous verrez : le menu Mises à jour propose Appliquer et Revenir en arrière quand le moniteur tourne comme service utilisateur systemd. Coût : aucun ; le moniteur s'arrête le temps de la mise à jour et le service revient tout seul, avec la version précédente si la nouvelle ne démarre pas."
 }
