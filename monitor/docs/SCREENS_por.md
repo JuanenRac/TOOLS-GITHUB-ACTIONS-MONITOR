@@ -151,6 +151,38 @@ Os dados vêm de `/api/screens/data?screen=overview` (ou `now`, `sentinels`): um
 2. Abra cada um no Chrome ou no Edge em modo quiosque: `msedge --kiosk "http://este-computador:8765/screen/now?monitor=2" --edge-kiosk-type=fullscreen` ou `chrome --kiosk "http://este-computador:8765/screen/now?monitor=2"`; com `--app=ENDEREÇO` em vez de `--kiosk` a janela não tem barras. Sem modo quiosque, o botão discreto no fim da página pede o ecrã inteiro.
 3. A partir de outro computador use o modo de rede: basta o token de acesso de um visualizador, porque estas páginas nunca escrevem.
 
+## Que separador está em que ecrã de parede
+
+Cada separador da página tem uma decisão, escrita no código (`TAB_DECISIONS` de `screens.py`) e verificada por um teste: é mostrado num dos ecrãs de parede ou diz porque não. Um separador mostrado tem os seus dados na resposta de `/api/screens/data` (a visão geral leva Alertas, Gráficos e Frota; Neste momento leva Agora; Sentinelas leva os cartões dos separadores das sentinelas). Um separador que não é mostrado indica o seu motivo:
+
+- `people`: nomeia pessoas, e um ecrã de parede nunca mostra um nome de utilizador.
+- `controls`: é feito de botões e campos que mudam alguma coisa, e um ecrã de parede não tem nenhum.
+- `reading`: foi feito para ser lido, comparado ou guardado, não para ser visto ao longe.
+- `text`: é feito de títulos, causas e mensagens, que um ecrã de parede nunca mostra.
+
+| Separador | Nome | Ecrã de parede | Motivo |
+|---|---|---|---|
+| `now` | Agora | `/screen/now` | - |
+| `al` | Alertas | `/screen/overview` | - |
+| `charts` | Gráficos | `/screen/overview` | - |
+| `sent` | Resumo | `/screen/sentinels` | - |
+| `sci` | Sentinela de CI | `/screen/sentinels` | - |
+| `scol` | Sentinela de colaboração | `/screen/sentinels` | - |
+| `ssec` | Sentinela de segurança | `/screen/sentinels` | - |
+| `sdel` | Sentinela de entrega | `/screen/sentinels` | - |
+| `ssup` | Sentinela da cadeia de fornecimento | `/screen/sentinels` | - |
+| `strend` | Tendência diária | - | `reading` |
+| `syvt` | Ontem vs hoje | - | `reading` |
+| `team` | Saúde da equipa | - | `people` |
+| `fleet` | Frota | `/screen/overview` | - |
+| `repos` | Repositórios | - | `controls` |
+| `rep` | Relatórios | - | `reading` |
+| `trep` | Relatórios agendados | - | `reading` |
+| `les` | Lições | - | `text` |
+| `hist` | Histórico | - | `text` |
+| `upd` | Atualizações | - | `controls` |
+| `cfg` | Definições | - | `controls` |
+
 ## Menu Ecrãs
 
 O botão **Ecrãs** da barra superior (o ícone de dois monitores) abre um menu com todos os tipos de ecrã que o monitor tem, para que ninguém tenha de decorar os endereços. Apenas navega: abre endereços, não escreve nada e não lê nada do GitHub. Está ativado por predefinição e `screens.menu` desativa-o.

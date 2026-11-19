@@ -28,11 +28,9 @@ TABS_FOR_AI = (HERE / "skills" / "external" / "references" / "tabs.md").read_tex
 # The single register: every tab of the page. A tab is registered here when it is created.
 SURFACES = ("now", "al", "charts", "sent", "sci", "scol", "ssec", "sdel", "ssup", "strend", "syvt", "team", "fleet", "repos", "rep", "trep", "les", "hist", "upd", "cfg")
 
-# Things that do not exist yet for ANY surface (the shared mechanisms still to build) and the version that closes them. When the mechanism exists, its check below turns true and the line must go.
-PENDING_FOR_ALL = {
-    "wall_screen": "2.1.5",          # the decision about the four wall screens, tab by tab
-    "demo_rich": "2.1.5",            # the demo with data for the tab (python tools/demo_monitor.py --rich)
-}
+# Things that do not exist yet for ANY surface (the shared mechanisms still to build) and the version that closes them. When the mechanism exists, its check below turns true and the line must go. Empty today: the decision of the wall
+# screens (screens.TAB_DECISIONS) and the demo with data for each tab (tools/demo_monitor.py --rich, TAB_DEMO) exist, and the two checks below look at every tab.
+PENDING_FOR_ALL = {}
 # Exceptions of one surface: {surface: {check: version}}. Nothing here is silent: each line names the version that closes it.
 EXCEPTIONS = {}
 
@@ -67,16 +65,35 @@ def covered_by_the_common_bar(tab):
     return has_brief(tab) and all(x in PAGE for x in ('id="bar-save"', 'id="bar-print"', 'id="bar-ai-int"', 'id="bar-ai-ext"', "/api/ai/briefs?tab="))
 
 
+def wall_screen_decided(tab):
+    """The decision of the wall screens for the tab: it is shown on one of them (in a field that its answer has) or it says why not (screens.TAB_DECISIONS)."""
+    from github_actions_monitor.app import screens
+    decision = screens.TAB_DECISIONS.get(tab)
+    if not decision:
+        return False
+    return decision.get("screen") in screens.KINDS if decision.get("screen") else decision.get("reason") in screens.NO_SCREEN_REASONS
+
+
+def demo_declared(tab):
+    """What `tools/demo_monitor.py --rich` puts in the tab is written in its TAB_DEMO (a package without the tools folder cannot check it and does not fail for it)."""
+    import ast
+    demo = HERE.parent / "tools" / "demo_monitor.py"
+    if not demo.is_file():
+        return True
+    for node in ast.parse(demo.read_text(encoding="utf-8")).body:
+        if isinstance(node, ast.Assign) and any(getattr(x, "id", "") == "TAB_DEMO" for x in node.targets):
+            row = ast.literal_eval(node.value).get(tab)
+            return bool(row) and row[0] in ("plain", "rich") and bool(row[1].strip())
+    return False
+
+
 def lite_knows_it(tab):
     lite_tabs = re.search(r'LITE\?\[([^\]]*)\]', PAGE).group(1)
     return f".lite #n-{tab}," in PAGE or f".lite #n-{tab}{{" in PAGE or f'"{tab}"' in lite_tabs
 
 
-CHECKS = {"button": has_button, "name_x8": named_in_eight_languages, "help_topic": has_help_topic, "ai_guide": in_the_guide_of_the_ais, "signal_row": has_signal_row, "brief": has_brief, "common_bar": covered_by_the_common_bar, "lite": lite_knows_it}
-MECHANISMS = {      # the shared mechanisms: true the day they exist
-    "wall_screen": lambda: False,
-    "demo_rich": lambda: False,
-}
+CHECKS = {"button": has_button, "name_x8": named_in_eight_languages, "help_topic": has_help_topic, "ai_guide": in_the_guide_of_the_ais, "signal_row": has_signal_row, "brief": has_brief, "common_bar": covered_by_the_common_bar, "lite": lite_knows_it, "wall_screen": wall_screen_decided, "demo_rich": demo_declared}
+MECHANISMS = {}      # the shared mechanisms still to build, each one true the day it exists (none today)
 
 
 class Register(unittest.TestCase):

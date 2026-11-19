@@ -151,6 +151,38 @@ Los datos salen de `/api/screens/data?screen=overview` (o `now`, `sentinels`): u
 2. Abre cada una en Chrome o Edge en modo quiosco: `msedge --kiosk "http://este-equipo:8765/screen/now?monitor=2" --edge-kiosk-type=fullscreen` o `chrome --kiosk "http://este-equipo:8765/screen/now?monitor=2"`; con `--app=DIRECCIÓN` en lugar de `--kiosk` la ventana no tiene barras. Sin modo quiosco, el botón discreto del pie de la página pide la pantalla completa.
 3. Desde otro equipo usa el modo red: basta el token de acceso de un visor, porque estas páginas nunca escriben.
 
+## Qué pestaña está en qué pantalla de pared
+
+Cada pestaña de la página tiene una decisión, escrita en el código (`TAB_DECISIONS` de `screens.py`) y comprobada por un test: se muestra en una de las pantallas de pared o dice por qué no. Una pestaña que se muestra tiene sus datos en la respuesta de `/api/screens/data` (la general lleva Alertas, Gráficas y Flota; Ahora mismo lleva Ahora; Centinelas lleva las tarjetas de las pestañas de centinelas). Una pestaña que no se muestra da su motivo:
+
+- `people`: nombra personas, y una pantalla de pared nunca muestra un nombre de usuario.
+- `controls`: se compone de botones y campos que cambian algo, y una pantalla de pared no tiene ninguno.
+- `reading`: está hecha para leerse, compararse o guardarse, no para verse de lejos.
+- `text`: se compone de títulos, causas y mensajes, que una pantalla de pared nunca muestra.
+
+| Pestaña | Nombre | Pantalla de pared | Motivo |
+|---|---|---|---|
+| `now` | Ahora | `/screen/now` | - |
+| `al` | Alertas | `/screen/overview` | - |
+| `charts` | Gráficas | `/screen/overview` | - |
+| `sent` | Resumen | `/screen/sentinels` | - |
+| `sci` | Centinela de CI | `/screen/sentinels` | - |
+| `scol` | Centinela de colaboración | `/screen/sentinels` | - |
+| `ssec` | Centinela de seguridad | `/screen/sentinels` | - |
+| `sdel` | Centinela de entrega | `/screen/sentinels` | - |
+| `ssup` | Centinela de cadena de suministro | `/screen/sentinels` | - |
+| `strend` | Tendencia diaria | - | `reading` |
+| `syvt` | Ayer vs hoy | - | `reading` |
+| `team` | Salud del equipo | - | `people` |
+| `fleet` | Flota | `/screen/overview` | - |
+| `repos` | Repositorios | - | `controls` |
+| `rep` | Informes | - | `reading` |
+| `trep` | Informes programados | - | `reading` |
+| `les` | Lecciones | - | `text` |
+| `hist` | Historial | - | `text` |
+| `upd` | Actualizaciones | - | `controls` |
+| `cfg` | Configuración | - | `controls` |
+
 ## Menú Pantallas
 
 El botón **Pantallas** de la barra superior (el icono de dos monitores) abre un menú con todos los tipos de pantalla que tiene el monitor, para que nadie tenga que recordar las direcciones. Solo navega: abre direcciones, no escribe nada y no lee nada de GitHub. Está activado por defecto y `screens.menu` lo desactiva.
