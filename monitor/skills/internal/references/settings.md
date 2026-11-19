@@ -663,11 +663,15 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `sentinels.security.signals.codeowners.enabled` | `-` | sentinel | CODEOWNERS file |
 | `sentinels.security.signals.dependabot.enabled` | `-` | sentinel | Dependabot alerts |
 | `sentinels.security.signals.dependabot.min_severity` | `-` | sentinel | Dependabot: least severity |
+| `sentinels.security.signals.runs_deleted.check_window_days` | `-` | sentinel | Days a run is watched |
+| `sentinels.security.signals.runs_deleted.enabled` | `-` | sentinel | Runs deleted after being seen |
+| `sentinels.security.signals.runs_deleted.max_checks` | `-` | sentinel | Requests per repository |
 | `sentinels.security.signals.secret.enabled` | `-` | sentinel | Secret scanning alerts |
 | `sentinels.security.signals.workflow.enabled` | `-` | sentinel | Workflow permissions |
 | `sentinels.supply.deadline_s` | `-` | sentinel | Time ceiling per round |
 | `sentinels.supply.enabled` | `-` | sentinel | Supply chain sentinel on |
 | `sentinels.supply.ignore` | `-` | sentinel | Workflow findings to ignore |
+| `sentinels.supply.incremental` | `-` | sentinel | Lint only what changed |
 | `sentinels.supply.max_calls_per_tick` | `-` | sentinel | Calls per round |
 | `sentinels.supply.max_files_per_repo` | `-` | sentinel | Workflow files per repository |
 | `sentinels.supply.max_repos_per_tick` | `-` | sentinel | Repositories per round |

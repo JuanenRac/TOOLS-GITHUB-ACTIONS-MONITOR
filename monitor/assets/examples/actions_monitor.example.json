@@ -273,6 +273,11 @@
         },
         "codeowners": {
           "enabled": false
+        },
+        "runs_deleted": {
+          "enabled": false,
+          "check_window_days": 14,
+          "max_checks": 50
         }
       },
       "penalty": {
@@ -282,7 +287,8 @@
         "low": 1,
         "branch": 5,
         "workflow": 3,
-        "codeowners": 1
+        "codeowners": 1,
+        "runs_deleted": 10
       }
     },
     "collab": {
@@ -345,6 +351,7 @@
     },
     "supply": {
       "enabled": false,
+      "incremental": false,
       "ignore": [],
       "max_calls_per_tick": 60,
       "max_files_per_repo": 40,

@@ -1604,10 +1604,10 @@ function secLevel(){const c=SECUR;return !c||c.enabled===false?"unknown":(c.leve
 function collabLevel(){const c=COLLAB;return !c||c.enabled===false?"unknown":(c.level||"unknown")}
 /* one card per signal in the panels of Collaboration, Security, Delivery and Supply chain: the same container as the cards of the CI sentinel (counter, list, filter by repository, help); Delivery and Supply chain add a table by code and filters of their own */
 const SPDEF={scol:["collab.issue.critical","collab.issue.external","collab.issue.stale","collab.pr.conflict","collab.pr.draft_old","collab.pr.review_pending"],
- ssec:["security.secret","security.code_scanning","security.dependabot","security.branch_unprotected","security.codeowners_missing","security.workflow_write"],
+ ssec:["security.secret","security.code_scanning","security.dependabot","security.branch_unprotected","security.codeowners_missing","security.workflow_write","security.runs_deleted"],
  sdel:["release.unreleased_pending","release.tag_without_release","release.release_without_notes","release.version_mismatch","release.ecosystem_drift","release.assets_missing"],
  ssup:["actions.supply.unpinned","actions.supply.mutable_ref","actions.supply.permissions_wide","actions.supply.permissions_missing","actions.supply.pr_target_checkout"]};
-const SPKEY={"security.secret":"secret","security.code_scanning":"code_scanning","security.dependabot":"dependabot","security.branch_unprotected":"branch","security.codeowners_missing":"codeowners","security.workflow_write":"workflow"};
+const SPKEY={"security.secret":"secret","security.code_scanning":"code_scanning","security.dependabot":"dependabot","security.branch_unprotected":"branch","security.codeowners_missing":"codeowners","security.workflow_write":"workflow","security.runs_deleted":"runs_deleted"};
 const SPF={},SPR={},SPTOUCH=new Set();
 function spf(scope){return SPF[scope]||(SPF[scope]={level:"",repo:""})}
 function spLevel(a){return a.level==="critical"||a.level==="error"?"bad":(a.level==="warning"?"warn":"ok")}
