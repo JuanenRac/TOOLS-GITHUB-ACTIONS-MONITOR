@@ -15,6 +15,12 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Añadido
 
+- Un menú Pantallas en la barra superior lista todos los tipos de pantalla del monitor (la página, los quioscos, las pantallas de pestañas, las tres pantallas de pared, una pared que rota, un preajuste de TV y un conjunto para varios monitores), con una descripción, los parámetros que admite cada dirección (tema, densidad, actualización, escala, idioma, rotación, filtro de repositorios), la copia de la dirección completa y la elección de abrirla en una ventana nueva o en la misma pestaña; para varios monitores abre una ventana por monitor con la distribución elegida, colocando cada una en su monitor cuando el navegador tiene la API de gestión de ventanas y listando comandos de quiosco en caso contrario
+
+- El catálogo del menú Pantallas lo leen también las herramientas: `GET /api/screens/menu`, el nuevo comando `screens` de la línea de comandos (`screens list`, `screens urls`) y la herramienta MCP `screens_menu`; las tres solo leen
+
+- Cinco ajustes para el menú Pantallas: `screens.menu` (activado por defecto; solo navega), `screens.menu_target` (ventana nueva o misma pestaña), `screens.menu_max_windows`, `screens.menu_rotate_seconds` y `screens.menu_tv_scale`, cada uno con su ayuda en Ajustes
+
 - **El progreso de una actualización como eventos enviados por el servidor**: `GET /api/updates/stream` envía `hello`, un fotograma `progress` cada vez que cambia el fichero de progreso del actualizador, comentarios de mantenimiento y `bye` cuando ya no corre nada (dos oyentes como máximo, 15 minutos cada uno, solo lectura, sin ajuste nuevo). El menú Actualizaciones lo usa mientras corre una actualización y sigue preguntando cada segundo y medio si el navegador no tiene EventSource o el monitor se reinicia. Las dos skills listan la ruta.
 - **Una nota sobre dónde descansa la confianza del SHA-256**: la confirmación de una actualización dice ahora que el zip y SHA256SUMS salen de la misma release de GitHub, de modo que la comprobación detecta una descarga dañada o incompleta pero no una release sustituida en su origen; la confianza descansa en GitHub y en tu cuenta allí. También en la guía de actualización.
 - **`tools/compare_tree.py`, para quien audita un paquete**: compara una release extraída (carpeta o zip) con los ficheros que versiona un ref de git, por contenido: no cuentan los fines de línea ni la disposición de los JSON; sí un cambio real, un fichero que falta y uno que sobra (`COMPARE=SAME` o `DIFFERENT`, código de salida 0, 1 o 2).

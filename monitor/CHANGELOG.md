@@ -17,6 +17,12 @@ when this file and `tool_version.py` disagree.
 
 ### Added
 
+- A Screens menu in the top bar lists every kind of screen the monitor has (the page, kiosks, the tab screens, the three wall screens, a wall that turns, a TV preset and a set for several monitors), with a description, the parameters each address accepts (theme, density, refresh, scale, language, rotation, repository filter), a copy of the full address and the choice of opening it in a new window or in the same tab; for several monitors it opens one window per monitor with the layout chosen, placing each on its own monitor when the browser has the Window Management API and listing kiosk commands otherwise
+
+- The catalogue of the Screens menu is also read by tools: `GET /api/screens/menu`, the new command `screens` of the command line (`screens list`, `screens urls`) and the MCP tool `screens_menu`; the three only read
+
+- Five settings for the Screens menu: `screens.menu` (on by default; it only navigates), `screens.menu_target` (new window or same tab), `screens.menu_max_windows`, `screens.menu_rotate_seconds` and `screens.menu_tv_scale`, each with its help in Settings
+
 - **The progress of an update as server-sent events**: `GET /api/updates/stream` sends `hello`, one `progress` frame each time the progress file of the updater changes, keep-alive comments and `bye` when nothing runs any more (at most two listeners, 15 minutes each, read only, no new setting). The Updates menu uses it while an update runs and keeps asking every second and a half when the browser has no EventSource or the monitor restarts. Both skills list the route.
 - **A note about where the trust of the SHA-256 rests**: the confirmation of an update now says that the zip and SHA256SUMS come from the same GitHub release, so the check finds a damaged or incomplete download but not a release replaced at its source; the trust rests on GitHub and on your account there. Also in the update guide.
 - **`tools/compare_tree.py`, for whoever audits a package**: compares an extracted release (a folder or the zip) with the files a git ref versions, by content: line endings and the layout of JSON files do not count, a real change, a missing file and an extra file do (`COMPARE=SAME` or `DIFFERENT`, exit code 0, 1 or 2).

@@ -15,6 +15,12 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Adicionado
 
+- Um menu Ecrãs na barra superior lista todos os tipos de ecrã do monitor (a página, os quiosques, os ecrãs de separadores, os três ecrãs de parede, uma parede rotativa, uma predefinição de TV e um conjunto para vários monitores), com uma descrição, os parâmetros que cada endereço aceita (tema, densidade, atualização, escala, idioma, rotação, filtro de repositórios), a cópia do endereço completo e a escolha de o abrir numa nova janela ou no mesmo separador; para vários monitores abre uma janela por monitor com a distribuição escolhida, colocando cada uma no seu monitor quando o navegador tem a API de gestão de janelas e listando comandos de quiosque caso contrário
+
+- O catálogo do menu Ecrãs também é lido pelas ferramentas: `GET /api/screens/menu`, o novo comando `screens` da linha de comandos (`screens list`, `screens urls`) e a ferramenta MCP `screens_menu`; as três só leem
+
+- Cinco definições para o menu Ecrãs: `screens.menu` (ativada por predefinição; apenas navega), `screens.menu_target` (nova janela ou o mesmo separador), `screens.menu_max_windows`, `screens.menu_rotate_seconds` e `screens.menu_tv_scale`, cada uma com a sua ajuda nas Definições
+
 - **O progresso de uma atualização como eventos enviados pelo servidor**: `GET /api/updates/stream` envia `hello`, uma trama `progress` sempre que o ficheiro de progresso do atualizador muda, comentários de manutenção e `bye` quando já nada corre (no máximo dois ouvintes, 15 minutos cada, só de leitura, sem definição nova). O menu Atualizações usa-o enquanto corre uma atualização e continua a perguntar de segundo e meio em segundo e meio se o navegador não tiver EventSource ou o monitor reiniciar. As duas skills listam a rota.
 - **Uma nota sobre onde assenta a confiança no SHA-256**: a confirmação de uma atualização diz agora que o zip e o SHA256SUMS vêm da mesma versão do GitHub, pelo que a verificação deteta uma transferência danificada ou incompleta mas não uma versão substituída na origem; a confiança assenta no GitHub e na sua conta aí. Também no guia de atualização.
 - **`tools/compare_tree.py`, para quem audita um pacote**: compara uma versão extraída (pasta ou zip) com os ficheiros que uma referência git versiona, por conteúdo: os fins de linha e a disposição dos JSON não contam; uma alteração real, um ficheiro em falta e um a mais contam (`COMPARE=SAME` ou `DIFFERENT`, código de saída 0, 1 ou 2).

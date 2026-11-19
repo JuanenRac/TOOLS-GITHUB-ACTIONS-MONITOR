@@ -752,6 +752,13 @@
       "notify_external": false
     }
   },
+  "screens": {
+    "menu": true,
+    "menu_target": "new",
+    "menu_max_windows": 4,
+    "menu_rotate_seconds": 20,
+    "menu_tv_scale": 1.5
+  },
   "tui": {
     "theme": "dark",
     "refresh_seconds": 5

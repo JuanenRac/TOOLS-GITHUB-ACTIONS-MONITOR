@@ -15,6 +15,12 @@ Versione dello strumento stesso (monitor + sentinella + strumenti batch), con il
 
 ### Aggiunto
 
+- Un menu Schermi nella barra superiore elenca ogni tipo di schermo del monitor (la pagina, i chioschi, gli schermi di schede, i tre schermi a parete, una parete a rotazione, un preset TV e un insieme per più monitor), con una descrizione, i parametri che ogni indirizzo accetta (tema, densità, aggiornamento, scala, lingua, rotazione, filtro dei repository), la copia dell'indirizzo completo e la scelta di aprirlo in una nuova finestra o nella stessa scheda; per più monitor apre una finestra per monitor con la disposizione scelta, collocando ciascuna sul suo monitor quando il browser ha l'API di gestione finestre ed elencando altrimenti i comandi chiosco
+
+- Il catalogo del menu Schermi è letto anche dagli strumenti: `GET /api/screens/menu`, il nuovo comando `screens` della riga di comando (`screens list`, `screens urls`) e lo strumento MCP `screens_menu`; tutti e tre si limitano a leggere
+
+- Cinque impostazioni per il menu Schermi: `screens.menu` (attiva per impostazione predefinita; fa solo da navigazione), `screens.menu_target` (nuova finestra o stessa scheda), `screens.menu_max_windows`, `screens.menu_rotate_seconds` e `screens.menu_tv_scale`, ciascuna con il suo aiuto nelle Impostazioni
+
 - **L'avanzamento di un aggiornamento come eventi inviati dal server**: `GET /api/updates/stream` invia `hello`, un frame `progress` a ogni cambiamento del file di avanzamento dell'aggiornatore, commenti di mantenimento e `bye` quando non gira più nulla (al massimo due ascoltatori, 15 minuti ciascuno, sola lettura, nessuna impostazione nuova). Il menu Aggiornamenti lo usa mentre un aggiornamento è in corso e continua a chiedere ogni secondo e mezzo se il browser non ha EventSource o il monitor si riavvia. Le due skill elencano la rotta.
 - **Una nota su dove poggia la fiducia nello SHA-256**: la conferma di un aggiornamento ora dice che lo zip e SHA256SUMS provengono dalla stessa release di GitHub, quindi il controllo rileva un download danneggiato o incompleto ma non una release sostituita all'origine; la fiducia poggia su GitHub e sul tuo account lì. Anche nella guida all'aggiornamento.
 - **`tools/compare_tree.py`, per chi controlla un pacchetto**: confronta una release estratta (cartella o zip) con i file che un ref git versiona, per contenuto: non contano i fine riga né la disposizione dei JSON, contano invece una modifica reale, un file mancante e uno in più (`COMPARE=SAME` o `DIFFERENT`, codice di uscita 0, 1 o 2).
