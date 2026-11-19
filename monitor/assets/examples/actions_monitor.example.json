@@ -816,6 +816,7 @@
       "large_labels": [],
       "self_labels": [],
       "queue_warn_minutes": 20,
+      "observed_reads_per_cycle": 0,
       "runaway_runs_per_hour": 20,
       "runaway_ignore_events": ["pull_request", "pull_request_target"],
       "thirdparty_usd_per_minute": 0.0,

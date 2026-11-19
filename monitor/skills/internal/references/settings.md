@@ -443,6 +443,7 @@ Generated from the code: every key of the Settings page with its default. `secur
 | `runners.model.enabled` | `false` | advanced | Model the runners |
 | `runners.model.jobs_per_cycle` | `10` | advanced | Runs whose jobs are read per cycle |
 | `runners.model.large_labels` | `[]` | advanced | Labels of your larger runners |
+| `runners.model.observed_reads_per_cycle` | `0` | advanced | Workflow files read to see what the self-hosted runners really run |
 | `runners.model.queue_warn_minutes` | `20` | advanced | Minutes a job may wait for a self-hosted runner |
 | `runners.model.runaway_ignore_events` | `["pull_request", "pull_request_target"]` | advanced | Events that do not count as runaway |
 | `runners.model.runaway_runs_per_hour` | `20` | advanced | Runs per hour of a workflow that fires itself |

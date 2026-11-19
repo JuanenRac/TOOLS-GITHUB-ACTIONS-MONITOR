@@ -63,7 +63,7 @@ from github_actions_monitor.data_pipeline import alertflow
 from github_actions_monitor.data_pipeline import paging
 from github_actions_monitor.data_pipeline import redrule
 from github_actions_monitor.data_pipeline import stuckrule
-from github_actions_monitor.integrations import runner_model
+from github_actions_monitor.integrations import remote_workflows, runner_model
 from github_actions_monitor.data_pipeline import sampling
 from github_actions_monitor.util import resilience
 from github_actions_monitor.security import secretstore
@@ -142,7 +142,7 @@ DEFAULTS = {
     "mirror": {"enabled": False, "folder": "", "max_mb": 500, "keep_days": 14, "max_per_cycle": 3},     # OFF: a local copy of the artifacts of the runs (mirror.py)
     "runners": {"enabled": False, "scope": "owner",                         # OFF: the self-hosted runners of the account (runners.py)
                 "model": {"enabled": False, "jobs_per_cycle": 10, "thirdparty_labels": ["blacksmith", "buildjet", "namespace-profile", "depot", "warpbuild", "ubicloud", "runs-on", "actuated", "cirrus-runners", "codspeed"],
-                          "large_labels": [], "self_labels": [], "queue_warn_minutes": 20, "runaway_runs_per_hour": 20, "runaway_ignore_events": ["pull_request", "pull_request_target"],
+                          "large_labels": [], "self_labels": [], "queue_warn_minutes": 20, "runaway_runs_per_hour": 20, "runaway_ignore_events": ["pull_request", "pull_request_target"], "observed_reads_per_cycle": 0,
                           "thirdparty_usd_per_minute": 0.0, "alerts": True, "alert_level": "warning"}},      # OFF: kinds of runner, queue and cost by kind, runaway workflows, self-hosted queues (runner_model.py)
     "upstream": {"enabled": False, "refresh_hours": 12, "requests_per_hour": 6, "forks_per_request": 8, "news_days": 7, "notify": False, "repos": []},      # OFF: follow the original repository of each fork, its CI and its latest release (data_pipeline/upstream.py)
     "cli": {"prefer_v1": True},      # the command line asks the frozen routes under /api/v1/ first (cli/monitor_cli.py)
@@ -1467,6 +1467,27 @@ def read_runner_jobs(config, data):
     return done
 
 
+RUNNER_FILES = {"reader": None}      # the workflow files of the repositories with a job on a self-hosted runner (remote_workflows.Reader), for runners.model.observed_reads_per_cycle
+
+
+def read_runner_workflows(config, data):
+    """runners.model.observed_reads_per_cycle (0 = off): reads the workflow files of the repositories that have a job on a self-hosted runner, at most that many calls per cycle, a repository again only
+    after six hours and a file only when its SHA changed. Read only. Returns the calls made."""
+    cfg = runner_model.settings(config)
+    if not cfg["enabled"] or cfg["observed_reads_per_cycle"] <= 0 or LITE["on"] or DEMO["on"]:
+        return 0
+    if RUNNER_FILES["reader"] is None:
+        RUNNER_FILES["reader"] = remote_workflows.Reader(lambda endpoint: gh_read(endpoint, retries=0), lambda: toolconfig.github_owner(LIVE_CONFIG or toolconfig.raw_config()))
+    reader = RUNNER_FILES["reader"]
+    repos = sorted({r["repo"] for held in RUNNER_JOBS["rows"].values() for r in held["rows"] if runner_model.kind_of(r.get("labels"), cfg) == "selfhosted"})
+    calls = 0
+    for repo in reader.due(repos, 21600):
+        if calls >= cfg["observed_reads_per_cycle"]:
+            break
+        calls += reader.refresh(repo, cfg["observed_reads_per_cycle"] - calls)
+    return calls
+
+
 def runner_list(config):
     """The self-hosted runners (runners.py) as the last cycle read them (read_runner_list); None when `runners.enabled` is off or the read failed (the model then says the reason is unknown). A request
     never reads GitHub: it is answered from this."""
@@ -1503,7 +1524,9 @@ def runner_model_payload(now=None):
         return {"schema": 1, "enabled": False}
     rows = [row for held in RUNNER_JOBS["rows"].values() for row in held["rows"]]
     tallies = [v for v in RUN_KINDS.values() if v.get("at", 0) >= now - 86400]
-    return runner_model.build(config, rows, data.get("runs") or [], tallies, quota.load(), runner_list(config), now, config.get("runs_per_repo") or 0)
+    reader = RUNNER_FILES["reader"]
+    declared = {repo: {name: runner_model.static_runs_on(text) for name, text in reader.texts(repo).items()} for repo in reader.known() if reader.state(repo)["state"] != "not_evaluable"} if reader else {}
+    return runner_model.build(config, rows, data.get("runs") or [], tallies, quota.load(), runner_list(config), now, config.get("runs_per_repo") or 0, declared, PRIVATE, set(data.get("repos") or []))
 
 
 def runner_alerts():
@@ -1805,6 +1828,7 @@ def maintain_extras(config, data):
                       ("finops", lambda: spare and read_costs(config, data)),
                       ("runner_model", lambda: spare and read_runner_jobs(config, data)),
                       ("runners", lambda: spare and read_runner_list(config, data)),
+                      ("runner_workflows", lambda: spare and read_runner_workflows(config, data)),
                       ("orgs", lambda: spare and read_extra_lists(config)),
                       ("pool", lambda: spare and refresh_pool_status()),
                       ("reports", lambda: spare and __import__("github_actions_monitor.integrations.reports", fromlist=["_"]).cycle(config, toolconfig.github_owner(config), list(data.get("repos") or []), data.get("runs") or [],
