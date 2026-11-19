@@ -282,7 +282,8 @@
         "low": 1,
         "branch": 5,
         "workflow": 3,
-        "codeowners": 1
+        "codeowners": 1,
+        "runs_deleted": 10
       }
     },
     "collab": {
