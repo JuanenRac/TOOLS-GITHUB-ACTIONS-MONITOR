@@ -25,6 +25,11 @@
 | `team` | la santé des dépôts classés, d'abord ceux qui demandent une personne ; `--severity warn\|bad` garde les pires et `--repo owner/name` donne le détail d'un dépôt | non |
 | `live` | l'état du récepteur de webhook et les derniers évènements | non |
 | `ai` | `ai models [--refresh]` liste les modèles du fournisseur d'IA avec les données de chacun ; `ai test --provider NOM --model NOM` en essaie un avec un texte synthétique (latence, jetons, coût estimé) ; `ai doctor` dit pourquoi une IA ne répond pas, sans afficher de clé | non |
+| `lessons` | ce que les échecs de cette CI ont appris : `lessons list`, `lessons brief --repo NOM` (à lire avant un push), `lessons failures`, `lessons close` | non |
+| `briefs` | les briefs des onglets que lisent les outils d'IA : `briefs index`, `briefs show ONGLET`, `briefs all` | oui |
+| `credential` | une autre connexion GitHub pour un compte pendant que tout tourne : `credential replace\|reload [--account ID] [--new-token-file FICHIER\|-]` ; n'affiche jamais de jeton | non |
+| `install-skill` | copie une skill du moniteur (`internal` ou `external`) dans le dossier où un outil d'IA lit ses skills : `install-skill external --dest DOSSIER` ; le moniteur n'a pas besoin de tourner | non |
+| `gh-token` | affiche un jeton d'installation d'une heure de la GitHub App pour que les lectures d'un outil consomment le quota de l'App (seulement avec `github_app.share_reads` activé) ; à lancer sans `--json` | non |
 
 Options de toutes les commandes : `--json` (la réponse comme un document JSON : `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (port 8766), `--timeout SECONDES` (1 à 60), `--lang CODE`. En mode réseau, mettez le jeton d'accès dans la variable d'environnement `MONITOR_ACCESS_TOKEN`, celle que lit le moniteur lui-même (`MONITOR_TOKEN` est accepté comme alias ; `--token JETON` est le dernier recours, car une option apparaît dans la liste des processus). L'ordre : `MONITOR_ACCESS_TOKEN`, puis `MONITOR_TOKEN`, puis `--token`. Il voyage dans l'en-tête `X-Monitor-Access`, jamais dans l'adresse ni à l'écran. Un `--url` en `http` non chiffré vers un autre ordinateur affiche un avertissement sur stderr (le jeton et les réponses circuleraient en clair) : utilisez `https` hors d'un réseau que vous contrôlez.
 

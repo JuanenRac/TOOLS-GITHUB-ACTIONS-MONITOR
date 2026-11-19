@@ -25,6 +25,11 @@
 | `team` | 按需要人处理的优先顺序列出仓库的健康状况；`--severity warn\|bad` 只保留较差的，`--repo owner/name` 显示单个仓库的详情 | 否 |
 | `live` | Webhook 接收器的状态和最近的事件 | 不支持 |
 | `ai` | `ai models [--refresh]` 列出 AI 提供方的模型及各模型的数据；`ai test --provider 名称 --model 名称` 用合成文本试用一个模型（延迟、令牌、估算成本）；`ai doctor` 说明 AI 为何没有响应，且不输出密钥 | 不支持 |
+| `lessons` | 这个 CI 的失败教会了什么:`lessons list`、`lessons brief --repo NAME`(推送前阅读)、`lessons failures`、`lessons close` | 不支持 |
+| `briefs` | AI 工具读取的各标签页摘要:`briefs index`、`briefs show TAB`、`briefs all` | 支持 |
+| `credential` | 在一切运行时为某个账户更换 GitHub 登录:`credential replace\|reload [--account ID] [--new-token-file FILE\|-]`;从不打印令牌 | 不支持 |
+| `install-skill` | 把监视器的一个技能(`internal` 或 `external`)复制到 AI 工具读取技能的文件夹:`install-skill external --dest FOLDER`;无需监视器正在运行 | 不支持 |
+| `gh-token` | 打印 GitHub App 的一小时安装令牌,使工具的读取消耗 App 的配额(仅在 `github_app.share_reads` 开启时);请不带 `--json` 运行 | 不支持 |
 
 所有命令的选项：`--json`（以单个 JSON 文档输出：`{"ok", "exit", "data"}`）、`--account ID`、`--url URL`、`--lite`（端口 8766）、`--timeout 秒数`（1 到 60）、`--lang 代码`。在网络模式下,请把访问令牌放在监视器自己读取的环境变量 `MONITOR_ACCESS_TOKEN` 中(`MONITOR_TOKEN` 作为别名也可用;`--token TOKEN` 是最后手段,因为命令行选项会出现在进程列表中)。优先顺序:`MONITOR_ACCESS_TOKEN`、`MONITOR_TOKEN`、`--token`。令牌通过请求头 `X-Monitor-Access` 传送,绝不出现在地址或屏幕上。对其他计算机使用未加密 `http` 的 `--url` 时,会在 stderr 打印警告(令牌和响应将以明文传输):在不受你控制的网络中请使用 `https`。
 

@@ -25,6 +25,11 @@
 | `team` | la salute dei repository in classifica, prima quelli che richiedono una persona; `--severity warn\|bad` tiene i peggiori e `--repo owner/name` dà il dettaglio di uno | no |
 | `live` | lo stato del ricevitore del webhook e gli ultimi eventi | no |
 | `ai` | `ai models [--refresh]` elenca i modelli del provider IA con i dati di ciascuno; `ai test --provider NOME --model NOME` ne prova uno con un testo sintetico (latenza, token, costo stimato); `ai doctor` dice perché un'IA non risponde, senza stampare una chiave | no |
+| `lessons` | ciò che gli errori di questa CI hanno insegnato: `lessons list`, `lessons brief --repo NOME` (da leggere prima di un push), `lessons failures`, `lessons close` | no |
+| `briefs` | i brief delle schede che leggono gli strumenti di IA: `briefs index`, `briefs show SCHEDA`, `briefs all` | sì |
+| `credential` | un altro accesso a GitHub per un account mentre tutto gira: `credential replace\|reload [--account ID] [--new-token-file FILE\|-]`; non stampa mai un token | no |
+| `install-skill` | copia una skill del monitor (`internal` o `external`) nella cartella da cui uno strumento di IA legge le sue skill: `install-skill external --dest CARTELLA`; il monitor non deve essere in esecuzione | no |
+| `gh-token` | stampa un token di installazione di un'ora della GitHub App perché le letture di uno strumento consumino la quota dell'App (solo con `github_app.share_reads` attivo); eseguilo senza `--json` | no |
 
 Opzioni di tutti i comandi: `--json` (la risposta come un documento JSON: `{"ok", "exit", "data"}`), `--account ID`, `--url URL`, `--lite` (porta 8766), `--timeout SECONDI` (da 1 a 60), `--lang CODICE`. In modalità di rete metti il token di accesso nella variabile d'ambiente `MONITOR_ACCESS_TOKEN`, quella che legge il monitor stesso (`MONITOR_TOKEN` è accettata come alias; `--token TOKEN` è l'ultima risorsa, perché un'opzione compare nell'elenco dei processi). L'ordine: `MONITOR_ACCESS_TOKEN`, poi `MONITOR_TOKEN`, poi `--token`. Viaggia nell'intestazione `X-Monitor-Access`, mai nell'indirizzo e mai a schermo. Un `--url` in `http` non cifrato verso un altro computer stampa un avviso su stderr (il token e le risposte viaggerebbero in chiaro): usa `https` fuori da una rete che controlli.
 
