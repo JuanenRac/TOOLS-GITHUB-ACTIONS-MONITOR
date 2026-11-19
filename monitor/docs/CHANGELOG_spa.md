@@ -11,6 +11,8 @@ Versión de la propia herramienta (monitor + centinela + herramientas por lotes)
 
 ### Cambiado
 
+- **El fichero de ejemplo de la configuración lleva ahora todos los ajustes, y la página de Ajustes muestra un defecto para todos**: los ajustes de la IA (el modelo, los límites y el proveedor de cada una de las cinco tareas, la cadena de respaldo, los presupuestos, las direcciones privadas, el registro de prompts, las palabras y patrones ocultos), el reparto de lecturas (qué fuente responde primero a cada tipo de lectura y cuántas llamadas guarda libres cada una), las tres carpetas, los días tras los que caduca un silencio, el id de aplicación de la GitHub App y las direcciones privadas de los avisos. Cada valor es lo que hace el código cuando el ajuste falta, una prueba los compara, y los cinco límites de tiempo por tarea que decían 30 segundos ahora dicen 0, que es lo que son: la tarea usa el límite general. Los tres ajustes calculados (el estado de la firma del webhook y de Slack y Discord) se muestran pero nunca se escriben.
+
 - **El recorrido de la página también avisa de un monitor que falla**: además de los errores de script y de consola, una respuesta con estado 5xx a una llamada de la página es ahora un problema del recorrido (con su dirección, sin la consulta), y el recorrido puede hacerse en tamaño de escritorio y de móvil (`--size desktop mobile`).
 
 ### Añadido
