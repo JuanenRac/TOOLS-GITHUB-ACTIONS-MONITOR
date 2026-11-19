@@ -16,6 +16,7 @@
 - **面向客户端的只读 API 在服务模式下自动开启**:`api.v1_enabled` 现在是 `auto`(默认)、`on` 或 `off`。使用 `auto` 时,监视器作为服务运行(团队模式的账户、Docker 镜像、systemd 单元)前缀 `/api/v1/` 会响应,一人一台电脑时保持关闭;旧的 true 和 false 含义不变。`/api/v1/me` 还会给出契约版本(`contract`)和该会话可做的事(`capabilities`)。
 - **可证明的 AI 隔离模式**:开启 `ai.airgapped`(默认关闭)后,AI 只与本机上的模型或您在 `ai.airgap_hosts` 中列出的私有地址上的模型通信;在聊天、模型列表、模型测试、备用链、助手和摘要中,任何互联网地址和任何云服务都会在建立连接之前被拒绝,AI 诊断会增加 `ai_egress` 检查。全局的 `airgapped` 开关也会将其开启,并且该设置只能从监视器所在的计算机更改。`ai.redact.extra_terms` 可添加您自己的词,在 AI 看到文本之前始终隐藏。
 - **不使用模型的相似警报**:开启 `ai.similar.enabled`(默认关闭)后,“解释此警报”还会在未解决的警报和订阅源记得的已解决警报中,列出最多 `ai.similar.max` 个与之相似的警报,通过简单的词语比较找到(不使用嵌入),只用账户的数据,并按 ID 引用。
+- **只读 API 的完整 OpenAPI 文档**:`/api/v1/openapi.json` 现在描述每条已冻结的路由(55 个路径)及契约中的键和类型,由 `docs/schemas/api_contract.json` 生成而非手写;契约未冻结的路由是实验性的,在 `/api/v1/` 下返回 404,仅当新设置 `api.experimental_routes` 开启时才会列出。测试使文档、契约和代码中的路由保持一致。
 
 ### 修复
 

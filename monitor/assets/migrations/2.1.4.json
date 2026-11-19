@@ -4,7 +4,7 @@
  "format": 1,
  "version": "2.1.4",
  "previous": "2.1.3",
- "digest": "da437791bfc1b8853b3e95292f5145b69836e588cec668104e9fd00a1c9bdd61",
+ "digest": "d850ddec1a5ce4a62cf1e975f20feab10b9ce0d59919895b4074c43dbfe88301",
  "data_schema": 2,
  "settings": {
   "added": [
@@ -66,6 +66,11 @@
    },
    {
     "key": "ai_alerts.briefs.access_log",
+    "kind": "bool",
+    "default": false
+   },
+   {
+    "key": "api.experimental_routes",
     "kind": "bool",
     "default": false
    }

@@ -20,7 +20,7 @@ Repositories with something running, a recent push or a failing last run are ref
 cycle ("hot"); the others only every cold_refresh_seconds with fewer runs, so ~130 repositories
 do not use up the GitHub allowance shared with the agents.
 """
-from github_actions_monitor.app import api_v1
+from github_actions_monitor.app import api_spec, api_v1
 from github_actions_monitor.app import degraded
 from github_actions_monitor.app import cycle_watch
 import argparse
@@ -140,7 +140,7 @@ DEFAULTS = {
                           "large_labels": [], "self_labels": [], "queue_warn_minutes": 20, "runaway_runs_per_hour": 20, "runaway_ignore_events": ["pull_request", "pull_request_target"],
                           "thirdparty_usd_per_minute": 0.0, "alerts": True, "alert_level": "warning"}},      # OFF: kinds of runner, queue and cost by kind, runaway workflows, self-hosted queues (runner_model.py)
     "upstream": {"enabled": False, "refresh_hours": 12, "requests_per_hour": 6, "forks_per_request": 8, "news_days": 7, "notify": False, "repos": []},      # OFF: follow the original repository of each fork, its CI and its latest release (data_pipeline/upstream.py)
-    "api": {"v1_enabled": "auto", "default_limit": 50, "max_limit": 200, "cursor_ttl_seconds": 900, "gzip_min_bytes": 1024},      # auto = on in the service mode, off for one person at one computer: the read API under /api/v1/ (app/api_v1.py)
+    "api": {"v1_enabled": "auto", "experimental_routes": False, "default_limit": 50, "max_limit": 200, "cursor_ttl_seconds": 900, "gzip_min_bytes": 1024},      # auto = on in the service mode, off for one person at one computer: the read API under /api/v1/ (app/api_v1.py)
     "compare": {"enabled": False, "default_window_days": 7, "default_days_filter": "all", "workdays": ["1", "2", "3", "4", "5"], "min_runs_per_window": 20, "min_days_of_history": 14, "min_resolved": 3, "min_snapshots": 12, "min_repo_runs": 3, "top_changes": 10, "include_in_report": False, "cache_seconds": 60},      # OFF: this period against the one before (compare/): read only, from the ledger and the snapshots of the score
     "otlp": {"enabled": False, "endpoint": "", "interval_seconds": 60},       # OFF: OpenTelemetry export to a collector you name (otlp.py)
     "organizations": {"discover": False},                                    # OFF: list the organisations of the login (orgs.py)
@@ -3010,6 +3010,10 @@ class Handler(BaseHTTPRequestHandler):
             self.send_response(404)
             self.end_headers()
             return False
+        if path not in api_v1.OWN_ROUTES and api_spec.experimental(rest) and not api_v1.settings(toolconfig.raw_config())["experimental_routes"]:      # a route the contract does not freeze: 404 unless `api.experimental_routes`
+            self.send_response(404)
+            self.end_headers()
+            return False
         self.v1 = True
         if path not in api_v1.OWN_ROUTES:
             self.path = rest + self.path[len(path):]
@@ -3023,7 +3027,7 @@ class Handler(BaseHTTPRequestHandler):
         ask = {k: v[0] for k, v in parse_qs(self.path.partition("?")[2]).items() if v}
         try:
             if path == "/api/v1/openapi.json":
-                payload = api_v1.openapi(TOOL_VERSION)
+                payload = api_spec.document(TOOL_VERSION, experimental_routes=cfg["experimental_routes"])
             elif path == "/api/v1/me":
                 context = getattr(self, "auth_user", None)
                 team = auth_http.active(LIVE_CONFIG or DEFAULTS, LITE["on"]) or bool(context)      # the process of an account is told by its supervisor, with a signed context, that the team mode is on
