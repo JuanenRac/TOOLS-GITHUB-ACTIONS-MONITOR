@@ -576,6 +576,7 @@ _f(_T_AI, "assistant", "ai.assistant.max_context", "int", (500, 200000), unit="t
 _f(_T_AI, "assistant", "ai.assistant.tools", "names", restart=False, secure=True)
 _f(_T_AI, "assistant", "ai.assistant.max_tool_calls", "int", (0, 20), unit="calls", restart=False)
 _f(_T_AI, "assistant", "ai.similar.enabled", "bool", restart=False)
+_f(_T_AI, "assistant", "ai.report_summary.enabled", "bool", restart=False)
 _f(_T_AI, "assistant", "ai.similar.max", "int", (1, 20), unit="", restart=False)
 _f(_T_AI, "catalog", "ai.catalog.enabled", "bool", secure=True)
 _f(_T_AI, "catalog", "ai.catalog.ttl_minutes", "int", (5, 10080))

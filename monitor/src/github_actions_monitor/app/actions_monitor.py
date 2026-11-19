@@ -1615,7 +1615,7 @@ def panel_list(lang=None):
 AI_MODEL_POST = ("/api/ai/models/refresh", "/api/ai/models/test", "/api/ai/models/data", "/api/ai/doctor")      # the list of models of the provider, the test of one model, the table of data, the doctor
 THIS_COMPUTER_ACTIONS = ("/api/ai/actions/confirm", "/api/ai/actions/unlock", "/api/ai/test", "/api/notify/test") + AI_MODEL_POST
 THIS_COMPUTER_ADVANCED = ("/api/gh-action/plan", "/api/gh-action/confirm", "/api/act/plan", "/api/act/confirm", "/api/act/stop", "/api/github-token", "/api/welcome", "/api/ai/ack", "/api/ai/lessons", "/api/ai/failures", "/api/ai/prompts/clear",
-                          "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run", "/api/ops/backup", "/api/ops/purge",
+                          "/api/alerts/mute", "/api/alerts/unmute", "/api/report-files/run", "/api/report-files/summary", "/api/ops/backup", "/api/ops/purge",
                           "/api/updates/check", "/api/updates/plan", "/api/updates/apply", "/api/updates/rollback")
 THIS_COMPUTER_POST = THIS_COMPUTER_ACTIONS + THIS_COMPUTER_ADVANCED
 
@@ -2007,6 +2007,27 @@ def report_gather():
     except Exception as error:   # noqa: BLE001 - the report still has the rest
         degraded.note("reports.compare", error)
     return gathered
+
+
+def report_summary_post(config, request):
+    """POST /api/report-files/summary: `action` = `draft` (the template), `draft_ai` (the template and the draft of the AI, only with ai.report_summary.enabled), `save` (the text as the person
+    edited it and where it came from) or `clear`. Nothing is written into a report here: the approved text goes into the next one."""
+    from github_actions_monitor.reporting import report_service, report_summary
+    from github_actions_monitor.sentinels import sentinel_ai
+    action, account = request.get("action"), report_account()
+    if action == "save":
+        saved = report_service.save_summary(account, request.get("text"), request.get("origin"))
+        return {"ok": saved is not None, "status": "saved" if saved else "empty", "summary": saved}
+    if action == "clear":
+        report_service.clear_summary(account)
+        return {"ok": True, "status": "cleared", "summary": None}
+    if action not in ("draft", "draft_ai"):
+        return {"ok": False, "status": "action"}
+    snapshot, alerts, team = report_gather()[:3]
+    doc = report_service.document(config, account, snapshot, alerts, team)
+    cfg, store = sentinel_ai.ai_config(config), ai_store()
+    drafts = report_summary.drafts(config, doc, i18n.language(), lambda text: sentinel_ai.explain("report", text, cfg, store), with_ai=action == "draft_ai")
+    return {"ok": True, "status": "draft", **drafts, "summary": report_service.pending_summary(account)}
 
 
 def report_account():
@@ -3050,7 +3071,7 @@ class Handler(BaseHTTPRequestHandler):
                 return
             try:
                 size = int(self.headers.get("Content-Length") or 0)
-                request = json.loads(self.rfile.read(size) if 0 < size <= 2048 else b"{}")
+                request = json.loads(self.rfile.read(size) if 0 < size <= (8192 if path == "/api/report-files/summary" else 2048) else b"{}")      # the text of a summary is up to 1200 characters
                 answer = handle_advanced_post(path, request if isinstance(request, dict) else {}, auth_http.acting_user(self))
                 self.json_reply(answer)
                 if path in ("/api/updates/apply", "/api/updates/rollback") and isinstance(answer, dict) and answer.get("started"):      # the process of the update is waiting for this one to stop
@@ -3644,7 +3665,9 @@ class Handler(BaseHTTPRequestHandler):
             config, account = toolconfig.raw_config(), report_account()
             if path == "/api/report-files":
                 cfg = report_service.settings(config)
-                self.json_reply({"schema": 1, "account": account, "enabled": cfg["enabled"], "cron": cfg["cron"], "formats": cfg["formats"], "reports": report_service.listing(account)})
+                from github_actions_monitor.reporting import report_summary
+                self.json_reply({"schema": 1, "account": account, "enabled": cfg["enabled"], "cron": cfg["cron"], "formats": cfg["formats"], "reports": report_service.listing(account),
+                                 "summary": {"ai": report_summary.enabled(config), "next": report_service.pending_summary(account)}})
                 return
             name = (parse_qs(self.path.partition("?")[2]).get("name") or [""])[0]
             found = report_service.read_file(account, name)
@@ -4258,6 +4281,10 @@ def handle_advanced_post(path, request, who=""):
         snapshot, alerts, team = report_gather()
         done = report_service.run(config, report_account(), snapshot, alerts, team)
         return {"ok": True, "files": done["files"], "at": done["at"]}
+    if path == "/api/report-files/summary":      # the summary of the next report: the drafts, the text a person approved, or its removal (admin, from this computer); Complete only
+        if LITE["on"]:
+            return {"ok": False, "status": "lite"}
+        return report_summary_post(config, request)
     if path == "/api/ai/prompts/clear":      # the local record of prompts is emptied (admin)
         from github_actions_monitor.integrations import ai_prompt_log
         return {"ok": True, "removed": ai_prompt_log.clear()}

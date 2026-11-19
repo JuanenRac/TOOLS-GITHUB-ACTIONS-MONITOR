@@ -83,6 +83,7 @@ background:linear-gradient(var(--panel2),var(--panel));box-shadow:inset 0 1px 0 
 @media (prefers-reduced-motion:no-preference){@keyframes tilepulse{0%,100%{box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo),0 0 0 0 rgba(96,165,250,.5)}50%{box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo),0 0 0 5px rgba(96,165,250,0)}}
 .tile.run:not(.skel){animation:tilepulse 2.4s ease-out infinite}@keyframes shimmer2{from{background-position:200% 0}to{background-position:-200% 0}}.tile.skel b{animation:shimmer2 1.4s linear infinite}}
 .sp{flex:1}
+#rs-sum-text{width:100%;box-sizing:border-box;margin:6px 0}
 select,input,textarea{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font:inherit;box-shadow:inset 0 1px 2px rgba(0,0,0,.25)}
 button{background:linear-gradient(var(--panel2),var(--panel));color:var(--text);border:1px solid var(--line2);border-radius:9px;padding:5px 12px;font:inherit;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo),0 3px 7px rgba(0,0,0,.22);transition:filter .14s,box-shadow .14s,transform .08s,border-color .14s}
 button:hover{filter:brightness(1.14);border-color:var(--run);box-shadow:inset 0 1px 0 var(--bev-hi),0 2px 0 var(--bev-lo),0 0 0 1px var(--run),0 0 14px var(--glow)}
@@ -570,7 +571,9 @@ header .tile.wide{min-width:0;grid-column:span 2}
 <section id="fleet-sec"><h2 data-i18n="ui.fleet_title"></h2><div class="body"><div class="tbl-tools" id="fleet-tools"></div><div class="mut" id="fleet-sum"></div><table><thead><tr id="fleet-head"></tr></thead><tbody id="fleet-rows"></tbody></table><div class="tbl-tools" id="fleet-pager"></div></div></section>
 </div>
 <div class="tab" id="t-trep" role="tabpanel" aria-labelledby="n-trep">
-<section id="rs-sec"><h2 data-i18n="ui.rs_title"></h2><div class="body"><div class="mut" id="rs-state"></div><ul id="rs-list"></ul><button id="rs-run" type="button" data-i18n="ui.rs_run"></button> <span class="mut" id="rs-msg" role="status"></span></div></section>
+<section id="rs-sec"><h2 data-i18n="ui.rs_title"></h2><div class="body"><div class="mut" id="rs-state"></div><ul id="rs-list"></ul><button id="rs-run" type="button" data-i18n="ui.rs_run"></button> <span class="mut" id="rs-msg" role="status"></span>
+<div id="rs-sum"><h3 data-i18n="ui.rs_sum_title"></h3><label class="mut" for="rs-sum-text" data-i18n="ui.rs_sum_help"></label><div class="mut" id="rs-sum-next"></div><textarea id="rs-sum-text" rows="4" maxlength="1200"></textarea>
+<div><button id="rs-sum-tpl" type="button" data-i18n="ui.rs_sum_tpl"></button> <button id="rs-sum-ai" type="button" data-i18n="ui.rs_sum_ai" hidden></button> <button id="rs-sum-save" type="button" data-i18n="ui.rs_sum_save"></button> <button id="rs-sum-clear" type="button" data-i18n="ui.rs_sum_clear"></button> <span class="mut" id="rs-sum-msg" role="status"></span></div></div></div></section>
 </div>
 <div class="tab" id="t-hist" role="tabpanel" aria-labelledby="n-hist">
 <section><h2 data-i18n="ui.h_title"></h2>
@@ -1881,7 +1884,25 @@ function rsPaint(){
   const st=$("rs-state"),ul=$("rs-list");
   if(!RS){st.textContent="";ul.innerHTML="";return}
   st.textContent=RS.enabled?T("ui.rs_on",{cron:RS.cron}):T("ui.rs_off");
+  const sm=RS.summary||{},nx=sm.next;$("rs-sum-next").textContent=nx?T("ui.rs_sum_next")+" "+nx.text:"";$("rs-sum-ai").hidden=!sm.ai;
   ul.innerHTML=(RS.reports||[]).length?RS.reports.slice(0,20).map(r=>`<li><a href="/api/report-files/file?name=${encodeURIComponent(r.name)}" target="_blank" rel="noopener">${esc(r.name)}</a> <span class="mut">${esc(T("ui.rs_kind_"+r.kind))} · ${esc(String(Math.max(1,Math.round(r.bytes/1024))))} KB</span></li>`).join(""):`<li class="mut">${esc(T("ui.rs_none"))}</li>`}
+let RS_ORIGIN="edited";
+async function rsSum(action,extra){
+  try{const r=await fetch("/api/report-files/summary",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.assign({action},extra||{}))});return await r.json()}catch(e){return null}}
+$("rs-sum-tpl").addEventListener("click",async()=>{
+  const m=$("rs-sum-msg");m.textContent="";const d=await rsSum("draft");
+  if(d&&d.ok){$("rs-sum-text").value=d.template||"";RS_ORIGIN="template"}else m.textContent=T("ui.rs_sum_failed")});
+$("rs-sum-ai").addEventListener("click",async()=>{
+  const m=$("rs-sum-msg");m.textContent="";const d=await rsSum("draft_ai");
+  if(d&&d.ok){const a=d.ai||{};if(a.status==="ok"&&a.text){$("rs-sum-text").value=a.text;RS_ORIGIN="ai"}else{$("rs-sum-text").value=d.template||"";RS_ORIGIN="template";m.textContent=T("ui.rs_sum_ai_off")}}
+  else m.textContent=T("ui.rs_sum_failed")});
+$("rs-sum-save").addEventListener("click",async()=>{
+  const m=$("rs-sum-msg"),text=$("rs-sum-text").value.trim();m.textContent="";
+  if(!text){m.textContent=T("ui.rs_sum_empty");return}
+  const d=await rsSum("save",{text,origin:RS_ORIGIN});m.textContent=d&&d.ok?T("ui.rs_sum_saved"):T("ui.rs_sum_failed");rsLoad()});
+$("rs-sum-clear").addEventListener("click",async()=>{
+  const m=$("rs-sum-msg");m.textContent="";const d=await rsSum("clear");
+  if(d&&d.ok){$("rs-sum-text").value="";RS_ORIGIN="edited";m.textContent=T("ui.rs_sum_cleared")}else m.textContent=T("ui.rs_sum_failed");rsLoad()});
 $("rs-run").addEventListener("click",async()=>{
   const msg=$("rs-msg");msg.textContent="";
   try{const r=await fetch("/api/report-files/run",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});const d=await r.json();msg.textContent=d&&d.ok?T("ui.rs_done"):T("ui.rs_failed")}catch(e){msg.textContent=T("ui.rs_failed")}

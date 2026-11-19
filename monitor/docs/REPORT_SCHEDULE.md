@@ -35,6 +35,7 @@ There is no PDF of its own: open the HTML page and print it to PDF from the brow
 
 - The **Scheduled reports** tab (menu group *Reports and learning*, address `#team-reports`) has: the list, a link to each file and the button **Write a report now** (an administrator, from this computer).
 - `GET /api/report-files` lists them, `GET /api/report-files/file?name=...` opens one (only a file the service wrote for this account) and `POST /api/report-files/run` writes one now.
+- The **summary of the next report** is a few lines that a person writes, edits and approves; they open the next report, once. In the same tab a card offers **Draft from the figures** (plain sentences made from the report, no model) and, with `ai.report_summary.enabled` on (off by default) and an AI configured, **Draft with the AI** (the figures go to the AI of the monitor cleaned of secrets, inside its daily budget). Nothing is written until **Save for the next report**; **Discard** removes it. `POST /api/report-files/summary` does the same with `action` = `draft`, `draft_ai`, `save` (text and origin) or `clear`, for an administrator at this computer; `GET /api/report-files` says whether a summary is waiting. The text is plain, cut to 1200 characters and cleaned of markup and secrets, and the report prints it escaped, with a line that says who wrote it.
 - In the team mode anyone who can see the account can read its reports; writing one now is for an administrator at this computer. The Lite edition has none of this.
 
 ## Comparison with the period before

@@ -79,6 +79,8 @@ Der Reiter Warnungen kann ein Panel mit festen Fragen zeigen, die die bereits ko
 
 Mit `ai.similar.enabled` an (standardmäßig aus) listet „Diese Warnung erklären“ auch bis zu `ai.similar.max` ähnliche Warnungen auf, damit die Antwort sagen kann „das ist schon in einem anderen Repository passiert“. Sie werden durch einen einfachen Wortvergleich (Code der Warnung, Workflow, Wörter von Titel und Ursache) unter den offenen und den im Feed gemerkten gelösten Warnungen gefunden: kein Modell, keine Embeddings, nur die Daten dieses Kontos, bei gleichen Daten dieselbe Reihenfolge, und jede wird mit ihrer ID genannt.
 
+Mit `ai.report_summary.enabled` an (standardmäßig aus) bietet Berichte **Mit der KI entwerfen** für die Zusammenfassung des nächsten Berichts: Die Zahlen des Berichts gehen, von Geheimnissen bereinigt, über denselben Bereiniger, dasselbe Budget, denselben Cache und dieselbe Kette wie jede andere Frage an diese KI, eine Person bearbeitet den Entwurf und gibt ihn frei, und der freigegebene Text eröffnet den nächsten Bericht einmal. Ohne diese Freigabe wird nichts geschrieben oder gesendet.
+
 Der Assistent hat fünf feste Fragen, alle nur lesend: „diese Meldung erklären“ (`explain_alert`), „die Lage zusammenfassen“ (`summarize_week`), „warum es hier langsam ist“ (`why_slow`), „die Lage eines Repositorys“ (`explain_repo`: seine Läufe und offenen Meldungen) und „was zuerst zu tun ist“ (`prioritize`: die offenen Meldungen, der Status und die Bewertung, mit den Ids in eine Reihenfolge gebracht). Sie nutzen dieselben vier Werkzeuge, dieselben Grenzen und dasselbe Tagesbudget; einen freien Chat gibt es weiterhin nicht.
 
 ## Isolierter Modus der KI (optional, standardmäßig aus)
