@@ -201,6 +201,11 @@ class TheServer(unittest.TestCase):
         self.assertEqual(self.get(served, "/api/v1/no-such-route")[0], 404)
         self.assertEqual(self.get(served, "/api/v2/me")[0], 404)
 
+    def test_every_answer_under_the_prefix_says_the_version_errors_included(self):
+        served = self.serve()
+        for path in ("/api/v1/me", "/api/v1/repos", "/api/v1/openapi.json", "/api/v1/health", "/api/v1/data", "/api/v1/auth/me", "/api/v1/repos?limit=0", "/api/v1/ai/brief"):
+            self.assertEqual(self.get(served, path)[2].getheader("X-API-Version"), "1", path)
+
     def test_the_roles_of_an_old_route_apply_under_the_prefix_too(self):
         # the prefix is removed BEFORE the gate, so the role a route needs is the one of the old route (ADMIN_GET stays admin); the gate sees only the old path
         from github_actions_monitor.security import auth

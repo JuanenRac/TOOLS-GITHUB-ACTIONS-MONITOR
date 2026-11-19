@@ -32,12 +32,12 @@ class TheApiCommand(unittest.TestCase):
 
     def test_it_is_a_command_with_its_two_actions_and_texts_in_eight_languages(self):
         self.assertIn("api", cli.COMMANDS)
-        self.assertEqual(cli.API_ACTIONS, ("openapi", "me"))
+        self.assertEqual(cli.API_ACTIONS, ("openapi", "me", "contract-check"))
         self.assertNotIn("api", cli.LITE_COMMANDS)      # the lite edition has no prefix
         from pathlib import Path
         for lang in ("en", "es", "de", "fr", "it", "ja", "zh", "pt"):
             texts = json.loads((Path(__file__).resolve().parent.parent / "assets" / "locales" / f"{lang}.json").read_text(encoding="utf-8"))
-            for key in ("cli.api_action", "cli.api_closed", "cli.api_me", "cli.api_can"):
+            for key in ("cli.api_action", "cli.api_closed", "cli.api_me", "cli.api_can", "cli.api_no_suite", "cli.api_suite_total"):
                 self.assertTrue(texts.get(key), (lang, key))
             self.assertIn("{things}", texts["cli.api_can"], lang)
             self.assertIn("api", texts["cli.help_command"], lang)
@@ -69,6 +69,23 @@ class TheApiCommand(unittest.TestCase):
             code, out, err = run(served.url, action)
             self.assertEqual(code, cli.EXIT_DEGRADED)
             self.assertIn("api.v1_enabled", out + err)
+
+    def test_contract_check_runs_the_suite_against_the_monitor(self):
+        import test_api_contract_suite as fixture
+        served = fixture.real_monitor(self)
+        code, out, _ = run(served.url, "contract-check")
+        self.assertEqual(code, cli.EXIT_OK)
+        self.assertNotIn("FAIL ", out)
+        self.assertRegex(out.strip().splitlines()[-1], r"^(\d+) of (\d+) checks pass$")
+        code, out, _ = run(served.url, "contract-check", "--json")
+        data = json.loads(out)["data"]
+        self.assertEqual((data["ok"], data["failed"]), (True, 0))
+
+    def test_contract_check_fails_with_exit_4_when_the_api_is_closed(self):
+        served = self.serve(False)
+        code, out, _ = run(served.url, "contract-check")
+        self.assertEqual(code, cli.EXIT_DEGRADED)
+        self.assertIn("FAIL openapi: served", out)
 
     def test_a_wrong_action_is_a_usage_error(self):
         served = self.serve(True)
