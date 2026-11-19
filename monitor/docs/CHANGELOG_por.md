@@ -15,6 +15,9 @@ Versão da própria ferramenta (monitor + sentinela + ferramentas em lote), com 
 
 ### Adicionado
 
+- **Quando o GitHub recusa uma ação da página, agora diz porquê**: a resposta de `/api/gh-action/confirm` traz `reason` (`forbidden`: o token não tem permissão de escrita em Actions; `not_found`: não existe ou é um repositório privado que o token não vê, o GitHub responde 404 nos dois casos; `method`, `conflict`, `invalid`) e a página mostra-o nos oito idiomas junto à recusa, em vez de um simples «o GitHub recusou».
+- **O aviso dos repositórios sem dados agrupa o mesmo erro**: quando muitos repositórios falham com a mesma mensagem, a página mostra UM aviso, «N repositórios: <erro>», e os nomes ficam atrás de uma dobra, em vez do primeiro erro de uma lista longa.
+- **O registo de acessos é rodado e escrito sob o bloqueio do sistema operativo**, e os testes que leem uma recusa do servidor libertam a sua ligação: o supervisor e as contas que escrevem o mesmo ficheiro já não podem perder uma linha enquanto um deles o move.
 - **O registo de prompts e a origem dos números de um modelo, na página**: por baixo da IA nas Definições, um cartão «Registo de prompts» mostra as últimas 20 entradas (já limpas de segredos e das suas palavras ocultas) e esvazia o registo com um botão, para um administrador neste computador; a tabela de modelos tem uma coluna «Origem» (a página, o ficheiro `config/ai_models.json` ou o fornecedor) para ver de onde vem cada número. Ambos nos oito idiomas.
 
 - **Mais duas perguntas para o assistente, ambas só de leitura**: «a situação de um repositório» (`explain_repo`, a partir das suas execuções e dos seus alertas abertos) e «o que fazer primeiro» (`prioritize`, os alertas abertos, o estado e a pontuação postos em ordem com os seus ids) juntam-se às três que existiam; usam as mesmas quatro ferramentas, limites e orçamento diário da IA, e continua a não haver chat livre.

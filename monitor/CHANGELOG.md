@@ -17,6 +17,9 @@ when this file and `tool_version.py` disagree.
 
 ### Added
 
+- **A refusal of GitHub to an action on the page says why**: the answer of `/api/gh-action/confirm` carries `reason` (`forbidden`: the token has no Actions write permission; `not_found`: no such item or a private repository the token cannot see, GitHub answers 404 for both; `method`, `conflict`, `invalid`) and the page prints it in the eight languages next to the refusal instead of a bare "GitHub refused it".
+- **The banner of repositories without data groups the same error**: when many repositories fail with the same message, the page shows ONE alert, "N repositories: <error>", and the names stay behind a fold, instead of the first error of a long list.
+- **The audit of accesses is rotated and written under the lock of the operating system**, and the tests that read a refusal of the server release its connection: the supervisor and the accounts that write the same file can no longer lose a line while one of them moves it.
 - **The record of prompts and the origin of the figures of a model, in the page**: under the AI in Settings, a card "Record of prompts" shows the last 20 entries (already cleaned of secrets and of your hidden words) and empties the record with a button, for an administrator on this computer; the table of models has a column "Origin" (the page, the file `config/ai_models.json` or the provider) so you can see where each figure comes from. Both in the eight languages.
 
 - **Two more questions for the assistant, both read-only**: "the situation of a repository" (`explain_repo`, from its runs and its open alerts) and "what to do first" (`prioritize`, the open alerts, the status and the score put in order with their ids) join the three that existed; they use the same four tools, limits and daily budget of the AI, and there is still no free chat.

@@ -223,6 +223,7 @@ class Server(unittest.TestCase):
             with urllib.request.urlopen(request, timeout=8) as answer:
                 return answer.status, json.loads(answer.read() or b"null")
         except urllib.error.HTTPError as error:
+            error.close()      # the answer of a refusal holds its socket: release it
             return error.code, None
 
     def test_about_help_and_discovery_answer_in_both_editions(self):
@@ -605,6 +606,7 @@ class WorkingModes(unittest.TestCase):
                 with urllib.request.urlopen(request, timeout=8) as answer:
                     return answer.status, json.load(answer)
             except urllib.error.HTTPError as error:
+                error.close()      # the answer of a refusal holds its socket: release it
                 return error.code, json.load(error)
         try:
             with am.LOCK:

@@ -73,7 +73,7 @@ curl -s -H "X-Monitor-Access: $(cat token.txt)" "http://127.0.0.1:8765/api/v1/re
 | `/api/discovery` | 发现功能找到的内容：含账户及已显示和已隐藏仓库的面板、最近的事件、建议的分组、其设置、复刻和组织。 |
 | `/api/discovery/group` | POST。把建议的分组加入生态系统文件，并保留该文件的副本。 |
 | `/api/gh-action/plan` | POST，本机。准备将发送给 GitHub 的内容（重新运行、取消、派发或合并）；此时尚未发送。 |
-| `/api/gh-action/confirm` | POST，本机。在您确认后，按计划把内容发送给 GitHub；会被记录。 |
+| `/api/gh-action/confirm` | POST，本机。在您确认后，按计划把内容发送给 GitHub；会被记录。 如果 GitHub 拒绝,响应会带有 `reason`:forbidden、not_found、method、conflict 或 invalid。 |
 | `/api/github-token` | 仅限本机。GitHub 令牌存放处的状态（所用方式以及是否已存有）；绝不含其值。 |
 | `/api/help/search` | 用一个词搜索帮助主题，并返回匹配的主题。 |
 | `/api/help/topic` | 一个帮助主题（`id=`）在页面语言下的文本。 |

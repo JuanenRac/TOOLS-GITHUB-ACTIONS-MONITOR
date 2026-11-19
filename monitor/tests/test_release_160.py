@@ -668,6 +668,7 @@ class Endpoints160(unittest.TestCase):
             with urllib.request.urlopen(request, timeout=5) as answer:
                 return answer.status, json.loads(answer.read())
         except urllib.error.HTTPError as error:
+            error.close()      # the answer of a refusal holds its socket: release it
             return error.code, None
 
     def test_health_is_local_only_and_calls_nothing(self):

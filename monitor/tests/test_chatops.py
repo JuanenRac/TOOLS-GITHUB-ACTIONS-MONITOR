@@ -425,6 +425,7 @@ class Route(unittest.TestCase):
             with urllib.request.urlopen(request, timeout=8) as answer:
                 return answer.status, json.loads(answer.read() or b"{}")
         except urllib.error.HTTPError as error:
+            error.close()      # the answer of a refusal holds its socket: release it
             with error:
                 return error.code, {}
 
